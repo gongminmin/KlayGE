@@ -13,7 +13,6 @@
 		<parameter type="float4x4" name="inv_view"/>
 		<parameter type="float4x4" name="inv_vp"/>
 		<parameter type="float3" name="eye_pos"/>
-		<parameter type="int" name="flip"/>
 	</cbuffer>
 	<parameter type="float3" name="eta_ratio"/>
 
@@ -86,14 +85,14 @@ float4 RefractPS(float3 normal			: TEXCOORD0,
 	incident.xyz = normalize(incident.xyz);
 
 	float2 tex = pos_ss.xy / pos_ss.w;
-	tex.y *= flip;
+	tex.y *= KLAYGE_FLIPPING;
 	tex = tex / 2 + 0.5f;
 	float4 backface = BackFace_tex.Sample(BackFace_Sampler, tex);
 	
 	pos_ss += dir_ss * (backface.z - incident.w);
 	
 	tex = pos_ss.xy / pos_ss.w;
-	tex.y *= flip;
+	tex.y *= KLAYGE_FLIPPING;
 	tex = tex / 2 + 0.5f;
 	backface = BackFace_tex.Sample(BackFace_Sampler, tex);
 

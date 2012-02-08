@@ -64,9 +64,9 @@ namespace
 			checked_pointer_cast<DetailedModel>(renderable_)->BackFaceDepthPass(dfdp);
 		}
 
-		void BackFaceDepthTex(TexturePtr const & tex, bool flipping)
+		void BackFaceDepthTex(TexturePtr const & tex)
 		{
-			checked_pointer_cast<DetailedModel>(renderable_)->BackFaceDepthTex(tex, flipping);
+			checked_pointer_cast<DetailedModel>(renderable_)->BackFaceDepthTex(tex);
 		}
 
 		void SigmaT(float sigma_t)
@@ -204,7 +204,7 @@ void SubSurfaceApp::OnResize(uint32_t width, uint32_t height)
 	FrameBufferPtr screen_buffer = rf.RenderEngineInstance().CurFrameBuffer();
 	back_face_depth_fb_->GetViewport().camera = screen_buffer->GetViewport().camera;
 
-	checked_pointer_cast<ModelObject>(model_)->BackFaceDepthTex(back_face_depth_tex_, re.RequiresFlipping());
+	checked_pointer_cast<ModelObject>(model_)->BackFaceDepthTex(back_face_depth_tex_);
 
 	UIManager::Instance().SettleCtrls(width, height);
 }

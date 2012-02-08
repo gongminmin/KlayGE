@@ -128,7 +128,6 @@ float4 PosNormTexPS(float3 normal : TEXCOORD0) : SV_Target
 	<parameter type="float3" name="light_color"/>
 	<parameter type="float3" name="light_falloff"/>
 	<parameter type="float4x4" name="light_vp"/>
-	<parameter type="int" name="flipping"/>
 
 	<parameter type="texture2D" name="diffuse_tex"/>
 	<parameter type="texture2D" name="normal_tex"/>
@@ -163,7 +162,7 @@ float4 PosNormTexPS(float3 normal : TEXCOORD0) : SV_Target
 float2 CalcLookupUV(float4 lookup_proj)
 {
 	float2 lookup_uv = lookup_proj.xy / lookup_proj.w * 0.5f;
-	lookup_uv.y *= flipping;
+	lookup_uv.y *= KLAYGE_FLIPPING;
 	lookup_uv += 0.5f;
 	return lookup_uv;
 }
@@ -252,7 +251,7 @@ float4 DistanceMappingPS(float4 L	: TEXCOORD0,
 	float dist = length(LightWorldPos);
 	float3 shadow_dir = normalize(LightWorldPos);
 	shadow_dir += deltaUV;
-	shadow_dir.y *= -flipping;
+	shadow_dir.y *= -KLAYGE_FLIPPING;
 	float2 moments = shadow_cube_tex.SampleLevel(linear_clamp_sampler, shadow_dir, 0).xy;
 	float p = (dist <= moments.x);
 	float variance = moments.y - moments.x * moments.x;
@@ -266,7 +265,7 @@ float4 DistanceMappingPS(float4 L	: TEXCOORD0,
 	float4 caustics = 1;
 	float2 lookup_uv = CalcLookupUV(LightProjPos);
 	float2 delta = texUV.xy - texCoord0.xy;
-	lookup_uv += float2(delta.x, -flipping * delta.y);
+	lookup_uv += float2(delta.x, -KLAYGE_FLIPPING * delta.y);
 	caustics = float4(caustics_tex.Sample(linear_border_sampler, lookup_uv).xyz + 1, 1);
 	
 #ifndef KLAYGE_OPENGLES2
@@ -307,7 +306,7 @@ float4 DistanceMappingPS_20(float4 L	: TEXCOORD0,
 	float dist = length(LightWorldPos);
 	float3 shadow_dir = normalize(LightWorldPos);
 	shadow_dir += deltaUV;
-	shadow_dir.y *= -flipping;
+	shadow_dir.y *= -KLAYGE_FLIPPING;
 	float2 moments = shadow_cube_tex.SampleLevel(linear_clamp_sampler, shadow_dir, 0).xy;
 	float p = (dist <= moments.x);
 	float variance = moments.y - moments.x * moments.x;
@@ -321,7 +320,7 @@ float4 DistanceMappingPS_20(float4 L	: TEXCOORD0,
 	float4 caustics = 1;
 	float2 lookup_uv = CalcLookupUV(LightProjPos);
 	float2 delta = texUV.xy - texCoord0.xy;
-	lookup_uv += float2(delta.x, -flipping * delta.y);
+	lookup_uv += float2(delta.x, -KLAYGE_FLIPPING * delta.y);
 	caustics = float4(caustics_tex.Sample(linear_border_sampler, lookup_uv).xyz + 1, 1);
 
 	float3 diffuse = diffuse_tex.Sample(linear_sampler, texUV.xy).rgb;
@@ -380,7 +379,7 @@ float4 RefractEffectPS(float3 wPosition : TEXCOORD0, float3 wNormal : TEXCOORD1,
     float3 reflect_vec = reflect(wViewVec, wNormal);
     float fresnel_term = fresnel_term_schlick(-wViewVec, wNormal, 0.0977f).x;
 
-    float3 reflected_clr = env_cube.Sample(trilinear_sampler, float3(reflect_vec.x, -flipping * reflect_vec.y, reflect_vec.z)).xyz;
+    float3 reflected_clr = env_cube.Sample(trilinear_sampler, float3(reflect_vec.x, -KLAYGE_FLIPPING * reflect_vec.y, reflect_vec.z)).xyz;
 
     float dist = 10.0f;
     float3 intersection_pt = wPosition + dist * refract_vec;

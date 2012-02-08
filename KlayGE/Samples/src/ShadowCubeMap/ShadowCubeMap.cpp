@@ -117,8 +117,6 @@ namespace
 		explicit ShadowMapped(uint32_t shadow_map_size)
 			: shadow_map_size_(shadow_map_size), pass_index_(0)
 		{
-			RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-			flipping_ = static_cast<int32_t>(re.RequiresFlipping() ? +1 : -1);
 		}
 
 		float4x4 LightViewProj() const
@@ -231,21 +229,17 @@ namespace
 				if (SMT_DP == sm_type_)
 				{
 					*(effect->ParameterByName("dpsm")) = static_cast<int32_t>(1);
-					*(effect->ParameterByName("flipping")) = -flipping_;
 					*(effect->ParameterByName("obj_model_to_light_view")) = model * light_views_[0];
 				}
 				else
 				{
 					*(effect->ParameterByName("dpsm")) = static_cast<int32_t>(0);
-					*(effect->ParameterByName("flipping")) = flipping_;
 				}
 			}
 		}
 
 	protected:
 		uint32_t shadow_map_size_;
-
-		int32_t flipping_;
 
 		bool gen_sm_pass_;
 		SM_TYPE sm_type_;

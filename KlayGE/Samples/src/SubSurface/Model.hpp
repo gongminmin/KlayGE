@@ -20,7 +20,7 @@ public:
 	void LightFalloff(KlayGE::float3 const & light_falloff);
 
 	void BackFaceDepthPass(bool dfdp);
-	void BackFaceDepthTex(KlayGE::TexturePtr const & tex, bool flipping);
+	void BackFaceDepthTex(KlayGE::TexturePtr const & tex);
 	void SigmaT(float sigma_t);
 	void MtlThickness(float thickness);
 
@@ -46,7 +46,7 @@ public:
 	void LightFalloff(KlayGE::float3 const & light_falloff);
 
 	void BackFaceDepthPass(bool dfdp);
-	void BackFaceDepthTex(KlayGE::TexturePtr const & tex, bool flipping);
+	void BackFaceDepthTex(KlayGE::TexturePtr const & tex);
 	void SigmaT(float sigma_t);
 	void MtlThickness(float thickness);
 

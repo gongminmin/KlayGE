@@ -143,7 +143,7 @@ void CalcPosLH(float3 pos,
 	oTsToView1_Depth.w = oPos.w;
 	
 	oScreenTc.xy = oPos.xy / oPos.w * 0.5f;
-	oScreenTc.y *= flipping;
+	oScreenTc.y *= KLAYGE_FLIPPING;
 	oScreenTc.xy += 0.5f;
 	
 #ifndef NOPERSPECTIVE_SUPPORT
@@ -206,7 +206,7 @@ void MeshDepthVS(float4 pos : POSITION,
 	oTexCoordDepth.z = oPos.w;
 
 	oScreenTc.xy = oPos.xy / oPos.w;
-	oScreenTc.y *= flipping;
+	oScreenTc.y *= KLAYGE_FLIPPING;
 	oScreenTc.xy = oScreenTc.xy * 0.5f + 0.5f;
 
 #ifndef NOPERSPECTIVE_SUPPORT
@@ -254,7 +254,7 @@ void SkinnedMeshDepthVS(float2 texcoord : TEXCOORD0,
 	oTexCoordDepth.z = oPos.w;
 
 	oScreenTc.xy = oPos.xy / oPos.w;
-	oScreenTc.y *= flipping;
+	oScreenTc.y *= KLAYGE_FLIPPING;
 	oScreenTc.xy = oScreenTc.xy * 0.5f + 0.5f;
 
 #ifndef NOPERSPECTIVE_SUPPORT
@@ -2021,7 +2021,7 @@ void MeshShadingVS(float4 pos : POSITION,
 	oNormal = mul(normal, (float3x3)model_view);
 
 	oTc.xy = oPos.xy / oPos.w;
-	oTc.y *= flipping;
+	oTc.y *= KLAYGE_FLIPPING;
 	oTc.xy = oTc.xy * 0.5f + 0.5f;
 
 #ifndef NOPERSPECTIVE_SUPPORT
@@ -2074,7 +2074,7 @@ void SkinnedMeshShadingVS(float2 texcoord : TEXCOORD0,
 	oNormal = mul(normal, (float3x3)model_view);
 
 	oTc.xy = oPos.xy / oPos.w;
-	oTc.y *= flipping;
+	oTc.y *= KLAYGE_FLIPPING;
 	oTc.xy = oTc.xy * 0.5f + 0.5f;
 
 #ifndef NOPERSPECTIVE_SUPPORT

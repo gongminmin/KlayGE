@@ -10,8 +10,6 @@
 	<cbuffer name="per_frame">
 		<parameter type="float4x4" name="mvp" semantic="WORLDVIEWPROJECTION"/>
 		<parameter type="float2" name="near_q"/>
-
-		<parameter type="int" name="flip"/>
 	</cbuffer>
 
 	<parameter type="sampler" name="point_sampler">
@@ -43,7 +41,7 @@ float4 DepthPeeling1stPS(float4 clr : COLOR0) : SV_Target
 float4 DepthPeelingNthPS(float4 clr : COLOR0, float4 pos_ss : TEXCOORD0) : SV_Target
 {
 	float2 tex_coord = pos_ss.xy / pos_ss.w;
-	tex_coord.y *= flip;
+	tex_coord.y *= KLAYGE_FLIPPING;
 	tex_coord = tex_coord / 2 + 0.5f;
 
 	float last_depth = non_linear_depth_to_linear(last_depth_tex.Sample(point_sampler, tex_coord).r, near_q.x, near_q.y);

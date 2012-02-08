@@ -85,9 +85,6 @@ namespace KlayGE
 	{
 		if (technique_)
 		{
-			flipping_ep_ = technique_->Effect().ParameterByName("flipping");
-			*flipping_ep_ = static_cast<int32_t>(Context::Instance().RenderFactoryInstance().RenderEngineInstance().RequiresFlipping() ? -1 : +1);
-
 			input_pins_ep_.resize(input_pins_.size());
 			for (size_t i = 0; i < input_pins_.size(); ++ i)
 			{

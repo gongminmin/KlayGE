@@ -16,7 +16,6 @@
 	
 	<cbuffer name="per_frame">
 		<parameter type="float3" name="depth_near_far_invfar"/>
-		<parameter type='int' name='flipping'/>
 	</cbuffer>
 
 	<parameter type="float" name="min_variance" value="0.3"/>
@@ -124,7 +123,7 @@ float VSM_Omnidirectional(float3 dir_ls, float len)
 #endif
 	{
 		float2 moments = shadow_map_cube_tex.Sample(linear_sampler,
-			float3(dir_ls.x, -flipping * dir_ls.y, dir_ls.z)).xy;
+			float3(dir_ls.x, -KLAYGE_FLIPPING * dir_ls.y, dir_ls.z)).xy;
 		shadow = Calc_VSM(moments, len);
 	}
 	
@@ -142,7 +141,7 @@ float VSM_Directional(float3 pos_es, float len)
 	{
 		float4 light_proj_pos = mul(float4(pos_es, 1), light_view_proj);
 		light_proj_pos /= light_proj_pos.w;
-		light_proj_pos.y *= flipping;
+		light_proj_pos.y *= KLAYGE_FLIPPING;
 		light_proj_pos.xy = light_proj_pos.xy / 2 + 0.5f;
 	
 		float2 moments = shadow_map_tex.Sample(linear_sampler, light_proj_pos.xy).xy;
@@ -198,7 +197,7 @@ void DeferredRenderingVS(float4 pos : POSITION,
 
 	oViewDir = mul(pos, light_volume_mv).xyz;
 	oTc.xy = oPos.xy / oPos.w * 0.5f;
-	oTc.y *= flipping;
+	oTc.y *= KLAYGE_FLIPPING;
 	oTc.xy += 0.5f;
 
 #ifndef NOPERSPECTIVE_SUPPORT
@@ -557,7 +556,7 @@ void ShadingVS(float4 pos : POSITION,
 
 	oViewDir = -mul(pos, light_volume_mv).xyz;
 	oTexCoord = pos.xy / 2;
-	oTexCoord.y *= flipping;
+	oTexCoord.y *= KLAYGE_FLIPPING;
 	oTexCoord += 0.5f;
 }
 

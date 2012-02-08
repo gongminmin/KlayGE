@@ -1829,6 +1829,12 @@ namespace KlayGE
 			std::stringstream ss;
 			ss << "-DKLAYGE_NO_TEX_LOD=" << ((ST_VertexShader == type) ? 0 : (glloader_GLES_EXT_shader_texture_lod() ? 0 : 1));
 			no_tex_lod_str = ss.str();
+		}		
+		std::string flipping_str;
+		{
+			std::stringstream ss;
+			ss << "-DKLAYGE_FLIPPING=" << (re.RequiresFlipping() ? -1 : +1);
+			flipping_str = ss.str();
 		}
 
 		std::vector<char const *> args;
@@ -1837,6 +1843,7 @@ namespace KlayGE
 		args.push_back(max_tex_array_str.c_str());
 		args.push_back(max_tex_depth_str.c_str());
 		args.push_back(no_tex_lod_str.c_str());
+		args.push_back(flipping_str.c_str());
 		if (!re.DeviceCaps().texture_format_support(EF_BC5))
 		{
 			args.push_back("-DKLAYGE_BC5_AS_AG");

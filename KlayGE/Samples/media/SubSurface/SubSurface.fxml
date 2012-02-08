@@ -13,8 +13,6 @@
 	<parameter type="float" name="material_thickness"/>
 	<parameter type="float" name="sigma_t"/>
 
-	<parameter type="int" name="flip"/>
-
 	<parameter type="sampler" name="linear_sampler">
 		<state name="filtering" value="min_mag_mip_linear"/>
 		<state name="address_u" value="wrap"/>
@@ -131,7 +129,7 @@ float4 SubSurfacePS(float2 uv : TEXCOORD0,
 	}
 
 	float2 tex_coord = oPosSS.xy / oPosSS.w;
-	tex_coord.y *= flip;
+	tex_coord.y *= KLAYGE_FLIPPING;
 	tex_coord = tex_coord * 0.5f + 0.5f;
 	float back_face_depth = non_linear_depth_to_linear(back_face_depth_tex.Sample(point_sampler, tex_coord).r, near_q.x, near_q.y);
 	float thickness = clamp(back_face_depth - oPosSS.w, 0, 100.0f);

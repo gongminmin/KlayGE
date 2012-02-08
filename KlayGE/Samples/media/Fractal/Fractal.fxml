@@ -1,7 +1,6 @@
 <?xml version='1.0'?>
 
 <effect>
-	<parameter type="int" name="flipping"/>
 	<parameter type="float3" name="clr0"/>
 	<parameter type="float3" name="clr1"/>
 	
@@ -13,7 +12,7 @@ void MandelbrotVS(float2 pos : POSITION,
 {
 	oPos = float4(pos, 0.5f, 1);
 	float2 tc = pos / 2;
-	tc.y *= flipping;
+	tc.y *= KLAYGE_FLIPPING;
 	tc += 0.5f;
 	
 	float scale = 2.4f;

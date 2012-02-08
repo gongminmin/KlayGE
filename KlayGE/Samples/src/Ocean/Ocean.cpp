@@ -235,14 +235,6 @@ namespace
 		{
 			*(technique_->Effect().ParameterByName("reflection_tex")) = tex;
 		}
-
-		void OnRenderBegin()
-		{
-			InfTerrainRenderable::OnRenderBegin();
-
-			RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-			*(technique_->Effect().ParameterByName("flipping")) = static_cast<int32_t>(re.RequiresFlipping() ? -1 : +1);
-		}
 	};
 
 	class OceanObject : public InfTerrainSceneObject

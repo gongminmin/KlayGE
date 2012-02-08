@@ -201,7 +201,6 @@ namespace KlayGE
 		RenderEffectParameterPtr specular_level_param_;
 		RenderEffectParameterPtr opacity_clr_param_;
 		RenderEffectParameterPtr opacity_map_enabled_param_;
-		RenderEffectParameterPtr flipping_param_;
 		RenderEffectParameterPtr opaque_depth_tex_param_;
 
 		TexturePtr diffuse_tex_;

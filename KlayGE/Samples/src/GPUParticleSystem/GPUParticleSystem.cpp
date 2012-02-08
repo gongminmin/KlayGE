@@ -239,10 +239,9 @@ namespace
 			*(technique_->Effect().ParameterByName("init_pos_life")) = float4(0, 0, 0, 8);
 		}
 
-		void SceneTexture(TexturePtr tex, bool flip)
+		void SceneTexture(TexturePtr const & tex)
 		{
 			*(technique_->Effect().ParameterByName("scene_tex")) = tex;
-			*(technique_->Effect().ParameterByName("flip")) = static_cast<int32_t>(flip ? -1 : +1);
 		}
 
 		void OnRenderBegin()
@@ -820,7 +819,7 @@ void GPUParticleSystemApp::OnResize(uint32_t width, uint32_t height)
 	fog_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*fog_tex_, 0, 1, 0));
 	fog_buffer_->Attach(FrameBuffer::ATT_DepthStencil, ds_view);
 
-	checked_pointer_cast<RenderParticles>(particles_->GetRenderable())->SceneTexture(scene_tex_, rf.RenderEngineInstance().RequiresFlipping());
+	checked_pointer_cast<RenderParticles>(particles_->GetRenderable())->SceneTexture(scene_tex_);
 
 	blend_pp_->InputPin(0, scene_tex_);
 

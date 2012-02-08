@@ -853,7 +853,6 @@ namespace KlayGE
 		}
 
 		*(dr_effect_->ParameterByName("shadowing_tex")) = shadowing_tex_;
-		*(dr_effect_->ParameterByName("flipping")) = static_cast<int32_t>(re.RequiresFlipping() ? -1 : +1);
 
 		ssvo_pp_->InputPin(0, opaque_g_buffer_rt0_tex_);
 		ssvo_pp_->InputPin(1, opaque_depth_tex_);
@@ -878,12 +877,10 @@ namespace KlayGE
 		{
 			*(vpls_lighting_instance_id_tech_->Effect().ParameterByName("gbuffer_tex")) = opaque_g_buffer_rt0_tex_;
 			*(vpls_lighting_instance_id_tech_->Effect().ParameterByName("depth_tex")) = opaque_depth_tex_;
-			*(vpls_lighting_instance_id_tech_->Effect().ParameterByName("flipping")) = static_cast<int32_t>(re.RequiresFlipping() ? -1 : +1);
 
 			*(subsplat_stencil_tech_->Effect().ParameterByName("depth_deriv_tex")) = depth_deriative_tex_;
 			*(subsplat_stencil_tech_->Effect().ParameterByName("normal_cone_tex")) = normal_cone_tex_;
 			*(subsplat_stencil_tech_->Effect().ParameterByName("depth_normal_threshold")) = float2(0.001f * camera->FarPlane(), 0.77f);
-			*(subsplat_stencil_tech_->Effect().ParameterByName("flipping")) = static_cast<int32_t>(re.RequiresFlipping() ? -1 : +1);
 
 			gbuffer_to_depth_derivate_pp_->InputPin(0, opaque_g_buffer_rt0_tex_);
 			gbuffer_to_depth_derivate_pp_->InputPin(1, opaque_depth_tex_);

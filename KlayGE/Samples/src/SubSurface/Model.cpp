@@ -92,10 +92,9 @@ void DetailedMesh::BackFaceDepthPass(bool dfdp)
 	}
 }
 
-void DetailedMesh::BackFaceDepthTex(KlayGE::TexturePtr const & tex, bool flipping)
+void DetailedMesh::BackFaceDepthTex(KlayGE::TexturePtr const & tex)
 {
 	*(technique_->Effect().ParameterByName("back_face_depth_tex")) = tex;
-	*(technique_->Effect().ParameterByName("flip")) = static_cast<int32_t>(flipping ? -1 : 1);
 
 	App3DFramework const & app = Context::Instance().AppInstance();
 	Camera const & camera = app.ActiveCamera();
@@ -176,11 +175,11 @@ void DetailedModel::BackFaceDepthPass(bool dfdp)
 	}
 }
 
-void DetailedModel::BackFaceDepthTex(KlayGE::TexturePtr const & tex, bool flipping)
+void DetailedModel::BackFaceDepthTex(KlayGE::TexturePtr const & tex)
 {
 	for (StaticMeshesPtrType::iterator iter = meshes_.begin(); iter != meshes_.end(); ++ iter)
 	{
-		checked_pointer_cast<DetailedMesh>(*iter)->BackFaceDepthTex(tex, flipping);
+		checked_pointer_cast<DetailedMesh>(*iter)->BackFaceDepthTex(tex);
 	}
 }
 

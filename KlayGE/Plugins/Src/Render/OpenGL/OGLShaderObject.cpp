@@ -1543,6 +1543,12 @@ namespace KlayGE
 			ss << "-DKLAYGE_MAX_TEX_DEPTH=" << re.DeviceCaps().max_texture_depth;
 			max_tex_depth_str = ss.str();
 		}
+		std::string flipping_str;
+		{
+			std::stringstream ss;
+			ss << "-DKLAYGE_FLIPPING=" << (re.RequiresFlipping() ? -1 : +1);
+			flipping_str = ss.str();
+		}
 
 		std::string shader_text = this->GenShaderText(effect);
 
@@ -1552,6 +1558,7 @@ namespace KlayGE
 		args.push_back(max_tex_array_str.c_str());
 		args.push_back(max_tex_depth_str.c_str());
 		args.push_back(NULL);
+		args.push_back(flipping_str.c_str());
 		if (!re.DeviceCaps().texture_format_support(EF_BC5))
 		{
 			args.push_back("-DKLAYGE_BC5_AS_AG");

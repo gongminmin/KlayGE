@@ -33,7 +33,6 @@
 		<parameter type="float3" name="disp_range0"/>
 		<parameter type="float3" name="disp_range1"/>
 		<parameter type="float" name="interpolate_frac"/>
-		<parameter type="int" name="flipping"/>
 	</cbuffer>
 
 	<parameter type="sampler" name="linear_wrap_sampler">
@@ -119,7 +118,7 @@ float4 OceanPS(float4 eye_dir_fog : TEXCOORD0, float4 tex_coord_noise_grad : TEX
 	float3 normal = normalize(float3(gradient.x, 1, gradient.y));
 
 	pos_ss.xyz /= pos_ss.w;
-	float2 ss_tc = float2(pos_ss.x, flipping * pos_ss.y) / 2 + 0.5f;
+	float2 ss_tc = float2(pos_ss.x, KLAYGE_FLIPPING * pos_ss.y) / 2 + 0.5f;
 
 	float2 bump = normal.xz / pos_ss.z;
 	float3 reflection = reflection_tex.Sample(linear_clamp_sampler, float2(ss_tc.x, 1 - ss_tc.y) + bump * 0.05f).xyz;

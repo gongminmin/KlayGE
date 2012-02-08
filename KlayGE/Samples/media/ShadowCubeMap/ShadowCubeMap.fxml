@@ -472,7 +472,6 @@ void GenCubeOneInstanceGSShadowMapGS(triangle float4 in_pos[3] : POSITION, trian
 	<parameter type="float" name="min_variance"/>
 	<parameter type="float" name="bleeding_reduce"/>
 	<parameter type="float3" name="light_pos"/>
-	<parameter type="int" name="flipping"/>
 
 	<parameter type="float4" name="ambient_clr"/>
 	<parameter type="float4" name="diffuse_clr"/>
@@ -570,7 +569,7 @@ float4 RenderScenePS(float2 Texcoord : TEXCOORD0, float3 LightWorldPos : TEXCOOR
 		dist = length(LightViewPos);
 
 		float2 tex = float2(LightViewPos.x * sign(LightViewPos.z), LightViewPos.y) / (dist + abs(LightViewPos.z));
-		tex.y *= flipping;
+		tex.y *= KLAYGE_FLIPPING;
 		tex = (tex + 1) / 2;
 		tex.x *= 0.5f;
 		if (LightViewPos.z < 0.0f)
@@ -584,7 +583,7 @@ float4 RenderScenePS(float2 Texcoord : TEXCOORD0, float3 LightWorldPos : TEXCOOR
 	{
 		dist = length(LightWorldPos);
 
-		float3 shadow_dir = float3(LightWorldPos.x, flipping * LightWorldPos.y, LightWorldPos.z);
+		float3 shadow_dir = float3(LightWorldPos.x, -KLAYGE_FLIPPING * LightWorldPos.y, LightWorldPos.z);
 		moments = shadow_cube_tex.SampleLevel(linear_clamp_sampler, shadow_dir, 0).xy;
 	}
 

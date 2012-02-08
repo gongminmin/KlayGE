@@ -182,10 +182,9 @@ namespace
 			*(technique_->Effect().ParameterByName("point_radius")) = 0.08f;
 		}
 
-		void SceneTexture(TexturePtr const tex, bool flip)
+		void SceneTexture(TexturePtr const & tex)
 		{
 			*(technique_->Effect().ParameterByName("scene_tex")) = tex;
-			*(technique_->Effect().ParameterByName("flip")) = static_cast<int32_t>(flip ? -1 : 1);
 		}
 
 		void ParticleAlphaFrom(TexturePtr const & tex)
@@ -593,7 +592,7 @@ void ParticleEditorApp::OnResize(uint32_t width, uint32_t height)
 	scene_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*scene_tex_, 0, 1, 0));
 	scene_buffer_->Attach(FrameBuffer::ATT_DepthStencil, ds_view);
 
-	checked_pointer_cast<RenderParticles>(particles_->GetRenderable())->SceneTexture(scene_tex_, rf.RenderEngineInstance().RequiresFlipping());
+	checked_pointer_cast<RenderParticles>(particles_->GetRenderable())->SceneTexture(scene_tex_);
 
 	copy_pp_->InputPin(0, scene_tex_);
 

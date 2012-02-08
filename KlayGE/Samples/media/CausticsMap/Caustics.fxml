@@ -76,14 +76,13 @@ void PointGS(point float4 in_pos[1] : POSITION, point float4 in_color[1] : TEXCO
 	<parameter type="float3" name="light_color"/>
 	<parameter type="float" name="light_density"/>
 	<parameter type="float" name="inv_occlusion_pixs"/>
-	<parameter type="int" name="flipping"/>
 
 	<shader>
 		<![CDATA[
 float2 CalcLookupUV(float4 lookup_proj)
 {   
 	float2 lookup_uv = lookup_proj.xy / lookup_proj.w * 0.5f;
-	lookup_uv.y *= flipping;
+	lookup_uv.y *= KLAYGE_FLIPPING;
 	lookup_uv += 0.5f;
 	return lookup_uv;
 }
@@ -108,7 +107,7 @@ void GenSingleFaceCausticsMap(float2 idx,
 	float3 view_dir;
 	
 	depth = t_first_depth.SampleLevel(point_sampler, idx, 0).x;
-	view_dir = texcoord_to_world(float2(idx.x, flipping < 0 ? idx.y : 1 - idx.y));
+	view_dir = texcoord_to_world(float2(idx.x, KLAYGE_FLIPPING < 0 ? idx.y : 1 - idx.y));
 	float3 incident_light = view_dir * (depth / ttow_z.w);
 	float3 surface_pt = incident_light + light_pos;
 	incident_light = normalize(incident_light);
@@ -121,11 +120,11 @@ void GenSingleFaceCausticsMap(float2 idx,
 	float2 intersect_uv;
 	intersect_uv = CalcIntersectionPtUV(surface_pt, caustics_pt, refract_light);
 	depth = t_background_depth.SampleLevel(linear_sampler, intersect_uv, 0).x;
-	view_dir = texcoord_to_world(float2(intersect_uv.x, flipping < 0 ? intersect_uv.y : 1 - intersect_uv.y));
+	view_dir = texcoord_to_world(float2(intersect_uv.x, KLAYGE_FLIPPING < 0 ? intersect_uv.y : 1 - intersect_uv.y));
 	caustics_pt = view_dir * (depth / ttow_z.w) + light_pos;
 	intersect_uv = CalcIntersectionPtUV(surface_pt, caustics_pt, refract_light);
 	depth = t_background_depth.SampleLevel(linear_sampler, intersect_uv, 0).x;
-	view_dir = texcoord_to_world(float2(intersect_uv.x, flipping < 0 ? intersect_uv.y : 1 - intersect_uv.y));
+	view_dir = texcoord_to_world(float2(intersect_uv.x, KLAYGE_FLIPPING < 0 ? intersect_uv.y : 1 - intersect_uv.y));
 	caustics_pt = view_dir * (depth / ttow_z.w) + light_pos;
 
 	float dist = distance(caustics_pt, surface_pt);
@@ -217,7 +216,7 @@ void GenDualFaceCausticsMap(float2 idx,
 	float3 view_dir;
 	
 	depth = t_first_depth.SampleLevel(point_sampler, idx, 0).x;
-	view_dir = texcoord_to_world(float2(idx.x, flipping < 0 ? idx.y : 1 - idx.y));
+	view_dir = texcoord_to_world(float2(idx.x, KLAYGE_FLIPPING < 0 ? idx.y : 1 - idx.y));
 	float3 incident_light = view_dir * (depth / ttow_z.w);
 	float3 surface_pt = incident_light + light_pos;
 	incident_light = normalize(incident_light);
@@ -235,11 +234,11 @@ void GenDualFaceCausticsMap(float2 idx,
 	
 	intersect_uv = CalcIntersectionPtUV(surface_pt, caustics_pt, refract_light);
 	depth = t_second_depth.SampleLevel(linear_sampler, intersect_uv, 0).x;
-	view_dir = texcoord_to_world(float2(intersect_uv.x, flipping < 0 ? intersect_uv.y : 1 - intersect_uv.y));
+	view_dir = texcoord_to_world(float2(intersect_uv.x, KLAYGE_FLIPPING < 0 ? intersect_uv.y : 1 - intersect_uv.y));
 	caustics_pt = view_dir * (depth / ttow_z.w) + light_pos;
 	intersect_uv = CalcIntersectionPtUV(surface_pt, caustics_pt, refract_light);
 	depth = t_second_depth.SampleLevel(linear_sampler, intersect_uv, 0).x;
-	view_dir = texcoord_to_world(float2(intersect_uv.x, flipping < 0 ? intersect_uv.y : 1 - intersect_uv.y));
+	view_dir = texcoord_to_world(float2(intersect_uv.x, KLAYGE_FLIPPING < 0 ? intersect_uv.y : 1 - intersect_uv.y));
 	caustics_pt = view_dir * (depth / ttow_z.w) + light_pos;
 
 	surface_pt = caustics_pt;
@@ -255,11 +254,11 @@ void GenDualFaceCausticsMap(float2 idx,
 	//2 steps second refract
 	intersect_uv = CalcIntersectionPtUV(surface_pt, caustics_pt, refract_light);
 	depth = t_background_depth.SampleLevel(linear_sampler, intersect_uv, 0).x;
-	view_dir = texcoord_to_world(float2(intersect_uv.x, flipping < 0 ? intersect_uv.y : 1 - intersect_uv.y));
+	view_dir = texcoord_to_world(float2(intersect_uv.x, KLAYGE_FLIPPING < 0 ? intersect_uv.y : 1 - intersect_uv.y));
 	caustics_pt = view_dir * (depth / ttow_z.w) + light_pos;
 	intersect_uv = CalcIntersectionPtUV(surface_pt, caustics_pt, refract_light);
 	depth = t_background_depth.SampleLevel(linear_sampler, intersect_uv, 0).x;
-	view_dir = texcoord_to_world(float2(intersect_uv.x, flipping < 0 ? intersect_uv.y : 1 - intersect_uv.y));
+	view_dir = texcoord_to_world(float2(intersect_uv.x, KLAYGE_FLIPPING < 0 ? intersect_uv.y : 1 - intersect_uv.y));
 	caustics_pt = view_dir * (depth / ttow_z.w) + light_pos;
 
 	float dist = distance(caustics_pt, first_pt);

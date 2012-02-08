@@ -30,8 +30,6 @@
 		<parameter type="float4x4" name="inv_proj"/>
 
 		<parameter type="float" name="far_plane"/>
-
-		<parameter type="int" name="flip"/>
 	</cbuffer>
 
 	<parameter type="texture2D" name="particle_tex"/>
@@ -93,7 +91,7 @@ float4 ParticlesPS(PS_IN ps_in) : SV_Target
 	float4 clr = particle_tex.Sample(bilinear_sampler, ps_in.tex);
 	
 	float2 tex_coord = ps_in.PosSS.xy / ps_in.PosSS.w;
-	tex_coord.y *= flip;
+	tex_coord.y *= KLAYGE_FLIPPING;
 	tex_coord = tex_coord / 2 + 0.5f;
 
 	float depth = scene_tex.SampleLevel(point_sampler, tex_coord, 0).a * far_plane;

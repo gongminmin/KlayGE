@@ -21,8 +21,6 @@
 		<parameter type="float4x4" name="Proj"/>
 
 		<parameter type="float3" name="depth_near_far_invfar"/>
-
-		<parameter type="int" name="flip"/>
 	</cbuffer>
 
 	<parameter type="float4" name="particle_color_from"/>
@@ -130,7 +128,7 @@ float4 ParticlePS(PS_IN ps_in) : SV_Target
 	else
 	{
 		float2 tex_coord = ps_in.PosSS.xy / ps_in.PosSS.w;
-		tex_coord.y *= flip;
+		tex_coord.y *= KLAYGE_FLIPPING;
 		tex_coord = tex_coord / 2 + 0.5f;
 		
 		float depth = scene_tex.SampleLevel(scene_sampler, tex_coord, 0).a * depth_near_far_invfar.y;

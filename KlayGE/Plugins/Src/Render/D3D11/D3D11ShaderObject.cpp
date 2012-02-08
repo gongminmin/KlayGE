@@ -745,6 +745,12 @@ namespace KlayGE
 			ss << caps.max_texture_depth;
 			max_tex_depth_str = ss.str();
 		}
+		std::string flipping_str;
+		{
+			std::stringstream ss;
+			ss << (render_eng.RequiresFlipping() ? -1 : +1);
+			flipping_str = ss.str();
+		}
 
 		is_validate_ = true;
 		for (size_t type = 0; type < ShaderObject::ST_NumShaderTypes; ++ type)
@@ -946,6 +952,10 @@ namespace KlayGE
 						}
 						{
 							D3D_SHADER_MACRO macro_d3d11 = { "KLAYGE_NO_TEX_LOD", "0" };
+							macros.push_back(macro_d3d11);
+						}
+						{
+							D3D_SHADER_MACRO macro_d3d11 = { "KLAYGE_FLIPPING", flipping_str.c_str() };
 							macros.push_back(macro_d3d11);
 						}
 						if (feature_level <= D3D_FEATURE_LEVEL_9_3)

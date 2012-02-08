@@ -611,7 +611,6 @@ namespace KlayGE
 			static_cast<float>(screen_frame_buffer_->Height()));
 		*(stereoscopic_effect_->ParameterByName("left_tex")) = stereo_colors_[0];
 		*(stereoscopic_effect_->ParameterByName("right_tex")) = stereo_colors_[1];
-		*(stereoscopic_effect_->ParameterByName("flipping")) = static_cast<int32_t>(this->RequiresFlipping() ? -1 : +1);
 	}
 
 	void RenderEngine::StereoscopicForLCDShutter()

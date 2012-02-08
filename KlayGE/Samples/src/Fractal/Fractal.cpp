@@ -76,12 +76,6 @@ namespace
 			*(technique_->Effect().ParameterByName("clr0")) = clr0;
 			*(technique_->Effect().ParameterByName("clr1")) = clr1;
 		}
-
-		void OnRenderBegin()
-		{
-			RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-			*(technique_->Effect().ParameterByName("flipping")) = static_cast<int32_t>(re.RequiresFlipping() ? -1 : +1);
-		}
 	};
 
 	enum

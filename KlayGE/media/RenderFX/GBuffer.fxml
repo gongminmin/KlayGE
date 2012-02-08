@@ -12,7 +12,6 @@
 		<parameter type="float4x4" name="model_view"/>
 		<parameter type="float4x4" name="inv_mvp"/>
 		<parameter type="float" name="depth_far"/>
-		<parameter type='int' name='flipping'/>
 	</cbuffer>
 
 	<cbuffer name="model">
@@ -90,7 +89,7 @@ void DepthVS(float4 pos : POSITION,
 	oTexCoordDepth.z = oPos.w;
 	
 	oScreenTc.xy = oPos.xy / oPos.w * 0.5f;
-	oScreenTc.y *= flipping;
+	oScreenTc.y *= KLAYGE_FLIPPING;
 	oScreenTc.xy += 0.5f;
 	
 #ifndef NOPERSPECTIVE_SUPPORT
@@ -159,7 +158,7 @@ void GBufferVS(float4 pos : POSITION,
 	oTsToView1_Depth.w = oPos.w;
 	
 	oScreenTc.xy = oPos.xy / oPos.w * 0.5f;
-	oScreenTc.y *= flipping;
+	oScreenTc.y *= KLAYGE_FLIPPING;
 	oScreenTc.xy += 0.5f;
 	
 #ifndef NOPERSPECTIVE_SUPPORT
@@ -665,7 +664,7 @@ void ShadingVS(float4 pos : POSITION,
 	oNormal = mul(normal, (float3x3)model_view);
 
 	oTc.xy = oPos.xy / oPos.w;
-	oTc.y *= flipping;
+	oTc.y *= KLAYGE_FLIPPING;
 	oTc.xy = oTc.xy * 0.5f + 0.5f;
 
 #ifndef NOPERSPECTIVE_SUPPORT

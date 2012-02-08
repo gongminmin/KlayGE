@@ -68,10 +68,9 @@ namespace
 			}
 		}
 
-		void LastDepth(TexturePtr const & depth_tex, bool flip)
+		void LastDepth(TexturePtr const & depth_tex)
 		{
 			*(technique_->Effect().ParameterByName("last_depth_tex")) = depth_tex;
-			*(technique_->Effect().ParameterByName("flip")) = static_cast<int32_t>(flip ? -1 : 1);
 		}
 
 		void Update()
@@ -93,9 +92,6 @@ namespace
 		{
 			*(technique_->Effect().ParameterByName("light_pos")) = light_pos;
 		}
-
-	private:
-		bool flip;
 	};
 
 	class PolygonObject : public SceneObjectHelper
@@ -134,12 +130,12 @@ namespace
 			}
 		}
 
-		void LastDepth(TexturePtr const & depth_tex, bool flip)
+		void LastDepth(TexturePtr const & depth_tex)
 		{
 			RenderModelPtr model = checked_pointer_cast<RenderModel>(renderable_);
 			for (uint32_t i = 0; i < model->NumMeshes(); ++ i)
 			{
-				checked_pointer_cast<RenderPolygon>(model->Mesh(i))->LastDepth(depth_tex, flip);
+				checked_pointer_cast<RenderPolygon>(model->Mesh(i))->LastDepth(depth_tex);
 			}
 		}
 
@@ -423,7 +419,7 @@ uint32_t DepthPeelingApp::DoUpdate(uint32_t pass)
 				{
 					if (!finished)
 					{
-						checked_pointer_cast<PolygonObject>(polygon_)->LastDepth(depth_texs_[(layer - 1) % 2], re.RequiresFlipping());
+						checked_pointer_cast<PolygonObject>(polygon_)->LastDepth(depth_texs_[(layer - 1) % 2]);
 
 						re.BindFrameBuffer(peeling_fbs_[layer]);
 						peeling_fbs_[layer]->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(0, 0, 0, 0), 1, 0);

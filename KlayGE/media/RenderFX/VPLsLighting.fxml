@@ -16,7 +16,6 @@
 	<parameter type="texture2D" name="depth_tex"/>
 
 	<parameter type="float2" name="vpl_params"/>
-	<parameter type='int' name='flipping'/>
 
 	<cbuffer name="per_frame">
 		<parameter type="float4x4" name="view"/>
@@ -69,7 +68,7 @@ void CalcVPLsLightingShape(float4 pos,
 	oPos = mul(float4(oViewDir.xyz, 1), proj);
 
 	oTc.xy = oPos.xy / oPos.w * 0.5f;
-	oTc.y *= flipping;
+	oTc.y *= KLAYGE_FLIPPING;
 	oTc.xy += 0.5f;
 
 #ifndef NOPERSPECTIVE_SUPPORT

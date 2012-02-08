@@ -269,9 +269,6 @@ namespace
 				*(technique_->Effect().ParameterByName("caustics_tex")) = caustics_map_;
 				*(technique_->Effect().ParameterByName("obj_model_to_light_model")) = model * inv_light_model;
 				*(technique_->Effect().ParameterByName("obj_model_to_light_view")) = model * first_light_view;
-
-				RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-				*(technique_->Effect().ParameterByName("flipping")) = static_cast<int32_t>(re.RequiresFlipping() ? -1 : +1);
 			}			
 			
 		}
@@ -397,9 +394,6 @@ namespace
 					*(technique_->Effect().ParameterByName("env_cube")) = env_cube_;
 					*(technique_->Effect().ParameterByName("refract_idx")) = float2(refract_idx, 1.0f / refract_idx);
 					*(technique_->Effect().ParameterByName("absorption_idx")) = absorption_idx;
-
-					RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-					*(technique_->Effect().ParameterByName("flipping")) = static_cast<int32_t>(re.RequiresFlipping() ? -1 : +1);
 				}
 				break;
 			}
@@ -664,9 +658,6 @@ namespace
 					*(technique_->Effect().ParameterByName("t_second_normals")) = input_tex.refract_obj_N_texture_b;
 				}
 			}
-
-			RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-			*(technique_->Effect().ParameterByName("flipping")) = static_cast<int32_t>(re.RequiresFlipping() ? -1 : +1);
 		}
 
 	private:

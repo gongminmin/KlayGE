@@ -70,10 +70,9 @@ namespace
 			}
 		}
 
-		void BackFaceTexture(TexturePtr const & bf_tex, bool flip)
+		void BackFaceTexture(TexturePtr const & bf_tex)
 		{
 			*(technique_->Effect().ParameterByName("BackFace_tex")) = bf_tex;
-			*(technique_->Effect().ParameterByName("flip")) = static_cast<int32_t>(flip ? -1 : 1);
 		}
 
 		void CompressedCubeMap(TexturePtr const & y_cube, TexturePtr const & c_cube)
@@ -124,9 +123,9 @@ namespace
 			checked_pointer_cast<RefractorRenderable>(renderable_)->Pass(pass);
 		}
 
-		void BackFaceTexture(TexturePtr const & bf_tex, bool flip)
+		void BackFaceTexture(TexturePtr const & bf_tex)
 		{
-			checked_pointer_cast<RefractorRenderable>(renderable_)->BackFaceTexture(bf_tex, flip);
+			checked_pointer_cast<RefractorRenderable>(renderable_)->BackFaceTexture(bf_tex);
 		}
 	};
 
@@ -286,7 +285,7 @@ uint32_t Refract::DoUpdate(uint32_t pass)
 		re.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->ClearDepth(1.0f);
 
 		checked_pointer_cast<RefractorObject>(refractor_)->Pass(1);
-		checked_pointer_cast<RefractorObject>(refractor_)->BackFaceTexture(render_tex_, re.RequiresFlipping());
+		checked_pointer_cast<RefractorObject>(refractor_)->BackFaceTexture(render_tex_);
 
 		sky_box_->Visible(true);
 		return App3DFramework::URV_Need_Flush | App3DFramework::URV_Finished;
