@@ -1525,22 +1525,29 @@ namespace KlayGE
 	{
 		OGLRenderFactory& rf = *checked_cast<OGLRenderFactory*>(&Context::Instance().RenderFactoryInstance());
 		RenderEngine& re = rf.RenderEngineInstance();
+		RenderDeviceCaps const & caps = re.DeviceCaps();
 		std::string max_sm_str;
 		{
 			std::stringstream ss;
-			ss << "-DKLAYGE_SHADER_MODEL=" << static_cast<int>(re.DeviceCaps().max_shader_model);
+			ss << "-DKLAYGE_SHADER_MODEL=" << static_cast<int>(caps.max_shader_model);
 			max_sm_str = ss.str();
 		}
 		std::string max_tex_array_str;
 		{
 			std::stringstream ss;
-			ss << "-DKLAYGE_MAX_TEX_ARRAY_LEN=" << re.DeviceCaps().max_texture_array_length;
+			ss << "-DKLAYGE_MAX_TEX_ARRAY_LEN=" << caps.max_texture_array_length;
 			max_tex_array_str = ss.str();
 		}
 		std::string max_tex_depth_str;
 		{
 			std::stringstream ss;
-			ss << "-DKLAYGE_MAX_TEX_DEPTH=" << re.DeviceCaps().max_texture_depth;
+			ss << "-DKLAYGE_MAX_TEX_DEPTH=" << caps.max_texture_depth;
+			max_tex_depth_str = ss.str();
+		}
+		std::string max_tex_units_str;
+		{
+			std::stringstream ss;
+			ss << "-DKLAYGE_MAX_TEX_UNITS=" << static_cast<int>(caps.max_pixel_texture_units);
 			max_tex_depth_str = ss.str();
 		}
 		std::string flipping_str;
@@ -1557,6 +1564,7 @@ namespace KlayGE
 		args.push_back(max_sm_str.c_str());
 		args.push_back(max_tex_array_str.c_str());
 		args.push_back(max_tex_depth_str.c_str());
+		args.push_back(max_tex_units_str.c_str());
 		args.push_back(NULL);
 		args.push_back(flipping_str.c_str());
 		if (!re.DeviceCaps().texture_format_support(EF_BC5))
@@ -1681,7 +1689,7 @@ namespace KlayGE
 							ss << "-DKLAYGE_NO_TEX_LOD=" << ((ST_VertexShader == type) ? 0 : ((glloader_GL_VERSION_2_1() || glloader_GL_ARB_shader_texture_lod()) ? 0 : 1));
 							no_tex_lod_str = ss.str();
 						}
-						args[4] = no_tex_lod_str.c_str();
+						args[5] = no_tex_lod_str.c_str();
 
 						CGprogram cg_shader = cgCreateProgram(CGContextIniter::Instance().Context(),
 								CG_SOURCE, shader_text.c_str(), profile, sd.func_name.c_str(), &args[0]);

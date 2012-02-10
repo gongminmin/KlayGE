@@ -1806,22 +1806,29 @@ namespace KlayGE
 #ifndef KLAYGE_PLATFORM_ANDROID
 		OGLESRenderFactory& rf = *checked_cast<OGLESRenderFactory*>(&Context::Instance().RenderFactoryInstance());
 		RenderEngine& re = rf.RenderEngineInstance();
+		RenderDeviceCaps const & caps = re.DeviceCaps();
 		std::string max_sm_str;
 		{
 			std::stringstream ss;
-			ss << "-DKLAYGE_SHADER_MODEL=" << static_cast<int>(re.DeviceCaps().max_shader_model);
+			ss << "-DKLAYGE_SHADER_MODEL=" << static_cast<int>(caps.max_shader_model);
 			max_sm_str = ss.str();
 		}
 		std::string max_tex_array_str;
 		{
 			std::stringstream ss;
-			ss << "-DKLAYGE_MAX_TEX_ARRAY_LEN=" << re.DeviceCaps().max_texture_array_length;
+			ss << "-DKLAYGE_MAX_TEX_ARRAY_LEN=" << caps.max_texture_array_length;
 			max_tex_array_str = ss.str();
 		}
 		std::string max_tex_depth_str;
 		{
 			std::stringstream ss;
-			ss << "-DKLAYGE_MAX_TEX_DEPTH=" << re.DeviceCaps().max_texture_depth;
+			ss << "-DKLAYGE_MAX_TEX_DEPTH=" << caps.max_texture_depth;
+			max_tex_depth_str = ss.str();
+		}
+		std::string max_tex_units_str;
+		{
+			std::stringstream ss;
+			ss << "-DKLAYGE_MAX_TEX_UNITS=" << static_cast<int>(caps.max_pixel_texture_units);
 			max_tex_depth_str = ss.str();
 		}
 		std::string no_tex_lod_str;
@@ -1842,6 +1849,7 @@ namespace KlayGE
 		args.push_back(max_sm_str.c_str());
 		args.push_back(max_tex_array_str.c_str());
 		args.push_back(max_tex_depth_str.c_str());
+		args.push_back(max_tex_units_str.c_str());
 		args.push_back(no_tex_lod_str.c_str());
 		args.push_back(flipping_str.c_str());
 		if (!re.DeviceCaps().texture_format_support(EF_BC5))

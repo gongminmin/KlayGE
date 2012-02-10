@@ -745,6 +745,12 @@ namespace KlayGE
 			ss << caps.max_texture_depth;
 			max_tex_depth_str = ss.str();
 		}
+		std::string max_tex_units_str;
+		{
+			std::stringstream ss;
+			ss << static_cast<int>(caps.max_pixel_texture_units);
+			max_tex_units_str = ss.str();
+		}
 		std::string flipping_str;
 		{
 			std::stringstream ss;
@@ -948,6 +954,10 @@ namespace KlayGE
 						}
 						{
 							D3D_SHADER_MACRO macro_d3d11 = { "KLAYGE_MAX_TEX_DEPTH", max_tex_depth_str.c_str() };
+							macros.push_back(macro_d3d11);
+						}
+						{
+							D3D_SHADER_MACRO macro_d3d11 = { "KLAYGE_MAX_TEX_UNITS", max_tex_units_str.c_str() };
 							macros.push_back(macro_d3d11);
 						}
 						{

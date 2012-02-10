@@ -98,7 +98,7 @@ float4 judatex2d_internal(int2 tile_xy, float2 in_tile_coord)
 #else
 	float2 tc = cache_addr.xy;
 	int index = cache_addr.z;
-	float4 ret;
+	float4 ret = 0;
 	switch (index)
 	{
 	case 0:
@@ -113,6 +113,7 @@ float4 judatex2d_internal(int2 tile_xy, float2 in_tile_coord)
 		ret = juda_tex_cache_2.Sample(jdt_aniso_sampler, tc);
 		break;
 
+#if KLAYGE_MAX_TEX_UNITS > 4
 	case 3:
 		ret = juda_tex_cache_3.Sample(jdt_aniso_sampler, tc);
 		break;
@@ -129,6 +130,7 @@ float4 judatex2d_internal(int2 tile_xy, float2 in_tile_coord)
 		ret = juda_tex_cache_6.Sample(jdt_aniso_sampler, tc);
 		break;
 
+#if KLAYGE_MAX_TEX_UNITS > 8
 	case 7:
 		ret = juda_tex_cache_7.Sample(jdt_aniso_sampler, tc);
 		break;
@@ -160,10 +162,14 @@ float4 judatex2d_internal(int2 tile_xy, float2 in_tile_coord)
 	case 14:
 		ret = juda_tex_cache_14.Sample(jdt_aniso_sampler, tc);
 		break;
-
+		
+#if KLAYGE_MAX_TEX_UNITS > 16
 	default:
 		ret = juda_tex_cache_15.Sample(jdt_aniso_sampler, tc);
 		break;
+#endif
+#endif
+#endif
 	}
 	return ret;
 #endif
@@ -177,7 +183,7 @@ float4 judatex2d_bias_internal(int2 tile_xy, float2 in_tile_coord, float bias)
 #else
 	float2 tc = cache_addr.xy;
 	int index = cache_addr.z;
-	float4 ret;
+	float4 ret = 0;
 	switch (index)
 	{
 	case 0:
@@ -192,6 +198,7 @@ float4 judatex2d_bias_internal(int2 tile_xy, float2 in_tile_coord, float bias)
 		ret = juda_tex_cache_2.SampleBias(jdt_aniso_sampler, tc, bias);
 		break;
 
+#if KLAYGE_MAX_TEX_UNITS > 4
 	case 3:
 		ret = juda_tex_cache_3.SampleBias(jdt_aniso_sampler, tc, bias);
 		break;
@@ -208,6 +215,7 @@ float4 judatex2d_bias_internal(int2 tile_xy, float2 in_tile_coord, float bias)
 		ret = juda_tex_cache_6.SampleBias(jdt_aniso_sampler, tc, bias);
 		break;
 
+#if KLAYGE_MAX_TEX_UNITS > 8
 	case 7:
 		ret = juda_tex_cache_7.SampleBias(jdt_aniso_sampler, tc, bias);
 		break;
@@ -240,9 +248,13 @@ float4 judatex2d_bias_internal(int2 tile_xy, float2 in_tile_coord, float bias)
 		ret = juda_tex_cache_14.SampleBias(jdt_aniso_sampler, tc, bias);
 		break;
 
+#if KLAYGE_MAX_TEX_UNITS > 16
 	default:
 		ret = juda_tex_cache_15.SampleBias(jdt_aniso_sampler, tc, bias);
 		break;
+#endif
+#endif
+#endif
 	}
 	return ret;
 #endif
@@ -256,7 +268,7 @@ float4 judatex2d_level_internal(int2 tile_xy, float2 in_tile_coord, float lod)
 #else
 	float2 tc = cache_addr.xy;
 	int index = cache_addr.z;
-	float4 ret;
+	float4 ret = 0;
 	switch (index)
 	{
 	case 0:
@@ -271,6 +283,7 @@ float4 judatex2d_level_internal(int2 tile_xy, float2 in_tile_coord, float lod)
 		ret = juda_tex_cache_2.SampleLevel(jdt_aniso_sampler, tc, lod);
 		break;
 
+#if KLAYGE_MAX_TEX_UNITS > 4
 	case 3:
 		ret = juda_tex_cache_3.SampleLevel(jdt_aniso_sampler, tc, lod);
 		break;
@@ -287,6 +300,7 @@ float4 judatex2d_level_internal(int2 tile_xy, float2 in_tile_coord, float lod)
 		ret = juda_tex_cache_6.SampleLevel(jdt_aniso_sampler, tc, lod);
 		break;
 
+#if KLAYGE_MAX_TEX_UNITS > 8
 	case 7:
 		ret = juda_tex_cache_7.SampleLevel(jdt_aniso_sampler, tc, lod);
 		break;
@@ -319,9 +333,13 @@ float4 judatex2d_level_internal(int2 tile_xy, float2 in_tile_coord, float lod)
 		ret = juda_tex_cache_14.SampleLevel(jdt_aniso_sampler, tc, lod);
 		break;
 
+#if KLAYGE_MAX_TEX_UNITS > 16
 	default:
 		ret = juda_tex_cache_15.SampleLevel(jdt_aniso_sampler, tc, lod);
 		break;
+#endif
+#endif
+#endif
 	}
 	return ret;
 #endif
@@ -329,14 +347,13 @@ float4 judatex2d_level_internal(int2 tile_xy, float2 in_tile_coord, float lod)
 
 float4 judatex2d_grad_internal(int2 tile_xy, float2 in_tile_coord, float2 tc_ddx, float2 tc_ddy)
 {
-	float3 cache_addr = juda_tex_indirect.SampleLevel(jdt_point_sampler, float2(tile_xy) * inv_juda_tex_indirect_size, 0).rgb * 255;
-	cache_addr.xy = cache_addr.xy * tile_size.y + tile_size.z;
-	float2 tc = float2((cache_addr.xy + in_tile_coord * tile_size.x) * inv_juda_tex_cache_size);
+	float3 cache_addr = calc_cache_addr(tile_xy, in_tile_coord);
 #if KLAYGE_MAX_TEX_ARRAY_LEN > 1
-	return juda_tex_cache.SampleGrad(jdt_aniso_sampler, float3(tc, cache_addr.z), tc_ddx, tc_ddy);
+	return juda_tex_cache.SampleGrad(jdt_aniso_sampler, cache_addr, tc_ddx, tc_ddy);
 #else
+	float2 tc = cache_addr.xy;
 	int index = cache_addr.z;
-	float4 ret;
+	float4 ret = 0;
 	switch (index)
 	{
 	case 0:
@@ -351,6 +368,7 @@ float4 judatex2d_grad_internal(int2 tile_xy, float2 in_tile_coord, float2 tc_ddx
 		ret = juda_tex_cache_2.SampleGrad(jdt_aniso_sampler, tc, tc_ddx, tc_ddy);
 		break;
 
+#if KLAYGE_MAX_TEX_UNITS > 4
 	case 3:
 		ret = juda_tex_cache_3.SampleGrad(jdt_aniso_sampler, tc, tc_ddx, tc_ddy);
 		break;
@@ -367,6 +385,7 @@ float4 judatex2d_grad_internal(int2 tile_xy, float2 in_tile_coord, float2 tc_ddx
 		ret = juda_tex_cache_6.SampleGrad(jdt_aniso_sampler, tc, tc_ddx, tc_ddy);
 		break;
 
+#if KLAYGE_MAX_TEX_UNITS > 8
 	case 7:
 		ret = juda_tex_cache_7.SampleGrad(jdt_aniso_sampler, tc, tc_ddx, tc_ddy);
 		break;
@@ -399,9 +418,13 @@ float4 judatex2d_grad_internal(int2 tile_xy, float2 in_tile_coord, float2 tc_ddx
 		ret = juda_tex_cache_14.SampleGrad(jdt_aniso_sampler, tc, tc_ddx, tc_ddy);
 		break;
 
+#if KLAYGE_MAX_TEX_UNITS > 16
 	default:
 		ret = juda_tex_cache_15.SampleGrad(jdt_aniso_sampler, tc, tc_ddx, tc_ddy);
 		break;
+#endif
+#endif
+#endif
 	}
 	return ret;
 #endif
