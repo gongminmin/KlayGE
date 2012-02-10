@@ -260,6 +260,12 @@ namespace KlayGE
 		glActiveTexture(active_tex_unit_);
 
 		binded_buffer_.clear();
+
+		fb_srgb_cache_ = false;
+		if (glloader_GL_ARB_framebuffer_sRGB())
+		{
+			glDisable(GL_FRAMEBUFFER_SRGB);
+		}
 	}
 
 	void OGLRenderEngine::MipMapLodBias(uint32_t stage, float bias)
@@ -690,6 +696,26 @@ namespace KlayGE
 		if (dirty)
 		{
 			glUniform4fv(location, count, value);
+		}
+	}
+
+	void OGLRenderEngine::EnableFramebufferSRGB(bool srgb)
+	{
+		if (fb_srgb_cache_ != srgb)
+		{
+			if (glloader_GL_ARB_framebuffer_sRGB())
+			{
+				if (srgb)
+				{
+					glEnable(GL_FRAMEBUFFER_SRGB);
+				}
+				else
+				{
+					glDisable(GL_FRAMEBUFFER_SRGB);
+				}
+			}
+
+			fb_srgb_cache_ = srgb;
 		}
 	}
 

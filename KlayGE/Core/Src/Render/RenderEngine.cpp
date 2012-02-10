@@ -247,6 +247,11 @@ namespace KlayGE
 
 				fmt = EF_ARGB8;
 			}
+			ElementFormat fmt_srgb = MakeSRGB(fmt);
+			if (caps.rendertarget_format_support(fmt_srgb, 1, 0))
+			{
+				fmt = fmt_srgb;
+			}
 
 			before_gamma_tex_ = rf.MakeTexture2D(screen_frame_buffer_->Width(), screen_frame_buffer_->Height(), 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
 			before_gamma_frame_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*before_gamma_tex_, 0, 1, 0));

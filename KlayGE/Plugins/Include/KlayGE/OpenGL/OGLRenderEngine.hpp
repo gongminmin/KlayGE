@@ -115,6 +115,8 @@ namespace KlayGE
 		void Uniform4uiv(GLint location, GLsizei count, GLuint const * value);
 		void Uniform4fv(GLint location, GLsizei count, GLfloat const * value);
 
+		void EnableFramebufferSRGB(bool srgb);
+
 		void GetFBOForBlit(GLuint& src, GLuint& dst) const
 		{
 			src = fbo_blit_src_;
@@ -189,6 +191,7 @@ namespace KlayGE
 
 		std::map<GLuint, std::vector<int4> > uniformi_cache_;
 		std::map<GLuint, std::vector<float4> > uniformf_cache_;
+		bool fb_srgb_cache_;
 
 		bool hack_for_nv_;
 		bool hack_for_ati_;

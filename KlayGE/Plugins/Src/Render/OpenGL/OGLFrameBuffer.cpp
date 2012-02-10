@@ -79,6 +79,8 @@ namespace KlayGE
 
 		if (fbo_ != 0)
 		{
+			re.EnableFramebufferSRGB(true);
+
 			std::vector<GLenum> targets(clr_views_.size());
 			for (size_t i = 0; i < clr_views_.size(); ++ i)
 			{
@@ -88,6 +90,8 @@ namespace KlayGE
 		}
 		else
 		{
+			re.EnableFramebufferSRGB(Context::Instance().Config().graphics_cfg.gamma);
+
 			GLenum targets[] = { GL_BACK_LEFT };
 			glDrawBuffers(1, &targets[0]);
 		}

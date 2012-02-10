@@ -316,14 +316,6 @@ namespace KlayGE
 		}
 #endif
 
-		if (try_srgb)
-		{
-			if (glloader_GL_ARB_framebuffer_sRGB())
-			{
-				glEnable(GL_FRAMEBUFFER_SRGB);
-			}
-		}
-
 		glPixelStorei(GL_PACK_ALIGNMENT, 1);
 		glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 

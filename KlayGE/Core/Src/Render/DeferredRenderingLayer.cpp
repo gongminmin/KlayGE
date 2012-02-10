@@ -820,13 +820,10 @@ namespace KlayGE
 
 			fmt = EF_ARGB8;
 		}
-		if (Context::Instance().Config().graphics_cfg.gamma)
+		ElementFormat fmt_srgb = MakeSRGB(fmt);
+		if (caps.rendertarget_format_support(fmt_srgb, 1, 0))
 		{
-			ElementFormat fmt_srgb = MakeSRGB(fmt);
-			if (caps.rendertarget_format_support(fmt_srgb, 1, 0))
-			{
-				fmt = fmt_srgb;
-			}
+			fmt = fmt_srgb;
 		}
 		ldr_tex_ = rf.MakeTexture2D(width, height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
 		grading_tex_ = rf.MakeTexture2D(width, height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
