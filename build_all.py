@@ -59,6 +59,16 @@ if __name__ == "__main__":
 	copy_to_dst("glloader/lib/x64/glloader_x64_d.dll", dst_dir_x64)
 	copy_to_dst("glloader/lib/x64/glloader_es_x64.dll", dst_dir_x64)
 	copy_to_dst("glloader/lib/x64/glloader_es_x64_d.dll", dst_dir_x64)
+	
+	print("Building kfont...")
+	os.chdir("kfont/build/%s-%d_0" % (compiler_name, compiler_version))
+	os.system("build_all.bat -q")
+	os.chdir("../../../")
+
+	copy_to_dst("kfont/lib/Win32/kfont_x86.dll", dst_dir_x86)
+	copy_to_dst("kfont/lib/Win32/kfont_x86_d.dll", dst_dir_x86)
+	copy_to_dst("kfont/lib/x64/kfont_x64.dll", dst_dir_x64)
+	copy_to_dst("kfont/lib/x64/kfont_x64_d.dll", dst_dir_x64)
 
 	print("Building KlayGE...")
 	os.chdir("KlayGE/Build/%s-%d_0" % (compiler_name, compiler_version))
