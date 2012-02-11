@@ -68,7 +68,7 @@
 
 	<shader>
 		<![CDATA[
-#ifdef KLAYGE_D3D11
+#if KLAYGE_D3D11
 #define NOPERSPECTIVE_SUPPORT
 #endif
 
@@ -638,7 +638,7 @@ float4 GenShadowMapWODepthTextureAlphaTestPS(float2 tc : TEXCOORD0, float3 view_
 	
 	<shader>
 		<![CDATA[
-#ifdef KLAYGE_D3D11
+#if KLAYGE_D3D11
 #define NOPERSPECTIVE_SUPPORT
 #endif
 

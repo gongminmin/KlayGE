@@ -30,7 +30,7 @@
 		<parameter type="float4" name="light_pos_es"/>
 		<parameter type="float4" name="light_dir_es"/>
 		<parameter type="float3" name="light_falloff"/>
-		<parameter type="int" name="light_attrib"/>
+		<parameter type="float4" name="light_attrib"/>
 	</cbuffer>
 
 	<parameter type="texture2D" name="shadow_map_tex"/>
@@ -71,31 +71,14 @@ float linstep(float min, float max, float v)
 
 	<shader>
 		<![CDATA[
-#ifdef KLAYGE_D3D11
+#if KLAYGE_D3D11
 #define NOPERSPECTIVE_SUPPORT
-#define INTEGER_SUPPORT
 #endif
 
 float4 CalcColor(float n_dot_l, float spec, float atten)
 {
 	float2 ds = n_dot_l * atten * float2(1, spec);
-#ifndef INTEGER_SUPPORT
-	if (((light_attrib / LSA_NoDiffuse) % 2) != 0)
-#else
-	if ((light_attrib & LSA_NoDiffuse) != 0)
-#endif
-	{
-		ds.x = 0;
-	}
-#ifndef INTEGER_SUPPORT
-	if (((light_attrib / LSA_NoSpecular) % 2) != 0)
-#else
-	if ((light_attrib & LSA_NoSpecular) != 0)
-#endif
-	{
-		ds.y = 0;
-	}
-
+	ds *= light_attrib.xy;
 	ds = max(ds, 0);
 	return ds.xxxy * light_color;
 }
@@ -116,11 +99,7 @@ float Calc_VSM(float2 moments, float len)
 float VSM_Omnidirectional(float3 dir_ls, float len)
 {
 	float shadow = 1;
-#ifndef INTEGER_SUPPORT
-	if (0 == ((light_attrib / LSA_NoShadow) % 2))
-#else
-	if (0 == (light_attrib & LSA_NoShadow))
-#endif
+	if (light_attrib.z > 0)
 	{
 		float2 moments = shadow_map_cube_tex.Sample(linear_sampler,
 			float3(dir_ls.x, -KLAYGE_FLIPPING * dir_ls.y, dir_ls.z)).xy;
@@ -133,11 +112,7 @@ float VSM_Omnidirectional(float3 dir_ls, float len)
 float VSM_Directional(float3 pos_es, float len)
 {
 	float shadow = 1;
-#ifndef INTEGER_SUPPORT
-	if (0 == ((light_attrib / LSA_NoShadow) % 2))
-#else
-	if (0 == (light_attrib & LSA_NoShadow))
-#endif
+	if (light_attrib.z > 0)
 	{
 		float4 light_proj_pos = mul(float4(pos_es, 1), light_view_proj);
 		light_proj_pos /= light_proj_pos.w;

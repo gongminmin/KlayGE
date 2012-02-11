@@ -33,7 +33,7 @@
 
 	<shader>
 		<![CDATA[
-#ifdef KLAYGE_D3D11
+#if KLAYGE_D3D11
 #define NOPERSPECTIVE_SUPPORT
 #endif
 

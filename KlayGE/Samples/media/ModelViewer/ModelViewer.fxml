@@ -218,10 +218,10 @@ void MeshDepthVS(float4 pos : POSITION,
 void SkinnedMeshDepthVS(float2 texcoord : TEXCOORD0,
 			float4 pos : POSITION,
 			float4 blend_weights : BLENDWEIGHT,
-#ifdef KLAYGE_OPENGL
+#if KLAYGE_OPENGL
 			float4 blend_indices_f : BLENDINDICES,
 #else
-#ifdef KLAYGE_OPENGLES2
+#if KLAYGE_OPENGLES2
 			float4 blend_indices_f : BLENDINDICES,
 #else
 			uint4 blend_indices : BLENDINDICES,
@@ -236,10 +236,10 @@ void SkinnedMeshDepthVS(float2 texcoord : TEXCOORD0,
 #endif
 			out float4 oPos : SV_Position)
 {
-#ifdef KLAYGE_OPENGL
+#if KLAYGE_OPENGL
 	int4 blend_indices = (int4)blend_indices_f;
 #else
-#ifdef KLAYGE_OPENGLES2
+#if KLAYGE_OPENGLES2
 	int4 blend_indices = (int4)blend_indices_f;
 #endif
 #endif
@@ -292,10 +292,10 @@ void MeshVS(float2 texcoord : TEXCOORD0,
 void SkinnedMeshVS(float2 texcoord : TEXCOORD0,
 			float4 pos : POSITION,
 			float4 blend_weights : BLENDWEIGHT,
-#ifdef KLAYGE_OPENGL
+#if KLAYGE_OPENGL
 			float4 blend_indices_f : BLENDINDICES,
 #else
-#ifdef KLAYGE_OPENGLES2
+#if KLAYGE_OPENGLES2
 			float4 blend_indices_f : BLENDINDICES,
 #else
 			uint4 blend_indices : BLENDINDICES,
@@ -313,10 +313,10 @@ void SkinnedMeshVS(float2 texcoord : TEXCOORD0,
 #endif
 			out float4 oPos : SV_Position)
 {
-#ifdef KLAYGE_OPENGL
+#if KLAYGE_OPENGL
 	int4 blend_indices = (int4)blend_indices_f;
 #else
-#ifdef KLAYGE_OPENGLES2
+#if KLAYGE_OPENGLES2
 	int4 blend_indices = (int4)blend_indices_f;
 #endif
 #endif
@@ -358,10 +358,10 @@ void VisualizeVertexVS(float2 tex0 : TEXCOORD0,
 void VisualizeVertexSkinnedVS(float2 tex0 : TEXCOORD0,
 				float4 pos : POSITION,
 				float4 blend_weights : BLENDWEIGHT,
-#ifdef KLAYGE_OPENGL
+#if KLAYGE_OPENGL
 				float4 blend_indices_f : BLENDINDICES,
 #else
-#ifdef KLAYGE_OPENGLES2
+#if KLAYGE_OPENGLES2
 				float4 blend_indices_f : BLENDINDICES,
 #else
 				uint4 blend_indices : BLENDINDICES,
@@ -373,10 +373,10 @@ void VisualizeVertexSkinnedVS(float2 tex0 : TEXCOORD0,
 				out float4 oClr : COLOR,
 				out float4 oPos : SV_Position)
 {
-#ifdef KLAYGE_OPENGL
+#if KLAYGE_OPENGL
 	int4 blend_indices = (int4)blend_indices_f;
 #else
-#ifdef KLAYGE_OPENGLES2
+#if KLAYGE_OPENGLES2
 	int4 blend_indices = (int4)blend_indices_f;
 #endif
 #endif
@@ -1025,10 +1025,10 @@ CONTROL_POINT SmoothVS(float2 tex0 : TEXCOORD0,
 CONTROL_POINT SmoothSkinnedVS(float2 tex0 : TEXCOORD0,
 				float4 pos : POSITION,
 				float4 blend_weights : BLENDWEIGHT,
-#ifdef KLAYGE_OPENGL
+#if KLAYGE_OPENGL
 				float4 blend_indices_f : BLENDINDICES,
 #else
-#ifdef KLAYGE_OPENGLES2
+#if KLAYGE_OPENGLES2
 				float4 blend_indices_f : BLENDINDICES,
 #else
 				uint4 blend_indices : BLENDINDICES,
@@ -1039,10 +1039,10 @@ CONTROL_POINT SmoothSkinnedVS(float2 tex0 : TEXCOORD0,
 {
 	CONTROL_POINT output;
 	
-#ifdef KLAYGE_OPENGL
+#if KLAYGE_OPENGL
 	int4 blend_indices = (int4)blend_indices_f;
 #else
-#ifdef KLAYGE_OPENGLES2
+#if KLAYGE_OPENGLES2
 	int4 blend_indices = (int4)blend_indices_f;
 #endif
 #endif
@@ -1590,10 +1590,10 @@ void SmoothDS(HS_CONSTANT_DATA_OUTPUT HSConstantData,
 void SkinnedStreamOutVS(float3 pos : POSITION,
 					float2 texcoord0 : TEXCOORD0,
 					float4 blend_weights : BLENDWEIGHT,
-#ifdef KLAYGE_OPENGL
+#if KLAYGE_OPENGL
 					float4 blend_indices_f : BLENDINDICES,
 #else
-#ifdef KLAYGE_OPENGLES2
+#if KLAYGE_OPENGLES2
 					float4 blend_indices_f : BLENDINDICES,
 #else
 					uint4 blend_indices : BLENDINDICES,
@@ -2033,10 +2033,10 @@ void MeshShadingVS(float4 pos : POSITION,
 void SkinnedMeshShadingVS(float2 texcoord : TEXCOORD0,
 			float4 pos : POSITION,
 			float4 blend_weights : BLENDWEIGHT,
-#ifdef KLAYGE_OPENGL
+#if KLAYGE_OPENGL
 			float4 blend_indices_f : BLENDINDICES,
 #else
-#ifdef KLAYGE_OPENGLES2
+#if KLAYGE_OPENGLES2
 			float4 blend_indices_f : BLENDINDICES,
 #else
 			uint4 blend_indices : BLENDINDICES,
@@ -2053,10 +2053,10 @@ void SkinnedMeshShadingVS(float2 texcoord : TEXCOORD0,
 			out float3 oNormal : TEXCOORD3,
 			out float4 oPos : SV_Position)
 {
-#ifdef KLAYGE_OPENGL
+#if KLAYGE_OPENGL
 	int4 blend_indices = (int4)blend_indices_f;
 #else
-#ifdef KLAYGE_OPENGLES2
+#if KLAYGE_OPENGLES2
 	int4 blend_indices = (int4)blend_indices_f;
 #endif
 #endif

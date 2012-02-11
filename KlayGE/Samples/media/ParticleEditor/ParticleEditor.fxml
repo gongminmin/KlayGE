@@ -161,7 +161,7 @@ void ParticleVS2(float4 pos : POSITION,
 	oSpin = spin;
 }
 
-#ifdef KLAYGE_OPENGL
+#if KLAYGE_OPENGL
 POINT TRIANGLE_OUT void ParticleGS(AttribArray<float4> in_CenterView_Life : SV_Position, AttribArray<float> in_radius : TEXCOORD0, AttribArray<float> in_spin : TEXCOORD1)
 {
 #else
@@ -213,7 +213,7 @@ void ParticleGS(point float4 in_CenterView_Life[1] : SV_Position, point float in
 		gs_out.view_dir.xyz = view_pos.xyz;
 		gs_out.tex = float3(float2(tex.x, -tex.y) / 2 + 0.5f, life_factor);
 
-#ifdef KLAYGE_OPENGL
+#if KLAYGE_OPENGL
 		emitVertex(gs_out.pos : POSITION, gs_out.clr : COLOR0, gs_out.PosSS : TEXCOORD0,
 			gs_out.CenterView : TEXCOORD1, gs_out.view_dir : TEXCOORD2, gs_out.tex : TEXCOORD3);
 #else

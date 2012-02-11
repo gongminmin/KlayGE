@@ -1652,7 +1652,7 @@ namespace KlayGE
 
 					*g_buffer_tex_param_ = opaque_g_buffer_rt0_tex_;
 					*depth_tex_param_ = opaque_depth_tex_;
-					*light_attrib_param_ = attr;
+					*light_attrib_param_ = float4(attr & LSA_NoDiffuse ? 0.0f : 1.0f, attr & LSA_NoSpecular ? 0.0f : 1.0f, attr & LSA_NoShadow ? -1.0f : 1.0f, 0.0f);
 					*light_color_param_ = light->Color();
 					*light_falloff_param_ = light->Falloff();
 
