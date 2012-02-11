@@ -34,7 +34,7 @@ namespace KlayGE
 		va_start(args, fmt); 
 
 #ifdef KLAYGE_PLATFORM_ANDROID
-		__android_log_print(ANDROID_LOG_INFO, app_name.c_str(), fmt, args);
+		__android_log_vprint(ANDROID_LOG_INFO, app_name.c_str(), fmt, args);
 #else
 		char buffer[1024];
 		vsprintf(buffer, fmt, args);
@@ -53,7 +53,7 @@ namespace KlayGE
 		va_start(args, fmt); 
 
 #ifdef KLAYGE_PLATFORM_ANDROID
-		__android_log_print(ANDROID_LOG_WARN, app_name.c_str(), fmt, args);
+		__android_log_vprint(ANDROID_LOG_WARN, app_name.c_str(), fmt, args);
 #else
 		char buffer[1024];
 		vsprintf(buffer, fmt, args);
@@ -72,7 +72,7 @@ namespace KlayGE
 		va_start(args, fmt); 
 
 #ifdef KLAYGE_PLATFORM_ANDROID
-		__android_log_print(ANDROID_LOG_ERROR, app_name.c_str(), fmt, args);
+		__android_log_vprint(ANDROID_LOG_ERROR, app_name.c_str(), fmt, args);
 #else
 		char buffer[1024];
 		vsprintf(buffer, fmt, args);
