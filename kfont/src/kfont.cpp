@@ -427,7 +427,7 @@ namespace KlayGE
 	void KFont::GetLZMADistanceData(uint8_t const *& p, uint32_t& size, int32_t index) const
 	{
 		p = &distances_lzma_[distances_addr_[index]];
-		size = distances_addr_[index + 1] - distances_addr_[index];
+		size = static_cast<uint32_t>(distances_addr_[index + 1] - distances_addr_[index]);
 	}
 
 	void KFont::CharSize(uint32_t size)
@@ -456,7 +456,7 @@ namespace KlayGE
 
 		output.resize(LZMA_PROPS_SIZE + out_len);
 
-		this->SetLZMADistanceData(ch, &output[0], output.size(), adv, fi);
+		this->SetLZMADistanceData(ch, &output[0], static_cast<uint32_t>(output.size()), adv, fi);
 	}
 
 	void KFont::SetLZMADistanceData(wchar_t ch, uint8_t const * p, uint32_t size, uint32_t adv, font_info const & fi)
@@ -464,8 +464,8 @@ namespace KlayGE
 		int32_t ci;
 		if (size > 0)
 		{
-			ci = distances_addr_.size() - 1;
-			uint32_t offset = distances_lzma_.size();
+			ci = static_cast<uint32_t>(distances_addr_.size() - 1);
+			uint32_t offset = static_cast<uint32_t>(distances_lzma_.size());
 			distances_addr_.back() = offset;
 			distances_addr_.push_back(offset + size);
 			distances_lzma_.insert(distances_lzma_.end(), p, p + size);
