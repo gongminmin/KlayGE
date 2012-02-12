@@ -141,7 +141,8 @@ namespace KlayGE
 		virtual void FullScreen(bool fs) = 0;
 
 		void PostProcess(bool skip);
-		void GammaCorrection();
+		void ColorGrading();
+		void ColorGradingEnabled(bool cg);
 
 		virtual void AdjustPerspectiveMatrix(float4x4& /*pers_mat*/)
 		{
@@ -225,8 +226,8 @@ namespace KlayGE
 		FrameBufferPtr screen_frame_buffer_;
 		FrameBufferPtr before_pp_frame_buffer_;
 		TexturePtr before_pp_tex_;
-		FrameBufferPtr before_gamma_frame_buffer_;
-		TexturePtr before_gamma_tex_;
+		FrameBufferPtr before_cg_frame_buffer_;
+		TexturePtr before_cg_tex_;
 		FrameBufferPtr stereo_frame_buffers_[2];
 		TexturePtr stereo_colors_[2];
 		FrameBufferPtr default_frame_buffers_[6];
@@ -257,7 +258,7 @@ namespace KlayGE
 
 		PostProcessPtr copy_pp_;
 		PostProcessChainPtr pp_chain_;
-		PostProcessPtr gamma_pp_;
+		PostProcessPtr color_grading_pp_;
 		int fb_stage_;
 	};
 }

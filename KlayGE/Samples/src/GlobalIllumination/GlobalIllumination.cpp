@@ -223,7 +223,7 @@ void GlobalIlluminationApp::AAHandler(UICheckBox const & sender)
 
 void GlobalIlluminationApp::ColorGradingHandler(UICheckBox const & sender)
 {
-	deferred_rendering_->ColorGradingEnabled(sender.GetChecked());
+	Context::Instance().RenderFactoryInstance().RenderEngineInstance().ColorGradingEnabled(sender.GetChecked());
 }
 
 void GlobalIlluminationApp::CtrlCameraHandler(UICheckBox const & sender)

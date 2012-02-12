@@ -2,6 +2,9 @@
 
 <post_processors>
 	<post_processor name="color_grading">
+		<params>
+			<param name="gamma_grading"/>
+		</params>
 		<input>
 			<pin name="src_tex"/>
 		</input>

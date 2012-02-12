@@ -84,7 +84,7 @@ float4 DistanceMappingPS(float4 L	: TEXCOORD0,
 		discard;
 	}
 
-#ifndef KLAYGE_OPENGLES2
+#if !KLAYGE_OPENGLES
 	float2 dx = ddx(texCoord0.xy);
 	float2 dy = ddy(texCoord0.xy);
 

@@ -118,7 +118,7 @@ void PostProcessingApp::InitObjects()
 	deferred_rendering_->SSVOEnabled(false);
 	deferred_rendering_->HDREnabled(false);
 	deferred_rendering_->AAEnabled(1);
-	deferred_rendering_->ColorGradingEnabled(false);
+	Context::Instance().RenderFactoryInstance().RenderEngineInstance().ColorGradingEnabled(false);
 
 	point_light_ = MakeSharedPtr<PointLightSource>();
 	point_light_->Attrib(LSA_NoShadow);

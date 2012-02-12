@@ -54,7 +54,6 @@ namespace KlayGE
 		isFullScreen_		= settings.full_screen;
 		color_bits_ = NumFormatBits(settings.color_fmt);
 
-		ElementFormat format = settings.color_fmt;
 		uint32_t depth_bits	= NumDepthBits(settings.depth_stencil_fmt);
 		uint32_t stencil_bits = NumStencilBits(settings.depth_stencil_fmt);
 

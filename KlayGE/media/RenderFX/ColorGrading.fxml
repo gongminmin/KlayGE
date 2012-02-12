@@ -15,6 +15,7 @@
 		<state name="address_w" value="clamp"/>
 	</parameter>
 
+	<parameter type="int2" name="gamma_grading"/>
 	<parameter type="texture2D" name="src_tex"/>
 	<parameter type="texture3D" name="color_grading_tex">
 		<annotation type="string" name="SasResourceAddress" value="color_grading.dds"/>		
@@ -22,9 +23,26 @@
 
 	<shader>
 		<![CDATA[
-float4 ColorGradingPS(float2 tc0 : TEXCOORD0) : SV_Target
+float4 ColorGradingPS(float2 tc : TEXCOORD0) : SV_Target
 {
-	return color_grading_tex.Sample(linear_sampler, src_tex.Sample(point_sampler, tc0).xyz + 0.5f / 16);
+	float3 rgb = src_tex.Sample(point_sampler, tc).xyz;
+	if (gamma_grading.x)
+	{
+		rgb = pow(max(rgb, 0), 1 / 2.2f);
+	}
+	
+#if !KLAYGE_OPENGLES
+	if (gamma_grading.y)
+	{
+		return color_grading_tex.Sample(linear_sampler, rgb + 0.5f / 16);
+	}
+	else
+	{
+		return float4(rgb, 1);
+	}
+#else
+	return float4(rgb, 1);
+#endif
 }
 		]]>
 	</shader>

@@ -245,7 +245,7 @@ namespace KlayGE
 
 
 	DeferredRenderingLayer::DeferredRenderingLayer()
-		: ssvo_enabled_(true), hdr_enabled_(true), aa_enabled_(true), color_grading_enabled_(true),
+		: ssvo_enabled_(true), hdr_enabled_(true), aa_enabled_(true),
 			illum_(0), indirect_scale_(1.0f)
 	{
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
@@ -454,16 +454,6 @@ namespace KlayGE
 		aa_pp_ = MakeSharedPtr<FXAAPostProcess>();
 		skip_aa_pp_ = LoadPostProcess(ResLoader::Instance().Open("Copy.ppml"), "copy");
 
-		skip_color_grading_pp_ = LoadPostProcess(ResLoader::Instance().Open("Copy.ppml"), "copy");
-		if (caps.max_texture_depth > 1)
-		{
-			color_grading_pp_ = LoadPostProcess(ResLoader::Instance().Open("ColorGrading.ppml"), "color_grading");
-		}
-		else
-		{
-			color_grading_pp_ = skip_color_grading_pp_;
-		}
-
 		if (caps.max_simultaneous_rts > 1)
 		{
 			rsm_buffer_ = rf.MakeFrameBuffer();
@@ -586,15 +576,10 @@ namespace KlayGE
 		aa_enabled_ = aa;
 	}
 
-	void DeferredRenderingLayer::ColorGradingEnabled(bool cg)
-	{
-		color_grading_enabled_ = cg;
-	}
-
 	void DeferredRenderingLayer::OutputPin(TexturePtr const & tex)
 	{
-		color_grading_pp_->OutputPin(0, tex);
-		skip_color_grading_pp_->OutputPin(0, tex);
+		aa_pp_->OutputPin(0, tex);
+		skip_aa_pp_->OutputPin(0, tex);
 	}
 
 	void DeferredRenderingLayer::OnResize(uint32_t width, uint32_t height)
@@ -826,7 +811,6 @@ namespace KlayGE
 			fmt = fmt_srgb;
 		}
 		ldr_tex_ = rf.MakeTexture2D(width, height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
-		grading_tex_ = rf.MakeTexture2D(width, height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
 
 		if (opaque_g_buffer_rt0_tex_)
 		{
@@ -847,12 +831,7 @@ namespace KlayGE
 		skip_hdr_pp_->OutputPin(0, ldr_tex_);
 
 		aa_pp_->InputPin(0, ldr_tex_);
-		aa_pp_->OutputPin(0, grading_tex_);
 		skip_aa_pp_->InputPin(0, ldr_tex_);
-		skip_aa_pp_->OutputPin(0, grading_tex_);
-
-		color_grading_pp_->InputPin(0, grading_tex_);
-		skip_color_grading_pp_->InputPin(0, grading_tex_);
 
 		if (rsm_buffer_)
 		{
@@ -1436,14 +1415,6 @@ namespace KlayGE
 					else
 					{
 						skip_aa_pp_->Apply();
-					}
-					if (color_grading_enabled_)
-					{
-						color_grading_pp_->Apply();
-					}
-					else
-					{
-						skip_color_grading_pp_->Apply();
 					}
 
 					return App3DFramework::URV_Finished;

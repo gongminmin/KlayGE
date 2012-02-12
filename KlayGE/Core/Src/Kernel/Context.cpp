@@ -108,6 +108,7 @@ namespace KlayGE
 		int motion_frames = 0;
 		bool hdr = false;
 		bool gamma = false;
+		bool color_grading = false;
 		int stereo_method = 0;
 		float stereo_separation = 0;
 
@@ -310,6 +311,21 @@ namespace KlayGE
 				}
 			}
 
+			XMLNodePtr color_grading_node = graphics_node->FirstNode("color_grading");
+			attr = color_grading_node->Attrib("value");
+			if (attr)
+			{
+				std::string color_grading_str = attr->ValueString();
+				if (("1" == color_grading_str) || ("true" == color_grading_str))
+				{
+					color_grading = true;
+				}
+				else
+				{
+					color_grading = false;
+				}
+			}
+
 			XMLNodePtr stereo_node = graphics_node->FirstNode("stereo");
 			attr = stereo_node->Attrib("method");
 			if (attr)
@@ -386,6 +402,7 @@ namespace KlayGE
 		cfg_.graphics_cfg.motion_frames = motion_frames;
 		cfg_.graphics_cfg.hdr = hdr;
 		cfg_.graphics_cfg.gamma = gamma;
+		cfg_.graphics_cfg.color_grading = color_grading;
 		cfg_.graphics_cfg.stereo_method = static_cast<StereoMethod>(stereo_method);
 		cfg_.graphics_cfg.stereo_separation = stereo_separation;
 
@@ -500,6 +517,10 @@ namespace KlayGE
 			XMLNodePtr gamma_node = cfg_doc.AllocNode(XNT_Element, "gamma");
 			gamma_node->AppendAttrib(cfg_doc.AllocAttribInt("value", cfg_.graphics_cfg.gamma));
 			graphics_node->AppendNode(gamma_node);
+
+			XMLNodePtr color_grading_node = cfg_doc.AllocNode(XNT_Element, "color_grading");
+			color_grading_node->AppendAttrib(cfg_doc.AllocAttribInt("value", cfg_.graphics_cfg.color_grading));
+			graphics_node->AppendNode(color_grading_node);
 
 			XMLNodePtr stereo_node = cfg_doc.AllocNode(XNT_Element, "stereo");
 			std::string method_str;

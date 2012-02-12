@@ -329,7 +329,7 @@ void ModelViewerApp::InitObjects()
 	deferred_rendering_->SSVOEnabled(false);
 	deferred_rendering_->HDREnabled(true);
 	deferred_rendering_->AAEnabled(1);
-	deferred_rendering_->ColorGradingEnabled(true);
+	rf.RenderEngineInstance().ColorGradingEnabled(true);
 
 	point_light_ = MakeSharedPtr<PointLightSource>();
 	point_light_->Attrib(LSA_NoShadow);
@@ -696,7 +696,7 @@ void ModelViewerApp::VisualizeChangedHandler(KlayGE::UIComboBox const & sender)
 		deferred_rendering_->SSVOEnabled(false);
 		deferred_rendering_->HDREnabled(true);
 		deferred_rendering_->AAEnabled(1);
-		deferred_rendering_->ColorGradingEnabled(true);
+		Context::Instance().RenderFactoryInstance().RenderEngineInstance().ColorGradingEnabled(true);
 	}
 	else
 	{
@@ -715,7 +715,7 @@ void ModelViewerApp::VisualizeChangedHandler(KlayGE::UIComboBox const & sender)
 		deferred_rendering_->SSVOEnabled(false);
 		deferred_rendering_->HDREnabled(false);
 		deferred_rendering_->AAEnabled(0);
-		deferred_rendering_->ColorGradingEnabled(false);
+		Context::Instance().RenderFactoryInstance().RenderEngineInstance().ColorGradingEnabled(false);
 	}
 }
 

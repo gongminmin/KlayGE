@@ -180,10 +180,18 @@ namespace KlayGE
 
 			copy_pp_ = LoadPostProcess(ResLoader::Instance().Open("Copy.ppml"), "copy");
 		}
-		if (render_settings_.gamma)
+		if (render_settings_.color_grading)
 		{
-			gamma_pp_ = LoadPostProcess(ResLoader::Instance().Open("GammaCorrection.ppml"), "gamma_correction");
-			gamma_pp_->SetParam(0, 1 / 2.2f);
+			color_grading_pp_ = LoadPostProcess(ResLoader::Instance().Open("ColorGrading.ppml"), "color_grading");
+			color_grading_pp_->SetParam(0, int2(render_settings_.gamma, render_settings_.color_grading));
+		}
+		else
+		{
+			if (render_settings_.gamma)
+			{
+				color_grading_pp_ = LoadPostProcess(ResLoader::Instance().Open("GammaCorrection.ppml"), "gamma_correction");
+				color_grading_pp_->SetParam(0, 1 / 2.2f);
+			}
 		}
 
 		for (int i = 0; i < 6; ++ i)
@@ -197,7 +205,7 @@ namespace KlayGE
 		RenderDeviceCaps const & caps = rf.RenderEngineInstance().DeviceCaps();
 
 		RenderViewPtr ds_view;
-		if (gamma_pp_ || pp_chain_)
+		if (color_grading_pp_ || pp_chain_)
 		{
 			ElementFormat fmt;
 			if (caps.rendertarget_format_support(render_settings_.depth_stencil_fmt, 1, 0))
@@ -213,10 +221,10 @@ namespace KlayGE
 			ds_view = rf.Make2DDepthStencilRenderView(screen_frame_buffer_->Width(), screen_frame_buffer_->Height(), fmt, 1, 0);
 		}
 
-		if (gamma_pp_)
+		if (color_grading_pp_)
 		{
-			before_gamma_frame_buffer_ = rf.MakeFrameBuffer();
-			before_gamma_frame_buffer_->GetViewport().camera = cur_frame_buffer_->GetViewport().camera;
+			before_cg_frame_buffer_ = rf.MakeFrameBuffer();
+			before_cg_frame_buffer_->GetViewport().camera = cur_frame_buffer_->GetViewport().camera;
 
 			ElementFormat fmt;
 			if (caps.rendertarget_format_support(EF_ABGR8, 1, 0))
@@ -235,20 +243,20 @@ namespace KlayGE
 				fmt = fmt_srgb;
 			}
 
-			before_gamma_tex_ = rf.MakeTexture2D(screen_frame_buffer_->Width(), screen_frame_buffer_->Height(), 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
-			before_gamma_frame_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*before_gamma_tex_, 0, 1, 0));
-			before_gamma_frame_buffer_->Attach(FrameBuffer::ATT_DepthStencil, ds_view);
+			before_cg_tex_ = rf.MakeTexture2D(screen_frame_buffer_->Width(), screen_frame_buffer_->Height(), 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+			before_cg_frame_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*before_cg_tex_, 0, 1, 0));
+			before_cg_frame_buffer_->Attach(FrameBuffer::ATT_DepthStencil, ds_view);
 
 			if (pp_chain_)
 			{
-				pp_chain_->OutputPin(0, before_gamma_tex_);
-				copy_pp_->OutputPin(0, before_gamma_tex_);
+				pp_chain_->OutputPin(0, before_cg_tex_);
+				copy_pp_->OutputPin(0, before_cg_tex_);
 			}
 
-			gamma_pp_->InputPin(0, before_gamma_tex_);
+			color_grading_pp_->InputPin(0, before_cg_tex_);
 
 			default_frame_buffers_[0 * 2 + 0] = default_frame_buffers_[0 * 2 + 1]
-				= default_frame_buffers_[1 * 2 + 0] = default_frame_buffers_[1 * 2 + 1] = before_gamma_frame_buffer_;
+				= default_frame_buffers_[1 * 2 + 0] = default_frame_buffers_[1 * 2 + 1] = before_cg_frame_buffer_;
 		}
 
 		if (pp_chain_)
@@ -427,7 +435,7 @@ namespace KlayGE
 		RenderDeviceCaps const & caps = rf.RenderEngineInstance().DeviceCaps();
 
 		RenderViewPtr ds_view;
-		if (gamma_pp_ || pp_chain_)
+		if (color_grading_pp_ || pp_chain_)
 		{
 			ElementFormat fmt;
 			if (caps.rendertarget_format_support(render_settings_.depth_stencil_fmt, 1, 0))
@@ -443,20 +451,20 @@ namespace KlayGE
 			ds_view = rf.Make2DDepthStencilRenderView(width, height, fmt, 1, 0);
 		}
 
-		if (gamma_pp_)
+		if (color_grading_pp_)
 		{
-			ElementFormat fmt = before_gamma_tex_->Format();
-			before_gamma_tex_ = rf.MakeTexture2D(width, height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
-			before_gamma_frame_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*before_gamma_tex_, 0, 1, 0));
-			before_gamma_frame_buffer_->Attach(FrameBuffer::ATT_DepthStencil, ds_view);
+			ElementFormat fmt = before_cg_tex_->Format();
+			before_cg_tex_ = rf.MakeTexture2D(width, height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+			before_cg_frame_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*before_cg_tex_, 0, 1, 0));
+			before_cg_frame_buffer_->Attach(FrameBuffer::ATT_DepthStencil, ds_view);
 
 			if (pp_chain_)
 			{
-				pp_chain_->OutputPin(0, before_gamma_tex_);
-				copy_pp_->OutputPin(0, before_gamma_tex_);
+				pp_chain_->OutputPin(0, before_cg_tex_);
+				copy_pp_->OutputPin(0, before_cg_tex_);
 			}
 
-			gamma_pp_->InputPin(0, before_gamma_tex_);
+			color_grading_pp_->InputPin(0, before_cg_tex_);
 		}
 
 		if (pp_chain_)
@@ -505,25 +513,33 @@ namespace KlayGE
 		}
 		else
 		{
-			if (gamma_pp_)
+			if (color_grading_pp_)
 			{
 				this->DefaultFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->ClearDepth(1.0f);
 			}
 		}
 	}
 
-	void RenderEngine::GammaCorrection()
+	void RenderEngine::ColorGrading()
 	{
-		if (gamma_pp_)
+		if (color_grading_pp_)
 		{
 			fb_stage_ = 2;
 
 			this->DefaultFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->ClearDepth(1.0f);
 
-			gamma_pp_->Apply();
+			color_grading_pp_->Apply();
 		}
 
 		fb_stage_ = 0;
+	}
+
+	void RenderEngine::ColorGradingEnabled(bool cg)
+	{
+		if (color_grading_pp_)
+		{
+			color_grading_pp_->SetParam(0, int2(render_settings_.gamma, cg));
+		}
 	}
 
 	void RenderEngine::Stereoscopic()
