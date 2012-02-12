@@ -199,12 +199,38 @@ namespace
 
 		void ParticleColorFrom(float4 const & clr)
 		{
-			*(technique_->Effect().ParameterByName("particle_color_from")) = clr;
+			float4 f4_clr;
+			if (Context::Instance().Config().graphics_cfg.gamma)
+			{
+				f4_clr.x() = MathLib::srgb_to_linear(clr.x());
+				f4_clr.y() = MathLib::srgb_to_linear(clr.y());
+				f4_clr.z() = MathLib::srgb_to_linear(clr.z());
+				f4_clr.w() = clr.w();
+			}
+			else
+			{
+				f4_clr = clr;
+			}
+
+			*(technique_->Effect().ParameterByName("particle_color_from")) = f4_clr;
 		}
 
 		void ParticleColorTo(float4 const & clr)
 		{
-			*(technique_->Effect().ParameterByName("particle_color_to")) = clr;
+			float4 f4_clr;
+			if (Context::Instance().Config().graphics_cfg.gamma)
+			{
+				f4_clr.x() = MathLib::srgb_to_linear(clr.x());
+				f4_clr.y() = MathLib::srgb_to_linear(clr.y());
+				f4_clr.z() = MathLib::srgb_to_linear(clr.z());
+				f4_clr.w() = clr.w();
+			}
+			else
+			{
+				f4_clr = clr;
+			}
+
+			*(technique_->Effect().ParameterByName("particle_color_to")) = f4_clr;
 		}
 
 		void SetInitLife(float life)
@@ -922,25 +948,8 @@ void ParticleEditorApp::LoadParticleColor(int id, KlayGE::Color const & clr)
 {
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-	float4 f4_clr;
+	float4 f4_clr = float4(clr.r(), clr.g(), clr.b(), 1);
 	ElementFormat fmt = rf.RenderEngineInstance().DeviceCaps().texture_format_support(EF_ABGR8) ? EF_ABGR8 : EF_ARGB8;
-	if (Context::Instance().Config().graphics_cfg.gamma)
-	{
-		f4_clr.x() = MathLib::srgb_to_linear(clr.r());
-		f4_clr.y() = MathLib::srgb_to_linear(clr.g());
-		f4_clr.z() = MathLib::srgb_to_linear(clr.b());
-		f4_clr.w() = 1;
-
-		ElementFormat fmt_srgb = MakeSRGB(fmt);
-		if (rf.RenderEngineInstance().DeviceCaps().texture_format_support(fmt_srgb))
-		{
-			fmt = fmt_srgb;
-		}
-	}
-	else
-	{
-		f4_clr = float4(clr.r(), clr.g(), clr.b(), 1);
-	}
 
 	if (id_particle_color_from_button_ == id)
 	{

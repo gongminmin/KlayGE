@@ -182,26 +182,8 @@ namespace KlayGE
 		}
 		if (render_settings_.gamma)
 		{
-			bool use_gamma_pp = false;
-			if ((EF_ARGB8 == render_settings_.color_fmt) || (EF_ABGR8 == render_settings_.color_fmt))
-			{
-				ElementFormat srgb_fmt = MakeSRGB(render_settings_.color_fmt);
-				if (!caps_.rendertarget_format_support(srgb_fmt, render_settings_.sample_count, render_settings_.sample_quality))
-				{
-					use_gamma_pp = true;
-				}
-			}
-			else
-			{
-				BOOST_ASSERT(EF_A2BGR10 == render_settings_.color_fmt);
-				use_gamma_pp = true;
-			}
-
-			if (use_gamma_pp)
-			{
-				gamma_pp_ = LoadPostProcess(ResLoader::Instance().Open("GammaCorrection.ppml"), "gamma_correction");
-				gamma_pp_->SetParam(0, 1 / 2.2f);
-			}
+			gamma_pp_ = LoadPostProcess(ResLoader::Instance().Open("GammaCorrection.ppml"), "gamma_correction");
+			gamma_pp_->SetParam(0, 1 / 2.2f);
 		}
 
 		for (int i = 0; i < 6; ++ i)
@@ -535,6 +517,8 @@ namespace KlayGE
 		if (gamma_pp_)
 		{
 			fb_stage_ = 2;
+
+			this->DefaultFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->ClearDepth(1.0f);
 
 			gamma_pp_->Apply();
 		}

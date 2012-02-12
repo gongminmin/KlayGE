@@ -74,24 +74,6 @@ namespace KlayGE
 		main_wnd->OnSetCursor().connect(boost::bind(&D3D11RenderWindow::OnSetCursor, this, _1));
 		main_wnd->OnClose().connect(boost::bind(&D3D11RenderWindow::OnClose, this, _1));
 
-		if (settings.gamma && ((EF_ARGB8 == format) || (EF_ABGR8 == format)))
-		{
-			for (size_t i = 0; i < adapter_->NumVideoMode(); ++ i)
-			{
-				D3D11VideoMode const & vm = adapter_->VideoMode(i);
-				if ((EF_ARGB8 == format) && (DXGI_FORMAT_B8G8R8A8_UNORM_SRGB == vm.Format()))
-				{
-					format = MakeSRGB(format);
-					break;
-				}
-				else if ((EF_ABGR8 == format) && (DXGI_FORMAT_R8G8B8A8_UNORM_SRGB == vm.Format()))
-				{
-					format = MakeSRGB(format);
-					break;
-				}
-			}
-		}
-
 		if (this->FullScreen())
 		{
 			left_ = 0;

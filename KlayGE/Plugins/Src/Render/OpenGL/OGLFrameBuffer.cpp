@@ -90,7 +90,7 @@ namespace KlayGE
 		}
 		else
 		{
-			re.EnableFramebufferSRGB(Context::Instance().Config().graphics_cfg.gamma);
+			re.EnableFramebufferSRGB(false);
 
 			GLenum targets[] = { GL_BACK_LEFT };
 			glDrawBuffers(1, &targets[0]);

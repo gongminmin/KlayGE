@@ -66,12 +66,6 @@ namespace KlayGE
 		main_wnd->OnSize().connect(boost::bind(&OGLRenderWindow::OnSize, this, _1, _2));
 		main_wnd->OnClose().connect(boost::bind(&OGLRenderWindow::OnClose, this, _1));
 
-		bool try_srgb = false;
-		if (settings.gamma && ((EF_ARGB8 == format) || (EF_ABGR8 == format)))
-		{
-			try_srgb = true;
-		}
-
 #if defined KLAYGE_PLATFORM_WINDOWS
 		hWnd_ = main_wnd->HWnd();
 		hDC_ = ::GetDC(hWnd_);
@@ -131,7 +125,7 @@ namespace KlayGE
 
 		uint32_t sample_count = settings.sample_count;
 
-		if ((sample_count > 1) || try_srgb)
+		if (sample_count > 1)
 		{
 			UINT num_formats;
 			float float_attrs[] = { 0, 0 };
@@ -149,7 +143,6 @@ namespace KlayGE
 					WGL_DOUBLE_BUFFER_ARB, GL_TRUE,
 					WGL_SAMPLE_BUFFERS_ARB, GL_TRUE,
 					WGL_SAMPLES_ARB, sample_count,
-					try_srgb ? WGL_FRAMEBUFFER_SRGB_CAPABLE_ARB : 0, try_srgb,
 					0, 0
 				};
 
@@ -160,7 +153,7 @@ namespace KlayGE
 				}
 			} while ((sample_count > 1) && (!valid || (num_formats < 1)));
 
-			if (valid && ((sample_count > 1) || try_srgb))
+			if (valid && (sample_count > 1))
 			{
 				::wglMakeCurrent(hDC_, NULL);
 				::wglDeleteContext(hRC_);
