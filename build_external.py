@@ -158,9 +158,9 @@ def build_external_libs(cfg):
 	print("\nBuilding 7z...\n")
 
 	if "win32" == platform:
-		os.chdir("External/7z")
-		os.system("build_%s%d_all.bat" % (compiler_name, compiler_version))
-		os.chdir("../../")
+		os.chdir("External/7z/build/%s-%d_0" % (compiler_name, compiler_version))
+		os.system("build_all.bat")
+		os.chdir("../../../../")
 
 	copy_to_dst("External/7z/build/%s-%d_0/Release/7zxa.%s" % (compiler_name, compiler_version, dll_suffix), dst_dir_x86)
 	copy_to_dst("External/7z/build/%s-%d_0/x64/Release/7zxa.%s" % (compiler_name, compiler_version, dll_suffix), dst_dir_x64)
