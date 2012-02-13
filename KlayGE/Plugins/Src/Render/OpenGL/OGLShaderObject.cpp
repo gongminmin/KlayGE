@@ -2020,9 +2020,8 @@ namespace KlayGE
 						glProgramParameteriEXT(ret->glsl_program_, GL_GEOMETRY_INPUT_TYPE_EXT, ret->gs_input_type_);
 						glProgramParameteriEXT(ret->glsl_program_, GL_GEOMETRY_OUTPUT_TYPE_EXT, ret->gs_output_type_);
 
-						int temp;
-						glGetIntegerv(GL_MAX_GEOMETRY_OUTPUT_VERTICES_EXT, &temp);
-						glProgramParameteriEXT(ret->glsl_program_, GL_GEOMETRY_VERTICES_OUT_EXT, temp);
+						// TODO: read maxvertexcount from shader
+						glProgramParameteriEXT(ret->glsl_program_, GL_GEOMETRY_VERTICES_OUT_EXT, 32);
 					}
 				}
 
@@ -2361,9 +2360,8 @@ namespace KlayGE
 			glProgramParameteriEXT(glsl_program_, GL_GEOMETRY_INPUT_TYPE_EXT, gs_input_type_);
 			glProgramParameteriEXT(glsl_program_, GL_GEOMETRY_OUTPUT_TYPE_EXT, gs_output_type_);
 
-			int temp;
-			glGetIntegerv(GL_MAX_GEOMETRY_OUTPUT_VERTICES_EXT, &temp);
-			glProgramParameteriEXT(glsl_program_, GL_GEOMETRY_VERTICES_OUT_EXT, temp);
+			// TODO: read maxvertexcount from shader
+			glProgramParameteriEXT(glsl_program_, GL_GEOMETRY_VERTICES_OUT_EXT, 32);
 		}
 
 		glDeleteShader(object);
