@@ -1548,7 +1548,7 @@ namespace KlayGE
 		{
 			std::stringstream ss;
 			ss << "-DKLAYGE_MAX_TEX_UNITS=" << static_cast<int>(caps.max_pixel_texture_units);
-			max_tex_depth_str = ss.str();
+			max_tex_units_str = ss.str();
 		}
 		std::string flipping_str;
 		{
