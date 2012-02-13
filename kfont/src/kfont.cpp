@@ -142,7 +142,7 @@ namespace KlayGE
 		}
 
 	private:
-#ifndef KLAYGE_PLATFORM_ANDROID
+#ifndef KFONT_PLATFORM_ANDROID
 		void* dll_handle_;
 		LzmaCompressFunc lzmaCompressFunc_;
 		LzmaUncompressFunc lzmaUncompressFunc_;
