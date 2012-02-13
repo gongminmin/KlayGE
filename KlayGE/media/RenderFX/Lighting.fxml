@@ -26,7 +26,7 @@ float spot_lighting(float3 light_pos, float3 light_dir, float2 cos_cone, float3 
 
 float3 fresnel_term_schlick(float3 light_vec, float3 halfway_vec, float3 c_spec)
 {
-	float e_n = max(dot(light_vec, halfway_vec), 0);
+	float e_n = saturate(dot(light_vec, halfway_vec));
 	return c_spec + (1 - c_spec) * pow(1 - e_n, 5);
 }
 
