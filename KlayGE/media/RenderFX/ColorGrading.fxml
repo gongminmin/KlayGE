@@ -31,18 +31,30 @@ float4 ColorGradingPS(float2 tc : TEXCOORD0) : SV_Target
 		rgb = pow(max(rgb, 0), 1 / 2.2f);
 	}
 	
-#if !KLAYGE_OPENGLES
+	rgb = saturate(rgb);
+	
+	const float DIM = 16;
+	
 	if (gamma_grading.y)
 	{
-		return color_grading_tex.Sample(linear_sampler, rgb + 0.5f / 16);
+#if !KLAYGE_OPENGLES
+		return color_grading_tex.Sample(linear_sampler, (rgb * (DIM - 1) + 0.5f) / DIM);
+#else
+		rgb.xy = (rgb.xy * (DIM - 1) + 0.5f) / DIM;
+		float slice = rgb.z * (DIM - 1);
+		float s = frac(slice);
+		slice -= s;
+		rgb.y = (rgb.y + slice) / DIM;
+
+		float3 col0 = color_grading_tex.Sample(linear_sampler, rgb.xy).xyz;
+ 		float3 col1 = color_grading_tex.Sample(linear_sampler, float2(rgb.x, rgb.y + 1.0f / DIM)).xyz;
+		return float4(lerp(col0, col1, s), 1);
+#endif
 	}
 	else
 	{
 		return float4(rgb, 1);
 	}
-#else
-	return float4(rgb, 1);
-#endif
 }
 		]]>
 	</shader>
