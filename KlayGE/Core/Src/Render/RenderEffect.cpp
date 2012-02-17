@@ -1501,6 +1501,805 @@ namespace
 
 		return var;
 	}
+
+	std::string read_short_string(ResIdentifierPtr const & res)
+	{
+		uint8_t len;
+		res->read(&len, sizeof(len));
+
+		std::string tmp;
+		if (len > 0)
+		{
+			tmp.resize(len);
+			res->read(&tmp[0], len * sizeof(tmp[0]));
+		}
+
+		return tmp;
+	}
+
+	void write_short_string(std::ostream& os, std::string const & str)
+	{
+		uint8_t len = static_cast<uint8_t>(std::min(str.size(), static_cast<size_t>(255)));
+		os.write(reinterpret_cast<char*>(&len), sizeof(len));
+
+		if (len > 0)
+		{
+			os.write(&str[0], len * sizeof(str[0]));
+		}
+	}
+
+	RenderVariablePtr stream_in_var(ResIdentifierPtr const & res, uint32_t type, uint32_t array_size)
+	{
+		RenderVariablePtr var;
+
+		switch (type)
+		{
+		case REDT_bool:
+			if (0 == array_size)
+			{
+				bool tmp;
+				res->read(&tmp, sizeof(tmp));
+
+				var = MakeSharedPtr<RenderVariableBool>();
+				*var = tmp;
+			}
+			break;
+
+		case REDT_uint:
+			if (0 == array_size)
+			{
+				uint32_t tmp;
+				res->read(&tmp, sizeof(tmp));
+
+				var = MakeSharedPtr<RenderVariableUInt>();
+				*var = tmp;
+			}
+			else
+			{
+				var = MakeSharedPtr<RenderVariableUIntArray>();
+
+				uint32_t len;
+				res->read(&len, sizeof(len));
+				if (len > 0)
+				{
+					std::vector<uint32_t> init_val(len);
+					res->read(&init_val[0], len * sizeof(init_val[0]));
+					*var = init_val;
+				}
+			}
+			break;
+
+		case REDT_int:
+			if (0 == array_size)
+			{
+				int32_t tmp;
+				res->read(&tmp, sizeof(tmp));
+
+				var = MakeSharedPtr<RenderVariableInt>();
+				*var = tmp;
+			}
+			else
+			{
+				var = MakeSharedPtr<RenderVariableIntArray>();
+
+				uint32_t len;
+				res->read(&len, sizeof(len));
+				if (len > 0)
+				{
+					std::vector<int32_t> init_val(len);
+					res->read(&init_val[0], len * sizeof(init_val[0]));
+					*var = init_val;
+				}
+			}
+			break;
+
+		case REDT_string:
+			{
+				var = MakeSharedPtr<RenderVariableString>();
+				*var = read_short_string(res);
+			}
+			break;
+
+		case REDT_texture1D:
+		case REDT_texture2D:
+		case REDT_texture3D:
+		case REDT_textureCUBE:
+		case REDT_texture1DArray:
+		case REDT_texture2DArray:
+		case REDT_texture3DArray:
+		case REDT_textureCUBEArray:
+		case REDT_rw_texture1D:
+		case REDT_rw_texture2D:
+		case REDT_rw_texture3D:
+		case REDT_rw_texture1DArray:
+		case REDT_rw_texture2DArray:
+			{
+				var = MakeSharedPtr<RenderVariableTexture>();
+				*var = TexturePtr();
+				*var = read_short_string(res);
+			}
+			break;
+
+		case REDT_sampler:
+			{
+				SamplerStateDesc desc;
+				res->read(&desc, sizeof(desc));
+
+				var = MakeSharedPtr<RenderVariableSampler>();
+				*var = Context::Instance().RenderFactoryInstance().MakeSamplerStateObject(desc);
+			}
+			break;
+
+		case REDT_shader:
+			{
+				shader_desc desc;
+				desc.profile = read_short_string(res);
+				desc.func_name = read_short_string(res);
+
+				var = MakeSharedPtr<RenderVariableShader>();
+				*var = desc;
+			}
+			break;
+
+		case REDT_float:
+			if (0 == array_size)
+			{
+				float tmp;
+				res->read(&tmp, sizeof(tmp));
+
+				var = MakeSharedPtr<RenderVariableFloat>();
+				*var = tmp;
+			}
+			else
+			{
+				var = MakeSharedPtr<RenderVariableFloatArray>();
+
+				uint32_t len;
+				res->read(&len, sizeof(len));
+				if (len > 0)
+				{
+					std::vector<float> init_val(len);
+					res->read(&init_val[0], len * sizeof(init_val[0]));
+					*var = init_val;
+				}
+			}
+			break;
+
+		case REDT_uint2:
+			if (0 == array_size)
+			{
+				uint2 tmp;
+				res->read(&tmp, sizeof(tmp));
+
+				var = MakeSharedPtr<RenderVariableUInt2>();
+				*var = tmp;
+			}
+			else
+			{
+				var = MakeSharedPtr<RenderVariableInt2Array>();
+
+				uint32_t len;
+				res->read(&len, sizeof(len));
+				if (len > 0)
+				{
+					std::vector<int2> init_val(len);
+					res->read(&init_val[0], len * sizeof(init_val[0]));
+					*var = init_val;
+				}
+			}
+			break;
+
+		case REDT_uint3:
+			if (0 == array_size)
+			{
+				uint3 tmp;
+				res->read(&tmp, sizeof(tmp));
+
+				var = MakeSharedPtr<RenderVariableUInt3>();
+				*var = tmp;
+			}
+			else
+			{
+				var = MakeSharedPtr<RenderVariableInt3Array>();
+
+				uint32_t len;
+				res->read(&len, sizeof(len));
+				if (len > 0)
+				{
+					std::vector<int3> init_val(len);
+					res->read(&init_val[0], len * sizeof(init_val[0]));
+					*var = init_val;
+				}
+			}
+			break;
+
+		case REDT_uint4:
+			if (0 == array_size)
+			{
+				uint4 tmp;
+				res->read(&tmp, sizeof(tmp));
+
+				var = MakeSharedPtr<RenderVariableUInt4>();
+				*var = tmp;
+			}
+			else
+			{
+				var = MakeSharedPtr<RenderVariableInt4Array>();
+
+				uint32_t len;
+				res->read(&len, sizeof(len));
+				if (len > 0)
+				{
+					std::vector<int4> init_val(len);
+					res->read(&init_val[0], len * sizeof(init_val[0]));
+					*var = init_val;
+				}
+			}
+			break;
+
+		case REDT_int2:
+			if (0 == array_size)
+			{
+				int2 tmp;
+				res->read(&tmp, sizeof(tmp));
+
+				var = MakeSharedPtr<RenderVariableInt2>();
+				*var = tmp;
+			}
+			else
+			{
+				var = MakeSharedPtr<RenderVariableInt2Array>();
+
+				uint32_t len;
+				res->read(&len, sizeof(len));
+				if (len > 0)
+				{
+					std::vector<int2> init_val(len);
+					res->read(&init_val[0], len * sizeof(init_val[0]));
+					*var = init_val;
+				}
+			}
+			break;
+
+		case REDT_int3:
+			if (0 == array_size)
+			{
+				int3 tmp;
+				res->read(&tmp, sizeof(tmp));
+
+				var = MakeSharedPtr<RenderVariableInt3>();
+				*var = tmp;
+			}
+			else
+			{
+				var = MakeSharedPtr<RenderVariableInt3Array>();
+
+				uint32_t len;
+				res->read(&len, sizeof(len));
+				if (len > 0)
+				{
+					std::vector<int3> init_val(len);
+					res->read(&init_val[0], len * sizeof(init_val[0]));
+					*var = init_val;
+				}
+			}
+			break;
+
+		case REDT_int4:
+			if (0 == array_size)
+			{
+				int4 tmp;
+				res->read(&tmp, sizeof(tmp));
+
+				var = MakeSharedPtr<RenderVariableInt4>();
+				*var = tmp;
+			}
+			else
+			{
+				var = MakeSharedPtr<RenderVariableInt4Array>();
+
+				uint32_t len;
+				res->read(&len, sizeof(len));
+				if (len > 0)
+				{
+					std::vector<int4> init_val(len);
+					res->read(&init_val[0], len * sizeof(init_val[0]));
+					*var = init_val;
+				}
+			}
+			break;
+
+		case REDT_float2:
+			if (0 == array_size)
+			{
+				float2 tmp;
+				res->read(&tmp, sizeof(tmp));
+
+				var = MakeSharedPtr<RenderVariableFloat2>();
+				*var = tmp;
+			}
+			else
+			{
+				var = MakeSharedPtr<RenderVariableFloat2Array>();
+
+				uint32_t len;
+				res->read(&len, sizeof(len));
+				if (len > 0)
+				{
+					std::vector<float2> init_val(len);
+					res->read(&init_val[0], len * sizeof(init_val[0]));
+					*var = init_val;
+				}
+			}
+			break;
+
+		case REDT_float3:
+			if (0 == array_size)
+			{
+				float3 tmp;
+				res->read(&tmp, sizeof(tmp));
+
+				var = MakeSharedPtr<RenderVariableFloat3>();
+				*var = tmp;
+			}
+			else
+			{
+				var = MakeSharedPtr<RenderVariableFloat3Array>();
+
+				uint32_t len;
+				res->read(&len, sizeof(len));
+				if (len > 0)
+				{
+					std::vector<float3> init_val(len);
+					res->read(&init_val[0], len * sizeof(init_val[0]));
+					*var = init_val;
+				}
+			}
+			break;
+
+		case REDT_float4:
+			if (0 == array_size)
+			{
+				float4 tmp;
+				res->read(&tmp, sizeof(tmp));
+
+				var = MakeSharedPtr<RenderVariableFloat4>();
+				*var = tmp;
+			}
+			else
+			{
+				var = MakeSharedPtr<RenderVariableFloat4Array>();
+
+				uint32_t len;
+				res->read(&len, sizeof(len));
+				if (len > 0)
+				{
+					std::vector<float4> init_val(len);
+					res->read(&init_val[0], len * sizeof(init_val[0]));
+					*var = init_val;
+				}
+			}
+			break;
+
+		case REDT_float4x4:
+			if (0 == array_size)
+			{
+				float4x4 tmp;
+				res->read(&tmp, sizeof(tmp));
+
+				var = MakeSharedPtr<RenderVariableFloat4x4>();
+				*var = tmp;
+			}
+			else
+			{
+				var = MakeSharedPtr<RenderVariableFloat4x4Array>();
+
+				uint32_t len;
+				res->read(&len, sizeof(len));
+				if (len > 0)
+				{
+					std::vector<float4x4> init_val(len);
+					res->read(&init_val[0], len * sizeof(init_val[0]));
+					*var = init_val;
+				}
+			}
+			break;
+
+		case REDT_buffer:
+		case REDT_structured_buffer:
+		case REDT_rw_buffer:
+		case REDT_rw_structured_buffer:
+		case REDT_consume_structured_buffer:
+		case REDT_append_structured_buffer:
+			{
+				var = MakeSharedPtr<RenderVariableBuffer>();
+				*var = GraphicsBufferPtr();
+				*var = read_short_string(res);
+			}
+			break;
+
+		case REDT_byte_address_buffer:
+		case REDT_rw_byte_address_buffer:
+			var = MakeSharedPtr<RenderVariableByteAddressBuffer>();
+			*var = GraphicsBufferPtr();
+			break;
+
+		default:
+			BOOST_ASSERT(false);
+			break;
+		}
+
+		return var;
+	}
+
+	void stream_out_var(std::ostream& os, RenderVariablePtr const & var, uint32_t type, uint32_t array_size)
+	{
+		switch (type)
+		{
+		case REDT_bool:
+			if (0 == array_size)
+			{
+				bool tmp;
+				var->Value(tmp);
+
+				os.write(reinterpret_cast<char const *>(&tmp), sizeof(tmp));
+			}
+			break;
+
+		case REDT_uint:
+			if (0 == array_size)
+			{
+				uint32_t tmp;
+				var->Value(tmp);
+
+				os.write(reinterpret_cast<char const *>(&tmp), sizeof(tmp));
+			}
+			else
+			{
+				std::vector<uint32_t> init_val;
+				var->Value(init_val);
+
+				uint32_t len = static_cast<uint32_t>(init_val.size());
+				os.write(reinterpret_cast<char const *>(&len), sizeof(len));
+				if (len > 0)
+				{
+					os.write(reinterpret_cast<char const *>(&init_val[0]), len * sizeof(init_val[0]));
+				}
+			}
+			break;
+
+		case REDT_int:
+			if (0 == array_size)
+			{
+				int32_t tmp;
+				var->Value(tmp);
+
+				os.write(reinterpret_cast<char const *>(&tmp), sizeof(tmp));
+			}
+			else
+			{
+				std::vector<int32_t> init_val;
+				var->Value(init_val);
+
+				uint32_t len = static_cast<uint32_t>(init_val.size());
+				os.write(reinterpret_cast<char const *>(&len), sizeof(len));
+				if (len > 0)
+				{
+					os.write(reinterpret_cast<char const *>(&init_val[0]), len * sizeof(init_val[0]));
+				}
+			}
+			break;
+
+		case REDT_string:
+			{
+				std::string tmp;
+				var->Value(tmp);
+				write_short_string(os, tmp);
+			}
+			break;
+
+		case REDT_texture1D:
+		case REDT_texture2D:
+		case REDT_texture3D:
+		case REDT_textureCUBE:
+		case REDT_texture1DArray:
+		case REDT_texture2DArray:
+		case REDT_texture3DArray:
+		case REDT_textureCUBEArray:
+		case REDT_rw_texture1D:
+		case REDT_rw_texture2D:
+		case REDT_rw_texture3D:
+		case REDT_rw_texture1DArray:
+		case REDT_rw_texture2DArray:
+			{
+				std::string tmp;
+				var->Value(tmp);
+				write_short_string(os, tmp);
+			}
+			break;
+
+		case REDT_sampler:
+			{
+				SamplerStateObjectPtr tmp;
+				var->Value(tmp);
+				SamplerStateDesc const & desc = tmp->GetDesc();
+				os.write(reinterpret_cast<char const *>(&desc), sizeof(desc));
+			}
+			break;
+
+		case REDT_shader:
+			{
+				shader_desc tmp;
+				var->Value(tmp);
+				write_short_string(os, tmp.profile);
+				write_short_string(os, tmp.func_name);
+			}
+			break;
+
+		case REDT_float:
+			if (0 == array_size)
+			{
+				float tmp;
+				var->Value(tmp);
+
+				os.write(reinterpret_cast<char const *>(&tmp), sizeof(tmp));
+			}
+			else
+			{
+				std::vector<float> init_val;
+				var->Value(init_val);
+
+				uint32_t len = static_cast<uint32_t>(init_val.size());
+				os.write(reinterpret_cast<char const *>(&len), sizeof(len));
+				if (len > 0)
+				{
+					os.write(reinterpret_cast<char const *>(&init_val[0]), len * sizeof(init_val[0]));
+				}
+			}
+			break;
+
+		case REDT_uint2:
+			if (0 == array_size)
+			{
+				uint2 tmp;
+				var->Value(tmp);
+
+				os.write(reinterpret_cast<char const *>(&tmp), sizeof(tmp));
+			}
+			else
+			{
+				std::vector<int2> init_val;
+				var->Value(init_val);
+
+				uint32_t len = static_cast<uint32_t>(init_val.size());
+				os.write(reinterpret_cast<char const *>(&len), sizeof(len));
+				if (len > 0)
+				{
+					os.write(reinterpret_cast<char const *>(&init_val[0]), len * sizeof(init_val[0]));
+				}
+			}
+			break;
+
+		case REDT_uint3:
+			if (0 == array_size)
+			{
+				uint3 tmp;
+				var->Value(tmp);
+
+				os.write(reinterpret_cast<char const *>(&tmp), sizeof(tmp));
+			}
+			else
+			{
+				std::vector<int3> init_val;
+				var->Value(init_val);
+
+				uint32_t len = static_cast<uint32_t>(init_val.size());
+				os.write(reinterpret_cast<char const *>(&len), sizeof(len));
+				if (len > 0)
+				{
+					os.write(reinterpret_cast<char const *>(&init_val[0]), len * sizeof(init_val[0]));
+				}
+			}
+			break;
+
+		case REDT_uint4:
+			if (0 == array_size)
+			{
+				uint4 tmp;
+				var->Value(tmp);
+
+				os.write(reinterpret_cast<char const *>(&tmp), sizeof(tmp));
+			}
+			else
+			{
+				std::vector<int4> init_val;
+				var->Value(init_val);
+
+				uint32_t len = static_cast<uint32_t>(init_val.size());
+				os.write(reinterpret_cast<char const *>(&len), sizeof(len));
+				if (len > 0)
+				{
+					os.write(reinterpret_cast<char const *>(&init_val[0]), len * sizeof(init_val[0]));
+				}
+			}
+			break;
+
+		case REDT_int2:
+			if (0 == array_size)
+			{
+				int2 tmp;
+				var->Value(tmp);
+
+				os.write(reinterpret_cast<char const *>(&tmp), sizeof(tmp));
+			}
+			else
+			{
+				std::vector<int2> init_val;
+				var->Value(init_val);
+
+				uint32_t len = static_cast<uint32_t>(init_val.size());
+				os.write(reinterpret_cast<char const *>(&len), sizeof(len));
+				if (len > 0)
+				{
+					os.write(reinterpret_cast<char const *>(&init_val[0]), len * sizeof(init_val[0]));
+				}
+			}
+			break;
+
+		case REDT_int3:
+			if (0 == array_size)
+			{
+				int3 tmp;
+				var->Value(tmp);
+
+				os.write(reinterpret_cast<char const *>(&tmp), sizeof(tmp));
+			}
+			else
+			{
+				std::vector<int3> init_val;
+				var->Value(init_val);
+
+				uint32_t len = static_cast<uint32_t>(init_val.size());
+				os.write(reinterpret_cast<char const *>(&len), sizeof(len));
+				if (len > 0)
+				{
+					os.write(reinterpret_cast<char const *>(&init_val[0]), len * sizeof(init_val[0]));
+				}
+			}
+			break;
+
+		case REDT_int4:
+			if (0 == array_size)
+			{
+				int4 tmp;
+				var->Value(tmp);
+
+				os.write(reinterpret_cast<char const *>(&tmp), sizeof(tmp));
+			}
+			else
+			{
+				std::vector<int4> init_val;
+				var->Value(init_val);
+
+				uint32_t len = static_cast<uint32_t>(init_val.size());
+				os.write(reinterpret_cast<char const *>(&len), sizeof(len));
+				if (len > 0)
+				{
+					os.write(reinterpret_cast<char const *>(&init_val[0]), len * sizeof(init_val[0]));
+				}
+			}
+			break;
+
+		case REDT_float2:
+			if (0 == array_size)
+			{
+				float2 tmp;
+				var->Value(tmp);
+
+				os.write(reinterpret_cast<char const *>(&tmp), sizeof(tmp));
+			}
+			else
+			{
+				std::vector<float2> init_val;
+				var->Value(init_val);
+
+				uint32_t len = static_cast<uint32_t>(init_val.size());
+				os.write(reinterpret_cast<char const *>(&len), sizeof(len));
+				if (len > 0)
+				{
+					os.write(reinterpret_cast<char const *>(&init_val[0]), len * sizeof(init_val[0]));
+				}
+			}
+			break;
+
+		case REDT_float3:
+			if (0 == array_size)
+			{
+				float3 tmp;
+				var->Value(tmp);
+
+				os.write(reinterpret_cast<char const *>(&tmp), sizeof(tmp));
+			}
+			else
+			{
+				std::vector<float3> init_val;
+				var->Value(init_val);
+
+				uint32_t len = static_cast<uint32_t>(init_val.size());
+				os.write(reinterpret_cast<char const *>(&len), sizeof(len));
+				if (len > 0)
+				{
+					os.write(reinterpret_cast<char*>(&init_val[0]), len * sizeof(init_val[0]));
+				}
+			}
+			break;
+
+		case REDT_float4:
+			if (0 == array_size)
+			{
+				float4 tmp;
+				var->Value(tmp);
+
+				os.write(reinterpret_cast<char const *>(&tmp), sizeof(tmp));
+			}
+			else
+			{
+				std::vector<float4> init_val;
+				var->Value(init_val);
+
+				uint32_t len = static_cast<uint32_t>(init_val.size());
+				os.write(reinterpret_cast<char const *>(&len), sizeof(len));
+				if (len > 0)
+				{
+					os.write(reinterpret_cast<char const *>(&init_val[0]), len * sizeof(init_val[0]));
+				}
+			}
+			break;
+
+		case REDT_float4x4:
+			if (0 == array_size)
+			{
+				float4x4 tmp;
+				var->Value(tmp);
+
+				os.write(reinterpret_cast<char const *>(&tmp), sizeof(tmp));
+			}
+			else
+			{
+				std::vector<float4x4> init_val;
+				var->Value(init_val);
+
+				uint32_t len = static_cast<uint32_t>(init_val.size());
+				os.write(reinterpret_cast<char const *>(&len), sizeof(len));
+				if (len > 0)
+				{
+					os.write(reinterpret_cast<char const *>(&init_val[0]), len * sizeof(init_val[0]));
+				}
+			}
+			break;
+
+		case REDT_buffer:
+		case REDT_structured_buffer:
+		case REDT_rw_buffer:
+		case REDT_rw_structured_buffer:
+		case REDT_consume_structured_buffer:
+		case REDT_append_structured_buffer:
+			{
+				std::string tmp;
+				var->Value(tmp);
+				write_short_string(os, tmp);
+			}
+			break;
+
+		case REDT_byte_address_buffer:
+		case REDT_rw_byte_address_buffer:
+			break;
+
+		default:
+			BOOST_ASSERT(false);
+			break;
+		}
+	}
 }
 
 namespace KlayGE
@@ -1512,6 +2311,16 @@ namespace KlayGE
 		var_ = read_var(node, type_, 0);
 	}
 
+	void RenderEffectAnnotation::StreamIn(ResIdentifierPtr const & res)
+	{
+		var_ = stream_in_var(res, type_, 0);
+	}
+
+	void RenderEffectAnnotation::StreamOut(std::ostream& os)
+	{
+		stream_out_var(os, var_, type_, 0);
+	}
+
 
 	RenderEffect::RenderEffect()
 	{
@@ -1519,131 +2328,373 @@ namespace KlayGE
 
 	void RenderEffect::Load(ResIdentifierPtr const & source, std::pair<std::string, std::string>* predefined_macros)
 	{
-		if (source)
+		std::string const & fxml_name = ResLoader::Instance().Locate(source->ResName());
+		std::string kfx_name = fxml_name.substr(0, fxml_name.rfind("."));
+		std::stringstream oss;
+		oss << kfx_name << ".kfx";
+		kfx_name = oss.str();
+
+		if (!this->StreamIn(ResLoader::Instance().Open(kfx_name), predefined_macros))
 		{
-			res_name_ = MakeSharedPtr<std::string>(source->ResName());
-			timestamp_ = source->Timestamp();
+			shader_descs_.reset();
+			cbuffers_.reset();
+			macros_.reset();
+			params_.clear();
+			shaders_.reset();
+			techniques_.clear();
 
-			shader_descs_ = MakeSharedPtr<BOOST_TYPEOF(*shader_descs_)>(1);
-
-			XMLDocument doc;
-			XMLNodePtr root = doc.Parse(source);
-
-			cbuffers_ = MakeSharedPtr<BOOST_TYPEOF(*cbuffers_)>();
-
-			XMLAttributePtr attr;
-
-			std::vector<XMLDocumentPtr> include_docs;
-			for (XMLNodePtr node = root->FirstNode("include"); node;)
+			if (source)
 			{
-				attr = node->Attrib("name");
-				include_docs.push_back(MakeSharedPtr<XMLDocument>());
-				XMLNodePtr include_root = include_docs.back()->Parse(ResLoader::Instance().Open(attr->ValueString()));
+				res_name_ = MakeSharedPtr<std::string>(source->ResName());
+				timestamp_ = source->Timestamp();
 
-				for (XMLNodePtr child_node = include_root->FirstNode(); child_node; child_node = child_node->NextSibling())
+				shader_descs_ = MakeSharedPtr<BOOST_TYPEOF(*shader_descs_)>(1);
+
+				XMLDocument doc;
+				XMLNodePtr root = doc.Parse(source);
+
+				cbuffers_ = MakeSharedPtr<BOOST_TYPEOF(*cbuffers_)>();
+
+				XMLAttributePtr attr;
+
+				std::vector<XMLDocumentPtr> include_docs;
+				for (XMLNodePtr node = root->FirstNode("include"); node;)
 				{
-					if (XNT_Element == child_node->Type())
+					attr = node->Attrib("name");
+					include_docs.push_back(MakeSharedPtr<XMLDocument>());
+					XMLNodePtr include_root = include_docs.back()->Parse(ResLoader::Instance().Open(attr->ValueString()));
+
+					for (XMLNodePtr child_node = include_root->FirstNode(); child_node; child_node = child_node->NextSibling())
 					{
-						root->InsertNode(node, doc.CloneNode(child_node));
-					}
-				}
-
-				XMLNodePtr node_next = node->NextSibling("include");
-				root->RemoveNode(node);
-				node = node_next;
-			}
-
-			{
-				XMLNodePtr macro_node = root->FirstNode("macro");
-				if (macro_node || predefined_macros)
-				{
-					macros_ = MakeSharedPtr<BOOST_TYPEOF(*macros_)>();
-				}
-				if (predefined_macros)
-				{
-					size_t m = 0;
-					while (!predefined_macros[m].first.empty())
-					{
-						macros_->push_back(std::make_pair(predefined_macros[m].first, predefined_macros[m].second));
-						++ m;
-					}
-				}
-				for (; macro_node; macro_node = macro_node->NextSibling("macro"))
-				{
-					macros_->push_back(std::make_pair(macro_node->Attrib("name")->ValueString(), macro_node->Attrib("value")->ValueString()));
-				}
-			}
-
-			std::vector<XMLNodePtr> parameter_nodes;
-			for (XMLNodePtr node = root->FirstNode(); node; node = node->NextSibling())
-			{
-				if ("parameter" == node->Name())
-				{
-					parameter_nodes.push_back(node);
-				}
-				else if ("cbuffer" == node->Name())
-				{
-					for (XMLNodePtr sub_node = node->FirstNode("parameter"); sub_node; sub_node = sub_node->NextSibling("parameter"))
-					{
-						parameter_nodes.push_back(sub_node);
-					}
-				}
-			}
-
-			for (uint32_t param_index = 0; param_index < parameter_nodes.size(); ++ param_index)
-			{
-				XMLNodePtr const & node = parameter_nodes[param_index];
-
-				uint32_t type = type_define::instance().type_code(node->Attrib("type")->ValueString());
-				if ((type != REDT_sampler)
-					&& (type != REDT_texture1D) && (type != REDT_texture2D) && (type != REDT_texture3D) && (type != REDT_textureCUBE)
-					&& (type != REDT_texture1DArray) && (type != REDT_texture2DArray) && (type != REDT_texture3DArray) && (type != REDT_textureCUBEArray))
-				{
-					XMLNodePtr parent_node = node->Parent();
-					std::string cbuff_name = parent_node->AttribString("name", "global_cb");
-
-					bool found = false;
-					for (size_t i = 0; i < cbuffers_->size(); ++ i)
-					{
-						if ((*cbuffers_)[i].first == cbuff_name)
+						if (XNT_Element == child_node->Type())
 						{
-							(*cbuffers_)[i].second.push_back(param_index);
-							found = true;
-							break;
+							root->InsertNode(node, doc.CloneNode(child_node));
 						}
 					}
-					if (!found)
-					{
-						cbuffers_->push_back(std::make_pair(cbuff_name, std::vector<uint32_t>(1, param_index)));
-					}
+
+					XMLNodePtr node_next = node->NextSibling("include");
+					root->RemoveNode(node);
+					node = node_next;
 				}
 
-				RenderEffectParameterPtr param = MakeSharedPtr<RenderEffectParameter>(*this);
-				params_.push_back(param);
-
-				param->Load(node);
-			}
-
-			{
-				XMLNodePtr shader_node = root->FirstNode("shader");
-				if (shader_node)
 				{
-					shaders_ = MakeSharedPtr<BOOST_TYPEOF(*shaders_)>();
-					for (; shader_node; shader_node = shader_node->NextSibling("shader"))
+					XMLNodePtr macro_node = root->FirstNode("macro");
+					if (macro_node || predefined_macros)
 					{
-						shaders_->push_back(RenderShaderFunc());
-						shaders_->back().Load(shader_node);
+						macros_ = MakeSharedPtr<BOOST_TYPEOF(*macros_)>();
+					}
+					if (predefined_macros)
+					{
+						size_t m = 0;
+						while (!predefined_macros[m].first.empty())
+						{
+							macros_->push_back(std::make_pair(std::make_pair(predefined_macros[m].first, predefined_macros[m].second), false));
+							++ m;
+						}
+					}
+					for (; macro_node; macro_node = macro_node->NextSibling("macro"))
+					{
+						macros_->push_back(std::make_pair(std::make_pair(macro_node->Attrib("name")->ValueString(), macro_node->Attrib("value")->ValueString()), true));
+					}
+				}
+
+				std::vector<XMLNodePtr> parameter_nodes;
+				for (XMLNodePtr node = root->FirstNode(); node; node = node->NextSibling())
+				{
+					if ("parameter" == node->Name())
+					{
+						parameter_nodes.push_back(node);
+					}
+					else if ("cbuffer" == node->Name())
+					{
+						for (XMLNodePtr sub_node = node->FirstNode("parameter"); sub_node; sub_node = sub_node->NextSibling("parameter"))
+						{
+							parameter_nodes.push_back(sub_node);
+						}
+					}
+				}
+
+				for (uint32_t param_index = 0; param_index < parameter_nodes.size(); ++ param_index)
+				{
+					XMLNodePtr const & node = parameter_nodes[param_index];
+
+					uint32_t type = type_define::instance().type_code(node->Attrib("type")->ValueString());
+					if ((type != REDT_sampler)
+						&& (type != REDT_texture1D) && (type != REDT_texture2D) && (type != REDT_texture3D) && (type != REDT_textureCUBE)
+						&& (type != REDT_texture1DArray) && (type != REDT_texture2DArray) && (type != REDT_texture3DArray) && (type != REDT_textureCUBEArray))
+					{
+						XMLNodePtr parent_node = node->Parent();
+						std::string cbuff_name = parent_node->AttribString("name", "global_cb");
+
+						bool found = false;
+						for (size_t i = 0; i < cbuffers_->size(); ++ i)
+						{
+							if ((*cbuffers_)[i].first == cbuff_name)
+							{
+								(*cbuffers_)[i].second.push_back(param_index);
+								found = true;
+								break;
+							}
+						}
+						if (!found)
+						{
+							cbuffers_->push_back(std::make_pair(cbuff_name, std::vector<uint32_t>(1, param_index)));
+						}
+					}
+
+					RenderEffectParameterPtr param = MakeSharedPtr<RenderEffectParameter>(*this);
+					params_.push_back(param);
+
+					param->Load(node);
+				}
+
+				{
+					XMLNodePtr shader_node = root->FirstNode("shader");
+					if (shader_node)
+					{
+						shaders_ = MakeSharedPtr<BOOST_TYPEOF(*shaders_)>();
+						for (; shader_node; shader_node = shader_node->NextSibling("shader"))
+						{
+							shaders_->push_back(RenderShaderFunc());
+							shaders_->back().Load(shader_node);
+						}
+					}
+				}
+
+				uint32_t index = 0;
+				for (XMLNodePtr node = root->FirstNode("technique"); node; node = node->NextSibling("technique"), ++ index)
+				{
+					RenderTechniquePtr technique = MakeSharedPtr<RenderTechnique>(*this);
+					techniques_.push_back(technique);
+
+					technique->Load(node, index);
+				}
+			}
+
+			std::ofstream ofs(kfx_name, std::ios_base::binary | std::ios_base::out);
+			this->StreamOut(ofs);
+		}
+	}
+
+	bool RenderEffect::StreamIn(ResIdentifierPtr const & source, std::pair<std::string, std::string>* predefined_macros)
+	{
+		bool ret = false;
+		if (source)
+		{
+			uint32_t fourcc;
+			source->read(&fourcc, sizeof(fourcc));
+			if (MakeFourCC<'K', 'F', 'X', ' '>::value == fourcc)
+			{
+				uint32_t ver;
+				source->read(&ver, sizeof(ver));
+				if (0x0100 == ver)
+				{
+					res_name_ = MakeSharedPtr<std::string>(source->ResName());
+					timestamp_ = source->Timestamp();
+
+					shader_descs_ = MakeSharedPtr<BOOST_TYPEOF(*shader_descs_)>(1);
+
+					cbuffers_ = MakeSharedPtr<BOOST_TYPEOF(*cbuffers_)>();
+
+					{
+						uint16_t num_macros;
+						source->read(&num_macros, sizeof(num_macros));
+
+						if ((num_macros > 0) || predefined_macros)
+						{
+							macros_ = MakeSharedPtr<BOOST_TYPEOF(*macros_)>();
+						}
+						if (predefined_macros)
+						{
+							size_t m = 0;
+							while (!predefined_macros[m].first.empty())
+							{
+								macros_->push_back(std::make_pair(std::make_pair(predefined_macros[m].first, predefined_macros[m].second), false));
+								++ m;
+							}
+						}
+						for (uint32_t i = 0; i < num_macros; ++ i)
+						{
+							std::string name = read_short_string(source);
+							std::string value = read_short_string(source);
+							macros_->push_back(std::make_pair(std::make_pair(name, value), true));
+						}
+					}
+
+					{
+						uint16_t num_cbufs;
+						source->read(&num_cbufs, sizeof(num_cbufs));
+						cbuffers_->resize(num_cbufs);
+						for (uint32_t i = 0; i < num_cbufs; ++ i)
+						{
+							(*cbuffers_)[i].first = read_short_string(source);
+
+							uint16_t len;
+							source->read(&len, sizeof(len));
+							(*cbuffers_)[i].second.resize(len);
+							source->read(&(*cbuffers_)[i].second[0], len * sizeof((*cbuffers_)[i].second[0]));
+						}
+					}
+
+					{
+						uint16_t num_params;
+						source->read(&num_params, sizeof(num_params));
+						params_.resize(num_params);
+						for (uint32_t i = 0; i < num_params; ++ i)
+						{
+							RenderEffectParameterPtr param = MakeSharedPtr<RenderEffectParameter>(*this);
+							params_[i] = param;
+
+							param->StreamIn(source);
+						}
+					}
+
+					{
+						uint16_t num_shaders;
+						source->read(&num_shaders, sizeof(num_shaders));
+						if (num_shaders > 0)
+						{
+							shaders_ = MakeSharedPtr<BOOST_TYPEOF(*shaders_)>(num_shaders);
+							for (uint32_t i = 0; i < num_shaders; ++ i)
+							{
+								(*shaders_)[i].StreamIn(source);
+							}
+						}
+					}
+
+					{
+						uint16_t num_shader_descs;
+						source->read(&num_shader_descs, sizeof(num_shader_descs));
+						shader_descs_->resize(num_shader_descs + 1);
+						for (uint32_t i = 0; i < num_shader_descs; ++ i)
+						{
+							(*shader_descs_)[i + 1].profile = read_short_string(source);
+							(*shader_descs_)[i + 1].func_name = read_short_string(source);
+
+							source->read(&(*shader_descs_)[i + 1].tech_pass, sizeof((*shader_descs_)[i + 1].tech_pass));
+
+							uint8_t len;
+							source->read(&len, sizeof(len));
+							if (len > 0)
+							{
+								(*shader_descs_)[i + 1].so_decl.resize(len);
+								source->read(&(*shader_descs_)[i + 1].so_decl[0], len * sizeof((*shader_descs_)[i + 1].so_decl[0]));
+							}
+						}
+					}
+
+					ret = true;
+					{
+						uint16_t num_techs;
+						source->read(&num_techs, sizeof(num_techs));
+						techniques_.resize(num_techs);
+						for (uint32_t i = 0; i < num_techs; ++ i)
+						{
+							RenderTechniquePtr technique = MakeSharedPtr<RenderTechnique>(*this);
+							techniques_[i] = technique;
+
+							ret &= technique->StreamIn(source, i);
+						}
+					}
+				}
+			}
+		}
+
+		return ret;
+	}
+
+	void RenderEffect::StreamOut(std::ostream& os)
+	{
+		uint32_t fourcc = MakeFourCC<'K', 'F', 'X', ' '>::value;
+		os.write(reinterpret_cast<char const *>(&fourcc), sizeof(fourcc));
+
+		uint32_t ver = 0x0100;
+		os.write(reinterpret_cast<char const *>(&ver), sizeof(ver));
+
+		{
+			uint16_t num_macros = 0;
+			if (macros_)
+			{
+				for (uint32_t i = 0; i < macros_->size(); ++ i)
+				{
+					if ((*macros_)[i].second)
+					{
+						++ num_macros;
 					}
 				}
 			}
 
-			uint32_t index = 0;
-			for (XMLNodePtr node = root->FirstNode("technique"); node; node = node->NextSibling("technique"), ++ index)
-			{
-				RenderTechniquePtr technique = MakeSharedPtr<RenderTechnique>(*this);
-				techniques_.push_back(technique);
+			os.write(reinterpret_cast<char const *>(&num_macros), sizeof(num_macros));
 
-				technique->Load(node, index);
+			if (macros_)
+			{
+				for (uint32_t i = 0; i < macros_->size(); ++ i)
+				{
+					if ((*macros_)[i].second)
+					{
+						write_short_string(os, (*macros_)[i].first.first);
+						write_short_string(os, (*macros_)[i].first.second);
+					}
+				}
+			}
+		}
+
+		{
+			uint16_t num_cbufs = static_cast<uint16_t>(cbuffers_->size());
+			os.write(reinterpret_cast<char const *>(&num_cbufs), sizeof(num_cbufs));
+			for (uint32_t i = 0; i < num_cbufs; ++ i)
+			{
+				write_short_string(os, (*cbuffers_)[i].first);
+
+				uint16_t len = static_cast<uint16_t>((*cbuffers_)[i].second.size());
+				os.write(reinterpret_cast<char const *>(&len), sizeof(len));
+				os.write(reinterpret_cast<char const *>(&(*cbuffers_)[i].second[0]), len * sizeof((*cbuffers_)[i].second[0]));
+			}
+		}
+
+		{
+			uint16_t num_params = static_cast<uint16_t>(params_.size());
+			os.write(reinterpret_cast<char const *>(&num_params), sizeof(num_params));
+			for (uint32_t i = 0; i < num_params; ++ i)
+			{
+				params_[i]->StreamOut(os);
+			}
+		}
+
+		{
+			uint16_t num_shaders = shaders_ ? static_cast<uint16_t>(shaders_->size()) : 0;
+			os.write(reinterpret_cast<char const *>(&num_shaders), sizeof(num_shaders));
+			for (uint32_t i = 0; i < num_shaders; ++ i)
+			{
+				(*shaders_)[i].StreamOut(os);
+			}
+		}
+
+		{
+			uint16_t num_shader_descs = static_cast<uint16_t>(shader_descs_->size() - 1);
+			os.write(reinterpret_cast<char const *>(&num_shader_descs), sizeof(num_shader_descs));
+			for (uint32_t i = 0; i < num_shader_descs; ++ i)
+			{
+				write_short_string(os, (*shader_descs_)[i + 1].profile);
+				write_short_string(os, (*shader_descs_)[i + 1].func_name);
+
+				os.write(reinterpret_cast<char const *>(&(*shader_descs_)[i + 1].tech_pass), sizeof((*shader_descs_)[i + 1].tech_pass));
+
+				uint8_t len = static_cast<uint8_t>((*shader_descs_)[i + 1].so_decl.size());
+				os.write(reinterpret_cast<char const *>(&len), sizeof(len));
+				if (len > 0)
+				{
+					os.write(reinterpret_cast<char const *>(&(*shader_descs_)[i + 1].so_decl[0]), len * sizeof((*shader_descs_)[i + 1].so_decl[0]));
+				}
+			}
+		}
+
+		{
+			uint16_t num_techs = static_cast<uint16_t>(techniques_.size());
+			os.write(reinterpret_cast<char const *>(&num_techs), sizeof(num_techs));
+			for (uint32_t i = 0; i < num_techs; ++ i)
+			{
+				techniques_[i]->StreamOut(os);
 			}
 		}
 	}
@@ -1850,6 +2901,86 @@ namespace KlayGE
 		}
 	}
 
+	bool RenderTechnique::StreamIn(ResIdentifierPtr const & res, uint32_t tech_index)
+	{
+		name_ = MakeSharedPtr<BOOST_TYPEOF(*name_)>(read_short_string(res));
+
+		uint8_t num_anno;
+		res->read(&num_anno, sizeof(num_anno));
+		if (num_anno > 0)
+		{
+			annotations_ = MakeSharedPtr<BOOST_TYPEOF(*annotations_)>();
+			annotations_->resize(num_anno);
+			for (uint32_t i = 0; i < num_anno; ++ i)
+			{
+				RenderEffectAnnotationPtr annotation = MakeSharedPtr<RenderEffectAnnotation>();
+				(*annotations_)[i] = annotation;
+				
+				annotation->StreamIn(res);
+			}
+		}
+
+		is_validate_ = true;
+
+		has_discard_ = false;
+		has_tessellation_ = false;
+		
+		res->read(&transparent_, sizeof(transparent_));
+		res->read(&weight_, sizeof(weight_));
+
+		bool ret = true;
+		uint8_t num_passes;
+		res->read(&num_passes, sizeof(num_passes));
+		passes_.resize(num_passes);
+		for (uint32_t pass_index = 0; pass_index < num_passes; ++ pass_index)
+		{
+			RenderPassPtr pass = MakeSharedPtr<RenderPass>(effect_);
+			passes_[pass_index] = pass;
+
+			ret &= pass->StreamIn(res, tech_index, pass_index);
+
+			is_validate_ &= pass->Validate();
+
+			has_discard_ |= pass->GetShaderObject()->HasDiscard();
+			has_tessellation_ |= pass->GetShaderObject()->HasTessellation();
+		}
+
+		return ret;
+	}
+
+	void RenderTechnique::StreamOut(std::ostream& os)
+	{
+		write_short_string(os, *name_);
+
+		uint8_t num_anno;
+		if (annotations_)
+		{
+			num_anno = static_cast<uint8_t>(annotations_->size());
+		}
+		else
+		{
+			num_anno = 0;
+		}
+		os.write(reinterpret_cast<char const *>(&num_anno), sizeof(num_anno));
+		for (uint32_t i = 0; i < num_anno; ++ i)
+		{
+			RenderEffectAnnotationPtr annotation = MakeSharedPtr<RenderEffectAnnotation>();
+			(*annotations_)[i] = annotation;
+				
+			annotation->StreamOut(os);
+		}
+
+		os.write(reinterpret_cast<char const *>(&transparent_), sizeof(transparent_));
+		os.write(reinterpret_cast<char const *>(&weight_), sizeof(weight_));
+
+		uint8_t num_passes = static_cast<uint8_t>(passes_.size());
+		os.write(reinterpret_cast<char const *>(&num_passes), sizeof(num_passes));
+		for (uint32_t pass_index = 0; pass_index < num_passes; ++ pass_index)
+		{
+			passes_[pass_index]->StreamOut(os);
+		}
+	}
+
 	RenderTechniquePtr RenderTechnique::Clone(RenderEffect& effect)
 	{
 		RenderTechniquePtr ret = MakeSharedPtr<RenderTechnique>(effect);
@@ -1877,7 +3008,7 @@ namespace KlayGE
 	{
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-		name_ = MakeSharedPtr<BOOST_TYPEOF(*name_)>(std::string(node->Attrib("name")->ValueString()));
+		name_ = MakeSharedPtr<BOOST_TYPEOF(*name_)>(node->Attrib("name")->ValueString());
 
 		if (inherit_pass)
 		{
@@ -2287,6 +3418,109 @@ namespace KlayGE
 		is_validate_ = shader_obj_->Validate();
 	}
 
+	bool RenderPass::StreamIn(ResIdentifierPtr const & res, uint32_t tech_index, uint32_t pass_index)
+	{
+		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+
+		name_ = MakeSharedPtr<BOOST_TYPEOF(*name_)>(read_short_string(res));
+
+		uint8_t num_anno;
+		res->read(&num_anno, sizeof(num_anno));
+		if (num_anno > 0)
+		{
+			annotations_ = MakeSharedPtr<BOOST_TYPEOF(*annotations_)>();
+			annotations_->resize(num_anno);
+			for (uint32_t i = 0; i < num_anno; ++ i)
+			{
+				RenderEffectAnnotationPtr annotation = MakeSharedPtr<RenderEffectAnnotation>();
+				(*annotations_)[i] = annotation;
+				
+				annotation->StreamIn(res);
+			}
+		}
+
+		RasterizerStateDesc rs_desc;
+		DepthStencilStateDesc dss_desc;
+		BlendStateDesc bs_desc;
+		res->read(&rs_desc, sizeof(rs_desc));
+		res->read(&dss_desc, sizeof(dss_desc));
+		res->read(&bs_desc, sizeof(bs_desc));
+		rasterizer_state_obj_ = rf.MakeRasterizerStateObject(rs_desc);
+		depth_stencil_state_obj_ = rf.MakeDepthStencilStateObject(dss_desc);
+		blend_state_obj_ = rf.MakeBlendStateObject(bs_desc);
+
+		res->read(&front_stencil_ref_, sizeof(front_stencil_ref_));
+		res->read(&back_stencil_ref_, sizeof(back_stencil_ref_));
+		res->read(&blend_factor_, sizeof(blend_factor_));
+		res->read(&sample_mask_, sizeof(sample_mask_));
+
+		shader_desc_ids_ = MakeSharedPtr<BOOST_TYPEOF(*shader_desc_ids_)>();
+		shader_desc_ids_->resize(ShaderObject::ST_NumShaderTypes, 0);
+		res->read(&(*shader_desc_ids_)[0], shader_desc_ids_->size() * sizeof((*shader_desc_ids_)[0]));
+
+		uint8_t dummy;
+		res->read(&dummy, sizeof(dummy));
+
+		
+		shader_obj_ = rf.MakeShaderObject();
+
+		std::vector<ShaderObjectPtr> shared_so(ShaderObject::ST_NumShaderTypes);
+		for (int type = 0; type < ShaderObject::ST_NumShaderTypes; ++ type)
+		{
+			shader_desc const & sd = effect_.GetShaderDesc((*shader_desc_ids_)[type]);
+			if (!sd.func_name.empty() && (sd.tech_pass != (tech_index << 16) + pass_index))
+			{
+				shared_so[type] = effect_.TechniqueByIndex(sd.tech_pass >> 16)->Pass(sd.tech_pass & 0xFFFF)->GetShaderObject();
+			}
+		}
+
+		shader_obj_->SetShader(effect_, *shader_desc_ids_, shared_so);
+
+		is_validate_ = shader_obj_->Validate();
+
+		return true;
+	}
+
+	void RenderPass::StreamOut(std::ostream& os)
+	{
+		write_short_string(os, *name_);
+
+		uint8_t num_anno;
+		if (annotations_)
+		{
+			num_anno = static_cast<uint8_t>(annotations_->size());
+		}
+		else
+		{
+			num_anno = 0;
+		}
+		os.write(reinterpret_cast<char const *>(&num_anno), sizeof(num_anno));
+		for (uint32_t i = 0; i < num_anno; ++ i)
+		{
+			RenderEffectAnnotationPtr annotation = MakeSharedPtr<RenderEffectAnnotation>();
+			(*annotations_)[i] = annotation;
+				
+			annotation->StreamOut(os);
+		}
+
+		RasterizerStateDesc const & rs_desc = rasterizer_state_obj_->GetDesc();
+		DepthStencilStateDesc dss_desc = depth_stencil_state_obj_->GetDesc();
+		BlendStateDesc bs_desc = blend_state_obj_->GetDesc();
+		os.write(reinterpret_cast<char const *>(&rs_desc), sizeof(rs_desc));
+		os.write(reinterpret_cast<char const *>(&dss_desc), sizeof(dss_desc));
+		os.write(reinterpret_cast<char const *>(&bs_desc), sizeof(bs_desc));
+
+		os.write(reinterpret_cast<char const *>(&front_stencil_ref_), sizeof(front_stencil_ref_));
+		os.write(reinterpret_cast<char const *>(&back_stencil_ref_), sizeof(back_stencil_ref_));
+		os.write(reinterpret_cast<char const *>(&blend_factor_), sizeof(blend_factor_));
+		os.write(reinterpret_cast<char const *>(&sample_mask_), sizeof(sample_mask_));
+
+		os.write(reinterpret_cast<char const *>(&(*shader_desc_ids_)[0]), shader_desc_ids_->size() * sizeof((*shader_desc_ids_)[0]));
+
+		uint8_t dummy = 0;
+		os.write(reinterpret_cast<char const *>(&dummy), sizeof(dummy));
+	}
+
 	RenderPassPtr RenderPass::Clone(RenderEffect& effect)
 	{
 		RenderPassPtr ret = MakeSharedPtr<RenderPass>(effect);
@@ -2336,7 +3570,7 @@ namespace KlayGE
 	void RenderEffectParameter::Load(XMLNodePtr const & node)
 	{
 		type_ = type_define::instance().type_code(node->Attrib("type")->ValueString());
-		name_ = MakeSharedPtr<BOOST_TYPEOF(*name_)>(std::string(node->Attrib("name")->ValueString()));
+		name_ = MakeSharedPtr<BOOST_TYPEOF(*name_)>(node->Attrib("name")->ValueString());
 
 		XMLAttributePtr attr = node->Attrib("semantic");
 		if (attr)
@@ -2396,6 +3630,129 @@ namespace KlayGE
 					}
 				}
 			}
+		}
+	}
+
+	void RenderEffectParameter::StreamIn(ResIdentifierPtr const & res)
+	{
+		res->read(&type_, sizeof(type_));
+		name_ = MakeSharedPtr<BOOST_TYPEOF(*name_)>(read_short_string(res));
+
+		std::string sem = read_short_string(res);
+		if (!sem.empty())
+		{
+			semantic_ = MakeSharedPtr<BOOST_TYPEOF(*semantic_)>(sem);
+		}
+
+		uint32_t as;
+		std::string as_str = read_short_string(res);
+		if (!as_str.empty())
+		{
+			array_size_ = MakeSharedPtr<std::string>(as_str);
+
+			try
+			{
+				as = boost::lexical_cast<uint32_t>(as_str);
+			}
+			catch (...)
+			{
+				as = 1;  // dummy array size
+			}
+		}
+		else
+		{
+			as = 0;
+		}
+		var_ = stream_in_var(res, type_, as);
+
+		uint8_t num_anno;
+		res->read(&num_anno, sizeof(num_anno));
+		if (num_anno > 0)
+		{
+			annotations_ = MakeSharedPtr<BOOST_TYPEOF(*annotations_)>();
+			annotations_->resize(num_anno);
+			for (uint32_t i = 0; i < num_anno; ++ i)
+			{
+				RenderEffectAnnotationPtr annotation = MakeSharedPtr<RenderEffectAnnotation>();
+				(*annotations_)[i] = annotation;
+				
+				annotation->StreamIn(res);
+			}
+		}
+
+		if (annotations_ && ((REDT_texture1D == type_) || (REDT_texture2D == type_) || (REDT_texture3D == type_) || (REDT_textureCUBE == type_)
+			|| (REDT_texture1DArray == type_) || (REDT_texture2DArray == type_) || (REDT_texture3DArray == type_) || (REDT_textureCUBEArray == type_)))
+		{
+			for (size_t i = 0; i < annotations_->size(); ++ i)
+			{
+				if (REDT_string == (*annotations_)[i]->Type())
+				{
+					if ("SasResourceAddress" == (*annotations_)[i]->Name())
+					{
+						std::string val;
+						(*annotations_)[i]->Value(val);
+
+						*var_ = SyncLoadTexture(val, EAH_GPU_Read | EAH_Immutable);
+					}
+				}
+			}
+		}
+	}
+
+	void RenderEffectParameter::StreamOut(std::ostream& os)
+	{
+		os.write(reinterpret_cast<char const *>(&type_), sizeof(type_));
+		write_short_string(os, *name_);
+		if (semantic_)
+		{
+			write_short_string(os, *semantic_);
+		}
+		else
+		{
+			uint8_t len = 0;
+			os.write(reinterpret_cast<char const *>(&len), sizeof(len));
+		}
+
+		if (array_size_)
+		{
+			write_short_string(os, *array_size_);
+		}
+		else
+		{
+			uint8_t len = 0;
+			os.write(reinterpret_cast<char const *>(&len), sizeof(len));
+		}
+		uint32_t as;
+		if (array_size_)
+		{
+			try
+			{
+				as = boost::lexical_cast<uint32_t>(*array_size_);
+			}
+			catch (...)
+			{
+				as = 1;  // dummy array size
+			}
+		}
+		else
+		{
+			as = 0;
+		}
+		stream_out_var(os, var_, type_, as);
+
+		uint8_t num_anno;
+		if (annotations_)
+		{
+			num_anno = static_cast<uint8_t>(annotations_->size());
+		}
+		else
+		{
+			num_anno = 0;
+		}
+		os.write(reinterpret_cast<char const *>(&num_anno), sizeof(num_anno));
+		for (uint32_t i = 0; i < num_anno; ++ i)
+		{
+			(*annotations_)[i]->StreamOut(os);
 		}
 	}
 
@@ -2463,6 +3820,27 @@ namespace KlayGE
 				str_ += shader_text_node->ValueString();
 			}
 		}
+	}
+
+	void RenderShaderFunc::StreamIn(ResIdentifierPtr const & res)
+	{
+		res->read(&type_, sizeof(type_));
+		res->read(&version_, sizeof(version_));
+
+		uint32_t len;
+		res->read(&len, sizeof(len));
+		str_.resize(len);
+		res->read(&str_[0], len * sizeof(str_[0]));
+	}
+
+	void RenderShaderFunc::StreamOut(std::ostream& os)
+	{
+		os.write(reinterpret_cast<char const *>(&type_), sizeof(type_));
+		os.write(reinterpret_cast<char const *>(&version_), sizeof(version_));
+
+		uint32_t len = str_.size();
+		os.write(reinterpret_cast<char const *>(&len), sizeof(len));
+		os.write(&str_[0], len * sizeof(str_[0]));
 	}
 
 

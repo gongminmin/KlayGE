@@ -417,6 +417,9 @@ namespace KlayGE
 	public:
 		void Load(XMLNodePtr const & node);
 
+		void StreamIn(ResIdentifierPtr const & res);
+		void StreamOut(std::ostream& os);
+
 		uint32_t Type() const
 		{
 			return type_;
@@ -443,6 +446,9 @@ namespace KlayGE
 	{
 	public:
 		void Load(XMLNodePtr const & node);
+
+		void StreamIn(ResIdentifierPtr const & res);
+		void StreamOut(std::ostream& os);
 
 		ShaderObject::ShaderType Type() const
 		{
@@ -473,6 +479,10 @@ namespace KlayGE
 		RenderEffect();
 
 		void Load(ResIdentifierPtr const & source, std::pair<std::string, std::string>* macros);
+
+		bool StreamIn(ResIdentifierPtr const & source, std::pair<std::string, std::string>* predefined_macros);
+		void StreamOut(std::ostream& os);
+
 		RenderEffectPtr Clone();
 
 		std::string const & ResName() const
@@ -542,7 +552,7 @@ namespace KlayGE
 		std::pair<std::string, std::string> const & MacroByIndex(uint32_t n) const
 		{
 			BOOST_ASSERT(n < this->NumMacros());
-			return (*macros_)[n];
+			return (*macros_)[n].first;
 		}
 
 		std::string const & TypeName(uint32_t code) const;
@@ -555,7 +565,7 @@ namespace KlayGE
 		boost::shared_ptr<std::vector<std::pair<std::string, std::vector<uint32_t> > > > cbuffers_;
 		std::vector<RenderTechniquePtr> techniques_;
 
-		boost::shared_ptr<std::vector<std::pair<std::string, std::string> > > macros_;
+		boost::shared_ptr<std::vector<std::pair<std::pair<std::string, std::string>, bool> > > macros_;
 		boost::shared_ptr<std::vector<RenderShaderFunc> > shaders_;
 
 		RenderEffectPtr prototype_effect_;
@@ -572,6 +582,10 @@ namespace KlayGE
 		}
 
 		void Load(XMLNodePtr const & node, uint32_t tech_index);
+
+		bool StreamIn(ResIdentifierPtr const & res, uint32_t tech_index);
+		void StreamOut(std::ostream& os);
+
 		RenderTechniquePtr Clone(RenderEffect& effect);
 
 		std::string const & Name() const
@@ -654,6 +668,10 @@ namespace KlayGE
 		}
 
 		void Load(XMLNodePtr const & node, uint32_t tech_index, uint32_t pass_index, RenderPassPtr const & inherit_pass);
+
+		bool StreamIn(ResIdentifierPtr const & res, uint32_t tech_index, uint32_t pass_index);
+		void StreamOut(std::ostream& os);
+
 		RenderPassPtr Clone(RenderEffect& effect);
 
 		std::string const & Name() const
@@ -721,6 +739,10 @@ namespace KlayGE
 		~RenderEffectParameter();
 
 		void Load(XMLNodePtr const & node);
+
+		void StreamIn(ResIdentifierPtr const & res);
+		void StreamOut(std::ostream& os);
+
 		RenderEffectParameterPtr Clone(RenderEffect& effect);
 
 		uint32_t type() const
