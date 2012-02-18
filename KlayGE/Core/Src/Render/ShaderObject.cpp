@@ -23,8 +23,17 @@ namespace KlayGE
 	class NullShaderObject : public ShaderObject
 	{
 	public:
-		void SetShader(RenderEffect const & /*effect*/, std::vector<uint32_t> const & /*shader_desc_ids*/,
-			std::vector<ShaderObjectPtr> const & /*shared_so*/)
+		void AttachShader(ShaderType /*type*/, RenderEffect const & /*effect*/, std::vector<uint32_t> const & /*shader_desc_ids*/)
+		{
+			is_validate_ = true;
+		}
+
+		void AttachShader(ShaderType /*type*/, RenderEffect const & /*effect*/, ShaderObjectPtr const & /*shared_so*/)
+		{
+			is_validate_ = true;
+		}
+
+		void LinkShaders(RenderEffect const & /*effect*/)
 		{
 			is_validate_ = true;
 		}

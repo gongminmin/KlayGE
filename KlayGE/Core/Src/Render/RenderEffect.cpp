@@ -2313,11 +2313,15 @@ namespace KlayGE
 
 	void RenderEffectAnnotation::StreamIn(ResIdentifierPtr const & res)
 	{
+		res->read(&type_, sizeof(type_));
+		name_ = read_short_string(res);
 		var_ = stream_in_var(res, type_, 0);
 	}
 
 	void RenderEffectAnnotation::StreamOut(std::ostream& os)
 	{
+		os.write(reinterpret_cast<char const *>(&type_), sizeof(type_));
+		write_short_string(os, name_);
 		stream_out_var(os, var_, type_, 0);
 	}
 
@@ -3394,26 +3398,26 @@ namespace KlayGE
 		depth_stencil_state_obj_ = rf.MakeDepthStencilStateObject(dss_desc);
 		blend_state_obj_ = rf.MakeBlendStateObject(bs_desc);
 
-		std::vector<ShaderObjectPtr> shared_so(ShaderObject::ST_NumShaderTypes);
-		for (int type = 0; type < ShaderObject::ST_NumShaderTypes; ++ type)
-		{
-			shader_desc const & sd = effect_.GetShaderDesc((*shader_desc_ids_)[type]);
-			if (!sd.func_name.empty() && (sd.tech_pass != 0xFFFFFFFF))
-			{
-				shared_so[type] = effect_.TechniqueByIndex(sd.tech_pass >> 16)->Pass(sd.tech_pass & 0xFFFF)->GetShaderObject();
-			}
-		}
-
-		shader_obj_->SetShader(effect_, *shader_desc_ids_, shared_so);
-
 		for (int type = 0; type < ShaderObject::ST_NumShaderTypes; ++ type)
 		{
 			shader_desc& sd = effect_.GetShaderDesc((*shader_desc_ids_)[type]);
-			if (!sd.func_name.empty() && (0xFFFFFFFF == sd.tech_pass))
+			if (!sd.func_name.empty())
 			{
-				sd.tech_pass = (tech_index << 16) + pass_index;
+				if (sd.tech_pass != 0xFFFFFFFF)
+				{
+					shader_obj_->AttachShader(static_cast<ShaderObject::ShaderType>(type),
+						effect_, effect_.TechniqueByIndex(sd.tech_pass >> 16)->Pass(sd.tech_pass & 0xFFFF)->GetShaderObject());
+				}
+				else
+				{
+					shader_obj_->AttachShader(static_cast<ShaderObject::ShaderType>(type),
+						effect_, *shader_desc_ids_);
+					sd.tech_pass = (tech_index << 16) + pass_index;
+				}
 			}
 		}
+
+		shader_obj_->LinkShaders(effect_);
 
 		is_validate_ = shader_obj_->Validate();
 	}
@@ -3464,17 +3468,25 @@ namespace KlayGE
 		
 		shader_obj_ = rf.MakeShaderObject();
 
-		std::vector<ShaderObjectPtr> shared_so(ShaderObject::ST_NumShaderTypes);
 		for (int type = 0; type < ShaderObject::ST_NumShaderTypes; ++ type)
 		{
+			ShaderObjectPtr shared_so;
 			shader_desc const & sd = effect_.GetShaderDesc((*shader_desc_ids_)[type]);
-			if (!sd.func_name.empty() && (sd.tech_pass != (tech_index << 16) + pass_index))
+			if (!sd.func_name.empty())
 			{
-				shared_so[type] = effect_.TechniqueByIndex(sd.tech_pass >> 16)->Pass(sd.tech_pass & 0xFFFF)->GetShaderObject();
+				if (sd.tech_pass != (tech_index << 16) + pass_index)
+				{
+					shader_obj_->AttachShader(static_cast<ShaderObject::ShaderType>(type),
+						effect_, effect_.TechniqueByIndex(sd.tech_pass >> 16)->Pass(sd.tech_pass & 0xFFFF)->GetShaderObject());
+				}
+				else
+				{
+					shader_obj_->AttachShader(static_cast<ShaderObject::ShaderType>(type), effect_, *shader_desc_ids_);
+				}
 			}
 		}
 
-		shader_obj_->SetShader(effect_, *shader_desc_ids_, shared_so);
+		shader_obj_->LinkShaders(effect_);
 
 		is_validate_ = shader_obj_->Validate();
 

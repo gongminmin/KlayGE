@@ -95,8 +95,9 @@ namespace KlayGE
 
 		static ShaderObjectPtr NullObject();
 
-		virtual void SetShader(RenderEffect const & effect, std::vector<uint32_t> const & shader_desc_ids,
-			std::vector<ShaderObjectPtr> const & shared_so) = 0;
+		virtual void AttachShader(ShaderType type, RenderEffect const & effect, std::vector<uint32_t> const & shader_desc_ids) = 0;
+		virtual void AttachShader(ShaderType type, RenderEffect const & effect, ShaderObjectPtr const & shared_so) = 0;
+		virtual void LinkShaders(RenderEffect const & effect) = 0;
 		virtual ShaderObjectPtr Clone(RenderEffect const & effect) = 0;
 
 		virtual void Bind() = 0;

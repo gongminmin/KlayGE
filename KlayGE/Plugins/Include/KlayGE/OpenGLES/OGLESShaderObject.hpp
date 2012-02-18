@@ -21,6 +21,7 @@
 #include <KlayGE/ShaderObject.hpp>
 
 #include <boost/function.hpp>
+#include <boost/tuple/tuple.hpp>
 
 namespace KlayGE
 {
@@ -30,10 +31,11 @@ namespace KlayGE
 		OGLESShaderObject();
 		~OGLESShaderObject();
 
-		std::string GenShaderText(RenderEffect const & effect);
+		std::string GenShaderText(ShaderType type, RenderEffect const & effect);
 
-		void SetShader(RenderEffect const & effect, std::vector<uint32_t> const & shader_desc_ids,
-			std::vector<ShaderObjectPtr> const & shared_so);
+		void AttachShader(ShaderType type, RenderEffect const & effect, std::vector<uint32_t> const & shader_desc_ids);
+		void AttachShader(ShaderType type, RenderEffect const & effect, ShaderObjectPtr const & shared_so);
+		void LinkShaders(RenderEffect const & effect);
 		ShaderObjectPtr Clone(RenderEffect const & effect);
 
 		void Bind();
@@ -77,7 +79,7 @@ namespace KlayGE
 
 		std::vector<std::pair<TexturePtr, SamplerStateObjectPtr> > samplers_;
 
-		std::vector<std::pair<std::string, std::pair<RenderEffectParameterPtr, RenderEffectParameterPtr> > > tex_sampler_binds_;
+		std::vector<boost::tuple<std::string, RenderEffectParameterPtr, RenderEffectParameterPtr, uint32_t> > tex_sampler_binds_;
 
 		std::map<std::pair<VertexElementUsage, uint8_t>, GLint> attrib_locs_;
 	};
