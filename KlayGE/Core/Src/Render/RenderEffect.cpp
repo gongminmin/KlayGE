@@ -72,6 +72,14 @@
 #ifdef KLAYGE_COMPILER_MSVC
 #pragma warning(pop)
 #endif
+#ifdef KLAYGE_COMPILER_MSVC
+#pragma warning(push)
+#pragma warning(disable: 6011 6334)
+#endif
+#include <boost/functional/hash.hpp>
+#ifdef KLAYGE_COMPILER_MSVC
+#pragma warning(pop)
+#endif
 
 #include <KlayGE/RenderEffect.hpp>
 
@@ -2332,13 +2340,33 @@ namespace KlayGE
 
 	void RenderEffect::Load(ResIdentifierPtr const & source, std::pair<std::string, std::string>* predefined_macros)
 	{
+		res_name_ = MakeSharedPtr<std::string>(source->ResName());
+		timestamp_ = source->Timestamp();
+		if (predefined_macros)
+		{
+			size_t hash_val = 0;
+			size_t m = 0;
+			while (!predefined_macros[m].first.empty())
+			{
+				boost::hash_range(hash_val, predefined_macros[m].first.begin(), predefined_macros[m].first.end());
+				boost::hash_range(hash_val, predefined_macros[m].second.begin(), predefined_macros[m].second.end());
+				++ m;
+			}
+			predefined_macros_hash_ = static_cast<uint64_t>(hash_val);
+		}
+		else
+		{
+			predefined_macros_hash_ = 0;
+		}
+
 		std::string const & fxml_name = ResLoader::Instance().Locate(source->ResName());
 		std::string kfx_name = fxml_name.substr(0, fxml_name.rfind("."));
 		std::stringstream oss;
 		oss << kfx_name << ".kfx";
 		kfx_name = oss.str();
 
-		if (!this->StreamIn(ResLoader::Instance().Open(kfx_name), predefined_macros))
+		std::vector<std::vector<std::vector<uint8_t> > > native_shader_blocks;
+		if (!this->StreamIn(ResLoader::Instance().Open(kfx_name), predefined_macros, native_shader_blocks))
 		{
 			shader_descs_.reset();
 			cbuffers_.reset();
@@ -2349,9 +2377,6 @@ namespace KlayGE
 
 			if (source)
 			{
-				res_name_ = MakeSharedPtr<std::string>(source->ResName());
-				timestamp_ = source->Timestamp();
-
 				shader_descs_ = MakeSharedPtr<BOOST_TYPEOF(*shader_descs_)>(1);
 
 				XMLDocument doc;
@@ -2475,129 +2500,147 @@ namespace KlayGE
 				}
 			}
 
+			native_shader_blocks.resize(shader_descs_->size());
+			for (size_t i = 1; i < shader_descs_->size(); ++ i)
+			{
+				uint32_t tech_pass_type = (*shader_descs_)[i].tech_pass_type;
+				ShaderObjectPtr const & so = techniques_[tech_pass_type >> 16]->Pass((tech_pass_type >> 8) & 0xFF)->GetShaderObject();
+
+				native_shader_blocks[i].push_back(std::vector<uint8_t>());
+				so->ExtractNativeShader(static_cast<ShaderObject::ShaderType>(tech_pass_type & 0xFF), *this, native_shader_blocks[i].back());
+			}
+
 			std::ofstream ofs(kfx_name, std::ios_base::binary | std::ios_base::out);
-			this->StreamOut(ofs);
+			this->StreamOut(ofs, native_shader_blocks);
 		}
 	}
 
-	bool RenderEffect::StreamIn(ResIdentifierPtr const & source, std::pair<std::string, std::string>* predefined_macros)
+	bool RenderEffect::StreamIn(ResIdentifierPtr const & source, std::pair<std::string, std::string>* predefined_macros,
+			std::vector<std::vector<std::vector<uint8_t> > >& native_shader_blocks)
 	{
 		bool ret = false;
 		if (source)
 		{
 			uint32_t fourcc;
 			source->read(&fourcc, sizeof(fourcc));
+			LittleEndianToNative<sizeof(fourcc)>(&fourcc);
 			if (MakeFourCC<'K', 'F', 'X', ' '>::value == fourcc)
 			{
 				uint32_t ver;
 				source->read(&ver, sizeof(ver));
-				if (0x0100 == ver)
+				LittleEndianToNative<sizeof(ver)>(&ver);
+				if (0x0102 == ver)
 				{
-					res_name_ = MakeSharedPtr<std::string>(source->ResName());
-					timestamp_ = source->Timestamp();
-
-					shader_descs_ = MakeSharedPtr<BOOST_TYPEOF(*shader_descs_)>(1);
-
-					cbuffers_ = MakeSharedPtr<BOOST_TYPEOF(*cbuffers_)>();
-
+					uint64_t timestamp;
+					source->read(&timestamp, sizeof(timestamp));
+					LittleEndianToNative<sizeof(timestamp)>(&timestamp);
+					if (timestamp <= source->Timestamp())
 					{
-						uint16_t num_macros;
-						source->read(&num_macros, sizeof(num_macros));
+						shader_descs_ = MakeSharedPtr<BOOST_TYPEOF(*shader_descs_)>(1);
 
-						if ((num_macros > 0) || predefined_macros)
+						cbuffers_ = MakeSharedPtr<BOOST_TYPEOF(*cbuffers_)>();
+
 						{
-							macros_ = MakeSharedPtr<BOOST_TYPEOF(*macros_)>();
-						}
-						if (predefined_macros)
-						{
-							size_t m = 0;
-							while (!predefined_macros[m].first.empty())
+							uint16_t num_macros;
+							source->read(&num_macros, sizeof(num_macros));
+
+							if ((num_macros > 0) || predefined_macros)
 							{
-								macros_->push_back(std::make_pair(std::make_pair(predefined_macros[m].first, predefined_macros[m].second), false));
-								++ m;
+								macros_ = MakeSharedPtr<BOOST_TYPEOF(*macros_)>();
+							}
+							if (predefined_macros)
+							{
+								size_t m = 0;
+								while (!predefined_macros[m].first.empty())
+								{
+									macros_->push_back(std::make_pair(std::make_pair(predefined_macros[m].first, predefined_macros[m].second), false));
+									++ m;
+								}
+							}
+							for (uint32_t i = 0; i < num_macros; ++ i)
+							{
+								std::string name = read_short_string(source);
+								std::string value = read_short_string(source);
+								macros_->push_back(std::make_pair(std::make_pair(name, value), true));
 							}
 						}
-						for (uint32_t i = 0; i < num_macros; ++ i)
+
 						{
-							std::string name = read_short_string(source);
-							std::string value = read_short_string(source);
-							macros_->push_back(std::make_pair(std::make_pair(name, value), true));
-						}
-					}
-
-					{
-						uint16_t num_cbufs;
-						source->read(&num_cbufs, sizeof(num_cbufs));
-						cbuffers_->resize(num_cbufs);
-						for (uint32_t i = 0; i < num_cbufs; ++ i)
-						{
-							(*cbuffers_)[i].first = read_short_string(source);
-
-							uint16_t len;
-							source->read(&len, sizeof(len));
-							(*cbuffers_)[i].second.resize(len);
-							source->read(&(*cbuffers_)[i].second[0], len * sizeof((*cbuffers_)[i].second[0]));
-						}
-					}
-
-					{
-						uint16_t num_params;
-						source->read(&num_params, sizeof(num_params));
-						params_.resize(num_params);
-						for (uint32_t i = 0; i < num_params; ++ i)
-						{
-							RenderEffectParameterPtr param = MakeSharedPtr<RenderEffectParameter>(*this);
-							params_[i] = param;
-
-							param->StreamIn(source);
-						}
-					}
-
-					{
-						uint16_t num_shaders;
-						source->read(&num_shaders, sizeof(num_shaders));
-						if (num_shaders > 0)
-						{
-							shaders_ = MakeSharedPtr<BOOST_TYPEOF(*shaders_)>(num_shaders);
-							for (uint32_t i = 0; i < num_shaders; ++ i)
+							uint16_t num_cbufs;
+							source->read(&num_cbufs, sizeof(num_cbufs));
+							cbuffers_->resize(num_cbufs);
+							for (uint32_t i = 0; i < num_cbufs; ++ i)
 							{
-								(*shaders_)[i].StreamIn(source);
+								(*cbuffers_)[i].first = read_short_string(source);
+
+								uint16_t len;
+								source->read(&len, sizeof(len));
+								(*cbuffers_)[i].second.resize(len);
+								source->read(&(*cbuffers_)[i].second[0], len * sizeof((*cbuffers_)[i].second[0]));
 							}
 						}
-					}
 
-					{
-						uint16_t num_shader_descs;
-						source->read(&num_shader_descs, sizeof(num_shader_descs));
-						shader_descs_->resize(num_shader_descs + 1);
-						for (uint32_t i = 0; i < num_shader_descs; ++ i)
 						{
-							(*shader_descs_)[i + 1].profile = read_short_string(source);
-							(*shader_descs_)[i + 1].func_name = read_short_string(source);
-
-							source->read(&(*shader_descs_)[i + 1].tech_pass, sizeof((*shader_descs_)[i + 1].tech_pass));
-
-							uint8_t len;
-							source->read(&len, sizeof(len));
-							if (len > 0)
+							uint16_t num_params;
+							source->read(&num_params, sizeof(num_params));
+							params_.resize(num_params);
+							for (uint32_t i = 0; i < num_params; ++ i)
 							{
-								(*shader_descs_)[i + 1].so_decl.resize(len);
-								source->read(&(*shader_descs_)[i + 1].so_decl[0], len * sizeof((*shader_descs_)[i + 1].so_decl[0]));
+								RenderEffectParameterPtr param = MakeSharedPtr<RenderEffectParameter>(*this);
+								params_[i] = param;
+
+								param->StreamIn(source);
 							}
 						}
-					}
 
-					ret = true;
-					{
-						uint16_t num_techs;
-						source->read(&num_techs, sizeof(num_techs));
-						techniques_.resize(num_techs);
-						for (uint32_t i = 0; i < num_techs; ++ i)
 						{
-							RenderTechniquePtr technique = MakeSharedPtr<RenderTechnique>(*this);
-							techniques_[i] = technique;
+							uint16_t num_shaders;
+							source->read(&num_shaders, sizeof(num_shaders));
+							if (num_shaders > 0)
+							{
+								shaders_ = MakeSharedPtr<BOOST_TYPEOF(*shaders_)>(num_shaders);
+								for (uint32_t i = 0; i < num_shaders; ++ i)
+								{
+									(*shaders_)[i].StreamIn(source);
+								}
+							}
+						}
 
-							ret &= technique->StreamIn(source, i);
+						{
+							uint16_t num_shader_descs;
+							source->read(&num_shader_descs, sizeof(num_shader_descs));
+							shader_descs_->resize(num_shader_descs + 1);
+							for (uint32_t i = 0; i < num_shader_descs; ++ i)
+							{
+								(*shader_descs_)[i + 1].profile = read_short_string(source);
+								(*shader_descs_)[i + 1].func_name = read_short_string(source);
+
+								source->read(&(*shader_descs_)[i + 1].tech_pass_type, sizeof((*shader_descs_)[i + 1].tech_pass_type));
+
+								uint8_t len;
+								source->read(&len, sizeof(len));
+								if (len > 0)
+								{
+									(*shader_descs_)[i + 1].so_decl.resize(len);
+									source->read(&(*shader_descs_)[i + 1].so_decl[0], len * sizeof((*shader_descs_)[i + 1].so_decl[0]));
+								}
+							}
+
+							native_shader_blocks.resize(shader_descs_->size());
+						}
+
+						ret = true;
+						{
+							uint16_t num_techs;
+							source->read(&num_techs, sizeof(num_techs));
+							techniques_.resize(num_techs);
+							for (uint32_t i = 0; i < num_techs; ++ i)
+							{
+								RenderTechniquePtr technique = MakeSharedPtr<RenderTechnique>(*this);
+								techniques_[i] = technique;
+
+								ret &= technique->StreamIn(source, i, native_shader_blocks);
+							}
 						}
 					}
 				}
@@ -2607,13 +2650,20 @@ namespace KlayGE
 		return ret;
 	}
 
-	void RenderEffect::StreamOut(std::ostream& os)
+	void RenderEffect::StreamOut(std::ostream& os,
+		std::vector<std::vector<std::vector<uint8_t> > > const & native_shader_blocks)
 	{
 		uint32_t fourcc = MakeFourCC<'K', 'F', 'X', ' '>::value;
+		NativeToLittleEndian<sizeof(fourcc)>(&fourcc);
 		os.write(reinterpret_cast<char const *>(&fourcc), sizeof(fourcc));
 
-		uint32_t ver = 0x0100;
+		uint32_t ver = 0x0102;
+		NativeToLittleEndian<sizeof(ver)>(&ver);
 		os.write(reinterpret_cast<char const *>(&ver), sizeof(ver));
+
+		uint64_t timestamp = timestamp_;
+		NativeToLittleEndian<sizeof(timestamp)>(&timestamp);
+		os.write(reinterpret_cast<char const *>(&timestamp), sizeof(timestamp));
 
 		{
 			uint16_t num_macros = 0;
@@ -2682,7 +2732,7 @@ namespace KlayGE
 				write_short_string(os, (*shader_descs_)[i + 1].profile);
 				write_short_string(os, (*shader_descs_)[i + 1].func_name);
 
-				os.write(reinterpret_cast<char const *>(&(*shader_descs_)[i + 1].tech_pass), sizeof((*shader_descs_)[i + 1].tech_pass));
+				os.write(reinterpret_cast<char const *>(&(*shader_descs_)[i + 1].tech_pass_type), sizeof((*shader_descs_)[i + 1].tech_pass_type));
 
 				uint8_t len = static_cast<uint8_t>((*shader_descs_)[i + 1].so_decl.size());
 				os.write(reinterpret_cast<char const *>(&len), sizeof(len));
@@ -2698,7 +2748,7 @@ namespace KlayGE
 			os.write(reinterpret_cast<char const *>(&num_techs), sizeof(num_techs));
 			for (uint32_t i = 0; i < num_techs; ++ i)
 			{
-				techniques_[i]->StreamOut(os);
+				techniques_[i]->StreamOut(os, i, native_shader_blocks);
 			}
 		}
 	}
@@ -2905,7 +2955,8 @@ namespace KlayGE
 		}
 	}
 
-	bool RenderTechnique::StreamIn(ResIdentifierPtr const & res, uint32_t tech_index)
+	bool RenderTechnique::StreamIn(ResIdentifierPtr const & res, uint32_t tech_index,
+			std::vector<std::vector<std::vector<uint8_t> > >& native_shader_blocks)
 	{
 		name_ = MakeSharedPtr<BOOST_TYPEOF(*name_)>(read_short_string(res));
 
@@ -2941,7 +2992,7 @@ namespace KlayGE
 			RenderPassPtr pass = MakeSharedPtr<RenderPass>(effect_);
 			passes_[pass_index] = pass;
 
-			ret &= pass->StreamIn(res, tech_index, pass_index);
+			ret &= pass->StreamIn(res, tech_index, pass_index, native_shader_blocks);
 
 			is_validate_ &= pass->Validate();
 
@@ -2952,7 +3003,8 @@ namespace KlayGE
 		return ret;
 	}
 
-	void RenderTechnique::StreamOut(std::ostream& os)
+	void RenderTechnique::StreamOut(std::ostream& os, uint32_t tech_index,
+			std::vector<std::vector<std::vector<uint8_t> > > const & native_shader_blocks)
 	{
 		write_short_string(os, *name_);
 
@@ -2981,7 +3033,7 @@ namespace KlayGE
 		os.write(reinterpret_cast<char const *>(&num_passes), sizeof(num_passes));
 		for (uint32_t pass_index = 0; pass_index < num_passes; ++ pass_index)
 		{
-			passes_[pass_index]->StreamOut(os);
+			passes_[pass_index]->StreamOut(os, tech_index, pass_index, native_shader_blocks);
 		}
 	}
 
@@ -3403,16 +3455,16 @@ namespace KlayGE
 			shader_desc& sd = effect_.GetShaderDesc((*shader_desc_ids_)[type]);
 			if (!sd.func_name.empty())
 			{
-				if (sd.tech_pass != 0xFFFFFFFF)
+				if (sd.tech_pass_type != 0xFFFFFFFF)
 				{
 					shader_obj_->AttachShader(static_cast<ShaderObject::ShaderType>(type),
-						effect_, effect_.TechniqueByIndex(sd.tech_pass >> 16)->Pass(sd.tech_pass & 0xFFFF)->GetShaderObject());
+						effect_, effect_.TechniqueByIndex(sd.tech_pass_type >> 16)->Pass((sd.tech_pass_type >> 8) & 0xFF)->GetShaderObject());
 				}
 				else
 				{
 					shader_obj_->AttachShader(static_cast<ShaderObject::ShaderType>(type),
 						effect_, *shader_desc_ids_);
-					sd.tech_pass = (tech_index << 16) + pass_index;
+					sd.tech_pass_type = (tech_index << 16) + (pass_index << 8) + type;
 				}
 			}
 		}
@@ -3422,7 +3474,8 @@ namespace KlayGE
 		is_validate_ = shader_obj_->Validate();
 	}
 
-	bool RenderPass::StreamIn(ResIdentifierPtr const & res, uint32_t tech_index, uint32_t pass_index)
+	bool RenderPass::StreamIn(ResIdentifierPtr const & res, uint32_t tech_index, uint32_t pass_index,
+			std::vector<std::vector<std::vector<uint8_t> > >& native_shader_blocks)
 	{
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
@@ -3462,11 +3515,10 @@ namespace KlayGE
 		shader_desc_ids_->resize(ShaderObject::ST_NumShaderTypes, 0);
 		res->read(&(*shader_desc_ids_)[0], shader_desc_ids_->size() * sizeof((*shader_desc_ids_)[0]));
 
-		uint8_t dummy;
-		res->read(&dummy, sizeof(dummy));
-
 		
 		shader_obj_ = rf.MakeShaderObject();
+
+		bool native_accepted = false;
 
 		for (int type = 0; type < ShaderObject::ST_NumShaderTypes; ++ type)
 		{
@@ -3474,14 +3526,48 @@ namespace KlayGE
 			shader_desc const & sd = effect_.GetShaderDesc((*shader_desc_ids_)[type]);
 			if (!sd.func_name.empty())
 			{
-				if (sd.tech_pass != (tech_index << 16) + pass_index)
+				ShaderObject::ShaderType st = static_cast<ShaderObject::ShaderType>(type);
+
+				if (sd.tech_pass_type != (tech_index << 16) + (pass_index << 8) + type)
 				{
-					shader_obj_->AttachShader(static_cast<ShaderObject::ShaderType>(type),
-						effect_, effect_.TechniqueByIndex(sd.tech_pass >> 16)->Pass(sd.tech_pass & 0xFFFF)->GetShaderObject());
+					shader_obj_->AttachShader(st,
+						effect_, effect_.TechniqueByIndex(sd.tech_pass_type >> 16)->Pass((sd.tech_pass_type >> 8) & 0xFF)->GetShaderObject());
 				}
 				else
 				{
-					shader_obj_->AttachShader(static_cast<ShaderObject::ShaderType>(type), effect_, *shader_desc_ids_);
+					std::vector<std::vector<uint8_t> >& this_native_shader_block = native_shader_blocks[(*shader_desc_ids_)[type]];
+
+					uint8_t num;
+					res->read(&num, sizeof(num));
+					this_native_shader_block.resize(num);
+
+					for (uint32_t i = 0; i < num; ++ i)
+					{
+						uint32_t len;
+						res->read(&len, sizeof(len));
+						this_native_shader_block[i].resize(len);
+						if (len > 0)
+						{
+							res->read(&this_native_shader_block[i][0], len * sizeof(this_native_shader_block[i][0]));
+						}
+					}
+
+					for (uint32_t i = 0; i < num; ++ i)
+					{
+						if (shader_obj_->AttachNativeShader(st, effect_, *shader_desc_ids_, this_native_shader_block[i]))
+						{
+							native_accepted = true;
+							break;
+						}
+					}
+
+					if (!native_accepted)
+					{
+						shader_obj_->AttachShader(st, effect_, *shader_desc_ids_);
+
+						this_native_shader_block.push_back(std::vector<uint8_t>());
+						shader_obj_->ExtractNativeShader(st, effect_, this_native_shader_block.back());
+					}
 				}
 			}
 		}
@@ -3490,10 +3576,11 @@ namespace KlayGE
 
 		is_validate_ = shader_obj_->Validate();
 
-		return true;
+		return native_accepted;
 	}
 
-	void RenderPass::StreamOut(std::ostream& os)
+	void RenderPass::StreamOut(std::ostream& os, uint32_t tech_index, uint32_t pass_index,
+			std::vector<std::vector<std::vector<uint8_t> > > const & native_shader_blocks)
 	{
 		write_short_string(os, *name_);
 
@@ -3529,8 +3616,30 @@ namespace KlayGE
 
 		os.write(reinterpret_cast<char const *>(&(*shader_desc_ids_)[0]), shader_desc_ids_->size() * sizeof((*shader_desc_ids_)[0]));
 
-		uint8_t dummy = 0;
-		os.write(reinterpret_cast<char const *>(&dummy), sizeof(dummy));
+		for (int type = 0; type < ShaderObject::ST_NumShaderTypes; ++ type)
+		{
+			ShaderObjectPtr shared_so;
+			shader_desc const & sd = effect_.GetShaderDesc((*shader_desc_ids_)[type]);
+			if (!sd.func_name.empty())
+			{
+				if (sd.tech_pass_type == (tech_index << 16) + (pass_index << 8) + type)
+				{
+					uint8_t num = static_cast<uint8_t>(native_shader_blocks[(*shader_desc_ids_)[type]].size());
+					os.write(reinterpret_cast<char const *>(&num), sizeof(num));
+
+					for (uint32_t i = 0; i < num; ++ i)
+					{
+						uint32_t len = static_cast<uint32_t>(native_shader_blocks[(*shader_desc_ids_)[type]][i].size());
+						os.write(reinterpret_cast<char const *>(&len), sizeof(len));
+						if (len > 0)
+						{
+							os.write(reinterpret_cast<char const *>(&native_shader_blocks[(*shader_desc_ids_)[type]][i][0]),
+								len * sizeof(native_shader_blocks[(*shader_desc_ids_)[type]][i][0]));
+						}
+					}
+				}
+			}
+		}
 	}
 
 	RenderPassPtr RenderPass::Clone(RenderEffect& effect)

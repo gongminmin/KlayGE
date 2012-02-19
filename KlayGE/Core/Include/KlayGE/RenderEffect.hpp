@@ -480,8 +480,9 @@ namespace KlayGE
 
 		void Load(ResIdentifierPtr const & source, std::pair<std::string, std::string>* macros);
 
-		bool StreamIn(ResIdentifierPtr const & source, std::pair<std::string, std::string>* predefined_macros);
-		void StreamOut(std::ostream& os);
+		bool StreamIn(ResIdentifierPtr const & source, std::pair<std::string, std::string>* predefined_macros,
+			std::vector<std::vector<std::vector<uint8_t> > >& native_shader_blocks);
+		void StreamOut(std::ostream& os, std::vector<std::vector<std::vector<uint8_t> > > const & native_shader_blocks);
 
 		RenderEffectPtr Clone();
 
@@ -492,6 +493,10 @@ namespace KlayGE
 		uint64_t Timestamp() const
 		{
 			return timestamp_;
+		}
+		uint64_t PredefinedMacrosHash() const
+		{
+			return predefined_macros_hash_;
 		}
 
 		void PrototypeEffect(RenderEffectPtr const & prototype_effect)
@@ -560,6 +565,7 @@ namespace KlayGE
 	private:
 		boost::shared_ptr<std::string> res_name_;
 		uint64_t timestamp_;
+		uint64_t predefined_macros_hash_;
 
 		std::vector<RenderEffectParameterPtr> params_;
 		boost::shared_ptr<std::vector<std::pair<std::string, std::vector<uint32_t> > > > cbuffers_;
@@ -583,8 +589,10 @@ namespace KlayGE
 
 		void Load(XMLNodePtr const & node, uint32_t tech_index);
 
-		bool StreamIn(ResIdentifierPtr const & res, uint32_t tech_index);
-		void StreamOut(std::ostream& os);
+		bool StreamIn(ResIdentifierPtr const & res, uint32_t tech_index,
+			std::vector<std::vector<std::vector<uint8_t> > >& native_shader_blocks);
+		void StreamOut(std::ostream& os, uint32_t tech_index,
+			std::vector<std::vector<std::vector<uint8_t> > > const & native_shader_blocks);
 
 		RenderTechniquePtr Clone(RenderEffect& effect);
 
@@ -669,8 +677,10 @@ namespace KlayGE
 
 		void Load(XMLNodePtr const & node, uint32_t tech_index, uint32_t pass_index, RenderPassPtr const & inherit_pass);
 
-		bool StreamIn(ResIdentifierPtr const & res, uint32_t tech_index, uint32_t pass_index);
-		void StreamOut(std::ostream& os);
+		bool StreamIn(ResIdentifierPtr const & res, uint32_t tech_index, uint32_t pass_index,
+			std::vector<std::vector<std::vector<uint8_t> > >& native_shader_blocks);
+		void StreamOut(std::ostream& os, uint32_t tech_index, uint32_t pass_index,
+			std::vector<std::vector<std::vector<uint8_t> > > const & native_shader_blocks);
 
 		RenderPassPtr Clone(RenderEffect& effect);
 

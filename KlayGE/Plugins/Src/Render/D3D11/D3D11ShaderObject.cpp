@@ -719,10 +719,166 @@ namespace KlayGE
 		return ss.str();
 	}
 
-	void D3D11ShaderObject::AttachShader(ShaderType type, RenderEffect const & effect, std::vector<uint32_t> const & shader_desc_ids)
+	std::string D3D11ShaderObject::GetShaderProfile(ShaderType type, RenderEffect const & effect, uint32_t shader_desc_id)
+	{
+		shader_desc const & sd = effect.GetShaderDesc(shader_desc_id);
+		D3D11RenderEngine const & render_eng = *checked_cast<D3D11RenderEngine const *>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+		RenderDeviceCaps const & caps = render_eng.DeviceCaps();
+		std::string shader_profile = sd.profile;
+		switch (type)
+		{
+		case ST_VertexShader:
+			if ("auto" == shader_profile)
+			{
+				shader_profile = render_eng.VertexShaderProfile();
+			}
+			break;
+
+		case ST_PixelShader:
+			if ("auto" == shader_profile)
+			{
+				shader_profile = render_eng.PixelShaderProfile();
+			}
+			break;
+
+		case ST_GeometryShader:
+			if (caps.max_shader_model >= 4)
+			{
+				if ("auto" == shader_profile)
+				{
+					shader_profile = render_eng.GeometryShaderProfile();
+				}
+			}
+			break;
+
+		case ST_ComputeShader:
+			if (caps.max_shader_model >= 4)
+			{
+				if ("auto" == shader_profile)
+				{
+					shader_profile = render_eng.ComputeShaderProfile();
+				}
+			}
+			break;
+
+		case ST_HullShader:
+			if (caps.max_shader_model >= 5)
+			{
+				if ("auto" == shader_profile)
+				{
+					shader_profile = render_eng.HullShaderProfile();
+				}
+			}
+			break;
+
+		case ST_DomainShader:
+			if (caps.max_shader_model >= 5)
+			{
+				if ("auto" == shader_profile)
+				{
+					shader_profile = render_eng.DomainShaderProfile();
+				}
+			}
+			break;
+
+		default:
+			break;
+		}
+
+		return shader_profile;
+	}
+
+	bool D3D11ShaderObject::AttachNativeShader(ShaderType type, RenderEffect const & effect, std::vector<uint32_t> const & shader_desc_ids,
+		std::vector<uint8_t> const & native_shader_block)
+	{
+		bool ret = false;
+
+		std::string shader_profile = this->GetShaderProfile(type, effect, shader_desc_ids[type]);
+		if (native_shader_block.size() >= 25 + shader_profile.size())
+		{
+			uint32_t fourcc;
+			memcpy(&fourcc, &native_shader_block[0], sizeof(fourcc));
+			LittleEndianToNative<sizeof(fourcc)>(&fourcc);
+			if (MakeFourCC<'D', 'X', 'B', 'C'>::value == fourcc)
+			{
+				uint32_t ver;
+				memcpy(&ver, &native_shader_block[4], sizeof(ver));
+				LittleEndianToNative<sizeof(ver)>(&ver);
+				if (1 == ver)
+				{
+					uint64_t timestamp;
+					memcpy(&timestamp, &native_shader_block[8], sizeof(timestamp));
+					LittleEndianToNative<sizeof(timestamp)>(&timestamp);
+					if (timestamp >= effect.Timestamp())
+					{
+						uint64_t hash_val;
+						memcpy(&hash_val, &native_shader_block[16], sizeof(hash_val));
+						LittleEndianToNative<sizeof(hash_val)>(&hash_val);
+						if (effect.PredefinedMacrosHash() == hash_val)
+						{
+							uint8_t len = native_shader_block[24];
+							std::string profile;
+							profile.resize(len);
+							memcpy(&profile[0], &native_shader_block[25], len);
+							if (profile == shader_profile)
+							{
+								ID3DBlob* code;
+								D3DCreateBlob(native_shader_block.size() - 25 - len, &code);
+								ID3DBlobPtr code_blob = MakeCOMPtr(code);
+
+								memcpy(code_blob->GetBufferPointer(), &native_shader_block[25 + len], code_blob->GetBufferSize());
+
+								this->AttachShaderBytecode(type, effect, shader_desc_ids, code_blob);
+
+								ret = true;
+							}
+						}
+					}
+				}
+			}
+		}
+
+		return ret;
+	}
+
+	void D3D11ShaderObject::ExtractNativeShader(ShaderType type, RenderEffect const & effect, std::vector<uint8_t>& native_shader_block)
+	{
+		native_shader_block.clear();
+
+		ID3DBlobPtr code_blob = shader_code_[type].first;
+		if (code_blob)
+		{
+			std::string const & shader_profile = shader_code_[type].second;
+
+			native_shader_block.resize(25 + shader_profile.size() + code_blob->GetBufferSize());
+
+			uint32_t fourcc = MakeFourCC<'D', 'X', 'B', 'C'>::value;
+			NativeToLittleEndian<sizeof(fourcc)>(&fourcc);
+			memcpy(&native_shader_block[0], &fourcc, sizeof(fourcc));
+
+			uint32_t ver = 1;
+			NativeToLittleEndian<sizeof(ver)>(&ver);
+			memcpy(&native_shader_block[4], &ver, sizeof(ver));
+
+			uint64_t timestamp = effect.Timestamp();
+			NativeToLittleEndian<sizeof(timestamp)>(&timestamp);
+			memcpy(&native_shader_block[8], &timestamp, sizeof(timestamp));
+
+			uint64_t hash_val = effect.PredefinedMacrosHash();
+			NativeToLittleEndian<sizeof(hash_val)>(&hash_val);
+			memcpy(&native_shader_block[16], &hash_val, sizeof(hash_val));
+
+			uint8_t len = static_cast<uint8_t>(shader_profile.size());
+			native_shader_block[24] = len;
+			memcpy(&native_shader_block[25], &shader_profile[0], len);
+
+			memcpy(&native_shader_block[25 + len], code_blob->GetBufferPointer(), code_blob->GetBufferSize());
+		}
+	}
+
+	ID3DBlobPtr D3D11ShaderObject::CompiteToBytecode(ShaderType type, RenderEffect const & effect, std::vector<uint32_t> const & shader_desc_ids)
 	{
 		D3D11RenderEngine const & render_eng = *checked_cast<D3D11RenderEngine const *>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-		ID3D11DevicePtr const & d3d_device = render_eng.D3DDevice();
 		D3D_FEATURE_LEVEL feature_level = render_eng.DeviceFeatureLevel();
 		RenderDeviceCaps const & caps = render_eng.DeviceCaps();
 
@@ -844,6 +1000,7 @@ namespace KlayGE
 			is_shader_validate_[type] = false;
 			break;
 		}
+		shader_code_[type].second = shader_profile;
 
 		ID3DBlob* code = NULL;
 		if (is_shader_validate_[type])
@@ -938,14 +1095,23 @@ namespace KlayGE
 			}
 		}
 
-		ID3DBlobPtr code_blob;
-		if (NULL == code)
+		return MakeCOMPtr(code);
+	}
+
+	void D3D11ShaderObject::AttachShaderBytecode(ShaderType type, RenderEffect const & effect, std::vector<uint32_t> const & shader_desc_ids, ID3DBlobPtr const & code_blob)
+	{
+		if (!code_blob)
 		{
 			is_shader_validate_[type] = false;
 		}
 		else
 		{
-			code_blob = MakeCOMPtr(code);
+			D3D11RenderEngine const & render_eng = *checked_cast<D3D11RenderEngine const *>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+			ID3D11DevicePtr const & d3d_device = render_eng.D3DDevice();
+			RenderDeviceCaps const & caps = render_eng.DeviceCaps();
+
+			shader_desc const & sd = effect.GetShaderDesc(shader_desc_ids[type]);
+
 			switch (type)
 			{
 			case ST_VertexShader:
@@ -983,8 +1149,9 @@ namespace KlayGE
 							geometry_shader_ = MakeCOMPtr(gs);
 						}
 					}
+
+					shader_code_[type].first = code_blob;
 				}
-				vs_code_ = code_blob;
 				break;
 
 			case ST_PixelShader:
@@ -996,6 +1163,7 @@ namespace KlayGE
 				else
 				{
 					pixel_shader_ = MakeCOMPtr(ps);
+					shader_code_[type].first = code_blob;
 				}
 				break;
 
@@ -1023,6 +1191,7 @@ namespace KlayGE
 					else
 					{
 						geometry_shader_ = MakeCOMPtr(gs);
+						shader_code_[type].first = code_blob;
 					}
 				}
 				else
@@ -1035,6 +1204,7 @@ namespace KlayGE
 					else
 					{
 						geometry_shader_ = MakeCOMPtr(gs);
+						shader_code_[type].first = code_blob;
 					}
 				}
 				break;
@@ -1048,6 +1218,7 @@ namespace KlayGE
 				else
 				{
 					compute_shader_ = MakeCOMPtr(cs);
+					shader_code_[type].first = code_blob;
 				}
 				break;
 
@@ -1060,6 +1231,7 @@ namespace KlayGE
 				else
 				{
 					hull_shader_ = MakeCOMPtr(hs);
+					shader_code_[type].first = code_blob;
 					has_tessellation_ = true;
 				}
 				break;
@@ -1073,6 +1245,7 @@ namespace KlayGE
 				else
 				{
 					domain_shader_ = MakeCOMPtr(ds);
+					shader_code_[type].first = code_blob;
 					has_tessellation_ = true;
 				}
 				break;
@@ -1259,6 +1432,12 @@ namespace KlayGE
 		}
 	}
 
+	void D3D11ShaderObject::AttachShader(ShaderType type, RenderEffect const & effect, std::vector<uint32_t> const & shader_desc_ids)
+	{
+		ID3DBlobPtr code_blob = this->CompiteToBytecode(type, effect, shader_desc_ids);
+		this->AttachShaderBytecode(type, effect, shader_desc_ids, code_blob);
+	}
+
 	void D3D11ShaderObject::AttachShader(ShaderType type, RenderEffect const & /*effect*/, ShaderObjectPtr const & shared_so)
 	{
 		D3D11RenderEngine const & render_eng = *checked_cast<D3D11RenderEngine const *>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
@@ -1269,11 +1448,11 @@ namespace KlayGE
 			D3D11ShaderObject const & so = *checked_cast<D3D11ShaderObject*>(shared_so.get());
 
 			is_shader_validate_[type] = so.is_shader_validate_[type];
+			shader_code_[type] = so.shader_code_[type];
 			switch (type)
 			{
 			case ST_VertexShader:
 				vertex_shader_ = so.vertex_shader_;
-				vs_code_ = so.vs_code_;
 				vs_signature_ = so.vs_signature_;
 				geometry_shader_ = so.geometry_shader_;
 				break;
@@ -1369,10 +1548,11 @@ namespace KlayGE
 		ret->compute_shader_ = compute_shader_;
 		ret->hull_shader_ = hull_shader_;
 		ret->domain_shader_ = domain_shader_;
-		ret->vs_code_ = vs_code_;
 		ret->vs_signature_ = vs_signature_;
 		for (size_t i = 0; i < ST_NumShaderTypes; ++ i)
 		{
+			ret->shader_code_[i] = shader_code_[i];
+
 			ret->samplers_[i].resize(samplers_[i].size(), NULL);
 			ret->srvsrcs_[i].resize(srvsrcs_[i].size(), NULL);
 			ret->srvs_[i].resize(srvs_[i].size(), NULL);

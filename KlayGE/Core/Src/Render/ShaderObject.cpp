@@ -23,6 +23,18 @@ namespace KlayGE
 	class NullShaderObject : public ShaderObject
 	{
 	public:
+		bool AttachNativeShader(ShaderType /*type*/, RenderEffect const & /*effect*/, std::vector<uint32_t> const & /*shader_desc_ids*/,
+			std::vector<uint8_t> const & /*native_shader_block*/)
+		{
+			is_validate_ = true;
+			return true;
+		}
+
+		void ExtractNativeShader(ShaderType /*type*/, RenderEffect const & /*effect*/, std::vector<uint8_t>& native_shader_block)
+		{
+			native_shader_block.clear();
+		}
+
 		void AttachShader(ShaderType /*type*/, RenderEffect const & /*effect*/, std::vector<uint32_t> const & /*shader_desc_ids*/)
 		{
 			is_validate_ = true;

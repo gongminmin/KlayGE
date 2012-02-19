@@ -1532,6 +1532,289 @@ namespace KlayGE
 		return ss.str();
 	}
 
+	bool OGLShaderObject::AttachNativeShader(ShaderType type, RenderEffect const & effect, std::vector<uint32_t> const & /*shader_desc_ids*/,
+			std::vector<uint8_t> const & native_shader_block)
+	{
+		bool ret = false;
+
+		if (native_shader_block.size() >= 24)
+		{
+			uint8_t const * nsbp = &native_shader_block[0];
+			uint32_t fourcc;
+			memcpy(&fourcc, nsbp, sizeof(fourcc));
+			nsbp += sizeof(fourcc);
+			LittleEndianToNative<sizeof(fourcc)>(&fourcc);
+			if (MakeFourCC<'G', 'L', 'S', 'L'>::value == fourcc)
+			{
+				uint32_t ver;
+				memcpy(&ver, nsbp, sizeof(ver));
+				nsbp += sizeof(ver);
+				LittleEndianToNative<sizeof(ver)>(&ver);
+				if (1 == ver)
+				{
+					uint64_t timestamp;
+					memcpy(&timestamp, nsbp, sizeof(timestamp));
+					nsbp += sizeof(timestamp);
+					LittleEndianToNative<sizeof(timestamp)>(&timestamp);
+					if (timestamp >= effect.Timestamp())
+					{
+						uint64_t hash_val;
+						memcpy(&hash_val, nsbp, sizeof(hash_val));
+						nsbp += sizeof(timestamp);
+						LittleEndianToNative<sizeof(hash_val)>(&hash_val);
+						if (effect.PredefinedMacrosHash() == hash_val)
+						{
+							uint32_t len32;
+							memcpy(&len32, nsbp, sizeof(len32));
+							nsbp += sizeof(len32);
+							LittleEndianToNative<sizeof(len32)>(&len32);
+							(*glsl_srcs_)[type] = MakeSharedPtr<std::string>(len32, '\0');
+							memcpy(&(*(*glsl_srcs_)[type])[0], nsbp, len32);
+							nsbp += len32;
+
+							uint16_t num16;
+							memcpy(&num16, nsbp, sizeof(num16));
+							nsbp += sizeof(num16);
+							LittleEndianToNative<sizeof(num16)>(&num16);
+							(*pnames_)[type] = MakeSharedPtr<std::vector<std::string> >(num16);
+							for (size_t i = 0; i < num16; ++ i)
+							{
+								uint8_t len8;
+								memcpy(&len8, nsbp, sizeof(len8));
+								nsbp += sizeof(len8);
+											
+								(*(*pnames_)[type])[i].resize(len8);
+								memcpy(&(*(*pnames_)[type])[i][0], nsbp, len8);
+								nsbp += len8;
+							}
+
+							memcpy(&num16, nsbp, sizeof(num16));
+							nsbp += sizeof(num16);
+							LittleEndianToNative<sizeof(num16)>(&num16);
+							(*glsl_res_names_)[type] = MakeSharedPtr<std::vector<std::string> >(num16);
+							for (size_t i = 0; i < num16; ++ i)
+							{
+								uint8_t len8;
+								memcpy(&len8, nsbp, sizeof(len8));
+								nsbp += sizeof(len8);
+
+								(*(*glsl_res_names_)[type])[i].resize(len8);
+								memcpy(&(*(*glsl_res_names_)[type])[i][0], nsbp, len8);
+								nsbp += len8;
+							}
+
+							memcpy(&num16, nsbp, sizeof(num16));
+							nsbp += sizeof(num16);
+							LittleEndianToNative<sizeof(num16)>(&num16);
+							for (size_t i = 0; i < num16; ++ i)
+							{
+								uint8_t len8;
+								memcpy(&len8, nsbp, sizeof(len8));
+								nsbp += sizeof(len8);
+
+								std::string tex_name;
+								tex_name.resize(len8);
+								memcpy(&tex_name[0], nsbp, len8);
+								nsbp += len8;
+
+								memcpy(&len8, nsbp, sizeof(len8));
+								nsbp += sizeof(len8);
+
+								std::string sampler_name;
+								sampler_name.resize(len8);
+								memcpy(&sampler_name[0], nsbp, len8);
+								nsbp += len8;
+
+								std::string combined_sampler_name = tex_name + "__" + sampler_name;
+
+								bool found = false;
+								for (uint32_t k = 0; k < tex_sampler_binds_.size(); ++ k)
+								{
+									if (tex_sampler_binds_[k].get<0>() == combined_sampler_name)
+									{
+										tex_sampler_binds_[k].get<3>() |= 1UL << type;
+										found = true;
+										break;
+									}
+								}
+								if (!found)
+								{
+									tex_sampler_binds_.push_back(boost::make_tuple(combined_sampler_name,
+										effect.ParameterByName(tex_name), effect.ParameterByName(sampler_name), 1UL << type));
+								}
+							}
+
+							if (ST_VertexShader == type)
+							{
+								uint8_t num8;
+								memcpy(&num8, nsbp, sizeof(num8));
+								nsbp += sizeof(num8);
+								vs_usages_->resize(num8);
+								for (size_t i = 0; i < num8; ++ i)
+								{
+									uint8_t veu;
+									memcpy(&veu, nsbp, sizeof(veu));
+									nsbp += sizeof(veu);
+
+									(*vs_usages_)[i] = static_cast<VertexElementUsage>(veu);
+								}
+
+								memcpy(&num8, nsbp, sizeof(num8));
+								nsbp += sizeof(num8);
+								vs_usage_indices_->resize(num8);
+								memcpy(&(*vs_usage_indices_)[0], nsbp, num8 * sizeof((*vs_usage_indices_)[0]));
+								nsbp += num8 * sizeof((*vs_usage_indices_)[0]);
+
+								memcpy(&num8, nsbp, sizeof(num8));
+								nsbp += sizeof(num8);
+								glsl_vs_attrib_names_->resize(num8);
+								for (size_t i = 0; i < num8; ++ i)
+								{
+									uint8_t len8;
+									memcpy(&len8, nsbp, sizeof(len8));
+									nsbp += sizeof(len8);
+
+									(*glsl_vs_attrib_names_)[i].resize(len8);
+									memcpy(&(*glsl_vs_attrib_names_)[i][0], nsbp, len8);
+									nsbp += len8;
+								}
+							}
+							else if (ST_GeometryShader == type)
+							{
+								memcpy(&gs_input_type_, nsbp, sizeof(gs_input_type_));
+								nsbp += sizeof(gs_input_type_);
+								LittleEndianToNative<sizeof(gs_input_type_)>(&gs_input_type_);
+
+								memcpy(&gs_output_type_, nsbp, sizeof(gs_output_type_));
+								nsbp += sizeof(gs_output_type_);
+								LittleEndianToNative<sizeof(gs_output_type_)>(&gs_output_type_);
+							}
+
+							this->AttachGLSL(type);
+
+							ret = true;
+						}
+					}
+				}
+			}
+		}
+
+		return ret;
+	}
+
+	void OGLShaderObject::ExtractNativeShader(ShaderType type, RenderEffect const & effect, std::vector<uint8_t>& native_shader_block)
+	{
+		native_shader_block.clear();
+
+		if ((*glsl_srcs_)[type])
+		{
+			std::ostringstream oss(std::ios_base::binary | std::ios_base::out);
+
+			uint32_t fourcc = MakeFourCC<'G', 'L', 'S', 'L'>::value;
+			NativeToLittleEndian<sizeof(fourcc)>(&fourcc);
+			oss.write(reinterpret_cast<char const *>(&fourcc), sizeof(fourcc));
+
+			uint32_t ver = 1;
+			NativeToLittleEndian<sizeof(ver)>(&ver);
+			oss.write(reinterpret_cast<char const *>(&ver), sizeof(ver));
+
+			uint64_t timestamp = effect.Timestamp();
+			NativeToLittleEndian<sizeof(timestamp)>(&timestamp);
+			oss.write(reinterpret_cast<char const *>(&timestamp), sizeof(timestamp));
+
+			uint64_t hash_val = effect.PredefinedMacrosHash();
+			NativeToLittleEndian<sizeof(hash_val)>(&hash_val);
+			oss.write(reinterpret_cast<char const *>(&hash_val), sizeof(hash_val));
+
+			uint32_t len32 = (*glsl_srcs_)[type]->size();
+			NativeToLittleEndian<sizeof(len32)>(&len32);
+			oss.write(reinterpret_cast<char const *>(&len32), sizeof(len32));
+			oss.write(&(*(*glsl_srcs_)[type])[0], (*glsl_srcs_)[type]->size());
+
+			uint16_t num16 = static_cast<uint16_t>((*pnames_)[type]->size());
+			NativeToLittleEndian<sizeof(num16)>(&num16);
+			oss.write(reinterpret_cast<char const *>(&num16), sizeof(num16));
+			for (size_t i = 0; i < (*pnames_)[type]->size(); ++ i)
+			{
+				uint8_t len8 = static_cast<uint8_t>((*(*pnames_)[type])[i].size());
+				oss.write(reinterpret_cast<char const *>(&len8), sizeof(len8));
+				oss.write(&(*(*pnames_)[type])[i][0], (*(*pnames_)[type])[i].size());
+			}
+
+			num16 = static_cast<uint16_t>((*glsl_res_names_)[type]->size());
+			NativeToLittleEndian<sizeof(num16)>(&num16);
+			oss.write(reinterpret_cast<char const *>(&num16), sizeof(num16));
+			for (size_t i = 0; i < (*glsl_res_names_)[type]->size(); ++ i)
+			{
+				uint8_t len8 = static_cast<uint8_t>((*(*glsl_res_names_)[type])[i].size());
+				oss.write(reinterpret_cast<char const *>(&len8), sizeof(len8));
+				oss.write(&(*(*glsl_res_names_)[type])[i][0], (*(*glsl_res_names_)[type])[i].size());
+			}
+
+			std::vector<std::pair<std::string, std::string> > tex_sampler_pairs;
+			for (size_t i = 0; i < tex_sampler_binds_.size(); ++ i)
+			{
+				if (tex_sampler_binds_[i].get<3>() | (1UL << type))
+				{
+					tex_sampler_pairs.push_back(std::make_pair(*tex_sampler_binds_[i].get<1>()->Name(),
+						*tex_sampler_binds_[i].get<2>()->Name()));
+				}
+			}
+
+			num16 = static_cast<uint16_t>(tex_sampler_pairs.size());
+			NativeToLittleEndian<sizeof(num16)>(&num16);
+			oss.write(reinterpret_cast<char const *>(&num16), sizeof(num16));
+			for (size_t i = 0; i < num16; ++ i)
+			{
+				uint8_t len8 = static_cast<uint8_t>(tex_sampler_pairs[i].first.size());
+				oss.write(reinterpret_cast<char const *>(&len8), sizeof(len8));
+				oss.write(&tex_sampler_pairs[i].first[0], len8);
+
+				len8 = static_cast<uint8_t>(tex_sampler_pairs[i].second.size());
+				oss.write(reinterpret_cast<char const *>(&len8), sizeof(len8));
+				oss.write(&tex_sampler_pairs[i].second[0], len8);
+			}
+
+			if (ST_VertexShader == type)
+			{
+				uint8_t num8 = static_cast<uint8_t>(vs_usages_->size());
+				oss.write(reinterpret_cast<char const *>(&num8), sizeof(num8));
+				for (size_t i = 0; i < vs_usages_->size(); ++ i)
+				{
+					uint8_t veu = static_cast<uint8_t>((*vs_usages_)[i]);
+					oss.write(reinterpret_cast<char const *>(&veu), sizeof(veu));
+				}
+
+				num8 = static_cast<uint8_t>(vs_usage_indices_->size());
+				oss.write(reinterpret_cast<char const *>(&num8), sizeof(num8));
+				oss.write(reinterpret_cast<char const *>(&(*vs_usage_indices_)[0]), vs_usage_indices_->size() * sizeof((*vs_usage_indices_)[0]));
+
+				num8 = static_cast<uint8_t>(glsl_vs_attrib_names_->size());
+				oss.write(reinterpret_cast<char const *>(&num8), sizeof(num8));
+				for (size_t i = 0; i < glsl_vs_attrib_names_->size(); ++ i)
+				{
+					uint8_t len8 = static_cast<uint8_t>((*glsl_vs_attrib_names_)[i].size());
+					oss.write(reinterpret_cast<char const *>(&len8), sizeof(len8));
+					oss.write(&(*glsl_vs_attrib_names_)[i][0], (*glsl_vs_attrib_names_)[i].size());
+				}
+			}
+			else if (ST_GeometryShader == type)
+			{
+				uint32_t git = gs_input_type_;
+				NativeToLittleEndian<sizeof(git)>(&git);
+				oss.write(reinterpret_cast<char const *>(&git), sizeof(git));
+
+				uint32_t got = gs_output_type_;
+				NativeToLittleEndian<sizeof(got)>(&got);
+				oss.write(reinterpret_cast<char const *>(&got), sizeof(got));
+			}
+
+			std::string out_str = oss.str();
+			native_shader_block.resize(out_str.size());
+			memcpy(&native_shader_block[0], &out_str[0], out_str.size());
+		}
+	}
+
 	void OGLShaderObject::AttachShader(ShaderType type, RenderEffect const & effect, std::vector<uint32_t> const & shader_desc_ids)
 	{
 		shader_desc const & sd = effect.GetShaderDesc(shader_desc_ids[type]);
@@ -1863,24 +2146,20 @@ namespace KlayGE
 
 			(*pnames_)[type] = (*so->pnames_)[type];
 			(*glsl_res_names_)[type] = (*so->glsl_res_names_)[type];
-			if (0 == type)
+			if (ST_VertexShader == type)
 			{
 				*vs_usages_ = *so->vs_usages_;
 				*vs_usage_indices_ = *so->vs_usage_indices_;
 				*glsl_vs_attrib_names_ = *so->glsl_vs_attrib_names_;
 			}
-
-			if (ST_GeometryShader == type)
+			else if (ST_GeometryShader == type)
 			{
 				gs_input_type_ = so->gs_input_type_;
 				gs_output_type_ = so->gs_output_type_;
 			}
-			else
+			else if (ST_PixelShader == type)
 			{
-				if (ST_PixelShader == type)
-				{
-					has_discard_ = so->has_discard_;
-				}
+				has_discard_ = so->has_discard_;
 			}
 
 			for (uint32_t j = 0; j < so->tex_sampler_binds_.size(); ++ j)

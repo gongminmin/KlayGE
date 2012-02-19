@@ -4,7 +4,7 @@ syntax: glob
 *.suo
 *.opensdf
 *.sdf
-*.fxml_bin
+*.kfx
 __pycache__
 glloader/Debug/
 glloader/Debug-GLES/

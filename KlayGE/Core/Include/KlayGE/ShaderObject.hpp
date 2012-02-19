@@ -29,14 +29,14 @@ namespace KlayGE
 	struct shader_desc
 	{
 		shader_desc()
-			: tech_pass(0xFFFFFFFF)
+			: tech_pass_type(0xFFFFFFFF)
 		{
 		}
 
 		std::string profile;
 		std::string func_name;
 
-		uint32_t tech_pass;
+		uint32_t tech_pass_type;
 
 #ifdef KLAYGE_PLATFORM_WINDOWS
 		#pragma pack(push, 1)
@@ -94,6 +94,10 @@ namespace KlayGE
 		}
 
 		static ShaderObjectPtr NullObject();
+
+		virtual bool AttachNativeShader(ShaderType type, RenderEffect const & effect, std::vector<uint32_t> const & shader_desc_ids,
+			std::vector<uint8_t> const & native_shader_block) = 0;
+		virtual void ExtractNativeShader(ShaderType type, RenderEffect const & effect, std::vector<uint8_t>& native_shader_block) = 0;
 
 		virtual void AttachShader(ShaderType type, RenderEffect const & effect, std::vector<uint32_t> const & shader_desc_ids) = 0;
 		virtual void AttachShader(ShaderType type, RenderEffect const & effect, ShaderObjectPtr const & shared_so) = 0;

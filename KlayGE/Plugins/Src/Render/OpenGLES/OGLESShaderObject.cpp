@@ -1262,6 +1262,269 @@ namespace KlayGE
 		return ss.str();
 	}
 
+	bool OGLESShaderObject::AttachNativeShader(ShaderType type, RenderEffect const & effect, std::vector<uint32_t> const & /*shader_desc_ids*/,
+			std::vector<uint8_t> const & native_shader_block)
+	{
+		bool ret = false;
+
+		if (native_shader_block.size() >= 24)
+		{
+			uint8_t const * nsbp = &native_shader_block[0];
+			uint32_t fourcc;
+			memcpy(&fourcc, nsbp, sizeof(fourcc));
+			nsbp += sizeof(fourcc);
+			LittleEndianToNative<sizeof(fourcc)>(&fourcc);
+			if (MakeFourCC<'E', 'L', 'S', 'L'>::value == fourcc)
+			{
+				uint32_t ver;
+				memcpy(&ver, nsbp, sizeof(ver));
+				nsbp += sizeof(ver);
+				LittleEndianToNative<sizeof(ver)>(&ver);
+				if (1 == ver)
+				{
+					uint64_t timestamp;
+					memcpy(&timestamp, nsbp, sizeof(timestamp));
+					nsbp += sizeof(timestamp);
+					LittleEndianToNative<sizeof(timestamp)>(&timestamp);
+					if (timestamp >= effect.Timestamp())
+					{
+						uint64_t hash_val;
+						memcpy(&hash_val, nsbp, sizeof(hash_val));
+						nsbp += sizeof(timestamp);
+						LittleEndianToNative<sizeof(hash_val)>(&hash_val);
+						if (effect.PredefinedMacrosHash() == hash_val)
+						{
+							uint32_t len32;
+							memcpy(&len32, nsbp, sizeof(len32));
+							nsbp += sizeof(len32);
+							LittleEndianToNative<sizeof(len32)>(&len32);
+							(*glsl_srcs_)[type] = MakeSharedPtr<std::string>(len32, '\0');
+							memcpy(&(*(*glsl_srcs_)[type])[0], nsbp, len32);
+							nsbp += len32;
+
+							uint16_t num16;
+							memcpy(&num16, nsbp, sizeof(num16));
+							nsbp += sizeof(num16);
+							LittleEndianToNative<sizeof(num16)>(&num16);
+							(*pnames_)[type] = MakeSharedPtr<std::vector<std::string> >(num16);
+							for (size_t i = 0; i < num16; ++ i)
+							{
+								uint8_t len8;
+								memcpy(&len8, nsbp, sizeof(len8));
+								nsbp += sizeof(len8);
+											
+								(*(*pnames_)[type])[i].resize(len8);
+								memcpy(&(*(*pnames_)[type])[i][0], nsbp, len8);
+								nsbp += len8;
+							}
+
+							memcpy(&num16, nsbp, sizeof(num16));
+							nsbp += sizeof(num16);
+							LittleEndianToNative<sizeof(num16)>(&num16);
+							(*glsl_res_names_)[type] = MakeSharedPtr<std::vector<std::string> >(num16);
+							for (size_t i = 0; i < num16; ++ i)
+							{
+								uint8_t len8;
+								memcpy(&len8, nsbp, sizeof(len8));
+								nsbp += sizeof(len8);
+
+								(*(*glsl_res_names_)[type])[i].resize(len8);
+								memcpy(&(*(*glsl_res_names_)[type])[i][0], nsbp, len8);
+								nsbp += len8;
+							}
+
+							memcpy(&num16, nsbp, sizeof(num16));
+							nsbp += sizeof(num16);
+							LittleEndianToNative<sizeof(num16)>(&num16);
+							for (size_t i = 0; i < num16; ++ i)
+							{
+								uint8_t len8;
+								memcpy(&len8, nsbp, sizeof(len8));
+								nsbp += sizeof(len8);
+
+								std::string tex_name;
+								tex_name.resize(len8);
+								memcpy(&tex_name[0], nsbp, len8);
+								nsbp += len8;
+
+								memcpy(&len8, nsbp, sizeof(len8));
+								nsbp += sizeof(len8);
+
+								std::string sampler_name;
+								sampler_name.resize(len8);
+								memcpy(&sampler_name[0], nsbp, len8);
+								nsbp += len8;
+
+								std::string combined_sampler_name = tex_name + "__" + sampler_name;
+
+								bool found = false;
+								for (uint32_t k = 0; k < tex_sampler_binds_.size(); ++ k)
+								{
+									if (tex_sampler_binds_[k].get<0>() == combined_sampler_name)
+									{
+										tex_sampler_binds_[k].get<3>() |= 1UL << type;
+										found = true;
+										break;
+									}
+								}
+								if (!found)
+								{
+									tex_sampler_binds_.push_back(boost::make_tuple(combined_sampler_name,
+										effect.ParameterByName(tex_name), effect.ParameterByName(sampler_name), 1UL << type));
+								}
+							}
+
+							if (ST_VertexShader == type)
+							{
+								uint8_t num8;
+								memcpy(&num8, nsbp, sizeof(num8));
+								nsbp += sizeof(num8);
+								vs_usages_->resize(num8);
+								for (size_t i = 0; i < num8; ++ i)
+								{
+									uint8_t veu;
+									memcpy(&veu, nsbp, sizeof(veu));
+									nsbp += sizeof(veu);
+
+									(*vs_usages_)[i] = static_cast<VertexElementUsage>(veu);
+								}
+
+								memcpy(&num8, nsbp, sizeof(num8));
+								nsbp += sizeof(num8);
+								vs_usage_indices_->resize(num8);
+								memcpy(&(*vs_usage_indices_)[0], nsbp, num8 * sizeof((*vs_usage_indices_)[0]));
+								nsbp += num8 * sizeof((*vs_usage_indices_)[0]);
+
+								memcpy(&num8, nsbp, sizeof(num8));
+								nsbp += sizeof(num8);
+								glsl_vs_attrib_names_->resize(num8);
+								for (size_t i = 0; i < num8; ++ i)
+								{
+									uint8_t len8;
+									memcpy(&len8, nsbp, sizeof(len8));
+									nsbp += sizeof(len8);
+
+									(*glsl_vs_attrib_names_)[i].resize(len8);
+									memcpy(&(*glsl_vs_attrib_names_)[i][0], nsbp, len8);
+									nsbp += len8;
+								}
+							}
+
+							this->AttachGLSL(type);
+
+							ret = true;
+						}
+					}
+				}
+			}
+		}
+
+		return ret;
+	}
+
+	void OGLESShaderObject::ExtractNativeShader(ShaderType type, RenderEffect const & effect, std::vector<uint8_t>& native_shader_block)
+	{
+		native_shader_block.clear();
+
+		if ((*glsl_srcs_)[type])
+		{
+			std::ostringstream oss(std::ios_base::binary | std::ios_base::out);
+
+			uint32_t fourcc = MakeFourCC<'E', 'L', 'S', 'L'>::value;
+			NativeToLittleEndian<sizeof(fourcc)>(&fourcc);
+			oss.write(reinterpret_cast<char const *>(&fourcc), sizeof(fourcc));
+
+			uint32_t ver = 1;
+			NativeToLittleEndian<sizeof(ver)>(&ver);
+			oss.write(reinterpret_cast<char const *>(&ver), sizeof(ver));
+
+			uint64_t timestamp = effect.Timestamp();
+			NativeToLittleEndian<sizeof(timestamp)>(&timestamp);
+			oss.write(reinterpret_cast<char const *>(&timestamp), sizeof(timestamp));
+
+			uint64_t hash_val = effect.PredefinedMacrosHash();
+			NativeToLittleEndian<sizeof(hash_val)>(&hash_val);
+			oss.write(reinterpret_cast<char const *>(&hash_val), sizeof(hash_val));
+
+			uint32_t len32 = (*glsl_srcs_)[type]->size();
+			NativeToLittleEndian<sizeof(len32)>(&len32);
+			oss.write(reinterpret_cast<char const *>(&len32), sizeof(len32));
+			oss.write(&(*(*glsl_srcs_)[type])[0], (*glsl_srcs_)[type]->size());
+
+			uint16_t num16 = static_cast<uint16_t>((*pnames_)[type]->size());
+			NativeToLittleEndian<sizeof(num16)>(&num16);
+			oss.write(reinterpret_cast<char const *>(&num16), sizeof(num16));
+			for (size_t i = 0; i < (*pnames_)[type]->size(); ++ i)
+			{
+				uint8_t len8 = static_cast<uint8_t>((*(*pnames_)[type])[i].size());
+				oss.write(reinterpret_cast<char const *>(&len8), sizeof(len8));
+				oss.write(&(*(*pnames_)[type])[i][0], (*(*pnames_)[type])[i].size());
+			}
+
+			num16 = static_cast<uint16_t>((*glsl_res_names_)[type]->size());
+			NativeToLittleEndian<sizeof(num16)>(&num16);
+			oss.write(reinterpret_cast<char const *>(&num16), sizeof(num16));
+			for (size_t i = 0; i < (*glsl_res_names_)[type]->size(); ++ i)
+			{
+				uint8_t len8 = static_cast<uint8_t>((*(*glsl_res_names_)[type])[i].size());
+				oss.write(reinterpret_cast<char const *>(&len8), sizeof(len8));
+				oss.write(&(*(*glsl_res_names_)[type])[i][0], (*(*glsl_res_names_)[type])[i].size());
+			}
+
+			std::vector<std::pair<std::string, std::string> > tex_sampler_pairs;
+			for (size_t i = 0; i < tex_sampler_binds_.size(); ++ i)
+			{
+				if (tex_sampler_binds_[i].get<3>() | (1UL << type))
+				{
+					tex_sampler_pairs.push_back(std::make_pair(*tex_sampler_binds_[i].get<1>()->Name(),
+						*tex_sampler_binds_[i].get<2>()->Name()));
+				}
+			}
+
+			num16 = static_cast<uint16_t>(tex_sampler_pairs.size());
+			NativeToLittleEndian<sizeof(num16)>(&num16);
+			oss.write(reinterpret_cast<char const *>(&num16), sizeof(num16));
+			for (size_t i = 0; i < num16; ++ i)
+			{
+				uint8_t len8 = static_cast<uint8_t>(tex_sampler_pairs[i].first.size());
+				oss.write(reinterpret_cast<char const *>(&len8), sizeof(len8));
+				oss.write(&tex_sampler_pairs[i].first[0], len8);
+
+				len8 = static_cast<uint8_t>(tex_sampler_pairs[i].second.size());
+				oss.write(reinterpret_cast<char const *>(&len8), sizeof(len8));
+				oss.write(&tex_sampler_pairs[i].second[0], len8);
+			}
+
+			if (ST_VertexShader == type)
+			{
+				uint8_t num8 = static_cast<uint8_t>(vs_usages_->size());
+				oss.write(reinterpret_cast<char const *>(&num8), sizeof(num8));
+				for (size_t i = 0; i < vs_usages_->size(); ++ i)
+				{
+					uint8_t veu = static_cast<uint8_t>((*vs_usages_)[i]);
+					oss.write(reinterpret_cast<char const *>(&veu), sizeof(veu));
+				}
+
+				num8 = static_cast<uint8_t>(vs_usage_indices_->size());
+				oss.write(reinterpret_cast<char const *>(&num8), sizeof(num8));
+				oss.write(reinterpret_cast<char const *>(&(*vs_usage_indices_)[0]), vs_usage_indices_->size() * sizeof((*vs_usage_indices_)[0]));
+
+				num8 = static_cast<uint8_t>(glsl_vs_attrib_names_->size());
+				oss.write(reinterpret_cast<char const *>(&num8), sizeof(num8));
+				for (size_t i = 0; i < glsl_vs_attrib_names_->size(); ++ i)
+				{
+					uint8_t len8 = static_cast<uint8_t>((*glsl_vs_attrib_names_)[i].size());
+					oss.write(reinterpret_cast<char const *>(&len8), sizeof(len8));
+					oss.write(&(*glsl_vs_attrib_names_)[i][0], (*glsl_vs_attrib_names_)[i].size());
+				}
+			}
+
+			std::string out_str = oss.str();
+			native_shader_block.resize(out_str.size());
+			memcpy(&native_shader_block[0], &out_str[0], out_str.size());
+		}
+	}
+
 	void OGLESShaderObject::AttachShader(ShaderType type, RenderEffect const & effect, std::vector<uint32_t> const & shader_desc_ids)
 	{
 		shader_desc const & sd = effect.GetShaderDesc(shader_desc_ids[type]);
@@ -1289,148 +1552,7 @@ namespace KlayGE
 
 		if (is_shader_validate_[type])
 		{
-			std::string const & effect_name = ResLoader::Instance().Locate(effect.ResName());
-			std::string fxml_bin_name = effect_name.substr(0, effect_name.rfind("."));
-			std::stringstream oss;
-			oss << fxml_bin_name << "_" << sd.func_name << "_" << type << ".fxml_bin";
-			fxml_bin_name = oss.str();
-
-			bool recompile_cg;
-			ResIdentifierPtr bin_res = ResLoader::Instance().Open(fxml_bin_name);
-			if (bin_res)
-			{
-				if (effect.Timestamp() < bin_res->Timestamp())
-				{
-					uint32_t fourcc;
-					bin_res->read(&fourcc, sizeof(fourcc));
-					if (fourcc != MakeFourCC<'F', 'X', 'M', 'L'>::value)
-					{
-						recompile_cg = true;
-					}
-					else
-					{
-						uint32_t ver;
-						bin_res->read(&ver, sizeof(ver));
-						if (ver != 1)
-						{
-							recompile_cg = true;
-						}
-						else
-						{
-							uint32_t len;
-							bin_res->read(&len, sizeof(len));
-							(*glsl_srcs_)[type] = MakeSharedPtr<std::string>(len, '\0');
-							bin_res->read(&(*(*glsl_srcs_)[type])[0], len);
-
-							uint32_t num;
-							bin_res->read(&num, sizeof(num));
-							(*pnames_)[type] = MakeSharedPtr<std::vector<std::string> >(num);
-							for (size_t i = 0; i < num; ++ i)
-							{
-								bin_res->read(&len, sizeof(len));
-											
-								(*(*pnames_)[type])[i].resize(len);
-								bin_res->read(&(*(*pnames_)[type])[i][0], len);
-							}
-
-							bin_res->read(&num, sizeof(num));
-							(*glsl_res_names_)[type] = MakeSharedPtr<std::vector<std::string> >(num);
-							for (size_t i = 0; i < num; ++ i)
-							{
-								bin_res->read(&len, sizeof(len));
-											
-								(*(*glsl_res_names_)[type])[i].resize(len);
-								bin_res->read(&(*(*glsl_res_names_)[type])[i][0], len);
-							}
-
-							bin_res->read(&num, sizeof(num));
-							vs_usages_->resize(num);
-							bin_res->read(&(*vs_usages_)[0], num * sizeof((*vs_usages_)[0]));
-
-							bin_res->read(&num, sizeof(num));
-							vs_usage_indices_->resize(num);
-							bin_res->read(&(*vs_usage_indices_)[0], num * sizeof((*vs_usage_indices_)[0]));
-
-							bin_res->read(&num, sizeof(num));
-							glsl_vs_attrib_names_->resize(num);
-							for (size_t i = 0; i < num; ++ i)
-							{
-								bin_res->read(&len, sizeof(len));
-											
-								(*glsl_vs_attrib_names_)[i].resize(len);
-								bin_res->read(&(*glsl_vs_attrib_names_)[i][0], len);
-							}
-
-							recompile_cg = false;
-						}
-					}
-				}
-				else
-				{
-					recompile_cg = true;
-				}
-							
-				bin_res.reset();
-			}
-			else
-			{
-				recompile_cg = true;
-			}
-
-			if (recompile_cg)
-			{
-				this->CompileToNative(shader_text, type, sd.func_name);
-
-#ifndef KLAYGE_PLATFORM_ANDROID
-				if (is_shader_validate_[type])
-				{
-					std::ofstream ofs(fxml_bin_name.c_str(), std::ios_base::out | std::ios_base::binary);
-					uint32_t fourcc = MakeFourCC<'F', 'X', 'M', 'L'>::value;
-					ofs.write(reinterpret_cast<char const *>(&fourcc), sizeof(fourcc));
-					uint32_t ver = 1;
-					ofs.write(reinterpret_cast<char const *>(&ver), sizeof(ver));
-								
-					uint32_t len = (*glsl_srcs_)[type]->size();
-					ofs.write(reinterpret_cast<char const *>(&len), sizeof(len));
-					ofs.write(&(*(*glsl_srcs_)[type])[0], len);
-
-					uint32_t num = (*pnames_)[type]->size();
-					ofs.write(reinterpret_cast<char const *>(&num), sizeof(num));
-					for (size_t i = 0; i < num; ++ i)
-					{
-						len = (*(*pnames_)[type])[i].size();
-						ofs.write(reinterpret_cast<char const *>(&len), sizeof(len));
-						ofs.write(&(*(*pnames_)[type])[i][0], len);
-					}
-
-					num = (*glsl_res_names_)[type]->size();
-					ofs.write(reinterpret_cast<char const *>(&num), sizeof(num));
-					for (size_t i = 0; i < num; ++ i)
-					{
-						len = (*(*glsl_res_names_)[type])[i].size();
-						ofs.write(reinterpret_cast<char const *>(&len), sizeof(len));
-						ofs.write(&(*(*glsl_res_names_)[type])[i][0], len);
-					}
-
-					num = vs_usages_->size();
-					ofs.write(reinterpret_cast<char const *>(&num), sizeof(num));
-					ofs.write(reinterpret_cast<char const *>(&(*vs_usages_)[0]), num * sizeof((*vs_usages_)[0]));
-
-					num = vs_usage_indices_->size();
-					ofs.write(reinterpret_cast<char const *>(&num), sizeof(num));
-					ofs.write(reinterpret_cast<char const *>(&(*vs_usage_indices_)[0]), num * sizeof((*vs_usage_indices_)[0]));
-
-					num = glsl_vs_attrib_names_->size();
-					ofs.write(reinterpret_cast<char const *>(&num), sizeof(num));
-					for (size_t i = 0; i < num; ++ i)
-					{
-						len = (*glsl_vs_attrib_names_)[i].size();
-						ofs.write(reinterpret_cast<char const *>(&len), sizeof(len));
-						ofs.write(&(*glsl_vs_attrib_names_)[i][0], len);
-					}
-				}
-#endif
-			}
+			this->CompileToNative(shader_text, type, sd.func_name);
 		}
 
 		if (is_shader_validate_[type])
