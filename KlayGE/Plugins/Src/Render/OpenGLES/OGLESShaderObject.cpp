@@ -1274,7 +1274,7 @@ namespace KlayGE
 			memcpy(&fourcc, nsbp, sizeof(fourcc));
 			nsbp += sizeof(fourcc);
 			LittleEndianToNative<sizeof(fourcc)>(&fourcc);
-			if (MakeFourCC<'E', 'L', 'S', 'L'>::value == fourcc)
+			if (MakeFourCC<'E', 'S', 'S', 'L'>::value == fourcc)
 			{
 				uint32_t ver;
 				memcpy(&ver, nsbp, sizeof(ver));
@@ -1430,7 +1430,7 @@ namespace KlayGE
 		{
 			std::ostringstream oss(std::ios_base::binary | std::ios_base::out);
 
-			uint32_t fourcc = MakeFourCC<'E', 'L', 'S', 'L'>::value;
+			uint32_t fourcc = MakeFourCC<'E', 'S', 'S', 'L'>::value;
 			NativeToLittleEndian<sizeof(fourcc)>(&fourcc);
 			oss.write(reinterpret_cast<char const *>(&fourcc), sizeof(fourcc));
 

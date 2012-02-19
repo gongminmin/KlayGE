@@ -2508,6 +2508,11 @@ namespace KlayGE
 
 				native_shader_blocks[i].push_back(std::vector<uint8_t>());
 				so->ExtractNativeShader(static_cast<ShaderObject::ShaderType>(tech_pass_type & 0xFF), *this, native_shader_blocks[i].back());
+
+				if (native_shader_blocks[i].back().empty())
+				{
+					native_shader_blocks[i].pop_back();
+				}
 			}
 
 			std::ofstream ofs(kfx_name, std::ios_base::binary | std::ios_base::out);
@@ -3518,7 +3523,7 @@ namespace KlayGE
 		
 		shader_obj_ = rf.MakeShaderObject();
 
-		bool native_accepted = false;
+		bool native_accepted = true;
 
 		for (int type = 0; type < ShaderObject::ST_NumShaderTypes; ++ type)
 		{
@@ -3528,10 +3533,12 @@ namespace KlayGE
 			{
 				ShaderObject::ShaderType st = static_cast<ShaderObject::ShaderType>(type);
 
+				bool this_native_accepted;
 				if (sd.tech_pass_type != (tech_index << 16) + (pass_index << 8) + type)
 				{
 					shader_obj_->AttachShader(st,
 						effect_, effect_.TechniqueByIndex(sd.tech_pass_type >> 16)->Pass((sd.tech_pass_type >> 8) & 0xFF)->GetShaderObject());
+					this_native_accepted = true;
 				}
 				else
 				{
@@ -3552,23 +3559,32 @@ namespace KlayGE
 						}
 					}
 
+					this_native_accepted = false;
 					for (uint32_t i = 0; i < num; ++ i)
 					{
 						if (shader_obj_->AttachNativeShader(st, effect_, *shader_desc_ids_, this_native_shader_block[i]))
 						{
-							native_accepted = true;
+							this_native_accepted = true;
 							break;
 						}
 					}
 
-					if (!native_accepted)
+					if (!this_native_accepted)
 					{
 						shader_obj_->AttachShader(st, effect_, *shader_desc_ids_);
 
 						this_native_shader_block.push_back(std::vector<uint8_t>());
 						shader_obj_->ExtractNativeShader(st, effect_, this_native_shader_block.back());
+
+						if (this_native_shader_block.back().empty())
+						{
+							this_native_shader_block.pop_back();
+							this_native_accepted = true;
+						}
 					}
 				}
+
+				native_accepted &= this_native_accepted;
 			}
 		}
 
