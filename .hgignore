@@ -87,7 +87,6 @@ KlayGE/Samples/build/codelite/.build-*
 KlayGE/Samples/build/codelite/*.txt
 KlayGE/Samples/build/vc-10_0/ipch/
 KlayGE/Samples/media/*/*.model_bin
-KlayGE/Tools/bin/
 KlayGE/Tools/Debug/
 KlayGE/Tools/Release/
 KlayGE/Tools/build/codelite/*.mk
