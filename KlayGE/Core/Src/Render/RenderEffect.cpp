@@ -1558,6 +1558,7 @@ namespace
 			{
 				uint32_t tmp;
 				res->read(&tmp, sizeof(tmp));
+				LittleEndianToNative<sizeof(tmp)>(&tmp);
 
 				var = MakeSharedPtr<RenderVariableUInt>();
 				*var = tmp;
@@ -1568,10 +1569,15 @@ namespace
 
 				uint32_t len;
 				res->read(&len, sizeof(len));
+				LittleEndianToNative<sizeof(len)>(&len);
 				if (len > 0)
 				{
 					std::vector<uint32_t> init_val(len);
 					res->read(&init_val[0], len * sizeof(init_val[0]));
+					for (uint32_t i = 0; i < len; ++ i)
+					{
+						LittleEndianToNative<sizeof(init_val[i])>(&init_val[i]);
+					}
 					*var = init_val;
 				}
 			}
@@ -1582,6 +1588,7 @@ namespace
 			{
 				int32_t tmp;
 				res->read(&tmp, sizeof(tmp));
+				LittleEndianToNative<sizeof(tmp)>(&tmp);
 
 				var = MakeSharedPtr<RenderVariableInt>();
 				*var = tmp;
@@ -1592,10 +1599,15 @@ namespace
 
 				uint32_t len;
 				res->read(&len, sizeof(len));
+				LittleEndianToNative<sizeof(len)>(&len);
 				if (len > 0)
 				{
 					std::vector<int32_t> init_val(len);
 					res->read(&init_val[0], len * sizeof(init_val[0]));
+					for (uint32_t i = 0; i < len; ++ i)
+					{
+						LittleEndianToNative<sizeof(init_val[i])>(&init_val[i]);
+					}
 					*var = init_val;
 				}
 			}
@@ -1632,6 +1644,18 @@ namespace
 			{
 				SamplerStateDesc desc;
 				res->read(&desc, sizeof(desc));
+				LittleEndianToNative<sizeof(desc.border_clr[0])>(&desc.border_clr[0]);
+				LittleEndianToNative<sizeof(desc.border_clr[1])>(&desc.border_clr[1]);
+				LittleEndianToNative<sizeof(desc.border_clr[2])>(&desc.border_clr[2]);
+				LittleEndianToNative<sizeof(desc.border_clr[3])>(&desc.border_clr[3]);
+				LittleEndianToNative<sizeof(desc.addr_mode_u)>(&desc.addr_mode_u);
+				LittleEndianToNative<sizeof(desc.addr_mode_v)>(&desc.addr_mode_v);
+				LittleEndianToNative<sizeof(desc.addr_mode_w)>(&desc.addr_mode_w);
+				LittleEndianToNative<sizeof(desc.filter)>(&desc.filter);
+				LittleEndianToNative<sizeof(desc.min_lod)>(&desc.min_lod);
+				LittleEndianToNative<sizeof(desc.max_lod)>(&desc.max_lod);
+				LittleEndianToNative<sizeof(desc.mip_map_lod_bias)>(&desc.mip_map_lod_bias);
+				LittleEndianToNative<sizeof(desc.cmp_func)>(&desc.cmp_func);
 
 				var = MakeSharedPtr<RenderVariableSampler>();
 				*var = Context::Instance().RenderFactoryInstance().MakeSamplerStateObject(desc);
@@ -1654,6 +1678,7 @@ namespace
 			{
 				float tmp;
 				res->read(&tmp, sizeof(tmp));
+				LittleEndianToNative<sizeof(tmp)>(&tmp);
 
 				var = MakeSharedPtr<RenderVariableFloat>();
 				*var = tmp;
@@ -1664,10 +1689,15 @@ namespace
 
 				uint32_t len;
 				res->read(&len, sizeof(len));
+				LittleEndianToNative<sizeof(len)>(&len);
 				if (len > 0)
 				{
 					std::vector<float> init_val(len);
 					res->read(&init_val[0], len * sizeof(init_val[0]));
+					for (uint32_t i = 0; i < len; ++ i)
+					{
+						LittleEndianToNative<sizeof(init_val[i])>(&init_val[i]);
+					}
 					*var = init_val;
 				}
 			}
@@ -1678,6 +1708,10 @@ namespace
 			{
 				uint2 tmp;
 				res->read(&tmp, sizeof(tmp));
+				for (int i = 0; i < 2; ++ i)
+				{
+					LittleEndianToNative<sizeof(tmp[i])>(&tmp[i]);
+				}
 
 				var = MakeSharedPtr<RenderVariableUInt2>();
 				*var = tmp;
@@ -1688,10 +1722,18 @@ namespace
 
 				uint32_t len;
 				res->read(&len, sizeof(len));
+				LittleEndianToNative<sizeof(len)>(&len);
 				if (len > 0)
 				{
 					std::vector<int2> init_val(len);
 					res->read(&init_val[0], len * sizeof(init_val[0]));
+					for (uint32_t i = 0; i < len; ++ i)
+					{
+						for (int j = 0; j < 2; ++ j)
+						{
+							LittleEndianToNative<sizeof(init_val[i][j])>(&init_val[i][j]);
+						}
+					}
 					*var = init_val;
 				}
 			}
@@ -1702,6 +1744,10 @@ namespace
 			{
 				uint3 tmp;
 				res->read(&tmp, sizeof(tmp));
+				for (int i = 0; i < 3; ++ i)
+				{
+					LittleEndianToNative<sizeof(tmp[i])>(&tmp[i]);
+				}
 
 				var = MakeSharedPtr<RenderVariableUInt3>();
 				*var = tmp;
@@ -1712,10 +1758,18 @@ namespace
 
 				uint32_t len;
 				res->read(&len, sizeof(len));
+				LittleEndianToNative<sizeof(len)>(&len);
 				if (len > 0)
 				{
 					std::vector<int3> init_val(len);
 					res->read(&init_val[0], len * sizeof(init_val[0]));
+					for (uint32_t i = 0; i < len; ++ i)
+					{
+						for (int j = 0; j < 3; ++ j)
+						{
+							LittleEndianToNative<sizeof(init_val[i][j])>(&init_val[i][j]);
+						}
+					}
 					*var = init_val;
 				}
 			}
@@ -1726,6 +1780,10 @@ namespace
 			{
 				uint4 tmp;
 				res->read(&tmp, sizeof(tmp));
+				for (int i = 0; i < 4; ++ i)
+				{
+					LittleEndianToNative<sizeof(tmp[i])>(&tmp[i]);
+				}
 
 				var = MakeSharedPtr<RenderVariableUInt4>();
 				*var = tmp;
@@ -1736,10 +1794,18 @@ namespace
 
 				uint32_t len;
 				res->read(&len, sizeof(len));
+				LittleEndianToNative<sizeof(len)>(&len);
 				if (len > 0)
 				{
 					std::vector<int4> init_val(len);
 					res->read(&init_val[0], len * sizeof(init_val[0]));
+					for (uint32_t i = 0; i < len; ++ i)
+					{
+						for (int j = 0; j < 4; ++ j)
+						{
+							LittleEndianToNative<sizeof(init_val[i][j])>(&init_val[i][j]);
+						}
+					}
 					*var = init_val;
 				}
 			}
@@ -1750,6 +1816,10 @@ namespace
 			{
 				int2 tmp;
 				res->read(&tmp, sizeof(tmp));
+				for (int i = 0; i < 2; ++ i)
+				{
+					LittleEndianToNative<sizeof(tmp[i])>(&tmp[i]);
+				}
 
 				var = MakeSharedPtr<RenderVariableInt2>();
 				*var = tmp;
@@ -1760,10 +1830,18 @@ namespace
 
 				uint32_t len;
 				res->read(&len, sizeof(len));
+				LittleEndianToNative<sizeof(len)>(&len);
 				if (len > 0)
 				{
 					std::vector<int2> init_val(len);
 					res->read(&init_val[0], len * sizeof(init_val[0]));
+					for (uint32_t i = 0; i < len; ++ i)
+					{
+						for (int j = 0; j < 2; ++ j)
+						{
+							LittleEndianToNative<sizeof(init_val[i][j])>(&init_val[i][j]);
+						}
+					}
 					*var = init_val;
 				}
 			}
@@ -1774,6 +1852,10 @@ namespace
 			{
 				int3 tmp;
 				res->read(&tmp, sizeof(tmp));
+				for (int i = 0; i < 3; ++ i)
+				{
+					LittleEndianToNative<sizeof(tmp[i])>(&tmp[i]);
+				}
 
 				var = MakeSharedPtr<RenderVariableInt3>();
 				*var = tmp;
@@ -1784,10 +1866,18 @@ namespace
 
 				uint32_t len;
 				res->read(&len, sizeof(len));
+				LittleEndianToNative<sizeof(len)>(&len);
 				if (len > 0)
 				{
 					std::vector<int3> init_val(len);
 					res->read(&init_val[0], len * sizeof(init_val[0]));
+					for (uint32_t i = 0; i < len; ++ i)
+					{
+						for (int j = 0; j < 3; ++ j)
+						{
+							LittleEndianToNative<sizeof(init_val[i][j])>(&init_val[i][j]);
+						}
+					}
 					*var = init_val;
 				}
 			}
@@ -1798,6 +1888,10 @@ namespace
 			{
 				int4 tmp;
 				res->read(&tmp, sizeof(tmp));
+				for (int i = 0; i < 4; ++ i)
+				{
+					LittleEndianToNative<sizeof(tmp[i])>(&tmp[i]);
+				}
 
 				var = MakeSharedPtr<RenderVariableInt4>();
 				*var = tmp;
@@ -1808,10 +1902,18 @@ namespace
 
 				uint32_t len;
 				res->read(&len, sizeof(len));
+				LittleEndianToNative<sizeof(len)>(&len);
 				if (len > 0)
 				{
 					std::vector<int4> init_val(len);
 					res->read(&init_val[0], len * sizeof(init_val[0]));
+					for (uint32_t i = 0; i < len; ++ i)
+					{
+						for (int j = 0; j < 4; ++ j)
+						{
+							LittleEndianToNative<sizeof(init_val[i][j])>(&init_val[i][j]);
+						}
+					}
 					*var = init_val;
 				}
 			}
@@ -1822,6 +1924,10 @@ namespace
 			{
 				float2 tmp;
 				res->read(&tmp, sizeof(tmp));
+				for (int i = 0; i < 2; ++ i)
+				{
+					LittleEndianToNative<sizeof(tmp[i])>(&tmp[i]);
+				}
 
 				var = MakeSharedPtr<RenderVariableFloat2>();
 				*var = tmp;
@@ -1832,10 +1938,18 @@ namespace
 
 				uint32_t len;
 				res->read(&len, sizeof(len));
+				LittleEndianToNative<sizeof(len)>(&len);
 				if (len > 0)
 				{
 					std::vector<float2> init_val(len);
 					res->read(&init_val[0], len * sizeof(init_val[0]));
+					for (uint32_t i = 0; i < len; ++ i)
+					{
+						for (int j = 0; j < 2; ++ j)
+						{
+							LittleEndianToNative<sizeof(init_val[i][j])>(&init_val[i][j]);
+						}
+					}
 					*var = init_val;
 				}
 			}
@@ -1846,6 +1960,10 @@ namespace
 			{
 				float3 tmp;
 				res->read(&tmp, sizeof(tmp));
+				for (int i = 0; i < 3; ++ i)
+				{
+					LittleEndianToNative<sizeof(tmp[i])>(&tmp[i]);
+				}
 
 				var = MakeSharedPtr<RenderVariableFloat3>();
 				*var = tmp;
@@ -1856,10 +1974,18 @@ namespace
 
 				uint32_t len;
 				res->read(&len, sizeof(len));
+				LittleEndianToNative<sizeof(len)>(&len);
 				if (len > 0)
 				{
 					std::vector<float3> init_val(len);
 					res->read(&init_val[0], len * sizeof(init_val[0]));
+					for (uint32_t i = 0; i < len; ++ i)
+					{
+						for (int j = 0; j < 3; ++ j)
+						{
+							LittleEndianToNative<sizeof(init_val[i][j])>(&init_val[i][j]);
+						}
+					}
 					*var = init_val;
 				}
 			}
@@ -1870,6 +1996,10 @@ namespace
 			{
 				float4 tmp;
 				res->read(&tmp, sizeof(tmp));
+				for (int i = 0; i < 4; ++ i)
+				{
+					LittleEndianToNative<sizeof(tmp[i])>(&tmp[i]);
+				}
 
 				var = MakeSharedPtr<RenderVariableFloat4>();
 				*var = tmp;
@@ -1880,10 +2010,18 @@ namespace
 
 				uint32_t len;
 				res->read(&len, sizeof(len));
+				LittleEndianToNative<sizeof(len)>(&len);
 				if (len > 0)
 				{
 					std::vector<float4> init_val(len);
 					res->read(&init_val[0], len * sizeof(init_val[0]));
+					for (uint32_t i = 0; i < len; ++ i)
+					{
+						for (int j = 0; j < 4; ++ j)
+						{
+							LittleEndianToNative<sizeof(init_val[i][j])>(&init_val[i][j]);
+						}
+					}
 					*var = init_val;
 				}
 			}
@@ -1894,6 +2032,10 @@ namespace
 			{
 				float4x4 tmp;
 				res->read(&tmp, sizeof(tmp));
+				for (int i = 0; i < 16; ++ i)
+				{
+					LittleEndianToNative<sizeof(tmp[i])>(&tmp[i]);
+				}
 
 				var = MakeSharedPtr<RenderVariableFloat4x4>();
 				*var = tmp;
@@ -1904,10 +2046,18 @@ namespace
 
 				uint32_t len;
 				res->read(&len, sizeof(len));
+				LittleEndianToNative<sizeof(len)>(&len);
 				if (len > 0)
 				{
 					std::vector<float4x4> init_val(len);
 					res->read(&init_val[0], len * sizeof(init_val[0]));
+					for (uint32_t i = 0; i < len; ++ i)
+					{
+						for (int j = 0; j < 16; ++ j)
+						{
+							LittleEndianToNative<sizeof(init_val[i][j])>(&init_val[i][j]);
+						}
+					}
 					*var = init_val;
 				}
 			}
@@ -1960,6 +2110,7 @@ namespace
 				uint32_t tmp;
 				var->Value(tmp);
 
+				NativeToLittleEndian<sizeof(tmp)>(&tmp);
 				os.write(reinterpret_cast<char const *>(&tmp), sizeof(tmp));
 			}
 			else
@@ -1968,9 +2119,14 @@ namespace
 				var->Value(init_val);
 
 				uint32_t len = static_cast<uint32_t>(init_val.size());
+				NativeToLittleEndian<sizeof(len)>(&len);
 				os.write(reinterpret_cast<char const *>(&len), sizeof(len));
 				if (len > 0)
 				{
+					for (uint32_t i = 0; i < len; ++ i)
+					{
+						NativeToLittleEndian<sizeof(init_val[i])>(&init_val[i]);
+					}
 					os.write(reinterpret_cast<char const *>(&init_val[0]), len * sizeof(init_val[0]));
 				}
 			}
@@ -1982,6 +2138,7 @@ namespace
 				int32_t tmp;
 				var->Value(tmp);
 
+				NativeToLittleEndian<sizeof(tmp)>(&tmp);
 				os.write(reinterpret_cast<char const *>(&tmp), sizeof(tmp));
 			}
 			else
@@ -1990,9 +2147,14 @@ namespace
 				var->Value(init_val);
 
 				uint32_t len = static_cast<uint32_t>(init_val.size());
+				NativeToLittleEndian<sizeof(len)>(&len);
 				os.write(reinterpret_cast<char const *>(&len), sizeof(len));
 				if (len > 0)
 				{
+					for (uint32_t i = 0; i < len; ++ i)
+					{
+						NativeToLittleEndian<sizeof(init_val[i])>(&init_val[i]);
+					}
 					os.write(reinterpret_cast<char const *>(&init_val[0]), len * sizeof(init_val[0]));
 				}
 			}
@@ -2030,7 +2192,19 @@ namespace
 			{
 				SamplerStateObjectPtr tmp;
 				var->Value(tmp);
-				SamplerStateDesc const & desc = tmp->GetDesc();
+				SamplerStateDesc desc = tmp->GetDesc();
+				NativeToLittleEndian<sizeof(desc.border_clr[0])>(&desc.border_clr[0]);
+				NativeToLittleEndian<sizeof(desc.border_clr[1])>(&desc.border_clr[1]);
+				NativeToLittleEndian<sizeof(desc.border_clr[2])>(&desc.border_clr[2]);
+				NativeToLittleEndian<sizeof(desc.border_clr[3])>(&desc.border_clr[3]);
+				NativeToLittleEndian<sizeof(desc.addr_mode_u)>(&desc.addr_mode_u);
+				NativeToLittleEndian<sizeof(desc.addr_mode_v)>(&desc.addr_mode_v);
+				NativeToLittleEndian<sizeof(desc.addr_mode_w)>(&desc.addr_mode_w);
+				NativeToLittleEndian<sizeof(desc.filter)>(&desc.filter);
+				NativeToLittleEndian<sizeof(desc.min_lod)>(&desc.min_lod);
+				NativeToLittleEndian<sizeof(desc.max_lod)>(&desc.max_lod);
+				NativeToLittleEndian<sizeof(desc.mip_map_lod_bias)>(&desc.mip_map_lod_bias);
+				NativeToLittleEndian<sizeof(desc.cmp_func)>(&desc.cmp_func);
 				os.write(reinterpret_cast<char const *>(&desc), sizeof(desc));
 			}
 			break;
@@ -2050,6 +2224,7 @@ namespace
 				float tmp;
 				var->Value(tmp);
 
+				NativeToLittleEndian<sizeof(tmp)>(&tmp);
 				os.write(reinterpret_cast<char const *>(&tmp), sizeof(tmp));
 			}
 			else
@@ -2058,9 +2233,14 @@ namespace
 				var->Value(init_val);
 
 				uint32_t len = static_cast<uint32_t>(init_val.size());
+				NativeToLittleEndian<sizeof(len)>(&len);
 				os.write(reinterpret_cast<char const *>(&len), sizeof(len));
 				if (len > 0)
 				{
+					for (uint32_t i = 0; i < len; ++ i)
+					{
+						NativeToLittleEndian<sizeof(init_val[i])>(&init_val[i]);
+					}
 					os.write(reinterpret_cast<char const *>(&init_val[0]), len * sizeof(init_val[0]));
 				}
 			}
@@ -2072,6 +2252,10 @@ namespace
 				uint2 tmp;
 				var->Value(tmp);
 
+				for (int i = 0; i < 2; ++ i)
+				{
+					NativeToLittleEndian<sizeof(tmp[i])>(&tmp[i]);
+				}
 				os.write(reinterpret_cast<char const *>(&tmp), sizeof(tmp));
 			}
 			else
@@ -2080,9 +2264,17 @@ namespace
 				var->Value(init_val);
 
 				uint32_t len = static_cast<uint32_t>(init_val.size());
+				NativeToLittleEndian<sizeof(len)>(&len);
 				os.write(reinterpret_cast<char const *>(&len), sizeof(len));
 				if (len > 0)
 				{
+					for (uint32_t i = 0; i < len; ++ i)
+					{
+						for (int j = 0; j < 2; ++ j)
+						{
+							NativeToLittleEndian<sizeof(init_val[i][j])>(&init_val[i][j]);
+						}
+					}
 					os.write(reinterpret_cast<char const *>(&init_val[0]), len * sizeof(init_val[0]));
 				}
 			}
@@ -2094,6 +2286,10 @@ namespace
 				uint3 tmp;
 				var->Value(tmp);
 
+				for (int i = 0; i < 3; ++ i)
+				{
+					NativeToLittleEndian<sizeof(tmp[i])>(&tmp[i]);
+				}
 				os.write(reinterpret_cast<char const *>(&tmp), sizeof(tmp));
 			}
 			else
@@ -2102,9 +2298,17 @@ namespace
 				var->Value(init_val);
 
 				uint32_t len = static_cast<uint32_t>(init_val.size());
+				NativeToLittleEndian<sizeof(len)>(&len);
 				os.write(reinterpret_cast<char const *>(&len), sizeof(len));
 				if (len > 0)
 				{
+					for (uint32_t i = 0; i < len; ++ i)
+					{
+						for (int j = 0; j < 3; ++ j)
+						{
+							NativeToLittleEndian<sizeof(init_val[i][j])>(&init_val[i][j]);
+						}
+					}
 					os.write(reinterpret_cast<char const *>(&init_val[0]), len * sizeof(init_val[0]));
 				}
 			}
@@ -2116,6 +2320,10 @@ namespace
 				uint4 tmp;
 				var->Value(tmp);
 
+				for (int i = 0; i < 3; ++ i)
+				{
+					NativeToLittleEndian<sizeof(tmp[i])>(&tmp[i]);
+				}
 				os.write(reinterpret_cast<char const *>(&tmp), sizeof(tmp));
 			}
 			else
@@ -2124,9 +2332,17 @@ namespace
 				var->Value(init_val);
 
 				uint32_t len = static_cast<uint32_t>(init_val.size());
+				NativeToLittleEndian<sizeof(len)>(&len);
 				os.write(reinterpret_cast<char const *>(&len), sizeof(len));
 				if (len > 0)
 				{
+					for (uint32_t i = 0; i < len; ++ i)
+					{
+						for (int j = 0; j < 4; ++ j)
+						{
+							NativeToLittleEndian<sizeof(init_val[i][j])>(&init_val[i][j]);
+						}
+					}
 					os.write(reinterpret_cast<char const *>(&init_val[0]), len * sizeof(init_val[0]));
 				}
 			}
@@ -2138,6 +2354,10 @@ namespace
 				int2 tmp;
 				var->Value(tmp);
 
+				for (int i = 0; i < 2; ++ i)
+				{
+					NativeToLittleEndian<sizeof(tmp[i])>(&tmp[i]);
+				}
 				os.write(reinterpret_cast<char const *>(&tmp), sizeof(tmp));
 			}
 			else
@@ -2146,9 +2366,17 @@ namespace
 				var->Value(init_val);
 
 				uint32_t len = static_cast<uint32_t>(init_val.size());
+				NativeToLittleEndian<sizeof(len)>(&len);
 				os.write(reinterpret_cast<char const *>(&len), sizeof(len));
 				if (len > 0)
 				{
+					for (uint32_t i = 0; i < len; ++ i)
+					{
+						for (int j = 0; j < 2; ++ j)
+						{
+							NativeToLittleEndian<sizeof(init_val[i][j])>(&init_val[i][j]);
+						}
+					}
 					os.write(reinterpret_cast<char const *>(&init_val[0]), len * sizeof(init_val[0]));
 				}
 			}
@@ -2160,6 +2388,10 @@ namespace
 				int3 tmp;
 				var->Value(tmp);
 
+				for (int i = 0; i < 3; ++ i)
+				{
+					NativeToLittleEndian<sizeof(tmp[i])>(&tmp[i]);
+				}
 				os.write(reinterpret_cast<char const *>(&tmp), sizeof(tmp));
 			}
 			else
@@ -2168,9 +2400,17 @@ namespace
 				var->Value(init_val);
 
 				uint32_t len = static_cast<uint32_t>(init_val.size());
+				NativeToLittleEndian<sizeof(len)>(&len);
 				os.write(reinterpret_cast<char const *>(&len), sizeof(len));
 				if (len > 0)
 				{
+					for (uint32_t i = 0; i < len; ++ i)
+					{
+						for (int j = 0; j < 3; ++ j)
+						{
+							NativeToLittleEndian<sizeof(init_val[i][j])>(&init_val[i][j]);
+						}
+					}
 					os.write(reinterpret_cast<char const *>(&init_val[0]), len * sizeof(init_val[0]));
 				}
 			}
@@ -2182,6 +2422,10 @@ namespace
 				int4 tmp;
 				var->Value(tmp);
 
+				for (int i = 0; i < 4; ++ i)
+				{
+					NativeToLittleEndian<sizeof(tmp[i])>(&tmp[i]);
+				}
 				os.write(reinterpret_cast<char const *>(&tmp), sizeof(tmp));
 			}
 			else
@@ -2190,9 +2434,17 @@ namespace
 				var->Value(init_val);
 
 				uint32_t len = static_cast<uint32_t>(init_val.size());
+				NativeToLittleEndian<sizeof(len)>(&len);
 				os.write(reinterpret_cast<char const *>(&len), sizeof(len));
 				if (len > 0)
 				{
+					for (uint32_t i = 0; i < len; ++ i)
+					{
+						for (int j = 0; j < 4; ++ j)
+						{
+							NativeToLittleEndian<sizeof(init_val[i][j])>(&init_val[i][j]);
+						}
+					}
 					os.write(reinterpret_cast<char const *>(&init_val[0]), len * sizeof(init_val[0]));
 				}
 			}
@@ -2204,6 +2456,10 @@ namespace
 				float2 tmp;
 				var->Value(tmp);
 
+				for (int i = 0; i < 2; ++ i)
+				{
+					NativeToLittleEndian<sizeof(tmp[i])>(&tmp[i]);
+				}
 				os.write(reinterpret_cast<char const *>(&tmp), sizeof(tmp));
 			}
 			else
@@ -2212,9 +2468,17 @@ namespace
 				var->Value(init_val);
 
 				uint32_t len = static_cast<uint32_t>(init_val.size());
+				NativeToLittleEndian<sizeof(len)>(&len);
 				os.write(reinterpret_cast<char const *>(&len), sizeof(len));
 				if (len > 0)
 				{
+					for (uint32_t i = 0; i < len; ++ i)
+					{
+						for (int j = 0; j < 2; ++ j)
+						{
+							NativeToLittleEndian<sizeof(init_val[i][j])>(&init_val[i][j]);
+						}
+					}
 					os.write(reinterpret_cast<char const *>(&init_val[0]), len * sizeof(init_val[0]));
 				}
 			}
@@ -2226,6 +2490,10 @@ namespace
 				float3 tmp;
 				var->Value(tmp);
 
+				for (int i = 0; i < 3; ++ i)
+				{
+					NativeToLittleEndian<sizeof(tmp[i])>(&tmp[i]);
+				}
 				os.write(reinterpret_cast<char const *>(&tmp), sizeof(tmp));
 			}
 			else
@@ -2234,9 +2502,17 @@ namespace
 				var->Value(init_val);
 
 				uint32_t len = static_cast<uint32_t>(init_val.size());
+				NativeToLittleEndian<sizeof(len)>(&len);
 				os.write(reinterpret_cast<char const *>(&len), sizeof(len));
 				if (len > 0)
 				{
+					for (uint32_t i = 0; i < len; ++ i)
+					{
+						for (int j = 0; j < 3; ++ j)
+						{
+							NativeToLittleEndian<sizeof(init_val[i][j])>(&init_val[i][j]);
+						}
+					}
 					os.write(reinterpret_cast<char*>(&init_val[0]), len * sizeof(init_val[0]));
 				}
 			}
@@ -2248,6 +2524,10 @@ namespace
 				float4 tmp;
 				var->Value(tmp);
 
+				for (int i = 0; i < 4; ++ i)
+				{
+					NativeToLittleEndian<sizeof(tmp[i])>(&tmp[i]);
+				}
 				os.write(reinterpret_cast<char const *>(&tmp), sizeof(tmp));
 			}
 			else
@@ -2256,9 +2536,17 @@ namespace
 				var->Value(init_val);
 
 				uint32_t len = static_cast<uint32_t>(init_val.size());
+				NativeToLittleEndian<sizeof(len)>(&len);
 				os.write(reinterpret_cast<char const *>(&len), sizeof(len));
 				if (len > 0)
 				{
+					for (uint32_t i = 0; i < len; ++ i)
+					{
+						for (int j = 0; j < 4; ++ j)
+						{
+							NativeToLittleEndian<sizeof(init_val[i][j])>(&init_val[i][j]);
+						}
+					}
 					os.write(reinterpret_cast<char const *>(&init_val[0]), len * sizeof(init_val[0]));
 				}
 			}
@@ -2270,6 +2558,10 @@ namespace
 				float4x4 tmp;
 				var->Value(tmp);
 
+				for (int i = 0; i < 16; ++ i)
+				{
+					NativeToLittleEndian<sizeof(tmp[i])>(&tmp[i]);
+				}
 				os.write(reinterpret_cast<char const *>(&tmp), sizeof(tmp));
 			}
 			else
@@ -2278,9 +2570,17 @@ namespace
 				var->Value(init_val);
 
 				uint32_t len = static_cast<uint32_t>(init_val.size());
+				NativeToLittleEndian<sizeof(len)>(&len);
 				os.write(reinterpret_cast<char const *>(&len), sizeof(len));
 				if (len > 0)
 				{
+					for (uint32_t i = 0; i < len; ++ i)
+					{
+						for (int j = 0; j < 16; ++ j)
+						{
+							NativeToLittleEndian<sizeof(init_val[i][j])>(&init_val[i][j]);
+						}
+					}
 					os.write(reinterpret_cast<char const *>(&init_val[0]), len * sizeof(init_val[0]));
 				}
 			}
@@ -2322,13 +2622,16 @@ namespace KlayGE
 	void RenderEffectAnnotation::StreamIn(ResIdentifierPtr const & res)
 	{
 		res->read(&type_, sizeof(type_));
+		LittleEndianToNative<sizeof(type_)>(&type_);
 		name_ = read_short_string(res);
 		var_ = stream_in_var(res, type_, 0);
 	}
 
 	void RenderEffectAnnotation::StreamOut(std::ostream& os)
 	{
-		os.write(reinterpret_cast<char const *>(&type_), sizeof(type_));
+		uint32_t t = type_;
+		NativeToLittleEndian<sizeof(t)>(&t);
+		os.write(reinterpret_cast<char const *>(&t), sizeof(t));
 		write_short_string(os, name_);
 		stream_out_var(os, var_, type_, 0);
 	}
@@ -2548,6 +2851,7 @@ namespace KlayGE
 						{
 							uint16_t num_macros;
 							source->read(&num_macros, sizeof(num_macros));
+							LittleEndianToNative<sizeof(num_macros)>(&num_macros);
 
 							if ((num_macros > 0) || predefined_macros)
 							{
@@ -2573,6 +2877,7 @@ namespace KlayGE
 						{
 							uint16_t num_cbufs;
 							source->read(&num_cbufs, sizeof(num_cbufs));
+							LittleEndianToNative<sizeof(num_cbufs)>(&num_cbufs);
 							cbuffers_->resize(num_cbufs);
 							for (uint32_t i = 0; i < num_cbufs; ++ i)
 							{
@@ -2580,14 +2885,20 @@ namespace KlayGE
 
 								uint16_t len;
 								source->read(&len, sizeof(len));
+								LittleEndianToNative<sizeof(len)>(&len);
 								(*cbuffers_)[i].second.resize(len);
 								source->read(&(*cbuffers_)[i].second[0], len * sizeof((*cbuffers_)[i].second[0]));
+								for (uint32_t j = 0; j < len; ++ j)
+								{
+									LittleEndianToNative<sizeof((*cbuffers_)[i].second[j])>(&(*cbuffers_)[i].second[j]);
+								}
 							}
 						}
 
 						{
 							uint16_t num_params;
 							source->read(&num_params, sizeof(num_params));
+							LittleEndianToNative<sizeof(num_params)>(&num_params);
 							params_.resize(num_params);
 							for (uint32_t i = 0; i < num_params; ++ i)
 							{
@@ -2601,6 +2912,7 @@ namespace KlayGE
 						{
 							uint16_t num_shaders;
 							source->read(&num_shaders, sizeof(num_shaders));
+							LittleEndianToNative<sizeof(num_shaders)>(&num_shaders);
 							if (num_shaders > 0)
 							{
 								shaders_ = MakeSharedPtr<BOOST_TYPEOF(*shaders_)>(num_shaders);
@@ -2614,6 +2926,7 @@ namespace KlayGE
 						{
 							uint16_t num_shader_descs;
 							source->read(&num_shader_descs, sizeof(num_shader_descs));
+							LittleEndianToNative<sizeof(num_shader_descs)>(&num_shader_descs);
 							shader_descs_->resize(num_shader_descs + 1);
 							for (uint32_t i = 0; i < num_shader_descs; ++ i)
 							{
@@ -2621,6 +2934,7 @@ namespace KlayGE
 								(*shader_descs_)[i + 1].func_name = read_short_string(source);
 
 								source->read(&(*shader_descs_)[i + 1].tech_pass_type, sizeof((*shader_descs_)[i + 1].tech_pass_type));
+								LittleEndianToNative<sizeof((*shader_descs_)[i + 1].tech_pass_type)>(&(*shader_descs_)[i + 1].tech_pass_type);
 
 								uint8_t len;
 								source->read(&len, sizeof(len));
@@ -2628,6 +2942,10 @@ namespace KlayGE
 								{
 									(*shader_descs_)[i + 1].so_decl.resize(len);
 									source->read(&(*shader_descs_)[i + 1].so_decl[0], len * sizeof((*shader_descs_)[i + 1].so_decl[0]));
+									for (uint32_t j = 0; j < len; ++ j)
+									{
+										LittleEndianToNative<sizeof((*shader_descs_)[i + 1].so_decl[j].usage)>(&(*shader_descs_)[i + 1].so_decl[j].usage);
+									}
 								}
 							}
 
@@ -2638,6 +2956,7 @@ namespace KlayGE
 						{
 							uint16_t num_techs;
 							source->read(&num_techs, sizeof(num_techs));
+							LittleEndianToNative<sizeof(num_techs)>(&num_techs);
 							techniques_.resize(num_techs);
 							for (uint32_t i = 0; i < num_techs; ++ i)
 							{
@@ -2683,6 +3002,7 @@ namespace KlayGE
 				}
 			}
 
+			NativeToLittleEndian<sizeof(num_macros)>(&num_macros);
 			os.write(reinterpret_cast<char const *>(&num_macros), sizeof(num_macros));
 
 			if (macros_)
@@ -2700,21 +3020,29 @@ namespace KlayGE
 
 		{
 			uint16_t num_cbufs = static_cast<uint16_t>(cbuffers_->size());
+			NativeToLittleEndian<sizeof(num_cbufs)>(&num_cbufs);
 			os.write(reinterpret_cast<char const *>(&num_cbufs), sizeof(num_cbufs));
-			for (uint32_t i = 0; i < num_cbufs; ++ i)
+			for (uint32_t i = 0; i < cbuffers_->size(); ++ i)
 			{
 				write_short_string(os, (*cbuffers_)[i].first);
 
 				uint16_t len = static_cast<uint16_t>((*cbuffers_)[i].second.size());
+				NativeToLittleEndian<sizeof(len)>(&len);
 				os.write(reinterpret_cast<char const *>(&len), sizeof(len));
-				os.write(reinterpret_cast<char const *>(&(*cbuffers_)[i].second[0]), len * sizeof((*cbuffers_)[i].second[0]));
+				for (size_t j = 0; j < (*cbuffers_)[i].second.size(); ++ j)
+				{
+					uint32_t tmp = (*cbuffers_)[i].second[i];
+					NativeToLittleEndian<sizeof(tmp)>(&tmp);
+					os.write(reinterpret_cast<char const *>(&tmp), sizeof(tmp));
+				}
 			}
 		}
 
 		{
 			uint16_t num_params = static_cast<uint16_t>(params_.size());
+			NativeToLittleEndian<sizeof(num_params)>(&num_params);
 			os.write(reinterpret_cast<char const *>(&num_params), sizeof(num_params));
-			for (uint32_t i = 0; i < num_params; ++ i)
+			for (uint32_t i = 0; i < params_.size(); ++ i)
 			{
 				params_[i]->StreamOut(os);
 			}
@@ -2722,36 +3050,46 @@ namespace KlayGE
 
 		{
 			uint16_t num_shaders = shaders_ ? static_cast<uint16_t>(shaders_->size()) : 0;
+			NativeToLittleEndian<sizeof(num_shaders)>(&num_shaders);
 			os.write(reinterpret_cast<char const *>(&num_shaders), sizeof(num_shaders));
-			for (uint32_t i = 0; i < num_shaders; ++ i)
+			if (shaders_)
 			{
-				(*shaders_)[i].StreamOut(os);
+				for (uint32_t i = 0; i < shaders_->size(); ++ i)
+				{
+					(*shaders_)[i].StreamOut(os);
+				}
 			}
 		}
 
 		{
 			uint16_t num_shader_descs = static_cast<uint16_t>(shader_descs_->size() - 1);
+			NativeToLittleEndian<sizeof(num_shader_descs)>(&num_shader_descs);
 			os.write(reinterpret_cast<char const *>(&num_shader_descs), sizeof(num_shader_descs));
-			for (uint32_t i = 0; i < num_shader_descs; ++ i)
+			for (uint32_t i = 0; i < shader_descs_->size() - 1; ++ i)
 			{
 				write_short_string(os, (*shader_descs_)[i + 1].profile);
 				write_short_string(os, (*shader_descs_)[i + 1].func_name);
 
-				os.write(reinterpret_cast<char const *>(&(*shader_descs_)[i + 1].tech_pass_type), sizeof((*shader_descs_)[i + 1].tech_pass_type));
+				uint32_t tmp = (*shader_descs_)[i + 1].tech_pass_type;
+				NativeToLittleEndian<sizeof(tmp)>(&tmp);
+				os.write(reinterpret_cast<char const *>(&tmp), sizeof(tmp));
 
 				uint8_t len = static_cast<uint8_t>((*shader_descs_)[i + 1].so_decl.size());
 				os.write(reinterpret_cast<char const *>(&len), sizeof(len));
-				if (len > 0)
+				for (uint32_t j = 0; j < len; ++ j)
 				{
-					os.write(reinterpret_cast<char const *>(&(*shader_descs_)[i + 1].so_decl[0]), len * sizeof((*shader_descs_)[i + 1].so_decl[0]));
+					shader_desc::stream_output_decl so_decl = (*shader_descs_)[i + 1].so_decl[j];
+					NativeToLittleEndian<sizeof(so_decl.usage)>(&so_decl.usage);
+					os.write(reinterpret_cast<char const *>(&so_decl), sizeof(so_decl));
 				}
 			}
 		}
 
 		{
 			uint16_t num_techs = static_cast<uint16_t>(techniques_.size());
+			NativeToLittleEndian<sizeof(num_techs)>(&num_techs);
 			os.write(reinterpret_cast<char const *>(&num_techs), sizeof(num_techs));
-			for (uint32_t i = 0; i < num_techs; ++ i)
+			for (uint32_t i = 0; i < techniques_.size(); ++ i)
 			{
 				techniques_[i]->StreamOut(os, i, native_shader_blocks);
 			}
@@ -2987,6 +3325,7 @@ namespace KlayGE
 		
 		res->read(&transparent_, sizeof(transparent_));
 		res->read(&weight_, sizeof(weight_));
+		LittleEndianToNative<sizeof(weight_)>(&weight_);
 
 		bool ret = true;
 		uint8_t num_passes;
@@ -3032,7 +3371,9 @@ namespace KlayGE
 		}
 
 		os.write(reinterpret_cast<char const *>(&transparent_), sizeof(transparent_));
-		os.write(reinterpret_cast<char const *>(&weight_), sizeof(weight_));
+		float w = weight_;
+		NativeToLittleEndian<sizeof(w)>(&w);
+		os.write(reinterpret_cast<char const *>(&w), sizeof(w));
 
 		uint8_t num_passes = static_cast<uint8_t>(passes_.size());
 		os.write(reinterpret_cast<char const *>(&num_passes), sizeof(num_passes));
@@ -3504,21 +3845,63 @@ namespace KlayGE
 		RasterizerStateDesc rs_desc;
 		DepthStencilStateDesc dss_desc;
 		BlendStateDesc bs_desc;
+
 		res->read(&rs_desc, sizeof(rs_desc));
+		LittleEndianToNative<sizeof(rs_desc.polygon_mode)>(&rs_desc.polygon_mode);
+		LittleEndianToNative<sizeof(rs_desc.shade_mode)>(&rs_desc.shade_mode);
+		LittleEndianToNative<sizeof(rs_desc.cull_mode)>(&rs_desc.cull_mode);
+		LittleEndianToNative<sizeof(rs_desc.polygon_offset_factor)>(&rs_desc.polygon_offset_factor);
+		LittleEndianToNative<sizeof(rs_desc.polygon_offset_units)>(&rs_desc.polygon_offset_units);
+		
 		res->read(&dss_desc, sizeof(dss_desc));
+		LittleEndianToNative<sizeof(dss_desc.depth_func)>(&dss_desc.depth_func);
+		LittleEndianToNative<sizeof(dss_desc.front_stencil_func)>(&dss_desc.front_stencil_func);
+		LittleEndianToNative<sizeof(dss_desc.front_stencil_read_mask)>(&dss_desc.front_stencil_read_mask);
+		LittleEndianToNative<sizeof(dss_desc.front_stencil_write_mask)>(&dss_desc.front_stencil_write_mask);
+		LittleEndianToNative<sizeof(dss_desc.front_stencil_fail)>(&dss_desc.front_stencil_fail);
+		LittleEndianToNative<sizeof(dss_desc.front_stencil_depth_fail)>(&dss_desc.front_stencil_depth_fail);
+		LittleEndianToNative<sizeof(dss_desc.front_stencil_pass)>(&dss_desc.front_stencil_pass);
+		LittleEndianToNative<sizeof(dss_desc.back_stencil_func)>(&dss_desc.back_stencil_func);
+		LittleEndianToNative<sizeof(dss_desc.back_stencil_read_mask)>(&dss_desc.back_stencil_read_mask);
+		LittleEndianToNative<sizeof(dss_desc.back_stencil_write_mask)>(&dss_desc.back_stencil_write_mask);
+		LittleEndianToNative<sizeof(dss_desc.back_stencil_fail)>(&dss_desc.back_stencil_fail);
+		LittleEndianToNative<sizeof(dss_desc.back_stencil_depth_fail)>(&dss_desc.back_stencil_depth_fail);
+		LittleEndianToNative<sizeof(dss_desc.back_stencil_pass)>(&dss_desc.back_stencil_pass);
+
 		res->read(&bs_desc, sizeof(bs_desc));
+		for (size_t i = 0; i < bs_desc.blend_op.size(); ++ i)
+		{
+			LittleEndianToNative<sizeof(bs_desc.blend_op[i])>(&bs_desc.blend_op[i]);
+			LittleEndianToNative<sizeof(bs_desc.src_blend[i])>(&bs_desc.src_blend[i]);
+			LittleEndianToNative<sizeof(bs_desc.dest_blend[i])>(&bs_desc.dest_blend[i]);
+			LittleEndianToNative<sizeof(bs_desc.blend_op_alpha[i])>(&bs_desc.blend_op_alpha[i]);
+			LittleEndianToNative<sizeof(bs_desc.src_blend_alpha[i])>(&bs_desc.src_blend_alpha[i]);
+			LittleEndianToNative<sizeof(bs_desc.dest_blend_alpha[i])>(&bs_desc.dest_blend_alpha[i]);
+		}
+		
 		rasterizer_state_obj_ = rf.MakeRasterizerStateObject(rs_desc);
 		depth_stencil_state_obj_ = rf.MakeDepthStencilStateObject(dss_desc);
 		blend_state_obj_ = rf.MakeBlendStateObject(bs_desc);
 
 		res->read(&front_stencil_ref_, sizeof(front_stencil_ref_));
+		LittleEndianToNative<sizeof(front_stencil_ref_)>(&front_stencil_ref_);
 		res->read(&back_stencil_ref_, sizeof(back_stencil_ref_));
+		LittleEndianToNative<sizeof(back_stencil_ref_)>(&back_stencil_ref_);
 		res->read(&blend_factor_, sizeof(blend_factor_));
+		for (int i = 0; i < 4; ++ i)
+		{
+			LittleEndianToNative<sizeof(blend_factor_[i])>(&blend_factor_[i]);
+		}
 		res->read(&sample_mask_, sizeof(sample_mask_));
+		LittleEndianToNative<sizeof(sample_mask_)>(&sample_mask_);
 
 		shader_desc_ids_ = MakeSharedPtr<BOOST_TYPEOF(*shader_desc_ids_)>();
 		shader_desc_ids_->resize(ShaderObject::ST_NumShaderTypes, 0);
 		res->read(&(*shader_desc_ids_)[0], shader_desc_ids_->size() * sizeof((*shader_desc_ids_)[0]));
+		for (int i = 0; i < ShaderObject::ST_NumShaderTypes; ++ i)
+		{
+			LittleEndianToNative<sizeof((*shader_desc_ids_)[i])>(&(*shader_desc_ids_)[i]);
+		}
 
 		
 		shader_obj_ = rf.MakeShaderObject();
@@ -3552,6 +3935,7 @@ namespace KlayGE
 					{
 						uint32_t len;
 						res->read(&len, sizeof(len));
+						LittleEndianToNative<sizeof(len)>(&len);
 						this_native_shader_block[i].resize(len);
 						if (len > 0)
 						{
@@ -3618,19 +4002,70 @@ namespace KlayGE
 			annotation->StreamOut(os);
 		}
 
-		RasterizerStateDesc const & rs_desc = rasterizer_state_obj_->GetDesc();
+		RasterizerStateDesc rs_desc = rasterizer_state_obj_->GetDesc();
 		DepthStencilStateDesc dss_desc = depth_stencil_state_obj_->GetDesc();
 		BlendStateDesc bs_desc = blend_state_obj_->GetDesc();
+
+		NativeToLittleEndian<sizeof(rs_desc.polygon_mode)>(&rs_desc.polygon_mode);
+		NativeToLittleEndian<sizeof(rs_desc.shade_mode)>(&rs_desc.shade_mode);
+		NativeToLittleEndian<sizeof(rs_desc.cull_mode)>(&rs_desc.cull_mode);
+		NativeToLittleEndian<sizeof(rs_desc.polygon_offset_factor)>(&rs_desc.polygon_offset_factor);
+		NativeToLittleEndian<sizeof(rs_desc.polygon_offset_units)>(&rs_desc.polygon_offset_units);
 		os.write(reinterpret_cast<char const *>(&rs_desc), sizeof(rs_desc));
+		
+		NativeToLittleEndian<sizeof(dss_desc.depth_func)>(&dss_desc.depth_func);
+		NativeToLittleEndian<sizeof(dss_desc.front_stencil_func)>(&dss_desc.front_stencil_func);
+		NativeToLittleEndian<sizeof(dss_desc.front_stencil_read_mask)>(&dss_desc.front_stencil_read_mask);
+		NativeToLittleEndian<sizeof(dss_desc.front_stencil_write_mask)>(&dss_desc.front_stencil_write_mask);
+		NativeToLittleEndian<sizeof(dss_desc.front_stencil_fail)>(&dss_desc.front_stencil_fail);
+		NativeToLittleEndian<sizeof(dss_desc.front_stencil_depth_fail)>(&dss_desc.front_stencil_depth_fail);
+		NativeToLittleEndian<sizeof(dss_desc.front_stencil_pass)>(&dss_desc.front_stencil_pass);
+		NativeToLittleEndian<sizeof(dss_desc.back_stencil_func)>(&dss_desc.back_stencil_func);
+		NativeToLittleEndian<sizeof(dss_desc.back_stencil_read_mask)>(&dss_desc.back_stencil_read_mask);
+		NativeToLittleEndian<sizeof(dss_desc.back_stencil_write_mask)>(&dss_desc.back_stencil_write_mask);
+		NativeToLittleEndian<sizeof(dss_desc.back_stencil_fail)>(&dss_desc.back_stencil_fail);
+		NativeToLittleEndian<sizeof(dss_desc.back_stencil_depth_fail)>(&dss_desc.back_stencil_depth_fail);
+		NativeToLittleEndian<sizeof(dss_desc.back_stencil_pass)>(&dss_desc.back_stencil_pass);
 		os.write(reinterpret_cast<char const *>(&dss_desc), sizeof(dss_desc));
+
+		for (size_t i = 0; i < bs_desc.blend_op.size(); ++ i)
+		{
+			NativeToLittleEndian<sizeof(bs_desc.blend_op[i])>(&bs_desc.blend_op[i]);
+			NativeToLittleEndian<sizeof(bs_desc.src_blend[i])>(&bs_desc.src_blend[i]);
+			NativeToLittleEndian<sizeof(bs_desc.dest_blend[i])>(&bs_desc.dest_blend[i]);
+			NativeToLittleEndian<sizeof(bs_desc.blend_op_alpha[i])>(&bs_desc.blend_op_alpha[i]);
+			NativeToLittleEndian<sizeof(bs_desc.src_blend_alpha[i])>(&bs_desc.src_blend_alpha[i]);
+			NativeToLittleEndian<sizeof(bs_desc.dest_blend_alpha[i])>(&bs_desc.dest_blend_alpha[i]);
+		}		
 		os.write(reinterpret_cast<char const *>(&bs_desc), sizeof(bs_desc));
 
-		os.write(reinterpret_cast<char const *>(&front_stencil_ref_), sizeof(front_stencil_ref_));
-		os.write(reinterpret_cast<char const *>(&back_stencil_ref_), sizeof(back_stencil_ref_));
-		os.write(reinterpret_cast<char const *>(&blend_factor_), sizeof(blend_factor_));
-		os.write(reinterpret_cast<char const *>(&sample_mask_), sizeof(sample_mask_));
+		{
+			uint16_t tmp = front_stencil_ref_;
+			NativeToLittleEndian<sizeof(tmp)>(&tmp);
+			os.write(reinterpret_cast<char const *>(&tmp), sizeof(tmp));
+			tmp = back_stencil_ref_;
+			NativeToLittleEndian<sizeof(tmp)>(&tmp);
+			os.write(reinterpret_cast<char const *>(&tmp), sizeof(tmp));
+		}
+		{
+			Color tmp = blend_factor_;
+			NativeToLittleEndian<sizeof(tmp[0])>(&tmp[0]);
+			NativeToLittleEndian<sizeof(tmp[1])>(&tmp[1]);
+			NativeToLittleEndian<sizeof(tmp[2])>(&tmp[2]);
+			NativeToLittleEndian<sizeof(tmp[3])>(&tmp[3]);
+			os.write(reinterpret_cast<char const *>(&tmp), sizeof(tmp));
+		}
+		{
+			uint32_t tmp = sample_mask_;
+			NativeToLittleEndian<sizeof(tmp)>(&tmp);
+			os.write(reinterpret_cast<char const *>(&tmp), sizeof(tmp));
+		}
 
-		os.write(reinterpret_cast<char const *>(&(*shader_desc_ids_)[0]), shader_desc_ids_->size() * sizeof((*shader_desc_ids_)[0]));
+		for (uint32_t i = 0; i < shader_desc_ids_->size(); ++ i)
+		{
+			uint32_t tmp = (*shader_desc_ids_)[i];
+			os.write(reinterpret_cast<char const *>(&tmp), sizeof(tmp));
+		}
 
 		for (int type = 0; type < ShaderObject::ST_NumShaderTypes; ++ type)
 		{
@@ -3646,7 +4081,10 @@ namespace KlayGE
 					for (uint32_t i = 0; i < num; ++ i)
 					{
 						uint32_t len = static_cast<uint32_t>(native_shader_blocks[(*shader_desc_ids_)[type]][i].size());
-						os.write(reinterpret_cast<char const *>(&len), sizeof(len));
+						{
+							uint32_t tmp = len;
+							os.write(reinterpret_cast<char const *>(&tmp), sizeof(tmp));
+						}
 						if (len > 0)
 						{
 							os.write(reinterpret_cast<char const *>(&native_shader_blocks[(*shader_desc_ids_)[type]][i][0]),
@@ -3773,6 +4211,7 @@ namespace KlayGE
 	void RenderEffectParameter::StreamIn(ResIdentifierPtr const & res)
 	{
 		res->read(&type_, sizeof(type_));
+		LittleEndianToNative<sizeof(type_)>(&type_);
 		name_ = MakeSharedPtr<BOOST_TYPEOF(*name_)>(read_short_string(res));
 
 		std::string sem = read_short_string(res);
@@ -3838,7 +4277,9 @@ namespace KlayGE
 
 	void RenderEffectParameter::StreamOut(std::ostream& os)
 	{
-		os.write(reinterpret_cast<char const *>(&type_), sizeof(type_));
+		uint32_t t = type_;
+		NativeToLittleEndian<sizeof(t)>(&t);
+		os.write(reinterpret_cast<char const *>(&t), sizeof(t));
 		write_short_string(os, *name_);
 		if (semantic_)
 		{
@@ -3962,21 +4403,30 @@ namespace KlayGE
 	void RenderShaderFunc::StreamIn(ResIdentifierPtr const & res)
 	{
 		res->read(&type_, sizeof(type_));
+		LittleEndianToNative<sizeof(type_)>(&type_);
 		res->read(&version_, sizeof(version_));
+		LittleEndianToNative<sizeof(version_)>(&version_);
 
 		uint32_t len;
 		res->read(&len, sizeof(len));
+		LittleEndianToNative<sizeof(len)>(&len);
 		str_.resize(len);
 		res->read(&str_[0], len * sizeof(str_[0]));
 	}
 
 	void RenderShaderFunc::StreamOut(std::ostream& os)
 	{
-		os.write(reinterpret_cast<char const *>(&type_), sizeof(type_));
-		os.write(reinterpret_cast<char const *>(&version_), sizeof(version_));
+		uint32_t tmp = type_;
+		NativeToLittleEndian<sizeof(tmp)>(&tmp);
+		os.write(reinterpret_cast<char const *>(&tmp), sizeof(tmp));
+		tmp = version_;
+		NativeToLittleEndian<sizeof(tmp)>(&tmp);
+		os.write(reinterpret_cast<char const *>(&tmp), sizeof(tmp));
 
 		uint32_t len = str_.size();
-		os.write(reinterpret_cast<char const *>(&len), sizeof(len));
+		tmp = len;
+		NativeToLittleEndian<sizeof(tmp)>(&tmp);
+		os.write(reinterpret_cast<char const *>(&tmp), sizeof(tmp));
 		os.write(&str_[0], len * sizeof(str_[0]));
 	}
 
