@@ -29,8 +29,6 @@ private:
 
 	KlayGE::FirstPersonCameraController fpcController_;
 
-	KlayGE::Timer timer_;
-
 	KlayGE::TexturePtr scene_tex_;
 	KlayGE::FrameBufferPtr scene_buffer_;
 

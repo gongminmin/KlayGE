@@ -1258,8 +1258,7 @@ uint32_t ParticleEditorApp::DoUpdate(uint32_t pass)
 		float4x4 mat = MathLib::translation(0.0f, 0.1f, 0.0f);
 		ps_->ModelMatrix(mat);
 
-		ps_->Update(static_cast<float>(timer_.elapsed()));
-		timer_.restart();
+		ps_->Update(this->AppTime(), this->FrameTime());
 
 		float4x4 view_mat = Context::Instance().AppInstance().ActiveCamera().ViewMatrix();
 		std::vector<std::pair<int, float> > active_particles;

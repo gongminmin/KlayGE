@@ -67,9 +67,9 @@ namespace KlayGE
 			return 1.0f / inv_emit_freq_;
 		}
 
-		void Update(float elapse_time)
+		void Update(float /*app_time*/, float elapsed_time)
 		{
-			accumulate_time_ += elapse_time;
+			accumulate_time_ += elapsed_time;
 			if (accumulate_time_ >= particles_.size() * inv_emit_freq_)
 			{
 				accumulate_time_ = 0;
@@ -80,12 +80,12 @@ namespace KlayGE
 			{
 				if (particle.life > 0)
 				{
-					update_func_(particle, elapse_time);
+					update_func_(particle, elapsed_time);
 				}
 				else
 				{
 					float const t = accumulate_time_ - particle.birth_time;
-					if ((t >= 0) && (t < elapse_time))
+					if ((t >= 0) && (t < elapsed_time))
 					{
 						gen_func_(particle, model_mat_);
 					}

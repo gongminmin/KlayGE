@@ -104,6 +104,8 @@ namespace KlayGE
 		Camera& ActiveCamera();
 
 		float FPS() const;
+		float AppTime() const;
+		float FrameTime() const;
 
 		void Run();
 		void Quit();
@@ -143,11 +145,12 @@ namespace KlayGE
 
 		// Stats
 		float	fps_;
-		float	frame_time_;
 		float	accumulate_time_;
 		uint32_t num_frames_;
 
 		Timer timer_;
+		float app_time_;
+		float frame_time_;
 
 		WindowPtr main_wnd_;
 	};

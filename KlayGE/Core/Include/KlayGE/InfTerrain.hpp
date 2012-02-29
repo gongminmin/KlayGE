@@ -57,7 +57,7 @@ namespace KlayGE
 		InfTerrainSceneObject();
 		virtual ~InfTerrainSceneObject();
 
-		void Update();
+		void Update(float app_time, float elapsed_time);
 
 	protected:
 		float base_level_;

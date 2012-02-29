@@ -56,16 +56,16 @@ namespace KlayGE
 		enabled_ = enabled;
 	}
 
-	void LightSource::BindUpdateFunc(boost::function<void(LightSource&)> const & update_func)
+	void LightSource::BindUpdateFunc(boost::function<void(LightSource&, float, float)> const & update_func)
 	{
 		update_func_ = update_func;
 	}
 
-	void LightSource::Update()
+	void LightSource::Update(float app_time, float elapsed_time)
 	{
 		if (update_func_)
 		{
-			update_func_(*this);
+			update_func_(*this, app_time, elapsed_time);
 		}
 	}
 

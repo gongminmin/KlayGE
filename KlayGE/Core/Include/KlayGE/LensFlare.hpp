@@ -48,7 +48,7 @@ namespace KlayGE
 			return lf_visible_;
 		}
 
-		void Update();
+		void Update(float app_time, float elapsed_time);
 
 	private:
 		float3 dir_;

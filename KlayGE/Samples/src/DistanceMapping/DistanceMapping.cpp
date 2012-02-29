@@ -267,17 +267,13 @@ namespace
 	class PointLightSourceUpdate
 	{
 	public:
-		void operator()(LightSource& light)
+		void operator()(LightSource& light, float app_time, float /*elapsed_time*/)
 		{
-			float degree = static_cast<float>(timer_.elapsed());
-			float4x4 matRot = MathLib::rotation_z(degree);
+			float4x4 matRot = MathLib::rotation_z(app_time);
 
 			float3 light_pos(1, 0, -1);
 			light.Position(MathLib::transform_coord(light_pos, matRot));
 		}
-
-	private:
-		Timer timer_;
 	};
 
 

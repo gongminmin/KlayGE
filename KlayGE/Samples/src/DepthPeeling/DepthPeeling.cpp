@@ -139,9 +139,9 @@ namespace
 			}
 		}
 
-		void Update()
+		void Update(float app_time, float elapsed_time)
 		{
-			SceneObjectHelper::Update();
+			SceneObjectHelper::Update(app_time, elapsed_time);
 
 			RenderModelPtr model = checked_pointer_cast<RenderModel>(renderable_);
 			for (uint32_t i = 0; i < model->NumMeshes(); ++ i)

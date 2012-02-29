@@ -64,9 +64,9 @@ namespace KlayGE
 		virtual void AddToSceneManager();
 		virtual void DelFromSceneManager();
 
-		void BindUpdateFunc(boost::function<void(SceneObject&)> const & update_func);
+		void BindUpdateFunc(boost::function<void(SceneObject&, float, float)> const & update_func);
 
-		virtual void Update();
+		virtual void Update(float app_time, float elapsed_time);
 
 		uint32_t Attrib() const;
 		bool Visible() const;
@@ -92,7 +92,7 @@ namespace KlayGE
 
 		float4x4 model_;
 
-		boost::function<void(SceneObject&)> update_func_;
+		boost::function<void(SceneObject&, float, float)> update_func_;
 	};
 }
 

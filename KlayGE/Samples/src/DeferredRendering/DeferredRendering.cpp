@@ -39,9 +39,9 @@ namespace
 			model_org_ = MathLib::scaling(cone_radius, cone_radius, cone_height) * MathLib::rotation_x(org_angle);
 		}
 
-		void operator()(LightSource& light)
+		void operator()(LightSource& light, float app_time, float /*elapsed_time*/)
 		{
-			light.ModelMatrix(model_org_ * MathLib::rotation_y(static_cast<float>(timer_.elapsed()) * 1000 * rot_speed_)
+			light.ModelMatrix(model_org_ * MathLib::rotation_y(app_time * 1000 * rot_speed_)
 				* MathLib::translation(pos_));
 		}
 
@@ -49,8 +49,6 @@ namespace
 		float4x4 model_org_;
 		float rot_speed_;
 		float3 pos_;
-
-		Timer timer_;
 	};
 
 	class GISpotLightSourceUpdate
@@ -62,9 +60,9 @@ namespace
 			model_org_ = MathLib::scaling(cone_radius, cone_radius, cone_height) * MathLib::rotation_x(org_angle);
 		}
 
-		void operator()(LightSource& light)
+		void operator()(LightSource& light, float app_time, float /*elapsed_time*/)
 		{
-			light.ModelMatrix(model_org_ * MathLib::rotation_y(sin(static_cast<float>(timer_.elapsed()) * 1000 * rot_speed_) * PI / 6)
+			light.ModelMatrix(model_org_ * MathLib::rotation_y(sin(app_time * 1000 * rot_speed_) * PI / 6)
 				* MathLib::translation(pos_));
 		}
 
@@ -72,8 +70,6 @@ namespace
 		float4x4 model_org_;
 		float rot_speed_;
 		float3 pos_;
-
-		Timer timer_;
 	};
 
 	class PointLightSourceUpdate
@@ -84,17 +80,15 @@ namespace
 		{
 		}
 
-		void operator()(LightSource& light)
+		void operator()(LightSource& light, float app_time, float /*elapsed_time*/)
 		{
-			light.ModelMatrix(MathLib::translation(sin(static_cast<float>(timer_.elapsed()) * 1000 * move_speed_), 0.0f, 0.0f)
+			light.ModelMatrix(MathLib::translation(sin(app_time * 1000 * move_speed_), 0.0f, 0.0f)
 				* MathLib::translation(pos_));
 		}
 
 	private:
 		float move_speed_;
 		float3 pos_;
-
-		Timer timer_;
 	};
 
 

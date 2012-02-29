@@ -224,7 +224,7 @@ namespace
 			renderable_ = ra;
 		}
 
-		void Update()
+		void Update(float /*app_time*/, float elapsed_time)
 		{
 			last_mats_.push_back(model_);
 
@@ -233,8 +233,7 @@ namespace
 			inst_.last_mat[1] = matT.Row(1);
 			inst_.last_mat[2] = matT.Row(2);
 
-			double e = rotate_timer_.elapsed() * 0.3f * -model_(3, 1);
-			rotate_timer_.restart();
+			double e = elapsed_time * 0.3f * -model_(3, 1);
 			model_ *= MathLib::rotation_y(static_cast<float>(e));
 
 			matT = MathLib::transpose(model_);
@@ -251,8 +250,6 @@ namespace
 	private:
 		InstData inst_;
 		boost::circular_buffer<float4x4> last_mats_;
-
-		Timer rotate_timer_;
 	};
 
 	class DepthOfField : public PostProcess

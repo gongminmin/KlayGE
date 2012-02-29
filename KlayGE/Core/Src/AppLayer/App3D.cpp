@@ -50,7 +50,8 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	App3DFramework::App3DFramework(std::string const & name)
 						: name_(name),
-							fps_(0), accumulate_time_(0), num_frames_(0)
+							fps_(0), accumulate_time_(0), num_frames_(0),
+							app_time_(0)
 	{
 		Context::Instance().AppInstance(*this);
 
@@ -206,8 +207,10 @@ namespace KlayGE
 		}
 
 		// measure statistics
+		frame_time_ = static_cast<float>(timer_.elapsed());
 		++ num_frames_;
-		accumulate_time_ += static_cast<float>(timer_.elapsed());
+		accumulate_time_ += frame_time_;
+		app_time_ += frame_time_;
 
 		// check if new second
 		if (accumulate_time_ > 1)
@@ -227,5 +230,15 @@ namespace KlayGE
 	float App3DFramework::FPS() const
 	{
 		return fps_;
+	}
+
+	float App3DFramework::AppTime() const
+	{
+		return app_time_;
+	}
+
+	float App3DFramework::FrameTime() const
+	{
+		return frame_time_;
 	}
 }

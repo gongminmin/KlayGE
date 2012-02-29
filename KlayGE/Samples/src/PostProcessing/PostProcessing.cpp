@@ -39,19 +39,16 @@ namespace
 	class ObjectUpdate
 	{
 	public:
-		void operator()(SceneObject& obj)
+		void operator()(SceneObject& obj, float app_time, float /*elapsed_time*/)
 		{
-			obj.SetModelMatrix(MathLib::rotation_y(-static_cast<float>(timer_.elapsed()) / 1.5f));
+			obj.SetModelMatrix(MathLib::rotation_y(-app_time / 1.5f));
 		}
-
-	private:
-		Timer timer_;
 	};
 
 	class PointLightSourceUpdate
 	{
 	public:
-		void operator()(LightSource& light)
+		void operator()(LightSource& light, float /*app_time*/, float /*elapsed_time*/)
 		{
 			float4x4 inv_view = MathLib::inverse(Context::Instance().AppInstance().ActiveCamera().ViewMatrix());
 			light.Position(MathLib::transform_coord(float3(2, 2, -3), inv_view));

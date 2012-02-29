@@ -80,13 +80,10 @@ namespace
 			renderable_ = MakeSharedPtr<FlagRenderable>(length_segs, width_segs);
 		}
 
-		void Update()
+		void Update(float app_time, float /*elapsed_time*/)
 		{
-			checked_pointer_cast<FlagRenderable>(renderable_)->SetAngle(static_cast<float>(timer_.elapsed()) / 0.4f);
+			checked_pointer_cast<FlagRenderable>(renderable_)->SetAngle(app_time / 0.4f);
 		}
-
-	private:
-		Timer timer_;
 	};
 
 

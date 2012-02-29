@@ -539,17 +539,17 @@ namespace
 			}
 		}
 
-		void Update(float elapse_time)
+		void Update(float /*app_time*/, float elapsed_time)
 		{
 			RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 
-			accumulate_time_ += elapse_time;
+			accumulate_time_ += elapsed_time;
 			if (accumulate_time_ >= max_num_particles_ * inv_emit_freq_)
 			{
 				accumulate_time_ = 0;
 			}
 
-			*elapse_time_param_ = elapse_time;
+			*elapse_time_param_ = elapsed_time;
 			*accumulate_time_param_ = accumulate_time_;
 
 			if (use_so)
@@ -884,8 +884,7 @@ uint32_t GPUParticleSystemApp::DoUpdate(uint32_t pass)
 			float4x4 mat = MathLib::translation(0.0f, 0.7f, 0.0f);
 			gpu_ps->ModelMatrix(mat);
 
-			gpu_ps->Update(static_cast<float>(timer_.elapsed()));
-			timer_.restart();
+			gpu_ps->Update(this->AppTime(), this->FrameTime());
 
 			if (use_so)
 			{

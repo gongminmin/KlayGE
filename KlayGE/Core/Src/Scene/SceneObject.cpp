@@ -57,16 +57,16 @@ namespace KlayGE
 		return model_;
 	}
 
-	void SceneObject::BindUpdateFunc(boost::function<void(SceneObject&)> const & update_func)
+	void SceneObject::BindUpdateFunc(boost::function<void(SceneObject&, float, float)> const & update_func)
 	{
 		update_func_ = update_func;
 	}
 
-	void SceneObject::Update()
+	void SceneObject::Update(float app_time, float elapsed_time)
 	{
 		if (update_func_)
 		{
-			update_func_(*this);
+			update_func_(*this, app_time, elapsed_time);
 		}
 	}
 

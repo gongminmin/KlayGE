@@ -103,7 +103,7 @@ namespace KlayGE
 		return dir_;
 	}
 
-	void LensFlareSceneObject::Update()
+	void LensFlareSceneObject::Update(float /*app_time*/, float /*elapsed_time*/)
 	{
 		float const FLARE_RENDERANGLE = 0.9f;
 		float const FLARE_SCALEAMOUNT = 0.2f;

@@ -70,8 +70,6 @@ private:
 	KlayGE::Color particle_color_from_;
 	KlayGE::Color particle_color_to_;
 
-	KlayGE::Timer timer_;
-
 	KlayGE::TexturePtr scene_tex_;
 	KlayGE::FrameBufferPtr scene_buffer_;
 

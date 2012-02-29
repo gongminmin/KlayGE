@@ -68,7 +68,7 @@ namespace KlayGE
 	public:
 		explicit SceneObjectLightSourceProxy(LightSourcePtr const & light);
 
-		void Update();
+		void Update(float app_time, float elapsed_time);
 
 		void Scaling(float x, float y, float z);
 		void Scaling(float3 const & s);
@@ -89,7 +89,7 @@ namespace KlayGE
 	public:
 		explicit SceneObjectCameraProxy(CameraPtr const & camera);
 
-		void Update();
+		void Update(float app_time, float elapsed_time);
 
 		void EyePos(float x, float y, float z);
 		void EyePos(float3 const & t);

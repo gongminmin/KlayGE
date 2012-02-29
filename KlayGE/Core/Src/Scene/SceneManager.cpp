@@ -341,12 +341,16 @@ namespace KlayGE
 		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 		re.BeginFrame();
 
+		App3DFramework& app = Context::Instance().AppInstance();
+		float const app_time = app.AppTime();
+		float const frame_time = app.FrameTime();
+
 		typedef BOOST_TYPEOF(lights_) LightsType;
 		BOOST_FOREACH(LightsType::const_reference light, lights_)
 		{
 			if (light->Enabled())
 			{
-				light->Update();
+				light->Update(app_time, frame_time);
 			}
 		}
 
@@ -355,7 +359,7 @@ namespace KlayGE
 		{
 			if (!(scene_obj->Attrib() & SceneObject::SOA_Overlay))
 			{
-				scene_obj->Update();
+				scene_obj->Update(app_time, frame_time);
 			}
 		}
 
@@ -399,6 +403,8 @@ namespace KlayGE
 
 		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 		App3DFramework& app = Context::Instance().AppInstance();
+		float const app_time = app.AppTime();
+		float const frame_time = app.FrameTime();
 
 		numObjectsRendered_ = 0;
 		numRenderablesRendered_ = 0;
@@ -446,7 +452,7 @@ namespace KlayGE
 			{
 				if (scene_objs_[i]->Attrib() & SceneObject::SOA_Overlay)
 				{
-					scene_objs_[i]->Update();
+					scene_objs_[i]->Update(app_time, frame_time);
 					(*visible_marks_)[i] = scene_objs_[i]->Visible();
 				}
 			}

@@ -451,7 +451,7 @@ namespace
 			return ocean_plane_;
 		}
 
-		void Update()
+		void Update(float app_time, float elapsed_time)
 		{
 			if (dirty_)
 			{
@@ -577,9 +577,9 @@ namespace
 				dirty_ = false;
 			}
 
-			InfTerrainSceneObject::Update();
+			InfTerrainSceneObject::Update(app_time, elapsed_time);
 
-			float t = static_cast<float>(timer_.elapsed() * ocean_param_.time_scale) / ocean_param_.time_peroid;
+			float t = app_time * ocean_param_.time_scale / ocean_param_.time_peroid;
 			float frame = (t - floor(t)) * ocean_param_.num_frames;
 			int frame0 = static_cast<int>(frame);
 			int frame1 = frame0 + 1;
@@ -746,8 +746,6 @@ namespace
 		TexturePtr displacement_tex_array_;
 		TexturePtr gradient_tex_array_;
 		std::vector<float3> displacement_params_;
-
-		Timer timer_;
 	};
 
 	

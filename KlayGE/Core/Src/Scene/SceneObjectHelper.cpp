@@ -126,7 +126,7 @@ namespace KlayGE
 		checked_pointer_cast<RenderableLightSourceProxy>(renderable_)->AttachLightSrc(light);
 	}
 
-	void SceneObjectLightSourceProxy::Update()
+	void SceneObjectLightSourceProxy::Update(float /*app_time*/, float /*elapsed_time*/)
 	{
 		model_ = model_scaling_ * MathLib::to_matrix(light_->Rotation()) * MathLib::translation(light_->Position()) * model_translation_;
 		checked_pointer_cast<RenderableLightSourceProxy>(renderable_)->SetModelMatrix(model_);
@@ -170,7 +170,7 @@ namespace KlayGE
 		up_vec_ = camera->UpVec();;
 	}
 
-	void SceneObjectCameraProxy::Update()
+	void SceneObjectCameraProxy::Update(float /*app_time*/, float /*elapsed_time*/)
 	{
 		camera_->ViewParams(eye_pos_, look_at_, up_vec_);
 		model_ = MathLib::inverse(camera_->ViewMatrix());

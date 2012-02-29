@@ -674,7 +674,7 @@ namespace KlayGE
 		{
 		}
 
-		void Update()
+		void Update(float /*app_time*/, float /*elapsed_time*/)
 		{
 			checked_pointer_cast<FontRenderable>(renderable_)->UpdateBuffers();
 		}

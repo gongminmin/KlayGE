@@ -37,7 +37,7 @@ namespace
 	class SpotLightSourceUpdate
 	{
 	public:
-		void operator()(LightSource& light)
+		void operator()(LightSource& light, float /*app_time*/, float /*elapsed_time*/)
 		{
 			light.Position(float3(0, 12, -4.8f));
 		}

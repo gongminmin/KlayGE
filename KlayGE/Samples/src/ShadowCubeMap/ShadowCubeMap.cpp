@@ -482,28 +482,22 @@ namespace
 	class OccluderObjectUpdate
 	{
 	public:
-		void operator()(SceneObject& obj)
+		void operator()(SceneObject& obj, float app_time, float /*elapsed_time*/)
 		{
-			obj.SetModelMatrix(MathLib::scaling(5.0f, 5.0f, 5.0f) * MathLib::translation(5.0f, 5.0f, 0.0f) * MathLib::rotation_y(-static_cast<float>(timer_.elapsed()) / 1.5f));
+			obj.SetModelMatrix(MathLib::scaling(5.0f, 5.0f, 5.0f) * MathLib::translation(5.0f, 5.0f, 0.0f) * MathLib::rotation_y(-app_time / 1.5f));
 		}
-
-	private:
-		Timer timer_;
 	};
 
 
 	class PointLightSourceUpdate
 	{
 	public:
-		void operator()(LightSource& light)
+		void operator()(LightSource& light, float app_time, float /*elapsed_time*/)
 		{
 			light.ModelMatrix(MathLib::rotation_z(0.4f)
-				* MathLib::rotation_y(static_cast<float>(timer_.elapsed()) / 1.4f)
+				* MathLib::rotation_y(app_time / 1.4f)
 				* MathLib::translation(2.0f, 12.0f, 4.0f));
 		}
-
-	private:
-		Timer timer_;
 	};
 
 

@@ -74,9 +74,9 @@ namespace KlayGE
 		bool Enabled() const;
 		void Enabled(bool enabled);
 
-		void BindUpdateFunc(boost::function<void(LightSource&)> const & update_func);
+		void BindUpdateFunc(boost::function<void(LightSource&, float, float)> const & update_func);
 
-		virtual void Update();
+		virtual void Update(float app_time, float elapsed_time);
 
 		virtual void AddToSceneManager();
 		virtual void DelFromSceneManager();
@@ -111,7 +111,7 @@ namespace KlayGE
 		bool enabled_;
 		float4 color_;
 
-		boost::function<void(LightSource&)> update_func_;
+		boost::function<void(LightSource&, float, float)> update_func_;
 	};
 
 	class KLAYGE_CORE_API AmbientLightSource : public LightSource
