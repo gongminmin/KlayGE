@@ -6,7 +6,6 @@
 #include <KlayGE/Font.hpp>
 #include <KlayGE/CameraController.hpp>
 #include <KlayGE/ParticleSystem.hpp>
-#include <KlayGE/Timer.hpp>
 #include <KlayGE/PostProcess.hpp>
 #include <KlayGE/UI.hpp>
 

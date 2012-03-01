@@ -1,5 +1,6 @@
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/Context.hpp>
+#include <KlayGE/App3D.hpp>
 #include <KlayGE/Util.hpp>
 #include <KlayGE/Math.hpp>
 #include <KlayGE/RenderEffect.hpp>
@@ -22,8 +23,7 @@ void NightVisionPostProcess::OnRenderBegin()
 {
 	PostProcess::OnRenderBegin();
 
-	float elapsed_time = static_cast<float>(timer_.elapsed());
-	timer_.restart();
+	float elapsed_time = Context::Instance().AppInstance().FrameTime();
 
 	float2 sc;
 	MathLib::sincos(elapsed_time * 50000.0f, sc.x(), sc.y());

@@ -15,7 +15,6 @@
 #include <KlayGE/RenderSettings.hpp>
 #include <KlayGE/SceneObjectHelper.hpp>
 #include <KlayGE/UI.hpp>
-#include <KlayGE/Timer.hpp>
 #include <KlayGE/Light.hpp>
 #include <KlayGE/Camera.hpp>
 
@@ -258,9 +257,6 @@ namespace
 		{
 			checked_pointer_cast<RenderPolygon>(renderable_)->LightFalloff(light_falloff);
 		}
-
-	private:
-		Timer timer_;
 	};
 
 

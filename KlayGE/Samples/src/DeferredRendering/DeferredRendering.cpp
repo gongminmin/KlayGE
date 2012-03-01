@@ -15,7 +15,6 @@
 #include <KlayGE/Mesh.hpp>
 #include <KlayGE/SceneObjectHelper.hpp>
 #include <KlayGE/PostProcess.hpp>
-#include <KlayGE/Timer.hpp>
 #include <KlayGE/Camera.hpp>
 #include <KlayGE/DeferredRenderingLayer.hpp>
 

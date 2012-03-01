@@ -45,6 +45,12 @@ namespace
 		{
 		}
 
+		void AppTime(float app_time)
+		{
+			
+			*(technique_->Effect().ParameterByName("t")) = app_time / 2.0f;
+		}
+
 		void OnRenderBegin()
 		{
 			App3DFramework const & app = Context::Instance().AppInstance();
@@ -55,7 +61,6 @@ namespace
 
 			*(technique_->Effect().ParameterByName("mvp")) = model * view * proj;
 			*(technique_->Effect().ParameterByName("eye_pos")) = app.ActiveCamera().EyePos();
-			*(technique_->Effect().ParameterByName("t")) = static_cast<float>(timer_.elapsed()) / 2.0f;
 		}
 
 		void LightPos(float3 const & light_pos)
@@ -82,9 +87,6 @@ namespace
 		{
 			*(technique_->Effect().ParameterByName("freq")) = freq;
 		}
-
-	private:
-		Timer timer_;
 	};
 
 	class PolygonObject : public SceneObjectHelper
@@ -138,6 +140,15 @@ namespace
 			for (uint32_t i = 0; i < model->NumMeshes(); ++ i)
 			{
 				checked_pointer_cast<RenderPolygon>(model->Mesh(i))->ProceduralFreq(freq);
+			}
+		}
+
+		void Update(float app_time, float /*elapsed_time*/)
+		{
+			RenderModelPtr model = checked_pointer_cast<RenderModel>(renderable_);
+			for (uint32_t i = 0; i < model->NumMeshes(); ++ i)
+			{
+				checked_pointer_cast<RenderPolygon>(model->Mesh(i))->AppTime(app_time);
 			}
 		}
 	};

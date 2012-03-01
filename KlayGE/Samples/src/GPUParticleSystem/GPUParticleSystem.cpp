@@ -17,7 +17,6 @@
 #include <KlayGE/RenderableHelper.hpp>
 #include <KlayGE/SceneObjectHelper.hpp>
 #include <KlayGE/ElementFormat.hpp>
-#include <KlayGE/Timer.hpp>
 #include <KlayGE/UI.hpp>
 #include <KlayGE/Camera.hpp>
 

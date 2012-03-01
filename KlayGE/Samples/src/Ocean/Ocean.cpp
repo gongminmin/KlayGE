@@ -17,7 +17,6 @@
 #include <KlayGE/GraphicsBuffer.hpp>
 #include <KlayGE/SceneObjectHelper.hpp>
 #include <KlayGE/PostProcess.hpp>
-#include <KlayGE/Timer.hpp>
 #include <KlayGE/InfTerrain.hpp>
 #include <KlayGE/LensFlare.hpp>
 #include <KlayGE/Camera.hpp>

@@ -48,7 +48,6 @@ private:
 
 	KlayGE::DeferredRenderingLayerPtr deferred_rendering_;
 
-	KlayGE::Timer ani_timer_;
 	float last_time_;
 	float frame_;
 

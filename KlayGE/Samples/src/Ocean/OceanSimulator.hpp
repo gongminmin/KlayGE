@@ -3,7 +3,6 @@
 
 #include <KlayGE/PreDeclare.hpp>
 #include <KlayGE/Math.hpp>
-#include <KlayGE/Timer.hpp>
 
 #include "FFT.hpp"
 

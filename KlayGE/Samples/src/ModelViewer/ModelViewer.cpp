@@ -759,7 +759,7 @@ uint32_t ModelViewerApp::DoUpdate(KlayGE::uint32_t pass)
 	boost::shared_ptr<ModelObject> model = checked_pointer_cast<ModelObject>(model_);
 	if (play_)
 	{
-		float this_time = static_cast<float>(ani_timer_.elapsed());
+		float this_time = this->AppTime();
 		if (this_time - last_time_ > 0.1f / model->FrameRate())
 		{
 			frame_ += 0.1f;
