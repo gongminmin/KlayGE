@@ -6,6 +6,10 @@
 #if defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
 #define KFONT_PLATFORM_WINDOWS
 #define NOMINMAX
+// Forces all boost's libraries to be linked as dll
+#ifndef BOOST_ALL_DYN_LINK
+	#define BOOST_ALL_DYN_LINK
+#endif
 #elif defined(__ANDROID__)
 #define KFONT_PLATFORM_ANDROID
 #endif
@@ -15,7 +19,7 @@
 #include <boost/cstdint.hpp>
 #if defined(_MSC_VER)
 #pragma warning(push)
-#pragma warning(disable: 6011 6334)
+#pragma warning(disable: 4100 6011 6334)
 #endif
 #include <boost/unordered_map.hpp>
 #include <boost/functional/hash.hpp>

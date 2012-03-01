@@ -39,7 +39,7 @@
         <Library Value="vorbisfile_static_d"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
-      <General OutputFile="../../lib/linux_x64/libKlayGE_AudioDataSource_OggVorbis_gcc_d.so" IntermediateDirectory="../../Debug/linux_x64/OggVorbis" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
+      <General OutputFile="../../lib/linux_x64/libKlayGE_AudioDataSource_OggVorbis_gcc_d.so" IntermediateDirectory="Debug/linux_x64/OggVorbis" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
       <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
         <PostConnectCommands/>
         <StartupCommands/>
@@ -86,7 +86,7 @@
         <Library Value="vorbisfile_static_d"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
-      <General OutputFile="../../lib/linux_x86/libKlayGE_AudioDataSource_OggVorbis_gcc_d.so" IntermediateDirectory="../../Debug/linux_x86/OggVorbis" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
+      <General OutputFile="../../lib/linux_x86/libKlayGE_AudioDataSource_OggVorbis_gcc_d.so" IntermediateDirectory="Debug/linux_x86/OggVorbis" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
       <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
         <PostConnectCommands/>
         <StartupCommands/>
@@ -135,7 +135,7 @@
         <Library Value="vorbisfile_static_d"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
-      <General OutputFile="../../lib/win_x64/libKlayGE_AudioDataSource_OggVorbis_mgw_d.dll" IntermediateDirectory="../../Debug/win_x64/OggVorbis" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
+      <General OutputFile="../../lib/win_x64/libKlayGE_AudioDataSource_OggVorbis_mgw_d.dll" IntermediateDirectory="Debug/win_x64/OggVorbis" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
       <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
         <PostConnectCommands/>
         <StartupCommands/>
@@ -184,7 +184,7 @@
         <Library Value="vorbisfile_static_d"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
-      <General OutputFile="../../lib/win_x86/libKlayGE_AudioDataSource_OggVorbis_mgw_d.dll" IntermediateDirectory="../../Debug/win_x86/OggVorbis" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
+      <General OutputFile="../../lib/win_x86/libKlayGE_AudioDataSource_OggVorbis_mgw_d.dll" IntermediateDirectory="Debug/win_x86/OggVorbis" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
       <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
         <PostConnectCommands/>
         <StartupCommands/>
@@ -231,7 +231,7 @@
         <Library Value="vorbisfile_static"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
-      <General OutputFile="../../lib/linux_x64/libKlayGE_AudioDataSource_OggVorbis_gcc.so" IntermediateDirectory="../../Release/linux_x64/OggVorbis" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
+      <General OutputFile="../../lib/linux_x64/libKlayGE_AudioDataSource_OggVorbis_gcc.so" IntermediateDirectory="Release/linux_x64/OggVorbis" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
       <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
         <PostConnectCommands/>
         <StartupCommands/>
@@ -278,7 +278,7 @@
         <Library Value="vorbisfile_static"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
-      <General OutputFile="../../lib/linux_x86/libKlayGE_AudioDataSource_OggVorbis_gcc.so" IntermediateDirectory="../../Release/linux_x86/OggVorbis" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
+      <General OutputFile="../../lib/linux_x86/libKlayGE_AudioDataSource_OggVorbis_gcc.so" IntermediateDirectory="Release/linux_x86/OggVorbis" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
       <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
         <PostConnectCommands/>
         <StartupCommands/>
@@ -327,7 +327,7 @@
         <Library Value="vorbisfile_static"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
-      <General OutputFile="../../lib/win_x64/libKlayGE_AudioDataSource_OggVorbis_mgw.dll" IntermediateDirectory="../../Release/win_x64/OggVorbis" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
+      <General OutputFile="../../lib/win_x64/libKlayGE_AudioDataSource_OggVorbis_mgw.dll" IntermediateDirectory="Release/win_x64/OggVorbis" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
       <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
         <PostConnectCommands/>
         <StartupCommands/>
@@ -376,7 +376,7 @@
         <Library Value="vorbisfile_static"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
-      <General OutputFile="../../lib/win_x86/libKlayGE_AudioDataSource_OggVorbis_mgw.dll" IntermediateDirectory="../../Release/win_x86/OggVorbis" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
+      <General OutputFile="../../lib/win_x86/libKlayGE_AudioDataSource_OggVorbis_mgw.dll" IntermediateDirectory="Release/win_x86/OggVorbis" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
       <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
         <PostConnectCommands/>
         <StartupCommands/>

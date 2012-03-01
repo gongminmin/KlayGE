@@ -39,7 +39,7 @@
       <Linker Options="-Wl,--enable-auto-import" Required="yes">
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
-      <General OutputFile="../../lib/linux_x64/libglloader_es_x64_d.dll" IntermediateDirectory="../../Debug-GLES/x64" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="no"/>
+      <General OutputFile="../../lib/linux_x64/libglloader_es_x64_d.dll" IntermediateDirectory="Debug-GLES/x64" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="no"/>
       <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
         <PostConnectCommands/>
         <StartupCommands/>
@@ -73,7 +73,7 @@
       <Linker Options="-Wl,--enable-auto-import" Required="yes">
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
-      <General OutputFile="../../lib/linux_x86/libglloader_es_x86_d.dll" IntermediateDirectory="../../Debug-GLES/x86" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="no"/>
+      <General OutputFile="../../lib/linux_x86/libglloader_es_x86_d.dll" IntermediateDirectory="Debug-GLES/x86" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="no"/>
       <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
         <PostConnectCommands/>
         <StartupCommands/>
@@ -107,7 +107,7 @@
       <Linker Options="-Wl,--enable-auto-import" Required="yes">
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
-      <General OutputFile="../../lib/win_x64/libglloader_es_x64_d.dll" IntermediateDirectory="../../Debug-GLES/x64" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="no"/>
+      <General OutputFile="../../lib/win_x64/libglloader_es_x64_d.dll" IntermediateDirectory="Debug-GLES/x64" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="no"/>
       <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
         <PostConnectCommands/>
         <StartupCommands/>
@@ -141,7 +141,7 @@
       <Linker Options="-Wl,--enable-auto-import" Required="yes">
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
-      <General OutputFile="../../lib/win_x86/libglloader_es_x86_d.dll" IntermediateDirectory="../../Debug-GLES/x86" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="no"/>
+      <General OutputFile="../../lib/win_x86/libglloader_es_x86_d.dll" IntermediateDirectory="Debug-GLES/x86" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="no"/>
       <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
         <PostConnectCommands/>
         <StartupCommands/>
@@ -176,7 +176,7 @@
         <Library Value="X11"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
-      <General OutputFile="../../lib/linux_x64/libglloader_x64_d.dll" IntermediateDirectory="../../Debug/x64" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="no"/>
+      <General OutputFile="../../lib/linux_x64/libglloader_x64_d.dll" IntermediateDirectory="Debug/x64" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="no"/>
       <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
         <PostConnectCommands/>
         <StartupCommands/>
@@ -211,7 +211,7 @@
         <Library Value="X11"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
-      <General OutputFile="../../lib/linux_x86/libglloader_x86_d.dll" IntermediateDirectory="../../Debug/x86" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="no"/>
+      <General OutputFile="../../lib/linux_x86/libglloader_x86_d.dll" IntermediateDirectory="Debug/x86" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="no"/>
       <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
         <PostConnectCommands/>
         <StartupCommands/>
@@ -245,7 +245,7 @@
         <Library Value="opengl32"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
-      <General OutputFile="../../lib/win_x64/libglloader_x64_d.dll" IntermediateDirectory="../../Debug/x64" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="no"/>
+      <General OutputFile="../../lib/win_x64/libglloader_x64_d.dll" IntermediateDirectory="Debug/x64" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="no"/>
       <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
         <PostConnectCommands/>
         <StartupCommands/>
@@ -279,7 +279,7 @@
         <Library Value="opengl32"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
-      <General OutputFile="../../lib/win_x86/libglloader_x86_d.dll" IntermediateDirectory="../../Debug/x86" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="no"/>
+      <General OutputFile="../../lib/win_x86/libglloader_x86_d.dll" IntermediateDirectory="Debug/x86" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="no"/>
       <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
         <PostConnectCommands/>
         <StartupCommands/>
@@ -313,7 +313,7 @@
       <Linker Options="-s -Wl,--enable-auto-import" Required="yes">
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
-      <General OutputFile="../../lib/linux_x64/libglloader_es_x64.dll" IntermediateDirectory="../../Release-GLES/x64" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="no"/>
+      <General OutputFile="../../lib/linux_x64/libglloader_es_x64.dll" IntermediateDirectory="Release-GLES/x64" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="no"/>
       <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
         <PostConnectCommands/>
         <StartupCommands/>
@@ -347,7 +347,7 @@
       <Linker Options="-s -Wl,--enable-auto-import" Required="yes">
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
-      <General OutputFile="../../lib/linux_x86/libglloader_es_x86.dll" IntermediateDirectory="../../Release-GLES/x86" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="no"/>
+      <General OutputFile="../../lib/linux_x86/libglloader_es_x86.dll" IntermediateDirectory="Release-GLES/x86" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="no"/>
       <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
         <PostConnectCommands/>
         <StartupCommands/>
@@ -381,7 +381,7 @@
       <Linker Options="-s -Wl,--enable-auto-import" Required="yes">
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
-      <General OutputFile="../../lib/win_x64/libglloader_es_x64.dll" IntermediateDirectory="../../Release-GLES/x64" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="no"/>
+      <General OutputFile="../../lib/win_x64/libglloader_es_x64.dll" IntermediateDirectory="Release-GLES/x64" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="no"/>
       <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
         <PostConnectCommands/>
         <StartupCommands/>
@@ -415,7 +415,7 @@
       <Linker Options="-s -Wl,--enable-auto-import" Required="yes">
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
-      <General OutputFile="../../lib/win_x86/libglloader_es_x86.dll" IntermediateDirectory="../../Release-GLES/x86" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="no"/>
+      <General OutputFile="../../lib/win_x86/libglloader_es_x86.dll" IntermediateDirectory="Release-GLES/x86" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="no"/>
       <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
         <PostConnectCommands/>
         <StartupCommands/>
@@ -450,7 +450,7 @@
         <Library Value="X11"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
-      <General OutputFile="../../lib/linux_x64/libglloader_x64.dll" IntermediateDirectory="../../Release/x64" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="no"/>
+      <General OutputFile="../../lib/linux_x64/libglloader_x64.dll" IntermediateDirectory="Release/x64" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="no"/>
       <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
         <PostConnectCommands/>
         <StartupCommands/>
@@ -485,7 +485,7 @@
         <Library Value="X11"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
-      <General OutputFile="../../lib/linux_x86/libglloader_x86.dll" IntermediateDirectory="../../Release/x86" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="no"/>
+      <General OutputFile="../../lib/linux_x86/libglloader_x86.dll" IntermediateDirectory="Release/x86" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="no"/>
       <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
         <PostConnectCommands/>
         <StartupCommands/>
@@ -519,7 +519,7 @@
         <Library Value="opengl32"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
-      <General OutputFile="../../lib/win_x64/libglloader_x64.dll" IntermediateDirectory="../../Release/x64" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="no"/>
+      <General OutputFile="../../lib/win_x64/libglloader_x64.dll" IntermediateDirectory="Release/x64" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="no"/>
       <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
         <PostConnectCommands/>
         <StartupCommands/>
@@ -553,7 +553,7 @@
         <Library Value="opengl32"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
-      <General OutputFile="../../lib/win_x86/libglloader_x86.dll" IntermediateDirectory="../../Release/x86" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="no"/>
+      <General OutputFile="../../lib/win_x86/libglloader_x86.dll" IntermediateDirectory="Release/x86" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="no"/>
       <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
         <PostConnectCommands/>
         <StartupCommands/>

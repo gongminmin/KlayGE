@@ -20,8 +20,8 @@
 	<Configurations>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory="../../$(ConfigurationName)/$(PlatformName)"
-			IntermediateDirectory="../../$(ConfigurationName)/$(PlatformName)"
+			OutputDirectory="$(ConfigurationName)/$(PlatformName)"
+			IntermediateDirectory="$(ConfigurationName)/$(PlatformName)"
 			ConfigurationType="2"
 			CharacterSet="2"
 			>
@@ -98,8 +98,8 @@
 		</Configuration>
 		<Configuration
 			Name="Debug|x64"
-			OutputDirectory="../../$(ConfigurationName)/$(PlatformName)"
-			IntermediateDirectory="../../$(ConfigurationName)/$(PlatformName)"
+			OutputDirectory="$(ConfigurationName)/$(PlatformName)"
+			IntermediateDirectory="$(ConfigurationName)/$(PlatformName)"
 			ConfigurationType="2"
 			CharacterSet="2"
 			>
@@ -177,8 +177,8 @@
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory="../../$(ConfigurationName)/$(PlatformName)"
-			IntermediateDirectory="../../$(ConfigurationName)/$(PlatformName)"
+			OutputDirectory="$(ConfigurationName)/$(PlatformName)"
+			IntermediateDirectory="$(ConfigurationName)/$(PlatformName)"
 			ConfigurationType="2"
 			CharacterSet="2"
 			>
@@ -255,8 +255,8 @@
 		</Configuration>
 		<Configuration
 			Name="Release|x64"
-			OutputDirectory="../../$(ConfigurationName)/$(PlatformName)"
-			IntermediateDirectory="../../$(ConfigurationName)/$(PlatformName)"
+			OutputDirectory="$(ConfigurationName)/$(PlatformName)"
+			IntermediateDirectory="$(ConfigurationName)/$(PlatformName)"
 			ConfigurationType="2"
 			CharacterSet="2"
 			>

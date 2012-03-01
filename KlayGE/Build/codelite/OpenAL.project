@@ -38,7 +38,7 @@
         <Library Value="openal"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
-      <General OutputFile="../../lib/linux_x64/libKlayGE_AudioEngine_OpenAL_gcc_d.so" IntermediateDirectory="../../Debug/linux_x64/OpenAL" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
+      <General OutputFile="../../lib/linux_x64/libKlayGE_AudioEngine_OpenAL_gcc_d.so" IntermediateDirectory="Debug/linux_x64/OpenAL" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
       <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
         <PostConnectCommands/>
         <StartupCommands/>
@@ -82,7 +82,7 @@
         <Library Value="openal"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
-      <General OutputFile="../../lib/linux_x86/libKlayGE_AudioEngine_OpenAL_gcc_d.so" IntermediateDirectory="../../Debug/linux_x86/OpenAL" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
+      <General OutputFile="../../lib/linux_x86/libKlayGE_AudioEngine_OpenAL_gcc_d.so" IntermediateDirectory="Debug/linux_x86/OpenAL" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
       <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
         <PostConnectCommands/>
         <StartupCommands/>
@@ -128,7 +128,7 @@
         <Library Value="OpenAL32"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
-      <General OutputFile="../../lib/win_x64/libKlayGE_AudioEngine_OpenAL_mgw_d.dll" IntermediateDirectory="../../Debug/win_x64/OpenAL" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
+      <General OutputFile="../../lib/win_x64/libKlayGE_AudioEngine_OpenAL_mgw_d.dll" IntermediateDirectory="Debug/win_x64/OpenAL" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
       <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
         <PostConnectCommands/>
         <StartupCommands/>
@@ -174,7 +174,7 @@
         <Library Value="OpenAL32"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
-      <General OutputFile="../../lib/win_x86/libKlayGE_AudioEngine_OpenAL_mgw_d.dll" IntermediateDirectory="../../Debug/win_x86/OpenAL" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
+      <General OutputFile="../../lib/win_x86/libKlayGE_AudioEngine_OpenAL_mgw_d.dll" IntermediateDirectory="Debug/win_x86/OpenAL" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
       <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
         <PostConnectCommands/>
         <StartupCommands/>
@@ -218,7 +218,7 @@
         <Library Value="openal"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
-      <General OutputFile="../../lib/linux_x64/libKlayGE_AudioEngine_OpenAL_gcc.so" IntermediateDirectory="../../Release/linux_x64/OpenAL" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
+      <General OutputFile="../../lib/linux_x64/libKlayGE_AudioEngine_OpenAL_gcc.so" IntermediateDirectory="Release/linux_x64/OpenAL" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
       <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
         <PostConnectCommands/>
         <StartupCommands/>
@@ -262,7 +262,7 @@
         <Library Value="openal"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
-      <General OutputFile="../../lib/linux_x86/libKlayGE_AudioEngine_OpenAL_gcc.so" IntermediateDirectory="../../Release/linux_x86/OpenAL" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
+      <General OutputFile="../../lib/linux_x86/libKlayGE_AudioEngine_OpenAL_gcc.so" IntermediateDirectory="Release/linux_x86/OpenAL" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
       <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
         <PostConnectCommands/>
         <StartupCommands/>
@@ -308,7 +308,7 @@
         <Library Value="OpenAL32"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
-      <General OutputFile="../../lib/win_x64/libKlayGE_AudioEngine_OpenAL_mgw.dll" IntermediateDirectory="../../Release/win_x64/OpenAL" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
+      <General OutputFile="../../lib/win_x64/libKlayGE_AudioEngine_OpenAL_mgw.dll" IntermediateDirectory="Release/win_x64/OpenAL" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
       <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
         <PostConnectCommands/>
         <StartupCommands/>
@@ -354,7 +354,7 @@
         <Library Value="OpenAL32"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
-      <General OutputFile="../../lib/win_x86/libKlayGE_AudioEngine_OpenAL_mgw.dll" IntermediateDirectory="../../Release/win_x86/OpenAL" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
+      <General OutputFile="../../lib/win_x86/libKlayGE_AudioEngine_OpenAL_mgw.dll" IntermediateDirectory="Release/win_x86/OpenAL" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
       <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
         <PostConnectCommands/>
         <StartupCommands/>

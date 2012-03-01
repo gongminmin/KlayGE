@@ -44,7 +44,6 @@
 #include <boost/type_traits/is_same.hpp>
 #include <boost/type_traits/add_reference.hpp>
 #include <boost/utility/result_of.hpp>
-#include <boost/pool/detail/singleton.hpp>
 #include <exception>
 #include <vector>
 

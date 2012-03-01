@@ -22,7 +22,7 @@
 		<Configuration
 			Name="Debug|Win32"
 			OutputDirectory="../../lib/$(PlatformName)"
-			IntermediateDirectory="../../$(ConfigurationName)/$(PlatformName)/$(TargetName)"
+			IntermediateDirectory="$(ConfigurationName)/$(PlatformName)/$(TargetName)"
 			ConfigurationType="2"
 			CharacterSet="1"
 			>
@@ -97,7 +97,7 @@
 		<Configuration
 			Name="Debug|x64"
 			OutputDirectory="../../lib/$(PlatformName)"
-			IntermediateDirectory="../../$(ConfigurationName)/$(PlatformName)/$(TargetName)"
+			IntermediateDirectory="$(ConfigurationName)/$(PlatformName)/$(TargetName)"
 			ConfigurationType="2"
 			CharacterSet="1"
 			>
@@ -172,7 +172,7 @@
 		<Configuration
 			Name="Release|Win32"
 			OutputDirectory="../../lib/$(PlatformName)"
-			IntermediateDirectory="../../$(ConfigurationName)/$(PlatformName)/$(TargetName)"
+			IntermediateDirectory="$(ConfigurationName)/$(PlatformName)/$(TargetName)"
 			ConfigurationType="2"
 			CharacterSet="1"
 			WholeProgramOptimization="0"
@@ -252,7 +252,7 @@
 		<Configuration
 			Name="Release|x64"
 			OutputDirectory="../../lib/$(PlatformName)"
-			IntermediateDirectory="../../$(ConfigurationName)/$(PlatformName)/$(TargetName)"
+			IntermediateDirectory="$(ConfigurationName)/$(PlatformName)/$(TargetName)"
 			ConfigurationType="2"
 			CharacterSet="1"
 			WholeProgramOptimization="0"

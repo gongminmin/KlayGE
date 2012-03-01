@@ -38,7 +38,7 @@
         <Library Value="boost_thread-mgw45-mt-1_47"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
-      <General OutputFile="../../lib/win_x64/libKlayGE_AudioEngine_DSound_mgw_d.dll" IntermediateDirectory="../../Debug/win_x64/DSound" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
+      <General OutputFile="../../lib/win_x64/libKlayGE_AudioEngine_DSound_mgw_d.dll" IntermediateDirectory="Debug/win_x64/DSound" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
       <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
         <PostConnectCommands/>
         <StartupCommands/>
@@ -82,7 +82,7 @@
         <Library Value="boost_thread-mgw45-mt-1_47"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
-      <General OutputFile="../../lib/win_x86/libKlayGE_AudioEngine_DSound_mgw_d.dll" IntermediateDirectory="../../Debug/win_x86/DSound" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
+      <General OutputFile="../../lib/win_x86/libKlayGE_AudioEngine_DSound_mgw_d.dll" IntermediateDirectory="Debug/win_x86/DSound" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
       <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
         <PostConnectCommands/>
         <StartupCommands/>
@@ -126,7 +126,7 @@
         <Library Value="boost_thread-mgw45-mt-1_47"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
-      <General OutputFile="../../lib/win_x64/libKlayGE_AudioEngine_DSound_mgw.dll" IntermediateDirectory="../../Release/win_x64/DSound" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
+      <General OutputFile="../../lib/win_x64/libKlayGE_AudioEngine_DSound_mgw.dll" IntermediateDirectory="Release/win_x64/DSound" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
       <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
         <PostConnectCommands/>
         <StartupCommands/>
@@ -170,7 +170,7 @@
         <Library Value="boost_thread-mgw45-mt-1_47"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
-      <General OutputFile="../../lib/win_x86/libKlayGE_AudioEngine_DSound_mgw.dll" IntermediateDirectory="../../Release/win_x86/DSound" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
+      <General OutputFile="../../lib/win_x86/libKlayGE_AudioEngine_DSound_mgw.dll" IntermediateDirectory="Release/win_x86/DSound" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
       <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
         <PostConnectCommands/>
         <StartupCommands/>

@@ -64,22 +64,22 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <OutDir>../../../bin/win_x86/</OutDir>
-    <IntDir>../../$(Configuration)/$(Platform)/$(TargetName)/</IntDir>
+    <IntDir>$(Configuration)/$(Platform)/$(TargetName)/</IntDir>
     <TargetName>$(ProjectName)_d</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <OutDir>../../../bin/win_x64/</OutDir>
-    <IntDir>../../$(Configuration)/$(Platform)/$(TargetName)/</IntDir>
+    <IntDir>$(Configuration)/$(Platform)/$(TargetName)/</IntDir>
     <TargetName>$(ProjectName)_d</TargetName>
     <LinkIncremental>true</LinkIncremental>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <OutDir>../../../bin/win_x86/</OutDir>
-    <IntDir>../../$(Configuration)/$(Platform)/$(TargetName)/</IntDir>
+    <IntDir>$(Configuration)/$(Platform)/$(TargetName)/</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <OutDir>../../../bin/win_x64/</OutDir>
-    <IntDir>../../$(Configuration)/$(Platform)/$(TargetName)/</IntDir>
+    <IntDir>$(Configuration)/$(Platform)/$(TargetName)/</IntDir>
     <LinkIncremental>false</LinkIncremental>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">

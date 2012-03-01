@@ -40,7 +40,7 @@
         <Library Value="boost_system-mgw45-mt-d-1_47"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
-      <General OutputFile="../../lib/win_x64/libKlayGE_InputEngine_DInput_mgw_d.dll" IntermediateDirectory="../../Debug/win_x64/DInput" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
+      <General OutputFile="../../lib/win_x64/libKlayGE_InputEngine_DInput_mgw_d.dll" IntermediateDirectory="Debug/win_x64/DInput" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
       <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
         <PostConnectCommands/>
         <StartupCommands/>
@@ -83,7 +83,7 @@
         <Library Value="boost_system-mgw45-mt-d-1_47"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
-      <General OutputFile="../../lib/win_x86/libKlayGE_InputEngine_DInput_mgw_d.dll" IntermediateDirectory="../../Debug/win_x86/DInput" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
+      <General OutputFile="../../lib/win_x86/libKlayGE_InputEngine_DInput_mgw_d.dll" IntermediateDirectory="Debug/win_x86/DInput" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
       <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
         <PostConnectCommands/>
         <StartupCommands/>
@@ -126,7 +126,7 @@
         <Library Value="boost_system-mgw45-mt-1_47"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
-      <General OutputFile="../../lib/win_x64/libKlayGE_InputEngine_DInput_mgw.dll" IntermediateDirectory="../../Release/win_x64/DInput" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
+      <General OutputFile="../../lib/win_x64/libKlayGE_InputEngine_DInput_mgw.dll" IntermediateDirectory="Release/win_x64/DInput" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
       <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
         <PostConnectCommands/>
         <StartupCommands/>
@@ -169,7 +169,7 @@
         <Library Value="boost_system-mgw45-mt-1_47"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
-      <General OutputFile="../../lib/win_x86/libKlayGE_InputEngine_DInput_mgw.dll" IntermediateDirectory="../../Release/win_x86/DInput" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
+      <General OutputFile="../../lib/win_x86/libKlayGE_InputEngine_DInput_mgw.dll" IntermediateDirectory="Release/win_x86/DInput" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
       <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
         <PostConnectCommands/>
         <StartupCommands/>

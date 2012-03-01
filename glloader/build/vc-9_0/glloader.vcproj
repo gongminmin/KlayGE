@@ -22,7 +22,7 @@
 		<Configuration
 			Name="Debug|Win32"
 			OutputDirectory="../../lib/$(PlatformName)"
-			IntermediateDirectory="../../$(ConfigurationName)/$(PlatformName)"
+			IntermediateDirectory="$(ConfigurationName)/$(PlatformName)"
 			ConfigurationType="2"
 			CharacterSet="2"
 			>
@@ -98,7 +98,7 @@
 		<Configuration
 			Name="Debug|x64"
 			OutputDirectory="../../lib/$(PlatformName)"
-			IntermediateDirectory="../../$(ConfigurationName)/$(PlatformName)"
+			IntermediateDirectory="$(ConfigurationName)/$(PlatformName)"
 			ConfigurationType="2"
 			CharacterSet="2"
 			>
@@ -175,7 +175,7 @@
 		<Configuration
 			Name="Release|Win32"
 			OutputDirectory="../../lib/$(PlatformName)"
-			IntermediateDirectory="../../$(ConfigurationName)/$(PlatformName)"
+			IntermediateDirectory="$(ConfigurationName)/$(PlatformName)"
 			ConfigurationType="2"
 			CharacterSet="2"
 			>
@@ -257,7 +257,7 @@
 		<Configuration
 			Name="Release|x64"
 			OutputDirectory="../../lib/$(PlatformName)"
-			IntermediateDirectory="../../$(ConfigurationName)/$(PlatformName)"
+			IntermediateDirectory="$(ConfigurationName)/$(PlatformName)"
 			ConfigurationType="2"
 			CharacterSet="2"
 			>
@@ -338,7 +338,7 @@
 		<Configuration
 			Name="Debug-GLES|Win32"
 			OutputDirectory="../../lib/$(PlatformName)"
-			IntermediateDirectory="../../$(ConfigurationName)/$(PlatformName)"
+			IntermediateDirectory="$(ConfigurationName)/$(PlatformName)"
 			ConfigurationType="2"
 			CharacterSet="2"
 			>
@@ -413,7 +413,7 @@
 		<Configuration
 			Name="Debug-GLES|x64"
 			OutputDirectory="../../lib/$(PlatformName)"
-			IntermediateDirectory="../../$(ConfigurationName)/$(PlatformName)"
+			IntermediateDirectory="$(ConfigurationName)/$(PlatformName)"
 			ConfigurationType="2"
 			CharacterSet="2"
 			>
@@ -491,7 +491,7 @@
 		<Configuration
 			Name="Release-GLES|Win32"
 			OutputDirectory="../../lib/$(PlatformName)"
-			IntermediateDirectory="../../$(ConfigurationName)/$(PlatformName)"
+			IntermediateDirectory="$(ConfigurationName)/$(PlatformName)"
 			ConfigurationType="2"
 			CharacterSet="2"
 			>
@@ -572,7 +572,7 @@
 		<Configuration
 			Name="Release-GLES|x64"
 			OutputDirectory="../../lib/$(PlatformName)"
-			IntermediateDirectory="../../$(ConfigurationName)/$(PlatformName)"
+			IntermediateDirectory="$(ConfigurationName)/$(PlatformName)"
 			ConfigurationType="2"
 			CharacterSet="2"
 			>

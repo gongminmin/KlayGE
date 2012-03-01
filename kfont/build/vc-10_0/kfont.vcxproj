@@ -63,25 +63,25 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
     <OutDir>../../lib/$(Platform)/</OutDir>
-    <IntDir>../../$(Configuration)/$(Platform)/</IntDir>
+    <IntDir>$(Configuration)/$(Platform)/</IntDir>
     <TargetName>$(ProjectName)_x86_d</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
     <OutDir>../../lib/$(Platform)/</OutDir>
-    <IntDir>../../$(Configuration)/$(Platform)/</IntDir>
+    <IntDir>$(Configuration)/$(Platform)/</IntDir>
     <TargetName>$(ProjectName)_x64_d</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
     <OutDir>../../lib/$(Platform)/</OutDir>
-    <IntDir>../../$(Configuration)/$(Platform)/</IntDir>
+    <IntDir>$(Configuration)/$(Platform)/</IntDir>
     <TargetName>$(ProjectName)_x86</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
     <OutDir>../../lib/$(Platform)/</OutDir>
-    <IntDir>../../$(Configuration)/$(Platform)/</IntDir>
+    <IntDir>$(Configuration)/$(Platform)/</IntDir>
     <TargetName>$(ProjectName)_x64</TargetName>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -97,6 +97,7 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>../../../External/boost/lib_vc10_x86/lib</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
       <Command>copy "$(TargetDir)$(TargetFileName)" ..\..\..\KlayGE\bin\win_x86\</Command>
@@ -116,6 +117,7 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>../../../External/boost/lib_vc10_x64/lib</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
       <Command>copy "$(TargetDir)$(TargetFileName)" ..\..\..\KlayGE\bin\win_x64\</Command>
@@ -144,6 +146,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalLibraryDirectories>../../../External/boost/lib_vc10_x86/lib</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
       <Command>copy "$(TargetDir)$(TargetFileName)" ..\..\..\KlayGE\bin\win_x86\</Command>
@@ -171,6 +174,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalLibraryDirectories>../../../External/boost/lib_vc10_x64/lib</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
       <Command>copy "$(TargetDir)$(TargetFileName)" ..\..\..\KlayGE\bin\win_x64\</Command>

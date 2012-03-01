@@ -40,7 +40,7 @@
         <Library Value="uuid"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
-      <General OutputFile="../../lib/win_x64/libKlayGE_ShowEngine_DShow_mgw_d.dll" IntermediateDirectory="../../Debug/win_x64/DShow" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
+      <General OutputFile="../../lib/win_x64/libKlayGE_ShowEngine_DShow_mgw_d.dll" IntermediateDirectory="Debug/win_x64/DShow" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
       <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
         <PostConnectCommands/>
         <StartupCommands/>
@@ -86,7 +86,7 @@
         <Library Value="uuid"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
-      <General OutputFile="../../lib/win_x86/libKlayGE_ShowEngine_DShow_mgw_d.dll" IntermediateDirectory="../../Debug/win_x86/DShow" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
+      <General OutputFile="../../lib/win_x86/libKlayGE_ShowEngine_DShow_mgw_d.dll" IntermediateDirectory="Debug/win_x86/DShow" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
       <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
         <PostConnectCommands/>
         <StartupCommands/>
@@ -132,7 +132,7 @@
         <Library Value="uuid"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
-      <General OutputFile="../../lib/win_x64/libKlayGE_ShowEngine_DShow_mgw.dll" IntermediateDirectory="../../Release/win_x64/DShow" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
+      <General OutputFile="../../lib/win_x64/libKlayGE_ShowEngine_DShow_mgw.dll" IntermediateDirectory="Release/win_x64/DShow" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
       <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
         <PostConnectCommands/>
         <StartupCommands/>
@@ -178,7 +178,7 @@
         <Library Value="uuid"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
-      <General OutputFile="../../lib/win_x86/libKlayGE_ShowEngine_DShow_mgw.dll" IntermediateDirectory="../../Release/win_x86/DShow" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
+      <General OutputFile="../../lib/win_x86/libKlayGE_ShowEngine_DShow_mgw.dll" IntermediateDirectory="Release/win_x86/DShow" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
       <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
         <PostConnectCommands/>
         <StartupCommands/>

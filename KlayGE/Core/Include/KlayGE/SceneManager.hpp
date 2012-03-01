@@ -37,7 +37,7 @@
 #include <boost/noncopyable.hpp>
 #ifdef KLAYGE_COMPILER_MSVC
 #pragma warning(push)
-#pragma warning(disable: 6011 6334)
+#pragma warning(disable: 4100 6011 6334)
 #endif
 #include <boost/unordered_map.hpp>
 #include <boost/functional/hash.hpp>
