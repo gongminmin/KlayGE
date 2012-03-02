@@ -2818,7 +2818,7 @@ namespace KlayGE
 				}
 			}
 
-			std::ofstream ofs(kfx_name, std::ios_base::binary | std::ios_base::out);
+			std::ofstream ofs(kfx_name.c_str(), std::ios_base::binary | std::ios_base::out);
 			this->StreamOut(ofs, native_shader_blocks);
 		}
 	}

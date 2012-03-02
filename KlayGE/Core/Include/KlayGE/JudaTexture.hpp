@@ -29,7 +29,7 @@
 #include <boost/smart_ptr.hpp>
 #ifdef KLAYGE_COMPILER_MSVC
 #pragma warning(push)
-#pragma warning(disable: 6248 6282 6385 6244)
+#pragma warning(disable: 6248 6282 6244 6385 6386)
 #endif
 #include <boost/interprocess/file_mapping.hpp>
 #ifdef KLAYGE_COMPILER_MSVC
