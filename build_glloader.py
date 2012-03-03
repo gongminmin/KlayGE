@@ -67,4 +67,3 @@ if __name__ == "__main__":
 	print("Building glloader...")
 	for arch in compiler_info[2]:
 		build_glloader(compiler_info[0], compiler_info[1], arch[0], arch[1])
-

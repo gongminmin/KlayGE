@@ -1,62 +1,62 @@
 SET(LIB_NAME KlayGE_RenderEngine_D3D11)
 
 SET(D3D11_RE_SOURCE_FILES
-    ${KLAYGE_PROJECT_DIR}/Plugins/Src/Render/D3D11/D3D11Adapter.cpp
-    ${KLAYGE_PROJECT_DIR}/Plugins/Src/Render/D3D11/D3D11AdapterList.cpp
-    ${KLAYGE_PROJECT_DIR}/Plugins/Src/Render/D3D11/D3D11FrameBuffer.cpp
-    ${KLAYGE_PROJECT_DIR}/Plugins/Src/Render/D3D11/D3D11GraphicsBuffer.cpp
-    ${KLAYGE_PROJECT_DIR}/Plugins/Src/Render/D3D11/D3D11Mapping.cpp
-    ${KLAYGE_PROJECT_DIR}/Plugins/Src/Render/D3D11/D3D11Query.cpp
-    ${KLAYGE_PROJECT_DIR}/Plugins/Src/Render/D3D11/D3D11RenderEngine.cpp
-    ${KLAYGE_PROJECT_DIR}/Plugins/Src/Render/D3D11/D3D11RenderFactory.cpp
-    ${KLAYGE_PROJECT_DIR}/Plugins/Src/Render/D3D11/D3D11RenderLayout.cpp
-    ${KLAYGE_PROJECT_DIR}/Plugins/Src/Render/D3D11/D3D11RenderStateObject.cpp
-    ${KLAYGE_PROJECT_DIR}/Plugins/Src/Render/D3D11/D3D11RenderView.cpp
-    ${KLAYGE_PROJECT_DIR}/Plugins/Src/Render/D3D11/D3D11RenderWindow.cpp
-    ${KLAYGE_PROJECT_DIR}/Plugins/Src/Render/D3D11/D3D11ShaderObject.cpp
-    ${KLAYGE_PROJECT_DIR}/Plugins/Src/Render/D3D11/D3D11Texture.cpp
-    ${KLAYGE_PROJECT_DIR}/Plugins/Src/Render/D3D11/D3D11Texture1D.cpp
-    ${KLAYGE_PROJECT_DIR}/Plugins/Src/Render/D3D11/D3D11Texture2D.cpp
-    ${KLAYGE_PROJECT_DIR}/Plugins/Src/Render/D3D11/D3D11Texture3D.cpp
-    ${KLAYGE_PROJECT_DIR}/Plugins/Src/Render/D3D11/D3D11TextureCube.cpp
-    ${KLAYGE_PROJECT_DIR}/Plugins/Src/Render/D3D11/D3D11VideoMode.cpp
+	${KLAYGE_PROJECT_DIR}/Plugins/Src/Render/D3D11/D3D11Adapter.cpp
+	${KLAYGE_PROJECT_DIR}/Plugins/Src/Render/D3D11/D3D11AdapterList.cpp
+	${KLAYGE_PROJECT_DIR}/Plugins/Src/Render/D3D11/D3D11FrameBuffer.cpp
+	${KLAYGE_PROJECT_DIR}/Plugins/Src/Render/D3D11/D3D11GraphicsBuffer.cpp
+	${KLAYGE_PROJECT_DIR}/Plugins/Src/Render/D3D11/D3D11Mapping.cpp
+	${KLAYGE_PROJECT_DIR}/Plugins/Src/Render/D3D11/D3D11Query.cpp
+	${KLAYGE_PROJECT_DIR}/Plugins/Src/Render/D3D11/D3D11RenderEngine.cpp
+	${KLAYGE_PROJECT_DIR}/Plugins/Src/Render/D3D11/D3D11RenderFactory.cpp
+	${KLAYGE_PROJECT_DIR}/Plugins/Src/Render/D3D11/D3D11RenderLayout.cpp
+	${KLAYGE_PROJECT_DIR}/Plugins/Src/Render/D3D11/D3D11RenderStateObject.cpp
+	${KLAYGE_PROJECT_DIR}/Plugins/Src/Render/D3D11/D3D11RenderView.cpp
+	${KLAYGE_PROJECT_DIR}/Plugins/Src/Render/D3D11/D3D11RenderWindow.cpp
+	${KLAYGE_PROJECT_DIR}/Plugins/Src/Render/D3D11/D3D11ShaderObject.cpp
+	${KLAYGE_PROJECT_DIR}/Plugins/Src/Render/D3D11/D3D11Texture.cpp
+	${KLAYGE_PROJECT_DIR}/Plugins/Src/Render/D3D11/D3D11Texture1D.cpp
+	${KLAYGE_PROJECT_DIR}/Plugins/Src/Render/D3D11/D3D11Texture2D.cpp
+	${KLAYGE_PROJECT_DIR}/Plugins/Src/Render/D3D11/D3D11Texture3D.cpp
+	${KLAYGE_PROJECT_DIR}/Plugins/Src/Render/D3D11/D3D11TextureCube.cpp
+	${KLAYGE_PROJECT_DIR}/Plugins/Src/Render/D3D11/D3D11VideoMode.cpp
 )
 
 SET(D3D11_RE_HEADER_FILES
-    ${KLAYGE_PROJECT_DIR}/Plugins/Include/KlayGE/D3D11/D3D11Adapter.hpp
-    ${KLAYGE_PROJECT_DIR}/Plugins/Include/KlayGE/D3D11/D3D11AdapterList.hpp
-    ${KLAYGE_PROJECT_DIR}/Plugins/Include/KlayGE/D3D11/D3D11FrameBuffer.hpp
-    ${KLAYGE_PROJECT_DIR}/Plugins/Include/KlayGE/D3D11/D3D11GraphicsBuffer.hpp
-    ${KLAYGE_PROJECT_DIR}/Plugins/Include/KlayGE/D3D11/D3D11Mapping.hpp
-    ${KLAYGE_PROJECT_DIR}/Plugins/Include/KlayGE/D3D11/D3D11MinGWDefs.hpp
-    ${KLAYGE_PROJECT_DIR}/Plugins/Include/KlayGE/D3D11/D3D11Query.hpp
-    ${KLAYGE_PROJECT_DIR}/Plugins/Include/KlayGE/D3D11/D3D11RenderEngine.hpp
-    ${KLAYGE_PROJECT_DIR}/Plugins/Include/KlayGE/D3D11/D3D11RenderFactory.hpp
-    ${KLAYGE_PROJECT_DIR}/Plugins/Include/KlayGE/D3D11/D3D11RenderFactoryInternal.hpp
-    ${KLAYGE_PROJECT_DIR}/Plugins/Include/KlayGE/D3D11/D3D11RenderLayout.hpp
-    ${KLAYGE_PROJECT_DIR}/Plugins/Include/KlayGE/D3D11/D3D11RenderStateObject.hpp
-    ${KLAYGE_PROJECT_DIR}/Plugins/Include/KlayGE/D3D11/D3D11RenderView.hpp
-    ${KLAYGE_PROJECT_DIR}/Plugins/Include/KlayGE/D3D11/D3D11RenderWindow.hpp
-    ${KLAYGE_PROJECT_DIR}/Plugins/Include/KlayGE/D3D11/D3D11ShaderObject.hpp
-    ${KLAYGE_PROJECT_DIR}/Plugins/Include/KlayGE/D3D11/D3D11Texture.hpp
-    ${KLAYGE_PROJECT_DIR}/Plugins/Include/KlayGE/D3D11/D3D11Typedefs.hpp
-    ${KLAYGE_PROJECT_DIR}/Plugins/Include/KlayGE/D3D11/D3D11VideoMode.hpp
+	${KLAYGE_PROJECT_DIR}/Plugins/Include/KlayGE/D3D11/D3D11Adapter.hpp
+	${KLAYGE_PROJECT_DIR}/Plugins/Include/KlayGE/D3D11/D3D11AdapterList.hpp
+	${KLAYGE_PROJECT_DIR}/Plugins/Include/KlayGE/D3D11/D3D11FrameBuffer.hpp
+	${KLAYGE_PROJECT_DIR}/Plugins/Include/KlayGE/D3D11/D3D11GraphicsBuffer.hpp
+	${KLAYGE_PROJECT_DIR}/Plugins/Include/KlayGE/D3D11/D3D11Mapping.hpp
+	${KLAYGE_PROJECT_DIR}/Plugins/Include/KlayGE/D3D11/D3D11MinGWDefs.hpp
+	${KLAYGE_PROJECT_DIR}/Plugins/Include/KlayGE/D3D11/D3D11Query.hpp
+	${KLAYGE_PROJECT_DIR}/Plugins/Include/KlayGE/D3D11/D3D11RenderEngine.hpp
+	${KLAYGE_PROJECT_DIR}/Plugins/Include/KlayGE/D3D11/D3D11RenderFactory.hpp
+	${KLAYGE_PROJECT_DIR}/Plugins/Include/KlayGE/D3D11/D3D11RenderFactoryInternal.hpp
+	${KLAYGE_PROJECT_DIR}/Plugins/Include/KlayGE/D3D11/D3D11RenderLayout.hpp
+	${KLAYGE_PROJECT_DIR}/Plugins/Include/KlayGE/D3D11/D3D11RenderStateObject.hpp
+	${KLAYGE_PROJECT_DIR}/Plugins/Include/KlayGE/D3D11/D3D11RenderView.hpp
+	${KLAYGE_PROJECT_DIR}/Plugins/Include/KlayGE/D3D11/D3D11RenderWindow.hpp
+	${KLAYGE_PROJECT_DIR}/Plugins/Include/KlayGE/D3D11/D3D11ShaderObject.hpp
+	${KLAYGE_PROJECT_DIR}/Plugins/Include/KlayGE/D3D11/D3D11Texture.hpp
+	${KLAYGE_PROJECT_DIR}/Plugins/Include/KlayGE/D3D11/D3D11Typedefs.hpp
+	${KLAYGE_PROJECT_DIR}/Plugins/Include/KlayGE/D3D11/D3D11VideoMode.hpp
 )
 
 SOURCE_GROUP("Source Files" FILES ${D3D11_RE_SOURCE_FILES})
 SOURCE_GROUP("Header Files" FILES ${D3D11_RE_HEADER_FILES})
 
 ADD_DEFINITIONS(-DKLAYGE_BUILD_DLL -DKLAYGE_D3D11_RE_SOURCE)
-ADD_DEFINITIONS(${Boost_LIB_DIAGNOSTIC_DEFINITIONS})
 
+INCLUDE_DIRECTORIES(${KLAYGE_PROJECT_DIR}/../External/boost)
+INCLUDE_DIRECTORIES(${KLAYGE_PROJECT_DIR}/../External/DXSDK/include)
 INCLUDE_DIRECTORIES(${KLAYGE_PROJECT_DIR}/Core/Include)
-INCLUDE_DIRECTORIES(${KLAYGE_PROJECT_DIR}/Plugins/Include
-                    ${Boost_INCLUDE_DIRS} ${D3D11_INCLUDE_DIR})
-LINK_DIRECTORIES(${Boost_LIBRARY_DIRS}
-                 ${CMAKE_BINARY_DIR}/Core)  # for autolinking under MSVC
+INCLUDE_DIRECTORIES(${KLAYGE_PROJECT_DIR}/Plugins/Include)
+LINK_DIRECTORIES(${KLAYGE_PROJECT_DIR}/../External/boost/lib_${KLAYGE_COMPILER_NAME}${KLAYGE_COMPILER_VERSION}_${KLAYGE_ARCH_NAME}/lib)
+LINK_DIRECTORIES(${KLAYGE_PROJECT_DIR}/lib/${KLAYGE_PLATFORM_NAME})
 
 ADD_LIBRARY(${LIB_NAME} SHARED
-    ${D3D11_RE_SOURCE_FILES} ${D3D11_RE_HEADER_FILES}
+	${D3D11_RE_SOURCE_FILES} ${D3D11_RE_HEADER_FILES}
 )
 ADD_DEPENDENCIES(${LIB_NAME} ${KLAYGE_CORELIB_NAME})
 
@@ -65,18 +65,17 @@ SET_TARGET_PROPERTIES(${LIB_NAME} PROPERTIES DEBUG_POSTFIX "${CMAKE_DEBUG_POSTFI
 SET_TARGET_PROPERTIES(${LIB_NAME} PROPERTIES OUTPUT_NAME "${LIB_NAME}${KLAYGE_NAME_POSTFIX}")
 
 IF(MSVC)
-    SET(EXTRA_LINKED_LIBRARIES "")
-ELSE(MSVC)
-    SET(EXTRA_LINKED_LIBRARIES boost_system)
-ENDIF(MSVC)
+	SET(EXTRA_LINKED_LIBRARIES "")
+ELSE()
+	SET(EXTRA_LINKED_LIBRARIES boost_system)
+ENDIF()
 
 TARGET_LINK_LIBRARIES(${LIB_NAME}
-    ${D3D11_LIBRARIES} ${DX_UTIL_LIBRARIES}
-    ${EXTRA_LINKED_LIBRARIES}
+	${EXTRA_LINKED_LIBRARIES}
 )
 
 INSTALL(TARGETS ${LIB_NAME}
-    RUNTIME DESTINATION ${KLAYGE_INSTALL_BINDIR}/Render
-    LIBRARY DESTINATION ${KLAYGE_INSTALL_LIBDIR}
-    ARCHIVE DESTINATION ${KLAYGE_INSTALL_ARCHIVEDIR}
+    RUNTIME DESTINATION ${KLAYGE_BIN_DIR}/Render
+    LIBRARY DESTINATION ${KLAYGE_BIN_DIR}/Render
+    ARCHIVE DESTINATION ${KLAYGE_OUTPUT_DIR}
 )

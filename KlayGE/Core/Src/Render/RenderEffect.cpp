@@ -4423,7 +4423,7 @@ namespace KlayGE
 		NativeToLittleEndian<sizeof(tmp)>(&tmp);
 		os.write(reinterpret_cast<char const *>(&tmp), sizeof(tmp));
 
-		uint32_t len = str_.size();
+		uint32_t len = static_cast<uint32_t>(str_.size());
 		tmp = len;
 		NativeToLittleEndian<sizeof(tmp)>(&tmp);
 		os.write(reinterpret_cast<char const *>(&tmp), sizeof(tmp));

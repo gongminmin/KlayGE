@@ -456,7 +456,7 @@ namespace KlayGE
 		frame = std::fmod(frame, static_cast<float>(frame_id.back() + 1));
 
 		std::vector<uint32_t>::const_iterator iter = std::upper_bound(frame_id.begin(), frame_id.end(), frame);
-		int index = iter - frame_id.begin();
+		int index = static_cast<int>(iter - frame_id.begin());
 
 		int index0 = index - 1;
 		int index1 = index % frame_id.size();

@@ -44,8 +44,6 @@ KlayGE/bin/*/*.ilk
 KlayGE/bin/*/*.pdb
 KlayGE/bin/*/*.py
 KlayGE/bin/*/*.pyc
-KlayGE/Build/*/Debug/
-KlayGE/Build/*/Release/
 KlayGE/Build/android/Core/obj
 KlayGE/Build/android/Plugins/Render/OpenGLES/libs
 KlayGE/Build/android/Plugins/Render/OpenGLES/obj
@@ -56,7 +54,7 @@ KlayGE/Build/codelite/*.tags
 KlayGE/Build/codelite/*.session
 KlayGE/Build/codelite/.build-*
 KlayGE/Build/codelite/*.txt
-KlayGE/Build/vc-10_0/ipch/
+KlayGE/Build/vc-*/
 KlayGE/Core/Src/KConfig/*.aps
 KlayGE/Core/Include/KlayGE/*.gch
 KlayGE/Exporters/3DSMax/MeshML/*.aps

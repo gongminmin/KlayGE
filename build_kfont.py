@@ -44,4 +44,3 @@ if __name__ == "__main__":
 	print("Building kfont...")
 	for arch in compiler_info[2]:
 		build_kfont(compiler_info[0], compiler_info[1], arch[0], arch[1])
-
