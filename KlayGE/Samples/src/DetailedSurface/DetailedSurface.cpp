@@ -152,7 +152,7 @@ namespace
 			}
 
 			ElementInitData init_data;
-			init_data.row_pitch = distortions.size() * sizeof(distortions[0]);
+			init_data.row_pitch = static_cast<uint32_t>(distortions.size() * sizeof(distortions[0]));
 			init_data.slice_pitch = 0;
 			init_data.data = &distortions[0];
 			GraphicsBufferPtr distortion_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, &init_data);

@@ -7,7 +7,7 @@ from blib_util import *
 
 def build_kfont(compiler_name, compiler_version, compiler_arch, generator_name):
 	curdir = os.path.abspath(os.curdir)
-	
+
 	build_dir = "kfont/build/%s-%d_0-%s" % (compiler_name, compiler_version, compiler_arch)
 	if not os.path.exists(build_dir):
 		os.makedirs(build_dir)
@@ -17,7 +17,7 @@ def build_kfont(compiler_name, compiler_version, compiler_arch, generator_name):
 	cmake_cmd = batch_command()
 	cmake_cmd.add_command('cmake -G "%s" %s' % (generator_name, "../cmake"))
 	cmake_cmd.execute()
-	
+
 	config_list = ("Debug", "Release")
 
 	build_cmd = batch_command()
@@ -26,7 +26,7 @@ def build_kfont(compiler_name, compiler_version, compiler_arch, generator_name):
 		build_cmd.add_command('devenv kfont.sln /Build %s /project ALL_BUILD' % config)
 		build_cmd.add_command('devenv kfont.sln /Build %s /project Install' % config)
 	build_cmd.execute()
-	
+
 	os.chdir(curdir)
 
 if __name__ == "__main__":
@@ -34,7 +34,7 @@ if __name__ == "__main__":
 		cfg = sys.argv[1]
 	else:
 		cfg = ""
-		
+
 	compiler_info = get_compiler_info(cfg)
 
 	if 0 == len(compiler_info):

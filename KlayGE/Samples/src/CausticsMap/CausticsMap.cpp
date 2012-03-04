@@ -536,7 +536,7 @@ namespace
 				rl_->TopologyType(RenderLayout::TT_PointList);
 
 				ElementInitData init_data;
-				init_data.row_pitch = xys.size() * sizeof(xys[0]);
+				init_data.row_pitch = static_cast<uint32_t>(xys.size() * sizeof(xys[0]));
 				init_data.slice_pitch = 0;
 				init_data.data = &xys[0];
 				GraphicsBufferPtr point_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, &init_data);
@@ -552,7 +552,7 @@ namespace
 				rl_->TopologyType(RenderLayout::TT_TriangleStrip);
 
 				ElementInitData init_data;
-				init_data.row_pitch = xys.size() * sizeof(xys[0]);
+				init_data.row_pitch = static_cast<uint32_t>(xys.size() * sizeof(xys[0]));
 				init_data.slice_pitch = 0;
 				init_data.data = &xys[0];
 				GraphicsBufferPtr point_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, &init_data);

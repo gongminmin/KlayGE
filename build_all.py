@@ -59,7 +59,7 @@ if __name__ == "__main__":
 	copy_to_dst("glloader/lib/x64/glloader_x64_d.dll", dst_dir_x64)
 	copy_to_dst("glloader/lib/x64/glloader_es_x64.dll", dst_dir_x64)
 	copy_to_dst("glloader/lib/x64/glloader_es_x64_d.dll", dst_dir_x64)
-	
+
 	print("Building kfont...")
 	os.chdir("kfont/build/%s-%d_0" % (compiler_name, compiler_version))
 	os.system("build_all.bat -q")

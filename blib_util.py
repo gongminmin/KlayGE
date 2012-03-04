@@ -32,16 +32,16 @@ def get_compiler_info(cfg):
 		arch_list = (("x86", "Visual Studio 9 2008"), ("x64", "Visual Studio 9 2008 Win64"))
 	else:
 		return ()
-		
+
 	return (compiler_name, compiler_version, arch_list)
-		
+
 class batch_command:
 	def __init__(self):
 		self.commands_ = []
-		
+
 	def add_command(self, cmd):
 		self.commands_ += [cmd]
-		
+
 	def execute(self):
 		import hashlib, datetime
 
