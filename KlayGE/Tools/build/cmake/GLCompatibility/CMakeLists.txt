@@ -22,3 +22,7 @@ SET(EXTRA_LINKED_LIBRARIES
 )
 
 SETUP_TOOL(GLCompatibility)
+
+INSTALL(FILES ${KLAYGE_PROJECT_DIR}/Tools/src/GLCompatibility/GLCompatibility.py
+	DESTINATION ${KLAYGE_BIN_DIR}
+)
