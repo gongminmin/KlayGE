@@ -1,5 +1,5 @@
 SET(SOURCE_FILES
-	${KLAYGE_PROJECT_DIR}/Tools/KFontGen/KFontGen.cpp
+	${KLAYGE_PROJECT_DIR}/Tools/src/KFontGen/KFontGen.cpp
 )
 
 SET(EXTRA_INCLUDE_DIRS

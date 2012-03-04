@@ -109,7 +109,7 @@ int main()
 		}
 
 		init_data[level].data = &this_level[0];
-		init_data[level].slice_pitch = init_data[level].row_pitch = this_level.size();
+		init_data[level].slice_pitch = init_data[level].row_pitch = static_cast<uint32_t>(this_level.size());
 
 		dim /= 2;
 	}

@@ -1,6 +1,6 @@
 SET(SOURCE_FILES
-	${KLAYGE_PROJECT_DIR}/Tools/GLCompatibility/GLCompatibility.cpp
-	${KLAYGE_PROJECT_DIR}/Tools/GLCompatibility/GLCompatibility.py
+	${KLAYGE_PROJECT_DIR}/Tools/src/GLCompatibility/GLCompatibility.cpp
+	${KLAYGE_PROJECT_DIR}/Tools/src/GLCompatibility/GLCompatibility.py
 )
 
 SET(EXTRA_INCLUDE_DIRS
