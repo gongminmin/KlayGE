@@ -1,0 +1,5 @@
+SET(SOURCE_FILES
+	${KLAYGE_PROJECT_DIR}/Tools/ForceTexSRGB/ForceTexSRGB.cpp
+)
+
+SETUP_TOOL(ForceTexSRGB)

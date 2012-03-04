@@ -66,8 +66,6 @@ KlayGE/Exporters/Maya/build/*/Debug/
 KlayGE/Exporters/Maya/build/*/Release/
 KlayGE/Exporters/Maya/build/vc-10_0/ipch/
 KlayGE/media/Models/*.model_bin
-KlayGE/Samples/build/*/Debug/
-KlayGE/Samples/build/*/Release/
 KlayGE/Samples/build/android/*/bin
 KlayGE/Samples/build/android/*/libs
 KlayGE/Samples/build/android/*/obj
@@ -77,16 +75,14 @@ KlayGE/Samples/build/codelite/*.tags
 KlayGE/Samples/build/codelite/*.session
 KlayGE/Samples/build/codelite/.build-*
 KlayGE/Samples/build/codelite/*.txt
-KlayGE/Samples/build/vc-10_0/ipch/
+KlayGE/Samples/build/vc-*/
 KlayGE/Samples/media/*/*.model_bin
-KlayGE/Tools/build/*/Debug/
-KlayGE/Tools/build/*/Release/
 KlayGE/Tools/build/codelite/*.mk
 KlayGE/Tools/build/codelite/*.tags
 KlayGE/Tools/build/codelite/*.session
 KlayGE/Tools/build/codelite/.build-*
 KlayGE/Tools/build/codelite/*.txt
-KlayGE/Tools/build/vc-10_0/ipch/
+KlayGE/Tools/build/vc-*/
 External/boost/bin.v2/
 External/boost/lib_*/
 External/boost/b2

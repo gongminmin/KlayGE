@@ -1104,7 +1104,7 @@ int main(int argc, char* argv[])
 				if (index != -1)
 				{
 					p = &lzma_dist[distances_addr[index]];
-					size = distances_size[index];
+					size = static_cast<uint32_t>(distances_size[index]);
 				}
 				else
 				{
