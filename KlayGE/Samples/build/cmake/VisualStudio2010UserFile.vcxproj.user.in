@@ -1,0 +1,23 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|@KLAYGE_VS_PLATFORM_NAME@'">
+    <LocalDebuggerCommand>@KLAYGE_BIN_DIR@/$(TargetFileName)</LocalDebuggerCommand>
+    <LocalDebuggerWorkingDirectory>@KLAYGE_BIN_DIR@</LocalDebuggerWorkingDirectory>
+    <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|@KLAYGE_VS_PLATFORM_NAME@'">
+    <LocalDebuggerCommand>@KLAYGE_BIN_DIR@/$(TargetFileName)</LocalDebuggerCommand>
+    <LocalDebuggerWorkingDirectory>@KLAYGE_BIN_DIR@</LocalDebuggerWorkingDirectory>
+    <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|@KLAYGE_VS_PLATFORM_NAME@'">
+    <LocalDebuggerCommand>@KLAYGE_BIN_DIR@/$(TargetFileName)</LocalDebuggerCommand>
+    <LocalDebuggerWorkingDirectory>@KLAYGE_BIN_DIR@</LocalDebuggerWorkingDirectory>
+    <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|@KLAYGE_VS_PLATFORM_NAME@'">
+    <LocalDebuggerCommand>@KLAYGE_BIN_DIR@/$(TargetFileName)</LocalDebuggerCommand>
+    <LocalDebuggerWorkingDirectory>@KLAYGE_BIN_DIR@</LocalDebuggerWorkingDirectory>
+    <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
+  </PropertyGroup>
+</Project>
