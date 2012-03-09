@@ -17,12 +17,10 @@ SET(HEADER_FILES
 )
 
 SET(EFFECT_FILES
-	${KLAYGE_PROJECT_DIR}/Samples/media/PostProcessing/AdaptiveAntiAliasPP.fxml
 	${KLAYGE_PROJECT_DIR}/Samples/media/PostProcessing/AsciiArtsPP.fxml
 	${KLAYGE_PROJECT_DIR}/Samples/media/PostProcessing/CartoonPP.fxml
 	${KLAYGE_PROJECT_DIR}/Samples/media/PostProcessing/NightVisionPP.fxml
 	${KLAYGE_PROJECT_DIR}/Samples/media/PostProcessing/OldFashion.fxml
-	${KLAYGE_PROJECT_DIR}/Samples/media/PostProcessing/PostProcessing.fxml
 	${KLAYGE_PROJECT_DIR}/Samples/media/PostProcessing/TilingPP.fxml
 )
 
