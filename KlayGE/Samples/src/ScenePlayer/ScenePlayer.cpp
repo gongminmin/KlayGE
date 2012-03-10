@@ -27,11 +27,20 @@
 #include <sstream>
 #include <fstream>
 #include <boost/bind.hpp>
+#include <boost/typeof/typeof.hpp>
 #ifdef KLAYGE_COMPILER_MSVC
 #pragma warning(push)
 #pragma warning(disable: 4702)
 #endif
 #include <boost/lexical_cast.hpp>
+#ifdef KLAYGE_COMPILER_MSVC
+#pragma warning(pop)
+#endif
+#ifdef KLAYGE_COMPILER_MSVC
+#pragma warning(push)
+#pragma warning(disable: 4127 6328)
+#endif
+#include <boost/tokenizer.hpp>
 #ifdef KLAYGE_COMPILER_MSVC
 #pragma warning(pop)
 #endif
@@ -107,8 +116,6 @@ void ScenePlayerApp::LoadScene(std::string const & name)
 	lights_.clear();
 	light_proxies_.clear();
 
-	using boost::lexical_cast;
-
 	ResIdentifierPtr ifs = ResLoader::Instance().Open(name.c_str());
 
 	KlayGE::XMLDocument doc;
@@ -125,34 +132,118 @@ void ScenePlayerApp::LoadScene(std::string const & name)
 		XMLNodePtr attribute_node = light_node->FirstNode("attribute");
 		if (attribute_node)
 		{
-			std::string attribute_str = attribute_node->Attrib("value")->ValueString();
-			if ("indirect" == attribute_str)
+			XMLAttributePtr attr = attribute_node->Attrib("value");
+			if (attr)
 			{
-				light_attr |= LSA_IndirectLighting;
+				try
+				{
+					light_attr = attr->ValueInt();
+				}
+				catch (boost::bad_lexical_cast const &)
+				{
+					light_attr = 0;
+
+					std::string attribute_str = attr->ValueString();
+			
+					boost::char_separator<char> sep("", " \t|");
+					boost::tokenizer<boost::char_separator<char> > tok(attribute_str, sep);
+					std::string this_token;
+					for (BOOST_AUTO(beg, tok.begin()); beg != tok.end(); ++ beg)
+					{
+						this_token = *beg;
+						if ("noshadow" == this_token)
+						{
+							light_attr |= LSA_NoShadow;
+						}
+						else if ("nodiffuse" == this_token)
+						{
+							light_attr |= LSA_NoDiffuse;
+						}
+						else if ("nospecular" == this_token)
+						{
+							light_attr |= LSA_NoSpecular;
+						}
+						else if ("indirect" == this_token)
+						{
+							light_attr |= LSA_IndirectLighting;
+						}
+					}
+				}
 			}
 		}
 
 		XMLNodePtr color_node = light_node->FirstNode("color");
 		if (color_node)
 		{
-			light_clr.x() = color_node->Attrib("x")->ValueFloat();
-			light_clr.y() = color_node->Attrib("y")->ValueFloat();
-			light_clr.z() = color_node->Attrib("z")->ValueFloat();
+			XMLAttributePtr attr = color_node->Attrib("x");
+			if (attr)
+			{
+				light_clr.x() = attr->ValueFloat();
+			}
+
+			attr = color_node->Attrib("y");
+			if (attr)
+			{
+				light_clr.y() = attr->ValueFloat();
+			}
+
+			attr = color_node->Attrib("z");
+			if (attr)
+			{
+				light_clr.z() = attr->ValueFloat();
+			}
 		}
 
 		XMLNodePtr fall_off_node = light_node->FirstNode("fall_off");
 		if (fall_off_node)
 		{
-			fall_off.x() = fall_off_node->Attrib("x")->ValueFloat();
-			fall_off.y() = fall_off_node->Attrib("y")->ValueFloat();
-			fall_off.z() = fall_off_node->Attrib("z")->ValueFloat();
+			XMLAttributePtr attr = fall_off_node->Attrib("x");
+			if (attr)
+			{
+				fall_off.x() = attr->ValueFloat();
+			}
+
+			attr = fall_off_node->Attrib("y");
+			if (attr)
+			{
+				fall_off.y() = attr->ValueFloat();
+			}
+
+			attr = fall_off_node->Attrib("z");
+			if (attr)
+			{
+				fall_off.z() = attr->ValueFloat();
+			}
 		}
 
 		XMLAttributePtr attr = light_node->Attrib("type");
 		BOOST_ASSERT(attr);
 
 		std::string type = attr->ValueString();
-		if ("spot" == type)
+		if ("ambient" == type)
+		{
+			light = MakeSharedPtr<AmbientLightSource>();
+			light->Color(light_clr);
+		}
+		else if ("point" == type)
+		{
+			float3 light_pos(0, 0, 0);
+
+			XMLNodePtr pos_node = light_node->FirstNode("position");
+			if (pos_node)
+			{
+				light_pos.x() = pos_node->Attrib("x")->ValueFloat();
+				light_pos.y() = pos_node->Attrib("y")->ValueFloat();
+				light_pos.z() = pos_node->Attrib("z")->ValueFloat();
+			}
+
+			light = MakeSharedPtr<PointLightSource>();
+			light->Attrib(light_attr);
+			light->Position(light_pos);
+			light->Color(light_clr);
+			light->Falloff(fall_off);
+		}
+		else if ("spot" == type)
 		{
 			float3 light_pos(0, 0, 0);
 			float3 light_dir(0, 0, 1);
@@ -192,9 +283,28 @@ void ScenePlayerApp::LoadScene(std::string const & name)
 			light->InnerAngle(inner_angle);
 			light->BindUpdateFunc(SpotLightSourceUpdate());
 		}
+		else
+		{
+			BOOST_ASSERT("directional" == type);
+
+			float3 light_dir(0, 0, 1);
+
+			XMLNodePtr dir_node = light_node->FirstNode("direction");
+			if (dir_node)
+			{
+				light_dir.x() = dir_node->Attrib("x")->ValueFloat();
+				light_dir.y() = dir_node->Attrib("y")->ValueFloat();
+				light_dir.z() = dir_node->Attrib("z")->ValueFloat();
+			}
+
+			light = MakeSharedPtr<DirectionalLightSource>();
+			light->Attrib(light_attr);
+			light->Direction(light_dir);
+			light->Color(light_clr);
+			light->Falloff(fall_off);
+		}
 
 		light->AddToSceneManager();
-
 		lights_.push_back(light);
 
 		XMLNodePtr proxy_node = light_node->FirstNode("proxy");
@@ -234,83 +344,118 @@ void ScenePlayerApp::LoadScene(std::string const & name)
 		XMLNodePtr skybox_node = root->FirstNode("skybox");
 
 		XMLAttributePtr y_cube_attr = skybox_node->Attrib("y_cube");
-		BOOST_ASSERT(y_cube_attr);
+		if (y_cube_attr)
+		{
+			XMLAttributePtr c_cube_attr = skybox_node->Attrib("c_cube");
+			BOOST_ASSERT(c_cube_attr);
 
-		XMLAttributePtr c_cube_attr = skybox_node->Attrib("c_cube");
-		BOOST_ASSERT(c_cube_attr);
+			sky_box_ = MakeSharedPtr<SceneObjectHDRSkyBox>();
+			checked_pointer_cast<SceneObjectHDRSkyBox>(sky_box_)->CompressedCubeMap(
+				SyncLoadTexture(y_cube_attr->ValueString(), EAH_GPU_Read | EAH_Immutable),
+				SyncLoadTexture(c_cube_attr->ValueString(), EAH_GPU_Read | EAH_Immutable));
+		}
+		else
+		{
+			XMLAttributePtr cube_attr = skybox_node->Attrib("cube");
+			BOOST_ASSERT(cube_attr);
 
-		boost::function<TexturePtr()> y_cube_tl = ASyncLoadTexture(y_cube_attr->ValueString(), EAH_GPU_Read | EAH_Immutable);
-		boost::function<TexturePtr()> c_cube_tl = ASyncLoadTexture(c_cube_attr->ValueString(), EAH_GPU_Read | EAH_Immutable);
+			sky_box_ = MakeSharedPtr<SceneObjectSkyBox>();
+			checked_pointer_cast<SceneObjectSkyBox>(sky_box_)->CubeMap(
+				SyncLoadTexture(cube_attr->ValueString(), EAH_GPU_Read | EAH_Immutable));
+		}
 
-		sky_box_ = MakeSharedPtr<SceneObjectHDRSkyBox>();
-		checked_pointer_cast<SceneObjectHDRSkyBox>(sky_box_)->CompressedCubeMap(y_cube_tl(), c_cube_tl());
 		sky_box_->AddToSceneManager();
 	}
 
 	{
-		XMLNodePtr camera_node = root->FirstNode("camera");
-
-		XMLAttributePtr x_attr = camera_node->Attrib("x");
-		BOOST_ASSERT(x_attr);
-
-		XMLAttributePtr y_attr = camera_node->Attrib("y");
-		BOOST_ASSERT(y_attr);
-
-		XMLAttributePtr z_attr = camera_node->Attrib("z");
-		BOOST_ASSERT(z_attr);
-
-		float3 eye_pos(x_attr->ValueFloat(), y_attr->ValueFloat(), z_attr->ValueFloat());
+		float3 eye_pos(0, 0, -1);
 		float3 look_at(0, 0, 0);
 		float3 up(0, 1, 0);
 		float near_plane = 0.1f;
 		float far_plane = 500;
 
+		XMLNodePtr camera_node = root->FirstNode("camera");
+
+		XMLAttributePtr x_attr = camera_node->Attrib("x");
+		if (x_attr)
+		{
+			eye_pos.x() = x_attr->ValueFloat();
+		}
+
+		XMLAttributePtr y_attr = camera_node->Attrib("y");
+		if (y_attr)
+		{
+			eye_pos.y() = y_attr->ValueFloat();
+		}
+
+		XMLAttributePtr z_attr = camera_node->Attrib("z");
+		if (z_attr)
+		{
+			eye_pos.z() = z_attr->ValueFloat();
+		}
+
 		XMLNodePtr look_at_node = camera_node->FirstNode("look_at");
 		if (look_at_node)
 		{
 			XMLAttributePtr x_attr = look_at_node->Attrib("x");
-			BOOST_ASSERT(x_attr);
+			if (x_attr)
+			{
+				look_at.x() = x_attr->ValueFloat();
+			}
 
 			XMLAttributePtr y_attr = look_at_node->Attrib("y");
-			BOOST_ASSERT(y_attr);
+			if (y_attr)
+			{
+				look_at.y() = y_attr->ValueFloat();
+			}
 
 			XMLAttributePtr z_attr = look_at_node->Attrib("z");
-			BOOST_ASSERT(z_attr);
-
-			look_at = float3(x_attr->ValueFloat(), y_attr->ValueFloat(), z_attr->ValueFloat());
+			if (z_attr)
+			{
+				look_at.z() = z_attr->ValueFloat();
+			}
 		}
 
 		XMLNodePtr up_node = camera_node->FirstNode("up");
 		if (up_node)
 		{
 			XMLAttributePtr x_attr = up_node->Attrib("x");
-			BOOST_ASSERT(x_attr);
+			if (x_attr)
+			{
+				up.x() = x_attr->ValueFloat();
+			}
 
 			XMLAttributePtr y_attr = up_node->Attrib("y");
-			BOOST_ASSERT(y_attr);
+			if (y_attr)
+			{
+				up.y() = y_attr->ValueFloat();
+			}
 
 			XMLAttributePtr z_attr = up_node->Attrib("z");
-			BOOST_ASSERT(z_attr);
-
-			up = float3(x_attr->ValueFloat(), y_attr->ValueFloat(), z_attr->ValueFloat());
+			if (z_attr)
+			{
+				up.z() = z_attr->ValueFloat();
+			}
 		}
 
 		XMLNodePtr near_node = camera_node->FirstNode("near_plane");
 		if (near_node)
 		{
 			XMLAttributePtr val_attr = near_node->Attrib("value");
-			BOOST_ASSERT(val_attr);
-
-			near_plane = val_attr->ValueFloat();
+			if (val_attr)
+			{
+				near_plane = val_attr->ValueFloat();
+			}
 		}
 
 		XMLNodePtr far_node = camera_node->FirstNode("far_plane");
 		if (far_node)
 		{
 			XMLAttributePtr val_attr = far_node->Attrib("value");
-			BOOST_ASSERT(val_attr);
-
-			far_plane = val_attr->ValueFloat();
+			if (val_attr)
+			{
+				far_plane = val_attr->ValueFloat();
+			}
 		}
 
 		this->LookAt(eye_pos, look_at, up);

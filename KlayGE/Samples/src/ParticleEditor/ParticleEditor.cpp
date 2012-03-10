@@ -42,14 +42,6 @@
 #pragma warning(pop)
 #endif
 #include <boost/typeof/typeof.hpp>
-#ifdef KLAYGE_COMPILER_MSVC
-#pragma warning(push)
-#pragma warning(disable: 4702)
-#endif
-#include <boost/lexical_cast.hpp>
-#ifdef KLAYGE_COMPILER_MSVC
-#pragma warning(pop)
-#endif
 
 #include "ParticleEditor.hpp"
 
@@ -979,8 +971,6 @@ void ParticleEditorApp::LoadParticleSystem(std::string const & name)
 	dialog_->Control<UIPolylineEditBox>(id_weight_over_life_)->ClearCtrlPoints();
 	dialog_->Control<UIPolylineEditBox>(id_transparency_over_life_)->ClearCtrlPoints();
 
-	using boost::lexical_cast;
-
 	ResIdentifierPtr ifs = ResLoader::Instance().Open(name.c_str());
 
 	KlayGE::XMLDocument doc;
@@ -1090,8 +1080,6 @@ void ParticleEditorApp::LoadParticleSystem(std::string const & name)
 
 void ParticleEditorApp::SaveParticleSystem(std::string const & name)
 {
-	using boost::lexical_cast;
-
 	KlayGE::XMLDocument doc;
 
 	XMLNodePtr root = doc.AllocNode(XNT_Element, "particle_system");
