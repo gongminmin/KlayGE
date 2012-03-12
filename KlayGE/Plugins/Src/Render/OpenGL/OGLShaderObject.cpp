@@ -1726,7 +1726,7 @@ namespace KlayGE
 			NativeToLittleEndian<sizeof(hash_val)>(&hash_val);
 			oss.write(reinterpret_cast<char const *>(&hash_val), sizeof(hash_val));
 
-			uint32_t len32 = (*glsl_srcs_)[type]->size();
+			uint32_t len32 = static_cast<uint32_t>((*glsl_srcs_)[type]->size());
 			NativeToLittleEndian<sizeof(len32)>(&len32);
 			oss.write(reinterpret_cast<char const *>(&len32), sizeof(len32));
 			oss.write(&(*(*glsl_srcs_)[type])[0], (*glsl_srcs_)[type]->size());
@@ -2361,7 +2361,7 @@ namespace KlayGE
 				{
 					if ((*glsl_srcs_)[type] && !(*glsl_srcs_)[type]->empty())
 					{
-						ret->AttachGLSL(type);
+						ret->AttachGLSL(static_cast<uint32_t>(type));
 					}
 				}
 
