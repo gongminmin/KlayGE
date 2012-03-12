@@ -24,6 +24,7 @@ private:
 	void LoadScene(std::string const & name);
 
 	void InputHandler(KlayGE::InputEngine const & sender, KlayGE::InputAction const & action);
+	void OpenHandler(KlayGE::UIButton const & sender);
 	void IllumChangedHandler(KlayGE::UIComboBox const & sender);
 	void ILScaleChangedHandler(KlayGE::UISlider const & sender);
 	void SSVOHandler(KlayGE::UICheckBox const & sender);
@@ -49,6 +50,7 @@ private:
 
 	float il_scale_;
 
+	int id_open_;
 	int id_illum_combo_;
 	int id_il_scale_static_;
 	int id_il_scale_slider_;

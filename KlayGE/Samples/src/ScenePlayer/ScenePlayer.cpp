@@ -19,6 +19,8 @@
 #include <KlayGE/Camera.hpp>
 #include <KlayGE/DeferredRenderingLayer.hpp>
 #include <KlayGE/XMLDom.hpp>
+#include <KlayGE/Script.hpp>
+#include <KlayGE/Window.hpp>
 
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/InputFactory.hpp>
@@ -52,12 +54,21 @@ using namespace KlayGE;
 
 namespace
 {
-	class SpotLightSourceUpdate
+	class LightSourceUpdate
 	{
 	public:
-		void operator()(LightSource& light, float /*app_time*/, float /*elapsed_time*/)
+		void operator()(LightSource& light, float app_time, float elapsed_time)
 		{
-			light.Position(float3(0, 12, -4.8f));
+			ScriptEngine se;
+			ScriptModule module("update");
+
+			PyObjectPtr py_mat = module.Call("update", boost::make_tuple(app_time, elapsed_time));
+			float4x4 light_mat;
+			for (int i = 0; i < 16; ++ i)
+			{
+				light_mat[i] = static_cast<float>(PyFloat_AsDouble(PyTuple_GetItem(py_mat.get(), i)));
+			}
+			light.ModelMatrix(light_mat);
 		}
 	};
 
@@ -109,6 +120,10 @@ bool ScenePlayerApp::ConfirmDevice() const
 
 void ScenePlayerApp::LoadScene(std::string const & name)
 {
+	SceneManager& sceneMgr(Context::Instance().SceneManagerInstance());
+	sceneMgr.ClearLight();
+	sceneMgr.ClearObject();
+
 	scene_models_.clear();
 	scene_objs_.clear();
 	sky_box_.reset();
@@ -281,7 +296,6 @@ void ScenePlayerApp::LoadScene(std::string const & name)
 			light->Falloff(fall_off);
 			light->OuterAngle(outer_angle);
 			light->InnerAngle(inner_angle);
-			light->BindUpdateFunc(SpotLightSourceUpdate());
 		}
 		else
 		{
@@ -484,6 +498,7 @@ void ScenePlayerApp::InitObjects()
 	UIManager::Instance().Load(ResLoader::Instance().Open("ScenePlayer.uiml"));
 	dialog_ = UIManager::Instance().GetDialogs()[0];
 
+	id_open_ = dialog_->IDFromName("Open");
 	id_illum_combo_ = dialog_->IDFromName("IllumCombo");
 	id_il_scale_static_ = dialog_->IDFromName("ILScaleStatic");
 	id_il_scale_slider_ = dialog_->IDFromName("ILScaleSlider");
@@ -492,6 +507,8 @@ void ScenePlayerApp::InitObjects()
 	id_aa_ = dialog_->IDFromName("AA");
 	id_cg_ = dialog_->IDFromName("CG");
 	id_ctrl_camera_ = dialog_->IDFromName("CtrlCamera");
+
+	dialog_->Control<UIButton>(id_open_)->OnClickedEvent().connect(boost::bind(&ScenePlayerApp::OpenHandler, this, _1));
 
 	dialog_->Control<UIComboBox>(id_illum_combo_)->OnSelectionChangedEvent().connect(boost::bind(&ScenePlayerApp::IllumChangedHandler, this, _1));
 	this->IllumChangedHandler(*dialog_->Control<UIComboBox>(id_illum_combo_));
@@ -531,6 +548,33 @@ void ScenePlayerApp::InputHandler(InputEngine const & /*sender*/, InputAction co
 		this->Quit();
 		break;
 	}
+}
+
+void ScenePlayerApp::OpenHandler(UIButton const & /*sender*/)
+{
+#if defined KLAYGE_PLATFORM_WINDOWS
+	OPENFILENAMEA ofn;
+	char fn[260];
+	HWND hwnd = this->MainWnd()->HWnd();
+
+	ZeroMemory(&ofn, sizeof(ofn));
+	ofn.lStructSize = sizeof(ofn);
+	ofn.hwndOwner = hwnd;
+	ofn.lpstrFile = fn;
+	ofn.lpstrFile[0] = '\0';
+	ofn.nMaxFile = sizeof(fn);
+	ofn.lpstrFilter = "Scene File\0*.scene\0All\0*.*\0";
+	ofn.nFilterIndex = 1;
+	ofn.lpstrFileTitle = NULL;
+	ofn.nMaxFileTitle = 0;
+	ofn.lpstrInitialDir = NULL;
+	ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
+
+	if (GetOpenFileNameA(&ofn))
+	{
+		this->LoadScene(fn);
+	}
+#endif
 }
 
 void ScenePlayerApp::IllumChangedHandler(UIComboBox const & sender)

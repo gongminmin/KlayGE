@@ -54,7 +54,7 @@ namespace KlayGE
 
 	private:
 		void ClipScene();
-		void Clear();
+		void ClearObject();
 
 		void OnAddSceneObject(SceneObjectPtr const & obj);
 		void OnDelSceneObject(SceneObjectsType::iterator iter);

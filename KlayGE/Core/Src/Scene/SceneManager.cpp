@@ -120,7 +120,8 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	SceneManager::~SceneManager()
 	{
-		this->Clear();
+		this->ClearLight();
+		this->ClearObject();
 	}
 
 	// ·µ»Ø¿Õ¶ÔÏó
@@ -325,7 +326,12 @@ namespace KlayGE
 		return scene_objs_;
 	}
 
-	void SceneManager::Clear()
+	void SceneManager::ClearLight()
+	{
+		lights_.resize(0);
+	}
+
+	void SceneManager::ClearObject()
 	{
 		scene_objs_.resize(0);
 		scene_obj_bbs_.resize(0);

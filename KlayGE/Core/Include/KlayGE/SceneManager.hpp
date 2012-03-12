@@ -89,7 +89,8 @@ namespace KlayGE
 
 		virtual bool AABBVisible(AABBox const & aabb);
 
-		virtual void Clear();
+		virtual void ClearLight();
+		virtual void ClearObject();
 
 		void Update();
 

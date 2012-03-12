@@ -233,10 +233,10 @@ namespace KlayGE
 #endif
 	}
 
-	void OCTree::Clear()
+	void OCTree::ClearObject()
 	{
-		scene_obj_bbs_.resize(0);
-		scene_objs_.resize(0);
+		SceneManager::ClearObject();
+
 		octree_.clear();
 		rebuild_tree_ = true;
 	}
