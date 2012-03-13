@@ -1,5 +1,6 @@
 SET(SOURCE_FILES
 	${KLAYGE_PROJECT_DIR}/Samples/src/ScenePlayer/ScenePlayer.cpp
+	${KLAYGE_PROJECT_DIR}/Samples/media/ScenePlayer/ScenePlayer.py
 	${KLAYGE_PROJECT_DIR}/Samples/media/ScenePlayer/DeferredRendering.scene
 	${KLAYGE_PROJECT_DIR}/Samples/media/ScenePlayer/GlobalIllumination.scene
 )
@@ -36,3 +37,7 @@ SET(EXTRA_LINKED_LIBRARIES
 )
 
 SETUP_SAMPLE(ScenePlayer)
+
+INSTALL(FILES ${KLAYGE_PROJECT_DIR}/Samples/media/ScenePlayer/ScenePlayer.py
+	DESTINATION ${KLAYGE_BIN_DIR}
+)

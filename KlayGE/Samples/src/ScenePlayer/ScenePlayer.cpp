@@ -57,19 +57,34 @@ namespace
 	class LightSourceUpdate
 	{
 	public:
+		LightSourceUpdate(std::string const& script)
+			: update_script_(script)
+		{
+		}
+
 		void operator()(LightSource& light, float app_time, float elapsed_time)
 		{
 			ScriptEngine se;
-			ScriptModule module("update");
+			ScriptModule module("ScenePlayer");
 
-			PyObjectPtr py_mat = module.Call("update", boost::make_tuple(app_time, elapsed_time));
-			float4x4 light_mat;
-			for (int i = 0; i < 16; ++ i)
+			std::ostringstream oss;
+			oss << update_script_ << endl;
+			oss << "result = update_matrix(" << app_time << ", " << elapsed_time << ").vec;" << endl;
+			
+			PyObjectPtr py_mat = module.RunString(oss.str());
+			if (py_mat)
 			{
-				light_mat[i] = static_cast<float>(PyFloat_AsDouble(PyTuple_GetItem(py_mat.get(), i)));
+				float4x4 light_mat;
+				for (int i = 0; i < 16; ++ i)
+				{
+					light_mat[i] = static_cast<float>(PyFloat_AsDouble(PyTuple_GetItem(py_mat.get(), i)));
+				}
+				light.ModelMatrix(light_mat);
 			}
-			light.ModelMatrix(light_mat);
 		}
+
+	private:
+		std::string update_script_;
 	};
 
 	enum
@@ -143,6 +158,7 @@ void ScenePlayerApp::LoadScene(std::string const & name)
 		uint32_t light_attr = 0;
 		float3 light_clr(0, 0, 0);
 		float3 fall_off(1, 0, 0);
+		std::string update_script;
 
 		XMLNodePtr attribute_node = light_node->FirstNode("attribute");
 		if (attribute_node)
@@ -231,6 +247,16 @@ void ScenePlayerApp::LoadScene(std::string const & name)
 			}
 		}
 
+		XMLNodePtr update_node = light_node->FirstNode("update");
+		if (update_node)
+		{
+			update_node = update_node->FirstNode();
+			if (update_node && (XNT_CData == update_node->Type()))
+			{
+				update_script = update_node->ValueString();
+			}
+		}
+
 		XMLAttributePtr attr = light_node->Attrib("type");
 		BOOST_ASSERT(attr);
 
@@ -316,6 +342,11 @@ void ScenePlayerApp::LoadScene(std::string const & name)
 			light->Direction(light_dir);
 			light->Color(light_clr);
 			light->Falloff(fall_off);
+		}
+
+		if (!update_script.empty())
+		{
+			light->BindUpdateFunc(LightSourceUpdate(update_script));
 		}
 
 		light->AddToSceneManager();
@@ -568,7 +599,7 @@ void ScenePlayerApp::OpenHandler(UIButton const & /*sender*/)
 	ofn.lpstrFileTitle = NULL;
 	ofn.nMaxFileTitle = 0;
 	ofn.lpstrInitialDir = NULL;
-	ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
+	ofn.Flags = OFN_NOCHANGEDIR | OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
 
 	if (GetOpenFileNameA(&ofn))
 	{

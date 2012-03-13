@@ -163,6 +163,11 @@ namespace KlayGE
 		return MakePyObjectPtr(PyObject_CallObject(func.get(), args.get()));
 	}
 
+	PyObjectPtr ScriptModule::RunString(std::string const & script)
+	{
+		return MakePyObjectPtr(PyRun_String(script.c_str(), Py_file_input, dict_.get(), dict_.get()));
+	}
+
 
 	// 向模块声明中添加一个方法
 	/////////////////////////////////////////////////////////////////////////////////
@@ -210,7 +215,7 @@ namespace KlayGE
 	}
 
 	// 从字符串运行脚本
-	void ScriptEngine::ExecString(std::string const & script)
+	void ScriptEngine::RunString(std::string const & script)
 	{
 		PyRun_SimpleString(script.c_str());
 	}

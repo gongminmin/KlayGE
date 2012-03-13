@@ -8,7 +8,7 @@
 		<proxy scale="0.1"/>
 		<update>
 			<![CDATA[
-def update(app_time, elapsed_time):
+def update_matrix(app_time, elapsed_time):
 	return translation(sin(app_time) + 2, 10, 0);
 			]]>
 		</update>
@@ -22,7 +22,7 @@ def update(app_time, elapsed_time):
 		<proxy scale="0.1"/>
 		<update>
 			<![CDATA[
-def update(app_time, elapsed_time):
+def update_matrix(app_time, elapsed_time):
 	cone_radius = sqrt(3) / 3;
 	return scaling(cone_radius, cone_radius, 1) * rotation_x(pi) * rotation_y(app_time * 1000 / 1400) * translation(0, 4, 0);
 			]]>
@@ -37,7 +37,7 @@ def update(app_time, elapsed_time):
 		<proxy scale="0.1"/>
 		<update>
 			<![CDATA[
-def update(app_time, elapsed_time):
+def update_matrix(app_time, elapsed_time):
 	cone_radius = 1;
 	return scaling(cone_radius, cone_radius, 1) * rotation_x(0) * rotation_y(-app_time * 1000 / 700) * translation(0, 3.4, 0);
 			]]>
@@ -53,7 +53,7 @@ def update(app_time, elapsed_time):
 		<proxy scale="0.1"/>
 		<update>
 			<![CDATA[
-def update(app_time, elapsed_time):
+def update_matrix(app_time, elapsed_time):
 	cone_radius = sqrt(3) / 3;
 	return scaling(cone_radius, cone_radius, 1) * rotation_x(pi * 0.13) * rotation_y(app_time * 1000 / 2800) * translation(0, 16, -4.8);
 			]]>

@@ -92,6 +92,8 @@ namespace KlayGE
 
 		PyObjectPtr Call(std::string const & func_name, PyObjectPtr* first, PyObjectPtr* last);
 
+		PyObjectPtr RunString(std::string const & script);
+
 	private:
 		PyObjectPtr module_;
 		PyObjectPtr dict_;
@@ -141,7 +143,7 @@ namespace KlayGE
 		~ScriptEngine();
 
 		// 从字符串运行脚本
-		void ExecString(std::string const & script);
+		void RunString(std::string const & script);
 	};
 }
 
