@@ -51,7 +51,7 @@ namespace KlayGE
 	App3DFramework::App3DFramework(std::string const & name)
 						: name_(name),
 							fps_(0), accumulate_time_(0), num_frames_(0),
-							app_time_(0)
+							app_time_(0), frame_time_(0)
 	{
 		Context::Instance().AppInstance(*this);
 

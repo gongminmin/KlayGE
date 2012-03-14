@@ -17,6 +17,33 @@ class float4x4:
 			f31, f32, f33, f34,
 			f41, f42, f43, f44 ];
 
+	def get(self, row, col):
+		return self.vec[row * 4 + col];
+
+
+def mul(lhs, rhs):
+	tmp = transpose(rhs);
+
+	return float4x4(
+		lhs.get(0, 0) * tmp.get(0, 0) + lhs.get(0, 1) * tmp.get(0, 1) + lhs.get(0, 2) * tmp.get(0, 2) + lhs.get(0, 3) * tmp.get(0, 3),
+		lhs.get(0, 0) * tmp.get(1, 0) + lhs.get(0, 1) * tmp.get(1, 1) + lhs.get(0, 2) * tmp.get(1, 2) + lhs.get(0, 3) * tmp.get(1, 3),
+		lhs.get(0, 0) * tmp.get(2, 0) + lhs.get(0, 1) * tmp.get(2, 1) + lhs.get(0, 2) * tmp.get(2, 2) + lhs.get(0, 3) * tmp.get(2, 3),
+		lhs.get(0, 0) * tmp.get(3, 0) + lhs.get(0, 1) * tmp.get(3, 1) + lhs.get(0, 2) * tmp.get(3, 2) + lhs.get(0, 3) * tmp.get(3, 3),
+
+		lhs.get(1, 0) * tmp.get(0, 0) + lhs.get(1, 1) * tmp.get(0, 1) + lhs.get(1, 2) * tmp.get(0, 2) + lhs.get(1, 3) * tmp.get(0, 3),
+		lhs.get(1, 0) * tmp.get(1, 0) + lhs.get(1, 1) * tmp.get(1, 1) + lhs.get(1, 2) * tmp.get(1, 2) + lhs.get(1, 3) * tmp.get(1, 3),
+		lhs.get(1, 0) * tmp.get(2, 0) + lhs.get(1, 1) * tmp.get(2, 1) + lhs.get(1, 2) * tmp.get(2, 2) + lhs.get(1, 3) * tmp.get(2, 3),
+		lhs.get(1, 0) * tmp.get(3, 0) + lhs.get(1, 1) * tmp.get(3, 1) + lhs.get(1, 2) * tmp.get(3, 2) + lhs.get(1, 3) * tmp.get(3, 3),
+
+		lhs.get(2, 0) * tmp.get(0, 0) + lhs.get(2, 1) * tmp.get(0, 1) + lhs.get(2, 2) * tmp.get(0, 2) + lhs.get(2, 3) * tmp.get(0, 3),
+		lhs.get(2, 0) * tmp.get(1, 0) + lhs.get(2, 1) * tmp.get(1, 1) + lhs.get(2, 2) * tmp.get(1, 2) + lhs.get(2, 3) * tmp.get(1, 3),
+		lhs.get(2, 0) * tmp.get(2, 0) + lhs.get(2, 1) * tmp.get(2, 1) + lhs.get(2, 2) * tmp.get(2, 2) + lhs.get(2, 3) * tmp.get(2, 3),
+		lhs.get(2, 0) * tmp.get(3, 0) + lhs.get(2, 1) * tmp.get(3, 1) + lhs.get(2, 2) * tmp.get(3, 2) + lhs.get(2, 3) * tmp.get(3, 3),
+
+		lhs.get(3, 0) * tmp.get(0, 0) + lhs.get(3, 1) * tmp.get(0, 1) + lhs.get(3, 2) * tmp.get(0, 2) + lhs.get(3, 3) * tmp.get(0, 3),
+		lhs.get(3, 0) * tmp.get(1, 0) + lhs.get(3, 1) * tmp.get(1, 1) + lhs.get(3, 2) * tmp.get(1, 2) + lhs.get(3, 3) * tmp.get(1, 3),
+		lhs.get(3, 0) * tmp.get(2, 0) + lhs.get(3, 1) * tmp.get(2, 1) + lhs.get(3, 2) * tmp.get(2, 2) + lhs.get(3, 3) * tmp.get(2, 3),
+		lhs.get(3, 0) * tmp.get(3, 0) + lhs.get(3, 1) * tmp.get(3, 1) + lhs.get(3, 2) * tmp.get(3, 2) + lhs.get(3, 3) * tmp.get(3, 3));
 
 def rotation_x(x):
 	sx = sin(x);
@@ -58,3 +85,10 @@ def translation(x, y, z):
 		0,	1,	0,	0,
 		0,	0,	1,	0,
 		x,	y,	z,	1);
+
+def transpose(rhs):
+	return float4x4(
+		rhs.get(0, 0), rhs.get(1, 0), rhs.get(2, 0), rhs.get(3, 0),
+		rhs.get(0, 1), rhs.get(1, 1), rhs.get(2, 1), rhs.get(3, 1),
+		rhs.get(0, 2), rhs.get(1, 2), rhs.get(2, 2), rhs.get(3, 2),
+		rhs.get(0, 3), rhs.get(1, 3), rhs.get(2, 3), rhs.get(3, 3));

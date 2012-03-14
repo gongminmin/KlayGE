@@ -24,7 +24,7 @@ def update_matrix(app_time, elapsed_time):
 			<![CDATA[
 def update_matrix(app_time, elapsed_time):
 	cone_radius = sqrt(3) / 3;
-	return scaling(cone_radius, cone_radius, 1) * rotation_x(pi) * rotation_y(app_time * 1000 / 1400) * translation(0, 4, 0);
+	return mul(mul(mul(scaling(cone_radius, cone_radius, 1), rotation_x(pi)), rotation_y(app_time * 1000 / 1400)), translation(0, 4, 0));
 			]]>
 		</update>
 	</light>
@@ -39,7 +39,7 @@ def update_matrix(app_time, elapsed_time):
 			<![CDATA[
 def update_matrix(app_time, elapsed_time):
 	cone_radius = 1;
-	return scaling(cone_radius, cone_radius, 1) * rotation_x(0) * rotation_y(-app_time * 1000 / 700) * translation(0, 3.4, 0);
+	return mul(mul(mul(scaling(cone_radius, cone_radius, 1), rotation_x(0)), rotation_y(-app_time * 1000 / 700)), translation(0, 3.4, 0));
 			]]>
 		</update>
 	</light>
@@ -49,13 +49,13 @@ def update_matrix(app_time, elapsed_time):
 		<direction x="0" y="0" z="1"/>
 		<color x="6.0" y="5.88" z="4.38"/>
 		<fall_off x="1" y="0.1" z="0"/>
-		<angle outer="0.785398" inner="0.523599"/>
+		<angle outer="0.523599" inner="0.392699"/>
 		<proxy scale="0.1"/>
 		<update>
 			<![CDATA[
 def update_matrix(app_time, elapsed_time):
 	cone_radius = sqrt(3) / 3;
-	return scaling(cone_radius, cone_radius, 1) * rotation_x(pi * 0.13) * rotation_y(app_time * 1000 / 2800) * translation(0, 16, -4.8);
+	return mul(mul(mul(scaling(cone_radius, cone_radius, 1), rotation_x(pi * 0.13)), rotation_y(sin(app_time * 1000 / 2800) * pi / 6)), translation(0, 16, -4.8));
 			]]>
 		</update>
 	</light>

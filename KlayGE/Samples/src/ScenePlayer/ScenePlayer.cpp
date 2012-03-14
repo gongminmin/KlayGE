@@ -67,17 +67,19 @@ namespace
 			ScriptEngine se;
 			ScriptModule module("ScenePlayer");
 
+			module.RunString(update_script_);
+
 			std::ostringstream oss;
-			oss << update_script_ << endl;
-			oss << "result = update_matrix(" << app_time << ", " << elapsed_time << ").vec;" << endl;
+			oss << "result = update_matrix(" << app_time << ", " << elapsed_time << ").vec;" << endl;			
+			module.RunString(oss.str());
 			
-			PyObjectPtr py_mat = module.RunString(oss.str());
+			PyObjectPtr py_mat = module.Value("result");
 			if (py_mat)
 			{
 				float4x4 light_mat;
 				for (int i = 0; i < 16; ++ i)
 				{
-					light_mat[i] = static_cast<float>(PyFloat_AsDouble(PyTuple_GetItem(py_mat.get(), i)));
+					light_mat[i] = static_cast<float>(PyFloat_AsDouble(PyList_GetItem(py_mat.get(), i)));
 				}
 				light.ModelMatrix(light_mat);
 			}
@@ -510,7 +512,7 @@ void ScenePlayerApp::LoadScene(std::string const & name)
 
 void ScenePlayerApp::InitObjects()
 {
-	this->LoadScene("GlobalIllumination.scene");
+	this->LoadScene("DeferredRendering.scene");
 
 	font_ = Context::Instance().RenderFactoryInstance().MakeFont("gkai00mp.kfont");
 
