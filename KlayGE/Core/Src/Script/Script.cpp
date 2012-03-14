@@ -129,6 +129,13 @@ namespace KlayGE
 	}
 
 
+	ScriptModule::ScriptModule()
+	{
+		module_	= MakePyObjectPtr(PyImport_AddModule("__main__"));
+		dict_	= MakePyObjectPtr(PyModule_GetDict(module_.get()));
+		Py_IncRef(dict_.get());
+	}
+
 	ScriptModule::ScriptModule(std::string const & name)
 	{
 		module_	= MakePyObjectPtr(PyImport_ImportModule(name.c_str()));

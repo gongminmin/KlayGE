@@ -19,7 +19,6 @@
 #include <KlayGE/Camera.hpp>
 #include <KlayGE/DeferredRenderingLayer.hpp>
 #include <KlayGE/XMLDom.hpp>
-#include <KlayGE/Script.hpp>
 #include <KlayGE/Window.hpp>
 
 #include <KlayGE/RenderFactory.hpp>
@@ -58,35 +57,79 @@ namespace
 	{
 	public:
 		LightSourceUpdate(std::string const& script)
-			: update_script_(script)
+			: script_(script)
 		{
+			module_.RunString("from ScenePlayer import *");
 		}
 
 		void operator()(LightSource& light, float app_time, float elapsed_time)
 		{
-			ScriptEngine se;
-			ScriptModule module("ScenePlayer");
+			module_.RunString(script_);
 
-			module.RunString(update_script_);
-
-			std::ostringstream oss;
-			oss << "result = update_matrix(" << app_time << ", " << elapsed_time << ").vec;" << endl;			
-			module.RunString(oss.str());
-			
-			PyObjectPtr py_mat = module.Value("result");
-			if (py_mat)
+			PyObjectPtr py_ret = module_.Call("update", boost::make_tuple(app_time, elapsed_time));
+			if (py_ret)
 			{
-				float4x4 light_mat;
-				for (int i = 0; i < 16; ++ i)
+				size_t s = PyTuple_Size(py_ret.get());
+
+				if (s > 0)
 				{
-					light_mat[i] = static_cast<float>(PyFloat_AsDouble(PyList_GetItem(py_mat.get(), i)));
+					PyObject* py_mat = PyTuple_GetItem(py_ret.get(), 0);
+					if (py_mat && (PyList_Size(py_mat) > 0))
+					{
+						float4x4 light_mat;
+						for (int i = 0; i < 16; ++ i)
+						{
+							light_mat[i] = static_cast<float>(PyFloat_AsDouble(PyList_GetItem(py_mat, i)));
+						}
+						light.ModelMatrix(light_mat);
+					}
 				}
-				light.ModelMatrix(light_mat);
+				if (s > 1)
+				{
+					PyObject* py_clr = PyTuple_GetItem(py_ret.get(), 1);
+					if (py_clr && (PyList_Size(py_clr) > 0))
+					{
+						float3 light_clr;
+						for (int i = 0; i < 3; ++ i)
+						{
+							light_clr[i] = static_cast<float>(PyFloat_AsDouble(PyList_GetItem(py_clr, i)));
+						}
+						light.Color(light_clr);
+					}
+				}				
+				if (s > 2)
+				{
+					PyObject* py_fo = PyTuple_GetItem(py_ret.get(), 1);
+					if (py_fo && (PyList_Size(py_fo) > 0))
+					{
+						float3 light_fall_off;
+						for (int i = 0; i < 3; ++ i)
+						{
+							light_fall_off[i] = static_cast<float>(PyFloat_AsDouble(PyList_GetItem(py_fo, i)));
+						}
+						light.Falloff(light_fall_off);
+					}
+				}
+				if (s > 3)
+				{
+					PyObject* py_oi = PyTuple_GetItem(py_ret.get(), 1);
+					if (py_oi && (PyList_Size(py_oi) > 0))
+					{
+						float2 light_outer_inner;
+						for (int i = 0; i < 2; ++ i)
+						{
+							light_outer_inner[i] = static_cast<float>(PyFloat_AsDouble(PyList_GetItem(py_oi, i)));
+						}
+						light.OuterAngle(light_outer_inner.x());
+						light.InnerAngle(light_outer_inner.y());
+					}
+				}
 			}
 		}
 
 	private:
-		std::string update_script_;
+		ScriptModule module_;
+		std::string script_;
 	};
 
 	enum

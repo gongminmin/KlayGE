@@ -78,6 +78,7 @@ namespace KlayGE
 		}
 
 	public:
+		ScriptModule();
 		explicit ScriptModule(std::string const & name);
 		~ScriptModule();
 

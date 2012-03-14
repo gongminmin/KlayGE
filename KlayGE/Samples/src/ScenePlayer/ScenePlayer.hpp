@@ -6,6 +6,7 @@
 #include <KlayGE/CameraController.hpp>
 #include <KlayGE/UI.hpp>
 #include <KlayGE/PostProcess.hpp>
+#include <KlayGE/Script.hpp>
 
 class ScenePlayerApp : public KlayGE::App3DFramework
 {
@@ -47,6 +48,8 @@ private:
 	KlayGE::DeferredRenderingLayerPtr deferred_rendering_;
 
 	KlayGE::UIDialogPtr dialog_;
+
+	KlayGE::ScriptEngine se_;
 
 	float il_scale_;
 
