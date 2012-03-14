@@ -133,6 +133,7 @@ namespace KlayGE
 	{
 		module_	= MakePyObjectPtr(PyImport_AddModule("__main__"));
 		dict_	= MakePyObjectPtr(PyModule_GetDict(module_.get()));
+		Py_IncRef(module_.get());
 		Py_IncRef(dict_.get());
 	}
 
@@ -140,6 +141,7 @@ namespace KlayGE
 	{
 		module_	= MakePyObjectPtr(PyImport_ImportModule(name.c_str()));
 		dict_	= MakePyObjectPtr(PyModule_GetDict(module_.get()));
+		Py_IncRef(module_.get());
 		Py_IncRef(dict_.get());
 	}
 

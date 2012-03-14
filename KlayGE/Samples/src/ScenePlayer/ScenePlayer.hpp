@@ -42,6 +42,7 @@ private:
 
 	std::vector<KlayGE::LightSourcePtr> lights_;
 	std::vector<KlayGE::SceneObjectPtr> light_proxies_;
+	std::vector<boost::function<void(KlayGE::LightSource&, float, float)> > light_updates_;
 
 	KlayGE::FirstPersonCameraController fpcController_;
 

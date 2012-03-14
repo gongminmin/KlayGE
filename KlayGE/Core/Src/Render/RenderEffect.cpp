@@ -3031,7 +3031,7 @@ namespace KlayGE
 				os.write(reinterpret_cast<char const *>(&len), sizeof(len));
 				for (size_t j = 0; j < (*cbuffers_)[i].second.size(); ++ j)
 				{
-					uint32_t tmp = (*cbuffers_)[i].second[i];
+					uint32_t tmp = (*cbuffers_)[i].second[j];
 					NativeToLittleEndian<sizeof(tmp)>(&tmp);
 					os.write(reinterpret_cast<char const *>(&tmp), sizeof(tmp));
 				}

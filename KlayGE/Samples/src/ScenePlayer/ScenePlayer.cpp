@@ -190,6 +190,7 @@ void ScenePlayerApp::LoadScene(std::string const & name)
 
 	lights_.clear();
 	light_proxies_.clear();
+	light_updates_.clear();
 
 	ResIdentifierPtr ifs = ResLoader::Instance().Open(name.c_str());
 
@@ -391,7 +392,9 @@ void ScenePlayerApp::LoadScene(std::string const & name)
 
 		if (!update_script.empty())
 		{
-			light->BindUpdateFunc(LightSourceUpdate(update_script));
+			boost::function<void(KlayGE::LightSource&, float, float)> update_func = LightSourceUpdate(update_script);
+			light_updates_.push_back(update_func);
+			light->BindUpdateFunc(update_func);
 		}
 
 		light->AddToSceneManager();

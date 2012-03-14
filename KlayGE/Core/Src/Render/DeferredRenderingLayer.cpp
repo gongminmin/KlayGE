@@ -1417,6 +1417,8 @@ namespace KlayGE
 						skip_aa_pp_->Apply();
 					}
 
+					lights_.resize(0);
+
 					return App3DFramework::URV_Finished;
 				}
 			}
