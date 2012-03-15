@@ -280,7 +280,7 @@ namespace KlayGE
 		if (iter == effect_pool_.end())
 		{
 			prototype = MakeSharedPtr<RenderEffect>();
-			prototype->Load(ResLoader::Instance().Open(effectName), macros);
+			prototype->Load(effectName, macros);
 			effect_pool_[entry].push_back(prototype);
 		}
 		else

@@ -478,7 +478,7 @@ namespace KlayGE
 	public:
 		RenderEffect();
 
-		void Load(ResIdentifierPtr const & source, std::pair<std::string, std::string>* macros);
+		void Load(std::string const & name, std::pair<std::string, std::string>* macros);
 
 		bool StreamIn(ResIdentifierPtr const & source, std::pair<std::string, std::string>* predefined_macros,
 			std::vector<std::vector<std::vector<uint8_t> > >& native_shader_blocks);

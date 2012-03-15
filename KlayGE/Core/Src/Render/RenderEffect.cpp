@@ -2641,10 +2641,32 @@ namespace KlayGE
 	{
 	}
 
-	void RenderEffect::Load(ResIdentifierPtr const & source, std::pair<std::string, std::string>* predefined_macros)
+	void RenderEffect::Load(std::string const & name, std::pair<std::string, std::string>* predefined_macros)
 	{
-		res_name_ = MakeSharedPtr<std::string>(source->ResName());
-		timestamp_ = source->Timestamp();
+		std::string fxml_name = ResLoader::Instance().Locate(name);
+		if (fxml_name.empty())
+		{
+			fxml_name = name;
+		}		
+		std::string kfx_name = fxml_name.substr(0, fxml_name.rfind(".")) + ".kfx";
+		std::string exists_kfx_name = ResLoader::Instance().Locate(kfx_name);
+		if (!exists_kfx_name.empty())
+		{
+			kfx_name = exists_kfx_name;
+		}
+
+		ResIdentifierPtr source = ResLoader::Instance().Open(fxml_name);
+		ResIdentifierPtr kfx_source = ResLoader::Instance().Open(kfx_name);
+
+		res_name_ = MakeSharedPtr<std::string>(fxml_name);
+		if (source)
+		{
+			timestamp_ = source->Timestamp();
+		}
+		else
+		{
+			timestamp_ = 0;
+		}
 		if (predefined_macros)
 		{
 			size_t hash_val = 0;
@@ -2662,14 +2684,8 @@ namespace KlayGE
 			predefined_macros_hash_ = 0;
 		}
 
-		std::string const & fxml_name = ResLoader::Instance().Locate(source->ResName());
-		std::string kfx_name = fxml_name.substr(0, fxml_name.rfind("."));
-		std::stringstream oss;
-		oss << kfx_name << ".kfx";
-		kfx_name = oss.str();
-
 		std::vector<std::vector<std::vector<uint8_t> > > native_shader_blocks;
-		if (!this->StreamIn(ResLoader::Instance().Open(kfx_name), predefined_macros, native_shader_blocks))
+		if (!this->StreamIn(kfx_source, predefined_macros, native_shader_blocks))
 		{
 			shader_descs_.reset();
 			cbuffers_.reset();
