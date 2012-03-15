@@ -63,6 +63,8 @@ SET_TARGET_PROPERTIES(${LIB_NAME} PROPERTIES
 	OUTPUT_NAME ${LIB_NAME}${KLAYGE_NAME_POSTFIX}
 )
 
+ADD_PRECOMPILED_HEADER("KlayGE/KlayGE.hpp" "${KLAYGE_PROJECT_DIR}/Plugins/Src/AudioDataSource/OggVorbis/OggVorbisSourceFactory.cpp")
+
 TARGET_LINK_LIBRARIES(${LIB_NAME}
 	debug libogg_static_d optimized libogg_static
 	debug libvorbis_static_d optimized libvorbis_static

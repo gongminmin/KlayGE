@@ -88,6 +88,18 @@ ELSE()
 	SET(KLAYGE_NAME_POSTFIX "${KLAYGE_NAME_POSTFIX}_gcc")
 ENDIF()
 
+
+MACRO(ADD_PRECOMPILED_HEADER PrecompiledHeader PrecompiledSource)
+	IF(MSVC)
+		GET_FILENAME_COMPONENT(PrecompiledBasename ${PrecompiledHeader} NAME_WE)
+		SET(PCHOutput "${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_CFG_INTDIR}/${PrecompiledBasename}.pch")
+
+		SET_TARGET_PROPERTIES(${LIB_NAME} PROPERTIES COMPILE_FLAGS "/Yu\"${PrecompiledHeader}\" /Fp\"${PCHOutput}\"" OBJECT_DEPENDS "${PCHOutput}")
+		SET_SOURCE_FILES_PROPERTIES(${PrecompiledSource} PROPERTIES COMPILE_FLAGS "/Yc\"${PrecompiledHeader}\" /Fp\"${PCHOutput}\"" OBJECT_OUTPUTS "${PCHOutput}")
+	ENDIF()
+ENDMACRO(ADD_PRECOMPILED_HEADER)
+
+
 # Projects
 ADD_SUBDIRECTORY(Core)
 
