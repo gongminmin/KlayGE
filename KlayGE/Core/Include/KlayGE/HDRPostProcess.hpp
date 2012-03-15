@@ -76,8 +76,6 @@ namespace KlayGE
 		TexturePtr adapted_textures_[2];
 		bool last_index_;
 
-		Timer timer_;
-
 		RenderEffectParameterPtr last_lum_tex_ep_;
 		RenderEffectParameterPtr frame_delta_ep_;
 	};
@@ -91,8 +89,6 @@ namespace KlayGE
 		void OnRenderBegin();
 
 	private:
-		Timer timer_;
-
 		RenderEffectParameterPtr frame_delta_ep_;
 	};
 

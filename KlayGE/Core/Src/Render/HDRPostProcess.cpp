@@ -22,6 +22,7 @@
 #include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/RenderEffect.hpp>
 #include <KlayGE/FrameBuffer.hpp>
+#include <KlayGE/App3D.hpp>
 
 #include <boost/assert.hpp>
 
@@ -168,8 +169,7 @@ namespace KlayGE
 		PostProcess::OnRenderBegin();
 
 		*last_lum_tex_ep_ = adapted_textures_[last_index_];
-		*frame_delta_ep_ = static_cast<float>(timer_.elapsed());
-		timer_.restart();
+		*frame_delta_ep_ = Context::Instance().AppInstance().FrameTime();
 
 		last_index_ = !last_index_;
 	}
@@ -199,8 +199,7 @@ namespace KlayGE
 	{
 		PostProcess::OnRenderBegin();
 
-		*frame_delta_ep_ = static_cast<float>(timer_.elapsed());
-		timer_.restart();
+		*frame_delta_ep_ = Context::Instance().AppInstance().FrameTime();
 	}
 
 
