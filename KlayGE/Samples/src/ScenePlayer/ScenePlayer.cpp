@@ -132,6 +132,45 @@ namespace
 		std::string script_;
 	};
 
+	class SceneObjectUpdate
+	{
+	public:
+		SceneObjectUpdate(std::string const& script)
+			: script_(script)
+		{
+			module_.RunString("from ScenePlayer import *");
+		}
+
+		void operator()(SceneObject& obj, float app_time, float elapsed_time)
+		{
+			module_.RunString(script_);
+
+			PyObjectPtr py_ret = module_.Call("update", boost::make_tuple(app_time, elapsed_time));
+			if (py_ret)
+			{
+				size_t s = PyTuple_Size(py_ret.get());
+
+				if (s > 0)
+				{
+					PyObject* py_mat = PyTuple_GetItem(py_ret.get(), 0);
+					if (py_mat && (PyList_Size(py_mat) > 0))
+					{
+						float4x4 obj_mat;
+						for (int i = 0; i < 16; ++ i)
+						{
+							obj_mat[i] = static_cast<float>(PyFloat_AsDouble(PyList_GetItem(py_mat, i)));
+						}
+						obj.SetModelMatrix(obj_mat);
+					}
+				}
+			}
+		}
+
+	private:
+		ScriptModule module_;
+		std::string script_;
+	};
+
 	enum
 	{
 		Exit,
@@ -190,7 +229,6 @@ void ScenePlayerApp::LoadScene(std::string const & name)
 
 	lights_.clear();
 	light_proxies_.clear();
-	light_updates_.clear();
 
 	ResIdentifierPtr ifs = ResLoader::Instance().Open(name.c_str());
 
@@ -392,9 +430,7 @@ void ScenePlayerApp::LoadScene(std::string const & name)
 
 		if (!update_script.empty())
 		{
-			boost::function<void(KlayGE::LightSource&, float, float)> update_func = LightSourceUpdate(update_script);
-			light_updates_.push_back(update_func);
-			light->BindUpdateFunc(update_func);
+			light->BindUpdateFunc(LightSourceUpdate(update_script));
 		}
 
 		light->AddToSceneManager();
@@ -420,6 +456,17 @@ void ScenePlayerApp::LoadScene(std::string const & name)
 
 	for (XMLNodePtr model_node = root->FirstNode("model"); model_node; model_node = model_node->NextSibling("model"))
 	{
+		std::string update_script;
+		XMLNodePtr update_node = model_node->FirstNode("update");
+		if (update_node)
+		{
+			update_node = update_node->FirstNode();
+			if (update_node && (XNT_CData == update_node->Type()))
+			{
+				update_script = update_node->ValueString();
+			}
+		}
+
 		XMLAttributePtr attr = model_node->Attrib("name");
 		BOOST_ASSERT(attr);
 
@@ -428,6 +475,10 @@ void ScenePlayerApp::LoadScene(std::string const & name)
 		for (size_t i = 0; i < model->NumMeshes(); ++ i)
 		{
 			SceneObjectPtr scene_obj = MakeSharedPtr<SceneObjectHelper>(model->Mesh(i), SceneObject::SOA_Cullable);
+			if (!update_script.empty())
+			{
+				scene_obj->BindUpdateFunc(SceneObjectUpdate(update_script));
+			}
 			scene_objs_.push_back(scene_obj);
 			scene_obj->AddToSceneManager();
 		}
@@ -558,7 +609,7 @@ void ScenePlayerApp::LoadScene(std::string const & name)
 
 void ScenePlayerApp::InitObjects()
 {
-	this->LoadScene("DeferredRendering.scene");
+	this->LoadScene("ShadowCubemap.scene");
 
 	font_ = Context::Instance().RenderFactoryInstance().MakeFont("gkai00mp.kfont");
 

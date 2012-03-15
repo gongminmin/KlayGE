@@ -1447,21 +1447,21 @@ namespace KlayGE
 							if (index_in_pass < 6)
 							{
 								std::pair<float3, float3> ad = CubeMapViewVector<float>(static_cast<Texture::CubeFaces>(index_in_pass));
-								dir_es = MathLib::transform_normal(ad.first, view_);
+								dir_es = MathLib::transform_normal(MathLib::transform_quat(ad.first, light->Rotation()), view_);
 								sm_camera = light->SMCamera(index_in_pass);
 							}
 						}
 						float4 light_dir_es_actived = float4(dir_es.x(), dir_es.y(), dir_es.z(), 0);
 
-						float4x4 mat_v, mat_vp;
+						float4x4 light_to_view, light_to_proj;
 						if (sm_camera)
 						{
 							sm_buffer_->GetViewport().camera = sm_camera;
 
 							*light_view_proj_param_ = inv_view_ * sm_camera->ViewMatrix() * sm_camera->ProjMatrix();
 
-							mat_v = MathLib::inverse(sm_camera->ViewMatrix()) * view_;
-							mat_vp = mat_v * proj_;
+							light_to_view = MathLib::inverse(sm_camera->ViewMatrix()) * view_;
+							light_to_proj = light_to_view * proj_;
 						}
 
 						if ((PT_GenShadowMap == pass_type) || (PT_GenReflectiveShadowMap == pass_type))
@@ -1491,8 +1491,8 @@ namespace KlayGE
 								rl = rl_cone_;
 								float const scale = light->CosOuterInner().w();
 								float4x4 light_model = MathLib::scaling(scale, scale, 1.0f);
-								*light_volume_mv_param_ = light_model * mat_v;
-								*light_volume_mvp_param_ = light_model * mat_vp;
+								*light_volume_mv_param_ = light_model * light_to_view;
+								*light_volume_mvp_param_ = light_model * light_to_proj;
 							}
 							break;
 
@@ -1500,7 +1500,7 @@ namespace KlayGE
 							if (PT_Lighting == pass_type)
 							{
 								rl = rl_box_;
-								float4x4 light_model = MathLib::translation(p);
+								float4x4 light_model = MathLib::to_matrix(light->Rotation()) * MathLib::translation(p);
 								*light_volume_mv_param_ = light_model * view_;
 								*light_volume_mvp_param_ = light_model * view_ * proj_;
 								*view_to_light_model_param_ = MathLib::inverse(light_model * view_);
@@ -1508,8 +1508,8 @@ namespace KlayGE
 							else
 							{
 								rl = rl_pyramid_;
-								*light_volume_mv_param_ = mat_v;
-								*light_volume_mvp_param_ = mat_vp;
+								*light_volume_mv_param_ = light_to_view;
+								*light_volume_mvp_param_ = light_to_proj;
 							}
 							break;
 
