@@ -1,0 +1,7 @@
+<?xml version='1.0'?>
+
+<gl_extension name="EGL_ANGLE_d3d_share_handle_client_buffer" reg_no="38">
+	<tokens>
+		<token name="EGL_D3D_TEXTURE_2D_SHARE_HANDLE_ANGLE" value="0x3200"/>
+	</tokens>
+</gl_extension>

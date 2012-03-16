@@ -1,0 +1,7 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GLX_EXT_swap_control_tear" reg_no="414">
+	<tokens>
+		<token name="GLX_LATE_SWAPS_TEAR_EXT" value="0x20F3"/>
+	</tokens>
+</gl_extension>

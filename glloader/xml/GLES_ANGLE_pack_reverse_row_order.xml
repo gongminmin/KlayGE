@@ -1,0 +1,7 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GLES_ANGLE_pack_reverse_row_order" reg_no="110">
+	<tokens>
+		<token name="GL_PACK_REVERSE_ROW_ORDER_ANGLE" value="0x93A4"/>
+	</tokens>
+</gl_extension>

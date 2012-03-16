@@ -1,0 +1,18 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GLES_ANGLE_translated_shader_source" reg_no="113">
+	<tokens>
+		<token name="GL_TRANSLATED_SHADER_SOURCE_LENGTH_ANGLE" value="0x93A0"/>
+	</tokens>
+
+	<functions>
+		<function name="glGetTranslatedShaderSourceANGLE" return="void">
+			<params>
+				<param type="GLuint" name="shader"/>
+				<param type="GLsizei" name="bufsize"/>
+				<param type="GLsizei*" name="length"/>
+				<param type="GLchar*" name="source"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

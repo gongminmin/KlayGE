@@ -1,0 +1,8 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GLES_ANGLE_texture_usage" reg_no="112">
+	<tokens>
+		<token name="GL_TEXTURE_USAGE_ANGLE" value="0x93A2"/>
+		<token name="GL_FRAMEBUFFER_ATTACHMENT_ANGLE" value="0x93A3"/>
+	</tokens>
+</gl_extension>
