@@ -11,18 +11,22 @@ from build_KlayGE import *
 
 if __name__ == "__main__":
 	if len(sys.argv) > 1:
-		cfg = sys.argv[1]
+		compiler = sys.argv[1]
 	else:
-		cfg = ""
+		compiler = ""
+	if len(sys.argv) > 2:
+		cfg = sys.argv[2]
+	else:
+		cfg = "x86"
 
-	compiler_info = get_compiler_info(cfg)
+	compiler_info = get_compiler_info(compiler, cfg)
 
 	if 0 == len(compiler_info):
 		print("Wrong configuration\n")
 		sys.exit(1)
 
 	print("Building external libs...")
-	build_external_libs(cfg)
+	build_external_libs(compiler)
 
 	print("Building glloader...")
 	for arch in compiler_info[2]:

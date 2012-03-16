@@ -3,33 +3,42 @@
 
 import os
 
-def get_compiler_info(cfg):
+def get_compiler_info(compiler, cfg):
 	env = os.environ
 
-	if "" == cfg:
+	if "" == compiler:
 		if "VS110COMNTOOLS" in env:
-			cfg = "vc11"
+			compiler = "vc11"
 		elif "VS100COMNTOOLS" in env:
-			cfg = "vc10"
+			compiler = "vc10"
 		elif "VS90COMNTOOLS" in env:
-			cfg = "vc9"
+			compiler = "vc9"
 		elif "VS80COMNTOOLS" in env:
-			cfg = "vc8"
+			compiler = "vc8"
 		elif os.path.exists("C:\MinGW\bin\gcc.exe"):
-			cfg = "mingw"
+			compiler = "mingw"
 
-	if "vc11" == cfg:
+	if "vc11" == compiler:
 		compiler_name = "vc"
 		compiler_version = 11
-		arch_list = (("x86", "Visual Studio 11"), ("x64", "Visual Studio 11 Win64"))
-	elif "vc10" == cfg:
+		if "x86" == cfg:
+			arch_list = (("x86", "Visual Studio 11"), )
+		else:
+			arch_list = (("x64", "Visual Studio 11 Win64"), )
+	elif "vc10" == compiler:
 		compiler_name = "vc"
 		compiler_version = 10
-		arch_list = (("x86", "Visual Studio 10"), ("x64", "Visual Studio 10 Win64"))
-	elif "vc9" == cfg:
+		if "x86" == cfg:
+			arch_list = (("x86", "Visual Studio 10"), )
+		else:
+			arch_list = (("x64", "Visual Studio 10 Win64"), )
+	elif "vc9" == compiler:
 		compiler_name = "vc"
 		compiler_version = 9
-		arch_list = (("x86", "Visual Studio 9 2008"), ("x64", "Visual Studio 9 2008 Win64"))
+		if "x86" == cfg:
+			arch_list = (("x86", "Visual Studio 9 2008"), )
+		else:
+			arch_list = (("x64", "Visual Studio 9 2008 Win64"), )
 	else:
 		return ()
 

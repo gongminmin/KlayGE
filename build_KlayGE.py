@@ -79,11 +79,15 @@ def build_Tools(compiler_name, compiler_version, compiler_arch, generator_name):
 
 if __name__ == "__main__":
 	if len(sys.argv) > 1:
-		cfg = sys.argv[1]
+		compiler = sys.argv[1]
 	else:
-		cfg = ""
+		compiler = ""
+	if len(sys.argv) > 2:
+		cfg = sys.argv[2]
+	else:
+		cfg = "x86"
 
-	compiler_info = get_compiler_info(cfg)
+	compiler_info = get_compiler_info(compiler, cfg)
 
 	if 0 == len(compiler_info):
 		print("Wrong configuration\n")

@@ -9,7 +9,7 @@ def copy_to_dst(src_name, dst_dir):
 	import shutil
 	shutil.copy(src_name, dst_dir)
 
-def build_external_libs(cfg):
+def build_external_libs(compiler):
 	import os
 	import glob
 
@@ -18,50 +18,50 @@ def build_external_libs(cfg):
 	if 0 == platform.find("linux"):
 		platform = "linux"
 
-	if "" == cfg:
+	if "" == compiler:
 		if "win32" == platform:
 			if "VS110COMNTOOLS" in env:
-				cfg = "vc11"
+				compiler = "vc11"
 			elif "VS100COMNTOOLS" in env:
-				cfg = "vc10"
+				compiler = "vc10"
 			elif "VS90COMNTOOLS" in env:
-				cfg = "vc9"
+				compiler = "vc9"
 			elif "VS80COMNTOOLS" in env:
-				cfg = "vc8"
+				compiler = "vc8"
 			elif os.path.exists("C:\MinGW\bin\gcc.exe"):
-				cfg = "mingw"
+				compiler = "mingw"
 		elif "linux" == platform:
-			cfg = "gcc"
+			compiler = "gcc"
 		else:
 			print("Unsupported platform\n")
 			sys.exit(1)
 
-	if "vc11" == cfg:
+	if "vc11" == compiler:
 		compiler_name = "vc"
 		compiler_version = 11
 		ide_name = "VS"
 		ide_version = 11
-	elif "vc10" == cfg:
+	elif "vc10" == compiler:
 		compiler_name = "vc"
 		compiler_version = 10
 		ide_name = "VS"
 		ide_version = 2010
-	elif "vc9" == cfg:
+	elif "vc9" == compiler:
 		compiler_name = "vc"
 		compiler_version = 9
 		ide_name = "VS"
 		ide_version = 2008
-	elif "vc8" == cfg:
+	elif "vc8" == compiler:
 		compiler_name = "vc"
 		compiler_version = 8
 		ide_name = "VS"
 		ide_version = 2005
-	elif "mingw" == cfg:
+	elif "mingw" == compiler:
 		compiler_name = "gcc"
 		compiler_version = 0
 		ide_name = "mingw"
 		ide_version = 0
-	elif "gcc" == cfg:
+	elif "gcc" == compiler:
 		compiler_name = "gcc"
 		compiler_version = 0
 		ide_name = "gcc"
@@ -170,8 +170,8 @@ def build_external_libs(cfg):
 		os.chdir("../../../../")
 
 	copy_to_dst("External/7z/build/%s-%d_0/Release/7zxa.%s" % (compiler_name, compiler_version, dll_suffix), dst_dir_x86)
-	copy_to_dst("External/7z/build/%s-%d_0/x64/Release/7zxa.%s" % (compiler_name, compiler_version, dll_suffix), dst_dir_x64)
 	copy_to_dst("External/7z/build/%s-%d_0/Release/LZMA.%s" % (compiler_name, compiler_version, dll_suffix), dst_dir_x86)
+	copy_to_dst("External/7z/build/%s-%d_0/x64/Release/7zxa.%s" % (compiler_name, compiler_version, dll_suffix), dst_dir_x64)
 	copy_to_dst("External/7z/build/%s-%d_0/x64/Release/LZMA.%s" % (compiler_name, compiler_version, dll_suffix), dst_dir_x64)
 
 
@@ -198,8 +198,8 @@ def build_external_libs(cfg):
 
 if __name__ == "__main__":
 	if len(sys.argv) > 1:
-		cfg = sys.argv[1]
+		compiler = sys.argv[1]
 	else:
-		cfg = ""
+		compiler = ""
 
-	build_external_libs(cfg)
+	build_external_libs(compiler)
