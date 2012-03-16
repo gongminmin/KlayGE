@@ -20,7 +20,9 @@ def build_external_libs(cfg):
 
 	if "" == cfg:
 		if "win32" == platform:
-			if "VS100COMNTOOLS" in env:
+			if "VS110COMNTOOLS" in env:
+				cfg = "vc11"
+			elif "VS100COMNTOOLS" in env:
 				cfg = "vc10"
 			elif "VS90COMNTOOLS" in env:
 				cfg = "vc9"
@@ -34,7 +36,12 @@ def build_external_libs(cfg):
 			print("Unsupported platform\n")
 			sys.exit(1)
 
-	if "vc10" == cfg:
+	if "vc11" == cfg:
+		compiler_name = "vc"
+		compiler_version = 11
+		ide_name = "VS"
+		ide_version = 11
+	elif "vc10" == cfg:
 		compiler_name = "vc"
 		compiler_version = 10
 		ide_name = "VS"
