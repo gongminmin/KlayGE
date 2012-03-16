@@ -106,8 +106,18 @@ namespace KlayGE
 		}
 	}
 
-	void Camera::Update()
+	void Camera::BindUpdateFunc(boost::function<void(Camera&, float, float)> const & update_func)
 	{
+		update_func_ = update_func;
+	}
+
+	void Camera::Update(float app_time, float elapsed_time)
+	{
+		if (update_func_)
+		{
+			update_func_(*this, app_time, elapsed_time);
+		}
+
 		prev_view_mats_[0].push_back(viewMat_[0]);
 		prev_proj_mats_[0].push_back(projMat_[0]);
 		if (this->StereoMode())

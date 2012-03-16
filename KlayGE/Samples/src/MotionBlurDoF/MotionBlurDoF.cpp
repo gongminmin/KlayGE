@@ -738,13 +738,15 @@ void MotionBlurDoFApp::DoUpdateOverlay()
 
 uint32_t MotionBlurDoFApp::DoUpdate(uint32_t pass)
 {
-	SceneManager& sceneMgr(Context::Instance().SceneManagerInstance());
-	RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+	Context& context = Context::Instance();
+	App3DFramework& app = context.AppInstance();
+	SceneManager& sceneMgr = context.SceneManagerInstance();
+	RenderEngine& renderEngine = context.RenderFactoryInstance().RenderEngineInstance();
 
 	switch (pass)
 	{
 	case 0:
-		this->ActiveCamera().Update();
+		this->ActiveCamera().Update(app.AppTime(), app.FrameTime());
 
 		clear_float_->Apply();
 		renderEngine.BindFrameBuffer(clr_depth_fb_);

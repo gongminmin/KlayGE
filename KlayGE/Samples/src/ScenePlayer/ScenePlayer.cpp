@@ -171,6 +171,92 @@ namespace
 		std::string script_;
 	};
 
+	class CameraUpdate
+	{
+	public:
+		CameraUpdate(std::string const& script)
+			: script_(script)
+		{
+			module_.RunString("from ScenePlayer import *");
+		}
+
+		void operator()(Camera& camera, float app_time, float elapsed_time)
+		{
+			module_.RunString(script_);
+
+			PyObjectPtr py_ret = module_.Call("update", boost::make_tuple(app_time, elapsed_time));
+			if (py_ret)
+			{
+				size_t s = PyTuple_Size(py_ret.get());
+
+				float3 eye = camera.EyePos();
+				float3 lookat = camera.LookAt();
+				float3 up = camera.UpVec();
+				float fov = camera.FOV();
+				float aspect = camera.Aspect();
+				float np = camera.NearPlane();
+				float fp = camera.FarPlane();
+				
+				if (s > 0)
+				{
+					PyObject* py_eye = PyTuple_GetItem(py_ret.get(), 0);
+					if (py_eye && (PyList_Size(py_eye) > 0))
+					{
+						for (int i = 0; i < 3; ++ i)
+						{
+							eye[i] = static_cast<float>(PyFloat_AsDouble(PyList_GetItem(py_eye, i)));
+						}
+					}
+				}
+				if (s > 1)
+				{
+					PyObject* py_lookat = PyTuple_GetItem(py_ret.get(), 0);
+					if (py_lookat && (PyList_Size(py_lookat) > 0))
+					{
+						for (int i = 0; i < 3; ++ i)
+						{
+							lookat[i] = static_cast<float>(PyFloat_AsDouble(PyList_GetItem(py_lookat, i)));
+						}
+					}
+				}
+				if (s > 2)
+				{
+					PyObject* py_up = PyTuple_GetItem(py_ret.get(), 0);
+					if (py_up && (PyList_Size(py_up) > 0))
+					{
+						for (int i = 0; i < 3; ++ i)
+						{
+							up[i] = static_cast<float>(PyFloat_AsDouble(PyList_GetItem(py_up, i)));
+						}
+					}
+				}
+				if (s > 3)
+				{
+					PyObject* py_np = PyTuple_GetItem(py_ret.get(), 0);
+					if (py_np)
+					{
+						np = static_cast<float>(PyFloat_AsDouble(py_np));
+					}
+				}
+				if (s > 4)
+				{
+					PyObject* py_fp = PyTuple_GetItem(py_ret.get(), 0);
+					if (py_fp)
+					{
+						fp = static_cast<float>(PyFloat_AsDouble(py_fp));
+					}
+				}
+
+				camera.ViewParams(eye, lookat, up);
+				camera.ProjParams(fov, aspect, np, fp);
+			}
+		}
+
+	private:
+		ScriptModule module_;
+		std::string script_;
+	};
+
 	enum
 	{
 		Exit,
@@ -600,6 +686,23 @@ void ScenePlayerApp::LoadScene(std::string const & name)
 			{
 				far_plane = val_attr->ValueFloat();
 			}
+		}
+
+		std::string update_script;
+
+		XMLNodePtr update_node = camera_node->FirstNode("update");
+		if (update_node)
+		{
+			update_node = update_node->FirstNode();
+			if (update_node && (XNT_CData == update_node->Type()))
+			{
+				update_script = update_node->ValueString();
+			}
+		}
+
+		if (!update_script.empty())
+		{
+			this->ActiveCamera().BindUpdateFunc(CameraUpdate(update_script));
 		}
 
 		this->LookAt(eye_pos, look_at, up);

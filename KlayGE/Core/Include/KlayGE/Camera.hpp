@@ -32,6 +32,7 @@
 #ifdef KLAYGE_COMPILER_MSVC
 #pragma warning(pop)
 #endif
+#include <boost/function.hpp>
 
 #include <KlayGE/Frustum.hpp>
 #include <KlayGE/Vector.hpp>
@@ -68,7 +69,9 @@ namespace KlayGE
 			float3 const & upVec = float3(0, 1, 0));
 		void ProjParams(float FOV, float aspect, float nearPlane, float farPlane);
 
-		void Update();
+		void BindUpdateFunc(boost::function<void(Camera&, float, float)> const & update_func);
+
+		void Update(float app_time, float elapsed_time);
 
 		float4x4 const & ViewMatrix() const;
 		float4x4 const & ProjMatrix() const;
@@ -103,6 +106,8 @@ namespace KlayGE
 		mutable bool	frustum_dirty_;
 
 		uint32_t	mode_;
+
+		boost::function<void(Camera&, float, float)> update_func_;
 	};
 }
 
