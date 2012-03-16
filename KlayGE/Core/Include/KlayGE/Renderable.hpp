@@ -90,7 +90,7 @@ namespace KlayGE
 		virtual void OnInstanceBegin(uint32_t id);
 		virtual void OnInstanceEnd(uint32_t id);
 
-		virtual AABBox const & GetBound() const = 0;
+		virtual AABBox const & Bound() const = 0;
 
 		virtual void AddToRenderQueue();
 
@@ -118,7 +118,7 @@ namespace KlayGE
 
 		// For deferred only
 
-		virtual void SetModelMatrix(float4x4 const & mat);
+		virtual void ModelMatrix(float4x4 const & mat);
 
 		virtual void Pass(PassType type);
 		virtual void LightingTex(TexturePtr const & tex);

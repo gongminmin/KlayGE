@@ -51,7 +51,7 @@ namespace KlayGE
 		renderable_ = renderable;
 		if (renderable_)
 		{
-			renderable_->SetModelMatrix(model_);
+			renderable_->ModelMatrix(model_);
 		}
 	}
 
@@ -129,7 +129,7 @@ namespace KlayGE
 	void SceneObjectLightSourceProxy::Update(float /*app_time*/, float /*elapsed_time*/)
 	{
 		model_ = model_scaling_ * MathLib::to_matrix(light_->Rotation()) * MathLib::translation(light_->Position()) * model_translation_;
-		checked_pointer_cast<RenderableLightSourceProxy>(renderable_)->SetModelMatrix(model_);
+		checked_pointer_cast<RenderableLightSourceProxy>(renderable_)->ModelMatrix(model_);
 
 		checked_pointer_cast<RenderableLightSourceProxy>(renderable_)->Update();
 	}

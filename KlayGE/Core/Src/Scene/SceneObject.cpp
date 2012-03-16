@@ -40,19 +40,19 @@ namespace KlayGE
 		return renderable_;
 	}
 
-	AABBox const & SceneObject::GetBound() const
+	AABBox const & SceneObject::Bound() const
 	{
 		BOOST_ASSERT(renderable_);
-		return renderable_->GetBound();
+		return renderable_->Bound();
 	}
 
-	void SceneObject::SetModelMatrix(float4x4 const & mat)
+	void SceneObject::ModelMatrix(float4x4 const & mat)
 	{
 		model_ = mat;
-		renderable_->SetModelMatrix(model_);
+		renderable_->ModelMatrix(model_);
 	}
 
-	float4x4 const & SceneObject::GetModelMatrix() const
+	float4x4 const & SceneObject::ModelMatrix() const
 	{
 		return model_;
 	}

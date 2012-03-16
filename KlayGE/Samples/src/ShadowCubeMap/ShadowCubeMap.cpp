@@ -484,7 +484,7 @@ namespace
 	public:
 		void operator()(SceneObject& obj, float app_time, float /*elapsed_time*/)
 		{
-			obj.SetModelMatrix(MathLib::scaling(5.0f, 5.0f, 5.0f) * MathLib::translation(5.0f, 5.0f, 0.0f) * MathLib::rotation_y(-app_time / 1.5f));
+			obj.ModelMatrix(MathLib::scaling(5.0f, 5.0f, 5.0f) * MathLib::translation(5.0f, 5.0f, 0.0f) * MathLib::rotation_y(-app_time / 1.5f));
 		}
 	};
 

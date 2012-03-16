@@ -157,8 +157,8 @@ namespace KlayGE
 						AABBox bb_ws;
 						if (obj->Attrib() & SceneObject::SOA_Moveable)
 						{
-							AABBox const & box = obj->GetBound();
-							float4x4 const & mat = obj->GetModelMatrix();
+							AABBox const & box = obj->Bound();
+							float4x4 const & mat = obj->ModelMatrix();
 
 							float3 min, max;
 							min = max = MathLib::transform_coord(box[0], mat);
@@ -225,8 +225,8 @@ namespace KlayGE
 			&& !(attr & SceneObject::SOA_Overlay)
 			&& !(attr & SceneObject::SOA_Moveable))
 		{
-			AABBox const & box = obj->GetBound();
-			float4x4 const & mat = obj->GetModelMatrix();
+			AABBox const & box = obj->Bound();
+			float4x4 const & mat = obj->ModelMatrix();
 
 			float3 min, max;
 			min = max = MathLib::transform_coord(box[0], mat);
@@ -510,12 +510,12 @@ namespace KlayGE
 				for (size_t j = 0; j < min_depthes.size(); ++ j)
 				{
 					RenderablePtr const & renderable = items.second[j];
-					AABBox const & box = renderable->GetBound();
+					AABBox const & box = renderable->Bound();
 					uint32_t const num = renderable->NumInstances();
 					float md = 1e10f;
 					for (uint32_t i = 0; i < num; ++ i)
 					{
-						float4x4 const & mat = renderable->GetInstance(i)->GetModelMatrix();
+						float4x4 const & mat = renderable->GetInstance(i)->ModelMatrix();
 						float4 const zvec(MathLib::dot(mat.Row(0), view_mat_z),
 							MathLib::dot(mat.Row(1), view_mat_z), MathLib::dot(mat.Row(2), view_mat_z),
 							MathLib::dot(mat.Row(3), view_mat_z));

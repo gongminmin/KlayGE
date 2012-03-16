@@ -73,8 +73,8 @@ namespace KlayGE
 			return rl_;
 		}
 
-		virtual AABBox const & GetBound() const;
-		void SetBound(AABBox const & aabb);
+		virtual AABBox const & Bound() const;
+		void Bound(AABBox const & aabb);
 
 		virtual std::wstring const & Name() const;
 
@@ -205,7 +205,7 @@ namespace KlayGE
 		void OnRenderBegin();
 		void OnRenderEnd();
 
-		AABBox const & GetBound() const
+		AABBox const & Bound() const
 		{
 			return aabb_;
 		}

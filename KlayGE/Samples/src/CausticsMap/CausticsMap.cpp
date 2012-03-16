@@ -481,12 +481,12 @@ namespace
 			}
 		}
 
-		void SetModelMatrix(float4x4 const & model)
+		void ModelMatrix(float4x4 const & model)
 		{
 			typedef BOOST_TYPEOF(meshes_) MeshesType;
 			BOOST_FOREACH(MeshesType::reference mesh, meshes_)
 			{
-				checked_pointer_cast<RefractMesh>(mesh)->SetModelMatrix(model);
+				checked_pointer_cast<RefractMesh>(mesh)->ModelMatrix(model);
 			}
 		}
 
@@ -768,14 +768,14 @@ void CausticsMapApp::InitObjects()
 	RenderablePtr model_sphere = SyncLoadModel("sphere_high.7z//sphere_high.meshml", EAH_GPU_Read | EAH_Immutable,
 		CreateModelFactory<RefractModel>(), CreateMeshFactory<RefractMesh>());
 	sphere_ = MakeSharedPtr<SceneObjectHelper>(model_sphere, SceneObjectHelper::SOA_Cullable);
-	sphere_->SetModelMatrix(MathLib::scaling(200.0f, 200.0f, 200.0f) * MathLib::translation(0.0f, 10.0f, 0.0f));
+	sphere_->ModelMatrix(MathLib::scaling(200.0f, 200.0f, 200.0f) * MathLib::translation(0.0f, 10.0f, 0.0f));
 	sphere_->AddToSceneManager();
 	sphere_->Visible(false);
 
 	RenderablePtr model_bunny = SyncLoadModel("bunny.7z//bunny.meshml", EAH_GPU_Read | EAH_Immutable,
 		CreateModelFactory<RefractModel>(), CreateMeshFactory<RefractMesh>());
 	bunny_ = MakeSharedPtr<SceneObjectHelper>(model_bunny, SceneObjectHelper::SOA_Cullable);
-	bunny_->SetModelMatrix(MathLib::scaling(320.0f, 320.0f, 320.0f) * MathLib::translation(3.0f, 2.0f, 0.0f));
+	bunny_->ModelMatrix(MathLib::scaling(320.0f, 320.0f, 320.0f) * MathLib::translation(3.0f, 2.0f, 0.0f));
 	bunny_->AddToSceneManager();
 	bunny_->Visible(false);
 
@@ -1150,7 +1150,7 @@ void CausticsMapApp::ModelSelectionComboBox(KlayGE::UIComboBox const & sender)
 		break;
 	}
 
-	dummy_light_env_->Position(MathLib::transform_coord(refract_obj_->GetBound().Center(), refract_obj_->GetModelMatrix()));
+	dummy_light_env_->Position(MathLib::transform_coord(refract_obj_->Bound().Center(), refract_obj_->ModelMatrix()));
 }
 
 void CausticsMapApp::DoUpdateOverlay()

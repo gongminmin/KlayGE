@@ -228,7 +228,7 @@ namespace KlayGE
 		}
 	}
 
-	void Renderable::SetModelMatrix(float4x4 const & mat)
+	void Renderable::ModelMatrix(float4x4 const & mat)
 	{
 		model_mat_ = mat;
 	}

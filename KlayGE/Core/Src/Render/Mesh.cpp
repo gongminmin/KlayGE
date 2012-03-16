@@ -183,7 +183,7 @@ namespace
 				StaticMeshPtr& mesh = meshes[mesh_index];
 
 				mesh->MaterialID(model_desc_.mtl_ids[mesh_index]);
-				mesh->SetBound(model_desc_.bbs[mesh_index]);
+				mesh->Bound(model_desc_.bbs[mesh_index]);
 
 				for (uint32_t ve_index = 0; ve_index < model_desc_.merged_buff.size(); ++ ve_index)
 				{
@@ -263,7 +263,7 @@ namespace KlayGE
 		typedef BOOST_TYPEOF(meshes_) MeshesType;
 		BOOST_FOREACH(MeshesType::const_reference mesh, meshes_)
 		{
-			aabb_ |= mesh->GetBound();
+			aabb_ |= mesh->Bound();
 		}
 	}
 
@@ -386,12 +386,12 @@ namespace KlayGE
 		return name_;
 	}
 
-	AABBox const & StaticMesh::GetBound() const
+	AABBox const & StaticMesh::Bound() const
 	{
 		return aabb_;
 	}
 
-	void StaticMesh::SetBound(AABBox const & aabb)
+	void StaticMesh::Bound(AABBox const & aabb)
 	{
 		aabb_ = aabb;
 	}

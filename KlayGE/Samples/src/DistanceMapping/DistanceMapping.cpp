@@ -199,9 +199,9 @@ namespace
 			aabb_ = MathLib::compute_bounding_box<float>(&xyzs[0], &xyzs[sizeof(xyzs) / sizeof(xyzs[0])]);
 		}
 
-		void SetModelMatrix(float4x4 const & mat)
+		void ModelMatrix(float4x4 const & mat)
 		{
-			RenderableHelper::SetModelMatrix(mat);
+			RenderableHelper::ModelMatrix(mat);
 			inv_model_mat_ = MathLib::inverse(model_mat_);
 		}
 
@@ -322,7 +322,7 @@ void DistanceMapping::InitObjects()
 	font_ = Context::Instance().RenderFactoryInstance().MakeFont("gkai00mp.kfont");
 
 	polygon_ = MakeSharedPtr<PolygonObject>();
-	polygon_->SetModelMatrix(MathLib::rotation_x(-0.5f));
+	polygon_->ModelMatrix(MathLib::rotation_x(-0.5f));
 	polygon_->AddToSceneManager();
 
 	this->LookAt(float3(2, 0, -2), float3(0, 0, 0));

@@ -58,7 +58,7 @@ namespace KlayGE
 		return rl_;
 	}
 
-	AABBox const & RenderableHelper::GetBound() const
+	AABBox const & RenderableHelper::Bound() const
 	{
 		return aabb_;
 	}

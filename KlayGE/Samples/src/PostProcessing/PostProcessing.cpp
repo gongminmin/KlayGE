@@ -41,7 +41,7 @@ namespace
 	public:
 		void operator()(SceneObject& obj, float app_time, float /*elapsed_time*/)
 		{
-			obj.SetModelMatrix(MathLib::rotation_y(-app_time / 1.5f));
+			obj.ModelMatrix(MathLib::rotation_y(-app_time / 1.5f));
 		}
 	};
 

@@ -160,7 +160,7 @@ namespace
 						{
 							obj_mat[i] = static_cast<float>(PyFloat_AsDouble(PyList_GetItem(py_mat, i)));
 						}
-						obj.SetModelMatrix(obj_mat);
+						obj.ModelMatrix(obj_mat);
 					}
 				}
 			}

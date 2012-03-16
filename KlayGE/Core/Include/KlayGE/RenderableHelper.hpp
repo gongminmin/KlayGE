@@ -47,7 +47,7 @@ namespace KlayGE
 		virtual RenderTechniquePtr const & GetRenderTechnique() const;
 		virtual RenderLayoutPtr const & GetRenderLayout() const;
 
-		virtual AABBox const & GetBound() const;
+		virtual AABBox const & Bound() const;
 
 		virtual std::wstring const & Name() const;
 
