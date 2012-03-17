@@ -242,6 +242,8 @@ namespace KlayGE
 		RenderEffectParameterPtr view_to_light_model_param_;
 		RenderEffectParameterPtr light_pos_es_param_;
 		RenderEffectParameterPtr light_dir_es_param_;
+		RenderEffectParameterPtr projective_map_tex_param_;
+		RenderEffectParameterPtr projective_map_cube_tex_param_;
 
 		std::vector<SceneObject*> visible_scene_objs_;
 		bool has_transparency_objs_;

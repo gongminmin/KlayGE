@@ -329,6 +329,7 @@ void ScenePlayerApp::LoadScene(std::string const & name)
 		float3 light_clr(0, 0, 0);
 		float3 fall_off(1, 0, 0);
 		std::string update_script;
+		TexturePtr projective;
 
 		XMLNodePtr attribute_node = light_node->FirstNode("attribute");
 		if (attribute_node)
@@ -427,6 +428,16 @@ void ScenePlayerApp::LoadScene(std::string const & name)
 			}
 		}
 
+		XMLNodePtr projective_node = light_node->FirstNode("projective");
+		if (projective_node)
+		{
+			XMLAttributePtr attr = projective_node->Attrib("name");
+			if (attr)
+			{
+				projective = SyncLoadTexture(attr->ValueString(), EAH_GPU_Read | EAH_Immutable);
+			}
+		}
+
 		XMLAttributePtr attr = light_node->Attrib("type");
 		BOOST_ASSERT(attr);
 
@@ -518,6 +529,8 @@ void ScenePlayerApp::LoadScene(std::string const & name)
 		{
 			light->BindUpdateFunc(LightSourceUpdate(update_script));
 		}
+
+		light->ProjectiveTexture(projective);
 
 		light->AddToSceneManager();
 		lights_.push_back(light);

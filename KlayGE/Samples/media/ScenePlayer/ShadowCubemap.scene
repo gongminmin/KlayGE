@@ -6,6 +6,7 @@
 		<color x="1" y="1" z="1"/>
 		<fall_off x="1" y="0.05" z="0"/>
 		<proxy scale="0.5"/>
+		<projective name="../ShadowCubeMap/lamp.dds"/>
 		<update>
 			<![CDATA[
 def update(app_time, elapsed_time):

@@ -559,6 +559,8 @@ namespace KlayGE
 		view_to_light_model_param_ = dr_effect_->ParameterByName("view_to_light_model");
 		light_pos_es_param_ = dr_effect_->ParameterByName("light_pos_es");
 		light_dir_es_param_ = dr_effect_->ParameterByName("light_dir_es");
+		projective_map_tex_param_ = dr_effect_->ParameterByName("projective_map_tex");
+		projective_map_cube_tex_param_ = dr_effect_->ParameterByName("projective_map_cube_tex");
 	}
 
 	void DeferredRenderingLayer::SSVOEnabled(bool ssvo)
@@ -733,15 +735,22 @@ namespace KlayGE
 			}
 		}
 
-		if (caps.rendertarget_format_support(EF_R16F, 1, 0))
+		if (caps.rendertarget_format_support(EF_B10G11R11F, 1, 0))
 		{
-			fmt = EF_R16F;
+			fmt = EF_B10G11R11F;
 		}
 		else
 		{
-			BOOST_ASSERT(caps.rendertarget_format_support(EF_ABGR16F, 1, 0));
+			if (caps.rendertarget_format_support(EF_ABGR8, 1, 0))
+			{
+				fmt = EF_ABGR8;
+			}
+			else
+			{
+				BOOST_ASSERT(caps.rendertarget_format_support(EF_ARGB8, 1, 0));
 
-			fmt = EF_ABGR16F;
+				fmt = EF_ARGB8;
+			}
 		}
 		shadowing_tex_ = rf.MakeTexture2D(width / 2, height / 2, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
 		shadowing_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*shadowing_tex_, 0, 1, 0));
@@ -1620,12 +1629,22 @@ namespace KlayGE
 				{
 					// Shadowing
 
+					if (LT_Point == type)
+					{
+						*projective_map_cube_tex_param_ = light->ProjectiveTexture();
+					}
+					else
+					{
+						*projective_map_tex_param_ = light->ProjectiveTexture();
+					}
+
 					re.BindFrameBuffer(shadowing_buffer_);
 					re.CurFrameBuffer()->Attached(FrameBuffer::ATT_Color0)->ClearColor(Color(1, 1, 1, 1));
 
 					*g_buffer_tex_param_ = opaque_g_buffer_rt0_tex_;
 					*depth_tex_param_ = opaque_depth_tex_;
-					*light_attrib_param_ = float4(attr & LSA_NoDiffuse ? 0.0f : 1.0f, attr & LSA_NoSpecular ? 0.0f : 1.0f, attr & LSA_NoShadow ? -1.0f : 1.0f, 0.0f);
+					*light_attrib_param_ = float4(attr & LSA_NoDiffuse ? 0.0f : 1.0f, attr & LSA_NoSpecular ? 0.0f : 1.0f,
+						attr & LSA_NoShadow ? -1.0f : 1.0f, light->ProjectiveTexture() ? 1.0f : -1.0f);
 					*light_color_param_ = light->Color();
 					*light_falloff_param_ = light->Falloff();
 

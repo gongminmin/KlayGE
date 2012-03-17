@@ -36,6 +36,9 @@
 	<parameter type="texture2D" name="shadow_map_tex"/>
 	<parameter type="textureCUBE" name="shadow_map_cube_tex"/>
 
+	<parameter type="texture2D" name="projective_map_tex"/>
+	<parameter type="textureCUBE" name="projective_map_cube_tex"/>
+
 	<parameter type="texture2D" name="shadowing_tex"/>
 
 	<parameter type="sampler" name="linear_sampler">
@@ -75,12 +78,12 @@ float linstep(float min, float max, float v)
 #define NOPERSPECTIVE_SUPPORT
 #endif
 
-float4 CalcColor(float n_dot_l, float spec, float atten)
+float4 CalcColor(float n_dot_l, float spec, float atten, float3 shadow)
 {
 	float2 ds = n_dot_l * atten * float2(1, spec);
 	ds *= light_attrib.xy;
 	ds = max(ds, 0);
-	return ds.xxxy * light_color;
+	return ds.xxxy * light_color * float4(shadow, dot(shadow, 1) / 3);
 }
 
 float Calc_VSM(float2 moments, float len)
@@ -96,34 +99,47 @@ float Calc_VSM(float2 moments, float len)
 	return max(p, p_max);
 }
 
-float VSM_Omnidirectional(float3 dir_ls, float len)
+float4 VSM_Omnidirectional(float3 dir_ls, float len)
 {
+	dir_ls.y *= -KLAYGE_FLIPPING;
+	
 	float shadow = 1;
 	if (light_attrib.z > 0)
 	{
-		float2 moments = shadow_map_cube_tex.Sample(linear_sampler,
-			float3(dir_ls.x, -KLAYGE_FLIPPING * dir_ls.y, dir_ls.z)).xy;
+		float2 moments = shadow_map_cube_tex.Sample(linear_sampler, dir_ls).xy;
 		shadow = Calc_VSM(moments, len);
 	}
+
+	float4 projective = 1;
+	if (light_attrib.w > 0)
+	{
+		projective = projective_map_cube_tex.Sample(linear_sampler, dir_ls);
+	}
 	
-	return shadow;
+	return projective * shadow;
 }
 
-float VSM_Directional(float3 pos_es, float len)
+float4 VSM_Directional(float3 pos_es, float len)
 {
+	float4 light_proj_pos = mul(float4(pos_es, 1), light_view_proj);
+	light_proj_pos /= light_proj_pos.w;
+	light_proj_pos.y *= KLAYGE_FLIPPING;
+	light_proj_pos.xy = light_proj_pos.xy / 2 + 0.5f;
+		
 	float shadow = 1;
 	if (light_attrib.z > 0)
 	{
-		float4 light_proj_pos = mul(float4(pos_es, 1), light_view_proj);
-		light_proj_pos /= light_proj_pos.w;
-		light_proj_pos.y *= KLAYGE_FLIPPING;
-		light_proj_pos.xy = light_proj_pos.xy / 2 + 0.5f;
-	
 		float2 moments = shadow_map_tex.Sample(linear_sampler, light_proj_pos.xy).xy;
 		shadow = Calc_VSM(moments, len);
 	}
 	
-	return shadow;
+	float4 projective = 1;
+	if (light_attrib.w > 0)
+	{
+		projective = projective_map_tex.Sample(linear_sampler, light_proj_pos.xy);
+	}
+	
+	return projective * shadow;
 }
 
 float4 NearestDepthUpsamplingShadow(float2 tc)
@@ -204,9 +220,9 @@ float4 DeferredRenderingPointPS(
 	if (n_dot_l > 0)
 	{
 		float spec = roughness_term(normalize(dir - view_dir), normal, GetShininess(ndc)).x;
-		float shadow = NearestDepthUpsamplingShadow(tc).r;
-		float atten = shadow * attenuation_term(light_pos_es.xyz, pos_es.xyz, light_falloff);
-		final_clr = CalcColor(n_dot_l, spec, atten);
+		float3 shadow = NearestDepthUpsamplingShadow(tc).xyz;
+		float atten = attenuation_term(light_pos_es.xyz, pos_es.xyz, light_falloff);
+		final_clr = CalcColor(n_dot_l, spec, atten, shadow);
 	}
 
 	return final_clr;
@@ -239,9 +255,9 @@ float4 DeferredRenderingSpotPS(
 		if (n_dot_l > 0)
 		{
 			float spec = roughness_term(normalize(dir - view_dir), normal, GetShininess(ndc)).x;
-			float shadow = NearestDepthUpsamplingShadow(tc).r;
-			float atten = spot * shadow * attenuation_term(light_pos_es.xyz, pos_es.xyz, light_falloff);
-			final_clr = CalcColor(n_dot_l, spec, atten);
+			float3 shadow = NearestDepthUpsamplingShadow(tc).xyz;
+			float atten = spot * attenuation_term(light_pos_es.xyz, pos_es.xyz, light_falloff);
+			final_clr = CalcColor(n_dot_l, spec, atten, shadow);
 		}
 	}
 
@@ -271,7 +287,7 @@ float4 DeferredRenderingDirectionalPS(
 	if (n_dot_l > 0)
 	{
 		float spec = roughness_term(normalize(dir - view_dir), normal, GetShininess(ndc)).x;
-		final_clr = CalcColor(n_dot_l, spec, 1);
+		final_clr = CalcColor(n_dot_l, spec, 1, 1);
 	}
 
 	return final_clr;
@@ -292,7 +308,7 @@ float4 DeferredRenderingAmbientPS(
 	float4 ndc = g_buffer_tex.Sample(point_sampler, tc);
 	float3 normal = GetNormal(ndc);
 
-	return CalcColor(0.5f + 0.5f * dot(light_dir_es.xyz, normal), 0, 1);
+	return CalcColor(0.5f + 0.5f * dot(light_dir_es.xyz, normal), 0, 1, 1);
 }
 
 float4 DeferredShadowingPointPS(
