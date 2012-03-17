@@ -2409,7 +2409,16 @@ namespace KlayGE
 	RenderableLightSourceProxy::RenderableLightSourceProxy(RenderModelPtr const & model, std::wstring const & name)
 			: StaticMesh(model, name)
 	{
-		this->Technique(Context::Instance().RenderFactoryInstance().LoadEffect("LightSourceProxy.fxml")->TechniqueByName("LightSourceProxy"));
+		RenderEffectPtr effect = Context::Instance().RenderFactoryInstance().LoadEffect("LightSourceProxy.fxml");
+
+		if (deferred_effect_)
+		{
+			this->BindDeferredEffect(effect);
+			shading_tech_ = effect->TechniqueByName("LightSourceProxyShadingTech");
+			special_shading_tech_ = effect->TechniqueByName("LightSourceProxySpecialShadingTech");
+		}
+
+		this->Technique(effect->TechniqueByName("LightSourceProxy"));
 	}
 
 	void RenderableLightSourceProxy::Technique(RenderTechniquePtr const & tech)
@@ -2423,57 +2432,51 @@ namespace KlayGE
 			light_color_param_ = technique_->Effect().ParameterByName("light_color");
 			light_falloff_param_ = technique_->Effect().ParameterByName("light_falloff");
 			light_is_projective_param_ = technique_->Effect().ParameterByName("light_is_projective");
-			light_projective_tex_param_ = technique_->Effect().ParameterByName("light_projective_tex");
+			projective_map_tex_param_ = technique_->Effect().ParameterByName("projective_map_tex");
+			projective_map_cube_tex_param_ = technique_->Effect().ParameterByName("projective_map_cube_tex");
 		}
 	}
 
 	void RenderableLightSourceProxy::Update()
 	{
-		if (!deferred_effect_)
+		if (light_color_param_)
 		{
-			if (light_color_param_)
+			*light_color_param_ = light_->Color();
+		}
+		if (light_falloff_param_)
+		{
+			*light_falloff_param_ = light_->Falloff();
+		}
+		if (light_->ProjectiveTexture() && light_is_projective_param_)
+		{
+			*light_is_projective_param_ = int2(light_->ProjectiveTexture() ? 1 : 0, LT_Point == light_->Type());
+		}
+		if (LT_Point == light_->Type())
+		{
+			if (projective_map_cube_tex_param_)
 			{
-				*light_color_param_ = light_->Color();
+				*projective_map_cube_tex_param_ = light_->ProjectiveTexture();
 			}
-			if (light_falloff_param_)
+		}
+		else
+		{
+			if (projective_map_tex_param_)
 			{
-				*light_falloff_param_ = light_->Falloff();
-			}
-			if (light_->ProjectiveTexture() && light_is_projective_param_)
-			{
-				*light_is_projective_param_ = static_cast<int32_t>(light_->ProjectiveTexture() ? 1 : 0);
-			}
-			if (light_projective_tex_param_)
-			{
-				*light_projective_tex_param_ = light_->ProjectiveTexture();
+				*projective_map_tex_param_ = light_->ProjectiveTexture();
 			}
 		}
 	}
 
 	void RenderableLightSourceProxy::OnRenderBegin()
 	{
-		if (deferred_effect_)
-		{
-			StaticMesh::OnRenderBegin();
+		Camera const & camera = Context::Instance().AppInstance().ActiveCamera();
 
-			if ((PT_OpaqueShading == type_) || (PT_OpaqueSpecialShading == type_))
-			{
-				float4 clr = light_->Color();
-				clr.w() = 0;
-				*emit_clr_param_ = clr;
-			}
-		}
-		else
-		{
-			Camera const & camera = Context::Instance().AppInstance().ActiveCamera();
+		float4x4 const & view = camera.ViewMatrix();
+		float4x4 const & proj = camera.ProjMatrix();
 
-			float4x4 const & view = camera.ViewMatrix();
-			float4x4 const & proj = camera.ProjMatrix();
-
-			float4x4 mv = model_mat_ * view;
-			*mvp_param_ = mv * proj;
-			*model_param_ = model_mat_;
-		}
+		float4x4 mv = model_mat_ * view;
+		*mvp_param_ = mv * proj;
+		*model_param_ = model_mat_;
 	}
 
 	void RenderableLightSourceProxy::AttachLightSrc(LightSourcePtr const & light)

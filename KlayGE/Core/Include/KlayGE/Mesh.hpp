@@ -450,7 +450,8 @@ namespace KlayGE
 		RenderEffectParameterPtr light_color_param_;
 		RenderEffectParameterPtr light_falloff_param_;
 		RenderEffectParameterPtr light_is_projective_param_;
-		RenderEffectParameterPtr light_projective_tex_param_;
+		RenderEffectParameterPtr projective_map_tex_param_;
+		RenderEffectParameterPtr projective_map_cube_tex_param_;
 	};
 }
 

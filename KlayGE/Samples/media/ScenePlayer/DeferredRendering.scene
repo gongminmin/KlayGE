@@ -6,10 +6,11 @@
 		<color x="0.8" y="0.96" z="1"/>
 		<fall_off x="1" y="0.5" z="0"/>
 		<proxy scale="0.1"/>
+		<projective name="../ShadowCubeMap/lamp.dds"/>
 		<update>
 			<![CDATA[
 def update(app_time, elapsed_time):
-	return (translation(sin(app_time) + 2, 10, 0).vec, );
+	return (mul(mul(rotation_z(0.4), rotation_y(app_time / 1.4)), translation(sin(app_time) + 2, 10, 0)).vec, );
 			]]>
 		</update>
 	</light>	
