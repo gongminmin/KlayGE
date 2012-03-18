@@ -18,7 +18,7 @@
 	</parameter>
 
 	<parameter type="texture2D" name="noise_tex">
-		<annotation type="string" name="SasResourceAddress" value="noise_tex.dds"/>
+		<annotation type="string" name="SasResourceAddress" value="white_noise_tex.dds"/>
 	</parameter>
 	<parameter type="texture2D" name="src_tex"/>
 
@@ -26,7 +26,7 @@
 		<![CDATA[
 float4 NightVisionPS(float2 tc0 : TEXCOORD0) : SV_Target
 {
-	float3 n = noise_tex.Sample(linear_sampler, tc0 * 1.5f + noise_offset).rgb;
+	float3 n = noise_tex.Sample(linear_sampler, tc0 * 1.5f + noise_offset).x;
 	float3 c = src_tex.Sample(point_sampler, tc0 + (n.xy * 0.001f)).rgb;
 	c *= color_amplification;
 

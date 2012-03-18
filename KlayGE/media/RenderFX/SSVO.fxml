@@ -39,83 +39,49 @@
 	<parameter type="texture2D" name="g_buffer_tex"/>
 	<parameter type="texture2D" name="depth_tex"/>
 
+	<parameter type="texture2D" name="noise_tex">
+		<annotation type="string" name="SasResourceAddress" value="white_noise_tex.dds"/>
+	</parameter>
+
 	<shader>
 		<![CDATA[
-float CalcObscurance(float2 tc, float3 pos_es, float3 x_dir, float3 y_dir, float3 normal, float radius)
+float CalcAlchemyObscurance(float2 tc, float3 pos_es, float3 x_dir, float3 y_dir, float3 normal, float radius, float depth_center)
 {
+	float rotate = noise_tex.Sample(linear_sampler, tc * 1.5f).x;
+	float sz, cz;
+	sincos(rotate, sz, cz);
+
+	x_dir *= radius;
+	y_dir *= radius;
+
 	float sqr_radius = radius * radius;
 	float obscurance = 0;
 	float total_weight = 0;
 	for (int i = 0; i < 2; ++ i)
 	{
 		float2 sxy = sphere_xy[i];
+		sxy = float2(dot(sxy, float2(cz, -sz)), dot(sxy, float2(sz, cz)));
 		for (int j = 0; j < 2; ++ j)
 		{
-			float3 sample_point_offset = (sxy.x * x_dir + sxy.y * y_dir) * radius;
+			float3 sample_point_offset = sxy.x * x_dir + sxy.y * y_dir;
 			float3 sample_point = pos_es + sample_point_offset;
 			float4 sample_point_ss = mul(float4(sample_point, 1), proj);
-		
+
 			float2 tc_sample = TexCoordFromPos(sample_point_ss / sample_point_ss.w);
-			float depth_sample = depth_tex.Sample(bilinear_sampler, tc_sample).r;
-
-			float3 view_dir_sample = normalize(sample_point);
-			float v = dot(pos_es, view_dir_sample);
-			float disc = sqr_radius - (dot(pos_es, pos_es) - v * v);
-			float intersect_t = v - sqrt(disc);
-
-			float zs;
-			if (depth_sample <= intersect_t * view_dir_sample.z)
-			{
-				float3 pos_es_sample = view_dir_sample * intersect_t;
-				zs = dot(pos_es_sample - pos_es, normal);
-				obscurance += zs;
-			}
-			else
-			{
-				float3 pos_es_sample = view_dir_sample * (depth_sample / view_dir_sample.z);
-				float3 pos_sphere_sample = mul(float3x3(x_dir, y_dir, normal), pos_es_sample - pos_es);
-				zs = sqrt(sqr_radius - dot(pos_sphere_sample.xy, pos_sphere_sample.xy));
-				obscurance += clamp(pos_sphere_sample.z, 0, zs);
-			}
-			total_weight += zs;
-
-			sxy = -sxy;
-		}
-	}
-
-	return (total_weight > 1e-6f) ? obscurance / total_weight : 0;
-}
-
-float CalcAlchemyObscurance(float2 tc, float3 pos_es, float3 x_dir, float3 y_dir, float3 normal, float radius){
-	float sqr_radius = radius * radius;
-	float obscurance = 0;
-	float total_weight = 0;
-	for (int i = 0; i < 2; ++ i)
-	{
-		float2 sxy = sphere_xy[i];
-		for (int j = 0; j < 2; ++ j)
-		{
-			float3 sample_point_offset = (sxy.x * x_dir + sxy.y * y_dir) * radius;
-			float3 sample_point = pos_es + sample_point_offset;
-			float4 sample_point_ss = mul(float4(sample_point, 1), proj);
-		
-			float2 tc_sample = TexCoordFromPos(sample_point_ss / sample_point_ss.w);
-			float depth_sample = depth_tex.Sample(bilinear_sampler, tc_sample).r;
-
-			float3 view_dir_sample = normalize(sample_point);
-			float3 pos_es_sample = view_dir_sample * (depth_sample / view_dir_sample.z);
+			float depth_sample = depth_tex.Sample(point_sampler, tc_sample).r;
+			float3 pos_es_sample = sample_point * (depth_sample / sample_point.z);
 			float3 dir_es_sample = pos_es_sample - pos_es;
 
 			float epsilon = 0.0001f;
 			float beta = 0.002f;
-			float r_sqr = 1.0f;
-	
-			float dist_sqr = dot( dir_es_sample, dir_es_sample );
-			if( dist_sqr < r_sqr ){
-				obscurance += max( 0.0f, dot(dir_es_sample, normal) - depth_sample * beta ) / ( dist_sqr + epsilon );
+
+			float dist_sqr = dot(dir_es_sample, dir_es_sample);
+			if (dist_sqr < sqr_radius)
+			{
+				obscurance += max(0.0f, dot(dir_es_sample, normal) - depth_center * beta) / (dist_sqr + epsilon);
 				total_weight += 1.0f;
 			}
-			
+
 			sxy = -sxy;
 		}
 	}
@@ -138,21 +104,18 @@ float4 SSVOPS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Target
 {
 	float radius = 0.5f;
 	float obscurance = 1;
-	
+
 	float depth = depth_tex.Sample(point_sampler, tc).r;
 	float3 normal = GetNormal(g_buffer_tex.Sample(point_sampler, tc));
-	
+
 	view_dir = normalize(view_dir);
 	float3 pos_es = view_dir * (depth / view_dir.z);
 
 	float3 y_dir = cross(normal, float3(0, 0, 1));
 	float3 x_dir = cross(y_dir, normal);
 
-	// obscurance = CalcObscurance(tc, pos_es, x_dir, y_dir, normal, radius);
-	// return float4(1 - saturate(vo_intensity * obscurance), depth, 0, 0);
-	
-	obscurance = CalcAlchemyObscurance(tc, pos_es, x_dir, y_dir, normal, radius);
-	return float4( max(0.0, 1.0 - obscurance), depth, 0, 0 );
+	obscurance = CalcAlchemyObscurance(tc, pos_es, x_dir, y_dir, normal, radius, depth);
+	return float4(max(0.0f, 1.0f - obscurance), depth, 0, 0);
 }
 		]]>
 	</shader>

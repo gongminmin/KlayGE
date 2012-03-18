@@ -2858,7 +2858,7 @@ namespace KlayGE
 					uint64_t timestamp;
 					source->read(&timestamp, sizeof(timestamp));
 					LittleEndianToNative<sizeof(timestamp)>(&timestamp);
-					if (timestamp <= source->Timestamp())
+					if (timestamp_ <= timestamp)
 					{
 						shader_descs_ = MakeSharedPtr<BOOST_TYPEOF(*shader_descs_)>(1);
 
