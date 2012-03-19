@@ -107,17 +107,17 @@ ENDFUNCTION()
 # - EXTRA_LINKED_LIBRARIES: dependencies required besides KlarGE_Core and boost
 #
 MACRO(SETUP_TOOL EXE_NAME)
+	SET(RESOURCE_FILES
+		${KLAYGE_PROJECT_DIR}/Tools/media/Common/KlayGETool.rc
+		${KLAYGE_PROJECT_DIR}/klayge_logo.ico
+	)
+
 	SOURCE_GROUP("Source Files" FILES ${SOURCE_FILES})
 	SOURCE_GROUP("Header Files" FILES ${HEADER_FILES})
 	SOURCE_GROUP("Resource Files" FILES ${RESOURCE_FILES})
 	SOURCE_GROUP("Effect Files" FILES ${EFFECT_FILES})
 	SOURCE_GROUP("Post Processors" FILES ${POST_PROCESSORS})
 	SOURCE_GROUP("UI Files" FILES ${UI_FILES})
-
-	SET(RESOURCE_FILES
-		${KLAYGE_PROJECT_DIR}/Tools/media/Common/KlayGETool.rc
-		${KLAYGE_PROJECT_DIR}/klayge_logo.ico
-	)
 
 	INCLUDE_DIRECTORIES(${KLAYGE_PROJECT_DIR}/../External/boost)
 	INCLUDE_DIRECTORIES(${KLAYGE_PROJECT_DIR}/Core/Include)
