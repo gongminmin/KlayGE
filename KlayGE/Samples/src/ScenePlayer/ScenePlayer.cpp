@@ -305,9 +305,12 @@ bool ScenePlayerApp::ConfirmDevice() const
 
 void ScenePlayerApp::LoadScene(std::string const & name)
 {
-	SceneManager& sceneMgr(Context::Instance().SceneManagerInstance());
+	Context& context = Context::Instance();
+	SceneManager& sceneMgr(context.SceneManagerInstance());
 	sceneMgr.ClearLight();
 	sceneMgr.ClearObject();
+
+	RenderFactory& rf = context.RenderFactoryInstance();
 
 	scene_models_.clear();
 	scene_objs_.clear();
@@ -600,11 +603,57 @@ void ScenePlayerApp::LoadScene(std::string const & name)
 		else
 		{
 			XMLAttributePtr cube_attr = skybox_node->Attrib("cube");
-			BOOST_ASSERT(cube_attr);
+			if (cube_attr)
+			{
+				sky_box_ = MakeSharedPtr<SceneObjectSkyBox>();
+				checked_pointer_cast<SceneObjectSkyBox>(sky_box_)->CubeMap(
+					SyncLoadTexture(cube_attr->ValueString(), EAH_GPU_Read | EAH_Immutable));
+			}
+			else
+			{
+				Color color(0, 0, 0, 1);
 
-			sky_box_ = MakeSharedPtr<SceneObjectSkyBox>();
-			checked_pointer_cast<SceneObjectSkyBox>(sky_box_)->CubeMap(
-				SyncLoadTexture(cube_attr->ValueString(), EAH_GPU_Read | EAH_Immutable));
+				XMLAttributePtr r_attr = skybox_node->Attrib("r");
+				if (r_attr)
+				{
+					color.r() = r_attr->ValueFloat();
+				}
+				XMLAttributePtr g_attr = skybox_node->Attrib("g");
+				if (g_attr)
+				{
+					color.g() = g_attr->ValueFloat();
+				}
+				XMLAttributePtr b_attr = skybox_node->Attrib("b");
+				if (b_attr)
+				{
+					color.b() = b_attr->ValueFloat();
+				}
+
+				uint32_t texel;
+				ElementFormat fmt;
+				if (rf.RenderEngineInstance().DeviceCaps().texture_format_support(EF_ABGR8))
+				{
+					fmt = EF_ABGR8;
+					texel = color.ABGR();
+				}
+				else
+				{
+					BOOST_ASSERT(rf.RenderEngineInstance().DeviceCaps().texture_format_support(EF_ARGB8));
+
+					fmt = EF_ARGB8;
+					texel = color.ARGB();
+				}
+				ElementInitData init_data[6];
+				for (int i = 0; i < 6; ++ i)
+				{
+					init_data[i].data = &texel;
+					init_data[i].row_pitch = sizeof(uint32_t);
+					init_data[i].slice_pitch = init_data[i].row_pitch;	
+				}
+
+				sky_box_ = MakeSharedPtr<SceneObjectSkyBox>();
+				checked_pointer_cast<SceneObjectSkyBox>(sky_box_)->CubeMap(rf.MakeTextureCube(1, 1, 1, fmt, 1, 0, EAH_GPU_Read, init_data));
+			}
 		}
 
 		sky_box_->AddToSceneManager();

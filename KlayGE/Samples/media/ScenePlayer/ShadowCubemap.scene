@@ -25,7 +25,7 @@ def update(app_time, elapsed_time):
 		</update>
 	</model>
 
-	<skybox y_cube="Lake_CraterLake03_y.dds" c_cube="Lake_CraterLake03_c.dds"/>
+	<skybox r="0.029" g="0.133" b="0.325"/>
 
 	<camera x="0" y="10" z="-25">
 		<look_at x="0" y="10" z="0"/>
