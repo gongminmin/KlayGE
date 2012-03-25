@@ -53,20 +53,44 @@ using namespace KlayGE;
 
 namespace
 {
-	class LightSourceUpdate
+	class PyScriptUpdate
 	{
 	public:
-		LightSourceUpdate(std::string const& script)
-			: script_(script)
+		PyScriptUpdate(std::string const & script)
 		{
-			module_.RunString("from ScenePlayer import *");
+			module_ = MakeSharedPtr<ScriptModule>();
+			module_->RunString("from ScenePlayer import *");
+
+			script_ = MakeSharedPtr<std::string>(script);
+		}
+
+		virtual ~PyScriptUpdate()
+		{
+		}
+
+		PyObjectPtr Run(float app_time, float elapsed_time)
+		{
+			module_->RunString(*script_);
+
+			return module_->Call("update", boost::make_tuple(app_time, elapsed_time));
+		}
+
+	private:
+		boost::shared_ptr<ScriptModule> module_;
+		boost::shared_ptr<std::string> script_;
+	};
+
+	class LightSourceUpdate : public PyScriptUpdate
+	{
+	public:
+		LightSourceUpdate(std::string const & script)
+			: PyScriptUpdate(script)
+		{
 		}
 
 		void operator()(LightSource& light, float app_time, float elapsed_time)
 		{
-			module_.RunString(script_);
-
-			PyObjectPtr py_ret = module_.Call("update", boost::make_tuple(app_time, elapsed_time));
+			PyObjectPtr py_ret = this->Run(app_time, elapsed_time);
 			if (py_ret)
 			{
 				size_t s = PyTuple_Size(py_ret.get());
@@ -126,26 +150,19 @@ namespace
 				}
 			}
 		}
-
-	private:
-		ScriptModule module_;
-		std::string script_;
 	};
 
-	class SceneObjectUpdate
+	class SceneObjectUpdate : public PyScriptUpdate
 	{
 	public:
-		SceneObjectUpdate(std::string const& script)
-			: script_(script)
+		SceneObjectUpdate(std::string const & script)
+			: PyScriptUpdate(script)
 		{
-			module_.RunString("from ScenePlayer import *");
 		}
 
 		void operator()(SceneObject& obj, float app_time, float elapsed_time)
 		{
-			module_.RunString(script_);
-
-			PyObjectPtr py_ret = module_.Call("update", boost::make_tuple(app_time, elapsed_time));
+			PyObjectPtr py_ret = this->Run(app_time, elapsed_time);
 			if (py_ret)
 			{
 				size_t s = PyTuple_Size(py_ret.get());
@@ -165,26 +182,19 @@ namespace
 				}
 			}
 		}
-
-	private:
-		ScriptModule module_;
-		std::string script_;
 	};
 
-	class CameraUpdate
+	class CameraUpdate : public PyScriptUpdate
 	{
 	public:
-		CameraUpdate(std::string const& script)
-			: script_(script)
+		CameraUpdate(std::string const & script)
+			: PyScriptUpdate(script)
 		{
-			module_.RunString("from ScenePlayer import *");
 		}
 
 		void operator()(Camera& camera, float app_time, float elapsed_time)
 		{
-			module_.RunString(script_);
-
-			PyObjectPtr py_ret = module_.Call("update", boost::make_tuple(app_time, elapsed_time));
+			PyObjectPtr py_ret = this->Run(app_time, elapsed_time);
 			if (py_ret)
 			{
 				size_t s = PyTuple_Size(py_ret.get());
@@ -251,10 +261,6 @@ namespace
 				camera.ProjParams(fov, aspect, np, fp);
 			}
 		}
-
-	private:
-		ScriptModule module_;
-		std::string script_;
 	};
 
 	enum
@@ -774,7 +780,7 @@ void ScenePlayerApp::LoadScene(std::string const & name)
 
 void ScenePlayerApp::InitObjects()
 {
-	this->LoadScene("ShadowCubemap.scene");
+	this->LoadScene("DeferredRendering.scene");
 
 	font_ = Context::Instance().RenderFactoryInstance().MakeFont("gkai00mp.kfont");
 
