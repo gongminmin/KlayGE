@@ -90,7 +90,7 @@ namespace KlayGE
 		GraphicsBufferPtr vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, &init_data);
 		rl_->BindVertexStream(vb, boost::make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F)));
 
-		aabb_ = MathLib::compute_bounding_box<float>(&v, &v + 1);
+		aabb_ = MathLib::compute_aabbox<float>(&v, &v + 1);
 	}
 
 	void RenderablePoint::OnRenderBegin()
@@ -129,7 +129,7 @@ namespace KlayGE
 		GraphicsBufferPtr vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, &init_data);
 		rl_->BindVertexStream(vb, boost::make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F)));
 
-		aabb_ = MathLib::compute_bounding_box<float>(&xyzs[0], &xyzs[0] + sizeof(xyzs) / sizeof(xyzs[0]));
+		aabb_ = MathLib::compute_aabbox<float>(&xyzs[0], &xyzs[0] + sizeof(xyzs) / sizeof(xyzs[0]));
 	}
 
 	void RenderableLine::OnRenderBegin()
@@ -168,7 +168,7 @@ namespace KlayGE
 		GraphicsBufferPtr vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, &init_data);
 		rl_->BindVertexStream(vb, boost::make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F)));
 
-		aabb_ = MathLib::compute_bounding_box<float>(&xyzs[0], &xyzs[0] + sizeof(xyzs) / sizeof(xyzs[0]));
+		aabb_ = MathLib::compute_aabbox<float>(&xyzs[0], &xyzs[0] + sizeof(xyzs) / sizeof(xyzs[0]));
 	}
 
 	void RenderableTriangle::OnRenderBegin()
@@ -334,7 +334,7 @@ namespace KlayGE
 		GraphicsBufferPtr vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, &init_data);
 		rl_->BindVertexStream(vb, boost::make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F)));
 
-		aabb_ = MathLib::compute_bounding_box<float>(&xyzs[0], &xyzs[4]);
+		aabb_ = MathLib::compute_aabbox<float>(&xyzs[0], &xyzs[4]);
 	}
 
 	void RenderableSkyBox::Technique(RenderTechniquePtr const & tech)
@@ -492,6 +492,6 @@ namespace KlayGE
 		GraphicsBufferPtr ib = rf.MakeIndexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, &init_data);
 		rl_->BindIndexStream(ib, EF_R16UI);
 
-		aabb_ = MathLib::compute_bounding_box<float>(pos.begin(), pos.end());
+		aabb_ = MathLib::compute_aabbox<float>(pos.begin(), pos.end());
 	}
 }

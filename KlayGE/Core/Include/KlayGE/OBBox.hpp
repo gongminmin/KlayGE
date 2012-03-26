@@ -17,7 +17,8 @@
 
 #include <KlayGE/PreDeclare.hpp>
 
-#include <KlayGE/Vector.hpp>
+#include <boost/operators.hpp>
+
 #include <KlayGE/Bound.hpp>
 
 namespace KlayGE
@@ -33,6 +34,10 @@ namespace KlayGE
 	public:
 		OBBox_T();
 		OBBox_T(AABBox_T<T> const & aabb);
+		OBBox_T(Vector_T<T, 3> const & center,
+			Vector_T<T, 3> const & x_axis, Vector_T<T, 3> const & y_axis, Vector_T<T, 3> const & z_axis,
+			Vector_T<T, 3> const & r);
+		OBBox_T(OBBox_T<T> const & rhs);
 
 		OBBox_T<T>& operator+=(Vector_T<T, 3> const & rhs);
 		OBBox_T<T>& operator-=(Vector_T<T, 3> const & rhs);

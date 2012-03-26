@@ -312,7 +312,7 @@ namespace KlayGE
 			std::vector<float3> pos;
 			std::vector<uint16_t> index;
 			CreateConeMesh(pos, index, 0, 100.0f, 100.0f, 12);
-			cone_bbox_ = MathLib::compute_bounding_box<float>(pos.begin(), pos.end());
+			cone_bbox_ = MathLib::compute_aabbox<float>(pos.begin(), pos.end());
 
 			ElementInitData init_data;
 			init_data.row_pitch = static_cast<uint32_t>(pos.size() * sizeof(pos[0]));
@@ -332,7 +332,7 @@ namespace KlayGE
 			std::vector<float3> pos;
 			std::vector<uint16_t> index;
 			CreatePyramidMesh(pos, index, 0, 100.0f, 100.0f);
-			pyramid_bbox_ = MathLib::compute_bounding_box<float>(pos.begin(), pos.end());
+			pyramid_bbox_ = MathLib::compute_aabbox<float>(pos.begin(), pos.end());
 
 			ElementInitData init_data;
 			init_data.row_pitch = static_cast<uint32_t>(pos.size() * sizeof(pos[0]));
@@ -352,7 +352,7 @@ namespace KlayGE
 			std::vector<float3> pos;
 			std::vector<uint16_t> index;
 			CreateBoxMesh(pos, index, 0, 100.0f);
-			box_bbox_ = MathLib::compute_bounding_box<float>(pos.begin(), pos.end());
+			box_bbox_ = MathLib::compute_aabbox<float>(pos.begin(), pos.end());
 
 			ElementInitData init_data;
 			init_data.row_pitch = static_cast<uint32_t>(pos.size() * sizeof(pos[0]));

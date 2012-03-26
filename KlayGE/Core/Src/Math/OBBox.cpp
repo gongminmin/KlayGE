@@ -14,7 +14,6 @@
 #include <KlayGE/Math.hpp>
 
 #include <boost/assert.hpp>
-#include <boost/operators.hpp>
 
 #include <KlayGE/OBBox.hpp>
 
@@ -36,6 +35,27 @@ namespace KlayGE
 		axis_[0] = Vector_T<T, 3>(1, 0, 0);
 		axis_[1] = Vector_T<T, 3>(0, 1, 0);
 		axis_[2] = Vector_T<T, 3>(0, 0, 1);
+	}
+
+	template <typename T>
+	OBBox_T<T>::OBBox_T(Vector_T<T, 3> const & center,
+			Vector_T<T, 3> const & x_axis, Vector_T<T, 3> const & y_axis, Vector_T<T, 3> const & z_axis,
+			Vector_T<T, 3> const & r)
+		: center_(center), r_(r)
+	{
+		axis_[0] = x_axis;
+		axis_[1] = y_axis;
+		axis_[2] = z_axis;
+	}
+
+	template <typename T>
+	OBBox_T<T>::OBBox_T(OBBox_T<T> const & rhs)
+		: Bound_T<T>(rhs),
+			center_(rhs.center_), r_(rhs.r_)
+	{
+		axis_[0] = rhs.axis_[0];
+		axis_[1] = rhs.axis_[1];
+		axis_[2] = rhs.axis_[2];
 	}
 
 	template <typename T>
