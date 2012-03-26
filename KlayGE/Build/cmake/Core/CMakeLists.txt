@@ -42,8 +42,11 @@ SOURCE_GROUP("Kernel\\Header Files" FILES ${KERNEL_HEADER_FILES})
 
 
 SET(MATH_SOURCE_FILES
+	${KLAYGE_PROJECT_DIR}/Core/Src/Math/AABBox.cpp
 	${KLAYGE_PROJECT_DIR}/Core/Src/Math/Frustum.cpp
 	${KLAYGE_PROJECT_DIR}/Core/Src/Math/Math.cpp
+	${KLAYGE_PROJECT_DIR}/Core/Src/Math/OBBox.cpp
+	${KLAYGE_PROJECT_DIR}/Core/Src/Math/Sphere.cpp
 )
 
 SET(MATH_HEADER_FILES
@@ -56,6 +59,7 @@ SET(MATH_HEADER_FILES
 	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/Math.hpp
 	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/Matrix.hpp
 	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/Noise.hpp
+	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/OBBox.hpp
 	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/Plane.hpp
 	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/Quaternion.hpp
 	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/Rect.hpp

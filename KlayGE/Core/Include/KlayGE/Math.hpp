@@ -907,5 +907,7 @@ namespace KlayGE
 #include <KlayGE/Bound.hpp>
 #include <KlayGE/Sphere.hpp>
 #include <KlayGE/AABBox.hpp>
+#include <KlayGE/Frustum.hpp>
+#include <KlayGE/OBBox.hpp>
 
 #endif		// _MATH_HPP

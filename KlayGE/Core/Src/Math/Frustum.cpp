@@ -26,12 +26,15 @@
 
 namespace KlayGE
 {
-	void Frustum::ClipMatrix(float4x4 const & clip)
+	template class KLAYGE_CORE_API Frustum_T<float>;
+
+	template <typename T>
+	void Frustum_T<T>::ClipMatrix(Matrix4_T<T> const & clip)
 	{
-		float4 const & column1(clip.Col(0));
-		float4 const & column2(clip.Col(1));
-		float4 const & column3(clip.Col(2));
-		float4 const & column4(clip.Col(3));
+		Vector_T<T, 4> const & column1(clip.Col(0));
+		Vector_T<T, 4> const & column2(clip.Col(1));
+		Vector_T<T, 4> const & column3(clip.Col(2));
+		Vector_T<T, 4> const & column4(clip.Col(3));
 
 		planes_[0] = column4 - column1;  // left
 		planes_[1] = column4 + column1;  // right
@@ -54,12 +57,14 @@ namespace KlayGE
 		}
 	}
 
-	bool Frustum::IsEmpty() const
+	template <typename T>
+	bool Frustum_T<T>::IsEmpty() const
 	{
 		return false;
 	}
 
-	bool Frustum::VecInBound(float3 const & v) const
+	template <typename T>
+	bool Frustum_T<T>::VecInBound(Vector_T<T, 3> const & v) const
 	{
 		for (int i = 0; i < 6; ++ i)
 		{
@@ -71,12 +76,20 @@ namespace KlayGE
 		return true;
 	}
 
-	float Frustum::MaxRadiusSq() const
+	template <typename T>
+	float Frustum_T<T>::MaxRadiusSq() const
 	{
 		return 0;
 	}
 
-	BoundOverlap Frustum::CollisionDet(AABBox const & aabb) const
+	template <typename T>
+	Plane_T<T> const & Frustum_T<T>::FrustumPlane(uint32_t index) const
+	{
+		return planes_[index];
+	}
+
+	template <typename T>
+	BoundOverlap Frustum_T<T>::CollisionDet(AABBox_T<T> const & aabb) const
 	{
 		bool intersect = false;
 		for (int i = 0; i < 6; ++ i)
@@ -84,8 +97,8 @@ namespace KlayGE
 			int const n = vertex_lut_[i];
 
 			// v1 is diagonally opposed to v0
-			float3 v0((n & 1) ? aabb.Min().x() : aabb.Max().x(), (n & 2) ? aabb.Min().y() : aabb.Max().y(), (n & 4) ? aabb.Min().z() : aabb.Max().z());
-			float3 v1((n & 1) ? aabb.Max().x() : aabb.Min().x(), (n & 2) ? aabb.Max().y() : aabb.Min().y(), (n & 4) ? aabb.Max().z() : aabb.Min().z());
+			Vector_T<T, 3> v0((n & 1) ? aabb.Min().x() : aabb.Max().x(), (n & 2) ? aabb.Min().y() : aabb.Max().y(), (n & 4) ? aabb.Min().z() : aabb.Max().z());
+			Vector_T<T, 3> v1((n & 1) ? aabb.Max().x() : aabb.Min().x(), (n & 2) ? aabb.Max().y() : aabb.Min().y(), (n & 4) ? aabb.Max().z() : aabb.Min().z());
 
 			if (MathLib::dot_coord(planes_[i], v0) < 0)
 			{
@@ -99,8 +112,18 @@ namespace KlayGE
 
 		return intersect ? BO_Partial : BO_Yes;
 	}
+	
+	template <typename T>
+	BoundOverlap Frustum_T<T>::CollisionDet(OBBox_T<T> const & obb) const
+	{
+		UNREF_PARAM(obb);
+		BOOST_ASSERT(false);
 
-	BoundOverlap Frustum::CollisionDet(Sphere const & sphere) const
+		return BO_No;
+	}	
+
+	template <typename T>
+	BoundOverlap Frustum_T<T>::CollisionDet(Sphere_T<T> const & sphere) const
 	{
 		bool intersect = false;
 		for (int i = 0; i < 6; ++ i)
@@ -117,5 +140,14 @@ namespace KlayGE
 		}
 
 		return intersect ? BO_Partial : BO_Yes;
+	}
+
+	template <typename T>
+	BoundOverlap Frustum_T<T>::CollisionDet(Frustum_T<T> const & frustum) const
+	{
+		UNREF_PARAM(frustum);
+		BOOST_ASSERT(false);
+
+		return BO_No;
 	}
 }

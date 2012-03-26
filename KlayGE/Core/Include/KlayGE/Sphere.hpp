@@ -16,6 +16,8 @@
 #ifndef _SPHERE_HPP
 #define _SPHERE_HPP
 
+#include <KlayGE/PreDeclare.hpp>
+
 #include <boost/operators.hpp>
 
 #include <KlayGE/Bound.hpp>
@@ -27,97 +29,47 @@ namespace KlayGE
 	template <typename T>
 	class Sphere_T : boost::addable2<Sphere_T<T>, Vector_T<T, 3>,
 						boost::subtractable2<Sphere_T<T>, Vector_T<T, 3>,
-						boost::andable<Sphere_T<T>,
-						boost::orable<Sphere_T<T>,
+						boost::multipliable2<Sphere_T<T>, T,
+						boost::dividable2<Sphere_T<T>, T,
 						boost::equality_comparable<Sphere_T<T> > > > > >,
 				public Bound_T<T>
 	{
 	public:
-		Sphere_T()
-		{
-		}
-		Sphere_T(Vector_T<T, 3> const & center, T const & radius)
-			: center_(center),
-				radius_(radius)
-		{
-		}
+		Sphere_T();
+		Sphere_T(Vector_T<T, 3> const & center, T const & radius);
 
 		// 赋值操作符
-		Sphere_T& operator+=(Vector_T<T, 3> const & rhs)
-		{
-			this->Center() += rhs;
-			return *this;
-		}
-		Sphere_T& operator-=(Vector_T<T, 3> const & rhs)
-		{
-			this->Center() -= rhs;
-			return *this;
-		}
-		Sphere_T& operator*=(T const & rhs)
-		{
-			this->Radius() *= rhs;
-			return *this;
-		}
-		Sphere_T& operator/=(T const & rhs)
-		{
-			return this->operator*=(1.0f / rhs);
-		}
+		Sphere_T& operator+=(Vector_T<T, 3> const & rhs);
+		Sphere_T& operator-=(Vector_T<T, 3> const & rhs);
+		Sphere_T& operator*=(T const & rhs);
+		Sphere_T& operator/=(T const & rhs);
 
-		Sphere_T& operator=(Sphere_T const & rhs)
-		{
-			if (this != &rhs)
-			{
-				this->Center() = rhs.Center();
-				this->Radius() = rhs.Radius();
-			}
-			return *this;
-		}
+		Sphere_T& operator=(Sphere_T const & rhs);
 
 		// 一元操作符
-		Sphere_T const & operator+() const
-		{
-			return *this;
-		}
-		Sphere_T const & operator-() const
-		{
-			return *this;
-		}
+		Sphere_T const & operator+() const;
+		Sphere_T const & operator-() const;
 
 		// 属性
-		Vector_T<T, 3>& Center()
-		{
-			return center_;
-		}
-		Vector_T<T, 3> const & Center() const
-		{
-			return center_;
-		}
-		T& Radius()
-		{
-			return radius_;
-		}
-		T Radius() const
-		{
-			return radius_;
-		}
+		Vector_T<T, 3>& Center();
+		Vector_T<T, 3> const & Center() const;
+		T& Radius();
+		T Radius() const;
 
-		bool IsEmpty() const
-		{
-			return MathLib::equal(radius_, 0.0f);
-		}
+		bool IsEmpty() const;
 
-		bool VecInBound(Vector_T<T, 3> const & v) const
-		{
-			return MathLib::vec_in_sphere(*this, v);
-		}
-		T MaxRadiusSq() const
-		{
-			return this->Radius() * this->Radius();
-		}
+		bool VecInBound(Vector_T<T, 3> const & v) const;
+		T MaxRadiusSq() const;
 
-		bool operator==(Sphere_T const & rhs)
+		BoundOverlap CollisionDet(AABBox_T<T> const & aabb) const;
+		BoundOverlap CollisionDet(OBBox_T<T> const & obb) const;
+		BoundOverlap CollisionDet(Sphere_T<T> const & sphere) const;
+		BoundOverlap CollisionDet(Frustum_T<T> const & frustum) const;
+
+		friend bool
+		operator==(Sphere_T<T> const & lhs, Sphere_T<T> const & rhs)
 		{
-			return (center_ == rhs.center_) && (radius_ == rhs.radius_);
+			return (lhs.center_ == rhs.center_) && (rhs.radius_ == rhs.radius_);
 		}
 
 	private:

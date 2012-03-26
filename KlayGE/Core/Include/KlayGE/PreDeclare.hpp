@@ -75,6 +75,12 @@ namespace KlayGE
 	template <typename T>
 	class AABBox_T;
 	typedef AABBox_T<float> AABBox;
+	template <typename T>
+	class Frustum_T;
+	typedef Frustum_T<float> Frustum;
+	template <typename T>
+	class OBBox_T;
+	typedef OBBox_T<float> OBBox;
 
 	class SceneManager;
 	typedef boost::shared_ptr<SceneManager> SceneManagerPtr;

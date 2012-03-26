@@ -21,7 +21,8 @@
 
 #pragma once
 
-#include <KlayGE/Math.hpp>
+#include <KlayGE/PreDeclare.hpp>
+
 #ifdef KLAYGE_COMPILER_MSVC
 #pragma warning(push)
 #pragma warning(disable: 6385)
@@ -33,27 +34,34 @@
 
 namespace KlayGE
 {
-	class KLAYGE_CORE_API Frustum : public Bound_T<float>
+	template <typename T>
+	class KLAYGE_CORE_API Frustum_T : public Bound_T<T>
 	{
 	public:
-		void ClipMatrix(float4x4 const & clip);
+		void ClipMatrix(Matrix4_T<T> const & clip);
 
 		bool IsEmpty() const;
 
-		bool VecInBound(float3 const & v) const;
+		bool VecInBound(Vector_T<T, 3> const & v) const;
 		float MaxRadiusSq() const;
 
-		BoundOverlap CollisionDet(AABBox const & aabb) const;
-		BoundOverlap CollisionDet(Sphere const & sphere) const;
+		Plane_T<T> const & FrustumPlane(uint32_t index) const;
+
+		BoundOverlap CollisionDet(AABBox_T<T> const & aabb) const;
+		BoundOverlap CollisionDet(OBBox_T<T> const & obb) const;
+		BoundOverlap CollisionDet(Sphere_T<T> const & sphere) const;
+		BoundOverlap CollisionDet(Frustum_T<T> const & frustum) const;
 
 	private:
-		typedef boost::array<Plane, 6> planes_t;
+		typedef boost::array<Plane_T<T>, 6> planes_t;
 		planes_t planes_;
 
 		// Look-Up Table
 		typedef boost::array<int, 6> vertex_lut_t;
 		vertex_lut_t vertex_lut_;
 	};
+
+	typedef Frustum_T<float> Frustum;
 }
 
 #endif			// _FRUSTUM_HPP

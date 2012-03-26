@@ -188,17 +188,21 @@
   </VirtualDirectory>
   <VirtualDirectory Name="Math Library">
     <VirtualDirectory Name="Source Files">
+      <File Name="../../Core/Src/Math/AABBox.cpp"/>
       <File Name="../../Core/Src/Math/Frustum.cpp"/>
       <File Name="../../Core/Src/Math/Math.cpp"/>
+      <File Name="../../Core/Src/Math/OBBox.cpp"/>
+      <File Name="../../Core/Src/Math/Sphere.cpp"/>
     </VirtualDirectory>
     <VirtualDirectory Name="Header Files">
+      <File Name="../../Core/Include/KlayGE/AABBox.hpp"/>
       <File Name="../../Core/Include/KlayGE/Bound.hpp"/>
-      <File Name="../../Core/Include/KlayGE/Box.hpp"/>
       <File Name="../../Core/Include/KlayGE/Color.hpp"/>
       <File Name="../../Core/Include/KlayGE/half.hpp"/>
       <File Name="../../Core/Include/KlayGE/Math.hpp"/>
       <File Name="../../Core/Include/KlayGE/Matrix.hpp"/>
       <File Name="../../Core/Include/KlayGE/Noise.hpp"/>
+      <File Name="../../Core/Include/KlayGE/OBBox.hpp"/>
       <File Name="../../Core/Include/KlayGE/Plane.hpp"/>
       <File Name="../../Core/Include/KlayGE/Quaternion.hpp"/>
       <File Name="../../Core/Include/KlayGE/Rect.hpp"/>
