@@ -258,8 +258,7 @@ namespace KlayGE
 	template <typename T>
 	bool OBBox_T<T>::Intersect(Sphere_T<T> const & sphere) const
 	{
-		Vector_T<T, 3> p = sphere.Center();
-		Vector_T<T, 3> d = p - pos_;
+		Vector_T<T, 3> d = sphere.Center() - pos_;
 		Vector_T<T, 3> closest_point_on_obb = pos_;
 		for (int i = 0; i < 3; ++ i)
 		{

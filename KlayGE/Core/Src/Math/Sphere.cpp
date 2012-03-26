@@ -129,10 +129,7 @@ namespace KlayGE
 	template <typename T>
 	bool Sphere_T<T>::Intersect(AABBox_T<T> const & aabb) const
 	{
-		UNREF_PARAM(aabb);
-		BOOST_ASSERT(false);
-
-		return false;
+		return aabb.Intersect(*this);
 	}
 
 	template <typename T>

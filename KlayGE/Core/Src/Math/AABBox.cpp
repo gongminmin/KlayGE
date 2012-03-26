@@ -259,10 +259,27 @@ namespace KlayGE
 	template <typename T>
 	bool AABBox_T<T>::Intersect(Sphere_T<T> const & sphere) const
 	{
-		UNREF_PARAM(sphere);
-		BOOST_ASSERT(false);
+		Vector_T<T, 3> half_size = this->HalfSize();
+		Vector_T<T, 3> d = sphere.Center() - this->Center();
+		Vector_T<T, 3> closest_point_on_obb = this->Center();
+		for (int i = 0; i < 3; ++ i)
+		{
+			Vector_T<T, 3> axis(0, 0, 0);
+			axis[i] = 1;
+			T dist = MathLib::dot(d, axis);
+			if (dist > half_size[i])
+			{
+				dist = half_size[i];
+			}
+			if (dist < -half_size[i])
+			{
+				dist = -half_size[i];
+			}
+			closest_point_on_obb += dist * axis;
+		}
 
-		return false;
+		Vector_T<T, 3> v = closest_point_on_obb - sphere.Center();
+		return MathLib::length_sq(v) <= sphere.Radius() * sphere.Radius();
 	}
 
 	template <typename T>
