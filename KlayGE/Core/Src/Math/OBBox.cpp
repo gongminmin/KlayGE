@@ -31,7 +31,7 @@ namespace KlayGE
 	template <typename T>
 	OBBox_T<T>::OBBox_T(AABBox_T<T> const & aabb)
 	{
-		pos_ = aabb.Center();
+		center_ = aabb.Center();
 		r_ = aabb.HalfSize();
 		axis_[0] = Vector_T<T, 3>(1, 0, 0);
 		axis_[1] = Vector_T<T, 3>(0, 1, 0);
@@ -41,14 +41,14 @@ namespace KlayGE
 	template <typename T>
 	OBBox_T<T>& OBBox_T<T>::operator+=(Vector_T<T, 3> const & rhs)
 	{
-		pos_ += rhs;
+		center_ += rhs;
 		return *this;
 	}
 
 	template <typename T>
 	OBBox_T<T>& OBBox_T<T>::operator-=(Vector_T<T, 3> const & rhs)
 	{
-		pos_ -= rhs;
+		center_ -= rhs;
 		return *this;
 	}
 
@@ -70,7 +70,7 @@ namespace KlayGE
 	{
 		if (this != &rhs)
 		{
-			pos_ = rhs.pos_;
+			center_ = rhs.center_;
 			axis_[0] = rhs.axis_[0];
 			axis_[1] = rhs.axis_[1];
 			axis_[2] = rhs.axis_[2];
@@ -89,7 +89,7 @@ namespace KlayGE
 	OBBox_T<T> const OBBox_T<T>::operator-() const
 	{
 		OBBox_T<T> ret;
-		ret.pos_ = -pos_;
+		ret.center_ = -center_;
 		ret.axis_[0] = -axis_[0];
 		ret.axis_[1] = -axis_[1];
 		ret.axis_[2] = -axis_[2];
@@ -106,7 +106,7 @@ namespace KlayGE
 	template <typename T>
 	bool OBBox_T<T>::VecInBound(Vector_T<T, 3> const & v) const
 	{
-		Vector_T<T, 3> d = v - pos_;
+		Vector_T<T, 3> d = v - center_;
 		if ((MathLib::dot(d, axis_[0]) <= r_[0])
 			&& (MathLib::dot(d, axis_[1]) <= r_[1])
 			&& (MathLib::dot(d, axis_[2]) <= r_[2]))
@@ -119,7 +119,25 @@ namespace KlayGE
 	template <typename T>
 	T OBBox_T<T>::MaxRadiusSq() const
 	{
-		return 0;
+		return MathLib::length_sq(r_);
+	}
+
+	template <typename T>
+	Vector_T<T, 3> const & OBBox_T<T>::Center() const
+	{
+		return center_;
+	}
+
+	template <typename T>
+	Vector_T<T, 3> const & OBBox_T<T>::Axis(uint32_t index) const
+	{
+		return axis_[index];
+	}
+	
+	template <typename T>
+	Vector_T<T, 3> const & OBBox_T<T>::HalfSize() const
+	{
+		return r_;
 	}
 
 	template <typename T>
@@ -144,7 +162,7 @@ namespace KlayGE
 			}
 		}
 
-		Vector_T<T, 3> t = obb.pos_ - pos_;
+		Vector_T<T, 3> t = obb.center_ - center_;
 		t = Vector_T<T, 3>(MathLib::dot(t, axis_[0]), MathLib::dot(t, axis_[1]), MathLib::dot(t, axis_[2]));
 
 		Matrix4_T<T> abs_r_mat = Matrix4_T<T>::Identity();
@@ -163,7 +181,7 @@ namespace KlayGE
 			T rb = obb.r_[0] * abs_r_mat(i, 0) +  obb.r_[1] * abs_r_mat(i, 1) + obb.r_[2] * abs_r_mat(i, 2);
 			if (MathLib::abs(t[i]) > ra + rb) 
 			{
-				return true;
+				return false;
 			}
 		}
 
@@ -174,7 +192,7 @@ namespace KlayGE
 			T rb = obb.r_[i];
 			if (MathLib::abs(t.x() + r_mat(0, i) + t.y() * r_mat(1, i) + t.z() * r_mat(2, i)) > ra + rb)
 			{
-				return true;
+				return false;
 			}
 		}
 
@@ -185,7 +203,7 @@ namespace KlayGE
 		T rb = obb.r_.y() * abs_r_mat(0, 2) + obb.r_.z() * abs_r_mat(0, 1);
 		if (MathLib::abs(t.z() * r_mat(1, 0) - t.y() * r_mat(2, 0)) > ra + rb)
 		{
-			return true;
+			return false;
 		}
 
 		// A.x < cross> B.y
@@ -193,7 +211,7 @@ namespace KlayGE
 		rb = obb.r_.x() * abs_r_mat(0, 2) + obb.r_.z() * abs_r_mat(0, 0);
 		if (MathLib::abs(t.z() * r_mat(1, 1) - t.y() * r_mat(2, 1)) > ra + rb)
 		{
-			return true;
+			return false;
 		}
 
 		// A.x <cross> B.z
@@ -201,7 +219,7 @@ namespace KlayGE
 		rb = obb.r_.x() * abs_r_mat(0, 1) + obb.r_.y() * abs_r_mat(0, 0);
 		if (MathLib::abs(t.z() * r_mat(1, 2) - t.y() * r_mat(2, 2)) > ra + rb)
 		{
-			return true;
+			return false;
 		}
 
 		// A.y <cross> B.x
@@ -209,7 +227,7 @@ namespace KlayGE
 		rb = obb.r_.y() * abs_r_mat(1, 2) + obb.r_.z() * abs_r_mat(1, 1);
 		if (MathLib::abs(t.x() * r_mat(2, 0) - t.z() * r_mat(0, 0)) > ra + rb)
 		{
-			return true;
+			return false;
 		}
 
 		// A.y <cross> B.y
@@ -217,7 +235,7 @@ namespace KlayGE
 		rb = obb.r_.x() * abs_r_mat(1, 2) + obb.r_.z() * abs_r_mat(1, 0);
 		if (MathLib::abs(t.x() * r_mat(2, 1) - t.z() * r_mat(0, 1)) > ra + rb)
 		{
-			return true;
+			return false;
 		}
 
 		// A.y <cross> B.z
@@ -225,7 +243,7 @@ namespace KlayGE
 		rb = obb.r_.x() * abs_r_mat(1, 1) + obb.r_.y() * abs_r_mat(1, 0);
 		if (MathLib::abs(t.x() * r_mat(2, 2) - t.z() * r_mat(0, 2)) > ra + rb)
 		{
-			return true;
+			return false;
 		}
 
 		// A.z <cross> B.x
@@ -233,7 +251,7 @@ namespace KlayGE
 		rb = obb.r_.y() * abs_r_mat(2, 2) + obb.r_.z() * abs_r_mat(2, 1);
 		if (MathLib::abs(t.y() * r_mat(0, 0) - t.x() * r_mat(1, 0)) > ra + rb)
 		{
-			return true;
+			return false;
 		}
 
 		// A.z <cross> B.y
@@ -241,7 +259,7 @@ namespace KlayGE
 		rb = obb.r_.x() * abs_r_mat(2, 2) + obb.r_.z() * abs_r_mat(2, 0);
 		if (MathLib::abs(t.y() * r_mat(0, 1) - t.x() * r_mat(1, 1)) > ra + rb)
 		{
-			return true;
+			return false;
 		}
 
 		// A.z <cross> B.z
@@ -249,17 +267,17 @@ namespace KlayGE
 		rb = obb.r_.x() * abs_r_mat(2, 1) + obb.r_.y() * abs_r_mat(2, 0);
 		if (MathLib::abs(t.y() * r_mat(0, 2) - t.x() * r_mat(1, 2)) > ra + rb)
 		{
-			return true;
+			return false;
 		}
 
-		return false;
+		return true;
 	}
 
 	template <typename T>
 	bool OBBox_T<T>::Intersect(Sphere_T<T> const & sphere) const
 	{
-		Vector_T<T, 3> d = sphere.Center() - pos_;
-		Vector_T<T, 3> closest_point_on_obb = pos_;
+		Vector_T<T, 3> d = sphere.Center() - center_;
+		Vector_T<T, 3> closest_point_on_obb = center_;
 		for (int i = 0; i < 3; ++ i)
 		{
 			T dist = MathLib::dot(d, axis_[i]);
@@ -281,24 +299,6 @@ namespace KlayGE
 	template <typename T>
 	bool OBBox_T<T>::Intersect(Frustum_T<T> const & frustum) const
 	{
-		for (int i = 0; i < 6; ++ i)
-		{
-			Plane_T<T> const & plane = frustum.FrustumPlane(i);
-			Vector_T<T, 3> const & pn = plane.Normal();
-
-			T x = MathLib::dot(axis_[0], pn) >= 0 ? r_[0] : -r_[0];
-			T y = MathLib::dot(axis_[1], pn) >= 0 ? r_[1] : -r_[1];
-			T z = MathLib::dot(axis_[2], pn) >= 0 ? r_[2] : -r_[2];
-
-			Vector_T<T, 3> const diag = x * axis_[0] + y * axis_[1] + z * axis_[2];
-			Vector_T<T, 3> const point = pos_ - diag;
-
-			if (MathLib::dot(point, pn) + plane.d() >= 0)
-			{
-				return false;
-			}
-		}
-
-		return true;
+		return frustum.Intersect(*this) != BO_No;
 	}
 }

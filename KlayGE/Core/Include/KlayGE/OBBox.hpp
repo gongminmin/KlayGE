@@ -49,6 +49,10 @@ namespace KlayGE
 		bool VecInBound(Vector_T<T, 3> const & v) const;
 		T MaxRadiusSq() const;
 
+		Vector_T<T, 3> const & Center() const;
+		Vector_T<T, 3> const & Axis(uint32_t index) const;
+		Vector_T<T, 3> const & HalfSize() const;
+
 		bool Intersect(AABBox_T<T> const & aabb) const;
 		bool Intersect(OBBox_T<T> const & obb) const;
 		bool Intersect(Sphere_T<T> const & sphere) const;
@@ -57,7 +61,7 @@ namespace KlayGE
 		friend bool
 		operator==(OBBox_T<T> const & lhs, OBBox_T<T> const & rhs)
 		{
-			return (lhs.pos_ == rhs.pos_)
+			return (lhs.center_ == rhs.center_)
 				&& (lhs.axis_[0] == rhs.axis_[0])
 				&& (lhs.axis_[1] == rhs.axis_[1])
 				&& (lhs.axis_[2] == rhs.axis_[2])
@@ -65,7 +69,7 @@ namespace KlayGE
 		}
 
 	private:
-		Vector_T<T, 3> pos_;
+		Vector_T<T, 3> center_;
 		Vector_T<T, 3> axis_[3];
 		Vector_T<T, 3> r_;
 	};
