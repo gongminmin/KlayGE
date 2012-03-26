@@ -47,10 +47,10 @@ namespace KlayGE
 
 		Plane_T<T> const & FrustumPlane(uint32_t index) const;
 
-		BoundOverlap CollisionDet(AABBox_T<T> const & aabb) const;
-		BoundOverlap CollisionDet(OBBox_T<T> const & obb) const;
-		BoundOverlap CollisionDet(Sphere_T<T> const & sphere) const;
-		BoundOverlap CollisionDet(Frustum_T<T> const & frustum) const;
+		BoundOverlap Intersect(AABBox_T<T> const & aabb) const;
+		BoundOverlap Intersect(OBBox_T<T> const & obb) const;
+		BoundOverlap Intersect(Sphere_T<T> const & sphere) const;
+		BoundOverlap Intersect(Frustum_T<T> const & frustum) const;
 
 	private:
 		typedef boost::array<Plane_T<T>, 6> planes_t;

@@ -243,47 +243,31 @@ namespace KlayGE
 	}
 
 	template <typename T>
-	BoundOverlap AABBox_T<T>::CollisionDet(AABBox_T<T> const & aabb) const
+	bool AABBox_T<T>::Intersect(AABBox_T<T> const & aabb) const
 	{
-		if (((min_.x() <= aabb.Min().x()) && (min_.y() <= aabb.Min().y()) && (min_.z() <= aabb.Min().z())
-			&& (max_.x() >= aabb.Max().x()) && (max_.y() >= aabb.Max().y()) && (max_.z() >= aabb.Max().z()))
-			|| ((min_.x() >= aabb.Min().x()) && (min_.y() >= aabb.Min().y()) && (min_.z() >= aabb.Min().z())
-				&& (max_.x() <= aabb.Max().x()) && (max_.y() <= aabb.Max().y()) && (max_.z() <= aabb.Max().z())))
-		{
-			return BO_Yes;
-		}
-		else
-		{
-			float3 const t = aabb.Center() - this->Center();
-			float3 const e = this->HalfSize() + aabb.HalfSize();
-			return ((MathLib::abs(t.x()) <= e.x()) && (MathLib::abs(t.y()) <= e.y()) && (MathLib::abs(t.z()) <= e.z())) ? BO_Partial : BO_No;
-		}
+		float3 const t = aabb.Center() - this->Center();
+		float3 const e = this->HalfSize() + aabb.HalfSize();
+		return (MathLib::abs(t.x()) <= e.x()) && (MathLib::abs(t.y()) <= e.y()) && (MathLib::abs(t.z()) <= e.z());
 	}
 
 	template <typename T>
-	BoundOverlap AABBox_T<T>::CollisionDet(OBBox_T<T> const & obb) const
+	bool AABBox_T<T>::Intersect(OBBox_T<T> const & obb) const
 	{
-		UNREF_PARAM(obb);
-		BOOST_ASSERT(false);
-
-		return BO_No;
+		return obb.Intersect(OBBox_T<T>(*this));
 	}
 
 	template <typename T>
-	BoundOverlap AABBox_T<T>::CollisionDet(Sphere_T<T> const & sphere) const
+	bool AABBox_T<T>::Intersect(Sphere_T<T> const & sphere) const
 	{
 		UNREF_PARAM(sphere);
 		BOOST_ASSERT(false);
 
-		return BO_No;
+		return false;
 	}
 
 	template <typename T>
-	BoundOverlap AABBox_T<T>::CollisionDet(Frustum_T<T> const & frustum) const
+	bool AABBox_T<T>::Intersect(Frustum_T<T> const & frustum) const
 	{
-		UNREF_PARAM(frustum);
-		BOOST_ASSERT(false);
-
-		return BO_No;
+		return frustum.Intersect(*this) != BO_No;
 	}
 }

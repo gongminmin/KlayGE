@@ -268,7 +268,7 @@ namespace KlayGE
 		BOOST_ASSERT(index < octree_.size());
 
 		octree_node_t& node = octree_[index];
-		BoundOverlap const vis = frustum_->CollisionDet(node.bb);
+		BoundOverlap const vis = frustum_->Intersect(node.bb);
 		node.visible = vis;
 		if (BO_Partial == vis)
 		{
@@ -311,7 +311,7 @@ namespace KlayGE
 		if (visible)
 		{
 			// Frustum VS AABB
-			BoundOverlap const bo = frustum_->CollisionDet(box);
+			BoundOverlap const bo = frustum_->Intersect(box);
 			visible = (bo != BO_No);
 		}
 		return visible;

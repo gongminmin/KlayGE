@@ -89,7 +89,7 @@ namespace KlayGE
 	}
 
 	template <typename T>
-	BoundOverlap Frustum_T<T>::CollisionDet(AABBox_T<T> const & aabb) const
+	BoundOverlap Frustum_T<T>::Intersect(AABBox_T<T> const & aabb) const
 	{
 		bool intersect = false;
 		for (int i = 0; i < 6; ++ i)
@@ -114,7 +114,7 @@ namespace KlayGE
 	}
 	
 	template <typename T>
-	BoundOverlap Frustum_T<T>::CollisionDet(OBBox_T<T> const & obb) const
+	BoundOverlap Frustum_T<T>::Intersect(OBBox_T<T> const & obb) const
 	{
 		UNREF_PARAM(obb);
 		BOOST_ASSERT(false);
@@ -123,7 +123,7 @@ namespace KlayGE
 	}	
 
 	template <typename T>
-	BoundOverlap Frustum_T<T>::CollisionDet(Sphere_T<T> const & sphere) const
+	BoundOverlap Frustum_T<T>::Intersect(Sphere_T<T> const & sphere) const
 	{
 		bool intersect = false;
 		for (int i = 0; i < 6; ++ i)
@@ -143,7 +143,7 @@ namespace KlayGE
 	}
 
 	template <typename T>
-	BoundOverlap Frustum_T<T>::CollisionDet(Frustum_T<T> const & frustum) const
+	BoundOverlap Frustum_T<T>::Intersect(Frustum_T<T> const & frustum) const
 	{
 		UNREF_PARAM(frustum);
 		BOOST_ASSERT(false);

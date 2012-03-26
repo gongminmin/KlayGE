@@ -313,7 +313,7 @@ namespace KlayGE
 
 	bool SceneManager::AABBVisible(AABBox const & aabb)
 	{
-		return frustum_->CollisionDet(aabb) != BO_No;
+		return frustum_->Intersect(aabb) != BO_No;
 	}
 
 	SceneManager::SceneObjectsType& SceneManager::SceneObjects()

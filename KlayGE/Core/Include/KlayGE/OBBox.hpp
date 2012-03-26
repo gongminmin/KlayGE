@@ -49,10 +49,10 @@ namespace KlayGE
 		bool VecInBound(Vector_T<T, 3> const & v) const;
 		T MaxRadiusSq() const;
 
-		BoundOverlap CollisionDet(AABBox_T<T> const & aabb) const;
-		BoundOverlap CollisionDet(OBBox_T<T> const & obb) const;
-		BoundOverlap CollisionDet(Sphere_T<T> const & sphere) const;
-		BoundOverlap CollisionDet(Frustum_T<T> const & frustum) const;
+		bool Intersect(AABBox_T<T> const & aabb) const;
+		bool Intersect(OBBox_T<T> const & obb) const;
+		bool Intersect(Sphere_T<T> const & sphere) const;
+		bool Intersect(Frustum_T<T> const & frustum) const;
 
 		friend bool
 		operator==(OBBox_T<T> const & lhs, OBBox_T<T> const & rhs)

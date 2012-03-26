@@ -123,13 +123,13 @@ namespace KlayGE
 	}
 
 	template <typename T>
-	BoundOverlap OBBox_T<T>::CollisionDet(AABBox_T<T> const & aabb) const
+	bool OBBox_T<T>::Intersect(AABBox_T<T> const & aabb) const
 	{
-		return this->CollisionDet(OBBox_T<T>(aabb));
+		return aabb.Intersect(*this);
 	}
 
 	template <typename T>
-	BoundOverlap OBBox_T<T>::CollisionDet(OBBox_T<T> const & obb) const
+	bool OBBox_T<T>::Intersect(OBBox_T<T> const & obb) const
 	{
 		// From Real-Time Collision Detection, p. 101-106. See http://realtimecollisiondetection.net/
 
@@ -163,7 +163,7 @@ namespace KlayGE
 			T rb = obb.r_[0] * abs_r_mat(i, 0) +  obb.r_[1] * abs_r_mat(i, 1) + obb.r_[2] * abs_r_mat(i, 2);
 			if (MathLib::abs(t[i]) > ra + rb) 
 			{
-				return BO_Partial;
+				return true;
 			}
 		}
 
@@ -174,7 +174,7 @@ namespace KlayGE
 			T rb = obb.r_[i];
 			if (MathLib::abs(t.x() + r_mat(0, i) + t.y() * r_mat(1, i) + t.z() * r_mat(2, i)) > ra + rb)
 			{
-				return BO_Partial;
+				return true;
 			}
 		}
 
@@ -185,7 +185,7 @@ namespace KlayGE
 		T rb = obb.r_.y() * abs_r_mat(0, 2) + obb.r_.z() * abs_r_mat(0, 1);
 		if (MathLib::abs(t.z() * r_mat(1, 0) - t.y() * r_mat(2, 0)) > ra + rb)
 		{
-			return BO_Partial;
+			return true;
 		}
 
 		// A.x < cross> B.y
@@ -193,7 +193,7 @@ namespace KlayGE
 		rb = obb.r_.x() * abs_r_mat(0, 2) + obb.r_.z() * abs_r_mat(0, 0);
 		if (MathLib::abs(t.z() * r_mat(1, 1) - t.y() * r_mat(2, 1)) > ra + rb)
 		{
-			return BO_Partial;
+			return true;
 		}
 
 		// A.x <cross> B.z
@@ -201,7 +201,7 @@ namespace KlayGE
 		rb = obb.r_.x() * abs_r_mat(0, 1) + obb.r_.y() * abs_r_mat(0, 0);
 		if (MathLib::abs(t.z() * r_mat(1, 2) - t.y() * r_mat(2, 2)) > ra + rb)
 		{
-			return BO_Partial;
+			return true;
 		}
 
 		// A.y <cross> B.x
@@ -209,7 +209,7 @@ namespace KlayGE
 		rb = obb.r_.y() * abs_r_mat(1, 2) + obb.r_.z() * abs_r_mat(1, 1);
 		if (MathLib::abs(t.x() * r_mat(2, 0) - t.z() * r_mat(0, 0)) > ra + rb)
 		{
-			return BO_Partial;
+			return true;
 		}
 
 		// A.y <cross> B.y
@@ -217,7 +217,7 @@ namespace KlayGE
 		rb = obb.r_.x() * abs_r_mat(1, 2) + obb.r_.z() * abs_r_mat(1, 0);
 		if (MathLib::abs(t.x() * r_mat(2, 1) - t.z() * r_mat(0, 1)) > ra + rb)
 		{
-			return BO_Partial;
+			return true;
 		}
 
 		// A.y <cross> B.z
@@ -225,7 +225,7 @@ namespace KlayGE
 		rb = obb.r_.x() * abs_r_mat(1, 1) + obb.r_.y() * abs_r_mat(1, 0);
 		if (MathLib::abs(t.x() * r_mat(2, 2) - t.z() * r_mat(0, 2)) > ra + rb)
 		{
-			return BO_Partial;
+			return true;
 		}
 
 		// A.z <cross> B.x
@@ -233,7 +233,7 @@ namespace KlayGE
 		rb = obb.r_.y() * abs_r_mat(2, 2) + obb.r_.z() * abs_r_mat(2, 1);
 		if (MathLib::abs(t.y() * r_mat(0, 0) - t.x() * r_mat(1, 0)) > ra + rb)
 		{
-			return BO_Partial;
+			return true;
 		}
 
 		// A.z <cross> B.y
@@ -241,7 +241,7 @@ namespace KlayGE
 		rb = obb.r_.x() * abs_r_mat(2, 2) + obb.r_.z() * abs_r_mat(2, 0);
 		if (MathLib::abs(t.y() * r_mat(0, 1) - t.x() * r_mat(1, 1)) > ra + rb)
 		{
-			return BO_Partial;
+			return true;
 		}
 
 		// A.z <cross> B.z
@@ -249,14 +249,14 @@ namespace KlayGE
 		rb = obb.r_.x() * abs_r_mat(2, 1) + obb.r_.y() * abs_r_mat(2, 0);
 		if (MathLib::abs(t.y() * r_mat(0, 2) - t.x() * r_mat(1, 2)) > ra + rb)
 		{
-			return BO_Partial;
+			return true;
 		}
 
-		return BO_No;
+		return false;
 	}
 
 	template <typename T>
-	BoundOverlap OBBox_T<T>::CollisionDet(Sphere_T<T> const & sphere) const
+	bool OBBox_T<T>::Intersect(Sphere_T<T> const & sphere) const
 	{
 		Vector_T<T, 3> p = sphere.Center();
 		Vector_T<T, 3> d = p - pos_;
@@ -276,18 +276,11 @@ namespace KlayGE
 		}
 
 		Vector_T<T, 3> v = closest_point_on_obb - sphere.Center();
-		if (MathLib::dot(v, v) <= sphere.Radius() * sphere.Radius())
-		{
-			return BO_Partial;
-		}
-		else
-		{
-			return BO_No;
-		}
+		return MathLib::length_sq(v) <= sphere.Radius() * sphere.Radius();
 	}
 
 	template <typename T>
-	BoundOverlap OBBox_T<T>::CollisionDet(Frustum_T<T> const & frustum) const
+	bool OBBox_T<T>::Intersect(Frustum_T<T> const & frustum) const
 	{
 		for (int i = 0; i < 6; ++ i)
 		{
@@ -303,10 +296,10 @@ namespace KlayGE
 
 			if (MathLib::dot(point, pn) + plane.d() >= 0)
 			{
-				return BO_No;
+				return false;
 			}
 		}
 
-		return BO_Partial;
+		return true;
 	}
 }

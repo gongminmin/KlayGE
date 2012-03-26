@@ -127,38 +127,31 @@ namespace KlayGE
 	}
 
 	template <typename T>
-	BoundOverlap Sphere_T<T>::CollisionDet(AABBox_T<T> const & aabb) const
+	bool Sphere_T<T>::Intersect(AABBox_T<T> const & aabb) const
 	{
 		UNREF_PARAM(aabb);
 		BOOST_ASSERT(false);
 
-		return BO_No;
+		return false;
 	}
 
 	template <typename T>
-	BoundOverlap Sphere_T<T>::CollisionDet(OBBox_T<T> const & obb) const
+	bool Sphere_T<T>::Intersect(OBBox_T<T> const & obb) const
 	{
-		UNREF_PARAM(obb);
-		BOOST_ASSERT(false);
-
-		return BO_No;
+		return obb.Intersect(*this);
 	}
 
 	template <typename T>
-	BoundOverlap Sphere_T<T>::CollisionDet(Sphere_T<T> const & sphere) const
+	bool Sphere_T<T>::Intersect(Sphere_T<T> const & sphere) const
 	{
-		UNREF_PARAM(sphere);
-		BOOST_ASSERT(false);
-
-		return BO_No;
+		Vector_T<T, 3> d = center_ - sphere.Center();
+		float r = radius_ + sphere.Radius();
+		return MathLib::length_sq(d) <= r * r;
 	}
 
 	template <typename T>
-	BoundOverlap Sphere_T<T>::CollisionDet(Frustum_T<T> const & frustum) const
+	bool Sphere_T<T>::Intersect(Frustum_T<T> const & frustum) const
 	{
-		UNREF_PARAM(frustum);
-		BOOST_ASSERT(false);
-
-		return BO_No;
+		return frustum.Intersect(*this) != BO_No;
 	}
 }
