@@ -18,8 +18,6 @@
 #include <boost/smart_ptr.hpp>
 
 #include <vector>
-#include <KlayGE/D3D11/D3D11MinGWDefs.hpp>
-#include <d3d11.h>
 #include <D3D11Shader.h>
 
 #include <KlayGE/RenderLayout.hpp>

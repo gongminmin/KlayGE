@@ -18,9 +18,6 @@
 #include <KlayGE/Context.hpp>
 #include <KlayGE/RenderFactory.hpp>
 
-#include <KlayGE/D3D11/D3D11MinGWDefs.hpp>
-#include <d3d11.h>
-
 #include <KlayGE/D3D11/D3D11RenderEngine.hpp>
 #include <KlayGE/D3D11/D3D11Query.hpp>
 

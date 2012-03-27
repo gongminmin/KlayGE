@@ -581,6 +581,14 @@ namespace KlayGE
 			}
 		}
 
+		template KLAYGE_CORE_API float4x4 look_at_lh(float3 const & vEye, float3 const & vAt);
+
+		template <typename T>
+		Matrix4_T<T> look_at_lh(Vector_T<T, 3> const & vEye, Vector_T<T, 3> const & vAt)
+		{
+			return look_at_lh(vEye, vAt, Vector_T<T, 3>(0, 1, 0));
+		}
+
 		template KLAYGE_CORE_API float4x4 look_at_lh(float3 const & vEye, float3 const & vAt,
 			float3 const & vUp);
 
@@ -597,6 +605,14 @@ namespace KlayGE
 				xAxis.y(),			yAxis.y(),			zAxis.y(),			0,
 				xAxis.z(),			yAxis.z(),			zAxis.z(),			0,
 				-dot(xAxis, vEye),	-dot(yAxis, vEye),	-dot(zAxis, vEye),	1);
+		}
+
+		template KLAYGE_CORE_API float4x4 look_at_rh(float3 const & vEye, float3 const & vAt);
+
+		template <typename T>
+		Matrix4_T<T> look_at_rh(Vector_T<T, 3> const & vEye, Vector_T<T, 3> const & vAt)
+		{
+			return look_at_rh(vEye, vAt, Vector_T<T, 3>(0, 1, 0));
 		}
 
 		template KLAYGE_CORE_API float4x4 look_at_rh(float3 const & vEye, float3 const & vAt,

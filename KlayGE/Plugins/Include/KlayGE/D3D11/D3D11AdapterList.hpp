@@ -19,9 +19,6 @@
 #include <boost/smart_ptr.hpp>
 #include <KlayGE/D3D11/D3D11Adapter.hpp>
 
-#include <KlayGE/D3D11/D3D11MinGWDefs.hpp>
-#include <d3d11.h>
-
 namespace KlayGE
 {
 	class D3D11AdapterList

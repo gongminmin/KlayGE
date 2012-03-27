@@ -426,12 +426,18 @@ namespace KlayGE
 		Matrix4_T<T> inverse(Matrix4_T<T> const & rhs);
 
 		template <typename T>
+		Matrix4_T<T> look_at_lh(Vector_T<T, 3> const & vEye, Vector_T<T, 3> const & vAt);
+
+		template <typename T>
 		Matrix4_T<T> look_at_lh(Vector_T<T, 3> const & vEye, Vector_T<T, 3> const & vAt,
-			Vector_T<T, 3> const & vUp = Vector_T<T, 3>(0, 1, 0));
+			Vector_T<T, 3> const & vUp);
+
+		template <typename T>
+		Matrix4_T<T> look_at_rh(Vector_T<T, 3> const & vEye, Vector_T<T, 3> const & vAt);
 
 		template <typename T>
 		Matrix4_T<T> look_at_rh(Vector_T<T, 3> const & vEye, Vector_T<T, 3> const & vAt,
-			Vector_T<T, 3> const & vUp = Vector_T<T, 3>(0, 1, 0));
+			Vector_T<T, 3> const & vUp);
 
 		template <typename T>
 		Matrix4_T<T> ortho_lh(T const & w, T const & h, T const & nearPlane, T const & farPlane);
