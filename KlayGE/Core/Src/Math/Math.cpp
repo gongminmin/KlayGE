@@ -1420,6 +1420,133 @@ namespace KlayGE
 			return -dot_coord(p, orig) / deno;
 		}
 
+
+		template KLAYGE_CORE_API void oblique_clipping(float4x4& proj, Plane const & clip_plane);
+		
+		// From Game Programming Gems 5, Section 2.6.
+		template <typename T>
+		void oblique_clipping(Matrix4_T<T>& proj, Plane_T<T> const & clip_plane)
+		{
+			Vector_T<T, 4> q;
+			q.x() = (MathLib::sgn(clip_plane.a()) - proj(2, 0)) / proj(0, 0);
+			q.y() = (MathLib::sgn(clip_plane.b()) - proj(2, 1)) / proj(1, 1);
+			q.z() = T(1);
+			q.w() = (T(1) - proj(2, 2)) / proj(3, 2);
+
+			T c = T(1) / MathLib::dot(clip_plane, q);
+
+			proj(0, 2) = clip_plane.a() * c;
+			proj(1, 2) = clip_plane.b() * c;
+			proj(2, 2) = clip_plane.c() * c;
+			proj(3, 2) = clip_plane.d() * c;
+		}
+
+
+		template KLAYGE_CORE_API Color negative(Color const & rhs);
+
+		template <typename T>
+		Color_T<T> negative(Color_T<T> const & rhs)
+		{
+			return Color_T<T>(1 - rhs.r(), 1 - rhs.g(), 1 - rhs.b(), rhs.a());
+		}
+
+		template KLAYGE_CORE_API Color modulate(Color const & lhs, Color const & rhs);
+
+		template <typename T>
+		Color_T<T> modulate(Color_T<T> const & lhs, Color_T<T> const & rhs)
+		{
+			return Color_T<T>(lhs.r() * rhs.r(), lhs.g() * rhs.g(), lhs.b() * rhs.b(), lhs.a() * rhs.a());
+		}
+
+
+		template KLAYGE_CORE_API bool vec_in_sphere(Sphere const & sphere, float3 const & v);
+
+		template <typename T>
+		bool vec_in_sphere(Sphere_T<T> const & sphere, Vector_T<T, 3> const & v)
+		{
+			if (length(v - sphere.Center()) < sphere.Radius())
+			{
+				return true;
+			}
+			return false;
+		}
+
+		template KLAYGE_CORE_API bool intersect_ray(Sphere const & sphere, float3 const & orig, float3 const & dir);
+
+		template <typename T>
+		bool intersect_ray(Sphere_T<T> const & sphere, Vector_T<T, 3> const & orig, Vector_T<T, 3> const & dir)
+		{
+			T const a = length_sq(dir);
+			T const b = 2 * dot(dir, orig - sphere.Center());
+			T const c = length_sq(orig - sphere.Center()) - sphere.Radius() * sphere.Radius();
+
+			if (b * b - 4 * a * c < 0)
+			{
+				return false;
+			}
+			return true;
+		}
+
+		template KLAYGE_CORE_API bool vec_in_box(AABBox const & aabb, float3 const & v);
+
+		template <typename T>
+		bool vec_in_box(AABBox_T<T> const & aabb, Vector_T<T, 3> const & v)
+		{
+			return (in_bound(v.x(), aabb.Min().x(), aabb.Max().x()))
+				&& (in_bound(v.y(), aabb.Min().y(), aabb.Max().y()))
+				&& (in_bound(v.z(), aabb.Min().z(), aabb.Max().z()));
+		}
+
+		template KLAYGE_CORE_API bool intersect_ray(AABBox const & aabb, float3 const & orig, float3 const & dir);
+
+		template <typename T>
+		bool intersect_ray(AABBox_T<T> const & aabb, Vector_T<T, 3> const & orig, Vector_T<T, 3> const & dir)
+		{
+			float t_near = -1e10f;
+			float t_far = +1e10f;
+
+			for (int i = 0; i < 3; ++ i)
+			{
+				if (equal(dir[i], T(0)))
+				{
+					if ((dir[i] < aabb.Min()[i]) || (dir[i] > aabb.Max()[i]))
+					{
+						return false;
+					}
+				}
+				else
+				{
+					float t1 = (aabb.Min()[i] - orig[i]) / dir[i];
+					float t2 = (aabb.Max()[i] - orig[i]) / dir[i];
+					if (t1 > t2)
+					{
+						std::swap(t1, t2);
+					}
+					if (t1 > t_near)
+					{
+						t_near = t1;
+					}
+					if (t2 < t_far)
+					{
+						t_far = t2;
+					}
+
+					if (t_near > t_far)
+					{
+						// box is missed
+						return false;
+					}
+					if (t_far < 0)
+					{
+						// box is behind ray
+						return false;
+					}
+				}
+			}
+
+			return true;
+		}
+
 		template KLAYGE_CORE_API AABBox compute_aabbox(float3* first, float3* last);
 		template KLAYGE_CORE_API AABBox compute_aabbox(float4* first, float4* last);
 		template KLAYGE_CORE_API AABBox compute_aabbox(float3 const * first, float3 const * last);
@@ -1814,130 +1941,84 @@ namespace KlayGE
 			return Sphere_T<value_type>(center, r);
 		}
 
-		template KLAYGE_CORE_API void oblique_clipping(float4x4& proj, Plane const & clip_plane);
-		
-		// From Game Programming Gems 5, Section 2.6.
+		template KLAYGE_CORE_API AABBox transform_aabbox(AABBox const & aabb, float4x4 const & mat);
+
 		template <typename T>
-		void oblique_clipping(Matrix4_T<T>& proj, Plane_T<T> const & clip_plane)
+		AABBox_T<T> transform_aabbox(AABBox_T<T> const & aabb, Matrix4_T<T> const & mat)
 		{
-			Vector_T<T, 4> q;
-			q.x() = (MathLib::sgn(clip_plane.a()) - proj(2, 0)) / proj(0, 0);
-			q.y() = (MathLib::sgn(clip_plane.b()) - proj(2, 1)) / proj(1, 1);
-			q.z() = T(1);
-			q.w() = (T(1) - proj(2, 2)) / proj(3, 2);
+			Vector_T<T, 3> scale, trans;
+			Quaternion_T<T> rot;
+			decompose(scale, rot, trans, mat);
 
-			T c = T(1) / MathLib::dot(clip_plane, q);
+			BOOST_ASSERT(equal(scale.x(), scale.y()) && equal(scale.y(), scale.z()));
 
-			proj(0, 2) = clip_plane.a() * c;
-			proj(1, 2) = clip_plane.b() * c;
-			proj(2, 2) = clip_plane.c() * c;
-			proj(3, 2) = clip_plane.d() * c;
+			return transform_aabbox(aabb, scale.x(), rot, trans);
 		}
 
-
-		template KLAYGE_CORE_API Color negative(Color const & rhs);
-
-		template <typename T>
-		Color_T<T> negative(Color_T<T> const & rhs)
-		{
-			return Color_T<T>(1 - rhs.r(), 1 - rhs.g(), 1 - rhs.b(), rhs.a());
-		}
-
-		template KLAYGE_CORE_API Color modulate(Color const & lhs, Color const & rhs);
+		template KLAYGE_CORE_API AABBox transform_aabbox(AABBox const & aabb, float scale, Quaternion const & rot, float3 const & trans);
 
 		template <typename T>
-		Color_T<T> modulate(Color_T<T> const & lhs, Color_T<T> const & rhs)
+		AABBox_T<T> transform_aabbox(AABBox_T<T> const & aabb, T scale, Quaternion_T<T> const & rot, Vector_T<T, 3> const & trans)
 		{
-			return Color_T<T>(lhs.r() * rhs.r(), lhs.g() * rhs.g(), lhs.b() * rhs.b(), lhs.a() * rhs.a());
-		}
-
-
-		template KLAYGE_CORE_API bool vec_in_sphere(Sphere const & sphere, float3 const & v);
-
-		template <typename T>
-		bool vec_in_sphere(Sphere_T<T> const & sphere, Vector_T<T, 3> const & v)
-		{
-			if (length(v - sphere.Center()) < sphere.Radius())
+			float3 min, max;
+			min = max = transform_quat(aabb[0] * scale, rot) + trans;
+			for (size_t j = 1; j < 8; ++ j)
 			{
-				return true;
-			}
-			return false;
-		}
-
-		template KLAYGE_CORE_API bool intersect_ray(Sphere const & sphere, float3 const & orig, float3 const & dir);
-
-		template <typename T>
-		bool intersect_ray(Sphere_T<T> const & sphere, Vector_T<T, 3> const & orig, Vector_T<T, 3> const & dir)
-		{
-			T const a = length_sq(dir);
-			T const b = 2 * dot(dir, orig - sphere.Center());
-			T const c = length_sq(orig - sphere.Center()) - sphere.Radius() * sphere.Radius();
-
-			if (b * b - 4 * a * c < 0)
-			{
-				return false;
-			}
-			return true;
-		}
-
-		template KLAYGE_CORE_API bool vec_in_box(AABBox const & aabb, float3 const & v);
-
-		template <typename T>
-		bool vec_in_box(AABBox_T<T> const & aabb, Vector_T<T, 3> const & v)
-		{
-			return (in_bound(v.x(), aabb.Min().x(), aabb.Max().x()))
-				&& (in_bound(v.y(), aabb.Min().y(), aabb.Max().y()))
-				&& (in_bound(v.z(), aabb.Min().z(), aabb.Max().z()));
-		}
-
-		template KLAYGE_CORE_API bool intersect_ray(AABBox const & aabb, float3 const & orig, float3 const & dir);
-
-		template <typename T>
-		bool intersect_ray(AABBox_T<T> const & aabb, Vector_T<T, 3> const & orig, Vector_T<T, 3> const & dir)
-		{
-			float t_near = -1e10f;
-			float t_far = +1e10f;
-
-			for (int i = 0; i < 3; ++ i)
-			{
-				if (equal(dir[i], T(0)))
-				{
-					if ((dir[i] < aabb.Min()[i]) || (dir[i] > aabb.Max()[i]))
-					{
-						return false;
-					}
-				}
-				else
-				{
-					float t1 = (aabb.Min()[i] - orig[i]) / dir[i];
-					float t2 = (aabb.Max()[i] - orig[i]) / dir[i];
-					if (t1 > t2)
-					{
-						std::swap(t1, t2);
-					}
-					if (t1 > t_near)
-					{
-						t_near = t1;
-					}
-					if (t2 < t_far)
-					{
-						t_far = t2;
-					}
-
-					if (t_near > t_far)
-					{
-						// box is missed
-						return false;
-					}
-					if (t_far < 0)
-					{
-						// box is behind ray
-						return false;
-					}
-				}
+				float3 vec = transform_quat(aabb[j] * scale, rot) + trans;
+				min = MathLib::minimize(min, vec);
+				max = MathLib::maximize(max, vec);
 			}
 
-			return true;
+			return AABBox_T<T>(min, max);
+		}
+
+		template KLAYGE_CORE_API OBBox transform_obb(OBBox const & obb, float4x4 const & mat);
+
+		template <typename T>
+		OBBox_T<T> transform_obb(OBBox_T<T> const & obb, Matrix4_T<T> const & mat)
+		{
+			Vector_T<T, 3> scale, trans;
+			Quaternion_T<T> rot;
+			decompose(scale, rot, trans, mat);
+
+			BOOST_ASSERT(equal(scale.x(), scale.y()) && equal(scale.y(), scale.z()));
+
+			return transform_obb(obb, scale.x(), rot, trans);
+		}
+
+		template KLAYGE_CORE_API OBBox transform_obb(OBBox const & obb, float scale, Quaternion const & rot, float3 const & trans);
+
+		template <typename T>
+		OBBox_T<T> transform_obb(OBBox_T<T> const & obb, T scale, Quaternion_T<T> const & rot, Vector_T<T, 3> const & trans)
+		{
+			Vector_T<T, 3> center = transform_quat(obb.Center() * scale, rot) + trans;
+			Vector_T<T, 3> axis[3] = { transform_quat(obb.Axis(0), rot), transform_quat(obb.Axis(1), rot), transform_quat(obb.Axis(2), rot) };
+			Vector_T<T, 3> extent = obb.HalfSize() * scale;
+			return OBBox_T<T>(center, axis[0], axis[1], axis[2], extent);
+		}
+
+		template KLAYGE_CORE_API Sphere transform_sphere(Sphere const & sphere, float4x4 const & mat);
+
+		template <typename T>
+		Sphere_T<T> transform_sphere(Sphere_T<T> const & sphere, Matrix4_T<T> const & mat)
+		{
+			Vector_T<T, 3> scale, trans;
+			Quaternion_T<T> rot;
+			decompose(scale, rot, trans, mat);
+
+			BOOST_ASSERT(equal(scale.x(), scale.y()) && equal(scale.y(), scale.z()));
+
+			return transform_sphere(sphere, scale.x(), rot, trans);
+		}
+
+		template KLAYGE_CORE_API Sphere transform_sphere(Sphere const & sphere, float scale, Quaternion const & rot, float3 const & trans);
+
+		template <typename T>
+		Sphere_T<T> transform_sphere(Sphere_T<T> const & sphere, T scale, Quaternion_T<T> const & rot, Vector_T<T, 3> const & trans)
+		{
+			Vector_T<T, 3> center = transform_quat(sphere.Center() * scale, rot) + trans;
+			T radius = sphere.Radius() * scale;
+			return Sphere_T<T>(center, radius);
 		}
 
 
