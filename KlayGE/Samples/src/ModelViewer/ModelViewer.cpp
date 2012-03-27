@@ -67,7 +67,7 @@ namespace
 
 			rl_->BindVertexStream(pos_vb, boost::make_tuple(vertex_element(VEU_Position, 0, EF_ABGR32F)));
 
-			aabb_ = MathLib::compute_aabbox<float>(&xyzs[0], &xyzs[sizeof(xyzs) / sizeof(xyzs[0])]);
+			aabb_ = MathLib::compute_aabbox(&xyzs[0], &xyzs[sizeof(xyzs) / sizeof(xyzs[0])]);
 		}
 
 		void OnRenderBegin()
@@ -131,7 +131,7 @@ namespace
 
 			rl_->BindVertexStream(pos_vb, boost::make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F)));
 
-			aabb_ = MathLib::compute_aabbox<float>(&xyzs[0], &xyzs[sizeof(xyzs) / sizeof(xyzs[0])]);
+			aabb_ = MathLib::compute_aabbox(&xyzs[0], &xyzs[sizeof(xyzs) / sizeof(xyzs[0])]);
 		}
 
 		void OnRenderBegin()

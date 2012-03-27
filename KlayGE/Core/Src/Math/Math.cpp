@@ -1420,6 +1420,400 @@ namespace KlayGE
 			return -dot_coord(p, orig) / deno;
 		}
 
+		template KLAYGE_CORE_API AABBox compute_aabbox(float3* first, float3* last);
+		template KLAYGE_CORE_API AABBox compute_aabbox(float4* first, float4* last);
+		template KLAYGE_CORE_API AABBox compute_aabbox(float3 const * first, float3 const * last);
+		template KLAYGE_CORE_API AABBox compute_aabbox(float4 const * first, float4 const * last);
+		template KLAYGE_CORE_API AABBox compute_aabbox(std::vector<float3>::iterator first, std::vector<float3>::iterator last);
+		template KLAYGE_CORE_API AABBox compute_aabbox(std::vector<float4>::iterator first, std::vector<float4>::iterator last);
+		template KLAYGE_CORE_API AABBox compute_aabbox(std::vector<float3>::const_iterator first, std::vector<float3>::const_iterator last);
+		template KLAYGE_CORE_API AABBox compute_aabbox(std::vector<float4>::const_iterator first, std::vector<float4>::const_iterator last);
+
+		template <typename Iterator>
+		AABBox_T<typename std::iterator_traits<Iterator>::value_type::value_type> compute_aabbox(Iterator first, Iterator last)
+		{
+			typedef typename std::iterator_traits<Iterator>::value_type::value_type value_type;
+
+			Vector_T<value_type, 3> minVec = *first;
+			Vector_T<value_type, 3> maxVec = *first;
+			Iterator iter = first;
+			++ iter;
+			for (; iter != last; ++ iter)
+			{
+				Vector_T<value_type, 3> const & v = *iter;
+				minVec = minimize(minVec, v);
+				maxVec = maximize(maxVec, v);
+			}
+			return AABBox_T<value_type>(minVec, maxVec);
+		}
+
+		template KLAYGE_CORE_API OBBox compute_obbox(float3* first, float3* last);
+		template KLAYGE_CORE_API OBBox compute_obbox(float4* first, float4* last);
+		template KLAYGE_CORE_API OBBox compute_obbox(float3 const * first, float3 const * last);
+		template KLAYGE_CORE_API OBBox compute_obbox(float4 const * first, float4 const * last);
+		template KLAYGE_CORE_API OBBox compute_obbox(std::vector<float3>::iterator first, std::vector<float3>::iterator last);
+		template KLAYGE_CORE_API OBBox compute_obbox(std::vector<float4>::iterator first, std::vector<float4>::iterator last);
+		template KLAYGE_CORE_API OBBox compute_obbox(std::vector<float3>::const_iterator first, std::vector<float3>::const_iterator last);
+		template KLAYGE_CORE_API OBBox compute_obbox(std::vector<float4>::const_iterator first, std::vector<float4>::const_iterator last);
+
+		template <typename Iterator>
+		OBBox_T<typename std::iterator_traits<Iterator>::value_type::value_type> compute_obbox(Iterator first, Iterator last)
+		{
+			typedef typename std::iterator_traits<Iterator>::value_type::value_type value_type;
+
+			// Compute the mean of the points.
+			Vector_T<value_type, 3> center = *first;
+			Iterator iter = first;
+			++ iter;
+			uint32_t n = 1;
+			for (; iter != last; ++ iter, ++ n)
+			{
+				center += Vector_T<value_type, 3>(*iter);
+			}
+			value_type inv_num_points = value_type(1) / n;
+			center *= inv_num_points;
+
+			// Compute the covariance matrix of the points.
+			value_type cov[6];
+			for (int i = 0; i < 6; ++ i)
+			{
+				cov[i] = 0;
+			}
+
+			for (Iterator iter = first; iter != last; ++ iter)
+			{
+				Vector_T<value_type, 3> diff = Vector_T<value_type, 3>(*iter) - center;
+				cov[0] += diff[0] * diff[0];
+				cov[1] += diff[0] * diff[1];
+				cov[2] += diff[0] * diff[2];
+				cov[3] += diff[1] * diff[1];
+				cov[4] += diff[1] * diff[2];
+				cov[5] += diff[2] * diff[2];
+			}
+
+			for (int i = 0; i < 6; ++ i)
+			{
+				cov[i] *= inv_num_points;
+			}
+
+			// Tridiagonal
+
+			value_type diagonal[3];
+			value_type sub_diagonal[3];
+			value_type matrix[3][3];
+			bool is_rotation = false;
+
+			value_type m00 = cov[0];
+			value_type m01 = cov[1];
+			value_type m02 = cov[2];
+			value_type m11 = cov[3];
+			value_type m12 = cov[4];
+			value_type m22 = cov[5];
+
+			diagonal[0] = m00;
+			sub_diagonal[2] = 0;
+			if (abs(m02) > value_type(1e-6))
+			{
+				value_type length = sqrt(m01 * m01 + m02 * m02);
+				value_type inv_length = 1 / length;
+				m01 *= inv_length;
+				m02 *= inv_length;
+				value_type q = 2 * m01 * m12 + m02 * (m22 - m11);
+				diagonal[1] = m11 + m02 * q;
+				diagonal[2] = m22 - m02 * q;
+				sub_diagonal[0] = length;
+				sub_diagonal[1] = m12 - m01 * q;
+				matrix[0][0] = 1;
+				matrix[0][1] = 0;
+				matrix[0][2] = 0;
+				matrix[1][0] = 0;
+				matrix[1][1] = m01;
+				matrix[1][2] = m02;
+				matrix[2][0] = 0;
+				matrix[2][1] = m02;
+				matrix[2][2] = -m01;
+				is_rotation = false;
+			}
+			else
+			{
+				diagonal[1] = m11;
+				diagonal[2] = m22;
+				sub_diagonal[0] = m01;
+				sub_diagonal[1] = m12;
+				matrix[0][0] = 1;
+				matrix[0][1] = 0;
+				matrix[0][2] = 0;
+				matrix[1][0] = 0;
+				matrix[1][1] = 1;
+				matrix[1][2] = 0;
+				matrix[2][0] = 0;
+				matrix[2][1] = 0;
+				matrix[2][2] = 1;
+				is_rotation = true;
+			}
+
+			// QLAlgorithm
+
+			int const nIterPower = 32;
+
+			for (int i0 = 0; i0 < 3; ++ i0)
+			{
+				int i1;
+				for (i1 = 0; i1 < nIterPower; ++ i1)
+				{
+					int i2;
+					for (i2 = i0; i2 <= 3 - 2; ++ i2)
+					{
+						value_type tmp = abs(diagonal[i2]) + abs(diagonal[i2+1]);
+
+						if (abs(sub_diagonal[i2]) + tmp == tmp)
+						{
+							break;
+						}
+					}
+					if (i2 == i0)
+					{
+						break;
+					}
+
+					value_type value0 = (diagonal[i0 + 1] - diagonal[i0]) / (2 * sub_diagonal[i0]);
+					value_type value1 = sqrt(value0 * value0 + 1);
+					if (value0 < 0)
+					{
+						value0 = diagonal[i2] - diagonal[i0] + sub_diagonal[i0] / (value0 - value1);
+					}
+					else
+					{
+						value0 = diagonal[i2] - diagonal[i0] + sub_diagonal[i0] / (value0 + value1);
+					}
+
+					value_type sn = 1, cs = 1, value2 = 0;
+					for (int i3 = i2 - 1; i3 >= i0; -- i3)
+					{
+						value_type value3 = sn * sub_diagonal[i3];
+						value_type value4 = cs * sub_diagonal[i3];
+						if (abs(value3) >= abs(value0))
+						{
+							cs = value0 / value3;
+							value1 = sqrt(cs * cs + 1);
+							sub_diagonal[i3 + 1] = value3 * value1;
+							sn = 1 / value1;
+							cs *= sn;
+						}
+						else
+						{
+							sn = value3 / value0;
+							value1 = sqrt(sn * sn + 1);
+							sub_diagonal[i3 + 1] = value0 * value1;
+							cs = 1 / value1;
+							sn *= cs;
+						}
+						value0 = diagonal[i3 + 1] - value2;
+						value1 = (diagonal[i3] - value0) * sn + 2 * value4 * cs;
+						value2 = sn * value1;
+						diagonal[i3 + 1] = value0 + value2;
+						value0 = cs * value1 - value4;
+
+						for (int i4 = 0; i4 < 3; ++ i4)
+						{
+							value3 = matrix[i4][i3 + 1];
+							matrix[i4][i3 + 1] = sn * matrix[i4][i3] + cs * value3;
+							matrix[i4][i3] = cs * matrix[i4][i3] - sn * value3;
+						}
+					}
+					diagonal[i0] -= value2;
+					sub_diagonal[i0] = value0;
+					sub_diagonal[i2] = 0;
+				}
+			}
+
+			// IncreasingSort
+
+			// Sort the eigenvalues in increasing order, e[0] <= ... <= e[mSize-1]
+			for (int i0 = 0, i1; i0 <= 3 - 2; ++ i0)
+			{ 
+				// Locate the minimum eigenvalue.
+				i1 = i0;
+				float min_value = diagonal[i1];
+				int i2;
+				for (i2 = i0 + 1; i2 < 3; ++ i2)
+				{
+					if (diagonal[i2] < min_value)
+					{
+						i1 = i2;
+						min_value = diagonal[i1];
+					}
+				}
+
+				if (i1 != i0)
+				{
+					// Swap the eigenvalues.
+					diagonal[i1] = diagonal[i0];
+					diagonal[i0] = min_value;
+
+					// Swap the eigenvectors corresponding to the eigenvalues.
+					for (i2 = 0; i2 < 3; ++ i2)
+					{
+						value_type tmp = matrix[i2][i0];
+						matrix[i2][i0] = matrix[i2][i1];
+						matrix[i2][i1] = tmp;
+						is_rotation = !is_rotation;
+					}
+				}
+			}
+
+			// GuaranteeRotation
+
+			if (!is_rotation)
+			{
+				// Change sign on the first column.
+				for (int row = 0; row < 3; ++ row)
+				{
+					matrix[row][0] = -matrix[row][0];
+				}
+			}
+
+			Vector_T<value_type, 3> axis[3];
+			Vector_T<value_type, 3> extent;
+			for (int i = 0; i < 3; ++ i)
+			{
+				extent[i] = diagonal[i];
+				for (int row = 0; row < 3; ++row)
+				{
+					axis[i][row] = matrix[row][i];
+				}
+			}
+
+			// Let C be the box center and let U0, U1, and U2 be the box axes.  Each
+			// input point is of the form X = C + y0*U0 + y1*U1 + y2*U2.  The
+			// following code computes min(y0), max(y0), min(y1), max(y1), min(y2),
+			// and max(y2).  The box center is then adjusted to be
+			//   C' = C + 0.5*(min(y0)+max(y0))*U0 + 0.5*(min(y1)+max(y1))*U1 +
+			//        0.5*(min(y2)+max(y2))*U2
+
+			Vector_T<value_type, 3> diff = Vector_T<value_type, 3>(*first) - center;
+			Vector_T<value_type, 3> pmin(dot(diff, axis[0]), dot(diff, axis[1]), dot(diff, axis[2]));
+			Vector_T<value_type, 3> pmax = pmin;
+			iter = first;
+			++ iter;
+			for (; iter != last; ++ iter)
+			{
+				diff = Vector_T<value_type, 3>(*iter) - center;
+				for (int j = 0; j < 3; ++j)
+				{
+					float d = dot(diff, axis[j]);
+					if (d < pmin[j])
+					{
+						pmin[j] = d;
+					}
+					else if (d > pmax[j])
+					{
+						pmax[j] = d;
+					}
+				}
+			}
+
+			center += (value_type(0.5) * (pmin[0] + pmax[0])) * axis[0]
+				+ (value_type(0.5) * (pmin[1] + pmax[1])) * axis[1]
+				+ (value_type(0.5) * (pmin[2] + pmax[2])) * axis[2];
+
+			extent[0] = value_type(0.5) * (pmax[0] - pmin[0]);
+			extent[1] = value_type(0.5) * (pmax[1] - pmin[1]);
+			extent[2] = value_type(0.5) * (pmax[2] - pmin[2]);
+
+			return OBBox_T<value_type>(center, axis[0], axis[1], axis[2], extent);
+		}
+
+		template KLAYGE_CORE_API Sphere compute_sphere(float3* first, float3* last);
+		template KLAYGE_CORE_API Sphere compute_sphere(float4* first, float4* last);
+		template KLAYGE_CORE_API Sphere compute_sphere(float3 const * first, float3 const * last);
+		template KLAYGE_CORE_API Sphere compute_sphere(float4 const * first, float4 const * last);
+		template KLAYGE_CORE_API Sphere compute_sphere(std::vector<float3>::iterator first, std::vector<float3>::iterator last);
+		template KLAYGE_CORE_API Sphere compute_sphere(std::vector<float4>::iterator first, std::vector<float4>::iterator last);
+		template KLAYGE_CORE_API Sphere compute_sphere(std::vector<float3>::const_iterator first, std::vector<float3>::const_iterator last);
+		template KLAYGE_CORE_API Sphere compute_sphere(std::vector<float4>::const_iterator first, std::vector<float4>::const_iterator last);
+
+		template <typename Iterator>
+		Sphere_T<typename std::iterator_traits<Iterator>::value_type::value_type> compute_sphere(Iterator first, Iterator last)
+		{
+			// from Graphics Gems I p301
+
+			typedef typename std::iterator_traits<Iterator>::value_type::value_type value_type;
+
+			value_type const min_float = std::numeric_limits<value_type>::min();
+			value_type const max_float = std::numeric_limits<value_type>::max();
+			Vector_T<value_type, 3> x_min(max_float, max_float, max_float);
+			Vector_T<value_type, 3> y_min(max_float, max_float, max_float);
+			Vector_T<value_type, 3> z_min(max_float, max_float, max_float);
+			Vector_T<value_type, 3> x_max(min_float, min_float, min_float);
+			Vector_T<value_type, 3> y_max(min_float, min_float, min_float);
+			Vector_T<value_type, 3> z_max(min_float, min_float, min_float);
+			for (Iterator iter = first; iter != last; ++ iter)
+			{
+				if (x_min.x() > iter->x())
+				{
+					x_min = *iter;
+				}
+				if (y_min.y() > iter->y())
+				{
+					y_min = *iter;
+				}
+				if (z_min.z() > iter->z())
+				{
+					z_min = *iter;
+				}
+
+				if (x_max.x() < iter->x())
+				{
+					x_max = *iter;
+				}
+				if (y_max.y() < iter->y())
+				{
+					y_max = *iter;
+				}
+				if (z_max.z() < iter->z())
+				{
+					z_max = *iter;
+				}
+			}
+
+			value_type x_span = length_sq(x_max - x_min);
+			value_type y_span = length_sq(y_max - y_min);
+			value_type z_span = length_sq(z_max - z_min);
+
+			Vector_T<value_type, 3> dia1 = x_min;
+			Vector_T<value_type, 3> dia2 = x_max;
+			value_type max_span = x_span;
+			if (y_span > max_span)
+			{
+				max_span = y_span;
+				dia1 = y_min;
+				dia2 = y_max;
+			}
+			if (z_span > max_span)
+			{
+				max_span = z_span;
+				dia1 = z_min;
+				dia2 = z_max;
+			}
+
+			Vector_T<value_type, 3> center((dia1 + dia2) / value_type(2));
+			value_type r = length(dia2 - center);
+
+			for (Iterator iter = first; iter != last; ++ iter)
+			{
+				value_type d = length(Vector_T<value_type, 3>(*iter) - center);
+
+				if (d > r)
+				{
+					r = (d + r) / 2;
+					center = (r * center + (d - r) * Vector_T<value_type, 3>(*iter)) / d;
+				}
+			}
+
+			return Sphere_T<value_type>(center, r);
+		}
+
 		template KLAYGE_CORE_API void oblique_clipping(float4x4& proj, Plane const & clip_plane);
 		
 		// From Game Programming Gems 5, Section 2.6.

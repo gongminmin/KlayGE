@@ -405,12 +405,12 @@ namespace KlayGE
 			switch (ve.format)
 			{
 			case EF_BGR32F:
-				aabb_ = MathLib::compute_aabbox<float>(static_cast<float3 const *>(buf),
+				aabb_ = MathLib::compute_aabbox(static_cast<float3 const *>(buf),
 					static_cast<float3 const *>(buf) + size / sizeof(float3));
 				break;
 
 			case EF_ABGR32F:
-				aabb_ = MathLib::compute_aabbox<float>(static_cast<float4 const *>(buf),
+				aabb_ = MathLib::compute_aabbox(static_cast<float4 const *>(buf),
 					static_cast<float4 const *>(buf) + size / sizeof(float4));
 				break;
 
