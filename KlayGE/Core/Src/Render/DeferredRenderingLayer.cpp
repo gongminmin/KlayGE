@@ -1098,16 +1098,7 @@ namespace KlayGE
 									*light_volume_mv_param_ = light_model * view_;
 									*light_volume_mvp_param_ = light_model * vp;
 
-									float3 min, max;
-									min = max = MathLib::transform_coord(cone_bbox_[0], light_model);
-									for (size_t k = 1; k < 8; ++ k)
-									{
-										float3 vec = MathLib::transform_coord(cone_bbox_[k], light_model);
-										min = MathLib::minimize(min, vec);
-										max = MathLib::maximize(max, vec);
-									}
-
-									if (scene_mgr.AABBVisible(AABBox(min, max)))
+									if (scene_mgr.AABBVisible(MathLib::transform_aabbox(cone_bbox_, light_model)))
 									{
 										if (attr & LSA_IndirectLighting)
 										{
@@ -1162,16 +1153,7 @@ namespace KlayGE
 										*light_volume_mv_param_ = light_model * view_;
 										*light_volume_mvp_param_ = light_model * vp;
 
-										float3 min, max;
-										min = max = MathLib::transform_coord(pyramid_bbox_[0], light_model);
-										for (size_t k = 1; k < 8; ++ k)
-										{
-											float3 vec = MathLib::transform_coord(pyramid_bbox_[k], light_model);
-											min = MathLib::minimize(min, vec);
-											max = MathLib::maximize(max, vec);
-										}
-
-										//if (scene_mgr.AABBVisible(AABBox(min, max)))
+										//if (scene_mgr.AABBVisible(MathLib::transform_aabbox(pyramid_bbox_, light_model)))
 										{
 											if (0 == (attr & LSA_NoShadow))
 											{
@@ -1198,16 +1180,7 @@ namespace KlayGE
 										*light_volume_mv_param_ = light_model * view_;
 										*light_volume_mvp_param_ = light_model * vp;
 
-										float3 min, max;
-										min = max = MathLib::transform_coord(box_bbox_[0], light_model);
-										for (size_t k = 1; k < 8; ++ k)
-										{
-											float3 vec = MathLib::transform_coord(box_bbox_[k], light_model);
-											min = MathLib::minimize(min, vec);
-											max = MathLib::maximize(max, vec);
-										}
-
-										if (scene_mgr.AABBVisible(AABBox(min, max)))
+										if (scene_mgr.AABBVisible(MathLib::transform_aabbox(box_bbox_, light_model)))
 										{
 											pass_scaned_.push_back(static_cast<uint32_t>((PT_Lighting << 24) + (i << 12) + 6));
 
