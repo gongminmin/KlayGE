@@ -1,0 +1,192 @@
+<?xml version='1.0'?>
+
+<effect>
+	<include name="PostProcess.fxml"/>
+	<include name="DeferredRenderingUtil.fxml"/>
+	<include name="BilateralBlur.fxml"/>
+	<include name="Lighting.fxml"/>
+
+	<cbuffer name="never_changes">
+		<parameter type="float2" name="sphere_xy" array_size="3">
+			<value>
+				<![CDATA[
+					0.00786173, 0.999969,
+					-0.270784, -0.96264,
+					0.965919, 0.258842
+				]]>
+			</value>
+		</parameter>
+	</cbuffer>
+
+	<cbuffer name="per_frame">
+		<parameter type="float4x4" name="proj"/>
+		<parameter type="float4x4" name="inv_proj"/>
+	</cbuffer>
+
+	<parameter type="sampler" name="bilinear_sampler">
+		<state name="filtering" value="min_mag_linear_mip_point"/>
+		<state name="address_u" value="clamp"/>
+		<state name="address_v" value="clamp"/>
+	</parameter>
+
+	<parameter type="sampler" name="point_sampler">
+		<state name="filtering" value="min_mag_mip_point"/>
+		<state name="address_u" value="clamp"/>
+		<state name="address_v" value="clamp"/>
+	</parameter>
+
+	<parameter type="texture2D" name="g_buffer_tex"/>
+	<parameter type="texture2D" name="depth_tex"/>
+	<parameter type="texture2D" name="lighting_tex"/>
+	<parameter type="texture2D" name="g_buffer_rt1_tex"/>
+
+	<parameter type="texture2D" name="noise_tex">
+		<annotation type="string" name="SasResourceAddress" value="white_noise_tex.dds"/>
+	</parameter>
+	<parameter type="sampler" name="bilinear_wrap_sampler">
+		<state name="filtering" value="min_mag_linear_mip_point"/>
+		<state name="address_u" value="wrap"/>
+		<state name="address_v" value="wrap"/>
+	</parameter>
+
+	<shader>
+		<![CDATA[
+float3 CalcAlchemyObscurance(float2 tc, float3 pos_es, float3 x_dir, float3 y_dir, float3 normal, float radius, float depth_center)
+{
+	float rotate = noise_tex.Sample(bilinear_wrap_sampler, tc * 1.5f).x;
+	float sz, cz;
+	sincos(rotate, sz, cz);
+
+	x_dir *= radius;
+	y_dir *= radius;
+
+	float sqr_radius = radius * radius;
+	float3 indirect = 0;
+	float total_weight = 0;
+	for (int i = 0; i < 3; ++ i)
+	{
+		float2 sxy = sphere_xy[i];
+		sxy = float2(dot(sxy, float2(cz, -sz)), dot(sxy, float2(sz, cz)));
+		for (int j = 0; j < 2; ++ j)
+		{
+			float3 sample_point_offset = sxy.x * x_dir + sxy.y * y_dir;
+			float3 sample_point = pos_es + sample_point_offset;
+			float4 sample_point_ss = mul(float4(sample_point, 1), proj);
+
+			float2 tc_sample = TexCoordFromPos(sample_point_ss / sample_point_ss.w);
+			float depth_sample = depth_tex.SampleLevel(point_sampler, tc_sample, 2).r;
+			float3 pos_es_sample = sample_point * (depth_sample / sample_point.z);
+			float3 dir_es_sample = pos_es_sample - pos_es;
+			float3 normal_sample = GetNormal(g_buffer_tex.SampleLevel(point_sampler, tc_sample, 2));
+			
+			if (dot(normal_sample, normal) < 1e-3f)
+			{
+				float dist_sqr = dot(dir_es_sample, dir_es_sample);
+				if (dist_sqr < sqr_radius)
+				{
+					total_weight += 1.0f;
+				
+					float atten = attenuation_term(pos_es_sample, pos_es, float3(1, 0.5f, 0));
+					indirect += atten * calc_brdf(lighting_tex.SampleLevel(bilinear_sampler, tc_sample, 2).xyz, normalize(dir_es_sample), normal)
+						* g_buffer_rt1_tex.SampleLevel(bilinear_sampler, tc_sample, 2).xyz;
+				}
+			}
+
+			sxy = -sxy;
+		}
+	}
+
+	float delta = 1.0f;
+	indirect = (total_weight > 1e-6f) ? indirect / total_weight : 0;
+	return indirect;
+}
+
+void SSGIVS(float4 pos : POSITION,
+					out float2 oTex : TEXCOORD0,
+					out float3 oViewDir : TEXCOORD1,
+					out float4 oPos : SV_Position)
+{
+	oTex = TexCoordFromPos(pos);
+	oPos = pos;
+	oViewDir = mul(pos, inv_proj).xyz;
+}
+
+float4 SSGIPS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Target
+{
+	float radius = 4;
+
+	float depth = depth_tex.Sample(point_sampler, tc).r;
+	float3 normal = GetNormal(g_buffer_tex.Sample(point_sampler, tc));
+
+	view_dir = normalize(view_dir);
+	float3 pos_es = view_dir * (depth / view_dir.z);
+
+	float3 y_dir = cross(normal, float3(0, 0, 1));
+	float3 x_dir = cross(y_dir, normal);
+
+	float3 indirect = CalcAlchemyObscurance(tc, pos_es, x_dir, y_dir, normal, radius, depth);
+	return float4(indirect, 0);
+}
+
+float4 CalcBlur3(float2 tc0, bool x_dir)
+{
+	float3 color = 0;
+
+	float center_d = src_tex.Sample(linear_sampler, tc0).w;
+
+	float total_weight = 0;
+	for (int i = -kernel_radius; i <= kernel_radius; ++ i)
+	{
+		float2 offset = float2(i * src_tex_size.y, 0);
+		float2 tc = tc0 + (x_dir ? offset.xy : offset.yx);
+		float4 src = src_tex.Sample(linear_sampler, tc);
+		float ddiff = src.w - center_d;
+		float weight = BilateralDistribution(i, ddiff);
+		color += src.xyz * weight;
+		total_weight += weight;
+	}
+
+	return float4(color / total_weight, center_d);
+}
+
+float4 BlurX3PS(float2 tc0 : TEXCOORD0) : SV_Target0
+{
+	return CalcBlur3(tc0, true);
+}
+
+float4 BlurY3PS(float2 tc0 : TEXCOORD0) : SV_Target0
+{
+	return float4(CalcBlur3(tc0, false).xyz, 0);
+}
+		]]>
+	</shader>
+
+	<technique name="SSGI">
+		<pass name="p0">
+			<state name="depth_write_mask" value="false"/>
+
+			<state name="vertex_shader" value="SSGIVS()"/>
+			<state name="pixel_shader" value="SSGIPS()"/>
+		</pass>
+	</technique>
+
+	<technique name="SSGIBlurX">
+		<pass name="p0">
+			<state name="depth_enable" value="false"/>
+			<state name="depth_write_mask" value="0"/>
+
+			<state name="vertex_shader" value="PostProcessVS()"/>
+			<state name="pixel_shader" value="BlurX3PS()"/>
+		</pass>
+	</technique>
+
+	<technique name="SSGIBlurY">
+		<pass name="p0">
+			<state name="depth_enable" value="false"/>
+			<state name="depth_write_mask" value="0"/>
+
+			<state name="vertex_shader" value="PostProcessVS()"/>
+			<state name="pixel_shader" value="BlurY3PS()"/>
+		</pass>
+	</technique>
+</effect>
