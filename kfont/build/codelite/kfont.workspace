@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<CodeLite_Workspace Name="kfont" Database="./kfont.tags">
+  <Project Name="kfont" Path="kfont.project" Active="Yes"/>
+  <BuildMatrix>
+    <WorkspaceConfiguration Name="Debug_win_x86" Selected="no">
+      <Project Name="kfont" ConfigName="Debug_win_x86"/>
+    </WorkspaceConfiguration>
+    <WorkspaceConfiguration Name="Release_win_x86" Selected="yes">
+      <Project Name="kfont" ConfigName="Release_win_x86"/>
+    </WorkspaceConfiguration>
+    <WorkspaceConfiguration Name="Debug_win_x64" Selected="no">
+      <Project Name="kfont" ConfigName="Debug_win_x64"/>
+    </WorkspaceConfiguration>
+    <WorkspaceConfiguration Name="Release_win_x64" Selected="no">
+      <Project Name="kfont" ConfigName="Release_win_x64"/>
+    </WorkspaceConfiguration>
+    <WorkspaceConfiguration Name="Debug_linux_x86" Selected="no">
+      <Project Name="kfont" ConfigName="Debug_linux_x86"/>
+    </WorkspaceConfiguration>
+    <WorkspaceConfiguration Name="Release_linux_x86" Selected="yes">
+      <Project Name="kfont" ConfigName="Release_linux_x86"/>
+    </WorkspaceConfiguration>
+    <WorkspaceConfiguration Name="Debug_linux_x64" Selected="no">
+      <Project Name="kfont" ConfigName="Debug_linux_x64"/>
+    </WorkspaceConfiguration>
+    <WorkspaceConfiguration Name="Release_linux_x64" Selected="no">
+      <Project Name="kfont" ConfigName="Release_linux_x64"/>
+    </WorkspaceConfiguration>
+  </BuildMatrix>
+</CodeLite_Workspace>

@@ -12,6 +12,8 @@ glloader/build/codelite/*.tags
 glloader/build/codelite/*.session
 glloader/build/codelite/.build-*
 glloader/build/codelite/*.txt
+glloader/build/codelite/Debug
+glloader/build/codelite/Release
 glloader/build/vc-*/
 glloader/doc/html/
 glloader/lib/
@@ -31,6 +33,8 @@ kfont/build/codelite/*.tags
 kfont/build/codelite/*.session
 kfont/build/codelite/.build-*
 kfont/build/codelite/*.txt
+kfont/build/codelite/Debug
+kfont/build/codelite/Release
 kfont/build/vc-*/
 kfont/lib/
 KlayGE/lib/
@@ -54,6 +58,8 @@ KlayGE/Build/codelite/*.tags
 KlayGE/Build/codelite/*.session
 KlayGE/Build/codelite/.build-*
 KlayGE/Build/codelite/*.txt
+KlayGE/Build/codelite/Debug
+KlayGE/Build/codelite/Release
 KlayGE/Build/vc-*/
 KlayGE/Core/Src/KConfig/*.aps
 KlayGE/Core/Include/KlayGE/*.gch
@@ -75,6 +81,8 @@ KlayGE/Samples/build/codelite/*.tags
 KlayGE/Samples/build/codelite/*.session
 KlayGE/Samples/build/codelite/.build-*
 KlayGE/Samples/build/codelite/*.txt
+KlayGE/Samples/build/codelite/Debug
+KlayGE/Samples/build/codelite/Release
 KlayGE/Samples/build/vc-*/
 KlayGE/Samples/media/*/*.model_bin
 KlayGE/Tools/build/codelite/*.mk
@@ -82,6 +90,8 @@ KlayGE/Tools/build/codelite/*.tags
 KlayGE/Tools/build/codelite/*.session
 KlayGE/Tools/build/codelite/.build-*
 KlayGE/Tools/build/codelite/*.txt
+KlayGE/Tools/build/codelite/Debug
+KlayGE/Tools/build/codelite/Release
 KlayGE/Tools/build/vc-*/
 External/boost/bin.v2/
 External/boost/lib_*/
