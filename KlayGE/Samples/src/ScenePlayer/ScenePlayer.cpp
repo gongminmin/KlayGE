@@ -803,6 +803,7 @@ void ScenePlayerApp::InitObjects()
 	id_illum_combo_ = dialog_->IDFromName("IllumCombo");
 	id_il_scale_static_ = dialog_->IDFromName("ILScaleStatic");
 	id_il_scale_slider_ = dialog_->IDFromName("ILScaleSlider");
+	id_ssgi_ = dialog_->IDFromName("SSGI");
 	id_ssvo_ = dialog_->IDFromName("SSVO");
 	id_hdr_ = dialog_->IDFromName("HDR");
 	id_aa_ = dialog_->IDFromName("AA");
@@ -817,6 +818,9 @@ void ScenePlayerApp::InitObjects()
 	dialog_->Control<UISlider>(id_il_scale_slider_)->SetValue(static_cast<int>(il_scale_ * 10));
 	dialog_->Control<UISlider>(id_il_scale_slider_)->OnValueChangedEvent().connect(boost::bind(&ScenePlayerApp::ILScaleChangedHandler, this, _1));
 	this->ILScaleChangedHandler(*dialog_->Control<UISlider>(id_il_scale_slider_));
+
+	dialog_->Control<UICheckBox>(id_ssgi_)->OnChangedEvent().connect(boost::bind(&ScenePlayerApp::SSGIHandler, this, _1));
+	this->SSGIHandler(*dialog_->Control<UICheckBox>(id_ssgi_));
 
 	dialog_->Control<UICheckBox>(id_ssvo_)->OnChangedEvent().connect(boost::bind(&ScenePlayerApp::SSVOHandler, this, _1));
 	this->SSVOHandler(*dialog_->Control<UICheckBox>(id_ssvo_));
@@ -891,6 +895,11 @@ void ScenePlayerApp::ILScaleChangedHandler(KlayGE::UISlider const & sender)
 	std::wostringstream stream;
 	stream << L"Scale: " << il_scale_ << " x";
 	dialog_->Control<UIStatic>(id_il_scale_static_)->SetText(stream.str());
+}
+
+void ScenePlayerApp::SSGIHandler(UICheckBox const & sender)
+{
+	deferred_rendering_->SSGIEnabled(sender.GetChecked());
 }
 
 void ScenePlayerApp::SSVOHandler(UICheckBox const & sender)

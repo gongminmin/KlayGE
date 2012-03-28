@@ -42,12 +42,17 @@
 	<parameter type="texture2D" name="noise_tex">
 		<annotation type="string" name="SasResourceAddress" value="white_noise_tex.dds"/>
 	</parameter>
+	<parameter type="sampler" name="bilinear_wrap_sampler">
+		<state name="filtering" value="min_mag_linear_mip_point"/>
+		<state name="address_u" value="wrap"/>
+		<state name="address_v" value="wrap"/>
+	</parameter>
 
 	<shader>
 		<![CDATA[
 float CalcAlchemyObscurance(float2 tc, float3 pos_es, float3 x_dir, float3 y_dir, float3 normal, float radius, float depth_center)
 {
-	float rotate = noise_tex.Sample(linear_sampler, tc * 1.5f).x;
+	float rotate = noise_tex.Sample(bilinear_wrap_sampler, tc * 1.5f).x;
 	float sz, cz;
 	sincos(rotate, sz, cz);
 
@@ -102,7 +107,7 @@ void SSVOVS(float4 pos : POSITION,
 
 float4 SSVOPS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Target
 {
-	float radius = 0.5f;
+	float radius = 1;
 	float obscurance = 1;
 
 	float depth = depth_tex.Sample(point_sampler, tc).r;

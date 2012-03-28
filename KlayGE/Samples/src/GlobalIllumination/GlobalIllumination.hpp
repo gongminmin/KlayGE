@@ -24,6 +24,7 @@ private:
 	void InputHandler(KlayGE::InputEngine const & sender, KlayGE::InputAction const & action);
 	void IllumChangedHandler(KlayGE::UIComboBox const & sender);
 	void ILScaleChangedHandler(KlayGE::UISlider const & sender);
+	void SSGIHandler(KlayGE::UICheckBox const & sender);
 	void SSVOHandler(KlayGE::UICheckBox const & sender);
 	void HDRHandler(KlayGE::UICheckBox const & sender);
 	void AAHandler(KlayGE::UICheckBox const & sender);
@@ -49,6 +50,7 @@ private:
 	int id_illum_combo_;
 	int id_il_scale_static_;
 	int id_il_scale_slider_;
+	int id_ssgi_;
 	int id_ssvo_;
 	int id_hdr_;
 	int id_aa_;

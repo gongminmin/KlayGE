@@ -9,7 +9,7 @@
 namespace KlayGE
 {
 	SSVOPostProcess::SSVOPostProcess()
-			: PostProcess(L"SSAO")
+			: PostProcess(L"SSVO")
 	{
 		input_pins_.push_back(std::make_pair("g_buffer_tex", TexturePtr()));
 		input_pins_.push_back(std::make_pair("depth_tex", TexturePtr()));

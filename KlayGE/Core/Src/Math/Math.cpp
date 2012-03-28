@@ -1966,8 +1966,6 @@ namespace KlayGE
 			Quaternion_T<T> rot;
 			decompose(scale, rot, trans, mat);
 
-			BOOST_ASSERT(equal(scale.x(), scale.y()) && equal(scale.y(), scale.z()));
-
 			return transform_aabbox(aabb, scale.x(), rot, trans);
 		}
 
@@ -1997,8 +1995,6 @@ namespace KlayGE
 			Quaternion_T<T> rot;
 			decompose(scale, rot, trans, mat);
 
-			BOOST_ASSERT(equal(scale.x(), scale.y()) && equal(scale.y(), scale.z()));
-
 			return transform_obb(obb, scale.x(), rot, trans);
 		}
 
@@ -2021,8 +2017,6 @@ namespace KlayGE
 			Vector_T<T, 3> scale, trans;
 			Quaternion_T<T> rot;
 			decompose(scale, rot, trans, mat);
-
-			BOOST_ASSERT(equal(scale.x(), scale.y()) && equal(scale.y(), scale.z()));
 
 			return transform_sphere(sphere, scale.x(), rot, trans);
 		}

@@ -30,6 +30,7 @@ namespace KlayGE
 	public:
 		DeferredRenderingLayer();
 
+		void SSGIEnabled(bool ssgi);
 		void SSVOEnabled(bool ssvo);
 		void HDREnabled(bool hdr);
 		void AAEnabled(int aa);
@@ -178,8 +179,13 @@ namespace KlayGE
 
 		TexturePtr ldr_tex_;
 
+		PostProcessPtr ssgi_pp_;
+		PostProcessPtr ssgi_blur_pp_;
+		TexturePtr small_ssgi_tex_;
+		bool ssgi_enabled_;
+
 		PostProcessPtr ssvo_pp_;
-		PostProcessPtr blur_pp_;
+		PostProcessPtr ssvo_blur_pp_;
 		TexturePtr small_ssvo_tex_;
 		bool ssvo_enabled_;
 
