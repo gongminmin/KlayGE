@@ -15,6 +15,7 @@
 #include <KlayGE/App3D.hpp>
 
 #include <cstdarg>
+#include <cstdio>
 
 #ifdef KLAYGE_PLATFORM_ANDROID
 #include <android/log.h>

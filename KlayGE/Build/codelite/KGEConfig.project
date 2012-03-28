@@ -18,22 +18,34 @@
     <File Name="../../klayge_logo.ico"/>
   </VirtualDirectory>
   <Settings Type="Executable">
+    <GlobalSettings>
+      <Compiler Options="" C_Options="">
+        <IncludePath Value="."/>
+      </Compiler>
+      <Linker Options="">
+        <LibraryPath Value="."/>
+      </Linker>
+      <ResourceCompiler Options=""/>
+    </GlobalSettings>
     <Configuration Name="Debug_win_x64" CompilerType="gnu g++" DebuggerType="GNU gdb debugger" Type="Executable" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
-      <Compiler Options="-m64 -Wall -g -O0" Required="yes" PreCompiledHeader="../../Core/Include/KlayGE/KlayGE.hpp">
-		<IncludePath Value="../../../External/boost"/>
+      <Compiler Options="-m64 -Wall -g -O0" C_Options="-m64 -Wall -g -O0" Required="yes" PreCompiledHeader="../../Core/Include/KlayGE/KlayGE.hpp" PCHInCommandLine="no" UseDifferentPCHFlags="no" PCHFlags="">
+        <IncludePath Value="../../../External/boost"/>
         <IncludePath Value="../../Core/Include"/>
         <Preprocessor Value="WIN64"/>
         <Preprocessor Value="_DEBUG"/>
         <Preprocessor Value="_WINDOWS"/>
       </Compiler>
       <Linker Options="-Wl,--enable-auto-import" Required="yes">
-		<LibraryPath Value="../../../External/boost/lib_gcc_x64/lib"/>
+        <LibraryPath Value="../../../External/boost/lib_gcc_x64/lib"/>
         <LibraryPath Value="../../lib/win_x64"/>
         <Library Value="KlayGE_Core_mgw_d"/>
-        <Library Value="boost_system-mgw45-mt-d-1_47"/>
+        <Library Value="boost_system-mgw45-mt-d-1_49"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
-      <General OutputFile="../../bin/win_x64/$(ProjectName)_mgw_d.exe" IntermediateDirectory="Debug/win_x64/$(ProjectName)" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
+      <General OutputFile="../../bin/win_x64/$(ProjectName)_mgw_d.exe" IntermediateDirectory="Debug/win_x64/$(ProjectName)" Command="" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
+      <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;">
+        <![CDATA[]]>
+      </Environment>
       <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
         <PostConnectCommands/>
         <StartupCommands/>
@@ -54,10 +66,15 @@
         <CustomPostBuild/>
         <CustomPreBuild/>
       </AdditionalRules>
+      <Completion>
+        <ClangCmpFlags/>
+        <ClangPP/>
+        <SearchPaths/>
+      </Completion>
     </Configuration>
     <Configuration Name="Debug_win_x86" CompilerType="gnu g++" DebuggerType="GNU gdb debugger" Type="Executable" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
-      <Compiler Options="-m32 -Wall -g -O0" Required="yes" PreCompiledHeader="../../Core/Include/KlayGE/KlayGE.hpp">
-		<IncludePath Value="../../../External/boost"/>
+      <Compiler Options="-m32 -Wall -g -O0" C_Options="-m32 -Wall -g -O0" Required="yes" PreCompiledHeader="../../Core/Include/KlayGE/KlayGE.hpp" PCHInCommandLine="no" UseDifferentPCHFlags="no" PCHFlags="">
+        <IncludePath Value="../../../External/boost"/>
         <IncludePath Value="../../Core/Include"/>
         <Preprocessor Value="WIN32"/>
         <Preprocessor Value="_DEBUG"/>
@@ -67,10 +84,13 @@
         <LibraryPath Value="../../../External/boost/lib_gcc_x86/lib"/>
         <LibraryPath Value="../../lib/win_x86"/>
         <Library Value="KlayGE_Core_mgw_d"/>
-        <Library Value="boost_system-mgw45-mt-d-1_47"/>
+        <Library Value="boost_system-mgw45-mt-d-1_49"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
-      <General OutputFile="../../bin/win_x86/$(ProjectName)_mgw_d.exe" IntermediateDirectory="Debug/win_x86/$(ProjectName)" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
+      <General OutputFile="../../bin/win_x86/$(ProjectName)_mgw_d.exe" IntermediateDirectory="Debug/win_x86/$(ProjectName)" Command="" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
+      <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;">
+        <![CDATA[]]>
+      </Environment>
       <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
         <PostConnectCommands/>
         <StartupCommands/>
@@ -91,10 +111,15 @@
         <CustomPostBuild/>
         <CustomPreBuild/>
       </AdditionalRules>
+      <Completion>
+        <ClangCmpFlags/>
+        <ClangPP/>
+        <SearchPaths/>
+      </Completion>
     </Configuration>
     <Configuration Name="Release_win_x64" CompilerType="gnu g++" DebuggerType="GNU gdb debugger" Type="Executable" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
-      <Compiler Options="-m64 -Wall -O2" Required="yes" PreCompiledHeader="../../Core/Include/KlayGE/KlayGE.hpp">
-		<IncludePath Value="../../../External/boost"/>
+      <Compiler Options="-m64 -Wall -O2" C_Options="-m64 -Wall -O2" Required="yes" PreCompiledHeader="../../Core/Include/KlayGE/KlayGE.hpp" PCHInCommandLine="no" UseDifferentPCHFlags="no" PCHFlags="">
+        <IncludePath Value="../../../External/boost"/>
         <IncludePath Value="../../Core/Include"/>
         <Preprocessor Value="WIN64"/>
         <Preprocessor Value="NDEBUG"/>
@@ -104,10 +129,13 @@
         <LibraryPath Value="../../../External/boost/lib_gcc_x64/lib"/>
         <LibraryPath Value="../../lib/win_x64"/>
         <Library Value="KlayGE_Core_mgw"/>
-        <Library Value="boost_system-mgw45-mt-1_47"/>
+        <Library Value="boost_system-mgw45-mt-1_49"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
-      <General OutputFile="../../bin/win_x64/$(ProjectName)_mgw.exe" IntermediateDirectory="Release/win_x64/$(ProjectName)" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
+      <General OutputFile="../../bin/win_x64/$(ProjectName)_mgw.exe" IntermediateDirectory="Release/win_x64/$(ProjectName)" Command="" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
+      <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;">
+        <![CDATA[]]>
+      </Environment>
       <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
         <PostConnectCommands/>
         <StartupCommands/>
@@ -128,10 +156,15 @@
         <CustomPostBuild/>
         <CustomPreBuild/>
       </AdditionalRules>
+      <Completion>
+        <ClangCmpFlags/>
+        <ClangPP/>
+        <SearchPaths/>
+      </Completion>
     </Configuration>
     <Configuration Name="Release_win_x86" CompilerType="gnu g++" DebuggerType="GNU gdb debugger" Type="Executable" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
-      <Compiler Options="-m32 -Wall -O2" Required="yes" PreCompiledHeader="../../Core/Include/KlayGE/KlayGE.hpp">
-		<IncludePath Value="../../../External/boost"/>
+      <Compiler Options="-m32 -Wall -O2" C_Options="-m32 -Wall -O2" Required="yes" PreCompiledHeader="../../Core/Include/KlayGE/KlayGE.hpp" PCHInCommandLine="no" UseDifferentPCHFlags="no" PCHFlags="">
+        <IncludePath Value="../../../External/boost"/>
         <IncludePath Value="../../Core/Include"/>
         <Preprocessor Value="WIN32"/>
         <Preprocessor Value="NDEBUG"/>
@@ -141,10 +174,13 @@
         <LibraryPath Value="../../../External/boost/lib_gcc_x86/lib"/>
         <LibraryPath Value="../../lib/win_x86"/>
         <Library Value="KlayGE_Core_mgw"/>
-        <Library Value="boost_system-mgw45-mt-1_47"/>
+        <Library Value="boost_system-mgw45-mt-1_49"/>
       </Linker>
       <ResourceCompiler Options="" Required="yes"/>
-      <General OutputFile="../../bin/win_x86/$(ProjectName)_mgw.exe" IntermediateDirectory="Release/win_x86/$(ProjectName)" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
+      <General OutputFile="../../bin/win_x86/$(ProjectName)_mgw.exe" IntermediateDirectory="Release/win_x86/$(ProjectName)" Command="" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
+      <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;">
+        <![CDATA[]]>
+      </Environment>
       <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
         <PostConnectCommands/>
         <StartupCommands/>
@@ -165,15 +201,11 @@
         <CustomPostBuild/>
         <CustomPreBuild/>
       </AdditionalRules>
+      <Completion>
+        <ClangCmpFlags/>
+        <ClangPP/>
+        <SearchPaths/>
+      </Completion>
     </Configuration>
-    <GlobalSettings>
-      <Compiler Options="">
-        <IncludePath Value="."/>
-      </Compiler>
-      <Linker Options="">
-        <LibraryPath Value="."/>
-      </Linker>
-      <ResourceCompiler Options=""/>
-    </GlobalSettings>
   </Settings>
 </CodeLite_Project>

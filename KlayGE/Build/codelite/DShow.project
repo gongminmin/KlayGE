@@ -34,7 +34,7 @@
 		<LibraryPath Value="../../../External/boost/lib_gcc_x64/lib"/>
 		<LibraryPath Value="../../lib/win_x64"/>
         <Library Value="KlayGE_Core_mgw_d"/>
-        <Library Value="boost_system-mgw45-mt-d-1_47"/>
+        <Library Value="boost_system-mgw45-mt-d-1_49"/>
         <Library Value="strmiids"/>
         <Library Value="ole32"/>
         <Library Value="uuid"/>
@@ -80,7 +80,7 @@
 		<LibraryPath Value="../../../External/boost/lib_gcc_x86/lib"/>
         <LibraryPath Value="../../lib/win_x86"/>
         <Library Value="KlayGE_Core_mgw_d"/>
-        <Library Value="boost_system-mgw45-mt-d-1_47"/>
+        <Library Value="boost_system-mgw45-mt-d-1_49"/>
         <Library Value="strmiids"/>
         <Library Value="ole32"/>
         <Library Value="uuid"/>
@@ -126,7 +126,7 @@
 		<LibraryPath Value="../../../External/boost/lib_gcc_x64/lib"/>
         <LibraryPath Value="../../lib/win_x64"/>
         <Library Value="KlayGE_Core_mgw"/>
-        <Library Value="boost_system-mgw45-mt-1_47"/>
+        <Library Value="boost_system-mgw45-mt-1_49"/>
         <Library Value="strmiids"/>
         <Library Value="ole32"/>
         <Library Value="uuid"/>
@@ -172,7 +172,7 @@
 		<LibraryPath Value="../../../External/boost/lib_gcc_x86/lib"/>
         <LibraryPath Value="../../lib/win_x86"/>
         <Library Value="KlayGE_Core_mgw"/>
-        <Library Value="boost_system-mgw45-mt-1_47"/>
+        <Library Value="boost_system-mgw45-mt-1_49"/>
         <Library Value="strmiids"/>
         <Library Value="ole32"/>
         <Library Value="uuid"/>

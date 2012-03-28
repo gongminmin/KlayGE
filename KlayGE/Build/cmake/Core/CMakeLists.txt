@@ -42,11 +42,7 @@ SOURCE_GROUP("Kernel\\Header Files" FILES ${KERNEL_HEADER_FILES})
 
 
 SET(MATH_SOURCE_FILES
-	${KLAYGE_PROJECT_DIR}/Core/Src/Math/AABBox.cpp
-	${KLAYGE_PROJECT_DIR}/Core/Src/Math/Frustum.cpp
 	${KLAYGE_PROJECT_DIR}/Core/Src/Math/Math.cpp
-	${KLAYGE_PROJECT_DIR}/Core/Src/Math/OBBox.cpp
-	${KLAYGE_PROJECT_DIR}/Core/Src/Math/Sphere.cpp
 )
 
 SET(MATH_HEADER_FILES

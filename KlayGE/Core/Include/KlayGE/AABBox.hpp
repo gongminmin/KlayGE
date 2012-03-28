@@ -23,6 +23,7 @@
 
 #include <KlayGE/PreDeclare.hpp>
 
+#include <boost/assert.hpp>
 #include <boost/operators.hpp>
 
 #include <KlayGE/Bound.hpp>
@@ -40,55 +41,210 @@ namespace KlayGE
 				public Bound_T<T>
 	{
 	public:
-		AABBox_T();
-		AABBox_T(Vector_T<T, 3> const & vMin, Vector_T<T, 3> const & vMax);
-		AABBox_T(AABBox_T<T> const & rhs);
+		AABBox_T()
+		{
+		}
+		AABBox_T(Vector_T<T, 3> const & vMin, Vector_T<T, 3> const & vMax)
+				: min_(vMin), max_(vMax)
+		{
+			BOOST_ASSERT(vMin.x() <= vMax.x());
+			BOOST_ASSERT(vMin.y() <= vMax.y());
+			BOOST_ASSERT(vMin.z() <= vMax.z());
+		}
+		AABBox_T(AABBox_T<T> const & rhs)
+				: Bound_T<T>(rhs),
+				min_(rhs.min_), max_(rhs.max_)
+		{
+		}
 
 		// 赋值操作符
-		AABBox_T<T>& operator+=(Vector_T<T, 3> const & rhs);
-		AABBox_T<T>& operator-=(Vector_T<T, 3> const & rhs);
-		AABBox_T<T>& operator*=(T const & rhs);
-		AABBox_T<T>& operator/=(T const & rhs);
-		AABBox_T<T>& operator&=(AABBox_T<T> const & rhs);
-		AABBox_T<T>& operator|=(AABBox_T<T> const & rhs);
+		AABBox_T<T>& operator+=(Vector_T<T, 3> const & rhs)
+		{
+			min_ += rhs;
+			max_ += rhs;
+			return *this;
+		}
+		AABBox_T<T>& operator-=(Vector_T<T, 3> const & rhs)
+		{
+			min_ -= rhs;
+			max_ -= rhs;
+			return *this;
+		}
+		AABBox_T<T>& operator*=(T const & rhs)
+		{
+			this->Min() *= rhs;
+			this->Max() *= rhs;
+			return *this;
+		}
+		AABBox_T<T>& operator/=(T const & rhs)
+		{
+			return this->operator*=(1.0f / rhs);
+		}
+		AABBox_T<T>& operator&=(AABBox_T<T> const & rhs)
+		{
+			min_ = MathLib::maximize(this->Min(), rhs.Min());
+			max_ = MathLib::minimize(this->Max(), rhs.Max());
+			return *this;
+		}
+		AABBox_T<T>& operator|=(AABBox_T<T> const & rhs)
+		{
+			min_ = MathLib::minimize(this->Min(), rhs.Min());
+			max_ = MathLib::maximize(this->Max(), rhs.Max());
+			return *this;
+		}
 
-		AABBox_T<T>& operator=(AABBox_T<T> const & rhs);
+		AABBox_T<T>& operator=(AABBox_T<T> const & rhs)
+		{
+			if (this != &rhs)
+			{
+				this->Min() = rhs.Min();
+				this->Max() = rhs.Max();
+			}
+			return *this;
+		}
 
 		// 一元操作符
-		AABBox_T<T> const operator+() const;
-		AABBox_T<T> const operator-() const;
+		AABBox_T<T> const operator+() const
+		{
+			return *this;
+		}
+		AABBox_T<T> const operator-() const
+		{
+			return AABBox_T<T>(-this->Max(), -this->Min());
+		}
 
-		Vector_T<T, 3> operator[](size_t i) const;
+		Vector_T<T, 3> operator[](size_t i) const
+		{
+			BOOST_ASSERT(i < 8);
+
+			return Vector_T<T, 3>((i & 1UL) ? this->Max().x() : this->Min().x(),
+				(i & 2UL) ? this->Max().y() : this->Min().y(),
+				(i & 4UL) ? this->Max().z() : this->Min().z());
+		}
 
 		// 属性
-		T Width() const;
-		T Height() const;
-		T Depth() const;
-		bool IsEmpty() const;
+		T Width() const
+		{
+			return this->Max().x() - this->Min().x();
+		}
+		T Height() const
+		{
+			return this->Max().y() - this->Min().y();
+		}
+		T Depth() const
+		{
+			return this->Max().z() - this->Min().z();
+		}
+		bool IsEmpty() const
+		{
+			return this->Min() == this->Max();
+		}
 
-		Vector_T<T, 3> const LeftBottomNear() const;
-		Vector_T<T, 3> const LeftTopNear() const;
-		Vector_T<T, 3> const RightBottomNear() const;
-		Vector_T<T, 3> const RightTopNear() const;
-		Vector_T<T, 3> const LeftBottomFar() const;
-		Vector_T<T, 3> const LeftTopFar() const;
-		Vector_T<T, 3> const RightBottomFar() const;
-		Vector_T<T, 3> const RightTopFar() const;
+		Vector_T<T, 3> const LeftBottomNear() const
+		{
+			return this->Min();
+		}
+		Vector_T<T, 3> const LeftTopNear() const
+		{
+			return Vector_T<T, 3>(this->Min().x(), this->Max().y(), this->Min().z());
+		}
+		Vector_T<T, 3> const RightBottomNear() const
+		{
+			return Vector_T<T, 3>(this->Max().x(), this->Min().y(), this->Min().z());
+		}
+		Vector_T<T, 3> const RightTopNear() const
+		{
+			return Vector_T<T, 3>(this->Max().x(), this->Max().y(), this->Min().z());
+		}
+		Vector_T<T, 3> const LeftBottomFar() const
+		{
+			return Vector_T<T, 3>(this->Min().x(), this->Min().y(), this->Max().z());
+		}
+		Vector_T<T, 3> const LeftTopFar() const
+		{
+			return Vector_T<T, 3>(this->Min().x(), this->Max().y(), this->Max().z());
+		}
+		Vector_T<T, 3> const RightBottomFar() const
+		{
+			return Vector_T<T, 3>(this->Max().x(), this->Min().y(), this->Max().z());
+		}
+		Vector_T<T, 3> const RightTopFar() const
+		{
+			return this->Max();
+		}
 
-		Vector_T<T, 3>& Min();
-		Vector_T<T, 3> const & Min() const;
-		Vector_T<T, 3>& Max();
-		Vector_T<T, 3> const & Max() const;
-		Vector_T<T, 3> Center() const;
-		Vector_T<T, 3> HalfSize() const;
+		Vector_T<T, 3>& Min()
+		{
+			return min_;
+		}
+		Vector_T<T, 3> const & Min() const
+		{
+			return min_;
+		}
+		Vector_T<T, 3>& Max()
+		{
+			return max_;
+		}
+		Vector_T<T, 3> const & Max() const
+		{
+			return max_;
+		}
+		Vector_T<T, 3> Center() const
+		{
+			return (min_ + max_) / 2.0f;
+		}
+		Vector_T<T, 3> HalfSize() const
+		{
+			return (max_ - min_) / 2.0f;
+		}
 
-		bool VecInBound(Vector_T<T, 3> const & v) const;
-		T MaxRadiusSq() const;
+		bool VecInBound(Vector_T<T, 3> const & v) const
+		{
+			return MathLib::vec_in_box(*this, v);
+		}
+		T MaxRadiusSq() const
+		{
+			return std::max<T>(MathLib::length_sq(this->Max()), MathLib::length_sq(this->Min()));
+		}
 
-		bool Intersect(AABBox_T<T> const & aabb) const;
-		bool Intersect(OBBox_T<T> const & obb) const;
-		bool Intersect(Sphere_T<T> const & sphere) const;
-		bool Intersect(Frustum_T<T> const & frustum) const;
+		bool Intersect(AABBox_T<T> const & aabb) const
+		{
+			float3 const t = aabb.Center() - this->Center();
+			float3 const e = this->HalfSize() + aabb.HalfSize();
+			return (MathLib::abs(t.x()) <= e.x()) && (MathLib::abs(t.y()) <= e.y()) && (MathLib::abs(t.z()) <= e.z());
+		}
+		bool Intersect(OBBox_T<T> const & obb) const
+		{
+			return obb.Intersect(OBBox_T<T>(*this));
+		}
+		bool Intersect(Sphere_T<T> const & sphere) const
+		{
+			Vector_T<T, 3> half_size = this->HalfSize();
+			Vector_T<T, 3> d = sphere.Center() - this->Center();
+			Vector_T<T, 3> closest_point_on_obb = this->Center();
+			for (int i = 0; i < 3; ++ i)
+			{
+				Vector_T<T, 3> axis(0, 0, 0);
+				axis[i] = 1;
+				T dist = MathLib::dot(d, axis);
+				if (dist > half_size[i])
+				{
+					dist = half_size[i];
+				}
+				if (dist < -half_size[i])
+				{
+					dist = -half_size[i];
+				}
+				closest_point_on_obb += dist * axis;
+			}
+
+			Vector_T<T, 3> v = closest_point_on_obb - sphere.Center();
+			return MathLib::length_sq(v) <= sphere.Radius() * sphere.Radius();
+		}
+		bool Intersect(Frustum_T<T> const & frustum) const
+		{
+			return frustum.Intersect(*this) != BO_No;
+		}
 
 		friend bool
 		operator==(AABBox_T<T> const & lhs, AABBox_T<T> const & rhs)

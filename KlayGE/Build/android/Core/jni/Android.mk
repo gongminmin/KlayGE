@@ -41,11 +41,7 @@ LOCAL_SRC_FILES := \
 		Kernel/Timer.cpp \
 		Kernel/Util.cpp \
 		Kernel/XMLDom.cpp \
-		Math/AABBox.cpp \
-		Math/Frustum.cpp \
 		Math/Math.cpp \
-		Math/OBBox.cpp \
-		Math/Sphere.cpp \
 		Net/Lobby.cpp \
 		Net/Player.cpp \
 		Net/Socket.cpp \
