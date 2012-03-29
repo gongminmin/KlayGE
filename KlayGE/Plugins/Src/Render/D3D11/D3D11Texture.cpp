@@ -22,6 +22,7 @@
 #include <cstring>
 #include <boost/assert.hpp>
 
+#include <KlayGE/D3D11/D3D11MinGWDefs.hpp>
 #ifdef KLAYGE_COMPILER_MSVC
 #pragma warning(push)
 #pragma warning(disable: 4005)

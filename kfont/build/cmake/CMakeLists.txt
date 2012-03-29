@@ -87,7 +87,7 @@ ADD_LIBRARY(${LIB_NAME} SHARED
 	${KFONT_SOURCE_FILES} ${KFONT_HEADER_FILES}
 )
 
-SET(LIB_OUTPUT_NAME ${LIB_NAME}_${KFONT_ARCH_NAME})
+SET(LIB_OUTPUT_NAME ${LIB_NAME}_${KFONT_COMPILER_NAME}_${KFONT_ARCH_NAME})
 
 IF(MSVC)
 	# hack to get around the "Debug" and "Release" directories cmake tries to add on Windows

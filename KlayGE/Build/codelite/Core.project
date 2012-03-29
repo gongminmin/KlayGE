@@ -36,6 +36,7 @@
       <File Name="../../Core/Src/Render/RenderView.cpp"/>
       <File Name="../../Core/Src/Render/SATPostProcess.cpp"/>
       <File Name="../../Core/Src/Render/ShaderObject.cpp"/>
+      <File Name="../../Core/Src/Render/SSGIPostProcess.cpp"/>
       <File Name="../../Core/Src/Render/SSVOPostProcess.cpp"/>
       <File Name="../../Core/Src/Render/TAAPostProcess.cpp"/>
       <File Name="../../Core/Src/Render/Texture.cpp"/>
@@ -73,6 +74,7 @@
       <File Name="../../Core/Include/KlayGE/RenderView.hpp"/>
       <File Name="../../Core/Include/KlayGE/SATPostProcess.hpp"/>
       <File Name="../../Core/Include/KlayGE/ShaderObject.hpp"/>
+      <File Name="../../Core/Include/KlayGE/SSGIPostProcess.hpp"/>
       <File Name="../../Core/Include/KlayGE/SSVOPostProcess.hpp"/>
       <File Name="../../Core/Include/KlayGE/TAAPostProcess.hpp"/>
       <File Name="../../Core/Include/KlayGE/Texture.hpp"/>
@@ -108,6 +110,7 @@
       <File Name="../../media/RenderFX/RenderableHelper.fxml"/>
       <File Name="../../media/RenderFX/RSM2VPLs.fxml"/>
       <File Name="../../media/RenderFX/SetSubsplatStencil.fxml"/>
+      <File Name="../../media/RenderFX/SSGI.fxml"/>
       <File Name="../../media/RenderFX/SSVO.fxml"/>
       <File Name="../../media/RenderFX/Stereoscopic.fxml"/>
       <File Name="../../media/RenderFX/SumLum.fxml"/>
@@ -341,7 +344,7 @@
         <Preprocessor Value="KLAYGE_BUILD_DLL"/>
         <Preprocessor Value="KLAYGE_CORE_SOURCE"/>
       </Compiler>
-      <Linker Options="--enable-auto-import" Required="yes">
+      <Linker Options="" Required="yes">
         <LibraryPath Value="../../../External/boost/lib_gcc_x64/lib"/>
         <LibraryPath Value="../../../External/Python/libs/amd64"/>
         <LibraryPath Value="../../lib/linux_x64"/>
@@ -352,7 +355,7 @@
         <Library Value="boost_thread"/>
         <Library Value="python2.6"/>
         <Library Value="X11"/>
-        <Library Value="kfont_x64_d"/>
+        <Library Value="kfont_mgw_x64_d"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
       <General OutputFile="../../lib/linux_x64/libKlayGE_Core_gcc_d.so" IntermediateDirectory="Debug/linux_x64/$(ProjectName)" Command="" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
@@ -399,7 +402,7 @@
         <Preprocessor Value="KLAYGE_BUILD_DLL"/>
         <Preprocessor Value="KLAYGE_CORE_SOURCE"/>
       </Compiler>
-      <Linker Options="--enable-auto-import" Required="yes">
+      <Linker Options="" Required="yes">
         <LibraryPath Value="../../../External/boost/lib_gcc_x86/lib"/>
         <LibraryPath Value="../../../External/Python/libs"/>
         <LibraryPath Value="../../lib/linux_x86"/>
@@ -410,7 +413,7 @@
         <Library Value="boost_thread"/>
         <Library Value="python2.6"/>
         <Library Value="X11"/>
-        <Library Value="kfont_x86_d"/>
+        <Library Value="kfont_mgw_x86_d"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
       <General OutputFile="../../lib/linux_x86/libKlayGE_Core_gcc_d.so" IntermediateDirectory="Debug/linux_x86/$(ProjectName)" Command="" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
@@ -459,20 +462,20 @@
         <Preprocessor Value="KLAYGE_BUILD_DLL"/>
         <Preprocessor Value="KLAYGE_CORE_SOURCE"/>
       </Compiler>
-      <Linker Options="-Wl,--enable-auto-import" Required="yes">
+      <Linker Options="" Required="yes">
         <LibraryPath Value="../../../External/boost/lib_gcc_x64/lib"/>
         <LibraryPath Value="../../../External/Python/libs/amd64"/>
         <LibraryPath Value="../../lib/win_x64"/>
         <LibraryPath Value="../../../kfont/lib/win_x64"/>
-        <Library Value="boost_filesystem-mgw45-mt-d-1_49"/>
-        <Library Value="boost_system-mgw45-mt-d-1_49"/>
-        <Library Value="boost_signals-mgw45-mt-d-1_49"/>
-        <Library Value="boost_thread-mgw45-mt-d-1_49"/>
+        <Library Value="boost_filesystem-mgw46-mt-d-1_49"/>
+        <Library Value="boost_system-mgw46-mt-d-1_49"/>
+        <Library Value="boost_signals-mgw46-mt-d-1_49"/>
+        <Library Value="boost_thread-mgw46-mt-d-1_49"/>
         <Library Value="gdi32"/>
         <Library Value="oleaut32"/>
         <Library Value="wsock32"/>
         <Library Value="python32_d"/>
-        <Library Value="kfont_x64_d"/>
+        <Library Value="kfont_mgw_x64_d"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
       <General OutputFile="../../lib/win_x64/libKlayGE_Core_mgw_d.dll" IntermediateDirectory="Debug/win_x64/$(ProjectName)" Command="" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
@@ -521,20 +524,20 @@
         <Preprocessor Value="KLAYGE_BUILD_DLL"/>
         <Preprocessor Value="KLAYGE_CORE_SOURCE"/>
       </Compiler>
-      <Linker Options="-Wl,--enable-auto-import" Required="yes">
+      <Linker Options="" Required="yes">
         <LibraryPath Value="../../../External/boost/lib_gcc_x86/lib"/>
         <LibraryPath Value="../../../External/Python/libs"/>
         <LibraryPath Value="../../lib/win_x86"/>
         <LibraryPath Value="../../../kfont/lib/win_x86"/>
-        <Library Value="boost_filesystem-mgw45-mt-d-1_49"/>
-        <Library Value="boost_system-mgw45-mt-d-1_49"/>
-        <Library Value="boost_signals-mgw45-mt-d-1_49"/>
-        <Library Value="boost_thread-mgw45-mt-d-1_49"/>
+        <Library Value="boost_filesystem-mgw46-mt-d-1_49"/>
+        <Library Value="boost_system-mgw46-mt-d-1_49"/>
+        <Library Value="boost_signals-mgw46-mt-d-1_49"/>
+        <Library Value="boost_thread-mgw46-mt-d-1_49"/>
         <Library Value="gdi32"/>
         <Library Value="oleaut32"/>
         <Library Value="wsock32"/>
         <Library Value="python32_d"/>
-        <Library Value="kfont_x86_d"/>
+        <Library Value="kfont_mgw_x86_d"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
       <General OutputFile="../../lib/win_x86/libKlayGE_Core_mgw_d.dll" IntermediateDirectory="Debug/win_x86/$(ProjectName)" Command="" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
@@ -581,7 +584,7 @@
         <Preprocessor Value="KLAYGE_BUILD_DLL"/>
         <Preprocessor Value="KLAYGE_CORE_SOURCE"/>
       </Compiler>
-      <Linker Options="-s --enable-auto-import" Required="yes">
+      <Linker Options="-s" Required="yes">
         <LibraryPath Value="../../../External/boost/lib_gcc_x64/lib"/>
         <LibraryPath Value="../../../External/Python/libs/amd64"/>
         <LibraryPath Value="../../lib/linux_x64"/>
@@ -592,7 +595,7 @@
         <Library Value="boost_thread"/>
         <Library Value="python2.6"/>
         <Library Value="X11"/>
-        <Library Value="kfont_x64"/>
+        <Library Value="kfont_mgw_x64"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
       <General OutputFile="../../lib/linux_x64/libKlayGE_Core_gcc.so" IntermediateDirectory="Release/linux_x64/$(ProjectName)" Command="" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
@@ -639,7 +642,7 @@
         <Preprocessor Value="KLAYGE_BUILD_DLL"/>
         <Preprocessor Value="KLAYGE_CORE_SOURCE"/>
       </Compiler>
-      <Linker Options="-s --enable-auto-import" Required="yes">
+      <Linker Options="-s" Required="yes">
         <LibraryPath Value="../../../External/boost/lib_gcc_x86/lib"/>
         <LibraryPath Value="../../../External/Python/libs"/>
         <LibraryPath Value="../../lib/linux_x86"/>
@@ -650,7 +653,7 @@
         <Library Value="boost_thread"/>
         <Library Value="python2.6"/>
         <Library Value="X11"/>
-        <Library Value="kfont_x86"/>
+        <Library Value="kfont_mgw_x86"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
       <General OutputFile="../../lib/linux_x86/libKlayGE_Core_gcc.so" IntermediateDirectory="Release/linux_x86/$(ProjectName)" Command="" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
@@ -699,20 +702,20 @@
         <Preprocessor Value="KLAYGE_BUILD_DLL"/>
         <Preprocessor Value="KLAYGE_CORE_SOURCE"/>
       </Compiler>
-      <Linker Options="-s -Wl,--enable-auto-import" Required="yes">
+      <Linker Options="-s" Required="yes">
         <LibraryPath Value="../../../External/boost/lib_gcc_x64/lib"/>
         <LibraryPath Value="../../../External/Python/libs/amd64"/>
         <LibraryPath Value="../../lib/win_x64"/>
         <LibraryPath Value="../../../kfont/lib/win_x64"/>
-        <Library Value="boost_filesystem-mgw45-mt-1_49"/>
-        <Library Value="boost_system-mgw45-mt-1_49"/>
-        <Library Value="boost_signals-mgw45-mt-1_49"/>
-        <Library Value="boost_thread-mgw45-mt-1_49"/>
+        <Library Value="boost_filesystem-mgw46-mt-1_49"/>
+        <Library Value="boost_system-mgw46-mt-1_49"/>
+        <Library Value="boost_signals-mgw46-mt-1_49"/>
+        <Library Value="boost_thread-mgw46-mt-1_49"/>
         <Library Value="gdi32"/>
         <Library Value="oleaut32"/>
         <Library Value="wsock32"/>
         <Library Value="python32"/>
-        <Library Value="kfont_x64"/>
+        <Library Value="kfont_mgw_x64"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
       <General OutputFile="../../lib/win_x64/libKlayGE_Core_mgw.dll" IntermediateDirectory="Release/win_x64/$(ProjectName)" Command="" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
@@ -761,20 +764,20 @@
         <Preprocessor Value="KLAYGE_BUILD_DLL"/>
         <Preprocessor Value="KLAYGE_CORE_SOURCE"/>
       </Compiler>
-      <Linker Options="-s -Wl,--enable-auto-import" Required="yes">
+      <Linker Options="-s" Required="yes">
         <LibraryPath Value="../../../External/boost/lib_gcc_x86/lib"/>
         <LibraryPath Value="../../../External/Python/libs"/>
         <LibraryPath Value="../../lib/win_x86"/>
         <LibraryPath Value="../../../kfont/lib/win_x86"/>
-        <Library Value="boost_filesystem-mgw45-mt-1_49"/>
-        <Library Value="boost_system-mgw45-mt-1_49"/>
-        <Library Value="boost_signals-mgw45-mt-1_49"/>
-        <Library Value="boost_thread-mgw45-mt-1_49"/>
+        <Library Value="boost_filesystem-mgw46-mt-1_49"/>
+        <Library Value="boost_system-mgw46-mt-1_49"/>
+        <Library Value="boost_signals-mgw46-mt-1_49"/>
+        <Library Value="boost_thread-mgw46-mt-1_49"/>
         <Library Value="gdi32"/>
         <Library Value="oleaut32"/>
         <Library Value="wsock32"/>
         <Library Value="python32"/>
-        <Library Value="kfont_x86"/>
+        <Library Value="kfont_mgw_x86"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
       <General OutputFile="../../lib/win_x86/libKlayGE_Core_mgw.dll" IntermediateDirectory="Release/win_x86/$(ProjectName)" Command="" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>

@@ -57,15 +57,15 @@
 	#ifndef KFONT_SOURCE
 		#if defined(_M_X64)
 			#if defined(KFONT_DEBUG)
-				#pragma comment(lib, "kfont_x64_d.lib")
+				#pragma comment(lib, "kfont_vc_x64_d.lib")
 			#else
-				#pragma comment(lib, "kfont_x64.lib")
+				#pragma comment(lib, "kfont_vc_x64.lib")
 			#endif
 		#elif(_M_IX86)
 			#if defined(KFONT_DEBUG)
-				#pragma comment(lib, "kfont_x86_d.lib")
+				#pragma comment(lib, "kfont_vc_x86_d.lib")
 			#else
-				#pragma comment(lib, "kfont_x86.lib")
+				#pragma comment(lib, "kfont_vc_x86.lib")
 			#endif
 		#endif
 	#endif

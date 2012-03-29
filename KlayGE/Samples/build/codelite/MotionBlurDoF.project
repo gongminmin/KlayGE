@@ -35,7 +35,7 @@
         <Preprocessor Value="_DEBUG"/>
         <Preprocessor Value="_CONSOLE"/>
       </Compiler>
-      <Linker Options="--enable-auto-import" Required="yes">
+      <Linker Options="" Required="yes">
         <LibraryPath Value="../../../../External/boost/lib_gcc_x64/lib"/>
 		<LibraryPath Value="../../../../External/Python/libs/amd64"/>
         <LibraryPath Value="../../../lib/linux_x64"/>
@@ -74,7 +74,7 @@
         <Preprocessor Value="_DEBUG"/>
         <Preprocessor Value="_CONSOLE"/>
       </Compiler>
-      <Linker Options="--enable-auto-import" Required="yes">
+      <Linker Options="" Required="yes">
         <LibraryPath Value="../../../../External/boost/lib_gcc_x86/lib"/>
 		<LibraryPath Value="../../../../External/Python/libs"/>
         <LibraryPath Value="../../../lib/linux_x86"/>
@@ -114,12 +114,12 @@
         <Preprocessor Value="_DEBUG"/>
         <Preprocessor Value="_CONSOLE"/>
       </Compiler>
-      <Linker Options="-Wl,--enable-auto-import" Required="yes">
+      <Linker Options="" Required="yes">
         <LibraryPath Value="../../../../External/boost/lib_gcc_x64/lib"/>
 		<LibraryPath Value="../../../../External/Python/libs/amd64"/>
         <LibraryPath Value="../../../lib/win_x64"/>
         <Library Value="KlayGE_Core_mgw_d"/>
-        <Library Value="boost_system-mgw45-mt-d-1_47"/>
+        <Library Value="boost_system-mgw46-mt-d-1_49"/>
         <Library Value="python32_d"/>
       </Linker>
       <ResourceCompiler Options="" Required="yes"/>
@@ -154,12 +154,12 @@
         <Preprocessor Value="_DEBUG"/>
         <Preprocessor Value="_CONSOLE"/>
       </Compiler>
-      <Linker Options="-Wl,--enable-auto-import" Required="yes">
+      <Linker Options="" Required="yes">
         <LibraryPath Value="../../../../External/boost/lib_gcc_x86/lib"/>
 		<LibraryPath Value="../../../../External/Python/libs"/>
         <LibraryPath Value="../../../lib/win_x86"/>
         <Library Value="KlayGE_Core_mgw_d"/>
-        <Library Value="boost_system-mgw45-mt-d-1_47"/>
+        <Library Value="boost_system-mgw46-mt-d-1_49"/>
         <Library Value="python32_d"/>
       </Linker>
       <ResourceCompiler Options="" Required="yes"/>
@@ -193,7 +193,7 @@
         <Preprocessor Value="NDEBUG"/>
         <Preprocessor Value="_CONSOLE"/>
       </Compiler>
-      <Linker Options="-s --enable-auto-import" Required="yes">
+      <Linker Options="-s" Required="yes">
         <LibraryPath Value="../../../../External/boost/lib_gcc_x64/lib"/>
 		<LibraryPath Value="../../../../External/Python/libs/amd64"/>
         <LibraryPath Value="../../../lib/linux_x64"/>
@@ -232,7 +232,7 @@
         <Preprocessor Value="NDEBUG"/>
         <Preprocessor Value="_CONSOLE"/>
       </Compiler>
-      <Linker Options="-s --enable-auto-import" Required="yes">
+      <Linker Options="-s" Required="yes">
         <LibraryPath Value="../../../../External/boost/lib_gcc_x86/lib"/>
 		<LibraryPath Value="../../../../External/Python/libs"/>
         <LibraryPath Value="../../../lib/linux_x86"/>
@@ -272,12 +272,12 @@
         <Preprocessor Value="NDEBUG"/>
         <Preprocessor Value="_CONSOLE"/>
       </Compiler>
-      <Linker Options="-s -Wl,--enable-auto-import" Required="yes">
+      <Linker Options="-s" Required="yes">
         <LibraryPath Value="../../../../External/boost/lib_gcc_x64/lib"/>
 		<LibraryPath Value="../../../../External/Python/libs/amd64"/>
         <LibraryPath Value="../../../lib/win_x64"/>
         <Library Value="KlayGE_Core_mgw_x64"/>
-        <Library Value="boost_system-mgw45-mt-1_47"/>
+        <Library Value="boost_system-mgw46-mt-1_49"/>
         <Library Value="python32"/>
       </Linker>
       <ResourceCompiler Options="" Required="yes"/>
@@ -312,12 +312,12 @@
         <Preprocessor Value="NDEBUG"/>
         <Preprocessor Value="_CONSOLE"/>
       </Compiler>
-      <Linker Options="-s -Wl,--enable-auto-import" Required="yes">
+      <Linker Options="-s" Required="yes">
         <LibraryPath Value="../../../../External/boost/lib_gcc_x86/lib"/>
 		<LibraryPath Value="../../../../External/Python/libs"/>
         <LibraryPath Value="../../../lib/win_x86"/>
         <Library Value="KlayGE_Core_mgw"/>
-        <Library Value="boost_system-mgw45-mt-1_47"/>
+        <Library Value="boost_system-mgw46-mt-1_49"/>
         <Library Value="python32"/>
       </Linker>
       <ResourceCompiler Options="" Required="yes"/>

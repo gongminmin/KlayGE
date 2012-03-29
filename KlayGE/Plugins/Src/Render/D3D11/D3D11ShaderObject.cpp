@@ -41,6 +41,7 @@
 #pragma warning(pop)
 #endif
 
+#include <KlayGE/D3D11/D3D11MinGWDefs.hpp>
 #include <D3DCompiler.h>
 
 #include <KlayGE/D3D11/D3D11RenderEngine.hpp>

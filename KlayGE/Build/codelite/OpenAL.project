@@ -28,7 +28,7 @@
         <Preprocessor Value="KLAYGE_BUILD_DLL"/>
         <Preprocessor Value="KLAYGE_OAL_AE_SOURCE"/>
       </Compiler>
-      <Linker Options="--enable-auto-import" Required="yes">
+      <Linker Options="" Required="yes">
         <LibraryPath Value="../../../External/boost/lib_gcc_x64/lib"/>
 		<LibraryPath Value="../../../External/OpenALSDK/libs/linux_x64"/>
 		<LibraryPath Value="../../lib/linux_x64"/>
@@ -72,7 +72,7 @@
         <Preprocessor Value="KLAYGE_BUILD_DLL"/>
         <Preprocessor Value="KLAYGE_OAL_AE_SOURCE"/>
       </Compiler>
-      <Linker Options="--enable-auto-import" Required="yes">
+      <Linker Options="" Required="yes">
         <LibraryPath Value="../../../External/boost/lib_gcc_x86/lib"/>
 		<LibraryPath Value="../../../External/OpenALSDK/libs/linux_x86"/>
 		<LibraryPath Value="../../lib/linux_x86"/>
@@ -118,13 +118,13 @@
         <Preprocessor Value="KLAYGE_BUILD_DLL"/>
         <Preprocessor Value="KLAYGE_OAL_AE_SOURCE"/>
       </Compiler>
-      <Linker Options="-Wl,--enable-auto-import" Required="yes">
+      <Linker Options="" Required="yes">
         <LibraryPath Value="../../../External/boost/lib_gcc_x64/lib"/>
 		<LibraryPath Value="../../../External/OpenALSDK/libs/Win64"/>
 		<LibraryPath Value="../../lib/win_x64"/>
         <Library Value="KlayGE_Core_mgw_d"/>
-        <Library Value="boost_system-mgw45-mt-d-1_49"/>
-        <Library Value="boost_thread-mgw45-mt-d-1_49"/>
+        <Library Value="boost_system-mgw46-mt-d-1_49"/>
+        <Library Value="boost_thread-mgw46-mt-d-1_49"/>
         <Library Value="OpenAL32"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
@@ -164,13 +164,13 @@
         <Preprocessor Value="KLAYGE_BUILD_DLL"/>
         <Preprocessor Value="KLAYGE_OAL_AE_SOURCE"/>
       </Compiler>
-      <Linker Options="-Wl,--enable-auto-import" Required="yes">
+      <Linker Options="" Required="yes">
         <LibraryPath Value="../../../External/boost/lib_gcc_x86/lib"/>
 		<LibraryPath Value="../../../External/OpenALSDK/libs/Win32"/>
 		<LibraryPath Value="../../lib/win_x86"/>
         <Library Value="KlayGE_Core_mgw_d"/>
-        <Library Value="boost_system-mgw45-mt-d-1_49"/>
-        <Library Value="boost_thread-mgw45-mt-d-1_49"/>
+        <Library Value="boost_system-mgw46-mt-d-1_49"/>
+        <Library Value="boost_thread-mgw46-mt-d-1_49"/>
         <Library Value="OpenAL32"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
@@ -208,7 +208,7 @@
         <Preprocessor Value="KLAYGE_BUILD_DLL"/>
         <Preprocessor Value="KLAYGE_OAL_AE_SOURCE"/>
       </Compiler>
-      <Linker Options="-s --enable-auto-import" Required="yes">
+      <Linker Options="-s" Required="yes">
         <LibraryPath Value="../../../External/boost/lib_gcc_x64/lib"/>
 		<LibraryPath Value="../../../External/OpenALSDK/libs/linux_x64"/>
 		<LibraryPath Value="../../lib/linux_x64"/>
@@ -252,7 +252,7 @@
         <Preprocessor Value="KLAYGE_BUILD_DLL"/>
         <Preprocessor Value="KLAYGE_OAL_AE_SOURCE"/>
       </Compiler>
-      <Linker Options="-s --enable-auto-import" Required="yes">
+      <Linker Options="-s" Required="yes">
         <LibraryPath Value="../../../External/boost/lib_gcc_x86/lib"/>
 		<LibraryPath Value="../../../External/OpenALSDK/libs/linux_x86"/>
 		<LibraryPath Value="../../lib/linux_x86"/>
@@ -298,13 +298,13 @@
         <Preprocessor Value="KLAYGE_BUILD_DLL"/>
         <Preprocessor Value="KLAYGE_OAL_AE_SOURCE"/>
       </Compiler>
-      <Linker Options="-s -Wl,--enable-auto-import" Required="yes">
+      <Linker Options="-s" Required="yes">
         <LibraryPath Value="../../../External/boost/lib_gcc_x64/lib"/>
 		<LibraryPath Value="../../../External/OpenALSDK/libs/Win64"/>
 		<LibraryPath Value="../../lib/win_x64"/>
         <Library Value="KlayGE_Core_mgw"/>
-        <Library Value="boost_system-mgw45-mt-1_49"/>
-        <Library Value="boost_thread-mgw45-mt-1_49"/>
+        <Library Value="boost_system-mgw46-mt-1_49"/>
+        <Library Value="boost_thread-mgw46-mt-1_49"/>
         <Library Value="OpenAL32"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
@@ -344,13 +344,13 @@
         <Preprocessor Value="KLAYGE_BUILD_DLL"/>
         <Preprocessor Value="KLAYGE_OAL_AE_SOURCE"/>
       </Compiler>
-      <Linker Options="-s -Wl,--enable-auto-import" Required="yes">
+      <Linker Options="-s" Required="yes">
         <LibraryPath Value="../../../External/boost/lib_gcc_x86/lib"/>
 		<LibraryPath Value="../../../External/OpenALSDK/libs/Win32"/>
 		<LibraryPath Value="../../lib/win_x86"/>
         <Library Value="KlayGE_Core_mgw"/>
-        <Library Value="boost_system-mgw45-mt-1_49"/>
-        <Library Value="boost_thread-mgw45-mt-1_49"/>
+        <Library Value="boost_system-mgw46-mt-1_49"/>
+        <Library Value="boost_thread-mgw46-mt-1_49"/>
         <Library Value="OpenAL32"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>

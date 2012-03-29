@@ -8,7 +8,7 @@
   <Description/>
   <Dependencies/>
   <VirtualDirectory Name="Source Files">
-    <File Name="../../NormalsFittingGen/NormalsFittingGen.cpp"/>
+    <File Name="../../src/NormalsFittingGen/NormalsFittingGen.cpp"/>
   </VirtualDirectory>
   <Settings Type="Executable">
     <Configuration Name="Debug_linux_x64" CompilerType="gnu g++" DebuggerType="GNU gdb debugger" Type="Executable" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
@@ -18,7 +18,7 @@
         <Preprocessor Value="_DEBUG"/>
         <Preprocessor Value="_CONSOLE"/>
       </Compiler>
-      <Linker Options="--enable-auto-import" Required="yes">
+      <Linker Options="" Required="yes">
         <LibraryPath Value="../../../../External/boost/lib_gcc_x64/lib"/>
         <LibraryPath Value="../../../lib/linux_x64"/>
         <Library Value="KlayGE_Core_gcc_d"/>
@@ -54,7 +54,7 @@
         <Preprocessor Value="_DEBUG"/>
         <Preprocessor Value="_CONSOLE"/>
       </Compiler>
-      <Linker Options="--enable-auto-import" Required="yes">
+      <Linker Options="" Required="yes">
         <LibraryPath Value="../../../../External/boost/lib_gcc_x86/lib"/>
         <LibraryPath Value="../../../lib/linux_x86"/>
         <Library Value="KlayGE_Core_gcc_d"/>
@@ -91,11 +91,11 @@
         <Preprocessor Value="_DEBUG"/>
         <Preprocessor Value="_CONSOLE"/>
       </Compiler>
-      <Linker Options="-Wl,--enable-auto-import" Required="yes">
+      <Linker Options="" Required="yes">
         <LibraryPath Value="../../../../External/boost/lib_gcc_x64/lib"/>
         <LibraryPath Value="../../../lib/win_x64"/>
         <Library Value="KlayGE_Core_mgw_d"/>
-        <Library Value="boost_system-mgw45-mt-d-1_47"/>
+        <Library Value="boost_system-mgw46-mt-d-1_49"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
       <General OutputFile="../../../bin/win_x64/$(ProjectName)_d.exe" IntermediateDirectory="Debug/win_x64/$(ProjectName)" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
@@ -128,11 +128,11 @@
         <Preprocessor Value="_DEBUG"/>
         <Preprocessor Value="_CONSOLE"/>
       </Compiler>
-      <Linker Options="-Wl,--enable-auto-import" Required="yes">
+      <Linker Options="" Required="yes">
         <LibraryPath Value="../../../../External/boost/lib_gcc_x86/lib"/>
         <LibraryPath Value="../../../lib/win_x86"/>
         <Library Value="KlayGE_Core_mgw_d"/>
-        <Library Value="boost_system-mgw45-mt-d-1_47"/>
+        <Library Value="boost_system-mgw46-mt-d-1_49"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
       <General OutputFile="../../../bin/win_x86/$(ProjectName)_d.exe" IntermediateDirectory="Debug/win_x86/$(ProjectName)" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
@@ -164,7 +164,7 @@
         <Preprocessor Value="NDEBUG"/>
         <Preprocessor Value="_CONSOLE"/>
       </Compiler>
-      <Linker Options="-s --enable-auto-import" Required="yes">
+      <Linker Options="-s" Required="yes">
         <LibraryPath Value="../../../../External/boost/lib_gcc_x64/lib"/>
         <LibraryPath Value="../../../lib/linux_x64"/>
         <Library Value="KlayGE_Core_gcc"/>
@@ -200,7 +200,7 @@
         <Preprocessor Value="NDEBUG"/>
         <Preprocessor Value="_CONSOLE"/>
       </Compiler>
-      <Linker Options="-s --enable-auto-import" Required="yes">
+      <Linker Options="-s" Required="yes">
         <LibraryPath Value="../../../../External/boost/lib_gcc_x86/lib"/>
         <LibraryPath Value="../../../lib/linux_x86"/>
         <Library Value="KlayGE_Core_gcc"/>
@@ -237,11 +237,11 @@
         <Preprocessor Value="NDEBUG"/>
         <Preprocessor Value="_CONSOLE"/>
       </Compiler>
-      <Linker Options="-s -Wl,--enable-auto-import" Required="yes">
+      <Linker Options="-s" Required="yes">
         <LibraryPath Value="../../../../External/boost/lib_gcc_x64/lib"/>
         <LibraryPath Value="../../../lib/win_x64"/>
         <Library Value="KlayGE_Core_mgw"/>
-        <Library Value="boost_system-mgw45-mt-1_47"/>
+        <Library Value="boost_system-mgw46-mt-1_49"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
       <General OutputFile="../../../bin/win_x64/$(ProjectName).exe" IntermediateDirectory="Release/win_x64/$(ProjectName)" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
@@ -274,11 +274,11 @@
         <Preprocessor Value="NDEBUG"/>
         <Preprocessor Value="_CONSOLE"/>
       </Compiler>
-      <Linker Options="-s -Wl,--enable-auto-import" Required="yes">
+      <Linker Options="-s" Required="yes">
         <LibraryPath Value="../../../../External/boost/lib_gcc_x86/lib"/>
         <LibraryPath Value="../../../lib/win_x86"/>
         <Library Value="KlayGE_Core_mgw"/>
-        <Library Value="boost_system-mgw45-mt-1_47"/>
+        <Library Value="boost_system-mgw46-mt-1_49"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
       <General OutputFile="../../../bin/win_x86/$(ProjectName).exe" IntermediateDirectory="Release/win_x86/$(ProjectName)" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>

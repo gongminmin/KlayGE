@@ -646,7 +646,7 @@ namespace KlayGE
 
 		std::string audio_path = ResLoader::Instance().Locate("Audio");
 		std::string fn = KLAYGE_STRINGIZE(KLAYGE_NAME) + std::string("_AudioEngine_") + af_name + "_" + dll_suffix_;
-#if defined KLAYGE_PLATFORM_LINUX || defined KLAYGE_PLATFORM_ANDROID
+#ifdef KLAYGE_COMPILER_GCC
 		fn = "lib" + fn;
 #endif
 
@@ -672,7 +672,7 @@ namespace KlayGE
 
 		std::string input_path = ResLoader::Instance().Locate("Input");
 		std::string fn = KLAYGE_STRINGIZE(KLAYGE_NAME) + std::string("_InputEngine_") + if_name + "_" + dll_suffix_;
-#if defined KLAYGE_PLATFORM_LINUX || defined KLAYGE_PLATFORM_ANDROID
+#ifdef KLAYGE_COMPILER_GCC
 		fn = "lib" + fn;
 #endif
 
@@ -698,7 +698,7 @@ namespace KlayGE
 
 		std::string show_path = ResLoader::Instance().Locate("Show");
 		std::string fn = KLAYGE_STRINGIZE(KLAYGE_NAME) + std::string("_ShowEngine_") + sf_name + "_" + dll_suffix_;
-#if defined KLAYGE_PLATFORM_LINUX || defined KLAYGE_PLATFORM_ANDROID
+#ifdef KLAYGE_COMPILER_GCC
 		fn = "lib" + fn;
 #endif
 
@@ -725,7 +725,7 @@ namespace KlayGE
 
 		std::string sm_path = ResLoader::Instance().Locate("Scene");
 		std::string fn = KLAYGE_STRINGIZE(KLAYGE_NAME) + std::string("_Scene_") + sm_name + "_" + dll_suffix_;
-#if defined KLAYGE_PLATFORM_LINUX || defined KLAYGE_PLATFORM_ANDROID
+#ifdef KLAYGE_COMPILER_GCC
 		fn = "lib" + fn;
 #endif
 
@@ -754,7 +754,7 @@ namespace KlayGE
 
 		std::string adsf_path = ResLoader::Instance().Locate("Audio");
 		std::string fn = KLAYGE_STRINGIZE(KLAYGE_NAME) + std::string("_AudioDataSource_") + adsf_name + "_" + dll_suffix_;
-#if defined KLAYGE_PLATFORM_LINUX || defined KLAYGE_PLATFORM_ANDROID
+#ifdef KLAYGE_COMPILER_GCC
 		fn = "lib" + fn;
 #endif
 

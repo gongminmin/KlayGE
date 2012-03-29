@@ -77,6 +77,7 @@ LOCAL_SRC_FILES := \
 		Render/RenderView.cpp \
 		Render/SATPostProcess.cpp \
 		Render/ShaderObject.cpp \
+		Render/SSGIPostProcess.cpp \
 		Render/SSVOPostProcess.cpp \
 		Render/TAAPostProcess.cpp \
 		Render/Texture.cpp \

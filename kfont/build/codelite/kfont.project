@@ -2,7 +2,7 @@
 <CodeLite_Project Name="kfont">
   <Plugins>
     <Plugin Name="qmake">
-      <![CDATA[00210001N0005Debug0000000000000001N0010Debug-GLES0000000000000001N0020Debug-GLES_linux_x640000000000000001N0020Debug-GLES_linux_x860000000000000001N0014Debug-GLES_x640000000000000001N0014Debug-GLES_x860000000000000001N0015Debug_linux_x640000000000000001N0015Debug_linux_x860000000000000001N0013Debug_win_x640000000000000001N0013Debug_win_x860000000000000001N0009Debug_x640000000000000001N0009Debug_x860000000000000001N0007Release0000000000000001N0012Release-GLES0000000000000001N0016Release-GLES_x640000000000000001N0016Release-GLES_x860000000000000001N0017Release_linux_x640000000000000001N0017Release_linux_x860000000000000001N0015Release_win_x860000000000000001N0011Release_x640000000000000001N0011Release_x86000000000000]]>
+      <![CDATA[00220001N0005Debug0000000000000001N0010Debug-GLES0000000000000001N0020Debug-GLES_linux_x640000000000000001N0020Debug-GLES_linux_x860000000000000001N0014Debug-GLES_x640000000000000001N0014Debug-GLES_x860000000000000001N0015Debug_linux_x640000000000000001N0015Debug_linux_x860000000000000001N0013Debug_win_x640000000000000001N0013Debug_win_x860000000000000001N0009Debug_x640000000000000001N0009Debug_x860000000000000001N0007Release0000000000000001N0012Release-GLES0000000000000001N0016Release-GLES_x640000000000000001N0016Release-GLES_x860000000000000001N0017Release_linux_x640000000000000001N0017Release_linux_x860000000000000001N0015Release_win_x640000000000000001N0015Release_win_x860000000000000001N0011Release_x640000000000000001N0011Release_x86000000000000]]>
     </Plugin>
   </Plugins>
   <Description/>
@@ -33,10 +33,9 @@
         <Preprocessor Value="_USRDLL"/>
         <Preprocessor Value="KFONT_SOURCE"/>
       </Compiler>
-      <Linker Options="-Wl,--enable-auto-import" Required="yes">
-      </Linker>
+      <Linker Options="" Required="yes"/>
       <ResourceCompiler Options="" Required="no"/>
-      <General OutputFile="../../lib/linux_x64/libkfont_x64_d.dll" IntermediateDirectory="Debug/x64" Command="" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="no"/>
+      <General OutputFile="../../lib/linux_x64/libkfont_gcc_x64_d.dll" IntermediateDirectory="Debug/x64" Command="" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="no"/>
       <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;">
         <![CDATA[]]>
       </Environment>
@@ -76,10 +75,9 @@
         <Preprocessor Value="_USRDLL"/>
         <Preprocessor Value="KFONT_SOURCE"/>
       </Compiler>
-      <Linker Options="-Wl,--enable-auto-import" Required="yes">
-      </Linker>
+      <Linker Options="" Required="yes"/>
       <ResourceCompiler Options="" Required="no"/>
-      <General OutputFile="../../lib/linux_x86/libkfont_x86_d.dll" IntermediateDirectory="Debug/x86" Command="" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="no"/>
+      <General OutputFile="../../lib/linux_x86/libkfont_gcc_x86_d.dll" IntermediateDirectory="Debug/x86" Command="" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="no"/>
       <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;">
         <![CDATA[]]>
       </Environment>
@@ -119,10 +117,9 @@
         <Preprocessor Value="_USRDLL"/>
         <Preprocessor Value="KFONT_SOURCE"/>
       </Compiler>
-      <Linker Options="-Wl,--enable-auto-import" Required="yes">
-      </Linker>
+      <Linker Options="" Required="yes"/>
       <ResourceCompiler Options="" Required="no"/>
-      <General OutputFile="../../lib/win_x64/libkfont_x64_d.dll" IntermediateDirectory="Debug/x64" Command="" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="no"/>
+      <General OutputFile="../../lib/win_x64/libkfont_mgw_x64_d.dll" IntermediateDirectory="Debug/x64" Command="" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="no"/>
       <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;">
         <![CDATA[]]>
       </Environment>
@@ -162,10 +159,9 @@
         <Preprocessor Value="_USRDLL"/>
         <Preprocessor Value="KFONT_SOURCE"/>
       </Compiler>
-      <Linker Options="-Wl,--enable-auto-import" Required="yes">
-      </Linker>
+      <Linker Options="" Required="yes"/>
       <ResourceCompiler Options="" Required="no"/>
-      <General OutputFile="../../lib/win_x86/libkfont_x86_d.dll" IntermediateDirectory="Debug/x86" Command="" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="no"/>
+      <General OutputFile="../../lib/win_x86/libkfont_mgw_x86_d.dll" IntermediateDirectory="Debug/x86" Command="" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="no"/>
       <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;">
         <![CDATA[]]>
       </Environment>
@@ -205,10 +201,9 @@
         <Preprocessor Value="_USRDLL"/>
         <Preprocessor Value="KFONT_SOURCE"/>
       </Compiler>
-      <Linker Options="-s -Wl,--enable-auto-import" Required="yes">
-      </Linker>
+      <Linker Options="-s" Required="yes"/>
       <ResourceCompiler Options="" Required="no"/>
-      <General OutputFile="../../lib/linux_x64/libkfont_x64.dll" IntermediateDirectory="Release/x64" Command="" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="no"/>
+      <General OutputFile="../../lib/linux_x64/libkfont_gcc_x64.dll" IntermediateDirectory="Release/x64" Command="" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="no"/>
       <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;">
         <![CDATA[]]>
       </Environment>
@@ -248,10 +243,9 @@
         <Preprocessor Value="_USRDLL"/>
         <Preprocessor Value="KFONT_SOURCE"/>
       </Compiler>
-      <Linker Options="-s -Wl,--enable-auto-import" Required="yes">
-      </Linker>
+      <Linker Options="-s" Required="yes"/>
       <ResourceCompiler Options="" Required="no"/>
-      <General OutputFile="../../lib/linux_x86/libkfont_x86.dll" IntermediateDirectory="Release/x86" Command="" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="no"/>
+      <General OutputFile="../../lib/linux_x86/libkfont_gcc_x86.dll" IntermediateDirectory="Release/x86" Command="" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="no"/>
       <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;">
         <![CDATA[]]>
       </Environment>
@@ -291,10 +285,9 @@
         <Preprocessor Value="_USRDLL"/>
         <Preprocessor Value="KFONT_SOURCE"/>
       </Compiler>
-      <Linker Options="-s -Wl,--enable-auto-import" Required="yes">
-      </Linker>
+      <Linker Options="-s" Required="yes"/>
       <ResourceCompiler Options="" Required="no"/>
-      <General OutputFile="../../lib/win_x64/libkfont_x64.dll" IntermediateDirectory="Release/x64" Command="" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="no"/>
+      <General OutputFile="../../lib/win_x64/libkfont_mgw_x64.dll" IntermediateDirectory="Release/x64" Command="" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="no"/>
       <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;">
         <![CDATA[]]>
       </Environment>
@@ -334,10 +327,9 @@
         <Preprocessor Value="_USRDLL"/>
         <Preprocessor Value="KFONT_SOURCE"/>
       </Compiler>
-      <Linker Options="-s -Wl,--enable-auto-import" Required="yes">
-      </Linker>
+      <Linker Options="-s" Required="yes"/>
       <ResourceCompiler Options="" Required="no"/>
-      <General OutputFile="../../lib/win_x86/libkfont_x86.dll" IntermediateDirectory="Release/x86" Command="" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="no"/>
+      <General OutputFile="../../lib/win_x86/libkfont_mgw_x86.dll" IntermediateDirectory="Release/x86" Command="" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="no"/>
       <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;">
         <![CDATA[]]>
       </Environment>

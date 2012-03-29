@@ -32,6 +32,7 @@
 	#define __out_bcount_opt(size)
 	#define __inout_opt
 	#define __out_ecount_part_opt(size,length)
+	#define __in_xcount_opt(size) 
 
 	#define WINAPI_INLINE  WINAPI
 
