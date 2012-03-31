@@ -40,10 +40,6 @@
 #include <KlayGE/Timer.hpp>
 #include <KlayGE/RenderSettings.hpp>
 
-#ifdef KLAYGE_PLATFORM_ANDROID
-#include <android_native_app_glue.h>
-#endif
-
 namespace KlayGE
 {
 	// 一个用于创建3D应用程序框架的基类。建立一个3D应用程序需要继承这个类，
@@ -87,13 +83,6 @@ namespace KlayGE
 		{
 			return main_wnd_;
 		}
-
-#ifdef KLAYGE_PLATFORM_ANDROID
-		android_app* AppState() const
-		{
-			return state_;
-		}
-#endif
 
 		virtual bool ConfirmDevice() const
 		{
@@ -139,9 +128,6 @@ namespace KlayGE
 
 	protected:
 		std::string name_;
-#ifdef KLAYGE_PLATFORM_ANDROID
-		android_app* state_;
-#endif
 
 		// Stats
 		float	fps_;

@@ -75,7 +75,7 @@ KlayGE/media/Models/*.model_bin
 KlayGE/Samples/build/android/*/bin
 KlayGE/Samples/build/android/*/libs
 KlayGE/Samples/build/android/*/obj
-KlayGE/Samples/build/android/*/media
+KlayGE/Samples/build/android/*/assets
 KlayGE/Samples/build/codelite/*.mk
 KlayGE/Samples/build/codelite/*.tags
 KlayGE/Samples/build/codelite/*.session

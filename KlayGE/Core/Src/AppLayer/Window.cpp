@@ -647,7 +647,7 @@ namespace KlayGE
 	{
 		a_window_ = NULL;
 
-		android_app* state = Context::Instance().AppInstance().AppState();
+		android_app* state = Context::Instance().AppState();
 		state->userData = this;
 		state->onAppCmd = MsgProc;
 

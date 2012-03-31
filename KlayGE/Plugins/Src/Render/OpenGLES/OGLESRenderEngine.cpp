@@ -158,7 +158,7 @@ namespace KlayGE
 			int events;
 			android_poll_source* source;
 
-			android_app* state = Context::Instance().AppInstance().AppState();
+			android_app* state = Context::Instance().AppState();
 
 			FrameBuffer& fb = *this->CurFrameBuffer();
 			do
