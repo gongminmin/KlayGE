@@ -3,7 +3,8 @@
 <effect>
 	<include name="PostProcess.fxml"/>
 
-	<parameter type="texture2D" name="src_tex"/>
+	<parameter type="texture2D" name="src1_tex"/>
+	<parameter type="texture2D" name="src2_tex"/>
 	
 	<parameter type="sampler" name="linear_sampler">
 		<state name="filtering" value="min_mag_linear_mip_point"/>
@@ -24,56 +25,213 @@ float BilateralDistribution(float r, float d)
 	return init_g * exp(-r * r * blur_factor - d * d * sharpness_factor);
 }
 
-float4 CalcBlur(float2 tc0, bool x_dir)
+float4 CalcBlur1(float2 tc0, bool x_dir)
 {
 	float color = 0;
 
-	float center_d = src_tex.Sample(linear_sampler, tc0).y;
+	float center_d = src2_tex.Sample(linear_sampler, tc0).x;
 
 	float total_weight = 0;
 	for (int i = -kernel_radius; i <= kernel_radius; ++ i)
 	{
 		float2 offset = float2(i * src_tex_size.y, 0);
 		float2 tc = tc0 + (x_dir ? offset.xy : offset.yx);
-		float2 src = src_tex.Sample(linear_sampler, tc).rg;
-		float ddiff = src.y - center_d;
+		float src = src1_tex.Sample(linear_sampler, tc).x;
+		float sample_d = src2_tex.Sample(linear_sampler, tc).x;
+		float ddiff = sample_d - center_d;
 		float weight = BilateralDistribution(i, ddiff);
-		color += src.x * weight;
+		color += src * weight;
 		total_weight += weight;
 	}
 
-	return float4(color / total_weight, center_d, 0, 0);
+	return color / total_weight;
 }
 
-float4 BlurXPS(float2 tc0 : TEXCOORD0) : SV_Target0
+float4 CalcBlur2(float2 tc0, bool x_dir)
 {
-	return CalcBlur(tc0, true);
+	float2 color = 0;
+
+	float center_d = src2_tex.Sample(linear_sampler, tc0).x;
+
+	float total_weight = 0;
+	for (int i = -kernel_radius; i <= kernel_radius; ++ i)
+	{
+		float2 offset = float2(i * src_tex_size.y, 0);
+		float2 tc = tc0 + (x_dir ? offset.xy : offset.yx);
+		float2 src = src1_tex.Sample(linear_sampler, tc).xy;
+		float sample_d = src2_tex.Sample(linear_sampler, tc).x;
+		float ddiff = sample_d - center_d;
+		float weight = BilateralDistribution(i, ddiff);
+		color += src * weight;
+		total_weight += weight;
+	}
+
+	return color.xyyy / total_weight;
 }
 
-float4 BlurYPS(float2 tc0 : TEXCOORD0) : SV_Target0
+float4 CalcBlur3(float2 tc0, bool x_dir)
 {
-	return CalcBlur(tc0, false).x;
+	float3 color = 0;
+
+	float center_d = src2_tex.Sample(linear_sampler, tc0).x;
+
+	float total_weight = 0;
+	for (int i = -kernel_radius; i <= kernel_radius; ++ i)
+	{
+		float2 offset = float2(i * src_tex_size.y, 0);
+		float2 tc = tc0 + (x_dir ? offset.xy : offset.yx);
+		float3 src = src1_tex.Sample(linear_sampler, tc).xyz;
+		float sample_d = src2_tex.Sample(linear_sampler, tc).x;
+		float ddiff = sample_d - center_d;
+		float weight = BilateralDistribution(i, ddiff);
+		color += src * weight;
+		total_weight += weight;
+	}
+
+	return color.xyzz / total_weight;
+}
+
+float4 CalcBlur4(float2 tc0, bool x_dir)
+{
+	float4 color = 0;
+
+	float center_d = src2_tex.Sample(linear_sampler, tc0).x;
+
+	float total_weight = 0;
+	for (int i = -kernel_radius; i <= kernel_radius; ++ i)
+	{
+		float2 offset = float2(i * src_tex_size.y, 0);
+		float2 tc = tc0 + (x_dir ? offset.xy : offset.yx);
+		float4 src = src1_tex.Sample(linear_sampler, tc);
+		float sample_d = src2_tex.Sample(linear_sampler, tc).x;
+		float ddiff = sample_d - center_d;
+		float weight = BilateralDistribution(i, ddiff);
+		color += src * weight;
+		total_weight += weight;
+	}
+
+	return color / total_weight;
+}
+
+float4 BlurX1PS(float2 tc0 : TEXCOORD0) : SV_Target0
+{
+	return CalcBlur1(tc0, true);
+}
+
+float4 BlurY1PS(float2 tc0 : TEXCOORD0) : SV_Target0
+{
+	return CalcBlur1(tc0, false);
+}
+
+float4 BlurX2PS(float2 tc0 : TEXCOORD0) : SV_Target0
+{
+	return CalcBlur2(tc0, true);
+}
+
+float4 BlurY2PS(float2 tc0 : TEXCOORD0) : SV_Target0
+{
+	return CalcBlur2(tc0, false);
+}
+
+float4 BlurX3PS(float2 tc0 : TEXCOORD0) : SV_Target0
+{
+	return CalcBlur3(tc0, true);
+}
+
+float4 BlurY3PS(float2 tc0 : TEXCOORD0) : SV_Target0
+{
+	return CalcBlur3(tc0, false);
+}
+
+float4 BlurX4PS(float2 tc0 : TEXCOORD0) : SV_Target0
+{
+	return CalcBlur4(tc0, true);
+}
+
+float4 BlurY4PS(float2 tc0 : TEXCOORD0) : SV_Target0
+{
+	return CalcBlur4(tc0, false);
 }
 		]]>
 	</shader>
 	
-	<technique name="BlurX">
+	<technique name="BlurX1">
 		<pass name="p0">
 			<state name="depth_enable" value="false"/>
 			<state name="depth_write_mask" value="0"/>
 
 			<state name="vertex_shader" value="PostProcessVS()"/>
-			<state name="pixel_shader" value="BlurXPS()"/>
+			<state name="pixel_shader" value="BlurX1PS()"/>
 		</pass>
 	</technique>
 
-	<technique name="BlurY">
+	<technique name="BlurY1">
 		<pass name="p0">
 			<state name="depth_enable" value="false"/>
 			<state name="depth_write_mask" value="0"/>
 
 			<state name="vertex_shader" value="PostProcessVS()"/>
-			<state name="pixel_shader" value="BlurYPS()"/>
+			<state name="pixel_shader" value="BlurY1PS()"/>
+		</pass>
+	</technique>
+
+	<technique name="BlurX2">
+		<pass name="p0">
+			<state name="depth_enable" value="false"/>
+			<state name="depth_write_mask" value="0"/>
+
+			<state name="vertex_shader" value="PostProcessVS()"/>
+			<state name="pixel_shader" value="BlurX2PS()"/>
+		</pass>
+	</technique>
+
+	<technique name="BlurY2">
+		<pass name="p0">
+			<state name="depth_enable" value="false"/>
+			<state name="depth_write_mask" value="0"/>
+
+			<state name="vertex_shader" value="PostProcessVS()"/>
+			<state name="pixel_shader" value="BlurY2PS()"/>
+		</pass>
+	</technique>
+
+	<technique name="BlurX3">
+		<pass name="p0">
+			<state name="depth_enable" value="false"/>
+			<state name="depth_write_mask" value="0"/>
+
+			<state name="vertex_shader" value="PostProcessVS()"/>
+			<state name="pixel_shader" value="BlurX3PS()"/>
+		</pass>
+	</technique>
+
+	<technique name="BlurY3">
+		<pass name="p0">
+			<state name="depth_enable" value="false"/>
+			<state name="depth_write_mask" value="0"/>
+
+			<state name="vertex_shader" value="PostProcessVS()"/>
+			<state name="pixel_shader" value="BlurY3PS()"/>
+		</pass>
+	</technique>
+
+	<technique name="BlurX4">
+		<pass name="p0">
+			<state name="depth_enable" value="false"/>
+			<state name="depth_write_mask" value="0"/>
+
+			<state name="vertex_shader" value="PostProcessVS()"/>
+			<state name="pixel_shader" value="BlurX4PS()"/>
+		</pass>
+	</technique>
+
+	<technique name="BlurY4">
+		<pass name="p0">
+			<state name="depth_enable" value="false"/>
+			<state name="depth_write_mask" value="0"/>
+
+			<state name="vertex_shader" value="PostProcessVS()"/>
+			<state name="pixel_shader" value="BlurY4PS()"/>
 		</pass>
 	</technique>
 </effect>

@@ -1100,13 +1100,16 @@ namespace KlayGE
 
 
 	SeparableBilateralFilterPostProcess::SeparableBilateralFilterPostProcess(RenderTechniquePtr const & tech, int kernel_radius, float multiplier, bool x_dir)
-		: PostProcess(L"SeparableBilateral",
-				std::vector<std::string>(),
-				std::vector<std::string>(1, "src_tex"),
-				std::vector<std::string>(1, "out_tex"),
-				tech ? tech : Context::Instance().RenderFactoryInstance().LoadEffect("BilateralBlur.fxml")->TechniqueByName(x_dir ? "BlurX" : "BlurY")),
+		: PostProcess(L"SeparableBilateral"),
 			kernel_radius_(kernel_radius), multiplier_(multiplier), x_dir_(x_dir)
 	{
+		input_pins_.push_back(std::make_pair("src1_tex", TexturePtr()));
+		input_pins_.push_back(std::make_pair("src2_tex", TexturePtr()));
+
+		output_pins_.push_back(std::make_pair("out_tex", TexturePtr()));
+
+		this->Technique(tech ? tech : Context::Instance().RenderFactoryInstance().LoadEffect("BilateralBlur.fxml")->TechniqueByName(x_dir ? "BlurX4" : "BlurY4"));
+
 		kernel_radius_ep_ = technique_->Effect().ParameterByName("kernel_radius");
 		src_tex_size_ep_ = technique_->Effect().ParameterByName("src_tex_size");
 		init_g_ep_ = technique_->Effect().ParameterByName("init_g");

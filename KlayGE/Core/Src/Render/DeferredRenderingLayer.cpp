@@ -802,21 +802,25 @@ namespace KlayGE
 		all_shading_tex_ = rf.MakeTexture2D(width, height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
 		all_shading_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*all_shading_tex_, 0, 1, 0));
 
-		if (caps.rendertarget_format_support(EF_ABGR16F, 1, 0))
+		if (caps.rendertarget_format_support(EF_B10G11R11F, 1, 0))
 		{
-			fmt = EF_ABGR16F;
+			fmt = EF_B10G11R11F;
 		}
 		else
 		{
-			BOOST_ASSERT(caps.rendertarget_format_support(EF_ABGR32F, 1, 0));
+			BOOST_ASSERT(caps.rendertarget_format_support(EF_ABGR16F, 1, 0));
 
-			fmt = EF_ABGR32F;
+			fmt = EF_ABGR16F;
 		}
 		small_ssgi_tex_ = rf.MakeTexture2D(width / 4, height / 4, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
 
-		if (caps.rendertarget_format_support(EF_GR16F, 1, 0))
+		if (caps.rendertarget_format_support(EF_R8, 1, 0))
 		{
-			fmt = EF_GR16F;
+			fmt = EF_R8;
+		}
+		else if (caps.rendertarget_format_support(EF_R16F, 1, 0))
+		{
+			fmt = EF_R16F;
 		}
 		else
 		{
@@ -856,12 +860,14 @@ namespace KlayGE
 		ssgi_pp_->InputPin(3, opaque_g_buffer_rt1_tex_);
 		ssgi_pp_->OutputPin(0, small_ssgi_tex_);
 		ssgi_blur_pp_->InputPin(0, small_ssgi_tex_);
+		ssgi_blur_pp_->InputPin(1, opaque_depth_tex_);
 		ssgi_blur_pp_->OutputPin(0, indirect_lighting_tex_);
 
 		ssvo_pp_->InputPin(0, opaque_g_buffer_rt0_tex_);
 		ssvo_pp_->InputPin(1, opaque_depth_tex_);
 		ssvo_pp_->OutputPin(0, small_ssvo_tex_);
 		ssvo_blur_pp_->InputPin(0, small_ssvo_tex_);
+		ssvo_blur_pp_->InputPin(1, opaque_depth_tex_);
 		ssvo_blur_pp_->OutputPin(0, opaque_lighting_tex_);
 
 		hdr_pp_->InputPin(0, all_shading_tex_);

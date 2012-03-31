@@ -38,6 +38,10 @@
 #include <string>
 #include <boost/assert.hpp>
 
+#ifdef KLAYGE_PLATFORM_ANDROID
+#include <android_native_app_glue.h>
+#endif
+
 #include <KlayGE/RenderSettings.hpp>
 #include <KlayGE/DllLoader.hpp>
 
@@ -62,6 +66,13 @@ namespace KlayGE
 		~Context();
 
 		static Context& Instance();
+		
+#ifdef KLAYGE_PLATFORM_ANDROID
+		android_app* AppState() const
+		{
+			return state_;
+		}
+#endif
 
 		void LoadCfg(std::string const & cfg_file);
 		void SaveCfg(std::string const & cfg_file);
@@ -194,6 +205,10 @@ namespace KlayGE
 		Context();
 
 		ContextCfg cfg_;
+
+#ifdef KLAYGE_PLATFORM_ANDROID
+		android_app* state_;
+#endif
 
 		App3DFramework*		app_;
 

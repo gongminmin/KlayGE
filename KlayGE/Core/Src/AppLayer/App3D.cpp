@@ -55,10 +55,6 @@ namespace KlayGE
 	{
 		Context::Instance().AppInstance(*this);
 
-#ifdef KLAYGE_PLATFORM_ANDROID
-		state_ = get_app();
-#endif
-
 		ContextCfg cfg = Context::Instance().Config();
 		main_wnd_ = this->MakeWindow(name_, cfg.graphics_cfg);
 		cfg.graphics_cfg.left = main_wnd_->Left();

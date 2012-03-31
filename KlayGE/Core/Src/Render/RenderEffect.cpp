@@ -2662,6 +2662,22 @@ namespace KlayGE
 		if (source)
 		{
 			timestamp_ = source->Timestamp();
+
+			XMLDocument doc;
+			XMLNodePtr root = doc.Parse(source);
+
+			XMLAttributePtr attr;
+
+			std::vector<XMLDocumentPtr> include_docs;
+			for (XMLNodePtr node = root->FirstNode("include"); node; node = node->NextSibling("include"))
+			{
+				attr = node->Attrib("name");
+				ResIdentifierPtr include_source = ResLoader::Instance().Open(attr->ValueString());
+				if (include_source)
+				{
+					timestamp_ = std::max(timestamp_, include_source->Timestamp());
+				}
+			}
 		}
 		else
 		{

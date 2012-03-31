@@ -127,37 +127,6 @@ float4 SSGIPS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Target
 	float3 indirect = CalcAlchemyObscurance(tc, pos_es, x_dir, y_dir, normal, radius, depth);
 	return float4(indirect, 0);
 }
-
-float4 CalcBlur3(float2 tc0, bool x_dir)
-{
-	float3 color = 0;
-
-	float center_d = src_tex.Sample(linear_sampler, tc0).w;
-
-	float total_weight = 0;
-	for (int i = -kernel_radius; i <= kernel_radius; ++ i)
-	{
-		float2 offset = float2(i * src_tex_size.y, 0);
-		float2 tc = tc0 + (x_dir ? offset.xy : offset.yx);
-		float4 src = src_tex.Sample(linear_sampler, tc);
-		float ddiff = src.w - center_d;
-		float weight = BilateralDistribution(i, ddiff);
-		color += src.xyz * weight;
-		total_weight += weight;
-	}
-
-	return float4(color / total_weight, center_d);
-}
-
-float4 BlurX3PS(float2 tc0 : TEXCOORD0) : SV_Target0
-{
-	return CalcBlur3(tc0, true);
-}
-
-float4 BlurY3PS(float2 tc0 : TEXCOORD0) : SV_Target0
-{
-	return float4(CalcBlur3(tc0, false).xyz, 0);
-}
 		]]>
 	</shader>
 
@@ -170,23 +139,9 @@ float4 BlurY3PS(float2 tc0 : TEXCOORD0) : SV_Target0
 		</pass>
 	</technique>
 
-	<technique name="SSGIBlurX">
-		<pass name="p0">
-			<state name="depth_enable" value="false"/>
-			<state name="depth_write_mask" value="0"/>
-
-			<state name="vertex_shader" value="PostProcessVS()"/>
-			<state name="pixel_shader" value="BlurX3PS()"/>
-		</pass>
+	<technique name="SSGIBlurX" inherit="BlurX3">
 	</technique>
 
-	<technique name="SSGIBlurY">
-		<pass name="p0">
-			<state name="depth_enable" value="false"/>
-			<state name="depth_write_mask" value="0"/>
-
-			<state name="vertex_shader" value="PostProcessVS()"/>
-			<state name="pixel_shader" value="BlurY3PS()"/>
-		</pass>
+	<technique name="SSGIBlurY" inherit="BlurY3">
 	</technique>
 </effect>

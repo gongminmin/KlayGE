@@ -52,6 +52,8 @@
 
 #define UNREF_PARAM(x) (x)
 
+#include <KlayGE/Log.hpp>
+
 namespace KlayGE
 {
 	// ÉèµÚn bitÎª1

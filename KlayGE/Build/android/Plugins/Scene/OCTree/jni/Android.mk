@@ -8,6 +8,7 @@ include $(CLEAR_VARS)
 LOCAL_C_INCLUDES := $(KLAYGE_PLUGIN_OCTREE_SRC_PATH)/../../../../../External/boost \
 		$(KLAYGE_PLUGIN_OCTREE_SRC_PATH)/../../../../Core/Include \
 		$(KLAYGE_PLUGIN_OCTREE_SRC_PATH)/../../../Include \
+		$(KLAYGE_PLUGIN_OCTREE_SRC_PATH)/../../../../../External/android_native_app_glue
 		
 LOCAL_MODULE := KlayGE_Scene_OCTree_gcc
 LOCAL_PATH := $(KLAYGE_PLUGIN_OCTREE_SRC_PATH)
@@ -18,9 +19,4 @@ LOCAL_SRC_FILES := \
 		
 LOCAL_CFLAGS := -DKLAYGE_BUILD_DLL -DKLAYGE_OCTREE_SM_SOURCE
 
-LOCAL_STATIC_LIBRARIES := KlayGE_Core boost_date_time boost_filesystem boost_signals boost_system boost_thread
-
 include $(BUILD_STATIC_LIBRARY)
-
-$(call import-module, boost)
-$(call import-module, KlayGE_Core)
