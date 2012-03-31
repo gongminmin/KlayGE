@@ -24,6 +24,9 @@
 #if defined KLAYGE_PLATFORM_WINDOWS
 #include <windows.h>
 #elif defined KLAYGE_PLATFORM_LINUX
+#elif defined KLAYGE_PLATFORM_ANDROID
+#include <KlayGE/Context.hpp>
+#include <android/asset_manager.h>
 #endif
 
 #include <KlayGE/ResLoader.hpp>
@@ -174,6 +177,17 @@ namespace KlayGE
 			}
 		}
 
+#ifdef KLAYGE_PLATFORM_ANDROID
+		android_app* state = Context::Instance().AppState();
+		AAssetManager* am = state->activity->assetManager;
+		AAsset* asset = AAssetManager_open(am, name.c_str(), AASSET_MODE_UNKNOWN);
+		if (asset != NULL)
+		{
+			AAsset_close(asset);
+			return name;
+		}
+#endif
+
 		return "";
 	}
 
@@ -234,6 +248,33 @@ namespace KlayGE
 				}
 			}
 		}
+
+#ifdef KLAYGE_PLATFORM_ANDROID
+		LogInfo("Loading %s", name.c_str());
+
+		android_app* state = Context::Instance().AppState();
+		AAssetManager* am = state->activity->assetManager;
+		AAsset* asset = AAssetManager_open(am, name.c_str(), AASSET_MODE_UNKNOWN);
+		if (asset != NULL)
+		{
+			boost::shared_ptr<std::stringstream> asset_file = MakeSharedPtr<std::stringstream>();
+
+			int total = 0;
+			int bytes = 0;
+			char buf[1024];
+			while ((bytes = AAsset_read(asset, buf, sizeof(buf))) > 0)
+			{
+				total += bytes;
+				asset_file->write(buf, bytes);
+			}
+
+			AAsset_close(asset);
+
+			LogInfo("DONE %s", name.c_str());
+
+			return MakeSharedPtr<ResIdentifier>(name, 0, asset_file);
+		}
+#endif
 
 		return ResIdentifierPtr();
 	}
