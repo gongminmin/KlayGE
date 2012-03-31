@@ -85,13 +85,7 @@
 #endif
 
 // Defines supported platforms
-#if defined(_XBOX_VER)
-	#if _XBOX_VER >= 200
-		#define KLAYGE_PLATFORM_XBOX360
-	#else
-		#error Unknown platform.
-	#endif
-#elif defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
+#if defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
 	#define KLAYGE_PLATFORM_WINDOWS
 
 	#if !defined(__GNUC__) && !defined(KLAYGE_HAS_DECLSPEC)
@@ -134,15 +128,15 @@
 
 // Defines supported CPUs
 #if defined(KLAYGE_COMPILER_MSVC)
-	#if defined(KLAYGE_PLATFORM_XBOX360)
-		#define KLAYGE_CPU_PPC
-		#define KLAYGE_COMPILER_TARGET ppc
-	#elif defined(_M_X64)
+	#if defined(_M_X64)
 		#define KLAYGE_CPU_X64
 		#define KLAYGE_COMPILER_TARGET x64
 	#elif defined(_M_IX86)
 		#define KLAYGE_CPU_X86
 		#define KLAYGE_COMPILER_TARGET x86
+	#elif defined(_M_ARM)
+		#define KLAYGE_CPU_ARM
+		#define KLAYGE_COMPILER_TARGET arm
 	#else
 		#error Unknown CPU type.
 	#endif
@@ -162,8 +156,12 @@
 #endif
 
 // Defines the native endian
-#if defined(KLAYGE_CPU_PPC) || defined(KLAYGE_CPU_ARM)
-	#define KLAYGE_BIG_ENDIAN
+#if defined(KLAYGE_CPU_ARM)
+	#ifdef __ARMEB__
+		#define KLAYGE_BIG_ENDIAN
+	#else
+		#define KLAYGE_LITTLE_ENDIAN
+	#endif
 #elif defined(KLAYGE_CPU_X86) || defined(KLAYGE_CPU_X64) || defined(KLAYGE_PLATFORM_WINDOWS)
 	#define KLAYGE_LITTLE_ENDIAN
 #else

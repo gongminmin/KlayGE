@@ -72,8 +72,12 @@
 #endif
 
 // Defines the native endian
-#if defined(__arm__)
-	#define KFONT_BIG_ENDIAN
+#if defined(_M_ARM) || defined(__arm__)
+	#ifdef __ARMEB__
+		#define KFONT_BIG_ENDIAN
+	#else
+		#define KFONT_LITTLE_ENDIAN
+	#endif
 #elif defined(_M_IX86) || defined(_M_X64) || defined(KFONT_PLATFORM_WINDOWS) || defined(__x86_64__) || defined(__i386__)
 	#define KFONT_LITTLE_ENDIAN
 #else

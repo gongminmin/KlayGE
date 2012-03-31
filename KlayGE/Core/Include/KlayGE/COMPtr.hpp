@@ -24,8 +24,10 @@
 #pragma warning(pop)
 #endif
 #ifdef KLAYGE_PLATFORM_WIN32
-	#ifndef BOOST_MEM_FN_ENABLE_STDCALL
-		#define BOOST_MEM_FN_ENABLE_STDCALL
+	#ifndef KLAYGE_CPU_ARM
+		#ifndef BOOST_MEM_FN_ENABLE_STDCALL
+			#define BOOST_MEM_FN_ENABLE_STDCALL
+		#endif
 	#endif
 #endif
 #include <boost/mem_fn.hpp>

@@ -40,6 +40,7 @@ namespace
 	using namespace KlayGE;
 
 
+#ifndef KLAYGE_CPU_ARM
 	void get_cpuid(int op, uint32_t* peax, uint32_t* pebx, uint32_t* pecx, uint32_t* pedx)
 	{	
 #ifdef KLAYGE_COMPILER_MSVC
@@ -82,6 +83,7 @@ namespace
         // TODO: Supports other compiler
 #endif
 	}
+#endif
 
 
 #if (defined(KLAYGE_CPU_X86) || defined(KLAYGE_CPU_X64)) && !defined(KLAYGE_PLATFORM_ANDROID)
@@ -647,11 +649,6 @@ namespace KlayGE
 				num_cores_ = static_cast<int>(pkg_core_ids.size());
 			}
 		}
-#elif defined(KLAYGE_CPU_PPC)
-#ifdef KLAYGE_PLATFORM_XBOX360
-		num_hw_threads_ = 6;
-		num_cores_ = 3;
-#endif
 #endif
 	}
 }
