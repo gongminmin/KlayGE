@@ -222,4 +222,8 @@
 	#define KLAYGE_CORE_API
 #endif // KLAYGE_HAS_DECLSPEC
 
+#if defined(KLAYGE_COMPILER_MSVC) || defined(KLAYGE_COMPILER_GCC)
+	#define KLAYGE_HAS_STRUCT_PACK
+#endif
+
 #endif		// _CONFIG_HPP

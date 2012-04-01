@@ -50,7 +50,7 @@ namespace
 {
 	using namespace KlayGE;
 
-#ifdef KLAYGE_PLATFORM_WINDOWS
+#ifdef KLAYGE_HAS_STRUCT_PACK
 #pragma pack(push, 1)
 #endif
 
@@ -197,7 +197,7 @@ namespace
 		uint32_t array_size;
 		uint32_t reserved;
 	};
-#ifdef KLAYGE_PLATFORM_WINDOWS
+#ifdef KLAYGE_HAS_STRUCT_PACK
 #pragma pack(pop)
 #endif
 

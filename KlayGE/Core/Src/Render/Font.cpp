@@ -90,7 +90,8 @@ namespace KlayGE
 				kfont_loader_(MakeSharedPtr<KFont>()),
 				tick_(0)
 	{
-		kfont_loader_->Load(ResLoader::Instance().Locate(font_name));
+		ResIdentifierPtr kfont_input = ResLoader::Instance().Open(font_name);
+		kfont_loader_->Load(kfont_input->input_stream());
 
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 

@@ -250,14 +250,12 @@ namespace KlayGE
 		}
 
 #ifdef KLAYGE_PLATFORM_ANDROID
-		LogInfo("Loading %s", name.c_str());
-
 		android_app* state = Context::Instance().AppState();
 		AAssetManager* am = state->activity->assetManager;
 		AAsset* asset = AAssetManager_open(am, name.c_str(), AASSET_MODE_UNKNOWN);
 		if (asset != NULL)
 		{
-			boost::shared_ptr<std::stringstream> asset_file = MakeSharedPtr<std::stringstream>();
+			boost::shared_ptr<std::stringstream> asset_file = MakeSharedPtr<std::stringstream>(std::ios_base::in | std::ios_base::out | std::ios_base::binary);
 
 			int total = 0;
 			int bytes = 0;
@@ -269,8 +267,6 @@ namespace KlayGE
 			}
 
 			AAsset_close(asset);
-
-			LogInfo("DONE %s", name.c_str());
 
 			return MakeSharedPtr<ResIdentifier>(name, 0, asset_file);
 		}

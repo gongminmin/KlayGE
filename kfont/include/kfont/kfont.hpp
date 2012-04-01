@@ -15,6 +15,7 @@
 #endif
 
 #include <vector>
+#include <istream>
 
 #include <boost/cstdint.hpp>
 #if defined(_MSC_VER)
@@ -104,6 +105,10 @@
 	#define KFONT_API
 #endif // KFONT_HAS_DECLSPEC
 
+#if defined(__GNUC__) || defined(_MSC_VER)
+	#define KFONT_HAS_STRUCT_PACK
+#endif
+
 namespace KlayGE
 {
 #ifdef _MSC_VER
@@ -123,7 +128,7 @@ namespace KlayGE
 	using boost::int16_t;
 	using boost::int8_t;
 
-#ifdef KFONT_PLATFORM_WINDOWS
+#ifdef KFONT_HAS_STRUCT_PACK
 	#pragma pack(push, 1)
 #endif
 	struct kfont_header
@@ -138,14 +143,14 @@ namespace KlayGE
 		int16_t base;
 		int16_t scale;
 	};
-#ifdef KFONT_PLATFORM_WINDOWS
+#ifdef KFONT_HAS_STRUCT_PACK
 	#pragma pack(pop)
 #endif
 
 	class KFONT_API KFont
 	{
 	public:
-#ifdef KFONT_PLATFORM_WINDOWS
+#ifdef KFONT_HAS_STRUCT_PACK
 	#pragma pack(push, 1)
 #endif
 		struct font_info
@@ -155,7 +160,7 @@ namespace KlayGE
 			uint16_t width;
 			uint16_t height;
 		};
-#ifdef KFONT_PLATFORM_WINDOWS
+#ifdef KFONT_HAS_STRUCT_PACK
 	#pragma pack(pop)
 #endif
 
@@ -163,6 +168,7 @@ namespace KlayGE
 		KFont();
 		
 		bool Load(std::string const & file_name);
+		bool Load(std::istream& kfont_input);
 		bool Save(std::string const & file_name);
 
 		uint32_t CharSize() const;

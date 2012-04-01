@@ -163,6 +163,11 @@ namespace KlayGE
 	bool KFont::Load(std::string const & file_name)
 	{
 		std::ifstream kfont_input(file_name.c_str(), std::ios_base::binary | std::ios_base::in);
+		return this->Load(kfont_input);
+	}
+
+	bool KFont::Load(std::istream& kfont_input)
+	{
 		if (kfont_input)
 		{
 			kfont_header header;

@@ -33,13 +33,17 @@ namespace
 {
 	uint32_t const BORDER_SIZE = 4;
 
+#ifdef KLAYGE_HAS_STRUCT_PACK
 #pragma pack(push, 1)
+#endif
 	struct tile_instance
 	{
 		float2 pos;
 		uint32_t tile_id;
 	};
+#ifdef KLAYGE_HAS_STRUCT_PACK
 #pragma pack(pop)
+#endif
 
 	class RenderTile : public RenderableHelper
 	{

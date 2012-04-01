@@ -20,7 +20,7 @@
 
 namespace KlayGE
 {
-#ifdef KLAYGE_PLATFORM_WINDOWS
+#ifdef KLAYGE_HAS_STRUCT_PACK
 	#pragma pack(push, 1)
 #endif
 	struct BC1_layout
@@ -52,7 +52,7 @@ namespace KlayGE
 		BC4_layout red;
 		BC4_layout green;
 	};
-#ifdef KLAYGE_PLATFORM_WINDOWS
+#ifdef KLAYGE_HAS_STRUCT_PACK
 	#pragma pack(pop)
 #endif
 

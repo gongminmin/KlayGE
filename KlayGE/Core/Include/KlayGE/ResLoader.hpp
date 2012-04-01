@@ -95,6 +95,11 @@ namespace KlayGE
 			return istream_->operator!();
 		}
 
+		std::istream& input_stream()
+		{
+			return *istream_;
+		}
+
 	private:
 		std::string res_name_;
 		uint64_t timestamp_;

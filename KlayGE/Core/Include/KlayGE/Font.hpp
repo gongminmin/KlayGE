@@ -109,7 +109,7 @@ namespace KlayGE
 			uint64_t tick;
 		};
 
-#ifdef KLAYGE_PLATFORM_WINDOWS
+#ifdef KLAYGE_HAS_STRUCT_PACK
 	#pragma pack(push, 1)
 #endif
 		struct FontVert
@@ -126,7 +126,7 @@ namespace KlayGE
 			{
 			}
 		};
-#ifdef KLAYGE_PLATFORM_WINDOWS
+#ifdef KLAYGE_HAS_STRUCT_PACK
 	#pragma pack(pop)
 #endif
 

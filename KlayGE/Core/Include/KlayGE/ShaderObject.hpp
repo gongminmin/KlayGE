@@ -38,7 +38,7 @@ namespace KlayGE
 
 		uint32_t tech_pass_type;
 
-#ifdef KLAYGE_PLATFORM_WINDOWS
+#ifdef KLAYGE_HAS_STRUCT_PACK
 		#pragma pack(push, 1)
 #endif
 		struct stream_output_decl
@@ -58,7 +58,7 @@ namespace KlayGE
 				return !(lhs == rhs);
 			}
 		};
-#ifdef KLAYGE_PLATFORM_WINDOWS
+#ifdef KLAYGE_HAS_STRUCT_PACK
 		#pragma pack(pop)
 #endif
 		std::vector<stream_output_decl> so_decl;

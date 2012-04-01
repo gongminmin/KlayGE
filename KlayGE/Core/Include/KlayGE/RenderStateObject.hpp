@@ -192,7 +192,7 @@ namespace KlayGE
 		TFO_Cmp_Anisotropic						= TFOE_Comparison | TFO_Anisotropic
 	};
 
-#ifdef KLAYGE_PLATFORM_WINDOWS
+#ifdef KLAYGE_HAS_STRUCT_PACK
 #pragma pack(push, 1)
 #endif
 	struct KLAYGE_CORE_API RasterizerStateDesc
@@ -279,7 +279,7 @@ namespace KlayGE
 
 		friend bool operator<(SamplerStateDesc const & lhs, SamplerStateDesc const & rhs);
 	};
-#ifdef KLAYGE_PLATFORM_WINDOWS
+#ifdef KLAYGE_HAS_STRUCT_PACK
 #pragma pack(pop)
 #endif
 

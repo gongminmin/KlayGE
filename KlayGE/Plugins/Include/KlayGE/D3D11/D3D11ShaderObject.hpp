@@ -28,7 +28,7 @@
 
 namespace KlayGE
 {
-#ifdef KLAYGE_PLATFORM_WINDOWS
+#ifdef KLAYGE_HAS_STRUCT_PACK
 #pragma pack(push, 2)
 #endif
 	struct D3D11ShaderParameterHandle
@@ -44,7 +44,7 @@ namespace KlayGE
 		uint8_t rows;
 		uint8_t columns;
 	};
-#ifdef KLAYGE_PLATFORM_WINDOWS
+#ifdef KLAYGE_HAS_STRUCT_PACK
 #pragma pack(pop)
 #endif
 

@@ -17,9 +17,9 @@
 
 namespace KlayGE
 {
-	void LogInfo(char const * fmt, ...);
-	void LogWarn(char const * fmt, ...);
-	void LogError(char const * fmt, ...);
+	void KLAYGE_CORE_API LogInfo(char const * fmt, ...);
+	void KLAYGE_CORE_API LogWarn(char const * fmt, ...);
+	void KLAYGE_CORE_API LogError(char const * fmt, ...);
 }
 
 #endif		// _TRACE_HPP
