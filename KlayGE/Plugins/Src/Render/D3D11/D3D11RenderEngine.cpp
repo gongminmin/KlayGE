@@ -839,8 +839,6 @@ namespace KlayGE
 			caps_.max_texture_cube_size = (D3D_FEATURE_LEVEL_9_3 == d3d_feature_level_) ? 4096 : 512;
 			caps_.max_texture_array_length = 1;
 			caps_.max_simultaneous_rts = (D3D_FEATURE_LEVEL_9_3 == d3d_feature_level_) ? 4 : 1;
-			caps_.max_vertices = (D3D_FEATURE_LEVEL_9_1 == d3d_feature_level_) ? 65535 : 1048575;
-			caps_.max_indices = (D3D_FEATURE_LEVEL_9_1 == d3d_feature_level_) ? 65535 : 1048575;
 			caps_.alpha_to_coverage_support = false;
 			caps_.mrt_independent_bit_depths_support = false;
 		}
@@ -852,8 +850,6 @@ namespace KlayGE
 			caps_.max_texture_cube_size = 8192;
 			caps_.max_texture_array_length = 512;
 			caps_.max_simultaneous_rts = 8;
-			caps_.max_vertices = 8388607;
-			caps_.max_indices = 16777215;
 			caps_.alpha_to_coverage_support = true;
 			caps_.mrt_independent_bit_depths_support = true;
 		}

@@ -38,7 +38,6 @@
 
 #include <KlayGE/PreDeclare.hpp>
 #include <KlayGE/Timer.hpp>
-#include <KlayGE/RenderSettings.hpp>
 
 namespace KlayGE
 {

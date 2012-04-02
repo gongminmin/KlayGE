@@ -1453,10 +1453,6 @@ namespace KlayGE
 			caps_.max_simultaneous_rts = 1;
 		}
 
-		glGetIntegerv(GL_MAX_ELEMENTS_VERTICES, &temp);
-		caps_.max_vertices = temp;
-		glGetIntegerv(GL_MAX_ELEMENTS_INDICES, &temp);
-		caps_.max_indices = temp;
 		glGetIntegerv(GL_MAX_VERTEX_ATTRIBS, &temp);
 		caps_.max_vertex_streams = temp;
 

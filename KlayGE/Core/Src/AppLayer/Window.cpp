@@ -20,10 +20,6 @@
 #include <KlayGE/Math.hpp>
 #include <KlayGE/Util.hpp>
 
-#ifdef KLAYGE_PLATFORM_ANDROID
-#include <KlayGE/App3D.hpp>
-#endif
-
 #include <KlayGE/Window.hpp>
 
 #ifdef KLAYGE_PLATFORM_WINDOWS

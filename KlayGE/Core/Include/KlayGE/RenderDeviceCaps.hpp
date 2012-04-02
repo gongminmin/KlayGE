@@ -41,13 +41,8 @@ namespace KlayGE
 		uint8_t max_vertex_texture_units;
 		uint8_t max_pixel_texture_units;
 		uint8_t max_geometry_texture_units;
-
 		uint8_t max_simultaneous_rts;
-
-		uint32_t max_vertices;
-		uint32_t max_indices;
-		uint32_t max_vertex_streams;
-
+		uint8_t max_vertex_streams;
 		uint8_t max_texture_anisotropy;
 
 		bool hw_instancing_support;
