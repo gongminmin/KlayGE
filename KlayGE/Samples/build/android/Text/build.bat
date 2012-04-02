@@ -11,7 +11,6 @@ copy ..\..\..\..\media\RenderFX\UI.kfx assets
 copy ..\..\..\..\media\PostProcessors\ColorGrading.ppml assets
 copy ..\..\..\..\media\Textures\2D\powered_by_klayge.dds assets
 copy ..\..\..\..\media\Textures\2D\ui.dds assets
-copy ..\..\..\..\media\Textures\2D\powered_by_klayge.dds assets
 copy ..\..\..\media\Text\text.txt assets
 copy ..\..\..\media\Text\Text.uiml assets
 
