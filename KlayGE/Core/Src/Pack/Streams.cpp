@@ -63,7 +63,7 @@ namespace KlayGE
 			return STG_E_INVALIDFUNCTION;
 		}
 
-		is_->seekg(static_cast<std::ifstream::off_type>(offset), way);
+		is_->seekg(static_cast<std::istream::off_type>(offset), way);
 		if (newPosition)
 		{
 			*newPosition = is_->tellg();

@@ -28,7 +28,6 @@
 #include <map>
 #include <algorithm>
 #include <sstream>
-#include <iostream>
 #include <boost/assert.hpp>
 #include <boost/typeof/typeof.hpp>
 #include <boost/foreach.hpp>
@@ -1052,7 +1051,7 @@ namespace KlayGE
 				0, 0, &code, &err_msg);
 			if (err_msg != NULL)
 			{
-				std::cerr << "Error when compiling " << sd.func_name << ":" << std::endl;
+				LogError("Error when compiling %s:", sd.func_name.c_str());
 
 				std::string err_str(static_cast<char*>(err_msg->GetBufferPointer()));
 				std::string::size_type pos = err_str.find("): error X");
@@ -1072,22 +1071,22 @@ namespace KlayGE
 					iss.str(shader_text);
 					std::string s;
 					int line = 1;
-					std::cerr << "..." << std::endl;
+					LogError("...");
 					while (iss)
 					{
 						std::getline(iss, s);
 						if ((line - err_line > -3) && (line - err_line < 3))
 						{
-							std::cerr << line << " " << s << std::endl;
+							LogError("%d %s", line, s.c_str());
 						}
 						++ line;
 					}
-					std::cerr << "..." << std::endl;
-					std::cerr << err_str.c_str() << std::endl;
+					LogError("...");
+					LogError(err_str.c_str());
 				}
 				else
 				{
-					std::cerr << err_str.c_str() << std::endl;
+					LogError(err_str.c_str());
 				}
 
 				err_msg->Release();

@@ -83,15 +83,13 @@ void TextApp::InitObjects()
 	font_ = Context::Instance().RenderFactoryInstance().MakeFont("gkai00mp.kfont");
 
 	{
-		ifstream ifs(ResLoader::Instance().Locate("text.txt").c_str());
-		std::string str;
-		std::wstring wstr;
-		while (ifs)
-		{
-			std::getline(ifs, str);
-			Convert(wstr, str);
-			text_ += wstr + L'\n';
-		}
+		ResIdentifierPtr text_input = ResLoader::Instance().Open("text.txt");
+		text_input->seekg(0, std::ios_base::end);
+		uint32_t size = static_cast<uint32_t>(text_input->tellg());
+		std::string str(size, '\0');
+		text_input->seekg(0, std::ios_base::beg);
+		text_input->read(&str[0], size);
+		Convert(text_, str);
 	}
 
 	this->LookAt(float3(-0.3f, 0.4f, -0.3f), float3(0, 0, 0));

@@ -29,7 +29,6 @@
 #include <algorithm>
 #include <sstream>
 #include <fstream>
-#include <iostream>
 #include <boost/assert.hpp>
 #ifdef KLAYGE_COMPILER_MSVC
 #pragma warning(push)
@@ -2038,16 +2037,16 @@ namespace KlayGE
 				while (iss)
 				{
 					std::getline(iss, s);
-					std::cerr << line << " " << s << std::endl;
+					LogError("%d %s", line, s.c_str());
 					++ line;
 				}
-				std::cerr << "Error when compiling " << func_name << ":" << std::endl;
-				std::cerr << cgGetErrorString(error) << std::endl;
+				LogError("Error when compiling %s:", func_name.c_str());
+				LogError(cgGetErrorString(error));
 
 				char const* listing = cgGetLastListing(CGContextIniter::Instance().Context());
 				if (listing)
 				{
-					std::cerr << listing << std::endl;
+					LogError(listing);
 				}
 			}
 #endif
@@ -2205,7 +2204,7 @@ namespace KlayGE
 			{
 				std::vector<char> info(len + 1, 0);
 				glGetShaderInfoLog(object, len, &len, &info[0]);
-				std::cerr << &info[0] << std::endl;
+				LogError(&info[0]);
 			}
 		}
 #endif
@@ -2230,7 +2229,7 @@ namespace KlayGE
 			{
 				std::vector<char> info(len + 1, 0);
 				glGetProgramInfoLog(glsl_program_, len, &len, &info[0]);
-				std::cerr << &info[0] << std::endl;
+				LogError(&info[0]);
 			}
 		}
 #endif
@@ -2260,7 +2259,7 @@ namespace KlayGE
 			{
 				std::vector<char> info(len + 1, 0);
 				glGetProgramInfoLog(glsl_program_, len, &len, &info[0]);
-				std::cerr << &info[0] << std::endl;
+				LogError(&info[0]);
 			}
 		}
 #endif

@@ -106,11 +106,15 @@ namespace KlayGE
 			boost::filesystem::path full_path = exe_path_ / new_path;
 			if (!boost::filesystem::exists(full_path))
 			{
+#ifndef KLAYGE_PLATFORM_ANDROID
 				full_path = boost::filesystem::current_path() / new_path;
 				if (!boost::filesystem::exists(full_path))
 				{
 					return;
 				}
+#else
+				return;
+#endif
 			}
 			new_path = full_path;
 		}

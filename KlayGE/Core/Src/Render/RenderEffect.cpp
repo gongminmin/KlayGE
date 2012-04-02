@@ -56,7 +56,6 @@
 
 #include <sstream>
 #include <fstream>
-#include <iostream>
 #include <boost/assert.hpp>
 #include <boost/typeof/typeof.hpp>
 #include <boost/foreach.hpp>
@@ -214,7 +213,7 @@ namespace
 					return static_cast<ShadeMode>(i);
 				}
 			}
-			cerr << "Wrong ShadeMode name: " << name << endl;
+			LogError("Wrong ShadeMode name: %s", name.c_str());
 			return static_cast<ShadeMode>(0xFFFFFFFF);
 		}
 
@@ -256,7 +255,7 @@ namespace
 					return static_cast<CompareFunction>(i);
 				}
 			}
-			cerr << "Wrong CompareFunction name: " << name << endl;
+			LogError("Wrong CompareFunction name: %s", name.c_str());
 			return static_cast<CompareFunction>(0xFFFFFFFF);
 		}
 
@@ -304,7 +303,7 @@ namespace
 					return static_cast<CullMode>(i);
 				}
 			}
-			cerr << "Wrong CullMode name: " << name << endl;
+			LogError("Wrong CullMode name: %s", name.c_str());
 			return static_cast<CullMode>(0xFFFFFFFF);
 		}
 
@@ -347,7 +346,7 @@ namespace
 					return static_cast<PolygonMode>(i);
 				}
 			}
-			cerr << "Wrong PolygonMode name: " << name << endl;
+			LogError("Wrong PolygonMode name: %s", name.c_str());
 			return static_cast<PolygonMode>(0xFFFFFFFF);
 		}
 
@@ -390,7 +389,7 @@ namespace
 					return static_cast<AlphaBlendFactor>(i);
 				}
 			}
-			cerr << "Wrong AlphaBlendFactor name: " << name << endl;
+			LogError("Wrong AlphaBlendFactor name: %s", name.c_str());
 			return static_cast<AlphaBlendFactor>(0xFFFFFFFF);
 		}
 
@@ -441,7 +440,7 @@ namespace
 					return static_cast<BlendOperation>(i + 1);
 				}
 			}
-			cerr << "Wrong BlendOperation name: " << name << endl;
+			LogError("Wrong BlendOperation name: %s", name.c_str());
 			return static_cast<BlendOperation>(0xFFFFFFFF);
 		}
 
@@ -486,7 +485,7 @@ namespace
 					return static_cast<StencilOperation>(i);
 				}
 			}
-			cerr << "Wrong StencilOperation name: " << name << endl;
+			LogError("Wrong StencilOperation name: %s", name.c_str());
 			return static_cast<StencilOperation>(0xFFFFFFFF);
 		}
 
@@ -550,7 +549,7 @@ namespace
 			{
 				return static_cast<TexFilterOp>((cmp << 4) + TFO_Anisotropic);
 			}
-			cerr << "Wrong TexFilterOp name: " << name << endl;
+			LogError("Wrong TexFilterOp name: %s", name.c_str());
 			return static_cast<TexFilterOp>(0xFFFFFFFF);
 		}
 
@@ -598,7 +597,7 @@ namespace
 					return static_cast<TexAddressingMode>(i);
 				}
 			}
-			cerr << "Wrong TexAddressingMode name: " << name << endl;
+			LogError("Wrong TexAddressingMode name: %s", name.c_str());
 			return static_cast<TexAddressingMode>(0xFFFFFFFF);
 		}
 
@@ -878,7 +877,7 @@ namespace
 					}
 					else
 					{
-						cerr << "Wrong sampler state name:" << name << endl;
+						LogError("Wrong sampler state name: %s", name.c_str());
 					}
 				}
 
@@ -3820,7 +3819,7 @@ namespace KlayGE
 			}
 			else
 			{
-				cerr << "Wrong state name: " << state_name << endl;
+				LogError("Wrong state name: %s", state_name.c_str());
 			}
 		}
 
