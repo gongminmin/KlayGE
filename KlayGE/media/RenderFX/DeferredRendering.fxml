@@ -444,6 +444,9 @@ float4 DeferredShadowingAmbientPS() : SV_Target
 				
 	<technique name="DeferredRenderingDirectional" inherit="DeferredRenderingPoint">
 		<pass name="p0">
+			<state name="front_stencil_func" value="equal"/>
+			<state name="back_stencil_func" value="equal"/>
+			
 			<state name="pixel_shader" value="DeferredRenderingDirectionalPS()"/>
 		</pass>
 	</technique>
