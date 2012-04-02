@@ -1,4 +1,4 @@
-call %ANDROID_NDK%\ndk-build
+call %ANDROID_NDK%\ndk-build -j 3
 
 if NOT EXIST ..\..\lib\android_armeabi mkdir ..\..\lib\android_armeabi
 copy /Y obj\local\armeabi\libglloader.a ..\..\lib\android_armeabi\

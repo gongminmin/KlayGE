@@ -1,4 +1,4 @@
-call %ANDROID_NDK%\ndk-build
+call %ANDROID_NDK%\ndk-build -j 3
 
 if NOT EXIST assets mkdir assets
 del /Q /F assets\*.*
