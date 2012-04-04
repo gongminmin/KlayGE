@@ -39,7 +39,7 @@ namespace KlayGE
 	inline boost::shared_ptr<T>
 	MakeCOMPtr(T* p)
 	{
-		return boost::shared_ptr<T>(p, boost::mem_fn(&T::Release));
+		return p ? boost::shared_ptr<T>(p, boost::mem_fn(&T::Release)) : boost::shared_ptr<T>();
 	}
 }
 
