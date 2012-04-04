@@ -86,6 +86,13 @@ namespace KlayGE
 	float const DEG2RAD	= 0.01745329f;			// 角度化弧度因数
 	float const RAD2DEG	= 57.29577f;			// 弧度化角度因数
 
+	enum BoundOverlap
+	{
+		BO_Yes,
+		BO_No,
+		BO_Partial
+	};
+
 	namespace MathLib
 	{
 		// 求绝对值
@@ -601,41 +608,65 @@ namespace KlayGE
 
 		// 范围
 		///////////////////////////////////////////////////////////////////////////////
-		template <typename T>
-		bool vec_in_sphere(Sphere_T<T> const & sphere, Vector_T<T, 3> const & v);
-
-		template <typename T>
-		bool intersect_ray(Sphere_T<T> const & sphere, Vector_T<T, 3> const & orig, Vector_T<T, 3> const & dir);
-
-		template <typename T>
-		bool vec_in_box(AABBox_T<T> const & box, Vector_T<T, 3> const & v);
-
-		template <typename T>
-		bool intersect_ray(AABBox_T<T> const & box, Vector_T<T, 3> const & orig, Vector_T<T, 3> const & dir);
-
 		template <typename Iterator>
 		AABBox_T<typename std::iterator_traits<Iterator>::value_type::value_type> compute_aabbox(Iterator first, Iterator last);
-
 		template <typename Iterator>
 		OBBox_T<typename std::iterator_traits<Iterator>::value_type::value_type> compute_obbox(Iterator first, Iterator last);
-
 		template <typename Iterator>
 		Sphere_T<typename std::iterator_traits<Iterator>::value_type::value_type> compute_sphere(Iterator first, Iterator last);
 
 		template <typename T>
-		AABBox_T<T> transform_aabbox(AABBox_T<T> const & aabb, Matrix4_T<T> const & mat);
+		AABBox_T<T> transform_aabb(AABBox_T<T> const & aabb, Matrix4_T<T> const & mat);
 		template <typename T>
-		AABBox_T<T> transform_aabbox(AABBox_T<T> const & aabb, T scale, Quaternion_T<T> const & rot, Vector_T<T, 3> const & trans);
-
+		AABBox_T<T> transform_aabb(AABBox_T<T> const & aabb, T scale, Quaternion_T<T> const & rot, Vector_T<T, 3> const & trans);
 		template <typename T>
 		OBBox_T<T> transform_obb(OBBox_T<T> const & obb, Matrix4_T<T> const & mat);
 		template <typename T>
 		OBBox_T<T> transform_obb(OBBox_T<T> const & obb, T scale, Quaternion_T<T> const & rot, Vector_T<T, 3> const & trans);
-
 		template <typename T>
 		Sphere_T<T> transform_sphere(Sphere_T<T> const & sphere, Matrix4_T<T> const & mat);
 		template <typename T>
 		Sphere_T<T> transform_sphere(Sphere_T<T> const & sphere, T scale, Quaternion_T<T> const & rot, Vector_T<T, 3> const & trans);
+		template <typename T>
+		Sphere_T<T> transform_frustum(Frustum_T<T> const & sphere, Matrix4_T<T> const & mat);
+		template <typename T>
+		Sphere_T<T> transform_frustum(Frustum_T<T> const & sphere, T scale, Quaternion_T<T> const & rot, Vector_T<T, 3> const & trans);
+
+		template <typename T>
+		bool intersect_point_aabb(Vector_T<T, 3> const & v, AABBox_T<T> const & aabb);
+		template <typename T>
+		bool intersect_point_obb(Vector_T<T, 3> const & v, OBBox_T<T> const & obb);
+		template <typename T>
+		bool intersect_point_sphere(Vector_T<T, 3> const & v, Sphere_T<T> const & sphere);
+		template <typename T>
+		bool intersect_point_frustum(Vector_T<T, 3> const & v, Frustum_T<T> const & frustum);
+
+		template <typename T>
+		bool intersect_ray_aabb(Vector_T<T, 3> const & orig, Vector_T<T, 3> const & dir, AABBox_T<T> const & aabb);
+		template <typename T>
+		bool intersect_ray_sphere(Vector_T<T, 3> const & orig, Vector_T<T, 3> const & dir, Sphere_T<T> const & sphere);
+
+		template <typename T>
+		bool intersect_aabb_aabb(AABBox_T<T> const & lhs, AABBox_T<T> const & aabb);
+		template <typename T>
+		bool intersect_aabb_obb(AABBox_T<T> const & lhs, OBBox_T<T> const & obb);
+		template <typename T>
+		bool intersect_aabb_sphere(AABBox_T<T> const & lhs, Sphere_T<T> const & sphere);
+		template <typename T>
+		bool intersect_obb_obb(OBBox_T<T> const & lhs, OBBox_T<T> const & obb);
+		template <typename T>
+		bool intersect_obb_sphere(OBBox_T<T> const & lhs, Sphere_T<T> const & sphere);
+		template <typename T>
+		bool intersect_sphere_sphere(Sphere_T<T> const & lhs, Sphere_T<T> const & sphere);
+
+		template <typename T>
+		BoundOverlap intersect_aabb_frustum(AABBox_T<T> const & lhs, Frustum_T<T> const & frustum);
+		template <typename T>
+		BoundOverlap intersect_obb_frustum(OBBox_T<T> const & lhs, Frustum_T<T> const & frustum);
+		template <typename T>
+		BoundOverlap intersect_sphere_frustum(Sphere_T<T> const & lhs, Frustum_T<T> const & frustum);
+		template <typename T>
+		BoundOverlap intersect_frustum_frustum(Frustum_T<T> const & lhs, Frustum_T<T> const & frustum);
 
 
 		// 网格

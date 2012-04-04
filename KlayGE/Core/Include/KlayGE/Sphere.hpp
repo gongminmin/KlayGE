@@ -111,7 +111,7 @@ namespace KlayGE
 
 		bool VecInBound(Vector_T<T, 3> const & v) const
 		{
-			return MathLib::vec_in_sphere(*this, v);
+			return MathLib::intersect_point_sphere(v, *this);
 		}
 		T MaxRadiusSq() const
 		{
@@ -128,13 +128,11 @@ namespace KlayGE
 		}
 		bool Intersect(Sphere_T<T> const & sphere) const
 		{
-			Vector_T<T, 3> d = center_ - sphere.Center();
-			float r = radius_ + sphere.Radius();
-			return MathLib::length_sq(d) <= r * r;
+			return intersect_sphere_sphere(*this, sphere);
 		}
 		bool Intersect(Frustum_T<T> const & frustum) const
 		{
-			return frustum.Intersect(*this) != BO_No;
+			return intersect_sphere_frustum(*this, frustum) != BO_No;
 		}
 
 		friend bool

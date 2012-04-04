@@ -1475,94 +1475,6 @@ namespace KlayGE
 		}
 
 
-		template KLAYGE_CORE_API bool vec_in_sphere(Sphere const & sphere, float3 const & v);
-
-		template <typename T>
-		bool vec_in_sphere(Sphere_T<T> const & sphere, Vector_T<T, 3> const & v)
-		{
-			if (length(v - sphere.Center()) < sphere.Radius())
-			{
-				return true;
-			}
-			return false;
-		}
-
-		template KLAYGE_CORE_API bool intersect_ray(Sphere const & sphere, float3 const & orig, float3 const & dir);
-
-		template <typename T>
-		bool intersect_ray(Sphere_T<T> const & sphere, Vector_T<T, 3> const & orig, Vector_T<T, 3> const & dir)
-		{
-			T const a = length_sq(dir);
-			T const b = 2 * dot(dir, orig - sphere.Center());
-			T const c = length_sq(orig - sphere.Center()) - sphere.Radius() * sphere.Radius();
-
-			if (b * b - 4 * a * c < 0)
-			{
-				return false;
-			}
-			return true;
-		}
-
-		template KLAYGE_CORE_API bool vec_in_box(AABBox const & aabb, float3 const & v);
-
-		template <typename T>
-		bool vec_in_box(AABBox_T<T> const & aabb, Vector_T<T, 3> const & v)
-		{
-			return (in_bound(v.x(), aabb.Min().x(), aabb.Max().x()))
-				&& (in_bound(v.y(), aabb.Min().y(), aabb.Max().y()))
-				&& (in_bound(v.z(), aabb.Min().z(), aabb.Max().z()));
-		}
-
-		template KLAYGE_CORE_API bool intersect_ray(AABBox const & aabb, float3 const & orig, float3 const & dir);
-
-		template <typename T>
-		bool intersect_ray(AABBox_T<T> const & aabb, Vector_T<T, 3> const & orig, Vector_T<T, 3> const & dir)
-		{
-			float t_near = -1e10f;
-			float t_far = +1e10f;
-
-			for (int i = 0; i < 3; ++ i)
-			{
-				if (equal(dir[i], T(0)))
-				{
-					if ((dir[i] < aabb.Min()[i]) || (dir[i] > aabb.Max()[i]))
-					{
-						return false;
-					}
-				}
-				else
-				{
-					float t1 = (aabb.Min()[i] - orig[i]) / dir[i];
-					float t2 = (aabb.Max()[i] - orig[i]) / dir[i];
-					if (t1 > t2)
-					{
-						std::swap(t1, t2);
-					}
-					if (t1 > t_near)
-					{
-						t_near = t1;
-					}
-					if (t2 < t_far)
-					{
-						t_far = t2;
-					}
-
-					if (t_near > t_far)
-					{
-						// box is missed
-						return false;
-					}
-					if (t_far < 0)
-					{
-						// box is behind ray
-						return false;
-					}
-				}
-			}
-
-			return true;
-		}
-
 		template KLAYGE_CORE_API AABBox compute_aabbox(float3* first, float3* last);
 		template KLAYGE_CORE_API AABBox compute_aabbox(float4* first, float4* last);
 		template KLAYGE_CORE_API AABBox compute_aabbox(float3 const * first, float3 const * last);
@@ -1957,22 +1869,23 @@ namespace KlayGE
 			return Sphere_T<value_type>(center, r);
 		}
 
-		template KLAYGE_CORE_API AABBox transform_aabbox(AABBox const & aabb, float4x4 const & mat);
+
+		template KLAYGE_CORE_API AABBox transform_aabb(AABBox const & aabb, float4x4 const & mat);
 
 		template <typename T>
-		AABBox_T<T> transform_aabbox(AABBox_T<T> const & aabb, Matrix4_T<T> const & mat)
+		AABBox_T<T> transform_aabb(AABBox_T<T> const & aabb, Matrix4_T<T> const & mat)
 		{
 			Vector_T<T, 3> scale, trans;
 			Quaternion_T<T> rot;
 			decompose(scale, rot, trans, mat);
 
-			return transform_aabbox(aabb, scale.x(), rot, trans);
+			return transform_aabb(aabb, scale.x(), rot, trans);
 		}
 
-		template KLAYGE_CORE_API AABBox transform_aabbox(AABBox const & aabb, float scale, Quaternion const & rot, float3 const & trans);
+		template KLAYGE_CORE_API AABBox transform_aabb(AABBox const & aabb, float scale, Quaternion const & rot, float3 const & trans);
 
 		template <typename T>
-		AABBox_T<T> transform_aabbox(AABBox_T<T> const & aabb, T scale, Quaternion_T<T> const & rot, Vector_T<T, 3> const & trans)
+		AABBox_T<T> transform_aabb(AABBox_T<T> const & aabb, T scale, Quaternion_T<T> const & rot, Vector_T<T, 3> const & trans)
 		{
 			float3 min, max;
 			min = max = transform_quat(aabb[0] * scale, rot) + trans;
@@ -2029,6 +1942,364 @@ namespace KlayGE
 			Vector_T<T, 3> center = transform_quat(sphere.Center() * scale, rot) + trans;
 			T radius = sphere.Radius() * scale;
 			return Sphere_T<T>(center, radius);
+		}
+
+		template KLAYGE_CORE_API bool intersect_point_aabb(float3 const & v, AABBox const & aabb);
+
+		template <typename T>
+		bool intersect_point_aabb(Vector_T<T, 3> const & v, AABBox_T<T> const & aabb)
+		{
+			return (in_bound(v.x(), aabb.Min().x(), aabb.Max().x()))
+				&& (in_bound(v.y(), aabb.Min().y(), aabb.Max().y()))
+				&& (in_bound(v.z(), aabb.Min().z(), aabb.Max().z()));
+		}
+
+		template KLAYGE_CORE_API bool intersect_point_obb(float3 const & v, OBBox const & obb);
+
+		template <typename T>
+		bool intersect_point_obb(Vector_T<T, 3> const & v, OBBox_T<T> const & obb)
+		{
+			Vector_T<T, 3> d = v - obb.Center();
+			return (dot(d, obb.Axis(0)) <= obb.HalfSize().x())
+				&& (dot(d, obb.Axis(1)) <= obb.HalfSize().y())
+				&& (dot(d, obb.Axis(2)) <= obb.HalfSize().z());
+		}
+
+		template KLAYGE_CORE_API bool intersect_point_sphere(float3 const & v, Sphere const & sphere);
+
+		template <typename T>
+		bool intersect_point_sphere(Vector_T<T, 3> const & v, Sphere_T<T> const & sphere)
+		{
+			return length(v - sphere.Center()) < sphere.Radius();
+		}
+
+		template KLAYGE_CORE_API bool intersect_point_frustum(float3 const & v, Frustum const & frustum);
+
+		template <typename T>
+		bool intersect_point_frustum(Vector_T<T, 3> const & v, Frustum_T<T> const & frustum)
+		{
+			for (int i = 0; i < 6; ++ i)
+			{
+				if (dot_coord(frustum.FrustumPlane(i), v) < 0)
+				{
+					return false;
+				}
+			}
+			return true;
+		}
+
+
+		template KLAYGE_CORE_API bool intersect_ray_aabb(float3 const & orig, float3 const & dir, AABBox const & aabb);
+
+		template <typename T>
+		bool intersect_ray_aabb(Vector_T<T, 3> const & orig, Vector_T<T, 3> const & dir, AABBox_T<T> const & aabb)
+		{
+			T t_near = T(-1e10);
+			T t_far = T(+1e10);
+
+			for (int i = 0; i < 3; ++ i)
+			{
+				if (equal(dir[i], T(0)))
+				{
+					if ((dir[i] < aabb.Min()[i]) || (dir[i] > aabb.Max()[i]))
+					{
+						return false;
+					}
+				}
+				else
+				{
+					float t1 = (aabb.Min()[i] - orig[i]) / dir[i];
+					float t2 = (aabb.Max()[i] - orig[i]) / dir[i];
+					if (t1 > t2)
+					{
+						std::swap(t1, t2);
+					}
+					if (t1 > t_near)
+					{
+						t_near = t1;
+					}
+					if (t2 < t_far)
+					{
+						t_far = t2;
+					}
+
+					if (t_near > t_far)
+					{
+						// box is missed
+						return false;
+					}
+					if (t_far < 0)
+					{
+						// box is behind ray
+						return false;
+					}
+				}
+			}
+
+			return true;
+		}
+		
+		template KLAYGE_CORE_API bool intersect_ray_sphere(float3 const & orig, float3 const & dir, Sphere const & sphere);
+
+		template <typename T>
+		bool intersect_ray_sphere(Vector_T<T, 3> const & orig, Vector_T<T, 3> const & dir, Sphere_T<T> const & sphere)
+		{
+			T const a = length_sq(dir);
+			T const b = 2 * dot(dir, orig - sphere.Center());
+			T const c = length_sq(orig - sphere.Center()) - sphere.Radius() * sphere.Radius();
+
+			if (b * b - 4 * a * c < 0)
+			{
+				return false;
+			}
+			return true;
+		}
+
+
+		template KLAYGE_CORE_API bool intersect_aabb_aabb(AABBox const & lhs, AABBox const & aabb);
+
+		template <typename T>
+		bool intersect_aabb_aabb(AABBox_T<T> const & lhs, AABBox_T<T> const & aabb)
+		{
+			Vector_T<T, 3> const t = aabb.Center() - lhs.Center();
+			Vector_T<T, 3> const e = aabb.HalfSize() + lhs.HalfSize();
+			return (MathLib::abs(t.x()) <= e.x()) && (MathLib::abs(t.y()) <= e.y()) && (MathLib::abs(t.z()) <= e.z());
+		}
+
+		template KLAYGE_CORE_API bool intersect_aabb_obb(AABBox const & lhs, OBBox const & obb);
+
+		template <typename T>
+		bool intersect_aabb_obb(AABBox_T<T> const & lhs, OBBox_T<T> const & obb)
+		{
+			return obb.Intersect(OBBox_T<T>(lhs));
+		}
+
+		template KLAYGE_CORE_API bool intersect_aabb_sphere(AABBox const & lhs, Sphere const & sphere);
+
+		template <typename T>
+		bool intersect_aabb_sphere(AABBox_T<T> const & lhs, Sphere_T<T> const & sphere)
+		{
+			Vector_T<T, 3> half_size = lhs.HalfSize();
+			Vector_T<T, 3> d = sphere.Center() - lhs.Center();
+			Vector_T<T, 3> closest_point_on_obb = lhs.Center();
+			for (int i = 0; i < 3; ++ i)
+			{
+				Vector_T<T, 3> axis(0, 0, 0);
+				axis[i] = 1;
+				T dist = MathLib::dot(d, axis);
+				if (dist > half_size[i])
+				{
+					dist = half_size[i];
+				}
+				if (dist < -half_size[i])
+				{
+					dist = -half_size[i];
+				}
+				closest_point_on_obb += dist * axis;
+			}
+
+			Vector_T<T, 3> v = closest_point_on_obb - sphere.Center();
+			return MathLib::length_sq(v) <= sphere.Radius() * sphere.Radius();
+		}
+
+		template KLAYGE_CORE_API bool intersect_obb_obb(OBBox const & lhs, OBBox const & obb);
+
+		template <typename T>
+		bool intersect_obb_obb(OBBox_T<T> const & lhs, OBBox_T<T> const & obb)
+		{
+			// From Real-Time Collision Detection, p. 101-106. See http://realtimecollisiondetection.net/
+
+			T epsilon = T(1e-3);
+
+			Matrix4_T<T> r_mat = Matrix4_T<T>::Identity();
+			for (int i = 0; i < 3; ++ i)
+			{
+				for (int j = 0; j < 3; ++ j)
+				{
+					r_mat(i, j) = MathLib::dot(lhs.Axis(i), obb.Axis(j));
+				}
+			}
+
+			Vector_T<T, 3> t = obb.Center() - lhs.Center();
+			t = Vector_T<T, 3>(MathLib::dot(t, lhs.Axis(0)), MathLib::dot(t, lhs.Axis(1)), MathLib::dot(t, lhs.Axis(2)));
+
+			Matrix4_T<T> abs_r_mat = Matrix4_T<T>::Identity();
+			for (int i = 0; i < 3; ++ i)
+			{
+				for (int j = 0; j < 3; ++ j)
+				{
+					abs_r_mat(i, j) = MathLib::abs(r_mat(i, j)) + epsilon;
+				}
+			}
+
+			Vector_T<T, 3> const & lr = lhs.HalfSize();
+			Vector_T<T, 3> const & rr = obb.HalfSize();
+
+			// Test the three major axes of this OBB.
+			for (int i = 0; i < 3; ++ i)
+			{
+				T ra = lr[i];
+				T rb = rr[0] * abs_r_mat(i, 0) +  rr[1] * abs_r_mat(i, 1) + rr[2] * abs_r_mat(i, 2);
+				if (MathLib::abs(t[i]) > ra + rb) 
+				{
+					return false;
+				}
+			}
+
+			// Test the three major axes of the OBB b.
+			for (int i = 0; i < 3; ++ i)
+			{
+				T ra = lr[0] * abs_r_mat(0, i) + lr[1] * abs_r_mat(1, i) + lr[2] * abs_r_mat(2, i);
+				T rb = rr[i];
+				if (MathLib::abs(t.x() + r_mat(0, i) + t.y() * r_mat(1, i) + t.z() * r_mat(2, i)) > ra + rb)
+				{
+					return false;
+				}
+			}
+
+			// Test the 9 different cross-axes.
+
+			// A.x <cross> B.x
+			T ra = lr.y() * abs_r_mat(2, 0) + lr.z() * abs_r_mat(1, 0);
+			T rb = rr.y() * abs_r_mat(0, 2) + rr.z() * abs_r_mat(0, 1);
+			if (MathLib::abs(t.z() * r_mat(1, 0) - t.y() * r_mat(2, 0)) > ra + rb)
+			{
+				return false;
+			}
+
+			// A.x < cross> B.y
+			ra = lr.y() * abs_r_mat(2, 1) + lr.z() * abs_r_mat(1, 1);
+			rb = rr.x() * abs_r_mat(0, 2) + rr.z() * abs_r_mat(0, 0);
+			if (MathLib::abs(t.z() * r_mat(1, 1) - t.y() * r_mat(2, 1)) > ra + rb)
+			{
+				return false;
+			}
+
+			// A.x <cross> B.z
+			ra = lr.y() * abs_r_mat(2, 2) + lr.z() * abs_r_mat(1, 2);
+			rb = rr.x() * abs_r_mat(0, 1) + rr.y() * abs_r_mat(0, 0);
+			if (MathLib::abs(t.z() * r_mat(1, 2) - t.y() * r_mat(2, 2)) > ra + rb)
+			{
+				return false;
+			}
+
+			// A.y <cross> B.x
+			ra = lr.x() * abs_r_mat(2, 0) + lr.z() * abs_r_mat(0, 0);
+			rb = rr.y() * abs_r_mat(1, 2) + rr.z() * abs_r_mat(1, 1);
+			if (MathLib::abs(t.x() * r_mat(2, 0) - t.z() * r_mat(0, 0)) > ra + rb)
+			{
+				return false;
+			}
+
+			// A.y <cross> B.y
+			ra = lr.x() * abs_r_mat(2, 1) + lr.z() * abs_r_mat(0, 1);
+			rb = rr.x() * abs_r_mat(1, 2) + rr.z() * abs_r_mat(1, 0);
+			if (MathLib::abs(t.x() * r_mat(2, 1) - t.z() * r_mat(0, 1)) > ra + rb)
+			{
+				return false;
+			}
+
+			// A.y <cross> B.z
+			ra = lr.x() * abs_r_mat(2, 2) + lr.z() * abs_r_mat(0, 2);
+			rb = rr.x() * abs_r_mat(1, 1) + rr.y() * abs_r_mat(1, 0);
+			if (MathLib::abs(t.x() * r_mat(2, 2) - t.z() * r_mat(0, 2)) > ra + rb)
+			{
+				return false;
+			}
+
+			// A.z <cross> B.x
+			ra = lr.x() * abs_r_mat(1, 0) + lr.y() * abs_r_mat(0, 0);
+			rb = rr.y() * abs_r_mat(2, 2) + rr.z() * abs_r_mat(2, 1);
+			if (MathLib::abs(t.y() * r_mat(0, 0) - t.x() * r_mat(1, 0)) > ra + rb)
+			{
+				return false;
+			}
+
+			// A.z <cross> B.y
+			ra = lr.x() * abs_r_mat(1, 1) + lr.y() * abs_r_mat(0, 1);
+			rb = rr.x() * abs_r_mat(2, 2) + rr.z() * abs_r_mat(2, 0);
+			if (MathLib::abs(t.y() * r_mat(0, 1) - t.x() * r_mat(1, 1)) > ra + rb)
+			{
+				return false;
+			}
+
+			// A.z <cross> B.z
+			ra = lr.x() * abs_r_mat(1, 2) + lr.y() * abs_r_mat(0, 2);
+			rb = rr.x() * abs_r_mat(2, 1) + rr.y() * abs_r_mat(2, 0);
+			if (MathLib::abs(t.y() * r_mat(0, 2) - t.x() * r_mat(1, 2)) > ra + rb)
+			{
+				return false;
+			}
+
+			return true;
+		}
+
+		template KLAYGE_CORE_API bool intersect_obb_sphere(OBBox const & lhs, Sphere const & sphere);
+
+		template <typename T>
+		bool intersect_obb_sphere(OBBox_T<T> const & lhs, Sphere_T<T> const & sphere)
+		{
+			Vector_T<T, 3> d = sphere.Center() - lhs.Center();
+			Vector_T<T, 3> closest_point_on_obb = lhs.Center();
+			for (int i = 0; i < 3; ++ i)
+			{
+				T dist = MathLib::dot(d, lhs.Axis(i));
+				if (dist > lhs.HalfSize()[i])
+				{
+					dist = lhs.HalfSize()[i];
+				}
+				if (dist < -lhs.HalfSize()[i])
+				{
+					dist = -lhs.HalfSize()[i];
+				}
+				closest_point_on_obb += dist * lhs.Axis(i);
+			}
+
+			Vector_T<T, 3> v = closest_point_on_obb - sphere.Center();
+			return MathLib::length_sq(v) <= sphere.Radius() * sphere.Radius();
+		}
+
+		template KLAYGE_CORE_API bool intersect_sphere_sphere(Sphere const & lhs, Sphere const & sphere);
+
+		template <typename T>
+		bool intersect_sphere_sphere(Sphere_T<T> const & lhs, Sphere_T<T> const & sphere)
+		{
+			Vector_T<T, 3> d = lhs.Center() - sphere.Center();
+			float r = lhs.Radius() + sphere.Radius();
+			return MathLib::length_sq(d) <= r * r;
+		}
+
+
+		template KLAYGE_CORE_API BoundOverlap intersect_aabb_frustum(AABBox const & lhs, Frustum const & frustum);
+
+		template <typename T>
+		BoundOverlap intersect_aabb_frustum(AABBox_T<T> const & lhs, Frustum_T<T> const & frustum)
+		{
+			return frustum.Intersect(lhs);
+		}
+
+		template KLAYGE_CORE_API BoundOverlap intersect_obb_frustum(OBBox const & lhs, Frustum const & frustum);
+
+		template <typename T>
+		BoundOverlap intersect_obb_frustum(OBBox_T<T> const & lhs, Frustum_T<T> const & frustum)
+		{
+			return frustum.Intersect(lhs);
+		}
+
+		template KLAYGE_CORE_API BoundOverlap intersect_sphere_frustum(Sphere const & lhs, Frustum const & frustum);
+
+		template <typename T>
+		BoundOverlap intersect_sphere_frustum(Sphere_T<T> const & lhs, Frustum_T<T> const & frustum)
+		{
+			return frustum.Intersect(lhs);
+		}
+
+		template KLAYGE_CORE_API BoundOverlap intersect_frustum_frustum(Frustum const & lhs, Frustum const & frustum);
+
+		template <typename T>
+		BoundOverlap intersect_frustum_frustum(Frustum_T<T> const & /*lhs*/, Frustum_T<T> const & /*frustum*/)
+		{
+			return BO_No;
 		}
 
 

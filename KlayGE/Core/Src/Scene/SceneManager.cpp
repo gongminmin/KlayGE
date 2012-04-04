@@ -160,7 +160,7 @@ namespace KlayGE
 							AABBox const & aabb = obj->Bound();
 							float4x4 const & mat = obj->ModelMatrix();
 
-							aabb_in_ws = MathLib::transform_aabbox(aabb, mat);
+							aabb_in_ws = MathLib::transform_aabb(aabb, mat);
 						}
 						else
 						{
@@ -218,7 +218,7 @@ namespace KlayGE
 		{
 			AABBox const & aabb = obj->Bound();
 			float4x4 const & mat = obj->ModelMatrix();
-			scene_obj_bbs_.push_back(MakeSharedPtr<AABBox>(MathLib::transform_aabbox(aabb, mat)));
+			scene_obj_bbs_.push_back(MakeSharedPtr<AABBox>(MathLib::transform_aabb(aabb, mat)));
 		}
 		else
 		{

@@ -200,7 +200,7 @@ namespace KlayGE
 
 		bool VecInBound(Vector_T<T, 3> const & v) const
 		{
-			return MathLib::vec_in_box(*this, v);
+			return MathLib::intersect_point_aabb(v, *this);
 		}
 		T MaxRadiusSq() const
 		{
@@ -209,41 +209,19 @@ namespace KlayGE
 
 		bool Intersect(AABBox_T<T> const & aabb) const
 		{
-			float3 const t = aabb.Center() - this->Center();
-			float3 const e = this->HalfSize() + aabb.HalfSize();
-			return (MathLib::abs(t.x()) <= e.x()) && (MathLib::abs(t.y()) <= e.y()) && (MathLib::abs(t.z()) <= e.z());
+			return MathLib::intersect_aabb_aabb(*this, aabb);
 		}
 		bool Intersect(OBBox_T<T> const & obb) const
 		{
-			return obb.Intersect(OBBox_T<T>(*this));
+			return MathLib::intersect_aabb_obb(*this, obb);
 		}
 		bool Intersect(Sphere_T<T> const & sphere) const
 		{
-			Vector_T<T, 3> half_size = this->HalfSize();
-			Vector_T<T, 3> d = sphere.Center() - this->Center();
-			Vector_T<T, 3> closest_point_on_obb = this->Center();
-			for (int i = 0; i < 3; ++ i)
-			{
-				Vector_T<T, 3> axis(0, 0, 0);
-				axis[i] = 1;
-				T dist = MathLib::dot(d, axis);
-				if (dist > half_size[i])
-				{
-					dist = half_size[i];
-				}
-				if (dist < -half_size[i])
-				{
-					dist = -half_size[i];
-				}
-				closest_point_on_obb += dist * axis;
-			}
-
-			Vector_T<T, 3> v = closest_point_on_obb - sphere.Center();
-			return MathLib::length_sq(v) <= sphere.Radius() * sphere.Radius();
+			return MathLib::intersect_aabb_sphere(*this, sphere);
 		}
 		bool Intersect(Frustum_T<T> const & frustum) const
 		{
-			return frustum.Intersect(*this) != BO_No;
+			return MathLib::intersect_aabb_frustum(*this, frustum) != BO_No;
 		}
 
 		friend bool

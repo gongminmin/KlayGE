@@ -74,14 +74,7 @@ namespace KlayGE
 
 		bool VecInBound(Vector_T<T, 3> const & v) const
 		{
-			for (int i = 0; i < 6; ++ i)
-			{
-				if (MathLib::dot_coord(planes_[i], v) < 0)
-				{
-					return false;
-				}
-			}
-			return true;
+			return MathLib::intersect_point_frustum(v, *this);
 		}
 		float MaxRadiusSq() const
 		{

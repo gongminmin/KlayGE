@@ -1134,7 +1134,7 @@ namespace KlayGE
 									*light_volume_mv_param_ = light_model * view_;
 									*light_volume_mvp_param_ = light_model * vp;
 
-									if (scene_mgr.AABBVisible(MathLib::transform_aabbox(cone_bbox_, light_model)))
+									if (scene_mgr.AABBVisible(MathLib::transform_aabb(cone_bbox_, light_model)))
 									{
 										if (attr & LSA_IndirectLighting)
 										{
@@ -1216,7 +1216,7 @@ namespace KlayGE
 										*light_volume_mv_param_ = light_model * view_;
 										*light_volume_mvp_param_ = light_model * vp;
 
-										if (scene_mgr.AABBVisible(MathLib::transform_aabbox(box_bbox_, light_model)))
+										if (scene_mgr.AABBVisible(MathLib::transform_aabb(box_bbox_, light_model)))
 										{
 											pass_scaned_.push_back(static_cast<uint32_t>((PT_Lighting << 24) + (i << 12) + 6));
 
