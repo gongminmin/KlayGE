@@ -81,7 +81,7 @@ namespace KlayGE
 				typedef BOOST_TYPEOF(formats) FormatsType;
 				BOOST_FOREACH(FormatsType::reference format, formats)
 				{
-					UINT num;
+					UINT num = 0;
 					output->GetDisplayModeList(format, DXGI_ENUM_MODES_SCALING, &num, 0);
 					if (num > 0)
 					{
