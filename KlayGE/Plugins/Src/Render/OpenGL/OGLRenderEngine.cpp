@@ -1719,7 +1719,7 @@ namespace KlayGE
 			rendertarget_format_.insert(EF_ABGR32UI);
 			rendertarget_format_.insert(EF_ABGR32I);
 		}
-		if (glloader_GL_VERSION_3_0() || (glloader_GL_ARB_half_float_pixel && glloader_GL_ARB_texture_rg()))
+		if (glloader_GL_VERSION_3_0() || (glloader_GL_ARB_half_float_pixel() && glloader_GL_ARB_texture_rg()))
 		{
 			rendertarget_format_.insert(EF_R16F);
 			rendertarget_format_.insert(EF_GR16F);
