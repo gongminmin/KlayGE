@@ -81,6 +81,11 @@ namespace KlayGE
 			return 0;
 		}
 
+		void FrustumPlane(uint32_t index, Plane_T<T> const & plane)
+		{
+			planes_[index] = plane;
+			vertex_lut_[index] = ((planes_[index].a() < 0) ? 1 : 0) | ((planes_[index].b() < 0) ? 2 : 0) | ((planes_[index].c() < 0) ? 4 : 0);
+		}
 		Plane_T<T> const & FrustumPlane(uint32_t index) const
 		{
 			return planes_[index];

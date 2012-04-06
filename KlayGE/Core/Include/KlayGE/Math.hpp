@@ -628,9 +628,9 @@ namespace KlayGE
 		template <typename T>
 		Sphere_T<T> transform_sphere(Sphere_T<T> const & sphere, T scale, Quaternion_T<T> const & rot, Vector_T<T, 3> const & trans);
 		template <typename T>
-		Sphere_T<T> transform_frustum(Frustum_T<T> const & sphere, Matrix4_T<T> const & mat);
+		Frustum_T<T> transform_frustum(Frustum_T<T> const & frustum, Matrix4_T<T> const & mat);
 		template <typename T>
-		Sphere_T<T> transform_frustum(Frustum_T<T> const & sphere, T scale, Quaternion_T<T> const & rot, Vector_T<T, 3> const & trans);
+		Frustum_T<T> transform_frustum(Frustum_T<T> const & frustum, T scale, Quaternion_T<T> const & rot, Vector_T<T, 3> const & trans);
 
 		template <typename T>
 		bool intersect_point_aabb(Vector_T<T, 3> const & v, AABBox_T<T> const & aabb);
@@ -643,6 +643,8 @@ namespace KlayGE
 
 		template <typename T>
 		bool intersect_ray_aabb(Vector_T<T, 3> const & orig, Vector_T<T, 3> const & dir, AABBox_T<T> const & aabb);
+		template <typename T>
+		bool intersect_ray_obb(Vector_T<T, 3> const & orig, Vector_T<T, 3> const & dir, OBBox_T<T> const & obb);
 		template <typename T>
 		bool intersect_ray_sphere(Vector_T<T, 3> const & orig, Vector_T<T, 3> const & dir, Sphere_T<T> const & sphere);
 

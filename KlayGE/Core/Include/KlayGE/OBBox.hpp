@@ -152,7 +152,7 @@ namespace KlayGE
 		}
 		bool Intersect(Frustum_T<T> const & frustum) const
 		{
-			return MathLib::intersect_obb_frustum(*this, frsutum) != BO_No;
+			return MathLib::intersect_obb_frustum(*this, frustum) != BO_No;
 		}
 
 		friend bool

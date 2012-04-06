@@ -1944,6 +1944,30 @@ namespace KlayGE
 			return Sphere_T<T>(center, radius);
 		}
 
+		template KLAYGE_CORE_API Frustum transform_frustum(Frustum const & frustum, float4x4 const & mat);
+
+		template <typename T>
+		Frustum_T<T> transform_frustum(Frustum_T<T> const & frustum, Matrix4_T<T> const & mat)
+		{
+			Frustum_T<T> ret;
+			for (int i = 0; i < 6; ++ i)
+			{
+				ret.FrustumPlane(i, normalize(mul(frustum.FrustumPlane(i), mat)));
+			}
+
+			return ret;
+		}
+
+		template KLAYGE_CORE_API Frustum transform_frustum(Frustum const & frustum, float scale, Quaternion const & rot, float3 const & trans);
+
+		template <typename T>
+		Frustum_T<T> transform_frustum(Frustum_T<T> const & frustum, T scale, Quaternion_T<T> const & rot, Vector_T<T, 3> const & trans)
+		{
+			Vector_T<T, 3> vscale(scale, scale, scale);
+			return transform_frustum(frustum, transformation<T>(NULL, NULL, &vscale, NULL, &rot, &trans));
+		}
+
+
 		template KLAYGE_CORE_API bool intersect_point_aabb(float3 const & v, AABBox const & aabb);
 
 		template <typename T>
@@ -2010,6 +2034,60 @@ namespace KlayGE
 				{
 					float t1 = (aabb.Min()[i] - orig[i]) / dir[i];
 					float t2 = (aabb.Max()[i] - orig[i]) / dir[i];
+					if (t1 > t2)
+					{
+						std::swap(t1, t2);
+					}
+					if (t1 > t_near)
+					{
+						t_near = t1;
+					}
+					if (t2 < t_far)
+					{
+						t_far = t2;
+					}
+
+					if (t_near > t_far)
+					{
+						// box is missed
+						return false;
+					}
+					if (t_far < 0)
+					{
+						// box is behind ray
+						return false;
+					}
+				}
+			}
+
+			return true;
+		}
+
+		template KLAYGE_CORE_API bool intersect_ray_obb(float3 const & orig, float3 const & dir, OBBox const & obb);
+
+		template <typename T>
+		bool intersect_ray_obb(Vector_T<T, 3> const & orig, Vector_T<T, 3> const & dir, OBBox_T<T> const & obb)
+		{
+			T t_near = T(-1e10);
+			T t_far = T(+1e10);
+			
+			Vector_T<T, 3> p = obb.Center() - orig;
+			Vector_T<T, 3> const & extent = obb.HalfSize();
+			for (int i = 0; i < 3; ++ i)
+			{
+				T e = dot(obb.Axis(i), p);
+				T f = dot(obb.Axis(i), dir);
+				if (equal(f, T(0)))
+				{
+					if ((e < -extent[i]) || (e > extent[i]))
+					{
+						return false;
+					}
+				}
+				else
+				{
+					float t1 = (e + extent[i]) / f;
+					float t2 = (e - extent[i]) / f;
 					if (t1 > t2)
 					{
 						std::swap(t1, t2);
