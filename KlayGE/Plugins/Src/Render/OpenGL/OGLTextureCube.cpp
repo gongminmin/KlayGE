@@ -71,12 +71,12 @@ namespace KlayGE
 			num_mip_maps_ = numMipMaps;
 		}
 
-		widthes_.resize(num_mip_maps_);
+		widths_.resize(num_mip_maps_);
 		{
 			uint32_t s = size;
 			for (uint32_t level = 0; level < num_mip_maps_; ++ level)
 			{
-				widthes_[level] = s;
+				widths_[level] = s;
 
 				s = std::max<uint32_t>(1U, s / 2);
 			}
@@ -112,7 +112,7 @@ namespace KlayGE
 			{
 				for (uint32_t level = 0; level < num_mip_maps_; ++ level)
 				{
-					uint32_t const s = widthes_[level];
+					uint32_t const s = widths_[level];
 
 					if (!pbos_.empty())
 					{
@@ -199,7 +199,7 @@ namespace KlayGE
 	{
 		BOOST_ASSERT(level < num_mip_maps_);
 
-		return widthes_[level];
+		return widths_[level];
 	}
 
 	uint32_t OGLTextureCube::Height(uint32_t level) const
@@ -410,7 +410,7 @@ namespace KlayGE
 			block_size = 0;
 		}
 
-		row_pitch = widthes_[level] * texel_size;
+		row_pitch = widths_[level] * texel_size;
 
 		uint8_t* p;
 		OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
@@ -485,7 +485,7 @@ namespace KlayGE
 		}
 		else
 		{
-			data = p + (y_offset * widthes_[level] + x_offset) * texel_size;
+			data = p + (y_offset * widths_[level] + x_offset) * texel_size;
 		}
 	}
 
@@ -525,7 +525,7 @@ namespace KlayGE
 						block_size = 16;
 					}
 
-					image_size = ((widthes_[level] + 3) / 4) * ((widthes_[level] + 3) / 4) * block_size;
+					image_size = ((widths_[level] + 3) / 4) * ((widths_[level] + 3) / 4) * block_size;
 				}
 
 				glBindTexture(target_type_, texture_);
@@ -549,12 +549,12 @@ namespace KlayGE
 					if (array_size_ > 1)
 					{
 						glCompressedTexSubImage3D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + face, level,
-							0, 0, array_index, widthes_[level], widthes_[level], 1, gl_format, image_size, p);
+							0, 0, array_index, widths_[level], widths_[level], 1, gl_format, image_size, p);
 					}
 					else
 					{
 						glCompressedTexSubImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + face, level,
-							0, 0, widthes_[level], widthes_[level], gl_format, image_size, p);
+							0, 0, widths_[level], widths_[level], gl_format, image_size, p);
 					}
 				}
 				else
@@ -562,13 +562,13 @@ namespace KlayGE
 					if (array_size_ > 1)
 					{
 						glTexSubImage3D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + face, level,
-							0, 0, array_index, widthes_[level], widthes_[level], 1,
+							0, 0, array_index, widths_[level], widths_[level], 1,
 							gl_format, gl_type, p);
 					}
 					else
 					{
 						glTexSubImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + face, level,
-							0, 0, widthes_[level], widthes_[level],
+							0, 0, widths_[level], widths_[level],
 							gl_format, gl_type, p);
 					}
 				}

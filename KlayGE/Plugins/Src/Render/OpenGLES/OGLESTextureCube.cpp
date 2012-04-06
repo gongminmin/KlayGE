@@ -81,13 +81,13 @@ namespace KlayGE
 		}
 
 		tex_data_.resize(6 * num_mip_maps_);
-		widthes_.resize(6 * num_mip_maps_);
+		widths_.resize(6 * num_mip_maps_);
 		for (int face = 0; face < 6; ++ face)
 		{
 			uint32_t s = size;
 			for (uint32_t level = 0; level < num_mip_maps_; ++ level)
 			{
-				widthes_[face * num_mip_maps_ + level] = s;
+				widths_[face * num_mip_maps_ + level] = s;
 
 				if (IsCompressedFormat(format_))
 				{
@@ -142,7 +142,7 @@ namespace KlayGE
 	{
 		BOOST_ASSERT(level < num_mip_maps_);
 
-		return widthes_[level];
+		return widths_[level];
 	}
 
 	uint32_t OGLESTextureCube::Height(uint32_t level) const
@@ -154,7 +154,7 @@ namespace KlayGE
 	{
 		BOOST_ASSERT(type_ == target.Type());
 
-		if ((format_ == target.Format()) && (widthes_[0] == target.Width(0)))
+		if ((format_ == target.Format()) && (widths_[0] == target.Width(0)))
 		{
 			uint32_t texel_size = NumFormatBytes(format_);
 
@@ -355,7 +355,7 @@ namespace KlayGE
 			block_size = 0;
 		}
 
-		row_pitch = widthes_[level] * texel_size;
+		row_pitch = widths_[level] * texel_size;
 
 		uint8_t* p = &tex_data_[face * num_mip_maps_ + level][0];
 		if (IsCompressedFormat(format_))
@@ -364,7 +364,7 @@ namespace KlayGE
 		}
 		else
 		{
-			data = p + (y_offset * widthes_[level] + x_offset) * texel_size;
+			data = p + (y_offset * widths_[level] + x_offset) * texel_size;
 		}
 	}
 
@@ -404,12 +404,12 @@ namespace KlayGE
 					GLsizei const image_size = ((this->Width(level) + 3) / 4) * ((this->Height(level) + 3) / 4) * block_size;
 
 					glCompressedTexSubImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + face, level,
-						0, 0, widthes_[level], widthes_[level], gl_format, image_size, &tex_data_[face * num_mip_maps_ + level][0]);
+						0, 0, widths_[level], widths_[level], gl_format, image_size, &tex_data_[face * num_mip_maps_ + level][0]);
 				}
 				else
 				{
 					glTexSubImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + face, level,
-						0, 0, widthes_[level], widthes_[level],
+						0, 0, widths_[level], widths_[level],
 						gl_format, gl_type, &tex_data_[face * num_mip_maps_ + level][0]);
 				}
 			}

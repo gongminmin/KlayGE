@@ -80,7 +80,7 @@ namespace KlayGE
 
 		array_size_ = array_size;
 		format_		= format;
-		widthes_.assign(1, size);
+		widths_.assign(1, size);
 
 		desc_.Width = size;
 		desc_.Height = size;
@@ -118,7 +118,7 @@ namespace KlayGE
 	{
 		BOOST_ASSERT(level < num_mip_maps_);
 
-		return widthes_[level];
+		return widths_[level];
 	}
 
 	uint32_t D3D11TextureCube::Height(uint32_t level) const
@@ -375,11 +375,11 @@ namespace KlayGE
 		array_size_ = desc_.ArraySize / 6;
 		BOOST_ASSERT(num_mip_maps_ != 0);
 
-		widthes_.resize(num_mip_maps_);
-		widthes_[0] = desc_.Width;
+		widths_.resize(num_mip_maps_);
+		widths_[0] = desc_.Width;
 		for (uint32_t level = 1; level < num_mip_maps_; ++ level)
 		{
-			widthes_[level] = std::max<uint32_t>(1U, widthes_[level - 1] / 2);
+			widths_[level] = std::max<uint32_t>(1U, widths_[level - 1] / 2);
 		}
 
 		format_ = D3D11Mapping::MappingFormat(desc_.Format);

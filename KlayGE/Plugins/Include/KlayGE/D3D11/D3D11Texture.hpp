@@ -149,7 +149,7 @@ namespace KlayGE
 		D3D11_TEXTURE1D_DESC desc_;
 		ID3D11Texture1DPtr d3dTexture1D_;
 
-		std::vector<uint32_t> widthes_;
+		std::vector<uint32_t> widths_;
 	};
 
 	class D3D11Texture2D : public D3D11Texture
@@ -198,7 +198,7 @@ namespace KlayGE
 		D3D11_TEXTURE2D_DESC desc_;
 		ID3D11Texture2DPtr d3dTexture2D_;
 
-		std::vector<uint32_t>	widthes_;
+		std::vector<uint32_t>	widths_;
 		std::vector<uint32_t>	heights_;
 	};
 
@@ -247,7 +247,7 @@ namespace KlayGE
 		D3D11_TEXTURE3D_DESC desc_;
 		ID3D11Texture3DPtr d3dTexture3D_;
 
-		std::vector<uint32_t>	widthes_;
+		std::vector<uint32_t>	widths_;
 		std::vector<uint32_t>	heights_;
 		std::vector<uint32_t>	depthes_;
 	};
@@ -302,7 +302,7 @@ namespace KlayGE
 		D3D11_TEXTURE2D_DESC desc_;
 		ID3D11TextureCubePtr d3dTextureCube_;
 
-		std::vector<uint32_t>	widthes_;
+		std::vector<uint32_t>	widths_;
 	};
 }
 

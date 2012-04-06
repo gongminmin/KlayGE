@@ -83,11 +83,11 @@ namespace KlayGE
 		}
 
 		tex_data_.resize(num_mip_maps_);
-		widthes_.resize(num_mip_maps_);
+		widths_.resize(num_mip_maps_);
 		heights_.resize(num_mip_maps_);
 		for (uint32_t level = 0; level < num_mip_maps_; ++ level)
 		{
-			widthes_[level] = width;
+			widths_[level] = width;
 			heights_[level] = height;
 
 			if (IsCompressedFormat(format_))
@@ -142,7 +142,7 @@ namespace KlayGE
 	{
 		BOOST_ASSERT(level < num_mip_maps_);
 
-		return widthes_[level];
+		return widths_[level];
 	}
 
 	uint32_t OGLESTexture2D::Height(uint32_t level) const
@@ -156,7 +156,7 @@ namespace KlayGE
 	{
 		BOOST_ASSERT(type_ == target.Type());
 
-		if ((format_ == target.Format()) && (widthes_[0] == target.Width(0)) && (heights_[0] == target.Height(0)))
+		if ((format_ == target.Format()) && (widths_[0] == target.Width(0)) && (heights_[0] == target.Height(0)))
 		{
 			uint32_t texel_size = NumFormatBytes(format_);
 
@@ -460,7 +460,7 @@ namespace KlayGE
 			block_size = 0;
 		}
 
-		row_pitch = widthes_[level] * texel_size;
+		row_pitch = widths_[level] * texel_size;
 
 		uint8_t* p = &tex_data_[level][0];
 		if (IsCompressedFormat(format_))
@@ -469,7 +469,7 @@ namespace KlayGE
 		}
 		else
 		{
-			data = p + (y_offset * widthes_[level] + x_offset) * texel_size;
+			data = p + (y_offset * widths_[level] + x_offset) * texel_size;
 		}
 	}
 
@@ -506,14 +506,14 @@ namespace KlayGE
 						block_size = 16;
 					}
 
-					GLsizei const image_size = ((widthes_[level] + 3) / 4) * ((heights_[level] + 3) / 4) * block_size;
+					GLsizei const image_size = ((widths_[level] + 3) / 4) * ((heights_[level] + 3) / 4) * block_size;
 
 					glCompressedTexSubImage2D(target_type_, level, 0, 0,
-						widthes_[level], heights_[level], gl_format, image_size, &tex_data_[level][0]);
+						widths_[level], heights_[level], gl_format, image_size, &tex_data_[level][0]);
 				}
 				else
 				{
-					glTexSubImage2D(target_type_, level, 0, 0, widthes_[level], heights_[level],
+					glTexSubImage2D(target_type_, level, 0, 0, widths_[level], heights_[level],
 							gl_format, gl_type, &tex_data_[level][0]);
 				}
 			}

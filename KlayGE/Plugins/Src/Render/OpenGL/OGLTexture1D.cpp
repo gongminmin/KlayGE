@@ -71,12 +71,12 @@ namespace KlayGE
 			num_mip_maps_ = numMipMaps;
 		}
 
-		widthes_.resize(num_mip_maps_);
+		widths_.resize(num_mip_maps_);
 		{
 			uint32_t w = width;
 			for (uint32_t level = 0; level < num_mip_maps_; ++ level)
 			{
-				widthes_[level] = w;
+				widths_[level] = w;
 
 				w = std::max<uint32_t>(1U, w / 2);
 			}
@@ -112,7 +112,7 @@ namespace KlayGE
 			{
 				for (uint32_t level = 0; level < num_mip_maps_; ++ level)
 				{
-					uint32_t const w = widthes_[level];
+					uint32_t const w = widths_[level];
 
 					if (!pbos_.empty())
 					{
@@ -205,7 +205,7 @@ namespace KlayGE
 	{
 		BOOST_ASSERT(level < num_mip_maps_);
 
-		return widthes_[level];
+		return widths_[level];
 	}
 
 	void OGLTexture1D::CopyToTexture(Texture& target)
@@ -502,7 +502,7 @@ namespace KlayGE
 						block_size = 16;
 					}
 
-					image_size = ((widthes_[level] + 3) / 4) * block_size;
+					image_size = ((widths_[level] + 3) / 4) * block_size;
 				}
 
 				glBindTexture(target_type_, texture_);
@@ -526,24 +526,24 @@ namespace KlayGE
 					if (array_size_ > 1)
 					{
 						glCompressedTexSubImage2D(target_type_, level, 0, array_index,
-							widthes_[level], 1, gl_format, image_size, p);
+							widths_[level], 1, gl_format, image_size, p);
 					}
 					else
 					{
 						glCompressedTexSubImage1D(target_type_, level, 0,
-							widthes_[level], gl_format, image_size, p);
+							widths_[level], gl_format, image_size, p);
 					}
 				}
 				else
 				{
 					if (array_size_ > 1)
 					{
-						glTexSubImage2D(target_type_, level, 0, array_index, widthes_[level], 1,
+						glTexSubImage2D(target_type_, level, 0, array_index, widths_[level], 1,
 							gl_format, gl_type, p);
 					}
 					else
 					{
-						glTexSubImage1D(target_type_, level, 0, widthes_[level],
+						glTexSubImage1D(target_type_, level, 0, widths_[level],
 							gl_format, gl_type, p);
 					}
 				}

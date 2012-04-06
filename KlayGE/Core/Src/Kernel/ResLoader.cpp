@@ -83,7 +83,7 @@ namespace KlayGE
 		}
 #endif
 
-		pathes_.push_back("");
+		paths_.push_back("");
 
 		this->AddPath("");
 		this->AddPath("../");
@@ -122,7 +122,7 @@ namespace KlayGE
 		{
 			path_str.push_back('/');
 		}
-		pathes_.push_back(path_str);
+		paths_.push_back(path_str);
 	}
 
 	std::string ResLoader::Locate(std::string const & name)
@@ -136,8 +136,8 @@ namespace KlayGE
 		}
 		else
 		{
-			typedef BOOST_TYPEOF(pathes_) PathesType;
-			BOOST_FOREACH(PathesType::const_reference path, pathes_)
+			typedef BOOST_TYPEOF(paths_) PathsType;
+			BOOST_FOREACH(PathsType::const_reference path, paths_)
 			{
 				std::string const res_name(path + name);
 
@@ -207,8 +207,8 @@ namespace KlayGE
 		}
 		else
 		{
-			typedef BOOST_TYPEOF(pathes_) PathesType;
-			BOOST_FOREACH(PathesType::const_reference path, pathes_)
+			typedef BOOST_TYPEOF(paths_) PathsType;
+			BOOST_FOREACH(PathsType::const_reference path, paths_)
 			{
 				std::string const res_name(path + name);
 

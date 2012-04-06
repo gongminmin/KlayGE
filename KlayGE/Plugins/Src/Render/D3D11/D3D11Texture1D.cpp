@@ -80,7 +80,7 @@ namespace KlayGE
 
 		array_size_ = array_size;
 		format_		= format;
-		widthes_.assign(1, width);
+		widths_.assign(1, width);
 
 		desc_.Width = width;
 		desc_.MipLevels = num_mip_maps_;
@@ -114,7 +114,7 @@ namespace KlayGE
 	{
 		BOOST_ASSERT(level < num_mip_maps_);
 
-		return widthes_[level];
+		return widths_[level];
 	}
 
 	void D3D11Texture1D::CopyToTexture(Texture& target)
@@ -318,11 +318,11 @@ namespace KlayGE
 		array_size_ = desc_.ArraySize;
 		BOOST_ASSERT(num_mip_maps_ != 0);
 
-		widthes_.resize(num_mip_maps_);
-		widthes_[0] = desc_.Width;
+		widths_.resize(num_mip_maps_);
+		widths_[0] = desc_.Width;
 		for (uint32_t level = 1; level < num_mip_maps_; ++ level)
 		{
-			widthes_[level] = std::max<uint32_t>(1U, widthes_[level - 1] / 2);
+			widths_[level] = std::max<uint32_t>(1U, widths_[level - 1] / 2);
 		}
 
 		format_ = D3D11Mapping::MappingFormat(desc_.Format);

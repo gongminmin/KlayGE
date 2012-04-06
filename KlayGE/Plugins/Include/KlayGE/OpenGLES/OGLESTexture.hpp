@@ -118,7 +118,7 @@ namespace KlayGE
 		void Unmap1D(uint32_t array_index, uint32_t level);
 
 	private:
-		std::vector<uint32_t> widthes_;
+		std::vector<uint32_t> widths_;
 	};
 
 	class OGLESTexture2D : public OGLESTexture
@@ -145,7 +145,7 @@ namespace KlayGE
 		void Unmap2D(uint32_t array_index, uint32_t level);
 
 	private:
-		std::vector<uint32_t> widthes_;
+		std::vector<uint32_t> widths_;
 		std::vector<uint32_t> heights_;
 	};
 
@@ -172,7 +172,7 @@ namespace KlayGE
 		void Unmap3D(uint32_t array_index, uint32_t level);
 
 	private:
-		std::vector<uint32_t> widthes_;
+		std::vector<uint32_t> widths_;
 		std::vector<uint32_t> heights_;
 		std::vector<uint32_t> depthes_;
 	};
@@ -198,7 +198,7 @@ namespace KlayGE
 		void UnmapCube(uint32_t array_index, CubeFaces face, uint32_t level);
 
 	private:
-		std::vector<uint32_t> widthes_;
+		std::vector<uint32_t> widths_;
 	};
 }
 

@@ -158,7 +158,7 @@ namespace KlayGE
 		ResLoader();
 
 		std::string exe_path_;
-		std::vector<std::string> pathes_;
+		std::vector<std::string> paths_;
 	};
 }
 

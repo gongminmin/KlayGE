@@ -76,7 +76,7 @@ namespace KlayGE
 			num_mip_maps_ = numMipMaps;
 		}
 
-		widthes_.resize(num_mip_maps_);
+		widths_.resize(num_mip_maps_);
 		heights_.resize(num_mip_maps_);
 		depthes_.resize(num_mip_maps_);
 		{
@@ -85,7 +85,7 @@ namespace KlayGE
 			uint32_t d = depth;
 			for (uint32_t level = 0; level < num_mip_maps_; ++ level)
 			{
-				widthes_[level] = w;
+				widths_[level] = w;
 				heights_[level] = h;
 				depthes_[level] = d;
 
@@ -121,7 +121,7 @@ namespace KlayGE
 		OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		for (uint32_t level = 0; level < num_mip_maps_; ++ level)
 		{
-			uint32_t const w = widthes_[level];
+			uint32_t const w = widths_[level];
 			uint32_t const h = heights_[level];
 			uint32_t const d = depthes_[level];
 
@@ -179,7 +179,7 @@ namespace KlayGE
 
 	uint32_t OGLTexture3D::Width(uint32_t level) const
 	{
-		return widthes_[level];
+		return widths_[level];
 	}
 
 	uint32_t OGLTexture3D::Height(uint32_t level) const
@@ -323,7 +323,7 @@ namespace KlayGE
 
 		uint32_t const texel_size = NumFormatBytes(format_);
 
-		row_pitch = widthes_[level] * texel_size;
+		row_pitch = widths_[level] * texel_size;
 		slice_pitch = row_pitch * heights_[level];
 
 		uint8_t* p;
@@ -379,7 +379,7 @@ namespace KlayGE
 			break;
 		}
 
-		data = p + ((z_offset * depthes_[level] + y_offset) * widthes_[level] + x_offset) * texel_size;
+		data = p + ((z_offset * depthes_[level] + y_offset) * widths_[level] + x_offset) * texel_size;
 	}
 
 	void OGLTexture3D::Unmap3D(uint32_t array_index, uint32_t level)
@@ -421,7 +421,7 @@ namespace KlayGE
 						block_size = 16;
 					}
 
-					image_size = ((widthes_[level] + 3) / 4) * ((heights_[level] + 3) / 4) * block_size;
+					image_size = ((widths_[level] + 3) / 4) * ((heights_[level] + 3) / 4) * block_size;
 				}
 
 				glBindTexture(target_type_, texture_);
@@ -443,12 +443,12 @@ namespace KlayGE
 				if (IsCompressedFormat(format_))
 				{
 					glCompressedTexSubImage3D(target_type_, level, 0, 0, 0,
-							widthes_[level], heights_[level], depthes_[level], gl_format, image_size,
+							widths_[level], heights_[level], depthes_[level], gl_format, image_size,
 							p);
 				}
 				else
 				{
-					glTexSubImage3D(target_type_, level, 0, 0, 0, widthes_[level], heights_[level], depthes_[level],
+					glTexSubImage3D(target_type_, level, 0, 0, 0, widths_[level], heights_[level], depthes_[level],
 							gl_format, gl_type, p);
 				}
 			}
