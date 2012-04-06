@@ -224,23 +224,24 @@ namespace KlayGE
 	{
 		BOOST_ASSERT(this->AccessHint() & EAH_GPU_Read);
 
-		D3D11_SHADER_RESOURCE_VIEW_DESC sr_desc;
+		D3D11_SHADER_RESOURCE_VIEW_DESC desc;
+		memset(&desc, 0, sizeof(desc));
 		switch (format_)
 		{
 		case EF_D16:
-			sr_desc.Format = DXGI_FORMAT_R16_UNORM;
+			desc.Format = DXGI_FORMAT_R16_UNORM;
 			break;
 
 		case EF_D24S8:
-			sr_desc.Format = DXGI_FORMAT_R24_UNORM_X8_TYPELESS;
+			desc.Format = DXGI_FORMAT_R24_UNORM_X8_TYPELESS;
 			break;
 
 		case EF_D32F:
-			sr_desc.Format = DXGI_FORMAT_R32_FLOAT;
+			desc.Format = DXGI_FORMAT_R32_FLOAT;
 			break;
 
 		default:
-			sr_desc.Format = desc_.Format;
+			desc.Format = desc_.Format;
 			break;
 		}
 
@@ -248,76 +249,55 @@ namespace KlayGE
 		{
 			if (sample_count_ > 1)
 			{
-				sr_desc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2DMSARRAY;
+				desc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2DMSARRAY;
 			}
 			else
 			{
-				sr_desc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2DARRAY;
+				desc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2DARRAY;
 			}
-			sr_desc.Texture2DArray.MostDetailedMip = first_level;
-			sr_desc.Texture2DArray.MipLevels = num_levels;
-			sr_desc.Texture2DArray.ArraySize = num_items;
-			sr_desc.Texture2DArray.FirstArraySlice = first_array_index;
+			desc.Texture2DArray.MostDetailedMip = first_level;
+			desc.Texture2DArray.MipLevels = num_levels;
+			desc.Texture2DArray.ArraySize = num_items;
+			desc.Texture2DArray.FirstArraySlice = first_array_index;
 		}
 		else
 		{
 			if (sample_count_ > 1)
 			{
-				sr_desc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2DMS;
+				desc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2DMS;
 			}
 			else
 			{
-				sr_desc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+				desc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
 			}
-			sr_desc.Texture2D.MostDetailedMip = first_level;
-			sr_desc.Texture2D.MipLevels = num_levels;
+			desc.Texture2D.MostDetailedMip = first_level;
+			desc.Texture2D.MipLevels = num_levels;
 		}
 
-		for (size_t i = 0; i < d3d_sr_views_.size(); ++ i)
-		{
-			if (0 == memcmp(&d3d_sr_views_[i].first, &sr_desc, sizeof(sr_desc)))
-			{
-				return d3d_sr_views_[i].second;
-			}
-		}
-
-		ID3D11ShaderResourceView* d3d_sr_view;
-		d3d_device_->CreateShaderResourceView(d3dTexture2D_.get(), &sr_desc, &d3d_sr_view);
-		d3d_sr_views_.push_back(std::make_pair(sr_desc, MakeCOMPtr(d3d_sr_view)));
-		return d3d_sr_views_.back().second;
+		return this->RetriveD3DSRV(desc);
 	}
 
 	ID3D11UnorderedAccessViewPtr const & D3D11Texture2D::RetriveD3DUnorderedAccessView(uint32_t first_array_index, uint32_t num_items, uint32_t level)
 	{
 		BOOST_ASSERT(this->AccessHint() & EAH_GPU_Unordered);
 
-		D3D11_UNORDERED_ACCESS_VIEW_DESC uav_desc;
-		uav_desc.Format = desc_.Format;
+		D3D11_UNORDERED_ACCESS_VIEW_DESC desc;
+		memset(&desc, 0, sizeof(desc));
+		desc.Format = desc_.Format;
 		if (array_size_ > 1)
 		{
-			uav_desc.ViewDimension = D3D11_UAV_DIMENSION_TEXTURE2DARRAY;
-			uav_desc.Texture2DArray.MipSlice = level;
-			uav_desc.Texture2DArray.ArraySize = num_items;
-			uav_desc.Texture2DArray.FirstArraySlice = first_array_index;
+			desc.ViewDimension = D3D11_UAV_DIMENSION_TEXTURE2DARRAY;
+			desc.Texture2DArray.MipSlice = level;
+			desc.Texture2DArray.ArraySize = num_items;
+			desc.Texture2DArray.FirstArraySlice = first_array_index;
 		}
 		else
 		{
-			uav_desc.ViewDimension = D3D11_UAV_DIMENSION_TEXTURE2D;
-			uav_desc.Texture2D.MipSlice = level;
+			desc.ViewDimension = D3D11_UAV_DIMENSION_TEXTURE2D;
+			desc.Texture2D.MipSlice = level;
 		}
 
-		for (size_t i = 0; i < d3d_ua_views_.size(); ++ i)
-		{
-			if (0 == memcmp(&d3d_ua_views_[i].first, &uav_desc, sizeof(uav_desc)))
-			{
-				return d3d_ua_views_[i].second;
-			}
-		}
-
-		ID3D11UnorderedAccessView* d3d_ua_view;
-		d3d_device_->CreateUnorderedAccessView(d3dTexture2D_.get(), &uav_desc, &d3d_ua_view);
-		d3d_ua_views_.push_back(std::make_pair(uav_desc, MakeCOMPtr(d3d_ua_view)));
-		return d3d_ua_views_.back().second;
+		return this->RetriveD3DUAV(desc);
 	}
 
 	ID3D11RenderTargetViewPtr const & D3D11Texture2D::RetriveD3DRenderTargetView(uint32_t first_array_index, uint32_t array_size, uint32_t level)
@@ -326,22 +306,9 @@ namespace KlayGE
 		BOOST_ASSERT(first_array_index < this->ArraySize());
 		BOOST_ASSERT(first_array_index + array_size <= this->ArraySize());
 
-		RTVDSVCreation rtv_creation;
-		memset(&rtv_creation, 0, sizeof(rtv_creation));
-		rtv_creation.first_array_index = first_array_index;
-		rtv_creation.array_size = array_size;
-		rtv_creation.level = level;
-		for (size_t i = 0; i < d3d_rt_views_.size(); ++ i)
-		{
-			if (0 == memcmp(&d3d_rt_views_[i].first, &rtv_creation, sizeof(rtv_creation)))
-			{
-				return d3d_rt_views_[i].second;
-			}
-		}
-
 		D3D11_RENDER_TARGET_VIEW_DESC desc;
+		memset(&desc, 0, sizeof(desc));
 		desc.Format = D3D11Mapping::MappingFormat(this->Format());
-
 		if (this->SampleCount() > 1)
 		{
 			if (this->ArraySize() > 1)
@@ -375,10 +342,7 @@ namespace KlayGE
 			desc.Texture2D.MipSlice = level;
 		}
 
-		ID3D11RenderTargetView* rt_view;
-		TIF(d3d_device_->CreateRenderTargetView(this->D3DTexture().get(), &desc, &rt_view));
-		d3d_rt_views_.push_back(std::make_pair(rtv_creation, MakeCOMPtr(rt_view)));
-		return d3d_rt_views_.back().second;
+		return this->RetriveD3DRTV(desc);
 	}
 
 	ID3D11DepthStencilViewPtr const & D3D11Texture2D::RetriveD3DDepthStencilView(uint32_t first_array_index, uint32_t array_size, uint32_t level)
@@ -387,23 +351,10 @@ namespace KlayGE
 		BOOST_ASSERT(first_array_index < this->ArraySize());
 		BOOST_ASSERT(first_array_index + array_size <= this->ArraySize());
 
-		RTVDSVCreation dsv_creation;
-		memset(&dsv_creation, 0, sizeof(dsv_creation));
-		dsv_creation.first_array_index = first_array_index;
-		dsv_creation.array_size = array_size;
-		dsv_creation.level = level;
-		for (size_t i = 0; i < d3d_ds_views_.size(); ++ i)
-		{
-			if (0 == memcmp(&d3d_ds_views_[i].first, &dsv_creation, sizeof(dsv_creation)))
-			{
-				return d3d_ds_views_[i].second;
-			}
-		}
-
 		D3D11_DEPTH_STENCIL_VIEW_DESC desc;
+		memset(&desc, 0, sizeof(desc));
 		desc.Format = D3D11Mapping::MappingFormat(this->Format());
 		desc.Flags = 0;
-
 		if (this->SampleCount() > 1)
 		{
 			if (this->ArraySize() > 1)
@@ -437,10 +388,7 @@ namespace KlayGE
 			desc.Texture2D.MipSlice = level;
 		}
 
-		ID3D11DepthStencilView* ds_view;
-		TIF(d3d_device_->CreateDepthStencilView(this->D3DTexture().get(), &desc, &ds_view));
-		d3d_ds_views_.push_back(std::make_pair(dsv_creation, MakeCOMPtr(ds_view)));
-		return d3d_ds_views_.back().second;
+		return this->RetriveD3DDSV(desc);
 	}
 
 	void D3D11Texture2D::Map2D(uint32_t array_index, uint32_t level, TextureMapAccess tma,
@@ -464,7 +412,7 @@ namespace KlayGE
 		if (!d3d_sr_views_.empty())
 		{
 			BOOST_ASSERT(access_hint_ & EAH_Generate_Mips);
-			d3d_imm_ctx_->GenerateMips(d3d_sr_views_[0].second.get());
+			d3d_imm_ctx_->GenerateMips(d3d_sr_views_.begin()->second.get());
 		}
 		else
 		{

@@ -16,6 +16,7 @@
 #pragma once
 
 #include <boost/smart_ptr.hpp>
+#include <boost/unordered_map.hpp>
 
 #include <KlayGE/Texture.hpp>
 #include <KlayGE/D3D11/D3D11Typedefs.hpp>
@@ -68,6 +69,11 @@ namespace KlayGE
 			uint32_t dst_sub_res, uint32_t dst_x_offset, uint32_t dst_y_offset, uint32_t dst_z_offset, uint32_t dst_width, uint32_t dst_height, uint32_t dst_depth,
 			uint32_t src_sub_res, uint32_t src_x_offset, uint32_t src_y_offset, uint32_t src_z_offset, uint32_t src_width, uint32_t src_height, uint32_t src_depth);
 
+		ID3D11ShaderResourceViewPtr const & RetriveD3DSRV(D3D11_SHADER_RESOURCE_VIEW_DESC const & desc);
+		ID3D11UnorderedAccessViewPtr const & RetriveD3DUAV(D3D11_UNORDERED_ACCESS_VIEW_DESC const & desc);
+		ID3D11RenderTargetViewPtr const & RetriveD3DRTV(D3D11_RENDER_TARGET_VIEW_DESC const & desc);
+		ID3D11DepthStencilViewPtr const & RetriveD3DDSV(D3D11_DEPTH_STENCIL_VIEW_DESC const & desc);
+
 	private:
 		virtual void Map1D(uint32_t array_index, uint32_t level, TextureMapAccess tma,
 			uint32_t width, uint32_t x_offset,
@@ -92,29 +98,10 @@ namespace KlayGE
 		ID3D11DevicePtr				d3d_device_;
 		ID3D11DeviceContextPtr		d3d_imm_ctx_;
 
-		std::vector<std::pair<D3D11_SHADER_RESOURCE_VIEW_DESC, ID3D11ShaderResourceViewPtr> > d3d_sr_views_;
-		std::vector<std::pair<D3D11_UNORDERED_ACCESS_VIEW_DESC, ID3D11UnorderedAccessViewPtr> > d3d_ua_views_;
-
-		struct RTVDSVCreation
-		{
-			uint32_t first_array_index;
-			uint32_t array_size;
-			uint32_t level;
-			union ForTex3DOrCube
-			{
-				struct ForTex3D
-				{
-					uint32_t first_slice;
-					uint32_t num_slices;
-				} for_3d;
-				struct ForTexCube
-				{
-					Texture::CubeFaces face;
-				} for_cube;
-			} for_3d_or_cube;
-		};
-		std::vector<std::pair<RTVDSVCreation, ID3D11RenderTargetViewPtr> > d3d_rt_views_;
-		std::vector<std::pair<RTVDSVCreation, ID3D11DepthStencilViewPtr> > d3d_ds_views_;
+		boost::unordered_map<size_t, ID3D11ShaderResourceViewPtr> d3d_sr_views_;
+		boost::unordered_map<size_t, ID3D11UnorderedAccessViewPtr> d3d_ua_views_;
+		boost::unordered_map<size_t, ID3D11RenderTargetViewPtr> d3d_rt_views_;
+		boost::unordered_map<size_t, ID3D11DepthStencilViewPtr> d3d_ds_views_;
 	};
 
 	typedef boost::shared_ptr<D3D11Texture> D3D11TexturePtr;

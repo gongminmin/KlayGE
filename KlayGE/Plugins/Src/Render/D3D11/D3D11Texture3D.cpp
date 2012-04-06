@@ -196,42 +196,32 @@ namespace KlayGE
 		UNREF_PARAM(first_array_index);
 		UNREF_PARAM(num_items);
 
-		D3D11_SHADER_RESOURCE_VIEW_DESC sr_desc;
+		D3D11_SHADER_RESOURCE_VIEW_DESC desc;
+		memset(&desc, 0, sizeof(desc));
 		switch (format_)
 		{
 		case EF_D16:
-			sr_desc.Format = DXGI_FORMAT_R16_UNORM;
+			desc.Format = DXGI_FORMAT_R16_UNORM;
 			break;
 
 		case EF_D24S8:
-			sr_desc.Format = DXGI_FORMAT_R24_UNORM_X8_TYPELESS;
+			desc.Format = DXGI_FORMAT_R24_UNORM_X8_TYPELESS;
 			break;
 
 		case EF_D32F:
-			sr_desc.Format = DXGI_FORMAT_R32_FLOAT;
+			desc.Format = DXGI_FORMAT_R32_FLOAT;
 			break;
 
 		default:
-			sr_desc.Format = desc_.Format;
+			desc.Format = desc_.Format;
 			break;
 		}
 
-		sr_desc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE3D;
-		sr_desc.Texture3D.MostDetailedMip = first_level;
-		sr_desc.Texture3D.MipLevels = num_levels;
+		desc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE3D;
+		desc.Texture3D.MostDetailedMip = first_level;
+		desc.Texture3D.MipLevels = num_levels;
 
-		for (size_t i = 0; i < d3d_sr_views_.size(); ++ i)
-		{
-			if (0 == memcmp(&d3d_sr_views_[i].first, &sr_desc, sizeof(sr_desc)))
-			{
-				return d3d_sr_views_[i].second;
-			}
-		}
-
-		ID3D11ShaderResourceView* d3d_sr_view;
-		d3d_device_->CreateShaderResourceView(d3dTexture3D_.get(), &sr_desc, &d3d_sr_view);
-		d3d_sr_views_.push_back(std::make_pair(sr_desc, MakeCOMPtr(d3d_sr_view)));
-		return d3d_sr_views_.back().second;
+		return this->RetriveD3DSRV(desc);
 	}
 
 	ID3D11UnorderedAccessViewPtr const & D3D11Texture3D::RetriveD3DUnorderedAccessView(uint32_t first_array_index, uint32_t num_items, uint32_t level)
@@ -242,23 +232,13 @@ namespace KlayGE
 		UNREF_PARAM(first_array_index);
 		UNREF_PARAM(num_items);
 
-		D3D11_UNORDERED_ACCESS_VIEW_DESC uav_desc;
-		uav_desc.Format = desc_.Format;
-		uav_desc.ViewDimension = D3D11_UAV_DIMENSION_TEXTURE3D;
-		uav_desc.Texture3D.MipSlice = level;
+		D3D11_UNORDERED_ACCESS_VIEW_DESC desc;
+		memset(&desc, 0, sizeof(desc));
+		desc.Format = desc_.Format;
+		desc.ViewDimension = D3D11_UAV_DIMENSION_TEXTURE3D;
+		desc.Texture3D.MipSlice = level;
 
-		for (size_t i = 0; i < d3d_ua_views_.size(); ++ i)
-		{
-			if (0 == memcmp(&d3d_ua_views_[i].first, &uav_desc, sizeof(uav_desc)))
-			{
-				return d3d_ua_views_[i].second;
-			}
-		}
-
-		ID3D11UnorderedAccessView* d3d_ua_view;
-		d3d_device_->CreateUnorderedAccessView(d3dTexture3D_.get(), &uav_desc, &d3d_ua_view);
-		d3d_ua_views_.push_back(std::make_pair(uav_desc, MakeCOMPtr(d3d_ua_view)));
-		return d3d_ua_views_.back().second;
+		return this->RetriveD3DUAV(desc);
 	}
 
 	ID3D11RenderTargetViewPtr const & D3D11Texture3D::RetriveD3DRenderTargetView(uint32_t array_index, uint32_t first_slice, uint32_t num_slices, uint32_t level)
@@ -267,55 +247,27 @@ namespace KlayGE
 		BOOST_ASSERT(0 == array_index);
 		UNREF_PARAM(array_index);
 
-		RTVDSVCreation rtv_creation;
-		memset(&rtv_creation, 0, sizeof(rtv_creation));
-		rtv_creation.first_array_index = array_index;
-		rtv_creation.array_size = 1;
-		rtv_creation.level = level;
-		rtv_creation.for_3d_or_cube.for_3d.first_slice = first_slice;
-		rtv_creation.for_3d_or_cube.for_3d.num_slices = num_slices;
-		for (size_t i = 0; i < d3d_rt_views_.size(); ++ i)
-		{
-			if (0 == memcmp(&d3d_rt_views_[i].first, &rtv_creation, sizeof(rtv_creation)))
-			{
-				return d3d_rt_views_[i].second;
-			}
-		}
-
 		D3D11_RENDER_TARGET_VIEW_DESC desc;
+		memset(&desc, 0, sizeof(desc));
 		desc.Format = D3D11Mapping::MappingFormat(this->Format());
 		desc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE3D;
 		desc.Texture3D.MipSlice = level;
 		desc.Texture3D.FirstWSlice = first_slice;
 		desc.Texture3D.WSize = num_slices;
 
-		ID3D11RenderTargetView* rt_view;
-		TIF(d3d_device_->CreateRenderTargetView(this->D3DTexture().get(), &desc, &rt_view));
-		d3d_rt_views_.push_back(std::make_pair(rtv_creation, MakeCOMPtr(rt_view)));
-		return d3d_rt_views_.back().second;
+		return this->RetriveD3DRTV(desc);
 	}
 
 	ID3D11DepthStencilViewPtr const & D3D11Texture3D::RetriveD3DDepthStencilView(uint32_t array_index, uint32_t first_slice, uint32_t num_slices, uint32_t level)
 	{
 		BOOST_ASSERT(this->AccessHint() & EAH_GPU_Write);
-
-		RTVDSVCreation dsv_creation;
-		memset(&dsv_creation, 0, sizeof(dsv_creation));
-		dsv_creation.first_array_index = array_index;
-		dsv_creation.array_size = 1;
-		dsv_creation.level = level;
-		for (size_t i = 0; i < d3d_ds_views_.size(); ++ i)
-		{
-			if (0 == memcmp(&d3d_ds_views_[i].first, &dsv_creation, sizeof(dsv_creation)))
-			{
-				return d3d_ds_views_[i].second;
-			}
-		}
+		BOOST_ASSERT(0 == array_index);
+		UNREF_PARAM(array_index);
 
 		D3D11_DEPTH_STENCIL_VIEW_DESC desc;
+		memset(&desc, 0, sizeof(desc));
 		desc.Format = D3D11Mapping::MappingFormat(this->Format());
 		desc.Flags = 0;
-
 		if (this->SampleCount() > 1)
 		{
 			desc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2DMSARRAY;
@@ -328,10 +280,7 @@ namespace KlayGE
 		desc.Texture2DArray.ArraySize = num_slices;
 		desc.Texture2DArray.FirstArraySlice = first_slice;
 
-		ID3D11DepthStencilView* ds_view;
-		TIF(d3d_device_->CreateDepthStencilView(this->D3DTexture().get(), &desc, &ds_view));
-		d3d_ds_views_.push_back(std::make_pair(dsv_creation, MakeCOMPtr(ds_view)));
-		return d3d_ds_views_.back().second;
+		return this->RetriveD3DDSV(desc);
 	}
 
 	void D3D11Texture3D::Map3D(uint32_t array_index, uint32_t level, TextureMapAccess tma,
@@ -357,7 +306,7 @@ namespace KlayGE
 		if (!d3d_sr_views_.empty())
 		{
 			BOOST_ASSERT(access_hint_ & EAH_Generate_Mips);
-			d3d_imm_ctx_->GenerateMips(d3d_sr_views_[0].second.get());
+			d3d_imm_ctx_->GenerateMips(d3d_sr_views_.begin()->second.get());
 		}
 		else
 		{

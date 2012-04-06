@@ -12,6 +12,7 @@
 
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/Util.hpp>
+#include <KlayGE/COMPtr.hpp>
 #include <KlayGE/ThrowErr.hpp>
 #include <KlayGE/Math.hpp>
 #include <KlayGE/Context.hpp>
@@ -21,6 +22,14 @@
 
 #include <cstring>
 #include <boost/assert.hpp>
+#ifdef KLAYGE_COMPILER_MSVC
+#pragma warning(push)
+#pragma warning(disable: 4100 6011 6334)
+#endif
+#include <boost/functional/hash.hpp>
+#ifdef KLAYGE_COMPILER_MSVC
+#pragma warning(pop)
+#endif
 
 #include <KlayGE/D3D11/D3D11MinGWDefs.hpp>
 #ifdef KLAYGE_COMPILER_MSVC
@@ -323,6 +332,78 @@ namespace KlayGE
 
 			D3DX11LoadTextureFromTexture(d3d_imm_ctx_.get(), this->D3DResource().get(), &info, other.D3DResource().get());
 		}
+	}
+
+	ID3D11ShaderResourceViewPtr const & D3D11Texture::RetriveD3DSRV(D3D11_SHADER_RESOURCE_VIEW_DESC const & desc)
+	{
+		char const * p = reinterpret_cast<char const *>(&desc);
+		size_t hash_val;
+		boost::hash_range(hash_val, p, p + sizeof(desc));
+
+		BOOST_AUTO(iter, d3d_sr_views_.find(hash_val));
+		if (iter != d3d_sr_views_.end())
+		{
+			return iter->second;
+		}
+
+		ID3D11ShaderResourceView* d3d_sr_view;
+		d3d_device_->CreateShaderResourceView(this->D3DResource().get(), &desc, &d3d_sr_view);
+		BOOST_AUTO(ret, d3d_sr_views_.insert(std::make_pair(hash_val, MakeCOMPtr(d3d_sr_view))));
+		return ret.first->second;
+	}
+
+	ID3D11UnorderedAccessViewPtr const & D3D11Texture::RetriveD3DUAV(D3D11_UNORDERED_ACCESS_VIEW_DESC const & desc)
+	{
+		char const * p = reinterpret_cast<char const *>(&desc);
+		size_t hash_val;
+		boost::hash_range(hash_val, p, p + sizeof(desc));
+
+		BOOST_AUTO(iter, d3d_ua_views_.find(hash_val));
+		if (iter != d3d_ua_views_.end())
+		{
+			return iter->second;
+		}
+
+		ID3D11UnorderedAccessView* d3d_ua_view;
+		d3d_device_->CreateUnorderedAccessView(this->D3DResource().get(), &desc, &d3d_ua_view);
+		BOOST_AUTO(ret, d3d_ua_views_.insert(std::make_pair(hash_val, MakeCOMPtr(d3d_ua_view))));
+		return ret.first->second;
+	}
+
+	ID3D11RenderTargetViewPtr const & D3D11Texture::RetriveD3DRTV(D3D11_RENDER_TARGET_VIEW_DESC const & desc)
+	{
+		char const * p = reinterpret_cast<char const *>(&desc);
+		size_t hash_val;
+		boost::hash_range(hash_val, p, p + sizeof(desc));
+
+		BOOST_AUTO(iter, d3d_rt_views_.find(hash_val));
+		if (iter != d3d_rt_views_.end())
+		{
+			return iter->second;
+		}
+
+		ID3D11RenderTargetView* rt_view;
+		d3d_device_->CreateRenderTargetView(this->D3DResource().get(), &desc, &rt_view);
+		BOOST_AUTO(ret, d3d_rt_views_.insert(std::make_pair(hash_val, MakeCOMPtr(rt_view))));
+		return ret.first->second;
+	}
+
+	ID3D11DepthStencilViewPtr const & D3D11Texture::RetriveD3DDSV(D3D11_DEPTH_STENCIL_VIEW_DESC const & desc)
+	{
+		char const * p = reinterpret_cast<char const *>(&desc);
+		size_t hash_val;
+		boost::hash_range(hash_val, p, p + sizeof(desc));
+
+		BOOST_AUTO(iter, d3d_ds_views_.find(hash_val));
+		if (iter != d3d_ds_views_.end())
+		{
+			return iter->second;
+		}
+
+		ID3D11DepthStencilView* ds_view;
+		d3d_device_->CreateDepthStencilView(this->D3DResource().get(), &desc, &ds_view);
+		BOOST_AUTO(ret, d3d_ds_views_.insert(std::make_pair(hash_val, MakeCOMPtr(ds_view))));
+		return ret.first->second;
 	}
 
 	void D3D11Texture::Map1D(uint32_t /*array_index*/, uint32_t /*level*/, TextureMapAccess /*tma*/,
