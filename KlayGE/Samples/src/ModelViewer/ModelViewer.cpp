@@ -289,7 +289,6 @@ int main()
 	Context::Instance().LoadCfg("KlayGE.cfg");
 
 	ContextCfg cfg = Context::Instance().Config();
-	cfg.graphics_cfg.hdr = false;
 	cfg.deferred_rendering = true;
 	Context::Instance().Config(cfg);
 
@@ -322,14 +321,15 @@ bool ModelViewerApp::ConfirmDevice() const
 void ModelViewerApp::InitObjects()
 {
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+	RenderEngine& re = rf.RenderEngineInstance();
 
 	font_ = rf.MakeFont("gkai00mp.kfont");
 
 	deferred_rendering_ = Context::Instance().DeferredRenderingLayerInstance();
 	deferred_rendering_->SSVOEnabled(false);
-	deferred_rendering_->HDREnabled(true);
-	deferred_rendering_->AAEnabled(1);
-	rf.RenderEngineInstance().ColorGradingEnabled(true);
+	re.HDREnabled(true);
+	re.PPAAEnabled(1);
+	re.ColorGradingEnabled(true);
 
 	point_light_ = MakeSharedPtr<PointLightSource>();
 	point_light_->Attrib(LSA_NoShadow);
@@ -689,14 +689,16 @@ void ModelViewerApp::MeshChangedHandler(KlayGE::UIComboBox const & sender)
 
 void ModelViewerApp::VisualizeChangedHandler(KlayGE::UIComboBox const & sender)
 {
+	RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+
 	if (0 == sender.GetSelectedIndex())
 	{
 		checked_pointer_cast<ModelObject>(model_)->VisualizeLighting();
 
 		deferred_rendering_->SSVOEnabled(false);
-		deferred_rendering_->HDREnabled(true);
-		deferred_rendering_->AAEnabled(1);
-		Context::Instance().RenderFactoryInstance().RenderEngineInstance().ColorGradingEnabled(true);
+		re.HDREnabled(true);
+		re.PPAAEnabled(1);
+		re.ColorGradingEnabled(true);
 	}
 	else
 	{
@@ -713,9 +715,9 @@ void ModelViewerApp::VisualizeChangedHandler(KlayGE::UIComboBox const & sender)
 		}
 
 		deferred_rendering_->SSVOEnabled(false);
-		deferred_rendering_->HDREnabled(false);
-		deferred_rendering_->AAEnabled(0);
-		Context::Instance().RenderFactoryInstance().RenderEngineInstance().ColorGradingEnabled(false);
+		re.HDREnabled(false);
+		re.PPAAEnabled(0);
+		re.ColorGradingEnabled(false);
 	}
 }
 

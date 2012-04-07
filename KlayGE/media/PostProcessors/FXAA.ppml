@@ -1,0 +1,23 @@
+<?xml version='1.0'?>
+
+<post_processors>
+	<post_processor name="fxaa">
+		<input>
+			<pin name="color_tex"/>
+		</input>
+		<output>
+			<pin name="output"/>
+		</output>
+		<shader effect="FXAA.fxml" tech="FXAA"/>
+	</post_processor>
+
+	<post_processor name="fxaa_show_edge">
+		<input>
+			<pin name="color_tex"/>
+		</input>
+		<output>
+			<pin name="output"/>
+		</output>
+		<shader effect="FXAA.fxml" tech="FXAAShowEdge"/>
+	</post_processor>
+</post_processors>

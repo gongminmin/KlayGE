@@ -150,6 +150,9 @@ namespace KlayGE
 
 		std::vector<RenderEffectParameterPtr> input_pins_ep_;
 		std::vector<RenderEffectParameterPtr> output_pins_ep_;
+
+		RenderEffectParameterPtr width_height_ep_;
+		RenderEffectParameterPtr inv_width_height_ep_;
 	};
 
 	KLAYGE_CORE_API PostProcessPtr LoadPostProcess(ResIdentifierPtr const & ppml, std::string const & pp_name);

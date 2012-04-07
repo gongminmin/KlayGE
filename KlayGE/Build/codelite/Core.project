@@ -15,7 +15,6 @@
       <File Name="../../Core/Src/Render/DeferredRenderingLayer.cpp"/>
       <File Name="../../Core/Src/Render/Font.cpp"/>
       <File Name="../../Core/Src/Render/FrameBuffer.cpp"/>
-      <File Name="../../Core/Src/Render/FXAAPostProcess.cpp"/>
       <File Name="../../Core/Src/Render/GraphicsBuffer.cpp"/>
       <File Name="../../Core/Src/Render/HDRPostProcess.cpp"/>
       <File Name="../../Core/Src/Render/HeightMap.cpp"/>
@@ -50,7 +49,6 @@
       <File Name="../../Core/Include/KlayGE/ElementFormat.hpp"/>
       <File Name="../../Core/Include/KlayGE/Font.hpp"/>
       <File Name="../../Core/Include/KlayGE/FrameBuffer.hpp"/>
-      <File Name="../../Core/Include/KlayGE/FXAAPostProcess.hpp"/>
       <File Name="../../Core/Include/KlayGE/GraphicsBuffer.hpp"/>
       <File Name="../../Core/Include/KlayGE/HDRPostProcess.hpp"/>
       <File Name="../../Core/Include/KlayGE/Heightmap.hpp"/>
@@ -127,6 +125,7 @@
       <File Name="../../media/PostProcessors/CustomMipMap.ppml"/>
       <File Name="../../media/PostProcessors/DepthToSM.ppml"/>
       <File Name="../../media/PostProcessors/Downsampler2x2.ppml"/>
+      <File Name="../../media/PostProcessors/FXAA.ppml"/>
       <File Name="../../media/PostProcessors/GammaCorrection.ppml"/>
       <File Name="../../media/PostProcessors/GlowMerger.ppml"/>
       <File Name="../../media/PostProcessors/RSM2VPLs.ppml"/>

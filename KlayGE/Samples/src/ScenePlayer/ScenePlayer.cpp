@@ -281,7 +281,6 @@ int main()
 	Context::Instance().LoadCfg("KlayGE.cfg");
 
 	ContextCfg cfg = Context::Instance().Config();
-	cfg.graphics_cfg.hdr = false;
 	cfg.deferred_rendering = true;
 	Context::Instance().Config(cfg);
 
@@ -909,12 +908,12 @@ void ScenePlayerApp::SSVOHandler(UICheckBox const & sender)
 
 void ScenePlayerApp::HDRHandler(UICheckBox const & sender)
 {
-	deferred_rendering_->HDREnabled(sender.GetChecked());
+	Context::Instance().RenderFactoryInstance().RenderEngineInstance().HDREnabled(sender.GetChecked());
 }
 
 void ScenePlayerApp::AAHandler(UICheckBox const & sender)
 {
-	deferred_rendering_->AAEnabled(sender.GetChecked());
+	Context::Instance().RenderFactoryInstance().RenderEngineInstance().PPAAEnabled(sender.GetChecked() ? 1 : 0);
 }
 
 void ScenePlayerApp::ColorGradingHandler(UICheckBox const & sender)

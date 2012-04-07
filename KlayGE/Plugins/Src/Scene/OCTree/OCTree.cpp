@@ -30,7 +30,7 @@
 #include <KlayGE/Plane.hpp>
 #include <KlayGE/SceneObject.hpp>
 #include <KlayGE/RenderableHelper.hpp>
-#ifdef KLAYGE_DEBUG
+#ifdef KLAYGE_DRAW_NODES
 #include <KlayGE/Camera.hpp>
 #include <KlayGE/App3D.hpp>
 #include <KlayGE/Context.hpp>
@@ -46,7 +46,7 @@
 
 #include <KlayGE/OCTree/OCTree.hpp>
 
-#ifdef KLAYGE_DEBUG
+#ifdef KLAYGE_DRAW_NODES
 namespace
 {
 	using namespace KlayGE;
@@ -213,7 +213,7 @@ namespace KlayGE
 			rebuild_tree_ = false;
 		}
 
-#ifdef KLAYGE_DEBUG
+#ifdef KLAYGE_DRAW_NODES
 		if (!node_renderable_)
 		{
 			node_renderable_ = MakeSharedPtr<NodeRenderable>();
@@ -228,7 +228,7 @@ namespace KlayGE
 
 		SceneManager::ClipScene();
 
-#ifdef KLAYGE_DEBUG
+#ifdef KLAYGE_DRAW_NODES
 		node_renderable_->Render();
 #endif
 	}
@@ -281,7 +281,7 @@ namespace KlayGE
 			}
 		}
 
-#ifdef KLAYGE_DEBUG
+#ifdef KLAYGE_DRAW_NODES
 		if ((vis != BO_No) && (-1 == node.first_child_index))
 		{
 			checked_pointer_cast<NodeRenderable>(node_renderable_)->AddInstance(MathLib::scaling(node.bb.HalfSize()) * MathLib::translation(node.bb.Center()));

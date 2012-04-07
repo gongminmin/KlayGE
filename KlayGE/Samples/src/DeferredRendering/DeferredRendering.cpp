@@ -173,7 +173,6 @@ int main()
 	Context::Instance().LoadCfg("KlayGE.cfg");
 
 	ContextCfg cfg = Context::Instance().Config();
-	cfg.graphics_cfg.hdr = false;
 	cfg.deferred_rendering = true;
 	Context::Instance().Config(cfg);
 
@@ -353,7 +352,8 @@ void DeferredRenderingApp::BufferChangedHandler(UIComboBox const & sender)
 	if (dialog_->Control<UICheckBox>(id_aa_)->GetChecked())
 	{
 		anti_alias_enabled_ = 1 + (4 == buffer_type_);
-		deferred_rendering_->AAEnabled(anti_alias_enabled_);
+		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+		re.PPAAEnabled(anti_alias_enabled_);
 	}
 }
 
@@ -378,13 +378,14 @@ void DeferredRenderingApp::SSVOHandler(UICheckBox const & sender)
 	{
 		ssvo_enabled_ = sender.GetChecked();
 		deferred_rendering_->SSVOEnabled(ssvo_enabled_);
+		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 		if (5 == buffer_type_)
 		{
-			deferred_rendering_->HDREnabled(false);
+			re.HDREnabled(false);
 		}
 		else
 		{
-			deferred_rendering_->HDREnabled(true);
+			re.HDREnabled(true);
 		}
 	}
 }
@@ -394,7 +395,8 @@ void DeferredRenderingApp::HDRHandler(UICheckBox const & sender)
 	if (0 == buffer_type_)
 	{
 		hdr_enabled_ = sender.GetChecked();
-		deferred_rendering_->HDREnabled(hdr_enabled_);
+		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+		re.HDREnabled(hdr_enabled_);
 	}
 }
 
@@ -403,7 +405,8 @@ void DeferredRenderingApp::AntiAliasHandler(UICheckBox const & sender)
 	if (0 == buffer_type_)
 	{
 		anti_alias_enabled_ = sender.GetChecked();
-		deferred_rendering_->AAEnabled(anti_alias_enabled_);
+		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+		re.PPAAEnabled(anti_alias_enabled_);
 	}
 }
 

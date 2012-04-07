@@ -56,7 +56,6 @@ LOCAL_SRC_FILES := \
 		Render/DeferredRenderingLayer.cpp \
 		Render/Font.cpp \
 		Render/FrameBuffer.cpp \
-		Render/FXAAPostProcess.cpp \
 		Render/GraphicsBuffer.cpp \
 		Render/HDRPostProcess.cpp \
 		Render/HeightMap.cpp \

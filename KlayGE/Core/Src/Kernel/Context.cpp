@@ -111,6 +111,7 @@ namespace KlayGE
 		int sync_interval = 0;
 		int motion_frames = 0;
 		bool hdr = false;
+		bool ppaa = false;
 		bool gamma = false;
 		bool color_grading = false;
 		int stereo_method = 0;
@@ -300,6 +301,21 @@ namespace KlayGE
 				}
 			}
 
+			XMLNodePtr ppaa_node = graphics_node->FirstNode("ppaa");
+			attr = hdr_node->Attrib("value");
+			if (attr)
+			{
+				std::string ppaa_str = attr->ValueString();
+				if (("1" == ppaa_str) || ("true" == ppaa_str))
+				{
+					ppaa = true;
+				}
+				else
+				{
+					ppaa = false;
+				}
+			}
+
 			XMLNodePtr gamma_node = graphics_node->FirstNode("gamma");
 			attr = gamma_node->Attrib("value");
 			if (attr)
@@ -405,6 +421,7 @@ namespace KlayGE
 		cfg_.graphics_cfg.sync_interval = sync_interval;
 		cfg_.graphics_cfg.motion_frames = motion_frames;
 		cfg_.graphics_cfg.hdr = hdr;
+		cfg_.graphics_cfg.ppaa = ppaa;
 		cfg_.graphics_cfg.gamma = gamma;
 		cfg_.graphics_cfg.color_grading = color_grading;
 		cfg_.graphics_cfg.stereo_method = static_cast<StereoMethod>(stereo_method);
@@ -517,6 +534,10 @@ namespace KlayGE
 			XMLNodePtr hdr_node = cfg_doc.AllocNode(XNT_Element, "hdr");
 			hdr_node->AppendAttrib(cfg_doc.AllocAttribInt("value", cfg_.graphics_cfg.hdr));
 			graphics_node->AppendNode(hdr_node);
+
+			XMLNodePtr ppaa_node = cfg_doc.AllocNode(XNT_Element, "ppaa");
+			ppaa_node->AppendAttrib(cfg_doc.AllocAttribInt("value", cfg_.graphics_cfg.ppaa));
+			graphics_node->AppendNode(ppaa_node);
 
 			XMLNodePtr gamma_node = cfg_doc.AllocNode(XNT_Element, "gamma");
 			gamma_node->AppendAttrib(cfg_doc.AllocAttribInt("value", cfg_.graphics_cfg.gamma));

@@ -30,8 +30,6 @@
 #include <KlayGE/Mesh.hpp>
 #include <KlayGE/SSGIPostProcess.hpp>
 #include <KlayGE/SSVOPostProcess.hpp>
-#include <KlayGE/HDRPostProcess.hpp>
-#include <KlayGE/FXAAPostProcess.hpp>
 
 #include <boost/typeof/typeof.hpp>
 #include <boost/foreach.hpp>
@@ -246,7 +244,7 @@ namespace KlayGE
 
 
 	DeferredRenderingLayer::DeferredRenderingLayer()
-		: ssgi_enabled_(false), ssvo_enabled_(true), hdr_enabled_(true), aa_enabled_(true),
+		: ssgi_enabled_(false), ssvo_enabled_(true),
 			illum_(0), indirect_scale_(1.0f)
 	{
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
@@ -304,7 +302,7 @@ namespace KlayGE
 		opaque_shading_buffer_ = rf.MakeFrameBuffer();
 		transparency_back_shading_buffer_ = rf.MakeFrameBuffer();
 		transparency_front_shading_buffer_ = rf.MakeFrameBuffer();
-		all_shading_buffer_ = rf.MakeFrameBuffer();
+		output_buffer_ = rf.MakeFrameBuffer();
 
 		{
 			rl_cone_ = rf.MakeRenderLayout();
@@ -453,12 +451,6 @@ namespace KlayGE
 		ssvo_blur_pp_ = MakeSharedPtr<BlurPostProcess<SeparableBilateralFilterPostProcess> >(8, 1.0f,
 			rf.LoadEffect("SSVO.fxml")->TechniqueByName("SSVOBlurX"), rf.LoadEffect("SSVO.fxml")->TechniqueByName("SSVOBlurY"));
 
-		hdr_pp_ = MakeSharedPtr<HDRPostProcess>();
-		skip_hdr_pp_ = LoadPostProcess(ResLoader::Instance().Open("Copy.ppml"), "copy");
-
-		aa_pp_ = MakeSharedPtr<FXAAPostProcess>();
-		skip_aa_pp_ = LoadPostProcess(ResLoader::Instance().Open("Copy.ppml"), "copy");
-
 		if (caps.max_simultaneous_rts > 1)
 		{
 			rsm_buffer_ = rf.MakeFrameBuffer();
@@ -578,20 +570,14 @@ namespace KlayGE
 		ssvo_enabled_ = ssvo;
 	}
 
-	void DeferredRenderingLayer::HDREnabled(bool hdr)
-	{
-		hdr_enabled_ = hdr;
-	}
-
-	void DeferredRenderingLayer::AAEnabled(int aa)
-	{
-		aa_enabled_ = aa;
-	}
-
 	void DeferredRenderingLayer::OutputPin(TexturePtr const & tex)
 	{
-		aa_pp_->OutputPin(0, tex);
-		skip_aa_pp_->OutputPin(0, tex);
+		output_tex_ = tex;
+		if (tex)
+		{
+			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+			output_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*tex, 0, 1, 0));
+		}
 	}
 
 	void DeferredRenderingLayer::OnResize(uint32_t width, uint32_t height)
@@ -614,7 +600,7 @@ namespace KlayGE
 		opaque_shading_buffer_->GetViewport().camera = camera;
 		transparency_back_shading_buffer_->GetViewport().camera = camera;
 		transparency_front_shading_buffer_->GetViewport().camera = camera;
-		all_shading_buffer_->GetViewport().camera = camera;
+		output_buffer_->GetViewport().camera = camera;
 
 		ElementFormat fmt8;
 		if (caps.rendertarget_format_support(EF_ABGR8, 1, 0))
@@ -799,9 +785,6 @@ namespace KlayGE
 		transparency_front_shading_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*transparency_front_shading_tex_, 0, 1, 0));
 		transparency_front_shading_buffer_->Attach(FrameBuffer::ATT_DepthStencil, transparency_front_ds_view);
 
-		all_shading_tex_ = rf.MakeTexture2D(width, height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
-		all_shading_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*all_shading_tex_, 0, 1, 0));
-
 		if (caps.rendertarget_format_support(EF_B10G11R11F, 1, 0))
 		{
 			fmt = EF_B10G11R11F;
@@ -830,23 +813,6 @@ namespace KlayGE
 		}
 		small_ssvo_tex_ = rf.MakeTexture2D(width / 2, height / 2, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
 
-		if (caps.rendertarget_format_support(EF_ABGR8, 1, 0))
-		{
-			fmt = EF_ABGR8;
-		}
-		else
-		{
-			BOOST_ASSERT(caps.rendertarget_format_support(EF_ARGB8, 1, 0));
-
-			fmt = EF_ARGB8;
-		}
-		ElementFormat fmt_srgb = MakeSRGB(fmt);
-		if (caps.rendertarget_format_support(fmt_srgb, 1, 0))
-		{
-			fmt = fmt_srgb;
-		}
-		ldr_tex_ = rf.MakeTexture2D(width, height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
-
 		if (opaque_g_buffer_rt0_tex_)
 		{
 			*(dr_effect_->ParameterByName("inv_width_height")) = float2(1.0f / width, 1.0f / height);
@@ -869,14 +835,6 @@ namespace KlayGE
 		ssvo_blur_pp_->InputPin(0, small_ssvo_tex_);
 		ssvo_blur_pp_->InputPin(1, opaque_depth_tex_);
 		ssvo_blur_pp_->OutputPin(0, opaque_lighting_tex_);
-
-		hdr_pp_->InputPin(0, all_shading_tex_);
-		hdr_pp_->OutputPin(0, ldr_tex_);
-		skip_hdr_pp_->InputPin(0, all_shading_tex_);
-		skip_hdr_pp_->OutputPin(0, ldr_tex_);
-
-		aa_pp_->InputPin(0, ldr_tex_);
-		skip_aa_pp_->InputPin(0, ldr_tex_);
 
 		if (rsm_buffer_)
 		{
@@ -1407,7 +1365,15 @@ namespace KlayGE
 				}
 				else
 				{
-					re.BindFrameBuffer(all_shading_buffer_);
+					if (output_tex_)
+					{
+						re.BindFrameBuffer(output_buffer_);
+					}
+					else
+					{
+						re.BindFrameBuffer(FrameBufferPtr());
+						re.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->ClearDepth(1.0f);
+					}
 
 					{
 						*shading_tex_param_ = opaque_shading_tex_;
@@ -1420,27 +1386,6 @@ namespace KlayGE
 						
 						*shading_tex_param_ = transparency_front_shading_tex_;
 						re.Render(*technique_merge_shading_alpha_blend_, *rl_quad_);
-					}
-
-					re.BindFrameBuffer(FrameBufferPtr());
-					re.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->ClearDepth(1.0f);
-
-					if (hdr_enabled_)
-					{
-						hdr_pp_->Apply();
-					}
-					else
-					{
-						skip_hdr_pp_->Apply();
-					}
-					if (aa_enabled_)
-					{
-						checked_pointer_cast<FXAAPostProcess>(aa_pp_)->ShowEdge(aa_enabled_ > 1);
-						aa_pp_->Apply();
-					}
-					else
-					{
-						skip_aa_pp_->Apply();
 					}
 
 					lights_.resize(0);

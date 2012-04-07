@@ -61,7 +61,6 @@ int main()
 	Context::Instance().LoadCfg("KlayGE.cfg");
 
 	ContextCfg cfg = Context::Instance().Config();
-	cfg.graphics_cfg.hdr = false;
 	cfg.deferred_rendering = true;
 	Context::Instance().Config(cfg);
 
@@ -222,12 +221,12 @@ void GlobalIlluminationApp::SSVOHandler(UICheckBox const & sender)
 
 void GlobalIlluminationApp::HDRHandler(UICheckBox const & sender)
 {
-	deferred_rendering_->HDREnabled(sender.GetChecked());
+	Context::Instance().RenderFactoryInstance().RenderEngineInstance().HDREnabled(sender.GetChecked());
 }
 
 void GlobalIlluminationApp::AAHandler(UICheckBox const & sender)
 {
-	deferred_rendering_->AAEnabled(sender.GetChecked());
+	Context::Instance().RenderFactoryInstance().RenderEngineInstance().PPAAEnabled(sender.GetChecked() ? 1 : 0);
 }
 
 void GlobalIlluminationApp::ColorGradingHandler(UICheckBox const & sender)

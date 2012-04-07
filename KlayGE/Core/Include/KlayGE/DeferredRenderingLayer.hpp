@@ -32,8 +32,6 @@ namespace KlayGE
 
 		void SSGIEnabled(bool ssgi);
 		void SSVOEnabled(bool ssvo);
-		void HDREnabled(bool hdr);
-		void AAEnabled(int aa);
 
 		void OutputPin(TexturePtr const & tex);
 
@@ -174,10 +172,8 @@ namespace KlayGE
 		FrameBufferPtr transparency_front_shading_buffer_;
 		TexturePtr transparency_front_shading_tex_;
 
-		FrameBufferPtr all_shading_buffer_;
-		TexturePtr all_shading_tex_;
-
-		TexturePtr ldr_tex_;
+		FrameBufferPtr output_buffer_;
+		TexturePtr output_tex_;
 
 		PostProcessPtr ssgi_pp_;
 		PostProcessPtr ssgi_blur_pp_;
@@ -188,14 +184,6 @@ namespace KlayGE
 		PostProcessPtr ssvo_blur_pp_;
 		TexturePtr small_ssvo_tex_;
 		bool ssvo_enabled_;
-
-		PostProcessPtr hdr_pp_;
-		PostProcessPtr skip_hdr_pp_;
-		bool hdr_enabled_;
-
-		PostProcessPtr aa_pp_;
-		PostProcessPtr skip_aa_pp_;
-		int aa_enabled_;
 
 		RenderLayoutPtr rl_cone_;
 		RenderLayoutPtr rl_pyramid_;

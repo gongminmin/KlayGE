@@ -73,7 +73,6 @@ int main()
 	Context::Instance().LoadCfg("KlayGE.cfg");
 
 	ContextCfg cfg = Context::Instance().Config();
-	cfg.graphics_cfg.hdr = false;
 	cfg.deferred_rendering = true;
 	Context::Instance().Config(cfg);
 
@@ -109,13 +108,16 @@ void PostProcessingApp::InitObjects()
 	boost::function<TexturePtr()> y_cube_tl = ASyncLoadTexture("rnl_cross_y.dds", EAH_GPU_Read | EAH_Immutable);
 	boost::function<TexturePtr()> c_cube_tl = ASyncLoadTexture("rnl_cross_c.dds", EAH_GPU_Read | EAH_Immutable);
 
-	font_ = Context::Instance().RenderFactoryInstance().MakeFont("gkai00mp.kfont");
+	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+	RenderEngine& re = rf.RenderEngineInstance();
+
+	font_ = rf.MakeFont("gkai00mp.kfont");
 
 	deferred_rendering_ = Context::Instance().DeferredRenderingLayerInstance();
 	deferred_rendering_->SSVOEnabled(false);
-	deferred_rendering_->HDREnabled(false);
-	deferred_rendering_->AAEnabled(1);
-	Context::Instance().RenderFactoryInstance().RenderEngineInstance().ColorGradingEnabled(false);
+	re.HDREnabled(false);
+	re.PPAAEnabled(0);
+	re.ColorGradingEnabled(false);
 
 	point_light_ = MakeSharedPtr<PointLightSource>();
 	point_light_->Attrib(LSA_NoShadow);

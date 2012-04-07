@@ -75,7 +75,6 @@ SET(RENDERING_SOURCE_FILES
 	${KLAYGE_PROJECT_DIR}/Core/Src/Render/DeferredRenderingLayer.cpp
 	${KLAYGE_PROJECT_DIR}/Core/Src/Render/Font.cpp
 	${KLAYGE_PROJECT_DIR}/Core/Src/Render/FrameBuffer.cpp
-	${KLAYGE_PROJECT_DIR}/Core/Src/Render/FXAAPostProcess.cpp
 	${KLAYGE_PROJECT_DIR}/Core/Src/Render/GraphicsBuffer.cpp
 	${KLAYGE_PROJECT_DIR}/Core/Src/Render/HDRPostProcess.cpp
 	${KLAYGE_PROJECT_DIR}/Core/Src/Render/HeightMap.cpp
@@ -111,7 +110,6 @@ SET(RENDERING_HEADER_FILES
 	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/ElementFormat.hpp
 	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/Font.hpp
 	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/FrameBuffer.hpp
-	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/FXAAPostProcess.hpp
 	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/GraphicsBuffer.hpp
 	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/HDRPostProcess.hpp
 	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/Heightmap.hpp
@@ -192,6 +190,7 @@ SET(RENDERING_POSTPROCESSOR_FILES
 	${KLAYGE_PROJECT_DIR}/media/PostProcessors/CustomMipMap.ppml
 	${KLAYGE_PROJECT_DIR}/media/PostProcessors/DepthToSM.ppml
 	${KLAYGE_PROJECT_DIR}/media/PostProcessors/Downsampler2x2.ppml
+	${KLAYGE_PROJECT_DIR}/media/PostProcessors/FXAA.ppml
 	${KLAYGE_PROJECT_DIR}/media/PostProcessors/GammaCorrection.ppml
 	${KLAYGE_PROJECT_DIR}/media/PostProcessors/GlowMerger.ppml
 	${KLAYGE_PROJECT_DIR}/media/PostProcessors/RSM2VPLs.ppml

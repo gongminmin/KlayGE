@@ -101,6 +101,9 @@ namespace KlayGE
 			{
 				params_[i].second = technique_->Effect().ParameterByName(params_[i].first);
 			}
+
+			width_height_ep_ = technique_->Effect().ParameterByName("width_height");
+			inv_width_height_ep_ = technique_->Effect().ParameterByName("inv_width_height");
 		}
 	}
 
@@ -432,6 +435,20 @@ namespace KlayGE
 	{
 		input_pins_[index].second = tex;
 		*(input_pins_ep_[index]) = tex;
+
+		if (0 == index)
+		{
+			float const width = static_cast<float>(tex->Width(0));
+			float const height = static_cast<float>(tex->Height(0));
+			if (width_height_ep_)
+			{
+				*width_height_ep_ = float4(width, height, 1 / width, 1 / height);
+			}
+			if (inv_width_height_ep_)
+			{
+				*inv_width_height_ep_ = float2(1 / width, 1 / height);
+			}
+		}
 	}
 
 	TexturePtr const & PostProcess::InputPin(uint32_t index) const

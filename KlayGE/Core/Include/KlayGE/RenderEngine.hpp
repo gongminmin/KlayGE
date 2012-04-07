@@ -141,7 +141,9 @@ namespace KlayGE
 		virtual void FullScreen(bool fs) = 0;
 
 		void PostProcess(bool skip);
-		void ColorGrading();
+
+		void HDREnabled(bool hdr);
+		void PPAAEnabled(int aa);
 		void ColorGradingEnabled(bool cg);
 
 		virtual void AdjustPerspectiveMatrix(float4x4& /*pers_mat*/)
@@ -224,13 +226,15 @@ namespace KlayGE
 
 		FrameBufferPtr cur_frame_buffer_;
 		FrameBufferPtr screen_frame_buffer_;
-		FrameBufferPtr before_pp_frame_buffer_;
-		TexturePtr before_pp_tex_;
-		FrameBufferPtr before_cg_frame_buffer_;
-		TexturePtr before_cg_tex_;
+		FrameBufferPtr hdr_frame_buffer_;
+		TexturePtr hdr_tex_;
+		FrameBufferPtr ldr_frame_buffer_;
+		TexturePtr ldr_tex_;
+		FrameBufferPtr cg_frame_buffer_;
+		TexturePtr cg_tex_;
 		FrameBufferPtr stereo_frame_buffers_[2];
 		TexturePtr stereo_colors_[2];
-		FrameBufferPtr default_frame_buffers_[6];
+		FrameBufferPtr default_frame_buffers_[4];
 
 		RenderLayoutPtr so_buffers_;
 
@@ -256,8 +260,13 @@ namespace KlayGE
 		RenderEffectPtr stereoscopic_effect_;
 		RenderTechniquePtr stereoscopic_tech_;
 
-		PostProcessPtr copy_pp_;
-		PostProcessChainPtr pp_chain_;
+		PostProcessPtr hdr_pp_;
+		PostProcessPtr skip_hdr_pp_;
+		bool hdr_enabled_;
+		PostProcessPtr ppaa_pp_;
+		PostProcessPtr ppaa_show_edge_pp_;
+		PostProcessPtr skip_ppaa_pp_;
+		int ppaa_enabled_;
 		PostProcessPtr color_grading_pp_;
 		int fb_stage_;
 	};
