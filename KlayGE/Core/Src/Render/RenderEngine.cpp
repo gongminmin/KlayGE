@@ -200,7 +200,7 @@ namespace KlayGE
 			}
 		}
 
-		for (int i = 0; i < 4; ++ i)
+		for (int i = 0; i < 8; ++ i)
 		{
 			default_frame_buffers_[i] = screen_frame_buffer_;
 		}
@@ -266,6 +266,10 @@ namespace KlayGE
 			}
 
 			color_grading_pp_->InputPin(0, cg_tex_);
+
+			default_frame_buffers_[0 * 2 + 0] = default_frame_buffers_[0 * 2 + 1]
+				= default_frame_buffers_[1 * 2 + 0] = default_frame_buffers_[1 * 2 + 1]
+				= default_frame_buffers_[2 * 2 + 0] = default_frame_buffers_[2 * 2 + 1] = cg_frame_buffer_;
 		}
 
 		if (ppaa_pp_)
@@ -303,6 +307,9 @@ namespace KlayGE
 			ppaa_pp_->InputPin(0, ldr_tex_);
 			ppaa_show_edge_pp_->InputPin(0, ldr_tex_);
 			skip_ppaa_pp_->InputPin(0, ldr_tex_);
+
+			default_frame_buffers_[0 * 2 + 0] = default_frame_buffers_[0 * 2 + 1]
+				= default_frame_buffers_[1 * 2 + 0] = default_frame_buffers_[1 * 2 + 1] = ldr_frame_buffer_;
 		}
 
 		if (hdr_pp_)
@@ -321,12 +328,7 @@ namespace KlayGE
 
 				fmt = EF_ABGR16F;
 			}
-			uint32_t access_hint = EAH_GPU_Read | EAH_GPU_Write;
-			if (caps.cs_support && (5 == caps.max_shader_model))
-			{
-				access_hint |= EAH_GPU_Unordered;
-			}
-			hdr_tex_ = rf.MakeTexture2D(screen_frame_buffer_->Width(), screen_frame_buffer_->Height(), 1, 1, fmt, 1, 0, access_hint, NULL);
+			hdr_tex_ = rf.MakeTexture2D(screen_frame_buffer_->Width(), screen_frame_buffer_->Height(), 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
 			hdr_frame_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*hdr_tex_, 0, 1, 0));
 			hdr_frame_buffer_->Attach(FrameBuffer::ATT_DepthStencil, ds_view);
 
@@ -533,6 +535,8 @@ namespace KlayGE
 			}
 
 			ppaa_pp_->InputPin(0, ldr_tex_);
+			ppaa_show_edge_pp_->InputPin(0, ldr_tex_);
+			skip_ppaa_pp_->InputPin(0, ldr_tex_);
 		}
 
 		if (hdr_pp_)
@@ -543,6 +547,7 @@ namespace KlayGE
 			hdr_frame_buffer_->Attach(FrameBuffer::ATT_DepthStencil, ds_view);
 
 			hdr_pp_->InputPin(0, hdr_tex_);
+			skip_hdr_pp_->InputPin(0, hdr_tex_);
 		}
 
 		if (stereo_method_ != STM_None)
@@ -564,11 +569,11 @@ namespace KlayGE
 
 	void RenderEngine::PostProcess(bool skip)
 	{
-		fb_stage_ = 0;
+		fb_stage_ = 1;
 
 		if (hdr_enabled_)
 		{
-			ldr_frame_buffer_->Attached(FrameBuffer::ATT_DepthStencil)->ClearDepth(1.0f);
+			this->DefaultFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->ClearDepth(1.0f);
 
 			if (skip)
 			{
@@ -583,14 +588,16 @@ namespace KlayGE
 		{
 			if (skip_hdr_pp_)
 			{
-				ldr_frame_buffer_->Attached(FrameBuffer::ATT_DepthStencil)->ClearDepth(1.0f);
+				this->DefaultFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->ClearDepth(1.0f);
 				skip_hdr_pp_->Apply();
 			}
 		}
 
+		fb_stage_ = 2;
+
 		if (ppaa_enabled_)
 		{
-			cg_frame_buffer_->Attached(FrameBuffer::ATT_DepthStencil)->ClearDepth(1.0f);
+			this->DefaultFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->ClearDepth(1.0f);
 
 			if (skip)
 			{
@@ -612,12 +619,12 @@ namespace KlayGE
 		{
 			if (skip_ppaa_pp_)
 			{
-				cg_frame_buffer_->Attached(FrameBuffer::ATT_DepthStencil)->ClearDepth(1.0f);
+				this->DefaultFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->ClearDepth(1.0f);
 				skip_ppaa_pp_->Apply();
 			}
 		}
 
-		fb_stage_ = 1;
+		fb_stage_ = 3;
 
 		if (color_grading_pp_)
 		{
@@ -756,7 +763,8 @@ namespace KlayGE
 
 				stereo_frame_buffers_[i]->Attach(FrameBuffer::ATT_DepthStencil, ds_view);
 
-				default_frame_buffers_[0 * 2 + i] = default_frame_buffers_[1 * 2 + i] = default_frame_buffers_[2 * 2 + i] = stereo_frame_buffers_[i];
+				default_frame_buffers_[0 * 2 + i] = default_frame_buffers_[1 * 2 + i]
+					= default_frame_buffers_[2 * 2 + i] = default_frame_buffers_[3 * 2 + i] = stereo_frame_buffers_[i];
 			}
 
 			this->CreateStereoscopicVB();

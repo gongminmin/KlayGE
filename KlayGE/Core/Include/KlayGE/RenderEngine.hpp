@@ -234,7 +234,7 @@ namespace KlayGE
 		TexturePtr cg_tex_;
 		FrameBufferPtr stereo_frame_buffers_[2];
 		TexturePtr stereo_colors_[2];
-		FrameBufferPtr default_frame_buffers_[4];
+		FrameBufferPtr default_frame_buffers_[8];
 
 		RenderLayoutPtr so_buffers_;
 
