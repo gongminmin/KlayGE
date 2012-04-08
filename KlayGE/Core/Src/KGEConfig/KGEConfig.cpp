@@ -295,6 +295,12 @@ INT_PTR CALLBACK Graphics_Tab_DlgProc(HWND hDlg, UINT uMsg, WPARAM /*wParam*/, L
 			SendMessage(hHDRCombo, CB_SETCURSEL, cfg.graphics_cfg.hdr ? 0 : 1, 0);
 		}
 		{
+			HWND hPPAACombo = GetDlgItem(hDlg, IDC_PPAA_COMBO);
+			SendMessage(hPPAACombo, CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(TEXT("Yes")));
+			SendMessage(hPPAACombo, CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(TEXT("No")));
+			SendMessage(hPPAACombo, CB_SETCURSEL, cfg.graphics_cfg.ppaa ? 0 : 1, 0);
+		}
+		{
 			HWND hStereoCombo = GetDlgItem(hDlg, IDC_STEREO_COMBO);
 			SendMessage(hStereoCombo, CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(TEXT("None")));
 			SendMessage(hStereoCombo, CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(TEXT("Color anaglyph: Red Cyan")));
@@ -749,7 +755,7 @@ bool UIConfiguration(HINSTANCE hInstance)
 	int cx = ::GetSystemMetrics(SM_CXSCREEN);
 	int cy = ::GetSystemMetrics(SM_CYSCREEN);
 	int width = 420;
-	int height = 480;
+	int height = 500;
 
 	HWND hWnd = ::CreateWindow(wc.lpszClassName, TEXT("KlayGE Configuration Tool"),
 		WS_CAPTION | WS_SYSMENU, (cx - width) / 2, (cy - height) / 2,

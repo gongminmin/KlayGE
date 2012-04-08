@@ -13,6 +13,7 @@
 #define IDC_DEPTH_FMT_COMBO             1020
 #define IDC_AA_COMBO                    1021
 #define IDC_FS_COMBO                    1022
+#define IDC_PPAA_COMBO                  1023
 
 // Next default values for new objects
 // 
