@@ -102,7 +102,7 @@ namespace KlayGE
 			hostent* pHostEnt = gethostbyname(host);
 #if defined KLAYGE_PLATFORM_WINDOWS
 			std::memcpy(&addr.S_un.S_addr, pHostEnt->h_addr_list[0], pHostEnt->h_length);
-#elif defined KLAYGE_PLATFORM_LINUX || defined KLAYGE_PLATFORM_ANDROID
+#else
 			std::memcpy(&addr.s_addr, pHostEnt->h_addr_list[0], pHostEnt->h_length);
 #endif
 		}

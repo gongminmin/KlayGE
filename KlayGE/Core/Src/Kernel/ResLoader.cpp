@@ -260,12 +260,10 @@ namespace KlayGE
 		{
 			boost::shared_ptr<std::stringstream> asset_file = MakeSharedPtr<std::stringstream>(std::ios_base::in | std::ios_base::out | std::ios_base::binary);
 
-			int total = 0;
 			int bytes = 0;
 			char buf[1024];
 			while ((bytes = AAsset_read(asset, buf, sizeof(buf))) > 0)
 			{
-				total += bytes;
 				asset_file->write(buf, bytes);
 			}
 

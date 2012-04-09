@@ -320,23 +320,6 @@ namespace KlayGE
 		last_tma_ = tma;
 
 		uint32_t const texel_size = NumFormatBytes(format_);
-		int block_size;
-		if (IsCompressedFormat(format_))
-		{
-			if ((EF_BC1 == format_) || (EF_SIGNED_BC1 == format_) || (EF_BC1_SRGB == format_)
-				|| (EF_BC4 == format_) || (EF_SIGNED_BC4 == format_) || (EF_BC4_SRGB == format_))
-			{
-				block_size = 8;
-			}
-			else
-			{
-				block_size = 16;
-			}
-		}
-		else
-		{
-			block_size = 0;
-		}
 
 		row_pitch = widths_[level] * texel_size;
 		slice_pitch = row_pitch * heights_[level];

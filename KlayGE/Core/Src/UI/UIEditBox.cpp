@@ -128,9 +128,12 @@ namespace KlayGE
 			succeed = this->Analyse();
 		}
 
-		while ((CP < static_cast<int>(char_width_.size())) && (nX > char_width_[CP]))
+		if (succeed)
 		{
-			++ CP;
+			while ((CP < static_cast<int>(char_width_.size())) && (nX > char_width_[CP]))
+			{
+				++ CP;
+			}
 		}
 
 		// If the coordinate falls outside the text region, we

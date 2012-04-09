@@ -232,7 +232,8 @@ namespace KlayGE
 			physique_mods_.clear();
 			skins_.clear();
 			skin_mods_.clear();
-			BOOST_FOREACH(BOOST_TYPEOF(nodes)::const_reference node, nodes)
+			typedef BOOST_TYPEOF(nodes) nodes_type;
+			BOOST_FOREACH(nodes_type::const_reference node, nodes)
 			{
 				Object* obj_ref = node->GetObjectRef();
 				while ((obj_ref != NULL) && (GEN_DERIVOB_CLASS_ID == obj_ref->SuperClassID()))
@@ -276,14 +277,16 @@ namespace KlayGE
 		std::vector<INode*> jnodes;
 		std::vector<INode*> mnodes;
 
-		BOOST_FOREACH(BOOST_TYPEOF(joint_nodes_)::const_reference jn, joint_nodes_)
+		typedef BOOST_TYPEOF(joint_nodes_) jn_type;
+		BOOST_FOREACH(jn_type::const_reference jn, joint_nodes_)
 		{
 			if (is_bone(jn.second.joint_node))
 			{
 				jnodes.push_back(jn.second.joint_node);
 			}
 		}
-		BOOST_FOREACH(BOOST_TYPEOF(nodes)::const_reference node, nodes)
+		typedef BOOST_TYPEOF(nodes) nodes_type;
+		BOOST_FOREACH(nodes_type::const_reference node, nodes)
 		{
 			if (is_bone(node))
 			{
@@ -303,12 +306,14 @@ namespace KlayGE
 		std::sort(mnodes.begin(), mnodes.end());
 		mnodes.erase(std::unique(mnodes.begin(), mnodes.end()), mnodes.end());
 
-		BOOST_FOREACH(BOOST_TYPEOF(jnodes)::const_reference jnode, jnodes)
+		typedef BOOST_TYPEOF(jnodes) jnodes_type;
+		BOOST_FOREACH(jnodes_type::const_reference jnode, jnodes)
 		{
 			this->extract_bone(jnode);
 		}
 		
-		BOOST_FOREACH(BOOST_TYPEOF(mnodes)::const_reference mnode, mnodes)
+		typedef BOOST_TYPEOF(mnodes) mnodes_type;
+		BOOST_FOREACH(mnodes_type::const_reference mnode, mnodes)
 		{
 			this->extract_object(mnode);
 		}
@@ -577,7 +582,8 @@ namespace KlayGE
 					}
 
 					vertex_index.pos_index = pos_indices[offset];
-					BOOST_FOREACH(BOOST_TYPEOF(tex_indices)::const_reference tex_index, tex_indices)
+					typedef BOOST_TYPEOF(tex_indices) ti_type;
+					BOOST_FOREACH(ti_type::const_reference tex_index, tex_indices)
 					{
 						vertex_index.tex_indices.push_back(tex_index.second[offset]);
 					}
@@ -634,7 +640,8 @@ namespace KlayGE
 				}
 
 				Matrix3 tm = node->GetObjTMAfterWSM(0);
-				BOOST_FOREACH(BOOST_TYPEOF(positions)::reference pos_binds, positions)
+				typedef BOOST_TYPEOF(positions) positions_type;
+				BOOST_FOREACH(positions_type::reference pos_binds, positions)
 				{
 					if (pos_binds.second.empty())
 					{
@@ -685,7 +692,8 @@ namespace KlayGE
 			}
 			else
 			{
-				BOOST_FOREACH(BOOST_TYPEOF(positions)::reference pos_binds, positions)
+				typedef BOOST_TYPEOF(positions) positions_type;
+				BOOST_FOREACH(positions_type::reference pos_binds, positions)
 				{
 					pos_binds.first = pos_binds.first * obj_matrix;
 				}
@@ -707,7 +715,8 @@ namespace KlayGE
 
 			obj_vertices.resize(vertex_indices.size());
 			int ver_index = 0;
-			BOOST_FOREACH(BOOST_TYPEOF(vertex_indices)::const_reference vertex_index, vertex_indices)
+			typedef BOOST_TYPEOF(vertex_indices) vi_type;
+			BOOST_FOREACH(vi_type::const_reference vertex_index, vertex_indices)
 			{
 				vertex_t& vertex = obj_vertices[ver_index];
 
@@ -837,9 +846,6 @@ namespace KlayGE
 		assert(is_bone(node));
 
 		int tpf = GetTicksPerFrame();
-		int start_tick = start_frame_ * tpf;
-		int end_tick = end_frame_ * tpf;
-		int tps = frame_rate_ * tpf;
 
 		key_frame_t kf;
 		kf.joint = tstr_to_str(node->GetName());
@@ -881,7 +887,8 @@ namespace KlayGE
 
 	void meshml_extractor::extract_all_joint_tms()
 	{
-		BOOST_FOREACH(BOOST_TYPEOF(joint_nodes_)::reference jn, joint_nodes_)
+		typedef BOOST_TYPEOF(joint_nodes_) jn_type;
+		BOOST_FOREACH(jn_type::reference jn, joint_nodes_)
 		{
 			joint_t joint;
 
@@ -939,7 +946,8 @@ namespace KlayGE
 		if (weight > 0)
 		{
 			bool repeat = false;
-			BOOST_FOREACH(BOOST_TYPEOF(binds)::reference bind, binds)
+			typedef BOOST_TYPEOF(binds) binds_type;
+			BOOST_FOREACH(binds_type::reference bind, binds)
 			{
 				if (bind.first == joint_name)
 				{
@@ -1043,18 +1051,22 @@ namespace KlayGE
 	void meshml_extractor::remove_redundant_joints()
 	{
 		std::set<std::string> joints_used;
-		BOOST_FOREACH(BOOST_TYPEOF(objs_info_)::const_reference obj_info, objs_info_)
+		typedef BOOST_TYPEOF(objs_info_) oi_type;
+		BOOST_FOREACH(oi_type::const_reference obj_info, objs_info_)
 		{
-			BOOST_FOREACH(BOOST_TYPEOF(obj_info.vertices)::const_reference vertex, obj_info.vertices)
+			typedef BOOST_TYPEOF(obj_info.vertices) ov_type;
+			BOOST_FOREACH(ov_type::const_reference vertex, obj_info.vertices)
 			{
-				BOOST_FOREACH(BOOST_TYPEOF(vertex.binds)::const_reference bind, vertex.binds)
+				typedef BOOST_TYPEOF(vertex.binds) vb_type;
+				BOOST_FOREACH(vb_type::const_reference bind, vertex.binds)
 				{
 					joints_used.insert(bind.first);
 				}
 			}
 		}
 
-		BOOST_FOREACH(BOOST_TYPEOF(joints_)::const_reference joint, joints_)
+		typedef BOOST_TYPEOF(joints_) joints_type;
+		BOOST_FOREACH(joints_type::const_reference joint, joints_)
 		{
 			if (joints_used.find(joint.first) != joints_used.end())
 			{
@@ -1113,7 +1125,8 @@ namespace KlayGE
 
 		objs_mtl_ = mtls_used;
 
-		BOOST_FOREACH(BOOST_TYPEOF(objs_info_)::reference obj_info, objs_info_)
+		typedef BOOST_TYPEOF(objs_info_) oi_type;
+		BOOST_FOREACH(oi_type::reference obj_info, objs_info_)
 		{
 			obj_info.mtl_id = mtl_mapping[obj_info.mtl_id];
 		}
@@ -1160,7 +1173,8 @@ namespace KlayGE
 				opt_obj.mtl_id = i;
 				opt_obj.vertex_elements = ves[j];
 
-				BOOST_FOREACH(BOOST_TYPEOF(oids)::reference oid, oids)
+				typedef BOOST_TYPEOF(oids) oids_type;
+				BOOST_FOREACH(oids_type::reference oid, oids)
 				{
 					int base = static_cast<int>(opt_obj.vertices.size());
 					if (oid.second == j)
@@ -1168,7 +1182,8 @@ namespace KlayGE
 						opt_obj.vertices.insert(opt_obj.vertices.end(),
 							objs_info_[oid.first].vertices.begin(), objs_info_[oid.first].vertices.end());
 
-						BOOST_FOREACH(BOOST_TYPEOF(objs_info_[oid.first].triangles)::reference old_tri, objs_info_[oid.first].triangles)
+						typedef BOOST_TYPEOF(objs_info_[oid.first].triangles) tris_type;
+						BOOST_FOREACH(tris_type::reference old_tri, objs_info_[oid.first].triangles)
 						{
 							triangle_t tri = old_tri;
 							tri.vertex_index[0] += base;
@@ -1227,7 +1242,8 @@ namespace KlayGE
 		std::map<std::string, int> joints_name_to_id;
 		std::vector<std::string> joints_id_to_name;
 		{
-			BOOST_FOREACH(BOOST_TYPEOF(joints_)::const_reference joint, joints_)
+			typedef BOOST_TYPEOF(joints_) joints_type;
+			BOOST_FOREACH(joints_type::const_reference joint, joints_)
 			{
 				joints_id_to_name.push_back(joint.first);
 			}
@@ -1270,7 +1286,8 @@ namespace KlayGE
 		if (joints_per_ver_ > 0)
 		{
 			ofs << "\t<bones_chunk>" << endl;
-			BOOST_FOREACH(BOOST_TYPEOF(joints_id_to_name)::const_reference joint_name, joints_id_to_name)
+			typedef BOOST_TYPEOF(joints_id_to_name) jitn_type;
+			BOOST_FOREACH(jitn_type::const_reference joint_name, joints_id_to_name)
 			{
 				int parent_id = -1;
 				if (!joints_[joint_name].parent_name.empty())
@@ -1300,7 +1317,7 @@ namespace KlayGE
 			ofs << "\t</bones_chunk>" << endl;
 		}
 
-		if (objs_mtl_.size() > 0)
+		if (!objs_mtl_.empty())
 		{
 			ofs << "\t<materials_chunk>" << endl;
 			for (size_t i = 0; i < objs_mtl_.size(); ++ i)
@@ -1324,7 +1341,8 @@ namespace KlayGE
 				if (objs_mtl_[i].texture_slots.size() > 0)
 				{
 					ofs << "\t\t\t<textures_chunk>" << endl;
-					BOOST_FOREACH(BOOST_TYPEOF(objs_mtl_[i].texture_slots)::const_reference ts, objs_mtl_[i].texture_slots)
+					typedef BOOST_TYPEOF(objs_mtl_[i].texture_slots) slots_type;
+					BOOST_FOREACH(slots_type::const_reference ts, objs_mtl_[i].texture_slots)
 					{
 						ofs << "\t\t\t\t<texture type=\"" << ts.first
 							<< "\" name=\"" << ts.second << "\"/>" << endl;
@@ -1337,12 +1355,14 @@ namespace KlayGE
 		}
 
 		ofs << "\t<meshes_chunk>" << endl;
-		BOOST_FOREACH(BOOST_TYPEOF(objs_info_)::const_reference obj_info, objs_info_)
+		typedef BOOST_TYPEOF(objs_info_) oi_type;
+		BOOST_FOREACH(oi_type::const_reference obj_info, objs_info_)
 		{
 			ofs << "\t\t<mesh name=\"" << obj_info.name << "\" mtl_id=\"" << obj_info.mtl_id << "\">" << endl;
 
 			ofs << "\t\t\t<vertices_chunk>" << endl;
-			BOOST_FOREACH(BOOST_TYPEOF(obj_info.vertices)::const_reference vertex, obj_info.vertices)
+			typedef BOOST_TYPEOF(obj_info.vertices) ov_type;
+			BOOST_FOREACH(ov_type::const_reference vertex, obj_info.vertices)
 			{
 				ofs << "\t\t\t\t<vertex x=\"" << vertex.pos.x
 					<< "\" y=\"" << vertex.pos.y
@@ -1374,14 +1394,16 @@ namespace KlayGE
 
 				if (eva.tex)
 				{
-					BOOST_FOREACH(BOOST_TYPEOF(vertex.tex)::const_reference tex, vertex.tex)
+					typedef BOOST_TYPEOF(vertex.tex) vt_type;
+					BOOST_FOREACH(vt_type::const_reference tex, vertex.tex)
 					{
 						ofs << "\t\t\t\t\t<tex_coord u=\"" << tex.x
 							<< "\" v=\"" << tex.y << "\"/>" << endl;
 					}
 				}
 
-				BOOST_FOREACH(BOOST_TYPEOF(vertex.binds)::const_reference bind, vertex.binds)
+				typedef BOOST_TYPEOF(vertex.binds) vb_type;
+				BOOST_FOREACH(vb_type::const_reference bind, vertex.binds)
 				{
 					assert(joints_name_to_id.find(bind.first) != joints_name_to_id.end());
 					ofs << "\t\t\t\t\t<weight bone_index=\"" << joints_name_to_id[bind.first]
@@ -1393,7 +1415,8 @@ namespace KlayGE
 			ofs << "\t\t\t</vertices_chunk>" << endl;
 
 			ofs << "\t\t\t<triangles_chunk>" << endl;
-			BOOST_FOREACH(BOOST_TYPEOF(obj_info.triangles)::const_reference tri, obj_info.triangles)
+			typedef BOOST_TYPEOF(obj_info.triangles) oit_type;
+			BOOST_FOREACH(oit_type::const_reference tri, obj_info.triangles)
 			{
 				ofs << "\t\t\t\t<triangle a=\"" << tri.vertex_index[0]
 					<< "\" b=\"" << tri.vertex_index[1]
@@ -1410,7 +1433,8 @@ namespace KlayGE
 			ofs << "\t<key_frames_chunk start_frame=\"" << start_frame_
 				<< "\" end_frame=\"" << end_frame_
 				<< "\" frame_rate=\"" << frame_rate_ << "\">" << endl;
-			BOOST_FOREACH(BOOST_TYPEOF(kfs_)::const_reference kf, kfs_)
+			typedef BOOST_TYPEOF(kfs_) kfs_type;
+			BOOST_FOREACH(kfs_type::const_reference kf, kfs_)
 			{
 				assert(kf.reals.size() == kf.duals.size());
 

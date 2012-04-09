@@ -73,7 +73,7 @@ namespace KlayGE
 		STDMETHOD(CryptoGetTextPassword)(BSTR *password);
 
 		CArchiveOpenCallback()
-			: ref_count_(1)
+			: ref_count_(1), password_is_defined_(false)
 		{
 		}
 

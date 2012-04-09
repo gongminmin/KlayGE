@@ -81,7 +81,7 @@ namespace KlayGE
 
 	public:
 		CArchiveExtractCallback()
-			: ref_count_(1)
+			: ref_count_(1), password_is_defined_(false)
 		{
 		}
 

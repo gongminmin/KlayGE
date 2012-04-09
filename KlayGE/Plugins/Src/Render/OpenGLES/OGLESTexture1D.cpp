@@ -208,8 +208,6 @@ namespace KlayGE
 		
 		BOOST_ASSERT(format_ == target.Format());
 
-		OGLESTexture1D& other = static_cast<OGLESTexture1D&>(target);
-
 		GLint gl_internalFormat;
 		GLenum gl_format;
 		GLenum gl_type;
@@ -266,7 +264,7 @@ namespace KlayGE
 					dst_width, 1, gl_target_type, &data_out[0]);
 
 				{
-					Texture::Mapper mapper(other, dst_array_index, dst_level, TMA_Write_Only, dst_x_offset, dst_width);
+					Texture::Mapper mapper(target, dst_array_index, dst_level, TMA_Write_Only, dst_x_offset, dst_width);
 					memcpy(mapper.Pointer<uint8_t*>(), &data_out[0], data_out.size() * sizeof(data_out[0]));
 				}
 #else

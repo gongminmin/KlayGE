@@ -210,7 +210,6 @@ void MayaMeshExporter::ExportMayaFile(std::string const & openfile)
 
 void MayaMeshExporter::ExportMayaNodes(MItDag& dagIterator)
 {
-	unsigned int depth = 0;
 	MDagPath dagPath;
 	for (; !dagIterator.isDone(); dagIterator.next())
 	{
@@ -287,7 +286,6 @@ void MayaMeshExporter::ExportMayaNodes(MItDag& dagIterator)
 				<< dagPath.fullPathName() << "] not supported." << std::endl;
 			break;
 		}
-		depth = dagIterator.depth();
 	}
 
 	start_frame_ = static_cast<int>(MAnimControl::minTime().as(MTime::kNTSCField));
