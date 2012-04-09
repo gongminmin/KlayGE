@@ -10,4 +10,34 @@
 		</output>
 		<shader effect="Copy.fxml" tech="Copy"/>
 	</post_processor>
+
+	<post_processor name="bilinear_copy">
+		<input>
+			<pin name="src_tex"/>
+		</input>
+		<output>
+			<pin name="output"/>
+		</output>
+		<shader effect="Copy.fxml" tech="BilinearCopy"/>
+	</post_processor>
+
+	<post_processor name="add_copy">
+		<input>
+			<pin name="src_tex"/>
+		</input>
+		<output>
+			<pin name="output"/>
+		</output>
+		<shader effect="Copy.fxml" tech="AddCopy"/>
+	</post_processor>
+
+	<post_processor name="add_bilinear_copy">
+		<input>
+			<pin name="src_tex"/>
+		</input>
+		<output>
+			<pin name="output"/>
+		</output>
+		<shader effect="Copy.fxml" tech="AddBilinearCopy"/>
+	</post_processor>
 </post_processors>

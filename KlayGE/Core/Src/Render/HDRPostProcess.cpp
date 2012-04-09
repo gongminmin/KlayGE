@@ -247,8 +247,8 @@ namespace KlayGE
 		}
 
 		bright_pass_downsampler_ = LoadPostProcess(ResLoader::Instance().Open("Downsampler2x2.ppml"), "bright_pass_downsampler2x2");
-		downsamplers_[0] = LoadPostProcess(ResLoader::Instance().Open("Downsampler2x2.ppml"), "downsampler2x2");
-		downsamplers_[1] = LoadPostProcess(ResLoader::Instance().Open("Downsampler2x2.ppml"), "downsampler2x2");
+		downsamplers_[0] = LoadPostProcess(ResLoader::Instance().Open("Copy.ppml"), "bilinear_copy");
+		downsamplers_[1] = LoadPostProcess(ResLoader::Instance().Open("Copy.ppml"), "bilinear_copy");
 		blurs_[0] = MakeSharedPtr<BlurPostProcess<SeparableGaussianFilterPostProcess> >(8, 1.0f);
 		blurs_[1] = MakeSharedPtr<BlurPostProcess<SeparableGaussianFilterPostProcess> >(8, 1.0f);
 		blurs_[2] = MakeSharedPtr<BlurPostProcess<SeparableGaussianFilterPostProcess> >(8, 1.0f);
