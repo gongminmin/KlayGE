@@ -28,10 +28,16 @@
 	<parameter type="float3" name="upper_left"/>
 	<parameter type="float3" name="x_dir"/>
 	<parameter type="float3" name="y_dir"/>
+	<parameter type="int2" name="is_not_bottom_top_level"/>
+	<parameter type="float2" name="depth_normal_threshold"/>
+	<parameter type="float" name="smaller_level"/>
 
 	<parameter type="texture2D" name="albedo_tex"/>
 	<parameter type="texture2D" name="normal_es_tex"/>
 	<parameter type="texture2D" name="depth_tex" />
+	<parameter type="texture2D" name="depth_derivate_tex" />
+	<parameter type="texture2D" name="normal_cone_tex" />
+	<parameter type="texture2D" name="vpl_tex" />
 
 	<shader>
 		<![CDATA[
@@ -40,13 +46,8 @@ float3 texcoord_to_view(float2 tex)
 	return upper_left + x_dir * tex.x + y_dir * tex.y;
 }
 
-float4 RSM2VPLsSpotPS(float2 tc : TEXCOORD0) : SV_Target
+float4 RSM2VPLsSpot(float2 tc, float2 rsm_tc)
 {
-	float vpl_id = tc.x * vpl_params.x;
-	float j = floor(vpl_id / vpl_params.y);
-	float i = vpl_id - j * vpl_params.y;
-	float2 rsm_tc = float2(i, j) * vpl_params.z + vpl_params.w;
-
 	float4 albedo_spec = albedo_tex.SampleLevel(point_sampler, rsm_tc, mip_level);
 	float3 albedo = albedo_spec.xyz;
 	float specular_level = albedo_spec.w;
@@ -90,6 +91,55 @@ float4 RSM2VPLsSpotPS(float2 tc : TEXCOORD0) : SV_Target
 		return normalize(unit_axis_to_unit_axis(float3(0, 1, 0), mul(normal_es, (float3x3)inv_view)));
 	}
 }
+
+float4 RSM2VPLsSpotPS(float2 tc : TEXCOORD0) : SV_Target
+{
+	float vpl_id = tc.x * vpl_params.x;
+	float j = floor(vpl_id / vpl_params.y);
+	float i = vpl_id - j * vpl_params.y;
+	float2 rsm_tc = float2(i, j) * vpl_params.z + vpl_params.w;
+
+	return RSM2VPLsSpot(tc, rsm_tc);
+}
+
+float4 RSM2VPLsSpotPSNew(float2 tc : TEXCOORD0) : SV_Target
+{
+	float vpl_id = tc.x * vpl_params.x - vpl_params.y;
+
+	if ((vpl_id < 0) || (vpl_id >= vpl_params.z * vpl_params.z))
+	{
+		return vpl_tex.SampleLevel(point_sampler, tc, 0);
+	}
+
+	float j = floor(vpl_id / vpl_params.z);
+	float i = vpl_id - j * vpl_params.z;
+	float2 rsm_tc = float2(i, j) / vpl_params.z + vpl_params.w;
+
+	if (is_not_bottom_top_level.x)
+	{
+		float depth_deriv = depth_derivate_tex.SampleLevel(point_sampler, rsm_tc, mip_level).r;  
+		float4 normal_cone = normal_cone_tex.SampleLevel(point_sampler, rsm_tc, mip_level);
+		normal_cone.xy -= normal_cone.zw;
+		float normal_deriv = max(normal_cone.x, normal_cone.y);
+		if (any(float2(depth_deriv, normal_deriv) > depth_normal_threshold))
+		{
+			return -1;
+		}
+	}
+	if (is_not_bottom_top_level.y)
+	{
+		float depth_deriv = depth_derivate_tex.SampleLevel(point_sampler, rsm_tc, smaller_level).r;
+		float4 normal_cone = normal_cone_tex.SampleLevel(point_sampler, rsm_tc, smaller_level);
+		normal_cone.xy -= normal_cone.zw;
+		float normal_deriv = max(normal_cone.x, normal_cone.y);
+		if (all(float2(depth_deriv, normal_deriv) <= depth_normal_threshold))
+		{
+			return -1;
+		}
+	}
+
+	return RSM2VPLsSpot(tc, rsm_tc);
+}
 		]]>
 	</shader>
 
@@ -99,6 +149,15 @@ float4 RSM2VPLsSpotPS(float2 tc : TEXCOORD0) : SV_Target
 
 			<state name="vertex_shader" value="PostProcessVS()"/>
 			<state name="pixel_shader" value="RSM2VPLsSpotPS()"/>
+		</pass>
+	</technique>
+
+	<technique name="RSM2VPLsSpotNew">
+		<pass name="p0">
+			<state name="depth_write_mask" value="false"/>
+
+			<state name="vertex_shader" value="PostProcessVS()"/>
+			<state name="pixel_shader" value="RSM2VPLsSpotPSNew()"/>
 		</pass>
 	</technique>
 </effect>

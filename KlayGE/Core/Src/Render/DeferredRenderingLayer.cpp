@@ -30,23 +30,36 @@
 #include <KlayGE/Mesh.hpp>
 #include <KlayGE/SSGIPostProcess.hpp>
 #include <KlayGE/SSVOPostProcess.hpp>
+//#include <KlayGE/half.hpp>
 
 #include <boost/typeof/typeof.hpp>
 #include <boost/foreach.hpp>
 
 #include <KlayGE/DeferredRenderingLayer.hpp>
 
+//#define USE_NEW_LIGHT_SAMPLING
+
 namespace KlayGE
 {
 	int const SM_SIZE = 512;
 	
 	int const VPL_COUNT_SQRT = 16;
-	int const VPL_COUNT = VPL_COUNT_SQRT * VPL_COUNT_SQRT;
 	
 	float const VPL_DELTA = 1.0f / VPL_COUNT_SQRT;
 	float const VPL_OFFSET = 0.5f * VPL_DELTA;
 
 	int const MAX_IL_MIPMAP_LEVELS = 3;
+
+#ifdef USE_NEW_LIGHT_SAMPLING
+	int const MIN_RSM_MIPMAP_SIZE = 4; // minimum mipmap level is 4x4
+	int const MAX_RSM_MIPMAP_LEVELS = 8; // (log(512)-log(4))/log(2) + 1
+	int const BEGIN_RSM_SAMPLING_LIGHT_LEVEL = 5;
+	int const SAMPLE_LEVEL_CNT = MAX_RSM_MIPMAP_LEVELS - BEGIN_RSM_SAMPLING_LIGHT_LEVEL;
+	int const VPL_COUNT = 16 * ((1UL << (SAMPLE_LEVEL_CNT * 2)) - 1) / (4 - 1);
+#else
+	int const MAX_RSM_MIPMAP_LEVELS = 6;
+	int const VPL_COUNT = VPL_COUNT_SQRT * VPL_COUNT_SQRT;
+#endif
 
 	template <typename T>
 	void CreateConeMesh(std::vector<T>& vb, std::vector<uint16_t>& ib, uint16_t vertex_base, float radius, float height, uint16_t n)
@@ -467,15 +480,21 @@ namespace KlayGE
 				fmt8 = EF_ARGB8;
 			}
 
-			rsm_texs_[0] = rf.MakeTexture2D(SM_SIZE, SM_SIZE, 6, 1, fmt8, 1, 0, EAH_GPU_Read | EAH_GPU_Write | EAH_Generate_Mips, NULL);
-			rsm_texs_[1] = rf.MakeTexture2D(SM_SIZE, SM_SIZE, 6, 1, fmt8, 1, 0, EAH_GPU_Read | EAH_GPU_Write | EAH_Generate_Mips, NULL);
+			rsm_texs_[0] = rf.MakeTexture2D(SM_SIZE, SM_SIZE, MAX_RSM_MIPMAP_LEVELS, 1, fmt8, 1, 0, EAH_GPU_Read | EAH_GPU_Write | EAH_Generate_Mips, NULL);
+			rsm_texs_[1] = rf.MakeTexture2D(SM_SIZE, SM_SIZE, MAX_RSM_MIPMAP_LEVELS, 1, fmt8, 1, 0, EAH_GPU_Read | EAH_GPU_Write | EAH_Generate_Mips, NULL);
 			rsm_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*rsm_texs_[0], 0, 1, 0)); // albedo
 			rsm_buffer_->Attach(FrameBuffer::ATT_Color1, rf.Make2DRenderView(*rsm_texs_[1], 0, 1, 0)); // normal (light space)
 			rsm_buffer_->Attach(FrameBuffer::ATT_DepthStencil, sm_depth_view);
 
 			vpl_tex_ = rf.MakeTexture2D(VPL_COUNT, 4, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);	
 
-			rsm_to_vpls_pps[LT_Spot] = LoadPostProcess(ResLoader::Instance().Open("RSM2VPLs.ppml"), "RSM2VPLsSpot");
+#ifdef USE_NEW_LIGHT_SAMPLING
+			std::string RSM2VPLsSpotName = "RSM2VPLsSpotNew";
+#else
+			std::string RSM2VPLsSpotName = "RSM2VPLsSpot";
+#endif
+
+			rsm_to_vpls_pps[LT_Spot] = LoadPostProcess(ResLoader::Instance().Open("RSM2VPLs.ppml"), RSM2VPLsSpotName);
 			rsm_to_vpls_pps[LT_Spot]->InputPin(0, rsm_texs_[0]);
 			rsm_to_vpls_pps[LT_Spot]->InputPin(1, rsm_texs_[1]);
 			rsm_to_vpls_pps[LT_Spot]->InputPin(2, sm_tex_);
@@ -515,6 +534,14 @@ namespace KlayGE
 			{
 				rl_vpl_->NumInstances(VPL_COUNT);
 			}
+
+#ifdef USE_NEW_LIGHT_SAMPLING
+			vpl_copy_ = rf.MakeTexture2D(VPL_COUNT, 4, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+			rsm_to_depth_derivate_pp_ =  LoadPostProcess(ResLoader::Instance().Open("CustomMipMap.ppml"), "GBuffer2DepthDerivate");
+			rsm_depth_derivate_mipmap_pp_ = LoadPostProcess(ResLoader::Instance().Open("CustomMipMap.ppml"), "DepthDerivateMipMap");
+			rsm_to_normal_cone_pp_ =  LoadPostProcess(ResLoader::Instance().Open("CustomMipMap.ppml"), "GBuffer2NormalCone");
+			rsm_normal_cone_mipmap_pp_ = LoadPostProcess(ResLoader::Instance().Open("CustomMipMap.ppml"), "NormalConeMipMap");
+#endif
 		}
 
 
@@ -729,6 +756,15 @@ namespace KlayGE
 				fb->Attach(FrameBuffer::ATT_DepthStencil, rf.Make2DDepthStencilRenderView(*subsplat_ds_tex, 0, 1, 0));
 				vpls_lighting_fbs_[i] = fb;
 			}
+#ifdef USE_NEW_LIGHT_SAMPLING
+			rsm_depth_derivative_tex_ = rf.MakeTexture2D(SM_SIZE, SM_SIZE, MAX_RSM_MIPMAP_LEVELS, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+			rsm_normal_cone_tex_ = rf.MakeTexture2D(SM_SIZE, SM_SIZE, MAX_RSM_MIPMAP_LEVELS, 1, fmt8, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+			if (rsm_depth_derivative_tex_->NumMipMaps() > 1)
+			{
+				rsm_depth_derivative_small_tex_ = rf.MakeTexture2D(SM_SIZE / 2, SM_SIZE / 2, MAX_RSM_MIPMAP_LEVELS - 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+				rsm_normal_cone_small_tex_ = rf.MakeTexture2D(SM_SIZE / 2, SM_SIZE / 2, MAX_RSM_MIPMAP_LEVELS - 1, 1, fmt8, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+			}
+#endif
 		}
 
 		if (caps.rendertarget_format_support(EF_B10G11R11F, 1, 0))
@@ -859,6 +895,22 @@ namespace KlayGE
 
 			depth_derivate_mipmap_pp_->InputPin(0, depth_deriative_tex_);
 			normal_cone_mipmap_pp_->InputPin(0, normal_cone_tex_);
+
+#ifdef USE_NEW_LIGHT_SAMPLING
+			rsm_to_depth_derivate_pp_->InputPin(1, sm_tex_);
+			rsm_to_depth_derivate_pp_->OutputPin(0, rsm_depth_derivative_tex_);
+			delta_x = 1.0f / sm_depth_tex_->Width(0);
+			delta_y = 1.0f / sm_depth_tex_->Height(0);
+			float4 rsm_delta_offset(delta_x, delta_y, delta_x / 2, delta_y / 2);
+			rsm_to_depth_derivate_pp_->SetParam(0, rsm_delta_offset);
+			
+			rsm_to_normal_cone_pp_->InputPin(0, rsm_texs_[0]);
+			rsm_to_normal_cone_pp_->OutputPin(0, rsm_normal_cone_tex_);
+			rsm_to_normal_cone_pp_->SetParam(0, rsm_delta_offset);
+
+			rsm_depth_derivate_mipmap_pp_->InputPin(0, rsm_depth_derivative_tex_);
+			rsm_normal_cone_mipmap_pp_->InputPin(0, rsm_normal_cone_tex_);
+#endif
 		}
 	}
 
@@ -1534,7 +1586,11 @@ namespace KlayGE
 						depth_to_vsm_pp_->Apply();
 					}
 
+#ifdef USE_NEW_LIGHT_SAMPLING
+					this->ExtractVPLsNew(rsm_buffer_->GetViewport().camera, light);
+#else
 					this->ExtractVPLs(rsm_buffer_->GetViewport().camera, light);
+#endif
 					this->VPLsLighting(light);
 
 					return App3DFramework::URV_Flushed;
@@ -1855,4 +1911,122 @@ namespace KlayGE
 	{
 		indirect_scale_ = scale;
 	}
+
+#ifdef USE_NEW_LIGHT_SAMPLING
+	void DeferredRenderingLayer::CreateRSMDepthDerivativeMipMap()
+	{
+		rsm_to_depth_derivate_pp_->Apply();
+		for (uint32_t i = 1; i < rsm_depth_derivative_tex_->NumMipMaps(); ++ i)
+		{
+			int width = rsm_depth_derivative_tex_->Width(i - 1);
+			int height = rsm_depth_derivative_tex_->Height(i - 1);
+
+			float delta_x = 1.0f / width;
+			float delta_y = 1.0f / height;
+			float4 delta_offset(delta_x, delta_y, delta_x / 2, delta_y / 2);			
+			rsm_depth_derivate_mipmap_pp_->SetParam(0, delta_offset);
+			rsm_depth_derivate_mipmap_pp_->SetParam(1, i - 1.0f);
+			rsm_depth_derivate_mipmap_pp_->OutputPin(0, rsm_depth_derivative_small_tex_, i - 1);
+			rsm_depth_derivate_mipmap_pp_->Apply();
+			rsm_depth_derivative_small_tex_->CopyToSubTexture2D(*rsm_depth_derivative_tex_, 0, i, 0, 0, width / 2, height / 2,
+					0, i - 1, 0, 0, width / 2, height / 2);
+		}
+	}
+
+	void DeferredRenderingLayer::CreateRSMNormalConeMipMap()
+	{
+		rsm_to_normal_cone_pp_->Apply();
+
+		for (uint32_t i = 1; i < rsm_normal_cone_tex_->NumMipMaps(); ++ i)
+		{
+			int width = rsm_normal_cone_tex_->Width(i - 1);
+			int height = rsm_normal_cone_tex_->Height(i - 1);
+			float delta_x = 1.0f / width;
+			float delta_y = 1.0f / height;
+			float4 delta_offset(delta_x, delta_y, delta_x / 2, delta_y / 2);
+
+			rsm_normal_cone_mipmap_pp_->SetParam(0, delta_offset);
+			rsm_normal_cone_mipmap_pp_->SetParam(1, i - 1.0f);
+
+			rsm_normal_cone_mipmap_pp_->OutputPin(0, rsm_normal_cone_small_tex_, i - 1);
+			rsm_normal_cone_mipmap_pp_->Apply();
+
+			rsm_normal_cone_small_tex_->CopyToSubTexture2D(*rsm_normal_cone_tex_, 0, i, 0, 0, width / 2, height / 2,
+				0, i - 1, 0, 0, width / 2, height / 2);
+		}
+	}
+
+	void DeferredRenderingLayer::ExtractVPLsNew(CameraPtr const & rsm_camera, LightSourcePtr const & light)
+	{
+		rsm_texs_[0]->BuildMipSubLevels();
+		rsm_texs_[1]->BuildMipSubLevels();
+		
+		this->CreateRSMDepthDerivativeMipMap();
+		this->CreateRSMNormalConeMipMap();
+		
+		float4x4 ls_to_es = MathLib::inverse(rsm_camera->ViewMatrix()) * view_;
+		float4x4 inv_proj = MathLib::inverse(rsm_camera->ProjMatrix());
+		LightType type = light->Type();
+
+		uint32_t sum_offset = 0;
+		uint32_t n = SM_SIZE / (1UL << BEGIN_RSM_SAMPLING_LIGHT_LEVEL);
+		for (uint32_t i = BEGIN_RSM_SAMPLING_LIGHT_LEVEL; i < rsm_texs_[0]->NumMipMaps(); ++ i)
+		{
+			vpl_tex_->CopyToTexture(*vpl_copy_);
+
+			// Param 1: number of VPLs. Param 2: level offset. Param 3: sqrt(number of current level's lights). Param 4: current level's offset.
+			float4 vpl_params(static_cast<float>(VPL_COUNT), static_cast<float>(sum_offset), static_cast<float>(n), 0.5f / n);
+			rsm_to_vpls_pps[type]->SetParam(0, ls_to_es);
+			rsm_to_vpls_pps[type]->SetParam(1, static_cast<float>(i)); // Mipmap level
+			rsm_to_vpls_pps[type]->SetParam(2, vpl_params);
+			rsm_to_vpls_pps[type]->SetParam(3, light->Color());
+			rsm_to_vpls_pps[type]->SetParam(4, light->CosOuterInner());
+			rsm_to_vpls_pps[type]->SetParam(5, light->Falloff());
+			rsm_to_vpls_pps[type]->SetParam(6, inv_view_);
+			float3 upper_left = MathLib::transform_coord(float3(-1, +1, 1), inv_proj);
+			float3 upper_right = MathLib::transform_coord(float3(+1, +1, 1), inv_proj);
+			float3 lower_left = MathLib::transform_coord(float3(-1, -1, 1), inv_proj);
+			rsm_to_vpls_pps[type]->SetParam(7, upper_left);
+			rsm_to_vpls_pps[type]->SetParam(8, upper_right - upper_left);
+			rsm_to_vpls_pps[type]->SetParam(9, lower_left - upper_left);
+			rsm_to_vpls_pps[type]->SetParam(10, int2(i != BEGIN_RSM_SAMPLING_LIGHT_LEVEL, i != rsm_texs_[0]->NumMipMaps() - 1));
+			rsm_to_vpls_pps[type]->SetParam(11, float2(0.001f * rsm_camera->FarPlane(), 0.77f));
+			rsm_to_vpls_pps[type]->SetParam(12, static_cast<float>(i + 1));
+
+			rsm_to_vpls_pps[type]->InputPin(3, rsm_depth_derivative_tex_);
+			rsm_to_vpls_pps[type]->InputPin(4, rsm_normal_cone_tex_);
+			rsm_to_vpls_pps[type]->InputPin(5, vpl_copy_);
+
+			rsm_to_vpls_pps[type]->Apply();
+
+			sum_offset += n * n;
+			n /= 2;
+		}
+
+		/*TexturePtr vpl_cpu_tex = Context::Instance().RenderFactoryInstance().MakeTexture2D(VPL_COUNT, 4, 1, 1, EF_ABGR16F, 1, 0, EAH_CPU_Read, NULL);
+		vpl_tex_->CopyToTexture(*vpl_cpu_tex);
+		{
+			uint32_t n = SM_SIZE / (1UL << BEGIN_RSM_SAMPLING_LIGHT_LEVEL);
+			Texture::Mapper mapper(*vpl_cpu_tex, 0, 0, TMA_Read_Only, 0, 0, VPL_COUNT, 4);
+			half const * p = mapper.Pointer<half>();
+			for (uint32_t i = BEGIN_RSM_SAMPLING_LIGHT_LEVEL; i < rsm_texs_[0]->NumMipMaps(); ++ i)
+			{
+				int a = 0;
+				for (uint32_t j = 0; j < n * n; ++ j)
+				{
+					if (float(p[j * 4]) < 0)
+					{
+						++ a;
+					}
+				}
+
+				LogInfo("%d %d %d", i, a, n * n);
+
+				p += n * n * 4;
+
+				n /= 2;
+			}
+		}*/
+	}
+#endif
 }
