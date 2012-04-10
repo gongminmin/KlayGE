@@ -152,7 +152,7 @@ SET(RENDERING_EFFECT_FILES
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/DeferredRendering.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/DeferredRenderingUtil.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/DepthToSM.fxml
-	${KLAYGE_PROJECT_DIR}/media/RenderFX/DownSample.fxml
+	${KLAYGE_PROJECT_DIR}/media/RenderFX/BrightPass.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/Fog.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/Font.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/FXAA.fxml
@@ -189,7 +189,7 @@ SET(RENDERING_POSTPROCESSOR_FILES
 	${KLAYGE_PROJECT_DIR}/media/PostProcessors/Copy2LightBuffer.ppml
 	${KLAYGE_PROJECT_DIR}/media/PostProcessors/CustomMipMap.ppml
 	${KLAYGE_PROJECT_DIR}/media/PostProcessors/DepthToSM.ppml
-	${KLAYGE_PROJECT_DIR}/media/PostProcessors/Downsampler2x2.ppml
+	${KLAYGE_PROJECT_DIR}/media/PostProcessors/BrightPass.ppml
 	${KLAYGE_PROJECT_DIR}/media/PostProcessors/FXAA.ppml
 	${KLAYGE_PROJECT_DIR}/media/PostProcessors/GammaCorrection.ppml
 	${KLAYGE_PROJECT_DIR}/media/PostProcessors/GlowMerger.ppml
