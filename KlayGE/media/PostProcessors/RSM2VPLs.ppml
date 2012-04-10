@@ -24,4 +24,34 @@
 		</output>
 		<shader effect="RSM2VPLs.fxml" tech="RSM2VPLsSpot"/>
 	</post_processor>
+
+	<post_processor name="RSM2VPLsSpotNew">
+		<params>
+			<param name="ls_to_es"/>
+			<param name="mip_level"/>
+			<param name="vpl_params"/>
+			<param name="light_color"/>
+			<param name="light_cos_out_inner"/>
+			<param name="light_falloff"/>
+			<param name="inv_view"/>
+			<param name="upper_left"/>
+			<param name="x_dir"/>
+			<param name="y_dir"/>
+			<param name="is_not_bottom_top_level"/>
+			<param name="depth_normal_threshold"/>
+			<param name="smaller_level"/>
+		</params>
+		<input>
+			<pin name="albedo_tex"/>
+			<pin name="normal_es_tex" />
+			<pin name="depth_tex" />
+			<pin name="depth_derivate_tex" />
+			<pin name="normal_cone_tex" />
+			<pin name="vpl_tex" />
+		</input>
+		<output>
+			<pin name="output"/>
+		</output>
+		<shader effect="RSM2VPLs.fxml" tech="RSM2VPLsSpotNew"/>
+	</post_processor>
 </post_processors>

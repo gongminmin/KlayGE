@@ -285,6 +285,24 @@ namespace KlayGE
 		RenderEffectParameterPtr vpl_x_coord_param_;
 
 		RenderLayoutPtr rl_vpl_;
+
+		// USE_NEW_LIGHT_SAMPLING
+	private:
+		void CreateRSMDepthDerivativeMipMap();
+		void CreateRSMNormalConeMipMap();
+		void ExtractVPLsNew(CameraPtr const & rsm_camera, LightSourcePtr const & light);
+
+	private:
+		TexturePtr rsm_depth_derivative_tex_;
+		TexturePtr rsm_depth_derivative_small_tex_;
+		TexturePtr rsm_normal_cone_tex_;
+		TexturePtr rsm_normal_cone_small_tex_;
+		TexturePtr vpl_copy_;
+
+		PostProcessPtr rsm_to_depth_derivate_pp_;
+		PostProcessPtr rsm_depth_derivate_mipmap_pp_;
+		PostProcessPtr rsm_to_normal_cone_pp_;
+		PostProcessPtr rsm_normal_cone_mipmap_pp_;
 	};
 }
 
