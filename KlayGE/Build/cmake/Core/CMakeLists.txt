@@ -152,15 +152,14 @@ SET(RENDERING_EFFECT_FILES
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/DeferredRendering.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/DeferredRenderingUtil.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/DepthToSM.fxml
-	${KLAYGE_PROJECT_DIR}/media/RenderFX/BrightPass.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/Fog.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/Font.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/FXAA.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/GammaCorrection.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/GBuffer.fxml
-	${KLAYGE_PROJECT_DIR}/media/RenderFX/GlowMerger.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/InfTerrain.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/JudaTexture.fxml
+	${KLAYGE_PROJECT_DIR}/media/RenderFX/LensEffects.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/LensFlare.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/Lighting.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/LightSourceProxy.fxml
@@ -189,10 +188,9 @@ SET(RENDERING_POSTPROCESSOR_FILES
 	${KLAYGE_PROJECT_DIR}/media/PostProcessors/Copy2LightBuffer.ppml
 	${KLAYGE_PROJECT_DIR}/media/PostProcessors/CustomMipMap.ppml
 	${KLAYGE_PROJECT_DIR}/media/PostProcessors/DepthToSM.ppml
-	${KLAYGE_PROJECT_DIR}/media/PostProcessors/BrightPass.ppml
 	${KLAYGE_PROJECT_DIR}/media/PostProcessors/FXAA.ppml
 	${KLAYGE_PROJECT_DIR}/media/PostProcessors/GammaCorrection.ppml
-	${KLAYGE_PROJECT_DIR}/media/PostProcessors/GlowMerger.ppml
+	${KLAYGE_PROJECT_DIR}/media/PostProcessors/LensEffects.ppml
 	${KLAYGE_PROJECT_DIR}/media/PostProcessors/RSM2VPLs.ppml
 	${KLAYGE_PROJECT_DIR}/media/PostProcessors/Upsampling.ppml
 )

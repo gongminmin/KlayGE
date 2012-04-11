@@ -223,103 +223,156 @@ namespace KlayGE
 	}
 
 
-	HDRPostProcess::HDRPostProcess()
-		: PostProcess(L"HDR")
+	ImageStatPostProcess::ImageStatPostProcess()
+		: PostProcess(L"ImageStat")
 	{
-		RenderDeviceCaps const & caps = Context::Instance().RenderFactoryInstance().RenderEngineInstance().DeviceCaps();
-		cs_support_ = caps.cs_support && (5 == caps.max_shader_model);
-
-		if (cs_support_)
+		sum_lums_1st_ = MakeSharedPtr<SumLumLogPostProcess>();
+		sum_lums_.resize(3);
+		for (size_t i = 0; i < sum_lums_.size(); ++ i)
 		{
-			sum_lums_1st_ = MakeSharedPtr<SumLumLogPostProcessCS>();
-			sum_lums_.resize(0);
-			adapted_lum_ = MakeSharedPtr<AdaptedLumPostProcessCS>();
+			sum_lums_[i] = MakeSharedPtr<SumLumIterativePostProcess>();
+		}
+		adapted_lum_ = MakeSharedPtr<AdaptedLumPostProcess>();
+	}
+
+	void ImageStatPostProcess::InputPin(uint32_t index, TexturePtr const & tex)
+	{
+		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+
+		std::vector<TexturePtr> lum_texs(sum_lums_.size() + 1);
+		ElementFormat fmt;
+		if (rf.RenderEngineInstance().DeviceCaps().rendertarget_format_support(EF_R16F, 1, 0))
+		{
+			fmt = EF_R16F;
 		}
 		else
 		{
-			sum_lums_1st_ = MakeSharedPtr<SumLumLogPostProcess>();
-			sum_lums_.resize(NUM_TONEMAP_TEXTURES);
-			for (size_t i = 0; i < sum_lums_.size(); ++ i)
-			{
-				sum_lums_[i] = MakeSharedPtr<SumLumIterativePostProcess>();
-			}
-			adapted_lum_ = MakeSharedPtr<AdaptedLumPostProcess>();
+			BOOST_ASSERT(rf.RenderEngineInstance().DeviceCaps().rendertarget_format_support(EF_ABGR16F, 1, 0));
+			fmt = EF_ABGR16F;
+		}
+			
+		int len = 1;
+		for (size_t i = 0; i < sum_lums_.size() + 1; ++ i)
+		{
+			lum_texs[sum_lums_.size() - i] = rf.MakeTexture2D(len, len, 1, 1, fmt, 1, 0,
+				EAH_GPU_Read | EAH_GPU_Write, NULL);
+			len *= 4;
 		}
 
-		bright_pass_downsampler_ = LoadPostProcess(ResLoader::Instance().Open("BrightPass.ppml"), "sqr_bright");
+		{
+			sum_lums_1st_->InputPin(index, tex);
+			sum_lums_1st_->OutputPin(index, lum_texs[0]);
+		}
+		for (size_t i = 0; i < sum_lums_.size(); ++ i)
+		{
+			sum_lums_[i]->InputPin(index, lum_texs[i]);
+			sum_lums_[i]->OutputPin(index, lum_texs[i + 1]);
+		}
+
+		{
+			adapted_lum_->InputPin(index, lum_texs[sum_lums_.size()]);
+		}
+	}
+
+	TexturePtr const & ImageStatPostProcess::InputPin(uint32_t index) const
+	{
+		return sum_lums_1st_->InputPin(index);
+	}
+
+	void ImageStatPostProcess::OutputPin(uint32_t index, TexturePtr const & tex, int level, int array_index, int face)
+	{
+		adapted_lum_->OutputPin(index, tex, level, array_index, face);
+	}
+
+	TexturePtr const & ImageStatPostProcess::OutputPin(uint32_t index) const
+	{
+		return adapted_lum_->OutputPin(index);
+	}
+
+	void ImageStatPostProcess::Apply()
+	{
+		// 降采样4x4 log
+		sum_lums_1st_->Apply();
+		for (size_t i = 0; i < sum_lums_.size(); ++ i)
+		{
+			// 降采样4x4
+			sum_lums_[i]->Apply();
+		}
+
+		adapted_lum_->Apply();
+	}
+
+
+	ImageStatPostProcessCS::ImageStatPostProcessCS()
+		: PostProcess(L"ImageStatCS")
+	{
+		sum_lums_1st_ = MakeSharedPtr<SumLumLogPostProcessCS>();
+		adapted_lum_ = MakeSharedPtr<AdaptedLumPostProcessCS>();
+	}
+
+	void ImageStatPostProcessCS::InputPin(uint32_t index, TexturePtr const & tex)
+	{
+		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+
+		TexturePtr lum_tex = rf.MakeTexture2D(2, 2, 1, 1, EF_R16F, 1, 0,
+					EAH_GPU_Read | EAH_GPU_Write | EAH_GPU_Unordered, NULL);
+
+		float init_lum = 0;
+		ElementInitData init_data;
+		init_data.row_pitch = sizeof(float);
+		init_data.slice_pitch = 0;
+		init_data.data = &init_lum;
+		TexturePtr adapted_lum_tex = rf.MakeTexture2D(1, 1, 1, 1, EF_R32F, 1, 0,
+					EAH_GPU_Read | EAH_GPU_Write | EAH_GPU_Unordered, &init_data);
+
+		sum_lums_1st_->InputPin(index, tex);
+		sum_lums_1st_->OutputPin(index, lum_tex);
+		adapted_lum_->InputPin(index, lum_tex);
+		adapted_lum_->OutputPin(index, adapted_lum_tex);
+	}
+
+	TexturePtr const & ImageStatPostProcessCS::InputPin(uint32_t index) const
+	{
+		return sum_lums_1st_->InputPin(index);
+	}
+
+	void ImageStatPostProcessCS::OutputPin(uint32_t index, TexturePtr const & tex, int level, int array_index, int face)
+	{
+		adapted_lum_->OutputPin(index, tex, level, array_index, face);
+	}
+
+	TexturePtr const & ImageStatPostProcessCS::OutputPin(uint32_t index) const
+	{
+		return adapted_lum_->OutputPin(index);
+	}
+
+	void ImageStatPostProcessCS::Apply()
+	{
+		// 降采样4x4 log
+		sum_lums_1st_->Apply();
+		adapted_lum_->Apply();
+	}
+
+
+	LensEffectsPostProcess::LensEffectsPostProcess()
+		: PostProcess(L"LensEffects")
+	{
+		bright_pass_downsampler_ = LoadPostProcess(ResLoader::Instance().Open("LensEffects.ppml"), "sqr_bright");
 		downsamplers_[0] = LoadPostProcess(ResLoader::Instance().Open("Copy.ppml"), "bilinear_copy");
 		downsamplers_[1] = LoadPostProcess(ResLoader::Instance().Open("Copy.ppml"), "bilinear_copy");
 		blurs_[0] = MakeSharedPtr<BlurPostProcess<SeparableGaussianFilterPostProcess> >(8, 1.0f);
 		blurs_[1] = MakeSharedPtr<BlurPostProcess<SeparableGaussianFilterPostProcess> >(8, 1.0f);
 		blurs_[2] = MakeSharedPtr<BlurPostProcess<SeparableGaussianFilterPostProcess> >(8, 1.0f);
 
-		glow_merger_ = LoadPostProcess(ResLoader::Instance().Open("GlowMerger.ppml"), "glow_merger");
-
-		tone_mapping_ = MakeSharedPtr<ToneMappingPostProcess>();
+		glow_merger_ = LoadPostProcess(ResLoader::Instance().Open("LensEffects.ppml"), "glow_merger");
 	}
 
-	void HDRPostProcess::InputPin(uint32_t index, TexturePtr const & tex)
+	void LensEffectsPostProcess::InputPin(uint32_t index, TexturePtr const & tex)
 	{
 		uint32_t const width = tex->Width(0);
 		uint32_t const height = tex->Height(0);
 
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-
-		if (cs_support_)
-		{
-			TexturePtr lum_tex = rf.MakeTexture2D(2, 2, 1, 1, EF_R16F, 1, 0,
-						EAH_GPU_Read | EAH_GPU_Write | EAH_GPU_Unordered, NULL);
-
-			float init_lum = 0;
-			ElementInitData init_data;
-			init_data.row_pitch = sizeof(float);
-			init_data.slice_pitch = 0;
-			init_data.data = &init_lum;
-			TexturePtr adapted_lum_tex = rf.MakeTexture2D(1, 1, 1, 1, EF_R32F, 1, 0,
-						EAH_GPU_Read | EAH_GPU_Write | EAH_GPU_Unordered, &init_data);
-
-			sum_lums_1st_->InputPin(index, tex);
-			sum_lums_1st_->OutputPin(index, lum_tex);
-			adapted_lum_->InputPin(index, lum_tex);
-			adapted_lum_->OutputPin(index, adapted_lum_tex);
-			tone_mapping_->InputPin(1, adapted_lum_tex);
-		}
-		else
-		{
-			std::vector<TexturePtr> lum_texs(sum_lums_.size() + 1);
-			ElementFormat fmt;
-			if (rf.RenderEngineInstance().DeviceCaps().rendertarget_format_support(EF_R16F, 1, 0))
-			{
-				fmt = EF_R16F;
-			}
-			else
-			{
-				BOOST_ASSERT(rf.RenderEngineInstance().DeviceCaps().rendertarget_format_support(EF_ABGR16F, 1, 0));
-				fmt = EF_ABGR16F;
-			}
-			
-			int len = 1;
-			for (size_t i = 0; i < sum_lums_.size() + 1; ++ i)
-			{
-				lum_texs[sum_lums_.size() - i] = rf.MakeTexture2D(len, len, 1, 1, fmt, 1, 0,
-					EAH_GPU_Read | EAH_GPU_Write, NULL);
-				len *= 4;
-			}
-
-			{
-				sum_lums_1st_->InputPin(index, tex);
-				sum_lums_1st_->OutputPin(index, lum_texs[0]);
-			}
-			for (size_t i = 0; i < sum_lums_.size(); ++ i)
-			{
-				sum_lums_[i]->InputPin(index, lum_texs[i]);
-				sum_lums_[i]->OutputPin(index, lum_texs[i + 1]);
-			}
-
-			{
-				adapted_lum_->InputPin(index, lum_texs[sum_lums_.size()]);
-			}
-		}
 
 		TexturePtr downsample_texs[3];
 		TexturePtr glow_texs[3];
@@ -362,20 +415,97 @@ namespace KlayGE
 			blurs_[i]->OutputPin(0, glow_texs[i]);
 		}
 
-		TexturePtr glow_merged_tex = rf.MakeTexture2D(width / 2, height / 2, 1, 1, downsample_texs[0]->Format(), 1, 0,
-			EAH_GPU_Read | EAH_GPU_Write, NULL);
 		glow_merger_->InputPin(0, glow_texs[0]);
 		glow_merger_->InputPin(1, glow_texs[1]);
 		glow_merger_->InputPin(2, glow_texs[2]);
-		glow_merger_->OutputPin(0, glow_merged_tex);
+	}
+
+	TexturePtr const & LensEffectsPostProcess::InputPin(uint32_t index) const
+	{
+		return bright_pass_downsampler_->InputPin(index);
+	}
+
+	void LensEffectsPostProcess::OutputPin(uint32_t index, TexturePtr const & tex, int level, int array_index, int face)
+	{
+		glow_merger_->OutputPin(index, tex, level, array_index, face);
+	}
+
+	TexturePtr const & LensEffectsPostProcess::OutputPin(uint32_t index) const
+	{
+		return glow_merger_->OutputPin(index);
+	}
+
+	void LensEffectsPostProcess::Apply()
+	{
+		bright_pass_downsampler_->Apply();
+		for (size_t i = 0; i < 2; ++ i)
+		{
+			downsamplers_[i]->Apply();
+		}
+		for (size_t i = 0; i < 3; ++ i)
+		{
+			blurs_[i]->Apply();
+		}
+
+		glow_merger_->Apply();
+	}
+
+
+	HDRPostProcess::HDRPostProcess()
+		: PostProcess(L"HDR")
+	{
+		RenderDeviceCaps const & caps = Context::Instance().RenderFactoryInstance().RenderEngineInstance().DeviceCaps();
+		cs_support_ = caps.cs_support && (5 == caps.max_shader_model);
+
+		if (cs_support_)
+		{
+			image_stat_ = MakeSharedPtr<ImageStatPostProcessCS>();
+		}
+		else
+		{
+			image_stat_ = MakeSharedPtr<ImageStatPostProcess>();
+		}
+		lens_effects_ = MakeSharedPtr<LensEffectsPostProcess>();
+		tone_mapping_ = MakeSharedPtr<ToneMappingPostProcess>();
+	}
+
+	void HDRPostProcess::InputPin(uint32_t index, TexturePtr const & tex)
+	{
+		uint32_t const width = tex->Width(0);
+		uint32_t const height = tex->Height(0);
+
+		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+
+		image_stat_->InputPin(index, tex);
+
+		ElementFormat fmt;
+		if (rf.RenderEngineInstance().DeviceCaps().rendertarget_format_support(EF_B10G11R11F, 1, 0))
+		{
+			fmt = EF_B10G11R11F;
+		}
+		else
+		{
+			BOOST_ASSERT(rf.RenderEngineInstance().DeviceCaps().rendertarget_format_support(EF_ABGR16F, 1, 0));
+			fmt = EF_ABGR16F;
+		}
+
+		TexturePtr lens_effects_tex = rf.MakeTexture2D(width / 2, height / 2, 1, 1, fmt, 1, 0,
+			EAH_GPU_Read | EAH_GPU_Write, NULL);
+
+		lens_effects_->InputPin(0, tex);
+		lens_effects_->OutputPin(0, lens_effects_tex);
 
 		tone_mapping_->InputPin(0, tex);
-		tone_mapping_->InputPin(2, glow_merged_tex);
+		if (cs_support_)
+		{
+			tone_mapping_->InputPin(1, image_stat_->OutputPin(0));
+		}
+		tone_mapping_->InputPin(2, lens_effects_tex);
 	}
 
 	TexturePtr const & HDRPostProcess::InputPin(uint32_t index) const
 	{
-		return bright_pass_downsampler_->InputPin(index);
+		return lens_effects_->InputPin(index);
 	}
 
 	void HDRPostProcess::OutputPin(uint32_t index, TexturePtr const & tex, int level, int array_index, int face)
@@ -390,34 +520,14 @@ namespace KlayGE
 
 	void HDRPostProcess::Apply()
 	{
-		// 降采样4x4 log
-		sum_lums_1st_->Apply();
-		for (size_t i = 0; i < sum_lums_.size(); ++ i)
-		{
-			// 降采样4x4
-			sum_lums_[i]->Apply();
-		}
-
-		adapted_lum_->Apply();
+		image_stat_->Apply();
 
 		if (!cs_support_)
 		{
-			tone_mapping_->InputPin(1, adapted_lum_->OutputPin(0));
+			tone_mapping_->InputPin(1, image_stat_->OutputPin(0));
 		}
 
-		bright_pass_downsampler_->Apply();
-		for (size_t i = 0; i < 2; ++ i)
-		{
-			downsamplers_[i]->Apply();
-		}
-		for (size_t i = 0; i < 3; ++ i)
-		{
-			blurs_[i]->Apply();
-		}
-
-		glow_merger_->Apply();
-
-		// Tone mapping
+		lens_effects_->Apply();
 		tone_mapping_->Apply();
 	}
 }

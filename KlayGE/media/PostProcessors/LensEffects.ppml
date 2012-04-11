@@ -1,0 +1,35 @@
+<?xml version='1.0'?>
+
+<post_processors>
+	<post_processor name="bright_pass">
+		<input>
+			<pin name="src_tex"/>
+		</input>
+		<output>
+			<pin name="output"/>
+		</output>
+		<shader effect="LensEffects.fxml" tech="BrightPass"/>
+	</post_processor>
+	
+	<post_processor name="sqr_bright">
+		<input>
+			<pin name="src_tex"/>
+		</input>
+		<output>
+			<pin name="output"/>
+		</output>
+		<shader effect="LensEffects.fxml" tech="SqrBright"/>
+	</post_processor>
+
+	<post_processor name="glow_merger">
+		<input>
+			<pin name="glow_tex_0"/>
+			<pin name="glow_tex_1"/>
+			<pin name="glow_tex_2"/>
+		</input>
+		<output>
+			<pin name="output"/>
+		</output>
+		<shader effect="LensEffects.fxml" tech="GlowMerger"/>
+	</post_processor>
+</post_processors>

@@ -224,6 +224,12 @@ namespace KlayGE
 	typedef boost::shared_ptr<AdaptedLumPostProcess> AdaptedLumPostProcessPtr;
 	class AdaptedLumPostProcessCS;
 	typedef boost::shared_ptr<AdaptedLumPostProcessCS> AdaptedLumPostProcessCSPtr;
+	class ImageStatPostProcess;
+	typedef boost::shared_ptr<ImageStatPostProcess> ImageStatPostProcessPtr;
+	class LensEffectsPostProcess;
+	typedef boost::shared_ptr<LensEffectsPostProcess> LensEffectsPostProcessPtr;
+	class LensEffectsPostProcessCS;
+	typedef boost::shared_ptr<LensEffectsPostProcessCS> LensEffectsPostProcessCSPtr;
 	class ToneMappingPostProcess;
 	typedef boost::shared_ptr<ToneMappingPostProcess> ToneMappingPostProcessPtr;
 	class HDRPostProcess;

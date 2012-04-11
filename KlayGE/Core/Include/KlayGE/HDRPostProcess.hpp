@@ -92,22 +92,10 @@ namespace KlayGE
 		RenderEffectParameterPtr frame_delta_ep_;
 	};
 
-	class KLAYGE_CORE_API ToneMappingPostProcess : public PostProcess
+	class KLAYGE_CORE_API ImageStatPostProcess : public PostProcess
 	{
 	public:
-		ToneMappingPostProcess();
-	};
-
-
-	class KLAYGE_CORE_API HDRPostProcess : public PostProcess
-	{
-		enum
-		{
-			NUM_TONEMAP_TEXTURES = 3
-		};
-
-	public:
-		HDRPostProcess();
+		ImageStatPostProcess();
 
 		void InputPin(uint32_t index, TexturePtr const & tex);
 		TexturePtr const & InputPin(uint32_t index) const;
@@ -119,10 +107,63 @@ namespace KlayGE
 		PostProcessPtr sum_lums_1st_;
 		std::vector<PostProcessPtr> sum_lums_;
 		PostProcessPtr adapted_lum_;
+	};
+
+	class KLAYGE_CORE_API ImageStatPostProcessCS : public PostProcess
+	{
+	public:
+		ImageStatPostProcessCS();
+
+		void InputPin(uint32_t index, TexturePtr const & tex);
+		TexturePtr const & InputPin(uint32_t index) const;
+		void OutputPin(uint32_t index, TexturePtr const & tex, int level = 0, int array_index = 0, int face = 0);
+		TexturePtr const & OutputPin(uint32_t index) const;
+		void Apply();
+
+	private:
+		PostProcessPtr sum_lums_1st_;
+		PostProcessPtr adapted_lum_;
+	};
+
+	class KLAYGE_CORE_API LensEffectsPostProcess : public PostProcess
+	{
+	public:
+		LensEffectsPostProcess();
+
+		void InputPin(uint32_t index, TexturePtr const & tex);
+		TexturePtr const & InputPin(uint32_t index) const;
+		void OutputPin(uint32_t index, TexturePtr const & tex, int level = 0, int array_index = 0, int face = 0);
+		TexturePtr const & OutputPin(uint32_t index) const;
+		void Apply();
+
+	private:
 		PostProcessPtr bright_pass_downsampler_;
 		PostProcessPtr downsamplers_[2];
 		PostProcessPtr blurs_[3];
 		PostProcessPtr glow_merger_;
+	};
+
+	class KLAYGE_CORE_API ToneMappingPostProcess : public PostProcess
+	{
+	public:
+		ToneMappingPostProcess();
+	};
+
+
+	class KLAYGE_CORE_API HDRPostProcess : public PostProcess
+	{
+	public:
+		HDRPostProcess();
+
+		void InputPin(uint32_t index, TexturePtr const & tex);
+		TexturePtr const & InputPin(uint32_t index) const;
+		void OutputPin(uint32_t index, TexturePtr const & tex, int level = 0, int array_index = 0, int face = 0);
+		TexturePtr const & OutputPin(uint32_t index) const;
+		void Apply();
+
+	private:
+		PostProcessPtr image_stat_;
+		PostProcessPtr lens_effects_;
 		PostProcessPtr tone_mapping_;
 
 		bool cs_support_;
