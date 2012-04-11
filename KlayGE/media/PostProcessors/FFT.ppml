@@ -1,0 +1,32 @@
+<?xml version='1.0'?>
+
+<post_processors>
+	<post_processor name="fft_x">
+		<input>
+			<pin name="real_tex"/>
+			<pin name="imag_tex"/>
+			<pin name="lookup_i_wr_wi"/>
+		</input>
+		<output>
+			<pin name="output_real"/>
+			<pin name="output_imag"/>
+		</output>
+		<shader effect="FFT.fxml" tech="FFTX"/>
+	</post_processor>
+
+	<post_processor name="fft_y">
+		<params>
+			<param name="scale"/>
+		</params>
+		<input>
+			<pin name="real_tex"/>
+			<pin name="imag_tex"/>
+			<pin name="lookup_i_wr_wi"/>
+		</input>
+		<output>
+			<pin name="output_real"/>
+			<pin name="output_imag"/>
+		</output>
+		<shader effect="FFT.fxml" tech="FFTY"/>
+	</post_processor>
+</post_processors>

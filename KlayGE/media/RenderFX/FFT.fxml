@@ -1,0 +1,87 @@
+<?xml version='1.0'?>
+
+<effect>
+	<include name="PostProcess.fxml"/>
+
+	<parameter type="sampler" name="point_sampler">
+		<state name="filtering" value="min_mag_mip_point"/>
+		<state name="address_u" value="clamp"/>
+		<state name="address_v" value="clamp"/>
+	</parameter>
+
+	<parameter type="texture2D" name="real_tex"/>
+	<parameter type="texture2D" name="imag_tex"/>
+	<parameter type="texture2D" name="lookup_i_wr_wi"/>
+
+	<parameter type="float" name="scale"/>
+
+	<shader>
+		<![CDATA[
+void FFTUnit(float2 r1, float2 r2, float wr, float wi,
+				out float4 oReal, out float4 oImag)
+{
+	float4 input_r1 = real_tex.Sample(point_sampler, r1);
+	float4 input_i1 = imag_tex.Sample(point_sampler, r1);
+
+	float4 input_r2 = real_tex.Sample(point_sampler, r2);
+	float4 input_i2 = imag_tex.Sample(point_sampler, r2);
+
+	float4 res_r = wr * input_r2 - wi * input_i2;
+	float4 res_i = wi * input_r2 + wr * input_i2;
+
+	oReal = input_r1 + res_r;
+	oImag = input_i1 + res_i;
+}
+
+void FFTXPS(float2 tc : TEXCOORD0,
+				out float4 oReal : SV_Target0,
+				out float4 oImag : SV_Target1)
+{
+	float4 i_wr_wi = lookup_i_wr_wi.Sample(point_sampler, tc);
+	
+	float2 r1 = float2(i_wr_wi.x, tc.y);
+	float2 r2 = float2(i_wr_wi.y, tc.y);
+
+	FFTUnit(r1, r2, i_wr_wi.z, i_wr_wi.w,
+		oReal, oImag);
+}
+
+void FFTYPS(float2 tc : TEXCOORD0,
+				out float4 oReal : SV_Target0,
+				out float4 oImag : SV_Target1)
+{
+	float4 i_wr_wi = lookup_i_wr_wi.Sample(point_sampler, tc);
+	
+	float2 r1 = float2(tc.x, i_wr_wi.x);
+	float2 r2 = float2(tc.x, i_wr_wi.y);
+
+	FFTUnit(r1, r2, i_wr_wi.z, i_wr_wi.w,
+		oReal, oImag);
+	
+	if (scale > 0)
+	{
+		oReal *= scale;
+		oImag *= scale;
+	}
+}
+		]]>
+	</shader>
+
+	<technique name="FFTX">
+		<pass name="p0">
+			<state name="depth_write_mask" value="false"/>
+
+			<state name="vertex_shader" value="PostProcessVS()"/>
+			<state name="pixel_shader" value="FFTXPS()"/>
+		</pass>
+	</technique>
+
+	<technique name="FFTY">
+		<pass name="p0">
+			<state name="depth_write_mask" value="false"/>
+
+			<state name="vertex_shader" value="PostProcessVS()"/>
+			<state name="pixel_shader" value="FFTYPS()"/>
+		</pass>
+	</technique>
+</effect>

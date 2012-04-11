@@ -32,4 +32,45 @@
 		</output>
 		<shader effect="LensEffects.fxml" tech="GlowMerger"/>
 	</post_processor>
+
+
+	<post_processor name="scaled_bright_pass">
+		<params>
+			<param name="scale"/>
+		</params>
+		<input>
+			<pin name="src_tex"/>
+		</input>
+		<output>
+			<pin name="output"/>
+		</output>
+		<shader effect="LensEffects.fxml" tech="ScaledBrightPass"/>
+	</post_processor>
+
+	<post_processor name="scaled_copy">
+		<params>
+			<param name="scale"/>
+		</params>
+		<input>
+			<pin name="src_tex"/>
+		</input>
+		<output>
+			<pin name="output"/>
+		</output>
+		<shader effect="LensEffects.fxml" tech="ScaledCopy"/>
+	</post_processor>
+
+	<post_processor name="complex_mul">
+		<input>
+			<pin name="lhs_real_tex"/>
+			<pin name="lhs_imag_tex"/>
+			<pin name="rhs_real_tex"/>
+			<pin name="rhs_imag_tex"/>
+		</input>
+		<output>
+			<pin name="output_real"/>
+			<pin name="output_imag"/>
+		</output>
+		<shader effect="LensEffects.fxml" tech="ComplexMul"/>
+	</post_processor>
 </post_processors>

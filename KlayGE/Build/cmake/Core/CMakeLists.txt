@@ -73,6 +73,7 @@ SET(RENDERING_SOURCE_FILES
 	${KLAYGE_PROJECT_DIR}/Core/Src/Render/Camera.cpp
 	${KLAYGE_PROJECT_DIR}/Core/Src/Render/CameraController.cpp
 	${KLAYGE_PROJECT_DIR}/Core/Src/Render/DeferredRenderingLayer.cpp
+	${KLAYGE_PROJECT_DIR}/Core/Src/Render/FFT.cpp
 	${KLAYGE_PROJECT_DIR}/Core/Src/Render/Font.cpp
 	${KLAYGE_PROJECT_DIR}/Core/Src/Render/FrameBuffer.cpp
 	${KLAYGE_PROJECT_DIR}/Core/Src/Render/GraphicsBuffer.cpp
@@ -108,6 +109,7 @@ SET(RENDERING_HEADER_FILES
 	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/CameraController.hpp
 	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/DeferredRenderingLayer.hpp
 	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/ElementFormat.hpp
+	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/FFT.hpp
 	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/Font.hpp
 	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/FrameBuffer.hpp
 	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/GraphicsBuffer.hpp
@@ -152,6 +154,7 @@ SET(RENDERING_EFFECT_FILES
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/DeferredRendering.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/DeferredRenderingUtil.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/DepthToSM.fxml
+	${KLAYGE_PROJECT_DIR}/media/RenderFX/FFT.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/Fog.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/Font.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/FXAA.fxml
@@ -188,6 +191,7 @@ SET(RENDERING_POSTPROCESSOR_FILES
 	${KLAYGE_PROJECT_DIR}/media/PostProcessors/Copy2LightBuffer.ppml
 	${KLAYGE_PROJECT_DIR}/media/PostProcessors/CustomMipMap.ppml
 	${KLAYGE_PROJECT_DIR}/media/PostProcessors/DepthToSM.ppml
+	${KLAYGE_PROJECT_DIR}/media/PostProcessors/FFT.ppml
 	${KLAYGE_PROJECT_DIR}/media/PostProcessors/FXAA.ppml
 	${KLAYGE_PROJECT_DIR}/media/PostProcessors/GammaCorrection.ppml
 	${KLAYGE_PROJECT_DIR}/media/PostProcessors/LensEffects.ppml

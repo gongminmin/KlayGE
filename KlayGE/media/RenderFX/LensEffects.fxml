@@ -74,4 +74,72 @@ float4 GlowMergerPS(float2 tex : TEXCOORD0) : SV_Target
 			<state name="pixel_shader" value="GlowMergerPS()"/>
 		</pass>
 	</technique>
+
+
+	<parameter type="float4" name="scale"/>
+
+	<shader>
+		<![CDATA[
+void ScaledCopyVS(float4 pos : POSITION,
+					out float2 oTex : TEXCOORD0,
+					out float4 oPos : SV_Position)
+{
+	oTex = TexCoordFromPos(float4(pos.xy * scale.xy, pos.zw));
+	oPos = float4(pos.xy * scale.zw, pos.zw);
+}
+		]]>
+	</shader>
+
+	<technique name="ScaledCopy">
+		<pass name="p0">
+			<state name="depth_enable" value="false"/>
+			<state name="depth_write_mask" value="0"/>
+
+			<state name="vertex_shader" value="ScaledCopyVS()"/>
+			<state name="pixel_shader" value="BilinearCopyPS()"/>
+		</pass>
+	</technique>
+
+	<technique name="ScaledBrightPass">
+		<pass name="p0">
+			<state name="depth_enable" value="false"/>
+			<state name="depth_write_mask" value="0"/>
+
+			<state name="vertex_shader" value="ScaledCopyVS()"/>
+			<state name="pixel_shader" value="BrightPassPS()"/>
+		</pass>
+	</technique>
+
+
+	<parameter type="texture2D" name="lhs_real_tex"/>
+	<parameter type="texture2D" name="lhs_imag_tex"/>
+	<parameter type="texture2D" name="rhs_real_tex"/>
+	<parameter type="texture2D" name="rhs_imag_tex"/>
+
+	<shader>
+		<![CDATA[
+void ComplexMulPS(float2 tc : TEXCOORD0,
+				out float4 oReal : SV_Target0,
+				out float4 oImag : SV_Target1)
+{
+	float4 lr = lhs_real_tex.Sample(point_sampler, tc);
+	float4 li = lhs_imag_tex.Sample(point_sampler, tc);
+	float4 rr = rhs_real_tex.Sample(point_sampler, tc);
+	float4 ri = rhs_imag_tex.Sample(point_sampler, tc);
+	
+	oReal = lr * rr - li * ri;
+	oImag = lr * ri + li * rr;
+}
+		]]>
+	</shader>
+
+	<technique name="ComplexMul">
+		<pass name="p0">
+			<state name="depth_enable" value="false"/>
+			<state name="depth_write_mask" value="0"/>
+
+			<state name="vertex_shader" value="PostProcessVS()"/>
+			<state name="pixel_shader" value="ComplexMulPS()"/>
+		</pass>
+	</technique>
 </effect>

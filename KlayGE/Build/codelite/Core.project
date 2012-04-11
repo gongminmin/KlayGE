@@ -13,6 +13,7 @@
       <File Name="../../Core/Src/Render/Camera.cpp"/>
       <File Name="../../Core/Src/Render/CameraController.cpp"/>
       <File Name="../../Core/Src/Render/DeferredRenderingLayer.cpp"/>
+      <File Name="../../Core/Src/Render/FFT.cpp"/>
       <File Name="../../Core/Src/Render/Font.cpp"/>
       <File Name="../../Core/Src/Render/FrameBuffer.cpp"/>
       <File Name="../../Core/Src/Render/GraphicsBuffer.cpp"/>
@@ -47,6 +48,7 @@
       <File Name="../../Core/Include/KlayGE/CameraController.hpp"/>
       <File Name="../../Core/Include/KlayGE/DeferredRenderingLayer.hpp"/>
       <File Name="../../Core/Include/KlayGE/ElementFormat.hpp"/>
+      <File Name="../../Core/Include/KlayGE/FFT.hpp"/>
       <File Name="../../Core/Include/KlayGE/Font.hpp"/>
       <File Name="../../Core/Include/KlayGE/FrameBuffer.hpp"/>
       <File Name="../../Core/Include/KlayGE/GraphicsBuffer.hpp"/>
@@ -89,15 +91,15 @@
       <File Name="../../media/RenderFX/DeferredRendering.fxml"/>
       <File Name="../../media/RenderFX/DeferredRenderingUtil.fxml"/>
       <File Name="../../media/RenderFX/DepthToSM.fxml"/>
-      <File Name="../../media/RenderFX/BrightPass.fxml"/>
+      <File Name="../../media/RenderFX/FFT.fxml"/>
       <File Name="../../media/RenderFX/Fog.fxml"/>
       <File Name="../../media/RenderFX/Font.fxml"/>
       <File Name="../../media/RenderFX/FXAA.fxml"/>
       <File Name="../../media/RenderFX/GammaCorrection.fxml"/>
       <File Name="../../media/RenderFX/GBuffer.fxml"/>
-      <File Name="../../media/RenderFX/GlowMerger.fxml"/>
       <File Name="../../media/RenderFX/InfTerrain.fxml"/>
       <File Name="../../media/RenderFX/JudaTexture.fxml"/>
+      <File Name="../../media/RenderFX/LensEffects.fxml"/>
       <File Name="../../media/RenderFX/LensFlare.fxml"/>
       <File Name="../../media/RenderFX/Lighting.fxml"/>
       <File Name="../../media/RenderFX/LightSourceProxy.fxml"/>
@@ -124,10 +126,10 @@
       <File Name="../../media/PostProcessors/Copy2LightBuffer.ppml"/>
       <File Name="../../media/PostProcessors/CustomMipMap.ppml"/>
       <File Name="../../media/PostProcessors/DepthToSM.ppml"/>
-      <File Name="../../media/PostProcessors/BrightPass.ppml"/>
+      <File Name="../../media/PostProcessors/FFT.ppml"/>
       <File Name="../../media/PostProcessors/FXAA.ppml"/>
       <File Name="../../media/PostProcessors/GammaCorrection.ppml"/>
-      <File Name="../../media/PostProcessors/GlowMerger.ppml"/>
+      <File Name="../../media/PostProcessors/LensEffects.ppml"/>
       <File Name="../../media/PostProcessors/RSM2VPLs.ppml"/>
       <File Name="../../media/PostProcessors/Upsampling.ppml"/>
       <File Name="../../media/PostProcessors/TAA.ppml"/>
