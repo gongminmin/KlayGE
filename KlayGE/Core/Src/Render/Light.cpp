@@ -187,6 +187,15 @@ namespace KlayGE
 	{
 	}
 
+	void AmbientLightSource::Attrib(int32_t attrib)
+	{
+		LightSource::Attrib(attrib);
+
+		// Disable shadow and GI
+		attrib_ |= LSA_NoShadow;
+		attrib_ &= ~LSA_IndirectLighting;
+	}
+
 
 	PointLightSource::PointLightSource()
 		: LightSource(LT_Point),
@@ -430,6 +439,15 @@ namespace KlayGE
 
 	DirectionalLightSource::~DirectionalLightSource()
 	{
+	}
+
+	void DirectionalLightSource::Attrib(int32_t attrib)
+	{
+		LightSource::Attrib(attrib);
+
+		// Disable shadow and GI
+		attrib_ |= LSA_NoShadow;
+		attrib_ &= ~LSA_IndirectLighting;
 	}
 
 	Quaternion const & DirectionalLightSource::Rotation() const

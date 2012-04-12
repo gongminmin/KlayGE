@@ -69,7 +69,7 @@ namespace KlayGE
 		LightType Type() const;
 
 		int32_t Attrib() const;
-		void Attrib(int32_t attrib);
+		virtual void Attrib(int32_t attrib);
 
 		bool Enabled() const;
 		void Enabled(bool enabled);
@@ -119,6 +119,8 @@ namespace KlayGE
 	public:
 		AmbientLightSource();
 		virtual ~AmbientLightSource();
+
+		void Attrib(int32_t attrib);
 	};
 
 	class KLAYGE_CORE_API PointLightSource : public LightSource
@@ -209,6 +211,8 @@ namespace KlayGE
 	public:
 		DirectionalLightSource();
 		virtual ~DirectionalLightSource();
+
+		void Attrib(int32_t attrib);
 
 		float3 Direction() const;
 		void Direction(float3 const & dir);
