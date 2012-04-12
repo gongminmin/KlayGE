@@ -77,6 +77,7 @@ float4 GlowMergerPS(float2 tex : TEXCOORD0) : SV_Target
 
 
 	<parameter type="float4" name="scale"/>
+	<parameter type="float" name="factor"/>
 
 	<shader>
 		<![CDATA[
@@ -87,6 +88,11 @@ void ScaledCopyVS(float4 pos : POSITION,
 	oTex = TexCoordFromPos(float4(pos.xy * scale.xy, pos.zw));
 	oPos = float4(pos.xy * scale.zw, pos.zw);
 }
+
+float4 ScaledCopyPS(float2 tc : TEXCOORD0) : SV_Target
+{
+	return src_tex.Sample(bilinear_sampler, tc) * factor;
+}
 		]]>
 	</shader>
 
@@ -96,7 +102,7 @@ void ScaledCopyVS(float4 pos : POSITION,
 			<state name="depth_write_mask" value="0"/>
 
 			<state name="vertex_shader" value="ScaledCopyVS()"/>
-			<state name="pixel_shader" value="BilinearCopyPS()"/>
+			<state name="pixel_shader" value="ScaledCopyPS()"/>
 		</pass>
 	</technique>
 
@@ -129,6 +135,9 @@ void ComplexMulPS(float2 tc : TEXCOORD0,
 	
 	oReal = lr * rr - li * ri;
 	oImag = lr * ri + li * rr;
+	
+	oReal *= factor;
+	oImag *= factor;
 }
 		]]>
 	</shader>

@@ -82,131 +82,55 @@ int main(int argc, char* argv[])
 		pattern_raw = pattern_refmt;
 	}
 
-	std::vector<float> pattern_r_raw(WIDTH * HEIGHT, 0);
-	std::vector<float> pattern_g_raw(WIDTH * HEIGHT, 0);
-	std::vector<float> pattern_b_raw(WIDTH * HEIGHT, 0);
-
-	float sum[3] = { 0, 0, 0 };
-	std::vector<float> pattern_real(WIDTH * HEIGHT * 4);
+	std::vector<float4> pattern_real(WIDTH * HEIGHT);
 	
 	{
 		Texture::Mapper mapper(*pattern_raw, 0, 0, TMA_Read_Only, 0, 0, width, height);
 
 		uint8_t const * p = mapper.Pointer<uint8_t>();
 		uint32_t const pitch = mapper.RowPitch() / sizeof(uint8_t);
-		for (int y = 0; y < height / 2; ++ y)
+		for (int y = 0; y < height; ++ y)
 		{
-			int start_y = HEIGHT - height / 2;
-
-			for (int x = 0; x < width / 2; ++ x)
+			int start_y;
+			if (y < height / 2)
 			{
-				int start_x = WIDTH - width / 2;
+				start_y = HEIGHT - height / 2;
+			}
+			else
+			{
+				start_y = -height / 2;
+			}
+
+			for (int x = 0; x < width; ++ x)
+			{
+				int start_x;
+				if (x < width / 2)
+				{
+					start_x = WIDTH - width / 2;
+				}
+				else
+				{
+					start_x = -width / 2;
+				}
 
 				float r = p[y * pitch + x * 4 + 0] / 255.0f;
 				float g = p[y * pitch + x * 4 + 1] / 255.0f;
 				float b = p[y * pitch + x * 4 + 2] / 255.0f;
-				float a = p[y * pitch + x * 4 + 3] / 255.0f;
-				if (a < 1e-6f)
+				uint8_t a = p[y * pitch + x * 4 + 3];
+				if (0 == a)
 				{
 					r = g = b = 0;
 				}
 
-				pattern_real[((y + start_y) * WIDTH + (x + start_x)) * 4 + 0] = r;
-				pattern_real[((y + start_y) * WIDTH + (x + start_x)) * 4 + 1] = g;
-				pattern_real[((y + start_y) * WIDTH + (x + start_x)) * 4 + 2] = b;
-
-				sum[0] += r;
-				sum[1] += g;
-				sum[2] += b;
+				pattern_real[(y + start_y) * WIDTH + (x + start_x)] = float4(r, g, b, 1);
 			}
-			for (int x = width / 2; x < width; ++ x)
-			{
-				int start_x = -static_cast<int>(width / 2);
-
-				float r = p[y * pitch + x * 4 + 0] / 255.0f;
-				float g = p[y * pitch + x * 4 + 1] / 255.0f;
-				float b = p[y * pitch + x * 4 + 2] / 255.0f;
-				float a = p[y * pitch + x * 4 + 3] / 255.0f;
-				if (a < 1e-6f)
-				{
-					r = g = b = 0;
-				}
-
-				pattern_real[((y + start_y) * WIDTH + (x + start_x)) * 4 + 0] = r;
-				pattern_real[((y + start_y) * WIDTH + (x + start_x)) * 4 + 1] = g;
-				pattern_real[((y + start_y) * WIDTH + (x + start_x)) * 4 + 2] = b;
-				
-				sum[0] += r;
-				sum[1] += g;
-				sum[2] += b;
-			}
-		}
-		for (int y = height / 2; y < height; ++ y)
-		{
-			int start_y = -static_cast<int>(height / 2);
-
-			for (int x = 0; x < width / 2; ++ x)
-			{
-				int start_x = WIDTH - width / 2;
-
-				float r = p[y * pitch + x * 4 + 0] / 255.0f;
-				float g = p[y * pitch + x * 4 + 1] / 255.0f;
-				float b = p[y * pitch + x * 4 + 2] / 255.0f;
-				float a = p[y * pitch + x * 4 + 3] / 255.0f;
-				if (a < 1e-6f)
-				{
-					r = g = b = 0;
-				}
-
-				pattern_real[((y + start_y) * WIDTH + (x + start_x)) * 4 + 0] = r;
-				pattern_real[((y + start_y) * WIDTH + (x + start_x)) * 4 + 1] = g;
-				pattern_real[((y + start_y) * WIDTH + (x + start_x)) * 4 + 2] = b;
-				
-				sum[0] += r;
-				sum[1] += g;
-				sum[2] += b;
-			}
-			for (int x = width / 2; x < width; ++ x)
-			{
-				int start_x = -static_cast<int>(width / 2);
-
-				float r = p[y * pitch + x * 4 + 0] / 255.0f;
-				float g = p[y * pitch + x * 4 + 1] / 255.0f;
-				float b = p[y * pitch + x * 4 + 2] / 255.0f;
-				float a = p[y * pitch + x * 4 + 3] / 255.0f;
-				if (a < 1e-6f)
-				{
-					r = g = b = 0;
-				}
-
-				pattern_real[((y + start_y) * WIDTH + (x + start_x)) * 4 + 0] = r;
-				pattern_real[((y + start_y) * WIDTH + (x + start_x)) * 4 + 1] = g;
-				pattern_real[((y + start_y) * WIDTH + (x + start_x)) * 4 + 2] = b;
-				
-				sum[0] += r;
-				sum[1] += g;
-				sum[2] += b;
-			}
-		}
-	}
-
-	float max_sum = std::max(std::max(sum[0], sum[1]), sum[2]) * 0.0075f;
-
-	for (uint32_t y = 0; y < HEIGHT; ++ y)
-	{
-		for (uint32_t x = 0; x < WIDTH; ++ x)
-		{
-			pattern_real[(y * WIDTH + x) * 4 + 0] /= max_sum;
-			pattern_real[(y * WIDTH + x) * 4 + 1] /= max_sum;
-			pattern_real[(y * WIDTH + x) * 4 + 2] /= max_sum;
-			pattern_real[(y * WIDTH + x) * 4 + 3] = 1;
 		}
 	}
 
 	ElementInitData pattern_real_data;
 	pattern_real_data.data = &pattern_real[0];
-	pattern_real_data.row_pitch = WIDTH * sizeof(float) * 4;
-	pattern_real_data.slice_pitch = WIDTH * HEIGHT * sizeof(float) * 4;
+	pattern_real_data.row_pitch = WIDTH * sizeof(float4);
+	pattern_real_data.slice_pitch = WIDTH * HEIGHT * sizeof(float4);
 	TexturePtr real_tex = rf.MakeTexture2D(WIDTH, HEIGHT, 1, 1, EF_ABGR32F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, &pattern_real_data);
 
 	TexturePtr pattern_real_tex = rf.MakeTexture2D(WIDTH, HEIGHT, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
