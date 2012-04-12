@@ -9,7 +9,6 @@
 #include <KlayGE/Context.hpp>
 #include <KlayGE/RenderSettings.hpp>
 #include <KlayGE/ResLoader.hpp>
-#include <KlayGE/Math.hpp>
 
 #include <cmath>
 #include <iostream>

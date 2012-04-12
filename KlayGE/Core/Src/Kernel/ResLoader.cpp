@@ -100,7 +100,7 @@ namespace KlayGE
 	void ResLoader::AddPath(std::string const & path)
 	{
 		boost::filesystem::path new_path(path);
-		if (!new_path.is_complete())
+		if (!new_path.is_absolute())
 		{
 			boost::filesystem::path full_path = exe_path_ / new_path;
 			if (!boost::filesystem::exists(full_path))
