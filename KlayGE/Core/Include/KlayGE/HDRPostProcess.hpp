@@ -143,6 +143,48 @@ namespace KlayGE
 		PostProcessPtr glow_merger_;
 	};
 
+	class KLAYGE_CORE_API FFTLensEffectsPostProcess : public PostProcess
+	{
+	public:
+		FFTLensEffectsPostProcess();
+
+		void InputPin(uint32_t index, TexturePtr const & tex);
+		TexturePtr const & InputPin(uint32_t index) const;
+		void OutputPin(uint32_t index, TexturePtr const & tex, int level = 0, int array_index = 0, int face = 0);
+		TexturePtr const & OutputPin(uint32_t index) const;		
+		void Apply();
+
+	private:
+		static int const WIDTH = 512;
+		static int const HEIGHT = 512;
+
+	private:
+		PostProcessPtr bilinear_copy_pp_;
+		PostProcessPtr bright_pass_pp_;
+		PostProcessPtr complex_mul_pp_;
+		PostProcessPtr scaled_copy_pp_;
+
+		std::vector<TexturePtr> restore_chain_;
+		std::vector<TexturePtr> downsample_chain_;
+
+		TexturePtr input_tex_;
+
+		TexturePtr resized_tex_;
+		TexturePtr empty_tex_;
+
+		TexturePtr freq_real_tex_;
+		TexturePtr freq_imag_tex_;
+		TexturePtr pattern_real_tex_;
+		TexturePtr pattern_imag_tex_;
+		TexturePtr mul_real_tex_;
+		TexturePtr mul_imag_tex_;
+
+		uint32_t width_, height_;
+
+		GPUFFTPtr fft_;
+		GPUFFTPtr ifft_;
+	};
+
 	class KLAYGE_CORE_API ToneMappingPostProcess : public PostProcess
 	{
 	public:

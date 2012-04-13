@@ -708,7 +708,7 @@ namespace
 						std::string value_str = value_node->ValueString();
 						std::vector<std::string> strs;
 						boost::algorithm::split(strs, value_str, boost::bind(std::equal_to<char>(), ',', _1));
-						std::vector<int32_t> init_val(std::min(array_size, static_cast<uint32_t>(strs.size())), 0);
+						std::vector<uint32_t> init_val(std::min(array_size, static_cast<uint32_t>(strs.size())), 0);
 						for (size_t index = 0; index < init_val.size(); ++ index)
 						{
 							if (index < strs.size())
@@ -941,7 +941,7 @@ namespace
 		case REDT_uint2:
 			if (0 == array_size)
 			{
-				int2 tmp(0, 0);
+				uint2 tmp(0, 0);
 				attr = node->Attrib("x");
 				if (attr)
 				{
@@ -990,7 +990,7 @@ namespace
 		case REDT_uint3:
 			if (0 == array_size)
 			{
-				int3 tmp(0, 0, 0);
+				uint3 tmp(0, 0, 0);
 				attr = node->Attrib("x");
 				if (attr)
 				{
@@ -1044,7 +1044,7 @@ namespace
 		case REDT_uint4:
 			if (0 == array_size)
 			{
-				int4 tmp(0, 0, 0, 0);
+				uint4 tmp(0, 0, 0, 0);
 				attr = node->Attrib("x");
 				if (attr)
 				{

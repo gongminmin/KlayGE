@@ -67,10 +67,10 @@ namespace KlayGE
 			ptr += height_ * 4;
 		}
 
-		tmp_real_tex_[0] = rf.MakeTexture2D(width_, height_, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
-		tmp_real_tex_[1] = rf.MakeTexture2D(width_, height_, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
-		tmp_imag_tex_[0] = rf.MakeTexture2D(width_, height_, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
-		tmp_imag_tex_[1] = rf.MakeTexture2D(width_, height_, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+		tmp_real_tex_[0] = rf.MakeTexture2D(width_, height_, 1, 1, EF_ABGR32F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+		tmp_real_tex_[1] = rf.MakeTexture2D(width_, height_, 1, 1, EF_ABGR32F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+		tmp_imag_tex_[0] = rf.MakeTexture2D(width_, height_, 1, 1, EF_ABGR32F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+		tmp_imag_tex_[1] = rf.MakeTexture2D(width_, height_, 1, 1, EF_ABGR32F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
 
 		fft_x_pp_ = LoadPostProcess(ResLoader::Instance().Open("FFT.ppml"), "fft_x");
 		fft_y_pp_ = LoadPostProcess(ResLoader::Instance().Open("FFT.ppml"), "fft_y");
@@ -151,10 +151,9 @@ namespace KlayGE
 
 	void GPUFFT::ComputeWeight(float& wr, float& wi, int n, int k)
 	{
-		wr = +cosf(2 * PI * k / n);
-		wi = -sinf(2 * PI * k / n);
-
-		wi = forward_ ? wi : -wi;
+		float phase = 2 * PI * k / n;
+		MathLib::sincos(phase, wi, wr);
+		wi = forward_ ? -wi : wi;
 	}
 
 	void GPUFFT::CreateButterflyLookups(std::vector<half>& lookup_i_wr_wi, int log_n, int n)

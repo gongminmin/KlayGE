@@ -23,10 +23,11 @@
 #include <KlayGE/RenderEffect.hpp>
 #include <KlayGE/FrameBuffer.hpp>
 #include <KlayGE/App3D.hpp>
+#include <KlayGE/FFT.hpp>
+#include <KlayGE/PostProcess.hpp>
 
 #include <boost/assert.hpp>
 
-#include <KlayGE/PostProcess.hpp>
 #include <KlayGE/HDRPostProcess.hpp>
 
 namespace KlayGE
@@ -448,6 +449,155 @@ namespace KlayGE
 		}
 
 		glow_merger_->Apply();
+	}
+
+
+	FFTLensEffectsPostProcess::FFTLensEffectsPostProcess()
+		: PostProcess(L"FFTLensEffects")
+	{
+		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+
+		pattern_real_tex_ = SyncLoadTexture("lens_effects_real.dds", EAH_GPU_Read | EAH_Immutable);
+		pattern_imag_tex_ = SyncLoadTexture("lens_effects_imag.dds", EAH_GPU_Read | EAH_Immutable);
+
+		ElementFormat fmt;
+		if (rf.RenderEngineInstance().DeviceCaps().rendertarget_format_support(EF_B10G11R11F, 1, 0))
+		{
+			fmt = EF_B10G11R11F;
+		}
+		else
+		{
+			BOOST_ASSERT(rf.RenderEngineInstance().DeviceCaps().rendertarget_format_support(EF_ABGR16F, 1, 0));
+			fmt = EF_ABGR16F;
+		}
+		resized_tex_ = rf.MakeTexture2D(WIDTH, WIDTH, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+		{
+			std::vector<uint8_t> zero_data(WIDTH * HEIGHT, 0);
+			ElementInitData resized_data;
+			resized_data.data = &zero_data[0];
+			resized_data.row_pitch = WIDTH * sizeof(uint8_t);
+			resized_data.slice_pitch = WIDTH * HEIGHT * sizeof(uint8_t);
+			empty_tex_ = rf.MakeTexture2D(WIDTH, HEIGHT, 1, 1, EF_R8, 1, 0, EAH_GPU_Read | EAH_Immutable, &resized_data);
+		}
+
+		fft_ = MakeSharedPtr<GPUFFT>(WIDTH, HEIGHT, true);
+		ifft_ = MakeSharedPtr<GPUFFT>(WIDTH, HEIGHT, false);
+	
+		freq_real_tex_ = rf.MakeTexture2D(WIDTH, HEIGHT, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+		freq_imag_tex_ = rf.MakeTexture2D(WIDTH, HEIGHT, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+
+		mul_real_tex_ = rf.MakeTexture2D(WIDTH, HEIGHT, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+		mul_imag_tex_ = rf.MakeTexture2D(WIDTH, HEIGHT, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+
+		bilinear_copy_pp_ = LoadPostProcess(ResLoader::Instance().Open("Copy.ppml"), "bilinear_copy");
+
+		bright_pass_pp_ = LoadPostProcess(ResLoader::Instance().Open("LensEffects.ppml"), "scaled_bright_pass");
+		bright_pass_pp_->OutputPin(0, resized_tex_);
+
+		complex_mul_pp_ = LoadPostProcess(ResLoader::Instance().Open("LensEffects.ppml"), "complex_mul");
+		complex_mul_pp_->SetParam(0, 0.1f);
+		complex_mul_pp_->InputPin(0, freq_real_tex_);
+		complex_mul_pp_->InputPin(1, freq_imag_tex_);
+		complex_mul_pp_->InputPin(2, pattern_real_tex_);
+		complex_mul_pp_->InputPin(3, pattern_imag_tex_);
+		complex_mul_pp_->OutputPin(0, mul_real_tex_);
+		complex_mul_pp_->OutputPin(1, mul_imag_tex_);
+
+		scaled_copy_pp_ = LoadPostProcess(ResLoader::Instance().Open("LensEffects.ppml"), "scaled_copy");
+		scaled_copy_pp_->SetParam(1, 1.5f);
+		scaled_copy_pp_->InputPin(0, mul_real_tex_);
+	}
+
+	void FFTLensEffectsPostProcess::InputPin(uint32_t /*index*/, TexturePtr const & tex)
+	{
+		input_tex_ = tex;
+
+		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+
+		downsample_chain_.resize(1);
+		downsample_chain_[0] = tex;
+		std::vector<uint32_t> widths;
+		std::vector<uint32_t> heights;
+		{
+			uint32_t ori_w = tex->Width(0);
+			uint32_t ori_h = tex->Height(0);
+			uint32_t ori_s = std::max(ori_w, ori_h);
+
+			widths.push_back(ori_w);
+			heights.push_back(ori_h);
+
+			while (ori_s > WIDTH)
+			{
+				ori_w >>= 1;
+				ori_h >>= 1;
+				ori_s >>= 1;
+
+				widths.push_back(ori_w);
+				heights.push_back(ori_h);
+			}
+		}
+
+		downsample_chain_.resize(widths.size() - 1);
+		for (size_t i = 1; i < widths.size() - 1; ++ i)
+		{
+			downsample_chain_[i] = rf.MakeTexture2D(widths[i], heights[i],
+				1, 1, tex->Format(), 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+		}
+
+		restore_chain_.resize(widths.size() - 1);
+		for (size_t i = 1; i < widths.size(); ++ i)
+		{
+			restore_chain_[i - 1] = rf.MakeTexture2D(widths[i], heights[i],
+				1, 1, tex->Format(), 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+		}
+
+		width_ = widths.back();
+		height_ = heights.back();
+
+		bright_pass_pp_->SetParam(0, float4(1, 1, static_cast<float>(width_) / WIDTH, static_cast<float>(height_) / HEIGHT));
+		bright_pass_pp_->InputPin(0, downsample_chain_[downsample_chain_.size() - 1]);
+
+		scaled_copy_pp_->SetParam(0, float4(static_cast<float>(width_) / WIDTH, static_cast<float>(height_) / HEIGHT, 1, 1));
+		scaled_copy_pp_->OutputPin(0, restore_chain_.back());
+	}
+
+	TexturePtr const & FFTLensEffectsPostProcess::InputPin(uint32_t /*index*/) const
+	{
+		return input_tex_;
+	}
+
+	void FFTLensEffectsPostProcess::OutputPin(uint32_t /*index*/, TexturePtr const & /*tex*/, int /*level*/, int /*array_index*/, int /*face*/)
+	{
+	}
+
+	TexturePtr const & FFTLensEffectsPostProcess::OutputPin(uint32_t /*index*/) const
+	{
+		return restore_chain_[0];
+	}
+		
+	void FFTLensEffectsPostProcess::Apply()
+	{
+		for (size_t i = 1; i < downsample_chain_.size(); ++ i)
+		{
+			bilinear_copy_pp_->InputPin(0, downsample_chain_[i - 1]);
+			bilinear_copy_pp_->OutputPin(0, downsample_chain_[i]);
+			bilinear_copy_pp_->Apply();
+		}
+		bright_pass_pp_->Apply();
+
+		fft_->Execute(freq_real_tex_, freq_imag_tex_, resized_tex_, empty_tex_);
+
+		complex_mul_pp_->Apply();
+
+		ifft_->Execute(mul_real_tex_, mul_imag_tex_, mul_real_tex_, mul_imag_tex_);
+		scaled_copy_pp_->Apply();
+
+		for (size_t i = restore_chain_.size() - 1; i > 0; -- i)
+		{
+			bilinear_copy_pp_->InputPin(0, restore_chain_[i]);
+			bilinear_copy_pp_->OutputPin(0, restore_chain_[i - 1]);
+			bilinear_copy_pp_->Apply();
+		}
 	}
 
 
