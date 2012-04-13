@@ -49,9 +49,9 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void DInputDevice::Acquire()
 	{
-		while (DIERR_OTHERAPPHASPRIO == device_->Acquire())
+		if (DIERR_OTHERAPPHASPRIO == device_->Acquire())
 		{
-			Sleep(1);
+			device_->Acquire();
 		}
 	}
 
@@ -59,17 +59,10 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void DInputDevice::Unacquire()
 	{
-		for (;;)
+		HRESULT hr = device_->Unacquire();
+		if ((hr != DI_OK) && (hr != DI_NOEFFECT))
 		{
-			HRESULT hr = device_->Unacquire();
-			if ((DI_OK == hr) || (DI_NOEFFECT == hr))
-			{
-				break;
-			}
-			else
-			{
-				Sleep(1);
-			}
+			device_->Unacquire();
 		}
 	}
 
@@ -98,18 +91,12 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void DInputDevice::Poll()
 	{
-		for (;;)
+		HRESULT hr = device_->Poll();
+		if ((DIERR_INPUTLOST == hr) || (DIERR_NOTACQUIRED == hr))
 		{
-			HRESULT hr = device_->Poll();
-			if ((DIERR_INPUTLOST == hr) || (DIERR_NOTACQUIRED == hr))
-			{
-				this->Acquire();
-			}
-			else
-			{
-				BOOST_ASSERT(DIERR_NOTINITIALIZED != hr);
-				break;
-			}
+			this->Acquire();
+
+			device_->Poll();
 		}
 	}
 
@@ -117,18 +104,12 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void DInputDevice::DeviceState(void* data, size_t size)
 	{
-		for (;;)
+		HRESULT hr = device_->GetDeviceState(static_cast<DWORD>(size), data);
+		if ((DIERR_INPUTLOST == hr) || (DIERR_NOTACQUIRED == hr))
 		{
-			HRESULT hr = device_->GetDeviceState(static_cast<DWORD>(size), data);
-			if ((DIERR_INPUTLOST == hr) || (DIERR_NOTACQUIRED == hr))
-			{
-				this->Acquire();
-			}
-			else
-			{
-				BOOST_ASSERT(DIERR_NOTINITIALIZED != hr);
-				break;
-			}
+			this->Acquire();
+
+			device_->GetDeviceState(static_cast<DWORD>(size), data);
 		}
 	}
 
@@ -136,19 +117,14 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void DInputDevice::DeviceData(size_t size, DIDEVICEOBJECTDATA* rgdod, uint32_t& num_elements)
 	{
-		for (;;)
+		HRESULT hr = device_->GetDeviceData(static_cast<DWORD>(size), rgdod,
+						reinterpret_cast<DWORD*>(&num_elements), 0);
+		if ((DIERR_INPUTLOST == hr) || (DIERR_NOTACQUIRED == hr))
 		{
-			HRESULT hr = device_->GetDeviceData(static_cast<DWORD>(size), rgdod,
-							reinterpret_cast<DWORD*>(&num_elements), 0);
-			if ((DIERR_INPUTLOST == hr) || (DIERR_NOTACQUIRED == hr))
-			{
-				this->Acquire();
-			}
-			else
-			{
-				BOOST_ASSERT(DIERR_NOTINITIALIZED != hr);
-				break;
-			}
+			this->Acquire();
+
+			device_->GetDeviceData(static_cast<DWORD>(size), rgdod,
+						reinterpret_cast<DWORD*>(&num_elements), 0);
 		}
 	}
 }
