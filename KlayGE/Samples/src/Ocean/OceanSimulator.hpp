@@ -4,8 +4,6 @@
 #include <KlayGE/PreDeclare.hpp>
 #include <KlayGE/Math.hpp>
 
-#include "FFT.hpp"
-
 namespace KlayGE
 {
 	struct OceanParameter
@@ -36,7 +34,6 @@ namespace KlayGE
 	{
 	public:
 		OceanSimulator();
-		~OceanSimulator();
 
 		// Update ocean wave when tick arrives.
 		void Update(uint32_t frame);
@@ -72,13 +69,9 @@ namespace KlayGE
 		// Angular frequency
 		GraphicsBufferPtr omega_buffer_;
 
-		// Height field H(t), choppy field Dx(t) and Dy(t) in frequency domain, updated each frame.
-		GraphicsBufferPtr ht_buffer_;
-
-		// Height & choppy buffer in the space domain, corresponding to H(t), Dx(t) and Dy(t)
-		GraphicsBufferPtr dxyz_buffer_;
-
-		GraphicsBufferPtr quad_vb_;
+		TexturePtr out_real_tex_;
+		TexturePtr out_imag_tex_;
+		FrameBufferPtr tex_fb_;
 
 		// Shaders, layouts and constants
 		RenderTechniquePtr update_spectrum_tech_;
@@ -88,8 +81,7 @@ namespace KlayGE
 
 		RenderLayoutPtr quad_layout_;
 
-		// FFT wrap-up
-		CSFFT_Plan fft_plan_;
+		GpuFftPtr fft_;
 	};
 }
 

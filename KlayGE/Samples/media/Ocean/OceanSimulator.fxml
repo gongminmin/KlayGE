@@ -18,10 +18,18 @@
 
 	<parameter type="structured_buffer" elem_type="float2" name="input_h0"/>
 	<parameter type="structured_buffer" elem_type="float" name="input_omega"/>
-	<parameter type="rw_structured_buffer" elem_type="float2" name="output_ht"/>
 
-	<shader type="compute_shader" version="4">
+	<shader>
 		<![CDATA[
+void QuadVS(float2 vPos : POSITION,
+		out float2 TexCoord : TEXCOORD0,
+		out float4 Position : SV_Position)
+{
+	Position = float4(vPos, 0, 1);
+	TexCoord.x = 0.5f + vPos.x * 0.5f;
+	TexCoord.y = 0.5f - vPos.y * 0.5f;
+}
+
 // Pre-FFT data preparation:
 
 // Notice: In CS5.0, we can output up to 8 RWBuffers but in CS4.x only one output buffer is allowed,
@@ -30,12 +38,15 @@
 // CUDA and OpenCL.
 
 // H(0) -> H(t)
-[numthreads(BLOCK_SIZE_X, BLOCK_SIZE_Y, 1)]
-void UpdateSpectrumCS(uint3 DTid : SV_DispatchThreadID)
+void UpdateSpectrumPS(float2 TexCoord : TEXCOORD0,
+			out float4 oReal : SV_Target0,
+			out float4 oImag : SV_Target1)
 {
-	int in_index = DTid.y * in_width + DTid.x;
-	int in_mindex = (actual_dim - DTid.y) * in_width + (actual_dim - DTid.x);
-	int out_index = DTid.y * out_width + DTid.x;
+	int index_x = (int)(TexCoord.x * out_width);
+	int index_y = (int)(TexCoord.y * out_height);
+	int in_index = index_y * in_width + index_x;
+	int in_mindex = (actual_dim - index_y) * in_width + (actual_dim - index_x);
+	int out_index = index_y * out_width + index_x;
 
 	// H(0) -> H(t)
 	float2 h0_k  = input_h0[in_index];
@@ -51,7 +62,7 @@ void UpdateSpectrumCS(uint3 DTid : SV_DispatchThreadID)
 	ht.y = h0_k_sub_mk.x * sin_v + h0_k_sub_mk.y * cos_v;
 
 	// H(t) -> Dx(t), Dy(t)
-	float2 kxy = DTid.xy - actual_dim * 0.5f;
+	float2 kxy = int2(index_x, index_y) - actual_dim * 0.5f;
 	float sqr_k = dot(kxy, kxy);
 	float rsqr_k = 0;
 	if (sqr_k > 1e-12f)
@@ -62,19 +73,18 @@ void UpdateSpectrumCS(uint3 DTid : SV_DispatchThreadID)
 	kxy *= rsqr_k;
 	float4 dt_xy = float2(ht.y, -ht.x).xyxy * float4(kxy.xx, kxy.yy);
 
-    if ((DTid.x < out_width) && (DTid.y < out_height))
-	{
-        output_ht[out_index] = ht;
-		output_ht[out_index + dx_addr_offset] = dt_xy.xy;
-		output_ht[out_index + dy_addr_offset] = dt_xy.zw;
-	}
+	oReal = float4(ht.x, dt_xy.x, dt_xy.z, 1);
+	oImag = float4(ht.y, dt_xy.y, dt_xy.w, 1);
 }
 		]]>
 	</shader>
 
 	<technique name="UpdateSpectrum">
 		<pass name="p0">
-			<state name="compute_shader" value="UpdateSpectrumCS()"/>
+			<state name="cull_mode" value="none"/>
+			
+			<state name="vertex_shader" value="QuadVS()"/>
+			<state name="pixel_shader" value="UpdateSpectrumPS()"/>
 		</pass>
 	</technique>
 
@@ -91,19 +101,10 @@ void UpdateSpectrumCS(uint3 DTid : SV_DispatchThreadID)
 		<state name="address_v" value="wrap"/>
 	</parameter>
 
-	<parameter type="structured_buffer" elem_type="float2" name="input_dxyz"/>
+	<parameter type="texture2D" name="dxyz_tex"/>
 
 	<shader>
 		<![CDATA[
-void QuadVS(float3 vPos : POSITION,
-		out float2 TexCoord : TEXCOORD0,
-		out float4 Position : SV_Position)
-{
-	Position = float4(vPos, 1);
-	TexCoord.x = 0.5f + vPos.x * 0.5f;
-	TexCoord.y = 0.5f - vPos.y * 0.5f;
-}
-
 // Post-FFT data wrap up: Dx, Dy, Dz -> Displacement
 float4 UpdateDisplacementPS(float2 TexCoord : TEXCOORD0) : SV_Target
 {
@@ -114,10 +115,7 @@ float4 UpdateDisplacementPS(float2 TexCoord : TEXCOORD0) : SV_Target
 	// cos(pi * (m1 + m2))
 	int sign_correction = ((index_x + index_y) & 1) ? -1 : 1;
 
-	float3 dxyz;
-	dxyz.x = input_dxyz[addr + dx_addr_offset].x;
-	dxyz.y = input_dxyz[addr + dy_addr_offset].x;
-	dxyz.z = input_dxyz[addr].x;
+	float3 dxyz = dxyz_tex.Sample(linear_sampler, 1 - TexCoord).yzx * dx_addr_offset;
 	dxyz.xy *= choppy_scale;
 	dxyz *= sign_correction;
 

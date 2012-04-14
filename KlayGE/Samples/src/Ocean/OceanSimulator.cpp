@@ -5,6 +5,7 @@
 #include <KlayGE/RenderEffect.hpp>
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/RenderEngine.hpp>
+#include <KlayGE/FFT.hpp>
 
 #include "OceanSimulator.hpp"
 
@@ -14,9 +15,6 @@ namespace
 
 	float const HALF_SQRT_2 = 0.7071068f;
 	float const GRAV_ACCEL = 9.8f;	// The acceleration of gravity, m/s^2
-
-	int const BLOCK_SIZE_X = 16;
-	int const BLOCK_SIZE_Y = 16;
 
 	// Generating gaussian random number with mean 0 and standard deviation 1.
 	float Gauss()
@@ -71,26 +69,23 @@ namespace KlayGE
 		quad_layout_ = rf.MakeRenderLayout();
 		quad_layout_->TopologyType(RenderLayout::TT_TriangleStrip);
 
-		float3 xyzs[] =
+		float2 xys[] =
 		{
-			float3(-1, +1, 0),
-			float3(+1, +1, 0),
-			float3(-1, -1, 0),
-			float3(+1, -1, 0)
+			float2(-1, +1),
+			float2(+1, +1),
+			float2(-1, -1),
+			float2(+1, -1)
 		};
 		ElementInitData init_data;
-		init_data.row_pitch = sizeof(xyzs);
+		init_data.row_pitch = sizeof(xys);
 		init_data.slice_pitch = 0;
-		init_data.data = xyzs;
-		quad_vb_ = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, &init_data);
-		quad_layout_->BindVertexStream(quad_vb_, boost::make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F)));
+		init_data.data = xys;
+		GraphicsBufferPtr quad_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, &init_data);
+		quad_layout_->BindVertexStream(quad_vb, boost::make_tuple(vertex_element(VEU_Position, 0, EF_GR32F)));
 
 		time_param_ = effect->ParameterByName("time");
-	}
 
-	OceanSimulator::~OceanSimulator()
-	{
-		fft_destroy_plan(&fft_plan_);
+		tex_fb_ = rf.MakeFrameBuffer();
 	}
 
 	// Initialize the vector field.
@@ -131,34 +126,29 @@ namespace KlayGE
 
 	void OceanSimulator::Update(uint32_t frame)
 	{
-		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-
+		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+		RenderEngine& re = rf.RenderEngineInstance();
+		
+		FrameBufferPtr old_fb = re.CurFrameBuffer();
+		
 		// ---------------------------- H(0) -> H(t), D(x, t), D(y, t) --------------------------------
 
 		*time_param_ = frame * param_.time_peroid / param_.num_frames;
 
-		uint32_t group_count_x = (param_.dmap_dim + BLOCK_SIZE_X - 1) / BLOCK_SIZE_X;
-		uint32_t group_count_y = (param_.dmap_dim + BLOCK_SIZE_Y - 1) / BLOCK_SIZE_Y;
-		re.Dispatch(*update_spectrum_tech_, group_count_x, group_count_y, 1);
+		re.BindFrameBuffer(tex_fb_);
+		re.Render(*update_spectrum_tech_, *quad_layout_);
 
 		// ------------------------------------ Perform FFT -------------------------------------------
-		fft_c2c(&fft_plan_, dxyz_buffer_, ht_buffer_);
+		fft_->Execute(out_real_tex_, out_imag_tex_, out_real_tex_, out_imag_tex_);
 
 		// --------------------------------- Wrap Dx, Dy and Dz ---------------------------------------
-		// Push RT
-		FrameBufferPtr old_fb = re.CurFrameBuffer();
 		re.BindFrameBuffer(displacement_fb_);
-
 		re.Render(*update_displacement_tech_, *quad_layout_);
 
-
 		// ----------------------------------- Generate Normal ----------------------------------------
-		// Set RT
 		re.BindFrameBuffer(gradient_fb_);
-
 		re.Render(*gen_gradient_folding_tech_, *quad_layout_);
 
-		// Pop RT
 		re.BindFrameBuffer(old_fb);
 	}
 
@@ -203,20 +193,10 @@ namespace KlayGE
 		// Notice: The following 3 should be half sized buffer due to conjugate symmetric input. But we use full
 		// spectrum buffer due to the CS4.0 restriction.
 
-		// Put H(t), Dx(t) and Dy(t) into one buffer
-		ht_buffer_ = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Read | EAH_GPU_Unordered | EAH_GPU_Structured, &init_data, EF_GR32F);
-		ht_buffer_->Resize(3 * params.dmap_dim * params.dmap_dim * sizeof(float) * 2);
-
 		// omega
 		init_data.row_pitch = static_cast<uint32_t>(omega_data.size() * sizeof(omega_data[0]));
 		init_data.data = &omega_data[0];
 		omega_buffer_ = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Read | EAH_GPU_Unordered | EAH_GPU_Structured, &init_data, EF_R32F);
-
-		// Notice: The following 3 should be real number data. But here we use the complex numbers and C2C FFT
-		// instead due to the CS4.0 restriction.
-		// Put Dz, Dx and Dy into one buffer
-		dxyz_buffer_ = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Read | EAH_GPU_Unordered | EAH_GPU_Structured, &init_data, EF_GR32F);
-		dxyz_buffer_->Resize(3 * params.dmap_dim * params.dmap_dim * sizeof(float) * 2);
 
 		displacement_tex_ = rf.MakeTexture2D(params.dmap_dim, params.dmap_dim, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
 		gradient_tex_ = rf.MakeTexture2D(params.dmap_dim, params.dmap_dim, 1, 1, EF_ABGR8, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
@@ -225,6 +205,11 @@ namespace KlayGE
 		displacement_fb_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*displacement_tex_, 0, 1, 0));
 		gradient_fb_ = rf.MakeFrameBuffer();
 		gradient_fb_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*gradient_tex_, 0, 1, 0));
+
+		out_real_tex_ = rf.MakeTexture2D(param_.dmap_dim, param_.dmap_dim, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+		out_imag_tex_ = rf.MakeTexture2D(param_.dmap_dim, param_.dmap_dim, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+		tex_fb_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*out_real_tex_, 0, 1, 0));
+		tex_fb_->Attach(FrameBuffer::ATT_Color1, rf.Make2DRenderView(*out_imag_tex_, 0, 1, 0));
 
 		// Constant buffers
 		uint32_t actual_dim = param_.dmap_dim;
@@ -244,13 +229,11 @@ namespace KlayGE
 		*(effect.ParameterByName("dy_addr_offset")) = dty_offset;
 		*(effect.ParameterByName("input_h0")) = h0_buffer_;
 		*(effect.ParameterByName("input_omega")) = omega_buffer_;
-		*(effect.ParameterByName("output_ht")) = ht_buffer_;
 		*(effect.ParameterByName("choppy_scale")) = param_.choppy_scale;
 		*(effect.ParameterByName("grid_len")) = param_.dmap_dim / param_.patch_length;
-		*(effect.ParameterByName("input_dxyz")) = dxyz_buffer_;
 		*(effect.ParameterByName("displacement_tex")) = displacement_tex_;
+		*(effect.ParameterByName("dxyz_tex")) = out_real_tex_;
 
-		fft_destroy_plan(&fft_plan_);
-		fft_create_plan(&fft_plan_, params.dmap_dim, params.dmap_dim, 3);
+		fft_ = MakeSharedPtr<GpuFftPS>(params.dmap_dim, params.dmap_dim, false);
 	}
 }
