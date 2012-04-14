@@ -250,8 +250,12 @@ namespace KlayGE
 	class LensFlareSceneObject;
 	class DeferredRenderingLayer;
 	typedef boost::shared_ptr<DeferredRenderingLayer> DeferredRenderingLayerPtr;
-	class GPUFFT;
-	typedef boost::shared_ptr<GPUFFT> GPUFFTPtr;
+	class GpuFft;
+	typedef boost::shared_ptr<GpuFft> GpuFftPtr;
+	class GpuFftPS;
+	typedef boost::shared_ptr<GpuFftPS> GpuFftPSPtr;
+	class GpuFftCS4;
+	typedef boost::shared_ptr<GpuFftCS4> GpuFftCS4Ptr;
 
 	class UIManager;
 	typedef boost::shared_ptr<UIManager> UIManagerPtr;

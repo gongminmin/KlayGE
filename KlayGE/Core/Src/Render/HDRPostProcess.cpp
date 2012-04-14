@@ -30,6 +30,8 @@
 
 #include <KlayGE/HDRPostProcess.hpp>
 
+//#define USE_FFT_LENS_EFFECTS
+
 namespace KlayGE
 {
 	SumLumPostProcess::SumLumPostProcess(RenderTechniquePtr const & tech)
@@ -480,8 +482,8 @@ namespace KlayGE
 			empty_tex_ = rf.MakeTexture2D(WIDTH, HEIGHT, 1, 1, EF_R8, 1, 0, EAH_GPU_Read | EAH_Immutable, &resized_data);
 		}
 
-		fft_ = MakeSharedPtr<GPUFFT>(WIDTH, HEIGHT, true);
-		ifft_ = MakeSharedPtr<GPUFFT>(WIDTH, HEIGHT, false);
+		fft_ = MakeSharedPtr<GpuFftPS>(WIDTH, HEIGHT, true);
+		ifft_ = MakeSharedPtr<GpuFftPS>(WIDTH, HEIGHT, false);
 	
 		freq_real_tex_ = rf.MakeTexture2D(WIDTH, HEIGHT, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
 		freq_imag_tex_ = rf.MakeTexture2D(WIDTH, HEIGHT, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
@@ -615,7 +617,13 @@ namespace KlayGE
 		{
 			image_stat_ = MakeSharedPtr<ImageStatPostProcess>();
 		}
+
+#ifdef USE_FFT_LENS_EFFECTS
+		lens_effects_ = MakeSharedPtr<FFTLensEffectsPostProcess>();
+#else
 		lens_effects_ = MakeSharedPtr<LensEffectsPostProcess>();
+#endif
+
 		tone_mapping_ = MakeSharedPtr<ToneMappingPostProcess>();
 	}
 
@@ -639,18 +647,20 @@ namespace KlayGE
 			fmt = EF_ABGR16F;
 		}
 
+		lens_effects_->InputPin(0, tex);
+		
+#ifndef USE_FFT_LENS_EFFECTS
 		TexturePtr lens_effects_tex = rf.MakeTexture2D(width / 2, height / 2, 1, 1, fmt, 1, 0,
 			EAH_GPU_Read | EAH_GPU_Write, NULL);
-
-		lens_effects_->InputPin(0, tex);
 		lens_effects_->OutputPin(0, lens_effects_tex);
+#endif
 
 		tone_mapping_->InputPin(0, tex);
 		if (cs_support_)
 		{
 			tone_mapping_->InputPin(1, image_stat_->OutputPin(0));
 		}
-		tone_mapping_->InputPin(2, lens_effects_tex);
+		tone_mapping_->InputPin(2, lens_effects_->OutputPin(0));
 	}
 
 	TexturePtr const & HDRPostProcess::InputPin(uint32_t index) const

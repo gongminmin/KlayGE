@@ -24,10 +24,21 @@
 
 namespace KlayGE
 {
-	class KLAYGE_CORE_API GPUFFT
+	class KLAYGE_CORE_API GpuFft
 	{
 	public:
-		GPUFFT(uint32_t width, uint32_t height, bool forward);
+		virtual ~GpuFft()
+		{
+		}
+
+		virtual void Execute(TexturePtr const & out_real, TexturePtr const & out_imag,
+			TexturePtr const & in_real, TexturePtr const & in_imag) = 0;
+	};
+
+	class KLAYGE_CORE_API GpuFftPS : public GpuFft
+	{
+	public:
+		GpuFftPS(uint32_t width, uint32_t height, bool forward);
 
 		void Execute(TexturePtr const & out_real, TexturePtr const & out_imag,
 			TexturePtr const & in_real, TexturePtr const & in_imag);
@@ -51,6 +62,39 @@ namespace KlayGE
 
 		PostProcessPtr fft_x_pp_;
 		PostProcessPtr fft_y_pp_;
+	};
+
+	class KLAYGE_CORE_API GpuFftCS4 : public GpuFft
+	{
+	public:
+		GpuFftCS4(uint32_t width, uint32_t height, bool forward);
+
+		void Execute(TexturePtr const & out_real, TexturePtr const & out_imag,
+			TexturePtr const & in_real, TexturePtr const & in_imag);
+
+	private:
+		void Radix008A(GraphicsBufferPtr const & dst,
+				   GraphicsBufferPtr const & src,
+				   uint32_t thread_count, uint32_t istride);
+
+	private:
+		GraphicsBufferPtr src_;
+		GraphicsBufferPtr dst_;
+		RenderLayoutPtr quad_layout_;
+		FrameBufferPtr tex_fb_;
+		GraphicsBufferPtr tmp_buffer_;
+		
+		RenderEffectPtr effect_;
+		RenderTechniquePtr radix008a_tech_;
+		RenderTechniquePtr radix008a_final_tech_;
+		RenderTechniquePtr tex2buf_tech_;
+		RenderTechniquePtr buf2tex_tech_;
+		RenderEffectParameterPtr real_tex_ep_;
+		RenderEffectParameterPtr imag_tex_ep_;
+
+		uint32_t width_, height_;
+
+		bool forward_;
 	};
 }
 

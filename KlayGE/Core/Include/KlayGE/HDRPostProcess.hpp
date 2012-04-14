@@ -181,8 +181,8 @@ namespace KlayGE
 
 		uint32_t width_, height_;
 
-		GPUFFTPtr fft_;
-		GPUFFTPtr ifft_;
+		GpuFftPtr fft_;
+		GpuFftPtr ifft_;
 	};
 
 	class KLAYGE_CORE_API ToneMappingPostProcess : public PostProcess
