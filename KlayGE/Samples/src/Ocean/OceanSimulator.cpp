@@ -131,21 +131,16 @@ namespace KlayGE
 		
 		FrameBufferPtr old_fb = re.CurFrameBuffer();
 		
-		// ---------------------------- H(0) -> H(t), D(x, t), D(y, t) --------------------------------
-
 		*time_param_ = frame * param_.time_peroid / param_.num_frames;
 
 		re.BindFrameBuffer(tex_fb_);
 		re.Render(*update_spectrum_tech_, *quad_layout_);
 
-		// ------------------------------------ Perform FFT -------------------------------------------
 		fft_->Execute(out_real_tex_, out_imag_tex_, out_real_tex_, out_imag_tex_);
 
-		// --------------------------------- Wrap Dx, Dy and Dz ---------------------------------------
 		re.BindFrameBuffer(displacement_fb_);
 		re.Render(*update_displacement_tech_, *quad_layout_);
 
-		// ----------------------------------- Generate Normal ----------------------------------------
 		re.BindFrameBuffer(gradient_fb_);
 		re.Render(*gen_gradient_folding_tech_, *quad_layout_);
 
@@ -173,7 +168,6 @@ namespace KlayGE
 
 		param_ = params;
 
-		// Height map H(0)
 		int height_map_size = (params.dmap_dim + 4) * (params.dmap_dim + 1);
 		std::vector<float2> h0_data(height_map_size);
 		std::vector<float> omega_data(height_map_size);
@@ -181,19 +175,12 @@ namespace KlayGE
 
 		ElementInitData init_data;
 
-		// For filling the buffer with zeroes.
 		std::vector<char> zero_data(3 * params.dmap_dim * params.dmap_dim * sizeof(float) * 2, 0);
 
-		// RW buffer allocations
-		// H0
 		init_data.row_pitch = static_cast<uint32_t>(h0_data.size() * sizeof(h0_data[0]));
 		init_data.data = &h0_data[0];
 		h0_buffer_ = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Read | EAH_GPU_Unordered | EAH_GPU_Structured, &init_data, EF_GR32F);
 
-		// Notice: The following 3 should be half sized buffer due to conjugate symmetric input. But we use full
-		// spectrum buffer due to the CS4.0 restriction.
-
-		// omega
 		init_data.row_pitch = static_cast<uint32_t>(omega_data.size() * sizeof(omega_data[0]));
 		init_data.data = &omega_data[0];
 		omega_buffer_ = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Read | EAH_GPU_Unordered | EAH_GPU_Structured, &init_data, EF_R32F);
@@ -211,10 +198,8 @@ namespace KlayGE
 		tex_fb_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*out_real_tex_, 0, 1, 0));
 		tex_fb_->Attach(FrameBuffer::ATT_Color1, rf.Make2DRenderView(*out_imag_tex_, 0, 1, 0));
 
-		// Constant buffers
 		uint32_t actual_dim = param_.dmap_dim;
 		uint32_t input_width = actual_dim + 4;
-		// We use full sized data here. The value "output_width" should be actual_dim/2+1 though.
 		uint32_t output_width = actual_dim;
 		uint32_t output_height = actual_dim;
 		uint32_t dtx_offset = actual_dim * actual_dim;

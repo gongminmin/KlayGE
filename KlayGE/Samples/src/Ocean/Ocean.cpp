@@ -244,9 +244,6 @@ namespace
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 			RenderEngine& re = rf.RenderEngineInstance();
 
-			RenderDeviceCaps const & caps = re.DeviceCaps();
-			cs_simulate_ = caps.cs_support;
-
 			base_level_ = 0;
 			strength_ = 10;
 
@@ -278,10 +275,7 @@ namespace
 			// pointy crests.
 			ocean_param_.choppy_scale		= 1.1f;
 
-			if (cs_simulate_)
-			{
-				ocean_simulator_ = MakeSharedPtr<OceanSimulator>();
-			}
+			ocean_simulator_ = MakeSharedPtr<OceanSimulator>();
 
 			use_tex_array_ = re.DeviceCaps().max_texture_array_length >= ocean_param_.num_frames;
 
@@ -456,122 +450,119 @@ namespace
 			{
 				checked_pointer_cast<RenderOcean>(renderable_)->PatchLength(ocean_param_.patch_length);
 
-				if (cs_simulate_)
+				ocean_simulator_->Parameters(ocean_param_);
+
+				RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+				TexturePtr disp_32f = rf.MakeTexture2D(ocean_param_.dmap_dim, ocean_param_.dmap_dim,
+						1, 1, EF_ABGR32F, 1, 0, EAH_CPU_Read | EAH_CPU_Write, NULL);
+
+				std::vector<float4> min_disps(ocean_param_.num_frames, float4(+1e10f, +1e10f, +1e10f, +1e10f));
+				std::vector<float4> disp_ranges(ocean_param_.num_frames);
+				std::vector<uint32_t> abgr8_disp(ocean_param_.dmap_dim * ocean_param_.dmap_dim);
+				for (uint32_t i = 0; i < ocean_param_.num_frames; ++ i)
 				{
-					ocean_simulator_->Parameters(ocean_param_);
+					ocean_simulator_->Update(i);
 
-					RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-					TexturePtr disp_32f = rf.MakeTexture2D(ocean_param_.dmap_dim, ocean_param_.dmap_dim,
-							1, 1, EF_ABGR32F, 1, 0, EAH_CPU_Read | EAH_CPU_Write, NULL);
+					TexturePtr const & sim_disp_tex = ocean_simulator_->DisplacementTex();
+					TexturePtr const & sim_grad_tex = ocean_simulator_->GradientTex();
 
-					std::vector<float4> min_disps(ocean_param_.num_frames, float4(+1e10f, +1e10f, +1e10f, +1e10f));
-					std::vector<float4> disp_ranges(ocean_param_.num_frames);
-					std::vector<uint32_t> abgr8_disp(ocean_param_.dmap_dim * ocean_param_.dmap_dim);
-					for (uint32_t i = 0; i < ocean_param_.num_frames; ++ i)
+					sim_disp_tex->CopyToSubTexture2D(*disp_32f,
+						0, 0, 0, 0, sim_disp_tex->Width(0), sim_disp_tex->Height(0),
+						0, 0, 0, 0, sim_disp_tex->Width(0), sim_disp_tex->Height(0));
+
 					{
-						ocean_simulator_->Update(i);
-
-						TexturePtr const & sim_disp_tex = ocean_simulator_->DisplacementTex();
-						TexturePtr const & sim_grad_tex = ocean_simulator_->GradientTex();
-
-						sim_disp_tex->CopyToSubTexture2D(*disp_32f,
-							0, 0, 0, 0, sim_disp_tex->Width(0), sim_disp_tex->Height(0),
-							0, 0, 0, 0, sim_disp_tex->Width(0), sim_disp_tex->Height(0));
-
+						float4 max_disp = float4(-1e10f, -1e10f, -1e10f, -1e10f);
+						Texture::Mapper mapper(*disp_32f, 0, 0, TMA_Read_Only, 0, 0, ocean_param_.dmap_dim, ocean_param_.dmap_dim);
+						float4* p = mapper.Pointer<float4>();
+						for (int y = 0; y < ocean_param_.dmap_dim; ++ y)
 						{
-							float4 max_disp = float4(-1e10f, -1e10f, -1e10f, -1e10f);
-							Texture::Mapper mapper(*disp_32f, 0, 0, TMA_Read_Only, 0, 0, ocean_param_.dmap_dim, ocean_param_.dmap_dim);
-							float4* p = mapper.Pointer<float4>();
-							for (int y = 0; y < ocean_param_.dmap_dim; ++ y)
+							for (int x = 0; x < ocean_param_.dmap_dim; ++ x)
 							{
-								for (int x = 0; x < ocean_param_.dmap_dim; ++ x)
-								{
-									float4 const & disp = p[y * mapper.RowPitch() / sizeof(float4) + x];
-									min_disps[i] = MathLib::minimize(min_disps[i], disp);
-									max_disp = MathLib::maximize(max_disp, disp);
-								}
-							}
-
-							disp_ranges[i] = max_disp - min_disps[i];
-
-							for (int y = 0; y < ocean_param_.dmap_dim; ++ y)
-							{
-								for (int x = 0; x < ocean_param_.dmap_dim; ++ x)
-								{
-									float4 const & disp = p[y * mapper.RowPitch() / sizeof(float4) + x];
-									float4 normalized_disp = (disp - min_disps[i]) / disp_ranges[i];
-									abgr8_disp[y * ocean_param_.dmap_dim + x] = Color(&normalized_disp.x()).ABGR();
-								}
+								float4 const & disp = p[y * mapper.RowPitch() / sizeof(float4) + x];
+								min_disps[i] = MathLib::minimize(min_disps[i], disp);
+								max_disp = MathLib::maximize(max_disp, disp);
 							}
 						}
 
-						ElementInitData init_data;
-						init_data.data = &abgr8_disp[0];
-						init_data.row_pitch = ocean_param_.dmap_dim * sizeof(uint32_t);
-						init_data.slice_pitch = init_data.row_pitch * ocean_param_.dmap_dim;
-						TexturePtr disp_8 = rf.MakeTexture2D(ocean_param_.dmap_dim, ocean_param_.dmap_dim,
-							1, 1, EF_ABGR8, 1, 0, EAH_CPU_Read | EAH_CPU_Write, &init_data);
+						disp_ranges[i] = max_disp - min_disps[i];
 
-						if (use_tex_array_)
+						for (int y = 0; y < ocean_param_.dmap_dim; ++ y)
 						{
-							disp_8->CopyToSubTexture2D(*displacement_tex_array_,
-								i, 0, 0, 0, sim_disp_tex->Width(0), sim_disp_tex->Height(0),
-								0, 0, 0, 0, sim_disp_tex->Width(0), sim_disp_tex->Height(0));
-							
-							sim_grad_tex->CopyToSubTexture2D(*gradient_tex_array_,
-								i, 0, 0, 0, sim_grad_tex->Width(0), sim_grad_tex->Height(0),
-								0, 0, 0, 0, sim_grad_tex->Width(0), sim_grad_tex->Height(0));
-						}
-						else
-						{
-							disp_8->CopyToTexture(*displacement_tex_[i]);
-							sim_grad_tex->CopyToSubTexture2D(*gradient_tex_[i],
-								0, 0, 0, 0, sim_grad_tex->Width(0), sim_grad_tex->Height(0),
-								0, 0, 0, 0, sim_grad_tex->Width(0), sim_grad_tex->Height(0));
-							gradient_tex_[i]->BuildMipSubLevels();
+							for (int x = 0; x < ocean_param_.dmap_dim; ++ x)
+							{
+								float4 const & disp = p[y * mapper.RowPitch() / sizeof(float4) + x];
+								float4 normalized_disp = (disp - min_disps[i]) / disp_ranges[i];
+								abgr8_disp[y * ocean_param_.dmap_dim + x] = Color(&normalized_disp.x()).ABGR();
+							}
 						}
 					}
+
+					ElementInitData init_data;
+					init_data.data = &abgr8_disp[0];
+					init_data.row_pitch = ocean_param_.dmap_dim * sizeof(uint32_t);
+					init_data.slice_pitch = init_data.row_pitch * ocean_param_.dmap_dim;
+					TexturePtr disp_8 = rf.MakeTexture2D(ocean_param_.dmap_dim, ocean_param_.dmap_dim,
+						1, 1, EF_ABGR8, 1, 0, EAH_CPU_Read | EAH_CPU_Write, &init_data);
 
 					if (use_tex_array_)
 					{
-						gradient_tex_array_->BuildMipSubLevels();
+						disp_8->CopyToSubTexture2D(*displacement_tex_array_,
+							i, 0, 0, 0, sim_disp_tex->Width(0), sim_disp_tex->Height(0),
+							0, 0, 0, 0, sim_disp_tex->Width(0), sim_disp_tex->Height(0));
+							
+						sim_grad_tex->CopyToSubTexture2D(*gradient_tex_array_,
+							i, 0, 0, 0, sim_grad_tex->Width(0), sim_grad_tex->Height(0),
+							0, 0, 0, 0, sim_grad_tex->Width(0), sim_grad_tex->Height(0));
 					}
+					else
+					{
+						disp_8->CopyToTexture(*displacement_tex_[i]);
+						sim_grad_tex->CopyToSubTexture2D(*gradient_tex_[i],
+							0, 0, 0, 0, sim_grad_tex->Width(0), sim_grad_tex->Height(0),
+							0, 0, 0, 0, sim_grad_tex->Width(0), sim_grad_tex->Height(0));
+						gradient_tex_[i]->BuildMipSubLevels();
+					}
+				}
 
-					displacement_params_.resize(ocean_param_.num_frames * 2);
+				if (use_tex_array_)
+				{
+					gradient_tex_array_->BuildMipSubLevels();
+				}
+
+				displacement_params_.resize(ocean_param_.num_frames * 2);
+				for (uint32_t i = 0; i < ocean_param_.num_frames; ++ i)
+				{
+					displacement_params_[i + ocean_param_.num_frames * 0] = float3(min_disps[i]);
+					displacement_params_[i + ocean_param_.num_frames * 1] = float3(disp_ranges[i]);
+				}
+
+				/*if (use_tex_array_)
+				{
+					SaveTexture(displacement_tex_array_, "OceanDisplacement.dds");
+
+					std::vector<float4> disp_params(ocean_param_.num_frames * 2);
 					for (uint32_t i = 0; i < ocean_param_.num_frames; ++ i)
 					{
-						displacement_params_[i + ocean_param_.num_frames * 0] = float3(min_disps[i]);
-						displacement_params_[i + ocean_param_.num_frames * 1] = float3(disp_ranges[i]);
+						disp_params[i + ocean_param_.num_frames * 0] = min_disps[i];
+						disp_params[i + ocean_param_.num_frames * 1] = disp_ranges[i];
 					}
 
-					/*if (use_tex_array_)
+					std::vector<ElementInitData> param_init_data(1);
+					param_init_data[0].data = &disp_params[0];
+					param_init_data[0].row_pitch = ocean_param_.num_frames * sizeof(float4);
+					param_init_data[0].slice_pitch = param_init_data[0].row_pitch * 2;
+					SaveTexture("OceanDisplacementParam.dds", Texture::TT_2D, ocean_param_.num_frames, 2, 1, 1, 1, EF_ABGR32F, param_init_data);
+
+					TexturePtr gta = rf.MakeTexture2D(ocean_param_.dmap_dim, ocean_param_.dmap_dim,
+						1, ocean_param_.num_frames, EF_GR8, 1, 0, EAH_CPU_Read | EAH_CPU_Write, NULL);
+					for (uint32_t i = 0; i < ocean_param_.num_frames; ++ i)
 					{
-						SaveTexture(displacement_tex_array_, "OceanDisplacement.dds");
-
-						std::vector<float4> disp_params(ocean_param_.num_frames * 2);
-						for (uint32_t i = 0; i < ocean_param_.num_frames; ++ i)
-						{
-							disp_params[i + ocean_param_.num_frames * 0] = min_disps[i];
-							disp_params[i + ocean_param_.num_frames * 1] = disp_ranges[i];
-						}
-
-						std::vector<ElementInitData> param_init_data(1);
-						param_init_data[0].data = &disp_params[0];
-						param_init_data[0].row_pitch = ocean_param_.num_frames * sizeof(float4);
-						param_init_data[0].slice_pitch = param_init_data[0].row_pitch * 2;
-						SaveTexture("OceanDisplacementParam.dds", Texture::TT_2D, ocean_param_.num_frames, 2, 1, 1, 1, EF_ABGR32F, param_init_data);
-
-						TexturePtr gta = rf.MakeTexture2D(ocean_param_.dmap_dim, ocean_param_.dmap_dim,
-							1, ocean_param_.num_frames, EF_GR8, 1, 0, EAH_CPU_Read | EAH_CPU_Write, NULL);
-						for (uint32_t i = 0; i < ocean_param_.num_frames; ++ i)
-						{
-							gradient_tex_array_->CopyToSubTexture2D(*gta,
-								i, 0, 0, 0, ocean_param_.dmap_dim, ocean_param_.dmap_dim,
-								i, 0, 0, 0, ocean_param_.dmap_dim, ocean_param_.dmap_dim);
-						}
-						SaveTexture(gta, "OceanGradient.dds");
-					}*/
-				}
+						gradient_tex_array_->CopyToSubTexture2D(*gta,
+							i, 0, 0, 0, ocean_param_.dmap_dim, ocean_param_.dmap_dim,
+							i, 0, 0, 0, ocean_param_.dmap_dim, ocean_param_.dmap_dim);
+					}
+					SaveTexture(gta, "OceanGradient.dds");
+				}*/
 
 				dirty_ = false;
 			}
@@ -729,8 +720,6 @@ namespace
 		}
 
 	private:
-		bool cs_simulate_;
-
 		OceanParameter ocean_param_;
 		bool dirty_;
 
@@ -939,27 +928,6 @@ void OceanApp::InitObjects()
 	this->ChoppyScaleChangedHandler(*dialog_params_->Control<UISlider>(id_choppy_scale_slider_));
 
 	dialog_params_->Control<UICheckBox>(id_fps_camera_)->OnChangedEvent().connect(boost::bind(&OceanApp::FPSCameraHandler, this, _1));
-
-	RenderDeviceCaps const & caps = re.DeviceCaps();
-	if (!caps.cs_support)
-	{
-		dialog_params_->GetControl(id_dmap_dim_static_)->SetEnabled(false);
-		dialog_params_->GetControl(id_dmap_dim_slider_)->SetEnabled(false);
-		dialog_params_->GetControl(id_patch_length_static_)->SetEnabled(false);
-		dialog_params_->GetControl(id_patch_length_slider_)->SetEnabled(false);
-		dialog_params_->GetControl(id_time_scale_static_)->SetEnabled(false);
-		dialog_params_->GetControl(id_time_scale_slider_)->SetEnabled(false);
-		dialog_params_->GetControl(id_wave_amplitude_static_)->SetEnabled(false);
-		dialog_params_->GetControl(id_wave_amplitude_slider_)->SetEnabled(false);
-		dialog_params_->GetControl(id_wind_speed_x_static_)->SetEnabled(false);
-		dialog_params_->GetControl(id_wind_speed_x_slider_)->SetEnabled(false);
-		dialog_params_->GetControl(id_wind_speed_y_static_)->SetEnabled(false);
-		dialog_params_->GetControl(id_wind_speed_y_slider_)->SetEnabled(false);
-		dialog_params_->GetControl(id_wind_dependency_static_)->SetEnabled(false);
-		dialog_params_->GetControl(id_wind_dependency_slider_)->SetEnabled(false);
-		dialog_params_->GetControl(id_choppy_scale_static_)->SetEnabled(false);
-		dialog_params_->GetControl(id_choppy_scale_slider_)->SetEnabled(false);
-	}
 }
 
 void OceanApp::OnResize(uint32_t width, uint32_t height)
