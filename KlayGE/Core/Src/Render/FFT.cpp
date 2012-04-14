@@ -241,7 +241,7 @@ namespace KlayGE
 
 		tex_fb_ = rf.MakeFrameBuffer();
 
-		effect_ = rf.LoadEffect("CSFFT.fxml");
+		effect_ = rf.LoadEffect("FFT.fxml");
 		tex2buf_tech_ = effect_->TechniqueByName("Tex2Buf");
 		buf2tex_tech_ = effect_->TechniqueByName("Buf2Tex");
 		radix008a_tech_ = effect_->TechniqueByName("FFTRadix008A");

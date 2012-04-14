@@ -458,18 +458,19 @@ namespace KlayGE
 		: PostProcess(L"FFTLensEffects")
 	{
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+		RenderDeviceCaps const & caps = rf.RenderEngineInstance().DeviceCaps();
 
 		pattern_real_tex_ = SyncLoadTexture("lens_effects_real.dds", EAH_GPU_Read | EAH_Immutable);
 		pattern_imag_tex_ = SyncLoadTexture("lens_effects_imag.dds", EAH_GPU_Read | EAH_Immutable);
 
 		ElementFormat fmt;
-		if (rf.RenderEngineInstance().DeviceCaps().rendertarget_format_support(EF_B10G11R11F, 1, 0))
+		if (caps.rendertarget_format_support(EF_B10G11R11F, 1, 0))
 		{
 			fmt = EF_B10G11R11F;
 		}
 		else
 		{
-			BOOST_ASSERT(rf.RenderEngineInstance().DeviceCaps().rendertarget_format_support(EF_ABGR16F, 1, 0));
+			BOOST_ASSERT(caps.rendertarget_format_support(EF_ABGR16F, 1, 0));
 			fmt = EF_ABGR16F;
 		}
 		resized_tex_ = rf.MakeTexture2D(WIDTH, WIDTH, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
@@ -482,8 +483,16 @@ namespace KlayGE
 			empty_tex_ = rf.MakeTexture2D(WIDTH, HEIGHT, 1, 1, EF_R8, 1, 0, EAH_GPU_Read | EAH_Immutable, &resized_data);
 		}
 
-		fft_ = MakeSharedPtr<GpuFftPS>(WIDTH, HEIGHT, true);
-		ifft_ = MakeSharedPtr<GpuFftPS>(WIDTH, HEIGHT, false);
+		if (caps.cs_support)
+		{
+			fft_ = MakeSharedPtr<GpuFftCS4>(WIDTH, HEIGHT, true);
+			ifft_ = MakeSharedPtr<GpuFftCS4>(WIDTH, HEIGHT, false);
+		}
+		else
+		{
+			fft_ = MakeSharedPtr<GpuFftPS>(WIDTH, HEIGHT, true);
+			ifft_ = MakeSharedPtr<GpuFftPS>(WIDTH, HEIGHT, false);
+		}
 	
 		freq_real_tex_ = rf.MakeTexture2D(WIDTH, HEIGHT, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
 		freq_imag_tex_ = rf.MakeTexture2D(WIDTH, HEIGHT, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
@@ -629,9 +638,6 @@ namespace KlayGE
 
 	void HDRPostProcess::InputPin(uint32_t index, TexturePtr const & tex)
 	{
-		uint32_t const width = tex->Width(0);
-		uint32_t const height = tex->Height(0);
-
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
 		image_stat_->InputPin(index, tex);
@@ -650,7 +656,7 @@ namespace KlayGE
 		lens_effects_->InputPin(0, tex);
 		
 #ifndef USE_FFT_LENS_EFFECTS
-		TexturePtr lens_effects_tex = rf.MakeTexture2D(width / 2, height / 2, 1, 1, fmt, 1, 0,
+		TexturePtr lens_effects_tex = rf.MakeTexture2D(tex->Width(0) / 2, tex->Height(0) / 2, 1, 1, fmt, 1, 0,
 			EAH_GPU_Read | EAH_GPU_Write, NULL);
 		lens_effects_->OutputPin(0, lens_effects_tex);
 #endif
