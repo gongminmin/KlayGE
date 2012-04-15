@@ -103,6 +103,9 @@ namespace KlayGE
 	OCTree::OCTree()
 		: max_tree_depth_(4), rebuild_tree_(false)
 	{
+		base_address_.resize(2);
+		base_address_[0] = 0;
+		base_address_[1] = 1;
 	}
 
 	void OCTree::MaxTreeDepth(uint32_t max_tree_depth)
@@ -141,9 +144,8 @@ namespace KlayGE
 			{
 				octree_[0].bb = bb_root;
 			}
-			base_address_.push_back(0);
-			base_address_.push_back(1);
 
+			base_address_.resize(2);
 			for (uint32_t d = 1; d <= max_tree_depth_; ++ d)
 			{
 				size_t const original_size = octree_.size();
