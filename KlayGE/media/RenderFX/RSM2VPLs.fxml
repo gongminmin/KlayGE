@@ -114,11 +114,12 @@ float4 RSM2VPLsSpotPSNew(float2 tc : TEXCOORD0) : SV_Target
 	float j = floor(vpl_id / vpl_params.z);
 	float i = vpl_id - j * vpl_params.z;
 	float2 rsm_tc = float2(i, j) / vpl_params.z + vpl_params.w;
+	float cur_level = smaller_level - 1;
 
 	if (is_not_bottom_top_level.x)
 	{
-		float depth_deriv = depth_derivate_tex.SampleLevel(point_sampler, rsm_tc, mip_level).r;  
-		float4 normal_cone = normal_cone_tex.SampleLevel(point_sampler, rsm_tc, mip_level);
+		float depth_deriv = depth_derivate_tex.SampleLevel(point_sampler, rsm_tc, cur_level).r;  
+		float4 normal_cone = normal_cone_tex.SampleLevel(point_sampler, rsm_tc, cur_level);
 		normal_cone.xy -= normal_cone.zw;
 		float normal_deriv = max(normal_cone.x, normal_cone.y);
 		if (any(float2(depth_deriv, normal_deriv) > depth_normal_threshold))
