@@ -1641,7 +1641,7 @@ namespace KlayGE
 					re.BindFrameBuffer(sm_buffer_);
 					re.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->ClearDepth(1.0f);
 
-					return App3DFramework::URV_Need_Flush | App3DFramework::URV_Opaque_Only;
+					return App3DFramework::URV_Need_Flush;
 				}
 				else //if (PT_Lighting == pass_type)
 				{
@@ -1659,8 +1659,6 @@ namespace KlayGE
 					re.BindFrameBuffer(shadowing_buffer_);
 					re.CurFrameBuffer()->Attached(FrameBuffer::ATT_Color0)->ClearColor(Color(1, 1, 1, 1));
 
-					*g_buffer_tex_param_ = opaque_g_buffer_rt0_tex_;
-					*depth_tex_param_ = opaque_depth_tex_;
 					*light_attrib_param_ = float4(attr & LSA_NoDiffuse ? 0.0f : 1.0f, attr & LSA_NoSpecular ? 0.0f : 1.0f,
 						attr & LSA_NoShadow ? -1.0f : 1.0f, light->ProjectiveTexture() ? 1.0f : -1.0f);
 					*light_color_param_ = light->Color();
@@ -1673,6 +1671,9 @@ namespace KlayGE
 							light->ConditionalRenderQuery(index_in_pass)->BeginConditionalRender();
 						}
 					}
+
+					*g_buffer_tex_param_ = opaque_g_buffer_rt0_tex_;
+					*depth_tex_param_ = opaque_depth_tex_;
 
 					if (0 == (attr & LSA_NoShadow))
 					{
@@ -1693,14 +1694,22 @@ namespace KlayGE
 						re.Render(*technique_light_stencil_, *rl);
 					}
 
-					*g_buffer_tex_param_ = opaque_g_buffer_rt0_tex_;
-					*depth_tex_param_ = opaque_depth_tex_;
-
 					re.Render(*technique_lights_[type], *rl);
 
 					if (has_transparency_objs_)
 					{
 						// Transparency objects back
+
+						re.BindFrameBuffer(shadowing_buffer_);
+						re.CurFrameBuffer()->Attached(FrameBuffer::ATT_Color0)->ClearColor(Color(1, 1, 1, 1));
+
+						*g_buffer_tex_param_ = transparency_back_g_buffer_rt0_tex_;
+						*depth_tex_param_ = transparency_back_depth_tex_;
+
+						if (0 == (attr & LSA_NoShadow))
+						{
+							re.Render(*technique_shadows_[type], *rl);
+						}
 
 						re.BindFrameBuffer(transparency_back_lighting_buffer_);
 						// Clear stencil to 0 with write mask
@@ -1711,12 +1720,20 @@ namespace KlayGE
 							re.Render(*technique_light_stencil_, *rl);
 						}
 
-						*g_buffer_tex_param_ = transparency_back_g_buffer_rt0_tex_;
-						*depth_tex_param_ = transparency_back_depth_tex_;
-
 						re.Render(*technique_lights_[type], *rl);
 
 						// Transparency objects front
+
+						re.BindFrameBuffer(shadowing_buffer_);
+						re.CurFrameBuffer()->Attached(FrameBuffer::ATT_Color0)->ClearColor(Color(1, 1, 1, 1));
+
+						*g_buffer_tex_param_ = transparency_front_g_buffer_rt0_tex_;
+						*depth_tex_param_ = transparency_front_depth_tex_;
+
+						if (0 == (attr & LSA_NoShadow))
+						{
+							re.Render(*technique_shadows_[type], *rl);
+						}
 
 						re.BindFrameBuffer(transparency_front_lighting_buffer_);
 						// Clear stencil to 0 with write mask
@@ -1726,9 +1743,6 @@ namespace KlayGE
 						{
 							re.Render(*technique_light_stencil_, *rl);
 						}
-
-						*g_buffer_tex_param_ = transparency_front_g_buffer_rt0_tex_;
-						*depth_tex_param_ = transparency_front_depth_tex_;
 
 						re.Render(*technique_lights_[type], *rl);
 					}
