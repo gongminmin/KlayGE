@@ -400,24 +400,27 @@ namespace KlayGE
 		{
 			if (!shader_srv_cache_[i].empty())
 			{
-				std::fill(shader_srv_cache_[i].begin(), shader_srv_cache_[i].end(), static_cast<ID3D11ShaderResourceView*>(NULL));
-				ShaderSetShaderResources[i](d3d_imm_ctx_.get(), 0, static_cast<UINT>(shader_srv_cache_[i].size()), &shader_srv_cache_[i][0]);
+				std::fill(shader_srv_ptr_cache_[i].begin(), shader_srv_ptr_cache_[i].end(), static_cast<ID3D11ShaderResourceView*>(NULL));
+				ShaderSetShaderResources[i](d3d_imm_ctx_.get(), 0, static_cast<UINT>(shader_srv_ptr_cache_[i].size()), &shader_srv_ptr_cache_[i][0]);
 				shader_srvsrc_cache_[i].clear();
 				shader_srv_cache_[i].clear();
+				shader_srv_ptr_cache_[i].clear();
 			}
 
 			if (!shader_sampler_cache_[i].empty())
 			{
-				std::fill(shader_sampler_cache_[i].begin(), shader_sampler_cache_[i].end(), static_cast<ID3D11SamplerState*>(NULL));
-				ShaderSetSamplers[i](d3d_imm_ctx_.get(), 0, static_cast<UINT>(shader_sampler_cache_[i].size()), &shader_sampler_cache_[i][0]);
+				std::fill(shader_sampler_ptr_cache_[i].begin(), shader_sampler_ptr_cache_[i].end(), static_cast<ID3D11SamplerState*>(NULL));
+				ShaderSetSamplers[i](d3d_imm_ctx_.get(), 0, static_cast<UINT>(shader_sampler_ptr_cache_[i].size()), &shader_sampler_ptr_cache_[i][0]);
 				shader_sampler_cache_[i].clear();
+				shader_sampler_ptr_cache_[i].clear();
 			}
 
 			if (!shader_cb_cache_[i].empty())
 			{
-				std::fill(shader_cb_cache_[i].begin(), shader_cb_cache_[i].end(), static_cast<ID3D11Buffer*>(NULL));
-				ShaderSetConstantBuffers[i](d3d_imm_ctx_.get(), 0, static_cast<UINT>(shader_cb_cache_[i].size()), &shader_cb_cache_[i][0]);
+				std::fill(shader_cb_ptr_cache_[i].begin(), shader_cb_ptr_cache_[i].end(), static_cast<ID3D11Buffer*>(NULL));
+				ShaderSetConstantBuffers[i](d3d_imm_ctx_.get(), 0, static_cast<UINT>(shader_cb_ptr_cache_[i].size()), &shader_cb_ptr_cache_[i][0]);
 				shader_cb_cache_[i].clear();
+				shader_cb_ptr_cache_[i].clear();
 			}
 		}
 	}
@@ -1140,41 +1143,79 @@ namespace KlayGE
 		}
 	}
 
-	void D3D11RenderEngine::SetShaderResources(ShaderObject::ShaderType st, std::vector<boost::tuple<void*, uint32_t, uint32_t> > const & srvsrcs, std::vector<ID3D11ShaderResourceView*> const & srvs)
+	void D3D11RenderEngine::SetShaderResources(ShaderObject::ShaderType st, std::vector<boost::tuple<void*, uint32_t, uint32_t> > const & srvsrcs, std::vector<ID3D11ShaderResourceViewPtr> const & srvs)
 	{
 		if (shader_srv_cache_[st] != srvs)
 		{
 			if (shader_srv_cache_[st].size() > srvs.size())
 			{
-				std::vector<ID3D11ShaderResourceView*> resized_srvs(shader_srv_cache_[st].size(), NULL);
-				std::copy(srvs.begin(), srvs.end(), resized_srvs.begin());
-				ShaderSetShaderResources[st](d3d_imm_ctx_.get(), 0, static_cast<UINT>(resized_srvs.size()), &resized_srvs[0]);
+				shader_srv_ptr_cache_[st].assign(shader_srv_cache_[st].size(), NULL);
 			}
 			else
 			{
-				ShaderSetShaderResources[st](d3d_imm_ctx_.get(), 0, static_cast<UINT>(srvs.size()), &srvs[0]);
+				shader_srv_ptr_cache_[st].resize(srvs.size());
 			}
+
+			for (size_t i = 0; i < srvs.size(); ++ i)
+			{
+				shader_srv_ptr_cache_[st][i] = srvs[i].get();
+			}
+
+			ShaderSetShaderResources[st](d3d_imm_ctx_.get(), 0, static_cast<UINT>(shader_srv_ptr_cache_[st].size()), &shader_srv_ptr_cache_[st][0]);
 
 			shader_srvsrc_cache_[st] = srvsrcs;
 			shader_srv_cache_[st] = srvs;
+			shader_srv_ptr_cache_[st].resize(srvs.size());
 		}
 	}
 
-	void D3D11RenderEngine::SetSamplers(ShaderObject::ShaderType st, std::vector<ID3D11SamplerState*> const & samplers)
+	void D3D11RenderEngine::SetSamplers(ShaderObject::ShaderType st, std::vector<ID3D11SamplerStatePtr> const & samplers)
 	{
 		if (shader_sampler_cache_[st] != samplers)
 		{
-			ShaderSetSamplers[st](d3d_imm_ctx_.get(), 0, static_cast<UINT>(samplers.size()), &samplers[0]);
+			if (shader_sampler_cache_[st].size() > samplers.size())
+			{
+				shader_sampler_ptr_cache_[st].assign(shader_sampler_cache_[st].size(), NULL);
+			}
+			else
+			{
+				shader_sampler_ptr_cache_[st].resize(samplers.size());
+			}
+
+			for (size_t i = 0; i < samplers.size(); ++ i)
+			{
+				shader_sampler_ptr_cache_[st][i] = samplers[i].get();
+			}
+
+			ShaderSetSamplers[st](d3d_imm_ctx_.get(), 0, static_cast<UINT>(shader_sampler_ptr_cache_[st].size()), &shader_sampler_ptr_cache_[st][0]);
+
 			shader_sampler_cache_[st] = samplers;
+			shader_sampler_ptr_cache_[st].resize(samplers.size());
 		}
 	}
 
-	void D3D11RenderEngine::SetConstantBuffers(ShaderObject::ShaderType st, std::vector<ID3D11Buffer*> const & cbs)
+	void D3D11RenderEngine::SetConstantBuffers(ShaderObject::ShaderType st, std::vector<ID3D11BufferPtr> const & cbs)
 	{
 		if (shader_cb_cache_[st] != cbs)
 		{
-			ShaderSetConstantBuffers[st](d3d_imm_ctx_.get(), 0, static_cast<UINT>(cbs.size()), &cbs[0]);
+			if (shader_cb_cache_[st].size() > cbs.size())
+			{
+				shader_cb_ptr_cache_[st].assign(shader_cb_cache_[st].size(), NULL);
+			}
+			else
+			{
+				shader_cb_ptr_cache_[st].resize(cbs.size());
+			}
+
+			for (size_t i = 0; i < cbs.size(); ++ i)
+			{
+				shader_cb_ptr_cache_[st][i] = cbs[i].get();
+			}
+
+			ShaderSetConstantBuffers[st](d3d_imm_ctx_.get(), 0, static_cast<UINT>(shader_cb_ptr_cache_[st].size()), &shader_cb_ptr_cache_[st][0]);
+
 			shader_cb_cache_[st] = cbs;
+			shader_cb_ptr_cache_[st].resize(cbs.size());
 		}
 	}
 
@@ -1198,7 +1239,8 @@ namespace KlayGE
 							|| ((rt_first >= first) && (rt_first < last))
 							|| ((rt_last >= first) && (rt_last < last)))
 						{
-							shader_srv_cache_[st][i] = NULL;
+							shader_srv_cache_[st][i].reset();
+							shader_srv_ptr_cache_[st][i] = NULL;
 							cleared = true;
 						}
 					}
@@ -1207,7 +1249,7 @@ namespace KlayGE
 
 			if (cleared)
 			{
-				ShaderSetShaderResources[st](d3d_imm_ctx_.get(), 0, static_cast<UINT>(shader_srv_cache_[st].size()), &shader_srv_cache_[st][0]);
+				ShaderSetShaderResources[st](d3d_imm_ctx_.get(), 0, static_cast<UINT>(shader_srv_ptr_cache_[st].size()), &shader_srv_ptr_cache_[st][0]);
 			}
 		}
 	}

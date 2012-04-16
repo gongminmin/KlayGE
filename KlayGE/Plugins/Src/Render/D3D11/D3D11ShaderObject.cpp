@@ -298,10 +298,10 @@ namespace
 	};
 
 	template <>
-	class SetD3D11ShaderParameter<SamplerStateObjectPtr, ID3D11SamplerState*>
+	class SetD3D11ShaderParameter<SamplerStateObjectPtr, ID3D11SamplerStatePtr>
 	{
 	public:
-		SetD3D11ShaderParameter(ID3D11SamplerState*& sampler, RenderEffectParameterPtr const & param)
+		SetD3D11ShaderParameter(ID3D11SamplerStatePtr& sampler, RenderEffectParameterPtr const & param)
 			: sampler_(&sampler), param_(param)
 		{
 		}
@@ -312,20 +312,20 @@ namespace
 			param_->Value(sampler);
 			if (sampler)
 			{
-				*sampler_ = checked_cast<D3D11SamplerStateObject*>(sampler.get())->D3DSamplerState().get();
+				*sampler_ = checked_cast<D3D11SamplerStateObject*>(sampler.get())->D3DSamplerState();
 			}
 		}
 
 	private:
-		ID3D11SamplerState** sampler_;
+		ID3D11SamplerStatePtr* sampler_;
 		RenderEffectParameterPtr param_;
 	};
 
 	template <>
-	class SetD3D11ShaderParameter<TexturePtr, ID3D11ShaderResourceView*>
+	class SetD3D11ShaderParameter<TexturePtr, ID3D11ShaderResourceViewPtr>
 	{
 	public:
-		SetD3D11ShaderParameter(boost::tuple<void*, uint32_t, uint32_t>& srvsrc, ID3D11ShaderResourceView*& srv, RenderEffectParameterPtr const & param)
+		SetD3D11ShaderParameter(boost::tuple<void*, uint32_t, uint32_t>& srvsrc, ID3D11ShaderResourceViewPtr& srv, RenderEffectParameterPtr const & param)
 			: srvsrc_(&srvsrc), srv_(&srv), param_(param)
 		{
 		}
@@ -338,7 +338,7 @@ namespace
 			{
 				*srvsrc_ = boost::make_tuple(tex_tuple.get<0>().get(), tex_tuple.get<1>() * tex_tuple.get<0>()->NumMipMaps() + tex_tuple.get<3>(),
 					tex_tuple.get<2>() * tex_tuple.get<4>());
-				*srv_ = checked_cast<D3D11Texture*>(tex_tuple.get<0>().get())->RetriveD3DShaderResourceView(tex_tuple.get<1>(), tex_tuple.get<2>(), tex_tuple.get<3>(), tex_tuple.get<4>()).get();
+				*srv_ = checked_cast<D3D11Texture*>(tex_tuple.get<0>().get())->RetriveD3DShaderResourceView(tex_tuple.get<1>(), tex_tuple.get<2>(), tex_tuple.get<3>(), tex_tuple.get<4>());
 			}
 			else
 			{
@@ -348,15 +348,15 @@ namespace
 
 	private:
 		boost::tuple<void*, uint32_t, uint32_t>* srvsrc_;
-		ID3D11ShaderResourceView** srv_;
+		ID3D11ShaderResourceViewPtr* srv_;
 		RenderEffectParameterPtr param_;
 	};
 
 	template <>
-	class SetD3D11ShaderParameter<GraphicsBufferPtr, ID3D11ShaderResourceView*>
+	class SetD3D11ShaderParameter<GraphicsBufferPtr, ID3D11ShaderResourceViewPtr>
 	{
 	public:
-		SetD3D11ShaderParameter(boost::tuple<void*, uint32_t, uint32_t>& srvsrc, ID3D11ShaderResourceView*& srv, RenderEffectParameterPtr const & param)
+		SetD3D11ShaderParameter(boost::tuple<void*, uint32_t, uint32_t>& srvsrc, ID3D11ShaderResourceViewPtr& srv, RenderEffectParameterPtr const & param)
 			: srvsrc_(&srvsrc), srv_(&srv), param_(param)
 		{
 		}
@@ -368,7 +368,7 @@ namespace
 			if (buf)
 			{
 				*srvsrc_ = boost::make_tuple(buf.get(), 0, 1);
-				*srv_ = checked_cast<D3D11GraphicsBuffer*>(buf.get())->D3DShaderResourceView().get();
+				*srv_ = checked_cast<D3D11GraphicsBuffer*>(buf.get())->D3DShaderResourceView();
 			}
 			else
 			{
@@ -378,15 +378,15 @@ namespace
 
 	private:
 		boost::tuple<void*, uint32_t, uint32_t>* srvsrc_;
-		ID3D11ShaderResourceView** srv_;
+		ID3D11ShaderResourceViewPtr* srv_;
 		RenderEffectParameterPtr param_;
 	};
 
 	template <>
-	class SetD3D11ShaderParameter<TexturePtr, ID3D11UnorderedAccessView*>
+	class SetD3D11ShaderParameter<TexturePtr, ID3D11UnorderedAccessViewPtr>
 	{
 	public:
-		SetD3D11ShaderParameter(void*& uavsrc, ID3D11UnorderedAccessView*& uav, RenderEffectParameterPtr const & param)
+		SetD3D11ShaderParameter(void*& uavsrc, ID3D11UnorderedAccessViewPtr& uav, RenderEffectParameterPtr const & param)
 			: uavsrc_(&uavsrc), uav_(&uav), param_(param)
 		{
 		}
@@ -398,7 +398,7 @@ namespace
 			if (tex_tuple.get<0>())
 			{
 				*uavsrc_ = tex_tuple.get<0>().get();
-				*uav_ = checked_cast<D3D11Texture*>(tex_tuple.get<0>().get())->RetriveD3DUnorderedAccessView(tex_tuple.get<1>(), tex_tuple.get<2>(), tex_tuple.get<3>()).get();
+				*uav_ = checked_cast<D3D11Texture*>(tex_tuple.get<0>().get())->RetriveD3DUnorderedAccessView(tex_tuple.get<1>(), tex_tuple.get<2>(), tex_tuple.get<3>());
 			}
 			else
 			{
@@ -408,15 +408,15 @@ namespace
 
 	private:
 		void** uavsrc_;
-		ID3D11UnorderedAccessView** uav_;
+		ID3D11UnorderedAccessViewPtr* uav_;
 		RenderEffectParameterPtr param_;
 	};
 
 	template <>
-	class SetD3D11ShaderParameter<GraphicsBufferPtr, ID3D11UnorderedAccessView*>
+	class SetD3D11ShaderParameter<GraphicsBufferPtr, ID3D11UnorderedAccessViewPtr>
 	{
 	public:
-		SetD3D11ShaderParameter(void*& uavsrc, ID3D11UnorderedAccessView*& uav, RenderEffectParameterPtr const & param)
+		SetD3D11ShaderParameter(void*& uavsrc, ID3D11UnorderedAccessViewPtr& uav, RenderEffectParameterPtr const & param)
 			: uavsrc_(&uavsrc), uav_(&uav), param_(param)
 		{
 		}
@@ -428,7 +428,7 @@ namespace
 			if (buf)
 			{
 				*uavsrc_ = buf.get();
-				*uav_ = checked_cast<D3D11GraphicsBuffer*>(buf.get())->D3DUnorderedAccessView().get();
+				*uav_ = checked_cast<D3D11GraphicsBuffer*>(buf.get())->D3DUnorderedAccessView();
 			}
 			else
 			{
@@ -438,7 +438,7 @@ namespace
 
 	private:
 		void** uavsrc_;
-		ID3D11UnorderedAccessView** uav_;
+		ID3D11UnorderedAccessViewPtr* uav_;
 		RenderEffectParameterPtr param_;
 	};
 }
@@ -1261,7 +1261,6 @@ namespace KlayGE
 				reflection->GetDesc(&desc);
 
 				dirty_[type].resize(desc.ConstantBuffers);
-				d3d_cbufs_[type].resize(desc.ConstantBuffers);
 				cbufs_[type].resize(desc.ConstantBuffers);
 				mem_cbufs_[type].resize(desc.ConstantBuffers);
 				for (UINT c = 0; c < desc.ConstantBuffers; ++ c)
@@ -1308,8 +1307,7 @@ namespace KlayGE
 					buf_desc.MiscFlags = 0;
 					ID3D11Buffer* tmp_buf;
 					TIF(d3d_device->CreateBuffer(&buf_desc, NULL, &tmp_buf));
-					d3d_cbufs_[type][c] = MakeCOMPtr(tmp_buf);
-					cbufs_[type][c] = tmp_buf;
+					cbufs_[type][c] = MakeCOMPtr(tmp_buf);
 				}
 
 				int num_samplers = -1;
@@ -1345,11 +1343,11 @@ namespace KlayGE
 					}
 				}
 
-				samplers_[type].resize(num_samplers + 1, NULL);
+				samplers_[type].resize(num_samplers + 1);
 				srvsrcs_[type].resize(num_srvs + 1, NULL);
-				srvs_[type].resize(num_srvs + 1, NULL);
+				srvs_[type].resize(num_srvs + 1);
 				uavsrcs_[type].resize(num_uavs + 1, NULL);
-				uavs_[type].resize(num_uavs + 1, NULL);
+				uavs_[type].resize(num_uavs + 1);
 
 				for (uint32_t i = 0; i < desc.BoundResources; ++ i)
 				{
@@ -1488,29 +1486,27 @@ namespace KlayGE
 				break;
 			}
 
-			samplers_[type].resize(so.samplers_[type].size(), NULL);
+			samplers_[type].resize(so.samplers_[type].size());
 			srvsrcs_[type].resize(so.srvs_[type].size(), NULL);
-			srvs_[type].resize(so.srvs_[type].size(), NULL);
+			srvs_[type].resize(so.srvs_[type].size());
 			uavsrcs_[type].resize(so.uavs_[type].size(), NULL);
-			uavs_[type].resize(so.uavs_[type].size(), NULL);
+			uavs_[type].resize(so.uavs_[type].size());
 
 			mem_cbufs_[type] = so.mem_cbufs_[type];
 			dirty_[type] = so.dirty_[type];
 
-			d3d_cbufs_[type].resize(so.d3d_cbufs_[type].size());
-			cbufs_[type].resize(d3d_cbufs_[type].size());
+			cbufs_[type].resize(so.cbufs_[type].size());
 			D3D11_BUFFER_DESC desc;
 			desc.Usage = D3D11_USAGE_DYNAMIC;
 			desc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
 			desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 			desc.MiscFlags = 0;
-			for (size_t j = 0; j < so.d3d_cbufs_[type].size(); ++ j)
+			for (size_t j = 0; j < so.cbufs_[type].size(); ++ j)
 			{
 				desc.ByteWidth = static_cast<UINT>(so.mem_cbufs_[type][j].size());
 				ID3D11Buffer* tmp_buf;
 				TIF(d3d_device->CreateBuffer(&desc, NULL, &tmp_buf));
-				d3d_cbufs_[type][j] = MakeCOMPtr(tmp_buf);
-				cbufs_[type][j] = tmp_buf;
+				cbufs_[type][j] = MakeCOMPtr(tmp_buf);
 			}
 
 			param_binds_[type].reserve(so.param_binds_[type].size());
@@ -1551,29 +1547,27 @@ namespace KlayGE
 		{
 			ret->shader_code_[i] = shader_code_[i];
 
-			ret->samplers_[i].resize(samplers_[i].size(), NULL);
+			ret->samplers_[i].resize(samplers_[i].size());
 			ret->srvsrcs_[i].resize(srvsrcs_[i].size(), NULL);
-			ret->srvs_[i].resize(srvs_[i].size(), NULL);
+			ret->srvs_[i].resize(srvs_[i].size());
 			ret->uavsrcs_[i].resize(uavsrcs_[i].size(), NULL);
-			ret->uavs_[i].resize(uavs_[i].size(), NULL);
+			ret->uavs_[i].resize(uavs_[i].size());
 
 			ret->mem_cbufs_[i] = mem_cbufs_[i];
 			ret->dirty_[i] = dirty_[i];
 
-			ret->d3d_cbufs_[i].resize(d3d_cbufs_[i].size());
 			ret->cbufs_[i].resize(cbufs_[i].size());
 			D3D11_BUFFER_DESC desc;
 			desc.Usage = D3D11_USAGE_DYNAMIC;
 			desc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
 			desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 			desc.MiscFlags = 0;
-			for (size_t j = 0; j < d3d_cbufs_[i].size(); ++ j)
+			for (size_t j = 0; j < cbufs_[i].size(); ++ j)
 			{
 				desc.ByteWidth = static_cast<UINT>((mem_cbufs_[i][j].size() + 15) / 16 * 16);
 				ID3D11Buffer* tmp_buf;
 				TIF(d3d_device->CreateBuffer(&desc, NULL, &tmp_buf));
-				ret->d3d_cbufs_[i][j] = MakeCOMPtr(tmp_buf);
-				ret->cbufs_[i][j] = tmp_buf;
+				ret->cbufs_[i][j] = MakeCOMPtr(tmp_buf);
 			}
 
 			ret->param_binds_[i].reserve(param_binds_[i].size());
@@ -1876,7 +1870,7 @@ namespace KlayGE
 			break;
 
 		case REDT_sampler:
-			ret.func = SetD3D11ShaderParameter<SamplerStateObjectPtr, ID3D11SamplerState*>(samplers_[p_handle.shader_type][p_handle.offset], param);
+			ret.func = SetD3D11ShaderParameter<SamplerStateObjectPtr, ID3D11SamplerStatePtr>(samplers_[p_handle.shader_type][p_handle.offset], param);
 			break;
 
 		case REDT_texture1D:
@@ -1887,7 +1881,7 @@ namespace KlayGE
 		case REDT_texture2DArray:
 		case REDT_texture3DArray:
 		case REDT_textureCUBEArray:
-			ret.func = SetD3D11ShaderParameter<TexturePtr, ID3D11ShaderResourceView*>(srvsrcs_[p_handle.shader_type][p_handle.offset], srvs_[p_handle.shader_type][p_handle.offset], param);
+			ret.func = SetD3D11ShaderParameter<TexturePtr, ID3D11ShaderResourceViewPtr>(srvsrcs_[p_handle.shader_type][p_handle.offset], srvs_[p_handle.shader_type][p_handle.offset], param);
 			break;
 
 		case REDT_buffer:
@@ -1895,7 +1889,7 @@ namespace KlayGE
 		case REDT_consume_structured_buffer:
 		case REDT_append_structured_buffer:
 		case REDT_byte_address_buffer:
-			ret.func = SetD3D11ShaderParameter<GraphicsBufferPtr, ID3D11ShaderResourceView*>(srvsrcs_[p_handle.shader_type][p_handle.offset], srvs_[p_handle.shader_type][p_handle.offset], param);
+			ret.func = SetD3D11ShaderParameter<GraphicsBufferPtr, ID3D11ShaderResourceViewPtr>(srvsrcs_[p_handle.shader_type][p_handle.offset], srvs_[p_handle.shader_type][p_handle.offset], param);
 			break;
 
 		case REDT_rw_texture1D:
@@ -1903,13 +1897,13 @@ namespace KlayGE
 		case REDT_rw_texture3D:
 		case REDT_rw_texture1DArray:
 		case REDT_rw_texture2DArray:
-			ret.func = SetD3D11ShaderParameter<TexturePtr, ID3D11UnorderedAccessView*>(uavsrcs_[p_handle.shader_type][p_handle.offset], uavs_[p_handle.shader_type][p_handle.offset], param);
+			ret.func = SetD3D11ShaderParameter<TexturePtr, ID3D11UnorderedAccessViewPtr>(uavsrcs_[p_handle.shader_type][p_handle.offset], uavs_[p_handle.shader_type][p_handle.offset], param);
 			break;
 
 		case REDT_rw_buffer:
 		case REDT_rw_structured_buffer:
 		case REDT_rw_byte_address_buffer:
-			ret.func = SetD3D11ShaderParameter<GraphicsBufferPtr, ID3D11UnorderedAccessView*>(uavsrcs_[p_handle.shader_type][p_handle.offset], uavs_[p_handle.shader_type][p_handle.offset], param);
+			ret.func = SetD3D11ShaderParameter<GraphicsBufferPtr, ID3D11UnorderedAccessViewPtr>(uavsrcs_[p_handle.shader_type][p_handle.offset], uavs_[p_handle.shader_type][p_handle.offset], param);
 			break;
 
 		default:
@@ -1941,16 +1935,16 @@ namespace KlayGE
 			}
 		}
 
-		for (size_t i = 0; i < d3d_cbufs_.size(); ++ i)
+		for (size_t i = 0; i < cbufs_.size(); ++ i)
 		{
-			for (size_t j = 0; j < d3d_cbufs_[i].size(); ++ j)
+			for (size_t j = 0; j < cbufs_[i].size(); ++ j)
 			{
 				if (dirty_[i][j])
 				{
 					D3D11_MAPPED_SUBRESOURCE mapped;
-					d3d_imm_ctx->Map(cbufs_[i][j], D3D11CalcSubresource(0, 0, 1), D3D11_MAP_WRITE_DISCARD, 0, &mapped);
+					d3d_imm_ctx->Map(cbufs_[i][j].get(), D3D11CalcSubresource(0, 0, 1), D3D11_MAP_WRITE_DISCARD, 0, &mapped);
 					memcpy(mapped.pData, &mem_cbufs_[i][j][0], static_cast<UINT>(mem_cbufs_[i][j].size()));
-					d3d_imm_ctx->Unmap(cbufs_[i][j], D3D11CalcSubresource(0, 0, 1));
+					d3d_imm_ctx->Unmap(cbufs_[i][j].get(), D3D11CalcSubresource(0, 0, 1));
 
 					dirty_[i][j] = false;
 				}
@@ -1977,16 +1971,19 @@ namespace KlayGE
 
 		if (!uavs_[ST_ComputeShader].empty())
 		{
+			std::vector<ID3D11UnorderedAccessView*> uavs_ptr(uavs_[ST_ComputeShader].size());
 			for (uint32_t i = 0; i < uavs_[ST_ComputeShader].size(); ++ i)
 			{
 				if (uavsrcs_[ST_ComputeShader][i] != NULL)
 				{
 					re.DetachSRV(uavsrcs_[ST_ComputeShader][i], 0, 1);
 				}
+
+				uavs_ptr[i] = uavs_[ST_ComputeShader][i].get();
 			}
 
-			d3d_imm_ctx->CSSetUnorderedAccessViews(0, static_cast<UINT>(uavs_[ST_ComputeShader].size()), &uavs_[ST_ComputeShader][0],
-				reinterpret_cast<UINT*>(&uavs_[ST_ComputeShader][0]));
+			d3d_imm_ctx->CSSetUnorderedAccessViews(0, static_cast<UINT>(uavs_[ST_ComputeShader].size()), &uavs_ptr[0],
+				reinterpret_cast<UINT*>(&uavs_ptr[0]));
 		}
 	}
 
