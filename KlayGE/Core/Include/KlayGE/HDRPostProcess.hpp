@@ -165,7 +165,6 @@ namespace KlayGE
 		PostProcessPtr scaled_copy_pp_;
 
 		std::vector<TexturePtr> restore_chain_;
-		std::vector<TexturePtr> downsample_chain_;
 
 		TexturePtr input_tex_;
 

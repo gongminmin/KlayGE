@@ -525,8 +525,6 @@ namespace KlayGE
 
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-		downsample_chain_.resize(1);
-		downsample_chain_[0] = tex;
 		std::vector<uint32_t> widths;
 		std::vector<uint32_t> heights;
 		{
@@ -548,13 +546,6 @@ namespace KlayGE
 			}
 		}
 
-		downsample_chain_.resize(widths.size() - 1);
-		for (size_t i = 1; i < widths.size() - 1; ++ i)
-		{
-			downsample_chain_[i] = rf.MakeTexture2D(widths[i], heights[i],
-				1, 1, tex->Format(), 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
-		}
-
 		restore_chain_.resize(widths.size() - 1);
 		for (size_t i = 1; i < widths.size(); ++ i)
 		{
@@ -566,7 +557,7 @@ namespace KlayGE
 		height_ = heights.back();
 
 		bright_pass_pp_->SetParam(0, float4(1, 1, static_cast<float>(width_) / WIDTH, static_cast<float>(height_) / HEIGHT));
-		bright_pass_pp_->InputPin(0, downsample_chain_[downsample_chain_.size() - 1]);
+		bright_pass_pp_->InputPin(0, input_tex_);
 
 		scaled_copy_pp_->SetParam(0, float4(static_cast<float>(width_) / WIDTH, static_cast<float>(height_) / HEIGHT, 1, 1));
 		scaled_copy_pp_->OutputPin(0, restore_chain_.back());
@@ -588,12 +579,6 @@ namespace KlayGE
 		
 	void FFTLensEffectsPostProcess::Apply()
 	{
-		for (size_t i = 1; i < downsample_chain_.size(); ++ i)
-		{
-			bilinear_copy_pp_->InputPin(0, downsample_chain_[i - 1]);
-			bilinear_copy_pp_->OutputPin(0, downsample_chain_[i]);
-			bilinear_copy_pp_->Apply();
-		}
 		bright_pass_pp_->Apply();
 
 		fft_->Execute(freq_real_tex_, freq_imag_tex_, resized_tex_, empty_tex_);
