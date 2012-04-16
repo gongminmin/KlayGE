@@ -563,6 +563,74 @@ void ScenePlayerApp::LoadScene(std::string const & name)
 
 	for (XMLNodePtr model_node = root->FirstNode("model"); model_node; model_node = model_node->NextSibling("model"))
 	{
+		uint32_t obj_attr = SceneObject::SOA_Cullable;
+		float4x4 obj_mat = float4x4::Identity();
+
+		XMLNodePtr transform_node = model_node->FirstNode("transform");
+		if (transform_node)
+		{
+			for (XMLNodePtr node = transform_node->FirstNode(); node; node = node->NextSibling())
+			{
+				if ("translation" == node->Name())
+				{
+					float x = node->Attrib("x")->ValueFloat();
+					float y = node->Attrib("y")->ValueFloat();
+					float z = node->Attrib("z")->ValueFloat();
+					obj_mat *= MathLib::translation(x, y, z);
+				}
+				else if ("scaling" == node->Name())
+				{
+					float x = node->Attrib("x")->ValueFloat();
+					float y = node->Attrib("y")->ValueFloat();
+					float z = node->Attrib("z")->ValueFloat();
+					obj_mat *= MathLib::scaling(x, y, z);
+				}
+			}
+		}
+
+		XMLNodePtr attribute_node = model_node->FirstNode("attribute");
+		if (attribute_node)
+		{
+			XMLAttributePtr attr = attribute_node->Attrib("value");
+			if (attr)
+			{
+				try
+				{
+					obj_attr = attr->ValueInt();
+				}
+				catch (boost::bad_lexical_cast const &)
+				{
+					obj_attr = SceneObject::SOA_Cullable;
+
+					std::string attribute_str = attr->ValueString();
+			
+					boost::char_separator<char> sep("", " \t|");
+					boost::tokenizer<boost::char_separator<char> > tok(attribute_str, sep);
+					std::string this_token;
+					for (BOOST_AUTO(beg, tok.begin()); beg != tok.end(); ++ beg)
+					{
+						this_token = *beg;
+						if ("cullable" == this_token)
+						{
+							obj_attr |= SceneObject::SOA_Cullable;
+						}
+						else if ("overlay" == this_token)
+						{
+							obj_attr |= SceneObject::SOA_Overlay;
+						}
+						else if ("moveable" == this_token)
+						{
+							obj_attr |= SceneObject::SOA_Moveable;
+						}
+						else if ("unvisible" == this_token)
+						{
+							obj_attr |= SceneObject::SOA_Unvisible;
+						}
+					}
+				}
+			}
+		}
+
 		std::string update_script;
 		XMLNodePtr update_node = model_node->FirstNode("update");
 		if (update_node)
@@ -581,7 +649,8 @@ void ScenePlayerApp::LoadScene(std::string const & name)
 		scene_models_.push_back(model);
 		for (size_t i = 0; i < model->NumMeshes(); ++ i)
 		{
-			SceneObjectPtr scene_obj = MakeSharedPtr<SceneObjectHelper>(model->Mesh(i), SceneObject::SOA_Cullable);
+			SceneObjectPtr scene_obj = MakeSharedPtr<SceneObjectHelper>(model->Mesh(i), obj_attr);
+			scene_obj->ModelMatrix(obj_mat);
 			if (!update_script.empty())
 			{
 				scene_obj->BindUpdateFunc(SceneObjectUpdate(update_script));

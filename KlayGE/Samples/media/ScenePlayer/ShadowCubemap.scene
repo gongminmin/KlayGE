@@ -17,6 +17,7 @@ def update(app_time, elapsed_time):
 
 	<model name="ScifiRoom.7z//ScifiRoom.meshml"/>
 	<model name="teapot.meshml">
+		<attribute value="moveable"/>
 		<update>
 			<![CDATA[
 def update(app_time, elapsed_time):
