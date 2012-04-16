@@ -38,7 +38,7 @@
 			<param name="x_dir"/>
 			<param name="y_dir"/>
 			<param name="is_not_bottom_top_level"/>
-			<param name="depth_normal_threshold"/>
+			<param name="depth_threshold"/>
 			<param name="smaller_level"/>
 		</params>
 		<input>
@@ -46,7 +46,6 @@
 			<pin name="normal_es_tex" />
 			<pin name="depth_tex" />
 			<pin name="depth_derivate_tex" />
-			<pin name="normal_cone_tex" />
 			<pin name="vpl_tex" />
 		</input>
 		<output>

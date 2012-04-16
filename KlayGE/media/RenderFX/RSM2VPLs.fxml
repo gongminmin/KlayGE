@@ -29,14 +29,13 @@
 	<parameter type="float3" name="x_dir"/>
 	<parameter type="float3" name="y_dir"/>
 	<parameter type="int2" name="is_not_bottom_top_level"/>
-	<parameter type="float2" name="depth_normal_threshold"/>
+	<parameter type="float" name="depth_threshold"/>
 	<parameter type="float" name="smaller_level"/>
 
 	<parameter type="texture2D" name="albedo_tex"/>
 	<parameter type="texture2D" name="normal_es_tex"/>
 	<parameter type="texture2D" name="depth_tex" />
 	<parameter type="texture2D" name="depth_derivate_tex" />
-	<parameter type="texture2D" name="normal_cone_tex" />
 	<parameter type="texture2D" name="vpl_tex" />
 
 	<shader>
@@ -119,10 +118,7 @@ float4 RSM2VPLsSpotPSNew(float2 tc : TEXCOORD0) : SV_Target
 	if (is_not_bottom_top_level.x)
 	{
 		float depth_deriv = depth_derivate_tex.SampleLevel(point_sampler, rsm_tc, cur_level).r;  
-		float4 normal_cone = normal_cone_tex.SampleLevel(point_sampler, rsm_tc, cur_level);
-		normal_cone.xy -= normal_cone.zw;
-		float normal_deriv = max(normal_cone.x, normal_cone.y);
-		if (any(float2(depth_deriv, normal_deriv) > depth_normal_threshold))
+		if (depth_deriv > depth_threshold)
 		{
 			return -1;
 		}
@@ -130,10 +126,7 @@ float4 RSM2VPLsSpotPSNew(float2 tc : TEXCOORD0) : SV_Target
 	if (is_not_bottom_top_level.y)
 	{
 		float depth_deriv = depth_derivate_tex.SampleLevel(point_sampler, rsm_tc, smaller_level).r;
-		float4 normal_cone = normal_cone_tex.SampleLevel(point_sampler, rsm_tc, smaller_level);
-		normal_cone.xy -= normal_cone.zw;
-		float normal_deriv = max(normal_cone.x, normal_cone.y);
-		if (all(float2(depth_deriv, normal_deriv) <= depth_normal_threshold))
+		if (depth_deriv <= depth_threshold)
 		{
 			return -1;
 		}

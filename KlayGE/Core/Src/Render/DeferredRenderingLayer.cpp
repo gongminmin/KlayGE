@@ -539,8 +539,6 @@ namespace KlayGE
 			vpl_copy_ = rf.MakeTexture2D(VPL_COUNT, 4, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
 			rsm_to_depth_derivate_pp_ =  LoadPostProcess(ResLoader::Instance().Open("CustomMipMap.ppml"), "GBuffer2DepthDerivate");
 			rsm_depth_derivate_mipmap_pp_ = LoadPostProcess(ResLoader::Instance().Open("CustomMipMap.ppml"), "DepthDerivateMipMap");
-			rsm_to_normal_cone_pp_ =  LoadPostProcess(ResLoader::Instance().Open("CustomMipMap.ppml"), "GBuffer2NormalCone");
-			rsm_normal_cone_mipmap_pp_ = LoadPostProcess(ResLoader::Instance().Open("CustomMipMap.ppml"), "NormalConeMipMap");
 #endif
 		}
 
@@ -758,11 +756,9 @@ namespace KlayGE
 			}
 #ifdef USE_NEW_LIGHT_SAMPLING
 			rsm_depth_derivative_tex_ = rf.MakeTexture2D(SM_SIZE, SM_SIZE, MAX_RSM_MIPMAP_LEVELS, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
-			rsm_normal_cone_tex_ = rf.MakeTexture2D(SM_SIZE, SM_SIZE, MAX_RSM_MIPMAP_LEVELS, 1, fmt8, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
 			if (rsm_depth_derivative_tex_->NumMipMaps() > 1)
 			{
 				rsm_depth_derivative_small_tex_ = rf.MakeTexture2D(SM_SIZE / 2, SM_SIZE / 2, MAX_RSM_MIPMAP_LEVELS - 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
-				rsm_normal_cone_small_tex_ = rf.MakeTexture2D(SM_SIZE / 2, SM_SIZE / 2, MAX_RSM_MIPMAP_LEVELS - 1, 1, fmt8, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
 			}
 #endif
 		}
@@ -904,12 +900,7 @@ namespace KlayGE
 			float4 rsm_delta_offset(delta_x, delta_y, delta_x / 2, delta_y / 2);
 			rsm_to_depth_derivate_pp_->SetParam(0, rsm_delta_offset);
 			
-			rsm_to_normal_cone_pp_->InputPin(0, rsm_texs_[0]);
-			rsm_to_normal_cone_pp_->OutputPin(0, rsm_normal_cone_tex_);
-			rsm_to_normal_cone_pp_->SetParam(0, rsm_delta_offset);
-
 			rsm_depth_derivate_mipmap_pp_->InputPin(0, rsm_depth_derivative_tex_);
-			rsm_normal_cone_mipmap_pp_->InputPin(0, rsm_normal_cone_tex_);
 #endif
 		}
 	}
@@ -1947,36 +1938,12 @@ namespace KlayGE
 		}
 	}
 
-	void DeferredRenderingLayer::CreateRSMNormalConeMipMap()
-	{
-		rsm_to_normal_cone_pp_->Apply();
-
-		for (uint32_t i = 1; i < rsm_normal_cone_tex_->NumMipMaps(); ++ i)
-		{
-			int width = rsm_normal_cone_tex_->Width(i - 1);
-			int height = rsm_normal_cone_tex_->Height(i - 1);
-			float delta_x = 1.0f / width;
-			float delta_y = 1.0f / height;
-			float4 delta_offset(delta_x, delta_y, delta_x / 2, delta_y / 2);
-
-			rsm_normal_cone_mipmap_pp_->SetParam(0, delta_offset);
-			rsm_normal_cone_mipmap_pp_->SetParam(1, i - 1.0f);
-
-			rsm_normal_cone_mipmap_pp_->OutputPin(0, rsm_normal_cone_small_tex_, i - 1);
-			rsm_normal_cone_mipmap_pp_->Apply();
-
-			rsm_normal_cone_small_tex_->CopyToSubTexture2D(*rsm_normal_cone_tex_, 0, i, 0, 0, width / 2, height / 2,
-				0, i - 1, 0, 0, width / 2, height / 2);
-		}
-	}
-
 	void DeferredRenderingLayer::ExtractVPLsNew(CameraPtr const & rsm_camera, LightSourcePtr const & light)
 	{
 		rsm_texs_[0]->BuildMipSubLevels();
 		rsm_texs_[1]->BuildMipSubLevels();
 		
 		this->CreateRSMDepthDerivativeMipMap();
-		this->CreateRSMNormalConeMipMap();
 		
 		float4x4 ls_to_es = MathLib::inverse(rsm_camera->ViewMatrix()) * view_;
 		float4x4 inv_proj = MathLib::inverse(rsm_camera->ProjMatrix());
@@ -2004,12 +1971,11 @@ namespace KlayGE
 			rsm_to_vpls_pps[type]->SetParam(8, upper_right - upper_left);
 			rsm_to_vpls_pps[type]->SetParam(9, lower_left - upper_left);
 			rsm_to_vpls_pps[type]->SetParam(10, int2(i != BEGIN_RSM_SAMPLING_LIGHT_LEVEL, i != rsm_texs_[0]->NumMipMaps() - 1));
-			rsm_to_vpls_pps[type]->SetParam(11, float2(0.001f * rsm_camera->FarPlane() * 4, 0.77f));
+			rsm_to_vpls_pps[type]->SetParam(11, 0.001f * rsm_camera->FarPlane() * 4);
 			rsm_to_vpls_pps[type]->SetParam(12, static_cast<float>(i + 1 - 2)); //smaller level(test level)
 
 			rsm_to_vpls_pps[type]->InputPin(3, rsm_depth_derivative_tex_);
-			rsm_to_vpls_pps[type]->InputPin(4, rsm_normal_cone_tex_);
-			rsm_to_vpls_pps[type]->InputPin(5, vpl_copy_);
+			rsm_to_vpls_pps[type]->InputPin(4, vpl_copy_);
 
 			rsm_to_vpls_pps[type]->Apply();
 
@@ -2039,7 +2005,7 @@ namespace KlayGE
 				int a = 0;
 				for (uint32_t j = 0; j < n * n; ++ j)
 				{
-					if (float(p[j * 4]) < 0)
+					if (float(p[j * 4]) >= 0)
 					{
 						++ a;
 					}
