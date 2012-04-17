@@ -256,12 +256,15 @@ namespace KlayGE
 
 	void OCTree::OnDelSceneObject(SceneManager::SceneObjectsType::iterator iter)
 	{
-		uint32_t const attr = (*iter)->Attrib();
-		if ((attr & SceneObject::SOA_Cullable)
-			&& !(attr & SceneObject::SOA_Overlay)
-			&& !(attr & SceneObject::SOA_Moveable))
+		if (iter != scene_objs_.end())
 		{
-			rebuild_tree_ = true;
+			uint32_t const attr = (*iter)->Attrib();
+			if ((attr & SceneObject::SOA_Cullable)
+				&& !(attr & SceneObject::SOA_Overlay)
+				&& !(attr & SceneObject::SOA_Moveable))
+			{
+				rebuild_tree_ = true;
+			}
 		}
 	}
 

@@ -812,7 +812,6 @@ namespace KlayGE
 					{
 						XMLNodePtr vertices_chunk = mesh_node->FirstNode("vertices_chunk");
 
-						bool has_position = false;
 						bool has_normal = false;
 						bool has_diffuse = false;
 						bool has_specular = false;
@@ -825,8 +824,6 @@ namespace KlayGE
 						for (XMLNodePtr vertex_node = vertices_chunk->FirstNode("vertex"); vertex_node; vertex_node = vertex_node->NextSibling("vertex"))
 						{
 							++ num_vertices;
-
-							has_position = true;
 						
 							XMLNodePtr normal_node = vertex_node->FirstNode("normal");
 							if (normal_node)
@@ -899,8 +896,6 @@ namespace KlayGE
 							vertex_element ve;
 
 							{
-								BOOST_ASSERT(has_position);
-
 								ve.usage = VEU_Position;
 								ve.usage_index = 0;
 								ve.format = EF_BGR32F;

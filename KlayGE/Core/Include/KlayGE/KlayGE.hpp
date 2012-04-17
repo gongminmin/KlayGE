@@ -31,10 +31,9 @@
 #ifndef _KLAYGE_HPP
 #define _KLAYGE_HPP
 
-#include <KlayGE/Config.hpp>
-
 #pragma once
 
+#include <KlayGE/Config.hpp>
 #include <KlayGE/Types.hpp>
 
 #define KLAYGE_NAME			KlayGE

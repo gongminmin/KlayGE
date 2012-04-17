@@ -50,7 +50,7 @@
 #endif
 #include <boost/checked_delete.hpp>
 
-#define UNREF_PARAM(x) (x)
+#define UNREF_PARAM(x) (void)(x)
 
 #include <KlayGE/Log.hpp>
 

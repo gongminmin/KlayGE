@@ -1450,7 +1450,7 @@ namespace KlayGE
 				case LT_Spot:
 					{
 						CameraPtr sm_camera;
-						float3 dir_es;
+						float3 dir_es(0, 0, 0);
 						if (LT_Spot == type)
 						{
 							dir_es = MathLib::transform_normal(light->Direction(), view_);

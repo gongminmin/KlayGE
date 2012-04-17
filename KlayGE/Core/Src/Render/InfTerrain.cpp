@@ -166,7 +166,6 @@ namespace KlayGE
 			look_at_vec = float3(0, 0, 1);
 		}
 		float4x4 virtual_view = MathLib::look_at_lh(camera.EyePos(), camera.EyePos() + look_at_vec);
-		float4x4 inv_virtual_view = MathLib::inverse(virtual_view);
 
 		float4x4 const & view = camera.ViewMatrix();
 		float4x4 const & proj = camera.ProjMatrix();

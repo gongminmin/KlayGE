@@ -5,7 +5,9 @@
 
 #if defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
 #define KFONT_PLATFORM_WINDOWS
-#define NOMINMAX
+#ifndef NOMINMAX
+	#define NOMINMAX
+#endif
 // Forces all boost's libraries to be linked as dll
 #ifndef BOOST_ALL_DYN_LINK
 	#define BOOST_ALL_DYN_LINK

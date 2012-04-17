@@ -535,7 +535,7 @@ namespace KlayGE
 			widths.push_back(ori_w);
 			heights.push_back(ori_h);
 
-			while (ori_s > WIDTH)
+			while (ori_s > static_cast<uint32_t>(WIDTH))
 			{
 				ori_w >>= 1;
 				ori_h >>= 1;
