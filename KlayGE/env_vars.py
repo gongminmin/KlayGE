@@ -18,9 +18,9 @@ if ('nt' == os.name):
 
 klayge_path = os.path.split(os.path.abspath(__file__))[0]
 if ('nt' == os.name):
-	klayge_bin_path = "%s\\bin" % klayge_path
+	klayge_bin_path = "%s\\bin\\win_x86" % klayge_path
 else:
-	klayge_bin_path = "%s/bin" % klayge_path
+	klayge_bin_path = "%s/bin/linux_x86" % klayge_path
 
 klayge_home = 'KLAYGE_HOME'
 
@@ -42,7 +42,7 @@ if ('nt' == os.name):
 		cur_path = env["path"]
 		if (cur_path[-1] != ";"):
 			cur_path += ";"
-		SetValueEx(k, "path", None, REG_SZ, "%s%%%s%%\\bin" % (cur_path, klayge_home))
+		SetValueEx(k, "path", None, REG_SZ, "%s%s" % (cur_path, klayge_bin_path))
 		FlushKey(k)
 		CloseKey(k)
 
@@ -59,10 +59,10 @@ else:
 		f.write('export %s=%s' % (klayge_home, klayge_path))
 	if klayge_bin_path.lower() not in env["PATH"].lower():
 		f.write('\n')
-		f.write('export PATH=$PATH:$%s/bin' % klayge_home)
+		f.write('export PATH=$PATH:$%s' % klayge_bin_path)
 	if (os.getenv("LD_LIBRARY_PATH") == None) or (klayge_bin_path.lower() not in env["LD_LIBRARY_PATH"].lower()):
 		f.write('\n')
-		f.write('export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$%s/bin' % klayge_home)
+		f.write('export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$%s' % klayge_bin_path)
 
 	f.close()
 
