@@ -2,10 +2,10 @@
 <CodeLite_Workspace Name="glloader" Database="./glloader.tags">
   <Project Name="glloader" Path="glloader.project" Active="Yes"/>
   <BuildMatrix>
-    <WorkspaceConfiguration Name="Debug_win_x86" Selected="no">
+    <WorkspaceConfiguration Name="Debug_win_x86" Selected="yes">
       <Project Name="glloader" ConfigName="Debug_win_x86"/>
     </WorkspaceConfiguration>
-    <WorkspaceConfiguration Name="Release_win_x86" Selected="yes">
+    <WorkspaceConfiguration Name="Release_win_x86" Selected="no">
       <Project Name="glloader" ConfigName="Release_win_x86"/>
     </WorkspaceConfiguration>
     <WorkspaceConfiguration Name="Debug-GLES_win_x86" Selected="no">

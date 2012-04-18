@@ -69,7 +69,7 @@
         <LibraryPath Value="../../../glloader/lib/linux_x64"/>
         <Library Value="KlayGE_Core_gcc_d"/>
         <Library Value="boost_system"/>
-        <Library Value="glloader_es_x64_d"/>
+        <Library Value="glloader_es_gcc_x64_d"/>
         <Library Value="GLU"/>
         <Library Value="Cg"/>
       </Linker>
@@ -118,7 +118,7 @@
         <LibraryPath Value="../../../glloader/lib/linux_x86"/>
         <Library Value="KlayGE_Core_gcc_d"/>
         <Library Value="boost_system"/>
-        <Library Value="glloader_es_x86_d"/>
+        <Library Value="glloader_es_gcc_x86_d"/>
         <Library Value="GLU"/>
         <Library Value="Cg"/>
       </Linker>
@@ -169,7 +169,7 @@
         <LibraryPath Value="../../../glloader/lib/win_x64"/>
         <Library Value="KlayGE_Core_mgw_d"/>
         <Library Value="boost_system-mgw46-mt-d-1_49"/>
-        <Library Value="glloader_es_x64_d"/>
+        <Library Value="glloader_es_mgw_x64_d"/>
         <Library Value="glu32"/>
         <Library Value="Gdi32"/>
         <Library Value="Cg"/>
@@ -221,7 +221,7 @@
         <LibraryPath Value="../../../glloader/lib/win_x86"/>
         <Library Value="KlayGE_Core_mgw_d"/>
         <Library Value="boost_system-mgw46-mt-d-1_49"/>
-        <Library Value="glloader_es_x86_d"/>
+        <Library Value="glloader_es_mgw_x86_d"/>
         <Library Value="glu32"/>
         <Library Value="Gdi32"/>
         <Library Value="Cg"/>
@@ -271,7 +271,7 @@
         <LibraryPath Value="../../../glloader/lib/linux_x64"/>
         <Library Value="KlayGE_Core_gcc"/>
         <Library Value="boost_system"/>
-        <Library Value="glloader_es_x64"/>
+        <Library Value="glloader_es_gcc_x64"/>
         <Library Value="GLU"/>
         <Library Value="X11"/>
         <Library Value="Cg"/>
@@ -321,7 +321,7 @@
         <LibraryPath Value="../../../glloader/lib/linux_x86"/>
         <Library Value="KlayGE_Core_gcc"/>
         <Library Value="boost_system"/>
-        <Library Value="glloader_es_x86"/>
+        <Library Value="glloader_es_gcc_x86"/>
         <Library Value="GLU"/>
         <Library Value="X11"/>
         <Library Value="Cg"/>
@@ -373,7 +373,7 @@
         <LibraryPath Value="../../../glloader/lib/win_x64"/>
         <Library Value="KlayGE_Core_mgw"/>
         <Library Value="boost_system-mgw46-mt-1_49"/>
-        <Library Value="glloader_es_x64"/>
+        <Library Value="glloader_es_mgw_x64"/>
         <Library Value="glu32"/>
         <Library Value="Gdi32"/>
         <Library Value="Cg"/>
@@ -425,7 +425,7 @@
         <LibraryPath Value="../../../glloader/lib/win_x86"/>
         <Library Value="KlayGE_Core_mgw"/>
         <Library Value="boost_system-mgw46-mt-1_49"/>
-        <Library Value="glloader_es_x86"/>
+        <Library Value="glloader_es_mgw_x86"/>
         <Library Value="glu32"/>
         <Library Value="Gdi32"/>
         <Library Value="Cg"/>
