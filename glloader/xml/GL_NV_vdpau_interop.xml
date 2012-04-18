@@ -62,13 +62,13 @@
 			</params>
 		</function>
 
-		<function name="VDPAUMapSurfacesNV" return="void">
+		<function name="glVDPAUMapSurfacesNV" return="void">
 			<params>
 				<param type="GLsizei" name="numSurfaces"/>
 				<param type="const GLvdpauSurfaceNV*" name="surfaces"/>
 			</params>
 		</function>
-		<function name="VDPAUUnmapSurfacesNV" return="void">
+		<function name="glVDPAUUnmapSurfacesNV" return="void">
 			<params>
 				<param type="GLsizei" name="numSurface"/>
 				<param type="const GLvdpauSurfaceNV*" name="surfaces"/>
