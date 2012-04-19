@@ -1995,7 +1995,8 @@ namespace KlayGE
 		if (!uavs_[ST_ComputeShader].empty())
 		{
 			std::vector<ID3D11UnorderedAccessView*> uavs(uavs_[ST_ComputeShader].size(), NULL);
-			d3d_imm_ctx->CSSetUnorderedAccessViews(0, 1, &uavs[0], reinterpret_cast<UINT*>(&uavs[0]));
+			d3d_imm_ctx->CSSetUnorderedAccessViews(0, static_cast<UINT>(uavs_[ST_ComputeShader].size()), &uavs[0],
+				reinterpret_cast<UINT*>(&uavs[0]));
 		}
 	}
 }
