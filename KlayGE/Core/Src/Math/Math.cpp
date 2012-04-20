@@ -1095,7 +1095,7 @@ namespace KlayGE
 				}
 				else
 				{
-					Vector_T<T, 3> axis = cross(from, to);
+					Vector_T<T, 3> axis = normalize(cross(from, to));
 
 					T const sin_theta = sqrt(1 - cos_theta * cos_theta);
 					T const sin_half_theta = sqrt((1 - cos_theta) / 2);

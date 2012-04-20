@@ -116,7 +116,7 @@ float4 SSVOPS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Target
 	view_dir = normalize(view_dir);
 	float3 pos_es = view_dir * (depth / view_dir.z);
 
-	float3 y_dir = cross(normal, float3(0, 0, 1));
+	float3 y_dir = normalize(cross(normal, float3(0, 0, 1)));
 	float3 x_dir = cross(y_dir, normal);
 
 	obscurance = CalcAlchemyObscurance(tc, pos_es, x_dir, y_dir, normal, radius, depth);

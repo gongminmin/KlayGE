@@ -23,7 +23,7 @@ float4 unit_axis_to_unit_axis(float3 from, float3 to)
 		}
 		else
 		{
-			float3 axis = cross(from, to);
+			float3 axis = normalize(cross(from, to));
 
 			float sin_theta = sqrt(1 - cos_theta * cos_theta);
 			float sin_half_theta = sqrt((1 - cos_theta) / 2);
