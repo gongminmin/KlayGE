@@ -255,7 +255,7 @@ void TWIDDLE_8(inout float2 D[8], float phase)
 
 
 [numthreads(COHERENCY_GRANULARITY, 1, 1)]
-void Radix008ACS(uint3 thread_id : SV_DispatchThreadID)
+void Radix008ACS4(uint3 thread_id : SV_DispatchThreadID)
 {
 	if (thread_id.x < thread_count)
 	{
@@ -290,7 +290,7 @@ void Radix008ACS(uint3 thread_id : SV_DispatchThreadID)
 }
 
 [numthreads(COHERENCY_GRANULARITY, 1, 1)]
-void Radix008AFinalCS(uint3 thread_id : SV_DispatchThreadID)
+void Radix008AFinalCS4(uint3 thread_id : SV_DispatchThreadID)
 {
 	if (thread_id.x < thread_count)
 	{
@@ -329,15 +329,242 @@ void Radix008AFinalCS(uint3 thread_id : SV_DispatchThreadID)
 		]]>
 	</shader>
 
-	<technique name="FFTRadix008A">
+	<technique name="FFTRadix008A4">
 		<pass name="p0">
-			<state name="compute_shader" value="Radix008ACS()"/>
+			<state name="compute_shader" value="Radix008ACS4()"/>
 		</pass>
 	</technique>
 
-	<technique name="FFTRadix008AFinal">
+	<technique name="FFTRadix008AFinal4">
 		<pass name="p0">
-			<state name="compute_shader" value="Radix008AFinalCS()"/>
+			<state name="compute_shader" value="Radix008AFinalCS4()"/>
+		</pass>
+	</technique>
+
+	
+	<cbuffer name="per_frame2">
+		<parameter type="uint4" name="istride2"/>
+		<parameter type="uint2" name="ostride2"/>
+		<parameter type="uint2" name="iscale2"/>
+		<parameter type="float" name="phase_base2"/>
+	</cbuffer>
+
+	<parameter type="texture2D" elem_type="float4" name="src_real_tex"/>
+	<parameter type="texture2D" elem_type="float4" name="src_imag_tex"/>
+	<parameter type="rw_texture2D" elem_type="float4" name="dst_real_tex"/>
+	<parameter type="rw_texture2D" elem_type="float4" name="dst_imag_tex"/>
+
+	<shader type="compute_shader" version="5">
+		<![CDATA[
+void FT2(inout float4 ar, inout float4 ai, inout float4 br, inout float4 bi)
+{
+	float4 tr = ar;
+	float4 ti = ai;
+	ar += br;
+	ai += bi;
+	br = tr - br;
+	bi = ti - bi;
+}
+
+void CMUL_forward(inout float4 ar, inout float4 ai, float4 bx, float4 by)
+{
+	float4 t = ar;
+	ar = t * bx - ai * by;
+	ai = t * by + ai * bx;
+}
+
+void UPD_forward(inout float4 ar, inout float4 ai, inout float4 br, inout float4 bi)
+{
+	float4 A = ar;
+	float4 B = bi;
+
+	ar += bi;
+	bi = ai + br;
+	ai -= br;
+	br = A - B;
+}
+
+void FFT_forward_4(inout float4 Dr[8], inout float4 Di[8])
+{
+	FT2(Dr[0], Di[0], Dr[2], Di[2]);
+	FT2(Dr[1], Di[1], Dr[3], Di[3]);
+	FT2(Dr[0], Di[0], Dr[1], Di[1]);
+
+	UPD_forward(Dr[2], Di[2], Dr[3], Di[3]);
+}
+
+void FFT_forward_8(inout float4 Dr[8], inout float4 Di[8])
+{
+	FT2(Dr[0], Di[0], Dr[4], Di[4]);
+	FT2(Dr[1], Di[1], Dr[5], Di[5]);
+	FT2(Dr[2], Di[2], Dr[6], Di[6]);
+	FT2(Dr[3], Di[3], Dr[7], Di[7]);
+
+	UPD_forward(Dr[4], Di[4], Dr[6], Di[6]);
+	UPD_forward(Dr[5], Di[5], Dr[7], Di[7]);
+
+	CMUL_forward(Dr[5], Di[5], COS_PI_4_16, -COS_PI_4_16);
+	CMUL_forward(Dr[7], Di[7], -COS_PI_4_16, -COS_PI_4_16);
+
+	FFT_forward_4(Dr, Di);
+	FT2(Dr[4], Di[4], Dr[5], Di[5]);
+	FT2(Dr[6], Di[6], Dr[7], Di[7]);
+}
+
+void TWIDDLE(inout float4 dr, inout float4 di, float phase)
+{
+	float tx, ty;
+
+	sincos(phase, ty, tx);
+	float4 t = dr;
+	dr = t * tx - di * ty;
+	di = t * ty + di * tx;
+}
+
+void TWIDDLE_8(inout float4 Dr[8], inout float4 Di[8], float phase)
+{
+	TWIDDLE(Dr[4], Di[4], 1 * phase);
+	TWIDDLE(Dr[2], Di[2], 2 * phase);
+	TWIDDLE(Dr[6], Di[6], 3 * phase);
+	TWIDDLE(Dr[1], Di[1], 4 * phase);
+	TWIDDLE(Dr[5], Di[5], 5 * phase);
+	TWIDDLE(Dr[3], Di[3], 6 * phase);
+	TWIDDLE(Dr[7], Di[7], 7 * phase);
+}
+
+
+[numthreads(BLOCK_SIZE_X, BLOCK_SIZE_Y, 1)]
+void Radix008ACS5(uint3 thread_id : SV_DispatchThreadID)
+{
+	// Fetch 8 complex numbers
+	float4 Dr[8];
+	float4 Di[8];
+
+	uint2 imod = thread_id.xy & istride2.zw;
+	uint2 xy = (thread_id.xy - imod) * iscale2 + imod;
+	for (uint i = 0; i < 8; ++ i)
+	{
+		Dr[i] = src_real_tex[xy + i * istride2.xy];
+		Di[i] = src_imag_tex[xy + i * istride2.xy];
+	}
+
+	// Math
+	FFT_forward_8(Dr, Di);
+	uint p = (0 == istride2.x) ? (thread_id.y & istride2.w) : (thread_id.x & istride2.z);
+	float phase = phase_base2 * p;
+	TWIDDLE_8(Dr, Di, phase);
+
+	// Store the result
+	dst_real_tex[thread_id.xy + 0 * ostride2] = Dr[0];
+	dst_real_tex[thread_id.xy + 1 * ostride2] = Dr[4];
+	dst_real_tex[thread_id.xy + 2 * ostride2] = Dr[2];
+	dst_real_tex[thread_id.xy + 3 * ostride2] = Dr[6];
+	dst_real_tex[thread_id.xy + 4 * ostride2] = Dr[1];
+	dst_real_tex[thread_id.xy + 5 * ostride2] = Dr[5];
+	dst_real_tex[thread_id.xy + 6 * ostride2] = Dr[3];
+	dst_real_tex[thread_id.xy + 7 * ostride2] = Dr[7];
+
+	dst_imag_tex[thread_id.xy + 0 * ostride2] = Di[0];
+	dst_imag_tex[thread_id.xy + 1 * ostride2] = Di[4];
+	dst_imag_tex[thread_id.xy + 2 * ostride2] = Di[2];
+	dst_imag_tex[thread_id.xy + 3 * ostride2] = Di[6];
+	dst_imag_tex[thread_id.xy + 4 * ostride2] = Di[1];
+	dst_imag_tex[thread_id.xy + 5 * ostride2] = Di[5];
+	dst_imag_tex[thread_id.xy + 6 * ostride2] = Di[3];
+	dst_imag_tex[thread_id.xy + 7 * ostride2] = Di[7];
+}
+
+[numthreads(BLOCK_SIZE_X, BLOCK_SIZE_Y, 1)]
+void Radix008AFinalXCS5(uint3 thread_id : SV_DispatchThreadID)
+{
+	// Fetch 8 complex numbers
+	float4 Dr[8];
+	float4 Di[8];
+	
+	uint2 xy = thread_id.xy * iscale2;
+	for (uint i = 0; i < 8; ++ i)
+	{
+		Dr[i] = src_real_tex[xy + i * istride2.xy];
+		Di[i] = src_imag_tex[xy + i * istride2.xy];
+	}
+
+	// Math
+	FFT_forward_8(Dr, Di);
+		
+	// Store the result
+	dst_real_tex[thread_id.xy + 0 * ostride2] = Dr[0];
+	dst_real_tex[thread_id.xy + 1 * ostride2] = Dr[4];
+	dst_real_tex[thread_id.xy + 2 * ostride2] = Dr[2];
+	dst_real_tex[thread_id.xy + 3 * ostride2] = Dr[6];
+	dst_real_tex[thread_id.xy + 4 * ostride2] = Dr[1];
+	dst_real_tex[thread_id.xy + 5 * ostride2] = Dr[5];
+	dst_real_tex[thread_id.xy + 6 * ostride2] = Dr[3];
+	dst_real_tex[thread_id.xy + 7 * ostride2] = Dr[7];
+
+	dst_imag_tex[thread_id.xy + 0 * ostride2] = Di[0];
+	dst_imag_tex[thread_id.xy + 1 * ostride2] = Di[4];
+	dst_imag_tex[thread_id.xy + 2 * ostride2] = Di[2];
+	dst_imag_tex[thread_id.xy + 3 * ostride2] = Di[6];
+	dst_imag_tex[thread_id.xy + 4 * ostride2] = Di[1];
+	dst_imag_tex[thread_id.xy + 5 * ostride2] = Di[5];
+	dst_imag_tex[thread_id.xy + 6 * ostride2] = Di[3];
+	dst_imag_tex[thread_id.xy + 7 * ostride2] = Di[7];
+}
+
+[numthreads(BLOCK_SIZE_X, BLOCK_SIZE_Y, 1)]
+void Radix008AFinalYCS5(uint3 thread_id : SV_DispatchThreadID)
+{
+	// Fetch 8 complex numbers
+	float4 Dr[8];
+	float4 Di[8];
+	
+	uint2 xy = thread_id.xy * iscale2;
+	for (uint i = 0; i < 8; ++ i)
+	{
+		Dr[i] = src_real_tex[xy + i * istride2.xy];
+		Di[i] = src_imag_tex[xy + i * istride2.xy];
+	}
+
+	// Math
+	FFT_forward_8(Dr, Di);
+
+	// Store the result
+	dst_real_tex[width_height - (thread_id.xy + 0 * ostride2)] = Dr[0] * scale;
+	dst_real_tex[width_height - (thread_id.xy + 1 * ostride2)] = Dr[4] * scale;
+	dst_real_tex[width_height - (thread_id.xy + 2 * ostride2)] = Dr[2] * scale;
+	dst_real_tex[width_height - (thread_id.xy + 3 * ostride2)] = Dr[6] * scale;
+	dst_real_tex[width_height - (thread_id.xy + 4 * ostride2)] = Dr[1] * scale;
+	dst_real_tex[width_height - (thread_id.xy + 5 * ostride2)] = Dr[5] * scale;
+	dst_real_tex[width_height - (thread_id.xy + 6 * ostride2)] = Dr[3] * scale;
+	dst_real_tex[width_height - (thread_id.xy + 7 * ostride2)] = Dr[7] * scale;
+
+	dst_imag_tex[width_height - (thread_id.xy + 0 * ostride2)] = Di[0] * scale;
+	dst_imag_tex[width_height - (thread_id.xy + 1 * ostride2)] = Di[4] * scale;
+	dst_imag_tex[width_height - (thread_id.xy + 2 * ostride2)] = Di[2] * scale;
+	dst_imag_tex[width_height - (thread_id.xy + 3 * ostride2)] = Di[6] * scale;
+	dst_imag_tex[width_height - (thread_id.xy + 4 * ostride2)] = Di[1] * scale;
+	dst_imag_tex[width_height - (thread_id.xy + 5 * ostride2)] = Di[5] * scale;
+	dst_imag_tex[width_height - (thread_id.xy + 6 * ostride2)] = Di[3] * scale;
+	dst_imag_tex[width_height - (thread_id.xy + 7 * ostride2)] = Di[7] * scale;
+}
+		]]>
+	</shader>
+
+	<technique name="FFTRadix008A5">
+		<pass name="p0">
+			<state name="compute_shader" value="Radix008ACS5()"/>
+		</pass>
+	</technique>
+
+	<technique name="FFTRadix008AFinalX5">
+		<pass name="p0">
+			<state name="compute_shader" value="Radix008AFinalXCS5()"/>
+		</pass>
+	</technique>
+
+	<technique name="FFTRadix008AFinalY5">
+		<pass name="p0">
+			<state name="compute_shader" value="Radix008AFinalYCS5()"/>
 		</pass>
 	</technique>
 </effect>

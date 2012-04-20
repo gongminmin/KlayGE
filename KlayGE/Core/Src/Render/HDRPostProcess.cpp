@@ -483,22 +483,32 @@ namespace KlayGE
 			empty_tex_ = rf.MakeTexture2D(WIDTH, HEIGHT, 1, 1, EF_R8, 1, 0, EAH_GPU_Read | EAH_Immutable, &resized_data);
 		}
 
+		uint32_t tex_creation_flags = EAH_GPU_Read | EAH_GPU_Write;
 		if (caps.cs_support)
 		{
-			fft_ = MakeSharedPtr<GpuFftCS4>(WIDTH, HEIGHT, true);
-			ifft_ = MakeSharedPtr<GpuFftCS4>(WIDTH, HEIGHT, false);
+			if (caps.max_shader_model >= 5)
+			{
+				fft_ = MakeSharedPtr<GpuFftCS5>(WIDTH, HEIGHT, true);
+				ifft_ = MakeSharedPtr<GpuFftCS5>(WIDTH, HEIGHT, false);
+				tex_creation_flags |= EAH_GPU_Unordered;
+			}
+			else
+			{
+				fft_ = MakeSharedPtr<GpuFftCS4>(WIDTH, HEIGHT, true);
+				ifft_ = MakeSharedPtr<GpuFftCS4>(WIDTH, HEIGHT, false);
+			}
 		}
 		else
 		{
 			fft_ = MakeSharedPtr<GpuFftPS>(WIDTH, HEIGHT, true);
 			ifft_ = MakeSharedPtr<GpuFftPS>(WIDTH, HEIGHT, false);
 		}
-	
-		freq_real_tex_ = rf.MakeTexture2D(WIDTH, HEIGHT, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
-		freq_imag_tex_ = rf.MakeTexture2D(WIDTH, HEIGHT, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
 
-		mul_real_tex_ = rf.MakeTexture2D(WIDTH, HEIGHT, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
-		mul_imag_tex_ = rf.MakeTexture2D(WIDTH, HEIGHT, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+		freq_real_tex_ = rf.MakeTexture2D(WIDTH, HEIGHT, 1, 1, EF_ABGR16F, 1, 0, tex_creation_flags, NULL);
+		freq_imag_tex_ = rf.MakeTexture2D(WIDTH, HEIGHT, 1, 1, EF_ABGR16F, 1, 0, tex_creation_flags, NULL);
+
+		mul_real_tex_ = rf.MakeTexture2D(WIDTH, HEIGHT, 1, 1, EF_ABGR16F, 1, 0, tex_creation_flags, NULL);
+		mul_imag_tex_ = rf.MakeTexture2D(WIDTH, HEIGHT, 1, 1, EF_ABGR16F, 1, 0, tex_creation_flags, NULL);
 
 		bilinear_copy_pp_ = LoadPostProcess(ResLoader::Instance().Open("Copy.ppml"), "bilinear_copy");
 
@@ -601,7 +611,7 @@ namespace KlayGE
 		: PostProcess(L"HDR")
 	{
 		RenderDeviceCaps const & caps = Context::Instance().RenderFactoryInstance().RenderEngineInstance().DeviceCaps();
-		cs_support_ = caps.cs_support && (5 == caps.max_shader_model);
+		cs_support_ = caps.cs_support && (caps.max_shader_model >= 5);
 
 		if (cs_support_)
 		{

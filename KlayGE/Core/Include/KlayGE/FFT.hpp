@@ -93,7 +93,32 @@ namespace KlayGE
 		RenderEffectParameterPtr imag_tex_ep_;
 
 		uint32_t width_, height_;
+		bool forward_;
+	};
 
+	class KLAYGE_CORE_API GpuFftCS5 : public GpuFft
+	{
+	public:
+		GpuFftCS5(uint32_t width, uint32_t height, bool forward);
+
+		void Execute(TexturePtr const & out_real, TexturePtr const & out_imag,
+			TexturePtr const & in_real, TexturePtr const & in_imag);
+
+	private:
+		void Radix008A(TexturePtr const & dst_real_tex, TexturePtr const & dst_imag_tex,
+					TexturePtr const & src_real_tex, TexturePtr const & src_imag_tex,
+					uint32_t thread_x, uint32_t thread_y, bool final_pass_x, bool final_pass_y);
+
+	private:
+		TexturePtr tmp_real_tex_[2];
+		TexturePtr tmp_imag_tex_[2];
+		
+		RenderEffectPtr effect_;
+		RenderTechniquePtr radix008a_tech_;
+		RenderTechniquePtr radix008a_final_x_tech_;
+		RenderTechniquePtr radix008a_final_y_tech_;
+
+		uint32_t width_, height_;
 		bool forward_;
 	};
 }

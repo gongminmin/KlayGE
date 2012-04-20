@@ -244,8 +244,8 @@ namespace KlayGE
 		effect_ = rf.LoadEffect("FFT.fxml");
 		tex2buf_tech_ = effect_->TechniqueByName("Tex2Buf");
 		buf2tex_tech_ = effect_->TechniqueByName("Buf2Tex");
-		radix008a_tech_ = effect_->TechniqueByName("FFTRadix008A");
-		radix008a_final_tech_ = effect_->TechniqueByName("FFTRadix008AFinal");
+		radix008a_tech_ = effect_->TechniqueByName("FFTRadix008A4");
+		radix008a_final_tech_ = effect_->TechniqueByName("FFTRadix008AFinal4");
 		real_tex_ep_ = effect_->ParameterByName("real_tex");
 		imag_tex_ep_ = effect_->ParameterByName("imag_tex");
 
@@ -369,5 +369,149 @@ namespace KlayGE
 		{
 			re.Dispatch(*radix008a_final_tech_, grid, 1, 1);
 		}
+	}
+
+
+	GpuFftCS5::GpuFftCS5(uint32_t width, uint32_t height, bool forward)
+			: width_(width), height_(height), forward_(forward)
+	{
+		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+
+		tmp_real_tex_[0] = rf.MakeTexture2D(width, height, 1, 1, EF_ABGR32F, 1, 0, EAH_GPU_Read | EAH_GPU_Unordered, NULL);
+		tmp_imag_tex_[0] = rf.MakeTexture2D(width, height, 1, 1, EF_ABGR32F, 1, 0, EAH_GPU_Read | EAH_GPU_Unordered, NULL);
+
+		tmp_real_tex_[1] = rf.MakeTexture2D(width, height, 1, 1, EF_ABGR32F, 1, 0, EAH_GPU_Read | EAH_GPU_Unordered, NULL);
+		tmp_imag_tex_[1] = rf.MakeTexture2D(width, height, 1, 1, EF_ABGR32F, 1, 0, EAH_GPU_Read | EAH_GPU_Unordered, NULL);
+
+		effect_ = rf.LoadEffect("FFT.fxml");
+		radix008a_tech_ = effect_->TechniqueByName("FFTRadix008A5");
+		radix008a_final_x_tech_ = effect_->TechniqueByName("FFTRadix008AFinalX5");
+		radix008a_final_y_tech_ = effect_->TechniqueByName("FFTRadix008AFinalY5");
+
+		*(effect_->ParameterByName("width_height")) = uint2(width - 1, height - 1);
+
+		*(effect_->ParameterByName("forward")) = static_cast<int32_t>(forward_);
+		*(effect_->ParameterByName("scale")) = 1.0f / (width_ * height_);
+	}
+
+	void GpuFftCS5::Execute(TexturePtr const & out_real, TexturePtr const & out_imag,
+			TexturePtr const & in_real, TexturePtr const & in_imag)
+	{
+		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+		RenderEngine& re = rf.RenderEngineInstance();
+
+		FrameBufferPtr old_fb = re.CurFrameBuffer();
+		re.BindFrameBuffer(FrameBufferPtr());
+
+		int index = 0;
+
+		// X direction
+
+		{
+			uint32_t istride = width_ / 8;
+			float phase_base = -PI2 / width_;
+
+			*(effect_->ParameterByName("ostride2")) = uint2(width_ / 8, 0);
+			*(effect_->ParameterByName("iscale2")) = uint2(8, 1);
+
+			*(effect_->ParameterByName("istride2")) = uint4(istride, 0, istride - 1, static_cast<uint32_t>(-1));
+			*(effect_->ParameterByName("phase_base2")) = phase_base;
+			this->Radix008A(tmp_real_tex_[index], tmp_imag_tex_[index], in_real, in_imag, width_ / 8, height_, 1 == istride, false);
+			index = !index;
+
+			uint32_t t = width_;
+			while (t > 8)
+			{
+				istride /= 8;
+				phase_base *= 8;
+				*(effect_->ParameterByName("istride2")) = uint4(istride, 0, istride - 1, static_cast<uint32_t>(-1));
+				*(effect_->ParameterByName("phase_base2")) = phase_base;
+				this->Radix008A(tmp_real_tex_[index], tmp_imag_tex_[index], tmp_real_tex_[!index], tmp_imag_tex_[!index], width_ / 8, height_, 1 == istride, false);
+				index = !index;
+
+				t /= 8;
+			}
+		}
+
+		// Y direction
+		
+		{
+			uint32_t istride = height_ / 8;
+			float phase_base = -PI2 / height_;
+
+			*(effect_->ParameterByName("ostride2")) = uint2(0, height_ / 8);
+			*(effect_->ParameterByName("iscale2")) = uint2(1, 8);
+
+			*(effect_->ParameterByName("istride2")) = uint4(0, istride, static_cast<uint32_t>(-1), istride - 1);
+			*(effect_->ParameterByName("phase_base2")) = phase_base;
+			if (1 == istride)
+			{
+				this->Radix008A(out_real, out_imag, tmp_real_tex_[!index], tmp_imag_tex_[!index], width_, height_ / 8, false, 1 == istride);
+			}
+			else
+			{
+				this->Radix008A(tmp_real_tex_[index], tmp_imag_tex_[index], tmp_real_tex_[!index], tmp_imag_tex_[!index], width_, height_ / 8, false, 1 == istride);
+			}
+			index = !index;
+
+			uint32_t t = height_;
+			while (t > 8)
+			{
+				istride /= 8;
+				phase_base *= 8;
+				*(effect_->ParameterByName("istride2")) = uint4(0, istride, static_cast<uint32_t>(-1), istride - 1);
+				*(effect_->ParameterByName("phase_base2")) = phase_base;
+				if (1 == istride)
+				{
+					this->Radix008A(out_real, out_imag, tmp_real_tex_[!index], tmp_imag_tex_[!index], width_, height_ / 8, false, 1 == istride);
+				}
+				else
+				{
+					this->Radix008A(tmp_real_tex_[index], tmp_imag_tex_[index], tmp_real_tex_[!index], tmp_imag_tex_[!index], width_, height_ / 8, false, 1 == istride);
+				}
+				index = !index;
+
+				t /= 8;
+			}
+		}
+
+		re.BindFrameBuffer(old_fb);
+	}
+
+	void GpuFftCS5::Radix008A(TexturePtr const & dst_real_tex, TexturePtr const & dst_imag_tex,
+					TexturePtr const & src_real_tex, TexturePtr const & src_imag_tex,
+					uint32_t thread_x, uint32_t thread_y, bool final_pass_x, bool final_pass_y)
+	{
+		// Setup execution configuration
+		uint32_t grid_x = (thread_x + BLOCK_SIZE_X - 1) / BLOCK_SIZE_X;
+		uint32_t grid_y = (thread_y + BLOCK_SIZE_Y - 1) / BLOCK_SIZE_Y;
+
+		// Buffers
+		*(effect_->ParameterByName("src_real_tex")) = src_real_tex;
+		*(effect_->ParameterByName("src_imag_tex")) = src_imag_tex;
+		*(effect_->ParameterByName("dst_real_tex")) = dst_real_tex;
+		*(effect_->ParameterByName("dst_imag_tex")) = dst_imag_tex;
+
+		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+		RenderEngine& re = rf.RenderEngineInstance();
+
+		// Shader
+		RenderTechniquePtr tech;
+		if (!final_pass_x)
+		{
+			if (final_pass_y && !forward_)
+			{
+				tech = radix008a_final_y_tech_;
+			}
+			else
+			{
+				tech = radix008a_tech_;
+			}
+		}
+		else
+		{
+			tech = radix008a_final_x_tech_;
+		}
+		re.Dispatch(*tech, grid_x, grid_y, 1);
 	}
 }
