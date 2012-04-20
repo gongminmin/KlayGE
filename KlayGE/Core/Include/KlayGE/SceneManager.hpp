@@ -88,6 +88,9 @@ namespace KlayGE
 		SceneObjectsType const & SceneObjects() const;
 
 		virtual bool AABBVisible(AABBox const & aabb);
+		virtual bool OBBVisible(OBBox const & obb);
+		virtual bool SphereVisible(Sphere const & sphere);
+		virtual bool FrustumVisible(Frustum const & frustum);
 
 		virtual void ClearLight();
 		virtual void ClearObject();

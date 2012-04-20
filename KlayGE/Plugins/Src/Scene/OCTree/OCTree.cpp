@@ -196,9 +196,7 @@ namespace KlayGE
 							BOOST_FOREACH(size_t obj_index, parent_obj_indices)
 							{
 								AABBox const & aabb_in_ws = *scene_obj_bbs_[obj_index];
-								if (((aabb_in_ws.Min().x() <= new_node.bb.Max().x()) && (aabb_in_ws.Max().x() >= new_node.bb.Min().x()))
-									&& ((aabb_in_ws.Min().y() <= new_node.bb.Max().y()) && (aabb_in_ws.Max().y() >= new_node.bb.Min().y()))
-									&& ((aabb_in_ws.Min().z() <= new_node.bb.Max().z()) && (aabb_in_ws.Max().z() >= new_node.bb.Min().z())))
+								if (MathLib::intersect_aabb_aabb(aabb_in_ws, new_node.bb))
 								{
 									new_node_obj_indices.push_back(obj_index);
 								}
@@ -294,18 +292,15 @@ namespace KlayGE
 #endif
 	}
 
-	bool OCTree::AABBVisible(AABBox const & box)
+	bool OCTree::AABBVisible(AABBox const & aabb)
 	{
 		// Frustum VS node
 		bool visible = true;
 		if (!octree_.empty())
 		{
-			octree_node_t const & node = octree_[0];
-			if (((box.Min().x() <= node.bb.Max().x()) && (box.Max().x() >= node.bb.Min().x()))
-				&& ((box.Min().y() <= node.bb.Max().y()) && (box.Max().y() >= node.bb.Min().y()))
-				&& ((box.Min().z() <= node.bb.Max().z()) && (box.Max().z() >= node.bb.Min().z())))
+			if (MathLib::intersect_aabb_aabb(octree_[0].bb, aabb))
 			{
-				visible = this->BBVisible(0, box);
+				visible = this->BoundVisible(0, aabb);
 			}
 			else
 			{
@@ -316,20 +311,68 @@ namespace KlayGE
 		if (visible)
 		{
 			// Frustum VS AABB
-			BoundOverlap const bo = frustum_->Intersect(box);
+			BoundOverlap const bo = frustum_->Intersect(aabb);
 			visible = (bo != BO_No);
 		}
 		return visible;
 	}
 
-	bool OCTree::BBVisible(size_t index, AABBox const & box) const
+	bool OCTree::OBBVisible(OBBox const & obb)
+	{
+		// Frustum VS node
+		bool visible = true;
+		if (!octree_.empty())
+		{
+			if (MathLib::intersect_aabb_obb(octree_[0].bb, obb))
+			{
+				visible = this->BoundVisible(0, obb);
+			}
+			else
+			{
+				// Out of scene
+				visible = true;
+			}
+		}
+		if (visible)
+		{
+			// Frustum VS OBB
+			BoundOverlap const bo = frustum_->Intersect(obb);
+			visible = (bo != BO_No);
+		}
+		return visible;
+	}
+
+	bool OCTree::SphereVisible(Sphere const & sphere)
+	{
+		// Frustum VS node
+		bool visible = true;
+		if (!octree_.empty())
+		{
+			if (MathLib::intersect_aabb_sphere(octree_[0].bb, sphere))
+			{
+				visible = this->BoundVisible(0, sphere);
+			}
+			else
+			{
+				// Out of scene
+				visible = true;
+			}
+		}
+		if (visible)
+		{
+			// Frustum VS OBB
+			BoundOverlap const bo = frustum_->Intersect(sphere);
+			visible = (bo != BO_No);
+		}
+		return visible;
+	}
+
+	bool OCTree::BoundVisible(size_t index, AABBox const & aabb) const
 	{
 		BOOST_ASSERT(index < octree_.size());
 
 		octree_node_t const & node = octree_[index];
-		if (((box.Min().x() <= node.bb.Max().x()) && (box.Max().x() >= node.bb.Min().x()))
-			&& ((box.Min().y() <= node.bb.Max().y()) && (box.Max().y() >= node.bb.Min().y()))
-			&& ((box.Min().z() <= node.bb.Max().z()) && (box.Max().z() >= node.bb.Min().z())))
+		if (MathLib::intersect_aabb_aabb(node.bb, aabb))
 		{
 			BoundOverlap const vis = node.visible;
 			switch (vis)
@@ -345,65 +388,203 @@ namespace KlayGE
 				{
 					float3 const center = node.bb.Center();
 					bool mark[6];
-					mark[0] = box.Min().x() < center.x();
-					mark[1] = box.Min().y() < center.y();
-					mark[2] = box.Min().z() < center.z();
-					mark[3] = box.Max().x() > center.x();
-					mark[4] = box.Max().y() > center.y();
-					mark[5] = box.Max().z() > center.z();
+					mark[0] = aabb.Min().x() < center.x();
+					mark[1] = aabb.Min().y() < center.y();
+					mark[2] = aabb.Min().z() < center.z();
+					mark[3] = aabb.Max().x() > center.x();
+					mark[4] = aabb.Max().y() > center.y();
+					mark[5] = aabb.Max().z() > center.z();
 
 					if (mark[0] && mark[1] && mark[2])
 					{
-						if (this->BBVisible(node.first_child_index + 0, box))
+						if (this->BoundVisible(node.first_child_index + 0, aabb))
 						{
 							return true;
 						}
 					}
 					if (mark[3] && mark[1] && mark[2])
 					{
-						if (this->BBVisible(node.first_child_index + 1, box))
+						if (this->BoundVisible(node.first_child_index + 1, aabb))
 						{
 							return true;
 						}
 					}
 					if (mark[0] && mark[4] && mark[2])
 					{
-						if (this->BBVisible(node.first_child_index + 2, box))
+						if (this->BoundVisible(node.first_child_index + 2, aabb))
 						{
 							return true;
 						}
 					}
 					if (mark[3] && mark[4] && mark[2])
 					{
-						if (this->BBVisible(node.first_child_index + 3, box))
+						if (this->BoundVisible(node.first_child_index + 3, aabb))
 						{
 							return true;
 						}
 					}
 					if (mark[0] && mark[1] && mark[5])
 					{
-						if (this->BBVisible(node.first_child_index + 4, box))
+						if (this->BoundVisible(node.first_child_index + 4, aabb))
 						{
 							return true;
 						}
 					}
 					if (mark[3] && mark[1] && mark[5])
 					{
-						if (this->BBVisible(node.first_child_index + 5, box))
+						if (this->BoundVisible(node.first_child_index + 5, aabb))
 						{
 							return true;
 						}
 					}
 					if (mark[0] && mark[4] && mark[5])
 					{
-						if (this->BBVisible(node.first_child_index + 6, box))
+						if (this->BoundVisible(node.first_child_index + 6, aabb))
 						{
 							return true;
 						}
 					}
 					if (mark[3] && mark[4] && mark[5])
 					{
-						if (this->BBVisible(node.first_child_index + 7, box))
+						if (this->BoundVisible(node.first_child_index + 7, aabb))
+						{
+							return true;
+						}
+					}
+
+					return false;
+				}
+				else
+				{
+					return true;
+				}
+				break;
+
+			default:
+				BOOST_ASSERT(false);
+				return false;
+			}
+		}
+		else
+		{
+			return false;
+		}
+	}
+
+	bool OCTree::BoundVisible(size_t index, OBBox const & obb) const
+	{
+		BOOST_ASSERT(index < octree_.size());
+
+		octree_node_t const & node = octree_[index];
+		if (MathLib::intersect_aabb_obb(node.bb, obb))
+		{
+			BoundOverlap const vis = node.visible;
+			switch (vis)
+			{
+			case BO_Yes:
+				return true;
+
+			case BO_No:
+				return false;
+
+			case BO_Partial:
+				if (node.first_child_index != -1)
+				{
+					for (int i = 0; i < 8; ++ i)
+					{
+						if (this->BoundVisible(node.first_child_index + i, obb))
+						{
+							return true;
+						}
+					}
+
+					return false;
+				}
+				else
+				{
+					return true;
+				}
+				break;
+
+			default:
+				BOOST_ASSERT(false);
+				return false;
+			}
+		}
+		else
+		{
+			return false;
+		}
+	}
+
+	bool OCTree::BoundVisible(size_t index, Sphere const & sphere) const
+	{
+		BOOST_ASSERT(index < octree_.size());
+
+		octree_node_t const & node = octree_[index];
+		if (MathLib::intersect_aabb_sphere(node.bb, sphere))
+		{
+			BoundOverlap const vis = node.visible;
+			switch (vis)
+			{
+			case BO_Yes:
+				return true;
+
+			case BO_No:
+				return false;
+
+			case BO_Partial:
+				if (node.first_child_index != -1)
+				{
+					for (int i = 0; i < 8; ++ i)
+					{
+						if (this->BoundVisible(node.first_child_index + i, sphere))
+						{
+							return true;
+						}
+					}
+
+					return false;
+				}
+				else
+				{
+					return true;
+				}
+				break;
+
+			default:
+				BOOST_ASSERT(false);
+				return false;
+			}
+		}
+		else
+		{
+			return false;
+		}
+	}
+
+	bool OCTree::BoundVisible(size_t index, Frustum const & frustum) const
+	{
+		BOOST_ASSERT(index < octree_.size());
+
+		octree_node_t const & node = octree_[index];
+		if (MathLib::intersect_aabb_frustum(node.bb, frustum))
+		{
+			BoundOverlap const vis = node.visible;
+			switch (vis)
+			{
+			case BO_Yes:
+				return true;
+
+			case BO_No:
+				return false;
+
+			case BO_Partial:
+				if (node.first_child_index != -1)
+				{
+					for (int i = 0; i < 8; ++ i)
+					{
+						if (this->BoundVisible(node.first_child_index + i, frustum))
 						{
 							return true;
 						}

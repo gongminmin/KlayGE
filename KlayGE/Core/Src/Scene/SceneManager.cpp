@@ -301,6 +301,21 @@ namespace KlayGE
 		return frustum_->Intersect(aabb) != BO_No;
 	}
 
+	bool SceneManager::OBBVisible(OBBox const & obb)
+	{
+		return frustum_->Intersect(obb) != BO_No;
+	}
+
+	bool SceneManager::SphereVisible(Sphere const & sphere)
+	{
+		return frustum_->Intersect(sphere) != BO_No;
+	}
+
+	bool SceneManager::FrustumVisible(Frustum const & frustum)
+	{
+		return frustum_->Intersect(frustum) != BO_No;
+	}
+
 	SceneManager::SceneObjectsType& SceneManager::SceneObjects()
 	{
 		return scene_objs_;

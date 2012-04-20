@@ -324,7 +324,7 @@ namespace KlayGE
 			std::vector<float3> pos;
 			std::vector<uint16_t> index;
 			CreateConeMesh(pos, index, 0, 100.0f, 100.0f, 12);
-			cone_bbox_ = MathLib::compute_aabbox(pos.begin(), pos.end());
+			cone_obb_ = MathLib::compute_obbox(pos.begin(), pos.end());
 
 			ElementInitData init_data;
 			init_data.row_pitch = static_cast<uint32_t>(pos.size() * sizeof(pos[0]));
@@ -344,7 +344,7 @@ namespace KlayGE
 			std::vector<float3> pos;
 			std::vector<uint16_t> index;
 			CreatePyramidMesh(pos, index, 0, 100.0f, 100.0f);
-			pyramid_bbox_ = MathLib::compute_aabbox(pos.begin(), pos.end());
+			pyramid_obb_ = MathLib::compute_obbox(pos.begin(), pos.end());
 
 			ElementInitData init_data;
 			init_data.row_pitch = static_cast<uint32_t>(pos.size() * sizeof(pos[0]));
@@ -364,7 +364,7 @@ namespace KlayGE
 			std::vector<float3> pos;
 			std::vector<uint16_t> index;
 			CreateBoxMesh(pos, index, 0, 100.0f);
-			box_bbox_ = MathLib::compute_aabbox(pos.begin(), pos.end());
+			box_obb_ = MathLib::compute_obbox(pos.begin(), pos.end());
 
 			ElementInitData init_data;
 			init_data.row_pitch = static_cast<uint32_t>(pos.size() * sizeof(pos[0]));
@@ -1135,7 +1135,7 @@ namespace KlayGE
 									*light_volume_mv_param_ = light_model * view_;
 									*light_volume_mvp_param_ = light_model * vp;
 
-									if (scene_mgr.AABBVisible(MathLib::transform_aabb(cone_bbox_, light_model)))
+									if (scene_mgr.OBBVisible(MathLib::transform_obb(cone_obb_, light_model)))
 									{
 										if (attr & LSA_IndirectLighting)
 										{
@@ -1190,7 +1190,7 @@ namespace KlayGE
 										*light_volume_mv_param_ = light_model * view_;
 										*light_volume_mvp_param_ = light_model * vp;
 
-										//if (scene_mgr.AABBVisible(MathLib::transform_aabbox(pyramid_bbox_, light_model)))
+										//if (scene_mgr.OBBVisible(MathLib::transform_obb(pyramid_obb_, light_model)))
 										{
 											if (0 == (attr & LSA_NoShadow))
 											{
@@ -1217,7 +1217,7 @@ namespace KlayGE
 										*light_volume_mv_param_ = light_model * view_;
 										*light_volume_mvp_param_ = light_model * vp;
 
-										if (scene_mgr.AABBVisible(MathLib::transform_aabb(box_bbox_, light_model)))
+										if (scene_mgr.OBBVisible(MathLib::transform_obb(box_obb_, light_model)))
 										{
 											pass_scaned_.push_back(static_cast<uint32_t>((PT_Lighting << 24) + (i << 12) + 6));
 

@@ -51,6 +51,8 @@ namespace KlayGE
 		uint32_t MaxTreeDepth() const;
 
 		bool AABBVisible(AABBox const & aabb);
+		bool OBBVisible(OBBox const & obb);
+		bool SphereVisible(Sphere const & sphere);
 
 	private:
 		void ClipScene();
@@ -60,7 +62,10 @@ namespace KlayGE
 		void OnDelSceneObject(SceneObjectsType::iterator iter);
 
 		void NodeVisible(size_t index);
-		bool BBVisible(size_t index, AABBox const & aabb) const;
+		bool BoundVisible(size_t index, AABBox const & aabb) const;
+		bool BoundVisible(size_t index, OBBox const & obb) const;
+		bool BoundVisible(size_t index, Sphere const & sphere) const;
+		bool BoundVisible(size_t index, Frustum const & frustum) const;
 
 	private:
 		OCTree(OCTree const & rhs);

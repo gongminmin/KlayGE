@@ -116,17 +116,24 @@ namespace KlayGE
 		}
 		BoundOverlap Intersect(OBBox_T<T> const & obb) const
 		{
+			Vector_T<T, 3> const & center = obb.Center();
+			Vector_T<T, 3> const & half_size = obb.HalfSize();
+			Vector_T<T, 3> diag = half_size[0] * obb.Axis(0) + half_size[1] * obb.Axis(1) + half_size[2] * obb.Axis(2);
+			for (int i = 0; i < 3; ++ i)
+			{
+				if (diag[i] < 0)
+				{
+					diag[i] = -diag[i];
+				}
+			}
+
+			Vector_T<T, 3> const min_pt = center - diag;
+			Vector_T<T, 3> const max_pt = center + diag;
+
 			bool intersect = false;
 			for (int i = 0; i < 6; ++ i)
 			{
 				int const n = vertex_lut_[i];
-
-				Vector_T<T, 3> const & center = obb.Center();
-				Vector_T<T, 3> const & half_size = obb.HalfSize();
-				Vector_T<T, 3> const diag = half_size[0] * obb.Axis(0) + half_size[1] * obb.Axis(1) + half_size[2] * obb.Axis(2);
-
-				Vector_T<T, 3> const min_pt = center - diag;
-				Vector_T<T, 3> const max_pt = center + diag;
 
 				// v1 is diagonally opposed to v0
 				Vector_T<T, 3> v0((n & 1) ? min_pt.x() : max_pt.x(), (n & 2) ? min_pt.y() : max_pt.y(), (n & 4) ? min_pt.z() : max_pt.z());
