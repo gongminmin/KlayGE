@@ -2,6 +2,9 @@
 
 <post_processors>
 	<post_processor name="bright_pass">
+		<params>
+			<param name="factor"/>
+		</params>
 		<input>
 			<pin name="src_tex"/>
 		</input>
@@ -37,6 +40,7 @@
 	<post_processor name="scaled_bright_pass">
 		<params>
 			<param name="scale"/>
+			<param name="factor"/>
 		</params>
 		<input>
 			<pin name="src_tex"/>
@@ -50,7 +54,6 @@
 	<post_processor name="scaled_copy">
 		<params>
 			<param name="scale"/>
-			<param name="factor"/>
 		</params>
 		<input>
 			<pin name="src_tex"/>
@@ -62,9 +65,6 @@
 	</post_processor>
 
 	<post_processor name="complex_mul">
-		<params>
-			<param name="factor"/>
-		</params>
 		<input>
 			<pin name="lhs_real_tex"/>
 			<pin name="lhs_imag_tex"/>

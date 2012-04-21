@@ -4,13 +4,15 @@
 	<include name="PostProcess.fxml"/>
 	<include name="Copy.fxml"/>
 
+	<parameter type="float" name="factor"/>
+	
 	<shader>
 		<![CDATA[
 float4 BrightPassPS(float2 tc : TEXCOORD0) : SV_Target
 {
 	float3 LUM_WEIGHT = float3(0.2126f, 0.7152f, 0.0722f);
 
-	float4 clr = src_tex.Sample(bilinear_sampler, tc);
+	float4 clr = src_tex.Sample(bilinear_sampler, tc) * factor;
 	float lum = dot(clr.xyz, LUM_WEIGHT);
 	if (lum < 1.5f)
 	{
@@ -77,7 +79,6 @@ float4 GlowMergerPS(float2 tex : TEXCOORD0) : SV_Target
 
 
 	<parameter type="float4" name="scale"/>
-	<parameter type="float" name="factor"/>
 
 	<shader>
 		<![CDATA[
@@ -91,7 +92,7 @@ void ScaledCopyVS(float4 pos : POSITION,
 
 float4 ScaledCopyPS(float2 tc : TEXCOORD0) : SV_Target
 {
-	return src_tex.Sample(bilinear_sampler, tc) * factor;
+	return src_tex.Sample(bilinear_sampler, tc);
 }
 		]]>
 	</shader>
@@ -135,9 +136,6 @@ void ComplexMulPS(float2 tc : TEXCOORD0,
 	
 	oReal = lr * rr - li * ri;
 	oImag = lr * ri + li * rr;
-	
-	oReal *= factor;
-	oImag *= factor;
 }
 		]]>
 	</shader>

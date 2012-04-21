@@ -85,8 +85,11 @@ int main(int argc, char* argv[])
 	std::vector<float4> pattern_real(WIDTH * HEIGHT);
 	
 	{
+		float3 LUM_WEIGHT(0.2126f, 0.7152f, 0.0722f);
+
 		Texture::Mapper mapper(*pattern_raw, 0, 0, TMA_Read_Only, 0, 0, width, height);
 
+		float sum_lum = 0;
 		uint8_t const * p = mapper.Pointer<uint8_t>();
 		uint32_t const pitch = mapper.RowPitch() / sizeof(uint8_t);
 		for (int y = 0; y < height; ++ y)
@@ -122,7 +125,18 @@ int main(int argc, char* argv[])
 					r = g = b = 0;
 				}
 
+				sum_lum += MathLib::dot(float3(r, g, b), LUM_WEIGHT);
+
 				pattern_real[(y + start_y) * WIDTH + (x + start_x)] = float4(r, g, b, 1);
+			}
+		}
+
+		float scale = 1.0f / sum_lum;
+		for (int y = 0; y < HEIGHT; ++ y)
+		{
+			for (int x = 0; x < WIDTH; ++ x)
+			{
+				pattern_real[y * WIDTH + x] *= scale;
 			}
 		}
 	}

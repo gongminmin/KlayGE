@@ -473,7 +473,7 @@ namespace KlayGE
 			BOOST_ASSERT(caps.rendertarget_format_support(EF_ABGR16F, 1, 0));
 			fmt = EF_ABGR16F;
 		}
-		resized_tex_ = rf.MakeTexture2D(WIDTH, WIDTH, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+		resized_tex_ = rf.MakeTexture2D(WIDTH, HEIGHT, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
 		{
 			std::vector<uint8_t> zero_data(WIDTH * HEIGHT, 0);
 			ElementInitData resized_data;
@@ -504,11 +504,11 @@ namespace KlayGE
 			ifft_ = MakeSharedPtr<GpuFftPS>(WIDTH, HEIGHT, false);
 		}
 
-		freq_real_tex_ = rf.MakeTexture2D(WIDTH, HEIGHT, 1, 1, EF_ABGR16F, 1, 0, tex_creation_flags, NULL);
-		freq_imag_tex_ = rf.MakeTexture2D(WIDTH, HEIGHT, 1, 1, EF_ABGR16F, 1, 0, tex_creation_flags, NULL);
+		freq_real_tex_ = rf.MakeTexture2D(WIDTH, HEIGHT, 1, 1, EF_ABGR32F, 1, 0, tex_creation_flags, NULL);
+		freq_imag_tex_ = rf.MakeTexture2D(WIDTH, HEIGHT, 1, 1, EF_ABGR32F, 1, 0, tex_creation_flags, NULL);
 
-		mul_real_tex_ = rf.MakeTexture2D(WIDTH, HEIGHT, 1, 1, EF_ABGR16F, 1, 0, tex_creation_flags, NULL);
-		mul_imag_tex_ = rf.MakeTexture2D(WIDTH, HEIGHT, 1, 1, EF_ABGR16F, 1, 0, tex_creation_flags, NULL);
+		mul_real_tex_ = rf.MakeTexture2D(WIDTH, HEIGHT, 1, 1, EF_ABGR32F, 1, 0, tex_creation_flags, NULL);
+		mul_imag_tex_ = rf.MakeTexture2D(WIDTH, HEIGHT, 1, 1, EF_ABGR32F, 1, 0, tex_creation_flags, NULL);
 
 		bilinear_copy_pp_ = LoadPostProcess(ResLoader::Instance().Open("Copy.ppml"), "bilinear_copy");
 
@@ -516,7 +516,6 @@ namespace KlayGE
 		bright_pass_pp_->OutputPin(0, resized_tex_);
 
 		complex_mul_pp_ = LoadPostProcess(ResLoader::Instance().Open("LensEffects.ppml"), "complex_mul");
-		complex_mul_pp_->SetParam(0, 0.1f);
 		complex_mul_pp_->InputPin(0, freq_real_tex_);
 		complex_mul_pp_->InputPin(1, freq_imag_tex_);
 		complex_mul_pp_->InputPin(2, pattern_real_tex_);
@@ -525,7 +524,6 @@ namespace KlayGE
 		complex_mul_pp_->OutputPin(1, mul_imag_tex_);
 
 		scaled_copy_pp_ = LoadPostProcess(ResLoader::Instance().Open("LensEffects.ppml"), "scaled_copy");
-		scaled_copy_pp_->SetParam(1, 1.5f);
 		scaled_copy_pp_->InputPin(0, mul_real_tex_);
 	}
 
@@ -567,6 +565,7 @@ namespace KlayGE
 		height_ = heights.back();
 
 		bright_pass_pp_->SetParam(0, float4(1, 1, static_cast<float>(width_) / WIDTH, static_cast<float>(height_) / HEIGHT));
+		bright_pass_pp_->SetParam(1, static_cast<float>(1UL << (2 * restore_chain_.size())));
 		bright_pass_pp_->InputPin(0, input_tex_);
 
 		scaled_copy_pp_->SetParam(0, float4(static_cast<float>(width_) / WIDTH, static_cast<float>(height_) / HEIGHT, 1, 1));
