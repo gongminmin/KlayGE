@@ -24,10 +24,8 @@ SET(KERNEL_HEADER_FILES
 	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/DllLoader.hpp
 	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/KlayGE.hpp
 	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/Log.hpp
-	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/MapVector.hpp
 	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/PreDeclare.hpp
 	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/ResLoader.hpp
-	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/SetVector.hpp
 	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/thread.hpp
 	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/ThrowErr.hpp
 	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/Timer.hpp

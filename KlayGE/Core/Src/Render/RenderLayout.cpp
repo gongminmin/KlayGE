@@ -15,7 +15,6 @@
 #include <KlayGE/Math.hpp>
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/Context.hpp>
-#include <KlayGE/MapVector.hpp>
 
 #include <KlayGE/RenderLayout.hpp>
 

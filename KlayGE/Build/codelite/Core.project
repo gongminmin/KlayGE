@@ -162,10 +162,8 @@
       <File Name="../../Core/Include/KlayGE/DllLoader.hpp"/>
       <File Name="../../Core/Include/KlayGE/KlayGE.hpp"/>
       <File Name="../../Core/Include/KlayGE/Log.hpp"/>
-      <File Name="../../Core/Include/KlayGE/MapVector.hpp"/>
       <File Name="../../Core/Include/KlayGE/PreDeclare.hpp"/>
       <File Name="../../Core/Include/KlayGE/ResLoader.hpp"/>
-      <File Name="../../Core/Include/KlayGE/SetVector.hpp"/>
       <File Name="../../Core/Include/KlayGE/thread.hpp"/>
       <File Name="../../Core/Include/KlayGE/ThrowErr.hpp"/>
       <File Name="../../Core/Include/KlayGE/Timer.hpp"/>

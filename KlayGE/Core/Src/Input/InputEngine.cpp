@@ -18,7 +18,6 @@
 
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/Util.hpp>
-#include <KlayGE/MapVector.hpp>
 
 #include <vector>
 
@@ -112,7 +111,7 @@ namespace KlayGE
 
 			for (uint32_t id = 0; id < action_handlers_.size(); ++ id)
 			{
-				MapVector<uint16_t, long> actions;
+				boost::container::flat_map<uint16_t, long> actions;
 
 				// 访问所有设备
 				typedef BOOST_TYPEOF(devices_) DevicesType;

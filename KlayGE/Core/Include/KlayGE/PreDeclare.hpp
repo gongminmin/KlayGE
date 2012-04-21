@@ -21,10 +21,6 @@ namespace KlayGE
 	class ResLoadingDesc;
 	typedef boost::shared_ptr<ResLoadingDesc> ResLoadingDescPtr;
 	class ResLoader;
-	template <typename Key, typename Type, class Traits, class Allocator>
-	class MapVector;
-	template <typename Key, class Traits, class Allocator>
-	class SetVector;
 
 	class XMLDocument;
 	typedef boost::shared_ptr<XMLDocument> XMLDocumentPtr;

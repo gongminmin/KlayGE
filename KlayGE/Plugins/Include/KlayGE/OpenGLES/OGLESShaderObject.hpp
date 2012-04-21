@@ -16,7 +16,6 @@
 #pragma once
 
 #include <KlayGE/PreDeclare.hpp>
-#include <KlayGE/MapVector.hpp>
 #include <KlayGE/RenderLayout.hpp>
 #include <KlayGE/ShaderObject.hpp>
 

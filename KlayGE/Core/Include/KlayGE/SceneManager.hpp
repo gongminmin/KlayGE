@@ -29,7 +29,6 @@
 #include <KlayGE/PreDeclare.hpp>
 
 #include <KlayGE/Renderable.hpp>
-#include <KlayGE/MapVector.hpp>
 #include <KlayGE/Frustum.hpp>
 
 #include <vector>

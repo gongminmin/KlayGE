@@ -17,7 +17,6 @@
 
 #include <KlayGE/PreDeclare.hpp>
 #include <KlayGE/ShaderObject.hpp>
-#include <KlayGE/MapVector.hpp>
 
 #include <boost/function.hpp>
 #include <boost/tuple/tuple.hpp>

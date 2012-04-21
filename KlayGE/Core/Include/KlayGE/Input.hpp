@@ -29,8 +29,9 @@
 #include <KlayGE/PreDeclare.hpp>
 
 #include <KlayGE/Vector.hpp>
-#include <KlayGE/MapVector.hpp>
 #include <KlayGE/Timer.hpp>
+
+#include <boost/container/flat_map.hpp>
 #ifdef KLAYGE_COMPILER_MSVC
 #pragma warning(push)
 #pragma warning(disable: 4100 4512 6011)
@@ -291,12 +292,12 @@ namespace KlayGE
 		uint16_t Action(uint16_t key) const;
 
 	private:
-		MapVector<uint16_t, uint16_t> actionMap_;
+		boost::container::flat_map<uint16_t, uint16_t> actionMap_;
 	};
 
 	typedef boost::signals2::signal<void(InputEngine const &, InputAction const &)> input_signal;
 	typedef boost::shared_ptr<input_signal> action_handler_t;
-	typedef MapVector<uint32_t, InputActionMap> action_maps_t;
+	typedef boost::container::flat_map<uint32_t, InputActionMap> action_maps_t;
 
 
 	//  ‰»Î“˝«Ê

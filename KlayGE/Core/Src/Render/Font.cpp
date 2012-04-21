@@ -63,7 +63,6 @@
 #include <KlayGE/AABBox.hpp>
 #include <KlayGE/ResLoader.hpp>
 #include <KlayGE/SceneObjectHelper.hpp>
-#include <KlayGE/MapVector.hpp>
 #include <KlayGE/LZMACodec.hpp>
 
 #include <algorithm>

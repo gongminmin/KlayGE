@@ -1,6 +1,5 @@
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/Context.hpp>
-#include <KlayGE/MapVector.hpp>
 #include <KlayGE/FrameBuffer.hpp>
 #include <KlayGE/RenderEffect.hpp>
 #include <KlayGE/RenderEngine.hpp>
@@ -8,6 +7,7 @@
 
 #include <numeric>
 #include <boost/assert.hpp>
+#include <boost/container/flat_map.hpp>
 
 #include "AsciiArtsPP.hpp"
 
@@ -90,7 +90,7 @@ namespace
 	class ascii_lums_builder
 	{
 	private:
-		typedef MapVector<float, uint8_t> lum_to_char_type;
+		typedef boost::container::flat_map<float, uint8_t> lum_to_char_type;
 		typedef std::vector<std::pair<float, lum_to_char_type::const_iterator> > diff_lum_to_iter_type;
 
 	public:
