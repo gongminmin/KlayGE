@@ -328,7 +328,7 @@ namespace KlayGE
 
 				fmt = EF_ABGR16F;
 			}
-			hdr_tex_ = rf.MakeTexture2D(screen_frame_buffer_->Width(), screen_frame_buffer_->Height(), 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+			hdr_tex_ = rf.MakeTexture2D(screen_frame_buffer_->Width(), screen_frame_buffer_->Height(), 4, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
 			hdr_frame_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*hdr_tex_, 0, 1, 0));
 			hdr_frame_buffer_->Attach(FrameBuffer::ATT_DepthStencil, ds_view);
 
@@ -581,6 +581,7 @@ namespace KlayGE
 			}
 			else
 			{
+				hdr_tex_->BuildMipSubLevels();
 				hdr_pp_->Apply();
 			}
 		}
