@@ -37,14 +37,6 @@ namespace KlayGE
 			: r_(0, 0, 0)
 		{
 		}
-		OBBox_T(AABBox_T<T> const & aabb)
-		{
-			center_ = aabb.Center();
-			r_ = aabb.HalfSize();
-			axis_[0] = Vector_T<T, 3>(1, 0, 0);
-			axis_[1] = Vector_T<T, 3>(0, 1, 0);
-			axis_[2] = Vector_T<T, 3>(0, 0, 1);
-		}
 		OBBox_T(Vector_T<T, 3> const & center,
 			Vector_T<T, 3> const & x_axis, Vector_T<T, 3> const & y_axis, Vector_T<T, 3> const & z_axis,
 			Vector_T<T, 3> const & r)

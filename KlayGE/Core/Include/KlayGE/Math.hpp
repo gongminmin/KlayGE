@@ -616,6 +616,11 @@ namespace KlayGE
 		Sphere_T<typename std::iterator_traits<Iterator>::value_type::value_type> compute_sphere(Iterator first, Iterator last);
 
 		template <typename T>
+		AABBox_T<T> convert_to_aabbox(OBBox_T<T> const & obb);
+		template <typename T>
+		OBBox_T<T> convert_to_obbox(AABBox_T<T> const & aabb);
+
+		template <typename T>
 		AABBox_T<T> transform_aabb(AABBox_T<T> const & aabb, Matrix4_T<T> const & mat);
 		template <typename T>
 		AABBox_T<T> transform_aabb(AABBox_T<T> const & aabb, T scale, Quaternion_T<T> const & rot, Vector_T<T, 3> const & trans);

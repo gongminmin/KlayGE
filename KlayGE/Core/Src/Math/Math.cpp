@@ -1870,6 +1870,38 @@ namespace KlayGE
 		}
 
 
+		template KLAYGE_CORE_API AABBox convert_to_aabbox(OBBox const & obb);
+
+		template <typename T>
+		AABBox_T<T> convert_to_aabbox(OBBox_T<T> const & obb)
+		{
+			Vector_T<T, 3> min(+1e10f, +1e10f, +1e10f);
+			Vector_T<T, 3> max(-1e10f, -1e10f, -1e10f);
+
+			Vector_T<T, 3> const & r = obb.HalfSize();
+			for (int i = 0; i < 8; ++ i)
+			{
+				Vector_T<T, 3> corner = obb.Center() + ((i & 1) ? r.x() : -r.x()) * obb.Axis(0)
+					+ ((i & 2) ? r.y() : -r.y()) * obb.Axis(1) + ((i & 4) ? r.z() : -r.z()) * obb.Axis(2);
+
+				min = minimize(min, corner);
+				max = maximize(max, corner);
+			}
+
+			return AABBox_T<T>(min, max);
+		}
+
+		template KLAYGE_CORE_API OBBox convert_to_obbox(AABBox const & aabb);
+
+		template <typename T>
+		OBBox_T<T> convert_to_obbox(AABBox_T<T> const & aabb)
+		{
+			return OBBox_T<T>(aabb.Center(),
+				Vector_T<T, 3>(1, 0, 0), Vector_T<T, 3>(0, 1, 0), Vector_T<T, 3>(0, 0, 1),
+				aabb.HalfSize());
+		}
+
+
 		template KLAYGE_CORE_API AABBox transform_aabb(AABBox const & aabb, float4x4 const & mat);
 
 		template <typename T>
@@ -1887,13 +1919,13 @@ namespace KlayGE
 		template <typename T>
 		AABBox_T<T> transform_aabb(AABBox_T<T> const & aabb, T scale, Quaternion_T<T> const & rot, Vector_T<T, 3> const & trans)
 		{
-			float3 min, max;
+			Vector_T<T, 3> min, max;
 			min = max = transform_quat(aabb[0] * scale, rot) + trans;
 			for (size_t j = 1; j < 8; ++ j)
 			{
-				float3 vec = transform_quat(aabb[j] * scale, rot) + trans;
-				min = MathLib::minimize(min, vec);
-				max = MathLib::maximize(max, vec);
+				Vector_T<T, 3> vec = transform_quat(aabb[j] * scale, rot) + trans;
+				min = minimize(min, vec);
+				max = maximize(max, vec);
 			}
 
 			return AABBox_T<T>(min, max);
@@ -2149,7 +2181,7 @@ namespace KlayGE
 		template <typename T>
 		bool intersect_aabb_obb(AABBox_T<T> const & lhs, OBBox_T<T> const & obb)
 		{
-			return obb.Intersect(OBBox_T<T>(lhs));
+			return obb.Intersect(MathLib::convert_to_obbox(lhs));
 		}
 
 		template KLAYGE_CORE_API bool intersect_aabb_sphere(AABBox const & lhs, Sphere const & sphere);
