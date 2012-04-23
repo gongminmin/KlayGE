@@ -62,6 +62,8 @@ namespace KlayGE
 		void OnDelSceneObject(SceneObjectsType::iterator iter);
 
 		void NodeVisible(size_t index);
+		void MarkNodeObjs(size_t index, bool force);
+
 		bool BoundVisible(size_t index, AABBox const & aabb) const;
 		bool BoundVisible(size_t index, OBBox const & obb) const;
 		bool BoundVisible(size_t index, Sphere const & sphere) const;
@@ -77,6 +79,8 @@ namespace KlayGE
 			AABBox bb;
 			int first_child_index;
 			BoundOverlap visible;
+
+			std::vector<size_t> obj_indices;
 		};
 
 		std::vector<octree_node_t, boost::pool_allocator<octree_node_t> > octree_;
@@ -86,7 +90,7 @@ namespace KlayGE
 
 		bool rebuild_tree_;
 
-#ifdef KLAYGE_DEBUG
+#ifdef KLAYGE_DRAW_NODES
 		RenderablePtr node_renderable_;
 #endif
 	};

@@ -30,19 +30,20 @@
 #include <KlayGE/Plane.hpp>
 #include <KlayGE/SceneObject.hpp>
 #include <KlayGE/RenderableHelper.hpp>
-#ifdef KLAYGE_DRAW_NODES
 #include <KlayGE/Camera.hpp>
 #include <KlayGE/App3D.hpp>
-#include <KlayGE/Context.hpp>
-#include <KlayGE/RenderFactory.hpp>
-#include <KlayGE/RenderEffect.hpp>
-#endif
 
 #include <algorithm>
 #include <functional>
 #include <boost/typeof/typeof.hpp>
 #include <boost/foreach.hpp>
 #include <boost/assert.hpp>
+
+#ifdef KLAYGE_DRAW_NODES
+#include <KlayGE/Context.hpp>
+#include <KlayGE/RenderFactory.hpp>
+#include <KlayGE/RenderEffect.hpp>
+#endif
 
 #include <KlayGE/OCTree/OCTree.hpp>
 
@@ -122,11 +123,10 @@ namespace KlayGE
 	{
 		if (rebuild_tree_)
 		{
-			typedef std::vector<size_t> ObjIndicesTypes;
-			std::vector<ObjIndicesTypes> obj_indices(1);
 			octree_.resize(1);
 			AABBox bb_root(float3(0, 0, 0), float3(0, 0, 0));
 			octree_[0].first_child_index = -1;
+			octree_[0].visible = BO_No;
 			for (size_t i = 0; i < scene_objs_.size(); ++ i)
 			{
 				SceneObjectPtr const & obj = scene_objs_[i];
@@ -138,7 +138,7 @@ namespace KlayGE
 					AABBox const & aabb_in_ws = *scene_obj_bbs_[i];
 
 					bb_root |= aabb_in_ws;
-					obj_indices[0].push_back(i);
+					octree_[0].obj_indices.push_back(i);
 				}
 			}
 			{
@@ -151,20 +151,20 @@ namespace KlayGE
 				size_t const original_size = octree_.size();
 				for (size_t i = base_address_[d - 1]; i < base_address_[d]; ++ i)
 				{
-					if (obj_indices[i].size() > 1)
+					if (octree_[i].obj_indices.size() > 1)
 					{
 						float3 const parent_center = octree_[i].bb.Center();
 						float3 const new_half_size = octree_[i].bb.HalfSize() / 2.0f;
 						octree_[i].first_child_index = static_cast<int>(base_address_[d] + octree_.size() - original_size);
+						octree_[i].visible = BO_No;
 
 						for (size_t j = 0; j < 8; ++ j)
 						{
 							octree_.push_back(octree_node_t());
 							octree_node_t& new_node = octree_.back();
 							new_node.first_child_index = -1;
-							obj_indices.push_back(ObjIndicesTypes());
-							ObjIndicesTypes& new_node_obj_indices = obj_indices.back();
-							ObjIndicesTypes& parent_obj_indices = obj_indices[i];
+							std::vector<size_t>& new_node_obj_indices = new_node.obj_indices;
+							std::vector<size_t>& parent_obj_indices = octree_[i].obj_indices;
 
 							float3 bb_center;
 							if (j & 1)
@@ -203,7 +203,7 @@ namespace KlayGE
 							}
 						}
 
-						obj_indices[i].clear();
+						octree_[i].obj_indices.clear();
 					}
 				}
 
@@ -226,7 +226,46 @@ namespace KlayGE
 			this->NodeVisible(0);
 		}
 
-		SceneManager::ClipScene();
+		App3DFramework& app = Context::Instance().AppInstance();
+		Camera& camera = app.ActiveCamera();
+
+		if (camera.OmniDirectionalMode())
+		{
+			for (size_t i = 0; i < scene_objs_.size(); ++ i)
+			{
+				SceneObjectPtr const & obj = scene_objs_[i];
+				(*visible_marks_)[i] = (!(obj->Attrib() & SceneObject::SOA_Overlay) && obj->Visible());
+			}
+		}
+		else
+		{
+			this->MarkNodeObjs(0, false);
+
+			for (size_t i = 0; i < scene_objs_.size(); ++ i)
+			{
+				SceneObjectPtr const & obj = scene_objs_[i];
+				if (obj->Visible())
+				{
+					uint32_t const attr = obj->Attrib();
+					if (!(attr & SceneObject::SOA_Overlay))
+					{
+						if (!(attr & SceneObject::SOA_Cullable))
+						{
+							(*visible_marks_)[i] = true;
+						}
+						else if (attr & SceneObject::SOA_Moveable)
+						{
+							AABBox const & aabb = obj->Bound();
+							float4x4 const & mat = obj->ModelMatrix();
+
+							AABBox aabb_in_ws = MathLib::transform_aabb(aabb, mat);
+
+							(*visible_marks_)[i] = this->AABBVisible(aabb_in_ws);
+						}
+					}
+				}
+			}
+		}
 
 #ifdef KLAYGE_DRAW_NODES
 		node_renderable_->Render();
@@ -290,6 +329,33 @@ namespace KlayGE
 			checked_pointer_cast<NodeRenderable>(node_renderable_)->AddInstance(MathLib::scaling(node.bb.HalfSize()) * MathLib::translation(node.bb.Center()));
 		}
 #endif
+	}
+
+	void OCTree::MarkNodeObjs(size_t index, bool force)
+	{
+		BOOST_ASSERT(index < octree_.size());
+
+		octree_node_t const & node = octree_[index];
+		if ((node.visible != BO_No) || force)
+		{
+			BOOST_FOREACH(size_t obj_index, node.obj_indices)
+			{
+				if (!(*visible_marks_)[obj_index] && scene_objs_[obj_index]->Visible())
+				{
+					AABBox const & aabb_in_ws = *scene_obj_bbs_[obj_index];
+					BoundOverlap const bo = frustum_->Intersect(aabb_in_ws);
+					(*visible_marks_)[obj_index] = (bo != BO_No);
+				}
+			}
+
+			if (node.first_child_index != -1)
+			{
+				for (int i = 0; i < 8; ++ i)
+				{
+					this->MarkNodeObjs(node.first_child_index + i, (BO_Yes == node.visible) || force);
+				}
+			}
+		}
 	}
 
 	bool OCTree::AABBVisible(AABBox const & aabb)
