@@ -240,7 +240,10 @@ namespace KlayGE
 		}
 		else
 		{
-			this->MarkNodeObjs(0, false);
+			if (!octree_.empty())
+			{
+				this->MarkNodeObjs(0, false);
+			}
 
 			for (size_t i = 0; i < scene_objs_.size(); ++ i)
 			{

@@ -28,7 +28,7 @@ namespace
 		{
 			for (uint32_t i = 0; i < n; ++ i)
 			{
-				this->Append(LoadPostProcess(ResLoader::Instance().Open("Downsampler2x2.ppml"), "downsampler2x2"));
+				this->Append(LoadPostProcess(ResLoader::Instance().Open("Copy.ppml"), "bilinear_copy"));
 			}
 		}
 
