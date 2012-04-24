@@ -141,9 +141,9 @@ namespace KlayGE
 					octree_[0].obj_indices.push_back(i);
 				}
 			}
-			{
-				octree_[0].bb = bb_root;
-			}
+			octree_[0].bb = bb_root;
+
+			typedef BOOST_TYPEOF(octree_[0].obj_indices) ObjIndicesType;
 
 			base_address_.resize(2);
 			for (uint32_t d = 1; d <= max_tree_depth_; ++ d)
@@ -153,43 +153,44 @@ namespace KlayGE
 				{
 					if (octree_[i].obj_indices.size() > 1)
 					{
+						size_t const this_size = octree_.size();
 						float3 const parent_center = octree_[i].bb.Center();
 						float3 const new_half_size = octree_[i].bb.HalfSize() / 2.0f;
-						octree_[i].first_child_index = static_cast<int>(base_address_[d] + octree_.size() - original_size);
+						octree_[i].first_child_index = static_cast<int>(base_address_[d] + this_size - original_size);
 						octree_[i].visible = BO_No;
 
+						octree_.resize(this_size + 8);
 						for (size_t j = 0; j < 8; ++ j)
 						{
-							octree_.push_back(octree_node_t());
-							octree_node_t& new_node = octree_.back();
+							octree_node_t& new_node = octree_[this_size + j];
 							new_node.first_child_index = -1;
-							std::vector<size_t>& new_node_obj_indices = new_node.obj_indices;
-							std::vector<size_t>& parent_obj_indices = octree_[i].obj_indices;
+							ObjIndicesType& new_node_obj_indices = new_node.obj_indices;
+							ObjIndicesType& parent_obj_indices = octree_[i].obj_indices;
 
-							float3 bb_center;
+							float3 bb_center = parent_center;
 							if (j & 1)
 							{
-								bb_center.x() = parent_center.x() + new_half_size.x();
+								bb_center.x() += new_half_size.x();
 							}
 							else
 							{
-								bb_center.x() = parent_center.x() - new_half_size.x();
+								bb_center.x() -= new_half_size.x();
 							}
 							if (j & 2)
 							{
-								bb_center.y() = parent_center.y() + new_half_size.y();
+								bb_center.y() += new_half_size.y();
 							}
 							else
 							{
-								bb_center.y() = parent_center.y() - new_half_size.y();
+								bb_center.y() -= new_half_size.y();
 							}
 							if (j & 4)
 							{
-								bb_center.z() = parent_center.z() + new_half_size.z();
+								bb_center.z() += new_half_size.z();
 							}
 							else
 							{
-								bb_center.z() = parent_center.z() - new_half_size.z();
+								bb_center.z() -= new_half_size.z();
 							}
 							new_node.bb = AABBox(bb_center - new_half_size, bb_center + new_half_size);
 
@@ -203,7 +204,7 @@ namespace KlayGE
 							}
 						}
 
-						octree_[i].obj_indices.clear();
+						octree_[i].obj_indices.swap(ObjIndicesType());
 					}
 				}
 
