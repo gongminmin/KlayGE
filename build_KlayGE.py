@@ -18,7 +18,7 @@ def build_KlayGE(compiler_name, compiler_version, compiler_arch, generator_name)
 	cmake_cmd.add_command('cmake -G "%s" %s' % (generator_name, "../cmake"))
 	cmake_cmd.execute()
 
-	config_list = ("Debug", "Release")
+	config_list = ("Debug", "RelWithDebInfo")
 
 	build_cmd = batch_command()
 	build_cmd.add_command('CALL "%%VS%d0COMNTOOLS%%..\\..\\VC\\vcvarsall.bat" %s' % (compiler_version, compiler_arch))
@@ -42,7 +42,7 @@ def build_Samples(compiler_name, compiler_version, compiler_arch, generator_name
 	cmake_cmd.add_command('cmake -G "%s" %s' % (generator_name, "../cmake"))
 	cmake_cmd.execute()
 
-	config_list = ("Debug", "Release")
+	config_list = ("Debug", "RelWithDebInfo")
 
 	build_cmd = batch_command()
 	build_cmd.add_command('CALL "%%VS%d0COMNTOOLS%%..\\..\\VC\\vcvarsall.bat" %s' % (compiler_version, compiler_arch))
@@ -66,7 +66,7 @@ def build_Tools(compiler_name, compiler_version, compiler_arch, generator_name):
 	cmake_cmd.add_command('cmake -G "%s" %s' % (generator_name, "../cmake"))
 	cmake_cmd.execute()
 
-	config_list = ("Debug", "Release")
+	config_list = ("Debug", "RelWithDebInfo")
 
 	build_cmd = batch_command()
 	build_cmd.add_command('CALL "%%VS%d0COMNTOOLS%%..\\..\\VC\\vcvarsall.bat" %s' % (compiler_version, compiler_arch))
@@ -90,7 +90,7 @@ def build_Tutorials(compiler_name, compiler_version, compiler_arch, generator_na
 	cmake_cmd.add_command('cmake -G "%s" %s' % (generator_name, "../cmake"))
 	cmake_cmd.execute()
 
-	config_list = ("Debug", "Release")
+	config_list = ("Debug", "RelWithDebInfo")
 
 	build_cmd = batch_command()
 	build_cmd.add_command('CALL "%%VS%d0COMNTOOLS%%..\\..\\VC\\vcvarsall.bat" %s' % (compiler_version, compiler_arch))

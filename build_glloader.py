@@ -20,7 +20,7 @@ def build_glloader(compiler_name, compiler_version, compiler_arch, generator_nam
 	cmake_cmd.add_command('cmake -G "%s" -D GLLOADER_USE_GLES:BOOL="FALSE" %s' % (generator_name, "../cmake"))
 	cmake_cmd.execute()
 
-	config_list = ("Debug", "Release")
+	config_list = ("Debug", "RelWithDebInfo")
 
 	build_cmd = batch_command()
 	build_cmd.add_command('CALL "%%VS%d0COMNTOOLS%%..\\..\\VC\\vcvarsall.bat" %s' % (compiler_version, compiler_arch))
@@ -41,7 +41,7 @@ def build_glloader(compiler_name, compiler_version, compiler_arch, generator_nam
 	cmake_cmd.add_command('cmake -G "%s" -D GLLOADER_USE_GLES:BOOL="TRUE" %s' % (generator_name, "../cmake"))
 	cmake_cmd.execute()
 
-	config_list = ("Debug", "Release")
+	config_list = ("Debug", "RelWithDebInfo")
 
 	build_cmd = batch_command()
 	build_cmd.add_command('CALL "%%VS%d0COMNTOOLS%%..\\..\\VC\\vcvarsall.bat" %s' % (compiler_version, compiler_arch))
