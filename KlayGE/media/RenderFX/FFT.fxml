@@ -94,7 +94,7 @@ void FFTYPS(float2 tc : TEXCOORD0,
 	<parameter type="int" name="forward"/>
 
 	<parameter type="uint2" name="width_height"/>
-	<parameter type="uint4" name="addr_offset"/>
+	<parameter type="uint3" name="addr_offset"/>
 
 	<parameter type="rw_structured_buffer" elem_type="float2" name="output_buf"/>
 
@@ -104,12 +104,11 @@ void FFTYPS(float2 tc : TEXCOORD0,
 void Tex2BufCS(uint3 thread_id : SV_DispatchThreadID)
 {
 	int out_index = thread_id.y * width_height.x + thread_id.x;
-	float4 real = real_tex.Load(int3(thread_id.xy, 0));
-	float4 imag = imag_tex.Load(int3(thread_id.xy, 0));
+	float3 real = real_tex.Load(int3(thread_id.xy, 0)).xyz;
+	float3 imag = imag_tex.Load(int3(thread_id.xy, 0)).xyz;
 	output_buf[out_index + addr_offset.x] = float2(real.x, imag.x);
 	output_buf[out_index + addr_offset.y] = float2(real.y, imag.y);
 	output_buf[out_index + addr_offset.z] = float2(real.z, imag.z);
-	output_buf[out_index + addr_offset.w] = float2(real.w, imag.w);	
 }
 		]]>
 	</shader>
@@ -149,10 +148,9 @@ void Buf2TexPS(float2 TexCoord : TEXCOORD0,
 	float2 c0 = input_buf[in_index + addr_offset.x];
 	float2 c1 = input_buf[in_index + addr_offset.y];
 	float2 c2 = input_buf[in_index + addr_offset.z];
-	float2 c3 = input_buf[in_index + addr_offset.w];
 
-	oReal = float4(c0.x, c1.x, c2.x, c3.x);
-	oImag = float4(c0.y, c1.y, c2.y, c3.y);
+	oReal = float4(c0.x, c1.x, c2.x, 1);
+	oImag = float4(c0.y, c1.y, c2.y, 1);
 }
 		]]>
 	</shader>

@@ -214,13 +214,13 @@ namespace KlayGE
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
 		src_ = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Read | EAH_GPU_Unordered | EAH_GPU_Structured, NULL, EF_GR32F);
-		src_->Resize(4 * width * height * sizeof(float) * 2);
+		src_->Resize(3 * width * height * sizeof(float) * 2);
 
 		dst_ = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Read | EAH_GPU_Unordered | EAH_GPU_Structured, NULL, EF_GR32F);
-		dst_->Resize(4 * width * height * sizeof(float) * 2);
+		dst_->Resize(3 * width * height * sizeof(float) * 2);
 
 		tmp_buffer_ = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Read | EAH_GPU_Unordered | EAH_GPU_Structured, NULL, EF_GR32F);
-		tmp_buffer_->Resize(4 * width * height * sizeof(float) * 2);
+		tmp_buffer_->Resize(3 * width * height * sizeof(float) * 2);
 
 		quad_layout_ = rf.MakeRenderLayout();
 		quad_layout_->TopologyType(RenderLayout::TT_TriangleStrip);
@@ -254,7 +254,7 @@ namespace KlayGE
 
 		*(effect_->ParameterByName("width_height")) = uint2(width, height);
 		uint32_t n = width * height;
-		*(effect_->ParameterByName("addr_offset")) = uint4(0 * n, 1 * n, 2 * n, 3 * n);
+		*(effect_->ParameterByName("addr_offset")) = uint3(0 * n, 1 * n, 2 * n);
 
 		*(effect_->ParameterByName("forward")) = static_cast<int32_t>(forward_);
 		*(effect_->ParameterByName("scale")) = 1.0f / (width_ * height_);
@@ -278,7 +278,7 @@ namespace KlayGE
 		re.Dispatch(*tex2buf_tech_, (width_ + BLOCK_SIZE_X - 1) / BLOCK_SIZE_X, (height_ + BLOCK_SIZE_Y - 1) / BLOCK_SIZE_Y, 1);
 
 		
-		uint32_t const thread_count = 4 * (width_ * height_) / 8;
+		uint32_t const thread_count = 3 * (width_ * height_) / 8;
 		uint32_t ostride = width_ * height_ / 8;
 		uint32_t istride = ostride;
 		uint32_t pstride = width_;
