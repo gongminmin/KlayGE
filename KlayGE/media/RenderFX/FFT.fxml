@@ -96,39 +96,15 @@ void FFTYPS(float2 tc : TEXCOORD0,
 	<parameter type="uint2" name="width_height"/>
 	<parameter type="uint3" name="addr_offset"/>
 
-	<parameter type="rw_structured_buffer" elem_type="float2" name="output_buf"/>
-
-	<shader type="compute_shader" version="4">
-		<![CDATA[
-[numthreads(BLOCK_SIZE_X, BLOCK_SIZE_Y, 1)]
-void Tex2BufCS(uint3 thread_id : SV_DispatchThreadID)
-{
-	int out_index = thread_id.y * width_height.x + thread_id.x;
-	float3 real = real_tex.Load(int3(thread_id.xy, 0)).xyz;
-	float3 imag = imag_tex.Load(int3(thread_id.xy, 0)).xyz;
-	output_buf[out_index + addr_offset.x] = float2(real.x, imag.x);
-	output_buf[out_index + addr_offset.y] = float2(real.y, imag.y);
-	output_buf[out_index + addr_offset.z] = float2(real.z, imag.z);
-}
-		]]>
-	</shader>
-
-	<technique name="Tex2Buf">
-		<pass name="p0">
-			<state name="compute_shader" value="Tex2BufCS()"/>
-		</pass>
-	</technique>
-
-
 	<parameter type="structured_buffer" elem_type="float2" name="input_buf"/>
 
 	<shader>
 		<![CDATA[
-void QuadVS(float3 vPos : POSITION,
+void QuadVS(float2 vPos : POSITION,
 		out float2 TexCoord : TEXCOORD0,
 		out float4 Position : SV_Position)
 {
-	Position = float4(vPos, 1);
+	Position = float4(vPos, 0, 1);
 	TexCoord.x = 0.5f + vPos.x * 0.5f;
 	TexCoord.y = 0.5f - vPos.y * 0.5f;
 	if (!forward)
@@ -169,6 +145,7 @@ void Buf2TexPS(float2 TexCoord : TEXCOORD0,
 		<parameter type="uint" name="thread_count"/>
 		<parameter type="uint" name="ostride"/>
 		<parameter type="uint" name="istride"/>
+		<parameter type="uint2" name="istride3"/>
 		<parameter type="uint" name="pstride"/>
 		<parameter type="float" name="phase_base"/>
 	</cbuffer>
@@ -288,6 +265,46 @@ void Radix008ACS4(uint3 thread_id : SV_DispatchThreadID)
 }
 
 [numthreads(COHERENCY_GRANULARITY, 1, 1)]
+void Radix008AFirstCS4(uint3 thread_id : SV_DispatchThreadID)
+{
+	if (thread_id.x < thread_count)
+	{
+		// Fetch 8 complex numbers
+		float2 D[8];
+
+		uint imod = thread_id.x & (istride - 1);
+		uint iaddr = ((thread_id.x - imod) << 3) + imod;
+		uint comp = iaddr / addr_offset.y;
+		uint index = iaddr - comp * addr_offset.y;
+		uint index_y = index / width_height.x;
+		uint index_x = index - index_y * width_height.x;
+		for (uint i = 0; i < 8; i++)
+		{
+			uint3 index_xy = uint3(uint2(index_x, index_y) + i * istride3, 0);
+			D[i] = float2(real_tex.Load(index_xy)[comp], imag_tex.Load(index_xy)[comp]);
+		}
+
+		// Math
+		FFT_forward_8(D);
+		uint p = thread_id.x & (istride - pstride);
+		float phase = phase_base * p;
+		TWIDDLE_8(D, phase);
+
+		// Store the result
+		uint omod = thread_id.x & (ostride - 1);
+		uint oaddr = ((thread_id.x - omod) << 3) + omod;
+		dst_data[oaddr + 0 * ostride] = D[0];
+		dst_data[oaddr + 1 * ostride] = D[4];
+		dst_data[oaddr + 2 * ostride] = D[2];
+		dst_data[oaddr + 3 * ostride] = D[6];
+		dst_data[oaddr + 4 * ostride] = D[1];
+		dst_data[oaddr + 5 * ostride] = D[5];
+		dst_data[oaddr + 6 * ostride] = D[3];
+		dst_data[oaddr + 7 * ostride] = D[7];
+	}
+}
+
+[numthreads(COHERENCY_GRANULARITY, 1, 1)]
 void Radix008AFinalCS4(uint3 thread_id : SV_DispatchThreadID)
 {
 	if (thread_id.x < thread_count)
@@ -330,6 +347,12 @@ void Radix008AFinalCS4(uint3 thread_id : SV_DispatchThreadID)
 	<technique name="FFTRadix008A4">
 		<pass name="p0">
 			<state name="compute_shader" value="Radix008ACS4()"/>
+		</pass>
+	</technique>
+
+	<technique name="FFTRadix008AFirst4">
+		<pass name="p0">
+			<state name="compute_shader" value="Radix008AFirstCS4()"/>
 		</pass>
 	</technique>
 
