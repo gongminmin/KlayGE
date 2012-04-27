@@ -214,47 +214,46 @@ namespace KlayGE
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
 		src_ = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Read | EAH_GPU_Unordered | EAH_GPU_Structured, NULL, EF_GR32F);
-		src_->Resize(4 * width * height * sizeof(float) * 2);
+		src_->Resize(3 * width * height * sizeof(float) * 2);
 
 		dst_ = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Read | EAH_GPU_Unordered | EAH_GPU_Structured, NULL, EF_GR32F);
-		dst_->Resize(4 * width * height * sizeof(float) * 2);
+		dst_->Resize(3 * width * height * sizeof(float) * 2);
 
 		tmp_buffer_ = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Read | EAH_GPU_Unordered | EAH_GPU_Structured, NULL, EF_GR32F);
-		tmp_buffer_->Resize(4 * width * height * sizeof(float) * 2);
+		tmp_buffer_->Resize(3 * width * height * sizeof(float) * 2);
 
 		quad_layout_ = rf.MakeRenderLayout();
 		quad_layout_->TopologyType(RenderLayout::TT_TriangleStrip);
 
-		float3 xyzs[] =
+		float2 xyzs[] =
 		{
-			float3(-1, +1, 0),
-			float3(+1, +1, 0),
-			float3(-1, -1, 0),
-			float3(+1, -1, 0)
+			float2(-1, +1),
+			float2(+1, +1),
+			float2(-1, -1),
+			float2(+1, -1)
 		};
 		ElementInitData init_data;
 		init_data.row_pitch = sizeof(xyzs);
 		init_data.slice_pitch = 0;
 		init_data.data = xyzs;
 		GraphicsBufferPtr quad_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, &init_data);
-		quad_layout_->BindVertexStream(quad_vb, boost::make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F)));
+		quad_layout_->BindVertexStream(quad_vb, boost::make_tuple(vertex_element(VEU_Position, 0, EF_GR32F)));
 
 		tex_fb_ = rf.MakeFrameBuffer();
 
 		effect_ = rf.LoadEffect("FFT.fxml");
-		tex2buf_tech_ = effect_->TechniqueByName("Tex2Buf");
 		buf2tex_tech_ = effect_->TechniqueByName("Buf2Tex");
 		radix008a_tech_ = effect_->TechniqueByName("FFTRadix008A4");
+		radix008a_first_tech_ = effect_->TechniqueByName("FFTRadix008AFirst4");
 		radix008a_final_tech_ = effect_->TechniqueByName("FFTRadix008AFinal4");
 		real_tex_ep_ = effect_->ParameterByName("real_tex");
 		imag_tex_ep_ = effect_->ParameterByName("imag_tex");
 
-		*(effect_->ParameterByName("output_buf")) = src_;
 		*(effect_->ParameterByName("input_buf")) = dst_;
 
 		*(effect_->ParameterByName("tex_width_height")) = uint2(width, height);
 		uint32_t n = width * height;
-		*(effect_->ParameterByName("addr_offset")) = uint4(0 * n, 1 * n, 2 * n, 3 * n);
+		*(effect_->ParameterByName("addr_offset")) = uint3(0 * n, 1 * n, 2 * n);
 
 		*(effect_->ParameterByName("forward")) = static_cast<int32_t>(forward_);
 		*(effect_->ParameterByName("scale")) = 1.0f / (width_ * height_);
@@ -274,13 +273,11 @@ namespace KlayGE
 
 		*real_tex_ep_ = in_real;
 		*imag_tex_ep_ = in_imag;
-
-		re.Dispatch(*tex2buf_tech_, (width_ + BLOCK_SIZE_X - 1) / BLOCK_SIZE_X, (height_ + BLOCK_SIZE_Y - 1) / BLOCK_SIZE_Y, 1);
-
 		
-		uint32_t const thread_count = 4 * (width_ * height_) / 8;
+		uint32_t const thread_count = 3 * (width_ * height_) / 8;
 		uint32_t ostride = width_ * height_ / 8;
 		uint32_t istride = ostride;
+		uint32_t istride3 = height_ / 8;
 		uint32_t pstride = width_;
 		float phase_base = -PI2 / (width_ * height_);
 
@@ -292,8 +289,9 @@ namespace KlayGE
 		*(effect_->ParameterByName("pstride")) = pstride;
 
 		*(effect_->ParameterByName("istride")) = istride;
+		*(effect_->ParameterByName("istride3")) = uint2(0, istride3);
 		*(effect_->ParameterByName("phase_base")) = phase_base;
-		this->Radix008A(tmp_buffer_, src_, thread_count, istride);
+		this->Radix008A(tmp_buffer_, src_, thread_count, istride, true);
 
 		GraphicsBufferPtr buf[2] = { dst_, tmp_buffer_ };
 		int index = 0;
@@ -302,10 +300,12 @@ namespace KlayGE
 		while (t > 8)
 		{
 			istride /= 8;
+			istride3 /= 8;
 			phase_base *= 8.0f;
 			*(effect_->ParameterByName("istride")) = istride;
+			*(effect_->ParameterByName("istride3")) = uint2(0, istride3);
 			*(effect_->ParameterByName("phase_base")) = phase_base;
-			this->Radix008A(buf[index], buf[!index], thread_count, istride);
+			this->Radix008A(buf[index], buf[!index], thread_count, istride, false);
 			index = !index;
 
 			t /= 8;
@@ -319,20 +319,24 @@ namespace KlayGE
 		*(effect_->ParameterByName("pstride")) = pstride;
 		
 		istride /= 8;
+		istride3 /= 8;
 		phase_base *= 8.0f;
 		*(effect_->ParameterByName("istride")) = istride;
+		*(effect_->ParameterByName("istride3")) = uint2(istride3, 0);
 		*(effect_->ParameterByName("phase_base")) = phase_base;
-		this->Radix008A(buf[index], buf[!index], thread_count, istride);
+		this->Radix008A(buf[index], buf[!index], thread_count, istride, false);
 		index = !index;
 
 		t = height_;
 		while (t > 8)
 		{
 			istride /= 8;
+			istride3 /= 8;
 			phase_base *= 8.0f;
 			*(effect_->ParameterByName("istride")) = istride;
+			*(effect_->ParameterByName("istride3")) = uint2(istride3, 0);
 			*(effect_->ParameterByName("phase_base")) = phase_base;
-			this->Radix008A(buf[index], buf[!index], thread_count, istride);
+			this->Radix008A(buf[index], buf[!index], thread_count, istride, false);
 			index = !index;
 
 			t /= 8;
@@ -348,10 +352,10 @@ namespace KlayGE
 
 	void GpuFftCS4::Radix008A(GraphicsBufferPtr const & dst,
 				   GraphicsBufferPtr const & src,
-				   uint32_t thread_count, uint32_t istride)
+				   uint32_t thread_count, uint32_t istride, bool first)
 	{
 		// Setup execution configuration
-		uint32_t grid = thread_count / COHERENCY_GRANULARITY;
+		uint32_t grid = (thread_count + COHERENCY_GRANULARITY - 1) / COHERENCY_GRANULARITY;
 
 		// Buffers
 		*(effect_->ParameterByName("src_data")) = src;
@@ -361,13 +365,20 @@ namespace KlayGE
 		RenderEngine& re = rf.RenderEngineInstance();
 
 		// Shader
-		if (istride > 1)
+		if (first)
 		{
-			re.Dispatch(*radix008a_tech_, grid, 1, 1);
+			re.Dispatch(*radix008a_first_tech_, grid, 1, 1);
 		}
 		else
 		{
-			re.Dispatch(*radix008a_final_tech_, grid, 1, 1);
+			if (istride > 1)
+			{
+				re.Dispatch(*radix008a_tech_, grid, 1, 1);
+			}
+			else
+			{
+				re.Dispatch(*radix008a_final_tech_, grid, 1, 1);
+			}
 		}
 	}
 

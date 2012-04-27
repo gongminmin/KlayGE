@@ -204,7 +204,8 @@ namespace KlayGE
 							}
 						}
 
-						octree_[i].obj_indices.swap(ObjIndicesType());
+						ObjIndicesType empty;
+						octree_[i].obj_indices.swap(empty);
 					}
 				}
 

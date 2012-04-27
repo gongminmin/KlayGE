@@ -75,7 +75,7 @@ namespace KlayGE
 	private:
 		void Radix008A(GraphicsBufferPtr const & dst,
 				   GraphicsBufferPtr const & src,
-				   uint32_t thread_count, uint32_t istride);
+				   uint32_t thread_count, uint32_t istride, bool first);
 
 	private:
 		GraphicsBufferPtr src_;
@@ -86,8 +86,8 @@ namespace KlayGE
 		
 		RenderEffectPtr effect_;
 		RenderTechniquePtr radix008a_tech_;
+		RenderTechniquePtr radix008a_first_tech_;
 		RenderTechniquePtr radix008a_final_tech_;
-		RenderTechniquePtr tex2buf_tech_;
 		RenderTechniquePtr buf2tex_tech_;
 		RenderEffectParameterPtr real_tex_ep_;
 		RenderEffectParameterPtr imag_tex_ep_;
