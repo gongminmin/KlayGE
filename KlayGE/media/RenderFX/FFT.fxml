@@ -93,7 +93,7 @@ void FFTYPS(float2 tc : TEXCOORD0,
 
 	<parameter type="int" name="forward"/>
 
-	<parameter type="uint2" name="width_height"/>
+	<parameter type="uint2" name="tex_width_height"/>
 	<parameter type="uint4" name="addr_offset"/>
 
 	<parameter type="rw_structured_buffer" elem_type="float2" name="output_buf"/>
@@ -103,7 +103,7 @@ void FFTYPS(float2 tc : TEXCOORD0,
 [numthreads(BLOCK_SIZE_X, BLOCK_SIZE_Y, 1)]
 void Tex2BufCS(uint3 thread_id : SV_DispatchThreadID)
 {
-	int out_index = thread_id.y * width_height.x + thread_id.x;
+	int out_index = thread_id.y * tex_width_height.x + thread_id.x;
 	float4 real = real_tex.Load(int3(thread_id.xy, 0));
 	float4 imag = imag_tex.Load(int3(thread_id.xy, 0));
 	output_buf[out_index + addr_offset.x] = float2(real.x, imag.x);
@@ -142,9 +142,9 @@ void Buf2TexPS(float2 TexCoord : TEXCOORD0,
 		out float4 oReal : SV_Target0,
 		out float4 oImag : SV_Target1)
 {
-	uint index_x = (uint)(TexCoord.x * width_height.x);
-	uint index_y = (uint)(TexCoord.y * width_height.y);
-	uint in_index = index_y * width_height.x + index_x;
+	uint index_x = (uint)(TexCoord.x * tex_width_height.x);
+	uint index_y = (uint)(TexCoord.y * tex_width_height.y);
+	uint in_index = index_y * tex_width_height.x + index_x;
 	
 	float2 c0 = input_buf[in_index + addr_offset.x];
 	float2 c1 = input_buf[in_index + addr_offset.y];
@@ -529,23 +529,23 @@ void Radix008AFinalYCS5(uint3 thread_id : SV_DispatchThreadID)
 	FFT_forward_8(Dr, Di);
 
 	// Store the result
-	dst_real_tex[width_height - (thread_id.xy + 0 * ostride2)] = Dr[0] * scale;
-	dst_real_tex[width_height - (thread_id.xy + 1 * ostride2)] = Dr[4] * scale;
-	dst_real_tex[width_height - (thread_id.xy + 2 * ostride2)] = Dr[2] * scale;
-	dst_real_tex[width_height - (thread_id.xy + 3 * ostride2)] = Dr[6] * scale;
-	dst_real_tex[width_height - (thread_id.xy + 4 * ostride2)] = Dr[1] * scale;
-	dst_real_tex[width_height - (thread_id.xy + 5 * ostride2)] = Dr[5] * scale;
-	dst_real_tex[width_height - (thread_id.xy + 6 * ostride2)] = Dr[3] * scale;
-	dst_real_tex[width_height - (thread_id.xy + 7 * ostride2)] = Dr[7] * scale;
+	dst_real_tex[tex_width_height - (thread_id.xy + 0 * ostride2)] = Dr[0] * scale;
+	dst_real_tex[tex_width_height - (thread_id.xy + 1 * ostride2)] = Dr[4] * scale;
+	dst_real_tex[tex_width_height - (thread_id.xy + 2 * ostride2)] = Dr[2] * scale;
+	dst_real_tex[tex_width_height - (thread_id.xy + 3 * ostride2)] = Dr[6] * scale;
+	dst_real_tex[tex_width_height - (thread_id.xy + 4 * ostride2)] = Dr[1] * scale;
+	dst_real_tex[tex_width_height - (thread_id.xy + 5 * ostride2)] = Dr[5] * scale;
+	dst_real_tex[tex_width_height - (thread_id.xy + 6 * ostride2)] = Dr[3] * scale;
+	dst_real_tex[tex_width_height - (thread_id.xy + 7 * ostride2)] = Dr[7] * scale;
 
-	dst_imag_tex[width_height - (thread_id.xy + 0 * ostride2)] = Di[0] * scale;
-	dst_imag_tex[width_height - (thread_id.xy + 1 * ostride2)] = Di[4] * scale;
-	dst_imag_tex[width_height - (thread_id.xy + 2 * ostride2)] = Di[2] * scale;
-	dst_imag_tex[width_height - (thread_id.xy + 3 * ostride2)] = Di[6] * scale;
-	dst_imag_tex[width_height - (thread_id.xy + 4 * ostride2)] = Di[1] * scale;
-	dst_imag_tex[width_height - (thread_id.xy + 5 * ostride2)] = Di[5] * scale;
-	dst_imag_tex[width_height - (thread_id.xy + 6 * ostride2)] = Di[3] * scale;
-	dst_imag_tex[width_height - (thread_id.xy + 7 * ostride2)] = Di[7] * scale;
+	dst_imag_tex[tex_width_height - (thread_id.xy + 0 * ostride2)] = Di[0] * scale;
+	dst_imag_tex[tex_width_height - (thread_id.xy + 1 * ostride2)] = Di[4] * scale;
+	dst_imag_tex[tex_width_height - (thread_id.xy + 2 * ostride2)] = Di[2] * scale;
+	dst_imag_tex[tex_width_height - (thread_id.xy + 3 * ostride2)] = Di[6] * scale;
+	dst_imag_tex[tex_width_height - (thread_id.xy + 4 * ostride2)] = Di[1] * scale;
+	dst_imag_tex[tex_width_height - (thread_id.xy + 5 * ostride2)] = Di[5] * scale;
+	dst_imag_tex[tex_width_height - (thread_id.xy + 6 * ostride2)] = Di[3] * scale;
+	dst_imag_tex[tex_ - (thread_id.xy + 7 * ostride2)] = Di[7] * scale;
 }
 		]]>
 	</shader>

@@ -252,7 +252,7 @@ namespace KlayGE
 		*(effect_->ParameterByName("output_buf")) = src_;
 		*(effect_->ParameterByName("input_buf")) = dst_;
 
-		*(effect_->ParameterByName("width_height")) = uint2(width, height);
+		*(effect_->ParameterByName("tex_width_height")) = uint2(width, height);
 		uint32_t n = width * height;
 		*(effect_->ParameterByName("addr_offset")) = uint4(0 * n, 1 * n, 2 * n, 3 * n);
 
@@ -388,7 +388,7 @@ namespace KlayGE
 		radix008a_final_x_tech_ = effect_->TechniqueByName("FFTRadix008AFinalX5");
 		radix008a_final_y_tech_ = effect_->TechniqueByName("FFTRadix008AFinalY5");
 
-		*(effect_->ParameterByName("width_height")) = uint2(width - 1, height - 1);
+		*(effect_->ParameterByName("tex_width_height")) = uint2(width - 1, height - 1);
 
 		*(effect_->ParameterByName("forward")) = static_cast<int32_t>(forward_);
 		*(effect_->ParameterByName("scale")) = 1.0f / (width_ * height_);
