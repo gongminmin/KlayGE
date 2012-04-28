@@ -44,7 +44,7 @@ SETUP_SAMPLE(MotionBlurDoF)
 
 ADD_CUSTOM_COMMAND(TARGET MotionBlurDoF
 	POST_BUILD
-	COMMAND ${CMAKE_COMMAND} -E copy ${KLAYGE_PROJECT_DIR}/Samples/media/MotionBlurDoF/MotionBlurDoF_init.py ${KLAYGE_BIN_DIR})
+	COMMAND ${CMAKE_COMMAND} -E copy_if_different ${KLAYGE_PROJECT_DIR}/Samples/media/MotionBlurDoF/MotionBlurDoF_init.py ${KLAYGE_BIN_DIR})
 
 
 INSTALL(FILES ${KLAYGE_PROJECT_DIR}/Samples/media/MotionBlurDoF/MotionBlurDoF_init.py

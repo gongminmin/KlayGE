@@ -7,6 +7,7 @@ syntax: glob
 *.kfx
 *.model_bin
 *.aps
+*.pyc
 __pycache__
 */build/android/*/bin
 */build/android/*/libs
@@ -39,7 +40,6 @@ KlayGE/bin/*/*.dll
 KlayGE/bin/*/*.so
 KlayGE/bin/*/*.exe
 KlayGE/bin/*/*.py
-KlayGE/bin/*/*.pyc
 KlayGE/build/android/Core/obj
 KlayGE/build/android/Plugins/Render/OpenGLES/libs
 KlayGE/build/android/Plugins/Render/OpenGLES/obj

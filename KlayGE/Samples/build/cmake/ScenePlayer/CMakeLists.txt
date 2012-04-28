@@ -41,7 +41,7 @@ SETUP_SAMPLE(ScenePlayer)
 
 ADD_CUSTOM_COMMAND(TARGET ScenePlayer
 	POST_BUILD
-	COMMAND ${CMAKE_COMMAND} -E copy ${KLAYGE_PROJECT_DIR}/Samples/media/ScenePlayer/ScenePlayer.py ${KLAYGE_BIN_DIR})
+	COMMAND ${CMAKE_COMMAND} -E copy_if_different ${KLAYGE_PROJECT_DIR}/Samples/media/ScenePlayer/ScenePlayer.py ${KLAYGE_BIN_DIR})
 
 
 INSTALL(FILES ${KLAYGE_PROJECT_DIR}/Samples/media/ScenePlayer/ScenePlayer.py
