@@ -35,7 +35,7 @@ namespace KlayGE
 				left(0), top(0),
 				color_fmt(EF_ARGB8), depth_stencil_fmt(EF_D16),
 				sample_count(1), sample_quality(0),
-				motion_frames(0), hdr(false), ppaa(false), gamma(false), color_grading(false),
+				motion_frames(0), hdr(false), fft_lens_effects(false), ppaa(false), gamma(false), color_grading(false),
 				stereo_method(STM_None), stereo_separation(0)
 		{
 		}
@@ -52,6 +52,7 @@ namespace KlayGE
 		uint32_t sync_interval;
 		uint32_t motion_frames;
 		bool hdr;
+		bool fft_lens_effects;
 		bool ppaa;
 		bool gamma;
 		bool color_grading;

@@ -175,7 +175,7 @@ namespace KlayGE
 		screen_frame_buffer_ = cur_frame_buffer_;
 		if (render_settings_.hdr)
 		{
-			hdr_pp_ = MakeSharedPtr<HDRPostProcess>();
+			hdr_pp_ = MakeSharedPtr<HDRPostProcess>(render_settings_.fft_lens_effects);
 			skip_hdr_pp_ = LoadPostProcess(ResLoader::Instance().Open("Copy.ppml"), "copy");
 		}
 		hdr_enabled_ = render_settings_.hdr;

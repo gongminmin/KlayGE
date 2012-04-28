@@ -141,7 +141,7 @@ void PostProcessingApp::InitObjects()
 	ascii_arts_ = MakeSharedPtr<AsciiArtsPostProcess>();
 	cartoon_ = MakeSharedPtr<CartoonPostProcess>();
 	tiling_ = MakeSharedPtr<TilingPostProcess>();
-	hdr_ = MakeSharedPtr<HDRPostProcess>();
+	hdr_ = MakeSharedPtr<HDRPostProcess>(false);
 	night_vision_ = MakeSharedPtr<NightVisionPostProcess>();
 	old_fashion_ = LoadPostProcess(ResLoader::Instance().Open("OldFashion.ppml"), "old_fashion");
 

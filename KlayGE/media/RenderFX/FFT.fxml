@@ -566,7 +566,7 @@ void Radix008AFinalYCS5(uint3 thread_id : SV_DispatchThreadID)
 	dst_imag_tex[tex_width_height - (thread_id.xy + 4 * ostride2)] = Di[1] * scale;
 	dst_imag_tex[tex_width_height - (thread_id.xy + 5 * ostride2)] = Di[5] * scale;
 	dst_imag_tex[tex_width_height - (thread_id.xy + 6 * ostride2)] = Di[3] * scale;
-	dst_imag_tex[tex_ - (thread_id.xy + 7 * ostride2)] = Di[7] * scale;
+	dst_imag_tex[tex_width_height - (thread_id.xy + 7 * ostride2)] = Di[7] * scale;
 }
 		]]>
 	</shader>

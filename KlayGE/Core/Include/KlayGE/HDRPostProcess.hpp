@@ -194,7 +194,7 @@ namespace KlayGE
 	class KLAYGE_CORE_API HDRPostProcess : public PostProcess
 	{
 	public:
-		HDRPostProcess();
+		explicit HDRPostProcess(bool fft_lens_effects);
 
 		void InputPin(uint32_t index, TexturePtr const & tex);
 		TexturePtr const & InputPin(uint32_t index) const;

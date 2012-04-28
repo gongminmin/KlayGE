@@ -30,8 +30,6 @@
 
 #include <KlayGE/HDRPostProcess.hpp>
 
-//#define USE_FFT_LENS_EFFECTS
-
 namespace KlayGE
 {
 	SumLumPostProcess::SumLumPostProcess(RenderTechniquePtr const & tech)
@@ -408,6 +406,10 @@ namespace KlayGE
 		glow_merger_->InputPin(0, glow_texs[0]);
 		glow_merger_->InputPin(1, glow_texs[1]);
 		glow_merger_->InputPin(2, glow_texs[2]);
+
+		TexturePtr lens_effects_tex = rf.MakeTexture2D(tex->Width(0) / 2, tex->Height(0) / 2, 1, 1, fmt, 1, 0,
+				EAH_GPU_Read | EAH_GPU_Write, NULL);
+		glow_merger_->OutputPin(0, lens_effects_tex);
 	}
 
 	TexturePtr const & LensEffectsPostProcess::InputPin(uint32_t index) const
@@ -593,7 +595,7 @@ namespace KlayGE
 	}
 
 
-	HDRPostProcess::HDRPostProcess()
+	HDRPostProcess::HDRPostProcess(bool fft_lens_effects)
 		: PostProcess(L"HDR")
 	{
 		RenderDeviceCaps const & caps = Context::Instance().RenderFactoryInstance().RenderEngineInstance().DeviceCaps();
@@ -608,11 +610,14 @@ namespace KlayGE
 			image_stat_ = MakeSharedPtr<ImageStatPostProcess>();
 		}
 
-#ifdef USE_FFT_LENS_EFFECTS
-		lens_effects_ = MakeSharedPtr<FFTLensEffectsPostProcess>();
-#else
-		lens_effects_ = MakeSharedPtr<LensEffectsPostProcess>();
-#endif
+		if (fft_lens_effects)
+		{
+			lens_effects_ = MakeSharedPtr<FFTLensEffectsPostProcess>();
+		}
+		else
+		{
+			lens_effects_ = MakeSharedPtr<LensEffectsPostProcess>();
+		}
 
 		tone_mapping_ = MakeSharedPtr<ToneMappingPostProcess>();
 	}
@@ -635,12 +640,6 @@ namespace KlayGE
 		}
 
 		lens_effects_->InputPin(0, tex);
-		
-#ifndef USE_FFT_LENS_EFFECTS
-		TexturePtr lens_effects_tex = rf.MakeTexture2D(tex->Width(0) / 2, tex->Height(0) / 2, 1, 1, fmt, 1, 0,
-			EAH_GPU_Read | EAH_GPU_Write, NULL);
-		lens_effects_->OutputPin(0, lens_effects_tex);
-#endif
 
 		tone_mapping_->InputPin(0, tex);
 		if (cs_support_)
