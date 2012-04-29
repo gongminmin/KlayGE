@@ -14,7 +14,7 @@ float4 BrightPassPS(float2 tc : TEXCOORD0) : SV_Target
 
 	float4 clr = src_tex.Sample(bilinear_sampler, tc) * factor;
 	float lum = dot(clr.xyz, LUM_WEIGHT);
-	if (lum < 1.5f)
+	if (lum < 3.0f)
 	{
 		clr.xyz = 0;
 	}
