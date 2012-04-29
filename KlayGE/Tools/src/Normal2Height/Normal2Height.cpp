@@ -19,7 +19,7 @@ namespace
 		for (size_t i = 0; i < normal_map.size(); ++ i)
 		{
 			float3 n = normal_map[i];
-			n.z() = std::max(n.z(), 0.1f);
+			n.z() = std::max(n.z(), 1e-6f);
 			ddm[i].x() = n.x() / n.z();
 			ddm[i].y() = n.y() / n.z();
 		}
@@ -27,45 +27,62 @@ namespace
 
 	void AccumulateDDM(std::vector<float>& height_map, std::vector<float2> const & ddm, uint32_t width, uint32_t height, int directions, int rings)
 	{
-		float step = 2 * PI / directions;
-
-		std::vector<float2> tmp_hm(ddm.size(), float2(0, 0));
-		for (size_t i = 0; i < ddm.size(); ++ i)
+		float const step = 2 * PI / directions;
+		std::vector<float2> dxdy(directions);
+		for (int i = 0; i < directions; ++ i)
 		{
-			int y = i / width;
-			int x = i - y * width;
+			MathLib::sincos(-i * step, dxdy[i].y(), dxdy[i].x());
+		}
 
-			int n = 0;
-			for (int j = 0; j < directions; ++ j)
+		std::vector<float2> tmp_hm[2];
+		tmp_hm[0].resize(ddm.size(), float2(0, 0));
+		tmp_hm[1].resize(ddm.size(), float2(0, 0));
+		int active = 0;
+		for (int i = 1; i < rings; ++ i)
+		{
+			for (size_t j = 0; j < ddm.size(); ++ j)
 			{
-				float angle = j * step;
-				float dx, dy;
-				MathLib::sincos(angle, dx, dy);
-				for (int k = 1; k < rings; ++ k)
+				int y = j / width;
+				int x = j - y * width;
+
+				for (int k = 0; k < directions; ++ k)
 				{
-					float2 delta(dx * k, dy * k);
-					int offset_x = static_cast<int>(delta.x() + 0.5f);
-					int offset_y = static_cast<int>(delta.y() + 0.5f);
-					int sample_x = x + offset_x;
-					int sample_y = y + offset_y;
-					if ((sample_x >= 0) && (sample_x < static_cast<int>(width)) && (sample_y >= 0) && (sample_y < static_cast<int>(height)))
-					{
-						tmp_hm[i] = tmp_hm[sample_y * width + sample_x] + ddm[sample_y * width + sample_x] * delta;
-						++ n;
-					}
+					float2 delta = dxdy[k] * static_cast<float>(i);
+					float sample_x = x + delta.x();
+					float sample_y = y + delta.y();
+					int sample_x0 = static_cast<int>(floor(sample_x));
+					int sample_y0 = static_cast<int>(floor(sample_y));
+					int sample_x1 = sample_x0 + 1;
+					int sample_y1 = sample_y0 + 1;
+					float weight_x = sample_x - sample_x0;
+					float weight_y = sample_y - sample_y0;
+
+					sample_x0 %= width;
+					sample_y0 %= height;
+					sample_x1 %= width;
+					sample_y1 %= height;
+
+					float2 hl0 = MathLib::lerp(tmp_hm[active][sample_y0 * width + sample_x0], tmp_hm[active][sample_y0 * width + sample_x1], weight_x);
+					float2 hl1 = MathLib::lerp(tmp_hm[active][sample_y1 * width + sample_x0], tmp_hm[active][sample_y1 * width + sample_x1], weight_x);
+					float2 h = MathLib::lerp(hl0, hl1, weight_y);
+					float2 ddl0 = MathLib::lerp(ddm[sample_y0 * width + sample_x0], ddm[sample_y0 * width + sample_x1], weight_x);
+					float2 ddl1 = MathLib::lerp(ddm[sample_y1 * width + sample_x0], ddm[sample_y1 * width + sample_x1], weight_x);
+					float2 dd = MathLib::lerp(ddl0, ddl1, weight_y);
+
+					tmp_hm[!active][j] += h + dd * delta;
 				}
 			}
 
-			if (n > 0)
-			{
-				tmp_hm[i] /= n;
-			}
+			active = !active;
 		}
+
+		float const scale = 0.5f / (directions * rings);
 
 		height_map.resize(ddm.size());
 		for (size_t i = 0; i < ddm.size(); ++ i)
 		{
-			height_map[i] = MathLib::length(tmp_hm[i]);
+			float2 const & h = tmp_hm[active][i];
+			height_map[i] = (h.x() + h.y()) * scale;
 		}
 	}
 
@@ -133,17 +150,7 @@ namespace
 				std::vector<float2> ddm;
 				CreateDDM(ddm, normals);
 
-				std::vector<float> acc_heights;
-				AccumulateDDM(acc_heights, ddm, the_width, the_height, 36, 5);
-
-				heights[i].resize(acc_heights.size());
-				for (uint32_t y = 0; y < the_height; ++ y)
-				{
-					for (uint32_t x = 0; x < the_width; ++ x)
-					{
-						heights[i][y * the_width + x] = acc_heights[y * the_width + x];
-					}
-				}
+				AccumulateDDM(heights[i], ddm, the_width, the_height, 4, 9);
 
 				the_width = (the_width + 1) / 2;
 				the_height = (the_height + 1) / 2;
@@ -165,7 +172,7 @@ namespace
 				{
 					for (size_t j = 0; j < heights[i].size(); ++ j)
 					{
-						heights[i][j] = (heights[i][j] - min_height) / (max_height - min_height) * 0.5f + 0.5f;
+						heights[i][j] = (heights[i][j] - min_height) / (max_height - min_height);
 					}
 				}
 			}
