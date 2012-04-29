@@ -13,13 +13,13 @@ namespace
 {
 	using namespace KlayGE;
 
-	void CreateDDM(std::vector<float2>& ddm, std::vector<float3> const & normal_map)
+	void CreateDDM(std::vector<float2>& ddm, std::vector<float3> const & normal_map, float min_z)
 	{
 		ddm.resize(normal_map.size());
 		for (size_t i = 0; i < normal_map.size(); ++ i)
 		{
 			float3 n = normal_map[i];
-			n.z() = std::max(n.z(), 1e-6f);
+			n.z() = std::max(n.z(), min_z);
 			ddm[i].x() = n.x() / n.z();
 			ddm[i].y() = n.y() / n.z();
 		}
@@ -86,7 +86,7 @@ namespace
 		}
 	}
 
-	void CreateHeightMap(std::string const & in_file, std::string const & out_file)
+	void CreateHeightMap(std::string const & in_file, std::string const & out_file, float min_z)
 	{
 		Texture::TextureType type;
 		uint32_t width, height, depth;
@@ -148,7 +148,7 @@ namespace
 				}
 
 				std::vector<float2> ddm;
-				CreateDDM(ddm, normals);
+				CreateDDM(ddm, normals, min_z);
 
 				AccumulateDDM(heights[i], ddm, the_width, the_height, 4, 9);
 
@@ -216,13 +216,19 @@ int main(int argc, char* argv[])
 {
 	using namespace KlayGE;
 
-	if (argc != 3)
+	if (argc < 3)
 	{
-		cout << "Usage: Normal2Height xxx.dds yyy.dds" << endl;
+		cout << "Usage: Normal2Height xxx.dds yyy.dds [min_z]" << endl;
 		return 1;
 	}
 
-	CreateHeightMap(argv[1], argv[2]);
+	float min_z = 1e-6f;
+	if (argc >= 4)
+	{
+		min_z = atof(argv[3]);
+	}
+
+	CreateHeightMap(argv[1], argv[2], min_z);
 
 	cout << "Height map is saved to " << argv[2] << endl;
 
