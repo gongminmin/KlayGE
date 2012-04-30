@@ -4,6 +4,7 @@
 #include <KlayGE/RenderEffect.hpp>
 #include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/RenderFactory.hpp>
+#include <KlayGE/ResLoader.hpp>
 
 #include <numeric>
 #include <boost/assert.hpp>
@@ -13,8 +14,8 @@
 
 using namespace KlayGE;
 
-int const CELL_WIDTH = 8;
-int const CELL_HEIGHT = 8;
+int const CELL_WIDTH = 16;
+int const CELL_HEIGHT = 16;
 int const INPUT_NUM_ASCII = 128;
 size_t const ASCII_WIDTH = 16;
 size_t const ASCII_HEIGHT = 16;
@@ -107,7 +108,7 @@ namespace
 			BOOST_ASSERT(ascii_data.size() == input_num_ascii_);
 
 			lum_to_char_type lum_to_char = this->cal_lum_to_char_map(ascii_data);
-			std::vector<uint8_t> final_chars = get_final_asciis(lum_to_char);
+			std::vector<uint8_t> final_chars = this->get_final_asciis(lum_to_char);
 
 			ascii_tiles_type ret(output_num_ascii_);
 			for (size_t i = 0; i < output_num_ascii_; ++ i)
@@ -142,7 +143,7 @@ namespace
 
 			lum_to_char_type ret;
 
-			std::vector<float> lums = cal_lums(ascii_data);
+			std::vector<float> lums = this->cal_lums(ascii_data);
 
 			float max_lum = *std::max_element(lums.begin(), lums.end());
 			for (std::vector<float>::const_iterator iter = lums.begin();
@@ -216,55 +217,6 @@ namespace
 		size_t output_num_ascii_;
 		size_t ascii_width_, ascii_height_;
 	};
-
-	class Downsampler8x8 : public PostProcess
-	{
-	public:
-		Downsampler8x8()
-			: PostProcess(L"Downsampler8x8",
-					std::vector<std::string>(),
-					std::vector<std::string>(1, "src_tex"),
-					std::vector<std::string>(1, "output"),
-					Context::Instance().RenderFactoryInstance().LoadEffect("AsciiArtsPP.fxml")->TechniqueByName("Downsample8x8"))
-		{
-			tex_coord_offset_ep_ = technique_->Effect().ParameterByName("tex_coord_offset");
-		}
-
-		void InputPin(uint32_t index, TexturePtr const & src_tex)
-		{
-			PostProcess::InputPin(index, src_tex);
-			this->GetSampleOffsets8x8(src_tex->Width(0), src_tex->Height(0));
-		}
-
-	private:
-		void GetSampleOffsets8x8(uint32_t width, uint32_t height)
-		{
-			std::vector<float4> tex_coord_offset(8);
-
-			float const tu = 1.0f / width;
-			float const tv = 1.0f / height;
-
-			// Sample from the 64 surrounding points.
-			int index = 0;
-			for (int y = -4; y <= 3; y += 2)
-			{
-				for (int x = -4; x <= 3; x += 4)
-				{
-					tex_coord_offset[index].x() = (x + 0.5f) * tu;
-					tex_coord_offset[index].y() = (y + 0.5f) * tv;
-					tex_coord_offset[index].z() = (x + 2.5f) * tu;
-					tex_coord_offset[index].w() = (y + 0.5f) * tv;
-
-					++ index;
-				}
-			}
-
-			*tex_coord_offset_ep_ = tex_coord_offset;
-		}
-
-	private:
-		RenderEffectParameterPtr tex_coord_offset_ep_;
-	};
 }
 
 AsciiArtsPostProcess::AsciiArtsPostProcess()
@@ -276,7 +228,7 @@ AsciiArtsPostProcess::AsciiArtsPostProcess()
 {
 	ascii_lums_builder builder(INPUT_NUM_ASCII, OUTPUT_NUM_ASCII, ASCII_WIDTH, ASCII_HEIGHT);
 
-	downsampler_ = MakeSharedPtr<Downsampler8x8>();
+	downsampler_ = LoadPostProcess(ResLoader::Instance().Open("Copy.ppml"), "bilinear_copy");
 
 	cell_per_row_line_ep_ = technique_->Effect().ParameterByName("cell_per_row_line");
 	*(technique_->Effect().ParameterByName("lums_tex")) = FillTexture(builder.build(LoadFromTexture("font.dds")));
@@ -286,13 +238,15 @@ void AsciiArtsPostProcess::InputPin(uint32_t index, TexturePtr const & tex)
 {
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-	downsample_tex_ = rf.MakeTexture2D(tex->Width(0) / CELL_WIDTH, tex->Height(0) / CELL_HEIGHT,
-		1, 1, tex->Format(), 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+	downsample_tex_ = rf.MakeTexture2D(tex->Width(0) / 2, tex->Height(0) / 2,
+		4, 1, tex->Format(), 1, 0, EAH_GPU_Read | EAH_GPU_Write | EAH_Generate_Mips, NULL);
 
 	downsampler_->InputPin(index, tex);
 	downsampler_->OutputPin(index, downsample_tex_);
 
 	PostProcess::InputPin(index, downsample_tex_);
+
+	*cell_per_row_line_ep_ = float2(static_cast<float>(CELL_WIDTH) / tex->Width(0), static_cast<float>(CELL_HEIGHT) / tex->Height(0));
 }
 
 TexturePtr const & AsciiArtsPostProcess::InputPin(uint32_t index) const
@@ -303,15 +257,7 @@ TexturePtr const & AsciiArtsPostProcess::InputPin(uint32_t index) const
 void AsciiArtsPostProcess::Apply()
 {
 	downsampler_->Apply();
+	downsample_tex_->BuildMipSubLevels();
+
 	PostProcess::Apply();
-}
-
-void AsciiArtsPostProcess::OnRenderBegin()
-{
-	PostProcess::OnRenderBegin();
-
-	RenderEngine const & re(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-	FrameBuffer const & fb(*re.CurFrameBuffer());
-
-	*cell_per_row_line_ep_ = float2(static_cast<float>(CELL_WIDTH) / fb.Width(), static_cast<float>(CELL_HEIGHT) / fb.Height());
 }
