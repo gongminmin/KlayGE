@@ -29,6 +29,7 @@ glloader/include/glloader/glloader_gl.h
 glloader/include/glloader/glloader_gles.h
 glloader/include/glloader/glloader_glx.h
 glloader/include/glloader/glloader_wgl.h
+glloader/src/*.rule
 glloader/src/glloader_egl.c
 glloader/src/glloader_gl.c
 glloader/src/glloader_gles.c
