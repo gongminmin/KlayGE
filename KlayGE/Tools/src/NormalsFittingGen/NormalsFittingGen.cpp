@@ -104,7 +104,7 @@ int main()
 		{
 			for (int x = 0; x < y; ++ x)
 			{
-				this_level[y * dim + x] = 0;
+				this_level[y * dim + x] = this_level[x * dim + y];
 			}
 		}
 

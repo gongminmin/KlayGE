@@ -55,7 +55,6 @@ float3 FittingCoord(float3 normal)
 	float3 normal_uns = abs(normal);
 	float max_comp = max(normal_uns.z, max(normal_uns.x, normal_uns.y));
 	float2 tc = normal_uns.z < max_comp ? (normal_uns.y < max_comp ? normal_uns.yz : normal_uns.xz) : normal_uns.xy;
-	tc = tc.x < tc.y ? tc.yx : tc.xy;
 	return float3(tc, 1 / max_comp);
 }
 		]]>
