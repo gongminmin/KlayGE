@@ -37,7 +37,7 @@
 
 #include <KlayGE/DeferredRenderingLayer.hpp>
 
-//#define USE_NEW_LIGHT_SAMPLING
+#define USE_NEW_LIGHT_SAMPLING
 
 namespace KlayGE
 {
@@ -51,7 +51,7 @@ namespace KlayGE
 	int const MAX_IL_MIPMAP_LEVELS = 3;
 
 #ifdef USE_NEW_LIGHT_SAMPLING
-	int const MIN_RSM_MIPMAP_SIZE = 4; // minimum mipmap level is 4x4
+	int const MIN_RSM_MIPMAP_SIZE = 4; // minimum mipmap size is 4x4
 	int const MAX_RSM_MIPMAP_LEVELS = 8; // (log(512)-log(4))/log(2) + 1
 	int const BEGIN_RSM_SAMPLING_LIGHT_LEVEL = 5;
 	int const SAMPLE_LEVEL_CNT = MAX_RSM_MIPMAP_LEVELS - BEGIN_RSM_SAMPLING_LIGHT_LEVEL;
@@ -1949,51 +1949,30 @@ namespace KlayGE
 		float4x4 inv_proj = MathLib::inverse(rsm_camera->ProjMatrix());
 		LightType type = light->Type();
 
-		uint32_t sum_offset = 0;
-		uint32_t n = SM_SIZE / (1UL << BEGIN_RSM_SAMPLING_LIGHT_LEVEL);
-		for (uint32_t i = BEGIN_RSM_SAMPLING_LIGHT_LEVEL; i < rsm_texs_[0]->NumMipMaps(); ++ i)
-		{
-			vpl_tex_->CopyToTexture(*vpl_copy_);
+		float4 vpl_params(static_cast<float>(VPL_COUNT), 2.0f, 
+			              static_cast<float>(MIN_RSM_MIPMAP_SIZE), static_cast<float>(MIN_RSM_MIPMAP_SIZE * MIN_RSM_MIPMAP_SIZE));
 
-			// Param 1: number of VPLs. Param 2: level offset. Param 3: sqrt(number of current level's lights). Param 4: current level's offset.
-			float4 vpl_params(static_cast<float>(VPL_COUNT), static_cast<float>(sum_offset), static_cast<float>(n), 0.5f / n);
-			rsm_to_vpls_pps[type]->SetParam(0, ls_to_es);
-			rsm_to_vpls_pps[type]->SetParam(1, static_cast<float>(i)); // Mipmap level
-			rsm_to_vpls_pps[type]->SetParam(2, vpl_params);
-			rsm_to_vpls_pps[type]->SetParam(3, light->Color());
-			rsm_to_vpls_pps[type]->SetParam(4, light->CosOuterInner());
-			rsm_to_vpls_pps[type]->SetParam(5, light->Falloff());
-			rsm_to_vpls_pps[type]->SetParam(6, inv_view_);
-			float3 upper_left = MathLib::transform_coord(float3(-1, +1, 1), inv_proj);
-			float3 upper_right = MathLib::transform_coord(float3(+1, +1, 1), inv_proj);
-			float3 lower_left = MathLib::transform_coord(float3(-1, -1, 1), inv_proj);
-			rsm_to_vpls_pps[type]->SetParam(7, upper_left);
-			rsm_to_vpls_pps[type]->SetParam(8, upper_right - upper_left);
-			rsm_to_vpls_pps[type]->SetParam(9, lower_left - upper_left);
-			rsm_to_vpls_pps[type]->SetParam(10, int2(i != BEGIN_RSM_SAMPLING_LIGHT_LEVEL, i != rsm_texs_[0]->NumMipMaps() - 1));
-			rsm_to_vpls_pps[type]->SetParam(11, 0.001f * rsm_camera->FarPlane() * 4);
-			rsm_to_vpls_pps[type]->SetParam(12, static_cast<float>(i + 1 - 2)); //smaller level(test level)
+		rsm_to_vpls_pps[type]->SetParam(0, ls_to_es);
+		//rsm_to_vpls_pps[type]->SetParam(1, static_cast<float>(1));
+		rsm_to_vpls_pps[type]->SetParam(2, vpl_params);
+		rsm_to_vpls_pps[type]->SetParam(3, light->Color());
+		rsm_to_vpls_pps[type]->SetParam(4, light->CosOuterInner());
+		rsm_to_vpls_pps[type]->SetParam(5, light->Falloff());
+		rsm_to_vpls_pps[type]->SetParam(6, inv_view_);
+		float3 upper_left = MathLib::transform_coord(float3(-1, +1, 1), inv_proj);
+		float3 upper_right = MathLib::transform_coord(float3(+1, +1, 1), inv_proj);
+		float3 lower_left = MathLib::transform_coord(float3(-1, -1, 1), inv_proj);
+		rsm_to_vpls_pps[type]->SetParam(7, upper_left);
+		rsm_to_vpls_pps[type]->SetParam(8, upper_right - upper_left);
+		rsm_to_vpls_pps[type]->SetParam(9, lower_left - upper_left);
+		rsm_to_vpls_pps[type]->SetParam(10, int2(2, 0));
+		rsm_to_vpls_pps[type]->SetParam(11, 0.001f * rsm_camera->FarPlane() * 10);
+		rsm_to_vpls_pps[type]->SetParam(12, static_cast<float>(rsm_texs_[0]->NumMipMaps() - 1));
 
-			rsm_to_vpls_pps[type]->InputPin(3, rsm_depth_derivative_tex_);
-			rsm_to_vpls_pps[type]->InputPin(4, vpl_copy_);
+		rsm_to_vpls_pps[type]->InputPin(3, rsm_depth_derivative_tex_);
 
-			rsm_to_vpls_pps[type]->Apply();
+		rsm_to_vpls_pps[type]->Apply();
 
-			sum_offset += n * n;
-			n /= 2;
-		}
-
-		////FOR TEST
-		////rsm_depth_derivative_tex_
-		//static boolean saved = false;
-		//if(!saved)
-		//{
-		//	saved = true;
-		//	SaveTexture(rsm_depth_derivative_tex_, "rsm_depth_derivative_tex_.dds");
-		//	SaveTexture(rsm_normal_cone_tex_, "rsm_normal_cone_tex_.dds");
-		//}
-		
-		
 		/*TexturePtr vpl_cpu_tex = Context::Instance().RenderFactoryInstance().MakeTexture2D(VPL_COUNT, 4, 1, 1, EF_ABGR16F, 1, 0, EAH_CPU_Read, NULL);
 		vpl_tex_->CopyToTexture(*vpl_cpu_tex);
 		{
@@ -2019,5 +1998,6 @@ namespace KlayGE
 			}
 		}*/
 	}
+
 #endif
 }

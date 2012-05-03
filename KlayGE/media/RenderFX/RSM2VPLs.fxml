@@ -45,12 +45,12 @@ float3 texcoord_to_view(float2 tex)
 	return upper_left + x_dir * tex.x + y_dir * tex.y;
 }
 
-float4 RSM2VPLsSpot(float2 tc, float2 rsm_tc)
+float4 RSM2VPLsSpot(float2 tc, float2 rsm_tc, float level)
 {
-	float4 albedo_spec = albedo_tex.SampleLevel(point_sampler, rsm_tc, mip_level);
+	float4 albedo_spec = albedo_tex.SampleLevel(point_sampler, rsm_tc, level);
 	float3 albedo = albedo_spec.xyz;
 	float specular_level = albedo_spec.w;
-	float4 normal_shininess = normal_es_tex.SampleLevel(point_sampler, rsm_tc, mip_level);
+	float4 normal_shininess = normal_es_tex.SampleLevel(point_sampler, rsm_tc, level);
 	float3 normal_ls = normal_shininess.xyz * 2 - 1;
 	float shininess = normal_shininess.w * 256.0f;
 	float3 normal_es = mul(float4(normal_ls, 0), ls_to_es).xyz;
@@ -98,24 +98,33 @@ float4 RSM2VPLsSpotPS(float2 tc : TEXCOORD0) : SV_Target
 	float i = vpl_id - j * vpl_params.y;
 	float2 rsm_tc = float2(i, j) * vpl_params.z + vpl_params.w;
 
-	return RSM2VPLsSpot(tc, rsm_tc);
+	return RSM2VPLsSpot(tc, rsm_tc, mip_level);
 }
 
 float4 RSM2VPLsSpotPSNew(float2 tc : TEXCOORD0) : SV_Target
 {
-	float vpl_id = tc.x * vpl_params.x - vpl_params.y;
-
-	if ((vpl_id < 0) || (vpl_id >= vpl_params.z * vpl_params.z))
+	float vpl_id = (1.0 - tc.x) * vpl_params.x;
+	float accum = 1;
+	float accum_sqrt = 1;
+	int k;
+	for (k = 0; k < 2; ++ k)
 	{
-		return vpl_tex.SampleLevel(point_sampler, tc, 0);
+		if (vpl_id - vpl_params.w * (accum * 4 - 1) / 3 < 0) 
+		{
+			break;
+		}
+		accum *= 4;
+		accum_sqrt *= 2;
 	}
+	vpl_id -= vpl_params.w * (accum - 1) / 3;
+	float n = accum_sqrt * vpl_params.z;
+	float j = floor(vpl_id / n);
+	float i = vpl_id - j * n;
+	float2 rsm_tc = (float2(i, j) + 0.5f) / n;
 
-	float j = floor(vpl_id / vpl_params.z);
-	float i = vpl_id - j * vpl_params.z;
-	float2 rsm_tc = float2(i, j) / vpl_params.z + vpl_params.w;
-	float cur_level = smaller_level - 1;
-
-	if (is_not_bottom_top_level.x)
+	float cur_level = smaller_level - k - vpl_params.y;
+	float next_level = cur_level + 1;
+	if (k != is_not_bottom_top_level.x)
 	{
 		float depth_deriv = depth_derivate_tex.SampleLevel(point_sampler, rsm_tc, cur_level).r;  
 		if (depth_deriv > depth_threshold)
@@ -123,16 +132,16 @@ float4 RSM2VPLsSpotPSNew(float2 tc : TEXCOORD0) : SV_Target
 			return -1;
 		}
 	}
-	if (is_not_bottom_top_level.y)
+	if (k != is_not_bottom_top_level.y)
 	{
-		float depth_deriv = depth_derivate_tex.SampleLevel(point_sampler, rsm_tc, smaller_level).r;
+		float depth_deriv = depth_derivate_tex.SampleLevel(point_sampler, rsm_tc, next_level).r;
 		if (depth_deriv <= depth_threshold)
 		{
 			return -1;
 		}
 	}
 
-	return RSM2VPLsSpot(tc, rsm_tc);
+	return RSM2VPLsSpot(tc, rsm_tc, cur_level);
 }
 		]]>
 	</shader>
