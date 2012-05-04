@@ -36,7 +36,6 @@
 	<parameter type="texture2D" name="normal_es_tex"/>
 	<parameter type="texture2D" name="depth_tex" />
 	<parameter type="texture2D" name="depth_derivate_tex" />
-	<parameter type="texture2D" name="vpl_tex" />
 
 	<shader>
 		<![CDATA[
@@ -103,7 +102,7 @@ float4 RSM2VPLsSpotPS(float2 tc : TEXCOORD0) : SV_Target
 
 float4 RSM2VPLsSpotPSNew(float2 tc : TEXCOORD0) : SV_Target
 {
-	float vpl_id = (1.0 - tc.x) * vpl_params.x;
+	float vpl_id = floor((1.0 - tc.x) * vpl_params.x);
 	float accum = 1;
 	float accum_sqrt = 1;
 	int k;

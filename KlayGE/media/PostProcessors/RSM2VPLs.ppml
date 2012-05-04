@@ -46,7 +46,6 @@
 			<pin name="normal_es_tex" />
 			<pin name="depth_tex" />
 			<pin name="depth_derivate_tex" />
-			<pin name="vpl_tex" />
 		</input>
 		<output>
 			<pin name="output"/>
