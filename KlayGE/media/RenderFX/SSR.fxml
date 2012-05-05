@@ -1,0 +1,179 @@
+<?xml version='1.0'?>
+
+<effect>
+	<include name="PostProcess.fxml"/>
+	<include name="DeferredRenderingUtil.fxml"/>
+	<include name="util.fxml"/>
+
+	<cbuffer name="per_frame">
+		<parameter type="float4x4" name="proj"/>
+		<parameter type="float4x4" name="inv_proj"/>
+		<parameter type="float2" name="near_q"/>
+		<parameter type="float" name="ray_length"/>
+	</cbuffer>
+
+	<cbuffer name="pp_params">
+		<parameter type="int" name="min_samples"/>
+		<parameter type="int" name="max_samples"/>
+		<parameter type="float" name="ray_length_fadeout_factor"/>
+		<parameter type="float" name="roughness"/>
+	</cbuffer>
+	
+	<parameter type="texture2D" name="g_buffer_tex"/>
+	<parameter type="texture2D" name="depth_tex"/>
+	<parameter type="texture2D" name="background_tex"/>
+
+	<parameter type="sampler" name="point_sampler">
+		<state name="filtering" value="min_mag_mip_point"/>
+		<state name="address_u" value="clamp"/>
+		<state name="address_v" value="clamp"/>
+	</parameter>
+
+	<shader>
+		<![CDATA[
+void ScreenSpaceReflectionPostProcessVS(float4 pos : POSITION,
+				out float2 oTc0 : TEXCOORD0,
+				out float3 oViewDir : TEXCOORD1,
+				out float4 oPos : SV_Position)
+{
+	PostProcessVS(pos, oTc0, oPos);
+	oViewDir = mul(oPos, inv_proj).xyz;
+}
+
+float4 ScreenSpaceReflectionPostProcessPS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Target
+{
+	float3 normal = GetNormal(g_buffer_tex.Sample(point_sampler, tc)); // eye space normal 
+	view_dir = normalize(view_dir); // eye space view direction
+	
+	float linear_depth = depth_tex.SampleLevel(point_sampler, tc, 0).x;
+	float non_linear_depth = linear_depth_to_non_linear(linear_depth, near_q.x, near_q.y);
+	float3 tex_pos = float3(tc, non_linear_depth); // let z component be projected nonlinear depth, so we can do linear interpolation in screen space
+	
+	float3 pos_es = view_dir * (linear_depth / view_dir.z);
+
+	float3 reflect_vec = normalize(reflect(view_dir, normal)); // eye space reflect vector
+	float4 proj_ray_end = mul(float4(pos_es + reflect_vec * ray_length, 1), proj);
+	proj_ray_end.xyz /= proj_ray_end.w;
+	float3 tex_reflect_vec = float3(TexCoordFromPos(proj_ray_end), proj_ray_end.z) - tex_pos;
+
+	// the reflect vector completely perpendiculars to screen
+	if (!any(tex_reflect_vec.xy))
+	{
+		return 0;
+	}
+
+	// try to compute the intersection point of reflection vector and screen edge
+	float t1 = 1;
+	if (tex_reflect_vec.x < 0)
+	{
+		t1 = -tex_pos.x / tex_reflect_vec.x;
+	}
+	else if (tex_reflect_vec.x > 1)
+	{
+		t1 = (1 - tex_pos.x) / tex_reflect_vec.x;
+	}
+
+	float t2 = 1;
+	if (tex_reflect_vec.y < 0)
+	{
+		t2 = -tex_pos.y / tex_reflect_vec.y;
+	}
+	else if (tex_reflect_vec.y > 1)
+	{
+		t2 = (1 - tex_pos.y) / tex_reflect_vec.y;
+	}
+
+	float3 tex_offset = min(t1, t2) * tex_reflect_vec;
+	
+	float orientation_factor = dot(reflect_vec, float3(0, 0, 1));
+	int num_steps = (int)lerp(max_samples, min_samples, abs(orientation_factor));
+
+	float step = 1.0f / num_steps;
+	float3 sample_step = tex_offset * step;
+
+	int sample_index = 0;
+	float3 cur_tex_pos = tex_pos;
+
+	float t = 0;
+	float2 pt1, pt2 = 0;
+
+	while (sample_index < num_steps)
+	{
+		cur_tex_pos += sample_step;
+		float cur_sample_depth = depth_tex.SampleLevel(point_sampler, cur_tex_pos.xy, 0).r;
+		float cur_ray_march_depth = non_linear_depth_to_linear(cur_tex_pos.z, near_q.x, near_q.y);
+	
+		t += step;
+		
+		if (cur_ray_march_depth > cur_sample_depth)
+		{
+			sample_index = max_samples;
+			pt2 = float2(cur_sample_depth, cur_ray_march_depth);
+		}
+		else
+		{
+			++ sample_index;
+			pt1 = float2(cur_sample_depth, cur_ray_march_depth);
+		}
+	}
+
+	float delta1 = pt1.x - pt1.y;
+	float delta2 = pt2.x - pt2.y;
+	float delta = delta1 - delta2;
+
+	float2 sample_tex_pos;
+	if (delta2 == 0)
+	{
+		sample_tex_pos = tex_pos.xy + tex_offset.xy;
+	}
+	else
+	{
+		t = (delta1 * t - delta2 * (t - step)) / delta;
+		sample_tex_pos = tex_pos.xy + t * tex_offset.xy;
+	}
+
+	float reflect_dir_fade_out_factor = clamp((reflect_vec.z + 0.5f) / 0.7f, 0, 1);
+
+	float2 screen_edge = clamp(abs(sample_tex_pos - 0.5f) / 0.5f, 0, 1);
+	float screen_edge_fade_out_factor = clamp((1 - max(screen_edge.x, screen_edge.y)) / ray_length_fadeout_factor, 0, 1);
+
+	float3 clr = background_tex.Sample(point_sampler, sample_tex_pos).rgb;
+	float alpha = (screen_edge_fade_out_factor * reflect_dir_fade_out_factor + reflect_dir_fade_out_factor * (1 - reflect_dir_fade_out_factor)) * (1 - roughness);
+
+	return float4(clr, alpha);
+}
+		]]>
+	</shader>
+
+	<technique name="ScreenSpaceReflectionPostProcess">
+		<pass name="p0">
+			<state name="cull_mode" value="back"/>
+			<state name="depth_enable" value="false"/>
+			<state name="depth_write_mask" value="false"/>
+
+			<state name="front_stencil_enable" value="true"/>
+			<state name="front_stencil_func" value="equal"/>
+			<state name="front_stencil_ref" value="64"/>
+			<state name="front_stencil_pass" value="keep"/>
+			<state name="front_stencil_read_mask" value="192"/>
+			<state name="front_stencil_write_mask" value="0"/>
+			<state name="back_stencil_enable" value="true"/>
+			<state name="back_stencil_func" value="equal"/>
+			<state name="back_stencil_ref" value="64"/>
+			<state name="back_stencil_pass" value="keep"/>
+			<state name="back_stencil_read_mask" value="192"/>
+			<state name="back_stencil_write_mask" value="0"/>
+
+			<state name="blend_enable" value="true"/>
+			<state name="blend_op" value="add"/>
+			<state name="src_blend" value="src_alpha"/>
+			<state name="dest_blend" value="inv_src_alpha"/>
+			<state name="blend_op_alpha" value="add"/>
+			<state name="src_blend_alpha" value="src_alpha"/>
+			<state name="dest_blend_alpha" value="zero"/>
+
+			<state name="vertex_shader" value="ScreenSpaceReflectionPostProcessVS()"/>
+			<state name="pixel_shader" value="ScreenSpaceReflectionPostProcessPS()"/>
+		</pass>
+	</technique>
+</effect>

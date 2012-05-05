@@ -254,6 +254,10 @@ namespace KlayGE
 	typedef boost::shared_ptr<GpuFftCS4> GpuFftCS4Ptr;
 	class GpuFftCS5;
 	typedef boost::shared_ptr<GpuFftCS4> GpuFftCS5Ptr;
+	class SSGIPostProcess;
+	typedef boost::shared_ptr<SSGIPostProcess> SSGIPostProcessPtr;
+	class SSRPostProcess;
+	typedef boost::shared_ptr<SSRPostProcess> SSRPostProcessPtr;
 
 	class UIManager;
 	typedef boost::shared_ptr<UIManager> UIManagerPtr;

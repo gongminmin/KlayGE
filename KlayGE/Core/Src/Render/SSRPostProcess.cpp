@@ -1,0 +1,51 @@
+#include <KlayGE/KlayGE.hpp>
+#include <KlayGE/Context.hpp>
+#include <KlayGE/App3D.hpp>
+#include <KlayGE/Camera.hpp>
+#include <KlayGE/RenderEffect.hpp>
+
+#include <KlayGE/SSRPostProcess.hpp>
+
+namespace KlayGE
+{
+	SSRPostProcess::SSRPostProcess()
+			: PostProcess(L"ScreenSpaceReflection")
+	{
+		input_pins_.push_back(std::make_pair("g_buffer_tex", TexturePtr()));
+		input_pins_.push_back(std::make_pair("depth_tex", TexturePtr()));
+		input_pins_.push_back(std::make_pair("background_tex", TexturePtr()));
+
+		output_pins_.push_back(std::make_pair("out_tex", TexturePtr()));
+
+		params_.push_back(std::make_pair("min_samples", RenderEffectParameterPtr()));
+		params_.push_back(std::make_pair("max_samples", RenderEffectParameterPtr()));
+		params_.push_back(std::make_pair("ray_length_fadeout_factor", RenderEffectParameterPtr()));
+		params_.push_back(std::make_pair("roughness", RenderEffectParameterPtr()));
+
+		RenderFactory & rf = Context::Instance().RenderFactoryInstance();
+		RenderEffectPtr effect = rf.LoadEffect("SSR.fxml");
+		this->Technique(effect->TechniqueByName("ScreenSpaceReflectionPostProcess"));
+
+		if (technique_ && technique_->Validate())
+		{
+			proj_param_ = effect->ParameterByName("proj");
+			inv_proj_param_ = effect->ParameterByName("inv_proj");
+			near_q_param_ = effect->ParameterByName("near_q");
+			ray_length_param_ = effect->ParameterByName("ray_length");
+		}
+	}
+
+	void SSRPostProcess::OnRenderBegin()
+	{
+		PostProcess::OnRenderBegin();
+
+		Camera& camera = Context::Instance().AppInstance().ActiveCamera();
+		float q = camera.FarPlane() / (camera.FarPlane() - camera.NearPlane());
+
+		float4x4 proj_mat = camera.ProjMatrix();
+		*proj_param_ = proj_mat;
+		*inv_proj_param_ = MathLib::inverse(proj_mat);
+		*near_q_param_ = float2(camera.NearPlane() * q, q);
+		*ray_length_param_ = camera.FarPlane() - camera.NearPlane();
+	}
+}
