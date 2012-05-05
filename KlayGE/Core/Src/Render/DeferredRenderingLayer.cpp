@@ -30,6 +30,7 @@
 #include <KlayGE/Mesh.hpp>
 #include <KlayGE/SSGIPostProcess.hpp>
 #include <KlayGE/SSVOPostProcess.hpp>
+#include <KlayGE/SSRPostProcess.hpp>
 //#include <KlayGE/half.hpp>
 
 #include <boost/typeof/typeof.hpp>
@@ -257,7 +258,7 @@ namespace KlayGE
 
 
 	DeferredRenderingLayer::DeferredRenderingLayer()
-		: ssgi_enabled_(false), ssvo_enabled_(true),
+		: ssgi_enabled_(false), ssvo_enabled_(true), ssr_enabled_(true),
 			illum_(0), indirect_scale_(1.0f)
 	{
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
@@ -316,6 +317,7 @@ namespace KlayGE
 		transparency_back_shading_buffer_ = rf.MakeFrameBuffer();
 		transparency_front_shading_buffer_ = rf.MakeFrameBuffer();
 		output_buffer_ = rf.MakeFrameBuffer();
+		ssr_buffer_ = rf.MakeFrameBuffer();
 
 		{
 			rl_cone_ = rf.MakeRenderLayout();
@@ -464,6 +466,8 @@ namespace KlayGE
 		ssvo_blur_pp_ = MakeSharedPtr<BlurPostProcess<SeparableBilateralFilterPostProcess> >(8, 1.0f,
 			rf.LoadEffect("SSVO.fxml")->TechniqueByName("SSVOBlurX"), rf.LoadEffect("SSVO.fxml")->TechniqueByName("SSVOBlurY"));
 
+		ssr_pp_ = MakeSharedPtr<SSRPostProcess>();
+
 		if (caps.max_simultaneous_rts > 1)
 		{
 			rsm_buffer_ = rf.MakeFrameBuffer();
@@ -593,6 +597,11 @@ namespace KlayGE
 	void DeferredRenderingLayer::SSVOEnabled(bool ssvo)
 	{
 		ssvo_enabled_ = ssvo;
+	}
+
+	void DeferredRenderingLayer::SSREnabled(bool ssr)
+	{
+		ssr_enabled_ = ssr;
 	}
 
 	void DeferredRenderingLayer::OutputPin(TexturePtr const & tex)
@@ -845,6 +854,9 @@ namespace KlayGE
 		}
 		small_ssvo_tex_ = rf.MakeTexture2D(width / 2, height / 2, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
 
+		ssr_tex_ = rf.MakeTexture2D(width, height, 1, 1, opaque_shading_tex_->Format(), 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+		ssr_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*ssr_tex_, 0, 1, 0));
+
 		if (opaque_g_buffer_rt0_tex_)
 		{
 			*(dr_effect_->ParameterByName("inv_width_height")) = float2(1.0f / width, 1.0f / height);
@@ -867,6 +879,10 @@ namespace KlayGE
 		ssvo_blur_pp_->InputPin(0, small_ssvo_tex_);
 		ssvo_blur_pp_->InputPin(1, opaque_depth_tex_);
 		ssvo_blur_pp_->OutputPin(0, opaque_lighting_tex_);
+
+		ssr_pp_->InputPin(0, opaque_g_buffer_rt0_tex_);
+		ssr_pp_->InputPin(1, opaque_depth_tex_);
+		ssr_pp_->InputPin(2, ssr_tex_);
 
 		if (rsm_buffer_)
 		{
@@ -938,6 +954,7 @@ namespace KlayGE
 			lights_.insert(lights_.end(), cur_lights.begin(), cur_lights.end());
 
 			has_transparency_objs_ = false;
+			has_reflective_objs_ = false;
 			visible_scene_objs_.resize(0);
 			SceneManager::SceneObjectsType const & scene_objs = scene_mgr.SceneObjects();
 			typedef BOOST_TYPEOF(scene_objs) SceneObjsType;
@@ -950,6 +967,10 @@ namespace KlayGE
 					if (so->AlphaBlend())
 					{
 						has_transparency_objs_ = true;
+					}
+					if (so->Reflection())
+					{
+						has_reflective_objs_ = true;
 					}
 				}
 			}
@@ -1408,6 +1429,35 @@ namespace KlayGE
 				}
 				else
 				{
+					if (has_reflective_objs_ && ssr_enabled_)
+					{
+						re.BindFrameBuffer(ssr_buffer_);
+
+						{
+							*shading_tex_param_ = opaque_shading_tex_;
+							re.Render(*technique_merge_shading_, *rl_quad_);
+						}
+						if (has_transparency_objs_)
+						{
+							*shading_tex_param_ = transparency_back_shading_tex_;
+							re.Render(*technique_merge_shading_alpha_blend_, *rl_quad_);
+						
+							*shading_tex_param_ = transparency_front_shading_tex_;
+							re.Render(*technique_merge_shading_alpha_blend_, *rl_quad_);
+						}
+
+						re.BindFrameBuffer(opaque_shading_buffer_);
+						ssr_pp_->Apply();
+						if (has_transparency_objs_)
+						{
+							re.BindFrameBuffer(transparency_back_shading_buffer_);
+							ssr_pp_->Apply();
+
+							re.BindFrameBuffer(transparency_front_shading_buffer_);
+							ssr_pp_->Apply();
+						}
+					}
+
 					if (output_tex_)
 					{
 						re.BindFrameBuffer(output_buffer_);

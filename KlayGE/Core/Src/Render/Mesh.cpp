@@ -319,6 +319,7 @@ namespace KlayGE
 		special_shading_ = false;
 		need_alpha_blend_ = false;
 		need_alpha_test_ = false;
+		need_reflection_ = false;
 
 		RenderModelPtr model = model_.lock();
 
@@ -375,7 +376,7 @@ namespace KlayGE
 		{
 			need_alpha_blend_ = true;
 		}
-		if ((mtl_->emit.x() > 0) || (mtl_->emit.y() > 0) || (mtl_->emit.z() > 0) || emit_tex_ || need_alpha_blend_)
+		if ((mtl_->emit.x() > 0) || (mtl_->emit.y() > 0) || (mtl_->emit.z() > 0) || emit_tex_ || need_alpha_blend_ || need_reflection_)
 		{
 			special_shading_ = true;
 		}

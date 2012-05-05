@@ -15,8 +15,6 @@ namespace KlayGE
 		input_pins_.push_back(std::make_pair("depth_tex", TexturePtr()));
 		input_pins_.push_back(std::make_pair("background_tex", TexturePtr()));
 
-		output_pins_.push_back(std::make_pair("out_tex", TexturePtr()));
-
 		params_.push_back(std::make_pair("min_samples", RenderEffectParameterPtr()));
 		params_.push_back(std::make_pair("max_samples", RenderEffectParameterPtr()));
 		params_.push_back(std::make_pair("ray_length_fadeout_factor", RenderEffectParameterPtr()));
@@ -33,12 +31,15 @@ namespace KlayGE
 			near_q_param_ = effect->ParameterByName("near_q");
 			ray_length_param_ = effect->ParameterByName("ray_length");
 		}
+
+		this->SetParam(0, static_cast<int32_t>(20));
+		this->SetParam(1, static_cast<int32_t>(30));
+		this->SetParam(2, 0.6f);
+		this->SetParam(3, 0.0f);
 	}
 
-	void SSRPostProcess::OnRenderBegin()
+	void SSRPostProcess::Apply()
 	{
-		PostProcess::OnRenderBegin();
-
 		Camera& camera = Context::Instance().AppInstance().ActiveCamera();
 		float q = camera.FarPlane() / (camera.FarPlane() - camera.NearPlane());
 
@@ -47,5 +48,7 @@ namespace KlayGE
 		*inv_proj_param_ = MathLib::inverse(proj_mat);
 		*near_q_param_ = float2(camera.NearPlane() * q, q);
 		*ray_length_param_ = camera.FarPlane() - camera.NearPlane();
+
+		this->Render();
 	}
 }

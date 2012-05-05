@@ -32,6 +32,7 @@ namespace KlayGE
 
 		void SSGIEnabled(bool ssgi);
 		void SSVOEnabled(bool ssvo);
+		void SSREnabled(bool ssr);
 
 		void OutputPin(TexturePtr const & tex);
 
@@ -185,6 +186,11 @@ namespace KlayGE
 		TexturePtr small_ssvo_tex_;
 		bool ssvo_enabled_;
 
+		PostProcessPtr ssr_pp_;
+		FrameBufferPtr ssr_buffer_;
+		TexturePtr ssr_tex_;
+		bool ssr_enabled_;
+
 		RenderLayoutPtr rl_cone_;
 		RenderLayoutPtr rl_pyramid_;
 		RenderLayoutPtr rl_box_;
@@ -241,6 +247,7 @@ namespace KlayGE
 
 		std::vector<SceneObject*> visible_scene_objs_;
 		bool has_transparency_objs_;
+		bool has_reflective_objs_;
 
 		FrameBufferPtr rsm_buffer_;
 		TexturePtr rsm_texs_[2];

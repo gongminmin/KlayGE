@@ -41,7 +41,7 @@ namespace KlayGE
 	public:
 		SSRPostProcess();
 
-		void OnRenderBegin();
+		void Apply();
 
 	private:
 		RenderEffectParameterPtr proj_param_;

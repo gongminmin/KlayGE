@@ -131,6 +131,10 @@ namespace KlayGE
 		{
 			return need_alpha_blend_;
 		}
+		virtual bool Reflection() const
+		{
+			return need_reflection_;
+		}
 
 	protected:
 		virtual void UpdateInstanceStream();
@@ -183,6 +187,7 @@ namespace KlayGE
 		bool special_shading_;
 		bool need_alpha_blend_;
 		bool need_alpha_test_;
+		bool need_reflection_;
 
 		RenderMaterialPtr mtl_;
 

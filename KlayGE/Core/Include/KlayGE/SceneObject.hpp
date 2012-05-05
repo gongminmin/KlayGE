@@ -83,6 +83,10 @@ namespace KlayGE
 		{
 			return renderable_->AlphaBlend();
 		}
+		bool Reflection() const
+		{
+			return renderable_->Reflection();
+		}
 
 	protected:
 		uint32_t attrib_;
