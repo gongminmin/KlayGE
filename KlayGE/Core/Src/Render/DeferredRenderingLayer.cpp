@@ -881,8 +881,9 @@ namespace KlayGE
 		ssvo_blur_pp_->OutputPin(0, opaque_lighting_tex_);
 
 		ssr_pp_->InputPin(0, opaque_g_buffer_rt0_tex_);
-		ssr_pp_->InputPin(1, opaque_depth_tex_);
-		ssr_pp_->InputPin(2, ssr_tex_);
+		ssr_pp_->InputPin(1, opaque_g_buffer_rt1_tex_);
+		ssr_pp_->InputPin(2, opaque_depth_tex_);
+		ssr_pp_->InputPin(3, ssr_tex_);
 
 		if (rsm_buffer_)
 		{

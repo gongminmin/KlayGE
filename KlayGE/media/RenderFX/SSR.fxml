@@ -1,6 +1,7 @@
 <?xml version='1.0'?>
 
 <effect>
+	<include name="Lighting.fxml"/>
 	<include name="PostProcess.fxml"/>
 	<include name="DeferredRenderingUtil.fxml"/>
 	<include name="util.fxml"/>
@@ -16,10 +17,10 @@
 		<parameter type="int" name="min_samples"/>
 		<parameter type="int" name="max_samples"/>
 		<parameter type="float" name="ray_length_fadeout_factor"/>
-		<parameter type="float" name="roughness"/>
 	</cbuffer>
 	
-	<parameter type="texture2D" name="g_buffer_tex"/>
+	<parameter type="texture2D" name="g_buffer_0_tex"/>
+	<parameter type="texture2D" name="g_buffer_1_tex"/>
 	<parameter type="texture2D" name="depth_tex"/>
 	<parameter type="texture2D" name="background_tex"/>
 
@@ -42,7 +43,7 @@ void ScreenSpaceReflectionPostProcessVS(float4 pos : POSITION,
 
 float4 ScreenSpaceReflectionPostProcessPS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Target
 {
-	float3 normal = GetNormal(g_buffer_tex.Sample(point_sampler, tc)); // eye space normal 
+	float3 normal = GetNormal(g_buffer_0_tex.Sample(point_sampler, tc)); // eye space normal 
 	view_dir = normalize(view_dir); // eye space view direction
 	
 	float linear_depth = depth_tex.SampleLevel(point_sampler, tc, 0).x;
@@ -136,9 +137,11 @@ float4 ScreenSpaceReflectionPostProcessPS(float2 tc : TEXCOORD0, float3 view_dir
 
 	float2 screen_edge = clamp(abs(sample_tex_pos - 0.5f) / 0.5f, 0, 1);
 	float screen_edge_fade_out_factor = clamp((1 - max(screen_edge.x, screen_edge.y)) / ray_length_fadeout_factor, 0, 1);
+	
+	float fresnel = fresnel_term_schlick(-view_dir, normal, g_buffer_1_tex.Sample(point_sampler, tc).w).x;
 
 	float3 clr = background_tex.Sample(point_sampler, sample_tex_pos).rgb;
-	float alpha = (screen_edge_fade_out_factor * reflect_dir_fade_out_factor + reflect_dir_fade_out_factor * (1 - reflect_dir_fade_out_factor)) * (1 - roughness);
+	float alpha = (screen_edge_fade_out_factor * reflect_dir_fade_out_factor + reflect_dir_fade_out_factor * (1 - reflect_dir_fade_out_factor)) * fresnel;
 
 	return float4(clr, alpha);
 }
