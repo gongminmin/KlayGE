@@ -17,6 +17,7 @@
 
 #include <limits>
 #include <boost/static_assert.hpp>
+#include <boost/type_traits/has_trivial_destructor.hpp>
 
 namespace KlayGE
 {
@@ -108,6 +109,20 @@ namespace KlayGE
 		}
 
 		void destroy(pointer p)
+		{
+			this->destroy_t<boost::has_trivial_destructor<boost::remove_pointer<pointer>::type>::value>(p);
+		}
+
+		template <bool trivial>
+		void destroy_t(pointer p);
+
+		template <>
+		void destroy_t<true>(pointer /*p*/)
+		{
+		}
+
+		template <>
+		void destroy_t<false>(pointer p)
 		{
 			p->~T();
 		}

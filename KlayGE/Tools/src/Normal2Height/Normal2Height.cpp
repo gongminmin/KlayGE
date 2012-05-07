@@ -225,7 +225,7 @@ int main(int argc, char* argv[])
 	float min_z = 1e-6f;
 	if (argc >= 4)
 	{
-		min_z = atof(argv[3]);
+		min_z = static_cast<float>(atof(argv[3]));
 	}
 
 	CreateHeightMap(argv[1], argv[2], min_z);
