@@ -22,7 +22,9 @@
 #include <KlayGE/Socket.hpp>
 
 #ifdef KLAYGE_COMPILER_MSVC
+#ifndef KLAYGE_CPU_ARM
 #pragma comment(lib, "wsock32.lib")
+#endif
 #endif
 
 #if defined KLAYGE_PLATFORM_WINDOWS

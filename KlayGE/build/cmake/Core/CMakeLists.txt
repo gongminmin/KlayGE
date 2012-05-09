@@ -378,6 +378,8 @@ INCLUDE_DIRECTORIES(${KLAYGE_PROJECT_DIR}/../kfont/include)
 LINK_DIRECTORIES(${KLAYGE_PROJECT_DIR}/../External/boost/lib_${KLAYGE_COMPILER_NAME}${KLAYGE_COMPILER_VERSION}_${KLAYGE_ARCH_NAME}/lib)
 IF(KLAYGE_ARCH_NAME MATCHES "x64")
 	LINK_DIRECTORIES(${KLAYGE_PROJECT_DIR}/../External/Python/libs/amd64)
+ELSEIF(KLAYGE_ARCH_NAME MATCHES "arm")
+	LINK_DIRECTORIES(${KLAYGE_PROJECT_DIR}/../External/Python/libs/arm)
 ELSE()
 	LINK_DIRECTORIES(${KLAYGE_PROJECT_DIR}/../External/Python/libs)
 ENDIF()
@@ -403,7 +405,9 @@ IF(MSVC)
 	# hack to get around the "Debug" and "Release" directories cmake tries to add on Windows
 	SET_TARGET_PROPERTIES(${LIB_NAME} PROPERTIES IMPORT_PREFIX "../")
 
-	SET(EXTRA_LINKED_LIBRARIES wsock32)
+	IF(KLAYGE_ARCH_NAME MATCHES "x86" OR KLAYGE_ARCH_NAME MATCHES "x64")
+		SET(EXTRA_LINKED_LIBRARIES wsock32)
+	ENDIF()
 ELSE()
 	SET(EXTRA_LINKED_LIBRARIES
 		boost_date_time boost_filesystem boost_signals boost_system boost_thread
