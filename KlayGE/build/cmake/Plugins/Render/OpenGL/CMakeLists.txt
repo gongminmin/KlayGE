@@ -63,9 +63,9 @@ IF(MSVC)
 	# hack to get around the "Debug" and "Release" directories cmake tries to add on Windows
 	SET_TARGET_PROPERTIES(${LIB_NAME} PROPERTIES IMPORT_PREFIX "../")
 
-	SET(EXTRA_LINKED_LIBRARIES cg glu32)
+	SET(EXTRA_LINKED_LIBRARIES cg)
 ELSE()
-	SET(EXTRA_LINKED_LIBRARIES boost_system cg GLU)
+	SET(EXTRA_LINKED_LIBRARIES boost_system cg)
 ENDIF()
 
 SET_TARGET_PROPERTIES(${LIB_NAME} PROPERTIES

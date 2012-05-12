@@ -71,6 +71,7 @@ SET(RENDERING_SOURCE_FILES
 	${KLAYGE_PROJECT_DIR}/Core/Src/Render/Camera.cpp
 	${KLAYGE_PROJECT_DIR}/Core/Src/Render/CameraController.cpp
 	${KLAYGE_PROJECT_DIR}/Core/Src/Render/DeferredRenderingLayer.cpp
+	${KLAYGE_PROJECT_DIR}/Core/Src/Render/ElementFormat.cpp
 	${KLAYGE_PROJECT_DIR}/Core/Src/Render/FFT.cpp
 	${KLAYGE_PROJECT_DIR}/Core/Src/Render/Font.cpp
 	${KLAYGE_PROJECT_DIR}/Core/Src/Render/FrameBuffer.cpp

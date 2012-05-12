@@ -32,7 +32,6 @@
 #include <boost/typeof/typeof.hpp>
 
 #include <glloader/glloader.h>
-#include <GL/glu.h>
 
 #include <KlayGE/OpenGL/OGLRenderEngine.hpp>
 #include <KlayGE/OpenGL/OGLMapping.hpp>
@@ -40,7 +39,6 @@
 
 #ifdef KLAYGE_COMPILER_MSVC
 #pragma comment(lib, "OpenGL32.lib")
-#pragma comment(lib, "glu32.lib")
 #endif
 
 namespace KlayGE

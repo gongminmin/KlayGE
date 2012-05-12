@@ -22,17 +22,10 @@
 #include <cstring>
 
 #include <glloader/glloader.h>
-#ifndef KLAYGE_PLATFORM_ANDROID
-#include <GL/glu.h>
-#endif
 
 #include <KlayGE/OpenGLES/OGLESRenderEngine.hpp>
 #include <KlayGE/OpenGLES/OGLESMapping.hpp>
 #include <KlayGE/OpenGLES/OGLESTexture.hpp>
-
-#ifdef KLAYGE_COMPILER_MSVC
-#pragma comment(lib, "glu32.lib")
-#endif
 
 namespace KlayGE
 {
@@ -251,62 +244,8 @@ namespace KlayGE
 		std::vector<uint8_t> data_in(src_width * src_height * src_format_size);
 		std::vector<uint8_t> data_out(dst_width * dst_height * dst_format_size);
 
-		for (uint32_t z = 0; z < src_depth; ++ z)
-		{
-			if ((src_width != dst_width) || (src_height != dst_height))
-			{
-#ifndef KLAYGE_PLATFORM_ANDROID
-				{
-					Texture::Mapper mapper(*this, src_array_index, src_level, TMA_Read_Only, src_x_offset, src_y_offset, src_z_offset + z,
-						src_width, src_height, 1);
-					uint8_t const * s = mapper.Pointer<uint8_t>();
-					uint8_t* d = &data_in[0];
-					for (uint32_t y = 0; y < src_height; ++ y)
-					{
-						memcpy(d, s, src_width * src_format_size);
-
-						s += mapper.RowPitch();
-						d += src_width * src_format_size;
-					}
-				}
-
-				gluScaleImage(gl_format, src_width, src_height, gl_type, &data_in[0],
-					dst_width, dst_height, gl_target_type, &data_out[0]);
-
-				{
-					Texture::Mapper mapper(target, dst_array_index, dst_level, TMA_Write_Only, dst_x_offset, dst_y_offset, dst_z_offset + z,
-						dst_width, dst_height, 1);
-					uint8_t const * s = &data_out[0];
-					uint8_t* d = mapper.Pointer<uint8_t>();
-					for (uint32_t y = 0; y < src_height; ++ y)
-					{
-						memcpy(d, s, dst_width * dst_format_size);
-
-						s += src_width * src_format_size;
-						d += mapper.RowPitch();
-					}
-				}
-#else
-				BOOST_ASSERT(false);
-#endif
-			}
-			else
-			{
-				Texture::Mapper mapper_src(*this, src_array_index, src_level, TMA_Read_Only, src_x_offset, src_y_offset, src_z_offset + z,
-						src_width, src_height, 1);
-				Texture::Mapper mapper_dst(target, dst_array_index, dst_level, TMA_Write_Only, dst_x_offset, dst_y_offset, dst_z_offset + z,
-						dst_width, dst_height, 1);
-				uint8_t const * s = mapper_src.Pointer<uint8_t>();
-				uint8_t* d = mapper_dst.Pointer<uint8_t>();
-				for (uint32_t y = 0; y < src_height; ++ y)
-				{
-					memcpy(d, s, src_width * src_format_size);
-
-					s += mapper_src.RowPitch();
-					d += mapper_dst.RowPitch();
-				}
-			}
-		}
+		this->ResizeTexture3D(target, dst_array_index, dst_level, dst_x_offset, dst_y_offset, dst_z_offset, dst_width, dst_height, dst_depth,
+			src_array_index, src_level, src_x_offset, src_y_offset, src_z_offset, src_width, src_height, src_depth, true);
 	}
 
 	void OGLESTexture3D::Map3D(uint32_t array_index, uint32_t level, TextureMapAccess tma,

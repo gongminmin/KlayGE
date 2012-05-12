@@ -2848,6 +2848,664 @@ namespace KlayGE
 		return access_hint_;
 	}
 
+	void Texture::ResizeTexture1D(Texture& target,
+		uint32_t dst_array_index, uint32_t dst_level, uint32_t dst_x_offset, uint32_t dst_width,
+		uint32_t src_array_index, uint32_t src_level, uint32_t src_x_offset, uint32_t src_width,
+		bool linear)
+	{
+		BOOST_ASSERT(TT_1D == this->Type());
+		BOOST_ASSERT(TT_1D == target.Type());
+
+		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+
+		uint32_t const src_elem_size = NumFormatBytes(this->Format());
+		uint32_t const dst_elem_size = NumFormatBytes(target.Format());
+
+		TexturePtr src_cpu;
+		Texture* src_cpu_ptr;
+		uint32_t src_cpu_array_index;
+		uint32_t src_cpu_level;
+		uint32_t src_cpu_x_offset;
+		if (this->AccessHint() & EAH_CPU_Read)
+		{
+			src_cpu_ptr = this;
+			src_cpu_array_index = src_array_index;
+			src_cpu_level = src_level;
+			src_cpu_x_offset = src_x_offset;
+		}
+		else
+		{
+			src_cpu = rf.MakeTexture1D(src_width, 1, 1,
+				this->Format(), this->SampleCount(), this->SampleQuality(), EAH_CPU_Read, NULL);
+			src_cpu_ptr = src_cpu.get();
+
+			this->CopyToSubTexture1D(*src_cpu, 0, 0, 0, src_width, src_array_index, src_level, src_x_offset, src_width);
+
+			src_cpu_array_index = 0;
+			src_cpu_level = 0;
+			src_cpu_x_offset = 0;
+		}
+
+		TexturePtr dst_cpu;
+		Texture* dst_cpu_ptr;
+		uint32_t dst_cpu_array_index;
+		uint32_t dst_cpu_level;
+		uint32_t dst_cpu_x_offset;
+		if (target.AccessHint() & EAH_CPU_Write)
+		{
+			dst_cpu_ptr = &target;
+			dst_cpu_array_index = dst_array_index;
+			dst_cpu_level = dst_level;
+			dst_cpu_x_offset = dst_x_offset;
+		}
+		else
+		{
+			dst_cpu = rf.MakeTexture1D(dst_width, 1, 1,
+				target.Format(), target.SampleCount(), target.SampleQuality(), EAH_CPU_Write, NULL);
+			dst_cpu_ptr = dst_cpu.get();
+
+			dst_cpu_array_index = 0;
+			dst_cpu_level = 0;
+			dst_cpu_x_offset = 0;
+		}
+
+		if (!linear && (this->Format() == target.Format()))
+		{
+			Mapper src_mapper(*src_cpu_ptr, src_cpu_array_index, src_cpu_level, TMA_Read_Only, src_cpu_x_offset, src_width);
+			Mapper dst_mapper(*dst_cpu_ptr, dst_cpu_array_index, dst_cpu_level, TMA_Write_Only, dst_cpu_x_offset, dst_width);
+
+			if (src_width == dst_width)
+			{
+				memcpy(dst_mapper.Pointer<uint8_t>(), src_mapper.Pointer<uint8_t>(), src_width * src_elem_size);
+			}
+			else
+			{
+				uint8_t const * src_p = src_mapper.Pointer<uint8_t>();
+				uint8_t* dst_p = dst_mapper.Pointer<uint8_t>();
+				for (uint32_t x = 0; x < dst_width; ++ x, dst_p += dst_elem_size)
+				{
+					float fx = static_cast<float>(x) / dst_width * src_width;
+					uint32_t sx = static_cast<uint32_t>(fx + 0.5f);
+					memcpy(dst_p, src_p + sx * src_elem_size, src_elem_size);
+				}
+			}
+		}
+		else
+		{
+			std::vector<Color> src_32f(src_width);
+			{
+				Mapper src_mapper(*src_cpu_ptr, src_cpu_array_index, src_cpu_level, TMA_Read_Only, src_cpu_x_offset, src_width);
+				ConvertToABGR32F(this->Format(), src_mapper.Pointer<uint8_t>(), src_width, &src_32f[0]);
+			}
+
+			std::vector<Color> dst_32f(dst_width);
+			if (linear)
+			{
+				for (uint32_t x = 0; x < dst_width; ++ x)
+				{
+					float fx = static_cast<float>(x) / dst_width * src_width;
+					uint32_t sx0 = static_cast<uint32_t>(fx);
+					uint32_t sx1 = MathLib::clamp<uint32_t>(sx0 + 1, 0, src_width - 1);
+					float weight = fx - sx0;
+					dst_32f[x] = MathLib::lerp(src_32f[sx0], src_32f[sx1], weight);
+				}
+			}
+			else
+			{
+				for (uint32_t x = 0; x < dst_width; ++ x)
+				{
+					float fx = static_cast<float>(x) / dst_width * src_width;
+					uint32_t sx = static_cast<uint32_t>(fx + 0.5f);
+					dst_32f[x] = src_32f[sx];
+				}
+			}
+			{
+				Mapper dst_mapper(*dst_cpu_ptr, dst_cpu_array_index, dst_cpu_level, TMA_Write_Only, dst_cpu_x_offset, dst_width);
+				ConvertFromABGR32F(target.Format(), &dst_32f[0], dst_width, dst_mapper.Pointer<uint8_t>());
+			}
+		}
+
+		if (dst_cpu_ptr != &target)
+		{
+			dst_cpu_ptr->CopyToSubTexture1D(target, dst_array_index, dst_level, dst_x_offset, dst_width, 0, 0, 0, dst_width);
+		}
+	}
+
+	void Texture::ResizeTexture2D(Texture& target,
+		uint32_t dst_array_index, uint32_t dst_level, uint32_t dst_x_offset, uint32_t dst_y_offset, uint32_t dst_width, uint32_t dst_height,
+		uint32_t src_array_index, uint32_t src_level, uint32_t src_x_offset, uint32_t src_y_offset, uint32_t src_width, uint32_t src_height,
+		bool linear)
+	{
+		BOOST_ASSERT((TT_2D == this->Type()) || (TT_Cube == this->Type()));
+		BOOST_ASSERT((TT_2D == target.Type()) || (TT_Cube == target.Type()));
+
+		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+
+		uint32_t const src_elem_size = NumFormatBytes(this->Format());
+		uint32_t const dst_elem_size = NumFormatBytes(target.Format());
+
+		TexturePtr src_cpu;
+		Texture* src_cpu_ptr;
+		uint32_t src_cpu_array_index;
+		uint32_t src_cpu_level;
+		uint32_t src_cpu_x_offset;
+		uint32_t src_cpu_y_offset;
+		if (this->AccessHint() & EAH_CPU_Read)
+		{
+			src_cpu_ptr = this;
+			src_cpu_array_index = src_array_index;
+			src_cpu_level = src_level;
+			src_cpu_x_offset = src_x_offset;
+			src_cpu_y_offset = src_y_offset;
+		}
+		else
+		{
+			src_cpu = rf.MakeTexture2D(src_width, src_height, 1, 1,
+				this->Format(), this->SampleCount(), this->SampleQuality(), EAH_CPU_Read, NULL);
+			src_cpu_ptr = src_cpu.get();
+
+			this->CopyToSubTexture2D(*src_cpu, 0, 0, 0, 0, src_width, src_height, 
+				src_array_index, src_level, src_x_offset, src_y_offset, src_width, src_height);
+
+			src_cpu_array_index = 0;
+			src_cpu_level = 0;
+			src_cpu_x_offset = 0;
+			src_cpu_y_offset = 0;
+		}
+
+		TexturePtr dst_cpu;
+		Texture* dst_cpu_ptr;
+		uint32_t dst_cpu_array_index;
+		uint32_t dst_cpu_level;
+		uint32_t dst_cpu_x_offset;
+		uint32_t dst_cpu_y_offset;
+		if (target.AccessHint() & EAH_CPU_Write)
+		{
+			dst_cpu_ptr = &target;
+			dst_cpu_array_index = dst_array_index;
+			dst_cpu_level = dst_level;
+			dst_cpu_x_offset = dst_x_offset;
+			dst_cpu_y_offset = dst_y_offset;
+		}
+		else
+		{
+			dst_cpu = rf.MakeTexture2D(dst_width, dst_height, 1, 1,
+				target.Format(), target.SampleCount(), target.SampleQuality(), EAH_CPU_Write, NULL);
+			dst_cpu_ptr = dst_cpu.get();
+
+			dst_cpu_array_index = 0;
+			dst_cpu_level = 0;
+			dst_cpu_x_offset = 0;
+			dst_cpu_y_offset = 0;
+		}
+
+		if (!linear && (this->Format() == target.Format()))
+		{
+			Mapper src_mapper(*src_cpu_ptr, src_cpu_array_index, src_cpu_level, TMA_Read_Only, src_cpu_x_offset, src_cpu_y_offset, src_width, src_height);
+			Mapper dst_mapper(*dst_cpu_ptr, dst_cpu_array_index, dst_cpu_level, TMA_Write_Only, dst_cpu_x_offset, dst_cpu_y_offset, dst_width, dst_height);
+
+			uint8_t const * src_ptr = src_mapper.Pointer<uint8_t>();
+			uint8_t* dst_ptr = dst_mapper.Pointer<uint8_t>();
+			uint32_t const src_pitch = src_mapper.RowPitch();
+			uint32_t const dst_pitch = dst_mapper.RowPitch();
+			for (uint32_t y = 0; y < dst_height; ++ y)
+			{
+				if (src_width == dst_width)
+				{
+					memcpy(dst_ptr + y * dst_pitch, src_ptr + y * src_pitch, src_width * src_elem_size);
+				}
+				else
+				{
+					float fy = static_cast<float>(y) / dst_height * src_height;
+					uint32_t sy = static_cast<uint32_t>(fy + 0.5f);
+					uint8_t const * src_p = src_ptr + sy * src_pitch;
+
+					uint8_t* dst_p = dst_ptr + y * dst_pitch;
+					for (uint32_t x = 0; x < dst_width; ++ x, dst_p += dst_elem_size)
+					{
+						float fx = static_cast<float>(x) / dst_width * src_width;
+						uint32_t sx = static_cast<uint32_t>(fx + 0.5f);
+						memcpy(dst_p, src_p + sx * src_elem_size, src_elem_size);
+					}
+				}
+			}
+		}
+		else
+		{
+			std::vector<Color> src_32f(src_width * src_height);
+			{
+				Mapper src_mapper(*src_cpu_ptr, src_cpu_array_index, src_cpu_level, TMA_Read_Only, src_cpu_x_offset, src_cpu_y_offset,
+					src_width, src_height);
+
+				uint8_t const * src_ptr = src_mapper.Pointer<uint8_t>();
+				uint32_t const src_pitch = src_mapper.RowPitch();
+				for (uint32_t y = 0; y < src_height; ++ y)
+				{
+					ConvertToABGR32F(this->Format(), src_ptr + y * src_pitch, src_width, &src_32f[y * src_width]);
+				}
+			}
+
+			std::vector<Color> dst_32f(dst_width * dst_height);
+			if (linear)
+			{
+				for (uint32_t y = 0; y < dst_height; ++ y)
+				{
+					float fy = static_cast<float>(y) / dst_height * src_height;
+					uint32_t sy0 = static_cast<uint32_t>(fy);
+					uint32_t sy1 = MathLib::clamp<uint32_t>(sy0 + 1, 0, src_height - 1);
+					float weight_y = fy - sy0;
+
+					for (uint32_t x = 0; x < dst_width; ++ x)
+					{
+						float fx = static_cast<float>(x) / dst_width * src_width;
+						uint32_t sx0 = static_cast<uint32_t>(fx);
+						uint32_t sx1 = MathLib::clamp<uint32_t>(sx0 + 1, 0, src_width - 1);
+						float weight_x = fx - sx0;
+						Color clr_x0 = MathLib::lerp(src_32f[sy0 * src_width + sx0], src_32f[sy0 * src_width + sx1], weight_x);
+						Color clr_x1 = MathLib::lerp(src_32f[sy1 * src_width + sx0], src_32f[sy1 * src_width + sx1], weight_x);
+						dst_32f[y * dst_width + x] = MathLib::lerp(clr_x0, clr_x1, weight_y);
+					}
+				}
+			}
+			else
+			{
+				for (uint32_t y = 0; y < dst_height; ++ y)
+				{
+					float fy = static_cast<float>(y) / dst_height * src_height;
+					uint32_t sy = static_cast<uint32_t>(fy + 0.5f);
+
+					for (uint32_t x = 0; x < dst_width; ++ x)
+					{
+						float fx = static_cast<float>(x) / dst_width * src_width;
+						uint32_t sx = static_cast<uint32_t>(fx + 0.5f);
+						dst_32f[y * dst_width + x] = src_32f[sy * src_width + sx];
+					}
+				}
+			}
+			{
+				Mapper dst_mapper(*dst_cpu_ptr, dst_cpu_array_index, dst_cpu_level, TMA_Write_Only, dst_cpu_x_offset, dst_cpu_y_offset, dst_width, dst_height);
+
+				uint8_t* dst_ptr = dst_mapper.Pointer<uint8_t>();
+				uint32_t const dst_pitch = dst_mapper.RowPitch();
+				for (uint32_t y = 0; y < dst_height; ++ y)
+				{
+					ConvertFromABGR32F(target.Format(), &dst_32f[y * dst_width], dst_width, dst_ptr + y * dst_pitch);
+				}
+			}
+		}
+
+		if (dst_cpu_ptr != &target)
+		{
+			dst_cpu_ptr->CopyToSubTexture2D(target, dst_array_index, dst_level, dst_x_offset, dst_y_offset, dst_width, dst_height, 0, 0, 0, 0, dst_width, dst_height);
+		}
+	}
+
+	void Texture::ResizeTexture3D(Texture& target,
+		uint32_t dst_array_index, uint32_t dst_level, uint32_t dst_x_offset, uint32_t dst_y_offset, uint32_t dst_z_offset, uint32_t dst_width, uint32_t dst_height, uint32_t dst_depth,
+		uint32_t src_array_index, uint32_t src_level, uint32_t src_x_offset, uint32_t src_y_offset, uint32_t src_z_offset, uint32_t src_width, uint32_t src_height, uint32_t src_depth,
+		bool linear)
+	{
+		BOOST_ASSERT(TT_3D == this->Type());
+		BOOST_ASSERT(TT_3D == target.Type());
+
+		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+
+		uint32_t const src_elem_size = NumFormatBytes(this->Format());
+		uint32_t const dst_elem_size = NumFormatBytes(target.Format());
+
+		TexturePtr src_cpu;
+		Texture* src_cpu_ptr;
+		uint32_t src_cpu_array_index;
+		uint32_t src_cpu_level;
+		uint32_t src_cpu_x_offset;
+		uint32_t src_cpu_y_offset;
+		uint32_t src_cpu_z_offset;
+		if (this->AccessHint() & EAH_CPU_Read)
+		{
+			src_cpu_ptr = this;
+			src_cpu_array_index = src_array_index;
+			src_cpu_level = src_level;
+			src_cpu_x_offset = src_x_offset;
+			src_cpu_y_offset = src_y_offset;
+			src_cpu_z_offset = src_z_offset;
+		}
+		else
+		{
+			src_cpu = rf.MakeTexture3D(src_width, src_height, src_depth, 1, 1,
+				this->Format(), this->SampleCount(), this->SampleQuality(), EAH_CPU_Read, NULL);
+			src_cpu_ptr = src_cpu.get();
+
+			this->CopyToSubTexture3D(*src_cpu, 0, 0, 0, 0, 0, src_width, src_height, src_depth, 
+				src_array_index, src_level, src_x_offset, src_y_offset, src_z_offset, src_width, src_height, src_depth);
+
+			src_cpu_array_index = 0;
+			src_cpu_level = 0;
+			src_cpu_x_offset = 0;
+			src_cpu_y_offset = 0;
+			src_cpu_z_offset = 0;
+		}
+
+		TexturePtr dst_cpu;
+		Texture* dst_cpu_ptr;
+		uint32_t dst_cpu_array_index;
+		uint32_t dst_cpu_level;
+		uint32_t dst_cpu_x_offset;
+		uint32_t dst_cpu_y_offset;
+		uint32_t dst_cpu_z_offset;
+		if (target.AccessHint() & EAH_CPU_Write)
+		{
+			dst_cpu_ptr = &target;
+			dst_cpu_array_index = dst_array_index;
+			dst_cpu_level = dst_level;
+			dst_cpu_x_offset = dst_x_offset;
+			dst_cpu_y_offset = dst_y_offset;
+			dst_cpu_z_offset = dst_z_offset;
+		}
+		else
+		{
+			dst_cpu = rf.MakeTexture3D(dst_width, dst_height, dst_depth, 1, 1,
+				target.Format(), target.SampleCount(), target.SampleQuality(), EAH_CPU_Write, NULL);
+			dst_cpu_ptr = dst_cpu.get();
+
+			dst_cpu_array_index = 0;
+			dst_cpu_level = 0;
+			dst_cpu_x_offset = 0;
+			dst_cpu_y_offset = 0;
+			dst_cpu_z_offset = 0;
+		}
+
+		if (!linear && (this->Format() == target.Format()))
+		{
+			Mapper src_mapper(*src_cpu_ptr, src_cpu_array_index, src_cpu_level, TMA_Read_Only, src_cpu_x_offset, src_cpu_y_offset, src_cpu_z_offset, src_width, src_height, src_depth);
+			Mapper dst_mapper(*dst_cpu_ptr, dst_cpu_array_index, dst_cpu_level, TMA_Write_Only, dst_cpu_x_offset, dst_cpu_y_offset, dst_cpu_z_offset, dst_width, dst_height, dst_depth);
+
+			uint8_t const * src_ptr = src_mapper.Pointer<uint8_t>();
+			uint8_t* dst_ptr = dst_mapper.Pointer<uint8_t>();
+			uint32_t const src_pitch = src_mapper.RowPitch();
+			uint32_t const dst_pitch = dst_mapper.RowPitch();
+			uint32_t const src_slice_pitch = src_mapper.SlicePitch();
+			uint32_t const dst_slice_pitch = dst_mapper.SlicePitch();
+			for (uint32_t z = 0; z < dst_depth; ++ z)
+			{
+				float fz = static_cast<float>(z) / dst_depth * src_depth;
+				uint32_t sz = static_cast<uint32_t>(fz + 0.5f);
+
+				for (uint32_t y = 0; y < dst_height; ++ y)
+				{
+					if (src_width == dst_width)
+					{
+						memcpy(dst_ptr + y * dst_pitch, src_ptr + y * src_pitch, src_width * src_elem_size);
+					}
+					else
+					{
+						float fy = static_cast<float>(y) / dst_height * src_height;
+						uint32_t sy = static_cast<uint32_t>(fy + 0.5f);
+						uint8_t const * src_p = src_ptr + sz * src_slice_pitch + sy * src_pitch;
+
+						uint8_t* dst_p = dst_ptr + z * dst_slice_pitch + y * dst_pitch;
+						for (uint32_t x = 0; x < dst_width; ++ x, dst_p += dst_elem_size)
+						{
+							float fx = static_cast<float>(x) / dst_width * src_width;
+							uint32_t sx = static_cast<uint32_t>(fx + 0.5f);
+							memcpy(dst_p, src_p + sx * src_elem_size, src_elem_size);
+						}
+					}
+				}
+			}
+		}
+		else
+		{
+			std::vector<Color> src_32f(src_width * src_height * src_depth);
+			{
+				Mapper src_mapper(*src_cpu_ptr, src_cpu_array_index, src_cpu_level, TMA_Read_Only, 0, 0, 0,
+					src_width, src_height, src_depth);
+
+				uint8_t const * src_ptr = src_mapper.Pointer<uint8_t>();
+				uint32_t const src_pitch = src_mapper.RowPitch();
+				uint32_t const src_slice_pitch = src_mapper.SlicePitch();
+				for (uint32_t z = 0; z < src_depth; ++ z)
+				{
+					for (uint32_t y = 0; y < src_height; ++ y)
+					{
+						ConvertToABGR32F(this->Format(), src_ptr + z * src_slice_pitch + y * src_pitch,
+							src_width, &src_32f[(z * src_height + y) * src_width]);
+					}
+				}
+			}
+
+			std::vector<Color> dst_32f(dst_width * dst_height * dst_depth);
+			if (linear)
+			{
+				for (uint32_t z = 0; z < dst_depth; ++ z)
+				{
+					float fz = static_cast<float>(z) / dst_depth * src_depth;
+					uint32_t sz0 = static_cast<uint32_t>(fz);
+					uint32_t sz1 = MathLib::clamp<uint32_t>(sz0 + 1, 0, src_depth - 1);
+					float weight_z = fz - sz0;
+							
+					for (uint32_t y = 0; y < dst_height; ++ y)
+					{
+						float fy = static_cast<float>(y) / dst_height * src_height;
+						uint32_t sy0 = static_cast<uint32_t>(fy);
+						uint32_t sy1 = MathLib::clamp<uint32_t>(sy0 + 1, 0, src_height - 1);
+						float weight_y = fy - sy0;
+							
+						for (uint32_t x = 0; x < dst_width; ++ x)
+						{
+							float fx = static_cast<float>(x) / dst_width * src_width;
+							uint32_t sx0 = static_cast<uint32_t>(fx);
+							uint32_t sx1 = MathLib::clamp<uint32_t>(sx0 + 1, 0, src_width - 1);
+							float weight_x = fx - sx0;
+							Color clr_x00 = MathLib::lerp(src_32f[(sz0 * src_height + sy0) * src_width + sx0],
+								src_32f[(sz0 * src_height + sy0) * src_width + sx1], weight_x);
+							Color clr_x01 = MathLib::lerp(src_32f[(sz0 * src_height + sy1) * src_width + sx0],
+								src_32f[(sz0 * src_height + sy1) * src_width + sx1], weight_x);
+							Color clr_y0 = MathLib::lerp(clr_x00, clr_x01, weight_y);
+							Color clr_x10 = MathLib::lerp(src_32f[(sz1 * src_height + sy0) * src_width + sx0],
+								src_32f[(sz1 * src_height + sy0) * src_width + sx1], weight_x);
+							Color clr_x11 = MathLib::lerp(src_32f[(sz1 * src_height + sy1) * src_width + sx0],
+								src_32f[(sz1 * src_height + sy1) * src_width + sx1], weight_x);
+							Color clr_y1 = MathLib::lerp(clr_x10, clr_x11, weight_y);
+							dst_32f[(z * dst_height + y) * dst_width + x] = MathLib::lerp(clr_y0, clr_y1, weight_z);
+						}
+					}
+				}
+			}
+			else
+			{
+				for (uint32_t z = 0; z < dst_depth; ++ z)
+				{
+					float fz = static_cast<float>(z) / dst_depth * src_depth;
+					uint32_t sz = static_cast<uint32_t>(fz + 0.5f);
+
+					for (uint32_t y = 0; y < dst_height; ++ y)
+					{
+						float fy = static_cast<float>(y) / dst_height * src_height;
+						uint32_t sy = static_cast<uint32_t>(fy + 0.5f);
+
+						for (uint32_t x = 0; x < dst_width; ++ x)
+						{
+							float fx = static_cast<float>(x) / dst_width * src_width;
+							uint32_t sx = static_cast<uint32_t>(fx + 0.5f);
+							dst_32f[(z * dst_height + y) * dst_width + x] = src_32f[(sz * src_height + sy) * src_width + sx];
+						}
+					}
+				}
+			}
+			{
+				Mapper dst_mapper(*dst_cpu_ptr, dst_cpu_array_index, dst_cpu_level, TMA_Write_Only, dst_cpu_x_offset, dst_cpu_y_offset, dst_cpu_z_offset, dst_width, dst_height, dst_height);
+
+				uint8_t* dst_ptr = dst_mapper.Pointer<uint8_t>();
+				uint32_t const dst_pitch = dst_mapper.RowPitch();
+				uint32_t const dst_slice_pitch = dst_mapper.SlicePitch();
+				for (uint32_t z = 0; z < dst_depth; ++ z)
+				{
+					for (uint32_t y = 0; y < dst_height; ++ y)
+					{
+						ConvertFromABGR32F(target.Format(), &dst_32f[(z * dst_height + y) * dst_width], dst_width, dst_ptr + z * dst_slice_pitch + y * dst_pitch);
+					}
+				}
+			}
+		}
+
+		if (dst_cpu_ptr != &target)
+		{
+			dst_cpu_ptr->CopyToSubTexture3D(target, dst_array_index, dst_level,
+				dst_x_offset, dst_y_offset, dst_z_offset, dst_width, dst_height, dst_depth, 0, 0, 0, 0, 0, dst_width, dst_height, dst_height);
+		}
+	}
+
+	void Texture::ResizeTextureCube(Texture& target,
+		uint32_t dst_array_index, CubeFaces dst_face, uint32_t dst_level, uint32_t dst_x_offset, uint32_t dst_y_offset, uint32_t dst_width, uint32_t dst_height,
+		uint32_t src_array_index, CubeFaces src_face, uint32_t src_level, uint32_t src_x_offset, uint32_t src_y_offset, uint32_t src_width, uint32_t src_height,
+		bool linear)
+	{
+		BOOST_ASSERT((TT_2D == this->Type()) || (TT_Cube == this->Type()));
+		BOOST_ASSERT((TT_2D == target.Type()) || (TT_Cube == target.Type()));
+
+		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+
+		uint32_t const src_elem_size = NumFormatBytes(this->Format());
+		uint32_t const dst_elem_size = NumFormatBytes(target.Format());
+
+		TexturePtr src_cpu;
+		Texture* src_cpu_ptr;
+		uint32_t src_cpu_array_index;
+		uint32_t src_cpu_level;
+		uint32_t src_cpu_x_offset;
+		uint32_t src_cpu_y_offset;
+		{
+			src_cpu = rf.MakeTexture2D(src_width, src_height, 1, 1,
+				this->Format(), this->SampleCount(), this->SampleQuality(), EAH_CPU_Read, NULL);
+			src_cpu_ptr = src_cpu.get();
+
+			this->CopyToSubTexture2D(*src_cpu, 0, 0, 0, 0, src_width, src_height, 
+				src_array_index * 6 + src_face - CF_Positive_X, src_level, src_x_offset, src_y_offset, src_width, src_height);
+
+			src_cpu_array_index = 0;
+			src_cpu_level = 0;
+			src_cpu_x_offset = 0;
+			src_cpu_y_offset = 0;
+		}
+
+		TexturePtr dst_cpu;
+		Texture* dst_cpu_ptr;
+		uint32_t dst_cpu_array_index;
+		uint32_t dst_cpu_level;
+		uint32_t dst_cpu_x_offset;
+		uint32_t dst_cpu_y_offset;
+		{
+			dst_cpu = rf.MakeTexture2D(dst_width, dst_height, 1, 1,
+				target.Format(), target.SampleCount(), target.SampleQuality(), EAH_CPU_Write, NULL);
+			dst_cpu_ptr = dst_cpu.get();
+
+			dst_cpu_array_index = 0;
+			dst_cpu_level = 0;
+			dst_cpu_x_offset = 0;
+			dst_cpu_y_offset = 0;
+		}
+
+		if (!linear && (this->Format() == target.Format()))
+		{
+			Mapper src_mapper(*src_cpu_ptr, src_cpu_array_index, src_cpu_level, TMA_Read_Only, src_cpu_x_offset, src_cpu_y_offset, src_width, src_height);
+			Mapper dst_mapper(*dst_cpu_ptr, dst_cpu_array_index, dst_cpu_level, TMA_Write_Only, dst_cpu_x_offset, dst_cpu_y_offset, dst_width, dst_height);
+
+			uint8_t const * src_ptr = src_mapper.Pointer<uint8_t>();
+			uint8_t* dst_ptr = dst_mapper.Pointer<uint8_t>();
+			uint32_t const src_pitch = src_mapper.RowPitch();
+			uint32_t const dst_pitch = dst_mapper.RowPitch();
+			for (uint32_t y = 0; y < dst_height; ++ y)
+			{
+				if (src_width == dst_width)
+				{
+					memcpy(dst_ptr + y * dst_pitch, src_ptr + y * src_pitch, src_width * src_elem_size);
+				}
+				else
+				{
+					float fy = static_cast<float>(y) / dst_height * src_height;
+					uint32_t sy = static_cast<uint32_t>(fy + 0.5f);
+					uint8_t const * src_p = src_ptr + sy * src_pitch;
+
+					uint8_t* dst_p = dst_ptr + y * dst_pitch;
+					for (uint32_t x = 0; x < dst_width; ++ x, dst_p += dst_elem_size)
+					{
+						float fx = static_cast<float>(x) / dst_width * src_width;
+						uint32_t sx = static_cast<uint32_t>(fx + 0.5f);
+						memcpy(dst_p, src_p + sx * src_elem_size, src_elem_size);
+					}
+				}
+			}
+		}
+		else
+		{
+			std::vector<Color> src_32f(src_width * src_height);
+			{
+				Mapper src_mapper(*src_cpu_ptr, src_cpu_array_index, src_cpu_level, TMA_Read_Only, src_cpu_x_offset, src_cpu_y_offset,
+					src_width, src_height);
+
+				uint8_t const * src_ptr = src_mapper.Pointer<uint8_t>();
+				uint32_t const src_pitch = src_mapper.RowPitch();
+				for (uint32_t y = 0; y < src_height; ++ y)
+				{
+					ConvertToABGR32F(this->Format(), src_ptr + y * src_pitch, src_width, &src_32f[y * src_width]);
+				}
+			}
+
+			std::vector<Color> dst_32f(dst_width * dst_height);
+			if (linear)
+			{
+				for (uint32_t y = 0; y < dst_height; ++ y)
+				{
+					float fy = static_cast<float>(y) / dst_height * src_height;
+					uint32_t sy0 = static_cast<uint32_t>(fy);
+					uint32_t sy1 = MathLib::clamp<uint32_t>(sy0 + 1, 0, src_height - 1);
+					float weight_y = fy - sy0;
+
+					for (uint32_t x = 0; x < dst_width; ++ x)
+					{
+						float fx = static_cast<float>(x) / dst_width * src_width;
+						uint32_t sx0 = static_cast<uint32_t>(fx);
+						uint32_t sx1 = MathLib::clamp<uint32_t>(sx0 + 1, 0, src_width - 1);
+						float weight_x = fx - sx0;
+						Color clr_x0 = MathLib::lerp(src_32f[sy0 * src_width + sx0], src_32f[sy0 * src_width + sx1], weight_x);
+						Color clr_x1 = MathLib::lerp(src_32f[sy1 * src_width + sx0], src_32f[sy1 * src_width + sx1], weight_x);
+						dst_32f[y * dst_width + x] = MathLib::lerp(clr_x0, clr_x1, weight_y);
+					}
+				}
+			}
+			else
+			{
+				for (uint32_t y = 0; y < dst_height; ++ y)
+				{
+					float fy = static_cast<float>(y) / dst_height * src_height;
+					uint32_t sy = static_cast<uint32_t>(fy + 0.5f);
+
+					for (uint32_t x = 0; x < dst_width; ++ x)
+					{
+						float fx = static_cast<float>(x) / dst_width * src_width;
+						uint32_t sx = static_cast<uint32_t>(fx + 0.5f);
+						dst_32f[y * dst_width + x] = src_32f[sy * src_width + sx];
+					}
+				}
+			}
+			{
+				Mapper dst_mapper(*dst_cpu_ptr, dst_cpu_array_index, dst_cpu_level, TMA_Write_Only, dst_cpu_x_offset, dst_cpu_y_offset, dst_width, dst_height);
+
+				uint8_t* dst_ptr = dst_mapper.Pointer<uint8_t>();
+				uint32_t const dst_pitch = dst_mapper.RowPitch();
+				for (uint32_t y = 0; y < dst_height; ++ y)
+				{
+					ConvertFromABGR32F(target.Format(), &dst_32f[y * dst_width], dst_width, dst_ptr + y * dst_pitch);
+				}
+			}
+		}
+
+		{
+			dst_cpu_ptr->CopyToSubTextureCube(target, dst_array_index, dst_face, dst_level, dst_x_offset, dst_y_offset, dst_width, dst_height,
+				0, CF_Positive_X, 0, 0, 0, dst_width, dst_height);
+		}
+	}
+
 
 	template KLAYGE_CORE_API std::pair<float3, float3> CubeMapViewVector(Texture::CubeFaces face);
 

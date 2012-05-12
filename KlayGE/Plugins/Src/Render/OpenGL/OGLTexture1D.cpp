@@ -31,7 +31,6 @@
 #include <cstring>
 
 #include <glloader/glloader.h>
-#include <GL/glu.h>
 
 #include <KlayGE/OpenGL/OGLRenderEngine.hpp>
 #include <KlayGE/OpenGL/OGLMapping.hpp>
@@ -39,7 +38,6 @@
 
 #ifdef KLAYGE_COMPILER_MSVC
 #pragma comment(lib, "OpenGL32.lib")
-#pragma comment(lib, "glu32.lib")
 #endif
 
 namespace KlayGE
@@ -327,36 +325,8 @@ namespace KlayGE
 				}
 				else
 				{
-					size_t const src_format_size = NumFormatBytes(format_);
-					size_t const dst_format_size = NumFormatBytes(target.Format());
-
-					if (src_width != dst_width)
-					{
-						std::vector<uint8_t> data_in(src_width * src_format_size);
-						std::vector<uint8_t> data_out(dst_width * dst_format_size);
-
-						{
-							Texture::Mapper mapper(*this, src_array_index, src_level, TMA_Read_Only, src_x_offset, src_width);
-							memcpy(&data_in[0], mapper.Pointer<uint8_t*>(), data_in.size() * sizeof(data_in[0]));
-						}
-
-						gluScaleImage(gl_format, src_width, 1, gl_type, &data_in[0],
-							dst_width, 1, gl_target_type, &data_out[0]);
-
-						{
-							Texture::Mapper mapper(target, dst_array_index, dst_level, TMA_Write_Only, dst_x_offset, dst_width);
-							memcpy(mapper.Pointer<uint8_t*>(), &data_out[0], data_out.size() * sizeof(data_out[0]));
-						}
-					}
-					else
-					{
-						Texture::Mapper mapper_src(*this, src_array_index, src_level, TMA_Read_Only, src_x_offset, src_width);
-						Texture::Mapper mapper_dst(target, dst_array_index, dst_level, TMA_Write_Only, dst_x_offset, dst_width);
-						uint8_t const * s = mapper_src.Pointer<uint8_t>();
-						uint8_t* d = mapper_dst.Pointer<uint8_t>();
-						
-						memcpy(d, s, src_width * src_format_size);
-					}
+					this->ResizeTexture1D(target, dst_array_index, dst_level, dst_x_offset, dst_width,
+						src_array_index, src_level, src_x_offset, src_width, true);
 				}
 			}
 		}

@@ -31,7 +31,6 @@
 #include <cstring>
 
 #include <glloader/glloader.h>
-#include <GL/glu.h>
 
 #include <KlayGE/OpenGL/OGLRenderEngine.hpp>
 #include <KlayGE/OpenGL/OGLMapping.hpp>
@@ -39,7 +38,6 @@
 
 #ifdef KLAYGE_COMPILER_MSVC
 #pragma comment(lib, "OpenGL32.lib")
-#pragma comment(lib, "glu32.lib")
 #endif
 
 namespace KlayGE
@@ -253,57 +251,8 @@ namespace KlayGE
 			}
 			else
 			{
-				BOOST_ASSERT(format_ == target.Format());
-
-				GLint gl_internalFormat;
-				GLenum gl_format;
-				GLenum gl_type;
-				OGLMapping::MappingFormat(gl_internalFormat, gl_format, gl_type, format_);
-
-				GLint gl_target_internal_format;
-				GLenum gl_target_format;
-				GLenum gl_target_type;
-				OGLMapping::MappingFormat(gl_target_internal_format, gl_target_format, gl_target_type, target.Format());
-
-				size_t const src_format_size = NumFormatBytes(format_);
-				size_t const dst_format_size = NumFormatBytes(target.Format());
-
-				std::vector<uint8_t> data_in(src_width * src_height * src_format_size);
-				std::vector<uint8_t> data_out(dst_width * dst_height * dst_format_size);
-
-				for (uint32_t z = 0; z < src_depth; ++ z)
-				{
-					{
-						Texture::Mapper mapper(*this, src_array_index, src_level, TMA_Read_Only, src_x_offset, src_y_offset, src_z_offset + z,
-							src_width, src_height, 1);
-						uint8_t const * s = mapper.Pointer<uint8_t>();
-						uint8_t* d = &data_in[0];
-						for (uint32_t y = 0; y < src_height; ++ y)
-						{
-							memcpy(d, s, src_width * src_format_size);
-
-							s += mapper.RowPitch();
-							d += src_width * src_format_size;
-						}
-					}
-
-					gluScaleImage(gl_format, src_width, src_height, gl_type, &data_in[0],
-						dst_width, dst_height, gl_target_type, &data_out[0]);
-
-					{
-						Texture::Mapper mapper(target, dst_array_index, dst_level, TMA_Write_Only, dst_x_offset, dst_y_offset, dst_z_offset + z,
-							dst_width, dst_height, 1);
-						uint8_t const * s = &data_out[0];
-						uint8_t* d = mapper.Pointer<uint8_t>();
-						for (uint32_t y = 0; y < src_height; ++ y)
-						{
-							memcpy(d, s, dst_width * dst_format_size);
-
-							s += src_width * src_format_size;
-							d += mapper.RowPitch();
-						}
-					}
-				}
+				this->ResizeTexture3D(target, dst_array_index, dst_level, dst_x_offset, dst_y_offset, dst_z_offset, dst_width, dst_height, dst_depth,
+						src_array_index, src_level, src_x_offset, src_y_offset, src_z_offset, src_width, src_height, src_depth, true);
 			}
 		}
 	}

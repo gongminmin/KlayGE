@@ -22,17 +22,10 @@
 #include <cstring>
 
 #include <glloader/glloader.h>
-#ifndef KLAYGE_PLATFORM_ANDROID
-#include <GL/glu.h>
-#endif
 
 #include <KlayGE/OpenGLES/OGLESRenderEngine.hpp>
 #include <KlayGE/OpenGLES/OGLESMapping.hpp>
 #include <KlayGE/OpenGLES/OGLESTexture.hpp>
-
-#ifdef KLAYGE_COMPILER_MSVC
-#pragma comment(lib, "glu32.lib")
-#endif
 
 namespace KlayGE
 {
@@ -264,61 +257,8 @@ namespace KlayGE
 		}
 		else
 		{
-			size_t const src_format_size = NumFormatBytes(format_);
-			size_t const dst_format_size = NumFormatBytes(target.Format());
-
-			if ((src_width != dst_width) || (src_height != dst_height))
-			{
-#ifndef KLAYGE_PLATFORM_ANDROID
-				std::vector<uint8_t> data_in(src_width * src_height * src_format_size);
-				std::vector<uint8_t> data_out(dst_width * dst_height * dst_format_size);
-
-				{
-					Texture::Mapper mapper(*this, src_array_index, src_level, TMA_Read_Only, src_x_offset, src_y_offset, src_width, src_height);
-					uint8_t const * s = mapper.Pointer<uint8_t>();
-					uint8_t* d = &data_in[0];
-					for (uint32_t y = 0; y < src_height; ++ y)
-					{
-						memcpy(d, s, src_width * src_format_size);
-
-						s += mapper.RowPitch();
-						d += src_width * src_format_size;
-					}
-				}
-
-				gluScaleImage(gl_format, src_width, src_height, gl_type, &data_in[0],
-					dst_width, dst_height, gl_target_type, &data_out[0]);
-
-				{
-					Texture::Mapper mapper(target, dst_array_index, dst_level, TMA_Write_Only, dst_x_offset, dst_y_offset, dst_width, dst_height);
-					uint8_t const * s = &data_out[0];
-					uint8_t* d = mapper.Pointer<uint8_t>();
-					for (uint32_t y = 0; y < dst_height; ++ y)
-					{
-						memcpy(d, s, dst_width * dst_format_size);
-
-						s += dst_width * src_format_size;
-						d += mapper.RowPitch();
-					}
-				}
-#else
-				BOOST_ASSERT(false);
-#endif
-			}
-			else
-			{
-				Texture::Mapper mapper_src(*this, src_array_index, src_level, TMA_Read_Only, src_x_offset, src_y_offset, src_width, src_height);
-				Texture::Mapper mapper_dst(target, dst_array_index, dst_level, TMA_Write_Only, dst_x_offset, dst_y_offset, dst_width, dst_height);
-				uint8_t const * s = mapper_src.Pointer<uint8_t>();
-				uint8_t* d = mapper_dst.Pointer<uint8_t>();
-				for (uint32_t y = 0; y < src_height; ++ y)
-				{
-					memcpy(d, s, src_width * src_format_size);
-
-					s += mapper_src.RowPitch();
-					d += mapper_dst.RowPitch();
-				}
-			}
+			this->ResizeTexture2D(target, dst_array_index, dst_level, dst_x_offset, dst_y_offset, dst_width, dst_height,
+						src_array_index, src_level, src_x_offset, src_y_offset, src_width, src_height, true);
 		}
 	}
 	
@@ -374,61 +314,8 @@ namespace KlayGE
 		}
 		else
 		{
-			size_t const src_format_size = NumFormatBytes(format_);
-			size_t const dst_format_size = NumFormatBytes(target.Format());
-
-			if ((src_width != dst_width) || (src_height != dst_height))
-			{
-#ifndef KLAYGE_PLATFORM_ANDROID
-				std::vector<uint8_t> data_in(src_width * src_height * src_format_size);
-				std::vector<uint8_t> data_out(dst_width * dst_height * dst_format_size);
-
-				{
-					Texture::Mapper mapper(*this, src_array_index, src_level, TMA_Read_Only, src_x_offset, src_y_offset, src_width, src_height);
-					uint8_t const * s = mapper.Pointer<uint8_t>();
-					uint8_t* d = &data_in[0];
-					for (uint32_t y = 0; y < src_height; ++ y)
-					{
-						memcpy(d, s, src_width * src_format_size);
-
-						s += mapper.RowPitch();
-						d += src_width * src_format_size;
-					}
-				}
-
-				gluScaleImage(gl_format, src_width, src_height, gl_type, &data_in[0],
-					dst_width, dst_height, gl_target_type, &data_out[0]);
-
-				{
-					Texture::Mapper mapper(target, dst_array_index, dst_face, dst_level, TMA_Write_Only, dst_x_offset, dst_y_offset, dst_width, dst_height);
-					uint8_t const * s = &data_out[0];
-					uint8_t* d = mapper.Pointer<uint8_t>();
-					for (uint32_t y = 0; y < dst_height; ++ y)
-					{
-						memcpy(d, s, dst_width * dst_format_size);
-
-						s += dst_width * src_format_size;
-						d += mapper.RowPitch();
-					}
-				}
-#else
-				BOOST_ASSERT(false);
-#endif
-			}
-			else
-			{
-				Texture::Mapper mapper_src(*this, src_array_index, src_level, TMA_Read_Only, src_x_offset, src_y_offset, src_width, src_height);
-				Texture::Mapper mapper_dst(target, dst_array_index, dst_face, dst_level, TMA_Write_Only, dst_x_offset, dst_y_offset, dst_width, dst_height);
-				uint8_t const * s = mapper_src.Pointer<uint8_t>();
-				uint8_t* d = mapper_dst.Pointer<uint8_t>();
-				for (uint32_t y = 0; y < src_height; ++ y)
-				{
-					memcpy(d, s, src_width * src_format_size);
-
-					s += mapper_src.RowPitch();
-					d += mapper_dst.RowPitch();
-				}
-			}
+			this->ResizeTextureCube(target, dst_array_index, dst_face, dst_level, dst_x_offset, dst_y_offset, dst_width, dst_height,
+						src_array_index, CF_Positive_X, src_level, src_x_offset, src_y_offset, src_width, src_height, true);
 		}
 	}
 

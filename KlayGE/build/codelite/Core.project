@@ -13,6 +13,7 @@
       <File Name="../../Core/Src/Render/Camera.cpp"/>
       <File Name="../../Core/Src/Render/CameraController.cpp"/>
       <File Name="../../Core/Src/Render/DeferredRenderingLayer.cpp"/>
+      <File Name="../../Core/Src/Render/ElementFormat.cpp"/>
       <File Name="../../Core/Src/Render/FFT.cpp"/>
       <File Name="../../Core/Src/Render/Font.cpp"/>
       <File Name="../../Core/Src/Render/FrameBuffer.cpp"/>

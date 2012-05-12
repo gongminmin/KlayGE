@@ -63,7 +63,6 @@
 		#pragma comment(lib, "glloader_es_vc_x64.lib")
 	#endif
 #endif
-#pragma comment(lib, "glu32.lib")
 #endif
 
 namespace KlayGE

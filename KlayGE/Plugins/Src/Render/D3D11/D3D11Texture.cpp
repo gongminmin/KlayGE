@@ -32,25 +32,8 @@
 #endif
 
 #include <KlayGE/D3D11/D3D11MinGWDefs.hpp>
-#ifdef KLAYGE_COMPILER_MSVC
-#pragma warning(push)
-#pragma warning(disable: 4005)
-#endif
-#include <d3dx11.h>
-#ifdef KLAYGE_COMPILER_MSVC
-#pragma warning(pop)
-#endif
-
 #include <KlayGE/D3D11/D3D11RenderEngine.hpp>
 #include <KlayGE/D3D11/D3D11Texture.hpp>
-
-#ifdef KLAYGE_COMPILER_MSVC
-#ifdef KLAYGE_DEBUG
-	#pragma comment(lib, "d3dx11d.lib")
-#else
-	#pragma comment(lib, "d3dx11.lib")
-#endif
-#endif
 
 namespace KlayGE
 {
@@ -272,69 +255,6 @@ namespace KlayGE
 		if (access_hint_ & EAH_Generate_Mips)
 		{
 			misc_flags |= D3D11_RESOURCE_MISC_GENERATE_MIPS;
-		}
-	}
-
-	void D3D11Texture::CopyToSubTexture(Texture& target,
-			uint32_t dst_sub_res, uint32_t dst_x_offset, uint32_t dst_y_offset, uint32_t dst_z_offset, uint32_t dst_width, uint32_t dst_height, uint32_t dst_depth,
-			uint32_t src_sub_res, uint32_t src_x_offset, uint32_t src_y_offset, uint32_t src_z_offset, uint32_t src_width, uint32_t src_height, uint32_t src_depth)
-	{
-		D3D11Texture& other(*checked_cast<D3D11Texture*>(&target));
-
-		if ((src_width == dst_width) && (src_height == dst_height) && (this->Format() == target.Format()))
-		{
-			D3D11_BOX src_box;
-			src_box.left = src_x_offset;
-			src_box.top = src_y_offset;
-			src_box.front = src_z_offset;
-			src_box.right = src_x_offset + src_width;
-			src_box.bottom = src_y_offset + src_height;
-			src_box.back = src_z_offset + src_depth;
-
-			d3d_imm_ctx_->CopySubresourceRegion(other.D3DResource().get(), dst_sub_res,
-				dst_x_offset, dst_y_offset, 0, this->D3DResource().get(), src_sub_res, &src_box);
-		}
-		else
-		{
-			D3D11_BOX src_box, dst_box;
-
-			src_box.left = src_x_offset;
-			src_box.top = src_y_offset;
-			src_box.front = src_z_offset;
-			src_box.right = src_x_offset + src_width;
-			src_box.bottom = src_y_offset + src_height;
-			src_box.back = src_z_offset + src_depth;
-
-			dst_box.left = dst_x_offset;
-			dst_box.top = dst_y_offset;
-			dst_box.front = dst_z_offset;
-			dst_box.right = dst_x_offset + dst_width;
-			dst_box.bottom = dst_y_offset + dst_height;
-			dst_box.back = dst_z_offset + dst_depth;
-
-			D3DX11_TEXTURE_LOAD_INFO info;
-			info.pSrcBox = &src_box;
-			info.pDstBox = &dst_box;
-			info.SrcFirstMip = src_sub_res;
-			info.DstFirstMip = dst_sub_res;
-			info.NumMips = 1;
-			info.SrcFirstElement = 0;
-			info.DstFirstElement = 0;
-			info.NumElements = 0;
-			info.Filter = D3DX11_FILTER_LINEAR;
-			info.MipFilter = D3DX11_FILTER_LINEAR;
-			if (IsSRGB(format_))
-			{
-				info.Filter |= D3DX11_FILTER_SRGB_IN;
-				info.MipFilter |= D3DX11_FILTER_SRGB_IN;
-			}
-			if (IsSRGB(target.Format()))
-			{
-				info.Filter |= D3DX11_FILTER_SRGB_OUT;
-				info.MipFilter |= D3DX11_FILTER_SRGB_OUT;
-			}
-
-			D3DX11LoadTextureFromTexture(d3d_imm_ctx_.get(), this->D3DResource().get(), &info, other.D3DResource().get());
 		}
 	}
 

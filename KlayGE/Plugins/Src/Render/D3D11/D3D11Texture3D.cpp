@@ -24,27 +24,10 @@
 #include <cstring>
 
 #include <KlayGE/D3D11/D3D11MinGWDefs.hpp>
-#ifdef KLAYGE_COMPILER_MSVC
-#pragma warning(push)
-#pragma warning(disable: 4005)
-#endif
-#include <d3dx11.h>
-#ifdef KLAYGE_COMPILER_MSVC
-#pragma warning(pop)
-#endif
-
 #include <KlayGE/D3D11/D3D11Typedefs.hpp>
 #include <KlayGE/D3D11/D3D11RenderEngine.hpp>
 #include <KlayGE/D3D11/D3D11Mapping.hpp>
 #include <KlayGE/D3D11/D3D11Texture.hpp>
-
-#ifdef KLAYGE_COMPILER_MSVC
-#ifdef KLAYGE_DEBUG
-	#pragma comment(lib, "d3dx11d.lib")
-#else
-	#pragma comment(lib, "d3dx11.lib")
-#endif
-#endif
 
 namespace KlayGE
 {
@@ -151,29 +134,16 @@ namespace KlayGE
 		}
 		else
 		{
-			D3DX11_TEXTURE_LOAD_INFO info;
-			info.pSrcBox = NULL;
-			info.pDstBox = NULL;
-			info.SrcFirstMip = D3D11CalcSubresource(0, 0, this->NumMipMaps());
-			info.DstFirstMip = D3D11CalcSubresource(0, 0, other.NumMipMaps());
-			info.NumMips = std::min(this->NumMipMaps(), target.NumMipMaps());
-			info.SrcFirstElement = 0;
-			info.DstFirstElement = 0;
-			info.NumElements = 0;
-			info.Filter = D3DX11_FILTER_LINEAR;
-			info.MipFilter = D3DX11_FILTER_LINEAR;
-			if (IsSRGB(format_))
+			uint32_t const array_size = std::min(this->ArraySize(), target.ArraySize());
+			uint32_t const num_mips = std::min(this->NumMipMaps(), target.NumMipMaps());
+			for (uint32_t index = 0; index < array_size; ++ index)
 			{
-				info.Filter |= D3DX11_FILTER_SRGB_IN;
-				info.MipFilter |= D3DX11_FILTER_SRGB_IN;
+				for (uint32_t level = 0; level < num_mips; ++ level)
+				{
+					this->ResizeTexture3D(target, index, level, 0, 0, 0, target.Width(level), target.Height(level), target.Depth(level),
+						index, level, 0, 0, 0, this->Width(level), this->Height(level), this->Depth(level), true);
+				}
 			}
-			if (IsSRGB(target.Format()))
-			{
-				info.Filter |= D3DX11_FILTER_SRGB_OUT;
-				info.MipFilter |= D3DX11_FILTER_SRGB_OUT;
-			}
-
-			D3DX11LoadTextureFromTexture(d3d_imm_ctx_.get(), d3dTexture3D_.get(), &info, other.D3DTexture().get());
 		}
 	}
 
@@ -183,9 +153,26 @@ namespace KlayGE
 	{
 		BOOST_ASSERT(type_ == target.Type());
 
-		this->CopyToSubTexture(target,
-			D3D11CalcSubresource(dst_level, dst_array_index, target.NumMipMaps()), dst_x_offset, dst_y_offset, dst_z_offset, dst_width, dst_height, dst_depth,
-			D3D11CalcSubresource(src_level, src_array_index, this->NumMipMaps()), src_x_offset, src_y_offset, src_z_offset, src_width, src_height, src_depth);
+		D3D11Texture& other(*checked_cast<D3D11Texture*>(&target));
+
+		if ((src_width == dst_width) && (src_height == dst_height) && (this->Format() == target.Format()))
+		{
+			D3D11_BOX src_box;
+			src_box.left = src_x_offset;
+			src_box.top = src_y_offset;
+			src_box.front = src_z_offset;
+			src_box.right = src_x_offset + src_width;
+			src_box.bottom = src_y_offset + src_height;
+			src_box.back = src_z_offset + src_depth;
+
+			d3d_imm_ctx_->CopySubresourceRegion(other.D3DResource().get(), D3D11CalcSubresource(dst_level, dst_array_index, target.NumMipMaps()),
+				dst_x_offset, dst_y_offset, 0, this->D3DResource().get(), D3D11CalcSubresource(src_level, src_array_index, this->NumMipMaps()), &src_box);
+		}
+		else
+		{
+			this->ResizeTexture3D(target, dst_array_index, dst_level, dst_x_offset, dst_y_offset, dst_z_offset, dst_width, dst_height, dst_depth,
+				src_array_index, src_level, src_x_offset, src_y_offset, src_z_offset, src_width, src_height, src_depth, true);
+		}
 	}
 
 	ID3D11ShaderResourceViewPtr const & D3D11Texture3D::RetriveD3DShaderResourceView(uint32_t first_array_index, uint32_t num_items, uint32_t first_level, uint32_t num_levels)
@@ -310,7 +297,14 @@ namespace KlayGE
 		}
 		else
 		{
-			D3DX11FilterTexture(d3d_imm_ctx_.get(), d3dTexture3D_.get(), 0, D3DX11_FILTER_LINEAR);
+			for (uint32_t index = 0; index < this->ArraySize(); ++ index)
+			{
+				for (uint32_t level = 1; level < this->NumMipMaps(); ++ level)
+				{
+					this->ResizeTexture3D(*this, index, level, 0, 0, 0, this->Width(level), this->Height(level), this->Depth(level),
+						index, level - 1, 0, 0, 0, this->Width(level - 1), this->Height(level - 1), this->Depth(level - 1), true);
+				}
+			}
 		}
 	}
 

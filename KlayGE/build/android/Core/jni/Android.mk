@@ -54,6 +54,8 @@ LOCAL_SRC_FILES := \
 		Render/Camera.cpp \
 		Render/CameraController.cpp \
 		Render/DeferredRenderingLayer.cpp \
+		Render/ElementFormat.cpp \
+		Render/FFT.cpp \
 		Render/Font.cpp \
 		Render/FrameBuffer.cpp \
 		Render/GraphicsBuffer.cpp \
@@ -77,6 +79,7 @@ LOCAL_SRC_FILES := \
 		Render/SATPostProcess.cpp \
 		Render/ShaderObject.cpp \
 		Render/SSGIPostProcess.cpp \
+		Render/SSRPostProcess.cpp \
 		Render/SSVOPostProcess.cpp \
 		Render/TAAPostProcess.cpp \
 		Render/Texture.cpp \
