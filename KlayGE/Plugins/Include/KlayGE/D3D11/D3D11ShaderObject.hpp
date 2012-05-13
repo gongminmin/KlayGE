@@ -43,6 +43,49 @@ namespace KlayGE
 		uint8_t rows;
 		uint8_t columns;
 	};
+
+	struct D3D11ShaderDesc
+	{
+		D3D11ShaderDesc()
+			: num_samplers(0), num_srvs(0), num_uavs(0)
+		{
+		}
+
+		struct ConstantBufferDesc
+		{
+			ConstantBufferDesc()
+				: size(0)
+			{
+			}
+
+			uint32_t size;
+
+			struct VariableDesc
+			{
+				std::string name;
+				uint32_t start_offset;
+				uint8_t type;
+				uint8_t rows;
+				uint8_t columns;
+				uint16_t elements;
+			};
+			std::vector<VariableDesc> var_desc;
+		};
+		std::vector<ConstantBufferDesc> cb_desc;
+
+		uint16_t num_samplers;
+		uint16_t num_srvs;
+		uint16_t num_uavs;
+
+		struct BoundResourceDesc
+		{
+			std::string name;
+			uint8_t type;
+			uint8_t dimension;
+			uint16_t bind_point;
+		};
+		std::vector<BoundResourceDesc> res_desc;
+	};
 #ifdef KLAYGE_HAS_STRUCT_PACK
 #pragma pack(pop)
 #endif
@@ -101,6 +144,7 @@ namespace KlayGE
 		ID3D11HullShaderPtr hull_shader_;
 		ID3D11DomainShaderPtr domain_shader_;
 		boost::array<std::pair<ID3DBlobPtr, std::string>, ST_NumShaderTypes> shader_code_;
+		boost::array<D3D11ShaderDesc, ST_NumShaderTypes> shader_desc_;
 
 		boost::array<std::vector<ID3D11SamplerStatePtr>, ST_NumShaderTypes> samplers_;
 		boost::array<std::vector<boost::tuple<void*, uint32_t, uint32_t> >, ST_NumShaderTypes> srvsrcs_;
