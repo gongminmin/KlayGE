@@ -2990,22 +2990,222 @@ namespace KlayGE
 		uint32_t src_cpu_level;
 		uint32_t src_cpu_x_offset;
 		uint32_t src_cpu_y_offset;
-		if (this->AccessHint() & EAH_CPU_Read)
+		ElementFormat src_cpu_fmt;
+		if ((this->AccessHint() & EAH_CPU_Read) && !IsCompressedFormat(this->Format()))
 		{
 			src_cpu_ptr = this;
 			src_cpu_array_index = src_array_index;
 			src_cpu_level = src_level;
 			src_cpu_x_offset = src_x_offset;
 			src_cpu_y_offset = src_y_offset;
+			src_cpu_fmt = this->Format();
 		}
 		else
 		{
+			if (IsCompressedFormat(this->Format()))
+			{
+				// Must be multiply of 4
+				BOOST_ASSERT(0 == (src_x_offset & 0x3));
+				BOOST_ASSERT(0 == (src_y_offset & 0x3));
+				BOOST_ASSERT(0 == (src_width & 0x3));
+				BOOST_ASSERT(0 == (src_height & 0x3));
+
+				BOOST_ASSERT(TT_2D == this->Type());
+
+				switch (this->Format())
+				{
+				case EF_BC1:
+				case EF_BC2:
+				case EF_BC3:
+					src_cpu_fmt = EF_ARGB8;
+					break;
+				
+				case EF_BC4:
+					src_cpu_fmt = EF_R8;
+					break;
+
+				case EF_BC5:
+					src_cpu_fmt = EF_GR8;
+					break;
+
+				case EF_SIGNED_BC1:
+				case EF_SIGNED_BC2:
+				case EF_SIGNED_BC3:
+					src_cpu_fmt = EF_SIGNED_ABGR8;
+					break;
+
+				case EF_SIGNED_BC4:
+					src_cpu_fmt = EF_SIGNED_R8;
+					break;
+
+				case EF_SIGNED_BC5:
+					src_cpu_fmt = EF_SIGNED_GR8;
+					break;
+
+				case EF_BC1_SRGB:
+				case EF_BC2_SRGB:
+				case EF_BC3_SRGB:
+					src_cpu_fmt = EF_ARGB8_SRGB;
+					break;
+				
+				case EF_BC4_SRGB:
+					src_cpu_fmt = EF_ARGB8_SRGB;
+					break;
+
+				case EF_BC5_SRGB:
+					src_cpu_fmt = EF_ARGB8_SRGB;
+					break;
+
+				default:
+					BOOST_ASSERT(false);
+					src_cpu_fmt = this->Format();
+					break;
+				}
+			}
+			else
+			{
+				src_cpu_fmt = this->Format();
+			}
+
 			src_cpu = rf.MakeTexture2D(src_width, src_height, 1, 1,
-				this->Format(), this->SampleCount(), this->SampleQuality(), EAH_CPU_Read, NULL);
+				src_cpu_fmt, this->SampleCount(), this->SampleQuality(), EAH_CPU_Read | EAH_CPU_Write, NULL);
 			src_cpu_ptr = src_cpu.get();
 
-			this->CopyToSubTexture2D(*src_cpu, 0, 0, 0, 0, src_width, src_height, 
-				src_array_index, src_level, src_x_offset, src_y_offset, src_width, src_height);
+			if (IsCompressedFormat(this->Format()))
+			{
+				TexturePtr src_bc_cpu = rf.MakeTexture2D(src_width, src_height, 1, 1,
+					this->Format(), this->SampleCount(), this->SampleQuality(), EAH_CPU_Read, NULL);
+				this->CopyToSubTexture2D(*src_bc_cpu, 0, 0, 0, 0, src_width, src_height, 
+					src_array_index, src_level, src_x_offset, src_y_offset, src_width, src_height);
+
+				Texture::Mapper mapper_src(*src_bc_cpu, 0, 0, TMA_Read_Only, 0, 0, src_width, src_height);
+				Texture::Mapper mapper_dst(*src_cpu, 0, 0, TMA_Write_Only, 0, 0, src_width, src_height);
+
+				switch (this->Format())
+				{
+				case EF_BC1:
+					DecodeBC1(mapper_dst.Pointer<void>(), mapper_dst.RowPitch(), mapper_src.Pointer<void>(), src_width, src_height);
+					break;
+
+				case EF_BC2:
+					DecodeBC2(mapper_dst.Pointer<void>(), mapper_dst.RowPitch(), mapper_src.Pointer<void>(), src_width, src_height);
+					break;
+
+				case EF_BC3:
+					DecodeBC3(mapper_dst.Pointer<void>(), mapper_dst.RowPitch(), mapper_src.Pointer<void>(), src_width, src_height);
+					break;
+				
+				case EF_BC4:
+					DecodeBC4(mapper_dst.Pointer<void>(), mapper_dst.RowPitch(), mapper_src.Pointer<void>(), src_width, src_height);
+					break;
+
+				case EF_BC5:
+					DecodeBC5(mapper_dst.Pointer<void>(), mapper_dst.RowPitch(), mapper_src.Pointer<void>(), src_width, src_height);
+					break;
+
+				case EF_SIGNED_BC1:
+					DecodeBC1(mapper_dst.Pointer<void>(), mapper_dst.RowPitch(), mapper_src.Pointer<void>(), src_width, src_height);
+					break;
+
+				case EF_SIGNED_BC2:
+					DecodeBC2(mapper_dst.Pointer<void>(), mapper_dst.RowPitch(), mapper_src.Pointer<void>(), src_width, src_height);
+					break;
+
+				case EF_SIGNED_BC3:
+					DecodeBC3(mapper_dst.Pointer<void>(), mapper_dst.RowPitch(), mapper_src.Pointer<void>(), src_width, src_height);
+					break;
+
+				case EF_SIGNED_BC4:
+					DecodeBC4(mapper_dst.Pointer<void>(), mapper_dst.RowPitch(), mapper_src.Pointer<void>(), src_width, src_height);
+					break;
+
+				case EF_SIGNED_BC5:
+					DecodeBC5(mapper_dst.Pointer<void>(), mapper_dst.RowPitch(), mapper_src.Pointer<void>(), src_width, src_height);
+					break;
+
+				case EF_BC1_SRGB:
+					DecodeBC1_sRGB(mapper_dst.Pointer<void>(), mapper_dst.RowPitch(), mapper_src.Pointer<void>(), src_width, src_height);
+					break;
+
+				case EF_BC2_SRGB:
+					DecodeBC2_sRGB(mapper_dst.Pointer<void>(), mapper_dst.RowPitch(), mapper_src.Pointer<void>(), src_width, src_height);
+					break;
+
+				case EF_BC3_SRGB:
+					DecodeBC3_sRGB(mapper_dst.Pointer<void>(), mapper_dst.RowPitch(), mapper_src.Pointer<void>(), src_width, src_height);
+					break;
+				
+				case EF_BC4_SRGB:
+					{
+						uint32_t const dst_pitch = mapper_dst.RowPitch();
+
+						uint8_t const * src = mapper_src.Pointer<uint8_t>();
+						uint8_t* dst = mapper_dst.Pointer<uint8_t>();
+
+						uint8_t uncompressed_r[16];
+						for (uint32_t y_base = 0; y_base < src_height; y_base += 4)
+						{
+							for (uint32_t x_base = 0; x_base < src_width; x_base += 4)
+							{
+								DecodeBC4_sRGB(&uncompressed_r[0], src);
+								src += 8;
+
+								for (int y = 0; y < 4; ++ y)
+								{
+									for (int x = 0; x < 4; ++ x)
+									{
+										dst[(y_base + y) * dst_pitch + (x_base + x) * 4 + 0] = 0;
+										dst[(y_base + y) * dst_pitch + (x_base + x) * 4 + 1] = 0;
+										dst[(y_base + y) * dst_pitch + (x_base + x) * 4 + 2] = uncompressed_r[y * 4 + x];
+										dst[(y_base + y) * dst_pitch + (x_base + x) * 4 + 3] = 0;
+									}
+								}
+							}
+						}
+					}
+					break;
+
+				case EF_BC5_SRGB:
+					{
+						uint32_t const dst_pitch = mapper_dst.RowPitch();
+
+						uint8_t const * src = mapper_src.Pointer<uint8_t>();
+						uint8_t* dst = mapper_dst.Pointer<uint8_t>();
+
+						uint8_t uncompressed_r[16];
+						uint8_t uncompressed_g[16];
+						for (uint32_t y_base = 0; y_base < src_height; y_base += 4)
+						{
+							for (uint32_t x_base = 0; x_base < src_width; x_base += 4)
+							{
+								DecodeBC5_sRGB(&uncompressed_r[0], &uncompressed_g[0], src);
+								src += 16;
+
+								for (int y = 0; y < 4; ++ y)
+								{
+									for (int x = 0; x < 4; ++ x)
+									{
+										dst[(y_base + y) * dst_pitch + (x_base + x) * 4 + 0] = 0;
+										dst[(y_base + y) * dst_pitch + (x_base + x) * 4 + 1] = uncompressed_g[y * 4 + x];
+										dst[(y_base + y) * dst_pitch + (x_base + x) * 4 + 2] = uncompressed_r[y * 4 + x];
+										dst[(y_base + y) * dst_pitch + (x_base + x) * 4 + 3] = 0;
+									}
+								}
+							}
+						}
+					}
+					break;
+
+				default:
+					BOOST_ASSERT(false);
+					break;
+				}
+			}
+			else
+			{
+				this->CopyToSubTexture2D(*src_cpu, 0, 0, 0, 0, src_width, src_height, 
+					src_array_index, src_level, src_x_offset, src_y_offset, src_width, src_height);
+			}
 
 			src_cpu_array_index = 0;
 			src_cpu_level = 0;
@@ -3019,18 +3219,85 @@ namespace KlayGE
 		uint32_t dst_cpu_level;
 		uint32_t dst_cpu_x_offset;
 		uint32_t dst_cpu_y_offset;
-		if (target.AccessHint() & EAH_CPU_Write)
+		ElementFormat dst_cpu_fmt;
+		if ((target.AccessHint() & EAH_CPU_Write) && !IsCompressedFormat(target.Format()))
 		{
 			dst_cpu_ptr = &target;
 			dst_cpu_array_index = dst_array_index;
 			dst_cpu_level = dst_level;
 			dst_cpu_x_offset = dst_x_offset;
 			dst_cpu_y_offset = dst_y_offset;
+			dst_cpu_fmt = target.Format();
 		}
 		else
 		{
+			if (IsCompressedFormat(target.Format()))
+			{
+				// Must be multiply of 4
+				BOOST_ASSERT(0 == (dst_x_offset & 0x3));
+				BOOST_ASSERT(0 == (dst_y_offset & 0x3));
+				BOOST_ASSERT(0 == (dst_width & 0x3));
+				BOOST_ASSERT(0 == (dst_height & 0x3));
+
+				BOOST_ASSERT(TT_2D == target.Type());
+
+				switch (target.Format())
+				{
+				case EF_BC1:
+				case EF_BC2:
+				case EF_BC3:
+					dst_cpu_fmt = EF_ARGB8;
+					break;
+				
+				case EF_BC4:
+					dst_cpu_fmt = EF_R8;
+					break;
+
+				case EF_BC5:
+					dst_cpu_fmt = EF_GR8;
+					break;
+
+				case EF_SIGNED_BC1:
+				case EF_SIGNED_BC2:
+				case EF_SIGNED_BC3:
+					dst_cpu_fmt = EF_SIGNED_ABGR8;
+					break;
+
+				case EF_SIGNED_BC4:
+					dst_cpu_fmt = EF_SIGNED_R8;
+					break;
+
+				case EF_SIGNED_BC5:
+					dst_cpu_fmt = EF_SIGNED_GR8;
+					break;
+
+				case EF_BC1_SRGB:
+				case EF_BC2_SRGB:
+				case EF_BC3_SRGB:
+					dst_cpu_fmt = EF_ARGB8_SRGB;
+					break;
+				
+				case EF_BC4_SRGB:
+					dst_cpu_fmt = EF_ARGB8_SRGB;
+					break;
+
+				case EF_BC5_SRGB:
+					dst_cpu_fmt = EF_ARGB8_SRGB;
+					break;
+
+				default:
+					BOOST_ASSERT(false);
+					dst_cpu_fmt = target.Format();
+					break;
+				}
+			}
+			else
+			{
+				dst_cpu_fmt = target.Format();
+			}
+
 			dst_cpu = rf.MakeTexture2D(dst_width, dst_height, 1, 1,
-				target.Format(), target.SampleCount(), target.SampleQuality(), EAH_CPU_Write, NULL);
+				dst_cpu_fmt, target.SampleCount(), target.SampleQuality(), EAH_CPU_Read | EAH_CPU_Write, NULL);
 			dst_cpu_ptr = dst_cpu.get();
 
 			dst_cpu_array_index = 0;
@@ -3039,7 +3306,7 @@ namespace KlayGE
 			dst_cpu_y_offset = 0;
 		}
 
-		if (!linear && (this->Format() == target.Format()))
+		if (!linear && (src_cpu_fmt == dst_cpu_fmt))
 		{
 			Mapper src_mapper(*src_cpu_ptr, src_cpu_array_index, src_cpu_level, TMA_Read_Only, src_cpu_x_offset, src_cpu_y_offset, src_width, src_height);
 			Mapper dst_mapper(*dst_cpu_ptr, dst_cpu_array_index, dst_cpu_level, TMA_Write_Only, dst_cpu_x_offset, dst_cpu_y_offset, dst_width, dst_height);
@@ -3081,7 +3348,7 @@ namespace KlayGE
 				uint32_t const src_pitch = src_mapper.RowPitch();
 				for (uint32_t y = 0; y < src_height; ++ y)
 				{
-					ConvertToABGR32F(this->Format(), src_ptr + y * src_pitch, src_width, &src_32f[y * src_width]);
+					ConvertToABGR32F(src_cpu_fmt, src_ptr + y * src_pitch, src_width, &src_32f[y * src_width]);
 				}
 			}
 
@@ -3129,14 +3396,161 @@ namespace KlayGE
 				uint32_t const dst_pitch = dst_mapper.RowPitch();
 				for (uint32_t y = 0; y < dst_height; ++ y)
 				{
-					ConvertFromABGR32F(target.Format(), &dst_32f[y * dst_width], dst_width, dst_ptr + y * dst_pitch);
+					ConvertFromABGR32F(dst_cpu_fmt, &dst_32f[y * dst_width], dst_width, dst_ptr + y * dst_pitch);
 				}
 			}
 		}
 
 		if (dst_cpu_ptr != &target)
 		{
-			dst_cpu_ptr->CopyToSubTexture2D(target, dst_array_index, dst_level, dst_x_offset, dst_y_offset, dst_width, dst_height, 0, 0, 0, 0, dst_width, dst_height);
+			if (IsCompressedFormat(target.Format()))
+			{
+				TexturePtr dst_bc_cpu = rf.MakeTexture2D(dst_width, dst_height, 1, 1,
+					target.Format(), target.SampleCount(), target.SampleQuality(), EAH_CPU_Read | EAH_CPU_Write, NULL);
+
+				Texture::Mapper mapper_src(*dst_cpu, 0, 0, TMA_Read_Only, 0, 0, dst_width, dst_height);
+				Texture::Mapper mapper_dst(*dst_bc_cpu, 0, 0, TMA_Write_Only, 0, 0, dst_width, dst_height);
+
+				switch (target.Format())
+				{
+				case EF_BC1:
+					EncodeBC1(mapper_dst.Pointer<void>(), mapper_dst.RowPitch(), mapper_src.Pointer<void>(), dst_width, dst_height, mapper_src.RowPitch(), EBCM_Quality);
+					break;
+
+				case EF_BC2:
+					EncodeBC2(mapper_dst.Pointer<void>(), mapper_dst.RowPitch(), mapper_src.Pointer<void>(), dst_width, dst_height, mapper_src.RowPitch(), EBCM_Quality);
+					break;
+
+				case EF_BC3:
+					EncodeBC3(mapper_dst.Pointer<void>(), mapper_dst.RowPitch(), mapper_src.Pointer<void>(), dst_width, dst_height, mapper_src.RowPitch(), EBCM_Quality);
+					break;
+				
+				case EF_BC4:
+					EncodeBC4(mapper_dst.Pointer<void>(), mapper_dst.RowPitch(), mapper_src.Pointer<void>(), dst_width, dst_height, mapper_src.RowPitch());
+					break;
+
+				case EF_BC5:
+					EncodeBC5(mapper_dst.Pointer<void>(), mapper_dst.RowPitch(), mapper_src.Pointer<void>(), dst_width, dst_height, mapper_src.RowPitch());
+					break;
+
+				case EF_SIGNED_BC1:
+					EncodeBC1(mapper_dst.Pointer<void>(), mapper_dst.RowPitch(), mapper_src.Pointer<void>(), dst_width, dst_height, mapper_src.RowPitch(), EBCM_Quality);
+					break;
+
+				case EF_SIGNED_BC2:
+					EncodeBC2(mapper_dst.Pointer<void>(), mapper_dst.RowPitch(), mapper_src.Pointer<void>(), dst_width, dst_height, mapper_src.RowPitch(), EBCM_Quality);
+					break;
+
+				case EF_SIGNED_BC3:
+					EncodeBC3(mapper_dst.Pointer<void>(), mapper_dst.RowPitch(), mapper_src.Pointer<void>(), dst_width, dst_height, mapper_src.RowPitch(), EBCM_Quality);
+					break;
+
+				case EF_SIGNED_BC4:
+					EncodeBC4(mapper_dst.Pointer<void>(), mapper_dst.RowPitch(), mapper_src.Pointer<void>(), dst_width, dst_height, mapper_src.RowPitch());
+					break;
+
+				case EF_SIGNED_BC5:
+					EncodeBC5(mapper_dst.Pointer<void>(), mapper_dst.RowPitch(), mapper_src.Pointer<void>(), dst_width, dst_height, mapper_src.RowPitch());
+					break;
+
+				case EF_BC1_SRGB:
+					EncodeBC1_sRGB(mapper_dst.Pointer<void>(), mapper_dst.RowPitch(), mapper_src.Pointer<void>(), dst_width, dst_height, mapper_src.RowPitch(), EBCM_Quality);
+					break;
+
+				case EF_BC2_SRGB:
+					EncodeBC2_sRGB(mapper_dst.Pointer<void>(), mapper_dst.RowPitch(), mapper_src.Pointer<void>(), dst_width, dst_height, mapper_src.RowPitch(), EBCM_Quality);
+					break;
+
+				case EF_BC3_SRGB:
+					EncodeBC3_sRGB(mapper_dst.Pointer<void>(), mapper_dst.RowPitch(), mapper_src.Pointer<void>(), dst_width, dst_height, mapper_src.RowPitch(), EBCM_Quality);
+					break;
+				
+				case EF_BC4_SRGB:
+					{
+						uint32_t const src_pitch = mapper_src.RowPitch();
+						uint32_t const dst_pitch = mapper_dst.RowPitch();
+
+						uint8_t const * src = mapper_src.Pointer<uint8_t>();
+						uint8_t* bc4 = mapper_dst.Pointer<uint8_t>();
+
+						uint8_t uncompressed_r[16];
+						for (uint32_t y_base = 0; y_base < src_height; y_base += 4)
+						{
+							BC4_layout* dst = reinterpret_cast<BC4_layout*>(bc4 + y_base / 4 * dst_pitch);
+
+							for (uint32_t x_base = 0; x_base < src_width; x_base += 4)
+							{
+								for (int y = 0; y < 4; ++ y)
+								{
+									for (int x = 0; x < 4; ++ x)
+									{
+										uint8_t pixel = 0;
+										if ((x_base + x < src_width) && (y_base + y < src_height))
+										{
+											pixel = src[(y_base + y) * src_pitch + (x_base + x) * 4 + 2];
+										}
+										uncompressed_r[y * 4 + x] = pixel;
+									}
+								}
+
+								EncodeBC4_sRGB(*dst, &uncompressed_r[0]);
+								++ dst;
+							}
+						}
+					}
+					break;
+
+				case EF_BC5_SRGB:
+					{
+						uint32_t const src_pitch = mapper_src.RowPitch();
+						uint32_t const dst_pitch = mapper_dst.RowPitch();
+
+						uint8_t const * src = mapper_src.Pointer<uint8_t>();
+						uint8_t* bc4 = mapper_dst.Pointer<uint8_t>();
+
+						uint8_t uncompressed_r[16];
+						uint8_t uncompressed_g[16];
+						for (uint32_t y_base = 0; y_base < src_height; y_base += 4)
+						{
+							BC5_layout* dst = reinterpret_cast<BC5_layout*>(bc4 + y_base / 4 * dst_pitch);
+
+							for (uint32_t x_base = 0; x_base < src_width; x_base += 4)
+							{
+								for (int y = 0; y < 4; ++ y)
+								{
+									for (int x = 0; x < 4; ++ x)
+									{
+										uint8_t r = 0, g = 0;
+										if ((x_base + x < dst_width) && (y_base + y < dst_height))
+										{
+											r = src[(y_base + y) * src_pitch + (x_base + x) * 4 + 2];
+											g = src[(y_base + y) * src_pitch + (x_base + x) * 4 + 1];
+										}
+										uncompressed_r[y * 4 + x] = r;
+										uncompressed_g[y * 4 + x] = g;
+									}
+								}
+
+								EncodeBC5_sRGB(*dst, &uncompressed_r[0], &uncompressed_g[0]);
+								++ dst;
+							}
+						}
+					}
+					break;
+
+				default:
+					BOOST_ASSERT(false);
+					break;
+				}
+
+				dst_bc_cpu->CopyToSubTexture2D(target, dst_array_index, dst_level, dst_x_offset, dst_y_offset,
+					dst_width, dst_height, 0, 0, 0, 0, dst_width, dst_height);
+			}
+			else
+			{
+				dst_cpu_ptr->CopyToSubTexture2D(target, dst_array_index, dst_level, dst_x_offset, dst_y_offset,
+					dst_width, dst_height, 0, 0, 0, 0, dst_width, dst_height);
+			}
 		}
 	}
 
