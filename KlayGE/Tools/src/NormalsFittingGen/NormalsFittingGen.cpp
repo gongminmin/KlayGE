@@ -49,14 +49,14 @@ void gen_normals_fitting(std::vector<uint8_t>& fitting_map, int dim)
 	fitting_map.resize(dim * dim);
 	float3 normal;
 	normal.z() = 1;
-	for (int y = 0; y < dim; ++ y)
+	for (int x = 0; x < dim; ++ x)
 	{
-		normal.y() = -(y + 0.5f) / dim;
-		for (int x = 0; x < dim; ++ x)
+		normal.x() = (x + 0.5f) / dim;
+		for (int y = 0; y < dim; ++ y)
 		{
-			normal.x() = (x + 0.5f) / dim;
+			normal.y() = (y + 0.5f) / dim * (x + 1.0f) / dim;
 
-			float quantized_length = find_minimum_quantization_error(normal);
+			float quantized_length = find_minimum_quantization_error(MathLib::normalize(normal));
 			fitting_map[y * dim + x] = static_cast<uint8_t>(MathLib::clamp(static_cast<int>(quantized_length * 255 + 0.5f), 0, 255));
 		}
 	}
@@ -99,17 +99,8 @@ int main()
 	std::vector<ElementInitData> init_data(mipmap);
 	for (int level = 0; level < mipmap; ++ level)
 	{
-		std::vector<uint8_t>& this_level = fitting_map[level];
-		for (int y = 0; y < dim; ++ y)
-		{
-			for (int x = 0; x < y; ++ x)
-			{
-				this_level[y * dim + x] = this_level[x * dim + y];
-			}
-		}
-
-		init_data[level].data = &this_level[0];
-		init_data[level].slice_pitch = init_data[level].row_pitch = static_cast<uint32_t>(this_level.size());
+		init_data[level].data = &fitting_map[level][0];
+		init_data[level].slice_pitch = init_data[level].row_pitch = static_cast<uint32_t>(fitting_map[level].size());
 
 		dim /= 2;
 	}
