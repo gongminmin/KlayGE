@@ -1896,9 +1896,7 @@ namespace KlayGE
 		template <typename T>
 		OBBox_T<T> convert_to_obbox(AABBox_T<T> const & aabb)
 		{
-			return OBBox_T<T>(aabb.Center(),
-				Vector_T<T, 3>(1, 0, 0), Vector_T<T, 3>(0, 1, 0), Vector_T<T, 3>(0, 0, 1),
-				aabb.HalfSize());
+			return OBBox_T<T>(aabb.Center(), Quaternion_T<T>::Identity(), aabb.HalfSize());
 		}
 
 
@@ -1949,9 +1947,9 @@ namespace KlayGE
 		OBBox_T<T> transform_obb(OBBox_T<T> const & obb, T scale, Quaternion_T<T> const & rot, Vector_T<T, 3> const & trans)
 		{
 			Vector_T<T, 3> center = transform_quat(obb.Center() * scale, rot) + trans;
-			Vector_T<T, 3> axis[3] = { transform_quat(obb.Axis(0), rot), transform_quat(obb.Axis(1), rot), transform_quat(obb.Axis(2), rot) };
+			Quaternion_T<T> rotation = mul(obb.Rotation(), rot);
 			Vector_T<T, 3> extent = obb.HalfSize() * scale;
-			return OBBox_T<T>(center, axis[0], axis[1], axis[2], extent);
+			return OBBox_T<T>(center, rotation, extent);
 		}
 
 		template KLAYGE_CORE_API Sphere transform_sphere(Sphere const & sphere, float4x4 const & mat);

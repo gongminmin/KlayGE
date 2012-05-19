@@ -34,25 +34,28 @@ namespace KlayGE
 	{
 	public:
 		OBBox_T()
-			: r_(0, 0, 0)
+			: extent_(0, 0, 0)
 		{
 		}
 		OBBox_T(Vector_T<T, 3> const & center,
 			Vector_T<T, 3> const & x_axis, Vector_T<T, 3> const & y_axis, Vector_T<T, 3> const & z_axis,
-			Vector_T<T, 3> const & r)
-			: center_(center), r_(r)
+			Vector_T<T, 3> const & extent)
+			: center_(center), extent_(extent)
 		{
-			axis_[0] = x_axis;
-			axis_[1] = y_axis;
-			axis_[2] = z_axis;
+			UNREF_PARAM(x_axis);
+			UNREF_PARAM(y_axis);
+			rotation_ = MathLib::unit_axis_to_unit_axis(Vector_T<T, 3>(0, 0, 1), MathLib::normalize(z_axis));
+		}
+		OBBox_T(Vector_T<T, 3> const & center,
+			Quaternion_T<T> const & rotation,
+			Vector_T<T, 3> const & extent)
+			: center_(center), rotation_(rotation), extent_(extent)
+		{
 		}
 		OBBox_T(OBBox_T<T> const & rhs)
 			: Bound_T<T>(rhs),
-				center_(rhs.center_), r_(rhs.r_)
+				center_(rhs.center_), rotation_(rhs.rotation_), extent_(rhs.extent_)
 		{
-			axis_[0] = rhs.axis_[0];
-			axis_[1] = rhs.axis_[1];
-			axis_[2] = rhs.axis_[2];
 		}
 
 		OBBox_T<T>& operator+=(Vector_T<T, 3> const & rhs)
@@ -67,7 +70,7 @@ namespace KlayGE
 		}
 		OBBox_T<T>& operator*=(T const & rhs)
 		{
-			r_ *= rhs;
+			extent_ *= rhs;
 			return *this;
 		}
 		OBBox_T<T>& operator/=(T const & rhs)
@@ -80,10 +83,8 @@ namespace KlayGE
 			if (this != &rhs)
 			{
 				center_ = rhs.center_;
-				axis_[0] = rhs.axis_[0];
-				axis_[1] = rhs.axis_[1];
-				axis_[2] = rhs.axis_[2];
-				r_ = rhs.r_;
+				rotation_ = rhs.rotation_;
+				extent_ = rhs.extent_;
 			}
 			return *this;
 		}
@@ -96,16 +97,14 @@ namespace KlayGE
 		{
 			OBBox_T<T> ret;
 			ret.center_ = -center_;
-			ret.axis_[0] = -axis_[0];
-			ret.axis_[1] = -axis_[1];
-			ret.axis_[2] = -axis_[2];
-			ret.r_ = r_;
+			ret.rotation_ = -rotation_;
+			ret.extent_ = extent_;
 			return ret;
 		}
 
 		bool IsEmpty() const
 		{
-			return MathLib::length_sq(r_) < T(1e-6);
+			return MathLib::length_sq(extent_) < T(1e-6);
 		}
 
 		bool VecInBound(Vector_T<T, 3> const & v) const
@@ -114,20 +113,26 @@ namespace KlayGE
 		}
 		T MaxRadiusSq() const
 		{
-			return MathLib::length_sq(r_);
+			return MathLib::length_sq(extent_);
 		}
 
 		Vector_T<T, 3> const & Center() const
 		{
 			return center_;
 		}
-		Vector_T<T, 3> const & Axis(uint32_t index) const
+		Quaternion_T<T> const & Rotation() const
 		{
-			return axis_[index];
+			return rotation_;
+		}
+		Vector_T<T, 3> Axis(uint32_t index) const
+		{
+			Vector_T<T, 3> v(0, 0, 0);
+			v[index] = 1;
+			return MathLib::transform_quat(v, rotation_);
 		}
 		Vector_T<T, 3> const & HalfSize() const
 		{
-			return r_;
+			return extent_;
 		}
 
 		bool Intersect(AABBox_T<T> const & aabb) const
@@ -151,16 +156,14 @@ namespace KlayGE
 		operator==(OBBox_T<T> const & lhs, OBBox_T<T> const & rhs)
 		{
 			return (lhs.center_ == rhs.center_)
-				&& (lhs.axis_[0] == rhs.axis_[0])
-				&& (lhs.axis_[1] == rhs.axis_[1])
-				&& (lhs.axis_[2] == rhs.axis_[2])
-				&& (rhs.r_ == rhs.r_);
+				&& (lhs.rotation_ == rhs.rotation_)
+				&& (rhs.extent_ == rhs.extent_);
 		}
 
 	private:
 		Vector_T<T, 3> center_;
-		Vector_T<T, 3> axis_[3];
-		Vector_T<T, 3> r_;
+		Quaternion_T<T> rotation_;
+		Vector_T<T, 3> extent_;
 	};
 }
 
