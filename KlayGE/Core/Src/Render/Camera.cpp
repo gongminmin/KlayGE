@@ -26,7 +26,6 @@ namespace KlayGE
 {
 	enum CameraMode
 	{
-		CM_Stereo = 1UL << 0,
 		CM_Omni = 1UL << 1
 	};
 
@@ -37,8 +36,8 @@ namespace KlayGE
 	{
 		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 		uint32_t num_motion_frames = re.NumMotionFrames();
-		prev_view_mats_[0].resize(num_motion_frames);
-		prev_proj_mats_[0].resize(num_motion_frames);
+		prev_view_mats_.resize(num_motion_frames);
+		prev_proj_mats_.resize(num_motion_frames);
 
 		// 设置观察矩阵的参数
 		this->ViewParams(float3(0, 0, 0), float3(0, 0, 1), float3(0, 1, 0));
@@ -49,61 +48,38 @@ namespace KlayGE
 
 	// 设置摄像机的观察矩阵
 	//////////////////////////////////////////////////////////////////////////////////
-	void Camera::ViewParams(float3 const & eyePos, float3 const & lookat,
-										float3 const & upVec)
+	void Camera::ViewParams(float3 const & eye_pos, float3 const & look_at)
+	{
+		this->ViewParams(eye_pos, look_at, float3(0, 1, 0));
+	}
+
+	void Camera::ViewParams(float3 const & eye_pos, float3 const & look_at,
+										float3 const & up_vec)
 	{
 		// 设置观察矩阵的参数
-		eyePos_		= eyePos;
-		lookat_		= lookat;
-		upVec_		= upVec;
+		eye_pos_	= eye_pos;
+		look_at_	= look_at;
+		up_vec_		= up_vec;
 
-		viewVec_ = MathLib::normalize(lookat_ - eyePos_);
-		float4x4 view_mat = MathLib::look_at_lh(eyePos_, lookat_, upVec);
-		if (this->StereoMode())
-		{
-			RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-			float separation = re.StereoSeparation() / 2;
-			viewMat_[0] = view_mat * MathLib::translation(+separation, 0.0f, 0.0f);
-			viewMat_[1] = view_mat * MathLib::translation(-separation, 0.0f, 0.0f);
-			frustum_dirty_ = true;
-			frustum_dirty_ = true;
-		}
-		else
-		{
-			viewMat_[0] = view_mat;
-			frustum_dirty_ = true;
-		}
+		view_vec_ = MathLib::normalize(look_at_ - eye_pos_);
+		view_mat_ = MathLib::look_at_lh(eye_pos_, look_at_, up_vec);
+		frustum_dirty_ = true;
 	}
 
 	// 设置摄像机的投射矩阵
 	//////////////////////////////////////////////////////////////////////////////////
-	void Camera::ProjParams(float FOV, float aspect, float nearPlane,
-											float farPlane)
+	void Camera::ProjParams(float fov, float aspect, float near_plane, float far_plane)
 	{
 		// 设置投射矩阵的参数
-		FOV_		= FOV;
+		fov_		= fov;
 		aspect_		= aspect;
-		nearPlane_	= nearPlane;
-		farPlane_	= farPlane;
+		near_plane_	= near_plane;
+		far_plane_	= far_plane;
 
 		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-		if (this->StereoMode())
-		{
-			float separation = nearPlane * re.StereoSeparation() / 2;
-			float height = 2 * nearPlane * tan(FOV / 2);
-			float width = height * aspect;
-			projMat_[0] = MathLib::perspective_off_center_lh(-width / 2 + separation, width / 2 + separation, -height / 2, height / 2, nearPlane, farPlane);
-			projMat_[1] = MathLib::perspective_off_center_lh(-width / 2 - separation, width / 2 - separation, -height / 2, height / 2, nearPlane, farPlane);
-			re.AdjustPerspectiveMatrix(projMat_[0]);
-			re.AdjustPerspectiveMatrix(projMat_[1]);
-			frustum_dirty_ = true;
-		}
-		else
-		{
-			projMat_[0] = MathLib::perspective_fov_lh(FOV, aspect, nearPlane, farPlane);
-			re.AdjustPerspectiveMatrix(projMat_[0]);
-			frustum_dirty_ = true;
-		}
+		proj_mat_ = MathLib::perspective_fov_lh(fov, aspect, near_plane, far_plane);
+		re.AdjustPerspectiveMatrix(proj_mat_);
+		frustum_dirty_ = true;
 	}
 
 	void Camera::BindUpdateFunc(boost::function<void(Camera&, float, float)> const & update_func)
@@ -118,97 +94,38 @@ namespace KlayGE
 			update_func_(*this, app_time, elapsed_time);
 		}
 
-		prev_view_mats_[0].push_back(viewMat_[0]);
-		prev_proj_mats_[0].push_back(projMat_[0]);
-		if (this->StereoMode())
-		{
-			prev_view_mats_[1].push_back(viewMat_[1]);
-			prev_proj_mats_[1].push_back(projMat_[1]);
-		}
+		prev_view_mats_.push_back(view_mat_);
+		prev_proj_mats_.push_back(proj_mat_);
 	}
 
 	float4x4 const & Camera::ViewMatrix() const
 	{
-		uint32_t eye = 0;
-		if (this->StereoMode())
-		{
-			RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-			eye = re.StereoActiveEye();
-		}
-		return viewMat_[eye];
+		return view_mat_;
 	}
 
 	float4x4 const & Camera::ProjMatrix() const
 	{
-		uint32_t eye = 0;
-		if (this->StereoMode())
-		{
-			RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-			eye = re.StereoActiveEye();
-		}
-		return projMat_[eye];
+		return proj_mat_;
 	}
 
 	float4x4 const & Camera::PrevViewMatrix() const
 	{
-		uint32_t eye = 0;
-		if (this->StereoMode())
-		{
-			RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-			eye = re.StereoActiveEye();
-		}
-		return prev_view_mats_[eye].front();
+		return prev_view_mats_.front();
 	}
 	
 	float4x4 const & Camera::PrevProjMatrix() const
 	{
-		uint32_t eye = 0;
-		if (this->StereoMode())
-		{
-			RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-			eye = re.StereoActiveEye();
-		}
-		return prev_proj_mats_[eye].front();
+		return prev_proj_mats_.front();
 	}
 
 	Frustum const & Camera::ViewFrustum() const
 	{
-		uint32_t eye = 0;
-		if (this->StereoMode())
-		{
-			RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-			eye = re.StereoActiveEye();
-		}
 		if (frustum_dirty_)
 		{
-			frustum_[0].ClipMatrix(viewMat_[0] * projMat_[0]);
-			if (this->StereoMode())
-			{
-				frustum_[1].ClipMatrix(viewMat_[1] * projMat_[1]);
-			}
+			frustum_.ClipMatrix(view_mat_ * proj_mat_);
 			frustum_dirty_ = false;
 		}
-		return frustum_[eye];
-	}
-
-	bool Camera::StereoMode() const
-	{
-		return (mode_ & CM_Stereo) > 0;
-	}
-
-	void Camera::StereoMode(bool stereo)
-	{
-		if (stereo)
-		{
-			mode_ |= CM_Stereo;
-
-			prev_view_mats_[1].resize(prev_view_mats_[0].size());
-			prev_proj_mats_[1].resize(prev_proj_mats_[0].size());
-		}
-		else
-		{
-			mode_ &= ~CM_Stereo;
-		}
+		return frustum_;
 	}
 
 	bool Camera::OmniDirectionalMode() const

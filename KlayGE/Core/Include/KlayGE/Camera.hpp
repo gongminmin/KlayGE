@@ -48,26 +48,26 @@ namespace KlayGE
 		Camera();
 
 		float3 const & EyePos() const
-			{ return eyePos_; }
+			{ return eye_pos_; }
 		float3 const & LookAt() const
-			{ return lookat_; }
+			{ return look_at_; }
 		float3 const & UpVec() const
-			{ return upVec_; }
+			{ return up_vec_; }
 		float3 const & ViewVec() const
-			{ return viewVec_; }
+			{ return view_vec_; }
 
 		float FOV() const
-			{ return FOV_; }
+			{ return fov_; }
 		float Aspect() const
 			{ return aspect_; }
 		float NearPlane() const
-			{ return nearPlane_; }
+			{ return near_plane_; }
 		float FarPlane() const
-			{ return farPlane_; }
+			{ return far_plane_; }
 
-		void ViewParams(float3 const & eyePos, float3 const & lookat,
-			float3 const & upVec = float3(0, 1, 0));
-		void ProjParams(float FOV, float aspect, float nearPlane, float farPlane);
+		void ViewParams(float3 const & eye_pos, float3 const & look_at);
+		void ViewParams(float3 const & eye_pos, float3 const & look_at, float3 const & up_vec);
+		void ProjParams(float fov, float aspect, float near_plane, float far_plane);
 
 		void BindUpdateFunc(boost::function<void(Camera&, float, float)> const & update_func);
 
@@ -80,29 +80,26 @@ namespace KlayGE
 
 		Frustum const & ViewFrustum() const;
 
-		bool StereoMode() const;
-		void StereoMode(bool stereo);
-
 		bool OmniDirectionalMode() const;
 		void OmniDirectionalMode(bool omni);
 
 	private:
-		float3		eyePos_;		// 观察矩阵的属性
-		float3		lookat_;
-		float3		upVec_;
-		float3		viewVec_;
-		float4x4	viewMat_[2];
+		float3		eye_pos_;		// 观察矩阵的属性
+		float3		look_at_;
+		float3		up_vec_;
+		float3		view_vec_;
+		float4x4	view_mat_;
 
-		float		FOV_;			// 投射矩阵的属性
+		float		fov_;			// 投射矩阵的属性
 		float		aspect_;
-		float		nearPlane_;
-		float		farPlane_;
-		float4x4	projMat_[2];
+		float		near_plane_;
+		float		far_plane_;
+		float4x4	proj_mat_;
 
-		boost::circular_buffer<float4x4> prev_view_mats_[2];
-		boost::circular_buffer<float4x4> prev_proj_mats_[2];
+		boost::circular_buffer<float4x4> prev_view_mats_;
+		boost::circular_buffer<float4x4> prev_proj_mats_;
 
-		mutable Frustum	frustum_[2];
+		mutable Frustum	frustum_;
 		mutable bool	frustum_dirty_;
 
 		uint32_t	mode_;

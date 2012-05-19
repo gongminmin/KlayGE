@@ -145,7 +145,7 @@ namespace KlayGE
 			cur_blend_factor_(1, 1, 1, 1),
 			cur_sample_mask_(0xFFFFFFFF),
 			motion_frames_(0),
-			stereo_method_(STM_None), stereo_separation_(0), stereo_active_eye_(0),
+			stereo_method_(STM_None), stereo_separation_(0),
 			fb_stage_(0)
 	{
 	}
@@ -172,6 +172,8 @@ namespace KlayGE
 		stereo_separation_ = settings.stereo_separation;
 		this->DoCreateRenderWindow(name, render_settings_);
 		this->CheckConfig();
+		RenderDeviceCaps const & caps = this->DeviceCaps();
+
 		screen_frame_buffer_ = cur_frame_buffer_;
 		if (render_settings_.hdr)
 		{
@@ -190,6 +192,7 @@ namespace KlayGE
 		{
 			color_grading_pp_ = LoadPostProcess(ResLoader::Instance().Open("ColorGrading.ppml"), "color_grading");
 			color_grading_pp_->SetParam(0, int2(render_settings_.gamma, render_settings_.color_grading));
+			skip_color_grading_pp_ = LoadPostProcess(ResLoader::Instance().Open("Copy.ppml"), "copy");
 		}
 		else
 		{
@@ -197,34 +200,95 @@ namespace KlayGE
 			{
 				color_grading_pp_ = LoadPostProcess(ResLoader::Instance().Open("GammaCorrection.ppml"), "gamma_correction");
 				color_grading_pp_->SetParam(0, 1 / 2.2f);
+				skip_color_grading_pp_ = LoadPostProcess(ResLoader::Instance().Open("Copy.ppml"), "copy");
+			}
+		}
+		if (render_settings_.stereo_method != STM_None)
+		{
+			if (caps.max_simultaneous_rts > 1)
+			{
+				stereo_lr_pp_ = LoadPostProcess(ResLoader::Instance().Open("Stereoscopic.ppml"), "stereo_left_right");
+				stereo_lr_pp_->SetParam(0, stereo_separation_);
+			}
+			else
+			{
+				stereo_l_pp_ = LoadPostProcess(ResLoader::Instance().Open("Stereoscopic.ppml"), "stereo_left");
+				stereo_l_pp_->SetParam(0, stereo_separation_);
+
+				stereo_r_pp_ = LoadPostProcess(ResLoader::Instance().Open("Stereoscopic.ppml"), "stereo_right");
+				stereo_r_pp_->SetParam(0, stereo_separation_);
 			}
 		}
 
-		for (int i = 0; i < 8; ++ i)
+		for (int i = 0; i < 5; ++ i)
 		{
 			default_frame_buffers_[i] = screen_frame_buffer_;
 		}
 
-		this->Stereo(settings.stereo_method);
-
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-		RenderDeviceCaps const & caps = rf.RenderEngineInstance().DeviceCaps();
 
 		RenderViewPtr ds_view;
-		if (hdr_pp_ || ppaa_pp_ || color_grading_pp_)
+		if (hdr_pp_ || ppaa_pp_ || color_grading_pp_ || stereo_lr_pp_ || stereo_l_pp_)
 		{
-			ElementFormat fmt;
-			if (caps.rendertarget_format_support(render_settings_.depth_stencil_fmt, 1, 0))
+			if (caps.texture_format_support(EF_D24S8) || caps.texture_format_support(EF_D16))
 			{
-				fmt = render_settings_.depth_stencil_fmt;
+				ElementFormat fmt;
+				if (caps.texture_format_support(render_settings_.depth_stencil_fmt))
+				{
+					fmt = render_settings_.depth_stencil_fmt;
+				}
+				else
+				{
+					BOOST_ASSERT(caps.texture_format_support(EF_D16));
+
+					fmt = EF_D16;
+				}
+				ds_tex_ = rf.MakeTexture2D(screen_frame_buffer_->Width(), screen_frame_buffer_->Height(), 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+				ds_view = rf.Make2DDepthStencilRenderView(*ds_tex_, 0, 1, 0);
 			}
 			else
 			{
-				BOOST_ASSERT(caps.rendertarget_format_support(EF_D16, 1, 0));
+				ElementFormat fmt;
+				if (caps.rendertarget_format_support(render_settings_.depth_stencil_fmt, 1, 0))
+				{
+					fmt = render_settings_.depth_stencil_fmt;
+				}
+				else
+				{
+					BOOST_ASSERT(caps.rendertarget_format_support(EF_D16, 1, 0));
 
-				fmt = EF_D16;
+					fmt = EF_D16;
+				}
+				ds_view = rf.Make2DDepthStencilRenderView(screen_frame_buffer_->Width(), screen_frame_buffer_->Height(), fmt, 1, 0);
 			}
-			ds_view = rf.Make2DDepthStencilRenderView(screen_frame_buffer_->Width(), screen_frame_buffer_->Height(), fmt, 1, 0);
+		}
+
+		if (stereo_lr_pp_ || stereo_l_pp_)
+		{
+			mono_frame_buffer_ = rf.MakeFrameBuffer();
+			mono_frame_buffer_->GetViewport().camera = cur_frame_buffer_->GetViewport().camera;
+
+			ElementFormat fmt;
+			if (caps.rendertarget_format_support(EF_ABGR8, 1, 0))
+			{
+				fmt = EF_ABGR8;
+			}
+			else
+			{
+				BOOST_ASSERT(caps.rendertarget_format_support(EF_ARGB8, 1, 0));
+
+				fmt = EF_ARGB8;
+			}
+
+			mono_tex_ = rf.MakeTexture2D(screen_frame_buffer_->Width(), screen_frame_buffer_->Height(), 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+			mono_frame_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*mono_tex_, 0, 1, 0));
+			mono_frame_buffer_->Attach(FrameBuffer::ATT_DepthStencil, ds_view);
+
+			stereo_texs_[0] = rf.MakeTexture2D(screen_frame_buffer_->Width(), screen_frame_buffer_->Height(), 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+			stereo_texs_[1] = rf.MakeTexture2D(screen_frame_buffer_->Width(), screen_frame_buffer_->Height(), 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+
+			default_frame_buffers_[0] = default_frame_buffers_[1]
+				= default_frame_buffers_[2] = default_frame_buffers_[3] = mono_frame_buffer_;
 		}
 
 		if (color_grading_pp_)
@@ -253,23 +317,7 @@ namespace KlayGE
 			cg_frame_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*cg_tex_, 0, 1, 0));
 			cg_frame_buffer_->Attach(FrameBuffer::ATT_DepthStencil, ds_view);
 
-			if (ppaa_pp_)
-			{
-				ppaa_pp_->OutputPin(0, cg_tex_);
-				ppaa_show_edge_pp_->OutputPin(0, cg_tex_);
-				skip_ppaa_pp_->OutputPin(0, cg_tex_);
-			}
-			if (hdr_pp_)
-			{
-				hdr_pp_->OutputPin(0, cg_tex_);
-				skip_hdr_pp_->OutputPin(0, cg_tex_);
-			}
-
-			color_grading_pp_->InputPin(0, cg_tex_);
-
-			default_frame_buffers_[0 * 2 + 0] = default_frame_buffers_[0 * 2 + 1]
-				= default_frame_buffers_[1 * 2 + 0] = default_frame_buffers_[1 * 2 + 1]
-				= default_frame_buffers_[2 * 2 + 0] = default_frame_buffers_[2 * 2 + 1] = cg_frame_buffer_;
+			default_frame_buffers_[0] = default_frame_buffers_[1] = default_frame_buffers_[2] = cg_frame_buffer_;
 		}
 
 		if (ppaa_pp_)
@@ -298,18 +346,7 @@ namespace KlayGE
 			ldr_frame_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*ldr_tex_, 0, 1, 0));
 			ldr_frame_buffer_->Attach(FrameBuffer::ATT_DepthStencil, ds_view);
 
-			if (hdr_pp_)
-			{
-				hdr_pp_->OutputPin(0, ldr_tex_);
-				skip_hdr_pp_->OutputPin(0, ldr_tex_);
-			}
-
-			ppaa_pp_->InputPin(0, ldr_tex_);
-			ppaa_show_edge_pp_->InputPin(0, ldr_tex_);
-			skip_ppaa_pp_->InputPin(0, ldr_tex_);
-
-			default_frame_buffers_[0 * 2 + 0] = default_frame_buffers_[0 * 2 + 1]
-				= default_frame_buffers_[1 * 2 + 0] = default_frame_buffers_[1 * 2 + 1] = ldr_frame_buffer_;
+			default_frame_buffers_[0] = default_frame_buffers_[1] = ldr_frame_buffer_;
 		}
 
 		if (hdr_pp_)
@@ -332,13 +369,11 @@ namespace KlayGE
 			hdr_frame_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*hdr_tex_, 0, 1, 0));
 			hdr_frame_buffer_->Attach(FrameBuffer::ATT_DepthStencil, ds_view);
 
-			hdr_pp_->InputPin(0, hdr_tex_);
-			skip_hdr_pp_->InputPin(0, hdr_tex_);
-
-			default_frame_buffers_[0 * 2 + 0] = default_frame_buffers_[0 * 2 + 1] = hdr_frame_buffer_;
+			default_frame_buffers_[0] = hdr_frame_buffer_;
 		}
 
 		this->BindFrameBuffer(default_frame_buffers_[0]);
+		this->Stereo(settings.stereo_method);
 	}
 
 	void RenderEngine::CheckConfig()
@@ -414,7 +449,7 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	FrameBufferPtr const & RenderEngine::DefaultFrameBuffer() const
 	{
-		return default_frame_buffers_[fb_stage_ * 2 + stereo_active_eye_];
+		return default_frame_buffers_[fb_stage_];
 	}
 
 	// 获取屏幕渲染目标
@@ -483,42 +518,57 @@ namespace KlayGE
 		RenderDeviceCaps const & caps = rf.RenderEngineInstance().DeviceCaps();
 
 		RenderViewPtr ds_view;
-		if (hdr_pp_ || ppaa_pp_ || color_grading_pp_)
+		if (hdr_pp_ || ppaa_pp_ || color_grading_pp_ || stereo_lr_pp_ || stereo_l_pp_)
 		{
-			ElementFormat fmt;
-			if (caps.rendertarget_format_support(render_settings_.depth_stencil_fmt, 1, 0))
+			if (caps.texture_format_support(EF_D24S8) || caps.texture_format_support(EF_D16))
 			{
-				fmt = render_settings_.depth_stencil_fmt;
+				ElementFormat fmt;
+				if (caps.texture_format_support(render_settings_.depth_stencil_fmt))
+				{
+					fmt = render_settings_.depth_stencil_fmt;
+				}
+				else
+				{
+					BOOST_ASSERT(caps.texture_format_support(EF_D16));
+
+					fmt = EF_D16;
+				}
+				ds_tex_ = rf.MakeTexture2D(screen_frame_buffer_->Width(), screen_frame_buffer_->Height(), 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+				ds_view = rf.Make2DDepthStencilRenderView(*ds_tex_, 0, 1, 0);
 			}
 			else
 			{
-				BOOST_ASSERT(caps.rendertarget_format_support(EF_D16, 1, 0));
+				ElementFormat fmt;
+				if (caps.rendertarget_format_support(render_settings_.depth_stencil_fmt, 1, 0))
+				{
+					fmt = render_settings_.depth_stencil_fmt;
+				}
+				else
+				{
+					BOOST_ASSERT(caps.rendertarget_format_support(EF_D16, 1, 0));
 
-				fmt = EF_D16;
+					fmt = EF_D16;
+				}
+				ds_view = rf.Make2DDepthStencilRenderView(screen_frame_buffer_->Width(), screen_frame_buffer_->Height(), fmt, 1, 0);
 			}
-			ds_view = rf.Make2DDepthStencilRenderView(width, height, fmt, 1, 0);
 		}
 
+		if (stereo_lr_pp_ || stereo_l_pp_)
+		{
+			ElementFormat fmt = mono_tex_->Format();
+			mono_tex_ = rf.MakeTexture2D(width, height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+			mono_frame_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*mono_tex_, 0, 1, 0));
+			mono_frame_buffer_->Attach(FrameBuffer::ATT_DepthStencil, ds_view);
+
+			stereo_texs_[0] = rf.MakeTexture2D(width, height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+			stereo_texs_[1] = rf.MakeTexture2D(width, height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+		}
 		if (color_grading_pp_)
 		{
 			ElementFormat fmt = cg_tex_->Format();
 			cg_tex_ = rf.MakeTexture2D(width, height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
 			cg_frame_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*cg_tex_, 0, 1, 0));
 			cg_frame_buffer_->Attach(FrameBuffer::ATT_DepthStencil, ds_view);
-
-			if (ppaa_pp_)
-			{
-				ppaa_pp_->OutputPin(0, cg_tex_);
-				ppaa_show_edge_pp_->OutputPin(0, cg_tex_);
-				skip_ppaa_pp_->OutputPin(0, cg_tex_);
-			}
-			if (hdr_pp_)
-			{
-				hdr_pp_->OutputPin(0, cg_tex_);
-				skip_hdr_pp_->OutputPin(0, cg_tex_);
-			}
-
-			color_grading_pp_->InputPin(0, cg_tex_);
 		}
 
 		if (ppaa_pp_)
@@ -527,16 +577,6 @@ namespace KlayGE
 			ldr_tex_ = rf.MakeTexture2D(width, height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
 			ldr_frame_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*ldr_tex_, 0, 1, 0));
 			ldr_frame_buffer_->Attach(FrameBuffer::ATT_DepthStencil, ds_view);
-
-			if (hdr_pp_)
-			{
-				hdr_pp_->OutputPin(0, ldr_tex_);
-				skip_hdr_pp_->OutputPin(0, ldr_tex_);
-			}
-
-			ppaa_pp_->InputPin(0, ldr_tex_);
-			ppaa_show_edge_pp_->InputPin(0, ldr_tex_);
-			skip_ppaa_pp_->InputPin(0, ldr_tex_);
 		}
 
 		if (hdr_pp_)
@@ -545,26 +585,9 @@ namespace KlayGE
 			hdr_tex_ = rf.MakeTexture2D(width, height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
 			hdr_frame_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*hdr_tex_, 0, 1, 0));
 			hdr_frame_buffer_->Attach(FrameBuffer::ATT_DepthStencil, ds_view);
-
-			hdr_pp_->InputPin(0, hdr_tex_);
-			skip_hdr_pp_->InputPin(0, hdr_tex_);
 		}
 
-		if (stereo_method_ != STM_None)
-		{
-			for (int i = 0; i < 2; ++ i)
-			{
-				stereo_colors_[i] = rf.MakeTexture2D(width, height, 1, 1, stereo_colors_[i]->Format(),
-					stereo_colors_[i]->SampleCount(), stereo_colors_[i]->SampleQuality(),
-					EAH_GPU_Read | EAH_GPU_Write, NULL);
-				stereo_frame_buffers_[i]->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*stereo_colors_[i], 0, 1, 0));
-
-				RenderViewPtr stereo_ds_view = rf.Make2DDepthStencilRenderView(screen_frame_buffer_->Width(), screen_frame_buffer_->Height(),
-					stereo_frame_buffers_[i]->Attached(FrameBuffer::ATT_DepthStencil)->Format(),
-					stereo_colors_[i]->SampleCount(), stereo_colors_[i]->SampleQuality());
-				stereo_frame_buffers_[i]->Attach(FrameBuffer::ATT_DepthStencil, stereo_ds_view);
-			}
-		}
+		this->AssemblePostProcessChain();
 	}
 
 	void RenderEngine::PostProcess(bool skip)
@@ -632,6 +655,35 @@ namespace KlayGE
 			this->DefaultFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->ClearDepth(1.0f);
 
 			color_grading_pp_->Apply();
+		}
+
+		if (stereo_method_ != STM_None)
+		{
+			fb_stage_ = 4;
+
+			this->DefaultFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->ClearDepth(1.0f);
+
+			float zpd = this->DefaultFrameBuffer()->GetViewport().camera->NearPlane();
+
+			if (stereo_lr_pp_)
+			{
+				stereo_lr_pp_->SetParam(0, stereo_separation_);
+				stereo_lr_pp_->SetParam(1, zpd);
+
+				stereo_lr_pp_->Apply();
+			}
+			else
+			{
+				stereo_l_pp_->SetParam(0, stereo_separation_);
+				stereo_l_pp_->SetParam(1, zpd);
+				stereo_r_pp_->SetParam(0, stereo_separation_);
+				stereo_r_pp_->SetParam(1, zpd);
+
+				stereo_l_pp_->Apply();
+				stereo_r_pp_->Apply();
+			}
+
+			this->Stereoscopic();
 		}
 
 		fb_stage_ = 0;
@@ -733,8 +785,8 @@ namespace KlayGE
 		
 		*(stereoscopic_effect_->ParameterByName("tex_size")) = float2(static_cast<float>(screen_frame_buffer_->Width()),
 			static_cast<float>(screen_frame_buffer_->Height()));
-		*(stereoscopic_effect_->ParameterByName("left_tex")) = stereo_colors_[0];
-		*(stereoscopic_effect_->ParameterByName("right_tex")) = stereo_colors_[1];
+		*(stereoscopic_effect_->ParameterByName("left_tex")) = stereo_texs_[0];
+		*(stereoscopic_effect_->ParameterByName("right_tex")) = stereo_texs_[1];
 	}
 
 	void RenderEngine::StereoscopicForLCDShutter()
@@ -744,31 +796,110 @@ namespace KlayGE
 	void RenderEngine::Stereo(StereoMethod method)
 	{
 		stereo_method_ = method;
-		stereo_active_eye_ = 0;
 		if (stereo_method_ != STM_None)
 		{
-			screen_frame_buffer_->GetViewport().camera->StereoMode(true);
+			this->CreateStereoscopicVB();
+		}
 
-			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-			RenderViewPtr ds_view = rf.Make2DDepthStencilRenderView(screen_frame_buffer_->Width(), screen_frame_buffer_->Height(),
-					render_settings_.depth_stencil_fmt, render_settings_.sample_count, render_settings_.sample_quality);
-			for (int i = 0; i < 2; ++ i)
+		this->AssemblePostProcessChain();
+	}
+
+	void RenderEngine::AssemblePostProcessChain()
+	{
+		if (stereo_method_ != STM_None)
+		{
+			if (stereo_lr_pp_ || stereo_l_pp_)
 			{
-				stereo_frame_buffers_[i] = rf.MakeFrameBuffer();
-				stereo_frame_buffers_[i]->GetViewport().camera = screen_frame_buffer_->GetViewport().camera;
+				if (color_grading_pp_)
+				{
+					color_grading_pp_->OutputPin(0, mono_tex_);
+					skip_color_grading_pp_->OutputPin(0, mono_tex_);
+				}
+				if (ppaa_pp_)
+				{
+					ppaa_pp_->OutputPin(0, mono_tex_);
+					ppaa_show_edge_pp_->OutputPin(0, mono_tex_);
+					skip_ppaa_pp_->OutputPin(0, mono_tex_);
+				}
+				if (hdr_pp_)
+				{
+					hdr_pp_->OutputPin(0, mono_tex_);
+					skip_hdr_pp_->OutputPin(0, mono_tex_);
+				}
 
-				stereo_colors_[i] = rf.MakeTexture2D(screen_frame_buffer_->Width(), screen_frame_buffer_->Height(),
-					1, 1, render_settings_.color_fmt, render_settings_.sample_count, render_settings_.sample_quality,
-					EAH_GPU_Read | EAH_GPU_Write, NULL);
-				stereo_frame_buffers_[i]->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*stereo_colors_[i], 0, 1, 0));
+				if (stereo_lr_pp_)
+				{
+					stereo_lr_pp_->InputPin(0, mono_tex_);
+					stereo_lr_pp_->InputPin(1, ds_tex_);
+					stereo_lr_pp_->OutputPin(0, stereo_texs_[0]);
+					stereo_lr_pp_->OutputPin(1, stereo_texs_[1]);
+				}
+				else
+				{
+					stereo_l_pp_->InputPin(0, mono_tex_);
+					stereo_l_pp_->InputPin(1, ds_tex_);
+					stereo_l_pp_->OutputPin(0, stereo_texs_[0]);
 
-				stereo_frame_buffers_[i]->Attach(FrameBuffer::ATT_DepthStencil, ds_view);
+					stereo_r_pp_->InputPin(0, mono_tex_);
+					stereo_r_pp_->InputPin(1, ds_tex_);
+					stereo_r_pp_->OutputPin(0, stereo_texs_[1]);
+				}
+			}
+		}
+		else
+		{
+			if (color_grading_pp_)
+			{
+				color_grading_pp_->OutputPin(0, TexturePtr());
+				skip_color_grading_pp_->OutputPin(0, TexturePtr());
+			}
+			if (ppaa_pp_)
+			{
+				ppaa_pp_->OutputPin(0, TexturePtr());
+				ppaa_show_edge_pp_->OutputPin(0, TexturePtr());
+				skip_ppaa_pp_->OutputPin(0, TexturePtr());
+			}
+			if (hdr_pp_)
+			{
+				hdr_pp_->OutputPin(0, TexturePtr());
+				skip_hdr_pp_->OutputPin(0, TexturePtr());
+			}
+		}
 
-				default_frame_buffers_[0 * 2 + i] = default_frame_buffers_[1 * 2 + i]
-					= default_frame_buffers_[2 * 2 + i] = default_frame_buffers_[3 * 2 + i] = stereo_frame_buffers_[i];
+		if (color_grading_pp_)
+		{
+			if (ppaa_pp_)
+			{
+				ppaa_pp_->OutputPin(0, cg_tex_);
+				ppaa_show_edge_pp_->OutputPin(0, cg_tex_);
+				skip_ppaa_pp_->OutputPin(0, cg_tex_);
+			}
+			if (hdr_pp_)
+			{
+				hdr_pp_->OutputPin(0, cg_tex_);
+				skip_hdr_pp_->OutputPin(0, cg_tex_);
 			}
 
-			this->CreateStereoscopicVB();
+			color_grading_pp_->InputPin(0, cg_tex_);
+		}
+
+		if (ppaa_pp_)
+		{
+			if (hdr_pp_)
+			{
+				hdr_pp_->OutputPin(0, ldr_tex_);
+				skip_hdr_pp_->OutputPin(0, ldr_tex_);
+			}
+
+			ppaa_pp_->InputPin(0, ldr_tex_);
+			ppaa_show_edge_pp_->InputPin(0, ldr_tex_);
+			skip_ppaa_pp_->InputPin(0, ldr_tex_);
+		}
+
+		if (hdr_pp_)
+		{
+			hdr_pp_->InputPin(0, hdr_tex_);
+			skip_hdr_pp_->InputPin(0, hdr_tex_);
 		}
 	}
 }

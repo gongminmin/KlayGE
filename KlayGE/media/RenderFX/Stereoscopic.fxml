@@ -3,14 +3,92 @@
 <effect>
 	<include name="PostProcess.fxml"/>
 
-	<parameter type="float2" name="tex_size"/>
-	<parameter type="texture2D" name="left_tex"/>
-	<parameter type="texture2D" name="right_tex"/>
+	<parameter type="float" name="separation"/>
+	<parameter type="float" name="zpd"/>
+	
 	<parameter type="sampler" name="point_sampler">
 		<state name="filtering" value="min_mag_mip_point"/>
 		<state name="address_u" value="clamp"/>
 		<state name="address_v" value="clamp"/>
 	</parameter>
+
+	<parameter type="texture2D" name="color_tex"/>
+	<parameter type="texture2D" name="depth_tex"/>
+	
+	<shader>
+		<![CDATA[
+float4 CalcStereoCoord(float2 tc : TEXCOORD0)
+{
+	// From "Secrets of CryENGINE 3 Graphics Technology"
+	
+	const float samples[3] = { 0.5f, 0.66f, 1.0f };
+	float min_depth_l = 1, min_depth_r = 1;
+	float2 uv = 0;
+	for (int i = 0; i < 3; ++ i)
+	{
+	    uv.x = samples[i] * separation;
+	    min_depth_l = min(min_depth_l, depth_tex.Sample(point_sampler, tc + uv).x);
+	    min_depth_r = min(min_depth_r, depth_tex.Sample(point_sampler, tc - uv).x);
+	}
+	
+	float parallax_l = (min_depth_l > 0 ? separation * (1 - zpd / min_depth_l) : 0);
+    float parallax_r = (min_depth_r > 0 ? separation * (1 - zpd / min_depth_r) : 0);
+	
+	return float4(tc + float2(parallax_l, 0), tc - float2(parallax_r, 0));
+}
+
+float4 StereoLeftPS(float2 tc0 : TEXCOORD0) : SV_Target
+{
+	float4 coord = CalcStereoCoord(tc0);
+	return color_tex.Sample(point_sampler, coord.xy);
+}
+
+float4 StereoRightPS(float2 tc0 : TEXCOORD0) : SV_Target
+{
+	float4 coord = CalcStereoCoord(tc0);
+	return color_tex.Sample(point_sampler, coord.zw);
+}
+
+void StereoLeftRightPS(float2 tc0 : TEXCOORD0,
+		out float4 oLeft : SV_Target0,
+		out float4 oRight : SV_Target1)
+{
+	float4 coord = CalcStereoCoord(tc0);
+	oLeft = color_tex.Sample(point_sampler, coord.xy);
+	oRight = color_tex.Sample(point_sampler, coord.zw);
+}
+		]]>
+	</shader>
+
+	<technique name="StereoLeft">
+		<pass name="p0">
+			<state name="depth_write_mask" value="false"/>
+
+			<state name="vertex_shader" value="PostProcessVS()"/>
+			<state name="pixel_shader" value="StereoLeftPS()"/>
+		</pass>
+	</technique>
+	<technique name="StereoRight">
+		<pass name="p0">
+			<state name="depth_write_mask" value="false"/>
+
+			<state name="vertex_shader" value="PostProcessVS()"/>
+			<state name="pixel_shader" value="StereoRightPS()"/>
+		</pass>
+	</technique>
+	<technique name="StereoLeftRight">
+		<pass name="p0">
+			<state name="depth_write_mask" value="false"/>
+
+			<state name="vertex_shader" value="PostProcessVS()"/>
+			<state name="pixel_shader" value="StereoLeftRightPS()"/>
+		</pass>
+	</technique>
+	
+	
+	<parameter type="float2" name="tex_size"/>
+	<parameter type="texture2D" name="left_tex"/>
+	<parameter type="texture2D" name="right_tex"/>
 
 	<shader>
 		<![CDATA[

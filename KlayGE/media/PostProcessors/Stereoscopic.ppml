@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<post_processors>
+	<post_processor name="stereo_left">
+		<params>
+			<param name="separation"/>
+			<param name="zpd"/>
+		</params>
+		<input>
+			<pin name="color_tex"/>
+			<pin name="depth_tex" />
+		</input>
+		<output>
+			<pin name="output"/>
+		</output>
+		<shader effect="Stereoscopic.fxml" tech="StereoLeft"/>
+	</post_processor>
+
+	<post_processor name="stereo_right">
+		<params>
+			<param name="separation"/>
+			<param name="zpd"/>
+		</params>
+		<input>
+			<pin name="color_tex"/>
+			<pin name="depth_tex" />
+		</input>
+		<output>
+			<pin name="output"/>
+		</output>
+		<shader effect="Stereoscopic.fxml" tech="StereoRight"/>
+	</post_processor>
+
+	<post_processor name="stereo_left_right">
+		<params>
+			<param name="separation"/>
+			<param name="zpd"/>
+		</params>
+		<input>
+			<pin name="color_tex"/>
+			<pin name="depth_tex" />
+		</input>
+		<output>
+			<pin name="output_left"/>
+			<pin name="output_right"/>
+		</output>
+		<shader effect="Stereoscopic.fxml" tech="StereoLeftRight"/>
+	</post_processor>
+</post_processors>

@@ -140,8 +140,9 @@ namespace KlayGE
 	{
 		cur_frame_buffer_.reset();
 		screen_frame_buffer_.reset();
-		stereo_frame_buffers_[0].reset();
-		stereo_frame_buffers_[1].reset();
+		mono_tex_.reset();
+		stereo_texs_[0].reset();
+		stereo_texs_[1].reset();
 
 		rasterizer_state_cache_.reset();
 		depth_stencil_state_cache_.reset();
@@ -1020,10 +1021,10 @@ namespace KlayGE
 
 	void D3D11RenderEngine::StereoscopicForLCDShutter()
 	{
-		uint32_t const w = stereo_colors_[0]->Width(0);
-		uint32_t const h = stereo_colors_[0]->Height(0);
-		stereo_colors_[0]->CopyToSubTexture2D(*stereo_lr_tex_, 0, 0, 0, 0, w, h, 0, 0, 0, 0, w, h);
-		stereo_colors_[1]->CopyToSubTexture2D(*stereo_lr_tex_, 0, 0, w, 0, w, h, 0, 0, 0, 0, w, h);
+		uint32_t const w = stereo_texs_[0]->Width(0);
+		uint32_t const h = stereo_texs_[0]->Height(0);
+		stereo_texs_[0]->CopyToSubTexture2D(*stereo_lr_tex_, 0, 0, 0, 0, w, h, 0, 0, 0, 0, w, h);
+		stereo_texs_[1]->CopyToSubTexture2D(*stereo_lr_tex_, 0, 0, w, 0, w, h, 0, 0, 0, 0, w, h);
 
 		ID3D11Texture2DPtr back = checked_cast<D3D11RenderWindow*>(this->ScreenFrameBuffer().get())->D3DBackBuffer();
 		ID3D11Texture2DPtr stereo = checked_cast<D3D11Texture2D*>(stereo_lr_tex_.get())->D3DTexture();

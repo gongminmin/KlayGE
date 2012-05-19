@@ -369,22 +369,7 @@ namespace KlayGE
 			}
 		}
 
-		if (re.Stereo() != STM_None)
-		{
-			for (uint32_t i = 0; i < 2; ++ i)
-			{
-				re.StereoActiveEye(i);
-				re.BindFrameBuffer(FrameBufferPtr());
-
-				this->FlushScene();
-			}
-
-			re.Stereoscopic();
-		}
-		else
-		{
-			this->FlushScene();
-		}
+		this->FlushScene();
 
 		for (BOOST_AUTO(iter, scene_objs_.begin()); iter != scene_objs_.end();)
 		{

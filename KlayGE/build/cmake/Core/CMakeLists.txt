@@ -198,6 +198,7 @@ SET(RENDERING_POSTPROCESSOR_FILES
 	${KLAYGE_PROJECT_DIR}/media/PostProcessors/GammaCorrection.ppml
 	${KLAYGE_PROJECT_DIR}/media/PostProcessors/LensEffects.ppml
 	${KLAYGE_PROJECT_DIR}/media/PostProcessors/RSM2VPLs.ppml
+	${KLAYGE_PROJECT_DIR}/media/PostProcessors/Stereoscopic.ppml
 	${KLAYGE_PROJECT_DIR}/media/PostProcessors/Upsampling.ppml
 )
 

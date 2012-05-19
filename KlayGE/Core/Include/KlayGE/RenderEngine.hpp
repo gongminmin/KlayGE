@@ -191,14 +191,6 @@ namespace KlayGE
 			return stereo_method_;
 		}
 		void Stereo(StereoMethod method);
-		uint32_t StereoActiveEye() const
-		{
-			return stereo_active_eye_;
-		}
-		void StereoActiveEye(uint32_t ae)
-		{
-			stereo_active_eye_ = ae;
-		}
 		void StereoSeparation(float separation)
 		{
 			stereo_separation_ = separation;
@@ -220,21 +212,24 @@ namespace KlayGE
 		virtual void CheckConfig();
 		void CreateStereoscopicVB();
 		virtual void StereoscopicForLCDShutter();
+		void AssemblePostProcessChain();
 
 	protected:
 		RenderSettings render_settings_;
 
 		FrameBufferPtr cur_frame_buffer_;
 		FrameBufferPtr screen_frame_buffer_;
+		TexturePtr ds_tex_;
 		FrameBufferPtr hdr_frame_buffer_;
 		TexturePtr hdr_tex_;
 		FrameBufferPtr ldr_frame_buffer_;
 		TexturePtr ldr_tex_;
 		FrameBufferPtr cg_frame_buffer_;
 		TexturePtr cg_tex_;
-		FrameBufferPtr stereo_frame_buffers_[2];
-		TexturePtr stereo_colors_[2];
-		FrameBufferPtr default_frame_buffers_[8];
+		FrameBufferPtr mono_frame_buffer_;
+		TexturePtr mono_tex_;
+		TexturePtr stereo_texs_[2];
+		FrameBufferPtr default_frame_buffers_[5];
 
 		RenderLayoutPtr so_buffers_;
 
@@ -255,7 +250,6 @@ namespace KlayGE
 
 		StereoMethod stereo_method_;
 		float stereo_separation_;
-		uint32_t stereo_active_eye_;
 		RenderLayoutPtr stereoscopic_rl_;
 		RenderEffectPtr stereoscopic_effect_;
 		RenderTechniquePtr stereoscopic_tech_;
@@ -268,6 +262,10 @@ namespace KlayGE
 		PostProcessPtr skip_ppaa_pp_;
 		int ppaa_enabled_;
 		PostProcessPtr color_grading_pp_;
+		PostProcessPtr skip_color_grading_pp_;
+		PostProcessPtr stereo_lr_pp_;
+		PostProcessPtr stereo_l_pp_;
+		PostProcessPtr stereo_r_pp_;
 		int fb_stage_;
 	};
 }
