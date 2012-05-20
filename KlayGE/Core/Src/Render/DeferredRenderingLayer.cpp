@@ -31,7 +31,6 @@
 #include <KlayGE/SSGIPostProcess.hpp>
 #include <KlayGE/SSVOPostProcess.hpp>
 #include <KlayGE/SSRPostProcess.hpp>
-//#include <KlayGE/half.hpp>
 
 #include <boost/typeof/typeof.hpp>
 #include <boost/foreach.hpp>
@@ -52,11 +51,11 @@ namespace KlayGE
 	int const MAX_IL_MIPMAP_LEVELS = 3;
 
 #ifdef USE_NEW_LIGHT_SAMPLING
-	int const MIN_RSM_MIPMAP_SIZE = 4; // minimum mipmap size is 4x4
-	int const MAX_RSM_MIPMAP_LEVELS = 8; // (log(512)-log(4))/log(2) + 1
+	int const MIN_RSM_MIPMAP_SIZE = 8; // minimum mipmap size is 8x8
+	int const MAX_RSM_MIPMAP_LEVELS = 7; // (log(512)-log(4))/log(2) + 1
 	int const BEGIN_RSM_SAMPLING_LIGHT_LEVEL = 5;
 	int const SAMPLE_LEVEL_CNT = MAX_RSM_MIPMAP_LEVELS - BEGIN_RSM_SAMPLING_LIGHT_LEVEL;
-	int const VPL_COUNT = 16 * ((1UL << (SAMPLE_LEVEL_CNT * 2)) - 1) / (4 - 1);
+	int const VPL_COUNT = 64 * ((1UL << (SAMPLE_LEVEL_CNT * 2)) - 1) / (4 - 1);
 #else
 	int const MAX_RSM_MIPMAP_LEVELS = 6;
 	int const VPL_COUNT = VPL_COUNT_SQRT * VPL_COUNT_SQRT;
@@ -2016,38 +2015,13 @@ namespace KlayGE
 		rsm_to_vpls_pps[type]->SetParam(7, upper_left);
 		rsm_to_vpls_pps[type]->SetParam(8, upper_right - upper_left);
 		rsm_to_vpls_pps[type]->SetParam(9, lower_left - upper_left);
-		rsm_to_vpls_pps[type]->SetParam(10, int2(2, 0));
+		rsm_to_vpls_pps[type]->SetParam(10, int2(1, 0));
 		rsm_to_vpls_pps[type]->SetParam(11, 0.001f * rsm_camera->FarPlane() * 10);
-		rsm_to_vpls_pps[type]->SetParam(12, static_cast<float>(rsm_texs_[0]->NumMipMaps() - 4));
+		rsm_to_vpls_pps[type]->SetParam(12, static_cast<float>(rsm_texs_[0]->NumMipMaps() - 2));
 
 		rsm_to_vpls_pps[type]->InputPin(3, rsm_depth_derivative_tex_);
 
 		rsm_to_vpls_pps[type]->Apply();
-
-		/*TexturePtr vpl_cpu_tex = Context::Instance().RenderFactoryInstance().MakeTexture2D(VPL_COUNT, 4, 1, 1, EF_ABGR16F, 1, 0, EAH_CPU_Read, NULL);
-		vpl_tex_->CopyToTexture(*vpl_cpu_tex);
-		{
-			uint32_t n = SM_SIZE / (1UL << BEGIN_RSM_SAMPLING_LIGHT_LEVEL);
-			Texture::Mapper mapper(*vpl_cpu_tex, 0, 0, TMA_Read_Only, 0, 0, VPL_COUNT, 4);
-			half const * p = mapper.Pointer<half>();
-			for (uint32_t i = BEGIN_RSM_SAMPLING_LIGHT_LEVEL; i < rsm_texs_[0]->NumMipMaps(); ++ i)
-			{
-				int a = 0;
-				for (uint32_t j = 0; j < n * n; ++ j)
-				{
-					if (float(p[j * 4]) >= 0)
-					{
-						++ a;
-					}
-				}
-
-				LogInfo("%d %d %d", i, a, n * n);
-
-				p += n * n * 4;
-
-				n /= 2;
-			}
-		}*/
 	}
 
 #endif

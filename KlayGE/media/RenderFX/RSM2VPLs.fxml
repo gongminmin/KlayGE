@@ -105,16 +105,14 @@ float4 RSM2VPLsSpotPSNew(float2 tc : TEXCOORD0) : SV_Target
 	float vpl_id = floor((1.0 - tc.x) * vpl_params.x);
 	float accum = 1;
 	float accum_sqrt = 1;
-	int k;
-	for (k = 0; k < 2; ++ k)
+	int k = 0;
+	if (vpl_id - vpl_params.w * (accum * 4 - 1) / 3 > 0)
 	{
-		if (vpl_id - vpl_params.w * (accum * 4 - 1) / 3 < 0) 
-		{
-			break;
-		}
 		accum *= 4;
 		accum_sqrt *= 2;
+		k = 1;
 	}
+
 	vpl_id -= vpl_params.w * (accum - 1) / 3;
 	float n = accum_sqrt * vpl_params.z;
 	float j = floor(vpl_id / n);
