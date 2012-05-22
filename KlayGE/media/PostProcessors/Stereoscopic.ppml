@@ -8,14 +8,13 @@
 		</params>
 		<input>
 			<pin name="color_tex"/>
-			<pin name="depth_tex" />
+			<pin name="depth_tex"/>
 		</input>
 		<output>
 			<pin name="output"/>
 		</output>
 		<shader effect="Stereoscopic.fxml" tech="StereoLeft"/>
 	</post_processor>
-
 	<post_processor name="stereo_right">
 		<params>
 			<param name="separation"/>
@@ -23,14 +22,13 @@
 		</params>
 		<input>
 			<pin name="color_tex"/>
-			<pin name="depth_tex" />
+			<pin name="depth_tex"/>
 		</input>
 		<output>
 			<pin name="output"/>
 		</output>
 		<shader effect="Stereoscopic.fxml" tech="StereoRight"/>
 	</post_processor>
-
 	<post_processor name="stereo_left_right">
 		<params>
 			<param name="separation"/>
@@ -38,12 +36,83 @@
 		</params>
 		<input>
 			<pin name="color_tex"/>
-			<pin name="depth_tex" />
+			<pin name="depth_tex"/>
 		</input>
 		<output>
 			<pin name="output_left"/>
 			<pin name="output_right"/>
 		</output>
 		<shader effect="Stereoscopic.fxml" tech="StereoLeftRight"/>
+	</post_processor>
+
+	<post_processor name="stereoscopic_red_cyan">
+		<input>
+			<pin name="left_tex"/>
+			<pin name="right_tex"/>
+		</input>
+		<output>
+			<pin name="output"/>
+		</output>
+		<shader effect="Stereoscopic.fxml" tech="RedCyan"/>
+	</post_processor>
+	<post_processor name="stereoscopic_yellow_blue">
+		<input>
+			<pin name="left_tex"/>
+			<pin name="right_tex"/>
+		</input>
+		<output>
+			<pin name="output"/>
+		</output>
+		<shader effect="Stereoscopic.fxml" tech="YellowBlue"/>
+	</post_processor>
+	<post_processor name="stereoscopic_green_red">
+		<input>
+			<pin name="left_tex"/>
+			<pin name="right_tex"/>
+		</input>
+		<output>
+			<pin name="output"/>
+		</output>
+		<shader effect="Stereoscopic.fxml" tech="GreenRed"/>
+	</post_processor>
+	<post_processor name="stereoscopic_hor_interlacing">
+		<input>
+			<pin name="left_tex"/>
+			<pin name="right_tex"/>
+		</input>
+		<output>
+			<pin name="output"/>
+		</output>
+		<shader effect="Stereoscopic.fxml" tech="HorInterlacing"/>
+	</post_processor>
+	<post_processor name="stereoscopic_ver_interlacing">
+		<input>
+			<pin name="left_tex"/>
+			<pin name="right_tex"/>
+		</input>
+		<output>
+			<pin name="output"/>
+		</output>
+		<shader effect="Stereoscopic.fxml" tech="VerInterlacing"/>
+	</post_processor>
+	<post_processor name="stereoscopic_horizontal">
+		<input>
+			<pin name="left_tex"/>
+			<pin name="right_tex"/>
+		</input>
+		<output>
+			<pin name="output"/>
+		</output>
+		<shader effect="Stereoscopic.fxml" tech="Horizontal"/>
+	</post_processor>
+	<post_processor name="stereoscopic_vertical">
+		<input>
+			<pin name="left_tex"/>
+			<pin name="right_tex"/>
+		</input>
+		<output>
+			<pin name="output"/>
+		</output>
+		<shader effect="Stereoscopic.fxml" tech="Vertical"/>
 	</post_processor>
 </post_processors>

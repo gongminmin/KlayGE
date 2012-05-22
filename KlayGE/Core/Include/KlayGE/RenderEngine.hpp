@@ -250,9 +250,7 @@ namespace KlayGE
 
 		StereoMethod stereo_method_;
 		float stereo_separation_;
-		RenderLayoutPtr stereoscopic_rl_;
-		RenderEffectPtr stereoscopic_effect_;
-		RenderTechniquePtr stereoscopic_tech_;
+		PostProcessPtr stereoscopic_pp_;
 
 		PostProcessPtr hdr_pp_;
 		PostProcessPtr skip_hdr_pp_;

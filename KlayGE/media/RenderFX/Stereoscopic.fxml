@@ -84,9 +84,9 @@ void StereoLeftRightPS(float2 tc0 : TEXCOORD0,
 			<state name="pixel_shader" value="StereoLeftRightPS()"/>
 		</pass>
 	</technique>
-	
-	
-	<parameter type="float2" name="tex_size"/>
+
+
+	<parameter type="float4" name="width_height"/>
 	<parameter type="texture2D" name="left_tex"/>
 	<parameter type="texture2D" name="right_tex"/>
 
@@ -114,7 +114,7 @@ float4 GreenRedPS(float2 tex : TEXCOORD0) : SV_Target
 float4 HorInterlacingPS(float2 tex : TEXCOORD0) : SV_Target
 {
 	float4 clr;
-	uint u = tex.x * tex_size.x;
+	uint u = tex.x * width_height.x;
 	if (u % 2)
 	{
 		clr = left_tex.Sample(point_sampler, tex);
@@ -129,7 +129,7 @@ float4 HorInterlacingPS(float2 tex : TEXCOORD0) : SV_Target
 float4 VerInterlacingPS(float2 tex : TEXCOORD0) : SV_Target
 {
 	float4 clr;
-	uint v = tex.y * tex_size.y;
+	uint v = tex.y * width_height.y;
 	if (v % 2)
 	{
 		clr = left_tex.Sample(point_sampler, tex);

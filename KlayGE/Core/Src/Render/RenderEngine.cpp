@@ -269,15 +269,22 @@ namespace KlayGE
 			mono_frame_buffer_->GetViewport().camera = cur_frame_buffer_->GetViewport().camera;
 
 			ElementFormat fmt;
-			if (caps.rendertarget_format_support(EF_ABGR8, 1, 0))
+			if (caps.rendertarget_format_support(render_settings_.color_fmt, 1, 0))
 			{
-				fmt = EF_ABGR8;
+				fmt = render_settings_.color_fmt;
 			}
 			else
 			{
-				BOOST_ASSERT(caps.rendertarget_format_support(EF_ARGB8, 1, 0));
+				if (caps.rendertarget_format_support(EF_ABGR8, 1, 0))
+				{
+					fmt = EF_ABGR8;
+				}
+				else
+				{
+					BOOST_ASSERT(caps.rendertarget_format_support(EF_ARGB8, 1, 0));
 
-				fmt = EF_ARGB8;
+					fmt = EF_ARGB8;
+				}
 			}
 
 			mono_tex_ = rf.MakeTexture2D(screen_frame_buffer_->Width(), screen_frame_buffer_->Height(), 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
@@ -720,7 +727,7 @@ namespace KlayGE
 		this->BindFrameBuffer(screen_frame_buffer_);
 		if (stereo_method_ != STM_LCDShutter)
 		{
-			this->Render(*stereoscopic_tech_, *stereoscopic_rl_);
+			stereoscopic_pp_->Render();
 		}
 		else
 		{
@@ -730,63 +737,48 @@ namespace KlayGE
 
 	void RenderEngine::CreateStereoscopicVB()
 	{
-		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-
-		stereoscopic_rl_ = rf.MakeRenderLayout();
-		stereoscopic_rl_->TopologyType(RenderLayout::TT_TriangleStrip);
-
-		float2 pos[] =
-		{
-			float2(-1, +1),
-			float2(+1, +1),
-			float2(-1, -1),
-			float2(+1, -1)
-		};
-		ElementInitData init_data;
-		init_data.row_pitch = sizeof(pos);
-		init_data.data = &pos[0];
-		GraphicsBufferPtr pos_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, &init_data);
-		stereoscopic_rl_->BindVertexStream(pos_vb, boost::make_tuple(vertex_element(VEU_Position, 0, EF_GR32F)));
-
-		stereoscopic_effect_ = rf.LoadEffect("Stereoscopic.fxml");
+		ResIdentifierPtr stereo_ppml = ResLoader::Instance().Open("Stereoscopic.ppml");
+		std::string pp_name;
 		switch (stereo_method_)
 		{
 		case STM_ColorAnaglyph_RedCyan:
-			stereoscopic_tech_ = stereoscopic_effect_->TechniqueByName("RedCyan");
+			pp_name = "stereoscopic_red_cyan";
 			break;
 
 		case STM_ColorAnaglyph_YellowBlue:
-			stereoscopic_tech_ = stereoscopic_effect_->TechniqueByName("YellowBlue");
+			pp_name = "stereoscopic_yellow_blue";
 			break;
 
 		case STM_ColorAnaglyph_GreenRed:
-			stereoscopic_tech_ = stereoscopic_effect_->TechniqueByName("GreenRed");
+			pp_name = "stereoscopic_green_red";
 			break;
 
 		case STM_HorizontalInterlacing:
-			stereoscopic_tech_ = stereoscopic_effect_->TechniqueByName("HorInterlacing");
+			pp_name = "stereoscopic_hor_interlacing";
 			break;
 
 		case STM_VerticalInterlacing:
-			stereoscopic_tech_ = stereoscopic_effect_->TechniqueByName("VerInterlacing");
+			pp_name = "stereoscopic_ver_interlacing";
 			break;
 
 		case STM_Horizontal:
-			stereoscopic_tech_ = stereoscopic_effect_->TechniqueByName("Horizontal");
+			pp_name = "stereoscopic_horizontal";
 			break;
 
 		case STM_Vertical:
-			stereoscopic_tech_ = stereoscopic_effect_->TechniqueByName("Vertical");
+			pp_name = "stereoscopic_vertical";
 			break;
 
 		default:
 			break;
 		}
-		
-		*(stereoscopic_effect_->ParameterByName("tex_size")) = float2(static_cast<float>(screen_frame_buffer_->Width()),
-			static_cast<float>(screen_frame_buffer_->Height()));
-		*(stereoscopic_effect_->ParameterByName("left_tex")) = stereo_texs_[0];
-		*(stereoscopic_effect_->ParameterByName("right_tex")) = stereo_texs_[1];
+
+		if (!pp_name.empty())
+		{
+			stereoscopic_pp_ = LoadPostProcess(stereo_ppml, pp_name);
+			stereoscopic_pp_->InputPin(0, stereo_texs_[0]);
+			stereoscopic_pp_->InputPin(1, stereo_texs_[1]);
+		}
 	}
 
 	void RenderEngine::StereoscopicForLCDShutter()
