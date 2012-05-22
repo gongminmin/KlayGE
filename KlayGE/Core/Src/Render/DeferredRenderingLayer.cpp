@@ -539,9 +539,7 @@ namespace KlayGE
 			}
 
 #ifdef USE_NEW_LIGHT_SAMPLING
-			vpl_copy_ = rf.MakeTexture2D(VPL_COUNT, 4, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
 			rsm_to_depth_derivate_pp_ =  LoadPostProcess(ResLoader::Instance().Open("CustomMipMap.ppml"), "GBuffer2DepthDerivate");
-			rsm_depth_derivate_mipmap_pp_ = LoadPostProcess(ResLoader::Instance().Open("CustomMipMap.ppml"), "DepthDerivateMipMap");
 #endif
 		}
 
@@ -763,11 +761,7 @@ namespace KlayGE
 				vpls_lighting_fbs_[i] = fb;
 			}
 #ifdef USE_NEW_LIGHT_SAMPLING
-			rsm_depth_derivative_tex_ = rf.MakeTexture2D(SM_SIZE / 8, SM_SIZE / 8, SAMPLE_LEVEL_CNT, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
-			if (rsm_depth_derivative_tex_->NumMipMaps() > 1)
-			{
-				rsm_depth_derivative_small_tex_ = rf.MakeTexture2D(SM_SIZE / 16, SM_SIZE / 16, SAMPLE_LEVEL_CNT - 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
-			}
+			rsm_depth_derivative_tex_ = rf.MakeTexture2D(MIN_RSM_MIPMAP_SIZE, MIN_RSM_MIPMAP_SIZE, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
 #endif
 		}
 
@@ -915,8 +909,6 @@ namespace KlayGE
 			delta_y = 1.0f / rsm_depth_derivative_tex_->Height(0);
 			float4 rsm_delta_offset(delta_x, delta_y, delta_x / 2, delta_y / 2);
 			rsm_to_depth_derivate_pp_->SetParam(0, rsm_delta_offset);
-			
-			rsm_depth_derivate_mipmap_pp_->InputPin(0, rsm_depth_derivative_tex_);
 #endif
 		}
 	}
@@ -1968,32 +1960,13 @@ namespace KlayGE
 	}
 
 #ifdef USE_NEW_LIGHT_SAMPLING
-	void DeferredRenderingLayer::CreateRSMDepthDerivativeMipMap()
-	{
-		rsm_to_depth_derivate_pp_->Apply();
-		for (uint32_t i = 1; i < rsm_depth_derivative_tex_->NumMipMaps(); ++ i)
-		{
-			int width = rsm_depth_derivative_tex_->Width(i - 1);
-			int height = rsm_depth_derivative_tex_->Height(i - 1);
-
-			float delta_x = 1.0f / width;
-			float delta_y = 1.0f / height;
-			float4 delta_offset(delta_x, delta_y, delta_x / 2, delta_y / 2);			
-			rsm_depth_derivate_mipmap_pp_->SetParam(0, delta_offset);
-			rsm_depth_derivate_mipmap_pp_->SetParam(1, i - 1.0f);
-			rsm_depth_derivate_mipmap_pp_->OutputPin(0, rsm_depth_derivative_small_tex_, i - 1);
-			rsm_depth_derivate_mipmap_pp_->Apply();
-			rsm_depth_derivative_small_tex_->CopyToSubTexture2D(*rsm_depth_derivative_tex_, 0, i, 0, 0, width / 2, height / 2,
-					0, i - 1, 0, 0, width / 2, height / 2);
-		}
-	}
 
 	void DeferredRenderingLayer::ExtractVPLsNew(CameraPtr const & rsm_camera, LightSourcePtr const & light)
 	{
 		rsm_texs_[0]->BuildMipSubLevels();
 		rsm_texs_[1]->BuildMipSubLevels();
 		
-		this->CreateRSMDepthDerivativeMipMap();
+		rsm_to_depth_derivate_pp_->Apply();
 		
 		float4x4 ls_to_es = MathLib::inverse(rsm_camera->ViewMatrix()) * view_;
 		float4x4 inv_proj = MathLib::inverse(rsm_camera->ProjMatrix());
@@ -2016,8 +1989,8 @@ namespace KlayGE
 		rsm_to_vpls_pps[type]->SetParam(8, upper_right - upper_left);
 		rsm_to_vpls_pps[type]->SetParam(9, lower_left - upper_left);
 		rsm_to_vpls_pps[type]->SetParam(10, int2(1, 0));
-		rsm_to_vpls_pps[type]->SetParam(11, 0.001f * rsm_camera->FarPlane() * 10);
-		rsm_to_vpls_pps[type]->SetParam(12, static_cast<float>(rsm_texs_[0]->NumMipMaps() - 2));
+		rsm_to_vpls_pps[type]->SetParam(11, 0.12f * rsm_camera->FarPlane());
+		rsm_to_vpls_pps[type]->SetParam(12, static_cast<float>(rsm_texs_[0]->NumMipMaps() - 1));
 
 		rsm_to_vpls_pps[type]->InputPin(3, rsm_depth_derivative_tex_);
 

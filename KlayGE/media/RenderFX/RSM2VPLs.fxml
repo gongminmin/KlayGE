@@ -119,11 +119,9 @@ float4 RSM2VPLsSpotPSNew(float2 tc : TEXCOORD0) : SV_Target
 	float i = vpl_id - j * n;
 	float2 rsm_tc = (float2(i, j) + 0.5f) / n;
 
-	float cur_level = smaller_level - k - vpl_params.y;
-	float next_level = cur_level + 1;
+	float depth_deriv = depth_derivate_tex.SampleLevel(point_sampler, rsm_tc, 0).r;  
 	if (k != is_not_bottom_top_level.x)
 	{
-		float depth_deriv = depth_derivate_tex.SampleLevel(point_sampler, rsm_tc, cur_level).r;  
 		if (depth_deriv > depth_threshold)
 		{
 			return -1;
@@ -131,14 +129,13 @@ float4 RSM2VPLsSpotPSNew(float2 tc : TEXCOORD0) : SV_Target
 	}
 	if (k != is_not_bottom_top_level.y)
 	{
-		float depth_deriv = depth_derivate_tex.SampleLevel(point_sampler, rsm_tc, next_level).r;
 		if (depth_deriv <= depth_threshold)
 		{
 			return -1;
 		}
 	}
 
-	return RSM2VPLsSpot(tc, rsm_tc, cur_level);
+	return RSM2VPLsSpot(tc, rsm_tc, smaller_level - k);
 }
 		]]>
 	</shader>
