@@ -88,9 +88,7 @@
 #if defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
 	#define KLAYGE_PLATFORM_WINDOWS
 
-	#if !defined(__GNUC__) && !defined(KLAYGE_HAS_DECLSPEC)
-		#define KLAYGE_HAS_DECLSPEC
-	#endif
+	#define KLAYGE_HAS_DECLSPEC
 
 	#if defined(_WIN64)
 		#define KLAYGE_PLATFORM_WIN64
@@ -103,15 +101,19 @@
 		#define BOOST_ALL_DYN_LINK
 	#endif
 
+	#if defined(__MINGW32__)
+		#define KLAYGE_COMPILER_NAME mgw
+		#include <_mingw.h>
+	#else
+		#include <sdkddkver.h>
+	#endif
+
 	// Shut min/max in windows.h
 	#ifndef NOMINMAX
 		#define NOMINMAX
 	#endif
-
-	#if defined(__MINGW32__)
-		#define KLAYGE_COMPILER_NAME mgw
-		#define KLAYGE_HAS_DECLSPEC
-		#include <_mingw.h>
+	#ifndef WINDOWS_LEAN_AND_MEAN
+		#define WINDOWS_LEAN_AND_MEAN
 	#endif
 #elif defined(__ANDROID__)
 	#define KLAYGE_PLATFORM_ANDROID

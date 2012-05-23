@@ -16,13 +16,17 @@
 #pragma once
 
 #include <KlayGE/D3D11/D3D11MinGWDefs.hpp>
-#ifdef KLAYGE_COMPILER_MSVC
-#pragma warning(push)
-#pragma warning(disable: 4005)
+#if (_WIN32_WINNT < 0x0602 /*_WIN32_WINNT_WIN8*/)
+	#ifdef KLAYGE_COMPILER_MSVC
+	#pragma warning(push)
+	#pragma warning(disable: 4005)
+	#endif
 #endif
 #include <d3d11.h>
-#ifdef KLAYGE_COMPILER_MSVC
-#pragma warning(pop)
+#if (_WIN32_WINNT < 0x0602 /*_WIN32_WINNT_WIN8*/)
+	#ifdef KLAYGE_COMPILER_MSVC
+	#pragma warning(pop)
+	#endif
 #endif
 
 namespace KlayGE
