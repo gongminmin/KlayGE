@@ -210,7 +210,6 @@ namespace KlayGE
 
 	private:
 		virtual void CheckConfig();
-		void CreateStereoscopicVB();
 		virtual void StereoscopicForLCDShutter();
 		void AssemblePostProcessChain();
 
@@ -228,7 +227,7 @@ namespace KlayGE
 		TexturePtr cg_tex_;
 		FrameBufferPtr mono_frame_buffer_;
 		TexturePtr mono_tex_;
-		TexturePtr stereo_texs_[2];
+		TexturePtr stereo_lr_tex_;
 		FrameBufferPtr default_frame_buffers_[5];
 
 		RenderLayoutPtr so_buffers_;
@@ -250,7 +249,6 @@ namespace KlayGE
 
 		StereoMethod stereo_method_;
 		float stereo_separation_;
-		PostProcessPtr stereoscopic_pp_;
 
 		PostProcessPtr hdr_pp_;
 		PostProcessPtr skip_hdr_pp_;
@@ -261,9 +259,7 @@ namespace KlayGE
 		int ppaa_enabled_;
 		PostProcessPtr color_grading_pp_;
 		PostProcessPtr skip_color_grading_pp_;
-		PostProcessPtr stereo_lr_pp_;
-		PostProcessPtr stereo_l_pp_;
-		PostProcessPtr stereo_r_pp_;
+		PostProcessPtr stereoscopic_pp_;
 		int fb_stage_;
 	};
 }

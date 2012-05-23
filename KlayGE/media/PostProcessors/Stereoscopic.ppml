@@ -1,54 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <post_processors>
-	<post_processor name="stereo_left">
-		<params>
-			<param name="separation"/>
-			<param name="zpd"/>
-		</params>
-		<input>
-			<pin name="color_tex"/>
-			<pin name="depth_tex"/>
-		</input>
-		<output>
-			<pin name="output"/>
-		</output>
-		<shader effect="Stereoscopic.fxml" tech="StereoLeft"/>
-	</post_processor>
-	<post_processor name="stereo_right">
-		<params>
-			<param name="separation"/>
-			<param name="zpd"/>
-		</params>
-		<input>
-			<pin name="color_tex"/>
-			<pin name="depth_tex"/>
-		</input>
-		<output>
-			<pin name="output"/>
-		</output>
-		<shader effect="Stereoscopic.fxml" tech="StereoRight"/>
-	</post_processor>
-	<post_processor name="stereo_left_right">
-		<params>
-			<param name="separation"/>
-			<param name="zpd"/>
-		</params>
-		<input>
-			<pin name="color_tex"/>
-			<pin name="depth_tex"/>
-		</input>
-		<output>
-			<pin name="output_left"/>
-			<pin name="output_right"/>
-		</output>
-		<shader effect="Stereoscopic.fxml" tech="StereoLeftRight"/>
-	</post_processor>
-
 	<post_processor name="stereoscopic_red_cyan">
+		<params>
+			<param name="separation"/>
+			<param name="zpd"/>
+		</params>
 		<input>
-			<pin name="left_tex"/>
-			<pin name="right_tex"/>
+			<pin name="color_tex"/>
+			<pin name="depth_tex"/>
 		</input>
 		<output>
 			<pin name="output"/>
@@ -56,9 +16,13 @@
 		<shader effect="Stereoscopic.fxml" tech="RedCyan"/>
 	</post_processor>
 	<post_processor name="stereoscopic_yellow_blue">
+		<params>
+			<param name="separation"/>
+			<param name="zpd"/>
+		</params>
 		<input>
-			<pin name="left_tex"/>
-			<pin name="right_tex"/>
+			<pin name="color_tex"/>
+			<pin name="depth_tex"/>
 		</input>
 		<output>
 			<pin name="output"/>
@@ -66,9 +30,13 @@
 		<shader effect="Stereoscopic.fxml" tech="YellowBlue"/>
 	</post_processor>
 	<post_processor name="stereoscopic_green_red">
+		<params>
+			<param name="separation"/>
+			<param name="zpd"/>
+		</params>
 		<input>
-			<pin name="left_tex"/>
-			<pin name="right_tex"/>
+			<pin name="color_tex"/>
+			<pin name="depth_tex"/>
 		</input>
 		<output>
 			<pin name="output"/>
@@ -76,9 +44,13 @@
 		<shader effect="Stereoscopic.fxml" tech="GreenRed"/>
 	</post_processor>
 	<post_processor name="stereoscopic_hor_interlacing">
+		<params>
+			<param name="separation"/>
+			<param name="zpd"/>
+		</params>
 		<input>
-			<pin name="left_tex"/>
-			<pin name="right_tex"/>
+			<pin name="color_tex"/>
+			<pin name="depth_tex"/>
 		</input>
 		<output>
 			<pin name="output"/>
@@ -86,9 +58,13 @@
 		<shader effect="Stereoscopic.fxml" tech="HorInterlacing"/>
 	</post_processor>
 	<post_processor name="stereoscopic_ver_interlacing">
+		<params>
+			<param name="separation"/>
+			<param name="zpd"/>
+		</params>
 		<input>
-			<pin name="left_tex"/>
-			<pin name="right_tex"/>
+			<pin name="color_tex"/>
+			<pin name="depth_tex"/>
 		</input>
 		<output>
 			<pin name="output"/>
@@ -96,9 +72,13 @@
 		<shader effect="Stereoscopic.fxml" tech="VerInterlacing"/>
 	</post_processor>
 	<post_processor name="stereoscopic_horizontal">
+		<params>
+			<param name="separation"/>
+			<param name="zpd"/>
+		</params>
 		<input>
-			<pin name="left_tex"/>
-			<pin name="right_tex"/>
+			<pin name="color_tex"/>
+			<pin name="depth_tex"/>
 		</input>
 		<output>
 			<pin name="output"/>
@@ -106,13 +86,32 @@
 		<shader effect="Stereoscopic.fxml" tech="Horizontal"/>
 	</post_processor>
 	<post_processor name="stereoscopic_vertical">
+		<params>
+			<param name="separation"/>
+			<param name="zpd"/>
+		</params>
 		<input>
-			<pin name="left_tex"/>
-			<pin name="right_tex"/>
+			<pin name="color_tex"/>
+			<pin name="depth_tex"/>
 		</input>
 		<output>
 			<pin name="output"/>
 		</output>
 		<shader effect="Stereoscopic.fxml" tech="Vertical"/>
+	</post_processor>
+
+	<post_processor name="stereoscopic_lcd_shutter">
+		<params>
+			<param name="separation"/>
+			<param name="zpd"/>
+		</params>
+		<input>
+			<pin name="color_tex"/>
+			<pin name="depth_tex"/>
+		</input>
+		<output>
+			<pin name="output"/>
+		</output>
+		<shader effect="Stereoscopic.fxml" tech="Horizontal"/>
 	</post_processor>
 </post_processors>

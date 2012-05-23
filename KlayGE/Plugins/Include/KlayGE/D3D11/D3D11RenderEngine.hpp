@@ -234,7 +234,7 @@ namespace KlayGE
 
 		std::string vs_profile_, ps_profile_, gs_profile_, cs_profile_, hs_profile_, ds_profile_;
 
-		TexturePtr stereo_lr_tex_;
+		TexturePtr stereo_lr_3d_vision_tex_;
 
 		std::set<ElementFormat> vertex_format_;
 		std::set<ElementFormat> texture_format_;

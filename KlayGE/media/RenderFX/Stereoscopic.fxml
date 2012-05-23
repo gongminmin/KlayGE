@@ -12,6 +12,7 @@
 		<state name="address_v" value="clamp"/>
 	</parameter>
 
+	<parameter type="float4" name="width_height"/>
 	<parameter type="texture2D" name="color_tex"/>
 	<parameter type="texture2D" name="depth_tex"/>
 	
@@ -37,106 +38,62 @@ float4 CalcStereoCoord(float2 tc : TEXCOORD0)
 	return float4(tc + float2(parallax_l, 0), tc - float2(parallax_r, 0));
 }
 
-float4 StereoLeftPS(float2 tc0 : TEXCOORD0) : SV_Target
-{
-	float4 coord = CalcStereoCoord(tc0);
-	return color_tex.Sample(point_sampler, coord.xy);
-}
 
-float4 StereoRightPS(float2 tc0 : TEXCOORD0) : SV_Target
-{
-	float4 coord = CalcStereoCoord(tc0);
-	return color_tex.Sample(point_sampler, coord.zw);
-}
-
-void StereoLeftRightPS(float2 tc0 : TEXCOORD0,
-		out float4 oLeft : SV_Target0,
-		out float4 oRight : SV_Target1)
-{
-	float4 coord = CalcStereoCoord(tc0);
-	oLeft = color_tex.Sample(point_sampler, coord.xy);
-	oRight = color_tex.Sample(point_sampler, coord.zw);
-}
-		]]>
-	</shader>
-
-	<technique name="StereoLeft">
-		<pass name="p0">
-			<state name="depth_write_mask" value="false"/>
-
-			<state name="vertex_shader" value="PostProcessVS()"/>
-			<state name="pixel_shader" value="StereoLeftPS()"/>
-		</pass>
-	</technique>
-	<technique name="StereoRight">
-		<pass name="p0">
-			<state name="depth_write_mask" value="false"/>
-
-			<state name="vertex_shader" value="PostProcessVS()"/>
-			<state name="pixel_shader" value="StereoRightPS()"/>
-		</pass>
-	</technique>
-	<technique name="StereoLeftRight">
-		<pass name="p0">
-			<state name="depth_write_mask" value="false"/>
-
-			<state name="vertex_shader" value="PostProcessVS()"/>
-			<state name="pixel_shader" value="StereoLeftRightPS()"/>
-		</pass>
-	</technique>
-
-
-	<parameter type="float4" name="width_height"/>
-	<parameter type="texture2D" name="left_tex"/>
-	<parameter type="texture2D" name="right_tex"/>
-
-	<shader>
-		<![CDATA[
 float4 RedCyanPS(float2 tex : TEXCOORD0) : SV_Target
 {
-	return float4(dot(left_tex.Sample(point_sampler, tex).gb, float2(0.7f, 0.3f)),
-		right_tex.Sample(point_sampler, tex).gb, 1);
+	float4 coord = CalcStereoCoord(tex);
+	float4 left = color_tex.Sample(point_sampler, coord.xy);
+	float4 right = color_tex.Sample(point_sampler, coord.zw);	
+	return float4(dot(left.gb, float2(0.7f, 0.3f)), right.gb, 1);
 }
 
 float4 YellowBluePS(float2 tex : TEXCOORD0) : SV_Target
 {
-	return float4(left_tex.Sample(point_sampler, tex).rg,
-		right_tex.Sample(point_sampler, tex).b, 1);
+	float4 coord = CalcStereoCoord(tex);
+	float4 left = color_tex.Sample(point_sampler, coord.xy);
+	float4 right = color_tex.Sample(point_sampler, coord.zw);
+	return float4(left.rg, right.b, 1);
 }
 
 float4 GreenRedPS(float2 tex : TEXCOORD0) : SV_Target
 {
-	return float4(right_tex.Sample(point_sampler, tex).r,
-		left_tex.Sample(point_sampler, tex).gb, 1);
+	float4 coord = CalcStereoCoord(tex);
+	float4 left = color_tex.Sample(point_sampler, coord.xy);
+	float4 right = color_tex.Sample(point_sampler, coord.zw);
+	return float4(right.r, left.gb, 1);
 }
 
 
 float4 HorInterlacingPS(float2 tex : TEXCOORD0) : SV_Target
 {
+	float4 coord = CalcStereoCoord(tex);
+	
 	float4 clr;
 	uint u = tex.x * width_height.x;
 	if (u % 2)
 	{
-		clr = left_tex.Sample(point_sampler, tex);
+		clr = color_tex.Sample(point_sampler, coord.xy);
 	}
 	else
 	{
-		clr = right_tex.Sample(point_sampler, tex);
+		clr = color_tex.Sample(point_sampler, coord.zw);
 	}
 	return clr;
 }
 
 float4 VerInterlacingPS(float2 tex : TEXCOORD0) : SV_Target
 {
+	float4 coord = CalcStereoCoord(tex);
+	
 	float4 clr;
 	uint v = tex.y * width_height.y;
 	if (v % 2)
 	{
-		clr = left_tex.Sample(point_sampler, tex);
+		clr = color_tex.Sample(point_sampler, coord.xy);
 	}
 	else
 	{
-		clr = right_tex.Sample(point_sampler, tex);
+		clr = color_tex.Sample(point_sampler, coord.zw);
 	}
 	return clr;
 }
@@ -146,11 +103,13 @@ float4 HorizontalPS(float2 tex : TEXCOORD0) : SV_Target
 	float4 clr;
 	if (tex.x < 0.5f)
 	{
-		clr = left_tex.Sample(point_sampler, float2(tex.x * 2, tex.y));
+		float4 coord = CalcStereoCoord(float2(tex.x * 2, tex.y));
+		clr = color_tex.Sample(point_sampler, coord.xy);
 	}
 	else
 	{
-		clr = right_tex.Sample(point_sampler, float2((tex.x - 0.5f) * 2, tex.y));
+		float4 coord = CalcStereoCoord(float2((tex.x - 0.5f) * 2, tex.y));
+		clr = color_tex.Sample(point_sampler, coord.zw);
 	}
 	return clr;
 }
@@ -160,11 +119,13 @@ float4 VerticalPS(float2 tex : TEXCOORD0) : SV_Target
 	float4 clr;
 	if (tex.y < 0.5f)
 	{
-		clr = left_tex.Sample(point_sampler, float2(tex.x, tex.y * 2));
+		float4 coord = CalcStereoCoord(float2(tex.x, tex.y * 2));
+		clr = color_tex.Sample(point_sampler, coord.xy);
 	}
 	else
 	{
-		clr = right_tex.Sample(point_sampler, float2(tex.x, (tex.y - 0.5f) * 2));
+		float4 coord = CalcStereoCoord(float2(tex.x, (tex.y - 0.5f) * 2));
+		clr = color_tex.Sample(point_sampler, coord.zw);
 	}
 	return clr;
 }

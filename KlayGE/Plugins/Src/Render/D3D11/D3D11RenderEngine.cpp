@@ -141,8 +141,8 @@ namespace KlayGE
 		cur_frame_buffer_.reset();
 		screen_frame_buffer_.reset();
 		mono_tex_.reset();
-		stereo_texs_[0].reset();
-		stereo_texs_[1].reset();
+		stereo_lr_tex_.reset();
+		stereo_lr_3d_vision_tex_.reset();
 
 		rasterizer_state_cache_.reset();
 		depth_stencil_state_cache_.reset();
@@ -312,7 +312,7 @@ namespace KlayGE
 		{
 			uint32_t const w = win->Width();
 			uint32_t const h = win->Height();
-			stereo_lr_tex_ = Context::Instance().RenderFactoryInstance().MakeTexture2D(w * 2, h + 1, 1, 1,
+			stereo_lr_3d_vision_tex_ = Context::Instance().RenderFactoryInstance().MakeTexture2D(w * 2, h + 1, 1, 1,
 				render_settings_.color_fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
 
 			NVSTEREOIMAGEHEADER sih;
@@ -329,7 +329,7 @@ namespace KlayGE
 			TexturePtr sih_tex = Context::Instance().RenderFactoryInstance().MakeTexture2D(sizeof(sih) / NumFormatBytes(render_settings_.color_fmt),
 				1, 1, 1, render_settings_.color_fmt, 1, 0, EAH_GPU_Read, &init_data);
 
-			sih_tex->CopyToSubTexture2D(*stereo_lr_tex_,
+			sih_tex->CopyToSubTexture2D(*stereo_lr_3d_vision_tex_,
 				0, 0, 0, h, sih_tex->Width(0), 1,
 				0, 0, 0, 0, sih_tex->Width(0), 1);
 		}
@@ -1021,17 +1021,16 @@ namespace KlayGE
 
 	void D3D11RenderEngine::StereoscopicForLCDShutter()
 	{
-		uint32_t const w = stereo_texs_[0]->Width(0);
-		uint32_t const h = stereo_texs_[0]->Height(0);
-		stereo_texs_[0]->CopyToSubTexture2D(*stereo_lr_tex_, 0, 0, 0, 0, w, h, 0, 0, 0, 0, w, h);
-		stereo_texs_[1]->CopyToSubTexture2D(*stereo_lr_tex_, 0, 0, w, 0, w, h, 0, 0, 0, 0, w, h);
+		uint32_t const w = stereo_lr_tex_->Width(0);
+		uint32_t const h = stereo_lr_tex_->Height(0);
+		stereo_lr_tex_->CopyToSubTexture2D(*stereo_lr_3d_vision_tex_, 0, 0, 0, 0, w, h, 0, 0, 0, 0, w, h);
 
 		ID3D11Texture2DPtr back = checked_cast<D3D11RenderWindow*>(this->ScreenFrameBuffer().get())->D3DBackBuffer();
-		ID3D11Texture2DPtr stereo = checked_cast<D3D11Texture2D*>(stereo_lr_tex_.get())->D3DTexture();
+		ID3D11Texture2DPtr stereo = checked_cast<D3D11Texture2D*>(stereo_lr_3d_vision_tex_.get())->D3DTexture();
 
 		D3D11_BOX box;
 		box.left = 0;
-		box.right = w;
+		box.right = w / 2;
 		box.top = 0;
 		box.bottom = h;
 		box.front = 0;

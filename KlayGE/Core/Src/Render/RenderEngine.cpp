@@ -203,22 +203,6 @@ namespace KlayGE
 				skip_color_grading_pp_ = LoadPostProcess(ResLoader::Instance().Open("Copy.ppml"), "copy");
 			}
 		}
-		if (render_settings_.stereo_method != STM_None)
-		{
-			if (caps.max_simultaneous_rts > 1)
-			{
-				stereo_lr_pp_ = LoadPostProcess(ResLoader::Instance().Open("Stereoscopic.ppml"), "stereo_left_right");
-				stereo_lr_pp_->SetParam(0, stereo_separation_);
-			}
-			else
-			{
-				stereo_l_pp_ = LoadPostProcess(ResLoader::Instance().Open("Stereoscopic.ppml"), "stereo_left");
-				stereo_l_pp_->SetParam(0, stereo_separation_);
-
-				stereo_r_pp_ = LoadPostProcess(ResLoader::Instance().Open("Stereoscopic.ppml"), "stereo_right");
-				stereo_r_pp_->SetParam(0, stereo_separation_);
-			}
-		}
 
 		for (int i = 0; i < 5; ++ i)
 		{
@@ -228,7 +212,7 @@ namespace KlayGE
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
 		RenderViewPtr ds_view;
-		if (hdr_pp_ || ppaa_pp_ || color_grading_pp_ || stereo_lr_pp_ || stereo_l_pp_)
+		if (hdr_pp_ || ppaa_pp_ || color_grading_pp_ || (render_settings_.stereo_method != STM_None))
 		{
 			if (caps.texture_format_support(EF_D24S8) || caps.texture_format_support(EF_D16))
 			{
@@ -263,7 +247,7 @@ namespace KlayGE
 			}
 		}
 
-		if (stereo_lr_pp_ || stereo_l_pp_)
+		if (render_settings_.stereo_method != STM_None)
 		{
 			mono_frame_buffer_ = rf.MakeFrameBuffer();
 			mono_frame_buffer_->GetViewport().camera = cur_frame_buffer_->GetViewport().camera;
@@ -287,12 +271,10 @@ namespace KlayGE
 				}
 			}
 
-			mono_tex_ = rf.MakeTexture2D(screen_frame_buffer_->Width(), screen_frame_buffer_->Height(), 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+			mono_tex_ = rf.MakeTexture2D(screen_frame_buffer_->Width(), screen_frame_buffer_->Height(), 1, 1,
+				fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
 			mono_frame_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*mono_tex_, 0, 1, 0));
 			mono_frame_buffer_->Attach(FrameBuffer::ATT_DepthStencil, ds_view);
-
-			stereo_texs_[0] = rf.MakeTexture2D(screen_frame_buffer_->Width(), screen_frame_buffer_->Height(), 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
-			stereo_texs_[1] = rf.MakeTexture2D(screen_frame_buffer_->Width(), screen_frame_buffer_->Height(), 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
 
 			default_frame_buffers_[0] = default_frame_buffers_[1]
 				= default_frame_buffers_[2] = default_frame_buffers_[3] = mono_frame_buffer_;
@@ -525,7 +507,7 @@ namespace KlayGE
 		RenderDeviceCaps const & caps = rf.RenderEngineInstance().DeviceCaps();
 
 		RenderViewPtr ds_view;
-		if (hdr_pp_ || ppaa_pp_ || color_grading_pp_ || stereo_lr_pp_ || stereo_l_pp_)
+		if (hdr_pp_ || ppaa_pp_ || color_grading_pp_ || (stereo_method_ != STM_None))
 		{
 			if (caps.texture_format_support(EF_D24S8) || caps.texture_format_support(EF_D16))
 			{
@@ -560,15 +542,12 @@ namespace KlayGE
 			}
 		}
 
-		if (stereo_lr_pp_ || stereo_l_pp_)
+		if (stereo_method_ != STM_None)
 		{
 			ElementFormat fmt = mono_tex_->Format();
 			mono_tex_ = rf.MakeTexture2D(width, height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
 			mono_frame_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*mono_tex_, 0, 1, 0));
 			mono_frame_buffer_->Attach(FrameBuffer::ATT_DepthStencil, ds_view);
-
-			stereo_texs_[0] = rf.MakeTexture2D(width, height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
-			stereo_texs_[1] = rf.MakeTexture2D(width, height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
 		}
 		if (color_grading_pp_)
 		{
@@ -669,27 +648,6 @@ namespace KlayGE
 			fb_stage_ = 4;
 
 			this->DefaultFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->ClearDepth(1.0f);
-
-			float zpd = this->DefaultFrameBuffer()->GetViewport().camera->NearPlane();
-
-			if (stereo_lr_pp_)
-			{
-				stereo_lr_pp_->SetParam(0, stereo_separation_);
-				stereo_lr_pp_->SetParam(1, zpd);
-
-				stereo_lr_pp_->Apply();
-			}
-			else
-			{
-				stereo_l_pp_->SetParam(0, stereo_separation_);
-				stereo_l_pp_->SetParam(1, zpd);
-				stereo_r_pp_->SetParam(0, stereo_separation_);
-				stereo_r_pp_->SetParam(1, zpd);
-
-				stereo_l_pp_->Apply();
-				stereo_r_pp_->Apply();
-			}
-
 			this->Stereoscopic();
 		}
 
@@ -725,59 +683,20 @@ namespace KlayGE
 		BOOST_ASSERT(stereo_method_ != STM_None);
 
 		this->BindFrameBuffer(screen_frame_buffer_);
+		if (stereoscopic_pp_)
+		{
+			stereoscopic_pp_->SetParam(0, stereo_separation_);
+			stereoscopic_pp_->SetParam(1, screen_frame_buffer_->GetViewport().camera->NearPlane());
+		}
 		if (stereo_method_ != STM_LCDShutter)
 		{
 			stereoscopic_pp_->Render();
 		}
 		else
 		{
+			stereoscopic_pp_->Apply();
 			this->StereoscopicForLCDShutter();
-		}
-	}
-
-	void RenderEngine::CreateStereoscopicVB()
-	{
-		ResIdentifierPtr stereo_ppml = ResLoader::Instance().Open("Stereoscopic.ppml");
-		std::string pp_name;
-		switch (stereo_method_)
-		{
-		case STM_ColorAnaglyph_RedCyan:
-			pp_name = "stereoscopic_red_cyan";
-			break;
-
-		case STM_ColorAnaglyph_YellowBlue:
-			pp_name = "stereoscopic_yellow_blue";
-			break;
-
-		case STM_ColorAnaglyph_GreenRed:
-			pp_name = "stereoscopic_green_red";
-			break;
-
-		case STM_HorizontalInterlacing:
-			pp_name = "stereoscopic_hor_interlacing";
-			break;
-
-		case STM_VerticalInterlacing:
-			pp_name = "stereoscopic_ver_interlacing";
-			break;
-
-		case STM_Horizontal:
-			pp_name = "stereoscopic_horizontal";
-			break;
-
-		case STM_Vertical:
-			pp_name = "stereoscopic_vertical";
-			break;
-
-		default:
-			break;
-		}
-
-		if (!pp_name.empty())
-		{
-			stereoscopic_pp_ = LoadPostProcess(stereo_ppml, pp_name);
-			stereoscopic_pp_->InputPin(0, stereo_texs_[0]);
-			stereoscopic_pp_->InputPin(1, stereo_texs_[1]);
+			this->BindFrameBuffer(screen_frame_buffer_);
 		}
 	}
 
@@ -790,7 +709,54 @@ namespace KlayGE
 		stereo_method_ = method;
 		if (stereo_method_ != STM_None)
 		{
-			this->CreateStereoscopicVB();
+			ResIdentifierPtr stereo_ppml = ResLoader::Instance().Open("Stereoscopic.ppml");
+			std::string pp_name;
+			switch (stereo_method_)
+			{
+			case STM_ColorAnaglyph_RedCyan:
+				pp_name = "stereoscopic_red_cyan";
+				break;
+
+			case STM_ColorAnaglyph_YellowBlue:
+				pp_name = "stereoscopic_yellow_blue";
+				break;
+
+			case STM_ColorAnaglyph_GreenRed:
+				pp_name = "stereoscopic_green_red";
+				break;
+
+			case STM_HorizontalInterlacing:
+				pp_name = "stereoscopic_hor_interlacing";
+				break;
+
+			case STM_VerticalInterlacing:
+				pp_name = "stereoscopic_ver_interlacing";
+				break;
+
+			case STM_Horizontal:
+				pp_name = "stereoscopic_horizontal";
+				break;
+
+			case STM_Vertical:
+				pp_name = "stereoscopic_vertical";
+				break;
+
+			case STM_LCDShutter:
+				pp_name = "stereoscopic_lcd_shutter";
+				break;
+
+			default:
+				BOOST_ASSERT(false);
+				break;
+			}
+
+			stereoscopic_pp_ = LoadPostProcess(stereo_ppml, pp_name);
+
+			if (STM_LCDShutter == stereo_method_)
+			{
+				stereo_lr_tex_ = Context::Instance().RenderFactoryInstance().MakeTexture2D(mono_tex_->Width(0) * 2,
+					mono_tex_->Height(0), 1, 1, mono_tex_->Format(), 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+			}
 		}
 
 		this->AssemblePostProcessChain();
@@ -800,7 +766,7 @@ namespace KlayGE
 	{
 		if (stereo_method_ != STM_None)
 		{
-			if (stereo_lr_pp_ || stereo_l_pp_)
+			if (stereoscopic_pp_)
 			{
 				if (color_grading_pp_)
 				{
@@ -819,22 +785,15 @@ namespace KlayGE
 					skip_hdr_pp_->OutputPin(0, mono_tex_);
 				}
 
-				if (stereo_lr_pp_)
+				stereoscopic_pp_->InputPin(0, mono_tex_);
+				stereoscopic_pp_->InputPin(1, ds_tex_);
+				if (STM_LCDShutter == stereo_method_)
 				{
-					stereo_lr_pp_->InputPin(0, mono_tex_);
-					stereo_lr_pp_->InputPin(1, ds_tex_);
-					stereo_lr_pp_->OutputPin(0, stereo_texs_[0]);
-					stereo_lr_pp_->OutputPin(1, stereo_texs_[1]);
+					stereoscopic_pp_->OutputPin(0, stereo_lr_tex_);
 				}
 				else
 				{
-					stereo_l_pp_->InputPin(0, mono_tex_);
-					stereo_l_pp_->InputPin(1, ds_tex_);
-					stereo_l_pp_->OutputPin(0, stereo_texs_[0]);
-
-					stereo_r_pp_->InputPin(0, mono_tex_);
-					stereo_r_pp_->InputPin(1, ds_tex_);
-					stereo_r_pp_->OutputPin(0, stereo_texs_[1]);
+					stereoscopic_pp_->OutputPin(0, TexturePtr());
 				}
 			}
 		}
