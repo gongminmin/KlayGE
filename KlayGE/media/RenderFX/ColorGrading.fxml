@@ -2,6 +2,7 @@
 
 <effect>
 	<include name="PostProcess.fxml"/>
+	<include name="util.fxml"/>
 
 	<parameter type="sampler" name="point_sampler">
 		<state name="filtering" value="min_mag_mip_point"/>
@@ -28,7 +29,7 @@ float4 ColorGradingPS(float2 tc : TEXCOORD0) : SV_Target
 	float3 rgb = src_tex.Sample(point_sampler, tc).xyz;
 	if (gamma_grading.x)
 	{
-		rgb = pow(max(rgb, 0), 1 / 2.2f);
+		rgb = linear_to_srgb(max(rgb, 1e-6f));
 	}
 	
 	rgb = saturate(rgb);
