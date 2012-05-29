@@ -145,8 +145,6 @@ namespace KlayGE
 		Vector_T<T, 3> center_;
 		T radius_;
 	};
-
-	typedef Sphere_T<float> Sphere;
 }
 
 #endif			// _SPHERE_HPP

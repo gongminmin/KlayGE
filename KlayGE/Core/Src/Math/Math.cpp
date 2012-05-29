@@ -2405,9 +2405,9 @@ namespace KlayGE
 		template KLAYGE_CORE_API BoundOverlap intersect_frustum_frustum(Frustum const & lhs, Frustum const & frustum);
 
 		template <typename T>
-		BoundOverlap intersect_frustum_frustum(Frustum_T<T> const & /*lhs*/, Frustum_T<T> const & /*frustum*/)
+		BoundOverlap intersect_frustum_frustum(Frustum_T<T> const & lhs, Frustum_T<T> const & frustum)
 		{
-			return BO_No;
+			return frustum.Intersect(lhs);
 		}
 
 

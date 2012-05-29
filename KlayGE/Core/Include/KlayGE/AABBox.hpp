@@ -233,8 +233,6 @@ namespace KlayGE
 	private:
 		Vector_T<T, 3> min_, max_;
 	};
-
-	typedef AABBox_T<float> AABBox;
 }
 
 #endif			// _AABBOX_HPP

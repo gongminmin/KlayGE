@@ -42,6 +42,15 @@ namespace KlayGE
 	public:
 		void ClipMatrix(Matrix4_T<T> const & clip)
 		{
+			corners_[0] = MathLib::transform_coord(Vector_T<T, 3>(-1, -1, 0), clip); // left bottom near
+			corners_[1] = MathLib::transform_coord(Vector_T<T, 3>(+1, -1, 0), clip); // right bottom near
+			corners_[2] = MathLib::transform_coord(Vector_T<T, 3>(-1, +1, 0), clip); // left top near
+			corners_[3] = MathLib::transform_coord(Vector_T<T, 3>(+1, +1, 0), clip); // right top near
+			corners_[4] = MathLib::transform_coord(Vector_T<T, 3>(-1, -1, 1), clip); // left bottom far
+			corners_[5] = MathLib::transform_coord(Vector_T<T, 3>(+1, -1, 1), clip); // right bottom far
+			corners_[6] = MathLib::transform_coord(Vector_T<T, 3>(-1, +1, 1), clip); // left top far
+			corners_[7] = MathLib::transform_coord(Vector_T<T, 3>(+1, +1, 1), clip); // right top far
+
 			Vector_T<T, 4> const & column1(clip.Col(0));
 			Vector_T<T, 4> const & column2(clip.Col(1));
 			Vector_T<T, 4> const & column3(clip.Col(2));
@@ -171,10 +180,93 @@ namespace KlayGE
 		}
 		BoundOverlap Intersect(Frustum_T<T> const & frustum) const
 		{
-			UNREF_PARAM(frustum);
-			BOOST_ASSERT(false);
+			bool outside = false;
+			bool inside_all = true;
+			for (int i = 0; i < 6; ++ i)
+			{
+				T min_p, max_p;
+				min_p = max_p = MathLib::dot_coord(frustum.FrustumPlane(i), corners_[0]);
+				for (int j = 1; j < 8; ++ j)
+				{
+					T tmp = MathLib::dot_coord(frustum.FrustumPlane(i), corners_[j]);
+					min_p = std::min(min_p, tmp);
+					max_p = std::max(max_p, tmp);
+				}
 
-			return BO_No;
+				outside |= (min_p > 0);
+				inside_all &= (max_p <= 0);
+			}
+			if (outside)
+			{
+				return BO_No;
+			}
+			if (inside_all)
+			{
+				return BO_Yes;
+			}
+
+			for (int i = 0; i < 6; ++ i)
+			{
+				T min_p = MathLib::dot_coord(this->FrustumPlane(i), frustum.corners_[0]);
+				for (int j = 1; j < 8; ++ j)
+				{
+					T tmp = MathLib::dot_coord(this->FrustumPlane(i), frustum.corners_[j]);
+					min_p = std::min(min_p, tmp);
+				}
+
+				outside |= (min_p > 0);
+			}
+			if (outside)
+			{
+				return BO_No;
+			}
+
+			Vector_T<T, 3> edge_axis_l[6];
+			edge_axis_l[0] = corners_[6];
+			edge_axis_l[1] = corners_[4];
+			edge_axis_l[2] = corners_[5];
+			edge_axis_l[3] = corners_[7];
+			edge_axis_l[4] = corners_[6] - corners_[5];
+			edge_axis_l[5] = corners_[7] - corners_[5];
+
+			Vector_T<T, 3> edge_axis_r[6];
+			edge_axis_r[0] = frustum.corners_[6];
+			edge_axis_r[1] = frustum.corners_[4];
+			edge_axis_r[2] = frustum.corners_[5];
+			edge_axis_r[3] = frustum.corners_[7];
+			edge_axis_r[4] = frustum.corners_[6] - frustum.corners_[5];
+			edge_axis_r[5] = frustum.corners_[7] - frustum.corners_[5];
+
+			for (int i = 0; i < 6; ++ i)
+			{
+				for (int j = 0; j < 6; ++ j)
+				{
+					Vector_T<T, 3> Axis = MathLib::cross(edge_axis_l[i], edge_axis_r[j]);
+
+					T min_l, max_l, min_r, max_r;
+					min_l = max_l = MathLib::dot(Axis, corners_[0]);
+					min_r = max_r = MathLib::dot(Axis, frustum.corners_[0]);
+					for (int k = 1; k < 8; ++ k)
+					{
+						T tmp = MathLib::dot(Axis, corners_[k]);
+						min_l = std::min(min_l, tmp);
+						max_l = std::max(max_l, tmp);
+
+						tmp = MathLib::dot(Axis, frustum.corners_[k]);
+						min_r = std::min(min_r, tmp);
+						max_r = std::max(max_r, tmp);
+					}
+
+					outside |= min_l > max_r;
+					outside |= min_r > max_l;
+				}
+			}
+			if (outside)
+			{
+				return BO_No;
+			}
+
+			return BO_Partial;
 		}
 
 	private:
@@ -184,9 +276,10 @@ namespace KlayGE
 		// Look-Up Table
 		typedef boost::array<int, 6> vertex_lut_t;
 		vertex_lut_t vertex_lut_;
-	};
 
-	typedef Frustum_T<float> Frustum;
+		typedef boost::array<Vector_T<T, 3>, 8> corners_t;
+		corners_t corners_;
+	};
 }
 
 #endif			// _FRUSTUM_HPP
