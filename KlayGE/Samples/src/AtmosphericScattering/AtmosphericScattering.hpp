@@ -26,7 +26,8 @@ private:
 
 private:
 	KlayGE::FontPtr font_;
-	KlayGE::SceneObjectPtr sphere_;
+	KlayGE::SceneObjectPtr planet_;
+	KlayGE::SceneObjectPtr atmosphere_;
 
 	KlayGE::TrackballCameraController tb_controller_;
 

@@ -30,15 +30,50 @@ using namespace KlayGE;
 
 namespace
 {
-	class AtmosphericScatteringMesh : public StaticMesh
+	class PlanetMesh : public StaticMesh
 	{
 	public:
-		AtmosphericScatteringMesh(RenderModelPtr const & model, std::wstring const & name)
+		PlanetMesh(RenderModelPtr const & model, std::wstring const & name)
 			: StaticMesh(model, name)
 		{
 			RenderFactory & rf = Context::Instance().RenderFactoryInstance();
 			RenderEffectPtr effect = rf.LoadEffect("AtmosphericScattering.fxml");
-			technique_ = effect->TechniqueByName("AtmosphericScatteringTech");
+			technique_ = effect->TechniqueByName("PlanetTech");
+		}
+
+		void BuildMeshInfo()
+		{
+		}
+
+		void Density(float density)
+		{
+			*(technique_->Effect().ParameterByName("density")) = density;
+		}
+		
+		void OnRenderBegin()
+		{
+			App3DFramework const & app = Context::Instance().AppInstance();
+
+			float4x4 const & view = app.ActiveCamera().ViewMatrix();
+			float4x4 const & proj = app.ActiveCamera().ProjMatrix();
+
+			*(technique_->Effect().ParameterByName("mvp")) = model_mat_ * view * proj;
+
+			float4x4 inv_mv = MathLib::inverse(model_mat_ * view);
+			*(technique_->Effect().ParameterByName("eye_pos")) = MathLib::transform_coord(float3(0, 0, 0), inv_mv);
+			*(technique_->Effect().ParameterByName("look_at_vec")) = MathLib::transform_normal(float3(0, 0, 1), inv_mv);
+		}
+	};
+
+	class AtmosphereMesh : public StaticMesh
+	{
+	public:
+		AtmosphereMesh(RenderModelPtr const & model, std::wstring const & name)
+			: StaticMesh(model, name)
+		{
+			RenderFactory & rf = Context::Instance().RenderFactoryInstance();
+			RenderEffectPtr effect = rf.LoadEffect("AtmosphericScattering.fxml");
+			technique_ = effect->TechniqueByName("AtmosphereTech");
 		}
 
 		void BuildMeshInfo()
@@ -128,10 +163,15 @@ void AtmosphericScatteringApp::InitObjects()
 	tb_controller_.AttachCamera(this->ActiveCamera());
 	tb_controller_.Scalers(0.003f, 0.003f);
 
-	RenderModelPtr model_sphere = SyncLoadModel("geosphere.7z//geosphere.meshml", EAH_GPU_Read,
-		CreateModelFactory<RenderModel>(), CreateMeshFactory<AtmosphericScatteringMesh>());
-	sphere_ = MakeSharedPtr<SceneObjectHelper>(model_sphere->Mesh(0), SceneObjectHelper::SOA_Cullable);
-	sphere_->AddToSceneManager();
+	RenderModelPtr model_planet = SyncLoadModel("geosphere.7z//geosphere.meshml", EAH_GPU_Read,
+		CreateModelFactory<RenderModel>(), CreateMeshFactory<PlanetMesh>());
+	planet_ = MakeSharedPtr<SceneObjectHelper>(model_planet->Mesh(0), SceneObjectHelper::SOA_Cullable);
+	planet_->AddToSceneManager();
+
+	RenderModelPtr model_atmosphere = SyncLoadModel("geosphere.7z//geosphere.meshml", EAH_GPU_Read,
+		CreateModelFactory<RenderModel>(), CreateMeshFactory<AtmosphereMesh>());
+	atmosphere_ = MakeSharedPtr<SceneObjectHelper>(model_atmosphere->Mesh(0), SceneObjectHelper::SOA_Cullable);
+	atmosphere_->AddToSceneManager();
 
 	UIManager::Instance().Load(ResLoader::Instance().Open("AtmosphericScattering.uiml"));
 	dialog_param_ = UIManager::Instance().GetDialog("AtmosphericScattering");
@@ -183,13 +223,14 @@ void AtmosphericScatteringApp::InputHandler(KlayGE::InputEngine const & /*sender
 void AtmosphericScatteringApp::AtmosphereTopHandler(KlayGE::UISlider const & sender)
 {
 	float value = 1 + sender.GetValue() / 1000.0f;
-	checked_pointer_cast<AtmosphericScatteringMesh>(sphere_->GetRenderable())->AtmosphereTop(value);
+	checked_pointer_cast<AtmosphereMesh>(atmosphere_->GetRenderable())->AtmosphereTop(value);
 }
 
 void AtmosphericScatteringApp::DensityHandler(KlayGE::UISlider const & sender)
 {
 	float value = sender.GetValue() / 100000.0f;
-	checked_pointer_cast<AtmosphericScatteringMesh>(sphere_->GetRenderable())->Density(value);
+	checked_pointer_cast<PlanetMesh>(planet_->GetRenderable())->Density(value);
+	checked_pointer_cast<AtmosphereMesh>(atmosphere_->GetRenderable())->Density(value);
 }
 
 void AtmosphericScatteringApp::DoUpdateOverlay()
@@ -211,6 +252,6 @@ uint32_t AtmosphericScatteringApp::DoUpdate(KlayGE::uint32_t /*pass*/)
 	re.BindFrameBuffer(FrameBufferPtr());
 	Color clear_clr(0.0f, 0.0f, 0.0f, 1);
 
-	re.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, clear_clr, 1, 0);
+	re.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth | FrameBuffer::CBM_Stencil, clear_clr, 1, 0);
 	return App3DFramework::URV_Need_Flush | App3DFramework::URV_Finished;
 }

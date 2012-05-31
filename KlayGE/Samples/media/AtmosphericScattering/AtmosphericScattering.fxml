@@ -33,49 +33,6 @@
 
 	<shader>
 		<![CDATA[
-void AtmosphericScatteringVS(float4 pos		: POSITION,
-					out float4 oPosOS		: TEXCOORD0,
-					out float4 oPos			: SV_Position)
-{
-	oPosOS = float4(pos.xyz * 1.2f, pos.w);
-	oPos = mul(oPosOS, mvp);
-}
-
-float4 PointOnSurface(float3 eye_pos, float3 view_dir)
-{
-	// intersect a point on an implicit surface
-	// this is just an ad-hoc way to add terrain geometry
-	// it has nothing to do with the atmospheric scattering itself
-
-	float4 result = 0;
-
-	float r = planet_radius;
-	float d = dot(eye_pos, view_dir);
-
-	float d2 = d * d;
-	float x2 = dot(eye_pos, eye_pos);
-	float r2 = r * r;
-	float D = d2 - x2 + r2;
-
-	if (D >= 0)
-	{
-		if (x2 > r2)
-		{
-			float t = -d - sqrt(D);
-			if (t > 0)
-			{
-				result = float4(eye_pos + view_dir * t, 1);
-			}
-		}
-		else
-		{
-			result = float4(eye_pos, 1);
-		}
-	}
-
-	return result;
-}
-
 float Chapman(float X, float h, float cos_chi)
 {
 	// this is the approximate Chapman function,
@@ -235,80 +192,136 @@ void AerialPerspective(float3 r0, float3 r1, bool infinite,
 	// This would not be possible with different absorbtion colors at different scale heights
 	result_s *= absorb;
 }
-
-float4 AtmosphericScatteringPS(float3 pos_os : TEXCOORD0) : SV_Target
-{
-	float3 color = 0;
-	float3 view_dir = normalize(pos_os - eye_pos);
-
-	// raycast a point to the planet surface
-	float4 P = PointOnSurface(eye_pos, view_dir);
-
-	if (P.w == 0)
-	{
-		// there was no surface intersection
-		// this is simply the aerial perspective of empty space
-		float3 t, s;
-		AerialPerspective(eye_pos, eye_pos + view_dir, true, t, s);
-		color = s;
-	}
-	else
-	{
-		// we have hit a surface point
-		// get surfance normal and generate spherical texture coordinates
-		float3 N = normalize(P.xyz);
-		float2 uv = 0.5f + float2(0.15915494f, 0.31830989f) * float2(atan2(N.z, N.x), asin(-N.y));
-
-		float3 surface_color = earth_color_tex.Sample(linear_sampler, uv).xyz;
-
-		// get the direct light color
-		// from the transmittance of the sun through the atmosphere
-		float3 light_color = Transmittance(P.xyz, light_dir);
-
-		// for shading the landmass we use the Lommel-Seeliger law
-		float3 V = -view_dir;
-		float dot_nv = max(0, dot(N, V));
-		float dot_nl = max(0, dot(N, light_dir));
-		float3 land_color = light_color * surface_color * dot_nl / (dot_nl + dot_nv);
-
-		// for shading the ocean 
-		// we obtain the skycolor reflection
-		// via the aerial perspective of the reflection vector,
-		// and mix it with an approximate fresnel factor
-		float3 t, s;
-		AerialPerspective(P.xyz, P.xyz - reflect(V, N), true, t, s);
-		float fresnel = 1 - dot_nv;
-		fresnel *= fresnel;
-		fresnel *= fresnel;
-		float3 ocean_color = lerp(land_color, s, fresnel);
-
-		// we also add the specular reflection of the sun to the ocean
-		// uses the micro-facet shading model described in ShaderX7 
-		float3 H = normalize(light_dir + V);
-		float dot_nh = max(0, dot(N, H));
-		float dot_lh = max(0, dot(light_dir, H));
-		ocean_color += light_color * 0.02f * (32 + 1) / 8 * pow(dot_nh, 32) / pow(dot_lh, 3) * dot_nl;
-
-		// final shaded surface color
-		surface_color = lerp(land_color, ocean_color, ocean_mask_tex.Sample(linear_sampler, uv).x);
-
-		// finally obtain the aerial perspective of the shaded surface point
-		// from the camera's point of view
-		AerialPerspective(eye_pos, P.xyz, false, t, s);
-		color = s + t * surface_color;
-	}
-
-	return float4(color, 1);
-}
 		]]>
 	</shader>
 	
-	<technique name="AtmosphericScatteringTech">
+	<shader>
+		<![CDATA[
+void PlanetVS(float4 pos		: POSITION,
+					float2 tex				: TEXCOORD0,
+					out float2 oTex			: TEXCOORD0,
+					out float3 oPosOS		: TEXCOORD1,
+					out float3 oViewDir		: TEXCOORD2,
+					out float4 oPos			: SV_Position)
+{
+	oTex = tex;
+	oPosOS = pos.xyz;
+	oPos = mul(float4(oPosOS, pos.w), mvp);
+	oViewDir = oPosOS - eye_pos;
+}
+
+float4 PlanetPS(float2 tex : TEXCOORD0, float3 pos_os : TEXCOORD1, float3 view_dir : TEXCOORD2) : SV_Target
+{
+	float3 color = 0;
+	view_dir = normalize(view_dir);
+	
+	// we have hit a surface point
+	// get surfance normal and generate spherical texture coordinates
+	float3 N = normalize(pos_os);
+	float2 uv = 0.5f + float2(0.15915494f, 0.31830989f) * float2(atan2(N.z, N.x), asin(-N.y));
+	
+	float3 P = N;
+
+	float3 surface_color = earth_color_tex.Sample(linear_sampler, uv).xyz;
+
+	// get the direct light color
+	// from the transmittance of the sun through the atmosphere
+	float3 light_color = Transmittance(P, light_dir);
+
+	// for shading the landmass we use the Lommel-Seeliger law
+	float3 V = -view_dir;
+	float dot_nv = max(0, dot(N, V));
+	float dot_nl = max(0, dot(N, light_dir));
+	float3 land_color = light_color * surface_color * dot_nl / (dot_nl + dot_nv);
+
+	// for shading the ocean 
+	// we obtain the skycolor reflection
+	// via the aerial perspective of the reflection vector,
+	// and mix it with an approximate fresnel factor
+	float3 t, s;
+	AerialPerspective(P, P - reflect(V, N), true, t, s);
+	float fresnel = 1 - dot_nv;
+	fresnel *= fresnel;
+	fresnel *= fresnel;
+	float3 ocean_color = lerp(land_color, s, fresnel);
+
+	// we also add the specular reflection of the sun to the ocean
+	// uses the micro-facet shading model described in ShaderX7 
+	float3 H = normalize(light_dir + V);
+	float dot_nh = max(0, dot(N, H));
+	float dot_lh = max(0, dot(light_dir, H));
+	ocean_color += light_color * 0.02f * (32 + 1) / 8 * pow(dot_nh, 32) / pow(dot_lh, 3) * dot_nl;
+
+	// final shaded surface color
+	surface_color = lerp(land_color, ocean_color, ocean_mask_tex.Sample(linear_sampler, uv).x);
+
+	// finally obtain the aerial perspective of the shaded surface point
+	// from the camera's point of view
+	AerialPerspective(eye_pos, P, false, t, s);
+	color = s + t * surface_color;
+
+	return float4(max(0, color), 1);
+}
+		
+		
+void AtmosphereVS(float4 pos		: POSITION,
+					float2 tex				: TEXCOORD0,
+					out float2 oTex			: TEXCOORD0,
+					out float3 oPosOS		: TEXCOORD1,
+					out float3 oViewDir		: TEXCOORD2,
+					out float4 oPos			: SV_Position)
+{
+	oTex = tex;
+	oPosOS = pos.xyz * atmosphere_top;
+	oPos = mul(float4(oPosOS, pos.w), mvp);
+	oViewDir = oPosOS - eye_pos;
+}
+
+float4 AtmospherePS(float2 tex : TEXCOORD0, float3 pos_os : TEXCOORD1, float3 view_dir : TEXCOORD2) : SV_Target
+{
+	float3 color = 0;
+	view_dir = normalize(view_dir);
+
+	// there was no surface intersection
+	// this is simply the aerial perspective of empty space
+	float3 t, s;
+	AerialPerspective(eye_pos, eye_pos + view_dir, true, t, s);
+	color = s;
+	
+	return float4(max(0, color), 1);
+}
+		]]>
+	</shader>
+
+	<technique name="PlanetTech">
 		<pass name="p0">
-			<state name="cull_mode" value="none"/>
+			<state name="front_stencil_enable" value="true"/>
+			<state name="front_stencil_func" value="always_pass"/>
+			<state name="front_stencil_ref" value="32"/>
+			<state name="front_stencil_pass" value="replace"/>
+			<state name="back_stencil_enable" value="true"/>
+			<state name="back_stencil_func" value="always_pass"/>
+			<state name="back_stencil_ref" value="32"/>
+			<state name="back_stencil_pass" value="replace"/>
 			
-			<state name="vertex_shader" value="AtmosphericScatteringVS()"/>
-			<state name="pixel_shader" value="AtmosphericScatteringPS()"/>
+			<state name="vertex_shader" value="PlanetVS()"/>
+			<state name="pixel_shader" value="PlanetPS()"/>
+		</pass>
+	</technique>
+
+	<technique name="AtmosphereTech">
+		<pass name="p0">
+			<state name="front_stencil_enable" value="true"/>
+			<state name="front_stencil_func" value="not_equal"/>
+			<state name="front_stencil_ref" value="32"/>
+			<state name="front_stencil_pass" value="replace"/>
+			<state name="back_stencil_enable" value="true"/>
+			<state name="back_stencil_func" value="always_pass"/>
+			<state name="back_stencil_ref" value="32"/>
+			<state name="back_stencil_pass" value="replace"/>
+			
+			<state name="vertex_shader" value="AtmosphereVS()"/>
+			<state name="pixel_shader" value="AtmospherePS()"/>
 		</pass>
 	</technique>
 </effect>
