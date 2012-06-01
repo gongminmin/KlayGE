@@ -40,7 +40,7 @@ def build_external_libs(compiler):
 		compiler_name = "vc"
 		compiler_version = 11
 		ide_name = "VS"
-		ide_version = 11
+		ide_version = 2012
 	elif "vc10" == compiler:
 		compiler_name = "vc"
 		compiler_version = 10
