@@ -19,10 +19,15 @@ private:
 	void DoUpdateOverlay();
 	KlayGE::uint32_t DoUpdate(KlayGE::uint32_t pass);
 
+	void LoadBeta(KlayGE::Color const & clr);
+	void LoadAbsorb(KlayGE::Color const & clr);
+
 	void InputHandler(KlayGE::InputEngine const & sender, KlayGE::InputAction const & action);
 
 	void AtmosphereTopHandler(KlayGE::UISlider const & sender);
 	void DensityHandler(KlayGE::UISlider const & sender);
+	void ChangeBetaHandler(KlayGE::UITexButton const & sender);
+	void ChangeAbsorbHandler(KlayGE::UITexButton const & sender);
 
 private:
 	KlayGE::FontPtr font_;
@@ -34,9 +39,14 @@ private:
 	KlayGE::SceneObjectPtr sun_light_src_;
 	KlayGE::DirectionalLightSourcePtr sun_light_;
 
+	KlayGE::Color beta_;
+	KlayGE::Color absorb_;
+
 	KlayGE::UIDialogPtr dialog_param_;
 	int id_atmosphere_top_;
 	int id_density_;
+	int id_beta_button_;
+	int id_absorb_button_;
 };
 
 #endif		// _ATMOSPHERICSCATTERING_HPP

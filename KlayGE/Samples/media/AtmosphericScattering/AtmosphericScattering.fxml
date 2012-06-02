@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <effect>
+	<include name="Lighting.fxml"/>
+	
 	<parameter type="float4x4" name="mvp"/>
 
 	<parameter type="float3" name="eye_pos"/>
@@ -38,11 +40,10 @@ float Chapman(float X, float h, float cos_chi)
 	// this is the approximate Chapman function,
 	// corrected for transitive consistency 
 
-	float c = sqrt(X + h);    
-    
+	float c = sqrt(X + h);
 	if (cos_chi >= 0)
-	{	
- 		return c / (c * cos_chi + 1) * exp2(-h);
+	{
+		return c / (c * cos_chi + 1) * exp2(-h);
 	}
 	else
 	{
@@ -63,7 +64,7 @@ float3 Transmittance(float3 r, float3 view_dir)
 	float x = len * INV_H50;
 	float h = x - X50;
 	float cos_chi = dot(r, view_dir) * inv_rl;
-	
+
 	return exp2(-BETA50 * H50 * Chapman(X50, h, cos_chi));
 }
 
@@ -96,8 +97,9 @@ void AerialPerspective(float3 r0, float3 r1, bool infinite,
 
 		if (D >= 0)
 		{
-			t0 = max(0, -dp - sqrt(D));
-			t1 = -dp + sqrt(D);
+			float sd = sqrt(D);
+			t0 = max(0, -dp - sd);
+			t1 = -dp + sd;
 		}
 		else
 		{
@@ -112,30 +114,31 @@ void AerialPerspective(float3 r0, float3 r1, bool infinite,
 	float inf_neg = 1;
 	if (!infinite)
 	{
-		t0 = min(t0, length(dr));
-		t1 = min(t1, length(dr));
+		float len_dr = length(dr);
+		t0 = min(t0, len_dr);
+		t1 = min(t1, len_dr);
 		inf_neg = -1;
 	}
 
 	// initialization of
 	// the integration loop variables
 
-	const int NMAX = 16;
-	int N = NMAX; 
+	const int NMAX = 8;
+	int N = NMAX;
 	float range = t1 - t0;
 	float dt = range / (N - 1);
 
-	float last_amtl = 0; 
+	float last_amtl = 0;
 	float last_mray = 0;
-
 	{
 		float3 r = r0 + drn * t1;
 		float rl = length(r);
 		float x = rl * INV_H50;
 		float h = x - X50;
-		float cos_chi_sun = dot(r / rl, light_dir);
-		float cos_chi_ray = dot(r / rl, inf_neg * drn);
-		
+		r /= rl;
+		float cos_chi_sun = dot(r, light_dir);
+		float cos_chi_ray = dot(r, inf_neg * drn);
+
 		last_amtl = H50 * Chapman(X50, h, cos_chi_sun);
 		last_mray = inf_neg * H50 * Chapman(X50, h, cos_chi_ray);
 	}
@@ -153,14 +156,15 @@ void AerialPerspective(float3 r0, float3 r1, bool infinite,
 		float t = i * dt + t0;
 		float3 r = r0 + drn * t;
 		float rl = length(r);
+		r /= rl;
 
 		// normalize altitude to 50%-height
 		float x = rl * INV_H50;
 		float h = x - X50;
 
 		// calculate local incidence angle with the sunlight
-		float cos_chi_sun = dot(r / rl, light_dir);
-		float cos_chi_ray = dot(r / rl, inf_neg * drn);
+		float cos_chi_sun = dot(r, light_dir);
+		float cos_chi_ray = dot(r, inf_neg * drn);
 
 		// calculate the airmass along this segment of the ray
 		float mray = inf_neg * H50 * Chapman(X50, h, cos_chi_ray);
@@ -240,9 +244,7 @@ float4 PlanetPS(float2 tex : TEXCOORD0, float3 pos_os : TEXCOORD1, float3 view_d
 	// and mix it with an approximate fresnel factor
 	float3 t, s;
 	AerialPerspective(P, P - reflect(V, N), true, t, s);
-	float fresnel = 1 - dot_nv;
-	fresnel *= fresnel;
-	fresnel *= fresnel;
+	float fresnel = fresnel_term_schlick(V, N, 0.027f).x;
 	float3 ocean_color = lerp(land_color, s, fresnel);
 
 	// we also add the specular reflection of the sun to the ocean
@@ -250,7 +252,7 @@ float4 PlanetPS(float2 tex : TEXCOORD0, float3 pos_os : TEXCOORD1, float3 view_d
 	float3 H = normalize(light_dir + V);
 	float dot_nh = max(0, dot(N, H));
 	float dot_lh = max(0, dot(light_dir, H));
-	ocean_color += light_color * 0.02f * (32 + 1) / 8 * pow(dot_nh, 32) / pow(dot_lh, 3) * dot_nl;
+	ocean_color += light_color * 0.02f * specular_term(H, N, 32) / pow(dot_lh, 3) * dot_nl;
 
 	// final shaded surface color
 	surface_color = lerp(land_color, ocean_color, ocean_mask_tex.Sample(linear_sampler, uv).x);

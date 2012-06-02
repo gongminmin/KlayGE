@@ -16,6 +16,7 @@
 #include <KlayGE/UI.hpp>
 #include <KlayGE/RenderableHelper.hpp>
 #include <KlayGE/SceneManager.hpp>
+#include <KlayGE/Window.hpp>
 
 #include <KlayGE/SSRPostProcess.hpp>
 
@@ -48,6 +49,16 @@ namespace
 		void Density(float density)
 		{
 			*(technique_->Effect().ParameterByName("density")) = density;
+		}
+
+		void Beta(Color const & clr)
+		{
+			*(technique_->Effect().ParameterByName("beta")) = float3(clr.r(), clr.g(), clr.b());
+		}
+
+		void Absorb(Color const & clr)
+		{
+			*(technique_->Effect().ParameterByName("absorb")) = float3(clr.r(), clr.g(), clr.b());
 		}
 		
 		void OnRenderBegin()
@@ -90,6 +101,16 @@ namespace
 		void Density(float density)
 		{
 			*(technique_->Effect().ParameterByName("density")) = density;
+		}
+
+		void Beta(Color const & clr)
+		{
+			*(technique_->Effect().ParameterByName("beta")) = float3(clr.r(), clr.g(), clr.b());
+		}
+
+		void Absorb(Color const & clr)
+		{
+			*(technique_->Effect().ParameterByName("absorb")) = float3(clr.r(), clr.g(), clr.b());
 		}
 		
 		void OnRenderBegin()
@@ -177,12 +198,20 @@ void AtmosphericScatteringApp::InitObjects()
 	dialog_param_ = UIManager::Instance().GetDialog("AtmosphericScattering");
 	id_atmosphere_top_ = dialog_param_->IDFromName("atmosphere_top");
 	id_density_ = dialog_param_->IDFromName("density");
+	id_beta_button_ = dialog_param_->IDFromName("beta_button");
+	id_absorb_button_ = dialog_param_->IDFromName("absorb_button");
 
 	dialog_param_->Control<UISlider>(id_atmosphere_top_)->OnValueChangedEvent().connect(boost::bind(&AtmosphericScatteringApp::AtmosphereTopHandler, this, _1));
 	this->AtmosphereTopHandler(*(dialog_param_->Control<UISlider>(id_atmosphere_top_)));
 
 	dialog_param_->Control<UISlider>(id_density_)->OnValueChangedEvent().connect(boost::bind(&AtmosphericScatteringApp::DensityHandler, this, _1));
 	this->DensityHandler(*(dialog_param_->Control<UISlider>(id_density_)));
+
+	dialog_param_->Control<UITexButton>(id_beta_button_)->OnClickedEvent().connect(boost::bind(&AtmosphericScatteringApp::ChangeBetaHandler, this, _1));
+	dialog_param_->Control<UITexButton>(id_absorb_button_)->OnClickedEvent().connect(boost::bind(&AtmosphericScatteringApp::ChangeAbsorbHandler, this, _1));
+
+	this->LoadBeta(Color(38.05f, 82.36f, 214.65f, 1));
+	this->LoadAbsorb(Color(0.75f, 0.85f, 1, 1));
 
 	sun_light_ = MakeSharedPtr<DirectionalLightSource>();
 	sun_light_->Attrib(0);
@@ -210,6 +239,65 @@ void AtmosphericScatteringApp::OnResize(KlayGE::uint32_t width, KlayGE::uint32_t
 	UIManager::Instance().SettleCtrls(width, height);
 }
 
+void AtmosphericScatteringApp::LoadBeta(Color const & clr)
+{
+	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+
+	checked_pointer_cast<PlanetMesh>(planet_->GetRenderable())->Beta(clr);
+	checked_pointer_cast<AtmosphereMesh>(atmosphere_->GetRenderable())->Beta(clr);
+
+	Color f4_clr = clr / 250.0f;
+	ElementFormat fmt;
+	uint32_t data = 0xFF000000;
+	if (rf.RenderEngineInstance().DeviceCaps().texture_format_support(EF_ABGR8))
+	{
+		fmt = EF_ABGR8;
+		data |= f4_clr.ABGR();
+	}
+	else
+	{
+		BOOST_ASSERT(rf.RenderEngineInstance().DeviceCaps().texture_format_support(EF_ARGB8));
+
+		fmt = EF_ARGB8;
+		data |= f4_clr.ARGB();
+	}
+
+	ElementInitData init_data;
+	init_data.data = &data;
+	init_data.row_pitch = 4;
+	TexturePtr tex_for_button = rf.MakeTexture2D(1, 1, 1, 1, fmt, 1, 0, EAH_GPU_Read, &init_data);
+	dialog_param_->Control<UITexButton>(id_beta_button_)->SetTexture(tex_for_button);
+}
+
+void AtmosphericScatteringApp::LoadAbsorb(Color const & clr)
+{
+	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+
+	checked_pointer_cast<PlanetMesh>(planet_->GetRenderable())->Absorb(clr);
+	checked_pointer_cast<AtmosphereMesh>(atmosphere_->GetRenderable())->Absorb(clr);
+
+	ElementFormat fmt;
+	uint32_t data = 0xFF000000;
+	if (rf.RenderEngineInstance().DeviceCaps().texture_format_support(EF_ABGR8))
+	{
+		fmt = EF_ABGR8;
+		data |= clr.ABGR();
+	}
+	else
+	{
+		BOOST_ASSERT(rf.RenderEngineInstance().DeviceCaps().texture_format_support(EF_ARGB8));
+
+		fmt = EF_ARGB8;
+		data |= clr.ARGB();
+	}
+
+	ElementInitData init_data;
+	init_data.data = &data;
+	init_data.row_pitch = 4;
+	TexturePtr tex_for_button = rf.MakeTexture2D(1, 1, 1, 1, fmt, 1, 0, EAH_GPU_Read, &init_data);
+	dialog_param_->Control<UITexButton>(id_absorb_button_)->SetTexture(tex_for_button);
+}
+
 void AtmosphericScatteringApp::InputHandler(KlayGE::InputEngine const & /*sender*/, KlayGE::InputAction const & action)
 {
 	switch (action.first)
@@ -231,6 +319,70 @@ void AtmosphericScatteringApp::DensityHandler(KlayGE::UISlider const & sender)
 	float value = sender.GetValue() / 100000.0f;
 	checked_pointer_cast<PlanetMesh>(planet_->GetRenderable())->Density(value);
 	checked_pointer_cast<AtmosphereMesh>(atmosphere_->GetRenderable())->Density(value);
+}
+
+void AtmosphericScatteringApp::ChangeBetaHandler(KlayGE::UITexButton const & /*sender*/)
+{
+#if defined KLAYGE_PLATFORM_WINDOWS
+	CHOOSECOLORA occ;
+	HWND hwnd = this->MainWnd()->HWnd();
+
+	static COLORREF cust_clrs[16] = { RGB(0xFF, 0xFF, 0xFF), RGB(0xFF, 0xFF, 0xFF), RGB(0xFF, 0xFF, 0xFF), RGB(0xFF, 0xFF, 0xFF),
+		RGB(0xFF, 0xFF, 0xFF), RGB(0xFF, 0xFF, 0xFF), RGB(0xFF, 0xFF, 0xFF), RGB(0xFF, 0xFF, 0xFF),
+		RGB(0xFF, 0xFF, 0xFF), RGB(0xFF, 0xFF, 0xFF), RGB(0xFF, 0xFF, 0xFF), RGB(0xFF, 0xFF, 0xFF),
+		RGB(0xFF, 0xFF, 0xFF), RGB(0xFF, 0xFF, 0xFF), RGB(0xFF, 0xFF, 0xFF), RGB(0xFF, 0xFF, 0xFF) };
+
+	Color f4_clr = beta_ / 250.0f;
+
+	ZeroMemory(&occ, sizeof(occ));
+	occ.lStructSize = sizeof(occ);
+	occ.hwndOwner = hwnd;
+	occ.hInstance = NULL;
+	occ.rgbResult = f4_clr.ABGR();
+	occ.lpCustColors = cust_clrs;
+	occ.Flags = CC_ANYCOLOR | CC_FULLOPEN | CC_RGBINIT;
+	occ.lCustData = 0;
+	occ.lpfnHook = NULL;
+	occ.lpTemplateName = NULL;
+
+	if (ChooseColorA(&occ))
+	{
+		beta_ = Color(occ.rgbResult) * 250.0f;
+		std::swap(beta_.r(), beta_.b());
+		this->LoadBeta(beta_);
+	}
+#endif
+}
+
+void AtmosphericScatteringApp::ChangeAbsorbHandler(KlayGE::UITexButton const & /*sender*/)
+{
+#if defined KLAYGE_PLATFORM_WINDOWS
+	CHOOSECOLORA occ;
+	HWND hwnd = this->MainWnd()->HWnd();
+
+	static COLORREF cust_clrs[16] = { RGB(0xFF, 0xFF, 0xFF), RGB(0xFF, 0xFF, 0xFF), RGB(0xFF, 0xFF, 0xFF), RGB(0xFF, 0xFF, 0xFF),
+		RGB(0xFF, 0xFF, 0xFF), RGB(0xFF, 0xFF, 0xFF), RGB(0xFF, 0xFF, 0xFF), RGB(0xFF, 0xFF, 0xFF),
+		RGB(0xFF, 0xFF, 0xFF), RGB(0xFF, 0xFF, 0xFF), RGB(0xFF, 0xFF, 0xFF), RGB(0xFF, 0xFF, 0xFF),
+		RGB(0xFF, 0xFF, 0xFF), RGB(0xFF, 0xFF, 0xFF), RGB(0xFF, 0xFF, 0xFF), RGB(0xFF, 0xFF, 0xFF) };
+
+	ZeroMemory(&occ, sizeof(occ));
+	occ.lStructSize = sizeof(occ);
+	occ.hwndOwner = hwnd;
+	occ.hInstance = NULL;
+	occ.rgbResult = absorb_.ABGR();
+	occ.lpCustColors = cust_clrs;
+	occ.Flags = CC_ANYCOLOR | CC_FULLOPEN | CC_RGBINIT;
+	occ.lCustData = 0;
+	occ.lpfnHook = NULL;
+	occ.lpTemplateName = NULL;
+
+	if (ChooseColorA(&occ))
+	{
+		absorb_ = Color(occ.rgbResult);
+		std::swap(absorb_.r(), absorb_.b());
+		this->LoadAbsorb(absorb_);
+	}
+#endif
 }
 
 void AtmosphericScatteringApp::DoUpdateOverlay()
