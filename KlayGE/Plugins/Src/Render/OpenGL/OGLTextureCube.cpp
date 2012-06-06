@@ -277,48 +277,54 @@ namespace KlayGE
 			}
 			else
 			{
-				BOOST_ASSERT(format_ == target.Format());
-
-				GLint gl_internalFormat;
-				GLenum gl_format;
-				GLenum gl_type;
-				OGLMapping::MappingFormat(gl_internalFormat, gl_format, gl_type, format_);
-
-				GLint gl_target_internal_format;
-				GLenum gl_target_format;
-				GLenum gl_target_type;
-				OGLMapping::MappingFormat(gl_target_internal_format, gl_target_format, gl_target_type, target.Format());
-
-				if (IsCompressedFormat(format_))
+				if ((src_width == dst_width) && (src_height == dst_height) && (format_ == target.Format()))
 				{
-					BOOST_ASSERT((src_width == dst_width) && (src_height == dst_height));
-					BOOST_ASSERT((0 == (src_x_offset & 0x3)) && (0 == (src_y_offset & 0x3)));
-					BOOST_ASSERT((0 == (dst_x_offset & 0x3)) && (0 == (dst_y_offset & 0x3)));
-					BOOST_ASSERT((0 == (src_width & 0x3)) && (0 == (src_height & 0x3)));
-					BOOST_ASSERT((0 == (dst_width & 0x3)) && (0 == (dst_height & 0x3)));
-
-					Texture::Mapper mapper_src(*this, src_array_index, src_face, src_level, TMA_Read_Only, 0, 0, this->Width(src_level), this->Height(src_level));
-					Texture::Mapper mapper_dst(target, dst_array_index, dst_face, dst_level, TMA_Write_Only, 0, 0, target.Width(dst_level), target.Height(dst_level));
-
-					int block_size;
-					if ((EF_BC1 == format_) || (EF_SIGNED_BC1 == format_) || (EF_BC1_SRGB == format_)
-						|| (EF_BC4 == format_) || (EF_SIGNED_BC4 == format_) || (EF_BC4_SRGB == format_))
+					if (IsCompressedFormat(format_))
 					{
-						block_size = 8;
+						BOOST_ASSERT((0 == (src_x_offset & 0x3)) && (0 == (src_y_offset & 0x3)));
+						BOOST_ASSERT((0 == (dst_x_offset & 0x3)) && (0 == (dst_y_offset & 0x3)));
+						BOOST_ASSERT((0 == (src_width & 0x3)) && (0 == (src_height & 0x3)));
+						BOOST_ASSERT((0 == (dst_width & 0x3)) && (0 == (dst_height & 0x3)));
+
+						Texture::Mapper mapper_src(*this, src_array_index, src_face, src_level, TMA_Read_Only, 0, 0, this->Width(src_level), this->Height(src_level));
+						Texture::Mapper mapper_dst(target, dst_array_index, dst_face, dst_level, TMA_Write_Only, 0, 0, target.Width(dst_level), target.Height(dst_level));
+
+						int block_size;
+						if ((EF_BC1 == format_) || (EF_SIGNED_BC1 == format_) || (EF_BC1_SRGB == format_)
+							|| (EF_BC4 == format_) || (EF_SIGNED_BC4 == format_) || (EF_BC4_SRGB == format_))
+						{
+							block_size = 8;
+						}
+						else
+						{
+							block_size = 16;
+						}
+
+						uint8_t const * s = mapper_src.Pointer<uint8_t>() + (src_y_offset / 4) * mapper_src.RowPitch() + (src_x_offset / 4 * block_size);
+						uint8_t* d = mapper_dst.Pointer<uint8_t>() + (dst_y_offset / 4) * mapper_dst.RowPitch() + (dst_x_offset / 4 * block_size);
+						for (uint32_t y = 0; y < src_height; y += 4)
+						{
+							memcpy(d, s, src_width / 4 * block_size);
+
+							s += mapper_src.RowPitch();
+							d += mapper_dst.RowPitch();
+						}
 					}
 					else
 					{
-						block_size = 16;
-					}
+						size_t const format_size = NumFormatBytes(format_);					
 
-					uint8_t const * s = mapper_src.Pointer<uint8_t>() + (src_y_offset / 4) * mapper_src.RowPitch() + (src_x_offset / 4 * block_size);
-					uint8_t* d = mapper_dst.Pointer<uint8_t>() + (dst_y_offset / 4) * mapper_dst.RowPitch() + (dst_x_offset / 4 * block_size);
-					for (uint32_t y = 0; y < src_height; y += 4)
-					{
-						memcpy(d, s, src_width / 4 * block_size);
+						Texture::Mapper mapper_src(*this, src_array_index, src_face, src_level, TMA_Read_Only, src_x_offset, src_y_offset, src_width, src_height);
+						Texture::Mapper mapper_dst(target, dst_array_index, dst_face, dst_level, TMA_Write_Only, dst_x_offset, dst_y_offset, dst_width, dst_height);
+						uint8_t const * s = mapper_src.Pointer<uint8_t>();
+						uint8_t* d = mapper_dst.Pointer<uint8_t>();
+						for (uint32_t y = 0; y < src_height; ++ y)
+						{
+							memcpy(d, s, src_width * format_size);
 
-						s += mapper_src.RowPitch();
-						d += mapper_dst.RowPitch();
+							s += mapper_src.RowPitch();
+							d += mapper_dst.RowPitch();
+						}
 					}
 				}
 				else

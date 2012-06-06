@@ -251,8 +251,71 @@ namespace KlayGE
 			}
 			else
 			{
-				this->ResizeTexture3D(target, dst_array_index, dst_level, dst_x_offset, dst_y_offset, dst_z_offset, dst_width, dst_height, dst_depth,
+				if ((src_width == dst_width) && (src_height == dst_height) && (src_depth == dst_depth) && (format_ == target.Format()))
+				{
+					if (IsCompressedFormat(format_))
+					{
+						BOOST_ASSERT((0 == (src_x_offset & 0x3)) && (0 == (src_y_offset & 0x3)));
+						BOOST_ASSERT((0 == (dst_x_offset & 0x3)) && (0 == (dst_y_offset & 0x3)));
+						BOOST_ASSERT((0 == (src_width & 0x3)) && (0 == (src_height & 0x3)));
+						BOOST_ASSERT((0 == (dst_width & 0x3)) && (0 == (dst_height & 0x3)));
+
+						for (uint32_t z = 0; z < src_depth; ++ z)
+						{
+							Texture::Mapper mapper_src(*this, src_array_index, src_level, TMA_Read_Only,
+								src_x_offset, src_y_offset, src_z_offset + z, src_width, src_height, 1);
+							Texture::Mapper mapper_dst(target, dst_array_index, dst_level, TMA_Write_Only,
+								dst_x_offset, dst_y_offset, dst_z_offset + z, dst_width, dst_height, 1);
+
+							int block_size;
+							if ((EF_BC1 == format_) || (EF_SIGNED_BC1 == format_) || (EF_BC1_SRGB == format_)
+								|| (EF_BC4 == format_) || (EF_SIGNED_BC4 == format_) || (EF_BC4_SRGB == format_))
+							{
+								block_size = 8;
+							}
+							else
+							{
+								block_size = 16;
+							}
+
+							uint8_t const * s = mapper_src.Pointer<uint8_t>();
+							uint8_t* d = mapper_dst.Pointer<uint8_t>();
+							for (uint32_t y = 0; y < src_height; y += 4)
+							{
+								memcpy(d, s, src_width / 4 * block_size);
+
+								s += mapper_src.RowPitch();
+								d += mapper_dst.RowPitch();
+							}
+						}
+					}
+					else
+					{
+						for (uint32_t z = 0; z < src_depth; ++ z)
+						{
+							size_t const format_size = NumFormatBytes(format_);
+
+							Texture::Mapper mapper_src(*this, src_array_index, src_level, TMA_Read_Only,
+								src_x_offset, src_y_offset, src_z_offset + z, src_width, src_height, 1);
+							Texture::Mapper mapper_dst(target, dst_array_index, dst_level, TMA_Write_Only,
+								dst_x_offset, dst_y_offset, dst_z_offset + z, dst_width, dst_height, 1);
+							uint8_t const * s = mapper_src.Pointer<uint8_t>();
+							uint8_t* d = mapper_dst.Pointer<uint8_t>();
+							for (uint32_t y = 0; y < src_height; ++ y)
+							{
+								memcpy(d, s, src_width * format_size);
+
+								s += mapper_src.RowPitch();
+								d += mapper_dst.RowPitch();
+							}
+						}
+					}
+				}
+				else
+				{
+					this->ResizeTexture3D(target, dst_array_index, dst_level, dst_x_offset, dst_y_offset, dst_z_offset, dst_width, dst_height, dst_depth,
 						src_array_index, src_level, src_x_offset, src_y_offset, src_z_offset, src_width, src_height, src_depth, true);
+				}
 			}
 		}
 	}
