@@ -857,6 +857,14 @@ namespace KlayGE
 			caps_.alpha_to_coverage_support = true;
 			caps_.mrt_independent_bit_depths_support = true;
 		}
+		if (d3d_feature_level_ <= D3D_FEATURE_LEVEL_9_2)
+		{
+			caps_.standard_derivatives_support = false;
+		}
+		else
+		{
+			caps_.standard_derivatives_support = true;
+		}
 		caps_.max_vertex_streams = 16;
 		caps_.max_texture_anisotropy = (D3D_FEATURE_LEVEL_9_1 == d3d_feature_level_) ? 2 : 16;
 		caps_.hw_instancing_support = (d3d_feature_level_ >= D3D_FEATURE_LEVEL_9_3);

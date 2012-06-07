@@ -1074,6 +1074,12 @@ namespace KlayGE
 			ss << (render_eng.RequiresFlipping() ? -1 : +1);
 			flipping_str = ss.str();
 		}
+		std::string standard_derivatives_str;
+		{
+			std::stringstream ss;
+			ss << (caps.standard_derivatives_support ? 1 : 0);
+			standard_derivatives_str = ss.str();
+		}
 
 		shader_desc const & sd = effect.GetShaderDesc(shader_desc_ids[type]);
 
@@ -1199,6 +1205,10 @@ namespace KlayGE
 			}
 			{
 				D3D_SHADER_MACRO macro_d3d11 = { "KLAYGE_FLIPPING", flipping_str.c_str() };
+				macros.push_back(macro_d3d11);
+			}
+			{
+				D3D_SHADER_MACRO macro_d3d11 = { "KLAYGE_DERIVATIVES", standard_derivatives_str.c_str() };
 				macros.push_back(macro_d3d11);
 			}
 			if (feature_level <= D3D_FEATURE_LEVEL_9_3)

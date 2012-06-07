@@ -44,7 +44,7 @@ float4 decode_hdr_yc(float y, float4 c)
 
 float mipmap_level(float2 uv, float2 texture_size)
 {
-#if !KLAYGE_OPENGLES
+#if KLAYGE_DERIVATIVES
 	float2 dx = ddx(uv * texture_size.x);
 	float2 dy = ddy(uv * texture_size.y);
 	float d = max(dot(dx, dx), dot(dy, dy));

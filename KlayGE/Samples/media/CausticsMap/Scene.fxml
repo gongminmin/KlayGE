@@ -240,7 +240,7 @@ float4 DistanceMappingPS(float4 L	: TEXCOORD0,
 		discard;
 	}
 
-#if !KLAYGE_OPENGLES
+#if KLAYGE_DERIVATIVES
 	float2 dx = ddx(texCoord0.xy);
 	float2 dy = ddy(texCoord0.xy);
 #endif
@@ -268,7 +268,7 @@ float4 DistanceMappingPS(float4 L	: TEXCOORD0,
 	lookup_uv += float2(delta.x, -KLAYGE_FLIPPING * delta.y);
 	caustics = float4(caustics_tex.Sample(linear_border_sampler, lookup_uv).xyz + 1, 1);
 	
-#if !KLAYGE_OPENGLES
+#if KLAYGE_DERIVATIVES
 	float3 diffuse = diffuse_tex.SampleGrad(linear_sampler, texUV.xy, dx, dy).rgb;
 	float3 bump_normal = decompress_normal(normal_tex.SampleGrad(linear_sampler, texUV.xy, dx, dy));
 #else

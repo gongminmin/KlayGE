@@ -53,6 +53,7 @@ namespace KlayGE
 		bool multithread_rendering_support;
 		bool multithread_res_creating_support;
 		bool mrt_independent_bit_depths_support;
+		bool standard_derivatives_support;
 
 		bool gs_support;
 		bool cs_support;

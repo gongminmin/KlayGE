@@ -1857,6 +1857,12 @@ namespace KlayGE
 			ss << "-DKLAYGE_FLIPPING=" << (re.RequiresFlipping() ? -1 : +1);
 			flipping_str = ss.str();
 		}
+		std::string standard_derivatives_str;
+		{
+			std::stringstream ss;
+			ss << "-DKLAYGE_DERIVATIVES=" << (caps.standard_derivatives_support ? 1 : 0);
+			standard_derivatives_str = ss.str();
+		}
 
 		std::string shader_text = this->GenShaderText(type, effect);
 
@@ -1868,6 +1874,7 @@ namespace KlayGE
 		args.push_back(max_tex_units_str.c_str());
 		args.push_back(NULL);
 		args.push_back(flipping_str.c_str());
+		args.push_back(standard_derivatives_str.c_str());
 		if (!re.DeviceCaps().texture_format_support(EF_BC5))
 		{
 			args.push_back("-DKLAYGE_BC5_AS_AG");

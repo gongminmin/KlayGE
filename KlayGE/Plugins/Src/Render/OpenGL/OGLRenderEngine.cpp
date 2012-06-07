@@ -1470,6 +1470,14 @@ namespace KlayGE
 		caps_.multithread_rendering_support = false;
 		caps_.multithread_res_creating_support = false;
 		caps_.mrt_independent_bit_depths_support = false;
+		if (caps_.max_shader_model < 3)
+		{
+			caps_.standard_derivatives_support = false;
+		}
+		else
+		{
+			caps_.standard_derivatives_support = true;
+		}
 
 		if (glloader_GL_ARB_geometry_shader4() || glloader_GL_EXT_geometry_shader4()
 			|| glloader_GL_NV_geometry_shader4())

@@ -29,7 +29,7 @@ void GenCubeShadowMapVS(float4 Position : POSITION,
 
 float4 GenCubeShadowMapPS(float dist : TEXCOORD0) : SV_Target
 {
-#if !KLAYGE_OPENGLES
+#if KLAYGE_DERIVATIVES
 	float2 dxdy = float2(ddx(dist), ddy(dist));
 #else
 	float2 dxdy = 0;
@@ -93,7 +93,7 @@ float4 GenDPShadowMapPS(float2 dist : TEXCOORD0) : SV_Target
 {
 	clip(dist.y);
 
-#if !KLAYGE_OPENGLES
+#if KLAYGE_DERIVATIVES
 	float2 dxdy = float2(ddx(dist.x), ddy(dist.x));
 #else
 	float2 dxdy = 0;
