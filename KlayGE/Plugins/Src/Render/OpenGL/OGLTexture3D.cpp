@@ -211,8 +211,6 @@ namespace KlayGE
 		BOOST_ASSERT(type_ == target.Type());
 		BOOST_ASSERT(0 == src_array_index);
 		BOOST_ASSERT(0 == dst_array_index);
-		// fix me
-		BOOST_ASSERT(src_depth == dst_depth);
 
 		if ((format_ == target.Format()) && !IsCompressedFormat(format_) && glloader_GL_NV_copy_image()
 			&& (src_width == dst_width) && (src_height == dst_height) && (src_depth == dst_depth) && (1 == sample_count_))

@@ -33,7 +33,7 @@ void LightSourceProxyVS(float4 pos : POSITION,
 	oNormal = mul(normal, (float3x3)model);
 }
 
-float4 LightSourceProxyPS(float3 pos_os : TEXCOORD0, float3 normal : TEXCOORD0) : SV_Target
+float4 LightSourceProxyPS(float3 pos_os : TEXCOORD0, float3 normal : TEXCOORD1) : SV_Target
 {
 	float atten = 1;
 	if (dot(light_falloff, light_falloff) > 0)

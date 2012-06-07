@@ -262,7 +262,7 @@ float4 PlanetPS(float2 tex : TEXCOORD0, float3 pos_os : TEXCOORD1, float3 view_d
 	AerialPerspective(eye_pos, P, false, t, s);
 	color = s + t * surface_color;
 
-	return float4(max(0, color), 1);
+	return float4(max(color, 0), 1);
 }
 		
 		
@@ -290,7 +290,7 @@ float4 AtmospherePS(float2 tex : TEXCOORD0, float3 pos_os : TEXCOORD1, float3 vi
 	AerialPerspective(eye_pos, eye_pos + view_dir, true, t, s);
 	color = s;
 	
-	return float4(max(0, color), 1);
+	return float4(max(color, 0), 1);
 }
 		]]>
 	</shader>

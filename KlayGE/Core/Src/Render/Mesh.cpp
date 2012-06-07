@@ -2443,7 +2443,7 @@ namespace KlayGE
 		{
 			*light_falloff_param_ = light_->Falloff();
 		}
-		if (light_->ProjectiveTexture() && light_is_projective_param_)
+		if (light_is_projective_param_)
 		{
 			*light_is_projective_param_ = int2(light_->ProjectiveTexture() ? 1 : 0, LT_Point == light_->Type());
 		}

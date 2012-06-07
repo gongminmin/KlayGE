@@ -860,15 +860,21 @@ namespace
 			tex_param_->Value((*samplers_)[stage_].first);
 			sampler_param_->Value((*samplers_)[stage_].second);
 
+			OGLESRenderEngine& re = *checked_cast<OGLESRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 			if ((*samplers_)[stage_].first)
 			{
-				OGLESRenderEngine& re = *checked_cast<OGLESRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-
 				re.ActiveTexture(GL_TEXTURE0 + stage_);
 				checked_pointer_cast<OGLESSamplerStateObject>((*samplers_)[stage_].second)->Active(stage_, (*samplers_)[stage_].first);
 				GLuint const tex_type = checked_pointer_cast<OGLESTexture>((*samplers_)[stage_].first)->GLType();
 				GLuint const gl_tex = checked_pointer_cast<OGLESTexture>((*samplers_)[stage_].first)->GLTexture();
 				glBindTexture(tex_type, gl_tex);
+
+				glUniform1i(location_, stage_);
+			}
+			else
+			{
+				re.ActiveTexture(GL_TEXTURE0 + stage_);
+				glBindTexture(GL_TEXTURE_2D, 0);
 
 				glUniform1i(location_, stage_);
 			}

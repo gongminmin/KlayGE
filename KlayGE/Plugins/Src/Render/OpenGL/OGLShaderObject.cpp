@@ -972,15 +972,21 @@ namespace
 			tex_param_->Value((*samplers_)[stage_].first);
 			sampler_param_->Value((*samplers_)[stage_].second);
 
+			OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 			if ((*samplers_)[stage_].first)
 			{
-				OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-
 				re.ActiveTexture(GL_TEXTURE0 + stage_);
 				checked_pointer_cast<OGLSamplerStateObject>((*samplers_)[stage_].second)->Active(stage_, (*samplers_)[stage_].first);
 				GLuint const tex_type = checked_pointer_cast<OGLTexture>((*samplers_)[stage_].first)->GLType();
 				GLuint const gl_tex = checked_pointer_cast<OGLTexture>((*samplers_)[stage_].first)->GLTexture();
 				glBindTexture(tex_type, gl_tex);
+
+				re.Uniform1i(location_, stage_);
+			}
+			else
+			{
+				re.ActiveTexture(GL_TEXTURE0 + stage_);
+				glBindTexture(GL_TEXTURE_2D, 0);
 
 				re.Uniform1i(location_, stage_);
 			}
