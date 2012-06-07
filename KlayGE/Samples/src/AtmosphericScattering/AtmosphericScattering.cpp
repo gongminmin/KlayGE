@@ -146,11 +146,6 @@ int main()
 
 	Context::Instance().LoadCfg("KlayGE.cfg");
 
-	ContextCfg cfg = Context::Instance().Config();
-	cfg.graphics_cfg.hdr = true;
-	cfg.deferred_rendering = true;
-	Context::Instance().Config(cfg);
-
 	AtmosphericScatteringApp app;
 	app.Create();
 	app.Run();

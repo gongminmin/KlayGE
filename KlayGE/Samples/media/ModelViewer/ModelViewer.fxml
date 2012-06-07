@@ -218,14 +218,10 @@ void MeshDepthVS(float4 pos : POSITION,
 void SkinnedMeshDepthVS(float2 texcoord : TEXCOORD0,
 			float4 pos : POSITION,
 			float4 blend_weights : BLENDWEIGHT,
-#if KLAYGE_OPENGL
-			float4 blend_indices_f : BLENDINDICES,
-#else
-#if KLAYGE_OPENGLES
+#if KLAYGE_OPENGL || KLAYGE_OPENGLES
 			float4 blend_indices_f : BLENDINDICES,
 #else
 			uint4 blend_indices : BLENDINDICES,
-#endif
 #endif
 			float3 normal : NORMAL,
 			out float3 oTexCoordDepth : TEXCOORD0,
@@ -236,12 +232,8 @@ void SkinnedMeshDepthVS(float2 texcoord : TEXCOORD0,
 #endif
 			out float4 oPos : SV_Position)
 {
-#if KLAYGE_OPENGL
+#if KLAYGE_OPENGL || KLAYGE_OPENGLES
 	int4 blend_indices = (int4)blend_indices_f;
-#else
-#if KLAYGE_OPENGLES
-	int4 blend_indices = (int4)blend_indices_f;
-#endif
 #endif
 
 	normal = normal * 2 - 1;
@@ -292,14 +284,10 @@ void MeshVS(float2 texcoord : TEXCOORD0,
 void SkinnedMeshVS(float2 texcoord : TEXCOORD0,
 			float4 pos : POSITION,
 			float4 blend_weights : BLENDWEIGHT,
-#if KLAYGE_OPENGL
-			float4 blend_indices_f : BLENDINDICES,
-#else
-#if KLAYGE_OPENGLES
+#if KLAYGE_OPENGL || KLAYGE_OPENGLES
 			float4 blend_indices_f : BLENDINDICES,
 #else
 			uint4 blend_indices : BLENDINDICES,
-#endif
 #endif
 			float3 normal : NORMAL,
 			float4 tangent : TANGENT,
@@ -313,12 +301,8 @@ void SkinnedMeshVS(float2 texcoord : TEXCOORD0,
 #endif
 			out float4 oPos : SV_Position)
 {
-#if KLAYGE_OPENGL
+#if KLAYGE_OPENGL || KLAYGE_OPENGLES
 	int4 blend_indices = (int4)blend_indices_f;
-#else
-#if KLAYGE_OPENGLES
-	int4 blend_indices = (int4)blend_indices_f;
-#endif
 #endif
 
 	float3 result_pos;
@@ -358,14 +342,10 @@ void VisualizeVertexVS(float2 tex0 : TEXCOORD0,
 void VisualizeVertexSkinnedVS(float2 tex0 : TEXCOORD0,
 				float4 pos : POSITION,
 				float4 blend_weights : BLENDWEIGHT,
-#if KLAYGE_OPENGL
-				float4 blend_indices_f : BLENDINDICES,
-#else
-#if KLAYGE_OPENGLES
+#if KLAYGE_OPENGL || KLAYGE_OPENGLES
 				float4 blend_indices_f : BLENDINDICES,
 #else
 				uint4 blend_indices : BLENDINDICES,
-#endif
 #endif
 				float3 N	: NORMAL,	// in object space
 				float4 T	: TANGENT,	// in object space
@@ -373,12 +353,8 @@ void VisualizeVertexSkinnedVS(float2 tex0 : TEXCOORD0,
 				out float4 oClr : COLOR,
 				out float4 oPos : SV_Position)
 {
-#if KLAYGE_OPENGL
+#if KLAYGE_OPENGL || KLAYGE_OPENGLES
 	int4 blend_indices = (int4)blend_indices_f;
-#else
-#if KLAYGE_OPENGLES
-	int4 blend_indices = (int4)blend_indices_f;
-#endif
 #endif
 
 	float3 result_pos;
@@ -1025,26 +1001,18 @@ CONTROL_POINT SmoothVS(float2 tex0 : TEXCOORD0,
 CONTROL_POINT SmoothSkinnedVS(float2 tex0 : TEXCOORD0,
 				float4 pos : POSITION,
 				float4 blend_weights : BLENDWEIGHT,
-#if KLAYGE_OPENGL
-				float4 blend_indices_f : BLENDINDICES,
-#else
-#if KLAYGE_OPENGLES
+#if KLAYGE_OPENGL || KLAYGE_OPENGLES
 				float4 blend_indices_f : BLENDINDICES,
 #else
 				uint4 blend_indices : BLENDINDICES,
-#endif
 #endif
 				float3 N	: NORMAL,
 				float4 T	: TANGENT)
 {
 	CONTROL_POINT output;
 	
-#if KLAYGE_OPENGL
+#if KLAYGE_OPENGL || KLAYGE_OPENGLES
 	int4 blend_indices = (int4)blend_indices_f;
-#else
-#if KLAYGE_OPENGLES
-	int4 blend_indices = (int4)blend_indices_f;
-#endif
 #endif
 
 	CalcSkinnedMesh(tex0, pos,
@@ -1590,14 +1558,10 @@ void SmoothDS(HS_CONSTANT_DATA_OUTPUT HSConstantData,
 void SkinnedStreamOutVS(float3 pos : POSITION,
 					float2 texcoord0 : TEXCOORD0,
 					float4 blend_weights : BLENDWEIGHT,
-#if KLAYGE_OPENGL
-					float4 blend_indices_f : BLENDINDICES,
-#else
-#if KLAYGE_OPENGLES
+#if KLAYGE_OPENGL || KLAYGE_OPENGLES
 					float4 blend_indices_f : BLENDINDICES,
 #else
 					uint4 blend_indices : BLENDINDICES,
-#endif
 #endif
 					float3 N : NORMAL,
 					float4 T : Tangent,
@@ -2033,14 +1997,10 @@ void MeshShadingVS(float4 pos : POSITION,
 void SkinnedMeshShadingVS(float2 texcoord : TEXCOORD0,
 			float4 pos : POSITION,
 			float4 blend_weights : BLENDWEIGHT,
-#if KLAYGE_OPENGL
-			float4 blend_indices_f : BLENDINDICES,
-#else
-#if KLAYGE_OPENGLES
+#if KLAYGE_OPENGL || KLAYGE_OPENGLES
 			float4 blend_indices_f : BLENDINDICES,
 #else
 			uint4 blend_indices : BLENDINDICES,
-#endif
 #endif
 			float3 normal : NORMAL,
 			out float2 oTexCoord : TEXCOORD0,
@@ -2053,12 +2013,8 @@ void SkinnedMeshShadingVS(float2 texcoord : TEXCOORD0,
 			out float3 oNormal : TEXCOORD3,
 			out float4 oPos : SV_Position)
 {
-#if KLAYGE_OPENGL
+#if KLAYGE_OPENGL || KLAYGE_OPENGLES
 	int4 blend_indices = (int4)blend_indices_f;
-#else
-#if KLAYGE_OPENGLES
-	int4 blend_indices = (int4)blend_indices_f;
-#endif
 #endif
 
 	normal = normal * 2 - 1;
