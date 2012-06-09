@@ -582,8 +582,6 @@ namespace KlayGE
 
 		if (hdr_enabled_)
 		{
-			this->DefaultFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->ClearDepth(1.0f);
-
 			if (skip)
 			{
 				skip_hdr_pp_->Apply();
@@ -598,7 +596,6 @@ namespace KlayGE
 		{
 			if (skip_hdr_pp_)
 			{
-				this->DefaultFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->ClearDepth(1.0f);
 				skip_hdr_pp_->Apply();
 			}
 		}
@@ -607,8 +604,6 @@ namespace KlayGE
 
 		if (ppaa_enabled_)
 		{
-			this->DefaultFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->ClearDepth(1.0f);
-
 			if (skip)
 			{
 				skip_ppaa_pp_->Apply();
@@ -629,7 +624,6 @@ namespace KlayGE
 		{
 			if (skip_ppaa_pp_)
 			{
-				this->DefaultFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->ClearDepth(1.0f);
 				skip_ppaa_pp_->Apply();
 			}
 		}
@@ -638,18 +632,17 @@ namespace KlayGE
 
 		if (color_grading_pp_)
 		{
-			this->DefaultFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->ClearDepth(1.0f);
-
 			color_grading_pp_->Apply();
 		}
+		
+		fb_stage_ = 4;
 
 		if (stereo_method_ != STM_None)
 		{
-			fb_stage_ = 4;
-
-			this->DefaultFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->ClearDepth(1.0f);
 			this->Stereoscopic();
 		}
+
+		this->DefaultFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->ClearDepth(1.0f);
 
 		fb_stage_ = 0;
 	}
