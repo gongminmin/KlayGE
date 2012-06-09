@@ -1,0 +1,7 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GLES_FJ_shader_binary_GCCSO" reg_no="114">
+	<tokens>
+		<token name="GL_GCCSO_SHADER_BINARY_FJ" value="0x9260"/>
+	</tokens>
+</gl_extension>

@@ -1,0 +1,22 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GLES_OES_required_internalformat" reg_no="115">
+	<tokens>
+		<token name="GL_ALPHA8_OES" value="0x803C"/>
+		<token name="GL_LUMINANCE8_OES" value="0x8040"/>
+		<token name="GL_LUMINANCE8_ALPHA8_OES" value="0x8045"/>
+		<token name="GL_LUMINANCE4_ALPHA4_OES" value="0x8043"/>
+		<token name="GL_RGB565_OES" value="0x8D62"/>
+		<token name="GL_RGB8_OES" value="0x8051"/>
+		<token name="GL_RGBA4_OES" value="0x8056"/>
+		<token name="GL_RGB5_A1_OES" value="0x8057"/>
+		<token name="GL_RGBA8_OES" value="0x8058"/>
+		<token name="GL_DEPTH_COMPONENT16_OES" value="0x81A5"/>
+		<token name="GL_DEPTH_COMPONENT24_OES" value="0x81A6"/>
+		<token name="GL_DEPTH_COMPONENT32_OES" value="0x81A7"/>
+		<token name="GL_DEPTH24_STENCIL8_OES" value="0x88F0"/>
+		<token name="GL_RGB10_EXT" value="0x8052"/>
+		<token name="GL_RGB10_A2_EXT" value="0x8059"/>
+		<token name="GL_RGBA8_OES" value="0x8058"/>
+	</tokens>
+</gl_extension>
