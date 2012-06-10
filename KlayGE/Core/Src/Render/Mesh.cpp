@@ -844,10 +844,16 @@ namespace KlayGE
 								has_specular = true;
 							}
 
+							uint32_t num_blend = 0;
 							for (XMLNodePtr weight_node = vertex_node->FirstNode("weight"); weight_node; weight_node = weight_node->NextSibling("weight"))
+							{
+								++ num_blend;
+							}
+							if (num_blend > 0)
 							{
 								has_weight = true;
 							}
+							Verify(num_blend <= 4);
 
 							uint32_t num_tex_coord = 0;
 							for (XMLNodePtr tex_coord_node = vertex_node->FirstNode("tex_coord"); tex_coord_node; tex_coord_node = tex_coord_node->NextSibling("tex_coord"))

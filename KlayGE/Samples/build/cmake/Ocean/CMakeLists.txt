@@ -11,6 +11,7 @@ SET(HEADER_FILES
 SET(EFFECT_FILES
 	${KLAYGE_PROJECT_DIR}/Samples/media/Ocean/Ocean.fxml
 	${KLAYGE_PROJECT_DIR}/Samples/media/Ocean/OceanSimulator.fxml
+	${KLAYGE_PROJECT_DIR}/Samples/media/Ocean/Terrain.fxml
 )
 
 SET(UI_FILES
