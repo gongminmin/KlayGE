@@ -42,8 +42,8 @@ namespace
 		{
 			for (size_t j = 0; j < ddm.size(); ++ j)
 			{
-				int y = j / width;
-				int x = j - y * width;
+				int y = static_cast<int>(j / width);
+				int x = static_cast<int>(j - y * width);
 
 				for (int k = 0; k < directions; ++ k)
 				{

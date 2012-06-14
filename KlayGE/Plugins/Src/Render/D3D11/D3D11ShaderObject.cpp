@@ -962,7 +962,7 @@ namespace KlayGE
 			oss.write(reinterpret_cast<char const *>(&len), sizeof(len));
 			oss.write(reinterpret_cast<char const *>(&shader_code_[type].second[0]), len);
 
-			uint32_t blob_size = code_blob->GetBufferSize();
+			uint32_t blob_size = static_cast<uint32_t>(code_blob->GetBufferSize());
 			NativeToLittleEndian<sizeof(blob_size)>(&blob_size);
 			oss.write(reinterpret_cast<char const *>(&blob_size), sizeof(blob_size));
 			oss.write(reinterpret_cast<char const *>(code_blob->GetBufferPointer()), code_blob->GetBufferSize());
@@ -1397,7 +1397,9 @@ namespace KlayGE
 						boost::hash_combine(seed, signature.ReadWriteMask);
 						boost::hash_combine(seed, signature.Stream);
 
-						boost::hash_combine(vs_signature_, seed);
+						size_t sig = vs_signature_;
+						boost::hash_combine(sig, seed);
+						vs_signature_ = static_cast<uint32_t>(sig);
 					}
 				}
 
@@ -1581,7 +1583,7 @@ namespace KlayGE
 					D3D11ShaderParameterHandle p_handle;
 					p_handle.shader_type = static_cast<uint8_t>(type);
 					p_handle.param_type = static_cast<D3D_SHADER_VARIABLE_TYPE>(shader_desc_[type].cb_desc[c].var_desc[v].type);
-					p_handle.cbuff = c;
+					p_handle.cbuff = static_cast<uint32_t>(c);
 					p_handle.offset = shader_desc_[type].cb_desc[c].var_desc[v].start_offset;
 					p_handle.elements = shader_desc_[type].cb_desc[c].var_desc[v].elements;
 					p_handle.rows = shader_desc_[type].cb_desc[c].var_desc[v].rows;
