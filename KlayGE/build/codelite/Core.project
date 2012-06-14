@@ -38,6 +38,7 @@
       <File Name="../../Core/Src/Render/SATPostProcess.cpp"/>
       <File Name="../../Core/Src/Render/ShaderObject.cpp"/>
       <File Name="../../Core/Src/Render/SSGIPostProcess.cpp"/>
+      <File Name="../../Core/Src/Render/SSRPostProcess.cpp"/>
       <File Name="../../Core/Src/Render/SSVOPostProcess.cpp"/>
       <File Name="../../Core/Src/Render/TAAPostProcess.cpp"/>
       <File Name="../../Core/Src/Render/Texture.cpp"/>
@@ -76,6 +77,7 @@
       <File Name="../../Core/Include/KlayGE/SATPostProcess.hpp"/>
       <File Name="../../Core/Include/KlayGE/ShaderObject.hpp"/>
       <File Name="../../Core/Include/KlayGE/SSGIPostProcess.hpp"/>
+      <File Name="../../Core/Include/KlayGE/SSRPostProcess.hpp"/>
       <File Name="../../Core/Include/KlayGE/SSVOPostProcess.hpp"/>
       <File Name="../../Core/Include/KlayGE/TAAPostProcess.hpp"/>
       <File Name="../../Core/Include/KlayGE/Texture.hpp"/>
@@ -112,6 +114,7 @@
       <File Name="../../media/RenderFX/RSM2VPLs.fxml"/>
       <File Name="../../media/RenderFX/SetSubsplatStencil.fxml"/>
       <File Name="../../media/RenderFX/SSGI.fxml"/>
+      <File Name="../../media/RenderFX/SSR.fxml"/>
       <File Name="../../media/RenderFX/SSVO.fxml"/>
       <File Name="../../media/RenderFX/Stereoscopic.fxml"/>
       <File Name="../../media/RenderFX/SumLum.fxml"/>

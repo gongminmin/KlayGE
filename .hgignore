@@ -19,8 +19,9 @@ __pycache__
 */build/codelite/*.session
 */build/codelite/.build-*
 */build/codelite/*.txt
-*/build/codelite/Debug
-*/build/codelite/Release
+*/build/codelite/Debug*
+*/build/codelite/Release*
+*/build/codelite/*.workspace.*
 */build/vc-*/
 */lib/
 glloader/doc/html/
