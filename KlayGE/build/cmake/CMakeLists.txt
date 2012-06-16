@@ -102,19 +102,19 @@ FUNCTION(KLAYGE_CREATE_VCPROJ_USERFILE TARGETNAME)
 
 		IF(MSVC_VERSION GREATER 1500)
 			CONFIGURE_FILE(
-				${KLAYGE_PROJECT_DIR}/Build/cmake/VisualStudio2010UserFile.vcxproj.user.in
+				${KLAYGE_PROJECT_DIR}/build/cmake/VisualStudio2010UserFile.vcxproj.user.in
 				${CMAKE_CURRENT_BINARY_DIR}/${TARGETNAME}.vcxproj.user
 				@ONLY
 			)
 		ELSEIF(MSVC_VERSION GREATER 1400)
 			CONFIGURE_FILE(
-				${KLAYGE_PROJECT_DIR}/Build/cmake/VisualStudio2008UserFile.vcproj.user.in
+				${KLAYGE_PROJECT_DIR}/build/cmake/VisualStudio2008UserFile.vcproj.user.in
 				${CMAKE_CURRENT_BINARY_DIR}/${TARGETNAME}.vcproj.${SYSTEM_NAME}.${USER_NAME}.user
 				@ONLY
 			)
 		ELSEIF(MSVC_VERSION GREATER 1300)
 			CONFIGURE_FILE(
-				${KLAYGE_PROJECT_DIR}/Build/cmake/VisualStudio2005UserFile.vcproj.user.in
+				${KLAYGE_PROJECT_DIR}/build/cmake/VisualStudio2005UserFile.vcproj.user.in
 				${CMAKE_CURRENT_BINARY_DIR}/${TARGETNAME}.vcproj.${SYSTEM_NAME}.${USER_NAME}.user
 				@ONLY
 			)
