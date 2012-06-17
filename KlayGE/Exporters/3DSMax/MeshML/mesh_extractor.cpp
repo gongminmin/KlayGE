@@ -168,6 +168,13 @@ namespace
 			+0.5f * (+t[0] * q[1] - t[1] * q[0] + t[2] * q[3]),
 			-0.5f * (+t[0] * q[0] + t[1] * q[1] + t[2] * q[2]));
 	}
+
+	std::string RemoveQuote(std::string const & str)
+	{
+		std::string ret = str;
+		ret.erase(std::remove(ret.begin(), ret.end(), '\"'), ret.end());
+		return ret;
+	}
 }
 
 namespace KlayGE
@@ -681,13 +688,6 @@ namespace KlayGE
 							pos_binds.second[j].second /= sum_weight;
 						}
 					}
-					else
-					{
-						for (int j = static_cast<int>(pos_binds.second.size()); j < joints_per_ver_; ++ j)
-						{
-							pos_binds.second.push_back(std::make_pair(tstr_to_str(root_node_->GetName()), 0.0f));
-						}
-					}
 				}
 			}
 			else
@@ -956,7 +956,7 @@ namespace KlayGE
 					break;
 				}
 			}
-			if (!repeat)
+			if (!repeat && (weight > 0))
 			{
 				binds.push_back(std::make_pair(joint_name, weight));
 			}
@@ -1297,7 +1297,7 @@ namespace KlayGE
 					assert(parent_id < joints_name_to_id[joint_name]);
 				}
 
-				ofs << "\t\t<bone name=\"" << joint_name
+				ofs << "\t\t<bone name=\"" << RemoveQuote(joint_name)
 					<< "\" parent=\"" << parent_id
 					<< "\">" << endl;
 
@@ -1344,8 +1344,8 @@ namespace KlayGE
 					typedef BOOST_TYPEOF(objs_mtl_[i].texture_slots) slots_type;
 					BOOST_FOREACH(slots_type::const_reference ts, objs_mtl_[i].texture_slots)
 					{
-						ofs << "\t\t\t\t<texture type=\"" << ts.first
-							<< "\" name=\"" << ts.second << "\"/>" << endl;
+						ofs << "\t\t\t\t<texture type=\"" << RemoveQuote(ts.first)
+							<< "\" name=\"" << RemoveQuote(ts.second) << "\"/>" << endl;
 					}
 					ofs << "\t\t\t</textures_chunk>" << endl;
 				}
@@ -1358,7 +1358,7 @@ namespace KlayGE
 		typedef BOOST_TYPEOF(objs_info_) oi_type;
 		BOOST_FOREACH(oi_type::const_reference obj_info, objs_info_)
 		{
-			ofs << "\t\t<mesh name=\"" << obj_info.name << "\" mtl_id=\"" << obj_info.mtl_id << "\">" << endl;
+			ofs << "\t\t<mesh name=\"" << RemoveQuote(obj_info.name) << "\" mtl_id=\"" << obj_info.mtl_id << "\">" << endl;
 
 			ofs << "\t\t\t<vertices_chunk>" << endl;
 			typedef BOOST_TYPEOF(obj_info.vertices) ov_type;
@@ -1438,7 +1438,7 @@ namespace KlayGE
 			{
 				assert(kf.reals.size() == kf.duals.size());
 
-				ofs << "\t\t<key_frame joint=\"" << kf.joint << "\">" << endl;
+				ofs << "\t\t<key_frame joint=\"" << RemoveQuote(kf.joint) << "\">" << endl;
 
 				for (size_t i = 0; i < kf.reals.size(); ++ i)
 				{

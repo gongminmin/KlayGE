@@ -578,7 +578,10 @@ void MayaMeshExporter::ExportMesh(MString const & objName, MFnMesh& fnMesh,
 					vertex.normal = MeshExtractor::Point3(3, norm[0], norm[1], norm[2]);
 					for (unsigned int n=0; n<numBinds; ++n)
 					{
-						vertex.binds.push_back(MeshExtractor::JointBinding(vJoints[n].asChar(), vWeights[n]));
+						if (vWeights[n] > 0)
+						{
+							vertex.binds.push_back(MeshExtractor::JointBinding(vJoints[n].asChar(), vWeights[n]));
+						}
 					}
 
 					if (hasTexCoords)
