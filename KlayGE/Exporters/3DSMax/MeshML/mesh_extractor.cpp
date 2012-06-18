@@ -454,11 +454,11 @@ namespace KlayGE
 
 				obj_triangles.resize(mesh.getNumFaces());
 
-				for (int channel = 1; channel < MAX_MESHMAPS; channel ++)
+				for (int channel = 1; channel < MAX_MESHMAPS; ++ channel)
 				{
 					if (mesh.mapSupport(channel))
 					{
-						const int num_map_verts = mesh.getNumMapVerts(channel);
+						int const num_map_verts = mesh.getNumMapVerts(channel);
 						if (num_map_verts > 0)
 						{
 							texs[channel].resize(num_map_verts, Point2(0.0f, 0.0f));
@@ -758,7 +758,7 @@ namespace KlayGE
 				for (std::map<int, std::vector<Point2> >::iterator uv_iter = texs.begin();
 					uv_iter != texs.end(); ++ uv_iter, ++ uv_layer)
 				{
-					Point2 tex = uv_iter->second[vertex_index.tex_indices[uv_layer]];
+					Point2 const & tex = uv_iter->second[vertex_index.tex_indices[uv_layer]];
 					obj_vertices[ver_index].tex.push_back(Point2(tex.x, 1 - tex.y));
 				}
 
@@ -789,18 +789,20 @@ namespace KlayGE
 			for (size_t i = mtl_base_index; i < objs_mtl_.size(); ++ i)
 			{
 				triangles_t obj_info_tris;
-				std::set<int> index_set;
+				std::vector<int> index_set;
 				for (size_t j = 0; j < obj_triangles.size(); ++ j)
 				{
 					if (face_mtl_id[j] == i)
 					{
-						index_set.insert(obj_triangles[j].vertex_index[0]);
-						index_set.insert(obj_triangles[j].vertex_index[1]);
-						index_set.insert(obj_triangles[j].vertex_index[2]);
+						index_set.push_back(obj_triangles[j].vertex_index[0]);
+						index_set.push_back(obj_triangles[j].vertex_index[1]);
+						index_set.push_back(obj_triangles[j].vertex_index[2]);
 
 						obj_info_tris.push_back(obj_triangles[j]);
 					}
 				}
+				std::sort(index_set.begin(), index_set.end());
+				index_set.erase(std::unique(index_set.begin(), index_set.end()), index_set.end());
 
 				if (!obj_info_tris.empty())
 				{
@@ -813,7 +815,7 @@ namespace KlayGE
 
 					std::map<int, int> mapping;
 					int new_index = 0;
-					for (std::set<int>::iterator iter = index_set.begin(); iter != index_set.end(); ++ iter, ++ new_index)
+					for (std::vector<int>::iterator iter = index_set.begin(); iter != index_set.end(); ++ iter, ++ new_index)
 					{
 						obj_info.vertices.push_back(obj_vertices[*iter]);
 						mapping.insert(std::make_pair(*iter, new_index));
@@ -1065,18 +1067,24 @@ namespace KlayGE
 			}
 		}
 
+		std::set<std::string> parent_joints_used;
 		typedef BOOST_TYPEOF(joints_) joints_type;
 		BOOST_FOREACH(joints_type::const_reference joint, joints_)
 		{
 			if (joints_used.find(joint.first) != joints_used.end())
 			{
 				joint_t const * j = &joint.second;
-				while (joints_.find(j->parent_name) != joints_.end())
+				while (!j->parent_name.empty())
 				{
-					joints_used.insert(j->parent_name);
+					parent_joints_used.insert(j->parent_name);
 					j = &joints_[j->parent_name];
 				}
 			}
+		}
+
+		BOOST_FOREACH(std::set<std::string>::const_reference joint, parent_joints_used)
+		{
+			joints_used.insert(joint);
 		}
 
 		for (BOOST_AUTO(iter, joints_.begin()); iter != joints_.end();)
