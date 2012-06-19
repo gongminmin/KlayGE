@@ -65,7 +65,7 @@ namespace KlayGE
 		}
 	};
 
-	typedef std::vector<std::pair<std::string, float> > binds_t;
+	typedef std::vector<std::pair<INode*, float> > binds_t;
 
 	struct vertex_t
 	{
@@ -112,14 +112,14 @@ namespace KlayGE
 		Quat real;
 		Quat dual;
 
-		std::string parent_name;
+		INode* parent_node;
 	};
 
-	typedef std::map<std::string, joint_t> joints_t;
+	typedef std::map<INode*, joint_t> joints_t;
 
 	struct key_frame_t
 	{
-		std::string joint;
+		INode* joint_node;
 
 		std::vector<Quat> reals;
 		std::vector<Quat> duals;
@@ -137,12 +137,6 @@ namespace KlayGE
 		triangles_t		triangles;
 
 		vertex_elements_t vertex_elements;
-	};
-
-	struct joint_and_mat_t
-	{
-		INode* joint_node;
-		Matrix3 mesh_init_matrix;
 	};
 
 	struct export_vertex_attrs
@@ -174,7 +168,7 @@ namespace KlayGE
 
 		void find_joints(INode* node);
 		void extract_all_joint_tms();
-		void add_joint_weight(binds_t& binds, std::string const & joint_name, float weight);
+		void add_joint_weight(binds_t& binds, INode* joint_node, float weight);
 
 		void physique_modifier(Modifier* mod, INode* node,
 			std::vector<std::pair<Point3, binds_t> >& positions);
@@ -196,7 +190,7 @@ namespace KlayGE
 		int joints_per_ver_;
 		bool combine_meshes_;
 
-		std::map<std::string, joint_and_mat_t> joint_nodes_;
+		std::map<INode*, Matrix3> joint_nodes_;
 
 		int cur_time_;
 		int start_frame_;
