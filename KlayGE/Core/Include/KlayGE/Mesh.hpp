@@ -38,7 +38,6 @@
 #include <KlayGE/Math.hpp>
 
 #include <vector>
-#include <map>
 #include <string>
 
 #include <boost/function.hpp>
@@ -51,8 +50,6 @@
 #ifdef KLAYGE_COMPILER_MSVC
 #pragma warning(pop)
 #endif
-
-#include <boost/container/flat_map.hpp>
 
 namespace KlayGE
 {
@@ -279,7 +276,7 @@ namespace KlayGE
 
 		std::pair<Quaternion, Quaternion> Frame(float frame) const;
 	};
-	typedef boost::container::flat_map<std::string, KeyFrames> KeyFramesType;
+	typedef std::vector<KeyFrames> KeyFramesType;
 
 	class KLAYGE_CORE_API SkinnedModel : public RenderModel
 	{

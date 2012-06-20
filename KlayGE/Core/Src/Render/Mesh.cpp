@@ -476,10 +476,11 @@ namespace KlayGE
 	
 	void SkinnedModel::BuildBones(float frame)
 	{
-		typedef BOOST_TYPEOF(joints_) JointsType;
-		BOOST_FOREACH(JointsType::reference joint, joints_)
+		for (size_t i = 0; i < joints_.size(); ++ i)
 		{
-			KeyFrames const & kf = key_frames_->find(joint.name)->second;
+			Joint& joint = joints_[i];
+			KeyFrames const & kf = (*key_frames_)[i];
+
 			std::pair<Quaternion, Quaternion> key_dq = kf.Frame(frame);
 
 			if (joint.parent != -1)
@@ -1840,11 +1841,27 @@ namespace KlayGE
 			decoded->read(&frame_rate, sizeof(frame_rate));
 			LittleEndianToNative<sizeof(frame_rate)>(&frame_rate);
 
-			kfs = MakeSharedPtr<KeyFramesType>();
+			kfs = MakeSharedPtr<KeyFramesType>(joints.size());
 			for (uint32_t kf_index = 0; kf_index < num_kfs; ++ kf_index)
 			{
 				std::string name;
 				ReadShortString(decoded, name);
+
+				uint32_t joint_index;
+				if ((kf_index < joints.size()) && (name == joints[kf_index].name))
+				{
+					joint_index = kf_index;
+				}
+				else
+				{
+					for (joint_index = 0; joint_index < num_joints; ++ joint_index)
+					{
+						if (name == joints[joint_index].name)
+						{
+							break;
+						}
+					}
+				}
 
 				uint32_t num_kf;
 				decoded->read(&num_kf, sizeof(num_kf));
@@ -1870,7 +1887,10 @@ namespace KlayGE
 					LittleEndianToNative<sizeof(kf.bind_dual[k_index][3])>(&kf.bind_dual[k_index][3]);
 				}
 
-				kfs->insert(std::make_pair(name, kf));
+				if (joint_index < num_joints)
+				{
+					(*kfs)[joint_index] = kf;
+				}
 			}
 		}
 	}
@@ -2281,28 +2301,28 @@ namespace KlayGE
 					XMLNodePtr key_frame_node = doc.AllocNode(XNT_Element, "key_frame");
 					key_frames_chunk->AppendNode(key_frame_node);
 
-					key_frame_node->AppendAttrib(doc.AllocAttribString("joint", iter->first));
+					key_frame_node->AppendAttrib(doc.AllocAttribString("joint", joints[i].name));
 
-					for (size_t j = 0; j < iter->second.bind_real.size(); ++ j)
+					for (size_t j = 0; j < iter->bind_real.size(); ++ j)
 					{
 						XMLNodePtr key_node = doc.AllocNode(XNT_Element, "key");
 						key_frame_node->AppendNode(key_node);
 
-						key_frame_node->AppendAttrib(doc.AllocAttribUInt("id", iter->second.frame_id[j]));
+						key_frame_node->AppendAttrib(doc.AllocAttribUInt("id", iter->frame_id[j]));
 
 						XMLNodePtr bind_real_node = doc.AllocNode(XNT_Element, "bind_real");
 						key_node->AppendNode(bind_real_node); 
-						bind_real_node->AppendAttrib(doc.AllocAttribFloat("x", iter->second.bind_real[j].x()));
-						bind_real_node->AppendAttrib(doc.AllocAttribFloat("y", iter->second.bind_real[j].y()));
-						bind_real_node->AppendAttrib(doc.AllocAttribFloat("z", iter->second.bind_real[j].z()));
-						bind_real_node->AppendAttrib(doc.AllocAttribFloat("w", iter->second.bind_real[j].w()));
+						bind_real_node->AppendAttrib(doc.AllocAttribFloat("x", iter->bind_real[j].x()));
+						bind_real_node->AppendAttrib(doc.AllocAttribFloat("y", iter->bind_real[j].y()));
+						bind_real_node->AppendAttrib(doc.AllocAttribFloat("z", iter->bind_real[j].z()));
+						bind_real_node->AppendAttrib(doc.AllocAttribFloat("w", iter->bind_real[j].w()));
 
 						XMLNodePtr bind_dual_node = doc.AllocNode(XNT_Element, "bind_dual");
 						key_node->AppendNode(bind_dual_node);
-						bind_dual_node->AppendAttrib(doc.AllocAttribFloat("x", iter->second.bind_dual[j].x()));
-						bind_dual_node->AppendAttrib(doc.AllocAttribFloat("y", iter->second.bind_dual[j].y()));
-						bind_dual_node->AppendAttrib(doc.AllocAttribFloat("z", iter->second.bind_dual[j].z()));
-						bind_dual_node->AppendAttrib(doc.AllocAttribFloat("w", iter->second.bind_dual[j].w()));
+						bind_dual_node->AppendAttrib(doc.AllocAttribFloat("x", iter->bind_dual[j].x()));
+						bind_dual_node->AppendAttrib(doc.AllocAttribFloat("y", iter->bind_dual[j].y()));
+						bind_dual_node->AppendAttrib(doc.AllocAttribFloat("z", iter->bind_dual[j].z()));
+						bind_dual_node->AppendAttrib(doc.AllocAttribFloat("w", iter->bind_dual[j].w()));
 					}
 				}
 			}
