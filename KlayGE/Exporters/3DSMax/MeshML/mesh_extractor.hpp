@@ -119,13 +119,11 @@ namespace KlayGE
 
 	struct key_frame_t
 	{
-		INode* joint_node;
-
 		std::vector<Quat> reals;
 		std::vector<Quat> duals;
 	};
 
-	typedef std::vector<key_frame_t> key_frames_t;
+	typedef std::map<INode*, key_frame_t> key_frames_t;
 
 	struct object_info_t
 	{

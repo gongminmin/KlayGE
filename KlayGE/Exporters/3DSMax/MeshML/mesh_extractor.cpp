@@ -215,7 +215,6 @@ namespace KlayGE
 			int tpf = GetTicksPerFrame();
 
 			key_frame_t kf;
-			kf.joint_node = root_node_;
 			for (int i = start_frame_; i < end_frame_; ++ i)
 			{
 				Matrix3 root_tm = root_node_->GetNodeTM(i * tpf);
@@ -225,7 +224,7 @@ namespace KlayGE
 				kf.reals.push_back(quat);
 				kf.duals.push_back(QuatTransToUDQ(quat, pos));
 			}
-			kfs_.push_back(kf);
+			kfs_.insert(std::make_pair(root_node_, kf));
 
 			this->find_joints(root_node_);
 
@@ -844,15 +843,13 @@ namespace KlayGE
 
 		int tpf = GetTicksPerFrame();
 
-		key_frame_t kf;
-		kf.joint_node = node;
-
 		INode* parent_node = node->GetParentNode();
 		if (!is_bone(parent_node))
 		{
 			parent_node = root_node_;
 		}
 
+		key_frame_t kf;
 		for (int i = start_frame_; i < end_frame_; ++ i)
 		{
 			Matrix3 local_tm = node->GetNodeTM(i * tpf) * Inverse(parent_node->GetNodeTM(i * tpf));
@@ -863,7 +860,7 @@ namespace KlayGE
 			kf.duals.push_back(QuatTransToUDQ(quat, pos));
 		}
 
-		kfs_.push_back(kf);
+		kfs_.insert(std::make_pair(node, kf));
 	}
 
 	Point3 meshml_extractor::point_from_matrix(Matrix3 const & mat)
@@ -1435,33 +1432,32 @@ namespace KlayGE
 			ofs << "\t<key_frames_chunk start_frame=\"" << start_frame_
 				<< "\" end_frame=\"" << end_frame_
 				<< "\" frame_rate=\"" << frame_rate_ << "\">" << endl;
-			typedef BOOST_TYPEOF(kfs_) kfs_type;
-			BOOST_FOREACH(kfs_type::const_reference kf, kfs_)
+			typedef BOOST_TYPEOF(joints_id_to_node) jitn_type;
+			BOOST_FOREACH(jitn_type::const_reference joint_node, joints_id_to_node)
 			{
+				assert(kfs_.find(joint_node) != kfs_.end());
+				key_frame_t const & kf = kfs_[joint_node];
 				assert(kf.reals.size() == kf.duals.size());
 
-				if (joints_.find(kf.joint_node) != joints_.end())
+				ofs << "\t\t<key_frame joint=\"" << RemoveQuote(tstr_to_str(joint_node->GetName())) << "\">" << endl;
+
+				for (size_t i = 0; i < kf.reals.size(); ++ i)
 				{
-					ofs << "\t\t<key_frame joint=\"" << RemoveQuote(tstr_to_str(kf.joint_node->GetName())) << "\">" << endl;
+					ofs << "\t\t\t<key>" << endl;
 
-					for (size_t i = 0; i < kf.reals.size(); ++ i)
-					{
-						ofs << "\t\t\t<key>" << endl;
+					ofs << "\t\t\t\t<bind_real x=\"" << kf.reals[i].x
+						<< "\" y=\"" << kf.reals[i].y
+						<< "\" z=\"" << kf.reals[i].z
+						<< "\" w=\"" << kf.reals[i].w << "\"/>" << endl;
+					ofs << "\t\t\t\t<bind_dual x=\"" << kf.duals[i].x
+						<< "\" y=\"" << kf.duals[i].y
+						<< "\" z=\"" << kf.duals[i].z
+						<< "\" w=\"" << kf.duals[i].w << "\"/>" << endl;
 
-						ofs << "\t\t\t\t<bind_real x=\"" << kf.reals[i].x
-							<< "\" y=\"" << kf.reals[i].y
-							<< "\" z=\"" << kf.reals[i].z
-							<< "\" w=\"" << kf.reals[i].w << "\"/>" << endl;
-						ofs << "\t\t\t\t<bind_dual x=\"" << kf.duals[i].x
-							<< "\" y=\"" << kf.duals[i].y
-							<< "\" z=\"" << kf.duals[i].z
-							<< "\" w=\"" << kf.duals[i].w << "\"/>" << endl;
-
-						ofs << "\t\t\t</key>" << endl;
-					}
-
-					ofs << "\t\t</key_frame>" << endl;
+					ofs << "\t\t\t</key>" << endl;
 				}
+
+				ofs << "\t\t</key_frame>" << endl;
 			}
 			ofs << "\t</key_frames_chunk>" << endl;
 		}
