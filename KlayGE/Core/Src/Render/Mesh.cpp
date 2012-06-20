@@ -569,7 +569,10 @@ namespace KlayGE
 		uint8_t len;
 		file->read(reinterpret_cast<char*>(&len), sizeof(len));
 		str.resize(len);
-		file->read(reinterpret_cast<char*>(&str[0]), len * sizeof(str[0]));
+		if (len > 0)
+		{
+			file->read(reinterpret_cast<char*>(&str[0]), len * sizeof(str[0]));
+		}
 	}
 
 	void WriteShortString(std::ostream& os, std::string const & str)
@@ -578,7 +581,10 @@ namespace KlayGE
 
 		uint8_t len = static_cast<uint8_t>(str.length());
 		os.write(reinterpret_cast<char const *>(&len), sizeof(len));
-		os.write(reinterpret_cast<char const *>(&str[0]), str.size() * sizeof(str[0]));
+		if (len > 0)
+		{
+			os.write(reinterpret_cast<char const *>(&str[0]), str.size() * sizeof(str[0]));
+		}
 	}
 
 	void ModelJIT(std::string const & meshml_name)
