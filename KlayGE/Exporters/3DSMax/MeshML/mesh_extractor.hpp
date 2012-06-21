@@ -163,6 +163,7 @@ namespace KlayGE
 
 		Point3 point_from_matrix(Matrix3 const & mat);
 		Quat quat_from_matrix(Matrix3 const & mat);
+		Point3 scale_from_matrix(Matrix3 const & mat);
 
 		void find_joints(INode* node);
 		void extract_all_joint_tms();

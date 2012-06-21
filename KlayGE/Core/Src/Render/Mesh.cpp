@@ -452,7 +452,7 @@ namespace KlayGE
 	}
 
 
-	std::pair<Quaternion, Quaternion> KeyFrames::Frame(float frame) const
+	std::pair<std::pair<Quaternion, Quaternion>, float> KeyFrames::Frame(float frame) const
 	{
 		frame = std::fmod(frame, static_cast<float>(frame_id.back() + 1));
 
@@ -463,7 +463,11 @@ namespace KlayGE
 		int index1 = index % frame_id.size();
 		int frame0 = frame_id[index0];
 		int frame1 = frame_id[index1];
-		return MathLib::sclerp(bind_real[index0], bind_dual[index0], bind_real[index1], bind_dual[index1], (frame - frame0) / (frame1 - frame0));
+		float factor = (frame - frame0) / (frame1 - frame0);
+		std::pair<std::pair<Quaternion, Quaternion>, float> ret;
+		ret.first = MathLib::sclerp(bind_real[index0], bind_dual[index0], bind_real[index1], bind_dual[index1], factor);
+		ret.second = MathLib::lerp(bind_scale[index0], bind_scale[index1], factor);
+		return ret;
 	}
 
 
@@ -481,25 +485,27 @@ namespace KlayGE
 			Joint& joint = joints_[i];
 			KeyFrames const & kf = (*key_frames_)[i];
 
-			std::pair<Quaternion, Quaternion> key_dq = kf.Frame(frame);
+			std::pair<std::pair<Quaternion, Quaternion>, float> key_dq = kf.Frame(frame);
 
 			if (joint.parent != -1)
 			{
 				Joint const & parent(joints_[joint.parent]);
 
-				if (MathLib::dot(key_dq.first, parent.bind_real) < 0)
+				if (MathLib::dot(key_dq.first.first, parent.bind_real) < 0)
 				{
-					key_dq.first = -key_dq.first;
-					key_dq.second = -key_dq.second;
+					key_dq.first.first = -key_dq.first.first;
+					key_dq.first.second = -key_dq.first.second;
 				}
 
-				joint.bind_real = MathLib::mul_real(key_dq.first, parent.bind_real);
-				joint.bind_dual = MathLib::mul_dual(key_dq.first, key_dq.second, parent.bind_real, parent.bind_dual);
+				joint.bind_real = MathLib::mul_real(key_dq.first.first, parent.bind_real);
+				joint.bind_dual = MathLib::mul_dual(key_dq.first.first, key_dq.first.second, parent.bind_real, parent.bind_dual);
+				joint.bind_scale = key_dq.second * parent.bind_scale;
 			}
 			else
 			{
-				joint.bind_real = key_dq.first;
-				joint.bind_dual = key_dq.second;
+				joint.bind_real = key_dq.first.first;
+				joint.bind_dual = key_dq.first.second;
+				joint.bind_scale = key_dq.second;
 			}
 		}
 
@@ -513,7 +519,7 @@ namespace KlayGE
 		for (size_t i = 0; i < joints_.size(); ++ i)
 		{
 			Quaternion real = MathLib::mul_real(joints_[i].inverse_origin_real, joints_[i].bind_real);
-			bind_reals_[i] = float4(real.x(), real.y(), real.z(), real.w());
+			bind_reals_[i] = float4(real.x(), real.y(), real.z(), real.w()) * joints_[i].inverse_origin_scale * joints_[i].bind_scale;
 
 			Quaternion dual = MathLib::mul_dual(joints_[i].inverse_origin_real, joints_[i].inverse_origin_dual,
 				joints_[i].bind_real, joints_[i].bind_dual);
@@ -1393,7 +1399,11 @@ namespace KlayGE
 						Quaternion bind_quat(bind_quat_node->Attrib("x")->ValueFloat(), bind_quat_node->Attrib("y")->ValueFloat(),
 							bind_quat_node->Attrib("z")->ValueFloat(), bind_quat_node->Attrib("w")->ValueFloat());
 
+						float scale = MathLib::length(bind_quat);
+						bind_quat /= scale;
+
 						Quaternion bind_dual = MathLib::quat_trans_to_udq(bind_quat, bind_pos);
+						bind_quat *= scale;
 
 						NativeToLittleEndian<sizeof(bind_quat[0])>(&bind_quat[0]);
 						NativeToLittleEndian<sizeof(bind_quat[1])>(&bind_quat[1]);
@@ -1466,6 +1476,7 @@ namespace KlayGE
 
 						Quaternion bind_real;
 						Quaternion bind_dual;
+						float bind_scale;
 						XMLNodePtr pos_node = key_node->FirstNode("pos");
 						if (pos_node)
 						{
@@ -1475,6 +1486,9 @@ namespace KlayGE
 							XMLNodePtr quat_node = key_node->FirstNode("quat");
 							bind_real = Quaternion(quat_node->Attrib("x")->ValueFloat(), quat_node->Attrib("y")->ValueFloat(),
 								quat_node->Attrib("z")->ValueFloat(), quat_node->Attrib("w")->ValueFloat());
+
+							bind_scale = MathLib::length(bind_real);
+							bind_real /= bind_scale;
 					
 					        bind_dual = MathLib::quat_trans_to_udq(bind_real, bind_pos);
 						}
@@ -1487,10 +1501,14 @@ namespace KlayGE
 							XMLNodePtr bind_dual_node = key_node->FirstNode("bind_dual");
 							bind_dual = Quaternion(bind_dual_node->Attrib("x")->ValueFloat(), bind_dual_node->Attrib("y")->ValueFloat(),
 								bind_dual_node->Attrib("z")->ValueFloat(), bind_dual_node->Attrib("w")->ValueFloat());
+
+							bind_scale = MathLib::length(bind_real);
+							bind_real /= bind_scale;
 						}
 
 						kfs.bind_real.push_back(bind_real);
 						kfs.bind_dual.push_back(bind_dual);
+						kfs.bind_scale.push_back(bind_scale);
 					}
 
 					// compress the key frame data
@@ -1500,8 +1518,10 @@ namespace KlayGE
 						uint32_t frame0 = kfs.frame_id[base + 0];
 						uint32_t frame1 = kfs.frame_id[base + 1];
 						uint32_t frame2 = kfs.frame_id[base + 2];
+						float factor = static_cast<float>(frame1 - frame0) / (frame2 - frame0);
 						std::pair<Quaternion, Quaternion> interpolate = MathLib::sclerp(kfs.bind_real[base + 0], kfs.bind_dual[base + 0],
-							kfs.bind_real[base + 2], kfs.bind_dual[base + 2], static_cast<float>(frame1 - frame0) / (frame2 - frame0));
+							kfs.bind_real[base + 2], kfs.bind_dual[base + 2], factor);
+						float scale = MathLib::lerp(kfs.bind_scale[base + 0], kfs.bind_scale[base + 2], factor);
 
 						float quat_dot = MathLib::dot(kfs.bind_real[base + 1], interpolate.first);
 						Quaternion to_sign_corrected_real = interpolate.first;
@@ -1515,15 +1535,18 @@ namespace KlayGE
 						std::pair<Quaternion, Quaternion> dif_dq = MathLib::inverse(kfs.bind_real[base + 1], kfs.bind_dual[base + 1]);
 						dif_dq.second = MathLib::mul_dual(dif_dq.first, dif_dq.second, to_sign_corrected_real, to_sign_corrected_dual);
 						dif_dq.first = MathLib::mul_real(dif_dq.first, to_sign_corrected_real);
+						float dif_scale = scale * kfs.bind_scale[base + 1];
 
 						if ((abs(dif_dq.first.x()) < 1e-5f) && (abs(dif_dq.first.y()) < 1e-5f)
 							&& (abs(dif_dq.first.z()) < 1e-5f) && (abs(dif_dq.first.w() - 1) < 1e-5f)
 							&& (abs(dif_dq.second.x()) < 1e-5f) && (abs(dif_dq.second.y()) < 1e-5f)
-							&& (abs(dif_dq.second.z()) < 1e-5f) && (abs(dif_dq.second.w()) < 1e-5f))
+							&& (abs(dif_dq.second.z()) < 1e-5f) && (abs(dif_dq.second.w()) < 1e-5f)
+							&& (abs(dif_scale - 1) < 1e-5f))
 						{
 							kfs.frame_id.erase(kfs.frame_id.begin() + base + 1);
 							kfs.bind_real.erase(kfs.bind_real.begin() + base + 1);
 							kfs.bind_dual.erase(kfs.bind_dual.begin() + base + 1);
+							kfs.bind_scale.erase(kfs.bind_scale.begin() + base + 1);
 						}
 						else
 						{
@@ -1538,6 +1561,7 @@ namespace KlayGE
 					{
 						NativeToLittleEndian<sizeof(kfs.frame_id[i])>(&kfs.frame_id[i]);
 						ss->write(reinterpret_cast<char*>(&kfs.frame_id[i]), sizeof(kfs.frame_id[i]));
+						kfs.bind_real[i] *= kfs.bind_scale[i];
 						NativeToLittleEndian<sizeof(kfs.bind_real[i][0])>(&kfs.bind_real[i][0]);
 						NativeToLittleEndian<sizeof(kfs.bind_real[i][1])>(&kfs.bind_real[i][1]);
 						NativeToLittleEndian<sizeof(kfs.bind_real[i][2])>(&kfs.bind_real[i][2]);
@@ -1833,6 +1857,10 @@ namespace KlayGE
 			LittleEndianToNative<sizeof(joint.bind_dual[2])>(&joint.bind_dual[2]);
 			LittleEndianToNative<sizeof(joint.bind_dual[3])>(&joint.bind_dual[3]);
 
+			joint.bind_scale = MathLib::length(joint.bind_real);
+			joint.inverse_origin_scale = 1 / joint.bind_scale;
+			joint.bind_real *= joint.inverse_origin_scale;
+
 			std::pair<Quaternion, Quaternion> inv = MathLib::inverse(joint.bind_real, joint.bind_dual);
 			joint.inverse_origin_real = inv.first;
 			joint.inverse_origin_dual = inv.second;
@@ -1877,6 +1905,7 @@ namespace KlayGE
 				kf.frame_id.resize(num_kf);
 				kf.bind_real.resize(num_kf);
 				kf.bind_dual.resize(num_kf);
+				kf.bind_scale.resize(num_kf);
 				for (uint32_t k_index = 0; k_index < num_kf; ++ k_index)
 				{
 					decoded->read(&kf.frame_id[k_index], sizeof(kf.frame_id[k_index]));
@@ -1891,6 +1920,9 @@ namespace KlayGE
 					LittleEndianToNative<sizeof(kf.bind_dual[k_index][1])>(&kf.bind_dual[k_index][1]);
 					LittleEndianToNative<sizeof(kf.bind_dual[k_index][2])>(&kf.bind_dual[k_index][2]);
 					LittleEndianToNative<sizeof(kf.bind_dual[k_index][3])>(&kf.bind_dual[k_index][3]);
+
+					kf.bind_scale[k_index] = MathLib::length(kf.bind_real[k_index]);
+					kf.bind_real[k_index] /= kf.bind_scale[k_index];
 				}
 
 				if (joint_index < num_joints)
@@ -1957,10 +1989,10 @@ namespace KlayGE
 
 				XMLNodePtr bind_real_node = doc.AllocNode(XNT_Element, "bind_real");
 				bone_node->AppendNode(bind_real_node);
-				bind_real_node->AppendAttrib(doc.AllocAttribFloat("x", bind_real.x()));
-				bind_real_node->AppendAttrib(doc.AllocAttribFloat("y", bind_real.y()));
-				bind_real_node->AppendAttrib(doc.AllocAttribFloat("z", bind_real.z()));
-				bind_real_node->AppendAttrib(doc.AllocAttribFloat("w", bind_real.w()));
+				bind_real_node->AppendAttrib(doc.AllocAttribFloat("x", bind_real.x() * joint.bind_scale));
+				bind_real_node->AppendAttrib(doc.AllocAttribFloat("y", bind_real.y() * joint.bind_scale));
+				bind_real_node->AppendAttrib(doc.AllocAttribFloat("z", bind_real.z() * joint.bind_scale));
+				bind_real_node->AppendAttrib(doc.AllocAttribFloat("w", bind_real.w() * joint.bind_scale));
 
 				XMLNodePtr bind_dual_node = doc.AllocNode(XNT_Element, "bind_dual");
 				bone_node->AppendNode(bind_dual_node);
@@ -2318,10 +2350,10 @@ namespace KlayGE
 
 						XMLNodePtr bind_real_node = doc.AllocNode(XNT_Element, "bind_real");
 						key_node->AppendNode(bind_real_node); 
-						bind_real_node->AppendAttrib(doc.AllocAttribFloat("x", iter->bind_real[j].x()));
-						bind_real_node->AppendAttrib(doc.AllocAttribFloat("y", iter->bind_real[j].y()));
-						bind_real_node->AppendAttrib(doc.AllocAttribFloat("z", iter->bind_real[j].z()));
-						bind_real_node->AppendAttrib(doc.AllocAttribFloat("w", iter->bind_real[j].w()));
+						bind_real_node->AppendAttrib(doc.AllocAttribFloat("x", iter->bind_real[j].x() * iter->bind_scale[j]));
+						bind_real_node->AppendAttrib(doc.AllocAttribFloat("y", iter->bind_real[j].y() * iter->bind_scale[j]));
+						bind_real_node->AppendAttrib(doc.AllocAttribFloat("z", iter->bind_real[j].z() * iter->bind_scale[j]));
+						bind_real_node->AppendAttrib(doc.AllocAttribFloat("w", iter->bind_real[j].w() * iter->bind_scale[j]));
 
 						XMLNodePtr bind_dual_node = doc.AllocNode(XNT_Element, "bind_dual");
 						key_node->AppendNode(bind_dual_node);

@@ -219,9 +219,10 @@ namespace KlayGE
 			{
 				Matrix3 root_tm = root_node_->GetNodeTM(i * tpf);
 
+				Point3 scale = this->scale_from_matrix(root_tm);
 				Quat quat = this->quat_from_matrix(root_tm);
 				Point3 pos = this->point_from_matrix(root_tm);
-				kf.reals.push_back(quat);
+				kf.reals.push_back(quat * scale.x);
 				kf.duals.push_back(QuatTransToUDQ(quat, pos));
 			}
 			kfs_.insert(std::make_pair(root_node_, kf));
@@ -854,9 +855,10 @@ namespace KlayGE
 		{
 			Matrix3 local_tm = node->GetNodeTM(i * tpf) * Inverse(parent_node->GetNodeTM(i * tpf));
 
+			Point3 scale = this->scale_from_matrix(local_tm);
 			Quat quat = this->quat_from_matrix(local_tm);
 			Point3 pos = this->point_from_matrix(local_tm) * unit_scale_;
-			kf.reals.push_back(quat);
+			kf.reals.push_back(quat * scale.x);
 			kf.duals.push_back(QuatTransToUDQ(quat, pos));
 		}
 
@@ -875,8 +877,18 @@ namespace KlayGE
 	{
 		Quat quat(mat);
 		std::swap(quat.y, quat.z);
+		quat.Normalize();
 
 		return quat;
+	}
+
+	Point3 meshml_extractor::scale_from_matrix(Matrix3 const & mat)
+	{
+		Point3 scale;
+		scale.x = mat.GetRow(0).Length();
+		scale.z = mat.GetRow(1).Length();
+		scale.y = mat.GetRow(2).Length();
+		return scale;
 	}
 
 	void meshml_extractor::extract_all_joint_tms()
@@ -926,9 +938,10 @@ namespace KlayGE
 
 			jn.second = Inverse(jn.first->GetNodeTM(0)) * skin_init_tm;
 
+			Point3 scale = this->scale_from_matrix(skin_init_tm);
 			Quat quat = this->quat_from_matrix(skin_init_tm);
 			Point3 pos = this->point_from_matrix(skin_init_tm) * unit_scale_;
-			joint.real = quat;
+			joint.real = quat * scale.x;
 			joint.dual = QuatTransToUDQ(quat, pos);
 
 			joints_[jn.first] = joint;

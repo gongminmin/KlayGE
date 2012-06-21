@@ -261,9 +261,11 @@ namespace KlayGE
 
 		Quaternion bind_real;
 		Quaternion bind_dual;
+		float bind_scale;
 
 		Quaternion inverse_origin_real;
 		Quaternion inverse_origin_dual;
+		float inverse_origin_scale;
 
 		int16_t parent;
 	};
@@ -273,8 +275,9 @@ namespace KlayGE
 		std::vector<uint32_t> frame_id;
 		std::vector<Quaternion> bind_real;
 		std::vector<Quaternion> bind_dual;
+		std::vector<float> bind_scale;
 
-		std::pair<Quaternion, Quaternion> Frame(float frame) const;
+		std::pair<std::pair<Quaternion, Quaternion>, float> Frame(float frame) const;
 	};
 	typedef std::vector<KeyFrames> KeyFramesType;
 
