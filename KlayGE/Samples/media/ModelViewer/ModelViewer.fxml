@@ -62,10 +62,6 @@ void Skinned(float3 pos,
 		blend_dual += joint_dual * weight;
 	}
 
-	float inv_len = 1 / length(blend_real);
-	blend_real *= inv_len;
-	blend_dual *= inv_len;
-
 	result_pos = pos_s + 2 * cross(blend_real.xyz, cross(blend_real.xyz, pos_s) + blend_real.w * pos_s);
 	float3 trans = 2 * (blend_real.w * blend_dual.xyz - blend_dual.w * blend_real.xyz + cross(blend_real.xyz, blend_dual.xyz));
 	result_pos += trans;

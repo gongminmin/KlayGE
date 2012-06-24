@@ -498,7 +498,7 @@ namespace KlayGE
 				}
 
 				joint.bind_real = MathLib::mul_real(key_dq.first.first, parent.bind_real);
-				joint.bind_dual = MathLib::mul_dual(key_dq.first.first, key_dq.first.second, parent.bind_real, parent.bind_dual);
+				joint.bind_dual = MathLib::mul_dual(key_dq.first.first, key_dq.first.second * parent.bind_scale, parent.bind_real, parent.bind_dual);
 				joint.bind_scale = key_dq.second * parent.bind_scale;
 			}
 			else
@@ -521,7 +521,7 @@ namespace KlayGE
 			Quaternion real = MathLib::mul_real(joints_[i].inverse_origin_real, joints_[i].bind_real);
 			bind_reals_[i] = float4(real.x(), real.y(), real.z(), real.w()) * joints_[i].inverse_origin_scale * joints_[i].bind_scale;
 
-			Quaternion dual = MathLib::mul_dual(joints_[i].inverse_origin_real, joints_[i].inverse_origin_dual,
+			Quaternion dual = MathLib::mul_dual(joints_[i].inverse_origin_real, joints_[i].inverse_origin_dual * joints_[i].bind_scale,
 				joints_[i].bind_real, joints_[i].bind_dual);
 			bind_duals_[i] = float4(dual.x(), dual.y(), dual.z(), dual.w());
 		}
@@ -1389,6 +1389,8 @@ namespace KlayGE
 					NativeToLittleEndian<sizeof(joint_parent)>(&joint_parent);
 					ss->write(reinterpret_cast<char*>(&joint_parent), sizeof(joint_parent));
 
+					Quaternion bind_real;
+					Quaternion bind_dual;
 					XMLNodePtr bind_pos_node = bone_node->FirstNode("bind_pos");
 					if (bind_pos_node)
 					{
@@ -1402,40 +1404,30 @@ namespace KlayGE
 						float scale = MathLib::length(bind_quat);
 						bind_quat /= scale;
 
-						Quaternion bind_dual = MathLib::quat_trans_to_udq(bind_quat, bind_pos);
-						bind_quat *= scale;
-
-						NativeToLittleEndian<sizeof(bind_quat[0])>(&bind_quat[0]);
-						NativeToLittleEndian<sizeof(bind_quat[1])>(&bind_quat[1]);
-						NativeToLittleEndian<sizeof(bind_quat[2])>(&bind_quat[2]);
-						NativeToLittleEndian<sizeof(bind_quat[3])>(&bind_quat[3]);
-						ss->write(reinterpret_cast<char*>(&bind_quat), sizeof(bind_quat));
-						NativeToLittleEndian<sizeof(bind_dual[0])>(&bind_dual[0]);
-						NativeToLittleEndian<sizeof(bind_dual[1])>(&bind_dual[1]);
-						NativeToLittleEndian<sizeof(bind_dual[2])>(&bind_dual[2]);
-						NativeToLittleEndian<sizeof(bind_dual[3])>(&bind_dual[3]);
-						ss->write(reinterpret_cast<char*>(&bind_dual), sizeof(bind_dual));
+						bind_dual = MathLib::quat_trans_to_udq(bind_quat, bind_pos);
+						bind_real = bind_quat * scale;
 					}
 					else
 					{
 						XMLNodePtr bind_real_node = bone_node->FirstNode("bind_real");
-						Quaternion bind_real(bind_real_node->Attrib("x")->ValueFloat(), bind_real_node->Attrib("y")->ValueFloat(),
+						bind_real = Quaternion(bind_real_node->Attrib("x")->ValueFloat(), bind_real_node->Attrib("y")->ValueFloat(),
 							bind_real_node->Attrib("z")->ValueFloat(), bind_real_node->Attrib("w")->ValueFloat());
-						NativeToLittleEndian<sizeof(bind_real[0])>(&bind_real[0]);
-						NativeToLittleEndian<sizeof(bind_real[1])>(&bind_real[1]);
-						NativeToLittleEndian<sizeof(bind_real[2])>(&bind_real[2]);
-						NativeToLittleEndian<sizeof(bind_real[3])>(&bind_real[3]);
-						ss->write(reinterpret_cast<char*>(&bind_real), sizeof(bind_real));
 							
 						XMLNodePtr bind_dual_node = bone_node->FirstNode("bind_dual");
-						Quaternion bind_dual(bind_dual_node->Attrib("x")->ValueFloat(), bind_dual_node->Attrib("y")->ValueFloat(),
+						bind_dual = Quaternion(bind_dual_node->Attrib("x")->ValueFloat(), bind_dual_node->Attrib("y")->ValueFloat(),
 							bind_dual_node->Attrib("z")->ValueFloat(), bind_dual_node->Attrib("w")->ValueFloat());
-						NativeToLittleEndian<sizeof(bind_dual[0])>(&bind_dual[0]);
-						NativeToLittleEndian<sizeof(bind_dual[1])>(&bind_dual[1]);
-						NativeToLittleEndian<sizeof(bind_dual[2])>(&bind_dual[2]);
-						NativeToLittleEndian<sizeof(bind_dual[3])>(&bind_dual[3]);
-						ss->write(reinterpret_cast<char*>(&bind_dual), sizeof(bind_dual));
 					}
+
+					NativeToLittleEndian<sizeof(bind_real[0])>(&bind_real[0]);
+					NativeToLittleEndian<sizeof(bind_real[1])>(&bind_real[1]);
+					NativeToLittleEndian<sizeof(bind_real[2])>(&bind_real[2]);
+					NativeToLittleEndian<sizeof(bind_real[3])>(&bind_real[3]);
+					ss->write(reinterpret_cast<char*>(&bind_real), sizeof(bind_real));
+					NativeToLittleEndian<sizeof(bind_dual[0])>(&bind_dual[0]);
+					NativeToLittleEndian<sizeof(bind_dual[1])>(&bind_dual[1]);
+					NativeToLittleEndian<sizeof(bind_dual[2])>(&bind_dual[2]);
+					NativeToLittleEndian<sizeof(bind_dual[3])>(&bind_dual[3]);
+					ss->write(reinterpret_cast<char*>(&bind_dual), sizeof(bind_dual));
 				}
 			}
 
@@ -1459,6 +1451,7 @@ namespace KlayGE
 					kfs.frame_id.clear();
 					kfs.bind_real.clear();
 					kfs.bind_dual.clear();
+					kfs.bind_scale.clear();
 
 					int32_t frame_id = -1;
 					for (XMLNodePtr key_node = kf_node->FirstNode("key"); key_node; key_node = key_node->NextSibling("key"))
@@ -1489,8 +1482,8 @@ namespace KlayGE
 
 							bind_scale = MathLib::length(bind_real);
 							bind_real /= bind_scale;
-					
-					        bind_dual = MathLib::quat_trans_to_udq(bind_real, bind_pos);
+
+							bind_dual = MathLib::quat_trans_to_udq(bind_real, bind_pos);
 						}
 						else
 						{
@@ -1523,18 +1516,15 @@ namespace KlayGE
 							kfs.bind_real[base + 2], kfs.bind_dual[base + 2], factor);
 						float scale = MathLib::lerp(kfs.bind_scale[base + 0], kfs.bind_scale[base + 2], factor);
 
-						float quat_dot = MathLib::dot(kfs.bind_real[base + 1], interpolate.first);
-						Quaternion to_sign_corrected_real = interpolate.first;
-						Quaternion to_sign_corrected_dual = interpolate.second;
-						if (quat_dot < 0)
+						if (MathLib::dot(kfs.bind_real[base + 1], interpolate.first) < 0)
 						{
-							to_sign_corrected_real = -to_sign_corrected_real;
-							to_sign_corrected_dual = -to_sign_corrected_dual;
+							interpolate.first = -interpolate.first;
+							interpolate.second = -interpolate.second;
 						}
 
 						std::pair<Quaternion, Quaternion> dif_dq = MathLib::inverse(kfs.bind_real[base + 1], kfs.bind_dual[base + 1]);
-						dif_dq.second = MathLib::mul_dual(dif_dq.first, dif_dq.second, to_sign_corrected_real, to_sign_corrected_dual);
-						dif_dq.first = MathLib::mul_real(dif_dq.first, to_sign_corrected_real);
+						dif_dq.second = MathLib::mul_dual(dif_dq.first, dif_dq.second * scale, interpolate.first, interpolate.second);
+						dif_dq.first = MathLib::mul_real(dif_dq.first, interpolate.first);
 						float dif_scale = scale * kfs.bind_scale[base + 1];
 
 						if ((abs(dif_dq.first.x()) < 1e-5f) && (abs(dif_dq.first.y()) < 1e-5f)

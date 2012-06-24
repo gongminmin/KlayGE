@@ -160,6 +160,78 @@ namespace
 		}
 	}
 
+	Quat ToQuaternion(Matrix3 const & mat)
+	{
+		Quat quat;
+		float s;
+		float const tr = mat.GetRow(0).x + mat.GetRow(1).y + mat.GetRow(2).z;
+
+		// check the diagonal
+		if (tr > 0)
+		{
+			s = sqrt(tr + 1);
+			quat.w = s * 0.5f;
+			s = 0.5f / s;
+			quat.x = (mat.GetRow(1).z - mat.GetRow(2).y) * s;
+			quat.y = (mat.GetRow(2).x - mat.GetRow(0).z) * s;
+			quat.z = (mat.GetRow(0).y - mat.GetRow(1).x) * s;
+		}
+		else
+		{
+			if ((mat.GetRow(1).y > mat.GetRow(0).x) && (mat.GetRow(2).z <= mat.GetRow(1).y))
+			{
+				s = sqrt((mat.GetRow(1).y - (mat.GetRow(2).z + mat.GetRow(0).x)) + 1);
+
+				quat.y = s * 0.5f;
+
+				if (abs(s) > 1e-6f)
+				{
+					s = 0.5f / s;
+				}
+
+				quat.w = (mat.GetRow(2).x - mat.GetRow(0).z) * s;
+				quat.z = (mat.GetRow(2).y + mat.GetRow(1).z) * s;
+				quat.x = (mat.GetRow(0).y + mat.GetRow(1).x) * s;
+			}
+			else
+			{
+				if (((mat.GetRow(1).y <= mat.GetRow(0).x) && (mat.GetRow(2).z > mat.GetRow(0).x)) || (mat.GetRow(2).z > mat.GetRow(1).y))
+				{
+					s = sqrt((mat.GetRow(2).z - (mat.GetRow(0).x + mat.GetRow(1).y)) + 1);
+
+					quat.z = s * 0.5f;
+
+					if (abs(s) > 1e-6f)
+					{
+						s = 0.5f / s;
+					}
+
+					quat.w = (mat.GetRow(0).y - mat.GetRow(1).x) * s;
+					quat.x = (mat.GetRow(0).z + mat.GetRow(2).x) * s;
+					quat.y = (mat.GetRow(1).z + mat.GetRow(2).y) * s;
+				}
+				else
+				{
+					s = sqrt((mat.GetRow(0).x - (mat.GetRow(1).y + mat.GetRow(2).z)) + 1);
+
+					quat.x = s * 0.5f;
+
+					if (abs(s) > 1e-6f)
+					{
+						s = 0.5f / s;
+					}
+
+					quat.w = (mat.GetRow(1).z - mat.GetRow(2).y) * s;
+					quat.y = (mat.GetRow(1).x + mat.GetRow(0).y) * s;
+					quat.z = (mat.GetRow(2).x + mat.GetRow(0).z) * s;
+				}
+			}
+		}
+
+		quat.Normalize();
+		return quat;
+	}
+
 	Quat QuatTransToUDQ(Quat const & q, Point3 const & t)
 	{
 		return Quat(+0.5f * (+t[0] * q[3] + t[1] * q[2] - t[2] * q[1]),
@@ -219,9 +291,11 @@ namespace KlayGE
 			{
 				Matrix3 root_tm = root_node_->GetNodeTM(i * tpf);
 
-				Point3 scale = this->scale_from_matrix(root_tm);
-				Quat quat = this->quat_from_matrix(root_tm);
-				Point3 pos = this->point_from_matrix(root_tm);
+				Point3 scale;
+				Quat quat;
+				Point3 pos;
+				this->decompose_matrix(scale, quat, pos, root_tm);
+				pos *= unit_scale_;
 				kf.reals.push_back(quat * scale.x);
 				kf.duals.push_back(QuatTransToUDQ(quat, pos));
 			}
@@ -855,9 +929,11 @@ namespace KlayGE
 		{
 			Matrix3 local_tm = node->GetNodeTM(i * tpf) * Inverse(parent_node->GetNodeTM(i * tpf));
 
-			Point3 scale = this->scale_from_matrix(local_tm);
-			Quat quat = this->quat_from_matrix(local_tm);
-			Point3 pos = this->point_from_matrix(local_tm) * unit_scale_;
+			Point3 scale;
+			Quat quat;
+			Point3 pos;
+			this->decompose_matrix(scale, quat, pos, local_tm);
+			pos *= unit_scale_;
 			kf.reals.push_back(quat * scale.x);
 			kf.duals.push_back(QuatTransToUDQ(quat, pos));
 		}
@@ -865,30 +941,25 @@ namespace KlayGE
 		kfs_.insert(std::make_pair(node, kf));
 	}
 
-	Point3 meshml_extractor::point_from_matrix(Matrix3 const & mat)
+	void meshml_extractor::decompose_matrix(Point3& scale, Quat& rot, Point3& trans, Matrix3 const & mat)
 	{
-		Point3 pos(mat.GetTrans());
-		std::swap(pos.y, pos.z);
+		Matrix3 mat_lh;
+		mat_lh.SetRow(0, Point3(mat.GetRow(0).x, mat.GetRow(0).z, mat.GetRow(0).y));
+		mat_lh.SetRow(1, Point3(mat.GetRow(2).x, mat.GetRow(2).z, mat.GetRow(2).y));
+		mat_lh.SetRow(2, Point3(mat.GetRow(1).x, mat.GetRow(1).z, mat.GetRow(1).y));
+		mat_lh.SetRow(3, Point3(mat.GetRow(3).x, mat.GetRow(3).z, mat.GetRow(3).y));
 
-		return pos;
-	}
+		scale.x = mat_lh.GetRow(0).Length();
+		scale.y = mat_lh.GetRow(1).Length();
+		scale.z = mat_lh.GetRow(2).Length();
 
-	Quat meshml_extractor::quat_from_matrix(Matrix3 const & mat)
-	{
-		Quat quat(mat);
-		std::swap(quat.y, quat.z);
-		quat.Normalize();
+		trans = mat_lh.GetRow(3);
 
-		return quat;
-	}
-
-	Point3 meshml_extractor::scale_from_matrix(Matrix3 const & mat)
-	{
-		Point3 scale;
-		scale.x = mat.GetRow(0).Length();
-		scale.z = mat.GetRow(1).Length();
-		scale.y = mat.GetRow(2).Length();
-		return scale;
+		mat_lh.SetRow(0, mat_lh.GetRow(0) / scale.x);
+		mat_lh.SetRow(1, mat_lh.GetRow(1) / scale.y);
+		mat_lh.SetRow(2, mat_lh.GetRow(2) / scale.z);
+		mat_lh.SetRow(3, Point3(0, 0, 0));
+		rot = ToQuaternion(mat_lh);
 	}
 
 	void meshml_extractor::extract_all_joint_tms()
@@ -938,9 +1009,11 @@ namespace KlayGE
 
 			jn.second = Inverse(jn.first->GetNodeTM(0)) * skin_init_tm;
 
-			Point3 scale = this->scale_from_matrix(skin_init_tm);
-			Quat quat = this->quat_from_matrix(skin_init_tm);
-			Point3 pos = this->point_from_matrix(skin_init_tm) * unit_scale_;
+			Point3 scale;
+			Quat quat;
+			Point3 pos;
+			this->decompose_matrix(scale, quat, pos, skin_init_tm);
+			pos *= unit_scale_;
 			joint.real = quat * scale.x;
 			joint.dual = QuatTransToUDQ(quat, pos);
 
