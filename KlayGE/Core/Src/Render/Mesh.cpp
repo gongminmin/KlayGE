@@ -521,7 +521,7 @@ namespace KlayGE
 			Quaternion real = MathLib::mul_real(joints_[i].inverse_origin_real, joints_[i].bind_real);
 			bind_reals_[i] = float4(real.x(), real.y(), real.z(), real.w()) * joints_[i].inverse_origin_scale * joints_[i].bind_scale;
 
-			Quaternion dual = MathLib::mul_dual(joints_[i].inverse_origin_real, joints_[i].inverse_origin_dual * joints_[i].bind_scale,
+			Quaternion dual = MathLib::mul_dual(joints_[i].inverse_origin_real, joints_[i].inverse_origin_dual,
 				joints_[i].bind_real, joints_[i].bind_dual);
 			bind_duals_[i] = float4(dual.x(), dual.y(), dual.z(), dual.w());
 		}
