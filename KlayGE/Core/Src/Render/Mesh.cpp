@@ -551,24 +551,31 @@ namespace KlayGE
 		bind_duals_.resize(joints_.size());
 		for (size_t i = 0; i < joints_.size(); ++ i)
 		{
-			Quaternion real = MathLib::mul_real(joints_[i].inverse_origin_real, joints_[i].bind_real);
-			Quaternion dual = MathLib::mul_dual(joints_[i].inverse_origin_real, joints_[i].inverse_origin_dual,
-				joints_[i].bind_real, joints_[i].bind_dual);
-			float bind_scale = joints_[i].inverse_origin_scale * joints_[i].bind_scale;
+			Joint const & joint = joints_[i];
 
-			if ((joints_[i].inverse_origin_scale > 0) && (joints_[i].bind_scale > 0))
+			Quaternion bind_real, bind_dual;
+			float bind_scale;
+			if ((joint.inverse_origin_scale > 0) && (joint.bind_scale > 0))
 			{
-				bind_reals_[i] = float4(real.x(), real.y(), real.z(), real.w()) * bind_scale;
-				bind_duals_[i] = float4(dual.x(), dual.y(), dual.z(), dual.w());
+				bind_real = MathLib::mul_real(joint.inverse_origin_real, joint.bind_real);
+				bind_dual = MathLib::mul_dual(joint.inverse_origin_real, joint.inverse_origin_dual,
+					joint.bind_real, joint.bind_dual);
+				bind_scale = joint.inverse_origin_scale * joint.bind_scale;
+
+				if (bind_real.w() < 0)
+				{
+					bind_real = -bind_real;
+					bind_dual = -bind_dual;
+				}
 			}
 			else
 			{
-				float4x4 tmp_mat = MathLib::scaling(abs(joints_[i].inverse_origin_scale), abs(joints_[i].inverse_origin_scale), joints_[i].inverse_origin_scale)
-					* MathLib::to_matrix(joints_[i].inverse_origin_real)
-					* MathLib::translation(MathLib::udq_to_trans(joints_[i].inverse_origin_real, joints_[i].inverse_origin_dual))
-					* MathLib::scaling(abs(joints_[i].bind_scale), abs(joints_[i].bind_scale), joints_[i].bind_scale)
-					* MathLib::to_matrix(joints_[i].bind_real)
-					* MathLib::translation(MathLib::udq_to_trans(joints_[i].bind_real, joints_[i].bind_dual));
+				float4x4 tmp_mat = MathLib::scaling(abs(joint.inverse_origin_scale), abs(joint.inverse_origin_scale), joint.inverse_origin_scale)
+					* MathLib::to_matrix(joint.inverse_origin_real)
+					* MathLib::translation(MathLib::udq_to_trans(joint.inverse_origin_real, joint.inverse_origin_dual))
+					* MathLib::scaling(abs(joint.bind_scale), abs(joint.bind_scale), joint.bind_scale)
+					* MathLib::to_matrix(joint.bind_real)
+					* MathLib::translation(MathLib::udq_to_trans(joint.bind_real, joint.bind_dual));
 
 				float flip = 1;
 				if (MathLib::dot(MathLib::cross(float3(tmp_mat(0, 0), tmp_mat(0, 1), tmp_mat(0, 2)),
@@ -587,17 +594,19 @@ namespace KlayGE
 				float3 trans;
 				MathLib::decompose(scale, rot, trans, tmp_mat);
 
-				dual = MathLib::quat_trans_to_udq(rot, trans);
+				bind_real = rot;
+				bind_dual = MathLib::quat_trans_to_udq(rot, trans);
+				bind_scale = scale.x();
 
-				if (flip * rot.w() < 0)
+				if (flip * bind_real.w() < 0)
 				{
-					rot = -rot;
-					dual = -dual;
+					bind_real = -bind_real;
+					bind_dual = -bind_dual;
 				}
-
-				bind_reals_[i] = float4(rot.x(), rot.y(), rot.z(), rot.w()) * scale.x();
-				bind_duals_[i] = float4(dual.x(), dual.y(), dual.z(), dual.w());
 			}
+
+			bind_reals_[i] = float4(bind_real.x(), bind_real.y(), bind_real.z(), bind_real.w()) * bind_scale;
+			bind_duals_[i] = float4(bind_dual.x(), bind_dual.y(), bind_dual.z(), bind_dual.w());
 		}
 	}
 
@@ -2084,15 +2093,15 @@ namespace KlayGE
 				bone_node->AppendAttrib(doc.AllocAttribString("name", joint.name));
 				bone_node->AppendAttrib(doc.AllocAttribInt("parent", joint.parent));
 
-				Quaternion const & bind_real = joint.bind_real;
+				Quaternion const & bind_real = joint.bind_real * abs(joint.bind_scale);
 				Quaternion const & bind_dual = joint.bind_dual;
 
 				XMLNodePtr bind_real_node = doc.AllocNode(XNT_Element, "bind_real");
 				bone_node->AppendNode(bind_real_node);
-				bind_real_node->AppendAttrib(doc.AllocAttribFloat("x", bind_real.x() * joint.bind_scale));
-				bind_real_node->AppendAttrib(doc.AllocAttribFloat("y", bind_real.y() * joint.bind_scale));
-				bind_real_node->AppendAttrib(doc.AllocAttribFloat("z", bind_real.z() * joint.bind_scale));
-				bind_real_node->AppendAttrib(doc.AllocAttribFloat("w", bind_real.w() * joint.bind_scale));
+				bind_real_node->AppendAttrib(doc.AllocAttribFloat("x", bind_real.x()));
+				bind_real_node->AppendAttrib(doc.AllocAttribFloat("y", bind_real.y()));
+				bind_real_node->AppendAttrib(doc.AllocAttribFloat("z", bind_real.z()));
+				bind_real_node->AppendAttrib(doc.AllocAttribFloat("w", bind_real.w()));
 
 				XMLNodePtr bind_dual_node = doc.AllocNode(XNT_Element, "bind_dual");
 				bone_node->AppendNode(bind_dual_node);
@@ -2448,19 +2457,22 @@ namespace KlayGE
 
 						key_frame_node->AppendAttrib(doc.AllocAttribUInt("id", iter->frame_id[j]));
 
+						Quaternion const & bind_real = iter->bind_real[j] * abs(iter->bind_scale[j]);
+						Quaternion const & bind_dual = iter->bind_dual[j];
+
 						XMLNodePtr bind_real_node = doc.AllocNode(XNT_Element, "bind_real");
 						key_node->AppendNode(bind_real_node); 
-						bind_real_node->AppendAttrib(doc.AllocAttribFloat("x", iter->bind_real[j].x() * iter->bind_scale[j]));
-						bind_real_node->AppendAttrib(doc.AllocAttribFloat("y", iter->bind_real[j].y() * iter->bind_scale[j]));
-						bind_real_node->AppendAttrib(doc.AllocAttribFloat("z", iter->bind_real[j].z() * iter->bind_scale[j]));
-						bind_real_node->AppendAttrib(doc.AllocAttribFloat("w", iter->bind_real[j].w() * iter->bind_scale[j]));
+						bind_real_node->AppendAttrib(doc.AllocAttribFloat("x", bind_real.x()));
+						bind_real_node->AppendAttrib(doc.AllocAttribFloat("y", bind_real.y()));
+						bind_real_node->AppendAttrib(doc.AllocAttribFloat("z", bind_real.z()));
+						bind_real_node->AppendAttrib(doc.AllocAttribFloat("w", bind_real.w()));
 
 						XMLNodePtr bind_dual_node = doc.AllocNode(XNT_Element, "bind_dual");
 						key_node->AppendNode(bind_dual_node);
-						bind_dual_node->AppendAttrib(doc.AllocAttribFloat("x", iter->bind_dual[j].x()));
-						bind_dual_node->AppendAttrib(doc.AllocAttribFloat("y", iter->bind_dual[j].y()));
-						bind_dual_node->AppendAttrib(doc.AllocAttribFloat("z", iter->bind_dual[j].z()));
-						bind_dual_node->AppendAttrib(doc.AllocAttribFloat("w", iter->bind_dual[j].w()));
+						bind_dual_node->AppendAttrib(doc.AllocAttribFloat("x", bind_dual.x()));
+						bind_dual_node->AppendAttrib(doc.AllocAttribFloat("y", bind_dual.y()));
+						bind_dual_node->AppendAttrib(doc.AllocAttribFloat("z", bind_dual.z()));
+						bind_dual_node->AppendAttrib(doc.AllocAttribFloat("w", bind_dual.w()));
 					}
 				}
 			}
