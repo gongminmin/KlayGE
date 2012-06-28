@@ -292,12 +292,10 @@ namespace KlayGE
 				Matrix3 root_tm = root_node_->GetNodeTM(i * tpf);
 
 				Point3 scale;
-				Quat quat;
-				Point3 pos;
-				this->decompose_matrix(scale, quat, pos, root_tm);
-				pos *= unit_scale_;
-				kf.reals.push_back(quat * scale.x);
-				kf.duals.push_back(QuatTransToUDQ(quat, pos));
+				Quat real, dual;
+				this->decompose_matrix(scale, real, dual, root_tm);
+				kf.reals.push_back(real * scale.x);
+				kf.duals.push_back(dual);
 			}
 			kfs_.insert(std::make_pair(root_node_, kf));
 
@@ -930,18 +928,16 @@ namespace KlayGE
 			Matrix3 local_tm = node->GetNodeTM(i * tpf) * Inverse(parent_node->GetNodeTM(i * tpf));
 
 			Point3 scale;
-			Quat quat;
-			Point3 pos;
-			this->decompose_matrix(scale, quat, pos, local_tm);
-			pos *= unit_scale_;
-			kf.reals.push_back(quat * scale.x);
-			kf.duals.push_back(QuatTransToUDQ(quat, pos));
+			Quat real, dual;
+			this->decompose_matrix(scale, real, dual, local_tm);
+			kf.reals.push_back(real * scale.x);
+			kf.duals.push_back(dual);
 		}
 
 		kfs_.insert(std::make_pair(node, kf));
 	}
 
-	void meshml_extractor::decompose_matrix(Point3& scale, Quat& rot, Point3& trans, Matrix3 const & mat)
+	void meshml_extractor::decompose_matrix(Point3& scale, Quat& real, Quat& dual, Matrix3 const & mat)
 	{
 		Matrix3 mat_lh;
 		mat_lh.SetRow(0, Point3(mat.GetRow(0).x, mat.GetRow(0).z, mat.GetRow(0).y));
@@ -949,17 +945,27 @@ namespace KlayGE
 		mat_lh.SetRow(2, Point3(mat.GetRow(1).x, mat.GetRow(1).z, mat.GetRow(1).y));
 		mat_lh.SetRow(3, Point3(mat.GetRow(3).x, mat.GetRow(3).z, mat.GetRow(3).y));
 
+		int flip = mat_lh.Parity() ? -1 : +1;
+
 		scale.x = mat_lh.GetRow(0).Length();
 		scale.y = mat_lh.GetRow(1).Length();
-		scale.z = mat_lh.GetRow(2).Length();
+		scale.z = flip * mat_lh.GetRow(2).Length();
 
-		trans = mat_lh.GetRow(3);
+		Point3 trans = mat_lh.GetRow(3);
 
 		mat_lh.SetRow(0, mat_lh.GetRow(0) / scale.x);
 		mat_lh.SetRow(1, mat_lh.GetRow(1) / scale.y);
 		mat_lh.SetRow(2, mat_lh.GetRow(2) / scale.z);
 		mat_lh.SetRow(3, Point3(0, 0, 0));
-		rot = ToQuaternion(mat_lh);
+		real = ToQuaternion(mat_lh);
+
+		dual = QuatTransToUDQ(real, trans * unit_scale_);
+
+		if (flip * real.w < 0)
+		{
+			real = -real;
+			dual = -dual;
+		}
 	}
 
 	void meshml_extractor::extract_all_joint_tms()
@@ -1010,12 +1016,10 @@ namespace KlayGE
 			jn.second = Inverse(jn.first->GetNodeTM(0)) * skin_init_tm;
 
 			Point3 scale;
-			Quat quat;
-			Point3 pos;
-			this->decompose_matrix(scale, quat, pos, skin_init_tm);
-			pos *= unit_scale_;
-			joint.real = quat * scale.x;
-			joint.dual = QuatTransToUDQ(quat, pos);
+			Quat real, dual;
+			this->decompose_matrix(scale, real, dual, skin_init_tm);
+			joint.real = real * scale.x;
+			joint.dual = dual;
 
 			joints_[jn.first] = joint;
 		}

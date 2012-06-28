@@ -161,7 +161,7 @@ namespace KlayGE
 		void combine_meshes_with_same_mtl();
 		void sort_meshes_by_mtl();
 
-		void decompose_matrix(Point3& scale, Quat& rot, Point3& trans, Matrix3 const & mat);
+		void decompose_matrix(Point3& scale, Quat& real, Quat& dual, Matrix3 const & mat);
 
 		void find_joints(INode* node);
 		void extract_all_joint_tms();

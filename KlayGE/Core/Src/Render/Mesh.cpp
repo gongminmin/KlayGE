@@ -497,9 +497,42 @@ namespace KlayGE
 					key_dq.first.second = -key_dq.first.second;
 				}
 
-				joint.bind_real = MathLib::mul_real(key_dq.first.first, parent.bind_real);
-				joint.bind_dual = MathLib::mul_dual(key_dq.first.first, key_dq.first.second * parent.bind_scale, parent.bind_real, parent.bind_dual);
-				joint.bind_scale = key_dq.second * parent.bind_scale;
+				if ((key_dq.second > 0) && (parent.bind_scale > 0))
+				{
+					joint.bind_real = MathLib::mul_real(key_dq.first.first, parent.bind_real);
+					joint.bind_dual = MathLib::mul_dual(key_dq.first.first, key_dq.first.second * parent.bind_scale, parent.bind_real, parent.bind_dual);
+					joint.bind_scale = key_dq.second * parent.bind_scale;
+				}
+				else
+				{
+					float4x4 tmp_mat = MathLib::scaling(abs(key_dq.second), abs(key_dq.second), key_dq.second)
+						* MathLib::to_matrix(key_dq.first.first)
+						* MathLib::translation(MathLib::udq_to_trans(key_dq.first.first, key_dq.first.second))
+						* MathLib::scaling(abs(parent.bind_scale), abs(parent.bind_scale), parent.bind_scale)
+						* MathLib::to_matrix(parent.bind_real)
+						* MathLib::translation(MathLib::udq_to_trans(parent.bind_real, parent.bind_dual));
+
+					float flip = 1;
+					if (MathLib::dot(MathLib::cross(float3(tmp_mat(0, 0), tmp_mat(0, 1), tmp_mat(0, 2)),
+						float3(tmp_mat(1, 0), tmp_mat(1, 1), tmp_mat(1, 2))),
+						float3(tmp_mat(2, 0), tmp_mat(2, 1), tmp_mat(2, 2))) < 0)
+					{
+						tmp_mat(2, 0) = -tmp_mat(2, 0);
+						tmp_mat(2, 1) = -tmp_mat(2, 1);
+						tmp_mat(2, 2) = -tmp_mat(2, 2);
+
+						flip = -1;
+					}
+
+					float3 scale;
+					Quaternion rot;
+					float3 trans;
+					MathLib::decompose(scale, rot, trans, tmp_mat);
+
+					joint.bind_real = rot;
+					joint.bind_dual = MathLib::quat_trans_to_udq(rot, trans);
+					joint.bind_scale = flip * scale.x();
+				}
 			}
 			else
 			{
@@ -519,11 +552,52 @@ namespace KlayGE
 		for (size_t i = 0; i < joints_.size(); ++ i)
 		{
 			Quaternion real = MathLib::mul_real(joints_[i].inverse_origin_real, joints_[i].bind_real);
-			bind_reals_[i] = float4(real.x(), real.y(), real.z(), real.w()) * joints_[i].inverse_origin_scale * joints_[i].bind_scale;
-
 			Quaternion dual = MathLib::mul_dual(joints_[i].inverse_origin_real, joints_[i].inverse_origin_dual,
 				joints_[i].bind_real, joints_[i].bind_dual);
-			bind_duals_[i] = float4(dual.x(), dual.y(), dual.z(), dual.w());
+			float bind_scale = joints_[i].inverse_origin_scale * joints_[i].bind_scale;
+
+			if ((joints_[i].inverse_origin_scale > 0) && (joints_[i].bind_scale > 0))
+			{
+				bind_reals_[i] = float4(real.x(), real.y(), real.z(), real.w()) * bind_scale;
+				bind_duals_[i] = float4(dual.x(), dual.y(), dual.z(), dual.w());
+			}
+			else
+			{
+				float4x4 tmp_mat = MathLib::scaling(abs(joints_[i].inverse_origin_scale), abs(joints_[i].inverse_origin_scale), joints_[i].inverse_origin_scale)
+					* MathLib::to_matrix(joints_[i].inverse_origin_real)
+					* MathLib::translation(MathLib::udq_to_trans(joints_[i].inverse_origin_real, joints_[i].inverse_origin_dual))
+					* MathLib::scaling(abs(joints_[i].bind_scale), abs(joints_[i].bind_scale), joints_[i].bind_scale)
+					* MathLib::to_matrix(joints_[i].bind_real)
+					* MathLib::translation(MathLib::udq_to_trans(joints_[i].bind_real, joints_[i].bind_dual));
+
+				float flip = 1;
+				if (MathLib::dot(MathLib::cross(float3(tmp_mat(0, 0), tmp_mat(0, 1), tmp_mat(0, 2)),
+					float3(tmp_mat(1, 0), tmp_mat(1, 1), tmp_mat(1, 2))),
+					float3(tmp_mat(2, 0), tmp_mat(2, 1), tmp_mat(2, 2))) < 0)
+				{
+					tmp_mat(2, 0) = -tmp_mat(2, 0);
+					tmp_mat(2, 1) = -tmp_mat(2, 1);
+					tmp_mat(2, 2) = -tmp_mat(2, 2);
+
+					flip = -1;
+				}
+
+				float3 scale;
+				Quaternion rot;
+				float3 trans;
+				MathLib::decompose(scale, rot, trans, tmp_mat);
+
+				dual = MathLib::quat_trans_to_udq(rot, trans);
+
+				if (flip * rot.w() < 0)
+				{
+					rot = -rot;
+					dual = -dual;
+				}
+
+				bind_reals_[i] = float4(rot.x(), rot.y(), rot.z(), rot.w()) * scale.x();
+				bind_duals_[i] = float4(dual.x(), dual.y(), dual.z(), dual.w());
+			}
 		}
 	}
 
@@ -1497,6 +1571,11 @@ namespace KlayGE
 
 							bind_scale = MathLib::length(bind_real);
 							bind_real /= bind_scale;
+							if (bind_real.w() < 0)
+							{
+								bind_real = -bind_real;
+								bind_scale = -bind_scale;
+							}
 						}
 
 						kfs.bind_real.push_back(bind_real);
@@ -1847,13 +1926,40 @@ namespace KlayGE
 			LittleEndianToNative<sizeof(joint.bind_dual[2])>(&joint.bind_dual[2]);
 			LittleEndianToNative<sizeof(joint.bind_dual[3])>(&joint.bind_dual[3]);
 
+			float flip = MathLib::sgn(joint.bind_real.w());
+
 			joint.bind_scale = MathLib::length(joint.bind_real);
 			joint.inverse_origin_scale = 1 / joint.bind_scale;
 			joint.bind_real *= joint.inverse_origin_scale;
 
-			std::pair<Quaternion, Quaternion> inv = MathLib::inverse(joint.bind_real, joint.bind_dual);
-			joint.inverse_origin_real = inv.first;
-			joint.inverse_origin_dual = inv.second;
+			if (flip > 0)
+			{
+				std::pair<Quaternion, Quaternion> inv = MathLib::inverse(joint.bind_real, joint.bind_dual);
+				joint.inverse_origin_real = inv.first;
+				joint.inverse_origin_dual = inv.second;
+			}
+			else
+			{
+				float4x4 tmp_mat = MathLib::scaling(joint.bind_scale, joint.bind_scale, flip * joint.bind_scale)
+					* MathLib::to_matrix(joint.bind_real)
+					* MathLib::translation(MathLib::udq_to_trans(joint.bind_real, joint.bind_dual));
+				tmp_mat = MathLib::inverse(tmp_mat);
+				tmp_mat(2, 0) = -tmp_mat(2, 0);
+				tmp_mat(2, 1) = -tmp_mat(2, 1);
+				tmp_mat(2, 2) = -tmp_mat(2, 2);
+
+				float3 scale;
+				Quaternion rot;
+				float3 trans;
+				MathLib::decompose(scale, rot, trans, tmp_mat);
+
+				joint.inverse_origin_real = rot;
+				joint.inverse_origin_dual = MathLib::quat_trans_to_udq(rot, trans);
+				joint.inverse_origin_scale = -scale.x();
+			}
+			
+			joint.inverse_origin_scale *= flip;
+			joint.bind_scale *= flip;
 		}
 
 		if (num_kfs > 0)
@@ -1911,8 +2017,12 @@ namespace KlayGE
 					LittleEndianToNative<sizeof(kf.bind_dual[k_index][2])>(&kf.bind_dual[k_index][2]);
 					LittleEndianToNative<sizeof(kf.bind_dual[k_index][3])>(&kf.bind_dual[k_index][3]);
 
+					float flip = MathLib::sgn(kf.bind_real[k_index].w());
+
 					kf.bind_scale[k_index] = MathLib::length(kf.bind_real[k_index]);
 					kf.bind_real[k_index] /= kf.bind_scale[k_index];
+
+					kf.bind_scale[k_index] *= flip;
 				}
 
 				if (joint_index < num_joints)
