@@ -38,12 +38,16 @@ void Skinned(float3 pos,
 {
 	float4 dp0 = joint_reals[blend_indices[0]];
 	
+	float3 pos_s = 0;
 	float4 blend_real = 0;
 	float4 blend_dual = 0;
 	for (int i = 0; i < 4; ++ i)
 	{
 		float4 joint_real = joint_reals[blend_indices[i]];
 		float4 joint_dual = joint_duals[blend_indices[i]];
+		
+		float scale = length(joint_real);
+		joint_real /= scale;
 
 		float weight = blend_weights[i];
 		
@@ -53,15 +57,12 @@ void Skinned(float3 pos,
 			joint_dual = -joint_dual;
 		}
 
+		pos_s += pos * scale * weight;
 		blend_real += joint_real * weight;
 		blend_dual += joint_dual * weight;
 	}
 
-	float inv_len = 1 / length(blend_real);
-	blend_real *= inv_len;
-	blend_dual *= inv_len;
-
-	result_pos = pos + 2 * cross(blend_real.xyz, cross(blend_real.xyz, pos) + blend_real.w * pos);
+	result_pos = pos_s + 2 * cross(blend_real.xyz, cross(blend_real.xyz, pos_s) + blend_real.w * pos_s);
 	float3 trans = 2 * (blend_real.w * blend_dual.xyz - blend_dual.w * blend_real.xyz + cross(blend_real.xyz, blend_dual.xyz));
 	result_pos += trans;
 

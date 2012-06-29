@@ -125,23 +125,17 @@ namespace KlayGE
 			create_device_flags |= D3D11_CREATE_DEVICE_DEBUG;
 #endif
 
-			bool use_nvperfhud = (adapter_->Description() == L"NVIDIA PerfHUD");
-
 			std::vector<boost::tuple<D3D_DRIVER_TYPE, std::wstring> > dev_type_behaviors;
-			if (use_nvperfhud)
-			{
-				dev_type_behaviors.push_back(boost::make_tuple(D3D_DRIVER_TYPE_REFERENCE, std::wstring(L"PerfHUD")));
-			}
-			else
-			{
-				dev_type_behaviors.push_back(boost::make_tuple(D3D_DRIVER_TYPE_HARDWARE, std::wstring(L"HW")));
-				dev_type_behaviors.push_back(boost::make_tuple(D3D_DRIVER_TYPE_WARP, std::wstring(L"WARP")));
-				dev_type_behaviors.push_back(boost::make_tuple(D3D_DRIVER_TYPE_SOFTWARE, std::wstring(L"SW")));
-				dev_type_behaviors.push_back(boost::make_tuple(D3D_DRIVER_TYPE_REFERENCE, std::wstring(L"REF")));
-			}
+			dev_type_behaviors.push_back(boost::make_tuple(D3D_DRIVER_TYPE_HARDWARE, std::wstring(L"HW")));
+			dev_type_behaviors.push_back(boost::make_tuple(D3D_DRIVER_TYPE_WARP, std::wstring(L"WARP")));
+			dev_type_behaviors.push_back(boost::make_tuple(D3D_DRIVER_TYPE_SOFTWARE, std::wstring(L"SW")));
+			dev_type_behaviors.push_back(boost::make_tuple(D3D_DRIVER_TYPE_REFERENCE, std::wstring(L"REF")));
 
 			D3D_FEATURE_LEVEL const feature_levels[] =
 			{
+#if (_WIN32_WINNT >= 0x0602 /*_WIN32_WINNT_WIN8*/)
+				D3D_FEATURE_LEVEL_11_1,
+#endif
 				D3D_FEATURE_LEVEL_11_0,
 				D3D_FEATURE_LEVEL_10_1,
 				D3D_FEATURE_LEVEL_10_0,
@@ -157,7 +151,7 @@ namespace KlayGE
 				ID3D11DeviceContext* d3d_imm_ctx = NULL;
 				IDXGIAdapter* dx_adapter = NULL;
 				D3D_DRIVER_TYPE dev_type = boost::get<0>(dev_type_beh);
-				if ((D3D_DRIVER_TYPE_HARDWARE == dev_type) || use_nvperfhud)
+				if (D3D_DRIVER_TYPE_HARDWARE == dev_type)
 				{
 					dx_adapter = adapter_->Adapter().get();
 					dev_type = D3D_DRIVER_TYPE_UNKNOWN;
@@ -200,28 +194,34 @@ namespace KlayGE
 						oss << adapter_->Description() << L" " << boost::get<1>(dev_type_beh);
 						switch (out_feature_level)
 						{
+#if (_WIN32_WINNT >= 0x0602 /*_WIN32_WINNT_WIN8*/)
+						case D3D_FEATURE_LEVEL_11_1:
+							oss << L" D3D Level 11.1";
+							break;
+#endif
+
 						case D3D_FEATURE_LEVEL_11_0:
-							oss << L" Full D3D11";
+							oss << L" D3D Level 11";
 							break;
 
 						case D3D_FEATURE_LEVEL_10_1:
-							oss << L" D3D11 Level 10.1";
+							oss << L" D3D Level 10.1";
 							break;
 
 						case D3D_FEATURE_LEVEL_10_0:
-							oss << L" D3D11 Level 10";
+							oss << L" D3D Level 10";
 							break;
 
 						case D3D_FEATURE_LEVEL_9_3:
-							oss << L" D3D11 Level 9.3";
+							oss << L" D3D Level 9.3";
 							break;
 
 						case D3D_FEATURE_LEVEL_9_2:
-							oss << L" D3D11 Level 9.2";
+							oss << L" D3D Level 9.2";
 							break;
 
 						case D3D_FEATURE_LEVEL_9_1:
-							oss << L" D3D11 Level 9.1";
+							oss << L" D3D Level 9.1";
 							break;
 						}
 						if (settings.sample_count > 1)

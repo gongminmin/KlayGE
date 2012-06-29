@@ -58,8 +58,6 @@ namespace KlayGE
 			{
 			}
 
-			uint32_t size;
-
 			struct VariableDesc
 			{
 				std::string name;
@@ -70,6 +68,8 @@ namespace KlayGE
 				uint16_t elements;
 			};
 			std::vector<VariableDesc> var_desc;
+
+			uint32_t size;
 		};
 		std::vector<ConstantBufferDesc> cb_desc;
 
@@ -114,7 +114,7 @@ namespace KlayGE
 			return shader_code_[ST_VertexShader].first;
 		}
 
-		size_t VSSignature() const
+		uint32_t VSSignature() const
 		{
 			return vs_signature_;
 		}
@@ -156,7 +156,7 @@ namespace KlayGE
 		boost::array<std::vector<char>, ST_NumShaderTypes> dirty_;
 		boost::array<std::vector<std::vector<uint8_t> >, ST_NumShaderTypes> mem_cbufs_;
 
-		size_t vs_signature_;
+		uint32_t vs_signature_;
 	};
 
 	typedef boost::shared_ptr<D3D11ShaderObject> D3D11ShaderObjectPtr;

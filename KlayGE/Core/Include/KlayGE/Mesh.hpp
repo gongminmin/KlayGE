@@ -38,7 +38,6 @@
 #include <KlayGE/Math.hpp>
 
 #include <vector>
-#include <map>
 #include <string>
 
 #include <boost/function.hpp>
@@ -51,8 +50,6 @@
 #ifdef KLAYGE_COMPILER_MSVC
 #pragma warning(pop)
 #endif
-
-#include <boost/container/flat_map.hpp>
 
 namespace KlayGE
 {
@@ -264,9 +261,11 @@ namespace KlayGE
 
 		Quaternion bind_real;
 		Quaternion bind_dual;
+		float bind_scale;
 
 		Quaternion inverse_origin_real;
 		Quaternion inverse_origin_dual;
+		float inverse_origin_scale;
 
 		int16_t parent;
 	};
@@ -276,10 +275,11 @@ namespace KlayGE
 		std::vector<uint32_t> frame_id;
 		std::vector<Quaternion> bind_real;
 		std::vector<Quaternion> bind_dual;
+		std::vector<float> bind_scale;
 
-		std::pair<Quaternion, Quaternion> Frame(float frame) const;
+		std::pair<std::pair<Quaternion, Quaternion>, float> Frame(float frame) const;
 	};
-	typedef boost::container::flat_map<std::string, KeyFrames> KeyFramesType;
+	typedef std::vector<KeyFrames> KeyFramesType;
 
 	class KLAYGE_CORE_API SkinnedModel : public RenderModel
 	{

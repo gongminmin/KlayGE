@@ -962,7 +962,7 @@ namespace KlayGE
 			oss.write(reinterpret_cast<char const *>(&len), sizeof(len));
 			oss.write(reinterpret_cast<char const *>(&shader_code_[type].second[0]), len);
 
-			uint32_t blob_size = code_blob->GetBufferSize();
+			uint32_t blob_size = static_cast<uint32_t>(code_blob->GetBufferSize());
 			NativeToLittleEndian<sizeof(blob_size)>(&blob_size);
 			oss.write(reinterpret_cast<char const *>(&blob_size), sizeof(blob_size));
 			oss.write(reinterpret_cast<char const *>(code_blob->GetBufferPointer()), code_blob->GetBufferSize());
@@ -1266,142 +1266,145 @@ namespace KlayGE
 				err_msg->Release();
 			}
 
-			ID3D11ShaderReflection* reflection;
-			D3DReflect(code->GetBufferPointer(), code->GetBufferSize(), IID_ID3D11ShaderReflection, reinterpret_cast<void**>(&reflection));
-			if (reflection != NULL)
+			if (code)
 			{
-				D3D11_SHADER_DESC desc;
-				reflection->GetDesc(&desc);
-
-				shader_desc_[type].cb_desc.resize(desc.ConstantBuffers);
-				for (UINT c = 0; c < desc.ConstantBuffers; ++ c)
+				ID3D11ShaderReflection* reflection;
+				D3DReflect(code->GetBufferPointer(), code->GetBufferSize(), IID_ID3D11ShaderReflection, reinterpret_cast<void**>(&reflection));
+				if (reflection != NULL)
 				{
-					ID3D11ShaderReflectionConstantBuffer* reflection_cb = reflection->GetConstantBufferByIndex(c);
+					D3D11_SHADER_DESC desc;
+					reflection->GetDesc(&desc);
 
-					D3D11_SHADER_BUFFER_DESC cb_desc;
-					reflection_cb->GetDesc(&cb_desc);
-					shader_desc_[type].cb_desc[c].size = cb_desc.Size;
-
-					for (UINT v = 0; v < cb_desc.Variables; ++ v)
+					shader_desc_[type].cb_desc.resize(desc.ConstantBuffers);
+					for (UINT c = 0; c < desc.ConstantBuffers; ++ c)
 					{
-						ID3D11ShaderReflectionVariable* reflection_var = reflection_cb->GetVariableByIndex(v);
+						ID3D11ShaderReflectionConstantBuffer* reflection_cb = reflection->GetConstantBufferByIndex(c);
 
-						D3D11_SHADER_VARIABLE_DESC var_desc;
-						reflection_var->GetDesc(&var_desc);
-						if (var_desc.uFlags & D3D_SVF_USED)
+						D3D11_SHADER_BUFFER_DESC cb_desc;
+						reflection_cb->GetDesc(&cb_desc);
+						shader_desc_[type].cb_desc[c].size = cb_desc.Size;
+
+						for (UINT v = 0; v < cb_desc.Variables; ++ v)
 						{
-							RenderEffectParameterPtr const & p = effect.ParameterByName(var_desc.Name);
-							if (p)
-							{
-								D3D11_SHADER_TYPE_DESC type_desc;
-								reflection_var->GetType()->GetDesc(&type_desc);
+							ID3D11ShaderReflectionVariable* reflection_var = reflection_cb->GetVariableByIndex(v);
 
-								D3D11ShaderDesc::ConstantBufferDesc::VariableDesc vd;
-								vd.name = var_desc.Name;
-								vd.start_offset = var_desc.StartOffset;
-								vd.type = static_cast<uint8_t>(type_desc.Type);
-								vd.rows = static_cast<uint8_t>(type_desc.Rows);
-								vd.columns = static_cast<uint8_t>(type_desc.Columns);
-								vd.elements = static_cast<uint16_t>(type_desc.Elements);
-								shader_desc_[type].cb_desc[c].var_desc.push_back(vd);
+							D3D11_SHADER_VARIABLE_DESC var_desc;
+							reflection_var->GetDesc(&var_desc);
+							if (var_desc.uFlags & D3D_SVF_USED)
+							{
+								RenderEffectParameterPtr const & p = effect.ParameterByName(var_desc.Name);
+								if (p)
+								{
+									D3D11_SHADER_TYPE_DESC type_desc;
+									reflection_var->GetType()->GetDesc(&type_desc);
+
+									D3D11ShaderDesc::ConstantBufferDesc::VariableDesc vd;
+									vd.name = var_desc.Name;
+									vd.start_offset = var_desc.StartOffset;
+									vd.type = static_cast<uint8_t>(type_desc.Type);
+									vd.rows = static_cast<uint8_t>(type_desc.Rows);
+									vd.columns = static_cast<uint8_t>(type_desc.Columns);
+									vd.elements = static_cast<uint16_t>(type_desc.Elements);
+									shader_desc_[type].cb_desc[c].var_desc.push_back(vd);
+								}
 							}
 						}
 					}
-				}
 
-				int num_samplers = -1;
-				int num_srvs = -1;
-				int num_uavs = -1;
-				for (uint32_t i = 0; i < desc.BoundResources; ++ i)
-				{
-					D3D11_SHADER_INPUT_BIND_DESC si_desc;
-					reflection->GetResourceBindingDesc(i, &si_desc);
-
-					switch (si_desc.Type)
+					int num_samplers = -1;
+					int num_srvs = -1;
+					int num_uavs = -1;
+					for (uint32_t i = 0; i < desc.BoundResources; ++ i)
 					{
-					case D3D_SIT_SAMPLER:
-						num_samplers = std::max(num_samplers, static_cast<int>(si_desc.BindPoint));
-						break;
+						D3D11_SHADER_INPUT_BIND_DESC si_desc;
+						reflection->GetResourceBindingDesc(i, &si_desc);
 
-					case D3D_SIT_TEXTURE:
-					case D3D_SIT_STRUCTURED:
-					case D3D_SIT_BYTEADDRESS:
-						num_srvs = std::max(num_srvs, static_cast<int>(si_desc.BindPoint));
-						break;
-
-					case D3D_SIT_UAV_RWTYPED:
-					case D3D_SIT_UAV_RWSTRUCTURED:
-					case D3D_SIT_UAV_RWBYTEADDRESS:
-					case D3D_SIT_UAV_APPEND_STRUCTURED:
-					case D3D_SIT_UAV_CONSUME_STRUCTURED:
-						num_uavs = std::max(num_uavs, static_cast<int>(si_desc.BindPoint));
-						break;
-
-					default:
-						break;
-					}
-				}
-
-				shader_desc_[type].num_samplers = static_cast<uint16_t>(num_samplers + 1);
-				shader_desc_[type].num_srvs = static_cast<uint16_t>(num_srvs + 1);
-				shader_desc_[type].num_uavs = static_cast<uint16_t>(num_uavs + 1);
-
-				for (uint32_t i = 0; i < desc.BoundResources; ++ i)
-				{
-					D3D11_SHADER_INPUT_BIND_DESC si_desc;
-					reflection->GetResourceBindingDesc(i, &si_desc);
-
-					switch (si_desc.Type)
-					{
-					case D3D_SIT_TEXTURE:
-					case D3D_SIT_SAMPLER:
-					case D3D_SIT_STRUCTURED:
-					case D3D_SIT_BYTEADDRESS:
-					case D3D_SIT_UAV_RWTYPED:
-					case D3D_SIT_UAV_RWSTRUCTURED:
-					case D3D_SIT_UAV_RWBYTEADDRESS:
-					case D3D_SIT_UAV_APPEND_STRUCTURED:
-					case D3D_SIT_UAV_CONSUME_STRUCTURED:
+						switch (si_desc.Type)
 						{
-							RenderEffectParameterPtr const & p = effect.ParameterByName(si_desc.Name);
-							if (p)
-							{
-								D3D11ShaderDesc::BoundResourceDesc brd;
-								brd.name = si_desc.Name;
-								brd.type = static_cast<uint8_t>(si_desc.Type);
-								brd.bind_point = static_cast<uint16_t>(si_desc.BindPoint);
-								shader_desc_[type].res_desc.push_back(brd);
-							}
+						case D3D_SIT_SAMPLER:
+							num_samplers = std::max(num_samplers, static_cast<int>(si_desc.BindPoint));
+							break;
+
+						case D3D_SIT_TEXTURE:
+						case D3D_SIT_STRUCTURED:
+						case D3D_SIT_BYTEADDRESS:
+							num_srvs = std::max(num_srvs, static_cast<int>(si_desc.BindPoint));
+							break;
+
+						case D3D_SIT_UAV_RWTYPED:
+						case D3D_SIT_UAV_RWSTRUCTURED:
+						case D3D_SIT_UAV_RWBYTEADDRESS:
+						case D3D_SIT_UAV_APPEND_STRUCTURED:
+						case D3D_SIT_UAV_CONSUME_STRUCTURED:
+							num_uavs = std::max(num_uavs, static_cast<int>(si_desc.BindPoint));
+							break;
+
+						default:
+							break;
 						}
-						break;
-
-					default:
-						break;
 					}
-				}
 
-				if (ST_VertexShader == type)
-				{
-					vs_signature_ = 0;
-					D3D11_SIGNATURE_PARAMETER_DESC signature;
-					for (uint32_t i = 0; i < desc.InputParameters; ++ i)
+					shader_desc_[type].num_samplers = static_cast<uint16_t>(num_samplers + 1);
+					shader_desc_[type].num_srvs = static_cast<uint16_t>(num_srvs + 1);
+					shader_desc_[type].num_uavs = static_cast<uint16_t>(num_uavs + 1);
+
+					for (uint32_t i = 0; i < desc.BoundResources; ++ i)
 					{
-						reflection->GetInputParameterDesc(i, &signature);
+						D3D11_SHADER_INPUT_BIND_DESC si_desc;
+						reflection->GetResourceBindingDesc(i, &si_desc);
 
-						size_t seed = boost::hash_range(signature.SemanticName, signature.SemanticName + strlen(signature.SemanticName));
-						boost::hash_combine(seed, signature.SemanticIndex);
-						boost::hash_combine(seed, signature.Register);
-						boost::hash_combine(seed, signature.SystemValueType);
-						boost::hash_combine(seed, signature.ComponentType);
-						boost::hash_combine(seed, signature.Mask);
-						boost::hash_combine(seed, signature.ReadWriteMask);
-						boost::hash_combine(seed, signature.Stream);
+						switch (si_desc.Type)
+						{
+						case D3D_SIT_TEXTURE:
+						case D3D_SIT_SAMPLER:
+						case D3D_SIT_STRUCTURED:
+						case D3D_SIT_BYTEADDRESS:
+						case D3D_SIT_UAV_RWTYPED:
+						case D3D_SIT_UAV_RWSTRUCTURED:
+						case D3D_SIT_UAV_RWBYTEADDRESS:
+						case D3D_SIT_UAV_APPEND_STRUCTURED:
+						case D3D_SIT_UAV_CONSUME_STRUCTURED:
+							{
+								RenderEffectParameterPtr const & p = effect.ParameterByName(si_desc.Name);
+								if (p)
+								{
+									D3D11ShaderDesc::BoundResourceDesc brd;
+									brd.name = si_desc.Name;
+									brd.type = static_cast<uint8_t>(si_desc.Type);
+									brd.bind_point = static_cast<uint16_t>(si_desc.BindPoint);
+									shader_desc_[type].res_desc.push_back(brd);
+								}
+							}
+							break;
 
-						boost::hash_combine(vs_signature_, seed);
+						default:
+							break;
+						}
 					}
-				}
 
-				reflection->Release();
+					if (ST_VertexShader == type)
+					{
+						vs_signature_ = 0;
+						D3D11_SIGNATURE_PARAMETER_DESC signature;
+						for (uint32_t i = 0; i < desc.InputParameters; ++ i)
+						{
+							reflection->GetInputParameterDesc(i, &signature);
+
+							size_t seed = boost::hash_range(signature.SemanticName, signature.SemanticName + strlen(signature.SemanticName));
+							boost::hash_combine(seed, signature.SemanticIndex);
+							boost::hash_combine(seed, signature.Register);
+							boost::hash_combine(seed, signature.SystemValueType);
+							boost::hash_combine(seed, signature.ComponentType);
+							boost::hash_combine(seed, signature.Mask);
+							boost::hash_combine(seed, signature.ReadWriteMask);
+							boost::hash_combine(seed, signature.Stream);
+
+							boost::hash_combine(vs_signature_, seed);
+						}
+					}
+
+					reflection->Release();
+				}
 			}
 		}
 
@@ -1581,7 +1584,7 @@ namespace KlayGE
 					D3D11ShaderParameterHandle p_handle;
 					p_handle.shader_type = static_cast<uint8_t>(type);
 					p_handle.param_type = static_cast<D3D_SHADER_VARIABLE_TYPE>(shader_desc_[type].cb_desc[c].var_desc[v].type);
-					p_handle.cbuff = c;
+					p_handle.cbuff = static_cast<uint32_t>(c);
 					p_handle.offset = shader_desc_[type].cb_desc[c].var_desc[v].start_offset;
 					p_handle.elements = shader_desc_[type].cb_desc[c].var_desc[v].elements;
 					p_handle.rows = shader_desc_[type].cb_desc[c].var_desc[v].rows;

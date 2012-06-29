@@ -15,16 +15,26 @@
 #include <sstream>
 #include <algorithm>
 
-namespace KlayGE
+namespace
 {
 	struct MaterialIDSortOp
 	{
-		bool operator()(MeshExtractor::MeshStruct const & lhs, MeshExtractor::MeshStruct const & rhs) const
+		bool operator()(KlayGE::MeshExtractor::MeshStruct const & lhs, KlayGE::MeshExtractor::MeshStruct const & rhs) const
 		{
 			return lhs.material_id < rhs.material_id;
 		}
 	};
 
+	std::string RemoveQuote(std::string const & str)
+	{
+		std::string ret = str;
+		ret.erase(std::remove(ret.begin(), ret.end(), '\"'), ret.end());
+		return ret;
+	}
+}
+
+namespace KlayGE
+{
 	MeshExtractor::MeshExtractor(std::ostream* out)
 		: start_frame_(0), end_frame_(0), frame_rate_(25),
 			vertexExportSettings_(VES_ALL), userExportSettings_(UES_ALL)
@@ -141,7 +151,7 @@ namespace KlayGE
 			if (fitr == joints_.end()) continue;
 
 			JointStruct& joint = fitr->second;
-			os << "\t\t<bone name=\"" << fitr->first;
+			os << "\t\t<bone name=\"" << RemoveQuote(fitr->first);
 
 			int parent_id = -1;
 			fitr = joints_.find(joint.parent_name);
@@ -192,8 +202,8 @@ namespace KlayGE
 				for (std::vector<TextureSlot>::iterator itr=mtl.texture_slots.begin();
 					itr!=mtl.texture_slots.end(); ++itr)
 				{
-					os << "\t\t\t\t<texture type=\"" << itr->first
-						<< "\" name=\"" << itr->second << "\"/>" << std::endl;
+					os << "\t\t\t\t<texture type=\"" << RemoveQuote(itr->first)
+						<< "\" name=\"" << RemoveQuote(itr->second) << "\"/>" << std::endl;
 				}
 				os << "\t\t\t</textures_chunk>" << std::endl;
 			}
@@ -210,7 +220,7 @@ namespace KlayGE
 		for (size_t i=0; i<obj_meshes_.size(); ++i)
 		{
 			MeshStruct& mesh = obj_meshes_[i];
-			os << "\t\t<mesh name=\"" << mesh.name
+			os << "\t\t<mesh name=\"" << RemoveQuote(mesh.name)
 				<< "\" mtl_id=\"" << mesh.material_id << "\">" << std::endl;
 
 			os << "\t\t\t<vertices_chunk>" << std::endl;
@@ -322,7 +332,7 @@ namespace KlayGE
 			KeyframeStruct& kf = keyframes_[i];
 			size_t frames = std::min<size_t>(kf.bind_reals.size(), kf.bind_duals.size());
 
-			os << "\t\t<key_frame joint=\"" << kf.joint << "\">" << std::endl;
+			os << "\t\t<key_frame joint=\"" << RemoveQuote(kf.joint) << "\">" << std::endl;
 			for (size_t j = 0; j < frames; ++ j)
 			{
 				Quat const & bind_real = kf.bind_duals[j];

@@ -121,8 +121,7 @@ namespace
 		}
 	};
 
-	bool bind_cmp(std::pair<std::string, float> const& lhs,
-		std::pair<std::string, float> const& rhs)
+	bool bind_cmp(std::pair<INode*, float> const& lhs, std::pair<INode*, float> const& rhs)
 	{
 		return lhs.second > rhs.second;
 	}
@@ -161,12 +160,91 @@ namespace
 		}
 	}
 
+	Quat ToQuaternion(Matrix3 const & mat)
+	{
+		Quat quat;
+		float s;
+		float const tr = mat.GetRow(0).x + mat.GetRow(1).y + mat.GetRow(2).z;
+
+		// check the diagonal
+		if (tr > 0)
+		{
+			s = sqrt(tr + 1);
+			quat.w = s * 0.5f;
+			s = 0.5f / s;
+			quat.x = (mat.GetRow(1).z - mat.GetRow(2).y) * s;
+			quat.y = (mat.GetRow(2).x - mat.GetRow(0).z) * s;
+			quat.z = (mat.GetRow(0).y - mat.GetRow(1).x) * s;
+		}
+		else
+		{
+			if ((mat.GetRow(1).y > mat.GetRow(0).x) && (mat.GetRow(2).z <= mat.GetRow(1).y))
+			{
+				s = sqrt((mat.GetRow(1).y - (mat.GetRow(2).z + mat.GetRow(0).x)) + 1);
+
+				quat.y = s * 0.5f;
+
+				if (abs(s) > 1e-6f)
+				{
+					s = 0.5f / s;
+				}
+
+				quat.w = (mat.GetRow(2).x - mat.GetRow(0).z) * s;
+				quat.z = (mat.GetRow(2).y + mat.GetRow(1).z) * s;
+				quat.x = (mat.GetRow(0).y + mat.GetRow(1).x) * s;
+			}
+			else
+			{
+				if (((mat.GetRow(1).y <= mat.GetRow(0).x) && (mat.GetRow(2).z > mat.GetRow(0).x)) || (mat.GetRow(2).z > mat.GetRow(1).y))
+				{
+					s = sqrt((mat.GetRow(2).z - (mat.GetRow(0).x + mat.GetRow(1).y)) + 1);
+
+					quat.z = s * 0.5f;
+
+					if (abs(s) > 1e-6f)
+					{
+						s = 0.5f / s;
+					}
+
+					quat.w = (mat.GetRow(0).y - mat.GetRow(1).x) * s;
+					quat.x = (mat.GetRow(0).z + mat.GetRow(2).x) * s;
+					quat.y = (mat.GetRow(1).z + mat.GetRow(2).y) * s;
+				}
+				else
+				{
+					s = sqrt((mat.GetRow(0).x - (mat.GetRow(1).y + mat.GetRow(2).z)) + 1);
+
+					quat.x = s * 0.5f;
+
+					if (abs(s) > 1e-6f)
+					{
+						s = 0.5f / s;
+					}
+
+					quat.w = (mat.GetRow(1).z - mat.GetRow(2).y) * s;
+					quat.y = (mat.GetRow(1).x + mat.GetRow(0).y) * s;
+					quat.z = (mat.GetRow(2).x + mat.GetRow(0).z) * s;
+				}
+			}
+		}
+
+		quat.Normalize();
+		return quat;
+	}
+
 	Quat QuatTransToUDQ(Quat const & q, Point3 const & t)
 	{
 		return Quat(+0.5f * (+t[0] * q[3] + t[1] * q[2] - t[2] * q[1]),
 			+0.5f * (-t[0] * q[2] + t[1] * q[3] + t[2] * q[0]),
 			+0.5f * (+t[0] * q[1] - t[1] * q[0] + t[2] * q[3]),
 			-0.5f * (+t[0] * q[0] + t[1] * q[1] + t[2] * q[2]));
+	}
+
+	std::string RemoveQuote(std::string const & str)
+	{
+		std::string ret = str;
+		ret.erase(std::remove(ret.begin(), ret.end(), '\"'), ret.end());
+		return ret;
 	}
 }
 
@@ -187,10 +265,7 @@ namespace KlayGE
 	{
 		if (is_bone(node))
 		{
-			std::string joint_name = tstr_to_str(node->GetName());
-			joint_and_mat_t jam;
-			jam.joint_node = node;
-			joint_nodes_[joint_name] = jam;
+			joint_nodes_.insert(std::make_pair(node, Matrix3()));
 		}
 		for (int i = 0; i < node->NumberOfChildren(); ++ i)
 		{
@@ -206,24 +281,23 @@ namespace KlayGE
 			joint_t root;
 			root.real.Identity();
 			root.dual.x = root.dual.y = root.dual.z = root.dual.w = 0;
-			root.parent_name = "";
-			std::string root_name = tstr_to_str(root_node_->GetName());
-			joints_.insert(std::make_pair(root_name, root));
+			root.parent_node = NULL;
+			joints_.insert(std::make_pair(root_node_, root));
 
 			int tpf = GetTicksPerFrame();
 
 			key_frame_t kf;
-			kf.joint = root_name;
 			for (int i = start_frame_; i < end_frame_; ++ i)
 			{
 				Matrix3 root_tm = root_node_->GetNodeTM(i * tpf);
 
-				Quat quat = this->quat_from_matrix(root_tm);
-				Point3 pos = this->point_from_matrix(root_tm);
-				kf.reals.push_back(quat);
-				kf.duals.push_back(QuatTransToUDQ(quat, pos));
+				Point3 scale;
+				Quat real, dual;
+				this->decompose_matrix(scale, real, dual, root_tm);
+				kf.reals.push_back(real * scale.x);
+				kf.duals.push_back(dual);
 			}
-			kfs_.push_back(kf);
+			kfs_.insert(std::make_pair(root_node_, kf));
 
 			this->find_joints(root_node_);
 
@@ -280,9 +354,9 @@ namespace KlayGE
 		typedef BOOST_TYPEOF(joint_nodes_) jn_type;
 		BOOST_FOREACH(jn_type::const_reference jn, joint_nodes_)
 		{
-			if (is_bone(jn.second.joint_node))
+			if (is_bone(jn.first))
 			{
-				jnodes.push_back(jn.second.joint_node);
+				jnodes.push_back(jn.first);
 			}
 		}
 		typedef BOOST_TYPEOF(nodes) nodes_type;
@@ -447,11 +521,11 @@ namespace KlayGE
 
 				obj_triangles.resize(mesh.getNumFaces());
 
-				for (int channel = 1; channel < MAX_MESHMAPS; channel ++)
+				for (int channel = 1; channel < MAX_MESHMAPS; ++ channel)
 				{
 					if (mesh.mapSupport(channel))
 					{
-						const int num_map_verts = mesh.getNumMapVerts(channel);
+						int const num_map_verts = mesh.getNumMapVerts(channel);
 						if (num_map_verts > 0)
 						{
 							texs[channel].resize(num_map_verts, Point2(0.0f, 0.0f));
@@ -651,7 +725,7 @@ namespace KlayGE
 							parent_node = parent_node->GetParentNode();
 						}
 
-						pos_binds.second.push_back(std::make_pair(tstr_to_str(parent_node->GetName()), 1.0f));
+						pos_binds.second.push_back(std::make_pair(parent_node, 1.0f));
 					}
 
 					Point3 v0 = pos_binds.first * tm;
@@ -661,7 +735,7 @@ namespace KlayGE
 						assert(joints_.find(pos_binds.second[i].first) != joints_.end());
 
 						pos_binds.first += pos_binds.second[i].second
-							* (v0 * joint_nodes_[pos_binds.second[i].first].mesh_init_matrix);
+							* (v0 * joint_nodes_[pos_binds.second[i].first]);
 					}
 
 					if (pos_binds.second.size() > static_cast<size_t>(joints_per_ver_))
@@ -679,13 +753,6 @@ namespace KlayGE
 						for (int j = 0; j < joints_per_ver_; ++ j)
 						{
 							pos_binds.second[j].second /= sum_weight;
-						}
-					}
-					else
-					{
-						for (int j = static_cast<int>(pos_binds.second.size()); j < joints_per_ver_; ++ j)
-						{
-							pos_binds.second.push_back(std::make_pair(tstr_to_str(root_node_->GetName()), 0.0f));
 						}
 					}
 				}
@@ -758,7 +825,7 @@ namespace KlayGE
 				for (std::map<int, std::vector<Point2> >::iterator uv_iter = texs.begin();
 					uv_iter != texs.end(); ++ uv_iter, ++ uv_layer)
 				{
-					Point2 tex = uv_iter->second[vertex_index.tex_indices[uv_layer]];
+					Point2 const & tex = uv_iter->second[vertex_index.tex_indices[uv_layer]];
 					obj_vertices[ver_index].tex.push_back(Point2(tex.x, 1 - tex.y));
 				}
 
@@ -789,18 +856,20 @@ namespace KlayGE
 			for (size_t i = mtl_base_index; i < objs_mtl_.size(); ++ i)
 			{
 				triangles_t obj_info_tris;
-				std::set<int> index_set;
+				std::vector<int> index_set;
 				for (size_t j = 0; j < obj_triangles.size(); ++ j)
 				{
 					if (face_mtl_id[j] == i)
 					{
-						index_set.insert(obj_triangles[j].vertex_index[0]);
-						index_set.insert(obj_triangles[j].vertex_index[1]);
-						index_set.insert(obj_triangles[j].vertex_index[2]);
+						index_set.push_back(obj_triangles[j].vertex_index[0]);
+						index_set.push_back(obj_triangles[j].vertex_index[1]);
+						index_set.push_back(obj_triangles[j].vertex_index[2]);
 
 						obj_info_tris.push_back(obj_triangles[j]);
 					}
 				}
+				std::sort(index_set.begin(), index_set.end());
+				index_set.erase(std::unique(index_set.begin(), index_set.end()), index_set.end());
 
 				if (!obj_info_tris.empty())
 				{
@@ -813,7 +882,7 @@ namespace KlayGE
 
 					std::map<int, int> mapping;
 					int new_index = 0;
-					for (std::set<int>::iterator iter = index_set.begin(); iter != index_set.end(); ++ iter, ++ new_index)
+					for (std::vector<int>::iterator iter = index_set.begin(); iter != index_set.end(); ++ iter, ++ new_index)
 					{
 						obj_info.vertices.push_back(obj_vertices[*iter]);
 						mapping.insert(std::make_pair(*iter, new_index));
@@ -847,42 +916,56 @@ namespace KlayGE
 
 		int tpf = GetTicksPerFrame();
 
-		key_frame_t kf;
-		kf.joint = tstr_to_str(node->GetName());
-
 		INode* parent_node = node->GetParentNode();
 		if (!is_bone(parent_node))
 		{
 			parent_node = root_node_;
 		}
 
+		key_frame_t kf;
 		for (int i = start_frame_; i < end_frame_; ++ i)
 		{
 			Matrix3 local_tm = node->GetNodeTM(i * tpf) * Inverse(parent_node->GetNodeTM(i * tpf));
 
-			Quat quat = this->quat_from_matrix(local_tm);
-			Point3 pos = this->point_from_matrix(local_tm) * unit_scale_;
-			kf.reals.push_back(quat);
-			kf.duals.push_back(QuatTransToUDQ(quat, pos));
+			Point3 scale;
+			Quat real, dual;
+			this->decompose_matrix(scale, real, dual, local_tm);
+			kf.reals.push_back(real * scale.x);
+			kf.duals.push_back(dual);
 		}
 
-		kfs_.push_back(kf);
+		kfs_.insert(std::make_pair(node, kf));
 	}
 
-	Point3 meshml_extractor::point_from_matrix(Matrix3 const & mat)
+	void meshml_extractor::decompose_matrix(Point3& scale, Quat& real, Quat& dual, Matrix3 const & mat)
 	{
-		Point3 pos(mat.GetTrans());
-		std::swap(pos.y, pos.z);
+		Matrix3 mat_lh;
+		mat_lh.SetRow(0, Point3(mat.GetRow(0).x, mat.GetRow(0).z, mat.GetRow(0).y));
+		mat_lh.SetRow(1, Point3(mat.GetRow(2).x, mat.GetRow(2).z, mat.GetRow(2).y));
+		mat_lh.SetRow(2, Point3(mat.GetRow(1).x, mat.GetRow(1).z, mat.GetRow(1).y));
+		mat_lh.SetRow(3, Point3(mat.GetRow(3).x, mat.GetRow(3).z, mat.GetRow(3).y));
 
-		return pos;
-	}
+		int flip = mat_lh.Parity() ? -1 : +1;
 
-	Quat meshml_extractor::quat_from_matrix(Matrix3 const & mat)
-	{
-		Quat quat(mat);
-		std::swap(quat.y, quat.z);
+		scale.x = mat_lh.GetRow(0).Length();
+		scale.y = mat_lh.GetRow(1).Length();
+		scale.z = flip * mat_lh.GetRow(2).Length();
 
-		return quat;
+		Point3 trans = mat_lh.GetRow(3);
+
+		mat_lh.SetRow(0, mat_lh.GetRow(0) / scale.x);
+		mat_lh.SetRow(1, mat_lh.GetRow(1) / scale.y);
+		mat_lh.SetRow(2, mat_lh.GetRow(2) / scale.z);
+		mat_lh.SetRow(3, Point3(0, 0, 0));
+		real = ToQuaternion(mat_lh);
+
+		dual = QuatTransToUDQ(real, trans * unit_scale_);
+
+		if (flip * real.w < 0)
+		{
+			real = -real;
+			dual = -dual;
+		}
 	}
 
 	void meshml_extractor::extract_all_joint_tms()
@@ -892,12 +975,12 @@ namespace KlayGE
 		{
 			joint_t joint;
 
-			INode* parent_node = jn.second.joint_node->GetParentNode();
+			INode* parent_node = jn.first->GetParentNode();
 			if (!is_bone(parent_node))
 			{
 				parent_node = root_node_;
 			}
-			joint.parent_name = tstr_to_str(parent_node->GetName());
+			joint.parent_node = parent_node;
 
 			Matrix3 tmp_tm;
 			Matrix3 skin_init_tm;
@@ -905,7 +988,7 @@ namespace KlayGE
 			bool found = false;
 			for (size_t i = 0; i < physiques_.size(); ++ i)
 			{
-				if (MATRIX_RETURNED == physiques_[i]->GetInitNodeTM(jn.second.joint_node, tmp_tm))
+				if (MATRIX_RETURNED == physiques_[i]->GetInitNodeTM(jn.first, tmp_tm))
 				{
 					skin_init_tm = tmp_tm;
 					found = true;
@@ -916,7 +999,7 @@ namespace KlayGE
 			{
 				for (size_t i = 0; i < skins_.size(); ++ i)
 				{
-					if (SKIN_OK == skins_[i]->GetBoneInitTM(jn.second.joint_node, tmp_tm, false))
+					if (SKIN_OK == skins_[i]->GetBoneInitTM(jn.first, tmp_tm, false))
 					{
 						skin_init_tm = tmp_tm;
 						found = true;
@@ -927,21 +1010,22 @@ namespace KlayGE
 			if (!found)
 			{
 				// fake bone
-				skin_init_tm = jn.second.joint_node->GetNodeTM(0);
+				skin_init_tm = jn.first->GetNodeTM(0);
 			}
 
-			jn.second.mesh_init_matrix = Inverse(jn.second.joint_node->GetNodeTM(0)) * skin_init_tm;
+			jn.second = Inverse(jn.first->GetNodeTM(0)) * skin_init_tm;
 
-			Quat quat = this->quat_from_matrix(skin_init_tm);
-			Point3 pos = this->point_from_matrix(skin_init_tm) * unit_scale_;
-			joint.real = quat;
-			joint.dual = QuatTransToUDQ(quat, pos);
+			Point3 scale;
+			Quat real, dual;
+			this->decompose_matrix(scale, real, dual, skin_init_tm);
+			joint.real = real * scale.x;
+			joint.dual = dual;
 
 			joints_[jn.first] = joint;
 		}
 	}
 
-	void meshml_extractor::add_joint_weight(binds_t& binds, std::string const & joint_name, float weight)
+	void meshml_extractor::add_joint_weight(binds_t& binds, INode* joint_node, float weight)
 	{
 		if (weight > 0)
 		{
@@ -949,16 +1033,16 @@ namespace KlayGE
 			typedef BOOST_TYPEOF(binds) binds_type;
 			BOOST_FOREACH(binds_type::reference bind, binds)
 			{
-				if (bind.first == joint_name)
+				if (bind.first == joint_node)
 				{
 					bind.second += weight;
 					repeat = true;
 					break;
 				}
 			}
-			if (!repeat)
+			if (!repeat && (weight > 0))
 			{
-				binds.push_back(std::make_pair(joint_name, weight));
+				binds.push_back(std::make_pair(joint_node, weight));
 			}
 		}
 	}
@@ -993,8 +1077,7 @@ namespace KlayGE
 						case RIGID_NON_BLENDED_TYPE:
 							{
 								IPhyRigidVertex* phy_rigid_ver = static_cast<IPhyRigidVertex*>(phy_ver_exp);
-								this->add_joint_weight(positions[i].second,
-									tstr_to_str(phy_rigid_ver->GetNode()->GetName()), 1);
+								this->add_joint_weight(positions[i].second, phy_rigid_ver->GetNode(), 1);
 							}
 							break;
 
@@ -1004,7 +1087,7 @@ namespace KlayGE
 								for (int j = 0; j < phy_blended_rigid_ver->GetNumberNodes(); ++ j)
 								{
 									this->add_joint_weight(positions[i].second,
-										tstr_to_str(phy_blended_rigid_ver->GetNode(j)->GetName()),
+										phy_blended_rigid_ver->GetNode(j),
 										phy_blended_rigid_ver->GetWeight(j));
 								}
 							}
@@ -1038,7 +1121,7 @@ namespace KlayGE
 					for (int j = 0; j < skin_cd->GetNumAssignedBones(i); ++ j)
 					{
 						this->add_joint_weight(positions[i].second,
-							tstr_to_str(skin->GetBone(skin_cd->GetAssignedBone(i, j))->GetName()),
+							skin->GetBone(skin_cd->GetAssignedBone(i, j)),
 							skin_cd->GetBoneWeight(i, j));
 					}
 				}
@@ -1050,7 +1133,7 @@ namespace KlayGE
 
 	void meshml_extractor::remove_redundant_joints()
 	{
-		std::set<std::string> joints_used;
+		std::set<INode*> joints_used;
 		typedef BOOST_TYPEOF(objs_info_) oi_type;
 		BOOST_FOREACH(oi_type::const_reference obj_info, objs_info_)
 		{
@@ -1065,18 +1148,24 @@ namespace KlayGE
 			}
 		}
 
+		std::set<INode*> parent_joints_used;
 		typedef BOOST_TYPEOF(joints_) joints_type;
 		BOOST_FOREACH(joints_type::const_reference joint, joints_)
 		{
 			if (joints_used.find(joint.first) != joints_used.end())
 			{
 				joint_t const * j = &joint.second;
-				while (joints_.find(j->parent_name) != joints_.end())
+				while (j->parent_node != NULL)
 				{
-					joints_used.insert(j->parent_name);
-					j = &joints_[j->parent_name];
+					parent_joints_used.insert(j->parent_node);
+					j = &joints_[j->parent_node];
 				}
 			}
+		}
+
+		BOOST_FOREACH(std::set<INode*>::const_reference joint, parent_joints_used)
+		{
+			joints_used.insert(joint);
 		}
 
 		for (BOOST_AUTO(iter, joints_.begin()); iter != joints_.end();)
@@ -1239,42 +1328,42 @@ namespace KlayGE
 			this->sort_meshes_by_mtl();
 		}
 
-		std::map<std::string, int> joints_name_to_id;
-		std::vector<std::string> joints_id_to_name;
+		std::map<INode*, int> joints_node_to_id;
+		std::vector<INode*> joints_id_to_node;
 		{
 			typedef BOOST_TYPEOF(joints_) joints_type;
 			BOOST_FOREACH(joints_type::const_reference joint, joints_)
 			{
-				joints_id_to_name.push_back(joint.first);
+				joints_id_to_node.push_back(joint.first);
 			}
 
 			bool swapped = true;
 			while (swapped)
 			{
 				swapped = false;
-				for (int i = 0; i < static_cast<int>(joints_id_to_name.size()); ++ i)
+				for (int i = 0; i < static_cast<int>(joints_id_to_node.size()); ++ i)
 				{
 					int par_index = -1;
-					if (!joints_[joints_id_to_name[i]].parent_name.empty())
+					if (joints_[joints_id_to_node[i]].parent_node != NULL)
 					{
-						std::vector<std::string>::iterator par_iter = std::find(joints_id_to_name.begin(), joints_id_to_name.end(),
-							joints_[joints_id_to_name[i]].parent_name);
-						assert(par_iter != joints_id_to_name.end());
-						par_index = static_cast<int>(par_iter - joints_id_to_name.begin());
+						std::vector<INode*>::iterator par_iter = std::find(joints_id_to_node.begin(), joints_id_to_node.end(),
+							joints_[joints_id_to_node[i]].parent_node);
+						assert(par_iter != joints_id_to_node.end());
+						par_index = static_cast<int>(par_iter - joints_id_to_node.begin());
 					}
 
 					if (par_index > i)
 					{
-						std::swap(joints_id_to_name[i], joints_id_to_name[par_index]);
+						std::swap(joints_id_to_node[i], joints_id_to_node[par_index]);
 						swapped = true;
 						break;
 					}
 				}
 			}
 
-			for (int i = 0; i < static_cast<int>(joints_id_to_name.size()); ++ i)
+			for (int i = 0; i < static_cast<int>(joints_id_to_node.size()); ++ i)
 			{
-				joints_name_to_id.insert(std::make_pair(joints_id_to_name[i], i));
+				joints_node_to_id.insert(std::make_pair(joints_id_to_node[i], i));
 			}
 		}
 
@@ -1286,22 +1375,22 @@ namespace KlayGE
 		if (joints_per_ver_ > 0)
 		{
 			ofs << "\t<bones_chunk>" << endl;
-			typedef BOOST_TYPEOF(joints_id_to_name) jitn_type;
-			BOOST_FOREACH(jitn_type::const_reference joint_name, joints_id_to_name)
+			typedef BOOST_TYPEOF(joints_id_to_node) jitn_type;
+			BOOST_FOREACH(jitn_type::const_reference joint_node, joints_id_to_node)
 			{
 				int parent_id = -1;
-				if (!joints_[joint_name].parent_name.empty())
+				if (joints_[joint_node].parent_node != NULL)
 				{
-					assert(joints_name_to_id.find(joints_[joint_name].parent_name) != joints_name_to_id.end());
-					parent_id = joints_name_to_id[joints_[joint_name].parent_name];
-					assert(parent_id < joints_name_to_id[joint_name]);
+					assert(joints_node_to_id.find(joints_[joint_node].parent_node) != joints_node_to_id.end());
+					parent_id = joints_node_to_id[joints_[joint_node].parent_node];
+					assert(parent_id < joints_node_to_id[joint_node]);
 				}
 
-				ofs << "\t\t<bone name=\"" << joint_name
+				ofs << "\t\t<bone name=\"" << RemoveQuote(tstr_to_str(joint_node->GetName()))
 					<< "\" parent=\"" << parent_id
 					<< "\">" << endl;
 
-				joint_t const & joint = joints_[joint_name];
+				joint_t const & joint = joints_[joint_node];
 
 				ofs << "\t\t\t<bind_real x=\"" << joint.real.x
 					<< "\" y=\"" << joint.real.y
@@ -1344,8 +1433,8 @@ namespace KlayGE
 					typedef BOOST_TYPEOF(objs_mtl_[i].texture_slots) slots_type;
 					BOOST_FOREACH(slots_type::const_reference ts, objs_mtl_[i].texture_slots)
 					{
-						ofs << "\t\t\t\t<texture type=\"" << ts.first
-							<< "\" name=\"" << ts.second << "\"/>" << endl;
+						ofs << "\t\t\t\t<texture type=\"" << RemoveQuote(ts.first)
+							<< "\" name=\"" << RemoveQuote(ts.second) << "\"/>" << endl;
 					}
 					ofs << "\t\t\t</textures_chunk>" << endl;
 				}
@@ -1358,7 +1447,7 @@ namespace KlayGE
 		typedef BOOST_TYPEOF(objs_info_) oi_type;
 		BOOST_FOREACH(oi_type::const_reference obj_info, objs_info_)
 		{
-			ofs << "\t\t<mesh name=\"" << obj_info.name << "\" mtl_id=\"" << obj_info.mtl_id << "\">" << endl;
+			ofs << "\t\t<mesh name=\"" << RemoveQuote(obj_info.name) << "\" mtl_id=\"" << obj_info.mtl_id << "\">" << endl;
 
 			ofs << "\t\t\t<vertices_chunk>" << endl;
 			typedef BOOST_TYPEOF(obj_info.vertices) ov_type;
@@ -1405,8 +1494,8 @@ namespace KlayGE
 				typedef BOOST_TYPEOF(vertex.binds) vb_type;
 				BOOST_FOREACH(vb_type::const_reference bind, vertex.binds)
 				{
-					assert(joints_name_to_id.find(bind.first) != joints_name_to_id.end());
-					ofs << "\t\t\t\t\t<weight bone_index=\"" << joints_name_to_id[bind.first]
+					assert(joints_node_to_id.find(bind.first) != joints_node_to_id.end());
+					ofs << "\t\t\t\t\t<weight bone_index=\"" << joints_node_to_id[bind.first]
 						<< "\" weight=\"" << bind.second << "\"/>" << endl;
 				}
 
@@ -1433,12 +1522,14 @@ namespace KlayGE
 			ofs << "\t<key_frames_chunk start_frame=\"" << start_frame_
 				<< "\" end_frame=\"" << end_frame_
 				<< "\" frame_rate=\"" << frame_rate_ << "\">" << endl;
-			typedef BOOST_TYPEOF(kfs_) kfs_type;
-			BOOST_FOREACH(kfs_type::const_reference kf, kfs_)
+			typedef BOOST_TYPEOF(joints_id_to_node) jitn_type;
+			BOOST_FOREACH(jitn_type::const_reference joint_node, joints_id_to_node)
 			{
+				assert(kfs_.find(joint_node) != kfs_.end());
+				key_frame_t const & kf = kfs_[joint_node];
 				assert(kf.reals.size() == kf.duals.size());
 
-				ofs << "\t\t<key_frame joint=\"" << kf.joint << "\">" << endl;
+				ofs << "\t\t<key_frame joint=\"" << RemoveQuote(tstr_to_str(joint_node->GetName())) << "\">" << endl;
 
 				for (size_t i = 0; i < kf.reals.size(); ++ i)
 				{

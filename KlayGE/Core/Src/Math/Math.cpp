@@ -2507,11 +2507,7 @@ namespace KlayGE
 		template <typename T>
 		Quaternion_T<T> quat_trans_to_udq(Quaternion_T<T> const & q, Vector_T<T, 3> const & t)
 		{
-			return Quaternion_T<T>(
-				+T(0.5) * (+t.x() * q.w() + t.y() * q.z() - t.z() * q.y()),
-				+T(0.5) * (-t.x() * q.z() + t.y() * q.w() + t.z() * q.x()),
-				+T(0.5) * (+t.x() * q.y() - t.y() * q.x() + t.z() * q.w()),
-				-T(0.5) * (+t.x() * q.x() + t.y() * q.y() + t.z() * q.z()));
+			return mul(q, Quaternion_T<T>(T(0.5) * t.x(), T(0.5) * t.y(), T(0.5) * t.z(), T(0.0)));
 		}
 
 		template KLAYGE_CORE_API float3 udq_to_trans(Quaternion const & real, Quaternion const & dual);
@@ -2519,10 +2515,8 @@ namespace KlayGE
 		template <typename T>
 		Vector_T<T, 3> udq_to_trans(Quaternion_T<T> const & real, Quaternion_T<T> const & dual)
 		{
-			return Vector_T<T, 3>(
-				T(2.0) * (-dual.w() * real.x() + dual.x() * real.w() - dual.y() * real.z() + dual.z() * real.y()),
-				T(2.0) * (-dual.w() * real.y() + dual.x() * real.z() + dual.y() * real.w() - dual.z() * real.x()),
-				T(2.0) * (-dual.w() * real.z() - dual.x() * real.y() + dual.y() * real.x() + dual.z() * real.w()));
+			Quaternion_T<T> qeq0 = mul(conjugate(real), dual);
+			return T(2.0) * Vector_T<T, 3>(qeq0.x(), qeq0.y(), qeq0.z());
 		}
 
 		template KLAYGE_CORE_API float3 dq_to_trans(Quaternion const & real, Quaternion const & dual);
