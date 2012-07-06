@@ -302,19 +302,25 @@ namespace KlayGE
 			pass_scaned_.push_back(static_cast<uint32_t>((PT_OpaqueGBuffer << 24) + 1));
 		}
 
-		opaque_pre_depth_buffer_ = rf.MakeFrameBuffer();
-		transparency_back_pre_depth_buffer_ = rf.MakeFrameBuffer();
-		transparency_front_pre_depth_buffer_ = rf.MakeFrameBuffer();
-		opaque_g_buffer_ = rf.MakeFrameBuffer();
-		transparency_back_g_buffer_ = rf.MakeFrameBuffer();
-		transparency_front_g_buffer_ = rf.MakeFrameBuffer();
+		g_buffer_enables_.resize(3);
+		pre_depth_buffers_.resize(3);
+		g_buffers_.resize(3);
+		g_buffer_rt0_texs_.resize(3);
+		g_buffer_rt1_texs_.resize(3);
+		g_buffer_ds_texs_.resize(3);
+		g_buffer_depth_texs_.resize(3);
+		lighting_buffers_.resize(3);
+		lighting_texs_.resize(3);
+		shading_buffers_.resize(3);
+		shading_texs_.resize(3);
+		for (size_t i = 0; i < g_buffers_.size(); ++ i)
+		{
+			pre_depth_buffers_[i] = rf.MakeFrameBuffer();
+			g_buffers_[i] = rf.MakeFrameBuffer();
+			lighting_buffers_[i] = rf.MakeFrameBuffer();
+			shading_buffers_[i] = rf.MakeFrameBuffer();
+		}
 		shadowing_buffer_ = rf.MakeFrameBuffer();
-		opaque_lighting_buffer_ = rf.MakeFrameBuffer();
-		transparency_back_lighting_buffer_ = rf.MakeFrameBuffer();
-		transparency_front_lighting_buffer_ = rf.MakeFrameBuffer();
-		opaque_shading_buffer_ = rf.MakeFrameBuffer();
-		transparency_back_shading_buffer_ = rf.MakeFrameBuffer();
-		transparency_front_shading_buffer_ = rf.MakeFrameBuffer();
 		output_buffer_ = rf.MakeFrameBuffer();
 		ssr_buffer_ = rf.MakeFrameBuffer();
 
@@ -417,8 +423,8 @@ namespace KlayGE
 			technique_no_lighting_ = dr_effect_->TechniqueByName("NoLightingTech");
 			technique_shading_ = dr_effect_->TechniqueByName("ShadingTech");
 		}
-		technique_merge_shading_ = dr_effect_->TechniqueByName("MergeShadingTech");
-		technique_merge_shading_alpha_blend_ = dr_effect_->TechniqueByName("MergeShadingAlphaBlendTech");
+		technique_merge_shadings_[0] = dr_effect_->TechniqueByName("MergeShadingTech");
+		technique_merge_shadings_[1] = dr_effect_->TechniqueByName("MergeShadingAlphaBlendTech");
 
 		sm_buffer_ = rf.MakeFrameBuffer();
 		ElementFormat fmt;
@@ -618,19 +624,14 @@ namespace KlayGE
 
 		RenderEngine& re = rf.RenderEngineInstance();
 		CameraPtr const & camera = re.CurFrameBuffer()->GetViewport().camera;
-		opaque_pre_depth_buffer_->GetViewport().camera = camera;
-		transparency_back_pre_depth_buffer_->GetViewport().camera = camera;
-		transparency_front_pre_depth_buffer_->GetViewport().camera = camera;
-		opaque_g_buffer_->GetViewport().camera = camera;
-		transparency_back_g_buffer_->GetViewport().camera = camera;
-		transparency_front_g_buffer_->GetViewport().camera = camera;
+		for (size_t i = 0; i < g_buffers_.size(); ++ i)
+		{
+			pre_depth_buffers_[i]->GetViewport().camera = camera;
+			g_buffers_[i]->GetViewport().camera = camera;
+			lighting_buffers_[i]->GetViewport().camera = camera;
+			shading_buffers_[i]->GetViewport().camera = camera;
+		}
 		shadowing_buffer_->GetViewport().camera = camera;
-		opaque_lighting_buffer_->GetViewport().camera = camera;
-		transparency_back_lighting_buffer_->GetViewport().camera = camera;
-		transparency_front_lighting_buffer_->GetViewport().camera = camera;
-		opaque_shading_buffer_->GetViewport().camera = camera;
-		transparency_back_shading_buffer_->GetViewport().camera = camera;
-		transparency_front_shading_buffer_->GetViewport().camera = camera;
 		output_buffer_->GetViewport().camera = camera;
 
 		ElementFormat fmt8;
@@ -663,9 +664,7 @@ namespace KlayGE
 			}
 		}
 
-		RenderViewPtr opaque_ds_view;
-		RenderViewPtr transparency_back_ds_view;
-		RenderViewPtr transparency_front_ds_view;
+		std::vector<RenderViewPtr> ds_views(g_buffers_.size());
 		if (depth_texture_)
 		{
 			ElementFormat ds_fmt;
@@ -680,63 +679,36 @@ namespace KlayGE
 				ds_fmt = EF_D16;
 			}
 
-			opaque_ds_tex_ = rf.MakeTexture2D(width, height, 1, 1, ds_fmt, 1, 0,  EAH_GPU_Read | EAH_GPU_Write, NULL);
-			opaque_ds_view = rf.Make2DDepthStencilRenderView(*opaque_ds_tex_, 0, 0, 0);
-
-			transparency_back_ds_tex_ = rf.MakeTexture2D(width, height, 1, 1, ds_fmt, 1, 0,  EAH_GPU_Read | EAH_GPU_Write, NULL);
-			transparency_back_ds_view = rf.Make2DDepthStencilRenderView(*transparency_back_ds_tex_, 0, 0, 0);
-
-			transparency_front_ds_tex_ = rf.MakeTexture2D(width, height, 1, 1, ds_fmt, 1, 0,  EAH_GPU_Read | EAH_GPU_Write, NULL);
-			transparency_front_ds_view = rf.Make2DDepthStencilRenderView(*transparency_front_ds_tex_, 0, 0, 0);
+			for (size_t i = 0; i < g_buffers_.size(); ++ i)
+			{
+				g_buffer_ds_texs_[i] = rf.MakeTexture2D(width, height, 1, 1, ds_fmt, 1, 0,  EAH_GPU_Read | EAH_GPU_Write, NULL);
+				ds_views[i] = rf.Make2DDepthStencilRenderView(*g_buffer_ds_texs_[i], 0, 0, 0);
+			}
 		}
 		else
 		{
-			opaque_ds_view = rf.Make2DDepthStencilRenderView(width, height, EF_D16, 1, 0);
-			transparency_back_ds_view = rf.Make2DDepthStencilRenderView(width, height, EF_D16, 1, 0);
-			transparency_front_ds_view = rf.Make2DDepthStencilRenderView(width, height, EF_D16, 1, 0);
+			for (size_t i = 0; i < g_buffers_.size(); ++ i)
+			{
+				ds_views[i] = rf.Make2DDepthStencilRenderView(width, height, EF_D16, 1, 0);
+			}
 		}
 
-		opaque_depth_tex_ = rf.MakeTexture2D(width, height, MAX_IL_MIPMAP_LEVELS + 1, 1, fmt, 1, 0,  EAH_GPU_Read | EAH_GPU_Write | EAH_Generate_Mips, NULL);
-
-		opaque_g_buffer_rt0_tex_ = rf.MakeTexture2D(width, height, MAX_IL_MIPMAP_LEVELS + 1, 1, fmt8, 1, 0, EAH_GPU_Read | EAH_GPU_Write | EAH_Generate_Mips, NULL);
-		opaque_g_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*opaque_g_buffer_rt0_tex_, 0, 1, 0));
-		if (mrt_g_buffer_)
+		for (size_t i = 0; i < g_buffers_.size(); ++ i)
 		{
-			opaque_g_buffer_rt1_tex_ = rf.MakeTexture2D(width, height, 1, 1, fmt8, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
-			opaque_g_buffer_->Attach(FrameBuffer::ATT_Color1, rf.Make2DRenderView(*opaque_g_buffer_rt1_tex_, 0, 1, 0));
+			g_buffer_depth_texs_[i] = rf.MakeTexture2D(width, height, MAX_IL_MIPMAP_LEVELS + 1, 1, fmt, 1, 0,  EAH_GPU_Read | EAH_GPU_Write | EAH_Generate_Mips, NULL);
+
+			g_buffer_rt0_texs_[i] = rf.MakeTexture2D(width, height, MAX_IL_MIPMAP_LEVELS + 1, 1, fmt8, 1, 0, EAH_GPU_Read | EAH_GPU_Write | EAH_Generate_Mips, NULL);
+			g_buffers_[i]->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*g_buffer_rt0_texs_[i], 0, 1, 0));
+			if (mrt_g_buffer_)
+			{
+				g_buffer_rt1_texs_[i] = rf.MakeTexture2D(width, height, 1, 1, fmt8, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+				g_buffers_[i]->Attach(FrameBuffer::ATT_Color1, rf.Make2DRenderView(*g_buffer_rt1_texs_[i], 0, 1, 0));
+			}
+			g_buffers_[i]->Attach(FrameBuffer::ATT_DepthStencil, ds_views[i]);
+
+			pre_depth_buffers_[i]->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*g_buffer_depth_texs_[i], 0, 1, 0));
+			pre_depth_buffers_[i]->Attach(FrameBuffer::ATT_DepthStencil, ds_views[i]);
 		}
-		opaque_g_buffer_->Attach(FrameBuffer::ATT_DepthStencil, opaque_ds_view);
-
-		opaque_pre_depth_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*opaque_depth_tex_, 0, 1, 0));
-		opaque_pre_depth_buffer_->Attach(FrameBuffer::ATT_DepthStencil, opaque_ds_view);
-
-		transparency_back_depth_tex_ = rf.MakeTexture2D(width, height, MAX_IL_MIPMAP_LEVELS + 1, 1, fmt, 1, 0,  EAH_GPU_Read | EAH_GPU_Write | EAH_Generate_Mips, NULL);
-
-		transparency_back_g_buffer_rt0_tex_ = rf.MakeTexture2D(width, height, MAX_IL_MIPMAP_LEVELS + 1, 1, fmt8, 1, 0, EAH_GPU_Read | EAH_GPU_Write | EAH_Generate_Mips, NULL);
-		transparency_back_g_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*transparency_back_g_buffer_rt0_tex_, 0, 1, 0));
-		if (mrt_g_buffer_)
-		{
-			transparency_back_g_buffer_rt1_tex_ = rf.MakeTexture2D(width, height, 1, 1, fmt8, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
-			transparency_back_g_buffer_->Attach(FrameBuffer::ATT_Color1, rf.Make2DRenderView(*transparency_back_g_buffer_rt1_tex_, 0, 1, 0));
-		}
-		transparency_back_g_buffer_->Attach(FrameBuffer::ATT_DepthStencil, transparency_back_ds_view);
-
-		transparency_back_pre_depth_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*transparency_back_depth_tex_, 0, 1, 0));
-		transparency_back_pre_depth_buffer_->Attach(FrameBuffer::ATT_DepthStencil, transparency_back_ds_view);
-
-		transparency_front_depth_tex_ = rf.MakeTexture2D(width, height, MAX_IL_MIPMAP_LEVELS + 1, 1, fmt, 1, 0,  EAH_GPU_Read | EAH_GPU_Write | EAH_Generate_Mips, NULL);
-
-		transparency_front_g_buffer_rt0_tex_ = rf.MakeTexture2D(width, height, MAX_IL_MIPMAP_LEVELS + 1, 1, fmt8, 1, 0, EAH_GPU_Read | EAH_GPU_Write | EAH_Generate_Mips, NULL);
-		transparency_front_g_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*transparency_front_g_buffer_rt0_tex_, 0, 1, 0));
-		if (mrt_g_buffer_)
-		{
-			transparency_front_g_buffer_rt1_tex_ = rf.MakeTexture2D(width, height, 1, 1, fmt8, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
-			transparency_front_g_buffer_->Attach(FrameBuffer::ATT_Color1, rf.Make2DRenderView(*transparency_front_g_buffer_rt1_tex_, 0, 1, 0));
-		}
-		transparency_front_g_buffer_->Attach(FrameBuffer::ATT_DepthStencil, transparency_front_ds_view);
-
-		transparency_front_pre_depth_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*transparency_front_depth_tex_, 0, 1, 0));
-		transparency_front_pre_depth_buffer_->Attach(FrameBuffer::ATT_DepthStencil, transparency_front_ds_view);
 
 		if (rsm_buffer_)
 		{
@@ -753,7 +725,7 @@ namespace KlayGE
 			for (uint32_t i = 0; i < indirect_lighting_tex_->NumMipMaps(); ++ i)
 			{
 				TexturePtr subsplat_ds_tex = rf.MakeTexture2D(indirect_lighting_tex_->Width(i), indirect_lighting_tex_->Height(i),
-					1, 1, opaque_ds_view->Format(), 1, 0,  EAH_GPU_Write, NULL);
+					1, 1, ds_views[0]->Format(), 1, 0,  EAH_GPU_Write, NULL);
 
 				FrameBufferPtr fb = rf.MakeFrameBuffer();
 				fb->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*indirect_lighting_tex_, 0, 1, i));
@@ -785,17 +757,12 @@ namespace KlayGE
 		shadowing_tex_ = rf.MakeTexture2D(width / 2, height / 2, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
 		shadowing_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*shadowing_tex_, 0, 1, 0));
 
-		opaque_lighting_tex_ = rf.MakeTexture2D(width, height, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
-		opaque_lighting_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*opaque_lighting_tex_, 0, 1, 0));
-		opaque_lighting_buffer_->Attach(FrameBuffer::ATT_DepthStencil, opaque_ds_view);
-
-		transparency_back_lighting_tex_ = rf.MakeTexture2D(width, height, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
-		transparency_back_lighting_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*transparency_back_lighting_tex_, 0, 1, 0));
-		transparency_back_lighting_buffer_->Attach(FrameBuffer::ATT_DepthStencil, transparency_back_ds_view);
-
-		transparency_front_lighting_tex_ = rf.MakeTexture2D(width, height, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
-		transparency_front_lighting_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*transparency_front_lighting_tex_, 0, 1, 0));
-		transparency_front_lighting_buffer_->Attach(FrameBuffer::ATT_DepthStencil, transparency_front_ds_view);
+		for (size_t i = 0; i < g_buffers_.size(); ++ i)
+		{
+			lighting_texs_[i] = rf.MakeTexture2D(width, height, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+			lighting_buffers_[i]->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*lighting_texs_[i], 0, 1, 0));
+			lighting_buffers_[i]->Attach(FrameBuffer::ATT_DepthStencil, ds_views[i]);
+		}
 
 		if (caps.rendertarget_format_support(EF_B10G11R11F, 1, 0))
 		{
@@ -807,17 +774,12 @@ namespace KlayGE
 
 			fmt = EF_ABGR16F;
 		}
-		opaque_shading_tex_ = rf.MakeTexture2D(width, height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
-		opaque_shading_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*opaque_shading_tex_, 0, 1, 0));
-		opaque_shading_buffer_->Attach(FrameBuffer::ATT_DepthStencil, opaque_ds_view);
-
-		transparency_back_shading_tex_ = rf.MakeTexture2D(width, height, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
-		transparency_back_shading_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*transparency_back_shading_tex_, 0, 1, 0));
-		transparency_back_shading_buffer_->Attach(FrameBuffer::ATT_DepthStencil, transparency_back_ds_view);
-
-		transparency_front_shading_tex_ = rf.MakeTexture2D(width, height, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
-		transparency_front_shading_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*transparency_front_shading_tex_, 0, 1, 0));
-		transparency_front_shading_buffer_->Attach(FrameBuffer::ATT_DepthStencil, transparency_front_ds_view);
+		for (size_t i = 0; i < g_buffers_.size(); ++ i)
+		{
+			shading_texs_[i] = rf.MakeTexture2D(width, height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+			shading_buffers_[i]->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*shading_texs_[i], 0, 1, 0));
+			shading_buffers_[i]->Attach(FrameBuffer::ATT_DepthStencil, ds_views[0]);
+		}
 
 		if (caps.rendertarget_format_support(EF_B10G11R11F, 1, 0))
 		{
@@ -847,55 +809,55 @@ namespace KlayGE
 		}
 		small_ssvo_tex_ = rf.MakeTexture2D(width / 2, height / 2, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
 
-		ssr_tex_ = rf.MakeTexture2D(width, height, 1, 1, opaque_shading_tex_->Format(), 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+		ssr_tex_ = rf.MakeTexture2D(width, height, 1, 1, shading_texs_[0]->Format(), 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
 		ssr_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*ssr_tex_, 0, 1, 0));
 
-		if (opaque_g_buffer_rt0_tex_)
+		if (g_buffer_rt0_texs_[0])
 		{
 			*(dr_effect_->ParameterByName("inv_width_height")) = float2(1.0f / width, 1.0f / height);
 		}
 
 		*(dr_effect_->ParameterByName("shadowing_tex")) = shadowing_tex_;
 
-		ssgi_pp_->InputPin(0, opaque_g_buffer_rt0_tex_);
-		ssgi_pp_->InputPin(1, opaque_depth_tex_);
-		ssgi_pp_->InputPin(2, opaque_lighting_tex_);
-		ssgi_pp_->InputPin(3, opaque_g_buffer_rt1_tex_);
+		ssgi_pp_->InputPin(0, g_buffer_rt0_texs_[0]);
+		ssgi_pp_->InputPin(1, g_buffer_depth_texs_[0]);
+		ssgi_pp_->InputPin(2, lighting_texs_[0]);
+		ssgi_pp_->InputPin(3, g_buffer_rt1_texs_[0]);
 		ssgi_pp_->OutputPin(0, small_ssgi_tex_);
 		ssgi_blur_pp_->InputPin(0, small_ssgi_tex_);
-		ssgi_blur_pp_->InputPin(1, opaque_depth_tex_);
+		ssgi_blur_pp_->InputPin(1, g_buffer_depth_texs_[0]);
 		ssgi_blur_pp_->OutputPin(0, indirect_lighting_tex_);
 
-		ssvo_pp_->InputPin(0, opaque_g_buffer_rt0_tex_);
-		ssvo_pp_->InputPin(1, opaque_depth_tex_);
+		ssvo_pp_->InputPin(0, g_buffer_rt0_texs_[0]);
+		ssvo_pp_->InputPin(1, g_buffer_depth_texs_[0]);
 		ssvo_pp_->OutputPin(0, small_ssvo_tex_);
 		ssvo_blur_pp_->InputPin(0, small_ssvo_tex_);
-		ssvo_blur_pp_->InputPin(1, opaque_depth_tex_);
-		ssvo_blur_pp_->OutputPin(0, opaque_lighting_tex_);
+		ssvo_blur_pp_->InputPin(1, g_buffer_depth_texs_[0]);
+		ssvo_blur_pp_->OutputPin(0, lighting_texs_[0]);
 
-		ssr_pp_->InputPin(0, opaque_g_buffer_rt0_tex_);
-		ssr_pp_->InputPin(1, opaque_g_buffer_rt1_tex_);
-		ssr_pp_->InputPin(2, opaque_depth_tex_);
+		ssr_pp_->InputPin(0, g_buffer_rt0_texs_[0]);
+		ssr_pp_->InputPin(1, g_buffer_rt1_texs_[0]);
+		ssr_pp_->InputPin(2, g_buffer_depth_texs_[0]);
 		ssr_pp_->InputPin(3, ssr_tex_);
 
 		if (rsm_buffer_)
 		{
-			*(vpls_lighting_instance_id_tech_->Effect().ParameterByName("gbuffer_tex")) = opaque_g_buffer_rt0_tex_;
-			*(vpls_lighting_instance_id_tech_->Effect().ParameterByName("depth_tex")) = opaque_depth_tex_;
+			*(vpls_lighting_instance_id_tech_->Effect().ParameterByName("gbuffer_tex")) = g_buffer_rt0_texs_[0];
+			*(vpls_lighting_instance_id_tech_->Effect().ParameterByName("depth_tex")) = g_buffer_depth_texs_[0];
 
 			*(subsplat_stencil_tech_->Effect().ParameterByName("depth_deriv_tex")) = depth_deriative_tex_;
 			*(subsplat_stencil_tech_->Effect().ParameterByName("normal_cone_tex")) = normal_cone_tex_;
 			*(subsplat_stencil_tech_->Effect().ParameterByName("depth_normal_threshold")) = float2(0.001f * camera->FarPlane(), 0.77f);
 
-			gbuffer_to_depth_derivate_pp_->InputPin(0, opaque_g_buffer_rt0_tex_);
-			gbuffer_to_depth_derivate_pp_->InputPin(1, opaque_depth_tex_);
+			gbuffer_to_depth_derivate_pp_->InputPin(0, g_buffer_rt0_texs_[0]);
+			gbuffer_to_depth_derivate_pp_->InputPin(1, g_buffer_depth_texs_[0]);
 			gbuffer_to_depth_derivate_pp_->OutputPin(0, depth_deriative_tex_);
-			float delta_x = 1.0f / opaque_g_buffer_rt0_tex_->Width(0);
-			float delta_y = 1.0f / opaque_g_buffer_rt0_tex_->Height(0);
+			float delta_x = 1.0f / g_buffer_rt0_texs_[0]->Width(0);
+			float delta_y = 1.0f / g_buffer_rt0_texs_[0]->Height(0);
 			float4 delta_offset(delta_x, delta_y, delta_x / 2, delta_y / 2);
 			gbuffer_to_depth_derivate_pp_->SetParam(0, delta_offset);
 
-			gbuffer_to_normal_cone_pp_->InputPin(0, opaque_g_buffer_rt0_tex_);
+			gbuffer_to_normal_cone_pp_->InputPin(0, g_buffer_rt0_texs_[0]);
 			gbuffer_to_normal_cone_pp_->OutputPin(0, normal_cone_tex_);
 			gbuffer_to_normal_cone_pp_->SetParam(0, delta_offset);
 
@@ -967,6 +929,10 @@ namespace KlayGE
 				}
 			}
 
+			g_buffer_enables_[0] = true;
+			g_buffer_enables_[1] = has_transparency_objs_;
+			g_buffer_enables_[2] = has_transparency_objs_;
+
 			indirect_lighting_enabled_ = false;
 			if (rsm_buffer_ && (illum_ != 1))
 			{
@@ -1010,7 +976,7 @@ namespace KlayGE
 			typedef BOOST_TYPEOF(visible_scene_objs_) VisibleSceneObjsType;
 			BOOST_FOREACH(VisibleSceneObjsType::reference deo, visible_scene_objs_)
 			{
-				deo->LightingTex(opaque_lighting_tex_);
+				deo->LightingTex(lighting_texs_[0]);
 			}
 		}
 		if ((PT_TransparencyBackShading == pass_type) && (0 == index_in_pass))
@@ -1018,7 +984,7 @@ namespace KlayGE
 			typedef BOOST_TYPEOF(visible_scene_objs_) VisibleSceneObjsType;
 			BOOST_FOREACH(VisibleSceneObjsType::reference deo, visible_scene_objs_)
 			{
-				deo->LightingTex(transparency_back_lighting_tex_);
+				deo->LightingTex(lighting_texs_[1]);
 			}
 		}
 		if ((PT_TransparencyFrontShading == pass_type) && (0 == index_in_pass))
@@ -1026,7 +992,7 @@ namespace KlayGE
 			typedef BOOST_TYPEOF(visible_scene_objs_) VisibleSceneObjsType;
 			BOOST_FOREACH(VisibleSceneObjsType::reference deo, visible_scene_objs_)
 			{
-				deo->LightingTex(transparency_front_lighting_tex_);
+				deo->LightingTex(lighting_texs_[2]);
 			}
 		}
 
@@ -1036,7 +1002,7 @@ namespace KlayGE
 
 			if (PT_OpaqueDepth == pass_type)
 			{
-				re.BindFrameBuffer(opaque_pre_depth_buffer_);
+				re.BindFrameBuffer(pre_depth_buffers_[0]);
 				re.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth | FrameBuffer::CBM_Stencil, Color(0, 0, 0, 0), 1.0f, 0);
 				return App3DFramework::URV_Need_Flush | App3DFramework::URV_Opaque_Only;
 			}
@@ -1044,13 +1010,13 @@ namespace KlayGE
 			{
 				if (PT_TransparencyBackDepth == pass_type)
 				{
-					re.BindFrameBuffer(transparency_back_pre_depth_buffer_);
+					re.BindFrameBuffer(pre_depth_buffers_[1]);
 					re.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth | FrameBuffer::CBM_Stencil, Color(0, 0, 0, 0), 0.0f, 128);
 					return App3DFramework::URV_Need_Flush | App3DFramework::URV_Transparency_Only;
 				}
 				else
 				{
-					re.BindFrameBuffer(transparency_front_pre_depth_buffer_);
+					re.BindFrameBuffer(pre_depth_buffers_[2]);
 					re.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth | FrameBuffer::CBM_Stencil, Color(0, 0, 0, 0), 1.0f, 128);
 					return App3DFramework::URV_Need_Flush | App3DFramework::URV_Transparency_Only;
 				}
@@ -1067,7 +1033,7 @@ namespace KlayGE
 
 				if ((PT_OpaqueGBuffer == pass_type) || (PT_OpaqueMRTGBuffer == pass_type))
 				{
-					re.BindFrameBuffer(opaque_g_buffer_);
+					re.BindFrameBuffer(g_buffers_[0]);
 					re.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth | FrameBuffer::CBM_Stencil, Color(0, 0, 0, 0), 1.0f, 0);
 					return App3DFramework::URV_Need_Flush | App3DFramework::URV_Opaque_Only;
 				}
@@ -1075,13 +1041,13 @@ namespace KlayGE
 				{
 					if ((PT_TransparencyBackGBuffer == pass_type) || (PT_TransparencyBackMRTGBuffer == pass_type))
 					{
-						re.BindFrameBuffer(transparency_back_g_buffer_);
+						re.BindFrameBuffer(g_buffers_[1]);
 						re.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth | FrameBuffer::CBM_Stencil, Color(0, 0, 0, 0), 0.0f, 128);
 						return App3DFramework::URV_Need_Flush | App3DFramework::URV_Transparency_Only;
 					}
 					else
 					{
-						re.BindFrameBuffer(transparency_front_g_buffer_);
+						re.BindFrameBuffer(g_buffers_[2]);
 						re.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth | FrameBuffer::CBM_Stencil, Color(0, 0, 0, 0), 1.0f, 128);
 						return App3DFramework::URV_Need_Flush | App3DFramework::URV_Transparency_Only;
 					}
@@ -1091,16 +1057,16 @@ namespace KlayGE
 			{
 				if ((PT_OpaqueGBuffer == pass_type) || (PT_OpaqueMRTGBuffer == pass_type))
 				{
-					opaque_g_buffer_rt0_tex_->BuildMipSubLevels();
+					g_buffer_rt0_texs_[0]->BuildMipSubLevels();
 
 					if (depth_texture_)
 					{
-						depth_to_linear_pp_->InputPin(0, opaque_ds_tex_);
-						depth_to_linear_pp_->OutputPin(0, opaque_depth_tex_);
+						depth_to_linear_pp_->InputPin(0, g_buffer_ds_texs_[0]);
+						depth_to_linear_pp_->OutputPin(0, g_buffer_depth_texs_[0]);
 						depth_to_linear_pp_->Apply();
 					}
 
-					opaque_depth_tex_->BuildMipSubLevels();
+					g_buffer_depth_texs_[0]->BuildMipSubLevels();
 
 					if (indirect_lighting_enabled_)
 					{
@@ -1113,7 +1079,7 @@ namespace KlayGE
 
 					float4x4 vp = view_ * proj_;
 
-					re.BindFrameBuffer(opaque_lighting_buffer_);
+					re.BindFrameBuffer(lighting_buffers_[0]);
 
 					pass_scaned_.resize(2 + !depth_texture_);
 
@@ -1287,29 +1253,29 @@ namespace KlayGE
 				{
 					if ((PT_TransparencyBackGBuffer == pass_type) || (PT_TransparencyBackMRTGBuffer == pass_type))
 					{
-						transparency_back_g_buffer_rt0_tex_->BuildMipSubLevels();
+						g_buffer_rt0_texs_[1]->BuildMipSubLevels();
 
 						if (depth_texture_)
 						{
-							depth_to_linear_pp_->InputPin(0, transparency_back_ds_tex_);
-							depth_to_linear_pp_->OutputPin(0, transparency_back_depth_tex_);
+							depth_to_linear_pp_->InputPin(0, g_buffer_ds_texs_[1]);
+							depth_to_linear_pp_->OutputPin(0, g_buffer_depth_texs_[1]);
 							depth_to_linear_pp_->Apply();
 						}
 
-						transparency_back_depth_tex_->BuildMipSubLevels();
+						g_buffer_depth_texs_[1]->BuildMipSubLevels();
 					}
 					else
 					{
-						transparency_front_g_buffer_rt0_tex_->BuildMipSubLevels();
+						g_buffer_rt0_texs_[2]->BuildMipSubLevels();
 
 						if (depth_texture_)
 						{
-							depth_to_linear_pp_->InputPin(0, transparency_front_ds_tex_);
-							depth_to_linear_pp_->OutputPin(0, transparency_front_depth_tex_);
+							depth_to_linear_pp_->InputPin(0, g_buffer_ds_texs_[2]);
+							depth_to_linear_pp_->OutputPin(0, g_buffer_depth_texs_[2]);
 							depth_to_linear_pp_->Apply();
 						}
 
-						transparency_front_depth_tex_->BuildMipSubLevels();
+						g_buffer_depth_texs_[2]->BuildMipSubLevels();
 					}
 				}
 
@@ -1346,13 +1312,13 @@ namespace KlayGE
 							ssvo_blur_pp_->Apply();
 						}
 
-						re.BindFrameBuffer(opaque_shading_buffer_);
+						re.BindFrameBuffer(shading_buffers_[0]);
 						if (mrt_g_buffer_)
 						{
-							*g_buffer_tex_param_ = opaque_g_buffer_rt0_tex_;
-							*g_buffer_1_tex_param_ = opaque_g_buffer_rt1_tex_;
-							*depth_tex_param_ = opaque_depth_tex_;
-							*lighting_tex_param_ = opaque_lighting_tex_;
+							*g_buffer_tex_param_ = g_buffer_rt0_texs_[0];
+							*g_buffer_1_tex_param_ = g_buffer_rt1_texs_[0];
+							*depth_tex_param_ = g_buffer_depth_texs_[0];
+							*lighting_tex_param_ = lighting_texs_[0];
 							*light_volume_mv_param_ = inv_proj_;
 
 							re.Render(*technique_no_lighting_, *rl_quad_);
@@ -1366,13 +1332,13 @@ namespace KlayGE
 						}
 
 					case PT_TransparencyBackShading:
-						re.BindFrameBuffer(transparency_back_shading_buffer_);
+						re.BindFrameBuffer(shading_buffers_[1]);
 						if (mrt_g_buffer_)
 						{
-							*g_buffer_tex_param_ = transparency_back_g_buffer_rt0_tex_;
-							*g_buffer_1_tex_param_ = transparency_back_g_buffer_rt1_tex_;
-							*depth_tex_param_ = transparency_back_depth_tex_;
-							*lighting_tex_param_ = transparency_back_lighting_tex_;
+							*g_buffer_tex_param_ = g_buffer_rt0_texs_[1];
+							*g_buffer_1_tex_param_ = g_buffer_rt1_texs_[1];
+							*depth_tex_param_ = g_buffer_depth_texs_[1];
+							*lighting_tex_param_ = lighting_texs_[1];
 							*light_volume_mv_param_ = inv_proj_;
 
 							re.CurFrameBuffer()->Attached(FrameBuffer::ATT_Color0)->ClearColor(Color(0, 0, 0, 0));
@@ -1386,13 +1352,13 @@ namespace KlayGE
 						}
 
 					case PT_TransparencyFrontShading:
-						re.BindFrameBuffer(transparency_front_shading_buffer_);
+						re.BindFrameBuffer(shading_buffers_[2]);
 						if (mrt_g_buffer_)
 						{
-							*g_buffer_tex_param_ = transparency_front_g_buffer_rt0_tex_;
-							*g_buffer_1_tex_param_ = transparency_front_g_buffer_rt1_tex_;
-							*depth_tex_param_ = transparency_front_depth_tex_;								
-							*lighting_tex_param_ = transparency_front_lighting_tex_;
+							*g_buffer_tex_param_ = g_buffer_rt0_texs_[2];
+							*g_buffer_1_tex_param_ = g_buffer_rt1_texs_[2];
+							*depth_tex_param_ = g_buffer_depth_texs_[2];								
+							*lighting_tex_param_ = lighting_texs_[2];
 							*light_volume_mv_param_ = inv_proj_;
 
 							re.CurFrameBuffer()->Attached(FrameBuffer::ATT_Color0)->ClearColor(Color(0, 0, 0, 0));
@@ -1406,16 +1372,16 @@ namespace KlayGE
 						}
 
 					case PT_OpaqueSpecialShading:
-						re.BindFrameBuffer(opaque_shading_buffer_);
+						re.BindFrameBuffer(shading_buffers_[0]);
 						return App3DFramework::URV_Need_Flush | App3DFramework::URV_Opaque_Only | App3DFramework::URV_Special_Shading_Only;
 
 					case PT_TransparencyBackSpecialShading:
-						re.BindFrameBuffer(transparency_back_shading_buffer_);
+						re.BindFrameBuffer(shading_buffers_[1]);
 						return App3DFramework::URV_Need_Flush | App3DFramework::URV_Transparency_Only | App3DFramework::URV_Special_Shading_Only;
 
 					case PT_TransparencyFrontSpecialShading:
 					default:
-						re.BindFrameBuffer(transparency_front_shading_buffer_);
+						re.BindFrameBuffer(shading_buffers_[2]);
 						return App3DFramework::URV_Need_Flush | App3DFramework::URV_Transparency_Only | App3DFramework::URV_Special_Shading_Only;
 					}
 				}
@@ -1425,28 +1391,16 @@ namespace KlayGE
 					{
 						re.BindFrameBuffer(ssr_buffer_);
 
+						for (size_t i = 0; i < 3; ++ i)
 						{
-							*shading_tex_param_ = opaque_shading_tex_;
-							re.Render(*technique_merge_shading_, *rl_quad_);
-						}
-						if (has_transparency_objs_)
-						{
-							*shading_tex_param_ = transparency_back_shading_tex_;
-							re.Render(*technique_merge_shading_alpha_blend_, *rl_quad_);
-						
-							*shading_tex_param_ = transparency_front_shading_tex_;
-							re.Render(*technique_merge_shading_alpha_blend_, *rl_quad_);
-						}
+							if (g_buffer_enables_[i])
+							{
+								*shading_tex_param_ = shading_texs_[i];
+								re.Render(*technique_merge_shadings_[i != 0], *rl_quad_);
 
-						re.BindFrameBuffer(opaque_shading_buffer_);
-						ssr_pp_->Apply();
-						if (has_transparency_objs_)
-						{
-							re.BindFrameBuffer(transparency_back_shading_buffer_);
-							ssr_pp_->Apply();
-
-							re.BindFrameBuffer(transparency_front_shading_buffer_);
-							ssr_pp_->Apply();
+								re.BindFrameBuffer(shading_buffers_[i]);
+								ssr_pp_->Apply();
+							}
 						}
 					}
 
@@ -1460,17 +1414,13 @@ namespace KlayGE
 						re.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->ClearDepth(1.0f);
 					}
 
+					for (size_t i = 0; i < 3; ++ i)
 					{
-						*shading_tex_param_ = opaque_shading_tex_;
-						re.Render(*technique_merge_shading_, *rl_quad_);
-					}
-					if (has_transparency_objs_)
-					{
-						*shading_tex_param_ = transparency_back_shading_tex_;
-						re.Render(*technique_merge_shading_alpha_blend_, *rl_quad_);
-						
-						*shading_tex_param_ = transparency_front_shading_tex_;
-						re.Render(*technique_merge_shading_alpha_blend_, *rl_quad_);
+						if (g_buffer_enables_[i])
+						{
+							*shading_tex_param_ = shading_texs_[i];
+							re.Render(*technique_merge_shadings_[i != 0], *rl_quad_);
+						}
 					}
 
 					lights_.resize(0);
@@ -1678,8 +1628,6 @@ namespace KlayGE
 				}
 				else //if (PT_Lighting == pass_type)
 				{
-					// Shadowing
-
 					if (LT_Point == type)
 					{
 						*projective_map_cube_tex_param_ = light->ProjectiveTexture();
@@ -1688,9 +1636,6 @@ namespace KlayGE
 					{
 						*projective_map_tex_param_ = light->ProjectiveTexture();
 					}
-
-					re.BindFrameBuffer(shadowing_buffer_);
-					re.CurFrameBuffer()->Attached(FrameBuffer::ATT_Color0)->ClearColor(Color(1, 1, 1, 1));
 
 					*light_attrib_param_ = float4(attr & LSA_NoDiffuse ? 0.0f : 1.0f, attr & LSA_NoSpecular ? 0.0f : 1.0f,
 						attr & LSA_NoShadow ? -1.0f : 1.0f, light->ProjectiveTexture() ? 1.0f : -1.0f);
@@ -1705,79 +1650,37 @@ namespace KlayGE
 						}
 					}
 
-					*g_buffer_tex_param_ = opaque_g_buffer_rt0_tex_;
-					*depth_tex_param_ = opaque_depth_tex_;
-
-					if (0 == (attr & LSA_NoShadow))
+					for (size_t i = 0; i < g_buffers_.size(); ++ i)
 					{
-						re.Render(*technique_shadows_[type], *rl);
-					}
-
-
-					// Lighting
-
-					// Opaque objects
-
-					re.BindFrameBuffer(opaque_lighting_buffer_);
-					// Clear stencil to 0 with write mask
-					re.Render(*technique_clear_stencil_, *rl_quad_);
-
-					if ((LT_Point == type) || (LT_Spot == type))
-					{
-						re.Render(*technique_light_stencil_, *rl);
-					}
-
-					re.Render(*technique_lights_[type], *rl);
-
-					if (has_transparency_objs_)
-					{
-						// Transparency objects back
-
-						re.BindFrameBuffer(shadowing_buffer_);
-						re.CurFrameBuffer()->Attached(FrameBuffer::ATT_Color0)->ClearColor(Color(1, 1, 1, 1));
-
-						*g_buffer_tex_param_ = transparency_back_g_buffer_rt0_tex_;
-						*depth_tex_param_ = transparency_back_depth_tex_;
-
-						if (0 == (attr & LSA_NoShadow))
+						if (g_buffer_enables_[i])
 						{
-							re.Render(*technique_shadows_[type], *rl);
+							// Shadowing
+
+							re.BindFrameBuffer(shadowing_buffer_);
+							re.CurFrameBuffer()->Attached(FrameBuffer::ATT_Color0)->ClearColor(Color(1, 1, 1, 1));
+
+							*g_buffer_tex_param_ = g_buffer_rt0_texs_[i];
+							*depth_tex_param_ = g_buffer_depth_texs_[i];
+
+							if (0 == (attr & LSA_NoShadow))
+							{
+								re.Render(*technique_shadows_[type], *rl);
+							}
+
+
+							// Lighting
+
+							re.BindFrameBuffer(lighting_buffers_[i]);
+							// Clear stencil to 0 with write mask
+							re.Render(*technique_clear_stencil_, *rl_quad_);
+
+							if ((LT_Point == type) || (LT_Spot == type))
+							{
+								re.Render(*technique_light_stencil_, *rl);
+							}
+
+							re.Render(*technique_lights_[type], *rl);
 						}
-
-						re.BindFrameBuffer(transparency_back_lighting_buffer_);
-						// Clear stencil to 0 with write mask
-						re.Render(*technique_clear_stencil_, *rl_quad_);
-
-						if ((LT_Point == type) || (LT_Spot == type))
-						{
-							re.Render(*technique_light_stencil_, *rl);
-						}
-
-						re.Render(*technique_lights_[type], *rl);
-
-						// Transparency objects front
-
-						re.BindFrameBuffer(shadowing_buffer_);
-						re.CurFrameBuffer()->Attached(FrameBuffer::ATT_Color0)->ClearColor(Color(1, 1, 1, 1));
-
-						*g_buffer_tex_param_ = transparency_front_g_buffer_rt0_tex_;
-						*depth_tex_param_ = transparency_front_depth_tex_;
-
-						if (0 == (attr & LSA_NoShadow))
-						{
-							re.Render(*technique_shadows_[type], *rl);
-						}
-
-						re.BindFrameBuffer(transparency_front_lighting_buffer_);
-						// Clear stencil to 0 with write mask
-						re.Render(*technique_clear_stencil_, *rl_quad_);
-
-						if ((LT_Point == type) || (LT_Spot == type))
-						{
-							re.Render(*technique_light_stencil_, *rl);
-						}
-
-						re.Render(*technique_lights_[type], *rl);
 					}
 
 					if ((type != LT_Ambient) && (type != LT_Directional))
@@ -1939,13 +1842,13 @@ namespace KlayGE
 	{
 		PostProcessPtr const & copy_to_light_buffer_pp = (0 == illum_) ? copy_to_light_buffer_pp_ : copy_to_light_buffer_i_pp_;
 		copy_to_light_buffer_pp->SetParam(0, indirect_scale_ * 256 / VPL_COUNT);
-		copy_to_light_buffer_pp->SetParam(1, float2(1.0f / opaque_g_buffer_rt0_tex_->Width(0), 1.0f / opaque_g_buffer_rt0_tex_->Height(0)));
+		copy_to_light_buffer_pp->SetParam(1, float2(1.0f / g_buffer_rt0_texs_[0]->Width(0), 1.0f / g_buffer_rt0_texs_[0]->Height(0)));
 		copy_to_light_buffer_pp->SetParam(2, depth_near_far_invfar_);
 		copy_to_light_buffer_pp->SetParam(3, inv_proj_);
 		copy_to_light_buffer_pp->InputPin(0, indirect_lighting_tex_);
-		copy_to_light_buffer_pp->InputPin(1, opaque_g_buffer_rt0_tex_);
-		copy_to_light_buffer_pp->InputPin(2, opaque_depth_tex_);
-		copy_to_light_buffer_pp->OutputPin(0, opaque_lighting_tex_);
+		copy_to_light_buffer_pp->InputPin(1, g_buffer_rt0_texs_[0]);
+		copy_to_light_buffer_pp->InputPin(2, g_buffer_depth_texs_[0]);
+		copy_to_light_buffer_pp->OutputPin(0, lighting_texs_[0]);
 		copy_to_light_buffer_pp->Apply();
 	}
 
