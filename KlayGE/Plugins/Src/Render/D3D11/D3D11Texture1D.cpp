@@ -91,6 +91,11 @@ namespace KlayGE
 		d3dTexture1D_ = MakeCOMPtr(d3d_tex);
 
 		this->UpdateParams();
+
+		if ((access_hint & (EAH_GPU_Read | EAH_Generate_Mips)) && (num_mip_maps_ > 1))
+		{
+			this->RetriveD3DShaderResourceView(0, array_size_, 0, num_mip_maps_);
+		}
 	}
 
 	uint32_t D3D11Texture1D::Width(uint32_t level) const
