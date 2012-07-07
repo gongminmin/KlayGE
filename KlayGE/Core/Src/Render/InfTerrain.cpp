@@ -131,6 +131,15 @@ namespace KlayGE
 		float4x4 const & view = camera.ViewMatrix();
 		float4x4 const & proj = camera.ProjMatrix();
 
+		if (deferred_effect_)
+		{
+			RenderableHelper::OnRenderBegin();
+		}
+		else
+		{
+			*(technique_->Effect().ParameterByName("mvp")) = view * proj;
+		}
+
 		float3 look_at_vec = float3(camera.LookAt().x() - camera.EyePos().x(), 0, camera.LookAt().z() - camera.EyePos().z());
 		if (MathLib::dot(look_at_vec, look_at_vec) < 1e-6f)
 		{
@@ -139,8 +148,6 @@ namespace KlayGE
 		float4x4 virtual_view = MathLib::look_at_lh(camera.EyePos(), camera.EyePos() + look_at_vec);
 		float4x4 inv_virtual_view = MathLib::inverse(virtual_view);
 
-		float4x4 vp = view * proj;
-		*(technique_->Effect().ParameterByName("mvp")) = vp;
 		*(technique_->Effect().ParameterByName("inv_virtual_view")) = inv_virtual_view;
 		*(technique_->Effect().ParameterByName("eye_pos")) = camera.EyePos();
 	}

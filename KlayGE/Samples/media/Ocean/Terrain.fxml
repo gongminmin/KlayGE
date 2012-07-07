@@ -5,6 +5,10 @@
 	<include name="Noise.fxml"/>
 	<include name="InfTerrain.fxml"/>
 
+	<cbuffer name="per_frame">
+		<parameter type="float4x4" name="mvp"/>
+	</cbuffer>
+	
 	<parameter type="float3" name="sun_dir"/>
 	<parameter type="float3" name="sun_color"/>
 	<parameter type="float3" name="fog_color"/>

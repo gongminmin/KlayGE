@@ -6,7 +6,6 @@
 
 	<cbuffer name="per_frame">
 		<parameter type="float3" name="eye_pos"/>
-		<parameter type="float4x4" name="mvp"/>
 		<parameter type="float4x4" name="inv_virtual_view"/>
 		<parameter type="float" name="offset_y"/>
 	</cbuffer>

@@ -776,9 +776,9 @@ namespace KlayGE
 		}
 		for (size_t i = 0; i < g_buffers_.size(); ++ i)
 		{
-			shading_texs_[i] = rf.MakeTexture2D(width, height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+			shading_texs_[i] = rf.MakeTexture2D(width, height, 1, 1, (0 == i) ? fmt : EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
 			shading_buffers_[i]->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*shading_texs_[i], 0, 1, 0));
-			shading_buffers_[i]->Attach(FrameBuffer::ATT_DepthStencil, ds_views[0]);
+			shading_buffers_[i]->Attach(FrameBuffer::ATT_DepthStencil, ds_views[i]);
 		}
 
 		if (caps.rendertarget_format_support(EF_B10G11R11F, 1, 0))
