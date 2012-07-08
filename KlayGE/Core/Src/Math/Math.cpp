@@ -1909,13 +1909,13 @@ namespace KlayGE
 			Quaternion_T<T> rot;
 			decompose(scale, rot, trans, mat);
 
-			return transform_aabb(aabb, scale.x(), rot, trans);
+			return transform_aabb(aabb, scale, rot, trans);
 		}
 
-		template KLAYGE_CORE_API AABBox transform_aabb(AABBox const & aabb, float scale, Quaternion const & rot, float3 const & trans);
+		template KLAYGE_CORE_API AABBox transform_aabb(AABBox const & aabb, float3 const & scale, Quaternion const & rot, float3 const & trans);
 
 		template <typename T>
-		AABBox_T<T> transform_aabb(AABBox_T<T> const & aabb, T scale, Quaternion_T<T> const & rot, Vector_T<T, 3> const & trans)
+		AABBox_T<T> transform_aabb(AABBox_T<T> const & aabb, Vector_T<T, 3> const & scale, Quaternion_T<T> const & rot, Vector_T<T, 3> const & trans)
 		{
 			Vector_T<T, 3> min, max;
 			min = max = transform_quat(aabb[0] * scale, rot) + trans;
@@ -1938,13 +1938,13 @@ namespace KlayGE
 			Quaternion_T<T> rot;
 			decompose(scale, rot, trans, mat);
 
-			return transform_obb(obb, scale.x(), rot, trans);
+			return transform_obb(obb, scale, rot, trans);
 		}
 
-		template KLAYGE_CORE_API OBBox transform_obb(OBBox const & obb, float scale, Quaternion const & rot, float3 const & trans);
+		template KLAYGE_CORE_API OBBox transform_obb(OBBox const & obb, float3 const & scale, Quaternion const & rot, float3 const & trans);
 
 		template <typename T>
-		OBBox_T<T> transform_obb(OBBox_T<T> const & obb, T scale, Quaternion_T<T> const & rot, Vector_T<T, 3> const & trans)
+		OBBox_T<T> transform_obb(OBBox_T<T> const & obb, Vector_T<T, 3> const & scale, Quaternion_T<T> const & rot, Vector_T<T, 3> const & trans)
 		{
 			Vector_T<T, 3> center = transform_quat(obb.Center() * scale, rot) + trans;
 			Quaternion_T<T> rotation = mul(obb.Rotation(), rot);
@@ -2259,7 +2259,7 @@ namespace KlayGE
 			{
 				T ra = lr[0] * abs_r_mat(0, i) + lr[1] * abs_r_mat(1, i) + lr[2] * abs_r_mat(2, i);
 				T rb = rr[i];
-				if (MathLib::abs(t.x() + r_mat(0, i) + t.y() * r_mat(1, i) + t.z() * r_mat(2, i)) > ra + rb)
+				if (MathLib::abs(t.x() * r_mat(0, i) + t.y() * r_mat(1, i) + t.z() * r_mat(2, i)) > ra + rb)
 				{
 					return false;
 				}

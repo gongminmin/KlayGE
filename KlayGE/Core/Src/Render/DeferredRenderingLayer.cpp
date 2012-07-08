@@ -1188,8 +1188,6 @@ namespace KlayGE
 
 									if (scene_mgr.OBBVisible(MathLib::transform_obb(box_obb_, light_model)))
 									{
-										pass_scaned_.push_back(static_cast<uint32_t>((PT_Lighting << 24) + (i << 12) + 6));
-
 										if (light->ConditionalRenderQuery(6))
 										{
 											light->ConditionalRenderQuery(6)->Begin();
@@ -1225,6 +1223,8 @@ namespace KlayGE
 												}
 											}
 										}
+
+										pass_scaned_.push_back(static_cast<uint32_t>((PT_Lighting << 24) + (i << 12) + 6));
 									}
 									else
 									{

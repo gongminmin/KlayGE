@@ -36,7 +36,6 @@
 #include <KlayGE/ResLoader.hpp>
 #include <KlayGE/Util.hpp>
 #include <KlayGE/BlockCompression.hpp>
-#include <KlayGE/thread.hpp>
 #include <KlayGE/half.hpp>
 
 #include <cstring>

@@ -30,7 +30,6 @@
 #include <KlayGE/Camera.hpp>
 #include <KlayGE/XMLDom.hpp>
 #include <KlayGE/LZMACodec.hpp>
-#include <KlayGE/thread.hpp>
 #include <KlayGE/Light.hpp>
 
 #include <algorithm>

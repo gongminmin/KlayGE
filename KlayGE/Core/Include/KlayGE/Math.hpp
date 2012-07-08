@@ -623,11 +623,11 @@ namespace KlayGE
 		template <typename T>
 		AABBox_T<T> transform_aabb(AABBox_T<T> const & aabb, Matrix4_T<T> const & mat);
 		template <typename T>
-		AABBox_T<T> transform_aabb(AABBox_T<T> const & aabb, T scale, Quaternion_T<T> const & rot, Vector_T<T, 3> const & trans);
+		AABBox_T<T> transform_aabb(AABBox_T<T> const & aabb, Vector_T<T, 3> const & scale, Quaternion_T<T> const & rot, Vector_T<T, 3> const & trans);
 		template <typename T>
 		OBBox_T<T> transform_obb(OBBox_T<T> const & obb, Matrix4_T<T> const & mat);
 		template <typename T>
-		OBBox_T<T> transform_obb(OBBox_T<T> const & obb, T scale, Quaternion_T<T> const & rot, Vector_T<T, 3> const & trans);
+		OBBox_T<T> transform_obb(OBBox_T<T> const & obb, Vector_T<T, 3> const & scale, Quaternion_T<T> const & rot, Vector_T<T, 3> const & trans);
 		template <typename T>
 		Sphere_T<T> transform_sphere(Sphere_T<T> const & sphere, Matrix4_T<T> const & mat);
 		template <typename T>

@@ -455,7 +455,9 @@ uint32_t DeferredRenderingApp::DoUpdate(uint32_t pass)
 		num_renderable_rendered_ = sceneMgr.NumRenderablesRendered();
 		num_primitives_rendered_ = sceneMgr.NumPrimitivesRendered();
 		num_vertices_rendered_ = sceneMgr.NumVerticesRendered();
-
+	}
+	if (2 == pass)
+	{
 		if ((1 == buffer_type_) || (2 == buffer_type_) || (3 == buffer_type_))
 		{
 			renderEngine.BindFrameBuffer(FrameBufferPtr());
