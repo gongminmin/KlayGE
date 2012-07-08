@@ -906,6 +906,7 @@ namespace KlayGE
 			}
 
 			lights_.insert(lights_.end(), cur_lights.begin(), cur_lights.end());
+			light_visibles_.assign(lights_.size(), true);
 
 			has_transparency_back_objs_ = false;
 			has_transparency_front_objs_ = false;
@@ -1170,57 +1171,64 @@ namespace KlayGE
 											light->ConditionalRenderQuery(0)->End();
 										}
 									}
+									else
+									{
+										light_visibles_[i] = false;
+									}
 								}
 								break;
 
 							case LT_Point:
 								{
 									float3 const & p = light->Position();
-									for (int j = 0; j < 6; ++ j)
+									
+									float4x4 light_model = MathLib::translation(p);
+									*light_volume_mv_param_ = light_model * view_;
+									*light_volume_mvp_param_ = light_model * vp;
+
+									if (scene_mgr.OBBVisible(MathLib::transform_obb(box_obb_, light_model)))
 									{
-										float4x4 const & light_view = light->SMCamera(j)->ViewMatrix();
-										float4x4 light_model = MathLib::inverse(light_view);
-										*light_volume_mv_param_ = light_model * view_;
-										*light_volume_mvp_param_ = light_model * vp;
+										pass_scaned_.push_back(static_cast<uint32_t>((PT_Lighting << 24) + (i << 12) + 6));
 
-										//if (scene_mgr.OBBVisible(MathLib::transform_obb(pyramid_obb_, light_model)))
+										if (light->ConditionalRenderQuery(6))
 										{
-											if (0 == (attr & LSA_NoShadow))
-											{
-												if (depth_texture_)
-												{
-													pass_scaned_.push_back(static_cast<uint32_t>((PT_GenShadowMap << 24) + (i << 12) + j));
-												}
-												else
-												{
-													pass_scaned_.push_back(static_cast<uint32_t>((PT_GenShadowMapWODepthTexture << 24) + (i << 12) + j));
-												}
-											}
+											light->ConditionalRenderQuery(6)->Begin();
+											re.Render(*technique_light_depth_only_, *rl_box_);
+											light->ConditionalRenderQuery(6)->End();
+										}
 
-											if (light->ConditionalRenderQuery(j))
+										for (int j = 0; j < 6; ++ j)
+										{
+											light_model = MathLib::inverse(light->SMCamera(j)->ViewMatrix());
+											*light_volume_mv_param_ = light_model * view_;
+											*light_volume_mvp_param_ = light_model * vp;
+
+											//if (scene_mgr.OBBVisible(MathLib::transform_obb(pyramid_obb_, light_model)))
 											{
-												light->ConditionalRenderQuery(j)->Begin();
-												re.Render(*technique_light_depth_only_, *rl_pyramid_);
-												light->ConditionalRenderQuery(j)->End();
+												if (0 == (attr & LSA_NoShadow))
+												{
+													if (depth_texture_)
+													{
+														pass_scaned_.push_back(static_cast<uint32_t>((PT_GenShadowMap << 24) + (i << 12) + j));
+													}
+													else
+													{
+														pass_scaned_.push_back(static_cast<uint32_t>((PT_GenShadowMapWODepthTexture << 24) + (i << 12) + j));
+													}
+												}
+
+												if (light->ConditionalRenderQuery(j))
+												{
+													light->ConditionalRenderQuery(j)->Begin();
+													re.Render(*technique_light_depth_only_, *rl_pyramid_);
+													light->ConditionalRenderQuery(j)->End();
+												}
 											}
 										}
 									}
+									else
 									{
-										float4x4 light_model = MathLib::translation(p);
-										*light_volume_mv_param_ = light_model * view_;
-										*light_volume_mvp_param_ = light_model * vp;
-
-										if (scene_mgr.OBBVisible(MathLib::transform_obb(box_obb_, light_model)))
-										{
-											pass_scaned_.push_back(static_cast<uint32_t>((PT_Lighting << 24) + (i << 12) + 6));
-
-											if (light->ConditionalRenderQuery(6))
-											{
-												light->ConditionalRenderQuery(6)->Begin();
-												re.Render(*technique_light_depth_only_, *rl_box_);
-												light->ConditionalRenderQuery(6)->End();
-											}
-										}
+										light_visibles_[i] = false;
 									}
 								}
 								break;
@@ -1444,6 +1452,7 @@ namespace KlayGE
 					}
 
 					lights_.resize(0);
+					light_visibles_.resize(0);
 
 					return App3DFramework::URV_Finished;
 				}
@@ -1451,6 +1460,7 @@ namespace KlayGE
 			else
 			{
 				LightSourcePtr const & light = lights_[org_no];
+				bool light_visible = light_visibles_[org_no];
 
 				LightType type = light->Type();
 				int32_t attr = light->Attrib();
@@ -1614,7 +1624,7 @@ namespace KlayGE
 						if (LT_Point == type)
 						{
 							sm_filter_pps_[index_in_pass]->Apply();
-							if (light->ConditionalRenderQuery(index_in_pass - 1))
+							if (light_visible && light->ConditionalRenderQuery(index_in_pass - 1))
 							{
 								light->ConditionalRenderQuery(index_in_pass - 1)->EndConditionalRender();
 							}
@@ -1624,7 +1634,7 @@ namespace KlayGE
 							sm_filter_pps_[0]->Apply();
 							if (!(light->Attrib() & LSA_IndirectLighting))
 							{
-								if (light->ConditionalRenderQuery(index_in_pass))
+								if (light_visible && light->ConditionalRenderQuery(index_in_pass))
 								{
 									light->ConditionalRenderQuery(index_in_pass)->EndConditionalRender();
 								}
@@ -1635,7 +1645,7 @@ namespace KlayGE
 
 				if ((PT_GenShadowMap == pass_type) || (PT_GenShadowMapWODepthTexture == pass_type))
 				{
-					if (light->ConditionalRenderQuery(index_in_pass))
+					if (light_visible && light->ConditionalRenderQuery(index_in_pass))
 					{
 						light->ConditionalRenderQuery(index_in_pass)->BeginConditionalRender();
 					}
@@ -1664,7 +1674,7 @@ namespace KlayGE
 
 					if ((type != LT_Ambient) && (type != LT_Directional))
 					{
-						if (light->ConditionalRenderQuery(index_in_pass))
+						if (light_visible && light->ConditionalRenderQuery(index_in_pass))
 						{
 							light->ConditionalRenderQuery(index_in_pass)->BeginConditionalRender();
 						}
@@ -1705,7 +1715,7 @@ namespace KlayGE
 
 					if ((type != LT_Ambient) && (type != LT_Directional))
 					{
-						if (light->ConditionalRenderQuery(index_in_pass))
+						if (light_visible && light->ConditionalRenderQuery(index_in_pass))
 						{
 							light->ConditionalRenderQuery(index_in_pass)->EndConditionalRender();
 						}

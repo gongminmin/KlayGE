@@ -176,6 +176,7 @@ namespace KlayGE
 		OBBox box_obb_;
 
 		std::vector<LightSourcePtr> lights_;
+		std::vector<bool> light_visibles_;
 
 		std::vector<uint32_t> pass_scaned_;
 
