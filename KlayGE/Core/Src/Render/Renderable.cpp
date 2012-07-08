@@ -43,7 +43,8 @@ namespace KlayGE
 
 			opacity_map_enabled_ = false;
 			special_shading_ = false;
-			need_alpha_blend_ = false;
+			need_transparency_back_ = false;
+			need_transparency_front_ = false;
 			need_alpha_test_ = false;
 			need_reflection_ = false;
 		}

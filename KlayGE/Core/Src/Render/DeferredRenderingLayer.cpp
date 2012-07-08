@@ -907,7 +907,8 @@ namespace KlayGE
 
 			lights_.insert(lights_.end(), cur_lights.begin(), cur_lights.end());
 
-			has_transparency_objs_ = false;
+			has_transparency_back_objs_ = false;
+			has_transparency_front_objs_ = false;
 			has_reflective_objs_ = false;
 			visible_scene_objs_.resize(0);
 			SceneManager::SceneObjectsType const & scene_objs = scene_mgr.SceneObjects();
@@ -918,9 +919,13 @@ namespace KlayGE
 				{
 					visible_scene_objs_.push_back(so.get());
 
-					if (so->AlphaBlend())
+					if (so->TransparencyBackFace())
 					{
-						has_transparency_objs_ = true;
+						has_transparency_back_objs_ = true;
+					}
+					if (so->TransparencyFrontFace())
+					{
+						has_transparency_front_objs_ = true;
 					}
 					if (so->Reflection())
 					{
@@ -930,8 +935,8 @@ namespace KlayGE
 			}
 
 			g_buffer_enables_[0] = true;
-			g_buffer_enables_[1] = has_transparency_objs_;
-			g_buffer_enables_[2] = has_transparency_objs_;
+			g_buffer_enables_[1] = has_transparency_back_objs_;
+			g_buffer_enables_[2] = has_transparency_front_objs_;
 
 			indirect_lighting_enabled_ = false;
 			if (rsm_buffer_ && (illum_ != 1))
@@ -1012,13 +1017,15 @@ namespace KlayGE
 				{
 					re.BindFrameBuffer(pre_depth_buffers_[1]);
 					re.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth | FrameBuffer::CBM_Stencil, Color(0, 0, 0, 0), 0.0f, 128);
-					return App3DFramework::URV_Need_Flush | App3DFramework::URV_Transparency_Only;
+					return App3DFramework::URV_Need_Flush | App3DFramework::URV_Transparency_Back_Only;
 				}
 				else
 				{
+					BOOST_ASSERT(PT_TransparencyFrontDepth == pass_type);
+
 					re.BindFrameBuffer(pre_depth_buffers_[2]);
 					re.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth | FrameBuffer::CBM_Stencil, Color(0, 0, 0, 0), 1.0f, 128);
-					return App3DFramework::URV_Need_Flush | App3DFramework::URV_Transparency_Only;
+					return App3DFramework::URV_Need_Flush | App3DFramework::URV_Transparency_Front_Only;
 				}
 			}
 		}
@@ -1043,13 +1050,15 @@ namespace KlayGE
 					{
 						re.BindFrameBuffer(g_buffers_[1]);
 						re.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth | FrameBuffer::CBM_Stencil, Color(0, 0, 0, 0), 0.0f, 128);
-						return App3DFramework::URV_Need_Flush | App3DFramework::URV_Transparency_Only;
+						return App3DFramework::URV_Need_Flush | App3DFramework::URV_Transparency_Back_Only;
 					}
 					else
 					{
+						BOOST_ASSERT((PT_TransparencyFrontGBuffer == pass_type) || (PT_TransparencyFrontMRTGBuffer == pass_type));
+
 						re.BindFrameBuffer(g_buffers_[2]);
 						re.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth | FrameBuffer::CBM_Stencil, Color(0, 0, 0, 0), 1.0f, 128);
-						return App3DFramework::URV_Need_Flush | App3DFramework::URV_Transparency_Only;
+						return App3DFramework::URV_Need_Flush | App3DFramework::URV_Transparency_Front_Only;
 					}
 				}
 			}
@@ -1083,13 +1092,18 @@ namespace KlayGE
 
 					pass_scaned_.resize(2 + !depth_texture_);
 
-					if (has_transparency_objs_)
+					if (has_transparency_back_objs_)
 					{
 						if (mrt_g_buffer_)
 						{
 							pass_scaned_.push_back(static_cast<uint32_t>((PT_TransparencyBackMRTGBuffer << 24) + 0));
 							pass_scaned_.push_back(static_cast<uint32_t>((PT_TransparencyBackMRTGBuffer << 24) + 1));
-
+						}
+					}
+					if (has_transparency_front_objs_)
+					{
+						if (mrt_g_buffer_)
+						{
 							pass_scaned_.push_back(static_cast<uint32_t>((PT_TransparencyFrontMRTGBuffer << 24) + 0));
 							pass_scaned_.push_back(static_cast<uint32_t>((PT_TransparencyFrontMRTGBuffer << 24) + 1));
 						}
@@ -1229,17 +1243,23 @@ namespace KlayGE
 						}
 					}
 					pass_scaned_.push_back(static_cast<uint32_t>((PT_OpaqueShading << 24) + 0));
-					if (has_transparency_objs_)
+					if (has_transparency_back_objs_)
 					{
 						pass_scaned_.push_back(static_cast<uint32_t>((PT_TransparencyBackShading << 24) + 0));
+					}
+					if (has_transparency_front_objs_)
+					{
 						pass_scaned_.push_back(static_cast<uint32_t>((PT_TransparencyFrontShading << 24) + 0));
 					}
 					if (mrt_g_buffer_)
 					{
 						pass_scaned_.push_back(static_cast<uint32_t>((PT_OpaqueSpecialShading << 24) + 0));
-						if (has_transparency_objs_)
+						if (has_transparency_back_objs_)
 						{
 							pass_scaned_.push_back(static_cast<uint32_t>((PT_TransparencyBackSpecialShading << 24) + 0));
+						}
+						if (has_transparency_front_objs_)
+						{
 							pass_scaned_.push_back(static_cast<uint32_t>((PT_TransparencyFrontSpecialShading << 24) + 0));
 						}
 						pass_scaned_.push_back(static_cast<uint32_t>((PT_OpaqueSpecialShading << 24) + 1));
@@ -1348,7 +1368,7 @@ namespace KlayGE
 						}
 						else
 						{
-							return App3DFramework::URV_Need_Flush | App3DFramework::URV_Transparency_Only;
+							return App3DFramework::URV_Need_Flush | App3DFramework::URV_Transparency_Back_Only;
 						}
 
 					case PT_TransparencyFrontShading:
@@ -1368,7 +1388,7 @@ namespace KlayGE
 						}
 						else
 						{
-							return App3DFramework::URV_Need_Flush | App3DFramework::URV_Transparency_Only;
+							return App3DFramework::URV_Need_Flush | App3DFramework::URV_Transparency_Front_Only;
 						}
 
 					case PT_OpaqueSpecialShading:
@@ -1377,12 +1397,12 @@ namespace KlayGE
 
 					case PT_TransparencyBackSpecialShading:
 						re.BindFrameBuffer(shading_buffers_[1]);
-						return App3DFramework::URV_Need_Flush | App3DFramework::URV_Transparency_Only | App3DFramework::URV_Special_Shading_Only;
+						return App3DFramework::URV_Need_Flush | App3DFramework::URV_Transparency_Back_Only | App3DFramework::URV_Special_Shading_Only;
 
 					case PT_TransparencyFrontSpecialShading:
 					default:
 						re.BindFrameBuffer(shading_buffers_[2]);
-						return App3DFramework::URV_Need_Flush | App3DFramework::URV_Transparency_Only | App3DFramework::URV_Special_Shading_Only;
+						return App3DFramework::URV_Need_Flush | App3DFramework::URV_Transparency_Front_Only | App3DFramework::URV_Special_Shading_Only;
 					}
 				}
 				else

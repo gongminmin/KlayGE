@@ -290,13 +290,35 @@ namespace KlayGE
 		return ss;
 	}
 	
-	bool RenderModel::AlphaBlend() const
+	bool RenderModel::TransparencyBackFace() const
 	{
 		bool ab = false;
 		typedef BOOST_TYPEOF(meshes_) MeshesType;
 		BOOST_FOREACH(MeshesType::const_reference mesh, meshes_)
 		{
-			ab |= mesh->AlphaBlend();
+			ab |= mesh->TransparencyBackFace();
+		}
+		return ab;
+	}
+
+	bool RenderModel::TransparencyFrontFace() const
+	{
+		bool ab = false;
+		typedef BOOST_TYPEOF(meshes_) MeshesType;
+		BOOST_FOREACH(MeshesType::const_reference mesh, meshes_)
+		{
+			ab |= mesh->TransparencyFrontFace();
+		}
+		return ab;
+	}
+
+	bool RenderModel::Reflection() const
+	{
+		bool ab = false;
+		typedef BOOST_TYPEOF(meshes_) MeshesType;
+		BOOST_FOREACH(MeshesType::const_reference mesh, meshes_)
+		{
+			ab |= mesh->Reflection();
 		}
 		return ab;
 	}
@@ -317,7 +339,8 @@ namespace KlayGE
 	{
 		opacity_map_enabled_ = false;
 		special_shading_ = false;
-		need_alpha_blend_ = false;
+		need_transparency_back_ = false;
+		need_transparency_front_ = false;
 		need_alpha_test_ = false;
 		need_reflection_ = false;
 
@@ -366,7 +389,8 @@ namespace KlayGE
 					}
 					else
 					{
-						need_alpha_blend_ = true;
+						need_transparency_back_ = true;
+						need_transparency_front_ = true;
 					}
 				}
 			}				
@@ -374,9 +398,11 @@ namespace KlayGE
 		
 		if (!need_alpha_test_ && (mtl_->opacity < 1))
 		{
-			need_alpha_blend_ = true;
+			need_transparency_back_ = true;
+			need_transparency_front_ = true;
 		}
-		if ((mtl_->emit.x() > 0) || (mtl_->emit.y() > 0) || (mtl_->emit.z() > 0) || emit_tex_ || need_alpha_blend_ || need_reflection_)
+		if ((mtl_->emit.x() > 0) || (mtl_->emit.y() > 0) || (mtl_->emit.z() > 0) || emit_tex_
+			|| need_transparency_back_ || need_transparency_front_ || need_reflection_)
 		{
 			special_shading_ = true;
 		}

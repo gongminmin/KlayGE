@@ -256,17 +256,24 @@ namespace KlayGE
 		{
 			if (urt_ & App3DFramework::URV_Opaque_Only)
 			{
-				add = !obj->AlphaBlend();
+				add = !(obj->TransparencyBackFace() || obj->TransparencyFrontFace());
 			}
 			else
 			{
-				if (urt_ & App3DFramework::URV_Transparency_Only)
+				if (urt_ & App3DFramework::URV_Transparency_Back_Only)
 				{
-					add = obj->AlphaBlend();
+					add = obj->TransparencyBackFace();
 				}
 				else
 				{
-					add = true;
+					if (urt_ & App3DFramework::URV_Transparency_Front_Only)
+					{
+						add = obj->TransparencyFrontFace();
+					}
+					else
+					{
+						add = true;
+					}
 				}
 			}
 

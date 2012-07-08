@@ -79,9 +79,13 @@ namespace KlayGE
 		virtual void Pass(PassType type);
 		virtual void LightingTex(TexturePtr const & tex);
 
-		bool AlphaBlend() const
+		bool TransparencyBackFace() const
 		{
-			return renderable_->AlphaBlend();
+			return renderable_->TransparencyBackFace();
+		}
+		bool TransparencyFrontFace() const
+		{
+			return renderable_->TransparencyFrontFace();
 		}
 		bool Reflection() const
 		{

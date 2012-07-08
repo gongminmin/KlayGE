@@ -61,8 +61,9 @@ namespace KlayGE
 			URV_Overlay = 1UL << 3,
 			URV_Skip_Postprocess = 1UL << 4,
 			URV_Opaque_Only = 1UL << 5,
-			URV_Transparency_Only = 1UL << 6,
-			URV_Special_Shading_Only = 1UL << 7
+			URV_Transparency_Back_Only = 1UL << 6,
+			URV_Transparency_Front_Only = 1UL << 7,
+			URV_Special_Shading_Only = 1UL << 8
 		};
 
 	public:

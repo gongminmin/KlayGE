@@ -234,7 +234,9 @@ namespace KlayGE
 		TexturePtr const & RetriveTexture(std::string const & name);
 
 		bool SpecialShading() const;
-		bool AlphaBlend() const;
+		bool TransparencyBackFace() const;
+		bool TransparencyFrontFace() const;
+		bool Reflection() const;
 
 	protected:
 		void UpdateBoundBox();

@@ -127,9 +127,13 @@ namespace KlayGE
 		{
 			return special_shading_;
 		}
-		virtual bool AlphaBlend() const
+		virtual bool TransparencyBackFace() const
 		{
-			return need_alpha_blend_;
+			return need_transparency_back_;
+		}
+		virtual bool TransparencyFrontFace() const
+		{
+			return need_transparency_front_;
 		}
 		virtual bool Reflection() const
 		{
@@ -185,7 +189,8 @@ namespace KlayGE
 		PassType type_;
 		bool opacity_map_enabled_;
 		bool special_shading_;
-		bool need_alpha_blend_;
+		bool need_transparency_back_;
+		bool need_transparency_front_;
 		bool need_alpha_test_;
 		bool need_reflection_;
 

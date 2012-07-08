@@ -221,7 +221,8 @@ namespace KlayGE
 		RenderEffectParameterPtr projective_map_cube_tex_param_;
 
 		std::vector<SceneObject*> visible_scene_objs_;
-		bool has_transparency_objs_;
+		bool has_transparency_back_objs_;
+		bool has_transparency_front_objs_;
 		bool has_reflective_objs_;
 
 		FrameBufferPtr rsm_buffer_;
