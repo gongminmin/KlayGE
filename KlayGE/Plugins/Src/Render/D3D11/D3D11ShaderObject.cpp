@@ -1405,6 +1405,16 @@ namespace KlayGE
 
 					reflection->Release();
 				}
+
+				ID3DBlob* strip_code = NULL;
+				D3DStripShader(code->GetBufferPointer(), code->GetBufferSize(),
+					D3DCOMPILER_STRIP_REFLECTION_DATA | D3DCOMPILER_STRIP_DEBUG_INFO | D3DCOMPILER_STRIP_TEST_BLOBS,
+					&strip_code);
+				if (strip_code)
+				{
+					code->Release();
+					code = strip_code;
+				}
 			}
 		}
 
