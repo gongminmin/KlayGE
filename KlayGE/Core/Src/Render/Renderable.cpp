@@ -112,7 +112,7 @@ namespace KlayGE
 				*specular_level_param_ = float4(MathLib::clamp(mtl_ ? mtl_->specular_level : 0, 0.0f, 1.0f), 0, 0, static_cast<float>(!!specular_tex_));
 				*emit_tex_param_ = emit_tex_;
 				*emit_clr_param_ = float4(mtl_ ? mtl_->emit.x() : 0, mtl_ ? mtl_->emit.y() : 0, mtl_ ? mtl_->emit.z() : 0, static_cast<float>(!!emit_tex_));
-				*opacity_clr_param_ = mtl_ ? mtl_->opacity : 1;
+				*opacity_clr_param_ = mtl_ ? mtl_->opacity : 1.0f;
 				*opacity_map_enabled_param_ = static_cast<int32_t>(opacity_map_enabled_);
 				break;
 

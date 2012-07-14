@@ -60,7 +60,9 @@ namespace KlayGE
 	public:
 		FirstPersonCameraController();
 
-		void AttachCamera(Camera& camera);
+		virtual void AttachCamera(Camera& camera);
+
+		void RequiresLeftButtonDown(bool lbd);
 
 		void Move(float x, float y, float z);
 		void Rotate(float yaw, float pitch, float roll);
@@ -70,6 +72,8 @@ namespace KlayGE
 		float2		rot_y_;
 		float2		rot_z_;
 		Quaternion	inv_rot_;
+
+		bool left_button_down_;
 
 		enum
 		{
@@ -93,7 +97,7 @@ namespace KlayGE
 	public:
 		TrackballCameraController();
 
-		void AttachCamera(Camera& camera);
+		virtual void AttachCamera(Camera& camera);
 
 	private:
 		bool reverse_target_;

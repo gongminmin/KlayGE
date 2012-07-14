@@ -76,6 +76,7 @@ namespace KlayGE
 
 
 	FirstPersonCameraController::FirstPersonCameraController()
+		: left_button_down_(false)
 	{
 		using namespace boost::assign;
 
@@ -102,8 +103,50 @@ namespace KlayGE
 		inputEngine.ActionMap(actionMap, input_handler, true);
 	}
 
+	void FirstPersonCameraController::RequiresLeftButtonDown(bool lbd)
+	{
+		left_button_down_ = lbd;
+	}
+
 	void FirstPersonCameraController::InputHandler(InputEngine const & ie, InputAction const & action)
 	{
+		bool ldb = false;
+		if (camera_)
+		{
+			InputMousePtr mouse;
+			for (uint32_t i = 0; i < ie.NumDevices(); ++ i)
+			{
+				InputMousePtr m = boost::dynamic_pointer_cast<InputMouse>(ie.Device(i));
+				if (m)
+				{
+					mouse = m;
+					break;
+				}
+			}
+
+			if (mouse)
+			{
+				bool mouse_on_ui = false;
+				std::vector<UIDialogPtr> const & dlgs = UIManager::Instance().GetDialogs();
+				for (size_t i = 0; i < dlgs.size(); ++ i)
+				{
+					if (dlgs[i]->GetVisible() && dlgs[i]->ContainsPoint(Vector_T<int32_t, 2>(mouse->AbsX(), mouse->AbsY())))
+					{
+						mouse_on_ui = true;
+						break;
+					}
+				}
+
+				if (!mouse_on_ui)
+				{
+					if (mouse->LeftButton())
+					{
+						ldb = true;
+					}
+				}
+			}
+		}
+
 		float elapsed_time = ie.ElapsedTime();
 		if (camera_)
 		{
@@ -112,19 +155,31 @@ namespace KlayGE
 			switch (action.first)
 			{
 			case TurnLeftRight:
-				this->Rotate(action.second * scaler, 0, 0);
+				if ((left_button_down_ && ldb) || !left_button_down_)
+				{
+					this->Rotate(action.second * scaler, 0, 0);
+				}
 				break;
 
 			case TurnUpDown:
-				this->Rotate(0, action.second * scaler, 0);
+				if ((left_button_down_ && ldb) || !left_button_down_)
+				{
+					this->Rotate(0, action.second * scaler, 0);
+				}
 				break;
 
 			case RollLeft:
-				this->Rotate(0, 0, -scaler);
+				if ((left_button_down_ && ldb) || !left_button_down_)
+				{
+					this->Rotate(0, 0, -scaler);
+				}
 				break;
 
 			case RollRight:
-				this->Rotate(0, 0, scaler);
+				if ((left_button_down_ && ldb) || !left_button_down_)
+				{
+					this->Rotate(0, 0, scaler);
+				}
 				break;
 
 			case Forward:

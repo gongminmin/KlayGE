@@ -328,6 +328,7 @@ void DistanceMapping::InitObjects()
 	this->LookAt(float3(2, 0, -2), float3(0, 0, 0));
 	this->Proj(0.1f, 100);
 
+	fpcController_.RequiresLeftButtonDown(true);
 	fpcController_.AttachCamera(this->ActiveCamera());
 	fpcController_.Scalers(0.05f, 0.1f);
 
