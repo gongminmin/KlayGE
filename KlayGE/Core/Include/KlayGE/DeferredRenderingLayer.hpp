@@ -225,6 +225,7 @@ namespace KlayGE
 		bool has_transparency_back_objs_;
 		bool has_transparency_front_objs_;
 		bool has_reflective_objs_;
+		bool has_simple_forward_objs_;
 
 		FrameBufferPtr rsm_buffer_;
 		TexturePtr rsm_texs_[2];

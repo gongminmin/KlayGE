@@ -50,6 +50,8 @@ namespace KlayGE
 
 		void Update(float app_time, float elapsed_time);
 
+		virtual void Pass(PassType type);
+
 	private:
 		float3 dir_;
 		bool lf_visible_;

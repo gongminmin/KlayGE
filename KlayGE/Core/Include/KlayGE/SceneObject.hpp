@@ -91,6 +91,10 @@ namespace KlayGE
 		{
 			return renderable_->Reflection();
 		}
+		bool SimpleForward() const
+		{
+			return renderable_->SimpleForward();
+		}
 
 	protected:
 		uint32_t attrib_;

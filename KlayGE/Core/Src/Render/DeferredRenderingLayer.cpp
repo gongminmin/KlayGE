@@ -911,6 +911,7 @@ namespace KlayGE
 			has_transparency_back_objs_ = false;
 			has_transparency_front_objs_ = false;
 			has_reflective_objs_ = false;
+			has_simple_forward_objs_ = false;
 			visible_scene_objs_.resize(0);
 			SceneManager::SceneObjectsType const & scene_objs = scene_mgr.SceneObjects();
 			typedef BOOST_TYPEOF(scene_objs) SceneObjsType;
@@ -931,6 +932,10 @@ namespace KlayGE
 					if (so->Reflection())
 					{
 						has_reflective_objs_ = true;
+					}
+					if (so->SimpleForward())
+					{
+						has_simple_forward_objs_ = true;
 					}
 				}
 			}
@@ -1454,7 +1459,19 @@ namespace KlayGE
 					lights_.resize(0);
 					light_visibles_.resize(0);
 
-					return App3DFramework::URV_Finished;
+					if (has_simple_forward_objs_)
+					{
+						typedef BOOST_TYPEOF(visible_scene_objs_) VisibleSceneObjsType;
+						BOOST_FOREACH(VisibleSceneObjsType::reference deo, visible_scene_objs_)
+						{
+							deo->Pass(PT_SimpleForward);
+						}
+						return App3DFramework::URV_Need_Flush | App3DFramework::URV_Simple_Forward_Only | App3DFramework::URV_Finished;
+					}
+					else
+					{
+						return App3DFramework::URV_Finished;
+					}
 				}
 			}
 			else

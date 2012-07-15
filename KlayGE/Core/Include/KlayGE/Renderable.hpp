@@ -52,7 +52,8 @@ namespace KlayGE
 		PT_TransparencyFrontShading,
 		PT_OpaqueSpecialShading,
 		PT_TransparencyBackSpecialShading,
-		PT_TransparencyFrontSpecialShading
+		PT_TransparencyFrontSpecialShading,
+		PT_SimpleForward
 	};
 
 	typedef std::vector<std::pair<std::string, std::string> > TextureSlotsType;
@@ -139,6 +140,10 @@ namespace KlayGE
 		{
 			return need_reflection_;
 		}
+		virtual bool SimpleForward() const
+		{
+			return need_simple_forward_;
+		}
 
 	protected:
 		virtual void UpdateInstanceStream();
@@ -193,6 +198,7 @@ namespace KlayGE
 		bool need_transparency_front_;
 		bool need_alpha_test_;
 		bool need_reflection_;
+		bool need_simple_forward_;
 
 		RenderMaterialPtr mtl_;
 

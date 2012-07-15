@@ -322,6 +322,17 @@ namespace KlayGE
 		return ab;
 	}
 
+	bool RenderModel::SimpleForward() const
+	{
+		bool ab = false;
+		typedef BOOST_TYPEOF(meshes_) MeshesType;
+		BOOST_FOREACH(MeshesType::const_reference mesh, meshes_)
+		{
+			ab |= mesh->SimpleForward();
+		}
+		return ab;
+	}
+
 
 	StaticMesh::StaticMesh(RenderModelPtr const & model, std::wstring const & name)
 		: name_(name), model_(model)
@@ -342,6 +353,7 @@ namespace KlayGE
 		need_transparency_front_ = false;
 		need_alpha_test_ = false;
 		need_reflection_ = false;
+		need_simple_forward_ = false;
 
 		RenderModelPtr model = model_.lock();
 

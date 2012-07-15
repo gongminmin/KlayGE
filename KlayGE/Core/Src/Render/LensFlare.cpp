@@ -67,6 +67,8 @@ namespace KlayGE
 		rl_->BindIndexStream(ib, EF_R32UI);
 
 		technique_ = rf.LoadEffect("LensFlare.fxml")->TechniqueByName("LensFlare");
+
+		need_simple_forward_ = true;
 	}
 
 	void LensFlareRenderable::FlareParam(std::vector<float3> const & param, float alpha_fac)
@@ -159,6 +161,16 @@ namespace KlayGE
 		else
 		{
 			lf_visible_ = false;
+		}
+
+		this->Visible(true);
+	}
+
+	void LensFlareSceneObject::Pass(PassType type)
+	{
+		if (PT_SimpleForward == type)
+		{
+			this->Visible(this->LFVisible());
 		}
 	}
 }

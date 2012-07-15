@@ -63,7 +63,8 @@ namespace KlayGE
 			URV_Opaque_Only = 1UL << 5,
 			URV_Transparency_Back_Only = 1UL << 6,
 			URV_Transparency_Front_Only = 1UL << 7,
-			URV_Special_Shading_Only = 1UL << 8
+			URV_Special_Shading_Only = 1UL << 8,
+			URV_Simple_Forward_Only = 1UL << 9
 		};
 
 	public:

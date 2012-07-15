@@ -47,6 +47,7 @@ namespace KlayGE
 			need_transparency_front_ = false;
 			need_alpha_test_ = false;
 			need_reflection_ = false;
+			need_simple_forward_ = false;
 		}
 	}
 
