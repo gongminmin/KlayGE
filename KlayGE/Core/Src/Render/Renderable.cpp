@@ -392,6 +392,9 @@ namespace KlayGE
 		case PT_TransparencyFrontSpecialShading:
 			return special_shading_alpha_blend_front_tech_;
 
+		case PT_SimpleForward:
+			return technique_;
+
 		default:
 			BOOST_ASSERT(false);
 			return gbuffer_tech_;

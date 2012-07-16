@@ -24,7 +24,7 @@
 	<parameter type="texture2D" name="depth_tex"/>
 	<parameter type="texture2D" name="background_tex"/>
 
-	<parameter type="sampler" name="point_sampler">
+	<parameter type="sampler" name="point_clamp_sampler">
 		<state name="filtering" value="min_mag_mip_point"/>
 		<state name="address_u" value="clamp"/>
 		<state name="address_v" value="clamp"/>
@@ -32,21 +32,12 @@
 
 	<shader>
 		<![CDATA[
-void ScreenSpaceReflectionPostProcessVS(float4 pos : POSITION,
-				out float2 oTc0 : TEXCOORD0,
-				out float3 oViewDir : TEXCOORD1,
-				out float4 oPos : SV_Position)
+float4 ScreenSpaceReflection(float2 tc, float3 normal, float3 view_dir)
 {
-	PostProcessVS(pos, oTc0, oPos);
-	oViewDir = mul(oPos, inv_proj).xyz;
-}
-
-float4 ScreenSpaceReflectionPostProcessPS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Target
-{
-	float3 normal = GetNormal(g_buffer_0_tex.Sample(point_sampler, tc)); // eye space normal 
+	normal = normalize(normal); // eye space normal 
 	view_dir = normalize(view_dir); // eye space view direction
 	
-	float linear_depth = depth_tex.SampleLevel(point_sampler, tc, 0).x;
+	float linear_depth = depth_tex.SampleLevel(point_clamp_sampler, tc, 0).x;
 	float non_linear_depth = linear_depth_to_non_linear(linear_depth, near_q.x, near_q.y);
 	float3 tex_pos = float3(tc, non_linear_depth); // let z component be projected nonlinear depth, so we can do linear interpolation in screen space
 	
@@ -101,7 +92,7 @@ float4 ScreenSpaceReflectionPostProcessPS(float2 tc : TEXCOORD0, float3 view_dir
 	while (sample_index < num_steps)
 	{
 		cur_tex_pos += sample_step;
-		float cur_sample_depth = depth_tex.SampleLevel(point_sampler, cur_tex_pos.xy, 0).r;
+		float cur_sample_depth = depth_tex.SampleLevel(point_clamp_sampler, cur_tex_pos.xy, 0).r;
 		float cur_ray_march_depth = non_linear_depth_to_linear(cur_tex_pos.z, near_q.x, near_q.y);
 	
 		t += step;
@@ -138,12 +129,26 @@ float4 ScreenSpaceReflectionPostProcessPS(float2 tc : TEXCOORD0, float3 view_dir
 	float2 screen_edge = clamp(abs(sample_tex_pos - 0.5f) / 0.5f, 0, 1);
 	float screen_edge_fade_out_factor = clamp((1 - max(screen_edge.x, screen_edge.y)) / ray_length_fadeout_factor, 0, 1);
 	
-	float fresnel = fresnel_term_schlick(-view_dir, normal, g_buffer_1_tex.Sample(point_sampler, tc).w).x;
+	float fresnel = fresnel_term_schlick(-view_dir, normal, g_buffer_1_tex.Sample(point_clamp_sampler, tc).w).x;
 
-	float3 clr = background_tex.Sample(point_sampler, sample_tex_pos).rgb;
+	float3 clr = background_tex.Sample(point_clamp_sampler, sample_tex_pos).rgb;
 	float alpha = (screen_edge_fade_out_factor * reflect_dir_fade_out_factor + reflect_dir_fade_out_factor * (1 - reflect_dir_fade_out_factor)) * fresnel;
 
 	return float4(clr, alpha);
+}
+
+void ScreenSpaceReflectionPostProcessVS(float4 pos : POSITION,
+				out float2 oTc0 : TEXCOORD0,
+				out float3 oViewDir : TEXCOORD1,
+				out float4 oPos : SV_Position)
+{
+	PostProcessVS(pos, oTc0, oPos);
+	oViewDir = mul(oPos, inv_proj).xyz;
+}
+
+float4 ScreenSpaceReflectionPostProcessPS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Target
+{
+	return ScreenSpaceReflection(tc, GetNormal(g_buffer_0_tex.Sample(point_clamp_sampler, tc)), view_dir);
 }
 		]]>
 	</shader>
@@ -170,10 +175,10 @@ float4 ScreenSpaceReflectionPostProcessPS(float2 tc : TEXCOORD0, float3 view_dir
 			<state name="blend_enable" value="true"/>
 			<state name="blend_op" value="add"/>
 			<state name="src_blend" value="src_alpha"/>
-			<state name="dest_blend" value="inv_src_alpha"/>
+			<state name="dest_blend" value="one"/>
 			<state name="blend_op_alpha" value="add"/>
-			<state name="src_blend_alpha" value="src_alpha"/>
-			<state name="dest_blend_alpha" value="zero"/>
+			<state name="src_blend_alpha" value="zero"/>
+			<state name="dest_blend_alpha" value="one"/>
 
 			<state name="vertex_shader" value="ScreenSpaceReflectionPostProcessVS()"/>
 			<state name="pixel_shader" value="ScreenSpaceReflectionPostProcessPS()"/>

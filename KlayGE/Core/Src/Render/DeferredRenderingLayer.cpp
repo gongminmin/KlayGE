@@ -1430,7 +1430,12 @@ namespace KlayGE
 							{
 								*shading_tex_param_ = shading_texs_[i];
 								re.Render(*technique_merge_shadings_[i != 0], *rl_quad_);
-
+							}
+						}
+						for (size_t i = 0; i < 3; ++ i)
+						{
+							if (g_buffer_enables_[i])
+							{
 								re.BindFrameBuffer(shading_buffers_[i]);
 								ssr_pp_->Apply();
 							}
