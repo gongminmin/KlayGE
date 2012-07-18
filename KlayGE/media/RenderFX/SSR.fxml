@@ -21,8 +21,9 @@
 	
 	<parameter type="texture2D" name="g_buffer_0_tex"/>
 	<parameter type="texture2D" name="g_buffer_1_tex"/>
-	<parameter type="texture2D" name="depth_tex"/>
+	<parameter type="texture2D" name="background_depth_tex"/>
 	<parameter type="texture2D" name="background_tex"/>
+	<parameter type="texture2D" name="foreground_depth_tex"/>
 
 	<parameter type="sampler" name="ssr_linear_sampler">
 		<state name="filtering" value="min_mag_linear_mip_point"/>
@@ -99,7 +100,7 @@ float4 ScreenSpaceReflection(float2 tc, float3 normal, float3 pos_es)
 	while (sample_index < num_steps)
 	{
 		cur_tex_pos += sample_step;
-		float cur_sample_depth = depth_tex.SampleLevel(ssr_linear_sampler, cur_tex_pos.xy, 0).r;
+		float cur_sample_depth = background_depth_tex.SampleLevel(ssr_linear_sampler, cur_tex_pos.xy, 0).r;
 		float cur_ray_march_depth = non_linear_depth_to_linear(cur_tex_pos.z, near_q.x, near_q.y);
 	
 		t += step;
@@ -144,15 +145,16 @@ float4 ScreenSpaceReflection(float2 tc, float3 normal, float3 pos_es)
 
 void ScreenSpaceReflectionPostProcessVS(float4 pos : POSITION,
 				out float2 oTc0 : TEXCOORD0,
-				out float3 oPosES : TEXCOORD1,
+				out float3 oViewDir : TEXCOORD1,
 				out float4 oPos : SV_Position)
 {
 	PostProcessVS(pos, oTc0, oPos);
-	oPosES = mul(oPos, inv_proj).xyz;
+	oViewDir = mul(oPos, inv_proj).xyz;
 }
 
-float4 ScreenSpaceReflectionPostProcessPS(float2 tc : TEXCOORD0, float3 pos_es : TEXCOORD1) : SV_Target
+float4 ScreenSpaceReflectionPostProcessPS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Target
 {
+	float3 pos_es = view_dir * (foreground_depth_tex.Sample(ssr_point_sampler, tc).x / view_dir.z);
 	return ScreenSpaceReflection(tc, GetNormal(g_buffer_0_tex.Sample(ssr_linear_sampler, tc)), pos_es);
 }
 		]]>

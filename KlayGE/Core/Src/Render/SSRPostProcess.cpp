@@ -13,8 +13,9 @@ namespace KlayGE
 	{
 		input_pins_.push_back(std::make_pair("g_buffer_0_tex", TexturePtr()));
 		input_pins_.push_back(std::make_pair("g_buffer_1_tex", TexturePtr()));
-		input_pins_.push_back(std::make_pair("depth_tex", TexturePtr()));
+		input_pins_.push_back(std::make_pair("background_depth_tex", TexturePtr()));
 		input_pins_.push_back(std::make_pair("background_tex", TexturePtr()));
+		input_pins_.push_back(std::make_pair("foreground_depth_tex", TexturePtr()));
 
 		params_.push_back(std::make_pair("min_samples", RenderEffectParameterPtr()));
 		params_.push_back(std::make_pair("max_samples", RenderEffectParameterPtr()));

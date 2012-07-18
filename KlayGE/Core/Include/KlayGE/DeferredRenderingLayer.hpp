@@ -23,6 +23,8 @@
 #include <KlayGE/PreDeclare.hpp>
 #include <KlayGE/Light.hpp>
 
+#include <boost/array.hpp>
+
 namespace KlayGE
 {
 	class KLAYGE_CORE_API DeferredRenderingLayer
@@ -130,24 +132,30 @@ namespace KlayGE
 		RenderEffectPtr g_buffer_effect_;
 		RenderEffectPtr dr_effect_;
 
-		std::vector<bool> g_buffer_enables_;
+		enum
+		{
+			NUM_G_BUFFERS = 3
+		};
 
-		std::vector<FrameBufferPtr> pre_depth_buffers_;
+		boost::array<bool, NUM_G_BUFFERS> g_buffer_enables_;
 
-		std::vector<FrameBufferPtr> g_buffers_;
-		std::vector<TexturePtr> g_buffer_rt0_texs_;
-		std::vector<TexturePtr> g_buffer_rt1_texs_;
-		std::vector<TexturePtr> g_buffer_ds_texs_;
-		std::vector<TexturePtr> g_buffer_depth_texs_;
+		boost::array<FrameBufferPtr, NUM_G_BUFFERS> pre_depth_buffers_;
+
+		boost::array<FrameBufferPtr, NUM_G_BUFFERS> g_buffers_;
+		boost::array<TexturePtr, NUM_G_BUFFERS> g_buffer_rt0_texs_;
+		boost::array<TexturePtr, NUM_G_BUFFERS> g_buffer_rt1_texs_;
+		boost::array<TexturePtr, NUM_G_BUFFERS> g_buffer_ds_texs_;
+		boost::array<TexturePtr, NUM_G_BUFFERS> g_buffer_depth_texs_;
 
 		FrameBufferPtr shadowing_buffer_;
 		TexturePtr shadowing_tex_;
 
-		std::vector<FrameBufferPtr> lighting_buffers_;
-		std::vector<TexturePtr> lighting_texs_;
+		boost::array<FrameBufferPtr, NUM_G_BUFFERS> lighting_buffers_;
+		boost::array<TexturePtr, NUM_G_BUFFERS> lighting_texs_;
 
-		std::vector<FrameBufferPtr> shading_buffers_;
-		std::vector<TexturePtr> shading_texs_;
+		boost::array<FrameBufferPtr, NUM_G_BUFFERS + 1> shading_buffers_;
+		boost::array<TexturePtr, NUM_G_BUFFERS + 1> shading_texs_;
+		int curr_frame_index_;
 
 		FrameBufferPtr output_buffer_;
 		TexturePtr output_tex_;
@@ -163,8 +171,6 @@ namespace KlayGE
 		bool ssvo_enabled_;
 
 		PostProcessPtr ssr_pp_;
-		FrameBufferPtr ssr_buffer_;
-		TexturePtr ssr_tex_;
 		bool ssr_enabled_;
 
 		RenderLayoutPtr rl_cone_;
