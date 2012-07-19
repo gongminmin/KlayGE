@@ -29,6 +29,14 @@ namespace KlayGE
 {
 	class KLAYGE_CORE_API DeferredRenderingLayer
 	{
+		enum
+		{
+			Opaque_GBuffer = 0,
+			TransparencyBack_GBuffer = 1,
+			TransparencyFront_GBuffer = 2,
+			Num_GBuffers
+		};
+
 	public:
 		DeferredRenderingLayer();
 
@@ -48,27 +56,27 @@ namespace KlayGE
 
 		TexturePtr const & OpaqueLightingTex() const
 		{
-			return lighting_texs_[0];
+			return lighting_texs_[Opaque_GBuffer];
 		}
 		TexturePtr const & TransparencyBackLightingTex() const
 		{
-			return lighting_texs_[1];
+			return lighting_texs_[TransparencyBack_GBuffer];
 		}
 		TexturePtr const & TransparencyFrontLightingTex() const
 		{
-			return lighting_texs_[2];
+			return lighting_texs_[TransparencyFront_GBuffer];
 		}
 		TexturePtr const & OpaqueShadingTex() const
 		{
-			return shading_texs_[0];
+			return curr_shading_texs_[Opaque_GBuffer];
 		}
 		TexturePtr const & TransparencyBackShadingTex() const
 		{
-			return shading_texs_[1];
+			return curr_shading_texs_[TransparencyBack_GBuffer];
 		}
 		TexturePtr const & TransparencyFrontShadingTex() const
 		{
-			return shading_texs_[2];
+			return curr_shading_texs_[TransparencyFront_GBuffer];
 		}
 
 		TexturePtr const & SmallSSVOTex() const
@@ -78,39 +86,39 @@ namespace KlayGE
 
 		TexturePtr const & OpaqueGBufferRT0Tex() const
 		{
-			return g_buffer_rt0_texs_[0];
+			return g_buffer_rt0_texs_[Opaque_GBuffer];
 		}
 		TexturePtr const & OpaqueGBufferRT1Tex() const
 		{
-			return g_buffer_rt1_texs_[0];
+			return g_buffer_rt1_texs_[Opaque_GBuffer];
 		}
 		TexturePtr const & OpaqueDepthTex() const
 		{
-			return g_buffer_depth_texs_[0];
+			return g_buffer_depth_texs_[Opaque_GBuffer];
 		}
 		TexturePtr const & TransparencyBackGBufferRT0Tex() const
 		{
-			return g_buffer_rt0_texs_[1];
+			return g_buffer_rt0_texs_[TransparencyBack_GBuffer];
 		}
 		TexturePtr const & TransparencyBackGBufferRT1Tex() const
 		{
-			return g_buffer_rt1_texs_[1];
+			return g_buffer_rt1_texs_[TransparencyBack_GBuffer];
 		}
 		TexturePtr const & TransparencyBackDepthTex() const
 		{
-			return g_buffer_depth_texs_[1];
+			return g_buffer_depth_texs_[TransparencyBack_GBuffer];
 		}
 		TexturePtr const & TransparencyFrontGBufferRT0Tex() const
 		{
-			return g_buffer_rt0_texs_[2];
+			return g_buffer_rt0_texs_[TransparencyFront_GBuffer];
 		}
 		TexturePtr const & TransparencyFrontGBufferRT1Tex() const
 		{
-			return g_buffer_rt1_texs_[2];
+			return g_buffer_rt1_texs_[TransparencyFront_GBuffer];
 		}
 		TexturePtr const & TransparencyFrontDepthTex() const
 		{
-			return g_buffer_depth_texs_[2];
+			return g_buffer_depth_texs_[TransparencyFront_GBuffer];
 		}
 
 		void DisplayIllum(int illum);
@@ -132,30 +140,26 @@ namespace KlayGE
 		RenderEffectPtr g_buffer_effect_;
 		RenderEffectPtr dr_effect_;
 
-		enum
-		{
-			NUM_G_BUFFERS = 3
-		};
+		boost::array<bool, Num_GBuffers> g_buffer_enables_;
 
-		boost::array<bool, NUM_G_BUFFERS> g_buffer_enables_;
+		boost::array<FrameBufferPtr, Num_GBuffers> pre_depth_buffers_;
 
-		boost::array<FrameBufferPtr, NUM_G_BUFFERS> pre_depth_buffers_;
-
-		boost::array<FrameBufferPtr, NUM_G_BUFFERS> g_buffers_;
-		boost::array<TexturePtr, NUM_G_BUFFERS> g_buffer_rt0_texs_;
-		boost::array<TexturePtr, NUM_G_BUFFERS> g_buffer_rt1_texs_;
-		boost::array<TexturePtr, NUM_G_BUFFERS> g_buffer_ds_texs_;
-		boost::array<TexturePtr, NUM_G_BUFFERS> g_buffer_depth_texs_;
+		boost::array<FrameBufferPtr, Num_GBuffers> g_buffers_;
+		boost::array<TexturePtr, Num_GBuffers> g_buffer_rt0_texs_;
+		boost::array<TexturePtr, Num_GBuffers> g_buffer_rt1_texs_;
+		boost::array<TexturePtr, Num_GBuffers> g_buffer_ds_texs_;
+		boost::array<TexturePtr, Num_GBuffers> g_buffer_depth_texs_;
 
 		FrameBufferPtr shadowing_buffer_;
 		TexturePtr shadowing_tex_;
 
-		boost::array<FrameBufferPtr, NUM_G_BUFFERS> lighting_buffers_;
-		boost::array<TexturePtr, NUM_G_BUFFERS> lighting_texs_;
+		boost::array<FrameBufferPtr, Num_GBuffers> lighting_buffers_;
+		boost::array<TexturePtr, Num_GBuffers> lighting_texs_;
 
-		boost::array<FrameBufferPtr, NUM_G_BUFFERS + 1> shading_buffers_;
-		boost::array<TexturePtr, NUM_G_BUFFERS + 1> shading_texs_;
-		int curr_frame_index_;
+		boost::array<FrameBufferPtr, Num_GBuffers> curr_shading_buffers_;
+		boost::array<TexturePtr, Num_GBuffers> curr_shading_texs_;
+		FrameBufferPtr prev_shading_buffer_;
+		TexturePtr prev_shading_tex_;
 
 		FrameBufferPtr output_buffer_;
 		TexturePtr output_tex_;
