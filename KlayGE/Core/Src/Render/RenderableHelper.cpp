@@ -308,7 +308,7 @@ namespace KlayGE
 			depth_far_ep_ = deferred_effect_->ParameterByName("depth_far");
 			inv_mvp_ep_ = deferred_effect_->ParameterByName("inv_mvp");
 
-			special_shading_ = true;
+			effect_attrs_ |= EA_SpecialShading;
 		}
 		else
 		{

@@ -908,9 +908,11 @@ namespace KlayGE
 			lights_.insert(lights_.end(), cur_lights.begin(), cur_lights.end());
 			light_visibles_.assign(lights_.size(), true);
 
-			has_transparency_back_objs_ = false;
-			has_transparency_front_objs_ = false;
+			bool has_transparency_back_objs = false;
+			bool has_transparency_front_objs = false;
 			has_reflective_objs_ = false;
+			has_dual_reflective_objs_.assign(false);
+			size_t num_dual_reflective_objs = 0;
 			has_simple_forward_objs_ = false;
 			visible_scene_objs_.resize(0);
 			SceneManager::SceneObjectsType const & scene_objs = scene_mgr.SceneObjects();
@@ -923,15 +925,23 @@ namespace KlayGE
 
 					if (so->TransparencyBackFace())
 					{
-						has_transparency_back_objs_ = true;
+						has_transparency_back_objs = true;
 					}
 					if (so->TransparencyFrontFace())
 					{
-						has_transparency_front_objs_ = true;
+						has_transparency_front_objs = true;
 					}
 					if (so->Reflection())
 					{
 						has_reflective_objs_ = true;
+					}
+					if (so->DualReflection())
+					{
+						if (num_dual_reflective_objs < has_dual_reflective_objs_.size())
+						{
+							has_dual_reflective_objs_[num_dual_reflective_objs] = true;
+							++ num_dual_reflective_objs;
+						}
 					}
 					if (so->SimpleForward())
 					{
@@ -941,8 +951,12 @@ namespace KlayGE
 			}
 
 			g_buffer_enables_[Opaque_GBuffer] = true;
-			g_buffer_enables_[TransparencyBack_GBuffer] = has_transparency_back_objs_;
-			g_buffer_enables_[TransparencyFront_GBuffer] = has_transparency_front_objs_;
+			g_buffer_enables_[TransparencyBack_GBuffer] = has_transparency_back_objs;
+			g_buffer_enables_[TransparencyFront_GBuffer] = has_transparency_front_objs;
+			g_buffer_enables_[DualReflection_0_GBuffer] = has_dual_reflective_objs_[0];
+			g_buffer_enables_[DualReflection_1_GBuffer] = has_dual_reflective_objs_[1];
+			g_buffer_enables_[DualReflection_2_GBuffer] = has_dual_reflective_objs_[2];
+			g_buffer_enables_[DualReflection_3_GBuffer] = has_dual_reflective_objs_[3];
 
 			indirect_lighting_enabled_ = false;
 			if (rsm_buffer_ && (illum_ != 1))
@@ -1098,7 +1112,7 @@ namespace KlayGE
 
 					pass_scaned_.resize(2 + !depth_texture_);
 
-					if (has_transparency_back_objs_)
+					if (g_buffer_enables_[TransparencyBack_GBuffer])
 					{
 						if (mrt_g_buffer_)
 						{
@@ -1106,7 +1120,7 @@ namespace KlayGE
 							pass_scaned_.push_back(static_cast<uint32_t>((PT_TransparencyBackMRTGBuffer << 24) + 1));
 						}
 					}
-					if (has_transparency_front_objs_)
+					if (g_buffer_enables_[TransparencyFront_GBuffer])
 					{
 						if (mrt_g_buffer_)
 						{
@@ -1256,22 +1270,22 @@ namespace KlayGE
 						}
 					}
 					pass_scaned_.push_back(static_cast<uint32_t>((PT_OpaqueShading << 24) + 0));
-					if (has_transparency_back_objs_)
+					if (g_buffer_enables_[TransparencyBack_GBuffer])
 					{
 						pass_scaned_.push_back(static_cast<uint32_t>((PT_TransparencyBackShading << 24) + 0));
 					}
-					if (has_transparency_front_objs_)
+					if (g_buffer_enables_[TransparencyFront_GBuffer])
 					{
 						pass_scaned_.push_back(static_cast<uint32_t>((PT_TransparencyFrontShading << 24) + 0));
 					}
 					if (mrt_g_buffer_)
 					{
 						pass_scaned_.push_back(static_cast<uint32_t>((PT_OpaqueSpecialShading << 24) + 0));
-						if (has_transparency_back_objs_)
+						if (g_buffer_enables_[TransparencyBack_GBuffer])
 						{
 							pass_scaned_.push_back(static_cast<uint32_t>((PT_TransparencyBackSpecialShading << 24) + 0));
 						}
-						if (has_transparency_front_objs_)
+						if (g_buffer_enables_[TransparencyFront_GBuffer])
 						{
 							pass_scaned_.push_back(static_cast<uint32_t>((PT_TransparencyFrontSpecialShading << 24) + 0));
 						}

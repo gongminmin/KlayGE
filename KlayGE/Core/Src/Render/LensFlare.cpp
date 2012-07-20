@@ -68,7 +68,7 @@ namespace KlayGE
 
 		technique_ = rf.LoadEffect("LensFlare.fxml")->TechniqueByName("LensFlare");
 
-		need_simple_forward_ = true;
+		effect_attrs_ |= EA_SimpleForward;
 	}
 
 	void LensFlareRenderable::FlareParam(std::vector<float3> const & param, float alpha_fac)

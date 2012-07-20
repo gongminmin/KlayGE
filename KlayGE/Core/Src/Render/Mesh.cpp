@@ -322,6 +322,17 @@ namespace KlayGE
 		return ab;
 	}
 
+	bool RenderModel::DualReflection() const
+	{
+		bool ab = false;
+		typedef BOOST_TYPEOF(meshes_) MeshesType;
+		BOOST_FOREACH(MeshesType::const_reference mesh, meshes_)
+		{
+			ab |= mesh->DualReflection();
+		}
+		return ab;
+	}
+
 	bool RenderModel::SimpleForward() const
 	{
 		bool ab = false;
@@ -348,12 +359,7 @@ namespace KlayGE
 	void StaticMesh::BuildMeshInfo()
 	{
 		opacity_map_enabled_ = false;
-		special_shading_ = false;
-		need_transparency_back_ = false;
-		need_transparency_front_ = false;
-		need_alpha_test_ = false;
-		need_reflection_ = false;
-		need_simple_forward_ = false;
+		effect_attrs_ = 0;
 
 		RenderModelPtr model = model_.lock();
 
@@ -396,26 +402,27 @@ namespace KlayGE
 
 					if ((EF_BC1 == tex->Format()) || (EF_BC1_SRGB == tex->Format()))
 					{
-						need_alpha_test_ = true;
+						effect_attrs_ |= EA_AlphaTest;
 					}
 					else
 					{
-						need_transparency_back_ = true;
-						need_transparency_front_ = true;
+						effect_attrs_ |= EA_TransparencyBack;
+						effect_attrs_ |= EA_TransparencyFront;
 					}
 				}
 			}				
 		}
 		
-		if (!need_alpha_test_ && (mtl_->opacity < 1))
+		if (!(effect_attrs_ & EA_AlphaTest) && (mtl_->opacity < 1))
 		{
-			need_transparency_back_ = true;
-			need_transparency_front_ = true;
+			effect_attrs_ |= EA_TransparencyBack;
+			effect_attrs_ |= EA_TransparencyFront;
 		}
 		if ((mtl_->emit.x() > 0) || (mtl_->emit.y() > 0) || (mtl_->emit.z() > 0) || emit_tex_
-			|| need_transparency_back_ || need_transparency_front_ || need_reflection_)
+			|| (effect_attrs_ & EA_TransparencyBack) || (effect_attrs_ & EA_TransparencyFront)
+			|| (effect_attrs_ & EA_Reflection) || (effect_attrs_ & EA_DualReflection))
 		{
-			special_shading_ = true;
+			effect_attrs_ |= EA_SpecialShading;
 		}
 	}
 

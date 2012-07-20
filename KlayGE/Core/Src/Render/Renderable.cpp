@@ -42,12 +42,7 @@ namespace KlayGE
 			model_mat_ = float4x4::Identity();
 
 			opacity_map_enabled_ = false;
-			special_shading_ = false;
-			need_transparency_back_ = false;
-			need_transparency_front_ = false;
-			need_alpha_test_ = false;
-			need_reflection_ = false;
-			need_simple_forward_ = false;
+			effect_attrs_ = 0;
 		}
 	}
 
@@ -297,7 +292,7 @@ namespace KlayGE
 		switch (type)
 		{
 		case PT_OpaqueDepth:
-			if (need_alpha_test_)
+			if (this->AlphaTest())
 			{
 				return depth_alpha_test_tech_;
 			}
@@ -313,7 +308,7 @@ namespace KlayGE
 			return depth_alpha_blend_front_tech_;
 
 		case PT_OpaqueGBuffer:
-			if (need_alpha_test_)
+			if (this->AlphaTest())
 			{
 				return gbuffer_alpha_test_tech_;
 			}
@@ -329,7 +324,7 @@ namespace KlayGE
 			return gbuffer_alpha_blend_front_tech_;
 
 		case PT_OpaqueMRTGBuffer:
-			if (need_alpha_test_)
+			if (this->AlphaTest())
 			{
 				return gbuffer_alpha_test_mrt_tech_;
 			}
@@ -345,7 +340,7 @@ namespace KlayGE
 			return gbuffer_alpha_blend_front_mrt_tech_;
 
 		case PT_GenReflectiveShadowMap:
-			if (need_alpha_test_)
+			if (this->AlphaTest())
 			{
 				return gen_rsm_alpha_test_tech_;
 			}
@@ -355,7 +350,7 @@ namespace KlayGE
 			}
 
 		case PT_GenShadowMap:
-			if (need_alpha_test_)
+			if (this->AlphaTest())
 			{
 				return gen_sm_alpha_test_tech_;
 			}
@@ -365,7 +360,7 @@ namespace KlayGE
 			}
 
 		case PT_GenShadowMapWODepthTexture:
-			if (need_alpha_test_)
+			if (this->AlphaTest())
 			{
 				return gen_sm_wo_dt_alpha_test_tech_;
 			}

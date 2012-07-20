@@ -74,6 +74,18 @@ namespace KlayGE
 	class KLAYGE_CORE_API Renderable : public boost::enable_shared_from_this<Renderable>
 	{
 	public:
+		enum EffectAttribute
+		{
+			EA_SpecialShading = 1UL << 0,
+			EA_TransparencyBack = 1UL << 1,
+			EA_TransparencyFront = 1UL << 2,
+			EA_AlphaTest = 1UL << 3,
+			EA_Reflection = 1UL << 4,
+			EA_DualReflection = 1UL << 5,
+			EA_SimpleForward = 1UL << 6
+		};
+
+	public:
 		Renderable();
 		virtual ~Renderable();
 
@@ -126,23 +138,31 @@ namespace KlayGE
 
 		virtual bool SpecialShading() const
 		{
-			return special_shading_;
+			return effect_attrs_ & EA_SpecialShading ? true : false;
 		}
 		virtual bool TransparencyBackFace() const
 		{
-			return need_transparency_back_;
+			return effect_attrs_ & EA_TransparencyBack ? true : false;
 		}
 		virtual bool TransparencyFrontFace() const
 		{
-			return need_transparency_front_;
+			return effect_attrs_ & EA_TransparencyFront ? true : false;
+		}		
+		virtual bool AlphaTest() const
+		{
+			return effect_attrs_ & EA_AlphaTest ? true : false;
 		}
 		virtual bool Reflection() const
 		{
-			return need_reflection_;
+			return effect_attrs_ & EA_Reflection ? true : false;
+		}
+		virtual bool DualReflection() const
+		{
+			return effect_attrs_ & EA_DualReflection ? true : false;
 		}
 		virtual bool SimpleForward() const
 		{
-			return need_simple_forward_;
+			return effect_attrs_ & EA_SimpleForward ? true : false;
 		}
 
 	protected:
@@ -193,12 +213,7 @@ namespace KlayGE
 
 		PassType type_;
 		bool opacity_map_enabled_;
-		bool special_shading_;
-		bool need_transparency_back_;
-		bool need_transparency_front_;
-		bool need_alpha_test_;
-		bool need_reflection_;
-		bool need_simple_forward_;
+		uint32_t effect_attrs_;
 
 		RenderMaterialPtr mtl_;
 
