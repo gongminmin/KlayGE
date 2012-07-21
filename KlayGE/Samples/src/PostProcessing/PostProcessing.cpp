@@ -175,6 +175,9 @@ void PostProcessingApp::InitObjects()
 	sky_box_ = MakeSharedPtr<SceneObjectHDRSkyBox>();
 	checked_pointer_cast<SceneObjectHDRSkyBox>(sky_box_)->CompressedCubeMap(y_cube_tl(), c_cube_tl());
 	sky_box_->AddToSceneManager();
+
+	color_fb_ = rf.MakeFrameBuffer();
+	color_fb_->GetViewport().camera = re.CurFrameBuffer()->GetViewport().camera;
 }
 
 void PostProcessingApp::OnResize(uint32_t width, uint32_t height)
@@ -195,8 +198,7 @@ void PostProcessingApp::OnResize(uint32_t width, uint32_t height)
 		fmt = EF_ARGB8;
 	}
 	color_tex_ = rf.MakeTexture2D(width, height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
-
-	deferred_rendering_->OutputPin(color_tex_);
+	color_fb_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*color_tex_, 0, 1, 0));
 
 	copy_->InputPin(0, color_tex_);
 
@@ -312,12 +314,18 @@ void PostProcessingApp::DoUpdateOverlay()
 
 uint32_t PostProcessingApp::DoUpdate(uint32_t pass)
 {
+	RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+		
+	if (0 == pass)
+	{
+		re.BindFrameBuffer(color_fb_);
+	}
+
 	uint32_t ret = deferred_rendering_->Update(pass);
 	if (ret & App3DFramework::URV_Finished)
 	{
-		RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-		renderEngine.BindFrameBuffer(FrameBufferPtr());
-		renderEngine.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->ClearDepth(1.0f);
+		re.BindFrameBuffer(FrameBufferPtr());
+		re.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->ClearDepth(1.0f);
 		active_pp_->Apply();
 
 		return App3DFramework::URV_Skip_Postprocess | App3DFramework::URV_Finished;

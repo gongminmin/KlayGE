@@ -40,6 +40,7 @@ private:
 	KlayGE::DeferredRenderingLayerPtr deferred_rendering_;
 
 	KlayGE::TexturePtr color_tex_;
+	KlayGE::FrameBufferPtr color_fb_;
 	KlayGE::PostProcessPtr active_pp_;
 	KlayGE::PostProcessPtr copy_;
 	KlayGE::PostProcessPtr ascii_arts_;

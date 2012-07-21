@@ -308,7 +308,7 @@ namespace KlayGE
 		template <typename T>
 		Plane_T<T> normalize(Plane_T<T> const & rhs)
 		{
-			T const inv(T(1) / length(rhs));
+			T const inv(T(1) / length(rhs.Normal()));
 			return Plane_T<T>(rhs.a() * inv, rhs.b() * inv, rhs.c() * inv, rhs.d() * inv);
 		}
 
@@ -719,7 +719,7 @@ namespace KlayGE
 		{
 			Plane_T<T> P(normalize(p));
 			T const aa2(-2 * P.a() * P.a()), ab2(-2 * P.a() * P.b()), ac2(-2 * P.a() * P.c()), ad2(-2 * P.a() * P.d());
-			T const bb2(-2 * P.b() * P.b()), bc2(-2 * P.b() * P.c()), bd2(-2 * P.a() * P.c());
+			T const bb2(-2 * P.b() * P.b()), bc2(-2 * P.b() * P.c()), bd2(-2 * P.b() * P.d());
 			T const cc2(-2 * P.c() * P.c()), cd2(-2 * P.c() * P.d());
 
 			return Matrix4_T<T>(
@@ -1397,7 +1397,7 @@ namespace KlayGE
 		template <typename T>
 		Plane_T<T> from_point_normal(Vector_T<T, 3> const & point, Vector_T<T, 3> const & normal)
 		{
-			return Plane(normal.x(), normal.y(), normal.z(), -dot(point, normal));
+			return Plane_T<T>(normal.x(), normal.y(), normal.z(), -dot(point, normal));
 		}
 
 		template KLAYGE_CORE_API Plane from_points(float3 const & v0, float3 const & v1, float3 const & v2);

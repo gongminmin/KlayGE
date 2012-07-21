@@ -48,8 +48,6 @@ namespace KlayGE
 		void SSVOEnabled(bool ssvo);
 		void SSREnabled(bool ssr);
 
-		void OutputPin(TexturePtr const & tex);
-
 		void OnResize(uint32_t width, uint32_t height);
 		uint32_t Update(uint32_t pass);
 
@@ -138,8 +136,8 @@ namespace KlayGE
 		void AccumulateToLightingTex();
 
 	private:
-		bool mrt_g_buffer_;
-		bool depth_texture_;
+		bool mrt_g_buffer_support_;
+		bool depth_texture_support_;
 
 		RenderEffectPtr g_buffer_effect_;
 		RenderEffectPtr dr_effect_;
@@ -165,8 +163,7 @@ namespace KlayGE
 		FrameBufferPtr prev_shading_buffer_;
 		TexturePtr prev_shading_tex_;
 
-		FrameBufferPtr output_buffer_;
-		TexturePtr output_tex_;
+		FrameBufferPtr output_fb_;
 
 		PostProcessPtr ssgi_pp_;
 		PostProcessPtr ssgi_blur_pp_;
