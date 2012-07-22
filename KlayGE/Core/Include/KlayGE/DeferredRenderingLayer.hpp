@@ -80,6 +80,10 @@ namespace KlayGE
 		{
 			return curr_shading_texs_[TransparencyFront_GBuffer];
 		}
+		TexturePtr const & PrevFrameShadingTex() const
+		{
+			return prev_shading_tex_;
+		}
 
 		TexturePtr const & SmallSSVOTex() const
 		{
