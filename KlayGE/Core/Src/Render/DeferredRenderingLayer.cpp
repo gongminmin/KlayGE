@@ -258,7 +258,7 @@ namespace KlayGE
 
 	DeferredRenderingLayer::DeferredRenderingLayer()
 		: ssgi_enabled_(false), ssvo_enabled_(true), ssr_enabled_(true),
-			illum_(0), indirect_scale_(1.0f)
+			light_scale_(1), illum_(0), indirect_scale_(1.0f)
 	{
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 		RenderEngine& re = rf.RenderEngineInstance();
@@ -1132,7 +1132,7 @@ namespace KlayGE
 									float4x4 const & light_view = light->SMCamera(0)->ViewMatrix();
 
 									float const scale = light->CosOuterInner().w();
-									float4x4 mat = MathLib::scaling(scale, scale, 1.0f);
+									float4x4 mat = MathLib::scaling(scale * light_scale_, scale * light_scale_, light_scale_);
 									float4x4 light_model = mat * MathLib::inverse(light_view);
 									*light_volume_mv_param_ = light_model * view_;
 									*light_volume_mvp_param_ = light_model * vp;
@@ -1190,7 +1190,8 @@ namespace KlayGE
 								{
 									float3 const & p = light->Position();
 									
-									float4x4 light_model = MathLib::translation(p);
+									float4x4 light_model = MathLib::scaling(light_scale_, light_scale_, light_scale_)
+										* MathLib::translation(p);
 									*light_volume_mv_param_ = light_model * view_;
 									*light_volume_mvp_param_ = light_model * vp;
 
@@ -1538,7 +1539,7 @@ namespace KlayGE
 
 								rl = rl_cone_;
 								float const scale = light->CosOuterInner().w();
-								float4x4 light_model = MathLib::scaling(scale, scale, 1.0f);
+								float4x4 light_model = MathLib::scaling(scale * light_scale_, scale * light_scale_, light_scale_);
 								*light_volume_mv_param_ = light_model * light_to_view;
 								*light_volume_mvp_param_ = light_model * light_to_proj;
 							}
@@ -1548,7 +1549,8 @@ namespace KlayGE
 							if (PT_Lighting == pass_type)
 							{
 								rl = rl_box_;
-								float4x4 light_model = MathLib::to_matrix(light->Rotation()) * MathLib::translation(p);
+								float4x4 light_model = MathLib::scaling(light_scale_, light_scale_, light_scale_)
+									* MathLib::to_matrix(light->Rotation()) * MathLib::translation(p);
 								*light_volume_mv_param_ = light_model * view_;
 								*light_volume_mvp_param_ = light_model * view_ * proj_;
 								*view_to_light_model_param_ = MathLib::inverse(light_model * view_);

@@ -14,6 +14,8 @@
 #include <KlayGE/Context.hpp>
 #include <KlayGE/SceneManager.hpp>
 #include <KlayGE/RenderFactory.hpp>
+#include <KlayGE/RenderEngine.hpp>
+#include <KlayGE/FrameBuffer.hpp>
 #include <KlayGE/Query.hpp>
 #include <KlayGE/Camera.hpp>
 
@@ -260,6 +262,9 @@ namespace KlayGE
 
 	void PointLightSource::UpdateCameras()
 	{
+		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+		CameraPtr const & camera = re.CurFrameBuffer()->GetViewport().camera;
+
 		for (int j = 0; j < 6; ++ j)
 		{
 			std::pair<float3, float3> ad = CubeMapViewVector<float>(static_cast<Texture::CubeFaces>(j));
@@ -270,7 +275,7 @@ namespace KlayGE
 			float3 up = MathLib::transform_quat(u, quat_);
 
 			sm_cameras_[j]->ViewParams(pos_, pos_ + lookat, up);
-			sm_cameras_[j]->ProjParams(PI / 2, 1, 0.1f, 100.0f);
+			sm_cameras_[j]->ProjParams(PI / 2, 1, camera->NearPlane(), camera->FarPlane());
 		}
 	}
 
@@ -367,7 +372,10 @@ namespace KlayGE
 		float3 up = MathLib::transform_quat(float3(0, 1, 0), quat_);
 
 		sm_camera_->ViewParams(pos_, pos_ + lookat, up);
-		sm_camera_->ProjParams(cos_outer_inner_.z(), 1, 0.1f, 100.0f);
+
+		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+		CameraPtr const & camera = re.CurFrameBuffer()->GetViewport().camera;
+		sm_camera_->ProjParams(cos_outer_inner_.z(), 1, camera->NearPlane(), camera->FarPlane());
 	}
 
 	float3 const & SpotLightSource::Falloff() const

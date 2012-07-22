@@ -130,6 +130,11 @@ namespace KlayGE
 		void DisplayIllum(int illum);
 		void IndirectScale(float scale);
 
+		void LightDistance(float dist)
+		{
+			light_scale_ = dist * 0.01f;
+		}
+
 	private:
 		void CreateDepthDerivativeMipMap();
 		void CreateNormalConeMipMap();
@@ -182,6 +187,7 @@ namespace KlayGE
 		PostProcessPtr ssr_pp_;
 		bool ssr_enabled_;
 
+		float light_scale_;
 		RenderLayoutPtr rl_cone_;
 		RenderLayoutPtr rl_pyramid_;
 		RenderLayoutPtr rl_box_;
