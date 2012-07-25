@@ -263,7 +263,7 @@ namespace KlayGE
 	void PointLightSource::UpdateCameras()
 	{
 		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-		CameraPtr const & camera = re.CurFrameBuffer()->GetViewport().camera;
+		CameraPtr const & camera = re.CurFrameBuffer()->GetViewport()->camera;
 
 		for (int j = 0; j < 6; ++ j)
 		{
@@ -374,7 +374,7 @@ namespace KlayGE
 		sm_camera_->ViewParams(pos_, pos_ + lookat, up);
 
 		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-		CameraPtr const & camera = re.CurFrameBuffer()->GetViewport().camera;
+		CameraPtr const & camera = re.CurFrameBuffer()->GetViewport()->camera;
 		sm_camera_->ProjParams(cos_outer_inner_.z(), 1, camera->NearPlane(), camera->FarPlane());
 	}
 

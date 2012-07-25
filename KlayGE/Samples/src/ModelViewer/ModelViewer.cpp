@@ -326,7 +326,7 @@ void ModelViewerApp::InitObjects()
 	font_ = rf.MakeFont("gkai00mp.kfont");
 
 	deferred_rendering_ = Context::Instance().DeferredRenderingLayerInstance();
-	deferred_rendering_->SSVOEnabled(false);
+	deferred_rendering_->SSVOEnabled(0, false);
 	re.HDREnabled(true);
 	re.PPAAEnabled(1);
 	re.ColorGradingEnabled(true);
@@ -427,7 +427,9 @@ void ModelViewerApp::InitObjects()
 void ModelViewerApp::OnResize(uint32_t width, uint32_t height)
 {
 	App3DFramework::OnResize(width, height);
-	deferred_rendering_->OnResize(width, height);
+
+	RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+	deferred_rendering_->SetupViewport(0, re.CurFrameBuffer()->GetViewport(), 0);
 
 	UIManager::Instance().SettleCtrls(width, height);
 }
@@ -695,7 +697,7 @@ void ModelViewerApp::VisualizeChangedHandler(KlayGE::UIComboBox const & sender)
 	{
 		checked_pointer_cast<ModelObject>(model_)->VisualizeLighting();
 
-		deferred_rendering_->SSVOEnabled(false);
+		deferred_rendering_->SSVOEnabled(0, false);
 		re.HDREnabled(true);
 		re.PPAAEnabled(1);
 		re.ColorGradingEnabled(true);
@@ -714,7 +716,7 @@ void ModelViewerApp::VisualizeChangedHandler(KlayGE::UIComboBox const & sender)
 			checked_pointer_cast<ModelObject>(model_)->VisualizeVertex(ve.usage, ve.usage_index);
 		}
 
-		deferred_rendering_->SSVOEnabled(false);
+		deferred_rendering_->SSVOEnabled(0, false);
 		re.HDREnabled(false);
 		re.PPAAEnabled(0);
 		re.ColorGradingEnabled(false);

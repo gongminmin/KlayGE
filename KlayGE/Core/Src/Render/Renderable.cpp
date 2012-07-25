@@ -55,7 +55,8 @@ namespace KlayGE
 		if (deferred_effect_)
 		{
 			RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-			Camera const & camera = *re.CurFrameBuffer()->GetViewport().camera;
+			DeferredRenderingLayerPtr const & drl = Context::Instance().DeferredRenderingLayerInstance();
+			Camera const & camera = *re.CurFrameBuffer()->GetViewport()->camera;
 
 			float4x4 const & view = camera.ViewMatrix();
 			float4x4 const & proj = camera.ProjMatrix();
@@ -71,7 +72,7 @@ namespace KlayGE
 			case PT_TransparencyFrontDepth:
 				*diffuse_tex_param_ = diffuse_tex_;
 				*diffuse_clr_param_ = float4(mtl_ ? mtl_->diffuse.x() : 0, mtl_ ? mtl_->diffuse.y() : 0, mtl_ ? mtl_->diffuse.z() : 0, static_cast<float>(!!diffuse_tex_));
-				*opaque_depth_tex_param_ = Context::Instance().DeferredRenderingLayerInstance()->OpaqueDepthTex();
+				*opaque_depth_tex_param_ = drl->OpaqueDepthTex(drl->ActiveViewport());
 				break;
 
 			case PT_OpaqueGBuffer:
@@ -90,7 +91,7 @@ namespace KlayGE
 				*specular_tex_param_ = specular_tex_;
 				*specular_level_param_ = float4(MathLib::clamp(mtl_ ? mtl_->specular_level : 0, 0.0f, 1.0f), 0, 0, static_cast<float>(!!specular_tex_));
 				*shininess_param_ = MathLib::clamp(mtl_ ? mtl_->shininess / 256.0f : 0, 1e-6f, 0.999f);
-				*opaque_depth_tex_param_ = Context::Instance().DeferredRenderingLayerInstance()->OpaqueDepthTex();
+				*opaque_depth_tex_param_ = drl->OpaqueDepthTex(drl->ActiveViewport());
 				break;
 
 			case PT_GenShadowMap:

@@ -324,12 +324,14 @@ void DeferredRenderingApp::InitObjects()
 void DeferredRenderingApp::OnResize(uint32_t width, uint32_t height)
 {
 	App3DFramework::OnResize(width, height);
-	deferred_rendering_->OnResize(width, height);
 
-	debug_pp_->InputPin(0, deferred_rendering_->OpaqueGBufferRT0Tex());
-	debug_pp_->InputPin(1, deferred_rendering_->OpaqueDepthTex());
-	debug_pp_->InputPin(2, deferred_rendering_->OpaqueLightingTex());
-	debug_pp_->InputPin(3, deferred_rendering_->SmallSSVOTex());
+	RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+	deferred_rendering_->SetupViewport(0, re.CurFrameBuffer()->GetViewport(), 0);
+
+	debug_pp_->InputPin(0, deferred_rendering_->OpaqueGBufferRT0Tex(0));
+	debug_pp_->InputPin(1, deferred_rendering_->OpaqueDepthTex(0));
+	debug_pp_->InputPin(2, deferred_rendering_->OpaqueLightingTex(0));
+	debug_pp_->InputPin(3, deferred_rendering_->SmallSSVOTex(0));
 
 	UIManager::Instance().SettleCtrls(width, height);
 }
@@ -377,7 +379,7 @@ void DeferredRenderingApp::SSVOHandler(UICheckBox const & sender)
 	if ((0 == buffer_type_) || (5 == buffer_type_))
 	{
 		ssvo_enabled_ = sender.GetChecked();
-		deferred_rendering_->SSVOEnabled(ssvo_enabled_);
+		deferred_rendering_->SSVOEnabled(0, ssvo_enabled_);
 		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 		if (5 == buffer_type_)
 		{

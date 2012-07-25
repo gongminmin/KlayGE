@@ -540,7 +540,7 @@ void ParticleEditorApp::InitObjects()
 
 	scene_buffer_ = rf.MakeFrameBuffer();
 	FrameBufferPtr screen_buffer = re.CurFrameBuffer();
-	scene_buffer_->GetViewport().camera = screen_buffer->GetViewport().camera;
+	scene_buffer_->GetViewport()->camera = screen_buffer->GetViewport()->camera;
 
 	copy_pp_ = LoadPostProcess(ResLoader::Instance().Open("Copy.ppml"), "copy");
 

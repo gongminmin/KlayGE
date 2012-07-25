@@ -101,10 +101,10 @@ namespace KlayGE
 		sc_desc_.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
 		sc_desc_.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
 
-		viewport_.left		= 0;
-		viewport_.top		= 0;
-		viewport_.width		= width_;
-		viewport_.height	= height_;
+		viewport_->left		= 0;
+		viewport_->top		= 0;
+		viewport_->width	= width_;
+		viewport_->height	= height_;
 
 
 		D3D11RenderEngine& re(*checked_cast<D3D11RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance()));
@@ -345,8 +345,8 @@ namespace KlayGE
 		height_ = height;
 
 		// Notify viewports of resize
-		viewport_.width = width;
-		viewport_.height = height;
+		viewport_->width = width;
+		viewport_->height = height;
 
 		if (d3d_imm_ctx_)
 		{

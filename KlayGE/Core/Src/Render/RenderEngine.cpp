@@ -250,7 +250,7 @@ namespace KlayGE
 		if (render_settings_.stereo_method != STM_None)
 		{
 			mono_frame_buffer_ = rf.MakeFrameBuffer();
-			mono_frame_buffer_->GetViewport().camera = cur_frame_buffer_->GetViewport().camera;
+			mono_frame_buffer_->GetViewport()->camera = cur_frame_buffer_->GetViewport()->camera;
 
 			ElementFormat fmt;
 			if (caps.rendertarget_format_support(render_settings_.color_fmt, 1, 0))
@@ -283,7 +283,7 @@ namespace KlayGE
 		if (color_grading_pp_)
 		{
 			cg_frame_buffer_ = rf.MakeFrameBuffer();
-			cg_frame_buffer_->GetViewport().camera = cur_frame_buffer_->GetViewport().camera;
+			cg_frame_buffer_->GetViewport()->camera = cur_frame_buffer_->GetViewport()->camera;
 
 			ElementFormat fmt;
 			if (caps.rendertarget_format_support(EF_ABGR8, 1, 0))
@@ -312,7 +312,7 @@ namespace KlayGE
 		if (ppaa_pp_)
 		{
 			ldr_frame_buffer_ = rf.MakeFrameBuffer();
-			ldr_frame_buffer_->GetViewport().camera = cur_frame_buffer_->GetViewport().camera;
+			ldr_frame_buffer_->GetViewport()->camera = cur_frame_buffer_->GetViewport()->camera;
 
 			ElementFormat fmt;
 			if (caps.rendertarget_format_support(EF_ABGR8, 1, 0))
@@ -341,7 +341,7 @@ namespace KlayGE
 		if (hdr_pp_)
 		{
 			hdr_frame_buffer_ = rf.MakeFrameBuffer();
-			hdr_frame_buffer_->GetViewport().camera = cur_frame_buffer_->GetViewport().camera;
+			hdr_frame_buffer_->GetViewport()->camera = cur_frame_buffer_->GetViewport()->camera;
 
 			ElementFormat fmt;
 			if (caps.rendertarget_format_support(EF_B10G11R11F, 1, 0))
@@ -679,7 +679,7 @@ namespace KlayGE
 		if (stereoscopic_pp_)
 		{
 			stereoscopic_pp_->SetParam(0, stereo_separation_);
-			stereoscopic_pp_->SetParam(1, screen_frame_buffer_->GetViewport().camera->NearPlane());
+			stereoscopic_pp_->SetParam(1, screen_frame_buffer_->GetViewport()->camera->NearPlane());
 		}
 		if (stereo_method_ != STM_LCDShutter)
 		{

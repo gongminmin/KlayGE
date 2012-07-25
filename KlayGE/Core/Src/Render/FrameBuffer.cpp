@@ -36,7 +36,7 @@ namespace KlayGE
 
 	FrameBuffer::FrameBuffer()
 					: left_(0), top_(0), width_(0), height_(0),
-						active_(false)
+						active_(false), viewport_(MakeSharedPtr<Viewport>())
 	{
 	}
 
@@ -80,19 +80,19 @@ namespace KlayGE
 
 	// 获取视口
 	/////////////////////////////////////////////////////////////////////////////////
-	Viewport const & FrameBuffer::GetViewport() const
+	ViewportPtr const & FrameBuffer::GetViewport() const
 	{
 		return viewport_;
 	}
 
-	Viewport& FrameBuffer::GetViewport()
+	ViewportPtr& FrameBuffer::GetViewport()
 	{
 		return viewport_;
 	}
 
 	// 设置视口
 	/////////////////////////////////////////////////////////////////////////////////
-	void FrameBuffer::SetViewport(Viewport const & viewport)
+	void FrameBuffer::SetViewport(ViewportPtr const & viewport)
 	{
 		viewport_ = viewport;
 	}
@@ -161,10 +161,10 @@ namespace KlayGE
 					width_ = view->Width();
 					height_ = view->Height();
 
-					viewport_.left		= 0;
-					viewport_.top		= 0;
-					viewport_.width		= width_;
-					viewport_.height	= height_;
+					viewport_->left		= 0;
+					viewport_->top		= 0;
+					viewport_->width	= width_;
+					viewport_->height	= height_;
 				}
 			}
 			break;

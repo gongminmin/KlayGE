@@ -175,10 +175,10 @@ namespace KlayGE
 		glPixelStorei(GL_PACK_ALIGNMENT, 1);
 		glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
-		viewport_.left = 0;
-		viewport_.top = 0;
-		viewport_.width = width_;
-		viewport_.height = height_;
+		viewport_->left = 0;
+		viewport_->top = 0;
+		viewport_->width = width_;
+		viewport_->height = height_;
 
 		std::wstring vendor, renderer, version;
 		Convert(vendor, reinterpret_cast<char const *>(glGetString(GL_VENDOR)));
@@ -237,8 +237,8 @@ namespace KlayGE
 		height_ = height;
 
 		// Notify viewports of resize
-		viewport_.width = width;
-		viewport_.height = height;
+		viewport_->width = width;
+		viewport_->height = height;
 
 		App3DFramework& app = Context::Instance().AppInstance();
 		app.OnResize(width, height);

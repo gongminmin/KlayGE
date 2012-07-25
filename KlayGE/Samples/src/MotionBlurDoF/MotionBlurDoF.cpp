@@ -503,8 +503,8 @@ void MotionBlurDoFApp::InitObjects()
 	RenderEngine& re = rf.RenderEngineInstance();
 	clr_depth_fb_ = rf.MakeFrameBuffer();
 	motion_vec_fb_ = rf.MakeFrameBuffer();
-	clr_depth_fb_->GetViewport().camera = re.CurFrameBuffer()->GetViewport().camera;
-	motion_vec_fb_->GetViewport().camera = re.CurFrameBuffer()->GetViewport().camera;
+	clr_depth_fb_->GetViewport()->camera = re.CurFrameBuffer()->GetViewport()->camera;
+	motion_vec_fb_->GetViewport()->camera = re.CurFrameBuffer()->GetViewport()->camera;
 
 	fpcController_.Scalers(0.05f, 0.5f);
 

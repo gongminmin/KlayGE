@@ -77,9 +77,9 @@ namespace KlayGE
 		uint32_t Width() const;
 		uint32_t Height() const;
 
-		Viewport const & GetViewport() const;
-		Viewport& GetViewport();
-		void SetViewport(Viewport const & viewport);
+		ViewportPtr const & GetViewport() const;
+		ViewportPtr& GetViewport();
+		void SetViewport(ViewportPtr const & viewport);
 
 		bool Active() const;
 		void Active(bool state);
@@ -110,7 +110,7 @@ namespace KlayGE
 
 		bool	active_;	// Is active i.e. visible
 
-		Viewport viewport_;
+		ViewportPtr viewport_;
 
 		std::vector<RenderViewPtr> clr_views_;
 		RenderViewPtr rs_view_;

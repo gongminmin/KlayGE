@@ -27,28 +27,92 @@
 
 namespace KlayGE
 {
+	enum
+	{
+		Opaque_GBuffer = 0,
+		TransparencyBack_GBuffer,
+		TransparencyFront_GBuffer,
+		DualReflection_0_GBuffer,
+		DualReflection_1_GBuffer,
+		DualReflection_2_GBuffer,
+		DualReflection_3_GBuffer,
+		Num_GBuffers
+	};
+
+	enum VPAttribMask
+	{
+		VPAM_NoOpaque = 1UL << 0,
+		VPAM_NoTransparencyBack = 1UL << 1,
+		VPAM_NoTransparencyFront = 1UL << 2,
+		VPAM_NoGI = 1UL << 3,
+		VPAM_NoSSVO = 1UL << 4,
+		VPAM_NoSSGI = 1UL << 5
+	};
+
+	struct PerViewport
+	{
+		PerViewport()
+			: ssgi_enabled(false), ssvo_enabled(true)
+		{
+		}
+
+		ViewportPtr viewport;
+
+		uint32_t attrib;
+
+		boost::array<bool, Num_GBuffers> g_buffer_enables;
+
+		boost::array<FrameBufferPtr, Num_GBuffers> pre_depth_buffers;
+
+		boost::array<FrameBufferPtr, Num_GBuffers> g_buffers;
+		boost::array<TexturePtr, Num_GBuffers> g_buffer_rt0_texs;
+		boost::array<TexturePtr, Num_GBuffers> g_buffer_rt1_texs;
+		boost::array<TexturePtr, Num_GBuffers> g_buffer_ds_texs;
+		boost::array<TexturePtr, Num_GBuffers> g_buffer_depth_texs;
+
+		boost::array<FrameBufferPtr, Num_GBuffers> lighting_buffers;
+		boost::array<TexturePtr, Num_GBuffers> lighting_texs;
+
+		FrameBufferPtr shadowing_buffer;
+		TexturePtr shadowing_tex;
+
+		boost::array<FrameBufferPtr, Num_GBuffers> curr_shading_buffers;
+		boost::array<TexturePtr, Num_GBuffers> curr_shading_texs;
+		FrameBufferPtr prev_shading_buffer;
+		TexturePtr prev_shading_tex;
+
+		FrameBufferPtr output_fb;
+
+		TexturePtr small_ssgi_tex;
+		bool ssgi_enabled;
+
+		TexturePtr small_ssvo_tex;
+		bool ssvo_enabled;
+
+		float4x4 view, proj;
+		float4x4 inv_view, inv_proj;
+		float3 depth_near_far_invfar;
+
+		TexturePtr depth_deriative_tex;
+		TexturePtr depth_deriative_small_tex;
+		TexturePtr normal_cone_tex;
+		TexturePtr normal_cone_small_tex;
+
+		TexturePtr indirect_lighting_tex;
+		TexturePtr indirect_lighting_pingpong_tex;
+		std::vector<FrameBufferPtr> vpls_lighting_fbs;
+	};
+
 	class KLAYGE_CORE_API DeferredRenderingLayer
 	{
-		enum
-		{
-			Opaque_GBuffer = 0,
-			TransparencyBack_GBuffer,
-			TransparencyFront_GBuffer,
-			DualReflection_0_GBuffer,
-			DualReflection_1_GBuffer,
-			DualReflection_2_GBuffer,
-			DualReflection_3_GBuffer,
-			Num_GBuffers
-		};
-
 	public:
 		DeferredRenderingLayer();
 
-		void SSGIEnabled(bool ssgi);
-		void SSVOEnabled(bool ssvo);
+		void SSGIEnabled(uint32_t vp, bool ssgi);
+		void SSVOEnabled(uint32_t vp, bool ssvo);
 		void SSREnabled(bool ssr);
 
-		void OnResize(uint32_t width, uint32_t height);
+		void SetupViewport(uint32_t index, ViewportPtr const & vp, uint32_t attrib);
 		uint32_t Update(uint32_t pass);
 
 		RenderEffectPtr const & GBufferEffect() const
@@ -56,75 +120,80 @@ namespace KlayGE
 			return g_buffer_effect_;
 		}
 
-		TexturePtr const & OpaqueLightingTex() const
+		TexturePtr const & OpaqueLightingTex(uint32_t vp) const
 		{
-			return lighting_texs_[Opaque_GBuffer];
+			return viewports_[vp].lighting_texs[Opaque_GBuffer];
 		}
-		TexturePtr const & TransparencyBackLightingTex() const
+		TexturePtr const & TransparencyBackLightingTex(uint32_t vp) const
 		{
-			return lighting_texs_[TransparencyBack_GBuffer];
+			return viewports_[vp].lighting_texs[TransparencyBack_GBuffer];
 		}
-		TexturePtr const & TransparencyFrontLightingTex() const
+		TexturePtr const & TransparencyFrontLightingTex(uint32_t vp) const
 		{
-			return lighting_texs_[TransparencyFront_GBuffer];
+			return viewports_[vp].lighting_texs[TransparencyFront_GBuffer];
 		}
-		TexturePtr const & OpaqueShadingTex() const
+		TexturePtr const & OpaqueShadingTex(uint32_t vp) const
 		{
-			return curr_shading_texs_[Opaque_GBuffer];
+			return viewports_[vp].curr_shading_texs[Opaque_GBuffer];
 		}
-		TexturePtr const & TransparencyBackShadingTex() const
+		TexturePtr const & TransparencyBackShadingTex(uint32_t vp) const
 		{
-			return curr_shading_texs_[TransparencyBack_GBuffer];
+			return viewports_[vp].curr_shading_texs[TransparencyBack_GBuffer];
 		}
-		TexturePtr const & TransparencyFrontShadingTex() const
+		TexturePtr const & TransparencyFrontShadingTex(uint32_t vp) const
 		{
-			return curr_shading_texs_[TransparencyFront_GBuffer];
+			return viewports_[vp].curr_shading_texs[TransparencyFront_GBuffer];
 		}
-		TexturePtr const & PrevFrameShadingTex() const
+		TexturePtr const & PrevFrameShadingTex(uint32_t vp) const
 		{
-			return prev_shading_tex_;
-		}
-
-		TexturePtr const & SmallSSVOTex() const
-		{
-			return small_ssvo_tex_;
+			return viewports_[vp].prev_shading_tex;
 		}
 
-		TexturePtr const & OpaqueGBufferRT0Tex() const
+		TexturePtr const & SmallSSVOTex(uint32_t vp) const
 		{
-			return g_buffer_rt0_texs_[Opaque_GBuffer];
+			return viewports_[vp].small_ssvo_tex;
 		}
-		TexturePtr const & OpaqueGBufferRT1Tex() const
+
+		TexturePtr const & OpaqueGBufferRT0Tex(uint32_t vp) const
 		{
-			return g_buffer_rt1_texs_[Opaque_GBuffer];
+			return viewports_[vp].g_buffer_rt0_texs[Opaque_GBuffer];
 		}
-		TexturePtr const & OpaqueDepthTex() const
+		TexturePtr const & OpaqueGBufferRT1Tex(uint32_t vp) const
 		{
-			return g_buffer_depth_texs_[Opaque_GBuffer];
+			return viewports_[vp].g_buffer_rt1_texs[Opaque_GBuffer];
 		}
-		TexturePtr const & TransparencyBackGBufferRT0Tex() const
+		TexturePtr const & OpaqueDepthTex(uint32_t vp) const
 		{
-			return g_buffer_rt0_texs_[TransparencyBack_GBuffer];
+			return viewports_[vp].g_buffer_depth_texs[Opaque_GBuffer];
 		}
-		TexturePtr const & TransparencyBackGBufferRT1Tex() const
+		TexturePtr const & TransparencyBackGBufferRT0Tex(uint32_t vp) const
 		{
-			return g_buffer_rt1_texs_[TransparencyBack_GBuffer];
+			return viewports_[vp].g_buffer_rt0_texs[TransparencyBack_GBuffer];
 		}
-		TexturePtr const & TransparencyBackDepthTex() const
+		TexturePtr const & TransparencyBackGBufferRT1Tex(uint32_t vp) const
 		{
-			return g_buffer_depth_texs_[TransparencyBack_GBuffer];
+			return viewports_[vp].g_buffer_rt1_texs[TransparencyBack_GBuffer];
 		}
-		TexturePtr const & TransparencyFrontGBufferRT0Tex() const
+		TexturePtr const & TransparencyBackDepthTex(uint32_t vp) const
 		{
-			return g_buffer_rt0_texs_[TransparencyFront_GBuffer];
+			return viewports_[vp].g_buffer_depth_texs[TransparencyBack_GBuffer];
 		}
-		TexturePtr const & TransparencyFrontGBufferRT1Tex() const
+		TexturePtr const & TransparencyFrontGBufferRT0Tex(uint32_t vp) const
 		{
-			return g_buffer_rt1_texs_[TransparencyFront_GBuffer];
+			return viewports_[vp].g_buffer_rt0_texs[TransparencyFront_GBuffer];
 		}
-		TexturePtr const & TransparencyFrontDepthTex() const
+		TexturePtr const & TransparencyFrontGBufferRT1Tex(uint32_t vp) const
 		{
-			return g_buffer_depth_texs_[TransparencyFront_GBuffer];
+			return viewports_[vp].g_buffer_rt1_texs[TransparencyFront_GBuffer];
+		}
+		TexturePtr const & TransparencyFrontDepthTex(uint32_t vp) const
+		{
+			return viewports_[vp].g_buffer_depth_texs[TransparencyFront_GBuffer];
+		}
+
+		uint32_t ActiveViewport() const
+		{
+			return active_viewport_;
 		}
 
 		void DisplayIllum(int illum);
@@ -136,13 +205,13 @@ namespace KlayGE
 		}
 
 	private:
-		void CreateDepthDerivativeMipMap();
-		void CreateNormalConeMipMap();
-		void SetSubsplatStencil();
-		void ExtractVPLs(CameraPtr const & rsm_camera, LightSourcePtr const & light);
-		void VPLsLighting(LightSourcePtr const & light);
-		void UpsampleMultiresLighting();
-		void AccumulateToLightingTex();
+		void CreateDepthDerivativeMipMap(uint32_t vp);
+		void CreateNormalConeMipMap(uint32_t vp);
+		void SetSubsplatStencil(uint32_t vp);
+		void ExtractVPLs(uint32_t vp, CameraPtr const & rsm_camera, LightSourcePtr const & light);
+		void VPLsLighting(uint32_t vp, LightSourcePtr const & light);
+		void UpsampleMultiresLighting(uint32_t vp);
+		void AccumulateToLightingTex(uint32_t vp);
 
 	private:
 		bool mrt_g_buffer_support_;
@@ -151,38 +220,14 @@ namespace KlayGE
 		RenderEffectPtr g_buffer_effect_;
 		RenderEffectPtr dr_effect_;
 
-		boost::array<bool, Num_GBuffers> g_buffer_enables_;
-
-		boost::array<FrameBufferPtr, Num_GBuffers> pre_depth_buffers_;
-
-		boost::array<FrameBufferPtr, Num_GBuffers> g_buffers_;
-		boost::array<TexturePtr, Num_GBuffers> g_buffer_rt0_texs_;
-		boost::array<TexturePtr, Num_GBuffers> g_buffer_rt1_texs_;
-		boost::array<TexturePtr, Num_GBuffers> g_buffer_ds_texs_;
-		boost::array<TexturePtr, Num_GBuffers> g_buffer_depth_texs_;
-
-		FrameBufferPtr shadowing_buffer_;
-		TexturePtr shadowing_tex_;
-
-		boost::array<FrameBufferPtr, Num_GBuffers> lighting_buffers_;
-		boost::array<TexturePtr, Num_GBuffers> lighting_texs_;
-
-		boost::array<FrameBufferPtr, Num_GBuffers> curr_shading_buffers_;
-		boost::array<TexturePtr, Num_GBuffers> curr_shading_texs_;
-		FrameBufferPtr prev_shading_buffer_;
-		TexturePtr prev_shading_tex_;
-
-		FrameBufferPtr output_fb_;
+		boost::array<PerViewport, 8> viewports_;
+		uint32_t active_viewport_;
 
 		PostProcessPtr ssgi_pp_;
 		PostProcessPtr ssgi_blur_pp_;
-		TexturePtr small_ssgi_tex_;
-		bool ssgi_enabled_;
 
 		PostProcessPtr ssvo_pp_;
 		PostProcessPtr ssvo_blur_pp_;
-		TexturePtr small_ssvo_tex_;
-		bool ssvo_enabled_;
 
 		PostProcessPtr ssr_pp_;
 		bool ssr_enabled_;
@@ -201,14 +246,14 @@ namespace KlayGE
 
 		std::vector<uint32_t> pass_scaned_;
 
-		RenderTechniquePtr technique_shadows_[LT_NumLightTypes];
-		RenderTechniquePtr technique_lights_[LT_NumLightTypes];
+		boost::array<RenderTechniquePtr, LT_NumLightTypes> technique_shadows_;
+		boost::array<RenderTechniquePtr, LT_NumLightTypes> technique_lights_;
 		RenderTechniquePtr technique_light_depth_only_;
 		RenderTechniquePtr technique_light_stencil_;
 		RenderTechniquePtr technique_clear_stencil_;
 		RenderTechniquePtr technique_no_lighting_;
 		RenderTechniquePtr technique_shading_;
-		RenderTechniquePtr technique_merge_shadings_[2];
+		boost::array<RenderTechniquePtr, 2> technique_merge_shadings_;
 
 		FrameBufferPtr sm_buffer_;
 		TexturePtr sm_tex_;
@@ -216,13 +261,9 @@ namespace KlayGE
 		TexturePtr blur_sm_tex_;
 		TexturePtr sm_cube_tex_;
 
-		PostProcessPtr sm_filter_pps_[7];
+		boost::array<PostProcessPtr, 7> sm_filter_pps_;
 		PostProcessPtr depth_to_vsm_pp_;
 		PostProcessPtr depth_to_linear_pp_;
-
-		float4x4 view_, proj_;
-		float4x4 inv_view_, inv_proj_;
-		float3 depth_near_far_invfar_;
 
 		RenderEffectParameterPtr g_buffer_tex_param_;
 		RenderEffectParameterPtr g_buffer_1_tex_param_;
@@ -241,6 +282,8 @@ namespace KlayGE
 		RenderEffectParameterPtr light_dir_es_param_;
 		RenderEffectParameterPtr projective_map_tex_param_;
 		RenderEffectParameterPtr projective_map_cube_tex_param_;
+		RenderEffectParameterPtr inv_width_height_param_;
+		RenderEffectParameterPtr shadowing_tex_param_;
 
 		std::vector<SceneObject*> visible_scene_objs_;
 		bool has_reflective_objs_;
@@ -248,22 +291,14 @@ namespace KlayGE
 		bool has_simple_forward_objs_;
 
 		FrameBufferPtr rsm_buffer_;
-		TexturePtr rsm_texs_[2];
+		boost::array<TexturePtr, 2> rsm_texs_;
 
-		PostProcessPtr rsm_to_vpls_pps[LT_NumLightTypes];
+		boost::array<PostProcessPtr, LT_NumLightTypes> rsm_to_vpls_pps_;
 		TexturePtr vpl_tex_;
-		
-		TexturePtr depth_deriative_tex_;
-		TexturePtr depth_deriative_small_tex_;
-		TexturePtr normal_cone_tex_;
-		TexturePtr normal_cone_small_tex_;
-		
-		TexturePtr indirect_lighting_tex_;
-		TexturePtr indirect_lighting_pingpong_tex_;
+				
 		RenderTechniquePtr subsplat_stencil_tech_;
 		RenderTechniquePtr vpls_lighting_instance_id_tech_;
 		RenderTechniquePtr vpls_lighting_no_instance_id_tech_;
-		std::vector<FrameBufferPtr> vpls_lighting_fbs_;
 		bool indirect_lighting_enabled_;	
 
 		PostProcessPtr gbuffer_to_depth_derivate_pp_;
@@ -280,6 +315,9 @@ namespace KlayGE
 
 		RenderEffectParameterPtr subsplat_cur_lower_level_param_;
 		RenderEffectParameterPtr subsplat_is_not_first_last_level_param_;
+		RenderEffectParameterPtr subsplat_depth_deriv_tex_param_;
+		RenderEffectParameterPtr subsplat_normal_cone_tex_param_;
+		RenderEffectParameterPtr subsplat_depth_normal_threshold_param_;
 
 		RenderEffectParameterPtr vpl_view_param_;
 		RenderEffectParameterPtr vpl_proj_param_;
@@ -288,12 +326,14 @@ namespace KlayGE
 		RenderEffectParameterPtr vpl_light_color_param_;
 		RenderEffectParameterPtr vpl_light_falloff_param_;
 		RenderEffectParameterPtr vpl_x_coord_param_;
+		RenderEffectParameterPtr vpl_gbuffer_tex_param_;
+		RenderEffectParameterPtr vpl_depth_tex_param_;
 
 		RenderLayoutPtr rl_vpl_;
 
 		// USE_NEW_LIGHT_SAMPLING
 	private:
-		void ExtractVPLsNew(CameraPtr const & rsm_camera, LightSourcePtr const & light);
+		void ExtractVPLsNew(uint32_t vp, CameraPtr const & rsm_camera, LightSourcePtr const & light);
 
 	private:
 		TexturePtr rsm_depth_derivative_tex_;

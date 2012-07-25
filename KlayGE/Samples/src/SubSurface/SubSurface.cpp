@@ -202,7 +202,7 @@ void SubSurfaceApp::OnResize(uint32_t width, uint32_t height)
 	back_face_depth_fb_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*dummy_color_tex, 0, 1, 0));
 	back_face_depth_fb_->Attach(FrameBuffer::ATT_DepthStencil, rf.Make2DDepthStencilRenderView(*back_face_depth_tex_, 0, 1, 0));
 	FrameBufferPtr screen_buffer = rf.RenderEngineInstance().CurFrameBuffer();
-	back_face_depth_fb_->GetViewport().camera = screen_buffer->GetViewport().camera;
+	back_face_depth_fb_->GetViewport()->camera = screen_buffer->GetViewport()->camera;
 
 	checked_pointer_cast<ModelObject>(model_)->BackFaceDepthTex(back_face_depth_tex_);
 

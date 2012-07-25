@@ -114,7 +114,7 @@ void PostProcessingApp::InitObjects()
 	font_ = rf.MakeFont("gkai00mp.kfont");
 
 	deferred_rendering_ = Context::Instance().DeferredRenderingLayerInstance();
-	deferred_rendering_->SSVOEnabled(false);
+	deferred_rendering_->SSVOEnabled(0, false);
 	re.HDREnabled(false);
 	re.PPAAEnabled(0);
 	re.ColorGradingEnabled(false);
@@ -177,13 +177,15 @@ void PostProcessingApp::InitObjects()
 	sky_box_->AddToSceneManager();
 
 	color_fb_ = rf.MakeFrameBuffer();
-	color_fb_->GetViewport().camera = re.CurFrameBuffer()->GetViewport().camera;
+	color_fb_->GetViewport()->camera = re.CurFrameBuffer()->GetViewport()->camera;
 }
 
 void PostProcessingApp::OnResize(uint32_t width, uint32_t height)
 {
 	App3DFramework::OnResize(width, height);
-	deferred_rendering_->OnResize(width, height);
+
+	RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+	deferred_rendering_->SetupViewport(0, re.CurFrameBuffer()->GetViewport(), 0);
 
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 	ElementFormat fmt;
@@ -204,8 +206,8 @@ void PostProcessingApp::OnResize(uint32_t width, uint32_t height)
 
 	ascii_arts_->InputPin(0, color_tex_);
 
-	cartoon_->InputPin(0, deferred_rendering_->OpaqueGBufferRT0Tex());
-	cartoon_->InputPin(1, deferred_rendering_->OpaqueDepthTex());
+	cartoon_->InputPin(0, deferred_rendering_->OpaqueGBufferRT0Tex(0));
+	cartoon_->InputPin(1, deferred_rendering_->OpaqueDepthTex(0));
 	cartoon_->InputPin(2, color_tex_);
 
 	tiling_->InputPin(0, color_tex_);

@@ -214,7 +214,7 @@ void DepthPeelingApp::InitObjects()
 	for (size_t i = 0; i < peeling_fbs_.size(); ++ i)
 	{
 		peeling_fbs_[i] = rf.MakeFrameBuffer();
-		peeling_fbs_[i]->GetViewport().camera = re.CurFrameBuffer()->GetViewport().camera;
+		peeling_fbs_[i]->GetViewport()->camera = re.CurFrameBuffer()->GetViewport()->camera;
 	}
 	peeled_texs_.resize(peeling_fbs_.size());
 	peeled_views_.resize(peeled_texs_.size());

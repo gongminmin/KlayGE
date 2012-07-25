@@ -30,8 +30,8 @@ namespace KlayGE
 		left_ = 0;
 		top_ = 0;
 
-		viewport_.left	= left_;
-		viewport_.top	= top_;
+		viewport_->left	= left_;
+		viewport_->top	= top_;
 
 		d3d_viewport_.MinDepth = 0.0f;
 		d3d_viewport_.MaxDepth = 1.0f;
@@ -121,8 +121,8 @@ namespace KlayGE
 
 		d3d_imm_ctx->OMSetRenderTargets(static_cast<UINT>(rt_view.size()), &rt_view[0], this->D3DDSView().get());
 		
-		d3d_viewport_.Width = static_cast<float>(viewport_.width);
-		d3d_viewport_.Height = static_cast<float>(viewport_.height);
+		d3d_viewport_.Width = static_cast<float>(viewport_->width);
+		d3d_viewport_.Height = static_cast<float>(viewport_->height);
 		re.RSSetViewports(1, &d3d_viewport_);
 	}
 

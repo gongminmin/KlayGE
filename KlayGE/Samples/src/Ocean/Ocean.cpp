@@ -871,17 +871,17 @@ void OceanApp::InitObjects()
 	depth_to_linear_pp_ = LoadPostProcess(ResLoader::Instance().Open("DepthToSM.ppml"), "DepthToSM");
 
 	refraction_fb_ = rf.MakeFrameBuffer();
-	refraction_fb_->GetViewport().camera = re.CurFrameBuffer()->GetViewport().camera;
+	refraction_fb_->GetViewport()->camera = re.CurFrameBuffer()->GetViewport()->camera;
 
 	Camera& scene_camera = this->ActiveCamera();
 	reflection_fb_ = rf.MakeFrameBuffer();
-	reflection_fb_->GetViewport().camera->ProjParams(scene_camera.FOV(), scene_camera.Aspect(),
+	reflection_fb_->GetViewport()->camera->ProjParams(scene_camera.FOV(), scene_camera.Aspect(),
 			scene_camera.NearPlane(), scene_camera.FarPlane());
 
 	blur_y_ = MakeSharedPtr<SeparableGaussianFilterPostProcess>(RenderTechniquePtr(), 8, 1.0f, false);
 
 	composed_fb_ = rf.MakeFrameBuffer();
-	composed_fb_->GetViewport().camera = re.CurFrameBuffer()->GetViewport().camera;
+	composed_fb_->GetViewport()->camera = re.CurFrameBuffer()->GetViewport()->camera;
 
 	UIManager::Instance().Load(ResLoader::Instance().Open("Ocean.uiml"));
 	dialog_params_ = UIManager::Instance().GetDialog("Parameters");
@@ -985,10 +985,10 @@ void OceanApp::OnResize(uint32_t width, uint32_t height)
 	reflection_fb_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*reflection_tex_, 0, 1, 0));
 	reflection_blur_tex_ = rf.MakeTexture2D(width / 2, height / 2, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
 	reflection_fb_->Attach(FrameBuffer::ATT_DepthStencil, rf.Make2DDepthStencilRenderView(width / 2, height / 2, EF_D16, 1, 0));
-	reflection_fb_->GetViewport().left = 0;
-	reflection_fb_->GetViewport().top = 0;
-	reflection_fb_->GetViewport().width = width / 2;
-	reflection_fb_->GetViewport().height = height / 2;
+	reflection_fb_->GetViewport()->left = 0;
+	reflection_fb_->GetViewport()->top = 0;
+	reflection_fb_->GetViewport()->width = width / 2;
+	reflection_fb_->GetViewport()->height = height / 2;
 
 	blur_y_->InputPin(0, reflection_tex_);
 	blur_y_->OutputPin(0, reflection_blur_tex_);
@@ -1178,7 +1178,7 @@ uint32_t OceanApp::DoUpdate(uint32_t pass)
 			float3 reflect_eye, reflect_at, reflect_up;
 			checked_pointer_cast<OceanObject>(ocean_)->ReflectViewParams(reflect_eye, reflect_at, reflect_up,
 				scene_camera.EyePos(), scene_camera.LookAt(), scene_camera.UpVec());
-			reflection_fb_->GetViewport().camera->ViewParams(reflect_eye, reflect_at, reflect_up);
+			reflection_fb_->GetViewport()->camera->ViewParams(reflect_eye, reflect_at, reflect_up);
 		}
 		return App3DFramework::URV_Need_Flush;
 

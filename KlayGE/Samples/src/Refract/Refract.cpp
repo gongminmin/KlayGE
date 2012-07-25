@@ -209,7 +209,7 @@ void Refract::InitObjects()
 
 	render_buffer_ = rf.MakeFrameBuffer();
 	FrameBufferPtr screen_buffer = re.CurFrameBuffer();
-	render_buffer_->GetViewport().camera = screen_buffer->GetViewport().camera;
+	render_buffer_->GetViewport()->camera = screen_buffer->GetViewport()->camera;
 
 	UIManager::Instance().Load(ResLoader::Instance().Open("Refract.uiml"));
 }

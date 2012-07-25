@@ -179,7 +179,9 @@ void GlobalIlluminationApp::InitObjects()
 void GlobalIlluminationApp::OnResize(uint32_t width, uint32_t height)
 {
 	App3DFramework::OnResize(width, height);
-	deferred_rendering_->OnResize(width, height);
+
+	RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+	deferred_rendering_->SetupViewport(0, re.CurFrameBuffer()->GetViewport(), 0);
 
 	UIManager::Instance().SettleCtrls(width, height);
 }
@@ -211,12 +213,12 @@ void GlobalIlluminationApp::ILScaleChangedHandler(KlayGE::UISlider const & sende
 
 void GlobalIlluminationApp::SSGIHandler(UICheckBox const & sender)
 {
-	deferred_rendering_->SSGIEnabled(sender.GetChecked());
+	deferred_rendering_->SSGIEnabled(0, sender.GetChecked());
 }
 
 void GlobalIlluminationApp::SSVOHandler(UICheckBox const & sender)
 {
-	deferred_rendering_->SSVOEnabled(sender.GetChecked());
+	deferred_rendering_->SSVOEnabled(0, sender.GetChecked());
 }
 
 void GlobalIlluminationApp::HDRHandler(UICheckBox const & sender)

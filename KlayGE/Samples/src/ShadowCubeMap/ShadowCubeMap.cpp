@@ -614,8 +614,8 @@ void ShadowCubeMap::InitObjects()
 	{
 		shadow_cube_one_tex_ = rf.MakeTextureCube(SHADOW_MAP_SIZE, 1, 1, shadow_tex_->Format(), 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
 		shadow_cube_one_buffer_ = rf.MakeFrameBuffer();
-		shadow_cube_one_buffer_->GetViewport().camera->OmniDirectionalMode(true);
-		shadow_cube_one_buffer_->GetViewport().camera->ProjParams(PI / 2, 1, 0.1f, 500.0f);
+		shadow_cube_one_buffer_->GetViewport()->camera->OmniDirectionalMode(true);
+		shadow_cube_one_buffer_->GetViewport()->camera->ProjParams(PI / 2, 1, 0.1f, 500.0f);
 		shadow_cube_one_buffer_->Attach(FrameBuffer::ATT_Color0, rf.MakeCubeRenderView(*shadow_cube_one_tex_, 0, 0));
 		TexturePtr shadow_one_depth_tex = rf.MakeTextureCube(SHADOW_MAP_SIZE, 1, 1, EF_D24S8, 1, 0, EAH_GPU_Write, NULL);
 		shadow_cube_one_buffer_->Attach(FrameBuffer::ATT_DepthStencil, rf.MakeCubeDepthStencilRenderView(*shadow_one_depth_tex, 0, 0));
@@ -627,7 +627,7 @@ void ShadowCubeMap::InitObjects()
 		shadow_dual_view_[i] = rf.Make2DRenderView(*shadow_dual_texs_[i], 0, 1, 0);
 
 		shadow_dual_buffers_[i] = rf.MakeFrameBuffer();
-		shadow_dual_buffers_[i]->GetViewport().camera->ProjParams(PI, 1, 0.1f, 500.0f);
+		shadow_dual_buffers_[i]->GetViewport()->camera->ProjParams(PI, 1, 0.1f, 500.0f);
 		shadow_dual_buffers_[i]->Attach(FrameBuffer::ATT_Color0, shadow_dual_view_[i]);
 		shadow_dual_buffers_[i]->Attach(FrameBuffer::ATT_DepthStencil, depth_view);
 	}
@@ -768,7 +768,7 @@ uint32_t ShadowCubeMap::DoUpdate(uint32_t pass)
 			{
 				float3 pos = light_->Position();
 				float3 lookat = light_->Position() + ((0 == pass) ? 1.0f : -1.0f) * light_->Direction();
-				shadow_dual_buffers_[pass]->GetViewport().camera->ViewParams(pos, lookat);
+				shadow_dual_buffers_[pass]->GetViewport()->camera->ViewParams(pos, lookat);
 
 				renderEngine.BindFrameBuffer(shadow_dual_buffers_[pass]);
 				renderEngine.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(0.0f, 0.0f, 0.0f, 1), 1.0f, 0);
@@ -824,7 +824,7 @@ uint32_t ShadowCubeMap::DoUpdate(uint32_t pass)
 				renderEngine.BindFrameBuffer(shadow_cube_buffer_);
 				renderEngine.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(0.0f, 0.0f, 0.0f, 1), 1.0f, 0);
 
-				shadow_cube_buffer_->GetViewport().camera = light_->SMCamera(pass);
+				shadow_cube_buffer_->GetViewport()->camera = light_->SMCamera(pass);
 
 				for (size_t i = 0; i < scene_objs_.size(); ++ i)
 				{
@@ -863,7 +863,7 @@ uint32_t ShadowCubeMap::DoUpdate(uint32_t pass)
 			{
 			case 0:
 				{
-					shadow_cube_one_buffer_->GetViewport().camera->ViewParams(light_->Position(), light_->Position() + light_->Direction());
+					shadow_cube_one_buffer_->GetViewport()->camera->ViewParams(light_->Position(), light_->Position() + light_->Direction());
 
 					renderEngine.BindFrameBuffer(shadow_cube_one_buffer_);
 					renderEngine.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(0.0f, 0.0f, 0.0f, 1), 1.0f, 0);

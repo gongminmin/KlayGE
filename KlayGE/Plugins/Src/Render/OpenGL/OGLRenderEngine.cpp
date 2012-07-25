@@ -745,7 +745,7 @@ namespace KlayGE
 	{
 		BOOST_ASSERT(fb);
 
-		Viewport const & vp = fb->GetViewport();
+		Viewport const & vp = *fb->GetViewport();
 		if ((vp_x_ != vp.left) || (vp_y_ != vp.top) || (vp_width_ != vp.width) || (vp_height_ != vp.height))
 		{
 			glViewport(vp.left, vp.top, vp.width, vp.height);

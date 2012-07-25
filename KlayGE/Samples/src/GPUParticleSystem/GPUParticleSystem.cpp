@@ -442,8 +442,8 @@ namespace
 					pos_vel_rt_buffer_[1]->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*particle_pos_texture_[1], 0, 1, 0));
 					pos_vel_rt_buffer_[1]->Attach(FrameBuffer::ATT_Color1, rf.Make2DRenderView(*particle_vel_texture_[1], 0, 1, 0));
 
-					pos_vel_rt_buffer_[0]->GetViewport().camera = pos_vel_rt_buffer_[1]->GetViewport().camera
-						= screen_buffer->GetViewport().camera;
+					pos_vel_rt_buffer_[0]->GetViewport()->camera = pos_vel_rt_buffer_[1]->GetViewport()->camera
+						= screen_buffer->GetViewport()->camera;
 				}
 				else
 				{
@@ -459,9 +459,9 @@ namespace
 					vel_rt_buffer_[1] = rf.MakeFrameBuffer();
 					vel_rt_buffer_[1]->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*particle_vel_texture_[1], 0, 1, 0));
 
-					pos_rt_buffer_[0]->GetViewport().camera = pos_rt_buffer_[1]->GetViewport().camera
-						= vel_rt_buffer_[0]->GetViewport().camera = vel_rt_buffer_[1]->GetViewport().camera
-						= screen_buffer->GetViewport().camera;
+					pos_rt_buffer_[0]->GetViewport()->camera = pos_rt_buffer_[1]->GetViewport()->camera
+						= vel_rt_buffer_[0]->GetViewport()->camera = vel_rt_buffer_[1]->GetViewport()->camera
+						= screen_buffer->GetViewport()->camera;
 				}
 			
 				for (int i = 0; i < tex_width_ * tex_height_; ++ i)
@@ -793,9 +793,9 @@ void GPUParticleSystemApp::InitObjects()
 	FrameBufferPtr screen_buffer = re.CurFrameBuffer();
 	
 	scene_buffer_ = rf.MakeFrameBuffer();
-	scene_buffer_->GetViewport().camera = screen_buffer->GetViewport().camera;
+	scene_buffer_->GetViewport()->camera = screen_buffer->GetViewport()->camera;
 	fog_buffer_ = rf.MakeFrameBuffer();
-	fog_buffer_->GetViewport().camera = screen_buffer->GetViewport().camera;
+	fog_buffer_->GetViewport()->camera = screen_buffer->GetViewport()->camera;
 
 	blend_pp_ = LoadPostProcess(ResLoader::Instance().Open("Blend.ppml"), "blend");
 
