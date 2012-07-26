@@ -32,10 +32,6 @@ namespace KlayGE
 		Opaque_GBuffer = 0,
 		TransparencyBack_GBuffer,
 		TransparencyFront_GBuffer,
-		DualReflection_0_GBuffer,
-		DualReflection_1_GBuffer,
-		DualReflection_2_GBuffer,
-		DualReflection_3_GBuffer,
 		Num_GBuffers
 	};
 
@@ -293,7 +289,6 @@ namespace KlayGE
 
 		std::vector<SceneObject*> visible_scene_objs_;
 		bool has_reflective_objs_;
-		boost::array<bool, 4> has_dual_reflective_objs_;
 		bool has_simple_forward_objs_;
 
 		FrameBufferPtr rsm_buffer_;

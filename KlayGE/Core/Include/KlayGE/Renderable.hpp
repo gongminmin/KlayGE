@@ -81,8 +81,7 @@ namespace KlayGE
 			EA_TransparencyFront = 1UL << 2,
 			EA_AlphaTest = 1UL << 3,
 			EA_Reflection = 1UL << 4,
-			EA_DualReflection = 1UL << 5,
-			EA_SimpleForward = 1UL << 6
+			EA_SimpleForward = 1UL << 5
 		};
 
 	public:
@@ -155,10 +154,6 @@ namespace KlayGE
 		virtual bool Reflection() const
 		{
 			return effect_attrs_ & EA_Reflection ? true : false;
-		}
-		virtual bool DualReflection() const
-		{
-			return effect_attrs_ & EA_DualReflection ? true : false;
 		}
 		virtual bool SimpleForward() const
 		{

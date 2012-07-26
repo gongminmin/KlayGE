@@ -91,10 +91,6 @@ namespace KlayGE
 		{
 			return renderable_->Reflection();
 		}
-		bool DualReflection() const
-		{
-			return renderable_->DualReflection();
-		}
 		bool SimpleForward() const
 		{
 			return renderable_->SimpleForward();

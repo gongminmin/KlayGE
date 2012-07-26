@@ -237,7 +237,6 @@ namespace KlayGE
 		virtual bool TransparencyBackFace() const;
 		virtual bool TransparencyFrontFace() const;
 		virtual bool Reflection() const;
-		virtual bool DualReflection() const;
 		virtual bool SimpleForward() const;
 
 	protected:

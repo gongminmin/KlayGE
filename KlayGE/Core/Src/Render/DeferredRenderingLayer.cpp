@@ -865,8 +865,6 @@ namespace KlayGE
 			bool has_transparency_back_objs = false;
 			bool has_transparency_front_objs = false;
 			has_reflective_objs_ = false;
-			has_dual_reflective_objs_.assign(false);
-			size_t num_dual_reflective_objs = 0;
 			has_simple_forward_objs_ = false;
 			visible_scene_objs_.resize(0);
 			SceneManager::SceneObjectsType const & scene_objs = scene_mgr.SceneObjects();
@@ -891,14 +889,6 @@ namespace KlayGE
 					{
 						has_reflective_objs_ = true;
 					}
-					if (so->DualReflection())
-					{
-						if (num_dual_reflective_objs < has_dual_reflective_objs_.size())
-						{
-							has_dual_reflective_objs_[num_dual_reflective_objs] = true;
-							++ num_dual_reflective_objs;
-						}
-					}
 					if (so->SimpleForward())
 					{
 						has_simple_forward_objs_ = true;
@@ -921,10 +911,6 @@ namespace KlayGE
 			pvp.g_buffer_enables[Opaque_GBuffer] = has_opaque_objs;
 			pvp.g_buffer_enables[TransparencyBack_GBuffer] = has_transparency_back_objs;
 			pvp.g_buffer_enables[TransparencyFront_GBuffer] = has_transparency_front_objs;
-			pvp.g_buffer_enables[DualReflection_0_GBuffer] = has_dual_reflective_objs_[0];
-			pvp.g_buffer_enables[DualReflection_1_GBuffer] = has_dual_reflective_objs_[1];
-			pvp.g_buffer_enables[DualReflection_2_GBuffer] = has_dual_reflective_objs_[2];
-			pvp.g_buffer_enables[DualReflection_3_GBuffer] = has_dual_reflective_objs_[3];
 
 			indirect_lighting_enabled_ = false;
 			if (rsm_buffer_ && (illum_ != 1))

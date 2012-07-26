@@ -322,17 +322,6 @@ namespace KlayGE
 		return ab;
 	}
 
-	bool RenderModel::DualReflection() const
-	{
-		bool ab = false;
-		typedef BOOST_TYPEOF(meshes_) MeshesType;
-		BOOST_FOREACH(MeshesType::const_reference mesh, meshes_)
-		{
-			ab |= mesh->DualReflection();
-		}
-		return ab;
-	}
-
 	bool RenderModel::SimpleForward() const
 	{
 		bool ab = false;
@@ -420,7 +409,7 @@ namespace KlayGE
 		}
 		if ((mtl_->emit.x() > 0) || (mtl_->emit.y() > 0) || (mtl_->emit.z() > 0) || emit_tex_
 			|| (effect_attrs_ & EA_TransparencyBack) || (effect_attrs_ & EA_TransparencyFront)
-			|| (effect_attrs_ & EA_Reflection) || (effect_attrs_ & EA_DualReflection))
+			|| (effect_attrs_ & EA_Reflection))
 		{
 			effect_attrs_ |= EA_SpecialShading;
 		}
