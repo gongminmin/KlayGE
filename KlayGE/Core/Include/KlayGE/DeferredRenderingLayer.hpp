@@ -44,9 +44,10 @@ namespace KlayGE
 		VPAM_NoOpaque = 1UL << 0,
 		VPAM_NoTransparencyBack = 1UL << 1,
 		VPAM_NoTransparencyFront = 1UL << 2,
-		VPAM_NoGI = 1UL << 3,
-		VPAM_NoSSVO = 1UL << 4,
-		VPAM_NoSSGI = 1UL << 5
+		VPAM_NoSimpleForward = 1UL << 3,
+		VPAM_NoGI = 1UL << 4,
+		VPAM_NoSSVO = 1UL << 5,
+		VPAM_NoSSGI = 1UL << 6
 	};
 
 	struct PerViewport
@@ -101,6 +102,9 @@ namespace KlayGE
 		TexturePtr indirect_lighting_tex;
 		TexturePtr indirect_lighting_pingpong_tex;
 		std::vector<FrameBufferPtr> vpls_lighting_fbs;
+
+		std::vector<ConditionalRenderPtr> light_conditional;
+		std::vector<bool> light_visibles;
 	};
 
 	class KLAYGE_CORE_API DeferredRenderingLayer
@@ -213,6 +217,9 @@ namespace KlayGE
 		void UpsampleMultiresLighting(uint32_t vp);
 		void AccumulateToLightingTex(uint32_t vp);
 
+		uint32_t ComposePassScanCode(uint32_t vp_index, int32_t pass_type, int32_t org_no, int32_t index_in_pass);
+		void DecomposePassScanCode(uint32_t& vp_index, int32_t& pass_type, int32_t& org_no, int32_t& index_in_pass, uint32_t code);
+
 	private:
 		bool mrt_g_buffer_support_;
 		bool depth_texture_support_;
@@ -242,7 +249,6 @@ namespace KlayGE
 		OBBox box_obb_;
 
 		std::vector<LightSourcePtr> lights_;
-		std::vector<bool> light_visibles_;
 
 		std::vector<uint32_t> pass_scaned_;
 

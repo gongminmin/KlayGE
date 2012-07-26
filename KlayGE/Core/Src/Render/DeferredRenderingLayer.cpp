@@ -286,20 +286,20 @@ namespace KlayGE
 
 		if (!depth_texture_support_)
 		{
-			pass_scaned_.push_back(static_cast<uint32_t>((PT_OpaqueDepth << 24) + 0));
+			pass_scaned_.push_back(this->ComposePassScanCode(0, PT_OpaqueDepth, 0, 0));
 		}
 
 		mrt_g_buffer_support_ = (caps.max_simultaneous_rts > 1);
 
 		if (mrt_g_buffer_support_)
 		{
-			pass_scaned_.push_back(static_cast<uint32_t>((PT_OpaqueMRTGBuffer << 24) + 0));
-			pass_scaned_.push_back(static_cast<uint32_t>((PT_OpaqueMRTGBuffer << 24) + 1));
+			pass_scaned_.push_back(this->ComposePassScanCode(0, PT_OpaqueMRTGBuffer, 0, 0));
+			pass_scaned_.push_back(this->ComposePassScanCode(0, PT_OpaqueMRTGBuffer, 0, 1));
 		}
 		else
 		{
-			pass_scaned_.push_back(static_cast<uint32_t>((PT_OpaqueGBuffer << 24) + 0));
-			pass_scaned_.push_back(static_cast<uint32_t>((PT_OpaqueGBuffer << 24) + 1));
+			pass_scaned_.push_back(this->ComposePassScanCode(0, PT_OpaqueGBuffer, 0, 0));
+			pass_scaned_.push_back(this->ComposePassScanCode(0, PT_OpaqueGBuffer, 0, 1));
 		}
 
 		for (size_t vpi = 0; vpi < viewports_.size(); ++ vpi)
@@ -812,15 +812,17 @@ namespace KlayGE
 
 	uint32_t DeferredRenderingLayer::Update(uint32_t pass)
 	{
-		uint32_t vp_index = 0;
-		PerViewport& pvp = viewports_[vp_index];
 		SceneManager& scene_mgr = Context::Instance().SceneManagerInstance();
-		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+		RenderEngine& re = rf.RenderEngineInstance();
 
-		int32_t pass_type = pass_scaned_[pass] >> 24;        //  8 bits, [31 - 24]
-		int32_t org_no = (pass_scaned_[pass] >> 12) & 0xFFF; // 12 bits, [23 - 12]
-		int32_t index_in_pass = pass_scaned_[pass] & 0xFFF;  // 12 bits, [11 -  0]
+		uint32_t vp_index;
+		int32_t pass_type, org_no, index_in_pass;
+		this->DecomposePassScanCode(vp_index, pass_type, org_no, index_in_pass, pass_scaned_[pass]);
 
+		active_viewport_ = vp_index;
+
+		PerViewport& pvp = viewports_[vp_index];
 		if (0 == pass)
 		{
 			pvp.output_fb = re.CurFrameBuffer();
@@ -858,8 +860,8 @@ namespace KlayGE
 			}
 
 			lights_.insert(lights_.end(), cur_lights.begin(), cur_lights.end());
-			light_visibles_.assign(lights_.size(), true);
 
+			bool has_opaque_objs = false;
 			bool has_transparency_back_objs = false;
 			bool has_transparency_front_objs = false;
 			has_reflective_objs_ = false;
@@ -874,6 +876,8 @@ namespace KlayGE
 				if ((0 == (so->Attrib() & SceneObject::SOA_Overlay)) && so->Visible())
 				{
 					visible_scene_objs_.push_back(so.get());
+
+					has_opaque_objs = true;
 
 					if (so->TransparencyBackFace())
 					{
@@ -902,7 +906,19 @@ namespace KlayGE
 				}
 			}
 
-			pvp.g_buffer_enables[Opaque_GBuffer] = true;
+			if (pvp.attrib & VPAM_NoOpaque)
+			{
+				has_opaque_objs = false;
+			}
+			if (pvp.attrib & VPAM_NoTransparencyBack)
+			{
+				has_transparency_back_objs = false;
+			}
+			if (pvp.attrib & VPAM_NoTransparencyFront)
+			{
+				has_transparency_front_objs = false;
+			}
+			pvp.g_buffer_enables[Opaque_GBuffer] = has_opaque_objs;
 			pvp.g_buffer_enables[TransparencyBack_GBuffer] = has_transparency_back_objs;
 			pvp.g_buffer_enables[TransparencyFront_GBuffer] = has_transparency_front_objs;
 			pvp.g_buffer_enables[DualReflection_0_GBuffer] = has_dual_reflective_objs_[0];
@@ -1047,7 +1063,7 @@ namespace KlayGE
 
 					pvp.g_buffer_depth_texs[Opaque_GBuffer]->BuildMipSubLevels();
 
-					if (indirect_lighting_enabled_)
+					if (indirect_lighting_enabled_ && !(pvp.attrib & VPAM_NoGI))
 					{
 						this->CreateDepthDerivativeMipMap(vp_index);
 						this->CreateNormalConeMipMap(vp_index);
@@ -1062,189 +1078,202 @@ namespace KlayGE
 
 					pass_scaned_.resize(2 + !depth_texture_support_);
 
-					if (pvp.g_buffer_enables[TransparencyBack_GBuffer])
+					for (uint32_t vpi = 0; vpi < viewports_.size(); ++ vpi)
 					{
-						if (mrt_g_buffer_support_)
+						PerViewport& pvp = viewports_[vpi];
+						if (pvp.viewport)
 						{
-							pass_scaned_.push_back(static_cast<uint32_t>((PT_TransparencyBackMRTGBuffer << 24) + 0));
-							pass_scaned_.push_back(static_cast<uint32_t>((PT_TransparencyBackMRTGBuffer << 24) + 1));
-						}
-					}
-					if (pvp.g_buffer_enables[TransparencyFront_GBuffer])
-					{
-						if (mrt_g_buffer_support_)
-						{
-							pass_scaned_.push_back(static_cast<uint32_t>((PT_TransparencyFrontMRTGBuffer << 24) + 0));
-							pass_scaned_.push_back(static_cast<uint32_t>((PT_TransparencyFrontMRTGBuffer << 24) + 1));
-						}
-					}
+							pvp.light_conditional.resize(lights_.size());
+							pvp.light_visibles.assign(lights_.size(), true);
 
-					for (size_t i = 0; i < lights_.size(); ++ i)
-					{
-						LightSourcePtr const & light = lights_[i];
-						if (light->Enabled())
-						{
-							int type = light->Type();
-							int32_t attr = light->Attrib();
-							switch (type)
+							if (pvp.g_buffer_enables[TransparencyBack_GBuffer])
 							{
-							case LT_Spot:
+								if (mrt_g_buffer_support_)
 								{
-									float4x4 const & light_view = light->SMCamera(0)->ViewMatrix();
-
-									float const scale = light->CosOuterInner().w();
-									float4x4 mat = MathLib::scaling(scale * light_scale_, scale * light_scale_, light_scale_);
-									float4x4 light_model = mat * MathLib::inverse(light_view);
-									*light_volume_mv_param_ = light_model * pvp.view;
-									*light_volume_mvp_param_ = light_model * vp;
-
-									if (scene_mgr.OBBVisible(MathLib::transform_obb(cone_obb_, light_model)))
-									{
-										if (attr & LSA_IndirectLighting)
-										{
-											if (rsm_buffer_ && (illum_ != 1))
-											{
-												pass_scaned_.push_back(static_cast<uint32_t>((PT_GenReflectiveShadowMap << 24) + (i << 12) + 0));
-												pass_scaned_.push_back(static_cast<uint32_t>((PT_IndirectLighting << 24) + (i << 12) + 0));
-											}
-											else
-											{
-												if (depth_texture_support_)
-												{
-													pass_scaned_.push_back(static_cast<uint32_t>((PT_GenShadowMap << 24) + (i << 12) + 0));
-												}
-												else
-												{
-													pass_scaned_.push_back(static_cast<uint32_t>((PT_GenShadowMapWODepthTexture << 24) + (i << 12) + 0));
-												}
-											}
-										}
-
-										if ((0 == (attr & LSA_NoShadow)) && (0 == (attr & LSA_IndirectLighting)))
-										{
-											if (depth_texture_support_)
-											{
-												pass_scaned_.push_back(static_cast<uint32_t>((PT_GenShadowMap << 24) + (i << 12) + 0));
-											}
-											else
-											{
-												pass_scaned_.push_back(static_cast<uint32_t>((PT_GenShadowMapWODepthTexture << 24) + (i << 12) + 0));
-											}
-										}
-										pass_scaned_.push_back(static_cast<uint32_t>((PT_Lighting << 24) + (i << 12) + 0));
-
-										if (light->ConditionalRenderQuery(0))
-										{
-											light->ConditionalRenderQuery(0)->Begin();
-											re.Render(*technique_light_depth_only_, *rl_cone_);
-											light->ConditionalRenderQuery(0)->End();
-										}
-									}
-									else
-									{
-										light_visibles_[i] = false;
-									}
+									pass_scaned_.push_back(this->ComposePassScanCode(vpi, PT_TransparencyBackMRTGBuffer, 0, 0));
+									pass_scaned_.push_back(this->ComposePassScanCode(vpi, PT_TransparencyBackMRTGBuffer, 0, 1));
 								}
-								break;
-
-							case LT_Point:
+							}
+							if (pvp.g_buffer_enables[TransparencyFront_GBuffer])
+							{
+								if (mrt_g_buffer_support_)
 								{
-									float3 const & p = light->Position();
-									
-									float4x4 light_model = MathLib::scaling(light_scale_, light_scale_, light_scale_)
-										* MathLib::translation(p);
-									*light_volume_mv_param_ = light_model * pvp.view;
-									*light_volume_mvp_param_ = light_model * vp;
+									pass_scaned_.push_back(this->ComposePassScanCode(vpi, PT_TransparencyFrontMRTGBuffer, 0, 0));
+									pass_scaned_.push_back(this->ComposePassScanCode(vpi, PT_TransparencyFrontMRTGBuffer, 0, 1));
+								}
+							}
 
-									if (scene_mgr.OBBVisible(MathLib::transform_obb(box_obb_, light_model)))
+							for (size_t i = 0; i < lights_.size(); ++ i)
+							{
+								LightSourcePtr const & light = lights_[i];
+								if (light->Enabled())
+								{
+									int type = light->Type();
+									int32_t attr = light->Attrib();
+									switch (type)
 									{
-										if (light->ConditionalRenderQuery(6))
+									case LT_Spot:
 										{
-											light->ConditionalRenderQuery(6)->Begin();
-											re.Render(*technique_light_depth_only_, *rl_box_);
-											light->ConditionalRenderQuery(6)->End();
-										}
+											float4x4 const & light_view = light->SMCamera(0)->ViewMatrix();
 
-										for (int j = 0; j < 6; ++ j)
-										{
-											light_model = MathLib::inverse(light->SMCamera(j)->ViewMatrix());
-											*light_volume_mv_param_ = light_model * pvp.view;
-											*light_volume_mvp_param_ = light_model * vp;
+											float const scale = light->CosOuterInner().w();
+											float4x4 mat = MathLib::scaling(scale * light_scale_, scale * light_scale_, light_scale_);
+											float4x4 light_model = mat * MathLib::inverse(light_view);
 
-											//if (scene_mgr.OBBVisible(MathLib::transform_obb(pyramid_obb_, light_model)))
+											if (scene_mgr.OBBVisible(MathLib::transform_obb(cone_obb_, light_model)))
 											{
-												if (0 == (attr & LSA_NoShadow))
+												if (attr & LSA_IndirectLighting)
 												{
-													if (depth_texture_support_)
+													if (rsm_buffer_ && (illum_ != 1))
 													{
-														pass_scaned_.push_back(static_cast<uint32_t>((PT_GenShadowMap << 24) + (i << 12) + j));
+														pass_scaned_.push_back(this->ComposePassScanCode(vpi, PT_GenReflectiveShadowMap, i, 0));
+														pass_scaned_.push_back(this->ComposePassScanCode(vpi, PT_IndirectLighting, i, 0));
 													}
 													else
 													{
-														pass_scaned_.push_back(static_cast<uint32_t>((PT_GenShadowMapWODepthTexture << 24) + (i << 12) + j));
+														if (depth_texture_support_)
+														{
+															pass_scaned_.push_back(this->ComposePassScanCode(vpi, PT_GenShadowMap, i, 0));
+														}
+														else
+														{
+															pass_scaned_.push_back(this->ComposePassScanCode(vpi, PT_GenShadowMapWODepthTexture, i, 0));
+														}
 													}
 												}
 
-												if (light->ConditionalRenderQuery(j))
+												if ((0 == (attr & LSA_NoShadow)) && (0 == (attr & LSA_IndirectLighting)))
 												{
-													light->ConditionalRenderQuery(j)->Begin();
-													re.Render(*technique_light_depth_only_, *rl_pyramid_);
-													light->ConditionalRenderQuery(j)->End();
+													if (depth_texture_support_)
+													{
+														pass_scaned_.push_back(this->ComposePassScanCode(vpi, PT_GenShadowMap, i, 0));
+													}
+													else
+													{
+														pass_scaned_.push_back(this->ComposePassScanCode(vpi, PT_GenShadowMapWODepthTexture, i, 0));
+													}
+												}
+												pass_scaned_.push_back(this->ComposePassScanCode(vpi, PT_Lighting, i, 0));
+
+												if (light->ConditionalRenderQuery(0))
+												{
+													if (!pvp.light_conditional[i])
+													{
+														pvp.light_conditional[i] = checked_pointer_cast<ConditionalRender>(rf.MakeConditionalRender());
+													}
+
+													*light_volume_mv_param_ = light_model * pvp.view;
+													*light_volume_mvp_param_ = light_model * vp;
+
+													pvp.light_conditional[i]->Begin();
+													re.Render(*technique_light_depth_only_, *rl_cone_);
+													pvp.light_conditional[i]->End();
 												}
 											}
+											else
+											{
+												pvp.light_visibles[i] = false;
+											}
 										}
+										break;
 
-										pass_scaned_.push_back(static_cast<uint32_t>((PT_Lighting << 24) + (i << 12) + 6));
-									}
-									else
-									{
-										light_visibles_[i] = false;
+									case LT_Point:
+										{
+											float3 const & p = light->Position();
+									
+											float4x4 light_model = MathLib::scaling(light_scale_, light_scale_, light_scale_)
+												* MathLib::translation(p);
+
+											if (scene_mgr.OBBVisible(MathLib::transform_obb(box_obb_, light_model)))
+											{
+												if (light->ConditionalRenderQuery(6))
+												{
+													if (!pvp.light_conditional[i])
+													{
+														pvp.light_conditional[i] = checked_pointer_cast<ConditionalRender>(rf.MakeConditionalRender());
+													}
+
+													*light_volume_mv_param_ = light_model * pvp.view;
+													*light_volume_mvp_param_ = light_model * vp;
+
+													pvp.light_conditional[i]->Begin();
+													re.Render(*technique_light_depth_only_, *rl_box_);
+													pvp.light_conditional[i]->End();
+												}
+
+												for (int j = 0; j < 6; ++ j)
+												{
+													light_model = MathLib::inverse(light->SMCamera(j)->ViewMatrix());
+
+													//if (scene_mgr.OBBVisible(MathLib::transform_obb(pyramid_obb_, light_model)))
+													{
+														if (0 == (attr & LSA_NoShadow))
+														{
+															if (depth_texture_support_)
+															{
+																pass_scaned_.push_back(this->ComposePassScanCode(vpi, PT_GenShadowMap, i, j));
+															}
+															else
+															{
+																pass_scaned_.push_back(this->ComposePassScanCode(vpi, PT_GenShadowMapWODepthTexture, i, j));
+															}
+														}
+													}
+												}
+
+												pass_scaned_.push_back(this->ComposePassScanCode(vpi, PT_Lighting, i, 6));
+											}
+											else
+											{
+												pvp.light_visibles[i] = false;
+											}
+										}
+										break;
+
+									default:
+										if (0 == (attr & LSA_NoShadow))
+										{
+											if (depth_texture_support_)
+											{
+												pass_scaned_.push_back(this->ComposePassScanCode(vpi, PT_GenShadowMap, i, 0));
+											}
+											else
+											{
+												pass_scaned_.push_back(this->ComposePassScanCode(vpi, PT_GenShadowMapWODepthTexture, i, 0));
+											}
+										}
+										pass_scaned_.push_back(this->ComposePassScanCode(vpi, PT_Lighting, i, 0));
+										break;
 									}
 								}
-								break;
-
-							default:
-								if (0 == (attr & LSA_NoShadow))
+							}
+							pass_scaned_.push_back(this->ComposePassScanCode(vpi, PT_OpaqueShading, 0, 0));
+							if (pvp.g_buffer_enables[TransparencyBack_GBuffer])
+							{
+								pass_scaned_.push_back(this->ComposePassScanCode(vpi, PT_TransparencyBackShading, 0, 0));
+							}
+							if (pvp.g_buffer_enables[TransparencyFront_GBuffer])
+							{
+								pass_scaned_.push_back(this->ComposePassScanCode(vpi, PT_TransparencyFrontShading, 0, 0));
+							}
+							if (mrt_g_buffer_support_)
+							{
+								pass_scaned_.push_back(this->ComposePassScanCode(vpi, PT_OpaqueSpecialShading, 0, 0));
+								if (pvp.g_buffer_enables[TransparencyBack_GBuffer])
 								{
-									if (depth_texture_support_)
-									{
-										pass_scaned_.push_back(static_cast<uint32_t>((PT_GenShadowMap << 24) + (i << 12) + 0));
-									}
-									else
-									{
-										pass_scaned_.push_back(static_cast<uint32_t>((PT_GenShadowMapWODepthTexture << 24) + (i << 12) + 0));
-									}
+									pass_scaned_.push_back(this->ComposePassScanCode(vpi, PT_TransparencyBackSpecialShading, 0, 0));
 								}
-								pass_scaned_.push_back(static_cast<uint32_t>((PT_Lighting << 24) + (i << 12) + 0));
-								break;
+								if (pvp.g_buffer_enables[TransparencyFront_GBuffer])
+								{
+									pass_scaned_.push_back(this->ComposePassScanCode(vpi, PT_TransparencyFrontSpecialShading, 0, 0));
+								}
+								pass_scaned_.push_back(this->ComposePassScanCode(vpi, PT_OpaqueSpecialShading, 0, 1));
+							}
+							else
+							{
+								pass_scaned_.push_back(this->ComposePassScanCode(vpi, PT_OpaqueShading, 0, 1));
 							}
 						}
-					}
-					pass_scaned_.push_back(static_cast<uint32_t>((PT_OpaqueShading << 24) + 0));
-					if (pvp.g_buffer_enables[TransparencyBack_GBuffer])
-					{
-						pass_scaned_.push_back(static_cast<uint32_t>((PT_TransparencyBackShading << 24) + 0));
-					}
-					if (pvp.g_buffer_enables[TransparencyFront_GBuffer])
-					{
-						pass_scaned_.push_back(static_cast<uint32_t>((PT_TransparencyFrontShading << 24) + 0));
-					}
-					if (mrt_g_buffer_support_)
-					{
-						pass_scaned_.push_back(static_cast<uint32_t>((PT_OpaqueSpecialShading << 24) + 0));
-						if (pvp.g_buffer_enables[TransparencyBack_GBuffer])
-						{
-							pass_scaned_.push_back(static_cast<uint32_t>((PT_TransparencyBackSpecialShading << 24) + 0));
-						}
-						if (pvp.g_buffer_enables[TransparencyFront_GBuffer])
-						{
-							pass_scaned_.push_back(static_cast<uint32_t>((PT_TransparencyFrontSpecialShading << 24) + 0));
-						}
-						pass_scaned_.push_back(static_cast<uint32_t>((PT_OpaqueSpecialShading << 24) + 1));
-					}
-					else
-					{
-						pass_scaned_.push_back(static_cast<uint32_t>((PT_OpaqueShading << 24) + 1));
 					}
 				}
 				else
@@ -1290,9 +1319,9 @@ namespace KlayGE
 					switch (pass_type)
 					{
 					case PT_OpaqueShading:
-						if ((indirect_lighting_enabled_ || pvp.ssgi_enabled) && (illum_ != 1))
+						if (((indirect_lighting_enabled_ && !(pvp.attrib & VPAM_NoGI)) || (pvp.ssgi_enabled && !(pvp.attrib & VPAM_NoSSGI))) && (illum_ != 1))
 						{
-							if (pvp.ssgi_enabled)
+							if (pvp.ssgi_enabled && !(pvp.attrib & VPAM_NoSSGI))
 							{
 								ssgi_pp_->InputPin(0, pvp.g_buffer_rt0_texs[Opaque_GBuffer]);
 								ssgi_pp_->InputPin(1, pvp.g_buffer_depth_texs[Opaque_GBuffer]);
@@ -1313,7 +1342,7 @@ namespace KlayGE
 							this->AccumulateToLightingTex(vp_index);
 						}
 
-						if (pvp.ssvo_enabled)
+						if (pvp.ssvo_enabled && !(pvp.attrib & VPAM_NoSSVO))
 						{							
 							ssvo_pp_->InputPin(0, pvp.g_buffer_rt0_texs[Opaque_GBuffer]);
 							ssvo_pp_->InputPin(1, pvp.g_buffer_depth_texs[Opaque_GBuffer]);
@@ -1430,30 +1459,41 @@ namespace KlayGE
 					}
 
 					lights_.resize(0);
-					light_visibles_.resize(0);
 
 					std::swap(pvp.curr_shading_buffers[0], pvp.prev_shading_buffer);
 					std::swap(pvp.curr_shading_texs[0], pvp.prev_shading_tex);
 
-					if (has_simple_forward_objs_)
+					uint32_t urv;
+					if (has_simple_forward_objs_ && !(pvp.attrib & VPAM_NoSimpleForward))
 					{
 						typedef BOOST_TYPEOF(visible_scene_objs_) VisibleSceneObjsType;
 						BOOST_FOREACH(VisibleSceneObjsType::reference deo, visible_scene_objs_)
 						{
 							deo->Pass(PT_SimpleForward);
 						}
-						return App3DFramework::URV_Need_Flush | App3DFramework::URV_Simple_Forward_Only | App3DFramework::URV_Finished;
+
+						urv = App3DFramework::URV_Need_Flush | App3DFramework::URV_Simple_Forward_Only;
+						if (pass_scaned_.size() - 1 == pass)
+						{
+							urv |= App3DFramework::URV_Finished;
+						}
 					}
 					else
 					{
-						return App3DFramework::URV_Finished;
+						urv = App3DFramework::URV_Flushed;
+						if (pass_scaned_.size() - 1 == pass)
+						{
+							urv = App3DFramework::URV_Finished;
+						}
 					}
+
+					return urv;
 				}
 			}
 			else
 			{
 				LightSourcePtr const & light = lights_[org_no];
-				bool light_visible = light_visibles_[org_no];
+				bool light_visible = pvp.light_visibles[org_no];
 
 				LightType type = light->Type();
 				int32_t attr = light->Attrib();
@@ -1618,9 +1658,9 @@ namespace KlayGE
 						if (LT_Point == type)
 						{
 							sm_filter_pps_[index_in_pass]->Apply();
-							if (light_visible && light->ConditionalRenderQuery(index_in_pass - 1))
+							if (light_visible && pvp.light_conditional[org_no])
 							{
-								light->ConditionalRenderQuery(index_in_pass - 1)->EndConditionalRender();
+								pvp.light_conditional[org_no]->EndConditionalRender();
 							}
 						}
 						else
@@ -1628,9 +1668,9 @@ namespace KlayGE
 							sm_filter_pps_[0]->Apply();
 							if (!(light->Attrib() & LSA_IndirectLighting))
 							{
-								if (light_visible && light->ConditionalRenderQuery(index_in_pass))
+								if (light_visible && pvp.light_conditional[org_no])
 								{
-									light->ConditionalRenderQuery(index_in_pass)->EndConditionalRender();
+									pvp.light_conditional[org_no]->EndConditionalRender();
 								}
 							}
 						}
@@ -1639,9 +1679,9 @@ namespace KlayGE
 
 				if ((PT_GenShadowMap == pass_type) || (PT_GenShadowMapWODepthTexture == pass_type))
 				{
-					if (light_visible && light->ConditionalRenderQuery(index_in_pass))
+					if (light_visible && pvp.light_conditional[org_no])
 					{
-						light->ConditionalRenderQuery(index_in_pass)->BeginConditionalRender();
+						pvp.light_conditional[org_no]->BeginConditionalRender();
 					}
 
 					// Shadow map generation
@@ -1668,9 +1708,9 @@ namespace KlayGE
 
 					if ((type != LT_Ambient) && (type != LT_Directional))
 					{
-						if (light_visible && light->ConditionalRenderQuery(index_in_pass))
+						if (light_visible && pvp.light_conditional[org_no])
 						{
-							light->ConditionalRenderQuery(index_in_pass)->BeginConditionalRender();
+							pvp.light_conditional[org_no]->BeginConditionalRender();
 						}
 					}
 
@@ -1711,9 +1751,9 @@ namespace KlayGE
 
 					if ((type != LT_Ambient) && (type != LT_Directional))
 					{
-						if (light_visible && light->ConditionalRenderQuery(index_in_pass))
+						if (light_visible && pvp.light_conditional[org_no])
 						{
-							light->ConditionalRenderQuery(index_in_pass)->EndConditionalRender();
+							pvp.light_conditional[org_no]->EndConditionalRender();
 						}
 					}
 
@@ -1922,6 +1962,19 @@ namespace KlayGE
 	void DeferredRenderingLayer::IndirectScale(float scale)
 	{
 		indirect_scale_ = scale;
+	}
+
+	uint32_t DeferredRenderingLayer::ComposePassScanCode(uint32_t vp_index, int32_t pass_type, int32_t org_no, int32_t index_in_pass)
+	{
+		return (vp_index << 28) | (pass_type << 20) | (org_no << 8) | index_in_pass;
+	}
+
+	void DeferredRenderingLayer::DecomposePassScanCode(uint32_t& vp_index, int32_t& pass_type, int32_t& org_no, int32_t& index_in_pass, uint32_t code)
+	{
+		vp_index = code >> 28;				//  4 bits, [31 - 28]
+		pass_type = (code >> 20) & 0xFF;	//  8 bits, [27 - 20]
+		org_no = (code >> 8) & 0xFFF;		// 12 bits, [19 - 8]
+		index_in_pass = (code) & 0xFF;		//  8 bits, [7 -  0]
 	}
 
 #ifdef USE_NEW_LIGHT_SAMPLING
