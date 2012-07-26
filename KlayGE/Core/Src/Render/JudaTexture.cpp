@@ -647,7 +647,8 @@ namespace KlayGE
 		uint32_t shuff = level << LEVEL_SHIFT;
 		for (int l = level; l >= 0; -- l)
 		{
-			shuff |= (((y >> l) & 1UL) << (2 * (MAX_TREE_LEVEL - tree_levels_ + l) + 1)) | (((x >> l) & 1UL) << (2 * (MAX_TREE_LEVEL - tree_levels_ + l) + 0));
+			shuff |= (((y >> l) & 1UL) << (2 * ((MAX_TREE_LEVEL + 1) - tree_levels_ + l) + 1))
+				| (((x >> l) & 1UL) << (2 * ((MAX_TREE_LEVEL + 1) - tree_levels_ + l) + 0));
 		}
 		return shuff;
 	}
@@ -658,30 +659,30 @@ namespace KlayGE
 		y = 0;
 		for (int l = level; l >= 0; -- l)
 		{
-			x |= (shuff >> (2 * (MAX_TREE_LEVEL - tree_levels_ + l) + 0)) & (1UL << l);
-			y |= (shuff >> (2 * (MAX_TREE_LEVEL - tree_levels_ + l) + 1)) & (1UL << l);
+			x |= (shuff >> (2 * ((MAX_TREE_LEVEL + 1) - tree_levels_ + l) + 0)) & (1UL << l);
+			y |= (shuff >> (2 * ((MAX_TREE_LEVEL + 1) - tree_levels_ + l) + 1)) & (1UL << l);
 		}
 	}
 
 	uint32_t JudaTexture::GetLevelBranch(uint32_t shuff, uint32_t level)
 	{
-		return (shuff >> (2 * (MAX_TREE_LEVEL - level - 1))) & 3UL;
+		return (shuff >> (2 * (MAX_TREE_LEVEL - level))) & 3UL;
 	}
 
 	uint32_t JudaTexture::SetLevelBranch(uint32_t shuff, uint32_t level, uint32_t bits)
 	{
-		return (shuff & ~(3UL << (2 * (MAX_TREE_LEVEL - level - 1)))) | (bits << (2 * (MAX_TREE_LEVEL - level - 1)));
+		return (shuff & ~(3UL << (2 * (MAX_TREE_LEVEL - level)))) | (bits << (2 * (MAX_TREE_LEVEL - level)));
 	}
 
 	uint32_t JudaTexture::GetParentShuff(uint32_t shuff)
 	{
-		return (0 == shuff) ? 0 : (shuff - ((1UL << LEVEL_SHIFT) | (shuff & (3UL << (2 * (MAX_TREE_LEVEL - (shuff >> LEVEL_SHIFT) - 1))))));
+		return (0 == shuff) ? 0 : (shuff - ((1UL << LEVEL_SHIFT) | (shuff & (3UL << (2 * (MAX_TREE_LEVEL - (shuff >> LEVEL_SHIFT)))))));
 	}
 
 	uint32_t JudaTexture::GetChildShuff(uint32_t shuff, uint32_t branch)
 	{
 		uint32_t level = shuff >> LEVEL_SHIFT;
-		return (shuff + (1UL << LEVEL_SHIFT)) | (branch << (2 * (MAX_TREE_LEVEL - level - 2)));
+		return (shuff + (1UL << LEVEL_SHIFT)) | (branch << (2 * (MAX_TREE_LEVEL - level - 1)));
 	}
 
 	void JudaTexture::Upsample(uint8_t* output, uint8_t const * input, uint32_t in_width, uint32_t in_height, uint32_t in_pitch,
