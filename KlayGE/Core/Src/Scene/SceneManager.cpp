@@ -109,7 +109,8 @@ namespace KlayGE
 	// ¹¹Ôìº¯Êý
 	/////////////////////////////////////////////////////////////////////////////////
 	SceneManager::SceneManager()
-		: numObjectsRendered_(0),
+		: frustum_(NULL),
+			numObjectsRendered_(0),
 			numRenderablesRendered_(0),
 			numPrimitivesRendered_(0),
 			numVerticesRendered_(0)
@@ -310,22 +311,50 @@ namespace KlayGE
 
 	bool SceneManager::AABBVisible(AABBox const & aabb)
 	{
-		return frustum_->Intersect(aabb) != BO_No;
+		if (frustum_)
+		{
+			return frustum_->Intersect(aabb) != BO_No;
+		}
+		else
+		{
+			return true;
+		}
 	}
 
 	bool SceneManager::OBBVisible(OBBox const & obb)
 	{
-		return frustum_->Intersect(obb) != BO_No;
+		if (frustum_)
+		{
+			return frustum_->Intersect(obb) != BO_No;
+		}
+		else
+		{
+			return true;
+		}
 	}
 
 	bool SceneManager::SphereVisible(Sphere const & sphere)
 	{
-		return frustum_->Intersect(sphere) != BO_No;
+		if (frustum_)
+		{
+			return frustum_->Intersect(sphere) != BO_No;
+		}
+		else
+		{
+			return true;
+		}
 	}
 
 	bool SceneManager::FrustumVisible(Frustum const & frustum)
 	{
-		return frustum_->Intersect(frustum) != BO_No;
+		if (frustum_)
+		{
+			return frustum_->Intersect(frustum) != BO_No;
+		}
+		else
+		{
+			return true;
+		}
 	}
 
 	SceneManager::SceneObjectsType& SceneManager::SceneObjects()

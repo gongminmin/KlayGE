@@ -36,26 +36,27 @@ namespace KlayGE
 	};
 
 	enum VPAttribMask
-	{
-		VPAM_NoOpaque = 1UL << 0,
-		VPAM_NoTransparencyBack = 1UL << 1,
-		VPAM_NoTransparencyFront = 1UL << 2,
-		VPAM_NoSimpleForward = 1UL << 3,
-		VPAM_NoGI = 1UL << 4,
-		VPAM_NoSSVO = 1UL << 5,
-		VPAM_NoSSGI = 1UL << 6
+	{		
+		VPAM_Enabled = 1UL << 0,
+		VPAM_NoOpaque = 1UL << 1,
+		VPAM_NoTransparencyBack = 1UL << 2,
+		VPAM_NoTransparencyFront = 1UL << 3,
+		VPAM_NoSimpleForward = 1UL << 4,
+		VPAM_NoGI = 1UL << 5,
+		VPAM_NoSSVO = 1UL << 6,
+		VPAM_NoSSGI = 1UL << 7
 	};
 
 	struct PerViewport
 	{
 		PerViewport()
-			: ssgi_enabled(false), ssvo_enabled(true)
+			: attrib(0), ssgi_enabled(false), ssvo_enabled(true)
 		{
 		}
 
-		ViewportPtr viewport;
-
 		uint32_t attrib;
+
+		FrameBufferPtr frame_buffer;
 
 		boost::array<bool, Num_GBuffers> g_buffer_enables;
 
@@ -78,8 +79,6 @@ namespace KlayGE
 		FrameBufferPtr prev_shading_buffer;
 		TexturePtr prev_shading_tex;
 
-		FrameBufferPtr output_fb;
-
 		TexturePtr small_ssgi_tex;
 		bool ssgi_enabled;
 
@@ -99,7 +98,6 @@ namespace KlayGE
 		TexturePtr indirect_lighting_pingpong_tex;
 		std::vector<FrameBufferPtr> vpls_lighting_fbs;
 
-		std::vector<ConditionalRenderPtr> light_conditional;
 		std::vector<bool> light_visibles;
 	};
 
@@ -112,7 +110,8 @@ namespace KlayGE
 		void SSVOEnabled(uint32_t vp, bool ssvo);
 		void SSREnabled(bool ssr);
 
-		void SetupViewport(uint32_t index, ViewportPtr const & vp, uint32_t attrib);
+		void SetupViewport(uint32_t index, FrameBufferPtr const & fb, uint32_t attrib);
+		void EnableViewport(uint32_t index, bool enable);
 		uint32_t Update(uint32_t pass);
 
 		RenderEffectPtr const & GBufferEffect() const

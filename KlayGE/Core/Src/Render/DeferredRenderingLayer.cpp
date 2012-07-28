@@ -617,14 +617,19 @@ namespace KlayGE
 		ssr_enabled_ = ssr;
 	}
 
-	void DeferredRenderingLayer::SetupViewport(uint32_t index, ViewportPtr const & vp, uint32_t attrib)
+	void DeferredRenderingLayer::SetupViewport(uint32_t index, FrameBufferPtr const & fb, uint32_t attrib)
 	{
 		PerViewport& pvp = viewports_[index];
-		pvp.viewport = vp;
 		pvp.attrib = attrib;
+		pvp.frame_buffer = fb;
 
-		uint32_t const width = vp->width;
-		uint32_t const height = vp->height;
+		if (fb)
+		{
+			pvp.attrib |= VPAM_Enabled;
+		}
+
+		uint32_t const width = pvp.frame_buffer->GetViewport()->width;
+		uint32_t const height = pvp.frame_buffer->GetViewport()->height;
 
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 		RenderDeviceCaps const & caps = rf.RenderEngineInstance().DeviceCaps();
@@ -810,6 +815,19 @@ namespace KlayGE
 		pvp.small_ssvo_tex = rf.MakeTexture2D(width / 2, height / 2, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
 	}
 
+	void DeferredRenderingLayer::EnableViewport(uint32_t index, bool enable)
+	{
+		PerViewport& pvp = viewports_[index];
+		if (enable)
+		{
+			pvp.attrib |= VPAM_Enabled;
+		}
+		else
+		{
+			pvp.attrib &= ~VPAM_Enabled;
+		}
+	}
+
 	uint32_t DeferredRenderingLayer::Update(uint32_t pass)
 	{
 		SceneManager& scene_mgr = Context::Instance().SceneManagerInstance();
@@ -825,21 +843,6 @@ namespace KlayGE
 		PerViewport& pvp = viewports_[vp_index];
 		if (0 == pass)
 		{
-			pvp.output_fb = re.CurFrameBuffer();
-			CameraPtr const & camera = pvp.output_fb->GetViewport()->camera;
-			for (size_t i = 0; i < pvp.g_buffers.size(); ++ i)
-			{
-				if (depth_texture_support_)
-				{
-					pvp.pre_depth_buffers[i]->GetViewport()->camera = camera;
-				}
-				pvp.g_buffers[i]->GetViewport()->camera = camera;
-				pvp.lighting_buffers[i]->GetViewport()->camera = camera;
-				pvp.curr_shading_buffers[i]->GetViewport()->camera = camera;
-			}
-			pvp.prev_shading_buffer->GetViewport()->camera = camera;
-			pvp.shadowing_buffer->GetViewport()->camera = camera;
-
 			lights_.resize(0);
 			std::vector<LightSourcePtr> cur_lights = scene_mgr.LightSources();
 			bool with_ambient = false;
@@ -896,22 +899,6 @@ namespace KlayGE
 				}
 			}
 
-			if (pvp.attrib & VPAM_NoOpaque)
-			{
-				has_opaque_objs = false;
-			}
-			if (pvp.attrib & VPAM_NoTransparencyBack)
-			{
-				has_transparency_back_objs = false;
-			}
-			if (pvp.attrib & VPAM_NoTransparencyFront)
-			{
-				has_transparency_front_objs = false;
-			}
-			pvp.g_buffer_enables[Opaque_GBuffer] = has_opaque_objs;
-			pvp.g_buffer_enables[TransparencyBack_GBuffer] = has_transparency_back_objs;
-			pvp.g_buffer_enables[TransparencyFront_GBuffer] = has_transparency_front_objs;
-
 			indirect_lighting_enabled_ = false;
 			if (rsm_buffer_ && (illum_ != 1))
 			{
@@ -925,17 +912,214 @@ namespace KlayGE
 				}
 			}
 
-			pvp.view = camera->ViewMatrix();
-			pvp.proj = camera->ProjMatrix();
-			pvp.inv_view = MathLib::inverse(pvp.view);
-			pvp.inv_proj = MathLib::inverse(pvp.proj);
-			pvp.depth_near_far_invfar = float3(camera->NearPlane(), camera->FarPlane(), 1 / camera->FarPlane());
-
-			if (depth_texture_support_)
+			pass_scaned_.clear();
+			for (uint32_t vpi = 0; vpi < viewports_.size(); ++ vpi)
 			{
-				float q = camera->FarPlane() / (camera->FarPlane() - camera->NearPlane());
-				float2 near_q(camera->NearPlane() * q, q);
-				depth_to_linear_pp_->SetParam(0, near_q);
+				PerViewport& pvp = viewports_[vpi];
+				if (pvp.attrib & VPAM_Enabled)
+				{
+					pvp.g_buffer_enables[Opaque_GBuffer] = (pvp.attrib & VPAM_NoOpaque) ? false : has_opaque_objs;
+					pvp.g_buffer_enables[TransparencyBack_GBuffer] = (pvp.attrib & VPAM_NoTransparencyBack) ? false : has_transparency_back_objs;
+					pvp.g_buffer_enables[TransparencyFront_GBuffer] = (pvp.attrib & VPAM_NoTransparencyFront) ? false : has_transparency_front_objs;
+
+					pvp.light_visibles.assign(lights_.size(), true);
+
+					if (pvp.g_buffer_enables[Opaque_GBuffer])
+					{
+						if (!depth_texture_support_)
+						{
+							pass_scaned_.push_back(this->ComposePassScanCode(vpi, PT_OpaqueDepth, 0, 0));
+						}
+
+						if (mrt_g_buffer_support_)
+						{
+							pass_scaned_.push_back(this->ComposePassScanCode(vpi, PT_OpaqueMRTGBuffer, 0, 0));
+							pass_scaned_.push_back(this->ComposePassScanCode(vpi, PT_OpaqueMRTGBuffer, 0, 1));
+						}
+						else
+						{
+							pass_scaned_.push_back(this->ComposePassScanCode(vpi, PT_OpaqueGBuffer, 0, 0));
+							pass_scaned_.push_back(this->ComposePassScanCode(vpi, PT_OpaqueGBuffer, 0, 1));
+						}
+					}
+					if (pvp.g_buffer_enables[TransparencyBack_GBuffer])
+					{
+						if (!depth_texture_support_)
+						{
+							pass_scaned_.push_back(this->ComposePassScanCode(vpi, PT_TransparencyBackDepth, 0, 0));
+						}
+
+						if (mrt_g_buffer_support_)
+						{
+							pass_scaned_.push_back(this->ComposePassScanCode(vpi, PT_TransparencyBackMRTGBuffer, 0, 0));
+							pass_scaned_.push_back(this->ComposePassScanCode(vpi, PT_TransparencyBackMRTGBuffer, 0, 1));
+						}
+						else
+						{
+							pass_scaned_.push_back(this->ComposePassScanCode(vpi, PT_TransparencyBackGBuffer, 0, 0));
+							pass_scaned_.push_back(this->ComposePassScanCode(vpi, PT_TransparencyBackGBuffer, 0, 1));
+						}
+					}
+					if (pvp.g_buffer_enables[TransparencyFront_GBuffer])
+					{
+						if (!depth_texture_support_)
+						{
+							pass_scaned_.push_back(this->ComposePassScanCode(vpi, PT_TransparencyFrontDepth, 0, 0));
+						}
+
+						if (mrt_g_buffer_support_)
+						{
+							pass_scaned_.push_back(this->ComposePassScanCode(vpi, PT_TransparencyFrontMRTGBuffer, 0, 0));
+							pass_scaned_.push_back(this->ComposePassScanCode(vpi, PT_TransparencyFrontMRTGBuffer, 0, 1));
+						}
+						else
+						{
+							pass_scaned_.push_back(this->ComposePassScanCode(vpi, PT_TransparencyFrontGBuffer, 0, 0));
+							pass_scaned_.push_back(this->ComposePassScanCode(vpi, PT_TransparencyFrontGBuffer, 0, 1));
+						}
+					}
+
+					for (size_t i = 0; i < lights_.size(); ++ i)
+					{
+						LightSourcePtr const & light = lights_[i];
+						if (light->Enabled())
+						{
+							int type = light->Type();
+							int32_t attr = light->Attrib();
+							switch (type)
+							{
+							case LT_Spot:
+								{
+									float4x4 const & light_view = light->SMCamera(0)->ViewMatrix();
+
+									float const scale = light->CosOuterInner().w();
+									float4x4 mat = MathLib::scaling(scale * light_scale_, scale * light_scale_, light_scale_);
+									float4x4 light_model = mat * MathLib::inverse(light_view);
+
+									if (scene_mgr.OBBVisible(MathLib::transform_obb(cone_obb_, light_model)))
+									{
+										if (attr & LSA_IndirectLighting)
+										{
+											if (rsm_buffer_ && (illum_ != 1))
+											{
+												pass_scaned_.push_back(this->ComposePassScanCode(vpi, PT_GenReflectiveShadowMap, i, 0));
+												pass_scaned_.push_back(this->ComposePassScanCode(vpi, PT_IndirectLighting, i, 0));
+											}
+											else
+											{
+												if (depth_texture_support_)
+												{
+													pass_scaned_.push_back(this->ComposePassScanCode(vpi, PT_GenShadowMap, i, 0));
+												}
+												else
+												{
+													pass_scaned_.push_back(this->ComposePassScanCode(vpi, PT_GenShadowMapWODepthTexture, i, 0));
+												}
+											}
+										}
+
+										if ((0 == (attr & LSA_NoShadow)) && (0 == (attr & LSA_IndirectLighting)))
+										{
+											if (depth_texture_support_)
+											{
+												pass_scaned_.push_back(this->ComposePassScanCode(vpi, PT_GenShadowMap, i, 0));
+											}
+											else
+											{
+												pass_scaned_.push_back(this->ComposePassScanCode(vpi, PT_GenShadowMapWODepthTexture, i, 0));
+											}
+										}
+										pass_scaned_.push_back(this->ComposePassScanCode(vpi, PT_Lighting, i, 0));
+									}
+									else
+									{
+										pvp.light_visibles[i] = false;
+									}
+								}
+								break;
+
+							case LT_Point:
+								{
+									float3 const & p = light->Position();
+									
+									float4x4 light_model = MathLib::scaling(light_scale_, light_scale_, light_scale_)
+										* MathLib::translation(p);
+
+									if (scene_mgr.OBBVisible(MathLib::transform_obb(box_obb_, light_model)))
+									{
+										for (int j = 0; j < 6; ++ j)
+										{
+											light_model = MathLib::inverse(light->SMCamera(j)->ViewMatrix());
+
+											//if (scene_mgr.OBBVisible(MathLib::transform_obb(pyramid_obb_, light_model)))
+											{
+												if (0 == (attr & LSA_NoShadow))
+												{
+													if (depth_texture_support_)
+													{
+														pass_scaned_.push_back(this->ComposePassScanCode(vpi, PT_GenShadowMap, i, j));
+													}
+													else
+													{
+														pass_scaned_.push_back(this->ComposePassScanCode(vpi, PT_GenShadowMapWODepthTexture, i, j));
+													}
+												}
+											}
+										}
+
+										pass_scaned_.push_back(this->ComposePassScanCode(vpi, PT_Lighting, i, 6));
+									}
+									else
+									{
+										pvp.light_visibles[i] = false;
+									}
+								}
+								break;
+
+							default:
+								if (0 == (attr & LSA_NoShadow))
+								{
+									if (depth_texture_support_)
+									{
+										pass_scaned_.push_back(this->ComposePassScanCode(vpi, PT_GenShadowMap, i, 0));
+									}
+									else
+									{
+										pass_scaned_.push_back(this->ComposePassScanCode(vpi, PT_GenShadowMapWODepthTexture, i, 0));
+									}
+								}
+								pass_scaned_.push_back(this->ComposePassScanCode(vpi, PT_Lighting, i, 0));
+								break;
+							}
+						}
+					}
+					pass_scaned_.push_back(this->ComposePassScanCode(vpi, PT_OpaqueShading, 0, 0));
+					if (pvp.g_buffer_enables[TransparencyBack_GBuffer])
+					{
+						pass_scaned_.push_back(this->ComposePassScanCode(vpi, PT_TransparencyBackShading, 0, 0));
+					}
+					if (pvp.g_buffer_enables[TransparencyFront_GBuffer])
+					{
+						pass_scaned_.push_back(this->ComposePassScanCode(vpi, PT_TransparencyFrontShading, 0, 0));
+					}
+					if (mrt_g_buffer_support_)
+					{
+						pass_scaned_.push_back(this->ComposePassScanCode(vpi, PT_OpaqueSpecialShading, 0, 0));
+						if (pvp.g_buffer_enables[TransparencyBack_GBuffer])
+						{
+							pass_scaned_.push_back(this->ComposePassScanCode(vpi, PT_TransparencyBackSpecialShading, 0, 0));
+						}
+						if (pvp.g_buffer_enables[TransparencyFront_GBuffer])
+						{
+							pass_scaned_.push_back(this->ComposePassScanCode(vpi, PT_TransparencyFrontSpecialShading, 0, 0));
+						}
+						pass_scaned_.push_back(this->ComposePassScanCode(vpi, PT_OpaqueSpecialShading, 0, 1));
+					}
+					else
+					{
+						pass_scaned_.push_back(this->ComposePassScanCode(vpi, PT_OpaqueShading, 0, 1));
+					}
+				}
 			}
 		}
 
@@ -977,6 +1161,33 @@ namespace KlayGE
 		{
 			// Pre depth for no depth texture support platforms
 
+			CameraPtr const & camera = pvp.frame_buffer->GetViewport()->camera;
+			for (size_t i = 0; i < pvp.g_buffers.size(); ++ i)
+			{
+				if (depth_texture_support_)
+				{
+					pvp.pre_depth_buffers[i]->GetViewport()->camera = camera;
+				}
+				pvp.g_buffers[i]->GetViewport()->camera = camera;
+				pvp.lighting_buffers[i]->GetViewport()->camera = camera;
+				pvp.curr_shading_buffers[i]->GetViewport()->camera = camera;
+			}
+			pvp.prev_shading_buffer->GetViewport()->camera = camera;
+			pvp.shadowing_buffer->GetViewport()->camera = camera;
+
+			pvp.view = camera->ViewMatrix();
+			pvp.proj = camera->ProjMatrix();
+			pvp.inv_view = MathLib::inverse(pvp.view);
+			pvp.inv_proj = MathLib::inverse(pvp.proj);
+			pvp.depth_near_far_invfar = float3(camera->NearPlane(), camera->FarPlane(), 1 / camera->FarPlane());
+
+			if (depth_texture_support_)
+			{
+				float q = camera->FarPlane() / (camera->FarPlane() - camera->NearPlane());
+				float2 near_q(camera->NearPlane() * q, q);
+				depth_to_linear_pp_->SetParam(0, near_q);
+			}
+
 			if (PT_OpaqueDepth == pass_type)
 			{
 				re.BindFrameBuffer(pvp.pre_depth_buffers[Opaque_GBuffer]);
@@ -1007,6 +1218,33 @@ namespace KlayGE
 			if (0 == index_in_pass)
 			{
 				// Generate G-Buffer
+
+				CameraPtr const & camera = pvp.frame_buffer->GetViewport()->camera;
+				for (size_t i = 0; i < pvp.g_buffers.size(); ++ i)
+				{
+					if (depth_texture_support_)
+					{
+						pvp.pre_depth_buffers[i]->GetViewport()->camera = camera;
+					}
+					pvp.g_buffers[i]->GetViewport()->camera = camera;
+					pvp.lighting_buffers[i]->GetViewport()->camera = camera;
+					pvp.curr_shading_buffers[i]->GetViewport()->camera = camera;
+				}
+				pvp.prev_shading_buffer->GetViewport()->camera = camera;
+				pvp.shadowing_buffer->GetViewport()->camera = camera;
+
+				pvp.view = camera->ViewMatrix();
+				pvp.proj = camera->ProjMatrix();
+				pvp.inv_view = MathLib::inverse(pvp.view);
+				pvp.inv_proj = MathLib::inverse(pvp.proj);
+				pvp.depth_near_far_invfar = float3(camera->NearPlane(), camera->FarPlane(), 1 / camera->FarPlane());
+
+				if (depth_texture_support_)
+				{
+					float q = camera->FarPlane() / (camera->FarPlane() - camera->NearPlane());
+					float2 near_q(camera->NearPlane() * q, q);
+					depth_to_linear_pp_->SetParam(0, near_q);
+				}
 
 				*depth_near_far_invfar_param_ = pvp.depth_near_far_invfar;
 
@@ -1054,212 +1292,6 @@ namespace KlayGE
 						this->CreateDepthDerivativeMipMap(vp_index);
 						this->CreateNormalConeMipMap(vp_index);
 						this->SetSubsplatStencil(vp_index);
-					}
-
-					// Light depth only
-
-					float4x4 vp = pvp.view * pvp.proj;
-
-					re.BindFrameBuffer(pvp.lighting_buffers[Opaque_GBuffer]);
-
-					pass_scaned_.resize(2 + !depth_texture_support_);
-
-					for (uint32_t vpi = 0; vpi < viewports_.size(); ++ vpi)
-					{
-						PerViewport& pvp = viewports_[vpi];
-						if (pvp.viewport)
-						{
-							pvp.light_conditional.resize(lights_.size());
-							pvp.light_visibles.assign(lights_.size(), true);
-
-							if (pvp.g_buffer_enables[TransparencyBack_GBuffer])
-							{
-								if (mrt_g_buffer_support_)
-								{
-									pass_scaned_.push_back(this->ComposePassScanCode(vpi, PT_TransparencyBackMRTGBuffer, 0, 0));
-									pass_scaned_.push_back(this->ComposePassScanCode(vpi, PT_TransparencyBackMRTGBuffer, 0, 1));
-								}
-							}
-							if (pvp.g_buffer_enables[TransparencyFront_GBuffer])
-							{
-								if (mrt_g_buffer_support_)
-								{
-									pass_scaned_.push_back(this->ComposePassScanCode(vpi, PT_TransparencyFrontMRTGBuffer, 0, 0));
-									pass_scaned_.push_back(this->ComposePassScanCode(vpi, PT_TransparencyFrontMRTGBuffer, 0, 1));
-								}
-							}
-
-							for (size_t i = 0; i < lights_.size(); ++ i)
-							{
-								LightSourcePtr const & light = lights_[i];
-								if (light->Enabled())
-								{
-									int type = light->Type();
-									int32_t attr = light->Attrib();
-									switch (type)
-									{
-									case LT_Spot:
-										{
-											float4x4 const & light_view = light->SMCamera(0)->ViewMatrix();
-
-											float const scale = light->CosOuterInner().w();
-											float4x4 mat = MathLib::scaling(scale * light_scale_, scale * light_scale_, light_scale_);
-											float4x4 light_model = mat * MathLib::inverse(light_view);
-
-											if (scene_mgr.OBBVisible(MathLib::transform_obb(cone_obb_, light_model)))
-											{
-												if (attr & LSA_IndirectLighting)
-												{
-													if (rsm_buffer_ && (illum_ != 1))
-													{
-														pass_scaned_.push_back(this->ComposePassScanCode(vpi, PT_GenReflectiveShadowMap, i, 0));
-														pass_scaned_.push_back(this->ComposePassScanCode(vpi, PT_IndirectLighting, i, 0));
-													}
-													else
-													{
-														if (depth_texture_support_)
-														{
-															pass_scaned_.push_back(this->ComposePassScanCode(vpi, PT_GenShadowMap, i, 0));
-														}
-														else
-														{
-															pass_scaned_.push_back(this->ComposePassScanCode(vpi, PT_GenShadowMapWODepthTexture, i, 0));
-														}
-													}
-												}
-
-												if ((0 == (attr & LSA_NoShadow)) && (0 == (attr & LSA_IndirectLighting)))
-												{
-													if (depth_texture_support_)
-													{
-														pass_scaned_.push_back(this->ComposePassScanCode(vpi, PT_GenShadowMap, i, 0));
-													}
-													else
-													{
-														pass_scaned_.push_back(this->ComposePassScanCode(vpi, PT_GenShadowMapWODepthTexture, i, 0));
-													}
-												}
-												pass_scaned_.push_back(this->ComposePassScanCode(vpi, PT_Lighting, i, 0));
-
-												if (light->ConditionalRenderQuery(0))
-												{
-													if (!pvp.light_conditional[i])
-													{
-														pvp.light_conditional[i] = checked_pointer_cast<ConditionalRender>(rf.MakeConditionalRender());
-													}
-
-													*light_volume_mv_param_ = light_model * pvp.view;
-													*light_volume_mvp_param_ = light_model * vp;
-
-													pvp.light_conditional[i]->Begin();
-													re.Render(*technique_light_depth_only_, *rl_cone_);
-													pvp.light_conditional[i]->End();
-												}
-											}
-											else
-											{
-												pvp.light_visibles[i] = false;
-											}
-										}
-										break;
-
-									case LT_Point:
-										{
-											float3 const & p = light->Position();
-									
-											float4x4 light_model = MathLib::scaling(light_scale_, light_scale_, light_scale_)
-												* MathLib::translation(p);
-
-											if (scene_mgr.OBBVisible(MathLib::transform_obb(box_obb_, light_model)))
-											{
-												if (light->ConditionalRenderQuery(6))
-												{
-													if (!pvp.light_conditional[i])
-													{
-														pvp.light_conditional[i] = checked_pointer_cast<ConditionalRender>(rf.MakeConditionalRender());
-													}
-
-													*light_volume_mv_param_ = light_model * pvp.view;
-													*light_volume_mvp_param_ = light_model * vp;
-
-													pvp.light_conditional[i]->Begin();
-													re.Render(*technique_light_depth_only_, *rl_box_);
-													pvp.light_conditional[i]->End();
-												}
-
-												for (int j = 0; j < 6; ++ j)
-												{
-													light_model = MathLib::inverse(light->SMCamera(j)->ViewMatrix());
-
-													//if (scene_mgr.OBBVisible(MathLib::transform_obb(pyramid_obb_, light_model)))
-													{
-														if (0 == (attr & LSA_NoShadow))
-														{
-															if (depth_texture_support_)
-															{
-																pass_scaned_.push_back(this->ComposePassScanCode(vpi, PT_GenShadowMap, i, j));
-															}
-															else
-															{
-																pass_scaned_.push_back(this->ComposePassScanCode(vpi, PT_GenShadowMapWODepthTexture, i, j));
-															}
-														}
-													}
-												}
-
-												pass_scaned_.push_back(this->ComposePassScanCode(vpi, PT_Lighting, i, 6));
-											}
-											else
-											{
-												pvp.light_visibles[i] = false;
-											}
-										}
-										break;
-
-									default:
-										if (0 == (attr & LSA_NoShadow))
-										{
-											if (depth_texture_support_)
-											{
-												pass_scaned_.push_back(this->ComposePassScanCode(vpi, PT_GenShadowMap, i, 0));
-											}
-											else
-											{
-												pass_scaned_.push_back(this->ComposePassScanCode(vpi, PT_GenShadowMapWODepthTexture, i, 0));
-											}
-										}
-										pass_scaned_.push_back(this->ComposePassScanCode(vpi, PT_Lighting, i, 0));
-										break;
-									}
-								}
-							}
-							pass_scaned_.push_back(this->ComposePassScanCode(vpi, PT_OpaqueShading, 0, 0));
-							if (pvp.g_buffer_enables[TransparencyBack_GBuffer])
-							{
-								pass_scaned_.push_back(this->ComposePassScanCode(vpi, PT_TransparencyBackShading, 0, 0));
-							}
-							if (pvp.g_buffer_enables[TransparencyFront_GBuffer])
-							{
-								pass_scaned_.push_back(this->ComposePassScanCode(vpi, PT_TransparencyFrontShading, 0, 0));
-							}
-							if (mrt_g_buffer_support_)
-							{
-								pass_scaned_.push_back(this->ComposePassScanCode(vpi, PT_OpaqueSpecialShading, 0, 0));
-								if (pvp.g_buffer_enables[TransparencyBack_GBuffer])
-								{
-									pass_scaned_.push_back(this->ComposePassScanCode(vpi, PT_TransparencyBackSpecialShading, 0, 0));
-								}
-								if (pvp.g_buffer_enables[TransparencyFront_GBuffer])
-								{
-									pass_scaned_.push_back(this->ComposePassScanCode(vpi, PT_TransparencyFrontSpecialShading, 0, 0));
-								}
-								pass_scaned_.push_back(this->ComposePassScanCode(vpi, PT_OpaqueSpecialShading, 0, 1));
-							}
-							else
-							{
-								pass_scaned_.push_back(this->ComposePassScanCode(vpi, PT_OpaqueShading, 0, 1));
-							}
-						}
 					}
 				}
 				else
@@ -1433,7 +1465,7 @@ namespace KlayGE
 						}
 					}
 
-					re.BindFrameBuffer(pvp.output_fb);
+					re.BindFrameBuffer(pvp.frame_buffer);
 
 					for (size_t i = 0; i < 3; ++ i)
 					{
@@ -1443,8 +1475,6 @@ namespace KlayGE
 							re.Render(*technique_merge_shadings_[i != 0], *rl_quad_);
 						}
 					}
-
-					lights_.resize(0);
 
 					std::swap(pvp.curr_shading_buffers[0], pvp.prev_shading_buffer);
 					std::swap(pvp.curr_shading_texs[0], pvp.prev_shading_tex);
@@ -1461,6 +1491,7 @@ namespace KlayGE
 						urv = App3DFramework::URV_Need_Flush | App3DFramework::URV_Simple_Forward_Only;
 						if (pass_scaned_.size() - 1 == pass)
 						{
+							lights_.clear();
 							urv |= App3DFramework::URV_Finished;
 						}
 					}
@@ -1469,6 +1500,7 @@ namespace KlayGE
 						urv = App3DFramework::URV_Flushed;
 						if (pass_scaned_.size() - 1 == pass)
 						{
+							lights_.clear();
 							urv = App3DFramework::URV_Finished;
 						}
 					}
@@ -1479,7 +1511,6 @@ namespace KlayGE
 			else
 			{
 				LightSourcePtr const & light = lights_[org_no];
-				bool light_visible = pvp.light_visibles[org_no];
 
 				LightType type = light->Type();
 				int32_t attr = light->Attrib();
@@ -1644,32 +1675,16 @@ namespace KlayGE
 						if (LT_Point == type)
 						{
 							sm_filter_pps_[index_in_pass]->Apply();
-							if (light_visible && pvp.light_conditional[org_no])
-							{
-								pvp.light_conditional[org_no]->EndConditionalRender();
-							}
 						}
 						else
 						{
 							sm_filter_pps_[0]->Apply();
-							if (!(light->Attrib() & LSA_IndirectLighting))
-							{
-								if (light_visible && pvp.light_conditional[org_no])
-								{
-									pvp.light_conditional[org_no]->EndConditionalRender();
-								}
-							}
 						}
 					}
 				}
 
 				if ((PT_GenShadowMap == pass_type) || (PT_GenShadowMapWODepthTexture == pass_type))
 				{
-					if (light_visible && pvp.light_conditional[org_no])
-					{
-						pvp.light_conditional[org_no]->BeginConditionalRender();
-					}
-
 					// Shadow map generation
 					re.BindFrameBuffer(sm_buffer_);
 					re.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->ClearDepth(1.0f);
@@ -1692,14 +1707,6 @@ namespace KlayGE
 					*light_color_param_ = light->Color();
 					*light_falloff_param_ = light->Falloff();
 
-					if ((type != LT_Ambient) && (type != LT_Directional))
-					{
-						if (light_visible && pvp.light_conditional[org_no])
-						{
-							pvp.light_conditional[org_no]->BeginConditionalRender();
-						}
-					}
-
 					for (size_t i = 0; i < pvp.g_buffers.size(); ++ i)
 					{
 						if (pvp.g_buffer_enables[i])
@@ -1711,7 +1718,7 @@ namespace KlayGE
 
 							*g_buffer_tex_param_ = pvp.g_buffer_rt0_texs[i];
 							*depth_tex_param_ = pvp.g_buffer_depth_texs[i];
-							*inv_width_height_param_ = float2(1.0f / pvp.viewport->width, 1.0f / pvp.viewport->height);
+							*inv_width_height_param_ = float2(1.0f / pvp.frame_buffer->GetViewport()->width, 1.0f / pvp.frame_buffer->GetViewport()->height);
 							*shadowing_tex_param_ = pvp.shadowing_tex;
 
 							if (0 == (attr & LSA_NoShadow))
@@ -1732,14 +1739,6 @@ namespace KlayGE
 							}
 
 							re.Render(*technique_lights_[type], *rl);
-						}
-					}
-
-					if ((type != LT_Ambient) && (type != LT_Directional))
-					{
-						if (light_visible && pvp.light_conditional[org_no])
-						{
-							pvp.light_conditional[org_no]->EndConditionalRender();
 						}
 					}
 
@@ -1818,7 +1817,7 @@ namespace KlayGE
 	{
 		PerViewport& pvp = viewports_[vp];
 
-		CameraPtr const & camera = pvp.output_fb->GetViewport()->camera;
+		CameraPtr const & camera = pvp.frame_buffer->GetViewport()->camera;
 		*subsplat_depth_deriv_tex_param_ = pvp.depth_deriative_tex;
 		*subsplat_normal_cone_tex_param_ = pvp.normal_cone_tex;
 		*subsplat_depth_normal_threshold_param_ = float2(0.001f * camera->FarPlane(), 0.77f);

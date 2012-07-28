@@ -381,9 +381,16 @@ namespace KlayGE
 		}
 		if (visible)
 		{
-			// Frustum VS AABB
-			BoundOverlap const bo = frustum_->Intersect(aabb);
-			visible = (bo != BO_No);
+			if (frustum_)
+			{
+				// Frustum VS AABB
+				BoundOverlap const bo = frustum_->Intersect(aabb);
+				visible = (bo != BO_No);
+			}
+			else
+			{
+				visible = true;
+			}
 		}
 		return visible;
 	}
@@ -406,9 +413,16 @@ namespace KlayGE
 		}
 		if (visible)
 		{
-			// Frustum VS OBB
-			BoundOverlap const bo = frustum_->Intersect(obb);
-			visible = (bo != BO_No);
+			if (frustum_)
+			{
+				// Frustum VS OBB
+				BoundOverlap const bo = frustum_->Intersect(obb);
+				visible = (bo != BO_No);
+			}
+			else
+			{
+				visible = true;
+			}
 		}
 		return visible;
 	}
@@ -431,9 +445,16 @@ namespace KlayGE
 		}
 		if (visible)
 		{
-			// Frustum VS OBB
-			BoundOverlap const bo = frustum_->Intersect(sphere);
-			visible = (bo != BO_No);
+			if (frustum_)
+			{
+				// Frustum VS OBB
+				BoundOverlap const bo = frustum_->Intersect(sphere);
+				visible = (bo != BO_No);
+			}
+			else
+			{
+				visible = true;
+			}
 		}
 		return visible;
 	}
