@@ -18,49 +18,6 @@ using namespace KlayGE;
 int const LOG_2_TILE_SIZE = 4;
 int const TILE_SIZE = 1 << LOG_2_TILE_SIZE;
 
-namespace
-{
-	class DownsamplerNxN : public PostProcessChain
-	{
-	public:
-		explicit DownsamplerNxN(uint32_t n)
-			: PostProcessChain(L"DownsamplerNxN")
-		{
-			for (uint32_t i = 0; i < n; ++ i)
-			{
-				this->Append(LoadPostProcess(ResLoader::Instance().Open("Copy.ppml"), "bilinear_copy"));
-			}
-		}
-
-		void InputPin(uint32_t index, TexturePtr const & tex)
-		{
-			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-
-			uint32_t w = std::max(tex->Width(0) / 2, static_cast<uint32_t>(1));
-			uint32_t h = std::max(tex->Height(0) / 2, static_cast<uint32_t>(1));
-			for (size_t i = 0; i < pp_chain_.size(); ++ i)
-			{
-				if (0 == i)
-				{
-					pp_chain_[i]->InputPin(index, tex);
-				}
-				else
-				{
-					pp_chain_[i]->InputPin(index, pp_chain_[i - 1]->OutputPin(index));
-				}
-				if (i != pp_chain_.size() - 1)
-				{
-					TexturePtr ds_tex = rf.MakeTexture2D(w, h, 1, 1, tex->Format(), 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
-					pp_chain_[i]->OutputPin(index, ds_tex);
-				}
-
-				w = std::max(w / 2, static_cast<uint32_t>(1));
-				h = std::max(h / 2, static_cast<uint32_t>(1));
-			}
-		}
-	};
-}
-
 TilingPostProcess::TilingPostProcess()
 	: PostProcess(L"Tiling",
 		std::vector<std::string>(),
@@ -68,7 +25,7 @@ TilingPostProcess::TilingPostProcess()
 		std::vector<std::string>(1, "output"),
 		Context::Instance().RenderFactoryInstance().LoadEffect("TilingPP.fxml")->TechniqueByName("Tiling"))
 {
-	downsampler_ = MakeSharedPtr<DownsamplerNxN>(LOG_2_TILE_SIZE);
+	downsampler_ = LoadPostProcess(ResLoader::Instance().Open("Copy.ppml"), "bilinear_copy");
 
 	tile_per_row_line_ep_ = technique_->Effect().ParameterByName("tile_per_row_line");
 }
@@ -77,8 +34,8 @@ void TilingPostProcess::InputPin(uint32_t index, TexturePtr const & tex)
 {
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-	downsample_tex_ = rf.MakeTexture2D(tex->Width(0) / TILE_SIZE, tex->Height(0) / TILE_SIZE,
-		1, 1, tex->Format(), 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+	downsample_tex_ = rf.MakeTexture2D(tex->Width(0) / 2, tex->Height(0) / 2,
+		4, 1, tex->Format(), 1, 0, EAH_GPU_Read | EAH_GPU_Write | EAH_Generate_Mips, NULL);
 
 	downsampler_->InputPin(index, tex);
 	downsampler_->OutputPin(index, downsample_tex_);
@@ -94,6 +51,8 @@ TexturePtr const & TilingPostProcess::InputPin(uint32_t index) const
 void TilingPostProcess::Apply()
 {
 	downsampler_->Apply();
+	downsample_tex_->BuildMipSubLevels();
+
 	PostProcess::Apply();
 }
 
