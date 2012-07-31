@@ -1,8 +1,10 @@
 <?xml version='1.0'?>
 
 <effect>
-  <shader>
-    <![CDATA[
+	<include name="PostProcess.fxml"/>
+	
+	<shader>
+		<![CDATA[
 float FogFactorLinear(float fog_coord, float start, float end)
 {
 	float fog = (end - fog_coord) / (end - start);
@@ -27,6 +29,67 @@ float FogFactorExp2(float fog_coord, float density)
 	float fog = exp(-dc * dc);
 	return saturate(fog);
 }
-    ]]>
-  </shader>
+		]]>
+	</shader>
+
+	
+	<parameter type="float3" name="fog_color"/>
+	<parameter type="float4x4" name="inv_proj"/>
+	<parameter type="float" name="density"/>
+
+	<parameter type="texture2D" name="depth_tex"/>
+	<parameter type="sampler" name="point_sampler">
+		<state name="filtering" value="min_mag_mip_point"/>
+		<state name="address_u" value="clamp"/>
+		<state name="address_v" value="clamp"/>
+	</parameter>
+
+	<shader>
+		<![CDATA[
+void FogVS(float4 pos : POSITION,
+				out float2 oTc0 : TEXCOORD0,
+				out float3 oViewDir : TEXCOORD1,
+				out float4 oPos : SV_Position)
+{
+	PostProcessVS(pos, oTc0, oPos);
+	oViewDir = mul(oPos, inv_proj).xyz;
+}
+
+float4 FogPS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Target
+{
+	float3 pos_es = view_dir * (depth_tex.Sample(point_sampler, tc).r / view_dir.z);
+	float fog_factor = FogFactorLinear(length(pos_es), density);
+	return float4(fog_color, fog_factor);
+}
+		]]>
+	</shader>
+
+	<technique name="Fog">
+		<pass name="p0">
+			<state name="depth_enable" value="false"/>
+			<state name="depth_write_mask" value="false"/>
+
+			<state name="cull_mode" value="none"/>
+
+			<state name="front_stencil_enable" value="true"/>
+			<state name="front_stencil_func" value="not_equal"/>
+			<state name="front_stencil_ref" value="128"/>
+			<state name="front_stencil_pass" value="keep"/>
+			<state name="back_stencil_enable" value="true"/>
+			<state name="back_stencil_func" value="not_equal"/>
+			<state name="back_stencil_ref" value="128"/>
+			<state name="back_stencil_pass" value="keep"/>
+
+			<state name="blend_enable" value="true"/>
+			<state name="blend_op" value="add"/>
+			<state name="src_blend" value="src_alpha"/>
+			<state name="dest_blend" value="inv_src_alpha"/>
+			<state name="blend_op_alpha" value="add"/>
+			<state name="src_blend_alpha" value="zero"/>
+			<state name="dest_blend_alpha" value="dst_alpha"/>
+
+			<state name="vertex_shader" value="FogVS()"/>
+			<state name="pixel_shader" value="FogPS()"/>
+		</pass>
+	</technique>
 </effect>

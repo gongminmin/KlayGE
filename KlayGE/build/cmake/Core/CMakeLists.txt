@@ -194,6 +194,7 @@ SET(RENDERING_POSTPROCESSOR_FILES
 	${KLAYGE_PROJECT_DIR}/media/PostProcessors/CustomMipMap.ppml
 	${KLAYGE_PROJECT_DIR}/media/PostProcessors/DepthToSM.ppml
 	${KLAYGE_PROJECT_DIR}/media/PostProcessors/FFT.ppml
+	${KLAYGE_PROJECT_DIR}/media/PostProcessors/Fog.ppml
 	${KLAYGE_PROJECT_DIR}/media/PostProcessors/FXAA.ppml
 	${KLAYGE_PROJECT_DIR}/media/PostProcessors/GammaCorrection.ppml
 	${KLAYGE_PROJECT_DIR}/media/PostProcessors/LensEffects.ppml

@@ -1478,7 +1478,7 @@ namespace KlayGE
 							if (pvp.g_buffer_enables[i])
 							{
 								re.BindFrameBuffer(pvp.curr_shading_buffers[i]);
-								atmospheric_pp_->SetParam(1, pvp.inv_proj);
+								atmospheric_pp_->SetParam(0, pvp.inv_proj);
 								atmospheric_pp_->InputPin(0, pvp.g_buffer_depth_texs[i]);
 								atmospheric_pp_->Render();
 							}
