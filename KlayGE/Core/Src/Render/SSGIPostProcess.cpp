@@ -13,8 +13,7 @@ namespace KlayGE
 	{
 		input_pins_.push_back(std::make_pair("g_buffer_tex", TexturePtr()));
 		input_pins_.push_back(std::make_pair("depth_tex", TexturePtr()));
-		input_pins_.push_back(std::make_pair("lighting_tex", TexturePtr()));
-		input_pins_.push_back(std::make_pair("g_buffer_rt1_tex", TexturePtr()));
+		input_pins_.push_back(std::make_pair("shading_tex", TexturePtr()));
 
 		output_pins_.push_back(std::make_pair("out_tex", TexturePtr()));
 

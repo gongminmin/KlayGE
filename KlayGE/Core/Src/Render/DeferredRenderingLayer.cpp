@@ -1349,8 +1349,7 @@ namespace KlayGE
 							{
 								ssgi_pp_->InputPin(0, pvp.g_buffer_rt0_texs[Opaque_GBuffer]);
 								ssgi_pp_->InputPin(1, pvp.g_buffer_depth_texs[Opaque_GBuffer]);
-								ssgi_pp_->InputPin(2, pvp.lighting_texs[Opaque_GBuffer]);
-								ssgi_pp_->InputPin(3, pvp.g_buffer_rt1_texs[Opaque_GBuffer]);
+								ssgi_pp_->InputPin(2, pvp.prev_shading_tex);
 								ssgi_pp_->OutputPin(0, pvp.small_ssgi_tex);
 								ssgi_pp_->Apply();
 
@@ -1473,7 +1472,7 @@ namespace KlayGE
 
 					if (atmospheric_pp_)
 					{
-						for (size_t i = 0; i < Num_GBuffers; ++ i)
+						for (size_t i = 0; i < pvp.g_buffers.size(); ++ i)
 						{
 							if (pvp.g_buffer_enables[i])
 							{
@@ -1487,7 +1486,7 @@ namespace KlayGE
 
 					re.BindFrameBuffer(pvp.frame_buffer);
 
-					for (size_t i = 0; i < Num_GBuffers; ++ i)
+					for (size_t i = 0; i < pvp.g_buffers.size(); ++ i)
 					{
 						if (pvp.g_buffer_enables[i])
 						{
