@@ -844,7 +844,7 @@ namespace KlayGE
 		if (0 == pass)
 		{
 			lights_.resize(0);
-			std::vector<LightSourcePtr> cur_lights = scene_mgr.LightSources();
+			std::vector<LightSourcePtr> const & cur_lights = scene_mgr.LightSources();
 			bool with_ambient = false;
 			typedef BOOST_TYPEOF(cur_lights) CurLightsType;
 			BOOST_FOREACH(CurLightsType::const_reference light, cur_lights)
@@ -862,7 +862,13 @@ namespace KlayGE
 				lights_.push_back(ambient_light);
 			}
 
-			lights_.insert(lights_.end(), cur_lights.begin(), cur_lights.end());
+			BOOST_FOREACH(CurLightsType::const_reference light, cur_lights)
+			{
+				if (light->Enabled())
+				{
+					lights_.push_back(light);
+				}
+			}
 
 			bool has_opaque_objs = false;
 			bool has_transparency_back_objs = false;
@@ -1465,9 +1471,23 @@ namespace KlayGE
 						}
 					}
 
+					if (atmospheric_pp_)
+					{
+						for (size_t i = 0; i < Num_GBuffers; ++ i)
+						{
+							if (pvp.g_buffer_enables[i])
+							{
+								re.BindFrameBuffer(pvp.curr_shading_buffers[i]);
+								atmospheric_pp_->SetParam(1, pvp.inv_proj);
+								atmospheric_pp_->InputPin(0, pvp.g_buffer_depth_texs[i]);
+								atmospheric_pp_->Render();
+							}
+						}
+					}
+
 					re.BindFrameBuffer(pvp.frame_buffer);
 
-					for (size_t i = 0; i < 3; ++ i)
+					for (size_t i = 0; i < Num_GBuffers; ++ i)
 					{
 						if (pvp.g_buffer_enables[i])
 						{

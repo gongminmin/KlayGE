@@ -114,6 +114,11 @@ namespace KlayGE
 		void EnableViewport(uint32_t index, bool enable);
 		uint32_t Update(uint32_t pass);
 
+		void AtmosphericPostProcess(PostProcessPtr const & pp)
+		{
+			atmospheric_pp_ = pp;
+		}
+
 		RenderEffectPtr const & GBufferEffect() const
 		{
 			return g_buffer_effect_;
@@ -289,6 +294,8 @@ namespace KlayGE
 		std::vector<SceneObject*> visible_scene_objs_;
 		bool has_reflective_objs_;
 		bool has_simple_forward_objs_;
+
+		PostProcessPtr atmospheric_pp_;
 
 		FrameBufferPtr rsm_buffer_;
 		boost::array<TexturePtr, 2> rsm_texs_;
