@@ -19,6 +19,7 @@
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/Math.hpp>
+#include <KlayGE/FrameBuffer.hpp>
 
 #include <KlayGE/Camera.hpp>
 
@@ -26,13 +27,14 @@ namespace KlayGE
 {
 	enum CameraMode
 	{
+		CM_Jitter = 1UL << 0,
 		CM_Omni = 1UL << 1
 	};
 
 	// ¹¹Ôìº¯Êý
 	//////////////////////////////////////////////////////////////////////////////////
 	Camera::Camera()
-		: frustum_dirty_(true), mode_(0)
+		: frustum_dirty_(true), mode_(0), cur_jitter_index_(0)
 	{
 		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 		uint32_t num_motion_frames = re.NumMotionFrames();
@@ -76,8 +78,8 @@ namespace KlayGE
 		near_plane_	= near_plane;
 		far_plane_	= far_plane;
 
-		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 		proj_mat_ = MathLib::perspective_fov_lh(fov, aspect, near_plane, far_plane);
+		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 		re.AdjustPerspectiveMatrix(proj_mat_);
 		frustum_dirty_ = true;
 	}
@@ -96,6 +98,32 @@ namespace KlayGE
 
 		prev_view_mats_.push_back(view_mat_);
 		prev_proj_mats_.push_back(proj_mat_);
+
+		if (this->JitterMode())
+		{
+			cur_jitter_index_ = (cur_jitter_index_ + 1) & 1;
+
+			float top = near_plane_ * tan(fov_ / 2);
+			float bottom = -top;
+			float right = top * aspect_;
+			float left = -right;
+			float width = right - left;
+			float height = top - bottom;
+
+			RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+			int win_width = re.CurFrameBuffer()->Width();
+			int win_height = re.CurFrameBuffer()->Height();
+
+			float const pixel_dx[2] = { -0.25f, +0.25f };
+			float const pixel_dy[2] = { +0.25f, -0.25f };
+			float dx = -pixel_dx[cur_jitter_index_] * width / win_width;
+			float dy = -pixel_dy[cur_jitter_index_] * height / win_height;
+			proj_mat_ = MathLib::perspective_off_center_lh(left + dx, right + dx, bottom + dy, top + dy,
+								near_plane_, far_plane_);
+
+			re.AdjustPerspectiveMatrix(proj_mat_);
+			frustum_dirty_ = true;
+		}
 	}
 
 	float4x4 const & Camera::ViewMatrix() const
@@ -142,6 +170,23 @@ namespace KlayGE
 		else
 		{
 			mode_ &= ~CM_Omni;
+		}
+	}
+
+	bool Camera::JitterMode() const
+	{
+		return (mode_ & CM_Omni) > 0;
+	}
+
+	void Camera::JitterMode(bool jitter)
+	{
+		if (jitter)
+		{
+			mode_ |= CM_Jitter;
+		}
+		else
+		{
+			mode_ &= ~CM_Jitter;
 		}
 	}
 }

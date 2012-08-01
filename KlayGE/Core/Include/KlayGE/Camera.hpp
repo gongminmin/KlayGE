@@ -82,6 +82,8 @@ namespace KlayGE
 
 		bool OmniDirectionalMode() const;
 		void OmniDirectionalMode(bool omni);
+		bool JitterMode() const;
+		void JitterMode(bool jitter);
 
 	private:
 		float3		eye_pos_;		// π€≤Ïæÿ’Ûµƒ Ù–‘
@@ -103,6 +105,7 @@ namespace KlayGE
 		mutable bool	frustum_dirty_;
 
 		uint32_t	mode_;
+		int cur_jitter_index_;
 
 		boost::function<void(Camera&, float, float)> update_func_;
 	};
