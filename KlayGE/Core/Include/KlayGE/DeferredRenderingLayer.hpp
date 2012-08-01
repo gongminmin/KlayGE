@@ -74,10 +74,18 @@ namespace KlayGE
 		FrameBufferPtr shadowing_buffer;
 		TexturePtr shadowing_tex;
 
-		boost::array<FrameBufferPtr, Num_GBuffers> curr_shading_buffers;
-		boost::array<TexturePtr, Num_GBuffers> curr_shading_texs;
-		FrameBufferPtr prev_shading_buffer;
-		TexturePtr prev_shading_tex;
+		boost::array<FrameBufferPtr, Num_GBuffers> shading_buffers;
+		boost::array<TexturePtr, Num_GBuffers> shading_texs;
+
+		FrameBufferPtr curr_merged_shading_buffer;
+		TexturePtr curr_merged_shading_tex;
+		FrameBufferPtr curr_merged_depth_buffer;
+		TexturePtr curr_merged_depth_tex;
+
+		FrameBufferPtr prev_merged_shading_buffer;
+		TexturePtr prev_merged_shading_tex;
+		FrameBufferPtr prev_merged_depth_buffer;
+		TexturePtr prev_merged_depth_tex;
 
 		TexturePtr small_ssgi_tex;
 		bool ssgi_enabled;
@@ -138,19 +146,23 @@ namespace KlayGE
 		}
 		TexturePtr const & OpaqueShadingTex(uint32_t vp) const
 		{
-			return viewports_[vp].curr_shading_texs[Opaque_GBuffer];
+			return viewports_[vp].shading_texs[Opaque_GBuffer];
 		}
 		TexturePtr const & TransparencyBackShadingTex(uint32_t vp) const
 		{
-			return viewports_[vp].curr_shading_texs[TransparencyBack_GBuffer];
+			return viewports_[vp].shading_texs[TransparencyBack_GBuffer];
 		}
 		TexturePtr const & TransparencyFrontShadingTex(uint32_t vp) const
 		{
-			return viewports_[vp].curr_shading_texs[TransparencyFront_GBuffer];
+			return viewports_[vp].shading_texs[TransparencyFront_GBuffer];
 		}
 		TexturePtr const & PrevFrameShadingTex(uint32_t vp) const
 		{
-			return viewports_[vp].prev_shading_tex;
+			return viewports_[vp].prev_merged_shading_tex;
+		}
+		TexturePtr const & PrevFrameDepthTex(uint32_t vp) const
+		{
+			return viewports_[vp].prev_merged_depth_tex;
 		}
 
 		TexturePtr const & SmallSSVOTex(uint32_t vp) const
@@ -260,6 +272,8 @@ namespace KlayGE
 		RenderTechniquePtr technique_no_lighting_;
 		RenderTechniquePtr technique_shading_;
 		boost::array<RenderTechniquePtr, 2> technique_merge_shadings_;
+		RenderTechniquePtr technique_merge_depth_;
+		RenderTechniquePtr technique_copy_shading_;
 
 		FrameBufferPtr sm_buffer_;
 		TexturePtr sm_tex_;
