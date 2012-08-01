@@ -418,8 +418,16 @@ namespace KlayGE
 			technique_no_lighting_ = dr_effect_->TechniqueByName("NoLightingTech");
 			technique_shading_ = dr_effect_->TechniqueByName("ShadingTech");
 		}
-		technique_merge_shadings_[0] = dr_effect_->TechniqueByName("MergeShadingTech");
-		technique_merge_shadings_[1] = dr_effect_->TechniqueByName("MergeShadingAlphaBlendTech");
+		if (depth_texture_support_)
+		{
+			technique_merge_shadings_[0] = dr_effect_->TechniqueByName("MergeShadingTech");
+			technique_merge_shadings_[1] = dr_effect_->TechniqueByName("MergeShadingAlphaBlendTech");
+		}
+		else
+		{
+			technique_merge_shadings_[0] = dr_effect_->TechniqueByName("MergeShadingWODepthTextureTech");
+			technique_merge_shadings_[1] = dr_effect_->TechniqueByName("MergeShadingAlphaBlendWODepthTextureTech");
+		}
 
 		sm_buffer_ = rf.MakeFrameBuffer();
 		ElementFormat fmt;
@@ -600,6 +608,7 @@ namespace KlayGE
 		projective_map_cube_tex_param_ = dr_effect_->ParameterByName("projective_map_cube_tex");
 		inv_width_height_param_ = dr_effect_->ParameterByName("inv_width_height");
 		shadowing_tex_param_ = dr_effect_->ParameterByName("shadowing_tex");
+		near_q_param_ = dr_effect_->ParameterByName("near_q");
 	}
 
 	void DeferredRenderingLayer::SSGIEnabled(uint32_t vp, bool ssgi)
@@ -1491,6 +1500,19 @@ namespace KlayGE
 						if (pvp.g_buffer_enables[i])
 						{
 							*shading_tex_param_ = pvp.curr_shading_texs[i];
+							if (depth_texture_support_)
+							{
+								*depth_tex_param_ = pvp.g_buffer_ds_texs[i];
+							}
+							else
+							{
+								*depth_tex_param_ = pvp.g_buffer_depth_texs[i];
+
+								CameraPtr const & camera = pvp.frame_buffer->GetViewport()->camera;
+								float q = camera->FarPlane() / (camera->FarPlane() - camera->NearPlane());
+								float2 near_q(camera->NearPlane() * q, q);
+								*near_q_param_ = near_q;
+							}
 							re.Render(*technique_merge_shadings_[i != 0], *rl_quad_);
 						}
 					}

@@ -290,6 +290,7 @@ namespace KlayGE
 		RenderEffectParameterPtr projective_map_cube_tex_param_;
 		RenderEffectParameterPtr inv_width_height_param_;
 		RenderEffectParameterPtr shadowing_tex_param_;
+		RenderEffectParameterPtr near_q_param_;
 
 		std::vector<SceneObject*> visible_scene_objs_;
 		bool has_reflective_objs_;

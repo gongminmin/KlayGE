@@ -3,6 +3,7 @@
 <effect>
 	<include name="DeferredRenderingUtil.fxml"/>
 	<include name="Lighting.fxml"/>
+	<include name="util.fxml"/>
 
 	<macro name="LT_Ambient" value="0"/>
 	<macro name="LT_Point" value="1"/>
@@ -539,6 +540,8 @@ float4 ClearStencilPS() : SV_Target
 	<parameter type="texture2D" name="g_buffer_1_tex"/>
 	<parameter type="texture2D" name="shading_tex"/>
 
+	<parameter type="float2" name="near_q"/>
+
 	<shader>
 		<![CDATA[
 void ShadingVS(float4 pos : POSITION,
@@ -572,9 +575,18 @@ float4 ShadingPS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Target
 	return float4(max(diff_lighting * diffuse.rgb + specular_normalize_factor(shininess) * spec_lighting * fresnel_term_schlick(normalize(view_dir), normal, diffuse.a), 0), 1);
 }
 
-float4 MergeShadingPS(float2 tc : TEXCOORD0) : SV_Target
+void MergeShadingPS(float2 tc : TEXCOORD0,
+		out float4 oClr : SV_Target0, out float oDepth : SV_Depth)
 {
-	return shading_tex.Sample(point_sampler, tc);
+	oClr = shading_tex.Sample(point_sampler, tc);
+	oDepth = depth_tex.Sample(point_sampler, tc).x;
+}
+
+void MergeShadingWODepthTexturePS(float2 tc : TEXCOORD0,
+		out float4 oClr : SV_Target0, out float oDepth : SV_Depth)
+{
+	oClr = shading_tex.Sample(point_sampler, tc);
+	oDepth = linear_depth_to_non_linear(depth_tex.Sample(point_sampler, tc).x, near_q.x, near_q.y);
 }
 		]]>
 	</shader>
@@ -624,8 +636,8 @@ float4 MergeShadingPS(float2 tc : TEXCOORD0) : SV_Target
 	<technique name="MergeShadingTech">
 		<pass name="p0">
 			<state name="cull_mode" value="front"/>
-			<state name="depth_enable" value="false"/>
-			<state name="depth_write_mask" value="false"/>
+			<state name="depth_enable" value="true"/>
+			<state name="depth_func" value="always_pass"/>
 
 			<state name="vertex_shader" value="ShadingVS()"/>
 			<state name="pixel_shader" value="MergeShadingPS()"/>
@@ -634,8 +646,8 @@ float4 MergeShadingPS(float2 tc : TEXCOORD0) : SV_Target
 	<technique name="MergeShadingAlphaBlendTech">
 		<pass name="p0">
 			<state name="cull_mode" value="front"/>
-			<state name="depth_enable" value="false"/>
-			<state name="depth_write_mask" value="false"/>
+			<state name="depth_enable" value="true"/>
+			<state name="depth_func" value="less"/>
 			
 			<state name="blend_enable" value="true"/>
 			<state name="blend_op" value="add"/>
@@ -647,6 +659,17 @@ float4 MergeShadingPS(float2 tc : TEXCOORD0) : SV_Target
 
 			<state name="vertex_shader" value="ShadingVS()"/>
 			<state name="pixel_shader" value="MergeShadingPS()"/>
+		</pass>
+	</technique>
+
+	<technique name="MergeShadingWODepthTextureTech" inherit="MergeShadingTech">
+		<pass name="p0">
+			<state name="pixel_shader" value="MergeShadingWODepthTexturePS()"/>
+		</pass>
+	</technique>
+	<technique name="MergeShadingAlphaBlendWODepthTextureTech" inherit="MergeShadingAlphaBlendTech">
+		<pass name="p0">
+			<state name="pixel_shader" value="MergeShadingWODepthTexturePS()"/>
 		</pass>
 	</technique>
 </effect>
