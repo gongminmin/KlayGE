@@ -3,17 +3,13 @@
 <gl_extension name="GL_EXT_texture_array" reg_no="329">
 	<tokens>
 		<token name="GL_TEXTURE_1D_ARRAY_EXT" value="0x8C18"/>
+		<token name="GL_PROXY_TEXTURE_1D_ARRAY_EXT" value="0x8C19"/>
 		<token name="GL_TEXTURE_2D_ARRAY_EXT" value="0x8C1A"/>
 		<token name="GL_PROXY_TEXTURE_2D_ARRAY_EXT" value="0x8C1B"/>
-		<token name="GL_PROXY_TEXTURE_1D_ARRAY_EXT" value="0x8C19"/>
 		<token name="GL_TEXTURE_BINDING_1D_ARRAY_EXT" value="0x8C1C"/>
 		<token name="GL_TEXTURE_BINDING_2D_ARRAY_EXT" value="0x8C1D"/>
 		<token name="GL_MAX_ARRAY_TEXTURE_LAYERS_EXT" value="0x88FF"/>
 		<token name="GL_COMPARE_REF_DEPTH_TO_TEXTURE_EXT" value="0x884E"/>
 		<token name="GL_FRAMEBUFFER_ATTACHMENT_TEXTURE_LAYER_EXT" value="0x8CD4"/>
-		<token name="GL_SAMPLER_1D_ARRAY_EXT" value="0x8DC0"/>
-		<token name="GL_SAMPLER_2D_ARRAY_EXT" value="0x8DC1"/>
-		<token name="GL_SAMPLER_1D_ARRAY_SHADOW_EXT" value="0x8DC3"/>
-		<token name="GL_SAMPLER_2D_ARRAY_SHADOW_EXT" value="0x8DC4"/>
 	</tokens>
 </gl_extension>

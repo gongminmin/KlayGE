@@ -2,18 +2,18 @@
 
 <gl_extension name="GL_ARB_occlusion_query" reg_no="29">
 	<tokens>
-		<token name="GL_SAMPLES_PASSED_ARB" value="0x8914"/>
 		<token name="GL_QUERY_COUNTER_BITS_ARB" value="0x8864"/>
 		<token name="GL_CURRENT_QUERY_ARB" value="0x8865"/>
 		<token name="GL_QUERY_RESULT_ARB" value="0x8866"/>
 		<token name="GL_QUERY_RESULT_AVAILABLE_ARB" value="0x8867"/>
+		<token name="GL_SAMPLES_PASSED_ARB" value="0x8914"/>
 	</tokens>
 
 	<functions>
-		<function name="glBeginQueryARB" return="void">
+		<function name="glGenQueriesARB" return="void">
 			<params>
-				<param type="GLenum" name="target"/>
-				<param type="GLuint" name="id"/>
+				<param type="GLsizei" name="n"/>
+				<param type="GLuint*" name="ids"/>
 			</params>
 		</function>
 		<function name="glDeleteQueriesARB" return="void">
@@ -22,15 +22,27 @@
 				<param type="const GLuint*" name="ids"/>
 			</params>
 		</function>
+		<function name="glIsQueryARB" return="GLboolean">
+			<params>
+				<param type="GLuint" name="id"/>
+			</params>
+		</function>
+		<function name="glBeginQueryARB" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLuint" name="id"/>
+			</params>
+		</function>
 		<function name="glEndQueryARB" return="void">
 			<params>
 				<param type="GLenum" name="target"/>
 			</params>
 		</function>
-		<function name="glGenQueriesARB" return="void">
+		<function name="glGetQueryivARB" return="void">
 			<params>
-				<param type="GLsizei" name="n"/>
-				<param type="GLuint*" name="ids"/>
+				<param type="GLenum" name="target"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLint*" name="params"/>
 			</params>
 		</function>
 		<function name="glGetQueryObjectivARB" return="void">
@@ -45,18 +57,6 @@
 				<param type="GLuint" name="id"/>
 				<param type="GLenum" name="pname"/>
 				<param type="GLuint*" name="params"/>
-			</params>
-		</function>
-		<function name="glGetQueryivARB" return="void">
-			<params>
-				<param type="GLenum" name="target"/>
-				<param type="GLenum" name="pname"/>
-				<param type="GLint*" name="param"/>
-			</params>
-		</function>
-		<function name="glIsQueryARB" return="GLboolean">
-			<params>
-				<param type="GLuint" name="id"/>
 			</params>
 		</function>
 	</functions>

@@ -5,7 +5,7 @@
 		<token name="GL_RENDERBUFFER_COVERAGE_SAMPLES_NV" value="0x8CAB"/>
 		<token name="GL_RENDERBUFFER_COLOR_SAMPLES_NV" value="0x8E10"/>
 		<token name="GL_MAX_MULTISAMPLE_COVERAGE_MODES_NV" value="0x8E11"/>
-		<token name="GL_MULITSAMPLE_COVERAGE_MODES_NV" value="0x8E12"/>
+		<token name="GL_MULTISAMPLE_COVERAGE_MODES_NV" value="0x8E12"/>
 	</tokens>
 
 	<functions>

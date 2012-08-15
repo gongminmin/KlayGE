@@ -27,11 +27,17 @@
 				<param type="GLclampf" name="value"/>
 				<param type="GLboolean" name="invert"/>
 			</params>
+			<mappings>
+				<mapping from="GL_SGIS_multisample" name="glSampleMaskSGIS"/>
+			</mappings>
 		</function>
 		<function name="glSamplePatternEXT" return="void">
 			<params>
 				<param type="GLenum" name="pattern"/>
 			</params>
+			<mappings>
+				<mapping from="GL_SGIS_multisample" name="glSamplePatternSGIS"/>
+			</mappings>
 		</function>
 	</functions>
 </gl_extension>

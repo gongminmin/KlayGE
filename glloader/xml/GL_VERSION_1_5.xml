@@ -12,15 +12,6 @@
 		<token name="GL_ELEMENT_ARRAY_BUFFER" value="0x8893"/>
 		<token name="GL_ARRAY_BUFFER_BINDING" value="0x8894"/>
 		<token name="GL_ELEMENT_ARRAY_BUFFER_BINDING" value="0x8895"/>
-		<token name="GL_VERTEX_ARRAY_BUFFER_BINDING" value="0x8896"/>
-		<token name="GL_NORMAL_ARRAY_BUFFER_BINDING" value="0x8897"/>
-		<token name="GL_COLOR_ARRAY_BUFFER_BINDING" value="0x8898"/>
-		<token name="GL_INDEX_ARRAY_BUFFER_BINDING" value="0x8899"/>
-		<token name="GL_TEXTURE_COORD_ARRAY_BUFFER_BINDING" value="0x889A"/>
-		<token name="GL_EDGE_FLAG_ARRAY_BUFFER_BINDING" value="0x889B"/>
-		<token name="GL_SECONDARY_COLOR_ARRAY_BUFFER_BINDING" value="0x889C"/>
-		<token name="GL_FOG_COORD_ARRAY_BUFFER_BINDING" value="0x889D"/>
-		<token name="GL_WEIGHT_ARRAY_BUFFER_BINDING" value="0x889E"/>
 		<token name="GL_VERTEX_ATTRIB_ARRAY_BUFFER_BINDING" value="0x889F"/>
 		<token name="GL_READ_ONLY" value="0x88B8"/>
 		<token name="GL_WRITE_ONLY" value="0x88B9"/>
@@ -38,19 +29,29 @@
 		<token name="GL_DYNAMIC_READ" value="0x88E9"/>
 		<token name="GL_DYNAMIC_COPY" value="0x88EA"/>
 		<token name="GL_SAMPLES_PASSED" value="0x8914"/>
-		<token name="GL_FOG_COORD_SRC" value="GL_FOG_COORDINATE_SRC"/>
-		<token name="GL_FOG_COORD" value="GL_FOG_COORDINATE"/>
-		<token name="GL_CURRENT_FOG_COORD" value="GL_CURRENT_FOG_COORDINATE"/>
-		<token name="GL_FOG_COORD_ARRAY_TYPE" value="GL_FOG_COORDINATE_ARRAY_TYPE"/>
-		<token name="GL_FOG_COORD_ARRAY_STRIDE" value="GL_FOG_COORDINATE_ARRAY_STRIDE"/>
-		<token name="GL_FOG_COORD_ARRAY_POINTER	" value="GL_FOG_COORDINATE_ARRAY_POINTER"/>
-		<token name="GL_FOG_COORD_ARRAY" value="GL_FOG_COORDINATE_ARRAY"/>
-		<token name="GL_SRC0_RGB" value="GL_SOURCE0_RGB"/>
-		<token name="GL_SRC1_RGB" value="GL_SOURCE1_RGB"/>
-		<token name="GL_SRC2_RGB" value="GL_SOURCE2_RGB"/>
-		<token name="GL_SRC0_ALPHA" value="GL_SOURCE0_ALPHA"/>
-		<token name="GL_SRC1_ALPHA" value="GL_SOURCE1_ALPHA"/>
-		<token name="GL_SRC2_ALPHA" value="GL_SOURCE2_ALPHA"/>
+		<token name="GL_VERTEX_ARRAY_BUFFER_BINDING" value="0x8896"/>
+		<token name="GL_NORMAL_ARRAY_BUFFER_BINDING" value="0x8897"/>
+		<token name="GL_COLOR_ARRAY_BUFFER_BINDING" value="0x8898"/>
+		<token name="GL_INDEX_ARRAY_BUFFER_BINDING" value="0x8899"/>
+		<token name="GL_TEXTURE_COORD_ARRAY_BUFFER_BINDING" value="0x889A"/>
+		<token name="GL_EDGE_FLAG_ARRAY_BUFFER_BINDING" value="0x889B"/>
+		<token name="GL_SECONDARY_COLOR_ARRAY_BUFFER_BINDING" value="0x889C"/>
+		<token name="GL_FOG_COORDINATE_ARRAY_BUFFER_BINDING" value="0x889D"/>
+		<token name="GL_WEIGHT_ARRAY_BUFFER_BINDING" value="0x889E"/>
+		<token name="GL_FOG_COORD_SRC" value="0x8450"/>
+		<token name="GL_FOG_COORD" value="0x8451"/>
+		<token name="GL_CURRENT_FOG_COORD" value="0x8453"/>
+		<token name="GL_FOG_COORD_ARRAY_TYPE" value="0x8454"/>
+		<token name="GL_FOG_COORD_ARRAY_STRIDE" value="0x8455"/>
+		<token name="GL_FOG_COORD_ARRAY_POINTER" value="0x8456"/>
+		<token name="GL_FOG_COORD_ARRAY" value="0x8457"/>
+		<token name="GL_FOG_COORD_ARRAY_BUFFER_BINDING" value="0x889D"/>
+		<token name="GL_SRC0_RGB" value="0x8580"/>
+		<token name="GL_SRC1_RGB" value="0x8581"/>
+		<token name="GL_SRC2_RGB" value="0x8582"/>
+		<token name="GL_SRC0_ALPHA" value="0x8588"/>
+		<token name="GL_SRC1_ALPHA" value="0x8589"/>
+		<token name="GL_SRC2_ALPHA" value="0x858A"/>
 	</tokens>
 
 	<functions>
@@ -101,7 +102,7 @@
 			<params>
 				<param type="GLenum" name="target"/>
 				<param type="GLenum" name="pname"/>
-				<param type="GLint*" name="param"/>
+				<param type="GLint*" name="params"/>
 			</params>
 			<mappings>
 				<mapping from="GL_ARB_occlusion_query" name="glGetQueryivARB"/>
@@ -234,8 +235,8 @@
 		</function>
 	</functions>
 
-	<additional>
+	<additionals>
 		<ext name="GL_ARB_depth_texture"/>
 		<ext name="GL_EXT_shadow_funcs"/>
-	</additional>
+	</additionals>
 </gl_extension>

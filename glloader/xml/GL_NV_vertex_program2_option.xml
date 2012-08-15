@@ -1,4 +1,8 @@
 <?xml version='1.0'?>
 
 <gl_extension name="GL_NV_vertex_program2_option" reg_no="305">
+	<tokens>
+		<token name="GL_MAX_PROGRAM_EXEC_INSTRUCTIONS_NV" value="0x88F4"/>
+		<token name="GL_MAX_PROGRAM_CALL_DEPTH_NV" value="0x88F5"/>
+	</tokens>
 </gl_extension>

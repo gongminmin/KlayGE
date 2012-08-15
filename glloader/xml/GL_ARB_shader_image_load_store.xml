@@ -2,21 +2,6 @@
 
 <gl_extension name="GL_ARB_shader_image_load_store" reg_no="115">
 	<tokens>
-		<token name="GL_MAX_IMAGE_UNITS" value="0x8F38"/>
-		<token name="GL_MAX_COMBINED_IMAGE_UNITS_AND_FRAGMENT_OUTPUTS" value="0x8F39"/>
-		<token name="GL_MAX_IMAGE_SAMPLES" value="0x906D"/>
-		<token name="GL_MAX_VERTEX_IMAGE_UNIFORMS" value="0x90CA"/>
-		<token name="GL_MAX_TESS_CONTROL_IMAGE_UNIFORMS" value="0x90CB"/>
-		<token name="GL_MAX_TESS_EVALUATION_IMAGE_UNIFORMS" value="0x90CC"/>
-		<token name="GL_MAX_GEOMETRY_IMAGE_UNIFORMS" value="0x90CD"/>
-		<token name="GL_MAX_FRAGMENT_IMAGE_UNIFORMS" value="0x90CE"/>
-		<token name="GL_MAX_COMBINED_IMAGE_UNIFORMS" value="0x90CF"/>
-		<token name="GL_IMAGE_BINDING_NAME" value="0x8F3A"/>
-		<token name="GL_IMAGE_BINDING_LEVEL" value="0x8F3B"/>
-		<token name="GL_IMAGE_BINDING_LAYERED" value="0x8F3C"/>
-		<token name="GL_IMAGE_BINDING_LAYER" value="0x8F3D"/>
-		<token name="GL_IMAGE_BINDING_ACCESS" value="0x8F3E"/>
-		<token name="GL_IMAGE_BINDING_FORMAT" value="0x906E"/>
 		<token name="GL_VERTEX_ATTRIB_ARRAY_BARRIER_BIT" value="0x00000001"/>
 		<token name="GL_ELEMENT_ARRAY_BARRIER_BIT" value="0x00000002"/>
 		<token name="GL_UNIFORM_BARRIER_BIT" value="0x00000004"/>
@@ -30,6 +15,13 @@
 		<token name="GL_TRANSFORM_FEEDBACK_BARRIER_BIT" value="0x00000800"/>
 		<token name="GL_ATOMIC_COUNTER_BARRIER_BIT" value="0x00001000"/>
 		<token name="GL_ALL_BARRIER_BITS" value="0xFFFFFFFF"/>
+		<token name="GL_MAX_IMAGE_UNITS" value="0x8F38"/>
+		<token name="GL_MAX_COMBINED_IMAGE_UNITS_AND_FRAGMENT_OUTPUTS" value="0x8F39"/>
+		<token name="GL_IMAGE_BINDING_NAME" value="0x8F3A"/>
+		<token name="GL_IMAGE_BINDING_LEVEL" value="0x8F3B"/>
+		<token name="GL_IMAGE_BINDING_LAYERED" value="0x8F3C"/>
+		<token name="GL_IMAGE_BINDING_LAYER" value="0x8F3D"/>
+		<token name="GL_IMAGE_BINDING_ACCESS" value="0x8F3E"/>
 		<token name="GL_IMAGE_1D" value="0x904C"/>
 		<token name="GL_IMAGE_2D" value="0x904D"/>
 		<token name="GL_IMAGE_3D" value="0x904E"/>
@@ -63,9 +55,17 @@
 		<token name="GL_UNSIGNED_INT_IMAGE_CUBE_MAP_ARRAY" value="0x906A"/>
 		<token name="GL_UNSIGNED_INT_IMAGE_2D_MULTISAMPLE" value="0x906B"/>
 		<token name="GL_UNSIGNED_INT_IMAGE_2D_MULTISAMPLE_ARRAY" value="0x906C"/>
+		<token name="GL_MAX_IMAGE_SAMPLES" value="0x906D"/>
+		<token name="GL_IMAGE_BINDING_FORMAT" value="0x906E"/>
 		<token name="GL_IMAGE_FORMAT_COMPATIBILITY_TYPE" value="0x90C7"/>
 		<token name="GL_IMAGE_FORMAT_COMPATIBILITY_BY_SIZE" value="0x90C8"/>
 		<token name="GL_IMAGE_FORMAT_COMPATIBILITY_BY_CLASS" value="0x90C9"/>
+		<token name="GL_MAX_VERTEX_IMAGE_UNIFORMS" value="0x90CA"/>
+		<token name="GL_MAX_TESS_CONTROL_IMAGE_UNIFORMS" value="0x90CB"/>
+		<token name="GL_MAX_TESS_EVALUATION_IMAGE_UNIFORMS" value="0x90CC"/>
+		<token name="GL_MAX_GEOMETRY_IMAGE_UNIFORMS" value="0x90CD"/>
+		<token name="GL_MAX_FRAGMENT_IMAGE_UNIFORMS" value="0x90CE"/>
+		<token name="GL_MAX_COMBINED_IMAGE_UNIFORMS" value="0x90CF"/>
 	</tokens>
 
 	<functions>

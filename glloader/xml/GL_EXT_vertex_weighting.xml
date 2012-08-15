@@ -30,7 +30,7 @@
 		</function>
 		<function name="glVertexWeightPointerEXT" return="void">
 			<params>
-				<param type="GLint" name="size"/>
+				<param type="GLsizei" name="size"/>
 				<param type="GLenum" name="type"/>
 				<param type="GLsizei" name="stride"/>
 				<param type="const GLvoid*" name="pointer"/>

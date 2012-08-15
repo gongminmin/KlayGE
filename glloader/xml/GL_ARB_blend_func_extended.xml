@@ -3,6 +3,7 @@
 <gl_extension name="GL_ARB_blend_func_extended" reg_no="78">
 	<tokens>
 		<token name="GL_SRC1_COLOR" value="0x88F9"/>
+		<token name="GL_SRC1_ALPHA" value="0x8589"/>
 		<token name="GL_ONE_MINUS_SRC1_COLOR" value="0x88FA"/>
 		<token name="GL_ONE_MINUS_SRC1_ALPHA" value="0x88FB"/>
 		<token name="GL_MAX_DUAL_SOURCE_DRAW_BUFFERS" value="0x88FC"/>

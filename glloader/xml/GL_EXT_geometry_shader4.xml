@@ -13,10 +13,10 @@
 		<token name="GL_MAX_GEOMETRY_UNIFORM_COMPONENTS_EXT" value="0x8DDF"/>
 		<token name="GL_MAX_GEOMETRY_OUTPUT_VERTICES_EXT" value="0x8DE0"/>
 		<token name="GL_MAX_GEOMETRY_TOTAL_OUTPUT_COMPONENTS_EXT" value="0x8DE1"/>
-		<token name="GL_LINES_ADJACENCY_EXT" value="0xA"/>
-		<token name="GL_LINE_STRIP_ADJACENCY_EXT" value="0xB"/>
-		<token name="GL_TRIANGLES_ADJACENCY_EXT" value="0xC"/>
-		<token name="GL_TRIANGLE_STRIP_ADJACENCY_EXT" value="0xD"/>
+		<token name="GL_LINES_ADJACENCY_EXT" value="0x000A"/>
+		<token name="GL_LINE_STRIP_ADJACENCY_EXT" value="0x000B"/>
+		<token name="GL_TRIANGLES_ADJACENCY_EXT" value="0x000C"/>
+		<token name="GL_TRIANGLE_STRIP_ADJACENCY_EXT" value="0x000D"/>
 		<token name="GL_FRAMEBUFFER_INCOMPLETE_LAYER_TARGETS_EXT" value="0x8DA8"/>
 		<token name="GL_FRAMEBUFFER_INCOMPLETE_LAYER_COUNT_EXT" value="0x8DA9"/>
 		<token name="GL_FRAMEBUFFER_ATTACHMENT_LAYERED_EXT" value="0x8DA7"/>
@@ -30,32 +30,6 @@
 				<param type="GLuint" name="program"/>
 				<param type="GLenum" name="pname"/>
 				<param type="GLint" name="value"/>
-			</params>
-		</function>
-		<function name="glFramebufferTextureEXT" return="void">
-			<params>
-				<param type="GLenum" name="target"/>
-				<param type="GLenum" name="attachment"/>
-				<param type="GLuint" name="texture"/>
-				<param type="GLint" name="level"/>
-			</params>
-		</function>
-		<function name="glFramebufferTextureLayerEXT" return="void">
-			<params>
-				<param type="GLenum" name="target"/>
-				<param type="GLenum" name="attachment"/>
-				<param type="GLuint" name="texture"/>
-				<param type="GLint" name="level"/>
-				<param type="GLint" name="layer"/>
-			</params>
-		</function>
-		<function name="glFramebufferTextureFaceEXT" return="void">
-			<params>
-				<param type="GLenum" name="target"/>
-				<param type="GLenum" name="attachment"/>
-				<param type="GLuint" name="texture"/>
-				<param type="GLint" name="level"/>
-				<param type="GLenum" name="face"/>
 			</params>
 		</function>
 	</functions>

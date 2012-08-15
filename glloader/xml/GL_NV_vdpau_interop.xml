@@ -15,14 +15,14 @@
 	<functions>
 		<function name="glVDPAUInitNV" return="void">
 			<params>
-				<param type="const void*" name="vdpDevice"/>
-				<param type="const void*" name="getProcAddress"/>
+				<param type="const GLvoid*" name="vdpDevice"/>
+				<param type="const GLvoid*" name="getProcAddress"/>
 			</params>
 		</function>
-		<function name="glVDPAUFiniNV" return="void" />
+		<function name="glVDPAUFiniNV" return="void"/>
 		<function name="glVDPAURegisterVideoSurfaceNV" return="GLvdpauSurfaceNV">
 			<params>
-				<param type="const void*" name="vdpSurface"/>
+				<param type="GLvoid*" name="vdpSurface"/>
 				<param type="GLenum" name="target"/>
 				<param type="GLsizei" name="numTextureNames"/>
 				<param type="const GLuint*" name="textureNames"/>
@@ -30,7 +30,7 @@
 		</function>
 		<function name="glVDPAURegisterOutputSurfaceNV" return="GLvdpauSurfaceNV">
 			<params>
-				<param type="const void*" name="vdpSurface"/>
+				<param type="GLvoid*" name="vdpSurface"/>
 				<param type="GLenum" name="target"/>
 				<param type="GLsizei" name="numTextureNames"/>
 				<param type="const GLuint*" name="textureNames"/>
@@ -61,7 +61,6 @@
 				<param type="GLenum" name="access"/>
 			</params>
 		</function>
-
 		<function name="glVDPAUMapSurfacesNV" return="void">
 			<params>
 				<param type="GLsizei" name="numSurfaces"/>

@@ -1,6 +1,6 @@
 <?xml version='1.0'?>
 
-<gl_extension name="GL_SGIS_point_line_texgen">
+<gl_extension name="GL_SGIS_point_line_texgen" reg_no="213">
 	<tokens>
 		<token name="GL_EYE_DISTANCE_TO_POINT_SGIS" value="0x81F0"/>
 		<token name="GL_OBJECT_DISTANCE_TO_POINT_SGIS" value="0x81F1"/>

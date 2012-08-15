@@ -24,7 +24,7 @@
 				<param type="const GLuint*" name="names"/>
 			</params>
 		</function>
- 		<function name="glIsNameAMD" return="GLboolean">
+		<function name="glIsNameAMD" return="GLboolean">
 			<params>
 				<param type="GLenum" name="identifier"/>
 				<param type="GLuint" name="name"/>

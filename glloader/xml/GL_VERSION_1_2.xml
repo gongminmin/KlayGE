@@ -7,7 +7,6 @@
 		<token name="GL_UNSIGNED_SHORT_5_5_5_1" value="0x8034"/>
 		<token name="GL_UNSIGNED_INT_8_8_8_8" value="0x8035"/>
 		<token name="GL_UNSIGNED_INT_10_10_10_2" value="0x8036"/>
-		<token name="GL_RESCALE_NORMAL" value="0x803A"/>
 		<token name="GL_TEXTURE_BINDING_3D" value="0x806A"/>
 		<token name="GL_PACK_SKIP_IMAGES" value="0x806B"/>
 		<token name="GL_PACK_IMAGE_HEIGHT" value="0x806C"/>
@@ -34,24 +33,25 @@
 		<token name="GL_TEXTURE_MAX_LOD" value="0x813B"/>
 		<token name="GL_TEXTURE_BASE_LEVEL" value="0x813C"/>
 		<token name="GL_TEXTURE_MAX_LEVEL" value="0x813D"/>
-		<token name="GL_LIGHT_MODEL_COLOR_CONTROL" value="0x81F8"/>
-		<token name="GL_SINGLE_COLOR" value="0x81F9"/>
-		<token name="GL_SEPARATE_SPECULAR_COLOR" value="0x81FA"/>
 		<token name="GL_SMOOTH_POINT_SIZE_RANGE" value="0x0B12"/>
 		<token name="GL_SMOOTH_POINT_SIZE_GRANULARITY" value="0x0B13"/>
 		<token name="GL_SMOOTH_LINE_WIDTH_RANGE" value="0x0B22"/>
 		<token name="GL_SMOOTH_LINE_WIDTH_GRANULARITY" value="0x0B23"/>
-		<token name="GL_ALIASED_POINT_SIZE_RANGE" value="0x846D"/>
 		<token name="GL_ALIASED_LINE_WIDTH_RANGE" value="0x846E"/>
+		<token name="GL_RESCALE_NORMAL" value="0x803A"/>
+		<token name="GL_LIGHT_MODEL_COLOR_CONTROL" value="0x81F8"/>
+		<token name="GL_SINGLE_COLOR" value="0x81F9"/>
+		<token name="GL_SEPARATE_SPECULAR_COLOR" value="0x81FA"/>
+		<token name="GL_ALIASED_POINT_SIZE_RANGE" value="0x846D"/>
 	</tokens>
 
 	<functions>
 		<function name="glBlendColor" return="void">
 			<params>
-				<param type="GLclampf" name="red"/>
-				<param type="GLclampf" name="green"/>
-				<param type="GLclampf" name="blue"/>
-				<param type="GLclampf" name="alpha"/>
+				<param type="GLfloat" name="red"/>
+				<param type="GLfloat" name="green"/>
+				<param type="GLfloat" name="blue"/>
+				<param type="GLfloat" name="alpha"/>
 			</params>
 			<mappings>
 				<mapping from="GL_EXT_blend_color" name="glBlendColorEXT"/>
@@ -78,6 +78,57 @@
 				<mapping from="GL_EXT_draw_range_elements" name="glDrawRangeElementsEXT"/>
 			</mappings>
 		</function>
+		<function name="glTexImage3D" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLint" name="level"/>
+				<param type="GLint" name="internalformat"/>
+				<param type="GLsizei" name="width"/>
+				<param type="GLsizei" name="height"/>
+				<param type="GLsizei" name="depth"/>
+				<param type="GLint" name="border"/>
+				<param type="GLenum" name="format"/>
+				<param type="GLenum" name="type"/>
+				<param type="const GLvoid*" name="pixels"/>
+			</params>
+			<mappings>
+				<mapping from="GL_EXT_texture3D" name="glTexImage3DEXT"/>
+			</mappings>
+		</function>
+		<function name="glTexSubImage3D" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLint" name="level"/>
+				<param type="GLint" name="xoffset"/>
+				<param type="GLint" name="yoffset"/>
+				<param type="GLint" name="zoffset"/>
+				<param type="GLsizei" name="width"/>
+				<param type="GLsizei" name="height"/>
+				<param type="GLsizei" name="depth"/>
+				<param type="GLenum" name="format"/>
+				<param type="GLenum" name="type"/>
+				<param type="const GLvoid*" name="pixels"/>
+			</params>
+			<mappings>
+				<mapping from="GL_EXT_texture3D" name="glTexSubImage3DEXT"/>
+			</mappings>
+		</function>
+		<function name="glCopyTexSubImage3D" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLint" name="level"/>
+				<param type="GLint" name="xoffset"/>
+				<param type="GLint" name="yoffset"/>
+				<param type="GLint" name="zoffset"/>
+				<param type="GLint" name="x"/>
+				<param type="GLint" name="y"/>
+				<param type="GLsizei" name="width"/>
+				<param type="GLsizei" name="height"/>
+			</params>
+			<mappings>
+				<mapping from="GL_EXT_copy_texture" name="glCopyTexSubImage3DEXT"/>
+			</mappings>
+		</function>
 		<function name="glColorTable" return="void">
 			<params>
 				<param type="GLenum" name="target"/>
@@ -88,6 +139,7 @@
 				<param type="const GLvoid*" name="table"/>
 			</params>
 			<mappings>
+				<mapping from="GL_EXT_paletted_texture" name="glColorTableEXT"/>
 				<mapping from="GL_SGI_color_table" name="glColorTableSGI"/>
 			</mappings>
 		</function>
@@ -429,57 +481,6 @@
 			</params>
 			<mappings>
 				<mapping from="GL_EXT_histogram" name="glResetMinmaxEXT"/>
-			</mappings>
-		</function>
-		<function name="glTexImage3D" return="void">
-			<params>
-				<param type="GLenum" name="target"/>
-				<param type="GLint" name="level"/>
-				<param type="GLenum" name="internalFormat"/>
-				<param type="GLsizei" name="width"/>
-				<param type="GLsizei" name="height"/>
-				<param type="GLsizei" name="depth"/>
-				<param type="GLint" name="border"/>
-				<param type="GLenum" name="format"/>
-				<param type="GLenum" name="type"/>
-				<param type="const GLvoid*" name="pixels"/>
-			</params>
-			<mappings>
-				<mapping from="GL_EXT_texture3D" name="glTexImage3DEXT"/>
-			</mappings>
-		</function>
-		<function name="glTexSubImage3D" return="void">
-			<params>
-				<param type="GLenum" name="target"/>
-				<param type="GLint" name="level"/>
-				<param type="GLint" name="xoffset"/>
-				<param type="GLint" name="yoffset"/>
-				<param type="GLint" name="zoffset"/>
-				<param type="GLsizei" name="width"/>
-				<param type="GLsizei" name="height"/>
-				<param type="GLsizei" name="depth"/>
-				<param type="GLenum" name="format"/>
-				<param type="GLenum" name="type"/>
-				<param type="const GLvoid*" name="pixels"/>
-			</params>
-			<mappings>
-				<mapping from="GL_EXT_texture3D" name="glTexSubImage3DEXT"/>
-			</mappings>
-		</function>
-		<function name="glCopyTexSubImage3D" return="void">
-			<params>
-				<param type="GLenum" name="target"/>
-				<param type="GLint" name="level"/>
-				<param type="GLint" name="xoffset"/>
-				<param type="GLint" name="yoffset"/>
-				<param type="GLint" name="zoffset"/>
-				<param type="GLint" name="x"/>
-				<param type="GLint" name="y"/>
-				<param type="GLsizei" name="width"/>
-				<param type="GLsizei" name="height"/>
-			</params>
-			<mappings>
-				<mapping from="GL_EXT_texture3D" name="glCopyTexSubImage3DEXT"/>
 			</mappings>
 		</function>
 	</functions>

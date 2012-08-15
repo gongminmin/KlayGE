@@ -2,12 +2,12 @@
 
 <gl_extension name="GL_EXT_pixel_transform" reg_no="138">
 	<tokens>
+		<token name="GL_PIXEL_TRANSFORM_2D_EXT" value="0x8330"/>
 		<token name="GL_PIXEL_MAG_FILTER_EXT" value="0x8331"/>
 		<token name="GL_PIXEL_MIN_FILTER_EXT" value="0x8332"/>
 		<token name="GL_PIXEL_CUBIC_WEIGHT_EXT" value="0x8333"/>
 		<token name="GL_CUBIC_EXT" value="0x8334"/>
 		<token name="GL_AVERAGE_EXT" value="0x8335"/>
-		<token name="GL_PIXEL_TRANSFORM_2D_EXT" value="0x8330"/>
 		<token name="GL_PIXEL_TRANSFORM_2D_STACK_DEPTH_EXT" value="0x8336"/>
 		<token name="GL_MAX_PIXEL_TRANSFORM_2D_STACK_DEPTH_EXT" value="0x8337"/>
 		<token name="GL_PIXEL_TRANSFORM_2D_MATRIX_EXT" value="0x8338"/>
@@ -18,14 +18,14 @@
 			<params>
 				<param type="GLenum" name="target"/>
 				<param type="GLenum" name="pname"/>
-				<param type="const GLint" name="param"/>
+				<param type="GLint" name="param"/>
 			</params>
 		</function>
 		<function name="glPixelTransformParameterfEXT" return="void">
 			<params>
 				<param type="GLenum" name="target"/>
 				<param type="GLenum" name="pname"/>
-				<param type="const GLfloat" name="param"/>
+				<param type="GLfloat" name="param"/>
 			</params>
 		</function>
 		<function name="glPixelTransformParameterivEXT" return="void">

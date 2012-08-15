@@ -16,7 +16,7 @@
 				<param type="const GLenum*" name="mode"/>
 				<param type="const GLsizei*" name="count"/>
 				<param type="GLenum" name="type"/>
-				<param type="const GLvoid* const*" name="indices"/>
+				<param type="const GLvoid**" name="indices"/>
 				<param type="GLsizei" name="primcount"/>
 				<param type="GLint" name="modestride"/>
 			</params>

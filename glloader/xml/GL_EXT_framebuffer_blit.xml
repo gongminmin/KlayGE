@@ -4,7 +4,7 @@
 	<tokens>
 		<token name="GL_READ_FRAMEBUFFER_EXT" value="0x8CA8"/>
 		<token name="GL_DRAW_FRAMEBUFFER_EXT" value="0x8CA9"/>
-		<token name="GL_DRAW_FRAMEBUFFER_BINDING_EXT" value="0x8CA6"/>
+		<token name="GL_DRAW_FRAMEBUFFER_BINDING_EXT" value="GL_FRAMEBUFFER_BINDING_EXT"/>
 		<token name="GL_READ_FRAMEBUFFER_BINDING_EXT" value="0x8CAA"/>
 	</tokens>
 

@@ -24,7 +24,7 @@
 				<param type="GLuint" name="group"/>
 				<param type="GLint*" name="numCounters"/>
 				<param type="GLint*" name="maxActiveCounters"/>
-				<param type="GLsizei" name="countersSize"/>
+				<param type="GLsizei" name="counterSize"/>
 				<param type="GLuint*" name="counters"/>
 			</params>
 		</function>
@@ -39,7 +39,7 @@
 		<function name="glGetPerfMonitorCounterStringAMD" return="void">
 			<params>
 				<param type="GLuint" name="group"/>
-				<param type="GLuint" name="count"/>
+				<param type="GLuint" name="counter"/>
 				<param type="GLsizei" name="bufSize"/>
 				<param type="GLsizei*" name="length"/>
 				<param type="GLchar*" name="counterString"/>
@@ -48,7 +48,7 @@
 		<function name="glGetPerfMonitorCounterInfoAMD" return="void">
 			<params>
 				<param type="GLuint" name="group"/>
-				<param type="GLuint" name="counter"/> 
+				<param type="GLuint" name="counter"/>
 				<param type="GLenum" name="pname"/>
 				<param type="GLvoid*" name="data"/>
 			</params>
@@ -68,7 +68,7 @@
 		<function name="glSelectPerfMonitorCountersAMD" return="void">
 			<params>
 				<param type="GLuint" name="monitor"/>
-				<param type="GLboolean" name="enable"/> 
+				<param type="GLboolean" name="enable"/>
 				<param type="GLuint" name="group"/>
 				<param type="GLint" name="numCounters"/>
 				<param type="GLuint*" name="counterList"/>

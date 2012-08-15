@@ -2,6 +2,7 @@
 
 <gl_extension name="GL_ARB_vertex_attrib_64bit" reg_no="99">
 	<tokens>
+		<token name="GL_RGB32I" value="0x8D83"/>
 		<token name="GL_DOUBLE_VEC2" value="0x8FFC"/>
 		<token name="GL_DOUBLE_VEC3" value="0x8FFD"/>
 		<token name="GL_DOUBLE_VEC4" value="0x8FFE"/>
@@ -62,7 +63,7 @@
 		<function name="glVertexAttribL1dv" return="void">
 			<params>
 				<param type="GLuint" name="index"/>
-				<param type="GLdouble const *" name="v"/>
+				<param type="const GLdouble*" name="v"/>
 			</params>
 			<mappings>
 				<mapping from="GL_EXT_vertex_attrib_64bit" name="glVertexAttribL1dvEXT"/>
@@ -71,7 +72,7 @@
 		<function name="glVertexAttribL2dv" return="void">
 			<params>
 				<param type="GLuint" name="index"/>
-				<param type="GLdouble const *" name="v"/>
+				<param type="const GLdouble*" name="v"/>
 			</params>
 			<mappings>
 				<mapping from="GL_EXT_vertex_attrib_64bit" name="glVertexAttribL2dvEXT"/>
@@ -80,7 +81,7 @@
 		<function name="glVertexAttribL3dv" return="void">
 			<params>
 				<param type="GLuint" name="index"/>
-				<param type="GLdouble const *" name="v"/>
+				<param type="const GLdouble*" name="v"/>
 			</params>
 			<mappings>
 				<mapping from="GL_EXT_vertex_attrib_64bit" name="glVertexAttribL3dvEXT"/>
@@ -89,7 +90,7 @@
 		<function name="glVertexAttribL4dv" return="void">
 			<params>
 				<param type="GLuint" name="index"/>
-				<param type="GLdouble const *" name="v"/>
+				<param type="const GLdouble*" name="v"/>
 			</params>
 			<mappings>
 				<mapping from="GL_EXT_vertex_attrib_64bit" name="glVertexAttribL4dvEXT"/>
@@ -101,7 +102,7 @@
 				<param type="GLint" name="size"/>
 				<param type="GLenum" name="type"/>
 				<param type="GLsizei" name="stride"/>
-				<param type="void const *" name="pointer"/>
+				<param type="const GLvoid*" name="pointer"/>
 			</params>
 			<mappings>
 				<mapping from="GL_EXT_vertex_attrib_64bit" name="glVertexAttribLPointerEXT"/>
@@ -115,20 +116,6 @@
 			</params>
 			<mappings>
 				<mapping from="GL_EXT_vertex_attrib_64bit" name="glGetVertexAttribLdvEXT"/>
-			</mappings>
-		</function>
-		<function name="glVertexArrayVertexAttribLOffset" return="void">
-			<params>
-				<param type="GLuint" name="vaobj"/>
-				<param type="GLuint" name="buffer"/>
-				<param type="GLuint" name="index"/>
-				<param type="GLint" name="size"/>
-				<param type="GLenum" name="type"/>
-				<param type="GLsizei" name="stride"/>
-				<param type="GLintptr" name="offset"/>
-			</params>
-			<mappings>
-				<mapping from="GL_EXT_vertex_attrib_64bit" name="glVertexArrayVertexAttribLOffsetEXT"/>
 			</mappings>
 		</function>
 	</functions>

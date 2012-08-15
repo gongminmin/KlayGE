@@ -2,10 +2,10 @@
 
 <gl_extension name="GL_EXT_provoking_vertex" reg_no="364" prefer="GL_ARB_provoking_vertex">
 	<tokens>
+		<token name="GL_QUADS_FOLLOW_PROVOKING_VERTEX_CONVENTION_EXT" value="0x8E4C"/>
 		<token name="GL_FIRST_VERTEX_CONVENTION_EXT" value="0x8E4D"/>
 		<token name="GL_LAST_VERTEX_CONVENTION_EXT" value="0x8E4E"/>
 		<token name="GL_PROVOKING_VERTEX_EXT" value="0x8E4F"/>
-		<token name="GL_QUADS_FOLLOW_PROVOKING_VERTEX_CONVENTION_EXT" value="0x8E4C"/>
 	</tokens>
 
 	<functions>

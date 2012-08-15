@@ -6,7 +6,5 @@
 		<token name="GL_RGB4_S3TC" value="0x83A1"/>
 		<token name="GL_RGBA_S3TC" value="0x83A2"/>
 		<token name="GL_RGBA4_S3TC" value="0x83A3"/>
-		<token name="GL_RGBA_DXT5_S3TC" value="0x83A4"/>
-		<token name="GL_RGBA4_DXT5_S3TC" value="0x83A5"/>
 	</tokens>
 </gl_extension>

@@ -7,6 +7,7 @@
 		<token name="GL_VERTEX_ARRAY_STORAGE_HINT_APPLE" value="0x851F"/>
 		<token name="GL_MAX_VERTEX_ARRAY_RANGE_ELEMENT_APPLE" value="0x8520"/>
 		<token name="GL_VERTEX_ARRAY_RANGE_POINTER_APPLE" value="0x8521"/>
+		<token name="GL_STORAGE_CLIENT_APPLE" value="0x85B4"/>
 		<token name="GL_STORAGE_CACHED_APPLE" value="0x85BE"/>
 		<token name="GL_STORAGE_SHARED_APPLE" value="0x85BF"/>
 	</tokens>

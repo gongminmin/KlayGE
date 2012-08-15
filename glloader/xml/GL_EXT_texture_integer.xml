@@ -2,7 +2,6 @@
 
 <gl_extension name="GL_EXT_texture_integer" reg_no="343">
 	<tokens>
-		<token name="GL_RGBA_INTEGER_MODE_EXT" value="0x8D9E"/>
 		<token name="GL_RGBA32UI_EXT" value="0x8D70"/>
 		<token name="GL_RGB32UI_EXT" value="0x8D71"/>
 		<token name="GL_ALPHA32UI_EXT" value="0x8D72"/>
@@ -49,25 +48,10 @@
 		<token name="GL_BGRA_INTEGER_EXT" value="0x8D9B"/>
 		<token name="GL_LUMINANCE_INTEGER_EXT" value="0x8D9C"/>
 		<token name="GL_LUMINANCE_ALPHA_INTEGER_EXT" value="0x8D9D"/>
+		<token name="GL_RGBA_INTEGER_MODE_EXT" value="0x8D9E"/>
 	</tokens>
 
 	<functions>
-		<function name="glClearColorIiEXT" return="void">
-			<params>
-				<param type="GLint" name="r"/>
-				<param type="GLint" name="g"/>
-				<param type="GLint" name="b"/>
-				<param type="GLint" name="a"/>
-			</params>
-		</function>
-		<function name="glClearColorIuiEXT" return="void">
-			<params>
-				<param type="GLuint" name="r"/>
-				<param type="GLuint" name="g"/>
-				<param type="GLuint" name="b"/>
-				<param type="GLuint" name="a"/>
-			</params>
-		</function>
 		<function name="glTexParameterIivEXT" return="void">
 			<params>
 				<param type="GLenum" name="target"/>
@@ -94,6 +78,22 @@
 				<param type="GLenum" name="target"/>
 				<param type="GLenum" name="pname"/>
 				<param type="GLuint*" name="params"/>
+			</params>
+		</function>
+		<function name="glClearColorIiEXT" return="void">
+			<params>
+				<param type="GLint" name="red"/>
+				<param type="GLint" name="green"/>
+				<param type="GLint" name="blue"/>
+				<param type="GLint" name="alpha"/>
+			</params>
+		</function>
+		<function name="glClearColorIuiEXT" return="void">
+			<params>
+				<param type="GLuint" name="red"/>
+				<param type="GLuint" name="green"/>
+				<param type="GLuint" name="blue"/>
+				<param type="GLuint" name="alpha"/>
 			</params>
 		</function>
 	</functions>

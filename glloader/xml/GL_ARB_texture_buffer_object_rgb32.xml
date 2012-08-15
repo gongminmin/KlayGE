@@ -1,4 +1,9 @@
 <?xml version='1.0'?>
 
 <gl_extension name="GL_ARB_texture_buffer_object_rgb32" reg_no="92">
+	<tokens>
+		<token name="GL_RGB32F" value="0x8815"/>
+		<token name="GL_RGB32UI" value="0x8D71"/>
+		<token name="GL_RGB32I" value="0x8D83"/>
+	</tokens>
 </gl_extension>

@@ -1,4 +1,7 @@
 <?xml version='1.0'?>
 
 <gl_extension name="GL_ARB_shading_language_100" reg_no="33">
+	<tokens>
+		<token name="GL_SHADING_LANGUAGE_VERSION_ARB" value="0x8B8C"/>
+	</tokens>
 </gl_extension>

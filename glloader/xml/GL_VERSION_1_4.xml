@@ -6,17 +6,24 @@
 		<token name="GL_BLEND_SRC_RGB" value="0x80C9"/>
 		<token name="GL_BLEND_DST_ALPHA" value="0x80CA"/>
 		<token name="GL_BLEND_SRC_ALPHA" value="0x80CB"/>
-		<token name="GL_POINT_SIZE_MIN" value="0x8126"/>
-		<token name="GL_POINT_SIZE_MAX" value="0x8127"/>
 		<token name="GL_POINT_FADE_THRESHOLD_SIZE" value="0x8128"/>
-		<token name="GL_POINT_DISTANCE_ATTENUATION" value="0x8129"/>
-		<token name="GL_GENERATE_MIPMAP" value="0x8191"/>
-		<token name="GL_GENERATE_MIPMAP_HINT" value="0x8192"/>
 		<token name="GL_DEPTH_COMPONENT16" value="0x81A5"/>
 		<token name="GL_DEPTH_COMPONENT24" value="0x81A6"/>
 		<token name="GL_DEPTH_COMPONENT32" value="0x81A7"/>
 		<token name="GL_MIRRORED_REPEAT" value="0x8370"/>
-		<token name="GL_FOG_COORDINATE_SRC" value="0x8450"/>
+		<token name="GL_MAX_TEXTURE_LOD_BIAS" value="0x84FD"/>
+		<token name="GL_TEXTURE_LOD_BIAS" value="0x8501"/>
+		<token name="GL_INCR_WRAP" value="0x8507"/>
+		<token name="GL_DECR_WRAP" value="0x8508"/>
+		<token name="GL_TEXTURE_DEPTH_SIZE" value="0x884A"/>
+		<token name="GL_TEXTURE_COMPARE_MODE" value="0x884C"/>
+		<token name="GL_TEXTURE_COMPARE_FUNC" value="0x884D"/>
+		<token name="GL_POINT_SIZE_MIN" value="0x8126"/>
+		<token name="GL_POINT_SIZE_MAX" value="0x8127"/>
+		<token name="GL_POINT_DISTANCE_ATTENUATION" value="0x8129"/>
+		<token name="GL_GENERATE_MIPMAP" value="0x8191"/>
+		<token name="GL_GENERATE_MIPMAP_HINT" value="0x8192"/>
+		<token name="GL_FOG_COORDINATE_SOURCE" value="0x8450"/>
 		<token name="GL_FOG_COORDINATE" value="0x8451"/>
 		<token name="GL_FRAGMENT_DEPTH" value="0x8452"/>
 		<token name="GL_CURRENT_FOG_COORDINATE" value="0x8453"/>
@@ -31,15 +38,8 @@
 		<token name="GL_SECONDARY_COLOR_ARRAY_STRIDE" value="0x845C"/>
 		<token name="GL_SECONDARY_COLOR_ARRAY_POINTER" value="0x845D"/>
 		<token name="GL_SECONDARY_COLOR_ARRAY" value="0x845E"/>
-		<token name="GL_MAX_TEXTURE_LOD_BIAS" value="0x84FD"/>
 		<token name="GL_TEXTURE_FILTER_CONTROL" value="0x8500"/>
-		<token name="GL_TEXTURE_LOD_BIAS" value="0x8501"/>
-		<token name="GL_INCR_WRAP" value="0x8507"/>
-		<token name="GL_DECR_WRAP" value="0x8508"/>
-		<token name="GL_TEXTURE_DEPTH_SIZE" value="0x884A"/>
 		<token name="GL_DEPTH_TEXTURE_MODE" value="0x884B"/>
-		<token name="GL_TEXTURE_COMPARE_MODE" value="0x884C"/>
-		<token name="GL_TEXTURE_COMPARE_FUNC" value="0x884D"/>
 		<token name="GL_COMPARE_R_TO_TEXTURE" value="0x884E"/>
 	</tokens>
 
@@ -53,6 +53,70 @@
 			</params>
 			<mappings>
 				<mapping from="GL_EXT_blend_func_separate" name="glBlendFuncSeparateEXT"/>
+				<mapping from="GL_INGR_blend_func_separate" name="glBlendFuncSeparateINGR"/>
+			</mappings>
+		</function>
+		<function name="glMultiDrawArrays" return="void">
+			<params>
+				<param type="GLenum" name="mode"/>
+				<param type="GLint*" name="first"/>
+				<param type="GLsizei*" name="count"/>
+				<param type="GLsizei" name="drawcount"/>
+			</params>
+			<mappings>
+				<mapping from="GL_EXT_multi_draw_arrays" name="glMultiDrawArraysEXT"/>
+			</mappings>
+		</function>
+		<function name="glMultiDrawElements" return="void">
+			<params>
+				<param type="GLenum" name="mode"/>
+				<param type="GLsizei*" name="count"/>
+				<param type="GLenum" name="type"/>
+				<param type="const GLvoid**" name="indices"/>
+				<param type="GLsizei" name="drawcount"/>
+			</params>
+			<mappings>
+				<mapping from="GL_EXT_multi_draw_arrays" name="glMultiDrawElementsEXT"/>
+			</mappings>
+		</function>
+		<function name="glPointParameterf" return="void">
+			<params>
+				<param type="GLenum" name="pname"/>
+				<param type="GLfloat" name="param"/>
+			</params>
+			<mappings>
+				<mapping from="GL_ARB_point_parameters" name="glPointParameterfARB"/>
+				<mapping from="GL_EXT_point_parameters" name="glPointParameterfEXT"/>
+				<mapping from="GL_SGIS_point_parameters" name="glPointParameterfSGIS"/>
+			</mappings>
+		</function>
+		<function name="glPointParameterfv" return="void">
+			<params>
+				<param type="GLenum" name="pname"/>
+				<param type="GLfloat*" name="params"/>
+			</params>
+			<mappings>
+				<mapping from="GL_ARB_point_parameters" name="glPointParameterfvARB"/>
+				<mapping from="GL_EXT_point_parameters" name="glPointParameterfvEXT"/>
+				<mapping from="GL_SGIS_point_parameters" name="glPointParameterfvSGIS"/>
+			</mappings>
+		</function>
+		<function name="glPointParameteri" return="void">
+			<params>
+				<param type="GLenum" name="pname"/>
+				<param type="GLint" name="param"/>
+			</params>
+			<mappings>
+				<mapping from="GL_NV_point_sprite" name="glPointParameteriNV"/>
+			</mappings>
+		</function>
+		<function name="glPointParameteriv" return="void">
+			<params>
+				<param type="GLenum" name="pname"/>
+				<param type="GLint*" name="params"/>
+			</params>
+			<mappings>
+				<mapping from="GL_NV_point_sprite" name="glPointParameterivNV"/>
 			</mappings>
 		</function>
 		<function name="glFogCoordf" return="void">
@@ -95,65 +159,6 @@
 			</params>
 			<mappings>
 				<mapping from="GL_EXT_fog_coord" name="glFogCoordPointerEXT"/>
-			</mappings>
-		</function>
-		<function name="glMultiDrawArrays" return="void">
-			<params>
-				<param type="GLenum" name="mode"/>
-				<param type="GLint*" name="first"/>
-				<param type="GLsizei*" name="count"/>
-				<param type="GLsizei" name="primcount"/>
-			</params>
-			<mappings>
-				<mapping from="GL_EXT_multi_draw_arrays" name="glMultiDrawArraysEXT"/>
-			</mappings>
-		</function>
-		<function name="glMultiDrawElements" return="void">
-			<params>
-				<param type="GLenum" name="mode"/>
-				<param type="GLsizei*" name="count"/>
-				<param type="GLenum" name="type"/>
-				<param type="const GLvoid**" name="indices"/>
-				<param type="GLsizei" name="primcount"/>
-			</params>
-			<mappings>
-				<mapping from="GL_EXT_multi_draw_arrays" name="glMultiDrawElementsEXT"/>
-			</mappings>
-		</function>
-		<function name="glPointParameterf" return="void">
-			<params>
-				<param type="GLenum" name="pname"/>
-				<param type="GLfloat" name="param"/>
-			</params>
-			<mappings>
-				<mapping from="GL_ARB_point_parameters" name="glPointParameterfARB"/>
-			</mappings>
-		</function>
-		<function name="glPointParameterfv" return="void">
-			<params>
-				<param type="GLenum" name="pname"/>
-				<param type="GLfloat*" name="params"/>
-			</params>
-			<mappings>
-				<mapping from="GL_ARB_point_parameters" name="glPointParameterfvARB"/>
-			</mappings>
-		</function>
-		<function name="glPointParameteri" return="void">
-			<params>
-				<param type="GLenum" name="pname"/>
-				<param type="GLfloat" name="param"/>
-			</params>
-			<mappings>
-				<mapping from="GL_NV_point_sprite" name="glPointParameteriNV"/>
-			</mappings>
-		</function>
-		<function name="glPointParameteriv" return="void">
-			<params>
-				<param type="GLenum" name="pname"/>
-				<param type="GLfloat*" name="params"/>
-			</params>
-			<mappings>
-				<mapping from="GL_NV_point_sprite" name="glPointParameterivNV"/>
 			</mappings>
 		</function>
 		<function name="glSecondaryColor3b" return="void">
@@ -323,7 +328,7 @@
 		</function>
 		<function name="glWindowPos2dv" return="void">
 			<params>
-				<param type="const GLdouble*" name="p"/>
+				<param type="const GLdouble*" name="v"/>
 			</params>
 			<mappings>
 				<mapping from="GL_ARB_window_pos" name="glWindowPos2dvARB"/>
@@ -342,7 +347,7 @@
 		</function>
 		<function name="glWindowPos2fv" return="void">
 			<params>
-				<param type="const GLfloat*" name="p"/>
+				<param type="const GLfloat*" name="v"/>
 			</params>
 			<mappings>
 				<mapping from="GL_ARB_window_pos" name="glWindowPos2fvARB"/>
@@ -361,7 +366,7 @@
 		</function>
 		<function name="glWindowPos2iv" return="void">
 			<params>
-				<param type="const GLint*" name="p"/>
+				<param type="const GLint*" name="v"/>
 			</params>
 			<mappings>
 				<mapping from="GL_ARB_window_pos" name="glWindowPos2ivARB"/>
@@ -380,7 +385,7 @@
 		</function>
 		<function name="glWindowPos2sv" return="void">
 			<params>
-				<param type="const GLshort*" name="p"/>
+				<param type="const GLshort*" name="v"/>
 			</params>
 			<mappings>
 				<mapping from="GL_ARB_window_pos" name="glWindowPos2svARB"/>
@@ -400,7 +405,7 @@
 		</function>
 		<function name="glWindowPos3dv" return="void">
 			<params>
-				<param type="const GLdouble*" name="p"/>
+				<param type="const GLdouble*" name="v"/>
 			</params>
 			<mappings>
 				<mapping from="GL_ARB_window_pos" name="glWindowPos3dvARB"/>
@@ -420,7 +425,7 @@
 		</function>
 		<function name="glWindowPos3fv" return="void">
 			<params>
-				<param type="const GLfloat*" name="p"/>
+				<param type="const GLfloat*" name="v"/>
 			</params>
 			<mappings>
 				<mapping from="GL_ARB_window_pos" name="glWindowPos3fvARB"/>
@@ -440,7 +445,7 @@
 		</function>
 		<function name="glWindowPos3iv" return="void">
 			<params>
-				<param type="const GLint*" name="p"/>
+				<param type="const GLint*" name="v"/>
 			</params>
 			<mappings>
 				<mapping from="GL_ARB_window_pos" name="glWindowPos3ivARB"/>
@@ -460,7 +465,7 @@
 		</function>
 		<function name="glWindowPos3sv" return="void">
 			<params>
-				<param type="const GLshort*" name="p"/>
+				<param type="const GLshort*" name="v"/>
 			</params>
 			<mappings>
 				<mapping from="GL_ARB_window_pos" name="glWindowPos3svARB"/>

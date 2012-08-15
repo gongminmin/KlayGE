@@ -7,44 +7,68 @@
 				<param type="GLdouble" name="x"/>
 				<param type="GLdouble" name="y"/>
 			</params>
+			<mappings>
+				<mapping from="GL_MESA_window_pos" name="glWindowPos2dMESA"/>
+			</mappings>
+		</function>
+		<function name="glWindowPos2dvARB" return="void">
+			<params>
+				<param type="const GLdouble*" name="v"/>
+			</params>
+			<mappings>
+				<mapping from="GL_MESA_window_pos" name="glWindowPos2dvMESA"/>
+			</mappings>
 		</function>
 		<function name="glWindowPos2fARB" return="void">
 			<params>
 				<param type="GLfloat" name="x"/>
 				<param type="GLfloat" name="y"/>
 			</params>
+			<mappings>
+				<mapping from="GL_MESA_window_pos" name="glWindowPos2fMESA"/>
+			</mappings>
+		</function>
+		<function name="glWindowPos2fvARB" return="void">
+			<params>
+				<param type="const GLfloat*" name="v"/>
+			</params>
+			<mappings>
+				<mapping from="GL_MESA_window_pos" name="glWindowPos2fvMESA"/>
+			</mappings>
 		</function>
 		<function name="glWindowPos2iARB" return="void">
 			<params>
 				<param type="GLint" name="x"/>
 				<param type="GLint" name="y"/>
 			</params>
+			<mappings>
+				<mapping from="GL_MESA_window_pos" name="glWindowPos2iMESA"/>
+			</mappings>
+		</function>
+		<function name="glWindowPos2ivARB" return="void">
+			<params>
+				<param type="const GLint*" name="v"/>
+			</params>
+			<mappings>
+				<mapping from="GL_MESA_window_pos" name="glWindowPos2ivMESA"/>
+			</mappings>
 		</function>
 		<function name="glWindowPos2sARB" return="void">
 			<params>
 				<param type="GLshort" name="x"/>
 				<param type="GLshort" name="y"/>
 			</params>
-		</function>
-		<function name="glWindowPos2dvARB" return="void">
-			<params>
-				<param type="const GLdouble*" name="p"/>
-			</params>
-		</function>
-		<function name="glWindowPos2fvARB" return="void">
-			<params>
-				<param type="const GLfloat*" name="p"/>
-			</params>
-		</function>
-		<function name="glWindowPos2ivARB" return="void">
-			<params>
-				<param type="const GLint*" name="p"/>
-			</params>
+			<mappings>
+				<mapping from="GL_MESA_window_pos" name="glWindowPos2sMESA"/>
+			</mappings>
 		</function>
 		<function name="glWindowPos2svARB" return="void">
 			<params>
-				<param type="const GLshort*" name="p"/>
+				<param type="const GLshort*" name="v"/>
 			</params>
+			<mappings>
+				<mapping from="GL_MESA_window_pos" name="glWindowPos2svMESA"/>
+			</mappings>
 		</function>
 		<function name="glWindowPos3dARB" return="void">
 			<params>
@@ -52,6 +76,17 @@
 				<param type="GLdouble" name="y"/>
 				<param type="GLdouble" name="z"/>
 			</params>
+			<mappings>
+				<mapping from="GL_MESA_window_pos" name="glWindowPos3dMESA"/>
+			</mappings>
+		</function>
+		<function name="glWindowPos3dvARB" return="void">
+			<params>
+				<param type="const GLdouble*" name="v"/>
+			</params>
+			<mappings>
+				<mapping from="GL_MESA_window_pos" name="glWindowPos3dvMESA"/>
+			</mappings>
 		</function>
 		<function name="glWindowPos3fARB" return="void">
 			<params>
@@ -59,6 +94,17 @@
 				<param type="GLfloat" name="y"/>
 				<param type="GLfloat" name="z"/>
 			</params>
+			<mappings>
+				<mapping from="GL_MESA_window_pos" name="glWindowPos3fMESA"/>
+			</mappings>
+		</function>
+		<function name="glWindowPos3fvARB" return="void">
+			<params>
+				<param type="const GLfloat*" name="v"/>
+			</params>
+			<mappings>
+				<mapping from="GL_MESA_window_pos" name="glWindowPos3fvMESA"/>
+			</mappings>
 		</function>
 		<function name="glWindowPos3iARB" return="void">
 			<params>
@@ -66,6 +112,17 @@
 				<param type="GLint" name="y"/>
 				<param type="GLint" name="z"/>
 			</params>
+			<mappings>
+				<mapping from="GL_MESA_window_pos" name="glWindowPos3iMESA"/>
+			</mappings>
+		</function>
+		<function name="glWindowPos3ivARB" return="void">
+			<params>
+				<param type="const GLint*" name="v"/>
+			</params>
+			<mappings>
+				<mapping from="GL_MESA_window_pos" name="glWindowPos3ivMESA"/>
+			</mappings>
 		</function>
 		<function name="glWindowPos3sARB" return="void">
 			<params>
@@ -73,26 +130,17 @@
 				<param type="GLshort" name="y"/>
 				<param type="GLshort" name="z"/>
 			</params>
-		</function>
-		<function name="glWindowPos3dvARB" return="void">
-			<params>
-				<param type="const GLdouble*" name="p"/>
-			</params>
-		</function>
-		<function name="glWindowPos3fvARB" return="void">
-			<params>
-				<param type="const GLfloat*" name="p"/>
-			</params>
-		</function>
-		<function name="glWindowPos3ivARB" return="void">
-			<params>
-				<param type="const GLint*" name="p"/>
-			</params>
+			<mappings>
+				<mapping from="GL_MESA_window_pos" name="glWindowPos3sMESA"/>
+			</mappings>
 		</function>
 		<function name="glWindowPos3svARB" return="void">
 			<params>
-				<param type="const GLshort*" name="p"/>
+				<param type="const GLshort*" name="v"/>
 			</params>
+			<mappings>
+				<mapping from="GL_MESA_window_pos" name="glWindowPos3svMESA"/>
+			</mappings>
 		</function>
 	</functions>
 </gl_extension>

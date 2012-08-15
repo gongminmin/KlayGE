@@ -2,27 +2,24 @@
 
 <gl_extension name="GL_EXT_framebuffer_object" reg_no="310" prefer="GL_ARB_framebuffer_object">
 	<tokens>
-		<token name="GL_FRAMEBUFFER_EXT" value="0x8D40"/>
-		<token name="GL_RENDERBUFFER_EXT" value="0x8D41"/>
-		<token name="GL_STENCIL_INDEX_EXT" value="0x8D45"/>
-		<token name="GL_STENCIL_INDEX1_EXT" value="0x8D46"/>
-		<token name="GL_STENCIL_INDEX4_EXT" value="0x8D47"/>
-		<token name="GL_STENCIL_INDEX8_EXT" value="0x8D48"/>
-		<token name="GL_STENCIL_INDEX16_EXT" value="0x8D49"/>
-		<token name="GL_RENDERBUFFER_WIDTH_EXT" value="0x8D42"/>
-		<token name="GL_RENDERBUFFER_HEIGHT_EXT" value="0x8D43"/>
-		<token name="GL_RENDERBUFFER_INTERNAL_FORMAT_EXT" value="0x8D44"/>
-		<token name="GL_RENDERBUFFER_RED_SIZE_EXT" value="0x8D50"/>
-		<token name="GL_RENDERBUFFER_GREEN_SIZE_EXT" value="0x8D51"/>
-		<token name="GL_RENDERBUFFER_BLUE_SIZE_EXT" value="0x8D52"/>
-		<token name="GL_RENDERBUFFER_ALPHA_SIZE_EXT" value="0x8D53"/>
-		<token name="GL_RENDERBUFFER_DEPTH_SIZE_EXT" value="0x8D54"/>
-		<token name="GL_RENDERBUFFER_STENCIL_SIZE_EXT" value="0x8D55"/>
+		<token name="GL_INVALID_FRAMEBUFFER_OPERATION_EXT" value="0x0506"/>
+		<token name="GL_MAX_RENDERBUFFER_SIZE_EXT" value="0x84E8"/>
+		<token name="GL_FRAMEBUFFER_BINDING_EXT" value="0x8CA6"/>
+		<token name="GL_RENDERBUFFER_BINDING_EXT" value="0x8CA7"/>
 		<token name="GL_FRAMEBUFFER_ATTACHMENT_OBJECT_TYPE_EXT" value="0x8CD0"/>
 		<token name="GL_FRAMEBUFFER_ATTACHMENT_OBJECT_NAME_EXT" value="0x8CD1"/>
 		<token name="GL_FRAMEBUFFER_ATTACHMENT_TEXTURE_LEVEL_EXT" value="0x8CD2"/>
 		<token name="GL_FRAMEBUFFER_ATTACHMENT_TEXTURE_CUBE_MAP_FACE_EXT" value="0x8CD3"/>
 		<token name="GL_FRAMEBUFFER_ATTACHMENT_TEXTURE_3D_ZOFFSET_EXT" value="0x8CD4"/>
+		<token name="GL_FRAMEBUFFER_COMPLETE_EXT" value="0x8CD5"/>
+		<token name="GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT_EXT" value="0x8CD6"/>
+		<token name="GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT_EXT" value="0x8CD7"/>
+		<token name="GL_FRAMEBUFFER_INCOMPLETE_DIMENSIONS_EXT" value="0x8CD9"/>
+		<token name="GL_FRAMEBUFFER_INCOMPLETE_FORMATS_EXT" value="0x8CDA"/>
+		<token name="GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER_EXT" value="0x8CDB"/>
+		<token name="GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER_EXT" value="0x8CDC"/>
+		<token name="GL_FRAMEBUFFER_UNSUPPORTED_EXT" value="0x8CDD"/>
+		<token name="GL_MAX_COLOR_ATTACHMENTS_EXT" value="0x8CDF"/>
 		<token name="GL_COLOR_ATTACHMENT0_EXT" value="0x8CE0"/>
 		<token name="GL_COLOR_ATTACHMENT1_EXT" value="0x8CE1"/>
 		<token name="GL_COLOR_ATTACHMENT2_EXT" value="0x8CE2"/>
@@ -41,19 +38,21 @@
 		<token name="GL_COLOR_ATTACHMENT15_EXT" value="0x8CEF"/>
 		<token name="GL_DEPTH_ATTACHMENT_EXT" value="0x8D00"/>
 		<token name="GL_STENCIL_ATTACHMENT_EXT" value="0x8D20"/>
-		<token name="GL_FRAMEBUFFER_COMPLETE_EXT" value="0x8CD5"/>
-		<token name="GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT_EXT" value="0x8CD6"/>
-		<token name="GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT_EXT" value="0x8CD7"/>
-		<token name="GL_FRAMEBUFFER_INCOMPLETE_DIMENSIONS_EXT" value="0x8CD9"/>
-		<token name="GL_FRAMEBUFFER_INCOMPLETE_FORMATS_EXT" value="0x8CDA"/>
-		<token name="GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER_EXT" value="0x8CDB"/>
-		<token name="GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER_EXT" value="0x8CDC"/>
-		<token name="GL_FRAMEBUFFER_UNSUPPORTED_EXT" value="0x8CDD"/>
-		<token name="GL_FRAMEBUFFER_BINDING_EXT" value="0x8CA6"/>
-		<token name="GL_RENDERBUFFER_BINDING_EXT" value="0x8CA7"/>
-		<token name="GL_MAX_COLOR_ATTACHMENTS_EXT" value="0x8CDF"/>
-		<token name="GL_MAX_RENDERBUFFER_SIZE_EXT" value="0x84E8"/>
-		<token name="GL_INVALID_FRAMEBUFFER_OPERATION_EXT" value="0x0506"/>
+		<token name="GL_FRAMEBUFFER_EXT" value="0x8D40"/>
+		<token name="GL_RENDERBUFFER_EXT" value="0x8D41"/>
+		<token name="GL_RENDERBUFFER_WIDTH_EXT" value="0x8D42"/>
+		<token name="GL_RENDERBUFFER_HEIGHT_EXT" value="0x8D43"/>
+		<token name="GL_RENDERBUFFER_INTERNAL_FORMAT_EXT" value="0x8D44"/>
+		<token name="GL_STENCIL_INDEX1_EXT" value="0x8D46"/>
+		<token name="GL_STENCIL_INDEX4_EXT" value="0x8D47"/>
+		<token name="GL_STENCIL_INDEX8_EXT" value="0x8D48"/>
+		<token name="GL_STENCIL_INDEX16_EXT" value="0x8D49"/>
+		<token name="GL_RENDERBUFFER_RED_SIZE_EXT" value="0x8D50"/>
+		<token name="GL_RENDERBUFFER_GREEN_SIZE_EXT" value="0x8D51"/>
+		<token name="GL_RENDERBUFFER_BLUE_SIZE_EXT" value="0x8D52"/>
+		<token name="GL_RENDERBUFFER_ALPHA_SIZE_EXT" value="0x8D53"/>
+		<token name="GL_RENDERBUFFER_DEPTH_SIZE_EXT" value="0x8D54"/>
+		<token name="GL_RENDERBUFFER_STENCIL_SIZE_EXT" value="0x8D55"/>
 	</tokens>
 
 	<functions>

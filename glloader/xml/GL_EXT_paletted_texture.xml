@@ -15,7 +15,7 @@
 		<function name="glColorTableEXT" return="void">
 			<params>
 				<param type="GLenum" name="target"/>
-				<param type="GLenum" name="internalformat"/>
+				<param type="GLenum" name="internalFormat"/>
 				<param type="GLsizei" name="width"/>
 				<param type="GLenum" name="format"/>
 				<param type="GLenum" name="type"/>
@@ -27,7 +27,7 @@
 				<param type="GLenum" name="target"/>
 				<param type="GLenum" name="format"/>
 				<param type="GLenum" name="type"/>
-				<param type="GLvoid*" name="table"/>
+				<param type="GLvoid*" name="data"/>
 			</params>
 		</function>
 		<function name="glGetColorTableParameterivEXT" return="void">

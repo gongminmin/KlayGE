@@ -5,7 +5,7 @@
 		<token name="GL_POINT_SIZE_MIN_SGIS" value="0x8126"/>
 		<token name="GL_POINT_SIZE_MAX_SGIS" value="0x8127"/>
 		<token name="GL_POINT_FADE_THRESHOLD_SIZE_SGIS" value="0x8128"/>
-		<token name="GL_POINT_DISTANCE_ATTENUATION_SGIS" value="0x8129"/>
+		<token name="GL_DISTANCE_ATTENUATION_SGIS" value="0x8129"/>
 	</tokens>
 
 	<functions>

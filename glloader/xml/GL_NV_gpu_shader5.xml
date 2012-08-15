@@ -30,10 +30,11 @@
 		<token name="GL_FLOAT16_VEC2_NV" value="0x8FF9"/>
 		<token name="GL_FLOAT16_VEC3_NV" value="0x8FFA"/>
 		<token name="GL_FLOAT16_VEC4_NV" value="0x8FFB"/>
+		<token name="GL_PATCHES" value="0x000E"/>
 	</tokens>
 
 	<functions>
-        <function name="glUniform1i64NV" return="void">
+		<function name="glUniform1i64NV" return="void">
 			<params>
 				<param type="GLint" name="location"/>
 				<param type="GLint64EXT" name="x"/>

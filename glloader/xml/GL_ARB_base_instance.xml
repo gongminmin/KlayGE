@@ -7,7 +7,7 @@
 				<param type="GLenum" name="mode"/>
 				<param type="GLint" name="first"/>
 				<param type="GLsizei" name="count"/>
-				<param type="GLsizei" name="primcount"/>
+				<param type="GLsizei" name="instancecount"/>
 				<param type="GLuint" name="baseinstance"/>
 			</params>
 		</function>
@@ -16,8 +16,8 @@
 				<param type="GLenum" name="mode"/>
 				<param type="GLsizei" name="count"/>
 				<param type="GLenum" name="type"/>
-				<param type="void const *" name="indices"/>
-				<param type="GLsizei" name="primcount"/>
+				<param type="const GLvoid*" name="indices"/>
+				<param type="GLsizei" name="instancecount"/>
 				<param type="GLuint" name="baseinstance"/>
 			</params>
 		</function>
@@ -26,8 +26,8 @@
 				<param type="GLenum" name="mode"/>
 				<param type="GLsizei" name="count"/>
 				<param type="GLenum" name="type"/>
-				<param type="void const *" name="indices"/>
-				<param type="GLsizei" name="primcount"/>
+				<param type="const GLvoid*" name="indices"/>
+				<param type="GLsizei" name="instancecount"/>
 				<param type="GLint" name="basevertex"/>
 				<param type="GLuint" name="baseinstance"/>
 			</params>

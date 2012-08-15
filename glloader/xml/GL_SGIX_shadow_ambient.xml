@@ -2,6 +2,6 @@
 
 <gl_extension name="GL_SGIX_shadow_ambient" reg_no="90" prefer="GL_ARB_shadow_ambient">
 	<tokens>
-		<token name="GL_TEXTURE_COMPARE_FAIL_VALUE_SGIX" value="0x80BF"/>
+		<token name="GL_SHADOW_AMBIENT_SGIX" value="0x80BF"/>
 	</tokens>
 </gl_extension>

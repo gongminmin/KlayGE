@@ -2,7 +2,6 @@
 
 <gl_extension name="GL_VERSION_2_1">
 	<tokens>
-		<token name="GL_CURRENT_RASTER_SECONDARY_COLOR" value="0x845F"/>
 		<token name="GL_PIXEL_PACK_BUFFER" value="0x88EB"/>
 		<token name="GL_PIXEL_UNPACK_BUFFER" value="0x88EC"/>
 		<token name="GL_PIXEL_PACK_BUFFER_BINDING" value="0x88ED"/>
@@ -17,12 +16,13 @@
 		<token name="GL_SRGB8" value="0x8C41"/>
 		<token name="GL_SRGB_ALPHA" value="0x8C42"/>
 		<token name="GL_SRGB8_ALPHA8" value="0x8C43"/>
+		<token name="GL_COMPRESSED_SRGB" value="0x8C48"/>
+		<token name="GL_COMPRESSED_SRGB_ALPHA" value="0x8C49"/>
+		<token name="GL_CURRENT_RASTER_SECONDARY_COLOR" value="0x845F"/>
 		<token name="GL_SLUMINANCE_ALPHA" value="0x8C44"/>
 		<token name="GL_SLUMINANCE8_ALPHA8" value="0x8C45"/>
 		<token name="GL_SLUMINANCE" value="0x8C46"/>
 		<token name="GL_SLUMINANCE8" value="0x8C47"/>
-		<token name="GL_COMPRESSED_SRGB" value="0x8C48"/>
-		<token name="GL_COMPRESSED_SRGB_ALPHA" value="0x8C49"/>
 		<token name="GL_COMPRESSED_SLUMINANCE" value="0x8C4A"/>
 		<token name="GL_COMPRESSED_SLUMINANCE_ALPHA" value="0x8C4B"/>
 	</tokens>

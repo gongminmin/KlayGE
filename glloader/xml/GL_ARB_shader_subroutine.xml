@@ -11,6 +11,8 @@
 		<token name="GL_MAX_SUBROUTINE_UNIFORM_LOCATIONS" value="0x8DE8"/>
 		<token name="GL_NUM_COMPATIBLE_SUBROUTINES" value="0x8E4A"/>
 		<token name="GL_COMPATIBLE_SUBROUTINES" value="0x8E4B"/>
+		<token name="GL_UNIFORM_SIZE" value="0x8A38"/>
+		<token name="GL_UNIFORM_NAME_LENGTH" value="0x8A39"/>
 	</tokens>
 
 	<functions>

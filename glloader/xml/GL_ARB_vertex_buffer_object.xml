@@ -7,6 +7,8 @@
 	</typedefs>
 
 	<tokens>
+		<token name="GL_BUFFER_SIZE_ARB" value="0x8764"/>
+		<token name="GL_BUFFER_USAGE_ARB" value="0x8765"/>
 		<token name="GL_ARRAY_BUFFER_ARB" value="0x8892"/>
 		<token name="GL_ELEMENT_ARRAY_BUFFER_ARB" value="0x8893"/>
 		<token name="GL_ARRAY_BUFFER_BINDING_ARB" value="0x8894"/>
@@ -18,11 +20,9 @@
 		<token name="GL_TEXTURE_COORD_ARRAY_BUFFER_BINDING_ARB" value="0x889A"/>
 		<token name="GL_EDGE_FLAG_ARRAY_BUFFER_BINDING_ARB" value="0x889B"/>
 		<token name="GL_SECONDARY_COLOR_ARRAY_BUFFER_BINDING_ARB" value="0x889C"/>
-		<token name="GL_FOG_COORD_ARRAY_BUFFER_BINDING_ARB" value="0x889D"/>
+		<token name="GL_FOG_COORDINATE_ARRAY_BUFFER_BINDING_ARB" value="0x889D"/>
 		<token name="GL_WEIGHT_ARRAY_BUFFER_BINDING_ARB" value="0x889E"/>
 		<token name="GL_VERTEX_ATTRIB_ARRAY_BUFFER_BINDING_ARB" value="0x889F"/>
-		<token name="GL_BUFFER_SIZE_ARB" value="0x8764"/>
-		<token name="GL_BUFFER_USAGE_ARB" value="0x8765"/>
 		<token name="GL_READ_ONLY_ARB" value="0x88B8"/>
 		<token name="GL_WRITE_ONLY_ARB" value="0x88B9"/>
 		<token name="GL_READ_WRITE_ARB" value="0x88BA"/>
@@ -47,6 +47,23 @@
 				<param type="GLuint" name="buffer"/>
 			</params>
 		</function>
+		<function name="glDeleteBuffersARB" return="void">
+			<params>
+				<param type="GLsizei" name="n"/>
+				<param type="const GLuint*" name="buffers"/>
+			</params>
+		</function>
+		<function name="glGenBuffersARB" return="void">
+			<params>
+				<param type="GLsizei" name="n"/>
+				<param type="GLuint*" name="buffers"/>
+			</params>
+		</function>
+		<function name="glIsBufferARB" return="GLboolean">
+			<params>
+				<param type="GLuint" name="buffer"/>
+			</params>
+		</function>
 		<function name="glBufferDataARB" return="void">
 			<params>
 				<param type="GLenum" name="target"/>
@@ -63,16 +80,23 @@
 				<param type="const GLvoid*" name="data"/>
 			</params>
 		</function>
-		<function name="glDeleteBuffersARB" return="void">
+		<function name="glGetBufferSubDataARB" return="void">
 			<params>
-				<param type="GLsizei" name="n"/>
-				<param type="const GLuint*" name="buffers"/>
+				<param type="GLenum" name="target"/>
+				<param type="GLintptrARB" name="offset"/>
+				<param type="GLsizeiptrARB" name="size"/>
+				<param type="GLvoid*" name="data"/>
 			</params>
 		</function>
-		<function name="glGenBuffersARB" return="void">
+		<function name="glMapBufferARB" return="GLvoid*">
 			<params>
-				<param type="GLsizei" name="n"/>
-				<param type="GLuint*" name="buffers"/>
+				<param type="GLenum" name="target"/>
+				<param type="GLenum" name="access"/>
+			</params>
+		</function>
+		<function name="glUnmapBufferARB" return="GLboolean">
+			<params>
+				<param type="GLenum" name="target"/>
 			</params>
 		</function>
 		<function name="glGetBufferParameterivARB" return="void">
@@ -87,30 +111,6 @@
 				<param type="GLenum" name="target"/>
 				<param type="GLenum" name="pname"/>
 				<param type="GLvoid**" name="params"/>
-			</params>
-		</function>
-		<function name="glGetBufferSubDataARB" return="void">
-			<params>
-				<param type="GLenum" name="target"/>
-				<param type="GLintptrARB" name="offset"/>
-				<param type="GLsizeiptrARB" name="size"/>
-				<param type="GLvoid*" name="data"/>
-			</params>
-		</function>
-		<function name="glIsBufferARB" return="GLboolean">
-			<params>
-				<param type="GLuint" name="buffer"/>
-			</params>
-		</function>
-		<function name="glMapBufferARB" return="GLvoid*">
-			<params>
-				<param type="GLenum" name="target"/>
-				<param type="GLenum" name="access"/>
-			</params>
-		</function>
-		<function name="glUnmapBufferARB" return="GLboolean">
-			<params>
-				<param type="GLenum" name="target"/>
 			</params>
 		</function>
 	</functions>

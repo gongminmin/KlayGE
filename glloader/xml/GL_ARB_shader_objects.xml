@@ -24,6 +24,14 @@
 		<token name="GL_FLOAT_MAT2_ARB" value="0x8B5A"/>
 		<token name="GL_FLOAT_MAT3_ARB" value="0x8B5B"/>
 		<token name="GL_FLOAT_MAT4_ARB" value="0x8B5C"/>
+		<token name="GL_SAMPLER_1D_ARB" value="0x8B5D"/>
+		<token name="GL_SAMPLER_2D_ARB" value="0x8B5E"/>
+		<token name="GL_SAMPLER_3D_ARB" value="0x8B5F"/>
+		<token name="GL_SAMPLER_CUBE_ARB" value="0x8B60"/>
+		<token name="GL_SAMPLER_1D_SHADOW_ARB" value="0x8B61"/>
+		<token name="GL_SAMPLER_2D_SHADOW_ARB" value="0x8B62"/>
+		<token name="GL_SAMPLER_2D_RECT_ARB" value="0x8B63"/>
+		<token name="GL_SAMPLER_2D_RECT_SHADOW_ARB" value="0x8B64"/>
 		<token name="GL_OBJECT_DELETE_STATUS_ARB" value="0x8B80"/>
 		<token name="GL_OBJECT_COMPILE_STATUS_ARB" value="0x8B81"/>
 		<token name="GL_OBJECT_LINK_STATUS_ARB" value="0x8B82"/>

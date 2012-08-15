@@ -9,7 +9,7 @@
 	</tokens>
 
 	<functions>
- 		<function name="glDeformationMap3dSGIX" return="void">
+		<function name="glDeformationMap3dSGIX" return="void">
 			<params>
 				<param type="GLenum" name="target"/>
 				<param type="GLdouble" name="u1"/>
@@ -27,7 +27,7 @@
 				<param type="const GLdouble*" name="points"/>
 			</params>
 		</function>
- 		<function name="glDeformationMap3fSGIX" return="void">
+		<function name="glDeformationMap3fSGIX" return="void">
 			<params>
 				<param type="GLenum" name="target"/>
 				<param type="GLfloat" name="u1"/>
@@ -45,12 +45,12 @@
 				<param type="const GLfloat*" name="points"/>
 			</params>
 		</function>
- 		<function name="glDeformSGIX" return="void">
+		<function name="glDeformSGIX" return="void">
 			<params>
 				<param type="GLbitfield" name="mask"/>
 			</params>
 		</function>
- 		<function name="glLoadIdentityDeformationMapSGIX" return="void">
+		<function name="glLoadIdentityDeformationMapSGIX" return="void">
 			<params>
 				<param type="GLbitfield" name="mask"/>
 			</params>

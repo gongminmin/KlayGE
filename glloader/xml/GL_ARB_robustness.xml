@@ -2,13 +2,14 @@
 
 <gl_extension name="GL_ARB_robustness" reg_no="105">
 	<tokens>
+		<token name="GL_NO_ERROR" value="0"/>
+		<token name="GL_CONTEXT_FLAG_ROBUST_ACCESS_BIT_ARB" value="0x00000004"/>
+		<token name="GL_LOSE_CONTEXT_ON_RESET_ARB" value="0x8252"/>
 		<token name="GL_GUILTY_CONTEXT_RESET_ARB" value="0x8253"/>
 		<token name="GL_INNOCENT_CONTEXT_RESET_ARB" value="0x8254"/>
 		<token name="GL_UNKNOWN_CONTEXT_RESET_ARB" value="0x8255"/>
 		<token name="GL_RESET_NOTIFICATION_STRATEGY_ARB" value="0x8256"/>
-		<token name="GL_LOSE_CONTEXT_ON_RESET_ARB" value="0x8252"/>
 		<token name="GL_NO_RESET_NOTIFICATION_ARB" value="0x8261"/>
-		<token name="GL_CONTEXT_FLAG_ROBUST_ACCESS_BIT_ARB" value="0x00000004"/>
 	</tokens>
 
 	<functions>
@@ -64,35 +65,13 @@
 				<param type="GLubyte*" name="pattern"/>
 			</params>
 		</function>
-		<function name="glGetnTexImageARB" return="void">
-			<params>
-				<param type="GLenum" name="target"/>
-				<param type="GLint" name="level"/>
-				<param type="GLenum" name="format"/>
-				<param type="GLenum" name="type"/>
-				<param type="GLsizei" name="bufSize"/>
-				<param type="void*" name="img"/>
-			</params>
-		</function>
-		<function name="glReadnPixelsARB" return="void">
-			<params>
-				<param type="GLint" name="x"/>
-				<param type="GLint" name="y"/>
-				<param type="GLsizei" name="width"/>
-				<param type="GLsizei" name="height"/>
-				<param type="GLenum" name="format"/>
-				<param type="GLenum" name="type"/>
-				<param type="GLsizei" name="bufSize"/>
-				<param type="void*" name="data"/>
-			</params>
-		</function>
 		<function name="glGetnColorTableARB" return="void">
 			<params>
 				<param type="GLenum" name="target"/>
 				<param type="GLenum" name="format"/>
 				<param type="GLenum" name="type"/>
 				<param type="GLsizei" name="bufSize"/>
-				<param type="void*" name="table"/>
+				<param type="GLvoid*" name="table"/>
 			</params>
 		</function>
 		<function name="glGetnConvolutionFilterARB" return="void">
@@ -101,7 +80,7 @@
 				<param type="GLenum" name="format"/>
 				<param type="GLenum" name="type"/>
 				<param type="GLsizei" name="bufSize"/>
-				<param type="void*" name="image"/>
+				<param type="GLvoid*" name="image"/>
 			</params>
 		</function>
 		<function name="glGetnSeparableFilterARB" return="void">
@@ -123,7 +102,7 @@
 				<param type="GLenum" name="format"/>
 				<param type="GLenum" name="type"/>
 				<param type="GLsizei" name="bufSize"/>
-				<param type="void*" name="values"/>
+				<param type="GLvoid*" name="values"/>
 			</params>
 		</function>
 		<function name="glGetnMinmaxARB" return="void">
@@ -133,7 +112,29 @@
 				<param type="GLenum" name="format"/>
 				<param type="GLenum" name="type"/>
 				<param type="GLsizei" name="bufSize"/>
-				<param type="void*" name="values"/>
+				<param type="GLvoid*" name="values"/>
+			</params>
+		</function>
+		<function name="glGetnTexImageARB" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLint" name="level"/>
+				<param type="GLenum" name="format"/>
+				<param type="GLenum" name="type"/>
+				<param type="GLsizei" name="bufSize"/>
+				<param type="GLvoid*" name="img"/>
+			</params>
+		</function>
+		<function name="glReadnPixelsARB" return="void">
+			<params>
+				<param type="GLint" name="x"/>
+				<param type="GLint" name="y"/>
+				<param type="GLsizei" name="width"/>
+				<param type="GLsizei" name="height"/>
+				<param type="GLenum" name="format"/>
+				<param type="GLenum" name="type"/>
+				<param type="GLsizei" name="bufSize"/>
+				<param type="GLvoid*" name="data"/>
 			</params>
 		</function>
 		<function name="glGetnCompressedTexImageARB" return="void">
@@ -141,7 +142,7 @@
 				<param type="GLenum" name="target"/>
 				<param type="GLint" name="lod"/>
 				<param type="GLsizei" name="bufSize"/>
-				<param type="void*" name="img"/>
+				<param type="GLvoid*" name="img"/>
 			</params>
 		</function>
 		<function name="glGetnUniformfvARB" return="void">

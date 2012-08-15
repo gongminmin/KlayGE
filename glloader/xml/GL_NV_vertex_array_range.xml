@@ -10,12 +10,12 @@
 	</tokens>
 
 	<functions>
+		<function name="glFlushVertexArrayRangeNV" return="void"/>
 		<function name="glVertexArrayRangeNV" return="void">
 			<params>
 				<param type="GLsizei" name="length"/>
 				<param type="GLvoid*" name="pointer"/>
 			</params>
 		</function>
-		<function name="glFlushVertexArrayRangeNV" return="void"/>
 	</functions>
 </gl_extension>

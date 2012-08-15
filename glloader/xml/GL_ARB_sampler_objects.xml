@@ -25,7 +25,7 @@
 		</function>
 		<function name="glBindSampler" return="void">
 			<params>
-				<param type="GLenum" name="unit"/>
+				<param type="GLuint" name="unit"/>
 				<param type="GLuint" name="sampler"/>
 			</params>
 		</function>
@@ -36,6 +36,13 @@
 				<param type="GLint" name="param"/>
 			</params>
 		</function>
+		<function name="glSamplerParameteriv" return="void">
+			<params>
+				<param type="GLuint" name="sampler"/>
+				<param type="GLenum" name="pname"/>
+				<param type="const GLint*" name="param"/>
+			</params>
+		</function>
 		<function name="glSamplerParameterf" return="void">
 			<params>
 				<param type="GLuint" name="sampler"/>
@@ -43,35 +50,35 @@
 				<param type="GLfloat" name="param"/>
 			</params>
 		</function>
-		<function name="glSamplerParameteriv" return="void">
-			<params>
-				<param type="GLuint" name="sampler"/>
-				<param type="GLenum" name="pname"/>
-				<param type="const GLint*" name="params"/>
-			</params>
-		</function>
 		<function name="glSamplerParameterfv" return="void">
 			<params>
 				<param type="GLuint" name="sampler"/>
 				<param type="GLenum" name="pname"/>
-				<param type="const GLfloat*" name="params"/>
+				<param type="const GLfloat*" name="param"/>
 			</params>
 		</function>
 		<function name="glSamplerParameterIiv" return="void">
 			<params>
 				<param type="GLuint" name="sampler"/>
 				<param type="GLenum" name="pname"/>
-				<param type="const GLint*" name="params"/>
+				<param type="const GLint*" name="param"/>
 			</params>
 		</function>
 		<function name="glSamplerParameterIuiv" return="void">
 			<params>
 				<param type="GLuint" name="sampler"/>
 				<param type="GLenum" name="pname"/>
-				<param type="const GLuint*" name="params"/>
+				<param type="const GLuint*" name="param"/>
 			</params>
 		</function>
 		<function name="glGetSamplerParameteriv" return="void">
+			<params>
+				<param type="GLuint" name="sampler"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLint*" name="params"/>
+			</params>
+		</function>
+		<function name="glGetSamplerParameterIiv" return="void">
 			<params>
 				<param type="GLuint" name="sampler"/>
 				<param type="GLenum" name="pname"/>
@@ -85,18 +92,11 @@
 				<param type="GLfloat*" name="params"/>
 			</params>
 		</function>
-		<function name="glGetSamplerParameterIiv" return="void">
+		<function name="glGetSamplerParameterIuiv" return="void">
 			<params>
 				<param type="GLuint" name="sampler"/>
 				<param type="GLenum" name="pname"/>
-				<param type="GLint*" name="params"/>
-			</params>
-		</function>
-		<function name="glGetSamplerParameterIfv" return="void">
-			<params>
-				<param type="GLuint" name="sampler"/>
-				<param type="GLenum" name="pname"/>
-				<param type="GLfloat*" name="params"/>
+				<param type="GLuint*" name="params"/>
 			</params>
 		</function>
 	</functions>

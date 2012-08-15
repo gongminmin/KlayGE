@@ -2,8 +2,8 @@
 
 <gl_extension name="GL_AMD_query_buffer_object" reg_no="420">
 	<tokens>
-		<token name="GL_QUERY_RESULT_NO_WAIT_AMD" value="0x9194"/>
 		<token name="GL_QUERY_BUFFER_AMD" value="0x9192"/>
 		<token name="GL_QUERY_BUFFER_BINDING_AMD" value="0x9193"/>
+		<token name="GL_QUERY_RESULT_NO_WAIT_AMD" value="0x9194"/>
 	</tokens>
 </gl_extension>

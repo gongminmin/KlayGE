@@ -24,13 +24,13 @@
 				<param type="GLenum" name="target"/>
 			</params>
 		</function>
-		<function name="glNamedMakeBufferResidentNV" return="void">
+		<function name="glMakeNamedBufferResidentNV" return="void">
 			<params>
 				<param type="GLuint" name="buffer"/>
 				<param type="GLenum" name="access"/>
 			</params>
 		</function>
-		<function name="glNamedMakeBufferNonResidentNV" return="void">
+		<function name="glMakeNamedBufferNonResidentNV" return="void">
 			<params>
 				<param type="GLuint" name="buffer"/>
 			</params>

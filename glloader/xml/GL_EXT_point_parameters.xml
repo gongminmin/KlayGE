@@ -5,7 +5,7 @@
 		<token name="GL_POINT_SIZE_MIN_EXT" value="0x8126"/>
 		<token name="GL_POINT_SIZE_MAX_EXT" value="0x8127"/>
 		<token name="GL_POINT_FADE_THRESHOLD_SIZE_EXT" value="0x8128"/>
-		<token name="GL_POINT_DISTANCE_ATTENUATION_EXT" value="0x8129"/>
+		<token name="GL_DISTANCE_ATTENUATION_EXT" value="0x8129"/>
 	</tokens>
 
 	<functions>

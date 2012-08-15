@@ -20,7 +20,7 @@
 		<function name="glGenVertexArraysAPPLE" return="void">
 			<params>
 				<param type="GLsizei" name="n"/>
-				<param type="const GLuint*" name="arrays"/>
+				<param type="GLuint*" name="arrays"/>
 			</params>
 		</function>
 		<function name="glIsVertexArrayAPPLE" return="GLboolean">

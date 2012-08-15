@@ -2,9 +2,9 @@
 
 <gl_extension name="GL_APPLE_element_array" reg_no="271">
 	<tokens>
-		<token name="GL_ELEMENT_ARRAY_APPLE" value="0x8768"/>
-		<token name="GL_ELEMENT_ARRAY_TYPE_APPLE" value="0x8769"/>
-		<token name="GL_ELEMENT_ARRAY_POINTER_APPLE" value="0x876A"/>
+		<token name="GL_ELEMENT_ARRAY_APPLE" value="0x8A0C"/>
+		<token name="GL_ELEMENT_ARRAY_TYPE_APPLE" value="0x8A0D"/>
+		<token name="GL_ELEMENT_ARRAY_POINTER_APPLE" value="0x8A0E"/>
 	</tokens>
 
 	<functions>

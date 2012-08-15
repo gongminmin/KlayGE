@@ -2,21 +2,29 @@
 
 <gl_extension name="GL_ARB_vertex_program" reg_no="26">
 	<tokens>
-		<token name="GL_VERTEX_PROGRAM_ARB" value="0x8620"/>
-		<token name="GL_VERTEX_PROGRAM_POINT_SIZE_ARB" value="0x8642"/>
-		<token name="GL_VERTEX_PROGRAM_TWO_SIDE_ARB" value="0x8643"/>
 		<token name="GL_COLOR_SUM_ARB" value="0x8458"/>
-		<token name="GL_PROGRAM_FORMAT_ASCII_ARB" value="0x8875"/>
+		<token name="GL_VERTEX_PROGRAM_ARB" value="0x8620"/>
 		<token name="GL_VERTEX_ATTRIB_ARRAY_ENABLED_ARB" value="0x8622"/>
 		<token name="GL_VERTEX_ATTRIB_ARRAY_SIZE_ARB" value="0x8623"/>
 		<token name="GL_VERTEX_ATTRIB_ARRAY_STRIDE_ARB" value="0x8624"/>
 		<token name="GL_VERTEX_ATTRIB_ARRAY_TYPE_ARB" value="0x8625"/>
-		<token name="GL_VERTEX_ATTRIB_ARRAY_NORMALIZED_ARB" value="0x886A"/>
 		<token name="GL_CURRENT_VERTEX_ATTRIB_ARB" value="0x8626"/>
-		<token name="GL_VERTEX_ATTRIB_ARRAY_POINTER_ARB" value="0x8645"/>
 		<token name="GL_PROGRAM_LENGTH_ARB" value="0x8627"/>
-		<token name="GL_PROGRAM_FORMAT_ARB" value="0x8876"/>
+		<token name="GL_PROGRAM_STRING_ARB" value="0x8628"/>
+		<token name="GL_MAX_PROGRAM_MATRIX_STACK_DEPTH_ARB" value="0x862E"/>
+		<token name="GL_MAX_PROGRAM_MATRICES_ARB" value="0x862F"/>
+		<token name="GL_CURRENT_MATRIX_STACK_DEPTH_ARB" value="0x8640"/>
+		<token name="GL_CURRENT_MATRIX_ARB" value="0x8641"/>
+		<token name="GL_VERTEX_PROGRAM_POINT_SIZE_ARB" value="0x8642"/>
+		<token name="GL_VERTEX_PROGRAM_TWO_SIDE_ARB" value="0x8643"/>
+		<token name="GL_VERTEX_ATTRIB_ARRAY_POINTER_ARB" value="0x8645"/>
+		<token name="GL_PROGRAM_ERROR_POSITION_ARB" value="0x864B"/>
 		<token name="GL_PROGRAM_BINDING_ARB" value="0x8677"/>
+		<token name="GL_MAX_VERTEX_ATTRIBS_ARB" value="0x8869"/>
+		<token name="GL_VERTEX_ATTRIB_ARRAY_NORMALIZED_ARB" value="0x886A"/>
+		<token name="GL_PROGRAM_ERROR_STRING_ARB" value="0x8874"/>
+		<token name="GL_PROGRAM_FORMAT_ASCII_ARB" value="0x8875"/>
+		<token name="GL_PROGRAM_FORMAT_ARB" value="0x8876"/>
 		<token name="GL_PROGRAM_INSTRUCTIONS_ARB" value="0x88A0"/>
 		<token name="GL_MAX_PROGRAM_INSTRUCTIONS_ARB" value="0x88A1"/>
 		<token name="GL_PROGRAM_NATIVE_INSTRUCTIONS_ARB" value="0x88A2"/>
@@ -40,15 +48,7 @@
 		<token name="GL_MAX_PROGRAM_LOCAL_PARAMETERS_ARB" value="0x88B4"/>
 		<token name="GL_MAX_PROGRAM_ENV_PARAMETERS_ARB" value="0x88B5"/>
 		<token name="GL_PROGRAM_UNDER_NATIVE_LIMITS_ARB" value="0x88B6"/>
-		<token name="GL_PROGRAM_STRING_ARB" value="0x8628"/>
-		<token name="GL_PROGRAM_ERROR_POSITION_ARB" value="0x864B"/>
-		<token name="GL_CURRENT_MATRIX_ARB" value="0x8641"/>
 		<token name="GL_TRANSPOSE_CURRENT_MATRIX_ARB" value="0x88B7"/>
-		<token name="GL_CURRENT_MATRIX_STACK_DEPTH_ARB" value="0x8640"/>
-		<token name="GL_MAX_VERTEX_ATTRIBS_ARB" value="0x8869"/>
-		<token name="GL_MAX_PROGRAM_MATRICES_ARB" value="0x862F"/>
-		<token name="GL_MAX_PROGRAM_MATRIX_STACK_DEPTH_ARB" value="0x862E"/>
-		<token name="GL_PROGRAM_ERROR_STRING_ARB" value="0x8874"/>
 		<token name="GL_MATRIX0_ARB" value="0x88C0"/>
 		<token name="GL_MATRIX1_ARB" value="0x88C1"/>
 		<token name="GL_MATRIX2_ARB" value="0x88C2"/>
@@ -84,10 +84,16 @@
 	</tokens>
 
 	<functions>
-		<function name="glVertexAttrib1sARB" return="void">
+		<function name="glVertexAttrib1dARB" return="void">
 			<params>
 				<param type="GLuint" name="index"/>
-				<param type="GLshort" name="x"/>
+				<param type="GLdouble" name="x"/>
+			</params>
+		</function>
+		<function name="glVertexAttrib1dvARB" return="void">
+			<params>
+				<param type="GLuint" name="index"/>
+				<param type="const GLdouble*" name="v"/>
 			</params>
 		</function>
 		<function name="glVertexAttrib1fARB" return="void">
@@ -96,24 +102,22 @@
 				<param type="GLfloat" name="x"/>
 			</params>
 		</function>
-		<function name="glVertexAttrib1dARB" return="void">
+		<function name="glVertexAttrib1fvARB" return="void">
 			<params>
 				<param type="GLuint" name="index"/>
-				<param type="GLdouble" name="x"/>
+				<param type="const GLfloat*" name="v"/>
 			</params>
 		</function>
-		<function name="glVertexAttrib2sARB" return="void">
+		<function name="glVertexAttrib1sARB" return="void">
 			<params>
 				<param type="GLuint" name="index"/>
 				<param type="GLshort" name="x"/>
-				<param type="GLshort" name="y"/>
 			</params>
 		</function>
-		<function name="glVertexAttrib2fARB" return="void">
+		<function name="glVertexAttrib1svARB" return="void">
 			<params>
 				<param type="GLuint" name="index"/>
-				<param type="GLfloat" name="x"/>
-				<param type="GLfloat" name="y"/>
+				<param type="const GLshort*" name="v"/>
 			</params>
 		</function>
 		<function name="glVertexAttrib2dARB" return="void">
@@ -123,20 +127,36 @@
 				<param type="GLdouble" name="y"/>
 			</params>
 		</function>
-		<function name="glVertexAttrib3sARB" return="void">
+		<function name="glVertexAttrib2dvARB" return="void">
 			<params>
 				<param type="GLuint" name="index"/>
-				<param type="GLshort" name="x"/>
-				<param type="GLshort" name="y"/>
-				<param type="GLshort" name="z"/>
+				<param type="const GLdouble*" name="v"/>
 			</params>
 		</function>
-		<function name="glVertexAttrib3fARB" return="void">
+		<function name="glVertexAttrib2fARB" return="void">
 			<params>
 				<param type="GLuint" name="index"/>
 				<param type="GLfloat" name="x"/>
 				<param type="GLfloat" name="y"/>
-				<param type="GLfloat" name="z"/>
+			</params>
+		</function>
+		<function name="glVertexAttrib2fvARB" return="void">
+			<params>
+				<param type="GLuint" name="index"/>
+				<param type="const GLfloat*" name="v"/>
+			</params>
+		</function>
+		<function name="glVertexAttrib2sARB" return="void">
+			<params>
+				<param type="GLuint" name="index"/>
+				<param type="GLshort" name="x"/>
+				<param type="GLshort" name="y"/>
+			</params>
+		</function>
+		<function name="glVertexAttrib2svARB" return="void">
+			<params>
+				<param type="GLuint" name="index"/>
+				<param type="const GLshort*" name="v"/>
 			</params>
 		</function>
 		<function name="glVertexAttrib3dARB" return="void">
@@ -147,31 +167,56 @@
 				<param type="GLdouble" name="z"/>
 			</params>
 		</function>
-		<function name="glVertexAttrib4sARB" return="void">
+		<function name="glVertexAttrib3dvARB" return="void">
 			<params>
 				<param type="GLuint" name="index"/>
-				<param type="GLshort" name="x"/>
-				<param type="GLshort" name="y"/>
-				<param type="GLshort" name="z"/>
-				<param type="GLshort" name="w"/>
+				<param type="const GLdouble*" name="v"/>
 			</params>
 		</function>
-		<function name="glVertexAttrib4fARB" return="void">
+		<function name="glVertexAttrib3fARB" return="void">
 			<params>
 				<param type="GLuint" name="index"/>
 				<param type="GLfloat" name="x"/>
 				<param type="GLfloat" name="y"/>
 				<param type="GLfloat" name="z"/>
-				<param type="GLfloat" name="w"/>
 			</params>
 		</function>
-		<function name="glVertexAttrib4dARB" return="void">
+		<function name="glVertexAttrib3fvARB" return="void">
 			<params>
 				<param type="GLuint" name="index"/>
-				<param type="GLdouble" name="x"/>
-				<param type="GLdouble" name="y"/>
-				<param type="GLdouble" name="z"/>
-				<param type="GLdouble" name="w"/>
+				<param type="const GLfloat*" name="v"/>
+			</params>
+		</function>
+		<function name="glVertexAttrib3sARB" return="void">
+			<params>
+				<param type="GLuint" name="index"/>
+				<param type="GLshort" name="x"/>
+				<param type="GLshort" name="y"/>
+				<param type="GLshort" name="z"/>
+			</params>
+		</function>
+		<function name="glVertexAttrib3svARB" return="void">
+			<params>
+				<param type="GLuint" name="index"/>
+				<param type="const GLshort*" name="v"/>
+			</params>
+		</function>
+		<function name="glVertexAttrib4NbvARB" return="void">
+			<params>
+				<param type="GLuint" name="index"/>
+				<param type="const GLbyte*" name="v"/>
+			</params>
+		</function>
+		<function name="glVertexAttrib4NivARB" return="void">
+			<params>
+				<param type="GLuint" name="index"/>
+				<param type="const GLint*" name="v"/>
+			</params>
+		</function>
+		<function name="glVertexAttrib4NsvARB" return="void">
+			<params>
+				<param type="GLuint" name="index"/>
+				<param type="const GLshort*" name="v"/>
 			</params>
 		</function>
 		<function name="glVertexAttrib4NubARB" return="void">
@@ -183,130 +228,16 @@
 				<param type="GLubyte" name="w"/>
 			</params>
 		</function>
-		<function name="glVertexAttrib1svARB" return="void">
-			<params>
-				<param type="GLuint" name="index"/>
-				<param type="const GLshort*" name="v"/>
-			</params>
-		</function>
-		<function name="glVertexAttrib1fvARB" return="void">
-			<params>
-				<param type="GLuint" name="index"/>
-				<param type="const GLfloat*" name="v"/>
-			</params>
-		</function>
-		<function name="glVertexAttrib1dvARB" return="void">
-			<params>
-				<param type="GLuint" name="index"/>
-				<param type="const GLdouble*" name="v"/>
-			</params>
-		</function>
-		<function name="glVertexAttrib2svARB" return="void">
-			<params>
-				<param type="GLuint" name="index"/>
-				<param type="const GLshort*" name="v"/>
-			</params>
-		</function>
-		<function name="glVertexAttrib2fvARB" return="void">
-			<params>
-				<param type="GLuint" name="index"/>
-				<param type="const GLfloat*" name="v"/>
-			</params>
-		</function>
-		<function name="glVertexAttrib2dvARB" return="void">
-			<params>
-				<param type="GLuint" name="index"/>
-				<param type="const GLdouble*" name="v"/>
-			</params>
-		</function>
-		<function name="glVertexAttrib3svARB" return="void">
-			<params>
-				<param type="GLuint" name="index"/>
-				<param type="const GLshort*" name="v"/>
-			</params>
-		</function>
-		<function name="glVertexAttrib3fvARB" return="void">
-			<params>
-				<param type="GLuint" name="index"/>
-				<param type="const GLfloat*" name="v"/>
-			</params>
-		</function>
-		<function name="glVertexAttrib3dvARB" return="void">
-			<params>
-				<param type="GLuint" name="index"/>
-				<param type="const GLdouble*" name="v"/>
-			</params>
-		</function>
-		<function name="glVertexAttrib4bvARB" return="void">
-			<params>
-				<param type="GLuint" name="index"/>
-				<param type="const GLbyte*" name="v"/>
-			</params>
-		</function>
-		<function name="glVertexAttrib4svARB" return="void">
-			<params>
-				<param type="GLuint" name="index"/>
-				<param type="const GLshort*" name="v"/>
-			</params>
-		</function>
-		<function name="glVertexAttrib4ivARB" return="void">
-			<params>
-				<param type="GLuint" name="index"/>
-				<param type="const GLint*" name="v"/>
-			</params>
-		</function>
-		<function name="glVertexAttrib4ubvARB" return="void">
-			<params>
-				<param type="GLuint" name="index"/>
-				<param type="const GLubyte*" name="v"/>
-			</params>
-		</function>
-		<function name="glVertexAttrib4usvARB" return="void">
-			<params>
-				<param type="GLuint" name="index"/>
-				<param type="const GLushort*" name="v"/>
-			</params>
-		</function>
-		<function name="glVertexAttrib4uivARB" return="void">
-			<params>
-				<param type="GLuint" name="index"/>
-				<param type="const GLuint*" name="v"/>
-			</params>
-		</function>
-		<function name="glVertexAttrib4fvARB" return="void">
-			<params>
-				<param type="GLuint" name="index"/>
-				<param type="const GLfloat*" name="v"/>
-			</params>
-		</function>
-		<function name="glVertexAttrib4dvARB" return="void">
-			<params>
-				<param type="GLuint" name="index"/>
-				<param type="const GLdouble*" name="v"/>
-			</params>
-		</function>
-		<function name="glVertexAttrib4NbvARB" return="void">
-			<params>
-				<param type="GLuint" name="index"/>
-				<param type="const GLbyte*" name="v"/>
-			</params>
-		</function>
-		<function name="glVertexAttrib4NsvARB" return="void">
-			<params>
-				<param type="GLuint" name="index"/>
-				<param type="const GLshort*" name="v"/>
-			</params>
-		</function>
-		<function name="glVertexAttrib4NivARB" return="void">
-			<params>
-				<param type="GLuint" name="index"/>
-				<param type="const GLint*" name="v"/>
-			</params>
-		</function>
 		<function name="glVertexAttrib4NubvARB" return="void">
 			<params>
 				<param type="GLuint" name="index"/>
 				<param type="const GLubyte*" name="v"/>
+			</params>
+		</function>
+		<function name="glVertexAttrib4NuivARB" return="void">
+			<params>
+				<param type="GLuint" name="index"/>
+				<param type="const GLuint*" name="v"/>
 			</params>
 		</function>
 		<function name="glVertexAttrib4NusvARB" return="void">
@@ -315,10 +246,79 @@
 				<param type="const GLushort*" name="v"/>
 			</params>
 		</function>
-		<function name="glVertexAttrib4NuivARB" return="void">
+		<function name="glVertexAttrib4bvARB" return="void">
+			<params>
+				<param type="GLuint" name="index"/>
+				<param type="const GLbyte*" name="v"/>
+			</params>
+		</function>
+		<function name="glVertexAttrib4dARB" return="void">
+			<params>
+				<param type="GLuint" name="index"/>
+				<param type="GLdouble" name="x"/>
+				<param type="GLdouble" name="y"/>
+				<param type="GLdouble" name="z"/>
+				<param type="GLdouble" name="w"/>
+			</params>
+		</function>
+		<function name="glVertexAttrib4dvARB" return="void">
+			<params>
+				<param type="GLuint" name="index"/>
+				<param type="const GLdouble*" name="v"/>
+			</params>
+		</function>
+		<function name="glVertexAttrib4fARB" return="void">
+			<params>
+				<param type="GLuint" name="index"/>
+				<param type="GLfloat" name="x"/>
+				<param type="GLfloat" name="y"/>
+				<param type="GLfloat" name="z"/>
+				<param type="GLfloat" name="w"/>
+			</params>
+		</function>
+		<function name="glVertexAttrib4fvARB" return="void">
+			<params>
+				<param type="GLuint" name="index"/>
+				<param type="const GLfloat*" name="v"/>
+			</params>
+		</function>
+		<function name="glVertexAttrib4ivARB" return="void">
+			<params>
+				<param type="GLuint" name="index"/>
+				<param type="const GLint*" name="v"/>
+			</params>
+		</function>
+		<function name="glVertexAttrib4sARB" return="void">
+			<params>
+				<param type="GLuint" name="index"/>
+				<param type="GLshort" name="x"/>
+				<param type="GLshort" name="y"/>
+				<param type="GLshort" name="z"/>
+				<param type="GLshort" name="w"/>
+			</params>
+		</function>
+		<function name="glVertexAttrib4svARB" return="void">
+			<params>
+				<param type="GLuint" name="index"/>
+				<param type="const GLshort*" name="v"/>
+			</params>
+		</function>
+		<function name="glVertexAttrib4ubvARB" return="void">
+			<params>
+				<param type="GLuint" name="index"/>
+				<param type="const GLubyte*" name="v"/>
+			</params>
+		</function>
+		<function name="glVertexAttrib4uivARB" return="void">
 			<params>
 				<param type="GLuint" name="index"/>
 				<param type="const GLuint*" name="v"/>
+			</params>
+		</function>
+		<function name="glVertexAttrib4usvARB" return="void">
+			<params>
+				<param type="GLuint" name="index"/>
+				<param type="const GLushort*" name="v"/>
 			</params>
 		</function>
 		<function name="glVertexAttribPointerARB" return="void">
@@ -354,18 +354,27 @@
 				<param type="GLenum" name="target"/>
 				<param type="GLuint" name="program"/>
 			</params>
+			<mappings>
+				<mapping from="GL_NV_vertex_program" name="glBindProgramNV"/>
+			</mappings>
 		</function>
 		<function name="glDeleteProgramsARB" return="void">
 			<params>
 				<param type="GLsizei" name="n"/>
 				<param type="const GLuint*" name="programs"/>
 			</params>
+			<mappings>
+				<mapping from="GL_NV_vertex_program" name="glDeleteProgramsNV"/>
+			</mappings>
 		</function>
 		<function name="glGenProgramsARB" return="void">
 			<params>
 				<param type="GLsizei" name="n"/>
 				<param type="GLuint*" name="programs"/>
 			</params>
+			<mappings>
+				<mapping from="GL_NV_vertex_program" name="glGenProgramsNV"/>
+			</mappings>
 		</function>
 		<function name="glProgramEnvParameter4dARB" return="void">
 			<params>
@@ -439,7 +448,7 @@
 			<params>
 				<param type="GLenum" name="target"/>
 				<param type="GLuint" name="index"/>
-				<param type="const GLdouble*" name="params"/>
+				<param type="GLdouble*" name="params"/>
 			</params>
 		</function>
 		<function name="glGetProgramEnvParameterfvARB" return="void">

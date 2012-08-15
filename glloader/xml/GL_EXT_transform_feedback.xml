@@ -20,6 +20,12 @@
 	</tokens>
 
 	<functions>
+		<function name="glBeginTransformFeedbackEXT" return="void">
+			<params>
+				<param type="GLenum" name="primitiveMode"/>
+			</params>
+		</function>
+		<function name="glEndTransformFeedbackEXT" return="void"/>
 		<function name="glBindBufferRangeEXT" return="void">
 			<params>
 				<param type="GLenum" name="target"/>
@@ -36,6 +42,9 @@
 				<param type="GLuint" name="buffer"/>
 				<param type="GLintptr" name="offset"/>
 			</params>
+			<mappings>
+				<mapping from="GL_NV_transform_feedback" name="glBindBufferOffsetNV"/>
+			</mappings>
 		</function>
 		<function name="glBindBufferBaseEXT" return="void">
 			<params>
@@ -44,17 +53,11 @@
 				<param type="GLuint" name="buffer"/>
 			</params>
 		</function>
-		<function name="glBeginTransformFeedbackEXT" return="void">
-			<params>
-				<param type="GLenum" name="primitiveMode"/>
-			</params>
-		</function>
-		<function name="glEndTransformFeedbackEXT" return="void"/>
 		<function name="glTransformFeedbackVaryingsEXT" return="void">
 			<params>
 				<param type="GLuint" name="program"/>
 				<param type="GLsizei" name="count"/>
-				<param type="const char**" name="varyings"/>
+				<param type="const GLchar**" name="varyings"/>
 				<param type="GLenum" name="bufferMode"/>
 			</params>
 		</function>

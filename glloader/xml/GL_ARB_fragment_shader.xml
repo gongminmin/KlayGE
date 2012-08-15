@@ -4,5 +4,6 @@
 	<tokens>
 		<token name="GL_FRAGMENT_SHADER_ARB" value="0x8B30"/>
 		<token name="GL_MAX_FRAGMENT_UNIFORM_COMPONENTS_ARB" value="0x8B49"/>
+		<token name="GL_FRAGMENT_SHADER_DERIVATIVE_HINT_ARB" value="0x8B8B"/>
 	</tokens>
 </gl_extension>

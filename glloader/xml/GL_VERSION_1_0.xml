@@ -437,16 +437,336 @@
 	</tokens>
 
 	<functions>
-		<function name="glAccum" return="void" link="static">
+		<function name="glCullFace" return="void" link="static">
 			<params>
-				<param type="GLenum" name="op"/>
-				<param type="GLfloat" name="value"/>
+				<param type="GLenum" name="mode"/>
 			</params>
 		</function>
-		<function name="glAlphaFunc" return="void" link="static">
+		<function name="glFrontFace" return="void" link="static">
+			<params>
+				<param type="GLenum" name="mode"/>
+			</params>
+		</function>
+		<function name="glHint" return="void" link="static">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLenum" name="mode"/>
+			</params>
+		</function>
+		<function name="glLineWidth" return="void" link="static">
+			<params>
+				<param type="GLfloat" name="width"/>
+			</params>
+		</function>
+		<function name="glPointSize" return="void" link="static">
+			<params>
+				<param type="GLfloat" name="size"/>
+			</params>
+		</function>
+		<function name="glPolygonMode" return="void" link="static">
+			<params>
+				<param type="GLenum" name="face"/>
+				<param type="GLenum" name="mode"/>
+			</params>
+		</function>
+		<function name="glScissor" return="void" link="static">
+			<params>
+				<param type="GLint" name="x"/>
+				<param type="GLint" name="y"/>
+				<param type="GLsizei" name="width"/>
+				<param type="GLsizei" name="height"/>
+			</params>
+		</function>
+		<function name="glTexParameterf" return="void" link="static">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLfloat" name="param"/>
+			</params>
+		</function>
+		<function name="glTexParameterfv" return="void" link="static">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLenum" name="pname"/>
+				<param type="const GLfloat*" name="params"/>
+			</params>
+		</function>
+		<function name="glTexParameteri" return="void" link="static">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLint" name="param"/>
+			</params>
+		</function>
+		<function name="glTexParameteriv" return="void" link="static">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLenum" name="pname"/>
+				<param type="const GLint*" name="params"/>
+			</params>
+		</function>
+		<function name="glTexImage1D" return="void" link="static">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLint" name="level"/>
+				<param type="GLint" name="internalformat"/>
+				<param type="GLsizei" name="width"/>
+				<param type="GLint" name="border"/>
+				<param type="GLenum" name="format"/>
+				<param type="GLenum" name="type"/>
+				<param type="const GLvoid*" name="pixels"/>
+			</params>
+		</function>
+		<function name="glTexImage2D" return="void" link="static">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLint" name="level"/>
+				<param type="GLint" name="internalformat"/>
+				<param type="GLsizei" name="width"/>
+				<param type="GLsizei" name="height"/>
+				<param type="GLint" name="border"/>
+				<param type="GLenum" name="format"/>
+				<param type="GLenum" name="type"/>
+				<param type="const GLvoid*" name="pixels"/>
+			</params>
+		</function>
+		<function name="glDrawBuffer" return="void" link="static">
+			<params>
+				<param type="GLenum" name="mode"/>
+			</params>
+		</function>
+		<function name="glClear" return="void" link="static">
+			<params>
+				<param type="GLbitfield" name="mask"/>
+			</params>
+		</function>
+		<function name="glClearColor" return="void" link="static">
+			<params>
+				<param type="GLfloat" name="red"/>
+				<param type="GLfloat" name="green"/>
+				<param type="GLfloat" name="blue"/>
+				<param type="GLfloat" name="alpha"/>
+			</params>
+		</function>
+		<function name="glClearStencil" return="void" link="static">
+			<params>
+				<param type="GLint" name="s"/>
+			</params>
+		</function>
+		<function name="glClearDepth" return="void" link="static">
+			<params>
+				<param type="GLdouble" name="depth"/>
+			</params>
+		</function>
+		<function name="glStencilMask" return="void" link="static">
+			<params>
+				<param type="GLuint" name="mask"/>
+			</params>
+		</function>
+		<function name="glColorMask" return="void" link="static">
+			<params>
+				<param type="GLboolean" name="red"/>
+				<param type="GLboolean" name="green"/>
+				<param type="GLboolean" name="blue"/>
+				<param type="GLboolean" name="alpha"/>
+			</params>
+		</function>
+		<function name="glDepthMask" return="void" link="static">
+			<params>
+				<param type="GLboolean" name="flag"/>
+			</params>
+		</function>
+		<function name="glDisable" return="void" link="static">
+			<params>
+				<param type="GLenum" name="cap"/>
+			</params>
+		</function>
+		<function name="glEnable" return="void" link="static">
+			<params>
+				<param type="GLenum" name="cap"/>
+			</params>
+		</function>
+		<function name="glFinish" return="void" link="static"/>
+		<function name="glFlush" return="void" link="static"/>
+		<function name="glBlendFunc" return="void" link="static">
+			<params>
+				<param type="GLenum" name="sfactor"/>
+				<param type="GLenum" name="dfactor"/>
+			</params>
+		</function>
+		<function name="glLogicOp" return="void" link="static">
+			<params>
+				<param type="GLenum" name="opcode"/>
+			</params>
+		</function>
+		<function name="glStencilFunc" return="void" link="static">
 			<params>
 				<param type="GLenum" name="func"/>
-				<param type="GLclampf" name="ref"/>
+				<param type="GLint" name="ref"/>
+				<param type="GLuint" name="mask"/>
+			</params>
+		</function>
+		<function name="glStencilOp" return="void" link="static">
+			<params>
+				<param type="GLenum" name="fail"/>
+				<param type="GLenum" name="zfail"/>
+				<param type="GLenum" name="zpass"/>
+			</params>
+		</function>
+		<function name="glDepthFunc" return="void" link="static">
+			<params>
+				<param type="GLenum" name="func"/>
+			</params>
+		</function>
+		<function name="glPixelStoref" return="void" link="static">
+			<params>
+				<param type="GLenum" name="pname"/>
+				<param type="GLfloat" name="param"/>
+			</params>
+		</function>
+		<function name="glPixelStorei" return="void" link="static">
+			<params>
+				<param type="GLenum" name="pname"/>
+				<param type="GLint" name="param"/>
+			</params>
+		</function>
+		<function name="glReadBuffer" return="void" link="static">
+			<params>
+				<param type="GLenum" name="mode"/>
+			</params>
+		</function>
+		<function name="glReadPixels" return="void" link="static">
+			<params>
+				<param type="GLint" name="x"/>
+				<param type="GLint" name="y"/>
+				<param type="GLsizei" name="width"/>
+				<param type="GLsizei" name="height"/>
+				<param type="GLenum" name="format"/>
+				<param type="GLenum" name="type"/>
+				<param type="GLvoid*" name="pixels"/>
+			</params>
+		</function>
+		<function name="glGetBooleanv" return="void" link="static">
+			<params>
+				<param type="GLenum" name="pname"/>
+				<param type="GLboolean*" name="params"/>
+			</params>
+		</function>
+		<function name="glGetDoublev" return="void" link="static">
+			<params>
+				<param type="GLenum" name="pname"/>
+				<param type="GLdouble*" name="params"/>
+			</params>
+		</function>
+		<function name="glGetError" return="GLenum" link="static"/>
+		<function name="glGetFloatv" return="void" link="static">
+			<params>
+				<param type="GLenum" name="pname"/>
+				<param type="GLfloat*" name="params"/>
+			</params>
+		</function>
+		<function name="glGetIntegerv" return="void" link="static">
+			<params>
+				<param type="GLenum" name="pname"/>
+				<param type="GLint*" name="params"/>
+			</params>
+		</function>
+		<function name="glGetString" return="const GLubyte*" link="static">
+			<params>
+				<param type="GLenum" name="name"/>
+			</params>
+		</function>
+		<function name="glGetTexImage" return="void" link="static">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLint" name="level"/>
+				<param type="GLenum" name="format"/>
+				<param type="GLenum" name="type"/>
+				<param type="GLvoid*" name="pixels"/>
+			</params>
+		</function>
+		<function name="glGetTexParameterfv" return="void" link="static">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLfloat*" name="params"/>
+			</params>
+		</function>
+		<function name="glGetTexParameteriv" return="void" link="static">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLint*" name="params"/>
+			</params>
+		</function>
+		<function name="glGetTexLevelParameterfv" return="void" link="static">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLint" name="level"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLfloat*" name="params"/>
+			</params>
+		</function>
+		<function name="glGetTexLevelParameteriv" return="void" link="static">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLint" name="level"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLint*" name="params"/>
+			</params>
+		</function>
+		<function name="glIsEnabled" return="GLboolean" link="static">
+			<params>
+				<param type="GLenum" name="cap"/>
+			</params>
+		</function>
+		<function name="glDepthRange" return="void" link="static">
+			<params>
+				<param type="GLdouble" name="zNear"/>
+				<param type="GLdouble" name="zFar"/>
+			</params>
+		</function>
+		<function name="glViewport" return="void" link="static">
+			<params>
+				<param type="GLint" name="x"/>
+				<param type="GLint" name="y"/>
+				<param type="GLsizei" name="width"/>
+				<param type="GLsizei" name="height"/>
+			</params>
+		</function>
+		<function name="glNewList" return="void" link="static">
+			<params>
+				<param type="GLuint" name="list"/>
+				<param type="GLenum" name="mode"/>
+			</params>
+		</function>
+		<function name="glEndList" return="void" link="static"/>
+		<function name="glCallList" return="void" link="static">
+			<params>
+				<param type="GLuint" name="list"/>
+			</params>
+		</function>
+		<function name="glCallLists" return="void" link="static">
+			<params>
+				<param type="GLsizei" name="n"/>
+				<param type="GLenum" name="type"/>
+				<param type="const GLvoid*" name="lists"/>
+			</params>
+		</function>
+		<function name="glDeleteLists" return="void" link="static">
+			<params>
+				<param type="GLuint" name="list"/>
+				<param type="GLsizei" name="range"/>
+			</params>
+		</function>
+		<function name="glGenLists" return="GLuint" link="static">
+			<params>
+				<param type="GLsizei" name="range"/>
+			</params>
+		</function>
+		<function name="glListBase" return="void" link="static">
+			<params>
+				<param type="GLuint" name="base"/>
 			</params>
 		</function>
 		<function name="glBegin" return="void" link="static">
@@ -463,66 +783,6 @@
 				<param type="GLfloat" name="xmove"/>
 				<param type="GLfloat" name="ymove"/>
 				<param type="const GLubyte*" name="bitmap"/>
-			</params>
-		</function>
-		<function name="glBlendFunc" return="void" link="static">
-			<params>
-				<param type="GLenum" name="sfactor"/>
-				<param type="GLenum" name="dfactor"/>
-			</params>
-		</function>
-		<function name="glCallList" return="void" link="static">
-			<params>
-				<param type="GLuint" name="list"/>
-			</params>
-		</function>
-		<function name="glCallLists" return="void" link="static">
-			<params>
-				<param type="GLsizei" name="n"/>
-				<param type="GLenum" name="type"/>
-				<param type="const GLvoid*" name="lists"/>
-			</params>
-		</function>
-		<function name="glClear" return="void" link="static">
-			<params>
-				<param type="GLbitfield" name="mask"/>
-			</params>
-		</function>
-		<function name="glClearAccum" return="void" link="static">
-			<params>
-				<param type="GLfloat" name="red"/>
-				<param type="GLfloat" name="green"/>
-				<param type="GLfloat" name="blue"/>
-				<param type="GLfloat" name="alpha"/>
-			</params>
-		</function>
-		<function name="glClearColor" return="void" link="static">
-			<params>
-				<param type="GLclampf" name="red"/>
-				<param type="GLclampf" name="green"/>
-				<param type="GLclampf" name="blue"/>
-				<param type="GLclampf" name="alpha"/>
-			</params>
-		</function>
-		<function name="glClearDepth" return="void" link="static">
-			<params>
-				<param type="GLclampd" name="depth"/>
-			</params>
-		</function>
-		<function name="glClearIndex" return="void" link="static">
-			<params>
-				<param type="GLfloat" name="c"/>
-			</params>
-		</function>
-		<function name="glClearStencil" return="void" link="static">
-			<params>
-				<param type="GLint" name="s"/>
-			</params>
-		</function>
-		<function name="glClipPlane" return="void" link="static">
-			<params>
-				<param type="GLenum" name="plane"/>
-				<param type="const GLdouble*" name="equation"/>
 			</params>
 		</function>
 		<function name="glColor3b" return="void" link="static">
@@ -725,75 +985,6 @@
 				<param type="const GLushort*" name="v"/>
 			</params>
 		</function>
-		<function name="glColorMask" return="void" link="static">
-			<params>
-				<param type="GLboolean" name="red"/>
-				<param type="GLboolean" name="green"/>
-				<param type="GLboolean" name="blue"/>
-				<param type="GLboolean" name="alpha"/>
-			</params>
-		</function>
-		<function name="glColorMaterial" return="void" link="static">
-			<params>
-				<param type="GLenum" name="face"/>
-				<param type="GLenum" name="mode"/>
-			</params>
-		</function>
-		<function name="glCopyPixels" return="void" link="static">
-			<params>
-				<param type="GLint" name="x"/>
-				<param type="GLint" name="y"/>
-				<param type="GLsizei" name="width"/>
-				<param type="GLsizei" name="height"/>
-				<param type="GLenum" name="type"/>
-			</params>
-		</function>
-		<function name="glCullFace" return="void" link="static">
-			<params>
-				<param type="GLenum" name="mode"/>
-			</params>
-		</function>
-		<function name="glDeleteLists" return="void" link="static">
-			<params>
-				<param type="GLuint" name="list"/>
-				<param type="GLsizei" name="range"/>
-			</params>
-		</function>
-		<function name="glDepthFunc" return="void" link="static">
-			<params>
-				<param type="GLenum" name="func"/>
-			</params>
-		</function>
-		<function name="glDepthMask" return="void" link="static">
-			<params>
-				<param type="GLboolean" name="flag"/>
-			</params>
-		</function>
-		<function name="glDepthRange" return="void" link="static">
-			<params>
-				<param type="GLclampd" name="zNear"/>
-				<param type="GLclampd" name="zFar"/>
-			</params>
-		</function>
-		<function name="glDisable" return="void" link="static">
-			<params>
-				<param type="GLenum" name="cap"/>
-			</params>
-		</function>
-		<function name="glDrawBuffer" return="void" link="static">
-			<params>
-				<param type="GLenum" name="mode"/>
-			</params>
-		</function>
-		<function name="glDrawPixels" return="void" link="static">
-			<params>
-				<param type="GLsizei" name="width"/>
-				<param type="GLsizei" name="height"/>
-				<param type="GLenum" name="format"/>
-				<param type="GLenum" name="type"/>
-				<param type="const GLvoid*" name="pixels"/>
-			</params>
-		</function>
 		<function name="glEdgeFlag" return="void" link="static">
 			<params>
 				<param type="GLboolean" name="flag"/>
@@ -804,328 +995,7 @@
 				<param type="const GLboolean*" name="flag"/>
 			</params>
 		</function>
-		<function name="glEnable" return="void" link="static">
-			<params>
-				<param type="GLenum" name="cap"/>
-			</params>
-		</function>
 		<function name="glEnd" return="void" link="static"/>
-		<function name="glEndList" return="void" link="static"/>
-		<function name="glEvalCoord1d" return="void" link="static">
-			<params>
-				<param type="GLdouble" name="u"/>
-			</params>
-		</function>
-		<function name="glEvalCoord1dv" return="void" link="static">
-			<params>
-				<param type="const GLdouble*" name="u"/>
-			</params>
-		</function>
-		<function name="glEvalCoord1f" return="void" link="static">
-			<params>
-				<param type="GLfloat" name="u"/>
-			</params>
-		</function>
-		<function name="glEvalCoord1fv" return="void" link="static">
-			<params>
-				<param type="const GLfloat*" name="u"/>
-			</params>
-		</function>
-		<function name="glEvalCoord2d" return="void" link="static">
-			<params>
-				<param type="GLdouble" name="u"/>
-				<param type="GLdouble" name="v"/>
-			</params>
-		</function>
-		<function name="glEvalCoord2dv" return="void" link="static">
-			<params>
-				<param type="const GLdouble*" name="u"/>
-			</params>
-		</function>
-		<function name="glEvalCoord2f" return="void" link="static">
-			<params>
-				<param type="GLfloat" name="u"/>
-				<param type="GLfloat" name="v"/>
-			</params>
-		</function>
-		<function name="glEvalCoord2fv" return="void" link="static">
-			<params>
-				<param type="const GLfloat*" name="u"/>
-			</params>
-		</function>
-		<function name="glEvalMesh1" return="void" link="static">
-			<params>
-				<param type="GLenum" name="mode"/>
-				<param type="GLint" name="i1"/>
-				<param type="GLint" name="i2"/>
-			</params>
-		</function>
-		<function name="glEvalMesh2" return="void" link="static">
-			<params>
-				<param type="GLenum" name="mode"/>
-				<param type="GLint" name="i1"/>
-				<param type="GLint" name="i2"/>
-				<param type="GLint" name="j1"/>
-				<param type="GLint" name="j2"/>
-			</params>
-		</function>
-		<function name="glEvalPoint1" return="void" link="static">
-			<params>
-				<param type="GLint" name="i"/>
-			</params>
-		</function>
-		<function name="glEvalPoint2" return="void" link="static">
-			<params>
-				<param type="GLint" name="i"/>
-				<param type="GLint" name="j"/>
-			</params>
-		</function>
-		<function name="glFeedbackBuffer" return="void" link="static">
-			<params>
-				<param type="GLsizei" name="size"/>
-				<param type="GLenum" name="type"/>
-				<param type="GLfloat*" name="buffer"/>
-			</params>
-		</function>
-		<function name="glFinish" return="void" link="static"/>
-		<function name="glFlush" return="void" link="static"/>
-		<function name="glFogf" return="void" link="static">
-			<params>
-				<param type="GLenum" name="pname"/>
-				<param type="GLfloat" name="param"/>
-			</params>
-		</function>
-		<function name="glFogfv" return="void" link="static">
-			<params>
-				<param type="GLenum" name="pname"/>
-				<param type="const GLfloat*" name="params"/>
-			</params>
-		</function>
-		<function name="glFogi" return="void" link="static">
-			<params>
-				<param type="GLenum" name="pname"/>
-				<param type="GLint" name="param"/>
-			</params>
-		</function>
-		<function name="glFogiv" return="void" link="static">
-			<params>
-				<param type="GLenum" name="pname"/>
-				<param type="const GLint*" name="params"/>
-			</params>
-		</function>
-		<function name="glFrontFace" return="void" link="static">
-			<params>
-				<param type="GLenum" name="mode"/>
-			</params>
-		</function>
-		<function name="glFrustum" return="void" link="static">
-			<params>
-				<param type="GLdouble" name="left"/>
-				<param type="GLdouble" name="right"/>
-				<param type="GLdouble" name="bottom"/>
-				<param type="GLdouble" name="top"/>
-				<param type="GLdouble" name="zNear"/>
-				<param type="GLdouble" name="zFar"/>
-			</params>
-		</function>
-		<function name="glGenLists" return="GLuint" link="static">
-			<params>
-				<param type="GLsizei" name="range"/>
-			</params>
-		</function>
-		<function name="glGetBooleanv" return="void" link="static">
-			<params>
-				<param type="GLenum" name="pname"/>
-				<param type="GLboolean*" name="params"/>
-			</params>
-		</function>
-		<function name="glGetClipPlane" return="void" link="static">
-			<params>
-				<param type="GLenum" name="plane"/>
-				<param type="GLdouble*" name="equation"/>
-			</params>
-		</function>
-		<function name="glGetDoublev" return="void" link="static">
-			<params>
-				<param type="GLenum" name="pname"/>
-				<param type="GLdouble*" name="params"/>
-			</params>
-		</function>
-		<function name="glGetError" return="GLenum" link="static"/>
-		<function name="glGetFloatv" return="void" link="static">
-			<params>
-				<param type="GLenum" name="pname"/>
-				<param type="GLfloat*" name="params"/>
-			</params>
-		</function>
-		<function name="glGetIntegerv" return="void" link="static">
-			<params>
-				<param type="GLenum" name="pname"/>
-				<param type="GLint*" name="params"/>
-			</params>
-		</function>
-		<function name="glGetLightfv" return="void" link="static">
-			<params>
-				<param type="GLenum" name="light"/>
-				<param type="GLenum" name="pname"/>
-				<param type="GLfloat*" name="params"/>
-			</params>
-		</function>
-		<function name="glGetLightiv" return="void" link="static">
-			<params>
-				<param type="GLenum" name="light"/>
-				<param type="GLenum" name="pname"/>
-				<param type="GLint*" name="params"/>
-			</params>
-		</function>
-		<function name="glGetMapdv" return="void" link="static">
-			<params>
-				<param type="GLenum" name="target"/>
-				<param type="GLenum" name="query"/>
-				<param type="GLdouble*" name="v"/>
-			</params>
-		</function>
-		<function name="glGetMapfv" return="void" link="static">
-			<params>
-				<param type="GLenum" name="target"/>
-				<param type="GLenum" name="query"/>
-				<param type="GLfloat*" name="v"/>
-			</params>
-		</function>
-		<function name="glGetMapiv" return="void" link="static">
-			<params>
-				<param type="GLenum" name="target"/>
-				<param type="GLenum" name="query"/>
-				<param type="GLint*" name="v"/>
-			</params>
-		</function>
-		<function name="glGetMaterialfv" return="void" link="static">
-			<params>
-				<param type="GLenum" name="face"/>
-				<param type="GLenum" name="pname"/>
-				<param type="GLfloat*" name="params"/>
-			</params>
-		</function>
-		<function name="glGetMaterialiv" return="void" link="static">
-			<params>
-				<param type="GLenum" name="face"/>
-				<param type="GLenum" name="pname"/>
-				<param type="GLint*" name="params"/>
-			</params>
-		</function>
-		<function name="glGetPixelMapfv" return="void" link="static">
-			<params>
-				<param type="GLenum" name="map"/>
-				<param type="GLfloat*" name="values"/>
-			</params>
-		</function>
-		<function name="glGetPixelMapuiv" return="void" link="static">
-			<params>
-				<param type="GLenum" name="map"/>
-				<param type="GLuint*" name="values"/>
-			</params>
-		</function>
-		<function name="glGetPixelMapusv" return="void" link="static">
-			<params>
-				<param type="GLenum" name="map"/>
-				<param type="GLushort*" name="values"/>
-			</params>
-		</function>
-		<function name="glGetPolygonStipple" return="void" link="static">
-			<params>
-				<param type="GLubyte*" name="mask"/>
-			</params>
-		</function>
-		<function name="glGetString" return="const GLubyte*" link="static">
-			<params>
-				<param type="GLenum" name="name"/>
-			</params>
-		</function>
-		<function name="glGetTexEnvfv" return="void" link="static">
-			<params>
-				<param type="GLenum" name="target"/>
-				<param type="GLenum" name="pname"/>
-				<param type="GLfloat*" name="params"/>
-			</params>
-		</function>
-		<function name="glGetTexEnviv" return="void" link="static">
-			<params>
-				<param type="GLenum" name="target"/>
-				<param type="GLenum" name="pname"/>
-				<param type="GLint*" name="params"/>
-			</params>
-		</function>
-		<function name="glGetTexGendv" return="void" link="static">
-			<params>
-				<param type="GLenum" name="coord"/>
-				<param type="GLenum" name="pname"/>
-				<param type="GLdouble*" name="params"/>
-			</params>
-		</function>
-		<function name="glGetTexGenfv" return="void" link="static">
-			<params>
-				<param type="GLenum" name="coord"/>
-				<param type="GLenum" name="pname"/>
-				<param type="GLfloat*" name="params"/>
-			</params>
-		</function>
-		<function name="glGetTexGeniv" return="void" link="static">
-			<params>
-				<param type="GLenum" name="coord"/>
-				<param type="GLenum" name="pname"/>
-				<param type="GLint*" name="params"/>
-			</params>
-		</function>
-		<function name="glGetTexImage" return="void" link="static">
-			<params>
-				<param type="GLenum" name="target"/>
-				<param type="GLint" name="level"/>
-				<param type="GLenum" name="format"/>
-				<param type="GLenum" name="type"/>
-				<param type="GLvoid*" name="pixels"/>
-			</params>
-		</function>
-		<function name="glGetTexLevelParameterfv" return="void" link="static">
-			<params>
-				<param type="GLenum" name="target"/>
-				<param type="GLint" name="level"/>
-				<param type="GLenum" name="pname"/>
-				<param type="GLfloat*" name="params"/>
-			</params>
-		</function>
-		<function name="glGetTexLevelParameteriv" return="void" link="static">
-			<params>
-				<param type="GLenum" name="target"/>
-				<param type="GLint" name="level"/>
-				<param type="GLenum" name="pname"/>
-				<param type="GLint*" name="params"/>
-			</params>
-		</function>
-		<function name="glGetTexParameterfv" return="void" link="static">
-			<params>
-				<param type="GLenum" name="target"/>
-				<param type="GLenum" name="pname"/>
-				<param type="GLfloat*" name="params"/>
-			</params>
-		</function>
-		<function name="glGetTexParameteriv" return="void" link="static">
-			<params>
-				<param type="GLenum" name="target"/>
-				<param type="GLenum" name="pname"/>
-				<param type="GLint*" name="params"/>
-			</params>
-		</function>
-		<function name="glHint" return="void" link="static">
-			<params>
-				<param type="GLenum" name="target"/>
-				<param type="GLenum" name="mode"/>
-			</params>
-		</function>
-		<function name="glIndexMask" return="void" link="static">
-			<params>
-				<param type="GLuint" name="mask"/>
-			</params>
-		</function>
 		<function name="glIndexd" return="void" link="static">
 			<params>
 				<param type="GLdouble" name="c"/>
@@ -1164,237 +1034,6 @@
 		<function name="glIndexsv" return="void" link="static">
 			<params>
 				<param type="const GLshort*" name="c"/>
-			</params>
-		</function>
-		<function name="glInitNames" return="void" link="static"/>
-		<function name="glIsEnabled" return="GLboolean" link="static">
-			<params>
-				<param type="GLenum" name="cap"/>
-			</params>
-		</function>
-		<function name="glIsList" return="GLboolean" link="static">
-			<params>
-				<param type="GLuint" name="list"/>
-			</params>
-		</function>
-		<function name="glLightModelf" return="void" link="static">
-			<params>
-				<param type="GLenum" name="pname"/>
-				<param type="GLfloat" name="param"/>
-			</params>
-		</function>
-		<function name="glLightModelfv" return="void" link="static">
-			<params>
-				<param type="GLenum" name="pname"/>
-				<param type="const GLfloat*" name="params"/>
-			</params>
-		</function>
-		<function name="glLightModeli" return="void" link="static">
-			<params>
-				<param type="GLenum" name="pname"/>
-				<param type="GLint" name="param"/>
-			</params>
-		</function>
-		<function name="glLightModeliv" return="void" link="static">
-			<params>
-				<param type="GLenum" name="pname"/>
-				<param type="const GLint*" name="params"/>
-			</params>
-		</function>
-		<function name="glLightf" return="void" link="static">
-			<params>
-				<param type="GLenum" name="light"/>
-				<param type="GLenum" name="pname"/>
-				<param type="GLfloat" name="param"/>
-			</params>
-		</function>
-		<function name="glLightfv" return="void" link="static">
-			<params>
-				<param type="GLenum" name="light"/>
-				<param type="GLenum" name="pname"/>
-				<param type="const GLfloat*" name="params"/>
-			</params>
-		</function>
-		<function name="glLighti" return="void" link="static">
-			<params>
-				<param type="GLenum" name="light"/>
-				<param type="GLenum" name="pname"/>
-				<param type="GLint" name="param"/>
-			</params>
-		</function>
-		<function name="glLightiv" return="void" link="static">
-			<params>
-				<param type="GLenum" name="light"/>
-				<param type="GLenum" name="pname"/>
-				<param type="const GLint*" name="params"/>
-			</params>
-		</function>
-		<function name="glLineStipple" return="void" link="static">
-			<params>
-				<param type="GLint" name="factor"/>
-				<param type="GLushort" name="pattern"/>
-			</params>
-		</function>
-		<function name="glLineWidth" return="void" link="static">
-			<params>
-				<param type="GLfloat" name="width"/>
-			</params>
-		</function>
-		<function name="glListBase" return="void" link="static">
-			<params>
-				<param type="GLuint" name="base"/>
-			</params>
-		</function>
-		<function name="glLoadIdentity" return="void" link="static"/>
-		<function name="glLoadMatrixd" return="void" link="static">
-			<params>
-				<param type="const GLdouble*" name="m"/>
-			</params>
-		</function>
-		<function name="glLoadMatrixf" return="void" link="static">
-			<params>
-				<param type="const GLfloat*" name="m"/>
-			</params>
-		</function>
-		<function name="glLoadName" return="void" link="static">
-			<params>
-				<param type="GLuint" name="name"/>
-			</params>
-		</function>
-		<function name="glLogicOp" return="void" link="static">
-			<params>
-				<param type="GLenum" name="opcode"/>
-			</params>
-		</function>
-		<function name="glMap1d" return="void" link="static">
-			<params>
-				<param type="GLenum" name="target"/>
-				<param type="GLdouble" name="u1"/>
-				<param type="GLdouble" name="u2"/>
-				<param type="GLint" name="stride"/>
-				<param type="GLint" name="order"/>
-				<param type="const GLdouble*" name="points"/>
-			</params>
-		</function>
-		<function name="glMap1f" return="void" link="static">
-			<params>
-				<param type="GLenum" name="target"/>
-				<param type="GLfloat" name="u1"/>
-				<param type="GLfloat" name="u2"/>
-				<param type="GLint" name="stride"/>
-				<param type="GLint" name="order"/>
-				<param type="const GLfloat*" name="points"/>
-			</params>
-		</function>
-		<function name="glMap2d" return="void" link="static">
-			<params>
-				<param type="GLenum" name="target"/>
-				<param type="GLdouble" name="u1"/>
-				<param type="GLdouble" name="u2"/>
-				<param type="GLint" name="ustride"/>
-				<param type="GLint" name="uorder"/>
-				<param type="GLdouble" name="v1"/>
-				<param type="GLdouble" name="v2"/>
-				<param type="GLint" name="vstride"/>
-				<param type="GLint" name="vorder"/>
-				<param type="const GLdouble*" name="points"/>
-			</params>
-		</function>
-		<function name="glMap2f" return="void" link="static">
-			<params>
-				<param type="GLenum" name="target"/>
-				<param type="GLfloat" name="u1"/>
-				<param type="GLfloat" name="u2"/>
-				<param type="GLint" name="ustride"/>
-				<param type="GLint" name="uorder"/>
-				<param type="GLfloat" name="v1"/>
-				<param type="GLfloat" name="v2"/>
-				<param type="GLint" name="vstride"/>
-				<param type="GLint" name="vorder"/>
-				<param type="const GLfloat*" name="points"/>
-			</params>
-		</function>
-		<function name="glMapGrid1d" return="void" link="static">
-			<params>
-				<param type="GLint" name="un"/>
-				<param type="GLdouble" name="u1"/>
-				<param type="GLdouble" name="u2"/>
-			</params>
-		</function>
-		<function name="glMapGrid1f" return="void" link="static">
-			<params>
-				<param type="GLint" name="un"/>
-				<param type="GLfloat" name="u1"/>
-				<param type="GLfloat" name="u2"/>
-			</params>
-		</function>
-		<function name="glMapGrid2d" return="void" link="static">
-			<params>
-				<param type="GLint" name="un"/>
-				<param type="GLdouble" name="u1"/>
-				<param type="GLdouble" name="u2"/>
-				<param type="GLint" name="vn"/>
-				<param type="GLdouble" name="v1"/>
-				<param type="GLdouble" name="v2"/>
-			</params>
-		</function>
-		<function name="glMapGrid2f" return="void" link="static">
-			<params>
-				<param type="GLint" name="un"/>
-				<param type="GLfloat" name="u1"/>
-				<param type="GLfloat" name="u2"/>
-				<param type="GLint" name="vn"/>
-				<param type="GLfloat" name="v1"/>
-				<param type="GLfloat" name="v2"/>
-			</params>
-		</function>
-		<function name="glMaterialf" return="void" link="static">
-			<params>
-				<param type="GLenum" name="face"/>
-				<param type="GLenum" name="pname"/>
-				<param type="GLfloat" name="param"/>
-			</params>
-		</function>
-		<function name="glMaterialfv" return="void" link="static">
-			<params>
-				<param type="GLenum" name="face"/>
-				<param type="GLenum" name="pname"/>
-				<param type="const GLfloat*" name="params"/>
-			</params>
-		</function>
-		<function name="glMateriali" return="void" link="static">
-			<params>
-				<param type="GLenum" name="face"/>
-				<param type="GLenum" name="pname"/>
-				<param type="GLint" name="param"/>
-			</params>
-		</function>
-		<function name="glMaterialiv" return="void" link="static">
-			<params>
-				<param type="GLenum" name="face"/>
-				<param type="GLenum" name="pname"/>
-				<param type="const GLint*" name="params"/>
-			</params>
-		</function>
-		<function name="glMatrixMode" return="void" link="static">
-			<params>
-				<param type="GLenum" name="mode"/>
-			</params>
-		</function>
-		<function name="glMultMatrixd" return="void" link="static">
-			<params>
-				<param type="const GLdouble*" name="m"/>
-			</params>
-		</function>
-		<function name="glMultMatrixf" return="void" link="static">
-			<params>
-				<param type="const GLfloat*" name="m"/>
-			</params>
-		</function>
-		<function name="glNewList" return="void" link="static">
-			<params>
-				<param type="GLuint" name="list"/>
-				<param type="GLenum" name="mode"/>
 			</params>
 		</function>
 		<function name="glNormal3b" return="void" link="static">
@@ -1455,102 +1094,6 @@
 		<function name="glNormal3sv" return="void" link="static">
 			<params>
 				<param type="const GLshort*" name="v"/>
-			</params>
-		</function>
-		<function name="glOrtho" return="void" link="static">
-			<params>
-				<param type="GLdouble" name="left"/>
-				<param type="GLdouble" name="right"/>
-				<param type="GLdouble" name="bottom"/>
-				<param type="GLdouble" name="top"/>
-				<param type="GLdouble" name="zNear"/>
-				<param type="GLdouble" name="zFar"/>
-			</params>
-		</function>
-		<function name="glPassThrough" return="void" link="static">
-			<params>
-				<param type="GLfloat" name="token"/>
-			</params>
-		</function>
-		<function name="glPixelMapfv" return="void" link="static">
-			<params>
-				<param type="GLenum" name="map"/>
-				<param type="GLsizei" name="mapsize"/>
-				<param type="const GLfloat*" name="values"/>
-			</params>
-		</function>
-		<function name="glPixelMapuiv" return="void" link="static">
-			<params>
-				<param type="GLenum" name="map"/>
-				<param type="GLsizei" name="mapsize"/>
-				<param type="const GLuint*" name="values"/>
-			</params>
-		</function>
-		<function name="glPixelMapusv" return="void" link="static">
-			<params>
-				<param type="GLenum" name="map"/>
-				<param type="GLsizei" name="mapsize"/>
-				<param type="const GLushort*" name="values"/>
-			</params>
-		</function>
-		<function name="glPixelStoref" return="void" link="static">
-			<params>
-				<param type="GLenum" name="pname"/>
-				<param type="GLfloat" name="param"/>
-			</params>
-		</function>
-		<function name="glPixelStorei" return="void" link="static">
-			<params>
-				<param type="GLenum" name="pname"/>
-				<param type="GLint" name="param"/>
-			</params>
-		</function>
-		<function name="glPixelTransferf" return="void" link="static">
-			<params>
-				<param type="GLenum" name="pname"/>
-				<param type="GLfloat" name="param"/>
-			</params>
-		</function>
-		<function name="glPixelTransferi" return="void" link="static">
-			<params>
-				<param type="GLenum" name="pname"/>
-				<param type="GLint" name="param"/>
-			</params>
-		</function>
-		<function name="glPixelZoom" return="void" link="static">
-			<params>
-				<param type="GLfloat" name="xfactor"/>
-				<param type="GLfloat" name="yfactor"/>
-			</params>
-		</function>
-		<function name="glPointSize" return="void" link="static">
-			<params>
-				<param type="GLfloat" name="size"/>
-			</params>
-		</function>
-		<function name="glPolygonMode" return="void" link="static">
-			<params>
-				<param type="GLenum" name="face"/>
-				<param type="GLenum" name="mode"/>
-			</params>
-		</function>
-		<function name="glPolygonStipple" return="void" link="static">
-			<params>
-				<param type="const GLubyte*" name="mask"/>
-			</params>
-		</function>
-		<function name="glPopAttrib" return="void" link="static"/>
-		<function name="glPopMatrix" return="void" link="static"/>
-		<function name="glPopName" return="void" link="static"/>
-		<function name="glPushAttrib" return="void" link="static">
-			<params>
-				<param type="GLbitfield" name="mask"/>
-			</params>
-		</function>
-		<function name="glPushMatrix" return="void" link="static"/>
-		<function name="glPushName" return="void" link="static">
-			<params>
-				<param type="GLuint" name="name"/>
 			</params>
 		</function>
 		<function name="glRasterPos2d" return="void" link="static">
@@ -1697,22 +1240,6 @@
 				<param type="const GLshort*" name="v"/>
 			</params>
 		</function>
-		<function name="glReadBuffer" return="void" link="static">
-			<params>
-				<param type="GLenum" name="mode"/>
-			</params>
-		</function>
-		<function name="glReadPixels" return="void" link="static">
-			<params>
-				<param type="GLint" name="x"/>
-				<param type="GLint" name="y"/>
-				<param type="GLsizei" name="width"/>
-				<param type="GLsizei" name="height"/>
-				<param type="GLenum" name="format"/>
-				<param type="GLenum" name="type"/>
-				<param type="GLvoid*" name="pixels"/>
-			</params>
-		</function>
 		<function name="glRectd" return="void" link="static">
 			<params>
 				<param type="GLdouble" name="x1"/>
@@ -1767,79 +1294,6 @@
 			<params>
 				<param type="const GLshort*" name="v1"/>
 				<param type="const GLshort*" name="v2"/>
-			</params>
-		</function>
-		<function name="glRenderMode" return="GLint" link="static">
-			<params>
-				<param type="GLenum" name="mode"/>
-			</params>
-		</function>
-		<function name="glRotated" return="void" link="static">
-			<params>
-				<param type="GLdouble" name="angle"/>
-				<param type="GLdouble" name="x"/>
-				<param type="GLdouble" name="y"/>
-				<param type="GLdouble" name="z"/>
-			</params>
-		</function>
-		<function name="glRotatef" return="void" link="static">
-			<params>
-				<param type="GLfloat" name="angle"/>
-				<param type="GLfloat" name="x"/>
-				<param type="GLfloat" name="y"/>
-				<param type="GLfloat" name="z"/>
-			</params>
-		</function>
-		<function name="glScaled" return="void" link="static">
-			<params>
-				<param type="GLdouble" name="x"/>
-				<param type="GLdouble" name="y"/>
-				<param type="GLdouble" name="z"/>
-			</params>
-		</function>
-		<function name="glScalef" return="void" link="static">
-			<params>
-				<param type="GLfloat" name="x"/>
-				<param type="GLfloat" name="y"/>
-				<param type="GLfloat" name="z"/>
-			</params>
-		</function>
-		<function name="glScissor" return="void" link="static">
-			<params>
-				<param type="GLint" name="x"/>
-				<param type="GLint" name="y"/>
-				<param type="GLsizei" name="width"/>
-				<param type="GLsizei" name="height"/>
-			</params>
-		</function>
-		<function name="glSelectBuffer" return="void" link="static">
-			<params>
-				<param type="GLsizei" name="size"/>
-				<param type="GLuint*" name="buffer"/>
-			</params>
-		</function>
-		<function name="glShadeModel" return="void" link="static">
-			<params>
-				<param type="GLenum" name="mode"/>
-			</params>
-		</function>
-		<function name="glStencilFunc" return="void" link="static">
-			<params>
-				<param type="GLenum" name="func"/>
-				<param type="GLint" name="ref"/>
-				<param type="GLuint" name="mask"/>
-			</params>
-		</function>
-		<function name="glStencilMask" return="void" link="static">
-			<params>
-				<param type="GLuint" name="mask"/>
-			</params>
-		</function>
-		<function name="glStencilOp" return="void" link="static">
-			<params>
-				<param type="GLenum" name="fail"/>
-				<param type="GLenum" name="zfail"/>
-				<param type="GLenum" name="zpass"/>
 			</params>
 		</function>
 		<function name="glTexCoord1d" return="void" link="static">
@@ -2026,143 +1480,6 @@
 				<param type="const GLshort*" name="v"/>
 			</params>
 		</function>
-		<function name="glTexEnvf" return="void" link="static">
-			<params>
-				<param type="GLenum" name="target"/>
-				<param type="GLenum" name="pname"/>
-				<param type="GLfloat" name="param"/>
-			</params>
-		</function>
-		<function name="glTexEnvfv" return="void" link="static">
-			<params>
-				<param type="GLenum" name="target"/>
-				<param type="GLenum" name="pname"/>
-				<param type="const GLfloat*" name="params"/>
-			</params>
-		</function>
-		<function name="glTexEnvi" return="void" link="static">
-			<params>
-				<param type="GLenum" name="target"/>
-				<param type="GLenum" name="pname"/>
-				<param type="GLint" name="param"/>
-			</params>
-		</function>
-		<function name="glTexEnviv" return="void" link="static">
-			<params>
-				<param type="GLenum" name="target"/>
-				<param type="GLenum" name="pname"/>
-				<param type="const GLint*" name="params"/>
-			</params>
-		</function>
-		<function name="glTexGend" return="void" link="static">
-			<params>
-				<param type="GLenum" name="coord"/>
-				<param type="GLenum" name="pname"/>
-				<param type="GLdouble" name="param"/>
-			</params>
-		</function>
-		<function name="glTexGendv" return="void" link="static">
-			<params>
-				<param type="GLenum" name="coord"/>
-				<param type="GLenum" name="pname"/>
-				<param type="const GLdouble*" name="params"/>
-			</params>
-		</function>
-		<function name="glTexGenf" return="void" link="static">
-			<params>
-				<param type="GLenum" name="coord"/>
-				<param type="GLenum" name="pname"/>
-				<param type="GLfloat" name="param"/>
-			</params>
-		</function>
-		<function name="glTexGenfv" return="void" link="static">
-			<params>
-				<param type="GLenum" name="coord"/>
-				<param type="GLenum" name="pname"/>
-				<param type="const GLfloat*" name="params"/>
-			</params>
-		</function>
-		<function name="glTexGeni" return="void" link="static">
-			<params>
-				<param type="GLenum" name="coord"/>
-				<param type="GLenum" name="pname"/>
-				<param type="GLint" name="param"/>
-			</params>
-		</function>
-		<function name="glTexGeniv" return="void" link="static">
-			<params>
-				<param type="GLenum" name="coord"/>
-				<param type="GLenum" name="pname"/>
-				<param type="const GLint*" name="params"/>
-			</params>
-		</function>
-		<function name="glTexImage1D" return="void" link="static">
-			<params>
-				<param type="GLenum" name="target"/>
-				<param type="GLint" name="level"/>
-				<param type="GLint" name="internalformat"/>
-				<param type="GLsizei" name="width"/>
-				<param type="GLint" name="border"/>
-				<param type="GLenum" name="format"/>
-				<param type="GLenum" name="type"/>
-				<param type="const GLvoid*" name="pixels"/>
-			</params>
-		</function>
-		<function name="glTexImage2D" return="void" link="static">
-			<params>
-				<param type="GLenum" name="target"/>
-				<param type="GLint" name="level"/>
-				<param type="GLint" name="internalformat"/>
-				<param type="GLsizei" name="width"/>
-				<param type="GLsizei" name="height"/>
-				<param type="GLint" name="border"/>
-				<param type="GLenum" name="format"/>
-				<param type="GLenum" name="type"/>
-				<param type="const GLvoid*" name="pixels"/>
-			</params>
-		</function>
-		<function name="glTexParameterf" return="void" link="static">
-			<params>
-				<param type="GLenum" name="target"/>
-				<param type="GLenum" name="pname"/>
-				<param type="GLfloat" name="param"/>
-			</params>
-		</function>
-		<function name="glTexParameterfv" return="void" link="static">
-			<params>
-				<param type="GLenum" name="target"/>
-				<param type="GLenum" name="pname"/>
-				<param type="const GLfloat*" name="params"/>
-			</params>
-		</function>
-		<function name="glTexParameteri" return="void" link="static">
-			<params>
-				<param type="GLenum" name="target"/>
-				<param type="GLenum" name="pname"/>
-				<param type="GLint" name="param"/>
-			</params>
-		</function>
-		<function name="glTexParameteriv" return="void" link="static">
-			<params>
-				<param type="GLenum" name="target"/>
-				<param type="GLenum" name="pname"/>
-				<param type="const GLint*" name="params"/>
-			</params>
-		</function>
-		<function name="glTranslated" return="void" link="static">
-			<params>
-				<param type="GLdouble" name="x"/>
-				<param type="GLdouble" name="y"/>
-				<param type="GLdouble" name="z"/>
-			</params>
-		</function>
-		<function name="glTranslatef" return="void" link="static">
-			<params>
-				<param type="GLfloat" name="x"/>
-				<param type="GLfloat" name="y"/>
-				<param type="GLfloat" name="z"/>
-			</params>
-		</function>
 		<function name="glVertex2d" return="void" link="static">
 			<params>
 				<param type="GLdouble" name="x"/>
@@ -2307,12 +1624,695 @@
 				<param type="const GLshort*" name="v"/>
 			</params>
 		</function>
-		<function name="glViewport" return="void" link="static">
+		<function name="glClipPlane" return="void" link="static">
+			<params>
+				<param type="GLenum" name="plane"/>
+				<param type="const GLdouble*" name="equation"/>
+			</params>
+		</function>
+		<function name="glColorMaterial" return="void" link="static">
+			<params>
+				<param type="GLenum" name="face"/>
+				<param type="GLenum" name="mode"/>
+			</params>
+		</function>
+		<function name="glFogf" return="void" link="static">
+			<params>
+				<param type="GLenum" name="pname"/>
+				<param type="GLfloat" name="param"/>
+			</params>
+		</function>
+		<function name="glFogfv" return="void" link="static">
+			<params>
+				<param type="GLenum" name="pname"/>
+				<param type="const GLfloat*" name="params"/>
+			</params>
+		</function>
+		<function name="glFogi" return="void" link="static">
+			<params>
+				<param type="GLenum" name="pname"/>
+				<param type="GLint" name="param"/>
+			</params>
+		</function>
+		<function name="glFogiv" return="void" link="static">
+			<params>
+				<param type="GLenum" name="pname"/>
+				<param type="const GLint*" name="params"/>
+			</params>
+		</function>
+		<function name="glLightf" return="void" link="static">
+			<params>
+				<param type="GLenum" name="light"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLfloat" name="param"/>
+			</params>
+		</function>
+		<function name="glLightfv" return="void" link="static">
+			<params>
+				<param type="GLenum" name="light"/>
+				<param type="GLenum" name="pname"/>
+				<param type="const GLfloat*" name="params"/>
+			</params>
+		</function>
+		<function name="glLighti" return="void" link="static">
+			<params>
+				<param type="GLenum" name="light"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLint" name="param"/>
+			</params>
+		</function>
+		<function name="glLightiv" return="void" link="static">
+			<params>
+				<param type="GLenum" name="light"/>
+				<param type="GLenum" name="pname"/>
+				<param type="const GLint*" name="params"/>
+			</params>
+		</function>
+		<function name="glLightModelf" return="void" link="static">
+			<params>
+				<param type="GLenum" name="pname"/>
+				<param type="GLfloat" name="param"/>
+			</params>
+		</function>
+		<function name="glLightModelfv" return="void" link="static">
+			<params>
+				<param type="GLenum" name="pname"/>
+				<param type="const GLfloat*" name="params"/>
+			</params>
+		</function>
+		<function name="glLightModeli" return="void" link="static">
+			<params>
+				<param type="GLenum" name="pname"/>
+				<param type="GLint" name="param"/>
+			</params>
+		</function>
+		<function name="glLightModeliv" return="void" link="static">
+			<params>
+				<param type="GLenum" name="pname"/>
+				<param type="const GLint*" name="params"/>
+			</params>
+		</function>
+		<function name="glLineStipple" return="void" link="static">
+			<params>
+				<param type="GLint" name="factor"/>
+				<param type="GLushort" name="pattern"/>
+			</params>
+		</function>
+		<function name="glMaterialf" return="void" link="static">
+			<params>
+				<param type="GLenum" name="face"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLfloat" name="param"/>
+			</params>
+		</function>
+		<function name="glMaterialfv" return="void" link="static">
+			<params>
+				<param type="GLenum" name="face"/>
+				<param type="GLenum" name="pname"/>
+				<param type="const GLfloat*" name="params"/>
+			</params>
+		</function>
+		<function name="glMateriali" return="void" link="static">
+			<params>
+				<param type="GLenum" name="face"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLint" name="param"/>
+			</params>
+		</function>
+		<function name="glMaterialiv" return="void" link="static">
+			<params>
+				<param type="GLenum" name="face"/>
+				<param type="GLenum" name="pname"/>
+				<param type="const GLint*" name="params"/>
+			</params>
+		</function>
+		<function name="glPolygonStipple" return="void" link="static">
+			<params>
+				<param type="const GLubyte*" name="mask"/>
+			</params>
+		</function>
+		<function name="glShadeModel" return="void" link="static">
+			<params>
+				<param type="GLenum" name="mode"/>
+			</params>
+		</function>
+		<function name="glTexEnvf" return="void" link="static">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLfloat" name="param"/>
+			</params>
+		</function>
+		<function name="glTexEnvfv" return="void" link="static">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLenum" name="pname"/>
+				<param type="const GLfloat*" name="params"/>
+			</params>
+		</function>
+		<function name="glTexEnvi" return="void" link="static">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLint" name="param"/>
+			</params>
+		</function>
+		<function name="glTexEnviv" return="void" link="static">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLenum" name="pname"/>
+				<param type="const GLint*" name="params"/>
+			</params>
+		</function>
+		<function name="glTexGend" return="void" link="static">
+			<params>
+				<param type="GLenum" name="coord"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLdouble" name="param"/>
+			</params>
+		</function>
+		<function name="glTexGendv" return="void" link="static">
+			<params>
+				<param type="GLenum" name="coord"/>
+				<param type="GLenum" name="pname"/>
+				<param type="const GLdouble*" name="params"/>
+			</params>
+		</function>
+		<function name="glTexGenf" return="void" link="static">
+			<params>
+				<param type="GLenum" name="coord"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLfloat" name="param"/>
+			</params>
+		</function>
+		<function name="glTexGenfv" return="void" link="static">
+			<params>
+				<param type="GLenum" name="coord"/>
+				<param type="GLenum" name="pname"/>
+				<param type="const GLfloat*" name="params"/>
+			</params>
+		</function>
+		<function name="glTexGeni" return="void" link="static">
+			<params>
+				<param type="GLenum" name="coord"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLint" name="param"/>
+			</params>
+		</function>
+		<function name="glTexGeniv" return="void" link="static">
+			<params>
+				<param type="GLenum" name="coord"/>
+				<param type="GLenum" name="pname"/>
+				<param type="const GLint*" name="params"/>
+			</params>
+		</function>
+		<function name="glFeedbackBuffer" return="void" link="static">
+			<params>
+				<param type="GLsizei" name="size"/>
+				<param type="GLenum" name="type"/>
+				<param type="GLfloat*" name="buffer"/>
+			</params>
+		</function>
+		<function name="glSelectBuffer" return="void" link="static">
+			<params>
+				<param type="GLsizei" name="size"/>
+				<param type="GLuint*" name="buffer"/>
+			</params>
+		</function>
+		<function name="glRenderMode" return="GLint" link="static">
+			<params>
+				<param type="GLenum" name="mode"/>
+			</params>
+		</function>
+		<function name="glInitNames" return="void" link="static"/>
+		<function name="glLoadName" return="void" link="static">
+			<params>
+				<param type="GLuint" name="name"/>
+			</params>
+		</function>
+		<function name="glPassThrough" return="void" link="static">
+			<params>
+				<param type="GLfloat" name="token"/>
+			</params>
+		</function>
+		<function name="glPopName" return="void" link="static"/>
+		<function name="glPushName" return="void" link="static">
+			<params>
+				<param type="GLuint" name="name"/>
+			</params>
+		</function>
+		<function name="glClearAccum" return="void" link="static">
+			<params>
+				<param type="GLfloat" name="red"/>
+				<param type="GLfloat" name="green"/>
+				<param type="GLfloat" name="blue"/>
+				<param type="GLfloat" name="alpha"/>
+			</params>
+		</function>
+		<function name="glClearIndex" return="void" link="static">
+			<params>
+				<param type="GLfloat" name="c"/>
+			</params>
+		</function>
+		<function name="glIndexMask" return="void" link="static">
+			<params>
+				<param type="GLuint" name="mask"/>
+			</params>
+		</function>
+		<function name="glAccum" return="void" link="static">
+			<params>
+				<param type="GLenum" name="op"/>
+				<param type="GLfloat" name="value"/>
+			</params>
+		</function>
+		<function name="glPopAttrib" return="void" link="static"/>
+		<function name="glPushAttrib" return="void" link="static">
+			<params>
+				<param type="GLbitfield" name="mask"/>
+			</params>
+		</function>
+		<function name="glMap1d" return="void" link="static">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLdouble" name="u1"/>
+				<param type="GLdouble" name="u2"/>
+				<param type="GLint" name="stride"/>
+				<param type="GLint" name="order"/>
+				<param type="const GLdouble*" name="points"/>
+			</params>
+		</function>
+		<function name="glMap1f" return="void" link="static">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLfloat" name="u1"/>
+				<param type="GLfloat" name="u2"/>
+				<param type="GLint" name="stride"/>
+				<param type="GLint" name="order"/>
+				<param type="const GLfloat*" name="points"/>
+			</params>
+		</function>
+		<function name="glMap2d" return="void" link="static">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLdouble" name="u1"/>
+				<param type="GLdouble" name="u2"/>
+				<param type="GLint" name="ustride"/>
+				<param type="GLint" name="uorder"/>
+				<param type="GLdouble" name="v1"/>
+				<param type="GLdouble" name="v2"/>
+				<param type="GLint" name="vstride"/>
+				<param type="GLint" name="vorder"/>
+				<param type="const GLdouble*" name="points"/>
+			</params>
+		</function>
+		<function name="glMap2f" return="void" link="static">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLfloat" name="u1"/>
+				<param type="GLfloat" name="u2"/>
+				<param type="GLint" name="ustride"/>
+				<param type="GLint" name="uorder"/>
+				<param type="GLfloat" name="v1"/>
+				<param type="GLfloat" name="v2"/>
+				<param type="GLint" name="vstride"/>
+				<param type="GLint" name="vorder"/>
+				<param type="const GLfloat*" name="points"/>
+			</params>
+		</function>
+		<function name="glMapGrid1d" return="void" link="static">
+			<params>
+				<param type="GLint" name="un"/>
+				<param type="GLdouble" name="u1"/>
+				<param type="GLdouble" name="u2"/>
+			</params>
+		</function>
+		<function name="glMapGrid1f" return="void" link="static">
+			<params>
+				<param type="GLint" name="un"/>
+				<param type="GLfloat" name="u1"/>
+				<param type="GLfloat" name="u2"/>
+			</params>
+		</function>
+		<function name="glMapGrid2d" return="void" link="static">
+			<params>
+				<param type="GLint" name="un"/>
+				<param type="GLdouble" name="u1"/>
+				<param type="GLdouble" name="u2"/>
+				<param type="GLint" name="vn"/>
+				<param type="GLdouble" name="v1"/>
+				<param type="GLdouble" name="v2"/>
+			</params>
+		</function>
+		<function name="glMapGrid2f" return="void" link="static">
+			<params>
+				<param type="GLint" name="un"/>
+				<param type="GLfloat" name="u1"/>
+				<param type="GLfloat" name="u2"/>
+				<param type="GLint" name="vn"/>
+				<param type="GLfloat" name="v1"/>
+				<param type="GLfloat" name="v2"/>
+			</params>
+		</function>
+		<function name="glEvalCoord1d" return="void" link="static">
+			<params>
+				<param type="GLdouble" name="u"/>
+			</params>
+		</function>
+		<function name="glEvalCoord1dv" return="void" link="static">
+			<params>
+				<param type="const GLdouble*" name="u"/>
+			</params>
+		</function>
+		<function name="glEvalCoord1f" return="void" link="static">
+			<params>
+				<param type="GLfloat" name="u"/>
+			</params>
+		</function>
+		<function name="glEvalCoord1fv" return="void" link="static">
+			<params>
+				<param type="const GLfloat*" name="u"/>
+			</params>
+		</function>
+		<function name="glEvalCoord2d" return="void" link="static">
+			<params>
+				<param type="GLdouble" name="u"/>
+				<param type="GLdouble" name="v"/>
+			</params>
+		</function>
+		<function name="glEvalCoord2dv" return="void" link="static">
+			<params>
+				<param type="const GLdouble*" name="u"/>
+			</params>
+		</function>
+		<function name="glEvalCoord2f" return="void" link="static">
+			<params>
+				<param type="GLfloat" name="u"/>
+				<param type="GLfloat" name="v"/>
+			</params>
+		</function>
+		<function name="glEvalCoord2fv" return="void" link="static">
+			<params>
+				<param type="const GLfloat*" name="u"/>
+			</params>
+		</function>
+		<function name="glEvalMesh1" return="void" link="static">
+			<params>
+				<param type="GLenum" name="mode"/>
+				<param type="GLint" name="i1"/>
+				<param type="GLint" name="i2"/>
+			</params>
+		</function>
+		<function name="glEvalPoint1" return="void" link="static">
+			<params>
+				<param type="GLint" name="i"/>
+			</params>
+		</function>
+		<function name="glEvalMesh2" return="void" link="static">
+			<params>
+				<param type="GLenum" name="mode"/>
+				<param type="GLint" name="i1"/>
+				<param type="GLint" name="i2"/>
+				<param type="GLint" name="j1"/>
+				<param type="GLint" name="j2"/>
+			</params>
+		</function>
+		<function name="glEvalPoint2" return="void" link="static">
+			<params>
+				<param type="GLint" name="i"/>
+				<param type="GLint" name="j"/>
+			</params>
+		</function>
+		<function name="glAlphaFunc" return="void" link="static">
+			<params>
+				<param type="GLenum" name="func"/>
+				<param type="GLfloat" name="ref"/>
+			</params>
+		</function>
+		<function name="glPixelZoom" return="void" link="static">
+			<params>
+				<param type="GLfloat" name="xfactor"/>
+				<param type="GLfloat" name="yfactor"/>
+			</params>
+		</function>
+		<function name="glPixelTransferf" return="void" link="static">
+			<params>
+				<param type="GLenum" name="pname"/>
+				<param type="GLfloat" name="param"/>
+			</params>
+		</function>
+		<function name="glPixelTransferi" return="void" link="static">
+			<params>
+				<param type="GLenum" name="pname"/>
+				<param type="GLint" name="param"/>
+			</params>
+		</function>
+		<function name="glPixelMapfv" return="void" link="static">
+			<params>
+				<param type="GLenum" name="map"/>
+				<param type="GLint" name="mapsize"/>
+				<param type="const GLfloat*" name="values"/>
+			</params>
+		</function>
+		<function name="glPixelMapuiv" return="void" link="static">
+			<params>
+				<param type="GLenum" name="map"/>
+				<param type="GLint" name="mapsize"/>
+				<param type="const GLuint*" name="values"/>
+			</params>
+		</function>
+		<function name="glPixelMapusv" return="void" link="static">
+			<params>
+				<param type="GLenum" name="map"/>
+				<param type="GLint" name="mapsize"/>
+				<param type="const GLushort*" name="values"/>
+			</params>
+		</function>
+		<function name="glCopyPixels" return="void" link="static">
 			<params>
 				<param type="GLint" name="x"/>
 				<param type="GLint" name="y"/>
 				<param type="GLsizei" name="width"/>
 				<param type="GLsizei" name="height"/>
+				<param type="GLenum" name="type"/>
+			</params>
+		</function>
+		<function name="glDrawPixels" return="void" link="static">
+			<params>
+				<param type="GLsizei" name="width"/>
+				<param type="GLsizei" name="height"/>
+				<param type="GLenum" name="format"/>
+				<param type="GLenum" name="type"/>
+				<param type="const GLvoid*" name="pixels"/>
+			</params>
+		</function>
+		<function name="glGetClipPlane" return="void" link="static">
+			<params>
+				<param type="GLenum" name="plane"/>
+				<param type="GLdouble*" name="equation"/>
+			</params>
+		</function>
+		<function name="glGetLightfv" return="void" link="static">
+			<params>
+				<param type="GLenum" name="light"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLfloat*" name="params"/>
+			</params>
+		</function>
+		<function name="glGetLightiv" return="void" link="static">
+			<params>
+				<param type="GLenum" name="light"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLint*" name="params"/>
+			</params>
+		</function>
+		<function name="glGetMapdv" return="void" link="static">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLenum" name="query"/>
+				<param type="GLdouble*" name="v"/>
+			</params>
+		</function>
+		<function name="glGetMapfv" return="void" link="static">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLenum" name="query"/>
+				<param type="GLfloat*" name="v"/>
+			</params>
+		</function>
+		<function name="glGetMapiv" return="void" link="static">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLenum" name="query"/>
+				<param type="GLint*" name="v"/>
+			</params>
+		</function>
+		<function name="glGetMaterialfv" return="void" link="static">
+			<params>
+				<param type="GLenum" name="face"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLfloat*" name="params"/>
+			</params>
+		</function>
+		<function name="glGetMaterialiv" return="void" link="static">
+			<params>
+				<param type="GLenum" name="face"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLint*" name="params"/>
+			</params>
+		</function>
+		<function name="glGetPixelMapfv" return="void" link="static">
+			<params>
+				<param type="GLenum" name="map"/>
+				<param type="GLfloat*" name="values"/>
+			</params>
+		</function>
+		<function name="glGetPixelMapuiv" return="void" link="static">
+			<params>
+				<param type="GLenum" name="map"/>
+				<param type="GLuint*" name="values"/>
+			</params>
+		</function>
+		<function name="glGetPixelMapusv" return="void" link="static">
+			<params>
+				<param type="GLenum" name="map"/>
+				<param type="GLushort*" name="values"/>
+			</params>
+		</function>
+		<function name="glGetPolygonStipple" return="void" link="static">
+			<params>
+				<param type="GLubyte*" name="mask"/>
+			</params>
+		</function>
+		<function name="glGetTexEnvfv" return="void" link="static">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLfloat*" name="params"/>
+			</params>
+		</function>
+		<function name="glGetTexEnviv" return="void" link="static">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLint*" name="params"/>
+			</params>
+		</function>
+		<function name="glGetTexGendv" return="void" link="static">
+			<params>
+				<param type="GLenum" name="coord"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLdouble*" name="params"/>
+			</params>
+		</function>
+		<function name="glGetTexGenfv" return="void" link="static">
+			<params>
+				<param type="GLenum" name="coord"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLfloat*" name="params"/>
+			</params>
+		</function>
+		<function name="glGetTexGeniv" return="void" link="static">
+			<params>
+				<param type="GLenum" name="coord"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLint*" name="params"/>
+			</params>
+		</function>
+		<function name="glIsList" return="GLboolean" link="static">
+			<params>
+				<param type="GLuint" name="list"/>
+			</params>
+		</function>
+		<function name="glFrustum" return="void" link="static">
+			<params>
+				<param type="GLdouble" name="left"/>
+				<param type="GLdouble" name="right"/>
+				<param type="GLdouble" name="bottom"/>
+				<param type="GLdouble" name="top"/>
+				<param type="GLdouble" name="zNear"/>
+				<param type="GLdouble" name="zFar"/>
+			</params>
+		</function>
+		<function name="glLoadIdentity" return="void" link="static"/>
+		<function name="glLoadMatrixf" return="void" link="static">
+			<params>
+				<param type="const GLfloat*" name="m"/>
+			</params>
+		</function>
+		<function name="glLoadMatrixd" return="void" link="static">
+			<params>
+				<param type="const GLdouble*" name="m"/>
+			</params>
+		</function>
+		<function name="glMatrixMode" return="void" link="static">
+			<params>
+				<param type="GLenum" name="mode"/>
+			</params>
+		</function>
+		<function name="glMultMatrixf" return="void" link="static">
+			<params>
+				<param type="const GLfloat*" name="m"/>
+			</params>
+		</function>
+		<function name="glMultMatrixd" return="void" link="static">
+			<params>
+				<param type="const GLdouble*" name="m"/>
+			</params>
+		</function>
+		<function name="glOrtho" return="void" link="static">
+			<params>
+				<param type="GLdouble" name="left"/>
+				<param type="GLdouble" name="right"/>
+				<param type="GLdouble" name="bottom"/>
+				<param type="GLdouble" name="top"/>
+				<param type="GLdouble" name="zNear"/>
+				<param type="GLdouble" name="zFar"/>
+			</params>
+		</function>
+		<function name="glPopMatrix" return="void" link="static"/>
+		<function name="glPushMatrix" return="void" link="static"/>
+		<function name="glRotated" return="void" link="static">
+			<params>
+				<param type="GLdouble" name="angle"/>
+				<param type="GLdouble" name="x"/>
+				<param type="GLdouble" name="y"/>
+				<param type="GLdouble" name="z"/>
+			</params>
+		</function>
+		<function name="glRotatef" return="void" link="static">
+			<params>
+				<param type="GLfloat" name="angle"/>
+				<param type="GLfloat" name="x"/>
+				<param type="GLfloat" name="y"/>
+				<param type="GLfloat" name="z"/>
+			</params>
+		</function>
+		<function name="glScaled" return="void" link="static">
+			<params>
+				<param type="GLdouble" name="x"/>
+				<param type="GLdouble" name="y"/>
+				<param type="GLdouble" name="z"/>
+			</params>
+		</function>
+		<function name="glScalef" return="void" link="static">
+			<params>
+				<param type="GLfloat" name="x"/>
+				<param type="GLfloat" name="y"/>
+				<param type="GLfloat" name="z"/>
+			</params>
+		</function>
+		<function name="glTranslated" return="void" link="static">
+			<params>
+				<param type="GLdouble" name="x"/>
+				<param type="GLdouble" name="y"/>
+				<param type="GLdouble" name="z"/>
+			</params>
+		</function>
+		<function name="glTranslatef" return="void" link="static">
+			<params>
+				<param type="GLfloat" name="x"/>
+				<param type="GLfloat" name="y"/>
+				<param type="GLfloat" name="z"/>
 			</params>
 		</function>
 	</functions>

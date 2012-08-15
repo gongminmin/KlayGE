@@ -2,17 +2,19 @@
 
 <gl_extension name="GL_ARB_copy_buffer" reg_no="59">
 	<tokens>
-		<token name="GL_COPY_READ_BUFFER" value="0x8F36"/>
-		<token name="GL_COPY_WRITE_BUFFER" value="0x8F37"/>
+		<token name="GL_COPY_READ_BUFFER_BINDING" value="0x8F36"/>
+		<token name="GL_COPY_READ_BUFFER" value="GL_COPY_READ_BUFFER_BINDING"/>
+		<token name="GL_COPY_WRITE_BUFFER_BINDING" value="0x8F37"/>
+		<token name="GL_COPY_WRITE_BUFFER" value="GL_COPY_WRITE_BUFFER_BINDING"/>
 	</tokens>
 
 	<functions>
-		<function name="glCopyBufferSubData" return="void*">
+		<function name="glCopyBufferSubData" return="void">
 			<params>
-				<param type="GLenum" name="readtarget"/>
-				<param type="GLenum" name="writetarget"/>
-				<param type="GLintptr" name="readoffset"/>
-				<param type="GLintptr" name="writeoffset"/>
+				<param type="GLenum" name="readTarget"/>
+				<param type="GLenum" name="writeTarget"/>
+				<param type="GLintptr" name="readOffset"/>
+				<param type="GLintptr" name="writeOffset"/>
 				<param type="GLsizeiptr" name="size"/>
 			</params>
 			<mappings>

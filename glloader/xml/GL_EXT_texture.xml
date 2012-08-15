@@ -21,7 +21,6 @@
 		<token name="GL_INTENSITY8_EXT" value="0x804B"/>
 		<token name="GL_INTENSITY12_EXT" value="0x804C"/>
 		<token name="GL_INTENSITY16_EXT" value="0x804D"/>
-		<token name="GL_R3_G3_B2_EXT" value="0x2A10"/>
 		<token name="GL_RGB2_EXT" value="0x804E"/>
 		<token name="GL_RGB4_EXT" value="0x804F"/>
 		<token name="GL_RGB5_EXT" value="0x8050"/>

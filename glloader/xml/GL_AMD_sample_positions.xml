@@ -10,7 +10,7 @@
 			<params>
 				<param type="GLenum" name="pname"/>
 				<param type="GLuint" name="index"/>
-				<param type="GLfloat const *" name="val"/>
+				<param type="const GLfloat*" name="val"/>
 			</params>
 		</function>
 	</functions>

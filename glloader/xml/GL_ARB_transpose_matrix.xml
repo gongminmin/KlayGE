@@ -9,17 +9,12 @@
 	</tokens>
 
 	<functions>
-		<function name="glLoadTransposeMatrixdARB" return="void">
-			<params>
-				<param type="const GLdouble*" name="m"/>
-			</params>
-		</function>
 		<function name="glLoadTransposeMatrixfARB" return="void">
 			<params>
 				<param type="const GLfloat*" name="m"/>
 			</params>
 		</function>
-		<function name="glMultTransposeMatrixdARB" return="void">
+		<function name="glLoadTransposeMatrixdARB" return="void">
 			<params>
 				<param type="const GLdouble*" name="m"/>
 			</params>
@@ -27,6 +22,11 @@
 		<function name="glMultTransposeMatrixfARB" return="void">
 			<params>
 				<param type="const GLfloat*" name="m"/>
+			</params>
+		</function>
+		<function name="glMultTransposeMatrixdARB" return="void">
+			<params>
+				<param type="const GLdouble*" name="m"/>
 			</params>
 		</function>
 	</functions>

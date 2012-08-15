@@ -3,7 +3,7 @@
 <gl_extension name="GL_ARB_uniform_buffer_object" reg_no="57">
 	<tokens>
 		<token name="GL_UNIFORM_BUFFER" value="0x8A11"/>
-		<token name="GL_UNIFORM_BUFFER_BINDING" value="0x8A23"/>
+		<token name="GL_UNIFORM_BUFFER_BINDING" value="0x8A28"/>
 		<token name="GL_UNIFORM_BUFFER_START" value="0x8A29"/>
 		<token name="GL_UNIFORM_BUFFER_SIZE" value="0x8A2A"/>
 		<token name="GL_MAX_VERTEX_UNIFORM_BLOCKS" value="0x8A2B"/>
@@ -34,7 +34,7 @@
 		<token name="GL_UNIFORM_BLOCK_REFERENCED_BY_VERTEX_SHADER" value="0x8A44"/>
 		<token name="GL_UNIFORM_BLOCK_REFERENCED_BY_GEOMETRY_SHADER" value="0x8A45"/>
 		<token name="GL_UNIFORM_BLOCK_REFERENCED_BY_FRAGMENT_SHADER" value="0x8A46"/>
-		<token name="GL_INVALID_INDEX" value="0xFFFFFFFF"/>
+		<token name="GL_INVALID_INDEX" value="0xFFFFFFFFu"/>
 	</tokens>
 
 	<functions>

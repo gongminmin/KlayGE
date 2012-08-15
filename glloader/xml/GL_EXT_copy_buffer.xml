@@ -7,7 +7,7 @@
 	</tokens>
 
 	<functions>
-		<function name="glCopyBufferSubDataEXT" return="void*">
+		<function name="glCopyBufferSubDataEXT" return="void">
 			<params>
 				<param type="GLenum" name="readtarget"/>
 				<param type="GLenum" name="writetarget"/>

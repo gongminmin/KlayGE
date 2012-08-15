@@ -41,7 +41,7 @@
 				<param type="GLdouble" name="u2"/>
 				<param type="GLint" name="stride"/>
 				<param type="GLint" name="order"/>
-				<param type="GLdouble const *" name="points"/>
+				<param type="const GLdouble*" name="points"/>
 			</params>
 		</function>
 		<function name="glMapVertexAttrib1fAPPLE" return="void">
@@ -52,7 +52,7 @@
 				<param type="GLfloat" name="u2"/>
 				<param type="GLint" name="stride"/>
 				<param type="GLint" name="order"/>
-				<param type="GLfloat const *" name="points"/>
+				<param type="const GLfloat*" name="points"/>
 			</params>
 		</function>
 		<function name="glMapVertexAttrib2dAPPLE" return="void">
@@ -67,7 +67,7 @@
 				<param type="GLdouble" name="v2"/>
 				<param type="GLint" name="vstride"/>
 				<param type="GLint" name="vorder"/>
-				<param type="GLdouble const *" name="points"/>
+				<param type="const GLdouble*" name="points"/>
 			</params>
 		</function>
 		<function name="glMapVertexAttrib2fAPPLE" return="void">
@@ -82,7 +82,7 @@
 				<param type="GLfloat" name="v2"/>
 				<param type="GLint" name="vstride"/>
 				<param type="GLint" name="vorder"/>
-				<param type="GLfloat const *" name="points"/>
+				<param type="const GLfloat*" name="points"/>
 			</params>
 		</function>
 	</functions>

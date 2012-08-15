@@ -308,13 +308,13 @@
 		</function>
 		<function name="glVertexBlendEnviATI" return="void">
 			<params>
-				<param type="GLenum" name="stream"/>
+				<param type="GLenum" name="pname"/>
 				<param type="GLint" name="param"/>
 			</params>
 		</function>
 		<function name="glVertexBlendEnvfATI" return="void">
 			<params>
-				<param type="GLenum" name="stream"/>
+				<param type="GLenum" name="pname"/>
 				<param type="GLfloat" name="param"/>
 			</params>
 		</function>

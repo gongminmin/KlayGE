@@ -14,7 +14,7 @@
 	<functions>
 		<function name="glTessellationFactorAMD" return="void">
 			<params>
-				<param type="float" name="factor"/>
+				<param type="GLfloat" name="factor"/>
 			</params>
 		</function>
 		<function name="glTessellationModeAMD" return="void">

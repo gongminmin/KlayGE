@@ -5,10 +5,6 @@
 		<token name="GL_POLYGON_OFFSET_EXT" value="0x8037"/>
 		<token name="GL_POLYGON_OFFSET_FACTOR_EXT" value="0x8038"/>
 		<token name="GL_POLYGON_OFFSET_BIAS_EXT" value="0x8039"/>
-		<token name="GL_POLYGON_OFFSET_UNITS_EXT" value="0x2A00"/>
-		<token name="GL_POLYGON_OFFSET_POINT_EXT" value="0x2A01"/>
-		<token name="GL_POLYGON_OFFSET_LINE_EXT" value="0x2A02"/>
-		<token name="GL_POLYGON_OFFSET_FILL_EXT" value="0x8037"/>
 	</tokens>
 
 	<functions>

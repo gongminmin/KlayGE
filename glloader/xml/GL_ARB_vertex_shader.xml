@@ -14,26 +14,26 @@
 	<functions>
 		<function name="glBindAttribLocationARB" return="void">
 			<params>
-				<param type="GLuint" name="programObj"/>
+				<param type="GLhandleARB" name="programObj"/>
 				<param type="GLuint" name="index"/>
-				<param type="const GLchar*" name="name"/>
+				<param type="const GLcharARB*" name="name"/>
 			</params>
 		</function>
 		<function name="glGetActiveAttribARB" return="void">
 			<params>
-				<param type="GLuint" name="programObj"/>
+				<param type="GLhandleARB" name="programObj"/>
 				<param type="GLuint" name="index"/>
 				<param type="GLsizei" name="maxLength"/>
 				<param type="GLsizei*" name="length"/>
 				<param type="GLint*" name="size"/>
 				<param type="GLenum*" name="type"/>
-				<param type="GLchar*" name="name"/>
+				<param type="GLcharARB*" name="name"/>
 			</params>
 		</function>
 		<function name="glGetAttribLocationARB" return="GLint">
 			<params>
-				<param type="GLuint" name="programObj"/>
-				<param type="const GLchar*" name="name"/>
+				<param type="GLhandleARB" name="programObj"/>
+				<param type="const GLcharARB*" name="name"/>
 			</params>
 		</function>
 	</functions>

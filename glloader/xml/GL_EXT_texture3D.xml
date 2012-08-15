@@ -11,7 +11,6 @@
 		<token name="GL_TEXTURE_DEPTH_EXT" value="0x8071"/>
 		<token name="GL_TEXTURE_WRAP_R_EXT" value="0x8072"/>
 		<token name="GL_MAX_3D_TEXTURE_SIZE_EXT" value="0x8073"/>
-		<token name="GL_TEXTURE_BINDING_3D_EXT" value="0x806A"/>
 	</tokens>
 
 	<functions>
@@ -19,7 +18,7 @@
 			<params>
 				<param type="GLenum" name="target"/>
 				<param type="GLint" name="level"/>
-				<param type="GLenum" name="internalFormat"/>
+				<param type="GLenum" name="internalformat"/>
 				<param type="GLsizei" name="width"/>
 				<param type="GLsizei" name="height"/>
 				<param type="GLsizei" name="depth"/>
@@ -42,19 +41,6 @@
 				<param type="GLenum" name="format"/>
 				<param type="GLenum" name="type"/>
 				<param type="const GLvoid*" name="pixels"/>
-			</params>
-		</function>
-		<function name="glCopyTexSubImage3DEXT" return="void">
-			<params>
-				<param type="GLenum" name="target"/>
-				<param type="GLint" name="level"/>
-				<param type="GLint" name="xoffset"/>
-				<param type="GLint" name="yoffset"/>
-				<param type="GLint" name="zoffset"/>
-				<param type="GLint" name="x"/>
-				<param type="GLint" name="y"/>
-				<param type="GLsizei" name="width"/>
-				<param type="GLsizei" name="height"/>
 			</params>
 		</function>
 	</functions>

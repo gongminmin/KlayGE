@@ -2,12 +2,12 @@
 
 <gl_extension name="GL_APPLE_object_purgeable" reg_no="371">
 	<tokens>
+		<token name="GL_BUFFER_OBJECT_APPLE" value="0x85B3"/>
 		<token name="GL_RELEASED_APPLE" value="0x8A19"/>
 		<token name="GL_VOLATILE_APPLE" value="0x8A1A"/>
 		<token name="GL_RETAINED_APPLE" value="0x8A1B"/>
 		<token name="GL_UNDEFINED_APPLE" value="0x8A1C"/>
 		<token name="GL_PURGEABLE_APPLE" value="0x8A1D"/>
-		<token name="GL_BUFFER_OBJECT_APPLE" value="0x85B3"/>
 	</tokens>
 
 	<functions>

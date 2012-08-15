@@ -5,5 +5,6 @@
 		<token name="GL_FOG_DISTANCE_MODE_NV" value="0x855A"/>
 		<token name="GL_EYE_RADIAL_NV" value="0x855B"/>
 		<token name="GL_EYE_PLANE_ABSOLUTE_NV" value="0x855C"/>
+		<token name="GL_EYE_PLANE" value="0x2502"/>
 	</tokens>
 </gl_extension>

@@ -53,7 +53,7 @@
 			<params>
 				<param type="GLint" name="location"/>
 				<param type="GLsizei" name="count"/>
-				<param type="GLuint64 const *" name="value"/>
+				<param type="const GLuint64*" name="value"/>
 			</params>
 		</function>
 		<function name="glProgramUniformHandleui64NV" return="void">
@@ -68,7 +68,7 @@
 				<param type="GLuint" name="program"/>
 				<param type="GLint" name="location"/>
 				<param type="GLsizei" name="count"/>
-				<param type="GLuint64 const *" name="values"/>
+				<param type="const GLuint64*" name="values"/>
 			</params>
 		</function>
 		<function name="glIsTextureHandleResidentNV" return="GLboolean">

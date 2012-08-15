@@ -6,7 +6,6 @@
 	</typedefs>
 
 	<tokens>
-		<token name="GL_MAX_DEBUG_MESSAGE_LENGTH_AMD" value="0x9143"/>
 		<token name="GL_MAX_DEBUG_LOGGED_MESSAGES_AMD" value="0x9144"/>
 		<token name="GL_DEBUG_LOGGED_MESSAGES_AMD" value="0x9145"/>
 		<token name="GL_DEBUG_SEVERITY_HIGH_AMD" value="0x9146"/>
@@ -44,7 +43,7 @@
 		<function name="glDebugMessageCallbackAMD" return="void">
 			<params>
 				<param type="GLDEBUGPROCAMD" name="callback"/>
-				<param type="void*" name="userParam"/>
+				<param type="GLvoid*" name="userParam"/>
 			</params>
 		</function>
 		<function name="glGetDebugMessageLogAMD" return="GLuint">

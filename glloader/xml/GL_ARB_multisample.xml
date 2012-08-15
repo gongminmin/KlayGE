@@ -16,7 +16,7 @@
 	<functions>
 		<function name="glSampleCoverageARB" return="void">
 			<params>
-				<param type="GLclampf" name="value"/>
+				<param type="GLfloat" name="value"/>
 				<param type="GLboolean" name="invert"/>
 			</params>
 		</function>

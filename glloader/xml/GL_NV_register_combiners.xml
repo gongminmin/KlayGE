@@ -53,6 +53,11 @@
 		<token name="GL_COMBINER5_NV" value="0x8555"/>
 		<token name="GL_COMBINER6_NV" value="0x8556"/>
 		<token name="GL_COMBINER7_NV" value="0x8557"/>
+		<token name="GL_TEXTURE0_ARB" value="0x84C0"/>
+		<token name="GL_TEXTURE1_ARB" value="0x84C1"/>
+		<token name="GL_ZERO" value="0"/>
+		<token name="GL_NONE" value="0"/>
+		<token name="GL_FOG" value="0x0B60"/>
 	</tokens>
 
 	<functions>

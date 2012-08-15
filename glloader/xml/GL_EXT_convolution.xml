@@ -115,6 +115,16 @@
 				<param type="GLint*" name="params"/>
 			</params>
 		</function>
+		<function name="glGetSeparableFilterEXT" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLenum" name="format"/>
+				<param type="GLenum" name="type"/>
+				<param type="GLvoid*" name="row"/>
+				<param type="GLvoid*" name="column"/>
+				<param type="GLvoid*" name="span"/>
+			</params>
+		</function>
 		<function name="glSeparableFilter2DEXT" return="void">
 			<params>
 				<param type="GLenum" name="target"/>
@@ -125,16 +135,6 @@
 				<param type="GLenum" name="type"/>
 				<param type="const GLvoid*" name="row"/>
 				<param type="const GLvoid*" name="column"/>
-			</params>
-		</function>
-		<function name="glGetSeparableFilterEXT" return="void">
-			<params>
-				<param type="GLenum" name="target"/>
-				<param type="GLenum" name="format"/>
-				<param type="GLenum" name="type"/>
-				<param type="GLvoid*" name="row"/>
-				<param type="GLvoid*" name="column"/>
-				<param type="GLvoid*" name="span"/>
 			</params>
 		</function>
 	</functions>

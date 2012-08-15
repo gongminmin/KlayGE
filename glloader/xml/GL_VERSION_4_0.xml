@@ -2,9 +2,10 @@
 
 <gl_extension name="GL_VERSION_4_0">
 	<tokens>
+		<token name="GL_SAMPLE_SHADING" value="0x8C36"/>
+		<token name="GL_MIN_SAMPLE_SHADING_VALUE" value="0x8C37"/>
 		<token name="GL_MIN_PROGRAM_TEXTURE_GATHER_OFFSET" value="0x8E5E"/>
 		<token name="GL_MAX_PROGRAM_TEXTURE_GATHER_OFFSET" value="0x8E5F"/>
-		<token name="GL_MAX_PROGRAM_TEXTURE_GATHER_COMPONENTS" value="0x8E9F"/>
 		<token name="GL_TEXTURE_CUBE_MAP_ARRAY" value="0x9009"/>
 		<token name="GL_TEXTURE_BINDING_CUBE_MAP_ARRAY" value="0x900A"/>
 		<token name="GL_PROXY_TEXTURE_CUBE_MAP_ARRAY" value="0x900B"/>
@@ -12,7 +13,120 @@
 		<token name="GL_SAMPLER_CUBE_MAP_ARRAY_SHADOW" value="0x900D"/>
 		<token name="GL_INT_SAMPLER_CUBE_MAP_ARRAY" value="0x900E"/>
 		<token name="GL_UNSIGNED_INT_SAMPLER_CUBE_MAP_ARRAY" value="0x900F"/>
+		<token name="GL_DRAW_INDIRECT_BUFFER" value="0x8F3F"/>
+		<token name="GL_DRAW_INDIRECT_BUFFER_BINDING" value="0x8F43"/>
+		<token name="GL_GEOMETRY_SHADER_INVOCATIONS" value="0x887F"/>
+		<token name="GL_MAX_GEOMETRY_SHADER_INVOCATIONS" value="0x8E5A"/>
+		<token name="GL_MIN_FRAGMENT_INTERPOLATION_OFFSET" value="0x8E5B"/>
+		<token name="GL_MAX_FRAGMENT_INTERPOLATION_OFFSET" value="0x8E5C"/>
+		<token name="GL_FRAGMENT_INTERPOLATION_OFFSET_BITS" value="0x8E5D"/>
+		<token name="GL_MAX_VERTEX_STREAMS" value="ARB_texture_multisample"/>
+		<token name="GL_DOUBLE_VEC2" value="0x8FFC"/>
+		<token name="GL_DOUBLE_VEC3" value="0x8FFD"/>
+		<token name="GL_DOUBLE_VEC4" value="0x8FFE"/>
+		<token name="GL_DOUBLE_MAT2" value="0x8F46"/>
+		<token name="GL_DOUBLE_MAT3" value="0x8F47"/>
+		<token name="GL_DOUBLE_MAT4" value="0x8F48"/>
+		<token name="GL_DOUBLE_MAT2x3" value="0x8F49"/>
+		<token name="GL_DOUBLE_MAT2x4" value="0x8F4A"/>
+		<token name="GL_DOUBLE_MAT3x2" value="0x8F4B"/>
+		<token name="GL_DOUBLE_MAT3x4" value="0x8F4C"/>
+		<token name="GL_DOUBLE_MAT4x2" value="0x8F4D"/>
+		<token name="GL_DOUBLE_MAT4x3" value="0x8F4E"/>
+		<token name="GL_ACTIVE_SUBROUTINES" value="0x8DE5"/>
+		<token name="GL_ACTIVE_SUBROUTINE_UNIFORMS" value="0x8DE6"/>
+		<token name="GL_ACTIVE_SUBROUTINE_UNIFORM_LOCATIONS" value="0x8E47"/>
+		<token name="GL_ACTIVE_SUBROUTINE_MAX_LENGTH" value="0x8E48"/>
+		<token name="GL_ACTIVE_SUBROUTINE_UNIFORM_MAX_LENGTH" value="0x8E49"/>
+		<token name="GL_MAX_SUBROUTINES" value="0x8DE7"/>
+		<token name="GL_MAX_SUBROUTINE_UNIFORM_LOCATIONS" value="0x8DE8"/>
+		<token name="GL_NUM_COMPATIBLE_SUBROUTINES" value="0x8E4A"/>
+		<token name="GL_COMPATIBLE_SUBROUTINES" value="0x8E4B"/>
+		<token name="GL_PATCHES" value="0x000E"/>
+		<token name="GL_PATCH_VERTICES" value="0x8E72"/>
+		<token name="GL_PATCH_DEFAULT_INNER_LEVEL" value="0x8E73"/>
+		<token name="GL_PATCH_DEFAULT_OUTER_LEVEL" value="0x8E74"/>
+		<token name="GL_TESS_CONTROL_OUTPUT_VERTICES" value="0x8E75"/>
+		<token name="GL_TESS_GEN_MODE" value="0x8E76"/>
+		<token name="GL_TESS_GEN_SPACING" value="0x8E77"/>
+		<token name="GL_TESS_GEN_VERTEX_ORDER" value="0x8E78"/>
+		<token name="GL_TESS_GEN_POINT_MODE" value="0x8E79"/>
+		<token name="GL_ISOLINES" value="0x8E7A"/>
+		<token name="GL_FRACTIONAL_ODD" value="0x8E7B"/>
+		<token name="GL_FRACTIONAL_EVEN" value="0x8E7C"/>
+		<token name="GL_MAX_PATCH_VERTICES" value="0x8E7D"/>
+		<token name="GL_MAX_TESS_GEN_LEVEL" value="0x8E7E"/>
+		<token name="GL_MAX_TESS_CONTROL_UNIFORM_COMPONENTS" value="0x8E7F"/>
+		<token name="GL_MAX_TESS_EVALUATION_UNIFORM_COMPONENTS" value="0x8E80"/>
+		<token name="GL_MAX_TESS_CONTROL_TEXTURE_IMAGE_UNITS" value="0x8E81"/>
+		<token name="GL_MAX_TESS_EVALUATION_TEXTURE_IMAGE_UNITS" value="0x8E82"/>
+		<token name="GL_MAX_TESS_CONTROL_OUTPUT_COMPONENTS" value="0x8E83"/>
+		<token name="GL_MAX_TESS_PATCH_COMPONENTS" value="0x8E84"/>
+		<token name="GL_MAX_TESS_CONTROL_TOTAL_OUTPUT_COMPONENTS" value="0x8E85"/>
+		<token name="GL_MAX_TESS_EVALUATION_OUTPUT_COMPONENTS" value="0x8E86"/>
+		<token name="GL_MAX_TESS_CONTROL_UNIFORM_BLOCKS" value="0x8E89"/>
+		<token name="GL_MAX_TESS_EVALUATION_UNIFORM_BLOCKS" value="0x8E8A"/>
+		<token name="GL_MAX_TESS_CONTROL_INPUT_COMPONENTS" value="0x886C"/>
+		<token name="GL_MAX_TESS_EVALUATION_INPUT_COMPONENTS" value="0x886D"/>
+		<token name="GL_MAX_COMBINED_TESS_CONTROL_UNIFORM_COMPONENTS" value="0x8E1E"/>
+		<token name="GL_MAX_COMBINED_TESS_EVALUATION_UNIFORM_COMPONENTS" value="0x8E1F"/>
+		<token name="GL_UNIFORM_BLOCK_REFERENCED_BY_TESS_CONTROL_SHADER" value="0x84F0"/>
+		<token name="GL_UNIFORM_BLOCK_REFERENCED_BY_TESS_EVALUATION_SHADER" value="0x84F1"/>
+		<token name="GL_TESS_EVALUATION_SHADER" value="0x8E87"/>
+		<token name="GL_TESS_CONTROL_SHADER" value="0x8E88"/>
 	</tokens>
+
+	<functions>
+		<function name="glMinSampleShading" return="void">
+			<params>
+				<param type="GLfloat" name="value"/>
+			</params>
+			<mappings>
+				<mapping from="GL_ARB_sample_shading" name="glMinSampleShadingARB"/>
+			</mappings>
+		</function>
+		<function name="glBlendEquationi" return="void">
+			<params>
+				<param type="GLuint" name="buf"/>
+				<param type="GLenum" name="mode"/>
+			</params>
+			<mappings>
+				<mapping from="GL_ARB_draw_buffers_blend" name="glBlendEquationiARB"/>
+			</mappings>
+		</function>
+		<function name="glBlendEquationSeparatei" return="void">
+			<params>
+				<param type="GLuint" name="buf"/>
+				<param type="GLenum" name="modeRGB"/>
+				<param type="GLenum" name="modeAlpha"/>
+			</params>
+			<mappings>
+				<mapping from="GL_ARB_draw_buffers_blend" name="glBlendEquationSeparateiARB"/>
+			</mappings>
+		</function>
+		<function name="glBlendFunci" return="void">
+			<params>
+				<param type="GLuint" name="buf"/>
+				<param type="GLenum" name="src"/>
+				<param type="GLenum" name="dst"/>
+			</params>
+			<mappings>
+				<mapping from="GL_ARB_draw_buffers_blend" name="glBlendFunciARB"/>
+			</mappings>
+		</function>
+		<function name="glBlendFuncSeparatei" return="void">
+			<params>
+				<param type="GLuint" name="buf"/>
+				<param type="GLenum" name="srcRGB"/>
+				<param type="GLenum" name="dstRGB"/>
+				<param type="GLenum" name="srcAlpha"/>
+				<param type="GLenum" name="dstAlpha"/>
+			</params>
+			<mappings>
+				<mapping from="GL_ARB_draw_buffers_blend" name="glBlendFuncSeparateiARB"/>
+			</mappings>
+		</function>
+	</functions>
 
 	<additionals>
 		<ext name="GL_ARB_draw_indirect"/>

@@ -2,6 +2,8 @@
 
 <gl_extension name="GL_NV_gpu_program4" reg_no="322">
 	<tokens>
+		<token name="GL_MIN_PROGRAM_TEXEL_OFFSET_NV" value="0x8904"/>
+		<token name="GL_MAX_PROGRAM_TEXEL_OFFSET_NV" value="0x8905"/>
 		<token name="GL_PROGRAM_ATTRIB_COMPONENTS_NV" value="0x8906"/>
 		<token name="GL_PROGRAM_RESULT_COMPONENTS_NV" value="0x8907"/>
 		<token name="GL_MAX_PROGRAM_ATTRIB_COMPONENTS_NV" value="0x8908"/>

@@ -5,7 +5,7 @@
 		<function name="glDrawArraysInstancedEXT" return="void">
 			<params>
 				<param type="GLenum" name="mode"/>
-				<param type="GLint" name="first"/>
+				<param type="GLint" name="start"/>
 				<param type="GLsizei" name="count"/>
 				<param type="GLsizei" name="primcount"/>
 			</params>
@@ -15,7 +15,7 @@
 				<param type="GLenum" name="mode"/>
 				<param type="GLsizei" name="count"/>
 				<param type="GLenum" name="type"/>
-				<param type="const void*" name="indices"/>
+				<param type="const GLvoid*" name="indices"/>
 				<param type="GLsizei" name="primcount"/>
 			</params>
 		</function>

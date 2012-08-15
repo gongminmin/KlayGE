@@ -18,7 +18,7 @@
 		<function name="glDeleteTransformFeedbacksNV" return="void">
 			<params>
 				<param type="GLsizei" name="n"/>
-				<param type="GLuint const *" name="ids"/>
+				<param type="const GLuint*" name="ids"/>
 			</params>
 		</function>
 		<function name="glGenTransformFeedbacksNV" return="void">

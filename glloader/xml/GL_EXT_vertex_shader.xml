@@ -78,8 +78,8 @@
 		<token name="GL_MAX_VERTEX_SHADER_LOCALS_EXT" value="0x87C9"/>
 		<token name="GL_MAX_OPTIMIZED_VERTEX_SHADER_INSTRUCTIONS_EXT" value="0x87CA"/>
 		<token name="GL_MAX_OPTIMIZED_VERTEX_SHADER_VARIANTS_EXT" value="0x87CB"/>
-		<token name="GL_MAX_OPTIMIZED_VERTEX_SHADER_INVARIANTS_EXT" value="0x87CC"/>
-		<token name="GL_MAX_OPTIMIZED_VERTEX_SHADER_LOCAL_CONSTANTS_EXT" value="0x87CD"/>
+		<token name="GL_MAX_OPTIMIZED_VERTEX_SHADER_LOCAL_CONSTANTS_EXT" value="0x87CC"/>
+		<token name="GL_MAX_OPTIMIZED_VERTEX_SHADER_INVARIANTS_EXT" value="0x87CD"/>
 		<token name="GL_MAX_OPTIMIZED_VERTEX_SHADER_LOCALS_EXT" value="0x87CE"/>
 		<token name="GL_VERTEX_SHADER_INSTRUCTIONS_EXT" value="0x87CF"/>
 		<token name="GL_VERTEX_SHADER_VARIANTS_EXT" value="0x87D0"/>
@@ -192,8 +192,8 @@
 		</function>
 		<function name="glGenSymbolsEXT" return="GLuint">
 			<params>
-				<param type="GLenum" name="dataType"/>
-				<param type="GLenum" name="storageType"/>
+				<param type="GLenum" name="datatype"/>
+				<param type="GLenum" name="storagetype"/>
 				<param type="GLenum" name="range"/>
 				<param type="GLuint" name="components"/>
 			</params>

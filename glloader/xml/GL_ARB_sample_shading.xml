@@ -9,7 +9,7 @@
 	<functions>
 		<function name="glMinSampleShadingARB" return="void">
 			<params>
-				<param type="GLclampf" name="value"/>
+				<param type="GLfloat" name="value"/>
 			</params>
 		</function>
 	</functions>

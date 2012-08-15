@@ -2,12 +2,12 @@
 
 <gl_extension name="GL_APPLE_texture_range" reg_no="367">
 	<tokens>
+		<token name="GL_TEXTURE_RANGE_LENGTH_APPLE" value="0x85B7"/>
+		<token name="GL_TEXTURE_RANGE_POINTER_APPLE" value="0x85B8"/>
 		<token name="GL_TEXTURE_STORAGE_HINT_APPLE" value="0x85BC"/>
 		<token name="GL_STORAGE_PRIVATE_APPLE" value="0x85BD"/>
 		<token name="GL_STORAGE_CACHED_APPLE" value="0x85BE"/>
 		<token name="GL_STORAGE_SHARED_APPLE" value="0x85BF"/>
-		<token name="GL_TEXTURE_RANGE_LENGTH_APPLE" value="0x85B7"/>
-		<token name="GL_TEXTURE_RANGE_POINTER_APPLE" value="0x85B8"/>
 	</tokens>
 
 	<functions>

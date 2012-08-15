@@ -6,5 +6,26 @@
 		<token name="GL_MIN_FRAGMENT_INTERPOLATION_OFFSET_NV" value="0x8E5B"/>
 		<token name="GL_MAX_FRAGMENT_INTERPOLATION_OFFSET_NV" value="0x8E5C"/>
 		<token name="GL_FRAGMENT_PROGRAM_INTERPOLATION_OFFSET_BITS_NV" value="0x8E5D"/>
+		<token name="GL_MIN_PROGRAM_TEXTURE_GATHER_OFFSET_NV" value="0x8E5E"/>
+		<token name="GL_MAX_PROGRAM_TEXTURE_GATHER_OFFSET_NV" value="0x8E5F"/>
+		<token name="GL_MAX_PROGRAM_SUBROUTINE_PARAMETERS_NV" value="0x8F44"/>
+		<token name="GL_MAX_PROGRAM_SUBROUTINE_NUM_NV" value="0x8F45"/>
 	</tokens>
+
+	<functions>
+		<function name="glProgramSubroutineParametersuivNV" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLsizei" name="count"/>
+				<param type="const GLuint*" name="params"/>
+			</params>
+		</function>
+		<function name="glGetProgramSubroutineParameteruivNV" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLuint" name="index"/>
+				<param type="GLuint*" name="param"/>
+			</params>
+		</function>
+	</functions>
 </gl_extension>

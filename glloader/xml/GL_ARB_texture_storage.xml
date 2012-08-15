@@ -3,9 +3,6 @@
 <gl_extension name="GL_ARB_texture_storage" reg_no="117">
 	<tokens>
 		<token name="GL_TEXTURE_IMMUTABLE_FORMAT" value="0x912F"/>
-		<token name="GL_ALPHA8_EXT" value="0x803C"/>
-		<token name="GL_LUMINANCE8_EXT" value="0x8040"/>
-		<token name="GL_LUMINANCE8_ALPHA8_EXT" value="0x8045"/>
 	</tokens>
 
 	<functions>

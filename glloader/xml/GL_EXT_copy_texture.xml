@@ -6,7 +6,7 @@
 			<params>
 				<param type="GLenum" name="target"/>
 				<param type="GLint" name="level"/>
-				<param type="GLenum" name="internalFormat"/>
+				<param type="GLenum" name="internalformat"/>
 				<param type="GLint" name="x"/>
 				<param type="GLint" name="y"/>
 				<param type="GLsizei" name="width"/>
@@ -17,7 +17,7 @@
 			<params>
 				<param type="GLenum" name="target"/>
 				<param type="GLint" name="level"/>
-				<param type="GLenum" name="internalFormat"/>
+				<param type="GLenum" name="internalformat"/>
 				<param type="GLint" name="x"/>
 				<param type="GLint" name="y"/>
 				<param type="GLsizei" name="width"/>
@@ -41,6 +41,19 @@
 				<param type="GLint" name="level"/>
 				<param type="GLint" name="xoffset"/>
 				<param type="GLint" name="yoffset"/>
+				<param type="GLint" name="x"/>
+				<param type="GLint" name="y"/>
+				<param type="GLsizei" name="width"/>
+				<param type="GLsizei" name="height"/>
+			</params>
+		</function>
+		<function name="glCopyTexSubImage3DEXT" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLint" name="level"/>
+				<param type="GLint" name="xoffset"/>
+				<param type="GLint" name="yoffset"/>
+				<param type="GLint" name="zoffset"/>
 				<param type="GLint" name="x"/>
 				<param type="GLint" name="y"/>
 				<param type="GLsizei" name="width"/>

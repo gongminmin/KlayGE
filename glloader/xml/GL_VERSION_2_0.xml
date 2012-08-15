@@ -2,14 +2,13 @@
 
 <gl_extension name="GL_VERSION_2_0">
 	<tokens>
-		<token name="GL_BLEND_EQUATION_RGB" value="GL_BLEND_EQUATION"/>
+		<token name="GL_BLEND_EQUATION_RGB" value="0x8009"/>
 		<token name="GL_VERTEX_ATTRIB_ARRAY_ENABLED" value="0x8622"/>
 		<token name="GL_VERTEX_ATTRIB_ARRAY_SIZE" value="0x8623"/>
 		<token name="GL_VERTEX_ATTRIB_ARRAY_STRIDE" value="0x8624"/>
 		<token name="GL_VERTEX_ATTRIB_ARRAY_TYPE" value="0x8625"/>
 		<token name="GL_CURRENT_VERTEX_ATTRIB" value="0x8626"/>
 		<token name="GL_VERTEX_PROGRAM_POINT_SIZE" value="0x8642"/>
-		<token name="GL_VERTEX_PROGRAM_TWO_SIDE" value="0x8643"/>
 		<token name="GL_VERTEX_ATTRIB_ARRAY_POINTER" value="0x8645"/>
 		<token name="GL_STENCIL_BACK_FUNC" value="0x8800"/>
 		<token name="GL_STENCIL_BACK_FAIL" value="0x8801"/>
@@ -33,11 +32,8 @@
 		<token name="GL_DRAW_BUFFER14" value="0x8833"/>
 		<token name="GL_DRAW_BUFFER15" value="0x8834"/>
 		<token name="GL_BLEND_EQUATION_ALPHA" value="0x883D"/>
-		<token name="GL_POINT_SPRITE" value="0x8861"/>
-		<token name="GL_COORD_REPLACE" value="0x8862"/>
 		<token name="GL_MAX_VERTEX_ATTRIBS" value="0x8869"/>
 		<token name="GL_VERTEX_ATTRIB_ARRAY_NORMALIZED" value="0x886A"/>
-		<token name="GL_MAX_TEXTURE_COORDS" value="0x8871"/>
 		<token name="GL_MAX_TEXTURE_IMAGE_UNITS" value="0x8872"/>
 		<token name="GL_FRAGMENT_SHADER" value="0x8B30"/>
 		<token name="GL_VERTEX_SHADER" value="0x8B31"/>
@@ -86,6 +82,10 @@
 		<token name="GL_STENCIL_BACK_REF" value="0x8CA3"/>
 		<token name="GL_STENCIL_BACK_VALUE_MASK" value="0x8CA4"/>
 		<token name="GL_STENCIL_BACK_WRITEMASK" value="0x8CA5"/>
+		<token name="GL_VERTEX_PROGRAM_TWO_SIDE" value="0x8643"/>
+		<token name="GL_POINT_SPRITE" value="0x8861"/>
+		<token name="GL_COORD_REPLACE" value="0x8862"/>
+		<token name="GL_MAX_TEXTURE_COORDS" value="0x8871"/>
 	</tokens>
 
 	<functions>
@@ -121,8 +121,8 @@
 		</function>
 		<function name="glStencilFuncSeparate" return="void">
 			<params>
-				<param type="GLenum" name="frontfunc"/>
-				<param type="GLenum" name="backfunc"/>
+				<param type="GLenum" name="face"/>
+				<param type="GLenum" name="func"/>
 				<param type="GLint" name="ref"/>
 				<param type="GLuint" name="mask"/>
 			</params>
@@ -135,9 +135,6 @@
 				<param type="GLenum" name="face"/>
 				<param type="GLuint" name="mask"/>
 			</params>
-			<mappings>
-				<mapping from="GL_ATI_separate_stencil" name="glStencilMaskSeparateATI"/>
-			</mappings>
 		</function>
 		<function name="glAttachShader" return="void">
 			<params>
@@ -155,7 +152,7 @@
 				<param type="const GLchar*" name="name"/>
 			</params>
 			<mappings>
-				<mapping from="GL_ARB_shader_objects" name="glBindAttribLocationARB"/>
+				<mapping from="GL_ARB_vertex_shader" name="glBindAttribLocationARB"/>
 			</mappings>
 		</function>
 		<function name="glCompileShader" return="void">
@@ -163,7 +160,7 @@
 				<param type="GLuint" name="shader"/>
 			</params>
 			<mappings>
-				<mapping from="GL_ARB_shader_objects" name="glCombileShaderARB"/>
+				<mapping from="GL_ARB_shader_objects" name="glCompileShaderARB"/>
 			</mappings>
 		</function>
 		<function name="glCreateProgram" return="GLuint">
@@ -183,17 +180,11 @@
 			<params>
 				<param type="GLuint" name="program"/>
 			</params>
-			<mappings>
-				<mapping from="GL_ARB_shader_objects" name="glDeleteObjectARB"/>
-			</mappings>
 		</function>
 		<function name="glDeleteShader" return="void">
 			<params>
 				<param type="GLuint" name="shader"/>
 			</params>
-			<mappings>
-				<mapping from="GL_ARB_shader_objects" name="glDeleteObjectARB"/>
-			</mappings>
 		</function>
 		<function name="glDetachShader" return="void">
 			<params>
@@ -253,7 +244,7 @@
 				<param type="GLuint" name="program"/>
 				<param type="GLsizei" name="maxCount"/>
 				<param type="GLsizei*" name="count"/>
-				<param type="GLuint*" name="shader"/>
+				<param type="GLuint*" name="obj"/>
 			</params>
 			<mappings>
 				<mapping from="GL_ARB_shader_objects" name="glGetAttachedObjectsARB"/>
@@ -265,18 +256,15 @@
 				<param type="const GLchar*" name="name"/>
 			</params>
 			<mappings>
-				<mapping from="GL_ARB_shader_objects" name="glGetAttribLocationARB"/>
+				<mapping from="GL_ARB_vertex_shader" name="glGetAttribLocationARB"/>
 			</mappings>
 		</function>
 		<function name="glGetProgramiv" return="void">
 			<params>
 				<param type="GLuint" name="program"/>
 				<param type="GLenum" name="pname"/>
-				<param type="const GLint*" name="params"/>
+				<param type="GLint*" name="params"/>
 			</params>
-			<mappings>
-				<mapping from="GL_ARB_shader_objects" name="glGetObjectParameterivARB"/>
-			</mappings>
 		</function>
 		<function name="glGetProgramInfoLog" return="void">
 			<params>
@@ -285,19 +273,13 @@
 				<param type="GLsizei*" name="length"/>
 				<param type="GLchar*" name="infoLog"/>
 			</params>
-			<mappings>
-				<mapping from="GL_ARB_shader_objects" name="glGetInfoLogARB"/>
-			</mappings>
 		</function>
 		<function name="glGetShaderiv" return="void">
 			<params>
 				<param type="GLuint" name="shader"/>
 				<param type="GLenum" name="pname"/>
-				<param type="const GLint*" name="params"/>
+				<param type="GLint*" name="params"/>
 			</params>
-			<mappings>
-				<mapping from="GL_ARB_shader_objects" name="glGetObjectParameterivARB"/>
-			</mappings>
 		</function>
 		<function name="glGetShaderInfoLog" return="void">
 			<params>
@@ -306,9 +288,6 @@
 				<param type="GLsizei*" name="length"/>
 				<param type="GLchar*" name="infoLog"/>
 			</params>
-			<mappings>
-				<mapping from="GL_ARB_shader_objects" name="glGetInfoLogARB"/>
-			</mappings>
 		</function>
 		<function name="glGetShaderSource" return="void">
 			<params>
@@ -358,6 +337,7 @@
 			</params>
 			<mappings>
 				<mapping from="GL_ARB_vertex_program" name="glGetVertexAttribdvARB"/>
+				<mapping from="GL_NV_vertex_program" name="glGetVertexAttribdvNV"/>
 			</mappings>
 		</function>
 		<function name="glGetVertexAttribfv" return="void">
@@ -368,6 +348,7 @@
 			</params>
 			<mappings>
 				<mapping from="GL_ARB_vertex_program" name="glGetVertexAttribfvARB"/>
+				<mapping from="GL_NV_vertex_program" name="glGetVertexAttribfvNV"/>
 			</mappings>
 		</function>
 		<function name="glGetVertexAttribiv" return="void">
@@ -378,6 +359,7 @@
 			</params>
 			<mappings>
 				<mapping from="GL_ARB_vertex_program" name="glGetVertexAttribivARB"/>
+				<mapping from="GL_NV_vertex_program" name="glGetVertexAttribivNV"/>
 			</mappings>
 		</function>
 		<function name="glGetVertexAttribPointerv" return="void">
@@ -388,6 +370,7 @@
 			</params>
 			<mappings>
 				<mapping from="GL_ARB_vertex_program" name="glGetVertexAttribPointervARB"/>
+				<mapping from="GL_NV_vertex_program" name="glGetVertexAttribPointervNV"/>
 			</mappings>
 		</function>
 		<function name="glIsProgram" return="GLboolean">
@@ -395,16 +378,14 @@
 				<param type="GLuint" name="program"/>
 			</params>
 			<mappings>
-				<mapping from="GL_ARB_shader_objects" name="glIsProgramARB"/>
+				<mapping from="GL_ARB_vertex_program" name="glIsProgramARB"/>
+				<mapping from="GL_NV_vertex_program" name="glIsProgramNV"/>
 			</mappings>
 		</function>
 		<function name="glIsShader" return="GLboolean">
 			<params>
 				<param type="GLuint" name="shader"/>
 			</params>
-			<mappings>
-				<mapping from="GL_ARB_shader_objects" name="glIsShaderARB"/>
-			</mappings>
 		</function>
 		<function name="glLinkProgram" return="void">
 			<params>
@@ -430,7 +411,7 @@
 				<param type="GLuint" name="program"/>
 			</params>
 			<mappings>
-				<mapping from="GL_ARB_shader_objects" name="glUseProgramARB"/>
+				<mapping from="GL_ARB_shader_objects" name="glUseProgramObjectARB"/>
 			</mappings>
 		</function>
 		<function name="glUniform1f" return="void">
@@ -645,6 +626,7 @@
 			</params>
 			<mappings>
 				<mapping from="GL_ARB_vertex_program" name="glVertexAttrib1dARB"/>
+				<mapping from="GL_NV_vertex_program" name="glVertexAttrib1dNV"/>
 			</mappings>
 		</function>
 		<function name="glVertexAttrib1dv" return="void">
@@ -654,6 +636,7 @@
 			</params>
 			<mappings>
 				<mapping from="GL_ARB_vertex_program" name="glVertexAttrib1dvARB"/>
+				<mapping from="GL_NV_vertex_program" name="glVertexAttrib1dvNV"/>
 			</mappings>
 		</function>
 		<function name="glVertexAttrib1f" return="void">
@@ -663,6 +646,7 @@
 			</params>
 			<mappings>
 				<mapping from="GL_ARB_vertex_program" name="glVertexAttrib1fARB"/>
+				<mapping from="GL_NV_vertex_program" name="glVertexAttrib1fNV"/>
 			</mappings>
 		</function>
 		<function name="glVertexAttrib1fv" return="void">
@@ -672,6 +656,7 @@
 			</params>
 			<mappings>
 				<mapping from="GL_ARB_vertex_program" name="glVertexAttrib1fvARB"/>
+				<mapping from="GL_NV_vertex_program" name="glVertexAttrib1fvNV"/>
 			</mappings>
 		</function>
 		<function name="glVertexAttrib1s" return="void">
@@ -681,6 +666,7 @@
 			</params>
 			<mappings>
 				<mapping from="GL_ARB_vertex_program" name="glVertexAttrib1sARB"/>
+				<mapping from="GL_NV_vertex_program" name="glVertexAttrib1sNV"/>
 			</mappings>
 		</function>
 		<function name="glVertexAttrib1sv" return="void">
@@ -690,6 +676,7 @@
 			</params>
 			<mappings>
 				<mapping from="GL_ARB_vertex_program" name="glVertexAttrib1svARB"/>
+				<mapping from="GL_NV_vertex_program" name="glVertexAttrib1svNV"/>
 			</mappings>
 		</function>
 		<function name="glVertexAttrib2d" return="void">
@@ -700,6 +687,7 @@
 			</params>
 			<mappings>
 				<mapping from="GL_ARB_vertex_program" name="glVertexAttrib2dARB"/>
+				<mapping from="GL_NV_vertex_program" name="glVertexAttrib2dNV"/>
 			</mappings>
 		</function>
 		<function name="glVertexAttrib2dv" return="void">
@@ -709,6 +697,7 @@
 			</params>
 			<mappings>
 				<mapping from="GL_ARB_vertex_program" name="glVertexAttrib2dvARB"/>
+				<mapping from="GL_NV_vertex_program" name="glVertexAttrib2dvNV"/>
 			</mappings>
 		</function>
 		<function name="glVertexAttrib2f" return="void">
@@ -719,6 +708,7 @@
 			</params>
 			<mappings>
 				<mapping from="GL_ARB_vertex_program" name="glVertexAttrib2fARB"/>
+				<mapping from="GL_NV_vertex_program" name="glVertexAttrib2fNV"/>
 			</mappings>
 		</function>
 		<function name="glVertexAttrib2fv" return="void">
@@ -728,6 +718,7 @@
 			</params>
 			<mappings>
 				<mapping from="GL_ARB_vertex_program" name="glVertexAttrib2fvARB"/>
+				<mapping from="GL_NV_vertex_program" name="glVertexAttrib2fvNV"/>
 			</mappings>
 		</function>
 		<function name="glVertexAttrib2s" return="void">
@@ -738,6 +729,7 @@
 			</params>
 			<mappings>
 				<mapping from="GL_ARB_vertex_program" name="glVertexAttrib2sARB"/>
+				<mapping from="GL_NV_vertex_program" name="glVertexAttrib2sNV"/>
 			</mappings>
 		</function>
 		<function name="glVertexAttrib2sv" return="void">
@@ -747,6 +739,7 @@
 			</params>
 			<mappings>
 				<mapping from="GL_ARB_vertex_program" name="glVertexAttrib2svARB"/>
+				<mapping from="GL_NV_vertex_program" name="glVertexAttrib2svNV"/>
 			</mappings>
 		</function>
 		<function name="glVertexAttrib3d" return="void">
@@ -758,6 +751,7 @@
 			</params>
 			<mappings>
 				<mapping from="GL_ARB_vertex_program" name="glVertexAttrib3dARB"/>
+				<mapping from="GL_NV_vertex_program" name="glVertexAttrib3dNV"/>
 			</mappings>
 		</function>
 		<function name="glVertexAttrib3dv" return="void">
@@ -767,6 +761,7 @@
 			</params>
 			<mappings>
 				<mapping from="GL_ARB_vertex_program" name="glVertexAttrib3dvARB"/>
+				<mapping from="GL_NV_vertex_program" name="glVertexAttrib3dvNV"/>
 			</mappings>
 		</function>
 		<function name="glVertexAttrib3f" return="void">
@@ -778,6 +773,7 @@
 			</params>
 			<mappings>
 				<mapping from="GL_ARB_vertex_program" name="glVertexAttrib3fARB"/>
+				<mapping from="GL_NV_vertex_program" name="glVertexAttrib3fNV"/>
 			</mappings>
 		</function>
 		<function name="glVertexAttrib3fv" return="void">
@@ -787,6 +783,7 @@
 			</params>
 			<mappings>
 				<mapping from="GL_ARB_vertex_program" name="glVertexAttrib3fvARB"/>
+				<mapping from="GL_NV_vertex_program" name="glVertexAttrib3fvNV"/>
 			</mappings>
 		</function>
 		<function name="glVertexAttrib3s" return="void">
@@ -798,6 +795,7 @@
 			</params>
 			<mappings>
 				<mapping from="GL_ARB_vertex_program" name="glVertexAttrib3sARB"/>
+				<mapping from="GL_NV_vertex_program" name="glVertexAttrib3sNV"/>
 			</mappings>
 		</function>
 		<function name="glVertexAttrib3sv" return="void">
@@ -807,6 +805,7 @@
 			</params>
 			<mappings>
 				<mapping from="GL_ARB_vertex_program" name="glVertexAttrib3svARB"/>
+				<mapping from="GL_NV_vertex_program" name="glVertexAttrib3svNV"/>
 			</mappings>
 		</function>
 		<function name="glVertexAttrib4Nbv" return="void">
@@ -846,6 +845,7 @@
 			</params>
 			<mappings>
 				<mapping from="GL_ARB_vertex_program" name="glVertexAttrib4NubARB"/>
+				<mapping from="GL_NV_vertex_program" name="glVertexAttrib4ubNV"/>
 			</mappings>
 		</function>
 		<function name="glVertexAttrib4Nubv" return="void">
@@ -855,6 +855,7 @@
 			</params>
 			<mappings>
 				<mapping from="GL_ARB_vertex_program" name="glVertexAttrib4NubvARB"/>
+				<mapping from="GL_NV_vertex_program" name="glVertexAttrib4ubvNV"/>
 			</mappings>
 		</function>
 		<function name="glVertexAttrib4Nuiv" return="void">
@@ -894,6 +895,7 @@
 			</params>
 			<mappings>
 				<mapping from="GL_ARB_vertex_program" name="glVertexAttrib4dARB"/>
+				<mapping from="GL_NV_vertex_program" name="glVertexAttrib4dNV"/>
 			</mappings>
 		</function>
 		<function name="glVertexAttrib4dv" return="void">
@@ -903,6 +905,7 @@
 			</params>
 			<mappings>
 				<mapping from="GL_ARB_vertex_program" name="glVertexAttrib4dvARB"/>
+				<mapping from="GL_NV_vertex_program" name="glVertexAttrib4dvNV"/>
 			</mappings>
 		</function>
 		<function name="glVertexAttrib4f" return="void">
@@ -915,6 +918,7 @@
 			</params>
 			<mappings>
 				<mapping from="GL_ARB_vertex_program" name="glVertexAttrib4fARB"/>
+				<mapping from="GL_NV_vertex_program" name="glVertexAttrib4fNV"/>
 			</mappings>
 		</function>
 		<function name="glVertexAttrib4fv" return="void">
@@ -924,6 +928,7 @@
 			</params>
 			<mappings>
 				<mapping from="GL_ARB_vertex_program" name="glVertexAttrib4fvARB"/>
+				<mapping from="GL_NV_vertex_program" name="glVertexAttrib4fvNV"/>
 			</mappings>
 		</function>
 		<function name="glVertexAttrib4iv" return="void">
@@ -945,6 +950,7 @@
 			</params>
 			<mappings>
 				<mapping from="GL_ARB_vertex_program" name="glVertexAttrib4sARB"/>
+				<mapping from="GL_NV_vertex_program" name="glVertexAttrib4sNV"/>
 			</mappings>
 		</function>
 		<function name="glVertexAttrib4sv" return="void">
@@ -954,6 +960,7 @@
 			</params>
 			<mappings>
 				<mapping from="GL_ARB_vertex_program" name="glVertexAttrib4svARB"/>
+				<mapping from="GL_NV_vertex_program" name="glVertexAttrib4svNV"/>
 			</mappings>
 		</function>
 		<function name="glVertexAttrib4ubv" return="void">

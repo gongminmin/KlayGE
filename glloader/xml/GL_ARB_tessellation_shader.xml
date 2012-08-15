@@ -2,7 +2,7 @@
 
 <gl_extension name="GL_ARB_tessellation_shader" reg_no="91">
 	<tokens>
-		<token name="GL_PATCHES" value="0xE"/>
+		<token name="GL_PATCHES" value="0x000E"/>
 		<token name="GL_PATCH_VERTICES" value="0x8E72"/>
 		<token name="GL_PATCH_DEFAULT_INNER_LEVEL" value="0x8E73"/>
 		<token name="GL_PATCH_DEFAULT_OUTER_LEVEL" value="0x8E74"/>
@@ -11,9 +11,14 @@
 		<token name="GL_TESS_GEN_SPACING" value="0x8E77"/>
 		<token name="GL_TESS_GEN_VERTEX_ORDER" value="0x8E78"/>
 		<token name="GL_TESS_GEN_POINT_MODE" value="0x8E79"/>
+		<token name="GL_TRIANGLES" value="0x0004"/>
+		<token name="GL_QUADS" value="0x0007"/>
 		<token name="GL_ISOLINES" value="0x8E7A"/>
+		<token name="GL_EQUAL" value="0x0202"/>
 		<token name="GL_FRACTIONAL_ODD" value="0x8E7B"/>
 		<token name="GL_FRACTIONAL_EVEN" value="0x8E7C"/>
+		<token name="GL_CCW" value="0x0901"/>
+		<token name="GL_CW" value="0x0900"/>
 		<token name="GL_MAX_PATCH_VERTICES" value="0x8E7D"/>
 		<token name="GL_MAX_TESS_GEN_LEVEL" value="0x8E7E"/>
 		<token name="GL_MAX_TESS_CONTROL_UNIFORM_COMPONENTS" value="0x8E7F"/>

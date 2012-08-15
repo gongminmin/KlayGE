@@ -10,7 +10,7 @@
 		</function>
 		<function name="glWindowPos2dvMESA" return="void">
 			<params>
-				<param type="const GLdouble*" name="p"/>
+				<param type="const GLdouble*" name="v"/>
 			</params>
 		</function>
 		<function name="glWindowPos2fMESA" return="void">
@@ -21,7 +21,7 @@
 		</function>
 		<function name="glWindowPos2fvMESA" return="void">
 			<params>
-				<param type="const GLfloat*" name="p"/>
+				<param type="const GLfloat*" name="v"/>
 			</params>
 		</function>
 		<function name="glWindowPos2iMESA" return="void">
@@ -32,7 +32,7 @@
 		</function>
 		<function name="glWindowPos2ivMESA" return="void">
 			<params>
-				<param type="const GLint*" name="p"/>
+				<param type="const GLint*" name="v"/>
 			</params>
 		</function>
 		<function name="glWindowPos2sMESA" return="void">
@@ -43,7 +43,7 @@
 		</function>
 		<function name="glWindowPos2svMESA" return="void">
 			<params>
-				<param type="const GLshort*" name="p"/>
+				<param type="const GLshort*" name="v"/>
 			</params>
 		</function>
 		<function name="glWindowPos3dMESA" return="void">
@@ -55,7 +55,7 @@
 		</function>
 		<function name="glWindowPos3dvMESA" return="void">
 			<params>
-				<param type="const GLdouble*" name="p"/>
+				<param type="const GLdouble*" name="v"/>
 			</params>
 		</function>
 		<function name="glWindowPos3fMESA" return="void">
@@ -67,7 +67,7 @@
 		</function>
 		<function name="glWindowPos3fvMESA" return="void">
 			<params>
-				<param type="const GLfloat*" name="p"/>
+				<param type="const GLfloat*" name="v"/>
 			</params>
 		</function>
 		<function name="glWindowPos3iMESA" return="void">
@@ -79,7 +79,7 @@
 		</function>
 		<function name="glWindowPos3ivMESA" return="void">
 			<params>
-				<param type="const GLint*" name="p"/>
+				<param type="const GLint*" name="v"/>
 			</params>
 		</function>
 		<function name="glWindowPos3sMESA" return="void">
@@ -91,7 +91,7 @@
 		</function>
 		<function name="glWindowPos3svMESA" return="void">
 			<params>
-				<param type="const GLshort*" name="p"/>
+				<param type="const GLshort*" name="v"/>
 			</params>
 		</function>
 		<function name="glWindowPos4dMESA" return="void">
@@ -104,7 +104,7 @@
 		</function>
 		<function name="glWindowPos4dvMESA" return="void">
 			<params>
-				<param type="const GLdouble*" name="p"/>
+				<param type="const GLdouble*" name="v"/>
 			</params>
 		</function>
 		<function name="glWindowPos4fMESA" return="void">
@@ -117,7 +117,7 @@
 		</function>
 		<function name="glWindowPos4fvMESA" return="void">
 			<params>
-				<param type="const GLfloat*" name="p"/>
+				<param type="const GLfloat*" name="v"/>
 			</params>
 		</function>
 		<function name="glWindowPos4iMESA" return="void">
@@ -130,7 +130,7 @@
 		</function>
 		<function name="glWindowPos4ivMESA" return="void">
 			<params>
-				<param type="const GLint*" name="p"/>
+				<param type="const GLint*" name="v"/>
 			</params>
 		</function>
 		<function name="glWindowPos4sMESA" return="void">
@@ -143,7 +143,7 @@
 		</function>
 		<function name="glWindowPos4svMESA" return="void">
 			<params>
-				<param type="const GLshort*" name="p"/>
+				<param type="const GLshort*" name="v"/>
 			</params>
 		</function>
 	</functions>

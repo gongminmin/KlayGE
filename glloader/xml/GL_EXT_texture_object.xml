@@ -4,21 +4,17 @@
 	<tokens>
 		<token name="GL_TEXTURE_PRIORITY_EXT" value="0x8066"/>
 		<token name="GL_TEXTURE_RESIDENT_EXT" value="0x8067"/>
-		<token name="GL_TEXTURE_BINDING_1D_EXT" value="0x8068"/>
-		<token name="GL_TEXTURE_BINDING_2D_EXT" value="0x8069"/>
+		<token name="GL_TEXTURE_1D_BINDING_EXT" value="0x8068"/>
+		<token name="GL_TEXTURE_2D_BINDING_EXT" value="0x8069"/>
+		<token name="GL_TEXTURE_3D_BINDING_EXT" value="0x806A"/>
 	</tokens>
 
 	<functions>
-		<function name="glGenTexturesEXT" return="void">
-			<params>
-				<param type="GLsizei" name="n"/>
-				<param type="GLuint*" name="textures"/>
-			</params>
-		</function>
-		<function name="glDeleteTexturesEXT" return="void">
+		<function name="glAreTexturesResidentEXT" return="GLboolean">
 			<params>
 				<param type="GLsizei" name="n"/>
 				<param type="const GLuint*" name="textures"/>
+				<param type="GLboolean*" name="residences"/>
 			</params>
 		</function>
 		<function name="glBindTextureEXT" return="void">
@@ -27,23 +23,28 @@
 				<param type="GLuint" name="texture"/>
 			</params>
 		</function>
-		<function name="glPrioritizeTexturesEXT" return="void">
+		<function name="glDeleteTexturesEXT" return="void">
 			<params>
 				<param type="GLsizei" name="n"/>
 				<param type="const GLuint*" name="textures"/>
-				<param type="const GLclampf*" name="priorities"/>
 			</params>
 		</function>
-		<function name="glAreTexturesResidentEXT" return="GLboolean">
+		<function name="glGenTexturesEXT" return="void">
 			<params>
 				<param type="GLsizei" name="n"/>
-				<param type="const GLuint*" name="textures"/>
-				<param type="GLboolean*" name="residences"/>
+				<param type="GLuint*" name="textures"/>
 			</params>
 		</function>
 		<function name="glIsTextureEXT" return="GLboolean">
 			<params>
 				<param type="GLuint" name="texture"/>
+			</params>
+		</function>
+		<function name="glPrioritizeTexturesEXT" return="void">
+			<params>
+				<param type="GLsizei" name="n"/>
+				<param type="const GLuint*" name="textures"/>
+				<param type="const GLclampf*" name="priorities"/>
 			</params>
 		</function>
 	</functions>

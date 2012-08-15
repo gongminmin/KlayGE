@@ -11,13 +11,13 @@
 	<functions>
 		<function name="glDepthRangedNV" return="void">
 			<params>
-				<param type="GLdouble" name="n"/>
-				<param type="GLdouble" name="f"/>
+				<param type="GLdouble" name="zNear"/>
+				<param type="GLdouble" name="zFar"/>
 			</params>
 		</function>
 		<function name="glClearDepthdNV" return="void">
 			<params>
-				<param type="GLdouble" name="d"/>
+				<param type="GLdouble" name="depth"/>
 			</params>
 		</function>
 		<function name="glDepthBoundsdNV" return="void">

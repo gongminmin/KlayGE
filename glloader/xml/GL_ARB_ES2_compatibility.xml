@@ -2,20 +2,21 @@
 
 <gl_extension name="GL_ARB_ES2_compatibility" reg_no="95">
 	<tokens>
-		<token name="GL_SHADER_COMPILER" value="0x8DFA"/>
-		<token name="GL_NUM_SHADER_BINARY_FORMATS" value="0x8DF9"/>
-		<token name="GL_MAX_VERTEX_UNIFORM_VECTORS" value="0x8DFB"/>
-		<token name="GL_MAX_VARYING_VECTORS" value="0x8DFC"/>
-		<token name="GL_MAX_FRAGMENT_UNIFORM_VECTORS" value="0x8DFD"/>
+		<token name="GL_FIXED" value="0x140C"/>
 		<token name="GL_IMPLEMENTATION_COLOR_READ_TYPE" value="0x8B9A"/>
 		<token name="GL_IMPLEMENTATION_COLOR_READ_FORMAT" value="0x8B9B"/>
-		<token name="GL_FIXED" value="0x140C"/>
 		<token name="GL_LOW_FLOAT" value="0x8DF0"/>
 		<token name="GL_MEDIUM_FLOAT" value="0x8DF1"/>
 		<token name="GL_HIGH_FLOAT" value="0x8DF2"/>
 		<token name="GL_LOW_INT" value="0x8DF3"/>
 		<token name="GL_MEDIUM_INT" value="0x8DF4"/>
 		<token name="GL_HIGH_INT" value="0x8DF5"/>
+		<token name="GL_SHADER_COMPILER" value="0x8DFA"/>
+		<token name="GL_NUM_SHADER_BINARY_FORMATS" value="0x8DF9"/>
+		<token name="GL_MAX_VERTEX_UNIFORM_VECTORS" value="0x8DFB"/>
+		<token name="GL_MAX_VARYING_VECTORS" value="0x8DFC"/>
+		<token name="GL_MAX_FRAGMENT_UNIFORM_VECTORS" value="0x8DFD"/>
+		<token name="GL_RGB565" value="0x8D62"/>
 	</tokens>
 
 	<functions>
@@ -25,7 +26,7 @@
 				<param type="GLsizei" name="count"/>
 				<param type="const GLuint*" name="shaders"/>
 				<param type="GLenum" name="binaryformat"/>
-				<param type="const void*" name="binary"/>
+				<param type="const GLvoid*" name="binary"/>
 				<param type="GLsizei" name="length"/>
 			</params>
 		</function>
@@ -39,13 +40,13 @@
 		</function>
 		<function name="glDepthRangef" return="void">
 			<params>
-				<param type="GLclampf" name="n"/>
-				<param type="GLclampf" name="f"/>
+				<param type="GLfloat" name="n"/>
+				<param type="GLfloat" name="f"/>
 			</params>
 		</function>
 		<function name="glClearDepthf" return="void">
 			<params>
-				<param type="GLclampf" name="d"/>
+				<param type="GLfloat" name="d"/>
 			</params>
 		</function>
 	</functions>

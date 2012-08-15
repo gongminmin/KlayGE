@@ -19,19 +19,6 @@
 	</tokens>
 
 	<functions>
-		<function name="glHistogramEXT" return="void">
-			<params>
-				<param type="GLenum" name="target"/>
-				<param type="GLsizei" name="width"/>
-				<param type="GLenum" name="internalformat"/>
-				<param type="GLboolean" name="sink"/>
-			</params>
-		</function>
-		<function name="glResetHistogramEXT" return="void">
-			<params>
-				<param type="GLenum" name="target"/>
-			</params>
-		</function>
 		<function name="glGetHistogramEXT" return="void">
 			<params>
 				<param type="GLenum" name="target"/>
@@ -55,18 +42,6 @@
 				<param type="GLint*" name="params"/>
 			</params>
 		</function>
-		<function name="glMinmaxEXT" return="void">
-			<params>
-				<param type="GLenum" name="target"/>
-				<param type="GLenum" name="internalformat"/>
-				<param type="GLboolean" name="sink"/>
-			</params>
-		</function>
-		<function name="glResetMinmaxEXT" return="void">
-			<params>
-				<param type="GLenum" name="target"/>
-			</params>
-		</function>
 		<function name="glGetMinmaxEXT" return="void">
 			<params>
 				<param type="GLenum" name="target"/>
@@ -88,6 +63,31 @@
 				<param type="GLenum" name="target"/>
 				<param type="GLenum" name="pname"/>
 				<param type="GLint*" name="params"/>
+			</params>
+		</function>
+		<function name="glHistogramEXT" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLsizei" name="width"/>
+				<param type="GLenum" name="internalformat"/>
+				<param type="GLboolean" name="sink"/>
+			</params>
+		</function>
+		<function name="glMinmaxEXT" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLenum" name="internalformat"/>
+				<param type="GLboolean" name="sink"/>
+			</params>
+		</function>
+		<function name="glResetHistogramEXT" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+			</params>
+		</function>
+		<function name="glResetMinmaxEXT" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
 			</params>
 		</function>
 	</functions>

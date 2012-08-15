@@ -1,4 +1,7 @@
 <?xml version='1.0'?>
 
 <gl_extension name="GL_NV_vertex_program3" reg_no="306">
+	<tokens>
+		<token name="GL_MAX_VERTEX_TEXTURE_IMAGE_UNITS_ARB" value="0x8B4C"/>
+	</tokens>
 </gl_extension>

@@ -8,16 +8,16 @@
 	</tokens>
 
 	<functions>
-		<function name="glCullParameterfvEXT" return="void">
-			<params>
-				<param type="GLenum" name="pname"/>
-				<param type="GLfloat*" name="params"/>
-			</params>
-		</function>
 		<function name="glCullParameterdvEXT" return="void">
 			<params>
 				<param type="GLenum" name="pname"/>
 				<param type="GLdouble*" name="params"/>
+			</params>
+		</function>
+		<function name="glCullParameterfvEXT" return="void">
+			<params>
+				<param type="GLenum" name="pname"/>
+				<param type="GLfloat*" name="params"/>
 			</params>
 		</function>
 	</functions>

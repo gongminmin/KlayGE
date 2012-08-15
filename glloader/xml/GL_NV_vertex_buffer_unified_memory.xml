@@ -5,25 +5,28 @@
 		<token name="GL_VERTEX_ATTRIB_ARRAY_UNIFIED_NV" value="0x8F1E"/>
 		<token name="GL_ELEMENT_ARRAY_UNIFIED_NV" value="0x8F1F"/>
 		<token name="GL_VERTEX_ATTRIB_ARRAY_ADDRESS_NV" value="0x8F20"/>
-		<token name="GL_TEXTURE_COORD_ARRAY_ADDRESS_NV" value="0x8F25"/>
 		<token name="GL_VERTEX_ARRAY_ADDRESS_NV" value="0x8F21"/>
 		<token name="GL_NORMAL_ARRAY_ADDRESS_NV" value="0x8F22"/>
 		<token name="GL_COLOR_ARRAY_ADDRESS_NV" value="0x8F23"/>
 		<token name="GL_INDEX_ARRAY_ADDRESS_NV" value="0x8F24"/>
+		<token name="GL_TEXTURE_COORD_ARRAY_ADDRESS_NV" value="0x8F25"/>
 		<token name="GL_EDGE_FLAG_ARRAY_ADDRESS_NV" value="0x8F26"/>
 		<token name="GL_SECONDARY_COLOR_ARRAY_ADDRESS_NV" value="0x8F27"/>
 		<token name="GL_FOG_COORD_ARRAY_ADDRESS_NV" value="0x8F28"/>
 		<token name="GL_ELEMENT_ARRAY_ADDRESS_NV" value="0x8F29"/>
 		<token name="GL_VERTEX_ATTRIB_ARRAY_LENGTH_NV" value="0x8F2A"/>
-		<token name="GL_TEXTURE_COORD_ARRAY_LENGTH_NV" value="0x8F2F"/>
 		<token name="GL_VERTEX_ARRAY_LENGTH_NV" value="0x8F2B"/>
 		<token name="GL_NORMAL_ARRAY_LENGTH_NV" value="0x8F2C"/>
 		<token name="GL_COLOR_ARRAY_LENGTH_NV" value="0x8F2D"/>
 		<token name="GL_INDEX_ARRAY_LENGTH_NV" value="0x8F2E"/>
+		<token name="GL_TEXTURE_COORD_ARRAY_LENGTH_NV" value="0x8F2F"/>
 		<token name="GL_EDGE_FLAG_ARRAY_LENGTH_NV" value="0x8F30"/>
 		<token name="GL_SECONDARY_COLOR_ARRAY_LENGTH_NV" value="0x8F31"/>
 		<token name="GL_FOG_COORD_ARRAY_LENGTH_NV" value="0x8F32"/>
 		<token name="GL_ELEMENT_ARRAY_LENGTH_NV" value="0x8F33"/>
+		<token name="GL_DRAW_INDIRECT_UNIFIED_NV" value="0x8F40"/>
+		<token name="GL_DRAW_INDIRECT_ADDRESS_NV" value="0x8F41"/>
+		<token name="GL_DRAW_INDIRECT_LENGTH_NV" value="0x8F42"/>
 	</tokens>
 
 	<functions>

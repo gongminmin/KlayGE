@@ -2,14 +2,14 @@
 
 <gl_extension name="GL_EXT_fog_coord" reg_no="149">
 	<tokens>
-		<token name="GL_FOG_COORD_SOURCE_EXT" value="0x8450"/>
-		<token name="GL_FOG_COORD_EXT" value="0x8451"/>
+		<token name="GL_FOG_COORDINATE_SOURCE_EXT" value="0x8450"/>
+		<token name="GL_FOG_COORDINATE_EXT" value="0x8451"/>
 		<token name="GL_FRAGMENT_DEPTH_EXT" value="0x8452"/>
-		<token name="GL_CURRENT_FOG_COORD_EXT" value="0x8453"/>
-		<token name="GL_FOG_COORD_ARRAY_TYPE_EXT" value="0x8454"/>
-		<token name="GL_FOG_COORD_ARRAY_STRIDE_EXT" value="0x8455"/>
-		<token name="GL_FOG_COORD_ARRAY_POINTER_EXT" value="0x8456"/>
-		<token name="GL_FOG_COORD_ARRAY_EXT" value="0x8457"/>
+		<token name="GL_CURRENT_FOG_COORDINATE_EXT" value="0x8453"/>
+		<token name="GL_FOG_COORDINATE_ARRAY_TYPE_EXT" value="0x8454"/>
+		<token name="GL_FOG_COORDINATE_ARRAY_STRIDE_EXT" value="0x8455"/>
+		<token name="GL_FOG_COORDINATE_ARRAY_POINTER_EXT" value="0x8456"/>
+		<token name="GL_FOG_COORDINATE_ARRAY_EXT" value="0x8457"/>
 	</tokens>
 
 	<functions>

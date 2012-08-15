@@ -71,12 +71,5 @@
 				<param type="GLuint64*" name="params"/>
 			</params>
 		</function>
-		<function name="glVideoParameterivNV" return="void">
-			<params>
-				<param type="GLuint" name="video_slot"/>
-				<param type="GLenum" name="pname"/>
-				<param type="const GLint*" name="params"/>
-			</params>
-		</function>
 	</functions>
 </gl_extension>

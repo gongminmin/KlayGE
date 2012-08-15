@@ -15,14 +15,14 @@
 				<param type="GLsizei" name="bufSize"/>
 				<param type="GLsizei*" name="length"/>
 				<param type="GLenum*" name="binaryFormat"/>
-				<param type="void*" name="binary"/>
+				<param type="GLvoid*" name="binary"/>
 			</params>
 		</function>
 		<function name="glProgramBinary" return="void">
 			<params>
 				<param type="GLuint" name="program"/>
 				<param type="GLenum" name="binaryFormat"/>
-				<param type="const void*" name="binary"/>
+				<param type="const GLvoid*" name="binary"/>
 				<param type="GLsizei" name="length"/>
 			</params>
 		</function>
@@ -32,6 +32,10 @@
 				<param type="GLenum" name="pname"/>
 				<param type="GLint" name="value"/>
 			</params>
+			<mappings>
+				<mapping from="GL_ARB_geometry_shader4" name="glProgramParameteriARB"/>
+				<mapping from="GL_EXT_geometry_shader4" name="glProgramParameteriEXT"/>
+			</mappings>
 		</function>
 	</functions>
 </gl_extension>

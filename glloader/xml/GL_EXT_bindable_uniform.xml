@@ -6,8 +6,8 @@
 		<token name="GL_MAX_FRAGMENT_BINDABLE_UNIFORMS_EXT" value="0x8DE3"/>
 		<token name="GL_MAX_GEOMETRY_BINDABLE_UNIFORMS_EXT" value="0x8DE4"/>
 		<token name="GL_MAX_BINDABLE_UNIFORM_SIZE_EXT" value="0x8DED"/>
-		<token name="GL_UNIFORM_BUFFER_BINDING_EXT" value="0x8DEF"/>
 		<token name="GL_UNIFORM_BUFFER_EXT" value="0x8DEE"/>
+		<token name="GL_UNIFORM_BUFFER_BINDING_EXT" value="0x8DEF"/>
 	</tokens>
 
 	<functions>

@@ -3,6 +3,21 @@
 <gl_extension name="GL_VERSION_3_3">
 	<tokens>
 		<token name="GL_VERTEX_ATTRIB_ARRAY_DIVISOR" value="0x88FE"/>
+		<token name="GL_SRC1_COLOR" value="0x88F9"/>
+		<token name="GL_ONE_MINUS_SRC1_COLOR" value="0x88FA"/>
+		<token name="GL_ONE_MINUS_SRC1_ALPHA" value="0x88FB"/>
+		<token name="GL_MAX_DUAL_SOURCE_DRAW_BUFFERS" value="0x88FC"/>
+		<token name="GL_ANY_SAMPLES_PASSED" value="0x8C2F"/>
+		<token name="GL_SAMPLER_BINDING" value="0x8919"/>
+		<token name="GL_RGB10_A2UI" value="0x906F"/>
+		<token name="GL_TEXTURE_SWIZZLE_R" value="0x8E42"/>
+		<token name="GL_TEXTURE_SWIZZLE_G" value="0x8E43"/>
+		<token name="GL_TEXTURE_SWIZZLE_B" value="0x8E44"/>
+		<token name="GL_TEXTURE_SWIZZLE_A" value="0x8E45"/>
+		<token name="GL_TEXTURE_SWIZZLE_RGBA" value="0x8E46"/>
+		<token name="GL_TIME_ELAPSED" value="0x88BF"/>
+		<token name="GL_TIMESTAMP" value="0x8E28"/>
+		<token name="GL_INT_2_10_10_10_REV" value="0x8D9F"/>
 	</tokens>
 
 	<functions>

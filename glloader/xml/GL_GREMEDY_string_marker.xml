@@ -5,7 +5,7 @@
 		<function name="glStringMarkerGREMEDY" return="void">
 			<params>
 				<param type="GLsizei" name="len"/>
-				<param type="const void*" name="string"/>
+				<param type="const GLvoid*" name="string"/>
 			</params>
 		</function>
 	</functions>

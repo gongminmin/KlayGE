@@ -3,8 +3,10 @@
 <gl_extension name="GL_ARB_transform_feedback2" reg_no="93">
 	<tokens>
 		<token name="GL_TRANSFORM_FEEDBACK" value="0x8E22"/>
-		<token name="GL_TRANSFORM_FEEDBACK_BUFFER_PAUSED" value="0x8E23"/>
-		<token name="GL_TRANSFORM_FEEDBACK_BUFFER_ACTIVE" value="0x8E24"/>
+		<token name="GL_TRANSFORM_FEEDBACK_PAUSED" value="0x8E23"/>
+		<token name="GL_TRANSFORM_FEEDBACK_BUFFER_PAUSED" value="GL_TRANSFORM_FEEDBACK_PAUSED"/>
+		<token name="GL_TRANSFORM_FEEDBACK_ACTIVE" value="0x8E24"/>
+		<token name="GL_TRANSFORM_FEEDBACK_BUFFER_ACTIVE" value="GL_TRANSFORM_FEEDBACK_ACTIVE"/>
 		<token name="GL_TRANSFORM_FEEDBACK_BINDING" value="0x8E25"/>
 	</tokens>
 
@@ -22,7 +24,7 @@
 		<function name="glDeleteTransformFeedbacks" return="void">
 			<params>
 				<param type="GLsizei" name="n"/>
-				<param type="GLuint const *" name="ids"/>
+				<param type="const GLuint*" name="ids"/>
 			</params>
 			<mappings>
 				<mapping from="GL_EXT_transform_feedback2" name="glDeleteTransformFeedbacksEXT"/>

@@ -34,7 +34,6 @@
 				<param type="const GLchar**" name="strings"/>
 			</params>
 		</function>
-
 		<function name="glBindProgramPipeline" return="void">
 			<params>
 				<param type="GLuint" name="pipeline"/>
@@ -57,13 +56,6 @@
 				<param type="GLuint" name="pipeline"/>
 			</params>
 		</function>
-		<function name="glProgramParameteri" return="void">
-			<params>
-				<param type="GLuint" name="program"/>
-				<param type="GLenum" name="pname"/>
-				<param type="GLint" name="value"/>
-			</params>
-		</function>
 		<function name="glGetProgramPipelineiv" return="void">
 			<params>
 				<param type="GLuint" name="pipeline"/>
@@ -78,101 +70,6 @@
 				<param type="GLint" name="v0"/>
 			</params>
 		</function>
-		<function name="glProgramUniform2i" return="void">
-			<params>
-				<param type="GLuint" name="program"/>
-				<param type="GLint" name="location"/>
-				<param type="GLint" name="v0"/>
-				<param type="GLint" name="v1"/>
-			</params>
-		</function>
-		<function name="glProgramUniform3i" return="void">
-			<params>
-				<param type="GLuint" name="program"/>
-				<param type="GLint" name="location"/>
-				<param type="GLint" name="v0"/>
-				<param type="GLint" name="v1"/>
-				<param type="GLint" name="v2"/>
-			</params>
-		</function>
-		<function name="glProgramUniform4i" return="void">
-			<params>
-				<param type="GLuint" name="program"/>
-				<param type="GLint" name="location"/>
-				<param type="GLint" name="v0"/>
-				<param type="GLint" name="v1"/>
-				<param type="GLint" name="v2"/>
-				<param type="GLint" name="v3"/>
-			</params>
-		</function>
-		<function name="glProgramUniform1f" return="void">
-			<params>
-				<param type="GLuint" name="program"/>
-				<param type="GLint" name="location"/>
-				<param type="GLfloat" name="v0"/>
-			</params>
-		</function>
-		<function name="glProgramUniform2f" return="void">
-			<params>
-				<param type="GLuint" name="program"/>
-				<param type="GLint" name="location"/>
-				<param type="GLfloat" name="v0"/>
-				<param type="GLfloat" name="v1"/>
-			</params>
-		</function>
-		<function name="glProgramUniform3f" return="void">
-			<params>
-				<param type="GLuint" name="program"/>
-				<param type="GLint" name="location"/>
-				<param type="GLfloat" name="v0"/>
-				<param type="GLfloat" name="v1"/>
-				<param type="GLfloat" name="v2"/>
-			</params>
-		</function>
-		<function name="glProgramUniform4f" return="void">
-			<params>
-				<param type="GLuint" name="program"/>
-				<param type="GLint" name="location"/>
-				<param type="GLfloat" name="v0"/>
-				<param type="GLfloat" name="v1"/>
-				<param type="GLfloat" name="v2"/>
-				<param type="GLfloat" name="v3"/>
-			</params>
-		</function>
-		<function name="glProgramUniform1d" return="void">
-			<params>
-				<param type="GLuint" name="program"/>
-				<param type="GLint" name="location"/>
-				<param type="GLdouble" name="v0"/>
-			</params>
-		</function>
-		<function name="glProgramUniform2d" return="void">
-			<params>
-				<param type="GLuint" name="program"/>
-				<param type="GLint" name="location"/>
-				<param type="GLdouble" name="v0"/>
-				<param type="GLdouble" name="v1"/>
-			</params>
-		</function>
-		<function name="glProgramUniform3d" return="void">
-			<params>
-				<param type="GLuint" name="program"/>
-				<param type="GLint" name="location"/>
-				<param type="GLdouble" name="v0"/>
-				<param type="GLdouble" name="v1"/>
-				<param type="GLdouble" name="v2"/>
-			</params>
-		</function>
-		<function name="glProgramUniform4d" return="void">
-			<params>
-				<param type="GLuint" name="program"/>
-				<param type="GLint" name="location"/>
-				<param type="GLdouble" name="v0"/>
-				<param type="GLdouble" name="v1"/>
-				<param type="GLdouble" name="v2"/>
-				<param type="GLdouble" name="v3"/>
-			</params>
-		</function>
 		<function name="glProgramUniform1iv" return="void">
 			<params>
 				<param type="GLuint" name="program"/>
@@ -181,28 +78,11 @@
 				<param type="const GLint*" name="value"/>
 			</params>
 		</function>
-		<function name="glProgramUniform2iv" return="void">
+		<function name="glProgramUniform1f" return="void">
 			<params>
 				<param type="GLuint" name="program"/>
 				<param type="GLint" name="location"/>
-				<param type="GLsizei" name="count"/>
-				<param type="const GLint*" name="value"/>
-			</params>
-		</function>
-		<function name="glProgramUniform3iv" return="void">
-			<params>
-				<param type="GLuint" name="program"/>
-				<param type="GLint" name="location"/>
-				<param type="GLsizei" name="count"/>
-				<param type="const GLint*" name="value"/>
-			</params>
-		</function>
-		<function name="glProgramUniform4iv" return="void">
-			<params>
-				<param type="GLuint" name="program"/>
-				<param type="GLint" name="location"/>
-				<param type="GLsizei" name="count"/>
-				<param type="const GLint*" name="value"/>
+				<param type="GLfloat" name="v0"/>
 			</params>
 		</function>
 		<function name="glProgramUniform1fv" return="void">
@@ -213,55 +93,14 @@
 				<param type="const GLfloat*" name="value"/>
 			</params>
 		</function>
-		<function name="glProgramUniform2fv" return="void">
+		<function name="glProgramUniform1d" return="void">
 			<params>
 				<param type="GLuint" name="program"/>
 				<param type="GLint" name="location"/>
-				<param type="GLsizei" name="count"/>
-				<param type="const GLfloat*" name="value"/>
-			</params>
-		</function>
-		<function name="glProgramUniform3fv" return="void">
-			<params>
-				<param type="GLuint" name="program"/>
-				<param type="GLint" name="location"/>
-				<param type="GLsizei" name="count"/>
-				<param type="const GLfloat*" name="value"/>
-			</params>
-		</function>
-		<function name="glProgramUniform4fv" return="void">
-			<params>
-				<param type="GLuint" name="program"/>
-				<param type="GLint" name="location"/>
-				<param type="GLsizei" name="count"/>
-				<param type="const GLfloat*" name="value"/>
+				<param type="GLdouble" name="v0"/>
 			</params>
 		</function>
 		<function name="glProgramUniform1dv" return="void">
-			<params>
-				<param type="GLuint" name="program"/>
-				<param type="GLint" name="location"/>
-				<param type="GLsizei" name="count"/>
-				<param type="const GLdouble*" name="value"/>
-			</params>
-		</function>
-		<function name="glProgramUniform2dv" return="void">
-			<params>
-				<param type="GLuint" name="program"/>
-				<param type="GLint" name="location"/>
-				<param type="GLsizei" name="count"/>
-				<param type="const GLdouble*" name="value"/>
-			</params>
-		</function>
-		<function name="glProgramUniform3dv" return="void">
-			<params>
-				<param type="GLuint" name="program"/>
-				<param type="GLint" name="location"/>
-				<param type="GLsizei" name="count"/>
-				<param type="const GLdouble*" name="value"/>
-			</params>
-		</function>
-		<function name="glProgramUniform4dv" return="void">
 			<params>
 				<param type="GLuint" name="program"/>
 				<param type="GLint" name="location"/>
@@ -276,12 +115,127 @@
 				<param type="GLuint" name="v0"/>
 			</params>
 		</function>
+		<function name="glProgramUniform1uiv" return="void">
+			<params>
+				<param type="GLuint" name="program"/>
+				<param type="GLint" name="location"/>
+				<param type="GLsizei" name="count"/>
+				<param type="const GLuint*" name="value"/>
+			</params>
+		</function>
+		<function name="glProgramUniform2i" return="void">
+			<params>
+				<param type="GLuint" name="program"/>
+				<param type="GLint" name="location"/>
+				<param type="GLint" name="v0"/>
+				<param type="GLint" name="v1"/>
+			</params>
+		</function>
+		<function name="glProgramUniform2iv" return="void">
+			<params>
+				<param type="GLuint" name="program"/>
+				<param type="GLint" name="location"/>
+				<param type="GLsizei" name="count"/>
+				<param type="const GLint*" name="value"/>
+			</params>
+		</function>
+		<function name="glProgramUniform2f" return="void">
+			<params>
+				<param type="GLuint" name="program"/>
+				<param type="GLint" name="location"/>
+				<param type="GLfloat" name="v0"/>
+				<param type="GLfloat" name="v1"/>
+			</params>
+		</function>
+		<function name="glProgramUniform2fv" return="void">
+			<params>
+				<param type="GLuint" name="program"/>
+				<param type="GLint" name="location"/>
+				<param type="GLsizei" name="count"/>
+				<param type="const GLfloat*" name="value"/>
+			</params>
+		</function>
+		<function name="glProgramUniform2d" return="void">
+			<params>
+				<param type="GLuint" name="program"/>
+				<param type="GLint" name="location"/>
+				<param type="GLdouble" name="v0"/>
+				<param type="GLdouble" name="v1"/>
+			</params>
+		</function>
+		<function name="glProgramUniform2dv" return="void">
+			<params>
+				<param type="GLuint" name="program"/>
+				<param type="GLint" name="location"/>
+				<param type="GLsizei" name="count"/>
+				<param type="const GLdouble*" name="value"/>
+			</params>
+		</function>
 		<function name="glProgramUniform2ui" return="void">
 			<params>
 				<param type="GLuint" name="program"/>
 				<param type="GLint" name="location"/>
 				<param type="GLuint" name="v0"/>
 				<param type="GLuint" name="v1"/>
+			</params>
+		</function>
+		<function name="glProgramUniform2uiv" return="void">
+			<params>
+				<param type="GLuint" name="program"/>
+				<param type="GLint" name="location"/>
+				<param type="GLsizei" name="count"/>
+				<param type="const GLuint*" name="value"/>
+			</params>
+		</function>
+		<function name="glProgramUniform3i" return="void">
+			<params>
+				<param type="GLuint" name="program"/>
+				<param type="GLint" name="location"/>
+				<param type="GLint" name="v0"/>
+				<param type="GLint" name="v1"/>
+				<param type="GLint" name="v2"/>
+			</params>
+		</function>
+		<function name="glProgramUniform3iv" return="void">
+			<params>
+				<param type="GLuint" name="program"/>
+				<param type="GLint" name="location"/>
+				<param type="GLsizei" name="count"/>
+				<param type="const GLint*" name="value"/>
+			</params>
+		</function>
+		<function name="glProgramUniform3f" return="void">
+			<params>
+				<param type="GLuint" name="program"/>
+				<param type="GLint" name="location"/>
+				<param type="GLfloat" name="v0"/>
+				<param type="GLfloat" name="v1"/>
+				<param type="GLfloat" name="v2"/>
+			</params>
+		</function>
+		<function name="glProgramUniform3fv" return="void">
+			<params>
+				<param type="GLuint" name="program"/>
+				<param type="GLint" name="location"/>
+				<param type="GLsizei" name="count"/>
+				<param type="const GLfloat*" name="value"/>
+			</params>
+		</function>
+		<function name="glProgramUniform3d" return="void">
+			<params>
+				<param type="GLuint" name="program"/>
+				<param type="GLint" name="location"/>
+				<param type="GLdouble" name="v0"/>
+				<param type="GLdouble" name="v1"/>
+				<param type="GLdouble" name="v2"/>
+			</params>
+		</function>
+		<function name="glProgramUniform3dv" return="void">
+			<params>
+				<param type="GLuint" name="program"/>
+				<param type="GLint" name="location"/>
+				<param type="GLsizei" name="count"/>
+				<param type="const GLdouble*" name="value"/>
 			</params>
 		</function>
 		<function name="glProgramUniform3ui" return="void">
@@ -293,6 +247,68 @@
 				<param type="GLuint" name="v2"/>
 			</params>
 		</function>
+		<function name="glProgramUniform3uiv" return="void">
+			<params>
+				<param type="GLuint" name="program"/>
+				<param type="GLint" name="location"/>
+				<param type="GLsizei" name="count"/>
+				<param type="const GLuint*" name="value"/>
+			</params>
+		</function>
+		<function name="glProgramUniform4i" return="void">
+			<params>
+				<param type="GLuint" name="program"/>
+				<param type="GLint" name="location"/>
+				<param type="GLint" name="v0"/>
+				<param type="GLint" name="v1"/>
+				<param type="GLint" name="v2"/>
+				<param type="GLint" name="v3"/>
+			</params>
+		</function>
+		<function name="glProgramUniform4iv" return="void">
+			<params>
+				<param type="GLuint" name="program"/>
+				<param type="GLint" name="location"/>
+				<param type="GLsizei" name="count"/>
+				<param type="const GLint*" name="value"/>
+			</params>
+		</function>
+		<function name="glProgramUniform4f" return="void">
+			<params>
+				<param type="GLuint" name="program"/>
+				<param type="GLint" name="location"/>
+				<param type="GLfloat" name="v0"/>
+				<param type="GLfloat" name="v1"/>
+				<param type="GLfloat" name="v2"/>
+				<param type="GLfloat" name="v3"/>
+			</params>
+		</function>
+		<function name="glProgramUniform4fv" return="void">
+			<params>
+				<param type="GLuint" name="program"/>
+				<param type="GLint" name="location"/>
+				<param type="GLsizei" name="count"/>
+				<param type="const GLfloat*" name="value"/>
+			</params>
+		</function>
+		<function name="glProgramUniform4d" return="void">
+			<params>
+				<param type="GLuint" name="program"/>
+				<param type="GLint" name="location"/>
+				<param type="GLdouble" name="v0"/>
+				<param type="GLdouble" name="v1"/>
+				<param type="GLdouble" name="v2"/>
+				<param type="GLdouble" name="v3"/>
+			</params>
+		</function>
+		<function name="glProgramUniform4dv" return="void">
+			<params>
+				<param type="GLuint" name="program"/>
+				<param type="GLint" name="location"/>
+				<param type="GLsizei" name="count"/>
+				<param type="const GLdouble*" name="value"/>
+			</params>
+		</function>
 		<function name="glProgramUniform4ui" return="void">
 			<params>
 				<param type="GLuint" name="program"/>
@@ -301,30 +317,6 @@
 				<param type="GLuint" name="v1"/>
 				<param type="GLuint" name="v2"/>
 				<param type="GLuint" name="v3"/>
-			</params>
-		</function>
-		<function name="glProgramUniform1uiv" return="void">
-			<params>
-				<param type="GLuint" name="program"/>
-				<param type="GLint" name="location"/>
-				<param type="GLsizei" name="count"/>
-				<param type="const GLuint*" name="value"/>
-			</params>
-		</function>
-		<function name="glProgramUniform2uiv" return="void">
-			<params>
-				<param type="GLuint" name="program"/>
-				<param type="GLint" name="location"/>
-				<param type="GLsizei" name="count"/>
-				<param type="const GLuint*" name="value"/>
-			</params>
-		</function>
-		<function name="glProgramUniform3uiv" return="void">
-			<params>
-				<param type="GLuint" name="program"/>
-				<param type="GLint" name="location"/>
-				<param type="GLsizei" name="count"/>
-				<param type="const GLuint*" name="value"/>
 			</params>
 		</function>
 		<function name="glProgramUniform4uiv" return="void">

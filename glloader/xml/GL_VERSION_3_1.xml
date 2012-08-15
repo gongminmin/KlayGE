@@ -33,6 +33,38 @@
 		<token name="GL_SIGNED_NORMALIZED" value="0x8F9C"/>
 		<token name="GL_PRIMITIVE_RESTART" value="0x8F9D"/>
 		<token name="GL_PRIMITIVE_RESTART_INDEX" value="0x8F9E"/>
+		<token name="GL_COPY_READ_BUFFER" value="GL_COPY_READ_BUFFER_BINDING"/>
+		<token name="GL_COPY_WRITE_BUFFER" value="GL_COPY_WRITE_BUFFER_BINDING"/>
+		<token name="GL_UNIFORM_BUFFER" value="0x8A11"/>
+		<token name="GL_UNIFORM_BUFFER_BINDING" value="0x8A28"/>
+		<token name="GL_UNIFORM_BUFFER_START" value="0x8A29"/>
+		<token name="GL_UNIFORM_BUFFER_SIZE" value="0x8A2A"/>
+		<token name="GL_MAX_VERTEX_UNIFORM_BLOCKS" value="0x8A2B"/>
+		<token name="GL_MAX_FRAGMENT_UNIFORM_BLOCKS" value="0x8A2D"/>
+		<token name="GL_MAX_COMBINED_UNIFORM_BLOCKS" value="0x8A2E"/>
+		<token name="GL_MAX_UNIFORM_BUFFER_BINDINGS" value="0x8A2F"/>
+		<token name="GL_MAX_UNIFORM_BLOCK_SIZE" value="0x8A30"/>
+		<token name="GL_MAX_COMBINED_VERTEX_UNIFORM_COMPONENTS" value="0x8A31"/>
+		<token name="GL_MAX_COMBINED_FRAGMENT_UNIFORM_COMPONENTS" value="0x8A33"/>
+		<token name="GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT" value="0x8A34"/>
+		<token name="GL_ACTIVE_UNIFORM_BLOCK_MAX_NAME_LENGTH" value="0x8A35"/>
+		<token name="GL_ACTIVE_UNIFORM_BLOCKS" value="0x8A36"/>
+		<token name="GL_UNIFORM_TYPE" value="0x8A37"/>
+		<token name="GL_UNIFORM_SIZE" value="0x8A38"/>
+		<token name="GL_UNIFORM_NAME_LENGTH" value="0x8A39"/>
+		<token name="GL_UNIFORM_BLOCK_INDEX" value="0x8A3A"/>
+		<token name="GL_UNIFORM_OFFSET" value="0x8A3B"/>
+		<token name="GL_UNIFORM_ARRAY_STRIDE" value="0x8A3C"/>
+		<token name="GL_UNIFORM_MATRIX_STRIDE" value="0x8A3D"/>
+		<token name="GL_UNIFORM_IS_ROW_MAJOR" value="0x8A3E"/>
+		<token name="GL_UNIFORM_BLOCK_BINDING" value="0x8A3F"/>
+		<token name="GL_UNIFORM_BLOCK_DATA_SIZE" value="0x8A40"/>
+		<token name="GL_UNIFORM_BLOCK_NAME_LENGTH" value="0x8A41"/>
+		<token name="GL_UNIFORM_BLOCK_ACTIVE_UNIFORMS" value="0x8A42"/>
+		<token name="GL_UNIFORM_BLOCK_ACTIVE_UNIFORM_INDICES" value="0x8A43"/>
+		<token name="GL_UNIFORM_BLOCK_REFERENCED_BY_VERTEX_SHADER" value="0x8A44"/>
+		<token name="GL_UNIFORM_BLOCK_REFERENCED_BY_FRAGMENT_SHADER" value="0x8A46"/>
+		<token name="GL_INVALID_INDEX" value="0xFFFFFFFFu"/>
 	</tokens>
 
 	<functions>
@@ -41,7 +73,7 @@
 				<param type="GLenum" name="mode"/>
 				<param type="GLint" name="first"/>
 				<param type="GLsizei" name="count"/>
-				<param type="GLsizei" name="primcount"/>
+				<param type="GLsizei" name="instancecount"/>
 			</params>
 			<mappings>
 				<mapping from="GL_ARB_draw_instanced" name="glDrawArraysInstancedARB"/>
@@ -53,8 +85,8 @@
 				<param type="GLenum" name="mode"/>
 				<param type="GLsizei" name="count"/>
 				<param type="GLenum" name="type"/>
-				<param type="const void*" name="indices"/>
-				<param type="GLsizei" name="primcount"/>
+				<param type="const GLvoid*" name="indices"/>
+				<param type="GLsizei" name="instancecount"/>
 			</params>
 			<mappings>
 				<mapping from="GL_ARB_draw_instanced" name="glDrawElementsInstancedARB"/>

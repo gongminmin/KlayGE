@@ -2,10 +2,10 @@
 
 <gl_extension name="GL_SGIX_resample" reg_no="212">
 	<tokens>
-		<token name="GL_PACK_RESAMPLE_SGIX" value="0x842E"/>
-		<token name="GL_UNPACK_RESAMPLE_SGIX" value="0x842F"/>
-		<token name="GL_RESAMPLE_REPLICATE_SGIX" value="0x8433"/>
-		<token name="GL_RESAMPLE_ZERO_FILL_SGIX" value="0x8434"/>
+		<token name="GL_PACK_RESAMPLE_SGIX" value="0x842C"/>
+		<token name="GL_UNPACK_RESAMPLE_SGIX" value="0x842D"/>
+		<token name="GL_RESAMPLE_REPLICATE_SGIX" value="0x842E"/>
+		<token name="GL_RESAMPLE_ZERO_FILL_SGIX" value="0x842F"/>
 		<token name="GL_RESAMPLE_DECIMATE_SGIX" value="0x8430"/>
 	</tokens>
 </gl_extension>

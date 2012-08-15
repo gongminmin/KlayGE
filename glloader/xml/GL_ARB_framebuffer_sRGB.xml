@@ -2,7 +2,7 @@
 
 <gl_extension name="GL_ARB_framebuffer_sRGB" reg_no="46">
 	<tokens>
-		<token name="GL_FRAMEBUFFER_SRGB" value="0x8DB9"/>		
+		<token name="GL_FRAMEBUFFER_SRGB" value="0x8DB9"/>
 	</tokens>
 
 	<additionals>

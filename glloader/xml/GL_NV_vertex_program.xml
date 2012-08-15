@@ -237,7 +237,7 @@
 			<params>
 				<param type="GLenum" name="target"/>
 				<param type="GLuint" name="index"/>
-				<param type="GLuint" name="count"/>
+				<param type="GLsizei" name="count"/>
 				<param type="const GLdouble*" name="v"/>
 			</params>
 		</function>
@@ -245,7 +245,7 @@
 			<params>
 				<param type="GLenum" name="target"/>
 				<param type="GLuint" name="index"/>
-				<param type="GLuint" name="count"/>
+				<param type="GLsizei" name="count"/>
 				<param type="const GLfloat*" name="v"/>
 			</params>
 		</function>

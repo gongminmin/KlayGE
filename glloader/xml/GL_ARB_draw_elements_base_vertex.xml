@@ -7,7 +7,7 @@
 				<param type="GLenum" name="mode"/>
 				<param type="GLsizei" name="count"/>
 				<param type="GLenum" name="type"/>
-				<param type="const void*" name="indices"/>
+				<param type="const GLvoid*" name="indices"/>
 				<param type="GLint" name="basevertex"/>
 			</params>
 		</function>
@@ -18,20 +18,17 @@
 				<param type="GLuint" name="end"/>
 				<param type="GLsizei" name="count"/>
 				<param type="GLenum" name="type"/>
-				<param type="const void*" name="indices"/>
-				<param type="GLsizei" name="basevertex"/>
+				<param type="const GLvoid*" name="indices"/>
+				<param type="GLint" name="basevertex"/>
 			</params>
-			<mappings>
-				<mapping from="GL_EXT_draw_instanced" name="glDrawElementsInstancedEXT"/>
-			</mappings>
 		</function>
 		<function name="glDrawElementsInstancedBaseVertex" return="void">
 			<params>
 				<param type="GLenum" name="mode"/>
 				<param type="GLsizei" name="count"/>
 				<param type="GLenum" name="type"/>
-				<param type="const void*" name="indices"/>
-				<param type="GLsizei" name="primcount"/>
+				<param type="const GLvoid*" name="indices"/>
+				<param type="GLsizei" name="instancecount"/>
 				<param type="GLint" name="basevertex"/>
 			</params>
 		</function>
@@ -40,8 +37,8 @@
 				<param type="GLenum" name="mode"/>
 				<param type="const GLsizei*" name="count"/>
 				<param type="GLenum" name="type"/>
-				<param type="const void*" name="indices"/>
-				<param type="GLsizei" name="primcount"/>
+				<param type="const GLvoid**" name="indices"/>
+				<param type="GLsizei" name="drawcount"/>
 				<param type="const GLint*" name="basevertex"/>
 			</params>
 		</function>

@@ -19,9 +19,6 @@
 				<param type="GLenum" name="pname"/>
 				<param type="GLint64*" name="params"/>
 			</params>
-			<mappings>
-				<mapping from="GL_EXT_timer_query" name="glGetQueryObjecti64vEXT"/>
-			</mappings>
 		</function>
 		<function name="glGetQueryObjectui64v" return="void">
 			<params>
@@ -29,9 +26,6 @@
 				<param type="GLenum" name="pname"/>
 				<param type="GLuint64*" name="params"/>
 			</params>
-			<mappings>
-				<mapping from="GL_EXT_timer_query" name="glGetQueryObjectui64vEXT"/>
-			</mappings>
 		</function>
 	</functions>
 </gl_extension>

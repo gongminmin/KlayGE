@@ -5,12 +5,12 @@
 		<token name="GL_COMBINE_ARB" value="0x8570"/>
 		<token name="GL_COMBINE_RGB_ARB" value="0x8571"/>
 		<token name="GL_COMBINE_ALPHA_ARB" value="0x8572"/>
-		<token name="GL_SRC0_RGB_ARB" value="0x8580"/>
-		<token name="GL_SRC1_RGB_ARB" value="0x8581"/>
-		<token name="GL_SRC2_RGB_ARB" value="0x8582"/>
-		<token name="GL_SRC0_ALPHA_ARB" value="0x8588"/>
-		<token name="GL_SRC1_ALPHA_ARB" value="0x8589"/>
-		<token name="GL_SRC2_ALPHA_ARB" value="0x858A"/>
+		<token name="GL_SOURCE0_RGB_ARB" value="0x8580"/>
+		<token name="GL_SOURCE1_RGB_ARB" value="0x8581"/>
+		<token name="GL_SOURCE2_RGB_ARB" value="0x8582"/>
+		<token name="GL_SOURCE0_ALPHA_ARB" value="0x8588"/>
+		<token name="GL_SOURCE1_ALPHA_ARB" value="0x8589"/>
+		<token name="GL_SOURCE2_ALPHA_ARB" value="0x858A"/>
 		<token name="GL_OPERAND0_RGB_ARB" value="0x8590"/>
 		<token name="GL_OPERAND1_RGB_ARB" value="0x8591"/>
 		<token name="GL_OPERAND2_RGB_ARB" value="0x8592"/>
@@ -26,7 +26,7 @@
 		<token name="GL_PREVIOUS_ARB" value="0x8578"/>
 	</tokens>
 
-	<additional>
+	<additionals>
 		<ext name="GL_EXT_texture_env_combine"/>
-	</additional>
+	</additionals>
 </gl_extension>

@@ -4,7 +4,7 @@
 	<functions>
 		<function name="glColorMaskIndexedEXT" return="void">
 			<params>
-				<param type="GLuint" name="buf"/>
+				<param type="GLuint" name="index"/>
 				<param type="GLboolean" name="r"/>
 				<param type="GLboolean" name="g"/>
 				<param type="GLboolean" name="b"/>
@@ -13,14 +13,14 @@
 		</function>
 		<function name="glGetBooleanIndexedvEXT" return="void">
 			<params>
-				<param type="GLenum" name="value"/>
+				<param type="GLenum" name="target"/>
 				<param type="GLuint" name="index"/>
 				<param type="GLboolean*" name="data"/>
 			</params>
 		</function>
 		<function name="glGetIntegerIndexedvEXT" return="void">
 			<params>
-				<param type="GLenum" name="value"/>
+				<param type="GLenum" name="target"/>
 				<param type="GLuint" name="index"/>
 				<param type="GLint*" name="data"/>
 			</params>

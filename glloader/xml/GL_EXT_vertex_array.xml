@@ -8,7 +8,6 @@
 		<token name="GL_INDEX_ARRAY_EXT" value="0x8077"/>
 		<token name="GL_TEXTURE_COORD_ARRAY_EXT" value="0x8078"/>
 		<token name="GL_EDGE_FLAG_ARRAY_EXT" value="0x8079"/>
-		<token name="GL_DOUBLE_EXT" value="0x140A"/>
 		<token name="GL_VERTEX_ARRAY_SIZE_EXT" value="0x807A"/>
 		<token name="GL_VERTEX_ARRAY_TYPE_EXT" value="0x807B"/>
 		<token name="GL_VERTEX_ARRAY_STRIDE_EXT" value="0x807C"/>
@@ -43,30 +42,6 @@
 				<param type="GLint" name="i"/>
 			</params>
 		</function>
-		<function name="glDrawArraysEXT" return="void">
-			<params>
-				<param type="GLenum" name="mode"/>
-				<param type="GLint" name="first"/>
-				<param type="GLsizei" name="count"/>
-			</params>
-		</function>
-		<function name="glVertexPointerEXT" return="void">
-			<params>
-				<param type="GLint" name="size"/>
-				<param type="GLenum" name="type"/>
-				<param type="GLsizei" name="stride"/>
-				<param type="GLsizei" name="count"/>
-				<param type="const GLvoid*" name="pointer"/>
-			</params>
-		</function>
-		<function name="glNormalPointerEXT" return="void">
-			<params>
-				<param type="GLenum" name="type"/>
-				<param type="GLsizei" name="stride"/>
-				<param type="GLsizei" name="count"/>
-				<param type="const GLvoid*" name="pointer"/>
-			</params>
-		</function>
 		<function name="glColorPointerEXT" return="void">
 			<params>
 				<param type="GLint" name="size"/>
@@ -76,7 +51,35 @@
 				<param type="const GLvoid*" name="pointer"/>
 			</params>
 		</function>
+		<function name="glDrawArraysEXT" return="void">
+			<params>
+				<param type="GLenum" name="mode"/>
+				<param type="GLint" name="first"/>
+				<param type="GLsizei" name="count"/>
+			</params>
+		</function>
+		<function name="glEdgeFlagPointerEXT" return="void">
+			<params>
+				<param type="GLsizei" name="stride"/>
+				<param type="GLsizei" name="count"/>
+				<param type="const GLboolean*" name="pointer"/>
+			</params>
+		</function>
+		<function name="glGetPointervEXT" return="void">
+			<params>
+				<param type="GLenum" name="pname"/>
+				<param type="GLvoid**" name="params"/>
+			</params>
+		</function>
 		<function name="glIndexPointerEXT" return="void">
+			<params>
+				<param type="GLenum" name="type"/>
+				<param type="GLsizei" name="stride"/>
+				<param type="GLsizei" name="count"/>
+				<param type="const GLvoid*" name="pointer"/>
+			</params>
+		</function>
+		<function name="glNormalPointerEXT" return="void">
 			<params>
 				<param type="GLenum" name="type"/>
 				<param type="GLsizei" name="stride"/>
@@ -93,17 +96,13 @@
 				<param type="const GLvoid*" name="pointer"/>
 			</params>
 		</function>
-		<function name="glEdgeFlagPointerEXT" return="void">
+		<function name="glVertexPointerEXT" return="void">
 			<params>
+				<param type="GLint" name="size"/>
+				<param type="GLenum" name="type"/>
 				<param type="GLsizei" name="stride"/>
 				<param type="GLsizei" name="count"/>
-				<param type="const GLboolean*" name="pointer"/>
-			</params>
-		</function>
-		<function name="glGetPointervEXT" return="void">
-			<params>
-				<param type="GLenum" name="pname"/>
-				<param type="GLvoid**" name="params"/>
+				<param type="const GLvoid*" name="pointer"/>
 			</params>
 		</function>
 	</functions>

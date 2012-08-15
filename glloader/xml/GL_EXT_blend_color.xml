@@ -2,20 +2,20 @@
 
 <gl_extension name="GL_EXT_blend_color" reg_no="2">
 	<tokens>
-		<token name="GL_BLEND_COLOR_EXT" value="0x8005"/>
 		<token name="GL_CONSTANT_COLOR_EXT" value="0x8001"/>
 		<token name="GL_ONE_MINUS_CONSTANT_COLOR_EXT" value="0x8002"/>
 		<token name="GL_CONSTANT_ALPHA_EXT" value="0x8003"/>
 		<token name="GL_ONE_MINUS_CONSTANT_ALPHA_EXT" value="0x8004"/>
+		<token name="GL_BLEND_COLOR_EXT" value="0x8005"/>
 	</tokens>
 
 	<functions>
 		<function name="glBlendColorEXT" return="void">
 			<params>
-				<param type="GLclampf" name="red"/>
-				<param type="GLclampf" name="green"/>
-				<param type="GLclampf" name="blue"/>
-				<param type="GLclampf" name="alpha"/>
+				<param type="GLfloat" name="red"/>
+				<param type="GLfloat" name="green"/>
+				<param type="GLfloat" name="blue"/>
+				<param type="GLfloat" name="alpha"/>
 			</params>
 		</function>
 	</functions>

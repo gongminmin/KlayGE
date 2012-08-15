@@ -101,32 +101,159 @@
 	</tokens>
 
 	<functions>
-		<function name="glArrayElement" return="void" link="static">
-			<params>
-				<param type="GLint" name="i"/>
-			</params>
-		</function>
 		<function name="glDrawArrays" return="void" link="static">
 			<params>
 				<param type="GLenum" name="mode"/>
 				<param type="GLint" name="first"/>
 				<param type="GLsizei" name="count"/>
 			</params>
+			<mappings>
+				<mapping from="GL_EXT_vertex_array" name="glDrawArraysEXT"/>
+			</mappings>
 		</function>
-		<function name="glVertexPointer" return="void" link="static">
+		<function name="glDrawElements" return="void" link="static">
 			<params>
-				<param type="GLint" name="size"/>
+				<param type="GLenum" name="mode"/>
+				<param type="GLsizei" name="count"/>
 				<param type="GLenum" name="type"/>
-				<param type="GLsizei" name="stride"/>
-				<param type="const GLvoid*" name="pointer"/>
+				<param type="const GLvoid*" name="indices"/>
 			</params>
 		</function>
-		<function name="glNormalPointer" return="void" link="static">
+		<function name="glGetPointerv" return="void" link="static">
 			<params>
-				<param type="GLenum" name="type"/>
-				<param type="GLsizei" name="stride"/>
-				<param type="const GLvoid*" name="pointer"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLvoid**" name="params"/>
 			</params>
+			<mappings>
+				<mapping from="GL_EXT_vertex_array" name="glGetPointervEXT"/>
+			</mappings>
+		</function>
+		<function name="glPolygonOffset" return="void" link="static">
+			<params>
+				<param type="GLfloat" name="factor"/>
+				<param type="GLfloat" name="units"/>
+			</params>
+		</function>
+		<function name="glCopyTexImage1D" return="void" link="static">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLint" name="level"/>
+				<param type="GLenum" name="internalformat"/>
+				<param type="GLint" name="x"/>
+				<param type="GLint" name="y"/>
+				<param type="GLsizei" name="width"/>
+				<param type="GLint" name="border"/>
+			</params>
+			<mappings>
+				<mapping from="GL_EXT_copy_texture" name="glCopyTexImage1DEXT"/>
+			</mappings>
+		</function>
+		<function name="glCopyTexImage2D" return="void" link="static">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLint" name="level"/>
+				<param type="GLenum" name="internalformat"/>
+				<param type="GLint" name="x"/>
+				<param type="GLint" name="y"/>
+				<param type="GLsizei" name="width"/>
+				<param type="GLsizei" name="height"/>
+				<param type="GLint" name="border"/>
+			</params>
+			<mappings>
+				<mapping from="GL_EXT_copy_texture" name="glCopyTexImage2DEXT"/>
+			</mappings>
+		</function>
+		<function name="glCopyTexSubImage1D" return="void" link="static">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLint" name="level"/>
+				<param type="GLint" name="xoffset"/>
+				<param type="GLint" name="x"/>
+				<param type="GLint" name="y"/>
+				<param type="GLsizei" name="width"/>
+			</params>
+			<mappings>
+				<mapping from="GL_EXT_copy_texture" name="glCopyTexSubImage1DEXT"/>
+			</mappings>
+		</function>
+		<function name="glCopyTexSubImage2D" return="void" link="static">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLint" name="level"/>
+				<param type="GLint" name="xoffset"/>
+				<param type="GLint" name="yoffset"/>
+				<param type="GLint" name="x"/>
+				<param type="GLint" name="y"/>
+				<param type="GLsizei" name="width"/>
+				<param type="GLsizei" name="height"/>
+			</params>
+			<mappings>
+				<mapping from="GL_EXT_copy_texture" name="glCopyTexSubImage2DEXT"/>
+			</mappings>
+		</function>
+		<function name="glTexSubImage1D" return="void" link="static">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLint" name="level"/>
+				<param type="GLint" name="xoffset"/>
+				<param type="GLsizei" name="width"/>
+				<param type="GLenum" name="format"/>
+				<param type="GLenum" name="type"/>
+				<param type="const GLvoid*" name="pixels"/>
+			</params>
+			<mappings>
+				<mapping from="GL_EXT_subtexture" name="glTexSubImage1DEXT"/>
+			</mappings>
+		</function>
+		<function name="glTexSubImage2D" return="void" link="static">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLint" name="level"/>
+				<param type="GLint" name="xoffset"/>
+				<param type="GLint" name="yoffset"/>
+				<param type="GLsizei" name="width"/>
+				<param type="GLsizei" name="height"/>
+				<param type="GLenum" name="format"/>
+				<param type="GLenum" name="type"/>
+				<param type="const GLvoid*" name="pixels"/>
+			</params>
+			<mappings>
+				<mapping from="GL_EXT_subtexture" name="glTexSubImage2DEXT"/>
+			</mappings>
+		</function>
+		<function name="glBindTexture" return="void" link="static">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLuint" name="texture"/>
+			</params>
+			<mappings>
+				<mapping from="GL_EXT_texture_object" name="glBindTextureEXT"/>
+			</mappings>
+		</function>
+		<function name="glDeleteTextures" return="void" link="static">
+			<params>
+				<param type="GLsizei" name="n"/>
+				<param type="const GLuint*" name="textures"/>
+			</params>
+		</function>
+		<function name="glGenTextures" return="void" link="static">
+			<params>
+				<param type="GLsizei" name="n"/>
+				<param type="GLuint*" name="textures"/>
+			</params>
+		</function>
+		<function name="glIsTexture" return="GLboolean" link="static">
+			<params>
+				<param type="GLuint" name="texture"/>
+			</params>
+		</function>
+		<function name="glArrayElement" return="void" link="static">
+			<params>
+				<param type="GLint" name="i"/>
+			</params>
+			<mappings>
+				<mapping from="GL_EXT_vertex_array" name="glArrayElementEXT"/>
+			</mappings>
 		</function>
 		<function name="glColorPointer" return="void" link="static">
 			<params>
@@ -136,7 +263,37 @@
 				<param type="const GLvoid*" name="pointer"/>
 			</params>
 		</function>
+		<function name="glDisableClientState" return="void" link="static">
+			<params>
+				<param type="GLenum" name="array"/>
+			</params>
+		</function>
+		<function name="glEdgeFlagPointer" return="void" link="static">
+			<params>
+				<param type="GLsizei" name="stride"/>
+				<param type="const GLvoid*" name="pointer"/>
+			</params>
+		</function>
+		<function name="glEnableClientState" return="void" link="static">
+			<params>
+				<param type="GLenum" name="array"/>
+			</params>
+		</function>
 		<function name="glIndexPointer" return="void" link="static">
+			<params>
+				<param type="GLenum" name="type"/>
+				<param type="GLsizei" name="stride"/>
+				<param type="const GLvoid*" name="pointer"/>
+			</params>
+		</function>
+		<function name="glInterleavedArrays" return="void" link="static">
+			<params>
+				<param type="GLenum" name="format"/>
+				<param type="GLsizei" name="stride"/>
+				<param type="const GLvoid*" name="pointer"/>
+			</params>
+		</function>
+		<function name="glNormalPointer" return="void" link="static">
 			<params>
 				<param type="GLenum" name="type"/>
 				<param type="GLsizei" name="stride"/>
@@ -151,116 +308,12 @@
 				<param type="const GLvoid*" name="pointer"/>
 			</params>
 		</function>
-		<function name="glEdgeFlagPointer" return="void" link="static">
+		<function name="glVertexPointer" return="void" link="static">
 			<params>
+				<param type="GLint" name="size"/>
+				<param type="GLenum" name="type"/>
 				<param type="GLsizei" name="stride"/>
-				<param type="const GLboolean*" name="pointer"/>
-			</params>
-		</function>
-		<function name="glGetPointerv" return="void" link="static">
-			<params>
-				<param type="GLenum" name="pname"/>
-				<param type="GLvoid **" name="params"/>
-			</params>
-		</function>
-		<function name="glPolygonOffset" return="void" link="static">
-			<params>
-				<param type="GLfloat" name="factor"/>
-				<param type="GLfloat" name="units"/>
-			</params>
-		</function>
-		<function name="glTexSubImage1D" return="void" link="static">
-			<params>
-				<param type="GLenum" name="target"/>
-				<param type="GLint" name="level"/>
-				<param type="GLint" name="xoffset"/>
-				<param type="GLsizei" name="width"/>
-				<param type="GLenum" name="format"/>
-				<param type="GLenum" name="type"/>
-				<param type="const GLvoid*" name="pixels"/>
-			</params>
-		</function>
-		<function name="glTexSubImage2D" return="void" link="static">
-			<params>
-				<param type="GLenum" name="target"/>
-				<param type="GLint" name="level"/>
-				<param type="GLint" name="xoffset"/>
-				<param type="GLint" name="yoffset"/>
-				<param type="GLsizei" name="width"/>
-				<param type="GLsizei" name="height"/>
-				<param type="GLenum" name="format"/>
-				<param type="GLenum" name="type"/>
-				<param type="const GLvoid*" name="pixels"/>
-			</params>
-		</function>
-		<function name="glCopyTexImage1D" return="void" link="static">
-			<params>
-				<param type="GLenum" name="target"/>
-				<param type="GLint" name="level"/>
-				<param type="GLenum" name="internalFormat"/>
-				<param type="GLint" name="x"/>
-				<param type="GLint" name="y"/>
-				<param type="GLsizei" name="width"/>
-				<param type="GLint" name="border"/>
-			</params>
-		</function>
-		<function name="glCopyTexImage2D" return="void" link="static">
-			<params>
-				<param type="GLenum" name="target"/>
-				<param type="GLint" name="level"/>
-				<param type="GLenum" name="internalFormat"/>
-				<param type="GLint" name="x"/>
-				<param type="GLint" name="y"/>
-				<param type="GLsizei" name="width"/>
-				<param type="GLsizei" name="height"/>
-				<param type="GLint" name="border"/>
-			</params>
-		</function>
-		<function name="glCopyTexSubImage1D" return="void" link="static">
-			<params>
-				<param type="GLenum" name="target"/>
-				<param type="GLint" name="level"/>
-				<param type="GLint" name="xoffset"/>
-				<param type="GLint" name="x"/>
-				<param type="GLint" name="y"/>
-				<param type="GLsizei" name="width"/>
-			</params>
-		</function>
-		<function name="glCopyTexSubImage2D" return="void" link="static">
-			<params>
-				<param type="GLenum" name="target"/>
-				<param type="GLint" name="level"/>
-				<param type="GLint" name="xoffset"/>
-				<param type="GLint" name="yoffset"/>
-				<param type="GLint" name="x"/>
-				<param type="GLint" name="y"/>
-				<param type="GLsizei" name="width"/>
-				<param type="GLsizei" name="height"/>
-			</params>
-		</function>
-		<function name="glGenTextures" return="void" link="static">
-			<params>
-				<param type="GLsizei" name="n"/>
-				<param type="GLuint*" name="textures"/>
-			</params>
-		</function>
-		<function name="glDeleteTextures" return="void" link="static">
-			<params>
-				<param type="GLsizei" name="n"/>
-				<param type="const GLuint*" name="textures"/>
-			</params>
-		</function>
-		<function name="glBindTexture" return="void" link="static">
-			<params>
-				<param type="GLenum" name="target"/>
-				<param type="GLuint" name="texture"/>
-			</params>
-		</function>
-		<function name="glPrioritizeTextures" return="void" link="static">
-			<params>
-				<param type="GLsizei" name="n"/>
-				<param type="const GLuint*" name="textures"/>
-				<param type="const GLclampf*" name="priorities"/>
+				<param type="const GLvoid*" name="pointer"/>
 			</params>
 		</function>
 		<function name="glAreTexturesResident" return="GLboolean" link="static">
@@ -270,28 +323,15 @@
 				<param type="GLboolean*" name="residences"/>
 			</params>
 		</function>
-		<function name="glIsTexture" return="GLboolean" link="static">
+		<function name="glPrioritizeTextures" return="void" link="static">
 			<params>
-				<param type="GLuint" name="texture"/>
+				<param type="GLsizei" name="n"/>
+				<param type="const GLuint*" name="textures"/>
+				<param type="const GLfloat*" name="priorities"/>
 			</params>
-		</function>
-		<function name="glEnableClientState" return="void" link="static">
-			<params>
-				<param type="GLenum" name="array"/>
-			</params>
-		</function>
-		<function name="glDisableClientState" return="void" link="static">
-			<params>
-				<param type="GLenum" name="array"/>
-			</params>
-		</function>
-		<function name="glDrawElements" return="void" link="static">
-			<params>
-				<param type="GLenum" name="mode"/>
-				<param type="GLsizei" name="count"/>
-				<param type="GLenum" name="type"/>
-				<param type="const GLvoid*" name="indices"/>
-			</params>
+			<mappings>
+				<mapping from="GL_EXT_texture_object" name="glPrioritizeTexturesEXT"/>
+			</mappings>
 		</function>
 		<function name="glIndexub" return="void" link="static">
 			<params>
@@ -303,18 +343,11 @@
 				<param type="const GLubyte*" name="c"/>
 			</params>
 		</function>
-		<function name="glInterleavedArrays" return="void" link="static">
-			<params>
-				<param type="GLenum" name="format"/>
-				<param type="GLsizei" name="stride"/>
-				<param type="const GLvoid*" name="pointer"/>
-			</params>
-		</function>
+		<function name="glPopClientAttrib" return="void" link="static"/>
 		<function name="glPushClientAttrib" return="void" link="static">
 			<params>
 				<param type="GLbitfield" name="mask"/>
 			</params>
 		</function>
-		<function name="glPopClientAttrib" return="void" link="static"/>
 	</functions>
 </gl_extension>

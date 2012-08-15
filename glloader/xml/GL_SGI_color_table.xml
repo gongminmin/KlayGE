@@ -31,13 +31,11 @@
 				<param type="const GLvoid*" name="table"/>
 			</params>
 		</function>
-		<function name="glCopyColorTableSGI" return="void">
+		<function name="glColorTableParameterfvSGI" return="void">
 			<params>
 				<param type="GLenum" name="target"/>
-				<param type="GLenum" name="internalformat"/>
-				<param type="GLint" name="x"/>
-				<param type="GLint" name="y"/>
-				<param type="GLsizei" name="width"/>
+				<param type="GLenum" name="pname"/>
+				<param type="const GLfloat*" name="params"/>
 			</params>
 		</function>
 		<function name="glColorTableParameterivSGI" return="void">
@@ -47,11 +45,13 @@
 				<param type="const GLint*" name="params"/>
 			</params>
 		</function>
-		<function name="glColorTableParameterfvSGI" return="void">
+		<function name="glCopyColorTableSGI" return="void">
 			<params>
 				<param type="GLenum" name="target"/>
-				<param type="GLenum" name="pname"/>
-				<param type="const GLfloat*" name="params"/>
+				<param type="GLenum" name="internalformat"/>
+				<param type="GLint" name="x"/>
+				<param type="GLint" name="y"/>
+				<param type="GLsizei" name="width"/>
 			</params>
 		</function>
 		<function name="glGetColorTableSGI" return="void">

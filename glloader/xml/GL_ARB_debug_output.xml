@@ -7,9 +7,6 @@
 
 	<tokens>
 		<token name="GL_DEBUG_OUTPUT_SYNCHRONOUS_ARB" value="0x8242"/>
-		<token name="GL_MAX_DEBUG_MESSAGE_LENGTH_ARB" value="0x9143"/>
-		<token name="GL_MAX_DEBUG_LOGGED_MESSAGES_ARB" value="0x9144"/>
-		<token name="GL_DEBUG_LOGGED_MESSAGES_ARB" value="0x9145"/>
 		<token name="GL_DEBUG_NEXT_LOGGED_MESSAGE_LENGTH_ARB" value="0x8243"/>
 		<token name="GL_DEBUG_CALLBACK_FUNCTION_ARB" value="0x8244"/>
 		<token name="GL_DEBUG_CALLBACK_USER_PARAM_ARB" value="0x8245"/>
@@ -25,6 +22,9 @@
 		<token name="GL_DEBUG_TYPE_PORTABILITY_ARB" value="0x824F"/>
 		<token name="GL_DEBUG_TYPE_PERFORMANCE_ARB" value="0x8250"/>
 		<token name="GL_DEBUG_TYPE_OTHER_ARB" value="0x8251"/>
+		<token name="GL_MAX_DEBUG_MESSAGE_LENGTH_ARB" value="0x9143"/>
+		<token name="GL_MAX_DEBUG_LOGGED_MESSAGES_ARB" value="0x9144"/>
+		<token name="GL_DEBUG_LOGGED_MESSAGES_ARB" value="0x9145"/>
 		<token name="GL_DEBUG_SEVERITY_HIGH_ARB" value="0x9146"/>
 		<token name="GL_DEBUG_SEVERITY_MEDIUM_ARB" value="0x9147"/>
 		<token name="GL_DEBUG_SEVERITY_LOW_ARB" value="0x9148"/>
@@ -56,7 +56,7 @@
 				<param type="GLDEBUGPROCARB" name="callback"/>
 				<param type="GLvoid*" name="userParam"/>
 			</params>
-		</function>    
+		</function>
 		<function name="glGetDebugMessageLogARB" return="GLuint">
 			<params>
 				<param type="GLuint" name="count"/>
