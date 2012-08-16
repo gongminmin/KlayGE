@@ -1,0 +1,33 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GL_ARB_shader_storage_buffer_object" reg_no="137">
+	<tokens>
+		<token name="GL_SHADER_STORAGE_BUFFER" value="0x90D2"/>
+		<token name="GL_SHADER_STORAGE_BUFFER_BINDING" value="0x90D3"/>
+		<token name="GL_SHADER_STORAGE_BUFFER_START" value="0x90D4"/>
+		<token name="GL_SHADER_STORAGE_BUFFER_SIZE" value="0x90D5"/>
+		<token name="GL_MAX_VERTEX_SHADER_STORAGE_BLOCKS" value="0x90D6"/>
+		<token name="GL_MAX_GEOMETRY_SHADER_STORAGE_BLOCKS" value="0x90D7"/>
+		<token name="GL_MAX_TESS_CONTROL_SHADER_STORAGE_BLOCKS" value="0x90D8"/>
+		<token name="GL_MAX_TESS_EVALUATION_SHADER_STORAGE_BLOCKS" value="0x90D9"/>
+		<token name="GL_MAX_FRAGMENT_SHADER_STORAGE_BLOCKS" value="0x90DA"/>
+		<token name="GL_MAX_COMPUTE_SHADER_STORAGE_BLOCKS" value="0x90DB"/>
+		<token name="GL_MAX_COMBINED_SHADER_STORAGE_BLOCKS" value="0x90DC"/>
+		<token name="GL_MAX_SHADER_STORAGE_BUFFER_BINDINGS" value="0x90DD"/>
+		<token name="GL_MAX_SHADER_STORAGE_BLOCK_SIZE" value="0x90DE"/>
+		<token name="GL_SHADER_STORAGE_BUFFER_OFFSET_ALIGNMENT" value="0x90DF"/>
+		<token name="GL_SHADER_STORAGE_BARRIER_BIT" value="0x2000"/>
+		<token name="GL_MAX_COMBINED_SHADER_OUTPUT_RESOURCES" value="GL_MAX_COMBINED_IMAGE_UNITS_AND_FRAGMENT_OUTPUTS"/>
+		<token name="GL_MAX_COMBINED_IMAGE_UNITS_AND_FRAGMENT_OUTPUTS" value="0x8F39"/>
+	</tokens>
+
+	<functions>
+		<function name="glShaderStorageBlockBinding" return="void">
+			<params>
+				<param type="GLuint" name="program"/>
+				<param type="GLuint" name="storageBlockIndex"/>
+				<param type="GLuint" name="storageBlockBinding"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

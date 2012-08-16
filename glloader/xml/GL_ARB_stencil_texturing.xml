@@ -1,0 +1,7 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GL_ARB_stencil_texturing" reg_no="138">
+	<tokens>
+		<token name="GL_DEPTH_STENCIL_TEXTURE_MODE" value="0x90EA"/>
+	</tokens>
+</gl_extension>

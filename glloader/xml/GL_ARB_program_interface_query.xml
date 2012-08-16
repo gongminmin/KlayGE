@@ -1,0 +1,110 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GL_ARB_program_interface_query" reg_no="134">
+	<tokens>
+		<token name="GL_UNIFORM" value="0x92E1"/>
+		<token name="GL_UNIFORM_BLOCK" value="0x92E2"/>
+		<token name="GL_PROGRAM_INPUT" value="0x92E3"/>
+		<token name="GL_PROGRAM_OUTPUT" value="0x92E4"/>
+		<token name="GL_BUFFER_VARIABLE" value="0x92E5"/>
+		<token name="GL_SHADER_STORAGE_BLOCK" value="0x92E6"/>
+		<token name="GL_ATOMIC_COUNTER_BUFFER" value="0x92C0"/>
+		<token name="GL_VERTEX_SUBROUTINE" value="0x92E8"/>
+		<token name="GL_TESS_CONTROL_SUBROUTINE" value="0x92E9"/>
+		<token name="GL_TESS_EVALUATION_SUBROUTINE" value="0x92EA"/>
+		<token name="GL_GEOMETRY_SUBROUTINE" value="0x92EB"/>
+		<token name="GL_FRAGMENT_SUBROUTINE" value="0x92EC"/>
+		<token name="GL_COMPUTE_SUBROUTINE" value="0x92ED"/>
+		<token name="GL_VERTEX_SUBROUTINE_UNIFORM" value="0x92EE"/>
+		<token name="GL_TESS_CONTROL_SUBROUTINE_UNIFORM" value="0x92EF"/>
+		<token name="GL_TESS_EVALUATION_SUBROUTINE_UNIFORM" value="0x92F0"/>
+		<token name="GL_GEOMETRY_SUBROUTINE_UNIFORM" value="0x92F1"/>
+		<token name="GL_FRAGMENT_SUBROUTINE_UNIFORM" value="0x92F2"/>
+		<token name="GL_COMPUTE_SUBROUTINE_UNIFORM" value="0x92F3"/>
+		<token name="GL_TRANSFORM_FEEDBACK_VARYING" value="0x92F4"/>
+		<token name="GL_ACTIVE_RESOURCES" value="0x92F5"/>
+		<token name="GL_MAX_NAME_LENGTH" value="0x92F6"/>
+		<token name="GL_MAX_NUM_ACTIVE_VARIABLES" value="0x92F7"/>
+		<token name="GL_MAX_NUM_COMPATIBLE_SUBROUTINES" value="0x92F8"/>
+		<token name="GL_NAME_LENGTH" value="0x92F9"/>
+		<token name="GL_TYPE" value="0x92FA"/>
+		<token name="GL_ARRAY_SIZE" value="0x92FB"/>
+		<token name="GL_OFFSET" value="0x92FC"/>
+		<token name="GL_BLOCK_INDEX" value="0x92FD"/>
+		<token name="GL_ARRAY_STRIDE" value="0x92FE"/>
+		<token name="GL_MATRIX_STRIDE" value="0x92FF"/>
+		<token name="GL_IS_ROW_MAJOR" value="0x9300"/>
+		<token name="GL_ATOMIC_COUNTER_BUFFER_INDEX" value="0x9301"/>
+		<token name="GL_BUFFER_BINDING" value="0x9302"/>
+		<token name="GL_BUFFER_DATA_SIZE" value="0x9303"/>
+		<token name="GL_NUM_ACTIVE_VARIABLES" value="0x9304"/>
+		<token name="GL_ACTIVE_VARIABLES" value="0x9305"/>
+		<token name="GL_REFERENCED_BY_VERTEX_SHADER" value="0x9306"/>
+		<token name="GL_REFERENCED_BY_TESS_CONTROL_SHADER" value="0x9307"/>
+		<token name="GL_REFERENCED_BY_TESS_EVALUATION_SHADER" value="0x9308"/>
+		<token name="GL_REFERENCED_BY_GEOMETRY_SHADER" value="0x9309"/>
+		<token name="GL_REFERENCED_BY_FRAGMENT_SHADER" value="0x930A"/>
+		<token name="GL_REFERENCED_BY_COMPUTE_SHADER" value="0x930B"/>
+		<token name="GL_TOP_LEVEL_ARRAY_SIZE" value="0x930C"/>
+		<token name="GL_TOP_LEVEL_ARRAY_STRIDE" value="0x930D"/>
+		<token name="GL_LOCATION" value="0x930E"/>
+		<token name="GL_LOCATION_INDEX" value="0x930F"/>
+		<token name="GL_IS_PER_PATCH" value="0x92E7"/>
+		<token name="GL_NUM_COMPATIBLE_SUBROUTINES" value="0x8E4A"/>
+		<token name="GL_COMPATIBLE_SUBROUTINES" value="0x8E4B"/>
+	</tokens>
+
+	<functions>
+		<function name="glGetProgramInterfaceiv" return="void">
+			<params>
+				<param type="GLuint" name="program"/>
+				<param type="GLenum" name="programInterface"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLint*" name="params"/>
+			</params>
+		</function>
+		<function name="glGetProgramResourceIndex" return="GLuint">
+			<params>
+				<param type="GLuint" name="program"/>
+				<param type="GLenum" name="programInterface"/>
+				<param type="const GLchar*" name="name"/>
+			</params>
+		</function>
+		<function name="glGetProgramResourceName" return="void">
+			<params>
+				<param type="GLuint" name="program"/>
+				<param type="GLenum" name="programInterface"/>
+				<param type="GLuint" name="index"/>
+				<param type="GLsizei" name="bufSize"/>
+				<param type="GLsizei*" name="length"/>
+				<param type="GLchar*" name="name"/>
+			</params>
+		</function>
+		<function name="glGetProgramResourceiv" return="void">
+			<params>
+				<param type="GLuint" name="program"/>
+				<param type="GLenum" name="programInterface"/>
+				<param type="GLuint" name="index"/>
+				<param type="GLsizei" name="propCount"/>
+				<param type="const GLenum*" name="props"/>
+				<param type="GLsizei" name="bufSize"/>
+				<param type="GLsizei*" name="length"/>
+				<param type="GLint*" name="params"/>
+			</params>
+		</function>
+		<function name="glGetProgramResourceLocation" return="GLint">
+			<params>
+				<param type="GLuint" name="program"/>
+				<param type="GLenum" name="programInterface"/>
+				<param type="const GLchar*" name="name"/>
+			</params>
+		</function>
+		<function name="glGetProgramResourceLocationIndex" return="GLint">
+			<params>
+				<param type="GLuint" name="program"/>
+				<param type="GLenum" name="programInterface"/>
+				<param type="const GLchar*" name="name"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

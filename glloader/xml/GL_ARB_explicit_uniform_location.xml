@@ -1,0 +1,7 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GL_ARB_explicit_uniform_location" reg_no="128">
+	<tokens>
+		<token name="GL_MAX_UNIFORM_LOCATIONS" value="0x826E"/>
+	</tokens>
+</gl_extension>

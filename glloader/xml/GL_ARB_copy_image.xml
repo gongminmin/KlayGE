@@ -1,8 +1,8 @@
 <?xml version='1.0'?>
 
-<gl_extension name="GL_NV_copy_image" reg_no="376" prefer="GL_ARB_copy_image">
+<gl_extension name="GL_ARB_copy_image" reg_no="123">
 	<functions>
-		<function name="glCopyImageSubDataNV" return="void">
+		<function name="glCopyImageSubData" return="void">
 			<params>
 				<param type="GLuint" name="srcName"/>
 				<param type="GLenum" name="srcTarget"/>
@@ -16,10 +16,13 @@
 				<param type="GLint" name="dstX"/>
 				<param type="GLint" name="dstY"/>
 				<param type="GLint" name="dstZ"/>
-				<param type="GLsizei" name="width"/>
-				<param type="GLsizei" name="height"/>
-				<param type="GLsizei" name="depth"/>
+				<param type="GLsizei" name="srcWidth"/>
+				<param type="GLsizei" name="srcHeight"/>
+				<param type="GLsizei" name="srcDepth"/>
 			</params>
+			<mappings>
+				<mapping from="GL_NV_copy_image" name="glCopyImageSubDataNV"/>
+			</mappings>
 		</function>
 	</functions>
 </gl_extension>

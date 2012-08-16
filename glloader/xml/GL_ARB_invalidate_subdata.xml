@@ -1,0 +1,54 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GL_ARB_invalidate_subdata" reg_no="132">
+	<functions>
+		<function name="glInvalidateTexSubImage" return="void">
+			<params>
+				<param type="GLuint" name="texture"/>
+				<param type="GLint" name="level"/>
+				<param type="GLint" name="xoffset"/>
+				<param type="GLint" name="yoffset"/>
+				<param type="GLint" name="zoffset"/>
+				<param type="GLsizei" name="width"/>
+				<param type="GLsizei" name="height"/>
+				<param type="GLsizei" name="depth"/>
+			</params>
+		</function>
+		<function name="glInvalidateTexImage" return="void">
+			<params>
+				<param type="GLuint" name="texture"/>
+				<param type="GLint" name="level"/>
+			</params>
+		</function>
+		<function name="glInvalidateBufferSubData" return="void">
+			<params>
+				<param type="GLuint" name="buffer"/>
+				<param type="GLintptr" name="offset"/>
+				<param type="GLsizeiptr" name="length"/>
+			</params>
+		</function>
+		<function name="glInvalidateBufferData" return="void">
+			<params>
+				<param type="GLuint" name="buffer"/>
+			</params>
+		</function>
+		<function name="glInvalidateFramebuffer" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLsizei" name="numAttachments"/>
+				<param type="const GLenum*" name="attachments"/>
+			</params>
+		</function>
+		<function name="glInvalidateSubFramebuffer" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLsizei" name="numAttachments"/>
+				<param type="const GLenum*" name="attachments"/>
+				<param type="GLint" name="x"/>
+				<param type="GLint" name="y"/>
+				<param type="GLsizei" name="width"/>
+				<param type="GLsizei" name="height"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

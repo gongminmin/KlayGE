@@ -1,0 +1,297 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GL_VERSION_4_3">
+	<tokens>
+		<token name="GL_NUM_SHADING_LANGUAGE_VERSIONS" value="0x82E9"/>
+		<token name="GL_VERTEX_ATTRIB_ARRAY_LONG" value="0x874E"/>
+		<token name="GL_COMPRESSED_RGB8_ETC2" value="0x9274"/>
+		<token name="GL_COMPRESSED_SRGB8_ETC2" value="0x9275"/>
+		<token name="GL_COMPRESSED_RGB8_PUNCHTHROUGH_ALPHA1_ETC2" value="0x9276"/>
+		<token name="GL_COMPRESSED_SRGB8_PUNCHTHROUGH_ALPHA1_ETC2" value="0x9277"/>
+		<token name="GL_COMPRESSED_RGBA8_ETC2_EAC" value="0x9278"/>
+		<token name="GL_COMPRESSED_SRGB8_ALPHA8_ETC2_EAC" value="0x9279"/>
+		<token name="GL_COMPRESSED_R11_EAC" value="0x9270"/>
+		<token name="GL_COMPRESSED_SIGNED_R11_EAC" value="0x9271"/>
+		<token name="GL_COMPRESSED_RG11_EAC" value="0x9272"/>
+		<token name="GL_COMPRESSED_SIGNED_RG11_EAC" value="0x9273"/>
+		<token name="GL_PRIMITIVE_RESTART_FIXED_INDEX" value="0x8D69"/>
+		<token name="GL_ANY_SAMPLES_PASSED_CONSERVATIVE" value="0x8D6A"/>
+		<token name="GL_MAX_ELEMENT_INDEX" value="0x8D6B"/>
+		<token name="GL_COMPUTE_SHADER" value="0x91B9"/>
+		<token name="GL_MAX_COMPUTE_UNIFORM_BLOCKS" value="0x91BB"/>
+		<token name="GL_MAX_COMPUTE_TEXTURE_IMAGE_UNITS" value="0x91BC"/>
+		<token name="GL_MAX_COMPUTE_IMAGE_UNIFORMS" value="0x91BD"/>
+		<token name="GL_MAX_COMPUTE_SHARED_MEMORY_SIZE" value="0x8262"/>
+		<token name="GL_MAX_COMPUTE_UNIFORM_COMPONENTS" value="0x8263"/>
+		<token name="GL_MAX_COMPUTE_ATOMIC_COUNTER_BUFFERS" value="0x8264"/>
+		<token name="GL_MAX_COMPUTE_ATOMIC_COUNTERS" value="0x8265"/>
+		<token name="GL_MAX_COMBINED_COMPUTE_UNIFORM_COMPONENTS" value="0x8266"/>
+		<token name="GL_MAX_COMPUTE_LOCAL_INVOCATIONS" value="0x90EB"/>
+		<token name="GL_MAX_COMPUTE_WORK_GROUP_COUNT" value="0x91BE"/>
+		<token name="GL_MAX_COMPUTE_WORK_GROUP_SIZE" value="0x91BF"/>
+		<token name="GL_COMPUTE_LOCAL_WORK_SIZE" value="0x8267"/>
+		<token name="GL_UNIFORM_BLOCK_REFERENCED_BY_COMPUTE_SHADER" value="0x90EC"/>
+		<token name="GL_ATOMIC_COUNTER_BUFFER_REFERENCED_BY_COMPUTE_SHADER" value="0x90ED"/>
+		<token name="GL_DISPATCH_INDIRECT_BUFFER" value="0x90EE"/>
+		<token name="GL_DISPATCH_INDIRECT_BUFFER_BINDING" value="0x90EF"/>
+		<token name="GL_DEBUG_OUTPUT_SYNCHRONOUS" value="0x8242"/>
+		<token name="GL_DEBUG_NEXT_LOGGED_MESSAGE_LENGTH" value="0x8243"/>
+		<token name="GL_DEBUG_CALLBACK_FUNCTION" value="0x8244"/>
+		<token name="GL_DEBUG_CALLBACK_USER_PARAM" value="0x8245"/>
+		<token name="GL_DEBUG_SOURCE_API" value="0x8246"/>
+		<token name="GL_DEBUG_SOURCE_WINDOW_SYSTEM" value="0x8247"/>
+		<token name="GL_DEBUG_SOURCE_SHADER_COMPILER" value="0x8248"/>
+		<token name="GL_DEBUG_SOURCE_THIRD_PARTY" value="0x8249"/>
+		<token name="GL_DEBUG_SOURCE_APPLICATION" value="0x824A"/>
+		<token name="GL_DEBUG_SOURCE_OTHER" value="0x824B"/>
+		<token name="GL_DEBUG_TYPE_ERROR" value="0x824C"/>
+		<token name="GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR" value="0x824D"/>
+		<token name="GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR" value="0x824E"/>
+		<token name="GL_DEBUG_TYPE_PORTABILITY" value="0x824F"/>
+		<token name="GL_DEBUG_TYPE_PERFORMANCE" value="0x8250"/>
+		<token name="GL_DEBUG_TYPE_OTHER" value="0x8251"/>
+		<token name="GL_MAX_DEBUG_MESSAGE_LENGTH" value="0x9143"/>
+		<token name="GL_MAX_DEBUG_LOGGED_MESSAGES" value="0x9144"/>
+		<token name="GL_DEBUG_LOGGED_MESSAGES" value="0x9145"/>
+		<token name="GL_DEBUG_SEVERITY_HIGH" value="0x9146"/>
+		<token name="GL_DEBUG_SEVERITY_MEDIUM" value="0x9147"/>
+		<token name="GL_DEBUG_SEVERITY_LOW" value="0x9148"/>
+		<token name="GL_DEBUG_TYPE_MARKER" value="0x8268"/>
+		<token name="GL_DEBUG_TYPE_PUSH_GROUP" value="0x8269"/>
+		<token name="GL_DEBUG_TYPE_POP_GROUP" value="0x826A"/>
+		<token name="GL_DEBUG_SEVERITY_NOTIFICATION" value="0x826B"/>
+		<token name="GL_MAX_DEBUG_GROUP_STACK_DEPTH" value="0x826C"/>
+		<token name="GL_DEBUG_GROUP_STACK_DEPTH" value="0x826D"/>
+		<token name="GL_BUFFER" value="0x82E0"/>
+		<token name="GL_SHADER" value="0x82E1"/>
+		<token name="GL_PROGRAM" value="0x82E2"/>
+		<token name="GL_QUERY" value="0x82E3"/>
+		<token name="GL_PROGRAM_PIPELINE" value="0x82E4"/>
+		<token name="GL_SAMPLER" value="0x82E6"/>
+		<token name="GL_DISPLAY_LIST" value="0x82E7"/>
+		<token name="GL_MAX_LABEL_LENGTH" value="0x82E8"/>
+		<token name="GL_DEBUG_OUTPUT" value="0x92E0"/>
+		<token name="GL_CONTEXT_FLAG_DEBUG_BIT" value="0x00000002"/>
+		<token name="GL_STACK_UNDERFLOW" value="0x0504"/>
+		<token name="GL_STACK_OVERFLOW" value="0x0503"/>
+		<token name="GL_MAX_UNIFORM_LOCATIONS" value="0x826E"/>
+		<token name="GL_FRAMEBUFFER_DEFAULT_WIDTH" value="0x9310"/>
+		<token name="GL_FRAMEBUFFER_DEFAULT_HEIGHT" value="0x9311"/>
+		<token name="GL_FRAMEBUFFER_DEFAULT_LAYERS" value="0x9312"/>
+		<token name="GL_FRAMEBUFFER_DEFAULT_SAMPLES" value="0x9313"/>
+		<token name="GL_FRAMEBUFFER_DEFAULT_FIXED_SAMPLE_LOCATIONS" value="0x9314"/>
+		<token name="GL_MAX_FRAMEBUFFER_WIDTH" value="0x9315"/>
+		<token name="GL_MAX_FRAMEBUFFER_HEIGHT" value="0x9316"/>
+		<token name="GL_MAX_FRAMEBUFFER_LAYERS" value="0x9317"/>
+		<token name="GL_MAX_FRAMEBUFFER_SAMPLES" value="0x9318"/>
+		<token name="GL_INTERNALFORMAT_SUPPORTED" value="0x826F"/>
+		<token name="GL_INTERNALFORMAT_PREFERRED" value="0x8270"/>
+		<token name="GL_INTERNALFORMAT_RED_SIZE" value="0x8271"/>
+		<token name="GL_INTERNALFORMAT_GREEN_SIZE" value="0x8272"/>
+		<token name="GL_INTERNALFORMAT_BLUE_SIZE" value="0x8273"/>
+		<token name="GL_INTERNALFORMAT_ALPHA_SIZE" value="0x8274"/>
+		<token name="GL_INTERNALFORMAT_DEPTH_SIZE" value="0x8275"/>
+		<token name="GL_INTERNALFORMAT_STENCIL_SIZE" value="0x8276"/>
+		<token name="GL_INTERNALFORMAT_SHARED_SIZE" value="0x8277"/>
+		<token name="GL_INTERNALFORMAT_RED_TYPE" value="0x8278"/>
+		<token name="GL_INTERNALFORMAT_GREEN_TYPE" value="0x8279"/>
+		<token name="GL_INTERNALFORMAT_BLUE_TYPE" value="0x827A"/>
+		<token name="GL_INTERNALFORMAT_ALPHA_TYPE" value="0x827B"/>
+		<token name="GL_INTERNALFORMAT_DEPTH_TYPE" value="0x827C"/>
+		<token name="GL_INTERNALFORMAT_STENCIL_TYPE" value="0x827D"/>
+		<token name="GL_MAX_WIDTH" value="0x827E"/>
+		<token name="GL_MAX_HEIGHT" value="0x827F"/>
+		<token name="GL_MAX_DEPTH" value="0x8280"/>
+		<token name="GL_MAX_LAYERS" value="0x8281"/>
+		<token name="GL_MAX_COMBINED_DIMENSIONS" value="0x8282"/>
+		<token name="GL_COLOR_COMPONENTS" value="0x8283"/>
+		<token name="GL_DEPTH_COMPONENTS" value="0x8284"/>
+		<token name="GL_STENCIL_COMPONENTS" value="0x8285"/>
+		<token name="GL_COLOR_RENDERABLE" value="0x8286"/>
+		<token name="GL_DEPTH_RENDERABLE" value="0x8287"/>
+		<token name="GL_STENCIL_RENDERABLE" value="0x8288"/>
+		<token name="GL_FRAMEBUFFER_RENDERABLE" value="0x8289"/>
+		<token name="GL_FRAMEBUFFER_RENDERABLE_LAYERED" value="0x828A"/>
+		<token name="GL_FRAMEBUFFER_BLEND" value="0x828B"/>
+		<token name="GL_READ_PIXELS" value="0x828C"/>
+		<token name="GL_READ_PIXELS_FORMAT" value="0x828D"/>
+		<token name="GL_READ_PIXELS_TYPE" value="0x828E"/>
+		<token name="GL_TEXTURE_IMAGE_FORMAT" value="0x828F"/>
+		<token name="GL_TEXTURE_IMAGE_TYPE" value="0x8290"/>
+		<token name="GL_GET_TEXTURE_IMAGE_FORMAT" value="0x8291"/>
+		<token name="GL_GET_TEXTURE_IMAGE_TYPE" value="0x8292"/>
+		<token name="GL_MIPMAP" value="0x8293"/>
+		<token name="GL_MANUAL_GENERATE_MIPMAP" value="0x8294"/>
+		<token name="GL_AUTO_GENERATE_MIPMAP" value="0x8295"/>
+		<token name="GL_COLOR_ENCODING" value="0x8296"/>
+		<token name="GL_SRGB_READ" value="0x8297"/>
+		<token name="GL_SRGB_WRITE" value="0x8298"/>
+		<token name="GL_FILTER" value="0x829A"/>
+		<token name="GL_VERTEX_TEXTURE" value="0x829B"/>
+		<token name="GL_TESS_CONTROL_TEXTURE" value="0x829C"/>
+		<token name="GL_TESS_EVALUATION_TEXTURE" value="0x829D"/>
+		<token name="GL_GEOMETRY_TEXTURE" value="0x829E"/>
+		<token name="GL_FRAGMENT_TEXTURE" value="0x829F"/>
+		<token name="GL_COMPUTE_TEXTURE" value="0x82A0"/>
+		<token name="GL_TEXTURE_SHADOW" value="0x82A1"/>
+		<token name="GL_TEXTURE_GATHER" value="0x82A2"/>
+		<token name="GL_TEXTURE_GATHER_SHADOW" value="0x82A3"/>
+		<token name="GL_SHADER_IMAGE_LOAD" value="0x82A4"/>
+		<token name="GL_SHADER_IMAGE_STORE" value="0x82A5"/>
+		<token name="GL_SHADER_IMAGE_ATOMIC" value="0x82A6"/>
+		<token name="GL_IMAGE_TEXEL_SIZE" value="0x82A7"/>
+		<token name="GL_IMAGE_COMPATIBILITY_CLASS" value="0x82A8"/>
+		<token name="GL_IMAGE_PIXEL_FORMAT" value="0x82A9"/>
+		<token name="GL_IMAGE_PIXEL_TYPE" value="0x82AA"/>
+		<token name="GL_SIMULTANEOUS_TEXTURE_AND_DEPTH_TEST" value="0x82AC"/>
+		<token name="GL_SIMULTANEOUS_TEXTURE_AND_STENCIL_TEST" value="0x82AD"/>
+		<token name="GL_SIMULTANEOUS_TEXTURE_AND_DEPTH_WRITE" value="0x82AE"/>
+		<token name="GL_SIMULTANEOUS_TEXTURE_AND_STENCIL_WRITE" value="0x82AF"/>
+		<token name="GL_TEXTURE_COMPRESSED_BLOCK_WIDTH" value="0x82B1"/>
+		<token name="GL_TEXTURE_COMPRESSED_BLOCK_HEIGHT" value="0x82B2"/>
+		<token name="GL_TEXTURE_COMPRESSED_BLOCK_SIZE" value="0x82B3"/>
+		<token name="GL_CLEAR_BUFFER" value="0x82B4"/>
+		<token name="GL_TEXTURE_VIEW" value="0x82B5"/>
+		<token name="GL_VIEW_COMPATIBILITY_CLASS" value="0x82B6"/>
+		<token name="GL_FULL_SUPPORT" value="0x82B7"/>
+		<token name="GL_CAVEAT_SUPPORT" value="0x82B8"/>
+		<token name="GL_IMAGE_CLASS_4_X_32" value="0x82B9"/>
+		<token name="GL_IMAGE_CLASS_2_X_32" value="0x82BA"/>
+		<token name="GL_IMAGE_CLASS_1_X_32" value="0x82BB"/>
+		<token name="GL_IMAGE_CLASS_4_X_16" value="0x82BC"/>
+		<token name="GL_IMAGE_CLASS_2_X_16" value="0x82BD"/>
+		<token name="GL_IMAGE_CLASS_1_X_16" value="0x82BE"/>
+		<token name="GL_IMAGE_CLASS_4_X_8" value="0x82BF"/>
+		<token name="GL_IMAGE_CLASS_2_X_8" value="0x82C0"/>
+		<token name="GL_IMAGE_CLASS_1_X_8" value="0x82C1"/>
+		<token name="GL_IMAGE_CLASS_11_11_10" value="0x82C2"/>
+		<token name="GL_IMAGE_CLASS_10_10_10_2" value="0x82C3"/>
+		<token name="GL_VIEW_CLASS_128_BITS" value="0x82C4"/>
+		<token name="GL_VIEW_CLASS_96_BITS" value="0x82C5"/>
+		<token name="GL_VIEW_CLASS_64_BITS" value="0x82C6"/>
+		<token name="GL_VIEW_CLASS_48_BITS" value="0x82C7"/>
+		<token name="GL_VIEW_CLASS_32_BITS" value="0x82C8"/>
+		<token name="GL_VIEW_CLASS_24_BITS" value="0x82C9"/>
+		<token name="GL_VIEW_CLASS_16_BITS" value="0x82CA"/>
+		<token name="GL_VIEW_CLASS_8_BITS" value="0x82CB"/>
+		<token name="GL_VIEW_CLASS_S3TC_DXT1_RGB" value="0x82CC"/>
+		<token name="GL_VIEW_CLASS_S3TC_DXT1_RGBA" value="0x82CD"/>
+		<token name="GL_VIEW_CLASS_S3TC_DXT3_RGBA" value="0x82CE"/>
+		<token name="GL_VIEW_CLASS_S3TC_DXT5_RGBA" value="0x82CF"/>
+		<token name="GL_VIEW_CLASS_RGTC1_RED" value="0x82D0"/>
+		<token name="GL_VIEW_CLASS_RGTC2_RG" value="0x82D1"/>
+		<token name="GL_VIEW_CLASS_BPTC_UNORM" value="0x82D2"/>
+		<token name="GL_VIEW_CLASS_BPTC_FLOAT" value="0x82D3"/>
+		<token name="GL_UNIFORM" value="0x92E1"/>
+		<token name="GL_UNIFORM_BLOCK" value="0x92E2"/>
+		<token name="GL_PROGRAM_INPUT" value="0x92E3"/>
+		<token name="GL_PROGRAM_OUTPUT" value="0x92E4"/>
+		<token name="GL_BUFFER_VARIABLE" value="0x92E5"/>
+		<token name="GL_SHADER_STORAGE_BLOCK" value="0x92E6"/>
+		<token name="GL_VERTEX_SUBROUTINE" value="0x92E8"/>
+		<token name="GL_TESS_CONTROL_SUBROUTINE" value="0x92E9"/>
+		<token name="GL_TESS_EVALUATION_SUBROUTINE" value="0x92EA"/>
+		<token name="GL_GEOMETRY_SUBROUTINE" value="0x92EB"/>
+		<token name="GL_FRAGMENT_SUBROUTINE" value="0x92EC"/>
+		<token name="GL_COMPUTE_SUBROUTINE" value="0x92ED"/>
+		<token name="GL_VERTEX_SUBROUTINE_UNIFORM" value="0x92EE"/>
+		<token name="GL_TESS_CONTROL_SUBROUTINE_UNIFORM" value="0x92EF"/>
+		<token name="GL_TESS_EVALUATION_SUBROUTINE_UNIFORM" value="0x92F0"/>
+		<token name="GL_GEOMETRY_SUBROUTINE_UNIFORM" value="0x92F1"/>
+		<token name="GL_FRAGMENT_SUBROUTINE_UNIFORM" value="0x92F2"/>
+		<token name="GL_COMPUTE_SUBROUTINE_UNIFORM" value="0x92F3"/>
+		<token name="GL_TRANSFORM_FEEDBACK_VARYING" value="0x92F4"/>
+		<token name="GL_ACTIVE_RESOURCES" value="0x92F5"/>
+		<token name="GL_MAX_NAME_LENGTH" value="0x92F6"/>
+		<token name="GL_MAX_NUM_ACTIVE_VARIABLES" value="0x92F7"/>
+		<token name="GL_MAX_NUM_COMPATIBLE_SUBROUTINES" value="0x92F8"/>
+		<token name="GL_NAME_LENGTH" value="0x92F9"/>
+		<token name="GL_TYPE" value="0x92FA"/>
+		<token name="GL_ARRAY_SIZE" value="0x92FB"/>
+		<token name="GL_OFFSET" value="0x92FC"/>
+		<token name="GL_BLOCK_INDEX" value="0x92FD"/>
+		<token name="GL_ARRAY_STRIDE" value="0x92FE"/>
+		<token name="GL_MATRIX_STRIDE" value="0x92FF"/>
+		<token name="GL_IS_ROW_MAJOR" value="0x9300"/>
+		<token name="GL_ATOMIC_COUNTER_BUFFER_INDEX" value="0x9301"/>
+		<token name="GL_BUFFER_BINDING" value="0x9302"/>
+		<token name="GL_BUFFER_DATA_SIZE" value="0x9303"/>
+		<token name="GL_NUM_ACTIVE_VARIABLES" value="0x9304"/>
+		<token name="GL_ACTIVE_VARIABLES" value="0x9305"/>
+		<token name="GL_REFERENCED_BY_VERTEX_SHADER" value="0x9306"/>
+		<token name="GL_REFERENCED_BY_TESS_CONTROL_SHADER" value="0x9307"/>
+		<token name="GL_REFERENCED_BY_TESS_EVALUATION_SHADER" value="0x9308"/>
+		<token name="GL_REFERENCED_BY_GEOMETRY_SHADER" value="0x9309"/>
+		<token name="GL_REFERENCED_BY_FRAGMENT_SHADER" value="0x930A"/>
+		<token name="GL_REFERENCED_BY_COMPUTE_SHADER" value="0x930B"/>
+		<token name="GL_TOP_LEVEL_ARRAY_SIZE" value="0x930C"/>
+		<token name="GL_TOP_LEVEL_ARRAY_STRIDE" value="0x930D"/>
+		<token name="GL_LOCATION" value="0x930E"/>
+		<token name="GL_LOCATION_INDEX" value="0x930F"/>
+		<token name="GL_IS_PER_PATCH" value="0x92E7"/>
+		<token name="GL_SHADER_STORAGE_BUFFER" value="0x90D2"/>
+		<token name="GL_SHADER_STORAGE_BUFFER_BINDING" value="0x90D3"/>
+		<token name="GL_SHADER_STORAGE_BUFFER_START" value="0x90D4"/>
+		<token name="GL_SHADER_STORAGE_BUFFER_SIZE" value="0x90D5"/>
+		<token name="GL_MAX_VERTEX_SHADER_STORAGE_BLOCKS" value="0x90D6"/>
+		<token name="GL_MAX_GEOMETRY_SHADER_STORAGE_BLOCKS" value="0x90D7"/>
+		<token name="GL_MAX_TESS_CONTROL_SHADER_STORAGE_BLOCKS" value="0x90D8"/>
+		<token name="GL_MAX_TESS_EVALUATION_SHADER_STORAGE_BLOCKS" value="0x90D9"/>
+		<token name="GL_MAX_FRAGMENT_SHADER_STORAGE_BLOCKS" value="0x90DA"/>
+		<token name="GL_MAX_COMPUTE_SHADER_STORAGE_BLOCKS" value="0x90DB"/>
+		<token name="GL_MAX_COMBINED_SHADER_STORAGE_BLOCKS" value="0x90DC"/>
+		<token name="GL_MAX_SHADER_STORAGE_BUFFER_BINDINGS" value="0x90DD"/>
+		<token name="GL_MAX_SHADER_STORAGE_BLOCK_SIZE" value="0x90DE"/>
+		<token name="GL_SHADER_STORAGE_BUFFER_OFFSET_ALIGNMENT" value="0x90DF"/>
+		<token name="GL_SHADER_STORAGE_BARRIER_BIT" value="0x2000"/>
+		<token name="GL_MAX_COMBINED_SHADER_OUTPUT_RESOURCES" value="GL_MAX_COMBINED_IMAGE_UNITS_AND_FRAGMENT_OUTPUTS"/>
+		<token name="GL_DEPTH_STENCIL_TEXTURE_MODE" value="0x90EA"/>
+		<token name="GL_TEXTURE_BUFFER_OFFSET" value="0x919D"/>
+		<token name="GL_TEXTURE_BUFFER_SIZE" value="0x919E"/>
+		<token name="GL_TEXTURE_BUFFER_OFFSET_ALIGNMENT" value="0x919F"/>
+		<token name="GL_TEXTURE_VIEW_MIN_LEVEL" value="0x82DB"/>
+		<token name="GL_TEXTURE_VIEW_NUM_LEVELS" value="0x82DC"/>
+		<token name="GL_TEXTURE_VIEW_MIN_LAYER" value="0x82DD"/>
+		<token name="GL_TEXTURE_VIEW_NUM_LAYERS" value="0x82DE"/>
+		<token name="GL_TEXTURE_IMMUTABLE_LEVELS" value="0x82DF"/>
+		<token name="GL_VERTEX_ATTRIB_BINDING" value="0x82D4"/>
+		<token name="GL_VERTEX_ATTRIB_RELATIVE_OFFSET" value="0x82D5"/>
+		<token name="GL_VERTEX_BINDING_DIVISOR" value="0x82D6"/>
+		<token name="GL_VERTEX_BINDING_OFFSET" value="0x82D7"/>
+		<token name="GL_VERTEX_BINDING_STRIDE" value="0x82D8"/>
+		<token name="GL_MAX_VERTEX_ATTRIB_RELATIVE_OFFSET" value="0x82D9"/>
+		<token name="GL_MAX_VERTEX_ATTRIB_BINDINGS" value="0x82DA"/>
+	</tokens>
+
+	<additionals>
+		<ext name="GL_ARB_arrays_of_arrays"/>
+		<ext name="GL_ARB_ES3_compatibility"/>
+		<ext name="GL_ARB_clear_buffer_object"/>
+		<ext name="GL_ARB_compute_shader"/>
+		<one_of>
+			<ext name="GL_ARB_copy_image"/>
+			<ext name="GL_NV_copy_image"/>
+		</one_of>
+		<ext name="GL_KHR_debug"/>
+		<ext name="GL_ARB_debug_output"/>
+		<ext name="GL_ARB_explicit_uniform_location"/>
+		<ext name="GL_ARB_fragment_layer_viewport"/>
+		<ext name="GL_ARB_framebuffer_no_attachments"/>
+		<ext name="GL_ARB_internalformat_query2"/>
+		<ext name="GL_ARB_invalidate_subdata"/>
+		<one_of>
+			<ext name="GL_ARB_multi_draw_indirect"/>
+			<ext name="GL_AMD_multi_draw_indirect"/>
+		</one_of>
+		<ext name="GL_ARB_program_interface_query"/>
+		<ext name="GL_ARB_robust_buffer_access_behavior"/>
+		<ext name="GL_ARB_shader_image_size"/>
+		<ext name="GL_ARB_shader_storage_buffer_object"/>
+		<ext name="GL_ARB_stencil_texturing"/>
+		<ext name="GL_ARB_texture_buffer_range"/>
+		<ext name="GL_ARB_texture_query_levels"/>
+		<ext name="GL_ARB_texture_storage_multisample"/>
+		<ext name="GL_ARB_texture_view"/>
+		<ext name="GL_ARB_vertex_attrib_binding"/>
+	</additionals>
+</gl_extension>

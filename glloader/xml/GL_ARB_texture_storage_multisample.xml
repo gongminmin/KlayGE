@@ -1,0 +1,50 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GL_ARB_texture_storage_multisample" reg_no="141">
+	<functions>
+		<function name="glTexStorage2DMultisample" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLsizei" name="samples"/>
+				<param type="GLenum" name="internalformat"/>
+				<param type="GLsizei" name="width"/>
+				<param type="GLsizei" name="height"/>
+				<param type="GLboolean" name="fixedsamplelocations"/>
+			</params>
+		</function>
+		<function name="glTexStorage3DMultisample" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLsizei" name="samples"/>
+				<param type="GLenum" name="internalformat"/>
+				<param type="GLsizei" name="width"/>
+				<param type="GLsizei" name="height"/>
+				<param type="GLsizei" name="depth"/>
+				<param type="GLboolean" name="fixedsamplelocations"/>
+			</params>
+		</function>
+		<function name="glTextureStorage2DMultisampleEXT" return="void">
+			<params>
+				<param type="GLuint" name="texture"/>
+				<param type="GLenum" name="target"/>
+				<param type="GLsizei" name="samples"/>
+				<param type="GLenum" name="internalformat"/>
+				<param type="GLsizei" name="width"/>
+				<param type="GLsizei" name="height"/>
+				<param type="GLboolean" name="fixedsamplelocations"/>
+			</params>
+		</function>
+		<function name="glTextureStorage3DMultisampleEXT" return="void">
+			<params>
+				<param type="GLuint" name="texture"/>
+				<param type="GLenum" name="target"/>
+				<param type="GLsizei" name="samples"/>
+				<param type="GLenum" name="internalformat"/>
+				<param type="GLsizei" name="width"/>
+				<param type="GLsizei" name="height"/>
+				<param type="GLsizei" name="depth"/>
+				<param type="GLboolean" name="fixedsamplelocations"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

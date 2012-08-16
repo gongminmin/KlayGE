@@ -1,0 +1,46 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GL_ARB_framebuffer_no_attachments" reg_no="130">
+	<tokens>
+		<token name="GL_FRAMEBUFFER_DEFAULT_WIDTH" value="0x9310"/>
+		<token name="GL_FRAMEBUFFER_DEFAULT_HEIGHT" value="0x9311"/>
+		<token name="GL_FRAMEBUFFER_DEFAULT_LAYERS" value="0x9312"/>
+		<token name="GL_FRAMEBUFFER_DEFAULT_SAMPLES" value="0x9313"/>
+		<token name="GL_FRAMEBUFFER_DEFAULT_FIXED_SAMPLE_LOCATIONS" value="0x9314"/>
+		<token name="GL_MAX_FRAMEBUFFER_WIDTH" value="0x9315"/>
+		<token name="GL_MAX_FRAMEBUFFER_HEIGHT" value="0x9316"/>
+		<token name="GL_MAX_FRAMEBUFFER_LAYERS" value="0x9317"/>
+		<token name="GL_MAX_FRAMEBUFFER_SAMPLES" value="0x9318"/>
+	</tokens>
+
+	<functions>
+		<function name="glFramebufferParameteri" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLint" name="param"/>
+			</params>
+		</function>
+		<function name="glGetFramebufferParameteriv" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLint*" name="params"/>
+			</params>
+		</function>
+		<function name="glNamedFramebufferParameteriEXT" return="void">
+			<params>
+				<param type="GLuint" name="framebuffer"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLint" name="param"/>
+			</params>
+		</function>
+		<function name="glGetNamedFramebufferParameterivEXT" return="void">
+			<params>
+				<param type="GLuint" name="framebuffer"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLint*" name="params"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

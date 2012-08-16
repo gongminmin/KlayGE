@@ -1,6 +1,6 @@
 <?xml version='1.0'?>
 
-<gl_extension name="GL_AMD_multi_draw_indirect" reg_no="408">
+<gl_extension name="GL_AMD_multi_draw_indirect" reg_no="408" prefer="GL_ARB_multi_draw_indirect">
 	<functions>
 		<function name="glMultiDrawArraysIndirectAMD" return="void">
 			<params>

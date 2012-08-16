@@ -1,0 +1,39 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GL_ARB_compute_shader" reg_no="122">
+	<tokens>
+		<token name="GL_COMPUTE_SHADER" value="0x91B9"/>
+		<token name="GL_MAX_COMPUTE_UNIFORM_BLOCKS" value="0x91BB"/>
+		<token name="GL_MAX_COMPUTE_TEXTURE_IMAGE_UNITS" value="0x91BC"/>
+		<token name="GL_MAX_COMPUTE_IMAGE_UNIFORMS" value="0x91BD"/>
+		<token name="GL_MAX_COMPUTE_SHARED_MEMORY_SIZE" value="0x8262"/>
+		<token name="GL_MAX_COMPUTE_UNIFORM_COMPONENTS" value="0x8263"/>
+		<token name="GL_MAX_COMPUTE_ATOMIC_COUNTER_BUFFERS" value="0x8264"/>
+		<token name="GL_MAX_COMPUTE_ATOMIC_COUNTERS" value="0x8265"/>
+		<token name="GL_MAX_COMBINED_COMPUTE_UNIFORM_COMPONENTS" value="0x8266"/>
+		<token name="GL_MAX_COMPUTE_LOCAL_INVOCATIONS" value="0x90EB"/>
+		<token name="GL_MAX_COMPUTE_WORK_GROUP_COUNT" value="0x91BE"/>
+		<token name="GL_MAX_COMPUTE_WORK_GROUP_SIZE" value="0x91BF"/>
+		<token name="GL_COMPUTE_LOCAL_WORK_SIZE" value="0x8267"/>
+		<token name="GL_UNIFORM_BLOCK_REFERENCED_BY_COMPUTE_SHADER" value="0x90EC"/>
+		<token name="GL_ATOMIC_COUNTER_BUFFER_REFERENCED_BY_COMPUTE_SHADER" value="0x90ED"/>
+		<token name="GL_DISPATCH_INDIRECT_BUFFER" value="0x90EE"/>
+		<token name="GL_DISPATCH_INDIRECT_BUFFER_BINDING" value="0x90EF"/>
+		<token name="GL_COMPUTE_SHADER_BIT" value="0x00000020"/>
+	</tokens>
+
+	<functions>
+		<function name="glDispatchCompute" return="void">
+			<params>
+				<param type="GLuint" name="num_groups_x"/>
+				<param type="GLuint" name="num_groups_y"/>
+				<param type="GLuint" name="num_groups_z"/>
+			</params>
+		</function>
+		<function name="glDispatchComputeIndirect" return="void">
+			<params>
+				<param type="GLintptr" name="indirect"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

@@ -1,0 +1,29 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GL_ARB_multi_draw_indirect" reg_no="133">
+	<functions>
+		<function name="glMultiDrawArraysIndirect" return="void">
+			<params>
+				<param type="GLenum" name="mode"/>
+				<param type="const GLvoid*" name="indirect"/>
+				<param type="GLsizei" name="drawcount"/>
+				<param type="GLsizei" name="stride"/>
+			</params>
+			<mappings>
+				<mapping from="GL_AMD_multi_draw_indirect" name="glMultiDrawArraysIndirectAMD"/>
+			</mappings>
+		</function>
+		<function name="glMultiDrawElementsIndirect" return="void">
+			<params>
+				<param type="GLenum" name="mode"/>
+				<param type="GLenum" name="type"/>
+				<param type="const GLvoid*" name="indirect"/>
+				<param type="GLsizei" name="drawcount"/>
+				<param type="GLsizei" name="stride"/>
+			</params>
+			<mappings>
+				<mapping from="GL_AMD_multi_draw_indirect" name="glMultiDrawElementsIndirectAMD"/>
+			</mappings>
+		</function>
+	</functions>
+</gl_extension>

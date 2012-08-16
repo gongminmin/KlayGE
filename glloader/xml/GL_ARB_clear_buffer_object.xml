@@ -1,0 +1,46 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GL_ARB_clear_buffer_object" reg_no="121">
+	<functions>
+		<function name="glClearBufferData" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLenum" name="internalformat"/>
+				<param type="GLenum" name="format"/>
+				<param type="GLenum" name="type"/>
+				<param type="const GLvoid*" name="data"/>
+			</params>
+		</function>
+		<function name="glClearBufferSubData" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLenum" name="internalformat"/>
+				<param type="GLintptr" name="offset"/>
+				<param type="GLsizeiptr" name="size"/>
+				<param type="GLenum" name="format"/>
+				<param type="GLenum" name="type"/>
+				<param type="const GLvoid*" name="data"/>
+			</params>
+		</function>
+		<function name="glClearNamedBufferDataEXT" return="void">
+			<params>
+				<param type="GLuint" name="buffer"/>
+				<param type="GLenum" name="internalformat"/>
+				<param type="GLenum" name="format"/>
+				<param type="GLenum" name="type"/>
+				<param type="const GLvoid*" name="data"/>
+			</params>
+		</function>
+		<function name="glClearNamedBufferSubDataEXT" return="void">
+			<params>
+				<param type="GLuint" name="buffer"/>
+				<param type="GLenum" name="internalformat"/>
+				<param type="GLsizeiptr" name="offset"/>
+				<param type="GLsizeiptr" name="size"/>
+				<param type="GLenum" name="format"/>
+				<param type="GLenum" name="type"/>
+				<param type="const GLvoid*" name="data"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

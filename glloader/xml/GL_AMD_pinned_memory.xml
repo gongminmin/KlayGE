@@ -1,0 +1,7 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GL_AMD_pinned_memory" reg_no="411">
+	<tokens>
+		<token name="GL_EXTERNAL_VIRTUAL_MEMORY_BUFFER_AMD" value="0x9160"/>
+	</tokens>
+</gl_extension>

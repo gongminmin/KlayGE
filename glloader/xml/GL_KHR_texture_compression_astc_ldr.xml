@@ -1,0 +1,34 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GL_KHR_texture_compression_astc_ldr" reg_no="118">
+	<tokens>
+		<token name="GL_COMPRESSED_RGBA_ASTC_4x4_KHR" value="0x93B0"/>
+		<token name="GL_COMPRESSED_RGBA_ASTC_5x4_KHR" value="0x93B1"/>
+		<token name="GL_COMPRESSED_RGBA_ASTC_5x5_KHR" value="0x93B2"/>
+		<token name="GL_COMPRESSED_RGBA_ASTC_6x5_KHR" value="0x93B3"/>
+		<token name="GL_COMPRESSED_RGBA_ASTC_6x6_KHR" value="0x93B4"/>
+		<token name="GL_COMPRESSED_RGBA_ASTC_8x5_KHR" value="0x93B5"/>
+		<token name="GL_COMPRESSED_RGBA_ASTC_8x6_KHR" value="0x93B6"/>
+		<token name="GL_COMPRESSED_RGBA_ASTC_8x8_KHR" value="0x93B7"/>
+		<token name="GL_COMPRESSED_RGBA_ASTC_10x5_KHR" value="0x93B8"/>
+		<token name="GL_COMPRESSED_RGBA_ASTC_10x6_KHR" value="0x93B9"/>
+		<token name="GL_COMPRESSED_RGBA_ASTC_10x8_KHR" value="0x93BA"/>
+		<token name="GL_COMPRESSED_RGBA_ASTC_10x10_KHR" value="0x93BB"/>
+		<token name="GL_COMPRESSED_RGBA_ASTC_12x10_KHR" value="0x93BC"/>
+		<token name="GL_COMPRESSED_RGBA_ASTC_12x12_KHR" value="0x93BD"/>
+		<token name="GL_COMPRESSED_SRGB8_ALPHA8_ASTC_4x4_KHR" value="0x93D0"/>
+		<token name="GL_COMPRESSED_SRGB8_ALPHA8_ASTC_5x4_KHR" value="0x93D1"/>
+		<token name="GL_COMPRESSED_SRGB8_ALPHA8_ASTC_5x5_KHR" value="0x93D2"/>
+		<token name="GL_COMPRESSED_SRGB8_ALPHA8_ASTC_6x5_KHR" value="0x93D3"/>
+		<token name="GL_COMPRESSED_SRGB8_ALPHA8_ASTC_6x6_KHR" value="0x93D4"/>
+		<token name="GL_COMPRESSED_SRGB8_ALPHA8_ASTC_8x5_KHR" value="0x93D5"/>
+		<token name="GL_COMPRESSED_SRGB8_ALPHA8_ASTC_8x6_KHR" value="0x93D6"/>
+		<token name="GL_COMPRESSED_SRGB8_ALPHA8_ASTC_8x8_KHR" value="0x93D7"/>
+		<token name="GL_COMPRESSED_SRGB8_ALPHA8_ASTC_10x5_KHR" value="0x93D8"/>
+		<token name="GL_COMPRESSED_SRGB8_ALPHA8_ASTC_10x6_KHR" value="0x93D9"/>
+		<token name="GL_COMPRESSED_SRGB8_ALPHA8_ASTC_10x8_KHR" value="0x93DA"/>
+		<token name="GL_COMPRESSED_SRGB8_ALPHA8_ASTC_10x10_KHR" value="0x93DB"/>
+		<token name="GL_COMPRESSED_SRGB8_ALPHA8_ASTC_12x10_KHR" value="0x93DC"/>
+		<token name="GL_COMPRESSED_SRGB8_ALPHA8_ASTC_12x12_KHR" value="0x93DD"/>
+	</tokens>
+</gl_extension>

@@ -1,0 +1,26 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GL_ARB_texture_view" reg_no="142">
+	<tokens>
+		<token name="GL_TEXTURE_VIEW_MIN_LEVEL" value="0x82DB"/>
+		<token name="GL_TEXTURE_VIEW_NUM_LEVELS" value="0x82DC"/>
+		<token name="GL_TEXTURE_VIEW_MIN_LAYER" value="0x82DD"/>
+		<token name="GL_TEXTURE_VIEW_NUM_LAYERS" value="0x82DE"/>
+		<token name="GL_TEXTURE_IMMUTABLE_LEVELS" value="0x82DF"/>
+	</tokens>
+
+	<functions>
+		<function name="glTextureView" return="void">
+			<params>
+				<param type="GLuint" name="texture"/>
+				<param type="GLenum" name="target"/>
+				<param type="GLuint" name="origtexture"/>
+				<param type="GLenum" name="internalformat"/>
+				<param type="GLuint" name="minlevel"/>
+				<param type="GLuint" name="numlevels"/>
+				<param type="GLuint" name="minlayer"/>
+				<param type="GLuint" name="numlayers"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

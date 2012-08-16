@@ -1,0 +1,112 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GL_ARB_vertex_attrib_binding" reg_no="143">
+	<tokens>
+		<token name="GL_VERTEX_ATTRIB_BINDING" value="0x82D4"/>
+		<token name="GL_VERTEX_ATTRIB_RELATIVE_OFFSET" value="0x82D5"/>
+		<token name="GL_VERTEX_BINDING_DIVISOR" value="0x82D6"/>
+		<token name="GL_VERTEX_BINDING_OFFSET" value="0x82D7"/>
+		<token name="GL_VERTEX_BINDING_STRIDE" value="0x82D8"/>
+		<token name="GL_MAX_VERTEX_ATTRIB_RELATIVE_OFFSET" value="0x82D9"/>
+		<token name="GL_MAX_VERTEX_ATTRIB_BINDINGS" value="0x82DA"/>
+	</tokens>
+
+	<functions>
+		<function name="glBindVertexBuffer" return="void">
+			<params>
+				<param type="GLuint" name="bindingindex"/>
+				<param type="GLuint" name="buffer"/>
+				<param type="GLintptr" name="offset"/>
+				<param type="GLsizei" name="stride"/>
+			</params>
+		</function>
+		<function name="glVertexAttribFormat" return="void">
+			<params>
+				<param type="GLuint" name="attribindex"/>
+				<param type="GLint" name="size"/>
+				<param type="GLenum" name="type"/>
+				<param type="GLboolean" name="normalized"/>
+				<param type="GLuint" name="relativeoffset"/>
+			</params>
+		</function>
+		<function name="glVertexAttribIFormat" return="void">
+			<params>
+				<param type="GLuint" name="attribindex"/>
+				<param type="GLint" name="size"/>
+				<param type="GLenum" name="type"/>
+				<param type="GLuint" name="relativeoffset"/>
+			</params>
+		</function>
+		<function name="glVertexAttribLFormat" return="void">
+			<params>
+				<param type="GLuint" name="attribindex"/>
+				<param type="GLint" name="size"/>
+				<param type="GLenum" name="type"/>
+				<param type="GLuint" name="relativeoffset"/>
+			</params>
+		</function>
+		<function name="glVertexAttribBinding" return="void">
+			<params>
+				<param type="GLuint" name="attribindex"/>
+				<param type="GLuint" name="bindingindex"/>
+			</params>
+		</function>
+		<function name="glVertexBindingDivisor" return="void">
+			<params>
+				<param type="GLuint" name="bindingindex"/>
+				<param type="GLuint" name="divisor"/>
+			</params>
+		</function>
+		<function name="glVertexArrayBindVertexBufferEXT" return="void">
+			<params>
+				<param type="GLuint" name="vaobj"/>
+				<param type="GLuint" name="bindingindex"/>
+				<param type="GLuint" name="buffer"/>
+				<param type="GLintptr" name="offset"/>
+				<param type="GLsizei" name="stride"/>
+			</params>
+		</function>
+		<function name="glVertexArrayVertexAttribFormatEXT" return="void">
+			<params>
+				<param type="GLuint" name="vaobj"/>
+				<param type="GLuint" name="attribindex"/>
+				<param type="GLint" name="size"/>
+				<param type="GLenum" name="type"/>
+				<param type="GLboolean" name="normalized"/>
+				<param type="GLuint" name="relativeoffset"/>
+			</params>
+		</function>
+		<function name="glVertexArrayVertexAttribIFormatEXT" return="void">
+			<params>
+				<param type="GLuint" name="vaobj"/>
+				<param type="GLuint" name="attribindex"/>
+				<param type="GLint" name="size"/>
+				<param type="GLenum" name="type"/>
+				<param type="GLuint" name="relativeoffset"/>
+			</params>
+		</function>
+		<function name="glVertexArrayVertexAttribLFormatEXT" return="void">
+			<params>
+				<param type="GLuint" name="vaobj"/>
+				<param type="GLuint" name="attribindex"/>
+				<param type="GLint" name="size"/>
+				<param type="GLenum" name="type"/>
+				<param type="GLuint" name="relativeoffset"/>
+			</params>
+		</function>
+		<function name="glVertexArrayVertexAttribBindingEXT" return="void">
+			<params>
+				<param type="GLuint" name="vaobj"/>
+				<param type="GLuint" name="attribindex"/>
+				<param type="GLuint" name="bindingindex"/>
+			</params>
+		</function>
+		<function name="glVertexArrayVertexBindingDivisorEXT" return="void">
+			<params>
+				<param type="GLuint" name="vaobj"/>
+				<param type="GLuint" name="bindingindex"/>
+				<param type="GLuint" name="divisor"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

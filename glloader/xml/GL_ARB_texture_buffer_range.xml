@@ -1,0 +1,31 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GL_ARB_texture_buffer_range" reg_no="139">
+	<tokens>
+		<token name="GL_TEXTURE_BUFFER_OFFSET" value="0x919D"/>
+		<token name="GL_TEXTURE_BUFFER_SIZE" value="0x919E"/>
+		<token name="GL_TEXTURE_BUFFER_OFFSET_ALIGNMENT" value="0x919F"/>
+	</tokens>
+
+	<functions>
+		<function name="glTexBufferRange" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLenum" name="internalformat"/>
+				<param type="GLuint" name="buffer"/>
+				<param type="GLintptr" name="offset"/>
+				<param type="GLsizeiptr" name="size"/>
+			</params>
+		</function>
+		<function name="glTextureBufferRangeEXT" return="void">
+			<params>
+				<param type="GLuint" name="texture"/>
+				<param type="GLenum" name="target"/>
+				<param type="GLenum" name="internalformat"/>
+				<param type="GLuint" name="buffer"/>
+				<param type="GLintptr" name="offset"/>
+				<param type="GLsizeiptr" name="size"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>
