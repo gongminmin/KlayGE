@@ -1,0 +1,18 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GLX_SGIX_dmbuffer" predefined="_DM_BUFFER_H_">
+	<tokens>
+		<token name="GLX_DIGITAL_MEDIA_PBUFFER_SGIX" value="0x8024"/>
+	</tokens>
+
+	<functions>
+		<function name="glXAssociateDMPbufferSGIX" return="Bool">
+			<params>
+				<param type="Display*" name="dpy"/>
+				<param type="GLXPbufferSGIX" name="pbuffer"/>
+				<param type="DMparams*" name="params"/>
+				<param type="DMbuffer" name="dmbuffer"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

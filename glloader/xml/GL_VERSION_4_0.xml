@@ -20,7 +20,7 @@
 		<token name="GL_MIN_FRAGMENT_INTERPOLATION_OFFSET" value="0x8E5B"/>
 		<token name="GL_MAX_FRAGMENT_INTERPOLATION_OFFSET" value="0x8E5C"/>
 		<token name="GL_FRAGMENT_INTERPOLATION_OFFSET_BITS" value="0x8E5D"/>
-		<token name="GL_MAX_VERTEX_STREAMS" value="ARB_texture_multisample"/>
+		<token name="GL_MAX_VERTEX_STREAMS" value="0x8E71"/>
 		<token name="GL_DOUBLE_VEC2" value="0x8FFC"/>
 		<token name="GL_DOUBLE_VEC3" value="0x8FFD"/>
 		<token name="GL_DOUBLE_VEC4" value="0x8FFE"/>
@@ -74,6 +74,11 @@
 		<token name="GL_UNIFORM_BLOCK_REFERENCED_BY_TESS_EVALUATION_SHADER" value="0x84F1"/>
 		<token name="GL_TESS_EVALUATION_SHADER" value="0x8E87"/>
 		<token name="GL_TESS_CONTROL_SHADER" value="0x8E88"/>
+		<token name="GL_TRANSFORM_FEEDBACK" value="0x8E22"/>
+		<token name="GL_TRANSFORM_FEEDBACK_BUFFER_PAUSED" value="GL_TRANSFORM_FEEDBACK_PAUSED"/>
+		<token name="GL_TRANSFORM_FEEDBACK_BUFFER_ACTIVE" value="GL_TRANSFORM_FEEDBACK_ACTIVE"/>
+		<token name="GL_TRANSFORM_FEEDBACK_BINDING" value="0x8E25"/>
+		<token name="GL_MAX_TRANSFORM_FEEDBACK_BUFFERS" value="0x8E70"/>
 	</tokens>
 
 	<functions>

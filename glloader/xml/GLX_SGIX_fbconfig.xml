@@ -17,6 +17,7 @@
 		<token name="GLX_FBCONFIG_ID_SGIX" value="0x8013"/>
 		<token name="GLX_RGBA_TYPE_SGIX" value="0x8014"/>
 		<token name="GLX_COLOR_INDEX_TYPE_SGIX" value="0x8015"/>
+		<token name="GLX_SCREEN_EXT" value="0x800C"/>
 	</tokens>
 
 	<functions>

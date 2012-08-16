@@ -6,8 +6,8 @@
 	</typedefs>
 
 	<tokens>
-		<token name="WGL_NUM_VIDEO_CAPTURE_SLOTS_NV" value="0x20CF"/>
 		<token name="WGL_UNIQUE_ID_NV" value="0x20CE"/>
+		<token name="WGL_NUM_VIDEO_CAPTURE_SLOTS_NV" value="0x20CF"/>
 	</tokens>
 
 	<functions>

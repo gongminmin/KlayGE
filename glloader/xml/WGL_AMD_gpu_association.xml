@@ -24,13 +24,13 @@
 		<function name="wglGetGPUInfoAMD" return="INT">
 			<params>
 				<param type="UINT" name="id"/>
-				<param type="INT" name="property"/>
+				<param type="int" name="property"/>
 				<param type="GLenum" name="dataType"/>
 				<param type="UINT" name="size"/>
 				<param type="void*" name="data"/>
 			</params>
 		</function>
-		<function name="wglGetContextGPUIDAMD" return="UINT">    
+		<function name="wglGetContextGPUIDAMD" return="UINT">
 			<params>
 				<param type="HGLRC" name="hglrc"/>
 			</params>
@@ -57,7 +57,6 @@
 				<param type="HGLRC" name="hglrc"/>
 			</params>
 		</function>
-    
 		<function name="wglGetCurrentAssociatedContextAMD" return="HGLRC"/>
 		<function name="wglBlitContextFramebufferAMD" return="VOID">
 			<params>

@@ -2,6 +2,9 @@
 
 <gl_extension name="GLX_EXT_texture_from_pixmap" reg_no="344">
 	<tokens>
+		<token name="GLX_TEXTURE_1D_BIT_EXT" value="0x00000001"/>
+		<token name="GLX_TEXTURE_2D_BIT_EXT" value="0x00000002"/>
+		<token name="GLX_TEXTURE_RECTANGLE_BIT_EXT" value="0x00000004"/>
 		<token name="GLX_BIND_TO_TEXTURE_RGB_EXT" value="0x20D0"/>
 		<token name="GLX_BIND_TO_TEXTURE_RGBA_EXT" value="0x20D1"/>
 		<token name="GLX_BIND_TO_MIPMAP_TEXTURE_EXT" value="0x20D2"/>
@@ -13,9 +16,6 @@
 		<token name="GLX_TEXTURE_FORMAT_NONE_EXT" value="0x20D8"/>
 		<token name="GLX_TEXTURE_FORMAT_RGB_EXT" value="0x20D9"/>
 		<token name="GLX_TEXTURE_FORMAT_RGBA_EXT" value="0x20DA"/>
-		<token name="GLX_TEXTURE_1D_BIT_EXT" value="0x00000001"/>
-		<token name="GLX_TEXTURE_2D_BIT_EXT" value="0x00000002"/>
-		<token name="GLX_TEXTURE_RECTANGLE_BIT_EXT" value="0x00000004"/>
 		<token name="GLX_TEXTURE_1D_EXT" value="0x20DB"/>
 		<token name="GLX_TEXTURE_2D_EXT" value="0x20DC"/>
 		<token name="GLX_TEXTURE_RECTANGLE_EXT" value="0x20DD"/>

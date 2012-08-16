@@ -18,7 +18,7 @@
 				<param type="GLushort" name="id"/>
 			</params>
 		</function>
-		<function name="wglDestroyDisplayColorTableEXT" return="void">
+		<function name="wglDestroyDisplayColorTableEXT" return="VOID">
 			<params>
 				<param type="GLushort" name="id"/>
 			</params>

@@ -5,5 +5,6 @@
 		<token name="GLX_VISUAL_CAVEAT_EXT" value="0x20"/>
 		<token name="GLX_SLOW_VISUAL_EXT" value="0x8001"/>
 		<token name="GLX_NON_CONFORMANT_VISUAL_EXT" value="0x800D"/>
+		<token name="GLX_NONE_EXT" value="0x8000"/>
 	</tokens>
 </gl_extension>

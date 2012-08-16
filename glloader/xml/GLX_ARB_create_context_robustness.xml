@@ -3,8 +3,8 @@
 <gl_extension name="GLX_ARB_create_context_robustness" reg_no="101">
 	<tokens>
 		<token name="GLX_CONTEXT_ROBUST_ACCESS_BIT_ARB" value="0x00000004"/>
+		<token name="GLX_LOSE_CONTEXT_ON_RESET_ARB" value="0x8252"/>
 		<token name="GLX_CONTEXT_RESET_NOTIFICATION_STRATEGY_ARB" value="0x8256"/>
 		<token name="GLX_NO_RESET_NOTIFICATION_ARB" value="0x8261"/>
-		<token name="GLX_LOSE_CONTEXT_ON_RESET_ARB" value="0x8252"/>
 	</tokens>
 </gl_extension>

@@ -2,7 +2,7 @@
 
 <gl_extension name="GLX_NV_video_output" reg_no="348">
 	<typedefs>
-		<typedef type="struct { unsigned int dummy; }*" synonym="GLXVideoDeviceNV"/>
+		<typedef type="unsigned int" synonym="GLXVideoDeviceNV"/>
 	</typedefs>
 
 	<tokens>
@@ -19,7 +19,7 @@
 	</tokens>
 
 	<functions>
-		<function name="glXGetVideoDeviceNV" return="GLint">
+		<function name="glXGetVideoDeviceNV" return="int">
 			<params>
 				<param type="Display*" name="dpy"/>
 				<param type="int" name="screen"/>
@@ -27,14 +27,14 @@
 				<param type="GLXVideoDeviceNV*" name="pVideoDevice"/>
 			</params>
 		</function>
-		<function name="glXReleaseVideoDeviceNV" return="GLint">
+		<function name="glXReleaseVideoDeviceNV" return="int">
 			<params>
 				<param type="Display*" name="dpy"/>
 				<param type="int" name="screen"/>
 				<param type="GLXVideoDeviceNV" name="VideoDevice"/>
 			</params>
 		</function>
-		<function name="glXBindVideoImageNV" return="GLint">
+		<function name="glXBindVideoImageNV" return="int">
 			<params>
 				<param type="Display*" name="dpy"/>
 				<param type="GLXVideoDeviceNV" name="VideoDevice"/>
@@ -42,13 +42,13 @@
 				<param type="int" name="iVideoBuffer"/>
 			</params>
 		</function>
-		<function name="glXReleaseVideoImageNV" return="GLint">
+		<function name="glXReleaseVideoImageNV" return="int">
 			<params>
 				<param type="Display*" name="dpy"/>
 				<param type="GLXPbuffer" name="pbuf"/>
 			</params>
 		</function>
-		<function name="glXSendPbufferToVideoNV" return="GLint">
+		<function name="glXSendPbufferToVideoNV" return="int">
 			<params>
 				<param type="Display*" name="dpy"/>
 				<param type="GLXPbuffer" name="pbuf"/>
@@ -57,7 +57,7 @@
 				<param type="GLboolean" name="bBlock"/>
 			</params>
 		</function>
-		<function name="glXGetVideoInfoNV" return="GLint">
+		<function name="glXGetVideoInfoNV" return="int">
 			<params>
 				<param type="Display*" name="dpy"/>
 				<param type="int" name="screen"/>

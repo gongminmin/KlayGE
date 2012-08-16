@@ -12,13 +12,13 @@
 	<functions>
 		<function name="wglEnumerateVideoDevicesNV" return="int">
 			<params>
-				<param type="HDC" name="hDc"/>
+				<param type="HDC" name="hDC"/>
 				<param type="HVIDEOOUTPUTDEVICENV*" name="phDeviceList"/>
 			</params>
 		</function>
 		<function name="wglBindVideoDeviceNV" return="BOOL">
 			<params>
-				<param type="HDC" name="hDc"/>
+				<param type="HDC" name="hDC"/>
 				<param type="unsigned int" name="uVideoSlot"/>
 				<param type="HVIDEOOUTPUTDEVICENV" name="hVideoDevice"/>
 				<param type="const int*" name="piAttribList"/>

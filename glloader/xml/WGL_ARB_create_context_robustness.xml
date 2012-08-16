@@ -3,8 +3,8 @@
 <gl_extension name="WGL_ARB_create_context_robustness" reg_no="102">
 	<tokens>
 		<token name="WGL_CONTEXT_ROBUST_ACCESS_BIT_ARB" value="0x00000004"/>
+		<token name="WGL_LOSE_CONTEXT_ON_RESET_ARB" value="0x8252"/>
 		<token name="WGL_CONTEXT_RESET_NOTIFICATION_STRATEGY_ARB" value="0x8256"/>
 		<token name="WGL_NO_RESET_NOTIFICATION_ARB" value="0x8261"/>
-		<token name="WGL_LOSE_CONTEXT_ON_RESET_ARB" value="0x8252"/>
 	</tokens>
 </gl_extension>

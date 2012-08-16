@@ -2,7 +2,7 @@
 
 <gl_extension name="GLX_ARB_fbconfig_float" reg_no="39">
 	<tokens>
-		<token name="GLX_RGBA_FLOAT_TYPE" value="0x20B9"/>
-		<token name="GLX_RGBA_FLOAT_BIT" value="0x00000004"/>
+		<token name="GLX_RGBA_FLOAT_TYPE_ARB" value="0x20B9"/>
+		<token name="GLX_RGBA_FLOAT_BIT_ARB" value="0x00000004"/>
 	</tokens>
 </gl_extension>

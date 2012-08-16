@@ -1,0 +1,18 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GLX_EXT_swap_control">
+	<tokens>
+		<token name="GLX_SWAP_INTERVAL_EXT" value="0x20F1"/>
+		<token name="GLX_MAX_SWAP_INTERVAL_EXT" value="0x20F2"/>
+	</tokens>
+
+	<functions>
+		<function name="glXSwapIntervalEXT" return="void">
+			<params>
+				<param type="Display*" name="dpy"/>
+				<param type="GLXDrawable" name="drawable"/>
+				<param type="int" name="interval"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

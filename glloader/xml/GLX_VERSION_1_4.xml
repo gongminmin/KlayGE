@@ -1,10 +1,6 @@
 <?xml version='1.0'?>
 
 <gl_extension name="GLX_VERSION_1_4">
-	<typedefs>
-		<typedef type="void" synonym="(*__GLXextFuncPtr)(void)"/>
-	</typedefs>
-
 	<tokens>
 		<token name="GLX_SAMPLE_BUFFERS" value="100000"/>
 		<token name="GLX_SAMPLES" value="100001"/>

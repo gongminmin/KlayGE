@@ -3,7 +3,6 @@
 <gl_extension name="WGL_EXT_make_current_read" reg_no="169" prefer="WGL_ARB_make_current_read">
 	<tokens>
 		<token name="ERROR_INVALID_PIXEL_TYPE_EXT" value="0x2043"/>
-		<token name="ERROR_INCOMPATIBLE_DEVICE_CONTEXTS_EXT" value="0x2054"/>
 	</tokens>
 
 	<functions>

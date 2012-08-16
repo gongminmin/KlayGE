@@ -5,8 +5,8 @@
 		<function name="wglAllocateMemoryNV" return="void*">
 			<params>
 				<param type="GLsizei" name="size"/>
-				<param type="GLfloat" name="readFrequency"/>
-				<param type="GLfloat" name="writeFrequency"/>
+				<param type="GLfloat" name="readfreq"/>
+				<param type="GLfloat" name="writefreq"/>
 				<param type="GLfloat" name="priority"/>
 			</params>
 		</function>

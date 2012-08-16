@@ -2,11 +2,11 @@
 
 <gl_extension name="GLX_ARB_create_context" reg_no="56">
 	<tokens>
+		<token name="GLX_CONTEXT_DEBUG_BIT_ARB" value="0x00000001"/>
+		<token name="GLX_CONTEXT_FORWARD_COMPATIBLE_BIT_ARB" value="0x00000002"/>
 		<token name="GLX_CONTEXT_MAJOR_VERSION_ARB" value="0x2091"/>
 		<token name="GLX_CONTEXT_MINOR_VERSION_ARB" value="0x2092"/>
 		<token name="GLX_CONTEXT_FLAGS_ARB" value="0x2094"/>
-		<token name="GLX_CONTEXT_DEBUG_BIT_ARB" value="0x0001"/>
-		<token name="GLX_CONTEXT_FORWARD_COMPATIBLE_BIT_ARB" value="0x0002"/>
 	</tokens>
 
 	<functions>
@@ -16,7 +16,7 @@
 				<param type="GLXFBConfig" name="config"/>
 				<param type="GLXContext" name="share_context"/>
 				<param type="Bool" name="direct"/>
-				<param type="int const *" name="attrib_list"/>
+				<param type="const int*" name="attrib_list"/>
 			</params>
 		</function>
 	</functions>

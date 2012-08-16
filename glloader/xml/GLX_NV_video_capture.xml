@@ -2,17 +2,17 @@
 
 <gl_extension name="GLX_NV_video_capture" reg_no="374">
 	<typedefs>
-		<typedef type="struct { unsigned int dummy; }*" synonym="GLXVideoCaptureDeviceNV"/>
+		<typedef type="XID" synonym="GLXVideoCaptureDeviceNV"/>
 	</typedefs>
 
 	<tokens>
 		<token name="GLX_DEVICE_ID_NV" value="0x20CD"/>
-		<token name="GLX_NUM_VIDEO_CAPTURE_SLOTS_NV" value="0x20CF"/>
 		<token name="GLX_UNIQUE_ID_NV" value="0x20CE"/>
+		<token name="GLX_NUM_VIDEO_CAPTURE_SLOTS_NV" value="0x20CF"/>
 	</tokens>
 
 	<functions>
-		<function name="glXBindVideoCaptureDeviceNV" return="void">
+		<function name="glXBindVideoCaptureDeviceNV" return="int">
 			<params>
 				<param type="Display*" name="dpy"/>
 				<param type="unsigned int" name="video_capture_slot"/>

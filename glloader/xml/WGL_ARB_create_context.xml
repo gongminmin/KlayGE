@@ -2,12 +2,12 @@
 
 <gl_extension name="WGL_ARB_create_context" reg_no="55">
 	<tokens>
+		<token name="WGL_CONTEXT_DEBUG_BIT_ARB" value="0x00000001"/>
+		<token name="WGL_CONTEXT_FORWARD_COMPATIBLE_BIT_ARB" value="0x00000002"/>
 		<token name="WGL_CONTEXT_MAJOR_VERSION_ARB" value="0x2091"/>
 		<token name="WGL_CONTEXT_MINOR_VERSION_ARB" value="0x2092"/>
 		<token name="WGL_CONTEXT_LAYER_PLANE_ARB" value="0x2093"/>
 		<token name="WGL_CONTEXT_FLAGS_ARB" value="0x2094"/>
-		<token name="WGL_CONTEXT_DEBUG_BIT_ARB" value="0x0001"/>
-		<token name="WGL_CONTEXT_FORWARD_COMPATIBLE_BIT_ARB" value="0x0002"/>
 		<token name="ERROR_INVALID_VERSION_ARB" value="0x2095"/>
 	</tokens>
 
@@ -16,7 +16,7 @@
 			<params>
 				<param type="HDC" name="hDC"/>
 				<param type="HGLRC" name="hShareContext"/>
-				<param type="int const *" name="attribList"/>
+				<param type="const int*" name="attribList"/>
 			</params>
 		</function>
 	</functions>

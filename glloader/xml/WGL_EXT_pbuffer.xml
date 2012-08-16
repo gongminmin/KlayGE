@@ -15,7 +15,6 @@
 		<token name="WGL_PBUFFER_LARGEST_EXT" value="0x2033"/>
 		<token name="WGL_PBUFFER_WIDTH_EXT" value="0x2034"/>
 		<token name="WGL_PBUFFER_HEIGHT_EXT" value="0x2035"/>
-		<token name="WGL_PBUFFER_LOST_EXT" value="0x2036"/>
 	</tokens>
 
 	<functions>

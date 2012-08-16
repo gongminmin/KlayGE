@@ -13,7 +13,6 @@
 		<token name="WGL_NUMBER_OVERLAYS_ARB" value="0x2008"/>
 		<token name="WGL_NUMBER_UNDERLAYS_ARB" value="0x2009"/>
 		<token name="WGL_TRANSPARENT_ARB" value="0x200A"/>
-		<token name="WGL_TRANSPARENT_VALUE_ARB" value="0x200B"/>
 		<token name="WGL_TRANSPARENT_RED_VALUE_ARB" value="0x2037"/>
 		<token name="WGL_TRANSPARENT_GREEN_VALUE_ARB" value="0x2038"/>
 		<token name="WGL_TRANSPARENT_BLUE_VALUE_ARB" value="0x2039"/>

@@ -14,11 +14,6 @@
 		<token name="WGL_NUMBER_UNDERLAYS_EXT" value="0x2009"/>
 		<token name="WGL_TRANSPARENT_EXT" value="0x200A"/>
 		<token name="WGL_TRANSPARENT_VALUE_EXT" value="0x200B"/>
-		<token name="WGL_TRANSPARENT_RED_VALUE_EXT" value="0x2037"/>
-		<token name="WGL_TRANSPARENT_GREEN_VALUE_EXT" value="0x2038"/>
-		<token name="WGL_TRANSPARENT_BLUE_VALUE_EXT" value="0x2039"/>
-		<token name="WGL_TRANSPARENT_ALPHA_VALUE_EXT" value="0x203A"/>
-		<token name="WGL_TRANSPARENT_INDEX_VALUE_EXT" value="0x203B"/>
 		<token name="WGL_SHARE_DEPTH_EXT" value="0x200C"/>
 		<token name="WGL_SHARE_STENCIL_EXT" value="0x200D"/>
 		<token name="WGL_SHARE_ACCUM_EXT" value="0x200E"/>
@@ -61,7 +56,7 @@
 				<param type="int" name="iPixelFormat"/>
 				<param type="int" name="iLayerPlane"/>
 				<param type="UINT" name="nAttributes"/>
-				<param type="const int*" name="piAttributes"/>
+				<param type="int*" name="piAttributes"/>
 				<param type="int*" name="piValues"/>
 			</params>
 		</function>
@@ -71,7 +66,7 @@
 				<param type="int" name="iPixelFormat"/>
 				<param type="int" name="iLayerPlane"/>
 				<param type="UINT" name="nAttributes"/>
-				<param type="const int*" name="piAttributes"/>
+				<param type="int*" name="piAttributes"/>
 				<param type="FLOAT*" name="pfValues"/>
 			</params>
 		</function>

@@ -2,7 +2,7 @@
 
 <gl_extension name="GL_AMD_debug_output" reg_no="395">
 	<typedefs>
-		<typedef type="void" synonym="(APIENTRY *GLDEBUGPROCAMD)(GLuint id, GLenum category, GLenum severity, GLsizei length, const GLchar* message, GLvoid* userParam);"/>
+		<typedef type="void" synonym="(APIENTRY *GLDEBUGPROCAMD)(GLuint id, GLenum category, GLenum severity, GLsizei length, const GLchar* message, GLvoid* userParam)"/>
 	</typedefs>
 
 	<tokens>

@@ -2,9 +2,9 @@
 
 <gl_extension name="WGL_NV_DX_interop" reg_no="407">
 	<tokens>
-		<token name="WGL_ACCESS_READ_ONLY_NV" value="0x0000"/>
-		<token name="WGL_ACCESS_READ_WRITE_NV" value="0x0001"/>
-		<token name="WGL_ACCESS_WRITE_DISCARD_NV" value="0x0002"/>
+		<token name="WGL_ACCESS_READ_ONLY_NV" value="0x00000000"/>
+		<token name="WGL_ACCESS_READ_WRITE_NV" value="0x00000001"/>
+		<token name="WGL_ACCESS_WRITE_DISCARD_NV" value="0x00000002"/>
 	</tokens>
 
 	<functions>

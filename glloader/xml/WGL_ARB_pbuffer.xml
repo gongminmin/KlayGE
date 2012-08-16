@@ -10,12 +10,15 @@
 		<token name="WGL_MAX_PBUFFER_PIXELS_ARB" value="0x202E"/>
 		<token name="WGL_MAX_PBUFFER_WIDTH_ARB" value="0x202F"/>
 		<token name="WGL_MAX_PBUFFER_HEIGHT_ARB" value="0x2030"/>
-		<token name="WGL_OPTIMAL_PBUFFER_WIDTH_ARB" value="0x2031"/>
-		<token name="WGL_OPTIMAL_PBUFFER_HEIGHT_ARB" value="0x2032"/>
 		<token name="WGL_PBUFFER_LARGEST_ARB" value="0x2033"/>
 		<token name="WGL_PBUFFER_WIDTH_ARB" value="0x2034"/>
 		<token name="WGL_PBUFFER_HEIGHT_ARB" value="0x2035"/>
 		<token name="WGL_PBUFFER_LOST_ARB" value="0x2036"/>
+		<token name="WGL_TRANSPARENT_RED_VALUE_ARB" value="0x2037"/>
+		<token name="WGL_TRANSPARENT_GREEN_VALUE_ARB" value="0x2038"/>
+		<token name="WGL_TRANSPARENT_BLUE_VALUE_ARB" value="0x2039"/>
+		<token name="WGL_TRANSPARENT_ALPHA_VALUE_ARB" value="0x203A"/>
+		<token name="WGL_TRANSPARENT_INDEX_VALUE_ARB" value="0x203B"/>
 	</tokens>
 
 	<functions>

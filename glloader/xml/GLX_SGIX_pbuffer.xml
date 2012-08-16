@@ -8,7 +8,7 @@
 
 	<tokens>
 		<token name="GLX_PBUFFER_BIT_SGIX" value="0x00000004"/>
-		<token name="GLX_PBUFFER_CLOBBER_MASK_SGIX" value="0x08000000"/>
+		<token name="GLX_BUFFER_CLOBBER_MASK_SGIX" value="0x08000000"/>
 		<token name="GLX_FRONT_LEFT_BUFFER_BIT_SGIX" value="0x00000001"/>
 		<token name="GLX_FRONT_RIGHT_BUFFER_BIT_SGIX" value="0x00000002"/>
 		<token name="GLX_BACK_LEFT_BUFFER_BIT_SGIX" value="0x00000004"/>
@@ -41,7 +41,7 @@
 				<param type="GLXFBConfigSGIX" name="config"/>
 				<param type="unsigned int" name="width"/>
 				<param type="unsigned int" name="height"/>
-				<param type="const int*" name="attrib_list"/>
+				<param type="int*" name="attrib_list"/>
 			</params>
 		</function>
 		<function name="glXDestroyGLXPbufferSGIX" return="void">
@@ -62,14 +62,14 @@
 			<params>
 				<param type="Display*" name="dpy"/>
 				<param type="GLXDrawable" name="drawable"/>
-				<param type="unsigned long" name="event_mask"/>
+				<param type="unsigned long" name="mask"/>
 			</params>
 		</function>
 		<function name="glXGetSelectedEventSGIX" return="void">
 			<params>
 				<param type="Display*" name="dpy"/>
 				<param type="GLXDrawable" name="drawable"/>
-				<param type="unsigned long*" name="event_mask"/>
+				<param type="unsigned long*" name="mask"/>
 			</params>
 		</function>
 	</functions>
