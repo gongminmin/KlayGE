@@ -15,8 +15,8 @@ def support_one(feature_names):
 			return True
 	return False
 
-ogl_ver_db = ['1.1', '1.2', '1.3', '1.4', '1.5', '2.0', '2.1', '3.0', '3.1', '3.2', '3.3', '4.0', '4.1', '4.2']
-glsl_ver_db = ['0.0', '1.1', '1.2', '1.3', '1.4', '1.5', '3.3', '4.0', '4.1', '4.2']
+ogl_ver_db = ['1.1', '1.2', '1.3', '1.4', '1.5', '2.0', '2.1', '3.0', '3.1', '3.2', '3.3', '4.0', '4.1', '4.2', '4.3']
+glsl_ver_db = ['0.0', '1.1', '1.2', '1.3', '1.4', '1.5', '3.3', '4.0', '4.1', '4.2', '4.3']
 
 features_db = {
 	'1.1' : {
@@ -197,6 +197,32 @@ features_db = {
 			'GLSL 4.20 feature pack' : lambda : is_supported('GL_ARB_shading_language_420pack'),
 			'Queries for sample counts available for a given internal format and usage' : lambda : is_supported('GL_ARB_internalformat_query'),
 			'More restrictive alignment constraints for mapped buffers' : lambda : is_supported('GL_ARB_map_buffer_alignment'),
+		},
+
+	'4.3' : {
+			'Allows multi-dimensional arrays in GLSL' : lambda : is_supported('GL_ARB_arrays_of_arrays'),
+			'OpenGL ES 3.0 compatibility' : lambda : is_supported('GL_ARB_ES3_compatibility'),
+			'Clear a buffer object with a constant value' : lambda : is_supported('GL_ARB_clear_buffer_object'),
+			'Compute shader' : lambda : is_supported('GL_ARB_compute_shader'),
+			'Direct copy of pixels between textures and render buffers' : lambda : support_one(['GL_ARB_copy_image', 'GL_NV_copy_image']),
+			'Enhanced debug context' : lambda : is_supported('GL_KHR_debug'),
+			'Debug output' : lambda : is_supported('GL_ARB_debug_output'),
+			'Set location of a default-block uniform in the shader' : lambda : is_supported('GL_ARB_explicit_uniform_location'),
+			'gl_Layer and gl_ViewportIndex in fragment shader' : lambda : is_supported('GL_ARB_fragment_layer_viewport'),
+			'Framebuffer without attachment' : lambda : is_supported('GL_ARB_framebuffer_no_attachments'),
+			'Find out actual supported limits for most texture parameters' : lambda : is_supported('GL_ARB_internalformat_query2'),
+			'Invalidate all or some of the contents of textures and buffers' : lambda : is_supported('GL_ARB_invalidate_subdata'),
+			'Draw many GPU generated objects with one call' : lambda : support_one(['GL_ARB_multi_draw_indirect', 'GL_AMD_multi_draw_indirect']),
+			'Shader reflection' : lambda : is_supported('GL_ARB_program_interface_query'),
+			'Restricted shader read/write to an object' : lambda : is_supported('GL_ARB_robust_buffer_access_behavior'),
+			'Query size of an image in a shader' : lambda : is_supported('GL_ARB_shader_image_size'),
+			'Enables all shader stages to read and write arbitrarily to buffers' : lambda : is_supported('GL_ARB_shader_storage_buffer_object'),
+			'Read stencil bits of a packed depth-stencil texture' : lambda : is_supported('GL_ARB_stencil_texturing'),
+			'Create texture buffer object corresponding to a subrange of a buffer\'s data store' : lambda : is_supported('GL_ARB_texture_buffer_range'),
+			'Query number of mipmap levels accessible through a sampler uniform' : lambda : is_supported('GL_ARB_texture_query_levels'),
+			'Immutable storage objects for multisampled textures' : lambda : is_supported('GL_ARB_texture_storage_multisample'),
+			'Provide different ways to interpret texture data without duplicating the texture' : lambda : is_supported('GL_ARB_texture_view'),
+			'Separate vertex attribute state from the data stores of each array' : lambda : is_supported('GL_ARB_vertex_attrib_binding'),
 		}
 }
 
@@ -342,13 +368,15 @@ def gl_compatibility(vendor, renderer, major_ver, minor_ver, glsl_major_ver, gls
 	exts = ext_str.split(' ')
 
 	print('OpenGL Compatibility Viewer')
-	print('Copyright(C) 2004-2011 Minmin Gong\n')
+	print('Copyright(C) 2004-2012 Minmin Gong\n')
 
 	info = information()
 	info.make_reports(vendor, renderer, major_ver, minor_ver, glsl_major_ver, glsl_minor_ver, exts)
 
 	report_file_name = 'report.html'
-	info.to_html(open(report_file_name, 'w'))
+	report_file = open(report_file_name, 'w')
+	info.to_html(report_file)
+	report_file.close()
 
 	import os
 	os.system(report_file_name);
