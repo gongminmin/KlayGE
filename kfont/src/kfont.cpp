@@ -18,6 +18,8 @@
 
 namespace
 {
+	using namespace KlayGE;
+
 	template <int size>
 	void EndianSwitch(void* p);
 
