@@ -620,7 +620,7 @@ void* get_gl_proc_address_by_api(const char* name)
 	CFURLRef bundleURL = CFURLCreateWithFileSystemPath(kCFAllocatorDefault,
 		CFSTR("/System/Library/Frameworks/OpenGL.framework"), kCFURLPOSIXPathStyle, true);
 
-	CFStringRef functionName = CFStringCreateWithCString(kCFAllocatorDefault, extname, kCFStringEncodingASCII);
+	CFStringRef functionName = CFStringCreateWithCString(kCFAllocatorDefault, name, kCFStringEncodingASCII);
 
 	CFBundleRef bundle = CFBundleCreate(kCFAllocatorDefault, bundleURL);
 	assert(bundle != NULL);
