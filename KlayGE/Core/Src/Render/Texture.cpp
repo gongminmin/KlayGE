@@ -1593,7 +1593,7 @@ namespace KlayGE
 				if ((desc.dds_caps.caps2 & DDSCAPS2_VOLUME) != 0)
 				{
 					type = Texture::TT_3D;
-					height = desc.width;
+					height = desc.height;
 					depth = desc.depth;
 				}
 				else
