@@ -137,7 +137,7 @@ void DetailedSkinnedMesh::BuildMeshInfo()
 			vb->CopyToBuffer(*vb_cpu);
 
 			GraphicsBuffer::Mapper mapper(*vb_cpu, BA_Read_Only);
-			if ((mapper.Pointer<float4>() + this->StartVertexLocation())->x() > 0)
+			if (mapper.Pointer<uint8_t>()[this->StartVertexLocation() * 4] > 0)
 			{
 				has_skinned_ = true;
 			}
@@ -795,7 +795,7 @@ void DetailedSkinnedModel::BuildModelInfo()
 		BOOST_FOREACH(MeshesType::const_reference mesh, meshes_)
 		{
 			mesh->AddVertexStream(blend_indices_vb,	vertex_element(VEU_BlendIndex, 0, EF_ABGR8));
-			mesh->AddVertexStream(blend_weights_vb, vertex_element(VEU_BlendWeight, 0, EF_ABGR32F));
+			mesh->AddVertexStream(blend_weights_vb, vertex_element(VEU_BlendWeight, 0, EF_ABGR8));
 		}
 	}
 }

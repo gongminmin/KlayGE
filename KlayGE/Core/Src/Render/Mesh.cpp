@@ -45,7 +45,7 @@ namespace
 {
 	using namespace KlayGE;
 
-	uint32_t const MODEL_BIN_VERSION = 5;
+	uint32_t const MODEL_BIN_VERSION = 6;
 
 	class RenderModelLoadingDesc : public ResLoadingDesc
 	{
@@ -1066,7 +1066,7 @@ namespace KlayGE
 							{
 								ve.usage = VEU_BlendWeight;
 								ve.usage_index = 0;
-								ve.format = EF_ABGR32F;
+								ve.format = EF_ABGR8;
 								vertex_elements.push_back(ve);
 
 								ve.usage = VEU_BlendIndex;
@@ -1289,8 +1289,9 @@ namespace KlayGE
 									if (VEU_BlendWeight == ves[mesh_index][i].usage)
 									{
 										float weight = weight_node->Attrib("weight")->ValueFloat();
+										uint8_t bone_weight = static_cast<uint8_t>(MathLib::clamp(static_cast<int>(weight * 255), 0, 255));
 										uint32_t buf_index = ves_mapping[mesh_index][i];
-										memcpy(&merged_buff[buf_index][(mesh_base_vertices[mesh_index] + index) * merged_ves[buf_index].element_size() + num_blend * sizeof(weight)], &weight, sizeof(weight));
+										memcpy(&merged_buff[buf_index][(mesh_base_vertices[mesh_index] + index) * merged_ves[buf_index].element_size() + num_blend * sizeof(bone_weight)], &bone_weight, sizeof(bone_weight));
 										break;
 									}
 								}
@@ -1312,7 +1313,7 @@ namespace KlayGE
 									if (VEU_BlendWeight == ves[mesh_index][i].usage)
 									{
 										uint32_t buf_index = ves_mapping[mesh_index][i];
-										memset(&merged_buff[buf_index][(mesh_base_vertices[mesh_index] + index) * merged_ves[buf_index].element_size() + b * sizeof(float)], 0, sizeof(float));
+										memset(&merged_buff[buf_index][(mesh_base_vertices[mesh_index] + index) * merged_ves[buf_index].element_size() + b * sizeof(uint8_t)], 0, sizeof(uint8_t));
 										break;
 									}
 								}
@@ -2387,8 +2388,8 @@ namespace KlayGE
 
 									if (weight_stream != -1)
 									{
-										float const * weights = reinterpret_cast<float const *>(&buffs[mesh_index][weight_stream][0]);
-										weight_node->AppendAttrib(doc.AllocAttribFloat("weight", weights[j * num_components + c]));
+										uint8_t const * bone_weights = &buffs[mesh_index][weight_stream][0];
+										weight_node->AppendAttrib(doc.AllocAttribFloat("weight", bone_weights[j * num_components + c] / 255.0f));
 									}
 								}
 							}

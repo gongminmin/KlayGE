@@ -1362,9 +1362,9 @@ namespace KlayGE
 					else
 					{
 						if ((0xC0000000 == desc.pixel_format.rgb_alpha_bit_mask)
-							&& (0x3FF00000 == desc.pixel_format.r_bit_mask)
+							&& (0x000003FF == desc.pixel_format.r_bit_mask)
 							&& (0x000FFC00 == desc.pixel_format.g_bit_mask)
-							&& (0x000003FF == desc.pixel_format.b_bit_mask))
+							&& (0x3FF00000 == desc.pixel_format.b_bit_mask))
 						{
 							format = EF_A2BGR10;
 						}
@@ -1468,9 +1468,9 @@ namespace KlayGE
 							else
 							{
 								if ((0xC0000000 == desc.pixel_format.rgb_alpha_bit_mask)
-									&& (0x3FF00000 == desc.pixel_format.r_bit_mask)
+									&& (0x000003FF == desc.pixel_format.r_bit_mask)
 									&& (0x000FFC00 == desc.pixel_format.g_bit_mask)
-									&& (0x000003FF == desc.pixel_format.b_bit_mask))
+									&& (0x3FF00000 == desc.pixel_format.b_bit_mask))
 								{
 									format = EF_SIGNED_A2BGR10;
 								}
