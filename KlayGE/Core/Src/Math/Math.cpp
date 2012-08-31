@@ -391,21 +391,7 @@ namespace KlayGE
 		template <typename T>
 		Vector_T<T, 3> transform_quat(Vector_T<T, 3> const & v, Quaternion_T<T> const & quat)
 		{
-			// result = av + bq + c(q.v CROSS v)
-			// where
-			//  a = q.w()^2 - (q.v DOT q.v)
-			//  b = 2 * (q.v DOT v)
-			//  c = 2q.w()
-			T const a(quat.w() * quat.w() - length_sq(quat.v()));
-			T const b(2 * dot(quat.v(), v));
-			T const c(quat.w() + quat.w());
-
-			// Must store this, because result may alias v
-			Vector_T<T, 3> cross_v(cross(quat.v(), v));		// q.v CROSS v
-
-			return Vector_T<T, 3>(a * v.x() + b * quat.x() + c * cross_v.x(),
-				a * v.y() + b * quat.y() + c * cross_v.y(),
-				a * v.z() + b * quat.z() + c * cross_v.z());
+			return v + cross(quat.v(), cross(quat.v(), v) + quat.w() * v) * T(2);
 		}
 
 		template KLAYGE_CORE_API float3 project(float3 const & vec,
@@ -1238,12 +1224,12 @@ namespace KlayGE
 		{
 			Quaternion_T<T> quat;
 			T s;
-			T const tr(mat(0, 0) + mat(1, 1) + mat(2, 2));
+			T const tr = mat(0, 0) + mat(1, 1) + mat(2, 2) + 1;
 
 			// check the diagonal
-			if (tr > 0)
+			if (tr > 1)
 			{
-				s = sqrt(tr + 1);
+				s = sqrt(tr);
 				quat.w() = s * T(0.5);
 				s = T(0.5) / s;
 				quat.x() = (mat(1, 2) - mat(2, 1)) * s;
@@ -1303,6 +1289,43 @@ namespace KlayGE
 			}
 
 			return normalize(quat);
+		}
+
+		template KLAYGE_CORE_API Quaternion to_quaternion(float3 const & tangent, float3 const & binormal, float3 const & normal, int bits);
+
+		template <typename T>
+		Quaternion_T<T> to_quaternion(Vector_T<T, 3> const & tangent, Vector_T<T, 3> const & binormal, Vector_T<T, 3> const & normal, int bits)
+		{
+			float k = 1;
+			if (dot(binormal, cross(normal, tangent)) < 0)
+			{
+				k = -1;
+			}
+
+			Matrix4_T<T> tangent_frame(tangent.x(), k * binormal.x(), normal.x(), 0,
+				tangent.y(), k * binormal.y(), normal.y(), 0,
+				tangent.z(), k * binormal.z(), normal.z(), 0,
+				0, 0, 0, 1);
+			Quaternion_T<T> tangent_quat = to_quaternion(tangent_frame);
+			if (tangent_quat.w() < 0)
+			{
+				tangent_quat = -tangent_quat;
+			}
+			T const bias = T(1) / ((1UL << (bits - 1)) - 1);
+			if (tangent_quat.w() < bias)
+			{
+				T const factor = sqrt(1 - bias * bias);
+				tangent_quat.x() *= factor;
+				tangent_quat.y() *= factor;
+				tangent_quat.z() *= factor;
+				tangent_quat.w() = bias;
+			}
+			if (k < 0)
+			{
+				tangent_quat = -tangent_quat;
+			}
+
+			return tangent_quat;
 		}
 
 		template KLAYGE_CORE_API Quaternion rotation_axis(float3 const & v, float const & angle);

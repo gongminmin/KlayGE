@@ -65,7 +65,7 @@ void CalcVPLsLightingShape(float4 pos,
 		float4 offset = vpls_tex.SampleLevel(point_sampler, float2(oViewDir.w, 2.5f / 4), 0);
 		float4 rotation = vpls_tex.SampleLevel(point_sampler, float2(oViewDir.w, 3.5f / 4), 0);
 
-		float3 rot_pos = mul(mul_quat(pos.xyz, rotation), (float3x3)view);
+		float3 rot_pos = mul(transform_quat(pos.xyz, rotation), (float3x3)view);
 
 		float3 light_vec = normalize(light_pos_es.xyz - offset.xyz);
 		float3 view_vec = normalize(rot_pos);

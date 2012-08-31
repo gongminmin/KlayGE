@@ -62,12 +62,9 @@ void Skinned(float3 pos,
 		blend_dual += joint_dual * weight;
 	}
 
-	result_pos = pos_s + 2 * cross(blend_real.xyz, cross(blend_real.xyz, pos_s) + blend_real.w * pos_s);
-	float3 trans = 2 * (blend_real.w * blend_dual.xyz - blend_dual.w * blend_real.xyz + cross(blend_real.xyz, blend_dual.xyz));
-	result_pos += trans;
-
-	result_normal = normal + 2 * cross(blend_real.xyz, cross(blend_real.xyz, normal) + blend_real.w * normal);
-	result_tangent = tangent + 2 * cross(blend_real.xyz, cross(blend_real.xyz, tangent) + blend_real.w * tangent);
+	result_pos = transform_quat(pos_s, blend_real) + 2 * mul_quat(float4(blend_dual.xyz, -blend_dual.w), blend_real).xyz;
+	result_normal = transform_quat(normal, blend_real);
+	result_tangent = transform_quat(tangent, blend_real);
 }
 
 void CalcMesh(float2 tex0,

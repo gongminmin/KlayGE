@@ -5,7 +5,7 @@
 		<![CDATA[
 float4 conjugate_quat(float4 rhs)
 {
-	return float4(-rhs.x, -rhs.y, -rhs.z, rhs.w);
+	return float4(-rhs.xyz, rhs.w);
 }
 
 float4 unit_axis_to_unit_axis(float3 from, float3 to)
@@ -58,18 +58,17 @@ float4 inverse_quat(float4 rhs)
 
 float4 mul_quat(float4 lhs, float4 rhs)
 {
-	return float4(dot(lhs, float4(rhs.w, -rhs.z, rhs.yx)),
-		dot(lhs, float4(rhs.zw, -rhs.x, rhs.y)),
-		dot(lhs, float4(-rhs.y, rhs.xwz)),
-		dot(lhs, float4(-rhs.xyz, rhs.w)));
+	float4 c, r;
+	c.xyz = cross(rhs.xyz, lhs.xyz);
+	c.w = -dot(rhs.xyz, lhs.xyz);
+	r = lhs * rhs.w + c;
+	r.xyz = rhs.xyz * lhs.w + r.xyz;
+	return r;
 }
 
-float3 mul_quat(float3 v, float4 quat)
+float3 transform_quat(float3 v, float4 quat)
 {
-	float3 abc = float3(quat.w * quat.w - dot(quat.xyz, quat.xyz),
-					2 * dot(quat.xyz, v), quat.w + quat.w);
-
-	return abc.x * v + abc.y * quat.xyz + abc.z * cross(quat.xyz, v);
+	return v + cross(quat.xyz, cross(quat.xyz, v) + quat.w * v) * 2;
 }
 
 float4 rotation_quat(float3 yaw_pitch_roll)

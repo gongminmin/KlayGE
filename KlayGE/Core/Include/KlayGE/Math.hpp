@@ -564,6 +564,9 @@ namespace KlayGE
 		Quaternion_T<T> to_quaternion(Matrix4_T<T> const & mat);
 
 		template <typename T>
+		Quaternion_T<T> to_quaternion(Vector_T<T, 3> const & tangent, Vector_T<T, 3> const & binormal, Vector_T<T, 3> const & normal, int bits);
+
+		template <typename T>
 		Quaternion_T<T> rotation_axis(Vector_T<T, 3> const & v, T const & angle);
 
 		template <typename T>

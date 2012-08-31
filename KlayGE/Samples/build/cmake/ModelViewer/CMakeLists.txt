@@ -10,6 +10,7 @@ SET(HEADER_FILES
 
 SET(EFFECT_FILES
 	${KLAYGE_PROJECT_DIR}/Samples/media/ModelViewer/ModelViewer.fxml
+	${KLAYGE_PROJECT_DIR}/Samples/media/ModelViewer/MVUtil.fxml
 )
 
 SET(UI_FILES
