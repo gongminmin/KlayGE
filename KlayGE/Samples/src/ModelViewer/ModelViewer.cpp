@@ -666,12 +666,19 @@ void ModelViewerApp::MeshChangedHandler(KlayGE::UIComboBox const & sender)
 			}
 
 			oss << oss_one.str();
-
-			dialog_model_->Control<UIComboBox>(id_visualize_)->AddItem(L"Vertex " + oss_one.str(), rl->VertexStreamFormat(i)[j]);
 		}
 
 		dialog_model_->Control<UIListBox>(id_vertex_streams_)->AddItem(oss.str());
 	}
+
+	dialog_model_->Control<UIComboBox>(id_visualize_)->AddItem(L"Vertex Position", VEU_Position);
+	dialog_model_->Control<UIComboBox>(id_visualize_)->AddItem(L"Vertex Normal", VEU_Normal);
+	dialog_model_->Control<UIComboBox>(id_visualize_)->AddItem(L"Vertex Diffuse", VEU_Diffuse);
+	dialog_model_->Control<UIComboBox>(id_visualize_)->AddItem(L"Vertex Specular", VEU_Specular);
+	dialog_model_->Control<UIComboBox>(id_visualize_)->AddItem(L"Vertex Blend weight", VEU_BlendWeight);
+	dialog_model_->Control<UIComboBox>(id_visualize_)->AddItem(L"Vertex Blend index", VEU_BlendIndex);
+	dialog_model_->Control<UIComboBox>(id_visualize_)->AddItem(L"Vertex Tangent", VEU_Tangent);
+	dialog_model_->Control<UIComboBox>(id_visualize_)->AddItem(L"Vertex Binormal", VEU_Binormal);
 
 	dialog_model_->Control<UIListBox>(id_textures_)->RemoveAllItems();
 	boost::shared_ptr<ModelObject> model = checked_pointer_cast<ModelObject>(model_);
@@ -712,8 +719,8 @@ void ModelViewerApp::VisualizeChangedHandler(KlayGE::UIComboBox const & sender)
 		}
 		catch (boost::bad_any_cast&)
 		{
-			vertex_element ve = boost::any_cast<vertex_element>(data);
-			checked_pointer_cast<ModelObject>(model_)->VisualizeVertex(ve.usage, ve.usage_index);
+			VertexElementUsage veu = boost::any_cast<VertexElementUsage>(data);
+			checked_pointer_cast<ModelObject>(model_)->VisualizeVertex(veu, 0);
 		}
 
 		deferred_rendering_->SSVOEnabled(0, false);
