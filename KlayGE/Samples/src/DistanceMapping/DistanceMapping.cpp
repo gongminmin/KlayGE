@@ -106,83 +106,46 @@ namespace
 				indices, indices + sizeof(indices) / sizeof(indices[0]),
 				xyzs, xyzs + sizeof(xyzs) / sizeof(xyzs[0]), texs, normal_float3);
 
+			Quaternion tangent_quat[sizeof(xyzs) / sizeof(xyzs[0])];
 			for (uint32_t j = 0; j < sizeof(xyzs) / sizeof(xyzs[0]); ++ j)
 			{
-				normal_float3[j] = MathLib::normalize(normal_float3[j]) * 0.5f + 0.5f;
+				float3 n = MathLib::normalize(normal_float3[j]);
+				float3 b = MathLib::normalize(binormal_float3[j]);
 
 				float3 t(tangent_float4[j].x(), tangent_float4[j].y(), tangent_float4[j].z());
-				t = MathLib::normalize(t) * 0.5f + 0.5f;
-				tangent_float4[j] = float4(t.x(), t.y(), t.z(), tangent_float4[j].w() * 0.5f + 0.5f);
+				t = MathLib::normalize(t);
+				
+				tangent_quat[j] = MathLib::to_quaternion(t, b, n, 8);
 			}
 
-			uint32_t normal[sizeof(xyzs) / sizeof(xyzs[0])];
 			uint32_t tangent[sizeof(xyzs) / sizeof(xyzs[0])];
 			ElementFormat fmt;
-			if (rf.RenderEngineInstance().DeviceCaps().vertex_format_support(EF_A2BGR10))
+			if (rf.RenderEngineInstance().DeviceCaps().vertex_format_support(EF_ABGR8))
 			{
-				fmt = EF_A2BGR10;
+				fmt = EF_ABGR8;
 
 				for (uint32_t j = 0; j < sizeof(xyzs) / sizeof(xyzs[0]); ++ j)
 				{
-					normal[j] = MathLib::clamp<uint32_t>(static_cast<uint32_t>(normal_float3[j].x() * 1023), 0, 1023)
-						| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(normal_float3[j].y() * 1023), 0, 1023) << 10)
-						| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(normal_float3[j].z() * 1023), 0, 1023) << 20);
-				}
-				for (uint32_t j = 0; j < sizeof(xyzs) / sizeof(xyzs[0]); ++ j)
-				{
-					tangent[j] = MathLib::clamp<uint32_t>(static_cast<uint32_t>(tangent_float4[j].x() * 1023), 0, 1023)
-						| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(tangent_float4[j].y() * 1023), 0, 1023) << 10)
-						| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(tangent_float4[j].z() * 1023), 0, 1023) << 20)
-						| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(tangent_float4[j].w() * 3), 0, 3) << 30);
+					tangent[j] = (MathLib::clamp<uint32_t>(static_cast<uint32_t>((tangent_quat[j].x() * 0.5f + 0.5f) * 255), 0, 255) << 0)
+						| (MathLib::clamp<uint32_t>(static_cast<uint32_t>((tangent_quat[j].y() * 0.5f + 0.5f) * 255), 0, 255) << 8)
+						| (MathLib::clamp<uint32_t>(static_cast<uint32_t>((tangent_quat[j].z() * 0.5f + 0.5f) * 255), 0, 255) << 16)
+						| (MathLib::clamp<uint32_t>(static_cast<uint32_t>((tangent_quat[j].w() * 0.5f + 0.5f) * 255), 0, 255) << 24);
 				}
 			}
 			else
 			{
-				if (rf.RenderEngineInstance().DeviceCaps().vertex_format_support(EF_ARGB8))
+				BOOST_ASSERT(rf.RenderEngineInstance().DeviceCaps().vertex_format_support(EF_ARGB8));
+
+				fmt = EF_ARGB8;
+
+				for (uint32_t j = 0; j < sizeof(xyzs) / sizeof(xyzs[0]); ++ j)
 				{
-					fmt = EF_ARGB8;
-
-					for (uint32_t j = 0; j < sizeof(xyzs) / sizeof(xyzs[0]); ++ j)
-					{
-						normal[j] = (MathLib::clamp<uint32_t>(static_cast<uint32_t>(normal_float3[j].x() * 255), 0, 255) << 16)
-							| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(normal_float3[j].y() * 255), 0, 255) << 8)
-							| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(normal_float3[j].z() * 255), 0, 255) << 0);
-					}
-					for (uint32_t j = 0; j < sizeof(xyzs) / sizeof(xyzs[0]); ++ j)
-					{
-						tangent[j] = (MathLib::clamp<uint32_t>(static_cast<uint32_t>(tangent_float4[j].x() * 255), 0, 255) << 16)
-							| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(tangent_float4[j].y() * 255), 0, 255) << 8)
-							| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(tangent_float4[j].z() * 255), 0, 255) << 0)
-							| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(tangent_float4[j].w() * 255), 0, 255) << 24);
-					}
-				}
-				else
-				{
-					BOOST_ASSERT(rf.RenderEngineInstance().DeviceCaps().vertex_format_support(EF_ABGR8));
-
-					fmt = EF_ABGR8;
-
-					for (uint32_t j = 0; j < sizeof(xyzs) / sizeof(xyzs[0]); ++ j)
-					{
-						normal[j] = (MathLib::clamp<uint32_t>(static_cast<uint32_t>(normal_float3[j].x() * 255), 0, 255) << 0)
-							| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(normal_float3[j].y() * 255), 0, 255) << 8)
-							| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(normal_float3[j].z() * 255), 0, 255) << 16);
-					}
-					for (uint32_t j = 0; j < sizeof(xyzs) / sizeof(xyzs[0]); ++ j)
-					{
-						tangent[j] = (MathLib::clamp<uint32_t>(static_cast<uint32_t>(tangent_float4[j].x() * 255), 0, 255) << 0)
-							| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(tangent_float4[j].y() * 255), 0, 255) << 8)
-							| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(tangent_float4[j].z() * 255), 0, 255) << 16)
-							| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(tangent_float4[j].w() * 255), 0, 255) << 24);
-					}
+					tangent[j] = (MathLib::clamp<uint32_t>(static_cast<uint32_t>((tangent_quat[j].x() * 0.5f + 0.5f) * 255), 0, 255) << 16)
+						| (MathLib::clamp<uint32_t>(static_cast<uint32_t>((tangent_quat[j].y() * 0.5f + 0.5f) * 255), 0, 255) << 8)
+						| (MathLib::clamp<uint32_t>(static_cast<uint32_t>((tangent_quat[j].z() * 0.5f + 0.5f) * 255), 0, 255) << 0)
+						| (MathLib::clamp<uint32_t>(static_cast<uint32_t>((tangent_quat[j].w() * 0.5f + 0.5f) * 255), 0, 255) << 24);
 				}
 			}
-			
-			init_data.row_pitch = sizeof(normal);
-			init_data.slice_pitch = 0;
-			init_data.data = normal;
-			GraphicsBufferPtr normal_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, &init_data);
-			rl_->BindVertexStream(normal_vb, boost::make_tuple(vertex_element(VEU_Normal, 0, fmt)));
 			
 			init_data.row_pitch = sizeof(tangent);
 			init_data.slice_pitch = 0;
