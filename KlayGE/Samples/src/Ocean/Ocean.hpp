@@ -36,21 +36,11 @@ private:
 	KlayGE::SceneObjectPtr ocean_;
 	KlayGE::SceneObjectPtr sky_box_;
 	KlayGE::SceneObjectPtr sun_flare_;
-	KlayGE::PostProcessPtr copy_pp_;
-	KlayGE::PostProcessPtr copy_composed_pp_;
-	KlayGE::PostProcessPtr depth_to_linear_pp_;
-
 	KlayGE::FirstPersonCameraController fpcController_;
 
-	KlayGE::TexturePtr refraction_tex_;
-	KlayGE::TexturePtr refraction_depth_tex_;
-	KlayGE::FrameBufferPtr refraction_fb_;
-	KlayGE::TexturePtr reflection_tex_;
-	KlayGE::TexturePtr reflection_blur_tex_;
-	KlayGE::FrameBufferPtr reflection_fb_;
-	KlayGE::PostProcessPtr blur_y_;
-	KlayGE::TexturePtr composed_tex_;
-	KlayGE::FrameBufferPtr composed_fb_;
+	KlayGE::DeferredRenderingLayerPtr deferred_rendering_;
+
+	KlayGE::PostProcessPtr fog_pp_;
 
 	KlayGE::UIDialogPtr dialog_params_;
 	int id_dmap_dim_static_;
@@ -70,6 +60,8 @@ private:
 	int id_choppy_scale_static_;
 	int id_choppy_scale_slider_;
 	int id_fps_camera_;
+
+	KlayGE::DirectionalLightSourcePtr sun_light_;
 };
 
-#endif		// _OCEAN_HPP
+#endif		// _DEFERREDRENDERING_HPP

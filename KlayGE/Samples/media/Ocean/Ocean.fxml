@@ -1,20 +1,21 @@
 <?xml version='1.0'?>
 
 <effect>
+	<include name="DeferredRenderingUtil.fxml"/>
+	<include name="util.fxml"/>
 	<include name="Lighting.fxml"/>
 	<include name="Noise.fxml"/>
+	<include name="GBuffer.fxml"/>
 	<include name="InfTerrain.fxml"/>
-	<include name="util.fxml"/>
+	<include name="PostProcess.fxml"/>
+	<include name="SSR.fxml"/>
 
 	<macro name="BLEND_FACTOR" value="0.6"/>
 	
-	<parameter type="float3" name="sun_dir"/>
-	<parameter type="float" name="sun_shineness" value="128"/>
-	<parameter type="float3" name="sun_color"/>
-	<parameter type="float3" name="fog_color"/>
 	<parameter type="float3" name="waterbody_color" x="0.07" y="0.15" z="0.2"/>
-	<parameter type="float3" name="waterbody_specular_color" x="5" y="5" z="5"/>
+	<parameter type="float3" name="waterbody_specular_color" x="10" y="10" z="10"/>	
 	<parameter type="float" name="patch_length"/>
+	<parameter type="float3" name="fog_color"/>
 
 	<parameter type="texture2D" name="displacement_tex_0"/>
 	<parameter type="texture2D" name="displacement_tex_1"/>
@@ -22,19 +23,20 @@
 	<parameter type="texture2D" name="gradient_tex_0"/>
 	<parameter type="texture2D" name="gradient_tex_1"/>
 	<parameter type="texture2DArray" name="gradient_tex_array"/>
-	<parameter type="texture2D" name="refraction_tex"/>
-	<parameter type="texture2D" name="refraction_depth_tex"/>
 	<parameter type="texture2D" name="reflection_tex"/>
 
-	<cbuffer name="per_frame">
-		<parameter type="float4x4" name="mvp"/>
+	<cbuffer name="per_frame">		
 		<parameter type="int2" name="frames"/>
 		<parameter type="float3" name="min_disp0"/>
 		<parameter type="float3" name="min_disp1"/>
 		<parameter type="float3" name="disp_range0"/>
 		<parameter type="float3" name="disp_range1"/>
 		<parameter type="float" name="interpolate_frac"/>
+		<parameter type="float4x4" name="inv_view"/>
 	</cbuffer>
+
+	<parameter type="texture2D" name="g_buffer_tex"/>
+	<parameter type="texture2D" name="opaque_shading_tex"/>
 
 	<parameter type="sampler" name="linear_wrap_sampler">
 		<state name="filtering" value="min_mag_mip_linear"/>
@@ -55,10 +57,116 @@
 
 	<shader>
 		<![CDATA[
-void OceanVS(float2 pos : POSITION,
-					out float4 eye_dir_fog : TEXCOORD0,
+void OceanGBufferVS(float2 pos : POSITION,
+			out float3 oTexCoordDepth : TEXCOORD0,
+			out float2 noise_grad : TEXCOORD1,
+#ifdef NOPERSPECTIVE_SUPPORT
+			out noperspective float2 oScreenTc : TEXCOORD2,
+#else
+			out float3 oScreenTc : TEXCOORD2,
+#endif
+			out float4 oPos : SV_Position)
+{
+	float4 pos_os = GetInfTerrainPosOS(pos, 10);
+	float2 tex_coord = pos_os.xz / (patch_length * 3.2f);
+
+#if KLAYGE_MAX_TEX_ARRAY_LEN > 1
+	float3 disp0 = displacement_tex_array.SampleLevel(linear_wrap_sampler, float3(tex_coord, frames.x), 0).xyz;
+	float3 disp1 = displacement_tex_array.SampleLevel(linear_wrap_sampler, float3(tex_coord, frames.y), 0).xyz;
+#else
+	float3 disp0 = displacement_tex_0.SampleLevel(linear_wrap_sampler, tex_coord, 0).xyz;
+	float3 disp1 = displacement_tex_1.SampleLevel(linear_wrap_sampler, tex_coord, 0).xyz;
+#endif
+
+	float3 disp = lerp(min_disp0 + disp0 * disp_range0, min_disp1 + disp1 * disp_range1, interpolate_frac);
+
+	float lacunarity = 1.93485736f;
+	float gain = 1.0f / 1.93485736f;
+	
+	float3 eye_dir = eye_pos - pos_os.xyz;
+	float fog_scale = saturate(length(eye_dir.xz) / 1200.0f);
+	float height_scale = 1 - fog_scale;
+
+	pos_os.xz += disp.xy;
+	
+	float noise_height = fBm(tex_coord, 3, lacunarity, gain);
+
+	float d = 1.0f / 64;
+	float fx = fBm(tex_coord + float2(d, 0), 3, lacunarity, gain);
+	float fy = fBm(tex_coord + float2(0, d), 3, lacunarity, gain);
+	noise_grad = (float2(fx, fy) - noise_height) * stretch;
+
+	pos_os.y = base_level + lerp(noise_height * stretch, disp.z, BLEND_FACTOR) * height_scale;
+	
+	float3 normal;
+	float4 tangent;
+	normal.xz = (float2(fx, fy) - pos_os.y) * stretch;
+	normal = normalize(float3(normal.x, 1, normal.z));
+	tangent.xyz = normalize(float3(1, (fx - pos_os.y) * stretch, 0));
+	tangent.w = 1;
+	
+	oPos = mul(pos_os, mvp);
+	
+	oTexCoordDepth.xy = tex_coord;
+	oTexCoordDepth.z = oPos.w;
+	
+	oScreenTc.xy = oPos.xy / oPos.w * 0.5f;
+	oScreenTc.y *= KLAYGE_FLIPPING;
+	oScreenTc.xy += 0.5f;
+	
+#ifndef NOPERSPECTIVE_SUPPORT
+	oScreenTc.z = oPos.w;
+	oScreenTc.xy *= oScreenTc.z;
+#endif
+}
+
+void OceanGBufferAlphaBlendMRTPS(float3 texcoord_depth : TEXCOORD0, float2 noise_grad : TEXCOORD1,
+#ifdef NOPERSPECTIVE_SUPPORT
+					noperspective float2 screen_tc : TEXCOORD2,
+#else
+					float3 screen_tc_w : TEXCOORD2,
+#endif
+					out float4 mrt_0 : SV_Target0, out float4 mrt_1 : SV_Target1)
+{
+#ifndef NOPERSPECTIVE_SUPPORT
+	float2 screen_tc = screen_tc_w.xy / screen_tc_w.z;
+#endif
+
+	clip(opaque_depth_tex.Sample(point_sampler, screen_tc).r - texcoord_depth.z);
+
+#if KLAYGE_MAX_TEX_ARRAY_LEN > 1
+	float2 gradient0 = gradient_tex_array.Sample(linear_wrap_sampler, float3(texcoord_depth.xy, frames.x)).xy;
+	float2 gradient1 = gradient_tex_array.Sample(linear_wrap_sampler, float3(texcoord_depth.xy * 6.4f, frames.x)).xy;
+	float2 gradient2 = gradient_tex_array.Sample(linear_wrap_sampler, float3(texcoord_depth.xy, frames.y)).xy;
+	float2 gradient3 = gradient_tex_array.Sample(linear_wrap_sampler, float3(texcoord_depth.xy * 6.4f, frames.y)).xy;
+#else
+	float2 gradient0 = gradient_tex_0.Sample(linear_wrap_sampler, texcoord_depth.xy).xy;
+	float2 gradient1 = gradient_tex_0.Sample(linear_wrap_sampler, texcoord_depth.xy * 6.4f).xy;
+	float2 gradient2 = gradient_tex_1.Sample(linear_wrap_sampler, texcoord_depth.xy).xy;
+	float2 gradient3 = gradient_tex_1.Sample(linear_wrap_sampler, texcoord_depth.xy * 6.4f).xy;
+#endif
+
+	float2 gradient = lerp(lerp(gradient0, gradient1, 0.3f), lerp(gradient2, gradient3, 0.3f), interpolate_frac) * 2 - 1;
+	gradient = lerp(noise_grad, gradient, BLEND_FACTOR);
+	
+	float3 normal = normalize(mul(float3(gradient.x, 1, gradient.y), (float3x3)model_view));
+
+	float3 diffuse = waterbody_color;
+	float specular = waterbody_specular_color.x;
+	
+	StoreMRTGBuffer(normal, specular, shininess, diffuse,
+		mrt_0, mrt_1);
+}
+
+void OceanSpecialShadingAlphaBlendVS(float2 pos : POSITION,
+					out float3 eye_dir : TEXCOORD0,
 					out float4 tex_coord_noise_grad : TEXCOORD1,
 					out float4 pos_ss : TEXCOORD2,
+#ifdef NOPERSPECTIVE_SUPPORT
+					out noperspective float2 oTc : TEXCOORD3,
+#else
+					out float3 oTc : TEXCOORD3,
+#endif
 					out float4 oPos : SV_Position)
 {
 	float4 pos_os = GetInfTerrainPosOS(pos, 10);
@@ -77,10 +185,11 @@ void OceanVS(float2 pos : POSITION,
 	float lacunarity = 1.93485736f;
 	float gain = 1.0f / 1.93485736f;
 
-	eye_dir_fog.xyz = eye_pos - pos_os.xyz;
-	float fog_scale = saturate(length(eye_dir_fog.xz) / 1200.0f);
+	eye_dir = eye_pos - pos_os.xyz;
+	float fog_scale = saturate(length(eye_dir.xz) / 1200.0f);
 	float height_scale = 1 - fog_scale;
-	eye_dir_fog.w = fog_scale;
+	
+	eye_dir = mul(eye_dir, (float3x3)model_view);
 
 	pos_os.xz += disp.xy;
 	
@@ -97,94 +206,81 @@ void OceanVS(float2 pos : POSITION,
 	
 	tex_coord_noise_grad = float4(tex_coord, noise_grad);
 	pos_ss = oPos;
+	
+	oTc.xy = oPos.xy / oPos.w;
+	oTc.y *= KLAYGE_FLIPPING;
+	oTc.xy = oTc.xy * 0.5f + 0.5f;
+
+#ifndef NOPERSPECTIVE_SUPPORT
+	oTc.z = oPos.w;
+	oTc.xy *= oTc.z;
+#endif
 }
 
-float4 OceanPS(float4 eye_dir_fog : TEXCOORD0, float4 tex_coord_noise_grad : TEXCOORD1, float4 pos_ss : TEXCOORD2) : SV_Target0
-{
-#if KLAYGE_MAX_TEX_ARRAY_LEN > 1
-	float2 gradient0 = gradient_tex_array.Sample(linear_wrap_sampler, float3(tex_coord_noise_grad.xy, frames.x)).xy;
-	float2 gradient1 = gradient_tex_array.Sample(linear_wrap_sampler, float3(tex_coord_noise_grad.xy * 6.4f, frames.x)).xy;
-	float2 gradient2 = gradient_tex_array.Sample(linear_wrap_sampler, float3(tex_coord_noise_grad.xy, frames.y)).xy;
-	float2 gradient3 = gradient_tex_array.Sample(linear_wrap_sampler, float3(tex_coord_noise_grad.xy * 6.4f, frames.y)).xy;
+float4 OceanSpecialShadingAlphaBlendPS(float3 eye_dir : TEXCOORD0, float4 tex_coord_noise_grad : TEXCOORD1, float4 pos_ss : TEXCOORD2,
+#ifdef NOPERSPECTIVE_SUPPORT
+	noperspective float2 tc : TEXCOORD3
 #else
-	float2 gradient0 = gradient_tex_0.Sample(linear_wrap_sampler, tex_coord_noise_grad.xy).xy;
-	float2 gradient1 = gradient_tex_0.Sample(linear_wrap_sampler, tex_coord_noise_grad.xy * 6.4f).xy;
-	float2 gradient2 = gradient_tex_1.Sample(linear_wrap_sampler, tex_coord_noise_grad.xy).xy;
-	float2 gradient3 = gradient_tex_1.Sample(linear_wrap_sampler, tex_coord_noise_grad.xy * 6.4f).xy;
+	float3 tc_w : TEXCOORD3
+#endif
+	) : SV_Target
+{
+#ifndef NOPERSPECTIVE_SUPPORT
+	float2 tc = tc_w.xy / tc_w.z;
 #endif
 
-	float2 gradient = lerp(lerp(gradient0, gradient1, 0.3f), lerp(gradient2, gradient3, 0.3f), interpolate_frac) * 2 - 1;
-	gradient = lerp(tex_coord_noise_grad.zw, gradient, BLEND_FACTOR);
+	float4 ndc = g_buffer_tex.Sample(point_sampler, tc);
+	float3 normal = GetNormal(ndc);
 	
-	float3 normal = normalize(float3(gradient.x, 1, gradient.y));
+	float3 normal_ws = mul(normal, (float3x3)inv_view);
+	
+	eye_dir = normalize(eye_dir);
 
-	pos_ss.xyz /= pos_ss.w;
-	float2 ss_tc = float2(pos_ss.x, KLAYGE_FLIPPING * pos_ss.y) / 2 + 0.5f;
-
-	float2 bump = normal.xz / pos_ss.z;
-	float3 reflection = reflection_tex.Sample(linear_clamp_sampler, float2(ss_tc.x, 1 - ss_tc.y) + bump * 0.05f).xyz;
-
-	float no_water_depth = refraction_depth_tex.Sample(point_clamp_sampler, ss_tc).x;
+	float2 bump = normal_ws.xz / (pos_ss.z / pos_ss.w);
+	float4 reflection4 = FrontSideSSR(tc, normal, -eye_dir, 1);
+	float3 reflection = reflection4.xyz * reflection4.w;
+	
+	float no_water_depth = opaque_depth_tex.Sample(point_clamp_sampler, tc).x;
 
 	float3 refraction;
-	float offseted_depth = refraction_depth_tex.Sample(point_clamp_sampler, ss_tc + bump * 0.2f).x;
+	float offseted_depth = opaque_depth_tex.Sample(point_clamp_sampler, tc + bump * 0.2f).x;
 	if (offseted_depth < pos_ss.w)
 	{
-		refraction = refraction_tex.Sample(linear_clamp_sampler, ss_tc).rgb;
+		refraction = opaque_shading_tex.Sample(linear_clamp_sampler, tc).rgb;
 	}
 	else
 	{
-		refraction.r = refraction_tex.Sample(linear_clamp_sampler, ss_tc + bump * 0.10f).r;
-		refraction.g = refraction_tex.Sample(linear_clamp_sampler, ss_tc + bump * 0.15f).g;
-		refraction.b = refraction_tex.Sample(linear_clamp_sampler, ss_tc + bump * 0.20f).b;
+		refraction.r = opaque_shading_tex.Sample(linear_clamp_sampler, tc + bump * 0.10f).r;
+		refraction.g = opaque_shading_tex.Sample(linear_clamp_sampler, tc + bump * 0.15f).g;
+		refraction.b = opaque_shading_tex.Sample(linear_clamp_sampler, tc + bump * 0.20f).b;
 	}
 
 	float water_depth = clamp(no_water_depth - pos_ss.w, 0, 100.0f);
-
-	float3 eye_dir = normalize(eye_dir_fog.xyz);
+	
 	float fresnel = fresnel_term_schlick(eye_dir, normal, 0.027f).x;
 
-	float3 ambient = waterbody_color * 0.1f;
-	float3 diffuse = waterbody_color;
-
-	float3 light_dir = normalize(-sun_dir);
-	float3 halfway = normalize(light_dir + eye_dir);
-	float3 specular = sun_color * waterbody_specular_color * specular_normalize_factor(sun_shineness) * roughness_term(halfway, normal, sun_shineness);
-
-	float n_dot_l = max(0.0f, directional_lighting(-light_dir, normal));
-	float3 water_color = ambient + (diffuse + specular) * n_dot_l;
-	float3 sss = 0.9f * (max(0, dot(-normal, light_dir)) + max(0, dot(-eye_dir, light_dir))) * exp(-water_depth * 0.04f) * waterbody_color;
-	water_color = lerp(lerp(water_color, refraction * exp(-water_depth * 0.05f), saturate(10 / pos_ss.w)), reflection, fresnel) + sss;
-
-	return float4(lerp(water_color, fog_color, eye_dir_fog.w), saturate(water_depth * 0.1f));
+	float3 water_color = lerp(refraction * exp(-water_depth * 0.05f) * saturate(10 / pos_ss.w), reflection, fresnel);
+	
+	return float4(water_color, saturate(water_depth * 0.1f));
 }
 		]]>
 	</shader>
 
-	<technique name="Ocean">
+	<technique name="OceanGBufferAlphaBlendFrontMRT" inherit="GBufferAlphaBlendFrontMRTTech">
 		<pass name="p0">
-			<state name="polygon_mode" value="fill"/>
+			<state name="vertex_shader" value="OceanGBufferVS()"/>
+			<state name="pixel_shader" value="OceanGBufferAlphaBlendMRTPS()"/>
+		</pass>
+	</technique>
 
-			<state name="blend_enable" value="true"/>
-			<state name="src_blend" value="src_alpha"/>
-			<state name="dest_blend" value="inv_src_alpha"/>
-			
-			<state name="vertex_shader" value="OceanVS()"/>
-			<state name="pixel_shader" value="OceanPS()"/>
+	<technique name="OceanSpecialShadingAlphaBlendFront" inherit="SpecialShadingAlphaBlendFrontTech">
+		<pass name="p0">
+			<state name="vertex_shader" value="OceanSpecialShadingAlphaBlendVS()"/>
+			<state name="pixel_shader" value="OceanSpecialShadingAlphaBlendPS()"/>
 		</pass>
 	</technique>
 
 	<parameter type="float2" name="scale_bias" x="4.2" y="-0.2"/>
-	<parameter type="float4x4" name="inv_mvp"/>
-
-	<parameter type="textureCUBE" name="skybox_tex"/>
-	<parameter type="textureCUBE" name="skybox_C_tex"/>
-	<parameter type="sampler" name="skybox_sampler">
-		<state name="filtering" value="min_mag_linear_mip_point"/>
-		<state name="address_u" value="clamp"/>
-		<state name="address_v" value="clamp"/>
-		<state name="address_w" value="clamp"/>
-	</parameter>
 
 	<shader>
 		<![CDATA[
@@ -196,7 +292,12 @@ void FoggySkyBoxVS(float4 pos : POSITION,
 	texcoord0 = mul(pos, inv_mvp).xyz;
 }
 
-float4 FoggySkyBoxPS(float3 texCoord0 : TEXCOORD0) : SV_Target
+void GBufferFoggySkyBoxMRTPS(out float4 mrt_0 : SV_Target0, out float4 mrt_1 : SV_Target1)
+{
+	mrt_0 = mrt_1 = 0;
+}
+
+float4 ShadingFoggySkyBoxPS(float3 texCoord0 : TEXCOORD0) : SV_Target
 {
 	float fog = saturate(normalize(texCoord0).y * scale_bias.x + scale_bias.y);
 	fog *= fog * (3 - 2 * fog);
@@ -209,14 +310,17 @@ float4 FoggySkyBoxPS(float3 texCoord0 : TEXCOORD0) : SV_Target
 		]]>
 	</shader>
 
-	<technique name="FoggySkyBox">
+	<technique name="GBufferFoggySkyBoxMRT" inherit="GBufferSkyBoxMRTTech">
 		<pass name="p0">
-			<state name="cull_mode" value="none"/>
-			<state name="depth_write_mask" value="0"/>
-			<state name="depth_func" value="equal"/>
-
 			<state name="vertex_shader" value="FoggySkyBoxVS()"/>
-			<state name="pixel_shader" value="FoggySkyBoxPS()"/>
+			<state name="pixel_shader" value="GBufferFoggySkyBoxMRTPS()"/>
+		</pass>
+	</technique>
+
+	<technique name="ShadingFoggySkyBox" inherit="ShadingSkyBoxTech">
+		<pass name="p0">
+			<state name="vertex_shader" value="FoggySkyBoxVS()"/>
+			<state name="pixel_shader" value="ShadingFoggySkyBoxPS()"/>
 		</pass>
 	</technique>
 </effect>

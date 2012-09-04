@@ -1,18 +1,13 @@
 <?xml version='1.0'?>
 
 <effect>
+	<include name="DeferredRenderingUtil.fxml"/>
+	<include name="util.fxml"/>
 	<include name="Lighting.fxml"/>
 	<include name="Noise.fxml"/>
+	<include name="GBuffer.fxml"/>
 	<include name="InfTerrain.fxml"/>
-
-	<cbuffer name="per_frame">
-		<parameter type="float4x4" name="mvp"/>
-	</cbuffer>
 	
-	<parameter type="float3" name="sun_dir"/>
-	<parameter type="float3" name="sun_color"/>
-	<parameter type="float3" name="fog_color"/>
-
 	<parameter type="texture2D" name="ground_tex_detail">
 		<annotation type="string" name="SasResourceAddress" value="RealSand38BoH.dds"/>
 	</parameter>
@@ -28,47 +23,82 @@
 
 	<shader>
 		<![CDATA[
-void TerrainVS(float2 pos : POSITION,
-					out float3 normal_os_fog : TEXCOORD0,
-					out float2 tex_coord : TEXCOORD1,
-					out float4 oPos : SV_Position)
+void NoiseTerrain(float2 pos,
+			out float3 oNormal,
+			out float2 oTexcoord,
+			out float4 oPos)
 {
 	float lacunarity = 1.93485736f;
 	float gain = 1.0f / 1.93485736f;
 
 	float4 pos_os = GetInfTerrainPosOS(pos, 0);
 
-	float fog_scale = saturate(length(pos_os.xz - eye_pos.xz) / 1200.0f);
-
 	pos_os.y = fBm(pos_os.xz / 192, 5, lacunarity, gain);
 	
 	float d = 1.0f;
 	float fx = fBm((pos_os.xz + float2(d, 0)) / 192, 5, lacunarity, gain);
 	float fy = fBm((pos_os.xz + float2(0, d)) / 192, 5, lacunarity, gain);
-	normal_os_fog.xy = (float2(fx, fy) - pos_os.y) * stretch;
+	oNormal.xz = -(float2(fx, fy) - pos_os.y) * stretch;
+	oNormal = normalize(float3(oNormal.x, 1, oNormal.z));
 	pos_os.y *= stretch;
 	pos_os.y += base_level;
 
 	oPos = mul(pos_os, mvp);
-	tex_coord = pos_os.xz / 8;
-	normal_os_fog.z = fog_scale;
+	oTexcoord = pos_os.xz / 8;
 }
 
-float4 TerrainPS(float3 normal_os_fog : TEXCOORD0, float2 tex_coord : TEXCOORD1) : SV_Target0
+void TerrainGBufferVS(float2 pos : POSITION,
+			out float2 oTexCoord : TEXCOORD0,
+			out float4 oNormalFog : TEXCOORD1,
+			out float4 oPos : SV_Position)
 {
-	float3 color = (sun_color * directional_lighting(-sun_dir, normalize(float3(normal_os_fog.x, 1, normal_os_fog.y))) + 0.1f)
-		* (ground_tex_detail.Sample(linear_sampler, tex_coord).rgb + ground_tex_base.Sample(linear_sampler, tex_coord / 16).rgb) / 2;
-	return float4(lerp(saturate(color), fog_color, normal_os_fog.z), 1);
+	float3 normal;
+	NoiseTerrain(pos,
+		normal, oTexCoord, oPos);
+
+	oNormalFog.xyz = mul(normal, (float3x3)model_view);
+	oNormalFog.w = saturate(oPos.w / 1200.0f);
+}
+
+void TerrainGBufferMRTPS(float2 texcoord : TEXCOORD0, float4 normal_fog : TEXCOORD1,
+					out float4 mrt_0 : SV_Target0, out float4 mrt_1 : SV_Target1)
+{
+	float3 normal = normalize(normal_fog.xyz);
+	float3 fitting_tc = FittingCoord(normal);
+	normal *= fitting_tc.z * normals_fitting_tex.Sample(bilinear_sampler, fitting_tc.xy).r;
+
+	float3 diffuse = (ground_tex_detail.Sample(aniso_sampler, texcoord).rgb + ground_tex_base.Sample(aniso_sampler, texcoord / 16).rgb) / 2;
+	float specular = 0;
+	
+	StoreMRTGBuffer(normal, specular, shininess, diffuse,
+		mrt_0, mrt_1);
 }
 		]]>
 	</shader>
 	
-	<technique name="Terrain">
+	<technique name="TerrainGBufferMRT" inherit="GBufferMRTTech">
 		<pass name="p0">
-			<state name="polygon_mode" value="fill"/>
-			
-			<state name="vertex_shader" value="TerrainVS()"/>
-			<state name="pixel_shader" value="TerrainPS()"/>
+			<state name="vertex_shader" value="TerrainGBufferVS()"/>
+			<state name="pixel_shader" value="TerrainGBufferMRTPS()"/>
 		</pass>
 	</technique>
+
+	<shader>
+		<![CDATA[
+void TerrainGenShadowMapVS(float2 pos : POSITION,
+						out float2 oTc : TEXCOORD0,
+						out float4 oPos : SV_Position)
+{
+	float3 normal;
+	NoiseTerrain(pos,
+		normal, oTc, oPos);
+}
+		]]>
+	</shader>
+
+	<technique name="TerrainGenShadowMap" inherit="GenShadowMapTech">
+		<pass name="p0">
+			<state name="vertex_shader" value="TerrainGenShadowMapVS()"/>
+		</pass>
+	</technique>	
 </effect>

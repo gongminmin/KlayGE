@@ -3,32 +3,26 @@
 #include <KlayGE/Util.hpp>
 #include <KlayGE/Math.hpp>
 #include <KlayGE/Font.hpp>
-#include <KlayGE/ElementFormat.hpp>
-#include <KlayGE/Framebuffer.hpp>
-#include <KlayGE/RenderLayout.hpp>
-#include <KlayGE/Renderable.hpp>
-#include <KlayGE/RenderableHelper.hpp>
+#include <KlayGE/FrameBuffer.hpp>
 #include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/RenderEffect.hpp>
 #include <KlayGE/SceneManager.hpp>
 #include <KlayGE/Context.hpp>
 #include <KlayGE/ResLoader.hpp>
 #include <KlayGE/RenderSettings.hpp>
-#include <KlayGE/GraphicsBuffer.hpp>
+#include <KlayGE/Mesh.hpp>
 #include <KlayGE/SceneObjectHelper.hpp>
 #include <KlayGE/PostProcess.hpp>
 #include <KlayGE/InfTerrain.hpp>
 #include <KlayGE/LensFlare.hpp>
 #include <KlayGE/Camera.hpp>
-
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/InputFactory.hpp>
+#include <KlayGE/DeferredRenderingLayer.hpp>
 
-#include <vector>
 #include <sstream>
-#include <iostream>
-#include <boost/tuple/tuple.hpp>
 #include <boost/bind.hpp>
+#include <boost/typeof/typeof.hpp>
 
 #include "OceanSimulator.hpp"
 #include "Ocean.hpp"
@@ -45,69 +39,33 @@ namespace
 			: InfTerrainRenderable(L"Terrain")
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-			technique_ = rf.LoadEffect("Terrain.fxml")->TechniqueByName("Terrain");
+			this->BindDeferredEffect(rf.LoadEffect("Terrain.fxml"));
+			gbuffer_mrt_tech_ = deferred_effect_->TechniqueByName("TerrainGBufferMRT");
+			technique_ = gbuffer_mrt_tech_;
 
 			this->SetStretch(strength);
 			this->SetBaseLevel(base_level);
-		}
 
-		void SunDirection(float3 const & dir)
-		{
-			*(technique_->Effect().ParameterByName("sun_dir")) = -dir;
-		}
+			diffuse_tex_ = SyncLoadTexture("RealSand40BoH.dds", EAH_GPU_Read | EAH_Immutable);
 
-		void SunColor(Color const & clr)
-		{
-			*(technique_->Effect().ParameterByName("sun_color")) = float3(clr.r(), clr.g(), clr.b());
-		}
-
-		void FogColor(Color const & clr)
-		{
-			*(technique_->Effect().ParameterByName("fog_color")) = float3(clr.r(), clr.g(), clr.b());
-		}
-
-		void ReflectionPass(bool ref)
-		{
-			ref_ = ref;
-		}
-
-		void ReflectionPlane(Plane const & plane)
-		{
-			plane_ = plane;
+			model_mat_ = float4x4::Identity();
 		}
 
 		void OnRenderBegin()
 		{
-			App3DFramework const & app = Context::Instance().AppInstance();
-			Camera const & camera = app.ActiveCamera();
-
-			float4x4 const & view = camera.ViewMatrix();
-			float4x4 proj = camera.ProjMatrix();
-
-			float3 look_at_vec = float3(camera.LookAt().x() - camera.EyePos().x(), 0, camera.LookAt().z() - camera.EyePos().z());
-			if (MathLib::dot(look_at_vec, look_at_vec) < 1e-6f)
+			InfTerrainRenderable::OnRenderBegin();
+					
+			switch (type_)
 			{
-				look_at_vec = float3(0, 0, 1);
+			case PT_OpaqueMRTGBuffer:
+				*diffuse_clr_param_ = float4(0, 0, 0, 1);
+				*normal_map_enabled_param_ = static_cast<int32_t>(0);
+				*height_map_enabled_param_ = static_cast<int32_t>(0);
+				*specular_level_param_ = float4(0, 0, 0, 0);
+				*shininess_param_ = 0.001f;
+				break;
 			}
-			float4x4 virtual_view = MathLib::look_at_lh(camera.EyePos(), camera.EyePos() + look_at_vec);
-			float4x4 inv_virtual_view = MathLib::inverse(virtual_view);
-
-			if (ref_)
-			{
-				MathLib::oblique_clipping(proj, 
-					MathLib::mul(plane_, MathLib::transpose(MathLib::inverse(view))));
-				Context::Instance().RenderFactoryInstance().RenderEngineInstance().AdjustPerspectiveMatrix(proj);
-			}
-
-			float4x4 vp = view * proj;
-			*(technique_->Effect().ParameterByName("mvp")) = vp;
-			*(technique_->Effect().ParameterByName("inv_virtual_view")) = inv_virtual_view;
-			*(technique_->Effect().ParameterByName("eye_pos")) = camera.EyePos();
 		}
-
-	private:
-		bool ref_;
-		Plane plane_;
 	};
 
 	class TerrainObject : public InfTerrainSceneObject
@@ -120,31 +78,6 @@ namespace
 
 			renderable_ = MakeSharedPtr<RenderTerrain>(base_level_, strength_);
 		}
-
-		void SunDirection(float3 const & dir)
-		{
-			checked_pointer_cast<RenderTerrain>(renderable_)->SunDirection(dir);
-		}
-
-		void SunColor(Color const & clr)
-		{
-			checked_pointer_cast<RenderTerrain>(renderable_)->SunColor(clr);
-		}
-
-		void FogColor(Color const & clr)
-		{
-			checked_pointer_cast<RenderTerrain>(renderable_)->FogColor(clr);
-		}
-
-		void ReflectionPass(bool ref)
-		{
-			checked_pointer_cast<RenderTerrain>(renderable_)->ReflectionPass(ref);
-		}
-
-		void ReflectionPlane(Plane const & plane)
-		{
-			checked_pointer_cast<RenderTerrain>(renderable_)->ReflectionPlane(plane);
-		}
 	};
 
 	class RenderOcean : public InfTerrainRenderable
@@ -154,25 +87,17 @@ namespace
 			: InfTerrainRenderable(L"Ocean")
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-			technique_ = rf.LoadEffect("Ocean.fxml")->TechniqueByName("Ocean");
+			this->BindDeferredEffect(rf.LoadEffect("Ocean.fxml"));
+			gbuffer_alpha_blend_front_mrt_tech_ = deferred_effect_->TechniqueByName("OceanGBufferAlphaBlendFrontMRT");
+			special_shading_alpha_blend_front_tech_ = deferred_effect_->TechniqueByName("OceanSpecialShadingAlphaBlendFront");
+			technique_ = gbuffer_alpha_blend_front_mrt_tech_;
 
 			this->SetStretch(strength);
 			this->SetBaseLevel(base_level);
-		}
 
-		void SunDirection(float3 const & dir)
-		{
-			*(technique_->Effect().ParameterByName("sun_dir")) = -dir;
-		}
-
-		void SunColor(Color const & clr)
-		{
-			*(technique_->Effect().ParameterByName("sun_color")) = float3(clr.r(), clr.g(), clr.b());
-		}
-
-		void FogColor(Color const & clr)
-		{
-			*(technique_->Effect().ParameterByName("fog_color")) = float3(clr.r(), clr.g(), clr.b());
+			model_mat_ = float4x4::Identity();
+			effect_attrs_ |= EA_TransparencyFront;
+			effect_attrs_ |= EA_SpecialShading;
 		}
 
 		void PatchLength(float patch_length)
@@ -220,19 +145,52 @@ namespace
 			*(technique_->Effect().ParameterByName("interpolate_frac")) = frac;
 		}
 
-		void RefractionTex(TexturePtr const & tex)
+		void OnRenderBegin()
 		{
-			*(technique_->Effect().ParameterByName("refraction_tex")) = tex;
-		}
+			InfTerrainRenderable::OnRenderBegin();
+					
+			switch (type_)
+			{
+			case PT_OpaqueMRTGBuffer:
+			case PT_TransparencyBackMRTGBuffer:
+			case PT_TransparencyFrontMRTGBuffer:
+				*diffuse_clr_param_ = float4(0.07f, 0.15f, 0.2f, 0);
+				*normal_map_enabled_param_ = static_cast<int32_t>(0);
+				*height_map_enabled_param_ = static_cast<int32_t>(0);
+				*specular_level_param_ = float4(5, 0, 0, 0);
+				*shininess_param_ = 0.5f;
+				*opaque_depth_tex_param_ = Context::Instance().DeferredRenderingLayerInstance()->OpaqueDepthTex(0);
+				break;
 
-		void RefractionDepthTex(TexturePtr const & tex)
-		{
-			*(technique_->Effect().ParameterByName("refraction_depth_tex")) = tex;
-		}
+			case PT_OpaqueSpecialShading:
+			case PT_TransparencyBackSpecialShading:
+			case PT_TransparencyFrontSpecialShading:
+				*diffuse_tex_param_ = TexturePtr();
+				*emit_tex_param_ = TexturePtr();
+				*emit_clr_param_ = float4(0, 0, 0, 0);
+				*opacity_clr_param_ = 1.0f;
+				*opacity_map_enabled_param_ = static_cast<int32_t>(0);
+				*(technique_->Effect().ParameterByName("opaque_shading_tex")) = Context::Instance().DeferredRenderingLayerInstance()->OpaqueShadingTex(0);
+				*(technique_->Effect().ParameterByName("g_buffer_tex")) = Context::Instance().DeferredRenderingLayerInstance()->TransparencyFrontGBufferRT0Tex(0);
+				{
+					App3DFramework const & app = Context::Instance().AppInstance();
+					Camera const & camera = app.ActiveCamera();
+					*(technique_->Effect().ParameterByName("proj")) = camera.ProjMatrix();
+					*(technique_->Effect().ParameterByName("inv_proj")) = MathLib::inverse(camera.ProjMatrix());
+					float q = camera.FarPlane() / (camera.FarPlane() - camera.NearPlane());
+					float2 near_q(camera.NearPlane() * q, q);
+					*(technique_->Effect().ParameterByName("near_q")) = near_q;
+					*(technique_->Effect().ParameterByName("ray_length")) = camera.FarPlane() - camera.NearPlane();
+					*(technique_->Effect().ParameterByName("min_samples")) = static_cast<int32_t>(20);
+					*(technique_->Effect().ParameterByName("max_samples")) = static_cast<int32_t>(30);
+					*(technique_->Effect().ParameterByName("ray_length_fadeout_factor")) = 0.6f;
+					*(technique_->Effect().ParameterByName("inv_view")) = MathLib::inverse(camera.ViewMatrix());
+				}
+				*(technique_->Effect().ParameterByName("front_side_depth_tex")) = Context::Instance().DeferredRenderingLayerInstance()->OpaqueDepthTex(0);
+				*(technique_->Effect().ParameterByName("front_side_tex")) = Context::Instance().DeferredRenderingLayerInstance()->OpaqueShadingTex(0);
 
-		void ReflectionTex(TexturePtr const & tex)
-		{
-			*(technique_->Effect().ParameterByName("reflection_tex")) = tex;
+				break;
+			}
 		}
 	};
 
@@ -250,7 +208,6 @@ namespace
 			renderable_ = MakeSharedPtr<RenderOcean>(base_level_, strength_);
 
 			ocean_plane_ = MathLib::from_point_normal(float3(0, base_level_, 0), float3(0, 1, 0));
-			reflect_mat_ = MathLib::reflect(ocean_plane_);
 
 			// The size of displacement map.
 			ocean_param_.dmap_dim			= 512;
@@ -424,21 +381,6 @@ namespace
 			}
 		}
 
-		void SunDirection(float3 const & dir)
-		{
-			checked_pointer_cast<RenderOcean>(renderable_)->SunDirection(dir);
-		}
-
-		void SunColor(Color const & clr)
-		{
-			checked_pointer_cast<RenderOcean>(renderable_)->SunColor(clr);
-		}
-
-		void FogColor(Color const & clr)
-		{
-			checked_pointer_cast<RenderOcean>(renderable_)->FogColor(clr);
-		}
-
 		Plane const & OceanPlane() const
 		{
 			return ocean_plane_;
@@ -591,30 +533,6 @@ namespace
 				displacement_params_[ocean_param_.num_frames + frame0], displacement_params_[ocean_param_.num_frames + frame1]);
 		}
 
-		void RefractionTex(TexturePtr const & tex)
-		{
-			checked_pointer_cast<RenderOcean>(renderable_)->RefractionTex(tex);
-		}
-
-		void RefractionDepthTex(TexturePtr const & tex)
-		{
-			checked_pointer_cast<RenderOcean>(renderable_)->RefractionDepthTex(tex);
-		}
-
-		void ReflectionTex(TexturePtr const & tex)
-		{
-			checked_pointer_cast<RenderOcean>(renderable_)->ReflectionTex(tex);
-		}
-
-		void ReflectViewParams(float3& reflect_eye, float3& reflect_at, float3& reflect_up,
-			float3 const & eye, float3 const & at, float3 const & up)
-		{
-			reflect_eye = MathLib::transform_coord(eye, reflect_mat_);
-			reflect_at = MathLib::transform_coord(at, reflect_mat_);
-			reflect_up = MathLib::transform_normal(up, reflect_mat_);
-			reflect_up *= -1.0f;
-		}
-
 		int DMapDim() const
 		{
 			return ocean_param_.dmap_dim;
@@ -724,7 +642,6 @@ namespace
 		bool dirty_;
 
 		Plane ocean_plane_;
-		float4x4 reflect_mat_;
 
 		boost::shared_ptr<OceanSimulator> ocean_simulator_;
 
@@ -736,14 +653,23 @@ namespace
 		std::vector<float3> displacement_params_;
 	};
 
-	
 	class RenderableFoggyHDRSkyBox : public RenderableHDRSkyBox
 	{
 	public:
 		RenderableFoggyHDRSkyBox()
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-			this->Technique(rf.LoadEffect("Ocean.fxml")->TechniqueByName("FoggySkyBox"));
+			RenderEffectPtr effect = rf.LoadEffect("Ocean.fxml");
+
+			gbuffer_mrt_tech_ = effect->TechniqueByName("GBufferFoggySkyBoxMRT");
+			shading_tech_ = effect->TechniqueByName("ShadingFoggySkyBox");
+			special_shading_tech_ = shading_tech_;
+			technique_ = gbuffer_mrt_tech_;
+
+			skybox_Ccube_tex_ep_ = effect->ParameterByName("skybox_C_tex");
+			skybox_cube_tex_ep_ = effect->ParameterByName("skybox_tex");
+			depth_far_ep_ = effect->ParameterByName("depth_far");
+			inv_mvp_ep_ = effect->ParameterByName("inv_mvp");
 		}
 		
 		void FogColor(Color const & clr)
@@ -773,18 +699,21 @@ namespace
 		Exit,
 	};
 
-	InputActionDefine actions[] = 
+	InputActionDefine actions[] =
 	{
 		InputActionDefine(Exit, KS_Escape),
 	};
 }
-
 
 int main()
 {
 	ResLoader::Instance().AddPath("../../Samples/media/Common");
 
 	Context::Instance().LoadCfg("KlayGE.cfg");
+
+	ContextCfg cfg = Context::Instance().Config();
+	cfg.deferred_rendering = true;
+	Context::Instance().Config(cfg);
 
 	OceanApp app;
 	app.Create();
@@ -801,9 +730,7 @@ OceanApp::OceanApp()
 
 bool OceanApp::ConfirmDevice() const
 {
-	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-	RenderEngine& re = rf.RenderEngineInstance();
-	RenderDeviceCaps const & caps = re.DeviceCaps();
+	RenderDeviceCaps const & caps = Context::Instance().RenderFactoryInstance().RenderEngineInstance().DeviceCaps();
 	if (caps.max_shader_model < 3)
 	{
 		return false;
@@ -814,26 +741,22 @@ bool OceanApp::ConfirmDevice() const
 void OceanApp::InitObjects()
 {
 	this->LookAt(float3(0, 20, 0), float3(0, 19.8f, 1));
-	this->Proj(0.01f, 3000);
+	this->Proj(0.1f, 3000);
 
-	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-	RenderEngine& re = rf.RenderEngineInstance();
+	boost::function<TexturePtr()> y_cube_tl = ASyncLoadTexture("DH001cross_y.dds", EAH_GPU_Read | EAH_Immutable);
+	boost::function<TexturePtr()> c_cube_tl = ASyncLoadTexture("DH001cross_c.dds", EAH_GPU_Read | EAH_Immutable);
 
-	// ½¨Á¢×ÖÌå
-	font_ = rf.MakeFont("gkai00mp.kfont");
+	font_ = Context::Instance().RenderFactoryInstance().MakeFont("gkai00mp.kfont");
 
-	TexturePtr skybox_y_tex = SyncLoadTexture("DH001cross_y.dds", EAH_GPU_Read | EAH_Immutable);
-	TexturePtr skybox_c_tex = SyncLoadTexture("DH001cross_c.dds", EAH_GPU_Read | EAH_Immutable);
+	deferred_rendering_ = Context::Instance().DeferredRenderingLayerInstance();
+	deferred_rendering_->SSVOEnabled(0, false);
 
-	terrain_ = MakeSharedPtr<TerrainObject>();
-	terrain_->AddToSceneManager();
-	ocean_ = MakeSharedPtr<OceanObject>();
-	ocean_->AddToSceneManager();
-	sun_flare_ = MakeSharedPtr<LensFlareSceneObject>();
-	checked_pointer_cast<LensFlareSceneObject>(sun_flare_)->Direction(float3(-0.267835f, 0.0517653f, 0.960315f));
-	sun_flare_->AddToSceneManager();
-
-	Color sun_color(1, 0.7f, 0.5f, 1);
+	sun_light_ = MakeSharedPtr<DirectionalLightSource>();
+	sun_light_->Attrib(LSA_NoShadow);//LSA_IndirectLighting);
+	sun_light_->Direction(float3(-0.267835f, 0.0517653f, 0.960315f));
+	sun_light_->Color(float3(1, 0.7f, 0.5f));
+	sun_light_->AddToSceneManager();
+	
 	Color fog_color(0.61f, 0.52f, 0.62f, 1);
 	if (Context::Instance().Config().graphics_cfg.gamma)
 	{
@@ -842,19 +765,25 @@ void OceanApp::InitObjects()
 		fog_color.b() = MathLib::srgb_to_linear(fog_color.b());
 	}
 
-	checked_pointer_cast<TerrainObject>(terrain_)->SunDirection(checked_pointer_cast<LensFlareSceneObject>(sun_flare_)->Direction());
-	checked_pointer_cast<TerrainObject>(terrain_)->SunColor(sun_color);
-	checked_pointer_cast<TerrainObject>(terrain_)->FogColor(fog_color);
-	checked_pointer_cast<OceanObject>(ocean_)->SunDirection(checked_pointer_cast<LensFlareSceneObject>(sun_flare_)->Direction());
-	checked_pointer_cast<OceanObject>(ocean_)->SunColor(sun_color);
-	checked_pointer_cast<OceanObject>(ocean_)->FogColor(fog_color);
+	terrain_ = MakeSharedPtr<TerrainObject>();
+	terrain_->AddToSceneManager();
 
-	checked_pointer_cast<TerrainObject>(terrain_)->ReflectionPlane(checked_pointer_cast<OceanObject>(ocean_)->OceanPlane());
+	ocean_ = MakeSharedPtr<OceanObject>();
+	ocean_->AddToSceneManager();
 
 	sky_box_ = MakeSharedPtr<SceneObjectFoggyHDRSkyBox>();
-	checked_pointer_cast<SceneObjectFoggyHDRSkyBox>(sky_box_)->CompressedCubeMap(skybox_y_tex, skybox_c_tex);
+	checked_pointer_cast<SceneObjectFoggyHDRSkyBox>(sky_box_)->CompressedCubeMap(y_cube_tl(), c_cube_tl());
 	checked_pointer_cast<SceneObjectFoggyHDRSkyBox>(sky_box_)->FogColor(fog_color);
 	sky_box_->AddToSceneManager();
+
+	sun_flare_ = MakeSharedPtr<LensFlareSceneObject>();
+	checked_pointer_cast<LensFlareSceneObject>(sun_flare_)->Direction(float3(-0.267835f, 0.0517653f, 0.960315f));
+	sun_flare_->AddToSceneManager();
+
+	fog_pp_ = LoadPostProcess(ResLoader::Instance().Open("Fog.ppml"), "fog");
+	fog_pp_->SetParam(1, float3(fog_color.r(), fog_color.g(), fog_color.b()));
+	fog_pp_->SetParam(2, 1.0f / 1200);
+	deferred_rendering_->AtmosphericPostProcess(fog_pp_);
 
 	fpcController_.Scalers(0.05f, 1.0f);
 
@@ -865,23 +794,6 @@ void OceanApp::InitObjects()
 	action_handler_t input_handler = MakeSharedPtr<input_signal>();
 	input_handler->connect(boost::bind(&OceanApp::InputHandler, this, _1, _2));
 	inputEngine.ActionMap(actionMap, input_handler, true);
-
-	copy_pp_ = LoadPostProcess(ResLoader::Instance().Open("Copy.ppml"), "copy");
-	copy_composed_pp_ = LoadPostProcess(ResLoader::Instance().Open("Copy.ppml"), "copy");
-	depth_to_linear_pp_ = LoadPostProcess(ResLoader::Instance().Open("DepthToSM.ppml"), "DepthToSM");
-
-	refraction_fb_ = rf.MakeFrameBuffer();
-	refraction_fb_->GetViewport()->camera = re.CurFrameBuffer()->GetViewport()->camera;
-
-	Camera& scene_camera = this->ActiveCamera();
-	reflection_fb_ = rf.MakeFrameBuffer();
-	reflection_fb_->GetViewport()->camera->ProjParams(scene_camera.FOV(), scene_camera.Aspect(),
-			scene_camera.NearPlane(), scene_camera.FarPlane());
-
-	blur_y_ = MakeSharedPtr<SeparableGaussianFilterPostProcess>(RenderTechniquePtr(), 8, 1.0f, false);
-
-	composed_fb_ = rf.MakeFrameBuffer();
-	composed_fb_->GetViewport()->camera = re.CurFrameBuffer()->GetViewport()->camera;
 
 	UIManager::Instance().Load(ResLoader::Instance().Open("Ocean.uiml"));
 	dialog_params_ = UIManager::Instance().GetDialog("Parameters");
@@ -934,80 +846,8 @@ void OceanApp::OnResize(uint32_t width, uint32_t height)
 {
 	App3DFramework::OnResize(width, height);
 
-	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-
-	ElementFormat fmt;
-	if (rf.RenderEngineInstance().DeviceCaps().rendertarget_format_support(EF_D24S8, 1, 0))
-	{
-		fmt = EF_D24S8;
-	}
-	else
-	{
-		BOOST_ASSERT(rf.RenderEngineInstance().DeviceCaps().rendertarget_format_support(EF_D16, 1, 0));
-
-		fmt = EF_D16;
-	}
-	TexturePtr refraction_ds_tex = rf.MakeTexture2D(width, height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
-	RenderViewPtr ds_view = rf.Make2DDepthStencilRenderView(*refraction_ds_tex, 0, 1, 0);
-	if (rf.RenderEngineInstance().DeviceCaps().rendertarget_format_support(EF_R16F, 1, 0))
-	{
-		fmt = EF_R16F;
-	}
-	else
-	{
-		if (rf.RenderEngineInstance().DeviceCaps().rendertarget_format_support(EF_R32F, 1, 0))
-		{
-			fmt = EF_R32F;
-		}
-		else
-		{
-			BOOST_ASSERT(rf.RenderEngineInstance().DeviceCaps().rendertarget_format_support(EF_ABGR16F, 1, 0));
-
-			fmt = EF_ABGR16F;
-		}
-	}
-	refraction_depth_tex_ = rf.MakeTexture2D(width, height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
-
-	if (rf.RenderEngineInstance().DeviceCaps().rendertarget_format_support(EF_B10G11R11F, 1, 0))
-	{
-		fmt = EF_B10G11R11F;
-	}
-	else
-	{
-		BOOST_ASSERT(rf.RenderEngineInstance().DeviceCaps().rendertarget_format_support(EF_ABGR16F, 1, 0));
-
-		fmt = EF_ABGR16F;
-	}
-	refraction_tex_ = rf.MakeTexture2D(width, height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
-	refraction_fb_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*refraction_tex_, 0, 1, 0));
-	refraction_fb_->Attach(FrameBuffer::ATT_DepthStencil, ds_view);
-	reflection_tex_ = rf.MakeTexture2D(width / 2, height / 2, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
-	reflection_fb_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*reflection_tex_, 0, 1, 0));
-	reflection_blur_tex_ = rf.MakeTexture2D(width / 2, height / 2, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
-	reflection_fb_->Attach(FrameBuffer::ATT_DepthStencil, rf.Make2DDepthStencilRenderView(width / 2, height / 2, EF_D16, 1, 0));
-	reflection_fb_->GetViewport()->left = 0;
-	reflection_fb_->GetViewport()->top = 0;
-	reflection_fb_->GetViewport()->width = width / 2;
-	reflection_fb_->GetViewport()->height = height / 2;
-
-	blur_y_->InputPin(0, reflection_tex_);
-	blur_y_->OutputPin(0, reflection_blur_tex_);
-
-	composed_tex_ = rf.MakeTexture2D(width, height, 1, 1, reflection_tex_->Format(), 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
-	composed_fb_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*composed_tex_, 0, 1, 0));
-	composed_fb_->Attach(FrameBuffer::ATT_DepthStencil, ds_view);
-
-	copy_pp_->InputPin(0, composed_tex_);
-
-	copy_composed_pp_->InputPin(0, refraction_tex_);
-	copy_composed_pp_->OutputPin(0, composed_tex_);
-
-	depth_to_linear_pp_->InputPin(0, refraction_ds_tex);
-	depth_to_linear_pp_->OutputPin(0, refraction_depth_tex_);
-
-	checked_pointer_cast<OceanObject>(ocean_)->RefractionTex(refraction_tex_);
-	checked_pointer_cast<OceanObject>(ocean_)->RefractionDepthTex(refraction_depth_tex_);
-	checked_pointer_cast<OceanObject>(ocean_)->ReflectionTex(reflection_blur_tex_);
+	RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+	deferred_rendering_->SetupViewport(0, re.CurFrameBuffer(), 0);
 
 	UIManager::Instance().SettleCtrls(width, height);
 }
@@ -1144,59 +984,5 @@ void OceanApp::DoUpdateOverlay()
 
 uint32_t OceanApp::DoUpdate(uint32_t pass)
 {
-	RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-
-	switch (pass)
-	{
-	case 0:
-		re.BindFrameBuffer(refraction_fb_);
-		re.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->ClearDepth(1);
-		checked_pointer_cast<TerrainObject>(terrain_)->ReflectionPass(false);
-		terrain_->Visible(true);
-		sky_box_->Visible(true);
-		ocean_->Visible(false);
-		sun_flare_->Visible(false);
-		return App3DFramework::URV_Need_Flush;
-
-	case 1:
-		{
-			Camera& scene_camera = this->ActiveCamera();
-
-			float q = scene_camera.FarPlane() / (scene_camera.FarPlane() - scene_camera.NearPlane());
-			float2 near_q(scene_camera.NearPlane() * q, q);
-			depth_to_linear_pp_->SetParam(0, near_q);
-			depth_to_linear_pp_->Apply();
-
-			re.BindFrameBuffer(reflection_fb_);
-			re.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->ClearDepth(1);
-			checked_pointer_cast<TerrainObject>(terrain_)->ReflectionPass(true);
-			terrain_->Visible(true);
-			sky_box_->Visible(true);
-			ocean_->Visible(false);
-			sun_flare_->Visible(false);
-
-			float3 reflect_eye, reflect_at, reflect_up;
-			checked_pointer_cast<OceanObject>(ocean_)->ReflectViewParams(reflect_eye, reflect_at, reflect_up,
-				scene_camera.EyePos(), scene_camera.LookAt(), scene_camera.UpVec());
-			reflection_fb_->GetViewport()->camera->ViewParams(reflect_eye, reflect_at, reflect_up);
-		}
-		return App3DFramework::URV_Need_Flush;
-
-	case 2:
-		blur_y_->Apply();
-		copy_composed_pp_->Apply();
-		re.BindFrameBuffer(composed_fb_);
-		terrain_->Visible(false);
-		sky_box_->Visible(false);
-		ocean_->Visible(true);
-		sun_flare_->Visible(checked_pointer_cast<LensFlareSceneObject>(sun_flare_)->LFVisible());
-		return App3DFramework::URV_Need_Flush;
-
-	default:
-		re.BindFrameBuffer(FrameBufferPtr());
-		re.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->ClearDepth(1);
-		copy_pp_->Apply();
-
-		return App3DFramework::URV_Flushed | App3DFramework::URV_Finished;
-	}
+	return deferred_rendering_->Update(pass);
 }
