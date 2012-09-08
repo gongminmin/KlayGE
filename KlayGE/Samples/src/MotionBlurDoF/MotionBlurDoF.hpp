@@ -49,6 +49,11 @@ private:
 	KlayGE::PostProcessPtr clear_float_;
 	KlayGE::PostProcessPtr depth_of_field_;
 	KlayGE::PostProcessPtr motion_blur_;
+	KlayGE::PostProcessPtr depth_of_field_copy_pp_;
+	KlayGE::PostProcessPtr motion_blur_copy_pp_;
+
+	bool dof_on_;
+	bool mb_on_;
 
 	KlayGE::UIDialogPtr dof_dialog_;
 	KlayGE::UIDialogPtr mb_dialog_;

@@ -45,11 +45,6 @@ float4 DepthOfFieldBlurFactorPS(float2 tex_coord0 : TEXCOORD0) : SV_Target
 {
 	return BlurFactor(tex_coord0);
 }
-
-float4 DepthOfFieldPassThroughPS(float2 tex_coord0 : TEXCOORD0) : SV_Target
-{
-	return src_tex.Sample(point_sampler, tex_coord0) + mid_value;
-}
 		]]>
 	</shader>
 	
@@ -70,16 +65,6 @@ float4 DepthOfFieldPassThroughPS(float2 tex_coord0 : TEXCOORD0) : SV_Target
 
 			<state name="vertex_shader" value="PostProcessVS()"/>
 			<state name="pixel_shader" value="DepthOfFieldBlurFactorPS()"/>
-		</pass>
-	</technique>
-
-	<technique name="DepthOfFieldPassThrough">
-		<pass name="p0">
-			<state name="depth_enable" value="false"/>
-			<state name="depth_write_mask" value="0"/>
-
-			<state name="vertex_shader" value="PostProcessVS()"/>
-			<state name="pixel_shader" value="DepthOfFieldPassThroughPS()"/>
 		</pass>
 	</technique>
 </effect>

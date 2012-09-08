@@ -261,28 +261,8 @@ namespace
 					std::vector<std::string>(1, "src_tex"),
 					std::vector<std::string>(1, "output"),
 					Context::Instance().RenderFactoryInstance().LoadEffect("DepthOfFieldPP.fxml")->TechniqueByName("DepthOfField")),
-				dof_on_(true), show_blur_factor_(false)
+				show_blur_factor_(false)
 		{
-		}
-
-		void DoFOn(bool on)
-		{
-			dof_on_ = on;
-			if (dof_on_)
-			{
-				if (show_blur_factor_)
-				{
-					technique_ = technique_->Effect().TechniqueByName("DepthOfFieldBlurFactor");
-				}
-				else
-				{
-					technique_ = technique_->Effect().TechniqueByName("DepthOfField");
-				}
-			}
-			else
-			{
-				technique_ = technique_->Effect().TechniqueByName("DepthOfFieldPassThrough");
-			}
 		}
 
 		void FocusPlane(float focus_plane)
@@ -312,14 +292,7 @@ namespace
 			}
 			else
 			{
-				if (dof_on_)
-				{
-					technique_ = technique_->Effect().TechniqueByName("DepthOfField");
-				}
-				else
-				{
-					technique_ = technique_->Effect().TechniqueByName("DepthOfFieldPassThrough");
-				}
+				technique_ = technique_->Effect().TechniqueByName("DepthOfField");
 			}
 		}
 		bool ShowBlurFactor() const
@@ -342,7 +315,7 @@ namespace
 
 		void Apply()
 		{
-			if (!show_blur_factor_ && dof_on_)
+			if (!show_blur_factor_)
 			{
 				sat_.Apply();
 				*(technique_->Effect().ParameterByName("sat_tex")) = sat_.OutputPin(0);
@@ -362,8 +335,6 @@ namespace
 		}
 
 	private:
-		bool dof_on_;
-
 		SummedAreaTablePostProcess sat_;
 
 		float focus_plane_;
@@ -376,7 +347,7 @@ namespace
 	public:
 		MotionBlur()
 			: PostProcess(L"MotionBlur"),
-				mb_on_(true), show_motion_vec_(false)
+				show_motion_vec_(false)
 		{
 			input_pins_.push_back(std::make_pair("src_tex", TexturePtr()));
 			input_pins_.push_back(std::make_pair("motion_vec_tex", TexturePtr()));
@@ -384,26 +355,6 @@ namespace
 			output_pins_.push_back(std::make_pair("output", TexturePtr()));
 
 			this->Technique(Context::Instance().RenderFactoryInstance().LoadEffect("MotionBlurPP.fxml")->TechniqueByName("MotionBlur"));
-		}
-
-		void MBOn(bool on)
-		{
-			mb_on_ = on;
-			if (mb_on_)
-			{
-				if (show_motion_vec_)
-				{
-					technique_ = technique_->Effect().TechniqueByName("MotionBlurMotionVec");
-				}
-				else
-				{
-					technique_ = technique_->Effect().TechniqueByName("MotionBlur");
-				}
-			}
-			else
-			{
-				technique_ = technique_->Effect().TechniqueByName("MotionBlurPassThrough");
-			}
 		}
 
 		void ShowMotionVector(bool show)
@@ -415,14 +366,7 @@ namespace
 			}
 			else
 			{
-				if (mb_on_)
-				{
-					technique_ = technique_->Effect().TechniqueByName("MotionBlur");
-				}
-				else
-				{
-					technique_ = technique_->Effect().TechniqueByName("MotionBlurPassThrough");
-				}
+				technique_ = technique_->Effect().TechniqueByName("MotionBlur");
 			}
 		}
 		bool ShowMotionVector() const
@@ -431,7 +375,6 @@ namespace
 		}
 
 	private:
-		bool mb_on_;
 		bool show_motion_vec_;
 	};
 
@@ -465,6 +408,7 @@ int main()
 
 MotionBlurDoFApp::MotionBlurDoFApp()
 					: App3DFramework("Motion Blur and Depth of field"),
+						mb_on_(true), dof_on_(true),
 						num_objs_rendered_(0), num_renderable_rendered_(0), num_primitives_rendered_(0), num_vertices_rendered_(0)
 {
 	ResLoader::Instance().AddPath("../../Samples/media/MotionBlurDoF");
@@ -517,8 +461,10 @@ void MotionBlurDoFApp::InitObjects()
 	inputEngine.ActionMap(actionMap, input_handler, true);
 
 	depth_of_field_ = MakeSharedPtr<DepthOfField>();
-
+	depth_of_field_copy_pp_ = LoadPostProcess(ResLoader::Instance().Open("Copy.ppml"), "copy");
+	
 	motion_blur_ = MakeSharedPtr<MotionBlur>();
+	motion_blur_copy_pp_ = LoadPostProcess(ResLoader::Instance().Open("Copy.ppml"), "copy");
 
 	clear_float_ = LoadPostProcess(ResLoader::Instance().Open("ClearFloat.ppml"), "clear_float");
 	float4 clear_clr(0.2f, 0.4f, 0.6f, 1);
@@ -617,8 +563,11 @@ void MotionBlurDoFApp::OnResize(uint32_t width, uint32_t height)
 	motion_blur_->InputPin(0, clr_depth_tex_);
 	motion_blur_->InputPin(1, motion_vec_tex_);
 	motion_blur_->OutputPin(0, mbed_tex_);
+	motion_blur_copy_pp_->InputPin(0, clr_depth_tex_);
+	motion_blur_copy_pp_->OutputPin(0, mbed_tex_);
 
 	depth_of_field_->InputPin(0, mbed_tex_);
+	depth_of_field_copy_pp_->InputPin(0, mbed_tex_);
 
 	UIManager::Instance().SettleCtrls(width, height);
 }
@@ -635,14 +584,13 @@ void MotionBlurDoFApp::InputHandler(InputEngine const & /*sender*/, InputAction 
 
 void MotionBlurDoFApp::DoFOnHandler(KlayGE::UICheckBox const & sender)
 {
-	bool dof_on = sender.GetChecked();
-	checked_pointer_cast<DepthOfField>(depth_of_field_)->DoFOn(dof_on);
+	dof_on_ = sender.GetChecked();
 
-	dof_dialog_->Control<UIStatic>(id_focus_plane_static_)->SetEnabled(dof_on);
-	dof_dialog_->Control<UISlider>(id_focus_plane_slider_)->SetEnabled(dof_on);
-	dof_dialog_->Control<UIStatic>(id_focus_range_static_)->SetEnabled(dof_on);
-	dof_dialog_->Control<UISlider>(id_focus_range_slider_)->SetEnabled(dof_on);
-	dof_dialog_->Control<UICheckBox>(id_blur_factor_)->SetEnabled(dof_on);
+	dof_dialog_->Control<UIStatic>(id_focus_plane_static_)->SetEnabled(dof_on_);
+	dof_dialog_->Control<UISlider>(id_focus_plane_slider_)->SetEnabled(dof_on_);
+	dof_dialog_->Control<UIStatic>(id_focus_range_static_)->SetEnabled(dof_on_);
+	dof_dialog_->Control<UISlider>(id_focus_range_slider_)->SetEnabled(dof_on_);
+	dof_dialog_->Control<UICheckBox>(id_blur_factor_)->SetEnabled(dof_on_);
 }
 
 void MotionBlurDoFApp::FocusPlaneChangedHandler(KlayGE::UISlider const & sender)
@@ -662,10 +610,9 @@ void MotionBlurDoFApp::BlurFactorHandler(KlayGE::UICheckBox const & sender)
 
 void MotionBlurDoFApp::MBOnHandler(KlayGE::UICheckBox const & sender)
 {
-	bool mb_on = sender.GetChecked();
-	checked_pointer_cast<MotionBlur>(motion_blur_)->MBOn(mb_on);
+	mb_on_ = sender.GetChecked();
 
-	mb_dialog_->Control<UICheckBox>(id_motion_vec_)->SetEnabled(mb_on);
+	mb_dialog_->Control<UICheckBox>(id_motion_vec_)->SetEnabled(mb_on_);
 }
 
 void MotionBlurDoFApp::MotionVecHandler(KlayGE::UICheckBox const & sender)
@@ -772,8 +719,22 @@ uint32_t MotionBlurDoFApp::DoUpdate(uint32_t pass)
 		num_primitives_rendered_ = sceneMgr.NumPrimitivesRendered();
 		num_vertices_rendered_ = sceneMgr.NumVerticesRendered();
 
-		motion_blur_->Apply();
-		depth_of_field_->Apply();
+		if (mb_on_)
+		{
+			motion_blur_->Apply();
+		}
+		else
+		{
+			motion_blur_copy_pp_->Apply();
+		}
+		if (dof_on_)
+		{
+			depth_of_field_->Apply();
+		}
+		else
+		{
+			depth_of_field_copy_pp_->Apply();
+		}
 
 		renderEngine.BindFrameBuffer(FrameBufferPtr());
 		renderEngine.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->ClearDepth(1.0f);
