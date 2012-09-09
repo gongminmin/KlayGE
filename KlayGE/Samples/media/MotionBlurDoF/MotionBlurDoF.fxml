@@ -19,11 +19,9 @@
 
 	<shader>
 		<![CDATA[
-void CalcColorDepth(float4 pos_ws, float3 normal, float3 clr,
-			out float4 oClrDepth, out float4 oPos)
+float3 CalcColor(float3 pos_ws, float3 normal_ws, float3 clr)
 {
-	oPos = mul(mul(pos_ws, view), proj);
-	oClrDepth = float4(saturate(clr * point_lighting(light_in_world, pos_ws.xyz, normal)) - mid_value.rgb, oPos.w * inv_depth_range);
+	return clr * (0.02f + saturate(point_lighting(light_in_world, pos_ws, normal_ws))) - mid_value.rgb;
 }
 
 void ColorDepthInstancedVS(float4 pos			: POSITION,
@@ -38,29 +36,41 @@ void ColorDepthInstancedVS(float4 pos			: POSITION,
 					float3 clr			: COLOR0,
 
 					out float4 oClrDepth : TEXCOORD0,
+					out float3 oPosWS : TEXCOORD1,
+					out float3 oNormalWS : TEXCOORD2,
 					out float4 oPos		: SV_Position)
 {
 	float4x4 model = { row0, row1, row2, float4(0, 0, 0, 1) };
 
 	float4 pos_ws = mul(model, pos);
 	normal = mul((float3x3)model, normal * 2 - 1);
-	CalcColorDepth(pos_ws, normal, clr, oClrDepth, oPos);
+	oPos = mul(mul(pos_ws, view), proj);
+	oPosWS = pos_ws.xyz;
+	oNormalWS = normal;
+	oClrDepth.xyz = clr;
+	oClrDepth.w = oPos.w * inv_depth_range;
 }
 
 void ColorDepthNonInstancedVS(float4 pos			: POSITION,
 					float3 normal		: NORMAL,
 
 					out float4 oClrDepth : TEXCOORD0,
+					out float3 oPosWS : TEXCOORD1,
+					out float3 oNormalWS : TEXCOORD2,
 					out float4 oPos		: SV_Position)
 {
 	float4 pos_ws = mul(pos, modelmat);
 	normal = mul(normal * 2 - 1, (float3x3)modelmat);
-	CalcColorDepth(pos_ws, normal, color.rgb, oClrDepth, oPos);
+	oPos = mul(mul(pos_ws, view), proj);
+	oPosWS = pos_ws.xyz;
+	oNormalWS = normal;
+	oClrDepth.xyz = color.rgb;
+	oClrDepth.w = oPos.w * inv_depth_range;
 }
 
-float4 ColorDepthPS(float4 clr_depth : TEXCOORD0) : SV_Target
+float4 ColorDepthPS(float4 clr_depth : TEXCOORD0, float3 pos_ws : TEXCOORD1, float3 normal_ws : TEXCOORD2) : SV_Target
 {
-	return clr_depth;
+	return float4(CalcColor(pos_ws, normal_ws, clr_depth.xyz), clr_depth.w);
 }
 		]]>
 	</shader>

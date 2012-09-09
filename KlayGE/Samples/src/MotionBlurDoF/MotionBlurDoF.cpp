@@ -233,8 +233,8 @@ namespace
 			inst_.last_mat[1] = matT.Row(1);
 			inst_.last_mat[2] = matT.Row(2);
 
-			double e = elapsed_time * 0.3f * -model_(3, 1);
-			model_ *= MathLib::rotation_y(static_cast<float>(e));
+			float e = elapsed_time * 0.3f * -model_(3, 1);
+			model_ *= MathLib::rotation_y(e);
 
 			matT = MathLib::transpose(model_);
 			inst_.mat[0] = matT.Row(0);
@@ -251,7 +251,7 @@ namespace
 		InstData inst_;
 		boost::circular_buffer<float4x4> last_mats_;
 	};
-
+	
 	class DepthOfField : public PostProcess
 	{
 	public:
@@ -260,9 +260,19 @@ namespace
 					std::vector<std::string>(),
 					std::vector<std::string>(1, "src_tex"),
 					std::vector<std::string>(1, "output"),
-					Context::Instance().RenderFactoryInstance().LoadEffect("DepthOfFieldPP.fxml")->TechniqueByName("DepthOfField")),
-				show_blur_factor_(false)
+					Context::Instance().RenderFactoryInstance().LoadEffect("DepthOfFieldPP.fxml")->TechniqueByName("DepthOfFieldSpreading")),
+				max_radius_(8), show_blur_factor_(false)
 		{
+			*(technique_->Effect().ParameterByName("max_radius")) = static_cast<float>(max_radius_);
+
+			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+			spread_fb_ = rf.MakeFrameBuffer();
+			spread_rl_ = rf.MakeRenderLayout();
+			spread_rl_->TopologyType(RenderLayout::TT_PointList);
+
+			normalization_rl_ = rf.MakeRenderLayout();
+			normalization_rl_->TopologyType(RenderLayout::TT_TriangleStrip);
+			normalization_technique_ = technique_->Effect().TechniqueByName("DepthOfFieldNormalization");
 		}
 
 		void FocusPlane(float focus_plane)
@@ -292,7 +302,7 @@ namespace
 			}
 			else
 			{
-				technique_ = technique_->Effect().TechniqueByName("DepthOfField");
+				technique_ = technique_->Effect().TechniqueByName("DepthOfFieldSpreading");
 			}
 		}
 		bool ShowBlurFactor() const
@@ -304,42 +314,106 @@ namespace
 		{
 			PostProcess::InputPin(index, tex);
 
-			uint32_t const width = tex->Width(0);
-			uint32_t const height = tex->Height(0);
+			uint32_t const width = tex->Width(0) + max_radius_ * 4 + 1;
+			uint32_t const height = tex->Height(0) + max_radius_ * 4 + 1;
 
-			sat_.InputPin(index, tex);
+			*(technique_->Effect().ParameterByName("width_height")) = float4(static_cast<float>(width),
+				static_cast<float>(height), 1.0f / width, 1.0f / height);				
 
-			*(technique_->Effect().ParameterByName("sat_size")) = float4(static_cast<float>(width),
-				static_cast<float>(height), 1.0f / width, 1.0f / height);
+			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+			spread_tex_ = rf.MakeTexture2D(width, height, 1, 1, EF_ABGR32F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+			spread_fb_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*spread_tex_, 0, 0, 0));
+
+			{
+				std::vector<float3> points;
+				for (uint32_t y = max_radius_; y < height - max_radius_; ++ y)
+				{
+					for (uint32_t x = max_radius_; x < width - max_radius_; ++ x)
+					{
+						points.push_back(float3(static_cast<float>(x + 0.5f) / width, static_cast<float>(y + 0.5f) / height, 0.5f));
+						points.push_back(float3(static_cast<float>(x + 0.5f) / width, static_cast<float>(y + 0.5f) / height, 1.5f));
+						points.push_back(float3(static_cast<float>(x + 0.5f) / width, static_cast<float>(y + 0.5f) / height, 2.5f));
+						points.push_back(float3(static_cast<float>(x + 0.5f) / width, static_cast<float>(y + 0.5f) / height, 3.5f));
+					}
+				}
+
+				ElementInitData init_data;
+				init_data.data = &points[0];
+				init_data.row_pitch = static_cast<uint32_t>(points.size() * sizeof(points[0]));
+				init_data.slice_pitch = 0;
+				GraphicsBufferPtr pos_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data);
+				spread_rl_->BindVertexStream(pos_vb, boost::make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F)));
+			}
+			{
+				float4 pos[] =
+				{
+					float4(-1, +1, 0 + (max_radius_ * 2 + 0.0f) / width, 0 + (max_radius_ * 2 + 0.0f) / height),
+					float4(+1, +1, 1 - (max_radius_ * 2 + 1.0f) / width, 0 + (max_radius_ * 2 + 0.0f) / height),
+					float4(-1, -1, 0 + (max_radius_ * 2 + 0.0f) / width, 1 - (max_radius_ * 2 + 1.0f) / height),
+					float4(+1, -1, 1 - (max_radius_ * 2 + 1.0f) / width, 1 - (max_radius_ * 2 + 1.0f) / height)
+				};
+				
+				ElementInitData init_data;
+				init_data.row_pitch = sizeof(pos);
+				init_data.data = &pos[0];
+				GraphicsBufferPtr pos_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data);
+				normalization_rl_->BindVertexStream(pos_vb, boost::make_tuple(vertex_element(VEU_Position, 0, EF_ABGR32F)));
+			}
+
+			sat_tex_ = rf.MakeTexture2D(width, height, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+
+			sat_.InputPin(index, spread_tex_);
+			sat_.OutputPin(0, sat_tex_);
 		}
+
+		using PostProcess::InputPin;
 
 		void Apply()
 		{
 			if (!show_blur_factor_)
 			{
+				App3DFramework const & app = Context::Instance().AppInstance();
+				float const depth_range = app.ActiveCamera().FarPlane();
+				*(technique_->Effect().ParameterByName("focus_plane_inv_range")) = float2(focus_plane_ / depth_range, depth_range / focus_range_);
+				*(technique_->Effect().ParameterByName("src_tex")) = this->InputPin(0);
+
+				RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+				re.BindFrameBuffer(spread_fb_);
+				spread_fb_->Clear(FrameBuffer::CBM_Color, Color(0, 0, 0, 0), 1, 0);
+				re.Render(*technique_, *spread_rl_);
+
 				sat_.Apply();
-				*(technique_->Effect().ParameterByName("sat_tex")) = sat_.OutputPin(0);
+
+				*(technique_->Effect().ParameterByName("src_tex")) = sat_tex_;
+
+				re.BindFrameBuffer(FrameBufferPtr());
+				re.Render(*normalization_technique_, *normalization_rl_);
 			}
-
-			PostProcess::Apply();
-		}
-
-		void OnRenderBegin()
-		{
-			PostProcess::OnRenderBegin();
-
-			App3DFramework const & app = Context::Instance().AppInstance();
-			float const depth_range = app.ActiveCamera().FarPlane();
-
-			*(technique_->Effect().ParameterByName("focus_plane_inv_range")) = float2(focus_plane_ / depth_range, depth_range / focus_range_);
+			else
+			{
+				*(technique_->Effect().ParameterByName("src_tex")) = this->InputPin(0);
+				PostProcess::Apply();
+			}
 		}
 
 	private:
 		SummedAreaTablePostProcess sat_;
 
+		int max_radius_;
+
 		float focus_plane_;
 		float focus_range_;
 		bool show_blur_factor_;
+
+		TexturePtr spread_tex_;
+		FrameBufferPtr spread_fb_;
+
+		RenderLayoutPtr spread_rl_;
+
+		RenderLayoutPtr normalization_rl_;
+		RenderTechniquePtr normalization_technique_;
+
+		TexturePtr sat_tex_;
 	};
 
 	class MotionBlur : public PostProcess
