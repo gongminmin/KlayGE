@@ -86,8 +86,6 @@ namespace
 			*(technique_->Effect().ParameterByName("proj")) = curr_proj;
 			*(technique_->Effect().ParameterByName("prev_view")) = prev_view;
 			*(technique_->Effect().ParameterByName("prev_proj")) = prev_proj;
-
-			*(technique_->Effect().ParameterByName("inv_depth_range")) = 1 / camera.FarPlane();
 		}
 
 		void MotionVecPass(bool motion_vec)
@@ -140,8 +138,6 @@ namespace
 			*(technique_->Effect().ParameterByName("proj")) = curr_proj;
 			*(technique_->Effect().ParameterByName("prev_view")) = prev_view;
 			*(technique_->Effect().ParameterByName("prev_proj")) = prev_proj;
-
-			*(technique_->Effect().ParameterByName("inv_depth_range")) = 1 / camera.FarPlane();
 		}
 
 		void OnInstanceBegin(uint32_t id)
@@ -256,13 +252,16 @@ namespace
 	{
 	public:
 		DepthOfField()
-			: PostProcess(L"DepthOfField",
-					std::vector<std::string>(),
-					std::vector<std::string>(1, "src_tex"),
-					std::vector<std::string>(1, "output"),
-					Context::Instance().RenderFactoryInstance().LoadEffect("DepthOfFieldPP.fxml")->TechniqueByName("DepthOfFieldSpreading")),
+			: PostProcess(L"DepthOfField"),
 				max_radius_(8), show_blur_factor_(false)
 		{
+			input_pins_.push_back(std::make_pair("color_tex", TexturePtr()));
+			input_pins_.push_back(std::make_pair("depth_tex", TexturePtr()));
+
+			output_pins_.push_back(std::make_pair("output", TexturePtr()));
+
+			this->Technique(Context::Instance().RenderFactoryInstance().LoadEffect("DepthOfFieldPP.fxml")->TechniqueByName("DepthOfFieldSpreading"));
+
 			*(technique_->Effect().ParameterByName("max_radius")) = static_cast<float>(max_radius_);
 
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
@@ -372,10 +371,9 @@ namespace
 		{
 			if (!show_blur_factor_)
 			{
-				App3DFramework const & app = Context::Instance().AppInstance();
-				float const depth_range = app.ActiveCamera().FarPlane();
-				*(technique_->Effect().ParameterByName("focus_plane_inv_range")) = float2(focus_plane_ / depth_range, depth_range / focus_range_);
-				*(technique_->Effect().ParameterByName("src_tex")) = this->InputPin(0);
+				*(technique_->Effect().ParameterByName("focus_plane_inv_range")) = float2(-focus_plane_ / focus_range_, 1.0f / focus_range_);
+				*(technique_->Effect().ParameterByName("color_tex")) = this->InputPin(0);
+				*(technique_->Effect().ParameterByName("depth_tex")) = this->InputPin(1);
 
 				RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 				re.BindFrameBuffer(spread_fb_);
@@ -391,7 +389,7 @@ namespace
 			}
 			else
 			{
-				*(technique_->Effect().ParameterByName("src_tex")) = this->InputPin(0);
+				*(technique_->Effect().ParameterByName("depth_tex")) = this->InputPin(1);
 				PostProcess::Apply();
 			}
 		}
@@ -423,7 +421,8 @@ namespace
 			: PostProcess(L"MotionBlur"),
 				show_motion_vec_(false)
 		{
-			input_pins_.push_back(std::make_pair("src_tex", TexturePtr()));
+			input_pins_.push_back(std::make_pair("color_tex", TexturePtr()));
+			input_pins_.push_back(std::make_pair("depth_tex", TexturePtr()));
 			input_pins_.push_back(std::make_pair("motion_vec_tex", TexturePtr()));
 
 			output_pins_.push_back(std::make_pair("output", TexturePtr()));
@@ -540,16 +539,6 @@ void MotionBlurDoFApp::InitObjects()
 	motion_blur_ = MakeSharedPtr<MotionBlur>();
 	motion_blur_copy_pp_ = LoadPostProcess(ResLoader::Instance().Open("Copy.ppml"), "copy");
 
-	clear_float_ = LoadPostProcess(ResLoader::Instance().Open("ClearFloat.ppml"), "clear_float");
-	float4 clear_clr(0.2f, 0.4f, 0.6f, 1);
-	if (Context::Instance().Config().graphics_cfg.gamma)
-	{
-		clear_clr.x() = 0.029f;
-		clear_clr.y() = 0.133f;
-		clear_clr.z() = 0.325f;
-	}
-	clear_float_->SetParam(clear_float_->ParamByName("clear_clr"), clear_clr);
-
 	UIManager::Instance().Load(ResLoader::Instance().Open("MotionBlurDoF.uiml"));
 	dof_dialog_ = UIManager::Instance().GetDialogs()[0];
 	mb_dialog_ = UIManager::Instance().GetDialogs()[1];
@@ -621,26 +610,98 @@ void MotionBlurDoFApp::OnResize(uint32_t width, uint32_t height)
 	App3DFramework::OnResize(width, height);
 
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-	RenderViewPtr ds_view = rf.Make2DDepthStencilRenderView(width, height, EF_D16, 1, 0);
+	RenderEngine& re = rf.RenderEngineInstance();
 
-	clr_depth_tex_ = rf.MakeTexture2D(width, height, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
-	clr_depth_fb_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*clr_depth_tex_, 0, 1, 0));
+	if (rf.RenderEngineInstance().DeviceCaps().texture_format_support(EF_D16))
+	{
+		depth_texture_support_ = true;
+	}
+	else
+	{
+		depth_texture_support_ = false;
+	}
+
+	RenderViewPtr ds_view;
+	if (depth_texture_support_)
+	{
+		ds_tex_ = rf.MakeTexture2D(width, height, 1, 1, EF_D16, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+		ds_view = rf.Make2DDepthStencilRenderView(*ds_tex_, 0, 1, 0);
+	}
+	else
+	{
+		ds_view = rf.Make2DDepthStencilRenderView(width, height, EF_D16, 1, 0);
+	}
+
+	ElementFormat depth_fmt;
+	if (re.DeviceCaps().rendertarget_format_support(EF_R16F, 1, 0))
+	{
+		depth_fmt = EF_R16F;
+	}
+	else
+	{
+		BOOST_ASSERT(re.DeviceCaps().rendertarget_format_support(EF_ABGR16F, 1, 0));
+
+		depth_fmt = EF_ABGR16F;
+	}
+	depth_tex_ = rf.MakeTexture2D(width, height, 1, 1, depth_fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+
+	if (depth_texture_support_)
+	{
+		depth_to_linear_pp_ = LoadPostProcess(ResLoader::Instance().Open("DepthToSM.ppml"), "DepthToSM");
+		depth_to_linear_pp_->InputPin(0, ds_tex_);
+		depth_to_linear_pp_->OutputPin(0, depth_tex_);
+	}
+
+	ElementFormat color_fmt;
+	if (re.DeviceCaps().rendertarget_format_support(EF_B10G11R11F, 1, 0))
+	{
+		color_fmt = EF_B10G11R11F;
+	}
+	else
+	{
+		BOOST_ASSERT(re.DeviceCaps().rendertarget_format_support(EF_ABGR16F, 1, 0));
+
+		color_fmt = EF_ABGR16F;
+	}
+
+	color_tex_ = rf.MakeTexture2D(width, height, 1, 1, color_fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+	clr_depth_fb_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*color_tex_, 0, 1, 0));
 	clr_depth_fb_->Attach(FrameBuffer::ATT_DepthStencil, ds_view);
-	clear_float_->OutputPin(0, clr_depth_tex_);
 
-	motion_vec_tex_ = rf.MakeTexture2D(width, height, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+	ElementFormat motion_fmt;
+	if (re.DeviceCaps().rendertarget_format_support(EF_GR8, 1, 0))
+	{
+		motion_fmt = EF_GR8;
+	}
+	else
+	{
+		if (re.DeviceCaps().rendertarget_format_support(EF_ABGR8, 1, 0))
+		{
+			motion_fmt = EF_ABGR8;
+		}
+		else
+		{
+			BOOST_ASSERT(re.DeviceCaps().rendertarget_format_support(EF_ARGB8, 1, 0));
+
+			motion_fmt = EF_ARGB8;
+		}
+	}
+
+	motion_vec_tex_ = rf.MakeTexture2D(width, height, 1, 1, motion_fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
 	motion_vec_fb_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*motion_vec_tex_, 0, 1, 0));
 	motion_vec_fb_->Attach(FrameBuffer::ATT_DepthStencil, ds_view);
 
-	mbed_tex_ = rf.MakeTexture2D(width, height, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+	mbed_tex_ = rf.MakeTexture2D(width, height, 1, 1, color_fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
 
-	motion_blur_->InputPin(0, clr_depth_tex_);
-	motion_blur_->InputPin(1, motion_vec_tex_);
+	motion_blur_->InputPin(0, color_tex_);
+	motion_blur_->InputPin(1, depth_tex_);
+	motion_blur_->InputPin(2, motion_vec_tex_);
 	motion_blur_->OutputPin(0, mbed_tex_);
-	motion_blur_copy_pp_->InputPin(0, clr_depth_tex_);
+	motion_blur_copy_pp_->InputPin(0, color_tex_);
 	motion_blur_copy_pp_->OutputPin(0, mbed_tex_);
 
 	depth_of_field_->InputPin(0, mbed_tex_);
+	depth_of_field_->InputPin(1, depth_tex_);
 	depth_of_field_copy_pp_->InputPin(0, mbed_tex_);
 
 	UIManager::Instance().SettleCtrls(width, height);
@@ -767,11 +828,30 @@ uint32_t MotionBlurDoFApp::DoUpdate(uint32_t pass)
 	switch (pass)
 	{
 	case 0:
-		this->ActiveCamera().Update(app.AppTime(), app.FrameTime());
+		{
+			Camera& camera = this->ActiveCamera();
 
-		clear_float_->Apply();
+			camera.Update(app.AppTime(), app.FrameTime());
+
+			if (depth_texture_support_)
+			{
+				float q = camera.FarPlane() / (camera.FarPlane() - camera.NearPlane());
+				float2 near_q(camera.NearPlane() * q, q);
+				depth_to_linear_pp_->SetParam(0, near_q);
+			}
+		}
+
 		renderEngine.BindFrameBuffer(clr_depth_fb_);
-		renderEngine.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->ClearDepth(1.0f);
+		{
+			Color clear_clr(0.2f, 0.4f, 0.6f, 1);
+			if (Context::Instance().Config().graphics_cfg.gamma)
+			{
+				clear_clr.r() = 0.029f;
+				clear_clr.g() = 0.133f;
+				clear_clr.b() = 0.325f;
+			}
+			renderEngine.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, clear_clr, 1.0f, 0);
+		}
 		for (int i = 0; i < NUM_INSTANCE; ++ i)
 		{
 			checked_pointer_cast<Teapot>(scene_objs_[i])->MotionVecPass(false);
@@ -779,8 +859,13 @@ uint32_t MotionBlurDoFApp::DoUpdate(uint32_t pass)
 		return App3DFramework::URV_Need_Flush;
 
 	case 1:
+		if (depth_texture_support_)
+		{
+			depth_to_linear_pp_->Apply();
+		}
+
 		renderEngine.BindFrameBuffer(motion_vec_fb_);
-		renderEngine.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(0, 0, 0, 1), 1.0f, 0);
+		renderEngine.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(0.5f, 0.5f, 0.5f, 1), 1.0f, 0);
 		for (int i = 0; i < NUM_INSTANCE; ++ i)
 		{
 			checked_pointer_cast<Teapot>(scene_objs_[i])->MotionVecPass(true);

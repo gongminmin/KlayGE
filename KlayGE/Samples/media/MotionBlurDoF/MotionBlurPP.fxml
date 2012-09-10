@@ -3,7 +3,8 @@
 <effect>
 	<include name="PostProcess.fxml"/>
 
-	<parameter type="texture2D" name="src_tex"/>
+	<parameter type="texture2D" name="color_tex"/>
+	<parameter type="texture2D" name="depth_tex"/>
 	<parameter type="texture2D" name="motion_vec_tex"/>
 
 	<parameter type="sampler" name="point_sampler">
@@ -16,28 +17,29 @@
 		<![CDATA[
 float4 MotionBlurPS(float2 tex_coord0 : TEXCOORD0) : SV_Target
 {
-	float2 motion_vec = motion_vec_tex.Sample(point_sampler, tex_coord0).rg;
-	motion_vec.y = -motion_vec.y;
+	float2 motion_vec = (motion_vec_tex.Sample(point_sampler, tex_coord0).rg - 0.5f) / 10;
 	const int NUM_SAMPLES = 12;
-	float4 clr = src_tex.Sample(point_sampler, tex_coord0);
+	float3 clr = color_tex.Sample(point_sampler, tex_coord0).xyz;
+	float depth = depth_tex.Sample(point_sampler, tex_coord0).x;
 	float sum_weight = 1;
 	for (int i = 1; i < NUM_SAMPLES; ++ i)
 	{
-		float4 other_clr = src_tex.Sample(point_sampler, tex_coord0 + motion_vec * i / NUM_SAMPLES);
-		if (clr.w >= other_clr.w)
+		float3 other_clr = color_tex.Sample(point_sampler, tex_coord0 + motion_vec * i / NUM_SAMPLES).xyz;
+		float other_depth = depth_tex.Sample(point_sampler, tex_coord0 + motion_vec * i / NUM_SAMPLES).x;
+		if (depth >= other_depth)
 		{
-			clr.rgb += other_clr.rgb;
+			clr += other_clr;
 			++ sum_weight;
 		}
 	}
-	clr.rgb /= sum_weight;
-	return clr;
+	clr /= sum_weight;
+	return float4(clr, depth);
 }
 
 float4 MotionBlurMotionVecPS(float2 tex_coord0 : TEXCOORD0) : SV_Target
 {
-	float3 motion_vec = motion_vec_tex.Sample(point_sampler, tex_coord0).rgb;
-	return float4(motion_vec.xy * 500, motion_vec.z, 1);
+	float2 motion_vec = (motion_vec_tex.Sample(point_sampler, tex_coord0).rg - 0.5f) / 10;
+	return float4(motion_vec.xy * 10, 1, 1);
 }
 		]]>
 	</shader>

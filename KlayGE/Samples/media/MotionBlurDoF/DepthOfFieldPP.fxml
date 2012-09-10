@@ -3,14 +3,13 @@
 <effect>
 	<include name="PostProcess.fxml"/>
 
-	<parameter type="float4" name="mid_value" value="0.5"/>
-		
 	<cbuffer name="per_frame">
 		<parameter type="float2" name="focus_plane_inv_range"/>
 	</cbuffer>
 	<parameter type="float4" name="sat_size"/>
 
-	<parameter type="texture2D" name="src_tex"/>
+	<parameter type="texture2D" name="color_tex"/>
+	<parameter type="texture2D" name="depth_tex"/>
 	<parameter type="texture2D" name="sat_tex"/>
 
 	<parameter type="sampler" name="point_sampler">
@@ -23,7 +22,7 @@
 		<![CDATA[
 float4 DepthOfFieldBlurFactorPS(float2 tc : TEXCOORD0) : SV_Target
 {
-	return saturate(abs(src_tex.Sample(point_sampler, tc).a - focus_plane_inv_range.x) * focus_plane_inv_range.y);
+	return saturate(abs(depth_tex.Sample(point_sampler, tc).x * focus_plane_inv_range.y + focus_plane_inv_range.x));
 }
 		]]>
 	</shader>
@@ -41,6 +40,7 @@ float4 DepthOfFieldBlurFactorPS(float2 tc : TEXCOORD0) : SV_Target
 
 	<parameter type="float4" name="width_height"/>
 	<parameter type="float" name="max_radius"/>
+	<parameter type="texture2D" name="src_tex"/>
 
 	<shader>
 		<![CDATA[
@@ -48,10 +48,9 @@ void DepthOfFieldSpreadingVS(float3 pos : POSITION,
 						out float4 oClr : TEXCOORD0,
 						out float4 oPos : SV_Position)
 {
-	int2 target_coord = pos.xy * width_height.xy;
+	float2 target_coord = pos.xy * width_height.xy;
 	float2 original_coord = (target_coord - max_radius * 2 + 0.5f) / (width_height.xy - max_radius * 4 - 1);
-	float4 input = src_tex.SampleLevel(point_sampler, original_coord, 0);
-	int radius = saturate(abs(input.w - focus_plane_inv_range.x) * focus_plane_inv_range.y) * max_radius;
+	float radius = floor(saturate(abs(depth_tex.SampleLevel(point_sampler, original_coord, 0).x * focus_plane_inv_range.y + focus_plane_inv_range.x)) * max_radius);
 	float area = (radius * 2 + 1) * (radius * 2 + 1);
 	
 	int index = (int)pos.z;
@@ -59,7 +58,7 @@ void DepthOfFieldSpreadingVS(float3 pos : POSITION,
 	float scale[4] = { +1, -1, -1, +1 };
 	oPos = float4((pos.xy + (offset[index].xy * radius + offset[index].zw) * width_height.zw) * 2 - 1, 0, 1);
 	oPos.y *= KLAYGE_FLIPPING;
-	oClr = scale[index] * float4(input.xyz, 1) / area;
+	oClr = scale[index] * float4(color_tex.SampleLevel(point_sampler, original_coord, 0).xyz, 1) / area;
 }
 
 float4 DepthOfFieldSpreadingPS(float4 clr : TEXCOORD0) : SV_Target

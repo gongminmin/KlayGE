@@ -40,13 +40,17 @@ private:
 
 	KlayGE::FirstPersonCameraController fpcController_;
 
+	bool depth_texture_support_;
+	KlayGE::PostProcessPtr depth_to_linear_pp_;
+
 	KlayGE::FrameBufferPtr clr_depth_fb_;
 	KlayGE::FrameBufferPtr motion_vec_fb_;
-	KlayGE::TexturePtr clr_depth_tex_;
+	KlayGE::TexturePtr color_tex_;
+	KlayGE::TexturePtr ds_tex_;
+	KlayGE::TexturePtr depth_tex_;
 	KlayGE::TexturePtr motion_vec_tex_;
 	KlayGE::TexturePtr mbed_tex_;
 
-	KlayGE::PostProcessPtr clear_float_;
 	KlayGE::PostProcessPtr depth_of_field_;
 	KlayGE::PostProcessPtr motion_blur_;
 	KlayGE::PostProcessPtr depth_of_field_copy_pp_;

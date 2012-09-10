@@ -8,20 +8,17 @@
 		<parameter type="float4x4" name="view"/>
 		<parameter type="float4x4" name="proj"/>
 		<parameter type="float3" name="light_in_world" x="2" y="2" z="-3"/>
-		<parameter type="float" name="inv_depth_range"/>
 	</cbuffer>
 
 	<parameter type="float4x4" name="modelmat" semantic="WORLD"/>
 	<parameter type="float4x4" name="last_modelmat"/>
 	<parameter type="float4" name="color"/>
 
-	<parameter type="float4" name="mid_value" value="0.5"/>
-
 	<shader>
 		<![CDATA[
 float3 CalcColor(float3 pos_ws, float3 normal_ws, float3 clr)
 {
-	return clr * (0.02f + saturate(point_lighting(light_in_world, pos_ws, normal_ws))) - mid_value.rgb;
+	return clr * (0.05f + saturate(point_lighting(light_in_world, pos_ws, normal_ws)));
 }
 
 void ColorDepthInstancedVS(float4 pos			: POSITION,
@@ -35,7 +32,7 @@ void ColorDepthInstancedVS(float4 pos			: POSITION,
 					float4 last_row2	: TEXCOORD6,
 					float3 clr			: COLOR0,
 
-					out float4 oClrDepth : TEXCOORD0,
+					out float3 oClr : TEXCOORD0,
 					out float3 oPosWS : TEXCOORD1,
 					out float3 oNormalWS : TEXCOORD2,
 					out float4 oPos		: SV_Position)
@@ -47,14 +44,13 @@ void ColorDepthInstancedVS(float4 pos			: POSITION,
 	oPos = mul(mul(pos_ws, view), proj);
 	oPosWS = pos_ws.xyz;
 	oNormalWS = normal;
-	oClrDepth.xyz = clr;
-	oClrDepth.w = oPos.w * inv_depth_range;
+	oClr = clr;
 }
 
 void ColorDepthNonInstancedVS(float4 pos			: POSITION,
 					float3 normal		: NORMAL,
 
-					out float4 oClrDepth : TEXCOORD0,
+					out float3 oClr : TEXCOORD0,
 					out float3 oPosWS : TEXCOORD1,
 					out float3 oNormalWS : TEXCOORD2,
 					out float4 oPos		: SV_Position)
@@ -64,13 +60,12 @@ void ColorDepthNonInstancedVS(float4 pos			: POSITION,
 	oPos = mul(mul(pos_ws, view), proj);
 	oPosWS = pos_ws.xyz;
 	oNormalWS = normal;
-	oClrDepth.xyz = color.rgb;
-	oClrDepth.w = oPos.w * inv_depth_range;
+	oClr.xyz = color.rgb;
 }
 
-float4 ColorDepthPS(float4 clr_depth : TEXCOORD0, float3 pos_ws : TEXCOORD1, float3 normal_ws : TEXCOORD2) : SV_Target
+float4 ColorDepthPS(float3 clr_depth : TEXCOORD0, float3 pos_ws : TEXCOORD1, float3 normal_ws : TEXCOORD2) : SV_Target
 {
-	return float4(CalcColor(pos_ws, normal_ws, clr_depth.xyz), clr_depth.w);
+	return float4(CalcColor(pos_ws, normal_ws, clr_depth), 1);
 }
 		]]>
 	</shader>
@@ -86,24 +81,6 @@ float4 ColorDepthPS(float4 clr_depth : TEXCOORD0, float3 pos_ws : TEXCOORD1, flo
 		<pass name="p0">
 			<state name="vertex_shader" value="ColorDepthNonInstancedVS()"/>
 			<state name="pixel_shader" value="ColorDepthPS()"/>
-		</pass>
-	</technique>
-
-	<parameter type="float4" name="clear_clr"/>
-	<shader>
-		<![CDATA[
-float4 ClearFloatPS(float2 tex_coord0 : TEXCOORD0) : SV_Target
-{
-	return clear_clr - mid_value;
-}
-		]]>
-	</shader>
-	<technique name="ClearFloat">
-		<pass name="p0">
-			<state name="depth_enable" value="false"/>
-
-			<state name="vertex_shader" value="PostProcessVS()"/>
-			<state name="pixel_shader" value="ClearFloatPS()"/>
 		</pass>
 	</technique>
 
@@ -164,7 +141,8 @@ void MotionVectorNonInstancedVS(float4 pos			: POSITION,
 
 float4 MotionVectorPS(float2 velocity : TEXCOORD0) : SV_Target
 {
-	return float4(velocity, 1, 1);
+	velocity.y *= KLAYGE_FLIPPING;
+	return float4(velocity * 10 + 0.5f, 1, 1);
 }
 		]]>
 	</shader>
