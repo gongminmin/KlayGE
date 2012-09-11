@@ -346,6 +346,8 @@ class information:
 			is_supported.exts.append('GLSL_4_1')
 		if glsl_ver_index >= 9:
 			is_supported.exts.append('GLSL_4_2')
+		if glsl_ver_index >= 10:
+			is_supported.exts.append('GLSL_4_3')
 
 		for i in range(0, len(ogl_ver_db)):
 			supported = []
