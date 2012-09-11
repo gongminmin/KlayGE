@@ -35,7 +35,6 @@
 #ifdef KLAYGE_COMPILER_MSVC
 #pragma warning(pop)
 #endif
-#include <boost/interprocess/mapped_region.hpp>
 #ifdef KLAYGE_COMPILER_MSVC
 #pragma warning(push)
 #pragma warning(disable: 4100 6011 6334)
@@ -45,6 +44,7 @@
 #ifdef KLAYGE_COMPILER_MSVC
 #pragma warning(pop)
 #endif
+#include <boost/interprocess/mapped_region.hpp>
 
 #ifdef KLAYGE_COMPILER_MSVC
 #pragma warning(push)

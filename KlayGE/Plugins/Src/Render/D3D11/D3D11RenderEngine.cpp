@@ -437,10 +437,10 @@ namespace KlayGE
 		{
 			size_t seed = boost::hash_range(elem.SemanticName, elem.SemanticName + strlen(elem.SemanticName));
 			boost::hash_combine(seed, elem.SemanticIndex);
-			boost::hash_combine(seed, elem.Format);
+			boost::hash_combine(seed, static_cast<uint32_t>(elem.Format));
 			boost::hash_combine(seed, elem.InputSlot);
 			boost::hash_combine(seed, elem.AlignedByteOffset);
-			boost::hash_combine(seed, elem.InputSlotClass);
+			boost::hash_combine(seed, static_cast<uint32_t>(elem.InputSlotClass));
 			boost::hash_combine(seed, elem.InstanceDataStepRate);
 
 			boost::hash_combine(elems_signature, seed);

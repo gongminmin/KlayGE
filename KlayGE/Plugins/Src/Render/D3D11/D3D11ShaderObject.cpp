@@ -1393,8 +1393,8 @@ namespace KlayGE
 							size_t seed = boost::hash_range(signature.SemanticName, signature.SemanticName + strlen(signature.SemanticName));
 							boost::hash_combine(seed, signature.SemanticIndex);
 							boost::hash_combine(seed, signature.Register);
-							boost::hash_combine(seed, signature.SystemValueType);
-							boost::hash_combine(seed, signature.ComponentType);
+							boost::hash_combine(seed, static_cast<uint32_t>(signature.SystemValueType));
+							boost::hash_combine(seed, static_cast<uint32_t>(signature.ComponentType));
 							boost::hash_combine(seed, signature.Mask);
 							boost::hash_combine(seed, signature.ReadWriteMask);
 							boost::hash_combine(seed, signature.Stream);
