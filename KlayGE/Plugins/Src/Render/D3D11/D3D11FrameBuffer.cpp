@@ -76,6 +76,26 @@ namespace KlayGE
 		}
 	}
 
+	ID3D11UnorderedAccessViewPtr D3D11FrameBuffer::D3DUAView(uint32_t n) const
+	{
+		if (n < ua_views_.size())
+		{
+			if (ua_views_[n])
+			{
+				D3D11UnorderedAccessView const & d3d_view(*checked_pointer_cast<D3D11UnorderedAccessView>(ua_views_[n]));
+				return d3d_view.D3DUnorderedAccessView();
+			}
+			else
+			{
+				return ID3D11UnorderedAccessViewPtr();
+			}
+		}
+		else
+		{
+			return ID3D11UnorderedAccessViewPtr();
+		}
+	}
+
 	std::wstring const & D3D11FrameBuffer::Description() const
 	{
 		static std::wstring const desc(L"Direct3D11 Framebuffer");
@@ -113,13 +133,40 @@ namespace KlayGE
 			rt_first_subres.push_back(p->RTFirstSubRes());
 			rt_num_subres.push_back(p->RTNumSubRes());
 		}
+		std::vector<ID3D11UnorderedAccessView*> ua_view(ua_views_.size());
+		std::vector<UINT> ua_init_count(ua_views_.size());
+		for (uint32_t i = 0; i < ua_views_.size(); ++ i)
+		{
+			if (ua_views_[i])
+			{
+				D3D11UnorderedAccessView* p = checked_cast<D3D11UnorderedAccessView*>(ua_views_[i].get());
+				rt_src.push_back(p->UASrc());
+				rt_first_subres.push_back(p->UAFirstSubRes());
+				rt_num_subres.push_back(p->UANumSubRes());
+				ua_view[i] = this->D3DUAView(i).get();
+				ua_init_count[i] = ua_views_[i]->InitCount();
+			}
+			else
+			{
+				ua_view[i] = NULL;
+				ua_init_count[i] = 0;
+			}
+		}
 
 		for (size_t i = 0; i < rt_src.size(); ++ i)
 		{
 			re.DetachSRV(rt_src[i], rt_first_subres[i], rt_num_subres[i]);
 		}
 
-		d3d_imm_ctx->OMSetRenderTargets(static_cast<UINT>(rt_view.size()), &rt_view[0], this->D3DDSView().get());
+		if (ua_views_.empty())
+		{
+			d3d_imm_ctx->OMSetRenderTargets(static_cast<UINT>(rt_view.size()), &rt_view[0], this->D3DDSView().get());
+		}
+		else
+		{
+			d3d_imm_ctx->OMSetRenderTargetsAndUnorderedAccessViews(static_cast<UINT>(rt_view.size()), &rt_view[0], this->D3DDSView().get(),
+				0, static_cast<UINT>(ua_view.size()), &ua_view[0], &ua_init_count[0]);
+		}
 		
 		d3d_viewport_.Width = static_cast<float>(viewport_->width);
 		d3d_viewport_.Height = static_cast<float>(viewport_->height);

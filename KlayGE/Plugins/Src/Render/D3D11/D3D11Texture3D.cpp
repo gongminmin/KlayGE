@@ -233,6 +233,22 @@ namespace KlayGE
 		return this->RetriveD3DUAV(desc);
 	}
 
+	ID3D11UnorderedAccessViewPtr const & D3D11Texture3D::RetriveD3DUnorderedAccessView(uint32_t array_index, uint32_t first_slice, uint32_t num_slices, uint32_t level)
+	{
+		BOOST_ASSERT(0 == array_index);
+		UNREF_PARAM(array_index);
+
+		D3D11_UNORDERED_ACCESS_VIEW_DESC desc;
+		memset(&desc, 0, sizeof(desc));
+		desc.Format = desc_.Format;
+		desc.ViewDimension = D3D11_UAV_DIMENSION_TEXTURE3D;
+		desc.Texture3D.MipSlice = level;
+		desc.Texture3D.FirstWSlice = first_slice;
+		desc.Texture3D.WSize = num_slices;
+
+		return this->RetriveD3DUAV(desc);
+	}
+
 	ID3D11RenderTargetViewPtr const & D3D11Texture3D::RetriveD3DRenderTargetView(uint32_t array_index, uint32_t first_slice, uint32_t num_slices, uint32_t level)
 	{
 		BOOST_ASSERT(this->AccessHint() & EAH_GPU_Write);

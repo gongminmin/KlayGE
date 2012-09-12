@@ -195,12 +195,7 @@ namespace KlayGE
 				}
 
 				uint32_t clr_id = att - ATT_Color0;
-				if (clr_views_.size() < clr_id + 1)
-				{
-					clr_views_.resize(clr_id + 1);
-				}
-
-				if (clr_views_[clr_id])
+				if ((clr_views_.size() < clr_id + 1) && clr_views_[clr_id])
 				{
 					clr_views_[clr_id]->OnDetached(*this, att);
 					clr_views_[clr_id].reset();
@@ -234,6 +229,61 @@ namespace KlayGE
 		}
 	}
 
+	void FrameBuffer::AttachUAV(uint32_t att, UnorderedAccessViewPtr const & view)
+	{
+		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+		if (att >= static_cast<uint32_t>(re.DeviceCaps().max_simultaneous_uavs))
+		{
+			THR(boost::system::posix_error::not_supported);
+		}
+
+		if ((att < ua_views_.size()) && ua_views_[att])
+		{
+			this->DetachUAV(att);
+		}
+
+		if (ua_views_.size() < att + 1)
+		{
+			ua_views_.resize(att + 1);
+		}
+
+		ua_views_[att] = view;
+
+		view->OnAttached(*this, att);
+
+		active_ = true;
+		views_dirty_ = true;
+	}
+
+	void FrameBuffer::DetachUAV(uint32_t att)
+	{
+		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+		if (att >= static_cast<uint32_t>(ATT_Color0 + re.DeviceCaps().max_simultaneous_rts))
+		{
+			THR(boost::system::posix_error::not_supported);
+		}
+
+		if ((ua_views_.size() < att + 1) && ua_views_[att])
+		{
+			ua_views_[att]->OnDetached(*this, att);
+			ua_views_[att].reset();
+		}
+
+		views_dirty_ = true;
+	}
+
+	UnorderedAccessViewPtr FrameBuffer::AttachedUAV(uint32_t att) const
+	{
+		if (ua_views_.size() < att + 1)
+		{
+			return UnorderedAccessViewPtr();
+		}
+		else
+		{
+			return ua_views_[att];
+		}
+	}
+
 	void FrameBuffer::OnBind()
 	{
 		for (uint32_t i = 0; i < clr_views_.size(); ++ i)
@@ -246,6 +296,13 @@ namespace KlayGE
 		if (rs_view_)
 		{
 			rs_view_->OnBind(*this, ATT_DepthStencil);
+		}
+		for (uint32_t i = 0; i < ua_views_.size(); ++ i)
+		{
+			if (ua_views_[i])
+			{
+				ua_views_[i]->OnBind(*this, i);
+			}
 		}
 		views_dirty_ = false;
 	}
@@ -262,6 +319,13 @@ namespace KlayGE
 		if (rs_view_)
 		{
 			rs_view_->OnUnbind(*this, ATT_DepthStencil);
+		}
+		for (uint32_t i = 0; i < ua_views_.size(); ++ i)
+		{
+			if (ua_views_[i])
+			{
+				ua_views_[i]->OnUnbind(*this, i);
+			}
 		}
 	}
 }

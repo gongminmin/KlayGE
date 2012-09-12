@@ -127,6 +127,13 @@ namespace KlayGE
 		return ret;
 	}
 
+	ID3D11UnorderedAccessViewPtr const & D3D11Texture::RetriveD3DUnorderedAccessView(uint32_t /*array_index*/, uint32_t /*first_slice*/, uint32_t /*num_slices*/, uint32_t /*level*/)
+	{
+		BOOST_ASSERT(false);
+		static ID3D11UnorderedAccessViewPtr ret;
+		return ret;
+	}
+
 	ID3D11UnorderedAccessViewPtr const & D3D11Texture::RetriveD3DUnorderedAccessView(uint32_t /*first_array_index*/, uint32_t /*num_items*/, CubeFaces /*first_face*/, uint32_t /*num_faces*/,
 		uint32_t /*level*/)
 	{

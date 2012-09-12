@@ -160,6 +160,8 @@ namespace KlayGE
 	typedef boost::shared_ptr<FrameBuffer> FrameBufferPtr;
 	class RenderView;
 	typedef boost::shared_ptr<RenderView> RenderViewPtr;
+	class UnorderedAccessView;
+	typedef boost::shared_ptr<UnorderedAccessView> UnorderedAccessViewPtr;
 	class GraphicsBuffer;
 	typedef boost::shared_ptr<GraphicsBuffer> GraphicsBufferPtr;
 	class RenderLayout;

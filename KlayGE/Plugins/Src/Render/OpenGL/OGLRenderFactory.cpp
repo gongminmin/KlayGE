@@ -167,6 +167,41 @@ namespace KlayGE
 		return RenderViewPtr();
 	}
 
+	UnorderedAccessViewPtr OGLRenderFactory::Make1DUnorderedAccessView(Texture& /*texture*/, int /*first_array_index*/, int /*array_size*/, int /*level*/)
+	{
+		return UnorderedAccessViewPtr();
+	}
+
+	UnorderedAccessViewPtr OGLRenderFactory::Make2DUnorderedAccessView(Texture& /*texture*/, int /*first_array_index*/, int /*array_size*/, int /*level*/)
+	{
+		return UnorderedAccessViewPtr();
+	}
+
+	UnorderedAccessViewPtr OGLRenderFactory::Make2DUnorderedAccessView(Texture& /*texture*/, int /*array_index*/, Texture::CubeFaces /*face*/, int /*level*/)
+	{
+		return UnorderedAccessViewPtr();
+	}
+
+	UnorderedAccessViewPtr OGLRenderFactory::Make2DUnorderedAccessView(Texture& /*texture*/, int /*array_index*/, uint32_t /*slice*/, int /*level*/)
+	{
+		return UnorderedAccessViewPtr();
+	}
+
+	UnorderedAccessViewPtr OGLRenderFactory::MakeCubeUnorderedAccessView(Texture& /*texture*/, int /*array_index*/, int /*level*/)
+	{
+		return UnorderedAccessViewPtr();
+	}
+
+	UnorderedAccessViewPtr OGLRenderFactory::Make3DUnorderedAccessView(Texture& /*texture*/, int /*array_index*/, uint32_t /*first_slice*/, uint32_t /*num_slices*/, int /*level*/)
+	{
+		return UnorderedAccessViewPtr();
+	}
+
+	UnorderedAccessViewPtr OGLRenderFactory::MakeGraphicsBufferUnorderedAccessView(GraphicsBuffer& /*gbuffer*/, ElementFormat /*pf*/)
+	{
+		return UnorderedAccessViewPtr();
+	}
+
 	ShaderObjectPtr OGLRenderFactory::MakeShaderObject()
 	{
 		return MakeSharedPtr<OGLShaderObject>();

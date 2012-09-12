@@ -164,6 +164,42 @@ namespace KlayGE
 		return MakeSharedPtr<D3D11DepthStencilRenderView>(texture, array_index, first_slice, num_slices, level);
 	}
 
+	UnorderedAccessViewPtr D3D11RenderFactory::Make1DUnorderedAccessView(Texture& texture, int first_array_index, int array_size, int level)
+	{
+		return MakeSharedPtr<D3D11UnorderedAccessView>(texture, first_array_index, array_size, level);
+	}
+
+	UnorderedAccessViewPtr D3D11RenderFactory::Make2DUnorderedAccessView(Texture& texture, int first_array_index, int array_size, int level)
+	{
+		return MakeSharedPtr<D3D11UnorderedAccessView>(texture, first_array_index, array_size, level);
+	}
+
+	UnorderedAccessViewPtr D3D11RenderFactory::Make2DUnorderedAccessView(Texture& texture, int array_index, Texture::CubeFaces face, int level)
+	{
+		return MakeSharedPtr<D3D11UnorderedAccessView>(texture, array_index, face, level);
+	}
+
+	UnorderedAccessViewPtr D3D11RenderFactory::Make2DUnorderedAccessView(Texture& texture, int array_index, uint32_t slice, int level)
+	{
+		return MakeSharedPtr<D3D11UnorderedAccessView>(texture, array_index, slice, level);
+	}
+
+	UnorderedAccessViewPtr D3D11RenderFactory::MakeCubeUnorderedAccessView(Texture& texture, int array_index, int level)
+	{
+		int array_size = 1;
+		return MakeSharedPtr<D3D11UnorderedAccessView>(texture, array_index, array_size, level);
+	}
+
+	UnorderedAccessViewPtr D3D11RenderFactory::Make3DUnorderedAccessView(Texture& texture, int array_index, uint32_t first_slice, uint32_t num_slices, int level)
+	{
+		return MakeSharedPtr<D3D11UnorderedAccessView>(texture, array_index, first_slice, num_slices, level);
+	}
+
+	UnorderedAccessViewPtr D3D11RenderFactory::MakeGraphicsBufferUnorderedAccessView(GraphicsBuffer& gbuffer, ElementFormat pf)
+	{
+		return MakeSharedPtr<D3D11UnorderedAccessView>(gbuffer, pf);
+	}
+
 	ShaderObjectPtr D3D11RenderFactory::MakeShaderObject()
 	{
 		return MakeSharedPtr<D3D11ShaderObject>();

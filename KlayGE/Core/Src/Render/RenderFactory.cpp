@@ -166,6 +166,41 @@ namespace KlayGE
 			return RenderView::NullObject();
 		}
 
+		UnorderedAccessViewPtr Make1DUnorderedAccessView(Texture& /*texture*/, int /*first_array_index*/, int /*array_size*/, int /*level*/)
+		{
+			return UnorderedAccessView::NullObject();
+		}
+
+		UnorderedAccessViewPtr Make2DUnorderedAccessView(Texture& /*texture*/, int /*first_array_index*/, int /*array_size*/, int /*level*/)
+		{
+			return UnorderedAccessView::NullObject();
+		}
+
+		UnorderedAccessViewPtr Make2DUnorderedAccessView(Texture& /*texture*/, int /*array_index*/, Texture::CubeFaces /*face*/, int /*level*/)
+		{
+			return UnorderedAccessView::NullObject();
+		}
+
+		UnorderedAccessViewPtr Make2DUnorderedAccessView(Texture& /*texture*/, int /*array_index*/, uint32_t /*slice*/, int /*level*/)
+		{
+			return UnorderedAccessView::NullObject();
+		}
+
+		UnorderedAccessViewPtr MakeCubeUnorderedAccessView(Texture& /*texture*/, int /*array_index*/, int /*level*/)
+		{
+			return UnorderedAccessView::NullObject();
+		}
+
+		UnorderedAccessViewPtr Make3DUnorderedAccessView(Texture& /*texture*/, int /*array_index*/, uint32_t /*first_slice*/, uint32_t /*num_slices*/, int /*level*/)
+		{
+			return UnorderedAccessView::NullObject();
+		}
+
+		UnorderedAccessViewPtr MakeGraphicsBufferUnorderedAccessView(GraphicsBuffer& /*gbuffer*/, ElementFormat /*pf*/)
+		{
+			return UnorderedAccessView::NullObject();
+		}
+
 		ShaderObjectPtr MakeShaderObject()
 		{
 			return ShaderObject::NullObject();

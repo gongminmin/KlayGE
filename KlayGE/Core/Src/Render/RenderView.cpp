@@ -65,4 +65,47 @@ namespace KlayGE
 	void RenderView::OnUnbind(FrameBuffer& /*fb*/, uint32_t /*att*/)
 	{
 	}
+
+
+	class NullUnorderedAccessView : public UnorderedAccessView
+	{
+	public:
+		void Clear(float4 const & /*val*/)
+		{
+		}
+
+		void Clear(uint4 const & /*val*/)
+		{
+		}
+
+		void OnAttached(FrameBuffer& /*fb*/, uint32_t /*att*/)
+		{
+		}
+
+		void OnDetached(FrameBuffer& /*fb*/, uint32_t /*att*/)
+		{
+		}
+
+		void OnBind(FrameBuffer& /*fb*/, uint32_t /*att*/)
+		{
+		}
+
+		void OnUnbind(FrameBuffer& /*fb*/, uint32_t /*att*/)
+		{
+		}
+	};
+
+	UnorderedAccessViewPtr UnorderedAccessView::NullObject()
+	{
+		static UnorderedAccessViewPtr obj = MakeSharedPtr<NullUnorderedAccessView>();
+		return obj;
+	}
+
+	void UnorderedAccessView::OnBind(FrameBuffer& /*fb*/, uint32_t /*att*/)
+	{
+	}
+	
+	void UnorderedAccessView::OnUnbind(FrameBuffer& /*fb*/, uint32_t /*att*/)
+	{
+	}
 }

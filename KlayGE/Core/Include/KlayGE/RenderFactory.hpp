@@ -88,6 +88,14 @@ namespace KlayGE
 		virtual RenderViewPtr MakeCubeDepthStencilRenderView(Texture& texture, int array_index, int level) = 0;
 		virtual RenderViewPtr Make3DDepthStencilRenderView(Texture& texture, int array_index, uint32_t first_slice, uint32_t num_slices, int level) = 0;
 
+		virtual UnorderedAccessViewPtr Make1DUnorderedAccessView(Texture& texture, int first_array_index, int array_size, int level) = 0;
+		virtual UnorderedAccessViewPtr Make2DUnorderedAccessView(Texture& texture, int first_array_index, int array_size, int level) = 0;
+		virtual UnorderedAccessViewPtr Make2DUnorderedAccessView(Texture& texture, int array_index, Texture::CubeFaces face, int level) = 0;
+		virtual UnorderedAccessViewPtr Make2DUnorderedAccessView(Texture& texture, int array_index, uint32_t slice, int level) = 0;
+		virtual UnorderedAccessViewPtr MakeCubeUnorderedAccessView(Texture& texture, int array_index, int level) = 0;
+		virtual UnorderedAccessViewPtr Make3DUnorderedAccessView(Texture& texture, int array_index, uint32_t first_slice, uint32_t num_slices, int level) = 0;
+		virtual UnorderedAccessViewPtr MakeGraphicsBufferUnorderedAccessView(GraphicsBuffer& gbuffer, ElementFormat pf) = 0;
+
 		RasterizerStateObjectPtr MakeRasterizerStateObject(RasterizerStateDesc const & desc);
 		DepthStencilStateObjectPtr MakeDepthStencilStateObject(DepthStencilStateDesc const & desc);
 		BlendStateObjectPtr MakeBlendStateObject(BlendStateDesc const & desc);

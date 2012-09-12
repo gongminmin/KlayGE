@@ -42,6 +42,7 @@ namespace KlayGE
 		uint8_t max_pixel_texture_units;
 		uint8_t max_geometry_texture_units;
 		uint8_t max_simultaneous_rts;
+		uint8_t max_simultaneous_uavs;
 		uint8_t max_vertex_streams;
 		uint8_t max_texture_anisotropy;
 

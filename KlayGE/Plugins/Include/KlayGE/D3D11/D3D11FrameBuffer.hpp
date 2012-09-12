@@ -28,6 +28,7 @@ namespace KlayGE
 
 		ID3D11RenderTargetViewPtr D3DRTView(uint32_t n) const;
 		ID3D11DepthStencilViewPtr D3DDSView() const;
+		ID3D11UnorderedAccessViewPtr D3DUAView(uint32_t n) const;
 
 		virtual std::wstring const & Description() const;
 

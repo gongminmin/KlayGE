@@ -1451,6 +1451,7 @@ namespace KlayGE
 		{
 			caps_.max_simultaneous_rts = 1;
 		}
+		caps_.max_simultaneous_uavs = 0;
 
 		glGetIntegerv(GL_MAX_VERTEX_ATTRIBS, &temp);
 		caps_.max_vertex_streams = static_cast<uint8_t>(temp);
