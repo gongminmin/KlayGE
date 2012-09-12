@@ -807,7 +807,7 @@ namespace KlayGE
 				}
 				vertex.normal = normal.Normalize();
 				// Gram-Schmidt orthogonalize
-				vertex.tangent = (tangent - normal * (tangent % normal)).Normalize();
+				vertex.tangent = (tangent - vertex.normal * (tangent % vertex.normal)).Normalize();
 				vertex.binormal = vertex.normal ^ vertex.tangent;
 				// Calculate handedness
 				vertex.weight = 1;
