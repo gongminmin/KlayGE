@@ -2,6 +2,7 @@
 
 <effect>
 	<include name="util.fxml"/>
+	<include name="Quaternion.fxml"/>
 	<include name="Lighting.fxml"/>
 	<include name="JudaTexture.fxml"/>
 
@@ -30,7 +31,6 @@
 		<![CDATA[
 void CalcTBN(float4 pos,
 					float2 texcoord0,
-					float3 N,
 					float4 T,
 					out float4 oL,
 					out float4 oV,
@@ -40,9 +40,9 @@ void CalcTBN(float4 pos,
 	oPos = mul(pos, mvp);
 	
 	float3x3 objToTangentSpace;
-	objToTangentSpace[0] = T.xyz;
-	objToTangentSpace[1] = cross(N, T.xyz) * T.w;
-	objToTangentSpace[2] = N;
+	objToTangentSpace[0] = transform_quat(float3(1, 0, 0), T);
+	objToTangentSpace[1] = transform_quat(float3(0, 1, 0), T) * sign(T.w);
+	objToTangentSpace[2] = transform_quat(float3(0, 0, 1), T);
 
 	float3 lightVec = light_pos - pos.xyz;
 	float3 viewVec = eye_pos - pos.xyz;
@@ -58,8 +58,7 @@ void CalcTBN(float4 pos,
 
 void CalcTBNVS(float4 pos				: POSITION,
 					float2 texcoord0	: TEXCOORD0,
-					float3 N			: NORMAL,
-					float4 T			: TANGENT,
+					float4 tangent_quat : TANGENT,
 					float distortion	: TEXCOORD1,
 					out float4 oL			: TEXCOORD0,	// in tangent space
 					out float4 oV			: TEXCOORD1,	// in tangent space
@@ -67,10 +66,9 @@ void CalcTBNVS(float4 pos				: POSITION,
 					out float oDistortion	: TEXCOORD3,
 					out float4 oPos			: SV_Position)
 {
-	N = N * 2 - 1;
-	T = T * 2 - 1;
+	tangent_quat = tangent_quat * 2 - 1;
 
-	CalcTBN(pos, texcoord0, N, T,
+	CalcTBN(pos, texcoord0, tangent_quat,
 		oL, oV, oH, oPos);
 
 	oDistortion = distortion;
@@ -120,8 +118,7 @@ float4 ParallaxMappingPS(float4 L		: TEXCOORD0,
 
 void ParallaxOcclusionMappingVS(float4 pos				: POSITION,
 					float2 texcoord0	: TEXCOORD0,
-					float3 N			: NORMAL,
-					float4 T			: TANGENT,
+					float4 tangent_quat			: TANGENT,
 					float distortion	: TEXCOORD1,
 					out float4 oL			: TEXCOORD0,	// in tangent space
 					out float4 oV			: TEXCOORD1,	// in tangent space
@@ -129,10 +126,9 @@ void ParallaxOcclusionMappingVS(float4 pos				: POSITION,
 					out float4 oParallaxOffsetTS : TEXCOORD3,   // Parallax offset vector in tangent space
 					out float4 oPos			: SV_Position)
 {
-	N = N * 2 - 1;
-	T = T * 2 - 1;
+	tangent_quat = tangent_quat * 2 - 1;
 
-	CalcTBN(pos, texcoord0, N, T,
+	CalcTBN(pos, texcoord0, tangent_quat,
 		oL, oV, oH, oPos);
 
 	oParallaxOffsetTS = float4(normalize(oV.xyz).xy, normalize(oL.xyz).xy) * height_scale;
@@ -312,20 +308,18 @@ struct VS_CONTROL_POINT_OUTPUT
 
 VS_CONTROL_POINT_OUTPUT TessellationVS(float4 pos	: POSITION,
 					float2 texcoord0	: TEXCOORD0,
-					float3 N			: NORMAL,
-					float4 T			: TANGENT,
+					float4 tangent_quat			: TANGENT,
 					float distortion	: TEXCOORD1)
 {
-	N = N * 2 - 1;
-	T = T * 2 - 1;
+	tangent_quat = tangent_quat * 2 - 1;
 
 	VS_CONTROL_POINT_OUTPUT output;
 	
 	output.Pos = pos.xyz;
 	output.Texcoord0 = texcoord0;
-	output.Normal = N;
-	output.Tangent = T.xyz;
-	output.Binormal = cross(N, T.xyz) * T.w;
+	output.Normal = transform_quat(float3(0, 0, 1), tangent_quat);
+	output.Tangent = transform_quat(float3(1, 0, 0), tangent_quat);
+	output.Binormal = transform_quat(float3(0, 1, 0), tangent_quat) * sign(tangent_quat.w);
 	output.Distortion = distortion * height_scale;
 
 	return output;

@@ -1,6 +1,7 @@
 <?xml version='1.0'?>
 
 <effect>
+	<include name="Quaternion.fxml"/>
 	<include name="Lighting.fxml"/>
 
 	<parameter type="float4x4" name="mvp"/>
@@ -20,7 +21,7 @@
 	<shader>
 		<![CDATA[
 void ObjectVS(float4 Position : POSITION,
-					float3 Normal : NORMAL,
+					float4 tangent_quat : TANGENT,
 					float2 Tex0 : TEXCOORD0,
 					out float2 oTex0 : TEXCOORD0,
 					out float3 oNormal : TEXCOORD1,
@@ -29,7 +30,7 @@ void ObjectVS(float4 Position : POSITION,
 					out float4 oPos : SV_Position)
 {
 	oPos = mul(Position, mvp);
-	oNormal = mul(Normal * 2 - 1, (float3x3)mv);
+	oNormal = mul(transform_quat(float3(0, 0, 1), tangent_quat * 2 - 1), (float3x3)mv);
 	oTex0 = Tex0;
 
 	oLightVec = light_pos - Position.xyz;

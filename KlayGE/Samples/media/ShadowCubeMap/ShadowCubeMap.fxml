@@ -2,6 +2,7 @@
 
 <effect>
 	<include name="Lighting.fxml"/>
+	<include name="Quaternion.fxml"/>
 
 	<parameter type="float4x4" name="mvp"/>
 	<parameter type="float4x4" name="model"/>
@@ -19,7 +20,7 @@ float calc_dist(float4 position)
 }
 
 void GenCubeShadowMapVS(float4 Position : POSITION,
-						float3 Normal   : NORMAL,
+						float4 tangent_quat   : TANGENT,
 						out float oDist : TEXCOORD0,
 						out float4 oPos : SV_Position)
 {
@@ -82,7 +83,7 @@ void CalcDPSM(float4 Position,
 }
 
 void GenDPShadowMapVS(float4 Position : POSITION,
-						float3 Normal : NORMAL,
+						float4 tangent_quat : TANGENT,
 					out float2 oDist  : TEXCOORD0,
 					out float4 oPos   : SV_Position)
 {
@@ -302,7 +303,7 @@ struct PS_IN
 };
 
 void GenCubeOneShadowMapVS(float4 Position : POSITION,
-						float3 Normal : NORMAL,
+						float4 tangent_quat : TANGENT,
 						out float4 oPos : POSITION,
 						out float oDist : TEXCOORD0)
 {
@@ -367,7 +368,7 @@ void GenCubeOneShadowMapGS(triangle float4 in_pos[3] : POSITION, triangle float 
 	<shader version="4">
 		<![CDATA[
 void GenCubeOneInstanceShadowMapVS(float4 Position : POSITION,
-						float3 Normal : NORMAL,
+						float4 tangent_quat : TANGENT,
 						uint instance_id : SV_InstanceID,
 						out float4 oPos : POSITION,
 						out float2 oDist : TEXCOORD0)
@@ -506,7 +507,7 @@ void GenCubeOneInstanceGSShadowMapGS(triangle float4 in_pos[3] : POSITION, trian
 	<shader>
 		<![CDATA[
 void RenderSceneVS(float4 Position : POSITION,
-					float3 Normal   : NORMAL,
+					float4 tangent_quat : TANGENT,
 					float2 Texcoord : TEXCOORD0,
 					out float2 oTexcoord : TEXCOORD0,
 					out float3 oLightWorldPos : TEXCOORD1,
@@ -517,7 +518,7 @@ void RenderSceneVS(float4 Position : POSITION,
 	oTexcoord = Texcoord;
 	oPos = mul(Position, mvp);
 	oLightWorldPos = mul(Position, obj_model_to_light_model).xyz;
-	oLightWorldNormal = mul(Normal * 2 - 1, (float3x3)obj_model_to_light_model);
+	oLightWorldNormal = mul(transform_quat(float3(0, 0, 1), tangent_quat * 2 - 1), (float3x3)obj_model_to_light_model);
 	oLightVuewPos = mul(Position, obj_model_to_light_view).xyz;
 }
 

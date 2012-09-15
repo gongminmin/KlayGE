@@ -4,6 +4,7 @@
 	<include name="Lighting.fxml"/>
 	<include name="PostProcess.fxml"/>
 	<include name="util.fxml"/>
+	<include name="Quaternion.fxml"/>
 
 	<parameter type="float3" name="light_pos"/>
 
@@ -23,13 +24,13 @@
 	<shader>
 		<![CDATA[
 void DepthPeelingVS(float4 pos				: POSITION,
-					float3 normal			: NORMAL,
+					float4 tangent_quat		: TANGENT,
 					out float4 oClr			: COLOR0,
 					out float4 oPosSS		: TEXCOORD0,
 					out float4 oPos			: SV_Position)
 {
 	oPos = mul(pos, mvp);
-	oClr = float4(max(point_lighting(light_pos, pos.xyz, normal * 2 - 1), 0.0f) * float3(1, 1, 0), 0.3f);
+	oClr = float4(max(point_lighting(light_pos, pos.xyz, transform_quat(float3(0, 0, 1), tangent_quat * 2 - 1)), 0.0f) * float3(1, 1, 0), 0.3f);
 	oPosSS = oPos;
 }
 

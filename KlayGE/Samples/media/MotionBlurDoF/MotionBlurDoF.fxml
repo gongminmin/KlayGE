@@ -2,6 +2,7 @@
 
 <effect>
 	<include name="Lighting.fxml"/>
+	<include name="Quaternion.fxml"/>
 	<include name="PostProcess.fxml"/>
 
 	<cbuffer name="per_frame">
@@ -22,7 +23,7 @@ float3 CalcColor(float3 pos_ws, float3 normal_ws, float3 clr)
 }
 
 void ColorDepthInstancedVS(float4 pos			: POSITION,
-					float3 normal		: NORMAL,
+					float4 tangent_quat		: TANGENT,
 
 					float4 row0			: TEXCOORD1,
 					float4 row1			: TEXCOORD2,
@@ -40,7 +41,7 @@ void ColorDepthInstancedVS(float4 pos			: POSITION,
 	float4x4 model = { row0, row1, row2, float4(0, 0, 0, 1) };
 
 	float4 pos_ws = mul(model, pos);
-	normal = mul((float3x3)model, normal * 2 - 1);
+	float3 normal = mul((float3x3)model, transform_quat(float3(0, 0, 1), tangent_quat * 2 - 1));
 	oPos = mul(mul(pos_ws, view), proj);
 	oPosWS = pos_ws.xyz;
 	oNormalWS = normal;
@@ -48,7 +49,7 @@ void ColorDepthInstancedVS(float4 pos			: POSITION,
 }
 
 void ColorDepthNonInstancedVS(float4 pos			: POSITION,
-					float3 normal		: NORMAL,
+					float4 tangent_quat		: TANGENT,
 
 					out float3 oClr : TEXCOORD0,
 					out float3 oPosWS : TEXCOORD1,
@@ -56,7 +57,7 @@ void ColorDepthNonInstancedVS(float4 pos			: POSITION,
 					out float4 oPos		: SV_Position)
 {
 	float4 pos_ws = mul(pos, modelmat);
-	normal = mul(normal * 2 - 1, (float3x3)modelmat);
+	float3 normal = mul(transform_quat(float3(0, 0, 1), tangent_quat * 2 - 1), (float3x3)modelmat);
 	oPos = mul(mul(pos_ws, view), proj);
 	oPosWS = pos_ws.xyz;
 	oNormalWS = normal;
@@ -108,7 +109,7 @@ void CalcMotionVector(float4 pos_curr, float4 pos_prev, float3 normal_es,
 }
 
 void MotionVectorInstancedVS(float4 pos			: POSITION,
-					float3 normal		: NORMAL,
+					float4 tangent_quat		: TANGENT,
 
 					float4 row0			: TEXCOORD1,
 					float4 row1			: TEXCOORD2,
@@ -124,18 +125,18 @@ void MotionVectorInstancedVS(float4 pos			: POSITION,
 	float4x4 model = { row0, row1, row2, float4(0, 0, 0, 1) };
 	float4x4 last_model = { last_row0, last_row1, last_row2, float4(0, 0, 0, 1) };
 
-	normal = mul(mul((float3x3)model, normal * 2 - 1), (float3x3)view);
+	float3 normal = mul(mul((float3x3)model, transform_quat(float3(0, 0, 1), tangent_quat * 2 - 1)), (float3x3)view);
 	CalcMotionVector(mul(model, pos), mul(last_model, pos), normal, oVelocity, oPos);
 }
 
 void MotionVectorNonInstancedVS(float4 pos			: POSITION,
-					float3 normal		: NORMAL,
+					float4 tangent_quat		: TANGENT,
 
 					out float2 oVelocity : TEXCOORD0,
 					out float4 oPos		: SV_Position)
 {
 	float4 pos_ws = mul(pos, modelmat);
-	normal = mul(mul(normal * 2 - 1, (float3x3)modelmat), (float3x3)view);
+	float3 normal = mul(mul(transform_quat(float3(0, 0, 1), tangent_quat * 2 - 1), (float3x3)modelmat), (float3x3)view);
 	CalcMotionVector(mul(pos, modelmat), mul(pos, last_modelmat), normal, oVelocity, oPos);
 }
 

@@ -2,6 +2,7 @@
 
 <effect>
 	<include name="util.fxml"/>
+	<include name="Quaternion.fxml"/>
 	<include name="Lighting.fxml"/>
 	
 	<parameter type="float4x4" name="model"/>
@@ -59,12 +60,12 @@ float4 PosTexPS() : SV_Target
 	<shader>
 		<![CDATA[
 void PosNormTexVS(float4 pos : POSITION,
-	float3 normal : NORMAL,
+	float4 tangent_quat : TANGENT,
 	out float3 oNormal : TEXCOORD0,
 	out float4 oPos : SV_Position)
 {
 	oPos = mul(pos, mvp);
-	oNormal = mul(normal * 2 - 1, (float3x3)model);
+	oNormal = mul(transform_quat(float3(0, 0, 1), tangent_quat * 2 - 1), (float3x3)model);
 }
     
 float4 PosNormTexPS(float3 normal : TEXCOORD0) : SV_Target
@@ -169,8 +170,7 @@ float2 CalcLookupUV(float4 lookup_proj)
 
 void DistanceMappingVS(float4 pos		: POSITION,
 					float2 texcoord0	: TEXCOORD0,
-					float3 N			: NORMAL,	// in object space
-					float4 T			: TANGENT,	// in object space
+					float4 tangent_quat : TANGENT,	// in object space
 					
 					out float4 oL		: TEXCOORD0,	// in tangent space
 					out float4 oV		: TEXCOORD1,	// in tangent space
@@ -181,13 +181,12 @@ void DistanceMappingVS(float4 pos		: POSITION,
 {
 	oPos = mul(pos, mvp);
 
-	N = N * 2 - 1;
-	T = T * 2 - 1;
+	tangent_quat = tangent_quat * 2 - 1;
 
 	float3x3 matObjToTangentSpace;
-	matObjToTangentSpace[0] = T.xyz;
-	matObjToTangentSpace[1] = cross(N, T.xyz) * T.w;
-	matObjToTangentSpace[2] = N;
+	matObjToTangentSpace[0] = transform_quat(float3(1, 0, 0), tangent_quat);
+	matObjToTangentSpace[1] = transform_quat(float3(0, 1, 0), tangent_quat) * sign(tangent_quat.w);
+	matObjToTangentSpace[2] = transform_quat(float3(0, 0, 1), tangent_quat);
 
 	float3 vLight = light_pos - pos.xyz;
 	float3 vView = eye_pos - pos.xyz;
@@ -358,7 +357,7 @@ float4 DistanceMappingPS_20(float4 L	: TEXCOORD0,
 
 	<shader>
 		<![CDATA[
-void RefractEffectVS(float4 position : POSITION, float3 normal : NORMAL,
+void RefractEffectVS(float4 position : POSITION, float4 tangent_quat : TANGENT,
     out float3 wPosition : TEXCOORD0,
     out float3 wNormal : TEXCOORD1,
     out float3 wViewVec : TEXCOORD2,
@@ -366,7 +365,7 @@ void RefractEffectVS(float4 position : POSITION, float3 normal : NORMAL,
 {
     hPos = mul(float4(position.xyz, 1), mvp);
     wPosition = mul(float4(position.xyz, 1), model).xyz;
-    wNormal = mul(normal * 2 - 1, (float3x3)model);
+    wNormal = mul(transform_quat(float3(0, 0, 1), tangent_quat * 2 - 1), (float3x3)model);
     wViewVec = normalize(wPosition - eye_pos);
 }
 

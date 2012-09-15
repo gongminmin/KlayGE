@@ -79,87 +79,48 @@ namespace
 			BOOST_AUTO(normal_loader, ASyncLoadTexture("normal.dds", EAH_GPU_Read));
 			BOOST_AUTO(dist_loader, ASyncLoadTexture("distance.dds", EAH_GPU_Read));
 
-			//normals, tangents
-			uint32_t  vertex_num = rl_->NumVertices();
-			vector<float3> normals(vertex_num);
-			vector<float4> tangents(vertex_num);
+			uint32_t vertex_num = rl_->NumVertices();
+			vector<Quaternion> tangent_quats(vertex_num);
 			for (uint32_t i = 0; i < vertex_num; ++i)
 			{
-				normals[i] = float3(0.5f, 0.5f, 0.0f);
-				tangents[i] = float4(1.0f, 0.5f, 0.5f, 1.0f);
+				float3 normal = float3(0, 0, -1);
+				float3 tangent = float3(1, 0, 0);
+				float3 binormal = MathLib::cross(normal, tangent);
+
+				tangent_quats[i] = MathLib::to_quaternion(tangent, binormal, normal, 8);
 			}
 
 			// convert to int
-			vector<uint32_t> inormal(vertex_num);
 			vector<uint32_t> itangent(vertex_num);
 			ElementFormat fmt;
-			if (rf.RenderEngineInstance().DeviceCaps().vertex_format_support(EF_A2BGR10))
+			if (rf.RenderEngineInstance().DeviceCaps().vertex_format_support(EF_ABGR8))
 			{
-				fmt = EF_A2BGR10;
+				fmt = EF_ABGR8;
 
 				for (uint32_t j = 0; j < vertex_num; ++ j)
 				{
-					inormal[j] = MathLib::clamp<uint32_t>(static_cast<uint32_t>(normals[j].x() * 1023), 0, 1023)
-						| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(normals[j].y() * 1023), 0, 1023) << 10)
-						| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(normals[j].z() * 1023), 0, 1023) << 20);
-				}
-				for (uint32_t j = 0; j < vertex_num; ++ j)
-				{
-					itangent[j] = MathLib::clamp<uint32_t>(static_cast<uint32_t>(tangents[j].x() * 1023), 0, 1023)
-						| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(tangents[j].y() * 1023), 0, 1023) << 10)
-						| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(tangents[j].z() * 1023), 0, 1023) << 20)
-						| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(tangents[j].w() * 3), 0, 3) << 30);
+					itangent[j] = (MathLib::clamp<uint32_t>(static_cast<uint32_t>((tangent_quats[j].x() * 0.5f + 0.5f) * 255), 0, 255) << 0)
+						| (MathLib::clamp<uint32_t>(static_cast<uint32_t>((tangent_quats[j].y() * 0.5f + 0.5f) * 255), 0, 255) << 8)
+						| (MathLib::clamp<uint32_t>(static_cast<uint32_t>((tangent_quats[j].z() * 0.5f + 0.5f) * 255), 0, 255) << 16)
+						| (MathLib::clamp<uint32_t>(static_cast<uint32_t>((tangent_quats[j].w() * 0.5f + 0.5f) * 255), 0, 255) << 24);
 				}
 			}
 			else
 			{
-				if (rf.RenderEngineInstance().DeviceCaps().vertex_format_support(EF_ABGR8))
+				BOOST_ASSERT(rf.RenderEngineInstance().DeviceCaps().vertex_format_support(EF_ARGB8));
+
+				fmt = EF_ARGB8;
+
+				for (uint32_t j = 0; j < vertex_num; ++ j)
 				{
-					fmt = EF_ABGR8;
-
-					for (uint32_t j = 0; j < vertex_num; ++ j)
-					{
-						inormal[j] = (MathLib::clamp<uint32_t>(static_cast<uint32_t>(normals[j].x() * 255), 0, 255) << 0)
-							| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(normals[j].y() * 255), 0, 255) << 8)
-							| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(normals[j].z() * 255), 0, 255) << 16);
-					}
-					for (uint32_t j = 0; j < vertex_num; ++ j)
-					{
-						itangent[j] = (MathLib::clamp<uint32_t>(static_cast<uint32_t>(tangents[j].x() * 255), 0, 255) << 0)
-							| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(tangents[j].y() * 255), 0, 255) << 8)
-							| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(tangents[j].z() * 255), 0, 255) << 16)
-							| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(tangents[j].w() * 255), 0, 255) << 24);
-					}
-				}
-				else
-				{
-					BOOST_ASSERT(rf.RenderEngineInstance().DeviceCaps().vertex_format_support(EF_ARGB8));
-
-					fmt = EF_ARGB8;
-
-					for (uint32_t j = 0; j < vertex_num; ++ j)
-					{
-						inormal[j] = (MathLib::clamp<uint32_t>(static_cast<uint32_t>(normals[j].x() * 255), 0, 255) << 16)
-							| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(normals[j].y() * 255), 0, 255) << 8)
-							| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(normals[j].z() * 255), 0, 255) << 0);
-					}
-					for (uint32_t j = 0; j < vertex_num; ++ j)
-					{
-						itangent[j] = (MathLib::clamp<uint32_t>(static_cast<uint32_t>(tangents[j].x() * 255), 0, 255) << 16)
-							| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(tangents[j].y() * 255), 0, 255) << 8)
-							| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(tangents[j].z() * 255), 0, 255) << 0)
-							| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(tangents[j].w() * 255), 0, 255) << 24);
-					}
+					itangent[j] = (MathLib::clamp<uint32_t>(static_cast<uint32_t>((tangent_quats[j].x() * 0.5f + 0.5f) * 255), 0, 255) << 16)
+						| (MathLib::clamp<uint32_t>(static_cast<uint32_t>((tangent_quats[j].y() * 0.5f + 0.5f) * 255), 0, 255) << 8)
+						| (MathLib::clamp<uint32_t>(static_cast<uint32_t>((tangent_quats[j].z() * 0.5f + 0.5f) * 255), 0, 255) << 0)
+						| (MathLib::clamp<uint32_t>(static_cast<uint32_t>((tangent_quats[j].w() * 0.5f + 0.5f) * 255), 0, 255) << 24);
 				}
 			}
 
 			ElementInitData init_data;
-			init_data.row_pitch = vertex_num * sizeof(inormal[0]);
-			init_data.slice_pitch = 0;
-			init_data.data = &inormal[0];
-			GraphicsBufferPtr normals_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data);
-			rl_->BindVertexStream(normals_vb, boost::make_tuple(vertex_element(VEU_Normal, 0, fmt)));
-
 			init_data.row_pitch = vertex_num * sizeof(itangent[0]);
 			init_data.slice_pitch = 0;
 			init_data.data = &itangent[0];

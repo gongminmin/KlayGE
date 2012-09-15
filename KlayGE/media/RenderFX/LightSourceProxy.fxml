@@ -4,8 +4,9 @@
 	<include name="DeferredRenderingUtil.fxml"/>
 	<include name="Lighting.fxml"/>
 	<include name="util.fxml"/>
+	<include name="Quaternion.fxml"/>
 	<include name="GBuffer.fxml"/>
-	
+
 	<parameter type="float4x4" name="model"/>
 	<parameter type="float4" name="light_color"/>
 	<parameter type="float3" name="light_falloff"/>
@@ -23,14 +24,16 @@
 	<shader>
 		<![CDATA[
 void LightSourceProxyVS(float4 pos : POSITION,
-						float3 normal : NORMAL,
+						float4 tangent_quat : TANGENT,
 			out float3 oPosOS : TEXCOORD0,
 			out float3 oNormal : TEXCOORD1,
 			out float4 oPos : SV_Position)
 {
+	tangent_quat = tangent_quat * 2 - 1;
+	
 	oPos = mul(pos, mvp);
 	oPosOS = pos.xyz;
-	oNormal = mul(normal, (float3x3)model);
+	oNormal = mul(transform_quat(float3(0, 0, 1), tangent_quat), (float3x3)model);
 }
 
 float4 LightSourceProxyPS(float3 pos_os : TEXCOORD0, float3 normal : TEXCOORD1) : SV_Target
@@ -76,7 +79,7 @@ float4 LightSourceProxyPS(float3 pos_os : TEXCOORD0, float3 normal : TEXCOORD1) 
 		<![CDATA[
 void LightSourceProxyShadingVS(float4 pos : POSITION,
 			float2 texcoord : TEXCOORD0,
-			float3 normal : NORMAL,
+			float4 tangent_quat : TANGENT,
 			out float2 oTexCoord : TEXCOORD0,
 #ifdef NOPERSPECTIVE_SUPPORT
 			out noperspective float2 oTc : TEXCOORD1,
@@ -93,8 +96,8 @@ void LightSourceProxyShadingVS(float4 pos : POSITION,
 	
 	oViewDir = -mul(pos, model_view).xyz;
 	
-	normal = normal * 2 - 1;
-	oNormal = mul(normal, (float3x3)model_view);
+	tangent_quat = tangent_quat * 2 - 1;
+	oNormal = mul(transform_quat(float3(0, 0, 1), tangent_quat), (float3x3)model_view);
 	
 	oPosOS = pos.xyz;
 

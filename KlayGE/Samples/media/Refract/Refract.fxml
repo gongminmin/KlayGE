@@ -3,6 +3,7 @@
 <effect>
 	<include name="Lighting.fxml"/>
 	<include name="util.fxml"/>
+	<include name="Quaternion.fxml"/>
 
 	<cbuffer name="per_frame">
 		<parameter type="float4x4" name="model"/>
@@ -53,7 +54,7 @@ float3x3 my_refract3(float3 i, float3 n, float3 eta)
 }
 
 void RefractVS(float4 pos			: POSITION,
-				float3 normal		: NORMAL,
+				float4 tangent_quat	: TANGENT,
 				out float3 out_normal	: TEXCOORD0,
 				out float4 incident : TEXCOORD1,
 				out float4 refract_vec : TEXCOORD2,
@@ -64,7 +65,7 @@ void RefractVS(float4 pos			: POSITION,
 	oPos = mul(pos, mvp);
 	pos_ss = oPos;
 
-	out_normal = mul(normal * 2 - 1, (float3x3)modelviewit);
+	out_normal = mul(transform_quat(float3(0, 0, 1), tangent_quat * 2 - 1), (float3x3)modelviewit);
 	incident.xyz = mul(pos, mv).xyz;
 	incident.w = incident.z;
 	
@@ -139,12 +140,12 @@ float4 RefractPS(float3 normal			: TEXCOORD0,
 	<shader>
 		<![CDATA[
 void RefractBackFaceVS(float4 pos : POSITION,
-							float3 normal : NORMAL,
+							float4 tangent_quat : TANGENT,
 							out float4 normal_depth : TEXCOORD0,
 							out float4 oPos : SV_Position)
 {
 	oPos = mul(pos, mvp);
-	normal_depth.xyz = mul(normal * 2 - 1, (float3x3)modelviewit);
+	normal_depth.xyz = mul(transform_quat(float3(0, 0, 1), tangent_quat * 2 - 1), (float3x3)modelviewit);
 	normal_depth.w = oPos.w;
 }
 

@@ -30,11 +30,13 @@
 void Skinned(float3 pos,
 			float3 normal,
 			float3 tangent,
+			float3 binormal,
 			float4 blend_weights,
 			int4 blend_indices,
 			out float3 result_pos,
 			out float3 result_normal,
-			out float3 result_tangent)
+			out float3 result_tangent,
+			out float3 result_binormal)
 {
 	float4 dp0 = joint_reals[blend_indices[0]];
 	
@@ -65,12 +67,14 @@ void Skinned(float3 pos,
 	result_pos = transform_quat(pos_s, blend_real) + 2 * mul_quat(float4(blend_dual.xyz, -blend_dual.w), blend_real).xyz;
 	result_normal = transform_quat(normal, blend_real);
 	result_tangent = transform_quat(tangent, blend_real);
+	result_binormal = transform_quat(binormal, blend_real);
 }
 
 void CalcMesh(float2 tex0,
 				float4 pos,
 				float3 N,
-				float4 T,
+				float3 T,
+				float3 B,
 
 				out float2 oTex,
 				out float3 oPos,
@@ -78,16 +82,14 @@ void CalcMesh(float2 tex0,
 				out float3 oTangent,
 				out float3 oBinormal)
 {
-	N = N * 2 - 1;
-	T = T * 2 - 1;
-	
 	oPos = pos.xyz;
-	oTangent = T.xyz;
+	oTangent = T;
 	oNormal = N;
+	oBinormal = B;
 
 	oNormal = normalize(oNormal);
 	oTangent = normalize(oTangent);
-	oBinormal = cross(oNormal, oTangent) * T.w;
+	oBinormal = normalize(oBinormal);
 
 	oTex = tex0;
 }
@@ -97,7 +99,8 @@ void CalcSkinnedMesh(float2 tex0,
 				float4 blend_weights,
 				int4 blend_indices,
 				float3 N,
-				float4 T,
+				float3 T,
+				float3 B,
 
 				out float2 oTex,
 				out float3 oPos,
@@ -105,14 +108,11 @@ void CalcSkinnedMesh(float2 tex0,
 				out float3 oTangent,
 				out float3 oBinormal)
 {
-	N = N * 2 - 1;
-	T = T * 2 - 1;
-	
-	Skinned(pos.xyz, N, T.xyz, blend_weights, blend_indices, oPos, oNormal, oTangent);
+	Skinned(pos.xyz, N, T, B, blend_weights, blend_indices, oPos, oNormal, oTangent, oBinormal);
 	
 	oNormal = normalize(oNormal);
 	oTangent = normalize(oTangent);
-	oBinormal = cross(oNormal, oTangent) * T.w;
+	oBinormal = normalize(oBinormal);
 
 	oTex = tex0;
 }
@@ -190,7 +190,7 @@ float4 VisualizeVertex(float3 pos, float3 tangent, float3 binormal, float3 norma
 
 void MeshDepthVS(float4 pos : POSITION,
 			float2 texcoord : TEXCOORD0,
-			float3 normal : NORMAL,
+			float4 tangent_quat : TANGENT,
 			out float3 oTexCoordDepth : TEXCOORD0,
 #ifdef NOPERSPECTIVE_SUPPORT
 			out noperspective float2 oScreenTc : TEXCOORD1,
@@ -221,7 +221,7 @@ void SkinnedMeshDepthVS(float2 texcoord : TEXCOORD0,
 #else
 			uint4 blend_indices : BLENDINDICES,
 #endif
-			float3 normal : NORMAL,
+			float4 tangent_quat : TANGENT,
 			out float3 oTexCoordDepth : TEXCOORD0,
 #ifdef NOPERSPECTIVE_SUPPORT
 			out noperspective float2 oScreenTc : TEXCOORD1,
@@ -234,10 +234,12 @@ void SkinnedMeshDepthVS(float2 texcoord : TEXCOORD0,
 	int4 blend_indices = (int4)blend_indices_f;
 #endif
 
-	normal = normal * 2 - 1;
+	tangent_quat = tangent_quat * 2 - 1;
+	float3 tangent = transform_quat(float3(1, 0, 0), tangent_quat);
+	float3 binormal = transform_quat(float3(0, 1, 0), tangent_quat) * sign(tangent_quat.w);
+	float3 normal = transform_quat(float3(0, 0, 1), tangent_quat);
 
-	float3 tangent = 0;
-	Skinned(pos.xyz, normal, tangent, blend_weights, blend_indices, pos.xyz, normal, tangent);
+	Skinned(pos.xyz, normal, tangent, binormal, blend_weights, blend_indices, pos.xyz, normal, tangent, binormal);
 
 	oPos = mul(pos, mvp);
 	oTexCoordDepth.xy = texcoord;
@@ -255,8 +257,7 @@ void SkinnedMeshDepthVS(float2 texcoord : TEXCOORD0,
 
 void MeshVS(float2 texcoord : TEXCOORD0,
 			float4 pos : POSITION,
-			float3 normal : NORMAL,
-			float4 tangent : TANGENT,
+			float4 tangent_quat : TANGENT,
 			out float4 oTexCoord_2xy : TEXCOORD0,
 			out float4 oTsToView0_2z : TEXCOORD1,
 			out float4 oTsToView1_Depth : TEXCOORD2,
@@ -267,10 +268,15 @@ void MeshVS(float2 texcoord : TEXCOORD0,
 #endif
 			out float4 oPos : SV_Position)
 {
+	tangent_quat = tangent_quat * 2 - 1;
+	float3 tangent = transform_quat(float3(1, 0, 0), tangent_quat);
+	float3 binormal = transform_quat(float3(0, 1, 0), tangent_quat) * sign(tangent_quat.w);
+	float3 normal = transform_quat(float3(0, 0, 1), tangent_quat);
+	
 	float3 result_pos;
 	float3x3 obj_to_ts;
 	CalcMesh(texcoord, pos,
-				normal, tangent,
+				normal, tangent, binormal,
 				oTexCoord_2xy.xy, result_pos,
 				obj_to_ts[2], obj_to_ts[0], obj_to_ts[1]);
 				
@@ -287,8 +293,7 @@ void SkinnedMeshVS(float2 texcoord : TEXCOORD0,
 #else
 			uint4 blend_indices : BLENDINDICES,
 #endif
-			float3 normal : NORMAL,
-			float4 tangent : TANGENT,
+			float4 tangent_quat : TANGENT,
 			out float4 oTexCoord_2xy : TEXCOORD0,
 			out float4 oTsToView0_2z : TEXCOORD1,
 			out float4 oTsToView1_Depth : TEXCOORD2,
@@ -303,11 +308,16 @@ void SkinnedMeshVS(float2 texcoord : TEXCOORD0,
 	int4 blend_indices = (int4)blend_indices_f;
 #endif
 
+	tangent_quat = tangent_quat * 2 - 1;
+	float3 tangent = transform_quat(float3(1, 0, 0), tangent_quat);
+	float3 binormal = transform_quat(float3(0, 1, 0), tangent_quat) * sign(tangent_quat.w);
+	float3 normal = transform_quat(float3(0, 0, 1), tangent_quat);
+
 	float3 result_pos;
 	float3x3 obj_to_ts;
 	CalcSkinnedMesh(texcoord, pos,
 				blend_weights, blend_indices,
-				normal, tangent,
+				normal, tangent, binormal,
 				oTexCoord_2xy.xy, result_pos,
 				obj_to_ts[2], obj_to_ts[0], obj_to_ts[1]);
 				
@@ -318,17 +328,21 @@ void SkinnedMeshVS(float2 texcoord : TEXCOORD0,
 
 void VisualizeVertexVS(float2 tex0 : TEXCOORD0,
 				float4 pos : POSITION,
-				float3 N	: NORMAL,	// in object space
-				float4 T	: TANGENT,	// in object space
+				float4 tangent_quat	: TANGENT,	// in object space
 				
 				out float4 oClr : COLOR,
 				out float4 oPos : SV_Position)
 {
+	tangent_quat = tangent_quat * 2 - 1;
+	float3 tangent = transform_quat(float3(1, 0, 0), tangent_quat);
+	float3 binormal = transform_quat(float3(0, 1, 0), tangent_quat) * sign(tangent_quat.w);
+	float3 normal = transform_quat(float3(0, 0, 1), tangent_quat);
+	
 	float3 result_pos;
 	float3x3 obj_to_ts;
 	float2 oTex;
 	CalcMesh(tex0, pos,
-				N, T,
+				normal, tangent, binormal,
 				oTex, result_pos,
 				obj_to_ts[2], obj_to_ts[0], obj_to_ts[1]);
 
@@ -345,8 +359,7 @@ void VisualizeVertexSkinnedVS(float2 tex0 : TEXCOORD0,
 #else
 				uint4 blend_indices : BLENDINDICES,
 #endif
-				float3 N	: NORMAL,	// in object space
-				float4 T	: TANGENT,	// in object space
+				float4 tangent_quat	: TANGENT,	// in object space
 				
 				out float4 oClr : COLOR,
 				out float4 oPos : SV_Position)
@@ -355,12 +368,17 @@ void VisualizeVertexSkinnedVS(float2 tex0 : TEXCOORD0,
 	int4 blend_indices = (int4)blend_indices_f;
 #endif
 
+	tangent_quat = tangent_quat * 2 - 1;
+	float3 tangent = transform_quat(float3(1, 0, 0), tangent_quat);
+	float3 binormal = transform_quat(float3(0, 1, 0), tangent_quat) * sign(tangent_quat.w);
+	float3 normal = transform_quat(float3(0, 0, 1), tangent_quat);
+
 	float3 result_pos;
 	float3x3 obj_to_ts;
 	float2 oTex;
 	CalcSkinnedMesh(tex0, pos,
 				blend_weights, blend_indices,
-				N, T,
+				normal, tangent, binormal,
 				oTex, result_pos,
 				obj_to_ts[2], obj_to_ts[0], obj_to_ts[1]);
 
@@ -982,13 +1000,17 @@ struct CONTROL_POINT
 
 CONTROL_POINT SmoothVS(float2 tex0 : TEXCOORD0,
 				float4 pos : POSITION,
-				float3 N	: NORMAL,
-				float4 T	: TANGENT)
+				float4 tangent_quat	: TANGENT)
 {
 	CONTROL_POINT output;
+	
+	tangent_quat = tangent_quat * 2 - 1;
+	float3 tangent = transform_quat(float3(1, 0, 0), tangent_quat);
+	float3 binormal = transform_quat(float3(0, 1, 0), tangent_quat) * sign(tangent_quat.w);
+	float3 normal = transform_quat(float3(0, 0, 1), tangent_quat);
 
 	CalcMesh(tex0, pos,
-				N, T,
+				normal, tangent, binormal,
 				output.Texcoord0, output.Pos,
 				output.Normal, output.Tangent, output.Binormal);
 
@@ -1004,8 +1026,7 @@ CONTROL_POINT SmoothSkinnedVS(float2 tex0 : TEXCOORD0,
 #else
 				uint4 blend_indices : BLENDINDICES,
 #endif
-				float3 N	: NORMAL,
-				float4 T	: TANGENT)
+				float4 tangent_quat	: TANGENT)
 {
 	CONTROL_POINT output;
 	
@@ -1013,9 +1034,14 @@ CONTROL_POINT SmoothSkinnedVS(float2 tex0 : TEXCOORD0,
 	int4 blend_indices = (int4)blend_indices_f;
 #endif
 
+	tangent_quat = tangent_quat * 2 - 1;
+	float3 tangent = transform_quat(float3(1, 0, 0), tangent_quat);
+	float3 binormal = transform_quat(float3(0, 1, 0), tangent_quat) * sign(tangent_quat.w);
+	float3 normal = transform_quat(float3(0, 0, 1), tangent_quat);
+
 	CalcSkinnedMesh(tex0, pos,
 				blend_weights, blend_indices,
-				N, T,
+				normal, tangent, binormal,
 				output.Texcoord0, output.Pos,
 				output.Normal, output.Tangent, output.Binormal);
 
@@ -1561,24 +1587,54 @@ void SkinnedStreamOutVS(float3 pos : POSITION,
 #else
 					uint4 blend_indices : BLENDINDICES,
 #endif
-					float3 N : NORMAL,
-					float4 T : Tangent,
+					float4 tangent_quat : Tangent,
 
 					out float4 oPosOS : SV_Position,
 					out float2 oTex0 : TEXCOORD0,
-					out float4 oNormal : NORMAL,
-					out float4 oTangent : TANGENT)
+					out float4 oTangentQuat : TANGENT)
 {
+	tangent_quat = tangent_quat * 2 - 1;
+	float3 tangent = transform_quat(float3(1, 0, 0), tangent_quat);
+	float3 binormal = transform_quat(float3(0, 1, 0), tangent_quat) * sign(tangent_quat.w);
+	float3 normal = transform_quat(float3(0, 0, 1), tangent_quat);
+	
 	float3 result_pos, result_normal, result_tangent, result_binormal;
 	CalcSkinnedMesh(texcoord0, float4(pos, 1),
 				blend_weights, blend_indices,
-				N, T,
+				normal, tangent, binormal,
 				oTex0, result_pos,
 				result_normal, result_tangent, result_binormal);
 
 	oPosOS = float4(result_pos, 1);
-	oNormal = float4(result_normal / 2 + 0.5f, 0);
-	oTangent = float4(result_tangent / 2 + 0.5f, T.w);
+	
+	float k = 1;
+	if (dot(result_binormal, cross(result_normal, result_tangent)) < 0)
+	{
+		k = -1;
+	}	
+	float4x4 frame;
+	frame[0] = float4(result_tangent, 0);
+	frame[1] = float4(k * result_binormal, 0);
+	frame[2] = float4(result_normal, 0);
+	frame[3] = float4(0, 0, 0, 1);
+	float4 result_tangent_quat = mat4_to_quat(frame);
+	if (result_tangent_quat.w < 0)
+	{
+		result_tangent_quat = -result_tangent_quat;
+	}
+	float bias = 1.0f / 127;
+	if (result_tangent_quat.w < bias)
+	{
+		float factor = sqrt(1 - bias * bias);
+		result_tangent_quat.xyz *= factor;
+		result_tangent_quat.w = bias;
+	}
+	if (k < 0)
+	{
+		result_tangent_quat = -result_tangent_quat;
+	}
+	
+	oTangentQuat = result_tangent_quat / 2 + 0.5f;
 }
 
 
@@ -1963,7 +2019,7 @@ void InstTessSmoothVisualizeVertexVS(float2 barycentric : TEXCOORD1,
 		<![CDATA[
 void MeshShadingVS(float4 pos : POSITION,
 			float2 texcoord : TEXCOORD0,
-			float3 normal : NORMAL,
+			float4 tangent_quat : TANGENT,
 			out float2 oTexCoord : TEXCOORD0,
 #ifdef NOPERSPECTIVE_SUPPORT
 			out noperspective float2 oTc : TEXCOORD1,
@@ -1979,7 +2035,8 @@ void MeshShadingVS(float4 pos : POSITION,
 	
 	oViewDir = -mul(pos, model_view).xyz;
 	
-	normal = normal * 2 - 1;
+	tangent_quat = tangent_quat * 2 - 1;
+	float3 normal = transform_quat(float3(0, 0, 1), tangent_quat);
 	oNormal = mul(normal, (float3x3)model_view);
 
 	oTc.xy = oPos.xy / oPos.w;
@@ -2000,7 +2057,7 @@ void SkinnedMeshShadingVS(float2 texcoord : TEXCOORD0,
 #else
 			uint4 blend_indices : BLENDINDICES,
 #endif
-			float3 normal : NORMAL,
+			float4 tangent_quat : TANGENT,
 			out float2 oTexCoord : TEXCOORD0,
 #ifdef NOPERSPECTIVE_SUPPORT
 			out noperspective float2 oTc : TEXCOORD1,
@@ -2015,10 +2072,12 @@ void SkinnedMeshShadingVS(float2 texcoord : TEXCOORD0,
 	int4 blend_indices = (int4)blend_indices_f;
 #endif
 
-	normal = normal * 2 - 1;
+	tangent_quat = tangent_quat * 2 - 1;
+	float3 tangent = transform_quat(float3(1, 0, 0), tangent_quat);
+	float3 binormal = transform_quat(float3(0, 1, 0), tangent_quat) * sign(tangent_quat.w);
+	float3 normal = transform_quat(float3(0, 0, 1), tangent_quat);
 
-	float3 tangent = 0;
-	Skinned(pos.xyz, normal, tangent, blend_weights, blend_indices, pos.xyz, normal, tangent);
+	Skinned(pos.xyz, normal, tangent, binormal, blend_weights, blend_indices, pos.xyz, normal, tangent, binormal);
 
 	oPos = mul(pos, mvp);
 	oTexCoord = texcoord;

@@ -26,7 +26,7 @@
 		<![CDATA[
 void DistanceMappingVS(float4 pos		: POSITION,
 					float2 texcoord0	: TEXCOORD0,
-					float4 T			: TANGENT,	// in object space
+					float4 tangent_quat	: TANGENT,	// in object space
 					
 					out float4 oL		: TEXCOORD0,	// in tangent space
 					out float4 oV		: TEXCOORD1,	// in tangent space
@@ -35,15 +35,15 @@ void DistanceMappingVS(float4 pos		: POSITION,
 {
 	oPos = mul(pos, worldviewproj);
 
-	T = T * 2 - 1;
+	tangent_quat = tangent_quat * 2 - 1;
 
 	float3 vLight = light_pos - pos.xyz;
 	float3 vView = eye_pos - pos.xyz;
 	float3 vHalf = normalize(vLight) + normalize(vView);
 
-	oL.xyz = transform_quat(vLight, T);
-	oV.xyz = transform_quat(vView, T);
-	oH = transform_quat(vHalf, T);
+	oL.xyz = transform_quat(vLight, tangent_quat);
+	oV.xyz = transform_quat(vView, tangent_quat);
+	oH = transform_quat(vHalf, tangent_quat);
 	
 	oL.w = texcoord0.x;
 	oV.w = texcoord0.y;

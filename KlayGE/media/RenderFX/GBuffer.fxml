@@ -3,6 +3,7 @@
 <effect>
 	<include name="DeferredRenderingUtil.fxml"/>
 	<include name="Lighting.fxml"/>
+	<include name="Quaternion.fxml"/>
 	<include name="util.fxml"/>
 
 	<macro name="ALPHA_TEST_THRESHOLD" value="0.2"/>
@@ -74,8 +75,7 @@
 
 void DepthVS(float4 pos : POSITION,
 			float2 texcoord : TEXCOORD0,
-			float3 normal : NORMAL,
-			float4 tangent : TANGENT,
+			float4 tangent_quat : TANGENT,
 			out float3 oTexCoordDepth : TEXCOORD0,
 #ifdef NOPERSPECTIVE_SUPPORT
 			out noperspective float2 oScreenTc : TEXCOORD2,
@@ -127,8 +127,7 @@ float4 DepthAlphaBlendPS(float3 texcoord_depth : TEXCOORD0,
 
 void GBufferVS(float4 pos : POSITION,
 			float2 texcoord : TEXCOORD0,
-			float3 normal : NORMAL,
-			float4 tangent : TANGENT,
+			float4 tangent_quat : TANGENT,
 			out float4 oTexCoord_2xy : TEXCOORD0,
 			out float4 oTsToView0_2z : TEXCOORD1,
 			out float4 oTsToView1_Depth : TEXCOORD2,
@@ -142,13 +141,12 @@ void GBufferVS(float4 pos : POSITION,
 	oPos = mul(pos, mvp);
 	oTexCoord_2xy.xy = texcoord;
 
-	normal = normal * 2 - 1;
-	tangent = tangent * 2 - 1;
+	tangent_quat = tangent_quat * 2 - 1;
 
 	float3x3 obj_to_ts;
-	obj_to_ts[0] = tangent.xyz;
-	obj_to_ts[1] = cross(normal, tangent.xyz) * tangent.w;
-	obj_to_ts[2] = normal;
+	obj_to_ts[0] = transform_quat(float3(1, 0, 0), tangent_quat);
+	obj_to_ts[1] = transform_quat(float3(0, 1, 0), tangent_quat) * sign(tangent_quat.w);
+	obj_to_ts[2] = transform_quat(float3(0, 0, 1), tangent_quat);
 	float3x3 ts_to_view = mul(obj_to_ts, (float3x3)model_view);
 	oTsToView0_2z.xyz = ts_to_view[0];
 	oTsToView1_Depth.xyz = ts_to_view[1];
@@ -450,8 +448,7 @@ void GBufferSkyBoxMRTPS(out float4 mrt_0 : SV_Target0, out float4 mrt_1 : SV_Tar
 		<![CDATA[
 void GenReflectiveShadowMapVS(float4 pos : POSITION,
 						float2 texcoord : TEXCOORD0,
-						float3 normal   : NORMAL,
-						float4 tangent : TANGENT,
+						float4 tangent_quat : TANGENT,
 						out float4 oTexCoord_2xy : TEXCOORD0,
 						out float4 oTsToView0_2z : TEXCOORD1,
 						out float3 oTsToView1 : TEXCOORD2,
@@ -460,13 +457,12 @@ void GenReflectiveShadowMapVS(float4 pos : POSITION,
 	oPos = mul(pos, mvp);
 	oTexCoord_2xy.xy = texcoord;
 
-	normal = normal * 2 - 1;
-	tangent = tangent * 2 - 1;
+	tangent_quat = tangent_quat * 2 - 1;
 
 	float3x3 obj_to_ts;
-	obj_to_ts[0] = tangent.xyz;
-	obj_to_ts[1] = cross(normal, tangent.xyz) * tangent.w;
-	obj_to_ts[2] = normal;
+	obj_to_ts[0] = transform_quat(float3(1, 0, 0), tangent_quat);
+	obj_to_ts[1] = transform_quat(float3(0, 1, 0), tangent_quat) * sign(tangent_quat.w);
+	obj_to_ts[2] = transform_quat(float3(0, 0, 1), tangent_quat);
 	float3x3 ts_to_view = mul(obj_to_ts, (float3x3)model_view);
 	oTsToView0_2z.xyz = ts_to_view[0];
 	oTsToView1 = ts_to_view[1];
@@ -644,7 +640,7 @@ float4 GenShadowMapWODepthTextureAlphaTestPS(float2 tc : TEXCOORD0, float3 view_
 
 void ShadingVS(float4 pos : POSITION,
 			float2 texcoord : TEXCOORD0,
-			float3 normal : NORMAL,
+			float4 tangent_quat : TANGENT,
 			out float2 oTexCoord : TEXCOORD0,
 #ifdef NOPERSPECTIVE_SUPPORT
 			out noperspective float2 oTc : TEXCOORD1,
@@ -660,8 +656,8 @@ void ShadingVS(float4 pos : POSITION,
 	
 	oViewDir = -mul(pos, model_view).xyz;
 	
-	normal = normal * 2 - 1;
-	oNormal = mul(normal, (float3x3)model_view);
+	tangent_quat = tangent_quat * 2 - 1;
+	oNormal = mul(transform_quat(float3(0, 0, 1), tangent_quat), (float3x3)model_view);
 
 	oTc.xy = oPos.xy / oPos.w;
 	oTc.y *= KLAYGE_FLIPPING;

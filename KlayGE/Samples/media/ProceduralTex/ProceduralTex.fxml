@@ -3,6 +3,7 @@
 <effect>
 	<include name="Lighting.fxml"/>
 	<include name="Noise.fxml"/>
+	<include name="Quaternion.fxml"/>
 
 	<cbuffer name="per_frame">
 		<parameter type="float4x4" name="mvp" semantic="WORLDVIEWPROJECTION"/>
@@ -54,7 +55,7 @@ float4 electro(float3 tex_coord)
 }
 
 void ProceduralTexVS(float4 pos			: POSITION,
-					float3 normal		: NORMAL,
+					float4 tangent_quat	: TANGENT,
 					out float3 oPosOS	: TEXCOORD0,
 					out float3 oNormalOS : TEXCOORD1,
 					out float3 oTexCoord : TEXCOORD2,
@@ -62,7 +63,7 @@ void ProceduralTexVS(float4 pos			: POSITION,
 {
 	oPos = mul(pos, mvp);
 	oPosOS = pos.xyz;
-	oNormalOS = normal * 2 - 1;
+	oNormalOS = transform_quat(float3(0, 0, 1), tangent_quat * 2 - 1);
 	oTexCoord = pos.xyz * freq * 0.6f;
 }
 

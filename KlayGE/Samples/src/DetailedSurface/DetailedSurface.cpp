@@ -57,7 +57,6 @@ namespace
 			RenderLayoutPtr rl = this->Mesh(0)->GetRenderLayout();
 
 			GraphicsBufferPtr pos_vb;
-			GraphicsBufferPtr normal_vb;
 			GraphicsBufferPtr tangent_vb;
 			std::vector<float3> positions(rl->NumVertices());
 			std::vector<float2> texs(rl->NumVertices());
@@ -90,10 +89,6 @@ namespace
 						float2* p = mapper.Pointer<float2>();
 						memcpy(&texs[0], p, texs.size() * sizeof(texs[0]));
 					}
-					break;
-
-				case VEU_Normal:
-					normal_vb = vb;
 					break;
 
 				case VEU_Tangent:

@@ -4,6 +4,7 @@
 	<include name="DeferredRenderingUtil.fxml"/>
 	<include name="Lighting.fxml"/>
 	<include name="util.fxml"/>
+	<include name="Quaternion.fxml"/>
 	<include name="GBuffer.fxml"/>
 
 	<shader>

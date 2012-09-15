@@ -1302,9 +1302,9 @@ namespace KlayGE
 				k = -1;
 			}
 
-			Matrix4_T<T> tangent_frame(tangent.x(), k * binormal.x(), normal.x(), 0,
-				tangent.y(), k * binormal.y(), normal.y(), 0,
-				tangent.z(), k * binormal.z(), normal.z(), 0,
+			Matrix4_T<T> tangent_frame(tangent.x(), tangent.y(), tangent.z(), 0,
+				k * binormal.x(), k * binormal.y(), k * binormal.z(), 0,
+				normal.x(), normal.y(), normal.z(), 0,
 				0, 0, 0, 1);
 			Quaternion_T<T> tangent_quat = to_quaternion(tangent_frame);
 			if (tangent_quat.w() < 0)

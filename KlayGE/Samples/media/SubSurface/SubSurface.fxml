@@ -3,6 +3,7 @@
 <effect>
 	<include name="Lighting.fxml"/>
 	<include name="util.fxml"/>
+	<include name="Quaternion.fxml"/>
 
 	<parameter type="float4x4" name="worldviewproj" semantic="WORLDVIEWPROJECTION"/>
 	<parameter type="float3" name="eye_pos"/>
@@ -34,8 +35,7 @@
 		<![CDATA[
 void BackFaceDepthVS(float2 tex0 : TEXCOORD0,
 				float4 pos : POSITION,
-				float3 N	: NORMAL,	// in object space
-				float4 T	: TANGENT,	// in object space
+				float4 tangent_quat	: TANGENT,	// in object space
 				
 				out float4 oPos : SV_Position)
 {
@@ -74,8 +74,7 @@ float4 BackFaceDepthPS() : SV_Target
 		<![CDATA[
 void SubSurfaceVS(float2 tex0 : TEXCOORD0,
 				float4 pos : POSITION,
-				float3 N	: NORMAL,	// in object space
-				float4 T	: TANGENT,	// in object space
+				float4 tangent_quat	: TANGENT,	// in object space
 				
 				out float2 oTex0 : TEXCOORD0,
 				out float3 oL	: TEXCOORD1,
@@ -90,7 +89,7 @@ void SubSurfaceVS(float2 tex0 : TEXCOORD0,
 	oV = eye_pos - pos.xyz;
 	oL = light_pos - pos.xyz;
 	oH = normalize(oL) + normalize(oV);
-	oN = N * 2 - 1;
+	oN = transform_quat(float3(0, 0, 1), tangent_quat * 2 - 1);
 
 	oPos = mul(pos, worldviewproj);
 	oPosSS = oPos;

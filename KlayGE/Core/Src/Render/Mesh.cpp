@@ -45,7 +45,7 @@ namespace
 {
 	using namespace KlayGE;
 
-	uint32_t const MODEL_BIN_VERSION = 6;
+	uint32_t const MODEL_BIN_VERSION = 7;
 
 	class RenderModelLoadingDesc : public ResLoadingDesc
 	{
@@ -949,6 +949,7 @@ namespace KlayGE
 						std::vector<uint32_t> max_num_tc_components;
 						bool has_tangent = false;
 						bool has_binormal = false;
+						bool has_tangent_quat = false;
 
 						uint32_t num_vertices = 0;
 						for (XMLNodePtr vertex_node = vertices_chunk->FirstNode("vertex"); vertex_node; vertex_node = vertex_node->NextSibling("vertex"))
@@ -1021,6 +1022,12 @@ namespace KlayGE
 							{
 								has_binormal = true;
 							}
+
+							XMLNodePtr tangent_quat_node = vertex_node->FirstNode("tangent_quat");
+							if (tangent_quat_node)
+							{
+								has_tangent_quat = true;
+							}
 						}
 
 						mesh_num_vertices.push_back(num_vertices);
@@ -1035,14 +1042,6 @@ namespace KlayGE
 								ve.usage = VEU_Position;
 								ve.usage_index = 0;
 								ve.format = EF_BGR32F;
-								vertex_elements.push_back(ve);
-							}
-
-							if (has_normal)
-							{
-								ve.usage = VEU_Normal;
-								ve.usage_index = 0;
-								ve.format = EF_A2BGR10;
 								vertex_elements.push_back(ve);
 							}
 
@@ -1100,20 +1099,33 @@ namespace KlayGE
 								vertex_elements.push_back(ve);
 							}
 
-							if (has_tangent)
+							if (has_tangent_quat)
 							{
 								ve.usage = VEU_Tangent;
 								ve.usage_index = 0;
-								ve.format = EF_A2BGR10;
+								ve.format = EF_ABGR8;
 								vertex_elements.push_back(ve);
 							}
-
-							if (has_binormal)
+							else
 							{
-								ve.usage = VEU_Binormal;
-								ve.usage_index = 0;
-								ve.format = EF_A2BGR10;
-								vertex_elements.push_back(ve);
+								if (has_normal && !has_tangent && !has_binormal)
+								{
+									ve.usage = VEU_Normal;
+									ve.usage_index = 0;
+									ve.format = EF_A2BGR10;
+									vertex_elements.push_back(ve);
+								}
+								else
+								{
+									if ((has_normal && has_tangent) || (has_normal && has_binormal)
+										|| (has_tangent && has_binormal))
+									{
+										ve.usage = VEU_Tangent;
+										ve.usage_index = 0;
+										ve.format = EF_ABGR8;
+										vertex_elements.push_back(ve);
+									}
+								}
 							}
 						}
 					}
@@ -1212,28 +1224,6 @@ namespace KlayGE
 											min_bb = MathLib::minimize(min_bb, pos);
 											max_bb = MathLib::maximize(max_bb, pos);
 										}
-										break;
-									}
-								}
-							}
-
-							XMLNodePtr normal_node = vertex_node->FirstNode("normal");
-							if (normal_node)
-							{
-								for (size_t i = 0; i < ves[mesh_index].size(); ++ i)
-								{
-									if (VEU_Normal == ves[mesh_index][i].usage)
-									{
-										float3 normal(normal_node->Attrib("x")->ValueFloat(),
-											normal_node->Attrib("y")->ValueFloat(), normal_node->Attrib("z")->ValueFloat());
-										normal = MathLib::normalize(normal) * 0.5f + 0.5f;
-
-										uint32_t compact = MathLib::clamp<uint32_t>(static_cast<uint32_t>(normal.x() * 1023), 0, 1023)
-											| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(normal.y() * 1023), 0, 1023) << 10)
-											| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(normal.z() * 1023), 0, 1023) << 20);
-
-										uint32_t buf_index = ves_mapping[mesh_index][i];
-										memcpy(&merged_buff[buf_index][(mesh_base_vertices[mesh_index] + index) * merged_ves[buf_index].element_size()], &compact, sizeof(compact));
 										break;
 									}
 								}
@@ -1351,54 +1341,105 @@ namespace KlayGE
 								++ usage;
 							}
 
-							XMLNodePtr tangent_node = vertex_node->FirstNode("tangent");
-							if (tangent_node)
+							XMLNodePtr tangent_quat_node = vertex_node->FirstNode("tangent_quat");
+							if (tangent_quat_node)
 							{
+								Quaternion tangent_quat(tangent_quat_node->Attrib("x")->ValueFloat(),
+									tangent_quat_node->Attrib("y")->ValueFloat(), tangent_quat_node->Attrib("z")->ValueFloat(),
+									tangent_quat_node->Attrib("w")->ValueFloat());			;
+								uint32_t compact = (MathLib::clamp<uint32_t>(static_cast<uint32_t>((tangent_quat.x() * 0.5f + 0.5f) * 255), 0, 255) << 0)
+									| (MathLib::clamp<uint32_t>(static_cast<uint32_t>((tangent_quat.y() * 0.5f + 0.5f) * 255), 0, 255) << 8)
+									| (MathLib::clamp<uint32_t>(static_cast<uint32_t>((tangent_quat.z() * 0.5f + 0.5f) * 255), 0, 255) << 16)
+									| (MathLib::clamp<uint32_t>(static_cast<uint32_t>((tangent_quat.w() * 0.5f + 0.5f) * 255), 0, 255) << 24);
 								for (size_t i = 0; i < ves[mesh_index].size(); ++ i)
 								{
 									if (VEU_Tangent == ves[mesh_index][i].usage)
 									{
-										float k = 1;
-										XMLAttributePtr attr = tangent_node->Attrib("w");
-										if (attr)
-										{
-											k = attr->ValueFloat();
-										}
-
-										float3 tangent(tangent_node->Attrib("x")->ValueFloat(),
-											tangent_node->Attrib("y")->ValueFloat(), tangent_node->Attrib("z")->ValueFloat());
-										tangent = MathLib::normalize(tangent) * 0.5f + 0.5f;
-
-										uint32_t compact = MathLib::clamp<uint32_t>(static_cast<uint32_t>(tangent.x() * 1023), 0, 1023)
-												| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(tangent.y() * 1023), 0, 1023) << 10)
-												| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(tangent.z() * 1023), 0, 1023) << 20)
-												| (MathLib::clamp<uint32_t>(static_cast<uint32_t>((k * 0.5f + 0.5f) * 3), 0, 3) << 30);
-
 										uint32_t buf_index = ves_mapping[mesh_index][i];
 										memcpy(&merged_buff[buf_index][(mesh_base_vertices[mesh_index] + index) * merged_ves[buf_index].element_size()], &compact, sizeof(compact));
 										break;
 									}
 								}
 							}
-
-							XMLNodePtr binormal_node = vertex_node->FirstNode("binormal");
-							if (binormal_node)
+							else
 							{
-								for (size_t i = 0; i < ves[mesh_index].size(); ++ i)
+								XMLNodePtr normal_node = vertex_node->FirstNode("normal");
+								XMLNodePtr tangent_node = vertex_node->FirstNode("tangent");
+								XMLNodePtr binormal_node = vertex_node->FirstNode("binormal");
+								if (normal_node && !tangent_node && !binormal_node)
 								{
-									if (VEU_Binormal == ves[mesh_index][i].usage)
+									for (size_t i = 0; i < ves[mesh_index].size(); ++ i)
 									{
-										float3 binormal(tangent_node->Attrib("x")->ValueFloat(),
+										if (VEU_Normal == ves[mesh_index][i].usage)
+										{
+											float3 normal(normal_node->Attrib("x")->ValueFloat(),
+												normal_node->Attrib("y")->ValueFloat(), normal_node->Attrib("z")->ValueFloat());
+											normal = MathLib::normalize(normal) * 0.5f + 0.5f;
+
+											uint32_t compact = MathLib::clamp<uint32_t>(static_cast<uint32_t>(normal.x() * 1023), 0, 1023)
+												| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(normal.y() * 1023), 0, 1023) << 10)
+												| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(normal.z() * 1023), 0, 1023) << 20);
+
+											uint32_t buf_index = ves_mapping[mesh_index][i];
+											memcpy(&merged_buff[buf_index][(mesh_base_vertices[mesh_index] + index) * merged_ves[buf_index].element_size()], &compact, sizeof(compact));
+											break;
+										}
+									}
+								}
+								else
+								{
+									float3 normal;
+									float3 tangent;
+									float3 binormal;
+									float reflection = 1;
+									if (normal_node)
+									{
+										normal = float3(normal_node->Attrib("x")->ValueFloat(),
+											normal_node->Attrib("y")->ValueFloat(), normal_node->Attrib("z")->ValueFloat());
+									}
+									if (tangent_node)
+									{
+										XMLAttributePtr attr = tangent_node->Attrib("w");
+										if (attr)
+										{
+											reflection = attr->ValueFloat();
+										}
+
+										tangent = float3(tangent_node->Attrib("x")->ValueFloat(),
 											tangent_node->Attrib("y")->ValueFloat(), tangent_node->Attrib("z")->ValueFloat());
-										binormal = MathLib::normalize(binormal) * 0.5f + 0.5f;
+									}
+									if (binormal_node)
+									{
+										binormal = float3(binormal_node->Attrib("x")->ValueFloat(),
+											binormal_node->Attrib("y")->ValueFloat(), binormal_node->Attrib("z")->ValueFloat());
+									}
 
-										uint32_t compact = MathLib::clamp<uint32_t>(static_cast<uint32_t>(binormal.x() * 1023), 0, 1023)
-												| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(binormal.y() * 1023), 0, 1023) << 10)
-												| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(binormal.z() * 1023), 0, 1023) << 20);
+									if (!normal_node)
+									{
+										normal = MathLib::cross(tangent, binormal * reflection);
+									}
+									if (!tangent_node)
+									{
+										tangent = MathLib::cross(binormal * reflection, normal);
+									}
+									if (!binormal_node)
+									{
+										binormal = MathLib::cross(normal, tangent) * reflection;
+									}
 
-										uint32_t buf_index = ves_mapping[mesh_index][i];
-										memcpy(&merged_buff[buf_index][(mesh_base_vertices[mesh_index] + index) * merged_ves[buf_index].element_size()], &compact, sizeof(compact));
-										break;
+									Quaternion tangent_quat = MathLib::to_quaternion(tangent, binormal, normal, 8);
+									uint32_t compact = (MathLib::clamp<uint32_t>(static_cast<uint32_t>((tangent_quat.x() * 0.5f + 0.5f) * 255), 0, 255) << 0)
+										| (MathLib::clamp<uint32_t>(static_cast<uint32_t>((tangent_quat.y() * 0.5f + 0.5f) * 255), 0, 255) << 8)
+										| (MathLib::clamp<uint32_t>(static_cast<uint32_t>((tangent_quat.z() * 0.5f + 0.5f) * 255), 0, 255) << 16)
+										| (MathLib::clamp<uint32_t>(static_cast<uint32_t>((tangent_quat.w() * 0.5f + 0.5f) * 255), 0, 255) << 24);
+									for (size_t i = 0; i < ves[mesh_index].size(); ++ i)
+									{
+										if (VEU_Tangent == ves[mesh_index][i].usage)
+										{
+											uint32_t buf_index = ves_mapping[mesh_index][i];
+											memcpy(&merged_buff[buf_index][(mesh_base_vertices[mesh_index] + index) * merged_ves[buf_index].element_size()], &compact, sizeof(compact));
+											break;
+										}
 									}
 								}
 							}
@@ -2263,26 +2304,8 @@ namespace KlayGE
 							break;
 
 						case VEU_Normal:
-						case VEU_Tangent:
-						case VEU_Binormal:
 							{
-								std::string node_name;
-								switch (ve.usage)
-								{
-								case VEU_Normal:
-									node_name = "normal";
-									break;
-
-								case VEU_Tangent:
-									node_name = "tangent";
-									break;
-
-								default:
-									node_name = "binormal";
-									break;
-								}
-
-								XMLNodePtr sub_node = doc.AllocNode(XNT_Element, node_name);
+								XMLNodePtr sub_node = doc.AllocNode(XNT_Element, "normal");
 								vertex_node->AppendNode(sub_node);
 
 								if (EF_A2BGR10 == ve.format)
@@ -2291,21 +2314,6 @@ namespace KlayGE
 									sub_node->AppendAttrib(doc.AllocAttribFloat("x", ((p[j] >>  0) & 0x3FF) / 1023.0f * 2 - 1));
 									sub_node->AppendAttrib(doc.AllocAttribFloat("y", ((p[j] >> 10) & 0x3FF) / 1023.0f * 2 - 1));
 									sub_node->AppendAttrib(doc.AllocAttribFloat("z", ((p[j] >> 20) & 0x3FF) / 1023.0f * 2 - 1));
-									if (VEU_Tangent == ve.usage)
-									{
-										sub_node->AppendAttrib(doc.AllocAttribFloat("w", ((p[j] >> 30) & 0x3) / 3.0f * 2 - 1));
-									}
-								}
-								else if (EF_ARGB8 == ve.format)
-								{
-									uint32_t const * p = reinterpret_cast<uint32_t const *>(&buffs[mesh_index][k][0]);
-									sub_node->AppendAttrib(doc.AllocAttribFloat("x", ((p[j] >> 16) & 0xFF) / 255.0f * 2 - 1));
-									sub_node->AppendAttrib(doc.AllocAttribFloat("y", ((p[j] >>  8) & 0xFF) / 255.0f * 2 - 1));
-									sub_node->AppendAttrib(doc.AllocAttribFloat("z", ((p[j] >>  0) & 0xFF) / 255.0f * 2 - 1));
-									if (VEU_Tangent == ve.usage)
-									{
-										sub_node->AppendAttrib(doc.AllocAttribFloat("w", ((p[j] >> 24) & 0xFF) / 255.0f * 2 - 1));
-									}
 								}
 								else if (EF_ABGR8 == ve.format)
 								{
@@ -2313,27 +2321,41 @@ namespace KlayGE
 									sub_node->AppendAttrib(doc.AllocAttribFloat("x", ((p[j] >>  0) & 0xFF) / 255.0f * 2 - 1));
 									sub_node->AppendAttrib(doc.AllocAttribFloat("y", ((p[j] >>  8) & 0xFF) / 255.0f * 2 - 1));
 									sub_node->AppendAttrib(doc.AllocAttribFloat("z", ((p[j] >> 16) & 0xFF) / 255.0f * 2 - 1));
-									if (VEU_Tangent == ve.usage)
-									{
-										sub_node->AppendAttrib(doc.AllocAttribFloat("w", ((p[j] >> 24) & 0xFF) / 255.0f * 2 - 1));
-									}
 								}
-								else if (EF_BGR32F == ve.format)
+								else
 								{
-									float3 const * p = reinterpret_cast<float3 const *>(&buffs[mesh_index][k][0]);
-									sub_node->AppendAttrib(doc.AllocAttribFloat("x", p[j].x()));
-									sub_node->AppendAttrib(doc.AllocAttribFloat("y", p[j].y()));
-									sub_node->AppendAttrib(doc.AllocAttribFloat("z", p[j].z()));
-								}
-								else if (EF_ABGR32F == ve.format)
-								{
-									BOOST_ASSERT(EF_ABGR32F == ve.format);
+									BOOST_ASSERT(EF_ARGB8 == ve.format);
 
-									float4 const * p = reinterpret_cast<float4 const *>(&buffs[mesh_index][k][0]);
-									sub_node->AppendAttrib(doc.AllocAttribFloat("x", p[j].x()));
-									sub_node->AppendAttrib(doc.AllocAttribFloat("y", p[j].y()));
-									sub_node->AppendAttrib(doc.AllocAttribFloat("z", p[j].z()));
-									sub_node->AppendAttrib(doc.AllocAttribFloat("w", p[j].w()));
+									uint32_t const * p = reinterpret_cast<uint32_t const *>(&buffs[mesh_index][k][0]);
+									sub_node->AppendAttrib(doc.AllocAttribFloat("x", ((p[j] >> 16) & 0xFF) / 255.0f * 2 - 1));
+									sub_node->AppendAttrib(doc.AllocAttribFloat("y", ((p[j] >>  8) & 0xFF) / 255.0f * 2 - 1));
+									sub_node->AppendAttrib(doc.AllocAttribFloat("z", ((p[j] >>  0) & 0xFF) / 255.0f * 2 - 1));
+								}
+							}
+							break;
+
+						case VEU_Tangent:
+							{
+								XMLNodePtr sub_node = doc.AllocNode(XNT_Element, "tangent_quat");
+								vertex_node->AppendNode(sub_node);
+
+								if (EF_ABGR8 == ve.format)
+								{
+									uint32_t const * p = reinterpret_cast<uint32_t const *>(&buffs[mesh_index][k][0]);
+									sub_node->AppendAttrib(doc.AllocAttribFloat("x", ((p[j] >>  0) & 0xFF) / 255.0f * 2 - 1));
+									sub_node->AppendAttrib(doc.AllocAttribFloat("y", ((p[j] >>  8) & 0xFF) / 255.0f * 2 - 1));
+									sub_node->AppendAttrib(doc.AllocAttribFloat("z", ((p[j] >> 16) & 0xFF) / 255.0f * 2 - 1));
+									sub_node->AppendAttrib(doc.AllocAttribFloat("w", ((p[j] >> 24) & 0xFF) / 255.0f * 2 - 1));
+								}
+								else
+								{
+									BOOST_ASSERT(EF_ARGB8 == ve.format);
+
+									uint32_t const * p = reinterpret_cast<uint32_t const *>(&buffs[mesh_index][k][0]);
+									sub_node->AppendAttrib(doc.AllocAttribFloat("x", ((p[j] >> 16) & 0xFF) / 255.0f * 2 - 1));
+									sub_node->AppendAttrib(doc.AllocAttribFloat("y", ((p[j] >>  8) & 0xFF) / 255.0f * 2 - 1));
+									sub_node->AppendAttrib(doc.AllocAttribFloat("z", ((p[j] >>  0) & 0xFF) / 255.0f * 2 - 1));
+									sub_node->AppendAttrib(doc.AllocAttribFloat("w", ((p[j] >> 24) & 0xFF) / 255.0f * 2 - 1));
 								}
 							}
 							break;

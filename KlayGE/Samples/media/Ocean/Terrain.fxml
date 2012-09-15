@@ -5,6 +5,7 @@
 	<include name="util.fxml"/>
 	<include name="Lighting.fxml"/>
 	<include name="Noise.fxml"/>
+	<include name="Quaternion.fxml"/>
 	<include name="GBuffer.fxml"/>
 	<include name="InfTerrain.fxml"/>
 	
