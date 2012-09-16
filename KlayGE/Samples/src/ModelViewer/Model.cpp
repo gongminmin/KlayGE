@@ -504,8 +504,7 @@ void DetailedSkinnedModel::BuildModelInfo()
 {
 	bool has_tc = false;
 	bool has_normal = false;
-	bool has_tangent = false;
-	bool has_binormal = false;
+	bool has_tangent_quat = false;
 	bool has_skinned = false;
 	RenderLayoutPtr const & rl = meshes_[0]->GetRenderLayout();
 	for (uint32_t i = 0; i < rl->NumVertexStreams(); ++ i)
@@ -521,11 +520,7 @@ void DetailedSkinnedModel::BuildModelInfo()
 			break;
 
 		case VEU_Tangent:
-			has_tangent = true;
-			break;
-
-		case VEU_Binormal:
-			has_binormal = true;
+			has_tangent_quat = true;
 			break;
 
 		case VEU_BlendIndex:
@@ -552,8 +547,7 @@ void DetailedSkinnedModel::BuildModelInfo()
 	std::vector<float3> positions(total_num_vertices);
 	std::vector<float2> texcoords(total_num_vertices);
 	std::vector<float3> normals(total_num_vertices);
-	std::vector<float3> tangents(total_num_vertices);
-	std::vector<float3> binormals(total_num_vertices);
+	std::vector<Quaternion> tangent_quats(total_num_vertices);
 	for (uint32_t i = 0; i < rl->NumVertexStreams(); ++ i)
 	{
 		GraphicsBufferPtr const & vb = rl->GetVertexStream(i);
@@ -582,8 +576,6 @@ void DetailedSkinnedModel::BuildModelInfo()
 			break;
 
 		case VEU_Normal:
-		case VEU_Tangent:
-		case VEU_Binormal:
 			{
 				GraphicsBufferPtr vb_cpu = rf.MakeVertexBuffer(BU_Static, EAH_CPU_Read, NULL);
 				vb_cpu->Resize(vb->Size());
@@ -595,38 +587,22 @@ void DetailedSkinnedModel::BuildModelInfo()
 					std::copy(mapper.Pointer<uint32_t>(), mapper.Pointer<uint32_t>() + n_32.size(), n_32.begin());
 				}
 
-				std::vector<float3>* p;
-				switch (rl->VertexStreamFormat(i)[0].usage)
-				{
-				case VEU_Normal:
-					p = &normals;
-					break;
-
-				case VEU_Tangent:
-					p = &tangents;
-					break;
-
-				default:
-					p = &binormals;
-					break;
-				}
-
 				if (EF_A2BGR10 == rl->VertexStreamFormat(i)[0].format)
 				{
 					for (uint32_t j = 0; j < total_num_vertices; ++ j)
 					{
-						(*p)[j].x() = ((n_32[j] >>  0) & 0x3FF) / 1023.0f * 2 - 1;
-						(*p)[j].y() = ((n_32[j] >> 10) & 0x3FF) / 1023.0f * 2 - 1;
-						(*p)[j].z() = ((n_32[j] >> 20) & 0x3FF) / 1023.0f * 2 - 1;
+						normals[j].x() = ((n_32[j] >>  0) & 0x3FF) / 1023.0f * 2 - 1;
+						normals[j].y() = ((n_32[j] >> 10) & 0x3FF) / 1023.0f * 2 - 1;
+						normals[j].z() = ((n_32[j] >> 20) & 0x3FF) / 1023.0f * 2 - 1;
 					}
 				}
 				else if (EF_ABGR8 == rl->VertexStreamFormat(i)[0].format)
 				{
 					for (uint32_t j = 0; j < total_num_vertices; ++ j)
 					{
-						(*p)[j].x() = ((n_32[j] >>  0) & 0xFF) / 255.0f * 2 - 1;
-						(*p)[j].y() = ((n_32[j] >>  8) & 0xFF) / 255.0f * 2 - 1;
-						(*p)[j].z() = ((n_32[j] >> 16) & 0xFF) / 255.0f * 2 - 1;
+						normals[j].x() = ((n_32[j] >>  0) & 0xFF) / 255.0f * 2 - 1;
+						normals[j].y() = ((n_32[j] >>  8) & 0xFF) / 255.0f * 2 - 1;
+						normals[j].z() = ((n_32[j] >> 16) & 0xFF) / 255.0f * 2 - 1;
 					}
 				}
 				else
@@ -635,9 +611,47 @@ void DetailedSkinnedModel::BuildModelInfo()
 
 					for (uint32_t j = 0; j < total_num_vertices; ++ j)
 					{
-						(*p)[j].x() = ((n_32[j] >> 16) & 0xFF) / 255.0f * 2 - 1;
-						(*p)[j].y() = ((n_32[j] >>  8) & 0xFF) / 255.0f * 2 - 1;
-						(*p)[j].z() = ((n_32[j] >>  0) & 0xFF) / 255.0f * 2 - 1;
+						normals[j].x() = ((n_32[j] >> 16) & 0xFF) / 255.0f * 2 - 1;
+						normals[j].y() = ((n_32[j] >>  8) & 0xFF) / 255.0f * 2 - 1;
+						normals[j].z() = ((n_32[j] >>  0) & 0xFF) / 255.0f * 2 - 1;
+					}
+				}
+			}
+			break;
+
+		
+		case VEU_Tangent:
+			{
+				GraphicsBufferPtr vb_cpu = rf.MakeVertexBuffer(BU_Static, EAH_CPU_Read, NULL);
+				vb_cpu->Resize(vb->Size());
+				vb->CopyToBuffer(*vb_cpu);
+
+				std::vector<uint32_t> n_32(total_num_vertices);
+				{
+					GraphicsBuffer::Mapper mapper(*vb_cpu, BA_Read_Only);
+					std::copy(mapper.Pointer<uint32_t>(), mapper.Pointer<uint32_t>() + n_32.size(), n_32.begin());
+				}
+
+				if (EF_ABGR8 == rl->VertexStreamFormat(i)[0].format)
+				{
+					for (uint32_t j = 0; j < total_num_vertices; ++ j)
+					{
+						tangent_quats[j].x() = ((n_32[j] >>  0) & 0xFF) / 255.0f * 2 - 1;
+						tangent_quats[j].y() = ((n_32[j] >>  8) & 0xFF) / 255.0f * 2 - 1;
+						tangent_quats[j].z() = ((n_32[j] >> 16) & 0xFF) / 255.0f * 2 - 1;
+						tangent_quats[j].w() = ((n_32[j] >> 24) & 0xFF) / 255.0f * 2 - 1;
+					}
+				}
+				else
+				{
+					BOOST_ASSERT(EF_ARGB8 == rl->VertexStreamFormat(i)[0].format);
+
+					for (uint32_t j = 0; j < total_num_vertices; ++ j)
+					{
+						tangent_quats[j].x() = ((n_32[j] >> 16) & 0xFF) / 255.0f * 2 - 1;
+						tangent_quats[j].y() = ((n_32[j] >>  8) & 0xFF) / 255.0f * 2 - 1;
+						tangent_quats[j].z() = ((n_32[j] >>  0) & 0xFF) / 255.0f * 2 - 1;
+						tangent_quats[j].w() = ((n_32[j] >> 24) & 0xFF) / 255.0f * 2 - 1;
 					}
 				}
 			}
@@ -673,23 +687,13 @@ void DetailedSkinnedModel::BuildModelInfo()
 		}
 	}
 
-	if (!has_normal)
+	if (!has_normal && !has_tc)
 	{
-		if (!has_tangent || !has_binormal)
+		BOOST_FOREACH(MeshesType::const_reference mesh, meshes_)
 		{
-			BOOST_FOREACH(MeshesType::const_reference mesh, meshes_)
-			{
-				MathLib::compute_normal(normals.begin() + mesh->BaseVertexLocation(),
-					indices.begin() + mesh->StartIndexLocation(), indices.begin() + mesh->StartIndexLocation() + mesh->NumTriangles() * 3,
-					positions.begin() + mesh->BaseVertexLocation(), positions.begin() + mesh->BaseVertexLocation() + mesh->NumVertices());
-			}
-		}
-		else
-		{
-			for (size_t i = 0; i < normals.size(); ++ i)
-			{
-				normals[i] = MathLib::cross(tangents[i], binormals[i]);
-			}
+			MathLib::compute_normal(normals.begin() + mesh->BaseVertexLocation(),
+				indices.begin() + mesh->StartIndexLocation(), indices.begin() + mesh->StartIndexLocation() + mesh->NumTriangles() * 3,
+				positions.begin() + mesh->BaseVertexLocation(), positions.begin() + mesh->BaseVertexLocation() + mesh->NumVertices());
 		}
 
 		std::vector<uint32_t> compacted(total_num_vertices);
@@ -703,6 +707,17 @@ void DetailedSkinnedModel::BuildModelInfo()
 				compacted[j] = MathLib::clamp<uint32_t>(static_cast<uint32_t>(n.x() * 1023), 0, 1023)
 					| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(n.y() * 1023), 0, 1023) << 10)
 					| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(n.z() * 1023), 0, 1023) << 20);
+			}
+		}
+		else if (rf.RenderEngineInstance().DeviceCaps().vertex_format_support(EF_ABGR8))
+		{
+			fmt = EF_ABGR8;
+			for (size_t j = 0; j < compacted.size(); ++ j)
+			{
+				float3 n = MathLib::normalize(normals[j]) * 0.5f + 0.5f;
+				compacted[j] = (MathLib::clamp<uint32_t>(static_cast<uint32_t>(n.x() * 255), 0, 255) << 0)
+					| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(n.y() * 255), 0, 255) << 8)
+					| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(n.z() * 255), 0, 255) << 16);
 			}
 		}
 		else
@@ -725,9 +740,11 @@ void DetailedSkinnedModel::BuildModelInfo()
 				vertex_element(VEU_Normal, 0, fmt), EAH_GPU_Read);
 		}
 	}
-
-	if (!has_tangent)
+	else if (!has_tangent_quat)
 	{
+		std::vector<float3> tangents(total_num_vertices);
+		std::vector<float3> binormals(total_num_vertices);
+		
 		// Compute TBN
 		BOOST_FOREACH(MeshesType::const_reference mesh, meshes_)
 		{
@@ -737,17 +754,22 @@ void DetailedSkinnedModel::BuildModelInfo()
 				texcoords.begin() + mesh->BaseVertexLocation(), normals.begin() + mesh->BaseVertexLocation());
 		}
 
+		for (size_t j = 0; j < total_num_vertices; ++ j)
+		{
+			tangent_quats[j] = MathLib::to_quaternion(tangents[j], binormals[j], normals[j], 8);
+		}
+
 		std::vector<uint32_t> compacted(total_num_vertices);
 		ElementFormat fmt;
-		if (rf.RenderEngineInstance().DeviceCaps().vertex_format_support(EF_A2BGR10))
+		if (rf.RenderEngineInstance().DeviceCaps().vertex_format_support(EF_ABGR8))
 		{	
-			fmt = EF_A2BGR10;
+			fmt = EF_ABGR8;
 			for (size_t j = 0; j < compacted.size(); ++ j)
 			{
-				float3 n = MathLib::normalize(tangents[j]) * 0.5f + 0.5f;
-				compacted[j] = MathLib::clamp<uint32_t>(static_cast<uint32_t>(n.x() * 1023), 0, 1023)
-					| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(n.y() * 1023), 0, 1023) << 10)
-					| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(n.z() * 1023), 0, 1023) << 20);
+				compacted[j] = (MathLib::clamp<uint32_t>(static_cast<uint32_t>((tangent_quats[j].x() * 0.5f + 0.5f) * 255), 0, 255) << 0)
+					| (MathLib::clamp<uint32_t>(static_cast<uint32_t>((tangent_quats[j].y() * 0.5f + 0.5f) * 255), 0, 255) << 8)
+					| (MathLib::clamp<uint32_t>(static_cast<uint32_t>((tangent_quats[j].z() * 0.5f + 0.5f) * 255), 0, 255) << 16)
+					| (MathLib::clamp<uint32_t>(static_cast<uint32_t>((tangent_quats[j].w() * 0.5f + 0.5f) * 255), 0, 255) << 24);
 			}
 		}
 		else
@@ -758,9 +780,10 @@ void DetailedSkinnedModel::BuildModelInfo()
 			for (size_t j = 0; j < compacted.size(); ++ j)
 			{
 				float3 n = MathLib::normalize(tangents[j]) * 0.5f + 0.5f;
-				compacted[j] = (MathLib::clamp<uint32_t>(static_cast<uint32_t>(n.x() * 255), 0, 255) << 16)
-					| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(n.y() * 255), 0, 255) << 8)
-					| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(n.z() * 255), 0, 255) << 0);
+				compacted[j] = (MathLib::clamp<uint32_t>(static_cast<uint32_t>((tangent_quats[j].x() * 0.5f + 0.5f) * 255), 0, 255) << 16)
+					| (MathLib::clamp<uint32_t>(static_cast<uint32_t>((tangent_quats[j].y() * 0.5f + 0.5f) * 255), 0, 255) << 8)
+					| (MathLib::clamp<uint32_t>(static_cast<uint32_t>((tangent_quats[j].z() * 0.5f + 0.5f) * 255), 0, 255) << 0)
+					| (MathLib::clamp<uint32_t>(static_cast<uint32_t>((tangent_quats[j].w() * 0.5f + 0.5f) * 255), 0, 255) << 24);
 			}
 		}
 

@@ -231,6 +231,37 @@ namespace
 		return quat;
 	}
 
+	Quat ToQuaternion(Point3 const & tangent, Point3 const & binormal, Point3 const & normal, int bits)
+	{
+		float k = 1;
+		if (binormal % (normal ^ tangent) < 0)
+		{
+			k = -1;
+		}
+
+		Matrix3 tangent_frame(tangent, k * binormal, normal, Point3(0, 0, 0));
+		Quat tangent_quat = ToQuaternion(tangent_frame);
+		if (tangent_quat.w < 0)
+		{
+			tangent_quat = -tangent_quat;
+		}
+		float const bias = 1.0f / ((1UL << (bits - 1)) - 1);
+		if (tangent_quat.w < bias)
+		{
+			float const factor = sqrt(1 - bias * bias);
+			tangent_quat.x *= factor;
+			tangent_quat.y *= factor;
+			tangent_quat.z *= factor;
+			tangent_quat.w = bias;
+		}
+		if (k < 0)
+		{
+			tangent_quat = -tangent_quat;
+		}
+
+		return tangent_quat;
+	}
+
 	Quat QuatTransToUDQ(Quat const & q, Point3 const & t)
 	{
 		return Quat(+0.5f * (+t[0] * q[3] + t[1] * q[2] - t[2] * q[1]),
@@ -807,18 +838,19 @@ namespace KlayGE
 				}
 				vertex.normal = normal.Normalize();
 				// Gram-Schmidt orthogonalize
-				vertex.tangent = (tangent - vertex.normal * (tangent % vertex.normal)).Normalize();
-				vertex.binormal = vertex.normal ^ vertex.tangent;
+				Point3 vertex_tangent = (tangent - vertex.normal * (tangent % vertex.normal)).Normalize();
+				Point3 vertex_binormal = (vertex.normal ^ vertex_tangent).Normalize();
 				// Calculate handedness
-				vertex.weight = 1;
-				if (vertex.binormal % binormal < 0)
+				if (vertex_binormal % binormal < 0)
 				{
-					vertex.weight = -1;
+					vertex_binormal *= -1;
 				}
 
 				std::swap(vertex.normal.y, vertex.normal.z);
-				std::swap(vertex.tangent.y, vertex.tangent.z);
-				std::swap(vertex.binormal.y, vertex.binormal.z);
+				std::swap(vertex_tangent.y, vertex_tangent.z);
+				std::swap(vertex_binormal.y, vertex_binormal.z);
+
+				vertex.tangent_quat = ToQuaternion(vertex_tangent, vertex_binormal, vertex.normal, 8);
 
 				int uv_layer = 0;
 				for (std::map<int, std::vector<Point2> >::iterator uv_iter = texs.begin();
@@ -1462,22 +1494,12 @@ namespace KlayGE
 						<< "\" y=\"" << vertex.normal.y
 						<< "\" z=\"" << vertex.normal.z << "\"/>" << endl;
 				}
-				if (eva.tangent)
+				if (eva.tangent_quat)
 				{
-					ofs << "\t\t\t\t\t<tangent x=\"" << vertex.tangent.x
-						<< "\" y=\"" << vertex.tangent.y
-						<< "\" z=\"" << vertex.tangent.z;
-					if (vertex.weight < 0)
-					{
-						ofs << "\" w=\"" << vertex.weight;
-					}
-					ofs << "\"/>" << endl;
-				}
-				if (eva.binormal)
-				{
-					ofs << "\t\t\t\t\t<binormal x=\"" << vertex.binormal.x
-						<< "\" y=\"" << vertex.binormal.y
-						<< "\" z=\"" << vertex.binormal.z << "\"/>" << endl;
+					ofs << "\t\t\t\t\t<tangent_quat x=\"" << vertex.tangent_quat.x
+						<< "\" y=\"" << vertex.tangent_quat.y
+						<< "\" z=\"" << vertex.tangent_quat.z
+						<< "\" w=\"" << vertex.tangent_quat.w << "\"/>" << endl;
 				}
 
 				if (eva.tex)

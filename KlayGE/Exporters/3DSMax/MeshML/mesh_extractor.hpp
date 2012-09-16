@@ -71,9 +71,7 @@ namespace KlayGE
 	{
 		Point3 pos;
 		Point3 normal;
-		Point3 tangent;
-		float weight;
-		Point3 binormal;
+		Quat tangent_quat;
 		std::vector<Point2> tex;
 
 		binds_t binds;
@@ -140,8 +138,7 @@ namespace KlayGE
 	struct export_vertex_attrs
 	{
 		bool normal;
-		bool tangent;
-		bool binormal;
+		bool tangent_quat;
 		bool tex;
 	};
 

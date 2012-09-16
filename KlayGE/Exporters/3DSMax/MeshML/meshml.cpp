@@ -157,17 +157,15 @@ namespace KlayGE
 
 			::SetWindowLongPtr(wnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(instance));
 
-			int const normal_index = static_cast<int>(::SendMessage(::GetDlgItem(wnd, IDC_LIST_EXPORT_VERTEX_ATTRS), LB_ADDSTRING, 0, reinterpret_cast<LPARAM>(TEXT("Normal"))));
-			int const tangent_index = static_cast<int>(::SendMessage(::GetDlgItem(wnd, IDC_LIST_EXPORT_VERTEX_ATTRS), LB_ADDSTRING, 0, reinterpret_cast<LPARAM>(TEXT("Tangent"))));
+			int const tangent_quat_index = static_cast<int>(::SendMessage(::GetDlgItem(wnd, IDC_LIST_EXPORT_VERTEX_ATTRS), LB_ADDSTRING, 0, reinterpret_cast<LPARAM>(TEXT("Tangent quaternion"))));
 			int const texcoord_index = static_cast<int>(::SendMessage(::GetDlgItem(wnd, IDC_LIST_EXPORT_VERTEX_ATTRS), LB_ADDSTRING, 0, reinterpret_cast<LPARAM>(TEXT("Texture coordinate"))));
 
-			int const binormal_index = static_cast<int>(::SendMessage(::GetDlgItem(wnd, IDC_LIST_IGNORED_VERTEX_ATTRS), LB_ADDSTRING, 0, reinterpret_cast<LPARAM>(TEXT("Binormal"))));
+			int const normal_index = static_cast<int>(::SendMessage(::GetDlgItem(wnd, IDC_LIST_IGNORED_VERTEX_ATTRS), LB_ADDSTRING, 0, reinterpret_cast<LPARAM>(TEXT("Normal"))));
 
-			::SendMessage(::GetDlgItem(wnd, IDC_LIST_EXPORT_VERTEX_ATTRS), LB_SETITEMDATA, normal_index, static_cast<LPARAM>(VEU_Normal));
-			::SendMessage(::GetDlgItem(wnd, IDC_LIST_EXPORT_VERTEX_ATTRS), LB_SETITEMDATA, tangent_index, static_cast<LPARAM>(VEU_Tangent));
+			::SendMessage(::GetDlgItem(wnd, IDC_LIST_EXPORT_VERTEX_ATTRS), LB_SETITEMDATA, tangent_quat_index, static_cast<LPARAM>(VEU_Tangent));
 			::SendMessage(::GetDlgItem(wnd, IDC_LIST_EXPORT_VERTEX_ATTRS), LB_SETITEMDATA, texcoord_index, static_cast<LPARAM>(VEU_TextureCoord));
 
-			::SendMessage(::GetDlgItem(wnd, IDC_LIST_IGNORED_VERTEX_ATTRS), LB_SETITEMDATA, binormal_index, static_cast<LPARAM>(VEU_Binormal));
+			::SendMessage(::GetDlgItem(wnd, IDC_LIST_IGNORED_VERTEX_ATTRS), LB_SETITEMDATA, normal_index, static_cast<LPARAM>(VEU_Normal));
 
 			::SendMessage(::GetDlgItem(wnd, IDC_COMBINE_MESHES), BM_SETCHECK, BST_CHECKED, NULL);
 		}
@@ -242,8 +240,7 @@ namespace KlayGE
 
 						export_vertex_attrs eva;
 						eva.normal = false;
-						eva.tangent = false;
-						eva.binormal = false;
+						eva.tangent_quat = false;
 						eva.tex = false;
 						for (int index = 0;; ++ index)
 						{
@@ -260,11 +257,7 @@ namespace KlayGE
 								break;
 
 							case VEU_Tangent:
-								eva.tangent = true;
-								break;
-
-							case VEU_Binormal:
-								eva.binormal = true;
+								eva.tangent_quat = true;
 								break;
 
 							case VEU_TextureCoord:

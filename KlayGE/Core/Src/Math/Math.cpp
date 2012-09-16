@@ -1296,7 +1296,7 @@ namespace KlayGE
 		template <typename T>
 		Quaternion_T<T> to_quaternion(Vector_T<T, 3> const & tangent, Vector_T<T, 3> const & binormal, Vector_T<T, 3> const & normal, int bits)
 		{
-			float k = 1;
+			T k = 1;
 			if (dot(binormal, cross(normal, tangent)) < 0)
 			{
 				k = -1;
