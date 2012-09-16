@@ -843,14 +843,14 @@ namespace KlayGE
 				// Calculate handedness
 				if (vertex_binormal % binormal < 0)
 				{
-					vertex_binormal *= -1;
+					vertex_binormal = -vertex_binormal;
 				}
 
 				std::swap(vertex.normal.y, vertex.normal.z);
 				std::swap(vertex_tangent.y, vertex_tangent.z);
 				std::swap(vertex_binormal.y, vertex_binormal.z);
 
-				vertex.tangent_quat = ToQuaternion(vertex_tangent, vertex_binormal, vertex.normal, 8);
+				vertex.tangent_quat = ToQuaternion(vertex_tangent, -vertex_binormal, vertex.normal, 8);
 
 				int uv_layer = 0;
 				for (std::map<int, std::vector<Point2> >::iterator uv_iter = texs.begin();
@@ -1457,9 +1457,11 @@ namespace KlayGE
 					<< "\" opacity=\"" << objs_mtl_[i].opacity
 					<< "\" specular_level=\"" << objs_mtl_[i].specular_level
 					<< "\" shininess=\"" << objs_mtl_[i].shininess
-					<< "\">" << endl;
-				if (objs_mtl_[i].texture_slots.size() > 0)
+					<< "\"";
+				if (!objs_mtl_[i].texture_slots.empty())
 				{
+					ofs << ">" << endl;
+
 					ofs << "\t\t\t<textures_chunk>" << endl;
 					typedef BOOST_TYPEOF(objs_mtl_[i].texture_slots) slots_type;
 					BOOST_FOREACH(slots_type::const_reference ts, objs_mtl_[i].texture_slots)
@@ -1468,8 +1470,13 @@ namespace KlayGE
 							<< "\" name=\"" << RemoveQuote(ts.second) << "\"/>" << endl;
 					}
 					ofs << "\t\t\t</textures_chunk>" << endl;
+
+					ofs << "\t\t</material>" << endl;
 				}
-				ofs << "\t\t</material>" << endl;
+				else
+				{
+					ofs << "/>" << endl;
+				}
 			}
 			ofs << "\t</materials_chunk>" << endl;
 		}
