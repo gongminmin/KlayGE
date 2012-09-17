@@ -260,7 +260,18 @@ namespace
 
 			output_pins_.push_back(std::make_pair("output", TexturePtr()));
 
-			this->Technique(Context::Instance().RenderFactoryInstance().LoadEffect("DepthOfFieldPP.fxml")->TechniqueByName("DepthOfFieldSpreading"));
+			RenderDeviceCaps const & caps = Context::Instance().RenderFactoryInstance().RenderEngineInstance().DeviceCaps();
+			gs_support_ = (caps.max_shader_model >= 4);
+
+			RenderEffectPtr effect = Context::Instance().RenderFactoryInstance().LoadEffect("DepthOfFieldPP.fxml");
+			if (gs_support_)
+			{
+				this->Technique(effect->TechniqueByName("DepthOfFieldSpreading4"));
+			}
+			else
+			{
+				this->Technique(effect->TechniqueByName("DepthOfFieldSpreading"));
+			}
 
 			*(technique_->Effect().ParameterByName("max_radius")) = static_cast<float>(max_radius_);
 
@@ -301,7 +312,14 @@ namespace
 			}
 			else
 			{
-				technique_ = technique_->Effect().TechniqueByName("DepthOfFieldSpreading");
+				if (gs_support_)
+				{
+					technique_ = technique_->Effect().TechniqueByName("DepthOfFieldSpreading4");
+				}
+				else
+				{
+					technique_ = technique_->Effect().TechniqueByName("DepthOfFieldSpreading");
+				}
 			}
 		}
 		bool ShowBlurFactor() const
@@ -324,24 +342,45 @@ namespace
 			spread_fb_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*spread_tex_, 0, 0, 0));
 
 			{
-				std::vector<float3> points;
-				for (uint32_t y = max_radius_; y < height - max_radius_; ++ y)
+				if (gs_support_)
 				{
-					for (uint32_t x = max_radius_; x < width - max_radius_; ++ x)
+					std::vector<float2> points;
+					for (uint32_t y = max_radius_; y < height - max_radius_; ++ y)
 					{
-						points.push_back(float3(static_cast<float>(x + 0.5f) / width, static_cast<float>(y + 0.5f) / height, 0.5f));
-						points.push_back(float3(static_cast<float>(x + 0.5f) / width, static_cast<float>(y + 0.5f) / height, 1.5f));
-						points.push_back(float3(static_cast<float>(x + 0.5f) / width, static_cast<float>(y + 0.5f) / height, 2.5f));
-						points.push_back(float3(static_cast<float>(x + 0.5f) / width, static_cast<float>(y + 0.5f) / height, 3.5f));
+						for (uint32_t x = max_radius_; x < width - max_radius_; ++ x)
+						{
+							points.push_back(float2(static_cast<float>(x + 0.5f) / width, static_cast<float>(y + 0.5f) / height));
+						}
 					}
-				}
 
-				ElementInitData init_data;
-				init_data.data = &points[0];
-				init_data.row_pitch = static_cast<uint32_t>(points.size() * sizeof(points[0]));
-				init_data.slice_pitch = 0;
-				GraphicsBufferPtr pos_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data);
-				spread_rl_->BindVertexStream(pos_vb, boost::make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F)));
+					ElementInitData init_data;
+					init_data.data = &points[0];
+					init_data.row_pitch = static_cast<uint32_t>(points.size() * sizeof(points[0]));
+					init_data.slice_pitch = 0;
+					GraphicsBufferPtr pos_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data);
+					spread_rl_->BindVertexStream(pos_vb, boost::make_tuple(vertex_element(VEU_Position, 0, EF_GR32F)));
+				}
+				else
+				{
+					std::vector<float3> points;
+					for (uint32_t y = max_radius_; y < height - max_radius_; ++ y)
+					{
+						for (uint32_t x = max_radius_; x < width - max_radius_; ++ x)
+						{
+							points.push_back(float3(static_cast<float>(x + 0.5f) / width, static_cast<float>(y + 0.5f) / height, 0.5f));
+							points.push_back(float3(static_cast<float>(x + 0.5f) / width, static_cast<float>(y + 0.5f) / height, 1.5f));
+							points.push_back(float3(static_cast<float>(x + 0.5f) / width, static_cast<float>(y + 0.5f) / height, 2.5f));
+							points.push_back(float3(static_cast<float>(x + 0.5f) / width, static_cast<float>(y + 0.5f) / height, 3.5f));
+						}
+					}
+
+					ElementInitData init_data;
+					init_data.data = &points[0];
+					init_data.row_pitch = static_cast<uint32_t>(points.size() * sizeof(points[0]));
+					init_data.slice_pitch = 0;
+					GraphicsBufferPtr pos_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data);
+					spread_rl_->BindVertexStream(pos_vb, boost::make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F)));
+				}
 			}
 			{
 				float4 pos[] =
@@ -396,6 +435,8 @@ namespace
 
 	private:
 		SummedAreaTablePostProcess sat_;
+
+		bool gs_support_;
 
 		int max_radius_;
 
