@@ -1238,10 +1238,36 @@ namespace KlayGE
 			}
 			else
 			{
-				if ((mat(1, 1) > mat(0, 0)) && (mat(2, 2) <= mat(1, 1)))
+				int maxi = 0;
+				T maxdiag = mat(0, 0);
+				for (int i = 1; i < 3; ++ i)
 				{
-					s = sqrt((mat(1, 1) - (mat(2, 2) + mat(0, 0))) + 1);
+					if (mat(i, i) > maxdiag)
+					{
+						maxi = i;
+						maxdiag = mat(i, i);
+					}
+				}
 
+				switch (maxi)
+				{
+				case 0:
+					s = sqrt((mat(0, 0) - (mat(1, 1) + mat(2, 2))) + 1);
+
+					quat.x() = s * T(0.5);
+
+					if (!equal<T>(s, 0))
+					{
+						s = T(0.5) / s;
+					}
+
+					quat.w() = (mat(1, 2) - mat(2, 1)) * s;
+					quat.y() = (mat(1, 0) + mat(0, 1)) * s;
+					quat.z() = (mat(2, 0) + mat(0, 2)) * s;
+					break;
+
+				case 1:
+					s = sqrt((mat(1, 1) - (mat(2, 2) + mat(0, 0))) + 1);
 					quat.y() = s * T(0.5);
 
 					if (!equal<T>(s, 0))
@@ -1252,39 +1278,23 @@ namespace KlayGE
 					quat.w() = (mat(2, 0) - mat(0, 2)) * s;
 					quat.z() = (mat(2, 1) + mat(1, 2)) * s;
 					quat.x() = (mat(0, 1) + mat(1, 0)) * s;
-				}
-				else
-				{
-					if (((mat(1, 1) <= mat(0, 0)) && (mat(2, 2) > mat(0, 0))) || (mat(2, 2) > mat(1, 1)))
+					break;
+
+				case 2:
+				default:
+					s = sqrt((mat(2, 2) - (mat(0, 0) + mat(1, 1))) + 1);
+
+					quat.z() = s * T(0.5);
+
+					if (!equal<T>(s, 0))
 					{
-						s = sqrt((mat(2, 2) - (mat(0, 0) + mat(1, 1))) + 1);
-
-						quat.z() = s * T(0.5);
-
-						if (!equal<T>(s, 0))
-						{
-							s = T(0.5) / s;
-						}
-
-						quat.w() = (mat(0, 1) - mat(1, 0)) * s;
-						quat.x() = (mat(0, 2) + mat(2, 0)) * s;
-						quat.y() = (mat(1, 2) + mat(2, 1)) * s;
+						s = T(0.5) / s;
 					}
-					else
-					{
-						s = sqrt((mat(0, 0) - (mat(1, 1) + mat(2, 2))) + 1);
 
-						quat.x() = s * T(0.5);
-
-						if (!equal<T>(s, 0))
-						{
-							s = T(0.5) / s;
-						}
-
-						quat.w() = (mat(1, 2) - mat(2, 1)) * s;
-						quat.y() = (mat(1, 0) + mat(0, 1)) * s;
-						quat.z() = (mat(2, 0) + mat(0, 2)) * s;
-					}
+					quat.w() = (mat(0, 1) - mat(1, 0)) * s;
+					quat.x() = (mat(0, 2) + mat(2, 0)) * s;
+					quat.y() = (mat(1, 2) + mat(2, 1)) * s;
+					break;
 				}
 			}
 
