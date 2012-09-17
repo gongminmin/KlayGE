@@ -412,11 +412,11 @@ void VisualizeTexturePS(float2 tex0 : TEXCOORD0,
 	{
 		if (specular_level.w > 0.5f)
 		{
-			mrt_1 = float4(specular_tex.Sample(linear_sampler, tex0).rgb, 1);
+			mrt_1 = float4(specular_tex.Sample(linear_sampler, tex0).xxx, 1);
 		}
 		else
 		{
-			mrt_1 = float4(specular_level.rgb, 1);
+			mrt_1 = float4(specular_level.xxx, 1);
 		}
 	}
 	else if (2 == texture_slot)

@@ -693,9 +693,13 @@ void ModelViewerApp::MeshChangedHandler(KlayGE::UIComboBox const & sender)
 		Convert(name, texture_slots[i].second);
 		oss << type << L": " << name;
 		dialog_model_->Control<UIListBox>(id_textures_)->AddItem(oss.str());
-
-		dialog_model_->Control<UIComboBox>(id_visualize_)->AddItem(L"Texture " + type, static_cast<int>(i));
 	}
+
+	dialog_model_->Control<UIComboBox>(id_visualize_)->AddItem(L"Texture Diffuse", 0);
+	dialog_model_->Control<UIComboBox>(id_visualize_)->AddItem(L"Texture Specular", 1);
+	dialog_model_->Control<UIComboBox>(id_visualize_)->AddItem(L"Texture Bump", 2);
+	dialog_model_->Control<UIComboBox>(id_visualize_)->AddItem(L"Texture Emit", 3);
+	dialog_model_->Control<UIComboBox>(id_visualize_)->AddItem(L"Texture Opacity", 4);
 }
 
 void ModelViewerApp::VisualizeChangedHandler(KlayGE::UIComboBox const & sender)
