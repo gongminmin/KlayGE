@@ -95,6 +95,7 @@ External/Python/PCbuild/ipch/
 External/Python/PCbuild/obj/
 External/Python/PCbuild/amd64/
 External/Python/PCbuild/*-temp-*/
+External/Python/PCbuild/x64-pgi/
 External/freetype/objs/debug
 External/freetype/objs/release
 External/freetype/objs/win32

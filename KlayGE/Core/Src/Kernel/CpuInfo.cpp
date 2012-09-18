@@ -102,7 +102,8 @@ namespace
 		CFM_MOVBE		= 1UL << 22,	// MOVBE (Intel)
 		CFM_POPCNT		= 1UL << 23,	// POPCNT
 		CFM_AES			= 1UL << 25,	// AES support (Intel)
-		CFM_AVX			= 1UL << 28,	// 256-bit AVX (Intel)
+		CFM_OSXSAVE		= 1UL << 27,	// OSX save
+		CFM_AVX			= 1UL << 28,	// 256-bit AVX
 
 		// In EDX of type 1
 		CFM_MMX			= 1UL << 23,	// MMX Technology
@@ -336,7 +337,7 @@ namespace KlayGE
 			feature_mask_ |= cpuid.Ecx() & CFM_MOVBE ? CF_MOVBE : 0;
 			feature_mask_ |= cpuid.Ecx() & CFM_POPCNT ? CF_POPCNT : 0;
 			feature_mask_ |= cpuid.Ecx() & CFM_AES ? CF_AES : 0;
-			feature_mask_ |= cpuid.Ecx() & CFM_AVX ? CF_AVX : 0;
+			feature_mask_ |= (cpuid.Ecx() & CFM_OSXSAVE) && (cpuid.Ecx() & CFM_AVX) ? CF_AVX : 0;
 		}
 
 		cpuid.Call(0x80000000);
