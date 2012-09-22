@@ -175,7 +175,7 @@ namespace KlayGE
 					}
 					else
 					{
-						if (boost::get<0>(dev_type_beh) != D3D_DRIVER_TYPE_HARDWARE)
+						if (dev_type != D3D_DRIVER_TYPE_HARDWARE)
 						{
 							IDXGIDevice1* dxgi_device = NULL;
 							HRESULT hr = d3d_device_->QueryInterface(IID_IDXGIDevice1, reinterpret_cast<void**>(&dxgi_device));
@@ -185,7 +185,6 @@ namespace KlayGE
 								dxgi_device->GetAdapter(&ada);
 								adapter_->ResetAdapter(MakeCOMPtr(ada));
 								adapter_->Enumerate();
-								ada->Release();
 							}
 							dxgi_device->Release();
 						}

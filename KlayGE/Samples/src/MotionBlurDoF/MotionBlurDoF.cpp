@@ -39,6 +39,13 @@
 using namespace std;
 using namespace KlayGE;
 
+#ifdef KLAYGE_COMPILER_MSVC
+extern "C"
+{
+	_declspec(dllexport) uint32_t NvOptimusEnablement = 0x00000001;
+}
+#endif
+
 namespace
 {
 	int32_t const NUM_LINE = 10;

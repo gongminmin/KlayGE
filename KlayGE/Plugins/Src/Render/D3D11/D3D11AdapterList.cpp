@@ -66,19 +66,12 @@ namespace KlayGE
 		// 枚举系统中的适配器
 		UINT adapter_no = 0;
 		IDXGIAdapter1* dxgi_adapter = NULL;
-		SIZE_T max_dedicated_video_mem = 0;
 		while (gi_factory->EnumAdapters1(adapter_no, &dxgi_adapter) != DXGI_ERROR_NOT_FOUND)
 		{
 			if (dxgi_adapter != NULL)
 			{
 				DXGI_ADAPTER_DESC ad;
 				dxgi_adapter->GetDesc(&ad);
-
-				if (ad.DedicatedVideoMemory > max_dedicated_video_mem)
-				{
-					max_dedicated_video_mem = ad.DedicatedVideoMemory;
-					current_adapter_ = adapter_no;
-				}
 
 				D3D11AdapterPtr adapter = MakeSharedPtr<D3D11Adapter>(adapter_no, MakeCOMPtr(dxgi_adapter));
 				adapter->Enumerate();
