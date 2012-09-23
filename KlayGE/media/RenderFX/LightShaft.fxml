@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<effect>
+	<include name="util.fxml"/>
+	<include name="PostProcess.fxml"/>
+
+	<parameter type="sampler" name="linear_sampler">
+		<state name="filtering" value="min_mag_linear_mip_point"/>
+		<state name="address_u" value="clamp"/>
+		<state name="address_v" value="clamp"/>
+	</parameter>
+
+	<parameter type="int" name="blur_sample_num"/>
+	<parameter type="float2" name="blur_origin"/>
+	<parameter type="float2" name="inv_width_height"/>
+	<parameter type="float" name="width_height_aspect"/>
+	<parameter type="float" name="cutoff_decay_weight" value="0.015625"/>
+	<parameter type="float" name="valid_sample_length" value="1.0"/>
+	<parameter type="texture2D" name="src_tex"/>
+
+	<shader>
+		<![CDATA[
+float4 LightShaftRadialBlurPS(float2 tc0 : TEXCOORD0) : SV_Target
+{
+	float2 blur_dir = blur_origin - tc0;
+
+	// try to compute the intersection point of blur_dir and screen edge
+	// it will shorten blur_dir length, thus it will decrease sample step and blur undersampling
+	float t1 = 1;
+	if (blur_dir.x > 0)
+	{
+		t1 = (1 - tc0.x) / blur_dir.x;
+	}
+	else if (blur_dir.x < 0)
+	{
+		t1 = -tc0.x / blur_dir.x;
+	}
+
+	float t2 = 1;
+	if (blur_dir.y > 0)
+	{
+		t2 = (1 - tc0.y) / blur_dir.y;
+	}
+	else if (blur_dir.y < 0)
+	{
+		t2 = -tc0.y / blur_dir.y;
+	}
+
+	float2 clamped_origin = tc0 + min(min(t1, t2), 1) * blur_dir;
+	blur_dir = clamped_origin - tc0;
+
+	float2 sample_step = blur_dir / blur_sample_num * lerp(0.5f, 1.0f, valid_sample_length);
+
+	float2 current_tc = tc0;
+	float4 sample_sum = 0;
+	float4 current_sample;
+	float sample_weight = 1;
+	for (int i = 0; i < blur_sample_num; ++ i)
+	{
+		current_sample = src_tex.SampleLevel(linear_sampler, current_tc, 0);
+		sample_sum += current_sample * sample_weight;
+		current_tc += sample_step;
+		sample_weight -= cutoff_decay_weight; // linear decay
+	}
+
+	return sample_sum / blur_sample_num;
+}
+	 ]]>
+	</shader>
+	
+	<technique name="LightShaftRadialBlur">
+		<pass name="p0">
+			<state name="depth_write_mask" value="false"/>
+
+			<state name="vertex_shader" value="PostProcessVS()"/>
+			<state name="pixel_shader" value="LightShaftRadialBlurPS()"/>
+		</pass>
+	</technique>
+
+	<parameter type="float3" name="light_pos"/>
+	<parameter type="float4" name="light_shaft_clr"/>
+	<parameter type="float" name="depth_clip" value="0.2"/>
+	
+	<parameter type="float" name="light_intensity" value="0.25"/>
+	<parameter type="float" name="shadow_intensity" value="0.2"/>
+	<parameter type="float" name="inv_frustum_depth"/>
+	<parameter type="texture2D" name="depth_mask"/>
+	<parameter type="texture2D" name="scene_tex"/>
+	
+	<shader>
+		<![CDATA[
+float4 ApplyLightShaftPS(float2 tc0 : TEXCOORD0) : SV_Target
+{  
+	float mask = depth_mask.Sample(linear_sampler, tc0).x;
+	float4 scene_color = scene_tex.Sample(linear_sampler, tc0);
+
+	float alpha = saturate(mask * inv_frustum_depth);
+
+	// aspect correction
+	float dist = length((blur_origin - tc0) * float2(width_height_aspect, 1));
+	float dist_decay = clamp(dist / 1.414f, 0, 1);
+
+	float4 clr = float4(scene_color.rgb, 1) * alpha * light_intensity * (1 - dist_decay); // glow fade out
+	clr.a = lerp(shadow_intensity * dist_decay, 1.0, alpha);
+	clr.a = lerp(clr.a, 1, dist_decay); // shadow fade out
+
+	return clr;
+}
+		]]>
+	</shader>
+	
+	<technique name="ApplyLightShaft">
+		<pass name="p0">
+			<state name="depth_write_mask" value="false"/>
+
+			<state name="blend_enable" value="true"/>
+			<state name="blend_op" value="add"/>
+			<state name="src_blend" value="one"/>
+			<state name="dest_blend" value="src_alpha"/>
+			<state name="blend_op_alpha" value="add"/>
+			<state name="src_blend_alpha" value="one"/>
+			<state name="dest_blend_alpha" value="one"/>
+
+			<state name="vertex_shader" value="PostProcessVS()"/>
+			<state name="pixel_shader" value="ApplyLightShaftPS()"/>
+		</pass>
+	</technique>
+</effect>

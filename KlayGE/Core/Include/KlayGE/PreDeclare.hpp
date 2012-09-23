@@ -244,9 +244,13 @@ namespace KlayGE
 	template <typename ParticleType>
 	class ParticleSystem;
 	class InfTerrainRenderable;
+	typedef boost::shared_ptr<InfTerrainRenderable> InfTerrainRenderablePtr;
 	class InfTerrainSceneObject;
+	typedef boost::shared_ptr<InfTerrainSceneObject> InfTerrainSceneObjectPtr;
 	class LensFlareRenderable;
+	typedef boost::shared_ptr<LensFlareRenderable> LensFlareRenderablePtr;
 	class LensFlareSceneObject;
+	typedef boost::shared_ptr<LensFlareSceneObject> LensFlareSceneObjectPtr;
 	class DeferredRenderingLayer;
 	typedef boost::shared_ptr<DeferredRenderingLayer> DeferredRenderingLayerPtr;
 	class GpuFft;
@@ -261,6 +265,8 @@ namespace KlayGE
 	typedef boost::shared_ptr<SSGIPostProcess> SSGIPostProcessPtr;
 	class SSRPostProcess;
 	typedef boost::shared_ptr<SSRPostProcess> SSRPostProcessPtr;
+	class LightShaftPostProcess;
+	typedef boost::shared_ptr<LightShaftPostProcess> LightShaftPostProcessPtr;
 
 	class UIManager;
 	typedef boost::shared_ptr<UIManager> UIManagerPtr;

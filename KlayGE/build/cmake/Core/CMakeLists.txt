@@ -82,6 +82,7 @@ SET(RENDERING_SOURCE_FILES
 	${KLAYGE_PROJECT_DIR}/Core/Src/Render/JudaTexture.cpp
 	${KLAYGE_PROJECT_DIR}/Core/Src/Render/LensFlare.cpp
 	${KLAYGE_PROJECT_DIR}/Core/Src/Render/Light.cpp
+	${KLAYGE_PROJECT_DIR}/Core/Src/Render/LightShaft.cpp
 	${KLAYGE_PROJECT_DIR}/Core/Src/Render/Mesh.cpp
 	${KLAYGE_PROJECT_DIR}/Core/Src/Render/PostProcess.cpp
 	${KLAYGE_PROJECT_DIR}/Core/Src/Render/Query.cpp
@@ -119,6 +120,7 @@ SET(RENDERING_HEADER_FILES
 	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/JudaTexture.hpp
 	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/LensFlare.hpp
 	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/Light.hpp
+	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/LightShaft.hpp
 	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/Mesh.hpp
 	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/ParticleSystem.hpp
 	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/PostProcess.hpp
@@ -166,6 +168,7 @@ SET(RENDERING_EFFECT_FILES
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/LensEffects.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/LensFlare.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/Lighting.fxml
+	${KLAYGE_PROJECT_DIR}/media/RenderFX/LightShaft.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/LightSourceProxy.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/Noise.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/PointSprite.fxml
@@ -198,6 +201,7 @@ SET(RENDERING_POSTPROCESSOR_FILES
 	${KLAYGE_PROJECT_DIR}/media/PostProcessors/FXAA.ppml
 	${KLAYGE_PROJECT_DIR}/media/PostProcessors/GammaCorrection.ppml
 	${KLAYGE_PROJECT_DIR}/media/PostProcessors/LensEffects.ppml
+	${KLAYGE_PROJECT_DIR}/media/PostProcessors/LightShaft.ppml
 	${KLAYGE_PROJECT_DIR}/media/PostProcessors/RSM2VPLs.ppml
 	${KLAYGE_PROJECT_DIR}/media/PostProcessors/Stereoscopic.ppml
 	${KLAYGE_PROJECT_DIR}/media/PostProcessors/Upsampling.ppml

@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<post_processors>
+	<post_processor name="LightShaftMaskRadialBlur">
+		<params>
+			<param name="blur_sample_num"/>
+			<param name="blur_origin"/>
+			<param name="cutoff_decay_weight"/>
+			<param name="valid_sample_length"/>
+			<param name="inv_width_height"/>
+		</params>
+		<input>
+			<pin name="src_tex"/>
+		</input>
+		<output>
+			<pin name="output"/>
+		</output>
+		<shader effect="LightShaft.fxml" tech="LightShaftRadialBlur"/>
+	</post_processor>
+
+	<post_processor name="ApplyLightShaftEffect">
+		<params>
+			<param name="inv_frustum_depth"/>
+			<param name="light_shaft_clr"/>
+			<param name="light_intensity"/>
+			<param name="shadow_intensity"/>
+			<param name="blur_origin"/>
+			<param name="width_height_aspect"/>
+		</params>
+		<input>
+			<pin name="depth_mask"/>
+			<pin name="scene_tex"/>
+		</input>
+		<output>
+			<pin name="output"/>
+		</output>
+		<shader effect="LightShaft.fxml" tech="ApplyLightShaft"/>
+	</post_processor>
+</post_processors>
