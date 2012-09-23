@@ -16,8 +16,8 @@
 		<parameter type="float" name="time"/>
 	</cbuffer>
 
-	<parameter type="structured_buffer" elem_type="float2" name="input_h0"/>
-	<parameter type="structured_buffer" elem_type="float" name="input_omega"/>
+	<parameter type="buffer" elem_type="float2" name="input_h0"/>
+	<parameter type="buffer" elem_type="float" name="input_omega"/>
 
 	<shader>
 		<![CDATA[
@@ -49,10 +49,10 @@ void UpdateSpectrumPS(float2 TexCoord : TEXCOORD0,
 	int out_index = index_y * out_width + index_x;
 
 	// H(0) -> H(t)
-	float2 h0_k  = input_h0[in_index];
-	float2 h0_mk = input_h0[in_mindex];
+	float2 h0_k  = input_h0.Load(in_index);
+	float2 h0_mk = input_h0.Load(in_mindex);
 	float sin_v, cos_v;
-	sincos(input_omega[in_index] * time, sin_v, cos_v);
+	sincos(input_omega.Load(in_index) * time, sin_v, cos_v);
 
 	float2 h0_k_add_mk = h0_k + h0_mk;
 	float2 h0_k_sub_mk = h0_k - h0_mk;

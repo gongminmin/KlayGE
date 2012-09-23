@@ -2648,11 +2648,6 @@ namespace KlayGE
 			fxml_name = name;
 		}		
 		std::string kfx_name = fxml_name.substr(0, fxml_name.rfind(".")) + ".kfx";
-		std::string exists_kfx_name = ResLoader::Instance().Locate(kfx_name);
-		if (!exists_kfx_name.empty())
-		{
-			kfx_name = exists_kfx_name;
-		}
 
 		ResIdentifierPtr source = ResLoader::Instance().Open(fxml_name);
 		ResIdentifierPtr kfx_source = ResLoader::Instance().Open(kfx_name);
