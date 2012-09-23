@@ -9,6 +9,7 @@
 		<parameter type="float4x4" name="view"/>
 		<parameter type="float4x4" name="proj"/>
 		<parameter type="float3" name="light_in_world" x="2" y="2" z="-3"/>
+		<parameter type="float" name="elapsed_time"/>
 	</cbuffer>
 
 	<parameter type="float4x4" name="modelmat" semantic="WORLD"/>
@@ -105,7 +106,7 @@ void CalcMotionVector(float4 pos_curr, float4 pos_prev, float3 normal_es,
 	
 	pos_curr /= pos_curr.w;
 	pos_prev /= pos_prev.w;
-	oVelocity = (pos_curr.xy - pos_prev.xy) * 0.5f;
+	oVelocity = (pos_curr.xy - pos_prev.xy) / (elapsed_time * 60);
 }
 
 void MotionVectorInstancedVS(float4 pos			: POSITION,

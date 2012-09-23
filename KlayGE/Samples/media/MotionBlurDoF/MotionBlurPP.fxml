@@ -24,8 +24,9 @@ float4 MotionBlurPS(float2 tex_coord0 : TEXCOORD0) : SV_Target
 	float sum_weight = 1;
 	for (int i = 1; i < NUM_SAMPLES; ++ i)
 	{
-		float3 other_clr = color_tex.Sample(point_sampler, tex_coord0 + motion_vec * i / NUM_SAMPLES).xyz;
-		float other_depth = depth_tex.Sample(point_sampler, tex_coord0 + motion_vec * i / NUM_SAMPLES).x;
+		float2 tc = tex_coord0 + motion_vec * i / NUM_SAMPLES;
+		float3 other_clr = color_tex.Sample(point_sampler, tc).xyz;
+		float other_depth = depth_tex.Sample(point_sampler, tc).x;
 		if (depth >= other_depth)
 		{
 			clr += other_clr;

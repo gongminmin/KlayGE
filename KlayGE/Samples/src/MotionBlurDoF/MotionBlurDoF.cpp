@@ -93,6 +93,7 @@ namespace
 			*(technique_->Effect().ParameterByName("proj")) = curr_proj;
 			*(technique_->Effect().ParameterByName("prev_view")) = prev_view;
 			*(technique_->Effect().ParameterByName("prev_proj")) = prev_proj;
+			*(technique_->Effect().ParameterByName("elapsed_time")) = app.FrameTime();
 		}
 
 		void MotionVecPass(bool motion_vec)
@@ -145,6 +146,7 @@ namespace
 			*(technique_->Effect().ParameterByName("proj")) = curr_proj;
 			*(technique_->Effect().ParameterByName("prev_view")) = prev_view;
 			*(technique_->Effect().ParameterByName("prev_proj")) = prev_proj;
+			*(technique_->Effect().ParameterByName("elapsed_time")) = app.FrameTime();
 		}
 
 		void OnInstanceBegin(uint32_t id)
