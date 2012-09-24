@@ -24,11 +24,18 @@
 #include <boost/foreach.hpp>
 #include <boost/typeof/typeof.hpp>
 
+#include "CausticsMap.hpp"
+
 using namespace KlayGE;
 using namespace KlayGE::MathLib;
 using namespace std;
 
-#include "CausticsMap.hpp"
+#ifdef KLAYGE_COMPILER_MSVC
+extern "C"
+{
+	_declspec(dllexport) uint32_t NvOptimusEnablement = 0x00000001;
+}
+#endif
 
 namespace
 {

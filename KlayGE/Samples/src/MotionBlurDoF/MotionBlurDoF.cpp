@@ -39,6 +39,13 @@
 using namespace std;
 using namespace KlayGE;
 
+#ifdef KLAYGE_COMPILER_MSVC
+extern "C"
+{
+	_declspec(dllexport) uint32_t NvOptimusEnablement = 0x00000001;
+}
+#endif
+
 namespace
 {
 	int32_t const NUM_LINE = 10;
@@ -86,6 +93,7 @@ namespace
 			*(technique_->Effect().ParameterByName("proj")) = curr_proj;
 			*(technique_->Effect().ParameterByName("prev_view")) = prev_view;
 			*(technique_->Effect().ParameterByName("prev_proj")) = prev_proj;
+			*(technique_->Effect().ParameterByName("elapsed_time")) = app.FrameTime();
 		}
 
 		void MotionVecPass(bool motion_vec)
@@ -138,6 +146,7 @@ namespace
 			*(technique_->Effect().ParameterByName("proj")) = curr_proj;
 			*(technique_->Effect().ParameterByName("prev_view")) = prev_view;
 			*(technique_->Effect().ParameterByName("prev_proj")) = prev_proj;
+			*(technique_->Effect().ParameterByName("elapsed_time")) = app.FrameTime();
 		}
 
 		void OnInstanceBegin(uint32_t id)

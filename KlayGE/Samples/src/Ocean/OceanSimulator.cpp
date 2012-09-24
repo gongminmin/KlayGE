@@ -179,11 +179,11 @@ namespace KlayGE
 
 		init_data.row_pitch = static_cast<uint32_t>(h0_data.size() * sizeof(h0_data[0]));
 		init_data.data = &h0_data[0];
-		h0_buffer_ = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Read | EAH_GPU_Unordered | EAH_GPU_Structured, &init_data, EF_GR32F);
+		h0_buffer_ = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Read, &init_data, EF_GR32F);
 
 		init_data.row_pitch = static_cast<uint32_t>(omega_data.size() * sizeof(omega_data[0]));
 		init_data.data = &omega_data[0];
-		omega_buffer_ = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Read | EAH_GPU_Unordered | EAH_GPU_Structured, &init_data, EF_R32F);
+		omega_buffer_ = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Read, &init_data, EF_R32F);
 
 		displacement_tex_ = rf.MakeTexture2D(params.dmap_dim, params.dmap_dim, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
 		gradient_tex_ = rf.MakeTexture2D(params.dmap_dim, params.dmap_dim, 1, 1, EF_ABGR8, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);

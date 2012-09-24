@@ -30,6 +30,13 @@
 using namespace KlayGE;
 using namespace std;
 
+#ifdef KLAYGE_COMPILER_MSVC
+extern "C"
+{
+	_declspec(dllexport) uint32_t NvOptimusEnablement = 0x00000001;
+}
+#endif
+
 namespace
 {
 	class RenderAxis : public RenderableHelper
