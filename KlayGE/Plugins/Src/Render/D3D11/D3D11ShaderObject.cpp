@@ -41,7 +41,9 @@
 #endif
 
 #include <KlayGE/D3D11/D3D11MinGWDefs.hpp>
+#ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
 #include <D3DCompiler.h>
+#endif
 
 #include <KlayGE/D3D11/D3D11RenderEngine.hpp>
 #include <KlayGE/D3D11/D3D11RenderStateObject.hpp>
@@ -49,8 +51,10 @@
 #include <KlayGE/D3D11/D3D11Texture.hpp>
 #include <KlayGE/D3D11/D3D11ShaderObject.hpp>
 
+#ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
 #ifdef KLAYGE_COMPILER_MSVC
 #pragma comment(lib, "d3dcompiler.lib")
+#endif
 #endif
 
 namespace
@@ -1040,6 +1044,7 @@ namespace KlayGE
 
 	ID3DBlobPtr D3D11ShaderObject::CompiteToBytecode(ShaderType type, RenderEffect const & effect, std::vector<uint32_t> const & shader_desc_ids)
 	{
+#ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
 		D3D11RenderEngine const & render_eng = *checked_cast<D3D11RenderEngine const *>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		D3D_FEATURE_LEVEL feature_level = render_eng.DeviceFeatureLevel();
 		RenderDeviceCaps const & caps = render_eng.DeviceCaps();
@@ -1419,6 +1424,13 @@ namespace KlayGE
 		}
 
 		return MakeCOMPtr(code);
+#else
+		UNREF_PARAM(type);
+		UNREF_PARAM(effect);
+		UNREF_PARAM(shader_desc_ids);
+
+		return ID3DBlobPtr();
+#endif
 	}
 
 	void D3D11ShaderObject::AttachShaderBytecode(ShaderType type, RenderEffect const & effect, std::vector<uint32_t> const & shader_desc_ids, ID3DBlobPtr const & code_blob)

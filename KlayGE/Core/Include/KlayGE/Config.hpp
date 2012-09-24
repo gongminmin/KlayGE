@@ -108,6 +108,15 @@
 		#include <sdkddkver.h>
 	#endif
 
+#if (_WIN32_WINNT >= 0x0602 /*_WIN32_WINNT_WIN8*/)
+	#include <winapifamily.h>
+	#if WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_DESKTOP)
+		#define KLAYGE_PLATFORM_WINDOWS_DESKTOP
+	#endif
+#else
+	#define KLAYGE_PLATFORM_WINDOWS_DESKTOP
+#endif
+
 	// Shut min/max in windows.h
 	#ifndef NOMINMAX
 		#define NOMINMAX
