@@ -19,6 +19,7 @@
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/InputFactory.hpp>
 #include <KlayGE/DeferredRenderingLayer.hpp>
+#include <KlayGE/LightShaft.hpp>
 
 #include <sstream>
 #include <boost/bind.hpp>
@@ -792,6 +793,10 @@ void OceanApp::InitObjects()
 	fog_pp_->SetParam(2, 1.0f / 1200);
 	deferred_rendering_->AtmosphericPostProcess(fog_pp_);
 
+	light_shaft_pp_ = MakeSharedPtr<LightShaftPostProcess>();
+	light_shaft_pp_->SetParam(0, sun_light_->Direction() * 10000.0f);
+	light_shaft_pp_->SetParam(1, sun_light_->Color());
+
 	fpcController_.Scalers(0.05f, 1.0f);
 
 	InputEngine& inputEngine(Context::Instance().InputFactoryInstance().InputEngineInstance());
@@ -855,6 +860,9 @@ void OceanApp::OnResize(uint32_t width, uint32_t height)
 
 	RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 	deferred_rendering_->SetupViewport(0, re.CurFrameBuffer(), 0);
+
+	light_shaft_pp_->InputPin(0, deferred_rendering_->OpaqueDepthTex(0));
+	light_shaft_pp_->InputPin(1, deferred_rendering_->PrevFrameShadingTex(0));
 
 	UIManager::Instance().SettleCtrls(width, height);
 }
@@ -991,5 +999,11 @@ void OceanApp::DoUpdateOverlay()
 
 uint32_t OceanApp::DoUpdate(uint32_t pass)
 {
-	return deferred_rendering_->Update(pass);
+	uint32_t ret = deferred_rendering_->Update(pass);
+	if (ret & App3DFramework::URV_Finished)
+	{
+		light_shaft_pp_->Apply();
+	}
+
+	return ret;
 }

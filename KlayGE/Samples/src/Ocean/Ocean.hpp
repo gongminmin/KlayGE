@@ -42,6 +42,8 @@ private:
 
 	KlayGE::PostProcessPtr fog_pp_;
 
+	KlayGE::PostProcessPtr light_shaft_pp_;
+
 	KlayGE::UIDialogPtr dialog_params_;
 	int id_dmap_dim_static_;
 	int id_dmap_dim_slider_;
