@@ -23,6 +23,10 @@
 #endif
 #include <dinput.h>
 
+#ifndef DIDFT_OPTIONAL
+#define DIDFT_OPTIONAL          0x80000000
+#endif
+
 #include <KlayGE/Input.hpp>
 #include <boost/smart_ptr.hpp>
 #include <boost/noncopyable.hpp>
