@@ -595,8 +595,8 @@ namespace KlayGE
 			std::max(ChannelBits<2>(format), ChannelBits<3>(format)));
 	}
 
-	void ConvertToABGR32F(ElementFormat fmt, void const * input, uint32_t num_elems, Color* output);
-	void ConvertFromABGR32F(ElementFormat fmt, Color const * input, uint32_t num_elems, void* output);
+	KLAYGE_CORE_API void ConvertToABGR32F(ElementFormat fmt, void const * input, uint32_t num_elems, Color* output);
+	KLAYGE_CORE_API void ConvertFromABGR32F(ElementFormat fmt, Color const * input, uint32_t num_elems, void* output);
 
 
 	enum ElementAccessHint

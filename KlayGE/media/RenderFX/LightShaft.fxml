@@ -101,7 +101,7 @@ float4 ApplyLightShaftPS(float2 tc0 : TEXCOORD0) : SV_Target
 	float dist_decay = clamp(dist / 1.414f, 0, 1);
 
 	float4 clr = float4(scene_color.rgb, 1) * alpha * light_intensity * (1 - dist_decay); // glow fade out
-	clr.a = lerp(shadow_intensity * dist_decay, 1.0, alpha);
+	clr.a = lerp(shadow_intensity * dist_decay, 1.0f, alpha);
 	clr.a = lerp(clr.a, 1, dist_decay); // shadow fade out
 
 	return clr;
