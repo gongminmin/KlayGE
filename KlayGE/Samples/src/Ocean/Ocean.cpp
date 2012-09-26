@@ -861,7 +861,7 @@ void OceanApp::OnResize(uint32_t width, uint32_t height)
 	RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 	deferred_rendering_->SetupViewport(0, re.CurFrameBuffer(), 0);
 
-	light_shaft_pp_->InputPin(0, deferred_rendering_->OpaqueDepthTex(0));
+	light_shaft_pp_->InputPin(0, deferred_rendering_->PrevFrameDepthTex(0));
 	light_shaft_pp_->InputPin(1, deferred_rendering_->PrevFrameShadingTex(0));
 
 	UIManager::Instance().SettleCtrls(width, height);

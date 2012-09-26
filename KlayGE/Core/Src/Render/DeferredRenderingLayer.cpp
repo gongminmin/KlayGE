@@ -314,11 +314,11 @@ namespace KlayGE
 				pvp.g_buffers[i] = rf.MakeFrameBuffer();
 				pvp.lighting_buffers[i] = rf.MakeFrameBuffer();
 				pvp.shading_buffers[i] = rf.MakeFrameBuffer();
+				pvp.curr_merged_shading_buffers[i] = rf.MakeFrameBuffer();
+				pvp.curr_merged_depth_buffers[i] = rf.MakeFrameBuffer();
+				pvp.prev_merged_shading_buffers[i] = rf.MakeFrameBuffer();
+				pvp.prev_merged_depth_buffers[i] = rf.MakeFrameBuffer();
 			}
-			pvp.curr_merged_shading_buffer = rf.MakeFrameBuffer();
-			pvp.curr_merged_depth_buffer = rf.MakeFrameBuffer();
-			pvp.prev_merged_shading_buffer = rf.MakeFrameBuffer();
-			pvp.prev_merged_depth_buffer = rf.MakeFrameBuffer();
 			pvp.shadowing_buffer = rf.MakeFrameBuffer();
 		}
 
@@ -423,7 +423,8 @@ namespace KlayGE
 		}
 		technique_merge_shadings_[0] = dr_effect_->TechniqueByName("MergeShadingTech");
 		technique_merge_shadings_[1] = dr_effect_->TechniqueByName("MergeShadingAlphaBlendTech");
-		technique_merge_depth_ = dr_effect_->TechniqueByName("MergeDepthTech");
+		technique_merge_depths_[0] = dr_effect_->TechniqueByName("MergeDepthTech");
+		technique_merge_depths_[1] = dr_effect_->TechniqueByName("MergeDepthAlphaBlendTech");
 		technique_copy_shading_ = dr_effect_->TechniqueByName("CopyShadingTech");
 
 		sm_buffer_ = rf.MakeFrameBuffer();
@@ -781,23 +782,25 @@ namespace KlayGE
 
 			fmt = EF_ABGR16F;
 		}
+		pvp.curr_merged_shading_tex = rf.MakeTexture2D(width, height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+		pvp.curr_merged_depth_tex = rf.MakeTexture2D(width, height, 1, 1, depth_fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+		pvp.prev_merged_shading_tex = rf.MakeTexture2D(width, height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+		pvp.prev_merged_depth_tex = rf.MakeTexture2D(width, height, 1, 1, depth_fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
 		for (size_t i = 0; i < pvp.shading_buffers.size(); ++ i)
 		{
 			pvp.shading_texs[i] = rf.MakeTexture2D(width, height, 1, 1, (0 == i) ? fmt : EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
 			pvp.shading_buffers[i]->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*pvp.shading_texs[i], 0, 1, 0));
 			pvp.shading_buffers[i]->Attach(FrameBuffer::ATT_DepthStencil, ds_views[i]);
-		}
-		{
-			pvp.curr_merged_shading_tex = rf.MakeTexture2D(width, height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
-			pvp.curr_merged_shading_buffer->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*pvp.curr_merged_shading_tex, 0, 1, 0));
-			pvp.curr_merged_depth_tex = rf.MakeTexture2D(width, height, 1, 1, depth_fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
-			pvp.curr_merged_depth_buffer->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*pvp.curr_merged_depth_tex, 0, 1, 0));
-		}
-		{
-			pvp.prev_merged_shading_tex = rf.MakeTexture2D(width, height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
-			pvp.prev_merged_shading_buffer->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*pvp.prev_merged_shading_tex, 0, 1, 0));
-			pvp.prev_merged_depth_tex = rf.MakeTexture2D(width, height, 1, 1, depth_fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
-			pvp.prev_merged_depth_buffer->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*pvp.prev_merged_depth_tex, 0, 1, 0));
+
+			pvp.curr_merged_shading_buffers[i]->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*pvp.curr_merged_shading_tex, 0, 1, 0));
+			pvp.curr_merged_shading_buffers[i]->Attach(FrameBuffer::ATT_DepthStencil, ds_views[i]);
+			pvp.curr_merged_depth_buffers[i]->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*pvp.curr_merged_depth_tex, 0, 1, 0));
+			pvp.curr_merged_depth_buffers[i]->Attach(FrameBuffer::ATT_DepthStencil, ds_views[i]);
+
+			pvp.prev_merged_shading_buffers[i]->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*pvp.prev_merged_shading_tex, 0, 1, 0));
+			pvp.prev_merged_shading_buffers[i]->Attach(FrameBuffer::ATT_DepthStencil, ds_views[i]);
+			pvp.prev_merged_depth_buffers[i]->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*pvp.prev_merged_depth_tex, 0, 1, 0));
+			pvp.prev_merged_depth_buffers[i]->Attach(FrameBuffer::ATT_DepthStencil, ds_views[i]);
 		}
 
 		if (caps.rendertarget_format_support(EF_B10G11R11F, 1, 0))
@@ -1191,11 +1194,11 @@ namespace KlayGE
 				pvp.g_buffers[i]->GetViewport()->camera = camera;
 				pvp.lighting_buffers[i]->GetViewport()->camera = camera;
 				pvp.shading_buffers[i]->GetViewport()->camera = camera;
+				pvp.curr_merged_shading_buffers[i]->GetViewport()->camera = camera;
+				pvp.curr_merged_depth_buffers[i]->GetViewport()->camera = camera;
+				pvp.prev_merged_shading_buffers[i]->GetViewport()->camera = camera;
+				pvp.prev_merged_depth_buffers[i]->GetViewport()->camera = camera;
 			}
-			pvp.curr_merged_shading_buffer->GetViewport()->camera = camera;
-			pvp.curr_merged_depth_buffer->GetViewport()->camera = camera;
-			pvp.prev_merged_shading_buffer->GetViewport()->camera = camera;
-			pvp.prev_merged_depth_buffer->GetViewport()->camera = camera;
 			pvp.shadowing_buffer->GetViewport()->camera = camera;
 
 			pvp.view = camera->ViewMatrix();
@@ -1252,11 +1255,11 @@ namespace KlayGE
 					pvp.g_buffers[i]->GetViewport()->camera = camera;
 					pvp.lighting_buffers[i]->GetViewport()->camera = camera;
 					pvp.shading_buffers[i]->GetViewport()->camera = camera;
+					pvp.curr_merged_shading_buffers[i]->GetViewport()->camera = camera;
+					pvp.curr_merged_depth_buffers[i]->GetViewport()->camera = camera;
+					pvp.prev_merged_shading_buffers[i]->GetViewport()->camera = camera;
+					pvp.prev_merged_depth_buffers[i]->GetViewport()->camera = camera;
 				}
-				pvp.curr_merged_shading_buffer->GetViewport()->camera = camera;
-				pvp.curr_merged_depth_buffer->GetViewport()->camera = camera;
-				pvp.prev_merged_shading_buffer->GetViewport()->camera = camera;
-				pvp.prev_merged_depth_buffer->GetViewport()->camera = camera;
 				pvp.shadowing_buffer->GetViewport()->camera = camera;
 
 				pvp.view = camera->ViewMatrix();
@@ -1504,23 +1507,23 @@ namespace KlayGE
 						}
 					}
 
-					re.BindFrameBuffer(pvp.curr_merged_shading_buffer);
 					for (size_t i = 0; i < pvp.g_buffers.size(); ++ i)
 					{
 						if (pvp.g_buffer_enables[i])
 						{
+							re.BindFrameBuffer(pvp.curr_merged_shading_buffers[i]);
 							*shading_tex_param_ = pvp.shading_texs[i];
 							re.Render(*technique_merge_shadings_[i != 0], *rl_quad_);
 						}
 					}
 
-					re.BindFrameBuffer(pvp.curr_merged_depth_buffer);
 					for (size_t i = 0; i < pvp.g_buffers.size(); ++ i)
 					{
 						if (pvp.g_buffer_enables[i])
 						{
+							re.BindFrameBuffer(pvp.curr_merged_depth_buffers[i]);
 							*depth_tex_param_ = pvp.g_buffer_depth_texs[i];
-							re.Render(*technique_merge_depth_, *rl_quad_);
+							re.Render(*technique_merge_depths_[i != 0], *rl_quad_);
 						}
 					}
 
@@ -1536,9 +1539,9 @@ namespace KlayGE
 						re.Render(*technique_copy_shading_, *rl_quad_);
 					}
 
-					std::swap(pvp.curr_merged_shading_buffer, pvp.prev_merged_shading_buffer);
+					std::swap(pvp.curr_merged_shading_buffers, pvp.prev_merged_shading_buffers);
 					std::swap(pvp.curr_merged_shading_tex, pvp.prev_merged_shading_tex);
-					std::swap(pvp.curr_merged_depth_buffer, pvp.prev_merged_depth_buffer);
+					std::swap(pvp.curr_merged_depth_buffers, pvp.prev_merged_depth_buffers);
 					std::swap(pvp.curr_merged_depth_tex, pvp.prev_merged_depth_tex);
 
 					uint32_t urv;

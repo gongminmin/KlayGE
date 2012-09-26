@@ -77,14 +77,14 @@ namespace KlayGE
 		boost::array<FrameBufferPtr, Num_GBuffers> shading_buffers;
 		boost::array<TexturePtr, Num_GBuffers> shading_texs;
 
-		FrameBufferPtr curr_merged_shading_buffer;
+		boost::array<FrameBufferPtr, Num_GBuffers> curr_merged_shading_buffers;
 		TexturePtr curr_merged_shading_tex;
-		FrameBufferPtr curr_merged_depth_buffer;
+		boost::array<FrameBufferPtr, Num_GBuffers> curr_merged_depth_buffers;
 		TexturePtr curr_merged_depth_tex;
 
-		FrameBufferPtr prev_merged_shading_buffer;
+		boost::array<FrameBufferPtr, Num_GBuffers> prev_merged_shading_buffers;
 		TexturePtr prev_merged_shading_tex;
-		FrameBufferPtr prev_merged_depth_buffer;
+		boost::array<FrameBufferPtr, Num_GBuffers> prev_merged_depth_buffers;
 		TexturePtr prev_merged_depth_tex;
 
 		TexturePtr small_ssgi_tex;
@@ -272,7 +272,7 @@ namespace KlayGE
 		RenderTechniquePtr technique_no_lighting_;
 		RenderTechniquePtr technique_shading_;
 		boost::array<RenderTechniquePtr, 2> technique_merge_shadings_;
-		RenderTechniquePtr technique_merge_depth_;
+		boost::array<RenderTechniquePtr, 2> technique_merge_depths_;
 		RenderTechniquePtr technique_copy_shading_;
 
 		FrameBufferPtr sm_buffer_;
