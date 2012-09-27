@@ -108,7 +108,10 @@ def build_external_libs(compiler):
 	print("\nBuilding Python...\n")
 
 	if "win32" == platform:
-		os.chdir("External/Python/PCbuild")
+		if "vc11" == compiler:
+			os.chdir("External/Python/vc-11_0")
+		else:
+			os.chdir("External/Python/PCbuild")
 		os.system("build_%s%d_all.bat" % (compiler_name, compiler_version))
 		os.chdir("../../../")
 	elif "linux" == platform:
