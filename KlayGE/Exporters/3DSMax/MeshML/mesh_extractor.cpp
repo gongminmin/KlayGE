@@ -311,6 +311,7 @@ namespace KlayGE
 			joint_t root;
 			root.real.Identity();
 			root.dual.x = root.dual.y = root.dual.z = root.dual.w = 0;
+			root.mat.IdentityMatrix();
 			root.parent_node = NULL;
 			joints_.insert(std::make_pair(root_node_, root));
 
@@ -319,13 +320,14 @@ namespace KlayGE
 			key_frame_t kf;
 			for (int i = start_frame_; i < end_frame_; ++ i)
 			{
-				Matrix3 root_tm = root_node_->GetNodeTM(i * tpf);
+				Matrix3 root_tm = this->rh_to_lh(root_node_->GetNodeTM(i * tpf));
 
 				Point3 scale;
 				Quat real, dual;
 				this->decompose_matrix(scale, real, dual, root_tm);
 				kf.reals.push_back(real * scale.x);
 				kf.duals.push_back(dual);
+				kf.mats.push_back(root_tm);
 			}
 			kfs_.insert(std::make_pair(root_node_, kf));
 
@@ -956,25 +958,32 @@ namespace KlayGE
 		key_frame_t kf;
 		for (int i = start_frame_; i < end_frame_; ++ i)
 		{
-			Matrix3 local_tm = node->GetNodeTM(i * tpf) * Inverse(parent_node->GetNodeTM(i * tpf));
+			Matrix3 local_tm = this->rh_to_lh(node->GetNodeTM(i * tpf) * Inverse(parent_node->GetNodeTM(i * tpf)));
 
 			Point3 scale;
 			Quat real, dual;
 			this->decompose_matrix(scale, real, dual, local_tm);
 			kf.reals.push_back(real * scale.x);
 			kf.duals.push_back(dual);
+			kf.mats.push_back(local_tm);
 		}
 
 		kfs_.insert(std::make_pair(node, kf));
 	}
 
-	void meshml_extractor::decompose_matrix(Point3& scale, Quat& real, Quat& dual, Matrix3 const & mat)
+	Matrix3 meshml_extractor::rh_to_lh(Matrix3 const & mat)
 	{
 		Matrix3 mat_lh;
 		mat_lh.SetRow(0, Point3(mat.GetRow(0).x, mat.GetRow(0).z, mat.GetRow(0).y));
 		mat_lh.SetRow(1, Point3(mat.GetRow(2).x, mat.GetRow(2).z, mat.GetRow(2).y));
 		mat_lh.SetRow(2, Point3(mat.GetRow(1).x, mat.GetRow(1).z, mat.GetRow(1).y));
 		mat_lh.SetRow(3, Point3(mat.GetRow(3).x, mat.GetRow(3).z, mat.GetRow(3).y));
+		return mat_lh;
+	}
+
+	void meshml_extractor::decompose_matrix(Point3& scale, Quat& real, Quat& dual, Matrix3 const & mat)
+	{
+		Matrix3 mat_lh = mat;
 
 		int flip = mat_lh.Parity() ? -1 : +1;
 
@@ -1046,11 +1055,14 @@ namespace KlayGE
 
 			jn.second = Inverse(jn.first->GetNodeTM(0)) * skin_init_tm;
 
+			skin_init_tm = this->rh_to_lh(skin_init_tm);
+
 			Point3 scale;
 			Quat real, dual;
 			this->decompose_matrix(scale, real, dual, skin_init_tm);
 			joint.real = real * scale.x;
 			joint.dual = dual;
+			joint.mat = skin_init_tm;
 
 			joints_[jn.first] = joint;
 		}
@@ -1432,6 +1444,22 @@ namespace KlayGE
 					<< "\" z=\"" << joint.dual.z
 					<< "\" w=\"" << joint.dual.w << "\"/>" << endl;
 
+				if (eva.full_joint_matrices)
+				{
+					ofs << "\t\t\t<bind_mat _11=\"" << joint.mat.GetRow(0).x
+						<< "\" _12=\"" << joint.mat.GetRow(0).y
+						<< "\" _13=\"" << joint.mat.GetRow(0).z
+						<< "\" _21=\"" << joint.mat.GetRow(1).x
+						<< "\" _22=\"" << joint.mat.GetRow(1).y
+						<< "\" _23=\"" << joint.mat.GetRow(1).z
+						<< "\" _31=\"" << joint.mat.GetRow(2).x
+						<< "\" _32=\"" << joint.mat.GetRow(2).y
+						<< "\" _33=\"" << joint.mat.GetRow(2).z
+						<< "\" _41=\"" << joint.mat.GetRow(3).x
+						<< "\" _42=\"" << joint.mat.GetRow(3).y
+						<< "\" _43=\"" << joint.mat.GetRow(3).z << "\"/>" << endl;
+				}
+
 				ofs << "\t\t</bone>" << endl;
 			}
 			ofs << "\t</bones_chunk>" << endl;
@@ -1571,6 +1599,22 @@ namespace KlayGE
 						<< "\" y=\"" << kf.duals[i].y
 						<< "\" z=\"" << kf.duals[i].z
 						<< "\" w=\"" << kf.duals[i].w << "\"/>" << endl;
+
+					if (eva.full_joint_matrices)
+					{
+						ofs << "\t\t\t\t<bind_mat _11=\"" << kf.mats[i].GetRow(0).x
+							<< "\" _12=\"" << kf.mats[i].GetRow(0).y
+							<< "\" _13=\"" << kf.mats[i].GetRow(0).z
+							<< "\" _21=\"" << kf.mats[i].GetRow(1).x
+							<< "\" _22=\"" << kf.mats[i].GetRow(1).y
+							<< "\" _23=\"" << kf.mats[i].GetRow(1).z
+							<< "\" _31=\"" << kf.mats[i].GetRow(2).x
+							<< "\" _32=\"" << kf.mats[i].GetRow(2).y
+							<< "\" _33=\"" << kf.mats[i].GetRow(2).z
+							<< "\" _41=\"" << kf.mats[i].GetRow(3).x
+							<< "\" _42=\"" << kf.mats[i].GetRow(3).y
+							<< "\" _43=\"" << kf.mats[i].GetRow(3).z << "\"/>" << endl;
+					}
 
 					ofs << "\t\t\t</key>" << endl;
 				}

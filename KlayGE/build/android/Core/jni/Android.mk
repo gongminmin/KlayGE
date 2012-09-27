@@ -65,6 +65,7 @@ LOCAL_SRC_FILES := \
 		Render/JudaTexture.cpp \
 		Render/LensFlare.cpp \
 		Render/Light.cpp \
+		Render/LightShaft.cpp \
 		Render/Mesh.cpp \
 		Render/PostProcess.cpp \
 		Render/Query.cpp \

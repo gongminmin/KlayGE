@@ -157,17 +157,13 @@ namespace KlayGE
 
 			::SetWindowLongPtr(wnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(instance));
 
-			int const tangent_quat_index = static_cast<int>(::SendMessage(::GetDlgItem(wnd, IDC_LIST_EXPORT_VERTEX_ATTRS), LB_ADDSTRING, 0, reinterpret_cast<LPARAM>(TEXT("Tangent quaternion"))));
-			int const texcoord_index = static_cast<int>(::SendMessage(::GetDlgItem(wnd, IDC_LIST_EXPORT_VERTEX_ATTRS), LB_ADDSTRING, 0, reinterpret_cast<LPARAM>(TEXT("Texture coordinate"))));
-
-			int const normal_index = static_cast<int>(::SendMessage(::GetDlgItem(wnd, IDC_LIST_IGNORED_VERTEX_ATTRS), LB_ADDSTRING, 0, reinterpret_cast<LPARAM>(TEXT("Normal"))));
-
-			::SendMessage(::GetDlgItem(wnd, IDC_LIST_EXPORT_VERTEX_ATTRS), LB_SETITEMDATA, tangent_quat_index, static_cast<LPARAM>(VEU_Tangent));
-			::SendMessage(::GetDlgItem(wnd, IDC_LIST_EXPORT_VERTEX_ATTRS), LB_SETITEMDATA, texcoord_index, static_cast<LPARAM>(VEU_TextureCoord));
-
-			::SendMessage(::GetDlgItem(wnd, IDC_LIST_IGNORED_VERTEX_ATTRS), LB_SETITEMDATA, normal_index, static_cast<LPARAM>(VEU_Normal));
-
-			::SendMessage(::GetDlgItem(wnd, IDC_COMBINE_MESHES), BM_SETCHECK, BST_CHECKED, NULL);
+			::SendMessage(::GetDlgItem(wnd, IDC_TANGENT_COMBO), CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(TEXT("Tangent quaternion")));
+			::SendMessage(::GetDlgItem(wnd, IDC_TANGENT_COMBO), CB_SETCURSEL, 0, reinterpret_cast<LPARAM>(TEXT("Normal")));
+			::SendMessage(::GetDlgItem(wnd, IDC_TANGENT_COMBO), CB_SETCURSEL, 0, reinterpret_cast<LPARAM>(TEXT("None")));
+			::SendMessage(::GetDlgItem(wnd, IDC_TANGENT_COMBO), CB_SETCURSEL, 0, 0);
+			::SendMessage(::GetDlgItem(wnd, IDC_TEXCOORD_CHECK), BM_SETCHECK, BST_CHECKED, NULL);
+			::SendMessage(::GetDlgItem(wnd, IDC_COMBINE_MESHES_CHECK), BM_SETCHECK, BST_UNCHECKED, NULL);
+			::SendMessage(::GetDlgItem(wnd, IDC_FULL_JOINT_MATRICES_CHECK), BM_SETCHECK, BST_UNCHECKED, NULL);
 		}
 		else
 		{
@@ -178,60 +174,12 @@ namespace KlayGE
 			case WM_COMMAND:
 				switch (LOWORD(wparam))
 				{
-				case IDC_BUTTON_ADD:
-					{
-						int const count = static_cast<int>(::SendMessage(::GetDlgItem(wnd, IDC_LIST_IGNORED_VERTEX_ATTRS), LB_GETSELCOUNT, 0, 0));
-						if (count > 0)
-						{
-							std::vector<int> sel_items(count);
-							::SendMessage(::GetDlgItem(wnd, IDC_LIST_IGNORED_VERTEX_ATTRS), LB_GETSELITEMS, count, reinterpret_cast<LPARAM>(&sel_items[0]));
-
-							for (size_t i = 0; i < sel_items.size(); ++ i)
-							{
-								int len = static_cast<int>(::SendMessage(::GetDlgItem(wnd, IDC_LIST_IGNORED_VERTEX_ATTRS), LB_GETTEXTLEN, sel_items[i], NULL));
-								std::vector<TCHAR> text(len + 1);
-								::SendMessage(::GetDlgItem(wnd, IDC_LIST_IGNORED_VERTEX_ATTRS), LB_GETTEXT, sel_items[i], reinterpret_cast<LPARAM>(&text[0]));
-								int data = static_cast<int>(::SendMessage(::GetDlgItem(wnd, IDC_LIST_IGNORED_VERTEX_ATTRS), LB_GETITEMDATA, sel_items[i], NULL));
-
-								int const ind = static_cast<int>(::SendMessage(::GetDlgItem(wnd, IDC_LIST_EXPORT_VERTEX_ATTRS), LB_ADDSTRING, 0, reinterpret_cast<LPARAM>(&text[0])));
-								::SendMessage(::GetDlgItem(wnd, IDC_LIST_EXPORT_VERTEX_ATTRS), LB_SETITEMDATA, ind, static_cast<LPARAM>(data));
-
-								::SendMessage(::GetDlgItem(wnd, IDC_LIST_IGNORED_VERTEX_ATTRS), LB_DELETESTRING, sel_items[i], 0);
-							}
-						}
-					}
-					break;
-
-				case IDC_BUTTON_DEL:
-					{
-						int const count = static_cast<int>(::SendMessage(::GetDlgItem(wnd, IDC_LIST_EXPORT_VERTEX_ATTRS), LB_GETSELCOUNT, 0, 0));
-						if (count > 0)
-						{
-							std::vector<int> sel_items(count);
-							::SendMessage(::GetDlgItem(wnd, IDC_LIST_EXPORT_VERTEX_ATTRS), LB_GETSELITEMS, count, reinterpret_cast<LPARAM>(&sel_items[0]));
-
-							for (size_t i = 0; i < sel_items.size(); ++ i)
-							{
-								int len = static_cast<int>(::SendMessage(::GetDlgItem(wnd, IDC_LIST_EXPORT_VERTEX_ATTRS), LB_GETTEXTLEN, sel_items[i], NULL));
-								std::vector<TCHAR> text(len + 1);
-								::SendMessage(::GetDlgItem(wnd, IDC_LIST_EXPORT_VERTEX_ATTRS), LB_GETTEXT, sel_items[i], reinterpret_cast<LPARAM>(&text[0]));
-								int data = static_cast<int>(::SendMessage(::GetDlgItem(wnd, IDC_LIST_EXPORT_VERTEX_ATTRS), LB_GETITEMDATA, sel_items[i], NULL));
-
-								int const ind = static_cast<int>(::SendMessage(::GetDlgItem(wnd, IDC_LIST_IGNORED_VERTEX_ATTRS), LB_ADDSTRING, 0, reinterpret_cast<LPARAM>(&text[0])));
-								::SendMessage(::GetDlgItem(wnd, IDC_LIST_IGNORED_VERTEX_ATTRS), LB_SETITEMDATA, ind, static_cast<LPARAM>(data));
-
-								::SendMessage(::GetDlgItem(wnd, IDC_LIST_EXPORT_VERTEX_ATTRS), LB_DELETESTRING, sel_items[i], 0);
-							}
-						}
-					}
-					break;
-
 				case IDOK:
 					{
 						assert(instance != NULL);
 
 						int const joint_per_ver = static_cast<int>(::SendMessage(::GetDlgItem(wnd, IDC_SPIN_JOINT_PER_VER), UDM_GETPOS32, NULL, NULL));
-						bool const combine_meshes = (BST_CHECKED == ::SendMessage(::GetDlgItem(wnd, IDC_COMBINE_MESHES), BM_GETCHECK, NULL, NULL));
+						bool const combine_meshes = (BST_CHECKED == ::SendMessage(::GetDlgItem(wnd, IDC_COMBINE_MESHES_CHECK), BM_GETCHECK, NULL, NULL));
 						Interval const se_ticks = instance->max_interface_->GetAnimRange();
 						meshml_extractor extractor(instance->max_interface_->GetRootNode(), joint_per_ver,
 							instance->max_interface_->GetTime(),
@@ -239,32 +187,10 @@ namespace KlayGE
 							combine_meshes);
 
 						export_vertex_attrs eva;
-						eva.normal = false;
-						eva.tangent_quat = false;
-						eva.tex = false;
-						for (int index = 0;; ++ index)
-						{
-							int data = static_cast<int>(::SendMessage(::GetDlgItem(wnd, IDC_LIST_EXPORT_VERTEX_ATTRS), LB_GETITEMDATA, index, NULL));
-							if (data == LB_ERR)
-							{
-								break;
-							}
-
-							switch (data)
-							{
-							case VEU_Normal:
-								eva.normal = true;
-								break;
-
-							case VEU_Tangent:
-								eva.tangent_quat = true;
-								break;
-
-							case VEU_TextureCoord:
-								eva.tex = true;
-								break;
-							}
-						}
+						eva.tangent_quat = (0 == ::SendMessage(::GetDlgItem(wnd, IDC_TANGENT_COMBO), CB_GETCURSEL, NULL, NULL));
+						eva.normal = (1 == ::SendMessage(::GetDlgItem(wnd, IDC_TANGENT_COMBO), CB_GETCURSEL, NULL, NULL));
+						eva.tex = (BST_CHECKED == ::SendMessage(::GetDlgItem(wnd, IDC_TEXCOORD_CHECK), BM_GETCHECK, NULL, NULL));
+						eva.full_joint_matrices = (BST_CHECKED == ::SendMessage(::GetDlgItem(wnd, IDC_FULL_JOINT_MATRICES_CHECK), BM_GETCHECK, NULL, NULL));
 
 						extractor.export_objects(instance->export_nodes_);
 						extractor.write_xml(instance->file_name_, eva);

@@ -110,6 +110,8 @@ namespace KlayGE
 		Quat real;
 		Quat dual;
 
+		Matrix3 mat;
+
 		INode* parent_node;
 	};
 
@@ -119,6 +121,8 @@ namespace KlayGE
 	{
 		std::vector<Quat> reals;
 		std::vector<Quat> duals;
+
+		std::vector<Matrix3> mats;
 	};
 
 	typedef std::map<INode*, key_frame_t> key_frames_t;
@@ -140,6 +144,8 @@ namespace KlayGE
 		bool normal;
 		bool tangent_quat;
 		bool tex;
+
+		bool full_joint_matrices;
 	};
 
 	class meshml_extractor
@@ -158,6 +164,7 @@ namespace KlayGE
 		void combine_meshes_with_same_mtl();
 		void sort_meshes_by_mtl();
 
+		Matrix3 rh_to_lh(Matrix3 const & mat);
 		void decompose_matrix(Point3& scale, Quat& real, Quat& dual, Matrix3 const & mat);
 
 		void find_joints(INode* node);
