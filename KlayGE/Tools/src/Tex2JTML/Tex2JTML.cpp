@@ -21,6 +21,9 @@
 #include <boost/typeof/typeof.hpp>
 #include <boost/math/common_factor_rt.hpp>
 
+#include <boost/filesystem.hpp>
+#include <boost/regex.hpp>
+
 #include <KlayGE/JudaTexture.hpp>
 
 #include "JTMLWriter.hpp"
@@ -58,12 +61,74 @@ inline static TextureNameTable& GetTextureNameTable()
 	return table;
 }
 
+std::string DosWildcardToRegex(std::string const & wildcard)
+{
+	std::string ret;
+	for (size_t i = 0; i < wildcard.size(); ++ i)
+	{
+		switch (wildcard[i])
+		{
+		case '*':
+			ret.append(".*");
+			break;
+
+		case '?':
+			ret.append(".");
+			break;
+
+		case '+':
+		case '(':
+		case ')':
+		case '^':
+		case '$':
+		case '.':
+		case '{':
+		case '}':
+		case '[':
+		case ']':
+		case '|':
+		case '\\':
+			ret.push_back('\\');
+			ret.push_back(wildcard[i]);
+			break;
+
+		default:
+			ret.push_back(wildcard[i]);
+			break;
+		}
+	}
+
+	return ret;
+}
+
 void GetCommandLineInfo(int argc, char* argv[], StringArray& tex_names, std::string& jtml)
 {
-	tex_names.resize(argc - 2);
+	tex_names.clear();
 	for (int i = 1; i < argc - 1; ++ i)
 	{
-		tex_names[i - 1] = argv[i];
+		std::string arg = argv[i];
+		if ((std::string::npos == arg.find("*")) && (std::string::npos == arg.find("?")))
+		{
+			tex_names.push_back(arg);
+		}
+		else
+		{
+			boost::regex const filter(DosWildcardToRegex(arg));
+
+			boost::filesystem::directory_iterator end_itr;
+			for (boost::filesystem::directory_iterator i("."); i != end_itr; ++ i)
+			{
+				if (boost::filesystem::is_regular_file(i->status()))
+				{
+					boost::smatch what;
+					std::string const name = i->path().filename().string();
+					if (boost::regex_match(name, what, filter))
+					{
+						tex_names.push_back(name);
+					}
+				}
+			}
+		}
 	}
 	jtml = argv[argc - 1];
 }
@@ -260,8 +325,8 @@ void ConvertTreeToJTML(boost::shared_ptr<TexPackNode> const & node, JTMLImageRec
 		JTMLImageRecord jir;
 		jir.u_ = TAM_Wrap;
 		jir.v_ = TAM_Wrap;
-		jir.x_ = node->Rect().left() / tile_size + 1;
-		jir.y_ = node->Rect().top() / tile_size + 1;
+		jir.x_ = node->Rect().left() / tile_size;
+		jir.y_ = node->Rect().top() / tile_size;
 		jir.w_ = node->Rect().Width() / tile_size;
 		jir.h_ = node->Rect().Height() / tile_size;
 		TextureNameTable& table = GetTextureNameTable();
