@@ -868,17 +868,17 @@ int main(int argc, char* argv[])
 	boost::program_options::store(boost::program_options::parse_command_line(argc, argv, desc), vm);
 	boost::program_options::notify(vm);
 
-	if ((argc <= 1) || (vm.count("help")))
+	if ((argc <= 1) || (vm.count("help") > 0))
 	{
 		cout << desc << endl;
 		return 1;
 	}
-	if (vm.count("version"))
+	if (vm.count("version") > 0)
 	{
 		cout << "KlayGE Font Generator, Version 2.0.0" << endl;
 		return 1;
 	}
-	if (vm.count("input-name"))
+	if (vm.count("input-name") > 0)
 	{
 		ttf_name = vm["input-name"].as<std::string>();
 	}
@@ -887,7 +887,7 @@ int main(int argc, char* argv[])
 		cout << "Input font name was not set." << endl;
 		return 1;
 	}
-	if (vm.count("output-name"))
+	if (vm.count("output-name") > 0)
 	{
 		kfont_name = vm["output-name"].as<std::string>();
 	}
