@@ -44,7 +44,7 @@ namespace KlayGE
 		this->InitDefaultElements();
 	}
 
-	UIScrollBar::UIScrollBar(UIDialogPtr const & dialog, int ID, int x, int y, int width, int height, int nTrackStart, int nTrackEnd, int nTrackPos, int nPageSize)
+	UIScrollBar::UIScrollBar(UIDialogPtr const & dialog, int ID, int4 const & coord_size, int nTrackStart, int nTrackEnd, int nTrackPos, int nPageSize)
 					: UIControl(UIScrollBar::Type, dialog),
 						show_thumb_(true), drag_(false),
 						position_(nTrackPos), page_size_(nPageSize),
@@ -60,8 +60,8 @@ namespace KlayGE
 
 		// Set the ID and position
 		this->SetID(ID);
-		this->SetLocation(x, y);
-		this->SetSize(width, height);
+		this->SetLocation(coord_size.x(), coord_size.y());
+		this->SetSize(coord_size.z(), coord_size.w());
 	}
 
 	UIScrollBar::UIScrollBar(uint32_t type, UIDialogPtr const & dialog)

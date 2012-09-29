@@ -39,7 +39,7 @@ namespace KlayGE
 		this->InitDefaultElements();
 	}
 
-	UICheckBox::UICheckBox(UIDialogPtr const & dialog, int ID, std::wstring const & strText, int x, int y, int width, int height, bool bChecked, uint8_t hotkey, bool bIsDefault)
+	UICheckBox::UICheckBox(UIDialogPtr const & dialog, int ID, std::wstring const & strText, int4 const & coord_size, bool bChecked, uint8_t hotkey, bool bIsDefault)
 					: UIControl(UICheckBox::Type, dialog),
 						checked_(bChecked), pressed_(false),
 						text_(strText)
@@ -48,8 +48,8 @@ namespace KlayGE
 
 		// Set the ID and list index
 		this->SetID(ID);
-		this->SetLocation(x, y);
-		this->SetSize(width, height);
+		this->SetLocation(coord_size.x(), coord_size.y());
+		this->SetSize(coord_size.z(), coord_size.w());
 		this->SetHotkey(hotkey);
 		this->SetIsDefault(bIsDefault);
 	}

@@ -35,7 +35,7 @@ namespace KlayGE
 		this->InitDefaultElements();
 	}
 
-	UISlider::UISlider(UIDialogPtr const & dialog, int ID, int x, int y, int width, int height, int min, int max, int value, bool bIsDefault)
+	UISlider::UISlider(UIDialogPtr const & dialog, int ID, int4 const & coord_size, int min, int max, int value, bool bIsDefault)
 					: UIControl(UISlider::Type, dialog),
 						value_(value), min_(min), max_(max),
 						pressed_(false)
@@ -44,8 +44,8 @@ namespace KlayGE
 
 		// Set the ID and list index
 		this->SetID(ID);
-		this->SetLocation(x, y);
-		this->SetSize(width, height);
+		this->SetLocation(coord_size.x(), coord_size.y());
+		this->SetSize(coord_size.z(), coord_size.w());
 		this->SetIsDefault(bIsDefault);
 
 		this->UpdateRects();

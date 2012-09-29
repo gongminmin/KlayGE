@@ -40,7 +40,7 @@ namespace KlayGE
 		this->InitDefaultElements();
 	}
 
-	UIPolylineEditBox::UIPolylineEditBox(UIDialogPtr const & dialog, int ID, int x, int y, int width, int height, uint8_t hotkey, bool bIsDefault)
+	UIPolylineEditBox::UIPolylineEditBox(UIDialogPtr const & dialog, int ID, int4 const & coord_size, uint8_t hotkey, bool bIsDefault)
 					: UIControl(UIPolylineEditBox::Type, dialog),
 						active_pt_(-1),
 						move_point_(false)
@@ -49,8 +49,8 @@ namespace KlayGE
 
 		// Set the ID and list index
 		this->SetID(ID);
-		this->SetLocation(x, y);
-		this->SetSize(width, height);
+		this->SetLocation(coord_size.x(), coord_size.y());
+		this->SetSize(coord_size.z(), coord_size.w());
 		this->SetHotkey(hotkey);
 		this->SetIsDefault(bIsDefault);
 	}

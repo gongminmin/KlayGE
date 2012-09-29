@@ -38,7 +38,7 @@ namespace KlayGE
 		this->InitDefaultElements();
 	}
 
-	UIProgressBar::UIProgressBar(UIDialogPtr const & dialog, int ID, int progress, int x, int y, int width, int height, uint8_t hotkey, bool bIsDefault)
+	UIProgressBar::UIProgressBar(UIDialogPtr const & dialog, int ID, int progress, int4 const & coord_size, uint8_t hotkey, bool bIsDefault)
 					: UIControl(UIProgressBar::Type, dialog),
 						progress_(progress)
 	{
@@ -46,8 +46,8 @@ namespace KlayGE
 
 		// Set the ID and list index
 		this->SetID(ID);
-		this->SetLocation(x, y);
-		this->SetSize(width, height);
+		this->SetLocation(coord_size.x(), coord_size.y());
+		this->SetSize(coord_size.z(), coord_size.w());
 		this->SetHotkey(hotkey);
 		this->SetIsDefault(bIsDefault);
 	}

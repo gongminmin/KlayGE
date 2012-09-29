@@ -31,7 +31,7 @@ namespace KlayGE
 		this->InitDefaultElements();
 	}
 
-	UIStatic::UIStatic(UIDialogPtr const & dialog, int ID, std::wstring const & strText, int x, int y, int width, int height, bool bIsDefault)
+	UIStatic::UIStatic(UIDialogPtr const & dialog, int ID, std::wstring const & strText, int4 const & coord_size, bool bIsDefault)
 					: UIControl(UIStatic::Type, dialog),
 						text_(strText)
 	{
@@ -39,8 +39,8 @@ namespace KlayGE
 
 		// Set the ID and list index
 		this->SetID(ID);
-		this->SetLocation(x, y);
-		this->SetSize(width, height);
+		this->SetLocation(coord_size.x(), coord_size.y());
+		this->SetSize(coord_size.z(), coord_size.w());
 		this->SetIsDefault(bIsDefault);
 	}
 

@@ -39,7 +39,7 @@ namespace KlayGE
 		this->InitDefaultElements();
 	}
 
-	UITexButton::UITexButton(UIDialogPtr const & dialog, int ID, TexturePtr const & tex, int x, int y, int width, int height, uint8_t hotkey, bool bIsDefault)
+	UITexButton::UITexButton(UIDialogPtr const & dialog, int ID, TexturePtr const & tex, int4 const & coord_size, uint8_t hotkey, bool bIsDefault)
 					: UIControl(UITexButton::Type, dialog),
 						pressed_(false)
 	{
@@ -49,8 +49,8 @@ namespace KlayGE
 
 		// Set the ID and list index
 		this->SetID(ID);
-		this->SetLocation(x, y);
-		this->SetSize(width, height);
+		this->SetLocation(coord_size.x(), coord_size.y());
+		this->SetSize(coord_size.z(), coord_size.w());
 		this->SetHotkey(hotkey);
 		this->SetIsDefault(bIsDefault);
 	}

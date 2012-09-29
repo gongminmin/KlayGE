@@ -227,7 +227,7 @@ namespace KlayGE
 		this->InitDefaultElements();
 	}
 
-	UIEditBox::UIEditBox(UIDialogPtr const & dialog, int ID, std::wstring const & strText, int x, int y, int width, int height, bool bIsDefault)
+	UIEditBox::UIEditBox(UIDialogPtr const & dialog, int ID, std::wstring const & strText, int4 const & coord_size, bool bIsDefault)
 					: UIControl(UIEditBox::Type, dialog),
 						border_(5),	// Default border width
 						spacing_(4),	// Default spacing
@@ -254,8 +254,8 @@ namespace KlayGE
 
 		// Set the ID and position
 		this->SetID(ID);
-		this->SetLocation(x, y);
-		this->SetSize(width, height);
+		this->SetLocation(coord_size.x(), coord_size.y());
+		this->SetSize(coord_size.z(), coord_size.w());
 		this->SetIsDefault(bIsDefault);
 
 		this->SetText(strText);

@@ -45,7 +45,7 @@ namespace KlayGE
 		this->GetDialog()->InitControl(scroll_bar_);
 	}
 
-	UIComboBox::UIComboBox(UIDialogPtr const & dialog, int ID, int x, int y, int width, int height, uint8_t hotkey, bool bIsDefault)
+	UIComboBox::UIComboBox(UIDialogPtr const & dialog, int ID, int4 const & coord_size, uint8_t hotkey, bool bIsDefault)
 						: UIControl(UIComboBox::Type, dialog),
 							selected_(-1), focused_(-1),
 							drop_height_(100), scroll_bar_(dialog),
@@ -58,8 +58,8 @@ namespace KlayGE
 
 		// Set the ID and list index
 		this->SetID(ID);
-		this->SetLocation(x, y);
-		this->SetSize(width, height);
+		this->SetLocation(coord_size.x(), coord_size.y());
+		this->SetSize(coord_size.z(), coord_size.w());
 		this->SetHotkey(hotkey);
 		this->SetIsDefault(bIsDefault);
 	}

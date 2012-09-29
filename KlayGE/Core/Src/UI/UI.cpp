@@ -559,7 +559,7 @@ namespace KlayGE
 						std::wstring wcaption;
 						Convert(wcaption, caption);
 						dlg->AddControl(MakeSharedPtr<UIStatic>(dlg, id, wcaption,
-							x, y, width, height, is_default));
+							int4(x, y, width, height), is_default));
 					}
 					else if ("button" == type_str)
 					{
@@ -568,7 +568,7 @@ namespace KlayGE
 						std::wstring wcaption;
 						Convert(wcaption, caption);
 						dlg->AddControl(MakeSharedPtr<UIButton>(dlg, id, wcaption,
-							x, y, width, height, hotkey, is_default));
+							int4(x, y, width, height), hotkey, is_default));
 					}
 					else if ("tex_button" == type_str)
 					{
@@ -581,7 +581,7 @@ namespace KlayGE
 						}
 						uint8_t hotkey = static_cast<uint8_t>(ctrl_node->AttribInt("hotkey", 0));
 						dlg->AddControl(MakeSharedPtr<UITexButton>(dlg, id, tex,
-							x, y, width, height, hotkey, is_default));
+							int4(x, y, width, height), hotkey, is_default));
 					}
 					else if ("check_box" == type_str)
 					{
@@ -591,7 +591,7 @@ namespace KlayGE
 						std::wstring wcaption;
 						Convert(wcaption, caption);
 						dlg->AddControl(MakeSharedPtr<UICheckBox>(dlg, id, wcaption,
-							x, y, width, height, checked, hotkey, is_default));
+							int4(x, y, width, height), checked, hotkey, is_default));
 					}
 					else if ("radio_button" == type_str)
 					{
@@ -602,7 +602,7 @@ namespace KlayGE
 						std::wstring wcaption;
 						Convert(wcaption, caption);
 						dlg->AddControl(MakeSharedPtr<UIRadioButton>(dlg, id, button_group, wcaption,
-							x, y, width, height, checked, hotkey, is_default));
+							int4(x, y, width, height), checked, hotkey, is_default));
 					}
 					else if ("slider" == type_str)
 					{
@@ -610,7 +610,7 @@ namespace KlayGE
 						int32_t max_v = ctrl_node->AttribInt("max", 100);
 						int32_t value = ctrl_node->AttribInt("value", 50);
 						dlg->AddControl(MakeSharedPtr<UISlider>(dlg, id,
-							x, y, width, height, min_v, max_v, value, is_default));
+							int4(x, y, width, height), min_v, max_v, value, is_default));
 					}
 					else if ("scroll_bar" == type_str)
 					{
@@ -619,7 +619,7 @@ namespace KlayGE
 						int32_t track_pos = ctrl_node->AttribInt("track_pos", 1);
 						int32_t page_size = ctrl_node->AttribInt("page_size", 1);
 						dlg->AddControl(MakeSharedPtr<UIScrollBar>(dlg, id,
-							x, y, width, height, track_start, track_end, track_pos, page_size));
+							int4(x, y, width, height), track_start, track_end, track_pos, page_size));
 					}
 					else if ("list_box" == type_str)
 					{
@@ -639,7 +639,7 @@ namespace KlayGE
 							}
 						}
 						dlg->AddControl(MakeSharedPtr<UIListBox>(dlg, id,
-							x, y, width, height, style ? UIListBox::SINGLE_SELECTION : UIListBox::MULTI_SELECTION));
+							int4(x, y, width, height), style ? UIListBox::SINGLE_SELECTION : UIListBox::MULTI_SELECTION));
 
 						for (XMLNodePtr item_node = ctrl_node->FirstNode("item"); item_node; item_node = item_node->NextSibling("item"))
 						{
@@ -659,7 +659,7 @@ namespace KlayGE
 					{
 						uint8_t hotkey = static_cast<uint8_t>(ctrl_node->AttribInt("hotkey", 0));
 						dlg->AddControl(MakeSharedPtr<UIComboBox>(dlg, id,
-							x, y, width, height, hotkey, is_default));
+							int4(x, y, width, height), hotkey, is_default));
 
 						for (XMLNodePtr item_node = ctrl_node->FirstNode("item"); item_node; item_node = item_node->NextSibling("item"))
 						{
@@ -681,7 +681,7 @@ namespace KlayGE
 						std::wstring wcaption;
 						Convert(wcaption, caption);
 						dlg->AddControl(MakeSharedPtr<UIEditBox>(dlg, id, wcaption,
-							x, y, width, height, is_default));
+							int4(x, y, width, height), is_default));
 					}
 					else if ("polyline_edit_box" == type_str)
 					{
@@ -691,14 +691,14 @@ namespace KlayGE
 						line_clr.b() = ctrl_node->AttribFloat("line_b", 0);
 						line_clr.a() = ctrl_node->AttribFloat("line_a", 1);
 						dlg->AddControl(MakeSharedPtr<UIPolylineEditBox>(dlg, id,
-							x, y, width, height, is_default));
+							int4(x, y, width, height), is_default));
 						dlg->Control<UIPolylineEditBox>(id)->SetColor(line_clr);
 					}
 					else if ("progress_bar" == type_str)
 					{
 						int32_t progress = ctrl_node->AttribInt("value", 0);
 						dlg->AddControl(MakeSharedPtr<UIProgressBar>(dlg, id, progress,
-							x, y, width, height, is_default));
+							int4(x, y, width, height), is_default));
 					}
 
 					dlg->GetControl(id)->SetVisible(visible);

@@ -49,7 +49,7 @@ namespace KlayGE
 		this->GetDialog()->InitControl(scroll_bar_);
 	}
 
-	UIListBox::UIListBox(UIDialogPtr const & dialog, int ID, int x, int y, int width, int height, STYLE dwStyle)
+	UIListBox::UIListBox(UIDialogPtr const & dialog, int ID, int4 const & coord_size, STYLE dwStyle)
 						: UIControl(UIListBox::Type, dialog),
 							scroll_bar_(dialog),
 							sb_width_(16), border_(6), margin_(5), text_height_(0),
@@ -64,8 +64,8 @@ namespace KlayGE
 
 		// Set the ID and position
 		this->SetID(ID);
-		this->SetLocation(x, y);
-		this->SetSize(width, height);
+		this->SetLocation(coord_size.x(), coord_size.y());
+		this->SetSize(coord_size.z(), coord_size.w());
 	}
 
 	void UIListBox::InitDefaultElements()
