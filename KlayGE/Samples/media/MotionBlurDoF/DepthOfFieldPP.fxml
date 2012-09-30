@@ -6,7 +6,6 @@
 	<cbuffer name="per_frame">
 		<parameter type="float2" name="focus_plane_inv_range"/>
 	</cbuffer>
-	<parameter type="float4" name="sat_size"/>
 
 	<parameter type="texture2D" name="color_tex"/>
 	<parameter type="texture2D" name="depth_tex"/>
@@ -49,7 +48,7 @@ void DepthOfFieldSpreadingVS(float3 pos : POSITION,
 						out float4 oPos : SV_Position)
 {
 	float2 target_coord = pos.xy * width_height.xy;
-	float2 original_coord = (target_coord - max_radius * 2 + 0.5f) / (width_height.xy - max_radius * 4 - 1);
+	float2 original_coord = (target_coord - max_radius * 2) / (width_height.xy - max_radius * 4 - 1);
 	float radius = floor(saturate(abs(depth_tex.SampleLevel(point_sampler, original_coord, 0).x * focus_plane_inv_range.y + focus_plane_inv_range.x)) * max_radius);
 	float area = (radius * 2 + 1) * (radius * 2 + 1);
 	
@@ -96,12 +95,12 @@ void DepthOfFieldSpreadingVS4(float2 pos : POSITION,
 						out float4 oPos : SV_Position)
 {
 	float2 target_coord = pos.xy * width_height.xy;
-	int3 original_coord = int3(target_coord - max_radius * 2 + 0.5f, 0);
-	float radius = floor(saturate(abs(depth_tex.Load(original_coord).x * focus_plane_inv_range.y + focus_plane_inv_range.x)) * max_radius);
+	float2 original_coord = (target_coord - max_radius * 2) / (width_height.xy - max_radius * 4 - 1);
+	float radius = floor(saturate(abs(depth_tex.SampleLevel(point_sampler, original_coord, 0).x * focus_plane_inv_range.y + focus_plane_inv_range.x)) * max_radius);
 	float area = (radius * 2 + 1) * (radius * 2 + 1);
 	
 	oPos = float4(pos.xy, radius, 0);
-	oClr = float4(color_tex.Load(original_coord).xyz, 1) / area;
+	oClr = float4(color_tex.SampleLevel(point_sampler, original_coord, 0).xyz, 1) / area;
 }
 
 #if KLAYGE_OPENGL

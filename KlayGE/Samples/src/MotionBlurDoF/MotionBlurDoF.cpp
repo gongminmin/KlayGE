@@ -344,7 +344,7 @@ namespace
 			uint32_t const height = tex->Height(0) + max_radius_ * 4 + 1;
 
 			*(technique_->Effect().ParameterByName("width_height")) = float4(static_cast<float>(width),
-				static_cast<float>(height), 1.0f / width, 1.0f / height);				
+				static_cast<float>(height), 1.0f / width, 1.0f / height);
 
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 			spread_tex_ = rf.MakeTexture2D(width, height, 1, 1, EF_ABGR32F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
