@@ -257,7 +257,7 @@ namespace
 		boost::circular_buffer<float4x4> last_mats_;
 	};
 
-#define SPREADING_PP 0
+#define SPREADING_PP 1
 	
 	class DepthOfField : public PostProcess
 	{
@@ -351,13 +351,12 @@ namespace
 			uint32_t const width = tex->Width(0) + max_radius_ * 4 + 1;
 			uint32_t const height = tex->Height(0) + max_radius_ * 4 + 1;
 
-			*(technique_->Effect().ParameterByName("width_height")) = float4(static_cast<float>(width),
+			*(technique_->Effect().ParameterByName("in_width_height")) = float4(static_cast<float>(width),
 				static_cast<float>(height), 1.0f / width, 1.0f / height);
 
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 			spread_tex_ = rf.MakeTexture2D(width, height, 1, 1, EF_ABGR32F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
 			spread_fb_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*spread_tex_, 0, 0, 0));
-
 
 #if SPREADING_PP
 			spreading_pp_->SetParam(0, float4(static_cast<float>(width),
@@ -434,10 +433,6 @@ namespace
 		{
 			if (!show_blur_factor_)
 			{
-				*(technique_->Effect().ParameterByName("focus_plane_inv_range")) = float2(-focus_plane_ / focus_range_, 1.0f / focus_range_);
-				*(technique_->Effect().ParameterByName("color_tex")) = this->InputPin(0);
-				*(technique_->Effect().ParameterByName("depth_tex")) = this->InputPin(1);
-
 				RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 #if SPREADING_PP
 				spreading_pp_->SetParam(2, float2(-focus_plane_ / focus_range_, 1.0f / focus_range_));
@@ -445,6 +440,10 @@ namespace
 				spreading_pp_->InputPin(1, this->InputPin(1));
 				spreading_pp_->Apply();
 #else
+				*(technique_->Effect().ParameterByName("focus_plane_inv_range")) = float2(-focus_plane_ / focus_range_, 1.0f / focus_range_);
+				*(technique_->Effect().ParameterByName("color_tex")) = this->InputPin(0);
+				*(technique_->Effect().ParameterByName("depth_tex")) = this->InputPin(1);
+
 				re.BindFrameBuffer(spread_fb_);
 				spread_fb_->Clear(FrameBuffer::CBM_Color, Color(0, 0, 0, 0), 1, 0);
 				re.Render(*technique_, *spread_rl_);

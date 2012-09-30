@@ -37,7 +37,7 @@ float4 DepthOfFieldBlurFactorPS(float2 tc : TEXCOORD0) : SV_Target
 	</technique>
 
 
-	<parameter type="float4" name="width_height"/>
+	<parameter type="float4" name="in_width_height"/>
 	<parameter type="float" name="max_radius"/>
 	<parameter type="texture2D" name="src_tex"/>
 
@@ -47,15 +47,15 @@ void DepthOfFieldSpreadingVS(float3 pos : POSITION,
 						out float4 oClr : TEXCOORD0,
 						out float4 oPos : SV_Position)
 {
-	float2 target_coord = pos.xy * width_height.xy;
-	float2 original_coord = (target_coord - max_radius * 2) / (width_height.xy - max_radius * 4 - 1);
+	float2 target_coord = pos.xy * in_width_height.xy;
+	float2 original_coord = (target_coord - max_radius * 2) / (in_width_height.xy - max_radius * 4 - 1);
 	float radius = floor(saturate(abs(depth_tex.SampleLevel(point_sampler, original_coord, 0).x * focus_plane_inv_range.y + focus_plane_inv_range.x)) * max_radius);
 	float area = (radius * 2 + 1) * (radius * 2 + 1);
 	
 	int index = (int)pos.z;
 	float4 offset[4] = { float4(-1, -1, 0, 0), float4(+1, -1, 1, 0), float4(-1, +1, 0, 1), float4(+1, +1, 1, 1) };
 	float scale[4] = { +1, -1, -1, +1 };
-	oPos = float4((pos.xy + (offset[index].xy * radius + offset[index].zw) * width_height.zw) * 2 - 1, 0, 1);
+	oPos = float4((pos.xy + (offset[index].xy * radius + offset[index].zw) * in_width_height.zw) * 2 - 1, 0, 1);
 	oPos.y *= KLAYGE_FLIPPING;
 	oClr = scale[index] * float4(color_tex.SampleLevel(point_sampler, original_coord, 0).xyz, 1) / area;
 }
@@ -65,12 +65,12 @@ float4 DepthOfFieldSpreadingPS(float4 clr : TEXCOORD0) : SV_Target
 	return clr;
 }
 
-float4 DepthOfFieldNewSpreadingPS(float2 tc : TEXCOORD0) : SV_Target
+float4 DepthOfFieldNewSpreadingPS(float2 tc : TEXCOORD0, float4 vpos : SV_Position) : SV_Target
 {
 	float4 ret = 0;
 	
-	float2 pos = tc * width_height.xy - max_radius * 2;
-	float2 original_size = width_height.xy - max_radius * 4 - 1;
+	float2 pos = tc * in_width_height.xy - max_radius * 2;
+	float2 original_size = in_width_height.xy - max_radius * 4 - 1;
 	
 	float4 offset[4] = { float4(+1, +1, 0, 0), float4(-1, +1, -1, 0), float4(+1, -1, 0, -1), float4(-1, -1, -1, -1) };
 	float scale[4] = { +1, -1, -1, +1 };
@@ -82,7 +82,7 @@ float4 DepthOfFieldNewSpreadingPS(float2 tc : TEXCOORD0) : SV_Target
 		{
 			float2 target_coord = pos + o.xy * i + o.zw;
 			float2 original_coord = target_coord / original_size;
-			if (all(target_coord >= -max_radius + 0.5f) && all(target_coord < original_size + 0.5f))
+			if (all(target_coord >= -max_radius) && all(target_coord < original_size))
 			{
 				float radius = floor(saturate(abs(depth_tex.SampleLevel(point_sampler, original_coord, 0).x * focus_plane_inv_range.y + focus_plane_inv_range.x)) * max_radius);
 				if (radius == i)
@@ -111,10 +111,10 @@ float4 DepthOfFieldNormalizationPS(float2 tc : TEXCOORD0) : SV_Target
 	return input / input.w;
 }
 		]]>
-	</shader>
+</shader>
 
-	<shader version="4">
-		<![CDATA[
+<shader version="4">
+	<![CDATA[
 struct PS_IN
 {
 	float4 clr : TEXCOORD0;
@@ -125,8 +125,8 @@ void DepthOfFieldSpreadingVS4(float2 pos : POSITION,
 						out float4 oClr : TEXCOORD0,
 						out float4 oPos : SV_Position)
 {
-	float2 target_coord = pos.xy * width_height.xy;
-	float2 original_coord = (target_coord - max_radius * 2) / (width_height.xy - max_radius * 4 - 1);
+	float2 target_coord = pos.xy * in_width_height.xy;
+	float2 original_coord = (target_coord - max_radius * 2) / (in_width_height.xy - max_radius * 4 - 1);
 	float radius = floor(saturate(abs(depth_tex.SampleLevel(point_sampler, original_coord, 0).x * focus_plane_inv_range.y + focus_plane_inv_range.x)) * max_radius);
 	float area = (radius * 2 + 1) * (radius * 2 + 1);
 	
@@ -152,7 +152,7 @@ void DepthOfFieldSpreadingGS4(point float4 in_clr[1] : TEXCOORD0, point float4 i
 	{
 		PS_IN gs_out;
 
-		gs_out.pos = float4((pos + (offset[index].xy * radius + offset[index].zw) * width_height.zw) * 2 - 1, 0, 1);
+		gs_out.pos = float4((pos + (offset[index].xy * radius + offset[index].zw) * in_width_height.zw) * 2 - 1, 0, 1);
 		gs_out.pos.y *= KLAYGE_FLIPPING;
 		gs_out.clr = scale[index] * clr;
 		
