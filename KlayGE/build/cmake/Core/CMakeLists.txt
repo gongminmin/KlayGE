@@ -99,7 +99,6 @@ SET(RENDERING_SOURCE_FILES
 	${KLAYGE_PROJECT_DIR}/Core/Src/Render/SSGIPostProcess.cpp
 	${KLAYGE_PROJECT_DIR}/Core/Src/Render/SSRPostProcess.cpp
 	${KLAYGE_PROJECT_DIR}/Core/Src/Render/SSVOPostProcess.cpp
-	${KLAYGE_PROJECT_DIR}/Core/Src/Render/TAAPostProcess.cpp
 	${KLAYGE_PROJECT_DIR}/Core/Src/Render/Texture.cpp
 	${KLAYGE_PROJECT_DIR}/Core/Src/Render/Viewport.cpp
 )
@@ -140,7 +139,6 @@ SET(RENDERING_HEADER_FILES
 	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/SSGIPostProcess.hpp
 	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/SSRPostProcess.hpp
 	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/SSVOPostProcess.hpp
-	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/TAAPostProcess.hpp
 	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/Texture.hpp
 	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/Viewport.hpp
 )
@@ -204,6 +202,7 @@ SET(RENDERING_POSTPROCESSOR_FILES
 	${KLAYGE_PROJECT_DIR}/media/PostProcessors/LightShaft.ppml
 	${KLAYGE_PROJECT_DIR}/media/PostProcessors/RSM2VPLs.ppml
 	${KLAYGE_PROJECT_DIR}/media/PostProcessors/Stereoscopic.ppml
+	${KLAYGE_PROJECT_DIR}/media/PostProcessors/TAA.ppml
 	${KLAYGE_PROJECT_DIR}/media/PostProcessors/Upsampling.ppml
 )
 

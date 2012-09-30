@@ -117,6 +117,7 @@ namespace KlayGE
 		void SSGIEnabled(uint32_t vp, bool ssgi);
 		void SSVOEnabled(uint32_t vp, bool ssvo);
 		void SSREnabled(bool ssr);
+		void TemporalAAEnabled(bool taa);
 
 		void SetupViewport(uint32_t index, FrameBufferPtr const & fb, uint32_t attrib);
 		void EnableViewport(uint32_t index, bool enable);
@@ -251,6 +252,9 @@ namespace KlayGE
 		PostProcessPtr ssr_pp_;
 		bool ssr_enabled_;
 
+		PostProcessPtr taa_pp_;
+		bool taa_enabled_;
+
 		float light_scale_;
 		RenderLayoutPtr rl_cone_;
 		RenderLayoutPtr rl_pyramid_;
@@ -273,7 +277,8 @@ namespace KlayGE
 		RenderTechniquePtr technique_shading_;
 		boost::array<RenderTechniquePtr, 2> technique_merge_shadings_;
 		boost::array<RenderTechniquePtr, 2> technique_merge_depths_;
-		RenderTechniquePtr technique_copy_shading_;
+		RenderTechniquePtr technique_copy_shading_depth_;
+		RenderTechniquePtr technique_copy_depth_;
 
 		FrameBufferPtr sm_buffer_;
 		TexturePtr sm_tex_;

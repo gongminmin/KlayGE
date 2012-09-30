@@ -41,7 +41,6 @@
       <File Name="../../Core/Src/Render/SSGIPostProcess.cpp"/>
       <File Name="../../Core/Src/Render/SSRPostProcess.cpp"/>
       <File Name="../../Core/Src/Render/SSVOPostProcess.cpp"/>
-      <File Name="../../Core/Src/Render/TAAPostProcess.cpp"/>
       <File Name="../../Core/Src/Render/Texture.cpp"/>
       <File Name="../../Core/Src/Render/Viewport.cpp"/>
     </VirtualDirectory>
@@ -81,7 +80,6 @@
       <File Name="../../Core/Include/KlayGE/SSGIPostProcess.hpp"/>
       <File Name="../../Core/Include/KlayGE/SSRPostProcess.hpp"/>
       <File Name="../../Core/Include/KlayGE/SSVOPostProcess.hpp"/>
-      <File Name="../../Core/Include/KlayGE/TAAPostProcess.hpp"/>
       <File Name="../../Core/Include/KlayGE/Texture.hpp"/>
       <File Name="../../Core/Include/KlayGE/Viewport.hpp"/>
     </VirtualDirectory>

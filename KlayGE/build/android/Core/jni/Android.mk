@@ -82,7 +82,6 @@ LOCAL_SRC_FILES := \
 		Render/SSGIPostProcess.cpp \
 		Render/SSRPostProcess.cpp \
 		Render/SSVOPostProcess.cpp \
-		Render/TAAPostProcess.cpp \
 		Render/Texture.cpp \
 		Render/Viewport.cpp \
 		Script/Script.cpp \

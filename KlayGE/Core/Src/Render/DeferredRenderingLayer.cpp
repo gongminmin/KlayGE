@@ -257,7 +257,7 @@ namespace KlayGE
 
 
 	DeferredRenderingLayer::DeferredRenderingLayer()
-		: active_viewport_(0), ssr_enabled_(true),
+		: active_viewport_(0), ssr_enabled_(true), taa_enabled_(true),
 			light_scale_(1), illum_(0), indirect_scale_(1.0f)
 	{
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
@@ -425,7 +425,8 @@ namespace KlayGE
 		technique_merge_shadings_[1] = dr_effect_->TechniqueByName("MergeShadingAlphaBlendTech");
 		technique_merge_depths_[0] = dr_effect_->TechniqueByName("MergeDepthTech");
 		technique_merge_depths_[1] = dr_effect_->TechniqueByName("MergeDepthAlphaBlendTech");
-		technique_copy_shading_ = dr_effect_->TechniqueByName("CopyShadingTech");
+		technique_copy_shading_depth_ = dr_effect_->TechniqueByName("CopyShadingDepthTech");
+		technique_copy_depth_ = dr_effect_->TechniqueByName("CopyDepthTech");
 
 		sm_buffer_ = rf.MakeFrameBuffer();
 		ElementFormat fmt;
@@ -473,6 +474,8 @@ namespace KlayGE
 			rf.LoadEffect("SSVO.fxml")->TechniqueByName("SSVOBlurX"), rf.LoadEffect("SSVO.fxml")->TechniqueByName("SSVOBlurY"));
 
 		ssr_pp_ = MakeSharedPtr<SSRPostProcess>();
+
+		taa_pp_ = LoadPostProcess(ResLoader::Instance().Open("TAA.ppml"), "taa");
 
 		if (caps.max_simultaneous_rts > 1)
 		{
@@ -624,11 +627,17 @@ namespace KlayGE
 		ssr_enabled_ = ssr;
 	}
 
+	void DeferredRenderingLayer::TemporalAAEnabled(bool taa)
+	{
+		taa_enabled_ = taa;
+	}
+
 	void DeferredRenderingLayer::SetupViewport(uint32_t index, FrameBufferPtr const & fb, uint32_t attrib)
 	{
 		PerViewport& pvp = viewports_[index];
 		pvp.attrib = attrib;
 		pvp.frame_buffer = fb;
+		pvp.frame_buffer->GetViewport()->camera->JitterMode(true);
 
 		if (fb)
 		{
@@ -802,6 +811,9 @@ namespace KlayGE
 			pvp.prev_merged_depth_buffers[i]->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*pvp.prev_merged_depth_tex, 0, 1, 0));
 			pvp.prev_merged_depth_buffers[i]->Attach(FrameBuffer::ATT_DepthStencil, ds_views[i]);
 		}
+
+		taa_pp_->InputPin(0, pvp.curr_merged_shading_tex);
+		taa_pp_->InputPin(1, pvp.prev_merged_shading_tex);
 
 		if (caps.rendertarget_format_support(EF_B10G11R11F, 1, 0))
 		{
@@ -1529,14 +1541,22 @@ namespace KlayGE
 
 					re.BindFrameBuffer(pvp.frame_buffer);
 					{
-						*shading_tex_param_ = pvp.curr_merged_shading_tex;
 						*depth_tex_param_ = pvp.curr_merged_depth_tex;
 
 						CameraPtr const & camera = pvp.frame_buffer->GetViewport()->camera;
 						float q = camera->FarPlane() / (camera->FarPlane() - camera->NearPlane());
 						float2 near_q(camera->NearPlane() * q, q);
 						*near_q_param_ = near_q;
-						re.Render(*technique_copy_shading_, *rl_quad_);
+					}
+					if (taa_enabled_)
+					{
+						taa_pp_->Apply();
+						re.Render(*technique_copy_depth_, *rl_quad_);
+					}
+					else
+					{
+						*shading_tex_param_ = pvp.curr_merged_shading_tex;
+						re.Render(*technique_copy_shading_depth_, *rl_quad_);
 					}
 
 					std::swap(pvp.curr_merged_shading_buffers, pvp.prev_merged_shading_buffers);
