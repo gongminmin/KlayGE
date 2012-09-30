@@ -13,6 +13,10 @@ SET(EFFECT_FILES
 	${KLAYGE_PROJECT_DIR}/Samples/media/MotionBlurDoF/MotionBlurPP.fxml
 )
 
+SET(POST_PROCESSORS
+	${KLAYGE_PROJECT_DIR}/Samples/media/MotionBlurDoF/Spreading.ppml
+)
+
 SET(UI_FILES
 	${KLAYGE_PROJECT_DIR}/Samples/media/MotionBlurDoF/MotionBlurDoF.uiml
 )

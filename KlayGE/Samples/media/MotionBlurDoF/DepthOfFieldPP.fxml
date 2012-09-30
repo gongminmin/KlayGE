@@ -65,6 +65,37 @@ float4 DepthOfFieldSpreadingPS(float4 clr : TEXCOORD0) : SV_Target
 	return clr;
 }
 
+float4 DepthOfFieldNewSpreadingPS(float2 tc : TEXCOORD0) : SV_Target
+{
+	float4 ret = 0;
+	
+	float2 pos = tc * width_height.xy - max_radius * 2;
+	float2 original_size = width_height.xy - max_radius * 4 - 1;
+	
+	float4 offset[4] = { float4(+1, +1, 0, 0), float4(-1, +1, -1, 0), float4(+1, -1, 0, -1), float4(-1, -1, -1, -1) };
+	float scale[4] = { +1, -1, -1, +1 };
+	for (int dir = 0; dir < 4; ++ dir)
+	{
+		float4 o = offset[dir];
+		float s = scale[dir];
+		for (int i = 0; i <= max_radius; ++ i)
+		{
+			float2 target_coord = pos + o.xy * i + o.zw;
+			float2 original_coord = target_coord / original_size;
+			if (all(target_coord >= -max_radius + 0.5f) && all(target_coord < original_size + 0.5f))
+			{
+				float radius = floor(saturate(abs(depth_tex.SampleLevel(point_sampler, original_coord, 0).x * focus_plane_inv_range.y + focus_plane_inv_range.x)) * max_radius);
+				if (radius == i)
+				{
+					float area = (radius * 2 + 1) * (radius * 2 + 1);
+					ret += s * float4(color_tex.SampleLevel(point_sampler, original_coord, 0).xyz, 1) / area;
+				}
+			}
+		}
+	}
+	return ret;
+}
+
 void DepthOfFieldNormalizationVS(float4 pos : POSITION,
 					out float2 oTex : TEXCOORD0,
 					out float4 oPos : SV_Position)
@@ -165,6 +196,16 @@ void DepthOfFieldSpreadingGS4(point float4 in_clr[1] : TEXCOORD0, point float4 i
 			<state name="vertex_shader" value="DepthOfFieldSpreadingVS4()"/>
 			<state name="geometry_shader" value="DepthOfFieldSpreadingGS4()"/>
 			<state name="pixel_shader" value="DepthOfFieldSpreadingPS()"/>
+		</pass>
+	</technique>
+
+	<technique name="DepthOfFieldNewSpreading">
+		<pass name="p0">
+			<state name="depth_enable" value="false"/>
+			<state name="depth_write_mask" value="0"/>
+
+			<state name="vertex_shader" value="PostProcessVS()"/>
+			<state name="pixel_shader" value="DepthOfFieldNewSpreadingPS()"/>
 		</pass>
 	</technique>
 

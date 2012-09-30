@@ -256,6 +256,8 @@ namespace
 		InstData inst_;
 		boost::circular_buffer<float4x4> last_mats_;
 	};
+
+#define SPREADING_PP 0
 	
 	class DepthOfField : public PostProcess
 	{
@@ -286,8 +288,14 @@ namespace
 
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 			spread_fb_ = rf.MakeFrameBuffer();
+
+#if SPREADING_PP
+			spreading_pp_ = LoadPostProcess(ResLoader::Instance().Open("Spreading.ppml"), "spreading");
+			spreading_pp_->SetParam(1, static_cast<float>(max_radius_));
+#else
 			spread_rl_ = rf.MakeRenderLayout();
 			spread_rl_->TopologyType(RenderLayout::TT_PointList);
+#endif
 
 			normalization_rl_ = rf.MakeRenderLayout();
 			normalization_rl_->TopologyType(RenderLayout::TT_TriangleStrip);
@@ -350,6 +358,12 @@ namespace
 			spread_tex_ = rf.MakeTexture2D(width, height, 1, 1, EF_ABGR32F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
 			spread_fb_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*spread_tex_, 0, 0, 0));
 
+
+#if SPREADING_PP
+			spreading_pp_->SetParam(0, float4(static_cast<float>(width),
+				static_cast<float>(height), 1.0f / width, 1.0f / height));
+			spreading_pp_->OutputPin(0, spread_tex_);
+#else
 			{
 				if (gs_support_)
 				{
@@ -391,6 +405,7 @@ namespace
 					spread_rl_->BindVertexStream(pos_vb, boost::make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F)));
 				}
 			}
+#endif
 			{
 				float4 pos[] =
 				{
@@ -424,9 +439,16 @@ namespace
 				*(technique_->Effect().ParameterByName("depth_tex")) = this->InputPin(1);
 
 				RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+#if SPREADING_PP
+				spreading_pp_->SetParam(2, float2(-focus_plane_ / focus_range_, 1.0f / focus_range_));
+				spreading_pp_->InputPin(0, this->InputPin(0));
+				spreading_pp_->InputPin(1, this->InputPin(1));
+				spreading_pp_->Apply();
+#else
 				re.BindFrameBuffer(spread_fb_);
 				spread_fb_->Clear(FrameBuffer::CBM_Color, Color(0, 0, 0, 0), 1, 0);
 				re.Render(*technique_, *spread_rl_);
+#endif
 
 				sat_.Apply();
 
@@ -456,7 +478,11 @@ namespace
 		TexturePtr spread_tex_;
 		FrameBufferPtr spread_fb_;
 
+#if SPREADING_PP
+		PostProcessPtr spreading_pp_;
+#else
 		RenderLayoutPtr spread_rl_;
+#endif
 
 		RenderLayoutPtr normalization_rl_;
 		RenderTechniquePtr normalization_technique_;
