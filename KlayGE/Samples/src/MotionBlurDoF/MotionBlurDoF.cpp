@@ -348,83 +348,86 @@ namespace
 		{
 			PostProcess::InputPin(index, tex);
 
-			uint32_t const width = tex->Width(0) + max_radius_ * 4 + 1;
-			uint32_t const height = tex->Height(0) + max_radius_ * 4 + 1;
+			if (0 == index)
+			{
+				uint32_t const width = tex->Width(0) + max_radius_ * 4 + 1;
+				uint32_t const height = tex->Height(0) + max_radius_ * 4 + 1;
 
-			*(technique_->Effect().ParameterByName("in_width_height")) = float4(static_cast<float>(width),
-				static_cast<float>(height), 1.0f / width, 1.0f / height);
+				*(technique_->Effect().ParameterByName("in_width_height")) = float4(static_cast<float>(width),
+					static_cast<float>(height), 1.0f / width, 1.0f / height);
 
-			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-			spread_tex_ = rf.MakeTexture2D(width, height, 1, 1, EF_ABGR32F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
-			spread_fb_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*spread_tex_, 0, 0, 0));
+				RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+				spread_tex_ = rf.MakeTexture2D(width, height, 1, 1, EF_ABGR32F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+				spread_fb_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*spread_tex_, 0, 0, 0));
 
 #if SPREADING_PP
-			spreading_pp_->SetParam(0, float4(static_cast<float>(width),
-				static_cast<float>(height), 1.0f / width, 1.0f / height));
-			spreading_pp_->OutputPin(0, spread_tex_);
+				spreading_pp_->SetParam(0, float4(static_cast<float>(width),
+					static_cast<float>(height), 1.0f / width, 1.0f / height));
+				spreading_pp_->OutputPin(0, spread_tex_);
 #else
-			{
-				if (gs_support_)
 				{
-					std::vector<float2> points;
-					for (uint32_t y = max_radius_; y < height - max_radius_; ++ y)
+					if (gs_support_)
 					{
-						for (uint32_t x = max_radius_; x < width - max_radius_; ++ x)
+						std::vector<float2> points;
+						for (uint32_t y = max_radius_; y < height - max_radius_; ++ y)
 						{
-							points.push_back(float2(static_cast<float>(x + 0.5f) / width, static_cast<float>(y + 0.5f) / height));
+							for (uint32_t x = max_radius_; x < width - max_radius_; ++ x)
+							{
+								points.push_back(float2(static_cast<float>(x + 0.5f) / width, static_cast<float>(y + 0.5f) / height));
+							}
 						}
-					}
 
-					ElementInitData init_data;
-					init_data.data = &points[0];
-					init_data.row_pitch = static_cast<uint32_t>(points.size() * sizeof(points[0]));
-					init_data.slice_pitch = 0;
-					GraphicsBufferPtr pos_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data);
-					spread_rl_->BindVertexStream(pos_vb, boost::make_tuple(vertex_element(VEU_Position, 0, EF_GR32F)));
-				}
-				else
-				{
-					std::vector<float3> points;
-					for (uint32_t y = max_radius_; y < height - max_radius_; ++ y)
+						ElementInitData init_data;
+						init_data.data = &points[0];
+						init_data.row_pitch = static_cast<uint32_t>(points.size() * sizeof(points[0]));
+						init_data.slice_pitch = 0;
+						GraphicsBufferPtr pos_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data);
+						spread_rl_->BindVertexStream(pos_vb, boost::make_tuple(vertex_element(VEU_Position, 0, EF_GR32F)));
+					}
+					else
 					{
-						for (uint32_t x = max_radius_; x < width - max_radius_; ++ x)
+						std::vector<float3> points;
+						for (uint32_t y = max_radius_; y < height - max_radius_; ++ y)
 						{
-							points.push_back(float3(static_cast<float>(x + 0.5f) / width, static_cast<float>(y + 0.5f) / height, 0.5f));
-							points.push_back(float3(static_cast<float>(x + 0.5f) / width, static_cast<float>(y + 0.5f) / height, 1.5f));
-							points.push_back(float3(static_cast<float>(x + 0.5f) / width, static_cast<float>(y + 0.5f) / height, 2.5f));
-							points.push_back(float3(static_cast<float>(x + 0.5f) / width, static_cast<float>(y + 0.5f) / height, 3.5f));
+							for (uint32_t x = max_radius_; x < width - max_radius_; ++ x)
+							{
+								points.push_back(float3(static_cast<float>(x + 0.5f) / width, static_cast<float>(y + 0.5f) / height, 0.5f));
+								points.push_back(float3(static_cast<float>(x + 0.5f) / width, static_cast<float>(y + 0.5f) / height, 1.5f));
+								points.push_back(float3(static_cast<float>(x + 0.5f) / width, static_cast<float>(y + 0.5f) / height, 2.5f));
+								points.push_back(float3(static_cast<float>(x + 0.5f) / width, static_cast<float>(y + 0.5f) / height, 3.5f));
+							}
 						}
-					}
 
-					ElementInitData init_data;
-					init_data.data = &points[0];
-					init_data.row_pitch = static_cast<uint32_t>(points.size() * sizeof(points[0]));
-					init_data.slice_pitch = 0;
-					GraphicsBufferPtr pos_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data);
-					spread_rl_->BindVertexStream(pos_vb, boost::make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F)));
+						ElementInitData init_data;
+						init_data.data = &points[0];
+						init_data.row_pitch = static_cast<uint32_t>(points.size() * sizeof(points[0]));
+						init_data.slice_pitch = 0;
+						GraphicsBufferPtr pos_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data);
+						spread_rl_->BindVertexStream(pos_vb, boost::make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F)));
+					}
 				}
-			}
 #endif
-			{
-				float4 pos[] =
 				{
-					float4(-1, +1, 0 + (max_radius_ * 2 + 0.0f) / width, 0 + (max_radius_ * 2 + 0.0f) / height),
-					float4(+1, +1, 1 - (max_radius_ * 2 + 1.0f) / width, 0 + (max_radius_ * 2 + 0.0f) / height),
-					float4(-1, -1, 0 + (max_radius_ * 2 + 0.0f) / width, 1 - (max_radius_ * 2 + 1.0f) / height),
-					float4(+1, -1, 1 - (max_radius_ * 2 + 1.0f) / width, 1 - (max_radius_ * 2 + 1.0f) / height)
-				};
+					float4 pos[] =
+					{
+						float4(-1, +1, 0 + (max_radius_ * 2 + 0.0f) / width, 0 + (max_radius_ * 2 + 0.0f) / height),
+						float4(+1, +1, 1 - (max_radius_ * 2 + 1.0f) / width, 0 + (max_radius_ * 2 + 0.0f) / height),
+						float4(-1, -1, 0 + (max_radius_ * 2 + 0.0f) / width, 1 - (max_radius_ * 2 + 1.0f) / height),
+						float4(+1, -1, 1 - (max_radius_ * 2 + 1.0f) / width, 1 - (max_radius_ * 2 + 1.0f) / height)
+					};
 				
-				ElementInitData init_data;
-				init_data.row_pitch = sizeof(pos);
-				init_data.data = &pos[0];
-				GraphicsBufferPtr pos_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data);
-				normalization_rl_->BindVertexStream(pos_vb, boost::make_tuple(vertex_element(VEU_Position, 0, EF_ABGR32F)));
+					ElementInitData init_data;
+					init_data.row_pitch = sizeof(pos);
+					init_data.data = &pos[0];
+					GraphicsBufferPtr pos_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data);
+					normalization_rl_->BindVertexStream(pos_vb, boost::make_tuple(vertex_element(VEU_Position, 0, EF_ABGR32F)));
+				}
+
+				sat_tex_ = rf.MakeTexture2D(width, height, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+
+				sat_.InputPin(0, spread_tex_);
+				sat_.OutputPin(0, sat_tex_);
 			}
-
-			sat_tex_ = rf.MakeTexture2D(width, height, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
-
-			sat_.InputPin(index, spread_tex_);
-			sat_.OutputPin(0, sat_tex_);
 		}
 
 		using PostProcess::InputPin;
