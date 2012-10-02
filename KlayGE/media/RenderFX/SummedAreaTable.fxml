@@ -132,4 +132,148 @@ float4 SATScanYDownSweepPS(float2 tex_coord0 : TEXCOORD0) : SV_Target
 			<state name="pixel_shader" value="SATScanYDownSweepPS()"/>
 		</pass>
 	</technique>
+
+	<macro name="BLOCK_SIZE" value="256"/>
+	<parameter type="rw_texture2D" elem_type="float4" name="out_tex"/>
+	<parameter type="rw_texture2D" elem_type="float4" name="out_sum_tex"/>
+	<parameter type="texture2D" name="in_tex"/>
+	<parameter type="texture2D" name="in_sum_tex"/>
+
+	<shader type="compute_shader" version="5">
+		<![CDATA[
+groupshared float4 shared_forscan[BLOCK_SIZE];
+
+float4 Scan(uint GI, bool inclusive)
+{
+	float4 sum = 0;
+
+	int offset = 1;
+	for (uint d = BLOCK_SIZE >> 1; d > 0; d >>= 1)
+	{
+		GroupMemoryBarrierWithGroupSync();
+		if (GI < d)
+		{
+			int ai = offset * (GI * 2 + 1) - 1;
+			int bi = offset * (GI * 2 + 2) - 1;
+
+			shared_forscan[bi] += shared_forscan[ai];
+		}
+		offset *= 2;
+	}
+   
+	if (0 == GI)
+	{
+		sum = shared_forscan[BLOCK_SIZE - 1];
+		shared_forscan[BLOCK_SIZE - 1] = 0;
+	}
+
+	for (d = 1; d < BLOCK_SIZE; d <<= 1)
+	{
+		offset >>= 1;
+		GroupMemoryBarrierWithGroupSync();
+		if (GI < d)                     
+		{
+			int ai = offset * (GI * 2 + 1) - 1;
+			int bi = offset * (GI * 2 + 2) - 1;
+			
+			float4 t = shared_forscan[ai];
+			shared_forscan[ai] = shared_forscan[bi];
+			shared_forscan[bi] += t; 
+		}
+	}
+	
+	if (inclusive && (0 == GI))
+	{
+		shared_forscan[0] = sum;
+	}
+	
+	GroupMemoryBarrierWithGroupSync();
+
+	return sum;
+}
+
+[numthreads(BLOCK_SIZE, 1, 1)]
+void InclusiveScanXCS(uint3 gid : SV_GroupID, 
+				uint3 dtid : SV_DispatchThreadID, 
+				uint GI : SV_GroupIndex)
+{
+	shared_forscan[GI] = in_tex[dtid.xy];
+	Scan(GI, true);
+	out_tex[dtid.xy] = shared_forscan[GI + 1];
+	if (BLOCK_SIZE - 1 == GI)
+	{
+		float4 sum = shared_forscan[0];
+		out_sum_tex[gid.xy] = sum;
+		out_tex[dtid.xy] = sum;
+	}
+}
+
+[numthreads(1, BLOCK_SIZE, 1)]
+void InclusiveScanYCS(uint3 gid : SV_GroupID, 
+				uint3 dtid : SV_DispatchThreadID, 
+				uint GI : SV_GroupIndex)
+{
+	shared_forscan[GI] = in_tex[dtid.xy];
+	Scan(GI, true);
+	out_tex[dtid.xy] = shared_forscan[GI + 1];
+	if (BLOCK_SIZE - 1 == GI)
+	{
+		float4 sum = shared_forscan[0];
+		out_sum_tex[gid.xy] = sum;
+		out_tex[dtid.xy] = sum;
+	}
+}
+
+
+[numthreads(BLOCK_SIZE, 1, 1)]
+void InclusiveAddSumXCS(uint3 gid : SV_GroupID, 
+				uint3 dtid : SV_DispatchThreadID, 
+				uint GI : SV_GroupIndex)
+{
+	if (0 == GI)
+	{
+		shared_forscan[0] = in_sum_tex[int2(gid.x - 1, gid.y)];
+	}
+	GroupMemoryBarrierWithGroupSync();
+	
+	out_tex[dtid.xy] = in_tex[dtid.xy] + shared_forscan[0];
+}
+
+[numthreads(1, BLOCK_SIZE, 1)]
+void InclusiveAddSumYCS(uint3 gid : SV_GroupID, 
+				uint3 dtid : SV_DispatchThreadID, 
+				uint GI : SV_GroupIndex)
+{
+	if (0 == GI)
+	{
+		shared_forscan[0] = in_sum_tex[int2(gid.x, gid.y - 1)];
+	}
+	GroupMemoryBarrierWithGroupSync();
+	
+	out_tex[dtid.xy] = in_tex[dtid.xy] + shared_forscan[0];
+}
+		]]>
+	</shader>
+
+	<technique name="SATScanXCS">
+		<pass name="p0">
+			<state name="compute_shader" value="InclusiveScanXCS()"/>
+		</pass>
+	</technique>
+	<technique name="SATScanYCS">
+		<pass name="p0">
+			<state name="compute_shader" value="InclusiveScanYCS()"/>
+		</pass>
+	</technique>
+	
+	<technique name="SATAddSumXCS">
+		<pass name="p0">
+			<state name="compute_shader" value="InclusiveAddSumXCS()"/>
+		</pass>
+	</technique>
+	<technique name="SATAddSumYCS">
+		<pass name="p0">
+			<state name="compute_shader" value="InclusiveAddSumYCS()"/>
+		</pass>
+	</technique>
 </effect>

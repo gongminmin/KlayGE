@@ -46,8 +46,40 @@ namespace KlayGE
 	public:
 		SummedAreaTablePostProcess();
 
-		void InputPin(uint32_t index, TexturePtr const & tex);
-		TexturePtr const & InputPin(uint32_t index) const;
+		virtual void InputPin(uint32_t index, TexturePtr const & tex);
+		using PostProcessChain::InputPin;
+	};
+
+
+	class KLAYGE_CORE_API SATSeparableInBlockScanPostProcessCS : public PostProcess
+	{
+	public:
+		explicit SATSeparableInBlockScanPostProcessCS(bool dir);
+
+		virtual void Apply();
+
+	private:
+		bool dir_;
+	};
+
+	class KLAYGE_CORE_API SATAddSumPostProcessCS : public PostProcess
+	{
+	public:
+		explicit SATAddSumPostProcessCS(bool dir);
+
+		virtual void Apply();
+
+	private:
+		bool dir_;
+	};
+
+	class KLAYGE_CORE_API SummedAreaTablePostProcessCS : public PostProcessChain
+	{
+	public:
+		SummedAreaTablePostProcessCS();
+
+		virtual void InputPin(uint32_t index, TexturePtr const & tex);
+		using PostProcessChain::InputPin;
 	};
 }
 

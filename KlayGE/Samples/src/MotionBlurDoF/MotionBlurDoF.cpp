@@ -273,6 +273,7 @@ namespace
 
 			RenderDeviceCaps const & caps = Context::Instance().RenderFactoryInstance().RenderEngineInstance().DeviceCaps();
 			gs_support_ = (caps.max_shader_model >= 4);
+			cs_support_ = caps.cs_support && (caps.max_shader_model >= 5);
 
 			RenderEffectPtr effect = Context::Instance().RenderFactoryInstance().LoadEffect("DepthOfFieldPP.fxml");
 			if (gs_support_)
@@ -296,6 +297,15 @@ namespace
 			spread_rl_ = rf.MakeRenderLayout();
 			spread_rl_->TopologyType(RenderLayout::TT_PointList);
 #endif
+
+			if (cs_support_)
+			{
+				sat_pp_ = MakeSharedPtr<SummedAreaTablePostProcessCS>();
+			}
+			else
+			{
+				sat_pp_ = MakeSharedPtr<SummedAreaTablePostProcess>();
+			}
 
 			normalization_rl_ = rf.MakeRenderLayout();
 			normalization_rl_->TopologyType(RenderLayout::TT_TriangleStrip);
@@ -357,7 +367,7 @@ namespace
 					static_cast<float>(height), 1.0f / width, 1.0f / height);
 
 				RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-				spread_tex_ = rf.MakeTexture2D(width, height, 1, 1, EF_ABGR32F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+				spread_tex_ = rf.MakeTexture2D(width, height, 1, 1, EF_ABGR32F, 1, 0, EAH_GPU_Read | EAH_GPU_Write | (cs_support_ ? EAH_GPU_Unordered : 0), NULL);
 				spread_fb_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*spread_tex_, 0, 0, 0));
 
 #if SPREADING_PP
@@ -423,10 +433,10 @@ namespace
 					normalization_rl_->BindVertexStream(pos_vb, boost::make_tuple(vertex_element(VEU_Position, 0, EF_ABGR32F)));
 				}
 
-				sat_tex_ = rf.MakeTexture2D(width, height, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+				sat_tex_ = rf.MakeTexture2D(width, height, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write | (cs_support_ ? EAH_GPU_Unordered : 0), NULL);
 
-				sat_.InputPin(0, spread_tex_);
-				sat_.OutputPin(0, sat_tex_);
+				sat_pp_->InputPin(0, spread_tex_);
+				sat_pp_->OutputPin(0, sat_tex_);
 			}
 		}
 
@@ -452,7 +462,7 @@ namespace
 				re.Render(*technique_, *spread_rl_);
 #endif
 
-				sat_.Apply();
+				sat_pp_->Apply();
 
 				*(technique_->Effect().ParameterByName("src_tex")) = sat_tex_;
 
@@ -467,9 +477,10 @@ namespace
 		}
 
 	private:
-		SummedAreaTablePostProcess sat_;
+		PostProcessPtr sat_pp_;
 
 		bool gs_support_;
+		bool cs_support_;
 
 		int max_radius_;
 
