@@ -258,44 +258,6 @@ namespace
 	};
 
 #define SPREADING_PP 1
-
-	class SpreadingPostProcessCS : public PostProcess
-	{
-	public:
-		SpreadingPostProcessCS()
-			: PostProcess(L"SpreadingCS")
-		{
-			input_pins_.push_back(std::make_pair("color_tex", TexturePtr()));
-			input_pins_.push_back(std::make_pair("depth_tex", TexturePtr()));
-
-			output_pins_.push_back(std::make_pair("spread_tex", TexturePtr()));
-
-			params_.push_back(std::make_pair("in_width_height", RenderEffectParameterPtr()));
-			params_.push_back(std::make_pair("max_radius", RenderEffectParameterPtr()));
-			params_.push_back(std::make_pair("focus_plane_inv_range", RenderEffectParameterPtr()));
-
-			this->Technique(Context::Instance().RenderFactoryInstance().LoadEffect("DepthOfFieldPP.fxml")->TechniqueByName("DepthOfFieldSpreadingCS"));
-		}
-
-		virtual void Apply()
-		{
-			RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-			re.BindFrameBuffer(re.DefaultFrameBuffer());
-
-			TexturePtr tex = this->OutputPin(0);
-
-			uint32_t tgx = (tex->Width(0) + BLOCK_SIZE_X - 1) / BLOCK_SIZE_X;
-			uint32_t tgy = (tex->Height(0) + BLOCK_SIZE_Y - 1) / BLOCK_SIZE_Y;
-
-			this->OnRenderBegin();
-			re.Dispatch(*technique_, tgx, tgy, 1);
-			this->OnRenderEnd();
-		}
-
-	private:
-		static uint32_t const BLOCK_SIZE_X = 16;
-		static uint32_t const BLOCK_SIZE_Y = 16;
-	};
 	
 	class DepthOfField : public PostProcess
 	{
@@ -331,7 +293,7 @@ namespace
 #if SPREADING_PP
 			if (cs_support_)
 			{
-				spreading_pp_ = MakeSharedPtr<SpreadingPostProcessCS>();
+				spreading_pp_ = LoadPostProcess(ResLoader::Instance().Open("Spreading.ppml"), "spreading_cs");
 			}
 			else
 			{

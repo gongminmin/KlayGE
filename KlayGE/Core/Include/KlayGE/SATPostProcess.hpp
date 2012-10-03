@@ -51,28 +51,6 @@ namespace KlayGE
 	};
 
 
-	class KLAYGE_CORE_API SATSeparableInBlockScanPostProcessCS : public PostProcess
-	{
-	public:
-		explicit SATSeparableInBlockScanPostProcessCS(bool dir);
-
-		virtual void Apply();
-
-	private:
-		bool dir_;
-	};
-
-	class KLAYGE_CORE_API SATAddSumPostProcessCS : public PostProcess
-	{
-	public:
-		explicit SATAddSumPostProcessCS(bool dir);
-
-		virtual void Apply();
-
-	private:
-		bool dir_;
-	};
-
 	class KLAYGE_CORE_API SATPostProcessCS : public PostProcessChain
 	{
 	public:

@@ -89,6 +89,7 @@ namespace KlayGE
 		};
 
 	public:
+		ShaderObject();
 		virtual ~ShaderObject()
 		{
 		}
@@ -124,6 +125,18 @@ namespace KlayGE
 		{
 			return has_tessellation_;
 		}
+		uint32_t CSBlockSizeX() const
+		{
+			return cs_block_size_x_;
+		}
+		uint32_t CSBlockSizeY() const
+		{
+			return cs_block_size_y_;
+		}
+		uint32_t CSBlockSizeZ() const
+		{
+			return cs_block_size_z_;
+		}
 
 	protected:
 		boost::array<bool, ST_NumShaderTypes> is_shader_validate_;
@@ -131,6 +144,7 @@ namespace KlayGE
 		bool is_validate_;
 		bool has_discard_;
 		bool has_tessellation_;
+		uint32_t cs_block_size_x_, cs_block_size_y_, cs_block_size_z_;
 	};
 }
 

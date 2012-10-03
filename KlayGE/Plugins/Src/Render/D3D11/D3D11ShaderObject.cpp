@@ -810,7 +810,7 @@ namespace KlayGE
 				memcpy(&ver, nsbp, sizeof(ver));
 				nsbp += sizeof(ver);
 				LittleEndianToNative<sizeof(ver)>(&ver);
-				if (2 == ver)
+				if (3 == ver)
 				{
 					uint64_t timestamp;
 					memcpy(&timestamp, nsbp, sizeof(timestamp));
@@ -923,6 +923,20 @@ namespace KlayGE
 									nsbp += sizeof(vs_signature_);
 									LittleEndianToNative<sizeof(vs_signature_)>(&vs_signature_);
 								}
+								else if (ST_ComputeShader == type)
+								{
+									memcpy(&cs_block_size_x_, nsbp, sizeof(cs_block_size_x_));
+									nsbp += sizeof(cs_block_size_x_);
+									LittleEndianToNative<sizeof(cs_block_size_x_)>(&cs_block_size_x_);
+
+									memcpy(&cs_block_size_y_, nsbp, sizeof(cs_block_size_y_));
+									nsbp += sizeof(cs_block_size_y_);
+									LittleEndianToNative<sizeof(cs_block_size_y_)>(&cs_block_size_y_);
+
+									memcpy(&cs_block_size_z_, nsbp, sizeof(cs_block_size_z_));
+									nsbp += sizeof(cs_block_size_z_);
+									LittleEndianToNative<sizeof(cs_block_size_z_)>(&cs_block_size_z_);
+								}
 
 								this->AttachShaderBytecode(type, effect, shader_desc_ids, code_blob);
 
@@ -950,7 +964,7 @@ namespace KlayGE
 			NativeToLittleEndian<sizeof(fourcc)>(&fourcc);
 			oss.write(reinterpret_cast<char const *>(&fourcc), sizeof(fourcc));
 
-			uint32_t ver = 2;
+			uint32_t ver = 3;
 			NativeToLittleEndian<sizeof(ver)>(&ver);
 			oss.write(reinterpret_cast<char const *>(&ver), sizeof(ver));
 
@@ -1034,6 +1048,20 @@ namespace KlayGE
 				uint32_t vs_signature = vs_signature_;
 				NativeToLittleEndian<sizeof(vs_signature)>(&vs_signature);
 				oss.write(reinterpret_cast<char const *>(&vs_signature), sizeof(vs_signature));
+			}
+			else if (ST_ComputeShader == type)
+			{
+				uint32_t cs_block_size_x = cs_block_size_x_;
+				NativeToLittleEndian<sizeof(cs_block_size_x)>(&cs_block_size_x);
+				oss.write(reinterpret_cast<char const *>(&cs_block_size_x), sizeof(cs_block_size_x));
+
+				uint32_t cs_block_size_y = cs_block_size_y_;
+				NativeToLittleEndian<sizeof(cs_block_size_y)>(&cs_block_size_y);
+				oss.write(reinterpret_cast<char const *>(&cs_block_size_y), sizeof(cs_block_size_y));
+
+				uint32_t cs_block_size_z = cs_block_size_z_;
+				NativeToLittleEndian<sizeof(cs_block_size_z)>(&cs_block_size_z);
+				oss.write(reinterpret_cast<char const *>(&cs_block_size_z), sizeof(cs_block_size_z));
 			}
 
 			std::string out_str = oss.str();
@@ -1407,6 +1435,10 @@ namespace KlayGE
 							boost::hash_combine(vs_signature_, seed);
 						}
 					}
+					else if (ST_ComputeShader == type)
+					{
+						reflection->GetThreadGroupSize(&cs_block_size_x_, &cs_block_size_y_, &cs_block_size_z_);
+					}
 
 					reflection->Release();
 				}
@@ -1701,6 +1733,9 @@ namespace KlayGE
 
 			case ST_ComputeShader:
 				compute_shader_ = so.compute_shader_;
+				cs_block_size_x_ = so.cs_block_size_x_;
+				cs_block_size_y_ = so.cs_block_size_y_;
+				cs_block_size_z_ = so.cs_block_size_z_;
 				break;
 
 			case ST_HullShader:
@@ -1781,6 +1816,9 @@ namespace KlayGE
 		ret->hull_shader_ = hull_shader_;
 		ret->domain_shader_ = domain_shader_;
 		ret->vs_signature_ = vs_signature_;
+		ret->cs_block_size_x_ = cs_block_size_x_;
+		ret->cs_block_size_y_ = cs_block_size_y_;
+		ret->cs_block_size_z_ = cs_block_size_z_;
 		for (size_t i = 0; i < ST_NumShaderTypes; ++ i)
 		{
 			ret->shader_code_[i] = shader_code_[i];

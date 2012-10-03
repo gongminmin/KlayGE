@@ -134,11 +134,11 @@ namespace KlayGE
 
 	private:
 		void CreateVB();
-
-	protected:
 		void UpdateBinds();
 
 	protected:
+		bool cs_based_;
+
 		std::vector<std::pair<std::string, TexturePtr> > input_pins_;
 		std::vector<std::pair<std::string, TexturePtr> > output_pins_;
 		uint32_t num_bind_output_;

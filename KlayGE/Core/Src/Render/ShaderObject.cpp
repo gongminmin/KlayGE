@@ -69,4 +69,10 @@ namespace KlayGE
 		static ShaderObjectPtr obj = MakeSharedPtr<NullShaderObject>();
 		return obj;
 	}
+
+	ShaderObject::ShaderObject()
+		: has_discard_(false), has_tessellation_(false),
+			cs_block_size_x_(0), cs_block_size_y_(0), cs_block_size_z_(0)
+	{
+	}
 }

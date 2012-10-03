@@ -1,0 +1,14 @@
+<?xml version='1.0'?>
+
+<post_processors>
+	<post_processor name="taa">
+		<input>
+			<pin name="curr_tex"/>
+			<pin name="prev_tex"/>
+		</input>
+		<output>
+			<pin name="output"/>
+		</output>
+		<shader effect="TAA.fxml" tech="TemporalAA"/>
+	</post_processor>
+</post_processors>

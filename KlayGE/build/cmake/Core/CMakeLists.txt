@@ -201,6 +201,7 @@ SET(RENDERING_POSTPROCESSOR_FILES
 	${KLAYGE_PROJECT_DIR}/media/PostProcessors/LensEffects.ppml
 	${KLAYGE_PROJECT_DIR}/media/PostProcessors/LightShaft.ppml
 	${KLAYGE_PROJECT_DIR}/media/PostProcessors/RSM2VPLs.ppml
+	${KLAYGE_PROJECT_DIR}/media/PostProcessors/SAT.ppml
 	${KLAYGE_PROJECT_DIR}/media/PostProcessors/Stereoscopic.ppml
 	${KLAYGE_PROJECT_DIR}/media/PostProcessors/TAA.ppml
 	${KLAYGE_PROJECT_DIR}/media/PostProcessors/Upsampling.ppml

@@ -43,7 +43,6 @@ namespace KlayGE
 			: RenderableHelper(name),
 				num_bind_output_(0)
 	{
-		this->CreateVB();
 	}
 
 	PostProcess::PostProcess(std::wstring const & name,
@@ -58,8 +57,6 @@ namespace KlayGE
 				params_(param_names.size()),
 				input_pins_ep_(input_pin_names.size())
 	{
-		this->CreateVB();
-
 		for (size_t i = 0; i < input_pin_names.size(); ++ i)
 		{
 			input_pins_[i].first = input_pin_names[i];
@@ -79,6 +76,17 @@ namespace KlayGE
 	{
 		technique_ = tech;
 		this->UpdateBinds();
+
+		if (technique_)
+		{
+			cs_based_ = (technique_->Pass(0)->GetShaderObject()->CSBlockSizeX() > 0);
+		}
+		else
+		{
+			cs_based_ = false;
+		}
+
+		this->CreateVB();
 	}
 
 	void PostProcess::UpdateBinds()
@@ -493,18 +501,21 @@ namespace KlayGE
 		output_pins_[index].second = tex;
 		if (tex)
 		{
-			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-			RenderViewPtr view;
-			if (Texture::TT_2D == tex->Type())
+			if (!cs_based_)
 			{
-				view = rf.Make2DRenderView(*tex, array_index, 1, level);
+				RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+				RenderViewPtr view;
+				if (Texture::TT_2D == tex->Type())
+				{
+					view = rf.Make2DRenderView(*tex, array_index, 1, level);
+				}
+				else
+				{
+					BOOST_ASSERT(Texture::TT_Cube == tex->Type());
+					view = rf.Make2DRenderView(*tex, array_index, static_cast<Texture::CubeFaces>(face), level);
+				}
+				frame_buffer_->Attach(FrameBuffer::ATT_Color0 + index, view);
 			}
-			else
-			{
-				BOOST_ASSERT(Texture::TT_Cube == tex->Type());
-				view = rf.Make2DRenderView(*tex, array_index, static_cast<Texture::CubeFaces>(face), level);
-			}
-			frame_buffer_->Attach(FrameBuffer::ATT_Color0 + index, view);
 
 			if (output_pins_ep_[index])
 			{
@@ -522,9 +533,34 @@ namespace KlayGE
 	void PostProcess::Apply()
 	{
 		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-		FrameBufferPtr const & fb = (0 == num_bind_output_) ? re.DefaultFrameBuffer() : frame_buffer_;
-		re.BindFrameBuffer(fb);
-		this->Render();
+		if (cs_based_)
+		{
+			re.BindFrameBuffer(re.DefaultFrameBuffer());
+
+			ShaderObjectPtr const & so = technique_->Pass(0)->GetShaderObject();
+			uint32_t const bx = so->CSBlockSizeX();
+			uint32_t const by = so->CSBlockSizeY();
+			uint32_t const bz = so->CSBlockSizeZ();
+			
+			BOOST_ASSERT(bx > 0);
+			BOOST_ASSERT(by > 0);
+			BOOST_ASSERT(bz > 0);
+
+			TexturePtr const & tex = this->OutputPin(0);
+			uint32_t tgx = (tex->Width(0) + bx - 1) / bx;
+			uint32_t tgy = (tex->Height(0) + by - 1) / by;
+			uint32_t tgz = (tex->Depth(0) + bz - 1) / bz;
+
+			this->OnRenderBegin();
+			re.Dispatch(*technique_, tgx, tgy, tgz);
+			this->OnRenderEnd();
+		}
+		else
+		{
+			FrameBufferPtr const & fb = (0 == num_bind_output_) ? re.DefaultFrameBuffer() : frame_buffer_;
+			re.BindFrameBuffer(fb);
+			this->Render();
+		}
 	}
 
 	void PostProcess::OnRenderBegin()
@@ -533,27 +569,39 @@ namespace KlayGE
 
 	void PostProcess::CreateVB()
 	{
-		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-
-		rl_ = rf.MakeRenderLayout();
-		rl_->TopologyType(RenderLayout::TT_TriangleStrip);
-
-		float2 pos[] =
+		if (cs_based_)
 		{
-			float2(-1, +1),
-			float2(+1, +1),
-			float2(-1, -1),
-			float2(+1, -1)
-		};
-		aabb_ = AABBox(float3(-1, -1, -1), float3(1, 1, 1));
-		ElementInitData init_data;
-		init_data.row_pitch = sizeof(pos);
-		init_data.data = &pos[0];
-		pos_vb_ = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data);
-		rl_->BindVertexStream(pos_vb_, boost::make_tuple(vertex_element(VEU_Position, 0, EF_GR32F)));
+			pos_vb_.reset();
+			rl_.reset();
+			frame_buffer_.reset();
+		}
+		else
+		{
+			if (!rl_)
+			{
+				RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-		frame_buffer_ = rf.MakeFrameBuffer();
-		frame_buffer_->GetViewport()->camera = rf.RenderEngineInstance().CurFrameBuffer()->GetViewport()->camera;
+				rl_ = rf.MakeRenderLayout();
+				rl_->TopologyType(RenderLayout::TT_TriangleStrip);
+
+				float2 pos[] =
+				{
+					float2(-1, +1),
+					float2(+1, +1),
+					float2(-1, -1),
+					float2(+1, -1)
+				};
+				aabb_ = AABBox(float3(-1, -1, -1), float3(1, 1, 1));
+				ElementInitData init_data;
+				init_data.row_pitch = sizeof(pos);
+				init_data.data = &pos[0];
+				pos_vb_ = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data);
+				rl_->BindVertexStream(pos_vb_, boost::make_tuple(vertex_element(VEU_Position, 0, EF_GR32F)));
+
+				frame_buffer_ = rf.MakeFrameBuffer();
+				frame_buffer_->GetViewport()->camera = rf.RenderEngineInstance().CurFrameBuffer()->GetViewport()->camera;
+			}
+		}
 	}
 
 

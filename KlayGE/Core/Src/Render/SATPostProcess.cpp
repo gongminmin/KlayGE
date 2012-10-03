@@ -221,102 +221,6 @@ namespace KlayGE
 	}
 
 
-	SATSeparableInBlockScanPostProcessCS::SATSeparableInBlockScanPostProcessCS(bool dir)
-			: PostProcess(L"SATSeparableInBlockScanCS"),
-				dir_(dir)
-	{
-		input_pins_.push_back(std::make_pair("in_tex", TexturePtr()));
-
-		output_pins_.push_back(std::make_pair("out_tex", TexturePtr()));
-		output_pins_.push_back(std::make_pair("out_sum_tex", TexturePtr()));
-
-		RenderTechniquePtr tech;
-		RenderEffectPtr effect = Context::Instance().RenderFactoryInstance().LoadEffect("SAT.fxml");
-		if (dir)
-		{
-			tech = effect->TechniqueByName("SATScanXCS");
-		}
-		else
-		{
-			tech = effect->TechniqueByName("SATScanYCS");
-		}
-
-		this->Technique(tech);
-	}
-
-	void SATSeparableInBlockScanPostProcessCS::Apply()
-	{
-		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-		re.BindFrameBuffer(re.DefaultFrameBuffer());
-
-		TexturePtr in_tex = this->InputPin(0);
-
-		uint32_t tgx, tgy;
-		if (dir_)
-		{
-			tgx = (in_tex->Width(0) + BLOCK_SIZE - 1) / BLOCK_SIZE;
-			tgy = in_tex->Height(0);
-		}
-		else
-		{
-			tgx = in_tex->Width(0);
-			tgy = (in_tex->Height(0) + BLOCK_SIZE - 1) / BLOCK_SIZE;
-		}
-
-		this->OnRenderBegin();
-		re.Dispatch(*technique_, tgx, tgy, 1);
-		this->OnRenderEnd();
-	}
-
-
-	SATAddSumPostProcessCS::SATAddSumPostProcessCS(bool dir)
-			: PostProcess(L"SATAddSumCS"),
-				dir_(dir)
-	{
-		input_pins_.push_back(std::make_pair("in_tex", TexturePtr()));
-		input_pins_.push_back(std::make_pair("in_sum_tex", TexturePtr()));
-
-		output_pins_.push_back(std::make_pair("out_tex", TexturePtr()));
-
-		RenderTechniquePtr tech;
-		RenderEffectPtr effect = Context::Instance().RenderFactoryInstance().LoadEffect("SAT.fxml");
-		if (dir)
-		{
-			tech = effect->TechniqueByName("SATAddSumXCS");
-		}
-		else
-		{
-			tech = effect->TechniqueByName("SATAddSumYCS");
-		}
-
-		this->Technique(tech);
-	}
-
-	void SATAddSumPostProcessCS::Apply()
-	{
-		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-		re.BindFrameBuffer(re.DefaultFrameBuffer());
-
-		TexturePtr in_tex = this->InputPin(0);
-
-		uint32_t tgx, tgy;
-		if (dir_)
-		{
-			tgx = (in_tex->Width(0) + BLOCK_SIZE - 1) / BLOCK_SIZE;
-			tgy = in_tex->Height(0);
-		}
-		else
-		{
-			tgx = in_tex->Width(0);
-			tgy = (in_tex->Height(0) + BLOCK_SIZE - 1) / BLOCK_SIZE;
-		}
-
-		this->OnRenderBegin();
-		re.Dispatch(*technique_, tgx, tgy, 1);
-		this->OnRenderEnd();
-	}
-
-
 	SATPostProcessCS::SATPostProcessCS()
 		: PostProcessChain(L"SATCS")
 	{
@@ -400,9 +304,11 @@ namespace KlayGE
 				inter_tex_y_down[i] = rf.MakeTexture2D(tex_width, heights[i], 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write | EAH_GPU_Unordered, NULL);
 			}
 
+			ResIdentifierPtr sat_ppml = ResLoader::Instance().Open("SAT.ppml");
+
 			for (size_t i = 0; i < widths.size() - 1; ++ i)
 			{
-				PostProcessPtr pp = MakeSharedPtr<SATSeparableInBlockScanPostProcessCS>(true);
+				PostProcessPtr pp = LoadPostProcess(sat_ppml, "in_block_scan_cs_x");
 				pp->InputPin(0, inter_tex_x_up[i]);
 				pp->OutputPin(0, inter_tex_x_down[i]);
 				if (i + 1 < inter_tex_x_up.size())
@@ -413,7 +319,7 @@ namespace KlayGE
 			}
 			for (size_t i = widths.size() - 2; i > 0; -- i)
 			{
-				PostProcessPtr pp = MakeSharedPtr<SATAddSumPostProcessCS>(true);
+				PostProcessPtr pp = LoadPostProcess(sat_ppml, "add_sum_cs_x");
 				pp->InputPin(0, inter_tex_x_down[i - 1]);
 				pp->InputPin(1, inter_tex_x_down[i]);
 				pp->OutputPin(0, inter_tex_x_up[i - 1]);
@@ -422,7 +328,7 @@ namespace KlayGE
 
 			for (size_t i = 0; i < heights.size() - 1; ++ i)
 			{
-				PostProcessPtr pp = MakeSharedPtr<SATSeparableInBlockScanPostProcessCS>(false);
+				PostProcessPtr pp = LoadPostProcess(sat_ppml, "in_block_scan_cs_y");
 				pp->InputPin(0, inter_tex_y_up[i]);
 				pp->OutputPin(0, inter_tex_y_down[i]);
 				if (i + 1 < inter_tex_y_up.size())
@@ -433,7 +339,7 @@ namespace KlayGE
 			}
 			for (size_t i = heights.size() - 2; i > 0; -- i)
 			{
-				PostProcessPtr pp = MakeSharedPtr<SATAddSumPostProcessCS>(false);
+				PostProcessPtr pp = LoadPostProcess(sat_ppml, "add_sum_cs_y");
 				pp->InputPin(0, inter_tex_y_down[i - 1]);
 				pp->InputPin(1, inter_tex_y_down[i]);
 				pp->OutputPin(0, inter_tex_y_up[i - 1]);

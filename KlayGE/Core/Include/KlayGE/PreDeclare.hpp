@@ -237,10 +237,6 @@ namespace KlayGE
 	typedef boost::shared_ptr<SATSeparableScanSweepPostProcess> SATSeparableScanSweepPostProcessPtr;
 	class SATPostProcess;
 	typedef boost::shared_ptr<SATPostProcess> SATPostProcessPtr;
-	class SATSeparableInBlockScanPostProcessCS;
-	typedef boost::shared_ptr<SATSeparableInBlockScanPostProcessCS> SATSeparableInBlockScanPostProcessCSPtr;
-	class SATAddSumPostProcessCS;
-	typedef boost::shared_ptr<SATAddSumPostProcessCS> SATAddSumPostProcessCSPtr;
 	class SATPostProcessCS;
 	typedef boost::shared_ptr<SATPostProcessCS> SATPostProcessCSPtr;
 	class TAAPostProcess;

@@ -214,13 +214,13 @@ namespace KlayGE
 		output_pins_.push_back(std::make_pair("out_tex", TexturePtr()));
 		
 		RenderEffectPtr effect = Context::Instance().RenderFactoryInstance().LoadEffect("ToneMapping.fxml");
-		technique_ = effect->TechniqueByName("ToneMapping30");
-		if (!technique_->Validate())
+		RenderTechniquePtr tech = effect->TechniqueByName("ToneMapping30");
+		if (!tech->Validate())
 		{
-			technique_ = effect->TechniqueByName("ToneMapping20");
+			tech = effect->TechniqueByName("ToneMapping20");
 		}
 
-		this->UpdateBinds();
+		this->Technique(tech);
 	}
 
 
