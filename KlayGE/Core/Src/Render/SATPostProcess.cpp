@@ -65,8 +65,6 @@ namespace KlayGE
 	}
 
 
-	uint32_t const BLOCK_SIZE = 256;
-
 	SATPostProcess::SATPostProcess()
 		: PostProcessChain(L"SAT")
 	{
@@ -221,6 +219,8 @@ namespace KlayGE
 	}
 
 
+	uint32_t const BLOCK_SIZE = 128;
+
 	SATPostProcessCS::SATPostProcessCS()
 		: PostProcessChain(L"SATCS")
 	{
@@ -299,7 +299,10 @@ namespace KlayGE
 			{
 				inter_tex_y_up[i] = rf.MakeTexture2D(tex_width, heights[i], 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write | EAH_GPU_Unordered, NULL);
 			}
-			for (size_t i = 0; i < heights.size() - 1; ++ i)
+			{
+				inter_tex_y_down[0] = inter_tex_x_down[0];
+			}
+			for (size_t i = 1; i < heights.size() - 1; ++ i)
 			{
 				inter_tex_y_down[i] = rf.MakeTexture2D(tex_width, heights[i], 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write | EAH_GPU_Unordered, NULL);
 			}
@@ -317,7 +320,7 @@ namespace KlayGE
 				}
 				this->Append(pp);
 			}
-			for (size_t i = widths.size() - 2; i > 0; -- i)
+			for (int i = static_cast<int>(widths.size()) - 2; i > 0; -- i)
 			{
 				PostProcessPtr pp = LoadPostProcess(sat_ppml, "add_sum_cs_x");
 				pp->InputPin(0, inter_tex_x_down[i - 1]);
@@ -337,7 +340,7 @@ namespace KlayGE
 				}
 				this->Append(pp);
 			}
-			for (size_t i = heights.size() - 2; i > 0; -- i)
+			for (int i = static_cast<int>(heights.size()) - 2; i > 0; -- i)
 			{
 				PostProcessPtr pp = LoadPostProcess(sat_ppml, "add_sum_cs_y");
 				pp->InputPin(0, inter_tex_y_down[i - 1]);

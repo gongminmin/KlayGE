@@ -133,7 +133,7 @@ float4 SATScanYDownSweepPS(float2 tex_coord0 : TEXCOORD0) : SV_Target
 		</pass>
 	</technique>
 
-	<macro name="BLOCK_SIZE" value="256"/>
+	<macro name="BLOCK_SIZE" value="128"/>
 	<parameter type="rw_texture2D" elem_type="float4" name="out_tex"/>
 	<parameter type="rw_texture2D" elem_type="float4" name="out_sum_tex"/>
 	<parameter type="texture2D" name="in_tex"/>
@@ -143,12 +143,13 @@ float4 SATScanYDownSweepPS(float2 tex_coord0 : TEXCOORD0) : SV_Target
 		<![CDATA[
 groupshared float4 shared_forscan[BLOCK_SIZE];
 
-float4 Scan(uint GI, bool inclusive)
+float4 Scan(uint GI)
 {
 	float4 sum = 0;
 
 	int offset = 1;
-	for (uint d = BLOCK_SIZE >> 1; d > 0; d >>= 1)
+	[unroll]
+	for (uint d = BLOCK_SIZE >> 1; d > 32; d >>= 1)
 	{
 		GroupMemoryBarrierWithGroupSync();
 		if (GI < d)
@@ -160,14 +161,46 @@ float4 Scan(uint GI, bool inclusive)
 		}
 		offset *= 2;
 	}
+	GroupMemoryBarrierWithGroupSync();
+	[unroll]
+	for (d = 32; d > 0; d >>= 1)
+	{
+		if (GI < d)
+		{
+			int ai = offset * (GI * 2 + 1) - 1;
+			int bi = offset * (GI * 2 + 2) - 1;
+
+			shared_forscan[bi] += shared_forscan[ai];
+		}
+		offset *= 2;
+	}
+	
+	GroupMemoryBarrierWithGroupSync();
    
-	if (0 == GI)
+	if (BLOCK_SIZE - 1 == GI)
 	{
 		sum = shared_forscan[BLOCK_SIZE - 1];
 		shared_forscan[BLOCK_SIZE - 1] = 0;
 	}
+	
+	GroupMemoryBarrierWithGroupSync();
 
-	for (d = 1; d < BLOCK_SIZE; d <<= 1)
+	[unroll]
+	for (d = 1; d < 64; d <<= 1)
+	{
+		offset >>= 1;
+		if (GI < d)                     
+		{
+			int ai = offset * (GI * 2 + 1) - 1;
+			int bi = offset * (GI * 2 + 2) - 1;
+			
+			float4 t = shared_forscan[ai];
+			shared_forscan[ai] = shared_forscan[bi];
+			shared_forscan[bi] += t; 
+		}
+	}
+	[unroll]
+	for (d = 64; d < BLOCK_SIZE; d <<= 1)
 	{
 		offset >>= 1;
 		GroupMemoryBarrierWithGroupSync();
@@ -182,11 +215,6 @@ float4 Scan(uint GI, bool inclusive)
 		}
 	}
 	
-	if (inclusive && (0 == GI))
-	{
-		shared_forscan[0] = sum;
-	}
-	
 	GroupMemoryBarrierWithGroupSync();
 
 	return sum;
@@ -198,11 +226,10 @@ void InclusiveScanXCS(uint3 gid : SV_GroupID,
 				uint GI : SV_GroupIndex)
 {
 	shared_forscan[GI] = in_tex[dtid.xy];
-	Scan(GI, true);
+	float4 sum = Scan(GI);
 	out_tex[dtid.xy] = shared_forscan[GI + 1];
 	if (BLOCK_SIZE - 1 == GI)
 	{
-		float4 sum = shared_forscan[0];
 		out_sum_tex[gid.xy] = sum;
 		out_tex[dtid.xy] = sum;
 	}
@@ -214,11 +241,10 @@ void InclusiveScanYCS(uint3 gid : SV_GroupID,
 				uint GI : SV_GroupIndex)
 {
 	shared_forscan[GI] = in_tex[dtid.xy];
-	Scan(GI, true);
+	float4 sum = Scan(GI);
 	out_tex[dtid.xy] = shared_forscan[GI + 1];
 	if (BLOCK_SIZE - 1 == GI)
 	{
-		float4 sum = shared_forscan[0];
 		out_sum_tex[gid.xy] = sum;
 		out_tex[dtid.xy] = sum;
 	}
