@@ -1,0 +1,35 @@
+<?xml version='1.0'?>
+
+<post_processors>
+	<post_processor name="spreading">
+		<params>
+			<param name="in_width_height"/>
+			<param name="max_radius"/>
+			<param name="focus_plane_inv_range"/>
+		</params>
+		<input>
+			<pin name="color_tex"/>
+			<pin name="depth_tex"/>
+		</input>
+		<output>
+			<pin name="spread_tex"/>
+		</output>
+		<shader effect="DepthOfFieldPP.fxml" tech="DepthOfFieldNewSpreading"/>
+	</post_processor>
+
+	<post_processor name="spreading_cs">
+		<params>
+			<param name="in_width_height"/>
+			<param name="max_radius"/>
+			<param name="focus_plane_inv_range"/>
+		</params>
+		<input>
+			<pin name="color_tex"/>
+			<pin name="depth_tex"/>
+		</input>
+		<output>
+			<pin name="spread_tex"/>
+		</output>
+		<shader effect="DepthOfFieldPP.fxml" tech="DepthOfFieldSpreadingCS"/>
+	</post_processor>
+</post_processors>
