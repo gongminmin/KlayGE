@@ -42,8 +42,6 @@
 
 #include <KlayGE/JudaTexture.hpp>
 
-#include "JTMLWriter.hpp"
-
 using namespace std;
 using namespace KlayGE;
 
@@ -257,10 +255,10 @@ unsigned int sqrt_16(unsigned long M)
 	return N; 
 }
 
-void CalcPackInfo(std::vector<KlayGE::TexturePtr>& ta, int num_tile, int tile_size, boost::shared_ptr<TexPackNode>& root)
+void CalcPackInfo(std::vector<KlayGE::TexturePtr>& ta, int num_tiles, int tile_size, boost::shared_ptr<TexPackNode>& root)
 {
 	root = MakeSharedPtr<TexPackNode>();
-	int width = sqrt_16(num_tile) * tile_size;
+	int width = sqrt_16(num_tiles) * tile_size;
 	root->Rect(KlayGE::Rect_T<uint32_t>(0, 0, width, width));
 	// The insert function traverses the tree looking for a place to insert the lightmap.
 	// It returns the pointer of the node the lightmap can go into or null to say it can't fit.
@@ -274,19 +272,46 @@ void CalcPackInfo(std::vector<KlayGE::TexturePtr>& ta, int num_tile, int tile_si
 	}
 }
 
+char const * GetTextureAddressTypeName(TexAddressingMode type)
+{
+	switch(type)
+	{
+	case TAM_Wrap:
+		return "wrap";
+
+	case TAM_Mirror:
+		return "mirror";
+
+	case TAM_Clamp:
+		return "clamp";
+
+	case TAM_Border:
+	default:
+		return "broder";
+	}
+}
+
+struct JTMLImageRecord
+{
+	std::string name;
+	uint32_t x, y, h, w;
+	TexAddressingMode u, v;
+};
+typedef std::vector<JTMLImageRecord> JTMLImageRecordArray;
+
 void ConvertTreeToJTML(boost::shared_ptr<TexPackNode> const & node, JTMLImageRecordArray& jirs, int tile_size)
 {
 	if (node->Texture())
 	{
 		JTMLImageRecord jir;
-		jir.u_ = TAM_Wrap;
-		jir.v_ = TAM_Wrap;
-		jir.x_ = node->Rect().left() / tile_size;
-		jir.y_ = node->Rect().top() / tile_size;
-		jir.w_ = node->Rect().Width() / tile_size;
-		jir.h_ = node->Rect().Height() / tile_size;
-		TextureNameTable& table = GetTextureNameTable();
-		jir.name_ = table[node->Texture()];
+		jir.u = TAM_Wrap;
+		jir.v = TAM_Wrap;
+		jir.x = node->Rect().left() / tile_size;
+		jir.y = node->Rect().top() / tile_size;
+		jir.w = node->Rect().Width() / tile_size;
+		jir.h = node->Rect().Height() / tile_size;
+		TextureNameTable const & table = GetTextureNameTable();
+		jir.name = table.find(node->Texture())->second;
 		jirs.push_back(jir);
 	}
 	if (!node->IsLeaf())
@@ -296,36 +321,64 @@ void ConvertTreeToJTML(boost::shared_ptr<TexPackNode> const & node, JTMLImageRec
 	}
 }
 
-void WriteJTML(boost::shared_ptr<TexPackNode> const & root, std::string const & jtml_name, int num_tile, int tile_size, ElementFormat fmt)
+void WriteJTML(boost::shared_ptr<TexPackNode> const & root, std::string const & jtml_name, int num_tiles, int tile_size, ElementFormat fmt)
 {
-	JTMLWriter& writer = JTMLWriter::Instance();
-	writer.SetElementFormat(fmt);
-	writer.SetTileNum(num_tile);
-	writer.SetTileSize(tile_size);
-	ConvertTreeToJTML(root, writer.GetImageRecordArray(), tile_size);
-	writer.WriteToJTML(jtml_name);
+	JTMLImageRecordArray jirs;
+	ConvertTreeToJTML(root, jirs, tile_size);
+
+	std::string fmt_str;
+	switch (fmt)
+	{
+	case EF_ABGR8:
+		fmt_str = "ABGR8";
+		break;
+
+	case EF_ARGB8:
+		fmt_str = "ARGB8";
+		break;
+
+	default:
+		BOOST_ASSERT(false);
+		break;
+	}
+
+	std::ofstream os(jtml_name.c_str());
+	os << "<?xml version='1.0'?>" << endl;
+	os << endl;
+	os << "<juda_tex num_tiles=\"" << num_tiles << "\" tile_size=\"" << tile_size << "\" format=\"" << fmt_str << "\">" << endl;
+	for (size_t i = 0; i < jirs.size(); ++ i)
+	{
+		JTMLImageRecord const & jir = jirs[i];
+		os << "\t<image name=\"" << jir.name
+				<< "\" x=\"" << jir.x << "\" y=\"" << jir.y << "\" w=\"" << jir.w << "\" h=\"" << jir.h
+				<<"\" address_u=\"" << GetTextureAddressTypeName(jir.u)
+				<<"\" address_v=\"" << GetTextureAddressTypeName(jir.v) << "\"/>\n";
+	}
+	os << "</juda_tex>" << endl;
 }
 
-void Tex2JTML(std::vector<std::string>& tex_names, uint32_t num_tile, uint32_t tile_size, std::string& jtml_name)
+void Tex2JTML(std::vector<std::string>& tex_names, uint32_t num_tiles, uint32_t tile_size, std::string& jtml_name)
 {
 	std::vector<KlayGE::TexturePtr> textures;
 	TextureNameTable& table = GetTextureNameTable();
 	textures.resize(tex_names.size());
 	for (size_t i = 0; i < tex_names.size(); ++ i)
 	{
+		cout << "Adding " << tex_names[i] << " (" << i + 1 << " / " << tex_names.size() << ") ...";
 		textures[i] = SyncLoadTexture(tex_names[i], EAH_CPU_Read);
 		table.insert(std::make_pair(textures[i], tex_names[i]));
+		cout << " DONE" << endl;
 	}
 
 	boost::shared_ptr<TexPackNode> root;
-	CalcPackInfo(textures, num_tile, tile_size, root);
+	CalcPackInfo(textures, num_tiles, tile_size, root);
 
-	WriteJTML(root, jtml_name, num_tile, tile_size, EF_ABGR8);
+	WriteJTML(root, jtml_name, num_tiles, tile_size, EF_ABGR8);
 }
 
 int main(int argc, char* argv[])
 {
-	int num_tile;
+	int num_tiles;
 	int tile_size;
 	std::vector<std::string> tex_names;
 	std::string jtml_name;
@@ -335,7 +388,7 @@ int main(int argc, char* argv[])
 		("help,H", "Produce help message")
 		("input-name,I", boost::program_options::value<std::string>(), "Input font name.")
 		("output-name,O", boost::program_options::value<std::string>(), "Output font name.")
-		("num-tile,N", boost::program_options::value<int>(&num_tile)->default_value(4096), "Number of tiles. Default is 4096.")
+		("num-tiles,N", boost::program_options::value<int>(&num_tiles)->default_value(4096), "Number of tiles. Default is 4096.")
 		("tile-size,T", boost::program_options::value<int>(&tile_size)->default_value(128), "Tile size. Default is 128.")
 		("version,v", "Version.");
 
@@ -411,7 +464,7 @@ int main(int argc, char* argv[])
 	EmptyApp app;
 	app.Create();
 
-	Tex2JTML(tex_names, num_tile, tile_size, jtml_name);
+	Tex2JTML(tex_names, num_tiles, tile_size, jtml_name);
 
 	return 0;
 }

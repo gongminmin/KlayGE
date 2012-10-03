@@ -1,9 +1,4 @@
-SET(HEADER_FILES
-	${KLAYGE_PROJECT_DIR}/Tools/src/Tex2JTML/JTMLWriter.hpp
-)
-
 SET(SOURCE_FILES
-	${KLAYGE_PROJECT_DIR}/Tools/src/Tex2JTML/JTMLWriter.cpp
 	${KLAYGE_PROJECT_DIR}/Tools/src/Tex2JTML/Tex2JTML.cpp
 )
 
