@@ -227,19 +227,13 @@ float4x4 quat_to_mat4(float4 quat)
 
 float4 quat_trans_to_udq(float4 q, float3 t)
 {
-	return float4(
-		+0.5f * (+t.x * q.w + t.y * q.z - t.z * q.y),
-		+0.5f * (-t.x * q.z + t.y * q.w + t.z * q.x),
-		+0.5f * (+t.x * q.y - t.y * q.x + t.z * q.w),
-		-0.5f * (+t.x * q.x + t.y * q.y + t.z * q.z));
+	return mul_quat(q, float4(0.5f * t.xyz, 0));
 }
 
 float3 udq_to_trans(float4 ndp, float4 dp)
 {
-	return float3(
-		2 * (-dp.w * ndp.x + dp.x * ndp.w - dp.y * ndp.z + dp.z * ndp.y),
-		2 * (-dp.w * ndp.y + dp.x * ndp.z + dp.y * ndp.w - dp.z * ndp.x),
-		2 * (-dp.w * ndp.z - dp.x * ndp.y + dp.y * ndp.x + dp.z * ndp.w));
+	float4 qeq0 = mul_quat(conjugate_quat(ndp), dp);
+	return 2 * qeq0.xyz;
 }
 
 float3 dq_to_trans(float4 ndp, float4 dp)

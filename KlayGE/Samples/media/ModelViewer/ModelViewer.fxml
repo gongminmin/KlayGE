@@ -63,6 +63,10 @@ void Skinned(float3 pos,
 		blend_real += joint_real * weight;
 		blend_dual += joint_dual * weight;
 	}
+	
+	float len = length(blend_real);
+	blend_real /= len;
+	blend_dual /= len;
 
 	result_pos = transform_quat(pos_s, blend_real) + 2 * mul_quat(float4(blend_dual.xyz, -blend_dual.w), blend_real).xyz;
 	result_normal = transform_quat(normal, blend_real);
