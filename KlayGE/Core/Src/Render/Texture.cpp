@@ -1183,20 +1183,27 @@ namespace
 
 namespace KlayGE
 {
-	// 载入DDS格式文件
-	void LoadTexture(std::string const & tex_name, Texture::TextureType& type,
-		uint32_t& width, uint32_t& height, uint32_t& depth, uint32_t& numMipMaps, uint32_t& array_size,
-		ElementFormat& format, std::vector<ElementInitData>& init_data, std::vector<uint8_t>& data_block)
+	void GetImageInfo(std::string const & tex_name, Texture::TextureType& type,
+		uint32_t& width, uint32_t& height, uint32_t& depth, uint32_t& num_mipmaps, uint32_t& array_size,
+		ElementFormat& format, uint32_t& row_pitch, uint32_t& slice_pitch)
 	{
 		ResIdentifierPtr file = ResLoader::Instance().Open(tex_name);
 
+		GetImageInfo(file, type, width, height, depth, num_mipmaps, array_size, format,
+			row_pitch, slice_pitch);
+	}
+
+	void GetImageInfo(ResIdentifierPtr const & tex_res, Texture::TextureType& type,
+		uint32_t& width, uint32_t& height, uint32_t& depth, uint32_t& num_mipmaps, uint32_t& array_size,
+		ElementFormat& format, uint32_t& row_pitch, uint32_t& slice_pitch)
+	{
 		uint32_t magic;
-		file->read(&magic, sizeof(magic));
+		tex_res->read(&magic, sizeof(magic));
 		LittleEndianToNative<sizeof(magic)>(&magic);
 		BOOST_ASSERT((MakeFourCC<'D', 'D', 'S', ' '>::value) == magic);
 
 		DDSSURFACEDESC2 desc;
-		file->read(&desc, sizeof(desc));
+		tex_res->read(&desc, sizeof(desc));
 		LittleEndianToNative<sizeof(desc.size)>(&desc.size);
 		LittleEndianToNative<sizeof(desc.flags)>(&desc.flags);
 		LittleEndianToNative<sizeof(desc.height)>(&desc.height);
@@ -1227,7 +1234,7 @@ namespace KlayGE
 		DDS_HEADER_DXT10 desc10;
 		if (MakeFourCC<'D', 'X', '1', '0'>::value == desc.pixel_format.four_cc)
 		{
-			file->read(&desc10, sizeof(desc10));
+			tex_res->read(&desc10, sizeof(desc10));
 			LittleEndianToNative<sizeof(desc10.dxgi_format)>(&desc10.dxgi_format);
 			LittleEndianToNative<sizeof(desc10.resource_dim)>(&desc10.resource_dim);
 			LittleEndianToNative<sizeof(desc10.misc_flag)>(&desc10.misc_flag);
@@ -1511,29 +1518,22 @@ namespace KlayGE
 			}
 		}
 
-		uint32_t main_image_size;
-		if ((desc.flags & DDSD_LINEARSIZE) != 0)
+		if ((desc.flags & DDSD_PITCH) != 0)
 		{
-			main_image_size = desc.linear_size;
+			row_pitch = desc.pitch;
 		}
 		else
 		{
-			if ((desc.flags & DDSD_PITCH) != 0)
+			if ((desc.flags & desc.pixel_format.flags & 0x00000040) != 0)
 			{
-				main_image_size = desc.pitch * desc.height;
+				row_pitch = desc.width * desc.pixel_format.rgb_bit_count / 8;
 			}
 			else
 			{
-				if ((desc.flags & desc.pixel_format.flags & 0x00000040) != 0)
-				{
-					main_image_size = desc.width * desc.height * desc.pixel_format.rgb_bit_count / 8;
-				}
-				else
-				{
-					main_image_size = desc.width * desc.height * NumFormatBytes(format);
-				}
+				row_pitch = desc.width * NumFormatBytes(format);
 			}
 		}
+		slice_pitch = row_pitch * height;
 
 		if (desc.reserved1[0] != 0)
 		{
@@ -1541,7 +1541,7 @@ namespace KlayGE
 		}
 
 		width = desc.width;
-		numMipMaps = desc.mip_map_count;
+		num_mipmaps = desc.mip_map_count;
 
 		if (MakeFourCC<'D', 'X', '1', '0'>::value == desc.pixel_format.four_cc)
 		{
@@ -1604,21 +1604,40 @@ namespace KlayGE
 				}
 			}
 		}
+	}
+
+	// 载入DDS格式文件
+	void LoadTexture(std::string const & tex_name, Texture::TextureType& type,
+		uint32_t& width, uint32_t& height, uint32_t& depth, uint32_t& num_mipmaps, uint32_t& array_size,
+		ElementFormat& format, std::vector<ElementInitData>& init_data, std::vector<uint8_t>& data_block)
+	{
+		ResIdentifierPtr tex_res = ResLoader::Instance().Open(tex_name);
+
+		LoadTexture(tex_res, type, width, height, depth, num_mipmaps, array_size,
+			format, init_data, data_block);
+	}
+
+	void LoadTexture(ResIdentifierPtr const & tex_res, Texture::TextureType& type,
+		uint32_t& width, uint32_t& height, uint32_t& depth, uint32_t& num_mipmaps, uint32_t& array_size,
+		ElementFormat& format, std::vector<ElementInitData>& init_data, std::vector<uint8_t>& data_block)
+	{
+		uint32_t row_pitch, slice_pitch;
+		GetImageInfo(tex_res, type, width, height, depth, num_mipmaps, array_size, format,
+			row_pitch, slice_pitch);
 
 		std::vector<size_t> base;
-		uint32_t format_size = NumFormatBytes(format);
 		switch (type)
 		{
 		case Texture::TT_1D:
 			{
-				init_data.resize(array_size * numMipMaps);
-				base.resize(array_size * numMipMaps);
+				init_data.resize(array_size * num_mipmaps);
+				base.resize(array_size * num_mipmaps);
 				for (uint32_t array_index = 0; array_index < array_size; ++ array_index)
 				{
 					uint32_t the_width = width;
-					for (uint32_t level = 0; level < numMipMaps; ++ level)
+					for (uint32_t level = 0; level < num_mipmaps; ++ level)
 					{
-						size_t const index = array_index * numMipMaps + level;
+						size_t const index = array_index * num_mipmaps + level;
 						uint32_t image_size;
 						if (IsCompressedFormat(format))
 						{
@@ -1637,7 +1656,7 @@ namespace KlayGE
 						}
 						else
 						{
-							image_size = main_image_size / (1UL << (level * 2));
+							image_size = slice_pitch / (1UL << (level * 2));
 						}
 
 						base[index] = data_block.size();
@@ -1645,8 +1664,8 @@ namespace KlayGE
 						init_data[index].row_pitch = image_size;
 						init_data[index].slice_pitch = image_size;
 
-						file->read(&data_block[base[index]], static_cast<std::streamsize>(image_size));
-						BOOST_ASSERT(file->gcount() == static_cast<int>(image_size));
+						tex_res->read(&data_block[base[index]], static_cast<std::streamsize>(image_size));
+						BOOST_ASSERT(tex_res->gcount() == static_cast<int>(image_size));
 
 						the_width = std::max<uint32_t>(the_width / 2, 1);
 					}
@@ -1656,15 +1675,15 @@ namespace KlayGE
 
 		case Texture::TT_2D:
 			{
-				init_data.resize(array_size * numMipMaps);
-				base.resize(array_size * numMipMaps);
+				init_data.resize(array_size * num_mipmaps);
+				base.resize(array_size * num_mipmaps);
 				for (uint32_t array_index = 0; array_index < array_size; ++ array_index)
 				{
 					uint32_t the_width = width;
 					uint32_t the_height = height;
-					for (uint32_t level = 0; level < numMipMaps; ++ level)
+					for (uint32_t level = 0; level < num_mipmaps; ++ level)
 					{
-						size_t const index = array_index * numMipMaps + level;
+						size_t const index = array_index * num_mipmaps + level;
 						if (IsCompressedFormat(format))
 						{
 							int block_size;
@@ -1685,24 +1704,17 @@ namespace KlayGE
 							init_data[index].row_pitch = (the_width + 3) / 4 * block_size;
 							init_data[index].slice_pitch = image_size;
 
-							file->read(&data_block[base[index]], static_cast<std::streamsize>(image_size));
-							BOOST_ASSERT(file->gcount() == static_cast<int>(image_size));
+							tex_res->read(&data_block[base[index]], static_cast<std::streamsize>(image_size));
+							BOOST_ASSERT(tex_res->gcount() == static_cast<int>(image_size));
 						}
 						else
 						{
-							if (desc.flags & DDSD_PITCH)
-							{
-								init_data[index].row_pitch = static_cast<uint32_t>(((desc.pitch >> level) + 3) / 4 * 4);
-							}
-							else
-							{
-								init_data[index].row_pitch = the_width * format_size;
-							}
+							init_data[index].row_pitch = row_pitch >> level;
 							init_data[index].slice_pitch = init_data[index].row_pitch * the_height;
 							base[index] = data_block.size();
 							data_block.resize(base[index] + init_data[index].slice_pitch);
 
-							file->read(&data_block[base[index]], static_cast<std::streamsize>(init_data[index].slice_pitch));
+							tex_res->read(&data_block[base[index]], static_cast<std::streamsize>(init_data[index].slice_pitch));
 						}
 
 						the_width = std::max<uint32_t>(the_width / 2, 1);
@@ -1714,16 +1726,16 @@ namespace KlayGE
 
 		case Texture::TT_3D:
 			{
-				init_data.resize(array_size * numMipMaps);
-				base.resize(array_size * numMipMaps);
+				init_data.resize(array_size * num_mipmaps);
+				base.resize(array_size * num_mipmaps);
 				for (uint32_t array_index = 0; array_index < array_size; ++ array_index)
 				{
 					uint32_t the_width = width;
 					uint32_t the_height = height;
 					uint32_t the_depth = depth;
-					for (uint32_t level = 0; level < numMipMaps; ++ level)
+					for (uint32_t level = 0; level < num_mipmaps; ++ level)
 					{
-						size_t const index = array_index * numMipMaps + level;
+						size_t const index = array_index * num_mipmaps + level;
 						if (IsCompressedFormat(format))
 						{
 							int block_size;
@@ -1744,26 +1756,18 @@ namespace KlayGE
 							init_data[index].row_pitch = (the_width + 3) / 4 * block_size;
 							init_data[index].slice_pitch = ((the_width + 3) / 4) * ((the_height + 3) / 4) * block_size;
 
-							file->read(&data_block[base[index]], static_cast<std::streamsize>(image_size));
-							BOOST_ASSERT(file->gcount() == static_cast<int>(image_size));
+							tex_res->read(&data_block[base[index]], static_cast<std::streamsize>(image_size));
+							BOOST_ASSERT(tex_res->gcount() == static_cast<int>(image_size));
 						}
 						else
 						{
-							if (desc.flags & DDSD_PITCH)
-							{
-								init_data[index].row_pitch = static_cast<uint32_t>(((desc.pitch >> level) + 3) / 4 * 4);
-								init_data[index].slice_pitch = init_data[index].row_pitch * (the_height + 3) / 4 * 4;
-							}
-							else
-							{
-								init_data[index].row_pitch = the_width * format_size;
-								init_data[index].slice_pitch = init_data[index].row_pitch * the_height;
-							}
+							init_data[index].row_pitch = row_pitch >> level;
+							init_data[index].slice_pitch = init_data[index].row_pitch * the_height;
 							base[index] = data_block.size();
 							data_block.resize(base[index] + init_data[index].slice_pitch * the_depth);
 
-							file->read(&data_block[base[index]], static_cast<std::streamsize>(init_data[index].slice_pitch * the_depth));
-							BOOST_ASSERT(file->gcount() == static_cast<int>(init_data[index].slice_pitch * the_depth));
+							tex_res->read(&data_block[base[index]], static_cast<std::streamsize>(init_data[index].slice_pitch * the_depth));
+							BOOST_ASSERT(tex_res->gcount() == static_cast<int>(init_data[index].slice_pitch * the_depth));
 						}
 
 						the_width = std::max<uint32_t>(the_width / 2, 1);
@@ -1776,17 +1780,17 @@ namespace KlayGE
 
 		case Texture::TT_Cube:
 			{
-				init_data.resize(array_size * 6 * numMipMaps);
-				base.resize(array_size * 6 * numMipMaps);
+				init_data.resize(array_size * 6 * num_mipmaps);
+				base.resize(array_size * 6 * num_mipmaps);
 				for (uint32_t array_index = 0; array_index < array_size; ++ array_index)
 				{
 					for (uint32_t face = Texture::CF_Positive_X; face <= Texture::CF_Negative_Z; ++ face)
 					{
 						uint32_t the_width = width;
 						uint32_t the_height = height;
-						for (uint32_t level = 0; level < numMipMaps; ++ level)
+						for (uint32_t level = 0; level < num_mipmaps; ++ level)
 						{
-							size_t const index = (array_index * 6 + face - Texture::CF_Positive_X) * numMipMaps + level;
+							size_t const index = (array_index * 6 + face - Texture::CF_Positive_X) * num_mipmaps + level;
 							if (IsCompressedFormat(format))
 							{
 								int block_size;
@@ -1807,25 +1811,18 @@ namespace KlayGE
 								init_data[index].row_pitch = (the_width + 3) / 4 * block_size;
 								init_data[index].slice_pitch = image_size;
 
-								file->read(&data_block[base[index]], static_cast<std::streamsize>(image_size));
-								BOOST_ASSERT(file->gcount() == static_cast<int>(image_size));
+								tex_res->read(&data_block[base[index]], static_cast<std::streamsize>(image_size));
+								BOOST_ASSERT(tex_res->gcount() == static_cast<int>(image_size));
 							}
 							else
 							{
-								if (desc.flags & DDSD_PITCH)
-								{
-									init_data[index].row_pitch = static_cast<uint32_t>(((desc.pitch >> level) + 3) / 4 * 4);
-								}
-								else
-								{
-									init_data[index].row_pitch = the_width * format_size;
-								}
+								init_data[index].row_pitch = row_pitch >> level;;
 								init_data[index].slice_pitch = init_data[index].row_pitch * the_width;
 								base[index] = data_block.size();
 								data_block.resize(base[index] + init_data[index].slice_pitch);
 
-								file->read(&data_block[base[index]], static_cast<std::streamsize>(init_data[index].slice_pitch));
-								BOOST_ASSERT(file->gcount() == static_cast<int>(init_data[index].slice_pitch));
+								tex_res->read(&data_block[base[index]], static_cast<std::streamsize>(init_data[index].slice_pitch));
+								BOOST_ASSERT(tex_res->gcount() == static_cast<int>(init_data[index].slice_pitch));
 							}
 
 							the_width = std::max<uint32_t>(the_width / 2, 1);

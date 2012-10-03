@@ -13,7 +13,6 @@
 #include <fstream>
 #include <sstream>
 #include <vector>
-#include <map>
 
 #include <boost/shared_ptr.hpp>
 #include <boost/enable_shared_from_this.hpp>
@@ -45,31 +44,13 @@
 using namespace std;
 using namespace KlayGE;
 
-class EmptyApp : public KlayGE::App3DFramework
+struct TextureDesc
 {
-public:
-	EmptyApp()
-		: App3DFramework("JudaTexPacker")
-	{
-	}
-
-	void DoUpdateOverlay()
-	{
-	}
-
-	uint32_t DoUpdate(uint32_t /*pass*/)
-	{
-		return URV_Finished;
-	}
+	std::string name;
+	uint32_t width;
+	uint32_t height;
 };
-
-typedef std::map<KlayGE::TexturePtr, std::string> TextureNameTable;
-
-static TextureNameTable& GetTextureNameTable()
-{
-	static TextureNameTable table;
-	return table;
-}
+typedef boost::shared_ptr<TextureDesc> TextureDescPtr;
 
 std::string DosWildcardToRegex(std::string const & wildcard)
 {
@@ -120,28 +101,28 @@ public:
 	{
 	}
 	
-	boost::shared_ptr<TexPackNode> Insert(KlayGE::TexturePtr const & tex)
+	boost::shared_ptr<TexPackNode> Insert(TextureDescPtr const & tex_desc)
 	{
 		if (!this->IsLeaf())
 		{
 			// try first child
-			boost::shared_ptr<TexPackNode> new_node = child_[0]->Insert(tex);
+			boost::shared_ptr<TexPackNode> new_node = child_[0]->Insert(tex_desc);
 			if (new_node)
 			{
 				return new_node;
 			}
 			// no room, then insert second child
-			return child_[1]->Insert(tex);
+			return child_[1]->Insert(tex_desc);
 		}
 		else
 		{
 			// room don't fit or already have picture here
-			if (!this->CanInsert(tex))
+			if (!this->CanInsert(tex_desc))
 			{
 				return boost::shared_ptr<TexPackNode>();
 			}
 			// result comes form perfecly fit
-			if (this->CanPerfectlyInsert(tex))
+			if (this->CanPerfectlyInsert(tex_desc))
 			{
 				return this->shared_from_this();
 			}
@@ -149,24 +130,24 @@ public:
 			child_[0] = MakeSharedPtr<TexPackNode>();
 			child_[1] = MakeSharedPtr<TexPackNode>();
 			// calc the rect for each child
-			int dw = rect_.Width() - tex->Width(0);
-			int dh = rect_.Height() - tex->Height(0);
+			int dw = rect_.Width() - tex_desc->width;
+			int dh = rect_.Height() - tex_desc->height;
 			if (dw > dh)
 			{
 				child_[0]->rect_ = rect_;
-				child_[0]->rect_.right() = rect_.left() + tex->Width(0);
+				child_[0]->rect_.right() = rect_.left() + tex_desc->width;
 				child_[1]->rect_ = rect_;
-				child_[1]->rect_.left() = rect_.left() + tex->Width(0);
+				child_[1]->rect_.left() = rect_.left() + tex_desc->width;
 			}
 			else
 			{
 				child_[0]->rect_ = rect_;
-				child_[0]->rect_.bottom() = rect_.top() + tex->Height(0);
+				child_[0]->rect_.bottom() = rect_.top() + tex_desc->height;
 				child_[1]->rect_ = rect_;
-				child_[1]->rect_.top() = rect_.top() + tex->Height(0);
+				child_[1]->rect_.top() = rect_.top() + tex_desc->height;
 			}
 			// insert first child we create
-			return child_[0]->Insert(tex);
+			return child_[0]->Insert(tex_desc);
 		}
 	}
 	
@@ -175,19 +156,19 @@ public:
 		return !child_[0] && !child_[1];
 	}
 	
-	bool IsFit(KlayGE::TexturePtr const & tex)
+	bool IsFit(TextureDescPtr const & tex_desc)
 	{
-		return (rect_.Height() >= tex->Height(0)) && (rect_.Width() >= tex->Width(0));
+		return (rect_.Height() >= tex_desc->height) && (rect_.Width() >= tex_desc->width);
 	}
 	
-	bool CanInsert(KlayGE::TexturePtr const & tex)
+	bool CanInsert(TextureDescPtr const & tex_desc)
 	{
-		return this->IsFit(tex) && !this->Texture();
+		return this->IsFit(tex_desc) && !this->TextureDesc();
 	}
 	
-	bool CanPerfectlyInsert(KlayGE::TexturePtr const & tex)
+	bool CanPerfectlyInsert(TextureDescPtr const & tex_desc)
 	{
-		return (rect_.Width() == tex->Width(0)) && (rect_.Height() == tex->Height(0));
+		return (rect_.Width() == tex_desc->width) && (rect_.Height() == tex_desc->height);
 	}
 
 	boost::shared_ptr<TexPackNode> Child(uint32_t index)
@@ -205,61 +186,27 @@ public:
 		return rect_;
 	}
 
-	void Texture(KlayGE::TexturePtr const & tex)
+	void TextureDesc(TextureDescPtr const & tex_desc)
 	{
-		texture_ = tex;
+		tex_desc_ = tex_desc;
 	}
-	KlayGE::TexturePtr const & Texture() const
+	TextureDescPtr const & TextureDesc() const
 	{
-		return texture_;
+		return tex_desc_;
 	}
 
 private:
 	boost::shared_ptr<TexPackNode> child_[2];
 	KlayGE::Rect_T<uint32_t> rect_;
-	KlayGE::TexturePtr texture_;
+	TextureDescPtr tex_desc_;
 };
 
 
-// Fast sqrt for integer
-unsigned int sqrt_16(unsigned long M) 
-{ 
-	unsigned int N, i; 
-	unsigned long tmp, ttp;
-	if (0 == M)
-	{
-		return 0;
-	}
-	N = 0;
-	tmp = (M >> 30);
-	M <<= 2; 
-	if (tmp > 1)
-	{ 
-		++ N;
-		tmp -= N; 
-	}
-	for (i = 15; i > 0; -- i)
-	{ 
-		N <<= 1;
-		tmp <<= 2; 
-		tmp += (M >> 30);
-		ttp = N; 
-		ttp = (ttp << 1) + 1;
-		M <<= 2; 
-		if (tmp >= ttp)
-		{ 
-			tmp -= ttp; 
-			++ N; 
-		}
-	}
-	return N; 
-}
-
-void CalcPackInfo(std::vector<KlayGE::TexturePtr>& ta, int num_tiles, int tile_size, boost::shared_ptr<TexPackNode>& root)
+void CalcPackInfo(std::vector<TextureDescPtr>& ta, int num_tiles, int tile_size, boost::shared_ptr<TexPackNode>& root)
 {
 	root = MakeSharedPtr<TexPackNode>();
-	int width = sqrt_16(num_tiles) * tile_size;
-	root->Rect(KlayGE::Rect_T<uint32_t>(0, 0, width, width));
+	int size = num_tiles * tile_size;
+	root->Rect(KlayGE::Rect_T<uint32_t>(0, 0, size, size));
 	// The insert function traverses the tree looking for a place to insert the lightmap.
 	// It returns the pointer of the node the lightmap can go into or null to say it can't fit.
 	for (size_t i = 0; i < ta.size(); ++ i)
@@ -267,7 +214,7 @@ void CalcPackInfo(std::vector<KlayGE::TexturePtr>& ta, int num_tiles, int tile_s
 		boost::shared_ptr<TexPackNode> node = root->Insert(ta[i]);
 		if (node)
 		{
-			node->Texture(ta[i]);
+			node->TextureDesc(ta[i]);
 		}
 	}
 }
@@ -301,7 +248,7 @@ typedef std::vector<JTMLImageRecord> JTMLImageRecordArray;
 
 void ConvertTreeToJTML(boost::shared_ptr<TexPackNode> const & node, JTMLImageRecordArray& jirs, int tile_size)
 {
-	if (node->Texture())
+	if (node->TextureDesc())
 	{
 		JTMLImageRecord jir;
 		jir.u = TAM_Wrap;
@@ -310,8 +257,7 @@ void ConvertTreeToJTML(boost::shared_ptr<TexPackNode> const & node, JTMLImageRec
 		jir.y = node->Rect().top() / tile_size;
 		jir.w = node->Rect().Width() / tile_size;
 		jir.h = node->Rect().Height() / tile_size;
-		TextureNameTable const & table = GetTextureNameTable();
-		jir.name = table.find(node->Texture())->second;
+		jir.name = node->TextureDesc()->name;
 		jirs.push_back(jir);
 	}
 	if (!node->IsLeaf())
@@ -359,19 +305,29 @@ void WriteJTML(boost::shared_ptr<TexPackNode> const & root, std::string const & 
 
 void Tex2JTML(std::vector<std::string>& tex_names, uint32_t num_tiles, uint32_t tile_size, std::string& jtml_name)
 {
-	std::vector<KlayGE::TexturePtr> textures;
-	TextureNameTable& table = GetTextureNameTable();
-	textures.resize(tex_names.size());
+	std::vector<TextureDescPtr> tex_descs(tex_names.size());
 	for (size_t i = 0; i < tex_names.size(); ++ i)
 	{
 		cout << "Adding " << tex_names[i] << " (" << i + 1 << " / " << tex_names.size() << ") ...";
-		textures[i] = SyncLoadTexture(tex_names[i], EAH_CPU_Read);
-		table.insert(std::make_pair(textures[i], tex_names[i]));
+		
+		Texture::TextureType type;
+		uint32_t width, height, depth;
+		uint32_t num_mipmaps;
+		uint32_t array_size;
+		ElementFormat format;
+		uint32_t row_pitch, slice_pitch;
+		GetImageInfo(tex_names[i], type, width, height, depth, num_mipmaps, array_size, format, row_pitch, slice_pitch);
+		
+		tex_descs[i] = MakeSharedPtr<TextureDesc>();
+		tex_descs[i]->name = tex_names[i];
+		tex_descs[i]->width = width;
+		tex_descs[i]->height = height;
+		
 		cout << " DONE" << endl;
 	}
 
 	boost::shared_ptr<TexPackNode> root;
-	CalcPackInfo(textures, num_tiles, tile_size, root);
+	CalcPackInfo(tex_descs, num_tiles, tile_size, root);
 
 	WriteJTML(root, jtml_name, num_tiles, tile_size, EF_ABGR8);
 }
@@ -453,16 +409,6 @@ int main(int argc, char* argv[])
 		cout << "Output jtml name was not set." << endl;
 		return 1;
 	}
-
-	ResLoader::Instance().AddPath("../../../bin");
-
-	Context::Instance().LoadCfg("KlayGE.cfg");
-	ContextCfg context_cfg = Context::Instance().Config();
-	context_cfg.graphics_cfg.hdr = false;
-	Context::Instance().Config(context_cfg);
-
-	EmptyApp app;
-	app.Create();
 
 	Tex2JTML(tex_names, num_tiles, tile_size, jtml_name);
 
