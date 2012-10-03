@@ -258,6 +258,44 @@ namespace
 	};
 
 #define SPREADING_PP 1
+
+	class SpreadingPostProcessCS : public PostProcess
+	{
+	public:
+		SpreadingPostProcessCS()
+			: PostProcess(L"SpreadingCS")
+		{
+			input_pins_.push_back(std::make_pair("color_tex", TexturePtr()));
+			input_pins_.push_back(std::make_pair("depth_tex", TexturePtr()));
+
+			output_pins_.push_back(std::make_pair("spread_tex", TexturePtr()));
+
+			params_.push_back(std::make_pair("in_width_height", RenderEffectParameterPtr()));
+			params_.push_back(std::make_pair("max_radius", RenderEffectParameterPtr()));
+			params_.push_back(std::make_pair("focus_plane_inv_range", RenderEffectParameterPtr()));
+
+			this->Technique(Context::Instance().RenderFactoryInstance().LoadEffect("DepthOfFieldPP.fxml")->TechniqueByName("DepthOfFieldSpreadingCS"));
+		}
+
+		virtual void Apply()
+		{
+			RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+			re.BindFrameBuffer(re.DefaultFrameBuffer());
+
+			TexturePtr tex = this->OutputPin(0);
+
+			uint32_t tgx = (tex->Width(0) + BLOCK_SIZE_X - 1) / BLOCK_SIZE_X;
+			uint32_t tgy = (tex->Height(0) + BLOCK_SIZE_Y - 1) / BLOCK_SIZE_Y;
+
+			this->OnRenderBegin();
+			re.Dispatch(*technique_, tgx, tgy, 1);
+			this->OnRenderEnd();
+		}
+
+	private:
+		static uint32_t const BLOCK_SIZE_X = 16;
+		static uint32_t const BLOCK_SIZE_Y = 16;
+	};
 	
 	class DepthOfField : public PostProcess
 	{
@@ -291,7 +329,14 @@ namespace
 			spread_fb_ = rf.MakeFrameBuffer();
 
 #if SPREADING_PP
-			spreading_pp_ = LoadPostProcess(ResLoader::Instance().Open("Spreading.ppml"), "spreading");
+			if (cs_support_)
+			{
+				spreading_pp_ = MakeSharedPtr<SpreadingPostProcessCS>();
+			}
+			else
+			{
+				spreading_pp_ = LoadPostProcess(ResLoader::Instance().Open("Spreading.ppml"), "spreading");
+			}
 			spreading_pp_->SetParam(1, static_cast<float>(max_radius_));
 #else
 			spread_rl_ = rf.MakeRenderLayout();
@@ -300,11 +345,11 @@ namespace
 
 			if (cs_support_)
 			{
-				sat_pp_ = MakeSharedPtr<SummedAreaTablePostProcessCS>();
+				sat_pp_ = MakeSharedPtr<SATPostProcessCS>();
 			}
 			else
 			{
-				sat_pp_ = MakeSharedPtr<SummedAreaTablePostProcess>();
+				sat_pp_ = MakeSharedPtr<SATPostProcess>();
 			}
 
 			normalization_rl_ = rf.MakeRenderLayout();

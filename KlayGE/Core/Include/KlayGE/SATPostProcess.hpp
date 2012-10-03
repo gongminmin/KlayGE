@@ -41,10 +41,10 @@ namespace KlayGE
 		RenderEffectParameterPtr scale_ep_;
 	};
 
-	class KLAYGE_CORE_API SummedAreaTablePostProcess : public PostProcessChain
+	class KLAYGE_CORE_API SATPostProcess : public PostProcessChain
 	{
 	public:
-		SummedAreaTablePostProcess();
+		SATPostProcess();
 
 		virtual void InputPin(uint32_t index, TexturePtr const & tex);
 		using PostProcessChain::InputPin;
@@ -73,10 +73,10 @@ namespace KlayGE
 		bool dir_;
 	};
 
-	class KLAYGE_CORE_API SummedAreaTablePostProcessCS : public PostProcessChain
+	class KLAYGE_CORE_API SATPostProcessCS : public PostProcessChain
 	{
 	public:
-		SummedAreaTablePostProcessCS();
+		SATPostProcessCS();
 
 		virtual void InputPin(uint32_t index, TexturePtr const & tex);
 		using PostProcessChain::InputPin;

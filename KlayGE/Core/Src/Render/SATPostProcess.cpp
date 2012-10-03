@@ -67,12 +67,12 @@ namespace KlayGE
 
 	uint32_t const BLOCK_SIZE = 256;
 
-	SummedAreaTablePostProcess::SummedAreaTablePostProcess()
-		: PostProcessChain(L"SummedAreaTable")
+	SATPostProcess::SATPostProcess()
+		: PostProcessChain(L"SAT")
 	{
 	}
 
-	void SummedAreaTablePostProcess::InputPin(uint32_t index, TexturePtr const & tex)
+	void SATPostProcess::InputPin(uint32_t index, TexturePtr const & tex)
 	{
 		if (0 == index)
 		{
@@ -160,7 +160,7 @@ namespace KlayGE
 				uint32_t const parent_length = inter_tex_x_up[i + 1]->Width(0);
 				uint32_t const child_length = inter_tex_x_up[i]->Width(0);
 
-				RenderEffectPtr effect = rf.LoadEffect("SummedAreaTable.fxml");
+				RenderEffectPtr effect = rf.LoadEffect("SAT.fxml");
 				SATSeparableScanSweepPostProcessPtr pp = MakeSharedPtr<SATSeparableScanSweepPostProcess>(effect->TechniqueByName("SATScanXUpSweep"), true);
 				pp->Length(child_length);
 				pp->AddrOffset(float3(0.5f / child_length, 1.5f / child_length, 0));
@@ -175,7 +175,7 @@ namespace KlayGE
 				uint32_t const parent_length = inter_tex_x_down[i]->Width(0);
 				uint32_t const child_length = inter_tex_x_down[i + 1]->Width(0);
 
-				RenderEffectPtr effect = rf.LoadEffect("SummedAreaTable.fxml");
+				RenderEffectPtr effect = rf.LoadEffect("SAT.fxml");
 				SATSeparableScanSweepPostProcessPtr pp = MakeSharedPtr<SATSeparableScanSweepPostProcess>(effect->TechniqueByName("SATScanXDownSweep"), false);
 				pp->Length(child_length);
 				pp->InputPin(0, inter_tex_x_down[i]);
@@ -191,7 +191,7 @@ namespace KlayGE
 				uint32_t const parent_length = inter_tex_y_up[i + 1]->Height(0);
 				uint32_t const child_length = inter_tex_y_up[i]->Height(0);
 
-				RenderEffectPtr effect = rf.LoadEffect("SummedAreaTable.fxml");
+				RenderEffectPtr effect = rf.LoadEffect("SAT.fxml");
 				SATSeparableScanSweepPostProcessPtr pp = MakeSharedPtr<SATSeparableScanSweepPostProcess>(effect->TechniqueByName("SATScanYUpSweep"), true);
 				pp->Length(child_length);
 				pp->AddrOffset(float3(0.5f / child_length, 1.5f / child_length, 0));
@@ -206,7 +206,7 @@ namespace KlayGE
 				uint32_t const parent_length = inter_tex_y_down[i]->Height(0);
 				uint32_t const child_length = inter_tex_y_down[i + 1]->Height(0);
 
-				RenderEffectPtr effect = rf.LoadEffect("SummedAreaTable.fxml");
+				RenderEffectPtr effect = rf.LoadEffect("SAT.fxml");
 				SATSeparableScanSweepPostProcessPtr pp = MakeSharedPtr<SATSeparableScanSweepPostProcess>(effect->TechniqueByName("SATScanYDownSweep"), false);
 				pp->Length(child_length);
 				pp->InputPin(0, inter_tex_y_down[i]);
@@ -231,7 +231,7 @@ namespace KlayGE
 		output_pins_.push_back(std::make_pair("out_sum_tex", TexturePtr()));
 
 		RenderTechniquePtr tech;
-		RenderEffectPtr effect = Context::Instance().RenderFactoryInstance().LoadEffect("SummedAreaTable.fxml");
+		RenderEffectPtr effect = Context::Instance().RenderFactoryInstance().LoadEffect("SAT.fxml");
 		if (dir)
 		{
 			tech = effect->TechniqueByName("SATScanXCS");
@@ -279,7 +279,7 @@ namespace KlayGE
 		output_pins_.push_back(std::make_pair("out_tex", TexturePtr()));
 
 		RenderTechniquePtr tech;
-		RenderEffectPtr effect = Context::Instance().RenderFactoryInstance().LoadEffect("SummedAreaTable.fxml");
+		RenderEffectPtr effect = Context::Instance().RenderFactoryInstance().LoadEffect("SAT.fxml");
 		if (dir)
 		{
 			tech = effect->TechniqueByName("SATAddSumXCS");
@@ -317,12 +317,12 @@ namespace KlayGE
 	}
 
 
-	SummedAreaTablePostProcessCS::SummedAreaTablePostProcessCS()
-		: PostProcessChain(L"SummedAreaTableCS")
+	SATPostProcessCS::SATPostProcessCS()
+		: PostProcessChain(L"SATCS")
 	{
 	}
 
-	void SummedAreaTablePostProcessCS::InputPin(uint32_t index, TexturePtr const & tex)
+	void SATPostProcessCS::InputPin(uint32_t index, TexturePtr const & tex)
 	{
 		if (0 == index)
 		{
@@ -379,11 +379,11 @@ namespace KlayGE
 			{
 				inter_tex_x_up[0] = tex;
 			}
-			for (size_t i = 1; i < widths.size(); ++ i)
+			for (size_t i = 1; i < widths.size() - 1; ++ i)
 			{
 				inter_tex_x_up[i] = rf.MakeTexture2D(widths[i], tex_height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write | EAH_GPU_Unordered, NULL);
 			}
-			for (size_t i = 0; i < widths.size(); ++ i)
+			for (size_t i = 0; i < widths.size() - 1; ++ i)
 			{
 				inter_tex_x_down[i] = rf.MakeTexture2D(widths[i], tex_height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write | EAH_GPU_Unordered, NULL);
 			}
@@ -391,11 +391,11 @@ namespace KlayGE
 			{
 				inter_tex_y_up[0] = tex;
 			}
-			for (size_t i = 1; i < heights.size(); ++ i)
+			for (size_t i = 1; i < heights.size() - 1; ++ i)
 			{
 				inter_tex_y_up[i] = rf.MakeTexture2D(tex_width, heights[i], 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write | EAH_GPU_Unordered, NULL);
 			}
-			for (size_t i = 0; i < heights.size(); ++ i)
+			for (size_t i = 0; i < heights.size() - 1; ++ i)
 			{
 				inter_tex_y_down[i] = rf.MakeTexture2D(tex_width, heights[i], 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write | EAH_GPU_Unordered, NULL);
 			}
@@ -405,10 +405,13 @@ namespace KlayGE
 				PostProcessPtr pp = MakeSharedPtr<SATSeparableInBlockScanPostProcessCS>(true);
 				pp->InputPin(0, inter_tex_x_up[i]);
 				pp->OutputPin(0, inter_tex_x_down[i]);
-				pp->OutputPin(1, inter_tex_x_up[i + 1]);
+				if (i + 1 < inter_tex_x_up.size())
+				{
+					pp->OutputPin(1, inter_tex_x_up[i + 1]);
+				}
 				this->Append(pp);
 			}
-			for (int i = static_cast<int>(widths.size()) - 2; i > 0; -- i)
+			for (size_t i = widths.size() - 2; i > 0; -- i)
 			{
 				PostProcessPtr pp = MakeSharedPtr<SATAddSumPostProcessCS>(true);
 				pp->InputPin(0, inter_tex_x_down[i - 1]);
@@ -422,10 +425,13 @@ namespace KlayGE
 				PostProcessPtr pp = MakeSharedPtr<SATSeparableInBlockScanPostProcessCS>(false);
 				pp->InputPin(0, inter_tex_y_up[i]);
 				pp->OutputPin(0, inter_tex_y_down[i]);
-				pp->OutputPin(1, inter_tex_y_up[i + 1]);
+				if (i + 1 < inter_tex_y_up.size())
+				{
+					pp->OutputPin(1, inter_tex_y_up[i + 1]);
+				}
 				this->Append(pp);
 			}
-			for (int i = static_cast<int>(heights.size()) - 2; i > 0; -- i)
+			for (size_t i = heights.size() - 2; i > 0; -- i)
 			{
 				PostProcessPtr pp = MakeSharedPtr<SATAddSumPostProcessCS>(false);
 				pp->InputPin(0, inter_tex_y_down[i - 1]);

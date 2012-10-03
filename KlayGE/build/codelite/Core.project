@@ -118,7 +118,7 @@
       <File Name="../../media/RenderFX/SSVO.fxml"/>
       <File Name="../../media/RenderFX/Stereoscopic.fxml"/>
       <File Name="../../media/RenderFX/SumLum.fxml"/>
-      <File Name="../../media/RenderFX/SummedAreaTable.fxml"/>
+      <File Name="../../media/RenderFX/SAT.fxml"/>
       <File Name="../../media/RenderFX/TAA.fxml"/>
       <File Name="../../media/RenderFX/ToneMapping.fxml"/>
       <File Name="../../media/RenderFX/Upsampling.fxml"/>

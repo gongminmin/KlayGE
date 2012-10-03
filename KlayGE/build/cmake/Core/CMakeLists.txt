@@ -180,7 +180,7 @@ SET(RENDERING_EFFECT_FILES
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/SSVO.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/Stereoscopic.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/SumLum.fxml
-	${KLAYGE_PROJECT_DIR}/media/RenderFX/SummedAreaTable.fxml
+	${KLAYGE_PROJECT_DIR}/media/RenderFX/SAT.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/TAA.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/ToneMapping.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/Upsampling.fxml
