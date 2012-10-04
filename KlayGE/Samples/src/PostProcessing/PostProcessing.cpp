@@ -324,11 +324,6 @@ uint32_t PostProcessingApp::DoUpdate(uint32_t pass)
 {
 	RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 		
-	if (0 == pass)
-	{
-		re.BindFrameBuffer(color_fb_);
-	}
-
 	uint32_t ret = deferred_rendering_->Update(pass);
 	if (ret & App3DFramework::URV_Finished)
 	{

@@ -1550,7 +1550,7 @@ namespace KlayGE
 					}
 					if (taa_enabled_)
 					{
-						taa_pp_->Apply();
+						taa_pp_->Render();
 						re.Render(*technique_copy_depth_, *rl_quad_);
 					}
 					else
