@@ -17,6 +17,7 @@
   </VirtualDirectory>
   <VirtualDirectory Name="Effects">
     <File Name="../../media/ModelViewer/ModelViewer.fxml"/>
+    <File Name="../../media/ModelViewer/MVUtil.fxml"/>
   </VirtualDirectory>
   <VirtualDirectory Name="UI">
     <File Name="../../media/ModelViewer/ModelViewer.uiml"/>

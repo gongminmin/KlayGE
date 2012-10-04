@@ -135,6 +135,7 @@
       <File Name="../../media/PostProcessors/GammaCorrection.ppml"/>
       <File Name="../../media/PostProcessors/LensEffects.ppml"/>
       <File Name="../../media/PostProcessors/RSM2VPLs.ppml"/>
+      <File Name="../../media/PostProcessors/SAT.ppml"/>
       <File Name="../../media/PostProcessors/Stereoscopic.ppml"/>
       <File Name="../../media/PostProcessors/Upsampling.ppml"/>
       <File Name="../../media/PostProcessors/TAA.ppml"/>

@@ -26,6 +26,9 @@
     <File Name="../../../klayge_logo.ico"/>
     <File Name="../../media/Common/KlayGESample.rc"/>
   </VirtualDirectory>
+  <VirtualDirectory Name="Post Processors">
+    <File Name="../../media/MotionBlurDoF/Spreading.ppml"/>
+  </VirtualDirectory>
   <Settings Type="Executable">
     <Configuration Name="Debug_linux_x64" CompilerType="gnu g++" DebuggerType="GNU gdb debugger" Type="Executable" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
       <Compiler Options="-m64 -g -Wall -O0 -march=core2" Required="yes" PreCompiledHeader="">
