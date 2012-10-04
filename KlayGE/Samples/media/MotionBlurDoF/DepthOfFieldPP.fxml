@@ -169,15 +169,13 @@ void DepthOfFieldSpreadingGS4(point float4 in_clr[1] : TEXCOORD0, point float4 i
 
 	<macro name="BLOCK_SIZE_X" value="16"/>
 	<macro name="BLOCK_SIZE_Y" value="16"/>
-	<macro name="BLOCK_SIZE" value="256"/>
 	<macro name="MAX_RADIUS" value="8"/>
 
 	<parameter type="rw_texture2D" elem_type="float4" name="spread_tex"/>
 	
 	<shader type="compute_shader" version="5">
 		<![CDATA[
-groupshared float shared_radius[BLOCK_SIZE_Y + MAX_RADIUS * 2 + 1][BLOCK_SIZE_X + MAX_RADIUS * 2 + 1];
-groupshared float4 shared_color[BLOCK_SIZE_Y + MAX_RADIUS * 2 + 1][BLOCK_SIZE_X + MAX_RADIUS * 2 + 1];
+groupshared float2 shared_radius[(BLOCK_SIZE_X + MAX_RADIUS * 2 + 1) * (BLOCK_SIZE_Y + MAX_RADIUS * 2 + 1)];
 
 [numthreads(BLOCK_SIZE_X, BLOCK_SIZE_Y, 1)]
 void DepthOfFieldSpreadingCS(uint3 gid : SV_GroupID, 
@@ -185,53 +183,58 @@ void DepthOfFieldSpreadingCS(uint3 gid : SV_GroupID,
 				uint3 gtid : SV_GroupThreadID, 
 				uint GI : SV_GroupIndex)
 {
-	int2 original_size = in_width_height.xy - max_radius * 4 - 1;
+	float2 original_size = in_width_height.xy - max_radius * 4 - 1;
+	float2 inv_original_size = 1 / original_size;
+	const uint shared_width = BLOCK_SIZE_X + MAX_RADIUS * 2 + 1;
 
-	for (int t = 0; t < 5; ++ t)
+	int2 start_coord = gid.xy * int2(BLOCK_SIZE_X, BLOCK_SIZE_Y) - MAX_RADIUS - 1;
+	for (uint t = 0; t < (shared_width * shared_width + BLOCK_SIZE_X * BLOCK_SIZE_Y - 1) / (BLOCK_SIZE_X * BLOCK_SIZE_Y); ++ t)
 	{
-		uint index = GI + t * BLOCK_SIZE;
-		if (index < (BLOCK_SIZE_X + MAX_RADIUS * 2 + 1) * (BLOCK_SIZE_Y + MAX_RADIUS * 2 + 1))
+		uint index = GI + t * (BLOCK_SIZE_X * BLOCK_SIZE_Y);
+		if (index < shared_width * shared_width)
 		{
-			uint y = index / (BLOCK_SIZE_X + MAX_RADIUS * 2 + 1);
-			uint x = index - y * (BLOCK_SIZE_X + MAX_RADIUS * 2 + 1);
-			int2 addr = gid.xy * int2(BLOCK_SIZE_X, BLOCK_SIZE_Y) - MAX_RADIUS - 1 + int2(x, y) - 2 * max_radius;
+			uint y = index / shared_width;
+			uint x = index - y * shared_width;
+			int2 addr = start_coord - 2 * max_radius + int2(x, y);
 			if (all(addr >= -max_radius) && all(addr < original_size + max_radius))
 			{
-				addr = clamp(addr, 0, original_size - 1);
-				float radius = floor(saturate(abs(depth_tex[addr].x * focus_plane_inv_range.y + focus_plane_inv_range.x)) * max_radius);
+				float2 original_coord = (addr + 0.5f) * inv_original_size;
+				float radius = floor(saturate(abs(depth_tex.SampleLevel(point_sampler, original_coord, 0).x * focus_plane_inv_range.y + focus_plane_inv_range.x)) * max_radius);
 				float area = (radius * 2 + 1) * (radius * 2 + 1);
-				shared_radius[y][x] = radius;
-				shared_color[y][x] = float4(color_tex[addr].xyz, 1) / area;
+				shared_radius[y * shared_width + x] = float2(radius, 1 / area);
 			}
 			else
 			{
-				shared_radius[y][x] = max_radius + 1;
-				shared_color[y][x] = 0;
+				shared_radius[y * shared_width + x] = float2(max_radius + 1, 0);
 			}
 		}
 	}
 	GroupMemoryBarrierWithGroupSync();
 
 	float4 ret = 0;
-
-	int4 offset[4] = { int4(+1, +1, 0, 0), int4(-1, +1, -1, 0), int4(+1, -1, 0, -1), int4(-1, -1, -1, -1) };
-	int scale[4] = { +1, -1, -1, +1 };
-	int2 center_coord = gtid.xy + MAX_RADIUS + 1;
+	
+	float4 offset[4] = { float4(+1, +1, 0, 0), float4(-1, +1, -1, 0), float4(+1, -1, 0, -1), float4(-1, -1, -1, -1) };
+	float scale[4] = { +1, -1, -1, +1 };
+	float2 center_coord = gtid.xy + MAX_RADIUS + 1;
+	float2 global_center_coord = dtid.xy - max_radius * 2 + 0.5f;
 	for (int i = 0; i <= max_radius; ++ i)
 	{
 		for (int dir = 0; dir < 4; ++ dir)
 		{
-			int4 o = offset[dir];
-			int s = scale[dir];
+			float4 o = offset[dir];
+			float s = scale[dir];
 
-			int2 target_coord = center_coord + o.xy * i + o.zw;
-			float radius = shared_radius[target_coord.y][target_coord.x];
-			if (radius == i)
+			float2 offset = o.xy * i + o.zw;
+			float2 target_coord = center_coord + offset;
+			float2 radius = shared_radius[target_coord.y * shared_width + target_coord.x];
+			if (radius.x == i)
 			{
-				ret += s * shared_color[target_coord.y][target_coord.x];
+				float2 original_coord = (global_center_coord + offset) * inv_original_size;
+				ret += s * float4(color_tex.SampleLevel(point_sampler, original_coord, 0).xyz, 1) * radius.y;
 			}
 		}
 	}
+	
 	spread_tex[dtid.xy] = ret;
 }
 		]]>

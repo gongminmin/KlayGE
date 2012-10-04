@@ -138,10 +138,10 @@ namespace KlayGE
 
 	enum ColorMask
 	{
-		CMASK_Red   = 1UL << 3,
-		CMASK_Green = 1UL << 2,
-		CMASK_Blue  = 1UL << 1,
-		CMASK_Alpha = 1UL << 0,
+		CMASK_Red   = 1UL << 0,
+		CMASK_Green = 1UL << 1,
+		CMASK_Blue  = 1UL << 2,
+		CMASK_Alpha = 1UL << 3,
 		CMASK_All   = CMASK_Red | CMASK_Green | CMASK_Blue | CMASK_Alpha
 	};
 

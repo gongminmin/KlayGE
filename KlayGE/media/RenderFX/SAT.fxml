@@ -143,7 +143,7 @@ float4 SATScanYDownSweepPS(float2 tex_coord0 : TEXCOORD0) : SV_Target
 		<![CDATA[
 groupshared float4 shared_forscan[BLOCK_SIZE];
 
-float4 ScanWarp(uint GI)
+float4 InclusiveScanWarp(uint GI)
 {
 	uint lane = GI & 31;
 	[unroll]
@@ -151,20 +151,27 @@ float4 ScanWarp(uint GI)
 	{
 		if (lane >= i)
 		{
-			shared_forscan[GI] = shared_forscan[GI - i] + shared_forscan[GI];
+			shared_forscan[GI] += shared_forscan[GI - i];
 		}
 	}
+	return shared_forscan[GI];
+}
+
+float4 ExclusiveScanWarp(uint GI)
+{
+	InclusiveScanWarp(GI);
+	uint lane = GI & 31;
 	return (lane > 0) ? shared_forscan[GI - 1] : 0;
 }
 
-float4 ScanBlock(uint GI)
+float4 InclusiveScanBlock(uint GI, float4 input)
 {
 	uint lane = GI & 31;
 	uint warp_id = GI >> 5;
 	
-	float4 input = shared_forscan[GI];
+	shared_forscan[GI] = input;
 
-	float4 val = ScanWarp(GI);
+	float4 val = InclusiveScanWarp(GI);
 	GroupMemoryBarrierWithGroupSync();
 	
 	if (31 == lane)
@@ -175,7 +182,7 @@ float4 ScanBlock(uint GI)
 
 	if (0 == warp_id)
 	{
-		ScanWarp(GI);
+		ExclusiveScanWarp(GI);
 	}
 	GroupMemoryBarrierWithGroupSync();
 	
@@ -183,12 +190,8 @@ float4 ScanBlock(uint GI)
 	{
 		val += shared_forscan[warp_id - 1];
 	}
-	GroupMemoryBarrierWithGroupSync();
 	
-	shared_forscan[GI] = val;
-	GroupMemoryBarrierWithGroupSync();
-
-	return val + input;
+	return val;
 }
 
 [numthreads(BLOCK_SIZE, 1, 1)]
@@ -196,13 +199,11 @@ void InclusiveScanXCS(uint3 gid : SV_GroupID,
 				uint3 dtid : SV_DispatchThreadID, 
 				uint GI : SV_GroupIndex)
 {
-	shared_forscan[GI] = in_tex[dtid.xy];
-	float4 sum = ScanBlock(GI);
-	out_tex[dtid.xy] = shared_forscan[GI + 1];
+	float4 val = InclusiveScanBlock(GI, in_tex[dtid.xy]);
+	out_tex[dtid.xy] = val;
 	if (BLOCK_SIZE - 1 == GI)
 	{
-		out_sum_tex[gid.xy] = sum;
-		out_tex[dtid.xy] = sum;
+		out_sum_tex[gid.xy] = val;
 	}
 }
 
@@ -211,13 +212,11 @@ void InclusiveScanYCS(uint3 gid : SV_GroupID,
 				uint3 dtid : SV_DispatchThreadID, 
 				uint GI : SV_GroupIndex)
 {
-	shared_forscan[GI] = in_tex[dtid.xy];
-	float4 sum = ScanBlock(GI);
-	out_tex[dtid.xy] = shared_forscan[GI + 1];
+	float4 val = InclusiveScanBlock(GI, in_tex[dtid.xy]);
+	out_tex[dtid.xy] = val;
 	if (BLOCK_SIZE - 1 == GI)
 	{
-		out_sum_tex[gid.xy] = sum;
-		out_tex[dtid.xy] = sum;
+		out_sum_tex[gid.xy] = val;
 	}
 }
 
