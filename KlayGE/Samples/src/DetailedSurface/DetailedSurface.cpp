@@ -173,9 +173,9 @@ namespace
 
 			technique_ = rf.LoadEffect("DetailedSurface.fxml")->TechniqueByName("Parallax");
 
-			tile_bb_[0] = int4(1, 1, 4, 4);
-			tile_bb_[1] = int4(7, 1, 4, 4);
-			tile_bb_[2] = int4(1, 7, 4, 4);
+			tile_bb_[0] = int4(0, 0, 4, 4);
+			tile_bb_[1] = int4(4, 0, 4, 4);
+			tile_bb_[2] = int4(0, 4, 4, 4);
 
 			*(technique_->Effect().ParameterByName("diffuse_tex_bb")) = tile_bb_[0];
 			*(technique_->Effect().ParameterByName("normal_tex_bb")) = tile_bb_[1];

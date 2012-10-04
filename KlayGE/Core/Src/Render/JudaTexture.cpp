@@ -26,6 +26,8 @@
 
 namespace
 {
+	uint32_t const JUDA_TEX_VERSION = 2;
+
 	using namespace KlayGE;
 
 	void u8_copy_1(uint8_t* output, uint8_t const * rhs)
@@ -112,7 +114,7 @@ namespace KlayGE
 	int const THRESHOLD_BIAS = 10;
 
 	JudaTexture::JudaTexture(uint32_t num_tiles, uint32_t tile_size, ElementFormat format)
-		: root_(new quadtree_node),
+		: root_(MakeSharedPtr<quadtree_node>()),
 			num_tiles_(num_tiles), tile_size_(tile_size), format_(format),
 			texel_size_(NumFormatBytes(format)),
 			decode_tick_(0), tile_tick_(0)
@@ -243,14 +245,28 @@ namespace KlayGE
 			}
 		}
 	}
+	
+	void JudaTexture::AddImageEntry(std::string const & name, uint32_t x, uint32_t y, uint32_t w, uint32_t h, TexAddressingMode addr_u, TexAddressingMode addr_v, Color const & border_clr)
+	{
+		ImageEntry entry;
+		entry.name = name;
+		entry.x = static_cast<uint16_t>(x);
+		entry.y = static_cast<uint16_t>(y);
+		entry.w = static_cast<uint16_t>(w);
+		entry.h = static_cast<uint16_t>(h);
+		entry.addr_u_v = static_cast<uint8_t>((addr_v << 4) | addr_u);
+		entry.border_clr = border_clr;
+		image_entries_.push_back(entry);
+	}
 
-	void JudaTexture::CommitTiles(std::vector<std::vector<uint8_t> > const & data, std::vector<uint32_t> const & tile_ids)
+	void JudaTexture::CommitTiles(std::vector<std::vector<uint8_t> > const & data, std::vector<uint32_t> const & tile_ids, std::vector<uint32_t> const & tile_attrs)
 	{
 		uint32_t const full_tile_bytes = tile_size_ * tile_size_ * texel_size_;
 
 		if (EMPTY_DATA_INDEX == root_->data_index)
 		{
 			root_->data_index = this->AllocateDataBlock();
+			root_->attr = 0xFFFFFFFF;
 			data_blocks_[root_->data_index].resize(full_tile_bytes, 0);
 		}
 
@@ -266,6 +282,7 @@ namespace KlayGE
 			{
 				node->data_index = this->AllocateDataBlock();
 			}
+			node->attr = tile_attrs[i];
 			data_blocks_[node->data_index] = data[i];
 		}
 		
@@ -292,6 +309,7 @@ namespace KlayGE
 				{
 					node->data_index = this->AllocateDataBlock();
 				}
+				node->attr = 0xFFFFFFFF;
 				data_blocks_[node->data_index].resize(full_tile_bytes);
 				this->DecodeATile(&data_blocks_[node->data_index], shuff, 1);
 			}
@@ -320,6 +338,10 @@ namespace KlayGE
 					{
 						node->data_index = this->AllocateDataBlock();
 					}
+					if (level != static_cast<int>(tree_levels_) - 1)
+					{
+						node->attr = 0xFFFFFFFF;
+					}
 					data_blocks_[node->data_index].resize(full_tile_bytes);
 					for (size_t y = 0; y < level_tile_size; ++ y)
 					{
@@ -344,6 +366,7 @@ namespace KlayGE
 					{
 						this->DeallocateDataBlock(node->data_index);
 						node->data_index = EMPTY_DATA_INDEX;
+						node->attr = 0xFFFFFFFF;
 					}
 
 					uint32_t branch = this->GetLevelBranch(shuff, level);
@@ -633,7 +656,7 @@ namespace KlayGE
 			uint32_t branch = this->GetLevelBranch(shuff, level);
 			if (!(*node)->children[branch])
 			{
-				(*node)->children[branch].reset(new quadtree_node);
+				(*node)->children[branch] = MakeSharedPtr<quadtree_node>();
 			}
 			
 			node = &((*node)->children[branch]);
@@ -777,8 +800,8 @@ namespace KlayGE
 		uint32_t tile_size;
 		ElementFormat format;
 
-		boost::shared_ptr<boost::interprocess::file_mapping> file(new boost::interprocess::file_mapping(ResLoader::Instance().Locate(file_name).c_str(), boost::interprocess::read_only));
-		boost::shared_ptr<boost::interprocess::mapped_region> region(new boost::interprocess::mapped_region(*file, boost::interprocess::read_only));
+		boost::shared_ptr<boost::interprocess::file_mapping> file = MakeSharedPtr<boost::interprocess::file_mapping>(ResLoader::Instance().Locate(file_name).c_str(), boost::interprocess::read_only);
+		boost::shared_ptr<boost::interprocess::mapped_region> region = MakeSharedPtr<boost::interprocess::mapped_region>(*file, boost::interprocess::read_only);
 		uint8_t* buf = static_cast<uint8_t*>(region->get_address());
 		uint8_t* ptr = buf;
 
@@ -787,7 +810,7 @@ namespace KlayGE
 		ptr += sizeof(fourcc);
 
 		uint32_t version = *reinterpret_cast<uint32_t*>(ptr);
-		Verify(1 == version);
+		Verify(JUDA_TEX_VERSION == version);
 		ptr += sizeof(version);
 
 		num_tiles = *reinterpret_cast<uint32_t*>(ptr);
@@ -799,10 +822,38 @@ namespace KlayGE
 
 		uint32_t non_empty_nodes = *reinterpret_cast<uint32_t*>(ptr);
 		ptr += sizeof(non_empty_nodes);
+
+		uint32_t num_image_entries = *reinterpret_cast<uint32_t*>(ptr);
+		ptr += sizeof(num_image_entries);
+		std::vector<JudaTexture::ImageEntry> image_entries(num_image_entries);
+		for (uint32_t i = 0; i < num_image_entries; ++ i)
+		{
+			uint16_t len = *reinterpret_cast<uint16_t*>(ptr);
+			ptr += sizeof(len);
+			image_entries[i].name.resize(len);
+			memcpy(&image_entries[i].name[0], ptr, len);
+			ptr += len;
+
+			image_entries[i].x = *reinterpret_cast<uint16_t*>(ptr);
+			ptr += sizeof(image_entries[i].x);
+			image_entries[i].y = *reinterpret_cast<uint16_t*>(ptr);
+			ptr += sizeof(image_entries[i].y);
+			image_entries[i].w = *reinterpret_cast<uint16_t*>(ptr);
+			ptr += sizeof(image_entries[i].w);
+			image_entries[i].h = *reinterpret_cast<uint16_t*>(ptr);
+			ptr += sizeof(image_entries[i].h);
+
+			image_entries[i].addr_u_v = *reinterpret_cast<uint8_t*>(ptr);
+			ptr += sizeof(image_entries[i].addr_u_v);
+
+			image_entries[i].border_clr = *reinterpret_cast<Color*>(ptr);
+			ptr += sizeof(image_entries[i].border_clr);
+		}
+
 		uint32_t data_blocks_offset = *reinterpret_cast<uint32_t*>(ptr);
 		ptr += sizeof(data_blocks_offset);
 
-		JudaTexturePtr ret(new JudaTexture(num_tiles, tile_size, format));
+		JudaTexturePtr ret = MakeSharedPtr<JudaTexture>(num_tiles, tile_size, format);
 
 		uint32_t tree_levels = ret->TreeLevels();
 
@@ -820,12 +871,28 @@ namespace KlayGE
 			ptr += size * sizeof(this_start_index_levels[0]);
 			for (size_t j = 0; j < size; ++ j)
 			{
-				this_level[j].reset(new JudaTexture::quadtree_node);
+				this_level[j] = MakeSharedPtr<JudaTexture::quadtree_node>();
 
 				if (!(this_start_index_levels[j] >> 31))
 				{
 					this_level[j]->data_index = data_index;
 					++ data_index;
+				}
+			}
+			if (i == tree_levels - 1)
+			{
+				std::vector<uint32_t> this_attr_levels(reinterpret_cast<uint32_t*>(ptr), reinterpret_cast<uint32_t*>(ptr) + size);
+				ptr += size * sizeof(this_attr_levels[0]);
+				for (size_t j = 0; j < size; ++ j)
+				{
+					this_level[j]->attr = this_attr_levels[j];
+				}
+			}
+			else
+			{
+				for (size_t j = 0; j < size; ++ j)
+				{
+					this_level[j]->attr = 0xFFFFFFFF;
 				}
 			}
 
@@ -863,6 +930,7 @@ namespace KlayGE
 		ret->input_region_ = region;
 		ret->input_buf_ = buf;
 		ret->data_blocks_pos_ = reinterpret_cast<uint64_t*>(buf + data_blocks_offset - (non_empty_nodes + 1) * sizeof(uint64_t));
+		ret->image_entries_ = image_entries;
 
 		return ret;
 	}
@@ -874,12 +942,12 @@ namespace KlayGE
 		std::vector<JudaTexture::quadtree_node_ptr> this_level;
 		std::vector<JudaTexture::quadtree_node_ptr> next_level;
 
-		boost::shared_ptr<std::ostream> ofs(new std::ofstream(file_name.c_str(), std::ios_base::out | std::ios_base::binary));
+		boost::shared_ptr<std::ostream> ofs = MakeSharedPtr<std::ofstream>(file_name.c_str(), std::ios_base::out | std::ios_base::binary);
 		
 		uint32_t fourcc = MakeFourCC<'J', 'D', 'T', ' '>::value;
 		ofs->write(reinterpret_cast<char const *>(&fourcc), sizeof(fourcc));
 
-		uint32_t version = 1;
+		uint32_t version = JUDA_TEX_VERSION;
 		ofs->write(reinterpret_cast<char const *>(&version), sizeof(version));
 
 		ofs->write(reinterpret_cast<char const *>(&juda_tex->num_tiles_), sizeof(juda_tex->num_tiles_));
@@ -888,6 +956,24 @@ namespace KlayGE
 
 		uint32_t non_empty_nodes = juda_tex->NumNonEmptyNodes();
 		ofs->write(reinterpret_cast<char const *>(&non_empty_nodes), sizeof(non_empty_nodes));
+
+		uint32_t num_image_entries = juda_tex->image_entries_.size();
+		ofs->write(reinterpret_cast<char const *>(&num_image_entries), sizeof(num_image_entries));
+		for (uint32_t i = 0; i < num_image_entries; ++ i)
+		{
+			uint16_t len = static_cast<uint16_t>(juda_tex->image_entries_[i].name.size());
+			ofs->write(reinterpret_cast<char const *>(&len), sizeof(len));
+			ofs->write(juda_tex->image_entries_[i].name.c_str(), len);
+
+			ofs->write(reinterpret_cast<char const *>(&juda_tex->image_entries_[i].x), sizeof(juda_tex->image_entries_[i].x));
+			ofs->write(reinterpret_cast<char const *>(&juda_tex->image_entries_[i].y), sizeof(juda_tex->image_entries_[i].y));
+			ofs->write(reinterpret_cast<char const *>(&juda_tex->image_entries_[i].w), sizeof(juda_tex->image_entries_[i].w));
+			ofs->write(reinterpret_cast<char const *>(&juda_tex->image_entries_[i].h), sizeof(juda_tex->image_entries_[i].h));
+
+			ofs->write(reinterpret_cast<char const *>(&juda_tex->image_entries_[i].addr_u_v), sizeof(juda_tex->image_entries_[i].addr_u_v));
+
+			ofs->write(reinterpret_cast<char const *>(&juda_tex->image_entries_[i].border_clr), sizeof(juda_tex->image_entries_[i].border_clr));
+		}
 
 		std::ostream::pos_type data_blocks_offset_pos = ofs->tellp();
 		
@@ -940,6 +1026,14 @@ namespace KlayGE
 					non_empty_block_data_index.push_back(this_level[j]->data_index);
 				}
 				ofs->write(reinterpret_cast<char const *>(&index), sizeof(index));
+			}
+
+			if (i == juda_tex->TreeLevels() - 1)
+			{
+				for (size_t j = 0; j < this_level.size(); ++ j)
+				{
+					ofs->write(reinterpret_cast<char const *>(&this_level[j]->attr), sizeof(this_level[j]->attr));
+				}
 			}
 
 			this_level.clear();

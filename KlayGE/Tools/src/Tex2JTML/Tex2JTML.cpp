@@ -344,7 +344,7 @@ int main(int argc, char* argv[])
 		("help,H", "Produce help message")
 		("input-name,I", boost::program_options::value<std::string>(), "Input font name.")
 		("output-name,O", boost::program_options::value<std::string>(), "Output font name.")
-		("num-tiles,N", boost::program_options::value<int>(&num_tiles)->default_value(4096), "Number of tiles. Default is 4096.")
+		("num-tiles,N", boost::program_options::value<int>(&num_tiles)->default_value(2048), "Number of tiles. Default is 2048.")
 		("tile-size,T", boost::program_options::value<int>(&tile_size)->default_value(128), "Tile size. Default is 128.")
 		("version,v", "Version.");
 

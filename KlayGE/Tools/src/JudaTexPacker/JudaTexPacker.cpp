@@ -82,10 +82,10 @@ struct calc_border : public address_calculator
 
 boost::shared_ptr<address_calculator> address_calculators[4] = 
 {
-	boost::shared_ptr<address_calculator>(new calc_wrap),
-	boost::shared_ptr<address_calculator>(new calc_mirror),
-	boost::shared_ptr<address_calculator>(new calc_clamp),
-	boost::shared_ptr<address_calculator>(new calc_border)
+	MakeSharedPtr<calc_wrap>(),
+	MakeSharedPtr<calc_mirror>(),
+	MakeSharedPtr<calc_clamp>(),
+	MakeSharedPtr<calc_border>()
 };
 
 void PackJTML(std::string const & jtml_name)
@@ -104,7 +104,7 @@ void PackJTML(std::string const & jtml_name)
 		num_tiles *= 2;
 	}
 
-	uint32_t tile_size = root->AttribInt("tile_size", 256);
+	uint32_t tile_size = root->AttribInt("tile_size", 128);
 	std::string fmt_str = root->AttribString("format", "");
 	ElementFormat format = EF_ARGB8;
 	if ("ARGB8" == fmt_str)
@@ -117,12 +117,13 @@ void PackJTML(std::string const & jtml_name)
 	}
 	uint32_t pixel_size = NumFormatBytes(format);
 
-	JudaTexturePtr juda_tex(new JudaTexture(num_tiles, tile_size, format));
+	JudaTexturePtr juda_tex = MakeSharedPtr<JudaTexture>(num_tiles, tile_size, format);
 
 	uint32_t level = juda_tex->TreeLevels() - 1;
 
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-	for (XMLNodePtr node = root->FirstNode("image"); node; node = node->NextSibling("image"))
+	uint32_t attr = 0;
+	for (XMLNodePtr node = root->FirstNode("image"); node; node = node->NextSibling("image"), ++ attr)
 	{
 		timer.restart();
 
@@ -152,64 +153,47 @@ void PackJTML(std::string const & jtml_name)
 			break;
 		}
 
+		TexAddressingMode addr_u, addr_v;
 		boost::shared_ptr<address_calculator> calc_u, calc_v;
-		if ("wrap" == address_u_str)
+		if ("mirror" == address_u_str)
 		{
+			addr_u = TAM_Mirror;
+			calc_u = address_calculators[TAM_Mirror];
+		}
+		else if ("clamp" == address_u_str)
+		{
+			addr_u = TAM_Clamp;
+			calc_u = address_calculators[TAM_Clamp];
+		}
+		else if ("border" == address_u_str)
+		{
+			addr_u = TAM_Border;
+			calc_u = address_calculators[TAM_Border];
+		}
+		else
+		{
+			addr_u = TAM_Wrap;
 			calc_u = address_calculators[TAM_Wrap];
 		}
+		if ("mirror" == address_v_str)
+		{
+			addr_v = TAM_Mirror;
+			calc_v = address_calculators[TAM_Mirror];
+		}
+		else if ("clamp" == address_v_str)
+		{
+			addr_v = TAM_Clamp;
+			calc_v = address_calculators[TAM_Clamp];
+		}
+		else if ("border" == address_v_str)
+		{
+			addr_v = TAM_Border;
+			calc_v = address_calculators[TAM_Border];
+		}
 		else
 		{
-			if ("mirror" == address_u_str)
-			{
-				calc_u = address_calculators[TAM_Mirror];
-			}
-			else
-			{
-				if ("clamp" == address_u_str)
-				{
-					calc_u = address_calculators[TAM_Clamp];
-				}
-				else
-				{
-					if ("border" == address_u_str)
-					{
-						calc_u = address_calculators[TAM_Border];
-					}
-					else
-					{
-						calc_u = address_calculators[TAM_Wrap];
-					}
-				}
-			}
-		}
-		if ("wrap" == address_v_str)
-		{
+			addr_v = TAM_Wrap;
 			calc_v = address_calculators[TAM_Wrap];
-		}
-		else
-		{
-			if ("mirror" == address_v_str)
-			{
-				calc_v = address_calculators[TAM_Mirror];
-			}
-			else
-			{
-				if ("clamp" == address_v_str)
-				{
-					calc_v = address_calculators[TAM_Clamp];
-				}
-				else
-				{
-					if ("border" == address_v_str)
-					{
-						calc_v = address_calculators[TAM_Border];
-					}
-					else
-					{
-						calc_v = address_calculators[TAM_Wrap];
-					}
-				}
-			}
 		}
 
 		cout << "Processing " << name << "... ";
@@ -233,23 +217,28 @@ void PackJTML(std::string const & jtml_name)
 		int32_t in_num_tiles_x = std::min((in_width + tile_size - 1) / tile_size, num_tiles);
 		int32_t in_num_tiles_y = std::min((in_height + tile_size - 1) / tile_size, num_tiles);
 
-		int32_t beg_tile_x = std::max(x - 1, 0) - x;
-		int32_t end_tile_x = std::min(static_cast<int32_t>(x + in_num_tiles_x + 1), static_cast<int32_t>(num_tiles)) - x;
-		int32_t beg_tile_y = std::max(y - 1, 0) - y;
-		int32_t end_tile_y = std::min(static_cast<int32_t>(y + in_num_tiles_y + 1), static_cast<int32_t>(num_tiles)) - y;
+		int32_t beg_tile_x = 0;
+		int32_t end_tile_x = std::min(static_cast<int32_t>(x + in_num_tiles_x), static_cast<int32_t>(num_tiles)) - x;
+		int32_t beg_tile_y = 0;
+		int32_t end_tile_y = std::min(static_cast<int32_t>(y + in_num_tiles_y), static_cast<int32_t>(num_tiles)) - y;
+
+		juda_tex->AddImageEntry(name, x, y, in_num_tiles_x, in_num_tiles_y, addr_u, addr_v, border_clr);
 
 		std::vector<std::vector<uint8_t> > tiles;
 		std::vector<uint32_t> tile_ids;
+		std::vector<uint32_t> tile_attrs;
 		for (int32_t by = beg_tile_y; by < end_tile_y; ++ by)
 		{
 			tiles.clear();
 			tile_ids.clear();
+			tile_attrs.clear();
 			for (int32_t bx = beg_tile_x; bx < end_tile_x; ++ bx)
 			{
 				uint32_t xindex = bx - beg_tile_x;
 
 				tiles.push_back(std::vector<uint8_t>(tile_size * tile_size * pixel_size, 0));
 				tile_ids.push_back(juda_tex->EncodeTileID(level, bx + x, by + y));
+				tile_attrs.push_back(attr);
 				for (size_t dy = 0; dy < tile_size; ++ dy)
 				{
 					int32_t tex_y = (*calc_v)(static_cast<int32_t>(by * tile_size + dy), in_height);
@@ -284,7 +273,7 @@ void PackJTML(std::string const & jtml_name)
 				}
 			}
 
-			juda_tex->CommitTiles(tiles, tile_ids);
+			juda_tex->CommitTiles(tiles, tile_ids, tile_attrs);
 		}
 
 		cout << "Takes " << timer.elapsed() << "s" << endl;

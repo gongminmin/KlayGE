@@ -63,14 +63,14 @@ namespace KlayGE
 		case EF_R8:
 			for (uint32_t i = 0; i < num_elems; ++ i, p += elem_size, ++ output)
 			{
-				*output = Color(*p / 255.0f, 0, 0, 0);
+				*output = Color(*p / 255.0f, 0, 0, 1);
 			}
 			break;
 
 		case EF_GR8:
 			for (uint32_t i = 0; i < num_elems; ++ i, p += elem_size, ++ output)
 			{
-				*output = Color(p[0] / 255.0f, p[1] / 255.0f, 0, 0);
+				*output = Color(p[0] / 255.0f, p[1] / 255.0f, 0, 1);
 			}
 			break;
 
@@ -78,14 +78,14 @@ namespace KlayGE
 			for (uint32_t i = 0; i < num_elems; ++ i, p += elem_size, ++ output)
 			{
 				int8_t const * s = reinterpret_cast<int8_t const *>(p);
-				*output = Color(s[0] / 127.0f, s[1] / 127.0f, 0, 0);
+				*output = Color(s[0] / 127.0f, s[1] / 127.0f, 0, 1);
 			}
 			break;
 
 		case EF_BGR8:
 			for (uint32_t i = 0; i < num_elems; ++ i, p += elem_size, ++ output)
 			{
-				*output = Color(p[0] / 255.0f, p[1] / 255.0f, p[2] / 255.0f, 0);
+				*output = Color(p[0] / 255.0f, p[1] / 255.0f, p[2] / 255.0f, 1);
 			}
 			break;
 
@@ -93,7 +93,7 @@ namespace KlayGE
 			for (uint32_t i = 0; i < num_elems; ++ i, p += elem_size, ++ output)
 			{
 				int8_t const * s = reinterpret_cast<int8_t const *>(p);
-				*output = Color(s[0] / 127.0f, s[1] / 127.0f, s[2] / 127.0f, 0);
+				*output = Color(s[0] / 127.0f, s[1] / 127.0f, s[2] / 127.0f, 1);
 			}
 			break;
 
@@ -160,7 +160,7 @@ namespace KlayGE
 		case EF_R8UI:
 			for (uint32_t i = 0; i < num_elems; ++ i, p += elem_size, ++ output)
 			{
-				*output = Color(*p, 0, 0, 0);
+				*output = Color(*p, 0, 0, 1);
 			}
 			break;
 
@@ -168,14 +168,14 @@ namespace KlayGE
 			for (uint32_t i = 0; i < num_elems; ++ i, p += elem_size, ++ output)
 			{
 				int8_t const * s = reinterpret_cast<int8_t const *>(p);
-				*output = Color(*s, 0, 0, 0);
+				*output = Color(*s, 0, 0, 1);
 			}
 			break;
 
 		case EF_GR8UI:
 			for (uint32_t i = 0; i < num_elems; ++ i, p += elem_size, ++ output)
 			{
-				*output = Color(p[0], p[1], 0, 0);
+				*output = Color(p[0], p[1], 0, 1);
 			}
 			break;
 
@@ -183,14 +183,14 @@ namespace KlayGE
 			for (uint32_t i = 0; i < num_elems; ++ i, p += elem_size, ++ output)
 			{
 				int8_t const * s = reinterpret_cast<int8_t const *>(p);
-				*output = Color(s[0], s[1], 0, 0);
+				*output = Color(s[0], s[1], 0, 1);
 			}
 			break;
 
 		case EF_BGR8UI:
 			for (uint32_t i = 0; i < num_elems; ++ i, p += elem_size, ++ output)
 			{
-				*output = Color(p[0], p[1], p[2], 0);
+				*output = Color(p[0], p[1], p[2], 1);
 			}
 			break;
 
@@ -198,7 +198,7 @@ namespace KlayGE
 			for (uint32_t i = 0; i < num_elems; ++ i, p += elem_size, ++ output)
 			{
 				int8_t const * s = reinterpret_cast<int8_t const *>(p);
-				*output = Color(s[0], s[1], s[2], 0);
+				*output = Color(s[0], s[1], s[2], 1);
 			}
 			break;
 
@@ -261,7 +261,7 @@ namespace KlayGE
 			for (uint32_t i = 0; i < num_elems; ++ i, p += elem_size, ++ output)
 			{
 				uint16_t const s = *reinterpret_cast<uint16_t const *>(p);
-				*output = Color(s / 65535.0f, 0, 0, 0);
+				*output = Color(s / 65535.0f, 0, 0, 1);
 			}
 			break;
 
@@ -269,7 +269,7 @@ namespace KlayGE
 			for (uint32_t i = 0; i < num_elems; ++ i, p += elem_size, ++ output)
 			{
 				int16_t const s = *reinterpret_cast<int16_t const *>(p);
-				*output = Color(s / 32767.0f, 0, 0, 0);
+				*output = Color(s / 32767.0f, 0, 0, 1);
 			}
 			break;
 
@@ -277,7 +277,7 @@ namespace KlayGE
 			for (uint32_t i = 0; i < num_elems; ++ i, p += elem_size, ++ output)
 			{
 				uint16_t const * s = reinterpret_cast<uint16_t const *>(p);
-				*output = Color(s[0] / 65535.0f, s[1] / 65535.0f, 0, 0);
+				*output = Color(s[0] / 65535.0f, s[1] / 65535.0f, 0, 1);
 			}
 			break;
 
@@ -285,7 +285,7 @@ namespace KlayGE
 			for (uint32_t i = 0; i < num_elems; ++ i, p += elem_size, ++ output)
 			{
 				int16_t const * s = reinterpret_cast<int16_t const *>(p);
-				*output = Color(s[0] / 32767.0f, s[1] / 32767.0f, 0, 0);
+				*output = Color(s[0] / 32767.0f, s[1] / 32767.0f, 0, 1);
 			}
 			break;
 
@@ -293,7 +293,7 @@ namespace KlayGE
 			for (uint32_t i = 0; i < num_elems; ++ i, p += elem_size, ++ output)
 			{
 				uint16_t const * s = reinterpret_cast<uint16_t const *>(p);
-				*output = Color(s[0] / 65535.0f, s[1] / 65535.0f, s[2] / 65535.0f, 0);
+				*output = Color(s[0] / 65535.0f, s[1] / 65535.0f, s[2] / 65535.0f, 1);
 			}
 			break;
 
@@ -301,7 +301,7 @@ namespace KlayGE
 			for (uint32_t i = 0; i < num_elems; ++ i, p += elem_size, ++ output)
 			{
 				int16_t const * s = reinterpret_cast<int16_t const *>(p);
-				*output = Color(s[0] / 32767.0f, s[1] / 32767.0f, s[2] / 32767.0f, 0);
+				*output = Color(s[0] / 32767.0f, s[1] / 32767.0f, s[2] / 32767.0f, 1);
 			}
 			break;
 
@@ -325,7 +325,7 @@ namespace KlayGE
 			for (uint32_t i = 0; i < num_elems; ++ i, p += elem_size, ++ output)
 			{
 				uint32_t const s = *reinterpret_cast<uint32_t const *>(p);
-				*output = Color(static_cast<float>(s) / 0xFFFFFFFF, 0, 0, 0);
+				*output = Color(static_cast<float>(s) / 0xFFFFFFFF, 0, 0, 1);
 			}
 			break;
 
@@ -333,7 +333,7 @@ namespace KlayGE
 			for (uint32_t i = 0; i < num_elems; ++ i, p += elem_size, ++ output)
 			{
 				int32_t const s = *reinterpret_cast<int32_t const *>(p);
-				*output = Color(static_cast<float>(s) / 0x7FFFFFFF, 0, 0, 0);
+				*output = Color(static_cast<float>(s) / 0x7FFFFFFF, 0, 0, 1);
 			}
 			break;
 
@@ -341,7 +341,7 @@ namespace KlayGE
 			for (uint32_t i = 0; i < num_elems; ++ i, p += elem_size, ++ output)
 			{
 				uint32_t const * s = reinterpret_cast<uint32_t const *>(p);
-				*output = Color(static_cast<float>(s[0]) / 0xFFFFFFFF, static_cast<float>(s[1]) / 0xFFFFFFFF, 0, 0);
+				*output = Color(static_cast<float>(s[0]) / 0xFFFFFFFF, static_cast<float>(s[1]) / 0xFFFFFFFF, 0, 1);
 			}
 			break;
 
@@ -349,7 +349,7 @@ namespace KlayGE
 			for (uint32_t i = 0; i < num_elems; ++ i, p += elem_size, ++ output)
 			{
 				int32_t const * s = reinterpret_cast<int32_t const *>(p);
-				*output = Color(static_cast<float>(s[0]) / 0x7FFFFFFF, static_cast<float>(s[1]) / 0x7FFFFFFF, 0, 0);
+				*output = Color(static_cast<float>(s[0]) / 0x7FFFFFFF, static_cast<float>(s[1]) / 0x7FFFFFFF, 0, 1);
 			}
 			break;
 
@@ -358,7 +358,7 @@ namespace KlayGE
 			{
 				uint32_t const * s = reinterpret_cast<uint32_t const *>(p);
 				*output = Color(static_cast<float>(s[0]) / 0xFFFFFFFF, static_cast<float>(s[1]) / 0xFFFFFFFF,
-					static_cast<float>(s[2]) / 0xFFFFFFFF, 0);
+					static_cast<float>(s[2]) / 0xFFFFFFFF, 1);
 			}
 			break;
 
@@ -367,7 +367,7 @@ namespace KlayGE
 			{
 				int32_t const * s = reinterpret_cast<int32_t const *>(p);
 				*output = Color(static_cast<float>(s[0]) / 0x7FFFFFFF, static_cast<float>(s[1]) / 0x7FFFFFFF,
-					static_cast<float>(s[2]) / 0x7FFFFFFF, 0);
+					static_cast<float>(s[2]) / 0x7FFFFFFF, 1);
 			}
 			break;
 
@@ -394,7 +394,7 @@ namespace KlayGE
 			for (uint32_t i = 0; i < num_elems; ++ i, p += elem_size, ++ output)
 			{
 				uint16_t const s = *reinterpret_cast<uint16_t const *>(p);
-				*output = Color(s, 0, 0, 0);
+				*output = Color(s, 0, 0, 1);
 			}
 			break;
 
@@ -402,7 +402,7 @@ namespace KlayGE
 			for (uint32_t i = 0; i < num_elems; ++ i, p += elem_size, ++ output)
 			{
 				int16_t const s = *reinterpret_cast<int16_t const *>(p);
-				*output = Color(s, 0, 0, 0);
+				*output = Color(s, 0, 0, 1);
 			}
 			break;
 
@@ -410,7 +410,7 @@ namespace KlayGE
 			for (uint32_t i = 0; i < num_elems; ++ i, p += elem_size, ++ output)
 			{
 				uint16_t const * s = reinterpret_cast<uint16_t const *>(p);
-				*output = Color(s[0], s[1], 0, 0);
+				*output = Color(s[0], s[1], 0, 1);
 			}
 			break;
 
@@ -418,7 +418,7 @@ namespace KlayGE
 			for (uint32_t i = 0; i < num_elems; ++ i, p += elem_size, ++ output)
 			{
 				int16_t const * s = reinterpret_cast<int16_t const *>(p);
-				*output = Color(s[0], s[1], 0, 0);
+				*output = Color(s[0], s[1], 0, 1);
 			}
 			break;
 
@@ -426,7 +426,7 @@ namespace KlayGE
 			for (uint32_t i = 0; i < num_elems; ++ i, p += elem_size, ++ output)
 			{
 				uint16_t const * s = reinterpret_cast<uint16_t const *>(p);
-				*output = Color(s[0], s[1], s[2], 0);
+				*output = Color(s[0], s[1], s[2], 1);
 			}
 			break;
 
@@ -434,7 +434,7 @@ namespace KlayGE
 			for (uint32_t i = 0; i < num_elems; ++ i, p += elem_size, ++ output)
 			{
 				int16_t const * s = reinterpret_cast<int16_t const *>(p);
-				*output = Color(s[0], s[1], s[2], 0);
+				*output = Color(s[0], s[1], s[2], 1);
 			}
 			break;
 
@@ -458,7 +458,7 @@ namespace KlayGE
 			for (uint32_t i = 0; i < num_elems; ++ i, p += elem_size, ++ output)
 			{
 				uint32_t const s = *reinterpret_cast<uint32_t const *>(p);
-				*output = Color(static_cast<float>(s), 0, 0, 0);
+				*output = Color(static_cast<float>(s), 0, 0, 1);
 			}
 			break;
 
@@ -466,7 +466,7 @@ namespace KlayGE
 			for (uint32_t i = 0; i < num_elems; ++ i, p += elem_size, ++ output)
 			{
 				int32_t const s = *reinterpret_cast<int32_t const *>(p);
-				*output = Color(static_cast<float>(s), 0, 0, 0);
+				*output = Color(static_cast<float>(s), 0, 0, 1);
 			}
 			break;
 
@@ -474,7 +474,7 @@ namespace KlayGE
 			for (uint32_t i = 0; i < num_elems; ++ i, p += elem_size, ++ output)
 			{
 				uint32_t const * s = reinterpret_cast<uint32_t const *>(p);
-				*output = Color(static_cast<float>(s[0]), static_cast<float>(s[1]), 0, 0);
+				*output = Color(static_cast<float>(s[0]), static_cast<float>(s[1]), 0, 1);
 			}
 			break;
 
@@ -482,7 +482,7 @@ namespace KlayGE
 			for (uint32_t i = 0; i < num_elems; ++ i, p += elem_size, ++ output)
 			{
 				int32_t const * s = reinterpret_cast<int32_t const *>(p);
-				*output = Color(static_cast<float>(s[0]), static_cast<float>(s[1]), 0, 0);
+				*output = Color(static_cast<float>(s[0]), static_cast<float>(s[1]), 0, 1);
 			}
 			break;
 
@@ -490,7 +490,7 @@ namespace KlayGE
 			for (uint32_t i = 0; i < num_elems; ++ i, p += elem_size, ++ output)
 			{
 				uint32_t const * s = reinterpret_cast<uint32_t const *>(p);
-				*output = Color(static_cast<float>(s[0]), static_cast<float>(s[1]), static_cast<float>(s[2]), 0);
+				*output = Color(static_cast<float>(s[0]), static_cast<float>(s[1]), static_cast<float>(s[2]), 1);
 			}
 			break;
 
@@ -498,7 +498,7 @@ namespace KlayGE
 			for (uint32_t i = 0; i < num_elems; ++ i, p += elem_size, ++ output)
 			{
 				int32_t const * s = reinterpret_cast<int32_t const *>(p);
-				*output = Color(static_cast<float>(s[0]), static_cast<float>(s[1]), static_cast<float>(s[2]), 0);
+				*output = Color(static_cast<float>(s[0]), static_cast<float>(s[1]), static_cast<float>(s[2]), 1);
 			}
 			break;
 
@@ -525,7 +525,7 @@ namespace KlayGE
 			for (uint32_t i = 0; i < num_elems; ++ i, p += elem_size, ++ output)
 			{
 				half const s = *reinterpret_cast<half const *>(p);
-				*output = Color(s, 0, 0, 0);
+				*output = Color(s, 0, 0, 1);
 			}
 			break;
 
@@ -533,7 +533,7 @@ namespace KlayGE
 			for (uint32_t i = 0; i < num_elems; ++ i, p += elem_size, ++ output)
 			{
 				half const * s = reinterpret_cast<half const *>(p);
-				*output = Color(s[0], s[1], 0, 0);
+				*output = Color(s[0], s[1], 0, 1);
 			}
 			break;
 
@@ -625,7 +625,7 @@ namespace KlayGE
 					result[2].i = ((exponent + 112) << 23) | (mantissa << 18);
 				}
 
-				*output = Color(result[0].f, result[1].f, result[2].f, 0);
+				*output = Color(result[0].f, result[1].f, result[2].f, 1);
 			}
 			break;
 
@@ -633,7 +633,7 @@ namespace KlayGE
 			for (uint32_t i = 0; i < num_elems; ++ i, p += elem_size, ++ output)
 			{
 				half const * s = reinterpret_cast<half const *>(p);
-				*output = Color(s[0], s[1], s[2], 0);
+				*output = Color(s[0], s[1], s[2], 1);
 			}
 			break;
 
@@ -649,7 +649,7 @@ namespace KlayGE
 			for (uint32_t i = 0; i < num_elems; ++ i, p += elem_size, ++ output)
 			{
 				float const s = *reinterpret_cast<float const *>(p);
-				*output = Color(s, 0, 0, 0);
+				*output = Color(s, 0, 0, 1);
 			}
 			break;
 
@@ -657,7 +657,7 @@ namespace KlayGE
 			for (uint32_t i = 0; i < num_elems; ++ i, p += elem_size, ++ output)
 			{
 				float const * s = reinterpret_cast<float const *>(p);
-				*output = Color(s[0], s[1], 0, 0);
+				*output = Color(s[0], s[1], 0, 1);
 			}
 			break;
 
@@ -665,7 +665,7 @@ namespace KlayGE
 			for (uint32_t i = 0; i < num_elems; ++ i, p += elem_size, ++ output)
 			{
 				float const * s = reinterpret_cast<float const *>(p);
-				*output = Color(s[0], s[1], s[2], 0);
+				*output = Color(s[0], s[1], s[2], 1);
 			}
 			break;
 

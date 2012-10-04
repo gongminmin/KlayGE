@@ -1,7 +1,7 @@
 <?xml version='1.0'?>
 
 <juda_tex num_tiles="16" tile_size="128" format="ABGR8">
-	<image name="diffuse.dds" x="1" y="1" w="4" h="4" address_u="wrap" address_v="wrap"/>
-	<image name="normal.dds" x="7" y="1" w="4" h="4" address_u="wrap" address_v="wrap"/>
-	<image name="height.dds" x="1" y="7" w="4" h="4" address_u="wrap" address_v="wrap"/>
+	<image name="diffuse.dds" x="0" y="0" w="4" h="4" address_u="wrap" address_v="wrap"/>
+	<image name="normal.dds" x="4" y="0" w="4" h="4" address_u="wrap" address_v="wrap"/>
+	<image name="height.dds" x="0" y="4" w="4" h="4" address_u="wrap" address_v="wrap"/>
 </juda_tex>

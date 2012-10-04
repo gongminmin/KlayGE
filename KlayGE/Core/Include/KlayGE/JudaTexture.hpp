@@ -22,6 +22,7 @@
 
 #include <KlayGE/PreDeclare.hpp>
 #include <KlayGE/Texture.hpp>
+#include <KlayGE/RenderStateObject.hpp>
 
 #include <vector>
 #include <deque>
@@ -77,6 +78,7 @@ namespace KlayGE
 		{
 			quadtree_node_ptr children[4];
 			uint32_t data_index;
+			uint32_t attr;
 
 			quadtree_node()
 				: data_index(EMPTY_DATA_INDEX)
@@ -105,7 +107,9 @@ namespace KlayGE
 		uint32_t TileSize() const;
 		ElementFormat Format() const;
 
-		void CommitTiles(std::vector<std::vector<uint8_t> > const & data, std::vector<uint32_t> const & tile_ids);
+		void AddImageEntry(std::string const & name, uint32_t x, uint32_t y, uint32_t w, uint32_t h, TexAddressingMode addr_u, TexAddressingMode addr_v, Color const & border_clr);
+
+		void CommitTiles(std::vector<std::vector<uint8_t> > const & data, std::vector<uint32_t> const & tile_ids, std::vector<uint32_t> const & tile_attrs);
 		void DecodeTiles(std::vector<std::vector<uint8_t> >& data, std::vector<uint32_t> const & tile_ids, uint32_t mipmaps);
 
 		void CacheProperty(uint32_t pages, ElementFormat format, uint32_t border_size);
@@ -174,6 +178,16 @@ namespace KlayGE
 			bias_func bias;
 		};
 		TexelOp texel_op_;
+
+		struct ImageEntry
+		{
+			std::string name;
+			uint16_t x, y;
+			uint16_t w, h;
+			uint32_t addr_u_v;
+			Color border_clr;
+		};
+		std::vector<ImageEntry> image_entries_;
 
 	private:
 		// Output only
