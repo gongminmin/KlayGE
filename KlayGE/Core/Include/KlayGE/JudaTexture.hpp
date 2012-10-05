@@ -124,6 +124,7 @@ namespace KlayGE
 
 	private:
 		void DecodeATile(std::vector<uint8_t>* data, uint32_t shuff, uint32_t mipmaps);
+		uint32_t DecodeAAttr(uint32_t shuff);
 		uint8_t* RetriveATile(uint32_t data_index);
 
 		uint32_t NumNonEmptySubNodes(quadtree_node_ptr const & node) const;
@@ -227,6 +228,7 @@ namespace KlayGE
 		struct TileInfo
 		{
 			uint32_t x, y, z;
+			uint32_t attr;
 			uint64_t tick;
 		};
 		boost::unordered_map<uint32_t, TileInfo, boost::hash<uint32_t>, std::equal_to<uint32_t>,

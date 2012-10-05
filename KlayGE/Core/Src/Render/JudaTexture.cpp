@@ -546,6 +546,71 @@ namespace KlayGE
 		}
 	}
 
+	uint32_t JudaTexture::DecodeAAttr(uint32_t shuff)
+	{
+		uint32_t target_level = shuff >> LEVEL_SHIFT;
+
+		uint32_t ret_attr = 0xFFFFFFFF;
+		quadtree_node_ptr node = root_;
+		if (0 == target_level)
+		{
+			ret_attr = root_->attr;
+		}
+		else
+		{
+			int step = target_level % lower_levels_;
+			if (0 == step)
+			{
+				step = lower_levels_;
+			}
+
+			std::vector<uint32_t> branches(target_level + 1);
+			for (uint32_t i = 0; i <= target_level; ++ i)
+			{
+				branches[i] = this->GetLevelBranch(shuff, i);
+			}
+
+			uint32_t start_sub_tile_x = 0;
+			uint32_t start_sub_tile_y = 0;
+			for (uint32_t i = 1; i <= target_level; ++ i)
+			{
+				uint32_t branch = branches[i];
+				uint32_t by = (branch >> 1) & 1UL;
+				uint32_t bx = (branch >> 0) & 1UL;
+				start_sub_tile_x = (start_sub_tile_x << 1) + bx;
+				start_sub_tile_y = (start_sub_tile_y << 1) + by;
+			}
+
+			for (uint32_t ll = 1; ll <= target_level; ll += step)
+			{
+				uint32_t const ll_b = ll;
+				if (ll > 1)
+				{
+					step = lower_levels_;
+				}
+				uint32_t const ll_e = ll + step;
+
+				for (uint32_t i = ll_b; i < ll_e; ++ i)
+				{
+					start_sub_tile_x &= ~(1UL << (target_level - i));
+					start_sub_tile_y &= ~(1UL << (target_level - i));
+
+					if (node)
+					{
+						node = node->children[branches[i]];
+				
+						if (node)
+						{
+							ret_attr = node->attr;
+						}
+					}
+				}
+			}
+		}
+
+		return ret_attr;
+	}
+
 	uint8_t* JudaTexture::RetriveATile(uint32_t data_index)
 	{
 		if (data_blocks_.empty())
@@ -1184,6 +1249,8 @@ namespace KlayGE
 		boost::unordered_map<uint32_t, uint32_t> neighbor_id_map;
 		std::vector<uint32_t> all_neighbor_ids;
 		std::vector<uint32_t> neighbor_ids;
+		std::vector<uint32_t> tile_attrs(tile_ids.size());
+		std::vector<bool> in_same_image(tile_ids.size() * 9, false);
 		BOOST_TYPEOF(tile_info_map_)& tim = tile_info_map_;
 		for (size_t i = 0; i < tile_ids.size(); ++ i)
 		{
@@ -1193,6 +1260,7 @@ namespace KlayGE
 				// Exists in cache
 
 				tmiter->second.tick = tile_tick_;
+				tile_attrs[i] = tmiter->second.attr;
 			}
 			else
 			{
@@ -1202,39 +1270,70 @@ namespace KlayGE
 				boost::array<uint32_t, 9> new_tile_id_with_neighbors;
 				std::fill(new_tile_id_with_neighbors.begin(), new_tile_id_with_neighbors.end(), 0xFFFFFFFF);
                 new_tile_id_with_neighbors[0] = tile_ids[i];
+				in_same_image[i * 9 + 0] = true;
 
-				if (tile_y > 0)
+				uint32_t attr = this->DecodeAAttr(this->Pos2Shuff(level, tile_x, tile_y));
+				tile_attrs[i] = attr;
+				if (attr != 0xFFFFFFFF)
 				{
-					if (tile_x > 0)
+					boost::array<int32_t, 9> new_tile_id_x;
+					boost::array<int32_t, 9> new_tile_id_y;
+
+					int32_t left = tile_x - 1;
+					int32_t right = tile_x + 1;
+					int32_t up = tile_y - 1;
+					int32_t down = tile_y + 1;
+
+					ImageEntry const & entry = image_entries_[attr];
+					if (TAM_Wrap == (entry.addr_u_v & 0xF))
 					{
-						new_tile_id_with_neighbors[1] = this->EncodeTileID(level, tile_x - 1, tile_y - 1);
+						left = entry.x + (left - entry.x + entry.w) % entry.w;
+						right = entry.x + (right - entry.x + entry.w) % entry.w;
 					}
-					new_tile_id_with_neighbors[2] = this->EncodeTileID(level, tile_x, tile_y - 1);
-					if (tile_x < num_tiles_ - 1)
+					if (TAM_Wrap == ((entry.addr_u_v >> 4) & 0xF))
 					{
-						new_tile_id_with_neighbors[3] = this->EncodeTileID(level, tile_x + 1, tile_y - 1);
+						up = entry.y + (up - entry.y + entry.h) % entry.h;
+						down = entry.y + (down - entry.y + entry.h) % entry.h;
 					}
-				}
-				{
-					if (tile_x > 0)
+
+					new_tile_id_x[1] = left;
+					new_tile_id_y[1] = up;
+					new_tile_id_x[2] = tile_x;
+					new_tile_id_y[2] = up;
+					new_tile_id_x[3] = right;
+					new_tile_id_y[3] = up;
+
+					new_tile_id_x[4] = left;
+					new_tile_id_y[4] = tile_y;
+					new_tile_id_x[5] = right;
+					new_tile_id_y[5] = tile_y;
+
+					new_tile_id_x[6] = left;
+					new_tile_id_y[6] = down;
+					new_tile_id_x[7] = tile_x;
+					new_tile_id_y[7] = down;
+					new_tile_id_x[8] = right;
+					new_tile_id_y[8] = down;
+
+					for (int j = 1; j < 9; ++ j)
 					{
-						new_tile_id_with_neighbors[4] = this->EncodeTileID(level, tile_x - 1, tile_y);
-					}
-					if (tile_x < num_tiles_ - 1)
-					{
-						new_tile_id_with_neighbors[5] = this->EncodeTileID(level, tile_x + 1, tile_y);
-					}
-				}
-				if (tile_y < num_tiles_ - 1)
-				{
-					if (tile_x > 0)
-					{
-						new_tile_id_with_neighbors[6] = this->EncodeTileID(level, tile_x - 1, tile_y + 1);
-					}
-					new_tile_id_with_neighbors[7] = this->EncodeTileID(level, tile_x, tile_y + 1);
-					if (tile_x < num_tiles_ - 1)
-					{
-						new_tile_id_with_neighbors[8] = this->EncodeTileID(level, tile_x + 1, tile_y + 1);
+						if ((new_tile_id_x[j] >= 0) && (new_tile_id_y[j] >= 0)
+							&& (new_tile_id_x[j] < static_cast<int32_t>(num_tiles_) - 1)
+							&& (new_tile_id_y[j] < static_cast<int32_t>(num_tiles_) - 1))
+						{
+							new_tile_id_with_neighbors[j] = this->EncodeTileID(level, new_tile_id_x[j], new_tile_id_y[j]);
+							if (new_tile_id_with_neighbors[j] != 0xFFFFFFFF)
+							{
+								if (attr == this->DecodeAAttr(this->Pos2Shuff(level, new_tile_id_x[j], new_tile_id_y[j])))
+								{
+									in_same_image[i * 9 + j] = true;
+								}
+							}
+						}
+						else
+						{
+							new_tile_id_with_neighbors[j] = 0xFFFFFFFF;
+						}
 					}
 				}
 
@@ -1261,6 +1360,23 @@ namespace KlayGE
 		tile_info.tick = tile_tick_;
 		for (size_t i = 0; i < all_neighbor_ids.size(); i += 9)
 		{
+			tile_info.attr = tile_attrs[i / 9];
+			uint8_t border_clr[4];
+			TexAddressingMode addr_u, addr_v;
+			if (tile_info.attr != 0xFFFFFFFF)
+			{
+				ImageEntry const & entry = image_entries_[tile_info.attr];
+				addr_u = static_cast<TexAddressingMode>(entry.addr_u_v & 0xF);
+				addr_v = static_cast<TexAddressingMode>((entry.addr_u_v >> 4) & 0xF);
+				texel_op_.from_float4(border_clr, &entry.border_clr.r());
+			}
+			else
+			{
+				addr_u = TAM_Clamp;
+				addr_v = TAM_Clamp;
+				border_clr[0] = border_clr[1] = border_clr[2] = border_clr[3] = 0;
+			}
+
 			if (tile_info_map_.size() < num_cache_total_tiles)
 			{
 				// Still has space in cache
@@ -1372,7 +1488,7 @@ namespace KlayGE
 							neighbor_data_ptr[0] + y * mip_tile_size * texel_size_, mip_tile_size);
 					}
 
-					if (neighbor_data_ptr[1] != NULL)
+					if ((neighbor_data_ptr[1] != NULL) && in_same_image[i + 1])
 					{
 						for (uint32_t y = 0; y < mip_border_size; ++ y)
 						{
@@ -1383,16 +1499,112 @@ namespace KlayGE
 					}
 					else
 					{
-						for (uint32_t y = 0; y < mip_border_size; ++ y)
+						if (tile_info.attr != 0xFFFFFFFF)
 						{
-							for (uint32_t x = 0; x < mip_border_size; ++ x)
+							std::vector<int32_t> border_coords_x(mip_border_size * mip_border_size);
+							std::vector<int32_t> border_coords_y(mip_border_size * mip_border_size);
+							switch (addr_u)
 							{
-								texel_op_.copy(data_with_border + y * data_pitch + x * texel_size_,
-									neighbor_data_ptr[0]);
+							case TAM_Mirror:
+								for (uint32_t y = 0; y < mip_border_size; ++ y)
+								{
+									for (uint32_t x = 0; x < mip_border_size; ++ x)
+									{
+										border_coords_x[y * mip_border_size + x] = mip_border_size - 1 - x;
+									}
+								}
+								break;
+
+							case TAM_Clamp:
+								for (uint32_t y = 0; y < mip_border_size; ++ y)
+								{
+									for (uint32_t x = 0; x < mip_border_size; ++ x)
+									{
+										border_coords_x[y * mip_border_size + x] = 0;
+									}
+								}
+								break;
+
+							case TAM_Border:
+								for (uint32_t y = 0; y < mip_border_size; ++ y)
+								{
+									for (uint32_t x = 0; x < mip_border_size; ++ x)
+									{
+										border_coords_x[y * mip_border_size + x] = -1;
+									}
+								}
+								break;
+
+							default:
+								BOOST_ASSERT(false);
+								break;
+							}
+							switch (addr_v)
+							{
+							case TAM_Mirror:
+								for (uint32_t y = 0; y < mip_border_size; ++ y)
+								{
+									for (uint32_t x = 0; x < mip_border_size; ++ x)
+									{
+										border_coords_y[y * mip_border_size + x] = mip_border_size - 1 - y;
+									}
+								}
+								break;
+
+							case TAM_Clamp:
+								for (uint32_t y = 0; y < mip_border_size; ++ y)
+								{
+									for (uint32_t x = 0; x < mip_border_size; ++ x)
+									{
+										border_coords_y[y * mip_border_size + x] = 0;
+									}
+								}
+								break;
+
+							case TAM_Border:
+								for (uint32_t y = 0; y < mip_border_size; ++ y)
+								{
+									for (uint32_t x = 0; x < mip_border_size; ++ x)
+									{
+										border_coords_y[y * mip_border_size + x] = -1;
+									}
+								}
+								break;
+
+							default:
+								BOOST_ASSERT(false);
+								break;
+							}
+
+							for (uint32_t y = 0; y < mip_border_size; ++ y)
+							{
+								for (uint32_t x = 0; x < mip_border_size; ++ x)
+								{
+									if ((border_coords_x[y * mip_border_size + x] >= 0) && (border_coords_y[y * mip_border_size + x] >= 0))
+									{
+										texel_op_.copy(data_with_border + y * data_pitch + x * texel_size_,
+											neighbor_data_ptr[0] + border_coords_y[y * mip_border_size + x] * mip_tile_with_border_size + border_coords_x[y * mip_border_size + x]);
+									}
+									else
+									{
+										texel_op_.copy(data_with_border + y * data_pitch + x * texel_size_, border_clr);
+									}
+								}
+							}
+						}
+						else
+						{
+							for (uint32_t y = 0; y < mip_border_size; ++ y)
+							{
+								for (uint32_t x = 0; x < mip_border_size; ++ x)
+								{
+									texel_op_.copy(data_with_border + y * data_pitch + x * texel_size_,
+											neighbor_data_ptr[0]);
+								}
 							}
 						}
 					}
-					if (neighbor_data_ptr[2] != NULL)
+					if ((neighbor_data_ptr[2] != NULL) && in_same_image[i + 2])
 					{
 						for (uint32_t y = 0; y < mip_border_size; ++ y)
 						{
@@ -1402,13 +1614,109 @@ namespace KlayGE
 					}
 					else
 					{
-						for (uint32_t y = 0; y < mip_border_size; ++ y)
+						if (tile_info.attr != 0xFFFFFFFF)
 						{
-							texel_op_.copy_array(data_with_border + y * data_pitch + mip_border_size * texel_size_,
-								neighbor_data_ptr[0], mip_tile_size);
+							std::vector<int32_t> border_coords_x(mip_tile_size * mip_border_size);
+							std::vector<int32_t> border_coords_y(mip_tile_size * mip_border_size);
+							switch (addr_u)
+							{
+							case TAM_Mirror:
+								for (uint32_t y = 0; y < mip_border_size; ++ y)
+								{
+									for (uint32_t x = 0; x < mip_tile_size; ++ x)
+									{
+										border_coords_x[y * mip_tile_size + x] = x;
+									}
+								}
+								break;
+
+							case TAM_Clamp:
+								for (uint32_t y = 0; y < mip_border_size; ++ y)
+								{
+									for (uint32_t x = 0; x < mip_tile_size; ++ x)
+									{
+										border_coords_x[y * mip_tile_size + x] = x;
+									}
+								}
+								break;
+
+							case TAM_Border:
+								for (uint32_t y = 0; y < mip_border_size; ++ y)
+								{
+									for (uint32_t x = 0; x < mip_tile_size; ++ x)
+									{
+										border_coords_x[y * mip_tile_size + x] = -1;
+									}
+								}
+								break;
+
+							default:
+								BOOST_ASSERT(false);
+								break;
+							}
+							switch (addr_v)
+							{
+							case TAM_Mirror:
+								for (uint32_t y = 0; y < mip_border_size; ++ y)
+								{
+									for (uint32_t x = 0; x < mip_tile_size; ++ x)
+									{
+										border_coords_y[y * mip_tile_size + x] = mip_border_size - 1 - y;
+									}
+								}
+								break;
+
+							case TAM_Clamp:
+								for (uint32_t y = 0; y < mip_border_size; ++ y)
+								{
+									for (uint32_t x = 0; x < mip_tile_size; ++ x)
+									{
+										border_coords_y[y * mip_tile_size + x] = 0;
+									}
+								}
+								break;
+
+							case TAM_Border:
+								for (uint32_t y = 0; y < mip_border_size; ++ y)
+								{
+									for (uint32_t x = 0; x < mip_tile_size; ++ x)
+									{
+										border_coords_y[y * mip_tile_size + x] = -1;
+									}
+								}
+								break;
+
+							default:
+								BOOST_ASSERT(false);
+								break;
+							}
+
+							for (uint32_t y = 0; y < mip_border_size; ++ y)
+							{
+								for (uint32_t x = 0; x < mip_tile_size; ++ x)
+								{
+									if ((border_coords_x[y * mip_tile_size + x] >= 0) && (border_coords_y[y * mip_tile_size + x] >= 0))
+									{
+										texel_op_.copy(data_with_border + y * data_pitch + x * texel_size_,
+											neighbor_data_ptr[0] + border_coords_y[y * mip_tile_size + x] * mip_tile_with_border_size + border_coords_x[y * mip_tile_size + x]);
+									}
+									else
+									{
+										texel_op_.copy(data_with_border + y * data_pitch + x * texel_size_, border_clr);
+									}
+								}
+							}
+						}
+						else
+						{
+							for (uint32_t y = 0; y < mip_border_size; ++ y)
+							{
+								texel_op_.copy_array(data_with_border + y * data_pitch + mip_border_size * texel_size_,
+									neighbor_data_ptr[0], mip_tile_size);
+							}
 						}
 					}
-					if (neighbor_data_ptr[3] != NULL)
+					if ((neighbor_data_ptr[3] != NULL) && in_same_image[i + 3])
 					{
 						for (uint32_t y = 0; y < mip_border_size; ++ y)
 						{
@@ -1418,17 +1726,113 @@ namespace KlayGE
 					}
 					else
 					{
-						for (uint32_t y = 0; y < mip_border_size; ++ y)
+						if (tile_info.attr != 0xFFFFFFFF)
 						{
-							for (uint32_t x = 0; x < mip_border_size; ++ x)
+							std::vector<int32_t> border_coords_x(mip_border_size * mip_border_size);
+							std::vector<int32_t> border_coords_y(mip_border_size * mip_border_size);
+							switch (addr_u)
 							{
-								texel_op_.copy(data_with_border + y * data_pitch + (x + mip_border_size + mip_tile_size) * texel_size_,
-									neighbor_data_ptr[0] + (mip_tile_size - 1) * texel_size_);
+							case TAM_Mirror:
+								for (uint32_t y = 0; y < mip_border_size; ++ y)
+								{
+									for (uint32_t x = 0; x < mip_border_size; ++ x)
+									{
+										border_coords_x[y * mip_border_size + x] = mip_tile_size - 1 - x;
+									}
+								}
+								break;
+
+							case TAM_Clamp:
+								for (uint32_t y = 0; y < mip_border_size; ++ y)
+								{
+									for (uint32_t x = 0; x < mip_border_size; ++ x)
+									{
+										border_coords_x[y * mip_border_size + x] = mip_tile_size - 1;
+									}
+								}
+								break;
+
+							case TAM_Border:
+								for (uint32_t y = 0; y < mip_border_size; ++ y)
+								{
+									for (uint32_t x = 0; x < mip_border_size; ++ x)
+									{
+										border_coords_x[y * mip_border_size + x] = -1;
+									}
+								}
+								break;
+
+							default:
+								BOOST_ASSERT(false);
+								break;
+							}
+							switch (addr_v)
+							{
+							case TAM_Mirror:
+								for (uint32_t y = 0; y < mip_border_size; ++ y)
+								{
+									for (uint32_t x = 0; x < mip_border_size; ++ x)
+									{
+										border_coords_y[y * mip_border_size + x] = mip_border_size - 1 - y;
+									}
+								}
+								break;
+
+							case TAM_Clamp:
+								for (uint32_t y = 0; y < mip_border_size; ++ y)
+								{
+									for (uint32_t x = 0; x < mip_border_size; ++ x)
+									{
+										border_coords_y[y * mip_border_size + x] = 0;
+									}
+								}
+								break;
+
+							case TAM_Border:
+								for (uint32_t y = 0; y < mip_border_size; ++ y)
+								{
+									for (uint32_t x = 0; x < mip_border_size; ++ x)
+									{
+										border_coords_y[y * mip_border_size + x] = -1;
+									}
+								}
+								break;
+
+							default:
+								BOOST_ASSERT(false);
+								break;
+							}
+
+							for (uint32_t y = 0; y < mip_border_size; ++ y)
+							{
+								for (uint32_t x = 0; x < mip_border_size; ++ x)
+								{
+									if ((border_coords_x[y * mip_border_size + x] >= 0) && (border_coords_y[y * mip_border_size + x] >= 0))
+									{
+										texel_op_.copy(data_with_border + y * data_pitch + x * texel_size_,
+											neighbor_data_ptr[0] + border_coords_y[y * mip_border_size + x] * mip_tile_with_border_size + border_coords_x[y * mip_border_size + x]);
+									}
+									else
+									{
+										texel_op_.copy(data_with_border + y * data_pitch + x * texel_size_, border_clr);
+									}
+								}
+							}
+						}
+						else
+						{
+							for (uint32_t y = 0; y < mip_border_size; ++ y)
+							{
+								for (uint32_t x = 0; x < mip_border_size; ++ x)
+								{
+									texel_op_.copy(data_with_border + y * data_pitch + (x + mip_border_size + mip_tile_size) * texel_size_,
+										neighbor_data_ptr[0] + (mip_tile_size - 1) * texel_size_);
+								}
 							}
 						}
 					}
 
-					if (neighbor_data_ptr[4] != NULL)
+					if ((neighbor_data_ptr[4] != NULL) && in_same_image[i + 4])
 					{
 						for (uint32_t y = 0; y < mip_tile_size; ++ y)
 						{
@@ -1438,16 +1842,112 @@ namespace KlayGE
 					}
 					else
 					{
-						for (uint32_t y = 0; y < mip_tile_size; ++ y)
+						if (tile_info.attr != 0xFFFFFFFF)
 						{
-							for (uint32_t x = 0; x < mip_border_size; ++ x)
+							std::vector<int32_t> border_coords_x(mip_border_size * mip_tile_size);
+							std::vector<int32_t> border_coords_y(mip_border_size * mip_tile_size);
+							switch (addr_u)
 							{
-								texel_op_.copy(data_with_border + (y + mip_border_size) * data_pitch + x * texel_size_,
-									neighbor_data_ptr[0] + y * mip_tile_size * texel_size_);
+							case TAM_Mirror:
+								for (uint32_t y = 0; y < mip_tile_size; ++ y)
+								{
+									for (uint32_t x = 0; x < mip_border_size; ++ x)
+									{
+										border_coords_x[y * mip_border_size + x] = mip_border_size - 1 - x;
+									}
+								}
+								break;
+
+							case TAM_Clamp:
+								for (uint32_t y = 0; y < mip_tile_size; ++ y)
+								{
+									for (uint32_t x = 0; x < mip_border_size; ++ x)
+									{
+										border_coords_x[y * mip_border_size + x] = 0;
+									}
+								}
+								break;
+
+							case TAM_Border:
+								for (uint32_t y = 0; y < mip_tile_size; ++ y)
+								{
+									for (uint32_t x = 0; x < mip_border_size; ++ x)
+									{
+										border_coords_x[y * mip_border_size + x] = -1;
+									}
+								}
+								break;
+
+							default:
+								BOOST_ASSERT(false);
+								break;
+							}
+							switch (addr_v)
+							{
+							case TAM_Mirror:
+								for (uint32_t y = 0; y < mip_tile_size; ++ y)
+								{
+									for (uint32_t x = 0; x < mip_border_size; ++ x)
+									{
+										border_coords_y[y * mip_border_size + x] = y;
+									}
+								}
+								break;
+
+							case TAM_Clamp:
+								for (uint32_t y = 0; y < mip_tile_size; ++ y)
+								{
+									for (uint32_t x = 0; x < mip_border_size; ++ x)
+									{
+										border_coords_y[y * mip_border_size + x] = y;
+									}
+								}
+								break;
+
+							case TAM_Border:
+								for (uint32_t y = 0; y < mip_tile_size; ++ y)
+								{
+									for (uint32_t x = 0; x < mip_border_size; ++ x)
+									{
+										border_coords_y[y * mip_border_size + x] = -1;
+									}
+								}
+								break;
+
+							default:
+								BOOST_ASSERT(false);
+								break;
+							}
+
+							for (uint32_t y = 0; y < mip_tile_size; ++ y)
+							{
+								for (uint32_t x = 0; x < mip_border_size; ++ x)
+								{
+									if ((border_coords_x[y * mip_border_size + x] >= 0) && (border_coords_y[y * mip_border_size + x] >= 0))
+									{
+										texel_op_.copy(data_with_border + y * data_pitch + x * texel_size_,
+											neighbor_data_ptr[0] + border_coords_y[y * mip_border_size + x] * mip_tile_with_border_size + border_coords_x[y * mip_border_size + x]);
+									}
+									else
+									{
+										texel_op_.copy(data_with_border + y * data_pitch + x * texel_size_, border_clr);
+									}
+								}
+							}
+						}
+						else
+						{
+							for (uint32_t y = 0; y < mip_tile_size; ++ y)
+							{
+								for (uint32_t x = 0; x < mip_border_size; ++ x)
+								{
+									texel_op_.copy(data_with_border + (y + mip_border_size) * data_pitch + x * texel_size_,
+										neighbor_data_ptr[0] + y * mip_tile_size * texel_size_);
+								}
 							}
 						}
 					}
-					if (neighbor_data_ptr[5] != NULL)
+					if ((neighbor_data_ptr[5] != NULL) && in_same_image[i + 5])
 					{
 						for (uint32_t y = 0; y < mip_tile_size; ++ y)
 						{
@@ -1457,17 +1957,113 @@ namespace KlayGE
 					}
 					else
 					{
-						for (uint32_t y = 0; y < mip_tile_size; ++ y)
+						if (tile_info.attr != 0xFFFFFFFF)
 						{
-							for (uint32_t x = 0; x < mip_border_size; ++ x)
+							std::vector<int32_t> border_coords_x(mip_border_size * mip_tile_size);
+							std::vector<int32_t> border_coords_y(mip_border_size * mip_tile_size);
+							switch (addr_u)
 							{
-								texel_op_.copy(data_with_border + (y + mip_border_size) * data_pitch + (x + mip_border_size + mip_tile_size) * texel_size_,
-									neighbor_data_ptr[0] + (y * mip_tile_size + mip_tile_size - 1) * texel_size_);
+							case TAM_Mirror:
+								for (uint32_t y = 0; y < mip_tile_size; ++ y)
+								{
+									for (uint32_t x = 0; x < mip_border_size; ++ x)
+									{
+										border_coords_x[y * mip_border_size + x] = mip_tile_size - 1 - x;
+									}
+								}
+								break;
+
+							case TAM_Clamp:
+								for (uint32_t y = 0; y < mip_tile_size; ++ y)
+								{
+									for (uint32_t x = 0; x < mip_border_size; ++ x)
+									{
+										border_coords_x[y * mip_border_size + x] = mip_tile_size - 1;
+									}
+								}
+								break;
+
+							case TAM_Border:
+								for (uint32_t y = 0; y < mip_tile_size; ++ y)
+								{
+									for (uint32_t x = 0; x < mip_border_size; ++ x)
+									{
+										border_coords_x[y * mip_border_size + x] = -1;
+									}
+								}
+								break;
+
+							default:
+								BOOST_ASSERT(false);
+								break;
+							}
+							switch (addr_v)
+							{
+							case TAM_Mirror:
+								for (uint32_t y = 0; y < mip_tile_size; ++ y)
+								{
+									for (uint32_t x = 0; x < mip_border_size; ++ x)
+									{
+										border_coords_y[y * mip_border_size + x] = y;
+									}
+								}
+								break;
+
+							case TAM_Clamp:
+								for (uint32_t y = 0; y < mip_tile_size; ++ y)
+								{
+									for (uint32_t x = 0; x < mip_border_size; ++ x)
+									{
+										border_coords_y[y * mip_border_size + x] = y;
+									}
+								}
+								break;
+
+							case TAM_Border:
+								for (uint32_t y = 0; y < mip_tile_size; ++ y)
+								{
+									for (uint32_t x = 0; x < mip_border_size; ++ x)
+									{
+										border_coords_y[y * mip_border_size + x] = -1;
+									}
+								}
+								break;
+
+							default:
+								BOOST_ASSERT(false);
+								break;
+							}
+
+							for (uint32_t y = 0; y < mip_tile_size; ++ y)
+							{
+								for (uint32_t x = 0; x < mip_border_size; ++ x)
+								{
+									if ((border_coords_x[y * mip_border_size + x] >= 0) && (border_coords_y[y * mip_border_size + x] >= 0))
+									{
+										texel_op_.copy(data_with_border + y * data_pitch + x * texel_size_,
+											neighbor_data_ptr[0] + border_coords_y[y * mip_border_size + x] * mip_tile_with_border_size + border_coords_x[y * mip_border_size + x]);
+									}
+									else
+									{
+										texel_op_.copy(data_with_border + y * data_pitch + x * texel_size_, border_clr);
+									}
+								}
+							}
+						}
+						else
+						{
+							for (uint32_t y = 0; y < mip_tile_size; ++ y)
+							{
+								for (uint32_t x = 0; x < mip_border_size; ++ x)
+								{
+									texel_op_.copy(data_with_border + (y + mip_border_size) * data_pitch + (x + mip_border_size + mip_tile_size) * texel_size_,
+										neighbor_data_ptr[0] + (y * mip_tile_size + mip_tile_size - 1) * texel_size_);
+								}
 							}
 						}
 					}
 
-					if (neighbor_data_ptr[6] != NULL)
+					if ((neighbor_data_ptr[6] != NULL) && in_same_image[i + 6])
 					{
 						for (uint32_t y = 0; y < mip_border_size; ++ y)
 						{
@@ -1477,16 +2073,112 @@ namespace KlayGE
 					}
 					else
 					{
-						for (uint32_t y = 0; y < mip_border_size; ++ y)
+						if (tile_info.attr != 0xFFFFFFFF)
 						{
-							for (uint32_t x = 0; x < mip_border_size; ++ x)
+							std::vector<int32_t> border_coords_x(mip_border_size * mip_border_size);
+							std::vector<int32_t> border_coords_y(mip_border_size * mip_border_size);
+							switch (addr_u)
 							{
-								texel_op_.copy(data_with_border + (y + mip_border_size + mip_tile_size) * data_pitch + x * texel_size_,
-									neighbor_data_ptr[0] + (mip_tile_size - 1) * mip_tile_size * texel_size_);
+							case TAM_Mirror:
+								for (uint32_t y = 0; y < mip_border_size; ++ y)
+								{
+									for (uint32_t x = 0; x < mip_border_size; ++ x)
+									{
+										border_coords_x[y * mip_border_size + x] = mip_border_size - 1 - x;
+									}
+								}
+								break;
+
+							case TAM_Clamp:
+								for (uint32_t y = 0; y < mip_border_size; ++ y)
+								{
+									for (uint32_t x = 0; x < mip_border_size; ++ x)
+									{
+										border_coords_x[y * mip_border_size + x] = 0;
+									}
+								}
+								break;
+
+							case TAM_Border:
+								for (uint32_t y = 0; y < mip_border_size; ++ y)
+								{
+									for (uint32_t x = 0; x < mip_border_size; ++ x)
+									{
+										border_coords_x[y * mip_border_size + x] = -1;
+									}
+								}
+								break;
+
+							default:
+								BOOST_ASSERT(false);
+								break;
+							}
+							switch (addr_v)
+							{
+							case TAM_Mirror:
+								for (uint32_t y = 0; y < mip_border_size; ++ y)
+								{
+									for (uint32_t x = 0; x < mip_border_size; ++ x)
+									{
+										border_coords_y[y * mip_border_size + x] = mip_tile_size - 1 - y;
+									}
+								}
+								break;
+
+							case TAM_Clamp:
+								for (uint32_t y = 0; y < mip_border_size; ++ y)
+								{
+									for (uint32_t x = 0; x < mip_border_size; ++ x)
+									{
+										border_coords_y[y * mip_border_size + x] = mip_tile_size - 1;
+									}
+								}
+								break;
+
+							case TAM_Border:
+								for (uint32_t y = 0; y < mip_border_size; ++ y)
+								{
+									for (uint32_t x = 0; x < mip_border_size; ++ x)
+									{
+										border_coords_y[y * mip_border_size + x] = -1;
+									}
+								}
+								break;
+
+							default:
+								BOOST_ASSERT(false);
+								break;
+							}
+
+							for (uint32_t y = 0; y < mip_border_size; ++ y)
+							{
+								for (uint32_t x = 0; x < mip_border_size; ++ x)
+								{
+									if ((border_coords_x[y * mip_border_size + x] >= 0) && (border_coords_y[y * mip_border_size + x] >= 0))
+									{
+										texel_op_.copy(data_with_border + y * data_pitch + x * texel_size_,
+											neighbor_data_ptr[0] + border_coords_y[y * mip_border_size + x] * mip_tile_with_border_size + border_coords_x[y * mip_border_size + x]);
+									}
+									else
+									{
+										texel_op_.copy(data_with_border + y * data_pitch + x * texel_size_, border_clr);
+									}
+								}
+							}
+						}
+						else
+						{
+							for (uint32_t y = 0; y < mip_border_size; ++ y)
+							{
+								for (uint32_t x = 0; x < mip_border_size; ++ x)
+								{
+									texel_op_.copy(data_with_border + (y + mip_border_size + mip_tile_size) * data_pitch + x * texel_size_,
+										neighbor_data_ptr[0] + (mip_tile_size - 1) * mip_tile_size * texel_size_);
+								}
 							}
 						}
 					}
-					if (neighbor_data_ptr[7] != NULL)
+					if ((neighbor_data_ptr[7] != NULL) && in_same_image[i + 7])
 					{
 						for (uint32_t y = 0; y < mip_border_size; ++ y)
 						{
@@ -1496,13 +2188,109 @@ namespace KlayGE
 					}
 					else
 					{
-						for (uint32_t y = 0; y < mip_border_size; ++ y)
+						if (tile_info.attr != 0xFFFFFFFF)
 						{
-							texel_op_.copy_array(data_with_border + (y + mip_border_size + mip_tile_size) * data_pitch + mip_border_size * texel_size_,
-								neighbor_data_ptr[0] + (mip_tile_size - 1) * mip_tile_size * texel_size_, mip_tile_size);
+							std::vector<int32_t> border_coords_x(mip_tile_size * mip_border_size);
+							std::vector<int32_t> border_coords_y(mip_tile_size * mip_border_size);
+							switch (addr_u)
+							{
+							case TAM_Mirror:
+								for (uint32_t y = 0; y < mip_border_size; ++ y)
+								{
+									for (uint32_t x = 0; x < mip_tile_size; ++ x)
+									{
+										border_coords_x[y * mip_tile_size + x] = x;
+									}
+								}
+								break;
+
+							case TAM_Clamp:
+								for (uint32_t y = 0; y < mip_border_size; ++ y)
+								{
+									for (uint32_t x = 0; x < mip_tile_size; ++ x)
+									{
+										border_coords_x[y * mip_tile_size + x] = x;
+									}
+								}
+								break;
+
+							case TAM_Border:
+								for (uint32_t y = 0; y < mip_border_size; ++ y)
+								{
+									for (uint32_t x = 0; x < mip_tile_size; ++ x)
+									{
+										border_coords_x[y * mip_tile_size + x] = -1;
+									}
+								}
+								break;
+
+							default:
+								BOOST_ASSERT(false);
+								break;
+							}
+							switch (addr_v)
+							{
+							case TAM_Mirror:
+								for (uint32_t y = 0; y < mip_border_size; ++ y)
+								{
+									for (uint32_t x = 0; x < mip_tile_size; ++ x)
+									{
+										border_coords_y[y * mip_tile_size + x] = mip_tile_size - 1 - y;
+									}
+								}
+								break;
+
+							case TAM_Clamp:
+								for (uint32_t y = 0; y < mip_border_size; ++ y)
+								{
+									for (uint32_t x = 0; x < mip_tile_size; ++ x)
+									{
+										border_coords_y[y * mip_tile_size + x] = mip_tile_size - 1;
+									}
+								}
+								break;
+
+							case TAM_Border:
+								for (uint32_t y = 0; y < mip_border_size; ++ y)
+								{
+									for (uint32_t x = 0; x < mip_tile_size; ++ x)
+									{
+										border_coords_y[y * mip_tile_size + x] = -1;
+									}
+								}
+								break;
+
+							default:
+								BOOST_ASSERT(false);
+								break;
+							}
+
+							for (uint32_t y = 0; y < mip_border_size; ++ y)
+							{
+								for (uint32_t x = 0; x < mip_tile_size; ++ x)
+								{
+									if ((border_coords_x[y * mip_tile_size + x] >= 0) && (border_coords_y[y * mip_tile_size + x] >= 0))
+									{
+										texel_op_.copy(data_with_border + y * data_pitch + x * texel_size_,
+											neighbor_data_ptr[0] + border_coords_y[y * mip_tile_size + x] * mip_tile_with_border_size + border_coords_x[y * mip_tile_size + x]);
+									}
+									else
+									{
+										texel_op_.copy(data_with_border + y * data_pitch + x * texel_size_, border_clr);
+									}
+								}
+							}
+						}
+						else
+						{
+							for (uint32_t y = 0; y < mip_border_size; ++ y)
+							{
+								texel_op_.copy_array(data_with_border + (y + mip_border_size + mip_tile_size) * data_pitch + mip_border_size * texel_size_,
+									neighbor_data_ptr[0] + (mip_tile_size - 1) * mip_tile_size * texel_size_, mip_tile_size);
+							}
 						}
 					}			
-					if (neighbor_data_ptr[8] != NULL)
+					if ((neighbor_data_ptr[8] != NULL) && in_same_image[i + 8])
 					{
 						for (uint32_t y = 0; y < mip_border_size; ++ y)
 						{
@@ -1512,12 +2300,108 @@ namespace KlayGE
 					}
 					else
 					{
-						for (uint32_t y = 0; y < mip_border_size; ++ y)
+						if (tile_info.attr != 0xFFFFFFFF)
 						{
-							for (uint32_t x = 0; x < mip_border_size; ++ x)
+							std::vector<int32_t> border_coords_x(mip_border_size * mip_border_size);
+							std::vector<int32_t> border_coords_y(mip_border_size * mip_border_size);
+							switch (addr_u)
 							{
-								texel_op_.copy(data_with_border + (y + mip_border_size + mip_tile_size) * data_pitch + (x + mip_border_size + mip_tile_size) * texel_size_,
-									neighbor_data_ptr[0] + (mip_tile_size - 1) * mip_tile_size * texel_size_);
+							case TAM_Mirror:
+								for (uint32_t y = 0; y < mip_border_size; ++ y)
+								{
+									for (uint32_t x = 0; x < mip_border_size; ++ x)
+									{
+										border_coords_x[y * mip_border_size + x] = mip_tile_size - 1 - x;
+									}
+								}
+								break;
+
+							case TAM_Clamp:
+								for (uint32_t y = 0; y < mip_border_size; ++ y)
+								{
+									for (uint32_t x = 0; x < mip_border_size; ++ x)
+									{
+										border_coords_x[y * mip_border_size + x] = mip_tile_size - 1;
+									}
+								}
+								break;
+
+							case TAM_Border:
+								for (uint32_t y = 0; y < mip_border_size; ++ y)
+								{
+									for (uint32_t x = 0; x < mip_border_size; ++ x)
+									{
+										border_coords_x[y * mip_border_size + x] = -1;
+									}
+								}
+								break;
+
+							default:
+								BOOST_ASSERT(false);
+								break;
+							}
+							switch (addr_v)
+							{
+							case TAM_Mirror:
+								for (uint32_t y = 0; y < mip_border_size; ++ y)
+								{
+									for (uint32_t x = 0; x < mip_border_size; ++ x)
+									{
+										border_coords_y[y * mip_border_size + x] = mip_tile_size - 1 - y;
+									}
+								}
+								break;
+
+							case TAM_Clamp:
+								for (uint32_t y = 0; y < mip_border_size; ++ y)
+								{
+									for (uint32_t x = 0; x < mip_border_size; ++ x)
+									{
+										border_coords_y[y * mip_border_size + x] = mip_tile_size - 1;
+									}
+								}
+								break;
+
+							case TAM_Border:
+								for (uint32_t y = 0; y < mip_border_size; ++ y)
+								{
+									for (uint32_t x = 0; x < mip_border_size; ++ x)
+									{
+										border_coords_y[y * mip_border_size + x] = -1;
+									}
+								}
+								break;
+
+							default:
+								BOOST_ASSERT(false);
+								break;
+							}
+
+							for (uint32_t y = 0; y < mip_border_size; ++ y)
+							{
+								for (uint32_t x = 0; x < mip_border_size; ++ x)
+								{
+									if ((border_coords_x[y * mip_border_size + x] >= 0) && (border_coords_y[y * mip_border_size + x] >= 0))
+									{
+										texel_op_.copy(data_with_border + y * data_pitch + x * texel_size_,
+											neighbor_data_ptr[0] + border_coords_y[y * mip_border_size + x] * mip_tile_with_border_size + border_coords_x[y * mip_border_size + x]);
+									}
+									else
+									{
+										texel_op_.copy(data_with_border + y * data_pitch + x * texel_size_, border_clr);
+									}
+								}
+							}
+						}
+						else
+						{
+							for (uint32_t y = 0; y < mip_border_size; ++ y)
+							{
+								for (uint32_t x = 0; x < mip_border_size; ++ x)
+								{
+									texel_op_.copy(data_with_border + (y + mip_border_size + mip_tile_size) * data_pitch + (x + mip_border_size + mip_tile_size) * texel_size_,
+										neighbor_data_ptr[0] + (mip_tile_size - 1) * mip_tile_size * texel_size_);
+								}
 							}
 						}
 					}
