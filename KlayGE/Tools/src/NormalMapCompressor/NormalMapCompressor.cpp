@@ -32,8 +32,16 @@ namespace
 	void CompressNormalMapSubresource(uint32_t width, uint32_t height, std::vector<Color>& in_data,
 		ElementFormat new_format, ElementInitData& new_data, std::vector<uint8_t>& new_data_block)
 	{
-		new_data.row_pitch = (width + 3) / 4 * 16;
-		new_data.slice_pitch = new_data.row_pitch * (height + 3) / 4;
+		if (IsCompressedFormat(new_format))
+		{
+			new_data.row_pitch = (width + 3) / 4 * 16;
+			new_data.slice_pitch = new_data.row_pitch * (height + 3) / 4;
+		}
+		else
+		{
+			new_data.row_pitch = width * 2;
+			new_data.slice_pitch = new_data.row_pitch * height;
+		}
 		new_data_block.resize(new_data.slice_pitch);
 		new_data.data = &new_data_block[0];
 
@@ -61,23 +69,23 @@ namespace
 					}
 				}
 
-				BC4_layout x_bc4;
-				EncodeBC4(x_bc4, uncom_x);
-				BC4_layout y_bc4;
-				EncodeBC4(y_bc4, uncom_y);
-
-				if (EF_BC5 == new_format)
+				if (IsCompressedFormat(new_format))
 				{
-					BC5_layout com_bc5;
-					com_bc5.red = x_bc4;
-					com_bc5.green = y_bc4;
+					BC4_layout x_bc4;
+					EncodeBC4(x_bc4, uncom_x);
+					BC4_layout y_bc4;
+					EncodeBC4(y_bc4, uncom_y);
 
-					memcpy(&com_normals[dest], &com_bc5, sizeof(com_bc5));
-					dest += sizeof(com_bc5);
-				}
-				else
-				{
-					if (EF_BC3 == new_format)
+					if (EF_BC5 == new_format)
+					{
+						BC5_layout com_bc5;
+						com_bc5.red = x_bc4;
+						com_bc5.green = y_bc4;
+
+						memcpy(&com_normals[dest], &com_bc5, sizeof(com_bc5));
+						dest += sizeof(com_bc5);
+					}
+					else if (EF_BC3 == new_format)
 					{
 						BC3_layout com_bc3;
 						com_bc3.alpha = x_bc4;
@@ -86,6 +94,17 @@ namespace
 
 						memcpy(&com_normals[dest], &com_bc3, sizeof(com_bc3));
 						dest += sizeof(com_bc3);
+					}
+				}
+				else
+				{
+					for (int y = 0; y < 4; ++ y)
+					{
+						for (int x = 0; x < 4; ++ x)
+						{
+							com_normals[((y_base + y) * new_data.row_pitch + (x_base + x)) * 2 + 0] = uncom_x[y * 4 + x];
+							com_normals[((y_base + y) * new_data.row_pitch + (x_base + x)) * 2 + 1] = uncom_y[y * 4 + x];
+						}
 					}
 				}
 			}
@@ -144,7 +163,7 @@ namespace
 		restored_data.slice_pitch = width * height * 4;
 		restored_data.data = &restored_data_block[0];
 		DecompressNormal(restored_data_block, normals);
-	}	
+	}
 
 	float MSESubresource(uint32_t width, uint32_t height, ElementFormat in_format, 
 		ElementInitData const & in_data, ElementFormat new_format, ElementInitData const & new_data)
@@ -240,7 +259,7 @@ int main(int argc, char* argv[])
 {
 	if (argc < 3)
 	{
-		cout << "使用方法: NormalMapCompressor xxx.dds yyy.dds [BC3 | BC5]" << endl;
+		cout << "Usage: NormalMapCompressor xxx.dds yyy.dds [BC3 | BC5 | GR]" << endl;
 		return 1;
 	}
 
@@ -253,6 +272,10 @@ int main(int argc, char* argv[])
 		if ("BC3" == format_str)
 		{
 			new_format = EF_BC3;
+		}
+		else if ("GR" == format_str)
+		{
+			new_format = EF_GR8;
 		}
 	}
 
