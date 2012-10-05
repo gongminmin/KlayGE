@@ -323,6 +323,12 @@ namespace KlayGE
 		ElementFormat format, std::vector<ElementInitData> const & init_data);
 	KLAYGE_CORE_API void SaveTexture(TexturePtr const & texture, std::string const & tex_name);
 
+	KLAYGE_CORE_API void ResizeTexture(void* dst_data, uint32_t dst_row_pitch, uint32_t dst_slice_pitch, ElementFormat dst_format,
+		uint32_t dst_width, uint32_t dst_height, uint32_t dst_depth,
+		void const * src_data, uint32_t src_row_pitch, uint32_t src_slice_pitch, ElementFormat src_format,
+		uint32_t src_width, uint32_t src_height, uint32_t src_depth,
+		bool linear);
+
 	// return the lookat and up vector in cubemap view
 	//////////////////////////////////////////////////////////////////////////////////
 	template <typename T>
