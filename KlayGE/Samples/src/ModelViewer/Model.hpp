@@ -88,7 +88,6 @@ private:
 	KlayGE::RenderLayoutPtr tess_pattern_rl_;
 	KlayGE::GraphicsBufferPtr skinned_pos_vb_;
 	KlayGE::GraphicsBufferPtr skinned_tex_vb_;
-	KlayGE::GraphicsBufferPtr skinned_normal_vb_;
 	KlayGE::GraphicsBufferPtr skinned_tangent_vb_;
 	KlayGE::GraphicsBufferPtr bindable_ib_;
 };

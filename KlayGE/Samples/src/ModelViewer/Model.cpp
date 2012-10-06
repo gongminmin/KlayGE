@@ -108,7 +108,6 @@ DetailedSkinnedMesh::DetailedSkinnedMesh(RenderModelPtr const & model, std::wstr
 
 		skinned_pos_vb_ = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Read | EAH_GPU_Write, NULL, EF_ABGR32F);
 		skinned_tex_vb_ = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Read | EAH_GPU_Write, NULL, EF_GR32F);
-		skinned_normal_vb_ = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Read | EAH_GPU_Write, NULL, EF_ABGR32F);
 		skinned_tangent_vb_ = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Read | EAH_GPU_Write, NULL, EF_ABGR32F);
 		skinned_rl_ = rf.MakeRenderLayout();
 		skinned_rl_->TopologyType(RenderLayout::TT_TriangleList);
@@ -151,11 +150,9 @@ void DetailedSkinnedMesh::BuildMeshInfo()
 	{
 		skinned_pos_vb_->Resize(this->NumVertices() * sizeof(float4));
 		skinned_tex_vb_->Resize(this->NumVertices() * sizeof(float2));
-		skinned_normal_vb_->Resize(this->NumVertices() * sizeof(float4));
 		skinned_tangent_vb_->Resize(this->NumVertices() * sizeof(float4));
 		skinned_rl_->BindVertexStream(skinned_pos_vb_, boost::make_tuple(vertex_element(VEU_Position, 0, EF_ABGR32F)));
 		skinned_rl_->BindVertexStream(skinned_tex_vb_, boost::make_tuple(vertex_element(VEU_TextureCoord, 0, EF_GR32F)));
-		skinned_rl_->BindVertexStream(skinned_normal_vb_, boost::make_tuple(vertex_element(VEU_Normal, 1, EF_ABGR32F)));
 		skinned_rl_->BindVertexStream(skinned_tangent_vb_, boost::make_tuple(vertex_element(VEU_Tangent, 2, EF_ABGR32F)));
 		skinned_rl_->BindIndexStream(rl_->GetIndexStream(), rl_->IndexStreamFormat());
 
@@ -207,7 +204,6 @@ void DetailedSkinnedMesh::OnRenderBegin()
 		{
 			*(deferred_effect_->ParameterByName("skinned_pos_buf")) = skinned_pos_vb_;
 			*(deferred_effect_->ParameterByName("skinned_tex_buf")) = skinned_tex_vb_;
-			*(deferred_effect_->ParameterByName("skinned_normal_buf")) = skinned_normal_vb_;
 			*(deferred_effect_->ParameterByName("skinned_tangent_buf")) = skinned_tangent_vb_;
 			*(deferred_effect_->ParameterByName("index_buf")) = bindable_ib_;
 			*(deferred_effect_->ParameterByName("start_index_loc")) = static_cast<int32_t>(this->StartIndexLocation());
