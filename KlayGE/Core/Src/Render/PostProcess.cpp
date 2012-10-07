@@ -41,6 +41,7 @@ namespace KlayGE
 {
 	PostProcess::PostProcess(std::wstring const & name)
 			: RenderableHelper(name),
+				cs_based_(false), cs_pixel_per_thread_x_(1), cs_pixel_per_thread_y_(1), cs_pixel_per_thread_z_(1),
 				num_bind_output_(0)
 	{
 	}
@@ -51,6 +52,7 @@ namespace KlayGE
 		std::vector<std::string> const & output_pin_names,
 		RenderTechniquePtr const & tech)
 			: RenderableHelper(name),
+				cs_based_(false), cs_pixel_per_thread_x_(1), cs_pixel_per_thread_y_(1), cs_pixel_per_thread_z_(1),
 				input_pins_(input_pin_names.size()),
 				output_pins_(output_pin_names.size()),
 				num_bind_output_(0),
@@ -85,6 +87,10 @@ namespace KlayGE
 		{
 			cs_based_ = false;
 		}
+
+		cs_pixel_per_thread_x_ = 1;
+		cs_pixel_per_thread_y_ = 1;
+		cs_pixel_per_thread_z_ = 1;
 
 		this->CreateVB();
 	}
@@ -538,9 +544,9 @@ namespace KlayGE
 			re.BindFrameBuffer(re.DefaultFrameBuffer());
 
 			ShaderObjectPtr const & so = technique_->Pass(0)->GetShaderObject();
-			uint32_t const bx = so->CSBlockSizeX();
-			uint32_t const by = so->CSBlockSizeY();
-			uint32_t const bz = so->CSBlockSizeZ();
+			uint32_t const bx = so->CSBlockSizeX() * cs_pixel_per_thread_x_;
+			uint32_t const by = so->CSBlockSizeY() * cs_pixel_per_thread_y_;
+			uint32_t const bz = so->CSBlockSizeZ() * cs_pixel_per_thread_z_;
 			
 			BOOST_ASSERT(bx > 0);
 			BOOST_ASSERT(by > 0);
@@ -615,6 +621,9 @@ namespace KlayGE
 		std::vector<std::string> input_pin_names;
 		std::vector<std::string> output_pin_names;
 		RenderTechniquePtr tech;
+		uint32_t cs_data_per_thread_x = 1;
+		uint32_t cs_data_per_thread_y = 1;
+		uint32_t cs_data_per_thread_z = 1;
 
 		for (XMLNodePtr pp_node = root->FirstNode("post_processor"); pp_node; pp_node = pp_node->NextSibling("post_processor"))
 		{
@@ -653,11 +662,31 @@ namespace KlayGE
 					std::string effect_name = shader_chunk->Attrib("effect")->ValueString();
 					std::string tech_name = shader_chunk->Attrib("tech")->ValueString();
 					tech = Context::Instance().RenderFactoryInstance().LoadEffect(effect_name)->TechniqueByName(tech_name);
+
+					XMLAttributePtr attr = shader_chunk->Attrib("cs_data_per_thread_x");
+					if (attr)
+					{
+						cs_data_per_thread_x = attr->ValueUInt();
+					}
+					attr = shader_chunk->Attrib("cs_data_per_thread_y");
+					if (attr)
+					{
+						cs_data_per_thread_y = attr->ValueUInt();
+					}
+					attr = shader_chunk->Attrib("cs_data_per_thread_z");
+					if (attr)
+					{
+						cs_data_per_thread_z = attr->ValueUInt();
+					}
 				}
 			}
 		}
 
-		return MakeSharedPtr<PostProcess>(wname, param_names, input_pin_names, output_pin_names, tech);
+		PostProcessPtr pp = MakeSharedPtr<PostProcess>(wname, param_names, input_pin_names, output_pin_names, tech);
+		pp->CSPixelPerThreadX(cs_data_per_thread_x);
+		pp->CSPixelPerThreadY(cs_data_per_thread_y);
+		pp->CSPixelPerThreadZ(cs_data_per_thread_z);
+		return pp;
 	}
 
 

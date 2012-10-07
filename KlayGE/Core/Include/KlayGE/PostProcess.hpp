@@ -123,6 +123,31 @@ namespace KlayGE
 		virtual void OutputPin(uint32_t index, TexturePtr const & tex, int level = 0, int array_index = 0, int face = 0);
 		virtual TexturePtr const & OutputPin(uint32_t index) const;
 
+		void CSPixelPerThreadX(uint32_t x)
+		{
+			cs_pixel_per_thread_x_ = x;
+		}
+		void CSPixelPerThreadY(uint32_t y)
+		{
+			cs_pixel_per_thread_y_ = y;
+		}
+		void CSPixelPerThreadZ(uint32_t z)
+		{
+			cs_pixel_per_thread_z_ = z;
+		}
+		uint32_t CSPixelPerThreadX() const
+		{
+			return cs_pixel_per_thread_x_;
+		}
+		uint32_t CSPixelPerThreadY() const
+		{
+			return cs_pixel_per_thread_y_;
+		}
+		uint32_t CSPixelPerThreadZ() const
+		{
+			return cs_pixel_per_thread_z_;
+		}
+
 		FrameBufferPtr const & OutputFrameBuffer() const
 		{
 			return frame_buffer_;
@@ -138,6 +163,9 @@ namespace KlayGE
 
 	protected:
 		bool cs_based_;
+		uint32_t cs_pixel_per_thread_x_;
+		uint32_t cs_pixel_per_thread_y_;
+		uint32_t cs_pixel_per_thread_z_;
 
 		std::vector<std::pair<std::string, TexturePtr> > input_pins_;
 		std::vector<std::pair<std::string, TexturePtr> > output_pins_;

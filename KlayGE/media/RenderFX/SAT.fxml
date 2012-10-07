@@ -143,25 +143,21 @@ float4 SATScanYDownSweepPS(float2 tex_coord0 : TEXCOORD0) : SV_Target
 		<![CDATA[
 groupshared float4 shared_forscan[BLOCK_SIZE];
 
-float4 InclusiveScanWarp(uint GI)
+float4 InclusiveScanWarp(uint GI, float4 val)
 {
+	shared_forscan[GI] = val;
+
 	uint lane = GI & 31;
 	[unroll]
 	for (uint i = 1; i < 32; i *= 2)
 	{
 		if (lane >= i)
 		{
-			shared_forscan[GI] += shared_forscan[GI - i];
+			val += shared_forscan[GI - i];
+			shared_forscan[GI] = val;
 		}
 	}
-	return shared_forscan[GI];
-}
-
-float4 ExclusiveScanWarp(uint GI)
-{
-	InclusiveScanWarp(GI);
-	uint lane = GI & 31;
-	return (lane > 0) ? shared_forscan[GI - 1] : 0;
+	return val;
 }
 
 float4 InclusiveScanBlock(uint GI, float4 input)
@@ -169,29 +165,22 @@ float4 InclusiveScanBlock(uint GI, float4 input)
 	uint lane = GI & 31;
 	uint warp_id = GI >> 5;
 	
-	shared_forscan[GI] = input;
-
-	float4 val = InclusiveScanWarp(GI);
+	float4 val = InclusiveScanWarp(GI, input);
 	GroupMemoryBarrierWithGroupSync();
 	
 	if (31 == lane)
 	{
-		shared_forscan[warp_id] = shared_forscan[GI];
+		shared_forscan[warp_id] = val;
 	}
 	GroupMemoryBarrierWithGroupSync();
 
 	if (0 == warp_id)
 	{
-		ExclusiveScanWarp(GI);
+		InclusiveScanWarp(GI, shared_forscan[GI]);
 	}
 	GroupMemoryBarrierWithGroupSync();
 	
-	if (warp_id > 0)
-	{
-		val += shared_forscan[warp_id - 1];
-	}
-	
-	return val;
+	return val + shared_forscan[warp_id - 1];
 }
 
 [numthreads(BLOCK_SIZE, 1, 1)]
