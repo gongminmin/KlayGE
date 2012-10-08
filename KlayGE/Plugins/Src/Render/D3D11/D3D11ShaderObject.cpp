@@ -15,6 +15,7 @@
 /////////////////////////////////////////////////////////////////////////////////
 
 #include <KlayGE/KlayGE.hpp>
+#define INITGUID
 #include <KlayGE/ThrowErr.hpp>
 #include <KlayGE/Util.hpp>
 #include <KlayGE/Math.hpp>
@@ -51,11 +52,21 @@
 #include <KlayGE/D3D11/D3D11Texture.hpp>
 #include <KlayGE/D3D11/D3D11ShaderObject.hpp>
 
-#ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
-#ifdef KLAYGE_COMPILER_MSVC
-#pragma comment(lib, "d3dcompiler.lib")
-#endif
-#endif
+DEFINE_GUID(IID_ID3D11ShaderReflection_46,
+	0x8d536ca1, 0x0cca, 0x4956, 0xa8, 0x37, 0x78, 0x69, 0x63, 0x75, 0x55, 0x84);
+
+struct D3D11_SIGNATURE_PARAMETER_DESC_46
+{
+	LPCSTR						SemanticName;
+	UINT						SemanticIndex;
+	UINT						Register;
+	D3D_NAME					SystemValueType;
+	D3D_REGISTER_COMPONENT_TYPE	ComponentType;
+	BYTE						Mask;
+	BYTE						ReadWriteMask;
+	UINT						Stream;
+	UINT						MinPrecision;
+};
 
 namespace
 {
@@ -1251,7 +1262,7 @@ namespace KlayGE
 				D3D_SHADER_MACRO macro_end = { NULL, NULL };
 				macros.push_back(macro_end);
 			}
-			D3DCompile(shader_text.c_str(), static_cast<UINT>(shader_text.size()), NULL, &macros[0],
+			render_eng.D3DCompile(shader_text.c_str(), static_cast<UINT>(shader_text.size()), NULL, &macros[0],
 				NULL, sd.func_name.c_str(), shader_profile.c_str(),
 				0, 0, &code, &err_msg);
 			if (err_msg != NULL)
@@ -1300,7 +1311,7 @@ namespace KlayGE
 			if (code)
 			{
 				ID3D11ShaderReflection* reflection;
-				D3DReflect(code->GetBufferPointer(), code->GetBufferSize(), IID_ID3D11ShaderReflection, reinterpret_cast<void**>(&reflection));
+				render_eng.D3DReflect(code->GetBufferPointer(), code->GetBufferSize(), IID_ID3D11ShaderReflection_46, reinterpret_cast<void**>(&reflection));
 				if (reflection != NULL)
 				{
 					D3D11_SHADER_DESC desc;
@@ -1416,10 +1427,10 @@ namespace KlayGE
 					if (ST_VertexShader == type)
 					{
 						vs_signature_ = 0;
-						D3D11_SIGNATURE_PARAMETER_DESC signature;
+						D3D11_SIGNATURE_PARAMETER_DESC_46 signature;
 						for (uint32_t i = 0; i < desc.InputParameters; ++ i)
 						{
-							reflection->GetInputParameterDesc(i, &signature);
+							reflection->GetInputParameterDesc(i, reinterpret_cast<D3D11_SIGNATURE_PARAMETER_DESC*>(&signature));
 
 							size_t seed = boost::hash_range(signature.SemanticName, signature.SemanticName + strlen(signature.SemanticName));
 							boost::hash_combine(seed, signature.SemanticIndex);
@@ -1429,6 +1440,7 @@ namespace KlayGE
 							boost::hash_combine(seed, signature.Mask);
 							boost::hash_combine(seed, signature.ReadWriteMask);
 							boost::hash_combine(seed, signature.Stream);
+							boost::hash_combine(seed, signature.MinPrecision);
 
 							boost::hash_combine(vs_signature_, seed);
 						}
@@ -1442,7 +1454,7 @@ namespace KlayGE
 				}
 
 				ID3DBlob* strip_code = NULL;
-				D3DStripShader(code->GetBufferPointer(), code->GetBufferSize(),
+				render_eng.D3DStripShader(code->GetBufferPointer(), code->GetBufferSize(),
 					D3DCOMPILER_STRIP_REFLECTION_DATA | D3DCOMPILER_STRIP_DEBUG_INFO | D3DCOMPILER_STRIP_TEST_BLOBS,
 					&strip_code);
 				if (strip_code)

@@ -181,9 +181,8 @@ def build_external_libs(compiler):
 	if "win32" == platform:
 		print("\nSeting up DXSDK...\n")
 
-		os.chdir("External/DXSDK/Redist")
-		os.system("dxwebsetup.exe")
-		os.chdir("../../../")
+		copy_to_dst("External/DXSDK/Redist/x86/d3dcompiler_46.%s" % dll_suffix, dst_dir_x86)
+		copy_to_dst("External/DXSDK/Redist/x64/d3dcompiler_46.%s" % dll_suffix, dst_dir_x64)
 
 
 	if "win32" == platform:
