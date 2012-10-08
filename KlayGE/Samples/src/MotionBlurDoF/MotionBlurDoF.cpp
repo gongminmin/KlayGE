@@ -257,8 +257,7 @@ namespace
 		boost::circular_buffer<float4x4> last_mats_;
 	};
 
-#define SPREADING_PP 1
-	
+
 	class DepthOfField : public PostProcess
 	{
 	public:
@@ -272,25 +271,14 @@ namespace
 			output_pins_.push_back(std::make_pair("output", TexturePtr()));
 
 			RenderDeviceCaps const & caps = Context::Instance().RenderFactoryInstance().RenderEngineInstance().DeviceCaps();
-			gs_support_ = (caps.max_shader_model >= 4);
 			cs_support_ = caps.cs_support && (caps.max_shader_model >= 5);
 
 			RenderEffectPtr effect = Context::Instance().RenderFactoryInstance().LoadEffect("DepthOfFieldPP.fxml");
-			if (gs_support_)
-			{
-				this->Technique(effect->TechniqueByName("DepthOfFieldSpreading4"));
-			}
-			else
-			{
-				this->Technique(effect->TechniqueByName("DepthOfFieldSpreading"));
-			}
-
-			*(technique_->Effect().ParameterByName("max_radius")) = static_cast<float>(max_radius_);
+			this->Technique(effect->TechniqueByName("DepthOfFieldNormalization"));
 
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 			spread_fb_ = rf.MakeFrameBuffer();
 
-#if SPREADING_PP
 			if (cs_support_)
 			{
 				spreading_pp_ = LoadPostProcess(ResLoader::Instance().Open("Spreading.ppml"), "spreading_cs");
@@ -300,10 +288,6 @@ namespace
 				spreading_pp_ = LoadPostProcess(ResLoader::Instance().Open("Spreading.ppml"), "spreading");
 			}
 			spreading_pp_->SetParam(1, static_cast<float>(max_radius_));
-#else
-			spread_rl_ = rf.MakeRenderLayout();
-			spread_rl_->TopologyType(RenderLayout::TT_PointList);
-#endif
 
 			if (cs_support_)
 			{
@@ -316,7 +300,6 @@ namespace
 
 			normalization_rl_ = rf.MakeRenderLayout();
 			normalization_rl_->TopologyType(RenderLayout::TT_TriangleStrip);
-			normalization_technique_ = technique_->Effect().TechniqueByName("DepthOfFieldNormalization");
 		}
 
 		void FocusPlane(float focus_plane)
@@ -346,14 +329,7 @@ namespace
 			}
 			else
 			{
-				if (gs_support_)
-				{
-					technique_ = technique_->Effect().TechniqueByName("DepthOfFieldSpreading4");
-				}
-				else
-				{
-					technique_ = technique_->Effect().TechniqueByName("DepthOfFieldSpreading");
-				}
+				technique_ = technique_->Effect().TechniqueByName("DepthOfFieldNormalization");
 			}
 		}
 		bool ShowBlurFactor() const
@@ -370,60 +346,14 @@ namespace
 				uint32_t const width = tex->Width(0) + max_radius_ * 4 + 1;
 				uint32_t const height = tex->Height(0) + max_radius_ * 4 + 1;
 
-				*(technique_->Effect().ParameterByName("in_width_height")) = float4(static_cast<float>(width),
-					static_cast<float>(height), 1.0f / width, 1.0f / height);
-
 				RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 				spread_tex_ = rf.MakeTexture2D(width, height, 1, 1, EF_ABGR32F, 1, 0, EAH_GPU_Read | EAH_GPU_Write | (cs_support_ ? EAH_GPU_Unordered : 0), NULL);
 				spread_fb_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*spread_tex_, 0, 0, 0));
 
-#if SPREADING_PP
 				spreading_pp_->SetParam(0, float4(static_cast<float>(width),
 					static_cast<float>(height), 1.0f / width, 1.0f / height));
 				spreading_pp_->OutputPin(0, spread_tex_);
-#else
-				{
-					if (gs_support_)
-					{
-						std::vector<float2> points;
-						for (uint32_t y = max_radius_; y < height - max_radius_; ++ y)
-						{
-							for (uint32_t x = max_radius_; x < width - max_radius_; ++ x)
-							{
-								points.push_back(float2(static_cast<float>(x + 0.5f) / width, static_cast<float>(y + 0.5f) / height));
-							}
-						}
 
-						ElementInitData init_data;
-						init_data.data = &points[0];
-						init_data.row_pitch = static_cast<uint32_t>(points.size() * sizeof(points[0]));
-						init_data.slice_pitch = 0;
-						GraphicsBufferPtr pos_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data);
-						spread_rl_->BindVertexStream(pos_vb, boost::make_tuple(vertex_element(VEU_Position, 0, EF_GR32F)));
-					}
-					else
-					{
-						std::vector<float3> points;
-						for (uint32_t y = max_radius_; y < height - max_radius_; ++ y)
-						{
-							for (uint32_t x = max_radius_; x < width - max_radius_; ++ x)
-							{
-								points.push_back(float3(static_cast<float>(x + 0.5f) / width, static_cast<float>(y + 0.5f) / height, 0.5f));
-								points.push_back(float3(static_cast<float>(x + 0.5f) / width, static_cast<float>(y + 0.5f) / height, 1.5f));
-								points.push_back(float3(static_cast<float>(x + 0.5f) / width, static_cast<float>(y + 0.5f) / height, 2.5f));
-								points.push_back(float3(static_cast<float>(x + 0.5f) / width, static_cast<float>(y + 0.5f) / height, 3.5f));
-							}
-						}
-
-						ElementInitData init_data;
-						init_data.data = &points[0];
-						init_data.row_pitch = static_cast<uint32_t>(points.size() * sizeof(points[0]));
-						init_data.slice_pitch = 0;
-						GraphicsBufferPtr pos_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data);
-						spread_rl_->BindVertexStream(pos_vb, boost::make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F)));
-					}
-				}
-#endif
 				{
 					float4 pos[] =
 					{
@@ -452,30 +382,21 @@ namespace
 			if (!show_blur_factor_)
 			{
 				RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-#if SPREADING_PP
 				spreading_pp_->SetParam(2, float2(-focus_plane_ / focus_range_, 1.0f / focus_range_));
 				spreading_pp_->InputPin(0, this->InputPin(0));
 				spreading_pp_->InputPin(1, this->InputPin(1));
 				spreading_pp_->Apply();
-#else
-				*(technique_->Effect().ParameterByName("focus_plane_inv_range")) = float2(-focus_plane_ / focus_range_, 1.0f / focus_range_);
-				*(technique_->Effect().ParameterByName("color_tex")) = this->InputPin(0);
-				*(technique_->Effect().ParameterByName("depth_tex")) = this->InputPin(1);
-
-				re.BindFrameBuffer(spread_fb_);
-				spread_fb_->Clear(FrameBuffer::CBM_Color, Color(0, 0, 0, 0), 1, 0);
-				re.Render(*technique_, *spread_rl_);
-#endif
 
 				sat_pp_->Apply();
 
 				*(technique_->Effect().ParameterByName("src_tex")) = spread_tex_;
 
 				re.BindFrameBuffer(FrameBufferPtr());
-				re.Render(*normalization_technique_, *normalization_rl_);
+				re.Render(*technique_, *normalization_rl_);
 			}
 			else
 			{
+				*(technique_->Effect().ParameterByName("focus_plane_inv_range")) = float2(-focus_plane_ / focus_range_, 1.0f / focus_range_);
 				*(technique_->Effect().ParameterByName("depth_tex")) = this->InputPin(1);
 				PostProcess::Apply();
 			}
@@ -484,7 +405,6 @@ namespace
 	private:
 		PostProcessPtr sat_pp_;
 
-		bool gs_support_;
 		bool cs_support_;
 
 		int max_radius_;
@@ -496,14 +416,9 @@ namespace
 		TexturePtr spread_tex_;
 		FrameBufferPtr spread_fb_;
 
-#if SPREADING_PP
 		PostProcessPtr spreading_pp_;
-#else
-		RenderLayoutPtr spread_rl_;
-#endif
 
 		RenderLayoutPtr normalization_rl_;
-		RenderTechniquePtr normalization_technique_;
 	};
 
 	class MotionBlur : public PostProcess

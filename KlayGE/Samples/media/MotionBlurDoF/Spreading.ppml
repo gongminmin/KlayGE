@@ -14,7 +14,7 @@
 		<output>
 			<pin name="spread_tex"/>
 		</output>
-		<shader effect="DepthOfFieldPP.fxml" tech="DepthOfFieldNewSpreading"/>
+		<shader effect="DepthOfFieldPP.fxml" tech="DepthOfFieldSpreading"/>
 	</post_processor>
 
 	<post_processor name="spreading_cs">
