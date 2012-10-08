@@ -440,10 +440,8 @@ namespace
 					normalization_rl_->BindVertexStream(pos_vb, boost::make_tuple(vertex_element(VEU_Position, 0, EF_ABGR32F)));
 				}
 
-				sat_tex_ = rf.MakeTexture2D(width, height, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write | (cs_support_ ? EAH_GPU_Unordered : 0), NULL);
-
 				sat_pp_->InputPin(0, spread_tex_);
-				sat_pp_->OutputPin(0, sat_tex_);
+				sat_pp_->OutputPin(0, spread_tex_);
 			}
 		}
 
@@ -471,7 +469,7 @@ namespace
 
 				sat_pp_->Apply();
 
-				*(technique_->Effect().ParameterByName("src_tex")) = sat_tex_;
+				*(technique_->Effect().ParameterByName("src_tex")) = spread_tex_;
 
 				re.BindFrameBuffer(FrameBufferPtr());
 				re.Render(*normalization_technique_, *normalization_rl_);
@@ -506,8 +504,6 @@ namespace
 
 		RenderLayoutPtr normalization_rl_;
 		RenderTechniquePtr normalization_technique_;
-
-		TexturePtr sat_tex_;
 	};
 
 	class MotionBlur : public PostProcess
