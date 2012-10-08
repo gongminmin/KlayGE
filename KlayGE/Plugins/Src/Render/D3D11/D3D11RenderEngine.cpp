@@ -429,7 +429,7 @@ namespace KlayGE
 		}
 	}
 
-	ID3D11InputLayoutPtr const & D3D11RenderEngine::CreateD3D11InputLayout(std::vector<D3D11_INPUT_ELEMENT_DESC> const & elems, size_t signature, ID3DBlobPtr const & vs_code)
+	ID3D11InputLayoutPtr const & D3D11RenderEngine::CreateD3D11InputLayout(std::vector<D3D11_INPUT_ELEMENT_DESC> const & elems, size_t signature, std::vector<uint8_t> const & vs_code)
 	{
 		size_t elems_signature = 0;
 		typedef BOOST_TYPEOF(elems) ElemsType;
@@ -456,7 +456,7 @@ namespace KlayGE
 		else
 		{
 			ID3D11InputLayout* ia;
-			TIF(d3d_device_->CreateInputLayout(&elems[0], static_cast<UINT>(elems.size()), vs_code->GetBufferPointer(), vs_code->GetBufferSize(), &ia));
+			TIF(d3d_device_->CreateInputLayout(&elems[0], static_cast<UINT>(elems.size()), &vs_code[0], vs_code.size(), &ia));
 			ID3D11InputLayoutPtr ret = MakeCOMPtr(ia);
 
 			BOOST_AUTO(in, input_layout_bank_.insert(std::make_pair(signature, ret)));
@@ -570,7 +570,7 @@ namespace KlayGE
 
 			D3D11RenderLayout const & d3d_rl = *checked_cast<D3D11RenderLayout const *>(&rl);
 			D3D11ShaderObject const & shader = *checked_cast<D3D11ShaderObject*>(tech.Pass(0)->GetShaderObject().get());
-			ID3D11InputLayoutPtr const & layout = d3d_rl.InputLayout(shader.VSSignature(), shader.VSCode());
+			ID3D11InputLayoutPtr const & layout = d3d_rl.InputLayout(shader.VSSignature(), *shader.VSCode());
 			if (layout != input_layout_cache_)
 			{
 				d3d_imm_ctx_->IASetInputLayout(layout.get());

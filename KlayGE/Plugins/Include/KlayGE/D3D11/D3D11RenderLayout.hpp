@@ -30,7 +30,7 @@ namespace KlayGE
 	public:
 		D3D11RenderLayout();
 
-		ID3D11InputLayoutPtr const & InputLayout(size_t signature, ID3DBlobPtr const & vs_code) const;
+		ID3D11InputLayoutPtr const & InputLayout(size_t signature, std::vector<uint8_t> const & vs_code) const;
 
 	private:
 		typedef std::vector<D3D11_INPUT_ELEMENT_DESC> input_elems_type;

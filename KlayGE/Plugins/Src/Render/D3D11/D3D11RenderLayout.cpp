@@ -33,7 +33,7 @@ namespace KlayGE
 	{
 	}
 
-	ID3D11InputLayoutPtr const & D3D11RenderLayout::InputLayout(size_t signature, ID3DBlobPtr const & vs_code) const
+	ID3D11InputLayoutPtr const & D3D11RenderLayout::InputLayout(size_t signature, std::vector<uint8_t> const & vs_code) const
 	{
 		for (size_t i = 0; i < input_layouts_.size(); ++ i)
 		{

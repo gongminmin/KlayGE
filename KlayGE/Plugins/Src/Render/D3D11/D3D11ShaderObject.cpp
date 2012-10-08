@@ -835,11 +835,9 @@ namespace KlayGE
 								uint32_t blob_size;
 								memcpy(&blob_size, nsbp, sizeof(blob_size));
 								nsbp += sizeof(blob_size);
-								ID3DBlob* code;
-								D3DCreateBlob(blob_size, &code);
-								ID3DBlobPtr code_blob = MakeCOMPtr(code);
+								boost::shared_ptr<std::vector<uint8_t> > code_blob = MakeSharedPtr<std::vector<uint8_t> >(blob_size);
 
-								memcpy(code_blob->GetBufferPointer(), nsbp, blob_size);
+								memcpy(&((*code_blob)[0]), nsbp, blob_size);
 								nsbp += blob_size;
 
 								D3D11ShaderDesc& sd = shader_desc_[type];
@@ -955,7 +953,7 @@ namespace KlayGE
 	{
 		native_shader_block.clear();
 
-		ID3DBlobPtr code_blob = shader_code_[type].first;
+		boost::shared_ptr<std::vector<uint8_t> > code_blob = shader_code_[type].first;
 		if (code_blob)
 		{
 			std::ostringstream oss(std::ios_base::binary | std::ios_base::out);
@@ -980,10 +978,10 @@ namespace KlayGE
 			oss.write(reinterpret_cast<char const *>(&len), sizeof(len));
 			oss.write(reinterpret_cast<char const *>(&shader_code_[type].second[0]), len);
 
-			uint32_t blob_size = static_cast<uint32_t>(code_blob->GetBufferSize());
+			uint32_t blob_size = static_cast<uint32_t>(code_blob->size());
 			NativeToLittleEndian<sizeof(blob_size)>(&blob_size);
 			oss.write(reinterpret_cast<char const *>(&blob_size), sizeof(blob_size));
-			oss.write(reinterpret_cast<char const *>(code_blob->GetBufferPointer()), code_blob->GetBufferSize());
+			oss.write(reinterpret_cast<char const *>(&((*code_blob)[0])), code_blob->size());
 
 			D3D11ShaderDesc const & sd = shader_desc_[type];
 
@@ -1070,7 +1068,7 @@ namespace KlayGE
 		}
 	}
 
-	ID3DBlobPtr D3D11ShaderObject::CompiteToBytecode(ShaderType type, RenderEffect const & effect, std::vector<uint32_t> const & shader_desc_ids)
+	boost::shared_ptr<std::vector<uint8_t> > D3D11ShaderObject::CompiteToBytecode(ShaderType type, RenderEffect const & effect, std::vector<uint32_t> const & shader_desc_ids)
 	{
 #ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
 		D3D11RenderEngine const & render_eng = *checked_cast<D3D11RenderEngine const *>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
@@ -1455,17 +1453,22 @@ namespace KlayGE
 			}
 		}
 
-		return MakeCOMPtr(code);
+		boost::shared_ptr<std::vector<uint8_t> > ret = MakeSharedPtr<std::vector<uint8_t> >(code->GetBufferSize());
+		memcpy(&((*ret)[0]), code->GetBufferPointer(), code->GetBufferSize());
+		code->Release();
+
+		return ret;
 #else
 		UNREF_PARAM(type);
 		UNREF_PARAM(effect);
 		UNREF_PARAM(shader_desc_ids);
 
-		return ID3DBlobPtr();
+		return boost::shared_ptr<std::vector<uint8_t> >();
 #endif
 	}
 
-	void D3D11ShaderObject::AttachShaderBytecode(ShaderType type, RenderEffect const & effect, std::vector<uint32_t> const & shader_desc_ids, ID3DBlobPtr const & code_blob)
+	void D3D11ShaderObject::AttachShaderBytecode(ShaderType type, RenderEffect const & effect,
+		std::vector<uint32_t> const & shader_desc_ids, boost::shared_ptr<std::vector<uint8_t> > const & code_blob)
 	{
 		if (!code_blob)
 		{
@@ -1483,7 +1486,7 @@ namespace KlayGE
 			{
 			case ST_VertexShader:
 				ID3D11VertexShader* vs;
-				if (FAILED(d3d_device->CreateVertexShader(code_blob->GetBufferPointer(), code_blob->GetBufferSize(), NULL, &vs)))
+				if (FAILED(d3d_device->CreateVertexShader(&((*code_blob)[0]), code_blob->size(), NULL, &vs)))
 				{
 					is_shader_validate_[type] = false;
 				}
@@ -1506,7 +1509,7 @@ namespace KlayGE
 						}
 
 						ID3D11GeometryShader* gs;
-						if (FAILED(d3d_device->CreateGeometryShaderWithStreamOutput(code_blob->GetBufferPointer(), code_blob->GetBufferSize(),
+						if (FAILED(d3d_device->CreateGeometryShaderWithStreamOutput(&((*code_blob)[0]), code_blob->size(),
 							&d3d11_decl[0], static_cast<UINT>(d3d11_decl.size()), 0, 0, rasterized_stream, NULL, &gs)))
 						{
 							is_shader_validate_[type] = false;
@@ -1523,7 +1526,7 @@ namespace KlayGE
 
 			case ST_PixelShader:
 				ID3D11PixelShader* ps;
-				if (FAILED(d3d_device->CreatePixelShader(code_blob->GetBufferPointer(), code_blob->GetBufferSize(), NULL, &ps)))
+				if (FAILED(d3d_device->CreatePixelShader(&((*code_blob)[0]), code_blob->size(), NULL, &ps)))
 				{
 					is_shader_validate_[type] = false;
 				}
@@ -1550,7 +1553,7 @@ namespace KlayGE
 					}
 
 					ID3D11GeometryShader* gs;
-					if (FAILED(d3d_device->CreateGeometryShaderWithStreamOutput(code_blob->GetBufferPointer(), code_blob->GetBufferSize(),
+					if (FAILED(d3d_device->CreateGeometryShaderWithStreamOutput(&((*code_blob)[0]), code_blob->size(),
 						&d3d11_decl[0], static_cast<UINT>(d3d11_decl.size()), 0, 0, rasterized_stream, NULL, &gs)))
 					{
 						is_shader_validate_[type] = false;
@@ -1564,7 +1567,7 @@ namespace KlayGE
 				else
 				{
 					ID3D11GeometryShader* gs;
-					if (FAILED(d3d_device->CreateGeometryShader(code_blob->GetBufferPointer(), code_blob->GetBufferSize(), NULL, &gs)))
+					if (FAILED(d3d_device->CreateGeometryShader(&((*code_blob)[0]), code_blob->size(), NULL, &gs)))
 					{
 						is_shader_validate_[type] = false;
 					}
@@ -1578,7 +1581,7 @@ namespace KlayGE
 
 			case ST_ComputeShader:
 				ID3D11ComputeShader* cs;
-				if (FAILED(d3d_device->CreateComputeShader(code_blob->GetBufferPointer(), code_blob->GetBufferSize(), NULL, &cs)))
+				if (FAILED(d3d_device->CreateComputeShader(&((*code_blob)[0]), code_blob->size(), NULL, &cs)))
 				{
 					is_shader_validate_[type] = false;
 				}
@@ -1591,7 +1594,7 @@ namespace KlayGE
 
 			case ST_HullShader:
 				ID3D11HullShader* hs;
-				if (FAILED(d3d_device->CreateHullShader(code_blob->GetBufferPointer(), code_blob->GetBufferSize(), NULL, &hs)))
+				if (FAILED(d3d_device->CreateHullShader(&((*code_blob)[0]), code_blob->size(), NULL, &hs)))
 				{
 					is_shader_validate_[type] = false;
 				}
@@ -1605,7 +1608,7 @@ namespace KlayGE
 
 			case ST_DomainShader:
 				ID3D11DomainShader* ds;
-				if (FAILED(d3d_device->CreateDomainShader(code_blob->GetBufferPointer(), code_blob->GetBufferSize(), NULL, &ds)))
+				if (FAILED(d3d_device->CreateDomainShader(&((*code_blob)[0]), code_blob->size(), NULL, &ds)))
 				{
 					is_shader_validate_[type] = false;
 				}
@@ -1699,7 +1702,7 @@ namespace KlayGE
 
 	void D3D11ShaderObject::AttachShader(ShaderType type, RenderEffect const & effect, std::vector<uint32_t> const & shader_desc_ids)
 	{
-		ID3DBlobPtr code_blob = this->CompiteToBytecode(type, effect, shader_desc_ids);
+		boost::shared_ptr<std::vector<uint8_t> > code_blob = this->CompiteToBytecode(type, effect, shader_desc_ids);
 		this->AttachShaderBytecode(type, effect, shader_desc_ids, code_blob);
 	}
 

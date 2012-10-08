@@ -109,7 +109,7 @@ namespace KlayGE
 		void Bind();
 		void Unbind();
 
-		ID3DBlobPtr const & VSCode() const
+		boost::shared_ptr<std::vector<uint8_t> > const & VSCode() const
 		{
 			return shader_code_[ST_VertexShader].first;
 		}
@@ -131,8 +131,9 @@ namespace KlayGE
 		parameter_bind_t GetBindFunc(D3D11ShaderParameterHandle const & p_handle, RenderEffectParameterPtr const & param);
 
 		std::string GetShaderProfile(ShaderType type, RenderEffect const & effect, uint32_t shader_desc_id);
-		ID3DBlobPtr CompiteToBytecode(ShaderType type, RenderEffect const & effect, std::vector<uint32_t> const & shader_desc_ids);
-		void AttachShaderBytecode(ShaderType type, RenderEffect const & effect, std::vector<uint32_t> const & shader_desc_ids, ID3DBlobPtr const & code_blob);
+		boost::shared_ptr<std::vector<uint8_t> > CompiteToBytecode(ShaderType type, RenderEffect const & effect, std::vector<uint32_t> const & shader_desc_ids);
+		void AttachShaderBytecode(ShaderType type, RenderEffect const & effect,
+			std::vector<uint32_t> const & shader_desc_ids, boost::shared_ptr<std::vector<uint8_t> > const & code_blob);
 
 	private:
 		boost::array<parameter_binds_t, ST_NumShaderTypes> param_binds_;
@@ -143,7 +144,7 @@ namespace KlayGE
 		ID3D11ComputeShaderPtr compute_shader_;
 		ID3D11HullShaderPtr hull_shader_;
 		ID3D11DomainShaderPtr domain_shader_;
-		boost::array<std::pair<ID3DBlobPtr, std::string>, ST_NumShaderTypes> shader_code_;
+		boost::array<std::pair<boost::shared_ptr<std::vector<uint8_t> >, std::string>, ST_NumShaderTypes> shader_code_;
 		boost::array<D3D11ShaderDesc, ST_NumShaderTypes> shader_desc_;
 
 		boost::array<std::vector<ID3D11SamplerStatePtr>, ST_NumShaderTypes> samplers_;
