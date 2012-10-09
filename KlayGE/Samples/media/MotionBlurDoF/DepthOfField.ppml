@@ -32,4 +32,23 @@
 		</output>
 		<shader effect="DepthOfFieldPP.fxml" tech="DepthOfFieldSpreadingCS"/>
 	</post_processor>
+
+
+	<post_processor name="merge_bokeh">
+		<params>
+			<param name="in_width_height"/>
+			<param name="bokeh_width_height"/>
+			<param name="max_radius"/>
+			<param name="focus_plane_inv_range"/>
+			<param name="focus_plane"/>
+		</params>
+		<input>
+			<pin name="bokeh_tex"/>
+			<pin name="depth_tex"/>
+		</input>
+		<output>
+			<pin name="out_tex"/>
+		</output>
+		<shader effect="DepthOfFieldPP.fxml" tech="MergeBokeh"/>
+	</post_processor>
 </post_processors>

@@ -9,6 +9,7 @@
 		<parameter type="float4x4" name="view"/>
 		<parameter type="float4x4" name="proj"/>
 		<parameter type="float3" name="light_in_world" x="2" y="2" z="-3"/>
+		<parameter type="float3" name="eye_in_world"/>
 		<parameter type="float" name="elapsed_time"/>
 	</cbuffer>
 
@@ -18,11 +19,6 @@
 
 	<shader>
 		<![CDATA[
-float3 CalcColor(float3 pos_ws, float3 normal_ws, float3 clr)
-{
-	return clr * (0.05f + saturate(point_lighting(light_in_world, pos_ws, normal_ws)));
-}
-
 void ColorDepthInstancedVS(float4 pos			: POSITION,
 					float4 tangent_quat		: TANGENT,
 
@@ -37,6 +33,8 @@ void ColorDepthInstancedVS(float4 pos			: POSITION,
 					out float3 oClr : TEXCOORD0,
 					out float3 oPosWS : TEXCOORD1,
 					out float3 oNormalWS : TEXCOORD2,
+					out float3 oLightVecWS : TEXCOORD3,
+					out float3 oHalfwayVecWS : TEXCOORD4,
 					out float4 oPos		: SV_Position)
 {
 	float4x4 model = { row0, row1, row2, float4(0, 0, 0, 1) };
@@ -47,6 +45,10 @@ void ColorDepthInstancedVS(float4 pos			: POSITION,
 	oPosWS = pos_ws.xyz;
 	oNormalWS = normal;
 	oClr = clr;
+	
+	oLightVecWS = light_in_world - pos_ws.xyz;
+	float3 view_vec = eye_in_world - pos_ws.xyz;
+	oHalfwayVecWS = normalize(oLightVecWS) + normalize(view_vec);
 }
 
 void ColorDepthNonInstancedVS(float4 pos			: POSITION,
@@ -55,6 +57,8 @@ void ColorDepthNonInstancedVS(float4 pos			: POSITION,
 					out float3 oClr : TEXCOORD0,
 					out float3 oPosWS : TEXCOORD1,
 					out float3 oNormalWS : TEXCOORD2,
+					out float3 oLightVecWS : TEXCOORD3,
+					out float3 oHalfwayVecWS : TEXCOORD4,
 					out float4 oPos		: SV_Position)
 {
 	float4 pos_ws = mul(pos, modelmat);
@@ -63,11 +67,20 @@ void ColorDepthNonInstancedVS(float4 pos			: POSITION,
 	oPosWS = pos_ws.xyz;
 	oNormalWS = normal;
 	oClr.xyz = color.rgb;
+	
+	oLightVecWS = light_in_world - pos_ws.xyz;
+	float3 view_vec = eye_in_world - pos_ws.xyz;
+	oHalfwayVecWS = normalize(oLightVecWS) + normalize(view_vec);
 }
 
-float4 ColorDepthPS(float3 clr_depth : TEXCOORD0, float3 pos_ws : TEXCOORD1, float3 normal_ws : TEXCOORD2) : SV_Target
+float4 ColorDepthPS(float3 clr : TEXCOORD0, float3 pos_ws : TEXCOORD1, float3 normal_ws : TEXCOORD2,
+	float3 light_vec_ws : TEXCOORD3, float3 halfway_vec_ws : TEXCOORD4) : SV_Target
 {
-	return float4(CalcColor(pos_ws, normal_ws, clr_depth), 1);
+	light_vec_ws = normalize(light_vec_ws);
+	halfway_vec_ws = normalize(halfway_vec_ws);
+	normal_ws = normalize(normal_ws);
+	
+	return float4(0.05f * clr + calc_brdf(clr, 0.2f, 35, light_vec_ws, halfway_vec_ws, normal_ws), 1);
 }
 		]]>
 	</shader>

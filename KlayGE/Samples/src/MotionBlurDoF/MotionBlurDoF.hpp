@@ -22,6 +22,7 @@ private:
 
 	void InputHandler(KlayGE::InputEngine const & sender, KlayGE::InputAction const & action);
 	void DoFOnHandler(KlayGE::UICheckBox const & sender);
+	void BokehOnHandler(KlayGE::UICheckBox const & sender);
 	void FocusPlaneChangedHandler(KlayGE::UISlider const & sender);
 	void FocusRangeChangedHandler(KlayGE::UISlider const & sender);
 	void BlurFactorHandler(KlayGE::UICheckBox const & sender);
@@ -52,17 +53,20 @@ private:
 	KlayGE::TexturePtr mbed_tex_;
 
 	KlayGE::PostProcessPtr depth_of_field_;
+	KlayGE::PostProcessPtr bokeh_filter_;
 	KlayGE::PostProcessPtr motion_blur_;
 	KlayGE::PostProcessPtr depth_of_field_copy_pp_;
 	KlayGE::PostProcessPtr motion_blur_copy_pp_;
 
 	bool dof_on_;
+	bool bokeh_on_;
 	bool mb_on_;
 
 	KlayGE::UIDialogPtr dof_dialog_;
 	KlayGE::UIDialogPtr mb_dialog_;
 	KlayGE::UIDialogPtr app_dialog_;
 	int id_dof_on_;
+	int id_bokeh_on_;
 	int id_focus_plane_static_;
 	int id_focus_plane_slider_;
 	int id_focus_range_static_;

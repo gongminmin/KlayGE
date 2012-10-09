@@ -14,7 +14,7 @@ SET(EFFECT_FILES
 )
 
 SET(POST_PROCESSORS
-	${KLAYGE_PROJECT_DIR}/Samples/media/MotionBlurDoF/Spreading.ppml
+	${KLAYGE_PROJECT_DIR}/Samples/media/MotionBlurDoF/DepthOfField.ppml
 )
 
 SET(UI_FILES

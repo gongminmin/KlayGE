@@ -89,6 +89,7 @@ namespace
 			float4x4 const & prev_view = camera.PrevViewMatrix();
 			float4x4 const & prev_proj = camera.PrevProjMatrix();
 
+			*(technique_->Effect().ParameterByName("eye_in_world")) = camera.EyePos();
 			*(technique_->Effect().ParameterByName("view")) = curr_view;
 			*(technique_->Effect().ParameterByName("proj")) = curr_proj;
 			*(technique_->Effect().ParameterByName("prev_view")) = prev_view;
@@ -142,6 +143,7 @@ namespace
 			float4x4 const & prev_view = camera.PrevViewMatrix();
 			float4x4 const & prev_proj = camera.PrevProjMatrix();
 
+			*(technique_->Effect().ParameterByName("eye_in_world")) = camera.EyePos();
 			*(technique_->Effect().ParameterByName("view")) = curr_view;
 			*(technique_->Effect().ParameterByName("proj")) = curr_proj;
 			*(technique_->Effect().ParameterByName("prev_view")) = prev_view;
@@ -281,11 +283,11 @@ namespace
 
 			if (cs_support_)
 			{
-				spreading_pp_ = LoadPostProcess(ResLoader::Instance().Open("Spreading.ppml"), "spreading_cs");
+				spreading_pp_ = LoadPostProcess(ResLoader::Instance().Open("DepthOfField.ppml"), "spreading_cs");
 			}
 			else
 			{
-				spreading_pp_ = LoadPostProcess(ResLoader::Instance().Open("Spreading.ppml"), "spreading");
+				spreading_pp_ = LoadPostProcess(ResLoader::Instance().Open("DepthOfField.ppml"), "spreading");
 			}
 			spreading_pp_->SetParam(1, static_cast<float>(max_radius_));
 
@@ -421,6 +423,203 @@ namespace
 		RenderLayoutPtr normalization_rl_;
 	};
 
+	class BokehFilter : public PostProcess
+	{
+	public:
+		BokehFilter()
+			: PostProcess(L"BokehFilter"),
+				max_radius_(16)
+		{
+			input_pins_.push_back(std::make_pair("color_tex", TexturePtr()));
+			input_pins_.push_back(std::make_pair("depth_tex", TexturePtr()));
+
+			output_pins_.push_back(std::make_pair("output", TexturePtr()));
+
+			RenderDeviceCaps const & caps = Context::Instance().RenderFactoryInstance().RenderEngineInstance().DeviceCaps();
+			gs_support_ = (caps.max_shader_model >= 4);
+
+			RenderEffectPtr effect = Context::Instance().RenderFactoryInstance().LoadEffect("DepthOfFieldPP.fxml");
+			if (gs_support_)
+			{
+				this->Technique(effect->TechniqueByName("SeparateBokeh4"));
+			}
+			else
+			{
+				this->Technique(effect->TechniqueByName("SeparateBokeh"));
+			}
+
+			*(technique_->Effect().ParameterByName("max_radius")) = static_cast<float>(max_radius_);
+
+			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+			bokeh_fb_ = rf.MakeFrameBuffer();
+
+			bokeh_rl_ = rf.MakeRenderLayout();
+
+			merge_bokeh_pp_ = LoadPostProcess(ResLoader::Instance().Open("DepthOfField.ppml"), "merge_bokeh");
+			merge_bokeh_pp_->SetParam(2, static_cast<float>(max_radius_));
+		}
+
+		void FocusPlane(float focus_plane)
+		{
+			focus_plane_ = focus_plane;
+		}
+		float FocusPlane() const
+		{
+			return focus_plane_;
+		}
+
+		void FocusRange(float focus_range)
+		{
+			focus_range_ = focus_range;
+		}
+		float FocusRange() const
+		{
+			return focus_range_;
+		}
+
+		void InputPin(uint32_t index, TexturePtr const & tex)
+		{
+			PostProcess::InputPin(index, tex);
+
+			if (0 == index)
+			{
+				uint32_t const in_width = tex->Width(0);
+				uint32_t const in_height = tex->Height(0);
+				uint32_t const out_width = in_width * 2 + max_radius_ * 2;
+				uint32_t const out_height = in_height;
+
+				*(technique_->Effect().ParameterByName("in_width_height")) = float4(static_cast<float>(in_width),
+					static_cast<float>(in_height), 1.0f / in_width, 1.0f / in_height);
+				*(technique_->Effect().ParameterByName("bokeh_width_height")) = float4(static_cast<float>(out_width),
+					static_cast<float>(out_height), 1.0f / out_width, 1.0f / out_height);
+
+				RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+				RenderDeviceCaps const & caps = rf.RenderEngineInstance().DeviceCaps();
+				ElementFormat fmt;
+				if (caps.rendertarget_format_support(EF_B10G11R11F, 1, 0))
+				{
+					fmt = EF_B10G11R11F;
+				}
+				else
+				{
+					BOOST_ASSERT(caps.rendertarget_format_support(EF_ABGR16F, 1, 0));
+
+					fmt = EF_ABGR16F;
+				}
+				bokeh_tex_ = rf.MakeTexture2D(out_width, out_height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+				bokeh_fb_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*bokeh_tex_, 0, 0, 0));
+
+				if (gs_support_)
+				{
+					bokeh_rl_->TopologyType(RenderLayout::TT_PointList);
+
+					std::vector<float2> points;
+					for (uint32_t y = 0; y < in_height; ++ y)
+					{
+						for (uint32_t x = 0; x < in_width; ++ x)
+						{
+							points.push_back(float2((x + 0.5f) / in_width, (y + 0.5f) / in_height));
+						}
+					}
+
+					ElementInitData init_data;
+					init_data.data = &points[0];
+					init_data.row_pitch = static_cast<uint32_t>(points.size() * sizeof(points[0]));
+					init_data.slice_pitch = 0;
+					GraphicsBufferPtr pos_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data);
+					bokeh_rl_->BindVertexStream(pos_vb, boost::make_tuple(vertex_element(VEU_Position, 0, EF_GR32F)));
+				}
+				else
+				{
+					bokeh_rl_->TopologyType(RenderLayout::TT_TriangleList);
+
+					std::vector<float3> points;
+					for (uint32_t y = 0; y < in_height; ++ y)
+					{
+						for (uint32_t x = 0; x < in_width; ++ x)
+						{
+							points.push_back(float3((x + 0.5f) / in_width, (y + 0.5f) / in_height, 0.5f));
+							points.push_back(float3((x + 0.5f) / in_width, (y + 0.5f) / in_height, 1.5f));
+							points.push_back(float3((x + 0.5f) / in_width, (y + 0.5f) / in_height, 2.5f));
+							points.push_back(float3((x + 0.5f) / in_width, (y + 0.5f) / in_height, 3.5f));
+						}
+					}
+
+					std::vector<uint32_t> indices;
+					uint32_t base = 0;
+					for (uint32_t y = 0; y < in_height; ++ y)
+					{
+						for (uint32_t x = 0; x < in_width; ++ x)
+						{
+							indices.push_back(base + 0);
+							indices.push_back(base + 1);
+							indices.push_back(base + 2);
+
+							indices.push_back(base + 2);
+							indices.push_back(base + 1);
+							indices.push_back(base + 3);
+
+							base += 4;
+						}
+					}
+
+					ElementInitData init_data;
+					init_data.data = &points[0];
+					init_data.row_pitch = static_cast<uint32_t>(points.size() * sizeof(points[0]));
+					init_data.slice_pitch = 0;
+					GraphicsBufferPtr pos_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data);
+					bokeh_rl_->BindVertexStream(pos_vb, boost::make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F)));
+
+					init_data.data = &indices[0];
+					init_data.row_pitch = static_cast<uint32_t>(indices.size() * sizeof(indices[0]));
+					init_data.slice_pitch = 0;
+					GraphicsBufferPtr pos_ib = rf.MakeIndexBuffer(BU_Static, EAH_GPU_Read, &init_data);
+					bokeh_rl_->BindIndexStream(pos_ib, EF_R32UI);
+				}
+
+				merge_bokeh_pp_->SetParam(0, float4(static_cast<float>(in_width),
+					static_cast<float>(in_height), 1.0f / in_width, 1.0f / in_height));
+				merge_bokeh_pp_->SetParam(1, float4(static_cast<float>(out_width),
+					static_cast<float>(out_height), 1.0f / out_width, 1.0f / out_height));
+				merge_bokeh_pp_->InputPin(0, bokeh_tex_);
+			}
+		}
+
+		using PostProcess::InputPin;
+
+		void Apply()
+		{
+			RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+			*(technique_->Effect().ParameterByName("focus_plane_inv_range")) = float2(-focus_plane_ / focus_range_, 1.0f / focus_range_);
+			*(technique_->Effect().ParameterByName("focus_plane")) = focus_plane_;
+			*(technique_->Effect().ParameterByName("color_tex")) = this->InputPin(0);
+			*(technique_->Effect().ParameterByName("depth_tex")) = this->InputPin(1);
+
+			re.BindFrameBuffer(bokeh_fb_);
+			bokeh_fb_->Clear(FrameBuffer::CBM_Color, Color(0, 0, 0, 0), 1, 0);
+			re.Render(*technique_, *bokeh_rl_);
+
+			merge_bokeh_pp_->SetParam(3, float2(-focus_plane_ / focus_range_, 1.0f / focus_range_));
+			merge_bokeh_pp_->SetParam(4, focus_plane_);
+			merge_bokeh_pp_->InputPin(1, this->InputPin(1));
+			merge_bokeh_pp_->Apply();
+		}
+
+	private:
+		bool gs_support_;
+
+		int max_radius_;
+
+		float focus_plane_;
+		float focus_range_;
+
+		TexturePtr bokeh_tex_;
+		FrameBufferPtr bokeh_fb_;
+		RenderLayoutPtr bokeh_rl_;
+
+		PostProcessPtr merge_bokeh_pp_;
+	};
+
 	class MotionBlur : public PostProcess
 	{
 	public:
@@ -541,6 +740,7 @@ void MotionBlurDoFApp::InitObjects()
 	inputEngine.ActionMap(actionMap, input_handler, true);
 
 	depth_of_field_ = MakeSharedPtr<DepthOfField>();
+	bokeh_filter_ = MakeSharedPtr<BokehFilter>();
 	depth_of_field_copy_pp_ = LoadPostProcess(ResLoader::Instance().Open("Copy.ppml"), "copy");
 	
 	motion_blur_ = MakeSharedPtr<MotionBlur>();
@@ -552,6 +752,7 @@ void MotionBlurDoFApp::InitObjects()
 	app_dialog_ = UIManager::Instance().GetDialogs()[2];
 
 	id_dof_on_ = dof_dialog_->IDFromName("DoFOn");
+	id_bokeh_on_ = dof_dialog_->IDFromName("BokehOn");
 	id_focus_plane_static_ = dof_dialog_->IDFromName("FocusPlaneStatic");
 	id_focus_plane_slider_ = dof_dialog_->IDFromName("FocusPlaneSlider");
 	id_focus_range_static_ = dof_dialog_->IDFromName("FocusRangeStatic");
@@ -563,6 +764,7 @@ void MotionBlurDoFApp::InitObjects()
 	id_ctrl_camera_ = app_dialog_->IDFromName("CtrlCamera");
 
 	dof_dialog_->Control<UICheckBox>(id_dof_on_)->OnChangedEvent().connect(boost::bind(&MotionBlurDoFApp::DoFOnHandler, this, _1));
+	dof_dialog_->Control<UICheckBox>(id_bokeh_on_)->OnChangedEvent().connect(boost::bind(&MotionBlurDoFApp::BokehOnHandler, this, _1));
 	dof_dialog_->Control<UISlider>(id_focus_plane_slider_)->OnValueChangedEvent().connect(boost::bind(&MotionBlurDoFApp::FocusPlaneChangedHandler, this, _1));
 	dof_dialog_->Control<UISlider>(id_focus_range_slider_)->OnValueChangedEvent().connect(boost::bind(&MotionBlurDoFApp::FocusRangeChangedHandler, this, _1));
 	dof_dialog_->Control<UICheckBox>(id_blur_factor_)->OnChangedEvent().connect(boost::bind(&MotionBlurDoFApp::BlurFactorHandler, this, _1));
@@ -573,6 +775,7 @@ void MotionBlurDoFApp::InitObjects()
 	app_dialog_->Control<UICheckBox>(id_ctrl_camera_)->OnChangedEvent().connect(boost::bind(&MotionBlurDoFApp::CtrlCameraHandler, this, _1));
 
 	this->DoFOnHandler(*dof_dialog_->Control<UICheckBox>(id_dof_on_));
+	this->BokehOnHandler(*dof_dialog_->Control<UICheckBox>(id_bokeh_on_));
 	this->FocusPlaneChangedHandler(*dof_dialog_->Control<UISlider>(id_focus_plane_slider_));
 	this->FocusRangeChangedHandler(*dof_dialog_->Control<UISlider>(id_focus_range_slider_));
 	this->BlurFactorHandler(*dof_dialog_->Control<UICheckBox>(id_blur_factor_));
@@ -711,6 +914,9 @@ void MotionBlurDoFApp::OnResize(uint32_t width, uint32_t height)
 	depth_of_field_->InputPin(1, depth_tex_);
 	depth_of_field_copy_pp_->InputPin(0, mbed_tex_);
 
+	bokeh_filter_->InputPin(0, mbed_tex_);
+	bokeh_filter_->InputPin(1, depth_tex_);
+
 	UIManager::Instance().SettleCtrls(width, height);
 }
 
@@ -728,6 +934,7 @@ void MotionBlurDoFApp::DoFOnHandler(KlayGE::UICheckBox const & sender)
 {
 	dof_on_ = sender.GetChecked();
 
+	dof_dialog_->Control<UICheckBox>(id_bokeh_on_)->SetEnabled(dof_on_);
 	dof_dialog_->Control<UIStatic>(id_focus_plane_static_)->SetEnabled(dof_on_);
 	dof_dialog_->Control<UISlider>(id_focus_plane_slider_)->SetEnabled(dof_on_);
 	dof_dialog_->Control<UIStatic>(id_focus_range_static_)->SetEnabled(dof_on_);
@@ -735,14 +942,21 @@ void MotionBlurDoFApp::DoFOnHandler(KlayGE::UICheckBox const & sender)
 	dof_dialog_->Control<UICheckBox>(id_blur_factor_)->SetEnabled(dof_on_);
 }
 
+void MotionBlurDoFApp::BokehOnHandler(KlayGE::UICheckBox const & sender)
+{
+	bokeh_on_ = sender.GetChecked();
+}
+
 void MotionBlurDoFApp::FocusPlaneChangedHandler(KlayGE::UISlider const & sender)
 {
 	checked_pointer_cast<DepthOfField>(depth_of_field_)->FocusPlane(sender.GetValue() / 50.0f);
+	checked_pointer_cast<BokehFilter>(bokeh_filter_)->FocusPlane(sender.GetValue() / 50.0f);
 }
 
 void MotionBlurDoFApp::FocusRangeChangedHandler(KlayGE::UISlider const & sender)
 {
 	checked_pointer_cast<DepthOfField>(depth_of_field_)->FocusRange(sender.GetValue() / 50.0f);
+	checked_pointer_cast<BokehFilter>(bokeh_filter_)->FocusRange(sender.GetValue() / 50.0f);
 }
 
 void MotionBlurDoFApp::BlurFactorHandler(KlayGE::UICheckBox const & sender)
@@ -896,6 +1110,10 @@ uint32_t MotionBlurDoFApp::DoUpdate(uint32_t pass)
 		if (dof_on_)
 		{
 			depth_of_field_->Apply();
+			if (bokeh_on_)
+			{
+				bokeh_filter_->Apply();
+			}
 		}
 		else
 		{

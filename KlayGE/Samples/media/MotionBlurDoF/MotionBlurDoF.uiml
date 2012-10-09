@@ -1,19 +1,20 @@
 <?xml version='1.0' encoding='utf-8' standalone='no'?>
 
 <ui>
-	<dialog id="DoF" caption="Depth of field" x="-140" y="60" align_x="right" width="140" height="210">
+	<dialog id="DoF" caption="Depth of field" x="-140" y="60" align_x="right" width="140" height="250">
 		<control type="check_box" id="DoFOn" caption="DoF on" x="20" y="20" width="350" height="24" checked="1" hotkey="0" is_default="0"/>
+		<control type="check_box" id="BokehOn" caption="Bokeh on" x="20" y="60" width="350" height="24" checked="1" hotkey="0" is_default="0"/>
 		
-		<control type="static" id="FocusPlaneStatic" caption="Focus plane:" x="20" y="60" width="100" height="24" is_default="0"/>
-		<control type="slider" id="FocusPlaneSlider" x="20" y="80" width="100" height="24" min="0" max="200" value="100" is_default="0"/>
+		<control type="static" id="FocusPlaneStatic" caption="Focus plane:" x="20" y="100" width="100" height="24" is_default="0"/>
+		<control type="slider" id="FocusPlaneSlider" x="20" y="120" width="100" height="24" min="0" max="200" value="100" is_default="0"/>
 
-		<control type="static" id="FocusRangeStatic" caption="Focus range:" x="20" y="108" width="100" height="24" is_default="0"/>
-		<control type="slider" id="FocusRangeSlider" x="20" y="128" width="100" height="24" min="0" max="200" value="100" is_default="0"/>
+		<control type="static" id="FocusRangeStatic" caption="Focus range:" x="20" y="148" width="100" height="24" is_default="0"/>
+		<control type="slider" id="FocusRangeSlider" x="20" y="168" width="100" height="24" min="0" max="200" value="100" is_default="0"/>
 
-		<control type="check_box" id="BlurFactor" caption="Show Blur factor" x="20" y="166" width="350" height="24" checked="0" hotkey="0" is_default="0"/>
+		<control type="check_box" id="BlurFactor" caption="Show Blur factor" x="20" y="206" width="350" height="24" checked="0" hotkey="0" is_default="0"/>
 	</dialog>
 
-	<dialog id="MotionBlur" caption="Motion Blur" x="-140" y="310" align_x="right" width="140" height="170">
+	<dialog id="MotionBlur" caption="Motion Blur" x="-140" y="360" align_x="right" width="140" height="120">
 		<control type="check_box" id="MBOn" caption="Motion blur on" x="20" y="20" width="350" height="24" checked="1" hotkey="0" is_default="0"/>
 		<control type="check_box" id="MotionVec" caption="Show Motion Vector" x="20" y="60" width="350" height="24" checked="0" hotkey="0" is_default="0"/>
 	</dialog>

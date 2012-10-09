@@ -117,7 +117,7 @@ float4 DepthOfFieldNormalizationPS(float2 tc : TEXCOORD0) : SV_Target
 	<macro name="MAX_RADIUS" value="8"/>
 
 	<parameter type="rw_texture2D" elem_type="float4" name="spread_tex"/>
-	
+
 	<shader type="compute_shader" version="5">
 		<![CDATA[
 groupshared float2 shared_radius[(BLOCK_SIZE_X + MAX_RADIUS * 2 + 1) * (BLOCK_SIZE_Y + MAX_RADIUS * 2 + 1)];
@@ -188,6 +188,215 @@ void DepthOfFieldSpreadingCS(uint3 gid : SV_GroupID,
 	<technique name="DepthOfFieldSpreadingCS">
 		<pass name="p0">
 			<state name="compute_shader" value="DepthOfFieldSpreadingCS()"/>
+		</pass>
+	</technique>
+
+
+	<parameter type="float" name="focus_plane"/>
+	<parameter type="float4" name="bokeh_width_height"/>
+
+	<parameter type="texture2D" name="bokeh_pattern_tex">
+		<annotation type="string" name="SasResourceAddress" value="bokeh_pattern.dds"/>
+	</parameter>
+	<parameter type="sampler" name="linear_sampler">
+		<state name="filtering" value="min_mag_linear_mip_point"/>
+		<state name="address_u" value="clamp"/>
+		<state name="address_v" value="clamp"/>
+	</parameter>
+
+	<parameter type="texture2D" name="bokeh_tex"/>
+
+	<shader>
+		<![CDATA[
+void SeparateBokehVS(float3 pos : POSITION,
+						out float2 oTc : TEXCOORD0,
+						out float3 oClr : TEXCOORD1,
+						out float4 oPos : SV_Position)
+{
+	const float3 RGB_TO_LUM = float3(0.2126f, 0.7152f, 0.0722f);
+
+	oClr = color_tex.SampleLevel(point_sampler, pos.xy, 0).xyz;
+	float lum = dot(oClr, RGB_TO_LUM);
+	if (lum > 1.5f)
+	{
+		float depth = depth_tex.SampleLevel(point_sampler, pos.xy, 0).x;
+		float radius = saturate(abs(depth * focus_plane_inv_range.y + focus_plane_inv_range.x)) * 8;
+		if (radius > 1)
+		{
+			float2 center_pos = pos.xy * in_width_height.xy;
+			if (depth > focus_plane)
+			{
+				center_pos.x += in_width_height.x + 2 * max_radius;
+			}
+		
+			int index = (int)pos.z;
+			float2 offset[4] = { float2(-1, -1), float2(+1, -1), float2(-1, +1), float2(+1, +1) };
+			oPos = float4(((center_pos + offset[index] * max_radius) * bokeh_width_height.zw) * 2 - 1, 0, 1);
+			oPos.y *= KLAYGE_FLIPPING;
+			oTc = offset[index] * 0.5f + 0.5f;
+		}
+		else
+		{
+			oPos = float4(1, 1, 1, 0);
+			oTc = 0;
+		}
+	}
+	else
+	{
+		oPos = float4(1, 1, 1, 0);
+		oTc = 0;
+	}
+}
+
+float4 SeparateBokehPS(float2 tc : TEXCOORD0, float3 clr : TEXCOORD1) : SV_Target
+{
+	float bokeh_pattern = bokeh_pattern_tex.Sample(linear_sampler, tc).x;
+	return float4(clr, bokeh_pattern);
+}
+
+float4 MergeBokehPS(float2 tc : TEXCOORD0) : SV_Target
+{
+	float depth = depth_tex.Sample(point_sampler, tc).x;
+	float radius = saturate(abs(depth * focus_plane_inv_range.y + focus_plane_inv_range.x)) * 8;
+	float2 bokeh_tc = tc * in_width_height.xy;
+	if ((radius > 1) && (depth > focus_plane))
+	{
+		bokeh_tc.x += in_width_height.x + 2 * max_radius;
+	}
+	
+	return bokeh_tex.Sample(point_sampler, bokeh_tc * bokeh_width_height.zw);
+}
+		]]>
+	</shader>
+
+	<shader version="4">
+		<![CDATA[
+struct PS_IN
+{
+	float2 tc : TEXCOORD0;
+	float3 clr : TEXCOORD1;
+	float4 pos : SV_Position;
+};
+
+void SeparateBokehVS4(float2 pos : POSITION,
+						out float3 oClr : TEXCOORD0,
+						out float4 oPos : SV_Position)
+{
+	const float3 RGB_TO_LUM = float3(0.2126f, 0.7152f, 0.0722f);
+
+	oClr = color_tex.SampleLevel(point_sampler, pos.xy, 0).xyz;
+	float lum = dot(oClr, RGB_TO_LUM);
+	if (lum > 1.5f)
+	{
+		float depth = depth_tex.SampleLevel(point_sampler, pos.xy, 0).x;
+		float radius = saturate(abs(depth * focus_plane_inv_range.y + focus_plane_inv_range.x)) * 8;
+		if (radius > 1)
+		{
+			float2 center_pos = pos.xy * in_width_height.xy;
+			if (depth > focus_plane)
+			{
+				center_pos.x += in_width_height.x + 2 * max_radius;
+			}
+		
+			oPos = float4(center_pos, 0, 1);
+		}
+		else
+		{
+			oPos = float4(1, 1, 1, 0);
+		}
+	}
+	else
+	{
+		oPos = float4(1, 1, 1, 0);
+	}
+}
+
+#if KLAYGE_OPENGL
+POINT TRIANGLE_OUT void SeparateBokehGS4(AttribArray<float3> in_clr : TEXCOORD0, AttribArray<float4> in_pos : POSITION)
+{
+#else
+[maxvertexcount(4)]
+void SeparateBokehGS4(point float3 in_clr[1] : TEXCOORD0, point float4 in_pos[1] : SV_Position, inout TriangleStream<PS_IN> out_stream)
+{
+#endif
+	static const float2 offset[4] = { float2(-1, -1), float2(+1, -1), float2(-1, +1), float2(+1, +1) };
+	if (in_pos[0].w > 0.5f)
+	{
+		float2 center_pos = in_pos[0].xy;
+		float3 clr = in_clr[0];
+		[unroll]
+		for (int index = 0; index < 4; ++ index)
+		{
+			PS_IN gs_out;
+
+			gs_out.pos = float4(((center_pos + offset[index] * max_radius) * bokeh_width_height.zw) * 2 - 1, 0, 1);
+			gs_out.pos.y *= KLAYGE_FLIPPING;
+			gs_out.clr = clr;
+			gs_out.tc = offset[index] * 0.5f + 0.5f;
+		
+#if KLAYGE_OPENGL
+			emitVertex(gs_out.tc : TEXCOORD0, gs_out.clr : TEXCOORD1, gs_out.pos : POSITION);
+#else
+			out_stream.Append(gs_out);
+#endif
+		}
+	}
+}
+		]]>
+	</shader>
+
+	<technique name="SeparateBokeh">
+		<pass name="p0">
+			<state name="depth_enable" value="false"/>
+			<state name="depth_write_mask" value="0"/>
+
+			<state name="blend_enable" value="true"/>
+			<state name="blend_op" value="add"/>
+			<state name="src_blend" value="src_alpha"/>
+			<state name="dest_blend" value="one"/>
+			<state name="blend_op_alpha" value="add"/>
+			<state name="src_blend_alpha" value="one"/>
+			<state name="dest_blend_alpha" value="one"/>
+
+			<state name="vertex_shader" value="SeparateBokehVS()"/>
+			<state name="pixel_shader" value="SeparateBokehPS()"/>
+		</pass>
+	</technique>
+
+	<technique name="SeparateBokeh4">
+		<pass name="p0">
+			<state name="depth_enable" value="false"/>
+			<state name="depth_write_mask" value="0"/>
+
+			<state name="blend_enable" value="true"/>
+			<state name="blend_op" value="add"/>
+			<state name="src_blend" value="src_alpha"/>
+			<state name="dest_blend" value="one"/>
+			<state name="blend_op_alpha" value="add"/>
+			<state name="src_blend_alpha" value="one"/>
+			<state name="dest_blend_alpha" value="one"/>
+
+			<state name="vertex_shader" value="SeparateBokehVS4()"/>
+			<state name="geometry_shader" value="SeparateBokehGS4()"/>
+			<state name="pixel_shader" value="SeparateBokehPS()"/>
+		</pass>
+	</technique>
+
+	<technique name="MergeBokeh">
+		<pass name="p0">
+			<state name="depth_enable" value="false"/>
+			<state name="depth_write_mask" value="0"/>
+
+			<state name="blend_enable" value="true"/>
+			<state name="blend_op" value="add"/>
+			<state name="src_blend" value="one"/>
+			<state name="dest_blend" value="one"/>
+			<state name="blend_op_alpha" value="add"/>
+			<state name="src_blend_alpha" value="one"/>
+			<state name="dest_blend_alpha" value="one"/>
+
+			<state name="vertex_shader" value="PostProcessVS()"/>
+			<state name="pixel_shader" value="MergeBokehPS()"/>
 		</pass>
 	</technique>
 </effect>
