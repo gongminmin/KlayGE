@@ -193,6 +193,7 @@ void DepthOfFieldSpreadingCS(uint3 gid : SV_GroupID,
 
 
 	<parameter type="float" name="focus_plane"/>
+	<parameter type="float" name="background_offset"/>
 	<parameter type="float4" name="bokeh_width_height"/>
 
 	<parameter type="texture2D" name="bokeh_pattern_tex">
@@ -208,32 +209,30 @@ void DepthOfFieldSpreadingCS(uint3 gid : SV_GroupID,
 
 	<shader>
 		<![CDATA[
-void SeparateBokehVS(float3 pos : POSITION,
+void SeparateBokehVS(float4 pos : POSITION,
 						out float2 oTc : TEXCOORD0,
 						out float3 oClr : TEXCOORD1,
 						out float4 oPos : SV_Position)
 {
 	const float3 RGB_TO_LUM = float3(0.2126f, 0.7152f, 0.0722f);
 
-	oClr = color_tex.SampleLevel(point_sampler, pos.xy, 0).xyz;
+	oClr = color_tex.SampleLevel(point_sampler, pos.xy, 1).xyz;
 	float lum = dot(oClr, RGB_TO_LUM);
 	if (lum > 1.5f)
 	{
-		float depth = depth_tex.SampleLevel(point_sampler, pos.xy, 0).x;
-		float radius = saturate(abs(depth * focus_plane_inv_range.y + focus_plane_inv_range.x)) * 8;
-		if (radius > 1)
+		float depth = depth_tex.SampleLevel(point_sampler, pos.xy, 1).x;
+		float radius = abs(depth * focus_plane_inv_range.y + focus_plane_inv_range.x) * max_radius;
+		if (radius > 1.5f)
 		{
 			float2 center_pos = pos.xy * in_width_height.xy;
 			if (depth > focus_plane)
 			{
-				center_pos.x += in_width_height.x + 2 * max_radius;
+				center_pos.x += background_offset;
 			}
 		
-			int index = (int)pos.z;
-			float2 offset[4] = { float2(-1, -1), float2(+1, -1), float2(-1, +1), float2(+1, +1) };
-			oPos = float4(((center_pos + offset[index] * max_radius) * bokeh_width_height.zw) * 2 - 1, 0, 1);
+			oPos = float4(((center_pos + pos.zw * max_radius) * bokeh_width_height.zw) * 2 - 1, 0, 1);
 			oPos.y *= KLAYGE_FLIPPING;
-			oTc = offset[index] * 0.5f + 0.5f;
+			oTc = pos.zw * 0.5f + 0.5f;
 		}
 		else
 		{
@@ -257,14 +256,14 @@ float4 SeparateBokehPS(float2 tc : TEXCOORD0, float3 clr : TEXCOORD1) : SV_Targe
 float4 MergeBokehPS(float2 tc : TEXCOORD0) : SV_Target
 {
 	float depth = depth_tex.Sample(point_sampler, tc).x;
-	float radius = saturate(abs(depth * focus_plane_inv_range.y + focus_plane_inv_range.x)) * 8;
+	float radius = abs(depth * focus_plane_inv_range.y + focus_plane_inv_range.x) * max_radius;
 	float2 bokeh_tc = tc * in_width_height.xy;
 	if ((radius > 1) && (depth > focus_plane))
 	{
-		bokeh_tc.x += in_width_height.x + 2 * max_radius;
+		bokeh_tc.x += background_offset;
 	}
 	
-	return bokeh_tex.Sample(point_sampler, bokeh_tc * bokeh_width_height.zw);
+	return bokeh_tex.Sample(linear_sampler, bokeh_tc * bokeh_width_height.zw);
 }
 		]]>
 	</shader>
@@ -284,18 +283,18 @@ void SeparateBokehVS4(float2 pos : POSITION,
 {
 	const float3 RGB_TO_LUM = float3(0.2126f, 0.7152f, 0.0722f);
 
-	oClr = color_tex.SampleLevel(point_sampler, pos.xy, 0).xyz;
+	oClr = color_tex.SampleLevel(point_sampler, pos.xy, 1).xyz;
 	float lum = dot(oClr, RGB_TO_LUM);
 	if (lum > 1.5f)
 	{
-		float depth = depth_tex.SampleLevel(point_sampler, pos.xy, 0).x;
-		float radius = saturate(abs(depth * focus_plane_inv_range.y + focus_plane_inv_range.x)) * 8;
-		if (radius > 1)
+		float depth = depth_tex.SampleLevel(point_sampler, pos.xy, 1).x;
+		float radius = abs(depth * focus_plane_inv_range.y + focus_plane_inv_range.x) * max_radius;
+		if (radius > 1.5f)
 		{
 			float2 center_pos = pos.xy * in_width_height.xy;
 			if (depth > focus_plane)
 			{
-				center_pos.x += in_width_height.x + 2 * max_radius;
+				center_pos.x += background_offset;
 			}
 		
 			oPos = float4(center_pos, 0, 1);

@@ -41,6 +41,7 @@
 			<param name="max_radius"/>
 			<param name="focus_plane_inv_range"/>
 			<param name="focus_plane"/>
+			<param name="background_offset"/>
 		</params>
 		<input>
 			<pin name="bokeh_tex"/>

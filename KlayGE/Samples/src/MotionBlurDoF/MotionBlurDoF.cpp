@@ -428,7 +428,7 @@ namespace
 	public:
 		BokehFilter()
 			: PostProcess(L"BokehFilter"),
-				max_radius_(16)
+				max_radius_(8)
 		{
 			input_pins_.push_back(std::make_pair("color_tex", TexturePtr()));
 			input_pins_.push_back(std::make_pair("depth_tex", TexturePtr()));
@@ -483,15 +483,16 @@ namespace
 
 			if (0 == index)
 			{
-				uint32_t const in_width = tex->Width(0);
-				uint32_t const in_height = tex->Height(0);
-				uint32_t const out_width = in_width * 2 + max_radius_ * 2;
+				uint32_t const in_width = tex->Width(0) / 2;
+				uint32_t const in_height = tex->Height(0) / 2;
+				uint32_t const out_width = in_width * 2 + max_radius_ * 4;
 				uint32_t const out_height = in_height;
 
 				*(technique_->Effect().ParameterByName("in_width_height")) = float4(static_cast<float>(in_width),
 					static_cast<float>(in_height), 1.0f / in_width, 1.0f / in_height);
 				*(technique_->Effect().ParameterByName("bokeh_width_height")) = float4(static_cast<float>(out_width),
 					static_cast<float>(out_height), 1.0f / out_width, 1.0f / out_height);
+				*(technique_->Effect().ParameterByName("background_offset")) = static_cast<float>(in_width + max_radius_ * 4);
 
 				RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 				RenderDeviceCaps const & caps = rf.RenderEngineInstance().DeviceCaps();
@@ -514,9 +515,9 @@ namespace
 					bokeh_rl_->TopologyType(RenderLayout::TT_PointList);
 
 					std::vector<float2> points;
-					for (uint32_t y = 0; y < in_height; ++ y)
+					for (uint32_t y = 0; y < in_height; y += 2)
 					{
-						for (uint32_t x = 0; x < in_width; ++ x)
+						for (uint32_t x = 0; x < in_width; x += 2)
 						{
 							points.push_back(float2((x + 0.5f) / in_width, (y + 0.5f) / in_height));
 						}
@@ -531,35 +532,56 @@ namespace
 				}
 				else
 				{
-					bokeh_rl_->TopologyType(RenderLayout::TT_TriangleList);
-
-					std::vector<float3> points;
-					for (uint32_t y = 0; y < in_height; ++ y)
+					std::vector<float4> points;
+					for (uint32_t y = 0; y < in_height; y += 2)
 					{
-						for (uint32_t x = 0; x < in_width; ++ x)
+						for (uint32_t x = 0; x < in_width; x += 2)
 						{
-							points.push_back(float3((x + 0.5f) / in_width, (y + 0.5f) / in_height, 0.5f));
-							points.push_back(float3((x + 0.5f) / in_width, (y + 0.5f) / in_height, 1.5f));
-							points.push_back(float3((x + 0.5f) / in_width, (y + 0.5f) / in_height, 2.5f));
-							points.push_back(float3((x + 0.5f) / in_width, (y + 0.5f) / in_height, 3.5f));
+							points.push_back(float4((x + 0.5f) / in_width, (y + 0.5f) / in_height, -1, -1));
+							points.push_back(float4((x + 0.5f) / in_width, (y + 0.5f) / in_height, +1, -1));
+							points.push_back(float4((x + 0.5f) / in_width, (y + 0.5f) / in_height, -1, +1));
+							points.push_back(float4((x + 0.5f) / in_width, (y + 0.5f) / in_height, +1, +1));
 						}
 					}
 
 					std::vector<uint32_t> indices;
 					uint32_t base = 0;
-					for (uint32_t y = 0; y < in_height; ++ y)
+					if (caps.primitive_restart_support)
 					{
-						for (uint32_t x = 0; x < in_width; ++ x)
+						bokeh_rl_->TopologyType(RenderLayout::TT_TriangleStrip);
+
+						for (uint32_t y = 0; y < in_height; ++ y)
 						{
-							indices.push_back(base + 0);
-							indices.push_back(base + 1);
-							indices.push_back(base + 2);
+							for (uint32_t x = 0; x < in_width; ++ x)
+							{
+								indices.push_back(base + 0);
+								indices.push_back(base + 1);
+								indices.push_back(base + 2);
+								indices.push_back(base + 3);
+								indices.push_back(0xFFFFFFFF);
 
-							indices.push_back(base + 2);
-							indices.push_back(base + 1);
-							indices.push_back(base + 3);
+								base += 4;
+							}
+						}
+					}
+					else
+					{
+						bokeh_rl_->TopologyType(RenderLayout::TT_TriangleList);
 
-							base += 4;
+						for (uint32_t y = 0; y < in_height; ++ y)
+						{
+							for (uint32_t x = 0; x < in_width; ++ x)
+							{
+								indices.push_back(base + 0);
+								indices.push_back(base + 1);
+								indices.push_back(base + 2);
+
+								indices.push_back(base + 2);
+								indices.push_back(base + 1);
+								indices.push_back(base + 3);
+
+								base += 4;
+							}
 						}
 					}
 
@@ -568,7 +590,7 @@ namespace
 					init_data.row_pitch = static_cast<uint32_t>(points.size() * sizeof(points[0]));
 					init_data.slice_pitch = 0;
 					GraphicsBufferPtr pos_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data);
-					bokeh_rl_->BindVertexStream(pos_vb, boost::make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F)));
+					bokeh_rl_->BindVertexStream(pos_vb, boost::make_tuple(vertex_element(VEU_Position, 0, EF_ABGR32F)));
 
 					init_data.data = &indices[0];
 					init_data.row_pitch = static_cast<uint32_t>(indices.size() * sizeof(indices[0]));
@@ -581,6 +603,7 @@ namespace
 					static_cast<float>(in_height), 1.0f / in_width, 1.0f / in_height));
 				merge_bokeh_pp_->SetParam(1, float4(static_cast<float>(out_width),
 					static_cast<float>(out_height), 1.0f / out_width, 1.0f / out_height));
+				merge_bokeh_pp_->SetParam(5, static_cast<float>(in_width + max_radius_ * 4));
 				merge_bokeh_pp_->InputPin(0, bokeh_tex_);
 			}
 		}
@@ -853,7 +876,7 @@ void MotionBlurDoFApp::OnResize(uint32_t width, uint32_t height)
 
 		depth_fmt = EF_ABGR16F;
 	}
-	depth_tex_ = rf.MakeTexture2D(width, height, 1, 1, depth_fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+	depth_tex_ = rf.MakeTexture2D(width, height, 2, 1, depth_fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write | EAH_Generate_Mips, NULL);
 
 	if (depth_texture_support_)
 	{
@@ -874,7 +897,7 @@ void MotionBlurDoFApp::OnResize(uint32_t width, uint32_t height)
 		color_fmt = EF_ABGR16F;
 	}
 
-	color_tex_ = rf.MakeTexture2D(width, height, 1, 1, color_fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+	color_tex_ = rf.MakeTexture2D(width, height, 2, 1, color_fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write | EAH_Generate_Mips, NULL);
 	clr_depth_fb_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*color_tex_, 0, 1, 0));
 	clr_depth_fb_->Attach(FrameBuffer::ATT_DepthStencil, ds_view);
 
@@ -1098,6 +1121,9 @@ uint32_t MotionBlurDoFApp::DoUpdate(uint32_t pass)
 		num_renderable_rendered_ = sceneMgr.NumRenderablesRendered();
 		num_primitives_rendered_ = sceneMgr.NumPrimitivesRendered();
 		num_vertices_rendered_ = sceneMgr.NumVerticesRendered();
+
+		color_tex_->BuildMipSubLevels();
+		depth_tex_->BuildMipSubLevels();
 
 		if (mb_on_)
 		{
