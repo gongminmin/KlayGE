@@ -63,6 +63,7 @@ namespace KlayGE
 
 		void NodeVisible(size_t index);
 		void MarkNodeObjs(size_t index, bool force);
+		void AdjustObjIndices(size_t index, size_t obj_index);
 
 		bool BoundVisible(size_t index, AABBox const & aabb) const;
 		bool BoundVisible(size_t index, OBBox const & obb) const;

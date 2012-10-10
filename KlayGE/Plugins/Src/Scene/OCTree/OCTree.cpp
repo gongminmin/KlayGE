@@ -307,6 +307,13 @@ namespace KlayGE
 			{
 				rebuild_tree_ = true;
 			}
+			else
+			{
+				if (iter != scene_objs_.end() - 1)
+				{
+					this->AdjustObjIndices(0, iter - scene_objs_.begin());
+				}
+			}
 		}
 	}
 
@@ -358,6 +365,37 @@ namespace KlayGE
 				for (int i = 0; i < 8; ++ i)
 				{
 					this->MarkNodeObjs(node.first_child_index + i, (BO_Yes == node.visible) || force);
+				}
+			}
+		}
+	}
+
+	void OCTree::AdjustObjIndices(size_t index, size_t obj_index)
+	{
+		if (index < octree_.size())
+		{
+			octree_node_t& node = octree_[index];
+			for (BOOST_AUTO(iter, node.obj_indices.begin()); iter != node.obj_indices.end();)
+			{
+				if (*iter == obj_index)
+				{
+					iter = node.obj_indices.erase(iter);
+				}
+				else
+				{
+					if (*iter > obj_index)
+					{
+						-- *iter;
+					}
+					++ iter;
+				}
+			}
+
+			if (node.first_child_index != -1)
+			{
+				for (int i = 0; i < 8; ++ i)
+				{
+					this->AdjustObjIndices(node.first_child_index + i, obj_index);
 				}
 			}
 		}
