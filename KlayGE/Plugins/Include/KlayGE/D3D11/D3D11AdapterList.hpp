@@ -26,7 +26,7 @@ namespace KlayGE
 	public:
 		D3D11AdapterList();
 
-		void Enumerate(IDXGIFactory1Ptr const & gi_factory);
+		void Enumerate(IDXGIFactoryNPtr const & gi_factory);
 
 		size_t NumAdapter() const;
 		D3D11AdapterPtr const & Adapter(size_t index) const;

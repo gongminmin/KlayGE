@@ -21,20 +21,24 @@
 	#pragma warning(push)
 	#pragma warning(disable: 4005)
 	#endif
-#endif
-#include <d3d11.h>
-#if (_WIN32_WINNT < 0x0602 /*_WIN32_WINNT_WIN8*/)
+	#include <d3d11.h>
 	#ifdef KLAYGE_COMPILER_MSVC
 	#pragma warning(pop)
 	#endif
+#else
+	#include <d3d11_1.h>
 #endif
 
 namespace KlayGE
 {
-	typedef boost::shared_ptr<IDXGIFactory>					IDXGIFactoryPtr;
 	typedef boost::shared_ptr<IDXGIAdapter>					IDXGIAdapterPtr;
-	typedef boost::shared_ptr<IDXGIFactory1>				IDXGIFactory1Ptr;
-	typedef boost::shared_ptr<IDXGIAdapter1>				IDXGIAdapter1Ptr;
+#if (_WIN32_WINNT >= 0x0602 /*_WIN32_WINNT_WIN8*/)
+	typedef boost::shared_ptr<IDXGIFactory2>				IDXGIFactoryNPtr;
+	typedef boost::shared_ptr<IDXGIAdapter2>				IDXGIAdapterNPtr;
+#else
+	typedef boost::shared_ptr<IDXGIFactory1>				IDXGIFactoryNPtr;
+	typedef boost::shared_ptr<IDXGIAdapter1>				IDXGIAdapterNPtr;
+#endif
 	typedef boost::shared_ptr<IDXGISwapChain>				IDXGISwapChainPtr;
 	typedef boost::shared_ptr<ID3D11Device>					ID3D11DevicePtr;
 	typedef boost::shared_ptr<ID3D11DeviceContext>			ID3D11DeviceContextPtr;

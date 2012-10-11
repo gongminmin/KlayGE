@@ -39,7 +39,7 @@
 
 namespace KlayGE
 {
-	D3D11RenderWindow::D3D11RenderWindow(IDXGIFactory1Ptr const & gi_factory, D3D11AdapterPtr const & adapter,
+	D3D11RenderWindow::D3D11RenderWindow(IDXGIFactoryNPtr const & gi_factory, D3D11AdapterPtr const & adapter,
 			std::string const & name, RenderSettings const & settings)
 						: hWnd_(NULL),
                             ready_(false), closed_(false),

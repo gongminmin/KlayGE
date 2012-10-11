@@ -141,8 +141,13 @@ namespace KlayGE
 		}
 #endif
 
+#if (_WIN32_WINNT >= 0x0602 /*_WIN32_WINNT_WIN8*/)
+		IDXGIFactory2* gi_factory;
+		TIF(DynamicCreateDXGIFactory1_(IID_IDXGIFactory2, reinterpret_cast<void**>(&gi_factory)));
+#else
 		IDXGIFactory1* gi_factory;
 		TIF(DynamicCreateDXGIFactory1_(IID_IDXGIFactory1, reinterpret_cast<void**>(&gi_factory)));
+#endif
 		gi_factory_ = MakeCOMPtr(gi_factory);
 
 		adapterList_.Enumerate(gi_factory_);
@@ -192,7 +197,7 @@ namespace KlayGE
 
 	// 获取D3D接口
 	/////////////////////////////////////////////////////////////////////////////////
-	IDXGIFactory1Ptr const & D3D11RenderEngine::DXGIFactory() const
+	IDXGIFactoryNPtr const & D3D11RenderEngine::DXGIFactory() const
 	{
 		return gi_factory_;
 	}

@@ -26,7 +26,7 @@ namespace KlayGE
 	class D3D11RenderWindow : public D3D11FrameBuffer
 	{
 	public:
-		D3D11RenderWindow(IDXGIFactory1Ptr const & gi_factory, D3D11AdapterPtr const & adapter,
+		D3D11RenderWindow(IDXGIFactoryNPtr const & gi_factory, D3D11AdapterPtr const & adapter,
 			std::string const & name, RenderSettings const & settings);
 		~D3D11RenderWindow();
 
@@ -92,7 +92,7 @@ namespace KlayGE
 		D3D11AdapterPtr			adapter_;
 
 		// Pointer to the 3D device specific for this window
-		IDXGIFactory1Ptr		gi_factory_;
+		IDXGIFactoryNPtr		gi_factory_;
 		ID3D11DevicePtr			d3d_device_;
 		ID3D11DeviceContextPtr	d3d_imm_ctx_;
 		DXGI_SWAP_CHAIN_DESC	sc_desc_;

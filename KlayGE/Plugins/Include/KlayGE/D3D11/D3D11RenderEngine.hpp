@@ -82,7 +82,7 @@ namespace KlayGE
 			return true;
 		}
 
-		IDXGIFactory1Ptr const & DXGIFactory() const;
+		IDXGIFactoryNPtr const & DXGIFactory() const;
 		ID3D11DevicePtr const & D3DDevice() const;
 		ID3D11DeviceContextPtr const & D3DDeviceImmContext() const;
 		D3D_FEATURE_LEVEL DeviceFeatureLevel() const;
@@ -213,7 +213,7 @@ namespace KlayGE
 
 		// Direct3D rendering device
 		// Only created after top-level window created
-		IDXGIFactory1Ptr	gi_factory_;
+		IDXGIFactoryNPtr	gi_factory_;
 		ID3D11DevicePtr		d3d_device_;
 		ID3D11DeviceContextPtr d3d_imm_ctx_;
 		D3D_FEATURE_LEVEL d3d_feature_level_;
