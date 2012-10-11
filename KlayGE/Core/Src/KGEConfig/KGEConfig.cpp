@@ -778,7 +778,11 @@ bool UIConfiguration(HINSTANCE hInstance)
 	return save_cfg;
 }
 
+#ifdef _In_
+int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE /*hPrevInstance*/, _In_ LPSTR /*lpszCmdLine*/, _In_ int /*nCmdShow*/)
+#else
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE /*hPrevInstance*/, LPSTR /*lpszCmdLine*/, int /*nCmdShow*/)
+#endif
 {
 	std::string cfg_path = ResLoader::Instance().Locate("KlayGE.cfg");
 	Context::Instance().LoadCfg(cfg_path);

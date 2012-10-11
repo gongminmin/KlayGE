@@ -1465,9 +1465,13 @@ namespace KlayGE
 			}
 		}
 
-		boost::shared_ptr<std::vector<uint8_t> > ret = MakeSharedPtr<std::vector<uint8_t> >(code->GetBufferSize());
-		memcpy(&((*ret)[0]), code->GetBufferPointer(), code->GetBufferSize());
-		code->Release();
+		boost::shared_ptr<std::vector<uint8_t> > ret;
+		if (code)
+		{
+			ret = MakeSharedPtr<std::vector<uint8_t> >(code->GetBufferSize());
+			memcpy(&((*ret)[0]), code->GetBufferPointer(), code->GetBufferSize());
+			code->Release();
+		}
 
 		return ret;
 #else
