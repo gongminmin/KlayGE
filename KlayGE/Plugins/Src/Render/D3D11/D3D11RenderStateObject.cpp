@@ -43,9 +43,40 @@ namespace KlayGE
 
 		ID3D11DevicePtr const & d3d_device = checked_cast<D3D11RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance())->D3DDevice();
 
+#if (_WIN32_WINNT >= 0x0602 /*_WIN32_WINNT_WIN8*/)
+		ID3D11Device1* d3d_device_1;
+		d3d_device->QueryInterface(IID_ID3D11Device1, reinterpret_cast<void**>(&d3d_device_1));
+		if (d3d_device_1 != NULL)
+		{
+			D3D11_RASTERIZER_DESC1 d3d_desc1;
+			d3d_desc1.FillMode = d3d_desc.FillMode;
+			d3d_desc1.CullMode = d3d_desc.CullMode;
+			d3d_desc1.FrontCounterClockwise = d3d_desc.FrontCounterClockwise;
+			d3d_desc1.DepthBias = d3d_desc.DepthBias;
+			d3d_desc1.DepthBiasClamp = d3d_desc.DepthBiasClamp;
+			d3d_desc1.SlopeScaledDepthBias = d3d_desc.SlopeScaledDepthBias;
+			d3d_desc1.DepthClipEnable = d3d_desc.DepthClipEnable;
+			d3d_desc1.ScissorEnable = d3d_desc.ScissorEnable;
+			d3d_desc1.MultisampleEnable = d3d_desc.MultisampleEnable;
+			d3d_desc1.AntialiasedLineEnable = d3d_desc.AntialiasedLineEnable;
+			d3d_desc1.ForcedSampleCount = 0;
+
+			ID3D11RasterizerState1* rasterizer_state;
+			TIF(d3d_device_1->CreateRasterizerState1(&d3d_desc1, &rasterizer_state));
+			rasterizer_state_ = MakeCOMPtr(rasterizer_state);
+			d3d_device_1->Release();
+		}
+		else
+		{
+			ID3D11RasterizerState* rasterizer_state;
+			TIF(d3d_device->CreateRasterizerState(&d3d_desc, &rasterizer_state));
+			rasterizer_state_ = MakeCOMPtr(rasterizer_state);
+		}
+#else
 		ID3D11RasterizerState* rasterizer_state;
 		TIF(d3d_device->CreateRasterizerState(&d3d_desc, &rasterizer_state));
 		rasterizer_state_ = MakeCOMPtr(rasterizer_state);
+#endif
 	}
 
 	void D3D11RasterizerStateObject::Active()
@@ -95,20 +126,55 @@ namespace KlayGE
 		for (int i = 0; i < 8; ++ i)
 		{
 			d3d_desc.RenderTarget[i].BlendEnable = desc.blend_enable[i];
-			d3d_desc.RenderTarget[i].RenderTargetWriteMask = static_cast<UINT8>(D3D11Mapping::MappingColorMask(desc.color_write_mask[i]));
 			d3d_desc.RenderTarget[i].SrcBlend = D3D11Mapping::Mapping(desc.src_blend[i]);
 			d3d_desc.RenderTarget[i].DestBlend = D3D11Mapping::Mapping(desc.dest_blend[i]);
 			d3d_desc.RenderTarget[i].BlendOp = D3D11Mapping::Mapping(desc.blend_op[i]);
 			d3d_desc.RenderTarget[i].SrcBlendAlpha = D3D11Mapping::Mapping(desc.src_blend_alpha[i]);
 			d3d_desc.RenderTarget[i].DestBlendAlpha = D3D11Mapping::Mapping(desc.dest_blend_alpha[i]);
 			d3d_desc.RenderTarget[i].BlendOpAlpha = D3D11Mapping::Mapping(desc.blend_op_alpha[i]);
+			d3d_desc.RenderTarget[i].RenderTargetWriteMask = static_cast<UINT8>(D3D11Mapping::MappingColorMask(desc.color_write_mask[i]));
 		}
 
 		ID3D11DevicePtr const & d3d_device = checked_cast<D3D11RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance())->D3DDevice();
 
+#if (_WIN32_WINNT >= 0x0602 /*_WIN32_WINNT_WIN8*/)
+		ID3D11Device1* d3d_device_1;
+		d3d_device->QueryInterface(IID_ID3D11Device1, reinterpret_cast<void**>(&d3d_device_1));
+		if (d3d_device_1 != NULL)
+		{
+			D3D11_BLEND_DESC1 d3d_desc1;
+			d3d_desc1.AlphaToCoverageEnable = d3d_desc.AlphaToCoverageEnable;
+			d3d_desc1.IndependentBlendEnable = d3d_desc.IndependentBlendEnable;
+			for (int i = 0; i < 8; ++ i)
+			{
+				d3d_desc1.RenderTarget[i].BlendEnable = d3d_desc.RenderTarget[i].BlendEnable;
+				d3d_desc1.RenderTarget[i].LogicOpEnable = false;
+				d3d_desc1.RenderTarget[i].SrcBlend = d3d_desc.RenderTarget[i].SrcBlend;
+				d3d_desc1.RenderTarget[i].DestBlend = d3d_desc.RenderTarget[i].DestBlend;
+				d3d_desc1.RenderTarget[i].BlendOp = d3d_desc.RenderTarget[i].BlendOp;
+				d3d_desc1.RenderTarget[i].SrcBlendAlpha = d3d_desc.RenderTarget[i].SrcBlendAlpha;
+				d3d_desc1.RenderTarget[i].DestBlendAlpha = d3d_desc.RenderTarget[i].DestBlendAlpha;
+				d3d_desc1.RenderTarget[i].BlendOpAlpha = d3d_desc.RenderTarget[i].BlendOpAlpha;
+				d3d_desc1.RenderTarget[i].LogicOp = D3D11_LOGIC_OP_NOOP;
+				d3d_desc1.RenderTarget[i].RenderTargetWriteMask = d3d_desc.RenderTarget[i].RenderTargetWriteMask;
+			}
+
+			ID3D11BlendState1* blend_state;
+			TIF(d3d_device_1->CreateBlendState1(&d3d_desc1, &blend_state));
+			blend_state_ = MakeCOMPtr(blend_state);
+			d3d_device_1->Release();
+		}
+		else
+		{
+			ID3D11BlendState* blend_state;
+			TIF(d3d_device->CreateBlendState(&d3d_desc, &blend_state));
+			blend_state_ = MakeCOMPtr(blend_state);
+		}
+#else
 		ID3D11BlendState* blend_state;
 		TIF(d3d_device->CreateBlendState(&d3d_desc, &blend_state));
 		blend_state_ = MakeCOMPtr(blend_state);
+#endif
 	}
 
 	void D3D11BlendStateObject::Active(Color const & blend_factor, uint32_t sample_mask)

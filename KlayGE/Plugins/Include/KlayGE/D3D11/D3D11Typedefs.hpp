@@ -32,16 +32,19 @@
 namespace KlayGE
 {
 	typedef boost::shared_ptr<IDXGIAdapter>					IDXGIAdapterPtr;
+	typedef boost::shared_ptr<IDXGIFactory1>				IDXGIFactory1Ptr;
+	typedef boost::shared_ptr<IDXGIAdapter1>				IDXGIAdapter1Ptr;
 #if (_WIN32_WINNT >= 0x0602 /*_WIN32_WINNT_WIN8*/)
-	typedef boost::shared_ptr<IDXGIFactory2>				IDXGIFactoryNPtr;
-	typedef boost::shared_ptr<IDXGIAdapter2>				IDXGIAdapterNPtr;
-#else
-	typedef boost::shared_ptr<IDXGIFactory1>				IDXGIFactoryNPtr;
-	typedef boost::shared_ptr<IDXGIAdapter1>				IDXGIAdapterNPtr;
+	typedef boost::shared_ptr<IDXGIFactory2>				IDXGIFactory2Ptr;
+	typedef boost::shared_ptr<IDXGIAdapter2>				IDXGIAdapter2Ptr;
 #endif
 	typedef boost::shared_ptr<IDXGISwapChain>				IDXGISwapChainPtr;
 	typedef boost::shared_ptr<ID3D11Device>					ID3D11DevicePtr;
 	typedef boost::shared_ptr<ID3D11DeviceContext>			ID3D11DeviceContextPtr;
+#if (_WIN32_WINNT >= 0x0602 /*_WIN32_WINNT_WIN8*/)
+	typedef boost::shared_ptr<ID3D11Device1>				ID3D11Device1Ptr;
+	typedef boost::shared_ptr<ID3D11DeviceContext1>			ID3D11DeviceContext1Ptr;
+#endif
 	typedef boost::shared_ptr<ID3D11Resource>				ID3D11ResourcePtr;
 	typedef boost::shared_ptr<ID3D11Texture1D>				ID3D11Texture1DPtr;
 	typedef boost::shared_ptr<ID3D11Texture2D>				ID3D11Texture2DPtr;
@@ -61,11 +64,16 @@ namespace KlayGE
 	typedef boost::shared_ptr<ID3D11DepthStencilView>		ID3D11DepthStencilViewPtr;
 	typedef boost::shared_ptr<ID3D11UnorderedAccessView>	ID3D11UnorderedAccessViewPtr;
 	typedef boost::shared_ptr<ID3D11RasterizerState>		ID3D11RasterizerStatePtr;
+#if (_WIN32_WINNT >= 0x0602 /*_WIN32_WINNT_WIN8*/)
+	typedef boost::shared_ptr<ID3D11RasterizerState1>		ID3D11RasterizerState1Ptr;
+#endif
 	typedef boost::shared_ptr<ID3D11DepthStencilState>		ID3D11DepthStencilStatePtr;
 	typedef boost::shared_ptr<ID3D11BlendState>				ID3D11BlendStatePtr;
+#if (_WIN32_WINNT >= 0x0602 /*_WIN32_WINNT_WIN8*/)
+	typedef boost::shared_ptr<ID3D11BlendState1>			ID3D11BlendState1Ptr;
+#endif
 	typedef boost::shared_ptr<ID3D11SamplerState>			ID3D11SamplerStatePtr;
 	typedef boost::shared_ptr<ID3D11ShaderResourceView>		ID3D11ShaderResourceViewPtr;
-	typedef boost::shared_ptr<ID3DBlob>						ID3DBlobPtr;
 }
 
 #endif		// _D3D11TYPEDEFS_HPP
