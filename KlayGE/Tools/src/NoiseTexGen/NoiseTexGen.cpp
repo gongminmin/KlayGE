@@ -163,12 +163,12 @@ static uint8_t simplex[][4] =
 
 int main()
 {
-	uint8_t perm_2d[256][256];
+	std::vector<uint8_t> perm_2d(256 * 256);
 	for (int y = 0; y < 256; ++ y)
 	{
 		for (int x = 0; x < 256; ++ x)
 		{
-			perm_2d[y][x] = permutation[(x + permutation[y & 255]) & 255];
+			perm_2d[y * 256 + x] = permutation[(x + permutation[y & 255]) & 255];
 		}
 	}
 	
@@ -179,21 +179,21 @@ int main()
 	SaveTexture("noise_simplex.dds", Texture::TT_2D,
 		64, 1, 1, 1, 1, EF_ABGR8, init_data);
 
-	uint8_t grad_perm[256][256 * 4];
+	std::vector<uint8_t> grad_perm(256 * 256 * 4);
 	for (int y = 0; y < 256; ++ y)
 	{
 		for (int x = 0; x < 256; ++ x)
 		{
-			int index = perm_2d[y][x] % 12;
-			grad_perm[y][x * 4 + 0] = grad3[index * 4 + 0];
-			grad_perm[y][x * 4 + 1] = grad3[index * 4 + 1];
-			grad_perm[y][x * 4 + 2] = grad3[index * 4 + 2];
-			grad_perm[y][x * 4 + 3] = perm_2d[y][x];
+			int index = perm_2d[y * 256 + x] % 12;
+			grad_perm[(y * 256 + x) * 4 + 0] = grad3[index * 4 + 0];
+			grad_perm[(y * 256 + x) * 4 + 1] = grad3[index * 4 + 1];
+			grad_perm[(y * 256 + x) * 4 + 2] = grad3[index * 4 + 2];
+			grad_perm[(y * 256 + x) * 4 + 3] = perm_2d[y * 256 + x];
 		}
 	}
-	init_data[0].data = grad_perm;
+	init_data[0].data = &grad_perm[0];
 	init_data[0].row_pitch = 256 * 4;
-	init_data[0].slice_pitch = sizeof(grad_perm);
+	init_data[0].slice_pitch = grad_perm.size() * sizeof(grad_perm[0]);
 	SaveTexture("noise_grad3_perm.dds", Texture::TT_2D,
 		256, 256, 1, 1, 1, EF_ABGR8, init_data);
 
@@ -201,16 +201,16 @@ int main()
 	{
 		for (int x = 0; x < 256; ++ x)
 		{
-			int index = perm_2d[y][x] % 32;
-			grad_perm[y][x * 4 + 0] = grad4[index * 4 + 0];
-			grad_perm[y][x * 4 + 1] = grad4[index * 4 + 1];
-			grad_perm[y][x * 4 + 2] = grad4[index * 4 + 2];
-			grad_perm[y][x * 4 + 3] = grad4[index * 4 + 3];
+			int index = perm_2d[y * 256 + x] % 32;
+			grad_perm[(y * 256 + x) * 4 + 0] = grad4[index * 4 + 0];
+			grad_perm[(y * 256 + x) * 4 + 1] = grad4[index * 4 + 1];
+			grad_perm[(y * 256 + x) * 4 + 2] = grad4[index * 4 + 2];
+			grad_perm[(y * 256 + x) * 4 + 3] = grad4[index * 4 + 3];
 		}
 	}
-	init_data[0].data = grad_perm;
+	init_data[0].data = &grad_perm[0];
 	init_data[0].row_pitch = 256 * 4;
-	init_data[0].slice_pitch = sizeof(grad_perm);
+	init_data[0].slice_pitch = grad_perm.size() * sizeof(grad_perm[0]);
 	SaveTexture("noise_grad4_perm.dds", Texture::TT_2D,
 		256, 256, 1, 1, 1, EF_ABGR8, init_data);
 

@@ -85,8 +85,10 @@ namespace
 						memcpy(&com_normals[dest], &com_bc5, sizeof(com_bc5));
 						dest += sizeof(com_bc5);
 					}
-					else if (EF_BC3 == new_format)
+					else
 					{
+						BOOST_ASSERT(EF_BC3 == new_format);
+
 						BC3_layout com_bc3;
 						com_bc3.alpha = x_bc4;
 
@@ -98,6 +100,8 @@ namespace
 				}
 				else
 				{
+					BOOST_ASSERT(EF_GR8 == new_format);
+
 					for (int y = 0; y < 4; ++ y)
 					{
 						for (int x = 0; x < 4; ++ x)
@@ -119,41 +123,60 @@ namespace
 
 		std::vector<uint8_t> normals(width * height * 4);
 
-		for (uint32_t y_base = 0; y_base < height; y_base += 4)
+		if (IsCompressedFormat(com_format))
 		{
-			for (uint32_t x_base = 0; x_base < width; x_base += 4)
+			for (uint32_t y_base = 0; y_base < height; y_base += 4)
 			{
-				uint32_t argb[16];
-				if (EF_BC5 == com_format)
+				for (uint32_t x_base = 0; x_base < width; x_base += 4)
 				{
-					uint8_t r[16];
-					uint8_t g[16];
-					DecodeBC5(r, g, static_cast<uint8_t const *>(com_data.data) + ((y_base / 4) * width / 4 + x_base / 4) * 16);
-					for (int i = 0; i < 16; ++ i)
+					uint32_t argb[16];
+				
+					if (EF_BC5 == com_format)
 					{
-						argb[i] = (r[i] << 8) | (g[i] << 24);
+						uint8_t r[16];
+						uint8_t g[16];
+						DecodeBC5(r, g, static_cast<uint8_t const *>(com_data.data) + ((y_base / 4) * width / 4 + x_base / 4) * 16);
+						for (int i = 0; i < 16; ++ i)
+						{
+							argb[i] = (r[i] << 8) | (g[i] << 24);
+						}
 					}
-				}
-				else
-				{
-					if (EF_BC3 == com_format)
+					else
 					{
+						BOOST_ASSERT(EF_BC3 == com_format);
+
 						DecodeBC3(argb, static_cast<uint8_t const *>(com_data.data) + ((y_base / 4) * width / 4 + x_base / 4) * 16);
 					}
-				}
 
-				for (int y = 0; y < 4; ++ y)
-				{
-					if (y_base + y < height)
+					for (int y = 0; y < 4; ++ y)
 					{
-						for (int x = 0; x < 4; ++ x)
+						if (y_base + y < height)
 						{
-							if (x_base + x < width)
+							for (int x = 0; x < 4; ++ x)
 							{
-								memcpy(&normals[((y_base + y) * width + (x_base + x)) * 4], &argb[y * 4 + x], sizeof(uint32_t));
+								if (x_base + x < width)
+								{
+									memcpy(&normals[((y_base + y) * width + (x_base + x)) * 4], &argb[y * 4 + x], sizeof(uint32_t));
+								}
 							}
 						}
 					}
+				}
+			}
+		}
+		else
+		{
+			BOOST_ASSERT(EF_GR8 == com_format);
+
+			uint8_t const * gr_data = static_cast<uint8_t const *>(com_data.data);
+			for (uint32_t y = 0; y < height; ++ y)
+			{
+				for (uint32_t x = 0; x < width; ++ x)
+				{
+					normals[(y * width + x) * 4 + 0] = 0;
+					normals[(y * width + x) * 4 + 1] = gr_data[y * com_data.row_pitch + x * 2 + 1];
+					normals[(y * width + x) * 4 + 2] = gr_data[y * com_data.row_pitch + x * 2 + 0];
+					normals[(y * width + x) * 4 + 3] = 0xFF;
 				}
 			}
 		}
