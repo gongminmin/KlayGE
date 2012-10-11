@@ -130,7 +130,7 @@ namespace KlayGE
 		}
 		if (mod_d3d11_ != NULL)
 		{
-			DynamicD3D11CreateDeviceAndSwapChain_ = reinterpret_cast<D3D11CreateDeviceAndSwapChainFunc>(::GetProcAddress(mod_d3d11_, "D3D11CreateDeviceAndSwapChain"));
+			DynamicD3D11CreateDevice_ = reinterpret_cast<D3D11CreateDeviceFunc>(::GetProcAddress(mod_d3d11_, "D3D11CreateDevice"));
 		}
 #ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
 		if (mod_d3dcompiler_ != NULL)

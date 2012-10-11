@@ -146,7 +146,6 @@ namespace KlayGE
 			typedef BOOST_TYPEOF(dev_type_behaviors) DevTypeBehaviorsType;
 			BOOST_FOREACH(DevTypeBehaviorsType::reference dev_type_beh, dev_type_behaviors)
 			{
-				IDXGISwapChain* sc = NULL;
 				ID3D11Device* d3d_device = NULL;
 				ID3D11DeviceContext* d3d_imm_ctx = NULL;
 				IDXGIAdapter* dx_adapter = NULL;
@@ -157,19 +156,16 @@ namespace KlayGE
 					dev_type = D3D_DRIVER_TYPE_UNKNOWN;
 				}
 				D3D_FEATURE_LEVEL out_feature_level;
-				if (SUCCEEDED(re.D3D11CreateDeviceAndSwapChain(dx_adapter, dev_type, NULL, create_device_flags,
-					feature_levels, num_feature_levels, D3D11_SDK_VERSION, &sc_desc_, &sc, &d3d_device,
+				if (SUCCEEDED(re.D3D11CreateDevice(dx_adapter, dev_type, NULL, create_device_flags,
+					feature_levels, num_feature_levels, D3D11_SDK_VERSION, &d3d_device,
 					&out_feature_level, &d3d_imm_ctx)))
 				{
-					swap_chain_ = MakeCOMPtr(sc);
-
 					d3d_device_ = MakeCOMPtr(d3d_device);
 					d3d_imm_ctx_ = MakeCOMPtr(d3d_imm_ctx);
 					re.D3DDevice(d3d_device_, d3d_imm_ctx_, out_feature_level);
 
 					if (!Context::Instance().AppInstance().ConfirmDevice())
 					{
-						swap_chain_.reset();
 						d3d_device_.reset();
 						d3d_imm_ctx_.reset();
 					}
@@ -232,6 +228,10 @@ namespace KlayGE
 					}
 				}
 			}
+
+			IDXGISwapChain* sc = NULL;
+			gi_factory_->CreateSwapChain(d3d_device_.get(), &sc_desc_, &sc);
+			swap_chain_ = MakeCOMPtr(sc);
 
 			Verify(swap_chain_);
 			Verify(d3d_device_);

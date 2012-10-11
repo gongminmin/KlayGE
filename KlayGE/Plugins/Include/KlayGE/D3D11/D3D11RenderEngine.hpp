@@ -102,14 +102,13 @@ namespace KlayGE
 		bool FullScreen() const;
 		void FullScreen(bool fs);
 
-		HRESULT D3D11CreateDeviceAndSwapChain(IDXGIAdapter* pAdapter,
+		HRESULT D3D11CreateDevice(IDXGIAdapter* pAdapter,
 								D3D_DRIVER_TYPE DriverType, HMODULE Software, UINT Flags,
 								D3D_FEATURE_LEVEL const * pFeatureLevels, UINT FeatureLevels, UINT SDKVersion,
-								DXGI_SWAP_CHAIN_DESC* pSwapChainDesc, IDXGISwapChain** ppSwapChain,
 								ID3D11Device** ppDevice, D3D_FEATURE_LEVEL* pFeatureLevel, ID3D11DeviceContext** ppImmediateContext) const
 		{
-			return DynamicD3D11CreateDeviceAndSwapChain_(pAdapter, DriverType, Software, Flags, pFeatureLevels, FeatureLevels, SDKVersion,
-				pSwapChainDesc, ppSwapChain, ppDevice, pFeatureLevel, ppImmediateContext);
+			return DynamicD3D11CreateDevice_(pAdapter, DriverType, Software, Flags, pFeatureLevels, FeatureLevels, SDKVersion,
+				ppDevice, pFeatureLevel, ppImmediateContext);
 		}
 		std::string const & VertexShaderProfile() const
 		{
@@ -190,10 +189,9 @@ namespace KlayGE
 #endif
 
 		typedef HRESULT (WINAPI *CreateDXGIFactory1Func)(REFIID riid, void** ppFactory);
-		typedef HRESULT (WINAPI *D3D11CreateDeviceAndSwapChainFunc)(IDXGIAdapter* pAdapter,
+		typedef HRESULT (WINAPI *D3D11CreateDeviceFunc)(IDXGIAdapter* pAdapter,
 								D3D_DRIVER_TYPE DriverType, HMODULE Software, UINT Flags,
 								D3D_FEATURE_LEVEL const * pFeatureLevels, UINT FeatureLevels, UINT SDKVersion,
-								DXGI_SWAP_CHAIN_DESC* pSwapChainDesc, IDXGISwapChain** ppSwapChain,
 								ID3D11Device** ppDevice, D3D_FEATURE_LEVEL* pFeatureLevel, ID3D11DeviceContext** ppImmediateContext);
 #ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
 		typedef HRESULT (WINAPI *D3DCompileFunc)(LPCVOID pSrcData, SIZE_T SrcDataSize, LPCSTR pSourceName,
@@ -204,7 +202,7 @@ namespace KlayGE
 #endif
 
 		CreateDXGIFactory1Func DynamicCreateDXGIFactory1_;
-		D3D11CreateDeviceAndSwapChainFunc DynamicD3D11CreateDeviceAndSwapChain_;
+		D3D11CreateDeviceFunc DynamicD3D11CreateDevice_;
 #ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
 		D3DCompileFunc DynamicD3DCompile_;
 		D3DReflectFunc DynamicD3DReflect_;
