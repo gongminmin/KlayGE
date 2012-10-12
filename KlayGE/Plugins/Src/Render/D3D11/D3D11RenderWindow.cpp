@@ -113,10 +113,6 @@ namespace KlayGE
 			d3d_device_ = re.D3DDevice();
 			d3d_imm_ctx_ = re.D3DDeviceImmContext();
 
-			IDXGISwapChain* sc = NULL;
-			gi_factory_->CreateSwapChain(d3d_device_.get(), &sc_desc_, &sc);
-			swap_chain_ = MakeCOMPtr(sc);
-
 			main_wnd_ = false;
 		}
 		else
@@ -132,17 +128,28 @@ namespace KlayGE
 			dev_type_behaviors.push_back(boost::make_tuple(D3D_DRIVER_TYPE_SOFTWARE, std::wstring(L"SW")));
 			dev_type_behaviors.push_back(boost::make_tuple(D3D_DRIVER_TYPE_REFERENCE, std::wstring(L"REF")));
 
-			D3D_FEATURE_LEVEL const feature_levels[] =
-			{
 #if (_WIN32_WINNT >= 0x0602 /*_WIN32_WINNT_WIN8*/)
-				D3D_FEATURE_LEVEL_11_1,
+			bool d3d_11_1 = false;
+			IDXGIFactory2* gi_factory_2;
+			gi_factory->QueryInterface(IID_IDXGIFactory2, reinterpret_cast<void**>(&gi_factory_2));
+			if (gi_factory_2 != NULL)
+			{
+				d3d_11_1 = true;
+				gi_factory_2->Release();
+			}
 #endif
-				D3D_FEATURE_LEVEL_11_0,
-				D3D_FEATURE_LEVEL_10_1,
-				D3D_FEATURE_LEVEL_10_0,
-				D3D_FEATURE_LEVEL_9_3
-			};
-			size_t const num_feature_levels = sizeof(feature_levels) / sizeof(feature_levels[0]);
+
+			std::vector<D3D_FEATURE_LEVEL> feature_levels;
+#if (_WIN32_WINNT >= 0x0602 /*_WIN32_WINNT_WIN8*/)
+			if (d3d_11_1)
+			{
+				feature_levels.push_back(D3D_FEATURE_LEVEL_11_1);
+			}
+#endif
+			feature_levels.push_back(D3D_FEATURE_LEVEL_11_0);
+			feature_levels.push_back(D3D_FEATURE_LEVEL_10_1);
+			feature_levels.push_back(D3D_FEATURE_LEVEL_10_0);
+			feature_levels.push_back(D3D_FEATURE_LEVEL_9_3);
 
 			typedef BOOST_TYPEOF(dev_type_behaviors) DevTypeBehaviorsType;
 			BOOST_FOREACH(DevTypeBehaviorsType::reference dev_type_beh, dev_type_behaviors)
@@ -158,7 +165,7 @@ namespace KlayGE
 				}
 				D3D_FEATURE_LEVEL out_feature_level;
 				if (SUCCEEDED(re.D3D11CreateDevice(dx_adapter, dev_type, NULL, create_device_flags,
-					feature_levels, num_feature_levels, D3D11_SDK_VERSION, &d3d_device,
+					&feature_levels[0], feature_levels.size(), D3D11_SDK_VERSION, &d3d_device,
 					&out_feature_level, &d3d_imm_ctx)))
 				{
 					d3d_device_ = MakeCOMPtr(d3d_device);
@@ -230,15 +237,16 @@ namespace KlayGE
 				}
 			}
 
-			IDXGISwapChain* sc = NULL;
-			gi_factory_->CreateSwapChain(d3d_device_.get(), &sc_desc_, &sc);
-			swap_chain_ = MakeCOMPtr(sc);
-
-			Verify(swap_chain_);
-			Verify(d3d_device_);
-
 			main_wnd_ = true;
 		}
+
+		IDXGISwapChain* sc = NULL;
+		gi_factory_->CreateSwapChain(d3d_device_.get(), &sc_desc_, &sc);
+		swap_chain_ = MakeCOMPtr(sc);
+
+		Verify(swap_chain_);
+		Verify(d3d_device_);
+		Verify(d3d_imm_ctx_);
 
 		bool isDepthBuffered = IsDepthFormat(settings.depth_stencil_fmt);
 		uint32_t depthBits = NumDepthBits(settings.depth_stencil_fmt);
