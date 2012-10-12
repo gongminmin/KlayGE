@@ -896,8 +896,8 @@ namespace KlayGE
 			caps_.logic_op_support = d3d11_feature.OutputMergerLogicOp ? true : false;
 		}
 #else
-		caps.is_tbdr = false;
-		caps.logic_op_support = false;
+		caps_.is_tbdr = false;
+		caps_.logic_op_support = false;
 #endif
 		caps_.max_vertex_streams = 16;
 		caps_.max_texture_anisotropy = (D3D_FEATURE_LEVEL_9_1 == d3d_feature_level_) ? 2 : 16;
