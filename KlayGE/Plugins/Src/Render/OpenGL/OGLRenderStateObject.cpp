@@ -319,7 +319,8 @@ namespace KlayGE
 			ogl_src_blend_(OGLMapping::Mapping(desc_.src_blend[0])),
 			ogl_dest_blend_(OGLMapping::Mapping(desc_.dest_blend[0])),
 			ogl_src_blend_alpha_(OGLMapping::Mapping(desc_.src_blend_alpha[0])),
-			ogl_dest_blend_alpha_(OGLMapping::Mapping(desc_.dest_blend_alpha[0]))
+			ogl_dest_blend_alpha_(OGLMapping::Mapping(desc_.dest_blend_alpha[0])),
+			ogl_logic_op_(OGLMapping::Mapping(desc_.logic_op[0]))
 	{
 	}
 
@@ -373,6 +374,18 @@ namespace KlayGE
 			}
 		}
 
+		if (cur_desc.logic_op_enable[0] != desc_.logic_op_enable[0])
+		{
+			if (desc_.logic_op_enable[0])
+			{
+				glEnable(GL_LOGIC_OP_MODE);
+			}
+			else
+			{
+				glDisable(GL_LOGIC_OP_MODE);
+			}
+		}
+
 		if (cur_desc.blend_op[0] != desc_.blend_op[0])
 		{
 			glBlendEquationSeparate(ogl_blend_op_, ogl_blend_op_alpha_);
@@ -407,6 +420,11 @@ namespace KlayGE
 						(desc_.color_write_mask[0] & CMASK_Blue) != 0,
 						(desc_.color_write_mask[0] & CMASK_Alpha) != 0);
 			}
+		}
+
+		if (cur_desc.logic_op[0] != desc_.logic_op[0])
+		{
+			glLogicOp(ogl_logic_op_);
 		}
 
 		if (cur_blend_factor != blend_factor)
@@ -452,6 +470,14 @@ namespace KlayGE
 				glDisable(GL_BLEND);
 			}
 		}
+		if (desc.logic_op_enable[0])
+		{
+			glEnable(GL_LOGIC_OP_MODE);
+		}
+		else
+		{
+			glDisable(GL_LOGIC_OP_MODE);
+		}
 		glBlendEquationSeparate(OGLMapping::Mapping(desc.blend_op[0]), OGLMapping::Mapping(desc.blend_op_alpha[0]));
 		glBlendFuncSeparate(OGLMapping::Mapping(desc.src_blend[0]), OGLMapping::Mapping(desc.dest_blend[0]),
 				OGLMapping::Mapping(desc.src_blend_alpha[0]), OGLMapping::Mapping(desc.dest_blend_alpha[0]));
@@ -472,6 +498,7 @@ namespace KlayGE
 					(desc.color_write_mask[0] & CMASK_Blue) != 0,
 					(desc.color_write_mask[0] & CMASK_Alpha) != 0);
 		}
+		glLogicOp(OGLMapping::Mapping(desc.logic_op[0]));
 
 		glBlendColor(1, 1, 1, 1);
 	}

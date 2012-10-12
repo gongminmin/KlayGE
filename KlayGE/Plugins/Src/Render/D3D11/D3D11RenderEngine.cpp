@@ -884,6 +884,21 @@ namespace KlayGE
 		{
 			caps_.standard_derivatives_support = true;
 		}
+#if (_WIN32_WINNT >= 0x0602 /*_WIN32_WINNT_WIN8*/)
+		{
+			D3D11_FEATURE_DATA_ARCHITECTURE_INFO arch_feature;
+			d3d_device_->CheckFeatureSupport(D3D11_FEATURE_ARCHITECTURE_INFO, &arch_feature, sizeof(arch_feature));
+			caps_.is_tbdr = arch_feature.TileBasedDeferredRenderer ? true : false;
+		}
+		{
+			D3D11_FEATURE_DATA_D3D11_OPTIONS d3d11_feature;
+			d3d_device_->CheckFeatureSupport(D3D11_FEATURE_D3D11_OPTIONS, &d3d11_feature, sizeof(d3d11_feature));
+			caps_.logic_op_support = d3d11_feature.OutputMergerLogicOp ? true : false;
+		}
+#else
+		caps.is_tbdr = false;
+		caps.logic_op_support = false;
+#endif
 		caps_.max_vertex_streams = 16;
 		caps_.max_texture_anisotropy = (D3D_FEATURE_LEVEL_9_1 == d3d_feature_level_) ? 2 : 16;
 		caps_.hw_instancing_support = (d3d_feature_level_ >= D3D_FEATURE_LEVEL_9_3);

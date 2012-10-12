@@ -341,6 +341,66 @@ namespace KlayGE
 		}
 	}
 
+#if (_WIN32_WINNT >= 0x0602 /*_WIN32_WINNT_WIN8*/)
+	D3D11_LOGIC_OP D3D11Mapping::Mapping(LogicOperation lo)
+	{
+		switch (lo)
+		{
+		case LOP_Clear:
+			return D3D11_LOGIC_OP_CLEAR;
+
+		case LOP_Set:
+			return D3D11_LOGIC_OP_SET;
+
+		case LOP_Copy:
+			return D3D11_LOGIC_OP_COPY;
+
+		case LOP_CopyInverted:
+			return D3D11_LOGIC_OP_COPY_INVERTED;
+
+		case LOP_Noop:
+			return D3D11_LOGIC_OP_NOOP;
+
+		case LOP_Invert:
+			return D3D11_LOGIC_OP_INVERT;
+
+		case LOP_And:
+			return D3D11_LOGIC_OP_AND;
+
+		case LOP_NAnd:
+			return D3D11_LOGIC_OP_NAND;
+
+		case LOP_Or:
+			return D3D11_LOGIC_OP_OR;
+
+		case LOP_NOR:
+			return D3D11_LOGIC_OP_NOR;
+
+		case LOP_XOR:
+			return D3D11_LOGIC_OP_XOR;
+
+		case LOP_Equiv:
+			return D3D11_LOGIC_OP_EQUIV;
+
+		case LOP_AndReverse:
+			return D3D11_LOGIC_OP_AND_REVERSE;
+
+		case LOP_AndInverted:
+			return D3D11_LOGIC_OP_AND_INVERTED;
+
+		case LOP_OrReverse:
+			return D3D11_LOGIC_OP_OR_REVERSE;
+
+		case LOP_OrInverted:
+			return D3D11_LOGIC_OP_OR_INVERTED;
+
+		default:
+			BOOST_ASSERT(false);
+			return D3D11_LOGIC_OP_NOOP;
+		}
+	}
+#endif
+
 	D3D11_PRIMITIVE_TOPOLOGY D3D11Mapping::Mapping(RenderLayout::topology_type tt)
 	{
 		switch (tt)

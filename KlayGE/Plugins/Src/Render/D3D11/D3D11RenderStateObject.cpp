@@ -148,14 +148,14 @@ namespace KlayGE
 			for (int i = 0; i < 8; ++ i)
 			{
 				d3d_desc1.RenderTarget[i].BlendEnable = d3d_desc.RenderTarget[i].BlendEnable;
-				d3d_desc1.RenderTarget[i].LogicOpEnable = false;
+				d3d_desc1.RenderTarget[i].LogicOpEnable = desc.logic_op_enable[i];
 				d3d_desc1.RenderTarget[i].SrcBlend = d3d_desc.RenderTarget[i].SrcBlend;
 				d3d_desc1.RenderTarget[i].DestBlend = d3d_desc.RenderTarget[i].DestBlend;
 				d3d_desc1.RenderTarget[i].BlendOp = d3d_desc.RenderTarget[i].BlendOp;
 				d3d_desc1.RenderTarget[i].SrcBlendAlpha = d3d_desc.RenderTarget[i].SrcBlendAlpha;
 				d3d_desc1.RenderTarget[i].DestBlendAlpha = d3d_desc.RenderTarget[i].DestBlendAlpha;
 				d3d_desc1.RenderTarget[i].BlendOpAlpha = d3d_desc.RenderTarget[i].BlendOpAlpha;
-				d3d_desc1.RenderTarget[i].LogicOp = D3D11_LOGIC_OP_NOOP;
+				d3d_desc1.RenderTarget[i].LogicOp = D3D11Mapping::Mapping(desc.logic_op[i]);
 				d3d_desc1.RenderTarget[i].RenderTargetWriteMask = d3d_desc.RenderTarget[i].RenderTargetWriteMask;
 			}
 

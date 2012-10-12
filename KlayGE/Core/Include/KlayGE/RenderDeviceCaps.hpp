@@ -46,6 +46,8 @@ namespace KlayGE
 		uint8_t max_vertex_streams;
 		uint8_t max_texture_anisotropy;
 
+		bool is_tbdr;
+
 		bool hw_instancing_support;
 		bool instance_id_support;
 		bool stream_output_support;
@@ -55,6 +57,7 @@ namespace KlayGE
 		bool multithread_res_creating_support;
 		bool mrt_independent_bit_depths_support;
 		bool standard_derivatives_support;
+		bool logic_op_support;
 
 		bool gs_support;
 		bool cs_support;

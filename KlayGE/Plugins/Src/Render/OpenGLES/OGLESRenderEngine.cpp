@@ -689,6 +689,8 @@ namespace KlayGE
 		glGetIntegerv(GL_MAX_VERTEX_ATTRIBS, &temp);
 		caps_.max_vertex_streams = static_cast<uint8_t>(temp);
 
+		caps_.is_tbdr = false;
+
 		caps_.hw_instancing_support = true;
 		caps_.instance_id_support = false;
 		caps_.stream_output_support = false;
@@ -697,7 +699,6 @@ namespace KlayGE
 		caps_.multithread_rendering_support = false;
 		caps_.multithread_res_creating_support = false;
 		caps_.mrt_independent_bit_depths_support = false;
-
 		if (glloader_GLES_OES_standard_derivatives())
 		{
 			glGetIntegerv(GL_FRAGMENT_SHADER_DERIVATIVE_HINT_OES, &temp);
@@ -707,6 +708,7 @@ namespace KlayGE
 		{
 			caps_.standard_derivatives_support = false;
 		}
+		caps_.logic_op_support = false;
 
 		caps_.gs_support = false;
 		caps_.cs_support = false;

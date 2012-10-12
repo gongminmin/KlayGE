@@ -70,6 +70,7 @@ namespace KlayGE
 		GLenum ogl_dest_blend_;
 		GLenum ogl_src_blend_alpha_;
 		GLenum ogl_dest_blend_alpha_;
+		GLenum ogl_logic_op_;
 	};
 
 	class OGLSamplerStateObject : public SamplerStateObject

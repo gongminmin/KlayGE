@@ -243,6 +243,64 @@ namespace KlayGE
 		}
 	}
 
+	GLenum OGLMapping::Mapping(LogicOperation lo)
+	{
+		switch (lo)
+		{
+		case LOP_Clear:
+			return GL_CLEAR;
+
+		case LOP_Set:
+			return GL_SET;
+
+		case LOP_Copy:
+			return GL_COPY;
+
+		case LOP_CopyInverted:
+			return GL_COPY_INVERTED;
+
+		case LOP_Noop:
+			return GL_NOOP;
+
+		case LOP_Invert:
+			return GL_INVERT;
+
+		case LOP_And:
+			return GL_AND;
+
+		case LOP_NAnd:
+			return GL_NAND;
+
+		case LOP_Or:
+			return GL_OR;
+
+		case LOP_NOR:
+			return GL_NOR;
+
+		case LOP_XOR:
+			return GL_XOR;
+
+		case LOP_Equiv:
+			return GL_EQUIV;
+
+		case LOP_AndReverse:
+			return GL_AND_REVERSE;
+
+		case LOP_AndInverted:
+			return GL_AND_INVERTED;
+
+		case LOP_OrReverse:
+			return GL_OR_REVERSE;
+
+		case LOP_OrInverted:
+			return GL_OR_INVERTED;
+
+		default:
+			BOOST_ASSERT(false);
+			return GL_NOOP;
+		}
+	}
+
 	void OGLMapping::Mapping(GLenum& primType, uint32_t& primCount, RenderLayout const & rl)
 	{
 		uint32_t const vertexCount = static_cast<uint32_t>(rl.UseIndices() ? rl.NumIndices() : rl.NumVertices());

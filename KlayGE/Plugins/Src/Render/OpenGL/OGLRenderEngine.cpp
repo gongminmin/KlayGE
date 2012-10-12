@@ -1456,6 +1456,8 @@ namespace KlayGE
 		glGetIntegerv(GL_MAX_VERTEX_ATTRIBS, &temp);
 		caps_.max_vertex_streams = static_cast<uint8_t>(temp);
 
+		caps_.is_tbdr = false;
+
 		caps_.hw_instancing_support = true;
 		caps_.instance_id_support = false;
 		caps_.stream_output_support = false;
@@ -1479,6 +1481,7 @@ namespace KlayGE
 		{
 			caps_.standard_derivatives_support = true;
 		}
+		caps_.logic_op_support = true;
 
 		if (glloader_GL_ARB_geometry_shader4() || glloader_GL_EXT_geometry_shader4()
 			|| glloader_GL_NV_geometry_shader4())

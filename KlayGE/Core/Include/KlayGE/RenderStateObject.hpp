@@ -191,6 +191,26 @@ namespace KlayGE
 		TFO_Cmp_Min_Mag_Mip_Linear				= TFOE_Comparison | TFO_Min_Mag_Mip_Linear,
 		TFO_Cmp_Anisotropic						= TFOE_Comparison | TFO_Anisotropic
 	};
+	
+	enum LogicOperation
+	{
+		LOP_Clear,
+		LOP_Set,
+		LOP_Copy,
+		LOP_CopyInverted,
+		LOP_Noop,
+		LOP_Invert,
+		LOP_And,
+		LOP_NAnd,
+		LOP_Or,
+		LOP_NOR,
+		LOP_XOR,
+		LOP_Equiv,
+		LOP_AndReverse,
+		LOP_AndInverted,
+		LOP_OrReverse,
+		LOP_OrInverted
+	};
 
 #ifdef KLAYGE_HAS_STRUCT_PACK
 #pragma pack(push, 1)
@@ -245,12 +265,14 @@ namespace KlayGE
 		bool				independent_blend_enable;
 
 		boost::array<bool, 8>				blend_enable;
+		boost::array<bool, 8>				logic_op_enable;
 		boost::array<BlendOperation, 8>		blend_op;
 		boost::array<AlphaBlendFactor, 8>	src_blend;
 		boost::array<AlphaBlendFactor, 8>	dest_blend;
 		boost::array<BlendOperation, 8>		blend_op_alpha;
 		boost::array<AlphaBlendFactor, 8>	src_blend_alpha;
 		boost::array<AlphaBlendFactor, 8>	dest_blend_alpha;
+		boost::array<LogicOperation, 8>		logic_op;
 		boost::array<uint8_t, 8>			color_write_mask;
 
 		BlendStateDesc();

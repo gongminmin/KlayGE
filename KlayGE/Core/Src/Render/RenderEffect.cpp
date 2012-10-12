@@ -88,6 +88,8 @@ namespace
 {
 	using namespace KlayGE;
 
+	uint32_t const KFX_VERSION = 0x0103;
+
 	boost::mutex singleton_mutex;
 
 	class type_define
@@ -615,6 +617,62 @@ namespace
 		static boost::shared_ptr<texture_addr_mode_define> instance_;
 	};
 	boost::shared_ptr<texture_addr_mode_define> texture_addr_mode_define::instance_;
+
+	class logic_operation_define
+	{
+	public:
+		static logic_operation_define& instance()
+		{
+			if (!instance_)
+			{
+				boost::mutex::scoped_lock lock(singleton_mutex);
+				if (!instance_)
+				{
+					instance_ = MakeSharedPtr<logic_operation_define>();
+				}
+			}
+			return *instance_;
+		}
+
+		LogicOperation from_str(std::string const & name) const
+		{
+			for (uint32_t i = 0; i < lops_.size(); ++ i)
+			{
+				if (lops_[i] == name)
+				{
+					return static_cast<LogicOperation>(i);
+				}
+			}
+			LogError("Wrong LogicOperation name: %s", name.c_str());
+			return static_cast<LogicOperation>(0xFFFFFFFF);
+		}
+
+		logic_operation_define()
+		{
+			lops_.push_back("clear");
+			lops_.push_back("set");
+			lops_.push_back("copy");
+			lops_.push_back("copy_inverted");
+			lops_.push_back("noop");
+			lops_.push_back("invert");
+			lops_.push_back("and");
+			lops_.push_back("nand");
+			lops_.push_back("or");
+			lops_.push_back("nor");
+			lops_.push_back("xor");
+			lops_.push_back("equiv");
+			lops_.push_back("and_reverse");
+			lops_.push_back("and_inverted");
+			lops_.push_back("or_reverse");
+			lops_.push_back("or_inverted");
+		}
+
+	private:
+		std::vector<std::string> lops_;
+
+		static boost::shared_ptr<logic_operation_define> instance_;
+	};
+	boost::shared_ptr<logic_operation_define> logic_operation_define::instance_;
 
 	bool bool_from_str(std::string const & name)
 	{
@@ -2863,7 +2921,7 @@ namespace KlayGE
 				uint32_t ver;
 				source->read(&ver, sizeof(ver));
 				LittleEndianToNative<sizeof(ver)>(&ver);
-				if (0x0102 == ver)
+				if (KFX_VERSION == ver)
 				{
 					uint64_t timestamp;
 					source->read(&timestamp, sizeof(timestamp));
@@ -3007,7 +3065,7 @@ namespace KlayGE
 		NativeToLittleEndian<sizeof(fourcc)>(&fourcc);
 		os.write(reinterpret_cast<char const *>(&fourcc), sizeof(fourcc));
 
-		uint32_t ver = 0x0102;
+		uint32_t ver = KFX_VERSION;
 		NativeToLittleEndian<sizeof(ver)>(&ver);
 		os.write(reinterpret_cast<char const *>(&ver), sizeof(ver));
 
@@ -3545,6 +3603,12 @@ namespace KlayGE
 				std::string value_str = state_node->Attrib("value")->ValueString();
 				bs_desc.blend_enable[index] = bool_from_str(value_str);
 			}
+			else if ("logic_op_enable" == state_name)
+			{
+				int index = get_index(state_node);
+				std::string value_str = state_node->Attrib("value")->ValueString();
+				bs_desc.logic_op_enable[index] = bool_from_str(value_str);
+			}
 			else if ("blend_op" == state_name)
 			{
 				int index = get_index(state_node);
@@ -3580,6 +3644,12 @@ namespace KlayGE
 				int index = get_index(state_node);
 				std::string value_str = state_node->Attrib("value")->ValueString();
 				bs_desc.dest_blend_alpha[index] = alpha_blend_factor_define::instance().from_str(value_str);
+			}
+			else if ("logic_op" == state_name)
+			{
+				int index = get_index(state_node);
+				std::string value_str = state_node->Attrib("value")->ValueString();
+				bs_desc.logic_op[index] = logic_operation_define::instance().from_str(value_str);
 			}
 			else if ("color_write_mask" == state_name)
 			{

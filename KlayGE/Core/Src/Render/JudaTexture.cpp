@@ -26,9 +26,9 @@
 
 namespace
 {
-	uint32_t const JUDA_TEX_VERSION = 2;
-
 	using namespace KlayGE;
+
+	uint32_t const JUDA_TEX_VERSION = 2;
 
 	void u8_copy_1(uint8_t* output, uint8_t const * rhs)
 	{

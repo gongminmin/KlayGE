@@ -78,6 +78,7 @@ namespace KlayGE
 			independent_blend_enable(false)
 	{
 		blend_enable.assign(false);
+		logic_op_enable.assign(false);
 		blend_op.assign(BOP_Add);
 		src_blend.assign(ABF_One);
 		dest_blend.assign(ABF_Zero);
@@ -85,6 +86,7 @@ namespace KlayGE
 		src_blend_alpha.assign(ABF_One);
 		dest_blend_alpha.assign(ABF_Zero);
 		color_write_mask.assign(CMASK_All);
+		logic_op.assign(LOP_Noop);
 	}
 
 	bool operator<(BlendStateDesc const & lhs, BlendStateDesc const & rhs)
