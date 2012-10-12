@@ -81,7 +81,7 @@ namespace
 	public:
 		TerrainObject()
 		{
-			base_level_ = -10;
+			base_level_ = 0;
 			strength_ = 50;
 
 			renderable_ = MakeSharedPtr<RenderTerrain>(base_level_, strength_);
@@ -748,7 +748,7 @@ bool OceanApp::ConfirmDevice() const
 
 void OceanApp::InitObjects()
 {
-	this->LookAt(float3(0, 20, 0), float3(0, 19.8f, 1));
+	this->LookAt(float3(0, 14, 0), float3(0, 13.8f, 1));
 	this->Proj(0.1f, 3000);
 
 	boost::function<TexturePtr()> y_cube_tl = ASyncLoadTexture("DH001cross_y.dds", EAH_GPU_Read | EAH_Immutable);
@@ -760,7 +760,7 @@ void OceanApp::InitObjects()
 	deferred_rendering_->SSVOEnabled(0, false);
 
 	sun_light_ = MakeSharedPtr<DirectionalLightSource>();
-	sun_light_->Attrib(LSA_NoShadow);//LSA_IndirectLighting);
+	sun_light_->Attrib(LSA_NoShadow);
 	sun_light_->Direction(float3(-0.267835f, 0.0517653f, 0.960315f));
 	sun_light_->Color(float3(1, 0.7f, 0.5f));
 	sun_light_->AddToSceneManager();

@@ -7,7 +7,6 @@
 			<param name="blur_origin"/>
 			<param name="cutoff_decay_weight"/>
 			<param name="valid_sample_length"/>
-			<param name="inv_width_height"/>
 		</params>
 		<input>
 			<pin name="src_tex"/>

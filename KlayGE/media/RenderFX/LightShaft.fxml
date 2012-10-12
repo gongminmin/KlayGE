@@ -12,7 +12,6 @@
 
 	<parameter type="int" name="blur_sample_num"/>
 	<parameter type="float2" name="blur_origin"/>
-	<parameter type="float2" name="inv_width_height"/>
 	<parameter type="float" name="width_height_aspect"/>
 	<parameter type="float" name="cutoff_decay_weight" value="0.015625"/>
 	<parameter type="float" name="valid_sample_length" value="1.0"/>
@@ -57,7 +56,7 @@ float4 LightShaftRadialBlurPS(float2 tc0 : TEXCOORD0) : SV_Target
 	float sample_weight = 1;
 	for (int i = 0; i < blur_sample_num; ++ i)
 	{
-		current_sample = src_tex.SampleLevel(linear_sampler, current_tc, 0);
+		current_sample = src_tex.Sample(linear_sampler, current_tc);
 		sample_sum += current_sample * sample_weight;
 		current_tc += sample_step;
 		sample_weight -= cutoff_decay_weight; // linear decay
