@@ -1014,7 +1014,7 @@ namespace KlayGE
 						}
 					}
 
-					for (size_t i = 0; i < lights_.size(); ++ i)
+					for (uint32_t i = 0; i < lights_.size(); ++ i)
 					{
 						LightSourcePtr const & light = lights_[i];
 						if (light->Enabled())

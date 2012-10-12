@@ -165,7 +165,7 @@ namespace KlayGE
 				}
 				D3D_FEATURE_LEVEL out_feature_level;
 				if (SUCCEEDED(re.D3D11CreateDevice(dx_adapter, dev_type, NULL, create_device_flags,
-					&feature_levels[0], feature_levels.size(), D3D11_SDK_VERSION, &d3d_device,
+					&feature_levels[0], static_cast<UINT>(feature_levels.size()), D3D11_SDK_VERSION, &d3d_device,
 					&out_feature_level, &d3d_imm_ctx)))
 				{
 					d3d_device_ = MakeCOMPtr(d3d_device);

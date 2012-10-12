@@ -1442,7 +1442,9 @@ namespace KlayGE
 							boost::hash_combine(seed, signature.Stream);
 							boost::hash_combine(seed, signature.MinPrecision);
 
-							boost::hash_combine(vs_signature_, seed);
+							size_t sig = vs_signature_;
+							boost::hash_combine(sig, seed);
+							vs_signature_ = static_cast<uint32_t>(sig);
 						}
 					}
 					else if (ST_ComputeShader == type)

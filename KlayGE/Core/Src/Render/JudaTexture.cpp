@@ -1022,7 +1022,7 @@ namespace KlayGE
 		uint32_t non_empty_nodes = juda_tex->NumNonEmptyNodes();
 		ofs->write(reinterpret_cast<char const *>(&non_empty_nodes), sizeof(non_empty_nodes));
 
-		uint32_t num_image_entries = juda_tex->image_entries_.size();
+		uint32_t num_image_entries = static_cast<uint32_t>(juda_tex->image_entries_.size());
 		ofs->write(reinterpret_cast<char const *>(&num_image_entries), sizeof(num_image_entries));
 		for (uint32_t i = 0; i < num_image_entries; ++ i)
 		{
