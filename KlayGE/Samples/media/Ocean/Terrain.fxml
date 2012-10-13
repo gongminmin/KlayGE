@@ -12,6 +12,9 @@
 	<parameter type="texture2D" name="ground_tex_detail">
 		<annotation type="string" name="SasResourceAddress" value="RealSand38BoH.dds"/>
 	</parameter>
+	<parameter type="texture2D" name="grass_tex_base">
+		<annotation type="string" name="SasResourceAddress" value="grass.dds"/>
+	</parameter>
 	<parameter type="texture2D" name="ground_tex_base">
 		<annotation type="string" name="SasResourceAddress" value="RealSand40BoH.dds"/>
 	</parameter>
@@ -26,7 +29,7 @@
 		<![CDATA[
 void NoiseTerrain(float2 pos,
 			out float3 oNormal,
-			out float2 oTexcoord,
+			out float3 oTexcoord,
 			out float4 oPos)
 {
 	float lacunarity = 1.93485736f;
@@ -35,6 +38,7 @@ void NoiseTerrain(float2 pos,
 	float4 pos_os = GetInfTerrainPosOS(pos, 0);
 
 	pos_os.y = fBm(pos_os.xz / 192, 5, lacunarity, gain);
+	oTexcoord.z = pos_os.y * 5 + 0.6f;
 	
 	float d = 1.0f;
 	float fx = fBm((pos_os.xz + float2(d, 0)) / 192, 5, lacunarity, gain);
@@ -45,11 +49,11 @@ void NoiseTerrain(float2 pos,
 	pos_os.y += base_level;
 
 	oPos = mul(pos_os, mvp);
-	oTexcoord = pos_os.xz / 8;
+	oTexcoord.xy = pos_os.xz / 8;
 }
 
 void TerrainGBufferVS(float2 pos : POSITION,
-			out float2 oTexCoord : TEXCOORD0,
+			out float3 oTexCoord : TEXCOORD0,
 			out float4 oNormalFog : TEXCOORD1,
 			out float4 oPos : SV_Position)
 {
@@ -61,14 +65,15 @@ void TerrainGBufferVS(float2 pos : POSITION,
 	oNormalFog.w = saturate(oPos.w / 1200.0f);
 }
 
-void TerrainGBufferMRTPS(float2 texcoord : TEXCOORD0, float4 normal_fog : TEXCOORD1,
+void TerrainGBufferMRTPS(float3 texcoord : TEXCOORD0, float4 normal_fog : TEXCOORD1,
 					out float4 mrt_0 : SV_Target0, out float4 mrt_1 : SV_Target1)
 {
 	float3 normal = normalize(normal_fog.xyz);
 	float3 fitting_tc = FittingCoord(normal);
 	normal *= fitting_tc.z * normals_fitting_tex.Sample(bilinear_sampler, fitting_tc.xy).r;
 
-	float3 diffuse = (ground_tex_detail.Sample(aniso_sampler, texcoord).rgb + ground_tex_base.Sample(aniso_sampler, texcoord / 16).rgb) / 2;
+	float3 diffuse = lerp((ground_tex_detail.Sample(aniso_sampler, texcoord.xy).rgb + ground_tex_base.Sample(aniso_sampler, texcoord.xy / 16).rgb) / 2,
+		grass_tex_base.Sample(aniso_sampler, texcoord.xy).rgb, saturate(texcoord.z));
 	float specular = 0;
 	
 	StoreMRTGBuffer(normal, specular, shininess, diffuse,
@@ -87,7 +92,7 @@ void TerrainGBufferMRTPS(float2 texcoord : TEXCOORD0, float4 normal_fog : TEXCOO
 	<shader>
 		<![CDATA[
 void TerrainGenShadowMapVS(float2 pos : POSITION,
-						out float2 oTc : TEXCOORD0,
+						out float3 oTc : TEXCOORD0,
 						out float4 oPos : SV_Position)
 {
 	float3 normal;
