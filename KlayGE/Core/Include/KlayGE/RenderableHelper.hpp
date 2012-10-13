@@ -163,6 +163,21 @@ namespace KlayGE
 		{
 		}
 	};
+
+	class KLAYGE_CORE_API RenderDecal : public RenderableHelper
+	{
+	public:
+		RenderDecal(TexturePtr const & normal_tex, TexturePtr const & diffuse_tex, float3 const & diffuse_clr,
+				TexturePtr const & specular_tex, float3 const & specular_level, float shininess);
+
+		void OnRenderBegin();
+
+	private:
+		RenderEffectParameterPtr inv_mv_ep_;
+		float3 diffuse_clr_;
+		float specular_level_;
+		float shininess_;
+	};
 }
 
 #endif		// _RENDERABLEHELPER_HPP

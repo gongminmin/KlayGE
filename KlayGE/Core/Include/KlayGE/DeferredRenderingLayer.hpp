@@ -119,6 +119,8 @@ namespace KlayGE
 		void SSREnabled(bool ssr);
 		void TemporalAAEnabled(bool taa);
 
+		void AddDecal(RenderDecalPtr const & decal);
+
 		void SetupViewport(uint32_t index, FrameBufferPtr const & fb, uint32_t attrib);
 		void EnableViewport(uint32_t index, bool enable);
 		uint32_t Update(uint32_t pass);
@@ -265,6 +267,7 @@ namespace KlayGE
 		OBBox box_obb_;
 
 		std::vector<LightSourcePtr> lights_;
+		std::vector<RenderablePtr> decals_;
 
 		std::vector<uint32_t> pass_scaned_;
 

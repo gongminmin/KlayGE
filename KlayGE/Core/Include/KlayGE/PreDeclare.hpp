@@ -126,6 +126,8 @@ namespace KlayGE
 	typedef boost::shared_ptr<RenderableHDRSkyBox> RenderableHDRSkyBoxPtr;
 	class RenderablePlane;
 	typedef boost::shared_ptr<RenderablePlane> RenderablePlanePtr;
+	class RenderDecal;
+	typedef boost::shared_ptr<RenderDecal> RenderDecalPtr;
 	class RenderEffect;
 	typedef boost::shared_ptr<RenderEffect> RenderEffectPtr;
 	class RenderTechnique;

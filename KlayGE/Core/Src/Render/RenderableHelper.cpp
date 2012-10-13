@@ -32,6 +32,8 @@
 #include <KlayGE/RenderEffect.hpp>
 #include <KlayGE/Context.hpp>
 #include <KlayGE/RenderFactory.hpp>
+#include <KlayGE/RenderEngine.hpp>
+#include <KlayGE/FrameBuffer.hpp>
 #include <KlayGE/App3D.hpp>
 #include <KlayGE/RenderLayout.hpp>
 #include <KlayGE/Camera.hpp>
@@ -205,7 +207,7 @@ namespace KlayGE
 			4, 0, 1, 1, 5, 4,
 			4, 6, 2, 2, 0, 4,
 			2, 6, 7, 7, 3, 2,
-			1, 3, 7, 7, 5, 1,
+			1, 3, 7, 7, 5, 1
 		};
 
 		rl_ = rf.MakeRenderLayout();
@@ -396,6 +398,7 @@ namespace KlayGE
 		*inv_mvp_ep_ = MathLib::inverse(rot_view * camera.ProjMatrix());
 	}
 
+
 	RenderableHDRSkyBox::RenderableHDRSkyBox()
 	{
 		if (deferred_effect_)
@@ -422,6 +425,7 @@ namespace KlayGE
 		*skybox_cube_tex_ep_ = y_cube;
 		*skybox_Ccube_tex_ep_ = c_cube;
 	}
+
 
 	RenderablePlane::RenderablePlane(float length, float width,
 				int length_segs, int width_segs, bool has_tex_coord)
@@ -493,5 +497,85 @@ namespace KlayGE
 		rl_->BindIndexStream(ib, EF_R16UI);
 
 		aabb_ = MathLib::compute_aabbox(pos.begin(), pos.end());
+	}
+
+
+	RenderDecal::RenderDecal(TexturePtr const & normal_tex, TexturePtr const & diffuse_tex, float3 const & diffuse_clr,
+			TexturePtr const & specular_tex, float3 const & specular_level, float shininess)
+		: RenderableHelper(L"Decal")
+	{
+		BOOST_ASSERT(deferred_effect_);
+
+		gbuffer_alpha_test_mrt_tech_ = deferred_effect_->TechniqueByName("DecalGBufferAlphaTestMRTTech");
+		technique_ = gbuffer_alpha_test_mrt_tech_;
+
+		aabb_ = AABBox(float3(-1, -1, -1), float3(1, 1, 1));
+		float3 xyzs[] =
+		{
+			aabb_[0], aabb_[1], aabb_[2], aabb_[3], aabb_[4], aabb_[5], aabb_[6], aabb_[7]
+		};
+
+		uint16_t indices[] =
+		{
+			0, 2, 3, 3, 1, 0,
+			5, 7, 6, 6, 4, 5,
+			4, 0, 1, 1, 5, 4,
+			4, 6, 2, 2, 0, 4,
+			2, 6, 7, 7, 3, 2,
+			1, 3, 7, 7, 5, 1
+		};
+
+		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+		rl_ = rf.MakeRenderLayout();
+		rl_->TopologyType(RenderLayout::TT_TriangleList);
+
+		ElementInitData init_data;
+		init_data.row_pitch = sizeof(xyzs);
+		init_data.slice_pitch = 0;
+		init_data.data = xyzs;
+
+		GraphicsBufferPtr vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, &init_data);
+		rl_->BindVertexStream(vb, boost::make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F)));
+
+		init_data.row_pitch = sizeof(indices);
+		init_data.slice_pitch = 0;
+		init_data.data = indices;
+
+		GraphicsBufferPtr ib = rf.MakeIndexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, &init_data);
+		rl_->BindIndexStream(ib, EF_R16UI);
+
+		model_mat_ = float4x4::Identity();
+		effect_attrs_ |= EA_AlphaTest;
+
+		inv_mv_ep_ = technique_->Effect().ParameterByName("inv_mv");
+
+		normal_tex_ = normal_tex;
+		diffuse_tex_ = diffuse_tex;
+		diffuse_clr_ = diffuse_clr;
+		specular_tex_ = specular_tex;
+		specular_level_ = specular_level.x();
+		shininess_ = shininess;
+	}
+
+	void RenderDecal::OnRenderBegin()
+	{
+		RenderableHelper::OnRenderBegin();
+
+		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+		Camera const & camera = *re.CurFrameBuffer()->GetViewport()->camera;
+
+		float4x4 const & view_to_decal = MathLib::inverse(model_mat_ * camera.ViewMatrix());
+					
+		switch (type_)
+		{
+		case PT_OpaqueMRTGBuffer:
+		case PT_TransparencyBackMRTGBuffer:
+		case PT_TransparencyFrontMRTGBuffer:
+			*diffuse_clr_param_ = float4(diffuse_clr_.x(), diffuse_clr_.y(), diffuse_clr_.z(), static_cast<float>(!!diffuse_tex_));
+			*specular_level_param_ = float4(specular_level_, 0, 0, static_cast<float>(!!specular_tex_));
+			*shininess_param_ = MathLib::clamp(shininess_ / 256.0f, 1e-6f, 0.999f);
+			*inv_mv_ep_ = view_to_decal;
+			break;
+		}
 	}
 }

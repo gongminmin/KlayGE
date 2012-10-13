@@ -632,6 +632,11 @@ namespace KlayGE
 		taa_enabled_ = taa;
 	}
 
+	void DeferredRenderingLayer::AddDecal(RenderDecalPtr const & decal)
+	{
+		decals_.push_back(decal);
+	}
+
 	void DeferredRenderingLayer::SetupViewport(uint32_t index, FrameBufferPtr const & fb, uint32_t attrib)
 	{
 		PerViewport& pvp = viewports_[index];
@@ -1333,6 +1338,17 @@ namespace KlayGE
 						this->CreateDepthDerivativeMipMap(vp_index);
 						this->CreateNormalConeMipMap(vp_index);
 						this->SetSubsplatStencil(vp_index);
+					}
+
+					if (!decals_.empty())
+					{
+						re.BindFrameBuffer(pvp.g_buffers[Opaque_GBuffer]);
+						typedef BOOST_TYPEOF(decals_) DecalsType;
+						BOOST_FOREACH(DecalsType::reference de, decals_)
+						{
+							de->Pass(PT_OpaqueMRTGBuffer);
+							de->Render();
+						}
 					}
 				}
 				else

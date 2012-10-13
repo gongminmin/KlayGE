@@ -12,6 +12,7 @@
 		<parameter type="float4x4" name="mvp"/>
 		<parameter type="float4x4" name="model_view"/>
 		<parameter type="float4x4" name="inv_mvp"/>
+		<parameter type="float4x4" name="inv_mv"/>
 		<parameter type="float" name="depth_far"/>
 	</cbuffer>
 
@@ -66,6 +67,13 @@
 	</parameter>
 
 	<parameter type="texture2D" name="opaque_depth_tex"/>
+
+	<parameter type="sampler" name="bilinear_border_sampler">
+		<state name="filtering" value="min_mag_linear_mip_point"/>
+		<state name="address_u" value="border"/>
+		<state name="address_v" value="border"/>
+		<state name="border_clr" r="0" g="0" b="0" a="0"/>
+	</parameter>
 
 	<shader>
 		<![CDATA[
@@ -293,6 +301,100 @@ void GBufferSkyBoxMRTPS(out float4 mrt_0 : SV_Target0, out float4 mrt_1 : SV_Tar
 {
 	mrt_0 = mrt_1 = 0;
 }
+
+
+void DecalGBufferVS(float4 pos : POSITION,
+			out float4 oTexCoord_2xy : TEXCOORD0,
+			out float4 oTsToView0_2z : TEXCOORD1,
+			out float4 oTsToView1_Depth : TEXCOORD2,
+#ifdef NOPERSPECTIVE_SUPPORT
+			out noperspective float2 oScreenTc : TEXCOORD3,
+#else
+			out float3 oScreenTc : TEXCOORD3,
+#endif
+			out float3 oViewDir : TEXCOORD4,
+			out float4 oPos : SV_Position)
+{
+	oPos = mul(pos, mvp);
+	oTexCoord_2xy.xy = float2(pos.x * 0.5f + 0.5f, KLAYGE_FLIPPING * pos.y * 0.5f + 0.5f);;
+
+	float3x3 obj_to_ts;
+	obj_to_ts[0] = float3(1, 0, 0);
+	obj_to_ts[1] = float3(0, -1, 0);
+	obj_to_ts[2] = float3(0, 0, -1);
+	float3x3 ts_to_view = mul(obj_to_ts, (float3x3)model_view);
+	oTsToView0_2z.xyz = ts_to_view[0];
+	oTsToView1_Depth.xyz = ts_to_view[1];
+	oTexCoord_2xy.zw = ts_to_view[2].xy;
+	oTsToView0_2z.w = ts_to_view[2].z;
+	
+	oTsToView1_Depth.w = oPos.w;
+	
+	oScreenTc.xy = oPos.xy / oPos.w * 0.5f;
+	oScreenTc.y *= KLAYGE_FLIPPING;
+	oScreenTc.xy += 0.5f;
+	
+#ifndef NOPERSPECTIVE_SUPPORT
+	oScreenTc.z = oPos.w;
+	oScreenTc.xy *= oScreenTc.z;
+#endif
+
+	oViewDir = mul(pos, model_view).xyz;
+}
+
+void DecalGBufferAlphaTestMRTPS(float4 texcoord_2xy : TEXCOORD0, float4 ts_to_view0_2z : TEXCOORD1, float3 ts_to_view1 : TEXCOORD2,
+#ifdef NOPERSPECTIVE_SUPPORT
+					noperspective float2 screen_tc : TEXCOORD3,
+#else
+					float3 screen_tc_w : TEXCOORD3,
+#endif
+					float3 view_dir : TEXCOORD4,
+					out float4 mrt_0 : SV_Target0, out float4 mrt_1 : SV_Target1)
+{
+#ifndef NOPERSPECTIVE_SUPPORT
+	float2 screen_tc = screen_tc_w.xy / screen_tc_w.z;
+#endif
+
+	float3 pos_es = view_dir * (opaque_depth_tex.Sample(point_sampler, screen_tc).r / view_dir.z);
+	float4 decal_pos = mul(float4(pos_es, 1), inv_mv);
+	if (all(abs(decal_pos.xy) <= decal_pos.w))
+	{
+		decal_pos /= decal_pos.w;
+		texcoord_2xy.xy = float2(decal_pos.x, -decal_pos.y) * 0.5f + 0.5f;
+
+		clip(diffuse_tex.Sample(bilinear_border_sampler, texcoord_2xy.xy).a - ALPHA_TEST_THRESHOLD);
+		
+		float3 normal = RestoreNormal(texcoord_2xy, ts_to_view0_2z, ts_to_view1);
+
+		float3 diffuse;
+		if (diffuse_clr.w > 0.5f)
+		{
+			diffuse = diffuse_tex.Sample(bilinear_border_sampler, texcoord_2xy.xy).rgb;
+		}
+		else
+		{
+			diffuse = diffuse_clr.rgb;
+		}
+	
+		float specular;
+		if (specular_level.w > 0.5f)
+		{
+			specular = dot(specular_tex.Sample(bilinear_border_sampler, texcoord_2xy.xy).rgb, float3(0.2126f, 0.7152f, 0.0722f));
+		}
+		else
+		{
+			specular = specular_level.x;
+		}
+	
+		StoreMRTGBuffer(normal, specular, shininess, diffuse,
+			mrt_0, mrt_1);
+	}
+	else
+	{
+		discard;
+		mrt_0 = mrt_1 = 0;
+	}
+}
 		]]>
 	</shader>
 
@@ -441,6 +543,15 @@ void GBufferSkyBoxMRTPS(out float4 mrt_0 : SV_Target0, out float4 mrt_1 : SV_Tar
 	<technique name="GBufferSkyBoxMRTTech" inherit="GBufferSkyBoxTech">
 		<pass name="p0">
 			<state name="pixel_shader" value="GBufferSkyBoxMRTPS()"/>
+		</pass>
+	</technique>
+
+	<technique name="DecalGBufferAlphaTestMRTTech" inherit="GBufferAlphaTestMRTTech">
+		<pass name="p0">
+			<state name="depth_write_mask" value="0"/>
+
+			<state name="vertex_shader" value="DecalGBufferVS()"/>
+			<state name="pixel_shader" value="DecalGBufferAlphaTestMRTPS()"/>
 		</pass>
 	</technique>
 
