@@ -47,8 +47,6 @@ namespace KlayGE
 
 		void Technique(RenderTechniquePtr const & tech);
 		void CubeMap(TexturePtr const & cube);
-
-		void Pass(PassType type);
 	};
 
 	class KLAYGE_CORE_API SceneObjectHDRSkyBox : public SceneObjectSkyBox
@@ -74,8 +72,6 @@ namespace KlayGE
 		void Scaling(float3 const & s);
 		void Translation(float x, float y, float z);
 		void Translation(float3 const & t);
-
-		void Pass(PassType type);
 
 	protected:
 		float4x4 model_scaling_;

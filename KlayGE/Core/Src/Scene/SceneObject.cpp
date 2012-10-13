@@ -115,6 +115,10 @@ namespace KlayGE
 	void SceneObject::Pass(PassType type)
 	{
 		renderable_->Pass(type);
+		if (attrib_ & SOA_NotCastShadow)
+		{
+			this->Visible((PT_GenShadowMap != type) && (PT_GenShadowMapWODepthTexture != type) && (PT_GenReflectiveShadowMap != type));
+		}
 	}
 
 	void SceneObject::LightingTex(TexturePtr const & tex)

@@ -56,7 +56,7 @@ namespace KlayGE
 	}
 
 	SceneObjectSkyBox::SceneObjectSkyBox(uint32_t attrib)
-		: SceneObjectHelper(MakeSharedPtr<RenderableSkyBox>(), attrib)
+		: SceneObjectHelper(MakeSharedPtr<RenderableSkyBox>(), attrib | SOA_NotCastShadow)
 	{
 	}
 
@@ -68,12 +68,6 @@ namespace KlayGE
 	void SceneObjectSkyBox::CubeMap(TexturePtr const & cube)
 	{
 		checked_pointer_cast<RenderableSkyBox>(renderable_)->CubeMap(cube);
-	}
-
-	void SceneObjectSkyBox::Pass(PassType type)
-	{
-		checked_pointer_cast<RenderableSkyBox>(renderable_)->Pass(type);
-		this->Visible((PT_GenShadowMap != type) && (PT_GenShadowMapWODepthTexture != type) && (PT_GenReflectiveShadowMap != type));
 	}
 
 	SceneObjectHDRSkyBox::SceneObjectHDRSkyBox(uint32_t attrib)
@@ -94,7 +88,7 @@ namespace KlayGE
 
 
 	SceneObjectLightSourceProxy::SceneObjectLightSourceProxy(LightSourcePtr const & light)
-		: SceneObjectHelper(SOA_Cullable | SOA_Moveable),
+		: SceneObjectHelper(SOA_Cullable | SOA_Moveable | SOA_NotCastShadow),
 			light_(light)
 	{
 		std::string mesh_name;
@@ -154,15 +148,9 @@ namespace KlayGE
 		model_translation_ = MathLib::translation(t);
 	}
 
-	void SceneObjectLightSourceProxy::Pass(PassType type)
-	{
-		renderable_->Pass(type);
-		this->Visible((PT_GenShadowMap != type) && (PT_GenShadowMapWODepthTexture != type) && (PT_GenReflectiveShadowMap != type));
-	}
-
 
 	SceneObjectCameraProxy::SceneObjectCameraProxy(CameraPtr const & camera)
-		: SceneObjectHelper(SOA_Cullable | SOA_Moveable),
+		: SceneObjectHelper(SOA_Cullable | SOA_Moveable | SOA_NotCastShadow),
 			camera_(camera)
 	{
 		eye_pos_ = camera_->EyePos();
