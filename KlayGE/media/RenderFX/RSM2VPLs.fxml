@@ -44,7 +44,7 @@ float3 texcoord_to_view(float2 tex)
 	return upper_left + x_dir * tex.x + y_dir * tex.y;
 }
 
-float4 RSM2VPLsSpot(float2 tc, float2 rsm_tc, float level)
+float4 RSM2VPLsSpot(float2 tc, float2 rsm_tc, float level, float factor)
 {
 	float4 albedo_spec = albedo_tex.SampleLevel(point_sampler, rsm_tc, level);
 	float3 albedo = albedo_spec.xyz;
@@ -68,7 +68,7 @@ float4 RSM2VPLsSpot(float2 tc, float2 rsm_tc, float level)
 			if (n_dot_l > 0)
 			{
 				float atten = n_dot_l * spot * attenuation_term(float3(0, 0, 0), pos_ls, light_falloff);
-				light = float4(albedo, atten);
+				light = float4(albedo * factor, atten);
 			}
 		}
 
@@ -97,7 +97,7 @@ float4 RSM2VPLsSpotPS(float2 tc : TEXCOORD0) : SV_Target
 	float i = vpl_id - j * vpl_params.y;
 	float2 rsm_tc = float2(i, j) * vpl_params.z + vpl_params.w;
 
-	return RSM2VPLsSpot(tc, rsm_tc, mip_level);
+	return RSM2VPLsSpot(tc, rsm_tc, mip_level, 1);
 }
 
 float4 RSM2VPLsSpotPSNew(float2 tc : TEXCOORD0) : SV_Target
@@ -105,11 +105,13 @@ float4 RSM2VPLsSpotPSNew(float2 tc : TEXCOORD0) : SV_Target
 	float vpl_id = floor((1.0 - tc.x) * vpl_params.x);
 	float accum = 1;
 	float accum_sqrt = 1;
+	float factor = 4;
 	int k = 0;
 	if (vpl_id - vpl_params.w * (accum * 4 - 1) / 3 > 0)
 	{
 		accum *= 4;
 		accum_sqrt *= 2;
+		factor = 1;
 		k = 1;
 	}
 
@@ -135,7 +137,7 @@ float4 RSM2VPLsSpotPSNew(float2 tc : TEXCOORD0) : SV_Target
 		}
 	}
 
-	return RSM2VPLsSpot(tc, rsm_tc, smaller_level - k);
+	return RSM2VPLsSpot(tc, rsm_tc, smaller_level - k, factor);
 }
 		]]>
 	</shader>
