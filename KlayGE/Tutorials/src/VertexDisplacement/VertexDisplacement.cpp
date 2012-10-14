@@ -122,7 +122,7 @@ int main()
 VertexDisplacement::VertexDisplacement()
 						: App3DFramework("VertexDisplacement")
 {
-	ResLoader::Instance().AddPath("../../Samples/media/VertexDisplacement");
+	ResLoader::Instance().AddPath("../../Tutorials/media/VertexDisplacement");
 }
 
 bool VertexDisplacement::ConfirmDevice() const

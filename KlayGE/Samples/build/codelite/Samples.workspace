@@ -7,7 +7,6 @@
   <Project Name="Text" Path="Text.project"/>
   <Project Name="ParticleEditor" Path="ParticleEditor.project"/>
   <Project Name="PostProcessing" Path="PostProcessing.project"/>
-  <Project Name="VertexDisplacement" Path="VertexDisplacement.project"/>
   <Project Name="SubSurface" Path="SubSurface.project"/>
   <Project Name="ShadowCubemap" Path="ShadowCubemap.project"/>
   <Project Name="ModelViewer" Path="ModelViewer.project"/>
@@ -25,7 +24,6 @@
   <BuildMatrix>
     <WorkspaceConfiguration Name="Debug_win_x86" Selected="no">
       <Project Name="VideoTexture" ConfigName="Debug_win_x86"/>
-      <Project Name="VertexDisplacement" ConfigName="Debug_win_x86"/>
       <Project Name="Text" ConfigName="Debug_win_x86"/>
       <Project Name="SubSurface" ConfigName="Debug_win_x86"/>
       <Project Name="ShadowCubemap" ConfigName="Debug_win_x86"/>
@@ -50,7 +48,6 @@
     </WorkspaceConfiguration>
     <WorkspaceConfiguration Name="Release_win_x86" Selected="yes">
       <Project Name="VideoTexture" ConfigName="Release_win_x86"/>
-      <Project Name="VertexDisplacement" ConfigName="Release_win_x86"/>
       <Project Name="Text" ConfigName="Release_win_x86"/>
       <Project Name="SubSurface" ConfigName="Release_win_x86"/>
       <Project Name="ShadowCubemap" ConfigName="Release_win_x86"/>
@@ -75,7 +72,6 @@
     </WorkspaceConfiguration>
     <WorkspaceConfiguration Name="Debug_win_x64" Selected="yes">
       <Project Name="VideoTexture" ConfigName="Debug_win_x64"/>
-      <Project Name="VertexDisplacement" ConfigName="Debug_win_x64"/>
       <Project Name="Text" ConfigName="Debug_win_x64"/>
       <Project Name="SubSurface" ConfigName="Debug_win_x64"/>
       <Project Name="ShadowCubemap" ConfigName="Debug_win_x64"/>
@@ -100,7 +96,6 @@
     </WorkspaceConfiguration>
     <WorkspaceConfiguration Name="Release_win_x64" Selected="yes">
       <Project Name="VideoTexture" ConfigName="Release_win_x64"/>
-      <Project Name="VertexDisplacement" ConfigName="Release_win_x64"/>
       <Project Name="Text" ConfigName="Release_win_x64"/>
       <Project Name="SubSurface" ConfigName="Release_win_x64"/>
       <Project Name="ShadowCubemap" ConfigName="Release_win_x64"/>
@@ -125,7 +120,6 @@
     </WorkspaceConfiguration>
     <WorkspaceConfiguration Name="Debug_linux_x86" Selected="yes">
       <Project Name="VideoTexture" ConfigName="Debug_linux_x86"/>
-      <Project Name="VertexDisplacement" ConfigName="Debug_linux_x86"/>
       <Project Name="Text" ConfigName="Debug_linux_x86"/>
       <Project Name="SubSurface" ConfigName="Debug_linux_x86"/>
       <Project Name="ShadowCubemap" ConfigName="Debug_linux_x86"/>
@@ -150,7 +144,6 @@
     </WorkspaceConfiguration>
     <WorkspaceConfiguration Name="Release_linux_x86" Selected="yes">
       <Project Name="VideoTexture" ConfigName="Release_linux_x86"/>
-      <Project Name="VertexDisplacement" ConfigName="Release_linux_x86"/>
       <Project Name="Text" ConfigName="Release_linux_x86"/>
       <Project Name="SubSurface" ConfigName="Release_linux_x86"/>
       <Project Name="ShadowCubemap" ConfigName="Release_linux_x86"/>
@@ -175,7 +168,6 @@
     </WorkspaceConfiguration>
     <WorkspaceConfiguration Name="Debug_linux_x64" Selected="yes">
       <Project Name="VideoTexture" ConfigName="Debug_linux_x64"/>
-      <Project Name="VertexDisplacement" ConfigName="Debug_linux_x64"/>
       <Project Name="Text" ConfigName="Debug_linux_x64"/>
       <Project Name="SubSurface" ConfigName="Debug_linux_x64"/>
       <Project Name="ShadowCubemap" ConfigName="Debug_linux_x64"/>
@@ -200,7 +192,6 @@
     </WorkspaceConfiguration>
     <WorkspaceConfiguration Name="Release_linux_x64" Selected="yes">
       <Project Name="VideoTexture" ConfigName="Release_linux_x64"/>
-      <Project Name="VertexDisplacement" ConfigName="Release_linux_x64"/>
       <Project Name="Text" ConfigName="Release_linux_x64"/>
       <Project Name="SubSurface" ConfigName="Release_linux_x64"/>
       <Project Name="ShadowCubemap" ConfigName="Release_linux_x64"/>
