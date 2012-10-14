@@ -731,7 +731,8 @@ int main()
 }
 
 OceanApp::OceanApp()
-				: App3DFramework("Ocean")
+			: App3DFramework("Ocean"),
+				light_shaft_on_(true)
 {
 	ResLoader::Instance().AddPath("../../Samples/media/Ocean");
 }
@@ -825,6 +826,7 @@ void OceanApp::InitObjects()
 	id_wind_dependency_slider_ = dialog_params_->IDFromName("WindDependencySlider");
 	id_choppy_scale_static_ = dialog_params_->IDFromName("ChoppyScaleStatic");
 	id_choppy_scale_slider_ = dialog_params_->IDFromName("ChoppyScaleSlider");
+	id_light_shaft_ = dialog_params_->IDFromName("LightShaft");
 	id_fps_camera_ = dialog_params_->IDFromName("FPSCamera");
 
 	dialog_params_->Control<UISlider>(id_dmap_dim_slider_)->OnValueChangedEvent().connect(boost::bind(&OceanApp::DMapDimChangedHandler, this, _1));
@@ -851,6 +853,8 @@ void OceanApp::InitObjects()
 	dialog_params_->Control<UISlider>(id_choppy_scale_slider_)->OnValueChangedEvent().connect(boost::bind(&OceanApp::ChoppyScaleChangedHandler, this, _1));
 	this->ChoppyScaleChangedHandler(*dialog_params_->Control<UISlider>(id_choppy_scale_slider_));
 
+	dialog_params_->Control<UICheckBox>(id_light_shaft_)->OnChangedEvent().connect(boost::bind(&OceanApp::LightShaftHandler, this, _1));
+
 	dialog_params_->Control<UICheckBox>(id_fps_camera_)->OnChangedEvent().connect(boost::bind(&OceanApp::FPSCameraHandler, this, _1));
 }
 
@@ -861,8 +865,8 @@ void OceanApp::OnResize(uint32_t width, uint32_t height)
 	RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 	deferred_rendering_->SetupViewport(0, re.CurFrameBuffer(), 0);
 
-	light_shaft_pp_->InputPin(0, deferred_rendering_->PrevFrameDepthTex(0));
-	light_shaft_pp_->InputPin(1, deferred_rendering_->PrevFrameShadingTex(0));
+	light_shaft_pp_->InputPin(0, deferred_rendering_->PrevFrameShadingTex(0));
+	light_shaft_pp_->InputPin(1, deferred_rendering_->PrevFrameDepthTex(0));
 
 	UIManager::Instance().SettleCtrls(width, height);
 }
@@ -965,6 +969,11 @@ void OceanApp::ChoppyScaleChangedHandler(UISlider const & sender)
 	checked_pointer_cast<OceanObject>(ocean_)->ChoppyScale(choppy);
 }
 
+void OceanApp::LightShaftHandler(UICheckBox const & sender)
+{
+	light_shaft_on_ = sender.GetChecked();
+}
+
 void OceanApp::FPSCameraHandler(UICheckBox const & sender)
 {
 	if (sender.GetChecked())
@@ -1002,7 +1011,10 @@ uint32_t OceanApp::DoUpdate(uint32_t pass)
 	uint32_t ret = deferred_rendering_->Update(pass);
 	if (ret & App3DFramework::URV_Finished)
 	{
-		light_shaft_pp_->Apply();
+		if (light_shaft_on_)
+		{
+			light_shaft_pp_->Apply();
+		}
 	}
 
 	return ret;

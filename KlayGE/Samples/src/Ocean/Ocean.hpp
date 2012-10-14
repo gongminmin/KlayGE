@@ -29,6 +29,7 @@ private:
 	void WindSpeedYChangedHandler(KlayGE::UISlider const & sender);
 	void WindDependencyChangedHandler(KlayGE::UISlider const & sender);
 	void ChoppyScaleChangedHandler(KlayGE::UISlider const & sender);
+	void LightShaftHandler(KlayGE::UICheckBox const & sender);
 	void FPSCameraHandler(KlayGE::UICheckBox const & sender);
 
 	KlayGE::FontPtr font_;
@@ -42,6 +43,7 @@ private:
 
 	KlayGE::PostProcessPtr fog_pp_;
 
+	bool light_shaft_on_;
 	KlayGE::PostProcessPtr light_shaft_pp_;
 
 	KlayGE::UIDialogPtr dialog_params_;
@@ -61,6 +63,7 @@ private:
 	int id_wind_dependency_slider_;
 	int id_choppy_scale_static_;
 	int id_choppy_scale_slider_;
+	int id_light_shaft_;
 	int id_fps_camera_;
 
 	KlayGE::DirectionalLightSourcePtr sun_light_;
