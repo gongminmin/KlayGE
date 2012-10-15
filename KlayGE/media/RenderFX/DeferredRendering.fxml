@@ -75,7 +75,7 @@ float linstep(float min, float max, float v)
 
 	<shader>
 		<![CDATA[
-#if KLAYGE_D3D11
+#if KLAYGE_SHADER_MODEL >= 4
 #define NOPERSPECTIVE_SUPPORT
 #endif
 
