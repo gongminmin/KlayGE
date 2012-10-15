@@ -15,6 +15,13 @@
 #include <vector>
 #include <sstream>
 
+#ifdef KLAYGE_COMPILER_MSVC
+extern "C"
+{
+	_declspec(dllexport) uint32_t NvOptimusEnablement = 0x00000001;
+}
+#endif
+
 class TutorFramework : public KlayGE::App3DFramework
 {
 public:
@@ -148,8 +155,15 @@ uint32_t TutorFramework::DoUpdate(uint32_t /*pass*/)
 {
 	KlayGE::RenderEngine& re = KlayGE::Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 
+	KlayGE::Color clear_clr(0.2f, 0.4f, 0.6f, 1);
+	if (KlayGE::Context::Instance().Config().graphics_cfg.gamma)
+	{
+		clear_clr.r() = 0.029f;
+		clear_clr.g() = 0.133f;
+		clear_clr.b() = 0.325f;
+	}
 	re.CurFrameBuffer()->Clear(KlayGE::FrameBuffer::CBM_Color | KlayGE::FrameBuffer::CBM_Depth,
-		KlayGE::Color(0.2f, 0.4f, 0.6f, 1), 1.0f, 0);
+		clear_clr, 1.0f, 0);
 
 	return KlayGE::App3DFramework::URV_Need_Flush | KlayGE::App3DFramework::URV_Finished;
 }
