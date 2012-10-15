@@ -159,6 +159,14 @@ namespace KlayGE
 		{
 			return viewports_[vp].shading_texs[TransparencyFront_GBuffer];
 		}
+		TexturePtr const & CurrFrameShadingTex(uint32_t vp) const
+		{
+			return viewports_[vp].curr_merged_shading_tex;
+		}
+		TexturePtr const & CurrFrameDepthTex(uint32_t vp) const
+		{
+			return viewports_[vp].curr_merged_depth_tex;
+		}
 		TexturePtr const & PrevFrameShadingTex(uint32_t vp) const
 		{
 			return viewports_[vp].prev_merged_shading_tex;

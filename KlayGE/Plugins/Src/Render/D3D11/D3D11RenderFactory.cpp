@@ -87,7 +87,16 @@ namespace KlayGE
 
 	QueryPtr D3D11RenderFactory::MakeConditionalRender()
 	{
-		return MakeSharedPtr<D3D11ConditionalRender>();
+		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+		RenderDeviceCaps const & caps = re.DeviceCaps();
+		if (caps.max_shader_model >= 4)
+		{
+			return MakeSharedPtr<D3D11ConditionalRender>();
+		}
+		else
+		{
+			return QueryPtr();
+		}
 	}
 
 	RenderViewPtr D3D11RenderFactory::Make1DRenderView(Texture& texture, int first_array_index, int array_size, int level)
