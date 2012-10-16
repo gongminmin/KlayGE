@@ -1029,11 +1029,47 @@ namespace KlayGE
 		UINT s;
 		for (size_t i = 0; i < sizeof(fmts) / sizeof(fmts[0]); ++ i)
 		{
+			if ((caps_.max_shader_model < 5)
+				&& ((EF_BC6 == fmts[i].first) || (EF_SIGNED_BC6 == fmts[i].first)
+					|| (EF_BC7 == fmts[i].first) || (EF_BC7_SRGB == fmts[i].first)))
+			{
+				continue;
+			}
+
 			d3d_device_->CheckFormatSupport(fmts[i].second, &s);
 			if (s != 0)
 			{
-				vertex_format_.insert(fmts[i].first);
-				texture_format_.insert(fmts[i].first);
+				if (IsDepthFormat(fmts[i].first))
+				{
+					DXGI_FORMAT depth_fmt;
+					switch (fmts[i].first)
+					{
+					case EF_D16:
+						depth_fmt = DXGI_FORMAT_R16_TYPELESS;
+						break;
+
+					case EF_D24S8:
+						depth_fmt = DXGI_FORMAT_R24G8_TYPELESS;
+						break;
+
+					case EF_D32F:
+					default:
+						depth_fmt = DXGI_FORMAT_R32_TYPELESS;
+						break;
+					}
+
+					d3d_device_->CheckFormatSupport(DXGI_FORMAT_R24G8_TYPELESS, &s);
+					if (s != 0)
+					{
+						vertex_format_.insert(fmts[i].first);
+						texture_format_.insert(fmts[i].first);
+					}
+				}
+				else
+				{
+					vertex_format_.insert(fmts[i].first);
+					texture_format_.insert(fmts[i].first);
+				}
 
 				UINT count = 1;
 				UINT quality;

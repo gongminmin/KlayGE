@@ -74,6 +74,9 @@ float3 DebugFxaaPixelShader(float2 pos)
 
 float3 FxaaPixelShader(float2 pos)
 {
+	float2 grad_x = ddx(pos);
+	float2 grad_y = ddy(pos);
+	
 	float2 posM = pos;
 	
 	float4 rgbyM = color_tex.Sample(linear_sampler, pos.xy);
@@ -195,12 +198,12 @@ float3 FxaaPixelShader(float2 pos)
 
 		if (!doneN)
 		{
-			lumaEndN = color_tex.Sample(linear_sampler, posN.xy).w;
+			lumaEndN = color_tex.SampleGrad(linear_sampler, posN.xy, grad_x, grad_y).w;
 			lumaEndN = lumaEndN - lumaNN * 0.5f;
 		}
 		if (!doneP)
 		{
-			lumaEndP = color_tex.Sample(linear_sampler, posP.xy).w;
+			lumaEndP = color_tex.SampleGrad(linear_sampler, posP.xy, grad_x, grad_y).w;
 			lumaEndP = lumaEndP - lumaNN * 0.5f;
 		}
 		doneN = abs(lumaEndN) >= gradientScaled;
