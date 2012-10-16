@@ -201,24 +201,22 @@ namespace
 		void OnRenderBegin()
 		{
 			App3DFramework const & app = Context::Instance().AppInstance();
+			Camera const & camera = app.ActiveCamera();
 
 			float4x4 const & model = MathLib::rotation_x(DEG90);
-			float4x4 const & view = app.ActiveCamera().ViewMatrix();
-			float4x4 const & proj = app.ActiveCamera().ProjMatrix();
+
+			*(technique_->Effect().ParameterByName("mvp")) = model * camera.ViewProjMatrix();
+			*(technique_->Effect().ParameterByName("model")) = model;
 
 			if ((Depth_WODT_Pass == pass_) || (Position_Pass == pass_))
 			{
-				*(technique_->Effect().ParameterByName("mvp")) = model * view * proj;
-				*(technique_->Effect().ParameterByName("model")) = model;
 			}
 			else if (Gen_Shadow_Pass == pass_)
 			{
 				float4x4 light_model = MathLib::to_matrix(light_->Rotation()) * MathLib::translation(light_->Position());
 				float4x4 inv_light_model = MathLib::inverse(light_model);
 
-				*(technique_->Effect().ParameterByName("model")) = model;
 				*(technique_->Effect().ParameterByName("obj_model_to_light_model")) = model * inv_light_model;
-				*(technique_->Effect().ParameterByName("mvp")) = model * view * proj;
 			}
 			else
 			{
@@ -229,8 +227,6 @@ namespace
 				*(technique_->Effect().ParameterByName("light_pos")) = float3(MathLib::transform(light_->Position(), MathLib::inverse(MathLib::rotation_x(DEG90))));
 				*(technique_->Effect().ParameterByName("light_color")) = float3(light_->Color());
 				*(technique_->Effect().ParameterByName("light_falloff")) = light_->Falloff();
-				*(technique_->Effect().ParameterByName("mvp")) = model * view * proj;
-				*(technique_->Effect().ParameterByName("model")) = model;
 				*(technique_->Effect().ParameterByName("light_vp")) = caustics_light_->SMCamera(0)->ViewMatrix() * caustics_light_->SMCamera(0)->ProjMatrix();
 				*(technique_->Effect().ParameterByName("eye_pos")) = float3(MathLib::transform(app.ActiveCamera().EyePos(), MathLib::inverse(model)));
 				*(technique_->Effect().ParameterByName("shadow_cube_tex")) = sm_texture_;
@@ -320,9 +316,10 @@ namespace
 		void OnRenderBegin()
 		{
 			CausticsMapApp& app = *checked_cast<CausticsMapApp*>(&Context::Instance().AppInstance());
+			Camera const & camera = app.ActiveCamera();
 
-			float4x4 const & view = app.ActiveCamera().ViewMatrix();
-			float4x4 const & proj = app.ActiveCamera().ProjMatrix();
+			*(technique_->Effect().ParameterByName("mvp")) = model_mat_ * camera.ViewProjMatrix();
+			*(technique_->Effect().ParameterByName("model")) = model_mat_;
 
 			switch (pass_)
 			{
@@ -332,10 +329,6 @@ namespace
 			case Normal_Back_WODT_Pass:
 			case Position_Normal_Front_Pass:
 			case Position_Normal_Back_Pass:
-				{
-					*(technique_->Effect().ParameterByName("mvp")) = model_mat_ * view * proj;
-					*(technique_->Effect().ParameterByName("model")) = model_mat_;
-				}
 				break;
 
 			case Gen_Shadow_Pass:
@@ -343,9 +336,7 @@ namespace
 					float4x4 light_model = MathLib::to_matrix(light_->Rotation()) * MathLib::translation(light_->Position());
 					float4x4 inv_light_model = MathLib::inverse(light_model);
 
-					*(technique_->Effect().ParameterByName("model")) = model_mat_;
 					*(technique_->Effect().ParameterByName("obj_model_to_light_model")) = model_mat_ * inv_light_model;
-					*(technique_->Effect().ParameterByName("mvp")) = model_mat_ * view * proj;
 				}
 				break;
 
@@ -354,10 +345,8 @@ namespace
 					float refract_idx = app.RefractIndex();
 					float3 absorption_idx = float3(0.1f, 0.1f, 0.1f);
 					
-					*(technique_->Effect().ParameterByName("mvp")) = model_mat_ * view * proj;
-					*(technique_->Effect().ParameterByName("model")) = model_mat_;
-					*(technique_->Effect().ParameterByName("vp")) = view * proj;
-					*(technique_->Effect().ParameterByName("eye_pos")) = app.ActiveCamera().EyePos();				
+					*(technique_->Effect().ParameterByName("vp")) = camera.ViewProjMatrix();
+					*(technique_->Effect().ParameterByName("eye_pos")) = camera.EyePos();				
 					*(technique_->Effect().ParameterByName("background_texture")) = scene_texture_;
 					*(technique_->Effect().ParameterByName("env_cube")) = env_cube_;
 					*(technique_->Effect().ParameterByName("refract_idx")) = float2(refract_idx, 1.0f / refract_idx);
@@ -579,8 +568,11 @@ namespace
 		{
 			CausticsMapApp& app = *checked_cast<CausticsMapApp*>(&Context::Instance().AppInstance());
 			Camera const & camera = app.ActiveCamera();
-			float4x4 light_view = camera.ViewMatrix();
-			float4x4 light_proj = camera.ProjMatrix();
+			float4x4 const & light_view = camera.ViewMatrix();
+			float4x4 const & light_proj = camera.ProjMatrix();
+			float4x4 const & light_view_proj = camera.ViewProjMatrix();
+			float4x4 const & inv_light_view = camera.InverseViewMatrix();
+			float4x4 const & inv_light_proj = camera.InverseProjMatrix();
 			float pt_size = app.PointSize();
 			float refract_idx = app.RefractIndex();
 			float3 absorption_idx = float3(0.1f, 0.1f, 0.1f);
@@ -595,7 +587,7 @@ namespace
 			{			
 				*(technique_->Effect().ParameterByName("light_view")) = light_view;
 				*(technique_->Effect().ParameterByName("light_proj")) = light_proj;
-				*(technique_->Effect().ParameterByName("light_vp")) = light_view * light_proj;
+				*(technique_->Effect().ParameterByName("light_vp")) = light_view_proj;
 				*(technique_->Effect().ParameterByName("light_pos")) = light_pos;
 				*(technique_->Effect().ParameterByName("light_color")) = light_clr;
 				*(technique_->Effect().ParameterByName("light_density")) = light_density;
@@ -609,8 +601,6 @@ namespace
 				*(technique_->Effect().ParameterByName("t_first_depth")) = input_tex.refract_obj_depth_tex_f;
 				*(technique_->Effect().ParameterByName("t_first_normals")) = input_tex.refract_obj_N_texture_f;
 
-				float4x4 inv_light_view = MathLib::inverse(light_view);
-				float4x4 inv_light_proj = MathLib::inverse(light_proj);
 				float3 ttow_center = MathLib::transform_normal(MathLib::transform_coord(float3(0, 0, 1), inv_light_proj), inv_light_view);
 				float3 ttow_left = MathLib::transform_coord(MathLib::transform_coord(float3(-1, 0, 1), inv_light_proj), inv_light_view);
 				float3 ttow_right = MathLib::transform_coord(MathLib::transform_coord(float3(+1, 0, 1), inv_light_proj), inv_light_view);
@@ -652,7 +642,7 @@ int main()
 CausticsMapApp::CausticsMapApp()
 	: App3DFramework("Caustics Map")
 {
-	ResLoader::Instance().AddPath("../../Samples/media/DistanceMapping");
+	ResLoader::Instance().AddPath("../../Tutorials/media/DistanceMapping");
 	ResLoader::Instance().AddPath("../../Samples/media/ShadowCubeMap");
 	ResLoader::Instance().AddPath("../../Samples/media/CausticsMap");
 }

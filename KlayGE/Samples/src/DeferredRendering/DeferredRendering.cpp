@@ -156,7 +156,7 @@ namespace
 			PostProcess::OnRenderBegin();
 
 			Camera const & camera = Context::Instance().AppInstance().ActiveCamera();
-			*(technique_->Effect().ParameterByName("inv_proj")) = MathLib::inverse(camera.ProjMatrix());
+			*(technique_->Effect().ParameterByName("inv_proj")) = camera.InverseProjMatrix();
 			*(technique_->Effect().ParameterByName("depth_near_far_invfar")) = float3(camera.NearPlane(), camera.FarPlane(), 1 / camera.FarPlane());
 		}
 	};

@@ -34,7 +34,8 @@ namespace KlayGE
 	// ¹¹Ôìº¯Êý
 	//////////////////////////////////////////////////////////////////////////////////
 	Camera::Camera()
-		: frustum_dirty_(true), mode_(0), cur_jitter_index_(0)
+		: view_proj_mat_dirty_(true), frustum_dirty_(true),
+			mode_(0), cur_jitter_index_(0)
 	{
 		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 		uint32_t num_motion_frames = re.NumMotionFrames();
@@ -65,6 +66,8 @@ namespace KlayGE
 
 		view_vec_ = MathLib::normalize(look_at_ - eye_pos_);
 		view_mat_ = MathLib::look_at_lh(eye_pos_, look_at_, up_vec);
+		inv_view_mat_ = MathLib::inverse(view_mat_);
+		view_proj_mat_dirty_ = true;
 		frustum_dirty_ = true;
 	}
 
@@ -81,6 +84,8 @@ namespace KlayGE
 		proj_mat_ = MathLib::perspective_fov_lh(fov, aspect, near_plane, far_plane);
 		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 		re.AdjustPerspectiveMatrix(proj_mat_);
+		inv_proj_mat_ = MathLib::inverse(proj_mat_);
+		view_proj_mat_dirty_ = true;
 		frustum_dirty_ = true;
 	}
 
@@ -136,6 +141,32 @@ namespace KlayGE
 		return proj_mat_;
 	}
 
+	float4x4 const & Camera::ViewProjMatrix() const
+	{
+		if (view_proj_mat_dirty_)
+		{
+			view_proj_mat_ = view_mat_ * proj_mat_;
+			inv_view_proj_mat_ = inv_proj_mat_ * inv_view_mat_;
+			view_proj_mat_dirty_ = false;
+		}
+		return view_proj_mat_;
+	}
+	
+	float4x4 const & Camera::InverseViewMatrix() const
+	{
+		return inv_view_mat_;
+	}
+
+	float4x4 const & Camera::InverseProjMatrix() const
+	{
+		return inv_proj_mat_;
+	}
+	
+	float4x4 const & Camera::InverseViewProjMatrix() const
+	{
+		return inv_view_proj_mat_;
+	}
+
 	float4x4 const & Camera::PrevViewMatrix() const
 	{
 		return prev_view_mats_.front();
@@ -150,7 +181,7 @@ namespace KlayGE
 	{
 		if (frustum_dirty_)
 		{
-			frustum_.ClipMatrix(view_mat_ * proj_mat_);
+			frustum_.ClipMatrix(this->ViewProjMatrix());
 			frustum_dirty_ = false;
 		}
 		return frustum_;

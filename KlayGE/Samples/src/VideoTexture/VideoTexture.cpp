@@ -61,13 +61,11 @@ namespace
 		void OnRenderBegin()
 		{
 			App3DFramework const & app = Context::Instance().AppInstance();
+			Camera const & camera = app.ActiveCamera();
 
-			float4x4 const & view = app.ActiveCamera().ViewMatrix();
-			float4x4 const & proj = app.ActiveCamera().ProjMatrix();
-
-			*(technique_->Effect().ParameterByName("mvp")) = view * proj;
-			*(technique_->Effect().ParameterByName("mv")) = view;
-			*(technique_->Effect().ParameterByName("eye_pos")) = app.ActiveCamera().EyePos();
+			*(technique_->Effect().ParameterByName("mvp")) = camera.ViewProjMatrix();
+			*(technique_->Effect().ParameterByName("mv")) = camera.ViewMatrix();
+			*(technique_->Effect().ParameterByName("eye_pos")) = camera.EyePos();
 		}
 
 		void VideoTexture(TexturePtr const & video_tex)

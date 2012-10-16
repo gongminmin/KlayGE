@@ -82,14 +82,11 @@ namespace
 			RenderableHelper::OnRenderBegin();
 
 			App3DFramework const & app = Context::Instance().AppInstance();
-
-			float4x4 const & view = app.ActiveCamera().ViewMatrix();
-			float4x4 const & proj = app.ActiveCamera().ProjMatrix();
-			float4x4 vp = view * proj;
+			Camera const & camera = app.ActiveCamera();
 
 			float4x4 scaling = MathLib::scaling(0.006f, 0.006f, 0.006f);
-			float4x4 trans = MathLib::translation(MathLib::transform_coord(float3(0.8f, -0.8f, 0.1f), MathLib::inverse(vp)));
-			*mvp_param_ = scaling * trans * vp;
+			float4x4 trans = MathLib::translation(MathLib::transform_coord(float3(0.8f, -0.8f, 0.1f), camera.InverseViewProjMatrix()));
+			*mvp_param_ = scaling * trans * camera.ViewProjMatrix();
 		}
 	};
 
@@ -146,12 +143,7 @@ namespace
 			RenderableHelper::OnRenderBegin();
 
 			App3DFramework const & app = Context::Instance().AppInstance();
-
-			float4x4 const & view = app.ActiveCamera().ViewMatrix();
-			float4x4 const & proj = app.ActiveCamera().ProjMatrix();
-			float4x4 mvp = view * proj;
-
-			*mvp_param_ = mvp;
+			*mvp_param_ = app.ActiveCamera().ViewProjMatrix();
 		}
 	};
 
@@ -283,7 +275,7 @@ namespace
 
 		void operator()(LightSource& light, float /*app_time*/, float /*elapsed_time*/)
 		{
-			float4x4 inv_view = MathLib::inverse(Context::Instance().AppInstance().ActiveCamera().ViewMatrix());
+			float4x4 inv_view = Context::Instance().AppInstance().ActiveCamera().InverseViewMatrix();
 			light.Position(MathLib::transform_coord(float3(0, 2.0f, 0), inv_view));
 		}
 	};

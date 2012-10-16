@@ -128,16 +128,13 @@ namespace KlayGE
 		App3DFramework const & app = Context::Instance().AppInstance();
 		Camera const & camera = app.ActiveCamera();
 
-		float4x4 const & view = camera.ViewMatrix();
-		float4x4 const & proj = camera.ProjMatrix();
-
 		if (deferred_effect_)
 		{
 			RenderableHelper::OnRenderBegin();
 		}
 		else
 		{
-			*(technique_->Effect().ParameterByName("mvp")) = view * proj;
+			*(technique_->Effect().ParameterByName("mvp")) = camera.ViewProjMatrix();
 		}
 
 		float3 look_at_vec = float3(camera.LookAt().x() - camera.EyePos().x(), 0, camera.LookAt().z() - camera.EyePos().z());
@@ -174,9 +171,7 @@ namespace KlayGE
 		}
 		float4x4 virtual_view = MathLib::look_at_lh(camera.EyePos(), camera.EyePos() + look_at_vec);
 
-		float4x4 const & view = camera.ViewMatrix();
-		float4x4 const & proj = camera.ProjMatrix();
-		float4x4 proj_to_virtual_view = MathLib::inverse(view * proj) * virtual_view;
+		float4x4 proj_to_virtual_view = camera.InverseViewProjMatrix() * virtual_view;
 
 		float2 const & x_dir_2d = checked_pointer_cast<InfTerrainRenderable>(renderable_)->XDir();
 		float2 const & y_dir_2d = checked_pointer_cast<InfTerrainRenderable>(renderable_)->YDir();

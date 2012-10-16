@@ -261,7 +261,6 @@ namespace
 
 			float4x4 const & view = camera.ViewMatrix();
 			float4x4 const & proj = camera.ProjMatrix();
-			float4x4 const inv_proj = MathLib::inverse(proj);
 
 			*(technique_->Effect().ParameterByName("View")) = view;
 			*(technique_->Effect().ParameterByName("Proj")) = proj;

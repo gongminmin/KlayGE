@@ -91,23 +91,21 @@ namespace
 		void OnRenderBegin()
 		{
 			App3DFramework const & app = Context::Instance().AppInstance();
+			Camera const & camera = app.ActiveCamera();
 
 			float4x4 const & model = float4x4::Identity();
-			float4x4 const & view = app.ActiveCamera().ViewMatrix();
-			float4x4 const & proj = app.ActiveCamera().ProjMatrix();
 
-			float4x4 const mv = model * view;
-			float4x4 const mvp = mv * proj;
+			float4x4 const mv = model * camera.ViewMatrix();
+			float4x4 const mvp = model * camera.ViewProjMatrix();
 
 			*(technique_->Effect().ParameterByName("model")) = model;
-			*(technique_->Effect().ParameterByName("modelviewit")) = MathLib::transpose(MathLib::inverse(mv));
 			*(technique_->Effect().ParameterByName("mvp")) = mvp;
 			*(technique_->Effect().ParameterByName("mv")) = mv;
-			*(technique_->Effect().ParameterByName("proj")) = proj;
-			*(technique_->Effect().ParameterByName("eye_pos")) = app.ActiveCamera().EyePos();
+			*(technique_->Effect().ParameterByName("proj")) = camera.ProjMatrix();
+			*(technique_->Effect().ParameterByName("eye_pos")) = camera.EyePos();
 
-			*(technique_->Effect().ParameterByName("inv_view")) = MathLib::inverse(view);
-			*(technique_->Effect().ParameterByName("inv_vp")) = MathLib::inverse(view * proj);
+			*(technique_->Effect().ParameterByName("inv_view")) = camera.InverseViewMatrix();
+			*(technique_->Effect().ParameterByName("inv_vp")) = camera.InverseViewProjMatrix();
 		}
 
 	private:

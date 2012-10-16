@@ -28,8 +28,7 @@ namespace KlayGE
 		PostProcess::OnRenderBegin();
 
 		Camera const & camera = Context::Instance().AppInstance().ActiveCamera();
-		float4x4 const & proj = camera.ProjMatrix();
-		*proj_param_ = proj;
-		*inv_proj_param_ = MathLib::inverse(proj);
+		*proj_param_ = camera.ProjMatrix();
+		*inv_proj_param_ = camera.InverseProjMatrix();
 	}
 }

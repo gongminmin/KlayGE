@@ -161,7 +161,7 @@ namespace KlayGE
 	void SceneObjectCameraProxy::Update(float /*app_time*/, float /*elapsed_time*/)
 	{
 		camera_->ViewParams(eye_pos_, look_at_, up_vec_);
-		model_ = MathLib::inverse(camera_->ViewMatrix());
+		model_ = camera_->InverseViewMatrix();
 	}
 
 	void SceneObjectCameraProxy::EyePos(float x, float y, float z)

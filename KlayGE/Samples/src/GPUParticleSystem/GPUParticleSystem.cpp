@@ -253,15 +253,12 @@ namespace
 		void OnRenderBegin()
 		{
 			App3DFramework const & app = Context::Instance().AppInstance();
+			Camera const & camera = app.ActiveCamera();
 
-			float4x4 const & view = app.ActiveCamera().ViewMatrix();
-			float4x4 const & proj = app.ActiveCamera().ProjMatrix();
-			float4x4 const inv_proj = MathLib::inverse(proj);
-
-			*(technique_->Effect().ParameterByName("View")) = view;
-			*(technique_->Effect().ParameterByName("Proj")) = proj;
-			*(technique_->Effect().ParameterByName("inv_view")) = MathLib::inverse(view);
-			*(technique_->Effect().ParameterByName("inv_proj")) = MathLib::inverse(proj);
+			*(technique_->Effect().ParameterByName("View")) = camera.ViewMatrix();
+			*(technique_->Effect().ParameterByName("Proj")) = camera.ProjMatrix();
+			*(technique_->Effect().ParameterByName("inv_view")) = camera.InverseViewMatrix();
+			*(technique_->Effect().ParameterByName("inv_proj")) = camera.InverseProjMatrix();
 
 			*(technique_->Effect().ParameterByName("far_plane")) = app.ActiveCamera().FarPlane();
 		}
@@ -691,13 +688,9 @@ namespace
 		void OnRenderBegin()
 		{
 			App3DFramework const & app = Context::Instance().AppInstance();
-
-			float4x4 view = app.ActiveCamera().ViewMatrix();
-			float4x4 proj = app.ActiveCamera().ProjMatrix();
-
-			*(technique_->Effect().ParameterByName("mvp")) = view * proj;
-
 			Camera const & camera = app.ActiveCamera();
+
+			*(technique_->Effect().ParameterByName("mvp")) = camera.ViewProjMatrix();
 			*(technique_->Effect().ParameterByName("inv_far")) = 1 / camera.FarPlane();
 		}
 

@@ -181,6 +181,7 @@ namespace
 		void OnRenderBegin(float4x4 const & model, RenderEffectPtr const & effect)
 		{
 			App3DFramework const & app = Context::Instance().AppInstance();
+			Camera const & camera = app.ActiveCamera();
 
 			*(effect->ParameterByName("model")) = model;
 			*(effect->ParameterByName("obj_model_to_light_model")) = model * inv_light_model_;
@@ -195,7 +196,7 @@ namespace
 
 						float4x4 mv = model * light_views_[pass_index_];
 						*(effect->ParameterByName("mv")) = mv;
-						*(effect->ParameterByName("far")) = app.ActiveCamera().FarPlane();
+						*(effect->ParameterByName("far")) = camera.FarPlane();
 
 						FrameBufferPtr const & cur_fb = Context::Instance().RenderFactoryInstance().RenderEngineInstance().CurFrameBuffer();
 						*(effect->ParameterByName("tess_edge_length_scale")) = float2(static_cast<float>(cur_fb->Width()), static_cast<float>(cur_fb->Height())) / 12.0f;
@@ -220,10 +221,7 @@ namespace
 			}
 			else
 			{
-				float4x4 const & view = app.ActiveCamera().ViewMatrix();
-				float4x4 const & proj = app.ActiveCamera().ProjMatrix();
-
-				*(effect->ParameterByName("mvp")) = model * view * proj;
+				*(effect->ParameterByName("mvp")) = model * camera.ViewProjMatrix();
 				*(effect->ParameterByName("light_pos")) = light_pos_;
 
 				*(effect->ParameterByName("light_projective_tex")) = lamp_tex_;

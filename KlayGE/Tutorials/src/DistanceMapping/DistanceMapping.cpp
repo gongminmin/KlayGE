@@ -194,10 +194,7 @@ namespace
 		{
 			App3DFramework const & app = Context::Instance().AppInstance();
 
-			float4x4 const & view = app.ActiveCamera().ViewMatrix();
-			float4x4 const & proj = app.ActiveCamera().ProjMatrix();
-
-			*(technique_->Effect().ParameterByName("worldviewproj")) = model_mat_ * view * proj;
+			*(technique_->Effect().ParameterByName("worldviewproj")) = model_mat_ * app.ActiveCamera().ViewProjMatrix();
 			*(technique_->Effect().ParameterByName("eye_pos")) = MathLib::transform_coord(app.ActiveCamera().EyePos(), inv_model_mat_);
 		}
 

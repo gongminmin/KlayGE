@@ -75,6 +75,10 @@ namespace KlayGE
 
 		float4x4 const & ViewMatrix() const;
 		float4x4 const & ProjMatrix() const;
+		float4x4 const & ViewProjMatrix() const;
+		float4x4 const & InverseViewMatrix() const;
+		float4x4 const & InverseProjMatrix() const;
+		float4x4 const & InverseViewProjMatrix() const;
 		float4x4 const & PrevViewMatrix() const;
 		float4x4 const & PrevProjMatrix() const;
 
@@ -91,15 +95,21 @@ namespace KlayGE
 		float3		up_vec_;
 		float3		view_vec_;
 		float4x4	view_mat_;
+		float4x4	inv_view_mat_;
 
 		float		fov_;			// Õ∂…‰æÿ’Ûµƒ Ù–‘
 		float		aspect_;
 		float		near_plane_;
 		float		far_plane_;
 		float4x4	proj_mat_;
+		float4x4	inv_proj_mat_;
 
 		boost::circular_buffer<float4x4> prev_view_mats_;
 		boost::circular_buffer<float4x4> prev_proj_mats_;
+
+		mutable float4x4	view_proj_mat_;
+		mutable float4x4	inv_view_proj_mat_;
+		mutable bool		view_proj_mat_dirty_;
 
 		mutable Frustum	frustum_;
 		mutable bool	frustum_dirty_;

@@ -190,14 +190,13 @@ namespace
 		void OnRenderBegin()
 		{
 			App3DFramework const & app = Context::Instance().AppInstance();
+			Camera const & camera = app.ActiveCamera();
 
 			float4x4 const & model = float4x4::Identity();
-			float4x4 const & view = app.ActiveCamera().ViewMatrix();
-			float4x4 const & proj = app.ActiveCamera().ProjMatrix();
 
-			*(technique_->Effect().ParameterByName("mvp")) = model * view * proj;
+			*(technique_->Effect().ParameterByName("mvp")) = model * camera.ViewProjMatrix();
 			*(technique_->Effect().ParameterByName("world")) = model;
-			*(technique_->Effect().ParameterByName("eye_pos")) = app.ActiveCamera().EyePos();
+			*(technique_->Effect().ParameterByName("eye_pos")) = camera.EyePos();
 		}
 
 		void LightPos(float3 const & light_pos)

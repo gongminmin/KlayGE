@@ -89,14 +89,12 @@ namespace KlayGE
 
 	void LightShaftPostProcess::Apply()
 	{
-		Camera& camera = Context::Instance().AppInstance().ActiveCamera();
+		Camera const & camera = Context::Instance().AppInstance().ActiveCamera();
 		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-		float4x4 const & view_mat = camera.ViewMatrix();
-		float4x4 const & proj_mat = camera.ProjMatrix();
 
 		float3 light_pos;
 		params_[0].second->Value(light_pos);
-		float4 proj_light_pos = MathLib::transform(light_pos, view_mat * proj_mat);
+		float4 proj_light_pos = MathLib::transform(light_pos, camera.ViewProjMatrix());
 
 		if (proj_light_pos.w() >= 0)
 		{

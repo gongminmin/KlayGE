@@ -184,7 +184,7 @@ namespace
 					App3DFramework const & app = Context::Instance().AppInstance();
 					Camera const & camera = app.ActiveCamera();
 					*(technique_->Effect().ParameterByName("proj")) = camera.ProjMatrix();
-					*(technique_->Effect().ParameterByName("inv_proj")) = MathLib::inverse(camera.ProjMatrix());
+					*(technique_->Effect().ParameterByName("inv_proj")) = camera.InverseProjMatrix();
 					float q = camera.FarPlane() / (camera.FarPlane() - camera.NearPlane());
 					float2 near_q(camera.NearPlane() * q, q);
 					*(technique_->Effect().ParameterByName("near_q")) = near_q;
@@ -192,7 +192,7 @@ namespace
 					*(technique_->Effect().ParameterByName("min_samples")) = static_cast<int32_t>(20);
 					*(technique_->Effect().ParameterByName("max_samples")) = static_cast<int32_t>(30);
 					*(technique_->Effect().ParameterByName("ray_length_fadeout_factor")) = 0.6f;
-					*(technique_->Effect().ParameterByName("inv_view")) = MathLib::inverse(camera.ViewMatrix());
+					*(technique_->Effect().ParameterByName("inv_view")) = camera.InverseViewMatrix();
 				}
 				*(technique_->Effect().ParameterByName("front_side_depth_tex")) = Context::Instance().DeferredRenderingLayerInstance()->OpaqueDepthTex(0);
 				*(technique_->Effect().ParameterByName("front_side_tex")) = Context::Instance().DeferredRenderingLayerInstance()->OpaqueShadingTex(0);

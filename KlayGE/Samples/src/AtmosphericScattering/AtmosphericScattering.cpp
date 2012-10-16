@@ -71,13 +71,11 @@ namespace
 		void OnRenderBegin()
 		{
 			App3DFramework const & app = Context::Instance().AppInstance();
+			Camera const & camera = app.ActiveCamera();
 
-			float4x4 const & view = app.ActiveCamera().ViewMatrix();
-			float4x4 const & proj = app.ActiveCamera().ProjMatrix();
+			*(technique_->Effect().ParameterByName("mvp")) = model_mat_ * camera.ViewProjMatrix();
 
-			*(technique_->Effect().ParameterByName("mvp")) = model_mat_ * view * proj;
-
-			float4x4 inv_mv = MathLib::inverse(model_mat_ * view);
+			float4x4 inv_mv = MathLib::inverse(model_mat_ * camera.ViewMatrix());
 			*(technique_->Effect().ParameterByName("eye_pos")) = MathLib::transform_coord(float3(0, 0, 0), inv_mv);
 			*(technique_->Effect().ParameterByName("look_at_vec")) = MathLib::transform_normal(float3(0, 0, 1), inv_mv);
 		}
@@ -123,13 +121,11 @@ namespace
 		void OnRenderBegin()
 		{
 			App3DFramework const & app = Context::Instance().AppInstance();
+			Camera const & camera = app.ActiveCamera();
 
-			float4x4 const & view = app.ActiveCamera().ViewMatrix();
-			float4x4 const & proj = app.ActiveCamera().ProjMatrix();
+			*(technique_->Effect().ParameterByName("mvp")) = model_mat_ * camera.ViewProjMatrix();
 
-			*(technique_->Effect().ParameterByName("mvp")) = model_mat_ * view * proj;
-
-			float4x4 inv_mv = MathLib::inverse(model_mat_ * view);
+			float4x4 inv_mv = MathLib::inverse(model_mat_ * camera.ViewMatrix());
 			*(technique_->Effect().ParameterByName("eye_pos")) = MathLib::transform_coord(float3(0, 0, 0), inv_mv);
 			*(technique_->Effect().ParameterByName("look_at_vec")) = MathLib::transform_normal(float3(0, 0, 1), inv_mv);
 		}

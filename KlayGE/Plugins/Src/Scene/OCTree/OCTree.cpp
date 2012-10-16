@@ -68,9 +68,7 @@ namespace
 
 			App3DFramework const & app = Context::Instance().AppInstance();
 
-			float4x4 const & view = app.ActiveCamera().ViewMatrix();
-			float4x4 const & proj = app.ActiveCamera().ProjMatrix();
-			float4x4 view_proj = view * proj;
+			float4x4 const & view_proj = app.ActiveCamera().ViewProjMatrix();
 
 			*(technique_->Effect().ParameterByName("color")) = float4(1, 1, 1, 1);
 			for (uint32_t i = 0; i < instances_.size(); ++ i)

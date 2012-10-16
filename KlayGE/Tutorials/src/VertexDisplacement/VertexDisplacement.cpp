@@ -67,14 +67,11 @@ namespace
 		void OnRenderBegin()
 		{
 			App3DFramework const & app = Context::Instance().AppInstance();
+			Camera const & camera = app.ActiveCamera();
 
-			float4x4 view = app.ActiveCamera().ViewMatrix();
-			float4x4 proj = app.ActiveCamera().ProjMatrix();
-			float4x4 modelView = view;
-
-			*(technique_->Effect().ParameterByName("modelview")) = modelView;
-			*(technique_->Effect().ParameterByName("proj")) = proj;
-			*(technique_->Effect().ParameterByName("mvp")) = modelView * proj;
+			*(technique_->Effect().ParameterByName("modelview")) = camera.ViewMatrix();
+			*(technique_->Effect().ParameterByName("proj")) = camera.ProjMatrix();
+			*(technique_->Effect().ParameterByName("mvp")) = camera.ViewProjMatrix();
 		}
 	};
 

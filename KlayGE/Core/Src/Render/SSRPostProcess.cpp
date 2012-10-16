@@ -43,9 +43,8 @@ namespace KlayGE
 		Camera& camera = Context::Instance().AppInstance().ActiveCamera();
 		float q = camera.FarPlane() / (camera.FarPlane() - camera.NearPlane());
 
-		float4x4 proj_mat = camera.ProjMatrix();
-		*proj_param_ = proj_mat;
-		*inv_proj_param_ = MathLib::inverse(proj_mat);
+		*proj_param_ = camera.ProjMatrix();
+		*inv_proj_param_ = camera.InverseProjMatrix();
 		*near_q_param_ = float2(camera.NearPlane() * q, q);
 		*ray_length_param_ = camera.FarPlane() - camera.NearPlane();
 

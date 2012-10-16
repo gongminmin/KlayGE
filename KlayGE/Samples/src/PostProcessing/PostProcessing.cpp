@@ -57,7 +57,7 @@ namespace
 	public:
 		void operator()(LightSource& light, float /*app_time*/, float /*elapsed_time*/)
 		{
-			float4x4 inv_view = MathLib::inverse(Context::Instance().AppInstance().ActiveCamera().ViewMatrix());
+			float4x4 inv_view = Context::Instance().AppInstance().ActiveCamera().InverseViewMatrix();
 			light.Position(MathLib::transform_coord(float3(2, 2, -3), inv_view));
 		}
 	};

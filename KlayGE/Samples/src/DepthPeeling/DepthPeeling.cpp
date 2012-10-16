@@ -86,10 +86,8 @@ namespace
 			Camera const & camera = app.ActiveCamera();
 
 			float4x4 const & model = float4x4::Identity();
-			float4x4 const & view = camera.ViewMatrix();
-			float4x4 const & proj = camera.ProjMatrix();
 
-			*(technique_->Effect().ParameterByName("mvp")) = model * view * proj;
+			*(technique_->Effect().ParameterByName("mvp")) = model * camera.ViewProjMatrix();
 
 			float q = camera.FarPlane() / (camera.FarPlane() - camera.NearPlane());
 			*(technique_->Effect().ParameterByName("near_q")) = float2(camera.NearPlane() * q, q);

@@ -1030,11 +1030,11 @@ namespace KlayGE
 							{
 							case LT_Spot:
 								{
-									float4x4 const & light_view = light->SMCamera(0)->ViewMatrix();
+									float4x4 const & inv_light_view = light->SMCamera(0)->InverseViewMatrix();
 
 									float const scale = light->CosOuterInner().w();
 									float4x4 mat = MathLib::scaling(scale * light_scale_, scale * light_scale_, light_scale_);
-									float4x4 light_model = mat * MathLib::inverse(light_view);
+									float4x4 light_model = mat * inv_light_view;
 
 									if (scene_mgr.OBBVisible(MathLib::transform_obb(cone_obb_, light_model)))
 									{
@@ -1089,7 +1089,7 @@ namespace KlayGE
 									{
 										for (int j = 0; j < 6; ++ j)
 										{
-											light_model = MathLib::inverse(light->SMCamera(j)->ViewMatrix());
+											light_model = light->SMCamera(j)->InverseViewMatrix();
 
 											//if (scene_mgr.OBBVisible(MathLib::transform_obb(pyramid_obb_, light_model)))
 											{
@@ -1220,8 +1220,8 @@ namespace KlayGE
 
 			pvp.view = camera->ViewMatrix();
 			pvp.proj = camera->ProjMatrix();
-			pvp.inv_view = MathLib::inverse(pvp.view);
-			pvp.inv_proj = MathLib::inverse(pvp.proj);
+			pvp.inv_view = camera->InverseViewMatrix();
+			pvp.inv_proj = camera->InverseProjMatrix();
 			pvp.depth_near_far_invfar = float3(camera->NearPlane(), camera->FarPlane(), 1 / camera->FarPlane());
 
 			if (depth_texture_support_)
@@ -1281,8 +1281,8 @@ namespace KlayGE
 
 				pvp.view = camera->ViewMatrix();
 				pvp.proj = camera->ProjMatrix();
-				pvp.inv_view = MathLib::inverse(pvp.view);
-				pvp.inv_proj = MathLib::inverse(pvp.proj);
+				pvp.inv_view = camera->InverseViewMatrix();
+				pvp.inv_proj = camera->InverseProjMatrix();
 				pvp.depth_near_far_invfar = float3(camera->NearPlane(), camera->FarPlane(), 1 / camera->FarPlane());
 
 				if (depth_texture_support_)
@@ -1647,7 +1647,7 @@ namespace KlayGE
 
 							*light_view_proj_param_ = pvp.inv_view * sm_camera->ViewMatrix() * sm_camera->ProjMatrix();
 
-							light_to_view = MathLib::inverse(sm_camera->ViewMatrix()) * pvp.view;
+							light_to_view = sm_camera->InverseViewMatrix() * pvp.view;
 							light_to_proj = light_to_view * pvp.proj;
 						}
 
@@ -1659,7 +1659,7 @@ namespace KlayGE
 								float2 near_q(sm_camera->NearPlane() * q, q);
 								depth_to_vsm_pp_->SetParam(0, near_q);
 							
-								float4x4 inv_sm_proj = MathLib::inverse(sm_camera->ProjMatrix());
+								float4x4 inv_sm_proj = sm_camera->InverseProjMatrix();
 								depth_to_vsm_pp_->SetParam(1, inv_sm_proj);
 							}
 						}
@@ -1691,7 +1691,7 @@ namespace KlayGE
 									* MathLib::to_matrix(light->Rotation()) * MathLib::translation(p);
 								*light_volume_mv_param_ = light_model * pvp.view;
 								*light_volume_mvp_param_ = light_model * pvp.view * pvp.proj;
-								*view_to_light_model_param_ = MathLib::inverse(light_model * pvp.view);
+								*view_to_light_model_param_ = pvp.inv_view * MathLib::inverse(light_model);
 							}
 							else
 							{
@@ -1942,11 +1942,11 @@ namespace KlayGE
 
 		rsm_texs_[0]->BuildMipSubLevels();
 		rsm_texs_[1]->BuildMipSubLevels();
-		float4x4 ls_to_es = MathLib::inverse(rsm_camera->ViewMatrix()) * pvp.view;
+		float4x4 ls_to_es = rsm_camera->InverseViewMatrix() * pvp.view;
 		float mip_level = (MathLib::log(static_cast<float>(SM_SIZE)) - MathLib::log(static_cast<float>(VPL_COUNT_SQRT))) / MathLib::log(2);
 		float4 vpl_params = float4(static_cast<float>(VPL_COUNT), static_cast<float>(VPL_COUNT_SQRT), VPL_DELTA, VPL_OFFSET);
 
-		float4x4 inv_proj = MathLib::inverse(rsm_camera->ProjMatrix());
+		float4x4 const & inv_proj = rsm_camera->InverseProjMatrix();
 
 		LightType type = light->Type();
 		rsm_to_vpls_pps_[type]->SetParam(0, ls_to_es);
@@ -2074,8 +2074,8 @@ namespace KlayGE
 		
 		rsm_to_depth_derivate_pp_->Apply();
 		
-		float4x4 ls_to_es = MathLib::inverse(rsm_camera->ViewMatrix()) * pvp.view;
-		float4x4 inv_proj = MathLib::inverse(rsm_camera->ProjMatrix());
+		float4x4 ls_to_es = rsm_camera->InverseViewMatrix() * pvp.view;
+		float4x4 const & inv_proj = rsm_camera->InverseProjMatrix();
 		LightType type = light->Type();
 
 		float4 vpl_params(static_cast<float>(VPL_COUNT), 2.0f, 

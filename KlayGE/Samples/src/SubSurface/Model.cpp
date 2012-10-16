@@ -55,9 +55,7 @@ void DetailedMesh::BuildMeshInfo()
 void DetailedMesh::OnRenderBegin()
 {
 	App3DFramework& app = Context::Instance().AppInstance();
-	float4x4 const & view = app.ActiveCamera().ViewMatrix();
-	float4x4 const & proj = app.ActiveCamera().ProjMatrix();
-	*(technique_->Effect().ParameterByName("worldviewproj")) = view * proj;
+	*(technique_->Effect().ParameterByName("worldviewproj")) = app.ActiveCamera().ViewProjMatrix();
 }
 
 void DetailedMesh::EyePos(KlayGE::float3 const & eye_pos)
