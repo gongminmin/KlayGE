@@ -293,13 +293,14 @@ namespace KlayGE
 
 		if (mrt_g_buffer_support_)
 		{
-			pass_scaned_.push_back(this->ComposePassScanCode(0, PT_OpaqueMRTGBuffer, 0, 0));
-			pass_scaned_.push_back(this->ComposePassScanCode(0, PT_OpaqueMRTGBuffer, 0, 1));
+			pass_scaned_.push_back(this->ComposePassScanCode(0, PT_OpaqueGBufferMRT, 0, 0));
+			pass_scaned_.push_back(this->ComposePassScanCode(0, PT_OpaqueGBufferMRT, 0, 1));
 		}
 		else
 		{
-			pass_scaned_.push_back(this->ComposePassScanCode(0, PT_OpaqueGBuffer, 0, 0));
-			pass_scaned_.push_back(this->ComposePassScanCode(0, PT_OpaqueGBuffer, 0, 1));
+			pass_scaned_.push_back(this->ComposePassScanCode(0, PT_OpaqueGBufferRT0, 0, 0));
+			pass_scaned_.push_back(this->ComposePassScanCode(0, PT_OpaqueGBufferRT0, 0, 1));
+			pass_scaned_.push_back(this->ComposePassScanCode(0, PT_OpaqueGBufferRT1, 0, 0));
 		}
 
 		for (size_t vpi = 0; vpi < viewports_.size(); ++ vpi)
@@ -312,6 +313,10 @@ namespace KlayGE
 					pvp.pre_depth_buffers[i] = rf.MakeFrameBuffer();
 				}
 				pvp.g_buffers[i] = rf.MakeFrameBuffer();
+				if (!mrt_g_buffer_support_)
+				{
+					pvp.g_buffers_rt1[i] = rf.MakeFrameBuffer();
+				}
 				pvp.lighting_buffers[i] = rf.MakeFrameBuffer();
 				pvp.shading_buffers[i] = rf.MakeFrameBuffer();
 				pvp.curr_merged_shading_buffers[i] = rf.MakeFrameBuffer();
@@ -416,11 +421,8 @@ namespace KlayGE
 		technique_light_depth_only_ = dr_effect_->TechniqueByName("DeferredRenderingLightDepthOnly");
 		technique_light_stencil_ = dr_effect_->TechniqueByName("DeferredRenderingLightStencil");
 		technique_clear_stencil_ = dr_effect_->TechniqueByName("ClearStencil");
-		if (mrt_g_buffer_support_)
-		{
-			technique_no_lighting_ = dr_effect_->TechniqueByName("NoLightingTech");
-			technique_shading_ = dr_effect_->TechniqueByName("ShadingTech");
-		}
+		technique_no_lighting_ = dr_effect_->TechniqueByName("NoLightingTech");
+		technique_shading_ = dr_effect_->TechniqueByName("ShadingTech");
 		technique_merge_shadings_[0] = dr_effect_->TechniqueByName("MergeShadingTech");
 		technique_merge_shadings_[1] = dr_effect_->TechniqueByName("MergeShadingAlphaBlendTech");
 		technique_merge_depths_[0] = dr_effect_->TechniqueByName("MergeDepthTech");
@@ -719,13 +721,18 @@ namespace KlayGE
 			pvp.g_buffer_depth_texs[i] = rf.MakeTexture2D(width, height, MAX_IL_MIPMAP_LEVELS + 1, 1, depth_fmt, 1, 0,  EAH_GPU_Read | EAH_GPU_Write | EAH_Generate_Mips, NULL);
 
 			pvp.g_buffer_rt0_texs[i] = rf.MakeTexture2D(width, height, MAX_IL_MIPMAP_LEVELS + 1, 1, fmt8, 1, 0, EAH_GPU_Read | EAH_GPU_Write | EAH_Generate_Mips, NULL);
+			pvp.g_buffer_rt1_texs[i] = rf.MakeTexture2D(width, height, 1, 1, fmt8, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
 			pvp.g_buffers[i]->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*pvp.g_buffer_rt0_texs[i], 0, 1, 0));
+			pvp.g_buffers[i]->Attach(FrameBuffer::ATT_DepthStencil, ds_views[i]);
 			if (mrt_g_buffer_support_)
 			{
-				pvp.g_buffer_rt1_texs[i] = rf.MakeTexture2D(width, height, 1, 1, fmt8, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
 				pvp.g_buffers[i]->Attach(FrameBuffer::ATT_Color1, rf.Make2DRenderView(*pvp.g_buffer_rt1_texs[i], 0, 1, 0));
 			}
-			pvp.g_buffers[i]->Attach(FrameBuffer::ATT_DepthStencil, ds_views[i]);
+			else
+			{
+				pvp.g_buffers_rt1[i]->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*pvp.g_buffer_rt1_texs[i], 0, 1, 0));
+				pvp.g_buffers_rt1[i]->Attach(FrameBuffer::ATT_DepthStencil, ds_views[i]);
+			}
 
 			if (depth_texture_support_)
 			{
@@ -973,13 +980,14 @@ namespace KlayGE
 
 						if (mrt_g_buffer_support_)
 						{
-							pass_scaned_.push_back(this->ComposePassScanCode(vpi, PT_OpaqueMRTGBuffer, 0, 0));
-							pass_scaned_.push_back(this->ComposePassScanCode(vpi, PT_OpaqueMRTGBuffer, 0, 1));
+							pass_scaned_.push_back(this->ComposePassScanCode(vpi, PT_OpaqueGBufferMRT, 0, 0));
+							pass_scaned_.push_back(this->ComposePassScanCode(vpi, PT_OpaqueGBufferMRT, 0, 1));
 						}
 						else
 						{
-							pass_scaned_.push_back(this->ComposePassScanCode(vpi, PT_OpaqueGBuffer, 0, 0));
-							pass_scaned_.push_back(this->ComposePassScanCode(vpi, PT_OpaqueGBuffer, 0, 1));
+							pass_scaned_.push_back(this->ComposePassScanCode(vpi, PT_OpaqueGBufferRT0, 0, 0));
+							pass_scaned_.push_back(this->ComposePassScanCode(vpi, PT_OpaqueGBufferRT0, 0, 1));
+							pass_scaned_.push_back(this->ComposePassScanCode(vpi, PT_OpaqueGBufferRT1, 0, 0));
 						}
 					}
 					if (pvp.g_buffer_enables[TransparencyBack_GBuffer])
@@ -991,13 +999,14 @@ namespace KlayGE
 
 						if (mrt_g_buffer_support_)
 						{
-							pass_scaned_.push_back(this->ComposePassScanCode(vpi, PT_TransparencyBackMRTGBuffer, 0, 0));
-							pass_scaned_.push_back(this->ComposePassScanCode(vpi, PT_TransparencyBackMRTGBuffer, 0, 1));
+							pass_scaned_.push_back(this->ComposePassScanCode(vpi, PT_TransparencyBackGBufferMRT, 0, 0));
+							pass_scaned_.push_back(this->ComposePassScanCode(vpi, PT_TransparencyBackGBufferMRT, 0, 1));
 						}
 						else
 						{
-							pass_scaned_.push_back(this->ComposePassScanCode(vpi, PT_TransparencyBackGBuffer, 0, 0));
-							pass_scaned_.push_back(this->ComposePassScanCode(vpi, PT_TransparencyBackGBuffer, 0, 1));
+							pass_scaned_.push_back(this->ComposePassScanCode(vpi, PT_TransparencyBackGBufferRT0, 0, 0));
+							pass_scaned_.push_back(this->ComposePassScanCode(vpi, PT_TransparencyBackGBufferRT0, 0, 1));
+							pass_scaned_.push_back(this->ComposePassScanCode(vpi, PT_TransparencyBackGBufferRT1, 0, 0));
 						}
 					}
 					if (pvp.g_buffer_enables[TransparencyFront_GBuffer])
@@ -1009,13 +1018,14 @@ namespace KlayGE
 
 						if (mrt_g_buffer_support_)
 						{
-							pass_scaned_.push_back(this->ComposePassScanCode(vpi, PT_TransparencyFrontMRTGBuffer, 0, 0));
-							pass_scaned_.push_back(this->ComposePassScanCode(vpi, PT_TransparencyFrontMRTGBuffer, 0, 1));
+							pass_scaned_.push_back(this->ComposePassScanCode(vpi, PT_TransparencyFrontGBufferMRT, 0, 0));
+							pass_scaned_.push_back(this->ComposePassScanCode(vpi, PT_TransparencyFrontGBufferMRT, 0, 1));
 						}
 						else
 						{
-							pass_scaned_.push_back(this->ComposePassScanCode(vpi, PT_TransparencyFrontGBuffer, 0, 0));
-							pass_scaned_.push_back(this->ComposePassScanCode(vpi, PT_TransparencyFrontGBuffer, 0, 1));
+							pass_scaned_.push_back(this->ComposePassScanCode(vpi, PT_TransparencyFrontGBufferRT0, 0, 0));
+							pass_scaned_.push_back(this->ComposePassScanCode(vpi, PT_TransparencyFrontGBufferRT0, 0, 1));
+							pass_scaned_.push_back(this->ComposePassScanCode(vpi, PT_TransparencyFrontGBufferRT1, 0, 0));
 						}
 					}
 
@@ -1142,58 +1152,27 @@ namespace KlayGE
 					{
 						pass_scaned_.push_back(this->ComposePassScanCode(vpi, PT_TransparencyFrontShading, 0, 0));
 					}
-					if (mrt_g_buffer_support_)
+					pass_scaned_.push_back(this->ComposePassScanCode(vpi, PT_OpaqueSpecialShading, 0, 0));
+					if (pvp.g_buffer_enables[TransparencyBack_GBuffer])
 					{
-						pass_scaned_.push_back(this->ComposePassScanCode(vpi, PT_OpaqueSpecialShading, 0, 0));
-						if (pvp.g_buffer_enables[TransparencyBack_GBuffer])
-						{
-							pass_scaned_.push_back(this->ComposePassScanCode(vpi, PT_TransparencyBackSpecialShading, 0, 0));
-						}
-						if (pvp.g_buffer_enables[TransparencyFront_GBuffer])
-						{
-							pass_scaned_.push_back(this->ComposePassScanCode(vpi, PT_TransparencyFrontSpecialShading, 0, 0));
-						}
-						pass_scaned_.push_back(this->ComposePassScanCode(vpi, PT_OpaqueSpecialShading, 0, 1));
+						pass_scaned_.push_back(this->ComposePassScanCode(vpi, PT_TransparencyBackSpecialShading, 0, 0));
 					}
-					else
+					if (pvp.g_buffer_enables[TransparencyFront_GBuffer])
 					{
-						pass_scaned_.push_back(this->ComposePassScanCode(vpi, PT_OpaqueShading, 0, 1));
+						pass_scaned_.push_back(this->ComposePassScanCode(vpi, PT_TransparencyFrontSpecialShading, 0, 0));
 					}
+					pass_scaned_.push_back(this->ComposePassScanCode(vpi, PT_OpaqueSpecialShading, 0, 1));
 				}
 			}
 		}
 
 		if ((pass_type != PT_Lighting) && (pass_type != PT_IndirectLighting)
-			&& ((mrt_g_buffer_support_ && (pass_type != PT_OpaqueShading) && (pass_type != PT_TransparencyBackShading) && (pass_type != PT_TransparencyFrontShading)) || !mrt_g_buffer_support_))
+			&& (pass_type != PT_OpaqueShading) && (pass_type != PT_TransparencyBackShading) && (pass_type != PT_TransparencyFrontShading))
 		{
 			typedef BOOST_TYPEOF(visible_scene_objs_) VisibleSceneObjsType;
 			BOOST_FOREACH(VisibleSceneObjsType::reference deo, visible_scene_objs_)
 			{
 				deo->Pass(static_cast<PassType>(pass_type));
-			}
-		}
-		if ((PT_OpaqueShading == pass_type) && (0 == index_in_pass))
-		{
-			typedef BOOST_TYPEOF(visible_scene_objs_) VisibleSceneObjsType;
-			BOOST_FOREACH(VisibleSceneObjsType::reference deo, visible_scene_objs_)
-			{
-				deo->LightingTex(pvp.lighting_texs[Opaque_GBuffer]);
-			}
-		}
-		if ((PT_TransparencyBackShading == pass_type) && (0 == index_in_pass))
-		{
-			typedef BOOST_TYPEOF(visible_scene_objs_) VisibleSceneObjsType;
-			BOOST_FOREACH(VisibleSceneObjsType::reference deo, visible_scene_objs_)
-			{
-				deo->LightingTex(pvp.lighting_texs[TransparencyBack_GBuffer]);
-			}
-		}
-		if ((PT_TransparencyFrontShading == pass_type) && (0 == index_in_pass))
-		{
-			typedef BOOST_TYPEOF(visible_scene_objs_) VisibleSceneObjsType;
-			BOOST_FOREACH(VisibleSceneObjsType::reference deo, visible_scene_objs_)
-			{
-				deo->LightingTex(pvp.lighting_texs[TransparencyFront_GBuffer]);
 			}
 		}
 
@@ -1209,6 +1188,10 @@ namespace KlayGE
 					pvp.pre_depth_buffers[i]->GetViewport()->camera = camera;
 				}
 				pvp.g_buffers[i]->GetViewport()->camera = camera;
+				if (!mrt_g_buffer_support_)
+				{
+					pvp.g_buffers_rt1[i]->GetViewport()->camera = camera;
+				}
 				pvp.lighting_buffers[i]->GetViewport()->camera = camera;
 				pvp.shading_buffers[i]->GetViewport()->camera = camera;
 				pvp.curr_merged_shading_buffers[i]->GetViewport()->camera = camera;
@@ -1255,8 +1238,8 @@ namespace KlayGE
 				}
 			}
 		}
-		else if ((PT_OpaqueGBuffer == pass_type) || (PT_TransparencyBackGBuffer == pass_type) || (PT_TransparencyFrontGBuffer == pass_type)
-			|| (PT_OpaqueMRTGBuffer == pass_type) || (PT_TransparencyBackMRTGBuffer == pass_type) || (PT_TransparencyFrontMRTGBuffer == pass_type))
+		else if ((PT_OpaqueGBufferRT0 == pass_type) || (PT_TransparencyBackGBufferRT0 == pass_type) || (PT_TransparencyFrontGBufferRT0 == pass_type)
+			|| (PT_OpaqueGBufferMRT == pass_type) || (PT_TransparencyBackGBufferMRT == pass_type) || (PT_TransparencyFrontGBufferMRT == pass_type))
 		{
 			if (0 == index_in_pass)
 			{
@@ -1270,6 +1253,10 @@ namespace KlayGE
 						pvp.pre_depth_buffers[i]->GetViewport()->camera = camera;
 					}
 					pvp.g_buffers[i]->GetViewport()->camera = camera;
+					if (!mrt_g_buffer_support_)
+					{
+						pvp.g_buffers_rt1[i]->GetViewport()->camera = camera;
+					}
 					pvp.lighting_buffers[i]->GetViewport()->camera = camera;
 					pvp.shading_buffers[i]->GetViewport()->camera = camera;
 					pvp.curr_merged_shading_buffers[i]->GetViewport()->camera = camera;
@@ -1294,7 +1281,7 @@ namespace KlayGE
 
 				*depth_near_far_invfar_param_ = pvp.depth_near_far_invfar;
 
-				if ((PT_OpaqueGBuffer == pass_type) || (PT_OpaqueMRTGBuffer == pass_type))
+				if ((PT_OpaqueGBufferRT0 == pass_type) || (PT_OpaqueGBufferMRT == pass_type))
 				{
 					re.BindFrameBuffer(pvp.g_buffers[Opaque_GBuffer]);
 					re.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth | FrameBuffer::CBM_Stencil, Color(0, 0, 0, 0), 1.0f, 0);
@@ -1302,7 +1289,7 @@ namespace KlayGE
 				}
 				else
 				{
-					if ((PT_TransparencyBackGBuffer == pass_type) || (PT_TransparencyBackMRTGBuffer == pass_type))
+					if ((PT_TransparencyBackGBufferRT0 == pass_type) || (PT_TransparencyBackGBufferMRT == pass_type))
 					{
 						re.BindFrameBuffer(pvp.g_buffers[TransparencyBack_GBuffer]);
 						re.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth | FrameBuffer::CBM_Stencil, Color(0, 0, 0, 0), 0.0f, 128);
@@ -1310,7 +1297,7 @@ namespace KlayGE
 					}
 					else
 					{
-						BOOST_ASSERT((PT_TransparencyFrontGBuffer == pass_type) || (PT_TransparencyFrontMRTGBuffer == pass_type));
+						BOOST_ASSERT((PT_TransparencyFrontGBufferRT0 == pass_type) || (PT_TransparencyFrontGBufferMRT == pass_type));
 
 						re.BindFrameBuffer(pvp.g_buffers[TransparencyFront_GBuffer]);
 						re.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth | FrameBuffer::CBM_Stencil, Color(0, 0, 0, 0), 1.0f, 128);
@@ -1320,7 +1307,7 @@ namespace KlayGE
 			}
 			else
 			{
-				if ((PT_OpaqueGBuffer == pass_type) || (PT_OpaqueMRTGBuffer == pass_type))
+				if ((PT_OpaqueGBufferRT0 == pass_type) || (PT_OpaqueGBufferMRT == pass_type))
 				{
 					pvp.g_buffer_rt0_texs[Opaque_GBuffer]->BuildMipSubLevels();
 
@@ -1346,14 +1333,14 @@ namespace KlayGE
 						typedef BOOST_TYPEOF(decals_) DecalsType;
 						BOOST_FOREACH(DecalsType::reference de, decals_)
 						{
-							de->Pass(PT_OpaqueMRTGBuffer);
+							de->Pass(PT_OpaqueGBufferMRT);
 							de->Render();
 						}
 					}
 				}
 				else
 				{
-					if ((PT_TransparencyBackGBuffer == pass_type) || (PT_TransparencyBackMRTGBuffer == pass_type))
+					if ((PT_TransparencyBackGBufferRT0 == pass_type) || (PT_TransparencyBackGBufferMRT == pass_type))
 					{
 						pvp.g_buffer_rt0_texs[TransparencyBack_GBuffer]->BuildMipSubLevels();
 
@@ -1382,6 +1369,27 @@ namespace KlayGE
 				}
 
 				return App3DFramework::URV_Flushed;
+			}
+		}
+		else if ((PT_OpaqueGBufferRT1 == pass_type) || (PT_TransparencyBackGBufferRT1 == pass_type) || (PT_TransparencyFrontGBufferRT1 == pass_type))
+		{
+			if (PT_OpaqueGBufferRT1 == pass_type)
+			{
+				re.BindFrameBuffer(pvp.g_buffers_rt1[Opaque_GBuffer]);
+				re.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color, Color(0, 0, 0, 0), 1.0f, 0);
+				return App3DFramework::URV_Need_Flush | App3DFramework::URV_Opaque_Only;
+			}
+			else if (PT_TransparencyBackGBufferRT1 == pass_type)
+			{
+				re.BindFrameBuffer(pvp.g_buffers_rt1[TransparencyBack_GBuffer]);
+				re.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color, Color(0, 0, 0, 0), 1.0f, 0);
+				return App3DFramework::URV_Need_Flush | App3DFramework::URV_Transparency_Back_Only;
+			}
+			else
+			{
+				re.BindFrameBuffer(pvp.g_buffers_rt1[TransparencyFront_GBuffer]);
+				re.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color, Color(0, 0, 0, 0), 1.0f, 0);
+				return App3DFramework::URV_Need_Flush | App3DFramework::URV_Transparency_Front_Only;
 			}
 		}
 		else
@@ -1430,63 +1438,42 @@ namespace KlayGE
 						}
 
 						re.BindFrameBuffer(pvp.shading_buffers[Opaque_GBuffer]);
-						if (mrt_g_buffer_support_)
-						{
-							*g_buffer_tex_param_ = pvp.g_buffer_rt0_texs[Opaque_GBuffer];
-							*g_buffer_1_tex_param_ = pvp.g_buffer_rt1_texs[Opaque_GBuffer];
-							*depth_tex_param_ = pvp.g_buffer_depth_texs[Opaque_GBuffer];
-							*lighting_tex_param_ = pvp.lighting_texs[Opaque_GBuffer];
-							*light_volume_mv_param_ = pvp.inv_proj;
+						*g_buffer_tex_param_ = pvp.g_buffer_rt0_texs[Opaque_GBuffer];
+						*g_buffer_1_tex_param_ = pvp.g_buffer_rt1_texs[Opaque_GBuffer];
+						*depth_tex_param_ = pvp.g_buffer_depth_texs[Opaque_GBuffer];
+						*lighting_tex_param_ = pvp.lighting_texs[Opaque_GBuffer];
+						*light_volume_mv_param_ = pvp.inv_proj;
 
-							re.Render(*technique_no_lighting_, *rl_quad_);
-							re.Render(*technique_shading_, *rl_quad_);
+						re.Render(*technique_no_lighting_, *rl_quad_);
+						re.Render(*technique_shading_, *rl_quad_);
 
-							return App3DFramework::URV_Flushed;
-						}
-						else
-						{
-							return App3DFramework::URV_Need_Flush | App3DFramework::URV_Opaque_Only;
-						}
+						return App3DFramework::URV_Flushed;
 
 					case PT_TransparencyBackShading:
 						re.BindFrameBuffer(pvp.shading_buffers[TransparencyBack_GBuffer]);
-						if (mrt_g_buffer_support_)
-						{
-							*g_buffer_tex_param_ = pvp.g_buffer_rt0_texs[TransparencyBack_GBuffer];
-							*g_buffer_1_tex_param_ = pvp.g_buffer_rt1_texs[TransparencyBack_GBuffer];
-							*depth_tex_param_ = pvp.g_buffer_depth_texs[TransparencyBack_GBuffer];
-							*lighting_tex_param_ = pvp.lighting_texs[TransparencyBack_GBuffer];
-							*light_volume_mv_param_ = pvp.inv_proj;
+						*g_buffer_tex_param_ = pvp.g_buffer_rt0_texs[TransparencyBack_GBuffer];
+						*g_buffer_1_tex_param_ = pvp.g_buffer_rt1_texs[TransparencyBack_GBuffer];
+						*depth_tex_param_ = pvp.g_buffer_depth_texs[TransparencyBack_GBuffer];
+						*lighting_tex_param_ = pvp.lighting_texs[TransparencyBack_GBuffer];
+						*light_volume_mv_param_ = pvp.inv_proj;
 
-							re.CurFrameBuffer()->Attached(FrameBuffer::ATT_Color0)->ClearColor(Color(0, 0, 0, 0));
-							re.Render(*technique_shading_, *rl_quad_);
+						re.CurFrameBuffer()->Attached(FrameBuffer::ATT_Color0)->ClearColor(Color(0, 0, 0, 0));
+						re.Render(*technique_shading_, *rl_quad_);
 
-							return App3DFramework::URV_Flushed;
-						}
-						else
-						{
-							return App3DFramework::URV_Need_Flush | App3DFramework::URV_Transparency_Back_Only;
-						}
+						return App3DFramework::URV_Flushed;
 
 					case PT_TransparencyFrontShading:
 						re.BindFrameBuffer(pvp.shading_buffers[TransparencyFront_GBuffer]);
-						if (mrt_g_buffer_support_)
-						{
-							*g_buffer_tex_param_ = pvp.g_buffer_rt0_texs[TransparencyFront_GBuffer];
-							*g_buffer_1_tex_param_ = pvp.g_buffer_rt1_texs[TransparencyFront_GBuffer];
-							*depth_tex_param_ = pvp.g_buffer_depth_texs[TransparencyFront_GBuffer];								
-							*lighting_tex_param_ = pvp.lighting_texs[TransparencyFront_GBuffer];
-							*light_volume_mv_param_ = pvp.inv_proj;
+						*g_buffer_tex_param_ = pvp.g_buffer_rt0_texs[TransparencyFront_GBuffer];
+						*g_buffer_1_tex_param_ = pvp.g_buffer_rt1_texs[TransparencyFront_GBuffer];
+						*depth_tex_param_ = pvp.g_buffer_depth_texs[TransparencyFront_GBuffer];								
+						*lighting_tex_param_ = pvp.lighting_texs[TransparencyFront_GBuffer];
+						*light_volume_mv_param_ = pvp.inv_proj;
 
-							re.CurFrameBuffer()->Attached(FrameBuffer::ATT_Color0)->ClearColor(Color(0, 0, 0, 0));
-							re.Render(*technique_shading_, *rl_quad_);
+						re.CurFrameBuffer()->Attached(FrameBuffer::ATT_Color0)->ClearColor(Color(0, 0, 0, 0));
+						re.Render(*technique_shading_, *rl_quad_);
 
-							return App3DFramework::URV_Flushed;
-						}
-						else
-						{
-							return App3DFramework::URV_Need_Flush | App3DFramework::URV_Transparency_Front_Only;
-						}
+						return App3DFramework::URV_Flushed;
 
 					case PT_OpaqueSpecialShading:
 						re.BindFrameBuffer(pvp.shading_buffers[Opaque_GBuffer]);

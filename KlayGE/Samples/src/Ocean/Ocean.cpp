@@ -48,6 +48,8 @@ namespace
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 			this->BindDeferredEffect(rf.LoadEffect("Terrain.fxml"));
+			gbuffer_rt0_tech_ = deferred_effect_->TechniqueByName("TerrainGBufferRT0");
+			gbuffer_rt1_tech_ = deferred_effect_->TechniqueByName("TerrainGBufferRT1");
 			gbuffer_mrt_tech_ = deferred_effect_->TechniqueByName("TerrainGBufferMRT");
 			technique_ = gbuffer_mrt_tech_;
 
@@ -65,7 +67,9 @@ namespace
 					
 			switch (type_)
 			{
-			case PT_OpaqueMRTGBuffer:
+			case PT_OpaqueGBufferRT0:
+			case PT_OpaqueGBufferRT1:
+			case PT_OpaqueGBufferMRT:
 				*diffuse_clr_param_ = float4(0, 0, 0, 1);
 				*normal_map_enabled_param_ = static_cast<int32_t>(0);
 				*height_map_enabled_param_ = static_cast<int32_t>(0);
@@ -96,6 +100,8 @@ namespace
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 			this->BindDeferredEffect(rf.LoadEffect("Ocean.fxml"));
+			gbuffer_alpha_blend_front_rt0_tech_ = deferred_effect_->TechniqueByName("OceanGBufferAlphaBlendFrontRT0");
+			gbuffer_alpha_blend_front_rt1_tech_ = deferred_effect_->TechniqueByName("OceanGBufferAlphaBlendFrontRT1");
 			gbuffer_alpha_blend_front_mrt_tech_ = deferred_effect_->TechniqueByName("OceanGBufferAlphaBlendFrontMRT");
 			special_shading_alpha_blend_front_tech_ = deferred_effect_->TechniqueByName("OceanSpecialShadingAlphaBlendFront");
 			technique_ = gbuffer_alpha_blend_front_mrt_tech_;
@@ -159,9 +165,15 @@ namespace
 					
 			switch (type_)
 			{
-			case PT_OpaqueMRTGBuffer:
-			case PT_TransparencyBackMRTGBuffer:
-			case PT_TransparencyFrontMRTGBuffer:
+			case PT_OpaqueGBufferRT0:
+			case PT_TransparencyBackGBufferRT0:
+			case PT_TransparencyFrontGBufferRT0:
+			case PT_OpaqueGBufferRT1:
+			case PT_TransparencyBackGBufferRT1:
+			case PT_TransparencyFrontGBufferRT1:
+			case PT_OpaqueGBufferMRT:
+			case PT_TransparencyBackGBufferMRT:
+			case PT_TransparencyFrontGBufferMRT:
 				*diffuse_clr_param_ = float4(0.07f, 0.15f, 0.2f, 0);
 				*normal_map_enabled_param_ = static_cast<int32_t>(0);
 				*height_map_enabled_param_ = static_cast<int32_t>(0);
@@ -669,9 +681,10 @@ namespace
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 			RenderEffectPtr effect = rf.LoadEffect("Ocean.fxml");
 
+			gbuffer_rt0_tech_ = effect->TechniqueByName("GBufferFoggySkyBoxRT0");
+			gbuffer_rt1_tech_ = effect->TechniqueByName("GBufferFoggySkyBoxRT1");
 			gbuffer_mrt_tech_ = effect->TechniqueByName("GBufferFoggySkyBoxMRT");
-			shading_tech_ = effect->TechniqueByName("ShadingFoggySkyBox");
-			special_shading_tech_ = shading_tech_;
+			special_shading_tech_ = effect->TechniqueByName("SpecialShadingFoggySkyBox");
 			technique_ = gbuffer_mrt_tech_;
 
 			skybox_Ccube_tex_ep_ = effect->ParameterByName("skybox_C_tex");

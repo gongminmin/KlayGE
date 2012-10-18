@@ -49,8 +49,8 @@ namespace
 
 			this->BindDeferredEffect(rf.LoadEffect("MVUtil.fxml"));
 			depth_tech_ = deferred_effect_->TechniqueByName("AxisDepthTech");
-			gbuffer_tech_ = deferred_effect_->TechniqueByName("AxisTech");
-			shading_tech_ = deferred_effect_->TechniqueByName("AxisShadingTech");
+			gbuffer_rt0_tech_ = deferred_effect_->TechniqueByName("AxisRT0Tech");
+			gbuffer_rt1_tech_ = deferred_effect_->TechniqueByName("AxisRT1Tech");
 			gbuffer_mrt_tech_ = deferred_effect_->TechniqueByName("AxisMRTTech");
 
 			float4 xyzs[] =
@@ -110,8 +110,8 @@ namespace
 
 			this->BindDeferredEffect(rf.LoadEffect("MVUtil.fxml"));
 			depth_tech_ = deferred_effect_->TechniqueByName("GridDepthTech");
-			gbuffer_tech_ = deferred_effect_->TechniqueByName("GridTech");
-			shading_tech_ = deferred_effect_->TechniqueByName("GridShadingTech");
+			gbuffer_rt0_tech_ = deferred_effect_->TechniqueByName("GridRT0Tech");
+			gbuffer_rt1_tech_ = deferred_effect_->TechniqueByName("GridRT1Tech");
 			gbuffer_mrt_tech_ = deferred_effect_->TechniqueByName("GridMRTTech");
 
 			float3 xyzs[(21 + 21) * 2];

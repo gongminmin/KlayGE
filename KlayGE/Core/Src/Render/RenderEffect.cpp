@@ -3294,6 +3294,7 @@ namespace KlayGE
 			BOOST_ASSERT(inherit != *name_);
 
 			parent_tech = effect_.TechniqueByName(inherit);
+			BOOST_ASSERT(parent_tech);
 			annotations_ = parent_tech->annotations_;
 		}
 

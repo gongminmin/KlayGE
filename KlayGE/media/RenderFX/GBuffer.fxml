@@ -2,7 +2,6 @@
 
 <effect>
 	<include name="DeferredRenderingUtil.fxml"/>
-	<include name="Lighting.fxml"/>
 	<include name="Quaternion.fxml"/>
 	<include name="util.fxml"/>
 
@@ -190,10 +189,35 @@ float3 RestoreNormal(float4 texcoord_2xy, float4 ts_to_view0_2z, float3 ts_to_vi
 	return normal;
 }
 
-float4 ConstructGBuffer(float4 texcoord_2xy, float4 ts_to_view0_2z, float3 ts_to_view1)
+float4 ConstructGBufferRT0(float4 texcoord_2xy, float4 ts_to_view0_2z, float3 ts_to_view1)
 {
 	float3 normal = RestoreNormal(texcoord_2xy, ts_to_view0_2z, ts_to_view1);
-	return StoreGBuffer(normal, shininess);
+	return StoreGBufferRT0(normal, shininess);
+}
+
+float4 ConstructGBufferRT1(float4 texcoord_2xy, float4 ts_to_view0_2z, float3 ts_to_view1)
+{
+	float3 diffuse;
+	if (diffuse_clr.w > 0.5f)
+	{
+		diffuse = diffuse_tex.Sample(aniso_sampler, texcoord_2xy.xy).rgb;
+	}
+	else
+	{
+		diffuse = diffuse_clr.rgb;
+	}
+	
+	float specular;
+	if (specular_level.w > 0.5f)
+	{
+		specular = dot(specular_tex.Sample(aniso_sampler, texcoord_2xy.xy).rgb, float3(0.2126f, 0.7152f, 0.0722f));
+	}
+	else
+	{
+		specular = specular_level.x;
+	}
+	
+	return StoreGBufferRT1(diffuse, specular);
 }
 
 void ConstructMRTGBuffer(float4 texcoord_2xy, float4 ts_to_view0_2z, float3 ts_to_view1,
@@ -221,22 +245,22 @@ void ConstructMRTGBuffer(float4 texcoord_2xy, float4 ts_to_view0_2z, float3 ts_t
 		specular = specular_level.x;
 	}
 	
-	StoreMRTGBuffer(normal, specular, shininess, diffuse,
+	StoreGBufferMRT(normal, specular, shininess, diffuse,
 		mrt_0, mrt_1);
 }
 
-float4 GBufferPS(float4 texcoord_2xy : TEXCOORD0, float4 ts_to_view0_2z : TEXCOORD1, float3 ts_to_view1 : TEXCOORD2) : SV_Target
+float4 GBufferRT0PS(float4 texcoord_2xy : TEXCOORD0, float4 ts_to_view0_2z : TEXCOORD1, float3 ts_to_view1 : TEXCOORD2) : SV_Target
 {
-	return ConstructGBuffer(texcoord_2xy, ts_to_view0_2z, ts_to_view1);
+	return ConstructGBufferRT0(texcoord_2xy, ts_to_view0_2z, ts_to_view1);
 }
 
-float4 GBufferAlphaTestPS(float4 texcoord_2xy : TEXCOORD0, float4 ts_to_view0_2z : TEXCOORD1, float3 ts_to_view1 : TEXCOORD2) : SV_Target
+float4 GBufferAlphaTestRT0PS(float4 texcoord_2xy : TEXCOORD0, float4 ts_to_view0_2z : TEXCOORD1, float3 ts_to_view1 : TEXCOORD2) : SV_Target
 {
 	clip(diffuse_tex.Sample(bilinear_sampler, texcoord_2xy.xy).a - ALPHA_TEST_THRESHOLD);
-	return ConstructGBuffer(texcoord_2xy, ts_to_view0_2z, ts_to_view1);
+	return ConstructGBufferRT0(texcoord_2xy, ts_to_view0_2z, ts_to_view1);
 }
 
-float4 GBufferAlphaBlendPS(float4 texcoord_2xy : TEXCOORD0, float4 ts_to_view0_2z : TEXCOORD1, float4 ts_to_view1_depth : TEXCOORD2,
+float4 GBufferAlphaBlendRT0PS(float4 texcoord_2xy : TEXCOORD0, float4 ts_to_view0_2z : TEXCOORD1, float4 ts_to_view1_depth : TEXCOORD2,
 #ifdef NOPERSPECTIVE_SUPPORT
 					noperspective float2 screen_tc : TEXCOORD3
 #else
@@ -249,7 +273,34 @@ float4 GBufferAlphaBlendPS(float4 texcoord_2xy : TEXCOORD0, float4 ts_to_view0_2
 #endif
 
 	clip(opaque_depth_tex.Sample(point_sampler, screen_tc).r - ts_to_view1_depth.w);	
-	return ConstructGBuffer(texcoord_2xy, ts_to_view0_2z, ts_to_view1_depth.xyz);
+	return ConstructGBufferRT0(texcoord_2xy, ts_to_view0_2z, ts_to_view1_depth.xyz);
+}
+
+float4 GBufferRT1PS(float4 texcoord_2xy : TEXCOORD0, float4 ts_to_view0_2z : TEXCOORD1, float3 ts_to_view1 : TEXCOORD2) : SV_Target
+{
+	return ConstructGBufferRT1(texcoord_2xy, ts_to_view0_2z, ts_to_view1);
+}
+
+float4 GBufferAlphaTestRT1PS(float4 texcoord_2xy : TEXCOORD0, float4 ts_to_view0_2z : TEXCOORD1, float3 ts_to_view1 : TEXCOORD2) : SV_Target
+{
+	clip(diffuse_tex.Sample(bilinear_sampler, texcoord_2xy.xy).a - ALPHA_TEST_THRESHOLD);
+	return ConstructGBufferRT1(texcoord_2xy, ts_to_view0_2z, ts_to_view1);
+}
+
+float4 GBufferAlphaBlendRT1PS(float4 texcoord_2xy : TEXCOORD0, float4 ts_to_view0_2z : TEXCOORD1, float4 ts_to_view1_depth : TEXCOORD2,
+#ifdef NOPERSPECTIVE_SUPPORT
+					noperspective float2 screen_tc : TEXCOORD3
+#else
+					float3 screen_tc_w : TEXCOORD3
+#endif
+			) : SV_Target
+{
+#ifndef NOPERSPECTIVE_SUPPORT
+	float2 screen_tc = screen_tc_w.xy / screen_tc_w.z;
+#endif
+
+	clip(opaque_depth_tex.Sample(point_sampler, screen_tc).r - ts_to_view1_depth.w);	
+	return ConstructGBufferRT1(texcoord_2xy, ts_to_view0_2z, ts_to_view1_depth.xyz);
 }
 
 void GBufferMRTPS(float4 texcoord_2xy : TEXCOORD0, float4 ts_to_view0_2z : TEXCOORD1, float3 ts_to_view1 : TEXCOORD2,
@@ -292,7 +343,12 @@ float4 DepthSkyBoxPS() : SV_Target
 	return depth_far;
 }
 
-float4 GBufferSkyBoxPS() : SV_Target
+float4 GBufferSkyBoxRT0PS() : SV_Target
+{
+	return 0;
+}
+
+float4 GBufferSkyBoxRT1PS() : SV_Target
 {
 	return 0;
 }
@@ -386,7 +442,7 @@ void DecalGBufferAlphaTestMRTPS(float4 texcoord_2xy : TEXCOORD0, float4 ts_to_vi
 			specular = specular_level.x;
 		}
 	
-		StoreMRTGBuffer(normal, specular, shininess, diffuse,
+		StoreGBufferMRT(normal, specular, shininess, diffuse,
 			mrt_0, mrt_1);
 	}
 	else
@@ -429,33 +485,83 @@ void DecalGBufferAlphaTestMRTPS(float4 texcoord_2xy : TEXCOORD0, float4 ts_to_vi
 		</pass>
 	</technique>
 
-	<technique name="GBufferTech">
+	<technique name="GBufferRT0Tech">
 		<pass name="p0">
 			<state name="cull_mode" value="back"/>
 
 			<state name="vertex_shader" value="GBufferVS()"/>
-			<state name="pixel_shader" value="GBufferPS()"/>
+			<state name="pixel_shader" value="GBufferRT0PS()"/>
 		</pass>
 	</technique>
-	<technique name="GBufferAlphaTestTech" inherit="GBufferTech">
+	<technique name="GBufferAlphaTestRT0Tech" inherit="GBufferRT0Tech">
 		<pass name="p0">
-			<state name="pixel_shader" value="GBufferAlphaTestPS()"/>
+			<state name="pixel_shader" value="GBufferAlphaTestRT0PS()"/>
 		</pass>
 	</technique>
-	<technique name="GBufferAlphaBlendBackTech">
+	<technique name="GBufferAlphaBlendBackRT0Tech">
 		<pass name="p0">
 			<state name="depth_func" value="greater"/>
 			
 			<state name="cull_mode" value="front"/>
+			
+			<state name="front_stencil_enable" value="true"/>
+			<state name="front_stencil_func" value="always_pass"/>
+			<state name="front_stencil_ref" value="0"/>
+			<state name="front_stencil_pass" value="replace"/>
+			<state name="back_stencil_enable" value="true"/>
+			<state name="back_stencil_func" value="always_pass"/>
+			<state name="back_stencil_ref" value="0"/>
+			<state name="back_stencil_pass" value="replace"/>
 
 			<state name="vertex_shader" value="GBufferVS()"/>
-			<state name="pixel_shader" value="GBufferAlphaBlendPS()"/>
+			<state name="pixel_shader" value="GBufferAlphaBlendRT0PS()"/>
 		</pass>
 	</technique>
-	<technique name="GBufferAlphaBlendFrontTech" inherit="GBufferAlphaBlendBackTech">
+	<technique name="GBufferAlphaBlendFrontRT0Tech" inherit="GBufferAlphaBlendBackRT0Tech">
 		<pass name="p0">
 			<state name="depth_func" value="less"/>
 			
+			<state name="cull_mode" value="back"/>
+		</pass>
+	</technique>
+
+	<technique name="GBufferRT1Tech">
+		<pass name="p0">
+			<state name="cull_mode" value="back"/>
+			<state name="depth_func" value="equal"/>
+
+			<state name="vertex_shader" value="GBufferVS()"/>
+			<state name="pixel_shader" value="GBufferRT1PS()"/>
+		</pass>
+	</technique>
+	<technique name="GBufferAlphaTestRT1Tech" inherit="GBufferRT1Tech">
+		<pass name="p0">
+			<state name="pixel_shader" value="GBufferAlphaTestRT1PS()"/>
+		</pass>
+	</technique>
+	<technique name="GBufferAlphaBlendBackRT1Tech">
+		<pass name="p0">
+			<state name="depth_func" value="equal"/>
+
+			<state name="cull_mode" value="front"/>
+			
+			<state name="front_stencil_enable" value="true"/>
+			<state name="front_stencil_func" value="not_equal"/>
+			<state name="front_stencil_ref" value="128"/>
+			<state name="front_stencil_pass" value="keep"/>
+			<state name="back_stencil_enable" value="true"/>
+			<state name="back_stencil_func" value="not_equal"/>
+			<state name="back_stencil_ref" value="128"/>
+			<state name="back_stencil_pass" value="keep"/>
+
+			<state name="vertex_shader" value="GBufferVS()"/>
+			<state name="pixel_shader" value="GBufferAlphaBlendRT1PS()"/>
+		</pass>
+	</technique>
+	<technique name="GBufferAlphaBlendFrontRT1Tech" inherit="GBufferAlphaBlendBackRT1Tech">
+		<pass name="p0">
+			<state name="depth_func" value="equal"/>
+
 			<state name="cull_mode" value="back"/>
 		</pass>
 	</technique>
@@ -520,7 +626,7 @@ void DecalGBufferAlphaTestMRTPS(float4 texcoord_2xy : TEXCOORD0, float4 ts_to_vi
 		</pass>
 	</technique>
 
-	<technique name="GBufferSkyBoxTech">
+	<technique name="GBufferSkyBoxRT0Tech">
 		<pass name="p0">
 			<state name="cull_mode" value="none"/>
 			<state name="depth_func" value="equal"/>
@@ -536,11 +642,31 @@ void DecalGBufferAlphaTestMRTPS(float4 texcoord_2xy : TEXCOORD0, float4 ts_to_vi
 			<state name="back_stencil_pass" value="replace"/>
 
 			<state name="vertex_shader" value="GBufferSkyBoxVS()"/>
-			<state name="pixel_shader" value="GBufferSkyBoxPS()"/>
+			<state name="pixel_shader" value="GBufferSkyBoxRT0PS()"/>
 		</pass>
 	</technique>
 
-	<technique name="GBufferSkyBoxMRTTech" inherit="GBufferSkyBoxTech">
+	<technique name="GBufferSkyBoxRT1Tech">
+		<pass name="p0">
+			<state name="cull_mode" value="none"/>
+			<state name="depth_func" value="equal"/>
+			<state name="depth_write_mask" value="false"/>
+
+			<state name="front_stencil_enable" value="true"/>
+			<state name="front_stencil_func" value="always_pass"/>
+			<state name="front_stencil_ref" value="128"/>
+			<state name="front_stencil_pass" value="replace"/>
+			<state name="back_stencil_enable" value="true"/>
+			<state name="back_stencil_func" value="always_pass"/>
+			<state name="back_stencil_ref" value="128"/>
+			<state name="back_stencil_pass" value="replace"/>
+
+			<state name="vertex_shader" value="GBufferSkyBoxVS()"/>
+			<state name="pixel_shader" value="GBufferSkyBoxRT1PS()"/>
+		</pass>
+	</technique>
+
+	<technique name="GBufferSkyBoxMRTTech" inherit="GBufferSkyBoxRT0Tech">
 		<pass name="p0">
 			<state name="pixel_shader" value="GBufferSkyBoxMRTPS()"/>
 		</pass>
@@ -749,7 +875,7 @@ float4 GenShadowMapWODepthTextureAlphaTestPS(float2 tc : TEXCOORD0, float3 view_
 #define NOPERSPECTIVE_SUPPORT
 #endif
 
-void ShadingVS(float4 pos : POSITION,
+void SpecialShadingVS(float4 pos : POSITION,
 			float2 texcoord : TEXCOORD0,
 			float4 tangent_quat : TANGENT,
 			out float2 oTexCoord : TEXCOORD0,
@@ -778,109 +904,6 @@ void ShadingVS(float4 pos : POSITION,
 	oTc.z = oPos.w;
 	oTc.xy *= oTc.z;
 #endif
-}
-
-float4 CalcShading(float3 view_dir, float3 normal, float2 tc, float3 diffuse, float specular, float3 emit, float opacity)
-{	
-	float4 lighting = lighting_tex.Sample(point_sampler, tc);
-	float3 diff_lighting = lighting.rgb;
-	float3 spec_lighting = lighting.a / (dot(lighting.rgb, float3(0.2126f, 0.7152f, 0.0722f)) + 1e-6f) * lighting.rgb;
-	return float4(max(emit + diff_lighting * diffuse + specular_normalize_factor(shininess) * spec_lighting * fresnel_term_schlick(normalize(view_dir), normal, specular), 0), opacity);
-}
-
-float4 ShadingPS(float2 texcoord : TEXCOORD0,
-#ifdef NOPERSPECTIVE_SUPPORT
-	noperspective float2 tc : TEXCOORD1,
-#else
-	float3 tc_w : TEXCOORD1,
-#endif
-	float3 view_dir : TEXCOORD2, float3 normal : TEXCOORD3
-	) : SV_Target
-{
-#ifndef NOPERSPECTIVE_SUPPORT
-	float2 tc = tc_w.xy / tc_w.z;
-#endif
-
-	float3 diffuse;
-	if (diffuse_clr.w > 0.5f)
-	{
-		diffuse = diffuse_tex.Sample(aniso_sampler, texcoord).rgb;
-	}
-	else
-	{
-		diffuse = diffuse_clr.rgb;
-	}
-	float specular;
-	if (specular_level.w > 0.5f)
-	{
-		specular = dot(specular_tex.Sample(aniso_sampler, texcoord).rgb, float3(0.2126f, 0.7152f, 0.0722f));
-	}
-	else
-	{
-		specular = specular_level.x;
-	}
-	float3 emit;
-	if (emit_clr.w > 0.5f)
-	{
-		emit = emit_tex.Sample(aniso_sampler, texcoord).rgb;
-	}
-	else
-	{
-		emit = emit_clr.rgb;
-	}
-	return CalcShading(view_dir, normal, tc, diffuse, specular, emit, 1);
-}
-
-float4 ShadingAlphaBlendPS(float2 texcoord : TEXCOORD0,
-#ifdef NOPERSPECTIVE_SUPPORT
-	noperspective float2 tc : TEXCOORD1,
-#else
-	float3 tc_w : TEXCOORD1,
-#endif
-	float3 view_dir : TEXCOORD2, float3 normal : TEXCOORD3
-	) : SV_Target
-{
-#ifndef NOPERSPECTIVE_SUPPORT
-	float2 tc = tc_w.xy / tc_w.z;
-#endif
-
-	float3 diffuse;
-	if (diffuse_clr.w > 0.5f)
-	{
-		diffuse = diffuse_tex.Sample(aniso_sampler, texcoord).rgb;
-	}
-	else
-	{
-		diffuse = diffuse_clr.rgb;
-	}
-	float specular;
-	if (specular_level.w > 0.5f)
-	{
-		specular = dot(specular_tex.Sample(aniso_sampler, texcoord).rgb, float3(0.2126f, 0.7152f, 0.0722f));
-	}
-	else
-	{
-		specular = specular_level.x;
-	}
-	float3 emit;
-	if (emit_clr.w > 0.5f)
-	{
-		emit = emit_tex.Sample(aniso_sampler, texcoord).rgb;
-	}
-	else
-	{
-		emit = emit_clr.rgb;
-	}
-	float opacity;
-	if (opacity_map_enabled)
-	{
-		opacity = diffuse_tex.Sample(aniso_sampler, texcoord).a;
-	}
-	else
-	{
-		opacity = opacity_clr;
-	}
-	return CalcShading(view_dir, normal, tc, diffuse, specular, emit, opacity);
 }
 
 float4 SpecialShadingPS(float2 texcoord : TEXCOORD0) : SV_Target
@@ -920,7 +943,7 @@ float4 SpecialShadingAlphaBlendPS(float2 texcoord : TEXCOORD0) : SV_Target
 	return float4(max(emit, 0), opacity);
 }
 
-void ShadingSkyBoxVS(float4 pos : POSITION,
+void SpecialShadingSkyBoxVS(float4 pos : POSITION,
 			out float3 texcoord0 : TEXCOORD0,
 			out float4 oPos : SV_Position)
 {
@@ -928,66 +951,18 @@ void ShadingSkyBoxVS(float4 pos : POSITION,
 	texcoord0 = mul(pos, inv_mvp).xyz;
 }
 
-float4 ShadingLDRSkyBoxPS(float3 texcoord : TEXCOORD0) : SV_Target
+float4 SpecialShadingLDRSkyBoxPS(float3 texcoord : TEXCOORD0) : SV_Target
 {
 	return skybox_tex.Sample(skybox_sampler, texcoord);
 }
 
-float4 ShadingSkyBoxPS(float3 texcoord : TEXCOORD0) : SV_Target
+float4 SpecialShadingSkyBoxPS(float3 texcoord : TEXCOORD0) : SV_Target
 {
 	return decode_hdr_yc(skybox_tex.Sample(skybox_sampler, texcoord).r,
 					skybox_C_tex.Sample(skybox_sampler, texcoord));
 }
 		]]>
 	</shader>
-
-	<technique name="ShadingTech">
-		<pass name="p0">
-			<state name="cull_mode" value="back"/>
-			<state name="depth_enable" value="true"/>
-			<state name="depth_func" value="equal"/>
-			<state name="depth_write_mask" value="false"/>
-
-			<state name="vertex_shader" value="ShadingVS()"/>
-			<state name="pixel_shader" value="ShadingPS()"/>
-		</pass>
-	</technique>
-	<technique name="ShadingAlphaBlendBackTech" inherit="ShadingTech">
-		<pass name="p0">
-			<state name="cull_mode" value="front"/>
-			
-			<state name="pixel_shader" value="ShadingAlphaBlendPS()"/>
-		</pass>
-	</technique>
-	<technique name="ShadingAlphaBlendFrontTech" inherit="ShadingAlphaBlendBackTech">
-		<pass name="p0">
-			<state name="cull_mode" value="back"/>
-		</pass>
-	</technique>
-
-	<technique name="ShadingLDRSkyBoxTech">
-		<pass name="p0">
-			<state name="cull_mode" value="none"/>
-			<state name="depth_enable" value="true"/>
-			<state name="depth_func" value="equal"/>
-			<state name="depth_write_mask" value="false"/>
-
-			<state name="vertex_shader" value="ShadingSkyBoxVS()"/>
-			<state name="pixel_shader" value="ShadingLDRSkyBoxPS()"/>
-		</pass>
-	</technique>
-
-	<technique name="ShadingSkyBoxTech">
-		<pass name="p0">
-			<state name="cull_mode" value="none"/>
-			<state name="depth_enable" value="true"/>
-			<state name="depth_func" value="equal"/>
-			<state name="depth_write_mask" value="false"/>
-
-			<state name="vertex_shader" value="ShadingSkyBoxVS()"/>
-			<state name="pixel_shader" value="ShadingSkyBoxPS()"/>
-		</pass>
-	</technique>
 
 	<technique name="SpecialShadingTech">
 		<pass name="p0">
@@ -1004,7 +979,7 @@ float4 ShadingSkyBoxPS(float3 texcoord : TEXCOORD0) : SV_Target
 			<state name="src_blend_alpha" value="src_alpha"/>
 			<state name="dest_blend_alpha" value="zero"/>
 
-			<state name="vertex_shader" value="ShadingVS()"/>
+			<state name="vertex_shader" value="SpecialShadingVS()"/>
 			<state name="pixel_shader" value="SpecialShadingPS()"/>
 		</pass>
 	</technique>
@@ -1018,6 +993,29 @@ float4 ShadingSkyBoxPS(float3 texcoord : TEXCOORD0) : SV_Target
 	<technique name="SpecialShadingAlphaBlendFrontTech" inherit="SpecialShadingAlphaBlendBackTech">
 		<pass name="p0">
 			<state name="cull_mode" value="back"/>
+		</pass>
+	</technique>
+
+	<technique name="ShadingLDRSkyBoxTech">
+		<pass name="p0">
+			<state name="cull_mode" value="none"/>
+			<state name="depth_enable" value="true"/>
+			<state name="depth_func" value="equal"/>
+			<state name="depth_write_mask" value="false"/>
+
+			<state name="vertex_shader" value="SpecialShadingSkyBoxVS()"/>
+			<state name="pixel_shader" value="SpecialShadingLDRSkyBoxPS()"/>
+		</pass>
+	</technique>
+	<technique name="ShadingSkyBoxTech">
+		<pass name="p0">
+			<state name="cull_mode" value="none"/>
+			<state name="depth_enable" value="true"/>
+			<state name="depth_func" value="equal"/>
+			<state name="depth_write_mask" value="false"/>
+
+			<state name="vertex_shader" value="SpecialShadingSkyBoxVS()"/>
+			<state name="pixel_shader" value="SpecialShadingSkyBoxPS()"/>
 		</pass>
 	</technique>
 </effect>

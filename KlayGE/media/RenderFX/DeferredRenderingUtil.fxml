@@ -3,16 +3,21 @@
 <effect>
 	<shader>
 		<![CDATA[
-float4 StoreGBuffer(float3 normal, float shininess)
+float4 StoreGBufferRT0(float3 normal, float shininess)
 {
 	return float4(normal * 0.5f + 0.5f, shininess);
 }
 
-void StoreMRTGBuffer(float3 normal, float specular_level, float shininess, float3 diffuse,
+float4 StoreGBufferRT1(float3 diffuse, float specular_level)
+{
+	return float4(diffuse, specular_level);
+}
+
+void StoreGBufferMRT(float3 normal, float specular_level, float shininess, float3 diffuse,
 			out float4 mrt_0, out float4 mrt_1)
 {
-	mrt_0 = StoreGBuffer(normal, shininess);
-	mrt_1 = float4(diffuse, specular_level);
+	mrt_0 = StoreGBufferRT0(normal, shininess);
+	mrt_1 = StoreGBufferRT1(diffuse, specular_level);
 }
 
 float3 GetNormal(float4 ndc)

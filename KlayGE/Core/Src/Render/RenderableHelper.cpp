@@ -300,11 +300,11 @@ namespace KlayGE
 		if (deferred_effect_)
 		{
 			depth_tech_ = deferred_effect_->TechniqueByName("DepthSkyBoxTech");
-			gbuffer_tech_ = deferred_effect_->TechniqueByName("GBufferSkyBoxTech");
+			gbuffer_rt0_tech_ = deferred_effect_->TechniqueByName("GBufferSkyBoxRT0Tech");
+			gbuffer_rt1_tech_ = deferred_effect_->TechniqueByName("GBufferSkyBoxRT1Tech");
 			gbuffer_mrt_tech_ = deferred_effect_->TechniqueByName("GBufferSkyBoxMRTTech");
-			shading_tech_ = deferred_effect_->TechniqueByName("ShadingLDRSkyBoxTech");
-			special_shading_tech_ = shading_tech_;
-			this->Technique(gbuffer_tech_);
+			special_shading_tech_ = deferred_effect_->TechniqueByName("ShadingLDRSkyBoxTech");
+			this->Technique(gbuffer_rt0_tech_);
 
 			skybox_cube_tex_ep_ = deferred_effect_->ParameterByName("skybox_tex");
 			depth_far_ep_ = deferred_effect_->ParameterByName("depth_far");
@@ -360,16 +360,16 @@ namespace KlayGE
 			technique_ = depth_tech_;
 			break;
 
-		case PT_OpaqueGBuffer:
-			technique_ = gbuffer_tech_;
+		case PT_OpaqueGBufferRT0:
+			technique_ = gbuffer_rt0_tech_;
 			break;
 
-		case PT_OpaqueMRTGBuffer:
+		case PT_OpaqueGBufferRT1:
+			technique_ = gbuffer_rt1_tech_;
+			break;
+
+		case PT_OpaqueGBufferMRT:
 			technique_ = gbuffer_mrt_tech_;
-			break;
-
-		case PT_OpaqueShading:
-			technique_ = shading_tech_;
 			break;
 
 		case PT_OpaqueSpecialShading:
@@ -403,8 +403,7 @@ namespace KlayGE
 	{
 		if (deferred_effect_)
 		{
-			shading_tech_ = deferred_effect_->TechniqueByName("ShadingSkyBoxTech");
-			special_shading_tech_ = shading_tech_;
+			special_shading_tech_ = deferred_effect_->TechniqueByName("ShadingSkyBoxTech");
 
 			skybox_Ccube_tex_ep_ = deferred_effect_->ParameterByName("skybox_C_tex");
 		}
@@ -568,9 +567,9 @@ namespace KlayGE
 					
 		switch (type_)
 		{
-		case PT_OpaqueMRTGBuffer:
-		case PT_TransparencyBackMRTGBuffer:
-		case PT_TransparencyFrontMRTGBuffer:
+		case PT_OpaqueGBufferMRT:
+		case PT_TransparencyBackGBufferMRT:
+		case PT_TransparencyFrontGBufferMRT:
 			*diffuse_clr_param_ = float4(diffuse_clr_.x(), diffuse_clr_.y(), diffuse_clr_.z(), static_cast<float>(!!diffuse_tex_));
 			*specular_level_param_ = float4(specular_level_, 0, 0, static_cast<float>(!!specular_tex_));
 			*shininess_param_ = MathLib::clamp(shininess_ / 256.0f, 1e-6f, 0.999f);

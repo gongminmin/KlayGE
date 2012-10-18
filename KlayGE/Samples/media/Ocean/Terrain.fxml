@@ -65,6 +65,24 @@ void TerrainGBufferVS(float2 pos : POSITION,
 	oNormalFog.w = saturate(oPos.w / 1200.0f);
 }
 
+float4 TerrainGBufferRT0PS(float3 texcoord : TEXCOORD0, float4 normal_fog : TEXCOORD1) : SV_Target
+{
+	float3 normal = normalize(normal_fog.xyz);
+	float3 fitting_tc = FittingCoord(normal);
+	normal *= fitting_tc.z * normals_fitting_tex.Sample(bilinear_sampler, fitting_tc.xy).r;
+	
+	return StoreGBufferRT0(normal, shininess);
+}
+
+float4 TerrainGBufferRT1PS(float3 texcoord : TEXCOORD0, float4 normal_fog : TEXCOORD1) : SV_Target
+{
+	float3 diffuse = lerp((ground_tex_detail.Sample(aniso_sampler, texcoord.xy).rgb + ground_tex_base.Sample(aniso_sampler, texcoord.xy / 16).rgb) / 2,
+		grass_tex_base.Sample(aniso_sampler, texcoord.xy).rgb, saturate(texcoord.z));
+	float specular = 0;
+	
+	return StoreGBufferRT1(diffuse, specular);
+}
+
 void TerrainGBufferMRTPS(float3 texcoord : TEXCOORD0, float4 normal_fog : TEXCOORD1,
 					out float4 mrt_0 : SV_Target0, out float4 mrt_1 : SV_Target1)
 {
@@ -76,11 +94,25 @@ void TerrainGBufferMRTPS(float3 texcoord : TEXCOORD0, float4 normal_fog : TEXCOO
 		grass_tex_base.Sample(aniso_sampler, texcoord.xy).rgb, saturate(texcoord.z));
 	float specular = 0;
 	
-	StoreMRTGBuffer(normal, specular, shininess, diffuse,
+	StoreGBufferMRT(normal, specular, shininess, diffuse,
 		mrt_0, mrt_1);
 }
 		]]>
 	</shader>
+
+	<technique name="TerrainGBufferRT0" inherit="GBufferRT0Tech">
+		<pass name="p0">
+			<state name="vertex_shader" value="TerrainGBufferVS()"/>
+			<state name="pixel_shader" value="TerrainGBufferRT0PS()"/>
+		</pass>
+	</technique>
+
+	<technique name="TerrainGBufferRT1" inherit="GBufferRT1Tech">
+		<pass name="p0">
+			<state name="vertex_shader" value="TerrainGBufferVS()"/>
+			<state name="pixel_shader" value="TerrainGBufferRT1PS()"/>
+		</pass>
+	</technique>
 	
 	<technique name="TerrainGBufferMRT" inherit="GBufferMRTTech">
 		<pass name="p0">

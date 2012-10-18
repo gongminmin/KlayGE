@@ -63,6 +63,7 @@ namespace KlayGE
 		boost::array<FrameBufferPtr, Num_GBuffers> pre_depth_buffers;
 
 		boost::array<FrameBufferPtr, Num_GBuffers> g_buffers;
+		boost::array<FrameBufferPtr, Num_GBuffers> g_buffers_rt1;
 		boost::array<TexturePtr, Num_GBuffers> g_buffer_rt0_texs;
 		boost::array<TexturePtr, Num_GBuffers> g_buffer_rt1_texs;
 		boost::array<TexturePtr, Num_GBuffers> g_buffer_ds_texs;

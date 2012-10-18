@@ -77,7 +77,7 @@ float4 LightSourceProxyPS(float3 pos_os : TEXCOORD0, float3 normal : TEXCOORD1) 
 
 	<shader>
 		<![CDATA[
-void LightSourceProxyShadingVS(float4 pos : POSITION,
+void LightSourceProxySpecialShadingVS(float4 pos : POSITION,
 			float2 texcoord : TEXCOORD0,
 			float4 tangent_quat : TANGENT,
 			out float2 oTexCoord : TEXCOORD0,
@@ -109,59 +109,6 @@ void LightSourceProxyShadingVS(float4 pos : POSITION,
 	oTc.z = oPos.w;
 	oTc.xy *= oTc.z;
 #endif
-}
-
-float4 LightSourceProxyShadingPS(float2 texcoord : TEXCOORD0,
-#ifdef NOPERSPECTIVE_SUPPORT
-	noperspective float2 tc : TEXCOORD1,
-#else
-	float3 tc_w : TEXCOORD1,
-#endif
-	float3 view_dir : TEXCOORD2, float3 normal : TEXCOORD3,
-	float3 pos_os : TEXCOORD4
-	) : SV_Target
-{
-#ifndef NOPERSPECTIVE_SUPPORT
-	float2 tc = tc_w.xy / tc_w.z;
-#endif
-
-	float3 diffuse;
-	if (diffuse_clr.w > 0.5f)
-	{
-		diffuse = diffuse_tex.Sample(aniso_sampler, texcoord).rgb;
-	}
-	else
-	{
-		diffuse = diffuse_clr.rgb;
-	}
-	float specular;
-	if (specular_level.w > 0.5f)
-	{
-		specular = dot(specular_tex.Sample(aniso_sampler, texcoord).rgb, float3(0.2126f, 0.7152f, 0.0722f));
-	}
-	else
-	{
-		specular = specular_level.x;
-	}
-	float3 emit = light_color.xyz;
-	if (light_is_projective.x)
-	{
-		float4 proj_clr;
-		if (light_is_projective.y)
-		{
-			proj_clr = projective_map_cube_tex.Sample(linear_sampler, pos_os);
-		}
-		else
-		{
-			float4 light_proj_pos = mul(float4(pos_os, 1), mvp);
-			light_proj_pos /= light_proj_pos.w;
-			light_proj_pos.y *= KLAYGE_FLIPPING;
-			light_proj_pos.xy = light_proj_pos.xy / 2 + 0.5f;
-			proj_clr = projective_map_tex.Sample(linear_sampler, light_proj_pos.xy);
-		}
-		emit *= proj_clr.xyz;
-	}
-	return CalcShading(view_dir, normal, tc, diffuse, specular, emit, 1);
 }
 
 float4 LightSourceProxySpecialShadingPS(float2 texcoord : TEXCOORD0,
@@ -197,18 +144,6 @@ float4 LightSourceProxySpecialShadingPS(float2 texcoord : TEXCOORD0,
 		]]>
 	</shader>
 
-	<technique name="LightSourceProxyShadingTech">
-		<pass name="p0">
-			<state name="cull_mode" value="back"/>
-			<state name="depth_enable" value="true"/>
-			<state name="depth_func" value="equal"/>
-			<state name="depth_write_mask" value="false"/>
-
-			<state name="vertex_shader" value="LightSourceProxyShadingVS()"/>
-			<state name="pixel_shader" value="LightSourceProxyShadingPS()"/>
-		</pass>
-	</technique>
-	
 	<technique name="LightSourceProxySpecialShadingTech">
 		<pass name="p0">
 			<state name="cull_mode" value="back"/>
@@ -224,7 +159,7 @@ float4 LightSourceProxySpecialShadingPS(float2 texcoord : TEXCOORD0,
 			<state name="src_blend_alpha" value="src_alpha"/>
 			<state name="dest_blend_alpha" value="zero"/>
 
-			<state name="vertex_shader" value="LightSourceProxyShadingVS()"/>
+			<state name="vertex_shader" value="LightSourceProxySpecialShadingVS()"/>
 			<state name="pixel_shader" value="LightSourceProxySpecialShadingPS()"/>
 		</pass>
 	</technique>

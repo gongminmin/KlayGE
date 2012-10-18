@@ -2642,7 +2642,6 @@ namespace KlayGE
 		if (deferred_effect_)
 		{
 			this->BindDeferredEffect(effect);
-			shading_tech_ = effect->TechniqueByName("LightSourceProxyShadingTech");
 			special_shading_tech_ = effect->TechniqueByName("LightSourceProxySpecialShadingTech");
 		}
 

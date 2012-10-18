@@ -36,12 +36,15 @@ namespace KlayGE
 		PT_OpaqueDepth,
 		PT_TransparencyBackDepth,
 		PT_TransparencyFrontDepth,
-		PT_OpaqueGBuffer,
-		PT_TransparencyBackGBuffer,
-		PT_TransparencyFrontGBuffer,
-		PT_OpaqueMRTGBuffer,
-		PT_TransparencyBackMRTGBuffer,
-		PT_TransparencyFrontMRTGBuffer,
+		PT_OpaqueGBufferRT0,
+		PT_TransparencyBackGBufferRT0,
+		PT_TransparencyFrontGBufferRT0,
+		PT_OpaqueGBufferRT1,
+		PT_TransparencyBackGBufferRT1,
+		PT_TransparencyFrontGBufferRT1,
+		PT_OpaqueGBufferMRT,
+		PT_TransparencyBackGBufferMRT,
+		PT_TransparencyFrontGBufferMRT,
 		PT_GenShadowMap,
 		PT_GenShadowMapWODepthTexture,
 		PT_GenReflectiveShadowMap,
@@ -133,7 +136,6 @@ namespace KlayGE
 		virtual void ModelMatrix(float4x4 const & mat);
 
 		virtual void Pass(PassType type);
-		virtual void LightingTex(TexturePtr const & tex);
 
 		virtual bool SpecialShading() const
 		{
@@ -180,10 +182,14 @@ namespace KlayGE
 		RenderTechniquePtr depth_alpha_test_tech_;
 		RenderTechniquePtr depth_alpha_blend_back_tech_;
 		RenderTechniquePtr depth_alpha_blend_front_tech_;
-		RenderTechniquePtr gbuffer_tech_;
-		RenderTechniquePtr gbuffer_alpha_test_tech_;
-		RenderTechniquePtr gbuffer_alpha_blend_back_tech_;
-		RenderTechniquePtr gbuffer_alpha_blend_front_tech_;
+		RenderTechniquePtr gbuffer_rt0_tech_;
+		RenderTechniquePtr gbuffer_alpha_test_rt0_tech_;
+		RenderTechniquePtr gbuffer_alpha_blend_back_rt0_tech_;
+		RenderTechniquePtr gbuffer_alpha_blend_front_rt0_tech_;
+		RenderTechniquePtr gbuffer_rt1_tech_;
+		RenderTechniquePtr gbuffer_alpha_test_rt1_tech_;
+		RenderTechniquePtr gbuffer_alpha_blend_back_rt1_tech_;
+		RenderTechniquePtr gbuffer_alpha_blend_front_rt1_tech_;
 		RenderTechniquePtr gbuffer_mrt_tech_;
 		RenderTechniquePtr gbuffer_alpha_test_mrt_tech_;
 		RenderTechniquePtr gbuffer_alpha_blend_back_mrt_tech_;
@@ -194,15 +200,9 @@ namespace KlayGE
 		RenderTechniquePtr gen_sm_wo_dt_alpha_test_tech_;
 		RenderTechniquePtr gen_rsm_tech_;
 		RenderTechniquePtr gen_rsm_alpha_test_tech_;
-		RenderTechniquePtr shading_tech_;
-		RenderTechniquePtr shading_alpha_blend_back_tech_;
-		RenderTechniquePtr shading_alpha_blend_front_tech_;
 		RenderTechniquePtr special_shading_tech_;
 		RenderTechniquePtr special_shading_alpha_blend_back_tech_;
 		RenderTechniquePtr special_shading_alpha_blend_front_tech_;
-
-		RenderEffectParameterPtr lighting_tex_param_;
-		RenderEffectParameterPtr g_buffer_1_tex_param_;
 
 		float4x4 model_mat_;
 

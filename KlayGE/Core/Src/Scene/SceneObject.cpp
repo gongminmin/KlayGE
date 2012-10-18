@@ -120,9 +120,4 @@ namespace KlayGE
 			this->Visible((PT_GenShadowMap != type) && (PT_GenShadowMapWODepthTexture != type) && (PT_GenReflectiveShadowMap != type));
 		}
 	}
-
-	void SceneObject::LightingTex(TexturePtr const & tex)
-	{
-		renderable_->LightingTex(tex);
-	}
 }

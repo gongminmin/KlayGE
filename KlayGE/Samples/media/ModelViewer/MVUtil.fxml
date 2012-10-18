@@ -39,9 +39,14 @@ void AxisDepthVS(float4 pos : POSITION,
 	oDepth = oPos.w;
 }
 
-float4 AxisPS(float4 clr : COLOR0) : SV_Target
+float4 AxisRT0PS() : SV_Target
 {
 	return 0;
+}
+
+float4 AxisRT1PS(float4 clr : COLOR0) : SV_Target
+{
+	return clr;
 }
 
 float4 AxisDepthPS(float depth : TEXCOORD0) : SV_Target
@@ -54,11 +59,6 @@ void AxisMRTPS(float4 clr : COLOR0,
 {
 	mrt_0 = 0;
 	mrt_1 = clr;
-}
-
-float4 AxisShadingPS(float4 clr : COLOR0) : SV_Target
-{
-	return clr;
 }
 		]]>
 	</shader>
@@ -79,7 +79,7 @@ float4 AxisShadingPS(float4 clr : COLOR0) : SV_Target
 		</pass>
 	</technique>
 
-	<technique name="AxisTech">
+	<technique name="AxisRT0Tech">
 		<pass name="p0">
 			<state name="front_stencil_enable" value="true"/>
 			<state name="front_stencil_func" value="always_pass"/>
@@ -91,7 +91,26 @@ float4 AxisShadingPS(float4 clr : COLOR0) : SV_Target
 			<state name="back_stencil_pass" value="replace"/>
 
 			<state name="vertex_shader" value="AxisVS()"/>
-			<state name="pixel_shader" value="AxisPS()"/>
+			<state name="pixel_shader" value="AxisRT0PS()"/>
+		</pass>
+	</technique>
+
+	<technique name="AxisRT1Tech">
+		<pass name="p0">
+			<state name="depth_func" value="equal"/>
+			<state name="depth_write_mask" value="false"/>
+			
+			<state name="front_stencil_enable" value="true"/>
+			<state name="front_stencil_func" value="always_pass"/>
+			<state name="front_stencil_ref" value="128"/>
+			<state name="front_stencil_pass" value="replace"/>
+			<state name="back_stencil_enable" value="true"/>
+			<state name="back_stencil_func" value="always_pass"/>
+			<state name="back_stencil_ref" value="128"/>
+			<state name="back_stencil_pass" value="replace"/>
+
+			<state name="vertex_shader" value="AxisVS()"/>
+			<state name="pixel_shader" value="AxisRT1PS()"/>
 		</pass>
 	</technique>
 
@@ -108,17 +127,6 @@ float4 AxisShadingPS(float4 clr : COLOR0) : SV_Target
 			
 			<state name="vertex_shader" value="AxisVS()"/>
 			<state name="pixel_shader" value="AxisMRTPS()"/>
-		</pass>
-	</technique>
-
-	<technique name="AxisShadingTech">
-		<pass name="p0">
-			<state name="depth_enable" value="true"/>
-			<state name="depth_func" value="equal"/>
-			<state name="depth_write_mask" value="false"/>
-
-			<state name="vertex_shader" value="AxisVS()"/>
-			<state name="pixel_shader" value="AxisShadingPS()"/>
 		</pass>
 	</technique>
 
@@ -155,9 +163,27 @@ void GridDepthVS(float4 pos : POSITION,
 	oDepth = oPos.w;
 }
 
-float4 GridPS(float4 clr : COLOR0) : SV_Target
+float4 GridRT0PS() : SV_Target
 {
 	return 0;
+}
+
+float4 GridRT1PS(float2 mark : TEXCOORD0) : SV_Target
+{
+	float4 clr;
+	if (mark.y > 2)
+	{
+		clr = float4(0, abs(mark.x), -mark.x, 1);
+	}
+	else if (mark.y > 1)
+	{
+		clr = float4(abs(mark.x), 0, -mark.x, 1);
+	}
+	else
+	{
+		clr = float4(0.5f, 0.5f, 0.5f, 1);
+	}
+	return clr;
 }
 
 float4 GridDepthPS(float depth : TEXCOORD0) : SV_Target
@@ -185,28 +211,10 @@ void GridMRTPS(float2 mark : TEXCOORD0,
 	}
 	mrt_1 = clr;
 }
-
-float4 GridShadingPS(float2 mark : TEXCOORD0) : SV_Target
-{
-	float4 clr;
-	if (mark.y > 2)
-	{
-		clr = float4(0, abs(mark.x), -mark.x, 1);
-	}
-	else if (mark.y > 1)
-	{
-		clr = float4(abs(mark.x), 0, -mark.x, 1);
-	}
-	else
-	{
-		clr = float4(0.5f, 0.5f, 0.5f, 1);
-	}
-	return clr;
-}
 		]]>
 	</shader>
 
-	<technique name="GridTech">
+	<technique name="GridRT0Tech">
 		<pass name="p0">
 			<state name="front_stencil_enable" value="true"/>
 			<state name="front_stencil_func" value="always_pass"/>
@@ -218,7 +226,26 @@ float4 GridShadingPS(float2 mark : TEXCOORD0) : SV_Target
 			<state name="back_stencil_pass" value="replace"/>
 
 			<state name="vertex_shader" value="GridVS()"/>
-			<state name="pixel_shader" value="GridPS()"/>
+			<state name="pixel_shader" value="GridRT0PS()"/>
+		</pass>
+	</technique>
+
+	<technique name="GridRT1Tech">
+		<pass name="p0">
+			<state name="depth_func" value="equal"/>
+			<state name="depth_write_mask" value="false"/>
+			
+			<state name="front_stencil_enable" value="true"/>
+			<state name="front_stencil_func" value="always_pass"/>
+			<state name="front_stencil_ref" value="128"/>
+			<state name="front_stencil_pass" value="replace"/>
+			<state name="back_stencil_enable" value="true"/>
+			<state name="back_stencil_func" value="always_pass"/>
+			<state name="back_stencil_ref" value="128"/>
+			<state name="back_stencil_pass" value="replace"/>
+
+			<state name="vertex_shader" value="GridVS()"/>
+			<state name="pixel_shader" value="GridRT1PS()"/>
 		</pass>
 	</technique>
 
@@ -251,17 +278,6 @@ float4 GridShadingPS(float2 mark : TEXCOORD0) : SV_Target
 			
 			<state name="vertex_shader" value="GridVS()"/>
 			<state name="pixel_shader" value="GridMRTPS()"/>
-		</pass>
-	</technique>
-
-	<technique name="GridShadingTech">
-		<pass name="p0">
-			<state name="depth_enable" value="true"/>
-			<state name="depth_func" value="equal"/>
-			<state name="depth_write_mask" value="false"/>
-
-			<state name="vertex_shader" value="GridVS()"/>
-			<state name="pixel_shader" value="GridShadingPS()"/>
 		</pass>
 	</technique>
 </effect>
