@@ -301,16 +301,13 @@ namespace KlayGE
 		{
 			depth_tech_ = deferred_effect_->TechniqueByName("DepthSkyBoxTech");
 			gbuffer_rt0_tech_ = deferred_effect_->TechniqueByName("GBufferSkyBoxRT0Tech");
-			gbuffer_rt1_tech_ = deferred_effect_->TechniqueByName("GBufferSkyBoxRT1Tech");
-			gbuffer_mrt_tech_ = deferred_effect_->TechniqueByName("GBufferSkyBoxMRTTech");
-			special_shading_tech_ = deferred_effect_->TechniqueByName("ShadingLDRSkyBoxTech");
+			gbuffer_rt1_tech_ = deferred_effect_->TechniqueByName("GBufferLDRSkyBoxRT1Tech");
+			gbuffer_mrt_tech_ = deferred_effect_->TechniqueByName("GBufferLDRSkyBoxMRTTech");
 			this->Technique(gbuffer_rt0_tech_);
 
 			skybox_cube_tex_ep_ = deferred_effect_->ParameterByName("skybox_tex");
 			depth_far_ep_ = deferred_effect_->ParameterByName("depth_far");
 			inv_mvp_ep_ = deferred_effect_->ParameterByName("inv_mvp");
-
-			effect_attrs_ |= EA_SpecialShading;
 		}
 		else
 		{
@@ -403,7 +400,8 @@ namespace KlayGE
 	{
 		if (deferred_effect_)
 		{
-			special_shading_tech_ = deferred_effect_->TechniqueByName("ShadingSkyBoxTech");
+			gbuffer_rt1_tech_ = deferred_effect_->TechniqueByName("GBufferSkyBoxRT1Tech");
+			gbuffer_mrt_tech_ = deferred_effect_->TechniqueByName("GBufferSkyBoxMRTTech");
 
 			skybox_Ccube_tex_ep_ = deferred_effect_->ParameterByName("skybox_C_tex");
 		}

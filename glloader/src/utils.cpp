@@ -261,6 +261,7 @@ namespace glloader
 			egl_features();
 
 			std::sort(features_.begin(), features_.end());
+			features_.erase(std::unique(features_.begin(), features_.end()), features_.end());
 		}
 
 		void gl_version(int& major, int& minor)

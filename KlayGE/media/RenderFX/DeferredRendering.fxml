@@ -65,8 +65,10 @@ float linstep(float min, float max, float v)
 
 	<shader>
 		<![CDATA[
+#if KLAYGE_D3D11
 #if KLAYGE_SHADER_MODEL >= 4
 #define NOPERSPECTIVE_SUPPORT
+#endif
 #endif
 
 float4 CalcColor(float n_dot_l, float spec, float atten, float3 shadow)
