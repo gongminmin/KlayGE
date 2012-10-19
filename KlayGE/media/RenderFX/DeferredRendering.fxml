@@ -4,16 +4,6 @@
 	<include name="DeferredRenderingUtil.fxml"/>
 	<include name="Lighting.fxml"/>
 	<include name="util.fxml"/>
-
-	<macro name="LT_Ambient" value="0"/>
-	<macro name="LT_Point" value="1"/>
-	<macro name="LT_Directional" value="2"/>
-	<macro name="LT_Spot" value="3"/>
-
-	<macro name="LSA_NoShadow" value="1"/>
-	<macro name="LSA_NoDiffuse" value="2"/>
-	<macro name="LSA_NoSpecular" value="4"/>
-	<macro name="LSA_IndirectLighting" value="8"/>
 	
 	<cbuffer name="per_frame">
 		<parameter type="float3" name="depth_near_far_invfar"/>

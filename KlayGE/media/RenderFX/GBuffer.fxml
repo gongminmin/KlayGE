@@ -866,8 +866,6 @@ float4 GenShadowMapWODepthTextureAlphaTestPS(float2 tc : TEXCOORD0, float3 view_
 
 	<parameter type="textureCUBE" name="skybox_tex"/>
 	<parameter type="textureCUBE" name="skybox_C_tex"/>
-
-	<parameter type="texture2D" name="lighting_tex"/>
 	
 	<shader>
 		<![CDATA[
@@ -877,33 +875,11 @@ float4 GenShadowMapWODepthTextureAlphaTestPS(float2 tc : TEXCOORD0, float3 view_
 
 void SpecialShadingVS(float4 pos : POSITION,
 			float2 texcoord : TEXCOORD0,
-			float4 tangent_quat : TANGENT,
 			out float2 oTexCoord : TEXCOORD0,
-#ifdef NOPERSPECTIVE_SUPPORT
-			out noperspective float2 oTc : TEXCOORD1,
-#else
-			out float3 oTc : TEXCOORD1,
-#endif
-			out float3 oViewDir : TEXCOORD2,
-			out float3 oNormal : TEXCOORD3,
 			out float4 oPos : SV_Position)
 {
 	oPos = mul(pos, mvp);
 	oTexCoord = texcoord;
-	
-	oViewDir = -mul(pos, model_view).xyz;
-	
-	tangent_quat = tangent_quat * 2 - 1;
-	oNormal = mul(transform_quat(float3(0, 0, 1), tangent_quat), (float3x3)model_view);
-
-	oTc.xy = oPos.xy / oPos.w;
-	oTc.y *= KLAYGE_FLIPPING;
-	oTc.xy = oTc.xy * 0.5f + 0.5f;
-
-#ifndef NOPERSPECTIVE_SUPPORT
-	oTc.z = oPos.w;
-	oTc.xy *= oTc.z;
-#endif
 }
 
 float4 SpecialShadingPS(float2 texcoord : TEXCOORD0) : SV_Target
