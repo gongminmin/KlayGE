@@ -116,11 +116,7 @@ namespace KlayGE
 		{
 			return scene_mgr_;
 		}
-		SceneManager& SceneManagerInstance()
-		{
-			BOOST_ASSERT(scene_mgr_);
-			return *scene_mgr_;
-		}
+		SceneManager& SceneManagerInstance();
 
 		void RenderFactoryInstance(RenderFactoryPtr const & factory)
 		{
@@ -130,11 +126,7 @@ namespace KlayGE
 		{
 			return render_factory_;
 		}
-		RenderFactory& RenderFactoryInstance()
-		{
-			BOOST_ASSERT(render_factory_);
-			return *render_factory_;
-		}
+		RenderFactory& RenderFactoryInstance();
 
 		void AudioFactoryInstance(AudioFactoryPtr const & factory)
 		{
@@ -144,11 +136,7 @@ namespace KlayGE
 		{
 			return audio_factory_;
 		}
-		AudioFactory& AudioFactoryInstance()
-		{
-			BOOST_ASSERT(audio_factory_);
-			return *audio_factory_;
-		}
+		AudioFactory& AudioFactoryInstance();
 
 		void InputFactoryInstance(InputFactoryPtr const & factory)
 		{
@@ -158,11 +146,7 @@ namespace KlayGE
 		{
 			return input_factory_;
 		}
-		InputFactory& InputFactoryInstance()
-		{
-			BOOST_ASSERT(input_factory_);
-			return *input_factory_;
-		}
+		InputFactory& InputFactoryInstance();
 
 		void ShowFactoryInstance(ShowFactoryPtr const & factory)
 		{
@@ -172,11 +156,7 @@ namespace KlayGE
 		{
 			return show_factory_;
 		}
-		ShowFactory& ShowFactoryInstance()
-		{
-			BOOST_ASSERT(show_factory_);
-			return *show_factory_;
-		}
+		ShowFactory& ShowFactoryInstance();
 
 		void AudioDataSourceFactoryInstance(AudioDataSourceFactoryPtr const & factory)
 		{
@@ -186,11 +166,7 @@ namespace KlayGE
 		{
 			return audio_data_src_factory_;
 		}
-		AudioDataSourceFactory& AudioDataSourceFactoryInstance()
-		{
-			BOOST_ASSERT(audio_data_src_factory_);
-			return *audio_data_src_factory_;
-		}
+		AudioDataSourceFactory& AudioDataSourceFactoryInstance();
 
 		void DeferredRenderingLayerInstance(DeferredRenderingLayerPtr const & drl)
 		{

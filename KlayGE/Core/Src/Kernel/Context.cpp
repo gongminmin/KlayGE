@@ -34,6 +34,7 @@
 #include <KlayGE/DeferredRenderingLayer.hpp>
 
 #include <fstream>
+#include <boost/thread/mutex.hpp>
 
 #ifdef KLAYGE_PLATFORM_ANDROID
 #include <KlayGE/OpenGLES/OGLESRenderFactory.hpp>
@@ -41,6 +42,11 @@
 #endif
 
 #include <KlayGE/Context.hpp>
+
+namespace
+{
+	boost::mutex singleton_mutex;
+}
 
 namespace KlayGE
 {
@@ -600,31 +606,6 @@ namespace KlayGE
 
 	void Context::Config(ContextCfg const & cfg)
 	{
-		if ((cfg_.render_factory_name != cfg.render_factory_name) || (RenderFactory::NullObject() == render_factory_))
-		{
-			this->LoadRenderFactory(cfg.render_factory_name);
-		}
-		if ((cfg_.audio_factory_name != cfg.audio_factory_name) || (AudioFactory::NullObject() == audio_factory_))
-		{
-			this->LoadAudioFactory(cfg.audio_factory_name);
-		}
-		if ((cfg_.input_factory_name != cfg.input_factory_name) || (InputFactory::NullObject() == input_factory_))
-		{
-			this->LoadInputFactory(cfg.input_factory_name);
-		}
-		if ((cfg_.show_factory_name != cfg.show_factory_name) || (ShowFactory::NullObject() == show_factory_))
-		{
-			this->LoadShowFactory(cfg.show_factory_name);
-		}
-		if ((cfg_.scene_manager_name != cfg.scene_manager_name) || (SceneManager::NullObject() == scene_mgr_))
-		{
-			this->LoadSceneManager(cfg.scene_manager_name);
-		}
-		if ((cfg_.audio_data_source_factory_name != cfg.audio_data_source_factory_name) || (AudioDataSourceFactory::NullObject() == audio_data_src_factory_))
-		{
-			this->LoadAudioDataSourceFactory(cfg.audio_data_source_factory_name);
-		}
-
 		cfg_ = cfg;
 	}
 
@@ -796,5 +777,83 @@ namespace KlayGE
 			LogError("Loading %s failed", path.c_str());
 			ads_loader_.Free();
 		}
+	}
+
+	SceneManager& Context::SceneManagerInstance()
+	{
+		if (SceneManager::NullObject() == scene_mgr_)
+		{
+			boost::mutex::scoped_lock lock(singleton_mutex);
+			if (SceneManager::NullObject() == scene_mgr_)
+			{
+				this->LoadSceneManager(cfg_.scene_manager_name);
+			}
+		}
+		return *scene_mgr_;
+	}
+
+	RenderFactory& Context::RenderFactoryInstance()
+	{
+		if (RenderFactory::NullObject() == render_factory_)
+		{
+			boost::mutex::scoped_lock lock(singleton_mutex);
+			if (RenderFactory::NullObject() == render_factory_)
+			{
+				this->LoadRenderFactory(cfg_.render_factory_name);
+			}
+		}
+		return *render_factory_;
+	}
+
+	AudioFactory& Context::AudioFactoryInstance()
+	{
+		if (AudioFactory::NullObject() == audio_factory_)
+		{
+			boost::mutex::scoped_lock lock(singleton_mutex);
+			if (AudioFactory::NullObject() == audio_factory_)
+			{
+				this->LoadAudioFactory(cfg_.audio_factory_name);
+			}
+		}
+		return *audio_factory_;
+	}
+
+	InputFactory& Context::InputFactoryInstance()
+	{
+		if (InputFactory::NullObject() == input_factory_)
+		{
+			boost::mutex::scoped_lock lock(singleton_mutex);
+			if (InputFactory::NullObject() == input_factory_)
+			{
+				this->LoadInputFactory(cfg_.input_factory_name);
+			}
+		}
+		return *input_factory_;
+	}
+
+	ShowFactory& Context::ShowFactoryInstance()
+	{
+		if (ShowFactory::NullObject() == show_factory_)
+		{
+			boost::mutex::scoped_lock lock(singleton_mutex);
+			if (ShowFactory::NullObject() == show_factory_)
+			{
+				this->LoadShowFactory(cfg_.show_factory_name);
+			}
+		}
+		return *show_factory_;
+	}
+
+	AudioDataSourceFactory& Context::AudioDataSourceFactoryInstance()
+	{
+		if (AudioDataSourceFactory::NullObject() == audio_data_src_factory_)
+		{
+			boost::mutex::scoped_lock lock(singleton_mutex);
+			if (AudioDataSourceFactory::NullObject() == audio_data_src_factory_)
+			{
+				this->LoadAudioDataSourceFactory(cfg_.audio_data_source_factory_name);
+			}
+		}
+		return *audio_data_src_factory_;
 	}
 }
