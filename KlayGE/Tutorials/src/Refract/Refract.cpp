@@ -162,7 +162,7 @@ int main()
 Refract::Refract()
 			: App3DFramework("Refract")
 {
-	ResLoader::Instance().AddPath("../../Samples/media/Refract");
+	ResLoader::Instance().AddPath("../../Tutorials/media/Refract");
 }
 
 bool Refract::ConfirmDevice() const

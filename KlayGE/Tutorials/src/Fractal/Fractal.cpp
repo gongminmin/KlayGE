@@ -114,7 +114,7 @@ int main()
 Fractal::Fractal()
 			: App3DFramework("Fractal")
 {
-	ResLoader::Instance().AddPath("../../Samples/media/Fractal");
+	ResLoader::Instance().AddPath("../../Tutorials/media/Fractal");
 }
 
 bool Fractal::ConfirmDevice() const

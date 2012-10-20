@@ -1,38 +1,56 @@
 <?xml version="1.0" encoding="utf-8"?>
 <CodeLite_Workspace Name="Tutorials" Database="./Tutorials.tags">
   <Project Name="DistanceMapping" Path="DistanceMapping.project"/>
+  <Project Name="Fractal" Path="Fractal.project"/>
+  <Project Name="Refract" Path="Refract.project"/>
   <Project Name="VertexDisplacement" Path="VertexDisplacement.project" Active="Yes"/>
   <BuildMatrix>
     <WorkspaceConfiguration Name="Debug_win_x86" Selected="no">
       <Project Name="DistanceMapping" ConfigName="Debug_win_x86"/>
+      <Project Name="Fractal" ConfigName="Debug_win_x86"/>
+      <Project Name="Refract" ConfigName="Debug_win_x86"/>
       <Project Name="VertexDisplacement" ConfigName="Debug_win_x86"/>
     </WorkspaceConfiguration>
     <WorkspaceConfiguration Name="Release_win_x86" Selected="yes">
       <Project Name="DistanceMapping" ConfigName="Release_win_x86"/>
+      <Project Name="Fractal" ConfigName="Release_win_x86"/>
+      <Project Name="Refract" ConfigName="Release_win_x86"/>
       <Project Name="VertexDisplacement" ConfigName="Release_win_x86"/>
     </WorkspaceConfiguration>
     <WorkspaceConfiguration Name="Debug_win_x64" Selected="yes">
       <Project Name="DistanceMapping" ConfigName="Debug_win_x64"/>
+      <Project Name="Fractal" ConfigName="Debug_win_x64"/>
+      <Project Name="Refract" ConfigName="Debug_win_x64"/>
       <Project Name="VertexDisplacement" ConfigName="Debug_win_x64"/>
     </WorkspaceConfiguration>
     <WorkspaceConfiguration Name="Release_win_x64" Selected="yes">
       <Project Name="DistanceMapping" ConfigName="Release_win_x64"/>
+      <Project Name="Fractal" ConfigName="Release_win_x64"/>
+      <Project Name="Refract" ConfigName="Release_win_x64"/>
       <Project Name="VertexDisplacement" ConfigName="Release_win_x64"/>
     </WorkspaceConfiguration>
     <WorkspaceConfiguration Name="Debug_linux_x86" Selected="yes">
       <Project Name="DistanceMapping" ConfigName="Debug_linux_x86"/>
+      <Project Name="Fractal" ConfigName="Debug_linux_x86"/>
+      <Project Name="Refract" ConfigName="Debug_linux_x86"/>
       <Project Name="VertexDisplacement" ConfigName="Debug_linux_x86"/>
     </WorkspaceConfiguration>
     <WorkspaceConfiguration Name="Release_linux_x86" Selected="yes">
       <Project Name="DistanceMapping" ConfigName="Release_linux_x86"/>
+      <Project Name="Fractal" ConfigName="Release_linux_x86"/>
+      <Project Name="Refract" ConfigName="Release_linux_x86"/>
       <Project Name="VertexDisplacement" ConfigName="Release_linux_x86"/>
     </WorkspaceConfiguration>
     <WorkspaceConfiguration Name="Debug_linux_x64" Selected="yes">
       <Project Name="DistanceMapping" ConfigName="Debug_linux_x64"/>
+      <Project Name="Fractal" ConfigName="Debug_linux_x64"/>
+      <Project Name="Refract" ConfigName="Debug_linux_x64"/>
       <Project Name="VertexDisplacement" ConfigName="Debug_linux_x64"/>
     </WorkspaceConfiguration>
     <WorkspaceConfiguration Name="Release_linux_x64" Selected="yes">
       <Project Name="DistanceMapping" ConfigName="Release_linux_x64"/>
+      <Project Name="Fractal" ConfigName="Release_linux_x64"/>
+      <Project Name="Refract" ConfigName="Release_linux_x64"/>
       <Project Name="VertexDisplacement" ConfigName="Release_linux_x64"/>
     </WorkspaceConfiguration>
   </BuildMatrix>

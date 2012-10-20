@@ -10,11 +10,9 @@
   <Project Name="SubSurface" Path="SubSurface.project"/>
   <Project Name="ShadowCubemap" Path="ShadowCubemap.project"/>
   <Project Name="ModelViewer" Path="ModelViewer.project"/>
-  <Project Name="Refract" Path="Refract.project"/>
   <Project Name="DepthPeeling" Path="DepthPeeling.project"/>
   <Project Name="Ocean" Path="Ocean.project"/>
   <Project Name="GPUParticleSystem" Path="GPUParticleSystem.project"/>
-  <Project Name="Fractal" Path="Fractal.project"/>
   <Project Name="JudaTexViewer" Path="JudaTexViewer.project"/>
   <Project Name="GlobalIllumination" Path="GlobalIllumination.project"/>
   <Project Name="CausticsMap" Path="CausticsMap.project"/>
@@ -26,7 +24,6 @@
       <Project Name="Text" ConfigName="Debug_win_x86"/>
       <Project Name="SubSurface" ConfigName="Debug_win_x86"/>
       <Project Name="ShadowCubemap" ConfigName="Debug_win_x86"/>
-      <Project Name="Refract" ConfigName="Debug_win_x86"/>
       <Project Name="ProceduralTex" ConfigName="Debug_win_x86"/>
       <Project Name="PostProcessing" ConfigName="Debug_win_x86"/>
       <Project Name="ParticleEditor" ConfigName="Debug_win_x86"/>
@@ -35,7 +32,6 @@
       <Project Name="MotionBlurDoF" ConfigName="Debug_win_x86"/>
       <Project Name="ModelViewer" ConfigName="Debug_win_x86"/>
       <Project Name="GPUParticleSystem" ConfigName="Debug_win_x86"/>
-      <Project Name="Fractal" ConfigName="Debug_win_x86"/>
       <Project Name="DepthPeeling" ConfigName="Debug_win_x86"/>
       <Project Name="DeferredRendering" ConfigName="Debug_win_x86"/>
       <Project Name="JudaTexViewer" ConfigName="Debug_win_x86"/>
@@ -49,7 +45,6 @@
       <Project Name="Text" ConfigName="Release_win_x86"/>
       <Project Name="SubSurface" ConfigName="Release_win_x86"/>
       <Project Name="ShadowCubemap" ConfigName="Release_win_x86"/>
-      <Project Name="Refract" ConfigName="Release_win_x86"/>
       <Project Name="ProceduralTex" ConfigName="Release_win_x86"/>
       <Project Name="PostProcessing" ConfigName="Release_win_x86"/>
       <Project Name="ParticleEditor" ConfigName="Release_win_x86"/>
@@ -58,7 +53,6 @@
       <Project Name="MotionBlurDoF" ConfigName="Release_win_x86"/>
       <Project Name="ModelViewer" ConfigName="Release_win_x86"/>
       <Project Name="GPUParticleSystem" ConfigName="Release_win_x86"/>
-      <Project Name="Fractal" ConfigName="Release_win_x86"/>
       <Project Name="DepthPeeling" ConfigName="Release_win_x86"/>
       <Project Name="DeferredRendering" ConfigName="Release_win_x86"/>
       <Project Name="JudaTexViewer" ConfigName="Release_win_x86"/>
@@ -72,7 +66,6 @@
       <Project Name="Text" ConfigName="Debug_win_x64"/>
       <Project Name="SubSurface" ConfigName="Debug_win_x64"/>
       <Project Name="ShadowCubemap" ConfigName="Debug_win_x64"/>
-      <Project Name="Refract" ConfigName="Debug_win_x64"/>
       <Project Name="ProceduralTex" ConfigName="Debug_win_x64"/>
       <Project Name="PostProcessing" ConfigName="Debug_win_x64"/>
       <Project Name="ParticleEditor" ConfigName="Debug_win_x64"/>
@@ -81,7 +74,6 @@
       <Project Name="MotionBlurDoF" ConfigName="Debug_win_x64"/>
       <Project Name="ModelViewer" ConfigName="Debug_win_x64"/>
       <Project Name="GPUParticleSystem" ConfigName="Debug_win_x64"/>
-      <Project Name="Fractal" ConfigName="Debug_win_x64"/>
       <Project Name="DepthPeeling" ConfigName="Debug_win_x64"/>
       <Project Name="DeferredRendering" ConfigName="Debug_win_x64"/>
       <Project Name="JudaTexViewer" ConfigName="Debug_win_x64"/>
@@ -95,7 +87,6 @@
       <Project Name="Text" ConfigName="Release_win_x64"/>
       <Project Name="SubSurface" ConfigName="Release_win_x64"/>
       <Project Name="ShadowCubemap" ConfigName="Release_win_x64"/>
-      <Project Name="Refract" ConfigName="Release_win_x64"/>
       <Project Name="ProceduralTex" ConfigName="Release_win_x64"/>
       <Project Name="PostProcessing" ConfigName="Release_win_x64"/>
       <Project Name="ParticleEditor" ConfigName="Release_win_x64"/>
@@ -104,7 +95,6 @@
       <Project Name="MotionBlurDoF" ConfigName="Release_win_x64"/>
       <Project Name="ModelViewer" ConfigName="Release_win_x64"/>
       <Project Name="GPUParticleSystem" ConfigName="Release_win_x64"/>
-      <Project Name="Fractal" ConfigName="Release_win_x64"/>
       <Project Name="DepthPeeling" ConfigName="Release_win_x64"/>
       <Project Name="DeferredRendering" ConfigName="Release_win_x64"/>
       <Project Name="JudaTexViewer" ConfigName="Release_win_x64"/>
@@ -118,7 +108,6 @@
       <Project Name="Text" ConfigName="Debug_linux_x86"/>
       <Project Name="SubSurface" ConfigName="Debug_linux_x86"/>
       <Project Name="ShadowCubemap" ConfigName="Debug_linux_x86"/>
-      <Project Name="Refract" ConfigName="Debug_linux_x86"/>
       <Project Name="ProceduralTex" ConfigName="Debug_linux_x86"/>
       <Project Name="PostProcessing" ConfigName="Debug_linux_x86"/>
       <Project Name="ParticleEditor" ConfigName="Debug_linux_x86"/>
@@ -127,7 +116,6 @@
       <Project Name="MotionBlurDoF" ConfigName="Debug_linux_x86"/>
       <Project Name="ModelViewer" ConfigName="Debug_linux_x86"/>
       <Project Name="GPUParticleSystem" ConfigName="Debug_linux_x86"/>
-      <Project Name="Fractal" ConfigName="Debug_linux_x86"/>
       <Project Name="DepthPeeling" ConfigName="Debug_linux_x86"/>
       <Project Name="DeferredRendering" ConfigName="Debug_linux_x86"/>
       <Project Name="JudaTexViewer" ConfigName="Debug_linux_x86"/>
@@ -141,7 +129,6 @@
       <Project Name="Text" ConfigName="Release_linux_x86"/>
       <Project Name="SubSurface" ConfigName="Release_linux_x86"/>
       <Project Name="ShadowCubemap" ConfigName="Release_linux_x86"/>
-      <Project Name="Refract" ConfigName="Release_linux_x86"/>
       <Project Name="ProceduralTex" ConfigName="Release_linux_x86"/>
       <Project Name="PostProcessing" ConfigName="Release_linux_x86"/>
       <Project Name="ParticleEditor" ConfigName="Release_linux_x86"/>
@@ -150,7 +137,6 @@
       <Project Name="MotionBlurDoF" ConfigName="Release_linux_x86"/>
       <Project Name="ModelViewer" ConfigName="Release_linux_x86"/>
       <Project Name="GPUParticleSystem" ConfigName="Release_linux_x86"/>
-      <Project Name="Fractal" ConfigName="Release_linux_x86"/>
       <Project Name="DepthPeeling" ConfigName="Release_linux_x86"/>
       <Project Name="DeferredRendering" ConfigName="Release_linux_x86"/>
       <Project Name="JudaTexViewer" ConfigName="Release_linux_x86"/>
@@ -164,7 +150,6 @@
       <Project Name="Text" ConfigName="Debug_linux_x64"/>
       <Project Name="SubSurface" ConfigName="Debug_linux_x64"/>
       <Project Name="ShadowCubemap" ConfigName="Debug_linux_x64"/>
-      <Project Name="Refract" ConfigName="Debug_linux_x64"/>
       <Project Name="ProceduralTex" ConfigName="Debug_linux_x64"/>
       <Project Name="PostProcessing" ConfigName="Debug_linux_x64"/>
       <Project Name="ParticleEditor" ConfigName="Debug_linux_x64"/>
@@ -173,7 +158,6 @@
       <Project Name="MotionBlurDoF" ConfigName="Debug_linux_x64"/>
       <Project Name="ModelViewer" ConfigName="Debug_linux_x64"/>
       <Project Name="GPUParticleSystem" ConfigName="Debug_linux_x64"/>
-      <Project Name="Fractal" ConfigName="Debug_linux_x64"/>
       <Project Name="DepthPeeling" ConfigName="Debug_linux_x64"/>
       <Project Name="DeferredRendering" ConfigName="Debug_linux_x64"/>
       <Project Name="JudaTexViewer" ConfigName="Debug_linux_x64"/>
@@ -187,7 +171,6 @@
       <Project Name="Text" ConfigName="Release_linux_x64"/>
       <Project Name="SubSurface" ConfigName="Release_linux_x64"/>
       <Project Name="ShadowCubemap" ConfigName="Release_linux_x64"/>
-      <Project Name="Refract" ConfigName="Release_linux_x64"/>
       <Project Name="ProceduralTex" ConfigName="Release_linux_x64"/>
       <Project Name="PostProcessing" ConfigName="Release_linux_x64"/>
       <Project Name="ParticleEditor" ConfigName="Release_linux_x64"/>
@@ -196,7 +179,6 @@
       <Project Name="MotionBlurDoF" ConfigName="Release_linux_x64"/>
       <Project Name="ModelViewer" ConfigName="Release_linux_x64"/>
       <Project Name="GPUParticleSystem" ConfigName="Release_linux_x64"/>
-      <Project Name="Fractal" ConfigName="Release_linux_x64"/>
       <Project Name="DepthPeeling" ConfigName="Release_linux_x64"/>
       <Project Name="DeferredRendering" ConfigName="Release_linux_x64"/>
       <Project Name="JudaTexViewer" ConfigName="Release_linux_x64"/>
