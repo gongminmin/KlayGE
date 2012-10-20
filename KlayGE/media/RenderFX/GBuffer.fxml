@@ -74,9 +74,6 @@
 		<state name="border_clr" r="0" g="0" b="0" a="0"/>
 	</parameter>
 
-	<parameter type="textureCUBE" name="skybox_tex"/>
-	<parameter type="textureCUBE" name="skybox_C_tex"/>
-
 	<shader>
 		<![CDATA[
 #if KLAYGE_D3D11
@@ -338,11 +335,9 @@ void GBufferAlphaBlendMRTPS(float4 texcoord_2xy : TEXCOORD0, float4 ts_to_view0_
 }
 
 void GBufferSkyBoxVS(float4 pos : POSITION,
-			out float3 texcoord0 : TEXCOORD0,
 			out float4 oPos : SV_Position)
 {
 	oPos = pos;
-	texcoord0 = mul(pos, inv_mvp).xyz;
 }
 
 float4 DepthSkyBoxPS() : SV_Target
@@ -355,28 +350,14 @@ float4 GBufferSkyBoxRT0PS() : SV_Target
 	return 0;
 }
 
-float4 GBufferLDRSkyBoxRT1PS(float3 texcoord : TEXCOORD0) : SV_Target
+float4 GBufferSkyBoxRT1PS() : SV_Target
 {
-	return skybox_tex.Sample(skybox_sampler, texcoord);
+	return 0;
 }
 
-float4 GBufferSkyBoxRT1PS(float3 texcoord : TEXCOORD0) : SV_Target
+void GBufferSkyBoxMRTPS(out float4 mrt_0 : SV_Target0, out float4 mrt_1 : SV_Target1)
 {
-	return decode_hdr_yc(skybox_tex.Sample(skybox_sampler, texcoord).r,
-					skybox_C_tex.Sample(skybox_sampler, texcoord));
-}
-
-void GBufferLDRSkyBoxMRTPS(float3 texcoord : TEXCOORD0, out float4 mrt_0 : SV_Target0, out float4 mrt_1 : SV_Target1)
-{
-	mrt_0 = 0;
-	mrt_1 = skybox_tex.Sample(skybox_sampler, texcoord);
-}
-
-void GBufferSkyBoxMRTPS(float3 texcoord : TEXCOORD0, out float4 mrt_0 : SV_Target0, out float4 mrt_1 : SV_Target1)
-{
-	mrt_0 = 0;
-	mrt_1 = decode_hdr_yc(skybox_tex.Sample(skybox_sampler, texcoord).r,
-					skybox_C_tex.Sample(skybox_sampler, texcoord));
+	mrt_0 = mrt_1 = 0;
 }
 
 
@@ -740,25 +721,6 @@ void DecalGBufferAlphaTestMRTPS(float4 texcoord_2xy : TEXCOORD0, float4 ts_to_vi
 		</pass>
 	</technique>
 
-	<technique name="GBufferLDRSkyBoxRT1Tech">
-		<pass name="p0">
-			<state name="cull_mode" value="none"/>
-			<state name="depth_func" value="equal"/>
-			<state name="depth_write_mask" value="false"/>
-
-			<state name="front_stencil_enable" value="true"/>
-			<state name="front_stencil_func" value="always_pass"/>
-			<state name="front_stencil_ref" value="128"/>
-			<state name="front_stencil_pass" value="replace"/>
-			<state name="back_stencil_enable" value="true"/>
-			<state name="back_stencil_func" value="always_pass"/>
-			<state name="back_stencil_ref" value="128"/>
-			<state name="back_stencil_pass" value="replace"/>
-
-			<state name="vertex_shader" value="GBufferSkyBoxVS()"/>
-			<state name="pixel_shader" value="GBufferLDRSkyBoxRT1PS()"/>
-		</pass>
-	</technique>
 	<technique name="GBufferSkyBoxRT1Tech">
 		<pass name="p0">
 			<state name="cull_mode" value="none"/>
@@ -779,11 +741,6 @@ void DecalGBufferAlphaTestMRTPS(float4 texcoord_2xy : TEXCOORD0, float4 ts_to_vi
 		</pass>
 	</technique>
 
-	<technique name="GBufferLDRSkyBoxMRTTech" inherit="GBufferSkyBoxRT0Tech">
-		<pass name="p0">
-			<state name="pixel_shader" value="GBufferLDRSkyBoxMRTPS()"/>
-		</pass>
-	</technique>
 	<technique name="GBufferSkyBoxMRTTech" inherit="GBufferSkyBoxRT0Tech">
 		<pass name="p0">
 			<state name="pixel_shader" value="GBufferSkyBoxMRTPS()"/>
@@ -993,6 +950,9 @@ float4 GenShadowMapWODepthTextureAlphaTestPS(float2 tc : TEXCOORD0, float3 view_
 		</pass>
 	</technique>
 
+
+	<parameter type="textureCUBE" name="skybox_tex"/>
+	<parameter type="textureCUBE" name="skybox_C_tex"/>
 	
 	<shader>
 		<![CDATA[
@@ -1041,6 +1001,25 @@ float4 SpecialShadingAlphaBlendPS(float2 texcoord : TEXCOORD0) : SV_Target
 	}
 	return float4(max(emit, 0), opacity);
 }
+
+void SpecialShadingSkyBoxVS(float4 pos : POSITION,
+			out float3 texcoord0 : TEXCOORD0,
+			out float4 oPos : SV_Position)
+{
+	oPos = pos;
+	texcoord0 = mul(pos, inv_mvp).xyz;
+}
+
+float4 SpecialShadingLDRSkyBoxPS(float3 texcoord : TEXCOORD0) : SV_Target
+{
+	return skybox_tex.Sample(skybox_sampler, texcoord);
+}
+
+float4 SpecialShadingSkyBoxPS(float3 texcoord : TEXCOORD0) : SV_Target
+{
+	return decode_hdr_yc(skybox_tex.Sample(skybox_sampler, texcoord).r,
+					skybox_C_tex.Sample(skybox_sampler, texcoord));
+}
 		]]>
 	</shader>
 
@@ -1073,6 +1052,29 @@ float4 SpecialShadingAlphaBlendPS(float2 texcoord : TEXCOORD0) : SV_Target
 	<technique name="SpecialShadingAlphaBlendFrontTech" inherit="SpecialShadingAlphaBlendBackTech">
 		<pass name="p0">
 			<state name="cull_mode" value="back"/>
+		</pass>
+	</technique>
+	
+	<technique name="ShadingLDRSkyBoxTech">
+		<pass name="p0">
+			<state name="cull_mode" value="none"/>
+			<state name="depth_enable" value="true"/>
+			<state name="depth_func" value="equal"/>
+			<state name="depth_write_mask" value="false"/>
+
+			<state name="vertex_shader" value="SpecialShadingSkyBoxVS()"/>
+			<state name="pixel_shader" value="SpecialShadingLDRSkyBoxPS()"/>
+		</pass>
+	</technique>
+	<technique name="ShadingSkyBoxTech">
+		<pass name="p0">
+			<state name="cull_mode" value="none"/>
+			<state name="depth_enable" value="true"/>
+			<state name="depth_func" value="equal"/>
+			<state name="depth_write_mask" value="false"/>
+
+			<state name="vertex_shader" value="SpecialShadingSkyBoxVS()"/>
+			<state name="pixel_shader" value="SpecialShadingSkyBoxPS()"/>
 		</pass>
 	</technique>
 </effect>
