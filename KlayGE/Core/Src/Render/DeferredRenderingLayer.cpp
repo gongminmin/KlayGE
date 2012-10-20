@@ -301,6 +301,7 @@ namespace KlayGE
 			pass_scaned_.push_back(this->ComposePassScanCode(0, PT_OpaqueGBufferRT0, 0, 0));
 			pass_scaned_.push_back(this->ComposePassScanCode(0, PT_OpaqueGBufferRT0, 0, 1));
 			pass_scaned_.push_back(this->ComposePassScanCode(0, PT_OpaqueGBufferRT1, 0, 0));
+			pass_scaned_.push_back(this->ComposePassScanCode(0, PT_OpaqueGBufferRT1, 0, 1));
 		}
 
 		for (size_t vpi = 0; vpi < viewports_.size(); ++ vpi)
@@ -988,6 +989,7 @@ namespace KlayGE
 							pass_scaned_.push_back(this->ComposePassScanCode(vpi, PT_OpaqueGBufferRT0, 0, 0));
 							pass_scaned_.push_back(this->ComposePassScanCode(vpi, PT_OpaqueGBufferRT0, 0, 1));
 							pass_scaned_.push_back(this->ComposePassScanCode(vpi, PT_OpaqueGBufferRT1, 0, 0));
+							pass_scaned_.push_back(this->ComposePassScanCode(vpi, PT_OpaqueGBufferRT1, 0, 1));
 						}
 					}
 					if (pvp.g_buffer_enables[TransparencyBack_GBuffer])
@@ -1329,11 +1331,12 @@ namespace KlayGE
 
 					if (!decals_.empty())
 					{
+						PassType pt = mrt_g_buffer_support_ ? PT_OpaqueGBufferMRT : PT_OpaqueGBufferRT0;
 						re.BindFrameBuffer(pvp.g_buffers[Opaque_GBuffer]);
 						typedef BOOST_TYPEOF(decals_) DecalsType;
 						BOOST_FOREACH(DecalsType::reference de, decals_)
 						{
-							de->Pass(PT_OpaqueGBufferMRT);
+							de->Pass(pt);
 							de->Render();
 						}
 					}
@@ -1373,23 +1376,41 @@ namespace KlayGE
 		}
 		else if ((PT_OpaqueGBufferRT1 == pass_type) || (PT_TransparencyBackGBufferRT1 == pass_type) || (PT_TransparencyFrontGBufferRT1 == pass_type))
 		{
-			if (PT_OpaqueGBufferRT1 == pass_type)
+			if (0 == index_in_pass)
 			{
-				re.BindFrameBuffer(pvp.g_buffers_rt1[Opaque_GBuffer]);
-				re.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color, Color(0, 0, 0, 0), 1.0f, 0);
-				return App3DFramework::URV_Need_Flush | App3DFramework::URV_Opaque_Only;
-			}
-			else if (PT_TransparencyBackGBufferRT1 == pass_type)
-			{
-				re.BindFrameBuffer(pvp.g_buffers_rt1[TransparencyBack_GBuffer]);
-				re.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color, Color(0, 0, 0, 0), 1.0f, 0);
-				return App3DFramework::URV_Need_Flush | App3DFramework::URV_Transparency_Back_Only;
+				if (PT_OpaqueGBufferRT1 == pass_type)
+				{
+					re.BindFrameBuffer(pvp.g_buffers_rt1[Opaque_GBuffer]);
+					re.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color, Color(0, 0, 0, 0), 1.0f, 0);
+					return App3DFramework::URV_Need_Flush | App3DFramework::URV_Opaque_Only;
+				}
+				else if (PT_TransparencyBackGBufferRT1 == pass_type)
+				{
+					re.BindFrameBuffer(pvp.g_buffers_rt1[TransparencyBack_GBuffer]);
+					re.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color, Color(0, 0, 0, 0), 1.0f, 0);
+					return App3DFramework::URV_Need_Flush | App3DFramework::URV_Transparency_Back_Only;
+				}
+				else
+				{
+					re.BindFrameBuffer(pvp.g_buffers_rt1[TransparencyFront_GBuffer]);
+					re.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color, Color(0, 0, 0, 0), 1.0f, 0);
+					return App3DFramework::URV_Need_Flush | App3DFramework::URV_Transparency_Front_Only;
+				}
 			}
 			else
 			{
-				re.BindFrameBuffer(pvp.g_buffers_rt1[TransparencyFront_GBuffer]);
-				re.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color, Color(0, 0, 0, 0), 1.0f, 0);
-				return App3DFramework::URV_Need_Flush | App3DFramework::URV_Transparency_Front_Only;
+				if (!decals_.empty())
+				{
+					re.BindFrameBuffer(pvp.g_buffers_rt1[Opaque_GBuffer]);
+					typedef BOOST_TYPEOF(decals_) DecalsType;
+					BOOST_FOREACH(DecalsType::reference de, decals_)
+					{
+						de->Pass(PT_OpaqueGBufferRT1);
+						de->Render();
+					}
+				}
+
+				return App3DFramework::URV_Flushed;
 			}
 		}
 		else

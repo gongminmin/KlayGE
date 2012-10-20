@@ -419,6 +419,82 @@ void DecalGBufferVS(float4 pos : POSITION,
 	oViewDir = mul(pos, model_view).xyz;
 }
 
+float4 DecalGBufferAlphaTestRT0PS(float4 texcoord_2xy : TEXCOORD0, float4 ts_to_view0_2z : TEXCOORD1, float3 ts_to_view1 : TEXCOORD2,
+#ifdef NOPERSPECTIVE_SUPPORT
+					noperspective float2 screen_tc : TEXCOORD3,
+#else
+					float3 screen_tc_w : TEXCOORD3,
+#endif
+					float3 view_dir : TEXCOORD4) : SV_Target
+{
+#ifndef NOPERSPECTIVE_SUPPORT
+	float2 screen_tc = screen_tc_w.xy / screen_tc_w.z;
+#endif
+
+	float3 pos_es = view_dir * (opaque_depth_tex.Sample(point_sampler, screen_tc).r / view_dir.z);
+	float4 decal_pos = mul(float4(pos_es, 1), inv_mv);
+	if (any(abs(decal_pos.xyz) > decal_pos.w))
+	{
+		discard;
+	}
+	
+	decal_pos /= decal_pos.w;
+	texcoord_2xy.xy = float2(decal_pos.x, -decal_pos.y) * 0.5f + 0.5f;
+
+	clip(diffuse_tex.Sample(bilinear_border_sampler, texcoord_2xy.xy).a - ALPHA_TEST_THRESHOLD);
+		
+	float3 normal = RestoreNormal(texcoord_2xy, ts_to_view0_2z, ts_to_view1);
+	
+	return StoreGBufferRT0(normal, shininess);
+}
+
+float4 DecalGBufferAlphaTestRT1PS(float4 texcoord_2xy : TEXCOORD0, float4 ts_to_view0_2z : TEXCOORD1, float3 ts_to_view1 : TEXCOORD2,
+#ifdef NOPERSPECTIVE_SUPPORT
+					noperspective float2 screen_tc : TEXCOORD3,
+#else
+					float3 screen_tc_w : TEXCOORD3,
+#endif
+					float3 view_dir : TEXCOORD4) : SV_Target
+{
+#ifndef NOPERSPECTIVE_SUPPORT
+	float2 screen_tc = screen_tc_w.xy / screen_tc_w.z;
+#endif
+
+	float3 pos_es = view_dir * (opaque_depth_tex.Sample(point_sampler, screen_tc).r / view_dir.z);
+	float4 decal_pos = mul(float4(pos_es, 1), inv_mv);
+	if (any(abs(decal_pos.xyz) > decal_pos.w))
+	{
+		discard;
+	}
+
+	decal_pos /= decal_pos.w;
+	texcoord_2xy.xy = float2(decal_pos.x, -decal_pos.y) * 0.5f + 0.5f;
+
+	clip(diffuse_tex.Sample(bilinear_border_sampler, texcoord_2xy.xy).a - ALPHA_TEST_THRESHOLD);
+
+	float3 diffuse;
+	if (diffuse_clr.w > 0.5f)
+	{
+		diffuse = diffuse_tex.Sample(bilinear_border_sampler, texcoord_2xy.xy).rgb;
+	}
+	else
+	{
+		diffuse = diffuse_clr.rgb;
+	}
+	
+	float specular;
+	if (specular_level.w > 0.5f)
+	{
+		specular = dot(specular_tex.Sample(bilinear_border_sampler, texcoord_2xy.xy).rgb, float3(0.2126f, 0.7152f, 0.0722f));
+	}
+	else
+	{
+		specular = specular_level.x;
+	}
+	
+	return StoreGBufferRT1(diffuse, specular);
+}
+
 void DecalGBufferAlphaTestMRTPS(float4 texcoord_2xy : TEXCOORD0, float4 ts_to_view0_2z : TEXCOORD1, float3 ts_to_view1 : TEXCOORD2,
 #ifdef NOPERSPECTIVE_SUPPORT
 					noperspective float2 screen_tc : TEXCOORD3,
@@ -434,43 +510,40 @@ void DecalGBufferAlphaTestMRTPS(float4 texcoord_2xy : TEXCOORD0, float4 ts_to_vi
 
 	float3 pos_es = view_dir * (opaque_depth_tex.Sample(point_sampler, screen_tc).r / view_dir.z);
 	float4 decal_pos = mul(float4(pos_es, 1), inv_mv);
-	if (all(abs(decal_pos.xy) <= decal_pos.w))
+	if (any(abs(decal_pos.xyz) > decal_pos.w))
 	{
-		decal_pos /= decal_pos.w;
-		texcoord_2xy.xy = float2(decal_pos.x, -decal_pos.y) * 0.5f + 0.5f;
+		discard;
+	}
+	
+	decal_pos /= decal_pos.w;
+	texcoord_2xy.xy = float2(decal_pos.x, -decal_pos.y) * 0.5f + 0.5f;
 
-		clip(diffuse_tex.Sample(bilinear_border_sampler, texcoord_2xy.xy).a - ALPHA_TEST_THRESHOLD);
+	clip(diffuse_tex.Sample(bilinear_border_sampler, texcoord_2xy.xy).a - ALPHA_TEST_THRESHOLD);
 		
-		float3 normal = RestoreNormal(texcoord_2xy, ts_to_view0_2z, ts_to_view1);
+	float3 normal = RestoreNormal(texcoord_2xy, ts_to_view0_2z, ts_to_view1);
 
-		float3 diffuse;
-		if (diffuse_clr.w > 0.5f)
-		{
-			diffuse = diffuse_tex.Sample(bilinear_border_sampler, texcoord_2xy.xy).rgb;
-		}
-		else
-		{
-			diffuse = diffuse_clr.rgb;
-		}
-	
-		float specular;
-		if (specular_level.w > 0.5f)
-		{
-			specular = dot(specular_tex.Sample(bilinear_border_sampler, texcoord_2xy.xy).rgb, float3(0.2126f, 0.7152f, 0.0722f));
-		}
-		else
-		{
-			specular = specular_level.x;
-		}
-	
-		StoreGBufferMRT(normal, specular, shininess, diffuse,
-			mrt_0, mrt_1);
+	float3 diffuse;
+	if (diffuse_clr.w > 0.5f)
+	{
+		diffuse = diffuse_tex.Sample(bilinear_border_sampler, texcoord_2xy.xy).rgb;
 	}
 	else
 	{
-		discard;
-		mrt_0 = mrt_1 = 0;
+		diffuse = diffuse_clr.rgb;
 	}
+	
+	float specular;
+	if (specular_level.w > 0.5f)
+	{
+		specular = dot(specular_tex.Sample(bilinear_border_sampler, texcoord_2xy.xy).rgb, float3(0.2126f, 0.7152f, 0.0722f));
+	}
+	else
+	{
+		specular = specular_level.x;
+	}
+	
+	StoreGBufferMRT(normal, specular, shininess, diffuse,
+		mrt_0, mrt_1);
 }
 		]]>
 	</shader>
@@ -717,11 +790,23 @@ void DecalGBufferAlphaTestMRTPS(float4 texcoord_2xy : TEXCOORD0, float4 ts_to_vi
 		</pass>
 	</technique>
 
-	<technique name="DecalGBufferAlphaTestMRTTech" inherit="GBufferAlphaTestMRTTech">
+	<technique name="DecalGBufferAlphaTestRT0Tech" inherit="GBufferAlphaTestRT0Tech">
 		<pass name="p0">
 			<state name="depth_write_mask" value="0"/>
 
 			<state name="vertex_shader" value="DecalGBufferVS()"/>
+			<state name="pixel_shader" value="DecalGBufferAlphaTestRT0PS()"/>
+		</pass>
+	</technique>
+
+	<technique name="DecalGBufferAlphaTestRT1Tech" inherit="DecalGBufferAlphaTestRT0Tech">
+		<pass name="p0">
+			<state name="pixel_shader" value="DecalGBufferAlphaTestRT1PS()"/>
+		</pass>
+	</technique>
+
+	<technique name="DecalGBufferAlphaTestMRTTech" inherit="DecalGBufferAlphaTestRT0Tech">
+		<pass name="p0">
 			<state name="pixel_shader" value="DecalGBufferAlphaTestMRTPS()"/>
 		</pass>
 	</technique>

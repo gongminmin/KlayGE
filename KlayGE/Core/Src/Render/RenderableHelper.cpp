@@ -503,8 +503,10 @@ namespace KlayGE
 	{
 		BOOST_ASSERT(deferred_effect_);
 
+		gbuffer_alpha_test_rt0_tech_ = deferred_effect_->TechniqueByName("DecalGBufferAlphaTestRT0Tech");
+		gbuffer_alpha_test_rt1_tech_ = deferred_effect_->TechniqueByName("DecalGBufferAlphaTestRT1Tech");
 		gbuffer_alpha_test_mrt_tech_ = deferred_effect_->TechniqueByName("DecalGBufferAlphaTestMRTTech");
-		technique_ = gbuffer_alpha_test_mrt_tech_;
+		technique_ = gbuffer_alpha_test_rt0_tech_;
 
 		aabb_ = AABBox(float3(-1, -1, -1), float3(1, 1, 1));
 		float3 xyzs[] =
@@ -565,6 +567,12 @@ namespace KlayGE
 					
 		switch (type_)
 		{
+		case PT_OpaqueGBufferRT0:
+		case PT_TransparencyBackGBufferRT0:
+		case PT_TransparencyFrontGBufferRT0:
+		case PT_OpaqueGBufferRT1:
+		case PT_TransparencyBackGBufferRT1:
+		case PT_TransparencyFrontGBufferRT1:
 		case PT_OpaqueGBufferMRT:
 		case PT_TransparencyBackGBufferMRT:
 		case PT_TransparencyFrontGBufferMRT:
@@ -572,6 +580,9 @@ namespace KlayGE
 			*specular_level_param_ = float4(specular_level_, 0, 0, static_cast<float>(!!specular_tex_));
 			*shininess_param_ = MathLib::clamp(shininess_ / 256.0f, 1e-6f, 0.999f);
 			*inv_mv_ep_ = view_to_decal;
+			break;
+
+		default:
 			break;
 		}
 	}
