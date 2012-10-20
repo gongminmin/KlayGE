@@ -288,6 +288,10 @@ void DetailedSkinnedMesh::UpdateTech()
 	gbuffer_alpha_test_mrt_tech_ = model->gbuffer_alpha_test_mrt_techs_[visualize_][line_mode_][smooth_mesh_][has_skinned_];
 	gbuffer_alpha_blend_back_mrt_tech_ = model->gbuffer_alpha_blend_back_mrt_techs_[visualize_][line_mode_][smooth_mesh_][has_skinned_];
 	gbuffer_alpha_blend_front_mrt_tech_ = model->gbuffer_alpha_blend_front_mrt_techs_[visualize_][line_mode_][smooth_mesh_][has_skinned_];
+
+	special_shading_tech_ = model->special_shading_techs_[visualize_][line_mode_][smooth_mesh_][has_skinned_];
+	special_shading_alpha_blend_back_tech_ = model->special_shading_alpha_blend_back_techs_[visualize_][line_mode_][smooth_mesh_][has_skinned_];
+	special_shading_alpha_blend_front_tech_ = model->special_shading_alpha_blend_front_techs_[visualize_][line_mode_][smooth_mesh_][has_skinned_];
 }
 
 void DetailedSkinnedMesh::Render()
@@ -351,6 +355,9 @@ DetailedSkinnedModel::DetailedSkinnedModel(std::wstring const & name)
 	std::string g_buffer_alpha_test_mrt_tech_str;
 	std::string g_buffer_alpha_blend_back_mrt_tech_str;
 	std::string g_buffer_alpha_blend_front_mrt_tech_str;
+	std::string special_shading_tech_str;
+	std::string special_shading_alpha_blend_back_tech_str;
+	std::string special_shading_alpha_blend_front_tech_str;
 	for (int i = 0; i < 3; ++ i)
 	{
 		for (int j = 0; j < 2; ++ j)
@@ -364,6 +371,7 @@ DetailedSkinnedModel::DetailedSkinnedModel(std::wstring const & name)
 					case 0:
 						depth_tech_str = "Depth";
 						g_buffer_tech_str = "GBuffer";
+						special_shading_tech_str = "SpecialShading";
 						break;
 
 					case 1:
@@ -379,17 +387,20 @@ DetailedSkinnedModel::DetailedSkinnedModel(std::wstring const & name)
 					{
 						depth_tech_str += "Fill";
 						g_buffer_tech_str += "Fill";
+						special_shading_tech_str += "Fill";
 					}
 					else
 					{
 						depth_tech_str += "Line";
 						g_buffer_tech_str += "Line";
+						special_shading_tech_str += "Line";
 					}
 					
 					if (1 == l)
 					{
 						depth_tech_str += "Skinned";
 						g_buffer_tech_str += "Skinned";
+						special_shading_tech_str += "Skinned";
 					}
 					
 					depth_alpha_test_tech_str = depth_tech_str;
@@ -402,6 +413,8 @@ DetailedSkinnedModel::DetailedSkinnedModel(std::wstring const & name)
 					g_buffer_alpha_test_mrt_tech_str = g_buffer_mrt_tech_str;
 					g_buffer_alpha_blend_back_mrt_tech_str = g_buffer_mrt_tech_str;
 					g_buffer_alpha_blend_front_mrt_tech_str = g_buffer_mrt_tech_str;
+					special_shading_alpha_blend_back_tech_str = special_shading_tech_str;
+					special_shading_alpha_blend_front_tech_str = special_shading_tech_str;
 					if (0 == i)
 					{
 						depth_alpha_test_tech_str += "AlphaTest";
@@ -415,6 +428,9 @@ DetailedSkinnedModel::DetailedSkinnedModel(std::wstring const & name)
 						g_buffer_alpha_test_mrt_tech_str += "AlphaTest";
 						g_buffer_alpha_blend_back_mrt_tech_str += "BlendBack";
 						g_buffer_alpha_blend_front_mrt_tech_str += "BlendFront";
+
+						special_shading_alpha_blend_back_tech_str += "BlendBack";
+						special_shading_alpha_blend_front_tech_str += "BlendFront";
 					}
 
 					if (1 == k)
@@ -435,6 +451,9 @@ DetailedSkinnedModel::DetailedSkinnedModel(std::wstring const & name)
 							g_buffer_alpha_test_mrt_tech_str += "Smooth5";
 							g_buffer_alpha_blend_back_mrt_tech_str += "Smooth5";
 							g_buffer_alpha_blend_front_mrt_tech_str += "Smooth5";
+							special_shading_tech_str += "Smooth5";
+							special_shading_alpha_blend_back_tech_str += "Smooth5";
+							special_shading_alpha_blend_front_tech_str += "Smooth5";
 							break;
 
 						case TM_Instanced:
@@ -450,6 +469,9 @@ DetailedSkinnedModel::DetailedSkinnedModel(std::wstring const & name)
 							g_buffer_alpha_test_mrt_tech_str += "Smooth4";
 							g_buffer_alpha_blend_back_mrt_tech_str += "Smooth4";
 							g_buffer_alpha_blend_front_mrt_tech_str += "Smooth4";
+							special_shading_tech_str += "Smooth4";
+							special_shading_alpha_blend_back_tech_str += "Smooth4";
+							special_shading_alpha_blend_front_tech_str += "Smooth4";
 							break;
 
 						case TM_No:
@@ -476,6 +498,10 @@ DetailedSkinnedModel::DetailedSkinnedModel(std::wstring const & name)
 					gbuffer_alpha_test_mrt_techs_[i][j][k][l] = effect_->TechniqueByName(g_buffer_alpha_test_mrt_tech_str + "MRTTech");
 					gbuffer_alpha_blend_back_mrt_techs_[i][j][k][l] = effect_->TechniqueByName(g_buffer_alpha_blend_back_mrt_tech_str + "MRTTech");
 					gbuffer_alpha_blend_front_mrt_techs_[i][j][k][l] = effect_->TechniqueByName(g_buffer_alpha_blend_front_mrt_tech_str + "MRTTech");
+
+					special_shading_techs_[i][j][k][l] = effect_->TechniqueByName(special_shading_tech_str + "Tech");
+					special_shading_alpha_blend_back_techs_[i][j][k][l] = effect_->TechniqueByName(special_shading_alpha_blend_back_tech_str + "Tech");
+					special_shading_alpha_blend_front_techs_[i][j][k][l] = effect_->TechniqueByName(special_shading_alpha_blend_front_tech_str + "Tech");
 				}
 			}
 		}
