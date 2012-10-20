@@ -164,6 +164,12 @@ namespace KlayGE
 	
 	float4x4 const & Camera::InverseViewProjMatrix() const
 	{
+		if (view_proj_mat_dirty_)
+		{
+			view_proj_mat_ = view_mat_ * proj_mat_;
+			inv_view_proj_mat_ = inv_proj_mat_ * inv_view_mat_;
+			view_proj_mat_dirty_ = false;
+		}
 		return inv_view_proj_mat_;
 	}
 

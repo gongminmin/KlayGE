@@ -1572,7 +1572,8 @@ namespace KlayGE
 						float2 near_q(camera->NearPlane() * q, q);
 						*near_q_param_ = near_q;
 					}
-					if (taa_enabled_)
+					App3DFramework& app = Context::Instance().AppInstance();
+					if ((app.FrameTime() < 1.0f / 30) && taa_enabled_)
 					{
 						taa_pp_->Render();
 						re.Render(*technique_copy_depth_, *rl_quad_);
