@@ -499,9 +499,18 @@ DetailedSkinnedModel::DetailedSkinnedModel(std::wstring const & name)
 					gbuffer_alpha_blend_back_mrt_techs_[i][j][k][l] = effect_->TechniqueByName(g_buffer_alpha_blend_back_mrt_tech_str + "MRTTech");
 					gbuffer_alpha_blend_front_mrt_techs_[i][j][k][l] = effect_->TechniqueByName(g_buffer_alpha_blend_front_mrt_tech_str + "MRTTech");
 
-					special_shading_techs_[i][j][k][l] = effect_->TechniqueByName(special_shading_tech_str + "Tech");
-					special_shading_alpha_blend_back_techs_[i][j][k][l] = effect_->TechniqueByName(special_shading_alpha_blend_back_tech_str + "Tech");
-					special_shading_alpha_blend_front_techs_[i][j][k][l] = effect_->TechniqueByName(special_shading_alpha_blend_front_tech_str + "Tech");
+					if (0 == i)
+					{
+						special_shading_techs_[i][j][k][l] = effect_->TechniqueByName(special_shading_tech_str + "Tech");
+						special_shading_alpha_blend_back_techs_[i][j][k][l] = effect_->TechniqueByName(special_shading_alpha_blend_back_tech_str + "Tech");
+						special_shading_alpha_blend_front_techs_[i][j][k][l] = effect_->TechniqueByName(special_shading_alpha_blend_front_tech_str + "Tech");
+					}
+					else
+					{
+						special_shading_techs_[i][j][k][l] = effect_->TechniqueByName("SpecialShadingTech");
+						special_shading_alpha_blend_back_techs_[i][j][k][l] = effect_->TechniqueByName("SpecialShadingAlphaBlendBackTech");
+						special_shading_alpha_blend_front_techs_[i][j][k][l] = effect_->TechniqueByName("SpecialShadingAlphaBlendFrontTech");
+					}
 				}
 			}
 		}

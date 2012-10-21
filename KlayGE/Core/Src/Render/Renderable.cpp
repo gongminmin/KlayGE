@@ -94,6 +94,7 @@ namespace KlayGE
 				*specular_tex_param_ = specular_tex_;
 				*specular_level_param_ = float4(MathLib::clamp(mtl_ ? mtl_->specular_level : 0, 0.0f, 1.0f), 0, 0, static_cast<float>(!!specular_tex_));
 				*shininess_param_ = MathLib::clamp(mtl_ ? mtl_->shininess / 256.0f : 0, 1e-6f, 0.999f);
+				*opacity_clr_param_ = mtl_ ? mtl_->opacity : 1.0f;
 				*opaque_depth_tex_param_ = drl->OpaqueDepthTex(drl->ActiveViewport());
 				break;
 
