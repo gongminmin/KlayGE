@@ -56,11 +56,21 @@ namespace KlayGE
 {
 	class KLAYGE_CORE_API SceneManager : boost::noncopyable
 	{
-	public:
-		typedef std::vector<LightSourcePtr> LightSourcesType;
-		typedef std::vector<SceneObjectPtr> SceneObjectsType;
-
 	protected:
+		struct SceneObjAABB
+		{
+			SceneObjectPtr so;
+			AABBoxPtr aabb_ws;
+			bool visible;
+
+			SceneObjAABB(SceneObjectPtr const & s, AABBoxPtr const & abw, bool v)
+				: so(s), aabb_ws(abw), visible(v)
+			{
+			}
+		};
+
+		typedef boost::shared_ptr<SceneObjAABB> SceneObjAABBPtrType;
+		typedef std::vector<SceneObjAABBPtrType> SceneObjAABBsType;
 		typedef std::vector<RenderablePtr> RenderItemsType;
 		typedef std::vector<std::pair<RenderTechniquePtr, RenderItemsType> > RenderQueueType;
 
@@ -75,16 +85,17 @@ namespace KlayGE
 		void AddLight(LightSourcePtr const & light);
 		void DelLight(LightSourcePtr const & light);
 
-		LightSourcesType& LightSources();
-		LightSourcesType const & LightSources() const;
+		uint32_t NumLights() const;
+		LightSourcePtr& GetLight(uint32_t index);
+		LightSourcePtr const & GetLight(uint32_t index) const;
 
 		void AddSceneObject(SceneObjectPtr const & obj);
 		void DelSceneObject(SceneObjectPtr const & obj);
-		SceneObjectsType::iterator DelSceneObject(SceneObjectsType::iterator iter);
 		void AddRenderable(RenderablePtr const & obj);
 
-		SceneObjectsType& SceneObjects();
-		SceneObjectsType const & SceneObjects() const;
+		uint32_t NumSceneObjects() const;
+		SceneObjectPtr& GetSceneObject(uint32_t index);
+		SceneObjectPtr const & GetSceneObject(uint32_t index) const;
 
 		virtual bool AABBVisible(AABBox const & aabb);
 		virtual bool OBBVisible(OBBox const & obb);
@@ -104,15 +115,14 @@ namespace KlayGE
 	protected:
 		void Flush(uint32_t urt);
 
+		SceneObjAABBsType::iterator DelSceneObject(SceneObjAABBsType::iterator iter);
 		virtual void OnAddSceneObject(SceneObjectPtr const & obj) = 0;
-		virtual void OnDelSceneObject(SceneObjectsType::iterator iter) = 0;
+		virtual void OnDelSceneObject(SceneObjAABBsType::iterator iter) = 0;
 
 	protected:
 		Frustum const * frustum_;
-		LightSourcesType lights_;
-		SceneObjectsType scene_objs_;
-		std::vector<boost::shared_ptr<AABBox> > scene_obj_bbs_;
-		boost::shared_ptr<std::vector<char> > visible_marks_;
+		std::vector<LightSourcePtr> lights_;
+		SceneObjAABBsType scene_objs_;
 
 		boost::unordered_map<size_t, boost::shared_ptr<std::vector<char> >, boost::hash<size_t>, std::equal_to<size_t>,
 			boost::fast_pool_allocator<std::pair<size_t, boost::shared_ptr<std::vector<char> > > > > visible_marks_map_;

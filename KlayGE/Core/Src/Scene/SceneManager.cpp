@@ -97,7 +97,7 @@ namespace KlayGE
 		{
 		}
 
-		void OnDelSceneObject(SceneObjectsType::iterator /*iter*/)
+		void OnDelSceneObject(SceneObjAABBsType::iterator /*iter*/)
 		{
 		}
 
@@ -144,7 +144,8 @@ namespace KlayGE
 		{
 			bool visible;
 
-			SceneObjectPtr const & obj = scene_objs_[i];
+			SceneObjAABBPtrType const & soaabb = scene_objs_[i];
+			SceneObjectPtr const & obj = soaabb->so;
 			if (!(obj->Attrib() & SceneObject::SOA_Overlay) && obj->Visible())
 			{
 				if (camera.OmniDirectionalMode())
@@ -155,20 +156,20 @@ namespace KlayGE
 				{
 					if (obj->Attrib() & SceneObject::SOA_Cullable)
 					{
-						AABBox aabb_in_ws;
+						AABBox aabb_ws;
 						if (obj->Attrib() & SceneObject::SOA_Moveable)
 						{
 							AABBox const & aabb = obj->Bound();
 							float4x4 const & mat = obj->ModelMatrix();
 
-							aabb_in_ws = MathLib::transform_aabb(aabb, mat);
+							aabb_ws = MathLib::transform_aabb(aabb, mat);
 						}
 						else
 						{
-							aabb_in_ws = *scene_obj_bbs_[i];
+							aabb_ws = *soaabb->aabb_ws;
 						}
 
-						visible = this->AABBVisible(aabb_in_ws);
+						visible = this->AABBVisible(aabb_ws);
 					}
 					else
 					{
@@ -181,7 +182,7 @@ namespace KlayGE
 				visible = false;
 			}
 
-			(*visible_marks_)[i] = visible;
+			soaabb->visible = visible;
 		}
 	}
 
@@ -196,22 +197,26 @@ namespace KlayGE
 		lights_.erase(iter);
 	}
 
-	SceneManager::LightSourcesType& SceneManager::LightSources()
+	uint32_t SceneManager::NumLights() const
 	{
-		return lights_;
+		return static_cast<uint32_t>(lights_.size());
 	}
 
-	SceneManager::LightSourcesType const & SceneManager::LightSources() const
+	LightSourcePtr& SceneManager::GetLight(uint32_t index)
 	{
-		return lights_;
+		return lights_[index];
+	}
+
+	LightSourcePtr const & SceneManager::GetLight(uint32_t index) const
+	{
+		return lights_[index];
 	}
 
 	// 加入渲染物体
 	/////////////////////////////////////////////////////////////////////////////////
 	void SceneManager::AddSceneObject(SceneObjectPtr const & obj)
 	{
-		scene_objs_.push_back(obj);
-
+		AABBoxPtr aabb_ws;
 		uint32_t const attr = obj->Attrib();
 		if ((attr & SceneObject::SOA_Cullable)
 			&& !(attr & SceneObject::SOA_Overlay)
@@ -219,12 +224,10 @@ namespace KlayGE
 		{
 			AABBox const & aabb = obj->Bound();
 			float4x4 const & mat = obj->ModelMatrix();
-			scene_obj_bbs_.push_back(MakeSharedPtr<AABBox>(MathLib::transform_aabb(aabb, mat)));
+			aabb_ws = MakeSharedPtr<AABBox>(MathLib::transform_aabb(aabb, mat));
 		}
-		else
-		{
-			scene_obj_bbs_.push_back(boost::shared_ptr<AABBox>());
-		}
+
+		scene_objs_.push_back(MakeSharedPtr<SceneObjAABB>(obj, aabb_ws, false));
 
 		this->OnAddSceneObject(obj);
 	}
@@ -233,18 +236,20 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void SceneManager::DelSceneObject(SceneObjectPtr const & obj)
 	{
-		BOOST_AUTO(iter, std::find(scene_objs_.begin(), scene_objs_.end(), obj));
-		if (iter != scene_objs_.end())
+		for (SceneObjAABBsType::iterator iter = scene_objs_.begin(); iter != scene_objs_.end(); ++ iter)
 		{
-			this->DelSceneObject(iter);
+			if ((*iter)->so == obj)
+			{
+				this->DelSceneObject(iter);
+				break;
+			}
 		}
 	}
 
-	SceneManager::SceneObjectsType::iterator SceneManager::DelSceneObject(SceneManager::SceneObjectsType::iterator iter)
+	SceneManager::SceneObjAABBsType::iterator SceneManager::DelSceneObject(SceneManager::SceneObjAABBsType::iterator iter)
 	{
 		this->OnDelSceneObject(iter);
 
-		scene_obj_bbs_.erase(scene_obj_bbs_.begin() + (iter - scene_objs_.begin()));
 		return scene_objs_.erase(iter);
 	}
 
@@ -357,14 +362,19 @@ namespace KlayGE
 		}
 	}
 
-	SceneManager::SceneObjectsType& SceneManager::SceneObjects()
+	uint32_t SceneManager::NumSceneObjects() const
 	{
-		return scene_objs_;
+		return static_cast<uint32_t>(scene_objs_.size());
 	}
 
-	SceneManager::SceneObjectsType const & SceneManager::SceneObjects() const
+	SceneObjectPtr& SceneManager::GetSceneObject(uint32_t index)
 	{
-		return scene_objs_;
+		return scene_objs_[index]->so;
+	}
+
+	SceneObjectPtr const & SceneManager::GetSceneObject(uint32_t index) const
+	{
+		return scene_objs_[index]->so;
 	}
 
 	void SceneManager::ClearLight()
@@ -375,7 +385,6 @@ namespace KlayGE
 	void SceneManager::ClearObject()
 	{
 		scene_objs_.resize(0);
-		scene_obj_bbs_.resize(0);
 	}
 
 	// 更新场景管理器
@@ -404,9 +413,9 @@ namespace KlayGE
 		typedef BOOST_TYPEOF(scene_objs_) SceneObjsType;
 		BOOST_FOREACH(SceneObjsType::const_reference scene_obj, scene_objs_)
 		{
-			if (!(scene_obj->Attrib() & SceneObject::SOA_Overlay))
+			if (!(scene_obj->so->Attrib() & SceneObject::SOA_Overlay))
 			{
-				scene_obj->Update(app_time, frame_time);
+				scene_obj->so->Update(app_time, frame_time);
 			}
 		}
 
@@ -414,7 +423,7 @@ namespace KlayGE
 
 		for (BOOST_AUTO(iter, scene_objs_.begin()); iter != scene_objs_.end();)
 		{
-			if ((*iter)->Attrib() & SceneObject::SOA_Overlay)
+			if ((*iter)->so->Attrib() & SceneObject::SOA_Overlay)
 			{
 				iter = this->DelSceneObject(iter);
 			}
@@ -445,7 +454,10 @@ namespace KlayGE
 
 		Camera& camera = app.ActiveCamera();
 
-		visible_marks_ = MakeSharedPtr<std::vector<char> >(scene_objs_.size());
+		BOOST_FOREACH(SceneObjAABBsType::const_reference scene_obj, scene_objs_)
+		{
+			scene_obj->visible = false;
+		}
 		if (urt & App3DFramework::URV_Need_Flush)
 		{
 			frustum_ = &camera.ViewFrustum();
@@ -453,7 +465,8 @@ namespace KlayGE
 			std::vector<uint32_t> visible_list((scene_objs_.size() + 31) / 32, 0);
 			for (size_t i = 0; i < scene_objs_.size(); ++ i)
 			{
-				if (!(scene_objs_[i]->Attrib() & SceneObject::SOA_Overlay) && scene_objs_[i]->Visible())
+				SceneObjectPtr const & obj = scene_objs_[i]->so;
+				if (!(obj->Attrib() & SceneObject::SOA_Overlay) && obj->Visible())
 				{
 					visible_list[i / 32] |= (1UL << (i & 31));
 				}
@@ -467,38 +480,44 @@ namespace KlayGE
 			if (vmiter == visible_marks_map_.end())
 			{
 				this->ClipScene();
-				visible_marks_map_.insert(std::make_pair(seed, visible_marks_));
+
+				boost::shared_ptr<std::vector<char> > visible_marks = MakeSharedPtr<std::vector<char> >(scene_objs_.size());
+				for (size_t i = 0; i < scene_objs_.size(); ++ i)
+				{
+					(*visible_marks)[i] = scene_objs_[i]->visible;
+				}
+
+				visible_marks_map_.insert(std::make_pair(seed, visible_marks));
 			}
 			else
 			{
-				std::copy(vmiter->second->begin(), vmiter->second->end(), visible_marks_->begin());
+				for (size_t i = 0; i < scene_objs_.size(); ++ i)
+				{
+					scene_objs_[i]->visible = (*vmiter->second)[i] ? true : false;
+				}
 			}
-		}
-		else
-		{
-			std::fill(visible_marks_->begin(), visible_marks_->end(), false);
 		}
 		if (urt & App3DFramework::URV_Overlay)
 		{
-			for (size_t i = 0; i < scene_objs_.size(); ++ i)
+			BOOST_FOREACH(SceneObjAABBsType::const_reference scene_obj, scene_objs_)
 			{
-				if (scene_objs_[i]->Attrib() & SceneObject::SOA_Overlay)
+				if (scene_obj->so->Attrib() & SceneObject::SOA_Overlay)
 				{
-					scene_objs_[i]->Update(app_time, frame_time);
-					(*visible_marks_)[i] = scene_objs_[i]->Visible();
+					scene_obj->so->Update(app_time, frame_time);
+					scene_obj->visible = scene_obj->so->Visible();
 				}
 			}
 		}
 
-		std::vector<std::pair<RenderablePtr, SceneObjectsType>,
-			boost::pool_allocator<std::pair<RenderablePtr, SceneObjectsType> > > renderables;
+		std::vector<std::pair<RenderablePtr, std::vector<SceneObjectPtr> >,
+			boost::pool_allocator<std::pair<RenderablePtr, std::vector<SceneObjectPtr> > > > renderables;
 		std::map<RenderablePtr, size_t, std::less<RenderablePtr>,
 			boost::fast_pool_allocator<std::pair<RenderablePtr const, size_t> > > renderables_map;
-		for (size_t i = 0; i < visible_marks_->size(); ++ i)
+		BOOST_FOREACH(SceneObjAABBsType::const_reference scene_obj, scene_objs_)
 		{
-			if ((*visible_marks_)[i])
+			if (scene_obj->visible)
 			{
-				SceneObjectPtr const & so = scene_objs_[i];
+				SceneObjectPtr const & so = scene_obj->so;
 				RenderablePtr const & renderable = so->GetRenderable();
 
 				BOOST_AUTO(iter, renderables_map.lower_bound(renderable));
@@ -509,7 +528,7 @@ namespace KlayGE
 				else
 				{
 					renderables_map.insert(std::make_pair(renderable, renderables.size()));
-					renderables.push_back(std::make_pair(renderable, SceneObjectsType(1, so)));
+					renderables.push_back(std::make_pair(renderable, std::vector<SceneObjectPtr>(1, so)));
 				}
 
 				++ numObjectsRendered_;
