@@ -15,12 +15,15 @@
 
 #pragma once
 
-#include <KlayGE/PreDeclare.hpp>
-
 #include <boost/static_assert.hpp>
 
 namespace KlayGE
 {
+	template <typename T, int N>
+	class Vector_T;
+	template <typename T>
+	class Matrix4_T;
+
 	namespace detail
 	{
 		template <typename T, int N>
