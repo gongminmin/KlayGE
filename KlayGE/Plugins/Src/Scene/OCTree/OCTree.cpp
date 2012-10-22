@@ -125,23 +125,19 @@ namespace KlayGE
 			AABBox bb_root(float3(0, 0, 0), float3(0, 0, 0));
 			octree_[0].first_child_index = -1;
 			octree_[0].visible = BO_No;
-			for (size_t i = 0; i < scene_objs_.size(); ++ i)
+			BOOST_FOREACH(SceneObjAABBPtrType const & soaabb, scene_objs_)
 			{
-				SceneObjectPtr const & obj = scene_objs_[i];
+				SceneObjectPtr const & obj = soaabb->so;
 				uint32_t const attr = obj->Attrib();
 				if ((attr & SceneObject::SOA_Cullable)
 					&& !(attr & SceneObject::SOA_Overlay)
 					&& !(attr & SceneObject::SOA_Moveable))
 				{
-					AABBox const & aabb_in_ws = *scene_obj_bbs_[i];
-
-					bb_root |= aabb_in_ws;
-					octree_[0].obj_indices.push_back(i);
+					bb_root |= *soaabb->aabb_ws;
+					octree_[0].obj_ptrs.push_back(soaabb);
 				}
 			}
 			octree_[0].bb = bb_root;
-
-			typedef BOOST_TYPEOF(octree_[0].obj_indices) ObjIndicesType;
 
 			base_address_.resize(2);
 			for (uint32_t d = 1; d <= max_tree_depth_; ++ d)
@@ -149,7 +145,7 @@ namespace KlayGE
 				size_t const original_size = octree_.size();
 				for (size_t i = base_address_[d - 1]; i < base_address_[d]; ++ i)
 				{
-					if (octree_[i].obj_indices.size() > 1)
+					if (octree_[i].obj_ptrs.size() > 1)
 					{
 						size_t const this_size = octree_.size();
 						float3 const parent_center = octree_[i].bb.Center();
@@ -162,8 +158,8 @@ namespace KlayGE
 						{
 							octree_node_t& new_node = octree_[this_size + j];
 							new_node.first_child_index = -1;
-							ObjIndicesType& new_node_obj_indices = new_node.obj_indices;
-							ObjIndicesType& parent_obj_indices = octree_[i].obj_indices;
+							SceneObjAABBsType& new_node_obj_ptrs = new_node.obj_ptrs;
+							SceneObjAABBsType& parent_obj_ptrs = octree_[i].obj_ptrs;
 
 							float3 bb_center = parent_center;
 							if (j & 1)
@@ -192,18 +188,17 @@ namespace KlayGE
 							}
 							new_node.bb = AABBox(bb_center - new_half_size, bb_center + new_half_size);
 
-							BOOST_FOREACH(size_t obj_index, parent_obj_indices)
+							BOOST_FOREACH(SceneObjAABBPtrType const & soaabb, parent_obj_ptrs)
 							{
-								AABBox const & aabb_in_ws = *scene_obj_bbs_[obj_index];
-								if (MathLib::intersect_aabb_aabb(aabb_in_ws, new_node.bb))
+								if (MathLib::intersect_aabb_aabb(*soaabb->aabb_ws, new_node.bb))
 								{
-									new_node_obj_indices.push_back(obj_index);
+									new_node_obj_ptrs.push_back(soaabb);
 								}
 							}
 						}
 
-						ObjIndicesType empty;
-						octree_[i].obj_indices.swap(empty);
+						SceneObjAABBsType empty;
+						octree_[i].obj_ptrs.swap(empty);
 					}
 				}
 
@@ -231,10 +226,10 @@ namespace KlayGE
 
 		if (camera.OmniDirectionalMode())
 		{
-			for (size_t i = 0; i < scene_objs_.size(); ++ i)
+			BOOST_FOREACH(SceneObjAABBPtrType const & soaabb, scene_objs_)
 			{
-				SceneObjectPtr const & obj = scene_objs_[i];
-				(*visible_marks_)[i] = (!(obj->Attrib() & SceneObject::SOA_Overlay) && obj->Visible());
+				SceneObjectPtr const & obj = soaabb->so;
+				soaabb->visible = (!(obj->Attrib() & SceneObject::SOA_Overlay) && obj->Visible());
 			}
 		}
 		else
@@ -244,9 +239,9 @@ namespace KlayGE
 				this->MarkNodeObjs(0, false);
 			}
 
-			for (size_t i = 0; i < scene_objs_.size(); ++ i)
+			BOOST_FOREACH(SceneObjAABBPtrType const & soaabb, scene_objs_)
 			{
-				SceneObjectPtr const & obj = scene_objs_[i];
+				SceneObjectPtr const & obj = soaabb->so;
 				if (obj->Visible())
 				{
 					uint32_t const attr = obj->Attrib();
@@ -254,16 +249,13 @@ namespace KlayGE
 					{
 						if (!(attr & SceneObject::SOA_Cullable))
 						{
-							(*visible_marks_)[i] = true;
+							soaabb->visible = true;
 						}
 						else if (attr & SceneObject::SOA_Moveable)
 						{
 							AABBox const & aabb = obj->Bound();
 							float4x4 const & mat = obj->ModelMatrix();
-
-							AABBox aabb_in_ws = MathLib::transform_aabb(aabb, mat);
-
-							(*visible_marks_)[i] = this->AABBVisible(aabb_in_ws);
+							soaabb->visible = this->AABBVisible(MathLib::transform_aabb(aabb, mat));
 						}
 					}
 				}
@@ -294,23 +286,16 @@ namespace KlayGE
 		}
 	}
 
-	void OCTree::OnDelSceneObject(SceneManager::SceneObjectsType::iterator iter)
+	void OCTree::OnDelSceneObject(SceneObjAABBsType::iterator iter)
 	{
 		if (iter != scene_objs_.end())
 		{
-			uint32_t const attr = (*iter)->Attrib();
+			uint32_t const attr = (*iter)->so->Attrib();
 			if ((attr & SceneObject::SOA_Cullable)
 				&& !(attr & SceneObject::SOA_Overlay)
 				&& !(attr & SceneObject::SOA_Moveable))
 			{
 				rebuild_tree_ = true;
-			}
-			else
-			{
-				if (iter != scene_objs_.end() - 1)
-				{
-					this->AdjustObjIndices(0, iter - scene_objs_.begin());
-				}
 			}
 		}
 	}
@@ -348,13 +333,12 @@ namespace KlayGE
 		octree_node_t const & node = octree_[index];
 		if ((node.visible != BO_No) || force)
 		{
-			BOOST_FOREACH(size_t obj_index, node.obj_indices)
+			BOOST_FOREACH(SceneObjAABBPtrType const & soaabb, node.obj_ptrs)
 			{
-				if (!(*visible_marks_)[obj_index] && scene_objs_[obj_index]->Visible())
+				if (!soaabb->visible && soaabb->so->Visible())
 				{
-					AABBox const & aabb_in_ws = *scene_obj_bbs_[obj_index];
-					BoundOverlap const bo = frustum_->Intersect(aabb_in_ws);
-					(*visible_marks_)[obj_index] = (bo != BO_No);
+					BoundOverlap const bo = frustum_->Intersect(*soaabb->aabb_ws);
+					soaabb->visible = (bo != BO_No);
 				}
 			}
 
@@ -363,37 +347,6 @@ namespace KlayGE
 				for (int i = 0; i < 8; ++ i)
 				{
 					this->MarkNodeObjs(node.first_child_index + i, (BO_Yes == node.visible) || force);
-				}
-			}
-		}
-	}
-
-	void OCTree::AdjustObjIndices(size_t index, size_t obj_index)
-	{
-		if (index < octree_.size())
-		{
-			octree_node_t& node = octree_[index];
-			for (BOOST_AUTO(iter, node.obj_indices.begin()); iter != node.obj_indices.end();)
-			{
-				if (*iter == obj_index)
-				{
-					iter = node.obj_indices.erase(iter);
-				}
-				else
-				{
-					if (*iter > obj_index)
-					{
-						-- *iter;
-					}
-					++ iter;
-				}
-			}
-
-			if (node.first_child_index != -1)
-			{
-				for (int i = 0; i < 8; ++ i)
-				{
-					this->AdjustObjIndices(node.first_child_index + i, obj_index);
 				}
 			}
 		}

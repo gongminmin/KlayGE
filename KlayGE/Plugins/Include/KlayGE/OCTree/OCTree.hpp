@@ -59,11 +59,10 @@ namespace KlayGE
 		void ClearObject();
 
 		void OnAddSceneObject(SceneObjectPtr const & obj);
-		void OnDelSceneObject(SceneObjectsType::iterator iter);
+		void OnDelSceneObject(SceneObjAABBsType::iterator iter);
 
 		void NodeVisible(size_t index);
 		void MarkNodeObjs(size_t index, bool force);
-		void AdjustObjIndices(size_t index, size_t obj_index);
 
 		bool BoundVisible(size_t index, AABBox const & aabb) const;
 		bool BoundVisible(size_t index, OBBox const & obb) const;
@@ -81,7 +80,7 @@ namespace KlayGE
 			int first_child_index;
 			BoundOverlap visible;
 
-			std::vector<size_t> obj_indices;
+			SceneObjAABBsType obj_ptrs;
 		};
 
 		std::vector<octree_node_t, boost::pool_allocator<octree_node_t> > octree_;

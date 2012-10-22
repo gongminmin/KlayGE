@@ -886,12 +886,11 @@ namespace KlayGE
 		if (0 == pass)
 		{
 			lights_.resize(0);
-			std::vector<LightSourcePtr> const & cur_lights = scene_mgr.LightSources();
+			uint32_t const num_lights = scene_mgr.NumLights();
 			bool with_ambient = false;
-			typedef BOOST_TYPEOF(cur_lights) CurLightsType;
-			BOOST_FOREACH(CurLightsType::const_reference light, cur_lights)
+			for (uint32_t i = 0; i < num_lights; ++ i)
 			{
-				if (LT_Ambient == light->Type())
+				if (LT_Ambient == scene_mgr.GetLight(i)->Type())
 				{
 					with_ambient = true;
 					break;
@@ -904,8 +903,9 @@ namespace KlayGE
 				lights_.push_back(ambient_light);
 			}
 
-			BOOST_FOREACH(CurLightsType::const_reference light, cur_lights)
+			for (uint32_t i = 0; i < num_lights; ++ i)
 			{
+				LightSourcePtr const & light = scene_mgr.GetLight(i);
 				if (light->Enabled())
 				{
 					lights_.push_back(light);
@@ -918,10 +918,10 @@ namespace KlayGE
 			has_reflective_objs_ = false;
 			has_simple_forward_objs_ = false;
 			visible_scene_objs_.resize(0);
-			SceneManager::SceneObjectsType const & scene_objs = scene_mgr.SceneObjects();
-			typedef BOOST_TYPEOF(scene_objs) SceneObjsType;
-			BOOST_FOREACH(SceneObjsType::const_reference so, scene_objs)
+			uint32_t const num_scene_objs = scene_mgr.NumSceneObjects();
+			for (uint32_t i = 0; i < num_scene_objs; ++ i)
 			{
+				SceneObjectPtr const & so = scene_mgr.GetSceneObject(i);
 				if ((0 == (so->Attrib() & SceneObject::SOA_Overlay)) && so->Visible())
 				{
 					visible_scene_objs_.push_back(so.get());

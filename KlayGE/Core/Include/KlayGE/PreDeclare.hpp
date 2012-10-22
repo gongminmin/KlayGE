@@ -45,12 +45,6 @@ namespace KlayGE
 	typedef Vector_T<float, 3> float3;
 	typedef Vector_T<float, 4> float4;
 	template <typename T>
-	class Size_T;
-	typedef Size_T<float> Size;
-	template <typename T>
-	class Rect_T;
-	typedef Rect_T<float> Rect;
-	template <typename T>
 	class Matrix4_T;
 	typedef Matrix4_T<float> float4x4;
 	template <typename T>
@@ -63,20 +57,33 @@ namespace KlayGE
 	class Color_T;
 	typedef Color_T<float> Color;
 	template <typename T>
+	class Size_T;
+	typedef Size_T<float> Size;
+	typedef boost::shared_ptr<Size> SizePtr;
+	template <typename T>
+	class Rect_T;
+	typedef Rect_T<float> Rect;
+	typedef boost::shared_ptr<Rect> RectPtr;
+	template <typename T>
 	class Bound_T;
 	typedef Bound_T<float> Bound;
+	typedef boost::shared_ptr<Bound> BoundPtr;
 	template <typename T>
 	class Sphere_T;
 	typedef Sphere_T<float> Sphere;
+	typedef boost::shared_ptr<Sphere> SpherePtr;
 	template <typename T>
 	class AABBox_T;
 	typedef AABBox_T<float> AABBox;
+	typedef boost::shared_ptr<AABBox> AABBoxPtr;
 	template <typename T>
 	class Frustum_T;
 	typedef Frustum_T<float> Frustum;
+	typedef boost::shared_ptr<Frustum> FrustumPtr;
 	template <typename T>
 	class OBBox_T;
 	typedef OBBox_T<float> OBBox;
+	typedef boost::shared_ptr<OBBox> OBBoxPtr;
 
 	class SceneManager;
 	typedef boost::shared_ptr<SceneManager> SceneManagerPtr;
