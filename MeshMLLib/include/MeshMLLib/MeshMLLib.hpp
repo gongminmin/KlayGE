@@ -1,0 +1,215 @@
+// MeshMLObj.hpp
+// KlayGE MeshML数据导出类 头文件
+// Ver 3.11.0
+// 版权所有(C) 龚敏敏, 2003-2010
+// Homepage: http://www.klayge.org
+//
+// 3.11.0
+// 初次建立 (王锐 2011.2.28)
+//
+// 修改记录
+/////////////////////////////////////////////////////////////////////////////////
+
+#ifndef _MESHMLLIB_HPP
+#define _MESHMLLIB_HPP
+
+#pragma once
+
+#include <vector>
+#include <string>
+#include <map>
+#include <iostream>
+
+#include <KlayGE/Vector.hpp>
+#include <KlayGE/Matrix.hpp>
+#include <KlayGE/Quaternion.hpp>
+
+namespace KlayGE
+{
+	class MeshMLObj
+	{
+	public:
+		enum VertexExportSetting
+		{
+			VES_None = 0,
+			VES_Normal = 0x1,
+			VES_TangentQuat = 0x2,
+			VES_Texcoord = 0x4
+		};
+
+		enum UserExportSetting
+		{
+			UES_None = 0,
+			UES_CombineMeshes = 0x1,
+			UES_SortMeshes = 0x2,
+			UES_All = 0xFF
+		};
+
+	public:
+		explicit MeshMLObj(float unit_scale);
+
+		void StartFrame(int sf)
+		{
+			start_frame_ = sf;
+		}
+		int StartFrame() const
+		{
+			return start_frame_;
+		}
+
+		void EndFrame(int ef)
+		{
+			end_frame_ = ef;
+		}
+		int EndFrame() const
+		{
+			return end_frame_;
+		}
+
+		void FrameRate(int fr)
+		{
+			frame_rate_ = fr;
+		}
+		int FrameRate() const
+		{
+			return frame_rate_;
+		}
+
+		int AllocJoint();
+		void SetJoint(int joint_id, std::string const & joint_name, int parent_id,
+			float4x4 const & bind_mat);
+		void SetJoint(int joint_id, std::string const & joint_name, int parent_id,
+			Quaternion const & bind_quat, float3 const & bind_pos);
+		void SetJoint(int joint_id, std::string const & joint_name, int parent_id,
+			Quaternion const & bind_real, Quaternion const & bind_dual);
+
+		int AllocMaterial();
+		void SetMaterial(int mtl_id, float3 const & ambient, float3 const & diffuse,
+			float3 const & specular, float3 const & emit, float opacity, float specular_level, float shininess);
+		int AllocTextureSlot(int mtl_id);
+		void SetTextureSlot(int mtl_id, int slot_id, std::string const & type, std::string const & name);
+
+		int AllocMesh();
+		void SetMesh(int mesh_id, int material_id, std::string const & name);
+		int AllocVertex(int mesh_id);
+		void SetVertex(int mesh_id, int vertex_id, float3 const & pos, float3 const & normal,
+			int texcoord_components, std::vector<float3> const & texcoords);
+		void SetVertex(int mesh_id, int vertex_id, float3 const & pos,
+			float3 const & tangent, float3 const & binormal, float3 const & normal,
+			int texcoord_components, std::vector<float3> const & texcoords);
+		void SetVertex(int mesh_id, int vertex_id, float3 const & pos, Quaternion const & tangent_quat,
+			int texcoord_components, std::vector<float3> const & texcoords);
+		int AllocJointBinding(int mesh_id, int vertex_id);
+		void SetJointBinding(int mesh_id, int vertex_id, int binding_id,
+			int joint_id, float weight);
+		int AllocTriangle(int mesh_id);
+		void SetTriangle(int mesh_id, int triangle_id, int index0, int index1, int index2);
+
+		int AllocKeyframes();
+		void SetKeyframes(int kfs_id, int joint_id);
+		int AllocKeyframe(int kfs_id);
+		void SetKeyframe(int kfs_id, int kf_id, float4x4 const & bind_mat);
+		void SetKeyframe(int kfs_id, int kf_id, Quaternion const & bind_quat, float3 const & bind_pos);
+		void SetKeyframe(int kfs_id, int kf_id, Quaternion const & bind_real, Quaternion const & bind_dual);
+
+		void WriteMeshML(std::ostream& os,
+			int vertex_export_settings = VES_TangentQuat | VES_Texcoord, int user_export_settings = UES_SortMeshes,
+			std::string const & encoding = std::string());
+
+	private:
+		typedef std::pair<std::string, std::string> TextureSlot;
+		typedef std::pair<int, float> JointBinding;
+
+		struct Material
+		{
+			float3 ambient;
+			float3 diffuse;
+			float3 specular;
+			float3 emit;
+			float opacity;
+			float specular_level;
+			float shininess;
+			std::vector<TextureSlot> texture_slots;
+
+			bool operator==(Material const & rhs) const
+			{
+				return (ambient == rhs.ambient) && (diffuse == rhs.diffuse)
+					&& (specular_level == rhs.specular_level) && (emit == rhs.emit)
+					&& (opacity == rhs.opacity) && (specular_level == rhs.specular_level)
+					&& (shininess == rhs.shininess);
+			}
+		};
+		
+		struct Vertex
+		{
+			float3 position;
+			float3 normal;
+			Quaternion tangent_quat;
+			int texcoord_components;
+			std::vector<float3> texcoords;
+			std::vector<JointBinding> binds;
+		};
+
+		struct Triangle
+		{
+			int vertex_index[3];
+		};
+
+		struct Mesh
+		{
+			int material_id;
+			std::string name;
+			std::vector<Vertex> vertices;
+			std::vector<Triangle> triangles;
+		};
+
+		struct Joint
+		{
+			std::string name;
+			int parent_id;
+			Quaternion bind_real;
+			Quaternion bind_dual;
+		};
+
+		struct Keyframes
+		{
+			int joint_id;
+			std::vector<Quaternion> bind_reals;
+			std::vector<Quaternion> bind_duals;
+		};
+
+		void OptimizeJoints();
+		void OptimizeMaterials();
+		void OptimizeMeshes(int user_export_settings);
+
+		void WriteJointChunk(std::ostream& os, std::map<int, int> const & joint_id_to_index);
+		void WriteMaterialChunk(std::ostream& os);
+		void WriteMeshChunk(std::ostream& os, std::map<int, int> const & joint_id_to_index, int vertex_export_settings);
+		void WriteKeyframeChunk(std::ostream& os, std::map<int, int> const & joint_id_to_index);
+
+		void MatrixToDQ(float4x4 const & mat, Quaternion& real, Quaternion& dual);
+
+		struct MaterialIDSortOp
+		{
+			bool operator()(Mesh const & lhs,
+				Mesh const & rhs) const
+			{
+				return lhs.material_id < rhs.material_id;
+			}
+		};
+
+	private:
+		float unit_scale_;
+
+		int start_frame_;
+		int end_frame_;
+		int frame_rate_;
+
+		std::map<int, Joint> joints_;
+		std::vector<Material> materials_;
+		std::vector<Mesh> meshes_;
+		std::vector<Keyframes> keyframes_;
+	};
+}
+
+#endif  // _MESHMLLIB_HPP
