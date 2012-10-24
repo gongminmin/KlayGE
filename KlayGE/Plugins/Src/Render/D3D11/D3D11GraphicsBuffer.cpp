@@ -125,7 +125,7 @@ namespace KlayGE
 			cpu_access_flags |= D3D11_CPU_ACCESS_WRITE;
 		}
 
-		if (D3D10_USAGE_STAGING == usage)
+		if (D3D11_USAGE_STAGING == usage)
 		{
 			bind_flags = 0;
 		}

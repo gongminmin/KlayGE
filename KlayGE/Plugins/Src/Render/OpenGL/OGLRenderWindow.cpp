@@ -94,7 +94,7 @@ namespace KlayGE
 			style = WS_OVERLAPPEDWINDOW;
 		}
 
-		RECT rc = { 0, 0, width_, height_ };
+		RECT rc = { 0, 0, static_cast<LONG>(width_), static_cast<LONG>(height_) };
 		::AdjustWindowRect(&rc, style, false);
 
 		::SetWindowLongPtrW(hWnd_, GWL_STYLE, style);
@@ -136,12 +136,12 @@ namespace KlayGE
 					WGL_DRAW_TO_WINDOW_ARB, GL_TRUE,
 					WGL_SUPPORT_OPENGL_ARB, GL_TRUE,
 					WGL_ACCELERATION_ARB, WGL_FULL_ACCELERATION_ARB,
-					WGL_COLOR_BITS_ARB, color_bits_,
-					WGL_DEPTH_BITS_ARB, depth_bits,
-					WGL_STENCIL_BITS_ARB, stencil_bits,
+					WGL_COLOR_BITS_ARB, static_cast<int>(color_bits_),
+					WGL_DEPTH_BITS_ARB, static_cast<int>(depth_bits),
+					WGL_STENCIL_BITS_ARB, static_cast<int>(stencil_bits),
 					WGL_DOUBLE_BUFFER_ARB, GL_TRUE,
 					WGL_SAMPLE_BUFFERS_ARB, GL_TRUE,
-					WGL_SAMPLES_ARB, sample_count,
+					WGL_SAMPLES_ARB, static_cast<int>(sample_count),
 					0, 0
 				};
 
@@ -429,7 +429,7 @@ namespace KlayGE
 
 			::SetWindowLongPtrW(hWnd_, GWL_STYLE, style);
 
-			RECT rc = { 0, 0, width_, height_ };
+			RECT rc = { 0, 0, static_cast<LONG>(width_), static_cast<LONG>(height_) };
 			::AdjustWindowRect(&rc, style, false);
 			width_ = rc.right - rc.left;
 			height_ = rc.bottom - rc.top;

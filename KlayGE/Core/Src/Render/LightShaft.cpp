@@ -43,7 +43,7 @@ namespace KlayGE
 
 		ResIdentifierPtr res = ResLoader::Instance().Open("LightShaft.ppml");
 
-		for (int i = 0; i < BLUR_ITERATE_NUM; ++ i)
+		for (uint32_t i = 0; i < BLUR_ITERATE_NUM; ++ i)
 		{
 			PostProcessPtr radial_blur_pp = LoadPostProcess(res, 0 == i ? "LightShaftRadialBlurCombine" : "LightShaftRadialBlur");
 			radial_blur_pp->SetParam(0, float2(static_cast<float>(RADIAL_SAMPLE_NUM), 1.0f / RADIAL_SAMPLE_NUM));

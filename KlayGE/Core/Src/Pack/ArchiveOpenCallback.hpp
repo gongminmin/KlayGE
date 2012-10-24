@@ -76,6 +76,10 @@ namespace KlayGE
 			: ref_count_(1), password_is_defined_(false)
 		{
 		}
+		
+		virtual ~CArchiveOpenCallback()
+		{
+		}
 
 		void Init(std::string const & pw);
 

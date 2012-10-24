@@ -155,10 +155,6 @@ namespace KlayGE
 		void Apply();
 
 	private:
-		static int const WIDTH = 512;
-		static int const HEIGHT = 512;
-
-	private:
 		PostProcessPtr bilinear_copy_pp_;
 		PostProcessPtr bright_pass_pp_;
 		PostProcessPtr complex_mul_pp_;

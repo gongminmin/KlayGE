@@ -95,7 +95,7 @@ void InitInstancedTessBuffs()
 
 DetailedSkinnedMesh::DetailedSkinnedMesh(RenderModelPtr const & model, std::wstring const & name)
 	: SkinnedMesh(model, name),
-			line_mode_(false), smooth_mesh_(false), tess_factor_(5), visualize_(0)
+			tess_factor_(5), visualize_(0), line_mode_(false), smooth_mesh_(false)
 {
 	this->BindDeferredEffect(checked_pointer_cast<DetailedSkinnedModel>(model)->Effect());
 
@@ -796,7 +796,6 @@ void DetailedSkinnedModel::BuildModelInfo()
 			fmt = EF_ARGB8;
 			for (size_t j = 0; j < compacted.size(); ++ j)
 			{
-				float3 n = MathLib::normalize(tangents[j]) * 0.5f + 0.5f;
 				compacted[j] = (MathLib::clamp<uint32_t>(static_cast<uint32_t>((tangent_quats[j].x() * 0.5f + 0.5f) * 255), 0, 255) << 16)
 					| (MathLib::clamp<uint32_t>(static_cast<uint32_t>((tangent_quats[j].y() * 0.5f + 0.5f) * 255), 0, 255) << 8)
 					| (MathLib::clamp<uint32_t>(static_cast<uint32_t>((tangent_quats[j].z() * 0.5f + 0.5f) * 255), 0, 255) << 0)

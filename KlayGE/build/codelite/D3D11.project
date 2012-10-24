@@ -75,9 +75,7 @@
         <LibraryPath Value="../../../External/DXSDK/lib/x64"/>
         <LibraryPath Value="../../lib/win_x64"/>
         <Library Value="KlayGE_Core_mgw_d"/>
-        <Library Value="boost_system-mgw46-mt-d-1_49"/>
-        <Library Value="d3dx11d"/>
-        <Library Value="d3dcompiler"/>
+        <Library Value="boost_system-mgw47-mt-d-1_51"/>
         <Library Value="Gdi32"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
@@ -123,9 +121,7 @@
         <LibraryPath Value="../../../External/DXSDK/lib/x86"/>
         <LibraryPath Value="../../lib/win_x86"/>
         <Library Value="KlayGE_Core_mgw_d"/>
-        <Library Value="boost_system-mgw46-mt-d-1_49"/>
-        <Library Value="d3dx11d"/>
-        <Library Value="d3dcompiler"/>
+        <Library Value="boost_system-mgw47-mt-d-1_51"/>
         <Library Value="Gdi32"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
@@ -171,9 +167,7 @@
         <LibraryPath Value="../../../External/DXSDK/lib/x64"/>
         <LibraryPath Value="../../lib/win_x64"/>
         <Library Value="KlayGE_Core_mgw"/>
-        <Library Value="boost_system-mgw46-mt-1_49"/>
-        <Library Value="d3dx11"/>
-        <Library Value="d3dcompiler"/>
+        <Library Value="boost_system-mgw47-mt-1_51"/>
         <Library Value="Gdi32"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
@@ -219,9 +213,7 @@
         <LibraryPath Value="../../../External/DXSDK/lib/x86"/>
         <LibraryPath Value="../../lib/win_x86"/>
         <Library Value="KlayGE_Core_mgw"/>
-        <Library Value="boost_system-mgw46-mt-1_49"/>
-        <Library Value="d3dx11"/>
-        <Library Value="d3dcompiler"/>
+        <Library Value="boost_system-mgw47-mt-1_51"/>
         <Library Value="Gdi32"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>

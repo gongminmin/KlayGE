@@ -333,12 +333,11 @@ namespace KlayGE
 		}
 	}
 
-	void OGLTexture1D::Map1D(uint32_t array_index, uint32_t level, TextureMapAccess tma, uint32_t x_offset, uint32_t width, void*& data)
+	void OGLTexture1D::Map1D(uint32_t array_index, uint32_t level, TextureMapAccess tma, uint32_t x_offset, uint32_t /*width*/, void*& data)
 	{
 		last_tma_ = tma;
 
 		uint32_t const texel_size = NumFormatBytes(format_);
-		GLsizei image_size;
 		int block_size;
 		if (IsCompressedFormat(format_))
 		{
@@ -351,12 +350,9 @@ namespace KlayGE
 			{
 				block_size = 16;
 			}
-
-			image_size = ((width + 3) / 4) * block_size;
 		}
 		else
 		{
-			image_size = width * texel_size;
 			block_size = 0;
 		}
 

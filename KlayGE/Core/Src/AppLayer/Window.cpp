@@ -143,7 +143,7 @@ namespace KlayGE
 		HINSTANCE hInst = ::GetModuleHandle(NULL);
 
 		uint32_t style = static_cast<uint32_t>(::GetWindowLongPtrW(wnd_, GWL_STYLE));
-		RECT rc = { 0, 0, width_, height_ };
+		RECT rc = { 0, 0, static_cast<LONG>(width_), static_cast<LONG>(height_) };
 		::AdjustWindowRect(&rc, style, false);
 
 		::DestroyWindow(wnd_);

@@ -16,8 +16,9 @@
   <Project Name="JudaTexViewer" Path="JudaTexViewer.project"/>
   <Project Name="GlobalIllumination" Path="GlobalIllumination.project"/>
   <Project Name="CausticsMap" Path="CausticsMap.project"/>
-  <Project Name="DetailedSurface" Path="DetailedSurface.project" Active="No"/>
-  <Project Name="AtmosphericScattering" Path="AtmosphericScattering.project" Active="No"/>
+  <Project Name="DetailedSurface" Path="DetailedSurface.project"/>
+  <Project Name="AtmosphericScattering" Path="AtmosphericScattering.project"/>
+  <Project Name="ScenePlayer" Path="ScenePlayer.project"/>
   <BuildMatrix>
     <WorkspaceConfiguration Name="Debug_win_x86" Selected="no">
       <Project Name="VideoTexture" ConfigName="Debug_win_x86"/>
@@ -39,6 +40,7 @@
       <Project Name="CausticsMap" ConfigName="Debug_win_x86"/>
       <Project Name="DetailedSurface" ConfigName="Debug_win_x86"/>
       <Project Name="AtmosphericScattering" ConfigName="Debug_win_x86"/>
+      <Project Name="ScenePlayer" ConfigName="Debug_win_x86"/>
     </WorkspaceConfiguration>
     <WorkspaceConfiguration Name="Release_win_x86" Selected="yes">
       <Project Name="VideoTexture" ConfigName="Release_win_x86"/>
@@ -60,6 +62,7 @@
       <Project Name="CausticsMap" ConfigName="Release_win_x86"/>
       <Project Name="DetailedSurface" ConfigName="Release_win_x86"/>
       <Project Name="AtmosphericScattering" ConfigName="Release_win_x86"/>
+      <Project Name="ScenePlayer" ConfigName="Release_win_x86"/>
     </WorkspaceConfiguration>
     <WorkspaceConfiguration Name="Debug_win_x64" Selected="yes">
       <Project Name="VideoTexture" ConfigName="Debug_win_x64"/>
@@ -81,6 +84,7 @@
       <Project Name="CausticsMap" ConfigName="Debug_win_x64"/>
       <Project Name="DetailedSurface" ConfigName="Debug_win_x64"/>
       <Project Name="AtmosphericScattering" ConfigName="Debug_win_x64"/>
+      <Project Name="ScenePlayer" ConfigName="Debug_win_x64"/>
     </WorkspaceConfiguration>
     <WorkspaceConfiguration Name="Release_win_x64" Selected="yes">
       <Project Name="VideoTexture" ConfigName="Release_win_x64"/>
@@ -102,6 +106,7 @@
       <Project Name="CausticsMap" ConfigName="Release_win_x64"/>
       <Project Name="DetailedSurface" ConfigName="Release_win_x64"/>
       <Project Name="AtmosphericScattering" ConfigName="Release_win_x64"/>
+      <Project Name="ScenePlayer" ConfigName="Release_win_x64"/>
     </WorkspaceConfiguration>
     <WorkspaceConfiguration Name="Debug_linux_x86" Selected="yes">
       <Project Name="VideoTexture" ConfigName="Debug_linux_x86"/>
@@ -123,6 +128,7 @@
       <Project Name="CausticsMap" ConfigName="Debug_linux_x86"/>
       <Project Name="DetailedSurface" ConfigName="Debug_linux_x86"/>
       <Project Name="AtmosphericScattering" ConfigName="Debug_linux_x86"/>
+      <Project Name="ScenePlayer" ConfigName="Debug_linux_x86"/>
     </WorkspaceConfiguration>
     <WorkspaceConfiguration Name="Release_linux_x86" Selected="yes">
       <Project Name="VideoTexture" ConfigName="Release_linux_x86"/>
@@ -144,6 +150,7 @@
       <Project Name="CausticsMap" ConfigName="Release_linux_x86"/>
       <Project Name="DetailedSurface" ConfigName="Release_linux_x86"/>
       <Project Name="AtmosphericScattering" ConfigName="Release_linux_x86"/>
+      <Project Name="ScenePlayer" ConfigName="Release_linux_x86"/>
     </WorkspaceConfiguration>
     <WorkspaceConfiguration Name="Debug_linux_x64" Selected="yes">
       <Project Name="VideoTexture" ConfigName="Debug_linux_x64"/>
@@ -165,6 +172,7 @@
       <Project Name="CausticsMap" ConfigName="Debug_linux_x64"/>
       <Project Name="DetailedSurface" ConfigName="Debug_linux_x64"/>
       <Project Name="AtmosphericScattering" ConfigName="Debug_linux_x64"/>
+      <Project Name="ScenePlayer" ConfigName="Debug_linux_x64"/>
     </WorkspaceConfiguration>
     <WorkspaceConfiguration Name="Release_linux_x64" Selected="yes">
       <Project Name="VideoTexture" ConfigName="Release_linux_x64"/>
@@ -186,6 +194,7 @@
       <Project Name="CausticsMap" ConfigName="Release_linux_x64"/>
       <Project Name="DetailedSurface" ConfigName="Release_linux_x64"/>
       <Project Name="AtmosphericScattering" ConfigName="Release_linux_x64"/>
+      <Project Name="ScenePlayer" ConfigName="Release_linux_x64"/>
     </WorkspaceConfiguration>
   </BuildMatrix>
 </CodeLite_Workspace>

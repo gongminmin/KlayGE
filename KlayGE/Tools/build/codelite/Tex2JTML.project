@@ -1,32 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<CodeLite_Project Name="GPUParticleSystem">
-  <Plugins>
-    <Plugin Name="qmake">
-      <![CDATA[00010001N0015Release_win_x86000000000000]]>
-    </Plugin>
-  </Plugins>
+<CodeLite_Project Name="Tex2JTML">
   <Description/>
   <Dependencies/>
-  <VirtualDirectory Name="Source Files">
-    <File Name="../../src/GPUParticleSystem/GPUParticleSystem.cpp"/>
-  </VirtualDirectory>
-  <VirtualDirectory Name="Header Files">
-    <File Name="../../src/GPUParticleSystem/GPUParticleSystem.hpp"/>
-  </VirtualDirectory>
-  <VirtualDirectory Name="Effects">
-    <File Name="../../media/GPUParticleSystem/GPUParticleSystem.fxml"/>
-    <File Name="../../media/GPUParticleSystem/Terrain.fxml"/>
-  </VirtualDirectory>
-  <VirtualDirectory Name="UI">
-    <File Name="../../media/GPUParticleSystem/GPUParticleSystem.uiml"/>
-  </VirtualDirectory>
-  <VirtualDirectory Name="Resource Files">
-    <File Name="../../../klayge_logo.ico"/>
-    <File Name="../../media/Common/KlayGESample.rc"/>
-  </VirtualDirectory>
-  <VirtualDirectory Name="Post Processors">
-    <File Name="../../media/GPUParticleSystem/Blend.ppml"/>
-  </VirtualDirectory>
   <Settings Type="Executable">
     <Configuration Name="Debug_linux_x64" CompilerType="gnu g++" DebuggerType="GNU gdb debugger" Type="Executable" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
       <Compiler Options="-m64 -g -Wall -O0 -march=core2" Required="yes" PreCompiledHeader="">
@@ -40,6 +15,9 @@
         <LibraryPath Value="../../../lib/linux_x64"/>
         <Library Value="KlayGE_Core_gcc_d"/>
         <Library Value="boost_system"/>
+        <Library Value="boost_program_options"/>
+        <Library Value="boost_regex"/>
+        <Library Value="boost_filesystem"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
       <General OutputFile="../../../bin/linux_x64/$(ProjectName)_d" IntermediateDirectory="Debug/linux_x64/$(ProjectName)" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
@@ -76,6 +54,9 @@
         <LibraryPath Value="../../../lib/linux_x86"/>
         <Library Value="KlayGE_Core_gcc_d"/>
         <Library Value="boost_system"/>
+        <Library Value="boost_program_options"/>
+        <Library Value="boost_regex"/>
+        <Library Value="boost_filesystem"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
       <General OutputFile="../../../bin/linux_x86/$(ProjectName)_d" IntermediateDirectory="Debug/linux_x86/$(ProjectName)" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
@@ -113,8 +94,11 @@
         <LibraryPath Value="../../../lib/win_x64"/>
         <Library Value="KlayGE_Core_mgw_d"/>
         <Library Value="boost_system-mgw47-mt-d-1_51"/>
+        <Library Value="boost_program_options-mgw47-mt-d-1_51"/>
+        <Library Value="boost_regex-mgw47-mt-d-1_51"/>
+        <Library Value="boost_filesystem-mgw47-mt-d-1_51"/>
       </Linker>
-      <ResourceCompiler Options="" Required="yes"/>
+      <ResourceCompiler Options="" Required="no"/>
       <General OutputFile="../../../bin/win_x64/$(ProjectName)_d.exe" IntermediateDirectory="Debug/win_x64/$(ProjectName)" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
       <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
         <PostConnectCommands/>
@@ -150,8 +134,11 @@
         <LibraryPath Value="../../../lib/win_x86"/>
         <Library Value="KlayGE_Core_mgw_d"/>
         <Library Value="boost_system-mgw47-mt-d-1_51"/>
+        <Library Value="boost_program_options-mgw47-mt-d-1_51"/>
+        <Library Value="boost_regex-mgw47-mt-d-1_51"/>
+        <Library Value="boost_filesystem-mgw47-mt-d-1_51"/>
       </Linker>
-      <ResourceCompiler Options="" Required="yes"/>
+      <ResourceCompiler Options="" Required="no"/>
       <General OutputFile="../../../bin/win_x86/$(ProjectName)_d.exe" IntermediateDirectory="Debug/win_x86/$(ProjectName)" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
       <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
         <PostConnectCommands/>
@@ -184,11 +171,14 @@
       <Linker Options="-s" Required="yes">
         <LibraryPath Value="../../../../External/boost/lib_gcc_x64/lib"/>
         <LibraryPath Value="../../../lib/linux_x64"/>
-        <Library Value="KlayGE_Core_gcc_x64"/>
+        <Library Value="KlayGE_Core_gcc"/>
         <Library Value="boost_system"/>
+        <Library Value="boost_program_options"/>
+        <Library Value="boost_regex"/>
+        <Library Value="boost_filesystem"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
-      <General OutputFile="../../../bin/linux_x64/$(ProjectName)_x64" IntermediateDirectory="Release/linux_x64/$(ProjectName)" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
+      <General OutputFile="../../../bin/linux_x64/$(ProjectName)" IntermediateDirectory="Release/linux_x64/$(ProjectName)" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
       <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
         <PostConnectCommands/>
         <StartupCommands/>
@@ -220,8 +210,11 @@
       <Linker Options="-s" Required="yes">
         <LibraryPath Value="../../../../External/boost/lib_gcc_x86/lib"/>
         <LibraryPath Value="../../../lib/linux_x86"/>
-        <Library Value="KlayGE_Core_gcc_x86"/>
+        <Library Value="KlayGE_Core_gcc"/>
         <Library Value="boost_system"/>
+        <Library Value="boost_program_options"/>
+        <Library Value="boost_regex"/>
+        <Library Value="boost_filesystem"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
       <General OutputFile="../../../bin/linux_x86/$(ProjectName)" IntermediateDirectory="Release/linux_x86/$(ProjectName)" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
@@ -257,11 +250,14 @@
       <Linker Options="-s" Required="yes">
         <LibraryPath Value="../../../../External/boost/lib_gcc_x64/lib"/>
         <LibraryPath Value="../../../lib/win_x64"/>
-        <Library Value="KlayGE_Core_mgw_x64"/>
+        <Library Value="KlayGE_Core_mgw"/>
         <Library Value="boost_system-mgw47-mt-1_51"/>
+        <Library Value="boost_program_options-mgw47-mt-1_51"/>
+        <Library Value="boost_regex-mgw47-mt-1_51"/>
+        <Library Value="boost_filesystem-mgw47-mt-1_51"/>
       </Linker>
-      <ResourceCompiler Options="" Required="yes"/>
-      <General OutputFile="../../../bin/win_x64/$(ProjectName)_x64.exe" IntermediateDirectory="Release/win_x64/$(ProjectName)" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
+      <ResourceCompiler Options="" Required="no"/>
+      <General OutputFile="../../../bin/win_x64/$(ProjectName).exe" IntermediateDirectory="Release/win_x64/$(ProjectName)" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
       <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
         <PostConnectCommands/>
         <StartupCommands/>
@@ -296,8 +292,11 @@
         <LibraryPath Value="../../../lib/win_x86"/>
         <Library Value="KlayGE_Core_mgw"/>
         <Library Value="boost_system-mgw47-mt-1_51"/>
+        <Library Value="boost_program_options-mgw47-mt-1_51"/>
+        <Library Value="boost_regex-mgw47-mt-1_51"/>
+        <Library Value="boost_filesystem-mgw47-mt-1_51"/>
       </Linker>
-      <ResourceCompiler Options="" Required="yes"/>
+      <ResourceCompiler Options="" Required="no"/>
       <General OutputFile="../../../bin/win_x86/$(ProjectName).exe" IntermediateDirectory="Release/win_x86/$(ProjectName)" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
       <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
         <PostConnectCommands/>
@@ -330,4 +329,8 @@
       <ResourceCompiler Options=""/>
     </GlobalSettings>
   </Settings>
+  <VirtualDirectory Name="Source Files">
+    <File Name="../../src/Tex2JTML/Tex2JTML.cpp"/>
+  </VirtualDirectory>
+  <VirtualDirectory Name="Header Files"/>
 </CodeLite_Project>

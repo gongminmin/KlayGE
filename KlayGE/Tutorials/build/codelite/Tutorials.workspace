@@ -4,54 +4,72 @@
   <Project Name="Fractal" Path="Fractal.project"/>
   <Project Name="Refract" Path="Refract.project"/>
   <Project Name="VertexDisplacement" Path="VertexDisplacement.project" Active="Yes"/>
+  <Project Name="Tutor1" Path="Tutor1.project" Active="No"/>
+  <Project Name="Tutor2" Path="Tutor2.project" Active="No"/>
   <BuildMatrix>
     <WorkspaceConfiguration Name="Debug_win_x86" Selected="no">
       <Project Name="DistanceMapping" ConfigName="Debug_win_x86"/>
       <Project Name="Fractal" ConfigName="Debug_win_x86"/>
       <Project Name="Refract" ConfigName="Debug_win_x86"/>
       <Project Name="VertexDisplacement" ConfigName="Debug_win_x86"/>
+      <Project Name="Tutor1" ConfigName="Debug_win_x86"/>
+      <Project Name="Tutor2" ConfigName="Debug_win_x86"/>
     </WorkspaceConfiguration>
     <WorkspaceConfiguration Name="Release_win_x86" Selected="yes">
       <Project Name="DistanceMapping" ConfigName="Release_win_x86"/>
       <Project Name="Fractal" ConfigName="Release_win_x86"/>
       <Project Name="Refract" ConfigName="Release_win_x86"/>
       <Project Name="VertexDisplacement" ConfigName="Release_win_x86"/>
+      <Project Name="Tutor1" ConfigName="Release_win_x86"/>
+      <Project Name="Tutor2" ConfigName="Release_win_x86"/>
     </WorkspaceConfiguration>
     <WorkspaceConfiguration Name="Debug_win_x64" Selected="yes">
       <Project Name="DistanceMapping" ConfigName="Debug_win_x64"/>
       <Project Name="Fractal" ConfigName="Debug_win_x64"/>
       <Project Name="Refract" ConfigName="Debug_win_x64"/>
       <Project Name="VertexDisplacement" ConfigName="Debug_win_x64"/>
+      <Project Name="Tutor1" ConfigName="Debug_win_x64"/>
+      <Project Name="Tutor2" ConfigName="Debug_win_x64"/>
     </WorkspaceConfiguration>
     <WorkspaceConfiguration Name="Release_win_x64" Selected="yes">
       <Project Name="DistanceMapping" ConfigName="Release_win_x64"/>
       <Project Name="Fractal" ConfigName="Release_win_x64"/>
       <Project Name="Refract" ConfigName="Release_win_x64"/>
       <Project Name="VertexDisplacement" ConfigName="Release_win_x64"/>
+      <Project Name="Tutor1" ConfigName="Release_win_x64"/>
+      <Project Name="Tutor2" ConfigName="Release_win_x64"/>
     </WorkspaceConfiguration>
     <WorkspaceConfiguration Name="Debug_linux_x86" Selected="yes">
       <Project Name="DistanceMapping" ConfigName="Debug_linux_x86"/>
       <Project Name="Fractal" ConfigName="Debug_linux_x86"/>
       <Project Name="Refract" ConfigName="Debug_linux_x86"/>
       <Project Name="VertexDisplacement" ConfigName="Debug_linux_x86"/>
+      <Project Name="Tutor1" ConfigName="Debug_linux_x86"/>
+      <Project Name="Tutor2" ConfigName="Debug_linux_x86"/>
     </WorkspaceConfiguration>
     <WorkspaceConfiguration Name="Release_linux_x86" Selected="yes">
       <Project Name="DistanceMapping" ConfigName="Release_linux_x86"/>
       <Project Name="Fractal" ConfigName="Release_linux_x86"/>
       <Project Name="Refract" ConfigName="Release_linux_x86"/>
       <Project Name="VertexDisplacement" ConfigName="Release_linux_x86"/>
+      <Project Name="Tutor1" ConfigName="Release_linux_x86"/>
+      <Project Name="Tutor2" ConfigName="Release_linux_x86"/>
     </WorkspaceConfiguration>
     <WorkspaceConfiguration Name="Debug_linux_x64" Selected="yes">
       <Project Name="DistanceMapping" ConfigName="Debug_linux_x64"/>
       <Project Name="Fractal" ConfigName="Debug_linux_x64"/>
       <Project Name="Refract" ConfigName="Debug_linux_x64"/>
       <Project Name="VertexDisplacement" ConfigName="Debug_linux_x64"/>
+      <Project Name="Tutor1" ConfigName="Debug_linux_x64"/>
+      <Project Name="Tutor2" ConfigName="Debug_linux_x64"/>
     </WorkspaceConfiguration>
     <WorkspaceConfiguration Name="Release_linux_x64" Selected="yes">
       <Project Name="DistanceMapping" ConfigName="Release_linux_x64"/>
       <Project Name="Fractal" ConfigName="Release_linux_x64"/>
       <Project Name="Refract" ConfigName="Release_linux_x64"/>
       <Project Name="VertexDisplacement" ConfigName="Release_linux_x64"/>
+      <Project Name="Tutor1" ConfigName="Release_linux_x64"/>
+      <Project Name="Tutor2" ConfigName="Release_linux_x64"/>
     </WorkspaceConfiguration>
   </BuildMatrix>
 </CodeLite_Workspace>

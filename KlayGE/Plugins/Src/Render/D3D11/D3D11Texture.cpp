@@ -268,7 +268,7 @@ namespace KlayGE
 	ID3D11ShaderResourceViewPtr const & D3D11Texture::RetriveD3DSRV(D3D11_SHADER_RESOURCE_VIEW_DESC const & desc)
 	{
 		char const * p = reinterpret_cast<char const *>(&desc);
-		size_t hash_val;
+		size_t hash_val = 0;
 		boost::hash_range(hash_val, p, p + sizeof(desc));
 
 		BOOST_AUTO(iter, d3d_sr_views_.find(hash_val));
@@ -286,7 +286,7 @@ namespace KlayGE
 	ID3D11UnorderedAccessViewPtr const & D3D11Texture::RetriveD3DUAV(D3D11_UNORDERED_ACCESS_VIEW_DESC const & desc)
 	{
 		char const * p = reinterpret_cast<char const *>(&desc);
-		size_t hash_val;
+		size_t hash_val = 0;
 		boost::hash_range(hash_val, p, p + sizeof(desc));
 
 		BOOST_AUTO(iter, d3d_ua_views_.find(hash_val));
@@ -304,7 +304,7 @@ namespace KlayGE
 	ID3D11RenderTargetViewPtr const & D3D11Texture::RetriveD3DRTV(D3D11_RENDER_TARGET_VIEW_DESC const & desc)
 	{
 		char const * p = reinterpret_cast<char const *>(&desc);
-		size_t hash_val;
+		size_t hash_val = 0;
 		boost::hash_range(hash_val, p, p + sizeof(desc));
 
 		BOOST_AUTO(iter, d3d_rt_views_.find(hash_val));
@@ -322,7 +322,7 @@ namespace KlayGE
 	ID3D11DepthStencilViewPtr const & D3D11Texture::RetriveD3DDSV(D3D11_DEPTH_STENCIL_VIEW_DESC const & desc)
 	{
 		char const * p = reinterpret_cast<char const *>(&desc);
-		size_t hash_val;
+		size_t hash_val = 0;
 		boost::hash_range(hash_val, p, p + sizeof(desc));
 
 		BOOST_AUTO(iter, d3d_ds_views_.find(hash_val));

@@ -16,7 +16,7 @@
     <Configuration Name="Debug_linux_x64" CompilerType="gnu g++" DebuggerType="GNU gdb debugger" Type="Executable" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
       <Compiler Options="-m64 -g -Wall -O0 -march=core2" Required="yes" PreCompiledHeader="">
         <IncludePath Value="../../../../External/boost"/>
-		<IncludePath Value="../../../../External/freetype/include"/>
+        <IncludePath Value="../../../../External/freetype/include"/>
         <IncludePath Value="../../../../kfont/include"/>
         <IncludePath Value="../../../Core/Include"/>
         <Preprocessor Value="_DEBUG"/>
@@ -30,7 +30,7 @@
         <Library Value="boost_system"/>
         <Library Value="boost_thread"/>
         <Library Value="boost_program_options"/>
-        <Library Value="freetype244D"/>
+        <Library Value="freetype249D"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
       <General OutputFile="../../../bin/linux_x64/$(ProjectName)_d" IntermediateDirectory="Debug/linux_x64/$(ProjectName)" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
@@ -66,13 +66,13 @@
       </Compiler>
       <Linker Options="" Required="yes">
         <LibraryPath Value="../../../../External/boost/lib_gcc_x86/lib"/>
-		<LibraryPath Value="../../../../External/freetype/objs/linux_x86"/>
+        <LibraryPath Value="../../../../External/freetype/objs/linux_x86"/>
         <LibraryPath Value="../../../lib/linux_x86"/>
         <Library Value="KlayGE_Core_gcc_d"/>
         <Library Value="boost_system"/>
         <Library Value="boost_thread"/>
         <Library Value="boost_program_options"/>
-        <Library Value="freetype244D"/>
+        <Library Value="freetype249D"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
       <General OutputFile="../../../bin/linux_x86/$(ProjectName)_d" IntermediateDirectory="Debug/linux_x86/$(ProjectName)" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
@@ -109,13 +109,13 @@
       </Compiler>
       <Linker Options="" Required="yes">
         <LibraryPath Value="../../../../External/boost/lib_gcc_x64/lib"/>
-		<LibraryPath Value="../../../../External/freetype/objs/win_x64"/>
+        <LibraryPath Value="../../../../External/freetype/objs/win_x64"/>
         <LibraryPath Value="../../../lib/win_x64"/>
         <Library Value="KlayGE_Core_mgw_d"/>
-        <Library Value="boost_system-mgw46-mt-d-1_49"/>
-        <Library Value="boost_thread-mgw46-mt-d-1_49"/>
-        <Library Value="boost_program_options-mgw46-mt-d-1_49"/>
-        <Library Value="freetype244D"/>
+        <Library Value="boost_system-mgw47-mt-d-1_51"/>
+        <Library Value="boost_thread-mgw47-mt-d-1_51"/>
+        <Library Value="boost_program_options-mgw47-mt-d-1_51"/>
+        <Library Value="freetype249D"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
       <General OutputFile="../../../bin/win_x64/$(ProjectName)_d.exe" IntermediateDirectory="Debug/win_x64/$(ProjectName)" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
@@ -152,13 +152,13 @@
       </Compiler>
       <Linker Options="" Required="yes">
         <LibraryPath Value="../../../../External/boost/lib_gcc_x86/lib"/>
-		<LibraryPath Value="../../../../External/freetype/objs/win_x86"/>
+        <LibraryPath Value="../../../../External/freetype/objs/win_x86"/>
         <LibraryPath Value="../../../lib/win_x86"/>
         <Library Value="KlayGE_Core_mgw_d"/>
-        <Library Value="boost_system-mgw46-mt-d-1_49"/>
-        <Library Value="boost_thread-mgw46-mt-d-1_49"/>
-        <Library Value="boost_program_options-mgw46-mt-d-1_49"/>
-        <Library Value="freetype244D"/>
+        <Library Value="boost_system-mgw47-mt-d-1_51"/>
+        <Library Value="boost_thread-mgw47-mt-d-1_51"/>
+        <Library Value="boost_program_options-mgw47-mt-d-1_51"/>
+        <Library Value="freetype249D"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
       <General OutputFile="../../../bin/win_x86/$(ProjectName)_d.exe" IntermediateDirectory="Debug/win_x86/$(ProjectName)" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
@@ -194,13 +194,13 @@
       </Compiler>
       <Linker Options="-s" Required="yes">
         <LibraryPath Value="../../../../External/boost/lib_gcc_x64/lib"/>
-		<LibraryPath Value="../../../../External/freetype/objs/linux_x64"/>
+        <LibraryPath Value="../../../../External/freetype/objs/linux_x64"/>
         <LibraryPath Value="../../../lib/linux_x64"/>
         <Library Value="KlayGE_Core_gcc"/>
         <Library Value="boost_system"/>
         <Library Value="boost_thread"/>
         <Library Value="boost_program_options"/>
-        <Library Value="freetype244"/>
+        <Library Value="freetype249"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
       <General OutputFile="../../../bin/linux_x64/$(ProjectName)" IntermediateDirectory="Release/linux_x64/$(ProjectName)" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
@@ -236,13 +236,13 @@
       </Compiler>
       <Linker Options="-s" Required="yes">
         <LibraryPath Value="../../../../External/boost/lib_gcc_x86/lib"/>
-		<LibraryPath Value="../../../../External/freetype/objs/linux_x86"/>
+        <LibraryPath Value="../../../../External/freetype/objs/linux_x86"/>
         <LibraryPath Value="../../../lib/linux_x86"/>
         <Library Value="KlayGE_Core_gcc"/>
         <Library Value="boost_system"/>
         <Library Value="boost_thread"/>
         <Library Value="boost_program_options"/>
-        <Library Value="freetype244"/>
+        <Library Value="freetype249"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
       <General OutputFile="../../../bin/linux_x86/$(ProjectName)" IntermediateDirectory="Release/linux_x86/$(ProjectName)" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
@@ -279,13 +279,13 @@
       </Compiler>
       <Linker Options="-s" Required="yes">
         <LibraryPath Value="../../../../External/boost/lib_gcc_x64/lib"/>
-		<LibraryPath Value="../../../../External/freetype/objs/win_x64"/>
+        <LibraryPath Value="../../../../External/freetype/objs/win_x64"/>
         <LibraryPath Value="../../../lib/win_x64"/>
         <Library Value="KlayGE_Core_mgw"/>
-        <Library Value="boost_system-mgw46-mt-1_49"/>
-        <Library Value="boost_thread-mgw46-mt-1_49"/>
-        <Library Value="boost_program_options-mgw46-mt-1_49"/>
-        <Library Value="freetype244"/>
+        <Library Value="boost_system-mgw47-mt-1_51"/>
+        <Library Value="boost_thread-mgw47-mt-1_51"/>
+        <Library Value="boost_program_options-mgw47-mt-1_51"/>
+        <Library Value="freetype249"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
       <General OutputFile="../../../bin/win_x64/$(ProjectName).exe" IntermediateDirectory="Release/win_x64/$(ProjectName)" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
@@ -322,13 +322,13 @@
       </Compiler>
       <Linker Options="-s" Required="yes">
         <LibraryPath Value="../../../../External/boost/lib_gcc_x86/lib"/>
-		<LibraryPath Value="../../../../External/freetype/objs/win_x86"/>
+        <LibraryPath Value="../../../../External/freetype/objs/win_x86"/>
         <LibraryPath Value="../../../lib/win_x86"/>
         <Library Value="KlayGE_Core_mgw"/>
-        <Library Value="boost_system-mgw46-mt-1_49"/>
-        <Library Value="boost_thread-mgw46-mt-1_49"/>
-        <Library Value="boost_program_options-mgw46-mt-1_49"/>
-        <Library Value="freetype244"/>
+        <Library Value="boost_system-mgw47-mt-1_51"/>
+        <Library Value="boost_thread-mgw47-mt-1_51"/>
+        <Library Value="boost_program_options-mgw47-mt-1_51"/>
+        <Library Value="freetype249"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
       <General OutputFile="../../../bin/win_x86/$(ProjectName).exe" IntermediateDirectory="Release/win_x86/$(ProjectName)" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>

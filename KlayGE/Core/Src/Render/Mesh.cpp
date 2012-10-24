@@ -538,10 +538,10 @@ namespace KlayGE
 				}
 				else
 				{
-					float4x4 tmp_mat = MathLib::scaling(abs(key_dq.second), abs(key_dq.second), key_dq.second)
+					float4x4 tmp_mat = MathLib::scaling(MathLib::abs(key_dq.second), MathLib::abs(key_dq.second), key_dq.second)
 						* MathLib::to_matrix(key_dq.first.first)
 						* MathLib::translation(MathLib::udq_to_trans(key_dq.first.first, key_dq.first.second))
-						* MathLib::scaling(abs(parent.bind_scale), abs(parent.bind_scale), parent.bind_scale)
+						* MathLib::scaling(MathLib::abs(parent.bind_scale), MathLib::abs(parent.bind_scale), parent.bind_scale)
 						* MathLib::to_matrix(parent.bind_real)
 						* MathLib::translation(MathLib::udq_to_trans(parent.bind_real, parent.bind_dual));
 
@@ -603,10 +603,10 @@ namespace KlayGE
 			}
 			else
 			{
-				float4x4 tmp_mat = MathLib::scaling(abs(joint.inverse_origin_scale), abs(joint.inverse_origin_scale), joint.inverse_origin_scale)
+				float4x4 tmp_mat = MathLib::scaling(MathLib::abs(joint.inverse_origin_scale), MathLib::abs(joint.inverse_origin_scale), joint.inverse_origin_scale)
 					* MathLib::to_matrix(joint.inverse_origin_real)
 					* MathLib::translation(MathLib::udq_to_trans(joint.inverse_origin_real, joint.inverse_origin_dual))
-					* MathLib::scaling(abs(joint.bind_scale), abs(joint.bind_scale), joint.bind_scale)
+					* MathLib::scaling(MathLib::abs(joint.bind_scale), MathLib::abs(joint.bind_scale), joint.bind_scale)
 					* MathLib::to_matrix(joint.bind_real)
 					* MathLib::translation(MathLib::udq_to_trans(joint.bind_real, joint.bind_dual));
 
@@ -1690,11 +1690,11 @@ namespace KlayGE
 						dif_dq.first = MathLib::mul_real(dif_dq.first, interpolate.first);
 						float dif_scale = scale * kfs.bind_scale[base + 1];
 
-						if ((abs(dif_dq.first.x()) < 1e-5f) && (abs(dif_dq.first.y()) < 1e-5f)
-							&& (abs(dif_dq.first.z()) < 1e-5f) && (abs(dif_dq.first.w() - 1) < 1e-5f)
-							&& (abs(dif_dq.second.x()) < 1e-5f) && (abs(dif_dq.second.y()) < 1e-5f)
-							&& (abs(dif_dq.second.z()) < 1e-5f) && (abs(dif_dq.second.w()) < 1e-5f)
-							&& (abs(dif_scale - 1) < 1e-5f))
+						if ((MathLib::abs(dif_dq.first.x()) < 1e-5f) && (MathLib::abs(dif_dq.first.y()) < 1e-5f)
+							&& (MathLib::abs(dif_dq.first.z()) < 1e-5f) && (MathLib::abs(dif_dq.first.w() - 1) < 1e-5f)
+							&& (MathLib::abs(dif_dq.second.x()) < 1e-5f) && (MathLib::abs(dif_dq.second.y()) < 1e-5f)
+							&& (MathLib::abs(dif_dq.second.z()) < 1e-5f) && (MathLib::abs(dif_dq.second.w()) < 1e-5f)
+							&& (MathLib::abs(dif_scale - 1) < 1e-5f))
 						{
 							kfs.frame_id.erase(kfs.frame_id.begin() + base + 1);
 							kfs.bind_real.erase(kfs.bind_real.begin() + base + 1);
@@ -2168,7 +2168,7 @@ namespace KlayGE
 				bone_node->AppendAttrib(doc.AllocAttribString("name", joint.name));
 				bone_node->AppendAttrib(doc.AllocAttribInt("parent", joint.parent));
 
-				Quaternion const & bind_real = joint.bind_real * abs(joint.bind_scale);
+				Quaternion const & bind_real = joint.bind_real * MathLib::abs(joint.bind_scale);
 				Quaternion const & bind_dual = joint.bind_dual;
 
 				XMLNodePtr bind_real_node = doc.AllocNode(XNT_Element, "bind_real");
@@ -2359,6 +2359,9 @@ namespace KlayGE
 								}
 							}
 							break;
+							
+						case VEU_Binormal:
+							break;
 
 						case VEU_Diffuse:
 						case VEU_Specular:
@@ -2513,7 +2516,7 @@ namespace KlayGE
 
 						key_frame_node->AppendAttrib(doc.AllocAttribUInt("id", iter->frame_id[j]));
 
-						Quaternion const & bind_real = iter->bind_real[j] * abs(iter->bind_scale[j]);
+						Quaternion const & bind_real = iter->bind_real[j] * MathLib::abs(iter->bind_scale[j]);
 						Quaternion const & bind_dual = iter->bind_dual[j];
 
 						XMLNodePtr bind_real_node = doc.AllocNode(XNT_Element, "bind_real");

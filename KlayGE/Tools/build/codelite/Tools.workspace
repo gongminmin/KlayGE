@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <CodeLite_Workspace Name="Tools" Database="./Tools.tags">
-  <Project Name="NormalMapCompressor" Path="NormalMapCompressor.project" Active="No"/>
-  <Project Name="ForceTexSRGB" Path="NormalMapCompressor.project" Active="No"/>
+  <Project Name="NormalMapCompressor" Path="NormalMapCompressor.project"/>
+  <Project Name="ForceTexSRGB" Path="NormalMapCompressor.project"/>
   <Project Name="NoiseTexGen" Path="NoiseTexGen.project"/>
   <Project Name="KFontGen" Path="KFontGen.project" Active="Yes"/>
   <Project Name="NormalMapGen" Path="NormalMapGen.project"/>
@@ -11,6 +11,11 @@
   <Project Name="DistanceMapCreator" Path="DistanceMapCreator.project"/>
   <Project Name="JudaTexPacker" Path="JudaTexPacker.project"/>
   <Project Name="NormalsFittingGen" Path="NormalsFittingGen.project"/>
+  <Project Name="Bump2Normal" Path="Bump2Normal.project" Active="No"/>
+  <Project Name="ColorGradingTexGen" Path="ColorGradingTexGen.project" Active="No"/>
+  <Project Name="FFTLensEffectsGen" Path="FFTLensEffectsGen.project" Active="No"/>
+  <Project Name="Normal2Height" Path="Normal2Height.project" Active="No"/>
+  <Project Name="Tex2JTML" Path="Tex2JTML.project" Active="No"/>
   <BuildMatrix>
     <WorkspaceConfiguration Name="Debug_win_x86" Selected="no">
       <Project Name="NormalMapGen" ConfigName="Debug_win_x86"/>
@@ -24,6 +29,11 @@
       <Project Name="DistanceMapCreator" ConfigName="Debug_win_x86"/>
       <Project Name="JudaTexPacker" ConfigName="Debug_win_x86"/>
       <Project Name="NormalsFittingGen" ConfigName="Debug_win_x86"/>
+      <Project Name="Bump2Normal" ConfigName="Debug_win_x86"/>
+      <Project Name="ColorGradingTexGen" ConfigName="Debug_win_x86"/>
+      <Project Name="FFTLensEffectsGen" ConfigName="Debug_win_x86"/>
+      <Project Name="Normal2Height" ConfigName="Debug_win_x86"/>
+      <Project Name="Tex2JTML" ConfigName="Debug_win_x86"/>
     </WorkspaceConfiguration>
     <WorkspaceConfiguration Name="Release_win_x86" Selected="yes">
       <Project Name="NormalMapGen" ConfigName="Release_win_x86"/>
@@ -37,8 +47,13 @@
       <Project Name="DistanceMapCreator" ConfigName="Release_win_x86"/>
       <Project Name="JudaTexPacker" ConfigName="Release_win_x86"/>
       <Project Name="NormalsFittingGen" ConfigName="Release_win_x86"/>
+      <Project Name="Bump2Normal" ConfigName="Release_win_x86"/>
+      <Project Name="ColorGradingTexGen" ConfigName="Release_win_x86"/>
+      <Project Name="FFTLensEffectsGen" ConfigName="Release_win_x86"/>
+      <Project Name="Normal2Height" ConfigName="Release_win_x86"/>
+      <Project Name="Tex2JTML" ConfigName="Release_win_x86"/>
     </WorkspaceConfiguration>
-    <WorkspaceConfiguration Name="Debug_win_x64" Selected="no">
+    <WorkspaceConfiguration Name="Debug_win_x64" Selected="yes">
       <Project Name="NormalMapGen" ConfigName="Debug_win_x64"/>
       <Project Name="NormalMapCompressor" ConfigName="Debug_win_x64"/>
       <Project Name="ForceTexSRGB" ConfigName="Debug_win_x64"/>
@@ -50,6 +65,11 @@
       <Project Name="DistanceMapCreator" ConfigName="Debug_win_x64"/>
       <Project Name="JudaTexPacker" ConfigName="Debug_win_x64"/>
       <Project Name="NormalsFittingGen" ConfigName="Debug_win_x64"/>
+      <Project Name="Bump2Normal" ConfigName="Debug_win_x64"/>
+      <Project Name="ColorGradingTexGen" ConfigName="Debug_win_x64"/>
+      <Project Name="FFTLensEffectsGen" ConfigName="Debug_win_x64"/>
+      <Project Name="Normal2Height" ConfigName="Debug_win_x64"/>
+      <Project Name="Tex2JTML" ConfigName="Debug_win_x64"/>
     </WorkspaceConfiguration>
     <WorkspaceConfiguration Name="Release_win_x64" Selected="yes">
       <Project Name="NormalMapGen" ConfigName="Release_win_x64"/>
@@ -63,8 +83,13 @@
       <Project Name="DistanceMapCreator" ConfigName="Release_win_x64"/>
       <Project Name="JudaTexPacker" ConfigName="Release_win_x64"/>
       <Project Name="NormalsFittingGen" ConfigName="Release_win_x64"/>
+      <Project Name="Bump2Normal" ConfigName="Release_win_x64"/>
+      <Project Name="ColorGradingTexGen" ConfigName="Release_win_x64"/>
+      <Project Name="FFTLensEffectsGen" ConfigName="Release_win_x64"/>
+      <Project Name="Normal2Height" ConfigName="Release_win_x64"/>
+      <Project Name="Tex2JTML" ConfigName="Release_win_x64"/>
     </WorkspaceConfiguration>
-    <WorkspaceConfiguration Name="Debug_linux_x86" Selected="no">
+    <WorkspaceConfiguration Name="Debug_linux_x86" Selected="yes">
       <Project Name="NormalMapGen" ConfigName="Debug_linux_x86"/>
       <Project Name="NormalMapCompressor" ConfigName="Debug_linux_x86"/>
       <Project Name="ForceTexSRGB" ConfigName="Debug_linux_x86"/>
@@ -76,6 +101,11 @@
       <Project Name="DistanceMapCreator" ConfigName="Debug_linux_x86"/>
       <Project Name="JudaTexPacker" ConfigName="Debug_linux_x86"/>
       <Project Name="NormalsFittingGen" ConfigName="Debug_linux_x86"/>
+      <Project Name="Bump2Normal" ConfigName="Debug_linux_x86"/>
+      <Project Name="ColorGradingTexGen" ConfigName="Debug_linux_x86"/>
+      <Project Name="FFTLensEffectsGen" ConfigName="Debug_linux_x86"/>
+      <Project Name="Normal2Height" ConfigName="Debug_linux_x86"/>
+      <Project Name="Tex2JTML" ConfigName="Debug_linux_x86"/>
     </WorkspaceConfiguration>
     <WorkspaceConfiguration Name="Release_linux_x86" Selected="yes">
       <Project Name="NormalMapGen" ConfigName="Release_linux_x86"/>
@@ -89,8 +119,13 @@
       <Project Name="DistanceMapCreator" ConfigName="Release_linux_x86"/>
       <Project Name="JudaTexPacker" ConfigName="Release_linux_x86"/>
       <Project Name="NormalsFittingGen" ConfigName="Release_linux_x86"/>
+      <Project Name="Bump2Normal" ConfigName="Release_linux_x86"/>
+      <Project Name="ColorGradingTexGen" ConfigName="Release_linux_x86"/>
+      <Project Name="FFTLensEffectsGen" ConfigName="Release_linux_x86"/>
+      <Project Name="Normal2Height" ConfigName="Release_linux_x86"/>
+      <Project Name="Tex2JTML" ConfigName="Release_linux_x86"/>
     </WorkspaceConfiguration>
-    <WorkspaceConfiguration Name="Debug_linux_x64" Selected="no">
+    <WorkspaceConfiguration Name="Debug_linux_x64" Selected="yes">
       <Project Name="NormalMapGen" ConfigName="Debug_linux_x64"/>
       <Project Name="NormalMapCompressor" ConfigName="Debug_linux_x64"/>
       <Project Name="ForceTexSRGB" ConfigName="Debug_linux_x64"/>
@@ -102,6 +137,11 @@
       <Project Name="DistanceMapCreator" ConfigName="Debug_linux_x64"/>
       <Project Name="JudaTexPacker" ConfigName="Debug_linux_x64"/>
       <Project Name="NormalsFittingGen" ConfigName="Debug_linux_x64"/>
+      <Project Name="Bump2Normal" ConfigName="Debug_linux_x64"/>
+      <Project Name="ColorGradingTexGen" ConfigName="Debug_linux_x64"/>
+      <Project Name="FFTLensEffectsGen" ConfigName="Debug_linux_x64"/>
+      <Project Name="Normal2Height" ConfigName="Debug_linux_x64"/>
+      <Project Name="Tex2JTML" ConfigName="Debug_linux_x64"/>
     </WorkspaceConfiguration>
     <WorkspaceConfiguration Name="Release_linux_x64" Selected="yes">
       <Project Name="NormalMapGen" ConfigName="Release_linux_x64"/>
@@ -115,6 +155,11 @@
       <Project Name="DistanceMapCreator" ConfigName="Release_linux_x64"/>
       <Project Name="JudaTexPacker" ConfigName="Release_linux_x64"/>
       <Project Name="NormalsFittingGen" ConfigName="Release_linux_x64"/>
+      <Project Name="Bump2Normal" ConfigName="Release_linux_x64"/>
+      <Project Name="ColorGradingTexGen" ConfigName="Release_linux_x64"/>
+      <Project Name="FFTLensEffectsGen" ConfigName="Release_linux_x64"/>
+      <Project Name="Normal2Height" ConfigName="Release_linux_x64"/>
+      <Project Name="Tex2JTML" ConfigName="Release_linux_x64"/>
     </WorkspaceConfiguration>
   </BuildMatrix>
 </CodeLite_Workspace>

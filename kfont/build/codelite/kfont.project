@@ -33,7 +33,10 @@
         <Preprocessor Value="_USRDLL"/>
         <Preprocessor Value="KFONT_SOURCE"/>
       </Compiler>
-      <Linker Options="" Required="yes"/>
+      <Linker Options="" Required="yes">
+        <LibraryPath Value="../../../External/boost/lib_gcc_x64/lib"/>
+        <Library Value="boost_system"/>
+      </Linker>
       <ResourceCompiler Options="" Required="no"/>
       <General OutputFile="../../lib/linux_x64/libkfont_gcc_x64_d.dll" IntermediateDirectory="Debug/x64" Command="" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="no"/>
       <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;">
@@ -59,7 +62,8 @@
         <CustomPostBuild/>
         <CustomPreBuild/>
       </AdditionalRules>
-      <Completion>
+      <Completion EnableCpp11="no">
+        <ClangCmpFlagsC/>
         <ClangCmpFlags/>
         <ClangPP/>
         <SearchPaths/>
@@ -75,7 +79,10 @@
         <Preprocessor Value="_USRDLL"/>
         <Preprocessor Value="KFONT_SOURCE"/>
       </Compiler>
-      <Linker Options="" Required="yes"/>
+      <Linker Options="" Required="yes">
+        <LibraryPath Value="../../../External/boost/lib_gcc_x86/lib"/>
+        <Library Value="boost_system"/>
+      </Linker>
       <ResourceCompiler Options="" Required="no"/>
       <General OutputFile="../../lib/linux_x86/libkfont_gcc_x86_d.dll" IntermediateDirectory="Debug/x86" Command="" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="no"/>
       <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;">
@@ -101,7 +108,8 @@
         <CustomPostBuild/>
         <CustomPreBuild/>
       </AdditionalRules>
-      <Completion>
+      <Completion EnableCpp11="no">
+        <ClangCmpFlagsC/>
         <ClangCmpFlags/>
         <ClangPP/>
         <SearchPaths/>
@@ -117,7 +125,10 @@
         <Preprocessor Value="_USRDLL"/>
         <Preprocessor Value="KFONT_SOURCE"/>
       </Compiler>
-      <Linker Options="" Required="yes"/>
+      <Linker Options="" Required="yes">
+        <LibraryPath Value="../../../External/boost/lib_gcc_x64/lib"/>
+        <Library Value="boost_system-mgw47-mt-1_51"/>
+      </Linker>
       <ResourceCompiler Options="" Required="no"/>
       <General OutputFile="../../lib/win_x64/libkfont_mgw_x64_d.dll" IntermediateDirectory="Debug/x64" Command="" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="no"/>
       <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;">
@@ -143,7 +154,8 @@
         <CustomPostBuild/>
         <CustomPreBuild/>
       </AdditionalRules>
-      <Completion>
+      <Completion EnableCpp11="no">
+        <ClangCmpFlagsC/>
         <ClangCmpFlags/>
         <ClangPP/>
         <SearchPaths/>
@@ -159,7 +171,10 @@
         <Preprocessor Value="_USRDLL"/>
         <Preprocessor Value="KFONT_SOURCE"/>
       </Compiler>
-      <Linker Options="" Required="yes"/>
+      <Linker Options="" Required="yes">
+        <LibraryPath Value="../../../External/boost/lib_gcc_x86/lib"/>
+        <Library Value="boost_system-mgw47-mt-1_51"/>
+      </Linker>
       <ResourceCompiler Options="" Required="no"/>
       <General OutputFile="../../lib/win_x86/libkfont_mgw_x86_d.dll" IntermediateDirectory="Debug/x86" Command="" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="no"/>
       <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;">
@@ -185,7 +200,8 @@
         <CustomPostBuild/>
         <CustomPreBuild/>
       </AdditionalRules>
-      <Completion>
+      <Completion EnableCpp11="no">
+        <ClangCmpFlagsC/>
         <ClangCmpFlags/>
         <ClangPP/>
         <SearchPaths/>
@@ -201,7 +217,10 @@
         <Preprocessor Value="_USRDLL"/>
         <Preprocessor Value="KFONT_SOURCE"/>
       </Compiler>
-      <Linker Options="-s" Required="yes"/>
+      <Linker Options="-s" Required="yes">
+        <LibraryPath Value="../../../External/boost/lib_gcc_x64/lib"/>
+        <Library Value="boost_system"/>
+      </Linker>
       <ResourceCompiler Options="" Required="no"/>
       <General OutputFile="../../lib/linux_x64/libkfont_gcc_x64.dll" IntermediateDirectory="Release/x64" Command="" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="no"/>
       <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;">
@@ -227,7 +246,8 @@
         <CustomPostBuild/>
         <CustomPreBuild/>
       </AdditionalRules>
-      <Completion>
+      <Completion EnableCpp11="no">
+        <ClangCmpFlagsC/>
         <ClangCmpFlags/>
         <ClangPP/>
         <SearchPaths/>
@@ -243,7 +263,10 @@
         <Preprocessor Value="_USRDLL"/>
         <Preprocessor Value="KFONT_SOURCE"/>
       </Compiler>
-      <Linker Options="-s" Required="yes"/>
+      <Linker Options="-s" Required="yes">
+        <LibraryPath Value="../../../External/boost/lib_gcc_x86/lib"/>
+        <Library Value="boost_system"/>
+      </Linker>
       <ResourceCompiler Options="" Required="no"/>
       <General OutputFile="../../lib/linux_x86/libkfont_gcc_x86.dll" IntermediateDirectory="Release/x86" Command="" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="no"/>
       <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;">
@@ -269,7 +292,8 @@
         <CustomPostBuild/>
         <CustomPreBuild/>
       </AdditionalRules>
-      <Completion>
+      <Completion EnableCpp11="no">
+        <ClangCmpFlagsC/>
         <ClangCmpFlags/>
         <ClangPP/>
         <SearchPaths/>
@@ -285,7 +309,10 @@
         <Preprocessor Value="_USRDLL"/>
         <Preprocessor Value="KFONT_SOURCE"/>
       </Compiler>
-      <Linker Options="-s" Required="yes"/>
+      <Linker Options="-s" Required="yes">
+        <LibraryPath Value="../../../External/boost/lib_gcc_x64/lib"/>
+        <Library Value="boost_system-mgw47-mt-1_51"/>
+      </Linker>
       <ResourceCompiler Options="" Required="no"/>
       <General OutputFile="../../lib/win_x64/libkfont_mgw_x64.dll" IntermediateDirectory="Release/x64" Command="" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="no"/>
       <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;">
@@ -311,7 +338,8 @@
         <CustomPostBuild/>
         <CustomPreBuild/>
       </AdditionalRules>
-      <Completion>
+      <Completion EnableCpp11="no">
+        <ClangCmpFlagsC/>
         <ClangCmpFlags/>
         <ClangPP/>
         <SearchPaths/>
@@ -327,7 +355,10 @@
         <Preprocessor Value="_USRDLL"/>
         <Preprocessor Value="KFONT_SOURCE"/>
       </Compiler>
-      <Linker Options="-s" Required="yes"/>
+      <Linker Options="-s" Required="yes">
+        <LibraryPath Value="../../../External/boost/lib_gcc_x86/lib"/>
+        <Library Value="boost_system-mgw47-mt-1_51"/>
+      </Linker>
       <ResourceCompiler Options="" Required="no"/>
       <General OutputFile="../../lib/win_x86/libkfont_mgw_x86.dll" IntermediateDirectory="Release/x86" Command="" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="no"/>
       <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;">
@@ -353,7 +384,8 @@
         <CustomPostBuild/>
         <CustomPreBuild/>
       </AdditionalRules>
-      <Completion>
+      <Completion EnableCpp11="no">
+        <ClangCmpFlagsC/>
         <ClangCmpFlags/>
         <ClangPP/>
         <SearchPaths/>

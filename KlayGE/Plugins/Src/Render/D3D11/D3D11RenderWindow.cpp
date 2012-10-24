@@ -430,7 +430,7 @@ namespace KlayGE
 
 			::SetWindowLongPtrW(hWnd_, GWL_STYLE, style);
 
-			RECT rc = { 0, 0, width_, height_ };
+			RECT rc = { 0, 0, static_cast<LONG>(width_), static_cast<LONG>(height_) };
 			::AdjustWindowRect(&rc, style, false);
 			width_ = rc.right - rc.left;
 			height_ = rc.bottom - rc.top;

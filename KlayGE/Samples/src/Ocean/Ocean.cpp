@@ -76,6 +76,9 @@ namespace
 				*specular_level_param_ = float4(0, 0, 0, 0);
 				*shininess_param_ = 0.001f;
 				break;
+				
+			default:
+				break;
 			}
 		}
 	};
@@ -208,7 +211,9 @@ namespace
 				}
 				*(technique_->Effect().ParameterByName("front_side_depth_tex")) = Context::Instance().DeferredRenderingLayerInstance()->OpaqueDepthTex(0);
 				*(technique_->Effect().ParameterByName("front_side_tex")) = Context::Instance().DeferredRenderingLayerInstance()->OpaqueShadingTex(0);
-
+				break;
+				
+			default:
 				break;
 			}
 		}

@@ -14,7 +14,6 @@
 /////////////////////////////////////////////////////////////////////////////////
 
 #include <KlayGE/KlayGE.hpp>
-#define INITGUID
 #include <KlayGE/ThrowErr.hpp>
 #include <KlayGE/Math.hpp>
 #include <KlayGE/Util.hpp>
@@ -800,7 +799,8 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void D3D11RenderEngine::ScissorRect(uint32_t x, uint32_t y, uint32_t width, uint32_t height)
 	{
-		D3D11_RECT rc = { x, y, width, height };
+		D3D11_RECT rc = { static_cast<LONG>(x), static_cast<LONG>(y),
+			static_cast<LONG>(width), static_cast<LONG>(height) };
 		d3d_imm_ctx_->RSSetScissorRects(1, &rc);
 	}
 
@@ -1058,7 +1058,7 @@ namespace KlayGE
 						break;
 					}
 
-					d3d_device_->CheckFormatSupport(DXGI_FORMAT_R24G8_TYPELESS, &s);
+					d3d_device_->CheckFormatSupport(depth_fmt, &s);
 					if (s != 0)
 					{
 						vertex_format_.insert(fmts[i].first);

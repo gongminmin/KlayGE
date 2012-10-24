@@ -1893,23 +1893,14 @@ namespace KlayGE
 
 		is_shader_validate_[type] = true;
 
-		GLenum shader_type;
 		switch (type)
 		{
 		case ST_VertexShader:
-			shader_type = GL_VERTEX_SHADER;
-			break;
-
 		case ST_PixelShader:
-			shader_type = GL_FRAGMENT_SHADER;
-			break;
-
 		case ST_GeometryShader:
-			shader_type = GL_GEOMETRY_SHADER_EXT;
 			break;
 
 		default:
-			shader_type = 0;
 			is_shader_validate_[type] = false;
 			break;
 		}

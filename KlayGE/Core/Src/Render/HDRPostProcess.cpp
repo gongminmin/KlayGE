@@ -443,6 +443,9 @@ namespace KlayGE
 	}
 
 
+	uint32_t const WIDTH = 512;
+	uint32_t const HEIGHT = 512;
+
 	FFTLensEffectsPostProcess::FFTLensEffectsPostProcess()
 		: PostProcess(L"FFTLensEffects")
 	{
@@ -624,20 +627,7 @@ namespace KlayGE
 
 	void HDRPostProcess::InputPin(uint32_t index, TexturePtr const & tex)
 	{
-		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-
 		image_stat_->InputPin(index, tex);
-
-		ElementFormat fmt;
-		if (rf.RenderEngineInstance().DeviceCaps().rendertarget_format_support(EF_B10G11R11F, 1, 0))
-		{
-			fmt = EF_B10G11R11F;
-		}
-		else
-		{
-			BOOST_ASSERT(rf.RenderEngineInstance().DeviceCaps().rendertarget_format_support(EF_ABGR16F, 1, 0));
-			fmt = EF_ABGR16F;
-		}
 
 		lens_effects_->InputPin(0, tex);
 

@@ -21,6 +21,25 @@
 
 namespace KlayGE
 {
+	template <typename pointer, bool trivial>
+	class destroy_t
+	{
+	public:
+		void operator()(pointer p)
+		{
+			p->~T();
+		}
+	};
+	
+	template <typename pointer>
+	class destroy_t<pointer, true>
+	{
+	public:
+		void operator()(pointer /*p*/)
+		{
+		}
+	};
+
 	template <typename T, int alignment>
 	class aligned_allocator
 	{
@@ -110,21 +129,7 @@ namespace KlayGE
 
 		void destroy(pointer p)
 		{
-			this->destroy_t<boost::has_trivial_destructor<boost::remove_pointer<pointer>::type>::value>(p);
-		}
-
-		template <bool trivial>
-		void destroy_t(pointer p);
-
-		template <>
-		void destroy_t<true>(pointer /*p*/)
-		{
-		}
-
-		template <>
-		void destroy_t<false>(pointer p)
-		{
-			p->~T();
+			destroy_t<pointer, boost::has_trivial_destructor<value_type>::value>()(p);
 		}
 
 		size_type max_size() const throw()
@@ -132,7 +137,7 @@ namespace KlayGE
 			return std::numeric_limits<size_t>::max() / sizeof(T);
 		}
 	};
-
+	
 	template <typename T, int alignment1, typename U, int alignment2>
 	inline bool operator==(const aligned_allocator<T, alignment1>&, const aligned_allocator<U, alignment2>&) throw()
 	{

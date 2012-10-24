@@ -118,7 +118,7 @@
 		<LibraryPath Value="../../../../External/Python/libs/amd64"/>
         <LibraryPath Value="../../../lib/win_x64"/>
         <Library Value="KlayGE_Core_mgw_d"/>
-        <Library Value="boost_system-mgw46-mt-d-1_49"/>
+        <Library Value="boost_system-mgw47-mt-d-1_51"/>
         <Library Value="python32_d"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
@@ -160,7 +160,7 @@
 		<LibraryPath Value="../../../../External/Python/libs"/>
         <LibraryPath Value="../../../lib/win_x86"/>
         <Library Value="KlayGE_Core_mgw_d"/>
-        <Library Value="boost_system-mgw46-mt-d-1_49"/>
+        <Library Value="boost_system-mgw47-mt-d-1_51"/>
         <Library Value="python32_d"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
@@ -284,7 +284,7 @@
 		<LibraryPath Value="../../../../External/Python/libs/amd64"/>
         <LibraryPath Value="../../../lib/win_x64"/>
         <Library Value="KlayGE_Core_mgw"/>
-        <Library Value="boost_system-mgw46-mt-1_49"/>
+        <Library Value="boost_system-mgw47-mt-1_51"/>
         <Library Value="python3.2"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
@@ -326,7 +326,7 @@
 		<LibraryPath Value="../../../../External/Python/libs"/>
         <LibraryPath Value="../../../lib/win_x86"/>
         <Library Value="KlayGE_Core_mgw"/>
-        <Library Value="boost_system-mgw46-mt-1_49"/>
+        <Library Value="boost_system-mgw47-mt-1_51"/>
         <Library Value="python32"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>

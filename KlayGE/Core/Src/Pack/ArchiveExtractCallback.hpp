@@ -84,6 +84,10 @@ namespace KlayGE
 			: ref_count_(1), password_is_defined_(false)
 		{
 		}
+		
+		virtual ~CArchiveExtractCallback()
+		{
+		}
 
 		void Init(std::string const & pw, boost::shared_ptr<ISequentialOutStream> const & outFileStream);
 
