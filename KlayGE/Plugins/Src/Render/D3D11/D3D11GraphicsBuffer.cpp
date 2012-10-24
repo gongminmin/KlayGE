@@ -1,4 +1,4 @@
-// D3D11IndexBuffer.cpp
+// D3D11GraphicsBuffer.cpp
 // KlayGE D3D11索引缓冲区类 实现文件
 // Ver 3.8.0
 // 版权所有(C) 龚敏敏, 2009

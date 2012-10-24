@@ -1,4 +1,4 @@
-// OGLGraphicsBuffer.hpp
+// OGLGraphicsBuffer.cpp
 // KlayGE OpenGL图形缓冲区类 实现文件
 // Ver 3.9.0
 // 版权所有(C) 龚敏敏, 2003-2009

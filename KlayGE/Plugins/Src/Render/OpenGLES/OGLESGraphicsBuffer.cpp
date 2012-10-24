@@ -1,4 +1,4 @@
-// OGLESGraphicsBuffer.hpp
+// OGLESGraphicsBuffer.cpp
 // KlayGE OpenGL ES 2图形缓冲区类 实现文件
 // Ver 3.10.0
 // 版权所有(C) 龚敏敏, 2010
@@ -101,17 +101,22 @@ namespace KlayGE
 		{
 		case BA_Write_Only:
 		case BA_Read_Write:
-			OGLESRenderEngine& re = *checked_cast<OGLESRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-			re.BindBuffer(target_, vb_);
-			// TODO: fix OES_mapbuffer
-			/*if (glloader_GLES_OES_mapbuffer())
 			{
-				glUnmapBufferOES(target_);
+				OGLESRenderEngine& re = *checked_cast<OGLESRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+				re.BindBuffer(target_, vb_);
+				// TODO: fix OES_mapbuffer
+				/*if (glloader_GLES_OES_mapbuffer())
+				{
+					glUnmapBufferOES(target_);
+				}
+				else*/
+				{
+					glBufferSubData(target_, 0, static_cast<GLsizeiptr>(size_in_byte_), &buf_data_[0]);
+				}
 			}
-			else*/
-			{
-				glBufferSubData(target_, 0, static_cast<GLsizeiptr>(size_in_byte_), &buf_data_[0]);
-			}
+			break;
+			
+		default:
 			break;
 		}
 	}
