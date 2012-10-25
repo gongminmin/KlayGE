@@ -39,7 +39,7 @@ namespace KlayGE
 		d3d_desc.DepthClipEnable = desc.depth_clip_enable;
 		d3d_desc.ScissorEnable = desc.scissor_enable;
 		d3d_desc.MultisampleEnable = desc.multisample_enable;
-		d3d_desc.AntialiasedLineEnable = desc.multisample_enable;
+		d3d_desc.AntialiasedLineEnable = false;
 
 		ID3D11DevicePtr const & d3d_device = checked_cast<D3D11RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance())->D3DDevice();
 

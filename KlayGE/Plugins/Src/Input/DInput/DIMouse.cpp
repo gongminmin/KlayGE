@@ -62,7 +62,7 @@ namespace KlayGE
 					: DInputDevice(guid, inputEng)
 	{
 		this->DataFormat(c_dfDIMouse2);
-		this->CooperativeLevel(checked_cast<DInputEngine const *>(&inputEng)->HWnd(), DISCL_NONEXCLUSIVE | DISCL_FOREGROUND);
+		this->CooperativeLevel(checked_cast<DInputEngine const *>(&inputEng)->HWnd(), DISCL_NONEXCLUSIVE);
 
 		// 把鼠标的设为相对模式
 		DIPROPDWORD dipdw;
