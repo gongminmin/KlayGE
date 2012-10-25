@@ -495,11 +495,41 @@ namespace KlayGE
 		this->OptimizeMeshes(user_export_settings);
 
 		std::map<int, int> joint_id_to_index;
+		std::vector<int> joint_index_to_id;
 		{
-			int index = 0;
-			for (std::map<int, Joint>::iterator iter = joints_.begin(); iter != joints_.end(); ++ iter, ++ index)
+			typedef BOOST_TYPEOF(joints_) joints_type;
+			BOOST_FOREACH(joints_type::const_reference joint, joints_)
 			{
-				joint_id_to_index.insert(std::make_pair(iter->first, index));
+				joint_index_to_id.push_back(joint.first);
+			}
+
+			bool swapped = true;
+			while (swapped)
+			{
+				swapped = false;
+				for (int i = 0; i < static_cast<int>(joint_index_to_id.size()); ++ i)
+				{
+					int par_index = -1;
+					if (joints_[joint_index_to_id[i]].parent_id != -1)
+					{
+						std::vector<int>::iterator par_iter = std::find(joint_index_to_id.begin(), joint_index_to_id.end(),
+							joints_[joint_index_to_id[i]].parent_id);
+						BOOST_ASSERT(par_iter != joint_index_to_id.end());
+						par_index = static_cast<int>(par_iter - joint_index_to_id.begin());
+					}
+
+					if (par_index > i)
+					{
+						std::swap(joint_index_to_id[i], joint_index_to_id[par_index]);
+						swapped = true;
+						break;
+					}
+				}
+			}
+
+			for (int i = 0; i < static_cast<int>(joint_index_to_id.size()); ++ i)
+			{
+				joint_id_to_index.insert(std::make_pair(joint_index_to_id[i], i));
 			}
 		}
 
