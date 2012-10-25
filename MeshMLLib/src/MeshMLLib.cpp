@@ -1,14 +1,32 @@
-// MeshMLObj.cpp
-// KlayGE MeshML数据导出类 实现文件
-// Ver 3.11.0
-// 版权所有(C) 龚敏敏, 2003-2010
-// Homepage: http://www.klayge.org
-//
-// 3.11.0
-// 初次建立 (王锐 2011.2.28)
-//
-// 修改记录
-/////////////////////////////////////////////////////////////////////////////////
+/**
+ * @file MeshMLLib.cpp
+ * @author Rui Wang, Minmin Gong
+ *
+ * @section DESCRIPTION
+ *
+ * This source file is part of KlayGE's subproject MeshMLLib
+ * For the latest info, see http://www.klayge.org
+ *
+ * @section LICENSE
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published
+ * by the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ * You may alternatively use this source under the terms of
+ * the KlayGE Proprietary License (KPL). You can obtained such a license
+ * from http://www.klayge.org/licensing/.
+ */
 
 #include <KlayGE/Types.hpp>
 #include <MeshMLLib/MeshMLLib.hpp>
@@ -497,8 +515,8 @@ namespace KlayGE
 		std::map<int, int> joint_id_to_index;
 		std::vector<int> joint_index_to_id;
 		{
-			typedef BOOST_TYPEOF(joints_) joints_type;
-			BOOST_FOREACH(joints_type::const_reference joint, joints_)
+			typedef BOOST_TYPEOF(joints_) JointsType;
+			BOOST_FOREACH(JointsType::const_reference joint, joints_)
 			{
 				joint_index_to_id.push_back(joint.first);
 			}
@@ -568,33 +586,31 @@ namespace KlayGE
 	void MeshMLObj::WriteJointChunk(std::ostream& os, std::map<int, int> const & joint_id_to_index)
 	{
 		os << "\t<bones_chunk>" << std::endl;
-		for (std::map<int, Joint>::iterator iter = joints_.begin(); iter != joints_.end(); ++ iter)
+		typedef BOOST_TYPEOF(joints_) JointsType;
+		BOOST_FOREACH(JointsType::const_reference joint, joints_)
 		{
-			Joint const & joint = iter->second;
-			os << "\t\t<bone name=\"" << RemoveQuote(joint.name);
+			os << "\t\t<bone name=\"" << RemoveQuote(joint.second.name);
 
-			int parent_id;
-			if (-1 == joint.parent_id)
+			int parent_id = -1;
+			if (joint.second.parent_id != -1)
 			{
-				parent_id = -1;
-			}
-			else
-			{
-				std::map<int, int>::const_iterator fiter = joint_id_to_index.find(joint.parent_id);
+				std::map<int, int>::const_iterator fiter = joint_id_to_index.find(joint.second.parent_id);
 				BOOST_ASSERT(fiter != joint_id_to_index.end());
 
 				parent_id = fiter->second;
+
+				assert(parent_id < joint_id_to_index[joint.first]);
 			}
 
 			os << "\" parent=\"" << parent_id << "\">" << std::endl;
-			os << "\t\t\t<bind_real x=\"" << joint.bind_real[0]
-				<< "\" y=\"" << joint.bind_real[1]
-				<< "\" z=\"" << joint.bind_real[2]
-				<< "\" w=\"" << joint.bind_real[3] << "\"/>" << std::endl;
-			os << "\t\t\t<bind_dual x=\"" << joint.bind_dual[0]
-				<< "\" y=\"" << joint.bind_dual[1]
-				<< "\" z=\"" << joint.bind_dual[2]
-				<< "\" w=\"" << joint.bind_dual[3] << "\"/>" << std::endl;
+			os << "\t\t\t<bind_real x=\"" << joint.second.bind_real[0]
+				<< "\" y=\"" << joint.second.bind_real[1]
+				<< "\" z=\"" << joint.second.bind_real[2]
+				<< "\" w=\"" << joint.second.bind_real[3] << "\"/>" << std::endl;
+			os << "\t\t\t<bind_dual x=\"" << joint.second.bind_dual[0]
+				<< "\" y=\"" << joint.second.bind_dual[1]
+				<< "\" z=\"" << joint.second.bind_dual[2]
+				<< "\" w=\"" << joint.second.bind_dual[3] << "\"/>" << std::endl;
 			os << "\t\t</bone>" << std::endl;
 		}
 		os << "\t</bones_chunk>" << std::endl;
@@ -603,9 +619,9 @@ namespace KlayGE
 	void MeshMLObj::WriteMaterialChunk(std::ostream& os)
 	{
 		os << "\t<materials_chunk>" << std::endl;
-		for (size_t i = 0; i < materials_.size(); ++ i)
+		typedef BOOST_TYPEOF(materials_) MaterialsType;
+		BOOST_FOREACH(MaterialsType::const_reference mtl, materials_)
 		{
-			Material const & mtl = materials_[i];
 			os << "\t\t<material ambient_r=\"" << mtl.ambient[0]
 				<< "\" ambient_g=\"" << mtl.ambient[1]
 				<< "\" ambient_b=\"" << mtl.ambient[2]
@@ -627,11 +643,11 @@ namespace KlayGE
 				os << ">" << std::endl;
 
 				os << "\t\t\t<textures_chunk>" << std::endl;
-				for (std::vector<TextureSlot>::const_iterator iter = mtl.texture_slots.begin();
-					iter != mtl.texture_slots.end(); ++ iter)
+				typedef BOOST_TYPEOF(mtl.texture_slots) TextureSlotsType;
+				BOOST_FOREACH(TextureSlotsType::const_reference tl, mtl.texture_slots)
 				{
-					os << "\t\t\t\t<texture type=\"" << RemoveQuote(iter->first)
-						<< "\" name=\"" << RemoveQuote(iter->second) << "\"/>" << std::endl;
+					os << "\t\t\t\t<texture type=\"" << RemoveQuote(tl.first)
+						<< "\" name=\"" << RemoveQuote(tl.second) << "\"/>" << std::endl;
 				}
 				os << "\t\t\t</textures_chunk>" << std::endl;
 
@@ -648,17 +664,16 @@ namespace KlayGE
 	void MeshMLObj::WriteMeshChunk(std::ostream& os, std::map<int, int> const & joint_id_to_index, int vertex_export_settings)
 	{
 		os << "\t<meshes_chunk>" << std::endl;
-		for (size_t i = 0; i < meshes_.size(); ++ i)
+		typedef BOOST_TYPEOF(meshes_) MeshesType;
+		BOOST_FOREACH(MeshesType::const_reference mesh, meshes_)
 		{
-			Mesh const & mesh = meshes_[i];
 			os << "\t\t<mesh name=\"" << RemoveQuote(mesh.name)
 				<< "\" mtl_id=\"" << mesh.material_id << "\">" << std::endl;
 
 			os << "\t\t\t<vertices_chunk>" << std::endl;
-			for (std::vector<Vertex>::const_iterator iter = mesh.vertices.begin();
-				iter != mesh.vertices.end(); ++ iter)
+			typedef BOOST_TYPEOF(mesh.vertices) VerticesType;
+			BOOST_FOREACH(VerticesType::const_reference vertex, mesh.vertices)
 			{
-				Vertex const & vertex = *iter;
 				os << "\t\t\t\t<vertex x=\"" << vertex.position.x()
 					<< "\" y=\"" << vertex.position.y()
 					<< "\" z=\"" << vertex.position.z() << "\"";
@@ -683,32 +698,30 @@ namespace KlayGE
 
 					if (vertex_export_settings & VES_Texcoord)
 					{
+						typedef BOOST_TYPEOF(vertex.texcoords) TexcoordsType;
 						switch (vertex.texcoord_components)
 						{
 						case 1:
-							for (std::vector<float3>::const_iterator titer = vertex.texcoords.begin();
-								titer != vertex.texcoords.end(); ++ titer)
+							BOOST_FOREACH(TexcoordsType::const_reference tc, vertex.texcoords)
 							{
-								os << "\t\t\t\t\t<tex_coord u=\"" << titer->x() << "\"/>" << std::endl;
+								os << "\t\t\t\t\t<tex_coord u=\"" << tc.x() << "\"/>" << std::endl;
 							}
 							break;
 
 						case 2:
-							for (std::vector<float3>::const_iterator titer = vertex.texcoords.begin();
-								titer != vertex.texcoords.end(); ++ titer)
+							BOOST_FOREACH(TexcoordsType::const_reference tc, vertex.texcoords)
 							{
-								os << "\t\t\t\t\t<tex_coord u=\"" << titer->x()
-									<< "\" v=\"" << titer->y() << "\"/>" << std::endl;
+								os << "\t\t\t\t\t<tex_coord u=\"" << tc.x()
+									<< "\" v=\"" << tc.y() << "\"/>" << std::endl;
 							}
 							break;
 
 						case 3:
-							for (std::vector<float3>::const_iterator titer = vertex.texcoords.begin();
-								titer != vertex.texcoords.end(); ++ titer)
+							BOOST_FOREACH(TexcoordsType::const_reference tc, vertex.texcoords)
 							{
-								os << "\t\t\t\t\t<tex_coord u=\"" << titer->x()
-									<< "\" v=\"" << titer->y()
-									<< "\" w=\"" << titer->z() << "\"/>" << std::endl;
+								os << "\t\t\t\t\t<tex_coord u=\"" << tc.x()
+									<< "\" v=\"" << tc.y()
+									<< "\" w=\"" << tc.z() << "\"/>" << std::endl;
 							}
 							break;
 
@@ -717,14 +730,14 @@ namespace KlayGE
 						}
 					}
 
-					for (std::vector<JointBinding>::const_iterator jiter = vertex.binds.begin();
-						jiter != vertex.binds.end(); ++ jiter)
+					typedef BOOST_TYPEOF(vertex.binds) BindsType;
+					BOOST_FOREACH(BindsType::const_reference bind, vertex.binds)
 					{
-						std::map<int, int>::const_iterator fiter = joint_id_to_index.find(jiter->first);
+						std::map<int, int>::const_iterator fiter = joint_id_to_index.find(bind.first);
 						BOOST_ASSERT(fiter != joint_id_to_index.end());
 
 						os << "\t\t\t\t\t<weight bone_index=\"" << fiter->second
-							<< "\" weight=\"" << jiter->second << "\"/>" << std::endl;
+							<< "\" weight=\"" << bind.second << "\"/>" << std::endl;
 					}
 					os << "\t\t\t\t</vertex>" << std::endl;
 				}
@@ -736,10 +749,9 @@ namespace KlayGE
 			os << "\t\t\t</vertices_chunk>" << std::endl;
 
 			os << "\t\t\t<triangles_chunk>" << std::endl;
-			for (std::vector<Triangle>::const_iterator iter = mesh.triangles.begin();
-				iter != mesh.triangles.end(); ++ iter)
+			typedef BOOST_TYPEOF(mesh.triangles) TrianglesType;
+			BOOST_FOREACH(TrianglesType::const_reference tri, mesh.triangles)
 			{
-				Triangle const & tri = *iter;
 				os << "\t\t\t\t<triangle a=\"" << tri.vertex_index[0]
 					<< "\" b=\"" << tri.vertex_index[1]
 					<< "\" c=\"" << tri.vertex_index[2] << "\"/>" << std::endl;
@@ -756,13 +768,15 @@ namespace KlayGE
 		os << "\t<key_frames_chunk start_frame=\"" << start_frame_
 			<< "\" end_frame=\"" << end_frame_
 			<< "\" frame_rate=\"" << frame_rate_ << "\">" << std::endl;
-		for (size_t i = 0; i < keyframes_.size(); ++ i)
+		typedef BOOST_TYPEOF(keyframes_) KeyFramesType;
+		BOOST_FOREACH(KeyFramesType::const_reference kf, keyframes_)
 		{
-			Keyframes const & kf = keyframes_[i];			
-			std::map<int, int>::const_iterator fiter = joint_id_to_index.find(kf.joint_id);
+			BOOST_AUTO(fiter, joint_id_to_index.find(kf.joint_id));
 			if (fiter != joint_id_to_index.end())
 			{
-				size_t frames = std::min<size_t>(kf.bind_reals.size(), kf.bind_duals.size());
+				BOOST_ASSERT(kf.bind_reals.size() == kf.bind_duals.size());
+
+				size_t const frames = kf.bind_reals.size();
 
 				os << "\t\t<key_frame joint=\"" << RemoveQuote(joints_[kf.joint_id].name) << "\">" << std::endl;
 				for (size_t j = 0; j < frames; ++ j)
@@ -792,28 +806,28 @@ namespace KlayGE
 		std::set<int> joints_used;
 
 		// Find all joints used in the mesh list
-		for (size_t i = 0; i < meshes_.size(); ++ i)
+		typedef BOOST_TYPEOF(meshes_) MeshesType;
+		BOOST_FOREACH(MeshesType::const_reference mesh, meshes_)
 		{
-			Mesh const & mesh = meshes_[i];
-			for (std::vector<Vertex>::const_iterator iter = mesh.vertices.begin();
-				iter != mesh.vertices.end(); ++ iter)
+			typedef BOOST_TYPEOF(mesh.vertices) VerticesType;
+			BOOST_FOREACH(VerticesType::const_reference vertex, mesh.vertices)
 			{
-				Vertex const & vertex = *iter;
-				for (std::vector<JointBinding>::const_iterator jiter = vertex.binds.begin();
-					jiter != vertex.binds.end(); ++ jiter)
+				typedef BOOST_TYPEOF(vertex.binds) BindsType;
+				BOOST_FOREACH(BindsType::const_reference bind, vertex.binds)
 				{
-					joints_used.insert(jiter->first);
+					joints_used.insert(bind.first);
 				}
 			}
 		}
 
 		// Traverse the joint list and see if used joints' parents can be added
 		std::set<int> parent_joints_used;
-		for (std::map<int, Joint>::const_iterator iter = joints_.begin(); iter != joints_.end(); ++ iter)
+		typedef BOOST_TYPEOF(joints_) JointsType;
+		BOOST_FOREACH(JointsType::const_reference joint, joints_)
 		{
-			if (joints_used.find(iter->first) != joints_used.end())
+			if (joints_used.find(joint.first) != joints_used.end())
 			{
-				Joint const * j = &iter->second;
+				Joint const * j = &joint.second;
 				while (j->parent_id != -1)
 				{
 					parent_joints_used.insert(j->parent_id);
@@ -822,14 +836,10 @@ namespace KlayGE
 			}
 		}
 
-		for (std::set<int>::const_iterator iter = parent_joints_used.begin();
-			iter != parent_joints_used.end(); ++ iter)
-		{
-			joints_used.insert(*iter);
-		}
+		joints_used.insert(parent_joints_used.begin(), parent_joints_used.end());
 
 		// Traverse the joint list and erase those never recorded by joints_used
-		for (std::map<int, Joint>::iterator iter = joints_.begin(); iter != joints_.end();)
+		for (BOOST_AUTO(iter, joints_.begin()); iter != joints_.end();)
 		{
 			if (joints_used.find(iter->first) == joints_used.end())
 			{
@@ -839,11 +849,6 @@ namespace KlayGE
 			{
 				++ iter;
 			}
-		}
-
-		for (std::map<int, Joint>::iterator iter = joints_.begin(); iter != joints_.end(); ++ iter)
-		{
-			BOOST_ASSERT(iter->second.parent_id < iter->first);
 		}
 	}
 
@@ -911,21 +916,21 @@ namespace KlayGE
 					opt_mesh.material_id = static_cast<int>(i);
 					opt_mesh.name = ss.str();
 
-					for (size_t j = 0; j < meshes_to_combine.size(); ++ j)
+					typedef BOOST_TYPEOF(meshes_to_combine) MeshesType;
+					BOOST_FOREACH(MeshesType::const_reference mesh, meshes_to_combine)
 					{
 						int base = static_cast<int>(opt_mesh.vertices.size());
-						Mesh& mesh = meshes_to_combine[j];
 						opt_mesh.vertices.insert(opt_mesh.vertices.end(),
 							mesh.vertices.begin(), mesh.vertices.end());
 
-						for (std::vector<Triangle>::iterator iter = mesh.triangles.begin();
-							iter != mesh.triangles.end(); ++ iter)
+						typedef BOOST_TYPEOF(mesh.triangles) TrianglesType;
+						BOOST_FOREACH(TrianglesType::const_reference tri, mesh.triangles)
 						{
-							Triangle tri;
-							tri.vertex_index[0] = iter->vertex_index[0] + base;
-							tri.vertex_index[1] = iter->vertex_index[1] + base;
-							tri.vertex_index[2] = iter->vertex_index[2] + base;
-							opt_mesh.triangles.push_back(tri);
+							Triangle opt_tri;
+							opt_tri.vertex_index[0] = tri.vertex_index[0] + base;
+							opt_tri.vertex_index[1] = tri.vertex_index[1] + base;
+							opt_tri.vertex_index[2] = tri.vertex_index[2] + base;
+							opt_mesh.triangles.push_back(opt_tri);
 						}
 					}
 					meshes_finished.push_back(opt_mesh);
