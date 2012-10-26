@@ -92,10 +92,10 @@
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>true</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
-      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
-      <AdditionalIncludeDirectories>../../../../../../External/boost</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../../../../../../External/boost;../../../../../../MeshMLLib/include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <AdditionalDependencies>core.lib;maxutil.lib;geom.lib;mesh.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -109,6 +109,7 @@
       <ImportLibrary>$(OutDir)MeshML.lib</ImportLibrary>
       <TargetMachine>MachineX86</TargetMachine>
       <OutputFile>D:/3ds Max 2010/plugins/$(TargetName)$(TargetExt)</OutputFile>
+      <AdditionalLibraryDirectories>../../../../../../MeshMLLib/lib/win_x86</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -120,13 +121,13 @@
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>true</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
-      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
-      <AdditionalIncludeDirectories>../../../../../../External/boost</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../../../../../../External/boost;../../../../../../KlayGE/Core/Include;../../../../../../MeshMLLib/include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>core.lib;maxutil.lib;geom.lib;mesh.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>core.lib;maxutil.lib;geom.lib;mesh.lib;MeshMLLib_vc_x64_d.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ModuleDefinitionFile>..\..\export.def</ModuleDefinitionFile>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ProgramDatabaseFile>$(OutDir)MeshML.pdb</ProgramDatabaseFile>
@@ -137,19 +138,20 @@
       <ImportLibrary>$(OutDir)MeshML.lib</ImportLibrary>
       <TargetMachine>MachineX64</TargetMachine>
       <OutputFile>D:/3ds Max 2010/plugins/$(TargetName)$(TargetExt)</OutputFile>
+      <AdditionalLibraryDirectories>../../../../../../MeshMLLib/lib/win_x64</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
       <Optimization>MaxSpeed</Optimization>
       <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;MESHML_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <ForceConformanceInForLoopScope>false</ForceConformanceInForLoopScope>
       <PrecompiledHeader>
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
-      <AdditionalIncludeDirectories>../../../../../../External/boost</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../../../../../../External/boost;../../../../../../MeshMLLib/include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <AdditionalDependencies>core.lib;maxutil.lib;geom.lib;mesh.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -163,6 +165,7 @@
       <ImportLibrary>$(OutDir)MeshML.lib</ImportLibrary>
       <TargetMachine>MachineX86</TargetMachine>
       <OutputFile>D:/3ds Max 2010/plugins/$(TargetName)$(TargetExt)</OutputFile>
+      <AdditionalLibraryDirectories>../../../../../../MeshMLLib/lib/win_x86</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -172,16 +175,16 @@
     <ClCompile>
       <Optimization>MinSpace</Optimization>
       <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;MESHML_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <ForceConformanceInForLoopScope>false</ForceConformanceInForLoopScope>
       <PrecompiledHeader>
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
-      <AdditionalIncludeDirectories>../../../../../../External/boost</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../../../../../../External/boost;../../../../../../KlayGE/Core/Include;../../../../../../MeshMLLib/include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>core.lib;maxutil.lib;geom.lib;mesh.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>core.lib;maxutil.lib;geom.lib;mesh.lib;MeshMLLib_vc_x64.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ModuleDefinitionFile>..\..\export.def</ModuleDefinitionFile>
       <SubSystem>Windows</SubSystem>
       <OptimizeReferences>true</OptimizeReferences>
@@ -192,6 +195,7 @@
       <ImportLibrary>$(OutDir)MeshML.lib</ImportLibrary>
       <TargetMachine>MachineX64</TargetMachine>
       <OutputFile>D:/3ds Max 2010/plugins/$(TargetName)$(TargetExt)</OutputFile>
+      <AdditionalLibraryDirectories>../../../../../../MeshMLLib/lib/win_x64</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>

@@ -92,35 +92,6 @@ namespace
 		}
 	}
 
-	struct less_Point2 : public std::binary_function<Point2, Point2, bool>
-	{
-		bool operator()(Point2 const & lhs, Point2 const & rhs) const
-		{
-			if (lhs.x < rhs.x)
-			{
-				return true;
-			}
-			else
-			{
-				if (lhs.x > rhs.x)
-				{
-					return false;
-				}
-				else
-				{
-					if (lhs.y < rhs.y)
-					{
-						return true;
-					}
-					else
-					{
-						return false;
-					}
-				}
-			}
-		}
-	};
-
 	bool bind_cmp(std::pair<INode*, float> const& lhs, std::pair<INode*, float> const& rhs)
 	{
 		return lhs.second > rhs.second;
@@ -158,137 +129,20 @@ namespace
 			binormal = (s1 * v2v0 - s2 * v1v0) / denominator;
 		}
 	}
-
-	Quat ToQuaternion(Matrix3 const & mat)
-	{
-		Quat quat;
-		float s;
-		float const tr = mat.GetRow(0).x + mat.GetRow(1).y + mat.GetRow(2).z;
-
-		// check the diagonal
-		if (tr > 0)
-		{
-			s = sqrt(tr + 1);
-			quat.w = s * 0.5f;
-			s = 0.5f / s;
-			quat.x = (mat.GetRow(1).z - mat.GetRow(2).y) * s;
-			quat.y = (mat.GetRow(2).x - mat.GetRow(0).z) * s;
-			quat.z = (mat.GetRow(0).y - mat.GetRow(1).x) * s;
-		}
-		else
-		{
-			if ((mat.GetRow(1).y > mat.GetRow(0).x) && (mat.GetRow(2).z <= mat.GetRow(1).y))
-			{
-				s = sqrt((mat.GetRow(1).y - (mat.GetRow(2).z + mat.GetRow(0).x)) + 1);
-
-				quat.y = s * 0.5f;
-
-				if (abs(s) > 1e-6f)
-				{
-					s = 0.5f / s;
-				}
-
-				quat.w = (mat.GetRow(2).x - mat.GetRow(0).z) * s;
-				quat.z = (mat.GetRow(2).y + mat.GetRow(1).z) * s;
-				quat.x = (mat.GetRow(0).y + mat.GetRow(1).x) * s;
-			}
-			else
-			{
-				if (((mat.GetRow(1).y <= mat.GetRow(0).x) && (mat.GetRow(2).z > mat.GetRow(0).x)) || (mat.GetRow(2).z > mat.GetRow(1).y))
-				{
-					s = sqrt((mat.GetRow(2).z - (mat.GetRow(0).x + mat.GetRow(1).y)) + 1);
-
-					quat.z = s * 0.5f;
-
-					if (abs(s) > 1e-6f)
-					{
-						s = 0.5f / s;
-					}
-
-					quat.w = (mat.GetRow(0).y - mat.GetRow(1).x) * s;
-					quat.x = (mat.GetRow(0).z + mat.GetRow(2).x) * s;
-					quat.y = (mat.GetRow(1).z + mat.GetRow(2).y) * s;
-				}
-				else
-				{
-					s = sqrt((mat.GetRow(0).x - (mat.GetRow(1).y + mat.GetRow(2).z)) + 1);
-
-					quat.x = s * 0.5f;
-
-					if (abs(s) > 1e-6f)
-					{
-						s = 0.5f / s;
-					}
-
-					quat.w = (mat.GetRow(1).z - mat.GetRow(2).y) * s;
-					quat.y = (mat.GetRow(1).x + mat.GetRow(0).y) * s;
-					quat.z = (mat.GetRow(2).x + mat.GetRow(0).z) * s;
-				}
-			}
-		}
-
-		quat.Normalize();
-		return quat;
-	}
-
-	Quat ToQuaternion(Point3 const & tangent, Point3 const & binormal, Point3 const & normal, int bits)
-	{
-		float k = 1;
-		if (binormal % (normal ^ tangent) < 0)
-		{
-			k = -1;
-		}
-
-		Matrix3 tangent_frame(tangent, k * binormal, normal, Point3(0, 0, 0));
-		Quat tangent_quat = ToQuaternion(tangent_frame);
-		if (tangent_quat.w < 0)
-		{
-			tangent_quat = -tangent_quat;
-		}
-		float const bias = 1.0f / ((1UL << (bits - 1)) - 1);
-		if (tangent_quat.w < bias)
-		{
-			float const factor = sqrt(1 - bias * bias);
-			tangent_quat.x *= factor;
-			tangent_quat.y *= factor;
-			tangent_quat.z *= factor;
-			tangent_quat.w = bias;
-		}
-		if (k < 0)
-		{
-			tangent_quat = -tangent_quat;
-		}
-
-		return tangent_quat;
-	}
-
-	Quat QuatTransToUDQ(Quat const & q, Point3 const & t)
-	{
-		return Quat(+0.5f * (+t[0] * q[3] + t[1] * q[2] - t[2] * q[1]),
-			+0.5f * (-t[0] * q[2] + t[1] * q[3] + t[2] * q[0]),
-			+0.5f * (+t[0] * q[1] - t[1] * q[0] + t[2] * q[3]),
-			-0.5f * (+t[0] * q[0] + t[1] * q[1] + t[2] * q[2]));
-	}
-
-	std::string RemoveQuote(std::string const & str)
-	{
-		std::string ret = str;
-		ret.erase(std::remove(ret.begin(), ret.end(), '\"'), ret.end());
-		return ret;
-	}
 }
 
 namespace KlayGE
 {
 	meshml_extractor::meshml_extractor(INode* root_node, int joints_per_ver, int cur_time, int start_frame, int end_frame, bool combine_meshes)
-						: root_node_(root_node),
-							unit_scale_(static_cast<float>(GetMasterScale(UNITS_METERS))),
+						: meshml_obj_(static_cast<float>(GetMasterScale(UNITS_METERS))),
+							root_node_(root_node),
 							joints_per_ver_(joints_per_ver),
 							cur_time_(cur_time),
-							start_frame_(start_frame), end_frame_(end_frame),
-							frame_rate_(GetFrameRate()),
 							combine_meshes_(combine_meshes)
 	{
+		meshml_obj_.StartFrame(start_frame);
+		meshml_obj_.EndFrame(end_frame);
+		meshml_obj_.FrameRate(GetFrameRate());
 	}
 
 	void meshml_extractor::find_joints(INode* node)
@@ -296,6 +150,9 @@ namespace KlayGE
 		if (is_bone(node))
 		{
 			joint_nodes_.insert(std::make_pair(node, Matrix3()));
+
+			int joint_id = meshml_obj_.AllocJoint();
+			joint_node_to_id_.insert(std::make_pair(node, joint_id));
 		}
 		for (int i = 0; i < node->NumberOfChildren(); ++ i)
 		{
@@ -308,28 +165,20 @@ namespace KlayGE
 		if (joints_per_ver_ > 0)
 		{
 			// root bone
-			joint_t root;
-			root.real.Identity();
-			root.dual.x = root.dual.y = root.dual.z = root.dual.w = 0;
-			root.mat.IdentityMatrix();
-			root.parent_node = NULL;
-			joints_.insert(std::make_pair(root_node_, root));
+			int joint_id = meshml_obj_.AllocJoint();
+			meshml_obj_.SetJoint(joint_id, tstr_to_str(root_node_->GetName()), -1, Quaternion(0, 0, 0, 1), Quaternion(0, 0, 0, 0));
+			joint_node_to_id_.insert(std::make_pair(root_node_, joint_id));
+
+			int kfs_id = meshml_obj_.AllocKeyframes();
+			meshml_obj_.SetKeyframes(kfs_id, joint_id);
 
 			int tpf = GetTicksPerFrame();
 
-			key_frame_t kf;
-			for (int i = start_frame_; i < end_frame_; ++ i)
+			for (int i = meshml_obj_.StartFrame(); i < meshml_obj_.EndFrame(); ++ i)
 			{
-				Matrix3 root_tm = this->rh_to_lh(root_node_->GetNodeTM(i * tpf));
-
-				Point3 scale;
-				Quat real, dual;
-				this->decompose_matrix(scale, real, dual, root_tm);
-				kf.reals.push_back(real * scale.x);
-				kf.duals.push_back(dual);
-				kf.mats.push_back(root_tm);
+				int kf_id = meshml_obj_.AllocKeyframe(kfs_id);
+				meshml_obj_.SetKeyframe(kfs_id, kf_id, this->rh_to_lh(root_node_->GetNodeTM(i * tpf)));
 			}
-			kfs_.insert(std::make_pair(root_node_, kf));
 
 			this->find_joints(root_node_);
 
@@ -425,31 +274,39 @@ namespace KlayGE
 		}
 	}
 
-	void meshml_extractor::get_material(materials_t& mtls, std::vector<std::map<int, std::pair<Matrix3, int> > >& uv_transss, Mtl* max_mtl)
+	void meshml_extractor::get_material(std::vector<int>& mtls_id, std::vector<std::map<int, std::pair<Matrix3, int> > >& uv_transss, Mtl* max_mtl)
 	{
 		if (max_mtl)
 		{
 			if (0 == max_mtl->NumSubMtls())
 			{
-				mtls.push_back(material_t());
-				material_t& mtl = mtls.back();
+				int mtl_id = meshml_obj_.AllocMaterial();
+				mtls_id.push_back(mtl_id);
+
 				uv_transss.push_back(std::map<int, std::pair<Matrix3, int> >());
 				std::map<int, std::pair<Matrix3, int> >& uv_transs = uv_transss.back();
 
-				mtl.ambient = max_mtl->GetAmbient();
-				mtl.diffuse = max_mtl->GetDiffuse();
-				mtl.specular = max_mtl->GetSpecular();
+				Color ambient = max_mtl->GetAmbient();
+				Color diffuse = max_mtl->GetDiffuse();
+				Color specular = max_mtl->GetSpecular();
+				Color emit;
 				if (max_mtl->GetSelfIllumColorOn())
 				{
-					mtl.emit = max_mtl->GetSelfIllumColor();
+					emit = max_mtl->GetSelfIllumColor();
 				}
 				else
 				{
-					mtl.emit = max_mtl->GetDiffuse() * max_mtl->GetSelfIllum();
+					emit = max_mtl->GetDiffuse() * max_mtl->GetSelfIllum();
 				}
-				mtl.opacity = 1 - max_mtl->GetXParency();
-				mtl.specular_level = max_mtl->GetShinStr();
-				mtl.shininess = max_mtl->GetShininess() * 100;
+				float opacity = 1 - max_mtl->GetXParency();
+				float specular_level = max_mtl->GetShinStr();
+				float shininess = max_mtl->GetShininess() * 100;
+
+				meshml_obj_.SetMaterial(mtl_id, float3(ambient.r, ambient.g, ambient.b),
+					float3(diffuse.r, diffuse.g, diffuse.b),
+					float3(specular.r, specular.g, specular.b),
+					float3(emit.r, emit.g, emit.b), opacity,
+					specular_level, shininess);
 
 				for (int j = 0; j < max_mtl->NumSubTexmaps(); ++ j)
 				{
@@ -487,7 +344,9 @@ namespace KlayGE
 							int channel = bitmap_tex->GetMapChannel();
 							uv_transs[channel] = std::make_pair(uv_mat, tex_u);
 
-							mtl.texture_slots.push_back(texture_slot_t(tstr_to_str(max_mtl->GetSubTexmapSlotName(j).data()), map_name));
+							int slot_id = meshml_obj_.AllocTextureSlot(mtl_id);
+							meshml_obj_.SetTextureSlot(mtl_id, slot_id,
+								tstr_to_str(max_mtl->GetSubTexmapSlotName(j).data()), map_name);
 						}
 					}
 				}
@@ -496,7 +355,7 @@ namespace KlayGE
 			{
 				for (int i = 0; i < max_mtl->NumSubMtls(); ++ i)
 				{
-					this->get_material(mtls, uv_transss, max_mtl->GetSubMtl(i));
+					this->get_material(mtls_id, uv_transss, max_mtl->GetSubMtl(i));
 				}
 			}
 		}
@@ -509,7 +368,6 @@ namespace KlayGE
 		std::string		obj_name;
 		vertices_t		obj_vertices;
 		triangles_t		obj_triangles;
-		vertex_elements_t obj_vertex_elements;
 
 		obj_name = tstr_to_str(node->GetName());
 
@@ -522,11 +380,11 @@ namespace KlayGE
 		std::map<int, std::vector<int> > tex_indices;
 		std::vector<std::map<int, std::pair<Matrix3, int> > > uv_transs;
 
-		size_t mtl_base_index = objs_mtl_.size();
+		size_t mtl_base_index = objs_mtl_id_.size();
 		Mtl* mtl = node->GetMtl();
 		if (mtl != NULL)
 		{
-			this->get_material(objs_mtl_, uv_transs, mtl);
+			this->get_material(objs_mtl_id_, uv_transs, mtl);
 		}
 
 		std::vector<unsigned int> face_sm_group;
@@ -577,7 +435,7 @@ namespace KlayGE
 							TVFace* tv_faces = mesh.mapFaces(channel);
 							for (size_t i = 0; i < obj_triangles.size(); ++ i)
 							{
-								int mtl_id = mesh.getFaceMtlIndex(static_cast<int>(i)) % (objs_mtl_.size() - mtl_base_index);
+								int mtl_id = mesh.getFaceMtlIndex(static_cast<int>(i)) % (objs_mtl_id_.size() - mtl_base_index);
 
 								tex_mat = uv_transs[mtl_id][channel].first;
 								tex_u = uv_transs[mtl_id][channel].second;
@@ -612,9 +470,9 @@ namespace KlayGE
 				{
 					face_sm_group[i] = mesh.faces[i].getSmGroup();
 					face_mtl_id[i] = mesh.faces[i].getMatID();
-					if (objs_mtl_.size() != mtl_base_index)
+					if (objs_mtl_id_.size() != mtl_base_index)
 					{
-						face_mtl_id[i] = static_cast<unsigned int>(mtl_base_index + face_mtl_id[i] % (objs_mtl_.size() - mtl_base_index));
+						face_mtl_id[i] = static_cast<unsigned int>(mtl_base_index + face_mtl_id[i] % (objs_mtl_id_.size() - mtl_base_index));
 					}
 					for (int j = 2; j >= 0; -- j)
 					{
@@ -772,7 +630,8 @@ namespace KlayGE
 
 					if (pos_binds.second.size() > static_cast<size_t>(joints_per_ver_))
 					{
-						std::nth_element(pos_binds.second.begin(), pos_binds.second.begin() + joints_per_ver_, pos_binds.second.end(), bind_cmp);
+						std::nth_element(pos_binds.second.begin(), pos_binds.second.begin() + joints_per_ver_,
+							pos_binds.second.end(), bind_cmp);
 						pos_binds.second.resize(joints_per_ver_);
 
 						float sum_weight = 0;
@@ -809,7 +668,8 @@ namespace KlayGE
 
 				compute_tangent(face_tangents[i], face_binormals[i], positions[pos_indices[i * 3 + 2]].first,
 					positions[pos_indices[i * 3 + 1]].first, positions[pos_indices[i * 3 + 0]].first,
-					texs[uv_layer][tex_indices[uv_layer][i * 3 + 2]], texs[uv_layer][tex_indices[uv_layer][i * 3 + 1]], texs[uv_layer][tex_indices[uv_layer][i * 3 + 0]]);
+					texs[uv_layer][tex_indices[uv_layer][i * 3 + 2]], texs[uv_layer][tex_indices[uv_layer][i * 3 + 1]],
+					texs[uv_layer][tex_indices[uv_layer][i * 3 + 0]]);
 			}
 
 			obj_vertices.resize(vertex_indices.size());
@@ -819,7 +679,7 @@ namespace KlayGE
 			{
 				vertex_t& vertex = obj_vertices[ver_index];
 
-				vertex.pos = positions[vertex_index.pos_index].first * unit_scale_;
+				vertex.pos = positions[vertex_index.pos_index].first;
 				std::swap(vertex.pos.y, vertex.pos.z);
 
 				Point3 normal(0, 0, 0);
@@ -840,19 +700,19 @@ namespace KlayGE
 				}
 				vertex.normal = normal.Normalize();
 				// Gram-Schmidt orthogonalize
-				Point3 vertex_tangent = (tangent - vertex.normal * (tangent % vertex.normal)).Normalize();
-				Point3 vertex_binormal = (vertex.normal ^ vertex_tangent).Normalize();
+				vertex.tangent = (tangent - vertex.normal * (tangent % vertex.normal)).Normalize();
+				vertex.binormal = (vertex.normal ^ vertex.tangent).Normalize();
 				// Calculate handedness
-				if (vertex_binormal % binormal < 0)
+				if (vertex.binormal % binormal < 0)
 				{
-					vertex_binormal = -vertex_binormal;
+					vertex.binormal = -vertex.binormal;
 				}
 
 				std::swap(vertex.normal.y, vertex.normal.z);
-				std::swap(vertex_tangent.y, vertex_tangent.z);
-				std::swap(vertex_binormal.y, vertex_binormal.z);
+				std::swap(vertex.tangent.y, vertex.tangent.z);
+				std::swap(vertex.binormal.y, vertex.binormal.z);
 
-				vertex.tangent_quat = ToQuaternion(vertex_tangent, -vertex_binormal, vertex.normal, 8);
+				vertex.binormal = -vertex.binormal;
 
 				int uv_layer = 0;
 				for (std::map<int, std::vector<Point2> >::iterator uv_iter = texs.begin();
@@ -872,21 +732,7 @@ namespace KlayGE
 				++ ver_index;
 			}
 
-			obj_vertex_elements.push_back(vertex_element_t(VEU_Position, 0, 3));
-			obj_vertex_elements.push_back(vertex_element_t(VEU_Normal, 0, 3));
-			obj_vertex_elements.push_back(vertex_element_t(VEU_Tangent, 0, 3));
-			obj_vertex_elements.push_back(vertex_element_t(VEU_Binormal, 0, 3));
-			for (size_t i = 0; i < obj_vertices[0].tex.size(); ++ i)
-			{
-				obj_vertex_elements.push_back(vertex_element_t(VEU_TextureCoord, static_cast<unsigned char>(i), 2));
-			}
-			if (!obj_vertices[0].binds.empty())
-			{
-				obj_vertex_elements.push_back(vertex_element_t(VEU_BlendWeight, 0, 4));
-				obj_vertex_elements.push_back(vertex_element_t(VEU_BlendIndex, 0, 4));
-			}
-
-			for (size_t i = mtl_base_index; i < objs_mtl_.size(); ++ i)
+			for (size_t i = mtl_base_index; i < objs_mtl_id_.size(); ++ i)
 			{
 				triangles_t obj_info_tris;
 				std::vector<int> index_set;
@@ -906,38 +752,52 @@ namespace KlayGE
 
 				if (!obj_info_tris.empty())
 				{
-					objs_info_.push_back(object_info_t());
-
-					object_info_t& obj_info = objs_info_.back();
-					obj_info.vertex_elements = obj_vertex_elements;
-
-					obj_info.triangles.resize(obj_info_tris.size());
+					int mesh_id = meshml_obj_.AllocMesh();
 
 					std::map<int, int> mapping;
 					int new_index = 0;
 					for (std::vector<int>::iterator iter = index_set.begin(); iter != index_set.end(); ++ iter, ++ new_index)
 					{
-						obj_info.vertices.push_back(obj_vertices[*iter]);
 						mapping.insert(std::make_pair(*iter, new_index));
+
+						vertex_t const & vert = obj_vertices[*iter];
+
+						int vertex_id = meshml_obj_.AllocVertex(mesh_id);
+						float3 pos(vert.pos.x, vert.pos.y, vert.pos.z);
+						float3 normal(vert.normal.x, vert.normal.y, vert.normal.z);
+						float3 tangent(vert.tangent.x, vert.tangent.y, vert.tangent.z);
+						float3 binormal(vert.binormal.x, vert.binormal.y, vert.binormal.z);
+						std::vector<float3> texs(vert.tex.size());
+						for (size_t ti = 0; ti < texs.size(); ++ ti)
+						{
+							texs[ti] = float3(vert.tex[ti].x, vert.tex[ti].y, 0);
+						}
+						meshml_obj_.SetVertex(mesh_id, vertex_id, pos, tangent, binormal, normal, 2, texs);
+
+						for (size_t bi = 0; bi < obj_vertices[*iter].binds.size(); ++ bi)
+						{
+							int binding_id = meshml_obj_.AllocJointBinding(mesh_id, vertex_id);
+							meshml_obj_.SetJointBinding(mesh_id, vertex_id, binding_id,
+								joint_node_to_id_[obj_vertices[*iter].binds[bi].first], obj_vertices[*iter].binds[bi].second);
+						}
 					}
 					for (size_t j = 0; j < obj_info_tris.size(); ++ j)
 					{
-						obj_info.triangles[j].vertex_index[0] = mapping[obj_info_tris[j].vertex_index[0]];
-						obj_info.triangles[j].vertex_index[1] = mapping[obj_info_tris[j].vertex_index[1]];
-						obj_info.triangles[j].vertex_index[2] = mapping[obj_info_tris[j].vertex_index[2]];
+						int triangle_id = meshml_obj_.AllocTriangle(mesh_id);
+						meshml_obj_.SetTriangle(mesh_id, triangle_id, mapping[obj_info_tris[j].vertex_index[0]],
+							mapping[obj_info_tris[j].vertex_index[1]], mapping[obj_info_tris[j].vertex_index[2]]);
 					}
 				
-					if (objs_mtl_.size() - mtl_base_index <= 1)
+					if (objs_mtl_id_.size() - mtl_base_index <= 1)
 					{
-						obj_info.name = obj_name;
+						meshml_obj_.SetMesh(mesh_id, objs_mtl_id_[i], obj_name);
 					}
 					else
 					{
 						std::ostringstream oss;
 						oss << obj_name << "__mat_" << (i - mtl_base_index);
-						obj_info.name = oss.str();
+						meshml_obj_.SetMesh(mesh_id, objs_mtl_id_[i], oss.str());
 					}
-					obj_info.mtl_id = i;
 				}
 			}
 		}
@@ -955,57 +815,23 @@ namespace KlayGE
 			parent_node = root_node_;
 		}
 
-		key_frame_t kf;
-		for (int i = start_frame_; i < end_frame_; ++ i)
+		int kfs_id = meshml_obj_.AllocKeyframes();
+		meshml_obj_.SetKeyframes(kfs_id, joint_node_to_id_[node]);
+
+		for (int i = meshml_obj_.StartFrame(); i < meshml_obj_.EndFrame(); ++ i)
 		{
-			Matrix3 local_tm = this->rh_to_lh(node->GetNodeTM(i * tpf) * Inverse(parent_node->GetNodeTM(i * tpf)));
-
-			Point3 scale;
-			Quat real, dual;
-			this->decompose_matrix(scale, real, dual, local_tm);
-			kf.reals.push_back(real * scale.x);
-			kf.duals.push_back(dual);
-			kf.mats.push_back(local_tm);
+			int kf_id = meshml_obj_.AllocKeyframe(kfs_id);
+			meshml_obj_.SetKeyframe(kfs_id, kf_id,
+				this->rh_to_lh(node->GetNodeTM(i * tpf) * Inverse(parent_node->GetNodeTM(i * tpf))));
 		}
-
-		kfs_.insert(std::make_pair(node, kf));
 	}
 
-	Matrix3 meshml_extractor::rh_to_lh(Matrix3 const & mat)
+	float4x4 meshml_extractor::rh_to_lh(Matrix3 const & mat)
 	{
-		Matrix3 mat_lh;
-		mat_lh.SetRow(0, Point3(mat.GetRow(0).x, mat.GetRow(0).z, mat.GetRow(0).y));
-		mat_lh.SetRow(1, Point3(mat.GetRow(2).x, mat.GetRow(2).z, mat.GetRow(2).y));
-		mat_lh.SetRow(2, Point3(mat.GetRow(1).x, mat.GetRow(1).z, mat.GetRow(1).y));
-		mat_lh.SetRow(3, Point3(mat.GetRow(3).x, mat.GetRow(3).z, mat.GetRow(3).y));
-		return mat_lh;
-	}
-
-	void meshml_extractor::decompose_matrix(Point3& scale, Quat& real, Quat& dual, Matrix3 const & mat)
-	{
-		Matrix3 mat_lh = mat;
-
-		int flip = mat_lh.Parity() ? -1 : +1;
-
-		scale.x = mat_lh.GetRow(0).Length();
-		scale.y = mat_lh.GetRow(1).Length();
-		scale.z = flip * mat_lh.GetRow(2).Length();
-
-		Point3 trans = mat_lh.GetRow(3);
-
-		mat_lh.SetRow(0, mat_lh.GetRow(0) / scale.x);
-		mat_lh.SetRow(1, mat_lh.GetRow(1) / scale.y);
-		mat_lh.SetRow(2, mat_lh.GetRow(2) / scale.z);
-		mat_lh.SetRow(3, Point3(0, 0, 0));
-		real = ToQuaternion(mat_lh);
-
-		dual = QuatTransToUDQ(real, trans * unit_scale_);
-
-		if (flip * real.w < 0)
-		{
-			real = -real;
-			dual = -dual;
-		}
+		return float4x4(mat.GetRow(0).x, mat.GetRow(0).z, mat.GetRow(0).y, 0,
+			mat.GetRow(2).x, mat.GetRow(2).z, mat.GetRow(2).y, 0,
+			mat.GetRow(1).x, mat.GetRow(1).z, mat.GetRow(1).y, 0,
+			mat.GetRow(3).x, mat.GetRow(3).z, mat.GetRow(3).y, 1);
 	}
 
 	void meshml_extractor::extract_all_joint_tms()
@@ -1013,14 +839,11 @@ namespace KlayGE
 		typedef BOOST_TYPEOF(joint_nodes_) jn_type;
 		BOOST_FOREACH(jn_type::reference jn, joint_nodes_)
 		{
-			joint_t joint;
-
 			INode* parent_node = jn.first->GetParentNode();
 			if (!is_bone(parent_node))
 			{
 				parent_node = root_node_;
 			}
-			joint.parent_node = parent_node;
 
 			Matrix3 tmp_tm;
 			Matrix3 skin_init_tm;
@@ -1055,16 +878,12 @@ namespace KlayGE
 
 			jn.second = Inverse(jn.first->GetNodeTM(0)) * skin_init_tm;
 
-			skin_init_tm = this->rh_to_lh(skin_init_tm);
-
-			Point3 scale;
-			Quat real, dual;
-			this->decompose_matrix(scale, real, dual, skin_init_tm);
-			joint.real = real * scale.x;
-			joint.dual = dual;
-			joint.mat = skin_init_tm;
-
-			joints_[jn.first] = joint;
+			BOOST_AUTO(iter, joint_node_to_id_.find(jn.first));
+			assert(iter != joint_node_to_id_.end());
+			BOOST_AUTO(par_iter, joint_node_to_id_.find(parent_node));
+			assert(par_iter != joint_node_to_id_.end());
+			meshml_obj_.SetJoint(iter->second, tstr_to_str(jn.first->GetName()), par_iter->second,
+				this->rh_to_lh(skin_init_tm));
 		}
 	}
 
@@ -1174,456 +993,31 @@ namespace KlayGE
 		}
 	}
 
-	void meshml_extractor::remove_redundant_joints()
-	{
-		std::set<INode*> joints_used;
-		typedef BOOST_TYPEOF(objs_info_) oi_type;
-		BOOST_FOREACH(oi_type::const_reference obj_info, objs_info_)
-		{
-			typedef BOOST_TYPEOF(obj_info.vertices) ov_type;
-			BOOST_FOREACH(ov_type::const_reference vertex, obj_info.vertices)
-			{
-				typedef BOOST_TYPEOF(vertex.binds) vb_type;
-				BOOST_FOREACH(vb_type::const_reference bind, vertex.binds)
-				{
-					joints_used.insert(bind.first);
-				}
-			}
-		}
-
-		std::set<INode*> parent_joints_used;
-		typedef BOOST_TYPEOF(joints_) joints_type;
-		BOOST_FOREACH(joints_type::const_reference joint, joints_)
-		{
-			if (joints_used.find(joint.first) != joints_used.end())
-			{
-				joint_t const * j = &joint.second;
-				while (j->parent_node != NULL)
-				{
-					parent_joints_used.insert(j->parent_node);
-					j = &joints_[j->parent_node];
-				}
-			}
-		}
-
-		BOOST_FOREACH(std::set<INode*>::const_reference joint, parent_joints_used)
-		{
-			joints_used.insert(joint);
-		}
-
-		for (BOOST_AUTO(iter, joints_.begin()); iter != joints_.end();)
-		{
-			if (joints_used.find(iter->first) == joints_used.end())
-			{
-				iter = joints_.erase(iter);
-			}
-			else
-			{
-				++ iter;
-			}
-		}
-	}
-
-	void meshml_extractor::remove_redundant_mtls()
-	{
-		std::vector<size_t> mtl_mapping(objs_mtl_.size());
-		materials_t mtls_used;
-		for (size_t i = 0; i < objs_mtl_.size(); ++ i)
-		{
-			bool found = false;
-			for (size_t j = 0; j < mtls_used.size(); ++ j)
-			{
-				if ((mtls_used[j].ambient == objs_mtl_[i].ambient)
-					&& (mtls_used[j].diffuse == objs_mtl_[i].diffuse)
-					&& (mtls_used[j].specular == objs_mtl_[i].specular)
-					&& (mtls_used[j].emit == objs_mtl_[i].emit)
-					&& (mtls_used[j].opacity == objs_mtl_[i].opacity)
-					&& (mtls_used[j].specular_level == objs_mtl_[i].specular_level)
-					&& (mtls_used[j].shininess == objs_mtl_[i].shininess)
-					&& (mtls_used[j].texture_slots == objs_mtl_[i].texture_slots))
-				{
-					mtl_mapping[i] = j;
-					found = true;
-					break;
-				}
-			}
-
-			if (!found)
-			{
-				mtl_mapping[i] = mtls_used.size();
-				mtls_used.push_back(objs_mtl_[i]);
-			}
-		}
-
-		objs_mtl_ = mtls_used;
-
-		typedef BOOST_TYPEOF(objs_info_) oi_type;
-		BOOST_FOREACH(oi_type::reference obj_info, objs_info_)
-		{
-			obj_info.mtl_id = mtl_mapping[obj_info.mtl_id];
-		}
-	}
-
-	void meshml_extractor::combine_meshes_with_same_mtl()
-	{
-		objects_info_t opt_objs_info;
-		for (size_t i = 0; i < objs_mtl_.size(); ++ i)
-		{
-			std::vector<vertex_elements_t> ves;
-			std::vector<std::pair<size_t, size_t> > oids;
-			for (size_t j = 0; j < objs_info_.size(); ++ j)
-			{
-				if (objs_info_[j].mtl_id == i)
-				{
-					bool found = false;
-					for (size_t k = 0; k < ves.size(); ++ k)
-					{
-						if (ves[k] == objs_info_[j].vertex_elements)
-						{
-							oids.push_back(std::make_pair(j, k));
-							found = true;
-							break;
-						}
-					}
-
-					if (!found)
-					{
-						oids.push_back(std::make_pair(j, ves.size()));
-						ves.push_back(objs_info_[j].vertex_elements);
-					}
-				}
-			}
-
-			for (size_t j = 0; j < ves.size(); ++ j)
-			{
-				opt_objs_info.push_back(object_info_t());
-				object_info_t& opt_obj = opt_objs_info.back();
-
-				std::ostringstream oss;
-				oss << "mesh_for_mtl_" << i << "_ve_" << j;
-				opt_obj.name = oss.str();
-				opt_obj.mtl_id = i;
-				opt_obj.vertex_elements = ves[j];
-
-				typedef BOOST_TYPEOF(oids) oids_type;
-				BOOST_FOREACH(oids_type::reference oid, oids)
-				{
-					int base = static_cast<int>(opt_obj.vertices.size());
-					if (oid.second == j)
-					{
-						opt_obj.vertices.insert(opt_obj.vertices.end(),
-							objs_info_[oid.first].vertices.begin(), objs_info_[oid.first].vertices.end());
-
-						typedef BOOST_TYPEOF(objs_info_[oid.first].triangles) tris_type;
-						BOOST_FOREACH(tris_type::reference old_tri, objs_info_[oid.first].triangles)
-						{
-							triangle_t tri = old_tri;
-							tri.vertex_index[0] += base;
-							tri.vertex_index[1] += base;
-							tri.vertex_index[2] += base;
-
-							opt_obj.triangles.push_back(tri);
-						}
-					}
-				}
-			}
-		}
-
-		objs_info_ = opt_objs_info;
-	}
-
-	void meshml_extractor::sort_meshes_by_mtl()
-	{
-		std::vector<std::pair<size_t, size_t> > mtl_ids(objs_info_.size());
-		for (size_t i = 0; i < objs_info_.size(); ++ i)
-		{
-			mtl_ids[i].first = objs_info_[i].mtl_id;
-			mtl_ids[i].second = i;
-		}
-
-		std::sort(mtl_ids.begin(), mtl_ids.end());
-
-		objects_info_t opt_objs_info;
-		for (size_t i = 0; i < mtl_ids.size(); ++ i)
-		{
-			opt_objs_info.push_back(objs_info_[mtl_ids[i].second]);
-		}
-
-		objs_info_ = opt_objs_info;
-	}
-
 	void meshml_extractor::write_xml(std::string const & file_name, export_vertex_attrs const & eva)
 	{
 		std::ofstream ofs(file_name.c_str());
-		if (!ofs)
+
+		int vertex_export_settings = 0;
+		if (eva.normal)
 		{
-			return;
+			vertex_export_settings |= MeshMLObj::VES_Normal;
+		}
+		if (eva.tangent_quat)
+		{
+			vertex_export_settings |= MeshMLObj::VES_TangentQuat;
+		}
+		if (eva.tex)
+		{
+			vertex_export_settings |= MeshMLObj::VES_Texcoord;
 		}
 
-		this->remove_redundant_joints();
-		this->remove_redundant_mtls();
+		int user_export_settings = 0;
 		if (combine_meshes_)
 		{
-			this->combine_meshes_with_same_mtl();
+			user_export_settings |= MeshMLObj::UES_CombineMeshes;
 		}
-		else
-		{
-			this->sort_meshes_by_mtl();
-		}
+		user_export_settings |= MeshMLObj::UES_SortMeshes;
 
-		std::map<INode*, int> joints_node_to_id;
-		std::vector<INode*> joints_id_to_node;
-		{
-			typedef BOOST_TYPEOF(joints_) joints_type;
-			BOOST_FOREACH(joints_type::const_reference joint, joints_)
-			{
-				joints_id_to_node.push_back(joint.first);
-			}
-
-			bool swapped = true;
-			while (swapped)
-			{
-				swapped = false;
-				for (int i = 0; i < static_cast<int>(joints_id_to_node.size()); ++ i)
-				{
-					int par_index = -1;
-					if (joints_[joints_id_to_node[i]].parent_node != NULL)
-					{
-						std::vector<INode*>::iterator par_iter = std::find(joints_id_to_node.begin(), joints_id_to_node.end(),
-							joints_[joints_id_to_node[i]].parent_node);
-						assert(par_iter != joints_id_to_node.end());
-						par_index = static_cast<int>(par_iter - joints_id_to_node.begin());
-					}
-
-					if (par_index > i)
-					{
-						std::swap(joints_id_to_node[i], joints_id_to_node[par_index]);
-						swapped = true;
-						break;
-					}
-				}
-			}
-
-			for (int i = 0; i < static_cast<int>(joints_id_to_node.size()); ++ i)
-			{
-				joints_node_to_id.insert(std::make_pair(joints_id_to_node[i], i));
-			}
-		}
-
-		using std::endl;
-
-		ofs << "<?xml version=\"1.0\"?>" << endl << endl;
-		ofs << "<model version=\"5\">" << endl;
-
-		if (joints_per_ver_ > 0)
-		{
-			ofs << "\t<bones_chunk>" << endl;
-			typedef BOOST_TYPEOF(joints_id_to_node) jitn_type;
-			BOOST_FOREACH(jitn_type::const_reference joint_node, joints_id_to_node)
-			{
-				int parent_id = -1;
-				if (joints_[joint_node].parent_node != NULL)
-				{
-					assert(joints_node_to_id.find(joints_[joint_node].parent_node) != joints_node_to_id.end());
-					parent_id = joints_node_to_id[joints_[joint_node].parent_node];
-					assert(parent_id < joints_node_to_id[joint_node]);
-				}
-
-				ofs << "\t\t<bone name=\"" << RemoveQuote(tstr_to_str(joint_node->GetName()))
-					<< "\" parent=\"" << parent_id
-					<< "\">" << endl;
-
-				joint_t const & joint = joints_[joint_node];
-
-				ofs << "\t\t\t<bind_real x=\"" << joint.real.x
-					<< "\" y=\"" << joint.real.y
-					<< "\" z=\"" << joint.real.z
-					<< "\" w=\"" << joint.real.w << "\"/>" << endl;
-				ofs << "\t\t\t<bind_dual x=\"" << joint.dual.x
-					<< "\" y=\"" << joint.dual.y
-					<< "\" z=\"" << joint.dual.z
-					<< "\" w=\"" << joint.dual.w << "\"/>" << endl;
-
-				if (eva.full_joint_matrices)
-				{
-					ofs << "\t\t\t<bind_mat _11=\"" << joint.mat.GetRow(0).x
-						<< "\" _12=\"" << joint.mat.GetRow(0).y
-						<< "\" _13=\"" << joint.mat.GetRow(0).z
-						<< "\" _21=\"" << joint.mat.GetRow(1).x
-						<< "\" _22=\"" << joint.mat.GetRow(1).y
-						<< "\" _23=\"" << joint.mat.GetRow(1).z
-						<< "\" _31=\"" << joint.mat.GetRow(2).x
-						<< "\" _32=\"" << joint.mat.GetRow(2).y
-						<< "\" _33=\"" << joint.mat.GetRow(2).z
-						<< "\" _41=\"" << joint.mat.GetRow(3).x
-						<< "\" _42=\"" << joint.mat.GetRow(3).y
-						<< "\" _43=\"" << joint.mat.GetRow(3).z << "\"/>" << endl;
-				}
-
-				ofs << "\t\t</bone>" << endl;
-			}
-			ofs << "\t</bones_chunk>" << endl;
-		}
-
-		if (!objs_mtl_.empty())
-		{
-			ofs << "\t<materials_chunk>" << endl;
-			for (size_t i = 0; i < objs_mtl_.size(); ++ i)
-			{
-				ofs << "\t\t<material ambient_r=\"" << objs_mtl_[i].ambient.r
-					<< "\" ambient_g=\"" << objs_mtl_[i].ambient.g
-					<< "\" ambient_b=\"" << objs_mtl_[i].ambient.b
-					<< "\" diffuse_r=\"" << objs_mtl_[i].diffuse.r
-					<< "\" diffuse_g=\"" << objs_mtl_[i].diffuse.g
-					<< "\" diffuse_b=\"" << objs_mtl_[i].diffuse.b
-					<< "\" specular_r=\"" << objs_mtl_[i].specular.r
-					<< "\" specular_g=\"" << objs_mtl_[i].specular.g
-					<< "\" specular_b=\"" << objs_mtl_[i].specular.b
-					<< "\" emit_r=\"" << objs_mtl_[i].emit.r
-					<< "\" emit_g=\"" << objs_mtl_[i].emit.g
-					<< "\" emit_b=\"" << objs_mtl_[i].emit.b
-					<< "\" opacity=\"" << objs_mtl_[i].opacity
-					<< "\" specular_level=\"" << objs_mtl_[i].specular_level
-					<< "\" shininess=\"" << objs_mtl_[i].shininess
-					<< "\"";
-				if (!objs_mtl_[i].texture_slots.empty())
-				{
-					ofs << ">" << endl;
-
-					ofs << "\t\t\t<textures_chunk>" << endl;
-					typedef BOOST_TYPEOF(objs_mtl_[i].texture_slots) slots_type;
-					BOOST_FOREACH(slots_type::const_reference ts, objs_mtl_[i].texture_slots)
-					{
-						ofs << "\t\t\t\t<texture type=\"" << RemoveQuote(ts.first)
-							<< "\" name=\"" << RemoveQuote(ts.second) << "\"/>" << endl;
-					}
-					ofs << "\t\t\t</textures_chunk>" << endl;
-
-					ofs << "\t\t</material>" << endl;
-				}
-				else
-				{
-					ofs << "/>" << endl;
-				}
-			}
-			ofs << "\t</materials_chunk>" << endl;
-		}
-
-		ofs << "\t<meshes_chunk>" << endl;
-		typedef BOOST_TYPEOF(objs_info_) oi_type;
-		BOOST_FOREACH(oi_type::const_reference obj_info, objs_info_)
-		{
-			ofs << "\t\t<mesh name=\"" << RemoveQuote(obj_info.name) << "\" mtl_id=\"" << obj_info.mtl_id << "\">" << endl;
-
-			ofs << "\t\t\t<vertices_chunk>" << endl;
-			typedef BOOST_TYPEOF(obj_info.vertices) ov_type;
-			BOOST_FOREACH(ov_type::const_reference vertex, obj_info.vertices)
-			{
-				ofs << "\t\t\t\t<vertex x=\"" << vertex.pos.x
-					<< "\" y=\"" << vertex.pos.y
-					<< "\" z=\"" << vertex.pos.z << "\">" << endl;
-
-				if (eva.normal)
-				{
-					ofs << "\t\t\t\t\t<normal x=\"" << vertex.normal.x
-						<< "\" y=\"" << vertex.normal.y
-						<< "\" z=\"" << vertex.normal.z << "\"/>" << endl;
-				}
-				if (eva.tangent_quat)
-				{
-					ofs << "\t\t\t\t\t<tangent_quat x=\"" << vertex.tangent_quat.x
-						<< "\" y=\"" << vertex.tangent_quat.y
-						<< "\" z=\"" << vertex.tangent_quat.z
-						<< "\" w=\"" << vertex.tangent_quat.w << "\"/>" << endl;
-				}
-
-				if (eva.tex)
-				{
-					typedef BOOST_TYPEOF(vertex.tex) vt_type;
-					BOOST_FOREACH(vt_type::const_reference tex, vertex.tex)
-					{
-						ofs << "\t\t\t\t\t<tex_coord u=\"" << tex.x
-							<< "\" v=\"" << tex.y << "\"/>" << endl;
-					}
-				}
-
-				typedef BOOST_TYPEOF(vertex.binds) vb_type;
-				BOOST_FOREACH(vb_type::const_reference bind, vertex.binds)
-				{
-					assert(joints_node_to_id.find(bind.first) != joints_node_to_id.end());
-					ofs << "\t\t\t\t\t<weight bone_index=\"" << joints_node_to_id[bind.first]
-						<< "\" weight=\"" << bind.second << "\"/>" << endl;
-				}
-
-				ofs << "\t\t\t\t</vertex>" << endl;
-			}
-			ofs << "\t\t\t</vertices_chunk>" << endl;
-
-			ofs << "\t\t\t<triangles_chunk>" << endl;
-			typedef BOOST_TYPEOF(obj_info.triangles) oit_type;
-			BOOST_FOREACH(oit_type::const_reference tri, obj_info.triangles)
-			{
-				ofs << "\t\t\t\t<triangle a=\"" << tri.vertex_index[0]
-					<< "\" b=\"" << tri.vertex_index[1]
-					<< "\" c=\"" << tri.vertex_index[2] << "\"/>" << endl;
-			}
-			ofs << "\t\t\t</triangles_chunk>" << endl;
-
-			ofs << "\t\t</mesh>" << endl;
-		}
-		ofs << "\t</meshes_chunk>" << endl;
-
-		if (joints_per_ver_ > 0)
-		{
-			ofs << "\t<key_frames_chunk start_frame=\"" << start_frame_
-				<< "\" end_frame=\"" << end_frame_
-				<< "\" frame_rate=\"" << frame_rate_ << "\">" << endl;
-			typedef BOOST_TYPEOF(joints_id_to_node) jitn_type;
-			BOOST_FOREACH(jitn_type::const_reference joint_node, joints_id_to_node)
-			{
-				assert(kfs_.find(joint_node) != kfs_.end());
-				key_frame_t const & kf = kfs_[joint_node];
-				assert(kf.reals.size() == kf.duals.size());
-
-				ofs << "\t\t<key_frame joint=\"" << RemoveQuote(tstr_to_str(joint_node->GetName())) << "\">" << endl;
-
-				for (size_t i = 0; i < kf.reals.size(); ++ i)
-				{
-					ofs << "\t\t\t<key>" << endl;
-
-					ofs << "\t\t\t\t<bind_real x=\"" << kf.reals[i].x
-						<< "\" y=\"" << kf.reals[i].y
-						<< "\" z=\"" << kf.reals[i].z
-						<< "\" w=\"" << kf.reals[i].w << "\"/>" << endl;
-					ofs << "\t\t\t\t<bind_dual x=\"" << kf.duals[i].x
-						<< "\" y=\"" << kf.duals[i].y
-						<< "\" z=\"" << kf.duals[i].z
-						<< "\" w=\"" << kf.duals[i].w << "\"/>" << endl;
-
-					if (eva.full_joint_matrices)
-					{
-						ofs << "\t\t\t\t<bind_mat _11=\"" << kf.mats[i].GetRow(0).x
-							<< "\" _12=\"" << kf.mats[i].GetRow(0).y
-							<< "\" _13=\"" << kf.mats[i].GetRow(0).z
-							<< "\" _21=\"" << kf.mats[i].GetRow(1).x
-							<< "\" _22=\"" << kf.mats[i].GetRow(1).y
-							<< "\" _23=\"" << kf.mats[i].GetRow(1).z
-							<< "\" _31=\"" << kf.mats[i].GetRow(2).x
-							<< "\" _32=\"" << kf.mats[i].GetRow(2).y
-							<< "\" _33=\"" << kf.mats[i].GetRow(2).z
-							<< "\" _41=\"" << kf.mats[i].GetRow(3).x
-							<< "\" _42=\"" << kf.mats[i].GetRow(3).y
-							<< "\" _43=\"" << kf.mats[i].GetRow(3).z << "\"/>" << endl;
-					}
-
-					ofs << "\t\t\t</key>" << endl;
-				}
-
-				ofs << "\t\t</key_frame>" << endl;
-			}
-			ofs << "\t</key_frames_chunk>" << endl;
-		}
-
-		ofs << "</model>" << endl;
+		meshml_obj_.WriteMeshML(ofs, vertex_export_settings, user_export_settings);
 	}
 }
