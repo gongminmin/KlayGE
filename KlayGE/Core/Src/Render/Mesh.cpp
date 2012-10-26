@@ -65,16 +65,18 @@ namespace
 			std::vector<uint8_t> merged_indices;
 			std::vector<std::string> mesh_names;
 			std::vector<int32_t> mtl_ids;
-			std::vector<AABBox> bbs;
+			std::vector<AABBox> pos_bbs;
+			std::vector<AABBox> tc_bbs;
 			std::vector<uint32_t> mesh_num_vertices;
 			std::vector<uint32_t> mesh_base_vertices;
 			std::vector<uint32_t> mesh_num_indices;
 			std::vector<uint32_t> mesh_start_indices;
 			std::vector<Joint> joints;
 			boost::shared_ptr<KeyFramesType> kfs;
-			int32_t start_frame;
-			int32_t end_frame;
-			int32_t frame_rate;
+			uint32_t num_frames;
+			uint32_t frame_rate;
+			boost::shared_ptr<ActionSetType> action_set;
+			std::vector<std::vector<AABBox> > mesh_frame_pos_bbs;
 
 			RenderModelPtr model;
 		};
@@ -121,10 +123,10 @@ namespace
 		{
 			LoadModel(model_desc_.res_name, model_desc_.mtls, model_desc_.merged_ves, model_desc_.all_is_index_16_bit,
 				model_desc_.merged_buff, model_desc_.merged_indices,
-				model_desc_.mesh_names, model_desc_.mtl_ids, model_desc_.bbs, 
+				model_desc_.mesh_names, model_desc_.mtl_ids, model_desc_.pos_bbs, 
 				model_desc_.mesh_num_vertices, model_desc_.mesh_base_vertices, model_desc_.mesh_num_indices, model_desc_.mesh_start_indices, 
 				model_desc_.joints, model_desc_.kfs,
-				model_desc_.start_frame, model_desc_.end_frame, model_desc_.frame_rate);
+				model_desc_.num_frames, model_desc_.frame_rate);
 
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 			if (rf.RenderEngineInstance().DeviceCaps().multithread_res_creating_support)
@@ -182,7 +184,7 @@ namespace
 				StaticMeshPtr& mesh = meshes[mesh_index];
 
 				mesh->MaterialID(model_desc_.mtl_ids[mesh_index]);
-				mesh->Bound(model_desc_.bbs[mesh_index]);
+				mesh->PosBound(model_desc_.pos_bbs[mesh_index]);
 
 				for (uint32_t ve_index = 0; ve_index < model_desc_.merged_buff.size(); ++ ve_index)
 				{
@@ -206,8 +208,7 @@ namespace
 					skinned->AssignJoints(model_desc_.joints.begin(), model_desc_.joints.end());
 					skinned->AttachKeyFrames(model_desc_.kfs);
 
-					skinned->StartFrame(model_desc_.start_frame);
-					skinned->EndFrame(model_desc_.end_frame);
+					skinned->NumFrames(model_desc_.num_frames);
 					skinned->FrameRate(model_desc_.frame_rate);
 				}
 			}
@@ -256,13 +257,25 @@ namespace KlayGE
 		}
 	}
 
+	AABBox const & RenderModel::PosBound() const
+	{
+		return pos_aabb_;
+	}
+
+	AABBox const & RenderModel::TexcoordBound() const
+	{
+		return tc_aabb_;
+	}
+
 	void RenderModel::UpdateBoundBox()
 	{
-		aabb_ = AABBox(float3(0, 0, 0), float3(0, 0, 0));
+		pos_aabb_ = AABBox(float3(0, 0, 0), float3(0, 0, 0));
+		tc_aabb_ = AABBox(float3(0, 0, 0), float3(0, 0, 0));
 		typedef BOOST_TYPEOF(meshes_) MeshesType;
 		BOOST_FOREACH(MeshesType::const_reference mesh, meshes_)
 		{
-			aabb_ |= mesh->Bound();
+			pos_aabb_ |= mesh->PosBound();
+			tc_aabb_ |= mesh->TexcoordBound();
 		}
 	}
 
@@ -420,40 +433,29 @@ namespace KlayGE
 		return name_;
 	}
 
-	AABBox const & StaticMesh::Bound() const
+	AABBox const & StaticMesh::PosBound() const
 	{
-		return aabb_;
+		return pos_aabb_;
 	}
 
-	void StaticMesh::Bound(AABBox const & aabb)
+	void StaticMesh::PosBound(AABBox const & aabb)
 	{
-		aabb_ = aabb;
+		pos_aabb_ = aabb;
+	}
+
+	AABBox const & StaticMesh::TexcoordBound() const
+	{
+		return tc_aabb_;
+	}
+
+	void StaticMesh::TexcoordBound(AABBox const & aabb)
+	{
+		tc_aabb_ = aabb;
 	}
 
 	void StaticMesh::AddVertexStream(void const * buf, uint32_t size, vertex_element const & ve, uint32_t access_hint)
 	{
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-
-		if (VEU_Position == ve.usage)
-		{
-			switch (ve.format)
-			{
-			case EF_BGR32F:
-				aabb_ = MathLib::compute_aabbox(static_cast<float3 const *>(buf),
-					static_cast<float3 const *>(buf) + size / sizeof(float3));
-				break;
-
-			case EF_ABGR32F:
-				aabb_ = MathLib::compute_aabbox(static_cast<float4 const *>(buf),
-					static_cast<float4 const *>(buf) + size / sizeof(float4));
-				break;
-
-			default:
-				BOOST_ASSERT(false);
-				break;
-			}
-		}
-
 		ElementInitData init_data;
 		init_data.data = buf;
 		init_data.row_pitch = size;
@@ -507,7 +509,7 @@ namespace KlayGE
 	SkinnedModel::SkinnedModel(std::wstring const & name)
 		: RenderModel(name),
 			last_frame_(-1),
-			start_frame_(0), end_frame_(1), frame_rate_(0)
+			num_frames_(0), frame_rate_(0)
 	{
 	}
 	
@@ -643,9 +645,19 @@ namespace KlayGE
 		}
 	}
 
-	void SkinnedModel::AttachKeyFrames(boost::shared_ptr<KlayGE::KeyFramesType> const & key_frames)
+	void SkinnedModel::AttachKeyFrames(boost::shared_ptr<KeyFramesType> const & key_frames)
 	{
 		key_frames_ = key_frames;
+		frame_pos_aabbs_.assign(num_frames_, std::make_pair(AABBox(), false));
+	}
+
+	void SkinnedModel::NumFrames(uint32_t nf)
+	{
+		if (nf != num_frames_)
+		{
+			num_frames_ = nf;
+			frame_pos_aabbs_.assign(num_frames_, std::make_pair(AABBox(), false));
+		}
 	}
 
 	float SkinnedModel::GetFrame() const
@@ -677,10 +689,70 @@ namespace KlayGE
 		}
 	}
 
+	AABBox const & SkinnedModel::FramePosBound(uint32_t frame) const
+	{
+		BOOST_ASSERT(frame < frame_pos_aabbs_.size());
+		if (!frame_pos_aabbs_[frame].second)
+		{
+			AABBox pos_aabb(float3(0, 0, 0), float3(0, 0, 0));
+			typedef BOOST_TYPEOF(meshes_) MeshesType;
+			BOOST_FOREACH(MeshesType::const_reference mesh, meshes_)
+			{
+				pos_aabb |= checked_pointer_cast<SkinnedMesh>(mesh)->FramePosBound(frame);
+			}
+
+			frame_pos_aabbs_[frame] = std::make_pair(pos_aabb, true);
+		}
+
+		return frame_pos_aabbs_[frame].first;
+	}
+
+	void SkinnedModel::AttachActionSet(boost::shared_ptr<ActionSetType> const & as)
+	{
+		action_set_ = as;
+	}
+	
+	uint32_t SkinnedModel::NumActionSet() const
+	{
+		return action_set_ ? action_set_->size() : 1;
+	}
+
+	void SkinnedModel::GetAction(uint32_t index, std::string& name, uint32_t& start_frame, uint32_t& end_frame)
+	{
+		if (action_set_)
+		{
+			BOOST_ASSERT(index < action_set_->size());
+
+			name = (*action_set_)[index].name;
+			start_frame = (*action_set_)[index].start_frame;
+			end_frame = (*action_set_)[index].end_frame;
+		}
+		else
+		{
+			name = "";
+			start_frame = 0;
+			end_frame = num_frames_;
+		}
+	}
+
 
 	SkinnedMesh::SkinnedMesh(RenderModelPtr const & model, std::wstring const & name)
 		: StaticMesh(model, name)
 	{
+		SkinnedModelPtr skinned_model = checked_pointer_cast<SkinnedModel>(model);
+		frame_pos_aabbs_.resize(skinned_model->NumFrames());
+	}
+
+	AABBox const & SkinnedMesh::FramePosBound(uint32_t frame) const
+	{
+		BOOST_ASSERT(frame < frame_pos_aabbs_.size());
+		return frame_pos_aabbs_[frame];
+	}
+
+	void SkinnedMesh::FramePosBound(uint32_t frame, AABBox const & aabb)
+	{
+		BOOST_ASSERT(frame < frame_pos_aabbs_.size());
+		frame_pos_aabbs_[frame] = aabb;
 	}
 
 
@@ -1763,7 +1835,7 @@ namespace KlayGE
 		std::vector<uint32_t>& mesh_num_vertices, std::vector<uint32_t>& mesh_base_vertices,
 		std::vector<uint32_t>& mesh_num_triangles, std::vector<uint32_t>& mesh_base_triangles,
 		std::vector<Joint>& joints, boost::shared_ptr<KeyFramesType>& kfs,
-		int32_t& start_frame, int32_t& end_frame, int32_t& frame_rate)
+		uint32_t& num_frames, uint32_t& frame_rate)
 	{
 		ResIdentifierPtr lzma_file;
 		if (meshml_name.rfind(jit_ext_name) + jit_ext_name.size() == meshml_name.size())
@@ -2048,10 +2120,11 @@ namespace KlayGE
 
 		if (num_kfs > 0)
 		{
+			int32_t start_frame;
 			decoded->read(&start_frame, sizeof(start_frame));
 			LittleEndianToNative<sizeof(start_frame)>(&start_frame);
-			decoded->read(&end_frame, sizeof(end_frame));
-			LittleEndianToNative<sizeof(end_frame)>(&end_frame);
+			decoded->read(&num_frames, sizeof(num_frames));
+			LittleEndianToNative<sizeof(num_frames)>(&num_frames);
 			decoded->read(&frame_rate, sizeof(frame_rate));
 			LittleEndianToNative<sizeof(frame_rate)>(&frame_rate);
 
@@ -2144,9 +2217,9 @@ namespace KlayGE
 		std::vector<std::vector<std::vector<uint8_t> > > const & buffs,
 		std::vector<char> const & is_index_16_bit, std::vector<std::vector<uint8_t> > const & indices,
 		std::vector<Joint> const & joints, boost::shared_ptr<KeyFramesType> const & kfs,
-		int32_t start_frame, int32_t end_frame, int32_t frame_rate)
+		uint32_t num_frames, uint32_t frame_rate)
 	{
-		KlayGE::XMLDocument doc;
+		XMLDocument doc;
 
 		XMLNodePtr root = doc.AllocNode(XNT_Element, "model");
 		doc.RootNode(root);
@@ -2496,8 +2569,8 @@ namespace KlayGE
 				XMLNodePtr key_frames_chunk = doc.AllocNode(XNT_Element, "key_frames_chunk");
 				root->AppendNode(key_frames_chunk);
 
-				key_frames_chunk->AppendAttrib(doc.AllocAttribUInt("start_frame", start_frame));
-				key_frames_chunk->AppendAttrib(doc.AllocAttribUInt("end_frame", end_frame));
+				key_frames_chunk->AppendAttrib(doc.AllocAttribUInt("start_frame", 0));
+				key_frames_chunk->AppendAttrib(doc.AllocAttribUInt("end_frame", num_frames));
 				key_frames_chunk->AppendAttrib(doc.AllocAttribUInt("frame_rate", frame_rate));
 
 				KeyFramesType::const_iterator iter = kfs->begin();
@@ -2613,9 +2686,8 @@ namespace KlayGE
 
 		std::vector<Joint> joints;
 		boost::shared_ptr<KeyFramesType> kfs;
-		int32_t start_frame = 0;
-		int32_t end_frame = 0;
-		int32_t frame_rate = 0;
+		uint32_t num_frame = 0;
+		uint32_t frame_rate = 0;
 		if (model->IsSkinned())
 		{
 			SkinnedModelPtr skinned = checked_pointer_cast<SkinnedModel>(model);
@@ -2626,14 +2698,13 @@ namespace KlayGE
 				joints[i] = checked_pointer_cast<SkinnedModel>(model)->GetJoint(i);
 			}
 
-			start_frame = skinned->StartFrame();
-			end_frame = skinned->EndFrame();
+			num_frame = skinned->NumFrames();
 			frame_rate = skinned->FrameRate();
 
 			kfs = skinned->GetKeyFrames();
 		}
 
-		SaveModel(meshml_name, mtls, mesh_names, mtl_ids, ves, buffs, is_index_16_bit, indices, joints, kfs, start_frame, end_frame, frame_rate);
+		SaveModel(meshml_name, mtls, mesh_names, mtl_ids, ves, buffs, is_index_16_bit, indices, joints, kfs, num_frame, frame_rate);
 	}
 
 

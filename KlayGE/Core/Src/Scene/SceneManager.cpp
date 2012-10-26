@@ -159,7 +159,7 @@ namespace KlayGE
 						AABBox aabb_ws;
 						if (obj->Attrib() & SceneObject::SOA_Moveable)
 						{
-							AABBox const & aabb = obj->Bound();
+							AABBox const & aabb = obj->PosBound();
 							float4x4 const & mat = obj->ModelMatrix();
 
 							aabb_ws = MathLib::transform_aabb(aabb, mat);
@@ -222,7 +222,7 @@ namespace KlayGE
 			&& !(attr & SceneObject::SOA_Overlay)
 			&& !(attr & SceneObject::SOA_Moveable))
 		{
-			AABBox const & aabb = obj->Bound();
+			AABBox const & aabb = obj->PosBound();
 			float4x4 const & mat = obj->ModelMatrix();
 			aabb_ws = MakeSharedPtr<AABBox>(MathLib::transform_aabb(aabb, mat));
 		}
@@ -555,7 +555,7 @@ namespace KlayGE
 				for (size_t j = 0; j < min_depthes.size(); ++ j)
 				{
 					RenderablePtr const & renderable = items.second[j];
-					AABBox const & box = renderable->Bound();
+					AABBox const & box = renderable->PosBound();
 					uint32_t const num = renderable->NumInstances();
 					float md = 1e10f;
 					for (uint32_t i = 0; i < num; ++ i)

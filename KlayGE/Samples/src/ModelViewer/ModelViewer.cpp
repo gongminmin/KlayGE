@@ -74,7 +74,8 @@ namespace
 
 			rl_->BindVertexStream(pos_vb, boost::make_tuple(vertex_element(VEU_Position, 0, EF_ABGR32F)));
 
-			aabb_ = MathLib::compute_aabbox(&xyzs[0], &xyzs[sizeof(xyzs) / sizeof(xyzs[0])]);
+			pos_aabb_ = MathLib::compute_aabbox(&xyzs[0], &xyzs[sizeof(xyzs) / sizeof(xyzs[0])]);
+			tc_aabb_ = AABBox(float3(0, 0, 0), float3(0, 0, 0));
 		}
 
 		void OnRenderBegin()
@@ -89,16 +90,6 @@ namespace
 			*mvp_param_ = scaling * trans * camera.ViewProjMatrix();
 		}
 	};
-
-	class AxisObject : public SceneObjectHelper
-	{
-	public:
-		AxisObject()
-			: SceneObjectHelper(MakeSharedPtr<RenderAxis>(), 0)
-		{
-		}
-	};
-
 
 	class RenderGrid : public RenderableHelper
 	{
@@ -135,7 +126,8 @@ namespace
 
 			rl_->BindVertexStream(pos_vb, boost::make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F)));
 
-			aabb_ = MathLib::compute_aabbox(&xyzs[0], &xyzs[sizeof(xyzs) / sizeof(xyzs[0])]);
+			pos_aabb_ = MathLib::compute_aabbox(&xyzs[0], &xyzs[sizeof(xyzs) / sizeof(xyzs[0])]);
+			tc_aabb_ = AABBox(float3(0, 0, 0), float3(0, 0, 0));
 		}
 
 		void OnRenderBegin()
@@ -144,15 +136,6 @@ namespace
 
 			App3DFramework const & app = Context::Instance().AppInstance();
 			*mvp_param_ = app.ActiveCamera().ViewProjMatrix();
-		}
-	};
-
-	class GridObject : public SceneObjectHelper
-	{
-	public:
-		GridObject()
-			: SceneObjectHelper(MakeSharedPtr<RenderGrid>(), 0)
-		{
 		}
 	};
 
@@ -185,14 +168,9 @@ namespace
 			checked_pointer_cast<DetailedSkinnedModel>(renderable_)->SetTime(0);
 		}
 
-		uint32_t StartFrame() const
+		uint32_t NumFrames() const
 		{
-			return checked_pointer_cast<DetailedSkinnedModel>(renderable_)->StartFrame();
-		}
-
-		uint32_t EndFrame() const
-		{
-			return checked_pointer_cast<DetailedSkinnedModel>(renderable_)->EndFrame();
+			return checked_pointer_cast<DetailedSkinnedModel>(renderable_)->NumFrames();
 		}
 
 		uint32_t FrameRate() const
@@ -338,10 +316,10 @@ void ModelViewerApp::InitObjects()
 	point_light_->BindUpdateFunc(PointLightSourceUpdate());
 	point_light_->AddToSceneManager();
 	
-	axis_ = MakeSharedPtr<AxisObject>();
+	axis_ = MakeSharedPtr<SceneObjectHelper>(MakeSharedPtr<RenderAxis>(), 0);
 	axis_->AddToSceneManager();
 
-	grid_ = MakeSharedPtr<GridObject>();
+	grid_ = MakeSharedPtr<SceneObjectHelper>(MakeSharedPtr<RenderGrid>(), 0);
 	grid_->AddToSceneManager();
 
 	Color clear_clr(0.2f, 0.4f, 0.6f, 1);
@@ -445,7 +423,7 @@ void ModelViewerApp::OpenModel(std::string const & name)
 	boost::shared_ptr<ModelObject> model = checked_pointer_cast<ModelObject>(model_);
 
 	frame_ = 0;
-	dialog_animation_->Control<UISlider>(id_frame_slider_)->SetRange(model->StartFrame() * 10, model->EndFrame() * 10 - 1);
+	dialog_animation_->Control<UISlider>(id_frame_slider_)->SetRange(0, model->NumFrames() * 10 - 1);
 	dialog_animation_->Control<UISlider>(id_frame_slider_)->SetValue(static_cast<int>(frame_ * 10 + 0.5f));
 
 	dialog_model_->Control<UIComboBox>(id_mesh_)->RemoveAllItems();
@@ -454,7 +432,7 @@ void ModelViewerApp::OpenModel(std::string const & name)
 		dialog_model_->Control<UIComboBox>(id_mesh_)->AddItem(model->Mesh(i)->Name());
 	}
 
-	AABBox const & bb = model_->Bound();
+	AABBox const & bb = model_->PosBound();
 	float3 center = bb.Center();
 	float3 half_size = bb.HalfSize();
 	this->LookAt(center + float3(half_size.x() * 2, half_size.y() * 2.5f, half_size.z() * 3), float3(0, center.y(), 0), float3(0.0f, 1.0f, 0.0f));
@@ -779,7 +757,7 @@ uint32_t ModelViewerApp::DoUpdate(KlayGE::uint32_t pass)
 		if (this_time - last_time_ > 0.1f / model->FrameRate())
 		{
 			frame_ += 0.1f;
-			frame_ = fmod(frame_, static_cast<float>(model->EndFrame() - model->StartFrame())) + model->StartFrame();
+			frame_ = fmod(frame_, static_cast<float>(model->NumFrames()));
 
 			last_time_ = this_time;
 		}

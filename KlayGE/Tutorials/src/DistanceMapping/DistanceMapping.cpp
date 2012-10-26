@@ -166,7 +166,8 @@ namespace
 			GraphicsBufferPtr ib = rf.MakeIndexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, &init_data);
 			rl_->BindIndexStream(ib, EF_R16UI);
 
-			aabb_ = MathLib::compute_aabbox(&xyzs[0], &xyzs[sizeof(xyzs) / sizeof(xyzs[0])]);
+			pos_aabb_ = MathLib::compute_aabbox(&xyzs[0], &xyzs[sizeof(xyzs) / sizeof(xyzs[0])]);
+			tc_aabb_ = AABBox(float3(0, 0, 0), float3(0, 0, 0));
 		}
 
 		void ModelMatrix(float4x4 const & mat)

@@ -71,8 +71,10 @@ namespace KlayGE
 			return rl_;
 		}
 
-		virtual AABBox const & Bound() const;
-		void Bound(AABBox const & aabb);
+		virtual AABBox const & PosBound() const;
+		virtual void PosBound(AABBox const & aabb);
+		virtual AABBox const & TexcoordBound() const;
+		virtual void TexcoordBound(AABBox const & aabb);
 
 		virtual std::wstring const & Name() const;
 
@@ -149,7 +151,8 @@ namespace KlayGE
 
 		RenderLayoutPtr rl_;
 
-		AABBox aabb_;
+		AABBox pos_aabb_;
+		AABBox tc_aabb_;
 
 		int32_t mtl_id_;
 
@@ -203,10 +206,9 @@ namespace KlayGE
 		void OnRenderBegin();
 		void OnRenderEnd();
 
-		AABBox const & Bound() const
-		{
-			return aabb_;
-		}
+		AABBox const & PosBound() const;
+		AABBox const & TexcoordBound() const;
+
 		std::wstring const & Name() const
 		{
 			return name_;
@@ -247,7 +249,8 @@ namespace KlayGE
 
 		RenderLayoutPtr rl_;
 
-		AABBox aabb_;
+		AABBox pos_aabb_;
+		AABBox tc_aabb_;
 
 		std::vector<RenderMaterialPtr> materials_;
 
@@ -283,6 +286,14 @@ namespace KlayGE
 		std::pair<std::pair<Quaternion, Quaternion>, float> Frame(float frame) const;
 	};
 	typedef std::vector<KeyFrames> KeyFramesType;
+
+	struct KLAYGE_CORE_API ActionSet
+	{
+		std::string name;
+		uint32_t start_frame;
+		uint32_t end_frame;
+	};
+	typedef std::vector<ActionSet> ActionSetType;
 
 	class KLAYGE_CORE_API SkinnedModel : public RenderModel
 	{
@@ -328,28 +339,17 @@ namespace KlayGE
 		{
 			return bind_duals_;
 		}
-		void AttachKeyFrames(boost::shared_ptr<KlayGE::KeyFramesType> const & kf);
+		void AttachKeyFrames(boost::shared_ptr<KeyFramesType> const & kf);
 
-		boost::shared_ptr<KlayGE::KeyFramesType> const & GetKeyFrames() const
+		boost::shared_ptr<KeyFramesType> const & GetKeyFrames() const
 		{
 			return key_frames_;
 		}
-		uint32_t StartFrame() const
+		uint32_t NumFrames() const
 		{
-			return start_frame_;
+			return num_frames_;
 		}
-		void StartFrame(uint32_t sf)
-		{
-			start_frame_ = sf;
-		}
-		uint32_t EndFrame() const
-		{
-			return end_frame_;
-		}
-		void EndFrame(uint32_t ef)
-		{
-			end_frame_ = ef;
-		}
+		void NumFrames(uint32_t nf);
 		uint32_t FrameRate() const
 		{
 			return frame_rate_;
@@ -365,6 +365,12 @@ namespace KlayGE
 		void RebindJoints();
 		void UnbindJoints();
 
+		virtual AABBox const & FramePosBound(uint32_t frame) const;
+
+		void AttachActionSet(boost::shared_ptr<ActionSetType> const & as);
+		uint32_t NumActionSet() const;
+		void GetAction(uint32_t index, std::string& name, uint32_t& start_frame, uint32_t& end_frame);
+
 	protected:
 		void BuildBones(float frame);
 		void UpdateBinds();
@@ -377,9 +383,12 @@ namespace KlayGE
 		boost::shared_ptr<KeyFramesType> key_frames_;
 		float last_frame_;
 
-		uint32_t start_frame_;
-		uint32_t end_frame_;
+		uint32_t num_frames_;
 		uint32_t frame_rate_;
+
+		mutable std::vector<std::pair<AABBox, bool> > frame_pos_aabbs_;
+
+		boost::shared_ptr<ActionSetType> action_set_;
 	};
 
 	class KLAYGE_CORE_API SkinnedMesh : public StaticMesh
@@ -389,6 +398,12 @@ namespace KlayGE
 		virtual ~SkinnedMesh()
 		{
 		}
+
+		virtual AABBox const & FramePosBound(uint32_t frame) const;
+		virtual void FramePosBound(uint32_t frame, AABBox const & aabb);
+
+	private:
+		std::vector<AABBox> frame_pos_aabbs_;
 	};
 
 
@@ -417,7 +432,7 @@ namespace KlayGE
 		std::vector<uint32_t>& mesh_num_vertices, std::vector<uint32_t>& mesh_base_vertices,
 		std::vector<uint32_t>& mesh_num_triangles, std::vector<uint32_t>& mesh_base_triangles,
 		std::vector<Joint>& joints, boost::shared_ptr<KeyFramesType>& kfs,
-		int32_t& start_frame, int32_t& end_frame, int32_t& frame_rate);
+		uint32_t& num_frames, uint32_t& frame_rate);
 	KLAYGE_CORE_API RenderModelPtr SyncLoadModel(std::string const & meshml_name, uint32_t access_hint,
 		boost::function<RenderModelPtr(std::wstring const &)> CreateModelFactoryFunc = CreateModelFactory<RenderModel>(),
 		boost::function<StaticMeshPtr(RenderModelPtr const &, std::wstring const &)> CreateMeshFactoryFunc = CreateMeshFactory<StaticMesh>());
@@ -430,7 +445,7 @@ namespace KlayGE
 		std::vector<std::vector<std::vector<uint8_t> > > const & buffs,
 		std::vector<char> const & is_index_16_bit, std::vector<std::vector<uint8_t> > const & indices,
 		std::vector<Joint> const & joints, boost::shared_ptr<KeyFramesType> const & kfs,
-		int32_t start_frame, int32_t end_frame, int32_t frame_rate);
+		uint32_t num_frames, uint32_t frame_rate);
 	KLAYGE_CORE_API void SaveModel(RenderModelPtr const & model, std::string const & meshml_name);
 
 

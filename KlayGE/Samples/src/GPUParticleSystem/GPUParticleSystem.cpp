@@ -386,7 +386,7 @@ namespace
 					GraphicsBufferPtr pos_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, &init_data);
 					rl_->BindVertexStream(pos_vb, boost::make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F)));
 
-					aabb_ = MathLib::compute_aabbox(&xyzs[0], &xyzs[4]);
+					pos_aabb_ = MathLib::compute_aabbox(&xyzs[0], &xyzs[4]);
 				}
 				{
 					float2 texs[] = 
@@ -403,6 +403,8 @@ namespace
 
 					GraphicsBufferPtr tex_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, &init_data);
 					rl_->BindVertexStream(tex_vb, boost::make_tuple(vertex_element(VEU_TextureCoord, 0, EF_GR32F)));
+
+					tc_aabb_ = AABBox(float3(0, 0, 0), float3(1, 1, 0));
 				}
 
 				if (use_mrt)

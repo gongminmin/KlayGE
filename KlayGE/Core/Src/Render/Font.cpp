@@ -131,7 +131,8 @@ namespace KlayGE
 		ib_ = rf.MakeIndexBuffer(BU_Dynamic, EAH_CPU_Write | EAH_GPU_Read, NULL);
 		rl_->BindIndexStream(ib_, EF_R16UI);
 
-		aabb_ = AABBox(float3(0, 0, 0), float3(0, 0, 0));
+		pos_aabb_ = AABBox(float3(0, 0, 0), float3(0, 0, 0));
+		tc_aabb_ = AABBox(float3(0, 0, 0), float3(0, 0, 0));
 	}
 
 	RenderTechniquePtr const & FontRenderable::GetRenderTechnique() const
@@ -186,7 +187,7 @@ namespace KlayGE
 		vertices_.resize(0);
 		indices_.resize(0);
 
-		aabb_ = AABBox(float3(0, 0, 0), float3(0, 0, 0));
+		pos_aabb_ = AABBox(float3(0, 0, 0), float3(0, 0, 0));
 	}
 
 	void FontRenderable::Render()
@@ -418,7 +419,7 @@ namespace KlayGE
 				y += (offset_adv.second >> 16) * rel_size_y;
 			}
 
-			aabb_ |= AABBox(float3(sx[i], sy[i], sz), float3(sx[i] + lines[i].first, sy[i] + h, sz + 0.1f));
+			pos_aabb_ |= AABBox(float3(sx[i], sy[i], sz), float3(sx[i] + lines[i].first, sy[i] + h, sz + 0.1f));
 		}
 	}
 
@@ -528,7 +529,7 @@ namespace KlayGE
 			}
 		}
 
-		aabb_ |= AABBox(float3(sx, sy, sz), float3(maxx, maxy, sz + 0.1f));
+		pos_aabb_ |= AABBox(float3(sx, sy, sz), float3(maxx, maxy, sz + 0.1f));
 	}
 
 	// 更新纹理，使用LRU算法

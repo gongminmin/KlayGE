@@ -94,8 +94,8 @@ namespace
 
 		void BuildMeshInfo()
 		{
-			aabb_.Min() *= 1.2f;
-			aabb_.Max() *= 1.2f;
+			pos_aabb_.Min() *= 1.2f;
+			pos_aabb_.Max() *= 1.2f;
 		}
 
 		void AtmosphereTop(float top)

@@ -253,7 +253,7 @@ namespace KlayGE
 						}
 						else if (attr & SceneObject::SOA_Moveable)
 						{
-							AABBox const & aabb = obj->Bound();
+							AABBox const & aabb = obj->PosBound();
 							float4x4 const & mat = obj->ModelMatrix();
 							soaabb->visible = this->AABBVisible(MathLib::transform_aabb(aabb, mat));
 						}

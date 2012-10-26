@@ -597,7 +597,8 @@ namespace KlayGE
 					float2(-1, -1),
 					float2(+1, -1)
 				};
-				aabb_ = AABBox(float3(-1, -1, -1), float3(1, 1, 1));
+				pos_aabb_ = AABBox(float3(-1, -1, -1), float3(1, 1, 1));
+				tc_aabb_ = AABBox(float3(0, 0, 0), float3(1, 1, 0));
 				ElementInitData init_data;
 				init_data.row_pitch = sizeof(pos);
 				init_data.data = &pos[0];

@@ -60,7 +60,8 @@ namespace KlayGE
 
 		virtual void ModelMatrix(float4x4 const & mat);
 		virtual float4x4 const & ModelMatrix() const;
-		virtual AABBox const & Bound() const;
+		virtual AABBox const & PosBound() const;
+		virtual AABBox const & TexcoordBound() const;
 
 		virtual void AddToSceneManager();
 		virtual void DelFromSceneManager();

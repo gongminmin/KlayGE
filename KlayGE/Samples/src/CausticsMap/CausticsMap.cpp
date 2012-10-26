@@ -548,7 +548,8 @@ namespace
 
 			point_texture_ = point_texture_loader();
 
-			aabb_ = AABBox(float3(0.0f, 0.0f, 0.0f), float3(1.0f, 1.0f, 0.0f));
+			pos_aabb_ = AABBox(float3(0.0f, 0.0f, 0.0f), float3(1.0f, 1.0f, 0.0f));
+			tc_aabb_ = AABBox(float3(0, 0, 0), float3(0, 0, 0));
 		}
 
 		void Pass(uint32_t pass)
@@ -1108,7 +1109,7 @@ void CausticsMapApp::ModelSelectionComboBox(KlayGE::UIComboBox const & sender)
 		break;
 	}
 
-	dummy_light_env_->Position(MathLib::transform_coord(refract_obj_->Bound().Center(), refract_obj_->ModelMatrix()));
+	dummy_light_env_->Position(MathLib::transform_coord(refract_obj_->PosBound().Center(), refract_obj_->ModelMatrix()));
 }
 
 void CausticsMapApp::DoUpdateOverlay()

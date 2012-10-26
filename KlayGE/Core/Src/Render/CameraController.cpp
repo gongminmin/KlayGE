@@ -95,7 +95,7 @@ namespace KlayGE
 					InputActionDefine(MoveRight, KS_RightArrow);
 
 		InputEngine& inputEngine(Context::Instance().InputFactoryInstance().InputEngineInstance());
-		KlayGE::InputActionMap actionMap;
+		InputActionMap actionMap;
 		actionMap.AddActions(actions.begin(), actions.end());
 
 		action_handler_t input_handler = MakeSharedPtr<input_signal>();
@@ -298,7 +298,7 @@ namespace KlayGE
 					InputActionDefine(Turn, MS_Y);
 
 		InputEngine& inputEngine(Context::Instance().InputFactoryInstance().InputEngineInstance());
-		KlayGE::InputActionMap actionMap;
+		InputActionMap actionMap;
 		actionMap.AddActions(actions.begin(), actions.end());
 
 		action_handler_t input_handler = MakeSharedPtr<input_signal>();

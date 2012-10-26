@@ -60,9 +60,14 @@ namespace KlayGE
 		return rl_;
 	}
 
-	AABBox const & RenderableHelper::Bound() const
+	AABBox const & RenderableHelper::PosBound() const
 	{
-		return aabb_;
+		return pos_aabb_;
+	}
+
+	AABBox const & RenderableHelper::TexcoordBound() const
+	{
+		return tc_aabb_;
 	}
 
 	std::wstring const & RenderableHelper::Name() const
@@ -92,7 +97,8 @@ namespace KlayGE
 		GraphicsBufferPtr vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, &init_data);
 		rl_->BindVertexStream(vb, boost::make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F)));
 
-		aabb_ = MathLib::compute_aabbox(&v, &v + 1);
+		pos_aabb_ = MathLib::compute_aabbox(&v, &v + 1);
+		tc_aabb_ = AABBox(float3(0, 0, 0), float3(0, 0, 0));
 	}
 
 	void RenderablePoint::OnRenderBegin()
@@ -131,7 +137,8 @@ namespace KlayGE
 		GraphicsBufferPtr vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, &init_data);
 		rl_->BindVertexStream(vb, boost::make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F)));
 
-		aabb_ = MathLib::compute_aabbox(&xyzs[0], &xyzs[0] + sizeof(xyzs) / sizeof(xyzs[0]));
+		pos_aabb_ = MathLib::compute_aabbox(&xyzs[0], &xyzs[0] + sizeof(xyzs) / sizeof(xyzs[0]));
+		tc_aabb_ = AABBox(float3(0, 0, 0), float3(0, 0, 0));
 	}
 
 	void RenderableLine::OnRenderBegin()
@@ -170,7 +177,8 @@ namespace KlayGE
 		GraphicsBufferPtr vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, &init_data);
 		rl_->BindVertexStream(vb, boost::make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F)));
 
-		aabb_ = MathLib::compute_aabbox(&xyzs[0], &xyzs[0] + sizeof(xyzs) / sizeof(xyzs[0]));
+		pos_aabb_ = MathLib::compute_aabbox(&xyzs[0], &xyzs[0] + sizeof(xyzs) / sizeof(xyzs[0]));
+		tc_aabb_ = AABBox(float3(0, 0, 0), float3(0, 0, 0));
 	}
 
 	void RenderableTriangle::OnRenderBegin()
@@ -188,7 +196,8 @@ namespace KlayGE
 	{
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-		aabb_ = aabb;
+		pos_aabb_ = aabb;
+		tc_aabb_ = AABBox(float3(0, 0, 0), float3(0, 0, 0));
 
 		technique_ = rf.LoadEffect("RenderableHelper.fxml")->TechniqueByName("BoxTec");
 		color_ep_ = technique_->Effect().ParameterByName("color");
@@ -244,7 +253,8 @@ namespace KlayGE
 	{
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-		aabb_ = aabb;
+		pos_aabb_ = aabb;
+		tc_aabb_ = AABBox(float3(0, 0, 0), float3(0, 0, 0));
 
 		technique_ = rf.LoadEffect("RenderableHelper.fxml")->TechniqueByName("BoxTec");
 		color_ep_ = technique_->Effect().ParameterByName("color");
@@ -336,7 +346,8 @@ namespace KlayGE
 		GraphicsBufferPtr vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, &init_data);
 		rl_->BindVertexStream(vb, boost::make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F)));
 
-		aabb_ = MathLib::compute_aabbox(&xyzs[0], &xyzs[4]);
+		pos_aabb_ = MathLib::compute_aabbox(&xyzs[0], &xyzs[4]);
+		tc_aabb_ = AABBox(float3(0, 0, 0), float3(0, 0, 0));
 	}
 
 	void RenderableSkyBox::Technique(RenderTechniquePtr const & tech)
@@ -495,7 +506,8 @@ namespace KlayGE
 		GraphicsBufferPtr ib = rf.MakeIndexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, &init_data);
 		rl_->BindIndexStream(ib, EF_R16UI);
 
-		aabb_ = MathLib::compute_aabbox(pos.begin(), pos.end());
+		pos_aabb_ = MathLib::compute_aabbox(pos.begin(), pos.end());
+		tc_aabb_ = AABBox(float3(0, 0, 0), float3(1, 1, 0));
 	}
 
 
@@ -510,10 +522,13 @@ namespace KlayGE
 		gbuffer_alpha_test_mrt_tech_ = deferred_effect_->TechniqueByName("DecalGBufferAlphaTestMRTTech");
 		technique_ = gbuffer_alpha_test_rt0_tech_;
 
-		aabb_ = AABBox(float3(-1, -1, -1), float3(1, 1, 1));
+		pos_aabb_ = AABBox(float3(-1, -1, -1), float3(1, 1, 1));
+		tc_aabb_ = AABBox(float3(0, 0, 0), float3(1, 1, 0));
+
 		float3 xyzs[] =
 		{
-			aabb_[0], aabb_[1], aabb_[2], aabb_[3], aabb_[4], aabb_[5], aabb_[6], aabb_[7]
+			pos_aabb_[0], pos_aabb_[1], pos_aabb_[2], pos_aabb_[3],
+			pos_aabb_[4], pos_aabb_[5], pos_aabb_[6], pos_aabb_[7]
 		};
 
 		uint16_t indices[] =
