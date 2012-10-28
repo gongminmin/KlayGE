@@ -3571,12 +3571,243 @@ namespace KlayGE
 		uint32_t src_width, uint32_t src_height, uint32_t src_depth,
 		bool linear)
 	{
-		uint8_t const * src_ptr = static_cast<uint8_t const *>(src_data);
-		uint8_t* dst_ptr = static_cast<uint8_t*>(dst_data);
-		uint32_t const src_elem_size = NumFormatBytes(src_format);
-		uint32_t const dst_elem_size = NumFormatBytes(dst_format);
+		std::vector<uint8_t> src_cpu_data_block;
+		void* src_cpu_data;
+		uint32_t src_cpu_row_pitch;
+		uint32_t src_cpu_slice_pitch;
+		ElementFormat src_cpu_format;
+		if (IsCompressedFormat(src_format))
+		{
+			switch (src_format)
+			{				
+			case EF_BC1:
+			case EF_BC2:
+			case EF_BC3:
+				src_cpu_format = EF_ARGB8;
+				break;
+				
+			case EF_BC4:
+				src_cpu_format = EF_R8;
+				break;
 
-		if (!linear && (src_format == dst_format))
+			case EF_BC5:
+				src_cpu_format = EF_GR8;
+				break;
+
+			case EF_SIGNED_BC1:
+			case EF_SIGNED_BC2:
+			case EF_SIGNED_BC3:
+				src_cpu_format = EF_SIGNED_ABGR8;
+				break;
+
+			case EF_SIGNED_BC4:
+				src_cpu_format = EF_SIGNED_R8;
+				break;
+
+			case EF_SIGNED_BC5:
+				src_cpu_format = EF_SIGNED_GR8;
+				break;
+
+			case EF_BC1_SRGB:
+			case EF_BC2_SRGB:
+			case EF_BC3_SRGB:
+			case EF_BC4_SRGB:
+			case EF_BC5_SRGB:
+				src_cpu_format = EF_ARGB8_SRGB;
+				break;
+
+			default:
+				BOOST_ASSERT(false);
+				src_cpu_format = src_format;
+				break;
+			}
+
+			src_cpu_row_pitch = src_width * NumFormatBytes(src_cpu_format);
+			src_cpu_slice_pitch = src_cpu_row_pitch * src_height;
+			src_cpu_data_block.resize(src_depth * src_cpu_slice_pitch);
+			src_cpu_data = &src_cpu_data_block[0];
+
+			uint8_t const * src = static_cast<uint8_t const *>(src_data);
+			uint8_t* dst = static_cast<uint8_t*>(src_cpu_data);
+			for (uint32_t z = 0; z < src_depth; ++ z)
+			{
+				switch (src_format)
+				{
+				case EF_BC1:
+				case EF_SIGNED_BC1:
+					DecodeBC1(dst, src_cpu_row_pitch, src, src_width, src_height);
+					break;
+
+				case EF_BC2:
+				case EF_SIGNED_BC2:
+					DecodeBC2(dst, src_cpu_row_pitch, src, src_width, src_height);
+					break;
+
+				case EF_BC3:
+				case EF_SIGNED_BC3:
+					DecodeBC3(dst, src_cpu_row_pitch, src, src_width, src_height);
+					break;
+				
+				case EF_BC4:
+				case EF_SIGNED_BC4:
+					DecodeBC4(dst, src_cpu_row_pitch, src, src_width, src_height);
+					break;
+
+				case EF_BC5:
+				case EF_SIGNED_BC5:
+					DecodeBC5(dst, src_cpu_row_pitch, src, src_width, src_height);
+					break;
+
+				case EF_BC1_SRGB:
+					DecodeBC1_sRGB(dst, src_cpu_row_pitch, src, src_width, src_height);
+					break;
+
+				case EF_BC2_SRGB:
+					DecodeBC2_sRGB(dst, src_cpu_row_pitch, src, src_width, src_height);
+					break;
+
+				case EF_BC3_SRGB:
+					DecodeBC3_sRGB(dst, src_cpu_row_pitch, src, src_width, src_height);
+					break;
+				
+				case EF_BC4_SRGB:
+					{
+						uint8_t uncompressed_r[16];
+						for (uint32_t y_base = 0; y_base < src_height; y_base += 4)
+						{
+							for (uint32_t x_base = 0; x_base < src_width; x_base += 4)
+							{
+								DecodeBC4_sRGB(&uncompressed_r[0], src);
+								src += 8;
+
+								for (int y = 0; y < 4; ++ y)
+								{
+									for (int x = 0; x < 4; ++ x)
+									{
+										dst[(y_base + y) * src_cpu_row_pitch + (x_base + x) * 4 + 0] = 0;
+										dst[(y_base + y) * src_cpu_row_pitch + (x_base + x) * 4 + 1] = 0;
+										dst[(y_base + y) * src_cpu_row_pitch + (x_base + x) * 4 + 2] = uncompressed_r[y * 4 + x];
+										dst[(y_base + y) * src_cpu_row_pitch + (x_base + x) * 4 + 3] = 0;
+									}
+								}
+							}
+						}
+					}
+					break;
+
+				case EF_BC5_SRGB:
+					{
+						uint8_t uncompressed_r[16];
+						uint8_t uncompressed_g[16];
+						for (uint32_t y_base = 0; y_base < src_height; y_base += 4)
+						{
+							for (uint32_t x_base = 0; x_base < src_width; x_base += 4)
+							{
+								DecodeBC5_sRGB(&uncompressed_r[0], &uncompressed_g[0], src);
+								src += 16;
+
+								for (int y = 0; y < 4; ++ y)
+								{
+									for (int x = 0; x < 4; ++ x)
+									{
+										dst[(y_base + y) * src_cpu_row_pitch + (x_base + x) * 4 + 0] = 0;
+										dst[(y_base + y) * src_cpu_row_pitch + (x_base + x) * 4 + 1] = uncompressed_g[y * 4 + x];
+										dst[(y_base + y) * src_cpu_row_pitch + (x_base + x) * 4 + 2] = uncompressed_r[y * 4 + x];
+										dst[(y_base + y) * src_cpu_row_pitch + (x_base + x) * 4 + 3] = 0;
+									}
+								}
+							}
+						}
+					}
+					break;
+
+				default:
+					BOOST_ASSERT(false);
+					break;
+				}
+
+				src += src_slice_pitch;
+				dst += src_cpu_slice_pitch;
+			}
+		}
+		else
+		{
+			src_cpu_data = const_cast<void*>(src_data);
+			src_cpu_row_pitch = src_row_pitch;
+			src_cpu_slice_pitch = src_slice_pitch;
+			src_cpu_format = src_format;
+		}
+
+		std::vector<uint8_t> dst_cpu_data_block;
+		void* dst_cpu_data;
+		uint32_t dst_cpu_row_pitch;
+		uint32_t dst_cpu_slice_pitch;
+		ElementFormat dst_cpu_format;
+		if (IsCompressedFormat(dst_format))
+		{
+			switch (dst_format)
+			{				
+			case EF_BC1:
+			case EF_BC2:
+			case EF_BC3:
+				dst_cpu_format = EF_ARGB8;
+				break;
+				
+			case EF_BC4:
+				dst_cpu_format = EF_R8;
+				break;
+
+			case EF_BC5:
+				dst_cpu_format = EF_GR8;
+				break;
+
+			case EF_SIGNED_BC1:
+			case EF_SIGNED_BC2:
+			case EF_SIGNED_BC3:
+				dst_cpu_format = EF_SIGNED_ABGR8;
+				break;
+
+			case EF_SIGNED_BC4:
+				dst_cpu_format = EF_SIGNED_R8;
+				break;
+
+			case EF_SIGNED_BC5:
+				dst_cpu_format = EF_SIGNED_GR8;
+				break;
+
+			case EF_BC1_SRGB:
+			case EF_BC2_SRGB:
+			case EF_BC3_SRGB:
+			case EF_BC4_SRGB:
+			case EF_BC5_SRGB:
+				dst_cpu_format = EF_ARGB8_SRGB;
+				break;
+
+			default:
+				BOOST_ASSERT(false);
+				dst_cpu_format = src_format;
+				break;
+			}
+
+			dst_cpu_row_pitch = dst_width * NumFormatBytes(src_cpu_format);
+			dst_cpu_slice_pitch = dst_cpu_row_pitch * dst_height;
+			dst_cpu_data_block.resize(dst_depth * dst_cpu_slice_pitch);
+			dst_cpu_data = &dst_cpu_data_block[0];
+		}
+		else
+		{
+			dst_cpu_data = const_cast<void*>(dst_data);
+			dst_cpu_row_pitch = dst_row_pitch;
+			dst_cpu_slice_pitch = dst_slice_pitch;
+			dst_cpu_format = dst_format;
+		}
+
+		uint8_t const * src_ptr = static_cast<uint8_t const *>(src_cpu_data);
+		uint8_t* dst_ptr = static_cast<uint8_t*>(dst_cpu_data);
+		uint32_t const src_elem_size = NumFormatBytes(src_cpu_format);
+		uint32_t const dst_elem_size = NumFormatBytes(dst_cpu_format);
+
+		if (!linear && (src_cpu_format == dst_cpu_format))
 		{
 			for (uint32_t z = 0; z < dst_depth; ++ z)
 			{
@@ -3588,8 +3819,8 @@ namespace KlayGE
 					float fy = static_cast<float>(y) / dst_height * src_height;
 					uint32_t sy = static_cast<uint32_t>(fy + 0.5f);
 
-					uint8_t const * src_p = src_ptr + sz * src_slice_pitch + sy * src_row_pitch;
-					uint8_t* dst_p = dst_ptr + z * dst_slice_pitch + y * dst_row_pitch;
+					uint8_t const * src_p = src_ptr + sz * src_cpu_slice_pitch + sy * src_cpu_row_pitch;
+					uint8_t* dst_p = dst_ptr + z * dst_cpu_slice_pitch + y * dst_cpu_row_pitch;
 
 					if (src_width == dst_width)
 					{
@@ -3615,7 +3846,7 @@ namespace KlayGE
 				{
 					for (uint32_t y = 0; y < src_height; ++ y)
 					{
-						ConvertToABGR32F(src_format, src_ptr + z * src_slice_pitch + y * src_row_pitch,
+						ConvertToABGR32F(src_cpu_format, src_ptr + z * src_cpu_slice_pitch + y * src_cpu_row_pitch,
 							src_width, &src_32f[(z * src_height + y) * src_width]);
 					}
 				}
@@ -3685,9 +3916,125 @@ namespace KlayGE
 				{
 					for (uint32_t y = 0; y < dst_height; ++ y)
 					{
-						ConvertFromABGR32F(dst_format, &dst_32f[(z * dst_height + y) * dst_width], dst_width, dst_ptr + z * dst_slice_pitch + y * dst_row_pitch);
+						ConvertFromABGR32F(dst_cpu_format, &dst_32f[(z * dst_height + y) * dst_width], dst_width, dst_ptr + z * dst_cpu_slice_pitch + y * dst_cpu_row_pitch);
 					}
 				}
+			}
+		}
+
+		if (IsCompressedFormat(dst_format))
+		{
+			uint8_t const * src = static_cast<uint8_t const *>(dst_cpu_data);
+			uint8_t* dst = static_cast<uint8_t*>(dst_data);
+			for (uint32_t z = 0; z < src_depth; ++ z)
+			{
+				switch (dst_format)
+				{
+				case EF_BC1:
+				case EF_SIGNED_BC1:
+					EncodeBC1(dst, dst_row_pitch, src, dst_width, dst_height, dst_cpu_row_pitch, EBCM_Quality);
+					break;
+
+				case EF_BC2:
+				case EF_SIGNED_BC2:
+					EncodeBC2(dst, dst_row_pitch, src, dst_width, dst_height, dst_cpu_row_pitch, EBCM_Quality);
+					break;
+
+				case EF_BC3:
+				case EF_SIGNED_BC3:
+					EncodeBC3(dst, dst_row_pitch, src, dst_width, dst_height, dst_cpu_row_pitch, EBCM_Quality);
+					break;
+				
+				case EF_BC4:
+				case EF_SIGNED_BC4:
+					EncodeBC4(dst, dst_row_pitch, src, dst_width, dst_height, dst_cpu_row_pitch);
+					break;
+
+				case EF_BC5:
+				case EF_SIGNED_BC5:
+					EncodeBC5(dst, dst_row_pitch, src, dst_width, dst_height, dst_cpu_row_pitch);
+					break;
+
+				case EF_BC1_SRGB:
+					EncodeBC1_sRGB(dst, dst_row_pitch, src, dst_width, dst_height, dst_cpu_row_pitch, EBCM_Quality);
+					break;
+
+				case EF_BC2_SRGB:
+					EncodeBC2_sRGB(dst, dst_row_pitch, src, dst_width, dst_height, dst_cpu_row_pitch, EBCM_Quality);
+					break;
+
+				case EF_BC3_SRGB:
+					EncodeBC3_sRGB(dst, dst_row_pitch, src, dst_width, dst_height, dst_cpu_row_pitch, EBCM_Quality);
+					break;
+				
+				case EF_BC4_SRGB:
+					{
+						uint8_t uncompressed_r[16];
+						for (uint32_t y_base = 0; y_base < src_height; y_base += 4)
+						{
+							BC4_layout* dst_bc = reinterpret_cast<BC4_layout*>(dst + y_base / 4 * dst_row_pitch);
+
+							for (uint32_t x_base = 0; x_base < src_width; x_base += 4)
+							{
+								for (int y = 0; y < 4; ++ y)
+								{
+									for (int x = 0; x < 4; ++ x)
+									{
+										uint8_t pixel = 0;
+										if ((x_base + x < src_width) && (y_base + y < src_height))
+										{
+											pixel = src[(y_base + y) * dst_cpu_row_pitch + (x_base + x) * 4 + 2];
+										}
+										uncompressed_r[y * 4 + x] = pixel;
+									}
+								}
+
+								EncodeBC4_sRGB(*dst_bc, &uncompressed_r[0]);
+								++ dst_bc;
+							}
+						}
+					}
+					break;
+
+				case EF_BC5_SRGB:
+					{
+						uint8_t uncompressed_r[16];
+						uint8_t uncompressed_g[16];
+						for (uint32_t y_base = 0; y_base < src_height; y_base += 4)
+						{
+							BC5_layout* dst_bc = reinterpret_cast<BC5_layout*>(dst + y_base / 4 * dst_row_pitch);
+
+							for (uint32_t x_base = 0; x_base < src_width; x_base += 4)
+							{
+								for (int y = 0; y < 4; ++ y)
+								{
+									for (int x = 0; x < 4; ++ x)
+									{
+										uint8_t r = 0, g = 0;
+										if ((x_base + x < dst_width) && (y_base + y < dst_height))
+										{
+											r = src[(y_base + y) * dst_cpu_row_pitch + (x_base + x) * 4 + 2];
+											g = src[(y_base + y) * dst_cpu_row_pitch + (x_base + x) * 4 + 1];
+										}
+										uncompressed_r[y * 4 + x] = r;
+										uncompressed_g[y * 4 + x] = g;
+									}
+								}
+
+								EncodeBC5_sRGB(*dst_bc, &uncompressed_r[0], &uncompressed_g[0]);
+								++ dst_bc;
+							}
+						}
+					}
+					break;
+
+				default:
+					BOOST_ASSERT(false);
+					break;
+				}
+
+				src += dst_cpu_slice_pitch;
+				dst += dst_slice_pitch;
 			}
 		}
 	}
