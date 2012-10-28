@@ -1,13 +1,10 @@
-#include "MeshExtractor.hpp"
-
 #include <maya/MLibrary.h>
 #include <maya/MGlobal.h>
 #include <maya/MArgList.h>
 #include <maya/MFloatArray.h>
-#include <maya/MPointArray.h>
+#include <maya/MFloatPointArray.h>
 #include <maya/MFloatVectorArray.h>
-#include <maya/MQuaternion.h>
-#include <maya/MColor.h>
+#include <maya/MFloatMatrix.h>
 #include <maya/MMatrix.h>
 #include <maya/MItDag.h>
 #include <maya/MItDependencyNodes.h>
@@ -38,198 +35,146 @@
 #include <iostream>
 #include <set>
 
+#include <boost/typeof/typeof.hpp>
+#include <boost/foreach.hpp>
+#include <boost/assert.hpp>
+#include <boost/shared_ptr.hpp>
+
+#include <MeshMLLib/MeshMLLib.hpp>
+
 using namespace KlayGE;
-/////////////////////////////////////////////////////////////////////////////////////////////////////
-MeshExtractor::Quat QuatTransToUDQ(MeshExtractor::Quat const & q, MeshExtractor::Point3 const & t)
-{
-	return MeshExtractor::Quat(4,
-		+0.5f * (+t[0] * q[3] + t[1] * q[2] - t[2] * q[1]),
-		+0.5f * (-t[0] * q[2] + t[1] * q[3] + t[2] * q[0]),
-		+0.5f * (+t[0] * q[1] - t[1] * q[0] + t[2] * q[3]),
-		-0.5f * (+t[0] * q[0] + t[1] * q[1] + t[2] * q[2]));
-}
-/////////////////////////////////////////////////////////////////////////////////////////////////////
+
 class MayaMeshExporter
 {
 public:
 	struct IndexAttributes
 	{
 		int id;
-		int vertexIndex;
-		int normalIndex;
-		int uvIndex;
-		int tangentIndex;
+		int vertex_index;
+		int normal_index;
+		int uv_index;
+		int tangent_index;
 
 		IndexAttributes()
-			: id(0), vertexIndex(0), normalIndex(0), uvIndex(0), tangentIndex(0) {}
+			: id(0), vertex_index(0), normal_index(0), uv_index(0), tangent_index(0)
+		{
+		}
 
 		bool operator<(IndexAttributes const & rhs) const
 		{
-			if (vertexIndex < rhs.vertexIndex)
+			if (vertex_index < rhs.vertex_index)
 			{
 				return true;
 			}
-			else if (vertexIndex > rhs.vertexIndex)
+			else if (vertex_index > rhs.vertex_index)
 			{
 				return false;
 			}
 
-			if (normalIndex < rhs.normalIndex)
+			if (normal_index < rhs.normal_index)
 			{
 				return true;
 			}
-			else if (normalIndex > rhs.normalIndex)
+			else if (normal_index > rhs.normal_index)
 			{
 				return false;
 			}
 
-			if (uvIndex < rhs.uvIndex)
+			if (uv_index < rhs.uv_index)
 			{
 				return true;
 			}
-			else if (uvIndex > rhs.uvIndex)
+			else if (uv_index > rhs.uv_index)
 			{
 				return false;
 			}
 
-			return tangentIndex < rhs.tangentIndex;
+			return tangent_index < rhs.tangent_index;
 		}
 	};
 
 	MayaMeshExporter();
-	void WriteMeshFile(std::string const & savefile);
 
-	void ExportMayaFile(std::string const & openfile);
-	void ExportMayaNodes(MItDag& dagIterator);
+	void WriteMeshFile(std::string const & save_file);
+
+	void ExportMayaFile(std::string const & open_file);
+	void ExportMayaNodes(MItDag& dag_iterator);
 
 private:
-	void ExportNurbsSurface(MString const & objName, MFnNurbsSurface& fnSurface, MDagPath& dagPath);
-	void ExportMesh(MString const & objName, MFnMesh& fnMesh, MFnSkinCluster* fnSkinClusterPtr, MDagPath& dagPath);
-	void ExportJoint(MString const * parentName, MFnIkJoint& fnJoint, MDagPath& dagPath);
-	void ExportKeyframe(MeshExtractor::KeyframeStruct* key, MTransformationMatrix const & initMatrix,
-		MDagPath& dagPath, MMatrix const & inv_parent);
+	void ExportNurbsSurface(MString const & obj_name, MFnNurbsSurface& fn_surface, MDagPath& dag_path);
+	void ExportMesh(MString const & obj_name, MFnMesh& fn_mesh, boost::shared_ptr<MFnSkinCluster> const & fn_skin_cluster, MDagPath& dag_path);
+	void ExportJoint(MDagPath const * parent_path, MFnIkJoint& fn_joint, MDagPath& dag_path);
+	void ExportKeyframe(int kfs_id, MDagPath& dag_path, MMatrix const & inv_parent);
 	int ExportMaterialAndTexture(MObject* shader, MObjectArray const & textures);
-	MeshExtractor::MaterialStruct* CreateDefaultMaterial();
-	MFnSkinCluster* ExportSkinCluster(MFnMesh& fnMesh, MDagPath& dagPath);
+	int AddDefaultMaterial();
+	boost::shared_ptr<MFnSkinCluster> ExportSkinCluster(MFnMesh& fn_mesh, MDagPath& dag_path);
 
-	MeshExtractor exporter_;
-	std::vector<MeshExtractor::MaterialStruct*> export_materials_;
-	std::vector<MeshExtractor::MeshStruct*> export_meshes_;
+	MeshMLObj meshml_obj_;
 
-	typedef std::map<std::string, MeshExtractor::JointStruct*> JointMap;
-	typedef std::map<std::string, MeshExtractor::KeyframeStruct*> KeyframeMap;
-	typedef std::pair<MTransformationMatrix, MDagPath> MatrixAndParentPath;
-
-	JointMap export_joints_;
-	KeyframeMap export_keyframes_;
-	std::map<std::string, MatrixAndParentPath> joints_info_;
-
-	int start_frame_;
-	int end_frame_;
-	int frame_rate_;
+	std::map<std::string, int> joint_to_id_;
+	std::map<int, MDagPath> joint_id_to_path_;
 };
 
 MayaMeshExporter::MayaMeshExporter()
-	: start_frame_(0), end_frame_(0), frame_rate_(30)
+	: meshml_obj_(1)
 {
-}
-
-void MayaMeshExporter::WriteMeshFile(std::string const & savefile)
-{
-	std::ofstream out_file(savefile.c_str());
-	exporter_.Output(&out_file);
+	meshml_obj_.StartFrame(0);
+	meshml_obj_.EndFrame(0);
+	meshml_obj_.FrameRate(30);
 
 	// Always add a default material
-	MeshExtractor::MaterialStruct* defMaterial = CreateDefaultMaterial();
-	exporter_.AddMaterial(*defMaterial);
-
-	// Add materials
-	for (size_t i=0; i<export_materials_.size(); ++i)
-	{
-		exporter_.AddMaterial(*(export_materials_[i]));
-	}
-
-	// Add meshes
-	for (size_t i=0; i<export_meshes_.size(); ++i)
-	{
-		exporter_.AddMesh(*(export_meshes_[i]));
-	}
-
-	// Add joints and keyframes
-	for (JointMap::iterator itr=export_joints_.begin(); itr!=export_joints_.end(); ++itr)
-	{
-		exporter_.AddJoint(itr->first, *(itr->second));
-	}
-
-	exporter_.StartFrame(start_frame_);
-	exporter_.EndFrame(end_frame_);
-	exporter_.FrameRate(frame_rate_);
-	for (KeyframeMap::iterator itr=export_keyframes_.begin(); itr!=export_keyframes_.end(); ++itr)
-	{
-		exporter_.AddKeyframe(*(itr->second));
-	}
-
-	// Write to file and cleanup
-	exporter_.WriteMeshML(5);
-
-	delete defMaterial;
-	for (size_t i=0; i<export_materials_.size(); ++i)
-	{
-		delete export_materials_[i];
-	}
-
-	for (size_t i=0; i<export_meshes_.size(); ++i)
-	{
-		delete export_meshes_[i];
-	}
-
-	for (JointMap::iterator itr=export_joints_.begin(); itr!=export_joints_.end(); ++itr)
-	{
-		delete itr->second;
-	}
-
-	for (KeyframeMap::iterator itr=export_keyframes_.begin(); itr!=export_keyframes_.end(); ++itr)
-	{
-		delete itr->second;
-	}
+	this->AddDefaultMaterial();
 }
 
-void MayaMeshExporter::ExportMayaFile(std::string const & openfile)
+void MayaMeshExporter::WriteMeshFile(std::string const & save_file)
 {
-	MStatus status = MFileIO::open(openfile.c_str(), NULL, true);
+	std::ofstream out_file(save_file.c_str());
+	meshml_obj_.WriteMeshML(out_file);
+}
+
+void MayaMeshExporter::ExportMayaFile(std::string const & open_file)
+{
+	MStatus status = MFileIO::open(open_file.c_str(), NULL, true);
 	if (!status)
 	{
-		std::cout << "MFileIO::open(" << openfile << ") failed - " << status.errorString() << std::endl;
+		std::cout << "MFileIO::open(" << open_file << ") failed - " << status.errorString() << std::endl;
 		return;
 	}
 
 	// Add meshes
-	MItDag dagIterator(MItDag::kDepthFirst, MFn::kInvalid, &status);
-	ExportMayaNodes(dagIterator);
+	MItDag dag_iterator(MItDag::kDepthFirst, MFn::kInvalid, &status);
+	this->ExportMayaNodes(dag_iterator);
 }
 
-void MayaMeshExporter::ExportMayaNodes(MItDag& dagIterator)
+void MayaMeshExporter::ExportMayaNodes(MItDag& dag_iterator)
 {
-	MDagPath dagPath;
-	for (; !dagIterator.isDone(); dagIterator.next())
+	int start_frame = static_cast<int>(MAnimControl::minTime().as(MTime::kNTSCField));
+	int end_frame = static_cast<int>(MAnimControl::maxTime().as(MTime::kNTSCField));
+	meshml_obj_.StartFrame(start_frame);
+	meshml_obj_.EndFrame(end_frame);
+
+	MAnimControl::setCurrentTime(MTime(start_frame, MTime::kNTSCField));
+	
+	MDagPath dag_path;
+	for (; !dag_iterator.isDone(); dag_iterator.next())
 	{
-		MStatus status = dagIterator.getPath(dagPath);
+		MStatus status = dag_iterator.getPath(dag_path);
 		if (!status)
 		{
 			std::cout << "Fail to get DAG path." << std::endl;
 			continue;
 		}
 
-		MString objName = dagIterator.partialPathName();
-		switch (dagPath.apiType())
+		MString obj_name = dag_iterator.partialPathName();
+		switch (dag_path.apiType())
 		{
 		case MFn::kTransform:
 			{
 				/*MFnTransform fnTransform(dagPath, &status);
 				if (status == MS::kSuccess)
 				{
-				MMatrix matrix = fnTransform.transformation().asMatrix();
-				// TODO: how to handle transformations?
+					MFloatMatrix matrix = fnTransform.transformation().asMatrix();
+					// TODO: how to handle transformations?
 				}
 				else
 				std::cout << "Fail to initialize transform node." << std::endl;*/
@@ -238,18 +183,17 @@ void MayaMeshExporter::ExportMayaNodes(MItDag& dagIterator)
 
 		case MFn::kMesh:
 			{
-				MFnMesh fnMesh(dagPath, &status);
-				if (status == MS::kSuccess)
+				MFnMesh fn_mesh(dag_path, &status);
+				if (MS::kSuccess == status)
 				{
-					if (!fnMesh.isIntermediateObject())
+					if (!fn_mesh.isIntermediateObject())
 					{
-						MFnSkinCluster* fnSkinClusterPtr = ExportSkinCluster(fnMesh, dagPath);
-						ExportMesh(objName, fnMesh, fnSkinClusterPtr, dagPath);
-						if (fnSkinClusterPtr) delete fnSkinClusterPtr;
+						boost::shared_ptr<MFnSkinCluster> fn_skin_cluster = this->ExportSkinCluster(fn_mesh, dag_path);
+						this->ExportMesh(obj_name, fn_mesh, fn_skin_cluster, dag_path);
 					}
 					else
 					{
-						std::cout << "Intermediate objects " << fnMesh.name().asChar()
+						std::cout << "Intermediate objects " << fn_mesh.name().asChar()
 							<< " will be ignored." << std::endl;
 					}
 				}
@@ -262,10 +206,10 @@ void MayaMeshExporter::ExportMayaNodes(MItDag& dagIterator)
 
 		case MFn::kNurbsSurface:
 			{
-				MFnNurbsSurface fnSurface(dagPath, &status);
+				MFnNurbsSurface fn_surface(dag_path, &status);
 				if (status == MS::kSuccess)
 				{
-					ExportNurbsSurface(objName, fnSurface, dagPath);
+					this->ExportNurbsSurface(obj_name, fn_surface, dag_path);
 				}
 				else
 				{
@@ -282,50 +226,54 @@ void MayaMeshExporter::ExportMayaNodes(MItDag& dagIterator)
 		case MFn::kCamera:
 		case MFn::kGroundPlane:
 		default:
-			std::cout << "MDagPath::apiType()=" << dagPath.apiType() << " ["
-				<< dagPath.fullPathName() << "] not supported." << std::endl;
+			std::cout << "MDagPath::apiType()=" << dag_path.apiType() << " ["
+				<< dag_path.fullPathName() << "] not supported." << std::endl;
 			break;
 		}
 	}
 
-	start_frame_ = static_cast<int>(MAnimControl::minTime().as(MTime::kNTSCField));
-	end_frame_   = static_cast<int>(MAnimControl::maxTime().as(MTime::kNTSCField));
-	int numFrames = end_frame_ - start_frame_ + 1;
-	if (numFrames > 0)
+	int num_frames = end_frame - start_frame + 1;
+	if (num_frames > 0)
 	{
-		for (int i = 0; i < numFrames; ++ i)
+		std::map<int, int> joint_id_to_kfs_id;
+		typedef BOOST_TYPEOF(joint_to_id_) JointsType;
+		BOOST_FOREACH(JointsType::const_reference joint, joint_to_id_)
 		{
-			MAnimControl::setCurrentTime(MTime(i + start_frame_, MTime::kNTSCField));
-			for (JointMap::iterator itr = export_joints_.begin(); itr != export_joints_.end(); ++ itr)
-			{
-				std::string const & jointNameString = itr->first;
-				MeshExtractor::KeyframeStruct* key = export_keyframes_[jointNameString];
-				if (!key)
-				{
-					key = new MeshExtractor::KeyframeStruct;
-					key->joint = jointNameString;
-					export_keyframes_[jointNameString] = key;
-				}
+			int kfs_id = meshml_obj_.AllocKeyframes();
+			meshml_obj_.SetKeyframes(kfs_id, joint.second);
 
-				MatrixAndParentPath& mapp = joints_info_[jointNameString];
+			joint_id_to_kfs_id.insert(std::make_pair(joint.second, kfs_id));
+		}
+
+		for (int i = 0; i < num_frames; ++ i)
+		{
+			MAnimControl::setCurrentTime(MTime(i + start_frame, MTime::kNTSCField));
+			BOOST_FOREACH(JointsType::const_reference joint, joint_to_id_)
+			{
+				MDagPath& dag_path = joint_id_to_path_[joint.second];
 				MMatrix inv_parent;
-				if (itr->second->parent_name.empty())
+				if (1 == dag_path.length())
 				{
 					inv_parent = MMatrix::identity;
 				}
 				else
 				{
-					inv_parent = joints_info_[itr->second->parent_name].second.inclusiveMatrixInverse();
+					MDagPath parent_path = dag_path;
+					parent_path.pop();
+
+					inv_parent = parent_path.inclusiveMatrixInverse();
 				}
-				ExportKeyframe(key, mapp.first, mapp.second, inv_parent);
+
+				int kfs_id = joint_id_to_kfs_id[joint_to_id_[dag_path.fullPathName().asChar()]];
+				this->ExportKeyframe(kfs_id, dag_path, inv_parent);
 			}
 		}
 	}
 }
 
-void MayaMeshExporter::ExportNurbsSurface(MString const & objName, MFnNurbsSurface& fnSurface, MDagPath& dagPath)
+void MayaMeshExporter::ExportNurbsSurface(MString const & obj_name, MFnNurbsSurface& fn_surface, MDagPath& dag_path)
 {
-	MFnDagNode surface_dn(dagPath);
+	MFnDagNode surface_dn(dag_path);
 	MPlug surface_plug;
 
 	int modeU = 0, modeV = 0, numberU = 0, numberV = 0;
@@ -387,25 +335,25 @@ void MayaMeshExporter::ExportNurbsSurface(MString const & objName, MFnNurbsSurfa
 		break;
 	}
 
-	params.setUNumber( numberU );
-	params.setVNumber( numberV );
+	params.setUNumber(numberU);
+	params.setVNumber(numberV);
 
 	// Try convert the NURBS surface to polygon mesh
 	MStatus status = MS::kSuccess;
-	MDagPath meshPath = dagPath;
-	MObject meshParent = meshPath.node();
-	MObject convertedMesh = fnSurface.tesselate(params, meshParent, &status);
+	MDagPath mesh_path = dag_path;
+	MObject mesh_parent = mesh_path.node();
+	MObject converted_mesh = fn_surface.tesselate(params, mesh_parent, &status);
 	if (status == MS::kSuccess)
 	{
-		meshPath.push(convertedMesh);
+		mesh_path.push(converted_mesh);
 
 		// Export the new generated mesh
-		MFnMesh fnConvertedMesh(convertedMesh, &status);
-		ExportMesh(objName, fnConvertedMesh, NULL, dagPath);
+		MFnMesh fn_converted_mesh(converted_mesh, &status);
+		this->ExportMesh(obj_name, fn_converted_mesh, boost::shared_ptr<MFnSkinCluster>(), dag_path);
 
 		// Remove the mesh to keep the scene clean
-		MFnDagNode parentNode(meshParent, &status);
-		parentNode.removeChild(convertedMesh);
+		MFnDagNode parent_node(mesh_parent, &status);
+		parent_node.removeChild(converted_mesh);
 	}
 	else
 	{
@@ -413,304 +361,285 @@ void MayaMeshExporter::ExportNurbsSurface(MString const & objName, MFnNurbsSurfa
 	}
 }
 
-void MayaMeshExporter::ExportMesh(MString const & objName, MFnMesh& fnMesh,
-	MFnSkinCluster* fnSkinClusterPtr, MDagPath& dagPath)
+void MayaMeshExporter::ExportMesh(MString const & obj_name, MFnMesh& fn_mesh,
+	boost::shared_ptr<MFnSkinCluster> const & fn_skin_cluster, MDagPath& dag_path)
 {
 	MStatus status = MS::kSuccess;
 	MObject component = MObject::kNullObj;
 	MSpace::Space space = MSpace::kWorld;
 
-	MItMeshPolygon polyIterator(dagPath, component, &status);
+	MItMeshPolygon poly_iterator(dag_path, component, &status);
 	if (status != MS::kSuccess)
 	{
 		std::cout << "Fail to initialize polygons." << std::endl;
 		return;
 	}
 
-	int polyVertexCount = polyIterator.polygonVertexCount();
-	if (polyVertexCount > 2)
+	int poly_vertex_count = poly_iterator.polygonVertexCount();
+	if (poly_vertex_count > 2)
 	{
-		// Initialize the exported mesh
-		MeshExtractor::MeshStruct* export_mesh = new MeshExtractor::MeshStruct;
-		export_mesh->material_id = 0;
-		export_mesh->name = objName.asChar();
+		int mesh_id = meshml_obj_.AllocMesh();
 
 		// Start to save mesh
-		int numVertices = fnMesh.numVertices();
-		//int numNormals = fnMesh.numNormals();
-		//int numPolygons = fnMesh.numPolygons();
-		//int numTexCoords = fnMesh.numUVs();
-		bool hasTexCoords = false;
-		MString* uvSetName = NULL;
+		int num_vertices = fn_mesh.numVertices();
+		MString* uv_set_name = NULL;
 
 		// Get fixed-pipeline shader (material)
-		MObjectArray shaderObjects;
-		MIntArray shaderIndices;
-		fnMesh.getConnectedShaders(0, shaderObjects, shaderIndices);
+		MObjectArray shader_objects;
+		MIntArray shader_indices;
+		fn_mesh.getConnectedShaders(0, shader_objects, shader_indices);
 
 		// Get UV set names and associated textures
 		// FIXME: At present only the first UV set is recorded and used
-		MObjectArray textureObjects;
-		MStringArray uvSetNames;
-		fnMesh.getUVSetNames(uvSetNames);
-		if (uvSetNames.length() > 0)
+		MObjectArray texture_objects;
+		MStringArray uv_set_names;
+		fn_mesh.getUVSetNames(uv_set_names);
+		if (uv_set_names.length() > 0)
 		{
-			uvSetName = &uvSetNames[0];
-			fnMesh.getAssociatedUVSetTextures(*uvSetName, textureObjects);
+			uv_set_name = &uv_set_names[0];
+			fn_mesh.getAssociatedUVSetTextures(*uv_set_name, texture_objects);
 		}
 
 		// Export shader (material) and texture object
 		// FIXME: At present only the first shader is recorded and used
-		if (shaderObjects.length() > 0)
-		{
-			export_mesh->material_id = ExportMaterialAndTexture(&shaderObjects[0], textureObjects);
-		}
-		else
-		{
-			export_mesh->material_id = ExportMaterialAndTexture(NULL, textureObjects);
-		}
+		int mtl_id = this->ExportMaterialAndTexture((shader_objects.length() > 0) ? &shader_objects[0] : NULL,
+			texture_objects);
+
+		meshml_obj_.SetMesh(mesh_id, mtl_id, obj_name.asChar());
 
 		// Get points
-		MPointArray points;
-		fnMesh.getPoints(points, space);
+		MFloatPointArray points;
+		fn_mesh.getPoints(points, space);
 
 		// Get normals
 		MFloatVectorArray normals;
-		fnMesh.getNormals(normals, space);
+		fn_mesh.getNormals(normals, space);
 
 		// Get UV coords of default UV set
-		MFloatArray uArray, vArray;
-		fnMesh.getUVs(uArray, vArray, uvSetName);
-		if (fnMesh.numUVs() > 0)
-		{
-			hasTexCoords = true;
-		}
+		MFloatArray u_array, v_array;
+		fn_mesh.getUVs(u_array, v_array, uv_set_name);
+		bool has_texcoords = (fn_mesh.numUVs() > 0);
 
 		// Get tangents of default UV set
 		MFloatVectorArray tangents;
-		fnMesh.getTangents(tangents, space, uvSetName);
+		fn_mesh.getTangents(tangents, space, uv_set_name);
 
 		// Get binormals of default UV set
 		MFloatVectorArray binormals;
-		fnMesh.getBinormals(binormals, space, uvSetName);
+		fn_mesh.getBinormals(binormals, space, uv_set_name);
 
 		// Get associated joints and weights
-		std::vector<MFloatArray> weights(numVertices);
-		std::vector<MStringArray> jointNames(numVertices);
-		if (fnSkinClusterPtr)
+		std::vector<std::vector<float> > weights(num_vertices);
+		std::vector<std::vector<MDagPath> > joint_paths(num_vertices);
+		if (fn_skin_cluster)
 		{
-			unsigned int numWeights;
-			MItGeometry geomIterator(dagPath);
-			for (int i = 0; !geomIterator.isDone(); geomIterator.next(), ++ i)
+			unsigned int num_weights;
+			MItGeometry geom_iterator(dag_path);
+			for (int i = 0; !geom_iterator.isDone(); geom_iterator.next(), ++ i)
 			{
-				MObject component = geomIterator.component();
-				MFloatArray vertexWeights;
-				status = fnSkinClusterPtr->getWeights(dagPath, component, vertexWeights, numWeights);
+				MObject component = geom_iterator.component();
+				MFloatArray vertex_weights;
+				status = fn_skin_cluster->getWeights(dag_path, component, vertex_weights, num_weights);
 				if (status != MS::kSuccess)
 				{
 					std::cout << "Fail to retrieve vertex weights." << std::endl;
 					continue;
 				}
 
-				weights[i] = vertexWeights;
-				jointNames[i].setLength(vertexWeights.length());
+				weights[i].resize(vertex_weights.length());
+				joint_paths[i].resize(vertex_weights.length());
 
-				MDagPathArray influenceObjs;
-				fnSkinClusterPtr->influenceObjects(influenceObjs, &status);
-				if (status != MS::kSuccess)
+				MDagPathArray influence_objs;
+				fn_skin_cluster->influenceObjects(influence_objs, &status);
+				if (MS::kSuccess == status)
+				{
+					for (unsigned int j = 0; j < influence_objs.length(); ++ j)
+					{
+						BOOST_AUTO(iter, joint_to_id_.find(influence_objs[j].fullPathName().asChar()));
+						BOOST_ASSERT(iter != joint_to_id_.end());
+
+						joint_paths[i][j] = influence_objs[j];
+						weights[i][j] = vertex_weights[j];
+					}
+				}
+				else
 				{
 					std::cout << "Fail to retrieve influence objects for the skin cluster." << std::endl;
-					continue;
-				}
-
-				for (unsigned int j=0; j<influenceObjs.length(); ++j)
-				{
-					MString partialPathName = influenceObjs[j].partialPathName();
-					JointMap::iterator itr = export_joints_.find(partialPathName.asChar());
-					if (itr == export_joints_.end()) continue;
-
-					// Record joint name
-					jointNames[i][j] = partialPathName;
 				}
 			}
 		}
 
 		// Traverse polygons
-		MItMeshPolygon polygonIterator(dagPath, component, &status);
+		MItMeshPolygon polygon_iterator(dag_path, component, &status);
 		if (status != MS::kSuccess)
 		{
 			std::cout << "Fail to traverse polygons." << std::endl;
 			return;
 		}
 
-		int idCount = 0, triIndices[4];
-		std::set<IndexAttributes> indexAttributes;
-		for (; !polygonIterator.isDone(); polygonIterator.next())
+		int id_count = 0;
+		int tri_indices[4];
+		std::set<IndexAttributes> index_attributes;
+		for (; !polygon_iterator.isDone(); polygon_iterator.next())
 		{
-			for (int i=0; i<polyVertexCount; ++i)
+			for (int i = 0; i < poly_vertex_count; ++ i)
 			{
 				IndexAttributes attr;
-				attr.vertexIndex = polygonIterator.vertexIndex(i);
-				attr.normalIndex = polygonIterator.normalIndex(i);
-				if (hasTexCoords)
+				attr.vertex_index = polygon_iterator.vertexIndex(i);
+				attr.normal_index = polygon_iterator.normalIndex(i);
+				if (has_texcoords)
 				{
-					polygonIterator.getUVIndex(i, attr.uvIndex);
-					attr.tangentIndex = polygonIterator.tangentIndex(i);
+					polygon_iterator.getUVIndex(i, attr.uv_index);
+					attr.tangent_index = polygon_iterator.tangentIndex(i);
 				}
 
-				std::set<IndexAttributes>::iterator itr = indexAttributes.find(attr);
-				if (itr != indexAttributes.end())
+				std::set<IndexAttributes>::iterator itr = index_attributes.find(attr);
+				if (itr != index_attributes.end())
 				{
 					// Reuse existing vertex
-					triIndices[i] = itr->id;
+					tri_indices[i] = itr->id;
 				}
 				else
 				{
 					// Create a new vertex and add it to the mesh
-					MPoint pos = points[attr.vertexIndex];
-					MFloatVector norm = normals[attr.normalIndex];
-					MFloatArray vWeights = weights[attr.vertexIndex];
-					MStringArray vJoints = jointNames[attr.vertexIndex];
-					unsigned int numBinds = std::min<unsigned int>(vWeights.length(), vJoints.length());
+					MFloatVector pos = points[attr.vertex_index];
+					MFloatVector norm = normals[attr.normal_index];
+					std::vector<float> const & vert_weights = weights[attr.vertex_index];
+					std::vector<MDagPath> const & joint_dag_paths = joint_paths[attr.vertex_index];
+					BOOST_ASSERT(vert_weights.size() == joint_dag_paths.size());
+					size_t num_binds = vert_weights.size();
 
-					MeshExtractor::VertexStruct vertex;
-					vertex.position = MeshExtractor::Point3(3, pos[0], pos[1], pos[2]);
-					vertex.normal = MeshExtractor::Point3(3, norm[0], norm[1], norm[2]);
-					for (unsigned int n=0; n<numBinds; ++n)
+					int vertex_id = meshml_obj_.AllocVertex(mesh_id);
+					if (has_texcoords)
 					{
-						if (vWeights[n] > 0)
+						MFloatVector tang = tangents[attr.tangent_index];
+						MFloatVector bi = binormals[attr.tangent_index];
+						float u = u_array[attr.uv_index];
+						float v = v_array[attr.uv_index];
+
+						std::vector<KlayGE::float3> texcoords;
+						texcoords.push_back(KlayGE::float3(u, v, 0));
+
+						meshml_obj_.SetVertex(mesh_id, vertex_id, KlayGE::float3(pos[0], pos[1], pos[2]),
+							KlayGE::float3(tang[0], tang[1], tang[2]), KlayGE::float3(bi[0], bi[1], bi[2]),
+							KlayGE::float3(norm[0], norm[1], norm[2]), 2, texcoords);
+					}
+					else
+					{
+						meshml_obj_.SetVertex(mesh_id, vertex_id, KlayGE::float3(pos[0], pos[1], pos[2]),
+							KlayGE::float3(norm[0], norm[1], norm[2]), 2, std::vector<KlayGE::float3>());
+					}
+					
+					for (size_t n = 0; n < num_binds; ++ n)
+					{
+						if (vert_weights[n] > 0)
 						{
-							vertex.binds.push_back(MeshExtractor::JointBinding(vJoints[n].asChar(), vWeights[n]));
+							BOOST_AUTO(iter, joint_to_id_.find(joint_dag_paths[n].fullPathName().asChar()));
+							BOOST_ASSERT(iter != joint_to_id_.end());
+
+							int binding_id = meshml_obj_.AllocJointBinding(mesh_id, vertex_id);
+							meshml_obj_.SetJointBinding(mesh_id, vertex_id, binding_id, iter->second, vert_weights[n]);
 						}
 					}
 
-					if (hasTexCoords)
-					{
-						MFloatVector teng = tangents[attr.tangentIndex];
-						MFloatVector bi = binormals[attr.tangentIndex];
-						float u = uArray[attr.uvIndex], v = vArray[attr.uvIndex];
-
-						vertex.tangent = MeshExtractor::Point3(3, teng[0], teng[1], teng[2]);
-						vertex.binormal = MeshExtractor::Point3(3, bi[0], bi[1], bi[2]);
-						vertex.texcoords.push_back(MeshExtractor::TexCoord(2, u, v));
-						vertex.texcoord_components = 2;
-					}
-					export_mesh->vertices.push_back(vertex);
-
 					// Record the index attributes
-					attr.id = idCount++;
-					triIndices[i] = attr.id;
-					indexAttributes.insert(attr);
+					attr.id = id_count;
+					tri_indices[i] = attr.id;
+					index_attributes.insert(attr);
+
+					++ id_count;
 				}
 			}
 
-			if (polyVertexCount == 3)
+			if (3 == poly_vertex_count)
 			{
-				MeshExtractor::TriangleStruct triangle;
-				for (int i=0; i<3; ++i)
-					triangle.vertex_index[i] = triIndices[i];
-				export_mesh->triangles.push_back(triangle);
+				int tri_id = meshml_obj_.AllocTriangle(mesh_id);
+				meshml_obj_.SetTriangle(mesh_id, tri_id, tri_indices[0], tri_indices[1], tri_indices[2]);
 			}
-			else if (polyVertexCount == 4)
+			else if (4 == poly_vertex_count)
 			{
-				MeshExtractor::TriangleStruct triangle1;
-				for (int i=0; i<3; ++i)
-					triangle1.vertex_index[i] = triIndices[i];
-				export_mesh->triangles.push_back(triangle1);
+				int tri0_id = meshml_obj_.AllocTriangle(mesh_id);
+				meshml_obj_.SetTriangle(mesh_id, tri0_id, tri_indices[0], tri_indices[1], tri_indices[2]);
 
-				MeshExtractor::TriangleStruct triangle2;
-				triangle2.vertex_index[0] = triIndices[0];
-				triangle2.vertex_index[1] = triIndices[2];
-				triangle2.vertex_index[2] = triIndices[3];
-				export_mesh->triangles.push_back(triangle2);
+				int tri1_id = meshml_obj_.AllocTriangle(mesh_id);
+				meshml_obj_.SetTriangle(mesh_id, tri1_id, tri_indices[0], tri_indices[2], tri_indices[3]);
 			}
 		}
-		export_meshes_.push_back(export_mesh);
 	}
 	else
 	{
 		std::cout << "The polygons may not be standard triangles or quads: vertex number = "
-			<< polyVertexCount << std::endl;
+			<< poly_vertex_count << std::endl;
 	}
 }
 
-void MayaMeshExporter::ExportJoint(MString const * parentName, MFnIkJoint& fnJoint, MDagPath& dagPath)
+void MayaMeshExporter::ExportJoint(MDagPath const * parent_path, MFnIkJoint& fn_joint, MDagPath& dag_path)
 {
-	MString jointName = fnJoint.partialPathName();
-	std::string jointNameString = jointName.asChar();
-	if (jointNameString.empty())
-		jointNameString = "0";  // Each joint must have a non-empty name
+	std::string joint_name = fn_joint.partialPathName().asChar();
+	if (joint_name.empty())
+	{
+		joint_name = "0";  // Each joint must have a non-empty name
+	}
 
-	MeshExtractor::JointStruct* export_joint = new MeshExtractor::JointStruct;
-	export_joints_[jointNameString] = export_joint;
+	int joint_id = meshml_obj_.AllocJoint();
 
 	// Compute joint transformation
-	MMatrix bindMatrix = dagPath.inclusiveMatrix();
-	MTransformationMatrix localMatrix = bindMatrix;
-	if (parentName)
+	MFloatMatrix bind_mat(dag_path.inclusiveMatrix().matrix);
+	int parent_id = -1;
+	if (parent_path)
 	{
-		MDagPath parentDagPath = joints_info_[parentName->asChar()].second;
-		export_joint->parent_name = parentName->asChar();
-	}
-	joints_info_[jointNameString] = MatrixAndParentPath(localMatrix, dagPath);
+		BOOST_AUTO(iter, joint_to_id_.find(parent_path->fullPathName().asChar()));
+		BOOST_ASSERT(iter != joint_to_id_.end());
 
-	double qx, qy, qz, qw;
-	MVector pos = localMatrix.translation(MSpace::kPostTransform);
-	localMatrix.getRotationQuaternion(qx, qy, qz, qw);
-	MeshExtractor::Point3 bind_pos = MeshExtractor::Point3(3, pos.x, pos.y, pos.z);
-	MeshExtractor::Quat bind_quat = MeshExtractor::Quat(4, qx, qy, qz, qw);
-	MeshExtractor::Quat bind_dual = QuatTransToUDQ(bind_quat, bind_pos);
-	export_joint->bind_real = bind_quat;
-	export_joint->bind_dual = bind_dual;
+		parent_id = iter->second;
+	}
+	joint_to_id_.insert(std::make_pair(dag_path.fullPathName().asChar(), joint_id));
+	joint_id_to_path_.insert(std::make_pair(joint_id, dag_path));
+
+	meshml_obj_.SetJoint(joint_id, joint_name, parent_id,
+		float4x4(bind_mat(0, 0), bind_mat(0, 1), bind_mat(0, 2), bind_mat(0, 3),
+			bind_mat(1, 0), bind_mat(1, 1), bind_mat(1, 2), bind_mat(1, 3),
+			bind_mat(2, 0), bind_mat(2, 1), bind_mat(2, 2), bind_mat(2, 3),
+			bind_mat(3, 0), bind_mat(3, 1), bind_mat(3, 2), bind_mat(3, 3)));
 	
 	// Traverse child joints
-	for (unsigned int i=0; i<dagPath.childCount(); ++i)
+	for (unsigned int i = 0; i < dag_path.childCount(); ++ i)
 	{
-		MObject child = dagPath.child(i);
-		MDagPath childPath = dagPath; childPath.push(child);
-		if (!childPath.hasFn(MFn::kJoint)) continue;
-
-		MFnIkJoint fnChildJoint(childPath);
-		JointMap::iterator itr = export_joints_.find(fnChildJoint.partialPathName().asChar());
-		if (itr == export_joints_.end())
+		MObject child = dag_path.child(i);
+		MDagPath child_path = dag_path;
+		child_path.push(child);
+		if (child_path.hasFn(MFn::kJoint))
 		{
-			ExportJoint(&jointName, fnChildJoint, childPath);
+			MFnIkJoint fn_child_joint(child_path);
+			BOOST_AUTO(iter, joint_to_id_.find(fn_child_joint.fullPathName().asChar()));
+			if (iter == joint_to_id_.end())
+			{
+				this->ExportJoint(&dag_path, fn_child_joint, child_path);
+			}
 		}
 	}
 }
 
-void MayaMeshExporter::ExportKeyframe(MeshExtractor::KeyframeStruct* key, MTransformationMatrix const & /*initMatrix*/,
-	MDagPath& dagPath, MMatrix const & inv_parent)
+void MayaMeshExporter::ExportKeyframe(int kfs_id, MDagPath& dag_path, MMatrix const & inv_parent)
 {
-	MMatrix bindMatrix = dagPath.inclusiveMatrix();
-	MTransformationMatrix localMatrix = bindMatrix * inv_parent;
+	MFloatMatrix local_mat((dag_path.inclusiveMatrix() * inv_parent).matrix);
 
-	double qx, qy, qz, qw;
-#if 0
-	// Relative to the joint initial matrix
-	MTransformationMatrix relMatrix = localMatrix.asMatrix() * initMatrix.asMatrix().inverse();
-	MVector pos = localMatrix.translation(MSpace::kPostTransform) - initMatrix.translation(MSpace::kPostTransform);
-	relMatrix.getRotationQuaternion(qx, qy, qz, qw);
-#else
-	// Absolute transformation
-	MVector pos = localMatrix.translation(MSpace::kPostTransform);
-	localMatrix.getRotationQuaternion(qx, qy, qz, qw);
-#endif
-	MeshExtractor::Point3 bind_pos = MeshExtractor::Point3(3, pos.x, pos.y, pos.z);
-	MeshExtractor::Quat bind_quat = MeshExtractor::Quat(4, qx, qy, qz, qw);
-	MeshExtractor::Quat bind_dual = QuatTransToUDQ(bind_quat, bind_pos);
-	key->bind_reals.push_back(bind_quat);
-	key->bind_duals.push_back(bind_dual);
+	int kf_id = meshml_obj_.AllocKeyframe(kfs_id);
+	meshml_obj_.SetKeyframe(kfs_id, kf_id,
+		float4x4(local_mat(0, 0), local_mat(0, 1), local_mat(0, 2), local_mat(0, 3),
+			local_mat(1, 0), local_mat(1, 1), local_mat(1, 2), local_mat(1, 3),
+			local_mat(2, 0), local_mat(2, 1), local_mat(2, 2), local_mat(2, 3),
+			local_mat(3, 0), local_mat(3, 1), local_mat(3, 2), local_mat(3, 3)));
 }
 
 int MayaMeshExporter::ExportMaterialAndTexture(MObject* shader, MObjectArray const & /*textures*/)
 {
-	MeshExtractor::MaterialStruct* material = NULL;
+	int mtl_id = -1;
 	MFnDependencyNode dn(*shader);
 	MPlugArray connections;
 
 	MObject surface_shader;
-	bool hasSurfaceShader = false;
+	bool has_surface_shader = false;
 	if (shader->hasFn(MFn::kShadingEngine))
 	{
 		// Get only connections of the surface shader
@@ -719,7 +648,7 @@ int MayaMeshExporter::ExportMaterialAndTexture(MObject* shader, MObjectArray con
 		if (connections.length() > 0)
 		{
 			surface_shader = connections[0].node();
-			hasSurfaceShader = true;
+			has_surface_shader = true;
 
 			if (surface_shader.hasFn(MFn::kLambert))
 			{
@@ -745,14 +674,10 @@ int MayaMeshExporter::ExportMaterialAndTexture(MObject* shader, MObjectArray con
 					shininess = blinn.specularRollOff();
 				}
 
-				material = new MeshExtractor::MaterialStruct;
-				material->ambient = MeshExtractor::Color(4, ac.r, ac.g, ac.b, ac.a);
-				material->diffuse = MeshExtractor::Color(4, dcoeff*dc.r, dcoeff*dc.g, dcoeff*dc.b, dc.a);
-				material->specular = MeshExtractor::Color(4, spec.r, spec.g, spec.b, spec.a);
-				material->emit = MeshExtractor::Color(4, ec.r, ec.g, ec.b, ec.a);
-				material->opacity = 1.0f - ((tr.r + tr.g + tr.b) / 3.0f);
-				material->specular_level = 0.36f;  // FIXME: what does this mean in Maya API?
-				material->shininess = shininess;
+				mtl_id = meshml_obj_.AllocMaterial();
+				meshml_obj_.SetMaterial(mtl_id, KlayGE::float3(ac.r, ac.g, ac.b), dcoeff * KlayGE::float3(dc.r, dc.g, dc.b),
+					KlayGE::float3(spec.r, spec.g, spec.b), KlayGE::float3(ec.r, ec.g, ec.b), 1.0f - ((tr.r + tr.g + tr.b) / 3.0f),
+					0.2126f * spec.r + 0.7152f * spec.g + 0.0722f * spec.b, shininess);
 			}
 			else
 			{
@@ -765,29 +690,29 @@ int MayaMeshExporter::ExportMaterialAndTexture(MObject* shader, MObjectArray con
 		}
 	}
 
-	if (!material)
+	if (mtl_id < 0)
 	{
-		material = CreateDefaultMaterial();
+		mtl_id = this->AddDefaultMaterial();
 	}
 
 	// Setup texture types and corresponding names in Maya
 	// FIXME: how to handle other types: NormalMap, OpacityMap, etc.
-	std::map<std::string, std::string> textureTypeMap;
-	textureTypeMap["DiffuseMap"] = "color";
-	textureTypeMap["AmbientMap"] = "ambientColor";
-	textureTypeMap["SpecularMap"] = "specularColor";
-	textureTypeMap["EmitMap"] = "incandescence";
-	textureTypeMap["TransparencyMap"] = "transparency";
-	textureTypeMap["BumpMap"] = "bumpValue";
+	std::map<std::string, std::string> texture_type_map;
+	texture_type_map["DiffuseMap"] = "color";
+	texture_type_map["AmbientMap"] = "ambientColor";
+	texture_type_map["SpecularMap"] = "specularColor";
+	texture_type_map["EmitMap"] = "incandescence";
+	texture_type_map["TransparencyMap"] = "transparency";
+	texture_type_map["BumpMap"] = "bumpValue";
 
 	// Record all texture types that are binded to this material
-	if (hasSurfaceShader)
+	if (has_surface_shader)
 	{
 		MFnDependencyNode surface_dn(surface_shader);
-		for (std::map<std::string, std::string>::const_iterator itr = textureTypeMap.begin();
-			itr != textureTypeMap.end(); ++ itr)
+		for (std::map<std::string, std::string>::const_iterator iter = texture_type_map.begin();
+			iter != texture_type_map.end(); ++ iter)
 		{
-			MPlug plug_specified = surface_dn.findPlug(itr->second.c_str(), true);
+			MPlug plug_specified = surface_dn.findPlug(iter->second.c_str(), true);
 			if (!plug_specified.isConnected())
 			{
 				continue;
@@ -795,108 +720,102 @@ int MayaMeshExporter::ExportMaterialAndTexture(MObject* shader, MObjectArray con
 
 			connections.clear();
 			plug_specified.connectedTo(connections, true, false);
-			if (connections.length() == 0)
+			if (connections.length() > 0)
 			{
-				continue;
-			}
-
-			MObject texObj = connections[0].node();
-			if (texObj.hasFn(MFn::kFileTexture))
-			{
-				MFnDependencyNode tex_dn(texObj);
-				MPlug plug = tex_dn.findPlug("fileTextureName");
-
-				MString textureName;
-				plug.getValue(textureName);
-				material->texture_slots.push_back(
-					MeshExtractor::TextureSlot(itr->first.c_str(), textureName.asChar()));
-			}
-			else
-			{
-				std::cout << "Unknown texture data type, not a valid file texture." << std::endl;
-			}
-		}
-	}
-
-	export_materials_.push_back(material);
-	return static_cast<int>(export_materials_.size());
-}
-
-MeshExtractor::MaterialStruct* MayaMeshExporter::CreateDefaultMaterial()
-{
-	MeshExtractor::MaterialStruct* defMaterial = new MeshExtractor::MaterialStruct;
-	defMaterial->ambient = MeshExtractor::Color(4, 0.0f, 0.0f, 0.0f, 1.0f);
-	defMaterial->diffuse = MeshExtractor::Color(4, 0.0f, 0.0f, 0.0f, 1.0f);
-	defMaterial->specular = MeshExtractor::Color(4, 0.9f, 0.9f, 0.9f, 1.0f);
-	defMaterial->emit = MeshExtractor::Color(4, 0.0f, 0.0f, 0.0f, 1.0f);
-	defMaterial->opacity = 1.0f;
-	defMaterial->specular_level = 0.36f;
-	defMaterial->shininess = 32.0f;
-	return defMaterial;
-}
-
-MFnSkinCluster* MayaMeshExporter::ExportSkinCluster(MFnMesh& fnMesh, MDagPath& /*dagPath*/)
-{
-	MStatus status = MS::kSuccess;
-	MFnSkinCluster* fnSkinClusterPtr = NULL;
-	MItDependencyNodes dn(MFn::kSkinClusterFilter);
-	for (; !dn.isDone() && !fnSkinClusterPtr; dn.next())
-	{
-		MObject object = dn.item();
-		fnSkinClusterPtr = new MFnSkinCluster(object, &status);
-
-		unsigned int numGeometries = fnSkinClusterPtr->numOutputConnections();
-		for (unsigned int i=0; i<numGeometries && fnSkinClusterPtr; ++i) 
-		{
-			unsigned int index = fnSkinClusterPtr->indexForOutputConnection(i);
-			MObject outputObject = fnSkinClusterPtr->outputShapeAtIndex(index);
-
-			// Check if skin cluster is invalid
-			if (outputObject != fnMesh.object())
-			{
-				delete fnSkinClusterPtr;
-				fnSkinClusterPtr = NULL;
-			}
-		}
-	}
-
-	if (fnSkinClusterPtr)
-	{
-		MDagPathArray influencePaths;
-		int numInfluenceObjs = fnSkinClusterPtr->influenceObjects(influencePaths, &status);
-
-		MDagPath jointPath,rootPath;
-		for (int i=0; i<numInfluenceObjs; ++i)
-		{
-			jointPath = influencePaths[i];
-			if (!jointPath.hasFn(MFn::kJoint))
-			{
-				continue;
-			}
-
-			// Try to retrieve the root path
-			rootPath = jointPath;
-			while (jointPath.length() > 0)
-			{
-				jointPath.pop();
-				if (jointPath.hasFn(MFn::kJoint) && (jointPath.length() > 0))
+				MObject tex_obj = connections[0].node();
+				if (tex_obj.hasFn(MFn::kFileTexture))
 				{
-					rootPath = jointPath;
+					MFnDependencyNode tex_dn(tex_obj);
+					MPlug plug = tex_dn.findPlug("fileTextureName");
+
+					MString texture_name;
+					plug.getValue(texture_name);
+
+					int slot_id = meshml_obj_.AllocTextureSlot(mtl_id);
+					meshml_obj_.SetTextureSlot(mtl_id, slot_id, iter->first, texture_name.asChar());
+				}
+				else
+				{
+					std::cout << "Unknown texture data type, not a valid file texture." << std::endl;
 				}
 			}
+		}
+	}
 
-			if (rootPath.hasFn(MFn::kJoint))
+	return mtl_id;
+}
+
+int MayaMeshExporter::AddDefaultMaterial()
+{
+	int mtl_id = meshml_obj_.AllocMaterial();
+	meshml_obj_.SetMaterial(mtl_id, KlayGE::float3(0, 0, 0), KlayGE::float3(0, 0, 0),
+		KlayGE::float3(0.9f, 0.9f, 0.9f), KlayGE::float3(0, 0, 0), 1,
+		0.9f, 32);
+	return mtl_id;
+}
+
+boost::shared_ptr<MFnSkinCluster> MayaMeshExporter::ExportSkinCluster(MFnMesh& fn_mesh, MDagPath& /*dag_path*/)
+{
+	MStatus status = MS::kSuccess;
+	boost::shared_ptr<MFnSkinCluster> fn_skin_cluster;
+	MItDependencyNodes dn(MFn::kSkinClusterFilter);
+	for (; !dn.isDone() && !fn_skin_cluster; dn.next())
+	{
+		MObject object = dn.item();
+		fn_skin_cluster.reset(new MFnSkinCluster(object, &status));
+
+		unsigned int num_geometries = fn_skin_cluster->numOutputConnections();
+		for (unsigned int i = 0; (i < num_geometries) && fn_skin_cluster; ++ i) 
+		{
+			unsigned int index = fn_skin_cluster->indexForOutputConnection(i);
+			MObject output_object = fn_skin_cluster->outputShapeAtIndex(index);
+
+			// Check if skin cluster is invalid
+			if (output_object != fn_mesh.object())
 			{
-				MFnIkJoint fnJoint(rootPath);
-
-				// Don't work on existing joints
-				JointMap::iterator itr = export_joints_.find(fnJoint.partialPathName().asChar());
-				if (itr == export_joints_.end())
-					ExportJoint(NULL, fnJoint, rootPath);
+				fn_skin_cluster.reset();
 			}
 		}
 	}
-	return fnSkinClusterPtr;
+
+	if (fn_skin_cluster)
+	{
+		MDagPathArray influence_paths;
+		int num_influence_objs = fn_skin_cluster->influenceObjects(influence_paths, &status);
+
+		MDagPath joint_path, root_path;
+		for (int i = 0; i < num_influence_objs; ++ i)
+		{
+			joint_path = influence_paths[i];
+			if (joint_path.hasFn(MFn::kJoint))
+			{
+				// Try to retrieve the root path
+				root_path = joint_path;
+				while (joint_path.length() > 0)
+				{
+					joint_path.pop();
+					if (joint_path.hasFn(MFn::kJoint) && (joint_path.length() > 0))
+					{
+						root_path = joint_path;
+					}
+				}
+
+				if (root_path.hasFn(MFn::kJoint))
+				{
+					MFnIkJoint fn_joint(root_path);
+
+					// Don't work on existing joints
+					BOOST_AUTO(iter, joint_to_id_.find(fn_joint.fullPathName().asChar()));
+					if (iter == joint_to_id_.end())
+					{
+						this->ExportJoint(NULL, fn_joint, root_path);
+					}
+				}
+			}
+		}
+	}
+
+	return fn_skin_cluster;
 }
 
 // Maya/standalone interface
@@ -906,14 +825,30 @@ MFnSkinCluster* MayaMeshExporter::ExportSkinCluster(MFnMesh& fnMesh, MDagPath& /
 class MayaToMeshML : public MPxFileTranslator
 {
 public:
-	MayaToMeshML() {}
-	virtual ~MayaToMeshML() {}
+	MayaToMeshML()
+	{
+	}
+	virtual ~MayaToMeshML()
+	{
+	}
 
-	virtual MString defaultExtension() const { return "meshml"; }
-	virtual MString filter() const { return "*.meshml"; }
+	virtual MString defaultExtension() const
+	{
+		return "meshml";
+	}
+	virtual MString filter() const
+	{
+		return "*.meshml";
+	}
 
-	virtual bool haveReadMethod() const { return false; }
-	virtual bool haveWriteMethod() const { return true; }
+	virtual bool haveReadMethod() const
+	{
+		return false;
+	}
+	virtual bool haveWriteMethod() const
+	{
+		return true;
+	}
 
 	virtual MStatus reader(MFileObject const & /*file*/, MString const & /*optionsString*/, FileAccessMode /*mode*/)
 	{
@@ -930,7 +865,7 @@ public:
 		}
 
 		MStatus status;
-		MItDag dagIterator(MItDag::kDepthFirst, MFn::kInvalid, &status);
+		MItDag dag_iterator(MItDag::kDepthFirst, MFn::kInvalid, &status);
 		if (!status)
 		{
 			std::cout << "Failed to initialize the plugin - " << status.errorString() << std::endl;
@@ -940,22 +875,22 @@ public:
 		if ((MPxFileTranslator::kExportAccessMode == mode) || (MPxFileTranslator::kSaveAccessMode == mode))
 		{
 			// Export all
-			exporter.ExportMayaNodes(dagIterator);
+			exporter.ExportMayaNodes(dag_iterator);
 		}
 		else if (MPxFileTranslator::kExportActiveAccessMode == mode)
 		{
 			// Export selected
-			MSelectionList selectionList;
-			MGlobal::getActiveSelectionList(selectionList);
-			if (selectionList.length() > 0)
+			MSelectionList selection_list;
+			MGlobal::getActiveSelectionList(selection_list);
+			if (selection_list.length() > 0)
 			{
-				MItSelectionList selIterator(selectionList);
-				for (; !selIterator.isDone(); selIterator.next())
+				MItSelectionList sel_iterator(selection_list);
+				for (; !sel_iterator.isDone(); sel_iterator.next())
 				{
-					MDagPath objectPath;
-					selIterator.getDagPath(objectPath);
-					dagIterator.reset(objectPath.node(), MItDag::kDepthFirst, MFn::kInvalid);
-					exporter.ExportMayaNodes(dagIterator);
+					MDagPath object_path;
+					sel_iterator.getDagPath(object_path);
+					dag_iterator.reset(object_path.node(), MItDag::kDepthFirst, MFn::kInvalid);
+					exporter.ExportMayaNodes(dag_iterator);
 				}
 			}
 		}
@@ -983,14 +918,14 @@ public:
 	}
 };
 
-char const* objOptionScript = "MeshMLMayaExporterOptions";
-char const* objDefaultOptions =" ";
+char const* obj_option_script = "MeshMLMayaExporterOptions";
+char const* obj_default_options =" ";
 
 MStatus initializePlugin(MObject obj)
 {
-	MFnPlugin plugin(obj, "KlayGE", "3.0", "Any");
+	MFnPlugin plugin(obj, "KlayGE", "4.0", "Any");
 	return plugin.registerFileTranslator("MeshMLMayaExporter", "none",
-		MayaToMeshML::creator, const_cast<char*>(objOptionScript), const_cast<char*>(objDefaultOptions));
+		MayaToMeshML::creator, const_cast<char*>(obj_option_script), const_cast<char*>(obj_default_options));
 }
 
 MStatus uninitializePlugin(MObject obj)
@@ -1009,7 +944,7 @@ int main(int argc, char** argv)
 		return 1;
 	}
 
-	MStatus status = MLibrary::initialize(true, "KlayGE: Maya file reader", true);
+	MStatus status = MLibrary::initialize(true, "KlayGE: Maya file exporter", true);
 	if (!status)
 	{
 		std::cout << "MLibrary::initialize() failed - " << status.errorString() << std::endl;
