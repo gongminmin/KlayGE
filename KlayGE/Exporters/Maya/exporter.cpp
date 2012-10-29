@@ -764,17 +764,10 @@ boost::shared_ptr<MFnSkinCluster> MayaMeshExporter::ExportSkinCluster(MFnMesh& f
 		MObject object = dn.item();
 		fn_skin_cluster.reset(new MFnSkinCluster(object, &status));
 
-		unsigned int num_geometries = fn_skin_cluster->numOutputConnections();
-		for (unsigned int i = 0; (i < num_geometries) && fn_skin_cluster; ++ i) 
+		unsigned int index = fn_skin_cluster->indexForOutputShape(fn_mesh.object(), &status);
+		if ((status != MS::kSuccess) || (index < 0))
 		{
-			unsigned int index = fn_skin_cluster->indexForOutputConnection(i);
-			MObject output_object = fn_skin_cluster->outputShapeAtIndex(index);
-
-			// Check if skin cluster is invalid
-			if (output_object != fn_mesh.object())
-			{
-				fn_skin_cluster.reset();
-			}
+			fn_skin_cluster.reset();
 		}
 	}
 

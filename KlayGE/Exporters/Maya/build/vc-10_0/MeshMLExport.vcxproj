@@ -20,10 +20,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\exporter.cpp" />
-    <ClCompile Include="..\..\MeshExtractor.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="..\..\MeshExtractor.hpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{B2E57368-EC68-4951-BDC4-7DBDA23E110C}</ProjectGuid>
