@@ -6,6 +6,7 @@
 	<include name="util.fxml"/>
 
 	<macro name="ALPHA_TEST_THRESHOLD" value="0.2"/>
+	<macro name="NORMAL_THRESHOLD" value="0.7"/>
 	
 	<cbuffer name="per_frame">
 		<parameter type="float4x4" name="mvp"/>
@@ -413,6 +414,11 @@ float4 DecalGBufferAlphaTestRT0PS(float4 texcoord_2xy : TEXCOORD0, float4 ts_to_
 #endif
 
 	float3 pos_es = view_dir * (opaque_depth_tex.Sample(point_sampler, screen_tc).r / view_dir.z);
+	
+	float3 decal_normal = normalize(float3(texcoord_2xy.zw, ts_to_view0_2z.w));
+	float3 pixel_normal = normalize(cross(ddx(pos_es), ddy(pos_es)));
+	clip(dot(decal_normal, pixel_normal) - NORMAL_THRESHOLD);
+	
 	float4 decal_pos = mul(float4(pos_es, 1), inv_mv);
 	if (any(abs(decal_pos.xyz) > decal_pos.w))
 	{
@@ -421,8 +427,6 @@ float4 DecalGBufferAlphaTestRT0PS(float4 texcoord_2xy : TEXCOORD0, float4 ts_to_
 	
 	decal_pos /= decal_pos.w;
 	texcoord_2xy.xy = float2(decal_pos.x, -decal_pos.y) * 0.5f + 0.5f;
-
-	clip(diffuse_tex.Sample(bilinear_border_sampler, texcoord_2xy.xy).a - ALPHA_TEST_THRESHOLD);
 		
 	float3 normal = RestoreNormal(texcoord_2xy, ts_to_view0_2z, ts_to_view1);
 	
@@ -442,6 +446,11 @@ float4 DecalGBufferAlphaTestRT1PS(float4 texcoord_2xy : TEXCOORD0, float4 ts_to_
 #endif
 
 	float3 pos_es = view_dir * (opaque_depth_tex.Sample(point_sampler, screen_tc).r / view_dir.z);
+
+	float3 decal_normal = normalize(float3(texcoord_2xy.zw, ts_to_view0_2z.w));
+	float3 pixel_normal = normalize(cross(ddx(pos_es), ddy(pos_es)));
+	clip(dot(decal_normal, pixel_normal) - NORMAL_THRESHOLD);
+	
 	float4 decal_pos = mul(float4(pos_es, 1), inv_mv);
 	if (any(abs(decal_pos.xyz) > decal_pos.w))
 	{
@@ -490,6 +499,11 @@ void DecalGBufferAlphaTestMRTPS(float4 texcoord_2xy : TEXCOORD0, float4 ts_to_vi
 #endif
 
 	float3 pos_es = view_dir * (opaque_depth_tex.Sample(point_sampler, screen_tc).r / view_dir.z);
+	
+	float3 decal_normal = normalize(float3(texcoord_2xy.zw, ts_to_view0_2z.w));
+	float3 pixel_normal = normalize(cross(ddx(pos_es), ddy(pos_es)));
+	clip(dot(decal_normal, pixel_normal) - NORMAL_THRESHOLD);
+	
 	float4 decal_pos = mul(float4(pos_es, 1), inv_mv);
 	if (any(abs(decal_pos.xyz) > decal_pos.w))
 	{
