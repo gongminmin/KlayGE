@@ -34,11 +34,12 @@
 #include <fstream>
 #include <iostream>
 #include <set>
+#include <map>
+#include <vector>
 
 #include <boost/typeof/typeof.hpp>
 #include <boost/foreach.hpp>
 #include <boost/assert.hpp>
-#include <boost/shared_ptr.hpp>
 
 #include <MeshMLLib/MeshMLLib.hpp>
 
@@ -102,17 +103,18 @@ public:
 
 private:
 	void ExportNurbsSurface(MString const & obj_name, MFnNurbsSurface& fn_surface, MDagPath& dag_path);
-	void ExportMesh(MString const & obj_name, MFnMesh& fn_mesh, boost::shared_ptr<MFnSkinCluster> const & fn_skin_cluster, MDagPath& dag_path);
+	void ExportMesh(MString const & obj_name, MFnMesh& fn_mesh, MDagPath& dag_path);
 	void ExportJoint(MDagPath const * parent_path, MFnIkJoint& fn_joint, MDagPath& dag_path);
 	void ExportKeyframe(int kfs_id, MDagPath& dag_path, MMatrix const & inv_parent);
 	int ExportMaterialAndTexture(MObject* shader, MObjectArray const & textures);
 	int AddDefaultMaterial();
-	boost::shared_ptr<MFnSkinCluster> ExportSkinCluster(MFnMesh& fn_mesh, MDagPath& dag_path);
 
 	MeshMLObj meshml_obj_;
 
 	std::map<std::string, int> joint_to_id_;
 	std::map<int, MDagPath> joint_id_to_path_;
+
+	std::vector<std::pair<MFnSkinCluster, std::vector<MObject> > > skin_clusters_;
 };
 
 MayaMeshExporter::MayaMeshExporter()
@@ -154,6 +156,60 @@ void MayaMeshExporter::ExportMayaNodes(MItDag& dag_iterator)
 	meshml_obj_.EndFrame(end_frame);
 
 	MAnimControl::setCurrentTime(MTime(start_frame, MTime::kNTSCField));
+
+	for (MItDependencyNodes dn(MFn::kSkinClusterFilter); !dn.isDone(); dn.next())
+	{
+		MStatus status = MS::kSuccess;
+		MObject object = dn.item();
+		MFnSkinCluster skin_cluster(object, &status);
+
+		std::vector<MObject> objs;
+		unsigned int num_geometries = skin_cluster.numOutputConnections();
+		for (unsigned int i = 0; i < num_geometries; ++ i) 
+ 		{
+			unsigned int index = skin_cluster.indexForOutputConnection(i);
+			objs.push_back(skin_cluster.outputShapeAtIndex(index));
+ 		}
+
+		if (num_geometries > 0)
+		{
+			skin_clusters_.push_back(std::make_pair(skin_cluster, objs));
+		}
+
+		MDagPathArray influence_paths;
+		int num_influence_objs = skin_cluster.influenceObjects(influence_paths, &status);
+
+		MDagPath joint_path, root_path;
+		for (int i = 0; i < num_influence_objs; ++ i)
+		{
+			joint_path = influence_paths[i];
+			if (joint_path.hasFn(MFn::kJoint))
+			{
+				// Try to retrieve the root path
+				root_path = joint_path;
+				while (joint_path.length() > 0)
+				{
+					joint_path.pop();
+					if (joint_path.hasFn(MFn::kJoint) && (joint_path.length() > 0))
+					{
+						root_path = joint_path;
+					}
+				}
+
+				if (root_path.hasFn(MFn::kJoint))
+				{
+					MFnIkJoint fn_joint(root_path);
+
+					// Don't work on existing joints
+					BOOST_AUTO(iter, joint_to_id_.find(fn_joint.fullPathName().asChar()));
+					if (iter == joint_to_id_.end())
+					{
+						this->ExportJoint(NULL, fn_joint, root_path);
+					}
+				}
+			}
+		}
+	}
 	
 	MDagPath dag_path;
 	for (; !dag_iterator.isDone(); dag_iterator.next())
@@ -188,8 +244,7 @@ void MayaMeshExporter::ExportMayaNodes(MItDag& dag_iterator)
 				{
 					if (!fn_mesh.isIntermediateObject())
 					{
-						boost::shared_ptr<MFnSkinCluster> fn_skin_cluster = this->ExportSkinCluster(fn_mesh, dag_path);
-						this->ExportMesh(obj_name, fn_mesh, fn_skin_cluster, dag_path);
+						this->ExportMesh(obj_name, fn_mesh, dag_path);
 					}
 					else
 					{
@@ -349,7 +404,7 @@ void MayaMeshExporter::ExportNurbsSurface(MString const & obj_name, MFnNurbsSurf
 
 		// Export the new generated mesh
 		MFnMesh fn_converted_mesh(converted_mesh, &status);
-		this->ExportMesh(obj_name, fn_converted_mesh, boost::shared_ptr<MFnSkinCluster>(), dag_path);
+		this->ExportMesh(obj_name, fn_converted_mesh, dag_path);
 
 		// Remove the mesh to keep the scene clean
 		MFnDagNode parent_node(mesh_parent, &status);
@@ -361,8 +416,7 @@ void MayaMeshExporter::ExportNurbsSurface(MString const & obj_name, MFnNurbsSurf
 	}
 }
 
-void MayaMeshExporter::ExportMesh(MString const & obj_name, MFnMesh& fn_mesh,
-	boost::shared_ptr<MFnSkinCluster> const & fn_skin_cluster, MDagPath& dag_path)
+void MayaMeshExporter::ExportMesh(MString const & obj_name, MFnMesh& fn_mesh, MDagPath& dag_path)
 {
 	MStatus status = MS::kSuccess;
 	MObject component = MObject::kNullObj;
@@ -431,7 +485,21 @@ void MayaMeshExporter::ExportMesh(MString const & obj_name, MFnMesh& fn_mesh,
 		// Get associated joints and weights
 		std::vector<std::vector<float> > weights(num_vertices);
 		std::vector<std::vector<MDagPath> > joint_paths(num_vertices);
-		if (fn_skin_cluster)
+
+		int skin_cluster_index = -1;
+		for (size_t i = 0; (i < skin_clusters_.size()) && (skin_cluster_index < 0); ++ i)
+		{
+			for (size_t j = 0; j < skin_clusters_[i].second.size(); ++ j)
+			{
+				if (skin_clusters_[i].second[j] == fn_mesh.object())
+				{
+					skin_cluster_index = static_cast<int>(i);
+					break;
+				}
+			}
+		}
+
+		if (skin_cluster_index >= 0)
 		{
 			unsigned int num_weights;
 			MItGeometry geom_iterator(dag_path);
@@ -439,7 +507,7 @@ void MayaMeshExporter::ExportMesh(MString const & obj_name, MFnMesh& fn_mesh,
 			{
 				MObject component = geom_iterator.component();
 				MFloatArray vertex_weights;
-				status = fn_skin_cluster->getWeights(dag_path, component, vertex_weights, num_weights);
+				status = skin_clusters_[skin_cluster_index].first.getWeights(dag_path, component, vertex_weights, num_weights);
 				if (status != MS::kSuccess)
 				{
 					std::cout << "Fail to retrieve vertex weights." << std::endl;
@@ -450,7 +518,7 @@ void MayaMeshExporter::ExportMesh(MString const & obj_name, MFnMesh& fn_mesh,
 				joint_paths[i].resize(vertex_weights.length());
 
 				MDagPathArray influence_objs;
-				fn_skin_cluster->influenceObjects(influence_objs, &status);
+				skin_clusters_[skin_cluster_index].first.influenceObjects(influence_objs, &status);
 				if (MS::kSuccess == status)
 				{
 					for (unsigned int j = 0; j < influence_objs.length(); ++ j)
@@ -466,6 +534,34 @@ void MayaMeshExporter::ExportMesh(MString const & obj_name, MFnMesh& fn_mesh,
 				{
 					std::cout << "Fail to retrieve influence objects for the skin cluster." << std::endl;
 				}
+			}
+		}
+		else
+		{
+			// Static mesh connect on joint
+
+			MDagPath parent_path = dag_path;
+			parent_path.pop();
+
+			while (parent_path.length() > 0)
+			{
+				BOOST_AUTO(iter, joint_to_id_.find(parent_path.fullPathName().asChar()));
+				if (iter != joint_to_id_.end())
+				{
+					MItGeometry geom_iterator(dag_path);
+					for (int i = 0; !geom_iterator.isDone(); geom_iterator.next(), ++ i)
+					{
+						weights[i].resize(1);
+						joint_paths[i].resize(1);
+
+						weights[i][0] = 1;
+						joint_paths[i][0] = parent_path;
+					}
+
+					break;
+				}
+
+				parent_path.pop();
 			}
 		}
 
@@ -752,63 +848,6 @@ int MayaMeshExporter::AddDefaultMaterial()
 		KlayGE::float3(0.9f, 0.9f, 0.9f), KlayGE::float3(0, 0, 0), 1,
 		0.9f, 32);
 	return mtl_id;
-}
-
-boost::shared_ptr<MFnSkinCluster> MayaMeshExporter::ExportSkinCluster(MFnMesh& fn_mesh, MDagPath& /*dag_path*/)
-{
-	MStatus status = MS::kSuccess;
-	boost::shared_ptr<MFnSkinCluster> fn_skin_cluster;
-	MItDependencyNodes dn(MFn::kSkinClusterFilter);
-	for (; !dn.isDone() && !fn_skin_cluster; dn.next())
-	{
-		MObject object = dn.item();
-		fn_skin_cluster.reset(new MFnSkinCluster(object, &status));
-
-		unsigned int index = fn_skin_cluster->indexForOutputShape(fn_mesh.object(), &status);
-		if ((status != MS::kSuccess) || (index < 0))
-		{
-			fn_skin_cluster.reset();
-		}
-	}
-
-	if (fn_skin_cluster)
-	{
-		MDagPathArray influence_paths;
-		int num_influence_objs = fn_skin_cluster->influenceObjects(influence_paths, &status);
-
-		MDagPath joint_path, root_path;
-		for (int i = 0; i < num_influence_objs; ++ i)
-		{
-			joint_path = influence_paths[i];
-			if (joint_path.hasFn(MFn::kJoint))
-			{
-				// Try to retrieve the root path
-				root_path = joint_path;
-				while (joint_path.length() > 0)
-				{
-					joint_path.pop();
-					if (joint_path.hasFn(MFn::kJoint) && (joint_path.length() > 0))
-					{
-						root_path = joint_path;
-					}
-				}
-
-				if (root_path.hasFn(MFn::kJoint))
-				{
-					MFnIkJoint fn_joint(root_path);
-
-					// Don't work on existing joints
-					BOOST_AUTO(iter, joint_to_id_.find(fn_joint.fullPathName().asChar()));
-					if (iter == joint_to_id_.end())
-					{
-						this->ExportJoint(NULL, fn_joint, root_path);
-					}
-				}
-			}
-		}
-	}
-
-	return fn_skin_cluster;
 }
 
 // Maya/standalone interface
