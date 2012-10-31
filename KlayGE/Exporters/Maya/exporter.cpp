@@ -30,6 +30,7 @@
 #include <maya/MPxFileTranslator.h>
 #include <maya/MFileIO.h>
 #include <maya/MIOStream.h>
+#include <maya/MDistance.h>
 
 #include <fstream>
 #include <iostream>
@@ -118,7 +119,7 @@ private:
 };
 
 MayaMeshExporter::MayaMeshExporter()
-	: meshml_obj_(1)
+	: meshml_obj_(static_cast<float>(MDistance(1, MDistance::internalUnit()).asMeters()))
 {
 	meshml_obj_.StartFrame(0);
 	meshml_obj_.EndFrame(0);
