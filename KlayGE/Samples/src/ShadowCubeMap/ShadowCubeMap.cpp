@@ -339,6 +339,14 @@ namespace
 
 				this->SetTessFactor(static_cast<int32_t>(tess_factor_));
 			}
+
+			AABBox const & pos_bb = this->PosBound();
+			*(effect_->ParameterByName("pos_center")) = pos_bb.Center();
+			*(effect_->ParameterByName("pos_extent")) = pos_bb.HalfSize();
+			
+			AABBox const & tc_bb = this->TexcoordBound();
+			*(effect_->ParameterByName("tc_center")) = float2(tc_bb.Center().x(), tc_bb.Center().y());
+			*(effect_->ParameterByName("tc_extent")) = float2(tc_bb.HalfSize().x(), tc_bb.HalfSize().y());
 		}
 
 		void MinVariance(float min_variance)

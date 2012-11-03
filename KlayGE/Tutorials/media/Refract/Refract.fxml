@@ -13,6 +13,10 @@
 		<parameter type="float4x4" name="inv_view"/>
 		<parameter type="float4x4" name="inv_vp"/>
 		<parameter type="float3" name="eye_pos"/>
+		<parameter type="float3" name="pos_center"/>
+		<parameter type="float3" name="pos_extent"/>
+		<parameter type="float2" name="tc_center"/>
+		<parameter type="float2" name="tc_extent"/>
 	</cbuffer>
 	<parameter type="float3" name="eta_ratio"/>
 
@@ -61,10 +65,13 @@ void RefractVS(float4 pos			: POSITION,
 				out float4 dir_ss	: TEXCOORD4,
 				out float4 oPos		: SV_Position)
 {
+	pos = float4(pos.xyz * pos_extent + pos_center, 1);
+	tangent_quat = tangent_quat * 2 - 1;
+	
 	oPos = mul(pos, mvp);
 	pos_ss = oPos;
 
-	out_normal = mul(transform_quat(float3(0, 0, 1), tangent_quat * 2 - 1), (float3x3)mv);
+	out_normal = mul(transform_quat(float3(0, 0, 1), tangent_quat), (float3x3)mv);
 	incident.xyz = mul(pos, mv).xyz;
 	incident.w = incident.z;
 	
@@ -143,8 +150,11 @@ void RefractBackFaceVS(float4 pos : POSITION,
 							out float4 normal_depth : TEXCOORD0,
 							out float4 oPos : SV_Position)
 {
+	pos = float4(pos.xyz * pos_extent + pos_center, 1);
+	tangent_quat = tangent_quat * 2 - 1;
+	
 	oPos = mul(pos, mvp);
-	normal_depth.xyz = mul(transform_quat(float3(0, 0, 1), tangent_quat * 2 - 1), (float3x3)mv);
+	normal_depth.xyz = mul(transform_quat(float3(0, 0, 1), tangent_quat), (float3x3)mv);
 	normal_depth.w = oPos.w;
 }
 

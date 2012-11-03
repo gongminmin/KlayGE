@@ -11,6 +11,8 @@
 		<parameter type="float3" name="light_in_world" x="2" y="2" z="-3"/>
 		<parameter type="float3" name="eye_in_world"/>
 		<parameter type="float" name="elapsed_time"/>
+		<parameter type="float3" name="pos_center"/>
+		<parameter type="float3" name="pos_extent"/>
 	</cbuffer>
 
 	<parameter type="float4x4" name="modelmat" semantic="WORLD"/>
@@ -37,6 +39,8 @@ void ColorDepthInstancedVS(float4 pos			: POSITION,
 					out float3 oHalfwayVecWS : TEXCOORD4,
 					out float4 oPos		: SV_Position)
 {
+	pos = float4(pos.xyz * pos_extent + pos_center, 1);
+
 	float4x4 model = { row0, row1, row2, float4(0, 0, 0, 1) };
 
 	float4 pos_ws = mul(model, pos);
@@ -61,8 +65,11 @@ void ColorDepthNonInstancedVS(float4 pos			: POSITION,
 					out float3 oHalfwayVecWS : TEXCOORD4,
 					out float4 oPos		: SV_Position)
 {
+	pos = float4(pos.xyz * pos_extent + pos_center, 1);
+	tangent_quat = tangent_quat * 2 - 1;
+	
 	float4 pos_ws = mul(pos, modelmat);
-	float3 normal = mul(transform_quat(float3(0, 0, 1), tangent_quat * 2 - 1), (float3x3)modelmat);
+	float3 normal = mul(transform_quat(float3(0, 0, 1), tangent_quat), (float3x3)modelmat);
 	oPos = mul(mul(pos_ws, view), proj);
 	oPosWS = pos_ws.xyz;
 	oNormalWS = normal;
@@ -136,10 +143,13 @@ void MotionVectorInstancedVS(float4 pos			: POSITION,
 					out float2 oVelocity : TEXCOORD0,
 					out float4 oPos		: SV_Position)
 {
+	pos = float4(pos.xyz * pos_extent + pos_center, 1);
+	tangent_quat = tangent_quat * 2 - 1;
+	
 	float4x4 model = { row0, row1, row2, float4(0, 0, 0, 1) };
 	float4x4 last_model = { last_row0, last_row1, last_row2, float4(0, 0, 0, 1) };
 
-	float3 normal = mul(mul((float3x3)model, transform_quat(float3(0, 0, 1), tangent_quat * 2 - 1)), (float3x3)view);
+	float3 normal = mul(mul((float3x3)model, transform_quat(float3(0, 0, 1), tangent_quat)), (float3x3)view);
 	CalcMotionVector(mul(model, pos), mul(last_model, pos), normal, oVelocity, oPos);
 }
 
@@ -149,8 +159,11 @@ void MotionVectorNonInstancedVS(float4 pos			: POSITION,
 					out float2 oVelocity : TEXCOORD0,
 					out float4 oPos		: SV_Position)
 {
+	pos = float4(pos.xyz * pos_extent + pos_center, 1);
+	tangent_quat = tangent_quat * 2 - 1;
+	
 	float4 pos_ws = mul(pos, modelmat);
-	float3 normal = mul(mul(transform_quat(float3(0, 0, 1), tangent_quat * 2 - 1), (float3x3)modelmat), (float3x3)view);
+	float3 normal = mul(mul(transform_quat(float3(0, 0, 1), tangent_quat), (float3x3)modelmat), (float3x3)view);
 	CalcMotionVector(mul(pos, modelmat), mul(pos, last_modelmat), normal, oVelocity, oPos);
 }
 

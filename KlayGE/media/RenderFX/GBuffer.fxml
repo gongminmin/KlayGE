@@ -17,6 +17,10 @@
 	</cbuffer>
 
 	<cbuffer name="model">
+		<parameter type="float3" name="pos_center"/>
+		<parameter type="float3" name="pos_extent"/>
+		<parameter type="float2" name="tc_center"/>
+		<parameter type="float2" name="tc_extent"/>
 		<parameter type="float4" name="diffuse_clr"/>
 		<parameter type="float4" name="emit_clr"/>
 		<parameter type="float4" name="specular_level"/>
@@ -94,6 +98,9 @@ void DepthVS(float4 pos : POSITION,
 #endif
 			out float4 oPos : SV_Position)
 {
+	pos = float4(pos.xyz * pos_extent + pos_center, 1);
+	texcoord = texcoord * tc_extent + tc_center;
+	
 	oPos = mul(pos, mvp);
 	oTexCoordDepth.xy = texcoord;
 	oTexCoordDepth.z = oPos.w;
@@ -148,6 +155,9 @@ void GBufferVS(float4 pos : POSITION,
 #endif
 			out float4 oPos : SV_Position)
 {
+	pos = float4(pos.xyz * pos_extent + pos_center, 1);
+	texcoord = texcoord * tc_extent + tc_center;
+	
 	oPos = mul(pos, mvp);
 	oTexCoord_2xy.xy = texcoord;
 
@@ -792,6 +802,9 @@ void GenReflectiveShadowMapVS(float4 pos : POSITION,
 						out float3 oTsToView1 : TEXCOORD2,
 						out float4 oPos : SV_Position)
 {
+	pos = float4(pos.xyz * pos_extent + pos_center, 1);
+	texcoord = texcoord * tc_extent + tc_center;
+	
 	oPos = mul(pos, mvp);
 	oTexCoord_2xy.xy = texcoord;
 
@@ -880,6 +893,9 @@ void GenShadowMapVS(float4 pos : POSITION,
 						out float2 oTc : TEXCOORD0,
 						out float4 oPos : SV_Position)
 {
+	pos = float4(pos.xyz * pos_extent + pos_center, 1);
+	texcoord = texcoord * tc_extent + tc_center;
+	
 	oPos = mul(pos, mvp);
 	oTc = texcoord;
 }
@@ -901,6 +917,9 @@ void GenShadowMapWODepthTextureVS(float4 pos : POSITION,
 						out float3 oViewDir : TEXCOORD1,
 						out float4 oPos : SV_Position)
 {
+	pos = float4(pos.xyz * pos_extent + pos_center, 1);
+	texcoord = texcoord * tc_extent + tc_center;
+	
 	oPos = mul(pos, mvp);
 	oTc = texcoord;
 	
@@ -975,6 +994,9 @@ void SpecialShadingVS(float4 pos : POSITION,
 			out float2 oTexCoord : TEXCOORD0,
 			out float4 oPos : SV_Position)
 {
+	pos = float4(pos.xyz * pos_extent + pos_center, 1);
+	texcoord = texcoord * tc_extent + tc_center;
+	
 	oPos = mul(pos, mvp);
 	oTexCoord = texcoord;
 }

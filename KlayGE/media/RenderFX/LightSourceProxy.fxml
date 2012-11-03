@@ -29,6 +29,7 @@ void LightSourceProxyVS(float4 pos : POSITION,
 			out float3 oNormal : TEXCOORD1,
 			out float4 oPos : SV_Position)
 {
+	pos = float4(pos.xyz * pos_extent + pos_center, 1);
 	tangent_quat = tangent_quat * 2 - 1;
 	
 	oPos = mul(pos, mvp);
@@ -91,6 +92,9 @@ void LightSourceProxySpecialShadingVS(float4 pos : POSITION,
 			out float3 oPosOS : TEXCOORD4,
 			out float4 oPos : SV_Position)
 {
+	pos = float4(pos.xyz * pos_extent + pos_center, 1);
+	texcoord = texcoord * tc_extent + tc_center;
+	
 	oPos = mul(pos, mvp);
 	oTexCoord = texcoord;
 	

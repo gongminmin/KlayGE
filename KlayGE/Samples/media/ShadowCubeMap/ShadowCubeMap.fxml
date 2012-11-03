@@ -8,6 +8,11 @@
 	<parameter type="float4x4" name="model"/>
 	<parameter type="float4x4" name="obj_model_to_light_model"/>
 
+	<parameter type="float3" name="pos_center"/>
+	<parameter type="float3" name="pos_extent"/>
+	<parameter type="float2" name="tc_center"/>
+	<parameter type="float2" name="tc_extent"/>
+
 	<parameter type="float3" name="light_falloff"/>
 
 	<shader>
@@ -24,6 +29,8 @@ void GenCubeShadowMapVS(float4 Position : POSITION,
 						out float oDist : TEXCOORD0,
 						out float4 oPos : SV_Position)
 {
+	Position = float4(Position.xyz * pos_extent + pos_center, 1);
+	
     oPos = mul(Position, mvp);
     oDist = calc_dist(Position);
 }
@@ -87,6 +94,8 @@ void GenDPShadowMapVS(float4 Position : POSITION,
 					out float2 oDist  : TEXCOORD0,
 					out float4 oPos   : SV_Position)
 {
+	Position = float4(Position.xyz * pos_extent + pos_center, 1);
+	
 	CalcDPSM(Position, oDist, oPos);
 }
 
@@ -142,6 +151,8 @@ struct VS_CONTROL_POINT_OUTPUT
 
 VS_CONTROL_POINT_OUTPUT HWTessGenDPShadowMapVS(float4 pos : POSITION)
 {
+	pos = float4(pos.xyz * pos_extent + pos_center, 1);
+	
 	VS_CONTROL_POINT_OUTPUT output;
 	output.Pos = pos.xyz;
 	return output;
@@ -307,6 +318,8 @@ void GenCubeOneShadowMapVS(float4 Position : POSITION,
 						out float4 oPos : POSITION,
 						out float oDist : TEXCOORD0)
 {
+	Position = float4(Position.xyz * pos_extent + pos_center, 1);
+	
 	oPos = Position;
 	oDist = calc_dist(Position);
 }
@@ -373,6 +386,8 @@ void GenCubeOneInstanceShadowMapVS(float4 Position : POSITION,
 						out float4 oPos : POSITION,
 						out float2 oDist : TEXCOORD0)
 {
+	Position = float4(Position.xyz * pos_extent + pos_center, 1);
+	
 	oPos = mul(Position, mvps[instance_id]);
 
 	oDist.x = calc_dist(Position);
@@ -515,10 +530,14 @@ void RenderSceneVS(float4 Position : POSITION,
 					out float3 oLightVuewPos : TEXCOORD3,
 					out float4 oPos : SV_Position)
 {
+	Position = float4(Position.xyz * pos_extent + pos_center, 1);
+	Texcoord = Texcoord * tc_extent + tc_center;
+	tangent_quat = tangent_quat * 2 - 1;
+	
 	oTexcoord = Texcoord;
 	oPos = mul(Position, mvp);
 	oLightWorldPos = mul(Position, obj_model_to_light_model).xyz;
-	oLightWorldNormal = mul(transform_quat(float3(0, 0, 1), tangent_quat * 2 - 1), (float3x3)obj_model_to_light_model);
+	oLightWorldNormal = mul(transform_quat(float3(0, 0, 1), tangent_quat), (float3x3)obj_model_to_light_model);
 	oLightVuewPos = mul(Position, obj_model_to_light_view).xyz;
 }
 

@@ -45,7 +45,7 @@ namespace
 {
 	using namespace KlayGE;
 
-	uint32_t const MODEL_BIN_VERSION = 7;
+	uint32_t const MODEL_BIN_VERSION = 8;
 
 	class RenderModelLoadingDesc : public ResLoadingDesc
 	{
@@ -72,11 +72,11 @@ namespace
 			std::vector<uint32_t> mesh_num_indices;
 			std::vector<uint32_t> mesh_start_indices;
 			std::vector<Joint> joints;
+			boost::shared_ptr<AnimationActionsType> actions;
 			boost::shared_ptr<KeyFramesType> kfs;
 			uint32_t num_frames;
 			uint32_t frame_rate;
-			boost::shared_ptr<ActionSetType> action_set;
-			std::vector<std::vector<AABBox> > mesh_frame_pos_bbs;
+			std::vector<boost::shared_ptr<AABBKeyFrames> > frame_pos_bbs;
 
 			RenderModelPtr model;
 		};
@@ -123,10 +123,10 @@ namespace
 		{
 			LoadModel(model_desc_.res_name, model_desc_.mtls, model_desc_.merged_ves, model_desc_.all_is_index_16_bit,
 				model_desc_.merged_buff, model_desc_.merged_indices,
-				model_desc_.mesh_names, model_desc_.mtl_ids, model_desc_.pos_bbs, 
+				model_desc_.mesh_names, model_desc_.mtl_ids, model_desc_.pos_bbs, model_desc_.tc_bbs,
 				model_desc_.mesh_num_vertices, model_desc_.mesh_base_vertices, model_desc_.mesh_num_indices, model_desc_.mesh_start_indices, 
-				model_desc_.joints, model_desc_.kfs,
-				model_desc_.num_frames, model_desc_.frame_rate);
+				model_desc_.joints, model_desc_.actions, model_desc_.kfs,
+				model_desc_.num_frames, model_desc_.frame_rate, model_desc_.frame_pos_bbs);
 
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 			if (rf.RenderEngineInstance().DeviceCaps().multithread_res_creating_support)
@@ -185,6 +185,7 @@ namespace
 
 				mesh->MaterialID(model_desc_.mtl_ids[mesh_index]);
 				mesh->PosBound(model_desc_.pos_bbs[mesh_index]);
+				mesh->TexcoordBound(model_desc_.tc_bbs[mesh_index]);
 
 				for (uint32_t ve_index = 0; ve_index < model_desc_.merged_buff.size(); ++ ve_index)
 				{
@@ -203,13 +204,19 @@ namespace
 			{
 				if (model->IsSkinned())
 				{
-					SkinnedModelPtr skinned = checked_pointer_cast<SkinnedModel>(model);
+					SkinnedModelPtr skinned_model = checked_pointer_cast<SkinnedModel>(model);
 
-					skinned->AssignJoints(model_desc_.joints.begin(), model_desc_.joints.end());
-					skinned->AttachKeyFrames(model_desc_.kfs);
+					skinned_model->AssignJoints(model_desc_.joints.begin(), model_desc_.joints.end());
+					skinned_model->AttachKeyFrames(model_desc_.kfs);
 
-					skinned->NumFrames(model_desc_.num_frames);
-					skinned->FrameRate(model_desc_.frame_rate);
+					skinned_model->NumFrames(model_desc_.num_frames);
+					skinned_model->FrameRate(model_desc_.frame_rate);
+
+					for (size_t mesh_index = 0; mesh_index < meshes.size(); ++ mesh_index)
+					{
+						SkinnedMeshPtr skinned_mesh = checked_pointer_cast<SkinnedMesh>(meshes[mesh_index]);
+						skinned_mesh->AttachFramePosBounds(model_desc_.frame_pos_bbs[mesh_index]);
+					}
 				}
 			}
 
@@ -505,6 +512,22 @@ namespace KlayGE
 		return ret;
 	}
 
+	AABBox AABBKeyFrames::Frame(float frame) const
+	{
+		frame = std::fmod(frame, static_cast<float>(frame_id.back() + 1));
+
+		std::vector<uint32_t>::const_iterator iter = std::upper_bound(frame_id.begin(), frame_id.end(), frame);
+		int index = static_cast<int>(iter - frame_id.begin());
+
+		int index0 = index - 1;
+		int index1 = index % frame_id.size();
+		int frame0 = frame_id[index0];
+		int frame1 = frame_id[index1];
+		float factor = (frame - frame0) / (frame1 - frame0);
+		return AABBox(MathLib::lerp(bb[index0].Min(), bb[index1].Min(), factor),
+			MathLib::lerp(bb[index0].Max(), bb[index1].Max(), factor));
+	}
+
 
 	SkinnedModel::SkinnedModel(std::wstring const & name)
 		: RenderModel(name),
@@ -645,21 +668,6 @@ namespace KlayGE
 		}
 	}
 
-	void SkinnedModel::AttachKeyFrames(boost::shared_ptr<KeyFramesType> const & key_frames)
-	{
-		key_frames_ = key_frames;
-		frame_pos_aabbs_.assign(num_frames_, std::make_pair(AABBox(), false));
-	}
-
-	void SkinnedModel::NumFrames(uint32_t nf)
-	{
-		if (nf != num_frames_)
-		{
-			num_frames_ = nf;
-			frame_pos_aabbs_.assign(num_frames_, std::make_pair(AABBox(), false));
-		}
-	}
-
 	float SkinnedModel::GetFrame() const
 	{
 		return last_frame_;
@@ -689,47 +697,41 @@ namespace KlayGE
 		}
 	}
 
-	AABBox const & SkinnedModel::FramePosBound(uint32_t frame) const
+	AABBox SkinnedModel::FramePosBound(uint32_t frame) const
 	{
-		BOOST_ASSERT(frame < frame_pos_aabbs_.size());
-		if (!frame_pos_aabbs_[frame].second)
+		AABBox pos_aabb(float3(0, 0, 0), float3(0, 0, 0));
+		typedef BOOST_TYPEOF(meshes_) MeshesType;
+		BOOST_FOREACH(MeshesType::const_reference mesh, meshes_)
 		{
-			AABBox pos_aabb(float3(0, 0, 0), float3(0, 0, 0));
-			typedef BOOST_TYPEOF(meshes_) MeshesType;
-			BOOST_FOREACH(MeshesType::const_reference mesh, meshes_)
-			{
-				pos_aabb |= checked_pointer_cast<SkinnedMesh>(mesh)->FramePosBound(frame);
-			}
-
-			frame_pos_aabbs_[frame] = std::make_pair(pos_aabb, true);
+			pos_aabb |= checked_pointer_cast<SkinnedMesh>(mesh)->FramePosBound(frame);
 		}
 
-		return frame_pos_aabbs_[frame].first;
+		return pos_aabb;
 	}
 
-	void SkinnedModel::AttachActionSet(boost::shared_ptr<ActionSetType> const & as)
+	void SkinnedModel::AttachActions(boost::shared_ptr<AnimationActionsType> const & actions)
 	{
-		action_set_ = as;
+		actions_ = actions;
 	}
 	
-	uint32_t SkinnedModel::NumActionSet() const
+	uint32_t SkinnedModel::NumActions() const
 	{
-		return action_set_ ? action_set_->size() : 1;
+		return actions_ ? actions_->size() : 1;
 	}
 
 	void SkinnedModel::GetAction(uint32_t index, std::string& name, uint32_t& start_frame, uint32_t& end_frame)
 	{
-		if (action_set_)
+		if (actions_)
 		{
-			BOOST_ASSERT(index < action_set_->size());
+			BOOST_ASSERT(index < actions_->size());
 
-			name = (*action_set_)[index].name;
-			start_frame = (*action_set_)[index].start_frame;
-			end_frame = (*action_set_)[index].end_frame;
+			name = (*actions_)[index].name;
+			start_frame = (*actions_)[index].start_frame;
+			end_frame = (*actions_)[index].end_frame;
 		}
 		else
 		{
-			name = "";
+			name = "root";
 			start_frame = 0;
 			end_frame = num_frames_;
 		}
@@ -739,20 +741,17 @@ namespace KlayGE
 	SkinnedMesh::SkinnedMesh(RenderModelPtr const & model, std::wstring const & name)
 		: StaticMesh(model, name)
 	{
-		SkinnedModelPtr skinned_model = checked_pointer_cast<SkinnedModel>(model);
-		frame_pos_aabbs_.resize(skinned_model->NumFrames());
 	}
 
-	AABBox const & SkinnedMesh::FramePosBound(uint32_t frame) const
+	AABBox SkinnedMesh::FramePosBound(uint32_t frame) const
 	{
-		BOOST_ASSERT(frame < frame_pos_aabbs_.size());
-		return frame_pos_aabbs_[frame];
+		BOOST_ASSERT(frame_pos_aabbs_);
+		return frame_pos_aabbs_->Frame(static_cast<float>(frame));
 	}
-
-	void SkinnedMesh::FramePosBound(uint32_t frame, AABBox const & aabb)
+	
+	void SkinnedMesh::AttachFramePosBounds(boost::shared_ptr<AABBKeyFrames> const & frame_pos_aabbs)
 	{
-		BOOST_ASSERT(frame < frame_pos_aabbs_.size());
-		frame_pos_aabbs_[frame] = aabb;
+		frame_pos_aabbs_ = frame_pos_aabbs;
 	}
 
 
@@ -921,6 +920,25 @@ namespace KlayGE
 				ss->write(reinterpret_cast<char*>(&num_kfs), sizeof(num_kfs));
 			}
 
+			XMLNodePtr action_set_chunk = root->FirstNode("actions_chunk");
+			if (action_set_chunk)
+			{
+				uint32_t num_actions = 0;
+				for (XMLNodePtr action_node = action_set_chunk->FirstNode("action"); action_node; action_node = action_node->NextSibling("action"))
+				{
+					++ num_actions;
+				}
+				num_actions = std::max(num_actions, 1U);
+				NativeToLittleEndian<sizeof(num_actions)>(&num_actions);
+				ss->write(reinterpret_cast<char*>(&num_actions), sizeof(num_actions));
+			}
+			else
+			{
+				uint32_t num_actions = key_frames_chunk ? 1 : 0;
+				NativeToLittleEndian<sizeof(num_actions)>(&num_actions);
+				ss->write(reinterpret_cast<char*>(&num_actions), sizeof(num_actions));
+			}
+
 			if (materials_chunk)
 			{
 				uint32_t mtl_index = 0;
@@ -1001,6 +1019,7 @@ namespace KlayGE
 				}
 			}
 
+			std::vector<AABBox> pos_bbs;
 			if (meshes_chunk)
 			{
 				std::vector<std::vector<vertex_element> > ves;
@@ -1113,7 +1132,7 @@ namespace KlayGE
 							{
 								ve.usage = VEU_Position;
 								ve.usage_index = 0;
-								ve.format = EF_BGR32F;
+								ve.format = EF_SIGNED_ABGR16;
 								vertex_elements.push_back(ve);
 							}
 
@@ -1121,7 +1140,7 @@ namespace KlayGE
 							{
 								ve.usage = VEU_Diffuse;
 								ve.usage_index = 0;
-								ve.format = EF_ABGR32F;
+								ve.format = EF_ABGR8;
 								vertex_elements.push_back(ve);
 							}
 
@@ -1129,7 +1148,7 @@ namespace KlayGE
 							{
 								ve.usage = VEU_Specular;
 								ve.usage_index = 0;
-								ve.format = EF_ABGR32F;
+								ve.format = EF_ABGR8;
 								vertex_elements.push_back(ve);
 							}
 
@@ -1150,24 +1169,7 @@ namespace KlayGE
 							{
 								ve.usage = VEU_TextureCoord;
 								ve.usage_index = static_cast<uint8_t>(usage);
-								switch (max_num_tc_components[usage])
-								{
-								case 1:
-									ve.format = EF_R32F;
-									break;
-
-								case 2:
-									ve.format = EF_GR32F;
-									break;
-
-								case 3:
-									ve.format = EF_BGR32F;
-									break;
-
-								default:
-									ve.format = EF_ABGR32F;
-									break;
-								}
+								ve.format = EF_SIGNED_GR16;
 								vertex_elements.push_back(ve);
 							}
 
@@ -1266,14 +1268,103 @@ namespace KlayGE
 				int const index_elem_size = is_index_16_bit ? 2 : 4;
 
 				std::vector<uint8_t> merged_indices(mesh_start_indices.back() * index_elem_size);
-				std::vector<AABBox> bounding_boxes;
+				std::vector<AABBox> tc_bbs;
 				mesh_index = 0;
 				for (XMLNodePtr mesh_node = meshes_chunk->FirstNode("mesh"); mesh_node; mesh_node = mesh_node->NextSibling("mesh"), ++ mesh_index)
 				{
-					float3 min_bb, max_bb;
+					float3 pos_min_bb, pos_max_bb;
+					float3 tc_min_bb, tc_max_bb;
 						
 					{
 						XMLNodePtr vertices_chunk = mesh_node->FirstNode("vertices_chunk");
+
+						XMLNodePtr pos_bb_node = vertices_chunk->FirstNode("pos_bb");
+						XMLNodePtr tc_bb_node = vertices_chunk->FirstNode("tc_bb");
+						if (pos_bb_node && tc_bb_node)
+						{
+							XMLNodePtr pos_min_node = pos_bb_node->FirstNode("min");
+							XMLNodePtr pos_max_node = pos_bb_node->FirstNode("max");
+							pos_min_bb = float3(pos_min_node->Attrib("x")->ValueFloat(),
+								pos_min_node->Attrib("y")->ValueFloat(), pos_min_node->Attrib("z")->ValueFloat());
+							pos_min_bb = float3(pos_min_node->Attrib("x")->ValueFloat(),
+								pos_min_node->Attrib("y")->ValueFloat(), pos_min_node->Attrib("z")->ValueFloat());
+
+							XMLNodePtr tc_min_node = tc_bb_node->FirstNode("min");
+							XMLNodePtr tc_max_node = tc_bb_node->FirstNode("max");
+							tc_min_bb = float3(tc_min_node->Attrib("x")->ValueFloat(),
+								tc_min_node->Attrib("y")->ValueFloat(), 0.0f);
+							tc_min_bb = float3(tc_max_node->Attrib("x")->ValueFloat(),
+								tc_max_node->Attrib("y")->ValueFloat(), 0.0f);
+						}
+						else
+						{
+							uint32_t index = 0;
+							for (XMLNodePtr vertex_node = vertices_chunk->FirstNode("vertex"); vertex_node; vertex_node = vertex_node->NextSibling("vertex"))
+							{
+								{
+									for (size_t i = 0; i < ves[mesh_index].size(); ++ i)
+									{
+										if (VEU_Position == ves[mesh_index][i].usage)
+										{
+											float3 pos(vertex_node->Attrib("x")->ValueFloat(),
+												vertex_node->Attrib("y")->ValueFloat(), vertex_node->Attrib("z")->ValueFloat());
+											if (0 == index)
+											{
+												pos_min_bb = pos_max_bb = pos;
+											}
+											else
+											{
+												pos_min_bb = MathLib::minimize(pos_min_bb, pos);
+												pos_max_bb = MathLib::maximize(pos_max_bb, pos);
+											}
+											break;
+										}
+									}
+								}
+
+								for (XMLNodePtr tex_coord_node = vertex_node->FirstNode("tex_coord"); tex_coord_node; tex_coord_node = tex_coord_node->NextSibling("tex_coord"))
+								{
+									for (size_t i = 0; i < ves[mesh_index].size(); ++ i)
+									{
+										if ((VEU_TextureCoord == ves[mesh_index][i].usage) && (0 == ves[mesh_index][i].usage_index))
+										{
+											float3 tex_coord(0, 0, 0);
+											XMLAttributePtr attr = tex_coord_node->Attrib("u");
+											if (attr)
+											{
+												tex_coord.x() = attr->ValueFloat();
+											}
+											attr = tex_coord_node->Attrib("v");
+											if (attr)
+											{
+												tex_coord.y() = attr->ValueFloat();
+											}
+
+											if (0 == index)
+											{
+												tc_min_bb = tc_max_bb = tex_coord;
+											}
+											else
+											{
+												tc_min_bb = MathLib::minimize(tc_min_bb, tex_coord);
+												tc_max_bb = MathLib::maximize(tc_max_bb, tex_coord);
+											}
+											break;
+										}
+									}
+								}
+
+								++ index;
+							}
+						}
+
+						pos_bbs.push_back(AABBox(pos_min_bb, pos_max_bb));
+						tc_bbs.push_back(AABBox(tc_min_bb, tc_max_bb));
+
+						float3 const pos_center = pos_bbs.back().Center();
+						float3 const pos_extent = pos_bbs.back().HalfSize();
+						float3 const tc_center = tc_bbs.back().Center();
+						float3 const tc_extent = tc_bbs.back().HalfSize();
 
 						uint32_t index = 0;
 						for (XMLNodePtr vertex_node = vertices_chunk->FirstNode("vertex"); vertex_node; vertex_node = vertex_node->NextSibling("vertex"))
@@ -1285,17 +1376,16 @@ namespace KlayGE
 									{
 										float3 pos(vertex_node->Attrib("x")->ValueFloat(),
 											vertex_node->Attrib("y")->ValueFloat(), vertex_node->Attrib("z")->ValueFloat());
+										pos = (pos - pos_center) / pos_extent * 0.5f + 0.5f;
+										int16_t s_pos[4] = 
+										{
+											static_cast<int16_t>(MathLib::clamp<int32_t>(static_cast<int32_t>(pos.x() * 65535 - 32768), -32768, 32767)),
+											static_cast<int16_t>(MathLib::clamp<int32_t>(static_cast<int32_t>(pos.y() * 65535 - 32768), -32768, 32767)),
+											static_cast<int16_t>(MathLib::clamp<int32_t>(static_cast<int32_t>(pos.z() * 65535 - 32768), -32768, 32767)),
+											32767
+										};
 										uint32_t buf_index = ves_mapping[mesh_index][i];
-										memcpy(&merged_buff[buf_index][(mesh_base_vertices[mesh_index] + index) * merged_ves[buf_index].element_size()], &pos, sizeof(pos));
-										if (0 == index)
-										{
-											min_bb = max_bb = pos;
-										}
-										else
-										{
-											min_bb = MathLib::minimize(min_bb, pos);
-											max_bb = MathLib::maximize(max_bb, pos);
-										}
+										memcpy(&merged_buff[buf_index][(mesh_base_vertices[mesh_index] + index) * merged_ves[buf_index].element_size()], s_pos, sizeof(s_pos));
 										break;
 									}
 								}
@@ -1310,8 +1400,12 @@ namespace KlayGE
 									{
 										float4 diffuse(diffuse_node->Attrib("r")->ValueFloat(), diffuse_node->Attrib("g")->ValueFloat(),
 											diffuse_node->Attrib("b")->ValueFloat(), diffuse_node->Attrib("a")->ValueFloat());
+										uint32_t compact = (MathLib::clamp<uint32_t>(static_cast<uint32_t>((diffuse.x() * 0.5f + 0.5f) * 255), 0, 255) << 0)
+											| (MathLib::clamp<uint32_t>(static_cast<uint32_t>((diffuse.y() * 0.5f + 0.5f) * 255), 0, 255) << 8)
+											| (MathLib::clamp<uint32_t>(static_cast<uint32_t>((diffuse.z() * 0.5f + 0.5f) * 255), 0, 255) << 16)
+											| (MathLib::clamp<uint32_t>(static_cast<uint32_t>((diffuse.w() * 0.5f + 0.5f) * 255), 0, 255) << 24);
 										uint32_t buf_index = ves_mapping[mesh_index][i];
-										memcpy(&merged_buff[buf_index][(mesh_base_vertices[mesh_index] + index) * merged_ves[buf_index].element_size()], &diffuse, sizeof(diffuse));
+										memcpy(&merged_buff[buf_index][(mesh_base_vertices[mesh_index] + index) * merged_ves[buf_index].element_size()], &compact, sizeof(compact));
 										break;
 									}
 								}
@@ -1326,8 +1420,12 @@ namespace KlayGE
 									{
 										float4 specular(specular_node->Attrib("r")->ValueFloat(), specular_node->Attrib("g")->ValueFloat(),
 											specular_node->Attrib("b")->ValueFloat(), specular_node->Attrib("a")->ValueFloat());
+										uint32_t compact = (MathLib::clamp<uint32_t>(static_cast<uint32_t>((specular.x() * 0.5f + 0.5f) * 255), 0, 255) << 0)
+											| (MathLib::clamp<uint32_t>(static_cast<uint32_t>((specular.y() * 0.5f + 0.5f) * 255), 0, 255) << 8)
+											| (MathLib::clamp<uint32_t>(static_cast<uint32_t>((specular.z() * 0.5f + 0.5f) * 255), 0, 255) << 16)
+											| (MathLib::clamp<uint32_t>(static_cast<uint32_t>((specular.w() * 0.5f + 0.5f) * 255), 0, 255) << 24);
 										uint32_t buf_index = ves_mapping[mesh_index][i];
-										memcpy(&merged_buff[buf_index][(mesh_base_vertices[mesh_index] + index) * merged_ves[buf_index].element_size()], &specular, sizeof(specular));
+										memcpy(&merged_buff[buf_index][(mesh_base_vertices[mesh_index] + index) * merged_ves[buf_index].element_size()], &compact, sizeof(compact));
 										break;
 									}
 								}
@@ -1399,14 +1497,16 @@ namespace KlayGE
 										{
 											tex_coord.y() = attr->ValueFloat();
 										}
-										attr = tex_coord_node->Attrib("w");
-										if (attr)
+
+										tex_coord = (tex_coord - tc_center) / tc_extent * 0.5f + 0.5f;
+										int16_t s_tc[2] = 
 										{
-											tex_coord.z() = attr->ValueFloat();
-										}
+											static_cast<int16_t>(MathLib::clamp<int32_t>(static_cast<int32_t>(tex_coord.x() * 65535 - 32768), -32768, 32767)),
+											static_cast<int16_t>(MathLib::clamp<int32_t>(static_cast<int32_t>(tex_coord.y() * 65535 - 32768), -32768, 32767)),
+										};
 
 										uint32_t buf_index = ves_mapping[mesh_index][i];
-										memcpy(&merged_buff[buf_index][(mesh_base_vertices[mesh_index] + index) * merged_ves[buf_index].element_size()], &tex_coord, merged_ves[buf_index].element_size());
+										memcpy(&merged_buff[buf_index][(mesh_base_vertices[mesh_index] + index) * merged_ves[buf_index].element_size()], s_tc, merged_ves[buf_index].element_size());
 										break;
 									}
 								}
@@ -1520,8 +1620,6 @@ namespace KlayGE
 						}
 					}
 
-					bounding_boxes.push_back(AABBox(min_bb, max_bb));
-
 					{
 						XMLNodePtr triangles_chunk = mesh_node->FirstNode("triangles_chunk");
 
@@ -1585,16 +1683,27 @@ namespace KlayGE
 					NativeToLittleEndian<sizeof(mtl_id)>(&mtl_id);
 					ss->write(reinterpret_cast<char*>(&mtl_id), sizeof(mtl_id));
 
-					float3 min_bb = bounding_boxes[mesh_index].Min();
+					float3 min_bb = pos_bbs[mesh_index].Min();
 					NativeToLittleEndian<sizeof(min_bb[0])>(&min_bb[0]);
 					NativeToLittleEndian<sizeof(min_bb[1])>(&min_bb[1]);
 					NativeToLittleEndian<sizeof(min_bb[2])>(&min_bb[2]);
 					ss->write(reinterpret_cast<char*>(&min_bb), sizeof(min_bb));
-					float3 max_bb = bounding_boxes[mesh_index].Max();
+					float3 max_bb = pos_bbs[mesh_index].Max();
 					NativeToLittleEndian<sizeof(max_bb[0])>(&max_bb[0]);
 					NativeToLittleEndian<sizeof(max_bb[1])>(&max_bb[1]);
 					NativeToLittleEndian<sizeof(max_bb[2])>(&max_bb[2]);
 					ss->write(reinterpret_cast<char*>(&max_bb), sizeof(max_bb));
+
+					min_bb = tc_bbs[mesh_index].Min();
+					NativeToLittleEndian<sizeof(min_bb[0])>(&min_bb[0]);
+					NativeToLittleEndian<sizeof(min_bb[1])>(&min_bb[1]);
+					ss->write(reinterpret_cast<char*>(&min_bb[0]), sizeof(min_bb[0]));
+					ss->write(reinterpret_cast<char*>(&min_bb[1]), sizeof(min_bb[1]));
+					max_bb = tc_bbs[mesh_index].Max();
+					NativeToLittleEndian<sizeof(max_bb[0])>(&max_bb[0]);
+					NativeToLittleEndian<sizeof(max_bb[1])>(&max_bb[1]);
+					ss->write(reinterpret_cast<char*>(&max_bb[0]), sizeof(max_bb[0]));
+					ss->write(reinterpret_cast<char*>(&max_bb[1]), sizeof(max_bb[1]));
 
 					NativeToLittleEndian<sizeof(mesh_num_vertices[mesh_index])>(&mesh_num_vertices[mesh_index]);
 					ss->write(reinterpret_cast<char*>(&mesh_num_vertices[mesh_index]), sizeof(mesh_num_vertices[mesh_index]));
@@ -1666,18 +1775,15 @@ namespace KlayGE
 				int32_t start_frame = key_frames_chunk->Attrib("start_frame")->ValueInt();
 				int32_t end_frame = key_frames_chunk->Attrib("end_frame")->ValueInt();
 				int32_t frame_rate = key_frames_chunk->Attrib("frame_rate")->ValueInt();
-				NativeToLittleEndian<sizeof(start_frame)>(&start_frame);
-				ss->write(reinterpret_cast<char*>(&start_frame), sizeof(start_frame));
-				NativeToLittleEndian<sizeof(end_frame)>(&end_frame);
-				ss->write(reinterpret_cast<char*>(&end_frame), sizeof(end_frame));
+				uint32_t num_frames = end_frame - start_frame;
+				NativeToLittleEndian<sizeof(num_frames)>(&num_frames);
+				ss->write(reinterpret_cast<char*>(&num_frames), sizeof(num_frames));
 				NativeToLittleEndian<sizeof(frame_rate)>(&frame_rate);
 				ss->write(reinterpret_cast<char*>(&frame_rate), sizeof(frame_rate));
 
 				KeyFrames kfs;
 				for (XMLNodePtr kf_node = key_frames_chunk->FirstNode("key_frame"); kf_node; kf_node = kf_node->NextSibling("key_frame"))
 				{
-					WriteShortString(*ss, kf_node->Attrib("joint")->ValueString());
-
 					kfs.frame_id.clear();
 					kfs.bind_real.clear();
 					kfs.bind_dual.clear();
@@ -1799,6 +1905,158 @@ namespace KlayGE
 						ss->write(reinterpret_cast<char*>(&kfs.bind_dual[i]), sizeof(kfs.bind_dual[i]));
 					}
 				}
+
+				AABBKeyFrames bb_kfs;
+				XMLNodePtr bb_kfs_chunk = root->FirstNode("bb_key_frames_chunk");
+				if (bb_kfs_chunk)
+				{
+					for (XMLNodePtr bb_kf_node = bb_kfs_chunk->FirstNode("bb_key_frame"); bb_kf_node; bb_kf_node = bb_kf_node->NextSibling("bb_key_frame"))
+					{
+						bb_kfs.frame_id.clear();
+						bb_kfs.bb.clear();
+
+						int32_t frame_id = -1;
+						for (XMLNodePtr key_node = bb_kf_node->FirstNode("key"); bb_kf_node; bb_kf_node = key_node->NextSibling("key"))
+						{
+							XMLAttributePtr id_attr = key_node->Attrib("id");
+							if (id_attr)
+							{
+								frame_id = id_attr->ValueInt();
+							}
+							else
+							{
+								++ frame_id;
+							}
+							bb_kfs.frame_id.push_back(frame_id);
+
+							XMLNodePtr bb_min_node = key_node->FirstNode("bb_min");
+							float3 bb_min = float3(bb_min_node->Attrib("x")->ValueFloat(), bb_min_node->Attrib("y")->ValueFloat(),
+									bb_min_node->Attrib("z")->ValueFloat());
+							XMLNodePtr bb_max_node = key_node->FirstNode("bb_max");
+							float3 bb_max = float3(bb_max_node->Attrib("x")->ValueFloat(), bb_max_node->Attrib("y")->ValueFloat(),
+									bb_max_node->Attrib("z")->ValueFloat());
+
+							bb_kfs.bb.push_back(AABBox(bb_min, bb_max));
+						}
+
+						// compress the bounding box key frame data
+						uint32_t base = 0;
+						while (base < bb_kfs.frame_id.size() - 2)
+						{
+							uint32_t frame0 = kfs.frame_id[base + 0];
+							uint32_t frame1 = kfs.frame_id[base + 1];
+							uint32_t frame2 = kfs.frame_id[base + 2];
+							float factor = static_cast<float>(frame1 - frame0) / (frame2 - frame0);
+							AABBox interpolate(MathLib::lerp(bb_kfs.bb[base + 0].Min(), bb_kfs.bb[base + 2].Min(), factor),
+								MathLib::lerp(bb_kfs.bb[base + 0].Max(), bb_kfs.bb[base + 2].Max(), factor));
+
+							float3 diff_min = bb_kfs.bb[base + 1].Min() - interpolate.Min();
+							float3 diff_max = bb_kfs.bb[base + 1].Max() - interpolate.Max();
+
+							if ((MathLib::abs(diff_min.x()) < 1e-5f) && (MathLib::abs(diff_min.y()) < 1e-5f)
+								&& (MathLib::abs(diff_min.z()) < 1e-5f)
+								&& (MathLib::abs(diff_max.x()) < 1e-5f) && (MathLib::abs(diff_max.y()) < 1e-5f)
+								&& (MathLib::abs(diff_max.z()) < 1e-5f))
+							{
+								bb_kfs.frame_id.erase(bb_kfs.frame_id.begin() + base + 1);
+								bb_kfs.bb.erase(bb_kfs.bb.begin() + base + 1);
+							}
+							else
+							{
+								++ base;
+							}
+						}
+
+						uint32_t num_bb_kf = static_cast<uint32_t>(bb_kfs.frame_id.size());
+						NativeToLittleEndian<sizeof(num_bb_kf)>(&num_bb_kf);
+						ss->write(reinterpret_cast<char*>(&num_bb_kf), sizeof(num_bb_kf));
+						for (uint32_t i = 0; i < num_bb_kf; ++ i)
+						{
+							NativeToLittleEndian<sizeof(bb_kfs.frame_id[i])>(&bb_kfs.frame_id[i]);
+							ss->write(reinterpret_cast<char*>(&bb_kfs.frame_id[i]), sizeof(bb_kfs.frame_id[i]));
+							float3 bb_min = bb_kfs.bb[i].Min();
+							float3 bb_max = bb_kfs.bb[i].Max();
+							NativeToLittleEndian<sizeof(bb_min[0])>(&bb_min[0]);
+							NativeToLittleEndian<sizeof(bb_min[1])>(&bb_min[1]);
+							NativeToLittleEndian<sizeof(bb_min[2])>(&bb_min[2]);
+							ss->write(reinterpret_cast<char*>(&bb_min), sizeof(bb_min));
+							NativeToLittleEndian<sizeof(bb_max[0])>(&bb_max[0]);
+							NativeToLittleEndian<sizeof(bb_max[1])>(&bb_max[1]);
+							NativeToLittleEndian<sizeof(bb_max[2])>(&bb_max[2]);
+							ss->write(reinterpret_cast<char*>(&bb_max), sizeof(bb_max));
+						}
+					}
+				}
+				else
+				{
+					bb_kfs.frame_id.resize(2);
+					bb_kfs.bb.resize(2);
+
+					bb_kfs.frame_id[0] = 0;
+					bb_kfs.frame_id[1] = num_frames - 1;
+
+					uint32_t mesh_index = 0;
+					for (XMLNodePtr mesh_node = meshes_chunk->FirstNode("mesh"); mesh_node; mesh_node = mesh_node->NextSibling("mesh"), ++ mesh_index)
+					{
+						bb_kfs.bb[0] = pos_bbs[mesh_index];
+						bb_kfs.bb[1] = pos_bbs[mesh_index];
+
+						uint32_t num_bb_kf = static_cast<uint32_t>(bb_kfs.frame_id.size());
+						NativeToLittleEndian<sizeof(num_bb_kf)>(&num_bb_kf);
+						ss->write(reinterpret_cast<char*>(&num_bb_kf), sizeof(num_bb_kf));
+						for (uint32_t i = 0; i < num_bb_kf; ++ i)
+						{
+							NativeToLittleEndian<sizeof(bb_kfs.frame_id[i])>(&bb_kfs.frame_id[i]);
+							ss->write(reinterpret_cast<char*>(&bb_kfs.frame_id[i]), sizeof(bb_kfs.frame_id[i]));
+							float3 bb_min = bb_kfs.bb[i].Min();
+							float3 bb_max = bb_kfs.bb[i].Max();
+							NativeToLittleEndian<sizeof(bb_min[0])>(&bb_min[0]);
+							NativeToLittleEndian<sizeof(bb_min[1])>(&bb_min[1]);
+							NativeToLittleEndian<sizeof(bb_min[2])>(&bb_min[2]);
+							ss->write(reinterpret_cast<char*>(&bb_min), sizeof(bb_min));
+							NativeToLittleEndian<sizeof(bb_max[0])>(&bb_max[0]);
+							NativeToLittleEndian<sizeof(bb_max[1])>(&bb_max[1]);
+							NativeToLittleEndian<sizeof(bb_max[2])>(&bb_max[2]);
+							ss->write(reinterpret_cast<char*>(&bb_max), sizeof(bb_max));
+						}
+					}
+				}
+
+				XMLNodePtr action_node;
+				if (action_set_chunk)
+				{
+					action_node = action_set_chunk->FirstNode("action");
+				}
+				if (action_node)
+				{
+					for (; action_node; action_node = action_node->NextSibling("action"))
+					{
+						WriteShortString(*ss, action_node->Attrib("name")->ValueString());
+
+						uint32_t sf = action_node->Attrib("start_frame")->ValueUInt();
+						uint32_t ef = action_node->Attrib("end_frame")->ValueUInt();
+
+						NativeToLittleEndian<sizeof(sf)>(&sf);
+						ss->write(reinterpret_cast<char*>(&sf), sizeof(sf));
+
+						NativeToLittleEndian<sizeof(ef)>(&ef);
+						ss->write(reinterpret_cast<char*>(&ef), sizeof(ef));
+					}
+				}
+				else
+				{
+					WriteShortString(*ss, "root");
+
+					uint32_t sf = 0;
+					LittleEndianToNative<sizeof(num_frames)>(&num_frames);
+					uint32_t ef = num_frames;
+
+					NativeToLittleEndian<sizeof(sf)>(&sf);
+					ss->write(reinterpret_cast<char*>(&sf), sizeof(sf));
+
+					NativeToLittleEndian<sizeof(ef)>(&ef);
+					ss->write(reinterpret_cast<char*>(&ef), sizeof(ef));
+				}
 			}
 
 			std::ofstream ofs((path_name + jit_ext_name).c_str(), std::ios_base::binary);
@@ -1831,11 +2089,13 @@ namespace KlayGE
 	void LoadModel(std::string const & meshml_name, std::vector<RenderMaterialPtr>& mtls,
 		std::vector<vertex_element>& merged_ves, char& all_is_index_16_bit,
 		std::vector<std::vector<uint8_t> >& merged_buff, std::vector<uint8_t>& merged_indices,
-		std::vector<std::string>& mesh_names, std::vector<int32_t>& mtl_ids, std::vector<AABBox>& bbs,
+		std::vector<std::string>& mesh_names, std::vector<int32_t>& mtl_ids,
+		std::vector<AABBox>& pos_bbs, std::vector<AABBox>& tc_bbs,
 		std::vector<uint32_t>& mesh_num_vertices, std::vector<uint32_t>& mesh_base_vertices,
 		std::vector<uint32_t>& mesh_num_triangles, std::vector<uint32_t>& mesh_base_triangles,
-		std::vector<Joint>& joints, boost::shared_ptr<KeyFramesType>& kfs,
-		uint32_t& num_frames, uint32_t& frame_rate)
+		std::vector<Joint>& joints, boost::shared_ptr<AnimationActionsType>& actions,
+		boost::shared_ptr<KeyFramesType>& kfs, uint32_t& num_frames, uint32_t& frame_rate,
+		std::vector<boost::shared_ptr<AABBKeyFrames> >& frame_pos_bbs)
 	{
 		ResIdentifierPtr lzma_file;
 		if (meshml_name.rfind(jit_ext_name) + jit_ext_name.size() == meshml_name.size())
@@ -1894,6 +2154,9 @@ namespace KlayGE
 		uint32_t num_kfs;
 		decoded->read(&num_kfs, sizeof(num_kfs));
 		LittleEndianToNative<sizeof(num_kfs)>(&num_kfs);
+		uint32_t num_actions;
+		decoded->read(&num_actions, sizeof(num_actions));
+		LittleEndianToNative<sizeof(num_actions)>(&num_actions);
 
 		mtls.resize(num_mtls);
 		for (uint32_t mtl_index = 0; mtl_index < num_mtls; ++ mtl_index)
@@ -2029,7 +2292,8 @@ namespace KlayGE
 
 		mesh_names.resize(num_meshes);
 		mtl_ids.resize(num_meshes);
-		bbs.resize(num_meshes);
+		pos_bbs.resize(num_meshes);
+		tc_bbs.resize(num_meshes);
 		mesh_num_vertices.resize(num_meshes);
 		mesh_base_vertices.resize(num_meshes);
 		mesh_num_triangles.resize(num_meshes);
@@ -2050,7 +2314,19 @@ namespace KlayGE
 			LittleEndianToNative<sizeof(max_bb.x())>(&max_bb.x());
 			LittleEndianToNative<sizeof(max_bb.y())>(&max_bb.y());
 			LittleEndianToNative<sizeof(max_bb.z())>(&max_bb.z());
-			bbs[mesh_index] = AABBox(min_bb, max_bb);
+			pos_bbs[mesh_index] = AABBox(min_bb, max_bb);
+
+			decoded->read(&min_bb[0], sizeof(min_bb[0]));
+			decoded->read(&min_bb[1], sizeof(min_bb[1]));
+			LittleEndianToNative<sizeof(min_bb.x())>(&min_bb.x());
+			LittleEndianToNative<sizeof(min_bb.y())>(&min_bb.y());
+			min_bb.z() = 0;
+			decoded->read(&max_bb[0], sizeof(max_bb[0]));
+			decoded->read(&max_bb[1], sizeof(max_bb[1]));
+			LittleEndianToNative<sizeof(max_bb.x())>(&max_bb.x());
+			LittleEndianToNative<sizeof(max_bb.y())>(&max_bb.y());
+			max_bb.z() = 0;
+			tc_bbs[mesh_index] = AABBox(min_bb, max_bb);
 
 			decoded->read(&mesh_num_vertices[mesh_index], sizeof(mesh_num_vertices[mesh_index]));
 			LittleEndianToNative<sizeof(mesh_num_vertices[mesh_index])>(&mesh_num_vertices[mesh_index]);
@@ -2120,9 +2396,6 @@ namespace KlayGE
 
 		if (num_kfs > 0)
 		{
-			int32_t start_frame;
-			decoded->read(&start_frame, sizeof(start_frame));
-			LittleEndianToNative<sizeof(start_frame)>(&start_frame);
 			decoded->read(&num_frames, sizeof(num_frames));
 			LittleEndianToNative<sizeof(num_frames)>(&num_frames);
 			decoded->read(&frame_rate, sizeof(frame_rate));
@@ -2131,24 +2404,7 @@ namespace KlayGE
 			kfs = MakeSharedPtr<KeyFramesType>(joints.size());
 			for (uint32_t kf_index = 0; kf_index < num_kfs; ++ kf_index)
 			{
-				std::string name;
-				ReadShortString(decoded, name);
-
-				uint32_t joint_index;
-				if ((kf_index < joints.size()) && (name == joints[kf_index].name))
-				{
-					joint_index = kf_index;
-				}
-				else
-				{
-					for (joint_index = 0; joint_index < num_joints; ++ joint_index)
-					{
-						if (name == joints[joint_index].name)
-						{
-							break;
-						}
-					}
-				}
+				uint32_t joint_index = kf_index;
 
 				uint32_t num_kf;
 				decoded->read(&num_kf, sizeof(num_kf));
@@ -2187,6 +2443,50 @@ namespace KlayGE
 					(*kfs)[joint_index] = kf;
 				}
 			}
+
+			frame_pos_bbs.resize(num_meshes);
+			for (uint32_t mesh_index = 0; mesh_index < num_meshes; ++ mesh_index)
+			{
+				uint32_t num_bb_kf;
+				decoded->read(&num_bb_kf, sizeof(num_bb_kf));
+				LittleEndianToNative<sizeof(num_bb_kf)>(&num_bb_kf);
+
+				frame_pos_bbs[mesh_index] = MakeSharedPtr<AABBKeyFrames>();
+				frame_pos_bbs[mesh_index]->frame_id.resize(num_bb_kf);
+				frame_pos_bbs[mesh_index]->bb.resize(num_bb_kf);
+
+				for (uint32_t bb_k_index = 0; bb_k_index < num_bb_kf; ++ bb_k_index)
+				{
+					decoded->read(&frame_pos_bbs[mesh_index]->frame_id[bb_k_index], sizeof(frame_pos_bbs[mesh_index]->frame_id[bb_k_index]));
+					LittleEndianToNative<sizeof(frame_pos_bbs[mesh_index]->frame_id[bb_k_index])>(&frame_pos_bbs[mesh_index]->frame_id[bb_k_index]);
+
+					float3 bb_min, bb_max;
+					decoded->read(&bb_min, sizeof(bb_min));
+					LittleEndianToNative<sizeof(bb_min[0])>(&bb_min[0]);
+					LittleEndianToNative<sizeof(bb_min[1])>(&bb_min[1]);
+					LittleEndianToNative<sizeof(bb_min[2])>(&bb_min[2]);
+					decoded->read(&bb_max, sizeof(bb_max));
+					LittleEndianToNative<sizeof(bb_max[0])>(&bb_max[0]);
+					LittleEndianToNative<sizeof(bb_max[1])>(&bb_max[1]);
+					LittleEndianToNative<sizeof(bb_max[2])>(&bb_max[2]);
+					frame_pos_bbs[mesh_index]->bb[bb_k_index] = AABBox(bb_min, bb_max);
+				}
+			}
+			
+			if (num_actions > 0)
+			{
+				actions = MakeSharedPtr<AnimationActionsType>(num_actions);
+				for (uint32_t action_index = 0; action_index < num_actions; ++ action_index)
+				{
+					AnimationAction action;
+					ReadShortString(decoded, action.name);
+					decoded->read(&action.start_frame, sizeof(action.start_frame));
+					LittleEndianToNative<sizeof(action.start_frame)>(&action.start_frame);
+					decoded->read(&action.end_frame, sizeof(action.end_frame));
+					LittleEndianToNative<sizeof(action.end_frame)>(&action.end_frame);
+					actions->push_back(action);
+				}
+			}
 		}
 	}
 
@@ -2213,17 +2513,20 @@ namespace KlayGE
 	}
 
 	void SaveModel(std::string const & meshml_name, std::vector<RenderMaterialPtr> const & mtls,
-		std::vector<std::string> const & mesh_names, std::vector<int32_t> const & mtl_ids, std::vector<std::vector<vertex_element> > const & ves,
+		std::vector<std::string> const & mesh_names, std::vector<int32_t> const & mtl_ids,
+		std::vector<AABBox> const & /*pos_bbs*/, std::vector<AABBox> const & /*tc_bbs*/,
+		std::vector<std::vector<vertex_element> > const & ves,
 		std::vector<std::vector<std::vector<uint8_t> > > const & buffs,
 		std::vector<char> const & is_index_16_bit, std::vector<std::vector<uint8_t> > const & indices,
-		std::vector<Joint> const & joints, boost::shared_ptr<KeyFramesType> const & kfs,
-		uint32_t num_frames, uint32_t frame_rate)
+		std::vector<Joint> const & joints, boost::shared_ptr<AnimationActionsType> const & actions,
+		boost::shared_ptr<KeyFramesType> const & kfs, uint32_t num_frames, uint32_t frame_rate,
+		std::vector<boost::shared_ptr<AABBKeyFrames> > const & /*frame_pos_bbs*/)
 	{
 		XMLDocument doc;
 
 		XMLNodePtr root = doc.AllocNode(XNT_Element, "model");
 		doc.RootNode(root);
-		root->AppendAttrib(doc.AllocAttribUInt("version", 5));
+		root->AppendAttrib(doc.AllocAttribUInt("version", 6));
 
 		if (kfs)
 		{
@@ -2560,6 +2863,22 @@ namespace KlayGE
 			}
 		}
 
+		if (actions)
+		{
+			XMLNodePtr actions_chunk = doc.AllocNode(XNT_Element, "actions_chunk");
+			root->AppendNode(actions_chunk);
+
+			for (AnimationActionsType::const_iterator iter = actions->begin(); iter != actions->end(); ++ iter)
+			{
+				XMLNodePtr action_node = doc.AllocNode(XNT_Element, "action");
+				action_node->AppendNode(action_node);
+
+				action_node->AppendAttrib(doc.AllocAttribString("name", iter->name));
+				action_node->AppendAttrib(doc.AllocAttribUInt("start_frame", iter->start_frame));
+				action_node->AppendAttrib(doc.AllocAttribUInt("end_frame", iter->end_frame));
+			}
+		}
+
 		if (kfs)
 		{
 			if (!kfs->empty())
@@ -2569,12 +2888,10 @@ namespace KlayGE
 				XMLNodePtr key_frames_chunk = doc.AllocNode(XNT_Element, "key_frames_chunk");
 				root->AppendNode(key_frames_chunk);
 
-				key_frames_chunk->AppendAttrib(doc.AllocAttribUInt("start_frame", 0));
-				key_frames_chunk->AppendAttrib(doc.AllocAttribUInt("end_frame", num_frames));
+				key_frames_chunk->AppendAttrib(doc.AllocAttribUInt("num_frame", num_frames));
 				key_frames_chunk->AppendAttrib(doc.AllocAttribUInt("frame_rate", frame_rate));
 
 				KeyFramesType::const_iterator iter = kfs->begin();
-
 				for (uint32_t i = 0; i < num_key_frames; ++ i, ++ iter)
 				{
 					XMLNodePtr key_frame_node = doc.AllocNode(XNT_Element, "key_frame");
@@ -2627,6 +2944,8 @@ namespace KlayGE
 
 		std::vector<std::string> mesh_names(model->NumMeshes());
 		std::vector<int32_t> mtl_ids(mesh_names.size());
+		std::vector<AABBox> pos_bbs(mesh_names.size());
+		std::vector<AABBox> tc_bbs(mesh_names.size());
 		std::vector<std::vector<vertex_element> > ves(mesh_names.size());
 		std::vector<std::vector<std::vector<uint8_t> > > buffs(mesh_names.size());
 		std::vector<char> is_index_16_bit(mesh_names.size());
@@ -2639,6 +2958,9 @@ namespace KlayGE
 
 				Convert(mesh_names[mesh_index], mesh.Name());
 				mtl_ids[mesh_index] = mesh.MaterialID();
+
+				pos_bbs[mesh_index] = mesh.PosBound();
+				tc_bbs[mesh_index] = mesh.TexcoordBound();
 
 				RenderLayoutPtr const & rl = mesh.GetRenderLayout();
 				ves[mesh_index].resize(rl->NumVertexStreams());
@@ -2685,26 +3007,38 @@ namespace KlayGE
 		}
 
 		std::vector<Joint> joints;
+		boost::shared_ptr<AnimationActionsType> actions;
 		boost::shared_ptr<KeyFramesType> kfs;
 		uint32_t num_frame = 0;
 		uint32_t frame_rate = 0;
+		std::vector<boost::shared_ptr<AABBKeyFrames> > frame_pos_bbs;
 		if (model->IsSkinned())
 		{
 			SkinnedModelPtr skinned = checked_pointer_cast<SkinnedModel>(model);
+
 			uint32_t num_joints = skinned->NumJoints();
 			joints.resize(num_joints);
 			for (uint32_t i = 0; i < num_joints; ++ i)
 			{
-				joints[i] = checked_pointer_cast<SkinnedModel>(model)->GetJoint(i);
+				joints[i] = skinned->GetJoint(i);
 			}
+
+			actions = skinned->GetActions();
 
 			num_frame = skinned->NumFrames();
 			frame_rate = skinned->FrameRate();
 
 			kfs = skinned->GetKeyFrames();
+
+			frame_pos_bbs.resize(model->NumMeshes());
+			for (size_t i = 0; i < frame_pos_bbs.size(); ++ i)
+			{
+				frame_pos_bbs[i] = checked_pointer_cast<SkinnedMesh>(skinned->Mesh(i))->GetFramePosBounds();
+			}
 		}
 
-		SaveModel(meshml_name, mtls, mesh_names, mtl_ids, ves, buffs, is_index_16_bit, indices, joints, kfs, num_frame, frame_rate);
+		SaveModel(meshml_name, mtls, mesh_names, mtl_ids, pos_bbs, tc_bbs, ves, buffs, is_index_16_bit, indices,
+			joints, actions, kfs, num_frame, frame_rate, frame_pos_bbs);
 	}
 
 
@@ -2729,6 +3063,10 @@ namespace KlayGE
 		{
 			mvp_param_ = technique_->Effect().ParameterByName("mvp");
 			model_param_ = technique_->Effect().ParameterByName("model");
+			pos_center_param_ = technique_->Effect().ParameterByName("pos_center");
+			pos_extent_param_ = technique_->Effect().ParameterByName("pos_extent");
+			tc_center_param_ = technique_->Effect().ParameterByName("tc_center");
+			tc_extent_param_ = technique_->Effect().ParameterByName("tc_extent");
 
 			light_color_param_ = technique_->Effect().ParameterByName("light_color");
 			light_falloff_param_ = technique_->Effect().ParameterByName("light_falloff");
@@ -2778,6 +3116,14 @@ namespace KlayGE
 		float4x4 mv = model_mat_ * view;
 		*mvp_param_ = mv * proj;
 		*model_param_ = model_mat_;
+
+		AABBox const & pos_bb = this->PosBound();
+		*pos_center_param_ = pos_bb.Center();
+		*pos_extent_param_ = pos_bb.HalfSize();
+
+		AABBox const & tc_bb = this->TexcoordBound();
+		*tc_center_param_ = float2(tc_bb.Center().x(), tc_bb.Center().y());
+		*tc_extent_param_ = float2(tc_bb.HalfSize().x(), tc_bb.HalfSize().y());
 	}
 
 	void RenderableLightSourceProxy::AttachLightSrc(LightSourcePtr const & light)

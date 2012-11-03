@@ -208,6 +208,9 @@ namespace
 			*(technique_->Effect().ParameterByName("mvp")) = model * camera.ViewProjMatrix();
 			*(technique_->Effect().ParameterByName("model")) = model;
 
+			*(technique_->Effect().ParameterByName("pos_center")) = float3(0, 0, 0);
+			*(technique_->Effect().ParameterByName("pos_extent")) = float3(1, 1, 1);
+
 			if ((Depth_WODT_Pass == pass_) || (Position_Pass == pass_))
 			{
 			}
@@ -320,6 +323,10 @@ namespace
 
 			*(technique_->Effect().ParameterByName("mvp")) = model_mat_ * camera.ViewProjMatrix();
 			*(technique_->Effect().ParameterByName("model")) = model_mat_;
+			
+			AABBox const & pos_bb = this->PosBound();
+			*(technique_->Effect().ParameterByName("pos_center")) = pos_bb.Center();
+			*(technique_->Effect().ParameterByName("pos_extent")) = pos_bb.HalfSize();
 
 			switch (pass_)
 			{

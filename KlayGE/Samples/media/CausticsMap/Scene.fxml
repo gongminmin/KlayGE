@@ -7,6 +7,8 @@
 	
 	<parameter type="float4x4" name="model"/>
 	<parameter type="float4x4" name="mvp"/>
+	<parameter type="float3" name="pos_center"/>
+	<parameter type="float3" name="pos_extent"/>
 
 	<shader>
 		<![CDATA[
@@ -14,6 +16,8 @@ void DepthTexWODTVS(float4 pos : POSITION,
 	out float oDepth : TEXCOORD0,
 	out float4 oPos : SV_Position)
 {
+	pos = float4(pos.xyz * pos_extent + pos_center, 1);
+	
     oPos = mul(pos, mvp);
 	oDepth = oPos.w;
 }  
@@ -26,6 +30,8 @@ float4 DepthTexWODTPS(float depth : TEXCOORD0) : SV_Target
 void PosTexVS(float4 pos : POSITION,
 	out float4 oPos : SV_Position)
 {
+	pos = float4(pos.xyz * pos_extent + pos_center, 1);
+
     oPos = mul(pos, mvp);
 }  
 
@@ -64,6 +70,8 @@ void PosNormTexVS(float4 pos : POSITION,
 	out float3 oNormal : TEXCOORD0,
 	out float4 oPos : SV_Position)
 {
+	pos = float4(pos.xyz * pos_extent + pos_center, 1);
+
 	oPos = mul(pos, mvp);
 	oNormal = mul(transform_quat(float3(0, 0, 1), tangent_quat * 2 - 1), (float3x3)model);
 }
@@ -179,6 +187,8 @@ void DistanceMappingVS(float4 pos		: POSITION,
 					out float4 oLightProjPos : TEXCOORD4,
 					out float4 oPos		: SV_Position)
 {
+	pos = float4(pos.xyz * pos_extent + pos_center, 1);
+	
 	oPos = mul(pos, mvp);
 
 	tangent_quat = tangent_quat * 2 - 1;
@@ -363,6 +373,8 @@ void RefractEffectVS(float4 position : POSITION, float4 tangent_quat : TANGENT,
     out float3 wViewVec : TEXCOORD2,
     out float4 hPos : SV_Position)
 {
+	position = float4(position.xyz * pos_extent + pos_center, 1);
+	
     hPos = mul(float4(position.xyz, 1), mvp);
     wPosition = mul(float4(position.xyz, 1), model).xyz;
     wNormal = mul(transform_quat(float3(0, 0, 1), tangent_quat * 2 - 1), (float3x3)model);

@@ -215,6 +215,10 @@ namespace KlayGE
 
 		RenderEffectParameterPtr mvp_param_;
 		RenderEffectParameterPtr model_view_param_;
+		RenderEffectParameterPtr pos_center_param_;
+		RenderEffectParameterPtr pos_extent_param_;
+		RenderEffectParameterPtr tc_center_param_;
+		RenderEffectParameterPtr tc_extent_param_;
 		RenderEffectParameterPtr shininess_param_;
 		RenderEffectParameterPtr specular_tex_param_;
 		RenderEffectParameterPtr normal_map_enabled_param_;

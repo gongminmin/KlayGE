@@ -9,6 +9,9 @@
 	<parameter type="float3" name="light_pos"/>
 
 	<cbuffer name="per_frame">
+		<parameter type="float3" name="pos_center"/>
+		<parameter type="float3" name="pos_extent"/>
+		
 		<parameter type="float4x4" name="mvp" semantic="WORLDVIEWPROJECTION"/>
 		<parameter type="float2" name="near_q"/>
 	</cbuffer>
@@ -29,6 +32,8 @@ void DepthPeelingVS(float4 pos				: POSITION,
 					out float4 oPosSS		: TEXCOORD0,
 					out float4 oPos			: SV_Position)
 {
+	pos = float4(pos.xyz * pos_extent + pos_center, 1);
+
 	oPos = mul(pos, mvp);
 	oClr = float4(max(point_lighting(light_pos, pos.xyz, transform_quat(float3(0, 0, 1), tangent_quat * 2 - 1)), 0.0f) * float3(1, 1, 0), 0.3f);
 	oPosSS = oPos;

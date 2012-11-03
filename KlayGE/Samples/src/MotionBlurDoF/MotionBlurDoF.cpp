@@ -77,6 +77,9 @@ namespace
 
 		void BuildMeshInfo()
 		{
+			AABBox const & bb = this->PosBound();
+			*(technique_->Effect().ParameterByName("pos_center")) = bb.Center();
+			*(technique_->Effect().ParameterByName("pos_extent")) = bb.HalfSize();
 		}
 
 		void OnRenderBegin()
@@ -131,6 +134,9 @@ namespace
 
 		void BuildMeshInfo()
 		{
+			AABBox const & bb = this->PosBound();
+			*(technique_->Effect().ParameterByName("pos_center")) = bb.Center();
+			*(technique_->Effect().ParameterByName("pos_extent")) = bb.HalfSize();
 		}
 
 		void OnRenderBegin()

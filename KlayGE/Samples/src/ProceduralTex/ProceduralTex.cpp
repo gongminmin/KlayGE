@@ -50,11 +50,13 @@ namespace
 
 		void BuildMeshInfo()
 		{
+			AABBox const & pos_bb = this->PosBound();
+			*(technique_->Effect().ParameterByName("pos_center")) = pos_bb.Center();
+			*(technique_->Effect().ParameterByName("pos_extent")) = pos_bb.HalfSize();
 		}
 
 		void AppTime(float app_time)
 		{
-			
 			*(technique_->Effect().ParameterByName("t")) = app_time / 2.0f;
 		}
 

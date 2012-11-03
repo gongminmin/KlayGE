@@ -65,6 +65,14 @@ namespace KlayGE
 			*mvp_param_ = mv * proj;
 			*model_view_param_ = mv;
 
+			AABBox const & pos_bb = this->PosBound();
+			*pos_center_param_ = pos_bb.Center();
+			*pos_extent_param_ = pos_bb.HalfSize();
+
+			AABBox const & tc_bb = this->TexcoordBound();
+			*tc_center_param_ = float2(tc_bb.Center().x(), tc_bb.Center().y());
+			*tc_extent_param_ = float2(tc_bb.HalfSize().x(), tc_bb.HalfSize().y());
+
 			switch (type_)
 			{
 			case PT_OpaqueDepth:
@@ -274,6 +282,10 @@ namespace KlayGE
 
 		mvp_param_ = deferred_effect_->ParameterByName("mvp");
 		model_view_param_ = deferred_effect_->ParameterByName("model_view");
+		pos_center_param_ = deferred_effect_->ParameterByName("pos_center");
+		pos_extent_param_ = deferred_effect_->ParameterByName("pos_extent");
+		tc_center_param_ = deferred_effect_->ParameterByName("tc_center");
+		tc_extent_param_ = deferred_effect_->ParameterByName("tc_extent");
 		shininess_param_ = deferred_effect_->ParameterByName("shininess");
 		normal_map_enabled_param_ = deferred_effect_->ParameterByName("normal_map_enabled");
 		normal_tex_param_ = deferred_effect_->ParameterByName("normal_tex");

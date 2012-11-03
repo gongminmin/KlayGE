@@ -13,6 +13,11 @@
 	<parameter type="float3" name="extinction_coefficient"/>
 	<parameter type="float" name="material_thickness"/>
 	<parameter type="float" name="sigma_t"/>
+	
+	<parameter type="float3" name="pos_center"/>
+	<parameter type="float3" name="pos_extent"/>
+	<parameter type="float2" name="tc_center"/>
+	<parameter type="float2" name="tc_extent"/>
 
 	<parameter type="sampler" name="linear_sampler">
 		<state name="filtering" value="min_mag_mip_linear"/>
@@ -39,6 +44,7 @@ void BackFaceDepthVS(float2 tex0 : TEXCOORD0,
 				
 				out float4 oPos : SV_Position)
 {
+	pos = float4(pos.xyz * pos_extent + pos_center, 1);
 	oPos = mul(pos, worldviewproj);
 }
 
@@ -84,12 +90,16 @@ void SubSurfaceVS(float2 tex0 : TEXCOORD0,
 				out float4 oPosSS : TEXCOORD5,
 				out float4 oPos : SV_Position)
 {
+	pos = float4(pos.xyz * pos_extent + pos_center, 1);
+	tex0 = tex0 * tc_extent + tc_center;
+	tangent_quat = tangent_quat * 2 - 1;
+	
 	oTex0 = tex0;
 	
 	oV = eye_pos - pos.xyz;
 	oL = light_pos - pos.xyz;
 	oH = normalize(oL) + normalize(oV);
-	oN = transform_quat(float3(0, 0, 1), tangent_quat * 2 - 1);
+	oN = transform_quat(float3(0, 0, 1), tangent_quat);
 
 	oPos = mul(pos, worldviewproj);
 	oPosSS = oPos;

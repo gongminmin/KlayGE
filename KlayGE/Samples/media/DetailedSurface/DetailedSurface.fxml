@@ -9,6 +9,10 @@
 	<cbuffer name="per_frame">
 		<parameter type="float4x4" name="mvp" semantic="WORLDVIEWPROJECTION"/>
 		<parameter type="float4x4" name="world"/>
+		<parameter type="float3" name="pos_center"/>
+		<parameter type="float3" name="pos_extent"/>
+		<parameter type="float2" name="tc_center"/>
+		<parameter type="float2" name="tc_extent"/>
 		<parameter type="float3" name="eye_pos"/>
 		<parameter type="float3" name="light_pos"/>
 		<parameter type="float3" name="light_color"/>
@@ -66,6 +70,8 @@ void CalcTBNVS(float4 pos				: POSITION,
 					out float oDistortion	: TEXCOORD3,
 					out float4 oPos			: SV_Position)
 {
+	pos = float4(pos.xyz * pos_extent + pos_center, 1);
+	texcoord0 = texcoord0 * tc_extent + tc_center;
 	tangent_quat = tangent_quat * 2 - 1;
 
 	CalcTBN(pos, texcoord0, tangent_quat,
@@ -126,6 +132,8 @@ void ParallaxOcclusionMappingVS(float4 pos				: POSITION,
 					out float4 oParallaxOffsetTS : TEXCOORD3,   // Parallax offset vector in tangent space
 					out float4 oPos			: SV_Position)
 {
+	pos = float4(pos.xyz * pos_extent + pos_center, 1);
+	texcoord0 = texcoord0 * tc_extent + tc_center;
 	tangent_quat = tangent_quat * 2 - 1;
 
 	CalcTBN(pos, texcoord0, tangent_quat,
@@ -311,6 +319,8 @@ VS_CONTROL_POINT_OUTPUT TessellationVS(float4 pos	: POSITION,
 					float4 tangent_quat			: TANGENT,
 					float distortion	: TEXCOORD1)
 {
+	pos = float4(pos.xyz * pos_extent + pos_center, 1);
+	texcoord0 = texcoord0 * tc_extent + tc_center;
 	tangent_quat = tangent_quat * 2 - 1;
 
 	VS_CONTROL_POINT_OUTPUT output;

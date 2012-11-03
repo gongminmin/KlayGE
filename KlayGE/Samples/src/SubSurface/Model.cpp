@@ -50,6 +50,14 @@ void DetailedMesh::BuildMeshInfo()
 		extinction_coefficient.z() = MathLib::srgb_to_linear(extinction_coefficient.z());
 	}
 	*(technique_->Effect().ParameterByName("extinction_coefficient")) = extinction_coefficient;
+
+	AABBox const & pos_bb = this->PosBound();
+	*(technique_->Effect().ParameterByName("pos_center")) = pos_bb.Center();
+	*(technique_->Effect().ParameterByName("pos_extent")) = pos_bb.HalfSize();
+
+	AABBox const & tc_bb = this->TexcoordBound();
+	*(technique_->Effect().ParameterByName("tc_center")) = float2(tc_bb.Center().x(), tc_bb.Center().y());
+	*(technique_->Effect().ParameterByName("tc_extent")) = float2(tc_bb.HalfSize().x(), tc_bb.HalfSize().y());
 }
 
 void DetailedMesh::OnRenderBegin()

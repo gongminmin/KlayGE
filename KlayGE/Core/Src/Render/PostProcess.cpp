@@ -600,9 +600,10 @@ namespace KlayGE
 				pos_aabb_ = AABBox(float3(-1, -1, -1), float3(1, 1, 1));
 				tc_aabb_ = AABBox(float3(0, 0, 0), float3(1, 1, 0));
 				ElementInitData init_data;
-				init_data.row_pitch = sizeof(pos);
 				init_data.data = &pos[0];
-				pos_vb_ = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data);
+				init_data.row_pitch = sizeof(pos);
+				init_data.slice_pitch = 0;
+				pos_vb_ = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, &init_data);
 				rl_->BindVertexStream(pos_vb_, boost::make_tuple(vertex_element(VEU_Position, 0, EF_GR32F)));
 
 				frame_buffer_ = rf.MakeFrameBuffer();

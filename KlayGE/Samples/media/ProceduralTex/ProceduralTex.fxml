@@ -7,6 +7,8 @@
 
 	<cbuffer name="per_frame">
 		<parameter type="float4x4" name="mvp" semantic="WORLDVIEWPROJECTION"/>
+		<parameter type="float3" name="pos_center"/>
+		<parameter type="float3" name="pos_extent"/>
 		<parameter type="float3" name="eye_pos"/>
 		<parameter type="float3" name="light_pos"/>
 		<parameter type="float3" name="light_color"/>
@@ -61,9 +63,12 @@ void ProceduralTexVS(float4 pos			: POSITION,
 					out float3 oTexCoord : TEXCOORD2,
 					out float4 oPos		: SV_Position)
 {
+	pos = float4(pos.xyz * pos_extent + pos_center, 1);
+	tangent_quat = tangent_quat * 2 - 1;
+	
 	oPos = mul(pos, mvp);
 	oPosOS = pos.xyz;
-	oNormalOS = transform_quat(float3(0, 0, 1), tangent_quat * 2 - 1);
+	oNormalOS = transform_quat(float3(0, 0, 1), tangent_quat);
 	oTexCoord = pos.xyz * freq * 0.6f;
 }
 

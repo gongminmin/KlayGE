@@ -178,6 +178,9 @@ void MeshDepthVS(float4 pos : POSITION,
 #endif
 			out float4 oPos : SV_Position)
 {
+	pos = float4(pos.xyz * pos_extent + pos_center, 1);
+	texcoord = texcoord * tc_extent + tc_center;
+	
 	oPos = mul(pos, mvp);
 	oTexCoordDepth.xy = texcoord;
 	oTexCoordDepth.z = oPos.w;
@@ -213,6 +216,8 @@ void SkinnedMeshDepthVS(float4 pos : POSITION,
 	int4 blend_indices = (int4)blend_indices_f;
 #endif
 
+	pos = float4(pos.xyz * pos_extent + pos_center, 1);
+	texcoord = texcoord * tc_extent + tc_center;
 	tangent_quat = tangent_quat * 2 - 1;
 
 	float4 result_tangent_quat;
@@ -251,6 +256,8 @@ void MeshVS(float4 pos : POSITION,
 #endif
 			out float4 oPos : SV_Position)
 {
+	pos = float4(pos.xyz * pos_extent + pos_center, 1);
+	texcoord = texcoord * tc_extent + tc_center;
 	tangent_quat = tangent_quat * 2 - 1;
 	
 	float3 result_pos;
@@ -293,6 +300,8 @@ void SkinnedMeshVS(float4 pos : POSITION,
 	int4 blend_indices = (int4)blend_indices_f;
 #endif
 
+	pos = float4(pos.xyz * pos_extent + pos_center, 1);
+	texcoord = texcoord * tc_extent + tc_center;
 	tangent_quat = tangent_quat * 2 - 1;
 
 	float3 result_pos;
@@ -320,6 +329,8 @@ void VisualizeVertexVS(float4 pos : POSITION,
 				out float4 oClr : COLOR,
 				out float4 oPos : SV_Position)
 {
+	pos = float4(pos.xyz * pos_extent + pos_center, 1);
+	tex0 = tex0 * tc_extent + tc_center;
 	tangent_quat = tangent_quat * 2 - 1;
 	
 	float3 result_pos;
@@ -357,6 +368,8 @@ void VisualizeVertexSkinnedVS(float4 pos : POSITION,
 	int4 blend_indices = (int4)blend_indices_f;
 #endif
 
+	pos = float4(pos.xyz * pos_extent + pos_center, 1);
+	tex0 = tex0 * tc_extent + tc_center;
 	tangent_quat = tangent_quat * 2 - 1;
 
 	float3 result_pos;
@@ -1185,6 +1198,9 @@ void MeshSpecialShadingVS(float4 pos : POSITION,
 			out float2 oTexCoord : TEXCOORD0,
 			out float4 oPos : SV_Position)
 {
+	pos = float4(pos.xyz * pos_extent + pos_center, 1);
+	texcoord = texcoord * tc_extent + tc_center;
+	
 	oPos = mul(pos, mvp);
 	oTexCoord = texcoord;
 }
@@ -1205,6 +1221,8 @@ void SkinnedMeshSpecialShadingVS(float4 pos : POSITION,
 	int4 blend_indices = (int4)blend_indices_f;
 #endif
 
+	pos = float4(pos.xyz * pos_extent + pos_center, 1);
+	texcoord = texcoord * tc_extent + tc_center;
 	tangent_quat = tangent_quat * 2 - 1;
 
 	float4 result_tangent_quat;
@@ -1355,7 +1373,9 @@ CONTROL_POINT SmoothVS(float4 pos : POSITION,
 				float4 tangent_quat	: TANGENT)
 {
 	CONTROL_POINT output;
-	
+
+	pos = float4(pos.xyz * pos_extent + pos_center, 1);
+	tex0 = tex0 * tc_extent + tc_center;
 	tangent_quat = tangent_quat * 2 - 1;
 
 	float4 result_tangent_quat;
@@ -1389,6 +1409,8 @@ CONTROL_POINT SmoothSkinnedVS(float4 pos : POSITION,
 	int4 blend_indices = (int4)blend_indices_f;
 #endif
 
+	pos = float4(pos.xyz * pos_extent + pos_center, 1);
+	tex0 = tex0 * tc_extent + tc_center;
 	tangent_quat = tangent_quat * 2 - 1;
 
 	float4 result_tangent_quat;
@@ -2171,7 +2193,7 @@ void SmoothDS(HS_CONSTANT_DATA_OUTPUT HSConstantData,
 
 	<shader type="vertex_shader" version="4">
 		<![CDATA[
-void SkinnedStreamOutVS(float3 pos : POSITION,
+void SkinnedStreamOutVS(float4 pos : POSITION,
 					float2 texcoord0 : TEXCOORD0,
 					float4 tangent_quat : Tangent,
 					float4 blend_weights : BLENDWEIGHT,
@@ -2184,11 +2206,13 @@ void SkinnedStreamOutVS(float3 pos : POSITION,
 					out float2 oTex0 : TEXCOORD0,
 					out float4 oTangentQuat : TANGENT)
 {
+	pos = float4(pos.xyz * pos_extent + pos_center, 1);
+	texcoord0 = texcoord0 * tc_extent + tc_center;
 	tangent_quat = tangent_quat * 2 - 1;
 	
 	float3 result_pos;
 	float4 result_tangent_quat;
-	CalcSkinnedMesh(texcoord0, float4(pos, 1),
+	CalcSkinnedMesh(texcoord0, pos,
 				blend_weights, blend_indices,
 				tangent_quat,
 				oTex0, result_pos,

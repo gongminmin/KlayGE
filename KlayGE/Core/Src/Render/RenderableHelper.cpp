@@ -99,6 +99,9 @@ namespace KlayGE
 
 		pos_aabb_ = MathLib::compute_aabbox(&v, &v + 1);
 		tc_aabb_ = AABBox(float3(0, 0, 0), float3(0, 0, 0));
+
+		*(technique_->Effect().ParameterByName("pos_center")) = float3(0, 0, 0);
+		*(technique_->Effect().ParameterByName("pos_extent")) = float3(1, 1, 1);
 	}
 
 	void RenderablePoint::OnRenderBegin()
@@ -139,6 +142,9 @@ namespace KlayGE
 
 		pos_aabb_ = MathLib::compute_aabbox(&xyzs[0], &xyzs[0] + sizeof(xyzs) / sizeof(xyzs[0]));
 		tc_aabb_ = AABBox(float3(0, 0, 0), float3(0, 0, 0));
+
+		*(technique_->Effect().ParameterByName("pos_center")) = float3(0, 0, 0);
+		*(technique_->Effect().ParameterByName("pos_extent")) = float3(1, 1, 1);
 	}
 
 	void RenderableLine::OnRenderBegin()
@@ -179,6 +185,9 @@ namespace KlayGE
 
 		pos_aabb_ = MathLib::compute_aabbox(&xyzs[0], &xyzs[0] + sizeof(xyzs) / sizeof(xyzs[0]));
 		tc_aabb_ = AABBox(float3(0, 0, 0), float3(0, 0, 0));
+
+		*(technique_->Effect().ParameterByName("pos_center")) = float3(0, 0, 0);
+		*(technique_->Effect().ParameterByName("pos_extent")) = float3(1, 1, 1);
 	}
 
 	void RenderableTriangle::OnRenderBegin()
@@ -236,6 +245,9 @@ namespace KlayGE
 
 		GraphicsBufferPtr ib = rf.MakeIndexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, &init_data);
 		rl_->BindIndexStream(ib, EF_R16UI);
+
+		*(technique_->Effect().ParameterByName("pos_center")) = float3(0, 0, 0);
+		*(technique_->Effect().ParameterByName("pos_extent")) = float3(1, 1, 1);
 	}
 
 	void RenderableTriBox::OnRenderBegin()
@@ -290,6 +302,9 @@ namespace KlayGE
 
 		GraphicsBufferPtr ib = rf.MakeIndexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, &init_data);
 		rl_->BindIndexStream(ib, EF_R16UI);
+
+		*(technique_->Effect().ParameterByName("pos_center")) = float3(0, 0, 0);
+		*(technique_->Effect().ParameterByName("pos_extent")) = float3(1, 1, 1);
 	}
 
 	void RenderableLineBox::OnRenderBegin()

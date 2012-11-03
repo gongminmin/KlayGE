@@ -49,6 +49,8 @@ class RenderPolygon : public KlayGE::StaticMesh
 public:
 	RenderPolygon(KlayGE::RenderModelPtr const & model, std::wstring const& name);
 
+	void BuildMeshInfo();
+
 	virtual void OnRenderBegin();
 };
 
@@ -116,6 +118,8 @@ void TutorFramework::InitObjects()
 
 	meshes[0]->GetRenderLayout()->TopologyType(KlayGE::RenderLayout::TT_TriangleStrip);
 
+	meshes[0]->PosBound(KlayGE::AABBox(KlayGE::float3(-1, -1, -1), KlayGE::float3(1, 1, 1)));
+
 	std::vector<KlayGE::uint16_t> indices2;
 	indices2.push_back(0); indices2.push_back(1); indices2.push_back(2);
 	indices2.push_back(0); indices2.push_back(2); indices2.push_back(3);
@@ -128,7 +132,12 @@ void TutorFramework::InitObjects()
 	meshes[1]->AddIndexStream(&indices2[0], static_cast<KlayGE::uint32_t>(sizeof(indices2[0]) * indices2.size()),
 		KlayGE::EF_R16UI, KlayGE::EAH_GPU_Read);
 	meshes[1]->GetRenderLayout()->TopologyType(KlayGE::RenderLayout::TT_TriangleList);
+	meshes[1]->PosBound(KlayGE::AABBox(KlayGE::float3(-1, -1, -1), KlayGE::float3(1, 1, 1)));
 
+	for (size_t i = 0; i < meshes.size(); ++ i)
+	{
+		meshes[i]->BuildMeshInfo();
+	}
 	model->AssignMeshes(meshes.begin(), meshes.end());
 
 	renderableMesh_ = KlayGE::MakeSharedPtr<KlayGE::SceneObjectHelper>(model, KlayGE::SceneObject::SOA_Cullable);
@@ -178,6 +187,13 @@ RenderPolygon::RenderPolygon(KlayGE::RenderModelPtr const & model, std::wstring 
 	this->SetRenderTechnique(effect->TechniqueByName("TriangleTec"));
 
 	*(effect->ParameterByName("color")) = KlayGE::float4(1.0f, 0.0f, 0.0f, 1.0f);
+}
+
+void RenderPolygon::BuildMeshInfo()
+{
+	KlayGE::AABBox const & pos_bb = this->PosBound();
+	*(technique_->Effect().ParameterByName("pos_center")) = pos_bb.Center();
+	*(technique_->Effect().ParameterByName("pos_extent")) = pos_bb.HalfSize();
 }
 
 void RenderPolygon::OnRenderBegin()
