@@ -561,6 +561,13 @@ void DetailedSkinnedModel::BuildModelInfo()
 
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
+	AABBox const & pos_bb = this->PosBound();
+	AABBox const & tc_bb = this->TexcoordBound();
+	float3 pos_center = pos_bb.Center();
+	float3 pos_extent = pos_bb.HalfSize();
+	float3 tc_center = tc_bb.Center();
+	float3 tc_extent = tc_bb.HalfSize();
+
 	std::vector<float3> positions(total_num_vertices);
 	std::vector<float2> texcoords(total_num_vertices);
 	std::vector<float3> normals(total_num_vertices);
@@ -576,8 +583,18 @@ void DetailedSkinnedModel::BuildModelInfo()
 				vb_cpu->Resize(vb->Size());
 				vb->CopyToBuffer(*vb_cpu);
 
-				GraphicsBuffer::Mapper mapper(*vb_cpu, BA_Read_Only);
-				std::copy(mapper.Pointer<float3>(), mapper.Pointer<float3>() + positions.size(), positions.begin());
+				std::vector<short> p_16(total_num_vertices * 4);
+				{
+					GraphicsBuffer::Mapper mapper(*vb_cpu, BA_Read_Only);
+					std::copy(mapper.Pointer<short>(), mapper.Pointer<short>() + p_16.size(), p_16.begin());
+				}
+
+				for (uint32_t j = 0; j < total_num_vertices; ++ j)
+				{
+					positions[j].x() = ((p_16[j * 4 + 0] + 32768) / 65535.0f * 2 - 1) * pos_extent.x() + pos_center.x();
+					positions[j].y() = ((p_16[j * 4 + 1] + 32768) / 65535.0f * 2 - 1) * pos_extent.y() + pos_center.y();
+					positions[j].z() = ((p_16[j * 4 + 2] + 32768) / 65535.0f * 2 - 1) * pos_extent.z() + pos_center.z();
+				}
 			}
 			break;
 
@@ -587,8 +604,17 @@ void DetailedSkinnedModel::BuildModelInfo()
 				vb_cpu->Resize(vb->Size());
 				vb->CopyToBuffer(*vb_cpu);
 
-				GraphicsBuffer::Mapper mapper(*vb_cpu, BA_Read_Only);
-				std::copy(mapper.Pointer<float2>(), mapper.Pointer<float2>() + texcoords.size(), texcoords.begin());
+				std::vector<short> t_16(total_num_vertices * 2);
+				{
+					GraphicsBuffer::Mapper mapper(*vb_cpu, BA_Read_Only);
+					std::copy(mapper.Pointer<short>(), mapper.Pointer<short>() + t_16.size(), t_16.begin());
+				}
+
+				for (uint32_t j = 0; j < total_num_vertices; ++ j)
+				{
+					texcoords[j].x() = ((t_16[j * 2 + 0] + 32768) / 65535.0f * 2 - 1) * tc_extent.x() + tc_center.x();
+					texcoords[j].y() = ((t_16[j * 2 + 1] + 32768) / 65535.0f * 2 - 1) * tc_extent.y() + tc_center.y();
+				}
 			}
 			break;
 
