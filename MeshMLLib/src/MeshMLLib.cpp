@@ -616,7 +616,7 @@ namespace KlayGE
 
 
 	MeshMLObj::MeshMLObj(float unit_scale)
-		: unit_scale_(unit_scale), start_frame_(0), end_frame_(0), frame_rate_(25)
+		: unit_scale_(unit_scale), num_frames_(0), frame_rate_(25)
 	{
 	}
 
@@ -908,7 +908,7 @@ namespace KlayGE
 			}
 		}
 
-		int model_ver = 5;
+		int model_ver = 6;
 
 		// Initialize the xml document
 		os << "<?xml version=\"1.0\"";
@@ -934,7 +934,7 @@ namespace KlayGE
 		if (!keyframes_.empty())
 		{
 			this->WriteKeyframeChunk(os, joint_index_to_id);
-			this->WriteAABBKeyframeChunk(os);
+			this->WriteAABBKeyframeChunk(os, joint_id_to_index);
 		}
 
 		// Finish the writing process
@@ -956,19 +956,18 @@ namespace KlayGE
 				BOOST_ASSERT(fiter != joint_id_to_index.end());
 
 				parent_id = fiter->second;
-
-				assert(parent_id < joint_id_to_index[joint.first]);
 			}
 
+			Quaternion const bind_real = joint.second.bind_real * joint.second.bind_scale;
+			Quaternion const & bind_dual = joint.second.bind_dual;
+
 			os << "\" parent=\"" << parent_id << "\">" << std::endl;
-			os << "\t\t\t<bind_real x=\"" << joint.second.bind_real[0] * joint.second.bind_scale
-				<< "\" y=\"" << joint.second.bind_real[1] * joint.second.bind_scale
-				<< "\" z=\"" << joint.second.bind_real[2] * joint.second.bind_scale
-				<< "\" w=\"" << joint.second.bind_real[3] * joint.second.bind_scale << "\"/>" << std::endl;
-			os << "\t\t\t<bind_dual x=\"" << joint.second.bind_dual[0]
-				<< "\" y=\"" << joint.second.bind_dual[1]
-				<< "\" z=\"" << joint.second.bind_dual[2]
-				<< "\" w=\"" << joint.second.bind_dual[3] << "\"/>" << std::endl;
+			os << "\t\t\t<bind_real v=\"" << bind_real[0]
+				<< " " << bind_real[1] << " " << bind_real[2]
+				<< " " << bind_real[3] << "\"/>" << std::endl;
+			os << "\t\t\t<bind_dual v=\"" << bind_dual[0]
+				<< " " << bind_dual[1] << " " << bind_dual[2]
+				<< " " << bind_dual[3] << "\"/>" << std::endl;
 			os << "\t\t</bone>" << std::endl;
 		}
 		os << "\t</bones_chunk>" << std::endl;
@@ -980,18 +979,18 @@ namespace KlayGE
 		typedef BOOST_TYPEOF(materials_) MaterialsType;
 		BOOST_FOREACH(MaterialsType::const_reference mtl, materials_)
 		{
-			os << "\t\t<material ambient_r=\"" << mtl.ambient[0]
-				<< "\" ambient_g=\"" << mtl.ambient[1]
-				<< "\" ambient_b=\"" << mtl.ambient[2]
-				<< "\" diffuse_r=\"" << mtl.diffuse[0]
-				<< "\" diffuse_g=\"" << mtl.diffuse[1]
-				<< "\" diffuse_b=\"" << mtl.diffuse[2]
-				<< "\" specular_r=\"" << mtl.specular[0]
-				<< "\" specular_g=\"" << mtl.specular[1]
-				<< "\" specular_b=\"" << mtl.specular[2]
-				<< "\" emit_r=\"" << mtl.emit[0]
-				<< "\" emit_g=\"" << mtl.emit[1]
-				<< "\" emit_b=\"" << mtl.emit[2]
+			os << "\t\t<material ambient=\"" << mtl.ambient[0]
+				<< " " << mtl.ambient[1]
+				<< " " << mtl.ambient[2]
+				<< "\" diffuse=\"" << mtl.diffuse[0]
+				<< " " << mtl.diffuse[1]
+				<< " " << mtl.diffuse[2]
+				<< "\" specular=\"" << mtl.specular[0]
+				<< " " << mtl.specular[1]
+				<< " " << mtl.specular[2]
+				<< "\" emit=\"" << mtl.emit[0]
+				<< " " << mtl.emit[1]
+				<< " " << mtl.emit[2]
 				<< "\" opacity=\"" << mtl.opacity
 				<< "\" specular_level=\"" << mtl.specular_level
 				<< "\" shininess=\"" << mtl.shininess << "\"";
@@ -1059,43 +1058,38 @@ namespace KlayGE
 				}
 			}
 
-			os << "\t\t\t\t<pos_bb>" << std::endl;
-			os << "\t\t\t\t\t<min x=\"" << pos_min_bb.x() << "\" y=\"" << pos_min_bb.y()
-				<< "\" z=\"" << pos_min_bb.z() << "\"/>" << std::endl;
-			os << "\t\t\t\t\t<max x=\"" << pos_max_bb.x() << "\" y=\"" << pos_max_bb.y()
-				<< "\" z=\"" << pos_max_bb.z() << "\"/>" << std::endl;
-			os << "\t\t\t\t</pos_bb>" << std::endl;
+			os << "\t\t\t\t<pos_bb min=\"" << pos_min_bb.x() << " " << pos_min_bb.y()
+				<< " " << pos_min_bb.z() << "\" max=\"" << pos_max_bb.x() << " " << pos_max_bb.y()
+				<< " " << pos_max_bb.z() << "\"/>" << std::endl;
 			if (vertex_export_settings & VES_Texcoord)
 			{
-				os << "\t\t\t\t<tc_bb>" << std::endl;
-				os << "\t\t\t\t\t<min x=\"" << tc_min_bb.x() << "\" y=\"" << tc_min_bb.y() << "\"/>" << std::endl;
-				os << "\t\t\t\t\t<max x=\"" << tc_max_bb.x() << "\" y=\"" << tc_max_bb.y() << "\"/>" << std::endl;
-				os << "\t\t\t\t</tc_bb>" << std::endl;
+				os << "\t\t\t\t<tc_bb min=\"" << tc_min_bb.x() << " " << tc_min_bb.y()
+					<< "\" max=\"" << tc_max_bb.x() << " " << tc_max_bb.y() << "\"/>" << std::endl;
 			}
 			os << std::endl;
 
 			BOOST_FOREACH(VerticesType::const_reference vertex, mesh.vertices)
 			{
-				os << "\t\t\t\t<vertex x=\"" << vertex.position.x()
-					<< "\" y=\"" << vertex.position.y()
-					<< "\" z=\"" << vertex.position.z() << "\"";
+				os << "\t\t\t\t<vertex v=\"" << vertex.position.x()
+					<< " " << vertex.position.y()
+					<< " " << vertex.position.z() << "\"";
 				if (vertex_export_settings != VES_None)
 				{
 					os << ">" << std::endl;
 
 					if (vertex_export_settings & VES_Normal)
 					{
-						os << "\t\t\t\t\t<normal x=\"" << vertex.normal.x()
-							<< "\" y=\"" << vertex.normal.y()
-							<< "\" z=\"" << vertex.normal.z() << "\"/>" << std::endl;
+						os << "\t\t\t\t\t<normal v=\"" << vertex.normal.x()
+							<< " " << vertex.normal.y()
+							<< " " << vertex.normal.z() << "\"/>" << std::endl;
 					}
 
 					if (vertex_export_settings & VES_TangentQuat)
 					{
-						os << "\t\t\t\t\t<tangent_quat x=\"" << vertex.tangent_quat.x()
-							<< "\" y=\"" << vertex.tangent_quat.y()
-							<< "\" z=\"" << vertex.tangent_quat.z()
-							<< "\" w=\"" << vertex.tangent_quat.w() << "\"/>" << std::endl;
+						os << "\t\t\t\t\t<tangent_quat v=\"" << vertex.tangent_quat.x()
+							<< " " << vertex.tangent_quat.y()
+							<< " " << vertex.tangent_quat.z()
+							<< " " << vertex.tangent_quat.w() << "\"/>" << std::endl;
 					}
 
 					if (vertex_export_settings & VES_Texcoord)
@@ -1106,24 +1100,23 @@ namespace KlayGE
 						case 1:
 							BOOST_FOREACH(TexcoordsType::const_reference tc, vertex.texcoords)
 							{
-								os << "\t\t\t\t\t<tex_coord u=\"" << tc.x() << "\"/>" << std::endl;
+								os << "\t\t\t\t\t<tex_coord v=\"" << tc.x() << "\"/>" << std::endl;
 							}
 							break;
 
 						case 2:
 							BOOST_FOREACH(TexcoordsType::const_reference tc, vertex.texcoords)
 							{
-								os << "\t\t\t\t\t<tex_coord u=\"" << tc.x()
-									<< "\" v=\"" << tc.y() << "\"/>" << std::endl;
+								os << "\t\t\t\t\t<tex_coord v=\"" << tc.x()
+									<< " " << tc.y() << "\"/>" << std::endl;
 							}
 							break;
 
 						case 3:
 							BOOST_FOREACH(TexcoordsType::const_reference tc, vertex.texcoords)
 							{
-								os << "\t\t\t\t\t<tex_coord u=\"" << tc.x()
-									<< "\" v=\"" << tc.y()
-									<< "\" w=\"" << tc.z() << "\"/>" << std::endl;
+								os << "\t\t\t\t\t<tex_coord v=\"" << tc.x()
+									<< " " << tc.y() << " " << tc.z() << "\"/>" << std::endl;
 							}
 							break;
 
@@ -1132,15 +1125,36 @@ namespace KlayGE
 						}
 					}
 
+					std::vector<std::pair<int, float> > binds;
 					typedef BOOST_TYPEOF(vertex.binds) BindsType;
 					BOOST_FOREACH(BindsType::const_reference bind, vertex.binds)
 					{
 						std::map<int, int>::const_iterator fiter = joint_id_to_index.find(bind.first);
 						BOOST_ASSERT(fiter != joint_id_to_index.end());
 
-						os << "\t\t\t\t\t<weight bone_index=\"" << fiter->second
-							<< "\" weight=\"" << bind.second << "\"/>" << std::endl;
+						binds.push_back(std::make_pair(fiter->second, bind.second));
 					}
+
+					os << "\t\t\t\t\t<weight bone_index=\"";
+					for (size_t i = 0; i < binds.size(); ++ i)
+					{
+						os << binds[i].first;
+						if (i != binds.size() - 1)
+						{
+							os << ' ';
+						}
+					}
+					os << "\" weight=\"";
+					for (size_t i = 0; i < binds.size(); ++ i)
+					{
+						os << binds[i].second;
+						if (i != binds.size() - 1)
+						{
+							os << ' ';
+						}
+					}
+					os << "\"/>" << std::endl;
+
 					os << "\t\t\t\t</vertex>" << std::endl;
 				}
 				else
@@ -1154,9 +1168,9 @@ namespace KlayGE
 			typedef BOOST_TYPEOF(mesh.triangles) TrianglesType;
 			BOOST_FOREACH(TrianglesType::const_reference tri, mesh.triangles)
 			{
-				os << "\t\t\t\t<triangle a=\"" << tri.vertex_index[0]
-					<< "\" b=\"" << tri.vertex_index[1]
-					<< "\" c=\"" << tri.vertex_index[2] << "\"/>" << std::endl;
+				os << "\t\t\t\t<triangle index=\"" << tri.vertex_index[0]
+					<< " " << tri.vertex_index[1]
+					<< " " << tri.vertex_index[2] << "\"/>" << std::endl;
 			}
 			os << "\t\t\t</triangles_chunk>" << std::endl;
 
@@ -1167,8 +1181,7 @@ namespace KlayGE
 
 	void MeshMLObj::WriteKeyframeChunk(std::ostream& os, std::vector<int> const & joint_index_to_id)
 	{
-		os << "\t<key_frames_chunk start_frame=\"" << start_frame_
-			<< "\" end_frame=\"" << end_frame_
+		os << "\t<key_frames_chunk num_frames=\"" << num_frames_
 			<< "\" frame_rate=\"" << frame_rate_ << "\">" << std::endl;
 		typedef BOOST_TYPEOF(joint_index_to_id) JointIndexToIDType;
 		BOOST_FOREACH(JointIndexToIDType::const_reference joint_id, joint_index_to_id)
@@ -1189,14 +1202,14 @@ namespace KlayGE
 						Quaternion const & bind_dual = kf.bind_duals[j];
 
 						os << "\t\t\t<key>" << std::endl;
-						os << "\t\t\t\t<bind_real x=\"" << bind_real.x()
-							<< "\" y=\"" << bind_real.y()
-							<< "\" z=\"" << bind_real.z()
-							<< "\" w=\"" << bind_real.w() << "\"/>" << std::endl;
-						os << "\t\t\t\t<bind_dual x=\"" << bind_dual.x()
-							<< "\" y=\"" << bind_dual.y()
-							<< "\" z=\"" << bind_dual.z()
-							<< "\" w=\"" << bind_dual.w() << "\"/>" << std::endl;
+						os << "\t\t\t\t<bind_real v=\"" << bind_real.x()
+							<< " " << bind_real.y()
+							<< " " << bind_real.z()
+							<< " " << bind_real.w() << "\"/>" << std::endl;
+						os << "\t\t\t\t<bind_dual v=\"" << bind_dual.x()
+							<< " " << bind_dual.y()
+							<< " " << bind_dual.z()
+							<< " " << bind_dual.w() << "\"/>" << std::endl;
 						os << "\t\t\t</key>" << std::endl;
 					}
 					os << "\t\t</key_frame>" << std::endl;
@@ -1206,39 +1219,43 @@ namespace KlayGE
 		os << "\t</key_frames_chunk>" << std::endl;
 	}
 
-	void MeshMLObj::WriteAABBKeyframeChunk(std::ostream& os)
+	void MeshMLObj::WriteAABBKeyframeChunk(std::ostream& os, std::map<int, int> const & joint_id_to_index)
 	{
-		int const num_frames = end_frame_ - start_frame_;
-
 		std::vector<Quaternion> bind_reals;
 		std::vector<Quaternion> bind_duals;
 		std::vector<std::vector<float3> > bb_min_key_frames(meshes_.size());
 		std::vector<std::vector<float3> > bb_max_key_frames(meshes_.size());
 		for (size_t m = 0; m < meshes_.size(); ++ m)
 		{
-			bb_min_key_frames[m].resize(num_frames);
-			bb_max_key_frames[m].resize(num_frames);
+			bb_min_key_frames[m].resize(num_frames_);
+			bb_max_key_frames[m].resize(num_frames_);
 		}
 
-		for (int f = 0; f < num_frames; ++ f)
+		for (int f = 0; f < num_frames_; ++ f)
 		{
-			this->UpdateJoints(f, bind_reals, bind_duals);
+			this->UpdateJoints(f, joint_id_to_index, bind_reals, bind_duals);
 			for (size_t m = 0; m < meshes_.size(); ++ m)
 			{
-				float3 bb_min, bb_max;
+				float3 bb_min(+1e10f, +1e10f, +1e10f);
+				float3 bb_max(-1e10f, -1e10f, -1e10f);
 				for (size_t v = 0; v < meshes_[m].vertices.size(); ++ v)
 				{
 					Vertex const & vertex = meshes_[m].vertices[v];
 
-					Quaternion dp0 = bind_reals[vertex.binds[0].first];
+					BOOST_AUTO(iter, joint_id_to_index.find(vertex.binds[0].first));
+					BOOST_ASSERT(iter != joint_id_to_index.end());
+					Quaternion const & dp0 = bind_reals[iter->second];
 	
 					float3 pos_s(0, 0, 0);
 					Quaternion blend_real(0, 0, 0, 0);
 					Quaternion blend_dual(0, 0, 0, 0);
 					for (size_t bi = 0; bi < vertex.binds.size(); ++ bi)
 					{
-						Quaternion joint_real = bind_reals[vertex.binds[bi].first];
-						Quaternion joint_dual = bind_duals[vertex.binds[bi].first];
+						iter = joint_id_to_index.find(vertex.binds[bi].first);
+						BOOST_ASSERT(iter != joint_id_to_index.end());
+
+						Quaternion joint_real = bind_reals[iter->second];
+						Quaternion joint_dual = bind_duals[iter->second];
 		
 						float scale = MathLib::length(joint_real);
 						joint_real /= scale;
@@ -1262,11 +1279,9 @@ namespace KlayGE
 
 					Quaternion trans = MathLib::mul(Quaternion(blend_dual.x(), blend_dual.y(), blend_dual.z(), -blend_dual.w()), blend_real);
 					float3 result_pos = MathLib::transform_quat(pos_s, blend_real) + 2 * float3(trans.x(), trans.y(), trans.z());
-					if (0 == v)
-					{
-						bb_min = bb_max = result_pos;
-					}
-					else
+
+					if ((result_pos.x() == result_pos.x()) && (result_pos.y() == result_pos.y())
+						&& (result_pos.z() == result_pos.z()))
 					{
 						bb_min.x() = std::min(bb_min.x(), result_pos.x());
 						bb_min.y() = std::min(bb_min.y(), result_pos.y());
@@ -1287,19 +1302,17 @@ namespace KlayGE
 		for (size_t m = 0; m < meshes_.size(); ++ m)
 		{
 			os << "\t\t<bb_key_frame mesh_id=\"" << m << "\">" << std::endl;
-			for (size_t f = 0; f < num_frames; ++ f)
+			for (size_t f = 0; f < num_frames_; ++ f)
 			{
 				float3 const & bb_min = bb_min_key_frames[m][f];
 				float3 const & bb_max = bb_max_key_frames[m][f];
 
-				os << "\t\t\t<key>" << std::endl;
-				os << "\t\t\t\t<bb_min x=\"" << bb_min.x()
-					<< "\" y=\"" << bb_min.y()
-					<< "\" z=\"" << bb_min.z() << "\"/>" << std::endl;
-				os << "\t\t\t\t<bb_max x=\"" << bb_max.x()
-					<< "\" y=\"" << bb_max.y()
-					<< "\" z=\"" << bb_max.z() << "\"/>" << std::endl;
-				os << "\t\t\t</key>" << std::endl;
+				os << "\t\t\t<key min=\"" << bb_min.x()
+					<< " " << bb_min.y()
+					<< " " << bb_min.z()
+					<< "\" max=\"" << bb_max.x()
+					<< " " << bb_max.y()
+					<< " " << bb_max.z() << "\"/>" << std::endl;
 			}
 			os << "\t\t</bb_key_frame>" << std::endl;
 		}
@@ -1489,13 +1502,16 @@ namespace KlayGE
 		real *= scale.x();
 	}
 
-	void MeshMLObj::UpdateJoints(int frame, std::vector<Quaternion>& bind_reals, std::vector<Quaternion>& bind_duals) const
+	void MeshMLObj::UpdateJoints(int frame, std::map<int, int> const & joint_id_to_index, std::vector<Quaternion>& bind_reals, std::vector<Quaternion>& bind_duals) const
 	{
-		std::vector<Joint> bind_joints;
+		std::vector<Joint> bind_joints(joints_.size());
 		typedef BOOST_TYPEOF(joints_) JointsType;
 		BOOST_FOREACH(JointsType::const_reference joint, joints_)
 		{
-			bind_joints.push_back(joint.second);
+			BOOST_AUTO(iter, joint_id_to_index.find(joint.first));
+			BOOST_ASSERT(iter != joint_id_to_index.end());
+
+			bind_joints[iter->second] = joint.second;
 		}
 
 		std::vector<Joint> bind_inverse_joints(bind_joints.size());
@@ -1556,7 +1572,10 @@ namespace KlayGE
 
 			if (joint.parent_id != -1)
 			{
-				Joint const & parent(bind_joints[joint.parent_id]);
+				BOOST_AUTO(piter, joint_id_to_index.find(joint.parent_id));
+				BOOST_ASSERT(piter != joint_id_to_index.end());
+
+				Joint const & parent(bind_joints[piter->second]);
 
 				if (MathLib::dot(key_dq.first.first, parent.bind_real) < 0)
 				{

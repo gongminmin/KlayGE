@@ -34,7 +34,7 @@ void Skinned(float3 pos,
 			out float4 result_tangent_quat)
 {
 	float4 dp0 = joint_reals[blend_indices[0]];
-	
+
 	float3 pos_s = 0;
 	float4 blend_real = 0;
 	float4 blend_dual = 0;
@@ -58,7 +58,7 @@ void Skinned(float3 pos,
 		blend_real += joint_real * weight;
 		blend_dual += joint_dual * weight;
 	}
-	
+
 	float len = length(blend_real);
 	blend_real /= len;
 	blend_dual /= len;

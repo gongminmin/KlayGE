@@ -93,6 +93,8 @@ namespace KlayGE
 		std::map<INode*, Matrix3> joint_nodes_;
 
 		int cur_time_;
+		int start_frame_;
+		int end_frame_;
 
 		std::vector<IPhysiqueExport*> physiques_;
 		std::vector<Modifier*> physique_mods_;

@@ -846,7 +846,7 @@ namespace KlayGE
 			XMLDocument doc;
 			XMLNodePtr root = doc.Parse(file);
 
-			BOOST_ASSERT(root->Attrib("version") && (root->Attrib("version")->ValueInt() >= 4));
+			BOOST_ASSERT(root->Attrib("version") && (root->Attrib("version")->ValueInt() >= 6));
 
 			XMLNodePtr materials_chunk = root->FirstNode("materials_chunk");
 			if (materials_chunk)
@@ -944,51 +944,44 @@ namespace KlayGE
 				uint32_t mtl_index = 0;
 				for (XMLNodePtr mtl_node = materials_chunk->FirstNode("material"); mtl_node; mtl_node = mtl_node->NextSibling("material"), ++ mtl_index)
 				{
-					RenderMaterialPtr mtl = MakeSharedPtr<RenderMaterial>();
-					float ambient_r = mtl_node->Attrib("ambient_r")->ValueFloat();
-					float ambient_g = mtl_node->Attrib("ambient_g")->ValueFloat();
-					float ambient_b = mtl_node->Attrib("ambient_b")->ValueFloat();
-					float diffuse_r = mtl_node->Attrib("diffuse_r")->ValueFloat();
-					float diffuse_g = mtl_node->Attrib("diffuse_g")->ValueFloat();
-					float diffuse_b = mtl_node->Attrib("diffuse_b")->ValueFloat();
-					float specular_r = mtl_node->Attrib("specular_r")->ValueFloat();
-					float specular_g = mtl_node->Attrib("specular_g")->ValueFloat();
-					float specular_b = mtl_node->Attrib("specular_b")->ValueFloat();
-					float emit_r = mtl_node->Attrib("emit_r")->ValueFloat();
-					float emit_g = mtl_node->Attrib("emit_g")->ValueFloat();
-					float emit_b = mtl_node->Attrib("emit_b")->ValueFloat();
+					std::istringstream attr_ss;
+					float3 ambient, diffuse, specular, emit;
+					attr_ss.str(mtl_node->Attrib("ambient")->ValueString());
+					attr_ss.seekg(0);
+					attr_ss >> ambient.x() >> ambient.y() >> ambient.z();
+					attr_ss.str(mtl_node->Attrib("diffuse")->ValueString());
+					attr_ss.seekg(0);
+					attr_ss >> diffuse.x() >> diffuse.y() >> diffuse.z();
+					attr_ss.str(mtl_node->Attrib("specular")->ValueString());
+					attr_ss.seekg(0);
+					attr_ss >> specular.x() >> specular.y() >> specular.z();
+					attr_ss.str(mtl_node->Attrib("emit")->ValueString());
+					attr_ss.seekg(0);
+					attr_ss >> emit.x() >> emit.y() >> emit.z();
 					float opacity = mtl_node->Attrib("opacity")->ValueFloat();
 					float specular_level = mtl_node->Attrib("specular_level")->ValueFloat();
 					float shininess = mtl_node->Attrib("shininess")->ValueFloat();
 
-					NativeToLittleEndian<sizeof(ambient_r)>(&ambient_r);
-					NativeToLittleEndian<sizeof(ambient_g)>(&ambient_g);
-					NativeToLittleEndian<sizeof(ambient_b)>(&ambient_b);
-					NativeToLittleEndian<sizeof(diffuse_r)>(&diffuse_r);
-					NativeToLittleEndian<sizeof(diffuse_g)>(&diffuse_g);
-					NativeToLittleEndian<sizeof(diffuse_b)>(&diffuse_b);
-					NativeToLittleEndian<sizeof(specular_r)>(&specular_r);
-					NativeToLittleEndian<sizeof(specular_g)>(&specular_g);
-					NativeToLittleEndian<sizeof(specular_b)>(&specular_b);
-					NativeToLittleEndian<sizeof(emit_r)>(&emit_r);
-					NativeToLittleEndian<sizeof(emit_g)>(&emit_g);
-					NativeToLittleEndian<sizeof(emit_b)>(&emit_b);
+					NativeToLittleEndian<sizeof(ambient[0])>(&ambient[0]);
+					NativeToLittleEndian<sizeof(ambient[1])>(&ambient[1]);
+					NativeToLittleEndian<sizeof(ambient[2])>(&ambient[2]);
+					NativeToLittleEndian<sizeof(diffuse[0])>(&diffuse[0]);
+					NativeToLittleEndian<sizeof(diffuse[1])>(&diffuse[1]);
+					NativeToLittleEndian<sizeof(diffuse[2])>(&diffuse[2]);
+					NativeToLittleEndian<sizeof(specular[0])>(&specular[0]);
+					NativeToLittleEndian<sizeof(specular[1])>(&specular[1]);
+					NativeToLittleEndian<sizeof(specular[2])>(&specular[2]);
+					NativeToLittleEndian<sizeof(emit[0])>(&emit[0]);
+					NativeToLittleEndian<sizeof(emit[1])>(&emit[1]);
+					NativeToLittleEndian<sizeof(emit[2])>(&emit[2]);
 					NativeToLittleEndian<sizeof(opacity)>(&opacity);
 					NativeToLittleEndian<sizeof(specular_level)>(&specular_level);
 					NativeToLittleEndian<sizeof(shininess)>(&shininess);
 
-					ss->write(reinterpret_cast<char*>(&ambient_r), sizeof(ambient_r));
-					ss->write(reinterpret_cast<char*>(&ambient_g), sizeof(ambient_g));
-					ss->write(reinterpret_cast<char*>(&ambient_b), sizeof(ambient_b));
-					ss->write(reinterpret_cast<char*>(&diffuse_r), sizeof(diffuse_r));
-					ss->write(reinterpret_cast<char*>(&diffuse_g), sizeof(diffuse_g));
-					ss->write(reinterpret_cast<char*>(&diffuse_b), sizeof(diffuse_b));
-					ss->write(reinterpret_cast<char*>(&specular_r), sizeof(specular_r));
-					ss->write(reinterpret_cast<char*>(&specular_g), sizeof(specular_g));
-					ss->write(reinterpret_cast<char*>(&specular_b), sizeof(specular_b));
-					ss->write(reinterpret_cast<char*>(&emit_r), sizeof(emit_r));
-					ss->write(reinterpret_cast<char*>(&emit_g), sizeof(emit_g));
-					ss->write(reinterpret_cast<char*>(&emit_b), sizeof(emit_b));
+					ss->write(reinterpret_cast<char*>(&ambient), sizeof(ambient));
+					ss->write(reinterpret_cast<char*>(&diffuse), sizeof(diffuse));
+					ss->write(reinterpret_cast<char*>(&specular), sizeof(specular));
+					ss->write(reinterpret_cast<char*>(&emit), sizeof(emit));
 					ss->write(reinterpret_cast<char*>(&opacity), sizeof(opacity));
 					ss->write(reinterpret_cast<char*>(&specular_level), sizeof(specular_level));
 					ss->write(reinterpret_cast<char*>(&shininess), sizeof(shininess));
@@ -1037,7 +1030,7 @@ namespace KlayGE
 						bool has_diffuse = false;
 						bool has_specular = false;
 						bool has_weight = false;
-						std::vector<uint32_t> max_num_tc_components;
+						bool has_tex_coord = false;
 						bool has_tangent = false;
 						bool has_binormal = false;
 						bool has_tangent_quat = false;
@@ -1065,41 +1058,16 @@ namespace KlayGE
 								has_specular = true;
 							}
 
-							uint32_t num_blend = 0;
-							for (XMLNodePtr weight_node = vertex_node->FirstNode("weight"); weight_node; weight_node = weight_node->NextSibling("weight"))
-							{
-								++ num_blend;
-							}
-							if (num_blend > 0)
+							XMLNodePtr weight_node = vertex_node->FirstNode("weight");
+							if (weight_node)
 							{
 								has_weight = true;
 							}
-							Verify(num_blend <= 4);
 
-							uint32_t num_tex_coord = 0;
-							for (XMLNodePtr tex_coord_node = vertex_node->FirstNode("tex_coord"); tex_coord_node; tex_coord_node = tex_coord_node->NextSibling("tex_coord"))
+							XMLNodePtr tex_coord_node = vertex_node->FirstNode("tex_coord");
+							if (tex_coord_node)
 							{
-								++ num_tex_coord;
-
-								if (num_tex_coord >= max_num_tc_components.size())
-								{
-									max_num_tc_components.resize(num_tex_coord, 0);
-								}
-
-								uint32_t num_components = 0;
-								if (tex_coord_node->Attrib("u"))
-								{
-									num_components = 1;
-								}
-								if (tex_coord_node->Attrib("v"))
-								{
-									num_components = 2;
-								}
-								if (tex_coord_node->Attrib("w"))
-								{
-									num_components = 3;
-								}
-								max_num_tc_components[num_tex_coord - 1] = std::max(max_num_tc_components[num_tex_coord - 1], num_components);
+								has_tex_coord = true;
 							}
 
 							XMLNodePtr tangent_node = vertex_node->FirstNode("tangent");
@@ -1165,10 +1133,10 @@ namespace KlayGE
 								vertex_elements.push_back(ve);
 							}
 
-							for (uint32_t usage = 0; usage < max_num_tc_components.size(); ++ usage)
+							if (has_tex_coord)
 							{
 								ve.usage = VEU_TextureCoord;
-								ve.usage_index = static_cast<uint8_t>(usage);
+								ve.usage_index = 0;
 								ve.format = EF_SIGNED_GR16;
 								vertex_elements.push_back(ve);
 							}
@@ -1216,9 +1184,9 @@ namespace KlayGE
 						char is_index_16 = true;
 						for (XMLNodePtr tri_node = triangles_chunk->FirstNode("triangle"); tri_node; tri_node = tri_node->NextSibling("triangle"))
 						{
-							uint32_t a = static_cast<uint32_t>(tri_node->Attrib("a")->ValueUInt());
-							uint32_t b = static_cast<uint32_t>(tri_node->Attrib("b")->ValueUInt());
-							uint32_t c = static_cast<uint32_t>(tri_node->Attrib("c")->ValueUInt());
+							uint32_t a, b, c;
+							std::istringstream attr_ss(tri_node->Attrib("index")->ValueString());
+							attr_ss >> a >> b >> c;
 							if ((a > 0xFFFF) || (b > 0xFFFF) || (c > 0xFFFF))
 							{
 								is_index_16 = false;
@@ -1281,39 +1249,33 @@ namespace KlayGE
 						XMLNodePtr pos_bb_node = vertices_chunk->FirstNode("pos_bb");
 						if (pos_bb_node)
 						{
-							XMLNodePtr pos_min_node = pos_bb_node->FirstNode("min");
-							XMLNodePtr pos_max_node = pos_bb_node->FirstNode("max");
-							pos_min_bb = float3(pos_min_node->Attrib("x")->ValueFloat(),
-								pos_min_node->Attrib("y")->ValueFloat(), pos_min_node->Attrib("z")->ValueFloat());
-							pos_max_bb = float3(pos_max_node->Attrib("x")->ValueFloat(),
-								pos_max_node->Attrib("y")->ValueFloat(), pos_max_node->Attrib("z")->ValueFloat());
+							std::istringstream attr_ss;
+							XMLAttributePtr attr = pos_bb_node->Attrib("min");
+							attr_ss.str(attr->ValueString());
+							attr_ss.seekg(0);
+							attr_ss >> pos_min_bb[0] >> pos_min_bb[1] >> pos_min_bb[2];
+							attr = pos_bb_node->Attrib("max");
+							attr_ss.str(attr->ValueString());
+							attr_ss.seekg(0);
+							attr_ss >> pos_max_bb[0] >> pos_max_bb[1] >> pos_max_bb[2];
 						}
 						else
 						{
 							uint32_t index = 0;
 							for (XMLNodePtr vertex_node = vertices_chunk->FirstNode("vertex"); vertex_node; vertex_node = vertex_node->NextSibling("vertex"))
 							{
+								float3 pos;
+								std::istringstream attr_ss(vertex_node->Attrib("v")->ValueString());
+								attr_ss >> pos.x() >> pos.y() >> pos.z();
+								if (0 == index)
 								{
-									for (size_t i = 0; i < ves[mesh_index].size(); ++ i)
-									{
-										if (VEU_Position == ves[mesh_index][i].usage)
-										{
-											float3 pos(vertex_node->Attrib("x")->ValueFloat(),
-												vertex_node->Attrib("y")->ValueFloat(), vertex_node->Attrib("z")->ValueFloat());
-											if (0 == index)
-											{
-												pos_min_bb = pos_max_bb = pos;
-											}
-											else
-											{
-												pos_min_bb = MathLib::minimize(pos_min_bb, pos);
-												pos_max_bb = MathLib::maximize(pos_max_bb, pos);
-											}
-											break;
-										}
-									}
+									pos_min_bb = pos_max_bb = pos;
 								}
-
+								else
+								{
+									pos_min_bb = MathLib::minimize(pos_min_bb, pos);
+									pos_max_bb = MathLib::maximize(pos_max_bb, pos);
+								}
 								++ index;
 							}
 						}
@@ -1321,50 +1283,36 @@ namespace KlayGE
 						XMLNodePtr tc_bb_node = vertices_chunk->FirstNode("tc_bb");
 						if (tc_bb_node)
 						{
-							XMLNodePtr tc_min_node = tc_bb_node->FirstNode("min");
-							XMLNodePtr tc_max_node = tc_bb_node->FirstNode("max");
-							tc_min_bb = float3(tc_min_node->Attrib("x")->ValueFloat(),
-								tc_min_node->Attrib("y")->ValueFloat(), 0.0f);
-							tc_max_bb = float3(tc_max_node->Attrib("x")->ValueFloat(),
-								tc_max_node->Attrib("y")->ValueFloat(), 0.0f);
+							XMLAttributePtr attr = tc_bb_node->Attrib("min");
+							std::istringstream attr_ss(attr->ValueString());
+							attr_ss >> tc_min_bb[0] >> tc_min_bb[1];
+							attr = tc_bb_node->Attrib("max");
+							attr_ss.str(attr->ValueString());
+							attr_ss.seekg(0);
+							attr_ss >> tc_max_bb[0] >> tc_max_bb[1];
+
+							tc_min_bb.z() = 0;
+							tc_max_bb.z() = 0;
 						}
 						else
 						{
 							uint32_t index = 0;
 							for (XMLNodePtr vertex_node = vertices_chunk->FirstNode("vertex"); vertex_node; vertex_node = vertex_node->NextSibling("vertex"))
 							{
-								for (XMLNodePtr tex_coord_node = vertex_node->FirstNode("tex_coord"); tex_coord_node; tex_coord_node = tex_coord_node->NextSibling("tex_coord"))
+								XMLNodePtr tex_coord_node = vertex_node->FirstNode("tex_coord");
+								float3 tex_coord;
+								std::istringstream attr_ss(tex_coord_node->Attrib("v")->ValueString());
+								attr_ss >> tex_coord.x() >> tex_coord.y();
+								tex_coord.z() = 0;
+								if (0 == index)
 								{
-									for (size_t i = 0; i < ves[mesh_index].size(); ++ i)
-									{
-										if ((VEU_TextureCoord == ves[mesh_index][i].usage) && (0 == ves[mesh_index][i].usage_index))
-										{
-											float3 tex_coord(0, 0, 0);
-											XMLAttributePtr attr = tex_coord_node->Attrib("u");
-											if (attr)
-											{
-												tex_coord.x() = attr->ValueFloat();
-											}
-											attr = tex_coord_node->Attrib("v");
-											if (attr)
-											{
-												tex_coord.y() = attr->ValueFloat();
-											}
-
-											if (0 == index)
-											{
-												tc_min_bb = tc_max_bb = tex_coord;
-											}
-											else
-											{
-												tc_min_bb = MathLib::minimize(tc_min_bb, tex_coord);
-												tc_max_bb = MathLib::maximize(tc_max_bb, tex_coord);
-											}
-											break;
-										}
-									}
+									tc_min_bb = tc_max_bb = tex_coord;
 								}
-
+								else
+								{
+									tc_min_bb = MathLib::minimize(tc_min_bb, tex_coord);
+									tc_max_bb = MathLib::maximize(tc_max_bb, tex_coord);
+								}
 								++ index;
 							}
 						}
@@ -1385,8 +1333,9 @@ namespace KlayGE
 								{
 									if (VEU_Position == ves[mesh_index][i].usage)
 									{
-										float3 pos(vertex_node->Attrib("x")->ValueFloat(),
-											vertex_node->Attrib("y")->ValueFloat(), vertex_node->Attrib("z")->ValueFloat());
+										float3 pos;
+										std::istringstream attr_ss(vertex_node->Attrib("v")->ValueString());
+										attr_ss >> pos.x() >> pos.y() >> pos.z();
 										pos = (pos - pos_center) / pos_extent * 0.5f + 0.5f;
 										int16_t s_pos[4] = 
 										{
@@ -1409,8 +1358,9 @@ namespace KlayGE
 								{
 									if (VEU_Diffuse == ves[mesh_index][i].usage)
 									{
-										float4 diffuse(diffuse_node->Attrib("r")->ValueFloat(), diffuse_node->Attrib("g")->ValueFloat(),
-											diffuse_node->Attrib("b")->ValueFloat(), diffuse_node->Attrib("a")->ValueFloat());
+										float4 diffuse;
+										std::istringstream attr_ss(diffuse_node->Attrib("v")->ValueString());
+										attr_ss >> diffuse.x() >> diffuse.y() >> diffuse.z() >> diffuse.w();
 										uint32_t compact = (MathLib::clamp<uint32_t>(static_cast<uint32_t>((diffuse.x() * 0.5f + 0.5f) * 255), 0, 255) << 0)
 											| (MathLib::clamp<uint32_t>(static_cast<uint32_t>((diffuse.y() * 0.5f + 0.5f) * 255), 0, 255) << 8)
 											| (MathLib::clamp<uint32_t>(static_cast<uint32_t>((diffuse.z() * 0.5f + 0.5f) * 255), 0, 255) << 16)
@@ -1429,8 +1379,9 @@ namespace KlayGE
 								{
 									if (VEU_Specular == ves[mesh_index][i].usage)
 									{
-										float4 specular(specular_node->Attrib("r")->ValueFloat(), specular_node->Attrib("g")->ValueFloat(),
-											specular_node->Attrib("b")->ValueFloat(), specular_node->Attrib("a")->ValueFloat());
+										float4 specular;
+										std::istringstream attr_ss(specular_node->Attrib("v")->ValueString());
+										attr_ss >> specular.x() >> specular.y() >> specular.z() >> specular.w();
 										uint32_t compact = (MathLib::clamp<uint32_t>(static_cast<uint32_t>((specular.x() * 0.5f + 0.5f) * 255), 0, 255) << 0)
 											| (MathLib::clamp<uint32_t>(static_cast<uint32_t>((specular.y() * 0.5f + 0.5f) * 255), 0, 255) << 8)
 											| (MathLib::clamp<uint32_t>(static_cast<uint32_t>((specular.z() * 0.5f + 0.5f) * 255), 0, 255) << 16)
@@ -1442,16 +1393,27 @@ namespace KlayGE
 								}
 							}
 
-							uint32_t num_blend = 0;
-							for (XMLNodePtr weight_node = vertex_node->FirstNode("weight"); weight_node; weight_node = weight_node->NextSibling("weight"))
+							XMLNodePtr weight_node = vertex_node->FirstNode("weight");
+							if (weight_node)
 							{
 								for (size_t i = 0; i < ves[mesh_index].size(); ++ i)
 								{
 									if (VEU_BlendIndex == ves[mesh_index][i].usage)
 									{
-										uint8_t bone_index = static_cast<uint8_t>(weight_node->Attrib("bone_index")->ValueUInt());
-										uint32_t buf_index = ves_mapping[mesh_index][i];
-										memcpy(&merged_buff[buf_index][(mesh_base_vertices[mesh_index] + index) * merged_ves[buf_index].element_size() + num_blend * sizeof(bone_index)], &bone_index, sizeof(bone_index));
+										std::istringstream attr_ss(weight_node->Attrib("bone_index")->ValueString());
+										uint32_t bone_index32[4] = { 0, 0, 0, 0 };
+										uint32_t num_blend = 0;
+										while (attr_ss && (num_blend < 4))
+										{
+											attr_ss >> bone_index32[num_blend];
+											++ num_blend;
+										}
+										for (int j = 0; j < 4; ++ j)
+										{
+											uint8_t bone_index = static_cast<uint8_t>(bone_index32[j]);
+											uint32_t buf_index = ves_mapping[mesh_index][i];
+											memcpy(&merged_buff[buf_index][(mesh_base_vertices[mesh_index] + index) * merged_ves[buf_index].element_size() + j * sizeof(bone_index)], &bone_index, sizeof(bone_index));
+										}
 										break;
 									}
 								}
@@ -1459,55 +1421,36 @@ namespace KlayGE
 								{
 									if (VEU_BlendWeight == ves[mesh_index][i].usage)
 									{
-										float weight = weight_node->Attrib("weight")->ValueFloat();
-										uint8_t bone_weight = static_cast<uint8_t>(MathLib::clamp(static_cast<int>(weight * 255), 0, 255));
-										uint32_t buf_index = ves_mapping[mesh_index][i];
-										memcpy(&merged_buff[buf_index][(mesh_base_vertices[mesh_index] + index) * merged_ves[buf_index].element_size() + num_blend * sizeof(bone_weight)], &bone_weight, sizeof(bone_weight));
-										break;
-									}
-								}
-								++ num_blend;
-							}
-							for (uint32_t b = num_blend; b < 4; ++ b)
-							{
-								for (size_t i = 0; i < ves[mesh_index].size(); ++ i)
-								{
-									if (VEU_BlendIndex == ves[mesh_index][i].usage)
-									{
-										uint32_t buf_index = ves_mapping[mesh_index][i];
-										memset(&merged_buff[buf_index][(mesh_base_vertices[mesh_index] + index) * merged_ves[buf_index].element_size() + b * sizeof(uint8_t)], 0, sizeof(uint8_t));
-										break;
-									}
-								}
-								for (size_t i = 0; i < ves[mesh_index].size(); ++ i)
-								{
-									if (VEU_BlendWeight == ves[mesh_index][i].usage)
-									{
-										uint32_t buf_index = ves_mapping[mesh_index][i];
-										memset(&merged_buff[buf_index][(mesh_base_vertices[mesh_index] + index) * merged_ves[buf_index].element_size() + b * sizeof(uint8_t)], 0, sizeof(uint8_t));
+										std::istringstream attr_ss(weight_node->Attrib("weight")->ValueString());
+										float bone_weight32[4] = { 0, 0, 0, 0 };
+										uint32_t num_blend = 0;
+										while (attr_ss && (num_blend < 4))
+										{
+											attr_ss >> bone_weight32[num_blend];
+											++ num_blend;
+										}
+										for (int j = 0; j < 4; ++ j)
+										{
+											uint8_t bone_weight = static_cast<uint8_t>(MathLib::clamp(static_cast<int>(bone_weight32[j] * 255), 0, 255));
+											uint32_t buf_index = ves_mapping[mesh_index][i];
+											memcpy(&merged_buff[buf_index][(mesh_base_vertices[mesh_index] + index) * merged_ves[buf_index].element_size() + j * sizeof(bone_weight)], &bone_weight, sizeof(bone_weight));
+										}
 										break;
 									}
 								}
 							}
 
-							uint32_t usage = 0;
-							for (XMLNodePtr tex_coord_node = vertex_node->FirstNode("tex_coord"); tex_coord_node; tex_coord_node = tex_coord_node->NextSibling("tex_coord"))
+							XMLNodePtr tex_coord_node = vertex_node->FirstNode("tex_coord");
+							if (tex_coord_node)
 							{
 								for (size_t i = 0; i < ves[mesh_index].size(); ++ i)
 								{
-									if ((VEU_TextureCoord == ves[mesh_index][i].usage) && (usage == ves[mesh_index][i].usage_index))
+									if (VEU_TextureCoord == ves[mesh_index][i].usage)
 									{
-										float3 tex_coord(0, 0, 0);
-										XMLAttributePtr attr = tex_coord_node->Attrib("u");
-										if (attr)
-										{
-											tex_coord.x() = attr->ValueFloat();
-										}
-										attr = tex_coord_node->Attrib("v");
-										if (attr)
-										{
-											tex_coord.y() = attr->ValueFloat();
-										}
+										float3 tex_coord;
+										std::istringstream attr_ss(tex_coord_node->Attrib("v")->ValueString());
+										attr_ss >> tex_coord.x() >> tex_coord.y();
+										tex_coord.z() = 0;
 
 										tex_coord = (tex_coord - tc_center) / tc_extent * 0.5f + 0.5f;
 										int16_t s_tc[2] = 
@@ -1521,15 +1464,14 @@ namespace KlayGE
 										break;
 									}
 								}
-								++ usage;
 							}
 
 							XMLNodePtr tangent_quat_node = vertex_node->FirstNode("tangent_quat");
 							if (tangent_quat_node)
 							{
-								Quaternion tangent_quat(tangent_quat_node->Attrib("x")->ValueFloat(),
-									tangent_quat_node->Attrib("y")->ValueFloat(), tangent_quat_node->Attrib("z")->ValueFloat(),
-									tangent_quat_node->Attrib("w")->ValueFloat());			;
+								Quaternion tangent_quat;
+								std::istringstream attr_ss(tangent_quat_node->Attrib("v")->ValueString());
+								attr_ss >> tangent_quat.x() >> tangent_quat.y() >> tangent_quat.z() >> tangent_quat.w();
 								uint32_t compact = (MathLib::clamp<uint32_t>(static_cast<uint32_t>((tangent_quat.x() * 0.5f + 0.5f) * 255), 0, 255) << 0)
 									| (MathLib::clamp<uint32_t>(static_cast<uint32_t>((tangent_quat.y() * 0.5f + 0.5f) * 255), 0, 255) << 8)
 									| (MathLib::clamp<uint32_t>(static_cast<uint32_t>((tangent_quat.z() * 0.5f + 0.5f) * 255), 0, 255) << 16)
@@ -1547,78 +1489,21 @@ namespace KlayGE
 							else
 							{
 								XMLNodePtr normal_node = vertex_node->FirstNode("normal");
-								XMLNodePtr tangent_node = vertex_node->FirstNode("tangent");
-								XMLNodePtr binormal_node = vertex_node->FirstNode("binormal");
-								if (normal_node && !tangent_node && !binormal_node)
+								if (normal_node)
 								{
 									for (size_t i = 0; i < ves[mesh_index].size(); ++ i)
 									{
 										if (VEU_Normal == ves[mesh_index][i].usage)
 										{
-											float3 normal(normal_node->Attrib("x")->ValueFloat(),
-												normal_node->Attrib("y")->ValueFloat(), normal_node->Attrib("z")->ValueFloat());
+											float3 normal;
+											std::istringstream attr_ss(normal_node->Attrib("v")->ValueString());
+											attr_ss >> normal.x() >> normal.y() >> normal.z();
 											normal = MathLib::normalize(normal) * 0.5f + 0.5f;
 
 											uint32_t compact = MathLib::clamp<uint32_t>(static_cast<uint32_t>(normal.x() * 1023), 0, 1023)
 												| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(normal.y() * 1023), 0, 1023) << 10)
 												| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(normal.z() * 1023), 0, 1023) << 20);
 
-											uint32_t buf_index = ves_mapping[mesh_index][i];
-											memcpy(&merged_buff[buf_index][(mesh_base_vertices[mesh_index] + index) * merged_ves[buf_index].element_size()], &compact, sizeof(compact));
-											break;
-										}
-									}
-								}
-								else
-								{
-									float3 normal;
-									float3 tangent;
-									float3 binormal;
-									float reflection = 1;
-									if (normal_node)
-									{
-										normal = float3(normal_node->Attrib("x")->ValueFloat(),
-											normal_node->Attrib("y")->ValueFloat(), normal_node->Attrib("z")->ValueFloat());
-									}
-									if (tangent_node)
-									{
-										XMLAttributePtr attr = tangent_node->Attrib("w");
-										if (attr)
-										{
-											reflection = attr->ValueFloat();
-										}
-
-										tangent = float3(tangent_node->Attrib("x")->ValueFloat(),
-											tangent_node->Attrib("y")->ValueFloat(), tangent_node->Attrib("z")->ValueFloat());
-									}
-									if (binormal_node)
-									{
-										binormal = float3(binormal_node->Attrib("x")->ValueFloat(),
-											binormal_node->Attrib("y")->ValueFloat(), binormal_node->Attrib("z")->ValueFloat());
-									}
-
-									if (!normal_node)
-									{
-										normal = MathLib::cross(tangent, binormal * reflection);
-									}
-									if (!tangent_node)
-									{
-										tangent = MathLib::cross(binormal * reflection, normal);
-									}
-									if (!binormal_node)
-									{
-										binormal = MathLib::cross(normal, tangent) * reflection;
-									}
-
-									Quaternion tangent_quat = MathLib::to_quaternion(tangent, binormal, normal, 8);
-									uint32_t compact = (MathLib::clamp<uint32_t>(static_cast<uint32_t>((tangent_quat.x() * 0.5f + 0.5f) * 255), 0, 255) << 0)
-										| (MathLib::clamp<uint32_t>(static_cast<uint32_t>((tangent_quat.y() * 0.5f + 0.5f) * 255), 0, 255) << 8)
-										| (MathLib::clamp<uint32_t>(static_cast<uint32_t>((tangent_quat.z() * 0.5f + 0.5f) * 255), 0, 255) << 16)
-										| (MathLib::clamp<uint32_t>(static_cast<uint32_t>((tangent_quat.w() * 0.5f + 0.5f) * 255), 0, 255) << 24);
-									for (size_t i = 0; i < ves[mesh_index].size(); ++ i)
-									{
-										if (VEU_Tangent == ves[mesh_index][i].usage)
-										{
 											uint32_t buf_index = ves_mapping[mesh_index][i];
 											memcpy(&merged_buff[buf_index][(mesh_base_vertices[mesh_index] + index) * merged_ves[buf_index].element_size()], &compact, sizeof(compact));
 											break;
@@ -1637,20 +1522,19 @@ namespace KlayGE
 						uint32_t index = 0;
 						for (XMLNodePtr tri_node = triangles_chunk->FirstNode("triangle"); tri_node; tri_node = tri_node->NextSibling("triangle"))
 						{
+							std::istringstream attr_ss(tri_node->Attrib("index")->ValueString());
 							if (is_index_16_bit)
 							{
-								uint16_t a = static_cast<uint16_t>(tri_node->Attrib("a")->ValueUInt());
-								uint16_t b = static_cast<uint16_t>(tri_node->Attrib("b")->ValueUInt());
-								uint16_t c = static_cast<uint16_t>(tri_node->Attrib("c")->ValueUInt());
+								uint16_t a, b, c;
+								attr_ss >> a >> b >> c;
 								memcpy(&merged_indices[(mesh_start_indices[mesh_index] + index * 3 + 0) * index_elem_size], &a, sizeof(a));
 								memcpy(&merged_indices[(mesh_start_indices[mesh_index] + index * 3 + 1) * index_elem_size], &b, sizeof(b));
 								memcpy(&merged_indices[(mesh_start_indices[mesh_index] + index * 3 + 2) * index_elem_size], &c, sizeof(c));
 							}
 							else
 							{
-								uint32_t a = static_cast<uint32_t>(tri_node->Attrib("a")->ValueUInt());
-								uint32_t b = static_cast<uint32_t>(tri_node->Attrib("b")->ValueUInt());
-								uint32_t c = static_cast<uint32_t>(tri_node->Attrib("c")->ValueUInt());
+								uint32_t a, b, c;
+								attr_ss >> a >> b >> c;
 								memcpy(&merged_indices[(mesh_start_indices[mesh_index] + index * 3 + 0) * index_elem_size], &a, sizeof(a));
 								memcpy(&merged_indices[(mesh_start_indices[mesh_index] + index * 3 + 1) * index_elem_size], &b, sizeof(b));
 								memcpy(&merged_indices[(mesh_start_indices[mesh_index] + index * 3 + 2) * index_elem_size], &c, sizeof(c));
@@ -1740,33 +1624,15 @@ namespace KlayGE
 					ss->write(reinterpret_cast<char*>(&joint_parent), sizeof(joint_parent));
 
 					Quaternion bind_real;
-					Quaternion bind_dual;
-					XMLNodePtr bind_pos_node = bone_node->FirstNode("bind_pos");
-					if (bind_pos_node)
-					{
-						float3 bind_pos(bind_pos_node->Attrib("x")->ValueFloat(), bind_pos_node->Attrib("y")->ValueFloat(),
-							bind_pos_node->Attrib("z")->ValueFloat());
-
-						XMLNodePtr bind_quat_node = bone_node->FirstNode("bind_quat");
-						Quaternion bind_quat(bind_quat_node->Attrib("x")->ValueFloat(), bind_quat_node->Attrib("y")->ValueFloat(),
-							bind_quat_node->Attrib("z")->ValueFloat(), bind_quat_node->Attrib("w")->ValueFloat());
-
-						float scale = MathLib::length(bind_quat);
-						bind_quat /= scale;
-
-						bind_dual = MathLib::quat_trans_to_udq(bind_quat, bind_pos);
-						bind_real = bind_quat * scale;
-					}
-					else
-					{
-						XMLNodePtr bind_real_node = bone_node->FirstNode("bind_real");
-						bind_real = Quaternion(bind_real_node->Attrib("x")->ValueFloat(), bind_real_node->Attrib("y")->ValueFloat(),
-							bind_real_node->Attrib("z")->ValueFloat(), bind_real_node->Attrib("w")->ValueFloat());
+					XMLNodePtr bind_real_node = bone_node->FirstNode("bind_real");
+					std::istringstream attr_ss(bind_real_node->Attrib("v")->ValueString());
+					attr_ss >> bind_real.x() >> bind_real.y() >> bind_real.z() >> bind_real.w();
 							
-						XMLNodePtr bind_dual_node = bone_node->FirstNode("bind_dual");
-						bind_dual = Quaternion(bind_dual_node->Attrib("x")->ValueFloat(), bind_dual_node->Attrib("y")->ValueFloat(),
-							bind_dual_node->Attrib("z")->ValueFloat(), bind_dual_node->Attrib("w")->ValueFloat());
-					}
+					Quaternion bind_dual;
+					XMLNodePtr bind_dual_node = bone_node->FirstNode("bind_dual");
+					attr_ss.str(bind_dual_node->Attrib("v")->ValueString());
+					attr_ss.seekg(0);
+					attr_ss >> bind_dual.x() >> bind_dual.y() >> bind_dual.z() >> bind_dual.w();
 
 					NativeToLittleEndian<sizeof(bind_real[0])>(&bind_real[0]);
 					NativeToLittleEndian<sizeof(bind_real[1])>(&bind_real[1]);
@@ -1783,10 +1649,9 @@ namespace KlayGE
 
 			if (key_frames_chunk)
 			{
-				int32_t start_frame = key_frames_chunk->Attrib("start_frame")->ValueInt();
-				int32_t end_frame = key_frames_chunk->Attrib("end_frame")->ValueInt();
+				XMLAttributePtr nf_attr = key_frames_chunk->Attrib("num_frames");
+				uint32_t num_frames = nf_attr->ValueUInt();
 				int32_t frame_rate = key_frames_chunk->Attrib("frame_rate")->ValueInt();
-				uint32_t num_frames = end_frame - start_frame;
 				NativeToLittleEndian<sizeof(num_frames)>(&num_frames);
 				ss->write(reinterpret_cast<char*>(&num_frames), sizeof(num_frames));
 				NativeToLittleEndian<sizeof(frame_rate)>(&frame_rate);
@@ -1815,40 +1680,22 @@ namespace KlayGE
 						kfs.frame_id.push_back(frame_id);
 
 						Quaternion bind_real;
-						Quaternion bind_dual;
-						float bind_scale;
-						XMLNodePtr pos_node = key_node->FirstNode("pos");
-						if (pos_node)
-						{
-							float3 bind_pos(pos_node->Attrib("x")->ValueFloat(), pos_node->Attrib("y")->ValueFloat(),
-								pos_node->Attrib("z")->ValueFloat());
-
-							XMLNodePtr quat_node = key_node->FirstNode("quat");
-							bind_real = Quaternion(quat_node->Attrib("x")->ValueFloat(), quat_node->Attrib("y")->ValueFloat(),
-								quat_node->Attrib("z")->ValueFloat(), quat_node->Attrib("w")->ValueFloat());
-
-							bind_scale = MathLib::length(bind_real);
-							bind_real /= bind_scale;
-
-							bind_dual = MathLib::quat_trans_to_udq(bind_real, bind_pos);
-						}
-						else
-						{
-							XMLNodePtr bind_real_node = key_node->FirstNode("bind_real");
-							bind_real = Quaternion(bind_real_node->Attrib("x")->ValueFloat(), bind_real_node->Attrib("y")->ValueFloat(),
-								bind_real_node->Attrib("z")->ValueFloat(), bind_real_node->Attrib("w")->ValueFloat());
+						XMLNodePtr bind_real_node = key_node->FirstNode("bind_real");
+						std::istringstream attr_ss(bind_real_node->Attrib("v")->ValueString());
+						attr_ss >> bind_real.x() >> bind_real.y() >> bind_real.z() >> bind_real.w();
 							
-							XMLNodePtr bind_dual_node = key_node->FirstNode("bind_dual");
-							bind_dual = Quaternion(bind_dual_node->Attrib("x")->ValueFloat(), bind_dual_node->Attrib("y")->ValueFloat(),
-								bind_dual_node->Attrib("z")->ValueFloat(), bind_dual_node->Attrib("w")->ValueFloat());
+						Quaternion bind_dual;
+						XMLNodePtr bind_dual_node = key_node->FirstNode("bind_dual");
+						attr_ss.str(bind_dual_node->Attrib("v")->ValueString());
+						attr_ss.seekg(0);
+						attr_ss >> bind_dual.x() >> bind_dual.y() >> bind_dual.z() >> bind_dual.w();
 
-							bind_scale = MathLib::length(bind_real);
-							bind_real /= bind_scale;
-							if (bind_real.w() < 0)
-							{
-								bind_real = -bind_real;
-								bind_scale = -bind_scale;
-							}
+						float bind_scale = MathLib::length(bind_real);
+						bind_real /= bind_scale;
+						if (bind_real.w() < 0)
+						{
+							bind_real = -bind_real;
+							bind_scale = -bind_scale;
 						}
 
 						kfs.bind_real.push_back(bind_real);
@@ -1940,12 +1787,16 @@ namespace KlayGE
 							}
 							bb_kfs.frame_id.push_back(frame_id);
 
-							XMLNodePtr bb_min_node = key_node->FirstNode("bb_min");
-							float3 bb_min = float3(bb_min_node->Attrib("x")->ValueFloat(), bb_min_node->Attrib("y")->ValueFloat(),
-									bb_min_node->Attrib("z")->ValueFloat());
-							XMLNodePtr bb_max_node = key_node->FirstNode("bb_max");
-							float3 bb_max = float3(bb_max_node->Attrib("x")->ValueFloat(), bb_max_node->Attrib("y")->ValueFloat(),
-									bb_max_node->Attrib("z")->ValueFloat());
+							float3 bb_min, bb_max;
+							std::istringstream attr_ss;
+							XMLAttributePtr attr = key_node->Attrib("min");
+							attr_ss.str(attr->ValueString());
+							attr_ss.seekg(0);
+							attr_ss >> bb_min[0] >> bb_min[1] >> bb_min[2];
+							attr = key_node->Attrib("max");
+							attr_ss.str(attr->ValueString());
+							attr_ss.seekg(0);
+							attr_ss >> bb_max[0] >> bb_max[1] >> bb_max[2];
 
 							bb_kfs.bb.push_back(AABBox(bb_min, bb_max));
 						}
@@ -2401,7 +2252,6 @@ namespace KlayGE
 				joint.inverse_origin_scale = -scale.x();
 			}
 			
-			joint.inverse_origin_scale *= flip;
 			joint.bind_scale *= flip;
 		}
 

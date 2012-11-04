@@ -66,22 +66,13 @@ namespace KlayGE
 	public:
 		explicit MeshMLObj(float unit_scale);
 
-		void StartFrame(int sf)
+		void NumFrames(int nf)
 		{
-			start_frame_ = sf;
+			num_frames_ = nf;
 		}
-		int StartFrame() const
+		int NumFrames() const
 		{
-			return start_frame_;
-		}
-
-		void EndFrame(int ef)
-		{
-			end_frame_ = ef;
-		}
-		int EndFrame() const
-		{
-			return end_frame_;
+			return num_frames_;
 		}
 
 		void FrameRate(int fr)
@@ -210,10 +201,10 @@ namespace KlayGE
 		void WriteMaterialChunk(std::ostream& os);
 		void WriteMeshChunk(std::ostream& os, std::map<int, int> const & joint_id_to_index, int vertex_export_settings);
 		void WriteKeyframeChunk(std::ostream& os, std::vector<int> const & joint_index_to_id);
-		void WriteAABBKeyframeChunk(std::ostream& os);
+		void WriteAABBKeyframeChunk(std::ostream& os, std::map<int, int> const & joint_id_to_index);
 
 		void MatrixToDQ(float4x4 const & mat, Quaternion& real, Quaternion& dual) const;
-		void UpdateJoints(int frame, std::vector<Quaternion>& bind_reals, std::vector<Quaternion>& bind_duals) const;
+		void UpdateJoints(int frame, std::map<int, int> const & joint_id_to_index, std::vector<Quaternion>& bind_reals, std::vector<Quaternion>& bind_duals) const;
 
 		struct MaterialIDSortOp
 		{
@@ -226,8 +217,7 @@ namespace KlayGE
 	private:
 		float unit_scale_;
 
-		int start_frame_;
-		int end_frame_;
+		int num_frames_;
 		int frame_rate_;
 
 		std::map<int, Joint> joints_;

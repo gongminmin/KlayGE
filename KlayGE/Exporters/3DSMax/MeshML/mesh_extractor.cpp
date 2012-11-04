@@ -138,10 +138,10 @@ namespace KlayGE
 							root_node_(root_node),
 							joints_per_ver_(joints_per_ver),
 							cur_time_(cur_time),
+							start_frame_(start_frame), end_frame_(end_frame),
 							combine_meshes_(combine_meshes)
 	{
-		meshml_obj_.StartFrame(start_frame);
-		meshml_obj_.EndFrame(end_frame);
+		meshml_obj_.NumFrames(end_frame_ - start_frame);
 		meshml_obj_.FrameRate(GetFrameRate());
 	}
 
@@ -174,7 +174,7 @@ namespace KlayGE
 
 			int tpf = GetTicksPerFrame();
 
-			for (int i = meshml_obj_.StartFrame(); i < meshml_obj_.EndFrame(); ++ i)
+			for (int i = start_frame_; i < end_frame_; ++ i)
 			{
 				int kf_id = meshml_obj_.AllocKeyframe(kfs_id);
 				meshml_obj_.SetKeyframe(kfs_id, kf_id, this->rh_to_lh(root_node_->GetNodeTM(i * tpf)));
@@ -622,7 +622,7 @@ namespace KlayGE
 					pos_binds.first = Point3(0, 0, 0);
 					for (size_t i = 0 ; i < pos_binds.second.size(); ++ i)
 					{
-						assert(joints_.find(pos_binds.second[i].first) != joints_.end());
+						assert(joint_nodes_.find(pos_binds.second[i].first) != joint_nodes_.end());
 
 						pos_binds.first += pos_binds.second[i].second
 							* (v0 * joint_nodes_[pos_binds.second[i].first]);
@@ -818,7 +818,7 @@ namespace KlayGE
 		int kfs_id = meshml_obj_.AllocKeyframes();
 		meshml_obj_.SetKeyframes(kfs_id, joint_node_to_id_[node]);
 
-		for (int i = meshml_obj_.StartFrame(); i < meshml_obj_.EndFrame(); ++ i)
+		for (int i = start_frame_; i < end_frame_; ++ i)
 		{
 			int kf_id = meshml_obj_.AllocKeyframe(kfs_id);
 			meshml_obj_.SetKeyframe(kfs_id, kf_id,
