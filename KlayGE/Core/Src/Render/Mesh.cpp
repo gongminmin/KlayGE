@@ -1279,22 +1279,14 @@ namespace KlayGE
 						XMLNodePtr vertices_chunk = mesh_node->FirstNode("vertices_chunk");
 
 						XMLNodePtr pos_bb_node = vertices_chunk->FirstNode("pos_bb");
-						XMLNodePtr tc_bb_node = vertices_chunk->FirstNode("tc_bb");
-						if (pos_bb_node && tc_bb_node)
+						if (pos_bb_node)
 						{
 							XMLNodePtr pos_min_node = pos_bb_node->FirstNode("min");
 							XMLNodePtr pos_max_node = pos_bb_node->FirstNode("max");
 							pos_min_bb = float3(pos_min_node->Attrib("x")->ValueFloat(),
 								pos_min_node->Attrib("y")->ValueFloat(), pos_min_node->Attrib("z")->ValueFloat());
-							pos_min_bb = float3(pos_min_node->Attrib("x")->ValueFloat(),
-								pos_min_node->Attrib("y")->ValueFloat(), pos_min_node->Attrib("z")->ValueFloat());
-
-							XMLNodePtr tc_min_node = tc_bb_node->FirstNode("min");
-							XMLNodePtr tc_max_node = tc_bb_node->FirstNode("max");
-							tc_min_bb = float3(tc_min_node->Attrib("x")->ValueFloat(),
-								tc_min_node->Attrib("y")->ValueFloat(), 0.0f);
-							tc_min_bb = float3(tc_max_node->Attrib("x")->ValueFloat(),
-								tc_max_node->Attrib("y")->ValueFloat(), 0.0f);
+							pos_max_bb = float3(pos_max_node->Attrib("x")->ValueFloat(),
+								pos_max_node->Attrib("y")->ValueFloat(), pos_max_node->Attrib("z")->ValueFloat());
 						}
 						else
 						{
@@ -1322,6 +1314,25 @@ namespace KlayGE
 									}
 								}
 
+								++ index;
+							}
+						}
+
+						XMLNodePtr tc_bb_node = vertices_chunk->FirstNode("tc_bb");
+						if (tc_bb_node)
+						{
+							XMLNodePtr tc_min_node = tc_bb_node->FirstNode("min");
+							XMLNodePtr tc_max_node = tc_bb_node->FirstNode("max");
+							tc_min_bb = float3(tc_min_node->Attrib("x")->ValueFloat(),
+								tc_min_node->Attrib("y")->ValueFloat(), 0.0f);
+							tc_max_bb = float3(tc_max_node->Attrib("x")->ValueFloat(),
+								tc_max_node->Attrib("y")->ValueFloat(), 0.0f);
+						}
+						else
+						{
+							uint32_t index = 0;
+							for (XMLNodePtr vertex_node = vertices_chunk->FirstNode("vertex"); vertex_node; vertex_node = vertex_node->NextSibling("vertex"))
+							{
 								for (XMLNodePtr tex_coord_node = vertex_node->FirstNode("tex_coord"); tex_coord_node; tex_coord_node = tex_coord_node->NextSibling("tex_coord"))
 								{
 									for (size_t i = 0; i < ves[mesh_index].size(); ++ i)
@@ -1916,7 +1927,7 @@ namespace KlayGE
 						bb_kfs.bb.clear();
 
 						int32_t frame_id = -1;
-						for (XMLNodePtr key_node = bb_kf_node->FirstNode("key"); bb_kf_node; bb_kf_node = key_node->NextSibling("key"))
+						for (XMLNodePtr key_node = bb_kf_node->FirstNode("key"); key_node; key_node = key_node->NextSibling("key"))
 						{
 							XMLAttributePtr id_attr = key_node->Attrib("id");
 							if (id_attr)

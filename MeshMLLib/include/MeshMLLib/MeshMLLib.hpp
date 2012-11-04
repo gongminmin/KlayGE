@@ -187,13 +187,19 @@ namespace KlayGE
 			int parent_id;
 			Quaternion bind_real;
 			Quaternion bind_dual;
+			float bind_scale;
 		};
 
 		struct Keyframes
 		{
 			int joint_id;
+
+			std::vector<int> frame_id;
 			std::vector<Quaternion> bind_reals;
 			std::vector<Quaternion> bind_duals;
+			std::vector<float> bind_scales;
+
+			std::pair<std::pair<Quaternion, Quaternion>, float> Frame(float frame) const;
 		};
 
 		void OptimizeJoints();
@@ -203,14 +209,15 @@ namespace KlayGE
 		void WriteJointChunk(std::ostream& os, std::map<int, int> const & joint_id_to_index);
 		void WriteMaterialChunk(std::ostream& os);
 		void WriteMeshChunk(std::ostream& os, std::map<int, int> const & joint_id_to_index, int vertex_export_settings);
-		void WriteKeyframeChunk(std::ostream& os, std::map<int, int> const & joint_id_to_index);
+		void WriteKeyframeChunk(std::ostream& os, std::vector<int> const & joint_index_to_id);
+		void WriteAABBKeyframeChunk(std::ostream& os);
 
-		void MatrixToDQ(float4x4 const & mat, Quaternion& real, Quaternion& dual);
+		void MatrixToDQ(float4x4 const & mat, Quaternion& real, Quaternion& dual) const;
+		void UpdateJoints(int frame, std::vector<Quaternion>& bind_reals, std::vector<Quaternion>& bind_duals) const;
 
 		struct MaterialIDSortOp
 		{
-			bool operator()(Mesh const & lhs,
-				Mesh const & rhs) const
+			bool operator()(Mesh const & lhs, Mesh const & rhs) const
 			{
 				return lhs.material_id < rhs.material_id;
 			}

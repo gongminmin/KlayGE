@@ -563,10 +563,10 @@ void DetailedSkinnedModel::BuildModelInfo()
 
 	AABBox const & pos_bb = this->PosBound();
 	AABBox const & tc_bb = this->TexcoordBound();
-	float3 pos_center = pos_bb.Center();
-	float3 pos_extent = pos_bb.HalfSize();
-	float3 tc_center = tc_bb.Center();
-	float3 tc_extent = tc_bb.HalfSize();
+	float3 const pos_center = pos_bb.Center();
+	float3 const pos_extent = pos_bb.HalfSize();
+	float3 const tc_center = tc_bb.Center();
+	float3 const tc_extent = tc_bb.HalfSize();
 
 	std::vector<float3> positions(total_num_vertices);
 	std::vector<float2> texcoords(total_num_vertices);

@@ -53,6 +53,18 @@ namespace KlayGE
 {
 	namespace MathLib
 	{
+		template <typename T>
+		T abs(T const & x)
+		{
+			return x < T(0) ? -x : x;
+		}
+
+		template <typename T>
+		T sgn(T const & x)
+		{
+			return x < T(0) ? T(-1) : (x > T(0) ? T(1) : T(0));
+		}
+
 		// From Quake III. But the magic number is from http://www.lomont.org/Math/Papers/2003/InvSqrt.pdf
 		float recip_sqrt(float number)
 		{
@@ -84,6 +96,12 @@ namespace KlayGE
 				<= std::numeric_limits<float>::epsilon());
 		}
 
+		void sincos(float x, float& s, float& c)
+		{
+			s = sin(x);
+			c = cos(x);
+		}
+
 		template <typename T>
 		typename T::value_type dot(T const & lhs, T const & rhs)
 		{
@@ -98,6 +116,18 @@ namespace KlayGE
 		}
 
 		template <typename T>
+		typename T::value_type length(T const & rhs)
+		{
+			return sqrt(length_sq(rhs));
+		}
+
+		template <typename T>
+		T lerp(T const & lhs, T const & rhs, float s)
+		{
+			return lhs + (rhs - lhs) * s;
+		}
+
+		template <typename T>
 		T normalize(T const & rhs)
 		{
 			return rhs * recip_sqrt(length_sq(rhs));
@@ -109,6 +139,12 @@ namespace KlayGE
 			return Vector_T<T, 3>(lhs.y() * rhs.z() - lhs.z() * rhs.y(),
 				lhs.z() * rhs.x() - lhs.x() * rhs.z(),
 				lhs.x() * rhs.y() - lhs.y() * rhs.x());
+		}
+
+		template <typename T>
+		Vector_T<T, 3> transform_quat(Vector_T<T, 3> const & v, Quaternion_T<T> const & quat)
+		{
+			return v + cross(quat.v(), cross(quat.v(), v) + quat.w() * v) * T(2);
 		}
 
 		template <typename T>
@@ -138,6 +174,165 @@ namespace KlayGE
 			rot_mat(3, 2) = 0;
 			rot_mat(3, 3) = 1;
 			rot = to_quaternion(rot_mat);
+		}
+
+		template <typename T>
+		Matrix4_T<T> mul(Matrix4_T<T> const & lhs, Matrix4_T<T> const & rhs)
+		{
+			Matrix4_T<T> const tmp(transpose(rhs));
+
+			return Matrix4_T<T>(
+				lhs(0, 0) * tmp(0, 0) + lhs(0, 1) * tmp(0, 1) + lhs(0, 2) * tmp(0, 2) + lhs(0, 3) * tmp(0, 3),
+				lhs(0, 0) * tmp(1, 0) + lhs(0, 1) * tmp(1, 1) + lhs(0, 2) * tmp(1, 2) + lhs(0, 3) * tmp(1, 3),
+				lhs(0, 0) * tmp(2, 0) + lhs(0, 1) * tmp(2, 1) + lhs(0, 2) * tmp(2, 2) + lhs(0, 3) * tmp(2, 3),
+				lhs(0, 0) * tmp(3, 0) + lhs(0, 1) * tmp(3, 1) + lhs(0, 2) * tmp(3, 2) + lhs(0, 3) * tmp(3, 3),
+
+				lhs(1, 0) * tmp(0, 0) + lhs(1, 1) * tmp(0, 1) + lhs(1, 2) * tmp(0, 2) + lhs(1, 3) * tmp(0, 3),
+				lhs(1, 0) * tmp(1, 0) + lhs(1, 1) * tmp(1, 1) + lhs(1, 2) * tmp(1, 2) + lhs(1, 3) * tmp(1, 3),
+				lhs(1, 0) * tmp(2, 0) + lhs(1, 1) * tmp(2, 1) + lhs(1, 2) * tmp(2, 2) + lhs(1, 3) * tmp(2, 3),
+				lhs(1, 0) * tmp(3, 0) + lhs(1, 1) * tmp(3, 1) + lhs(1, 2) * tmp(3, 2) + lhs(1, 3) * tmp(3, 3),
+
+				lhs(2, 0) * tmp(0, 0) + lhs(2, 1) * tmp(0, 1) + lhs(2, 2) * tmp(0, 2) + lhs(2, 3) * tmp(0, 3),
+				lhs(2, 0) * tmp(1, 0) + lhs(2, 1) * tmp(1, 1) + lhs(2, 2) * tmp(1, 2) + lhs(2, 3) * tmp(1, 3),
+				lhs(2, 0) * tmp(2, 0) + lhs(2, 1) * tmp(2, 1) + lhs(2, 2) * tmp(2, 2) + lhs(2, 3) * tmp(2, 3),
+				lhs(2, 0) * tmp(3, 0) + lhs(2, 1) * tmp(3, 1) + lhs(2, 2) * tmp(3, 2) + lhs(2, 3) * tmp(3, 3),
+
+				lhs(3, 0) * tmp(0, 0) + lhs(3, 1) * tmp(0, 1) + lhs(3, 2) * tmp(0, 2) + lhs(3, 3) * tmp(0, 3),
+				lhs(3, 0) * tmp(1, 0) + lhs(3, 1) * tmp(1, 1) + lhs(3, 2) * tmp(1, 2) + lhs(3, 3) * tmp(1, 3),
+				lhs(3, 0) * tmp(2, 0) + lhs(3, 1) * tmp(2, 1) + lhs(3, 2) * tmp(2, 2) + lhs(3, 3) * tmp(2, 3),
+				lhs(3, 0) * tmp(3, 0) + lhs(3, 1) * tmp(3, 1) + lhs(3, 2) * tmp(3, 2) + lhs(3, 3) * tmp(3, 3));
+		}
+
+		template <typename T>
+		T determinant(Matrix4_T<T> const & rhs)
+		{
+			T const _3142_3241(rhs(2, 0) * rhs(3, 1) - rhs(2, 1) * rhs(3, 0));
+			T const _3143_3341(rhs(2, 0) * rhs(3, 2) - rhs(2, 2) * rhs(3, 0));
+			T const _3144_3441(rhs(2, 0) * rhs(3, 3) - rhs(2, 3) * rhs(3, 0));
+			T const _3243_3342(rhs(2, 1) * rhs(3, 2) - rhs(2, 2) * rhs(3, 1));
+			T const _3244_3442(rhs(2, 1) * rhs(3, 3) - rhs(2, 3) * rhs(3, 1));
+			T const _3344_3443(rhs(2, 2) * rhs(3, 3) - rhs(2, 3) * rhs(3, 2));
+
+			return rhs(0, 0) * (rhs(1, 1) * _3344_3443 - rhs(1, 2) * _3244_3442 + rhs(1, 3) * _3243_3342)
+				- rhs(0, 1) * (rhs(1, 0) * _3344_3443 - rhs(1, 2) * _3144_3441 + rhs(1, 3) * _3143_3341)
+				+ rhs(0, 2) * (rhs(1, 0) * _3244_3442 - rhs(1, 1) * _3144_3441 + rhs(1, 3) * _3142_3241)
+				- rhs(0, 3) * (rhs(1, 0) * _3243_3342 - rhs(1, 1) * _3143_3341 + rhs(1, 2) * _3142_3241);
+		}
+
+		template <typename T>
+		Matrix4_T<T> inverse(Matrix4_T<T> const & rhs)
+		{
+			T const _2132_2231(rhs(1, 0) * rhs(2, 1) - rhs(1, 1) * rhs(2, 0));
+			T const _2133_2331(rhs(1, 0) * rhs(2, 2) - rhs(1, 2) * rhs(2, 0));
+			T const _2134_2431(rhs(1, 0) * rhs(2, 3) - rhs(1, 3) * rhs(2, 0));
+			T const _2142_2241(rhs(1, 0) * rhs(3, 1) - rhs(1, 1) * rhs(3, 0));
+			T const _2143_2341(rhs(1, 0) * rhs(3, 2) - rhs(1, 2) * rhs(3, 0));
+			T const _2144_2441(rhs(1, 0) * rhs(3, 3) - rhs(1, 3) * rhs(3, 0));
+			T const _2233_2332(rhs(1, 1) * rhs(2, 2) - rhs(1, 2) * rhs(2, 1));
+			T const _2234_2432(rhs(1, 1) * rhs(2, 3) - rhs(1, 3) * rhs(2, 1));
+			T const _2243_2342(rhs(1, 1) * rhs(3, 2) - rhs(1, 2) * rhs(3, 1));
+			T const _2244_2442(rhs(1, 1) * rhs(3, 3) - rhs(1, 3) * rhs(3, 1));
+			T const _2334_2433(rhs(1, 2) * rhs(2, 3) - rhs(1, 3) * rhs(2, 2));
+			T const _2344_2443(rhs(1, 2) * rhs(3, 3) - rhs(1, 3) * rhs(3, 2));
+			T const _3142_3241(rhs(2, 0) * rhs(3, 1) - rhs(2, 1) * rhs(3, 0));
+			T const _3143_3341(rhs(2, 0) * rhs(3, 2) - rhs(2, 2) * rhs(3, 0));
+			T const _3144_3441(rhs(2, 0) * rhs(3, 3) - rhs(2, 3) * rhs(3, 0));
+			T const _3243_3342(rhs(2, 1) * rhs(3, 2) - rhs(2, 2) * rhs(3, 1));
+			T const _3244_3442(rhs(2, 1) * rhs(3, 3) - rhs(2, 3) * rhs(3, 1));
+			T const _3344_3443(rhs(2, 2) * rhs(3, 3) - rhs(2, 3) * rhs(3, 2));
+
+			// 行列式的值
+			T const det(determinant(rhs));
+			if (!equal<T>(det, 0))
+			{
+				T invDet(T(1) / det);
+
+				return Matrix4_T<T>(
+					+invDet * (rhs(1, 1) * _3344_3443 - rhs(1, 2) * _3244_3442 + rhs(1, 3) * _3243_3342),
+					-invDet * (rhs(0, 1) * _3344_3443 - rhs(0, 2) * _3244_3442 + rhs(0, 3) * _3243_3342),
+					+invDet * (rhs(0, 1) * _2344_2443 - rhs(0, 2) * _2244_2442 + rhs(0, 3) * _2243_2342),
+					-invDet * (rhs(0, 1) * _2334_2433 - rhs(0, 2) * _2234_2432 + rhs(0, 3) * _2233_2332),
+
+					-invDet * (rhs(1, 0) * _3344_3443 - rhs(1, 2) * _3144_3441 + rhs(1, 3) * _3143_3341),
+					+invDet * (rhs(0, 0) * _3344_3443 - rhs(0, 2) * _3144_3441 + rhs(0, 3) * _3143_3341),
+					-invDet * (rhs(0, 0) * _2344_2443 - rhs(0, 2) * _2144_2441 + rhs(0, 3) * _2143_2341),
+					+invDet * (rhs(0, 0) * _2334_2433 - rhs(0, 2) * _2134_2431 + rhs(0, 3) * _2133_2331),
+
+					+invDet * (rhs(1, 0) * _3244_3442 - rhs(1, 1) * _3144_3441 + rhs(1, 3) * _3142_3241),
+					-invDet * (rhs(0, 0) * _3244_3442 - rhs(0, 1) * _3144_3441 + rhs(0, 3) * _3142_3241),
+					+invDet * (rhs(0, 0) * _2244_2442 - rhs(0, 1) * _2144_2441 + rhs(0, 3) * _2142_2241),
+					-invDet * (rhs(0, 0) * _2234_2432 - rhs(0, 1) * _2134_2431 + rhs(0, 3) * _2132_2231),
+
+					-invDet * (rhs(1, 0) * _3243_3342 - rhs(1, 1) * _3143_3341 + rhs(1, 2) * _3142_3241),
+					+invDet * (rhs(0, 0) * _3243_3342 - rhs(0, 1) * _3143_3341 + rhs(0, 2) * _3142_3241),
+					-invDet * (rhs(0, 0) * _2243_2342 - rhs(0, 1) * _2143_2341 + rhs(0, 2) * _2142_2241),
+					+invDet * (rhs(0, 0) * _2233_2332 - rhs(0, 1) * _2133_2331 + rhs(0, 2) * _2132_2231));
+			}
+			else
+			{
+				return rhs;
+			}
+		}
+
+		template <typename T>
+		Matrix4_T<T> scaling(T const & sx, T const & sy, T const & sz)
+		{
+			return Matrix4_T<T>(
+				sx,	0,	0,	0,
+				0,	sy,	0,	0,
+				0,	0,	sz,	0,
+				0,	0,	0,	1);
+		}
+
+		template <typename T>
+		Matrix4_T<T> to_matrix(Quaternion_T<T> const & quat)
+		{
+			// calculate coefficients
+			T const x2(quat.x() + quat.x());
+			T const y2(quat.y() + quat.y());
+			T const z2(quat.z() + quat.z());
+
+			T const xx2(quat.x() * x2), xy2(quat.x() * y2), xz2(quat.x() * z2);
+			T const yy2(quat.y() * y2), yz2(quat.y() * z2), zz2(quat.z() * z2);
+			T const wx2(quat.w() * x2), wy2(quat.w() * y2), wz2(quat.w() * z2);
+
+			return Matrix4_T<T>(
+				1 - yy2 - zz2,	xy2 + wz2,		xz2 - wy2,		0,
+				xy2 - wz2,		1 - xx2 - zz2,	yz2 + wx2,		0,
+				xz2 + wy2,		yz2 - wx2,		1 - xx2 - yy2,	0,
+				0,				0,				0,				1);
+		}
+
+		template <typename T>
+		Matrix4_T<T> translation(T const & x, T const & y, T const & z)
+		{
+			return Matrix4_T<T>(
+				1,	0,	0,	0,
+				0,	1,	0,	0,
+				0,	0,	1,	0,
+				x,	y,	z,	1);
+		}
+
+		template <typename T>
+		Matrix4_T<T> translation(Vector_T<T, 3> const & pos)
+		{
+			return translation(pos.x(), pos.y(), pos.z());
+		}
+
+		template <typename T>
+		Matrix4_T<T> transpose(Matrix4_T<T> const & rhs)
+		{
+			return Matrix4_T<T>(
+				rhs(0, 0), rhs(1, 0), rhs(2, 0), rhs(3, 0),
+				rhs(0, 1), rhs(1, 1), rhs(2, 1), rhs(3, 1),
+				rhs(0, 2), rhs(1, 2), rhs(2, 2), rhs(3, 2),
+				rhs(0, 3), rhs(1, 3), rhs(2, 3), rhs(3, 3));
+		}
+
+		template <typename T>
+		Quaternion_T<T> conjugate(Quaternion_T<T> const & rhs)
+		{
+			return Quaternion_T<T>(-rhs.x(), -rhs.y(), -rhs.z(), rhs.w());
 		}
 
 		template <typename T>
@@ -268,11 +463,157 @@ namespace KlayGE
 		}
 
 		template <typename T>
+		std::pair<Quaternion_T<T>, Quaternion_T<T> > conjugate(Quaternion_T<T> const & real, Quaternion_T<T> const & dual)
+		{
+			return std::make_pair(MathLib::conjugate(real), MathLib::conjugate(dual));
+		}
+
+		template <typename T>
 		Quaternion_T<T> quat_trans_to_udq(Quaternion_T<T> const & q, Vector_T<T, 3> const & t)
 		{
 			return mul(q, Quaternion_T<T>(T(0.5) * t.x(), T(0.5) * t.y(), T(0.5) * t.z(), T(0.0)));
 		}
+
+		template <typename T>
+		Vector_T<T, 3> udq_to_trans(Quaternion_T<T> const & real, Quaternion_T<T> const & dual)
+		{
+			Quaternion_T<T> qeq0 = mul(conjugate(real), dual);
+			return T(2.0) * Vector_T<T, 3>(qeq0.x(), qeq0.y(), qeq0.z());
+		}
+
+		template <typename T>
+		std::pair<Quaternion_T<T>, Quaternion_T<T> > inverse(Quaternion_T<T> const & real, Quaternion_T<T> const & dual)
+		{
+			float sqr_len_0 = MathLib::dot(real, real);
+			float sqr_len_e = 2.0f * MathLib::dot(real, dual);
+			float inv_sqr_len_0 = 1.0f / sqr_len_0;
+			float inv_sqr_len_e = -sqr_len_e / (sqr_len_0 * sqr_len_0);
+			std::pair<Quaternion_T<T>, Quaternion_T<T> > conj = conjugate(real, dual);
+			return std::make_pair(inv_sqr_len_0 * conj.first, inv_sqr_len_0 * conj.second + inv_sqr_len_e * conj.first);
+		}
+
+		template <typename T>
+		Quaternion_T<T> mul_real(Quaternion_T<T> const & lhs_real, Quaternion_T<T> const & rhs_real)
+		{
+			return lhs_real * rhs_real;
+		}
+
+		template <typename T>
+		Quaternion_T<T> mul_dual(Quaternion_T<T> const & lhs_real, Quaternion_T<T> const & lhs_dual,
+			Quaternion_T<T> const & rhs_real, Quaternion_T<T> const & rhs_dual)
+		{
+			return lhs_real * rhs_dual + lhs_dual * rhs_real;
+		}
+
+		template <typename T>
+		void udq_to_screw(T& angle, T& pitch, Vector_T<T, 3>& dir, Vector_T<T, 3>& moment,
+			Quaternion_T<T> const & real, Quaternion_T<T> const & dual)
+		{
+			if (abs(real.w()) >= 1)
+			{
+				// pure translation
+
+				angle = 0;
+				dir = dual.v();
+
+				T dir_sq_len = length_sq(dir);
+
+				if (dir_sq_len > T(1e-6))
+				{
+					T dir_len = sqrt(dir_sq_len);
+					pitch = 2 * dir_len;
+					dir /= dir_len;
+				}
+				else
+				{
+					pitch = 0;
+				}
+
+				moment = Vector_T<T, 3>::Zero();
+			}
+			else
+			{ 
+				angle = 2 * acos(real.w());
+
+				float s = length_sq(real.v());
+				if (s < T(1e-6))
+				{
+					dir = Vector_T<T, 3>::Zero();
+					pitch = 0;
+					moment = Vector_T<T, 3>::Zero();
+				}
+				else
+				{
+					float oos = recip_sqrt(s);
+					dir = real.v() * oos;
+
+					pitch = -2 * dual.w() * oos;
+
+					moment = (dual.v() - dir * pitch * real.w() * T(0.5)) * oos;
+				}
+			}
+		}
+
+		template <typename T>
+		std::pair<Quaternion_T<T>, Quaternion_T<T> > udq_from_screw(T const & angle, T const & pitch, Vector_T<T, 3> const & dir, Vector_T<T, 3> const & moment)
+		{
+			T sa, ca;
+			sincos(angle * T(0.5), sa, ca);
+			return std::make_pair(Quaternion_T<T>(dir * sa, ca),
+				Quaternion_T<T>(sa * moment + T(0.5) * pitch * ca * dir, -pitch * sa * T(0.5)));
+		}
+
+		template <typename T>
+		std::pair<Quaternion_T<T>, Quaternion_T<T> > sclerp(Quaternion_T<T> const & lhs_real, Quaternion_T<T> const & lhs_dual,
+			Quaternion_T<T> const & rhs_real, Quaternion_T<T> const & rhs_dual, float const & slerp)
+		{
+			// Make sure dot product is >= 0
+			float quat_dot = dot(lhs_real, rhs_real);
+			Quaternion to_sign_corrected_real = rhs_real;
+			Quaternion to_sign_corrected_dual = rhs_dual;
+			if (quat_dot < 0)
+			{
+				to_sign_corrected_real = -to_sign_corrected_real;
+				to_sign_corrected_dual = -to_sign_corrected_dual;
+			}
+
+			std::pair<Quaternion_T<T>, Quaternion_T<T> > dif_dq = inverse(lhs_real, lhs_dual);
+			dif_dq.second = mul_dual(dif_dq.first, dif_dq.second, to_sign_corrected_real, to_sign_corrected_dual);
+			dif_dq.first = mul_real(dif_dq.first, to_sign_corrected_real);
+	
+			float angle, pitch;
+			float3 direction, moment;
+			udq_to_screw(angle, pitch, direction, moment, dif_dq.first, dif_dq.second);
+
+			angle *= slerp; 
+			pitch *= slerp;
+			dif_dq = udq_from_screw(angle, pitch, direction, moment);
+
+			dif_dq.second = mul_dual(lhs_real, lhs_dual, dif_dq.first, dif_dq.second);
+			dif_dq.first = mul_real(lhs_real, dif_dq.first);
+
+			return dif_dq;
+		}
 	}
+
+	std::pair<std::pair<Quaternion, Quaternion>, float> MeshMLObj::Keyframes::Frame(float frame) const
+	{
+		frame = std::fmod(frame, static_cast<float>(frame_id.back() + 1));
+
+		BOOST_AUTO(iter, std::upper_bound(frame_id.begin(), frame_id.end(), frame));
+		int index = static_cast<int>(iter - frame_id.begin());
+
+		int index0 = index - 1;
+		int index1 = index % frame_id.size();
+		int frame0 = frame_id[index0];
+		int frame1 = frame_id[index1];
+		float factor = (frame - frame0) / (frame1 - frame0);
+		std::pair<std::pair<Quaternion, Quaternion>, float> ret;
+		ret.first = MathLib::sclerp(bind_reals[index0], bind_duals[index0], bind_reals[index1], bind_duals[index1], factor);
+		ret.second = MathLib::lerp(bind_scales[index0], bind_scales[index1], factor);
+		return ret;
+	}
+
 
 	MeshMLObj::MeshMLObj(float unit_scale)
 		: unit_scale_(unit_scale), start_frame_(0), end_frame_(0), frame_rate_(25)
@@ -304,11 +645,18 @@ namespace KlayGE
 	void MeshMLObj::SetJoint(int joint_id, std::string const & joint_name, int parent_id,
 		Quaternion const & bind_real, Quaternion const & bind_dual)
 	{
+		float scale = MathLib::length(bind_real);
+		if (bind_real.w() < 0)
+		{
+			scale = -scale;
+		}
+
 		Joint& joint = joints_[joint_id];
 		joint.name = joint_name;
 		joint.parent_id = parent_id;
-		joint.bind_real = bind_real;
+		joint.bind_real = bind_real / scale;
 		joint.bind_dual = bind_dual;
+		joint.bind_scale = scale;
 	}
 
 	int MeshMLObj::AllocMaterial()
@@ -477,9 +825,11 @@ namespace KlayGE
 		BOOST_ASSERT(static_cast<int>(keyframes_.size()) > kfs_id);
 
 		Keyframes& kfs = keyframes_[kfs_id];
-		int id = static_cast<int>(kfs.bind_reals.size());
+		int id = static_cast<int>(kfs.frame_id.size());
+		kfs.frame_id.push_back(id);
 		kfs.bind_reals.push_back(Quaternion());
 		kfs.bind_duals.push_back(Quaternion());
+		kfs.bind_scales.push_back(1);
 		return id;
 	}
 
@@ -501,9 +851,16 @@ namespace KlayGE
 		BOOST_ASSERT(static_cast<int>(keyframes_.size()) > kfs_id);
 		BOOST_ASSERT(static_cast<int>(keyframes_[kfs_id].bind_reals.size()) > kf_id);
 
+		float scale = MathLib::length(bind_real);
+		if (bind_real.w() < 0)
+		{
+			scale = -scale;
+		}
+		
 		Keyframes& kfs = keyframes_[kfs_id];
-		kfs.bind_reals[kf_id] = bind_real;
+		kfs.bind_reals[kf_id] = bind_real / scale;
 		kfs.bind_duals[kf_id] = bind_dual;
+		kfs.bind_scales[kf_id] = scale;
 	}
 
 	void MeshMLObj::WriteMeshML(std::ostream& os, int vertex_export_settings, int user_export_settings, std::string const & encoding)
@@ -554,10 +911,10 @@ namespace KlayGE
 		int model_ver = 5;
 
 		// Initialize the xml document
-		os << "<?xml version=\"1.0\" ";
+		os << "<?xml version=\"1.0\"";
 		if (!encoding.empty())
 		{
-			os << "encoding=\"" << encoding << "\"";
+			os << " encoding=\"" << encoding << "\"";
 		}
 		os << "?>" << std::endl << std::endl;
 		os << "<model version=\"" << model_ver << "\">" << std::endl;
@@ -576,7 +933,8 @@ namespace KlayGE
 		}
 		if (!keyframes_.empty())
 		{
-			this->WriteKeyframeChunk(os, joint_id_to_index);
+			this->WriteKeyframeChunk(os, joint_index_to_id);
+			this->WriteAABBKeyframeChunk(os);
 		}
 
 		// Finish the writing process
@@ -603,10 +961,10 @@ namespace KlayGE
 			}
 
 			os << "\" parent=\"" << parent_id << "\">" << std::endl;
-			os << "\t\t\t<bind_real x=\"" << joint.second.bind_real[0]
-				<< "\" y=\"" << joint.second.bind_real[1]
-				<< "\" z=\"" << joint.second.bind_real[2]
-				<< "\" w=\"" << joint.second.bind_real[3] << "\"/>" << std::endl;
+			os << "\t\t\t<bind_real x=\"" << joint.second.bind_real[0] * joint.second.bind_scale
+				<< "\" y=\"" << joint.second.bind_real[1] * joint.second.bind_scale
+				<< "\" z=\"" << joint.second.bind_real[2] * joint.second.bind_scale
+				<< "\" w=\"" << joint.second.bind_real[3] * joint.second.bind_scale << "\"/>" << std::endl;
 			os << "\t\t\t<bind_dual x=\"" << joint.second.bind_dual[0]
 				<< "\" y=\"" << joint.second.bind_dual[1]
 				<< "\" z=\"" << joint.second.bind_dual[2]
@@ -671,7 +1029,51 @@ namespace KlayGE
 				<< "\" mtl_id=\"" << mesh.material_id << "\">" << std::endl;
 
 			os << "\t\t\t<vertices_chunk>" << std::endl;
+
 			typedef BOOST_TYPEOF(mesh.vertices) VerticesType;
+			float3 pos_min_bb = mesh.vertices[0].position;
+			float3 pos_max_bb = pos_min_bb;
+			float2 tc_min_bb(-1, -1);
+			float2 tc_max_bb(+1, +1);
+			if (vertex_export_settings & VES_Texcoord)
+			{
+				tc_min_bb = tc_max_bb = mesh.vertices[0].texcoords[0];
+			}
+			BOOST_FOREACH(VerticesType::const_reference vertex, mesh.vertices)
+			{
+				pos_min_bb.x() = std::min(pos_min_bb.x(), vertex.position.x());
+				pos_min_bb.y() = std::min(pos_min_bb.y(), vertex.position.y());
+				pos_min_bb.z() = std::min(pos_min_bb.z(), vertex.position.z());
+
+				pos_max_bb.x() = std::max(pos_max_bb.x(), vertex.position.x());
+				pos_max_bb.y() = std::max(pos_max_bb.y(), vertex.position.y());
+				pos_max_bb.z() = std::max(pos_max_bb.z(), vertex.position.z());
+
+				if (vertex_export_settings & VES_Texcoord)
+				{
+					tc_min_bb.x() = std::min(tc_min_bb.x(), vertex.texcoords[0].x());
+					tc_min_bb.y() = std::min(tc_min_bb.y(), vertex.texcoords[0].y());
+
+					tc_max_bb.x() = std::max(tc_max_bb.x(), vertex.texcoords[0].x());
+					tc_max_bb.y() = std::max(tc_max_bb.y(), vertex.texcoords[0].y());
+				}
+			}
+
+			os << "\t\t\t\t<pos_bb>" << std::endl;
+			os << "\t\t\t\t\t<min x=\"" << pos_min_bb.x() << "\" y=\"" << pos_min_bb.y()
+				<< "\" z=\"" << pos_min_bb.z() << "\"/>" << std::endl;
+			os << "\t\t\t\t\t<max x=\"" << pos_max_bb.x() << "\" y=\"" << pos_max_bb.y()
+				<< "\" z=\"" << pos_max_bb.z() << "\"/>" << std::endl;
+			os << "\t\t\t\t</pos_bb>" << std::endl;
+			if (vertex_export_settings & VES_Texcoord)
+			{
+				os << "\t\t\t\t<tc_bb>" << std::endl;
+				os << "\t\t\t\t\t<min x=\"" << tc_min_bb.x() << "\" y=\"" << tc_min_bb.y() << "\"/>" << std::endl;
+				os << "\t\t\t\t\t<max x=\"" << tc_max_bb.x() << "\" y=\"" << tc_max_bb.y() << "\"/>" << std::endl;
+				os << "\t\t\t\t</tc_bb>" << std::endl;
+			}
+			os << std::endl;
+
 			BOOST_FOREACH(VerticesType::const_reference vertex, mesh.vertices)
 			{
 				os << "\t\t\t\t<vertex x=\"" << vertex.position.x()
@@ -763,42 +1165,145 @@ namespace KlayGE
 		os << "\t</meshes_chunk>" << std::endl;
 	}
 
-	void MeshMLObj::WriteKeyframeChunk(std::ostream& os, std::map<int, int> const & joint_id_to_index)
+	void MeshMLObj::WriteKeyframeChunk(std::ostream& os, std::vector<int> const & joint_index_to_id)
 	{
 		os << "\t<key_frames_chunk start_frame=\"" << start_frame_
 			<< "\" end_frame=\"" << end_frame_
 			<< "\" frame_rate=\"" << frame_rate_ << "\">" << std::endl;
-		typedef BOOST_TYPEOF(keyframes_) KeyFramesType;
-		BOOST_FOREACH(KeyFramesType::const_reference kf, keyframes_)
+		typedef BOOST_TYPEOF(joint_index_to_id) JointIndexToIDType;
+		BOOST_FOREACH(JointIndexToIDType::const_reference joint_id, joint_index_to_id)
 		{
-			BOOST_AUTO(fiter, joint_id_to_index.find(kf.joint_id));
-			if (fiter != joint_id_to_index.end())
+			typedef BOOST_TYPEOF(keyframes_) KeyFramesType;
+			BOOST_FOREACH(KeyFramesType::const_reference kf, keyframes_)
 			{
-				BOOST_ASSERT(kf.bind_reals.size() == kf.bind_duals.size());
-
-				size_t const frames = kf.bind_reals.size();
-
-				os << "\t\t<key_frame joint=\"" << RemoveQuote(joints_[kf.joint_id].name) << "\">" << std::endl;
-				for (size_t j = 0; j < frames; ++ j)
+				if (kf.joint_id == joint_id)
 				{
-					Quaternion const & bind_real = kf.bind_reals[j];
-					Quaternion const & bind_dual = kf.bind_duals[j];
+					BOOST_ASSERT(kf.bind_reals.size() == kf.bind_duals.size());
 
-					os << "\t\t\t<key>" << std::endl;
-					os << "\t\t\t\t<bind_real x=\"" << bind_real.x()
-						<< "\" y=\"" << bind_real.y()
-						<< "\" z=\"" << bind_real.z()
-						<< "\" w=\"" << bind_real.w() << "\"/>" << std::endl;
-					os << "\t\t\t\t<bind_dual x=\"" << bind_dual.x()
-						<< "\" y=\"" << bind_dual.y()
-						<< "\" z=\"" << bind_dual.z()
-						<< "\" w=\"" << bind_dual.w() << "\"/>" << std::endl;
-					os << "\t\t\t</key>" << std::endl;
+					size_t const frames = kf.bind_reals.size();
+
+					os << "\t\t<key_frame joint_id=\"" << kf.joint_id << "\">" << std::endl;
+					for (size_t j = 0; j < frames; ++ j)
+					{
+						Quaternion const bind_real = kf.bind_reals[j] * kf.bind_scales[j];
+						Quaternion const & bind_dual = kf.bind_duals[j];
+
+						os << "\t\t\t<key>" << std::endl;
+						os << "\t\t\t\t<bind_real x=\"" << bind_real.x()
+							<< "\" y=\"" << bind_real.y()
+							<< "\" z=\"" << bind_real.z()
+							<< "\" w=\"" << bind_real.w() << "\"/>" << std::endl;
+						os << "\t\t\t\t<bind_dual x=\"" << bind_dual.x()
+							<< "\" y=\"" << bind_dual.y()
+							<< "\" z=\"" << bind_dual.z()
+							<< "\" w=\"" << bind_dual.w() << "\"/>" << std::endl;
+						os << "\t\t\t</key>" << std::endl;
+					}
+					os << "\t\t</key_frame>" << std::endl;
 				}
-				os << "\t\t</key_frame>" << std::endl;
 			}
 		}
 		os << "\t</key_frames_chunk>" << std::endl;
+	}
+
+	void MeshMLObj::WriteAABBKeyframeChunk(std::ostream& os)
+	{
+		int const num_frames = end_frame_ - start_frame_;
+
+		std::vector<Quaternion> bind_reals;
+		std::vector<Quaternion> bind_duals;
+		std::vector<std::vector<float3> > bb_min_key_frames(meshes_.size());
+		std::vector<std::vector<float3> > bb_max_key_frames(meshes_.size());
+		for (size_t m = 0; m < meshes_.size(); ++ m)
+		{
+			bb_min_key_frames[m].resize(num_frames);
+			bb_max_key_frames[m].resize(num_frames);
+		}
+
+		for (int f = 0; f < num_frames; ++ f)
+		{
+			this->UpdateJoints(f, bind_reals, bind_duals);
+			for (size_t m = 0; m < meshes_.size(); ++ m)
+			{
+				float3 bb_min, bb_max;
+				for (size_t v = 0; v < meshes_[m].vertices.size(); ++ v)
+				{
+					Vertex const & vertex = meshes_[m].vertices[v];
+
+					Quaternion dp0 = bind_reals[vertex.binds[0].first];
+	
+					float3 pos_s(0, 0, 0);
+					Quaternion blend_real(0, 0, 0, 0);
+					Quaternion blend_dual(0, 0, 0, 0);
+					for (size_t bi = 0; bi < vertex.binds.size(); ++ bi)
+					{
+						Quaternion joint_real = bind_reals[vertex.binds[bi].first];
+						Quaternion joint_dual = bind_duals[vertex.binds[bi].first];
+		
+						float scale = MathLib::length(joint_real);
+						joint_real /= scale;
+
+						float weight = vertex.binds[bi].second;
+		
+						if (MathLib::dot(dp0, joint_real) < 0)
+						{
+							joint_real = -joint_real;
+							joint_dual = -joint_dual;
+						}
+
+						pos_s += vertex.position * scale * weight;
+						blend_real += joint_real * weight;
+						blend_dual += joint_dual * weight;
+					}
+	
+					float len = MathLib::length(blend_real);
+					blend_real /= len;
+					blend_dual /= len;
+
+					Quaternion trans = MathLib::mul(Quaternion(blend_dual.x(), blend_dual.y(), blend_dual.z(), -blend_dual.w()), blend_real);
+					float3 result_pos = MathLib::transform_quat(pos_s, blend_real) + 2 * float3(trans.x(), trans.y(), trans.z());
+					if (0 == v)
+					{
+						bb_min = bb_max = result_pos;
+					}
+					else
+					{
+						bb_min.x() = std::min(bb_min.x(), result_pos.x());
+						bb_min.y() = std::min(bb_min.y(), result_pos.y());
+						bb_min.z() = std::min(bb_min.z(), result_pos.z());
+
+						bb_max.x() = std::max(bb_max.x(), result_pos.x());
+						bb_max.y() = std::max(bb_max.y(), result_pos.y());
+						bb_max.z() = std::max(bb_max.z(), result_pos.z());
+					}
+				}
+
+				bb_min_key_frames[m][f] = bb_min;
+				bb_max_key_frames[m][f] = bb_max;
+			}
+		}
+
+		os << "\t<bb_key_frames_chunk>" << std::endl;
+		for (size_t m = 0; m < meshes_.size(); ++ m)
+		{
+			os << "\t\t<bb_key_frame mesh_id=\"" << m << "\">" << std::endl;
+			for (size_t f = 0; f < num_frames; ++ f)
+			{
+				float3 const & bb_min = bb_min_key_frames[m][f];
+				float3 const & bb_max = bb_max_key_frames[m][f];
+
+				os << "\t\t\t<key>" << std::endl;
+				os << "\t\t\t\t<bb_min x=\"" << bb_min.x()
+					<< "\" y=\"" << bb_min.y()
+					<< "\" z=\"" << bb_min.z() << "\"/>" << std::endl;
+				os << "\t\t\t\t<bb_max x=\"" << bb_max.x()
+					<< "\" y=\"" << bb_max.y()
+					<< "\" z=\"" << bb_max.z() << "\"/>" << std::endl;
+				os << "\t\t\t</key>" << std::endl;
+			}
+			os << "\t\t</bb_key_frame>" << std::endl;
+		}
+		os << "\t</bb_key_frames_chunk>" << std::endl;
 	}
 
 	void MeshMLObj::OptimizeJoints()
@@ -954,7 +1459,7 @@ namespace KlayGE
 		}
 	}
 
-	void MeshMLObj::MatrixToDQ(float4x4 const & mat, Quaternion& real, Quaternion& dual)
+	void MeshMLObj::MatrixToDQ(float4x4 const & mat, Quaternion& real, Quaternion& dual) const
 	{
 		float4x4 tmp_mat = mat;
 		float flip = 1;
@@ -982,5 +1487,189 @@ namespace KlayGE
 		}
 
 		real *= scale.x();
+	}
+
+	void MeshMLObj::UpdateJoints(int frame, std::vector<Quaternion>& bind_reals, std::vector<Quaternion>& bind_duals) const
+	{
+		std::vector<Joint> bind_joints;
+		typedef BOOST_TYPEOF(joints_) JointsType;
+		BOOST_FOREACH(JointsType::const_reference joint, joints_)
+		{
+			bind_joints.push_back(joint.second);
+		}
+
+		std::vector<Joint> bind_inverse_joints(bind_joints.size());
+		for (size_t i = 0; i < bind_joints.size(); ++ i)
+		{
+			Joint inverse_joint;
+
+			float flip = MathLib::sgn(bind_joints[i].bind_scale);
+
+			inverse_joint.bind_scale = 1 / bind_joints[i].bind_scale;
+
+			if (flip > 0)
+			{
+				std::pair<Quaternion, Quaternion> inv = MathLib::inverse(bind_joints[i].bind_real, bind_joints[i].bind_dual);
+				inverse_joint.bind_real = inv.first;
+				inverse_joint.bind_dual = inv.second;
+			}
+			else
+			{
+				float4x4 tmp_mat = MathLib::scaling(abs(bind_joints[i].bind_scale), abs(bind_joints[i].bind_scale), bind_joints[i].bind_scale)
+					* MathLib::to_matrix(bind_joints[i].bind_real)
+					* MathLib::translation(MathLib::udq_to_trans(bind_joints[i].bind_real, bind_joints[i].bind_dual));
+				tmp_mat = MathLib::inverse(tmp_mat);
+				tmp_mat(2, 0) = -tmp_mat(2, 0);
+				tmp_mat(2, 1) = -tmp_mat(2, 1);
+				tmp_mat(2, 2) = -tmp_mat(2, 2);
+
+				float3 scale;
+				Quaternion rot;
+				float3 trans;
+				MathLib::decompose(scale, rot, trans, tmp_mat);
+
+				inverse_joint.bind_real = rot;
+				inverse_joint.bind_dual = MathLib::quat_trans_to_udq(rot, trans);
+				inverse_joint.bind_scale = -scale.x();
+			}
+
+			bind_inverse_joints[i] = inverse_joint;
+		}
+
+		for (size_t i = 0; i < bind_joints.size(); ++ i)
+		{
+			size_t kf_id = 0;
+			Joint& joint = bind_joints[i];
+			for (size_t j = 0; j < keyframes_.size(); ++ j)
+			{
+				Keyframes const & kf = keyframes_[j];
+				if (kf.joint_id == static_cast<int>(i))
+				{
+					kf_id = j;
+					break;
+				}
+			}
+
+			Keyframes const & kf = keyframes_[kf_id];
+
+			std::pair<std::pair<Quaternion, Quaternion>, float> key_dq = kf.Frame(static_cast<float>(frame));
+
+			if (joint.parent_id != -1)
+			{
+				Joint const & parent(bind_joints[joint.parent_id]);
+
+				if (MathLib::dot(key_dq.first.first, parent.bind_real) < 0)
+				{
+					key_dq.first.first = -key_dq.first.first;
+					key_dq.first.second = -key_dq.first.second;
+				}
+
+				if ((key_dq.second > 0) && (parent.bind_scale > 0))
+				{
+					joint.bind_real = MathLib::mul_real(key_dq.first.first, parent.bind_real);
+					joint.bind_dual = MathLib::mul_dual(key_dq.first.first, key_dq.first.second * parent.bind_scale, parent.bind_real, parent.bind_dual);
+					joint.bind_scale = key_dq.second * parent.bind_scale;
+				}
+				else
+				{
+					float4x4 tmp_mat = MathLib::scaling(MathLib::abs(key_dq.second), MathLib::abs(key_dq.second), key_dq.second)
+						* MathLib::to_matrix(key_dq.first.first)
+						* MathLib::translation(MathLib::udq_to_trans(key_dq.first.first, key_dq.first.second))
+						* MathLib::scaling(MathLib::abs(parent.bind_scale), MathLib::abs(parent.bind_scale), parent.bind_scale)
+						* MathLib::to_matrix(parent.bind_real)
+						* MathLib::translation(MathLib::udq_to_trans(parent.bind_real, parent.bind_dual));
+
+					float flip = 1;
+					if (MathLib::dot(MathLib::cross(float3(tmp_mat(0, 0), tmp_mat(0, 1), tmp_mat(0, 2)),
+						float3(tmp_mat(1, 0), tmp_mat(1, 1), tmp_mat(1, 2))),
+						float3(tmp_mat(2, 0), tmp_mat(2, 1), tmp_mat(2, 2))) < 0)
+					{
+						tmp_mat(2, 0) = -tmp_mat(2, 0);
+						tmp_mat(2, 1) = -tmp_mat(2, 1);
+						tmp_mat(2, 2) = -tmp_mat(2, 2);
+
+						flip = -1;
+					}
+
+					float3 scale;
+					Quaternion rot;
+					float3 trans;
+					MathLib::decompose(scale, rot, trans, tmp_mat);
+
+					joint.bind_real = rot;
+					joint.bind_dual = MathLib::quat_trans_to_udq(rot, trans);
+					joint.bind_scale = flip * scale.x();
+				}
+			}
+			else
+			{
+				joint.bind_real = key_dq.first.first;
+				joint.bind_dual = key_dq.first.second;
+				joint.bind_scale = key_dq.second;
+			}
+		}
+
+		bind_reals.resize(bind_joints.size());
+		bind_duals.resize(bind_joints.size());
+		for (size_t i = 0; i < bind_joints.size(); ++ i)
+		{
+			Joint const & joint = bind_joints[i];
+			Joint const & inverse_joint = bind_inverse_joints[i];
+
+			Quaternion bind_real, bind_dual;
+			float bind_scale;
+			if ((inverse_joint.bind_scale > 0) && (joint.bind_scale > 0))
+			{
+				bind_real = MathLib::mul_real(inverse_joint.bind_real, joint.bind_real);
+				bind_dual = MathLib::mul_dual(inverse_joint.bind_real, inverse_joint.bind_dual,
+					joint.bind_real, joint.bind_dual);
+				bind_scale = inverse_joint.bind_scale * joint.bind_scale;
+
+				if (bind_real.w() < 0)
+				{
+					bind_real = -bind_real;
+					bind_dual = -bind_dual;
+				}
+			}
+			else
+			{
+				float4x4 tmp_mat = MathLib::scaling(MathLib::abs(inverse_joint.bind_scale), MathLib::abs(inverse_joint.bind_scale), inverse_joint.bind_scale)
+					* MathLib::to_matrix(inverse_joint.bind_real)
+					* MathLib::translation(MathLib::udq_to_trans(inverse_joint.bind_real, inverse_joint.bind_dual))
+					* MathLib::scaling(MathLib::abs(joint.bind_scale), MathLib::abs(joint.bind_scale), joint.bind_scale)
+					* MathLib::to_matrix(joint.bind_real)
+					* MathLib::translation(MathLib::udq_to_trans(joint.bind_real, joint.bind_dual));
+
+				float flip = 1;
+				if (MathLib::dot(MathLib::cross(float3(tmp_mat(0, 0), tmp_mat(0, 1), tmp_mat(0, 2)),
+					float3(tmp_mat(1, 0), tmp_mat(1, 1), tmp_mat(1, 2))),
+					float3(tmp_mat(2, 0), tmp_mat(2, 1), tmp_mat(2, 2))) < 0)
+				{
+					tmp_mat(2, 0) = -tmp_mat(2, 0);
+					tmp_mat(2, 1) = -tmp_mat(2, 1);
+					tmp_mat(2, 2) = -tmp_mat(2, 2);
+
+					flip = -1;
+				}
+
+				float3 scale;
+				Quaternion rot;
+				float3 trans;
+				MathLib::decompose(scale, rot, trans, tmp_mat);
+
+				bind_real = rot;
+				bind_dual = MathLib::quat_trans_to_udq(rot, trans);
+				bind_scale = scale.x();
+
+				if (flip * bind_real.w() < 0)
+				{
+					bind_real = -bind_real;
+					bind_dual = -bind_dual;
+				}
+			}
+
+			bind_reals[i] = bind_real * bind_scale;
+			bind_duals[i] = bind_dual;
+		}
 	}
 }  // namespace KlayGE
