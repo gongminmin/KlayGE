@@ -986,18 +986,18 @@ namespace KlayGE
 					ss->write(reinterpret_cast<char*>(&specular_level), sizeof(specular_level));
 					ss->write(reinterpret_cast<char*>(&shininess), sizeof(shininess));
 
-					XMLNodePtr textures_chunk = mtl_node->FirstNode("textures_chunk");
-					if (textures_chunk)
+					XMLNodePtr tex_node = mtl_node->FirstNode("texture");
+					if (tex_node)
 					{
 						uint32_t num_texs = 0;
-						for (XMLNodePtr tex_node = textures_chunk->FirstNode("texture"); tex_node; tex_node = tex_node->NextSibling("texture"))
+						for (XMLNodePtr tex_node = mtl_node->FirstNode("texture"); tex_node; tex_node = tex_node->NextSibling("texture"))
 						{
 							++ num_texs;
 						}
 						NativeToLittleEndian<sizeof(num_texs)>(&num_texs);
 						ss->write(reinterpret_cast<char*>(&num_texs), sizeof(num_texs));
 
-						for (XMLNodePtr tex_node = textures_chunk->FirstNode("texture"); tex_node; tex_node = tex_node->NextSibling("texture"))
+						for (XMLNodePtr tex_node = mtl_node->FirstNode("texture"); tex_node; tex_node = tex_node->NextSibling("texture"))
 						{
 							WriteShortString(*ss, tex_node->Attrib("type")->ValueString());
 							WriteShortString(*ss, tex_node->Attrib("name")->ValueString());
@@ -1400,7 +1400,7 @@ namespace KlayGE
 								{
 									if (VEU_BlendIndex == ves[mesh_index][i].usage)
 									{
-										std::istringstream attr_ss(weight_node->Attrib("bone_index")->ValueString());
+										std::istringstream attr_ss(weight_node->Attrib("joint")->ValueString());
 										uint32_t bone_index32[4] = { 0, 0, 0, 0 };
 										uint32_t num_blend = 0;
 										while (attr_ss && (num_blend < 4))
@@ -1624,12 +1624,12 @@ namespace KlayGE
 					ss->write(reinterpret_cast<char*>(&joint_parent), sizeof(joint_parent));
 
 					Quaternion bind_real;
-					XMLNodePtr bind_real_node = bone_node->FirstNode("bind_real");
+					XMLNodePtr bind_real_node = bone_node->FirstNode("real");
 					std::istringstream attr_ss(bind_real_node->Attrib("v")->ValueString());
 					attr_ss >> bind_real.x() >> bind_real.y() >> bind_real.z() >> bind_real.w();
 							
 					Quaternion bind_dual;
-					XMLNodePtr bind_dual_node = bone_node->FirstNode("bind_dual");
+					XMLNodePtr bind_dual_node = bone_node->FirstNode("dual");
 					attr_ss.str(bind_dual_node->Attrib("v")->ValueString());
 					attr_ss.seekg(0);
 					attr_ss >> bind_dual.x() >> bind_dual.y() >> bind_dual.z() >> bind_dual.w();
@@ -1680,12 +1680,12 @@ namespace KlayGE
 						kfs.frame_id.push_back(frame_id);
 
 						Quaternion bind_real;
-						XMLNodePtr bind_real_node = key_node->FirstNode("bind_real");
+						XMLNodePtr bind_real_node = key_node->FirstNode("real");
 						std::istringstream attr_ss(bind_real_node->Attrib("v")->ValueString());
 						attr_ss >> bind_real.x() >> bind_real.y() >> bind_real.z() >> bind_real.w();
 							
 						Quaternion bind_dual;
-						XMLNodePtr bind_dual_node = key_node->FirstNode("bind_dual");
+						XMLNodePtr bind_dual_node = key_node->FirstNode("dual");
 						attr_ss.str(bind_dual_node->Attrib("v")->ValueString());
 						attr_ss.seekg(0);
 						attr_ss >> bind_dual.x() >> bind_dual.y() >> bind_dual.z() >> bind_dual.w();
@@ -1701,46 +1701,6 @@ namespace KlayGE
 						kfs.bind_real.push_back(bind_real);
 						kfs.bind_dual.push_back(bind_dual);
 						kfs.bind_scale.push_back(bind_scale);
-					}
-
-					// compress the key frame data
-					uint32_t base = 0;
-					while (base < kfs.frame_id.size() - 2)
-					{
-						uint32_t frame0 = kfs.frame_id[base + 0];
-						uint32_t frame1 = kfs.frame_id[base + 1];
-						uint32_t frame2 = kfs.frame_id[base + 2];
-						float factor = static_cast<float>(frame1 - frame0) / (frame2 - frame0);
-						std::pair<Quaternion, Quaternion> interpolate = MathLib::sclerp(kfs.bind_real[base + 0], kfs.bind_dual[base + 0],
-							kfs.bind_real[base + 2], kfs.bind_dual[base + 2], factor);
-						float scale = MathLib::lerp(kfs.bind_scale[base + 0], kfs.bind_scale[base + 2], factor);
-
-						if (MathLib::dot(kfs.bind_real[base + 1], interpolate.first) < 0)
-						{
-							interpolate.first = -interpolate.first;
-							interpolate.second = -interpolate.second;
-						}
-
-						std::pair<Quaternion, Quaternion> dif_dq = MathLib::inverse(kfs.bind_real[base + 1], kfs.bind_dual[base + 1]);
-						dif_dq.second = MathLib::mul_dual(dif_dq.first, dif_dq.second * scale, interpolate.first, interpolate.second);
-						dif_dq.first = MathLib::mul_real(dif_dq.first, interpolate.first);
-						float dif_scale = scale * kfs.bind_scale[base + 1];
-
-						if ((MathLib::abs(dif_dq.first.x()) < 1e-5f) && (MathLib::abs(dif_dq.first.y()) < 1e-5f)
-							&& (MathLib::abs(dif_dq.first.z()) < 1e-5f) && (MathLib::abs(dif_dq.first.w() - 1) < 1e-5f)
-							&& (MathLib::abs(dif_dq.second.x()) < 1e-5f) && (MathLib::abs(dif_dq.second.y()) < 1e-5f)
-							&& (MathLib::abs(dif_dq.second.z()) < 1e-5f) && (MathLib::abs(dif_dq.second.w()) < 1e-5f)
-							&& (MathLib::abs(dif_scale - 1) < 1e-5f))
-						{
-							kfs.frame_id.erase(kfs.frame_id.begin() + base + 1);
-							kfs.bind_real.erase(kfs.bind_real.begin() + base + 1);
-							kfs.bind_dual.erase(kfs.bind_dual.begin() + base + 1);
-							kfs.bind_scale.erase(kfs.bind_scale.begin() + base + 1);
-						}
-						else
-						{
-							++ base;
-						}
 					}
 
 					uint32_t num_kf = static_cast<uint32_t>(kfs.frame_id.size());
@@ -1799,34 +1759,6 @@ namespace KlayGE
 							attr_ss >> bb_max[0] >> bb_max[1] >> bb_max[2];
 
 							bb_kfs.bb.push_back(AABBox(bb_min, bb_max));
-						}
-
-						// compress the bounding box key frame data
-						uint32_t base = 0;
-						while (base < bb_kfs.frame_id.size() - 2)
-						{
-							uint32_t frame0 = kfs.frame_id[base + 0];
-							uint32_t frame1 = kfs.frame_id[base + 1];
-							uint32_t frame2 = kfs.frame_id[base + 2];
-							float factor = static_cast<float>(frame1 - frame0) / (frame2 - frame0);
-							AABBox interpolate(MathLib::lerp(bb_kfs.bb[base + 0].Min(), bb_kfs.bb[base + 2].Min(), factor),
-								MathLib::lerp(bb_kfs.bb[base + 0].Max(), bb_kfs.bb[base + 2].Max(), factor));
-
-							float3 diff_min = bb_kfs.bb[base + 1].Min() - interpolate.Min();
-							float3 diff_max = bb_kfs.bb[base + 1].Max() - interpolate.Max();
-
-							if ((MathLib::abs(diff_min.x()) < 1e-5f) && (MathLib::abs(diff_min.y()) < 1e-5f)
-								&& (MathLib::abs(diff_min.z()) < 1e-5f)
-								&& (MathLib::abs(diff_max.x()) < 1e-5f) && (MathLib::abs(diff_max.y()) < 1e-5f)
-								&& (MathLib::abs(diff_max.z()) < 1e-5f))
-							{
-								bb_kfs.frame_id.erase(bb_kfs.frame_id.begin() + base + 1);
-								bb_kfs.bb.erase(bb_kfs.bb.begin() + base + 1);
-							}
-							else
-							{
-								++ base;
-							}
 						}
 
 						uint32_t num_bb_kf = static_cast<uint32_t>(bb_kfs.frame_id.size());
@@ -2408,14 +2340,14 @@ namespace KlayGE
 				Quaternion const & bind_real = joint.bind_real * MathLib::abs(joint.bind_scale);
 				Quaternion const & bind_dual = joint.bind_dual;
 
-				XMLNodePtr bind_real_node = doc.AllocNode(XNT_Element, "bind_real");
+				XMLNodePtr bind_real_node = doc.AllocNode(XNT_Element, "real");
 				bone_node->AppendNode(bind_real_node);
 				bind_real_node->AppendAttrib(doc.AllocAttribFloat("x", bind_real.x()));
 				bind_real_node->AppendAttrib(doc.AllocAttribFloat("y", bind_real.y()));
 				bind_real_node->AppendAttrib(doc.AllocAttribFloat("z", bind_real.z()));
 				bind_real_node->AppendAttrib(doc.AllocAttribFloat("w", bind_real.w()));
 
-				XMLNodePtr bind_dual_node = doc.AllocNode(XNT_Element, "bind_dual");
+				XMLNodePtr bind_dual_node = doc.AllocNode(XNT_Element, "dual");
 				bone_node->AppendNode(bind_dual_node);
 				bind_dual_node->AppendAttrib(doc.AllocAttribFloat("x", bind_dual.x()));
 				bind_dual_node->AppendAttrib(doc.AllocAttribFloat("y", bind_dual.y()));
@@ -2471,13 +2403,10 @@ namespace KlayGE
 				uint32_t const num_textures = static_cast<uint32_t const>(mtl->texture_slots.size());
 				if (num_textures > 0)
 				{
-					XMLNodePtr textures_chunk = doc.AllocNode(XNT_Element, "textures_chunk");
-					mtl_node->AppendNode(textures_chunk);
-
 					for (uint8_t j = 0; j < num_textures; ++ j)
 					{
 						XMLNodePtr texture_node = doc.AllocNode(XNT_Element, "texture");
-						textures_chunk->AppendNode(texture_node);
+						mtl_node->AppendNode(texture_node);
 
 						texture_node->AppendAttrib(doc.AllocAttribString("type", mtl->texture_slots[j].first));
 						texture_node->AppendAttrib(doc.AllocAttribString("name", mtl->texture_slots[j].second));
@@ -2646,7 +2575,7 @@ namespace KlayGE
 									vertex_node->AppendNode(weight_node);
 
 									uint8_t const * bone_indices = &buffs[mesh_index][k][0];
-									weight_node->AppendAttrib(doc.AllocAttribFloat("bone_index", bone_indices[j * num_components + c]));
+									weight_node->AppendAttrib(doc.AllocAttribFloat("joint", bone_indices[j * num_components + c]));
 
 									if (weight_stream != -1)
 									{
@@ -2770,14 +2699,14 @@ namespace KlayGE
 						Quaternion const & bind_real = iter->bind_real[j] * MathLib::abs(iter->bind_scale[j]);
 						Quaternion const & bind_dual = iter->bind_dual[j];
 
-						XMLNodePtr bind_real_node = doc.AllocNode(XNT_Element, "bind_real");
+						XMLNodePtr bind_real_node = doc.AllocNode(XNT_Element, "real");
 						key_node->AppendNode(bind_real_node); 
 						bind_real_node->AppendAttrib(doc.AllocAttribFloat("x", bind_real.x()));
 						bind_real_node->AppendAttrib(doc.AllocAttribFloat("y", bind_real.y()));
 						bind_real_node->AppendAttrib(doc.AllocAttribFloat("z", bind_real.z()));
 						bind_real_node->AppendAttrib(doc.AllocAttribFloat("w", bind_real.w()));
 
-						XMLNodePtr bind_dual_node = doc.AllocNode(XNT_Element, "bind_dual");
+						XMLNodePtr bind_dual_node = doc.AllocNode(XNT_Element, "dual");
 						key_node->AppendNode(bind_dual_node);
 						bind_dual_node->AppendAttrib(doc.AllocAttribFloat("x", bind_dual.x()));
 						bind_dual_node->AppendAttrib(doc.AllocAttribFloat("y", bind_dual.y()));

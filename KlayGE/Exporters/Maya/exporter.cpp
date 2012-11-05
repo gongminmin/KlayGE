@@ -121,8 +121,7 @@ private:
 MayaMeshExporter::MayaMeshExporter()
 	: meshml_obj_(static_cast<float>(MDistance(1, MDistance::internalUnit()).asMeters()))
 {
-	meshml_obj_.StartFrame(0);
-	meshml_obj_.EndFrame(0);
+	meshml_obj_.NumFrames(0);
 	meshml_obj_.FrameRate(30);
 
 	// Always add a default material
@@ -153,8 +152,8 @@ void MayaMeshExporter::ExportMayaNodes(MItDag& dag_iterator)
 {
 	int start_frame = static_cast<int>(MAnimControl::minTime().as(MTime::kNTSCField));
 	int end_frame = static_cast<int>(MAnimControl::maxTime().as(MTime::kNTSCField));
-	meshml_obj_.StartFrame(start_frame);
-	meshml_obj_.EndFrame(end_frame);
+	int num_frames = end_frame - start_frame + 1;
+	meshml_obj_.NumFrames(num_frames);
 
 	MAnimControl::setCurrentTime(MTime(start_frame, MTime::kNTSCField));
 
@@ -288,7 +287,6 @@ void MayaMeshExporter::ExportMayaNodes(MItDag& dag_iterator)
 		}
 	}
 
-	int num_frames = end_frame - start_frame + 1;
 	if (num_frames > 0)
 	{
 		std::map<int, int> joint_id_to_kfs_id;

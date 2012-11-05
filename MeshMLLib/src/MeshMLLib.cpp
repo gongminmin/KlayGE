@@ -598,15 +598,15 @@ namespace KlayGE
 
 	std::pair<std::pair<Quaternion, Quaternion>, float> MeshMLObj::Keyframes::Frame(float frame) const
 	{
-		frame = std::fmod(frame, static_cast<float>(frame_id.back() + 1));
+		frame = std::fmod(frame, static_cast<float>(frame_ids.back() + 1));
 
-		BOOST_AUTO(iter, std::upper_bound(frame_id.begin(), frame_id.end(), frame));
-		int index = static_cast<int>(iter - frame_id.begin());
+		BOOST_AUTO(iter, std::upper_bound(frame_ids.begin(), frame_ids.end(), frame));
+		int index = static_cast<int>(iter - frame_ids.begin());
 
 		int index0 = index - 1;
-		int index1 = index % frame_id.size();
-		int frame0 = frame_id[index0];
-		int frame1 = frame_id[index1];
+		int index1 = index % frame_ids.size();
+		int frame0 = frame_ids[index0];
+		int frame1 = frame_ids[index1];
 		float factor = (frame - frame0) / (frame1 - frame0);
 		std::pair<std::pair<Quaternion, Quaternion>, float> ret;
 		ret.first = MathLib::sclerp(bind_reals[index0], bind_duals[index0], bind_reals[index1], bind_duals[index1], factor);
@@ -825,8 +825,8 @@ namespace KlayGE
 		BOOST_ASSERT(static_cast<int>(keyframes_.size()) > kfs_id);
 
 		Keyframes& kfs = keyframes_[kfs_id];
-		int id = static_cast<int>(kfs.frame_id.size());
-		kfs.frame_id.push_back(id);
+		int id = static_cast<int>(kfs.frame_ids.size());
+		kfs.frame_ids.push_back(id);
 		kfs.bind_reals.push_back(Quaternion());
 		kfs.bind_duals.push_back(Quaternion());
 		kfs.bind_scales.push_back(1);
@@ -878,30 +878,6 @@ namespace KlayGE
 				joint_index_to_id.push_back(joint.first);
 			}
 
-			bool swapped = true;
-			while (swapped)
-			{
-				swapped = false;
-				for (int i = 0; i < static_cast<int>(joint_index_to_id.size()); ++ i)
-				{
-					int par_index = -1;
-					if (joints_[joint_index_to_id[i]].parent_id != -1)
-					{
-						std::vector<int>::iterator par_iter = std::find(joint_index_to_id.begin(), joint_index_to_id.end(),
-							joints_[joint_index_to_id[i]].parent_id);
-						BOOST_ASSERT(par_iter != joint_index_to_id.end());
-						par_index = static_cast<int>(par_iter - joint_index_to_id.begin());
-					}
-
-					if (par_index > i)
-					{
-						std::swap(joint_index_to_id[i], joint_index_to_id[par_index]);
-						swapped = true;
-						break;
-					}
-				}
-			}
-
 			for (int i = 0; i < static_cast<int>(joint_index_to_id.size()); ++ i)
 			{
 				joint_id_to_index.insert(std::make_pair(joint_index_to_id[i], i));
@@ -914,7 +890,7 @@ namespace KlayGE
 		{
 			if (joint.second.parent_id != -1)
 			{
-				std::map<int, int>::const_iterator fiter = joint_id_to_index.find(joint.second.parent_id);
+				BOOST_AUTO(fiter, joint_id_to_index.find(joint.second.parent_id));
 				BOOST_ASSERT(fiter != joint_id_to_index.end());
 
 				joint.second.parent_id = fiter->second;
@@ -984,10 +960,10 @@ namespace KlayGE
 			Quaternion const & bind_dual = joint.second.bind_dual;
 
 			os << "\" parent=\"" << joint.second.parent_id << "\">" << std::endl;
-			os << "\t\t\t<bind_real v=\"" << bind_real[0]
+			os << "\t\t\t<real v=\"" << bind_real[0]
 				<< " " << bind_real[1] << " " << bind_real[2]
 				<< " " << bind_real[3] << "\"/>" << std::endl;
-			os << "\t\t\t<bind_dual v=\"" << bind_dual[0]
+			os << "\t\t\t<dual v=\"" << bind_dual[0]
 				<< " " << bind_dual[1] << " " << bind_dual[2]
 				<< " " << bind_dual[3] << "\"/>" << std::endl;
 			os << "\t\t</bone>" << std::endl;
@@ -1021,14 +997,12 @@ namespace KlayGE
 			{
 				os << ">" << std::endl;
 
-				os << "\t\t\t<textures_chunk>" << std::endl;
 				typedef BOOST_TYPEOF(mtl.texture_slots) TextureSlotsType;
 				BOOST_FOREACH(TextureSlotsType::const_reference tl, mtl.texture_slots)
 				{
-					os << "\t\t\t\t<texture type=\"" << RemoveQuote(tl.first)
+					os << "\t\t\t<texture type=\"" << RemoveQuote(tl.first)
 						<< "\" name=\"" << RemoveQuote(tl.second) << "\"/>" << std::endl;
 				}
-				os << "\t\t\t</textures_chunk>" << std::endl;
 
 				os << "\t\t</material>" << std::endl;
 			}
@@ -1147,7 +1121,7 @@ namespace KlayGE
 						}
 					}
 
-					os << "\t\t\t\t\t<weight bone_index=\"";
+					os << "\t\t\t\t\t<weight joint=\"";
 					for (size_t i = 0; i < vertex.binds.size(); ++ i)
 					{
 						os << vertex.binds[i].first;
@@ -1193,54 +1167,99 @@ namespace KlayGE
 
 	void MeshMLObj::WriteKeyframeChunk(std::ostream& os)
 	{
+		float const THRESHOLD = 1e-3f;
+
+		std::map<int, int> joint_id_to_kf;
+		for (size_t i = 0; i < keyframes_.size(); ++ i)
+		{
+			joint_id_to_kf.insert(std::make_pair(keyframes_[i].joint_id, static_cast<int>(i)));
+		}
+
 		os << "\t<key_frames_chunk num_frames=\"" << num_frames_
 			<< "\" frame_rate=\"" << frame_rate_ << "\">" << std::endl;
 		typedef BOOST_TYPEOF(joints_) JointsType;
 		BOOST_FOREACH(JointsType::const_reference joint, joints_)
 		{
-			typedef BOOST_TYPEOF(keyframes_) KeyFramesType;
-			BOOST_FOREACH(KeyFramesType::const_reference kf, keyframes_)
+			BOOST_AUTO(iter, joint_id_to_kf.find(joint.first));
+			BOOST_ASSERT(iter != joint_id_to_kf.end());
+
+			Keyframes kf = keyframes_[iter->second];
+
+			BOOST_ASSERT(kf.bind_reals.size() == kf.bind_duals.size());
+
+			int base = 0;
+			while (base < kf.frame_ids.size() - 2)
 			{
-				if (kf.joint_id == joint.first)
+				int const frame0 = kf.frame_ids[base + 0];
+				int const frame1 = kf.frame_ids[base + 1];
+				int const frame2 = kf.frame_ids[base + 2];
+				float const factor = static_cast<float>(frame1 - frame0) / (frame2 - frame0);
+				std::pair<Quaternion, Quaternion> interpolate = MathLib::sclerp(kf.bind_reals[base + 0], kf.bind_duals[base + 0],
+					kf.bind_reals[base + 2], kf.bind_duals[base + 2], factor);
+				float const scale = MathLib::lerp(kf.bind_scales[base + 0], kf.bind_scales[base + 2], factor);
+
+				if (MathLib::dot(kf.bind_reals[base + 1], interpolate.first) < 0)
 				{
-					BOOST_ASSERT(kf.bind_reals.size() == kf.bind_duals.size());
+					interpolate.first = -interpolate.first;
+					interpolate.second = -interpolate.second;
+				}
 
-					size_t const frames = kf.bind_reals.size();
+				std::pair<Quaternion, Quaternion> diff_dq = MathLib::inverse(kf.bind_reals[base + 1], kf.bind_duals[base + 1]);
+				diff_dq.second = MathLib::mul_dual(diff_dq.first, diff_dq.second * scale, interpolate.first, interpolate.second);
+				diff_dq.first = MathLib::mul_real(diff_dq.first, interpolate.first);
+				float diff_scale = scale * kf.bind_scales[base + 1];
 
-					os << "\t\t<key_frame joint_id=\"" << kf.joint_id << "\">" << std::endl;
-					for (size_t j = 0; j < frames; ++ j)
-					{
-						Quaternion const bind_real = kf.bind_reals[j] * kf.bind_scales[j];
-						Quaternion const & bind_dual = kf.bind_duals[j];
-
-						os << "\t\t\t<key>" << std::endl;
-						os << "\t\t\t\t<bind_real v=\"" << bind_real.x()
-							<< " " << bind_real.y()
-							<< " " << bind_real.z()
-							<< " " << bind_real.w() << "\"/>" << std::endl;
-						os << "\t\t\t\t<bind_dual v=\"" << bind_dual.x()
-							<< " " << bind_dual.y()
-							<< " " << bind_dual.z()
-							<< " " << bind_dual.w() << "\"/>" << std::endl;
-						os << "\t\t\t</key>" << std::endl;
-					}
-					os << "\t\t</key_frame>" << std::endl;
-
-					break;
+				if ((MathLib::abs(diff_dq.first.x()) < THRESHOLD) && (MathLib::abs(diff_dq.first.y()) < THRESHOLD)
+					&& (MathLib::abs(diff_dq.first.z()) < THRESHOLD) && (MathLib::abs(diff_dq.first.w() - 1) < THRESHOLD)
+					&& (MathLib::abs(diff_dq.second.x()) < THRESHOLD) && (MathLib::abs(diff_dq.second.y()) < THRESHOLD)
+					&& (MathLib::abs(diff_dq.second.z()) < THRESHOLD) && (MathLib::abs(diff_dq.second.w()) < THRESHOLD)
+					&& (MathLib::abs(diff_scale - 1) < THRESHOLD))
+				{
+					kf.frame_ids.erase(kf.frame_ids.begin() + base + 1);
+					kf.bind_reals.erase(kf.bind_reals.begin() + base + 1);
+					kf.bind_duals.erase(kf.bind_duals.begin() + base + 1);
+					kf.bind_scales.erase(kf.bind_scales.begin() + base + 1);
+				}
+				else
+				{
+					++ base;
 				}
 			}
+
+			os << "\t\t<key_frame joint=\"" << kf.joint_id << "\">" << std::endl;
+			for (size_t j = 0; j < kf.frame_ids.size(); ++ j)
+			{
+				Quaternion const bind_real = kf.bind_reals[j] * kf.bind_scales[j];
+				Quaternion const & bind_dual = kf.bind_duals[j];
+
+				os << "\t\t\t<key id=\"" << kf.frame_ids[j] << "\">" << std::endl;
+				os << "\t\t\t\t<real v=\"" << bind_real.x()
+					<< " " << bind_real.y()
+					<< " " << bind_real.z()
+					<< " " << bind_real.w() << "\"/>" << std::endl;
+				os << "\t\t\t\t<dual v=\"" << bind_dual.x()
+					<< " " << bind_dual.y()
+					<< " " << bind_dual.z()
+					<< " " << bind_dual.w() << "\"/>" << std::endl;
+				os << "\t\t\t</key>" << std::endl;
+			}
+			os << "\t\t</key_frame>" << std::endl;
 		}
 		os << "\t</key_frames_chunk>" << std::endl;
 	}
 
 	void MeshMLObj::WriteAABBKeyframeChunk(std::ostream& os)
 	{
+		float const THRESHOLD = 1e-3f;
+
 		std::vector<Quaternion> bind_reals;
 		std::vector<Quaternion> bind_duals;
+		std::vector<std::vector<int> > frame_ids(meshes_.size());
 		std::vector<std::vector<float3> > bb_min_key_frames(meshes_.size());
 		std::vector<std::vector<float3> > bb_max_key_frames(meshes_.size());
 		for (size_t m = 0; m < meshes_.size(); ++ m)
 		{
+			frame_ids[m].resize(num_frames_);
 			bb_min_key_frames[m].resize(num_frames_);
 			bb_max_key_frames[m].resize(num_frames_);
 		}
@@ -1302,6 +1321,7 @@ namespace KlayGE
 					}
 				}
 
+				frame_ids[m][f] = f;
 				bb_min_key_frames[m][f] = bb_min;
 				bb_max_key_frames[m][f] = bb_max;
 			}
@@ -1310,13 +1330,46 @@ namespace KlayGE
 		os << "\t<bb_key_frames_chunk>" << std::endl;
 		for (size_t m = 0; m < meshes_.size(); ++ m)
 		{
-			os << "\t\t<bb_key_frame mesh_id=\"" << m << "\">" << std::endl;
-			for (size_t f = 0; f < num_frames_; ++ f)
-			{
-				float3 const & bb_min = bb_min_key_frames[m][f];
-				float3 const & bb_max = bb_max_key_frames[m][f];
+			std::vector<int>& fid = frame_ids[m];
+			std::vector<float3>& min_kf = bb_min_key_frames[m];
+			std::vector<float3>& max_kf = bb_max_key_frames[m];
 
-				os << "\t\t\t<key min=\"" << bb_min.x()
+			int base = 0;
+			while (base < fid.size() - 2)
+			{
+				int const frame0 = fid[base + 0];
+				int const frame1 = fid[base + 1];
+				int const frame2 = fid[base + 2];
+				float const factor = static_cast<float>(frame1 - frame0) / (frame2 - frame0);
+				float3 const interpolate_min = MathLib::lerp(min_kf[base + 0], min_kf[base + 2], factor);
+				float3 const interpolate_max = MathLib::lerp(max_kf[base + 0], max_kf[base + 2], factor);
+
+				float3 const diff_min = min_kf[base + 1] - interpolate_min;
+				float3 const diff_max = max_kf[base + 1] - interpolate_max;
+
+				if ((MathLib::abs(diff_min.x()) < THRESHOLD) && (MathLib::abs(diff_min.y()) < THRESHOLD)
+					&& (MathLib::abs(diff_min.z()) < THRESHOLD)
+					&& (MathLib::abs(diff_max.x()) < THRESHOLD) && (MathLib::abs(diff_max.y()) < THRESHOLD)
+					&& (MathLib::abs(diff_max.z()) < THRESHOLD))
+				{
+					fid.erase(fid.begin() + base + 1);
+					min_kf.erase(min_kf.begin() + base + 1);
+					max_kf.erase(max_kf.begin() + base + 1);
+				}
+				else
+				{
+					++ base;
+				}
+			}
+
+			os << "\t\t<bb_key_frame mesh=\"" << m << "\">" << std::endl;
+			for (size_t f = 0; f < fid.size(); ++ f)
+			{
+				float3 const & bb_min = min_kf[f];
+				float3 const & bb_max = max_kf[f];
+
+				os << "\t\t\t<key id=\"" << fid[f]
+					<< "\" min=\"" << bb_min.x()
 					<< " " << bb_min.y()
 					<< " " << bb_min.z()
 					<< "\" max=\"" << bb_max.x()

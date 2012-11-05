@@ -185,7 +185,7 @@ namespace KlayGE
 		{
 			int joint_id;
 
-			std::vector<int> frame_id;
+			std::vector<int> frame_ids;
 			std::vector<Quaternion> bind_reals;
 			std::vector<Quaternion> bind_duals;
 			std::vector<float> bind_scales;
