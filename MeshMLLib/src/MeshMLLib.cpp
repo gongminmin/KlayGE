@@ -908,6 +908,37 @@ namespace KlayGE
 			}
 		}
 
+		// Replace parent_id
+		typedef BOOST_TYPEOF(joints_) JointsType;
+		BOOST_FOREACH(JointsType::reference joint, joints_)
+		{
+			if (joint.second.parent_id != -1)
+			{
+				std::map<int, int>::const_iterator fiter = joint_id_to_index.find(joint.second.parent_id);
+				BOOST_ASSERT(fiter != joint_id_to_index.end());
+
+				joint.second.parent_id = fiter->second;
+			}
+		}
+
+		// Replace joint_id in weight
+		typedef BOOST_TYPEOF(meshes_) MeshesType;
+		BOOST_FOREACH(MeshesType::reference mesh, meshes_)
+		{
+			typedef BOOST_TYPEOF(mesh.vertices) VerticesType;
+			BOOST_FOREACH(VerticesType::reference vertex, mesh.vertices)
+			{
+				typedef BOOST_TYPEOF(vertex.binds) BindsType;
+				BOOST_FOREACH(BindsType::reference bind, vertex.binds)
+				{
+					std::map<int, int>::const_iterator fiter = joint_id_to_index.find(bind.first);
+					BOOST_ASSERT(fiter != joint_id_to_index.end());
+
+					bind.first = fiter->second;
+				}
+			}
+		}
+
 		int model_ver = 6;
 
 		// Initialize the xml document
@@ -921,7 +952,7 @@ namespace KlayGE
 
 		if (!joints_.empty())
 		{
-			this->WriteJointChunk(os, joint_id_to_index);
+			this->WriteJointChunk(os);
 		}
 		if (!materials_.empty())
 		{
@@ -929,19 +960,19 @@ namespace KlayGE
 		}
 		if (!meshes_.empty())
 		{
-			this->WriteMeshChunk(os, joint_id_to_index, vertex_export_settings);
+			this->WriteMeshChunk(os, vertex_export_settings);
 		}
 		if (!keyframes_.empty())
 		{
-			this->WriteKeyframeChunk(os, joint_index_to_id);
-			this->WriteAABBKeyframeChunk(os, joint_id_to_index);
+			this->WriteKeyframeChunk(os);
+			this->WriteAABBKeyframeChunk(os);
 		}
 
 		// Finish the writing process
 		os << "</model>" << std::endl;
 	}
 
-	void MeshMLObj::WriteJointChunk(std::ostream& os, std::map<int, int> const & joint_id_to_index)
+	void MeshMLObj::WriteJointChunk(std::ostream& os)
 	{
 		os << "\t<bones_chunk>" << std::endl;
 		typedef BOOST_TYPEOF(joints_) JointsType;
@@ -949,19 +980,10 @@ namespace KlayGE
 		{
 			os << "\t\t<bone name=\"" << RemoveQuote(joint.second.name);
 
-			int parent_id = -1;
-			if (joint.second.parent_id != -1)
-			{
-				std::map<int, int>::const_iterator fiter = joint_id_to_index.find(joint.second.parent_id);
-				BOOST_ASSERT(fiter != joint_id_to_index.end());
-
-				parent_id = fiter->second;
-			}
-
 			Quaternion const bind_real = joint.second.bind_real * joint.second.bind_scale;
 			Quaternion const & bind_dual = joint.second.bind_dual;
 
-			os << "\" parent=\"" << parent_id << "\">" << std::endl;
+			os << "\" parent=\"" << joint.second.parent_id << "\">" << std::endl;
 			os << "\t\t\t<bind_real v=\"" << bind_real[0]
 				<< " " << bind_real[1] << " " << bind_real[2]
 				<< " " << bind_real[3] << "\"/>" << std::endl;
@@ -1018,7 +1040,7 @@ namespace KlayGE
 		os << "\t</materials_chunk>" << std::endl;
 	}
 
-	void MeshMLObj::WriteMeshChunk(std::ostream& os, std::map<int, int> const & joint_id_to_index, int vertex_export_settings)
+	void MeshMLObj::WriteMeshChunk(std::ostream& os, int vertex_export_settings)
 	{
 		os << "\t<meshes_chunk>" << std::endl;
 		typedef BOOST_TYPEOF(meshes_) MeshesType;
@@ -1125,30 +1147,20 @@ namespace KlayGE
 						}
 					}
 
-					std::vector<std::pair<int, float> > binds;
-					typedef BOOST_TYPEOF(vertex.binds) BindsType;
-					BOOST_FOREACH(BindsType::const_reference bind, vertex.binds)
-					{
-						std::map<int, int>::const_iterator fiter = joint_id_to_index.find(bind.first);
-						BOOST_ASSERT(fiter != joint_id_to_index.end());
-
-						binds.push_back(std::make_pair(fiter->second, bind.second));
-					}
-
 					os << "\t\t\t\t\t<weight bone_index=\"";
-					for (size_t i = 0; i < binds.size(); ++ i)
+					for (size_t i = 0; i < vertex.binds.size(); ++ i)
 					{
-						os << binds[i].first;
-						if (i != binds.size() - 1)
+						os << vertex.binds[i].first;
+						if (i != vertex.binds.size() - 1)
 						{
 							os << ' ';
 						}
 					}
 					os << "\" weight=\"";
-					for (size_t i = 0; i < binds.size(); ++ i)
+					for (size_t i = 0; i < vertex.binds.size(); ++ i)
 					{
-						os << binds[i].second;
-						if (i != binds.size() - 1)
+						os << vertex.binds[i].second;
+						if (i != vertex.binds.size() - 1)
 						{
 							os << ' ';
 						}
@@ -1179,17 +1191,17 @@ namespace KlayGE
 		os << "\t</meshes_chunk>" << std::endl;
 	}
 
-	void MeshMLObj::WriteKeyframeChunk(std::ostream& os, std::vector<int> const & joint_index_to_id)
+	void MeshMLObj::WriteKeyframeChunk(std::ostream& os)
 	{
 		os << "\t<key_frames_chunk num_frames=\"" << num_frames_
 			<< "\" frame_rate=\"" << frame_rate_ << "\">" << std::endl;
-		typedef BOOST_TYPEOF(joint_index_to_id) JointIndexToIDType;
-		BOOST_FOREACH(JointIndexToIDType::const_reference joint_id, joint_index_to_id)
+		typedef BOOST_TYPEOF(joints_) JointsType;
+		BOOST_FOREACH(JointsType::const_reference joint, joints_)
 		{
 			typedef BOOST_TYPEOF(keyframes_) KeyFramesType;
 			BOOST_FOREACH(KeyFramesType::const_reference kf, keyframes_)
 			{
-				if (kf.joint_id == joint_id)
+				if (kf.joint_id == joint.first)
 				{
 					BOOST_ASSERT(kf.bind_reals.size() == kf.bind_duals.size());
 
@@ -1213,13 +1225,15 @@ namespace KlayGE
 						os << "\t\t\t</key>" << std::endl;
 					}
 					os << "\t\t</key_frame>" << std::endl;
+
+					break;
 				}
 			}
 		}
 		os << "\t</key_frames_chunk>" << std::endl;
 	}
 
-	void MeshMLObj::WriteAABBKeyframeChunk(std::ostream& os, std::map<int, int> const & joint_id_to_index)
+	void MeshMLObj::WriteAABBKeyframeChunk(std::ostream& os)
 	{
 		std::vector<Quaternion> bind_reals;
 		std::vector<Quaternion> bind_duals;
@@ -1233,7 +1247,7 @@ namespace KlayGE
 
 		for (int f = 0; f < num_frames_; ++ f)
 		{
-			this->UpdateJoints(f, joint_id_to_index, bind_reals, bind_duals);
+			this->UpdateJoints(f, bind_reals, bind_duals);
 			for (size_t m = 0; m < meshes_.size(); ++ m)
 			{
 				float3 bb_min(+1e10f, +1e10f, +1e10f);
@@ -1242,20 +1256,15 @@ namespace KlayGE
 				{
 					Vertex const & vertex = meshes_[m].vertices[v];
 
-					BOOST_AUTO(iter, joint_id_to_index.find(vertex.binds[0].first));
-					BOOST_ASSERT(iter != joint_id_to_index.end());
-					Quaternion const & dp0 = bind_reals[iter->second];
+					Quaternion const & dp0 = bind_reals[vertex.binds[0].first];
 	
 					float3 pos_s(0, 0, 0);
 					Quaternion blend_real(0, 0, 0, 0);
 					Quaternion blend_dual(0, 0, 0, 0);
 					for (size_t bi = 0; bi < vertex.binds.size(); ++ bi)
 					{
-						iter = joint_id_to_index.find(vertex.binds[bi].first);
-						BOOST_ASSERT(iter != joint_id_to_index.end());
-
-						Quaternion joint_real = bind_reals[iter->second];
-						Quaternion joint_dual = bind_duals[iter->second];
+						Quaternion joint_real = bind_reals[vertex.binds[bi].first];
+						Quaternion joint_dual = bind_duals[vertex.binds[bi].first];
 		
 						float scale = MathLib::length(joint_real);
 						joint_real /= scale;
@@ -1502,16 +1511,13 @@ namespace KlayGE
 		real *= scale.x();
 	}
 
-	void MeshMLObj::UpdateJoints(int frame, std::map<int, int> const & joint_id_to_index, std::vector<Quaternion>& bind_reals, std::vector<Quaternion>& bind_duals) const
+	void MeshMLObj::UpdateJoints(int frame, std::vector<Quaternion>& bind_reals, std::vector<Quaternion>& bind_duals) const
 	{
-		std::vector<Joint> bind_joints(joints_.size());
+		std::vector<Joint> bind_joints;
 		typedef BOOST_TYPEOF(joints_) JointsType;
 		BOOST_FOREACH(JointsType::const_reference joint, joints_)
 		{
-			BOOST_AUTO(iter, joint_id_to_index.find(joint.first));
-			BOOST_ASSERT(iter != joint_id_to_index.end());
-
-			bind_joints[iter->second] = joint.second;
+			bind_joints.push_back(joint.second);
 		}
 
 		std::vector<Joint> bind_inverse_joints(bind_joints.size());
@@ -1572,10 +1578,7 @@ namespace KlayGE
 
 			if (joint.parent_id != -1)
 			{
-				BOOST_AUTO(piter, joint_id_to_index.find(joint.parent_id));
-				BOOST_ASSERT(piter != joint_id_to_index.end());
-
-				Joint const & parent(bind_joints[piter->second]);
+				Joint const & parent(bind_joints[joint.parent_id]);
 
 				if (MathLib::dot(key_dq.first.first, parent.bind_real) < 0)
 				{

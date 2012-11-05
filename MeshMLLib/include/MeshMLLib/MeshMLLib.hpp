@@ -197,14 +197,14 @@ namespace KlayGE
 		void OptimizeMaterials();
 		void OptimizeMeshes(int user_export_settings);
 
-		void WriteJointChunk(std::ostream& os, std::map<int, int> const & joint_id_to_index);
+		void WriteJointChunk(std::ostream& os);
 		void WriteMaterialChunk(std::ostream& os);
-		void WriteMeshChunk(std::ostream& os, std::map<int, int> const & joint_id_to_index, int vertex_export_settings);
-		void WriteKeyframeChunk(std::ostream& os, std::vector<int> const & joint_index_to_id);
-		void WriteAABBKeyframeChunk(std::ostream& os, std::map<int, int> const & joint_id_to_index);
+		void WriteMeshChunk(std::ostream& os, int vertex_export_settings);
+		void WriteKeyframeChunk(std::ostream& os);
+		void WriteAABBKeyframeChunk(std::ostream& os);
 
 		void MatrixToDQ(float4x4 const & mat, Quaternion& real, Quaternion& dual) const;
-		void UpdateJoints(int frame, std::map<int, int> const & joint_id_to_index, std::vector<Quaternion>& bind_reals, std::vector<Quaternion>& bind_duals) const;
+		void UpdateJoints(int frame, std::vector<Quaternion>& bind_reals, std::vector<Quaternion>& bind_duals) const;
 
 		struct MaterialIDSortOp
 		{
