@@ -158,8 +158,8 @@ namespace KlayGE
 			::SetWindowLongPtr(wnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(instance));
 
 			::SendMessage(::GetDlgItem(wnd, IDC_TANGENT_COMBO), CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(TEXT("Tangent quaternion")));
-			::SendMessage(::GetDlgItem(wnd, IDC_TANGENT_COMBO), CB_SETCURSEL, 0, reinterpret_cast<LPARAM>(TEXT("Normal")));
-			::SendMessage(::GetDlgItem(wnd, IDC_TANGENT_COMBO), CB_SETCURSEL, 0, reinterpret_cast<LPARAM>(TEXT("None")));
+			::SendMessage(::GetDlgItem(wnd, IDC_TANGENT_COMBO), CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(TEXT("Normal")));
+			::SendMessage(::GetDlgItem(wnd, IDC_TANGENT_COMBO), CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(TEXT("None")));
 			::SendMessage(::GetDlgItem(wnd, IDC_TANGENT_COMBO), CB_SETCURSEL, 0, 0);
 			::SendMessage(::GetDlgItem(wnd, IDC_TEXCOORD_CHECK), BM_SETCHECK, BST_CHECKED, NULL);
 			::SendMessage(::GetDlgItem(wnd, IDC_COMBINE_MESHES_CHECK), BM_SETCHECK, BST_UNCHECKED, NULL);

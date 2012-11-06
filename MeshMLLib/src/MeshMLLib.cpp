@@ -596,6 +596,40 @@ namespace KlayGE
 		}
 	}
 
+	bool MeshMLObj::Material::operator==(MeshMLObj::Material const & rhs) const
+	{
+		bool same = (ambient == rhs.ambient) && (diffuse == rhs.diffuse)
+			&& (specular_level == rhs.specular_level) && (emit == rhs.emit)
+			&& (opacity == rhs.opacity) && (specular_level == rhs.specular_level)
+			&& (shininess == rhs.shininess);
+		if (same)
+		{
+			for (size_t i = 0; i < texture_slots.size(); ++ i)
+			{
+				bool found = false;
+				for (size_t j = 0; j < rhs.texture_slots.size(); ++ j)
+				{
+					if (texture_slots[i] == rhs.texture_slots[j])
+					{
+						found = true;
+						break;
+					}
+				}
+
+				if (!found)
+				{
+					return false;
+				}
+			}
+
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+	}
+
 	std::pair<std::pair<Quaternion, Quaternion>, float> MeshMLObj::Keyframes::Frame(float frame) const
 	{
 		frame = std::fmod(frame, static_cast<float>(frame_ids.back() + 1));
@@ -1121,25 +1155,28 @@ namespace KlayGE
 						}
 					}
 
-					os << "\t\t\t\t\t<weight joint=\"";
-					for (size_t i = 0; i < vertex.binds.size(); ++ i)
+					if (!vertex.binds.empty())
 					{
-						os << vertex.binds[i].first;
-						if (i != vertex.binds.size() - 1)
+						os << "\t\t\t\t\t<weight joint=\"";
+						for (size_t i = 0; i < vertex.binds.size(); ++ i)
 						{
-							os << ' ';
+							os << vertex.binds[i].first;
+							if (i != vertex.binds.size() - 1)
+							{
+								os << ' ';
+							}
 						}
-					}
-					os << "\" weight=\"";
-					for (size_t i = 0; i < vertex.binds.size(); ++ i)
-					{
-						os << vertex.binds[i].second;
-						if (i != vertex.binds.size() - 1)
+						os << "\" weight=\"";
+						for (size_t i = 0; i < vertex.binds.size(); ++ i)
 						{
-							os << ' ';
+							os << vertex.binds[i].second;
+							if (i != vertex.binds.size() - 1)
+							{
+								os << ' ';
+							}
 						}
+						os << "\"/>" << std::endl;
 					}
-					os << "\"/>" << std::endl;
 
 					os << "\t\t\t\t</vertex>" << std::endl;
 				}

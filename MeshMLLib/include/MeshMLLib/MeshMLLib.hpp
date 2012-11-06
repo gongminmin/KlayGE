@@ -140,13 +140,7 @@ namespace KlayGE
 			float shininess;
 			std::vector<TextureSlot> texture_slots;
 
-			bool operator==(Material const & rhs) const
-			{
-				return (ambient == rhs.ambient) && (diffuse == rhs.diffuse)
-					&& (specular_level == rhs.specular_level) && (emit == rhs.emit)
-					&& (opacity == rhs.opacity) && (specular_level == rhs.specular_level)
-					&& (shininess == rhs.shininess);
-			}
+			bool operator==(Material const & rhs) const;
 		};
 		
 		struct Vertex
