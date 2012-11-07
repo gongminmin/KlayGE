@@ -905,6 +905,7 @@ namespace KlayGE
 
 		std::map<int, int> joint_id_to_index;
 		std::vector<int> joint_index_to_id;
+		if (!joints_.empty())
 		{
 			typedef BOOST_TYPEOF(joints_) JointsType;
 			BOOST_FOREACH(JointsType::const_reference joint, joints_)
@@ -916,37 +917,56 @@ namespace KlayGE
 			{
 				joint_id_to_index.insert(std::make_pair(joint_index_to_id[i], i));
 			}
-		}
 
-		// Replace parent_id
-		typedef BOOST_TYPEOF(joints_) JointsType;
-		BOOST_FOREACH(JointsType::reference joint, joints_)
-		{
-			if (joint.second.parent_id != -1)
+			// Replace parent_id
+			typedef BOOST_TYPEOF(joints_) JointsType;
+			BOOST_FOREACH(JointsType::reference joint, joints_)
 			{
-				BOOST_AUTO(fiter, joint_id_to_index.find(joint.second.parent_id));
-				BOOST_ASSERT(fiter != joint_id_to_index.end());
-
-				joint.second.parent_id = fiter->second;
-			}
-		}
-
-		// Replace joint_id in weight
-		typedef BOOST_TYPEOF(meshes_) MeshesType;
-		BOOST_FOREACH(MeshesType::reference mesh, meshes_)
-		{
-			typedef BOOST_TYPEOF(mesh.vertices) VerticesType;
-			BOOST_FOREACH(VerticesType::reference vertex, mesh.vertices)
-			{
-				typedef BOOST_TYPEOF(vertex.binds) BindsType;
-				BOOST_FOREACH(BindsType::reference bind, vertex.binds)
+				if (joint.second.parent_id != -1)
 				{
-					std::map<int, int>::const_iterator fiter = joint_id_to_index.find(bind.first);
+					BOOST_AUTO(fiter, joint_id_to_index.find(joint.second.parent_id));
 					BOOST_ASSERT(fiter != joint_id_to_index.end());
 
-					bind.first = fiter->second;
+					joint.second.parent_id = fiter->second;
 				}
 			}
+
+			// Replace joint_id in weight
+			typedef BOOST_TYPEOF(meshes_) MeshesType;
+			BOOST_FOREACH(MeshesType::reference mesh, meshes_)
+			{
+				typedef BOOST_TYPEOF(mesh.vertices) VerticesType;
+				BOOST_FOREACH(VerticesType::reference vertex, mesh.vertices)
+				{
+					typedef BOOST_TYPEOF(vertex.binds) BindsType;
+					BOOST_FOREACH(BindsType::reference bind, vertex.binds)
+					{
+						BOOST_AUTO(fiter, joint_id_to_index.find(bind.first));
+						BOOST_ASSERT(fiter != joint_id_to_index.end());
+
+						bind.first = fiter->second;
+					}
+				}
+			}
+
+			// Replace joint_id in keyframes and remove unused keyframes
+			for (BOOST_AUTO(iter, keyframes_.begin()); iter != keyframes_.end();)
+			{
+				BOOST_AUTO(fiter, joint_id_to_index.find(iter->joint_id));
+				if (fiter != joint_id_to_index.end())
+				{
+					iter->joint_id = fiter->second;
+					++ iter;
+				}
+				else
+				{
+					iter = keyframes_.erase(iter);
+				}
+			}
+		}
+		else
+		{
+			keyframes_.clear();
 		}
 
 		int model_ver = 6;
