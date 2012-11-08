@@ -920,11 +920,11 @@ namespace KlayGE
 				ss->write(reinterpret_cast<char*>(&num_kfs), sizeof(num_kfs));
 			}
 
-			XMLNodePtr action_set_chunk = root->FirstNode("actions_chunk");
-			if (action_set_chunk)
+			XMLNodePtr actions_chunk = root->FirstNode("actions_chunk");
+			if (actions_chunk)
 			{
 				uint32_t num_actions = 0;
-				for (XMLNodePtr action_node = action_set_chunk->FirstNode("action"); action_node; action_node = action_node->NextSibling("action"))
+				for (XMLNodePtr action_node = actions_chunk->FirstNode("action"); action_node; action_node = action_node->NextSibling("action"))
 				{
 					++ num_actions;
 				}
@@ -1817,9 +1817,9 @@ namespace KlayGE
 				}
 
 				XMLNodePtr action_node;
-				if (action_set_chunk)
+				if (actions_chunk)
 				{
-					action_node = action_set_chunk->FirstNode("action");
+					action_node = actions_chunk->FirstNode("action");
 				}
 				if (action_node)
 				{
@@ -1827,8 +1827,8 @@ namespace KlayGE
 					{
 						WriteShortString(*ss, action_node->Attrib("name")->ValueString());
 
-						uint32_t sf = action_node->Attrib("start_frame")->ValueUInt();
-						uint32_t ef = action_node->Attrib("end_frame")->ValueUInt();
+						uint32_t sf = action_node->Attrib("start")->ValueUInt();
+						uint32_t ef = action_node->Attrib("end")->ValueUInt();
 
 						NativeToLittleEndian<sizeof(sf)>(&sf);
 						ss->write(reinterpret_cast<char*>(&sf), sizeof(sf));

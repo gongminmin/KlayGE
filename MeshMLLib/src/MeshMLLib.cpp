@@ -599,9 +599,9 @@ namespace KlayGE
 	bool MeshMLObj::Material::operator==(MeshMLObj::Material const & rhs) const
 	{
 		bool same = (ambient == rhs.ambient) && (diffuse == rhs.diffuse)
-			&& (specular_level == rhs.specular_level) && (emit == rhs.emit)
+			&& (specular == rhs.specular) && (emit == rhs.emit)
 			&& (opacity == rhs.opacity) && (specular_level == rhs.specular_level)
-			&& (shininess == rhs.shininess);
+			&& (shininess == rhs.shininess) && (texture_slots.size() == rhs.texture_slots.size());
 		if (same)
 		{
 			for (size_t i = 0; i < texture_slots.size(); ++ i)
@@ -897,6 +897,23 @@ namespace KlayGE
 		kfs.bind_scales[kf_id] = scale;
 	}
 
+	int MeshMLObj::AllocAction()
+	{
+		int id = static_cast<int>(actions_.size());
+		actions_.push_back(AnimationAction());
+		return id;
+	}
+
+	void MeshMLObj::SetAction(int action_id, std::string const & name, int start_frame, int end_frame)
+	{
+		BOOST_ASSERT(static_cast<int>(actions_.size()) > action_id);
+
+		AnimationAction& action = actions_[action_id];
+		action.name = name;
+		action.start_frame = start_frame;
+		action.end_frame = end_frame;
+	}
+
 	void MeshMLObj::WriteMeshML(std::ostream& os, int vertex_export_settings, int user_export_settings, std::string const & encoding)
 	{
 		this->OptimizeJoints();
@@ -996,6 +1013,7 @@ namespace KlayGE
 		{
 			this->WriteKeyframeChunk(os);
 			this->WriteAABBKeyframeChunk(os);
+			this->WriteActionChunk(os);
 		}
 
 		// Finish the writing process
@@ -1226,19 +1244,18 @@ namespace KlayGE
 	{
 		float const THRESHOLD = 1e-3f;
 
-		std::map<int, int> joint_id_to_kf;
+		std::map<int, int> joint_index_to_kf;
 		for (size_t i = 0; i < keyframes_.size(); ++ i)
 		{
-			joint_id_to_kf.insert(std::make_pair(keyframes_[i].joint_id, static_cast<int>(i)));
+			joint_index_to_kf.insert(std::make_pair(keyframes_[i].joint_id, static_cast<int>(i)));
 		}
 
 		os << "\t<key_frames_chunk num_frames=\"" << num_frames_
 			<< "\" frame_rate=\"" << frame_rate_ << "\">" << std::endl;
-		typedef BOOST_TYPEOF(joints_) JointsType;
-		BOOST_FOREACH(JointsType::const_reference joint, joints_)
+		for (int joint_index = 0; joint_index < joints_.size(); ++ joint_index)
 		{
-			BOOST_AUTO(iter, joint_id_to_kf.find(joint.first));
-			BOOST_ASSERT(iter != joint_id_to_kf.end());
+			BOOST_AUTO(iter, joint_index_to_kf.find(joint_index));
+			BOOST_ASSERT(iter != joint_index_to_kf.end());
 
 			Keyframes kf = keyframes_[iter->second];
 
@@ -1436,6 +1453,31 @@ namespace KlayGE
 			os << "\t\t</bb_key_frame>" << std::endl;
 		}
 		os << "\t</bb_key_frames_chunk>" << std::endl;
+	}
+
+	void MeshMLObj::WriteActionChunk(std::ostream& os)
+	{
+		os << "\t<actions_chunk>" << std::endl;
+		if (actions_.empty())
+		{
+			os << "\t\t<action name=\"" << "root"
+				<< "\" start=\"" << 0
+				<< "\" end=\"" << num_frames_ - 1
+				<< "\"/>" << std::endl;
+		}
+		else
+		{
+			for (size_t a = 0; a < actions_.size(); ++ a)
+			{
+				AnimationAction const & action = actions_[a];
+
+				os << "\t\t<action name=\"" << action.name
+					<< "\" start=\"" << action.start_frame
+					<< "\" end=\"" << action.end_frame
+					<< "\"/>" << std::endl;
+			}
+		}
+		os << "\t</actions_chunk>" << std::endl;
 	}
 
 	void MeshMLObj::OptimizeJoints()

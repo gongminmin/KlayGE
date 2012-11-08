@@ -121,6 +121,9 @@ namespace KlayGE
 		void SetKeyframe(int kfs_id, int kf_id, Quaternion const & bind_quat, float3 const & bind_pos);
 		void SetKeyframe(int kfs_id, int kf_id, Quaternion const & bind_real, Quaternion const & bind_dual);
 
+		int AllocAction();
+		void SetAction(int action_id, std::string const & name, int start_frame, int end_frame);
+
 		void WriteMeshML(std::ostream& os,
 			int vertex_export_settings = VES_TangentQuat | VES_Texcoord, int user_export_settings = UES_SortMeshes,
 			std::string const & encoding = std::string());
@@ -187,6 +190,13 @@ namespace KlayGE
 			std::pair<std::pair<Quaternion, Quaternion>, float> Frame(float frame) const;
 		};
 
+		struct AnimationAction
+		{
+			std::string name;
+			int start_frame;
+			int end_frame;
+		};
+
 		void OptimizeJoints();
 		void OptimizeMaterials();
 		void OptimizeMeshes(int user_export_settings);
@@ -196,6 +206,7 @@ namespace KlayGE
 		void WriteMeshChunk(std::ostream& os, int vertex_export_settings);
 		void WriteKeyframeChunk(std::ostream& os);
 		void WriteAABBKeyframeChunk(std::ostream& os);
+		void WriteActionChunk(std::ostream& os);
 
 		void MatrixToDQ(float4x4 const & mat, Quaternion& real, Quaternion& dual) const;
 		void UpdateJoints(int frame, std::vector<Quaternion>& bind_reals, std::vector<Quaternion>& bind_duals) const;
@@ -218,6 +229,7 @@ namespace KlayGE
 		std::vector<Material> materials_;
 		std::vector<Mesh> meshes_;
 		std::vector<Keyframes> keyframes_;
+		std::vector<AnimationAction> actions_;
 	};
 }
 
