@@ -1,0 +1,54 @@
+<?xml version='1.0'?>
+
+<effect>
+	<include name="PostProcess.fxml"/>
+
+	<parameter type="float4" name="width_height"/>
+	<parameter type="float" name="offset"/>
+	<parameter type="float" name="stageno"/>
+	<parameter type="float" name="stepno"/>
+
+	<parameter type="texture2D" name="src_tex"/>
+
+	<parameter type="sampler" name="point_sampler">
+		<state name="filtering" value="min_mag_mip_point"/>
+		<state name="address_u" value="clamp"/>
+		<state name="address_v" value="clamp"/>
+	</parameter>
+
+	<shader>
+		<![CDATA[
+float4 BitonicSortPS(float2 tc : TEXCOORD0) : SV_Target
+{
+	float2 elem2d = floor(tc * width_height.xy);
+	float elem1d = elem2d.y * width_height.x + elem2d.x;
+
+	float csign = (fmod(elem1d, stageno) < offset) ? 1 : -1;
+	float cdir = (fmod(floor(elem1d / stepno), 2) == 0) ? 1 : -1;
+
+	float adr1d = csign * offset + elem1d;
+	float2 adr2d;
+	adr2d.y = floor(adr1d * width_height.z);
+	adr2d.x = adr1d - adr2d.y * width_height.x;
+	adr2d = (adr2d + 0.5f) * width_height.zw;
+
+	float f0 = src_tex.Sample(point_sampler, tc).x;
+	float f1 = src_tex.Sample(point_sampler, adr2d).x;
+
+	float cmin = min(f0, f1);
+	float cmax = max(f0, f1);
+
+	return (csign == cdir) ? cmin : cmax;
+}
+		]]>
+	</shader>
+	
+	<technique name="BitonicSort">
+		<pass name="p0">
+			<state name="depth_write_mask" value="0"/>
+
+			<state name="vertex_shader" value="PostProcessVS()"/>
+			<state name="pixel_shader" value="BitonicSortPS()"/>
+		</pass>
+	</technique>
+</effect>

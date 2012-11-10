@@ -175,6 +175,7 @@ SET(RENDERING_EFFECT_FILES
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/RenderableHelper.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/RSM2VPLs.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/SetSubsplatStencil.fxml
+	${KLAYGE_PROJECT_DIR}/media/RenderFX/Sort.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/SSGI.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/SSR.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/SSVO.fxml
@@ -202,6 +203,7 @@ SET(RENDERING_POSTPROCESSOR_FILES
 	${KLAYGE_PROJECT_DIR}/media/PostProcessors/LightShaft.ppml
 	${KLAYGE_PROJECT_DIR}/media/PostProcessors/RSM2VPLs.ppml
 	${KLAYGE_PROJECT_DIR}/media/PostProcessors/SAT.ppml
+	${KLAYGE_PROJECT_DIR}/media/PostProcessors/Sort.ppml
 	${KLAYGE_PROJECT_DIR}/media/PostProcessors/Stereoscopic.ppml
 	${KLAYGE_PROJECT_DIR}/media/PostProcessors/TAA.ppml
 	${KLAYGE_PROJECT_DIR}/media/PostProcessors/Upsampling.ppml

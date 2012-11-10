@@ -1,0 +1,18 @@
+<?xml version='1.0'?>
+
+<post_processors>
+	<post_processor name="bitonicsort">
+		<params>
+			<param name="offset"/>
+			<param name="stageno"/>
+			<param name="stepno"/>
+		</params>
+		<input>
+			<pin name="src_tex"/>
+		</input>
+		<output>
+			<pin name="output"/>
+		</output>
+		<shader effect="Sort.fxml" tech="BitonicSort"/>
+	</post_processor>
+</post_processors>

@@ -113,6 +113,7 @@
       <File Name="../../media/RenderFX/RenderableHelper.fxml"/>
       <File Name="../../media/RenderFX/RSM2VPLs.fxml"/>
       <File Name="../../media/RenderFX/SetSubsplatStencil.fxml"/>
+      <File Name="../../media/RenderFX/Sort.fxml"/>
       <File Name="../../media/RenderFX/SSGI.fxml"/>
       <File Name="../../media/RenderFX/SSR.fxml"/>
       <File Name="../../media/RenderFX/SSVO.fxml"/>
@@ -136,6 +137,7 @@
       <File Name="../../media/PostProcessors/LensEffects.ppml"/>
       <File Name="../../media/PostProcessors/RSM2VPLs.ppml"/>
       <File Name="../../media/PostProcessors/SAT.ppml"/>
+      <File Name="../../media/PostProcessors/Sort.ppml"/>
       <File Name="../../media/PostProcessors/Stereoscopic.ppml"/>
       <File Name="../../media/PostProcessors/Upsampling.ppml"/>
       <File Name="../../media/PostProcessors/TAA.ppml"/>
