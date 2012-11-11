@@ -263,6 +263,9 @@ namespace KlayGE
 	using std::copyif;
 #endif
 
+	std::string ReadShortString(ResIdentifierPtr const & res);
+	void WriteShortString(std::ostream& os, std::string const & str);
+
 	template <typename T>
 	inline boost::shared_ptr<T> MakeSharedPtr()
 	{

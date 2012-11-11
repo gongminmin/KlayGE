@@ -1567,32 +1567,6 @@ namespace
 		return var;
 	}
 
-	std::string read_short_string(ResIdentifierPtr const & res)
-	{
-		uint8_t len;
-		res->read(&len, sizeof(len));
-
-		std::string tmp;
-		if (len > 0)
-		{
-			tmp.resize(len);
-			res->read(&tmp[0], len * sizeof(tmp[0]));
-		}
-
-		return tmp;
-	}
-
-	void write_short_string(std::ostream& os, std::string const & str)
-	{
-		uint8_t len = static_cast<uint8_t>(std::min(str.size(), static_cast<size_t>(255)));
-		os.write(reinterpret_cast<char*>(&len), sizeof(len));
-
-		if (len > 0)
-		{
-			os.write(&str[0], len * sizeof(str[0]));
-		}
-	}
-
 	RenderVariablePtr stream_in_var(ResIdentifierPtr const & res, uint32_t type, uint32_t array_size)
 	{
 		RenderVariablePtr var;
@@ -1673,7 +1647,7 @@ namespace
 		case REDT_string:
 			{
 				var = MakeSharedPtr<RenderVariableString>();
-				*var = read_short_string(res);
+				*var = ReadShortString(res);
 			}
 			break;
 
@@ -1693,7 +1667,7 @@ namespace
 			{
 				var = MakeSharedPtr<RenderVariableTexture>();
 				*var = TexturePtr();
-				*var = read_short_string(res);
+				*var = ReadShortString(res);
 			}
 			break;
 
@@ -1722,8 +1696,8 @@ namespace
 		case REDT_shader:
 			{
 				shader_desc desc;
-				desc.profile = read_short_string(res);
-				desc.func_name = read_short_string(res);
+				desc.profile = ReadShortString(res);
+				desc.func_name = ReadShortString(res);
 
 				var = MakeSharedPtr<RenderVariableShader>();
 				*var = desc;
@@ -2129,7 +2103,7 @@ namespace
 			{
 				var = MakeSharedPtr<RenderVariableBuffer>();
 				*var = GraphicsBufferPtr();
-				*var = read_short_string(res);
+				*var = ReadShortString(res);
 			}
 			break;
 
@@ -2221,7 +2195,7 @@ namespace
 			{
 				std::string tmp;
 				var->Value(tmp);
-				write_short_string(os, tmp);
+				WriteShortString(os, tmp);
 			}
 			break;
 
@@ -2241,7 +2215,7 @@ namespace
 			{
 				std::string tmp;
 				var->Value(tmp);
-				write_short_string(os, tmp);
+				WriteShortString(os, tmp);
 			}
 			break;
 
@@ -2270,8 +2244,8 @@ namespace
 			{
 				shader_desc tmp;
 				var->Value(tmp);
-				write_short_string(os, tmp.profile);
-				write_short_string(os, tmp.func_name);
+				WriteShortString(os, tmp.profile);
+				WriteShortString(os, tmp.func_name);
 			}
 			break;
 
@@ -2652,7 +2626,7 @@ namespace
 			{
 				std::string tmp;
 				var->Value(tmp);
-				write_short_string(os, tmp);
+				WriteShortString(os, tmp);
 			}
 			break;
 
@@ -2680,7 +2654,7 @@ namespace KlayGE
 	{
 		res->read(&type_, sizeof(type_));
 		LittleEndianToNative<sizeof(type_)>(&type_);
-		name_ = read_short_string(res);
+		name_ = ReadShortString(res);
 		var_ = stream_in_var(res, type_, 0);
 	}
 
@@ -2689,7 +2663,7 @@ namespace KlayGE
 		uint32_t t = type_;
 		NativeToLittleEndian<sizeof(t)>(&t);
 		os.write(reinterpret_cast<char const *>(&t), sizeof(t));
-		write_short_string(os, name_);
+		WriteShortString(os, name_);
 		stream_out_var(os, var_, type_, 0);
 	}
 
@@ -2952,8 +2926,8 @@ namespace KlayGE
 							}
 							for (uint32_t i = 0; i < num_macros; ++ i)
 							{
-								std::string name = read_short_string(source);
-								std::string value = read_short_string(source);
+								std::string name = ReadShortString(source);
+								std::string value = ReadShortString(source);
 								macros_->push_back(std::make_pair(std::make_pair(name, value), true));
 							}
 						}
@@ -2965,7 +2939,7 @@ namespace KlayGE
 							cbuffers_->resize(num_cbufs);
 							for (uint32_t i = 0; i < num_cbufs; ++ i)
 							{
-								(*cbuffers_)[i].first = read_short_string(source);
+								(*cbuffers_)[i].first = ReadShortString(source);
 
 								uint16_t len;
 								source->read(&len, sizeof(len));
@@ -3014,8 +2988,8 @@ namespace KlayGE
 							shader_descs_->resize(num_shader_descs + 1);
 							for (uint32_t i = 0; i < num_shader_descs; ++ i)
 							{
-								(*shader_descs_)[i + 1].profile = read_short_string(source);
-								(*shader_descs_)[i + 1].func_name = read_short_string(source);
+								(*shader_descs_)[i + 1].profile = ReadShortString(source);
+								(*shader_descs_)[i + 1].func_name = ReadShortString(source);
 
 								source->read(&(*shader_descs_)[i + 1].tech_pass_type, sizeof((*shader_descs_)[i + 1].tech_pass_type));
 								LittleEndianToNative<sizeof((*shader_descs_)[i + 1].tech_pass_type)>(&(*shader_descs_)[i + 1].tech_pass_type);
@@ -3095,8 +3069,8 @@ namespace KlayGE
 				{
 					if ((*macros_)[i].second)
 					{
-						write_short_string(os, (*macros_)[i].first.first);
-						write_short_string(os, (*macros_)[i].first.second);
+						WriteShortString(os, (*macros_)[i].first.first);
+						WriteShortString(os, (*macros_)[i].first.second);
 					}
 				}
 			}
@@ -3108,7 +3082,7 @@ namespace KlayGE
 			os.write(reinterpret_cast<char const *>(&num_cbufs), sizeof(num_cbufs));
 			for (uint32_t i = 0; i < cbuffers_->size(); ++ i)
 			{
-				write_short_string(os, (*cbuffers_)[i].first);
+				WriteShortString(os, (*cbuffers_)[i].first);
 
 				uint16_t len = static_cast<uint16_t>((*cbuffers_)[i].second.size());
 				NativeToLittleEndian<sizeof(len)>(&len);
@@ -3151,8 +3125,8 @@ namespace KlayGE
 			os.write(reinterpret_cast<char const *>(&num_shader_descs), sizeof(num_shader_descs));
 			for (uint32_t i = 0; i < shader_descs_->size() - 1; ++ i)
 			{
-				write_short_string(os, (*shader_descs_)[i + 1].profile);
-				write_short_string(os, (*shader_descs_)[i + 1].func_name);
+				WriteShortString(os, (*shader_descs_)[i + 1].profile);
+				WriteShortString(os, (*shader_descs_)[i + 1].func_name);
 
 				uint32_t tmp = (*shader_descs_)[i + 1].tech_pass_type;
 				NativeToLittleEndian<sizeof(tmp)>(&tmp);
@@ -3386,7 +3360,7 @@ namespace KlayGE
 	bool RenderTechnique::StreamIn(ResIdentifierPtr const & res, uint32_t tech_index,
 			std::vector<std::vector<std::vector<uint8_t> > >& native_shader_blocks)
 	{
-		name_ = MakeSharedPtr<BOOST_TYPEOF(*name_)>(read_short_string(res));
+		name_ = MakeSharedPtr<BOOST_TYPEOF(*name_)>(ReadShortString(res));
 
 		uint8_t num_anno;
 		res->read(&num_anno, sizeof(num_anno));
@@ -3435,7 +3409,7 @@ namespace KlayGE
 	void RenderTechnique::StreamOut(std::ostream& os, uint32_t tech_index,
 			std::vector<std::vector<std::vector<uint8_t> > > const & native_shader_blocks)
 	{
-		write_short_string(os, *name_);
+		WriteShortString(os, *name_);
 
 		uint8_t num_anno;
 		if (annotations_)
@@ -3922,7 +3896,7 @@ namespace KlayGE
 	{
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-		name_ = MakeSharedPtr<BOOST_TYPEOF(*name_)>(read_short_string(res));
+		name_ = MakeSharedPtr<BOOST_TYPEOF(*name_)>(ReadShortString(res));
 
 		uint8_t num_anno;
 		res->read(&num_anno, sizeof(num_anno));
@@ -4079,7 +4053,7 @@ namespace KlayGE
 	void RenderPass::StreamOut(std::ostream& os, uint32_t tech_index, uint32_t pass_index,
 			std::vector<std::vector<std::vector<uint8_t> > > const & native_shader_blocks)
 	{
-		write_short_string(os, *name_);
+		WriteShortString(os, *name_);
 
 		uint8_t num_anno;
 		if (annotations_)
@@ -4309,16 +4283,16 @@ namespace KlayGE
 	{
 		res->read(&type_, sizeof(type_));
 		LittleEndianToNative<sizeof(type_)>(&type_);
-		name_ = MakeSharedPtr<BOOST_TYPEOF(*name_)>(read_short_string(res));
+		name_ = MakeSharedPtr<BOOST_TYPEOF(*name_)>(ReadShortString(res));
 
-		std::string sem = read_short_string(res);
+		std::string sem = ReadShortString(res);
 		if (!sem.empty())
 		{
 			semantic_ = MakeSharedPtr<BOOST_TYPEOF(*semantic_)>(sem);
 		}
 
 		uint32_t as;
-		std::string as_str = read_short_string(res);
+		std::string as_str = ReadShortString(res);
 		if (!as_str.empty())
 		{
 			array_size_ = MakeSharedPtr<std::string>(as_str);
@@ -4377,10 +4351,10 @@ namespace KlayGE
 		uint32_t t = type_;
 		NativeToLittleEndian<sizeof(t)>(&t);
 		os.write(reinterpret_cast<char const *>(&t), sizeof(t));
-		write_short_string(os, *name_);
+		WriteShortString(os, *name_);
 		if (semantic_)
 		{
-			write_short_string(os, *semantic_);
+			WriteShortString(os, *semantic_);
 		}
 		else
 		{
@@ -4390,7 +4364,7 @@ namespace KlayGE
 
 		if (array_size_)
 		{
-			write_short_string(os, *array_size_);
+			WriteShortString(os, *array_size_);
 		}
 		else
 		{

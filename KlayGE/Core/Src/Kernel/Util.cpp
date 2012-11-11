@@ -17,6 +17,7 @@
 /////////////////////////////////////////////////////////////////////////////////
 
 #include <KlayGE/KlayGE.hpp>
+#include <KlayGE/ResLoader.hpp>
 
 #ifdef KLAYGE_COMPILER_MSVC
 #pragma warning(push)
@@ -155,5 +156,31 @@ namespace KlayGE
 #else
 		return errno;
 #endif
+	}
+
+	std::string ReadShortString(ResIdentifierPtr const & res)
+	{
+		uint8_t len;
+		res->read(&len, sizeof(len));
+
+		std::string tmp;
+		if (len > 0)
+		{
+			tmp.resize(len);
+			res->read(&tmp[0], len * sizeof(tmp[0]));
+		}
+
+		return tmp;
+	}
+
+	void WriteShortString(std::ostream& os, std::string const & str)
+	{
+		uint8_t len = static_cast<uint8_t>(std::min(str.size(), static_cast<size_t>(255)));
+		os.write(reinterpret_cast<char*>(&len), sizeof(len));
+
+		if (len > 0)
+		{
+			os.write(&str[0], len * sizeof(str[0]));
+		}
 	}
 }

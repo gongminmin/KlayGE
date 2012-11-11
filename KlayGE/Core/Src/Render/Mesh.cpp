@@ -757,29 +757,6 @@ namespace KlayGE
 
 	std::string const jit_ext_name = ".model_bin";
 
-	void ReadShortString(ResIdentifierPtr& file, std::string& str)
-	{
-		uint8_t len;
-		file->read(reinterpret_cast<char*>(&len), sizeof(len));
-		str.resize(len);
-		if (len > 0)
-		{
-			file->read(reinterpret_cast<char*>(&str[0]), len * sizeof(str[0]));
-		}
-	}
-
-	void WriteShortString(std::ostream& os, std::string const & str)
-	{
-		BOOST_ASSERT(str.size() < 256);
-
-		uint8_t len = static_cast<uint8_t>(str.length());
-		os.write(reinterpret_cast<char const *>(&len), sizeof(len));
-		if (len > 0)
-		{
-			os.write(reinterpret_cast<char const *>(&str[0]), str.size() * sizeof(str[0]));
-		}
-	}
-
 	void ModelJIT(std::string const & meshml_name)
 	{
 		std::string::size_type const pkt_offset(meshml_name.find("//"));
@@ -2006,9 +1983,8 @@ namespace KlayGE
 
 			for (uint32_t tex_index = 0; tex_index < num_texs; ++ tex_index)
 			{
-				std::string type, name;
-				ReadShortString(decoded, type);
-				ReadShortString(decoded, name);
+				std::string type = ReadShortString(decoded);
+				std::string name = ReadShortString(decoded);
 				mtl->texture_slots.push_back(std::make_pair(type, name));
 			}
 		}
@@ -2094,7 +2070,7 @@ namespace KlayGE
 		mesh_base_triangles.resize(num_meshes);
 		for (uint32_t mesh_index = 0; mesh_index < num_meshes; ++ mesh_index)
 		{
-			ReadShortString(decoded, mesh_names[mesh_index]);
+			mesh_names[mesh_index] = ReadShortString(decoded);
 
 			decoded->read(&mtl_ids[mesh_index], sizeof(mtl_ids[mesh_index]));
 			LittleEndianToNative<sizeof(mtl_ids[mesh_index])>(&mtl_ids[mesh_index]);
@@ -2137,7 +2113,7 @@ namespace KlayGE
 		{
 			Joint& joint = joints[joint_index];
 
-			ReadShortString(decoded, joint.name);
+			joint.name = ReadShortString(decoded);
 			decoded->read(&joint.parent, sizeof(joint.parent));
 			LittleEndianToNative<sizeof(joint.parent)>(&joint.parent);
 
@@ -2272,7 +2248,7 @@ namespace KlayGE
 				for (uint32_t action_index = 0; action_index < num_actions; ++ action_index)
 				{
 					AnimationAction action;
-					ReadShortString(decoded, action.name);
+					action.name = ReadShortString(decoded);
 					decoded->read(&action.start_frame, sizeof(action.start_frame));
 					LittleEndianToNative<sizeof(action.start_frame)>(&action.start_frame);
 					decoded->read(&action.end_frame, sizeof(action.end_frame));
