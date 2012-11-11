@@ -45,7 +45,7 @@ namespace
 	}
 
 	void CompressHDRSubresource(ElementInitData& y_data, ElementInitData& c_data, std::vector<uint8_t>& y_data_block, std::vector<uint8_t>& c_data_block,
-		ElementInitData const & hdr_data)
+		ElementInitData const & hdr_data, ElementFormat y_format, ElementFormat c_format)
 	{
 		float const log2 = log(2.0f);
 
@@ -58,20 +58,42 @@ namespace
 		y_data.data = &y_data_block[0];
 
 		float const * hdr_src = static_cast<float const *>(hdr_data.data);
-		uint16_t* y_dst = reinterpret_cast<uint16_t*>(&y_data_block[0]);
-
-		for (uint32_t y = 0; y < height; ++ y)
+		if (EF_R16 == y_format)
 		{
-			for (uint32_t x = 0; x < width; ++ x)
+			uint16_t* y_dst = reinterpret_cast<uint16_t*>(&y_data_block[0]);
+
+			for (uint32_t y = 0; y < height; ++ y)
 			{
-				float R = hdr_src[(y * width + x) * 4 + 0];
-				float G = hdr_src[(y * width + x) * 4 + 1];
-				float B = hdr_src[(y * width + x) * 4 + 2];
-				float Y = CalcLum(R, G, B);
+				for (uint32_t x = 0; x < width; ++ x)
+				{
+					float R = hdr_src[(y * width + x) * 4 + 0];
+					float G = hdr_src[(y * width + x) * 4 + 1];
+					float B = hdr_src[(y * width + x) * 4 + 2];
+					float Y = CalcLum(R, G, B);
 
-				float log_y = log(Y) / log2 + 16;
+					float log_y = log(Y) / log2 + 16;
 
-				y_dst[y * width + x] = static_cast<uint16_t>(MathLib::clamp<uint32_t>(static_cast<uint32_t>(log_y * 2048), 0, 65535));
+					y_dst[y * width + x] = static_cast<uint16_t>(MathLib::clamp<uint32_t>(static_cast<uint32_t>(log_y * 2048), 0, 65535));
+				}
+			}
+		}
+		else
+		{
+			half* y_dst = reinterpret_cast<half*>(&y_data_block[0]);
+
+			for (uint32_t y = 0; y < height; ++ y)
+			{
+				for (uint32_t x = 0; x < width; ++ x)
+				{
+					float R = hdr_src[(y * width + x) * 4 + 0];
+					float G = hdr_src[(y * width + x) * 4 + 1];
+					float B = hdr_src[(y * width + x) * 4 + 2];
+					float Y = CalcLum(R, G, B);
+
+					float log_y = log(Y) / log2 + 16;
+
+					y_dst[y * width + x] = half(log_y * 2048 / 65535);
+				}
 			}
 		}
 
@@ -119,17 +141,38 @@ namespace
 					}
 				}
 
-				BC5_layout com_bc5;
-				EncodeBC4(com_bc5.red, uncom_u);
-				EncodeBC4(com_bc5.green, uncom_v);
+				if (EF_BC5 == c_format)
+				{
+					BC5_layout com_bc5;
+					EncodeBC4(com_bc5.red, uncom_u);
+					EncodeBC4(com_bc5.green, uncom_v);
 
-				memcpy(c_dst, &com_bc5, sizeof(com_bc5));
-				c_dst += sizeof(com_bc5);
+					memcpy(c_dst, &com_bc5, sizeof(com_bc5));
+					c_dst += sizeof(com_bc5);
+				}
+				else
+				{
+					uint32_t uncom_argb[16];
+					for (int y = 0; y < 4; ++ y)
+					{
+						for (int x = 0; x < 4; ++ x)
+						{
+							uncom_argb[y * 4 + x] = (uncom_u[y * 4 + x] << 24) | (uncom_v[y * 4 + x] << 8);
+						}
+					}
+
+					BC3_layout com_bc3;
+					EncodeBC3(com_bc3, uncom_argb, EBCM_Quality);
+
+					memcpy(c_dst, &com_bc3, sizeof(com_bc3));
+					c_dst += sizeof(com_bc3);
+				}
 			}
 		}
 	}
 
-	void DecompressHDRSubresource(ElementInitData& hdr_data, std::vector<uint8_t>& hdr_data_block, ElementInitData const & y_data, ElementInitData const & c_data)
+	void DecompressHDRSubresource(ElementInitData& hdr_data, std::vector<uint8_t>& hdr_data_block, ElementInitData const & y_data, ElementInitData const & c_data,
+		ElementFormat y_format, ElementFormat c_format)
 	{
 		float const log2 = log(2.0f);
 
@@ -146,13 +189,22 @@ namespace
 		{
 			for (uint32_t x_base = 0; x_base < width / 2; x_base += 4)
 			{
+				uint8_t const * src = static_cast<uint8_t const *>(c_data.data) + ((y_base / 4) * width / 2 / 4 + x_base / 4) * 16;
+
 				uint32_t argb[16];
-				uint8_t r[16];
-				uint8_t g[16];
-				DecodeBC5(r, g, static_cast<uint8_t const *>(c_data.data) + ((y_base / 4) * width / 2 / 4 + x_base / 4) * 16);
-				for (int i = 0; i < 16; ++ i)
+				if (EF_BC5 == c_format)
 				{
-					argb[i] = (r[i] << 8) | (g[i] << 24);
+					uint8_t r[16];
+					uint8_t g[16];
+					DecodeBC5(r, g, src);
+					for (int i = 0; i < 16; ++ i)
+					{
+						argb[i] = (r[i] << 8) | (g[i] << 24);
+					}
+				}
+				else
+				{
+					DecodeBC3(argb, src);
 				}
 
 				for (int y = 0; y < 4; ++ y)
@@ -165,29 +217,54 @@ namespace
 			}
 		}
 
-		uint16_t const * y_src = static_cast<uint16_t const *>(y_data.data);
-		float* hdr = reinterpret_cast<float*>(&hdr_data_block[0]);
-		for (uint32_t y = 0; y < height; ++ y)
+		if (EF_R16 == y_format)
 		{
-			for (uint32_t x = 0; x < width; ++ x)
+			uint16_t const * y_src = static_cast<uint16_t const *>(y_data.data);
+			float* hdr = reinterpret_cast<float*>(&hdr_data_block[0]);
+			for (uint32_t y = 0; y < height; ++ y)
 			{
-				float Y = exp((y_src[y * width + x] / 2048.0f - 16) * log2);
-				float B = c_data_uncom[(y / 2 * width / 2 + x / 2) * 4 + 2] / 256.0f;
-				float R = c_data_uncom[(y / 2 * width / 2 + x / 2) * 4 + 1] / 256.0f;
-				B = B * B * Y;
-				R = R * R * Y;
-				float G = (Y - R - B) / lum_weight.y();
+				for (uint32_t x = 0; x < width; ++ x)
+				{
+					float Y = exp((y_src[y * width + x] / 2048.0f - 16) * log2);
+					float B = c_data_uncom[(y / 2 * width / 2 + x / 2) * 4 + 2] / 256.0f;
+					float R = c_data_uncom[(y / 2 * width / 2 + x / 2) * 4 + 1] / 256.0f;
+					B = B * B * Y;
+					R = R * R * Y;
+					float G = (Y - R - B) / lum_weight.y();
 
-				hdr[(y * width + x) * 4 + 0] = R / lum_weight.x();
-				hdr[(y * width + x) * 4 + 1] = G;
-				hdr[(y * width + x) * 4 + 2] = B / lum_weight.z();
-				hdr[(y * width + x) * 4 + 3] = 1;
+					hdr[(y * width + x) * 4 + 0] = R / lum_weight.x();
+					hdr[(y * width + x) * 4 + 1] = G;
+					hdr[(y * width + x) * 4 + 2] = B / lum_weight.z();
+					hdr[(y * width + x) * 4 + 3] = 1;
+				}
+			}
+		}
+		else
+		{
+			half const * y_src = static_cast<half const *>(y_data.data);
+			float* hdr = reinterpret_cast<float*>(&hdr_data_block[0]);
+			for (uint32_t y = 0; y < height; ++ y)
+			{
+				for (uint32_t x = 0; x < width; ++ x)
+				{
+					float Y = exp((y_src[y * width + x] * 65535 / 2048.0f - 16) * log2);
+					float B = c_data_uncom[(y / 2 * width / 2 + x / 2) * 4 + 2] / 256.0f;
+					float R = c_data_uncom[(y / 2 * width / 2 + x / 2) * 4 + 1] / 256.0f;
+					B = B * B * Y;
+					R = R * R * Y;
+					float G = (Y - R - B) / lum_weight.y();
+
+					hdr[(y * width + x) * 4 + 0] = R / lum_weight.x();
+					hdr[(y * width + x) * 4 + 1] = G;
+					hdr[(y * width + x) * 4 + 2] = B / lum_weight.z();
+					hdr[(y * width + x) * 4 + 3] = 1;
+				}
 			}
 		}
 	}
 
 	void CompressHDR(std::string const & in_file,
-		std::string const & out_y_file, std::string const & out_c_file)
+		std::string const & out_y_file, std::string const & out_c_file, ElementFormat y_format, ElementFormat c_format)
 	{
 		Texture::TextureType in_type;
 		uint32_t in_width, in_height, in_depth;
@@ -243,11 +320,11 @@ namespace
 		std::vector<std::vector<uint8_t> > c_data_block(in_data.size());
 		for (size_t i = 0; i < in_data.size(); ++ i)
 		{
-			CompressHDRSubresource(y_data[i], c_data[i], y_data_block[i], c_data_block[i], in_data[i]);
+			CompressHDRSubresource(y_data[i], c_data[i], y_data_block[i], c_data_block[i], in_data[i], y_format, c_format);
 		}
 
-		SaveTexture(out_y_file, in_type, in_width, in_height, in_depth, in_num_mipmaps, in_array_size, EF_R16, y_data);
-		SaveTexture(out_c_file, in_type, in_width / 2, in_height / 2, in_depth, in_num_mipmaps, in_array_size, EF_BC5, c_data);
+		SaveTexture(out_y_file, in_type, in_width, in_height, in_depth, in_num_mipmaps, in_array_size, y_format, y_data);
+		SaveTexture(out_c_file, in_type, in_width / 2, in_height / 2, in_depth, in_num_mipmaps, in_array_size, c_format, c_data);
 
 		float mse = 0;
 		int n = 0;
@@ -256,7 +333,7 @@ namespace
 			{
 				ElementInitData restored_data;
 				std::vector<uint8_t> restored_data_block;
-				DecompressHDRSubresource(restored_data, restored_data_block, y_data[i], c_data[i]);
+				DecompressHDRSubresource(restored_data, restored_data_block, y_data[i], c_data[i], y_format, c_format);
 
 				uint32_t width = in_data[i].row_pitch / (sizeof(float) * 4);
 				uint32_t height = in_data[i].slice_pitch / in_data[i].row_pitch;
@@ -295,8 +372,28 @@ int main(int argc, char* argv[])
 
 	if (argc < 2)
 	{
-		cout << "使用方法: HDRCompressor xxx.dds" << endl;
+		cout << "使用方法: HDRCompressor xxx.dds [R16 | R16F] [BC5 | BC3]" << endl;
 		return 1;
+	}
+
+	ElementFormat y_format = EF_R16;
+	if (argc >= 3)
+	{
+		std::string format_str(argv[3]);
+		if ("R16F" == format_str)
+		{
+			y_format = EF_R16F;
+		}
+	}
+
+	ElementFormat c_format = EF_BC5;
+	if (argc >= 4)
+	{
+		std::string format_str(argv[3]);
+		if ("BC3" == format_str)
+		{
+			c_format = EF_BC3;
+		}
 	}
 
 	ResLoader::Instance().AddPath("../../../bin");
@@ -305,7 +402,7 @@ int main(int argc, char* argv[])
 	std::string y_file = basename(output_path) + "_y" + extension(output_path);
 	std::string c_file = basename(output_path) + "_c" + extension(output_path);
 
-	CompressHDR(argv[1], y_file, c_file);
+	CompressHDR(argv[1], y_file, c_file, y_format, c_format);
 
 	cout << "HDR texture is compressed into " << y_file << " and " << c_file << endl;
 

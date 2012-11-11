@@ -342,8 +342,8 @@ int main(int argc, char* argv[])
 	boost::program_options::options_description desc("Allowed options");
 	desc.add_options()
 		("help,H", "Produce help message")
-		("input-name,I", boost::program_options::value<std::string>(), "Input font name.")
-		("output-name,O", boost::program_options::value<std::string>(), "Output font name.")
+		("input-name,I", boost::program_options::value<std::string>(), "Input textures names.")
+		("output-name,O", boost::program_options::value<std::string>(), "Output jtml name.")
 		("num-tiles,N", boost::program_options::value<int>(&num_tiles)->default_value(2048), "Number of tiles. Default is 2048.")
 		("tile-size,T", boost::program_options::value<int>(&tile_size)->default_value(128), "Tile size. Default is 128.")
 		("version,v", "Version.");
@@ -397,7 +397,7 @@ int main(int argc, char* argv[])
 	}
 	else
 	{
-		cout << "Input texture name was not set." << endl;
+		cout << "Need input textures names." << endl;
 		return 1;
 	}
 	if (vm.count("output-name") > 0)
@@ -406,7 +406,7 @@ int main(int argc, char* argv[])
 	}
 	else
 	{
-		cout << "Output jtml name was not set." << endl;
+		cout << "Need output jtml name." << endl;
 		return 1;
 	}
 
