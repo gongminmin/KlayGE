@@ -867,20 +867,20 @@ namespace KlayGE
 		return id;
 	}
 
-	void MeshMLObj::SetKeyframe(int kfs_id, int kf_id, float4x4 const & bind_mat)
+	void MeshMLObj::SetKeyframe(int kfs_id, int kf_id, int frame_id, float4x4 const & bind_mat)
 	{
 		Quaternion real, dual;
 		this->MatrixToDQ(bind_mat, real, dual);
 
-		this->SetKeyframe(kfs_id, kf_id, real, dual);
+		this->SetKeyframe(kfs_id, kf_id, frame_id, real, dual);
 	}
 
-	void MeshMLObj::SetKeyframe(int kfs_id, int kf_id, Quaternion const & bind_quat, float3 const & bind_pos)
+	void MeshMLObj::SetKeyframe(int kfs_id, int kf_id, int frame_id, Quaternion const & bind_quat, float3 const & bind_pos)
 	{
-		this->SetKeyframe(kfs_id, kf_id, bind_quat, MathLib::quat_trans_to_udq(bind_quat, bind_pos));
+		this->SetKeyframe(kfs_id, kf_id, frame_id, bind_quat, MathLib::quat_trans_to_udq(bind_quat, bind_pos));
 	}
 
-	void MeshMLObj::SetKeyframe(int kfs_id, int kf_id, Quaternion const & bind_real, Quaternion const & bind_dual)
+	void MeshMLObj::SetKeyframe(int kfs_id, int kf_id, int frame_id, Quaternion const & bind_real, Quaternion const & bind_dual)
 	{
 		BOOST_ASSERT(static_cast<int>(keyframes_.size()) > kfs_id);
 		BOOST_ASSERT(static_cast<int>(keyframes_[kfs_id].bind_reals.size()) > kf_id);
@@ -892,6 +892,7 @@ namespace KlayGE
 		}
 		
 		Keyframes& kfs = keyframes_[kfs_id];
+		kfs.frame_ids[kf_id] = frame_id;
 		kfs.bind_reals[kf_id] = bind_real / scale;
 		kfs.bind_duals[kf_id] = bind_dual;
 		kfs.bind_scales[kf_id] = scale;

@@ -106,7 +106,7 @@ private:
 	void ExportNurbsSurface(MString const & obj_name, MFnNurbsSurface& fn_surface, MDagPath& dag_path);
 	void ExportMesh(MString const & obj_name, MFnMesh& fn_mesh, MDagPath& dag_path);
 	void ExportJoint(MDagPath const * parent_path, MFnIkJoint& fn_joint, MDagPath& dag_path);
-	void ExportKeyframe(int kfs_id, MDagPath& dag_path, MMatrix const & inv_parent);
+	void ExportKeyframe(int kfs_id, int frame_id, MDagPath& dag_path, MMatrix const & inv_parent);
 	int ExportMaterialAndTexture(MObject* shader, MObjectArray const & textures);
 	int AddDefaultMaterial();
 
@@ -319,7 +319,7 @@ void MayaMeshExporter::ExportMayaNodes(MItDag& dag_iterator)
 				}
 
 				int kfs_id = joint_id_to_kfs_id[joint_to_id_[dag_path.fullPathName().asChar()]];
-				this->ExportKeyframe(kfs_id, dag_path, inv_parent);
+				this->ExportKeyframe(kfs_id, i, dag_path, inv_parent);
 			}
 		}
 	}
@@ -715,12 +715,12 @@ void MayaMeshExporter::ExportJoint(MDagPath const * parent_path, MFnIkJoint& fn_
 	}
 }
 
-void MayaMeshExporter::ExportKeyframe(int kfs_id, MDagPath& dag_path, MMatrix const & inv_parent)
+void MayaMeshExporter::ExportKeyframe(int kfs_id, int frame_id, MDagPath& dag_path, MMatrix const & inv_parent)
 {
 	MFloatMatrix local_mat((dag_path.inclusiveMatrix() * inv_parent).matrix);
 
 	int kf_id = meshml_obj_.AllocKeyframe(kfs_id);
-	meshml_obj_.SetKeyframe(kfs_id, kf_id,
+	meshml_obj_.SetKeyframe(kfs_id, kf_id, frame_id,
 		float4x4(local_mat(0, 0), local_mat(0, 1), local_mat(0, 2), local_mat(0, 3),
 			local_mat(1, 0), local_mat(1, 1), local_mat(1, 2), local_mat(1, 3),
 			local_mat(2, 0), local_mat(2, 1), local_mat(2, 2), local_mat(2, 3),

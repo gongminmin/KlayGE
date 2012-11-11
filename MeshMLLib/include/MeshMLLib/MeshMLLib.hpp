@@ -117,9 +117,9 @@ namespace KlayGE
 		int AllocKeyframes();
 		void SetKeyframes(int kfs_id, int joint_id);
 		int AllocKeyframe(int kfs_id);
-		void SetKeyframe(int kfs_id, int kf_id, float4x4 const & bind_mat);
-		void SetKeyframe(int kfs_id, int kf_id, Quaternion const & bind_quat, float3 const & bind_pos);
-		void SetKeyframe(int kfs_id, int kf_id, Quaternion const & bind_real, Quaternion const & bind_dual);
+		void SetKeyframe(int kfs_id, int kf_id, int frame_id, float4x4 const & bind_mat);
+		void SetKeyframe(int kfs_id, int kf_id, int frame_id, Quaternion const & bind_quat, float3 const & bind_pos);
+		void SetKeyframe(int kfs_id, int kf_id, int frame_id, Quaternion const & bind_real, Quaternion const & bind_dual);
 
 		int AllocAction();
 		void SetAction(int action_id, std::string const & name, int start_frame, int end_frame);

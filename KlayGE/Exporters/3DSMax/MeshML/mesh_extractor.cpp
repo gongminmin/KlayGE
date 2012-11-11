@@ -177,7 +177,7 @@ namespace KlayGE
 			for (int i = start_frame_; i < end_frame_; ++ i)
 			{
 				int kf_id = meshml_obj_.AllocKeyframe(kfs_id);
-				meshml_obj_.SetKeyframe(kfs_id, kf_id, this->rh_to_lh(root_node_->GetNodeTM(i * tpf)));
+				meshml_obj_.SetKeyframe(kfs_id, kf_id, i, this->rh_to_lh(root_node_->GetNodeTM(i * tpf)));
 			}
 
 			this->find_joints(root_node_);
@@ -821,7 +821,7 @@ namespace KlayGE
 		for (int i = start_frame_; i < end_frame_; ++ i)
 		{
 			int kf_id = meshml_obj_.AllocKeyframe(kfs_id);
-			meshml_obj_.SetKeyframe(kfs_id, kf_id,
+			meshml_obj_.SetKeyframe(kfs_id, kf_id, i,
 				this->rh_to_lh(node->GetNodeTM(i * tpf) * Inverse(parent_node->GetNodeTM(i * tpf))));
 		}
 	}
