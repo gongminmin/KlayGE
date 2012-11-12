@@ -206,8 +206,6 @@ void DetailedSkinnedMesh::OnRenderBegin()
 			*(deferred_effect_->ParameterByName("skinned_tex_buf")) = skinned_tex_vb_;
 			*(deferred_effect_->ParameterByName("skinned_tangent_buf")) = skinned_tangent_vb_;
 			*(deferred_effect_->ParameterByName("index_buf")) = bindable_ib_;
-			*(deferred_effect_->ParameterByName("start_index_loc")) = static_cast<int32_t>(this->StartIndexLocation());
-			*(deferred_effect_->ParameterByName("base_vertex_loc")) = static_cast<int32_t>(this->BaseVertexLocation());
 		}
 	}
 }
@@ -734,9 +732,9 @@ void DetailedSkinnedModel::BuildModelInfo()
 	{
 		BOOST_FOREACH(MeshesType::const_reference mesh, meshes_)
 		{
-			MathLib::compute_normal(normals.begin() + mesh->BaseVertexLocation(),
+			MathLib::compute_normal(normals.begin() + mesh->StartVertexLocation(),
 				indices.begin() + mesh->StartIndexLocation(), indices.begin() + mesh->StartIndexLocation() + mesh->NumTriangles() * 3,
-				positions.begin() + mesh->BaseVertexLocation(), positions.begin() + mesh->BaseVertexLocation() + mesh->NumVertices());
+				positions.begin() + mesh->StartVertexLocation(), positions.begin() + mesh->StartVertexLocation() + mesh->NumVertices());
 		}
 
 		std::vector<uint32_t> compacted(total_num_vertices);
@@ -791,10 +789,10 @@ void DetailedSkinnedModel::BuildModelInfo()
 		// Compute TBN
 		BOOST_FOREACH(MeshesType::const_reference mesh, meshes_)
 		{
-			MathLib::compute_tangent(tangents.begin() + mesh->BaseVertexLocation(), binormals.begin() + mesh->BaseVertexLocation(),
+			MathLib::compute_tangent(tangents.begin() + mesh->StartVertexLocation(), binormals.begin() + mesh->StartVertexLocation(),
 				indices.begin() + mesh->StartIndexLocation(), indices.begin() + mesh->StartIndexLocation() + mesh->NumTriangles() * 3,
-				positions.begin() + mesh->BaseVertexLocation(), positions.begin() + mesh->BaseVertexLocation() + mesh->NumVertices(),
-				texcoords.begin() + mesh->BaseVertexLocation(), normals.begin() + mesh->BaseVertexLocation());
+				positions.begin() + mesh->StartVertexLocation(), positions.begin() + mesh->StartVertexLocation() + mesh->NumVertices(),
+				texcoords.begin() + mesh->StartVertexLocation(), normals.begin() + mesh->StartVertexLocation());
 		}
 
 		for (size_t j = 0; j < total_num_vertices; ++ j)

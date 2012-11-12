@@ -49,8 +49,10 @@ namespace
 	}
 }
 
-namespace KlayGE
+namespace
 {
+	using namespace KlayGE;
+
 	namespace MathLib
 	{
 		template <typename T>
@@ -465,7 +467,7 @@ namespace KlayGE
 		template <typename T>
 		std::pair<Quaternion_T<T>, Quaternion_T<T> > conjugate(Quaternion_T<T> const & real, Quaternion_T<T> const & dual)
 		{
-			return std::make_pair(MathLib::conjugate(real), MathLib::conjugate(dual));
+			return std::make_pair(conjugate(real), conjugate(dual));
 		}
 
 		template <typename T>
@@ -484,8 +486,8 @@ namespace KlayGE
 		template <typename T>
 		std::pair<Quaternion_T<T>, Quaternion_T<T> > inverse(Quaternion_T<T> const & real, Quaternion_T<T> const & dual)
 		{
-			float sqr_len_0 = MathLib::dot(real, real);
-			float sqr_len_e = 2.0f * MathLib::dot(real, dual);
+			float sqr_len_0 = dot(real, real);
+			float sqr_len_e = 2.0f * dot(real, dual);
 			float inv_sqr_len_0 = 1.0f / sqr_len_0;
 			float inv_sqr_len_e = -sqr_len_e / (sqr_len_0 * sqr_len_0);
 			std::pair<Quaternion_T<T>, Quaternion_T<T> > conj = conjugate(real, dual);
@@ -595,7 +597,10 @@ namespace KlayGE
 			return dif_dq;
 		}
 	}
+}
 
+namespace KlayGE
+{
 	bool MeshMLObj::Material::operator==(MeshMLObj::Material const & rhs) const
 	{
 		bool same = (ambient == rhs.ambient) && (diffuse == rhs.diffuse)
@@ -1253,7 +1258,7 @@ namespace KlayGE
 
 		os << "\t<key_frames_chunk num_frames=\"" << num_frames_
 			<< "\" frame_rate=\"" << frame_rate_ << "\">" << std::endl;
-		for (int joint_index = 0; joint_index < joints_.size(); ++ joint_index)
+		for (int joint_index = 0; joint_index < static_cast<int>(joints_.size()); ++ joint_index)
 		{
 			BOOST_AUTO(iter, joint_index_to_kf.find(joint_index));
 			BOOST_ASSERT(iter != joint_index_to_kf.end());
@@ -1263,7 +1268,7 @@ namespace KlayGE
 			BOOST_ASSERT(kf.bind_reals.size() == kf.bind_duals.size());
 
 			int base = 0;
-			while (base < kf.frame_ids.size() - 2)
+			while (base < static_cast<int>(kf.frame_ids.size() - 2))
 			{
 				int const frame0 = kf.frame_ids[base + 0];
 				int const frame1 = kf.frame_ids[base + 1];
@@ -1410,7 +1415,7 @@ namespace KlayGE
 			std::vector<float3>& max_kf = bb_max_key_frames[m];
 
 			int base = 0;
-			while (base < fid.size() - 2)
+			while (base < static_cast<int>(fid.size() - 2))
 			{
 				int const frame0 = fid[base + 0];
 				int const frame1 = fid[base + 1];

@@ -1477,12 +1477,12 @@ namespace KlayGE
 		void oblique_clipping(Matrix4_T<T>& proj, Plane_T<T> const & clip_plane)
 		{
 			Vector_T<T, 4> q;
-			q.x() = (MathLib::sgn(clip_plane.a()) - proj(2, 0)) / proj(0, 0);
-			q.y() = (MathLib::sgn(clip_plane.b()) - proj(2, 1)) / proj(1, 1);
+			q.x() = (sgn(clip_plane.a()) - proj(2, 0)) / proj(0, 0);
+			q.y() = (sgn(clip_plane.b()) - proj(2, 1)) / proj(1, 1);
 			q.z() = T(1);
 			q.w() = (T(1) - proj(2, 2)) / proj(3, 2);
 
-			T c = T(1) / MathLib::dot(clip_plane, q);
+			T c = T(1) / dot(clip_plane, q);
 
 			proj(0, 2) = clip_plane.a() * c;
 			proj(1, 2) = clip_plane.b() * c;
@@ -2212,7 +2212,7 @@ namespace KlayGE
 		template <typename T>
 		bool intersect_aabb_obb(AABBox_T<T> const & lhs, OBBox_T<T> const & obb)
 		{
-			return obb.Intersect(MathLib::convert_to_obbox(lhs));
+			return obb.Intersect(convert_to_obbox(lhs));
 		}
 
 		template KLAYGE_CORE_API bool intersect_aabb_sphere(AABBox const & lhs, Sphere const & sphere);
@@ -2227,7 +2227,7 @@ namespace KlayGE
 			{
 				Vector_T<T, 3> axis(0, 0, 0);
 				axis[i] = 1;
-				T dist = MathLib::dot(d, axis);
+				T dist = dot(d, axis);
 				if (dist > half_size[i])
 				{
 					dist = half_size[i];
@@ -2240,7 +2240,7 @@ namespace KlayGE
 			}
 
 			Vector_T<T, 3> v = closest_point_on_obb - sphere.Center();
-			return MathLib::length_sq(v) <= sphere.Radius() * sphere.Radius();
+			return length_sq(v) <= sphere.Radius() * sphere.Radius();
 		}
 
 		template KLAYGE_CORE_API bool intersect_obb_obb(OBBox const & lhs, OBBox const & obb);
@@ -2257,12 +2257,12 @@ namespace KlayGE
 			{
 				for (int j = 0; j < 3; ++ j)
 				{
-					r_mat(i, j) = MathLib::dot(lhs.Axis(i), obb.Axis(j));
+					r_mat(i, j) = dot(lhs.Axis(i), obb.Axis(j));
 				}
 			}
 
 			Vector_T<T, 3> t = obb.Center() - lhs.Center();
-			t = Vector_T<T, 3>(MathLib::dot(t, lhs.Axis(0)), MathLib::dot(t, lhs.Axis(1)), MathLib::dot(t, lhs.Axis(2)));
+			t = Vector_T<T, 3>(dot(t, lhs.Axis(0)), dot(t, lhs.Axis(1)), dot(t, lhs.Axis(2)));
 
 			Matrix4_T<T> abs_r_mat = Matrix4_T<T>::Identity();
 			for (int i = 0; i < 3; ++ i)
@@ -2384,7 +2384,7 @@ namespace KlayGE
 			Vector_T<T, 3> closest_point_on_obb = lhs.Center();
 			for (int i = 0; i < 3; ++ i)
 			{
-				T dist = MathLib::dot(d, lhs.Axis(i));
+				T dist = dot(d, lhs.Axis(i));
 				if (dist > lhs.HalfSize()[i])
 				{
 					dist = lhs.HalfSize()[i];
@@ -2397,7 +2397,7 @@ namespace KlayGE
 			}
 
 			Vector_T<T, 3> v = closest_point_on_obb - sphere.Center();
-			return MathLib::length_sq(v) <= sphere.Radius() * sphere.Radius();
+			return length_sq(v) <= sphere.Radius() * sphere.Radius();
 		}
 
 		template KLAYGE_CORE_API bool intersect_sphere_sphere(Sphere const & lhs, Sphere const & sphere);
@@ -2407,7 +2407,7 @@ namespace KlayGE
 		{
 			Vector_T<T, 3> d = lhs.Center() - sphere.Center();
 			float r = lhs.Radius() + sphere.Radius();
-			return MathLib::length_sq(d) <= r * r;
+			return length_sq(d) <= r * r;
 		}
 
 
@@ -2600,7 +2600,7 @@ namespace KlayGE
 		template <typename T>
 		std::pair<Quaternion_T<T>, Quaternion_T<T> > conjugate(Quaternion_T<T> const & real, Quaternion_T<T> const & dual)
 		{
-			return std::make_pair(MathLib::conjugate(real), MathLib::conjugate(dual));
+			return std::make_pair(conjugate(real), conjugate(dual));
 		}
 
 		template KLAYGE_CORE_API std::pair<Quaternion, Quaternion> inverse(Quaternion const & real, Quaternion const & dual);
@@ -2608,8 +2608,8 @@ namespace KlayGE
 		template <typename T>
 		std::pair<Quaternion_T<T>, Quaternion_T<T> > inverse(Quaternion_T<T> const & real, Quaternion_T<T> const & dual)
 		{
-			float sqr_len_0 = MathLib::dot(real, real);
-			float sqr_len_e = 2.0f * MathLib::dot(real, dual);
+			float sqr_len_0 = dot(real, real);
+			float sqr_len_e = 2.0f * dot(real, dual);
 			float inv_sqr_len_0 = 1.0f / sqr_len_0;
 			float inv_sqr_len_e = -sqr_len_e / (sqr_len_0 * sqr_len_0);
 			std::pair<Quaternion_T<T>, Quaternion_T<T> > conj = conjugate(real, dual);

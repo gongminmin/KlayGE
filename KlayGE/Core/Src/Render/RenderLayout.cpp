@@ -206,16 +206,6 @@ namespace KlayGE
 		return start_index_location_;
 	}
 
-	void RenderLayout::BaseVertexLocation(int32_t location)
-	{
-		base_vertex_location_ = location;
-	}
-
-	int32_t RenderLayout::BaseVertexLocation() const
-	{
-		return base_vertex_location_;
-	}
-
 	void RenderLayout::StartInstanceLocation(uint32_t location)
 	{
 		start_instance_location_ = location;

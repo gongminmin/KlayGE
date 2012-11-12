@@ -244,9 +244,6 @@ namespace KlayGE
 		void StartIndexLocation(uint32_t location);
 		uint32_t StartIndexLocation() const;
 
-		void BaseVertexLocation(int32_t location);
-		int32_t BaseVertexLocation() const;
-
 		void StartInstanceLocation(uint32_t location);
 		uint32_t StartInstanceLocation() const;
 

@@ -2188,8 +2188,6 @@ void SmoothDS(HS_CONSTANT_DATA_OUTPUT HSConstantData,
 	<parameter type="buffer" elem_type="float2" name="skinned_tex_buf"/>
 	<parameter type="buffer" elem_type="float4" name="skinned_tangent_buf"/>
 	<parameter type="buffer" elem_type="uint" name="index_buf"/>
-	<parameter type="int" name="start_index_loc"/>
-	<parameter type="int" name="base_vertex_loc"/>
 
 	<shader type="vertex_shader" version="4">
 		<![CDATA[

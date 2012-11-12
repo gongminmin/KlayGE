@@ -700,7 +700,7 @@ namespace KlayGE
 					RenderPassPtr const & pass = tech.Pass(i);
 
 					pass->Bind();
-					d3d_imm_ctx_->DrawIndexedInstanced(num_indices, num_instances, rl.StartIndexLocation(), rl.BaseVertexLocation(), rl.StartInstanceLocation());
+					d3d_imm_ctx_->DrawIndexedInstanced(num_indices, num_instances, rl.StartIndexLocation(), rl.StartVertexLocation(), rl.StartInstanceLocation());
 					pass->Unbind();
 				}
 			}
@@ -740,7 +740,7 @@ namespace KlayGE
 					RenderPassPtr const & pass = tech.Pass(i);
 
 					pass->Bind();
-					d3d_imm_ctx_->DrawIndexed(num_indices, rl.StartIndexLocation(), rl.BaseVertexLocation());
+					d3d_imm_ctx_->DrawIndexed(num_indices, rl.StartIndexLocation(), rl.StartVertexLocation());
 					pass->Unbind();
 				}
 			}

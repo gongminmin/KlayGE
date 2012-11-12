@@ -119,15 +119,6 @@ namespace KlayGE
 			return rl_->StartIndexLocation();
 		}
 
-		void BaseVertexLocation(int32_t location)
-		{
-			rl_->BaseVertexLocation(location);
-		}
-		int32_t BaseVertexLocation() const
-		{
-			return rl_->BaseVertexLocation();
-		}
-
 		void StartInstanceLocation(uint32_t location)
 		{
 			rl_->StartInstanceLocation(location);
@@ -463,14 +454,14 @@ namespace KlayGE
 		boost::function<StaticMeshPtr(RenderModelPtr const &, std::wstring const &)> CreateMeshFactoryFunc = CreateMeshFactory<StaticMesh>());
 
 	KLAYGE_CORE_API void SaveModel(std::string const & meshml_name, std::vector<RenderMaterialPtr> const & mtls,
+		std::vector<vertex_element> const & merged_ves, char all_is_index_16_bit, 
+		std::vector<std::vector<uint8_t> > const & merged_buffs, std::vector<uint8_t> const & merged_indices,
 		std::vector<std::string> const & mesh_names, std::vector<int32_t> const & mtl_ids,
 		std::vector<AABBox> const & pos_bbs, std::vector<AABBox> const & tc_bbs,
-		std::vector<std::vector<vertex_element> > const & ves,
-		std::vector<std::vector<std::vector<uint8_t> > > const & buffs,
-		std::vector<char> const & is_index_16_bit, std::vector<std::vector<uint8_t> > const & indices,
+		std::vector<uint32_t>& mesh_num_vertices, std::vector<uint32_t>& mesh_base_vertices,
+		std::vector<uint32_t>& mesh_num_triangles, std::vector<uint32_t>& mesh_base_triangles,
 		std::vector<Joint> const & joints, boost::shared_ptr<AnimationActionsType> const & actions,
-		boost::shared_ptr<KeyFramesType> const & kfs, uint32_t num_frames, uint32_t frame_rate,
-		std::vector<boost::shared_ptr<AABBKeyFrames> > const & frame_pos_bbs);
+		boost::shared_ptr<KeyFramesType> const & kfs, uint32_t num_frames, uint32_t frame_rate);
 	KLAYGE_CORE_API void SaveModel(RenderModelPtr const & model, std::string const & meshml_name);
 
 
