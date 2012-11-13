@@ -180,7 +180,11 @@ namespace KlayGE
 						border_(5),	// Default border width
 						spacing_(4),	// Default spacing
 #ifdef KLAYGE_PLATFORM_WINDOWS
+#ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
 						blink_time_(GetCaretBlinkTime() * 0.001f),
+#else
+						blink_time_(1),
+#endif
 #else
 						blink_time_(1),
 #endif
@@ -206,7 +210,11 @@ namespace KlayGE
 						border_(5),	// Default border width
 						spacing_(4),	// Default spacing
 #ifdef KLAYGE_PLATFORM_WINDOWS
+#ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
 						blink_time_(GetCaretBlinkTime() * 0.001f),
+#else
+						blink_time_(1),
+#endif
 #else
 						blink_time_(1),
 #endif
@@ -232,7 +240,11 @@ namespace KlayGE
 						border_(5),	// Default border width
 						spacing_(4),	// Default spacing
 #ifdef KLAYGE_PLATFORM_WINDOWS
+#ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
 						blink_time_(GetCaretBlinkTime() * 0.001f),
+#else
+						blink_time_(1),
+#endif
 #else
 						blink_time_(1),
 #endif

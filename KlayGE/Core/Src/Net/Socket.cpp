@@ -21,6 +21,8 @@
 
 #include <KlayGE/Socket.hpp>
 
+#ifndef KLAYGE_PLATFORM_WINDOWS_METRO
+
 #ifdef KLAYGE_COMPILER_MSVC
 #ifndef KLAYGE_CPU_ARM
 #pragma comment(lib, "wsock32.lib")
@@ -325,3 +327,5 @@ namespace KlayGE
 		return timeOut.tv_sec * 1000 + timeOut.tv_usec;
 	}
 }
+
+#endif

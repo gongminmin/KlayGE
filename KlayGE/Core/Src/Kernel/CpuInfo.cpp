@@ -382,7 +382,11 @@ namespace KlayGE
 #if defined KLAYGE_PLATFORM_WINDOWS
 		{
 			SYSTEM_INFO si;
+#if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
 			::GetSystemInfo(&si);
+#else
+			::GetNativeSystemInfo(&si);
+#endif
 			num_hw_threads_ = si.dwNumberOfProcessors;
 		}
 #elif defined KLAYGE_PLATFORM_LINUX
@@ -393,6 +397,7 @@ namespace KlayGE
 #endif
 
 #if defined KLAYGE_PLATFORM_WINDOWS
+#if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
 		GetLogicalProcessorInformationPtr glpi = NULL;
 		{
 			OSVERSIONINFO os_ver_info;
@@ -482,6 +487,10 @@ namespace KlayGE
 					}
 				}
 			}
+#else
+		{
+			bool supported = false;
+#endif
 #elif defined KLAYGE_PLATFORM_LINUX
 		{
 			bool supported = (GenuineIntel == cpu_string_) || (AuthenticAMD == cpu_string_);
@@ -552,6 +561,7 @@ namespace KlayGE
 				apic_extractor.SetPackageTopology(log_procs_per_pkg, cores_per_pkg);
 
 #if defined KLAYGE_PLATFORM_WINDOWS
+#if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
 				DWORD_PTR process_affinity, system_affinity;
 				HANDLE process_handle = ::GetCurrentProcess();
 				HANDLE thread_handle = ::GetCurrentThread();
@@ -606,6 +616,7 @@ namespace KlayGE
 					::SetThreadAffinityMask(thread_handle, prev_thread_affinity);
 					::Sleep(0);
 				}
+#endif
 #elif defined KLAYGE_PLATFORM_LINUX
 				if (1 == num_hw_threads_)
 				{
@@ -642,6 +653,9 @@ namespace KlayGE
 				}
 #endif
 
+#if defined KLAYGE_PLATFORM_WINDOWS_METRO
+				num_cores_ = num_hw_threads_;
+#else
 				std::vector<uint8_t> pkg_core_ids(apic_ids.size());
 				for (size_t i = 0; i < apic_ids.size(); ++ i)
 				{
@@ -650,6 +664,7 @@ namespace KlayGE
 				std::sort(pkg_core_ids.begin(), pkg_core_ids.end());
 				pkg_core_ids.erase(std::unique(pkg_core_ids.begin(), pkg_core_ids.end()), pkg_core_ids.end());
 				num_cores_ = static_cast<int>(pkg_core_ids.size());
+#endif
 			}
 		}
 #endif

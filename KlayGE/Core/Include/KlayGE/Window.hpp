@@ -35,7 +35,11 @@
 #endif
 
 #if defined KLAYGE_PLATFORM_WINDOWS
+#if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
 #include <windows.h>
+#else
+#include <agile.h>
+#endif
 #elif defined KLAYGE_PLATFORM_LINUX
 #include <X11/X.h>
 #include <X11/Xlib.h>
@@ -69,14 +73,21 @@ namespace KlayGE
 		~Window();
 
 #if defined KLAYGE_PLATFORM_WINDOWS
+#if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
 		void Recreate();
-#endif
 
-#if defined KLAYGE_PLATFORM_WINDOWS
 		HWND HWnd() const
 		{
 			return wnd_;
 		}
+#else
+		void SetWindow(Windows::UI::Core::CoreWindow^ window);
+
+		Windows::UI::Core::CoreWindow^ GetWindow() const
+		{
+			return wnd_.Get();
+		}
+#endif
 #elif defined KLAYGE_PLATFORM_LINUX
 		::Display* XDisplay() const
 		{
@@ -207,11 +218,34 @@ namespace KlayGE
 		CloseEvent close_event_;
 
 #if defined KLAYGE_PLATFORM_WINDOWS
+#if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
 	private:
 		static LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg,
 			WPARAM wParam, LPARAM lParam);
 
 		LRESULT MsgProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+#else
+		ref class MetroMsgs sealed
+		{
+			friend class Window;
+
+		public:
+			MetroMsgs();
+
+		private:
+			void OnWindowSizeChanged(Windows::UI::Core::CoreWindow^ sender, Windows::UI::Core::WindowSizeChangedEventArgs^ args);
+			void OnLogicalDpiChanged(Platform::Object^ sender);
+			void OnWindowClosed(Windows::UI::Core::CoreWindow^ sender, Windows::UI::Core::CoreWindowEventArgs^ args);
+			void OnVisibilityChanged(Windows::UI::Core::CoreWindow^ sender, Windows::UI::Core::VisibilityChangedEventArgs^ args);
+			void OnPointerPressed(Windows::UI::Core::CoreWindow^ sender, Windows::UI::Core::PointerEventArgs^ args);
+			void OnPointerMoved(Windows::UI::Core::CoreWindow^ sender, Windows::UI::Core::PointerEventArgs^ args);
+
+			void BindWindow(Window* win);
+
+		private:
+			Window* win_;
+		};
+#endif
 #elif defined KLAYGE_PLATFORM_LINUX
 	public:
 		void MsgProc(XEvent const & event);
@@ -233,7 +267,12 @@ namespace KlayGE
 		std::wstring wname_;
 #endif
 
+#if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
 		HWND wnd_;
+#else
+		Platform::Agile<Windows::UI::Core::CoreWindow> wnd_;
+		MetroMsgs^ msgs_;
+#endif
 #elif defined KLAYGE_PLATFORM_LINUX
 		::Display* x_display_;
 		::GLXFBConfig* fbc_;

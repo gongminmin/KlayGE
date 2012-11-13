@@ -41,7 +41,11 @@ namespace KlayGE
 {
 	D3D11RenderWindow::D3D11RenderWindow(IDXGIFactory1Ptr const & gi_factory, D3D11AdapterPtr const & adapter,
 			std::string const & name, RenderSettings const & settings)
+#ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
 						: hWnd_(NULL),
+#else
+						:
+#endif
                             ready_(false), closed_(false),
                             adapter_(adapter),
                             gi_factory_(gi_factory)
@@ -55,14 +59,12 @@ namespace KlayGE
 
 		ElementFormat format = settings.color_fmt;
 
-		// Destroy current window if any
-		if (hWnd_ != NULL)
-		{
-			this->Destroy();
-		}
-
 		WindowPtr main_wnd = Context::Instance().AppInstance().MainWnd();
+#ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
 		hWnd_ = main_wnd->HWnd();
+#else
+		wnd_ = main_wnd->GetWindow();
+#endif
 		main_wnd->OnActive().connect(boost::bind(&D3D11RenderWindow::OnActive, this, _1, _2));
 		main_wnd->OnPaint().connect(boost::bind(&D3D11RenderWindow::OnPaint, this, _1));
 		main_wnd->OnEnterSizeMove().connect(boost::bind(&D3D11RenderWindow::OnEnterSizeMove, this, _1));
@@ -85,6 +87,7 @@ namespace KlayGE
 		back_buffer_format_ = D3D11Mapping::MappingFormat(format);
 
 		std::memset(&sc_desc_, 0, sizeof(sc_desc_));
+#ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
 		sc_desc_.BufferCount = 1;
 		sc_desc_.BufferDesc.Width = this->Width();
 		sc_desc_.BufferDesc.Height = this->Height();
@@ -100,6 +103,19 @@ namespace KlayGE
 		sc_desc_.Windowed = !this->FullScreen();
 		sc_desc_.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
 		sc_desc_.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
+#else
+		sc_desc_.BufferCount = 2;
+		sc_desc_.Width = this->Width();
+		sc_desc_.Height = this->Height();
+		sc_desc_.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
+		sc_desc_.Stereo = false;
+		sc_desc_.SampleDesc.Count = 1;
+		sc_desc_.SampleDesc.Quality = 0;
+		sc_desc_.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
+		sc_desc_.Scaling = DXGI_SCALING_NONE;
+		sc_desc_.SwapEffect = DXGI_SWAP_EFFECT_FLIP_SEQUENTIAL;
+		sc_desc_.Flags = 0;
+#endif
 
 		viewport_->left		= 0;
 		viewport_->top		= 0;
@@ -190,6 +206,9 @@ namespace KlayGE
 								adapter_->ResetAdapter(MakeCOMPtr(ada));
 								adapter_->Enumerate();
 							}
+#ifdef KLAYGE_PLATFORM_WINDOWS_METRO
+							dxgi_device->SetMaximumFrameLatency(1);
+#endif
 							dxgi_device->Release();
 						}
 
@@ -240,8 +259,20 @@ namespace KlayGE
 			main_wnd_ = true;
 		}
 
+#ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
 		IDXGISwapChain* sc = NULL;
 		gi_factory_->CreateSwapChain(d3d_device_.get(), &sc_desc_, &sc);
+#else
+		IDXGISwapChain1* sc = NULL;
+		IDXGIFactory2* gi_factory_2;
+		gi_factory->QueryInterface(IID_IDXGIFactory2, reinterpret_cast<void**>(&gi_factory_2));
+		if (gi_factory_2 != NULL)
+		{
+			gi_factory_2->CreateSwapChainForCoreWindow(d3d_device_.get(),
+				reinterpret_cast<IUnknown*>(wnd_.Get()), &sc_desc_, nullptr, &sc);
+			gi_factory_2->Release();
+		}
+#endif
 		swap_chain_ = MakeCOMPtr(sc);
 
 		Verify(swap_chain_);
@@ -302,7 +333,9 @@ namespace KlayGE
 			}
 		}
 
+#ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
 		gi_factory_->MakeWindowAssociation(hWnd_, DXGI_MWA_NO_WINDOW_CHANGES | DXGI_MWA_NO_ALT_ENTER);
+#endif
 		swap_chain_->SetFullscreenState(this->FullScreen(), NULL);
 
 		this->UpdateSurfacesPtrs();
@@ -411,6 +444,7 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void D3D11RenderWindow::FullScreen(bool fs)
 	{
+#ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
 		if (isFullScreen_ != fs)
 		{
 			left_ = 0;
@@ -454,12 +488,22 @@ namespace KlayGE
 			::ShowWindow(hWnd_, SW_SHOWNORMAL);
 			::UpdateWindow(hWnd_);
 		}
+#else
+		UNREF_PARAM(fs);
+#endif
 	}
 
 	void D3D11RenderWindow::WindowMovedOrResized()
 	{
 		::RECT rect;
+#ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
 		::GetClientRect(hWnd_, &rect);
+#else
+		rect.left = static_cast<LONG>(wnd_->Bounds.Left);
+		rect.right = static_cast<LONG>(wnd_->Bounds.Right);
+		rect.top = static_cast<LONG>(wnd_->Bounds.Top);
+		rect.bottom = static_cast<LONG>(wnd_->Bounds.Bottom);
+#endif
 
 		uint32_t new_left = rect.left;
 		uint32_t new_top = rect.top;

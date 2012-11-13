@@ -102,14 +102,6 @@ namespace KlayGE
 		bool FullScreen() const;
 		void FullScreen(bool fs);
 
-		HRESULT D3D11CreateDevice(IDXGIAdapter* pAdapter,
-								D3D_DRIVER_TYPE DriverType, HMODULE Software, UINT Flags,
-								D3D_FEATURE_LEVEL const * pFeatureLevels, UINT FeatureLevels, UINT SDKVersion,
-								ID3D11Device** ppDevice, D3D_FEATURE_LEVEL* pFeatureLevel, ID3D11DeviceContext** ppImmediateContext) const
-		{
-			return DynamicD3D11CreateDevice_(pAdapter, DriverType, Software, Flags, pFeatureLevels, FeatureLevels, SDKVersion,
-				ppDevice, pFeatureLevel, ppImmediateContext);
-		}
 		std::string const & VertexShaderProfile() const
 		{
 			return vs_profile_;
@@ -154,6 +146,10 @@ namespace KlayGE
 
 		ID3D11InputLayoutPtr const & CreateD3D11InputLayout(std::vector<D3D11_INPUT_ELEMENT_DESC> const & elems, size_t signature, std::vector<uint8_t> const & vs_code);
 
+		HRESULT D3D11CreateDevice(IDXGIAdapter* pAdapter,
+								D3D_DRIVER_TYPE DriverType, HMODULE Software, UINT Flags,
+								D3D_FEATURE_LEVEL const * pFeatureLevels, UINT FeatureLevels, UINT SDKVersion,
+								ID3D11Device** ppDevice, D3D_FEATURE_LEVEL* pFeatureLevel, ID3D11DeviceContext** ppImmediateContext) const;
 #ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
 		HRESULT D3DCompile(LPCVOID pSrcData, SIZE_T SrcDataSize, LPCSTR pSourceName,
 								D3D_SHADER_MACRO const * pDefines, ID3DInclude* pInclude, LPCSTR pEntrypoint,
@@ -182,28 +178,24 @@ namespace KlayGE
 		D3D11AdapterList const & D3DAdapters() const;
 		D3D11AdapterPtr const & ActiveAdapter() const;
 
+#ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
 		HMODULE mod_dxgi_;
 		HMODULE mod_d3d11_;
-#ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
 		HMODULE mod_d3dcompiler_;
-#endif
 
 		typedef HRESULT (WINAPI *CreateDXGIFactory1Func)(REFIID riid, void** ppFactory);
 		typedef HRESULT (WINAPI *D3D11CreateDeviceFunc)(IDXGIAdapter* pAdapter,
 								D3D_DRIVER_TYPE DriverType, HMODULE Software, UINT Flags,
 								D3D_FEATURE_LEVEL const * pFeatureLevels, UINT FeatureLevels, UINT SDKVersion,
 								ID3D11Device** ppDevice, D3D_FEATURE_LEVEL* pFeatureLevel, ID3D11DeviceContext** ppImmediateContext);
-#ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
 		typedef HRESULT (WINAPI *D3DCompileFunc)(LPCVOID pSrcData, SIZE_T SrcDataSize, LPCSTR pSourceName,
 								D3D_SHADER_MACRO const * pDefines, ID3DInclude* pInclude, LPCSTR pEntrypoint,
 								LPCSTR pTarget, UINT Flags1, UINT Flags2, ID3DBlob** ppCode, ID3DBlob** ppErrorMsgs);
 		typedef HRESULT (WINAPI *D3DReflectFunc)(LPCVOID pSrcData, SIZE_T SrcDataSize, REFIID pInterface, void** ppReflector);
 		typedef HRESULT (WINAPI *D3DStripShaderFunc)(LPCVOID pShaderBytecode, SIZE_T BytecodeLength, UINT uStripFlags, ID3DBlob** ppStrippedBlob);
-#endif
 
 		CreateDXGIFactory1Func DynamicCreateDXGIFactory1_;
 		D3D11CreateDeviceFunc DynamicD3D11CreateDevice_;
-#ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
 		D3DCompileFunc DynamicD3DCompile_;
 		D3DReflectFunc DynamicD3DReflect_;
 		D3DStripShaderFunc DynamicD3DStripShader_;

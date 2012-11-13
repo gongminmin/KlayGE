@@ -25,6 +25,8 @@
 #include <KlayGE/NetMsg.hpp>
 #include <KlayGE/Player.hpp>
 
+#ifndef KLAYGE_PLATFORM_WINDOWS_METRO
+
 namespace
 {
 	class ReceiveThreadFunc
@@ -220,3 +222,5 @@ namespace KlayGE
 		return socket_.Send(buf, size);
 	}
 }
+
+#endif

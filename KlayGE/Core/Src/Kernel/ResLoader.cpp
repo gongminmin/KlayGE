@@ -41,10 +41,12 @@ namespace KlayGE
 	ResLoader::ResLoader()
 	{
 #if defined KLAYGE_PLATFORM_WINDOWS
+#if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
 		char buf[MAX_PATH];
 		GetModuleFileNameA(NULL, buf, sizeof(buf));
 		exe_path_ = buf;
 		exe_path_ = exe_path_.substr(0, exe_path_.rfind("\\"));
+#endif
 #elif defined KLAYGE_PLATFORM_LINUX || defined KLAYGE_PLATFORM_ANDROID
 		{
 			char line[1024];

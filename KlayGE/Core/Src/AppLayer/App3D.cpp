@@ -44,6 +44,18 @@
 
 #include <KlayGE/App3D.hpp>
 
+#ifdef KLAYGE_PLATFORM_WINDOWS_METRO
+#include <ppl.h>
+#include <ppltasks.h>
+
+using namespace Windows::ApplicationModel;
+using namespace Windows::ApplicationModel::Core;
+using namespace Windows::ApplicationModel::Activation;
+using namespace Windows::UI::Core;
+using namespace Windows::Foundation;
+using namespace concurrency;
+#endif
+
 namespace KlayGE
 {
 	// ¹¹Ôìº¯Êý
@@ -52,6 +64,10 @@ namespace KlayGE
 						: name_(name),
 							fps_(0), accumulate_time_(0), num_frames_(0),
 							app_time_(0), frame_time_(0)
+#if defined KLAYGE_PLATFORM_WINDOWS_METRO
+							, metro_fw_(ref new MetroFramework),
+							metro_fw_src_(ref new MetroFrameworkSource)
+#endif
 	{
 		Context::Instance().AppInstance(*this);
 
@@ -62,6 +78,10 @@ namespace KlayGE
 		cfg.graphics_cfg.width = main_wnd_->Width();
 		cfg.graphics_cfg.height = main_wnd_->Height();
 		Context::Instance().Config(cfg);
+
+#if defined KLAYGE_PLATFORM_WINDOWS_METRO
+		metro_fw_->BindAppFramework(this);
+#endif
 	}
 
 	App3DFramework::~App3DFramework()
@@ -166,7 +186,9 @@ namespace KlayGE
 	void App3DFramework::Quit()
 	{
 #ifdef KLAYGE_PLATFORM_WINDOWS
+#ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
 		::PostQuitMessage(0);
+#endif
 #else
 		exit(0);
 #endif
@@ -231,4 +253,76 @@ namespace KlayGE
 	{
 		return frame_time_;
 	}
+
+#if defined KLAYGE_PLATFORM_WINDOWS_METRO
+	IFrameworkViewSource^ App3DFramework::GetMetroSource()
+	{
+		return metro_fw_src_;
+	}
+
+	App3DFramework::MetroFramework::MetroFramework()
+	{
+	}
+
+	void App3DFramework::MetroFramework::Initialize(CoreApplicationView^ applicationView)
+	{
+		applicationView->Activated +=
+			ref new TypedEventHandler<CoreApplicationView^, IActivatedEventArgs^>(this, &MetroFramework::OnActivated);
+
+		CoreApplication::Suspending +=
+			ref new EventHandler<SuspendingEventArgs^>(this, &MetroFramework::OnSuspending);
+
+		CoreApplication::Resuming +=
+			ref new EventHandler<Platform::Object^>(this, &MetroFramework::OnResuming);
+	}
+
+	void App3DFramework::MetroFramework::SetWindow(CoreWindow^ window)
+	{
+		app_->main_wnd_->SetWindow(CoreWindow::GetForCurrentThread());
+	}
+
+	void App3DFramework::MetroFramework::Load(Platform::String^ entryPoint)
+	{
+	}
+
+	void App3DFramework::MetroFramework::Run()
+	{
+		app_->Run();
+	}
+
+	void App3DFramework::MetroFramework::Uninitialize()
+	{
+	}
+
+	void App3DFramework::MetroFramework::OnActivated(CoreApplicationView^ applicationView, IActivatedEventArgs^ args)
+	{
+		CoreWindow::GetForCurrentThread()->Activate();
+	}
+
+	void App3DFramework::MetroFramework::OnSuspending(Platform::Object^ sender, SuspendingEventArgs^ args)
+	{
+		SuspendingDeferral^ deferral = args->SuspendingOperation->GetDeferral();
+
+		create_task([this, deferral]()
+		{
+			// Insert your code here.
+
+			deferral->Complete();
+		});
+	}
+
+	void App3DFramework::MetroFramework::OnResuming(Platform::Object^ sender, Platform::Object^ args)
+	{
+	}
+
+	void App3DFramework::MetroFramework::BindAppFramework(App3DFramework* app)
+	{
+		app_ = app;
+	}
+	
+	IFrameworkView^ App3DFramework::MetroFrameworkSource::CreateView()
+	{
+		return ref new MetroFramework;
+	}
+#endif
 }

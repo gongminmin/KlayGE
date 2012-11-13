@@ -39,6 +39,8 @@
 #include <KlayGE/thread.hpp>
 #include <KlayGE/Socket.hpp>
 
+#ifndef KLAYGE_PLATFORM_WINDOWS_METRO
+
 namespace KlayGE
 {
 	struct LobbyDes
@@ -82,5 +84,7 @@ namespace KlayGE
 		SendQueueType	sendQueue_;
 	};
 }
+
+#endif
 
 #endif			// _PLAYER_HPP

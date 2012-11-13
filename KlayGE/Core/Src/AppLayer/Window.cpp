@@ -28,9 +28,17 @@
 #endif
 #endif
 
+#ifdef KLAYGE_PLATFORM_WINDOWS_METRO
+using namespace Windows::ApplicationModel::Core;
+using namespace Windows::ApplicationModel::Activation;
+using namespace Windows::UI::Core;
+using namespace Windows::Foundation;
+#endif
+
 namespace KlayGE
 {
 #ifdef KLAYGE_PLATFORM_WINDOWS
+#ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
 	LRESULT Window::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	{
 #ifdef KLAYGE_COMPILER_MSVC
@@ -449,6 +457,76 @@ namespace KlayGE
 
 		return ::DefWindowProc(hWnd, uMsg, wParam, lParam);
 	}
+#else
+	Window::Window(std::string const & /*name*/, RenderSettings const & /*settings*/)
+		: msgs_(ref new MetroMsgs)
+	{
+		msgs_->BindWindow(this);
+	}
+
+	Window::~Window()
+	{
+	}
+
+	void Window::SetWindow(CoreWindow^ window)
+	{
+		wnd_ = window;
+
+		left_ = 0;
+		top_ = 0;
+		width_ = static_cast<uint32_t>(wnd_->Bounds.Width);
+		height_ = static_cast<uint32_t>(wnd_->Bounds.Height);
+
+		window->SizeChanged += 
+			ref new TypedEventHandler<CoreWindow^, WindowSizeChangedEventArgs^>(msgs_, &MetroMsgs::OnWindowSizeChanged);
+
+		window->VisibilityChanged +=
+			ref new TypedEventHandler<CoreWindow^, VisibilityChangedEventArgs^>(msgs_, &MetroMsgs::OnVisibilityChanged);
+
+		window->Closed += 
+			ref new TypedEventHandler<CoreWindow^, CoreWindowEventArgs^>(msgs_, &MetroMsgs::OnWindowClosed);
+
+		window->PointerCursor = ref new CoreCursor(CoreCursorType::Arrow, 0);
+
+		window->PointerPressed +=
+			ref new TypedEventHandler<CoreWindow^, PointerEventArgs^>(msgs_, &MetroMsgs::OnPointerPressed);
+
+		window->PointerMoved +=
+			ref new TypedEventHandler<CoreWindow^, PointerEventArgs^>(msgs_, &MetroMsgs::OnPointerMoved);
+	}
+
+	Window::MetroMsgs::MetroMsgs()
+	{
+	}
+
+	void Window::MetroMsgs::OnWindowSizeChanged(CoreWindow^ /*sender*/, WindowSizeChangedEventArgs^ /*args*/)
+	{
+		win_->OnSize()(*win_, true);
+	}
+
+	void Window::MetroMsgs::OnVisibilityChanged(CoreWindow^ /*sender*/, VisibilityChangedEventArgs^ args)
+	{
+		win_->OnActive()(*win_, args->Visible);
+	}
+
+	void Window::MetroMsgs::OnWindowClosed(CoreWindow^ /*sender*/, CoreWindowEventArgs^ /*args*/)
+	{
+		win_->OnClose()(*win_);
+	}
+
+	void Window::MetroMsgs::OnPointerPressed(CoreWindow^ /*sender*/, PointerEventArgs^ /*args*/)
+	{
+	}
+
+	void Window::MetroMsgs::OnPointerMoved(CoreWindow^ /*sender*/, PointerEventArgs^ /*args*/)
+	{
+	}
+
+	void Window::MetroMsgs::BindWindow(Window* win)
+	{
+		win_ = win;
+	}
+#endif
 #elif defined KLAYGE_PLATFORM_LINUX
 	Window::Window(std::string const & name, RenderSettings const & settings)
 	{

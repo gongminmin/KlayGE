@@ -25,6 +25,7 @@
 
 #include <string>
 
+#ifndef KLAYGE_PLATFORM_WINDOWS_METRO
 #if defined KLAYGE_PLATFORM_WINDOWS
 	#ifndef _WINSOCKAPI_
 	#include <winsock.h>
@@ -103,5 +104,6 @@ namespace KlayGE
 		SOCKET		socket_;
 	};
 }
+#endif
 
 #endif			// _SOCKET_HPP

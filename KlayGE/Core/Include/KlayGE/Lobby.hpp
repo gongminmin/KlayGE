@@ -27,6 +27,8 @@
 #include <list>
 #include <KlayGE/Socket.hpp>
 
+#ifndef KLAYGE_PLATFORM_WINDOWS_METRO
+
 namespace KlayGE
 {
 	typedef std::list<std::vector<char> > SendQueueType;
@@ -112,6 +114,8 @@ namespace KlayGE
 		std::string		name_;
 	};
 }
+
+#endif
 
 #endif			// _LOBBY_HPP
 

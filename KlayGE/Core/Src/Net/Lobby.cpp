@@ -22,6 +22,8 @@
 #include <KlayGE/NetMsg.hpp>
 #include <KlayGE/Lobby.hpp>
 
+#ifndef KLAYGE_PLATFORM_WINDOWS_METRO
+
 namespace KlayGE
 {
 	// ¹¹Ôìº¯Êý
@@ -293,3 +295,5 @@ namespace KlayGE
 		}
 	}
 }
+
+#endif

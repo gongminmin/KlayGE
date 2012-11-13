@@ -19,6 +19,10 @@
 #include <KlayGE/D3D11/D3D11FrameBuffer.hpp>
 #include <KlayGE/D3D11/D3D11Adapter.hpp>
 
+#if defined KLAYGE_PLATFORM_WINDOWS_METRO
+#include <agile.h>
+#endif
+
 namespace KlayGE
 {
 	struct RenderSettings;
@@ -83,7 +87,11 @@ namespace KlayGE
 	private:
 		std::string	name_;
 
+#ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
 		HWND	hWnd_;				// Win32 Window handle
+#else
+		Platform::Agile<Windows::UI::Core::CoreWindow> wnd_;
+#endif
 		bool	ready_;				// Is ready i.e. available for update
 		bool	closed_;
 		bool	isFullScreen_;
@@ -95,7 +103,11 @@ namespace KlayGE
 		IDXGIFactory1Ptr		gi_factory_;
 		ID3D11DevicePtr			d3d_device_;
 		ID3D11DeviceContextPtr	d3d_imm_ctx_;
+#ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
 		DXGI_SWAP_CHAIN_DESC	sc_desc_;
+#else
+		DXGI_SWAP_CHAIN_DESC1	sc_desc_;
+#endif
 		IDXGISwapChainPtr		swap_chain_;
 		bool					main_wnd_;
 

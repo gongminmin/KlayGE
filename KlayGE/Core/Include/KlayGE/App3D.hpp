@@ -102,6 +102,10 @@ namespace KlayGE
 
 		virtual void OnResize(uint32_t width, uint32_t height);
 
+#if defined KLAYGE_PLATFORM_WINDOWS_METRO
+		Windows::ApplicationModel::Core::IFrameworkViewSource^ GetMetroSource();
+#endif
+
 	protected:
 		void LookAt(float3 const & eye, float3 const & lookAt);
 		void LookAt(float3 const & eye, float3 const & lookAt, float3 const & up);
@@ -140,6 +144,42 @@ namespace KlayGE
 		float frame_time_;
 
 		WindowPtr main_wnd_;
+
+#if defined KLAYGE_PLATFORM_WINDOWS_METRO
+	private:
+		ref class MetroFramework sealed : public Windows::ApplicationModel::Core::IFrameworkView
+		{
+			friend class App3DFramework;
+
+		public:
+			MetroFramework();
+	
+			virtual void Initialize(Windows::ApplicationModel::Core::CoreApplicationView^ applicationView);
+			virtual void SetWindow(Windows::UI::Core::CoreWindow^ window);
+			virtual void Load(Platform::String^ entryPoint);
+			virtual void Run();
+			virtual void Uninitialize();
+
+		private:
+			void OnActivated(Windows::ApplicationModel::Core::CoreApplicationView^ applicationView, Windows::ApplicationModel::Activation::IActivatedEventArgs^ args);
+			void OnSuspending(Platform::Object^ sender, Windows::ApplicationModel::SuspendingEventArgs^ args);
+			void OnResuming(Platform::Object^ sender, Platform::Object^ args);
+
+			void BindAppFramework(App3DFramework* app);
+
+		private:
+			App3DFramework* app_;
+		};
+
+		ref class MetroFrameworkSource sealed : Windows::ApplicationModel::Core::IFrameworkViewSource
+		{
+		public:
+			virtual Windows::ApplicationModel::Core::IFrameworkView^ CreateView();
+		};
+
+		MetroFramework^ metro_fw_;
+		MetroFrameworkSource^ metro_fw_src_;
+#endif
 	};
 }
 
