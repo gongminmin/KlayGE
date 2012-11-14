@@ -58,6 +58,103 @@ using namespace concurrency;
 
 namespace KlayGE
 {
+#if defined KLAYGE_PLATFORM_WINDOWS_METRO
+	ref class MetroFramework sealed : public Windows::ApplicationModel::Core::IFrameworkView
+	{
+		friend class App3DFramework;
+
+	public:
+		MetroFramework();
+	
+		virtual void Initialize(Windows::ApplicationModel::Core::CoreApplicationView^ application_view);
+		virtual void SetWindow(Windows::UI::Core::CoreWindow^ window);
+		virtual void Load(Platform::String^ entryPoint);
+		virtual void Run();
+		virtual void Uninitialize();
+
+	private:
+		void OnActivated(Windows::ApplicationModel::Core::CoreApplicationView^ application_view, Windows::ApplicationModel::Activation::IActivatedEventArgs^ args);
+		void OnSuspending(Platform::Object^ sender, Windows::ApplicationModel::SuspendingEventArgs^ args);
+		void OnResuming(Platform::Object^ sender, Platform::Object^ args);
+
+		void BindAppFramework(App3DFramework* app);
+
+	private:
+		App3DFramework* app_;
+	};
+
+	ref class MetroFrameworkSource sealed : Windows::ApplicationModel::Core::IFrameworkViewSource
+	{
+	public:
+		virtual Windows::ApplicationModel::Core::IFrameworkView^ CreateView();
+	};
+
+	MetroFramework::MetroFramework()
+	{
+	}
+
+	void MetroFramework::Initialize(CoreApplicationView^ application_view)
+	{
+		application_view->Activated +=
+			ref new TypedEventHandler<CoreApplicationView^, IActivatedEventArgs^>(this, &MetroFramework::OnActivated);
+
+		CoreApplication::Suspending +=
+			ref new EventHandler<SuspendingEventArgs^>(this, &MetroFramework::OnSuspending);
+
+		CoreApplication::Resuming +=
+			ref new EventHandler<Platform::Object^>(this, &MetroFramework::OnResuming);
+	}
+
+	void MetroFramework::SetWindow(CoreWindow^ window)
+	{
+		app_->main_wnd_->SetWindow(CoreWindow::GetForCurrentThread());
+	}
+
+	void MetroFramework::Load(Platform::String^ entryPoint)
+	{
+	}
+
+	void MetroFramework::Run()
+	{
+		app_->MetroRun();
+	}
+
+	void MetroFramework::Uninitialize()
+	{
+	}
+
+	void MetroFramework::OnActivated(CoreApplicationView^ application_view, IActivatedEventArgs^ args)
+	{
+		CoreWindow::GetForCurrentThread()->Activate();
+	}
+
+	void MetroFramework::OnSuspending(Platform::Object^ sender, SuspendingEventArgs^ args)
+	{
+		SuspendingDeferral^ deferral = args->SuspendingOperation->GetDeferral();
+
+		create_task([this, deferral]()
+		{
+			// Insert your code here.
+
+			deferral->Complete();
+		});
+	}
+
+	void MetroFramework::OnResuming(Platform::Object^ sender, Platform::Object^ args)
+	{
+	}
+
+	void MetroFramework::BindAppFramework(App3DFramework* app)
+	{
+		app_ = app;
+	}
+	
+	IFrameworkView^ MetroFrameworkSource::CreateView()
+	{
+		return ref new MetroFramework;
+	}
+#endif
+
 	// ¹¹Ôìº¯Êý
 	/////////////////////////////////////////////////////////////////////////////////
 	App3DFramework::App3DFramework(std::string const & name)
@@ -65,8 +162,7 @@ namespace KlayGE
 							fps_(0), accumulate_time_(0), num_frames_(0),
 							app_time_(0), frame_time_(0)
 #if defined KLAYGE_PLATFORM_WINDOWS_METRO
-							, metro_fw_(ref new MetroFramework),
-							metro_fw_src_(ref new MetroFrameworkSource)
+							, metro_fw_(ref new MetroFramework)
 #endif
 	{
 		Context::Instance().AppInstance(*this);
@@ -126,7 +222,17 @@ namespace KlayGE
 		return MakeSharedPtr<Window>(name, settings);
 	}
 
+#if defined KLAYGE_PLATFORM_WINDOWS_METRO
 	void App3DFramework::Run()
+	{
+		MetroFrameworkSource^ metro_app = ref new MetroFrameworkSource;
+		CoreApplication::Run(metro_app);
+	}
+
+	void App3DFramework::MetroRun()
+#else
+	void App3DFramework::Run()
+#endif
 	{
 		Context::Instance().RenderFactoryInstance().RenderEngineInstance().StartRendering();
 
@@ -253,76 +359,4 @@ namespace KlayGE
 	{
 		return frame_time_;
 	}
-
-#if defined KLAYGE_PLATFORM_WINDOWS_METRO
-	IFrameworkViewSource^ App3DFramework::GetMetroSource()
-	{
-		return metro_fw_src_;
-	}
-
-	App3DFramework::MetroFramework::MetroFramework()
-	{
-	}
-
-	void App3DFramework::MetroFramework::Initialize(CoreApplicationView^ applicationView)
-	{
-		applicationView->Activated +=
-			ref new TypedEventHandler<CoreApplicationView^, IActivatedEventArgs^>(this, &MetroFramework::OnActivated);
-
-		CoreApplication::Suspending +=
-			ref new EventHandler<SuspendingEventArgs^>(this, &MetroFramework::OnSuspending);
-
-		CoreApplication::Resuming +=
-			ref new EventHandler<Platform::Object^>(this, &MetroFramework::OnResuming);
-	}
-
-	void App3DFramework::MetroFramework::SetWindow(CoreWindow^ window)
-	{
-		app_->main_wnd_->SetWindow(CoreWindow::GetForCurrentThread());
-	}
-
-	void App3DFramework::MetroFramework::Load(Platform::String^ entryPoint)
-	{
-	}
-
-	void App3DFramework::MetroFramework::Run()
-	{
-		app_->Run();
-	}
-
-	void App3DFramework::MetroFramework::Uninitialize()
-	{
-	}
-
-	void App3DFramework::MetroFramework::OnActivated(CoreApplicationView^ applicationView, IActivatedEventArgs^ args)
-	{
-		CoreWindow::GetForCurrentThread()->Activate();
-	}
-
-	void App3DFramework::MetroFramework::OnSuspending(Platform::Object^ sender, SuspendingEventArgs^ args)
-	{
-		SuspendingDeferral^ deferral = args->SuspendingOperation->GetDeferral();
-
-		create_task([this, deferral]()
-		{
-			// Insert your code here.
-
-			deferral->Complete();
-		});
-	}
-
-	void App3DFramework::MetroFramework::OnResuming(Platform::Object^ sender, Platform::Object^ args)
-	{
-	}
-
-	void App3DFramework::MetroFramework::BindAppFramework(App3DFramework* app)
-	{
-		app_ = app;
-	}
-	
-	IFrameworkView^ App3DFramework::MetroFrameworkSource::CreateView()
-	{
-		return ref new MetroFramework;
-	}
-#endif
 }
