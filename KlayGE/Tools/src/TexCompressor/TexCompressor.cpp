@@ -132,7 +132,7 @@ int main(int argc, char* argv[])
 
 	CompressTex(in_file, out_file, fmt);
 
-	cout << "Mipmapped texture is saved." << endl;
+	cout << "Compressed texture is saved." << endl;
 
 	return 0;
 }

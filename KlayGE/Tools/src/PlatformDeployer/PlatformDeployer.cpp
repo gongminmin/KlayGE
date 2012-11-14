@@ -18,6 +18,7 @@
 #include <boost/enable_shared_from_this.hpp>
 #include <boost/foreach.hpp>
 #include <boost/typeof/typeof.hpp>
+#include <boost/algorithm/string/case_conv.hpp>
 
 #include <boost/filesystem.hpp>
 #include <boost/regex.hpp>
@@ -87,6 +88,8 @@ std::string DosWildcardToRegex(std::string const & wildcard)
 void Deploy(std::vector<std::string> const & res_names, std::string const & res_type, std::string const & platform)
 {
 	std::ofstream ofs("convert.bat");
+
+	ofs << "@echo off" << std::endl << std::endl;
 		
 	if (("pc_dx11" == platform) || ("pc_dx10" == platform) || ("pc_gl4" == platform) || ("pc_gl3" == platform))
 	{
@@ -237,6 +240,7 @@ void Deploy(std::vector<std::string> const & res_names, std::string const & res_
 	if (res_type != "model")
 	{
 		system("convert.bat");
+		system("del convert.bat");
 	}
 }
 
@@ -335,6 +339,9 @@ int main(int argc, char* argv[])
 	{
 		platform = "pc_dx11";
 	}
+
+	boost::algorithm::to_lower(res_type);
+	boost::algorithm::to_lower(platform);
 
 	Context::Instance().LoadCfg("KlayGE.cfg");
 	ContextCfg context_cfg = Context::Instance().Config();
