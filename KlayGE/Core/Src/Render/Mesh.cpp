@@ -717,7 +717,7 @@ namespace KlayGE
 	
 	uint32_t SkinnedModel::NumActions() const
 	{
-		return actions_ ? actions_->size() : 1;
+		return actions_ ? static_cast<uint32_t>(actions_->size()) : 1;
 	}
 
 	void SkinnedModel::GetAction(uint32_t index, std::string& name, uint32_t& start_frame, uint32_t& end_frame)
@@ -732,6 +732,8 @@ namespace KlayGE
 		}
 		else
 		{
+			BOOST_ASSERT(0 == index);
+
 			name = "root";
 			start_frame = 0;
 			end_frame = num_frames_;
@@ -922,20 +924,23 @@ namespace KlayGE
 				uint32_t mtl_index = 0;
 				for (XMLNodePtr mtl_node = materials_chunk->FirstNode("material"); mtl_node; mtl_node = mtl_node->NextSibling("material"), ++ mtl_index)
 				{
-					std::istringstream attr_ss;
 					float3 ambient, diffuse, specular, emit;
-					attr_ss.str(mtl_node->Attrib("ambient")->ValueString());
-					attr_ss.seekg(0);
-					attr_ss >> ambient.x() >> ambient.y() >> ambient.z();
-					attr_ss.str(mtl_node->Attrib("diffuse")->ValueString());
-					attr_ss.seekg(0);
-					attr_ss >> diffuse.x() >> diffuse.y() >> diffuse.z();
-					attr_ss.str(mtl_node->Attrib("specular")->ValueString());
-					attr_ss.seekg(0);
-					attr_ss >> specular.x() >> specular.y() >> specular.z();
-					attr_ss.str(mtl_node->Attrib("emit")->ValueString());
-					attr_ss.seekg(0);
-					attr_ss >> emit.x() >> emit.y() >> emit.z();
+					{
+						std::istringstream attr_ss(mtl_node->Attrib("ambient")->ValueString());
+						attr_ss >> ambient.x() >> ambient.y() >> ambient.z();
+					}
+					{
+						std::istringstream attr_ss(mtl_node->Attrib("diffuse")->ValueString());
+						attr_ss >> diffuse.x() >> diffuse.y() >> diffuse.z();
+					}
+					{
+						std::istringstream attr_ss(mtl_node->Attrib("specular")->ValueString());
+						attr_ss >> specular.x() >> specular.y() >> specular.z();
+					}
+					{
+						std::istringstream attr_ss(mtl_node->Attrib("emit")->ValueString());
+						attr_ss >> emit.x() >> emit.y() >> emit.z();
+					}
 					float opacity = mtl_node->Attrib("opacity")->ValueFloat();
 					float specular_level = mtl_node->Attrib("specular_level")->ValueFloat();
 					float shininess = mtl_node->Attrib("shininess")->ValueFloat();
@@ -1227,15 +1232,16 @@ namespace KlayGE
 						XMLNodePtr pos_bb_node = vertices_chunk->FirstNode("pos_bb");
 						if (pos_bb_node)
 						{
-							std::istringstream attr_ss;
-							XMLAttributePtr attr = pos_bb_node->Attrib("min");
-							attr_ss.str(attr->ValueString());
-							attr_ss.seekg(0);
-							attr_ss >> pos_min_bb[0] >> pos_min_bb[1] >> pos_min_bb[2];
-							attr = pos_bb_node->Attrib("max");
-							attr_ss.str(attr->ValueString());
-							attr_ss.seekg(0);
-							attr_ss >> pos_max_bb[0] >> pos_max_bb[1] >> pos_max_bb[2];
+							{
+								XMLAttributePtr attr = pos_bb_node->Attrib("min");
+								std::istringstream attr_ss(attr->ValueString());
+								attr_ss >> pos_min_bb[0] >> pos_min_bb[1] >> pos_min_bb[2];
+							}
+							{
+								XMLAttributePtr attr = pos_bb_node->Attrib("max");
+								std::istringstream attr_ss(attr->ValueString());
+								attr_ss >> pos_max_bb[0] >> pos_max_bb[1] >> pos_max_bb[2];
+							}
 						}
 						else
 						{
@@ -1261,13 +1267,16 @@ namespace KlayGE
 						XMLNodePtr tc_bb_node = vertices_chunk->FirstNode("tc_bb");
 						if (tc_bb_node)
 						{
-							XMLAttributePtr attr = tc_bb_node->Attrib("min");
-							std::istringstream attr_ss(attr->ValueString());
-							attr_ss >> tc_min_bb[0] >> tc_min_bb[1];
-							attr = tc_bb_node->Attrib("max");
-							attr_ss.str(attr->ValueString());
-							attr_ss.seekg(0);
-							attr_ss >> tc_max_bb[0] >> tc_max_bb[1];
+							{
+								XMLAttributePtr attr = tc_bb_node->Attrib("min");
+								std::istringstream attr_ss(attr->ValueString());
+								attr_ss >> tc_min_bb[0] >> tc_min_bb[1];
+							}
+							{
+								XMLAttributePtr attr = tc_bb_node->Attrib("max");
+								std::istringstream attr_ss(attr->ValueString());
+								attr_ss >> tc_max_bb[0] >> tc_max_bb[1];
+							}
 
 							tc_min_bb.z() = 0;
 							tc_max_bb.z() = 0;
@@ -1603,14 +1612,17 @@ namespace KlayGE
 
 					Quaternion bind_real;
 					XMLNodePtr bind_real_node = bone_node->FirstNode("real");
-					std::istringstream attr_ss(bind_real_node->Attrib("v")->ValueString());
-					attr_ss >> bind_real.x() >> bind_real.y() >> bind_real.z() >> bind_real.w();
+					{
+						std::istringstream attr_ss(bind_real_node->Attrib("v")->ValueString());
+						attr_ss >> bind_real.x() >> bind_real.y() >> bind_real.z() >> bind_real.w();
+					}
 							
 					Quaternion bind_dual;
 					XMLNodePtr bind_dual_node = bone_node->FirstNode("dual");
-					attr_ss.str(bind_dual_node->Attrib("v")->ValueString());
-					attr_ss.seekg(0);
-					attr_ss >> bind_dual.x() >> bind_dual.y() >> bind_dual.z() >> bind_dual.w();
+					{
+						std::istringstream attr_ss(bind_dual_node->Attrib("v")->ValueString());
+						attr_ss >> bind_dual.x() >> bind_dual.y() >> bind_dual.z() >> bind_dual.w();
+					}
 
 					NativeToLittleEndian<sizeof(bind_real[0])>(&bind_real[0]);
 					NativeToLittleEndian<sizeof(bind_real[1])>(&bind_real[1]);
@@ -1659,14 +1671,17 @@ namespace KlayGE
 
 						Quaternion bind_real;
 						XMLNodePtr bind_real_node = key_node->FirstNode("real");
-						std::istringstream attr_ss(bind_real_node->Attrib("v")->ValueString());
-						attr_ss >> bind_real.x() >> bind_real.y() >> bind_real.z() >> bind_real.w();
+						{
+							std::istringstream attr_ss(bind_real_node->Attrib("v")->ValueString());
+							attr_ss >> bind_real.x() >> bind_real.y() >> bind_real.z() >> bind_real.w();
+						}
 							
 						Quaternion bind_dual;
 						XMLNodePtr bind_dual_node = key_node->FirstNode("dual");
-						attr_ss.str(bind_dual_node->Attrib("v")->ValueString());
-						attr_ss.seekg(0);
-						attr_ss >> bind_dual.x() >> bind_dual.y() >> bind_dual.z() >> bind_dual.w();
+						{
+							std::istringstream attr_ss(bind_dual_node->Attrib("v")->ValueString());
+							attr_ss >> bind_dual.x() >> bind_dual.y() >> bind_dual.z() >> bind_dual.w();
+						}
 
 						float bind_scale = MathLib::length(bind_real);
 						bind_real /= bind_scale;
@@ -1726,15 +1741,16 @@ namespace KlayGE
 							bb_kfs.frame_id.push_back(frame_id);
 
 							float3 bb_min, bb_max;
-							std::istringstream attr_ss;
-							XMLAttributePtr attr = key_node->Attrib("min");
-							attr_ss.str(attr->ValueString());
-							attr_ss.seekg(0);
-							attr_ss >> bb_min[0] >> bb_min[1] >> bb_min[2];
-							attr = key_node->Attrib("max");
-							attr_ss.str(attr->ValueString());
-							attr_ss.seekg(0);
-							attr_ss >> bb_max[0] >> bb_max[1] >> bb_max[2];
+							{
+								XMLAttributePtr attr = key_node->Attrib("min");
+								std::istringstream attr_ss(attr->ValueString());
+								attr_ss >> bb_min[0] >> bb_min[1] >> bb_min[2];
+							}
+							{
+								XMLAttributePtr attr = key_node->Attrib("max");
+								std::istringstream attr_ss(attr->ValueString());
+								attr_ss >> bb_max[0] >> bb_max[1] >> bb_max[2];
+							}
 
 							bb_kfs.bb.push_back(AABBox(bb_min, bb_max));
 						}

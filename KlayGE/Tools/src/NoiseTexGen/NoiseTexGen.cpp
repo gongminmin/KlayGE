@@ -193,7 +193,7 @@ int main()
 	}
 	init_data[0].data = &grad_perm[0];
 	init_data[0].row_pitch = 256 * 4;
-	init_data[0].slice_pitch = grad_perm.size() * sizeof(grad_perm[0]);
+	init_data[0].slice_pitch = static_cast<uint32_t>(grad_perm.size() * sizeof(grad_perm[0]));
 	SaveTexture("noise_grad3_perm.dds", Texture::TT_2D,
 		256, 256, 1, 1, 1, EF_ABGR8, init_data);
 
@@ -210,7 +210,7 @@ int main()
 	}
 	init_data[0].data = &grad_perm[0];
 	init_data[0].row_pitch = 256 * 4;
-	init_data[0].slice_pitch = grad_perm.size() * sizeof(grad_perm[0]);
+	init_data[0].slice_pitch = static_cast<uint32_t>(grad_perm.size() * sizeof(grad_perm[0]));
 	SaveTexture("noise_grad4_perm.dds", Texture::TT_2D,
 		256, 256, 1, 1, 1, EF_ABGR8, init_data);
 
