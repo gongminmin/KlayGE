@@ -1468,7 +1468,7 @@ namespace KlayGE
 		{
 			os << "\t\t<action name=\"" << "root"
 				<< "\" start=\"" << 0
-				<< "\" end=\"" << num_frames_ - 1
+				<< "\" end=\"" << num_frames_
 				<< "\"/>" << std::endl;
 		}
 		else

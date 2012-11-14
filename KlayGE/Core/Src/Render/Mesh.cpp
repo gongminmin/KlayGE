@@ -2317,7 +2317,19 @@ namespace KlayGE
 			int mtl_id = obj.AllocMaterial();
 			mtl_map.insert(std::make_pair(i, mtl_id));
 
-			obj.SetMaterial(mtl_id, mtls[i]->ambient, mtls[i]->diffuse, mtls[i]->specular, mtls[i]->emit,
+			float3 ambient = mtls[i]->ambient;
+			float3 diffuse = mtls[i]->diffuse;
+			if (Context::Instance().Config().graphics_cfg.gamma)
+			{
+				ambient.x() = MathLib::linear_to_srgb(ambient.x());
+				ambient.y() = MathLib::linear_to_srgb(ambient.y());
+				ambient.z() = MathLib::linear_to_srgb(ambient.z());
+				diffuse.x() = MathLib::linear_to_srgb(diffuse.x());
+				diffuse.y() = MathLib::linear_to_srgb(diffuse.y());
+				diffuse.z() = MathLib::linear_to_srgb(diffuse.z());
+			}
+
+			obj.SetMaterial(mtl_id, ambient, diffuse, mtls[i]->specular, mtls[i]->emit,
 				mtls[i]->opacity, mtls[i]->specular_level, mtls[i]->shininess);
 
 			for (size_t ts = 0; ts < mtls[i]->texture_slots.size(); ++ ts)
@@ -2371,7 +2383,7 @@ namespace KlayGE
 							{
 								BOOST_ASSERT(EF_SIGNED_ABGR16 == merged_ves[ve].format);
 
-								uint16_t const * p = reinterpret_cast<uint16_t const *>(src);
+								int16_t const * p = reinterpret_cast<int16_t const *>(src);
 								pos.x() = (((p[0] + 32768) / 65536.0f) * 2 - 1) * pos_extent.x() + pos_center.x();
 								pos.y() = (((p[1] + 32768) / 65536.0f) * 2 - 1) * pos_extent.y() + pos_center.y();
 								pos.z() = (((p[2] + 32768) / 65536.0f) * 2 - 1) * pos_extent.z() + pos_center.z();
@@ -2395,7 +2407,7 @@ namespace KlayGE
 							{
 								BOOST_ASSERT(EF_SIGNED_GR16 == merged_ves[ve].format);
 
-								uint16_t const * p = reinterpret_cast<uint16_t const *>(src);
+								int16_t const * p = reinterpret_cast<int16_t const *>(src);
 								texcoords.back().x() = (((p[0] + 32768) / 65536.0f) * 2 - 1) * tc_extent.x() + tc_center.x();
 								texcoords.back().y() = (((p[1] + 32768) / 65536.0f) * 2 - 1) * tc_extent.y() + tc_center.y();
 							}
@@ -2531,7 +2543,7 @@ namespace KlayGE
 					if (bindings[b].second > 0)
 					{
 						int binding_id = obj.AllocJointBinding(mesh_id, vert_id);
-						obj.SetJointBinding(mesh_id, vert_id, binding_id, bindings[b].first, bindings[b].second);
+						obj.SetJointBinding(mesh_id, vert_id, binding_id, joint_map[bindings[b].first], bindings[b].second);
 					}
 				}
 			}
@@ -2542,14 +2554,14 @@ namespace KlayGE
 				int index[3];
 				if (all_is_index_16_bit)
 				{
-					uint16_t const * src = reinterpret_cast<uint16_t const *>(&merged_indices[(mesh_base_triangles[i] + t) * sizeof(uint16_t)]);
+					uint16_t const * src = reinterpret_cast<uint16_t const *>(&merged_indices[(mesh_base_triangles[i] + t * 3) * sizeof(uint16_t)]);
 					index[0] = src[0];
 					index[1] = src[1];
 					index[2] = src[2];
 				}
 				else
 				{
-					uint32_t const * src = reinterpret_cast<uint32_t const *>(&merged_indices[(mesh_base_triangles[i] + t) * sizeof(uint32_t)]);
+					uint32_t const * src = reinterpret_cast<uint32_t const *>(&merged_indices[(mesh_base_triangles[i] + t * 3)* sizeof(uint32_t)]);
 					index[0] = src[0];
 					index[1] = src[1];
 					index[2] = src[2];
@@ -2593,6 +2605,8 @@ namespace KlayGE
 
 	void SaveModel(RenderModelPtr const & model, std::string const & meshml_name)
 	{
+		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+
 		std::vector<RenderMaterialPtr> mtls(model->NumMaterials());
 		if (!mtls.empty())
 		{
@@ -2630,14 +2644,15 @@ namespace KlayGE
 				for (uint32_t j = 0; j < rl->NumVertexStreams(); ++ j)
 				{
 					GraphicsBufferPtr const & vb = rl->GetVertexStream(j);
-					GraphicsBufferPtr vb_cpu = Context::Instance().RenderFactoryInstance().MakeVertexBuffer(BU_Static, EAH_CPU_Read, NULL);
-					vb_cpu->Resize(vb->Size());
+					GraphicsBufferPtr vb_cpu = rf.MakeVertexBuffer(BU_Static, EAH_CPU_Read, NULL);
+					uint32_t size = vb->Size();
+					vb_cpu->Resize(size);
 					vb->CopyToBuffer(*vb_cpu);
 
-					merged_buffs[j].resize(vb->Size());
+					merged_buffs[j].resize(size);
 
 					GraphicsBuffer::Mapper mapper(*vb_cpu, BA_Read_Only);
-					memcpy(&merged_buffs[j][0], mapper.Pointer<uint8_t>(), vb->Size());
+					memcpy(&merged_buffs[j][0], mapper.Pointer<uint8_t>(), size);
 				}
 
 				if (EF_R16UI == rl->IndexStreamFormat())
@@ -2650,15 +2665,17 @@ namespace KlayGE
 					all_is_index_16_bit = false;
 				}
 
-				merged_indices.resize((all_is_index_16_bit ? 2 : 4) * mesh.NumTriangles() * 3);
 				{
 					GraphicsBufferPtr ib = rl->GetIndexStream();
-					GraphicsBufferPtr ib_cpu = Context::Instance().RenderFactoryInstance().MakeIndexBuffer(BU_Static, EAH_CPU_Read, NULL);
-					ib_cpu->Resize(ib->Size());
+					GraphicsBufferPtr ib_cpu = rf.MakeIndexBuffer(BU_Static, EAH_CPU_Read, NULL);
+					uint32_t size = ib->Size();
+					ib_cpu->Resize(size);
 					ib->CopyToBuffer(*ib_cpu);
 
+					merged_indices.resize(size);
+
 					GraphicsBuffer::Mapper mapper(*ib_cpu, BA_Read_Only);
-					memcpy(&merged_indices[0], mapper.Pointer<uint8_t>(), ib->Size());
+					memcpy(&merged_indices[0], mapper.Pointer<uint8_t>(), size);
 				}
 			}
 
@@ -2693,7 +2710,38 @@ namespace KlayGE
 			joints.resize(num_joints);
 			for (uint32_t i = 0; i < num_joints; ++ i)
 			{
-				joints[i] = skinned->GetJoint(i);
+				Joint joint = skinned->GetJoint(i);
+
+				float flip = MathLib::sgn(joint.inverse_origin_scale);
+
+				joint.bind_scale = 1 / joint.inverse_origin_scale;
+				if (flip > 0)
+				{
+					std::pair<Quaternion, Quaternion> inv = MathLib::inverse(joint.inverse_origin_real, joint.inverse_origin_dual);
+					joint.bind_real = inv.first;
+					joint.bind_dual = inv.second;
+				}
+				else
+				{
+					float4x4 tmp_mat = MathLib::scaling(-joint.inverse_origin_scale, -joint.inverse_origin_scale, joint.inverse_origin_scale)
+						* MathLib::to_matrix(joint.inverse_origin_real)
+						* MathLib::translation(MathLib::udq_to_trans(joint.inverse_origin_real, joint.inverse_origin_dual));
+					tmp_mat = MathLib::inverse(tmp_mat);
+					tmp_mat(2, 0) = -tmp_mat(2, 0);
+					tmp_mat(2, 1) = -tmp_mat(2, 1);
+					tmp_mat(2, 2) = -tmp_mat(2, 2);
+
+					float3 scale;
+					Quaternion rot;
+					float3 trans;
+					MathLib::decompose(scale, rot, trans, tmp_mat);
+
+					joint.bind_real = rot;
+					joint.bind_dual = MathLib::quat_trans_to_udq(rot, trans);
+					joint.bind_scale = -scale.x();
+				}
+
+				joints[i] = joint;
 			}
 
 			actions = skinned->GetActions();
