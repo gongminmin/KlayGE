@@ -127,6 +127,7 @@ float4 SSVOPS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Target
 
 	<technique name="SSVO">
 		<pass name="p0">
+			<state name="depth_enable" value="false"/>
 			<state name="depth_write_mask" value="false"/>
 
 			<state name="vertex_shader" value="SSVOVS()"/>

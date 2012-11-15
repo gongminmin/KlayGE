@@ -71,6 +71,7 @@ float4 CopyToLightBufferPS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) :
 
 	<technique name="CopyToLightBuffer">
 		<pass name="p0">
+			<state name="depth_enable" value="false"/>
 			<state name="depth_write_mask" value="false"/>
 
 			<state name="blend_enable" value="true"/>
@@ -88,6 +89,7 @@ float4 CopyToLightBufferPS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) :
 
 	<technique name="CopyToLightBufferI">
 		<pass name="p0">
+			<state name="depth_enable" value="false"/>
 			<state name="depth_write_mask" value="false"/>
 
 			<state name="blend_enable" value="false"/>

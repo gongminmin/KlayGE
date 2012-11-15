@@ -32,6 +32,7 @@ float4 BilinearCopyPS(float2 tc0 : TEXCOORD0) : SV_Target
 
 	<technique name="Copy">
 		<pass name="p0">
+			<state name="depth_enable" value="false"/>
 			<state name="depth_write_mask" value="false"/>
 
 			<state name="vertex_shader" value="PostProcessVS()"/>
@@ -41,6 +42,7 @@ float4 BilinearCopyPS(float2 tc0 : TEXCOORD0) : SV_Target
 
 	<technique name="BilinearCopy">
 		<pass name="p0">
+			<state name="depth_enable" value="false"/>
 			<state name="depth_write_mask" value="false"/>
 
 			<state name="vertex_shader" value="PostProcessVS()"/>

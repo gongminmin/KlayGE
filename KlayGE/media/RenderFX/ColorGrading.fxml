@@ -62,6 +62,7 @@ float4 ColorGradingPS(float2 tc : TEXCOORD0) : SV_Target
 
 	<technique name="ColorGrading">
 		<pass name="p0">
+			<state name="depth_enable" value="false"/>
 			<state name="depth_write_mask" value="false"/>
 
 			<state name="vertex_shader" value="PostProcessVS()"/>
