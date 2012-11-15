@@ -42,13 +42,52 @@ float4 BitonicSortPS(float2 tc : TEXCOORD0) : SV_Target
 }
 		]]>
 	</shader>
-	
+
 	<technique name="BitonicSort">
 		<pass name="p0">
 			<state name="depth_write_mask" value="0"/>
 
 			<state name="vertex_shader" value="PostProcessVS()"/>
 			<state name="pixel_shader" value="BitonicSortPS()"/>
+		</pass>
+	</technique>
+
+
+	<macro name="BLOCK_SIZE_X" value="16"/>
+	<macro name="BLOCK_SIZE_Y" value="16"/>
+
+	<parameter type="rw_texture2D" name="out_tex"/>
+	
+	<shader type="compute_shader" version="5">
+		<![CDATA[
+[numthreads(BLOCK_SIZE_X, BLOCK_SIZE_Y, 1)]
+void BitonicSortCS(uint3 thread_id : SV_DispatchThreadID)
+{
+	float2 elem2d = thread_id.xy;
+	float elem1d = elem2d.y * width_height.x + elem2d.x;
+
+	float csign = (fmod(elem1d, stageno) < offset) ? 1 : -1;
+	float cdir = (fmod(floor(elem1d / stepno), 2) == 0) ? 1 : -1;
+
+	float adr1d = csign * offset + elem1d;
+	uint2 adr2d;
+	adr2d.y = floor(adr1d * width_height.z);
+	adr2d.x = adr1d - adr2d.y * width_height.x;
+
+	float f0 = src_tex[thread_id.xy].x;
+	float f1 = src_tex[adr2d].x;
+
+	float cmin = min(f0, f1);
+	float cmax = max(f0, f1);
+
+	out_tex[thread_id.xy] = (csign == cdir) ? cmin : cmax;
+}
+		]]>
+	</shader>
+
+	<technique name="BitonicSortCS">
+		<pass name="p0">
+			<state name="compute_shader" value="BitonicSortCS()"/>
 		</pass>
 	</technique>
 </effect>

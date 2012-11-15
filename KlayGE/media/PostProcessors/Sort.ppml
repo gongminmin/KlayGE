@@ -11,8 +11,23 @@
 			<pin name="src_tex"/>
 		</input>
 		<output>
-			<pin name="output"/>
+			<pin name="out_tex"/>
 		</output>
 		<shader effect="Sort.fxml" tech="BitonicSort"/>
+	</post_processor>
+
+	<post_processor name="bitonicsort_cs">
+		<params>
+			<param name="offset"/>
+			<param name="stageno"/>
+			<param name="stepno"/>
+		</params>
+		<input>
+			<pin name="src_tex"/>
+		</input>
+		<output>
+			<pin name="out_tex"/>
+		</output>
+		<shader effect="Sort.fxml" tech="BitonicSortCS"/>
 	</post_processor>
 </post_processors>
