@@ -116,45 +116,35 @@ float4 axis_angle_to_quat(float3 v, float angle)
 float4 slerp(float4 lhs, float4 rhs, float s)
 {
 	float scale0, scale1;
-	float4 q2;
 
 	// DOT the quats to get the cosine of the angle between them
 	float cosom = dot(lhs, rhs);
 
-	// Two special cases:
-	// Quats are exactly opposite?
-	if (cosom > -1)
+	float dir = 1;
+	if (cosom < 0)
 	{
-		// make sure they are different enough to avoid a divide by 0
-		if (cosom < 1)
-		{
-			// SLERP away
-			float omega = acos(cosom);
-			float isinom = 1.0 / sin(omega);
-			scale0 = sin((1 - s) * omega) * isinom;
-			scale1 = sin(s * omega) * isinom;
-		}
-		else
-		{
-			// LERP is good enough at this distance
-			scale0 = 1 - s;
-			scale1 = s;
-		}
-
-		q2 = rhs * scale1;
+		dir = -1;
+		cosom = -cosom;
+	}
+	
+	// make sure they are different enough to avoid a divide by 0
+	if (cosom < 1 - 1e-6f)
+	{
+		// SLERP away
+		const float omega = acos(cosom);
+		const float isinom = 1 / sin(omega);
+		scale0 = sin((1 - s) * omega) * isinom;
+		scale1 = sin(s * omega) * isinom;
 	}
 	else
 	{
-		// SLERP towards a perpendicular quat
-		// Set slerp parameters
-		scale0 = sin((1 - s) * 3.1415926 / 2);
-		scale1 = sin(s * 3.1415926 / 2);
-
-		q2 = float4(-rhs.y, rhs.x, -rhs.w, rhs.z) * scale1;
+		// LERP is good enough at this distance
+		scale0 = 1 - s;
+		scale1 = s;
 	}
 
 	// Compute the result
-	return scale0 * lhs + q2;
+	return scale0 * lhs + dir * scale1 * rhs;
 }
 
 float4 mat4_to_quat(float4x4 mat)
@@ -220,6 +210,15 @@ float4x4 quat_to_mat4(float4 quat)
 		c0.y - c2.z,		1 - c0.x - c1.z,	c1.y + c2.x,		0,
 		c0.z + c2.y,		c1.y - c2.x,		1 - c0.x - c1.x,	0,
 		0,					0,					0,					1);
+}
+
+float4 bary_centric_quat(float4 q1, float4 q2, float4 q3, float f, float g)
+{
+	const float temp = f + g;
+	float4 qt1 = slerp(q1, q2, temp);
+	float4 qt2 = slerp(q1, q3, temp);
+
+	return slerp(qt1, qt2, g / temp);
 }
 
 

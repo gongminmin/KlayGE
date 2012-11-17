@@ -386,6 +386,14 @@ namespace KlayGE
 		template <typename T>
 		T fresnel_term(T const & cos_theta, T const & refraction_index);
 
+		template <typename T, int N>
+		Vector_T<T, N> catmull_rom(Vector_T<T, N> const & v0, Vector_T<T, N> const & v1,
+			Vector_T<T, N> const & v2, Vector_T<T, N> const & v3, T s);
+
+		template <typename T, int N>
+		Vector_T<T, N> hermite(Vector_T<T, N> const & v1, Vector_T<T, N> const & t1,
+			Vector_T<T, N> const & v2, Vector_T<T, N> const & t2, T s);
+
 
 		// 2D œÚ¡ø
 		///////////////////////////////////////////////////////////////////////////////
@@ -538,7 +546,7 @@ namespace KlayGE
 
 		template <typename T>
 		Quaternion_T<T> bary_centric(Quaternion_T<T> const & q1, Quaternion_T<T> const & q2,
-			Quaternion_T<T> const & q3, typename Quaternion_T<T>::value_type const & f, typename Quaternion_T<T>::value_type const & g);
+			Quaternion_T<T> const & q3, T f, T g);
 
 		template <typename T>
 		Quaternion_T<T> exp(Quaternion_T<T> const & rhs);
@@ -570,7 +578,16 @@ namespace KlayGE
 		Quaternion_T<T> rotation_axis(Vector_T<T, 3> const & v, T const & angle);
 
 		template <typename T>
-		Quaternion_T<T> slerp(Quaternion_T<T> const & lhs, Quaternion_T<T> const & rhs, T const & slerp);
+		Quaternion_T<T> slerp(Quaternion_T<T> const & lhs, Quaternion_T<T> const & rhs, T s);
+
+		template <typename T>
+		void squad_setup(Quaternion_T<T>& a, Quaternion_T<T>& b, Quaternion_T<T>& c,
+			Quaternion_T<T> const & q0, Quaternion_T<T> const & q1, Quaternion_T<T> const & q2,
+			Quaternion_T<T> const & q3);
+
+		template <typename T>
+		Quaternion_T<T> squad(Quaternion_T<T> const & q1, Quaternion_T<T> const & a, Quaternion_T<T> const & b,
+			Quaternion_T<T> const & c, float t);
 
 		template <typename T>
 		Quaternion_T<T> rotation_quat_yaw_pitch_roll(Vector_T<T, 3> const & ang);
@@ -868,7 +885,7 @@ namespace KlayGE
 
 		template <typename T>
 		std::pair<Quaternion_T<T>, Quaternion_T<T> > sclerp(Quaternion_T<T> const & lhs_real, Quaternion_T<T> const & lhs_dual,
-			Quaternion_T<T> const & rhs_real, Quaternion_T<T> const & rhs_dual, float const & slerp);
+			Quaternion_T<T> const & rhs_real, Quaternion_T<T> const & rhs_dual, T s);
 	}
 }
 

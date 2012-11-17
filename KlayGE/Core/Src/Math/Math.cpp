@@ -350,6 +350,44 @@ namespace KlayGE
 					* (sqr(cos_theta * (g + cos_theta) - 1) / sqr(cos_theta * (g - cos_theta) + 1) + 1);
 		}
 
+		template KLAYGE_CORE_API float2 catmull_rom(float2 const & v0, float2 const & v1, float2 const & v2,
+			float2 const & v3, float s);
+		template KLAYGE_CORE_API float3 catmull_rom(float3 const & v0, float3 const & v1, float3 const & v2,
+			float3 const & v3, float s);
+		template KLAYGE_CORE_API float4 catmull_rom(float4 const & v0, float4 const & v1, float4 const & v2,
+			float4 const & v3, float s);
+
+		template <typename T, int N>
+		Vector_T<T, N> catmull_rom(Vector_T<T, N> const & v0, Vector_T<T, N> const & v1, Vector_T<T, N> const & v2,
+			Vector_T<T, N> const & v3, T s)
+		{
+			T const s2 = s * s;
+			T const s3 = s2 * s;
+			return ((-s3 + 2 * s2 - s) * v0 + (3 * s3 - 5 * s2 + 2) * v1
+				+ (-3 * s3 + 4 * s2 + s) * v2 + (s3 - s2) * v3) * T(0.5);
+		}
+
+		template KLAYGE_CORE_API float2 hermite(float2 const & v1, float2 const & t1, float2 const & v2,
+			float2 const & t2, float s);
+		template KLAYGE_CORE_API float3 hermite(float3 const & v1, float3 const & t1, float3 const & v2,
+			float3 const & t2, float s);
+		template KLAYGE_CORE_API float4 hermite(float4 const & v1, float4 const & t1, float4 const & v2,
+			float4 const & t2, float s);
+
+		template <typename T, int N>
+		Vector_T<T, N> hermite(Vector_T<T, N> const & v1, Vector_T<T, N> const & t1,
+			Vector_T<T, N> const & v2, Vector_T<T, N> const & t2, T s)
+		{
+			T const s2 = s * s;
+			T const s3 = s2 * s;
+			T const h1 = T(2) * s3 - T(3) * s2 + T(1);
+		    T const h2 = s3 - T(2) * s2 + s;
+		    T const h3 = T(-2) * s3 + T(3) * s2;
+		    T const h4 = s3 - s2;
+
+		    return h1 * v1 + h2 * t1 + h3 * v2 + h4 * t2;
+		}
+
 		// 2D Vector
 		///////////////////////////////////////////////////////////////////////////////
 
@@ -1097,7 +1135,7 @@ namespace KlayGE
 
 		template <typename T>
 		Quaternion_T<T> bary_centric(Quaternion_T<T> const & q1, Quaternion_T<T> const & q2,
-			Quaternion_T<T> const & q3, typename Quaternion_T<T>::value_type const & f, typename Quaternion_T<T>::value_type const & g)
+			Quaternion_T<T> const & q3, T f, T g)
 		{
 			T const temp(f + g);
 			Quaternion_T<T> qT1(slerp(q1, q2, temp));
@@ -1356,10 +1394,10 @@ namespace KlayGE
 			}
 		}
 
-		template KLAYGE_CORE_API Quaternion slerp(Quaternion const & lhs, Quaternion const & rhs, float const & slerp);
+		template KLAYGE_CORE_API Quaternion slerp(Quaternion const & lhs, Quaternion const & rhs, float s);
 
 		template <typename T>
-		Quaternion_T<T> slerp(Quaternion_T<T> const & lhs, Quaternion_T<T> const & rhs, T const & slerp)
+		Quaternion_T<T> slerp(Quaternion_T<T> const & lhs, Quaternion_T<T> const & rhs, T s)
 		{
 			T scale0, scale1;
 
@@ -1379,18 +1417,81 @@ namespace KlayGE
 				// SLERP away
 				T const omega = acos(cosom);
 				T const isinom = T(1) / sin(omega);
-				scale0 = sin((T(1) - slerp) * omega) * isinom;
-				scale1 = sin(slerp * omega) * isinom;
+				scale0 = sin((T(1) - s) * omega) * isinom;
+				scale1 = sin(s * omega) * isinom;
 			}
 			else
 			{
 				// LERP is good enough at this distance
-				scale0 = T(1) - slerp;
-				scale1 = slerp;
+				scale0 = T(1) - s;
+				scale1 = s;
 			}
 
 			// Compute the result
 			return scale0 * lhs + dir * scale1 * rhs;
+		}
+
+		template KLAYGE_CORE_API void squad_setup(Quaternion& a, Quaternion& b, Quaternion& c,
+			Quaternion const & q0, Quaternion const & q1, Quaternion const & q2,
+			Quaternion const & q3);
+
+		template <typename T>
+		void squad_setup(Quaternion_T<T>& a, Quaternion_T<T>& b, Quaternion_T<T>& c,
+			Quaternion_T<T> const & q0, Quaternion_T<T> const & q1, Quaternion_T<T> const & q2,
+			Quaternion_T<T> const & q3)
+		{
+			Quaternion_T<T> q, temp1, temp2, temp3;
+
+			if (dot(q0, q1) < 0)
+			{
+				temp2 = -q0;
+			}
+			else
+			{
+				temp2 = q0;
+			}
+
+			if (dot(q1, q2) < 0)
+			{
+				c = -q2;
+			}
+			else
+			{
+				c = q2;
+			}
+
+			if (dot(c, q3) < 0)
+			{
+				temp3 = -q3;
+			}
+			else
+			{
+				temp3 = q3;
+			}
+
+			temp1 = inverse(q1);
+			temp2 = ln(mul(temp1, temp2));
+			q = ln(mul(temp1, c));
+			temp1 = temp2 + q;
+			temp1 = exp(temp1 * T(-0.25));
+			a = mul(q1, temp1);
+
+			temp1 = inverse(c);
+			temp2 = ln(mul(temp1, q1));
+			q = ln(mul(temp1, temp3));
+			temp1 = temp2 + q;
+			temp1 = exp(temp1 * T(-0.25));
+			b = mul(c, temp1);
+		}
+
+		template KLAYGE_CORE_API Quaternion squad(Quaternion const & q1, Quaternion const & a, Quaternion const & b,
+			Quaternion const & c, float t);
+
+		template <typename T>
+		Quaternion_T<T> squad(Quaternion_T<T> const & q1, Quaternion_T<T> const & a, Quaternion_T<T> const & b,
+			Quaternion_T<T> const & c, float t)
+		{
+			return slerp(slerp(q1, c, t), slerp(a, b, t), T(2) * t * (T(1) - t));
 		}
 
 		template KLAYGE_CORE_API Quaternion rotation_quat_yaw_pitch_roll(float3 const & ang);
@@ -2699,11 +2800,11 @@ namespace KlayGE
 
 
 		template KLAYGE_CORE_API std::pair<Quaternion, Quaternion> sclerp(Quaternion const & lhs_real, Quaternion const & lhs_dual,
-			Quaternion const & rhs_real, Quaternion const & rhs_dual, float const & slerp);
+			Quaternion const & rhs_real, Quaternion const & rhs_dual, float s);
 
 		template <typename T>
 		std::pair<Quaternion_T<T>, Quaternion_T<T> > sclerp(Quaternion_T<T> const & lhs_real, Quaternion_T<T> const & lhs_dual,
-			Quaternion_T<T> const & rhs_real, Quaternion_T<T> const & rhs_dual, float const & slerp)
+			Quaternion_T<T> const & rhs_real, Quaternion_T<T> const & rhs_dual, T s)
 		{
 			// Make sure dot product is >= 0
 			float quat_dot = dot(lhs_real, rhs_real);
@@ -2723,8 +2824,8 @@ namespace KlayGE
 			float3 direction, moment;
 			udq_to_screw(angle, pitch, direction, moment, dif_dq.first, dif_dq.second);
 
-			angle *= slerp; 
-			pitch *= slerp;
+			angle *= s; 
+			pitch *= s;
 			dif_dq = udq_from_screw(angle, pitch, direction, moment);
 
 			dif_dq.second = mul_dual(lhs_real, lhs_dual, dif_dq.first, dif_dq.second);
