@@ -42,7 +42,7 @@ namespace KlayGE
 {
 	// 3DÉãÏñ»ú²Ù×÷
 	//////////////////////////////////////////////////////////////////////////////////
-	class KLAYGE_CORE_API Camera
+	class KLAYGE_CORE_API Camera : public boost::enable_shared_from_this<Camera>
 	{
 	public:
 		Camera();
@@ -72,6 +72,9 @@ namespace KlayGE
 		void BindUpdateFunc(boost::function<void(Camera&, float, float)> const & update_func);
 
 		void Update(float app_time, float elapsed_time);
+
+		void AddToSceneManager();
+		void DelFromSceneManager();
 
 		float4x4 const & ViewMatrix() const;
 		float4x4 const & ProjMatrix() const;

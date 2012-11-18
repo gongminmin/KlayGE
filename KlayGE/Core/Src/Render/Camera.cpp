@@ -20,6 +20,7 @@
 #include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/Math.hpp>
 #include <KlayGE/FrameBuffer.hpp>
+#include <KlayGE/SceneManager.hpp>
 
 #include <KlayGE/Camera.hpp>
 
@@ -129,6 +130,16 @@ namespace KlayGE
 			re.AdjustPerspectiveMatrix(proj_mat_);
 			frustum_dirty_ = true;
 		}
+	}
+
+	void Camera::AddToSceneManager()
+	{
+		Context::Instance().SceneManagerInstance().AddCamera(this->shared_from_this());
+	}
+
+	void Camera::DelFromSceneManager()
+	{
+		Context::Instance().SceneManagerInstance().DelCamera(this->shared_from_this());
 	}
 
 	float4x4 const & Camera::ViewMatrix() const

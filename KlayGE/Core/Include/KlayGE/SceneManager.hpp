@@ -82,6 +82,13 @@ namespace KlayGE
 
 		virtual void ClipScene();
 
+		void AddCamera(CameraPtr const & camera);
+		void DelCamera(CameraPtr const & camera);
+
+		uint32_t NumCameras() const;
+		CameraPtr& GetCamera(uint32_t index);
+		CameraPtr const & GetCamera(uint32_t index) const;
+
 		void AddLight(LightSourcePtr const & light);
 		void DelLight(LightSourcePtr const & light);
 
@@ -102,6 +109,7 @@ namespace KlayGE
 		virtual bool SphereVisible(Sphere const & sphere);
 		virtual bool FrustumVisible(Frustum const & frustum);
 
+		virtual void ClearCamera();
 		virtual void ClearLight();
 		virtual void ClearObject();
 
@@ -120,6 +128,7 @@ namespace KlayGE
 		virtual void OnDelSceneObject(SceneObjAABBsType::iterator iter) = 0;
 
 	protected:
+		std::vector<CameraPtr> cameras_;
 		Frustum const * frustum_;
 		std::vector<LightSourcePtr> lights_;
 		SceneObjAABBsType scene_objs_;

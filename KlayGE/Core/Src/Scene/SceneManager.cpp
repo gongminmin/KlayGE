@@ -186,6 +186,32 @@ namespace KlayGE
 		}
 	}
 
+	void SceneManager::AddCamera(CameraPtr const & camera)
+	{
+		cameras_.push_back(camera);
+	}
+	
+	void SceneManager::DelCamera(CameraPtr const & camera)
+	{
+		BOOST_AUTO(iter, std::find(cameras_.begin(), cameras_.end(), camera));
+		cameras_.erase(iter);
+	}
+
+	uint32_t SceneManager::NumCameras() const
+	{
+		return static_cast<uint32_t>(cameras_.size());
+	}
+
+	CameraPtr& SceneManager::GetCamera(uint32_t index)
+	{
+		return cameras_[index];
+	}
+
+	CameraPtr const & SceneManager::GetCamera(uint32_t index) const
+	{
+		return cameras_[index];
+	}
+
 	void SceneManager::AddLight(LightSourcePtr const & light)
 	{
 		lights_.push_back(light);
@@ -377,6 +403,11 @@ namespace KlayGE
 		return scene_objs_[index]->so;
 	}
 
+	void SceneManager::ClearCamera()
+	{
+		cameras_.resize(0);
+	}
+
 	void SceneManager::ClearLight()
 	{
 		lights_.resize(0);
@@ -400,6 +431,12 @@ namespace KlayGE
 		App3DFramework& app = Context::Instance().AppInstance();
 		float const app_time = app.AppTime();
 		float const frame_time = app.FrameTime();
+
+		typedef BOOST_TYPEOF(cameras_) CamerasType;
+		BOOST_FOREACH(CamerasType::const_reference camera, cameras_)
+		{
+			camera->Update(app_time, frame_time);
+		}
 
 		typedef BOOST_TYPEOF(lights_) LightsType;
 		BOOST_FOREACH(LightsType::const_reference light, lights_)
