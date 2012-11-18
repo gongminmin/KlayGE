@@ -214,11 +214,18 @@ float4x4 quat_to_mat4(float4 quat)
 
 float4 bary_centric_quat(float4 q1, float4 q2, float4 q3, float f, float g)
 {
-	const float temp = f + g;
-	float4 qt1 = slerp(q1, q2, temp);
-	float4 qt2 = slerp(q1, q3, temp);
-
-	return slerp(qt1, qt2, g / temp);
+	float4 ret;
+	const float s = f + g;
+	if (s != 0)
+	{
+		ret = slerp(slerp(q1, q2, s), slerp(q1, q3, s), g / s);
+	}
+	else
+	{
+		ret = q1;
+	}
+	
+	return ret;
 }
 
 

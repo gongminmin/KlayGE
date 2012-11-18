@@ -1312,9 +1312,7 @@ float3 PhongProject(float3 p, float3 c, float3 n)
 void InterpolatePhongAttrs(float3 bc_coords,
 				float3 pos0, float3 pos1, float3 pos2,
 				float2 tex0, float2 tex1, float2 tex2,
-				float3 normal0, float3 normal1, float3 normal2,
-				float3 tangent0, float3 tangent1, float3 tangent2,
-				float3 binormal0, float3 binormal1, float3 binormal2,
+				float4 tangent_quat0, float4 tangent_quat1, float4 tangent_quat2,
 				
 				out float3 oPos, out float2 oTex,
 				out float3 oNormal, out float3 oTangent, out float3 oBinormal)
@@ -1325,6 +1323,10 @@ void InterpolatePhongAttrs(float3 bc_coords,
 	float w = bc_coords.z;
 	
 	float alpha = 0.75f;
+	
+	float3 normal0 = transform_quat(float3(0, 0, 1), tangent_quat0);
+	float3 normal1 = transform_quat(float3(0, 0, 1), tangent_quat1);
+	float3 normal2 = transform_quat(float3(0, 0, 1), tangent_quat2);
 
 	float3 p = w * pos0 + u * pos1 + v * pos2;
 	float3 c0 = PhongProject(p, pos0, normal0);
@@ -1332,24 +1334,12 @@ void InterpolatePhongAttrs(float3 bc_coords,
 	float3 c2 = PhongProject(p, pos2, normal2);
 	float3 q = w * c0 + u * c1 + v * c2;
 	oPos = lerp(p, q, alpha);
-
-	// Compute normal from quadratic control points and barycentric coords
-	oNormal = normal0 * w
-					+ normal1 * u
-					+ normal2 * v;
-	oNormal = normalize(oNormal);
-
-	// Linearly interpolate the tangent
-	oTangent = tangent0 * w
-					+ tangent1 * u
-					+ tangent2 * v;
-	oTangent = normalize(oTangent);
-
-	// Linearly interpolate the binormal
-	oBinormal = binormal0 * w
-					+ binormal1 * u
-					+ binormal2 * v;
-	oBinormal = normalize(oBinormal);
+	
+	float4 tangent_quat = normalize(bary_centric_quat(tangent_quat0, tangent_quat1, tangent_quat2, u, v));
+	
+	oTangent = transform_quat(float3(1, 0, 0), tangent_quat);
+	oBinormal = transform_quat(float3(0, 1, 0), tangent_quat) * sign(tangent_quat.w);
+	oNormal = normal0 * w + normal1 * u + normal2 * v;
 
 	// Linearly interpolate the texture coords
 	oTex = tex0 * w + tex1 * u + tex2 * v;
@@ -1363,9 +1353,7 @@ struct CONTROL_POINT
 {
 	float3 Pos : POSITION;
 	float2 Texcoord0 : TEXCOORD0;
-	float3 Normal : TEXCOORD1;
-	float3 Tangent : TEXCOORD2;
-	float3 Binormal : TEXCOORD3;
+	float4 TangentQuat : TEXCOORD1;
 };
 
 CONTROL_POINT SmoothVS(float4 pos : POSITION,
@@ -1384,9 +1372,7 @@ CONTROL_POINT SmoothVS(float4 pos : POSITION,
 				output.Texcoord0, output.Pos,
 				result_tangent_quat);
 				
-	output.Tangent = transform_quat(float3(1, 0, 0), result_tangent_quat);
-	output.Binormal = transform_quat(float3(0, 1, 0), result_tangent_quat) * sign(result_tangent_quat.w);
-	output.Normal = transform_quat(float3(0, 0, 1), result_tangent_quat);
+	output.TangentQuat = result_tangent_quat;
 
 	return output;
 }
@@ -1413,16 +1399,11 @@ CONTROL_POINT SmoothSkinnedVS(float4 pos : POSITION,
 	tex0 = tex0 * tc_extent + tc_center;
 	tangent_quat = tangent_quat * 2 - 1;
 
-	float4 result_tangent_quat;
 	CalcSkinnedMesh(tex0, pos,
 				blend_weights, blend_indices,
 				tangent_quat,
 				output.Texcoord0, output.Pos,
-				result_tangent_quat);
-
-	output.Tangent = transform_quat(float3(1, 0, 0), result_tangent_quat);
-	output.Binormal = transform_quat(float3(0, 1, 0), result_tangent_quat) * sign(result_tangent_quat.w);
-	output.Normal = transform_quat(float3(0, 0, 1), result_tangent_quat);
+				output.TangentQuat);
 	
 	return output;
 }
@@ -1483,9 +1464,7 @@ CONTROL_POINT SmoothHS(InputPatch<CONTROL_POINT, 3> p,
 	CONTROL_POINT output;
 	output.Pos = p[i].Pos;
 	output.Texcoord0 = p[i].Texcoord0;
-	output.Normal = p[i].Normal;
-	output.Tangent = p[i].Tangent;
-	output.Binormal = p[i].Binormal;
+	output.TangentQuat = p[i].TangentQuat;
 	return output;
 }
 
@@ -1509,9 +1488,7 @@ void SmoothDS(HS_CONSTANT_DATA_OUTPUT HSConstantData,
 	InterpolatePhongAttrs(bc_coords,
 				patch[0].Pos, patch[1].Pos, patch[2].Pos,
 				patch[0].Texcoord0, patch[1].Texcoord0, patch[2].Texcoord0,
-				patch[0].Normal, patch[1].Normal, patch[2].Normal,
-				patch[0].Tangent, patch[1].Tangent, patch[2].Tangent,
-				patch[0].Binormal, patch[1].Binormal, patch[2].Binormal,
+				patch[0].TangentQuat, patch[1].TangentQuat, patch[2].TangentQuat,
 				
 				pos, oTexCoord_2xy.xy,
 				obj_to_ts[2], obj_to_ts[0], obj_to_ts[1]);
@@ -2241,25 +2218,11 @@ void CalcInstTessSmooth(float2 barycentric,
 	float3 pos_os2 = skinned_pos_buf.Load(index2).xyz;
 	float2 tex2 = skinned_tex_buf.Load(index2).xy;
 	float4 tangent_quat2 = skinned_tangent_buf.Load(index2) * 2 - 1;
-	
-	float3 tangent0 = transform_quat(float3(1, 0, 0), tangent_quat0);
-	float3 binormal0 = transform_quat(float3(0, 1, 0), tangent_quat0) * sign(tangent_quat0.w);
-	float3 normal0 = transform_quat(float3(0, 0, 1), tangent_quat0);
-	
-	float3 tangent1 = transform_quat(float3(1, 0, 0), tangent_quat1);
-	float3 binormal1 = transform_quat(float3(0, 1, 0), tangent_quat1) * sign(tangent_quat1.w);
-	float3 normal1 = transform_quat(float3(0, 0, 1), tangent_quat1);
-	
-	float3 tangent2 = transform_quat(float3(1, 0, 0), tangent_quat2);
-	float3 binormal2 = transform_quat(float3(0, 1, 0), tangent_quat2) * sign(tangent_quat2.w);
-	float3 normal2 = transform_quat(float3(0, 0, 1), tangent_quat2);
 
 	InterpolatePhongAttrs(float3(barycentric, 1 - barycentric.x - barycentric.y),
 				pos_os0, pos_os1, pos_os2,
 				tex0, tex1, tex2,
-				normal0, normal1, normal2,
-				tangent0.xyz, tangent1.xyz, tangent2.xyz,
-				binormal0, binormal1, binormal2,
+				tangent_quat0, tangent_quat1, tangent_quat2,
 				
 				oPos, oTex0,
 				oNormal, oTangent, oBinormal);

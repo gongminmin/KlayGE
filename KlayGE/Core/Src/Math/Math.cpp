@@ -1137,11 +1137,18 @@ namespace KlayGE
 		Quaternion_T<T> bary_centric(Quaternion_T<T> const & q1, Quaternion_T<T> const & q2,
 			Quaternion_T<T> const & q3, T f, T g)
 		{
-			T const temp(f + g);
-			Quaternion_T<T> qT1(slerp(q1, q2, temp));
-			Quaternion_T<T> qT2(slerp(q1, q3, temp));
+			Quaternion_T<T> ret;
+			T const s = f + g;
+			if (s != T(0))
+			{
+				ret = slerp(slerp(q1, q2, s), slerp(q1, q3, s), g / s);
+			}
+			else
+			{
+				ret = q1;
+			}
 
-			return slerp(qT1, qT2, g / temp);
+			return ret;
 		}
 
 		template KLAYGE_CORE_API Quaternion exp(Quaternion const & rhs);
