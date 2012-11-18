@@ -31,7 +31,10 @@
 #include <KlayGE/Color.hpp>
 #include <KlayGE/UI.hpp>
 #include <KlayGE/Camera.hpp>
+#include <KlayGE/XMLDom.hpp>
+#include <KlayGE/App3D.hpp>
 
+#include <sstream>
 #ifdef KLAYGE_COMPILER_MSVC
 #pragma warning(push)
 #pragma warning(disable: 4512)
@@ -412,5 +415,381 @@ namespace KlayGE
 		reverse_target_ = false;
 		target_ = camera_->LookAt();
 		right_ = MathLib::normalize(MathLib::cross(float3(0, 1, 0), -camera_->EyePos()));
+	}
+
+
+	CameraPathController::CameraPathController()
+		: curr_frame_(0), frame_rate_(30)
+	{
+	}
+
+	uint32_t CameraPathController::NumCurves() const
+	{
+		return static_cast<uint32_t>(curves_.size());
+	}
+
+	uint32_t CameraPathController::AddCurve(CameraPathController::InterpolateType type, uint32_t num_frames)
+	{
+		uint32_t curve_id = static_cast<uint32_t>(curves_.size());
+		curves_.push_back(CameraCurve());
+		CameraCurve& curve = curves_.back();
+		curve.type = type;
+		curve.num_frames = num_frames;
+		return curve_id;
+	}
+
+	void CameraPathController::DelCurve(uint32_t curve_id)
+	{
+		BOOST_ASSERT(curve_id < curves_.size());
+
+		curves_.erase(curves_.begin() + curve_id);
+	}
+
+	CameraPathController::InterpolateType CameraPathController::CurveType(uint32_t curve_id) const
+	{
+		BOOST_ASSERT(curve_id < curves_.size());
+
+		return curves_[curve_id].type;
+	}
+
+	uint32_t CameraPathController::NumCurveFrames(uint32_t curve_id) const
+	{
+		BOOST_ASSERT(curve_id < curves_.size());
+
+		return curves_[curve_id].num_frames;
+	}
+
+	uint32_t CameraPathController::NumControlPoints(uint32_t curve_id) const
+	{
+		BOOST_ASSERT(curve_id < curves_.size());
+
+		return static_cast<uint32_t>(curves_[curve_id].eye_ctrl_pts.size());
+	}
+
+	uint32_t CameraPathController::AddControlPoint(uint32_t curve_id, float frame_id,
+		float3 const & eye_ctrl_pt, float3 const & target_ctrl_pt,
+		float3 const & up_ctrl_pt, bool corner)
+	{
+		BOOST_ASSERT(curve_id < curves_.size());
+
+		CameraCurve& curve = curves_[curve_id];
+
+		uint32_t pt_id = curve.eye_ctrl_pts.size();
+		curve.frame_ids.push_back(frame_id);
+		curve.eye_ctrl_pts.push_back(eye_ctrl_pt);
+		curve.target_ctrl_pts.push_back(target_ctrl_pt);
+		curve.up_ctrl_pts.push_back(up_ctrl_pt);
+		curve.corners.push_back(corner);
+		return pt_id;
+	}
+
+	void CameraPathController::DelControlPoint(uint32_t curve_id, uint32_t pt_id)
+	{
+		BOOST_ASSERT(curve_id < curves_.size());
+		BOOST_ASSERT(pt_id < curves_[curve_id].eye_ctrl_pts.size());
+
+		curves_[curve_id].eye_ctrl_pts.erase(curves_[curve_id].eye_ctrl_pts.begin() + pt_id);
+		curves_[curve_id].target_ctrl_pts.erase(curves_[curve_id].target_ctrl_pts.begin() + pt_id);
+		curves_[curve_id].up_ctrl_pts.erase(curves_[curve_id].up_ctrl_pts.begin() + pt_id);
+	}
+
+	float CameraPathController::FrameID(uint32_t curve_id, uint32_t pt_id) const
+	{
+		BOOST_ASSERT(curve_id < curves_.size());
+		BOOST_ASSERT(pt_id < curves_[curve_id].eye_ctrl_pts.size());
+
+		return curves_[curve_id].frame_ids[pt_id];
+	}
+
+	float3 const & CameraPathController::EyeControlPoint(uint32_t curve_id, uint32_t pt_id) const
+	{
+		BOOST_ASSERT(curve_id < curves_.size());
+		BOOST_ASSERT(pt_id < curves_[curve_id].eye_ctrl_pts.size());
+
+		return curves_[curve_id].eye_ctrl_pts[pt_id];
+	}
+
+	float3 const & CameraPathController::TargetControlPoint(uint32_t curve_id, uint32_t pt_id) const
+	{
+		BOOST_ASSERT(curve_id < curves_.size());
+		BOOST_ASSERT(pt_id < curves_[curve_id].target_ctrl_pts.size());
+
+		return curves_[curve_id].target_ctrl_pts[pt_id];
+	}
+
+	float3 const & CameraPathController::UpControlPoint(uint32_t curve_id, uint32_t pt_id) const
+	{
+		BOOST_ASSERT(curve_id < curves_.size());
+		BOOST_ASSERT(pt_id < curves_[curve_id].up_ctrl_pts.size());
+
+		return curves_[curve_id].up_ctrl_pts[pt_id];
+	}	
+
+	bool CameraPathController::Corner(uint32_t curve_id, uint32_t pt_id) const
+	{
+		BOOST_ASSERT(curve_id < curves_.size());
+		BOOST_ASSERT(pt_id < curves_[curve_id].eye_ctrl_pts.size());
+
+		return curves_[curve_id].corners[pt_id];
+	}
+
+	void CameraPathController::FrameID(uint32_t curve_id, uint32_t pt_id, float frame_id)
+	{
+		BOOST_ASSERT(curve_id < curves_.size());
+		BOOST_ASSERT(pt_id < curves_[curve_id].eye_ctrl_pts.size());
+
+		curves_[curve_id].frame_ids[pt_id] = frame_id;
+	}
+
+	void CameraPathController::EyeControlPoint(uint32_t curve_id, uint32_t pt_id, float3 const & pt)
+	{
+		BOOST_ASSERT(curve_id < curves_.size());
+		BOOST_ASSERT(pt_id < curves_[curve_id].eye_ctrl_pts.size());
+
+		curves_[curve_id].eye_ctrl_pts[pt_id] = pt;
+	}
+
+	void CameraPathController::TargetControlPoint(uint32_t curve_id, uint32_t pt_id, float3 const & pt)
+	{
+		BOOST_ASSERT(curve_id < curves_.size());
+		BOOST_ASSERT(pt_id < curves_[curve_id].target_ctrl_pts.size());
+
+		curves_[curve_id].target_ctrl_pts[pt_id] = pt;
+	}
+
+	void CameraPathController::UpControlPoint(uint32_t curve_id, uint32_t pt_id, float3 const & pt)
+	{
+		BOOST_ASSERT(curve_id < curves_.size());
+		BOOST_ASSERT(pt_id < curves_[curve_id].up_ctrl_pts.size());
+
+		curves_[curve_id].up_ctrl_pts[pt_id] = pt;
+	}
+	
+	void CameraPathController::Corner(uint32_t curve_id, uint32_t pt_id, bool corner)
+	{
+		BOOST_ASSERT(curve_id < curves_.size());
+		BOOST_ASSERT(pt_id < curves_[curve_id].eye_ctrl_pts.size());
+
+		curves_[curve_id].corners[pt_id] = corner;
+	}
+
+	uint32_t CameraPathController::FrameRate() const
+	{
+		return frame_rate_;
+	}
+
+	void CameraPathController::FrameRate(uint32_t frame_rate)
+	{
+		frame_rate_ = frame_rate;
+	}
+
+	float CameraPathController::Frame() const
+	{
+		return curr_frame_;
+	}
+
+	void CameraPathController::Frame(float frame)
+	{
+		curr_frame_ = frame;
+		this->UpdateCamera();
+	}
+
+	void CameraPathController::AttachCamera(Camera& camera)
+	{
+		CameraController::AttachCamera(camera);
+
+		start_time_ = Context::Instance().AppInstance().AppTime();
+		camera.BindUpdateFunc(boost::bind(&CameraPathController::UpdateCameraFunc, this, _1, _2, _3));
+	}
+
+	void CameraPathController::DetachCamera()
+	{
+		camera_->BindUpdateFunc(boost::function<void(Camera&, float, float)>());
+
+		CameraController::DetachCamera();
+	}
+
+	void CameraPathController::UpdateCameraFunc(Camera& /*camera*/, float app_time, float /*elapsed_time*/)
+	{
+		curr_frame_ = frame_rate_ * (app_time - start_time_);
+		this->UpdateCamera();
+	}
+
+	void CameraPathController::UpdateCamera()
+	{
+		uint32_t total_frames = 0;
+		for (size_t i = 0; i < curves_.size(); ++ i)
+		{
+			total_frames += curves_[i].num_frames;
+		}
+
+		float frame = MathLib::mod(curr_frame_, static_cast<float>(total_frames));
+		for (size_t i = 0; i < curves_.size(); ++ i)
+		{
+			CameraCurve const & curve = curves_[i];
+			if (frame < curve.num_frames)
+			{
+				switch (curve.type)
+				{
+				case IT_Linear:
+					for (size_t j = 0; j < curve.eye_ctrl_pts.size() - 1; ++ j)
+					{
+						if ((frame >= curve.frame_ids[j + 0])
+							&& (frame < curve.frame_ids[j + 1]))
+						{
+							float factor = (frame - curve.frame_ids[j + 0])
+								/ (curve.frame_ids[j + 1] - curve.frame_ids[j + 0]);
+							float3 eye = MathLib::lerp(curve.eye_ctrl_pts[j + 0],
+								curve.eye_ctrl_pts[j + 1], factor);
+							float3 target = MathLib::lerp(curve.target_ctrl_pts[j + 0],
+								curve.target_ctrl_pts[j + 1], factor);
+							float3 up = MathLib::lerp(curve.up_ctrl_pts[j + 0],
+								curve.up_ctrl_pts[j + 1], factor);
+
+							camera_->ViewParams(eye, target, up);
+
+							break;
+						}
+					}
+					break;
+
+				default:
+					BOOST_ASSERT(false);
+					break;
+				}
+
+				break;
+			}
+			else
+			{
+				frame -= curve.num_frames;
+			}
+		}
+	}
+
+	CameraPathControllerPtr LoadCameraPath(ResIdentifierPtr const & res)
+	{
+		CameraPathControllerPtr ret = MakeSharedPtr<CameraPathController>();
+
+		XMLDocument doc;
+		XMLNodePtr root = doc.Parse(res);
+
+		XMLAttributePtr attr = root->Attrib("frame_rate");
+		if (attr)
+		{
+			ret->FrameRate(attr->ValueUInt());
+		}
+
+		for (XMLNodePtr curve_node = root->FirstNode("curve"); curve_node; curve_node = curve_node->NextSibling("curve"))
+		{
+			std::string type_str = curve_node->Attrib("type")->ValueString();
+			CameraPathController::InterpolateType type;
+			if ("linear" == type_str)
+			{
+				type = CameraPathController::IT_Linear;
+			}
+			else
+			{
+				BOOST_ASSERT(false);
+				type = CameraPathController::IT_Linear;
+			}
+			uint32_t num_frames = curve_node->Attrib("num_frames")->ValueUInt();
+			uint32_t curve_id = ret->AddCurve(type, num_frames);
+			for (XMLNodePtr key_node = curve_node->FirstNode("key"); key_node; key_node = key_node->NextSibling("key"))
+			{
+				float frame_id = key_node->Attrib("frame")->ValueFloat();
+
+				float3 eye_ctrl_pt;
+				{
+					std::istringstream attr_ss(key_node->Attrib("eye")->ValueString());
+					attr_ss >> eye_ctrl_pt.x() >> eye_ctrl_pt.y() >> eye_ctrl_pt.z();
+				}				
+				float3 target_ctrl_pt;
+				{
+					std::istringstream attr_ss(key_node->Attrib("target")->ValueString());
+					attr_ss >> target_ctrl_pt.x() >> target_ctrl_pt.y() >> target_ctrl_pt.z();
+				}				
+				float3 up_ctrl_pt;
+				{
+					std::istringstream attr_ss(key_node->Attrib("up")->ValueString());
+					attr_ss >> up_ctrl_pt.x() >> up_ctrl_pt.y() >> up_ctrl_pt.z();
+				}
+
+				bool corner;
+				attr = key_node->Attrib("corner");
+				if (attr)
+				{
+					corner = (attr->ValueInt() != 0);
+				}
+				else
+				{
+					corner = false;
+				}
+
+				ret->AddControlPoint(curve_id, frame_id, eye_ctrl_pt, target_ctrl_pt, up_ctrl_pt, corner);
+			}
+		}
+
+		return ret;
+	}
+
+	void SaveCameraPath(std::ostream& os, CameraPathControllerPtr const & path)
+	{
+		XMLDocument doc;
+		XMLNodePtr root = doc.AllocNode(XNT_Element, "camera_path");
+		doc.RootNode(root);
+
+		root->AppendAttrib(doc.AllocAttribUInt("frame_rate", path->FrameRate()));
+
+		for (uint32_t curve_id = 0; curve_id < path->NumCurves(); ++ curve_id)
+		{
+			XMLNodePtr curve_node = doc.AllocNode(XNT_Element, "curve");
+			std::string type_str;
+			CameraPathController::InterpolateType type = path->CurveType(curve_id);
+			switch (type)
+			{
+			case CameraPathController::IT_Linear:
+				type_str = "linear";
+				break;
+
+			default:
+				BOOST_ASSERT(false);
+				break;
+			}
+			curve_node->AppendAttrib(doc.AllocAttribString("type", type_str));
+			curve_node->AppendAttrib(doc.AllocAttribUInt("num_frames", path->NumCurveFrames(curve_id)));
+
+			for (uint32_t key_id = 0; key_id < path->NumControlPoints(curve_id); ++ key_id)
+			{
+				XMLNodePtr key_node = doc.AllocNode(XNT_Element, "key");
+
+				key_node->AppendAttrib(doc.AllocAttribFloat("frame", path->FrameID(curve_id, key_id)));
+
+				{
+					float3 const & eye_ctrl_pt = path->EyeControlPoint(curve_id, key_id);
+					std::ostringstream attr_ss;
+					attr_ss << eye_ctrl_pt.x() << ' ' << eye_ctrl_pt.y() << ' ' << eye_ctrl_pt.z();
+					key_node->AppendAttrib(doc.AllocAttribString("eye", attr_ss.str()));					
+				}
+				{
+					float3 const & target_ctrl_pt = path->TargetControlPoint(curve_id, key_id);
+					std::ostringstream attr_ss;
+					attr_ss << target_ctrl_pt.x() << ' ' << target_ctrl_pt.y() << ' ' << target_ctrl_pt.z();
+					key_node->AppendAttrib(doc.AllocAttribString("target", attr_ss.str()));					
+				}
+				{
+					float3 const & up_ctrl_pt = path->EyeControlPoint(curve_id, key_id);
+					std::ostringstream attr_ss;
+					attr_ss << up_ctrl_pt.x() << ' ' << up_ctrl_pt.y() << ' ' << up_ctrl_pt.z();
+					key_node->AppendAttrib(doc.AllocAttribString("up", attr_ss.str()));					
+				}
+
+				key_node->AppendAttrib(doc.AllocAttribUInt("corner", path->Corner(curve_id, key_id)));
+
+				curve_node->AppendNode(key_node);
+			}
+		}
+
+		doc.Print(os);
 	}
 }

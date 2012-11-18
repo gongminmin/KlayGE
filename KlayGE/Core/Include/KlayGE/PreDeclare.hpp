@@ -105,7 +105,14 @@ namespace KlayGE
 	struct ElementInitData;
 	class Camera;
 	typedef boost::shared_ptr<Camera> CameraPtr;
+	class CameraController;
+	typedef boost::shared_ptr<CameraController> CameraControllerPtr;
 	class FirstPersonCameraController;
+	typedef boost::shared_ptr<FirstPersonCameraController> FirstPersonCameraControllerPtr;
+	class TrackballCameraController;
+	typedef boost::shared_ptr<TrackballCameraController> TrackballCameraControllerPtr;
+	class CameraPathController;
+	typedef boost::shared_ptr<CameraPathController> CameraPathControllerPtr;
 	class Font;
 	typedef boost::shared_ptr<Font> FontPtr;
 	class RenderEngine;
