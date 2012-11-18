@@ -825,9 +825,6 @@ namespace KlayGE
 			pvp.prev_merged_depth_buffers[i]->Attach(FrameBuffer::ATT_DepthStencil, ds_views[i]);
 		}
 
-		taa_pp_->InputPin(0, pvp.curr_merged_shading_tex);
-		taa_pp_->InputPin(1, pvp.prev_merged_shading_tex);
-
 		if (caps.rendertarget_format_support(EF_B10G11R11F, 1, 0))
 		{
 			fmt = EF_B10G11R11F;
@@ -1575,6 +1572,8 @@ namespace KlayGE
 					App3DFramework& app = Context::Instance().AppInstance();
 					if ((app.FrameTime() < 1.0f / 30) && taa_enabled_)
 					{
+						taa_pp_->InputPin(0, pvp.curr_merged_shading_tex);
+						taa_pp_->InputPin(1, pvp.prev_merged_shading_tex);
 						taa_pp_->Render();
 						re.Render(*technique_copy_depth_, *rl_quad_);
 					}
