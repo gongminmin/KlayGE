@@ -28,20 +28,20 @@ namespace KlayGE
 	DInputEngine::DInputEngine()
 	{
 		mod_dinput8_ = ::LoadLibraryW(L"dinput8.dll");
-		if (NULL == mod_dinput8_)
+		if (nullptr == mod_dinput8_)
 		{
-			::MessageBoxW(NULL, L"Can't load dinput8.dll", L"Error", MB_OK);
+			::MessageBoxW(nullptr, L"Can't load dinput8.dll", L"Error", MB_OK);
 		}
 
-		if (mod_dinput8_ != NULL)
+		if (mod_dinput8_ != nullptr)
 		{
 			DynamicDirectInput8Create_ = reinterpret_cast<DirectInput8CreateFunc>(::GetProcAddress(mod_dinput8_, "DirectInput8Create"));
 		}
 
 		// Create DirectInput object
 		IDirectInput8W* di;
-		DynamicDirectInput8Create_(::GetModuleHandle(NULL), DIRECTINPUT_VERSION, 
-			IID_IDirectInput8W, reinterpret_cast<void**>(&di), NULL);
+		DynamicDirectInput8Create_(::GetModuleHandle(nullptr), DIRECTINPUT_VERSION, 
+			IID_IDirectInput8W, reinterpret_cast<void**>(&di), nullptr);
 		dinput_ = MakeCOMPtr(di);
 	}
 

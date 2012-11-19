@@ -203,7 +203,7 @@ void PostProcessingApp::OnResize(uint32_t width, uint32_t height)
 
 		fmt = EF_ARGB8;
 	}
-	color_tex_ = rf.MakeTexture2D(width, height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+	color_tex_ = rf.MakeTexture2D(width, height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
 	color_fb_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*color_tex_, 0, 1, 0));
 
 	deferred_rendering_->SetupViewport(0, color_fb_, 0);

@@ -65,10 +65,10 @@ namespace KlayGE
 	{
 		// 枚举系统中的适配器
 		UINT adapter_no = 0;
-		IDXGIAdapter1* dxgi_adapter = NULL;
+		IDXGIAdapter1* dxgi_adapter = nullptr;
 		while (gi_factory->EnumAdapters1(adapter_no, &dxgi_adapter) != DXGI_ERROR_NOT_FOUND)
 		{
-			if (dxgi_adapter != NULL)
+			if (dxgi_adapter != nullptr)
 			{
 				DXGI_ADAPTER_DESC ad;
 				dxgi_adapter->GetDesc(&ad);

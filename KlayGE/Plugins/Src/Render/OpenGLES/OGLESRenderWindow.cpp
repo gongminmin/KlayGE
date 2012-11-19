@@ -141,7 +141,7 @@ namespace KlayGE
 		EGLint major_ver, minor_ver;
 		EGLint num_cfgs;
 		eglInitialize(display_, &major_ver, &minor_ver);
-		eglGetConfigs(display_, NULL, 0, &num_cfgs);
+		eglGetConfigs(display_, nullptr, 0, &num_cfgs);
 
 		eglChooseConfig(display_, &visual_attr[0], &cfg_, 1, &num_cfgs);
 
@@ -158,7 +158,7 @@ namespace KlayGE
 		ANativeWindow_setBuffersGeometry(wnd, 0, 0, format);
 #endif
 
-		surf_ = eglCreateWindowSurface(display_, cfg_, wnd, NULL);
+		surf_ = eglCreateWindowSurface(display_, cfg_, wnd, nullptr);
 
 		EGLint ctx_attr[] = { EGL_CONTEXT_CLIENT_VERSION, 2, EGL_NONE };
 		context_ = eglCreateContext(display_, cfg_, EGL_NO_CONTEXT, ctx_attr);
@@ -284,7 +284,7 @@ namespace KlayGE
 			}
 			else
 			{
-				::ChangeDisplaySettings(NULL, 0);
+				::ChangeDisplaySettings(nullptr, 0);
 
 				style = WS_OVERLAPPEDWINDOW;
 			}
@@ -355,13 +355,13 @@ namespace KlayGE
 	void OGLESRenderWindow::Destroy()
 	{
 #if defined KLAYGE_PLATFORM_WINDOWS
-		if (hWnd_ != NULL)
+		if (hWnd_ != nullptr)
 		{
 			::ReleaseDC(hWnd_, hDC_);
 
 			if (isFullScreen_)
 			{
-				::ChangeDisplaySettings(NULL, 0);
+				::ChangeDisplaySettings(nullptr, 0);
 				ShowCursor(TRUE);
 			}
 		}
@@ -369,12 +369,12 @@ namespace KlayGE
 #elif defined KLAYGE_PLATFORM_ANDROID
 #endif
 
-		if (display_ != NULL)
+		if (display_ != nullptr)
 		{
 			eglDestroyContext(display_, context_);
 			eglTerminate(display_);
 
-			display_ = NULL;
+			display_ = nullptr;
 		}
 	}
 

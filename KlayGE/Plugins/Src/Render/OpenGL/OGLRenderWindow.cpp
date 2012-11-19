@@ -98,7 +98,7 @@ namespace KlayGE
 		::AdjustWindowRect(&rc, style, false);
 
 		::SetWindowLongPtrW(hWnd_, GWL_STYLE, style);
-		::SetWindowPos(hWnd_, NULL, settings.left, settings.top, rc.right - rc.left, rc.bottom - rc.top,
+		::SetWindowPos(hWnd_, nullptr, settings.left, settings.top, rc.right - rc.left, rc.bottom - rc.top,
 			SWP_SHOWWINDOW | SWP_NOZORDER);
 
 		// there is no guarantee that the contents of the stack that become
@@ -154,7 +154,7 @@ namespace KlayGE
 
 			if (valid && (sample_count > 1))
 			{
-				::wglMakeCurrent(hDC_, NULL);
+				::wglMakeCurrent(hDC_, nullptr);
 				::wglDeleteContext(hRC_);
 				::ReleaseDC(hWnd_, hDC_);
 
@@ -164,7 +164,7 @@ namespace KlayGE
 				hDC_ = ::GetDC(hWnd_);
 
 				::SetWindowLongPtrW(hWnd_, GWL_STYLE, style);
-				::SetWindowPos(hWnd_, NULL, settings.left, settings.top, rc.right - rc.left, rc.bottom - rc.top,
+				::SetWindowPos(hWnd_, nullptr, settings.left, settings.top, rc.right - rc.left, rc.bottom - rc.top,
 					SWP_SHOWWINDOW | SWP_NOZORDER);
 
 				::SetPixelFormat(hDC_, pixelFormat, &pfd);
@@ -201,10 +201,10 @@ namespace KlayGE
 			{
 				attribs[1] = versions[i][0];
 				attribs[3] = versions[i][1];
-				HGLRC hRC_new = wglCreateContextAttribsARB(hDC_, NULL, attribs);
-				if (hRC_new != NULL)
+				HGLRC hRC_new = wglCreateContextAttribsARB(hDC_, nullptr, attribs);
+				if (hRC_new != nullptr)
 				{
-					::wglMakeCurrent(hDC_, NULL);
+					::wglMakeCurrent(hDC_, nullptr);
 					::wglDeleteContext(hRC_);
 					hRC_ = hRC_new;
 
@@ -236,7 +236,7 @@ namespace KlayGE
 
 		// Create an OpenGL rendering context
 		x_context_ = glXCreateContext(x_display_, vi,
-					NULL,		// No sharing of display lists
+					nullptr,		// No sharing of display lists
 					GL_TRUE);	// Direct rendering if possible
 
 		glXMakeCurrent(x_display_, x_window_, x_context_);
@@ -264,10 +264,10 @@ namespace KlayGE
 			{
 				attribs[1] = versions[i][0];
 				attribs[3] = versions[i][1];
-				GLXContext x_context_new = glXCreateContextAttribsARB(x_display_, fbc_[0], NULL, GL_TRUE, attribs);
-				if (x_context_new != NULL)
+				GLXContext x_context_new = glXCreateContextAttribsARB(x_display_, fbc_[0], nullptr, GL_TRUE, attribs);
+				if (x_context_new != nullptr)
 				{
-					glXMakeCurrent(x_display_, x_window_, NULL);
+					glXMakeCurrent(x_display_, x_window_, nullptr);
 					glXDestroyContext(x_display_, x_context_);
 					x_context_ = x_context_new;
 
@@ -422,7 +422,7 @@ namespace KlayGE
 			}
 			else
 			{
-				::ChangeDisplaySettings(NULL, 0);
+				::ChangeDisplaySettings(nullptr, 0);
 
 				style = WS_OVERLAPPEDWINDOW;
 			}
@@ -475,28 +475,28 @@ namespace KlayGE
 	void OGLRenderWindow::Destroy()
 	{
 #if defined KLAYGE_PLATFORM_WINDOWS
-		if (hWnd_ != NULL)
+		if (hWnd_ != nullptr)
 		{
-			if (hDC_ != NULL)
+			if (hDC_ != nullptr)
 			{
-				::wglMakeCurrent(hDC_, NULL);
-				if (hRC_ != NULL)
+				::wglMakeCurrent(hDC_, nullptr);
+				if (hRC_ != nullptr)
 				{
 					::wglDeleteContext(hRC_);
-					hRC_ = NULL;
+					hRC_ = nullptr;
 				}
 				::ReleaseDC(hWnd_, hDC_);
-				hDC_ = NULL;
+				hDC_ = nullptr;
 			}
 
 			if (isFullScreen_)
 			{
-				::ChangeDisplaySettings(NULL, 0);
+				::ChangeDisplaySettings(nullptr, 0);
 				ShowCursor(TRUE);
 			}
 		}
 #elif defined KLAYGE_PLATFORM_LINUX
-		if (x_display_ != NULL)
+		if (x_display_ != nullptr)
 		{
 			glXDestroyContext(x_display_, x_context_);
 		}

@@ -93,7 +93,7 @@ namespace KlayGE
 		}
 		bool AppValid() const
 		{
-			return app_ != NULL;
+			return app_ != nullptr;
 		}
 		App3DFramework& AppInstance()
 		{

@@ -42,7 +42,7 @@ namespace KlayGE
 		d3d_imm_ctx_ = renderEngine.D3DDeviceImmContext();
 		size_in_byte_ = 0;
 
-		if (init_data != NULL)
+		if (init_data != nullptr)
 		{
 			D3D11_BUFFER_DESC desc;
 			this->GetD3DFlags(desc.Usage, desc.CPUAccessFlags, desc.BindFlags, desc.MiscFlags);
@@ -170,7 +170,7 @@ namespace KlayGE
 			desc.StructureByteStride = NumFormatBytes(fmt_as_shader_res_);
 
 			ID3D11Buffer* buffer;
-			TIF(d3d_device_->CreateBuffer(&desc, NULL, &buffer));
+			TIF(d3d_device_->CreateBuffer(&desc, nullptr, &buffer));
 			buffer_ = MakeCOMPtr(buffer);
 			hw_buf_size_ = this->Size();
 

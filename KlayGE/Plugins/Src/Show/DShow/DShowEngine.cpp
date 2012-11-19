@@ -35,7 +35,7 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	DShowEngine::DShowEngine()
 	{
-		::CoInitializeEx(NULL, COINIT_APARTMENTTHREADED);
+		::CoInitializeEx(nullptr, COINIT_APARTMENTTHREADED);
 
 		this->Init();
 	}
@@ -98,12 +98,12 @@ namespace KlayGE
 		this->Init();
 
 		IGraphBuilder* graph;
-		TIF(::CoCreateInstance(CLSID_FilterGraph, NULL, CLSCTX_ALL,
+		TIF(::CoCreateInstance(CLSID_FilterGraph, nullptr, CLSCTX_ALL,
 			IID_IGraphBuilder, reinterpret_cast<void**>(&graph)));
 		graph_ = MakeCOMPtr(graph);
 
 		IBaseFilter* filter;
-		TIF(::CoCreateInstance(CLSID_VideoMixingRenderer9, NULL, CLSCTX_INPROC_SERVER,
+		TIF(::CoCreateInstance(CLSID_VideoMixingRenderer9, nullptr, CLSCTX_INPROC_SERVER,
 			IID_IBaseFilter, reinterpret_cast<void**>(&filter)));
 		filter_ = MakeCOMPtr(filter);
 
@@ -147,7 +147,7 @@ namespace KlayGE
 
 		std::wstring fn;
 		Convert(fn, fileName);
-		TIF(graph_->RenderFile(fn.c_str(), NULL));
+		TIF(graph_->RenderFile(fn.c_str(), nullptr));
 
 		state_ = SS_Stopped;
 	}

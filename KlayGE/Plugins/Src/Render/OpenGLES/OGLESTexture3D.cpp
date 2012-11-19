@@ -107,7 +107,7 @@ namespace KlayGE
 
 				GLsizei const image_size = ((width + 3) / 4) * ((height + 3) / 4) * depth * block_size;
 
-				if (NULL == init_data)
+				if (nullptr == init_data)
 				{
 					tex_data_[level].resize(image_size, 0);
 				}
@@ -123,7 +123,7 @@ namespace KlayGE
 			{
 				GLsizei const image_size = width * height * depth * texel_size;
 
-				if (NULL == init_data)
+				if (nullptr == init_data)
 				{
 					tex_data_[level].resize(image_size, 0);
 				}

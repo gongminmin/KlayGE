@@ -24,18 +24,18 @@ namespace KlayGE
 	class Trace
 	{
 	public:
-		Trace(char const * func, int line = 0, char const * file = NULL)
+		Trace(char const * func, int line = 0, char const * file = nullptr)
 			: func_(func), line_(line), file_(file)
 		{
 #ifdef KLAYGE_DEBUG
-			LOG_Info("Enter %s in file %s (line %d)", func_, file_ != NULL ? file_ : "", line_);
+			LOG_Info("Enter %s in file %s (line %d)", func_, file_ != nullptr ? file_ : "", line_);
 #endif
 		}
 
 		~Trace()
 		{
 #ifdef KLAYGE_DEBUG
-			LOG_Info("Leave %s in file %s (line %d)", func_, file_ != NULL ? file_ : "", line_);
+			LOG_Info("Leave %s in file %s (line %d)", func_, file_ != nullptr ? file_ : "", line_);
 #endif
 		}
 

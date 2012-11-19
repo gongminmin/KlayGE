@@ -2011,7 +2011,7 @@ namespace KlayGE
 		{
 			args.push_back("-DKLAYGE_BC5_AS_GA");
 		}
-		args.push_back(NULL);
+		args.push_back(nullptr);
 
 		CGprofile profile;
 		switch (type)
@@ -2079,7 +2079,7 @@ namespace KlayGE
 					char const * glsl_param_name = cgGetParameterResourceName(cg_param);
 					std::string hacked_name = std::string("_") + pname;
 
-					if ((cgGetError() != CG_NO_ERROR) || (NULL == glsl_param_name))
+					if ((cgGetError() != CG_NO_ERROR) || (nullptr == glsl_param_name))
 					{
 						// Some times cgGetParameterResourceName doesn't work
 						glsl_param_name = hacked_name.c_str();
@@ -2194,7 +2194,7 @@ namespace KlayGE
 		}
 		//printf("%s\n", glsl);
 
-		glShaderSource(object, 1, &glsl, NULL);
+		glShaderSource(object, 1, &glsl, nullptr);
 
 		glCompileShader(object);
 

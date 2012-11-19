@@ -1490,7 +1490,7 @@ namespace KlayGE
 		}
 		int GetTextLength() const
 		{
-			return buffer_.GetTextSize();	// Returns text length in chars excluding NULL.
+			return buffer_.GetTextSize();	// Returns text length in chars excluding nullptr.
 		}
 		void ClearText();
 		virtual void SetTextColor(Color const & Color)

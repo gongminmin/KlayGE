@@ -227,7 +227,7 @@ namespace KlayGE
 
 		if (!hint)
 		{
-			hint = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Read, NULL);
+			hint = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Read, nullptr);
 		}
 
 		std::vector<uint8_t> instance_buffer(instance_stream_.stream->Size());
@@ -236,7 +236,7 @@ namespace KlayGE
 			std::copy(mapper.Pointer<uint8_t>(), mapper.Pointer<uint8_t>() + instance_stream_.stream->Size(),
 				instance_buffer.begin());
 		}
-		GraphicsBufferPtr hint_sys_mem = rf.MakeVertexBuffer(BU_Static, EAH_CPU_Write, NULL);
+		GraphicsBufferPtr hint_sys_mem = rf.MakeVertexBuffer(BU_Static, EAH_CPU_Write, nullptr);
 		hint->Resize(instance_stream_.vertex_size * num_vertices);
 		GraphicsBuffer::Mapper dst_mapper(*hint_sys_mem, BA_Write_Only);
 

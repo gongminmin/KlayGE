@@ -91,7 +91,7 @@ namespace KlayGE
 	}
 
 	D3D11RenderTargetRenderView::D3D11RenderTargetRenderView(ID3D11RenderTargetViewPtr const & view, uint32_t width, uint32_t height, ElementFormat pf)
-		: rt_view_(view), rt_src_(NULL), rt_first_subres_(0), rt_num_subres_(0)
+		: rt_view_(view), rt_src_(nullptr), rt_first_subres_(0), rt_num_subres_(0)
 	{
 		width_ = width;
 		height_ = height;
@@ -158,7 +158,7 @@ namespace KlayGE
 	}
 
 	D3D11DepthStencilRenderView::D3D11DepthStencilRenderView(ID3D11DepthStencilViewPtr const & view, uint32_t width, uint32_t height, ElementFormat pf)
-		: ds_view_(view), rt_src_(NULL), rt_first_subres_(0), rt_num_subres_(0)
+		: ds_view_(view), rt_src_(nullptr), rt_first_subres_(0), rt_num_subres_(0)
 	{
 		width_ = width;
 		height_ = height;
@@ -167,7 +167,7 @@ namespace KlayGE
 
 	D3D11DepthStencilRenderView::D3D11DepthStencilRenderView(uint32_t width, uint32_t height,
 											ElementFormat pf, uint32_t sample_count, uint32_t sample_quality)
-		: rt_src_(NULL), rt_first_subres_(0), rt_num_subres_(0)
+		: rt_src_(nullptr), rt_first_subres_(0), rt_num_subres_(0)
 	{
 		BOOST_ASSERT(IsDepthFormat(pf));
 
@@ -184,7 +184,7 @@ namespace KlayGE
 		tex_desc.CPUAccessFlags = 0;
 		tex_desc.MiscFlags = 0;
 		ID3D11Texture2D* depth_tex;
-		TIF(d3d_device_->CreateTexture2D(&tex_desc, NULL, &depth_tex));
+		TIF(d3d_device_->CreateTexture2D(&tex_desc, nullptr, &depth_tex));
 
 		D3D11_DEPTH_STENCIL_VIEW_DESC desc;
 		desc.Format = tex_desc.Format;
@@ -297,7 +297,7 @@ namespace KlayGE
 	}
 
 	D3D11UnorderedAccessView::D3D11UnorderedAccessView(ID3D11UnorderedAccessViewPtr const & view, uint32_t width, uint32_t height, ElementFormat pf)
-		: ua_view_(view), ua_src_(NULL), ua_first_subres_(0), ua_num_subres_(0)
+		: ua_view_(view), ua_src_(nullptr), ua_first_subres_(0), ua_num_subres_(0)
 	{
 		width_ = width;
 		height_ = height;

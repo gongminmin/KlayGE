@@ -193,7 +193,7 @@ void SubSurfaceApp::OnResize(uint32_t width, uint32_t height)
 
 		fmt = EF_ARGB8;
 	}
-	TexturePtr dummy_color_tex = rf.MakeTexture2D(width, height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+	TexturePtr dummy_color_tex = rf.MakeTexture2D(width, height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
 	if (caps.rendertarget_format_support(EF_D24S8, 1, 0))
 	{
 		fmt = EF_D24S8;
@@ -204,7 +204,7 @@ void SubSurfaceApp::OnResize(uint32_t width, uint32_t height)
 
 		fmt = EF_D16;
 	}
-	back_face_depth_tex_ = rf.MakeTexture2D(width, height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+	back_face_depth_tex_ = rf.MakeTexture2D(width, height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
 	back_face_depth_fb_ = rf.MakeFrameBuffer();
 	back_face_depth_fb_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*dummy_color_tex, 0, 1, 0));
 	back_face_depth_fb_->Attach(FrameBuffer::ATT_DepthStencil, rf.Make2DDepthStencilRenderView(*back_face_depth_tex_, 0, 1, 0));

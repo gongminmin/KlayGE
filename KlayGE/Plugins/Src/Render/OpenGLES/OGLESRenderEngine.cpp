@@ -99,7 +99,7 @@ namespace KlayGE
 		bool gotMsg;
 		MSG  msg;
 
-		::PeekMessage(&msg, NULL, 0, 0, PM_NOREMOVE);
+		::PeekMessage(&msg, nullptr, 0, 0, PM_NOREMOVE);
 
 		FrameBuffer& fb = *this->ScreenFrameBuffer();
 		while (WM_QUIT != msg.message)
@@ -108,11 +108,11 @@ namespace KlayGE
 			// 不然, 用 GetMessage() 减少 CPU 占用率
 			if (fb.Active())
 			{
-				gotMsg = ::PeekMessage(&msg, NULL, 0, 0, PM_REMOVE) ? true : false;
+				gotMsg = ::PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE) ? true : false;
 			}
 			else
 			{
-				gotMsg = ::GetMessage(&msg, NULL, 0, 0) ? true : false;
+				gotMsg = ::GetMessage(&msg, nullptr, 0, 0) ? true : false;
 			}
 
 			if (gotMsg)
@@ -162,10 +162,10 @@ namespace KlayGE
 			FrameBuffer& fb = *this->CurFrameBuffer();
 			do
 			{
-				ident = ALooper_pollAll(fb.Active() ? 0 : -1, NULL, &events, reinterpret_cast<void**>(&source));
+				ident = ALooper_pollAll(fb.Active() ? 0 : -1, nullptr, &events, reinterpret_cast<void**>(&source));
 
 				// Process this event.
-				if (source != NULL)
+				if (source != nullptr)
 				{
 					source->process(state, source);
 				}
@@ -379,7 +379,7 @@ namespace KlayGE
 		numVerticesJustRendered_ += num_instance * vertexCount;
 
 		GLenum index_type = GL_UNSIGNED_SHORT;
-		uint8_t* index_offset = NULL;
+		uint8_t* index_offset = nullptr;
 		if (rl.UseIndices())
 		{
 			OGLESGraphicsBuffer& stream(*checked_pointer_cast<OGLESGraphicsBuffer>(rl.GetIndexStream()));

@@ -105,7 +105,7 @@ namespace KlayGE
 	XMLNode::XMLNode(void* node)
 		: node_(node)
 	{
-		if (node_ != NULL)
+		if (node_ != nullptr)
 		{
 			name_ = std::string(static_cast<rapidxml::xml_node<>*>(node_)->name(),
 				static_cast<rapidxml::xml_node<>*>(node_)->name_size());
@@ -480,7 +480,7 @@ namespace KlayGE
 	XMLAttribute::XMLAttribute(void* attr)
 		: attr_(attr)
 	{
-		if (attr_ != NULL)
+		if (attr_ != nullptr)
 		{
 			name_ = std::string(static_cast<rapidxml::xml_attribute<>*>(attr_)->name(), static_cast<rapidxml::xml_attribute<>*>(attr_)->name_size());
 			value_ = std::string(static_cast<rapidxml::xml_attribute<>*>(attr_)->value(), static_cast<rapidxml::xml_attribute<>*>(attr_)->value_size());

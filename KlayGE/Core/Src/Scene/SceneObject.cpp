@@ -115,7 +115,7 @@ namespace KlayGE
 
 	void const * SceneObject::InstanceData() const
 	{
-		return NULL;
+		return nullptr;
 	}
 
 	void SceneObject::Pass(PassType type)

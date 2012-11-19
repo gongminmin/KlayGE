@@ -92,18 +92,18 @@ namespace KlayGE
 	DSAudioEngine::DSAudioEngine()
 	{
 		mod_dsound_ = ::LoadLibraryW(L"dsound.dll");
-		if (NULL == mod_dsound_)
+		if (nullptr == mod_dsound_)
 		{
-			::MessageBoxW(NULL, L"Can't load dinput8.dll", L"Error", MB_OK);
+			::MessageBoxW(nullptr, L"Can't load dinput8.dll", L"Error", MB_OK);
 		}
 
-		if (mod_dsound_ != NULL)
+		if (mod_dsound_ != nullptr)
 		{
 			DynamicDirectSoundCreate_ = reinterpret_cast<DirectSoundCreateFunc>(::GetProcAddress(mod_dsound_, "DirectSoundCreate"));
 		}
 
-		IDirectSound* dsound(NULL);
-		TIF(DynamicDirectSoundCreate_(&DSDEVID_DefaultPlayback, &dsound, NULL));
+		IDirectSound* dsound(nullptr);
+		TIF(DynamicDirectSoundCreate_(&DSDEVID_DefaultPlayback, &dsound, nullptr));
 		dsound_ = MakeCOMPtr(dsound);
 
 		TIF(dsound_->SetCooperativeLevel(::GetForegroundWindow(), DSSCL_PRIORITY));
@@ -113,8 +113,8 @@ namespace KlayGE
 		desc.dwSize  = sizeof(desc);
 		desc.dwFlags = DSBCAPS_CTRL3D | DSBCAPS_PRIMARYBUFFER;
 
-		IDirectSoundBuffer* pDSBPrimary(NULL);
-		TIF(dsound_->CreateSoundBuffer(&desc, &pDSBPrimary, NULL));
+		IDirectSoundBuffer* pDSBPrimary(nullptr);
+		TIF(dsound_->CreateSoundBuffer(&desc, &pDSBPrimary, nullptr));
 
 		WAVEFORMATEX wfx;
 		std::memset(&wfx, 0, sizeof(wfx));

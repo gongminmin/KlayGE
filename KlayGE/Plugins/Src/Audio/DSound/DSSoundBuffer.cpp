@@ -80,7 +80,7 @@ namespace KlayGE
 
 		// DirectSound只能播放 PCM 数据。其他格式可能不能工作。
 		IDirectSoundBuffer* temp;
-		TIF(dsound->CreateSoundBuffer(&dsbd, &temp, NULL));
+		TIF(dsound->CreateSoundBuffer(&dsbd, &temp, nullptr));
 		sources_[0] = IDSBufferPtr(temp);
 
 		// 复制缓冲区，使所有缓冲区使用同一段数据
@@ -95,7 +95,7 @@ namespace KlayGE
 		DWORD lockedBufferSize;		// 锁定的内存大小
 		TIF(sources_[0]->Lock(0, static_cast<DWORD>(dataSource_->Size()),
 			reinterpret_cast<void**>(&lockedBuffer), &lockedBufferSize,
-			NULL, NULL, DSBLOCK_FROMWRITECURSOR));
+			nullptr, nullptr, DSBLOCK_FROMWRITECURSOR));
 
 		dataSource_->Reset();
 
@@ -120,7 +120,7 @@ namespace KlayGE
 		}
 
 		// 缓冲区解锁
-		sources_[0]->Unlock(lockedBuffer, lockedBufferSize, NULL, 0);
+		sources_[0]->Unlock(lockedBuffer, lockedBufferSize, nullptr, 0);
 
 		this->Position(float3(0, 0, 0));
 		this->Velocity(float3(0, 0, 0));

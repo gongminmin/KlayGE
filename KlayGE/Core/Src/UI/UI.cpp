@@ -97,12 +97,12 @@ namespace KlayGE
 				rl_->TopologyType(RenderLayout::TT_TriangleList);
 			}
 
-			vb_ = rf.MakeVertexBuffer(BU_Dynamic, EAH_CPU_Write | EAH_GPU_Read, NULL);
+			vb_ = rf.MakeVertexBuffer(BU_Dynamic, EAH_CPU_Write | EAH_GPU_Read, nullptr);
 			rl_->BindVertexStream(vb_, boost::make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F),
 												vertex_element(VEU_Diffuse, 0, EF_ABGR32F),
 												vertex_element(VEU_TextureCoord, 0, EF_GR32F)));
 
-			ib_ = rf.MakeIndexBuffer(BU_Dynamic, EAH_CPU_Write | EAH_GPU_Read, NULL);
+			ib_ = rf.MakeIndexBuffer(BU_Dynamic, EAH_CPU_Write | EAH_GPU_Read, nullptr);
 			rl_->BindIndexStream(ib_, EF_R16UI);
 
 			if (texture)

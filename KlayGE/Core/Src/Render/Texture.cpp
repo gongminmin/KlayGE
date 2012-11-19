@@ -2410,22 +2410,22 @@ namespace KlayGE
 		{
 		case Texture::TT_1D:
 			texture_sys_mem = renderFactory.MakeTexture1D(texture->Width(0),
-				numMipMaps, array_size, format, 1, 0, EAH_CPU_Read, NULL);
+				numMipMaps, array_size, format, 1, 0, EAH_CPU_Read, nullptr);
 			break;
 
 		case Texture::TT_2D:
 			texture_sys_mem = renderFactory.MakeTexture2D(texture->Width(0), texture->Height(0),
-				numMipMaps, array_size, format, 1, 0, EAH_CPU_Read, NULL);
+				numMipMaps, array_size, format, 1, 0, EAH_CPU_Read, nullptr);
 			break;
 
 		case Texture::TT_3D:
 			texture_sys_mem = renderFactory.MakeTexture3D(texture->Width(0), texture->Height(0),
-				texture->Depth(0), numMipMaps, array_size, format, 1, 0, EAH_CPU_Read, NULL);
+				texture->Depth(0), numMipMaps, array_size, format, 1, 0, EAH_CPU_Read, nullptr);
 			break;
 
 		case Texture::TT_Cube:
 			texture_sys_mem = renderFactory.MakeTextureCube(texture->Width(0),
-				numMipMaps, array_size, format, 1, 0, EAH_CPU_Read, NULL);
+				numMipMaps, array_size, format, 1, 0, EAH_CPU_Read, nullptr);
 			break;
 
 		default:
@@ -2869,7 +2869,7 @@ namespace KlayGE
 		else
 		{
 			src_cpu = rf.MakeTexture1D(src_width, 1, 1,
-				this->Format(), this->SampleCount(), this->SampleQuality(), EAH_CPU_Read, NULL);
+				this->Format(), this->SampleCount(), this->SampleQuality(), EAH_CPU_Read, nullptr);
 			src_cpu_ptr = src_cpu.get();
 
 			this->CopyToSubTexture1D(*src_cpu, 0, 0, 0, src_width, src_array_index, src_level, src_x_offset, src_width);
@@ -2894,7 +2894,7 @@ namespace KlayGE
 		else
 		{
 			dst_cpu = rf.MakeTexture1D(dst_width, 1, 1,
-				target.Format(), target.SampleCount(), target.SampleQuality(), EAH_CPU_Write, NULL);
+				target.Format(), target.SampleCount(), target.SampleQuality(), EAH_CPU_Write, nullptr);
 			dst_cpu_ptr = dst_cpu.get();
 
 			dst_cpu_array_index = 0;
@@ -3012,13 +3012,13 @@ namespace KlayGE
 			}
 
 			src_cpu = rf.MakeTexture2D(src_width, src_height, 1, 1,
-				src_cpu_fmt, this->SampleCount(), this->SampleQuality(), EAH_CPU_Read | EAH_CPU_Write, NULL);
+				src_cpu_fmt, this->SampleCount(), this->SampleQuality(), EAH_CPU_Read | EAH_CPU_Write, nullptr);
 			src_cpu_ptr = src_cpu.get();
 
 			if (IsCompressedFormat(this->Format()))
 			{
 				TexturePtr src_bc_cpu = rf.MakeTexture2D(src_width, src_height, 1, 1,
-					this->Format(), this->SampleCount(), this->SampleQuality(), EAH_CPU_Read, NULL);
+					this->Format(), this->SampleCount(), this->SampleQuality(), EAH_CPU_Read, nullptr);
 				this->CopyToSubTexture2D(*src_bc_cpu, 0, 0, 0, 0, src_width, src_height, 
 					src_array_index, src_level, src_x_offset, src_y_offset, src_width, src_height);
 
@@ -3241,7 +3241,7 @@ namespace KlayGE
 			}
 
 			dst_cpu = rf.MakeTexture2D(dst_width, dst_height, 1, 1,
-				dst_cpu_fmt, target.SampleCount(), target.SampleQuality(), EAH_CPU_Read | EAH_CPU_Write, NULL);
+				dst_cpu_fmt, target.SampleCount(), target.SampleQuality(), EAH_CPU_Read | EAH_CPU_Write, nullptr);
 			dst_cpu_ptr = dst_cpu.get();
 
 			dst_cpu_array_index = 0;
@@ -3265,7 +3265,7 @@ namespace KlayGE
 			if (IsCompressedFormat(target.Format()))
 			{
 				TexturePtr dst_bc_cpu = rf.MakeTexture2D(dst_width, dst_height, 1, 1,
-					target.Format(), target.SampleCount(), target.SampleQuality(), EAH_CPU_Read | EAH_CPU_Write, NULL);
+					target.Format(), target.SampleCount(), target.SampleQuality(), EAH_CPU_Read | EAH_CPU_Write, nullptr);
 
 				Texture::Mapper mapper_src(*dst_cpu, 0, 0, TMA_Read_Only, 0, 0, dst_width, dst_height);
 				Texture::Mapper mapper_dst(*dst_bc_cpu, 0, 0, TMA_Write_Only, 0, 0, dst_width, dst_height);
@@ -3442,7 +3442,7 @@ namespace KlayGE
 		else
 		{
 			src_cpu = rf.MakeTexture3D(src_width, src_height, src_depth, 1, 1,
-				this->Format(), this->SampleCount(), this->SampleQuality(), EAH_CPU_Read, NULL);
+				this->Format(), this->SampleCount(), this->SampleQuality(), EAH_CPU_Read, nullptr);
 			src_cpu_ptr = src_cpu.get();
 
 			this->CopyToSubTexture3D(*src_cpu, 0, 0, 0, 0, 0, src_width, src_height, src_depth, 
@@ -3474,7 +3474,7 @@ namespace KlayGE
 		else
 		{
 			dst_cpu = rf.MakeTexture3D(dst_width, dst_height, dst_depth, 1, 1,
-				target.Format(), target.SampleCount(), target.SampleQuality(), EAH_CPU_Write, NULL);
+				target.Format(), target.SampleCount(), target.SampleQuality(), EAH_CPU_Write, nullptr);
 			dst_cpu_ptr = dst_cpu.get();
 
 			dst_cpu_array_index = 0;
@@ -3519,7 +3519,7 @@ namespace KlayGE
 		uint32_t src_cpu_y_offset;
 		{
 			src_cpu = rf.MakeTexture2D(src_width, src_height, 1, 1,
-				this->Format(), this->SampleCount(), this->SampleQuality(), EAH_CPU_Read, NULL);
+				this->Format(), this->SampleCount(), this->SampleQuality(), EAH_CPU_Read, nullptr);
 			src_cpu_ptr = src_cpu.get();
 
 			this->CopyToSubTexture2D(*src_cpu, 0, 0, 0, 0, src_width, src_height, 
@@ -3539,7 +3539,7 @@ namespace KlayGE
 		uint32_t dst_cpu_y_offset;
 		{
 			dst_cpu = rf.MakeTexture2D(dst_width, dst_height, 1, 1,
-				target.Format(), target.SampleCount(), target.SampleQuality(), EAH_CPU_Write, NULL);
+				target.Format(), target.SampleCount(), target.SampleQuality(), EAH_CPU_Write, nullptr);
 			dst_cpu_ptr = dst_cpu.get();
 
 			dst_cpu_array_index = 0;

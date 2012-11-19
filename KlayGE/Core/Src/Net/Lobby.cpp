@@ -120,7 +120,7 @@ namespace KlayGE
 			for (BOOST_AUTO(iter, players_.begin()); iter != players_.end();)
 			{
 				// ´óÓÚ20Ãë
-				if (std::time(NULL) - iter->second.time >= 20 * 1000)
+				if (std::time(nullptr) - iter->second.time >= 20 * 1000)
 				{
 					iter = players_.erase(iter);
 				}
@@ -291,7 +291,7 @@ namespace KlayGE
 	{
 		if (iter != this->players_.end())
 		{
-			iter->second.time = static_cast<uint32_t>(std::time(NULL));
+			iter->second.time = static_cast<uint32_t>(std::time(nullptr));
 		}
 	}
 }

@@ -132,7 +132,7 @@ namespace KlayGE
 		bool gotMsg;
 		MSG  msg;
 
-		::PeekMessage(&msg, NULL, 0, 0, PM_NOREMOVE);
+		::PeekMessage(&msg, nullptr, 0, 0, PM_NOREMOVE);
 
 		FrameBuffer& fb = *this->ScreenFrameBuffer();
 		while (WM_QUIT != msg.message)
@@ -141,11 +141,11 @@ namespace KlayGE
 			// 不然, 用 GetMessage() 减少 CPU 占用率
 			if (fb.Active())
 			{
-				gotMsg = ::PeekMessage(&msg, NULL, 0, 0, PM_REMOVE) ? true : false;
+				gotMsg = ::PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE) ? true : false;
 			}
 			else
 			{
-				gotMsg = ::GetMessage(&msg, NULL, 0, 0) ? true : false;
+				gotMsg = ::GetMessage(&msg, nullptr, 0, 0) ? true : false;
 			}
 
 			if (gotMsg)
@@ -874,7 +874,7 @@ namespace KlayGE
 		numVerticesJustRendered_ += num_instance * vertexCount;
 
 		GLenum index_type = GL_UNSIGNED_SHORT;
-		uint8_t* index_offset = NULL;
+		uint8_t* index_offset = nullptr;
 		if (rl.UseIndices())
 		{
 			if (EF_R16UI == rl.IndexStreamFormat())
@@ -917,7 +917,7 @@ namespace KlayGE
 			uint32_t const instance_size = rl.InstanceSize();
 			BOOST_ASSERT(num_instance * instance_size <= stream.Size());
 
-			uint8_t* elem_offset = NULL;
+			uint8_t* elem_offset = nullptr;
 			for (size_t i = 0; i < inst_format_size; ++ i)
 			{
 				vertex_element const & vs_elem = rl.InstanceStreamFormat()[i];

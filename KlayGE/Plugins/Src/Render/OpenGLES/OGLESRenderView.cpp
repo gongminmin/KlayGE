@@ -439,7 +439,7 @@ namespace KlayGE
 				glGenTextures(1, &tex_2d_);
 				glBindTexture(GL_TEXTURE_2D, tex_2d_);
 				glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width_, height_,
-					0, GL_RGBA, GL_FLOAT, NULL);
+					0, GL_RGBA, GL_FLOAT, nullptr);
 				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);

@@ -256,7 +256,7 @@ namespace KlayGE
 		for (size_t i = 0; i < sum_lums_.size() + 1; ++ i)
 		{
 			lum_texs[sum_lums_.size() - i] = rf.MakeTexture2D(len, len, 1, 1, fmt, 1, 0,
-				EAH_GPU_Read | EAH_GPU_Write, NULL);
+				EAH_GPU_Read | EAH_GPU_Write, nullptr);
 			len *= 4;
 		}
 
@@ -316,7 +316,7 @@ namespace KlayGE
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
 		TexturePtr lum_tex = rf.MakeTexture2D(2, 2, 1, 1, EF_R16F, 1, 0,
-					EAH_GPU_Read | EAH_GPU_Write | EAH_GPU_Unordered, NULL);
+					EAH_GPU_Read | EAH_GPU_Write | EAH_GPU_Unordered, nullptr);
 
 		float init_lum = 0;
 		ElementInitData init_data;
@@ -382,10 +382,10 @@ namespace KlayGE
 		for (size_t i = 0; i < 3; ++ i)
 		{
 			downsample_texs[i] = rf.MakeTexture2D(width / (2 << i), height / (2 << i), 1, 1, fmt, 1, 0,
-				EAH_GPU_Read | EAH_GPU_Write, NULL);
+				EAH_GPU_Read | EAH_GPU_Write, nullptr);
 		
 			glow_texs[i] = rf.MakeTexture2D(width / (2 << i), height / (2 << i), 1, 1, fmt, 1, 0,
-				EAH_GPU_Read | EAH_GPU_Write, NULL);
+				EAH_GPU_Read | EAH_GPU_Write, nullptr);
 		}
 		
 		{
@@ -408,7 +408,7 @@ namespace KlayGE
 		glow_merger_->InputPin(2, glow_texs[2]);
 
 		TexturePtr lens_effects_tex = rf.MakeTexture2D(tex->Width(0) / 2, tex->Height(0) / 2, 1, 1, fmt, 1, 0,
-				EAH_GPU_Read | EAH_GPU_Write, NULL);
+				EAH_GPU_Read | EAH_GPU_Write, nullptr);
 		glow_merger_->OutputPin(0, lens_effects_tex);
 	}
 
@@ -465,7 +465,7 @@ namespace KlayGE
 			BOOST_ASSERT(caps.rendertarget_format_support(EF_ABGR16F, 1, 0));
 			fmt = EF_ABGR16F;
 		}
-		resized_tex_ = rf.MakeTexture2D(WIDTH, HEIGHT, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+		resized_tex_ = rf.MakeTexture2D(WIDTH, HEIGHT, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
 		{
 			std::vector<uint8_t> zero_data(WIDTH * HEIGHT, 0);
 			ElementInitData resized_data;
@@ -496,11 +496,11 @@ namespace KlayGE
 			ifft_ = MakeSharedPtr<GpuFftPS>(WIDTH, HEIGHT, false);
 		}
 
-		freq_real_tex_ = rf.MakeTexture2D(WIDTH, HEIGHT, 1, 1, EF_ABGR32F, 1, 0, tex_creation_flags, NULL);
-		freq_imag_tex_ = rf.MakeTexture2D(WIDTH, HEIGHT, 1, 1, EF_ABGR32F, 1, 0, tex_creation_flags, NULL);
+		freq_real_tex_ = rf.MakeTexture2D(WIDTH, HEIGHT, 1, 1, EF_ABGR32F, 1, 0, tex_creation_flags, nullptr);
+		freq_imag_tex_ = rf.MakeTexture2D(WIDTH, HEIGHT, 1, 1, EF_ABGR32F, 1, 0, tex_creation_flags, nullptr);
 
-		mul_real_tex_ = rf.MakeTexture2D(WIDTH, HEIGHT, 1, 1, EF_ABGR32F, 1, 0, tex_creation_flags, NULL);
-		mul_imag_tex_ = rf.MakeTexture2D(WIDTH, HEIGHT, 1, 1, EF_ABGR32F, 1, 0, tex_creation_flags, NULL);
+		mul_real_tex_ = rf.MakeTexture2D(WIDTH, HEIGHT, 1, 1, EF_ABGR32F, 1, 0, tex_creation_flags, nullptr);
+		mul_imag_tex_ = rf.MakeTexture2D(WIDTH, HEIGHT, 1, 1, EF_ABGR32F, 1, 0, tex_creation_flags, nullptr);
 
 		bilinear_copy_pp_ = LoadPostProcess(ResLoader::Instance().Open("Copy.ppml"), "bilinear_copy");
 
@@ -550,7 +550,7 @@ namespace KlayGE
 		for (size_t i = 1; i < widths.size(); ++ i)
 		{
 			restore_chain_[i - 1] = rf.MakeTexture2D(widths[i], heights[i],
-				1, 1, tex->Format(), 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+				1, 1, tex->Format(), 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
 		}
 
 		width_ = widths.back();

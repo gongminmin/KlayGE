@@ -75,7 +75,7 @@ namespace
 				case VEU_Position:
 					pos_vb = vb;
 					{
-						GraphicsBufferPtr vb_cpu = rf.MakeVertexBuffer(BU_Static, EAH_CPU_Read, NULL);
+						GraphicsBufferPtr vb_cpu = rf.MakeVertexBuffer(BU_Static, EAH_CPU_Read, nullptr);
 						vb_cpu->Resize(vb->Size());
 						vb->CopyToBuffer(*vb_cpu);
 
@@ -88,7 +88,7 @@ namespace
 				case VEU_TextureCoord:
 					if (0 == rl->VertexStreamFormat(i)[0].usage_index)
 					{
-						GraphicsBufferPtr vb_cpu = rf.MakeVertexBuffer(BU_Static, EAH_CPU_Read, NULL);
+						GraphicsBufferPtr vb_cpu = rf.MakeVertexBuffer(BU_Static, EAH_CPU_Read, nullptr);
 						vb_cpu->Resize(vb->Size());
 						vb->CopyToBuffer(*vb_cpu);
 
@@ -110,7 +110,7 @@ namespace
 			std::vector<uint32_t> indices(rl->NumIndices());
 			{
 				GraphicsBufferPtr ib = rl->GetIndexStream();
-				GraphicsBufferPtr ib_cpu = rf.MakeVertexBuffer(BU_Static, EAH_CPU_Read, NULL);
+				GraphicsBufferPtr ib_cpu = rf.MakeVertexBuffer(BU_Static, EAH_CPU_Read, nullptr);
 				ib_cpu->Resize(ib->Size());
 				ib->CopyToBuffer(*ib_cpu);
 

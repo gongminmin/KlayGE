@@ -2660,7 +2660,7 @@ namespace KlayGE
 				for (uint32_t j = 0; j < rl->NumVertexStreams(); ++ j)
 				{
 					GraphicsBufferPtr const & vb = rl->GetVertexStream(j);
-					GraphicsBufferPtr vb_cpu = rf.MakeVertexBuffer(BU_Static, EAH_CPU_Read, NULL);
+					GraphicsBufferPtr vb_cpu = rf.MakeVertexBuffer(BU_Static, EAH_CPU_Read, nullptr);
 					uint32_t size = vb->Size();
 					vb_cpu->Resize(size);
 					vb->CopyToBuffer(*vb_cpu);
@@ -2683,7 +2683,7 @@ namespace KlayGE
 
 				{
 					GraphicsBufferPtr ib = rl->GetIndexStream();
-					GraphicsBufferPtr ib_cpu = rf.MakeIndexBuffer(BU_Static, EAH_CPU_Read, NULL);
+					GraphicsBufferPtr ib_cpu = rf.MakeIndexBuffer(BU_Static, EAH_CPU_Read, nullptr);
 					uint32_t size = ib->Size();
 					ib_cpu->Resize(size);
 					ib->CopyToBuffer(*ib_cpu);

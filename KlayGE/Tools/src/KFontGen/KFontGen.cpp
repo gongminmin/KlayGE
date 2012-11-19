@@ -1108,7 +1108,7 @@ int main(int argc, char* argv[])
 				}
 				else
 				{
-					p = NULL;
+					p = nullptr;
 					size = 0;
 				}
 				kfont_output.SetLZMADistanceData(static_cast<wchar_t>(ch), p, size, cia.second.second, fi);

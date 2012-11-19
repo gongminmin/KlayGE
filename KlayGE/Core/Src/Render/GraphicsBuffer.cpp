@@ -41,7 +41,7 @@ namespace KlayGE
 
 		void* Map(BufferAccess /*ba*/)
 		{
-			return NULL;
+			return nullptr;
 		}
 
 		void Unmap()

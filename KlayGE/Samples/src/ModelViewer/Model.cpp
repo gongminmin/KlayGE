@@ -106,9 +106,9 @@ DetailedSkinnedMesh::DetailedSkinnedMesh(RenderModelPtr const & model, std::wstr
 		tess_pattern_rl_ = rf.MakeRenderLayout();
 		tess_pattern_rl_->TopologyType(RenderLayout::TT_TriangleList);
 
-		skinned_pos_vb_ = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Read | EAH_GPU_Write, NULL, EF_ABGR32F);
-		skinned_tex_vb_ = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Read | EAH_GPU_Write, NULL, EF_GR32F);
-		skinned_tangent_vb_ = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Read | EAH_GPU_Write, NULL, EF_ABGR32F);
+		skinned_pos_vb_ = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Read | EAH_GPU_Write, nullptr, EF_ABGR32F);
+		skinned_tex_vb_ = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Read | EAH_GPU_Write, nullptr, EF_GR32F);
+		skinned_tangent_vb_ = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Read | EAH_GPU_Write, nullptr, EF_ABGR32F);
 		skinned_rl_ = rf.MakeRenderLayout();
 		skinned_rl_->TopologyType(RenderLayout::TT_TriangleList);
 
@@ -131,7 +131,7 @@ void DetailedSkinnedMesh::BuildMeshInfo()
 		GraphicsBufferPtr const & vb = rl_->GetVertexStream(i);
 		if (VEU_BlendWeight == rl_->VertexStreamFormat(i)[0].usage)
 		{
-			GraphicsBufferPtr vb_cpu = rf.MakeVertexBuffer(BU_Static, EAH_CPU_Read, NULL);
+			GraphicsBufferPtr vb_cpu = rf.MakeVertexBuffer(BU_Static, EAH_CPU_Read, nullptr);
 			vb_cpu->Resize(vb->Size());
 			vb->CopyToBuffer(*vb_cpu);
 
@@ -165,7 +165,7 @@ void DetailedSkinnedMesh::BuildMeshInfo()
 
 		uint32_t const index_size = (EF_R16UI == rl_->IndexStreamFormat()) ? 2 : 4;
 
-		GraphicsBufferPtr ib_sysmem = rf.MakeVertexBuffer(BU_Static, EAH_CPU_Read, NULL);
+		GraphicsBufferPtr ib_sysmem = rf.MakeVertexBuffer(BU_Static, EAH_CPU_Read, nullptr);
 		ib_sysmem->Resize(rl_->GetIndexStream()->Size());
 		rl_->GetIndexStream()->CopyToBuffer(*ib_sysmem);
 		{
@@ -577,7 +577,7 @@ void DetailedSkinnedModel::BuildModelInfo()
 		{
 		case VEU_Position:
 			{
-				GraphicsBufferPtr vb_cpu = rf.MakeVertexBuffer(BU_Static, EAH_CPU_Read, NULL);
+				GraphicsBufferPtr vb_cpu = rf.MakeVertexBuffer(BU_Static, EAH_CPU_Read, nullptr);
 				vb_cpu->Resize(vb->Size());
 				vb->CopyToBuffer(*vb_cpu);
 
@@ -598,7 +598,7 @@ void DetailedSkinnedModel::BuildModelInfo()
 
 		case VEU_TextureCoord:
 			{
-				GraphicsBufferPtr vb_cpu = rf.MakeVertexBuffer(BU_Static, EAH_CPU_Read, NULL);
+				GraphicsBufferPtr vb_cpu = rf.MakeVertexBuffer(BU_Static, EAH_CPU_Read, nullptr);
 				vb_cpu->Resize(vb->Size());
 				vb->CopyToBuffer(*vb_cpu);
 
@@ -618,7 +618,7 @@ void DetailedSkinnedModel::BuildModelInfo()
 
 		case VEU_Normal:
 			{
-				GraphicsBufferPtr vb_cpu = rf.MakeVertexBuffer(BU_Static, EAH_CPU_Read, NULL);
+				GraphicsBufferPtr vb_cpu = rf.MakeVertexBuffer(BU_Static, EAH_CPU_Read, nullptr);
 				vb_cpu->Resize(vb->Size());
 				vb->CopyToBuffer(*vb_cpu);
 
@@ -663,7 +663,7 @@ void DetailedSkinnedModel::BuildModelInfo()
 		
 		case VEU_Tangent:
 			{
-				GraphicsBufferPtr vb_cpu = rf.MakeVertexBuffer(BU_Static, EAH_CPU_Read, NULL);
+				GraphicsBufferPtr vb_cpu = rf.MakeVertexBuffer(BU_Static, EAH_CPU_Read, nullptr);
 				vb_cpu->Resize(vb->Size());
 				vb->CopyToBuffer(*vb_cpu);
 
@@ -705,7 +705,7 @@ void DetailedSkinnedModel::BuildModelInfo()
 	std::vector<uint16_t> indices(total_num_indices);
 	{
 		GraphicsBufferPtr ib = rl->GetIndexStream();
-		GraphicsBufferPtr ib_cpu = rf.MakeIndexBuffer(BU_Static, EAH_CPU_Read, NULL);
+		GraphicsBufferPtr ib_cpu = rf.MakeIndexBuffer(BU_Static, EAH_CPU_Read, nullptr);
 		ib_cpu->Resize(ib->Size());
 		ib->CopyToBuffer(*ib_cpu);
 

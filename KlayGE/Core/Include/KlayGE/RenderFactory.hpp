@@ -62,7 +62,7 @@ namespace KlayGE
 
 		FontPtr MakeFont(std::string const & fontName, uint32_t flags = 0);
 
-		RenderEffectPtr LoadEffect(std::string const & effectName, std::pair<std::string, std::string>* macros = NULL);
+		RenderEffectPtr LoadEffect(std::string const & effectName, std::pair<std::string, std::string>* macros = nullptr);
 
 		virtual RenderLayoutPtr MakeRenderLayout() = 0;
 

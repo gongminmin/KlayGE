@@ -364,7 +364,7 @@ namespace KlayGE
 		int nX2;
 		int nX1st = buffer_.CPtoX(first_visible_, false);  // 1st visible char
 		int nX = buffer_.CPtoX(nCP, false);  // LEAD
-		// If nCP is the NULL terminator, get the leading edge instead of trailing.
+		// If nCP is the nullptr terminator, get the leading edge instead of trailing.
 		if (nCP == static_cast<int>(buffer_.GetTextSize()))
 		{
 			nX2 = nX;
@@ -630,7 +630,7 @@ namespace KlayGE
 			int nX1st = buffer_.CPtoX(first_visible_, false);  // X offset of the 1st visible char
 			bool bTrail;
 			int nCP = buffer_.XtoCP(pt.x() - text_rc_.left() + nX1st, bTrail);
-			// Cap at the NULL character.
+			// Cap at the nullptr character.
 			if (bTrail && (nCP < static_cast<int>(buffer_.GetTextSize())))
 			{
 				this->PlaceCaret(nCP + 1);
@@ -782,7 +782,7 @@ namespace KlayGE
 				bool bTrail;
 				int nCP = buffer_.XtoCP(pt.x() - text_rc_.left() + nX1st, bTrail);
 
-				// Cap at the NULL character.
+				// Cap at the nullptr character.
 				if (bTrail && (nCP < static_cast<int>(buffer_.GetTextSize())))
 				{
 					this->PlaceCaret(nCP + 1);

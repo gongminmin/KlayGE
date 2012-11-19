@@ -46,7 +46,7 @@ namespace KlayGE
 #if (_WIN32_WINNT >= 0x0602 /*_WIN32_WINNT_WIN8*/)
 		ID3D11Device1* d3d_device_1;
 		d3d_device->QueryInterface(IID_ID3D11Device1, reinterpret_cast<void**>(&d3d_device_1));
-		if (d3d_device_1 != NULL)
+		if (d3d_device_1 != nullptr)
 		{
 			D3D11_RASTERIZER_DESC1 d3d_desc1;
 			d3d_desc1.FillMode = d3d_desc.FillMode;
@@ -140,7 +140,7 @@ namespace KlayGE
 #if (_WIN32_WINNT >= 0x0602 /*_WIN32_WINNT_WIN8*/)
 		ID3D11Device1* d3d_device_1;
 		d3d_device->QueryInterface(IID_ID3D11Device1, reinterpret_cast<void**>(&d3d_device_1));
-		if (d3d_device_1 != NULL)
+		if (d3d_device_1 != nullptr)
 		{
 			D3D11_BLEND_DESC1 d3d_desc1;
 			d3d_desc1.AlphaToCoverageEnable = d3d_desc.AlphaToCoverageEnable;

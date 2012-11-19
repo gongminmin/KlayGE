@@ -32,12 +32,12 @@ namespace KlayGE
 						cur_surf_index_(0xFFFFFFFF)
 	{
 		mod_d3d9_ = ::LoadLibraryW(L"d3d9.dll");
-		if (NULL == mod_d3d9_)
+		if (nullptr == mod_d3d9_)
 		{
-			::MessageBoxW(NULL, L"Can't load d3d9.dll", L"Error", MB_OK);
+			::MessageBoxW(nullptr, L"Can't load d3d9.dll", L"Error", MB_OK);
 		}
 
-		if (mod_d3d9_ != NULL)
+		if (mod_d3d9_ != nullptr)
 		{
 			DynamicDirect3DCreate9_ = reinterpret_cast<Direct3DCreate9Func>(::GetProcAddress(mod_d3d9_, "Direct3DCreate9"));
 		}
@@ -95,10 +95,10 @@ namespace KlayGE
 
 		for (size_t i = 0; i < surfaces_.size(); ++ i)
 		{
-			if (surfaces_[i] != NULL)
+			if (surfaces_[i] != nullptr)
 			{
 				surfaces_[i]->Release();
-				surfaces_[i] = NULL;
+				surfaces_[i] = nullptr;
 			}
 		}
 	}
@@ -113,7 +113,7 @@ namespace KlayGE
 			return S_OK;
 		}
 
-		if (NULL == lpNumBuffers)
+		if (nullptr == lpNumBuffers)
 		{
 			return E_POINTER;
 		}
@@ -192,11 +192,11 @@ namespace KlayGE
 				fmt = EF_ARGB8;
 			}
 		}
-		present_tex_ = rf.MakeTexture2D(lpAllocInfo->dwWidth, lpAllocInfo->dwHeight, 1, 1, fmt, 1, 0, EAH_CPU_Write | EAH_GPU_Read, NULL);
+		present_tex_ = rf.MakeTexture2D(lpAllocInfo->dwWidth, lpAllocInfo->dwHeight, 1, 1, fmt, 1, 0, EAH_CPU_Write | EAH_GPU_Read, nullptr);
 
 		IDirect3DSurface9* surf;
 		TIF(d3d_device_->CreateOffscreenPlainSurface(lpAllocInfo->dwWidth, lpAllocInfo->dwHeight,
-			D3DFMT_X8R8G8B8, D3DPOOL_SYSTEMMEM, &surf, NULL));
+			D3DFMT_X8R8G8B8, D3DPOOL_SYSTEMMEM, &surf, nullptr));
 		cache_surf_ = MakeCOMPtr(surf);
 
 		return S_OK;
@@ -218,11 +218,11 @@ namespace KlayGE
 	{
 		if (dwUserID != USER_ID)
 		{
-			*lplpSurface = NULL;
+			*lplpSurface = nullptr;
 			return S_OK;
 		}
 
-		if (NULL == lplpSurface)
+		if (nullptr == lplpSurface)
 		{
 			return E_POINTER;
 		}
@@ -287,13 +287,13 @@ namespace KlayGE
 		}
 
 		// parameter validation
-		if (NULL == lpPresInfo)
+		if (nullptr == lpPresInfo)
 		{
 			return E_POINTER;
 		}
 		else
 		{
-			if (NULL == lpPresInfo->lpSurf)
+			if (nullptr == lpPresInfo->lpSurf)
 			{
 				return E_POINTER;
 			}
@@ -317,10 +317,10 @@ namespace KlayGE
 
 			for (size_t i = 0; i < surfaces_.size(); ++ i)
 			{
-				if (surfaces_[i] != NULL)
+				if (surfaces_[i] != nullptr)
 				{
 					surfaces_[i]->Release();
-					surfaces_[i] = NULL;
+					surfaces_[i] = nullptr;
 				}
 			}
 
@@ -338,7 +338,7 @@ namespace KlayGE
 	{
 		HRESULT hr = E_NOINTERFACE;
 
-		if (NULL == ppvObject)
+		if (nullptr == ppvObject)
 		{
 			hr = E_POINTER;
 		}
@@ -405,7 +405,7 @@ namespace KlayGE
 			TIF(d3d_device_->GetRenderTargetData(surfaces_[cur_surf_index_], cache_surf_.get()));
 
 			D3DLOCKED_RECT d3dlocked_rc;
-			TIF(cache_surf_->LockRect(&d3dlocked_rc, NULL, D3DLOCK_NOSYSLOCK | D3DLOCK_READONLY));
+			TIF(cache_surf_->LockRect(&d3dlocked_rc, nullptr, D3DLOCK_NOSYSLOCK | D3DLOCK_READONLY));
 
 			uint32_t const width = present_tex_->Width(0);
 			uint32_t const height = present_tex_->Height(0);

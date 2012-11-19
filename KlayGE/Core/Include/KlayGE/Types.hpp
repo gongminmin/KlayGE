@@ -20,6 +20,27 @@
 
 #include <boost/cstdint.hpp>
 
+#ifndef KLAYGE_CXX11_SUPPORT
+const class nullptr_t
+{
+public:
+	template <typename T>
+	operator T*() const
+	{
+		return reinterpret_cast<T*>(0);
+	}
+
+	template <typename C, typename T>
+	operator T C::*() const
+	{
+		return reinterpret_cast<T C::*>(0);
+	}
+
+private:
+	void operator&() const;
+} nullptr = {};
+#endif
+
 namespace KlayGE
 {
 #ifdef KLAYGE_COMPILER_MSVC

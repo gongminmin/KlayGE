@@ -77,7 +77,7 @@ int main(int argc, char* argv[])
 	int height = static_cast<int>(pattern_raw->Height(0));
 	if (pattern_raw->Format() != EF_ABGR8)
 	{
-		TexturePtr pattern_refmt = rf.MakeTexture2D(width, height, 1, 1, EF_ABGR8, 1, 0, EAH_CPU_Read, NULL);
+		TexturePtr pattern_refmt = rf.MakeTexture2D(width, height, 1, 1, EF_ABGR8, 1, 0, EAH_CPU_Read, nullptr);
 		pattern_raw->CopyToSubTexture2D(*pattern_refmt, 0, 0, 0, 0, width, height, 0, 0, 0, 0, width, height);
 		pattern_raw = pattern_refmt;
 	}
@@ -147,8 +147,8 @@ int main(int argc, char* argv[])
 	pattern_real_data.slice_pitch = WIDTH * HEIGHT * sizeof(float4);
 	TexturePtr real_tex = rf.MakeTexture2D(WIDTH, HEIGHT, 1, 1, EF_ABGR32F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, &pattern_real_data);
 
-	TexturePtr pattern_real_tex = rf.MakeTexture2D(WIDTH, HEIGHT, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
-	TexturePtr pattern_imag_tex = rf.MakeTexture2D(WIDTH, HEIGHT, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+	TexturePtr pattern_real_tex = rf.MakeTexture2D(WIDTH, HEIGHT, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
+	TexturePtr pattern_imag_tex = rf.MakeTexture2D(WIDTH, HEIGHT, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
 
 	GpuFftPS fft(WIDTH, HEIGHT, true);
 	fft.Execute(pattern_real_tex, pattern_imag_tex, real_tex, empty_tex);

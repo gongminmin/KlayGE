@@ -32,7 +32,7 @@ namespace KlayGE
 		DInputEngine const & dinputEng = *checked_cast<DInputEngine const *>(&inputEng);
 
 		IDirectInputDevice8W* device;
-		dinputEng.DInput()->CreateDevice(guid, &device, NULL);
+		dinputEng.DInput()->CreateDevice(guid, &device, nullptr);
 		device_ = MakeCOMPtr(device);
 
 		this->Unacquire();

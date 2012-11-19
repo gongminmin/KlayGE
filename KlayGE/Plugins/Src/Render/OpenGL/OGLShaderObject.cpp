@@ -1872,7 +1872,7 @@ namespace KlayGE
 		args.push_back(max_tex_array_str.c_str());
 		args.push_back(max_tex_depth_str.c_str());
 		args.push_back(max_tex_units_str.c_str());
-		args.push_back(NULL);
+		args.push_back(nullptr);
 		args.push_back(flipping_str.c_str());
 		args.push_back(standard_derivatives_str.c_str());
 		if (!re.DeviceCaps().texture_format_support(EF_BC5))
@@ -1883,7 +1883,7 @@ namespace KlayGE
 		{
 			args.push_back("-DKLAYGE_BC5_AS_GA");
 		}
-		args.push_back(NULL);
+		args.push_back(nullptr);
 
 		bool has_gs = false;
 		if (!effect.GetShaderDesc(shader_desc_ids[ST_GeometryShader]).func_name.empty())
@@ -2043,7 +2043,7 @@ namespace KlayGE
 						char const * glsl_param_name = cgGetParameterResourceName(cg_param);
 						std::string hacked_name = std::string("_") + pname;
 
-						if ((cgGetError() != CG_NO_ERROR) || (NULL == glsl_param_name))
+						if ((cgGetError() != CG_NO_ERROR) || (nullptr == glsl_param_name))
 						{
 							// Some times cgGetParameterResourceName doesn't work
 							glsl_param_name = hacked_name.c_str();
@@ -2224,7 +2224,7 @@ namespace KlayGE
 					GLint len = 0;
 					glGetProgramiv(glsl_program_, GL_PROGRAM_BINARY_LENGTH, &len);
 					glsl_bin_program_ = MakeSharedPtr<std::vector<uint8_t> >(len);
-					glGetProgramBinary(glsl_program_, len, NULL, reinterpret_cast<GLenum*>(&(*glsl_bin_formats_)[0]), &(*glsl_bin_program_)[0]);
+					glGetProgramBinary(glsl_program_, len, nullptr, reinterpret_cast<GLenum*>(&(*glsl_bin_formats_)[0]), &(*glsl_bin_program_)[0]);
 				}
 			}
 
@@ -2635,7 +2635,7 @@ namespace KlayGE
 		}
 		//printf("%s\n", glsl);
 
-		glShaderSource(object, 1, &glsl, NULL);
+		glShaderSource(object, 1, &glsl, nullptr);
 
 		glCompileShader(object);
 

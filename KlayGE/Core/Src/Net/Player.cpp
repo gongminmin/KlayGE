@@ -63,15 +63,15 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void Player::ReceiveFunc()
 	{
-		static time_t lastTime = std::time(NULL);
+		static time_t lastTime = std::time(nullptr);
 
 		for (;;)
 		{
-			if (std::time(NULL) - lastTime >= 10 * 1000)
+			if (std::time(nullptr) - lastTime >= 10 * 1000)
 			{
 				char msg(MSG_NOP);
 				socket_.Send(&msg, sizeof(msg));
-				lastTime = std::time(NULL);
+				lastTime = std::time(nullptr);
 			}
 
 			if (!sendQueue_.empty())

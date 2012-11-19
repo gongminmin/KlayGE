@@ -475,15 +475,15 @@ void ModelViewerApp::OpenHandler(KlayGE::UIButton const & /*sender*/)
 	ofn.nMaxFile = sizeof(fn);
 	ofn.lpstrFilter = "All Model File (*.meshml, *.model_bin)\0*.meshml;*.model_bin\0MeshML File (*.meshml)\0*.meshml\0model_bin File (*.model_bin)\0*.model_bin\0All\0*.*\0";
 	ofn.nFilterIndex = 1;
-	ofn.lpstrFileTitle = NULL;
+	ofn.lpstrFileTitle = nullptr;
 	ofn.nMaxFileTitle = 0;
-	ofn.lpstrInitialDir = NULL;
+	ofn.lpstrInitialDir = nullptr;
 	ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
 
 	if (GetOpenFileNameA(&ofn))
 	{
 		HCURSOR cur = GetCursor();
-		SetCursor(LoadCursor(NULL, IDC_WAIT));
+		SetCursor(LoadCursor(nullptr, IDC_WAIT));
 		
 		this->OpenModel(fn);
 		
@@ -507,15 +507,15 @@ void ModelViewerApp::SaveAsHandler(KlayGE::UIButton const & /*sender*/)
 	ofn.nMaxFile = sizeof(fn);
 	ofn.lpstrFilter = "MeshML File\0*.meshml\0All\0*.*\0";
 	ofn.nFilterIndex = 1;
-	ofn.lpstrFileTitle = NULL;
+	ofn.lpstrFileTitle = nullptr;
 	ofn.nMaxFileTitle = 0;
-	ofn.lpstrInitialDir = NULL;
+	ofn.lpstrInitialDir = nullptr;
 	ofn.Flags = OFN_OVERWRITEPROMPT;
 
 	if (GetSaveFileNameA(&ofn))
 	{
 		HCURSOR cur = GetCursor();
-		SetCursor(LoadCursor(NULL, IDC_WAIT));
+		SetCursor(LoadCursor(nullptr, IDC_WAIT));
 		
 		SaveModel(checked_pointer_cast<DetailedSkinnedModel>(model_->GetRenderable()), fn);
 

@@ -111,8 +111,8 @@ namespace KlayGE
 		RenderEngine const & renderEngine = rf.RenderEngineInstance();
 		RenderDeviceCaps const & caps = renderEngine.DeviceCaps();
 		uint32_t size = std::min<uint32_t>(2048U, std::min<uint32_t>(caps.max_texture_width, caps.max_texture_height)) / kfont_char_size * kfont_char_size;
-		dist_texture_ = rf.MakeTexture2D(size, size, 1, 1, EF_R8, 1, 0, EAH_GPU_Read, NULL);
-		a_char_texture_ = rf.MakeTexture2D(kfont_char_size, kfont_char_size, 1, 1, EF_R8, 1, 0, EAH_CPU_Write, NULL);
+		dist_texture_ = rf.MakeTexture2D(size, size, 1, 1, EF_R8, 1, 0, EAH_GPU_Read, nullptr);
+		a_char_texture_ = rf.MakeTexture2D(kfont_char_size, kfont_char_size, 1, 1, EF_R8, 1, 0, EAH_CPU_Write, nullptr);
 
 		char_free_list_.push_back(std::make_pair(0, size * size / kfont_char_size / kfont_char_size));
 
@@ -123,12 +123,12 @@ namespace KlayGE
 		half_width_height_ep_ = effect_->ParameterByName("half_width_height");
 		mvp_ep_ = effect_->ParameterByName("mvp");
 
-		vb_ = rf.MakeVertexBuffer(BU_Dynamic, EAH_CPU_Write | EAH_GPU_Read, NULL);
+		vb_ = rf.MakeVertexBuffer(BU_Dynamic, EAH_CPU_Write | EAH_GPU_Read, nullptr);
 		rl_->BindVertexStream(vb_, boost::make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F),
 										vertex_element(VEU_Diffuse, 0, EF_ABGR8),
 										vertex_element(VEU_TextureCoord, 0, EF_GR32F)));
 
-		ib_ = rf.MakeIndexBuffer(BU_Dynamic, EAH_CPU_Write | EAH_GPU_Read, NULL);
+		ib_ = rf.MakeIndexBuffer(BU_Dynamic, EAH_CPU_Write | EAH_GPU_Read, nullptr);
 		rl_->BindIndexStream(ib_, EF_R16UI);
 
 		pos_aabb_ = AABBox(float3(0, 0, 0), float3(0, 0, 0));

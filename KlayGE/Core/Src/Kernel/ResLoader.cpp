@@ -43,7 +43,7 @@ namespace KlayGE
 #if defined KLAYGE_PLATFORM_WINDOWS
 #if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
 		char buf[MAX_PATH];
-		GetModuleFileNameA(NULL, buf, sizeof(buf));
+		GetModuleFileNameA(nullptr, buf, sizeof(buf));
 		exe_path_ = buf;
 		exe_path_ = exe_path_.substr(0, exe_path_.rfind("\\"));
 #endif
@@ -52,7 +52,7 @@ namespace KlayGE
 			char line[1024];
 			void const * symbol = "";
 			FILE* fp = fopen("/proc/self/maps", "r");
-			if (fp != NULL)
+			if (fp != nullptr)
 			{
 				while (!feof(fp))
 				{
@@ -186,7 +186,7 @@ namespace KlayGE
 		android_app* state = Context::Instance().AppState();
 		AAssetManager* am = state->activity->assetManager;
 		AAsset* asset = AAssetManager_open(am, name.c_str(), AASSET_MODE_UNKNOWN);
-		if (asset != NULL)
+		if (asset != nullptr)
 		{
 			AAsset_close(asset);
 			return name;
@@ -258,7 +258,7 @@ namespace KlayGE
 		android_app* state = Context::Instance().AppState();
 		AAssetManager* am = state->activity->assetManager;
 		AAsset* asset = AAssetManager_open(am, name.c_str(), AASSET_MODE_UNKNOWN);
-		if (asset != NULL)
+		if (asset != nullptr)
 		{
 			boost::shared_ptr<std::stringstream> asset_file = MakeSharedPtr<std::stringstream>(std::ios_base::in | std::ios_base::out | std::ios_base::binary);
 

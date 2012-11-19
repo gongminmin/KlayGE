@@ -948,9 +948,9 @@ void ScenePlayerApp::OpenHandler(UIButton const & /*sender*/)
 	ofn.nMaxFile = sizeof(fn);
 	ofn.lpstrFilter = "Scene File\0*.scene\0All\0*.*\0";
 	ofn.nFilterIndex = 1;
-	ofn.lpstrFileTitle = NULL;
+	ofn.lpstrFileTitle = nullptr;
 	ofn.nMaxFileTitle = 0;
-	ofn.lpstrInitialDir = NULL;
+	ofn.lpstrInitialDir = nullptr;
 	ofn.Flags = OFN_NOCHANGEDIR | OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
 
 	if (GetOpenFileNameA(&ofn))

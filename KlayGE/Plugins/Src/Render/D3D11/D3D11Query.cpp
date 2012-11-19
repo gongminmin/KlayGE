@@ -107,7 +107,7 @@ namespace KlayGE
 		D3D11RenderEngine const & re = *checked_cast<D3D11RenderEngine const *>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		ID3D11DeviceContextPtr const & d3d_imm_ctx = re.D3DDeviceImmContext();
 
-		d3d_imm_ctx->SetPredication(NULL, false);
+		d3d_imm_ctx->SetPredication(nullptr, false);
 	}
 
 	bool D3D11ConditionalRender::AnySamplesPassed()

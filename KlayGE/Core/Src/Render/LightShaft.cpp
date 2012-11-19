@@ -68,9 +68,9 @@ namespace KlayGE
 
 				TexturePtr blur_tex[2];
 				blur_tex[0] = rf.MakeTexture2D(tex_width, tex_height, 1, 1, EF_ABGR16F,
-					1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+					1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
 				blur_tex[1] = rf.MakeTexture2D(tex_width, tex_height, 1, 1, EF_ABGR16F,
-					1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+					1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
 
 				bool active_idx = false;
 				radial_blur_pps_[0]->OutputPin(0, blur_tex[active_idx]);

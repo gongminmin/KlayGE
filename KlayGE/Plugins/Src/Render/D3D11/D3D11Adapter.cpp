@@ -76,7 +76,7 @@ namespace KlayGE
 		IDXGIOutput* output;
 		while (adapter_->EnumOutputs(i, &output) != DXGI_ERROR_NOT_FOUND)
 		{
-			if (output != NULL)
+			if (output != nullptr)
 			{
 				typedef BOOST_TYPEOF(formats) FormatsType;
 				BOOST_FOREACH(FormatsType::reference format, formats)

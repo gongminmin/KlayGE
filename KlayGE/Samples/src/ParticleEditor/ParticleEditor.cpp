@@ -147,7 +147,7 @@ namespace
 			{
 				rl_->TopologyType(RenderLayout::TT_PointList);
 
-				GraphicsBufferPtr pos_vb = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Read | EAH_CPU_Write, NULL);
+				GraphicsBufferPtr pos_vb = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Read | EAH_CPU_Write, nullptr);
 				rl_->BindVertexStream(pos_vb, boost::make_tuple(vertex_element(VEU_Position, 0, EF_ABGR32F),
 					vertex_element(VEU_TextureCoord, 0, EF_R32F)));
 
@@ -164,7 +164,7 @@ namespace
 				GraphicsBufferPtr tex_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, &init_data);
 				rl_->BindVertexStream(tex_vb, boost::make_tuple(vertex_element(VEU_Position, 0, EF_GR32F)));
 
-				GraphicsBufferPtr pos_vb = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Read | EAH_CPU_Write, NULL);
+				GraphicsBufferPtr pos_vb = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Read | EAH_CPU_Write, nullptr);
 				rl_->BindVertexStream(pos_vb,
 					boost::make_tuple(vertex_element(VEU_TextureCoord, 0, EF_ABGR32F),
 						vertex_element(VEU_TextureCoord, 1, EF_R32F)),
@@ -613,7 +613,7 @@ void ParticleEditorApp::OnResize(uint32_t width, uint32_t height)
 
 	RenderViewPtr ds_view = rf.Make2DDepthStencilRenderView(width, height, EF_D16, 1, 0);
 
-	scene_tex_ = rf.MakeTexture2D(width, height, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+	scene_tex_ = rf.MakeTexture2D(width, height, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
 	scene_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*scene_tex_, 0, 1, 0));
 	scene_buffer_->Attach(FrameBuffer::ATT_DepthStencil, ds_view);
 
@@ -649,9 +649,9 @@ void ParticleEditorApp::OpenHandler(KlayGE::UIButton const & /*sender*/)
 	ofn.nMaxFile = sizeof(fn);
 	ofn.lpstrFilter = "PSML File\0*.psml\0All\0*.*\0";
 	ofn.nFilterIndex = 1;
-	ofn.lpstrFileTitle = NULL;
+	ofn.lpstrFileTitle = nullptr;
 	ofn.nMaxFileTitle = 0;
-	ofn.lpstrInitialDir = NULL;
+	ofn.lpstrInitialDir = nullptr;
 	ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
 
 	if (GetOpenFileNameA(&ofn))
@@ -676,9 +676,9 @@ void ParticleEditorApp::SaveAsHandler(KlayGE::UIButton const & /*sender*/)
 	ofn.nMaxFile = sizeof(fn);
 	ofn.lpstrFilter = "PSML File\0*.psml\0All\0*.*\0";
 	ofn.nFilterIndex = 1;
-	ofn.lpstrFileTitle = NULL;
+	ofn.lpstrFileTitle = nullptr;
 	ofn.nMaxFileTitle = 0;
-	ofn.lpstrInitialDir = NULL;
+	ofn.lpstrInitialDir = nullptr;
 	ofn.Flags = OFN_OVERWRITEPROMPT;
 	ofn.lpstrDefExt = ".psml";
 
@@ -768,9 +768,9 @@ void ParticleEditorApp::ChangeParticleAlphaFromHandler(KlayGE::UITexButton const
 	ofn.nMaxFile = sizeof(fn);
 	ofn.lpstrFilter = "DDS File\0*.dds\0All\0*.*\0";
 	ofn.nFilterIndex = 1;
-	ofn.lpstrFileTitle = NULL;
+	ofn.lpstrFileTitle = nullptr;
 	ofn.nMaxFileTitle = 0;
-	ofn.lpstrInitialDir = NULL;
+	ofn.lpstrInitialDir = nullptr;
 	ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
 
 	if (GetOpenFileNameA(&ofn))
@@ -796,9 +796,9 @@ void ParticleEditorApp::ChangeParticleAlphaToHandler(KlayGE::UITexButton const &
 	ofn.nMaxFile = sizeof(fn);
 	ofn.lpstrFilter = "DDS File\0*.dds\0All\0*.*\0";
 	ofn.nFilterIndex = 1;
-	ofn.lpstrFileTitle = NULL;
+	ofn.lpstrFileTitle = nullptr;
 	ofn.nMaxFileTitle = 0;
-	ofn.lpstrInitialDir = NULL;
+	ofn.lpstrInitialDir = nullptr;
 	ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
 
 	if (GetOpenFileNameA(&ofn))
@@ -823,13 +823,13 @@ void ParticleEditorApp::ChangeParticleColorFromHandler(KlayGE::UITexButton const
 	ZeroMemory(&occ, sizeof(occ));
 	occ.lStructSize = sizeof(occ);
 	occ.hwndOwner = hwnd;
-	occ.hInstance = NULL;
+	occ.hInstance = nullptr;
 	occ.rgbResult = particle_color_from_.ABGR();
 	occ.lpCustColors = cust_clrs;
 	occ.Flags = CC_ANYCOLOR | CC_FULLOPEN | CC_RGBINIT;
 	occ.lCustData = 0;
-	occ.lpfnHook = NULL;
-	occ.lpTemplateName = NULL;
+	occ.lpfnHook = nullptr;
+	occ.lpTemplateName = nullptr;
 
 	if (ChooseColorA(&occ))
 	{
@@ -854,13 +854,13 @@ void ParticleEditorApp::ChangeParticleColorToHandler(KlayGE::UITexButton const &
 	ZeroMemory(&occ, sizeof(occ));
 	occ.lStructSize = sizeof(occ);
 	occ.hwndOwner = hwnd;
-	occ.hInstance = NULL;
+	occ.hInstance = nullptr;
 	occ.rgbResult = particle_color_to_.ABGR();
 	occ.lpCustColors = cust_clrs;
 	occ.Flags = CC_ANYCOLOR | CC_FULLOPEN | CC_RGBINIT;
 	occ.lCustData = 0;
-	occ.lpfnHook = NULL;
-	occ.lpTemplateName = NULL;
+	occ.lpfnHook = nullptr;
+	occ.lpTemplateName = nullptr;
 
 	if (ChooseColorA(&occ))
 	{
@@ -910,7 +910,7 @@ void ParticleEditorApp::LoadParticleAlpha(int id, std::string const & name)
 	if (EF_R8 == tex->Format())
 	{
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-		TexturePtr cpu_tex = rf.MakeTexture2D(tex->Width(0), tex->Height(0), 1, 1, EF_R8, 1, 0, EAH_CPU_Read, NULL);
+		TexturePtr cpu_tex = rf.MakeTexture2D(tex->Width(0), tex->Height(0), 1, 1, EF_R8, 1, 0, EAH_CPU_Read, nullptr);
 		tex->CopyToTexture(*cpu_tex);
 
 		std::vector<uint8_t> data(tex->Width(0) * tex->Height(0) * 4);

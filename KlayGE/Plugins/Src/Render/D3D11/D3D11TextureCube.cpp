@@ -77,7 +77,7 @@ namespace KlayGE
 		desc_.MiscFlags |= D3D11_RESOURCE_MISC_TEXTURECUBE;
 
 		std::vector<D3D11_SUBRESOURCE_DATA> subres_data(6 * num_mip_maps_);
-		if (init_data != NULL)
+		if (init_data != nullptr)
 		{
 			for (int face = 0; face < 6; ++ face)
 			{
@@ -91,7 +91,7 @@ namespace KlayGE
 		}
 
 		ID3D11Texture2D* d3d_tex;
-		TIF(d3d_device_->CreateTexture2D(&desc_, (init_data != NULL) ? &subres_data[0] : NULL, &d3d_tex));
+		TIF(d3d_device_->CreateTexture2D(&desc_, (init_data != nullptr) ? &subres_data[0] : nullptr, &d3d_tex));
 		d3dTextureCube_ = MakeCOMPtr(d3d_tex);
 
 		this->UpdateParams();

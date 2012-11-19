@@ -60,7 +60,7 @@ namespace KlayGE
 
 		// DirectSound只能播放PCM数据。其他格式可能不能工作。
 		IDirectSoundBuffer* buffer;
-		TIF(dsound->CreateSoundBuffer(&dsbd, &buffer, NULL));
+		TIF(dsound->CreateSoundBuffer(&dsbd, &buffer, nullptr));
 		buffer_ = MakeCOMPtr(buffer);
 
 		if (mono)
@@ -103,7 +103,7 @@ namespace KlayGE
 			DWORD lockedBufferSize;		// 锁定的内存大小
 			TIF(buffer_->Lock(fillSize_ * writePos_, fillSize_,
 				reinterpret_cast<void**>(&lockedBuffer), &lockedBufferSize,
-				NULL, NULL, 0));
+				nullptr, nullptr, 0));
 
 			std::vector<uint8_t> data(fillSize_);
 			data.resize(dataSource_->Read(&data[0], fillSize_));
@@ -128,7 +128,7 @@ namespace KlayGE
 			}
 
 			// 缓冲区解锁
-			buffer_->Unlock(lockedBuffer, lockedBufferSize, NULL, 0);
+			buffer_->Unlock(lockedBuffer, lockedBufferSize, nullptr, 0);
 
 			// 形成环形缓冲区
 			++ writePos_;
@@ -150,7 +150,7 @@ namespace KlayGE
 		uint8_t* lockedBuffer;			// 指向缓冲区锁定的内存的指针
 		DWORD lockedBufferSize;		// 锁定的内存大小
 		TIF(buffer_->Lock(0, fillSize_ * fillCount_,
-			reinterpret_cast<void**>(&lockedBuffer), &lockedBufferSize, NULL, NULL, 0));
+			reinterpret_cast<void**>(&lockedBuffer), &lockedBufferSize, nullptr, nullptr, 0));
 
 		std::vector<uint8_t> data(fillSize_ * fillCount_);
 		data.resize(dataSource_->Read(&data[0], fillSize_ * fillCount_));
@@ -170,7 +170,7 @@ namespace KlayGE
 		}
 
 		// 缓冲区解锁
-		buffer_->Unlock(lockedBuffer, lockedBufferSize, NULL, 0);
+		buffer_->Unlock(lockedBuffer, lockedBufferSize, nullptr, 0);
 
 		buffer_->SetCurrentPosition(0);
 	}

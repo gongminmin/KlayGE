@@ -335,13 +335,13 @@ void AtmosphericScatteringApp::ChangeBetaHandler(KlayGE::UITexButton const & /*s
 	ZeroMemory(&occ, sizeof(occ));
 	occ.lStructSize = sizeof(occ);
 	occ.hwndOwner = hwnd;
-	occ.hInstance = NULL;
+	occ.hInstance = nullptr;
 	occ.rgbResult = f4_clr.ABGR();
 	occ.lpCustColors = cust_clrs;
 	occ.Flags = CC_ANYCOLOR | CC_FULLOPEN | CC_RGBINIT;
 	occ.lCustData = 0;
-	occ.lpfnHook = NULL;
-	occ.lpTemplateName = NULL;
+	occ.lpfnHook = nullptr;
+	occ.lpTemplateName = nullptr;
 
 	if (ChooseColorA(&occ))
 	{
@@ -366,13 +366,13 @@ void AtmosphericScatteringApp::ChangeAbsorbHandler(KlayGE::UITexButton const & /
 	ZeroMemory(&occ, sizeof(occ));
 	occ.lStructSize = sizeof(occ);
 	occ.hwndOwner = hwnd;
-	occ.hInstance = NULL;
+	occ.hInstance = nullptr;
 	occ.rgbResult = absorb_.ABGR();
 	occ.lpCustColors = cust_clrs;
 	occ.Flags = CC_ANYCOLOR | CC_FULLOPEN | CC_RGBINIT;
 	occ.lCustData = 0;
-	occ.lpfnHook = NULL;
-	occ.lpTemplateName = NULL;
+	occ.lpfnHook = nullptr;
+	occ.lpTemplateName = nullptr;
 
 	if (ChooseColorA(&occ))
 	{

@@ -32,7 +32,7 @@ namespace KlayGE
 
 		glGenBuffers(1, &vb_);
 
-		if (init_data != NULL)
+		if (init_data != nullptr)
 		{
 			size_in_byte_ = init_data->row_pitch;
 
@@ -66,7 +66,7 @@ namespace KlayGE
 		OGLESRenderEngine& re = *checked_cast<OGLESRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		re.BindBuffer(target_, vb_);
 		glBufferData(target_,
-				static_cast<GLsizeiptr>(size_in_byte_), NULL,
+				static_cast<GLsizeiptr>(size_in_byte_), nullptr,
 				(BU_Static == usage_) ? GL_STATIC_DRAW : GL_DYNAMIC_DRAW);
 		buf_data_.resize(size_in_byte_);
 	}

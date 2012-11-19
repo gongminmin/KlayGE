@@ -65,7 +65,7 @@ namespace KlayGE
 		vorbis_callbacks.seek_func = OggVorbisSource::VorbisSeek;
 		vorbis_callbacks.tell_func = OggVorbisSource::VorbisTell;
 
-		Verify(0 == ov_open_callbacks(this, &vf_, NULL, 0, vorbis_callbacks));
+		Verify(0 == ov_open_callbacks(this, &vf_, nullptr, 0, vorbis_callbacks));
 
 		vorbis_info* vorbis_info = ov_info(&vf_, -1);
 		format_ = (1 == vorbis_info->channels) ? AF_Mono16 : AF_Stereo16;
@@ -84,7 +84,7 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	size_t OggVorbisSource::Read(void* data, size_t size)
 	{
-		BOOST_ASSERT(data != NULL);
+		BOOST_ASSERT(data != nullptr);
 
 		char* pcm = static_cast<char*>(data);
 

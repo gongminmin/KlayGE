@@ -140,7 +140,7 @@ namespace KlayGE
 
 						if (!pbos_.empty())
 						{
-							glBufferData(GL_PIXEL_UNPACK_BUFFER_ARB, image_size, NULL, GL_STREAM_DRAW);
+							glBufferData(GL_PIXEL_UNPACK_BUFFER_ARB, image_size, nullptr, GL_STREAM_DRAW);
 							re.BindBuffer(GL_PIXEL_UNPACK_BUFFER_ARB, 0);
 						}
 						else
@@ -153,16 +153,16 @@ namespace KlayGE
 							if (0 == array_index)
 							{
 								glCompressedTexImage3D(target_type_, level, glinternalFormat,
-									w, h, array_size, 0, image_size, NULL);
+									w, h, array_size, 0, image_size, nullptr);
 							}
 					
 							glCompressedTexSubImage3D(target_type_, level, 0, 0, array_index, w, h, 1,
-								glformat, gltype, (NULL == init_data) ? NULL : init_data[array_index * num_mip_maps_ + level].data);
+								glformat, gltype, (nullptr == init_data) ? nullptr : init_data[array_index * num_mip_maps_ + level].data);
 						}
 						else
 						{
 							glCompressedTexImage2D(target_type_, level, glinternalFormat,
-								w, h, 0, image_size, (NULL == init_data) ? NULL : init_data[array_index * num_mip_maps_ + level].data);
+								w, h, 0, image_size, (nullptr == init_data) ? nullptr : init_data[array_index * num_mip_maps_ + level].data);
 						}
 					}
 					else
@@ -171,7 +171,7 @@ namespace KlayGE
 
 						if (!pbos_.empty())
 						{
-							glBufferData(GL_PIXEL_UNPACK_BUFFER_ARB, image_size, NULL, GL_STREAM_DRAW);
+							glBufferData(GL_PIXEL_UNPACK_BUFFER_ARB, image_size, nullptr, GL_STREAM_DRAW);
 							re.BindBuffer(GL_PIXEL_UNPACK_BUFFER_ARB, 0);
 						}
 						else
@@ -183,16 +183,16 @@ namespace KlayGE
 						{
 							if (0 == array_index)
 							{
-								glTexImage3D(target_type_, level, glinternalFormat, w, h, array_size, 0, glformat, gltype, NULL);
+								glTexImage3D(target_type_, level, glinternalFormat, w, h, array_size, 0, glformat, gltype, nullptr);
 							}
 
 							glTexSubImage3D(target_type_, level, 0, 0, array_index, w, h, 1,
-								glformat, gltype, (NULL == init_data) ? NULL : init_data[array_index * num_mip_maps_ + level].data);
+								glformat, gltype, (nullptr == init_data) ? nullptr : init_data[array_index * num_mip_maps_ + level].data);
 						}
 						else
 						{
 							glTexImage2D(target_type_, level, glinternalFormat, w, h, 0, glformat, gltype,
-								(NULL == init_data) ? NULL : init_data[array_index * num_mip_maps_ + level].data);
+								(nullptr == init_data) ? nullptr : init_data[array_index * num_mip_maps_ + level].data);
 						}
 					}
 				}
@@ -546,12 +546,12 @@ namespace KlayGE
 					glBindTexture(target_type_, texture_);
 					if (IsCompressedFormat(format_))
 					{
-						glGetCompressedTexImage(target_type_, level, NULL);
+						glGetCompressedTexImage(target_type_, level, nullptr);
 						p = static_cast<uint8_t*>(glMapBuffer(GL_PIXEL_PACK_BUFFER_ARB, GL_READ_ONLY));
 					}
 					else
 					{
-						glGetTexImage(target_type_, level, gl_format, gl_type, NULL);
+						glGetTexImage(target_type_, level, gl_format, gl_type, nullptr);
 						p = static_cast<uint8_t*>(glMapBuffer(GL_PIXEL_PACK_BUFFER_ARB, GL_READ_ONLY));
 					}
 				}
@@ -589,7 +589,7 @@ namespace KlayGE
 
 		default:
 			BOOST_ASSERT(false);
-			p = NULL;
+			p = nullptr;
 			break;
 		}
 
@@ -651,7 +651,7 @@ namespace KlayGE
 					re.BindBuffer(GL_PIXEL_UNPACK_BUFFER_ARB, pbos_[array_index * num_mip_maps_ + level]);
 					glUnmapBuffer(GL_PIXEL_UNPACK_BUFFER_ARB);
 
-					p = NULL;
+					p = nullptr;
 				}
 				else
 				{

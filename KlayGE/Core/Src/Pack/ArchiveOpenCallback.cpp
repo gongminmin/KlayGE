@@ -40,7 +40,7 @@ namespace KlayGE
 #ifdef KLAYGE_PLATFORM_WINDOWS
 			*password = SysAllocString(password_.c_str());
 #else
-			*password = NULL;
+			*password = nullptr;
 #endif
 			return S_OK;
 		}

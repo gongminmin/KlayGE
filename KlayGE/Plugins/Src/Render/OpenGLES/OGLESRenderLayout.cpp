@@ -48,7 +48,7 @@ namespace KlayGE
 			uint32_t const size = this->VertexSize(i);
 			vertex_elements_type const & vertex_stream_fmt = this->VertexStreamFormat(i);
 
-			uint8_t* elem_offset = NULL;
+			uint8_t* elem_offset = nullptr;
 			typedef BOOST_TYPEOF(vertex_stream_fmt) VertexStreamFmtType;
 			BOOST_FOREACH(VertexStreamFmtType::const_reference vs_elem, vertex_stream_fmt)
 			{

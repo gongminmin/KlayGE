@@ -94,6 +94,199 @@ namespace KlayGE
 		static uint64_t const value = MakeElementFormat2<ch0, 0, ch0_size, 0, ch0_type, 0>::value;
 	};
 
+#ifdef KLAYGE_CXX11_SUPPORT
+	enum ElementFormat : uint64_t
+	{
+		// Unknown element format.
+		EF_Unknown = 0,
+
+		// 8-bit element format, all bits alpha.
+		EF_A8 = MakeElementFormat1<EC_A, 8, ECT_UNorm>::value,
+
+		// 16-bit element format, 4 bits for alpha, red, green and blue.
+		EF_ARGB4 = MakeElementFormat4<EC_A, EC_R, EC_G, EC_B, 4, 4, 4, 4, ECT_UNorm, ECT_UNorm, ECT_UNorm, ECT_UNorm>::value,
+
+		// 8-bit element format, 8 bits for red.
+		EF_R8 = MakeElementFormat1<EC_R, 8, ECT_UNorm>::value,
+		// 8-bit element format, 8 bits for signed red.
+		EF_SIGNED_R8 = MakeElementFormat1<EC_R, 8, ECT_SNorm>::value,
+		// 16-bit element format, 8 bits for red, green.
+		EF_GR8 = MakeElementFormat2<EC_G, EC_R, 8, 8, ECT_UNorm, ECT_UNorm>::value,
+		// 16-bit element format, 8 bits for signed red, green.
+		EF_SIGNED_GR8 = MakeElementFormat2<EC_G, EC_R, 8, 8, ECT_SNorm, ECT_SNorm>::value,
+		// 24-bit element format, 8 bits for red, green and blue.
+		EF_BGR8 = MakeElementFormat3<EC_B, EC_G, EC_R, 8, 8, 8, ECT_UNorm, ECT_UNorm, ECT_UNorm>::value,
+		// 24-bit element format, 8 bits for signed red, green and blue.
+		EF_SIGNED_BGR8 = MakeElementFormat3<EC_B, EC_G, EC_R, 8, 8, 8, ECT_SNorm, ECT_SNorm, ECT_SNorm>::value,
+		// 32-bit element format, 8 bits for alpha, red, green and blue.
+		EF_ARGB8 = MakeElementFormat4<EC_A, EC_R, EC_G, EC_B, 8, 8, 8, 8, ECT_UNorm, ECT_UNorm, ECT_UNorm, ECT_UNorm>::value,
+		// 32-bit element format, 8 bits for alpha, red, green and blue.
+		EF_ABGR8 = MakeElementFormat4<EC_A, EC_B, EC_G, EC_R, 8, 8, 8, 8, ECT_UNorm, ECT_UNorm, ECT_UNorm, ECT_UNorm>::value,
+		// 32-bit element format, 8 bits for signed alpha, red, green and blue.
+		EF_SIGNED_ABGR8 = MakeElementFormat4<EC_A, EC_B, EC_G, EC_R, 8, 8, 8, 8, ECT_SNorm, ECT_SNorm, ECT_SNorm, ECT_SNorm>::value,
+		// 32-bit element format, 2 bits for alpha, 10 bits for red, green and blue.
+		EF_A2BGR10 = MakeElementFormat4<EC_A, EC_B, EC_G, EC_R, 2, 10, 10, 10, ECT_UNorm, ECT_UNorm, ECT_UNorm, ECT_UNorm>::value,
+		// 32-bit element format, 2 bits for alpha, 10 bits for signed red, green and blue.
+		EF_SIGNED_A2BGR10 = MakeElementFormat4<EC_A, EC_B, EC_G, EC_R, 2, 10, 10, 10, ECT_SNorm, ECT_SNorm, ECT_SNorm, ECT_SNorm>::value,
+
+		// 32-bit element format, 8 bits for alpha, red, green and blue.
+		EF_R8UI = MakeElementFormat1<EC_R, 8, ECT_UInt>::value,
+		// 32-bit element format, 8 bits for alpha, red, green and blue.
+		EF_R8I = MakeElementFormat1<EC_R, 8, ECT_SInt>::value,
+		// 16-bit element format, 8 bits for red, green.
+		EF_GR8UI = MakeElementFormat2<EC_G, EC_R, 8, 8, ECT_UInt, ECT_UInt>::value,
+		// 16-bit element format, 8 bits for red, green.
+		EF_GR8I = MakeElementFormat2<EC_G, EC_R, 8, 8, ECT_SInt, ECT_SInt>::value,
+		// 24-bit element format, 8 bits for red, green and blue.
+		EF_BGR8UI = MakeElementFormat3<EC_B, EC_G, EC_R, 8, 8, 8, ECT_UInt, ECT_UInt, ECT_UInt>::value,
+		// 24-bit element format, 8 bits for red, green and blue.
+		EF_BGR8I = MakeElementFormat3<EC_B, EC_G, EC_R, 8, 8, 8, ECT_SInt, ECT_SInt, ECT_SInt>::value,
+		// 32-bit element format, 8 bits for alpha, red, green and blue.
+		EF_ABGR8UI = MakeElementFormat4<EC_A, EC_B, EC_G, EC_R, 8, 8, 8, 8, ECT_UInt, ECT_UInt, ECT_UInt, ECT_UInt>::value,
+		// 32-bit element format, 8 bits for signed alpha, red, green and blue.
+		EF_ABGR8I = MakeElementFormat4<EC_A, EC_B, EC_G, EC_R, 8, 8, 8, 8, ECT_SInt, ECT_SInt, ECT_SInt, ECT_SInt>::value,
+		// 32-bit element format, 2 bits for alpha, 10 bits for red, green and blue.
+		EF_A2BGR10UI = MakeElementFormat4<EC_A, EC_B, EC_G, EC_R, 2, 10, 10, 10, ECT_UInt, ECT_UInt, ECT_UInt, ECT_UInt>::value,
+		// 32-bit element format, 2 bits for alpha, 10 bits for red, green and blue.
+		EF_A2BGR10I = MakeElementFormat4<EC_A, EC_B, EC_G, EC_R, 2, 10, 10, 10, ECT_SInt, ECT_SInt, ECT_SInt, ECT_SInt>::value,
+
+		// 16-bit element format, 16 bits for red.
+		EF_R16 = MakeElementFormat1<EC_R, 16, ECT_UNorm>::value,
+		// 16-bit element format, 16 bits for signed red.
+		EF_SIGNED_R16 = MakeElementFormat1<EC_R, 16, ECT_SNorm>::value,
+		// 32-bit element format, 16 bits for red and green.
+		EF_GR16 = MakeElementFormat2<EC_G, EC_R, 16, 16, ECT_UNorm, ECT_UNorm>::value,
+		// 32-bit element format, 16 bits for signed red and green.
+		EF_SIGNED_GR16 = MakeElementFormat2<EC_G, EC_R, 16, 16, ECT_SNorm, ECT_SNorm>::value,
+		// 48-bit element format, 16 bits for alpha, blue, green and red.
+		EF_BGR16 = MakeElementFormat3<EC_B, EC_G, EC_R, 16, 16, 16, ECT_UNorm, ECT_UNorm, ECT_UNorm>::value,
+		// 48-bit element format, 16 bits for signed alpha, blue, green and red.
+		EF_SIGNED_BGR16 = MakeElementFormat3<EC_B, EC_G, EC_R, 16, 16, 16, ECT_SNorm, ECT_SNorm, ECT_SNorm>::value,
+		// 64-bit element format, 16 bits for alpha, blue, green and red.
+		EF_ABGR16 = MakeElementFormat4<EC_A, EC_B, EC_G, EC_R, 16, 16, 16, 16, ECT_UNorm, ECT_UNorm, ECT_UNorm, ECT_UNorm>::value,
+		// 64-bit element format, 16 bits for signed alpha, blue, green and red.
+		EF_SIGNED_ABGR16 = MakeElementFormat4<EC_A, EC_B, EC_G, EC_R, 16, 16, 16, 16, ECT_SNorm, ECT_SNorm, ECT_SNorm, ECT_SNorm>::value,
+		// 32-bit element format, 32 bits for red.
+		EF_R32 = MakeElementFormat1<EC_R, 32, ECT_UNorm>::value,
+		// 32-bit element format, 32 bits for signed red.
+		EF_SIGNED_R32 = MakeElementFormat1<EC_R, 32, ECT_SNorm>::value,
+		// 64-bit element format, 16 bits for red and green.
+		EF_GR32 = MakeElementFormat2<EC_G, EC_R, 32, 32, ECT_UNorm, ECT_UNorm>::value,
+		// 64-bit element format, 16 bits for signed red and green.
+		EF_SIGNED_GR32 = MakeElementFormat2<EC_G, EC_R, 32, 32, ECT_SNorm, ECT_SNorm>::value,
+		// 96-bit element format, 16 bits for alpha, blue, green and red.
+		EF_BGR32 = MakeElementFormat3<EC_B, EC_G, EC_R, 32, 32, 32, ECT_UNorm, ECT_UNorm, ECT_UNorm>::value,
+		// 96-bit element format, 16 bits for signed_alpha, blue, green and red.
+		EF_SIGNED_BGR32 = MakeElementFormat3<EC_B, EC_G, EC_R, 32, 32, 32, ECT_SNorm, ECT_SNorm, ECT_SNorm>::value,
+		// 128-bit element format, 16 bits for alpha, blue, green and red.
+		EF_ABGR32 = MakeElementFormat4<EC_A, EC_B, EC_G, EC_R, 32, 32, 32, 32, ECT_UNorm, ECT_UNorm, ECT_UNorm, ECT_UNorm>::value,
+		// 128-bit element format, 16 bits for signed alpha, blue, green and red.
+		EF_SIGNED_ABGR32 = MakeElementFormat4<EC_A, EC_B, EC_G, EC_R, 32, 32, 32, 32, ECT_SNorm, ECT_SNorm, ECT_SNorm, ECT_SNorm>::value,
+
+		// 16-bit element format, 16 bits for red.
+		EF_R16UI = MakeElementFormat1<EC_R, 16, ECT_UInt>::value,
+		// 16-bit element format, 16 bits for signed red.
+		EF_R16I = MakeElementFormat1<EC_R, 16, ECT_SInt>::value,
+		// 32-bit element format, 16 bits for red and green.
+		EF_GR16UI = MakeElementFormat2<EC_G, EC_R, 16, 16, ECT_UInt, ECT_UInt>::value,
+		// 32-bit element format, 16 bits for signed red and green.
+		EF_GR16I = MakeElementFormat2<EC_G, EC_R, 16, 16, ECT_SInt, ECT_SInt>::value,
+		// 48-bit element format, 16 bits for alpha, blue, green and red.
+		EF_BGR16UI = MakeElementFormat3<EC_B, EC_G, EC_R, 16, 16, 16, ECT_UInt, ECT_UInt, ECT_UInt>::value,
+		// 48-bit element format, 16 bits for signed alpha, blue, green and red.
+		EF_BGR16I = MakeElementFormat3<EC_B, EC_G, EC_R, 16, 16, 16, ECT_SInt, ECT_SInt, ECT_SInt>::value,
+		// 64-bit element format, 16 bits for alpha, blue, green and red.
+		EF_ABGR16UI = MakeElementFormat4<EC_A, EC_B, EC_G, EC_R, 16, 16, 16, 16, ECT_UInt, ECT_UInt, ECT_UInt, ECT_UInt>::value,
+		// 64-bit element format, 16 bits for signed alpha, blue, green and red.
+		EF_ABGR16I = MakeElementFormat4<EC_A, EC_B, EC_G, EC_R, 16, 16, 16, 16, ECT_SInt, ECT_SInt, ECT_SInt, ECT_SInt>::value,
+		// 32-bit element format, 32 bits for red.
+		EF_R32UI = MakeElementFormat1<EC_R, 32, ECT_UInt>::value,
+		// 32-bit element format, 32 bits for signed red.
+		EF_R32I = MakeElementFormat1<EC_R, 32, ECT_SInt>::value,
+		// 64-bit element format, 16 bits for red and green.
+		EF_GR32UI = MakeElementFormat2<EC_G, EC_R, 32, 32, ECT_UInt, ECT_UInt>::value,
+		// 64-bit element format, 16 bits for signed red and green.
+		EF_GR32I = MakeElementFormat2<EC_G, EC_R, 32, 32, ECT_SInt, ECT_SInt>::value,
+		// 96-bit element format, 16 bits for alpha, blue, green and red.
+		EF_BGR32UI = MakeElementFormat3<EC_B, EC_G, EC_R, 32, 32, 32, ECT_UInt, ECT_UInt, ECT_UInt>::value,
+		// 96-bit element format, 16 bits for signed_alpha, blue, green and red.
+		EF_BGR32I = MakeElementFormat3<EC_B, EC_G, EC_R, 32, 32, 32, ECT_SInt, ECT_SInt, ECT_SInt>::value,
+		// 128-bit element format, 16 bits for alpha, blue, green and red.
+		EF_ABGR32UI = MakeElementFormat4<EC_A, EC_B, EC_G, EC_R, 32, 32, 32, 32, ECT_UInt, ECT_UInt, ECT_UInt, ECT_UInt>::value,
+		// 128-bit element format, 16 bits for signed alpha, blue, green and red.
+		EF_ABGR32I = MakeElementFormat4<EC_A, EC_B, EC_G, EC_R, 32, 32, 32, 32, ECT_SInt, ECT_SInt, ECT_SInt, ECT_SInt>::value,
+
+		// 16-bit element format, 16 bits floating-point for red.
+		EF_R16F = MakeElementFormat1<EC_R, 16, ECT_Float>::value,
+		// 32-bit element format, 16 bits floating-point for green and red.
+		EF_GR16F = MakeElementFormat2<EC_G, EC_R, 16, 16, ECT_Float, ECT_Float>::value,
+		// 32-bit element format, 11 bits floating-point for green and red, 10 bits floating-point for blue.
+		EF_B10G11R11F = MakeElementFormat3<EC_B, EC_G, EC_R, 10, 11, 11, ECT_Float, ECT_Float, ECT_Float>::value,
+		// 48-bit element format, 16 bits floating-point for blue, green and red.
+		EF_BGR16F = MakeElementFormat3<EC_B, EC_G, EC_R, 16, 16, 16, ECT_Float, ECT_Float, ECT_Float>::value,
+		// 64-bit element format, 16 bits floating-point for alpha, blue, green and red.
+		EF_ABGR16F = MakeElementFormat4<EC_A, EC_B, EC_G, EC_R, 16, 16, 16, 16, ECT_Float, ECT_Float, ECT_Float, ECT_Float>::value,
+		// 32-bit element format, 32 bits floating-point for red.
+		EF_R32F = MakeElementFormat1<EC_R, 32, ECT_Float>::value,
+		// 64-bit element format, 32 bits floating-point for green and red.
+		EF_GR32F = MakeElementFormat2<EC_G, EC_R, 32, 32, ECT_Float, ECT_Float>::value,
+		// 96-bit element format, 32 bits floating-point for blue, green and red.
+		EF_BGR32F = MakeElementFormat3<EC_B, EC_G, EC_R, 32, 32, 32, ECT_Float, ECT_Float, ECT_Float>::value,
+		// 128-bit element format, 32 bits floating-point for alpha, blue, green and red.
+		EF_ABGR32F = MakeElementFormat4<EC_A, EC_B, EC_G, EC_R, 32, 32, 32, 32, ECT_Float, ECT_Float, ECT_Float, ECT_Float>::value,
+
+		// BC1 compression element format, DXT1
+		EF_BC1 = MakeElementFormat1<EC_BC, 1, ECT_UNorm>::value,
+		// BC1 compression element format, signed DXT1
+		EF_SIGNED_BC1 = MakeElementFormat1<EC_BC, 1, ECT_SNorm>::value,
+		// BC2 compression element format, DXT3
+		EF_BC2 = MakeElementFormat1<EC_BC, 2, ECT_UNorm>::value,
+		// BC2 compression element format, signed DXT3
+		EF_SIGNED_BC2 = MakeElementFormat1<EC_BC, 2, ECT_SNorm>::value,
+		// BC3 compression element format, DXT5
+		EF_BC3 = MakeElementFormat1<EC_BC, 3, ECT_UNorm>::value,
+		// BC3 compression element format, signed DXT5
+		EF_SIGNED_BC3 = MakeElementFormat1<EC_BC, 3, ECT_SNorm>::value,
+		// BC4 compression element format, 1 channel
+		EF_BC4 = MakeElementFormat1<EC_BC, 4, ECT_UNorm>::value,
+		// BC4 compression element format, 1 channel signed
+		EF_SIGNED_BC4 = MakeElementFormat1<EC_BC, 4, ECT_SNorm>::value,
+		// BC5 compression element format, 2 channels
+		EF_BC5 = MakeElementFormat1<EC_BC, 5, ECT_UNorm>::value,
+		// BC5 compression element format, 2 channels signed
+		EF_SIGNED_BC5 = MakeElementFormat1<EC_BC, 5, ECT_SNorm>::value,
+		// BC6 compression element format, 3 channels
+		EF_BC6 = MakeElementFormat1<EC_BC, 6, ECT_UNorm>::value,
+		// BC6 compression element format, 3 channels
+		EF_SIGNED_BC6 = MakeElementFormat1<EC_BC, 6, ECT_SNorm>::value,
+		// BC7 compression element format, 3 channels
+		EF_BC7 = MakeElementFormat1<EC_BC, 7, ECT_UNorm>::value,
+
+		// 16-bit element format, 16 bits depth
+		EF_D16 = MakeElementFormat1<EC_D, 16, ECT_UNorm>::value,
+		// 32-bit element format, 24 bits depth and 8 bits stencil
+		EF_D24S8 = MakeElementFormat2<EC_D, EC_S, 24, 8, ECT_UNorm, ECT_UInt>::value,
+		// 32-bit element format, 32 bits depth
+		EF_D32F = MakeElementFormat1<EC_D, 32, ECT_Float>::value,
+
+		// 32-bit element format, 8 bits for alpha, red, green and blue. Standard RGB (gamma = 2.2).
+		EF_ARGB8_SRGB = MakeElementFormat4<EC_A, EC_R, EC_G, EC_B, 8, 8, 8, 8, ECT_UNorm_SRGB, ECT_UNorm_SRGB, ECT_UNorm_SRGB, ECT_UNorm_SRGB>::value,
+		// 32-bit element format, 8 bits for alpha, red, green and blue. Standard RGB (gamma = 2.2).
+		EF_ABGR8_SRGB = MakeElementFormat4<EC_A, EC_B, EC_G, EC_R, 8, 8, 8, 8, ECT_UNorm_SRGB, ECT_UNorm_SRGB, ECT_UNorm_SRGB, ECT_UNorm_SRGB>::value,
+		// BC1 compression element format. Standard RGB (gamma = 2.2).
+		EF_BC1_SRGB = MakeElementFormat1<EC_BC, 1, ECT_UNorm_SRGB>::value,
+		// BC2 compression element format. Standard RGB (gamma = 2.2).
+		EF_BC2_SRGB = MakeElementFormat1<EC_BC, 2, ECT_UNorm_SRGB>::value,
+		// BC3 compression element format. Standard RGB (gamma = 2.2).
+		EF_BC3_SRGB = MakeElementFormat1<EC_BC, 3, ECT_UNorm_SRGB>::value,
+		// BC4 compression element format. Standard RGB (gamma = 2.2).
+		EF_BC4_SRGB = MakeElementFormat1<EC_BC, 4, ECT_UNorm_SRGB>::value,
+		// BC5 compression element format. Standard RGB (gamma = 2.2).
+		EF_BC5_SRGB = MakeElementFormat1<EC_BC, 5, ECT_UNorm_SRGB>::value,
+		// BC7 compression element format. Standard RGB (gamma = 2.2).
+		EF_BC7_SRGB = MakeElementFormat1<EC_BC, 7, ECT_UNorm_SRGB>::value
+	};
+#else
 	typedef uint64_t ElementFormat;
 
 	// Unknown element format.
@@ -284,54 +477,58 @@ namespace KlayGE
 	ElementFormat const EF_BC5_SRGB = MakeElementFormat1<EC_BC, 5, ECT_UNorm_SRGB>::value;
 	// BC7 compression element format. Standard RGB (gamma = 2.2).
 	ElementFormat const EF_BC7_SRGB = MakeElementFormat1<EC_BC, 7, ECT_UNorm_SRGB>::value;
+#endif
 
 
 	template <int c>
 	inline ElementChannel
 	Channel(ElementFormat ef)
 	{
-		return static_cast<ElementChannel>((ef >> (4 * c)) & 0xF);
+		return static_cast<ElementChannel>((static_cast<uint64_t>(ef) >> (4 * c)) & 0xF);
 	}
 
 	template <int c>
 	inline ElementFormat
 	Channel(ElementFormat ef, ElementChannel new_c)
 	{
-		ef &= ~(0xFULL << (4 * c));
-		ef |= (static_cast<uint64_t>(new_c) << (4 * c));
-		return ef;
+		uint64_t ef64 = static_cast<uint64_t>(ef);
+		ef64 &= ~(0xFULL << (4 * c));
+		ef64 |= (static_cast<uint64_t>(new_c) << (4 * c));
+		return static_cast<ElementFormat>(ef64);
 	}
 
 	template <int c>
 	inline uint8_t
 	ChannelBits(ElementFormat ef)
 	{
-		return (ef >> (16 + 6 * c)) & 0x3F;
+		return (static_cast<uint64_t>(ef) >> (16 + 6 * c)) & 0x3F;
 	}
 
 	template <int c>
 	inline ElementFormat
 	ChannelBits(ElementFormat ef, uint64_t new_c)
 	{
-		ef &= ~(0x3FULL << (16 + 6 * c));
-		ef |= (new_c << (16 + 6 * c));
-		return ef;
+		uint64_t ef64 = static_cast<uint64_t>(ef);
+		ef64 &= ~(0x3FULL << (16 + 6 * c));
+		ef64 |= (new_c << (16 + 6 * c));
+		return static_cast<ElementFormat>(ef64);
 	}
 
 	template <int c>
 	inline ElementChannelType
 	ChannelType(ElementFormat ef)
 	{
-		return static_cast<ElementChannelType>((ef >> (40 + 4 * c)) & 0xF);
+		return static_cast<ElementChannelType>((static_cast<uint64_t>(ef) >> (40 + 4 * c)) & 0xF);
 	}
 
 	template <int c>
 	inline ElementFormat
 	ChannelType(ElementFormat ef, ElementChannelType new_c)
 	{
-		ef &= ~(0xFULL << (40 + 4 * c));
-		ef |= (static_cast<uint64_t>(new_c) << (40 + 4 * c));
-		return ef;
+		uint64_t ef64 = static_cast<uint64_t>(ef);
+		ef64 &= ~(0xFULL << (40 + 4 * c));
+		ef64 |= (static_cast<uint64_t>(new_c) << (40 + 4 * c));
+		return static_cast<ElementFormat>(ef64);
 	}
 
 	inline bool

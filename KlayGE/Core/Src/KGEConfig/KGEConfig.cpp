@@ -41,7 +41,7 @@ enum nTabDialogs
 	NTABS
 };
 
-HWND hTab = NULL; // Handle to tab control.
+HWND hTab = nullptr; // Handle to tab control.
 HWND hTabDlg[NTABS] = {0}; // Array of handle to tab dialogs.
 int iCurSelTab = 0;
 
@@ -457,9 +457,9 @@ INT_PTR CreateTabDialogs(HWND hWnd, HINSTANCE hInstance)
 				rcClient.right - rcClient.left - 10,
 				rcClient.bottom - rcClient.top - 45,
 				hWnd,
-				NULL,
+				nullptr,
 				hInstance,
-				NULL);
+				nullptr);
 
 	ShowWindow(hTab, SW_SHOWNORMAL);
 
@@ -502,9 +502,9 @@ INT_PTR CreateButtons(HWND hWnd, HINSTANCE hInstance)
 				72,
 				22,
 				hWnd,
-				NULL,
+				nullptr,
 				hInstance,
-				NULL);
+				nullptr);
 	hCancelButton = CreateWindowEx(
 				WS_EX_CONTROLPARENT,
 				WC_BUTTON,
@@ -515,9 +515,9 @@ INT_PTR CreateButtons(HWND hWnd, HINSTANCE hInstance)
 				72,
 				22,
 				hWnd,
-				NULL,
+				nullptr,
 				hInstance,
-				NULL);
+				nullptr);
 
 	return FALSE;
 }
@@ -745,9 +745,9 @@ bool UIConfiguration(HINSTANCE hInstance)
 	wc.cbWndExtra		= 0;
 	wc.hInstance		= hInstance;
 	wc.hIcon			= ::LoadIcon(hInstance, TEXT("IDI_KLAYGEICON"));
-	wc.hCursor			= ::LoadCursor(NULL, IDC_ARROW);
+	wc.hCursor			= ::LoadCursor(nullptr, IDC_ARROW);
 	wc.hbrBackground	= reinterpret_cast<HBRUSH>(COLOR_WINDOW);
-	wc.lpszMenuName		= NULL;
+	wc.lpszMenuName		= nullptr;
 	wc.lpszClassName	= TEXT("KGEConfig");
 	wc.hIconSm			= wc.hIcon;
 	::RegisterClassEx(&wc);
@@ -759,7 +759,7 @@ bool UIConfiguration(HINSTANCE hInstance)
 
 	HWND hWnd = ::CreateWindow(wc.lpszClassName, TEXT("KlayGE Configuration Tool"),
 		WS_CAPTION | WS_SYSMENU, (cx - width) / 2, (cy - height) / 2,
-		width, height, 0, 0, hInstance, NULL);
+		width, height, 0, 0, hInstance, nullptr);
 
 	::ShowWindow(hWnd, SW_SHOWNORMAL);
 	::UpdateWindow(hWnd);
@@ -769,7 +769,7 @@ bool UIConfiguration(HINSTANCE hInstance)
 
 	MSG msg;
 	memset(&msg, 0, sizeof(msg));
-	while (::GetMessage(&msg, NULL, 0, 0))
+	while (::GetMessage(&msg, nullptr, 0, 0))
 	{
 		::TranslateMessage(&msg);
 		::DispatchMessage(&msg);

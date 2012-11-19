@@ -310,7 +310,7 @@ void JudaTexViewer::InitObjects()
 
 	font_ = rf.MakeFont("gkai00mp.kfont");
 
-	tile_pos_vb_ = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Read | EAH_CPU_Write, NULL);
+	tile_pos_vb_ = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Read | EAH_CPU_Write, nullptr);
 
 	tile_ = MakeSharedPtr<TileObject>();
 	tile_->AddToSceneManager();
@@ -463,15 +463,15 @@ void JudaTexViewer::OpenHandler(KlayGE::UIButton const & /*sender*/)
 	ofn.nMaxFile = sizeof(fn);
 	ofn.lpstrFilter = "JDT File\0*.jdt\0All\0*.*\0";
 	ofn.nFilterIndex = 1;
-	ofn.lpstrFileTitle = NULL;
+	ofn.lpstrFileTitle = nullptr;
 	ofn.nMaxFileTitle = 0;
-	ofn.lpstrInitialDir = NULL;
+	ofn.lpstrInitialDir = nullptr;
 	ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
 
 	if (GetOpenFileNameA(&ofn))
 	{
 		HCURSOR cur = GetCursor();
-		SetCursor(LoadCursor(NULL, IDC_WAIT));
+		SetCursor(LoadCursor(nullptr, IDC_WAIT));
 		
 		this->OpenJudaTex(fn);
 		

@@ -35,7 +35,7 @@ void TilingPostProcess::InputPin(uint32_t index, TexturePtr const & tex)
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
 	downsample_tex_ = rf.MakeTexture2D(tex->Width(0) / 2, tex->Height(0) / 2,
-		4, 1, tex->Format(), 1, 0, EAH_GPU_Read | EAH_GPU_Write | EAH_Generate_Mips, NULL);
+		4, 1, tex->Format(), 1, 0, EAH_GPU_Read | EAH_GPU_Write | EAH_Generate_Mips, nullptr);
 
 	downsampler_->InputPin(index, tex);
 	downsampler_->OutputPin(index, downsample_tex_);

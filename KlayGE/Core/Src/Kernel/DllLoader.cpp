@@ -27,7 +27,7 @@
 namespace KlayGE
 {
 	DllLoader::DllLoader()
-		: dll_handle_(NULL)
+		: dll_handle_(nullptr)
 	{
 	}
 
@@ -56,7 +56,7 @@ namespace KlayGE
 		dll_handle_ = ::dlopen(name.c_str(), RTLD_LAZY);
 #endif
 
-		return (dll_handle_ != NULL);
+		return (dll_handle_ != nullptr);
 	}
 
 	void DllLoader::Free()

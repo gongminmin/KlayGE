@@ -1171,20 +1171,20 @@ namespace KlayGE
 			uint32_t array_size = std::min((pages + s * s - 1) / (s * s), static_cast<uint32_t>(caps.max_pixel_texture_units - 1));
 			if (caps.max_texture_array_length > array_size)
 			{
-				tex_cache_ = rf.MakeTexture2D(tile_with_border_size * s, tile_with_border_size * s, mipmap, array_size, format, 1, 0, EAH_GPU_Read, NULL);
+				tex_cache_ = rf.MakeTexture2D(tile_with_border_size * s, tile_with_border_size * s, mipmap, array_size, format, 1, 0, EAH_GPU_Read, nullptr);
 			}
 			else
 			{
 				tex_cache_array_.resize(array_size);
 				for (uint32_t i = 0; i < array_size; ++ i)
 				{
-					tex_cache_array_[i] = rf.MakeTexture2D(tile_with_border_size * s, tile_with_border_size * s, mipmap, 1, format, 1, 0, EAH_GPU_Read, NULL);
+					tex_cache_array_[i] = rf.MakeTexture2D(tile_with_border_size * s, tile_with_border_size * s, mipmap, 1, format, 1, 0, EAH_GPU_Read, nullptr);
 				}
 			}
 
-			tex_a_tile_cache_ = rf.MakeTexture2D(tile_with_border_size, tile_with_border_size, mipmap, 1, format, 1, 0, EAH_CPU_Write, NULL);
-			tex_indirect_ = rf.MakeTexture2D(num_tiles_, num_tiles_, 1, 1, EF_ABGR8, 1, 0, EAH_GPU_Read, NULL);
-			tex_a_tile_indirect_ = rf.MakeTexture2D(1, 1, 1, 1, EF_ABGR8, 1, 0, EAH_CPU_Write, NULL);
+			tex_a_tile_cache_ = rf.MakeTexture2D(tile_with_border_size, tile_with_border_size, mipmap, 1, format, 1, 0, EAH_CPU_Write, nullptr);
+			tex_indirect_ = rf.MakeTexture2D(num_tiles_, num_tiles_, 1, 1, EF_ABGR8, 1, 0, EAH_GPU_Read, nullptr);
+			tex_a_tile_indirect_ = rf.MakeTexture2D(1, 1, 1, 1, EF_ABGR8, 1, 0, EAH_CPU_Write, nullptr);
 
 			tile_free_list_.push_back(std::make_pair(0, pages));
 		}
@@ -1473,7 +1473,7 @@ namespace KlayGE
 					}
 					else
 					{
-						neighbor_data_ptr[j] = NULL;
+						neighbor_data_ptr[j] = nullptr;
 					}
 				}
 
@@ -1488,7 +1488,7 @@ namespace KlayGE
 							neighbor_data_ptr[0] + y * mip_tile_size * texel_size_, mip_tile_size);
 					}
 
-					if ((neighbor_data_ptr[1] != NULL) && in_same_image[i + 1])
+					if ((neighbor_data_ptr[1] != nullptr) && in_same_image[i + 1])
 					{
 						for (uint32_t y = 0; y < mip_border_size; ++ y)
 						{
@@ -1604,7 +1604,7 @@ namespace KlayGE
 							}
 						}
 					}
-					if ((neighbor_data_ptr[2] != NULL) && in_same_image[i + 2])
+					if ((neighbor_data_ptr[2] != nullptr) && in_same_image[i + 2])
 					{
 						for (uint32_t y = 0; y < mip_border_size; ++ y)
 						{
@@ -1716,7 +1716,7 @@ namespace KlayGE
 							}
 						}
 					}
-					if ((neighbor_data_ptr[3] != NULL) && in_same_image[i + 3])
+					if ((neighbor_data_ptr[3] != nullptr) && in_same_image[i + 3])
 					{
 						for (uint32_t y = 0; y < mip_border_size; ++ y)
 						{
@@ -1832,7 +1832,7 @@ namespace KlayGE
 						}
 					}
 
-					if ((neighbor_data_ptr[4] != NULL) && in_same_image[i + 4])
+					if ((neighbor_data_ptr[4] != nullptr) && in_same_image[i + 4])
 					{
 						for (uint32_t y = 0; y < mip_tile_size; ++ y)
 						{
@@ -1947,7 +1947,7 @@ namespace KlayGE
 							}
 						}
 					}
-					if ((neighbor_data_ptr[5] != NULL) && in_same_image[i + 5])
+					if ((neighbor_data_ptr[5] != nullptr) && in_same_image[i + 5])
 					{
 						for (uint32_t y = 0; y < mip_tile_size; ++ y)
 						{
@@ -2063,7 +2063,7 @@ namespace KlayGE
 						}
 					}
 
-					if ((neighbor_data_ptr[6] != NULL) && in_same_image[i + 6])
+					if ((neighbor_data_ptr[6] != nullptr) && in_same_image[i + 6])
 					{
 						for (uint32_t y = 0; y < mip_border_size; ++ y)
 						{
@@ -2178,7 +2178,7 @@ namespace KlayGE
 							}
 						}
 					}
-					if ((neighbor_data_ptr[7] != NULL) && in_same_image[i + 7])
+					if ((neighbor_data_ptr[7] != nullptr) && in_same_image[i + 7])
 					{
 						for (uint32_t y = 0; y < mip_border_size; ++ y)
 						{
@@ -2290,7 +2290,7 @@ namespace KlayGE
 							}
 						}
 					}			
-					if ((neighbor_data_ptr[8] != NULL) && in_same_image[i + 8])
+					if ((neighbor_data_ptr[8] != nullptr) && in_same_image[i + 8])
 					{
 						for (uint32_t y = 0; y < mip_border_size; ++ y)
 						{
@@ -2495,7 +2495,7 @@ namespace KlayGE
 
 						default:
 							BOOST_ASSERT(false);
-							p_argb = NULL;
+							p_argb = nullptr;
 							pitch = 0;
 							break;
 						}

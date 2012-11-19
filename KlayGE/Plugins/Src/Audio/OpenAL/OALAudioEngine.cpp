@@ -74,7 +74,7 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	OALAudioEngine::OALAudioEngine()
 	{
-		ALCdevice* device(alcOpenDevice(NULL));
+		ALCdevice* device(alcOpenDevice(nullptr));
 		ALCcontext* context(alcCreateContext(device, 0));
 
 		alcMakeContextCurrent(context);

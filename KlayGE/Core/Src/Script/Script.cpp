@@ -39,7 +39,7 @@ namespace KlayGE
 	public:
 		void operator()(PyObject* p)
 		{
-			if (p != NULL)
+			if (p != nullptr)
 			{
 				Py_DecRef(p);
 			}
@@ -184,7 +184,7 @@ namespace KlayGE
 	{
 		method_names_.push_back(method_name);
 
-		PyMethodDef def = { method_name.c_str(), method, METH_VARARGS, NULL };
+		PyMethodDef def = { method_name.c_str(), method, METH_VARARGS, nullptr };
 		methods_.push_back(def);
 	}
 
@@ -197,7 +197,7 @@ namespace KlayGE
 		{
 			PyModuleDef_HEAD_INIT,
 			module_name_.c_str(),
-			NULL,
+			nullptr,
 			-1,
 			&methods_[0]
 		};

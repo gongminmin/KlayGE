@@ -2135,7 +2135,7 @@ namespace KlayGE
 		Frustum_T<T> transform_frustum(Frustum_T<T> const & frustum, T scale, Quaternion_T<T> const & rot, Vector_T<T, 3> const & trans)
 		{
 			Vector_T<T, 3> vscale(scale, scale, scale);
-			return transform_frustum(frustum, transformation<T>(NULL, NULL, &vscale, NULL, &rot, &trans));
+			return transform_frustum(frustum, transformation<T>(nullptr, nullptr, &vscale, nullptr, &rot, &trans));
 		}
 
 

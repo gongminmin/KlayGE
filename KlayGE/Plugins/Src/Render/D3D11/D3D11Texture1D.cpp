@@ -73,7 +73,7 @@ namespace KlayGE
 		this->GetD3DFlags(desc_.Usage, desc_.BindFlags, desc_.CPUAccessFlags, desc_.MiscFlags);
 
 		std::vector<D3D11_SUBRESOURCE_DATA> subres_data(array_size_ * num_mip_maps_);
-		if (init_data != NULL)
+		if (init_data != nullptr)
 		{
 			for (uint32_t j = 0; j < array_size_; ++ j)
 			{
@@ -87,7 +87,7 @@ namespace KlayGE
 		}
 
 		ID3D11Texture1D* d3d_tex;
-		TIF(d3d_device_->CreateTexture1D(&desc_, (init_data != NULL) ? &subres_data[0] : NULL, &d3d_tex));
+		TIF(d3d_device_->CreateTexture1D(&desc_, (init_data != nullptr) ? &subres_data[0] : nullptr, &d3d_tex));
 		d3dTexture1D_ = MakeCOMPtr(d3d_tex);
 
 		this->UpdateParams();

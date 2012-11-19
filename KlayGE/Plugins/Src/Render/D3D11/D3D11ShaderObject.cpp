@@ -357,7 +357,7 @@ namespace
 			}
 			else
 			{
-				*srvsrc_ = NULL;
+				*srvsrc_ = nullptr;
 			}
 		}
 
@@ -387,7 +387,7 @@ namespace
 			}
 			else
 			{
-				*srvsrc_ = NULL;
+				*srvsrc_ = nullptr;
 			}
 		}
 
@@ -417,7 +417,7 @@ namespace
 			}
 			else
 			{
-				*uavsrc_ = NULL;
+				*uavsrc_ = nullptr;
 			}
 		}
 
@@ -447,7 +447,7 @@ namespace
 			}
 			else
 			{
-				*uavsrc_ = NULL;
+				*uavsrc_ = nullptr;
 			}
 		}
 
@@ -1212,7 +1212,7 @@ namespace KlayGE
 		}
 		shader_code_[type].second = shader_profile;
 
-		ID3DBlob* code = NULL;
+		ID3DBlob* code = nullptr;
 		if (is_shader_validate_[type])
 		{
 			ID3DBlob* err_msg;
@@ -1259,13 +1259,13 @@ namespace KlayGE
 				macros.push_back(macro_bc5_as_bc3);
 			}
 			{
-				D3D_SHADER_MACRO macro_end = { NULL, NULL };
+				D3D_SHADER_MACRO macro_end = { nullptr, nullptr };
 				macros.push_back(macro_end);
 			}
-			render_eng.D3DCompile(shader_text.c_str(), static_cast<UINT>(shader_text.size()), NULL, &macros[0],
-				NULL, sd.func_name.c_str(), shader_profile.c_str(),
+			render_eng.D3DCompile(shader_text.c_str(), static_cast<UINT>(shader_text.size()), nullptr, &macros[0],
+				nullptr, sd.func_name.c_str(), shader_profile.c_str(),
 				0, 0, &code, &err_msg);
-			if (err_msg != NULL)
+			if (err_msg != nullptr)
 			{
 				LogError("Error when compiling %s:", sd.func_name.c_str());
 
@@ -1312,7 +1312,7 @@ namespace KlayGE
 			{
 				ID3D11ShaderReflection* reflection;
 				render_eng.D3DReflect(code->GetBufferPointer(), code->GetBufferSize(), IID_ID3D11ShaderReflection_46, reinterpret_cast<void**>(&reflection));
-				if (reflection != NULL)
+				if (reflection != nullptr)
 				{
 					D3D11_SHADER_DESC desc;
 					reflection->GetDesc(&desc);
@@ -1455,7 +1455,7 @@ namespace KlayGE
 					reflection->Release();
 				}
 
-				ID3DBlob* strip_code = NULL;
+				ID3DBlob* strip_code = nullptr;
 				render_eng.D3DStripShader(code->GetBufferPointer(), code->GetBufferSize(),
 					D3DCOMPILER_STRIP_REFLECTION_DATA | D3DCOMPILER_STRIP_DEBUG_INFO | D3DCOMPILER_STRIP_TEST_BLOBS,
 					&strip_code);
@@ -1504,7 +1504,7 @@ namespace KlayGE
 			{
 			case ST_VertexShader:
 				ID3D11VertexShader* vs;
-				if (FAILED(d3d_device->CreateVertexShader(&((*code_blob)[0]), code_blob->size(), NULL, &vs)))
+				if (FAILED(d3d_device->CreateVertexShader(&((*code_blob)[0]), code_blob->size(), nullptr, &vs)))
 				{
 					is_shader_validate_[type] = false;
 				}
@@ -1530,7 +1530,7 @@ namespace KlayGE
 
 							ID3D11GeometryShader* gs;
 							if (FAILED(d3d_device->CreateGeometryShaderWithStreamOutput(&((*code_blob)[0]), code_blob->size(),
-								&d3d11_decl[0], static_cast<UINT>(d3d11_decl.size()), 0, 0, rasterized_stream, NULL, &gs)))
+								&d3d11_decl[0], static_cast<UINT>(d3d11_decl.size()), 0, 0, rasterized_stream, nullptr, &gs)))
 							{
 								is_shader_validate_[type] = false;
 							}
@@ -1551,7 +1551,7 @@ namespace KlayGE
 
 			case ST_PixelShader:
 				ID3D11PixelShader* ps;
-				if (FAILED(d3d_device->CreatePixelShader(&((*code_blob)[0]), code_blob->size(), NULL, &ps)))
+				if (FAILED(d3d_device->CreatePixelShader(&((*code_blob)[0]), code_blob->size(), nullptr, &ps)))
 				{
 					is_shader_validate_[type] = false;
 				}
@@ -1581,7 +1581,7 @@ namespace KlayGE
 
 						ID3D11GeometryShader* gs;
 						if (FAILED(d3d_device->CreateGeometryShaderWithStreamOutput(&((*code_blob)[0]), code_blob->size(),
-							&d3d11_decl[0], static_cast<UINT>(d3d11_decl.size()), 0, 0, rasterized_stream, NULL, &gs)))
+							&d3d11_decl[0], static_cast<UINT>(d3d11_decl.size()), 0, 0, rasterized_stream, nullptr, &gs)))
 						{
 							is_shader_validate_[type] = false;
 						}
@@ -1594,7 +1594,7 @@ namespace KlayGE
 					else
 					{
 						ID3D11GeometryShader* gs;
-						if (FAILED(d3d_device->CreateGeometryShader(&((*code_blob)[0]), code_blob->size(), NULL, &gs)))
+						if (FAILED(d3d_device->CreateGeometryShader(&((*code_blob)[0]), code_blob->size(), nullptr, &gs)))
 						{
 							is_shader_validate_[type] = false;
 						}
@@ -1615,7 +1615,7 @@ namespace KlayGE
 				if (caps.cs_support)
 				{
 					ID3D11ComputeShader* cs;
-					if (FAILED(d3d_device->CreateComputeShader(&((*code_blob)[0]), code_blob->size(), NULL, &cs)))
+					if (FAILED(d3d_device->CreateComputeShader(&((*code_blob)[0]), code_blob->size(), nullptr, &cs)))
 					{
 						is_shader_validate_[type] = false;
 					}
@@ -1635,7 +1635,7 @@ namespace KlayGE
 				if (caps.hs_support)
 				{
 					ID3D11HullShader* hs;
-					if (FAILED(d3d_device->CreateHullShader(&((*code_blob)[0]), code_blob->size(), NULL, &hs)))
+					if (FAILED(d3d_device->CreateHullShader(&((*code_blob)[0]), code_blob->size(), nullptr, &hs)))
 					{
 						is_shader_validate_[type] = false;
 					}
@@ -1656,7 +1656,7 @@ namespace KlayGE
 				if (caps.ds_support)
 				{
 					ID3D11DomainShader* ds;
-					if (FAILED(d3d_device->CreateDomainShader(&((*code_blob)[0]), code_blob->size(), NULL, &ds)))
+					if (FAILED(d3d_device->CreateDomainShader(&((*code_blob)[0]), code_blob->size(), nullptr, &ds)))
 					{
 						is_shader_validate_[type] = false;
 					}
@@ -1710,14 +1710,14 @@ namespace KlayGE
 				buf_desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 				buf_desc.MiscFlags = 0;
 				ID3D11Buffer* tmp_buf;
-				TIF(d3d_device->CreateBuffer(&buf_desc, NULL, &tmp_buf));
+				TIF(d3d_device->CreateBuffer(&buf_desc, nullptr, &tmp_buf));
 				cbufs_[type][c] = MakeCOMPtr(tmp_buf);
 			}
 
 			samplers_[type].resize(shader_desc_[type].num_samplers);
-			srvsrcs_[type].resize(shader_desc_[type].num_srvs, NULL);
+			srvsrcs_[type].resize(shader_desc_[type].num_srvs, nullptr);
 			srvs_[type].resize(shader_desc_[type].num_srvs);
-			uavsrcs_[type].resize(shader_desc_[type].num_uavs, NULL);
+			uavsrcs_[type].resize(shader_desc_[type].num_uavs, nullptr);
 			uavs_[type].resize(shader_desc_[type].num_uavs);
 
 			for (size_t i = 0; i < shader_desc_[type].res_desc.size(); ++ i)
@@ -1816,9 +1816,9 @@ namespace KlayGE
 			}
 
 			samplers_[type].resize(so.samplers_[type].size());
-			srvsrcs_[type].resize(so.srvs_[type].size(), NULL);
+			srvsrcs_[type].resize(so.srvs_[type].size(), nullptr);
 			srvs_[type].resize(so.srvs_[type].size());
-			uavsrcs_[type].resize(so.uavs_[type].size(), NULL);
+			uavsrcs_[type].resize(so.uavs_[type].size(), nullptr);
 			uavs_[type].resize(so.uavs_[type].size());
 
 			mem_cbufs_[type] = so.mem_cbufs_[type];
@@ -1834,7 +1834,7 @@ namespace KlayGE
 			{
 				desc.ByteWidth = static_cast<UINT>(so.mem_cbufs_[type][j].size());
 				ID3D11Buffer* tmp_buf;
-				TIF(d3d_device->CreateBuffer(&desc, NULL, &tmp_buf));
+				TIF(d3d_device->CreateBuffer(&desc, nullptr, &tmp_buf));
 				cbufs_[type][j] = MakeCOMPtr(tmp_buf);
 			}
 
@@ -1881,9 +1881,9 @@ namespace KlayGE
 			ret->shader_desc_[i] = shader_desc_[i];
 
 			ret->samplers_[i].resize(samplers_[i].size());
-			ret->srvsrcs_[i].resize(srvsrcs_[i].size(), NULL);
+			ret->srvsrcs_[i].resize(srvsrcs_[i].size(), nullptr);
 			ret->srvs_[i].resize(srvs_[i].size());
-			ret->uavsrcs_[i].resize(uavsrcs_[i].size(), NULL);
+			ret->uavsrcs_[i].resize(uavsrcs_[i].size(), nullptr);
 			ret->uavs_[i].resize(uavs_[i].size());
 
 			ret->mem_cbufs_[i] = mem_cbufs_[i];
@@ -1899,7 +1899,7 @@ namespace KlayGE
 			{
 				desc.ByteWidth = static_cast<UINT>((mem_cbufs_[i][j].size() + 15) / 16 * 16);
 				ID3D11Buffer* tmp_buf;
-				TIF(d3d_device->CreateBuffer(&desc, NULL, &tmp_buf));
+				TIF(d3d_device->CreateBuffer(&desc, nullptr, &tmp_buf));
 				ret->cbufs_[i][j] = MakeCOMPtr(tmp_buf);
 			}
 
@@ -2307,7 +2307,7 @@ namespace KlayGE
 			std::vector<ID3D11UnorderedAccessView*> uavs_ptr(uavs_[ST_ComputeShader].size());
 			for (uint32_t i = 0; i < uavs_[ST_ComputeShader].size(); ++ i)
 			{
-				if (uavsrcs_[ST_ComputeShader][i] != NULL)
+				if (uavsrcs_[ST_ComputeShader][i] != nullptr)
 				{
 					re.DetachSRV(uavsrcs_[ST_ComputeShader][i], 0, 1);
 				}
@@ -2327,7 +2327,7 @@ namespace KlayGE
 
 		if (!uavs_[ST_ComputeShader].empty())
 		{
-			std::vector<ID3D11UnorderedAccessView*> uavs(uavs_[ST_ComputeShader].size(), NULL);
+			std::vector<ID3D11UnorderedAccessView*> uavs(uavs_[ST_ComputeShader].size(), nullptr);
 			d3d_imm_ctx->CSSetUnorderedAccessViews(0, static_cast<UINT>(uavs_[ST_ComputeShader].size()), &uavs[0],
 				reinterpret_cast<UINT*>(&uavs[0]));
 		}

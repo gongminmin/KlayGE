@@ -53,7 +53,7 @@ namespace KlayGE
 {
 	CameraController::CameraController()
 		: rotationScaler_(0.05f), moveScaler_(1),
-			camera_(NULL)
+			camera_(nullptr)
 	{
 	}
 
@@ -74,7 +74,7 @@ namespace KlayGE
 
 	void CameraController::DetachCamera()
 	{
-		camera_ = NULL;
+		camera_ = nullptr;
 	}
 
 
@@ -345,11 +345,11 @@ namespace KlayGE
 					if (mouse->LeftButton())
 					{
 						Quaternion q = MathLib::rotation_axis(right_, yd * rotationScaler_);
-						float4x4 mat = MathLib::transformation<float>(NULL, NULL, NULL, &target_, &q, NULL);
+						float4x4 mat = MathLib::transformation<float>(nullptr, nullptr, nullptr, &target_, &q, nullptr);
 						float3 pos = MathLib::transform_coord(camera_->EyePos(), mat);
 
 						q = MathLib::rotation_axis(float3(0.0f, MathLib::dot(camera_->UpVec(), float3(0, 1, 0)) < 0 ? -1.0f : 1.0f, 0.0f), xd * rotationScaler_);
-						mat = MathLib::transformation<float>(NULL, NULL, NULL, &target_, &q, NULL);
+						mat = MathLib::transformation<float>(nullptr, nullptr, nullptr, &target_, &q, nullptr);
 						pos = MathLib::transform_coord(pos, mat);
 
 						right_ = MathLib::transform_quat(right_, q);

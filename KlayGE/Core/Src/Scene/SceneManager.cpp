@@ -109,7 +109,7 @@ namespace KlayGE
 	// ¹¹Ôìº¯Êý
 	/////////////////////////////////////////////////////////////////////////////////
 	SceneManager::SceneManager()
-		: frustum_(NULL),
+		: frustum_(nullptr),
 			numObjectsRendered_(0),
 			numRenderablesRendered_(0),
 			numPrimitivesRendered_(0),

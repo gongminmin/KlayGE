@@ -355,7 +355,7 @@ namespace
 				uint32_t const height = tex->Height(0) + max_radius_ * 4 + 1;
 
 				RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-				spread_tex_ = rf.MakeTexture2D(width, height, 1, 1, EF_ABGR32F, 1, 0, EAH_GPU_Read | EAH_GPU_Write | (cs_support_ ? EAH_GPU_Unordered : 0), NULL);
+				spread_tex_ = rf.MakeTexture2D(width, height, 1, 1, EF_ABGR32F, 1, 0, EAH_GPU_Read | EAH_GPU_Write | (cs_support_ ? EAH_GPU_Unordered : 0), nullptr);
 				spread_fb_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*spread_tex_, 0, 0, 0));
 
 				spreading_pp_->SetParam(0, float4(static_cast<float>(width),
@@ -513,7 +513,7 @@ namespace
 
 					fmt = EF_ABGR16F;
 				}
-				bokeh_tex_ = rf.MakeTexture2D(out_width, out_height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+				bokeh_tex_ = rf.MakeTexture2D(out_width, out_height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
 				bokeh_fb_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*bokeh_tex_, 0, 0, 0));
 
 				if (gs_support_)
@@ -863,7 +863,7 @@ void MotionBlurDoFApp::OnResize(uint32_t width, uint32_t height)
 	RenderViewPtr ds_view;
 	if (depth_texture_support_)
 	{
-		ds_tex_ = rf.MakeTexture2D(width, height, 1, 1, EF_D16, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+		ds_tex_ = rf.MakeTexture2D(width, height, 1, 1, EF_D16, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
 		ds_view = rf.Make2DDepthStencilRenderView(*ds_tex_, 0, 1, 0);
 	}
 	else
@@ -882,7 +882,7 @@ void MotionBlurDoFApp::OnResize(uint32_t width, uint32_t height)
 
 		depth_fmt = EF_ABGR16F;
 	}
-	depth_tex_ = rf.MakeTexture2D(width, height, 2, 1, depth_fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write | EAH_Generate_Mips, NULL);
+	depth_tex_ = rf.MakeTexture2D(width, height, 2, 1, depth_fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write | EAH_Generate_Mips, nullptr);
 
 	if (depth_texture_support_)
 	{
@@ -903,7 +903,7 @@ void MotionBlurDoFApp::OnResize(uint32_t width, uint32_t height)
 		color_fmt = EF_ABGR16F;
 	}
 
-	color_tex_ = rf.MakeTexture2D(width, height, 2, 1, color_fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write | EAH_Generate_Mips, NULL);
+	color_tex_ = rf.MakeTexture2D(width, height, 2, 1, color_fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write | EAH_Generate_Mips, nullptr);
 	clr_depth_fb_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*color_tex_, 0, 1, 0));
 	clr_depth_fb_->Attach(FrameBuffer::ATT_DepthStencil, ds_view);
 
@@ -926,11 +926,11 @@ void MotionBlurDoFApp::OnResize(uint32_t width, uint32_t height)
 		}
 	}
 
-	motion_vec_tex_ = rf.MakeTexture2D(width, height, 1, 1, motion_fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+	motion_vec_tex_ = rf.MakeTexture2D(width, height, 1, 1, motion_fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
 	motion_vec_fb_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*motion_vec_tex_, 0, 1, 0));
 	motion_vec_fb_->Attach(FrameBuffer::ATT_DepthStencil, ds_view);
 
-	mbed_tex_ = rf.MakeTexture2D(width, height, 1, 1, color_fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+	mbed_tex_ = rf.MakeTexture2D(width, height, 1, 1, color_fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
 
 	motion_blur_->InputPin(0, color_tex_);
 	motion_blur_->InputPin(1, depth_tex_);

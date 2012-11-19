@@ -49,7 +49,7 @@ namespace KlayGE
 #ifdef KLAYGE_COMPILER_MSVC
 #pragma warning(pop)
 #endif
-		if (win != NULL)
+		if (win != nullptr)
 		{
 			return win->MsgProc(hWnd, uMsg, wParam, lParam);
 		}
@@ -61,7 +61,7 @@ namespace KlayGE
 
 	Window::Window(std::string const & name, RenderSettings const & settings)
 	{
-		HINSTANCE hInst = ::GetModuleHandle(NULL);
+		HINSTANCE hInst = ::GetModuleHandle(nullptr);
 
 		// Register the window class
 #ifdef KLAYGE_COMPILER_GCC
@@ -77,16 +77,16 @@ namespace KlayGE
 		wc.cbClsExtra		= 0;
 		wc.cbWndExtra		= sizeof(this);
 		wc.hInstance		= hInst;
-		wc.hIcon			= NULL;
-		wc.hCursor			= ::LoadCursor(NULL, IDC_ARROW);
+		wc.hIcon			= nullptr;
+		wc.hCursor			= ::LoadCursor(nullptr, IDC_ARROW);
 		wc.hbrBackground	= static_cast<HBRUSH>(::GetStockObject(BLACK_BRUSH));
-		wc.lpszMenuName		= NULL;
+		wc.lpszMenuName		= nullptr;
 #ifdef KLAYGE_COMPILER_GCC
 		wc.lpszClassName	= name_.c_str();
 #else
 		wc.lpszClassName	= wname_.c_str();
 #endif
-		wc.hIconSm			= NULL;
+		wc.hIconSm			= nullptr;
 #ifdef KLAYGE_COMPILER_GCC
 		::RegisterClassExA(&wc);
 #else
@@ -111,11 +111,11 @@ namespace KlayGE
 #ifdef KLAYGE_COMPILER_GCC
 		wnd_ = ::CreateWindowA(name_.c_str(), name_.c_str(),
 			style, settings.left, settings.top,
-			rc.right - rc.left, rc.bottom - rc.top, 0, 0, hInst, NULL);
+			rc.right - rc.left, rc.bottom - rc.top, 0, 0, hInst, nullptr);
 #else
 		wnd_ = ::CreateWindowW(wname_.c_str(), wname_.c_str(),
 			style, settings.left, settings.top,
-			rc.right - rc.left, rc.bottom - rc.top, 0, 0, hInst, NULL);
+			rc.right - rc.left, rc.bottom - rc.top, 0, 0, hInst, nullptr);
 #endif
 
 		::GetClientRect(wnd_, &rc);
@@ -139,16 +139,16 @@ namespace KlayGE
 
 	Window::~Window()
 	{
-		if (wnd_ != NULL)
+		if (wnd_ != nullptr)
 		{
 			::DestroyWindow(wnd_);
-			wnd_ = NULL;
+			wnd_ = nullptr;
 		}
 	}
 
 	void Window::Recreate()
 	{
-		HINSTANCE hInst = ::GetModuleHandle(NULL);
+		HINSTANCE hInst = ::GetModuleHandle(nullptr);
 
 		uint32_t style = static_cast<uint32_t>(::GetWindowLongPtrW(wnd_, GWL_STYLE));
 		RECT rc = { 0, 0, static_cast<LONG>(width_), static_cast<LONG>(height_) };
@@ -159,11 +159,11 @@ namespace KlayGE
 #ifdef KLAYGE_COMPILER_GCC
 		wnd_ = ::CreateWindowA(name_.c_str(), name_.c_str(),
 			style, left_, top_,
-			rc.right - rc.left, rc.bottom - rc.top, 0, 0, hInst, NULL);
+			rc.right - rc.left, rc.bottom - rc.top, 0, 0, hInst, nullptr);
 #else
 		wnd_ = ::CreateWindowW(wname_.c_str(), wname_.c_str(),
 			style, left_, top_,
-			rc.right - rc.left, rc.bottom - rc.top, 0, 0, hInst, NULL);
+			rc.right - rc.left, rc.bottom - rc.top, 0, 0, hInst, nullptr);
 #endif
 
 		::GetClientRect(wnd_, &rc);
@@ -530,7 +530,7 @@ namespace KlayGE
 #elif defined KLAYGE_PLATFORM_LINUX
 	Window::Window(std::string const & name, RenderSettings const & settings)
 	{
-		x_display_ = XOpenDisplay(NULL);
+		x_display_ = XOpenDisplay(nullptr);
 
 		int r_size, g_size, b_size, a_size, d_size, s_size;
 		switch (settings.color_fmt)
@@ -719,13 +719,13 @@ namespace KlayGE
 #elif defined KLAYGE_PLATFORM_ANDROID
 	Window::Window(std::string const & /*name*/, RenderSettings const & settings)
 	{
-		a_window_ = NULL;
+		a_window_ = nullptr;
 
 		android_app* state = Context::Instance().AppState();
 		state->userData = this;
 		state->onAppCmd = MsgProc;
 
-		while (NULL == a_window_)
+		while (nullptr == a_window_)
 		{
 			// Read all pending events.
 			int ident;
@@ -734,10 +734,10 @@ namespace KlayGE
 
 			do
 			{
-				ident = ALooper_pollAll(0, NULL, &events, reinterpret_cast<void**>(&source));
+				ident = ALooper_pollAll(0, nullptr, &events, reinterpret_cast<void**>(&source));
 
 				// Process this event.
-				if (source != NULL)
+				if (source != nullptr)
 				{
 					source->process(state, source);
 				}
@@ -747,11 +747,11 @@ namespace KlayGE
 				{
 					return;
 				}
-			} while ((NULL == a_window_) && (ident >= 0));
+			} while ((nullptr == a_window_) && (ident >= 0));
 		}
 
 		ANativeWindow_Buffer buffer;
-		if (ANativeWindow_lock(a_window_, &buffer, NULL) >= 0)
+		if (ANativeWindow_lock(a_window_, &buffer, nullptr) >= 0)
 		{
 			ANativeWindow_unlockAndPost(a_window_);
 		}

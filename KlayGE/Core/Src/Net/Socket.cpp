@@ -70,7 +70,7 @@ namespace KlayGE
 		if (INADDR_NONE == sockAddr_in.sin_addr.s_addr)
 		{
 			hostent* pHostEnt = gethostbyname(address.c_str());
-			if (pHostEnt != NULL)
+			if (pHostEnt != nullptr)
 			{
 				std::memcpy(&sockAddr_in.sin_addr.s_addr,
 					pHostEnt->h_addr_list[0], pHostEnt->h_length);
@@ -169,7 +169,7 @@ namespace KlayGE
 	{
 		connectedSocket.Close();
 
-		connectedSocket.socket_ = accept(this->socket_, NULL, NULL);
+		connectedSocket.socket_ = accept(this->socket_, nullptr, nullptr);
 	}
 
 	// °ó¶¨¶Ë¿Ú

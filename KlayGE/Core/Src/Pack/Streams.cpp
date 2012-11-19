@@ -39,7 +39,7 @@ namespace KlayGE
 			*processedSize = static_cast<uint32_t>(is_->gcount());
 		}
 
-		return (*is_ != NULL) ? S_OK: E_FAIL;
+		return (*is_ != nullptr) ? S_OK: E_FAIL;
 	}
 
 	STDMETHODIMP CInStream::Seek(int64_t offset, uint32_t seekOrigin, uint64_t* newPosition)
@@ -69,7 +69,7 @@ namespace KlayGE
 			*newPosition = is_->tellg();
 		}
 
-		return (*is_ != NULL) ? S_OK: E_FAIL;
+		return (*is_ != nullptr) ? S_OK: E_FAIL;
 	}
 
 	STDMETHODIMP CInStream::GetSize(uint64_t* size)
@@ -95,7 +95,7 @@ namespace KlayGE
 			*processedSize = size;
 		}
 
-		return (*os_ != NULL) ? S_OK: E_FAIL;
+		return (*os_ != nullptr) ? S_OK: E_FAIL;
 	}
 
 	STDMETHODIMP COutStream::Seek(int64_t offset, uint32_t seekOrigin, uint64_t* newPosition)
@@ -125,7 +125,7 @@ namespace KlayGE
 			*newPosition = os_->tellp();
 		}
 
-		return (*os_ != NULL) ? S_OK: E_FAIL;
+		return (*os_ != nullptr) ? S_OK: E_FAIL;
 	}
 
 	STDMETHODIMP COutStream::SetSize(uint64_t /*newSize*/)

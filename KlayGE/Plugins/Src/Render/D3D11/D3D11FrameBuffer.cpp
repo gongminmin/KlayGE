@@ -123,7 +123,7 @@ namespace KlayGE
 			}
 			else
 			{
-				rt_view[i] = NULL;
+				rt_view[i] = nullptr;
 			}
 		}
 		if (rs_view_)
@@ -148,7 +148,7 @@ namespace KlayGE
 			}
 			else
 			{
-				ua_view[i] = NULL;
+				ua_view[i] = nullptr;
 				ua_init_count[i] = 0;
 			}
 		}

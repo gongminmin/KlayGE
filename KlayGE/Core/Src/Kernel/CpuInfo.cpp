@@ -398,7 +398,7 @@ namespace KlayGE
 
 #if defined KLAYGE_PLATFORM_WINDOWS
 #if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
-		GetLogicalProcessorInformationPtr glpi = NULL;
+		GetLogicalProcessorInformationPtr glpi = nullptr;
 		{
 			OSVERSIONINFO os_ver_info;
 			memset(&os_ver_info, 0, sizeof(os_ver_info));
@@ -419,12 +419,12 @@ namespace KlayGE
 			}
 		}
 
-		if (glpi != NULL)
+		if (glpi != nullptr)
 		{
 			std::vector<SYSTEM_LOGICAL_PROCESSOR_INFORMATION> slpi_;
 
 			uint32_t cbBuffer = 0;
-			glpi(NULL, &cbBuffer);
+			glpi(nullptr, &cbBuffer);
 
 			slpi_.resize(cbBuffer / sizeof(slpi_[0]));
 			glpi(&slpi_[0], &cbBuffer);

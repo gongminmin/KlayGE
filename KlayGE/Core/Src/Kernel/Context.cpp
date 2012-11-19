@@ -631,7 +631,7 @@ namespace KlayGE
 		render_loader_.Load(path);
 
 		MakeRenderFactoryFunc mrf = (MakeRenderFactoryFunc)render_loader_.GetProcAddress("MakeRenderFactory");
-		if (mrf != NULL)
+		if (mrf != nullptr)
 		{
 			mrf(render_factory_);
 		}
@@ -660,7 +660,7 @@ namespace KlayGE
 		audio_loader_.Load(path);
 
 		MakeAudioFactoryFunc maf = (MakeAudioFactoryFunc)audio_loader_.GetProcAddress("MakeAudioFactory");
-		if (maf != NULL)
+		if (maf != nullptr)
 		{
 			maf(audio_factory_);
 		}
@@ -686,7 +686,7 @@ namespace KlayGE
 		input_loader_.Load(path);
 
 		MakeInputFactoryFunc mif = (MakeInputFactoryFunc)input_loader_.GetProcAddress("MakeInputFactory");
-		if (mif != NULL)
+		if (mif != nullptr)
 		{
 			mif(input_factory_);
 		}
@@ -712,7 +712,7 @@ namespace KlayGE
 		show_loader_.Load(path);
 
 		MakeShowFactoryFunc msf = (MakeShowFactoryFunc)show_loader_.GetProcAddress("MakeShowFactory");
-		if (msf != NULL)
+		if (msf != nullptr)
 		{
 			msf(show_factory_);
 		}
@@ -739,7 +739,7 @@ namespace KlayGE
 		sm_loader_.Load(path);
 
 		MakeSceneManagerFunc msm = (MakeSceneManagerFunc)sm_loader_.GetProcAddress("MakeSceneManager");
-		if (msm != NULL)
+		if (msm != nullptr)
 		{
 			msm(scene_mgr_);
 		}
@@ -768,7 +768,7 @@ namespace KlayGE
 		ads_loader_.Load(path);
 
 		MakeAudioDataSourceFactoryFunc madsf = (MakeAudioDataSourceFactoryFunc)ads_loader_.GetProcAddress("MakeAudioDataSourceFactory");
-		if (madsf != NULL)
+		if (madsf != nullptr)
 		{
 			madsf(audio_data_src_factory_);
 		}

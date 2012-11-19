@@ -1037,7 +1037,7 @@ namespace KlayGE
 		TexturePtr argb8_tex;
 		if (dst_tex->Format() != EF_ARGB8)
 		{
-			argb8_tex = Context::Instance().RenderFactoryInstance().MakeTexture2D(width, height, 1, 1, EF_ARGB8, 1, 0, EAH_CPU_Read | EAH_CPU_Write, NULL);
+			argb8_tex = Context::Instance().RenderFactoryInstance().MakeTexture2D(width, height, 1, 1, EF_ARGB8, 1, 0, EAH_CPU_Read | EAH_CPU_Write, nullptr);
 		}
 		else
 		{
@@ -1063,7 +1063,7 @@ namespace KlayGE
 		TexturePtr argb8_tex;
 		if (dst_tex->Format() != EF_ARGB8)
 		{
-			argb8_tex = Context::Instance().RenderFactoryInstance().MakeTexture2D(width, height, 1, 1, EF_ARGB8, 1, 0, EAH_CPU_Read | EAH_CPU_Write, NULL);
+			argb8_tex = Context::Instance().RenderFactoryInstance().MakeTexture2D(width, height, 1, 1, EF_ARGB8, 1, 0, EAH_CPU_Read | EAH_CPU_Write, nullptr);
 		}
 		else
 		{
@@ -1089,7 +1089,7 @@ namespace KlayGE
 		TexturePtr argb8_tex;
 		if (dst_tex->Format() != EF_ARGB8)
 		{
-			argb8_tex = Context::Instance().RenderFactoryInstance().MakeTexture2D(width, height, 1, 1, EF_ARGB8, 1, 0, EAH_CPU_Read | EAH_CPU_Write, NULL);
+			argb8_tex = Context::Instance().RenderFactoryInstance().MakeTexture2D(width, height, 1, 1, EF_ARGB8, 1, 0, EAH_CPU_Read | EAH_CPU_Write, nullptr);
 		}
 		else
 		{
@@ -1115,7 +1115,7 @@ namespace KlayGE
 		TexturePtr r8_tex;
 		if (dst_tex->Format() != EF_ARGB8)
 		{
-			r8_tex = Context::Instance().RenderFactoryInstance().MakeTexture2D(width, height, 1, 1, EF_ARGB8, 1, 0, EAH_CPU_Read | EAH_CPU_Write, NULL);
+			r8_tex = Context::Instance().RenderFactoryInstance().MakeTexture2D(width, height, 1, 1, EF_ARGB8, 1, 0, EAH_CPU_Read | EAH_CPU_Write, nullptr);
 		}
 		else
 		{
@@ -1141,7 +1141,7 @@ namespace KlayGE
 		TexturePtr gr8_tex;
 		if (dst_tex->Format() != EF_ARGB8)
 		{
-			gr8_tex = Context::Instance().RenderFactoryInstance().MakeTexture2D(width, height, 1, 1, EF_ARGB8, 1, 0, EAH_CPU_Read | EAH_CPU_Write, NULL);
+			gr8_tex = Context::Instance().RenderFactoryInstance().MakeTexture2D(width, height, 1, 1, EF_ARGB8, 1, 0, EAH_CPU_Read | EAH_CPU_Write, nullptr);
 		}
 		else
 		{
@@ -1667,7 +1667,7 @@ namespace KlayGE
 		TexturePtr argb8_tex;
 		if (src_tex->Format() != EF_ARGB8)
 		{
-			argb8_tex = Context::Instance().RenderFactoryInstance().MakeTexture2D(width, height, 1, 1, EF_ARGB8, 1, 0, EAH_CPU_Read | EAH_CPU_Write, NULL);
+			argb8_tex = Context::Instance().RenderFactoryInstance().MakeTexture2D(width, height, 1, 1, EF_ARGB8, 1, 0, EAH_CPU_Read | EAH_CPU_Write, nullptr);
 			src_tex->CopyToTexture(*argb8_tex);
 		}
 		else
@@ -1689,7 +1689,7 @@ namespace KlayGE
 		TexturePtr argb8_tex;
 		if (src_tex->Format() != EF_ARGB8)
 		{
-			argb8_tex = Context::Instance().RenderFactoryInstance().MakeTexture2D(width, height, 1, 1, EF_ARGB8, 1, 0, EAH_CPU_Read | EAH_CPU_Write, NULL);
+			argb8_tex = Context::Instance().RenderFactoryInstance().MakeTexture2D(width, height, 1, 1, EF_ARGB8, 1, 0, EAH_CPU_Read | EAH_CPU_Write, nullptr);
 			src_tex->CopyToTexture(*argb8_tex);
 		}
 		else
@@ -1711,7 +1711,7 @@ namespace KlayGE
 		TexturePtr argb8_tex;
 		if (src_tex->Format() != EF_ARGB8)
 		{
-			argb8_tex = Context::Instance().RenderFactoryInstance().MakeTexture2D(width, height, 1, 1, EF_ARGB8, 1, 0, EAH_CPU_Read | EAH_CPU_Write, NULL);
+			argb8_tex = Context::Instance().RenderFactoryInstance().MakeTexture2D(width, height, 1, 1, EF_ARGB8, 1, 0, EAH_CPU_Read | EAH_CPU_Write, nullptr);
 			src_tex->CopyToTexture(*argb8_tex);
 		}
 		else
@@ -1733,7 +1733,7 @@ namespace KlayGE
 		TexturePtr r8_tex;
 		if (src_tex->Format() != EF_R8)
 		{
-			r8_tex = Context::Instance().RenderFactoryInstance().MakeTexture2D(width, height, 1, 1, EF_R8, 1, 0, EAH_CPU_Read | EAH_CPU_Write, NULL);
+			r8_tex = Context::Instance().RenderFactoryInstance().MakeTexture2D(width, height, 1, 1, EF_R8, 1, 0, EAH_CPU_Read | EAH_CPU_Write, nullptr);
 			src_tex->CopyToTexture(*r8_tex);
 		}
 		else
@@ -1755,7 +1755,7 @@ namespace KlayGE
 		TexturePtr gr8_tex;
 		if (src_tex->Format() != EF_GR8)
 		{
-			gr8_tex = Context::Instance().RenderFactoryInstance().MakeTexture2D(width, height, 1, 1, EF_GR8, 1, 0, EAH_CPU_Read | EAH_CPU_Write, NULL);
+			gr8_tex = Context::Instance().RenderFactoryInstance().MakeTexture2D(width, height, 1, 1, EF_GR8, 1, 0, EAH_CPU_Read | EAH_CPU_Write, nullptr);
 			src_tex->CopyToTexture(*gr8_tex);
 		}
 		else
