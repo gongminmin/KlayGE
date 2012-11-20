@@ -474,7 +474,7 @@ namespace KlayGE
 
 		CameraCurve& curve = curves_[curve_id];
 
-		uint32_t pt_id = curve.eye_ctrl_pts.size();
+		uint32_t pt_id = static_cast<uint32_t>(curve.eye_ctrl_pts.size());
 		curve.frame_ids.push_back(frame_id);
 		curve.eye_ctrl_pts.push_back(eye_ctrl_pt);
 		curve.target_ctrl_pts.push_back(target_ctrl_pt);
