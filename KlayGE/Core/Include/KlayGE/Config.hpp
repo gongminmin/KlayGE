@@ -37,6 +37,8 @@
 		#if __GNUC_MINOR__ >= 3
 			#ifdef __GXX_EXPERIMENTAL_CXX0X__
 				#define KLAYGE_CXX11_SUPPORT
+				#define KLAYGE_NULLPTR_SUPPORT
+				#define KLAYGE_STRONGLY_TYPED_ENUMS_SUPPORT
 			#endif
 		#endif
 	#else
@@ -70,6 +72,10 @@
 
 	#if _MSC_VER >= 1600
 		#define KLAYGE_CXX11_SUPPORT
+		#define KLAYGE_NULLPTR_SUPPORT
+		#if _MSC_VER >= 1700
+			#define KLAYGE_STRONGLY_TYPED_ENUMS_SUPPORT
+		#endif
 	#endif
 
 	#if _MSC_VER >= 1400

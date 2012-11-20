@@ -28,6 +28,7 @@
  * from http://www.klayge.org/licensing/.
  */
 
+#include <KlayGE/Config.hpp>
 #include <KlayGE/Types.hpp>
 #include <MeshMLLib/MeshMLLib.hpp>
 

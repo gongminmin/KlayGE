@@ -94,7 +94,7 @@ namespace KlayGE
 		static uint64_t const value = MakeElementFormat2<ch0, 0, ch0_size, 0, ch0_type, 0>::value;
 	};
 
-#ifdef KLAYGE_CXX11_SUPPORT
+#ifdef KLAYGE_STRONGLY_TYPED_ENUMS_SUPPORT
 	enum ElementFormat : uint64_t
 	{
 		// Unknown element format.

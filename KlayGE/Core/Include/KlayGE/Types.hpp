@@ -20,7 +20,7 @@
 
 #include <boost/cstdint.hpp>
 
-#ifndef KLAYGE_CXX11_SUPPORT
+#ifndef KLAYGE_NULLPTR_SUPPORT
 const class nullptr_t
 {
 public:
