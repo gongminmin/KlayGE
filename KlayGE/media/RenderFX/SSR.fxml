@@ -16,7 +16,6 @@
 	<cbuffer name="pp_params">
 		<parameter type="int" name="min_samples"/>
 		<parameter type="int" name="max_samples"/>
-		<parameter type="float" name="ray_length_fadeout_factor"/>
 	</cbuffer>
 	
 	<parameter type="texture2D" name="g_buffer_0_tex"/>

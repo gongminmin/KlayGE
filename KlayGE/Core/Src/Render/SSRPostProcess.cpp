@@ -19,7 +19,6 @@ namespace KlayGE
 
 		params_.push_back(std::make_pair("min_samples", RenderEffectParameterPtr()));
 		params_.push_back(std::make_pair("max_samples", RenderEffectParameterPtr()));
-		params_.push_back(std::make_pair("ray_length_fadeout_factor", RenderEffectParameterPtr()));
 
 		RenderFactory & rf = Context::Instance().RenderFactoryInstance();
 		RenderEffectPtr effect = rf.LoadEffect("SSR.fxml");
@@ -35,7 +34,6 @@ namespace KlayGE
 
 		this->SetParam(0, static_cast<int32_t>(20));
 		this->SetParam(1, static_cast<int32_t>(30));
-		this->SetParam(2, 0.6f);
 	}
 
 	void SSRPostProcess::Apply()
