@@ -57,7 +57,7 @@ namespace KlayGE
 			return TRUE;
 		}
 
-		void* Create(BOOL loading)
+		void* Create(BOOL /*loading*/)
 		{
 			return new meshml_export;
 		}

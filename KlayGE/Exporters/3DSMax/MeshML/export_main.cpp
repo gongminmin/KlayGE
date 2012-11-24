@@ -10,7 +10,10 @@
 // ÐÞ¸Ä¼ÇÂ¼
 /////////////////////////////////////////////////////////////////////////////////
 
+#pragma warning(push)
+#pragma warning(disable: 4100 4238 4239 4244 4245 4512)
 #include <max.h>
+#pragma warning(pop)
 
 #include "meshml.hpp"
 #include "export_main.hpp"
@@ -19,7 +22,7 @@ KlayGE::meshml_class_desc mcd;
 
 HINSTANCE dll_instance;
 
-BOOL APIENTRY DllMain(HINSTANCE module, DWORD ul_reason_for_call, LPVOID reserved)
+BOOL APIENTRY DllMain(HINSTANCE module, DWORD /*ul_reason_for_call*/, LPVOID /*reserved*/)
 {
 	dll_instance = module;
 	return TRUE;

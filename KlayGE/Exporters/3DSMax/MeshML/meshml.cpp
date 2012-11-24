@@ -13,8 +13,11 @@
 // ÐÞ¸Ä¼ÇÂ¼
 /////////////////////////////////////////////////////////////////////////////////
 
+#pragma warning(push)
+#pragma warning(disable: 4100 4238 4239 4244 4245 4512)
 #include <max.h>
 #include <Interval.h>
+#pragma warning(pop)
 
 #include <vector>
 #include <sstream>
@@ -103,8 +106,8 @@ namespace KlayGE
 		}
 	}
 
-	int meshml_export::DoExport(TCHAR const * name, ExpInterface* exp_interface, Interface* max_interface,
-							BOOL suppress_prompts, DWORD options)
+	int meshml_export::DoExport(TCHAR const * name, ExpInterface* /*exp_interface*/, Interface* max_interface,
+							BOOL /*suppress_prompts*/, DWORD options)
 	{
 		file_name_ = tstr_to_str(name);
 

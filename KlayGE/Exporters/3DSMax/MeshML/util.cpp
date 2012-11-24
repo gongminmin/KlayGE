@@ -10,12 +10,15 @@
 // ÐÞ¸Ä¼ÇÂ¼
 /////////////////////////////////////////////////////////////////////////////////
 
+#pragma warning(push)
+#pragma warning(disable: 4100 4238 4239 4244 4245 4512)
 #include <max.h>
 #if VERSION_3DSMAX >= 7 << 16
 #include <CS/bipexp.h>
 #else
 #include <bipexp.h>
 #endif
+#pragma warning(pop)
 
 #include "util.hpp"
 
