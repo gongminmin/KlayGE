@@ -115,7 +115,7 @@ ENDFUNCTION()
 SET(PLUGIN_NAME "MeshML")
 
 SET(SOURCE_FILES
-	${KLAYGE_PROJECT_DIR}/Exporters/Maya/exporter.cpp
+	${KLAYGE_PROJECT_DIR}/Exporters/src/Maya/exporter.cpp
 )
 
 SOURCE_GROUP("Source Files" FILES ${SOURCE_FILES})

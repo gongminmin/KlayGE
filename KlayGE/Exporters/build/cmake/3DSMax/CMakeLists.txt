@@ -116,22 +116,22 @@ ENDFUNCTION()
 SET(PLUGIN_NAME "MeshML")
 
 SET(SOURCE_FILES
-	${KLAYGE_PROJECT_DIR}/Exporters/3DSMax/MeshML/export_main.cpp
-	${KLAYGE_PROJECT_DIR}/Exporters/3DSMax/MeshML/mesh_extractor.cpp
-	${KLAYGE_PROJECT_DIR}/Exporters/3DSMax/MeshML/meshml.cpp
-	${KLAYGE_PROJECT_DIR}/Exporters/3DSMax/MeshML/util.cpp
+	${KLAYGE_PROJECT_DIR}/Exporters/src/3DSMax/export_main.cpp
+	${KLAYGE_PROJECT_DIR}/Exporters/src/3DSMax/mesh_extractor.cpp
+	${KLAYGE_PROJECT_DIR}/Exporters/src/3DSMax/meshml.cpp
+	${KLAYGE_PROJECT_DIR}/Exporters/src/3DSMax/util.cpp
 )
 
 SET(HEADER_FILES
-	${KLAYGE_PROJECT_DIR}/Exporters/3DSMax/MeshML/export_main.hpp
-	${KLAYGE_PROJECT_DIR}/Exporters/3DSMax/MeshML/mesh_extractor.hpp
-	${KLAYGE_PROJECT_DIR}/Exporters/3DSMax/MeshML/meshml.hpp
-	${KLAYGE_PROJECT_DIR}/Exporters/3DSMax/MeshML/resource.h
-	${KLAYGE_PROJECT_DIR}/Exporters/3DSMax/MeshML/util.hpp
+	${KLAYGE_PROJECT_DIR}/Exporters/src/3DSMax/export_main.hpp
+	${KLAYGE_PROJECT_DIR}/Exporters/src/3DSMax/mesh_extractor.hpp
+	${KLAYGE_PROJECT_DIR}/Exporters/src/3DSMax/meshml.hpp
+	${KLAYGE_PROJECT_DIR}/Exporters/src/3DSMax/resource.h
+	${KLAYGE_PROJECT_DIR}/Exporters/src/3DSMax/util.hpp
 )
 
 SET(RESOURCE_FILES
-	${KLAYGE_PROJECT_DIR}/Exporters/3DSMax/MeshML/meshml.rc
+	${KLAYGE_PROJECT_DIR}/Exporters/src/3DSMax/meshml.rc
 )
 
 SOURCE_GROUP("Source Files" FILES ${SOURCE_FILES})
