@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<effect>
+	<include name="Lighting.fxml"/>
+	<include name="util.fxml" />
+	<include name="DeferredRenderingUtil.fxml" />
+	<include name="Quaternion.fxml"/>
+	<include name="GBuffer.fxml"/>
+	<include name="PostProcess.fxml"/>
+	<include name="SSR.fxml"/>
+
+	<parameter type="float4x4" name="back_mvp"/>
+	<parameter type="float4x4" name="back_model_view"/>
+	<parameter type="float4x4" name="inv_view"/>
+	<parameter type="float3" name="eye_in_back_camera"/>
+
+	<shader>
+		<![CDATA[
+void ReflectSpecialShadingVS(float4 pos : POSITION,
+			float2 texcoord : TEXCOORD0,
+			float4 tangent_quat : TANGENT,
+#ifdef NOPERSPECTIVE_SUPPORT
+			out noperspective float2 oTcFront : TEXCOORD0,
+			out noperspective float2 oTcBack : TEXCOORD1,
+#else
+			out float3 oTcFront : TEXCOORD0,
+			out float3 oTcBack : TEXCOORD1,
+#endif
+			out float3 oPosESFront : TEXCOORD2,
+			out float3 oPosESBack : TEXCOORD3,
+			out float3 oNormalESFront : TEXCOORD4,
+			out float3 oNormalESBack : TEXCOORD5,
+			out float2 oTexcoord : TEXCOORD6,
+			out float4 oPos : SV_Position)
+{
+	pos = float4(pos.xyz * pos_extent + pos_center, 1);
+	texcoord = texcoord * tc_extent + tc_center;
+	
+	oPos = mul(pos, mvp);
+	float4 pos_back = mul(pos, back_mvp);
+	
+	oTexcoord = texcoord;
+	
+	oPosESFront = mul(pos, model_view).xyz;
+	oPosESBack = mul(pos, back_model_view).xyz;
+	
+	tangent_quat = tangent_quat * 2 - 1;
+	float3 normal = transform_quat(float3(0, 0, 1), tangent_quat);
+	oNormalESFront = mul(normal, (float3x3)model_view);
+	oNormalESBack = mul(normal, (float3x3)back_model_view);
+
+	oTcFront.xy = oPos.xy / oPos.w;
+	oTcFront.y *= KLAYGE_FLIPPING;
+	oTcFront.xy = oTcFront.xy * 0.5f + 0.5f;
+	
+	oTcBack.xy = pos_back.xy / pos_back.w;
+	oTcBack.y *= KLAYGE_FLIPPING;
+	oTcBack.xy = oTcBack.xy * 0.5f + 0.5f;
+
+#ifndef NOPERSPECTIVE_SUPPORT
+	oTcFront.z = oPos.w;
+	oTcFront.xy *= oTcFront.z;
+
+	oTcBack.z = pos_back.w;
+	oTcBack.xy *= oTcBack.z;
+#endif
+}
+
+float4 ReflectSpecialShadingPS(
+#ifdef NOPERSPECTIVE_SUPPORT
+			noperspective float2 tc_front : TEXCOORD0,
+			noperspective float2 tc_back : TEXCOORD1,
+#else
+			float3 tc_w_front : TEXCOORD0,
+			float3 tc_w_back : TEXCOORD1,
+#endif
+			float3 pos_es_front : TEXCOORD2,
+			float3 pos_es_back : TEXCOORD3,
+			float3 normal_es_front : TEXCOORD4,
+			float3 normal_es_back : TEXCOORD5,
+			float2 texcoord : TEXCOORD6) : SV_Target
+{
+#ifndef NOPERSPECTIVE_SUPPORT
+	float2 tc_front = tc_w_front.xy / tc_w_front.z;
+	float2 tc_back = tc_w_back.xy / tc_w_back.z;
+#endif
+
+	normal_es_front = normalize(normal_es_front);
+	normal_es_back = normalize(normal_es_back);
+
+	float3 reflect_vec_front = reflect(pos_es_front, normal_es_front);
+	float3 reflect_vec_back = reflect(pos_es_back, normal_es_back);
+	
+	float specular;
+	if (specular_level.w > 0.5f)
+	{
+		specular = dot(specular_tex.Sample(aniso_sampler, texcoord).rgb, float3(0.2126f, 0.7152f, 0.0722f));
+	}
+	else
+	{
+		specular = specular_level.x;
+	}
+
+	float3 reflect_vec_ws = mul(reflect_vec_front, (float3x3)inv_view);
+	float3 sky = decode_hdr_yc(skybox_tex.Sample(skybox_sampler, reflect_vec_front).r,
+			skybox_C_tex.Sample(skybox_sampler, reflect_vec_front)).xyz;
+
+	float fresnel = fresnel_term_schlick(-normalize(pos_es_back), normal_es_back, specular).x;
+	float4 ssr;
+	if (reflect_vec_front.z > 0)
+	{
+		ssr = CalcSSR(tc_front, normal_es_front, pos_es_front, pos_es_front, 1);
+	}
+	else
+	{
+		if (reflect_vec_back.z < 0)
+		{
+			ssr = CalcSSR(tc_back, normal_es_back, pos_es_back, pos_es_back - eye_in_back_camera, 0);
+		}
+		else
+		{
+			ssr = 0;
+		}
+	}
+
+	ssr.xyz = lerp(sky, ssr.xyz, ssr.w);
+	ssr.w = fresnel;
+	
+	return ssr;
+}
+		]]>
+	</shader>
+
+	<technique name="ReflectSpecialShadingTech" inherit="SpecialShadingTech">
+		<pass name="p0">
+			<state name="blend_enable" value="true"/>
+			<state name="blend_op" value="add"/>
+			<state name="src_blend" value="src_alpha"/>
+			<state name="dest_blend" value="one"/>
+			<state name="blend_op_alpha" value="add"/>
+			<state name="src_blend_alpha" value="zero"/>
+			<state name="dest_blend_alpha" value="one"/>
+
+			<state name="vertex_shader" value="ReflectSpecialShadingVS()"/>
+			<state name="pixel_shader" value="ReflectSpecialShadingPS()"/>
+		</pass>
+	</technique>
+</effect>

@@ -40,7 +40,7 @@
 
 	<shader>
 		<![CDATA[
-float4 FrontSideSSR(float2 tc, float3 normal, float3 pos_es, float fresnel)
+float4 CalcSSR(float2 tc, float3 normal, float3 pos_es, float3 indicent_es, bool front_side)
 {
 	normal = normalize(normal); // eye space normal 
 	float3 view_dir = normalize(pos_es); // eye space view direction
@@ -49,7 +49,7 @@ float4 FrontSideSSR(float2 tc, float3 normal, float3 pos_es, float fresnel)
 	float non_linear_depth = linear_depth_to_non_linear(linear_depth, near_q.x, near_q.y);
 	float3 tex_pos = float3(tc, non_linear_depth); // let z component be projected nonlinear depth, so we can do linear interpolation in screen space
 
-	float3 reflect_vec = normalize(reflect(view_dir, normal)); // eye space reflect vector
+	float3 reflect_vec = normalize(reflect(indicent_es, normal)); // eye space reflect vector
 	float4 proj_ray_end = mul(float4(pos_es + reflect_vec * ray_length, 1), proj);
 	proj_ray_end.xyz /= proj_ray_end.w;
 	float3 tex_reflect_pos = float3(TexCoordFromPos(proj_ray_end), proj_ray_end.z);
@@ -100,7 +100,15 @@ float4 FrontSideSSR(float2 tc, float3 normal, float3 pos_es, float fresnel)
 	while (sample_index < num_steps)
 	{
 		cur_tex_pos += sample_step;
-		float cur_sample_depth = front_side_depth_tex.SampleLevel(ssr_linear_sampler, cur_tex_pos.xy, 0).r;
+		float cur_sample_depth;
+		if (front_side)
+		{
+			cur_sample_depth = front_side_depth_tex.SampleLevel(ssr_linear_sampler, cur_tex_pos.xy, 0).r;
+		}
+		else
+		{
+			cur_sample_depth = back_side_depth_tex.SampleLevel(ssr_linear_sampler, cur_tex_pos.xy, 0).r;
+		}
 		float cur_ray_march_depth = non_linear_depth_to_linear(cur_tex_pos.z, near_q.x, near_q.y);
 	
 		t += step;
@@ -132,115 +140,42 @@ float4 FrontSideSSR(float2 tc, float3 normal, float3 pos_es, float fresnel)
 		sample_tex_pos = tex_pos.xy + t * tex_offset.xy;
 	}
 
-	float reflect_dir_fade_out_factor = 1 - orientation_factor;
-	float screen_edge_fade_out_factor = saturate(distance(sample_tex_pos, 0.5f) * 2);
-	
-	float3 clr = front_side_tex.Sample(ssr_linear_sampler, sample_tex_pos).rgb;
-	float alpha = (1 - max(screen_edge_fade_out_factor, reflect_dir_fade_out_factor)) * fresnel;
-
-	return float4(clr, saturate(alpha));
-}
-
-float4 BackSideSSR(float2 tc, float3 normal, float3 pos_es, float fresnel)
-{
-	normal = normalize(normal); // eye space normal 
-	float3 view_dir = normalize(pos_es); // eye space view direction
-	
-	float linear_depth = pos_es.z;
-	float non_linear_depth = linear_depth_to_non_linear(linear_depth, near_q.x, near_q.y);
-	float3 tex_pos = float3(tc, non_linear_depth); // let z component be projected nonlinear depth, so we can do linear interpolation in screen space
-
-	float3 reflect_vec = normalize(reflect(view_dir, normal)); // eye space reflect vector
-	reflect_vec.z = -reflect_vec.z;
-	float4 proj_ray_end = mul(float4(pos_es + reflect_vec * ray_length, 1), proj);
-	proj_ray_end.xyz /= proj_ray_end.w;	
-	float3 tex_reflect_pos = float3(TexCoordFromPos(proj_ray_end), proj_ray_end.z);
-	float3 tex_reflect_vec = tex_reflect_pos - tex_pos;
-	
-	// the reflect vector completely perpendiculars to screen
-	if (!any(tex_reflect_vec.xy))
+	float sample_z;
+	if (front_side)
 	{
-		return 0;
-	}
-
-	// try to compute the intersection point of reflection vector and screen edge
-	float t1 = 1;
-	if (tex_reflect_pos.x < 0)
-	{
-		t1 = -tex_pos.x / tex_reflect_vec.x;
-	}
-	else if (tex_reflect_pos.x > 1)
-	{
-		t1 = (1 - tex_pos.x) / tex_reflect_vec.x;
-	}
-
-	float t2 = 1;
-	if (tex_reflect_pos.y < 0)
-	{
-		t2 = -tex_pos.y / tex_reflect_vec.y;
-	}
-	else if (tex_reflect_pos.y > 1)
-	{
-		t2 = (1 - tex_pos.y) / tex_reflect_vec.y;
-	}
-
-	float3 tex_offset = min(t1, t2) * tex_reflect_vec;
-	
-	float orientation_factor = dot(reflect_vec, float3(0, 0, 1));
-	int num_steps = (int)lerp(max_samples, min_samples, abs(orientation_factor));
-
-	float step = 1.0f / num_steps;
-	float3 sample_step = tex_offset * step;
-
-	int sample_index = 0;
-	float3 cur_tex_pos = tex_pos;
-
-	float t = 0;
-	float2 pt1 = float2(linear_depth, linear_depth);
-	float2 pt2 = float2(linear_depth, linear_depth);
-
-	while (sample_index < num_steps)
-	{
-		cur_tex_pos += sample_step;
-		float cur_sample_depth = back_side_depth_tex.SampleLevel(ssr_linear_sampler, cur_tex_pos.xy, 0).r;
-		float cur_ray_march_depth = non_linear_depth_to_linear(cur_tex_pos.z, near_q.x, near_q.y);
-	
-		t += step;
-		
-		if (cur_ray_march_depth > cur_sample_depth)
-		{
-			sample_index = num_steps;
-			pt2 = float2(cur_sample_depth, cur_ray_march_depth);
-		}
-		else
-		{
-			++ sample_index;
-			pt1 = float2(cur_sample_depth, cur_ray_march_depth);
-		}
-	}
-
-	float delta1 = pt1.x - pt1.y;
-	float delta2 = pt2.x - pt2.y;
-	float delta = delta1 - delta2;
-
-	float2 sample_tex_pos;
-	if (delta2 == 0)
-	{
-		sample_tex_pos = tex_pos.xy + tex_offset.xy;
+		sample_z = front_side_depth_tex.SampleLevel(ssr_linear_sampler, sample_tex_pos.xy, 0).r;
 	}
 	else
 	{
-		t = (delta1 * t - delta2 * (t - step)) / delta;
-		sample_tex_pos = tex_pos.xy + t * tex_offset.xy;
+		sample_z = back_side_depth_tex.SampleLevel(ssr_linear_sampler, sample_tex_pos.xy, 0).r;
 	}
+	sample_z = linear_depth_to_non_linear(sample_z, near_q.x, near_q.y);
 
-	float reflect_dir_fade_out_factor = 1 - orientation_factor;
-	float screen_edge_fade_out_factor = saturate(distance(sample_tex_pos, 0.5f) * 2);
+	float4 ret;
+	if (sample_z > 1 - 1e-6f)
+	{
+		ret = 0;
+	}
+	else
+	{
+		float reflect_dir_fade_out_factor = 1 - orientation_factor;
+		float screen_edge_fade_out_factor = saturate(distance(sample_tex_pos, 0.5f) * 2);
 
-	float3 clr = back_side_tex.Sample(ssr_linear_sampler, sample_tex_pos).rgb;
-	float alpha = (1 - max(screen_edge_fade_out_factor, reflect_dir_fade_out_factor)) * fresnel;
+		float3 clr;
+		if (front_side)
+		{
+			clr = front_side_tex.Sample(ssr_linear_sampler, sample_tex_pos).rgb;
+		}
+		else
+		{
+			clr = back_side_tex.Sample(ssr_linear_sampler, sample_tex_pos).rgb;
+		}
+		float alpha = 1 - max(screen_edge_fade_out_factor, reflect_dir_fade_out_factor);
 
-	return float4(clr, saturate(alpha));
+		ret = float4(clr, alpha);
+	}
+	
+	return ret;
 }
 
 void ScreenSpaceReflectionPostProcessVS(float4 pos : POSITION,
@@ -256,8 +191,9 @@ float4 ScreenSpaceReflectionPostProcessPS(float2 tc : TEXCOORD0, float3 view_dir
 {
 	float3 pos_es = view_dir * (foreground_depth_tex.Sample(ssr_point_sampler, tc).x / view_dir.z);
 	float3 normal = GetNormal(g_buffer_0_tex.Sample(ssr_linear_sampler, tc));
+	float4 clr = CalcSSR(tc, normal, pos_es, pos_es, 1);
 	float fresnel = fresnel_term_schlick(-view_dir, normal, g_buffer_1_tex.Sample(ssr_linear_sampler, tc).w).x;
-	return FrontSideSSR(tc, normal, pos_es, fresnel);
+	return float4(clr.xyz, saturate(clr.w * fresnel));
 }
 		]]>
 	</shader>

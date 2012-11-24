@@ -206,7 +206,6 @@ namespace
 					*(technique_->Effect().ParameterByName("ray_length")) = camera.FarPlane() - camera.NearPlane();
 					*(technique_->Effect().ParameterByName("min_samples")) = static_cast<int32_t>(20);
 					*(technique_->Effect().ParameterByName("max_samples")) = static_cast<int32_t>(30);
-					*(technique_->Effect().ParameterByName("ray_length_fadeout_factor")) = 0.6f;
 					*(technique_->Effect().ParameterByName("inv_view")) = camera.InverseViewMatrix();
 				}
 				*(technique_->Effect().ParameterByName("front_side_depth_tex")) = Context::Instance().DeferredRenderingLayerInstance()->OpaqueDepthTex(0);
