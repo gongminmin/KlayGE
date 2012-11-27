@@ -653,6 +653,31 @@ namespace KlayGE
 					}
 					break;
 
+				case IT_CatmullRom:
+					for (size_t j = 0; j < curve.eye_ctrl_pts.size() - 3; ++ j)
+					{
+						if ((frame >= curve.frame_ids[j + 0])
+							&& (frame < curve.frame_ids[j + 3]))
+						{
+							float factor = (frame - curve.frame_ids[j + 0])
+								/ (curve.frame_ids[j + 3] - curve.frame_ids[j + 0]);
+							float3 eye = MathLib::catmull_rom(curve.eye_ctrl_pts[j + 0],
+								curve.eye_ctrl_pts[j + 1], curve.eye_ctrl_pts[j + 2],
+								curve.eye_ctrl_pts[j + 3], factor);
+							float3 target = MathLib::catmull_rom(curve.target_ctrl_pts[j + 0],
+								curve.target_ctrl_pts[j + 1], curve.target_ctrl_pts[j + 2],
+								curve.target_ctrl_pts[j + 3], factor);
+							float3 up = MathLib::catmull_rom(curve.up_ctrl_pts[j + 0],
+								curve.up_ctrl_pts[j + 1], curve.up_ctrl_pts[j + 2], 
+								curve.up_ctrl_pts[j + 3], factor);
+
+							camera_->ViewParams(eye, target, up);
+
+							break;
+						}
+					}
+					break;
+
 				default:
 					BOOST_ASSERT(false);
 					break;
@@ -687,6 +712,10 @@ namespace KlayGE
 			if ("linear" == type_str)
 			{
 				type = CameraPathController::IT_Linear;
+			}
+			else if ("catmull_rom" == type_str)
+			{
+				type = CameraPathController::IT_CatmullRom;
 			}
 			else
 			{
@@ -750,6 +779,10 @@ namespace KlayGE
 			{
 			case CameraPathController::IT_Linear:
 				type_str = "linear";
+				break;
+
+			case CameraPathController::IT_CatmullRom:
+				type_str = "catmull_rom";
 				break;
 
 			default:
