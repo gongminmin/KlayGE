@@ -31,6 +31,8 @@ private:
 	KlayGE::SceneObjectPtr teapot_;
 	KlayGE::SceneObjectPtr dino_;
 
+	KlayGE::LightSourcePtr point_light_;
+
 	KlayGE::FontPtr font_;
 
 	KlayGE::SceneObjectPtr sky_box_;

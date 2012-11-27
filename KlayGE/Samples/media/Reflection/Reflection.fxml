@@ -105,7 +105,7 @@ float4 ReflectSpecialShadingPS(
 	float3 sky = decode_hdr_yc(skybox_tex.Sample(skybox_sampler, reflect_vec_front).r,
 			skybox_C_tex.Sample(skybox_sampler, reflect_vec_front)).xyz;
 
-	float fresnel = fresnel_term_schlick(-normalize(pos_es_back), normal_es_back, specular).x;
+	float fresnel = fresnel_term_schlick(-normalize(pos_es_front), normal_es_front, specular).x;
 	float4 ssr;
 	if (reflect_vec_front.z > 0)
 	{

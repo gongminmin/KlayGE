@@ -36,46 +36,6 @@ extern "C"
 
 namespace
 {
-	class SpotLightSourceUpdate
-	{
-	public:
-		SpotLightSourceUpdate(float cone_radius, float cone_height, float org_angle, float rot_speed, float3 const & pos)
-			: rot_speed_(rot_speed), pos_(pos)
-		{
-			model_org_ = MathLib::scaling(cone_radius, cone_radius, cone_height) * MathLib::rotation_x(org_angle);
-		}
-
-		void operator()(LightSource& light, float app_time, float /*elapsed_time*/)
-		{
-			light.ModelMatrix(model_org_ * MathLib::rotation_y(app_time * 1000 * rot_speed_)
-				* MathLib::translation(pos_));
-		}
-
-	private:
-		float4x4 model_org_;
-		float rot_speed_;
-		float3 pos_;
-	};
-
-	class PointLightSourceUpdate
-	{
-	public:
-		PointLightSourceUpdate(float move_speed, float3 const & pos)
-			: move_speed_(move_speed), pos_(pos)
-		{
-		}
-
-		void operator()(LightSource& light, float app_time, float /*elapsed_time*/)
-		{
-			light.ModelMatrix(MathLib::translation(sin(app_time * 1000 * move_speed_), 0.0f, 0.0f)
-				* MathLib::translation(pos_));
-		}
-
-	private:
-		float move_speed_;
-		float3 pos_;
-	};
-
 	class ReflectMesh : public StaticMesh
 	{
 	public:
@@ -96,7 +56,9 @@ namespace
 		{
 			StaticMesh::BuildMeshInfo();
 
-			mtl_->specular = float3(10, 10, 10);
+			mtl_->diffuse = float3(0.2f, 0.2f, 0.2f);
+			mtl_->shininess = 128;
+			mtl_->specular_level = 0.6f;
 		}
 
 		void OnRenderBegin()
@@ -114,7 +76,7 @@ namespace
 					*(technique_->Effect().ParameterByName("proj")) = camera.ProjMatrix();
 					*(technique_->Effect().ParameterByName("inv_proj")) = MathLib::inverse(camera.ProjMatrix());
 					float q = camera.FarPlane() / (camera.FarPlane() - camera.NearPlane());
-					float2 near_q(camera.NearPlane() * q, q);
+					float3 near_q(camera.NearPlane() * q, q, camera.FarPlane());
 					*(technique_->Effect().ParameterByName("near_q")) = near_q;
 					*(technique_->Effect().ParameterByName("ray_length")) = camera.FarPlane() - camera.NearPlane();
 					*(technique_->Effect().ParameterByName("inv_view")) = camera.InverseViewMatrix();
@@ -190,6 +152,22 @@ namespace
 		TexturePtr back_refl_depth_tex_;
 	};
 
+	class DinoMesh : public StaticMesh
+	{
+	public:
+		DinoMesh(RenderModelPtr const & model, std::wstring const & name)
+			: StaticMesh(model, name)
+		{
+		}
+
+		void BuildMeshInfo()
+		{
+			StaticMesh::BuildMeshInfo();
+
+			mtl_->diffuse = float3(1, 0.73f, 0.08f);
+		}
+	};
+
 
 	enum
 	{
@@ -253,13 +231,20 @@ void ScreenSpaceReflectionApp::InitObjects()
 	//screen_camera_path_->AttachCamera(this->ActiveCamera());
 	//this->ActiveCamera().AddToSceneManager();
 
+	point_light_ = MakeSharedPtr<PointLightSource>();
+	point_light_->Attrib(LSA_NoShadow);
+	point_light_->Color(float3(1, 1, 1));
+	point_light_->Position(float3(0, 3, -2));
+	point_light_->Falloff(float3(1, 0, 0.3f));
+	point_light_->AddToSceneManager();
+
 	teapot_ = MakeSharedPtr<SceneObjectHelper>(SyncLoadModel("teapot.meshml", EAH_GPU_Read | EAH_Immutable,
 		CreateModelFactory<RenderModel>(), CreateMeshFactory<ReflectMesh>())->Mesh(0), SceneObjectHelper::SOA_Cullable);
 	teapot_->ModelMatrix(MathLib::scaling(float3(15, 15, 15)));
 	teapot_->AddToSceneManager();
 
 	dino_ = MakeSharedPtr<SceneObjectHelper>(SyncLoadModel("dino50.7z//dino50.meshml", EAH_GPU_Read | EAH_Immutable,
-		CreateModelFactory<RenderModel>(), CreateMeshFactory<StaticMesh>())->Mesh(0), SceneObjectHelper::SOA_Cullable);
+		CreateModelFactory<RenderModel>(), CreateMeshFactory<DinoMesh>())->Mesh(0), SceneObjectHelper::SOA_Cullable);
 	dino_->ModelMatrix(MathLib::translation(0.0f, 1.0f, -2.0f));
 	dino_->AddToSceneManager();
 
@@ -402,8 +387,8 @@ uint32_t ScreenSpaceReflectionApp::DoUpdate(KlayGE::uint32_t pass)
 
 		float3 refl_eye_pos = MathLib::transform_coord(eye, refl_mat);
 		float3 refl_eye_at = MathLib::transform_coord(at, refl_mat);
-		back_camera->ViewParams(refl_eye_pos, refl_eye_at, screen_camera_->UpVec());
-		back_camera->ProjParams(screen_camera_->FOV(), screen_camera_->Aspect(), MathLib::dot_coord(refl_plane, eye), screen_camera_->FarPlane());
+		back_camera->ViewParams(center, center + direction, screen_camera_->UpVec());
+		back_camera->ProjParams(PI / 2, 1, screen_camera_->NearPlane(), screen_camera_->FarPlane());
 
 		checked_pointer_cast<ReflectMesh>(teapot_->GetRenderable())->BackCamera(back_camera);
 

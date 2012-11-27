@@ -9,7 +9,7 @@
 	<cbuffer name="per_frame">
 		<parameter type="float4x4" name="proj"/>
 		<parameter type="float4x4" name="inv_proj"/>
-		<parameter type="float2" name="near_q"/>
+		<parameter type="float3" name="near_q"/>
 		<parameter type="float" name="ray_length"/>
 	</cbuffer>
 
@@ -129,15 +129,15 @@ float4 CalcSSR(float2 tc, float3 normal, float3 pos_es, float3 indicent_es, bool
 	float delta2 = pt2.x - pt2.y;
 	float delta = delta1 - delta2;
 
-	float2 sample_tex_pos;
+	float3 sample_tex_pos;
 	if (delta2 == 0)
 	{
-		sample_tex_pos = tex_pos.xy + tex_offset.xy;
+		sample_tex_pos = tex_pos + tex_offset;
 	}
 	else
 	{
 		t = (delta1 * t - delta2 * (t - step)) / delta;
-		sample_tex_pos = tex_pos.xy + t * tex_offset.xy;
+		sample_tex_pos = tex_pos + t * tex_offset;
 	}
 
 	float sample_z;
@@ -149,30 +149,30 @@ float4 CalcSSR(float2 tc, float3 normal, float3 pos_es, float3 indicent_es, bool
 	{
 		sample_z = back_side_depth_tex.SampleLevel(ssr_linear_sampler, sample_tex_pos.xy, 0).r;
 	}
-	sample_z = linear_depth_to_non_linear(sample_z, near_q.x, near_q.y);
 
 	float4 ret;
-	if (sample_z > 1 - 1e-6f)
-	{
-		ret = 0;
-	}
-	else
+	if ((sample_z < near_q.z - 1e-6f)
+		&& (abs(sample_z - non_linear_depth_to_linear(sample_tex_pos.z, near_q.x, near_q.y)) < 0.1f))
 	{
 		float reflect_dir_fade_out_factor = 1 - orientation_factor;
-		float screen_edge_fade_out_factor = saturate(distance(sample_tex_pos, 0.5f) * 2);
+		float screen_edge_fade_out_factor = saturate((distance(sample_tex_pos.xy, 0.5f) - 0.4f) * 3);
 
 		float3 clr;
 		if (front_side)
 		{
-			clr = front_side_tex.Sample(ssr_linear_sampler, sample_tex_pos).rgb;
+			clr = front_side_tex.Sample(ssr_linear_sampler, sample_tex_pos.xy).rgb;
 		}
 		else
 		{
-			clr = back_side_tex.Sample(ssr_linear_sampler, sample_tex_pos).rgb;
+			clr = back_side_tex.Sample(ssr_linear_sampler, sample_tex_pos.xy).rgb;
 		}
 		float alpha = 1 - max(screen_edge_fade_out_factor, reflect_dir_fade_out_factor);
 
 		ret = float4(clr, alpha);
+	}
+	else
+	{
+		ret = 0;
 	}
 	
 	return ret;
