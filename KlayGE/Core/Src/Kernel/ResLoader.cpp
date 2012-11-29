@@ -18,7 +18,9 @@
 #include <sstream>
 #include <boost/typeof/typeof.hpp>
 #include <boost/foreach.hpp>
+#ifndef KLAYGE_PLATFORM_WINDOWS_METRO
 #include <boost/filesystem.hpp>
+#endif
 
 #if defined KLAYGE_PLATFORM_WINDOWS
 #include <windows.h>
@@ -101,6 +103,7 @@ namespace KlayGE
 
 	void ResLoader::AddPath(std::string const & path)
 	{
+#ifndef KLAYGE_PLATFORM_WINDOWS_METRO
 		boost::filesystem::path new_path(path);
 		if (!new_path.is_absolute())
 		{
@@ -125,10 +128,14 @@ namespace KlayGE
 			path_str.push_back('/');
 		}
 		paths_.push_back(path_str);
+#else
+		UNREF_PARAM(path);
+#endif
 	}
 
 	std::string ResLoader::Locate(std::string const & name)
 	{
+#ifndef KLAYGE_PLATFORM_WINDOWS_METRO
 		if (('/' == name[0]) || ('\\' == name[0]))
 		{
 			if (boost::filesystem::exists(name))
@@ -194,10 +201,22 @@ namespace KlayGE
 #endif
 
 		return "";
+#else
+		std::ifstream ifs(name.c_str(), std::ios_base::binary);
+		if (ifs)
+		{
+			return name;
+		}
+		else
+		{
+			return "";
+		}
+#endif
 	}
 
 	ResIdentifierPtr ResLoader::Open(std::string const & name)
 	{
+#ifndef KLAYGE_PLATFORM_WINDOWS_METRO
 		if (('/' == name[0]) || ('\\' == name[0]))
 		{
 			if (boost::filesystem::exists(name))
@@ -276,6 +295,19 @@ namespace KlayGE
 #endif
 
 		return ResIdentifierPtr();
+#else
+		WIN32_FILE_ATTRIBUTE_DATA info;
+		if (::GetFileAttributesExA(name.c_str(), GetFileExInfoStandard, &info))
+		{
+			uint64_t timestamp = info.ftLastWriteTime.dwHighDateTime * 0x100000000ULL + info.ftLastWriteTime.dwLowDateTime;
+			return MakeSharedPtr<ResIdentifier>(name, timestamp,
+				MakeSharedPtr<std::ifstream>(name.c_str(), std::ios_base::binary));
+		}
+		else
+		{
+			return ResIdentifierPtr();
+		}
+#endif
 	}
 
 	void* ResLoader::SyncQuery(ResLoadingDescPtr const & res_desc)

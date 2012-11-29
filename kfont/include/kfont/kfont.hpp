@@ -4,16 +4,36 @@
 #pragma once
 
 #if defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
-#define KFONT_PLATFORM_WINDOWS
-#ifndef NOMINMAX
-	#define NOMINMAX
-#endif
-// Forces all boost's libraries to be linked as dll
-#ifndef BOOST_ALL_DYN_LINK
-	#define BOOST_ALL_DYN_LINK
-#endif
+	#define KFONT_PLATFORM_WINDOWS
+
+	#ifndef NOMINMAX
+		#define NOMINMAX
+	#endif
+
+	// Forces all boost's libraries to be linked as dll
+	#ifndef BOOST_ALL_DYN_LINK
+		#define BOOST_ALL_DYN_LINK
+	#endif
+
+	#if defined(__MINGW32__)
+		#define KLAYGE_COMPILER_NAME mgw
+		#include <_mingw.h>
+	#else
+		#include <sdkddkver.h>
+	#endif
+
+	#if (_WIN32_WINNT >= 0x0602 /*_WIN32_WINNT_WIN8*/)
+		#include <winapifamily.h>
+		#if WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_DESKTOP)
+			#define KFONT_PLATFORM_WINDOWS_DESKTOP
+		#else
+			#define KFONT_PLATFORM_WINDOWS_METRO
+		#endif
+	#else
+		#define KFONT_PLATFORM_WINDOWS_DESKTOP
+	#endif
 #elif defined(__ANDROID__)
-#define KFONT_PLATFORM_ANDROID
+	#define KFONT_PLATFORM_ANDROID
 #endif
 
 #include <vector>
@@ -58,17 +78,39 @@
 	#endif
 
 	#ifndef KFONT_SOURCE
-		#if defined(_M_X64)
-			#if defined(KFONT_DEBUG)
-				#pragma comment(lib, "kfont_vc_x64_d.lib")
-			#else
-				#pragma comment(lib, "kfont_vc_x64.lib")
+		#ifdef KFONT_PLATFORM_WINDOWS_DESKTOP
+			#if defined(_M_X64)
+				#if defined(KFONT_DEBUG)
+					#pragma comment(lib, "kfont_vc_x64_d.lib")
+				#else
+					#pragma comment(lib, "kfont_vc_x64.lib")
+				#endif
+			#elif(_M_IX86)
+				#if defined(KFONT_DEBUG)
+					#pragma comment(lib, "kfont_vc_x86_d.lib")
+				#else
+					#pragma comment(lib, "kfont_vc_x86.lib")
+				#endif
 			#endif
-		#elif(_M_IX86)
-			#if defined(KFONT_DEBUG)
-				#pragma comment(lib, "kfont_vc_x86_d.lib")
-			#else
-				#pragma comment(lib, "kfont_vc_x86.lib")
+		#else
+			#if defined(_M_X64)
+				#if defined(KFONT_DEBUG)
+					#pragma comment(lib, "kfont_vc_x64_app_d.lib")
+				#else
+					#pragma comment(lib, "kfont_vc_x64_app.lib")
+				#endif
+			#elif(_M_IX86)
+				#if defined(KFONT_DEBUG)
+					#pragma comment(lib, "kfont_vc_x86_app_d.lib")
+				#else
+					#pragma comment(lib, "kfont_vc_x86_app.lib")
+				#endif
+			#elif(_M_ARM)
+				#if defined(KFONT_DEBUG)
+					#pragma comment(lib, "kfont_vc_arm_app_d.lib")
+				#else
+					#pragma comment(lib, "kfont_vc_arm_app.lib")
+				#endif
 			#endif
 		#endif
 	#endif
