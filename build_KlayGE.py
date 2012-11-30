@@ -5,7 +5,7 @@ from __future__ import print_function
 import os, sys
 from blib_util import *
 
-def build_KlayGE(compiler_name, compiler_version, compiler_arch, generator_name):
+def build_KlayGE(compiler_name, compiler_version, compiler_arch, generator_name, config_list):
 	curdir = os.path.abspath(os.curdir)
 
 	build_dir = "KlayGE/Build/%s-%d_0-%s" % (compiler_name, compiler_version, compiler_arch)
@@ -13,12 +13,14 @@ def build_KlayGE(compiler_name, compiler_version, compiler_arch, generator_name)
 		os.makedirs(build_dir)
 
 	os.chdir(build_dir)
+	
+	additional_options = ""
+	if (compiler_arch.find("_app") > 0):
+		additional_options += "-D KLAYGE_WITH_WINRT:BOOL=\"TRUE\""
 
 	cmake_cmd = batch_command()
-	cmake_cmd.add_command('cmake -G "%s" %s' % (generator_name, "../cmake"))
+	cmake_cmd.add_command('cmake -G "%s" %s %s' % (generator_name, additional_options, "../cmake"))
 	cmake_cmd.execute()
-
-	config_list = ("Debug", "RelWithDebInfo")
 
 	build_cmd = batch_command()
 	build_cmd.add_command('CALL "%%VS%d0COMNTOOLS%%..\\..\\VC\\vcvarsall.bat" %s' % (compiler_version, compiler_arch))
@@ -29,7 +31,7 @@ def build_KlayGE(compiler_name, compiler_version, compiler_arch, generator_name)
 
 	os.chdir(curdir)
 
-def build_Samples(compiler_name, compiler_version, compiler_arch, generator_name):
+def build_Samples(compiler_name, compiler_version, compiler_arch, generator_name, config_list):
 	curdir = os.path.abspath(os.curdir)
 
 	build_dir = "KlayGE/Samples/build/%s-%d_0-%s" % (compiler_name, compiler_version, compiler_arch)
@@ -37,12 +39,14 @@ def build_Samples(compiler_name, compiler_version, compiler_arch, generator_name
 		os.makedirs(build_dir)
 
 	os.chdir(build_dir)
+	
+	additional_options = ""
+	if (compiler_arch.find("_app") > 0):
+		additional_options += "-D KLAYGE_WITH_WINRT:BOOL=\"TRUE\""
 
 	cmake_cmd = batch_command()
-	cmake_cmd.add_command('cmake -G "%s" %s' % (generator_name, "../cmake"))
+	cmake_cmd.add_command('cmake -G "%s" %s %s' % (generator_name, additional_options, "../cmake"))
 	cmake_cmd.execute()
-
-	config_list = ("Debug", "RelWithDebInfo")
 
 	build_cmd = batch_command()
 	build_cmd.add_command('CALL "%%VS%d0COMNTOOLS%%..\\..\\VC\\vcvarsall.bat" %s' % (compiler_version, compiler_arch))
@@ -53,7 +57,7 @@ def build_Samples(compiler_name, compiler_version, compiler_arch, generator_name
 
 	os.chdir(curdir)
 
-def build_Tools(compiler_name, compiler_version, compiler_arch, generator_name):
+def build_Tools(compiler_name, compiler_version, compiler_arch, generator_name, config_list):
 	curdir = os.path.abspath(os.curdir)
 
 	build_dir = "KlayGE/Tools/build/%s-%d_0-%s" % (compiler_name, compiler_version, compiler_arch)
@@ -66,8 +70,6 @@ def build_Tools(compiler_name, compiler_version, compiler_arch, generator_name):
 	cmake_cmd.add_command('cmake -G "%s" %s' % (generator_name, "../cmake"))
 	cmake_cmd.execute()
 
-	config_list = ("Debug", "RelWithDebInfo")
-
 	build_cmd = batch_command()
 	build_cmd.add_command('CALL "%%VS%d0COMNTOOLS%%..\\..\\VC\\vcvarsall.bat" %s' % (compiler_version, compiler_arch))
 	for config in config_list:
@@ -77,7 +79,7 @@ def build_Tools(compiler_name, compiler_version, compiler_arch, generator_name):
 
 	os.chdir(curdir)
 
-def build_Tutorials(compiler_name, compiler_version, compiler_arch, generator_name):
+def build_Tutorials(compiler_name, compiler_version, compiler_arch, generator_name, config_list):
 	curdir = os.path.abspath(os.curdir)
 
 	build_dir = "KlayGE/Tutorials/build/%s-%d_0-%s" % (compiler_name, compiler_version, compiler_arch)
@@ -85,12 +87,14 @@ def build_Tutorials(compiler_name, compiler_version, compiler_arch, generator_na
 		os.makedirs(build_dir)
 
 	os.chdir(build_dir)
+	
+	additional_options = ""
+	if (compiler_arch.find("_app") > 0):
+		additional_options += "-D KLAYGE_WITH_WINRT:BOOL=\"TRUE\""
 
 	cmake_cmd = batch_command()
-	cmake_cmd.add_command('cmake -G "%s" %s' % (generator_name, "../cmake"))
+	cmake_cmd.add_command('cmake -G "%s" %s %s' % (generator_name, additional_options, "../cmake"))
 	cmake_cmd.execute()
-
-	config_list = ("Debug", "RelWithDebInfo")
 
 	build_cmd = batch_command()
 	build_cmd.add_command('CALL "%%VS%d0COMNTOOLS%%..\\..\\VC\\vcvarsall.bat" %s' % (compiler_version, compiler_arch))
@@ -107,11 +111,15 @@ if __name__ == "__main__":
 	else:
 		compiler = ""
 	if len(sys.argv) > 2:
-		cfg = sys.argv[2]
+		arch = sys.argv[2]
 	else:
-		cfg = "x86"
+		arch = ""
+	if len(sys.argv) > 3:
+		cfg = sys.argv[3]
+	else:
+		cfg = ""
 
-	compiler_info = get_compiler_info(compiler, cfg)
+	compiler_info = get_compiler_info(compiler, arch, cfg)
 
 	if 0 == len(compiler_info):
 		print("Wrong configuration\n")
@@ -119,16 +127,16 @@ if __name__ == "__main__":
 
 	print("Building KlayGE...")
 	for arch in compiler_info[2]:
-		build_KlayGE(compiler_info[0], compiler_info[1], arch[0], arch[1])
+		build_KlayGE(compiler_info[0], compiler_info[1], arch[0], arch[1], compiler_info[3])
 
 	print("Building Samples...")
 	for arch in compiler_info[2]:
-		build_Samples(compiler_info[0], compiler_info[1], arch[0], arch[1])
+		build_Samples(compiler_info[0], compiler_info[1], arch[0], arch[1], compiler_info[3])
 
 	print("Building Tools...")
 	for arch in compiler_info[2]:
-		build_Tools(compiler_info[0], compiler_info[1], arch[0], arch[1])
+		build_Tools(compiler_info[0], compiler_info[1], arch[0], arch[1], compiler_info[3])
 
 	print("Building Tutorials...")
 	for arch in compiler_info[2]:
-		build_Tutorials(compiler_info[0], compiler_info[1], arch[0], arch[1])
+		build_Tutorials(compiler_info[0], compiler_info[1], arch[0], arch[1], compiler_info[3])

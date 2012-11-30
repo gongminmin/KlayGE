@@ -9,6 +9,7 @@ syntax: glob
 *.aps
 *.pyc
 __pycache__
+cfg_build.py
 */build/android/*/bin
 */build/android/*/libs
 */build/android/*/obj

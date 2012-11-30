@@ -7,7 +7,7 @@ from build_external import build_external_libs
 from build_external import copy_to_dst
 from blib_util import *
 
-def build_glloader(compiler_name, compiler_version, compiler_arch, generator_name):
+def build_glloader(compiler_name, compiler_version, compiler_arch, generator_name, config_list):
 	curdir = os.path.abspath(os.curdir)
 
 	build_dir = "glloader/build/%s-%d_0-%s" % (compiler_name, compiler_version, compiler_arch)
@@ -19,8 +19,6 @@ def build_glloader(compiler_name, compiler_version, compiler_arch, generator_nam
 	cmake_cmd = batch_command()
 	cmake_cmd.add_command('cmake -G "%s" -D GLLOADER_USE_GLES:BOOL="FALSE" %s' % (generator_name, "../cmake"))
 	cmake_cmd.execute()
-
-	config_list = ("Debug", "RelWithDebInfo")
 
 	build_cmd = batch_command()
 	build_cmd.add_command('CALL "%%VS%d0COMNTOOLS%%..\\..\\VC\\vcvarsall.bat" %s' % (compiler_version, compiler_arch))
@@ -41,8 +39,6 @@ def build_glloader(compiler_name, compiler_version, compiler_arch, generator_nam
 	cmake_cmd.add_command('cmake -G "%s" -D GLLOADER_USE_GLES:BOOL="TRUE" %s' % (generator_name, "../cmake"))
 	cmake_cmd.execute()
 
-	config_list = ("Debug", "RelWithDebInfo")
-
 	build_cmd = batch_command()
 	build_cmd.add_command('CALL "%%VS%d0COMNTOOLS%%..\\..\\VC\\vcvarsall.bat" %s' % (compiler_version, compiler_arch))
 	for config in config_list:
@@ -58,11 +54,15 @@ if __name__ == "__main__":
 	else:
 		compiler = ""
 	if len(sys.argv) > 2:
-		cfg = sys.argv[2]
+		arch = sys.argv[2]
 	else:
-		cfg = "x86"
+		arch = ""
+	if len(sys.argv) > 3:
+		cfg = sys.argv[3]
+	else:
+		cfg = ""
 
-	compiler_info = get_compiler_info(compiler, cfg)
+	compiler_info = get_compiler_info(compiler, arch, cfg)
 
 	if 0 == len(compiler_info):
 		print("Wrong configuration\n")
@@ -70,4 +70,4 @@ if __name__ == "__main__":
 
 	print("Building glloader...")
 	for arch in compiler_info[2]:
-		build_glloader(compiler_info[0], compiler_info[1], arch[0], arch[1])
+		build_glloader(compiler_info[0], compiler_info[1], arch[0], arch[1], compiler_info[3])
