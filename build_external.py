@@ -73,6 +73,12 @@ def build_external_libs(compiler):
 	if "win32" == platform:
 		dst_dir_x86 = "KlayGE/bin/win_x86/"
 		dst_dir_x64 = "KlayGE/bin/win_x64/"
+		if ("vc" == compiler_name) and (compiler_version >= 11):
+			dst_dir_x86_app = "KlayGE/bin/win_x86_app/"
+			dst_dir_arm_app = "KlayGE/bin/win_arm_app/"
+		else:
+			dst_dir_x86_app = ""
+			dst_dir_arm_app = ""
 		bat_suffix = "bat"
 		dll_suffix = "dll"
 	elif "linux" == platform:
@@ -103,6 +109,12 @@ def build_external_libs(compiler):
 		copy_to_dst(fname, dst_dir_x86)
 	for fname in glob.iglob("External/boost/lib_%s_x64/lib/*.%s" % (boost_toolset, dll_suffix)):
 		copy_to_dst(fname, dst_dir_x64)
+	if dst_dir_x86_app != "":
+		for fname in glob.iglob("External/boost/lib_%s_x86_app/lib/*.%s" % (boost_toolset, dll_suffix)):
+			copy_to_dst(fname, dst_dir_x86_app)
+	if dst_dir_arm_app != "":
+		for fname in glob.iglob("External/boost/lib_%s_arm_app/lib/*.%s" % (boost_toolset, dll_suffix)):
+			copy_to_dst(fname, dst_dir_arm_app)
 
 
 	print("\nBuilding Python...\n")

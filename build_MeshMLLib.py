@@ -22,6 +22,14 @@ def build_MeshMLLib(compiler_name, compiler_version, compiler_arch, generator_na
 	cmake_cmd.add_command('cmake -G "%s" %s %s' % (generator_name, additional_options, "../cmake"))
 	cmake_cmd.execute()
 
+
+	if ("x86_app" == compiler_arch):
+		compiler_arch = "x86"
+	elif ("arm_app" == compiler_arch):
+		compiler_arch = "x86_arm"
+	elif ("x64" == compiler_arch):
+		compiler_arch = "x86_amd64"
+
 	build_cmd = batch_command()
 	build_cmd.add_command('CALL "%%VS%d0COMNTOOLS%%..\\..\\VC\\vcvarsall.bat" %s' % (compiler_version, compiler_arch))
 	for config in config_list:
