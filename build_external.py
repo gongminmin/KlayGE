@@ -182,15 +182,25 @@ def build_7z(compiler_name, compiler_version, compiler_arch, config_list, platfo
 		if "x64" == compiler_arch:
 			arch = "x64"
 			compiler_arch = "x86_amd64"
+			folder_suffix = ""
+		elif "arm_app" == compiler_arch:
+			arch = "ARM"
+			compiler_arch = "x86_arm"
+			folder_suffix = "_app"
+		elif "x86_app" == compiler_arch:
+			arch = "Win32"
+			compiler_arch = "x86"
+			folder_suffix = "_app"
 		else:
 			arch = "Win32"
+			folder_suffix = ""
 		configs = []
 		if "Debug" in config_list:
 			configs.append("Debug")
 		if ("Release" in config_list) or ("RelWithDebInfo" in config_list) or ("MinSizeRel" in config_list):
 			configs.append("Release")
 
-		os.chdir("External/7z/build/%s-%d_0" % (compiler_name, compiler_version))
+		os.chdir("External/7z/build/%s-%d_0%s" % (compiler_name, compiler_version, folder_suffix))
 		build_cmd = batch_command()
 		build_cmd.add_command('CALL "%%VS%d0COMNTOOLS%%..\\..\\VC\\vcvarsall.bat" %s' % (compiler_version, compiler_arch))
 		for cfg in configs:
@@ -261,16 +271,23 @@ def build_external_libs(compiler_name, compiler_version, compiler_arch, generato
 		print("\nBuilding freetype...\n")
 		build_freetype(compiler_name, compiler_version, compiler_arch, config_list, platform, ide_version)
 		
-	if (compiler_arch != "x86_app") and (compiler_arch != "arm_app"):
-		print("\nBuilding 7z...\n")
-		build_7z(compiler_name, compiler_version, compiler_arch, config_list, platform)
+	print("\nBuilding 7z...\n")
+	build_7z(compiler_name, compiler_version, compiler_arch, config_list, platform)
 
-		if "x64" == compiler_arch:
-			subdir = "x64/"
-		else:
-			subdir = ""
-		copy_to_dst("External/7z/build/%s-%d_0/%sRelease/7zxa.%s" % (compiler_name, compiler_version, subdir, dll_suffix), dst_dir)
-		copy_to_dst("External/7z/build/%s-%d_0/%sRelease/LZMA.%s" % (compiler_name, compiler_version, subdir, dll_suffix), dst_dir)
+	if "x64" == compiler_arch:
+		subdir = "x64/"
+		folder_suffix = ""
+	elif "arm_app" == compiler_arch:
+		subdir = "ARM/"
+		folder_suffix = "_app"
+	elif "x86_app" == compiler_arch:
+		subdir = ""
+		folder_suffix = "_app"
+	else:
+		subdir = ""
+		folder_suffix = ""
+	copy_to_dst("External/7z/build/%s-%d_0%s/%sRelease/7zxa.%s" % (compiler_name, compiler_version, folder_suffix, subdir, dll_suffix), dst_dir)
+	copy_to_dst("External/7z/build/%s-%d_0%s/%sRelease/LZMA.%s" % (compiler_name, compiler_version, folder_suffix, subdir, dll_suffix), dst_dir)
 
 	if (compiler_arch != "x86_app") and (compiler_arch != "arm_app"):
 		if "win32" == platform:
