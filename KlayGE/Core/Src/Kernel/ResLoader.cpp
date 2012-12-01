@@ -89,6 +89,9 @@ namespace KlayGE
 
 		paths_.push_back("");
 
+#if defined KLAYGE_PLATFORM_WINDOWS_METRO
+		this->AddPath("Assets/");
+#else
 		this->AddPath("");
 		this->AddPath("../");
 		this->AddPath("../../media/RenderFX/");
@@ -99,6 +102,7 @@ namespace KlayGE
 		this->AddPath("../../media/Textures/Juda/");
 		this->AddPath("../../media/Fonts/");
 		this->AddPath("../../media/PostProcessors/");
+#endif
 	}
 
 	void ResLoader::AddPath(std::string const & path)
@@ -123,22 +127,26 @@ namespace KlayGE
 			new_path = full_path;
 		}
 		std::string path_str = new_path.string();
+#else
+		std::string path_str = path;
+#endif
 		if (path_str[path_str.length() - 1] != '/')
 		{
 			path_str.push_back('/');
 		}
 		paths_.push_back(path_str);
-#else
-		UNREF_PARAM(path);
-#endif
 	}
 
 	std::string ResLoader::Locate(std::string const & name)
 	{
-#ifndef KLAYGE_PLATFORM_WINDOWS_METRO
 		if (('/' == name[0]) || ('\\' == name[0]))
 		{
+#ifndef KLAYGE_PLATFORM_WINDOWS_METRO
 			if (boost::filesystem::exists(name))
+#else
+			WIN32_FILE_ATTRIBUTE_DATA info;
+			if (::GetFileAttributesExA(name.c_str(), GetFileExInfoStandard, &info))
+#endif
 			{
 				return name;
 			}
@@ -150,7 +158,12 @@ namespace KlayGE
 			{
 				std::string const res_name(path + name);
 
+#ifndef KLAYGE_PLATFORM_WINDOWS_METRO
 				if (boost::filesystem::exists(res_name))
+#else
+				WIN32_FILE_ATTRIBUTE_DATA info;
+				if (::GetFileAttributesExA(res_name.c_str(), GetFileExInfoStandard, &info))
+#endif
 				{
 					return res_name;
 				}
@@ -160,9 +173,15 @@ namespace KlayGE
 					if (pkt_offset != std::string::npos)
 					{
 						std::string pkt_name = res_name.substr(0, pkt_offset);
+#ifndef KLAYGE_PLATFORM_WINDOWS_METRO
 						if (boost::filesystem::exists(pkt_name)
 								&& (boost::filesystem::is_regular_file(pkt_name)
 										|| boost::filesystem::is_symlink(pkt_name)))
+#else
+						WIN32_FILE_ATTRIBUTE_DATA info;
+						BOOL exists = ::GetFileAttributesExA(pkt_name.c_str(), GetFileExInfoStandard, &info);
+						if (exists && (!(info.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)))
+#endif
 						{
 							std::string::size_type const password_offset = pkt_name.find("|");
 							std::string password;
@@ -173,7 +192,11 @@ namespace KlayGE
 							}
 							std::string const file_name = res_name.substr(pkt_offset + 2);
 
+#ifndef KLAYGE_PLATFORM_WINDOWS_METRO
 							uint64_t timestamp = boost::filesystem::last_write_time(pkt_name);
+#else
+							uint64_t timestamp = info.ftLastWriteTime.dwHighDateTime * 0x100000000ULL + info.ftLastWriteTime.dwLowDateTime;
+#endif
 							ResIdentifierPtr pkt_file = MakeSharedPtr<ResIdentifier>(name, timestamp,
 								MakeSharedPtr<std::ifstream>(pkt_name.c_str(), std::ios_base::binary));
 							if (*pkt_file)
@@ -201,27 +224,24 @@ namespace KlayGE
 #endif
 
 		return "";
-#else
-		std::ifstream ifs(name.c_str(), std::ios_base::binary);
-		if (ifs)
-		{
-			return name;
-		}
-		else
-		{
-			return "";
-		}
-#endif
 	}
 
 	ResIdentifierPtr ResLoader::Open(std::string const & name)
 	{
-#ifndef KLAYGE_PLATFORM_WINDOWS_METRO
 		if (('/' == name[0]) || ('\\' == name[0]))
 		{
+#ifndef KLAYGE_PLATFORM_WINDOWS_METRO
 			if (boost::filesystem::exists(name))
+#else
+			WIN32_FILE_ATTRIBUTE_DATA info;
+			if (::GetFileAttributesExA(name.c_str(), GetFileExInfoStandard, &info))
+#endif
 			{
+#ifndef KLAYGE_PLATFORM_WINDOWS_METRO
 				uint64_t timestamp = boost::filesystem::last_write_time(name);
+#else
+				uint64_t timestamp = info.ftLastWriteTime.dwHighDateTime * 0x100000000ULL + info.ftLastWriteTime.dwLowDateTime;
+#endif
 				return MakeSharedPtr<ResIdentifier>(name, timestamp,
 					MakeSharedPtr<std::ifstream>(name.c_str(), std::ios_base::binary));
 			}
@@ -233,9 +253,18 @@ namespace KlayGE
 			{
 				std::string const res_name(path + name);
 
+#ifndef KLAYGE_PLATFORM_WINDOWS_METRO
 				if (boost::filesystem::exists(res_name))
+#else
+				WIN32_FILE_ATTRIBUTE_DATA info;
+				if (::GetFileAttributesExA(res_name.c_str(), GetFileExInfoStandard, &info))
+#endif
 				{
+#ifndef KLAYGE_PLATFORM_WINDOWS_METRO
 					uint64_t timestamp = boost::filesystem::last_write_time(res_name);
+#else
+					uint64_t timestamp = info.ftLastWriteTime.dwHighDateTime * 0x100000000ULL + info.ftLastWriteTime.dwLowDateTime;
+#endif
 					return MakeSharedPtr<ResIdentifier>(name, timestamp,
 						MakeSharedPtr<std::ifstream>(res_name.c_str(), std::ios_base::binary));
 				}
@@ -245,9 +274,15 @@ namespace KlayGE
 					if (pkt_offset != std::string::npos)
 					{
 						std::string pkt_name = res_name.substr(0, pkt_offset);
+#ifndef KLAYGE_PLATFORM_WINDOWS_METRO
 						if (boost::filesystem::exists(pkt_name)
 								&& (boost::filesystem::is_regular_file(pkt_name)
 										|| boost::filesystem::is_symlink(pkt_name)))
+#else
+						WIN32_FILE_ATTRIBUTE_DATA info;
+						BOOL exists = ::GetFileAttributesExA(pkt_name.c_str(), GetFileExInfoStandard, &info);
+						if (exists && (!(info.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)))
+#endif
 						{
 							std::string::size_type const password_offset = pkt_name.find("|");
 							std::string password;
@@ -258,7 +293,11 @@ namespace KlayGE
 							}
 							std::string const file_name = res_name.substr(pkt_offset + 2);
 
+#ifndef KLAYGE_PLATFORM_WINDOWS_METRO
 							uint64_t timestamp = boost::filesystem::last_write_time(pkt_name);
+#else
+							uint64_t timestamp = info.ftLastWriteTime.dwHighDateTime * 0x100000000ULL + info.ftLastWriteTime.dwLowDateTime;
+#endif
 							ResIdentifierPtr pkt_file = MakeSharedPtr<ResIdentifier>(name, timestamp,
 								MakeSharedPtr<std::ifstream>(pkt_name.c_str(), std::ios_base::binary));
 							if (*pkt_file)
@@ -295,19 +334,6 @@ namespace KlayGE
 #endif
 
 		return ResIdentifierPtr();
-#else
-		WIN32_FILE_ATTRIBUTE_DATA info;
-		if (::GetFileAttributesExA(name.c_str(), GetFileExInfoStandard, &info))
-		{
-			uint64_t timestamp = info.ftLastWriteTime.dwHighDateTime * 0x100000000ULL + info.ftLastWriteTime.dwLowDateTime;
-			return MakeSharedPtr<ResIdentifier>(name, timestamp,
-				MakeSharedPtr<std::ifstream>(name.c_str(), std::ios_base::binary));
-		}
-		else
-		{
-			return ResIdentifierPtr();
-		}
-#endif
 	}
 
 	void* ResLoader::SyncQuery(ResLoadingDescPtr const & res_desc)

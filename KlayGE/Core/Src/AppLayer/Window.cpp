@@ -458,10 +458,12 @@ namespace KlayGE
 		return ::DefWindowProc(hWnd, uMsg, wParam, lParam);
 	}
 #else
-	Window::Window(std::string const & /*name*/, RenderSettings const & /*settings*/)
+	Window::Window(std::string const & name, RenderSettings const & /*settings*/)
 		: msgs_(ref new MetroMsgs)
 	{
 		msgs_->BindWindow(this);
+
+		Convert(wname_, name);
 	}
 
 	Window::~Window()

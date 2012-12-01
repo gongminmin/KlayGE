@@ -150,9 +150,8 @@ namespace KlayGE
 
 #if defined KLAYGE_PLATFORM_WINDOWS_METRO
 	private:
+		void MetroCreate();
 		void MetroRun();
-
-		MetroFramework^ metro_fw_;
 #endif
 	};
 }

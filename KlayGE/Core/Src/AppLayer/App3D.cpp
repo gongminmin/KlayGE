@@ -59,9 +59,12 @@ using namespace concurrency;
 namespace KlayGE
 {
 #if defined KLAYGE_PLATFORM_WINDOWS_METRO
+	ref class MetroFrameworkSource;
+
 	ref class MetroFramework sealed : public Windows::ApplicationModel::Core::IFrameworkView
 	{
 		friend class App3DFramework;
+		friend MetroFrameworkSource;
 
 	public:
 		MetroFramework();
@@ -85,8 +88,16 @@ namespace KlayGE
 
 	ref class MetroFrameworkSource sealed : Windows::ApplicationModel::Core::IFrameworkViewSource
 	{
+		friend class App3DFramework;
+
 	public:
 		virtual Windows::ApplicationModel::Core::IFrameworkView^ CreateView();
+
+	private:
+		void BindAppFramework(App3DFramework* app);
+
+	private:
+		App3DFramework* app_;
 	};
 
 	MetroFramework::MetroFramework()
@@ -108,6 +119,7 @@ namespace KlayGE
 	void MetroFramework::SetWindow(CoreWindow^ window)
 	{
 		app_->main_wnd_->SetWindow(CoreWindow::GetForCurrentThread());
+		app_->MetroCreate();
 	}
 
 	void MetroFramework::Load(Platform::String^ entryPoint)
@@ -151,7 +163,14 @@ namespace KlayGE
 	
 	IFrameworkView^ MetroFrameworkSource::CreateView()
 	{
-		return ref new MetroFramework;
+		MetroFramework^ ret = ref new MetroFramework;
+		ret->BindAppFramework(app_);
+		return ret;
+	}
+
+	void MetroFrameworkSource::BindAppFramework(App3DFramework* app)
+	{
+		app_ = app;
 	}
 #endif
 
@@ -161,22 +180,17 @@ namespace KlayGE
 						: name_(name),
 							fps_(0), accumulate_time_(0), num_frames_(0),
 							app_time_(0), frame_time_(0)
-#if defined KLAYGE_PLATFORM_WINDOWS_METRO
-							, metro_fw_(ref new MetroFramework)
-#endif
 	{
 		Context::Instance().AppInstance(*this);
 
 		ContextCfg cfg = Context::Instance().Config();
 		main_wnd_ = this->MakeWindow(name_, cfg.graphics_cfg);
+#ifndef KLAYGE_PLATFORM_WINDOWS_METRO
 		cfg.graphics_cfg.left = main_wnd_->Left();
 		cfg.graphics_cfg.top = main_wnd_->Top();
 		cfg.graphics_cfg.width = main_wnd_->Width();
 		cfg.graphics_cfg.height = main_wnd_->Height();
 		Context::Instance().Config(cfg);
-
-#if defined KLAYGE_PLATFORM_WINDOWS_METRO
-		metro_fw_->BindAppFramework(this);
 #endif
 	}
 
@@ -189,9 +203,24 @@ namespace KlayGE
 
 	// 建立应用程序主窗口
 	/////////////////////////////////////////////////////////////////////////////////
+#ifdef KLAYGE_PLATFORM_WINDOWS_METRO
+	void App3DFramework::Create()
+	{
+	}
+
+	void App3DFramework::MetroCreate()
+	{
+		ContextCfg cfg = Context::Instance().Config();
+		cfg.graphics_cfg.left = main_wnd_->Left();
+		cfg.graphics_cfg.top = main_wnd_->Top();
+		cfg.graphics_cfg.width = main_wnd_->Width();
+		cfg.graphics_cfg.height = main_wnd_->Height();
+		Context::Instance().Config(cfg);
+#else
 	void App3DFramework::Create()
 	{
 		ContextCfg const & cfg = Context::Instance().Config();
+#endif
 		Context::Instance().RenderFactoryInstance().RenderEngineInstance().CreateRenderWindow(name_,
 			cfg.graphics_cfg);
 
@@ -226,6 +255,7 @@ namespace KlayGE
 	void App3DFramework::Run()
 	{
 		MetroFrameworkSource^ metro_app = ref new MetroFrameworkSource;
+		metro_app->BindAppFramework(this);
 		CoreApplication::Run(metro_app);
 	}
 
