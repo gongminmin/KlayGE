@@ -13,24 +13,36 @@ except:
 
 compiler		= "auto"		# could be "vc11", "vc10", "vc9", "mingw", "auto".
 arch			= ("x86", )		# could be "x86", "x64", "arm_app", "x86_app"
-config			= ("Debug", "RelWithDebInfo")
+config			= ("Debug", "RelWithDebInfo") # could be "Debug", "Release", "MinSizeRel", "RelWithDebInfo"
 	""")
 	cfg_build_f.close()
 	import cfg_build
 
 def get_compiler_info(compiler, archs, cfg):
+	import sys
+
 	env = os.environ
+	
+	platform = sys.platform
+	if 0 == platform.find("linux"):
+		platform = "linux"
 
 	if "" == compiler:
 		if ("" == cfg_build.compiler) or ("auto" == cfg_build.compiler):
-			if "VS110COMNTOOLS" in env:
-				compiler = "vc11"
-			elif "VS100COMNTOOLS" in env:
-				compiler = "vc10"
-			elif "VS90COMNTOOLS" in env:
-				compiler = "vc9"
-			elif os.path.exists("C:\MinGW\bin\gcc.exe"):
-				compiler = "mingw"
+			if "win32" == platform:
+				if "VS110COMNTOOLS" in env:
+					compiler = "vc11"
+				elif "VS100COMNTOOLS" in env:
+					compiler = "vc10"
+				elif "VS90COMNTOOLS" in env:
+					compiler = "vc9"
+				elif os.path.exists("C:\MinGW\bin\gcc.exe"):
+					compiler = "mingw"
+			elif "linux" == platform:
+				compiler = "gcc"
+			else:
+				print("Unsupported platform\n")
+				sys.exit(1)
 		else:
 			compiler = cfg_build.compiler
 			
@@ -74,7 +86,7 @@ def get_compiler_info(compiler, archs, cfg):
 	else:
 		return ()
 		
-	return (compiler_name, compiler_version, arch_list, cfg)
+	return (compiler_name, compiler_version, arch_list, cfg, platform)
 
 class batch_command:
 	def __init__(self):
@@ -84,7 +96,7 @@ class batch_command:
 		self.commands_ += [cmd]
 
 	def execute(self):
-		batch_file = "build.bat"
+		batch_file = "kge_build.bat"
 		batch_f = open(batch_file, "w")
 		batch_f.writelines([cmd_line + "\n" for cmd_line in self.commands_])
 		batch_f.close()
