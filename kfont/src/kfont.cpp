@@ -129,7 +129,11 @@ namespace KlayGE
 		{
 #ifndef KFONT_PLATFORM_ANDROID
 #ifdef KFONT_PLATFORM_WINDOWS
+#ifdef KFONT_PLATFORM_WINDOWS_DESKTOP
 			dll_handle_ = static_cast<void*>(::LoadLibraryA("LZMA.dll"));
+#else
+			dll_handle_ = static_cast<void*>(::LoadPackagedLibrary(L"LZMA.dll", 0));
+#endif
 			lzmaCompressFunc_ = (LzmaCompressFunc)reinterpret_cast<void*>(::GetProcAddress(static_cast<HMODULE>(dll_handle_), "LzmaCompress"));
 			lzmaUncompressFunc_ = (LzmaUncompressFunc)reinterpret_cast<void*>(::GetProcAddress(static_cast<HMODULE>(dll_handle_), "LzmaUncompress"));
 #else

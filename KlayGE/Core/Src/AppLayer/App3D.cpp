@@ -118,7 +118,7 @@ namespace KlayGE
 
 	void MetroFramework::SetWindow(CoreWindow^ window)
 	{
-		app_->main_wnd_->SetWindow(CoreWindow::GetForCurrentThread());
+		app_->MainWnd()->SetWindow(CoreWindow::GetForCurrentThread());
 		app_->MetroCreate();
 	}
 

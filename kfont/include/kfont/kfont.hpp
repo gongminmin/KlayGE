@@ -39,6 +39,10 @@
 #include <vector>
 #include <istream>
 
+#ifdef KFONT_PLATFORM_WINDOWS
+#include <windows.h>
+#endif
+
 #include <boost/cstdint.hpp>
 #if defined(_MSC_VER)
 #pragma warning(push)
