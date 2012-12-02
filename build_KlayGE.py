@@ -152,7 +152,8 @@ if __name__ == "__main__":
 
 	print("Building Samples...")
 	for arch in compiler_info[2]:
-		build_Samples(compiler_info[0], compiler_info[1], arch[0], arch[1], compiler_info[3])
+		if (arch[0] != "x86_app") and (arch[0] != "arm_app"):
+			build_Samples(compiler_info[0], compiler_info[1], arch[0], arch[1], compiler_info[3])
 
 	print("Building Tools...")
 	for arch in compiler_info[2]:
@@ -161,4 +162,5 @@ if __name__ == "__main__":
 
 	print("Building Tutorials...")
 	for arch in compiler_info[2]:
-		build_Tutorials(compiler_info[0], compiler_info[1], arch[0], arch[1], compiler_info[3])
+		if (arch[0] != "x86_app") and (arch[0] != "arm_app"):
+			build_Tutorials(compiler_info[0], compiler_info[1], arch[0], arch[1], compiler_info[3])

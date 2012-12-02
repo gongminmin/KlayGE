@@ -53,7 +53,12 @@ namespace
 }
 
 
+#ifdef KLAYGE_PLATFORM_WINDOWS_METRO
+[Platform::MTAThread]
+int main(Platform::Array<Platform::String^>^ /*args*/)
+#else
 int main()
+#endif
 {
 	ResLoader::Instance().AddPath("../../Samples/media/Common");
 
