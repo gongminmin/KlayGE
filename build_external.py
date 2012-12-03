@@ -54,6 +54,10 @@ def build_Python(compiler_name, compiler_version, compiler_arch, config_list, pl
 			os.chdir("External/Python/vc-11_0")
 		else:
 			os.chdir("External/Python/PCbuild")
+		if (compiler_version >= 10):
+			sln_suffix = "%d" % compiler_version
+		else:
+			sln_suffix = ""
 
 		if "x64" == compiler_arch:
 			arch = "x64"
@@ -71,7 +75,7 @@ def build_Python(compiler_name, compiler_version, compiler_arch, config_list, pl
 		build_cmd = batch_command()
 		build_cmd.add_command('CALL "%%VS%d0COMNTOOLS%%..\\..\\VC\\vcvarsall.bat" %s' % (compiler_version, compiler_arch))
 		for cfg in configs:
-			build_cmd.add_command('devenv pcbuild11.sln /Build "%s|%s"' % (cfg, arch))
+			build_cmd.add_command('devenv pcbuild%s.sln /Build "%s|%s"' % (sln_suffix, cfg, arch))
 			build_cmd.add_command('move /Y %s*.pyd ..\\DLLs\\%s' % (subdir, subdir))
 			build_cmd.add_command('move /Y %s*.dll ..\\DLLs\\%s' % (subdir, subdir))
 			build_cmd.add_command('move /Y %s*.lib ..\\libs\\%s' % (subdir, subdir))
