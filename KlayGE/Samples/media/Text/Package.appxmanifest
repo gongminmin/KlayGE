@@ -15,7 +15,7 @@
   </Resources>
   <Applications>
     <Application Id="App" Executable="$targetnametoken$.exe" EntryPoint="Text.App">
-      <VisualElements DisplayName="Text" Logo="Assets\Logo.png" SmallLogo="Assets\SmallLogo.png" Description="KlayGE Sample: Text" ForegroundText="light" BackgroundColor="#464646">
+      <VisualElements DisplayName="Text" Logo="Assets\Logo.png" SmallLogo="Assets\SmallLogo.png" Description="KlayGE Sample: Text" ForegroundText="light" BackgroundColor="#336699">
         <DefaultTile ShowName="allLogos" ShortName="Text" />
         <SplashScreen Image="Assets\SplashScreen.png" />
       </VisualElements>

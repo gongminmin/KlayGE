@@ -378,10 +378,23 @@ namespace KlayGE
 		for (TextureSlotsType::const_iterator iter = texture_slots.begin();
 			iter != texture_slots.end(); ++ iter)
 		{
-			TexturePtr tex;
-			if (!ResLoader::Instance().Locate(iter->second).empty())
+			std::string tex_name = ResLoader::Instance().Locate(iter->second);
+			if (tex_name.empty())
 			{
-				tex = model->RetriveTexture(iter->second);
+				std::string::size_type pos = iter->second.rfind('/');
+				if (std::string::npos == pos)
+				{
+					pos = iter->second.rfind('\\');
+				}
+				if (pos != std::string::npos)
+				{
+					tex_name = iter->second.substr(pos + 1);
+				}
+			}
+			TexturePtr tex;
+			if (!ResLoader::Instance().Locate(tex_name).empty())
+			{
+				tex = model->RetriveTexture(tex_name);
 			}
 
 			if (("Diffuse Color" == iter->first) || ("Diffuse Color Map" == iter->first))
