@@ -116,21 +116,8 @@
     <PostBuildEvent>
       <Message>
       </Message>
-      <Command>IF NOT EXIST $(OutDir)AppX\Render mkdir $(OutDir)AppX\Render
-IF NOT EXIST $(OutDir)AppX\Scene mkdir $(OutDir)AppX\Scene
-copy /Y ..\..\..\bin\win_x86_app\7zxa.dll $(OutDir)AppX\
-copy /Y ..\..\..\bin\win_x86_app\boost_chrono-vc110-mt-gd-1_51.dll $(OutDir)AppX\
-copy /Y ..\..\..\bin\win_x86_app\boost_date_time-vc110-mt-gd-1_51.dll $(OutDir)AppX\
-copy /Y ..\..\..\bin\win_x86_app\boost_regex-vc110-mt-gd-1_51.dll $(OutDir)AppX\
-copy /Y ..\..\..\bin\win_x86_app\boost_signals-vc110-mt-gd-1_51.dll $(OutDir)AppX\
-copy /Y ..\..\..\bin\win_x86_app\boost_system-vc110-mt-gd-1_51.dll $(OutDir)AppX\
-copy /Y ..\..\..\bin\win_x86_app\boost_thread-vc110-mt-gd-1_51.dll $(OutDir)AppX\
-copy /Y ..\..\..\bin\win_x86_app\kfont_vc_x86_app_d.dll $(OutDir)AppX\
-copy /Y ..\..\..\bin\win_x86_app\KlayGE_Core_vc_d.dll $(OutDir)AppX\
-copy /Y ..\..\..\bin\win_x86_app\LZMA.dll $(OutDir)AppX\
-copy /Y ..\..\..\bin\win_x86_app\Render\KlayGE_RenderEngine_D3D11_vc_d.dll $(OutDir)AppX\Render\
-copy /Y ..\..\..\bin\win_x86_app\Scene\KlayGE_Scene_OCTree_vc_d.dll $(OutDir)AppX\Scene\
-</Command>
+      <Command>
+      </Command>
     </PostBuildEvent>
     <Link>
       <AdditionalLibraryDirectories>../../../../External/boost/lib_vc11_x86_app/lib;../../../lib/win_x86_app;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
@@ -181,20 +168,8 @@ copy /Y ..\..\..\bin\win_x86_app\Scene\KlayGE_Scene_OCTree_vc_d.dll $(OutDir)App
     <PostBuildEvent>
       <Message>
       </Message>
-      <Command>IF NOT EXIST $(OutDir)AppX\Render mkdir $(OutDir)AppX\Render
-IF NOT EXIST $(OutDir)AppX\Scene mkdir $(OutDir)AppX\Scene
-copy /Y ..\..\..\bin\win_arm_app\7zxa.dll $(OutDir)AppX\
-copy /Y ..\..\..\bin\win_arm_app\boost_chrono-vc110-mt-gd-1_51.dll $(OutDir)AppX\
-copy /Y ..\..\..\bin\win_arm_app\boost_date_time-vc110-mt-gd-1_51.dll $(OutDir)AppX\
-copy /Y ..\..\..\bin\win_arm_app\boost_regex-vc110-mt-gd-1_51.dll $(OutDir)AppX\
-copy /Y ..\..\..\bin\win_arm_app\boost_signals-vc110-mt-gd-1_51.dll $(OutDir)AppX\
-copy /Y ..\..\..\bin\win_arm_app\boost_system-vc110-mt-gd-1_51.dll $(OutDir)AppX\
-copy /Y ..\..\..\bin\win_arm_app\boost_thread-vc110-mt-gd-1_51.dll $(OutDir)AppX\
-copy /Y ..\..\..\bin\win_arm_app\kfont_vc_arm_app_d.dll $(OutDir)AppX\
-copy /Y ..\..\..\bin\win_arm_app\KlayGE_Core_vc_d.dll $(OutDir)AppX\
-copy /Y ..\..\..\bin\win_arm_app\LZMA.dll $(OutDir)AppX\
-copy /Y ..\..\..\bin\win_arm_app\Render\KlayGE_RenderEngine_D3D11_vc_d.dll $(OutDir)AppX\Render\
-copy /Y ..\..\..\bin\win_arm_app\Scene\KlayGE_Scene_OCTree_vc_d.dll $(OutDir)AppX\Scene\</Command>
+      <Command>
+      </Command>
     </PostBuildEvent>
     <Link>
       <AdditionalLibraryDirectories>../../../../External/boost/lib_vc11_arm_app/lib;../../../lib/win_arm_app;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
@@ -248,20 +223,8 @@ copy /Y ..\..\..\bin\win_arm_app\Scene\KlayGE_Scene_OCTree_vc_d.dll $(OutDir)App
     <PostBuildEvent>
       <Message>
       </Message>
-      <Command>IF NOT EXIST $(OutDir)AppX\Render mkdir $(OutDir)AppX\Render
-IF NOT EXIST $(OutDir)AppX\Scene mkdir $(OutDir)AppX\Scene
-copy /Y ..\..\..\bin\win_x86_app\7zxa.dll $(OutDir)AppX\
-copy /Y ..\..\..\bin\win_x86_app\boost_chrono-vc110-mt-1_51.dll $(OutDir)AppX\
-copy /Y ..\..\..\bin\win_x86_app\boost_date_time-vc110-mt-1_51.dll $(OutDir)AppX\
-copy /Y ..\..\..\bin\win_x86_app\boost_regex-vc110-mt-1_51.dll $(OutDir)AppX\
-copy /Y ..\..\..\bin\win_x86_app\boost_signals-vc110-mt-1_51.dll $(OutDir)AppX\
-copy /Y ..\..\..\bin\win_x86_app\boost_system-vc110-mt-1_51.dll $(OutDir)AppX\
-copy /Y ..\..\..\bin\win_x86_app\boost_thread-vc110-mt-1_51.dll $(OutDir)AppX\
-copy /Y ..\..\..\bin\win_x86_app\kfont_vc_x86_app.dll $(OutDir)AppX\
-copy /Y ..\..\..\bin\win_x86_app\KlayGE_Core_vc.dll $(OutDir)AppX\
-copy /Y ..\..\..\bin\win_x86_app\LZMA.dll $(OutDir)AppX\
-copy /Y ..\..\..\bin\win_x86_app\Render\KlayGE_RenderEngine_D3D11_vc.dll $(OutDir)AppX\Render\
-copy /Y ..\..\..\bin\win_x86_app\Scene\KlayGE_Scene_OCTree_vc.dll $(OutDir)AppX\Scene\</Command>
+      <Command>
+      </Command>
     </PostBuildEvent>
     <Link>
       <AdditionalLibraryDirectories>../../../../External/boost/lib_vc11_x86_app/lib;../../../lib/win_x86_app;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
@@ -315,20 +278,8 @@ copy /Y ..\..\..\bin\win_x86_app\Scene\KlayGE_Scene_OCTree_vc.dll $(OutDir)AppX\
     <PostBuildEvent>
       <Message>
       </Message>
-      <Command>IF NOT EXIST $(OutDir)AppX\Render mkdir $(OutDir)AppX\Render
-IF NOT EXIST $(OutDir)AppX\Scene mkdir $(OutDir)AppX\Scene
-copy /Y ..\..\..\bin\win_arm_app\7zxa.dll $(OutDir)AppX\
-copy /Y ..\..\..\bin\win_arm_app\boost_chrono-vc110-mt-1_51.dll $(OutDir)AppX\
-copy /Y ..\..\..\bin\win_arm_app\boost_date_time-vc110-mt-1_51.dll $(OutDir)AppX\
-copy /Y ..\..\..\bin\win_arm_app\boost_regex-vc110-mt-1_51.dll $(OutDir)AppX\
-copy /Y ..\..\..\bin\win_arm_app\boost_signals-vc110-mt-1_51.dll $(OutDir)AppX\
-copy /Y ..\..\..\bin\win_arm_app\boost_system-vc110-mt-1_51.dll $(OutDir)AppX\
-copy /Y ..\..\..\bin\win_arm_app\boost_thread-vc110-mt-1_51.dll $(OutDir)AppX\
-copy /Y ..\..\..\bin\win_arm_app\kfont_vc_arm_app.dll $(OutDir)AppX\
-copy /Y ..\..\..\bin\win_arm_app\KlayGE_Core_vc.dll $(OutDir)AppX\
-copy /Y ..\..\..\bin\win_arm_app\LZMA.dll $(OutDir)AppX\
-copy /Y ..\..\..\bin\win_arm_app\Render\KlayGE_RenderEngine_D3D11_vc.dll $(OutDir)AppX\Render\
-copy /Y ..\..\..\bin\win_arm_app\Scene\KlayGE_Scene_OCTree_vc.dll $(OutDir)AppX\Scene\</Command>
+      <Command>
+      </Command>
     </PostBuildEvent>
     <Link>
       <AdditionalLibraryDirectories>../../../../External/boost/lib_vc11_arm_app/lib;../../../lib/win_arm_app;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
@@ -410,25 +361,179 @@ copy /Y ..\..\..\bin\win_arm_app\Scene\KlayGE_Scene_OCTree_vc.dll $(OutDir)AppX\
       <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</DeploymentContent>
       <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</DeploymentContent>
     </None>
+    <None Include="..\..\..\bin\win_x86_app\7zxa.dll">
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">true</DeploymentContent>
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">true</DeploymentContent>
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</DeploymentContent>
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</DeploymentContent>
+    </None>
+    <None Include="..\..\..\bin\win_x86_app\boost_chrono-vc110-mt-1_51.dll">
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">true</DeploymentContent>
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">true</DeploymentContent>
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</DeploymentContent>
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</DeploymentContent>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    </None>
+    <None Include="..\..\..\bin\win_x86_app\boost_chrono-vc110-mt-gd-1_51.dll">
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">true</DeploymentContent>
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">true</DeploymentContent>
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</DeploymentContent>
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</DeploymentContent>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+    </None>
+    <None Include="..\..\..\bin\win_x86_app\boost_date_time-vc110-mt-1_51.dll">
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">true</DeploymentContent>
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">true</DeploymentContent>
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</DeploymentContent>
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</DeploymentContent>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    </None>
+    <None Include="..\..\..\bin\win_x86_app\boost_date_time-vc110-mt-gd-1_51.dll">
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">true</DeploymentContent>
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">true</DeploymentContent>
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</DeploymentContent>
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</DeploymentContent>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+    </None>
+    <None Include="..\..\..\bin\win_x86_app\boost_regex-vc110-mt-1_51.dll">
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">true</DeploymentContent>
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">true</DeploymentContent>
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</DeploymentContent>
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</DeploymentContent>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    </None>
+    <None Include="..\..\..\bin\win_x86_app\boost_regex-vc110-mt-gd-1_51.dll">
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">true</DeploymentContent>
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">true</DeploymentContent>
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</DeploymentContent>
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</DeploymentContent>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+    </None>
+    <None Include="..\..\..\bin\win_x86_app\boost_signals-vc110-mt-1_51.dll">
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">true</DeploymentContent>
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">true</DeploymentContent>
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</DeploymentContent>
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</DeploymentContent>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    </None>
+    <None Include="..\..\..\bin\win_x86_app\boost_signals-vc110-mt-gd-1_51.dll">
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">true</DeploymentContent>
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">true</DeploymentContent>
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</DeploymentContent>
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</DeploymentContent>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+    </None>
+    <None Include="..\..\..\bin\win_x86_app\boost_system-vc110-mt-1_51.dll">
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">true</DeploymentContent>
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">true</DeploymentContent>
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</DeploymentContent>
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</DeploymentContent>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    </None>
+    <None Include="..\..\..\bin\win_x86_app\boost_system-vc110-mt-gd-1_51.dll">
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">true</DeploymentContent>
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">true</DeploymentContent>
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</DeploymentContent>
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</DeploymentContent>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+    </None>
+    <None Include="..\..\..\bin\win_x86_app\boost_thread-vc110-mt-1_51.dll">
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">true</DeploymentContent>
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">true</DeploymentContent>
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</DeploymentContent>
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</DeploymentContent>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    </None>
+    <None Include="..\..\..\bin\win_x86_app\boost_thread-vc110-mt-gd-1_51.dll">
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">true</DeploymentContent>
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">true</DeploymentContent>
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</DeploymentContent>
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</DeploymentContent>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+    </None>
+    <None Include="..\..\..\bin\win_x86_app\kfont_vc_x86_app.dll">
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">true</DeploymentContent>
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">true</DeploymentContent>
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</DeploymentContent>
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</DeploymentContent>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    </None>
+    <None Include="..\..\..\bin\win_x86_app\kfont_vc_x86_app_d.dll">
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">true</DeploymentContent>
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">true</DeploymentContent>
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</DeploymentContent>
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</DeploymentContent>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+    </None>
+    <None Include="..\..\..\bin\win_x86_app\KlayGE_Core_vc.dll">
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">true</DeploymentContent>
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">true</DeploymentContent>
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</DeploymentContent>
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</DeploymentContent>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    </None>
+    <None Include="..\..\..\bin\win_x86_app\KlayGE_Core_vc_d.dll">
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">true</DeploymentContent>
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">true</DeploymentContent>
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</DeploymentContent>
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</DeploymentContent>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+    </None>
+    <None Include="..\..\..\bin\win_x86_app\LZMA.dll">
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">true</DeploymentContent>
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">true</DeploymentContent>
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</DeploymentContent>
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</DeploymentContent>
+    </None>
+    <None Include="..\..\..\bin\win_x86_app\Render\KlayGE_RenderEngine_D3D11_vc.dll">
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">true</DeploymentContent>
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">true</DeploymentContent>
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</DeploymentContent>
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</DeploymentContent>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    </None>
+    <None Include="..\..\..\bin\win_x86_app\Render\KlayGE_RenderEngine_D3D11_vc_d.dll">
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">true</DeploymentContent>
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">true</DeploymentContent>
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</DeploymentContent>
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</DeploymentContent>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+    </None>
+    <None Include="..\..\..\bin\win_x86_app\Scene\KlayGE_Scene_OCTree_vc.dll">
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">true</DeploymentContent>
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">true</DeploymentContent>
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</DeploymentContent>
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</DeploymentContent>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    </None>
+    <None Include="..\..\..\bin\win_x86_app\Scene\KlayGE_Scene_OCTree_vc_d.dll">
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">true</DeploymentContent>
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">true</DeploymentContent>
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</DeploymentContent>
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</DeploymentContent>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+    </None>
     <None Include="..\..\..\media\Fonts\gkai00mp.kfont">
-      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">true</DeploymentContent>
-      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">true</DeploymentContent>
-      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</DeploymentContent>
-      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</DeploymentContent>
-    </None>
-    <None Include="..\..\..\media\Models\directional_light_proxy.meshml">
-      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">true</DeploymentContent>
-      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">true</DeploymentContent>
-      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</DeploymentContent>
-      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</DeploymentContent>
-    </None>
-    <None Include="..\..\..\media\Models\directional_light_proxy.meshml.model_bin">
-      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">true</DeploymentContent>
-      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">true</DeploymentContent>
-      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</DeploymentContent>
-      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</DeploymentContent>
-    </None>
-    <None Include="..\..\..\media\Models\indirect_light_proxy.meshml">
       <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">true</DeploymentContent>
       <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">true</DeploymentContent>
       <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</DeploymentContent>
@@ -440,19 +545,7 @@ copy /Y ..\..\..\bin\win_arm_app\Scene\KlayGE_Scene_OCTree_vc.dll $(OutDir)AppX\
       <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</DeploymentContent>
       <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</DeploymentContent>
     </None>
-    <None Include="..\..\..\media\Models\point_light_proxy.meshml">
-      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">true</DeploymentContent>
-      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">true</DeploymentContent>
-      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</DeploymentContent>
-      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</DeploymentContent>
-    </None>
     <None Include="..\..\..\media\Models\point_light_proxy.meshml.model_bin">
-      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">true</DeploymentContent>
-      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">true</DeploymentContent>
-      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</DeploymentContent>
-      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</DeploymentContent>
-    </None>
-    <None Include="..\..\..\media\Models\spot_light_proxy.meshml">
       <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">true</DeploymentContent>
       <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">true</DeploymentContent>
       <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</DeploymentContent>
@@ -596,12 +689,6 @@ copy /Y ..\..\..\bin\win_arm_app\Scene\KlayGE_Scene_OCTree_vc.dll $(OutDir)AppX\
       <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</DeploymentContent>
       <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</DeploymentContent>
     </None>
-    <None Include="..\..\..\media\RenderFX\GammaCorrection.kfx">
-      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">true</DeploymentContent>
-      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">true</DeploymentContent>
-      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</DeploymentContent>
-      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</DeploymentContent>
-    </None>
     <None Include="..\..\..\media\RenderFX\GBuffer.kfx">
       <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">true</DeploymentContent>
       <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">true</DeploymentContent>
@@ -687,12 +774,6 @@ copy /Y ..\..\..\bin\win_arm_app\Scene\KlayGE_Scene_OCTree_vc.dll $(OutDir)AppX\
       <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</DeploymentContent>
     </None>
     <None Include="..\..\..\media\RenderFX\VPLsLighting.kfx">
-      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">true</DeploymentContent>
-      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">true</DeploymentContent>
-      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</DeploymentContent>
-      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</DeploymentContent>
-    </None>
-    <None Include="..\..\media\Common\sponza_crytek.7z">
       <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">true</DeploymentContent>
       <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">true</DeploymentContent>
       <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</DeploymentContent>

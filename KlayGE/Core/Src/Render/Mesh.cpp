@@ -378,23 +378,10 @@ namespace KlayGE
 		for (TextureSlotsType::const_iterator iter = texture_slots.begin();
 			iter != texture_slots.end(); ++ iter)
 		{
-			std::string tex_name = ResLoader::Instance().Locate(iter->second);
-			if (tex_name.empty())
-			{
-				std::string::size_type pos = iter->second.rfind('/');
-				if (std::string::npos == pos)
-				{
-					pos = iter->second.rfind('\\');
-				}
-				if (pos != std::string::npos)
-				{
-					tex_name = iter->second.substr(pos + 1);
-				}
-			}
 			TexturePtr tex;
-			if (!ResLoader::Instance().Locate(tex_name).empty())
+			if (!ResLoader::Instance().Locate(iter->second).empty())
 			{
-				tex = model->RetriveTexture(tex_name);
+				tex = model->RetriveTexture(iter->second);
 			}
 
 			if (("Diffuse Color" == iter->first) || ("Diffuse Color Map" == iter->first))
@@ -1906,6 +1893,10 @@ namespace KlayGE
 		else
 		{
 			std::string full_meshml_name = ResLoader::Instance().Locate(meshml_name);
+			if (full_meshml_name.empty())
+			{
+				full_meshml_name = meshml_name;
+			}
 			ModelJIT(full_meshml_name);
 
 			std::string no_packing_name;

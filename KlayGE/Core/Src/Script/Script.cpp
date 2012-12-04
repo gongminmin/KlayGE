@@ -20,6 +20,8 @@
 
 #include <KlayGE/Script.hpp>
 
+#ifndef KLAYGE_PLATFORM_WINDOWS_METRO
+
 #ifdef KLAYGE_COMPILER_MSVC
 #define PYTHON_VER_STR KLAYGE_STRINGIZE(PY_MAJOR_VERSION)KLAYGE_STRINGIZE(PY_MINOR_VERSION)
 
@@ -229,3 +231,5 @@ namespace KlayGE
 		PyRun_SimpleString(script.c_str());
 	}
 }
+
+#endif

@@ -99,6 +99,72 @@
     <None Include="..\..\..\bin\KlayGE.cfg">
       <Filter>Resource Files</Filter>
     </None>
+    <None Include="..\..\..\bin\win_x86_app\7zxa.dll">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\..\..\bin\win_x86_app\boost_chrono-vc110-mt-1_51.dll">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\..\..\bin\win_x86_app\boost_chrono-vc110-mt-gd-1_51.dll">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\..\..\bin\win_x86_app\boost_date_time-vc110-mt-1_51.dll">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\..\..\bin\win_x86_app\boost_date_time-vc110-mt-gd-1_51.dll">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\..\..\bin\win_x86_app\boost_regex-vc110-mt-1_51.dll">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\..\..\bin\win_x86_app\boost_regex-vc110-mt-gd-1_51.dll">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\..\..\bin\win_x86_app\boost_signals-vc110-mt-1_51.dll">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\..\..\bin\win_x86_app\boost_signals-vc110-mt-gd-1_51.dll">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\..\..\bin\win_x86_app\boost_system-vc110-mt-1_51.dll">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\..\..\bin\win_x86_app\boost_system-vc110-mt-gd-1_51.dll">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\..\..\bin\win_x86_app\boost_thread-vc110-mt-1_51.dll">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\..\..\bin\win_x86_app\boost_thread-vc110-mt-gd-1_51.dll">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\..\..\bin\win_x86_app\kfont_vc_x86_app.dll">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\..\..\bin\win_x86_app\kfont_vc_x86_app_d.dll">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\..\..\bin\win_x86_app\KlayGE_Core_vc.dll">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\..\..\bin\win_x86_app\KlayGE_Core_vc_d.dll">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\..\..\bin\win_x86_app\LZMA.dll">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\..\..\bin\win_x86_app\Render\KlayGE_RenderEngine_D3D11_vc.dll">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\..\..\bin\win_x86_app\Render\KlayGE_RenderEngine_D3D11_vc_d.dll">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\..\..\bin\win_x86_app\Scene\KlayGE_Scene_OCTree_vc.dll">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\..\..\bin\win_x86_app\Scene\KlayGE_Scene_OCTree_vc_d.dll">
+      <Filter>Resource Files</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Text Include="..\..\media\Text\text.txt">

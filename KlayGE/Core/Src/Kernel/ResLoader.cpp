@@ -223,7 +223,24 @@ namespace KlayGE
 		}
 #endif
 
+#ifndef KLAYGE_PLATFORM_WINDOWS_METRO
 		return "";
+#else
+		std::string::size_type pos = name.rfind('/');
+		if (std::string::npos == pos)
+		{
+			pos = name.rfind('\\');
+		}
+		if (pos != std::string::npos)
+		{
+			std::string file_name = name.substr(pos + 1);
+			return this->Locate(file_name);
+		}
+		else
+		{
+			return "";
+		}
+#endif
 	}
 
 	ResIdentifierPtr ResLoader::Open(std::string const & name)
@@ -333,7 +350,25 @@ namespace KlayGE
 		}
 #endif
 
+
+#ifndef KLAYGE_PLATFORM_WINDOWS_METRO
 		return ResIdentifierPtr();
+#else
+		std::string::size_type pos = name.rfind('/');
+		if (std::string::npos == pos)
+		{
+			pos = name.rfind('\\');
+		}
+		if (pos != std::string::npos)
+		{
+			std::string file_name = name.substr(pos + 1);
+			return this->Open(file_name);
+		}
+		else
+		{
+			return ResIdentifierPtr();
+		}
+#endif		
 	}
 
 	void* ResLoader::SyncQuery(ResLoadingDescPtr const & res_desc)
