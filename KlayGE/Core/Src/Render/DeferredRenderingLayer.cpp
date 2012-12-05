@@ -752,16 +752,16 @@ namespace KlayGE
 				pvp.normal_cone_small_tex = rf.MakeTexture2D(width / 4, height / 4, MAX_IL_MIPMAP_LEVELS - 1, 1, fmt8, 1, 0, EAH_GPU_Write, nullptr);
 			}
 			pvp.indirect_lighting_tex = rf.MakeTexture2D(width / 2, height / 2, MAX_IL_MIPMAP_LEVELS, 1, EF_ABGR16F, 1, 0,  EAH_GPU_Read | EAH_GPU_Write, nullptr);
-			pvp.indirect_lighting_pingpong_tex = rf.MakeTexture2D(width / 2, height / 2, MAX_IL_MIPMAP_LEVELS - 1, 1, EF_ABGR16F, 1, 0,  EAH_GPU_Write, nullptr);
+			pvp.indirect_lighting_pingpong_tex = rf.MakeTexture2D(width / 2, height / 2, MAX_IL_MIPMAP_LEVELS - 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Write, nullptr);
 			pvp.vpls_lighting_fbs.resize(MAX_IL_MIPMAP_LEVELS);
 			for (uint32_t i = 0; i < pvp.indirect_lighting_tex->NumMipMaps(); ++ i)
 			{
-				TexturePtr subsplat_ds_tex = rf.MakeTexture2D(pvp.indirect_lighting_tex->Width(i), pvp.indirect_lighting_tex->Height(i),
-					1, 1, ds_views[Opaque_GBuffer]->Format(), 1, 0,  EAH_GPU_Write, nullptr);
+				RenderViewPtr subsplat_ds_view = rf.Make2DDepthStencilRenderView(pvp.indirect_lighting_tex->Width(i), pvp.indirect_lighting_tex->Height(i),
+					ds_views[Opaque_GBuffer]->Format(), 1, 0);
 
 				FrameBufferPtr fb = rf.MakeFrameBuffer();
 				fb->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*pvp.indirect_lighting_tex, 0, 1, i));
-				fb->Attach(FrameBuffer::ATT_DepthStencil, rf.Make2DDepthStencilRenderView(*subsplat_ds_tex, 0, 1, 0));
+				fb->Attach(FrameBuffer::ATT_DepthStencil, subsplat_ds_view);
 				pvp.vpls_lighting_fbs[i] = fb;
 			}
 		}
