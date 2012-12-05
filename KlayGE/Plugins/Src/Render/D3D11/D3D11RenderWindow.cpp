@@ -335,8 +335,8 @@ namespace KlayGE
 
 #ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
 		gi_factory_->MakeWindowAssociation(hWnd_, DXGI_MWA_NO_WINDOW_CHANGES | DXGI_MWA_NO_ALT_ENTER);
-#endif
 		swap_chain_->SetFullscreenState(this->FullScreen(), nullptr);
+#endif
 
 		this->UpdateSurfacesPtrs();
 
@@ -527,10 +527,12 @@ namespace KlayGE
 			d3d_imm_ctx_->ClearState();
 		}
 
+#ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
 		if (swap_chain_)
 		{
 			swap_chain_->SetFullscreenState(false, nullptr);
 		}
+#endif
 
 		render_target_view_.reset();
 		depth_stencil_view_.reset();
