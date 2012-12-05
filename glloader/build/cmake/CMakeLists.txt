@@ -83,6 +83,8 @@ SET(CMAKE_RELWITHDEBINFO_POSTFIX "" CACHE STRING "add a postfix, usually empty o
 SET(CMAKE_MINSIZEREL_POSTFIX "" CACHE STRING "add a postfix, usually empty on windows")
 
 
+EXECUTE_PROCESS(COMMAND python "../../autogen.py")
+
 ADD_CUSTOM_COMMAND(OUTPUT ../../src/glloader_gl.c
 	COMMAND "../../autogen.py")
 ADD_CUSTOM_TARGET(autogen ALL DEPENDS ../../src/glloader_gl.c)
