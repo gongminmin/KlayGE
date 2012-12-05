@@ -211,6 +211,9 @@ namespace KlayGE
 
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
+		uint32_t const width = screen_frame_buffer_->Width();
+		uint32_t const height = screen_frame_buffer_->Height();
+
 		RenderViewPtr ds_view;
 		if (hdr_pp_ || ppaa_pp_ || color_grading_pp_ || (render_settings_.stereo_method != STM_None))
 		{
@@ -227,7 +230,7 @@ namespace KlayGE
 
 					fmt = EF_D16;
 				}
-				ds_tex_ = rf.MakeTexture2D(screen_frame_buffer_->Width(), screen_frame_buffer_->Height(), 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
+				ds_tex_ = rf.MakeTexture2D(width, height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
 				ds_view = rf.Make2DDepthStencilRenderView(*ds_tex_, 0, 1, 0);
 			}
 			else
@@ -243,7 +246,7 @@ namespace KlayGE
 
 					fmt = EF_D16;
 				}
-				ds_view = rf.Make2DDepthStencilRenderView(screen_frame_buffer_->Width(), screen_frame_buffer_->Height(), fmt, 1, 0);
+				ds_view = rf.Make2DDepthStencilRenderView(width, height, fmt, 1, 0);
 			}
 		}
 
@@ -271,7 +274,7 @@ namespace KlayGE
 				}
 			}
 
-			mono_tex_ = rf.MakeTexture2D(screen_frame_buffer_->Width(), screen_frame_buffer_->Height(), 1, 1,
+			mono_tex_ = rf.MakeTexture2D(width, height, 1, 1,
 				fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
 			mono_frame_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*mono_tex_, 0, 1, 0));
 			mono_frame_buffer_->Attach(FrameBuffer::ATT_DepthStencil, ds_view);
@@ -302,7 +305,7 @@ namespace KlayGE
 				fmt = fmt_srgb;
 			}
 
-			cg_tex_ = rf.MakeTexture2D(screen_frame_buffer_->Width(), screen_frame_buffer_->Height(), 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
+			cg_tex_ = rf.MakeTexture2D(width, height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
 			cg_frame_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*cg_tex_, 0, 1, 0));
 			cg_frame_buffer_->Attach(FrameBuffer::ATT_DepthStencil, ds_view);
 
@@ -331,7 +334,7 @@ namespace KlayGE
 				fmt = fmt_srgb;
 			}
 
-			ldr_tex_ = rf.MakeTexture2D(screen_frame_buffer_->Width(), screen_frame_buffer_->Height(), 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
+			ldr_tex_ = rf.MakeTexture2D(width, height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
 			ldr_frame_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*ldr_tex_, 0, 1, 0));
 			ldr_frame_buffer_->Attach(FrameBuffer::ATT_DepthStencil, ds_view);
 
@@ -354,7 +357,7 @@ namespace KlayGE
 
 				fmt = EF_ABGR16F;
 			}
-			hdr_tex_ = rf.MakeTexture2D(screen_frame_buffer_->Width(), screen_frame_buffer_->Height(), 4, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write | EAH_Generate_Mips, nullptr);
+			hdr_tex_ = rf.MakeTexture2D(width, height, 4, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write | EAH_Generate_Mips, nullptr);
 			hdr_frame_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*hdr_tex_, 0, 1, 0));
 			hdr_frame_buffer_->Attach(FrameBuffer::ATT_DepthStencil, ds_view);
 
@@ -511,34 +514,14 @@ namespace KlayGE
 		{
 			if (caps.texture_format_support(EF_D24S8) || caps.texture_format_support(EF_D16))
 			{
-				ElementFormat fmt;
-				if (caps.texture_format_support(render_settings_.depth_stencil_fmt))
-				{
-					fmt = render_settings_.depth_stencil_fmt;
-				}
-				else
-				{
-					BOOST_ASSERT(caps.texture_format_support(EF_D16));
-
-					fmt = EF_D16;
-				}
-				ds_tex_ = rf.MakeTexture2D(screen_frame_buffer_->Width(), screen_frame_buffer_->Height(), 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
+				ElementFormat fmt = ds_tex_->Format();
+				ds_tex_ = rf.MakeTexture2D(width, height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
 				ds_view = rf.Make2DDepthStencilRenderView(*ds_tex_, 0, 1, 0);
 			}
 			else
 			{
-				ElementFormat fmt;
-				if (caps.rendertarget_format_support(render_settings_.depth_stencil_fmt, 1, 0))
-				{
-					fmt = render_settings_.depth_stencil_fmt;
-				}
-				else
-				{
-					BOOST_ASSERT(caps.rendertarget_format_support(EF_D16, 1, 0));
-
-					fmt = EF_D16;
-				}
-				ds_view = rf.Make2DDepthStencilRenderView(screen_frame_buffer_->Width(), screen_frame_buffer_->Height(), fmt, 1, 0);
+				ElementFormat fmt = ds_view->Format();
+				ds_view = rf.Make2DDepthStencilRenderView(width, height, fmt, 1, 0);
 			}
 		}
 
@@ -556,7 +539,6 @@ namespace KlayGE
 			cg_frame_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*cg_tex_, 0, 1, 0));
 			cg_frame_buffer_->Attach(FrameBuffer::ATT_DepthStencil, ds_view);
 		}
-
 		if (ppaa_pp_)
 		{
 			ElementFormat fmt = ldr_tex_->Format();
@@ -564,11 +546,10 @@ namespace KlayGE
 			ldr_frame_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*ldr_tex_, 0, 1, 0));
 			ldr_frame_buffer_->Attach(FrameBuffer::ATT_DepthStencil, ds_view);
 		}
-
 		if (hdr_pp_)
 		{
 			ElementFormat fmt = hdr_tex_->Format();
-			hdr_tex_ = rf.MakeTexture2D(width, height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write | EAH_Generate_Mips, nullptr);
+			hdr_tex_ = rf.MakeTexture2D(width, height, 4, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write | EAH_Generate_Mips, nullptr);
 			hdr_frame_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*hdr_tex_, 0, 1, 0));
 			hdr_frame_buffer_->Attach(FrameBuffer::ATT_DepthStencil, ds_view);
 		}
