@@ -120,6 +120,7 @@ SET(SOURCE_FILES
 	${KLAYGE_PROJECT_DIR}/Exporters/src/3DSMax/mesh_extractor.cpp
 	${KLAYGE_PROJECT_DIR}/Exporters/src/3DSMax/meshml.cpp
 	${KLAYGE_PROJECT_DIR}/Exporters/src/3DSMax/util.cpp
+	${KLAYGE_PROJECT_DIR}/Exporters/src/3DSMax/export.def
 )
 
 SET(HEADER_FILES
