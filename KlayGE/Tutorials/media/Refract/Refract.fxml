@@ -35,6 +35,7 @@
 		<state name="address_w" value="clamp"/>
 	</parameter>
 	<parameter type="texture2D" name="BackFace_tex"/>
+	<parameter type="texture2D" name="BackFaceDepth_tex"/>
 	<parameter type="sampler" name="BackFace_Sampler">
 		<state name="filtering" value="min_mag_linear_mip_point"/>
 		<state name="address_u" value="clamp"/>
@@ -94,16 +95,16 @@ float4 RefractPS(float3 normal			: TEXCOORD0,
 	float2 tex = pos_ss.xy / pos_ss.w;
 	tex.y *= KLAYGE_FLIPPING;
 	tex = tex / 2 + 0.5f;
-	float4 backface = BackFace_tex.Sample(BackFace_Sampler, tex);
+	float backface_depth = BackFaceDepth_tex.Sample(BackFace_Sampler, tex).x;
 	
-	pos_ss += dir_ss * (backface.z - incident.w);
+	pos_ss += dir_ss * (backface_depth - incident.w);
 	
 	tex = pos_ss.xy / pos_ss.w;
 	tex.y *= KLAYGE_FLIPPING;
 	tex = tex / 2 + 0.5f;
-	backface = BackFace_tex.Sample(BackFace_Sampler, tex);
+	float2 backface = BackFace_tex.Sample(BackFace_Sampler, tex).xy;
 
-	float3 back_face_normal = -restore_normal(backface.xy);
+	float3 back_face_normal = -restore_normal(backface * 2 - 1);
 
 	float3x3 refract_rgb = my_refract3(refract_vec.xyz, back_face_normal, 1 / eta_ratio);
 	float3 reflect_vec = reflect(incident.xyz, normal);
@@ -147,20 +148,35 @@ float4 RefractPS(float3 normal			: TEXCOORD0,
 		<![CDATA[
 void RefractBackFaceVS(float4 pos : POSITION,
 							float4 tangent_quat : TANGENT,
-							out float4 normal_depth : TEXCOORD0,
+							out float3 oNormal : TEXCOORD0,
 							out float4 oPos : SV_Position)
 {
 	pos = float4(pos.xyz * pos_extent + pos_center, 1);
 	tangent_quat = tangent_quat * 2 - 1;
 	
 	oPos = mul(pos, mvp);
-	normal_depth.xyz = mul(transform_quat(float3(0, 0, 1), tangent_quat), (float3x3)mv);
-	normal_depth.w = oPos.w;
+	oNormal = mul(transform_quat(float3(0, 0, 1), tangent_quat), (float3x3)mv);
 }
 
-float4 RefractBackFacePS(float4 normal_depth : TEXCOORD0) : SV_Target
+float4 RefractBackFacePS(float3 normal : TEXCOORD0) : SV_Target
 {
-	return float4(normalize(normal_depth.xyz).xy, normal_depth.w, 1);
+	return float4(normalize(normal).xy * 0.5f + 0.5f, 0, 1);
+}
+
+void RefractBackFaceDepthVS(float4 pos : POSITION,
+							float4 tangent_quat : TANGENT,
+							out float oDepth : TEXCOORD0,
+							out float4 oPos : SV_Position)
+{
+	pos = float4(pos.xyz * pos_extent + pos_center, 1);
+	
+	oPos = mul(pos, mvp);
+	oDepth = oPos.w;
+}
+
+float4 RefractBackFaceDepthPS(float depth : TEXCOORD0) : SV_Target
+{
+	return depth;
 }
 		]]>
 	</shader>
@@ -168,10 +184,20 @@ float4 RefractBackFacePS(float4 normal_depth : TEXCOORD0) : SV_Target
 	<technique name="RefractBackFace">
 		<pass name="p0">
 			<state name="cull_mode" value="front"/>
-			<state name="depth_func" value="greater"/>
+			<state name="depth_func" value="greater_equal"/>
 
 			<state name="vertex_shader" value="RefractBackFaceVS()"/>
 			<state name="pixel_shader" value="RefractBackFacePS()"/>
+		</pass>
+	</technique>
+
+	<technique name="RefractBackFaceDepth">
+		<pass name="p0">
+			<state name="cull_mode" value="front"/>
+			<state name="depth_func" value="greater"/>
+
+			<state name="vertex_shader" value="RefractBackFaceDepthVS()"/>
+			<state name="pixel_shader" value="RefractBackFaceDepthPS()"/>
 		</pass>
 	</technique>
 </effect>

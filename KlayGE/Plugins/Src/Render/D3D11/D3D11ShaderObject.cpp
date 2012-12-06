@@ -1500,21 +1500,83 @@ namespace KlayGE
 
 			shader_desc const & sd = effect.GetShaderDesc(shader_desc_ids[type]);
 
-			switch (type)
+			int shader_ver = ("auto" == sd.profile) ? 0 : sd.profile[3] - '0';
+			if (shader_ver > caps.max_shader_model)
 			{
-			case ST_VertexShader:
-				ID3D11VertexShader* vs;
-				if (FAILED(d3d_device->CreateVertexShader(&((*code_blob)[0]), code_blob->size(), nullptr, &vs)))
+				is_shader_validate_[type] = false;
+			}
+			else
+			{
+				switch (type)
 				{
-					is_shader_validate_[type] = false;
-				}
-				else
-				{
-					vertex_shader_ = MakeCOMPtr(vs);
-
-					if (!sd.so_decl.empty())
+				case ST_VertexShader:
 					{
-						if (caps.gs_support)
+						ID3D11VertexShader* vs;
+						if (FAILED(d3d_device->CreateVertexShader(&((*code_blob)[0]), code_blob->size(), nullptr, &vs)))
+						{
+							is_shader_validate_[type] = false;
+						}
+						else
+						{
+							vertex_shader_ = MakeCOMPtr(vs);
+
+							if (!sd.so_decl.empty())
+							{
+								if (caps.gs_support)
+								{
+									std::vector<D3D11_SO_DECLARATION_ENTRY> d3d11_decl(sd.so_decl.size());
+									for (size_t i = 0; i < sd.so_decl.size(); ++ i)
+									{
+										d3d11_decl[i] = D3D11Mapping::Mapping(sd.so_decl[i], static_cast<uint8_t>(i));
+									}
+
+									UINT rasterized_stream = 0;
+									if ((caps.max_shader_model >= 5) && (effect.GetShaderDesc(shader_desc_ids[ST_PixelShader]).func_name.empty()))
+									{
+										rasterized_stream = D3D11_SO_NO_RASTERIZED_STREAM;
+									}
+
+									ID3D11GeometryShader* gs;
+									if (FAILED(d3d_device->CreateGeometryShaderWithStreamOutput(&((*code_blob)[0]), code_blob->size(),
+										&d3d11_decl[0], static_cast<UINT>(d3d11_decl.size()), 0, 0, rasterized_stream, nullptr, &gs)))
+									{
+										is_shader_validate_[type] = false;
+									}
+									else
+									{
+										geometry_shader_ = MakeCOMPtr(gs);
+									}
+								}
+								else
+								{
+									is_shader_validate_[type] = false;
+								}
+							}
+
+							shader_code_[type].first = code_blob;
+						}
+					}
+					break;
+
+				case ST_PixelShader:
+					{
+						ID3D11PixelShader* ps;
+						if (FAILED(d3d_device->CreatePixelShader(&((*code_blob)[0]), code_blob->size(), nullptr, &ps)))
+						{
+							is_shader_validate_[type] = false;
+						}
+						else
+						{
+							pixel_shader_ = MakeCOMPtr(ps);
+							shader_code_[type].first = code_blob;
+						}
+					}
+					break;
+
+				case ST_GeometryShader:
+					if (caps.gs_support)
+					{
+						if (!sd.so_decl.empty())
 						{
 							std::vector<D3D11_SO_DECLARATION_ENTRY> d3d11_decl(sd.so_decl.size());
 							for (size_t i = 0; i < sd.so_decl.size(); ++ i)
@@ -1537,145 +1599,95 @@ namespace KlayGE
 							else
 							{
 								geometry_shader_ = MakeCOMPtr(gs);
+								shader_code_[type].first = code_blob;
 							}
 						}
 						else
 						{
-							is_shader_validate_[type] = false;
+							ID3D11GeometryShader* gs;
+							if (FAILED(d3d_device->CreateGeometryShader(&((*code_blob)[0]), code_blob->size(), nullptr, &gs)))
+							{
+								is_shader_validate_[type] = false;
+							}
+							else
+							{
+								geometry_shader_ = MakeCOMPtr(gs);
+								shader_code_[type].first = code_blob;
+							}
 						}
 					}
-
-					shader_code_[type].first = code_blob;
-				}
-				break;
-
-			case ST_PixelShader:
-				ID3D11PixelShader* ps;
-				if (FAILED(d3d_device->CreatePixelShader(&((*code_blob)[0]), code_blob->size(), nullptr, &ps)))
-				{
-					is_shader_validate_[type] = false;
-				}
-				else
-				{
-					pixel_shader_ = MakeCOMPtr(ps);
-					shader_code_[type].first = code_blob;
-				}
-				break;
-
-			case ST_GeometryShader:
-				if (caps.gs_support)
-				{
-					if (!sd.so_decl.empty())
+					else
 					{
-						std::vector<D3D11_SO_DECLARATION_ENTRY> d3d11_decl(sd.so_decl.size());
-						for (size_t i = 0; i < sd.so_decl.size(); ++ i)
-						{
-							d3d11_decl[i] = D3D11Mapping::Mapping(sd.so_decl[i], static_cast<uint8_t>(i));
-						}
+						is_shader_validate_[type] = false;
+					}
+					break;
 
-						UINT rasterized_stream = 0;
-						if ((caps.max_shader_model >= 5) && (effect.GetShaderDesc(shader_desc_ids[ST_PixelShader]).func_name.empty()))
-						{
-							rasterized_stream = D3D11_SO_NO_RASTERIZED_STREAM;
-						}
-
-						ID3D11GeometryShader* gs;
-						if (FAILED(d3d_device->CreateGeometryShaderWithStreamOutput(&((*code_blob)[0]), code_blob->size(),
-							&d3d11_decl[0], static_cast<UINT>(d3d11_decl.size()), 0, 0, rasterized_stream, nullptr, &gs)))
+				case ST_ComputeShader:
+					if (caps.cs_support)
+					{
+						ID3D11ComputeShader* cs;
+						if (FAILED(d3d_device->CreateComputeShader(&((*code_blob)[0]), code_blob->size(), nullptr, &cs)))
 						{
 							is_shader_validate_[type] = false;
 						}
 						else
 						{
-							geometry_shader_ = MakeCOMPtr(gs);
+							compute_shader_ = MakeCOMPtr(cs);
 							shader_code_[type].first = code_blob;
 						}
 					}
 					else
 					{
-						ID3D11GeometryShader* gs;
-						if (FAILED(d3d_device->CreateGeometryShader(&((*code_blob)[0]), code_blob->size(), nullptr, &gs)))
+						is_shader_validate_[type] = false;
+					}
+					break;
+
+				case ST_HullShader:
+					if (caps.hs_support)
+					{
+						ID3D11HullShader* hs;
+						if (FAILED(d3d_device->CreateHullShader(&((*code_blob)[0]), code_blob->size(), nullptr, &hs)))
 						{
 							is_shader_validate_[type] = false;
 						}
 						else
 						{
-							geometry_shader_ = MakeCOMPtr(gs);
+							hull_shader_ = MakeCOMPtr(hs);
 							shader_code_[type].first = code_blob;
+							has_tessellation_ = true;
 						}
 					}
-				}
-				else
-				{
-					is_shader_validate_[type] = false;
-				}
-				break;
-
-			case ST_ComputeShader:
-				if (caps.cs_support)
-				{
-					ID3D11ComputeShader* cs;
-					if (FAILED(d3d_device->CreateComputeShader(&((*code_blob)[0]), code_blob->size(), nullptr, &cs)))
+					else
 					{
 						is_shader_validate_[type] = false;
 					}
-					else
-					{
-						compute_shader_ = MakeCOMPtr(cs);
-						shader_code_[type].first = code_blob;
-					}
-				}
-				else
-				{
-					is_shader_validate_[type] = false;
-				}
-				break;
+					break;
 
-			case ST_HullShader:
-				if (caps.hs_support)
-				{
-					ID3D11HullShader* hs;
-					if (FAILED(d3d_device->CreateHullShader(&((*code_blob)[0]), code_blob->size(), nullptr, &hs)))
+				case ST_DomainShader:
+					if (caps.ds_support)
+					{
+						ID3D11DomainShader* ds;
+						if (FAILED(d3d_device->CreateDomainShader(&((*code_blob)[0]), code_blob->size(), nullptr, &ds)))
+						{
+							is_shader_validate_[type] = false;
+						}
+						else
+						{
+							domain_shader_ = MakeCOMPtr(ds);
+							shader_code_[type].first = code_blob;
+							has_tessellation_ = true;
+						}
+					}
+					else
 					{
 						is_shader_validate_[type] = false;
 					}
-					else
-					{
-						hull_shader_ = MakeCOMPtr(hs);
-						shader_code_[type].first = code_blob;
-						has_tessellation_ = true;
-					}
-				}
-				else
-				{
-					is_shader_validate_[type] = false;
-				}
-				break;
+					break;
 
-			case ST_DomainShader:
-				if (caps.ds_support)
-				{
-					ID3D11DomainShader* ds;
-					if (FAILED(d3d_device->CreateDomainShader(&((*code_blob)[0]), code_blob->size(), nullptr, &ds)))
-					{
-						is_shader_validate_[type] = false;
-					}
-					else
-					{
-						domain_shader_ = MakeCOMPtr(ds);
-						shader_code_[type].first = code_blob;
-						has_tessellation_ = true;
-					}
-				}
-				else
-				{
+				default:
 					is_shader_validate_[type] = false;
+					break;
 				}
-				break;
-
-			default:
-				is_shader_validate_[type] = false;
-				break;
 			}
 
 			// Shader reflection

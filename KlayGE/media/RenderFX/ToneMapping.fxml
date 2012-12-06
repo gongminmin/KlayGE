@@ -58,6 +58,18 @@ float3 ToneMapping(float3 color, float3 blur, float adapted_lum)
 	return F(1.6f * adapted_lum_dest * color) / F(White);
 }
 
+float4 ToneMapping20PS(float2 iTex : TEXCOORD0) : SV_Target
+{
+	float lum = max(0.001f, lum_tex.Sample(point_sampler, 0.5f.xx).r);
+	// For FXAA
+	float3 ldr_rgb = saturate(ToneMapping(src_tex.Sample(linear_sampler, iTex).rgb, bloom_tex.Sample(linear_sampler, iTex).rgb, lum));
+	return float4(ldr_rgb, dot(ldr_rgb, RGB_TO_LUM));
+}
+		]]>
+	</shader>
+
+	<shader version="3">
+		<![CDATA[		
 void ToneMapping30VS(float4 pos : POSITION,
 					out float3 oTex : TEXCOORD0,
 					out float4 oPos : SV_Position)
@@ -74,28 +86,9 @@ float4 ToneMapping30PS(float3 iTex : TEXCOORD0) : SV_Target
 	float3 ldr_rgb = saturate(ToneMapping(src_tex.Sample(linear_sampler, iTex.xy).rgb, bloom_tex.Sample(linear_sampler, iTex.xy).rgb, iTex.z));
 	return float4(ldr_rgb, dot(ldr_rgb, RGB_TO_LUM));
 }
-
-
-float4 ToneMapping20PS(float2 iTex : TEXCOORD0) : SV_Target
-{
-	float lum = max(0.001f, lum_tex.Sample(point_sampler, 0.5f.xx).r);
-	// For FXAA
-	float3 ldr_rgb = saturate(ToneMapping(src_tex.Sample(linear_sampler, iTex).rgb, bloom_tex.Sample(linear_sampler, iTex).rgb, lum));
-	return float4(ldr_rgb, dot(ldr_rgb, RGB_TO_LUM));
-}
 		]]>
 	</shader>
-	
-	<technique name="ToneMapping30">
-		<pass name="p0">
-			<state name="depth_enable" value="false"/>
-			<state name="depth_write_mask" value="0"/>
 
-			<state name="vertex_shader" value="ToneMapping30VS()"/>
-			<state name="pixel_shader" value="ToneMapping30PS()"/>
-		</pass>
-	</technique>
-	
 	<technique name="ToneMapping20">
 		<pass name="p0">
 			<state name="depth_enable" value="false"/>
@@ -103,6 +96,16 @@ float4 ToneMapping20PS(float2 iTex : TEXCOORD0) : SV_Target
 
 			<state name="vertex_shader" value="PostProcessVS()"/>
 			<state name="pixel_shader" value="ToneMapping20PS()"/>
+		</pass>
+	</technique>
+
+	<technique name="ToneMapping30">
+		<pass name="p0">
+			<state name="depth_enable" value="false"/>
+			<state name="depth_write_mask" value="0"/>
+
+			<state name="vertex_shader" value="ToneMapping30VS()"/>
+			<state name="pixel_shader" value="ToneMapping30PS()"/>
 		</pass>
 	</technique>
 </effect>

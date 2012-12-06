@@ -17,6 +17,7 @@
 #include <KlayGE/SceneObjectHelper.hpp>
 #include <KlayGE/Camera.hpp>
 #include <KlayGE/UI.hpp>
+#include <KlayGE/PostProcess.hpp>
 
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/InputFactory.hpp>
@@ -50,6 +51,7 @@ namespace
 			RenderEffectPtr effect = rf.LoadEffect("Refract.fxml");
 			front_face_tech_ = effect->TechniqueByName("Refract");
 			back_face_tech_ = effect->TechniqueByName("RefractBackFace");
+			back_face_depth_tech_ = effect->TechniqueByName("RefractBackFaceDepth");
 
 			technique_ = back_face_tech_;
 			*(technique_->Effect().ParameterByName("eta_ratio")) = float3(1 / 1.1f, 1 / 1.11f, 1 / 1.12f);
@@ -66,15 +68,19 @@ namespace
 			*(technique_->Effect().ParameterByName("tc_extent")) = float2(tc_bb.HalfSize().x(), tc_bb.HalfSize().y());
 		}
 
-		void Pass(int pass)
+		virtual void Pass(PassType pass)
 		{
 			switch (pass)
 			{
-			case 0:
+			case PT_TransparencyBackDepth:
+				technique_ = back_face_depth_tech_;
+				break;
+
+			case PT_TransparencyBackGBufferRT0:
 				technique_ = back_face_tech_;
 				break;
 
-			case 1:
+			case PT_TransparencyFrontShading:
 				technique_ = front_face_tech_;
 				break;
 
@@ -87,6 +93,10 @@ namespace
 		void BackFaceTexture(TexturePtr const & bf_tex)
 		{
 			*(technique_->Effect().ParameterByName("BackFace_tex")) = bf_tex;
+		}
+		void BackFaceDepthTexture(TexturePtr const & bf_tex)
+		{
+			*(technique_->Effect().ParameterByName("BackFaceDepth_tex")) = bf_tex;
 		}
 
 		void CompressedCubeMap(TexturePtr const & y_cube, TexturePtr const & c_cube)
@@ -116,6 +126,7 @@ namespace
 		}
 
 	private:
+		RenderTechniquePtr back_face_depth_tech_;
 		RenderTechniquePtr back_face_tech_;
 		RenderTechniquePtr front_face_tech_;
 	};
@@ -130,14 +141,13 @@ namespace
 			checked_pointer_cast<RefractorRenderable>(renderable_)->CompressedCubeMap(y_cube, c_cube);
 		}
 
-		void Pass(int pass)
-		{
-			checked_pointer_cast<RefractorRenderable>(renderable_)->Pass(pass);
-		}
-
 		void BackFaceTexture(TexturePtr const & bf_tex)
 		{
 			checked_pointer_cast<RefractorRenderable>(renderable_)->BackFaceTexture(bf_tex);
+		}
+		void BackFaceDepthTexture(TexturePtr const & bf_tex)
+		{
+			checked_pointer_cast<RefractorRenderable>(renderable_)->BackFaceDepthTexture(bf_tex);
 		}
 	};
 
@@ -219,9 +229,23 @@ void Refract::InitObjects()
 	input_handler->connect(boost::bind(&Refract::InputHandler, this, _1, _2));
 	inputEngine.ActionMap(actionMap, input_handler, true);
 
-	render_buffer_ = rf.MakeFrameBuffer();
-	FrameBufferPtr screen_buffer = re.CurFrameBuffer();
-	render_buffer_->GetViewport()->camera = screen_buffer->GetViewport()->camera;
+	if (rf.RenderEngineInstance().DeviceCaps().texture_format_support(EF_D16))
+	{
+		depth_texture_support_ = true;
+	}
+	else
+	{
+		depth_texture_support_ = false;
+	}
+
+	backface_buffer_ = rf.MakeFrameBuffer();
+	FrameBufferPtr const & screen_buffer = re.CurFrameBuffer();
+	backface_buffer_->GetViewport()->camera = screen_buffer->GetViewport()->camera;
+	if (!depth_texture_support_)
+	{
+		backface_depth_buffer_ = rf.MakeFrameBuffer();
+		backface_depth_buffer_->GetViewport()->camera = screen_buffer->GetViewport()->camera;
+	}
 
 	UIManager::Instance().Load(ResLoader::Instance().Open("Refract.uiml"));
 }
@@ -233,23 +257,82 @@ void Refract::OnResize(uint32_t width, uint32_t height)
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 	ContextCfg const & cfg = Context::Instance().Config();
 
-	ElementFormat fmt;
-	if (rf.RenderEngineInstance().DeviceCaps().rendertarget_format_support(cfg.graphics_cfg.depth_stencil_fmt, 1, 0))
+	RenderViewPtr backface_ds_view;
+	if (depth_texture_support_)
 	{
-		fmt = cfg.graphics_cfg.depth_stencil_fmt;
+		ElementFormat ds_fmt;
+		if (rf.RenderEngineInstance().DeviceCaps().texture_format_support(cfg.graphics_cfg.depth_stencil_fmt))
+		{
+			ds_fmt = cfg.graphics_cfg.depth_stencil_fmt;
+		}
+		else
+		{
+			BOOST_ASSERT(rf.RenderEngineInstance().DeviceCaps().texture_format_support(EF_D16));
+
+			ds_fmt = EF_D16;
+		}
+		backface_ds_tex_ = rf.MakeTexture2D(width, height, 1, 1, ds_fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
+		backface_ds_view = rf.Make2DDepthStencilRenderView(*backface_ds_tex_, 0, 1, 0);
 	}
 	else
 	{
-		BOOST_ASSERT(rf.RenderEngineInstance().DeviceCaps().rendertarget_format_support(EF_D16, 1, 0));
-
-		fmt = EF_D16;
+		backface_ds_view = rf.Make2DDepthStencilRenderView(width, height, EF_D16, 1, 0);
 	}
 
-	RenderViewPtr ds_view = rf.Make2DDepthStencilRenderView(width, height, fmt, 1, 0);
+	ElementFormat depth_fmt;
+	if (rf.RenderEngineInstance().DeviceCaps().texture_format_support(EF_R16F))
+	{
+		depth_fmt = EF_R16F;
+	}
+	else
+	{
+		if (rf.RenderEngineInstance().DeviceCaps().texture_format_support(EF_GR16F))
+		{
+			depth_fmt = EF_GR16F;
+		}
+		else
+		{
+			BOOST_ASSERT(rf.RenderEngineInstance().DeviceCaps().texture_format_support(EF_ABGR16F));
 
-	render_tex_ = rf.MakeTexture2D(width, height, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
-	render_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*render_tex_, 0, 1, 0));
-	render_buffer_->Attach(FrameBuffer::ATT_DepthStencil, ds_view);
+			depth_fmt = EF_ABGR16F;
+		}
+	}
+	backface_depth_tex_ = rf.MakeTexture2D(width, height, 1, 1, depth_fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
+
+	ElementFormat normal_fmt;
+	if (rf.RenderEngineInstance().DeviceCaps().texture_format_support(EF_GR8))
+	{
+		normal_fmt = EF_GR8;
+	}
+	else
+	{
+		if (rf.RenderEngineInstance().DeviceCaps().texture_format_support(EF_ABGR8))
+		{
+			normal_fmt = EF_ABGR8;
+		}
+		else
+		{
+			BOOST_ASSERT(rf.RenderEngineInstance().DeviceCaps().texture_format_support(EF_ARGB8));
+
+			normal_fmt = EF_ARGB8;
+		}
+	}
+	backface_tex_ = rf.MakeTexture2D(width, height, 1, 1, normal_fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
+
+	backface_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*backface_tex_, 0, 1, 0));
+	backface_buffer_->Attach(FrameBuffer::ATT_DepthStencil, backface_ds_view);
+
+	if (depth_texture_support_)
+	{
+		depth_to_linear_pp_ = LoadPostProcess(ResLoader::Instance().Open("DepthToSM.ppml"), "DepthToSM");
+		depth_to_linear_pp_->InputPin(0, backface_ds_tex_);
+		depth_to_linear_pp_->OutputPin(0, backface_depth_tex_);
+	}
+	else
+	{
+		backface_depth_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*backface_depth_tex_, 0, 1, 0));
+		backface_depth_buffer_->Attach(FrameBuffer::ATT_DepthStencil, backface_ds_view);
+	}
 
 	UIManager::Instance().SettleCtrls(width, height);
 }
@@ -283,21 +366,67 @@ uint32_t Refract::DoUpdate(uint32_t pass)
 	switch (pass)
 	{
 	case 0:
-		// 第一遍，渲染背面
-		re.BindFrameBuffer(render_buffer_);
-		re.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->ClearDepth(0.0f);
+		if (depth_texture_support_)
+		{
+			// Pass 0: Render backface's normal and depth
+			re.BindFrameBuffer(backface_buffer_);
+			re.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->ClearDepth(0.0f);
 
-		checked_pointer_cast<RefractorObject>(refractor_)->Pass(0);
-		sky_box_->Visible(false);
-		return App3DFramework::URV_Need_Flush;
+			checked_pointer_cast<RefractorObject>(refractor_)->Pass(PT_TransparencyBackGBufferRT0);
+			sky_box_->Visible(false);
+			return App3DFramework::URV_Need_Flush;
+		}
+		else
+		{
+			// Pass 0: Render backface's depth
+			re.BindFrameBuffer(backface_depth_buffer_);
+			re.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->ClearDepth(0.0f);
+
+			checked_pointer_cast<RefractorObject>(refractor_)->Pass(PT_TransparencyBackDepth);
+			sky_box_->Visible(false);
+			return App3DFramework::URV_Need_Flush;
+		}
+
+	case 1:
+		if (depth_texture_support_)
+		{
+			Camera& camera = this->ActiveCamera();
+			float q = camera.FarPlane() / (camera.FarPlane() - camera.NearPlane());
+			float2 near_q(camera.NearPlane() * q, q);
+			depth_to_linear_pp_->SetParam(0, near_q);
+			depth_to_linear_pp_->Apply();
+		
+			// Pass 1: Render front face
+			re.BindFrameBuffer(FrameBufferPtr());
+			re.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->ClearDepth(1.0f);
+
+			checked_pointer_cast<RefractorObject>(refractor_)->Pass(PT_TransparencyFrontShading);
+			checked_pointer_cast<RefractorObject>(refractor_)->BackFaceTexture(backface_tex_);
+			checked_pointer_cast<RefractorObject>(refractor_)->BackFaceDepthTexture(backface_depth_tex_);
+
+			sky_box_->Visible(true);
+			return App3DFramework::URV_Need_Flush | App3DFramework::URV_Finished;
+		}
+		else
+		{
+			// Pass 1: Render backface's normal and depth
+			re.BindFrameBuffer(backface_buffer_);
+
+			checked_pointer_cast<RefractorObject>(refractor_)->Pass(PT_TransparencyBackGBufferRT0);
+			sky_box_->Visible(false);
+			return App3DFramework::URV_Need_Flush;
+		}
 
 	default:
-		// 第二遍，渲染正面
+		BOOST_ASSERT(!depth_texture_support_);
+		
+		// Pass 2: Render front face
 		re.BindFrameBuffer(FrameBufferPtr());
 		re.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->ClearDepth(1.0f);
 
-		checked_pointer_cast<RefractorObject>(refractor_)->Pass(1);
-		checked_pointer_cast<RefractorObject>(refractor_)->BackFaceTexture(render_tex_);
+		checked_pointer_cast<RefractorObject>(refractor_)->Pass(PT_TransparencyFrontShading);
+		checked_pointer_cast<RefractorObject>(refractor_)->BackFaceTexture(backface_tex_);
+		checked_pointer_cast<RefractorObject>(refractor_)->BackFaceDepthTexture(backface_depth_tex_);
 
 		sky_box_->Visible(true);
 		return App3DFramework::URV_Need_Flush | App3DFramework::URV_Finished;

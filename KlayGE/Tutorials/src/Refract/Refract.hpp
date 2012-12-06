@@ -29,8 +29,13 @@ private:
 	KlayGE::TexturePtr y_cube_map_;
 	KlayGE::TexturePtr c_cube_map_;
 
-	KlayGE::FrameBufferPtr render_buffer_;
-	KlayGE::TexturePtr render_tex_;
+	bool depth_texture_support_;
+	KlayGE::FrameBufferPtr backface_buffer_;
+	KlayGE::FrameBufferPtr backface_depth_buffer_;
+	KlayGE::TexturePtr backface_tex_;
+	KlayGE::TexturePtr backface_ds_tex_;
+	KlayGE::TexturePtr backface_depth_tex_;
+	KlayGE::PostProcessPtr depth_to_linear_pp_;
 };
 
 #endif		// _REFRACT_HPP
