@@ -164,7 +164,15 @@ namespace
 		{
 			StaticMesh::BuildMeshInfo();
 
-			mtl_->diffuse = float3(1, 0.73f, 0.08f);
+			mtl_->diffuse = float3(0.73f, 1, 0.46f);
+			if (Context::Instance().Config().graphics_cfg.gamma)
+			{
+				mtl_->diffuse.x() = MathLib::srgb_to_linear(mtl_->diffuse.x());
+				mtl_->diffuse.y() = MathLib::srgb_to_linear(mtl_->diffuse.y());
+				mtl_->diffuse.z() = MathLib::srgb_to_linear(mtl_->diffuse.z());
+			}
+			mtl_->shininess = 64;
+			mtl_->specular_level = 0.8f;
 		}
 	};
 
@@ -199,7 +207,7 @@ int main()
 }
 
 ScreenSpaceReflectionApp::ScreenSpaceReflectionApp()
-	: App3DFramework("Screen Space Local Reflection")
+	: App3DFramework("Reflection")
 {
 	ResLoader::Instance().AddPath("../../Samples/media/CausticsMap");
 	ResLoader::Instance().AddPath("../../Samples/media/Reflection");
@@ -222,7 +230,7 @@ void ScreenSpaceReflectionApp::InitObjects()
 	boost::function<TexturePtr()> y_cube_tl = ASyncLoadTexture("Lake_CraterLake03_y.dds", EAH_GPU_Read | EAH_Immutable);
 	boost::function<TexturePtr()> c_cube_tl = ASyncLoadTexture("Lake_CraterLake03_c.dds", EAH_GPU_Read | EAH_Immutable);
 
-	this->LookAt(float3(0.0f, 2.0f, -5.0f), float3(0.0f, 0.0f, 0.0f), float3(0, 1, 0));
+	this->LookAt(float3(2.0f, 2.0f, -5.0f), float3(0.0f, 1.0f, 0.0f), float3(0, 1, 0));
 	this->Proj(0.1f, 500.0f);
 	tb_controller_.AttachCamera(this->ActiveCamera());
 	tb_controller_.Scalers(0.003f, 0.05f);
@@ -245,7 +253,7 @@ void ScreenSpaceReflectionApp::InitObjects()
 
 	dino_ = MakeSharedPtr<SceneObjectHelper>(SyncLoadModel("dino50.7z//dino50.meshml", EAH_GPU_Read | EAH_Immutable,
 		CreateModelFactory<RenderModel>(), CreateMeshFactory<DinoMesh>())->Mesh(0), SceneObjectHelper::SOA_Cullable);
-	dino_->ModelMatrix(MathLib::translation(0.0f, 1.0f, -2.0f));
+	dino_->ModelMatrix(MathLib::scaling(float3(2, 2, 2)) * MathLib::translation(0.0f, 1.0f, -2.5f));
 	dino_->AddToSceneManager();
 
 	deferred_rendering_ = Context::Instance().DeferredRenderingLayerInstance();
@@ -300,9 +308,9 @@ void ScreenSpaceReflectionApp::OnResize(KlayGE::uint32_t width, KlayGE::uint32_t
 
 	deferred_rendering_->SetupViewport(1, re.CurFrameBuffer(), VPAM_NoSSVO | VPAM_NoSSGI);
 	
-	back_refl_tex_ = rf.MakeTexture2D(width / 2, height / 2, 1, 1, 
+	back_refl_tex_ = rf.MakeTexture2D(width / 2, width / 2, 1, 1, 
 		deferred_rendering_->OpaqueShadingTex(1)->Format(), 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
-	back_refl_ds_tex_ = rf.MakeTexture2D(width / 2, height / 2, 1, 1, 
+	back_refl_ds_tex_ = rf.MakeTexture2D(width / 2, width / 2, 1, 1, 
 		EF_D16, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
 	back_refl_fb_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*back_refl_tex_, 0, 1, 0));
 	back_refl_fb_->Attach(FrameBuffer::ATT_DepthStencil, rf.Make2DDepthStencilRenderView(*back_refl_ds_tex_, 0, 1, 0));
@@ -361,7 +369,7 @@ void ScreenSpaceReflectionApp::DoUpdateOverlay()
 {
 	UIManager::Instance().Render();
 
-	font_->RenderText(0, 0, Color(1, 1, 0, 1), L"Screen Space Local Reflection", 16);
+	font_->RenderText(0, 0, Color(1, 1, 0, 1), L"Reflection", 16);
 
 	std::wostringstream stream;
 	stream.precision(2);
