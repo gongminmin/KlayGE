@@ -30,11 +30,35 @@
 
 #include <KlayGE/Config.hpp>
 #include <KlayGE/Types.hpp>
+
+namespace KlayGE
+{
+	template <typename T>
+	class Matrix4_T;
+	typedef Matrix4_T<float> float4x4;
+
+	template <typename T>
+	class Quaternion_T;
+	typedef Quaternion_T<float> Quaternion;
+
+	namespace MathLib
+	{
+		template <typename T>
+		Matrix4_T<T> mul(Matrix4_T<T> const & lhs, Matrix4_T<T> const & rhs);
+
+		template <typename T>
+		Quaternion_T<T> mul(Quaternion_T<T> const & lhs, Quaternion_T<T> const & rhs);
+	}
+}
+
+#include <KlayGE/Matrix.hpp>
 #include <MeshMLLib/MeshMLLib.hpp>
 
 #include <set>
 #include <sstream>
 #include <algorithm>
+#include <cmath>
+#include <limits>
 
 #include <boost/assert.hpp>
 #include <boost/typeof/typeof.hpp>
@@ -50,9 +74,11 @@ namespace
 	}
 }
 
-namespace
+namespace MeshMLLib
 {
-	using namespace KlayGE;
+	using KlayGE::Vector_T;
+	using KlayGE::Quaternion_T;
+	using KlayGE::Matrix4_T;
 
 	namespace MathLib
 	{
@@ -66,6 +92,11 @@ namespace
 		T sgn(T const & x)
 		{
 			return x < T(0) ? T(-1) : (x > T(0) ? T(1) : T(0));
+		}
+
+		float sqrt(float x)
+		{
+			return std::sqrt(x);
 		}
 
 		// From Quake III. But the magic number is from http://www.lomont.org/Math/Papers/2003/InvSqrt.pdf
@@ -85,6 +116,16 @@ namespace
 			fni.f = fni.f * (threehalfs - (x2 * fni.f * fni.f));		// 2nd iteration, this can be removed
 
 			return fni.f;
+		}
+
+		float sin(float x)
+		{
+			return std::sin(x);
+		}
+
+		float acos(float x)
+		{
+			return std::acos(x);
 		}
 
 		template <typename T>
@@ -108,7 +149,7 @@ namespace
 		template <typename T>
 		typename T::value_type dot(T const & lhs, T const & rhs)
 		{
-			return detail::dot_helper<typename T::value_type,
+			return KlayGE::detail::dot_helper<typename T::value_type,
 							T::elem_num>::Do(&lhs[0], &rhs[0]);
 		}
 
@@ -600,7 +641,7 @@ namespace
 	}
 }
 
-namespace KlayGE
+namespace MeshMLLib
 {
 	bool MeshMLObj::Material::operator==(MeshMLObj::Material const & rhs) const
 	{
@@ -1529,7 +1570,7 @@ namespace KlayGE
 		{
 			if (joints_used.find(iter->first) == joints_used.end())
 			{
-				iter = joints_.erase(iter);
+				joints_.erase(iter ++);
 			}
 			else
 			{
@@ -1696,7 +1737,7 @@ namespace KlayGE
 			}
 			else
 			{
-				float4x4 tmp_mat = MathLib::scaling(abs(bind_joints[i].bind_scale), abs(bind_joints[i].bind_scale), bind_joints[i].bind_scale)
+				float4x4 tmp_mat = MathLib::scaling(MathLib::abs(bind_joints[i].bind_scale), MathLib::abs(bind_joints[i].bind_scale), bind_joints[i].bind_scale)
 					* MathLib::to_matrix(bind_joints[i].bind_real)
 					* MathLib::translation(MathLib::udq_to_trans(bind_joints[i].bind_real, bind_joints[i].bind_dual));
 				tmp_mat = MathLib::inverse(tmp_mat);

@@ -39,11 +39,23 @@
 #include <iostream>
 
 #include <KlayGE/Vector.hpp>
-#include <KlayGE/Matrix.hpp>
 #include <KlayGE/Quaternion.hpp>
 
 namespace KlayGE
 {
+	template <typename T>
+	class Matrix4_T;
+	typedef Matrix4_T<float> float4x4;
+}
+
+namespace MeshMLLib
+{
+	using KlayGE::float2;
+	using KlayGE::float3;
+	using KlayGE::float4;
+	using KlayGE::float4x4;
+	using KlayGE::Quaternion;
+
 	class MeshMLObj
 	{
 	public:

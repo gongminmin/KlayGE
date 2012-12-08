@@ -2312,7 +2312,7 @@ namespace KlayGE
 		std::vector<Joint> const & joints, boost::shared_ptr<AnimationActionsType> const & actions,
 		boost::shared_ptr<KeyFramesType> const & kfs, uint32_t num_frames, uint32_t frame_rate)
 	{
-		MeshMLObj obj(1);
+		MeshMLLib::MeshMLObj obj(1);
 		obj.NumFrames(num_frames);
 		obj.FrameRate(frame_rate);
 

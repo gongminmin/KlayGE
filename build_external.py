@@ -263,16 +263,12 @@ def build_external_libs(compiler_name, compiler_version, compiler_arch, generato
 		copy_to_dst("External/Python/DLLs/%spython32.%s" % (subdir, dll_suffix), dst_dir)
 		copy_to_dst("External/Python/DLLs/%spython32_d.%s" % (subdir, dll_suffix), dst_dir)
 
-		try:
+		if not os.path.exists("%sLib" % dst_dir):
 			os.mkdir("%sLib" % dst_dir)
-		except:
-			pass;
 		for fname in glob.iglob("External/Python/Lib/*.py"):
 			copy_to_dst(fname, "%sLib/" % dst_dir)
-		try:
+		if not os.path.exists("%sLib/encodings" % dst_dir):
 			os.mkdir("%sLib/encodings" % dst_dir)
-		except:
-			pass;
 		for fname in glob.iglob("External/Python/Lib/encodings/*.py"):
 			copy_to_dst(fname, "%sLib/encodings/" % dst_dir)
 
