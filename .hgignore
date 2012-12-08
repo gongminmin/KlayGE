@@ -43,6 +43,7 @@ KlayGE/bin/*/*.dll
 KlayGE/bin/*/*.so
 KlayGE/bin/*/*.exe
 KlayGE/bin/*/*.py
+KlayGE/bin/*/Lib
 KlayGE/build/android/Core/obj
 KlayGE/build/android/Plugins/Render/OpenGLES/libs
 KlayGE/build/android/Plugins/Render/OpenGLES/obj

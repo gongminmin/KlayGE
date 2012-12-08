@@ -263,6 +263,19 @@ def build_external_libs(compiler_name, compiler_version, compiler_arch, generato
 		copy_to_dst("External/Python/DLLs/%spython32.%s" % (subdir, dll_suffix), dst_dir)
 		copy_to_dst("External/Python/DLLs/%spython32_d.%s" % (subdir, dll_suffix), dst_dir)
 
+		try:
+			os.mkdir("%sLib" % dst_dir)
+		except:
+			pass;
+		for fname in glob.iglob("External/Python/Lib/*.py"):
+			copy_to_dst(fname, "%sLib/" % dst_dir)
+		try:
+			os.mkdir("%sLib/encodings" % dst_dir)
+		except:
+			pass;
+		for fname in glob.iglob("External/Python/Lib/encodings/*.py"):
+			copy_to_dst(fname, "%sLib/encodings/" % dst_dir)
+
 	if (compiler_arch != "x86_app") and (compiler_arch != "arm_app"):
 		print("\nBuilding libogg...\n")
 		build_libogg(compiler_name, compiler_version, compiler_arch, config_list, platform, ide_name, ide_version)
