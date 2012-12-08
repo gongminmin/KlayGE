@@ -1,16 +1,16 @@
 LOCAL_PATH := $(call my-dir)
 
-TEXT_PATH := $(LOCAL_PATH)
-TEXT_SRC_PATH := $(LOCAL_PATH)/../../../../src/Text
+TUTOR2_PATH := $(LOCAL_PATH)
+TUTOR2_SRC_PATH := $(LOCAL_PATH)/../../../../src/Tutor2
 
 include $(CLEAR_VARS)
 
-LOCAL_C_INCLUDES := $(TEXT_SRC_PATH)/../../../External/boost \
-		$(TEXT_SRC_PATH)/../../Core/Include \
+LOCAL_C_INCLUDES := $(TUTOR2_SRC_PATH)/../../../External/boost \
+		$(TUTOR2_SRC_PATH)/../../Core/Include \
 		
-LOCAL_MODULE := Text
-LOCAL_PATH := $(TEXT_SRC_PATH)
-LOCAL_SRC_FILES := Text.cpp
+LOCAL_MODULE := Tutor2
+LOCAL_PATH := $(TUTOR2_SRC_PATH)
+LOCAL_SRC_FILES := Tutor2.cpp
 LOCAL_LDLIBS := -llog -landroid
 LOCAL_STATIC_LIBRARIES := KlayGE_Core KlayGE_RenderEngine_OpenGLES KlayGE_Scene_OCTree glloader kfont MeshMLLib \
 		boost_date_time boost_filesystem boost_signals boost_system boost_thread \
