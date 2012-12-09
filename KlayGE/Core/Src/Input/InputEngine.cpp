@@ -79,8 +79,8 @@ namespace KlayGE
 		// 对当前设备应用新的动作映射
 		for (uint32_t id = 0; id < action_handlers_.size(); ++ id)
 		{
-			typedef BOOST_TYPEOF(devices_) DevicesType;
-			BOOST_FOREACH(DevicesType::reference device, devices_)
+			typedef KLAYGE_DECLTYPE(devices_) DevicesType;
+			KLAYGE_FOREACH(DevicesType::reference device, devices_)
 			{
 				device->ActionMap(id, action_handlers_[id].first);
 			}
@@ -103,8 +103,8 @@ namespace KlayGE
 		{
 			timer_.restart();
 
-			typedef BOOST_TYPEOF(devices_) DevicesType;
-			BOOST_FOREACH(DevicesType::reference device, devices_)
+			typedef KLAYGE_DECLTYPE(devices_) DevicesType;
+			KLAYGE_FOREACH(DevicesType::reference device, devices_)
 			{
 				device->UpdateInputs();
 			}
@@ -114,14 +114,14 @@ namespace KlayGE
 				boost::container::flat_map<uint16_t, long> actions;
 
 				// 访问所有设备
-				typedef BOOST_TYPEOF(devices_) DevicesType;
-				BOOST_FOREACH(DevicesType::reference device, devices_)
+				typedef KLAYGE_DECLTYPE(devices_) DevicesType;
+				KLAYGE_FOREACH(DevicesType::reference device, devices_)
 				{
 					InputActionsType const theAction(device->UpdateActionMap(id));
 
 					// 去掉重复的动作
-					typedef BOOST_TYPEOF(theAction) ActionType;
-					BOOST_FOREACH(ActionType::const_reference act, theAction)
+					typedef KLAYGE_DECLTYPE(theAction) ActionType;
+					KLAYGE_FOREACH(ActionType::const_reference act, theAction)
 					{
 						if (actions.find(act.first) == actions.end())
 						{

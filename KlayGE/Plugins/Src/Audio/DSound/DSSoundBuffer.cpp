@@ -84,7 +84,7 @@ namespace KlayGE
 		sources_[0] = IDSBufferPtr(temp);
 
 		// 复制缓冲区，使所有缓冲区使用同一段数据
-		for (BOOST_AUTO(iter, sources_.begin() + 1); iter != sources_.end(); ++ iter)
+		for (KLAYGE_AUTO(iter, sources_.begin() + 1); iter != sources_.end(); ++ iter)
 		{
 			TIF(dsound->DuplicateSoundBuffer(sources_[0].get(), &temp));
 			*iter = IDSBufferPtr(temp);
@@ -145,7 +145,7 @@ namespace KlayGE
 	{
 		BOOST_ASSERT(!sources_.empty());
 
-		BOOST_AUTO(iter, std::find_if(sources_.begin(), sources_.end(), IsSourceFree));
+		KLAYGE_AUTO(iter, std::find_if(sources_.begin(), sources_.end(), IsSourceFree));
 		if (iter == sources_.end())
 		{
 			iter = sources_.begin();
@@ -171,8 +171,8 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void DSSoundBuffer::Play(bool loop)
 	{
-		BOOST_AUTO(iter, FreeSource());
-		BOOST_AUTO(ds3DBuf, Get3DBufferInterface(iter));
+		KLAYGE_AUTO(iter, FreeSource());
+		KLAYGE_AUTO(ds3DBuf, Get3DBufferInterface(iter));
 		if (ds3DBuf)
 		{
 			ds3DBuf->SetPosition(pos_[0], pos_[1], pos_[2], DS3D_IMMEDIATE);

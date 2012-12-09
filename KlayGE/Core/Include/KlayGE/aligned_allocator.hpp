@@ -17,7 +17,11 @@
 
 #include <limits>
 #include <boost/static_assert.hpp>
-#include <boost/type_traits/has_trivial_destructor.hpp>
+#ifdef KLAYGE_TYPE_TRAITS_SUPPORT
+	#include <type_traits>
+#else
+	#include <boost/type_traits/has_trivial_destructor.hpp>
+#endif
 
 namespace KlayGE
 {
@@ -55,8 +59,8 @@ namespace KlayGE
 
 		static const int alignment_size = alignment;
 
-		BOOST_STATIC_ASSERT(0 == (alignment & (alignment - 1)));
-		BOOST_STATIC_ASSERT(alignment <= 65536);
+		KLAYGE_STATIC_ASSERT(0 == (alignment & (alignment - 1)));
+		KLAYGE_STATIC_ASSERT(alignment <= 65536);
 
 		template <typename U>
 		struct rebind
@@ -129,7 +133,11 @@ namespace KlayGE
 
 		void destroy(pointer p)
 		{
+#ifdef KLAYGE_TYPE_TRAITS_SUPPORT
+			destroy_t<pointer, std::has_trivial_destructor<value_type>::value>()(p);
+#else
 			destroy_t<pointer, boost::has_trivial_destructor<value_type>::value>()(p);
+#endif
 		}
 
 		size_type max_size() const throw()

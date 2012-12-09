@@ -59,8 +59,8 @@ namespace KlayGE
 
 		alGenSources(static_cast<ALsizei>(sources_.size()), &sources_[0]);
 
-		typedef BOOST_TYPEOF(sources_) SourcesType;
-		BOOST_FOREACH(SourcesType::reference source, sources_)
+		typedef KLAYGE_DECLTYPE(sources_) SourcesType;
+		KLAYGE_FOREACH(SourcesType::reference source, sources_)
 		{
 			alSourcef(source, AL_PITCH, 1);
 			alSourcef(source, AL_GAIN, volume);
@@ -90,7 +90,7 @@ namespace KlayGE
 	{
 		BOOST_ASSERT(!sources_.empty());
 
-		BOOST_AUTO(iter, std::find_if(sources_.begin(), sources_.end(), IsSourceFree));
+		KLAYGE_AUTO(iter, std::find_if(sources_.begin(), sources_.end(), IsSourceFree));
 		if (iter == sources_.end())
 		{
 			iter = sources_.begin();

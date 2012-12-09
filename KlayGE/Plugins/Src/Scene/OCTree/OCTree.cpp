@@ -125,7 +125,7 @@ namespace KlayGE
 			AABBox bb_root(float3(0, 0, 0), float3(0, 0, 0));
 			octree_[0].first_child_index = -1;
 			octree_[0].visible = BO_No;
-			BOOST_FOREACH(SceneObjAABBPtrType const & soaabb, scene_objs_)
+			KLAYGE_FOREACH(SceneObjAABBPtrType const & soaabb, scene_objs_)
 			{
 				SceneObjectPtr const & obj = soaabb->so;
 				uint32_t const attr = obj->Attrib();
@@ -188,7 +188,7 @@ namespace KlayGE
 							}
 							new_node.bb = AABBox(bb_center - new_half_size, bb_center + new_half_size);
 
-							BOOST_FOREACH(SceneObjAABBPtrType const & soaabb, parent_obj_ptrs)
+							KLAYGE_FOREACH(SceneObjAABBPtrType const & soaabb, parent_obj_ptrs)
 							{
 								if (MathLib::intersect_aabb_aabb(*soaabb->aabb_ws, new_node.bb))
 								{
@@ -226,7 +226,7 @@ namespace KlayGE
 
 		if (camera.OmniDirectionalMode())
 		{
-			BOOST_FOREACH(SceneObjAABBPtrType const & soaabb, scene_objs_)
+			KLAYGE_FOREACH(SceneObjAABBPtrType const & soaabb, scene_objs_)
 			{
 				SceneObjectPtr const & obj = soaabb->so;
 				soaabb->visible = (!(obj->Attrib() & SceneObject::SOA_Overlay) && obj->Visible());
@@ -239,7 +239,7 @@ namespace KlayGE
 				this->MarkNodeObjs(0, false);
 			}
 
-			BOOST_FOREACH(SceneObjAABBPtrType const & soaabb, scene_objs_)
+			KLAYGE_FOREACH(SceneObjAABBPtrType const & soaabb, scene_objs_)
 			{
 				SceneObjectPtr const & obj = soaabb->so;
 				if (obj->Visible())
@@ -333,7 +333,7 @@ namespace KlayGE
 		octree_node_t const & node = octree_[index];
 		if ((node.visible != BO_No) || force)
 		{
-			BOOST_FOREACH(SceneObjAABBPtrType const & soaabb, node.obj_ptrs)
+			KLAYGE_FOREACH(SceneObjAABBPtrType const & soaabb, node.obj_ptrs)
 			{
 				if (!soaabb->visible && soaabb->so->Visible())
 				{

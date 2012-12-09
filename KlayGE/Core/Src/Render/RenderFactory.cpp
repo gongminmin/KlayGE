@@ -235,34 +235,34 @@ namespace KlayGE
 
 	RenderFactory::~RenderFactory()
 	{
-		typedef BOOST_TYPEOF(effect_pool_) EffectPoolType;
-		BOOST_FOREACH(EffectPoolType::reference effect, effect_pool_)
+		typedef KLAYGE_DECLTYPE(effect_pool_) EffectPoolType;
+		KLAYGE_FOREACH(EffectPoolType::reference effect, effect_pool_)
 		{
 			effect.second.clear();
 		}
-		typedef BOOST_TYPEOF(font_pool_) FontPoolType;
-		BOOST_FOREACH(FontPoolType::reference font, font_pool_)
+		typedef KLAYGE_DECLTYPE(font_pool_) FontPoolType;
+		KLAYGE_FOREACH(FontPoolType::reference font, font_pool_)
 		{
 			font.second.first.reset();
 			font.second.second.reset();
 		}
-		typedef BOOST_TYPEOF(rs_pool_) RSPoolType;
-		BOOST_FOREACH(RSPoolType::reference rs, rs_pool_)
+		typedef KLAYGE_DECLTYPE(rs_pool_) RSPoolType;
+		KLAYGE_FOREACH(RSPoolType::reference rs, rs_pool_)
 		{
 			rs.second.reset();
 		}
-		typedef BOOST_TYPEOF(dss_pool_) DSSPoolType;
-		BOOST_FOREACH(DSSPoolType::reference dss, dss_pool_)
+		typedef KLAYGE_DECLTYPE(dss_pool_) DSSPoolType;
+		KLAYGE_FOREACH(DSSPoolType::reference dss, dss_pool_)
 		{
 			dss.second.reset();
 		}
-		typedef BOOST_TYPEOF(bs_pool_) BSPoolType;
-		BOOST_FOREACH(BSPoolType::reference bs, bs_pool_)
+		typedef KLAYGE_DECLTYPE(bs_pool_) BSPoolType;
+		KLAYGE_FOREACH(BSPoolType::reference bs, bs_pool_)
 		{
 			bs.second.reset();
 		}
-		typedef BOOST_TYPEOF(ss_pool_) SSPoolType;
-		BOOST_FOREACH(SSPoolType::reference ss, ss_pool_)
+		typedef KLAYGE_DECLTYPE(ss_pool_) SSPoolType;
+		KLAYGE_FOREACH(SSPoolType::reference ss, ss_pool_)
 		{
 			ss.second.reset();
 		}
@@ -290,7 +290,7 @@ namespace KlayGE
 	{
 		FontPtr ret;
 
-		BOOST_AUTO(fiter, font_pool_.find(fontName));
+		KLAYGE_AUTO(fiter, font_pool_.find(fontName));
 		if (fiter == font_pool_.end())
 		{
 			RenderablePtr font_renderable = MakeSharedPtr<FontRenderable>(fontName);
@@ -310,8 +310,8 @@ namespace KlayGE
 	{
 		RenderEffectPtr prototype;
 
-		BOOST_AUTO(entry, std::make_pair(effectName, macros));
-		BOOST_AUTO(iter, effect_pool_.find(entry));
+		KLAYGE_AUTO(entry, std::make_pair(effectName, macros));
+		KLAYGE_AUTO(iter, effect_pool_.find(entry));
 		if (iter == effect_pool_.end())
 		{
 			prototype = MakeSharedPtr<RenderEffect>();
@@ -335,7 +335,7 @@ namespace KlayGE
 	{
 		RasterizerStateObjectPtr ret;
 
-		BOOST_AUTO(iter, rs_pool_.find(desc));
+		KLAYGE_AUTO(iter, rs_pool_.find(desc));
 		if (iter == rs_pool_.end())
 		{
 			ret = this->DoMakeRasterizerStateObject(desc);
@@ -353,7 +353,7 @@ namespace KlayGE
 	{
 		DepthStencilStateObjectPtr ret;
 
-		BOOST_AUTO(iter, dss_pool_.find(desc));
+		KLAYGE_AUTO(iter, dss_pool_.find(desc));
 		if (iter == dss_pool_.end())
 		{
 			ret = this->DoMakeDepthStencilStateObject(desc);
@@ -371,7 +371,7 @@ namespace KlayGE
 	{
 		BlendStateObjectPtr ret;
 
-		BOOST_AUTO(iter, bs_pool_.find(desc));
+		KLAYGE_AUTO(iter, bs_pool_.find(desc));
 		if (iter == bs_pool_.end())
 		{
 			ret = this->DoMakeBlendStateObject(desc);
@@ -389,7 +389,7 @@ namespace KlayGE
 	{
 		SamplerStateObjectPtr ret;
 
-		BOOST_AUTO(iter, ss_pool_.find(desc));
+		KLAYGE_AUTO(iter, ss_pool_.find(desc));
 		if (iter == ss_pool_.end())
 		{
 			ret = this->DoMakeSamplerStateObject(desc);

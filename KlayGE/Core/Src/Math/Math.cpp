@@ -254,7 +254,7 @@ namespace KlayGE
 		template <typename T>
 		T transform_coord(T const & v, Matrix4_T<typename T::value_type> const & mat)
 		{
-			BOOST_STATIC_ASSERT(T::elem_num < 4);
+			KLAYGE_STATIC_ASSERT(T::elem_num < 4);
 
 			Vector_T<typename T::value_type, 4> temp(detail::transform_helper<typename T::value_type, T::elem_num>::Do(v, mat));
 			Vector_T<typename T::value_type, T::elem_num> ret(&temp[0]);
@@ -275,7 +275,7 @@ namespace KlayGE
 		template <typename T>
 		T transform_normal(T const & v, Matrix4_T<typename T::value_type> const & mat)
 		{
-			BOOST_STATIC_ASSERT(T::elem_num < 4);
+			KLAYGE_STATIC_ASSERT(T::elem_num < 4);
 
 			return detail::transform_normal_helper<typename T::value_type, T::elem_num>::Do(v, mat);
 		}

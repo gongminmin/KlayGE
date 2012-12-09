@@ -153,8 +153,8 @@ namespace KlayGE
 		}
 		else
 		{
-			typedef BOOST_TYPEOF(paths_) PathsType;
-			BOOST_FOREACH(PathsType::const_reference path, paths_)
+			typedef KLAYGE_DECLTYPE(paths_) PathsType;
+			KLAYGE_FOREACH(PathsType::const_reference path, paths_)
 			{
 				std::string const res_name(path + name);
 
@@ -265,8 +265,8 @@ namespace KlayGE
 		}
 		else
 		{
-			typedef BOOST_TYPEOF(paths_) PathsType;
-			BOOST_FOREACH(PathsType::const_reference path, paths_)
+			typedef KLAYGE_DECLTYPE(paths_) PathsType;
+			KLAYGE_FOREACH(PathsType::const_reference path, paths_)
 			{
 				std::string const res_name(path + name);
 

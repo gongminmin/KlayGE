@@ -246,7 +246,7 @@ namespace KlayGE
 
 	void OGLESRenderEngine::BindBuffer(GLenum target, GLuint buffer)
 	{
-		BOOST_AUTO(iter, binded_buffer_.find(target));
+		KLAYGE_AUTO(iter, binded_buffer_.find(target));
 		if ((iter == binded_buffer_.end()) || (iter->second != buffer))
 		{
 			glBindBuffer(target, buffer);
@@ -258,7 +258,7 @@ namespace KlayGE
 	{
 		for (GLsizei i = 0; i < n; ++ i)
 		{
-			for (BOOST_AUTO(iter, binded_buffer_.begin()); iter != binded_buffer_.end();)
+			for (KLAYGE_AUTO(iter, binded_buffer_.begin()); iter != binded_buffer_.end();)
 			{
 				if (iter->second == buffers[i])
 				{

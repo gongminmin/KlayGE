@@ -19,6 +19,14 @@
 #pragma once
 
 #include <boost/cstdint.hpp>
+#include <boost/static_assert.hpp>
+#include <boost/typeof/typeof.hpp>
+#include <boost/foreach.hpp>
+#ifdef KLAYGE_TYPE_TRAITS_SUPPORT
+#include <type_traits>
+#else
+#include <boost/type_traits/remove_reference.hpp>
+#endif
 
 #ifndef KLAYGE_NULLPTR_SUPPORT
 const class nullptr_t
@@ -39,6 +47,30 @@ public:
 private:
 	void operator&() const;
 } nullptr = {};
+#endif
+
+#ifdef KLAYGE_STATIC_ASSERT_SUPPORT
+	#define KLAYGE_STATIC_ASSERT(x) static_assert(x, #x)
+#else
+	#define KLAYGE_STATIC_ASSERT(x) BOOST_STATIC_ASSERT(x)
+#endif
+
+#ifdef KLAYGE_DECLTYPE_SUPPORT
+	#define KLAYGE_AUTO(var, expr) auto var = expr
+	#ifdef KLAYGE_TYPE_TRAITS_SUPPORT
+		#define KLAYGE_DECLTYPE(expr) std::remove_reference<decltype(expr)>::type
+	#else
+		#define KLAYGE_DECLTYPE(expr) boost::remove_reference<decltype(expr)>::type
+	#endif
+#else
+	#define KLAYGE_AUTO(Var, Expr) BOOST_AUTO(Var, Expr)
+	#define KLAYGE_DECLTYPE(expr) BOOST_TYPEOF(expr)
+#endif
+
+#ifdef KLAYGE_FOREACH_SUPPORT
+	#define KLAYGE_FOREACH(var, col) for (var : col)
+#else
+	#define KLAYGE_FOREACH(var, col) BOOST_FOREACH(var, col)
 #endif
 
 namespace KlayGE

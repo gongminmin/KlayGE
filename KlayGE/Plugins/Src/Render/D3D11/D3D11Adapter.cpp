@@ -78,8 +78,8 @@ namespace KlayGE
 		{
 			if (output != nullptr)
 			{
-				typedef BOOST_TYPEOF(formats) FormatsType;
-				BOOST_FOREACH(FormatsType::reference format, formats)
+				typedef KLAYGE_DECLTYPE(formats) FormatsType;
+				KLAYGE_FOREACH(FormatsType::reference format, formats)
 				{
 					UINT num = 0;
 					output->GetDisplayModeList(format, DXGI_ENUM_MODES_SCALING, &num, 0);
@@ -88,8 +88,8 @@ namespace KlayGE
 						std::vector<DXGI_MODE_DESC> mode_descs(num);
 						output->GetDisplayModeList(format, DXGI_ENUM_MODES_SCALING, &num, &mode_descs[0]);
 
-						typedef BOOST_TYPEOF(mode_descs) ModeDescsType;
-						BOOST_FOREACH(ModeDescsType::reference mode_desc, mode_descs)
+						typedef KLAYGE_DECLTYPE(mode_descs) ModeDescsType;
+						KLAYGE_FOREACH(ModeDescsType::reference mode_desc, mode_descs)
 						{
 							D3D11VideoMode const video_mode(mode_desc.Width, mode_desc.Height,
 								mode_desc.Format);

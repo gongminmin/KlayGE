@@ -297,7 +297,7 @@ namespace KlayGE
 
 	void OGLRenderEngine::BindBuffer(GLenum target, GLuint buffer)
 	{
-		BOOST_AUTO(iter, binded_buffer_.find(target));
+		KLAYGE_AUTO(iter, binded_buffer_.find(target));
 		if ((iter == binded_buffer_.end()) || (iter->second != buffer))
 		{
 			glBindBuffer(target, buffer);
@@ -309,7 +309,7 @@ namespace KlayGE
 	{
 		for (GLsizei i = 0; i < n; ++ i)
 		{
-			for (BOOST_AUTO(iter, binded_buffer_.begin()); iter != binded_buffer_.end();)
+			for (KLAYGE_AUTO(iter, binded_buffer_.begin()); iter != binded_buffer_.end();)
 			{
 				if (iter->second == buffers[i])
 				{
@@ -366,7 +366,7 @@ namespace KlayGE
 	void OGLRenderEngine::Uniform1i(GLint location, GLint value)
 	{
 		bool dirty = false;
-		BOOST_AUTO(iter_p, uniformi_cache_.find(cur_program_));
+		KLAYGE_AUTO(iter_p, uniformi_cache_.find(cur_program_));
 		if (iter_p == uniformi_cache_.end())
 		{
 			dirty = true;
@@ -377,7 +377,7 @@ namespace KlayGE
 			dirty = true;
 			iter_p->second.resize(location + 1);
 		}
-		BOOST_AUTO(iter_v, iter_p->second.begin() + location);
+		KLAYGE_AUTO(iter_v, iter_p->second.begin() + location);
 		if (iter_v->x() != value)
 		{
 			dirty = true;
@@ -398,7 +398,7 @@ namespace KlayGE
 	void OGLRenderEngine::Uniform1f(GLint location, float value)
 	{
 		bool dirty = false;
-		BOOST_AUTO(iter_p, uniformf_cache_.find(cur_program_));
+		KLAYGE_AUTO(iter_p, uniformf_cache_.find(cur_program_));
 		if (iter_p == uniformf_cache_.end())
 		{
 			dirty = true;
@@ -409,7 +409,7 @@ namespace KlayGE
 			dirty = true;
 			iter_p->second.resize(location + 1);
 		}
-		BOOST_AUTO(iter_v, iter_p->second.begin() + location);
+		KLAYGE_AUTO(iter_v, iter_p->second.begin() + location);
 		if (iter_v->x() != value)
 		{
 			dirty = true;
@@ -425,7 +425,7 @@ namespace KlayGE
 	void OGLRenderEngine::Uniform1iv(GLint location, GLsizei count, GLint const * value)
 	{
 		bool dirty = false;
-		BOOST_AUTO(iter_p, uniformi_cache_.find(cur_program_));
+		KLAYGE_AUTO(iter_p, uniformi_cache_.find(cur_program_));
 		if (iter_p == uniformi_cache_.end())
 		{
 			dirty = true;
@@ -438,7 +438,7 @@ namespace KlayGE
 		}
 		for (GLsizei i = 0; i < count; ++ i)
 		{
-			BOOST_AUTO(iter_v, iter_p->second.begin() + location + i);
+			KLAYGE_AUTO(iter_v, iter_p->second.begin() + location + i);
 			if (iter_v->x() != value[i])
 			{
 				dirty = true;
@@ -460,7 +460,7 @@ namespace KlayGE
 	void OGLRenderEngine::Uniform1fv(GLint location, GLsizei count, GLfloat const * value)
 	{
 		bool dirty = false;
-		BOOST_AUTO(iter_p, uniformf_cache_.find(cur_program_));
+		KLAYGE_AUTO(iter_p, uniformf_cache_.find(cur_program_));
 		if (iter_p == uniformf_cache_.end())
 		{
 			dirty = true;
@@ -473,7 +473,7 @@ namespace KlayGE
 		}
 		for (GLsizei i = 0; i < count; ++ i)
 		{
-			BOOST_AUTO(iter_v, iter_p->second.begin() + location + i);
+			KLAYGE_AUTO(iter_v, iter_p->second.begin() + location + i);
 			if (iter_v->x() != value[i])
 			{
 				dirty = true;
@@ -490,7 +490,7 @@ namespace KlayGE
 	void OGLRenderEngine::Uniform2iv(GLint location, GLsizei count, GLint const * value)
 	{
 		bool dirty = false;
-		BOOST_AUTO(iter_p, uniformi_cache_.find(cur_program_));
+		KLAYGE_AUTO(iter_p, uniformi_cache_.find(cur_program_));
 		if (iter_p == uniformi_cache_.end())
 		{
 			dirty = true;
@@ -503,7 +503,7 @@ namespace KlayGE
 		}
 		for (GLsizei i = 0; i < count; ++ i)
 		{
-			BOOST_AUTO(iter_v, iter_p->second.begin() + location + i);
+			KLAYGE_AUTO(iter_v, iter_p->second.begin() + location + i);
 			if ((iter_v->x() != value[i * 2 + 0]) || (iter_v->y() != value[i * 2 + 1]))
 			{
 				dirty = true;
@@ -526,7 +526,7 @@ namespace KlayGE
 	void OGLRenderEngine::Uniform2fv(GLint location, GLsizei count, GLfloat const * value)
 	{
 		bool dirty = false;
-		BOOST_AUTO(iter_p, uniformf_cache_.find(cur_program_));
+		KLAYGE_AUTO(iter_p, uniformf_cache_.find(cur_program_));
 		if (iter_p == uniformf_cache_.end())
 		{
 			dirty = true;
@@ -539,7 +539,7 @@ namespace KlayGE
 		}
 		for (GLsizei i = 0; i < count; ++ i)
 		{
-			BOOST_AUTO(iter_v, iter_p->second.begin() + location + i);
+			KLAYGE_AUTO(iter_v, iter_p->second.begin() + location + i);
 			if ((iter_v->x() != value[i * 2 + 0]) || (iter_v->y() != value[i * 2 + 1]))
 			{
 				dirty = true;
@@ -557,7 +557,7 @@ namespace KlayGE
 	void OGLRenderEngine::Uniform3iv(GLint location, GLsizei count, GLint const * value)
 	{
 		bool dirty = false;
-		BOOST_AUTO(iter_p, uniformi_cache_.find(cur_program_));
+		KLAYGE_AUTO(iter_p, uniformi_cache_.find(cur_program_));
 		if (iter_p == uniformi_cache_.end())
 		{
 			dirty = true;
@@ -570,7 +570,7 @@ namespace KlayGE
 		}
 		for (GLsizei i = 0; i < count; ++ i)
 		{
-			BOOST_AUTO(iter_v, iter_p->second.begin() + location + i);
+			KLAYGE_AUTO(iter_v, iter_p->second.begin() + location + i);
 			if ((iter_v->x() != value[i * 3 + 0]) || (iter_v->y() != value[i * 3 + 1])
 				 || (iter_v->z() != value[i * 3 + 2]))
 			{
@@ -595,7 +595,7 @@ namespace KlayGE
 	void OGLRenderEngine::Uniform3fv(GLint location, GLsizei count, GLfloat const * value)
 	{
 		bool dirty = false;
-		BOOST_AUTO(iter_p, uniformf_cache_.find(cur_program_));
+		KLAYGE_AUTO(iter_p, uniformf_cache_.find(cur_program_));
 		if (iter_p == uniformf_cache_.end())
 		{
 			dirty = true;
@@ -608,7 +608,7 @@ namespace KlayGE
 		}
 		for (GLsizei i = 0; i < count; ++ i)
 		{
-			BOOST_AUTO(iter_v, iter_p->second.begin() + location + i);
+			KLAYGE_AUTO(iter_v, iter_p->second.begin() + location + i);
 			if ((iter_v->x() != value[i * 3 + 0]) || (iter_v->y() != value[i * 3 + 1])
 				 || (iter_v->z() != value[i * 3 + 2]))
 			{
@@ -628,7 +628,7 @@ namespace KlayGE
 	void OGLRenderEngine::Uniform4iv(GLint location, GLsizei count, GLint const * value)
 	{
 		bool dirty = false;
-		BOOST_AUTO(iter_p, uniformi_cache_.find(cur_program_));
+		KLAYGE_AUTO(iter_p, uniformi_cache_.find(cur_program_));
 		if (iter_p == uniformi_cache_.end())
 		{
 			dirty = true;
@@ -641,7 +641,7 @@ namespace KlayGE
 		}
 		for (GLsizei i = 0; i < count; ++ i)
 		{
-			BOOST_AUTO(iter_v, iter_p->second.begin() + location + i);
+			KLAYGE_AUTO(iter_v, iter_p->second.begin() + location + i);
 			if ((iter_v->x() != value[i * 4 + 0]) || (iter_v->y() != value[i * 4 + 1])
 				 || (iter_v->z() != value[i * 4 + 2])|| (iter_v->w() != value[i * 4 + 3]))
 			{
@@ -667,7 +667,7 @@ namespace KlayGE
 	void OGLRenderEngine::Uniform4fv(GLint location, GLsizei count, GLfloat const * value)
 	{
 		bool dirty = false;
-		BOOST_AUTO(iter_p, uniformf_cache_.find(cur_program_));
+		KLAYGE_AUTO(iter_p, uniformf_cache_.find(cur_program_));
 		if (iter_p == uniformf_cache_.end())
 		{
 			dirty = true;
@@ -680,7 +680,7 @@ namespace KlayGE
 		}
 		for (GLsizei i = 0; i < count; ++ i)
 		{
-			BOOST_AUTO(iter_v, iter_p->second.begin() + location + i);
+			KLAYGE_AUTO(iter_v, iter_p->second.begin() + location + i);
 			if ((iter_v->x() != value[i * 4 + 0]) || (iter_v->y() != value[i * 4 + 1])
 				 || (iter_v->z() != value[i * 4 + 2])|| (iter_v->w() != value[i * 4 + 3]))
 			{

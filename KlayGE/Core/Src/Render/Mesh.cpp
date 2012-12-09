@@ -240,8 +240,8 @@ namespace KlayGE
 
 	void RenderModel::AddToRenderQueue()
 	{
-		typedef BOOST_TYPEOF(meshes_) MeshesType;
-		BOOST_FOREACH(MeshesType::reference mesh, meshes_)
+		typedef KLAYGE_DECLTYPE(meshes_) MeshesType;
+		KLAYGE_FOREACH(MeshesType::reference mesh, meshes_)
 		{
 			mesh->AddToRenderQueue();
 		}
@@ -249,8 +249,8 @@ namespace KlayGE
 
 	void RenderModel::OnRenderBegin()
 	{
-		typedef BOOST_TYPEOF(meshes_) MeshesType;
-		BOOST_FOREACH(MeshesType::reference mesh, meshes_)
+		typedef KLAYGE_DECLTYPE(meshes_) MeshesType;
+		KLAYGE_FOREACH(MeshesType::reference mesh, meshes_)
 		{
 			mesh->OnRenderBegin();
 		}
@@ -258,8 +258,8 @@ namespace KlayGE
 
 	void RenderModel::OnRenderEnd()
 	{
-		typedef BOOST_TYPEOF(meshes_) MeshesType;
-		BOOST_FOREACH(MeshesType::reference mesh, meshes_)
+		typedef KLAYGE_DECLTYPE(meshes_) MeshesType;
+		KLAYGE_FOREACH(MeshesType::reference mesh, meshes_)
 		{
 			mesh->OnRenderEnd();
 		}
@@ -279,8 +279,8 @@ namespace KlayGE
 	{
 		pos_aabb_ = AABBox(float3(0, 0, 0), float3(0, 0, 0));
 		tc_aabb_ = AABBox(float3(0, 0, 0), float3(0, 0, 0));
-		typedef BOOST_TYPEOF(meshes_) MeshesType;
-		BOOST_FOREACH(MeshesType::const_reference mesh, meshes_)
+		typedef KLAYGE_DECLTYPE(meshes_) MeshesType;
+		KLAYGE_FOREACH(MeshesType::const_reference mesh, meshes_)
 		{
 			pos_aabb_ |= mesh->PosBound();
 			tc_aabb_ |= mesh->TexcoordBound();
@@ -289,7 +289,7 @@ namespace KlayGE
 
 	TexturePtr const & RenderModel::RetriveTexture(std::string const & name)
 	{
-		BOOST_AUTO(iter, tex_pool_.find(name));
+		KLAYGE_AUTO(iter, tex_pool_.find(name));
 		if (tex_pool_.end() == iter)
 		{
 			TexturePtr tex = SyncLoadTexture(name, EAH_GPU_Read | EAH_Immutable);
@@ -302,8 +302,8 @@ namespace KlayGE
 	bool RenderModel::SpecialShading() const
 	{
 		bool ss = false;
-		typedef BOOST_TYPEOF(meshes_) MeshesType;
-		BOOST_FOREACH(MeshesType::const_reference mesh, meshes_)
+		typedef KLAYGE_DECLTYPE(meshes_) MeshesType;
+		KLAYGE_FOREACH(MeshesType::const_reference mesh, meshes_)
 		{
 			ss |= mesh->SpecialShading();
 		}
@@ -313,8 +313,8 @@ namespace KlayGE
 	bool RenderModel::TransparencyBackFace() const
 	{
 		bool ab = false;
-		typedef BOOST_TYPEOF(meshes_) MeshesType;
-		BOOST_FOREACH(MeshesType::const_reference mesh, meshes_)
+		typedef KLAYGE_DECLTYPE(meshes_) MeshesType;
+		KLAYGE_FOREACH(MeshesType::const_reference mesh, meshes_)
 		{
 			ab |= mesh->TransparencyBackFace();
 		}
@@ -324,8 +324,8 @@ namespace KlayGE
 	bool RenderModel::TransparencyFrontFace() const
 	{
 		bool ab = false;
-		typedef BOOST_TYPEOF(meshes_) MeshesType;
-		BOOST_FOREACH(MeshesType::const_reference mesh, meshes_)
+		typedef KLAYGE_DECLTYPE(meshes_) MeshesType;
+		KLAYGE_FOREACH(MeshesType::const_reference mesh, meshes_)
 		{
 			ab |= mesh->TransparencyFrontFace();
 		}
@@ -335,8 +335,8 @@ namespace KlayGE
 	bool RenderModel::Reflection() const
 	{
 		bool ab = false;
-		typedef BOOST_TYPEOF(meshes_) MeshesType;
-		BOOST_FOREACH(MeshesType::const_reference mesh, meshes_)
+		typedef KLAYGE_DECLTYPE(meshes_) MeshesType;
+		KLAYGE_FOREACH(MeshesType::const_reference mesh, meshes_)
 		{
 			ab |= mesh->Reflection();
 		}
@@ -346,8 +346,8 @@ namespace KlayGE
 	bool RenderModel::SimpleForward() const
 	{
 		bool ab = false;
-		typedef BOOST_TYPEOF(meshes_) MeshesType;
-		BOOST_FOREACH(MeshesType::const_reference mesh, meshes_)
+		typedef KLAYGE_DECLTYPE(meshes_) MeshesType;
+		KLAYGE_FOREACH(MeshesType::const_reference mesh, meshes_)
 		{
 			ab |= mesh->SimpleForward();
 		}
@@ -701,8 +701,8 @@ namespace KlayGE
 	AABBox SkinnedModel::FramePosBound(uint32_t frame) const
 	{
 		AABBox pos_aabb(float3(0, 0, 0), float3(0, 0, 0));
-		typedef BOOST_TYPEOF(meshes_) MeshesType;
-		BOOST_FOREACH(MeshesType::const_reference mesh, meshes_)
+		typedef KLAYGE_DECLTYPE(meshes_) MeshesType;
+		KLAYGE_FOREACH(MeshesType::const_reference mesh, meshes_)
 		{
 			pos_aabb |= checked_pointer_cast<SkinnedMesh>(mesh)->FramePosBound(frame);
 		}

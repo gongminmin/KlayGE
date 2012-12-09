@@ -271,7 +271,7 @@ namespace KlayGE
 		size_t hash_val = 0;
 		boost::hash_range(hash_val, p, p + sizeof(desc));
 
-		BOOST_AUTO(iter, d3d_sr_views_.find(hash_val));
+		KLAYGE_AUTO(iter, d3d_sr_views_.find(hash_val));
 		if (iter != d3d_sr_views_.end())
 		{
 			return iter->second;
@@ -279,7 +279,7 @@ namespace KlayGE
 
 		ID3D11ShaderResourceView* d3d_sr_view;
 		d3d_device_->CreateShaderResourceView(this->D3DResource().get(), &desc, &d3d_sr_view);
-		BOOST_AUTO(ret, d3d_sr_views_.insert(std::make_pair(hash_val, MakeCOMPtr(d3d_sr_view))));
+		KLAYGE_AUTO(ret, d3d_sr_views_.insert(std::make_pair(hash_val, MakeCOMPtr(d3d_sr_view))));
 		return ret.first->second;
 	}
 
@@ -289,7 +289,7 @@ namespace KlayGE
 		size_t hash_val = 0;
 		boost::hash_range(hash_val, p, p + sizeof(desc));
 
-		BOOST_AUTO(iter, d3d_ua_views_.find(hash_val));
+		KLAYGE_AUTO(iter, d3d_ua_views_.find(hash_val));
 		if (iter != d3d_ua_views_.end())
 		{
 			return iter->second;
@@ -297,7 +297,7 @@ namespace KlayGE
 
 		ID3D11UnorderedAccessView* d3d_ua_view;
 		d3d_device_->CreateUnorderedAccessView(this->D3DResource().get(), &desc, &d3d_ua_view);
-		BOOST_AUTO(ret, d3d_ua_views_.insert(std::make_pair(hash_val, MakeCOMPtr(d3d_ua_view))));
+		KLAYGE_AUTO(ret, d3d_ua_views_.insert(std::make_pair(hash_val, MakeCOMPtr(d3d_ua_view))));
 		return ret.first->second;
 	}
 
@@ -307,7 +307,7 @@ namespace KlayGE
 		size_t hash_val = 0;
 		boost::hash_range(hash_val, p, p + sizeof(desc));
 
-		BOOST_AUTO(iter, d3d_rt_views_.find(hash_val));
+		KLAYGE_AUTO(iter, d3d_rt_views_.find(hash_val));
 		if (iter != d3d_rt_views_.end())
 		{
 			return iter->second;
@@ -315,7 +315,7 @@ namespace KlayGE
 
 		ID3D11RenderTargetView* rt_view;
 		d3d_device_->CreateRenderTargetView(this->D3DResource().get(), &desc, &rt_view);
-		BOOST_AUTO(ret, d3d_rt_views_.insert(std::make_pair(hash_val, MakeCOMPtr(rt_view))));
+		KLAYGE_AUTO(ret, d3d_rt_views_.insert(std::make_pair(hash_val, MakeCOMPtr(rt_view))));
 		return ret.first->second;
 	}
 
@@ -325,7 +325,7 @@ namespace KlayGE
 		size_t hash_val = 0;
 		boost::hash_range(hash_val, p, p + sizeof(desc));
 
-		BOOST_AUTO(iter, d3d_ds_views_.find(hash_val));
+		KLAYGE_AUTO(iter, d3d_ds_views_.find(hash_val));
 		if (iter != d3d_ds_views_.end())
 		{
 			return iter->second;
@@ -333,7 +333,7 @@ namespace KlayGE
 
 		ID3D11DepthStencilView* ds_view;
 		d3d_device_->CreateDepthStencilView(this->D3DResource().get(), &desc, &ds_view);
-		BOOST_AUTO(ret, d3d_ds_views_.insert(std::make_pair(hash_val, MakeCOMPtr(ds_view))));
+		KLAYGE_AUTO(ret, d3d_ds_views_.insert(std::make_pair(hash_val, MakeCOMPtr(ds_view))));
 		return ret.first->second;
 	}
 

@@ -42,7 +42,7 @@ namespace KlayGE
 
 	Lobby::PlayerAddrsIter Lobby::ID(sockaddr_in const & addr)
 	{
-		for (BOOST_AUTO(iter, players_.begin()); iter != players_.end(); ++ iter)
+		for (KLAYGE_AUTO(iter, players_.begin()); iter != players_.end(); ++ iter)
 		{
 			if (0 == std::memcmp(&addr, &(iter->second.addr), sizeof(addr)))
 			{
@@ -105,19 +105,19 @@ namespace KlayGE
 			}
 
 			// 发送信息
-			typedef BOOST_TYPEOF(players_) PlayersType;
-			BOOST_FOREACH(PlayersType::reference player, players_)
+			typedef KLAYGE_DECLTYPE(players_) PlayersType;
+			KLAYGE_FOREACH(PlayersType::reference player, players_)
 			{
 				SendQueueType& msgs = player.second.msgs;
-				typedef BOOST_TYPEOF(msgs) MsgsType;
-				BOOST_FOREACH(MsgsType::reference msg, msgs)
+				typedef KLAYGE_DECLTYPE(msgs) MsgsType;
+				KLAYGE_FOREACH(MsgsType::reference msg, msgs)
 				{
 					socket_.SendTo(&msg[0], static_cast<int>(msg.size()), player.second.addr);
 				}
 			}
 
 			// 检查是否有在线用户超时
-			for (BOOST_AUTO(iter, players_.begin()); iter != players_.end();)
+			for (KLAYGE_AUTO(iter, players_.begin()); iter != players_.end();)
 			{
 				// 大于20秒
 				if (std::time(nullptr) - iter->second.time >= 20 * 1000)
@@ -137,8 +137,8 @@ namespace KlayGE
 	char Lobby::NumPlayer() const
 	{
 		char n = 0;
-		typedef BOOST_TYPEOF(players_) PlayersType;
-		BOOST_FOREACH(PlayersType::const_reference player, players_)
+		typedef KLAYGE_DECLTYPE(players_) PlayersType;
+		KLAYGE_FOREACH(PlayersType::const_reference player, players_)
 		{
 			if (player.first != 0)
 			{
@@ -177,8 +177,8 @@ namespace KlayGE
 		players_.resize(maxPlayers);
 		PlayerAddrs(players_).swap(players_);
 
-		typedef BOOST_TYPEOF(players_) PlayersType;
-		BOOST_FOREACH(PlayersType::reference player, players_)
+		typedef KLAYGE_DECLTYPE(players_) PlayersType;
+		KLAYGE_FOREACH(PlayersType::reference player, players_)
 		{
 			player.first = 0;
 		}
@@ -220,7 +220,7 @@ namespace KlayGE
 		//			Player名字		16 字节
 
 		char id = 1;
-		BOOST_AUTO(iter, players_.begin());
+		KLAYGE_AUTO(iter, players_.begin());
 		for (; iter != this->players_.end(); ++ iter, ++ id)
 		{
 			if (0 == iter->first)

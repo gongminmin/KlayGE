@@ -187,7 +187,7 @@ namespace KlayGE
 
 	void OGLESTexture::TexParameteri(GLenum pname, GLint param)
 	{
-		BOOST_AUTO(iter, tex_param_i_.find(pname));
+		KLAYGE_AUTO(iter, tex_param_i_.find(pname));
 		if ((iter == tex_param_i_.end()) || (iter->second != param))
 		{
 			glBindTexture(target_type_, texture_);
@@ -199,7 +199,7 @@ namespace KlayGE
 
 	void OGLESTexture::TexParameterf(GLenum pname, GLfloat param)
 	{
-		BOOST_AUTO(iter, tex_param_f_.find(pname));
+		KLAYGE_AUTO(iter, tex_param_f_.find(pname));
 		if ((iter == tex_param_f_.end()) || (iter->second != param))
 		{
 			glBindTexture(target_type_, texture_);

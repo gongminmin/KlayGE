@@ -931,7 +931,7 @@ namespace KlayGE
 				boost::char_separator<char> sep("", " \t\n.,():;+-*/%&!|^[]{}'\"?");
 				boost::tokenizer<boost::char_separator<char> > tok(s, sep);
 				std::string this_token;
-				for (BOOST_AUTO(beg, tok.begin()); beg != tok.end();)
+				for (KLAYGE_AUTO(beg, tok.begin()); beg != tok.end();)
 				{
 					this_token = *beg;
 
@@ -1103,12 +1103,12 @@ namespace KlayGE
 		}
 		ss << std::endl;
 
-		BOOST_AUTO(cbuffers, effect.CBuffers());
-		typedef BOOST_TYPEOF(cbuffers) CBuffersType;
-		BOOST_FOREACH(CBuffersType::const_reference cbuff, cbuffers)
+		KLAYGE_AUTO(cbuffers, effect.CBuffers());
+		typedef KLAYGE_DECLTYPE(cbuffers) CBuffersType;
+		KLAYGE_FOREACH(CBuffersType::const_reference cbuff, cbuffers)
 		{
-			typedef BOOST_TYPEOF(cbuff.second) CBuffersSecondType;
-			BOOST_FOREACH(CBuffersSecondType::const_reference param_index, cbuff.second)
+			typedef KLAYGE_DECLTYPE(cbuff.second) CBuffersSecondType;
+			KLAYGE_FOREACH(CBuffersSecondType::const_reference param_index, cbuff.second)
 			{
 				RenderEffectParameter& param = *effect.ParameterByIndex(param_index);
 
@@ -1201,7 +1201,7 @@ namespace KlayGE
 		boost::char_separator<char> sep("", " \t\n.,():;+-*/%&!|^[]{}'\"?");
 		boost::tokenizer<boost::char_separator<char> > tok(glsl, sep);
 		std::string this_token;
-		for (BOOST_AUTO(beg, tok.begin()); beg != tok.end(); ++ beg)
+		for (KLAYGE_AUTO(beg, tok.begin()); beg != tok.end(); ++ beg)
 		{
 			this_token = *beg;
 
@@ -1721,8 +1721,8 @@ namespace KlayGE
 
 			ret->attrib_locs_ = attrib_locs_;
 
-			typedef BOOST_TYPEOF(param_binds_) ParamBindsType;
-			BOOST_FOREACH(ParamBindsType::reference pb, param_binds_)
+			typedef KLAYGE_DECLTYPE(param_binds_) ParamBindsType;
+			KLAYGE_FOREACH(ParamBindsType::reference pb, param_binds_)
 			{
 				if (pb.param)
 				{
@@ -1764,7 +1764,7 @@ namespace KlayGE
 
 	GLint OGLESShaderObject::GetAttribLocation(VertexElementUsage usage, uint8_t usage_index)
 	{
-		BOOST_AUTO(iter, attrib_locs_.find(std::make_pair(usage, usage_index)));
+		KLAYGE_AUTO(iter, attrib_locs_.find(std::make_pair(usage, usage_index)));
 		if (iter != attrib_locs_.end())
 		{
 			return iter->second;
@@ -2247,8 +2247,8 @@ namespace KlayGE
 	{
 		glUseProgram(glsl_program_);
 
-		typedef BOOST_TYPEOF(param_binds_) ParamBindsType;
-		BOOST_FOREACH(ParamBindsType::reference pb, param_binds_)
+		typedef KLAYGE_DECLTYPE(param_binds_) ParamBindsType;
+		KLAYGE_FOREACH(ParamBindsType::reference pb, param_binds_)
 		{
 			pb.func();
 		}

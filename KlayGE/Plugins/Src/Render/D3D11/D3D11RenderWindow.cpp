@@ -167,8 +167,8 @@ namespace KlayGE
 			feature_levels.push_back(D3D_FEATURE_LEVEL_10_0);
 			feature_levels.push_back(D3D_FEATURE_LEVEL_9_3);
 
-			typedef BOOST_TYPEOF(dev_type_behaviors) DevTypeBehaviorsType;
-			BOOST_FOREACH(DevTypeBehaviorsType::reference dev_type_beh, dev_type_behaviors)
+			typedef KLAYGE_DECLTYPE(dev_type_behaviors) DevTypeBehaviorsType;
+			KLAYGE_FOREACH(DevTypeBehaviorsType::reference dev_type_beh, dev_type_behaviors)
 			{
 				ID3D11Device* d3d_device = nullptr;
 				ID3D11DeviceContext* d3d_imm_ctx = nullptr;

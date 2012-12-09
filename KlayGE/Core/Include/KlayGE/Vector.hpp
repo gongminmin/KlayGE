@@ -81,21 +81,21 @@ namespace KlayGE
 		template <typename U, int M>
 		Vector_T(Vector_T<U, M> const & rhs)
 		{
-			BOOST_STATIC_ASSERT(M >= N);
+			KLAYGE_STATIC_ASSERT(M >= N);
 
 			detail::vector_helper<T, N>::DoCopy(&vec_[0], &rhs[0]);
 		}
 
 		Vector_T(T const & x, T const & y)
 		{
-			BOOST_STATIC_ASSERT(2 == elem_num);
+			KLAYGE_STATIC_ASSERT(2 == elem_num);
 
 			this->x() = x;
 			this->y() = y;
 		}
 		Vector_T(T const & x, T const & y, T const & z)
 		{
-			BOOST_STATIC_ASSERT(3 == elem_num);
+			KLAYGE_STATIC_ASSERT(3 == elem_num);
 
 			this->x() = x;
 			this->y() = y;
@@ -103,7 +103,7 @@ namespace KlayGE
 		}
 		Vector_T(T const & x, T const & y, T const & z, T const & w)
 		{
-			BOOST_STATIC_ASSERT(4 == elem_num);
+			KLAYGE_STATIC_ASSERT(4 == elem_num);
 
 			this->x() = x;
 			this->y() = y;
@@ -150,45 +150,45 @@ namespace KlayGE
 
 		reference x()
 		{
-			BOOST_STATIC_ASSERT(elem_num >= 1);
+			KLAYGE_STATIC_ASSERT(elem_num >= 1);
 			return vec_[0];
 		}
 		const_reference x() const
 		{
-			BOOST_STATIC_ASSERT(elem_num >= 1);
+			KLAYGE_STATIC_ASSERT(elem_num >= 1);
 			return vec_[0];
 		}
 
 		reference y()
 		{
-			BOOST_STATIC_ASSERT(elem_num >= 2);
+			KLAYGE_STATIC_ASSERT(elem_num >= 2);
 			return vec_[1];
 		}
 		const_reference y() const
 		{
-			BOOST_STATIC_ASSERT(elem_num >= 2);
+			KLAYGE_STATIC_ASSERT(elem_num >= 2);
 			return vec_[1];
 		}
 
 		reference z()
 		{
-			BOOST_STATIC_ASSERT(elem_num >= 3);
+			KLAYGE_STATIC_ASSERT(elem_num >= 3);
 			return vec_[2];
 		}
 		const_reference z() const
 		{
-			BOOST_STATIC_ASSERT(elem_num >= 3);
+			KLAYGE_STATIC_ASSERT(elem_num >= 3);
 			return vec_[2];
 		}
 
 		reference w()
 		{
-			BOOST_STATIC_ASSERT(elem_num >= 4);
+			KLAYGE_STATIC_ASSERT(elem_num >= 4);
 			return vec_[3];
 		}
 		const_reference w() const
 		{
-			BOOST_STATIC_ASSERT(elem_num >= 4);
+			KLAYGE_STATIC_ASSERT(elem_num >= 4);
 			return vec_[3];
 		}
 
@@ -252,7 +252,7 @@ namespace KlayGE
 		template <typename U, int M>
 		Vector_T& operator=(Vector_T<U, M> const & rhs)
 		{
-			BOOST_STATIC_ASSERT(M >= N);
+			KLAYGE_STATIC_ASSERT(M >= N);
 
 			detail::vector_helper<T, N>::DoCopy(&vec_[0], &rhs.vec_[0]);
 			return *this;

@@ -209,8 +209,8 @@ namespace KlayGE
 
 		std::vector<uint32_t> lines(1, 0);
 
-		typedef BOOST_TYPEOF(text) TextType;
-		BOOST_FOREACH(TextType::const_reference ch, text)
+		typedef KLAYGE_DECLTYPE(text) TextType;
+		KLAYGE_FOREACH(TextType::const_reference ch, text)
 		{
 			if (ch != L'\n')
 			{
@@ -257,9 +257,9 @@ namespace KlayGE
 		this->UpdateTexture(text);
 
 		KFont& kl = *kfont_loader_;
-		BOOST_TYPEOF(char_info_map_)& cim = char_info_map_;
-		BOOST_TYPEOF(vertices_)& verts = vertices_;
-		BOOST_TYPEOF(indices_)& inds = indices_;
+		KLAYGE_DECLTYPE(char_info_map_)& cim = char_info_map_;
+		KLAYGE_DECLTYPE(vertices_)& verts = vertices_;
+		KLAYGE_DECLTYPE(indices_)& inds = indices_;
 
 		float const h = font_height * yScale;
 		float const rel_size = static_cast<float>(font_height) / kl.CharSize();
@@ -268,8 +268,8 @@ namespace KlayGE
 
 		std::vector<std::pair<float, std::wstring> > lines(1, std::make_pair(0.0f, L""));
 
-		typedef BOOST_TYPEOF(text) TextType;
-		BOOST_FOREACH(TextType::const_reference ch, text)
+		typedef KLAYGE_DECLTYPE(text) TextType;
+		KLAYGE_FOREACH(TextType::const_reference ch, text)
 		{
 			if (ch != L'\n')
 			{
@@ -296,8 +296,8 @@ namespace KlayGE
 		{
 			if (align & Font::FA_Hor_Right)
 			{
-				typedef BOOST_TYPEOF(lines) LinesType;
-				BOOST_FOREACH(LinesType::const_reference p, lines)
+				typedef KLAYGE_DECLTYPE(lines) LinesType;
+				KLAYGE_FOREACH(LinesType::const_reference p, lines)
 				{
 					sx.push_back(rc.right() - p.first);
 				}
@@ -305,8 +305,8 @@ namespace KlayGE
 			else
 			{
 				// Font::FA_Hor_Center
-				typedef BOOST_TYPEOF(lines) LinesType;
-				BOOST_FOREACH(LinesType::const_reference p, lines)
+				typedef KLAYGE_DECLTYPE(lines) LinesType;
+				KLAYGE_FOREACH(LinesType::const_reference p, lines)
 				{
 					sx.push_back((rc.left() + rc.right()) / 2 - p.first / 2);
 				}
@@ -315,7 +315,7 @@ namespace KlayGE
 
 		if (align & Font::FA_Ver_Top)
 		{
-			for (BOOST_AUTO(iter, lines.begin()); iter != lines.end(); ++ iter)
+			for (KLAYGE_AUTO(iter, lines.begin()); iter != lines.end(); ++ iter)
 			{
 				sy.push_back(rc.top() + (iter - lines.begin()) * h);
 			}
@@ -324,7 +324,7 @@ namespace KlayGE
 		{
 			if (align & Font::FA_Ver_Bottom)
 			{
-				for (BOOST_AUTO(iter, lines.begin()); iter != lines.end(); ++ iter)
+				for (KLAYGE_AUTO(iter, lines.begin()); iter != lines.end(); ++ iter)
 				{
 					sy.push_back(rc.bottom() - (lines.size() - (iter - lines.begin())) * h);
 				}
@@ -332,7 +332,7 @@ namespace KlayGE
 			else
 			{
 				// Font::FA_Ver_Middle
-				for (BOOST_AUTO(iter, lines.begin()); iter != lines.end(); ++ iter)
+				for (KLAYGE_AUTO(iter, lines.begin()); iter != lines.end(); ++ iter)
 				{
 					sy.push_back((rc.top() + rc.bottom()) / 2
 						- lines.size() * h / 2 + (iter - lines.begin()) * h);
@@ -363,8 +363,8 @@ namespace KlayGE
 
 			uint16_t lastIndex(static_cast<uint16_t>(verts.size()));
 
-			typedef BOOST_TYPEOF(lines[i].second) LinesType;
-			BOOST_FOREACH(LinesType::const_reference ch, lines[i].second)
+			typedef KLAYGE_DECLTYPE(lines[i].second) LinesType;
+			KLAYGE_FOREACH(LinesType::const_reference ch, lines[i].second)
 			{
 				std::pair<int32_t, uint32_t> const & offset_adv = kl.CharIndexAdvance(ch);
 				if (offset_adv.first != -1)
@@ -376,7 +376,7 @@ namespace KlayGE
 					float width = ci.width * rel_size_x;
 					float height = ci.height * rel_size_y;
 
-					BOOST_AUTO(cmiter, cim.find(ch));
+					KLAYGE_AUTO(cmiter, cim.find(ch));
 					Rect_T<float> const & texRect(cmiter->second.rc);
 
 					Rect_T<float> pos_rc(x + left, y + top, x + left + width, y + top + height);
@@ -429,9 +429,9 @@ namespace KlayGE
 		this->UpdateTexture(text);
 
 		KFont& kl = *kfont_loader_;
-		BOOST_TYPEOF(char_info_map_)& cim = char_info_map_;
-		BOOST_TYPEOF(vertices_)& verts = vertices_;
-		BOOST_TYPEOF(indices_)& inds = indices_;
+		KLAYGE_DECLTYPE(char_info_map_)& cim = char_info_map_;
+		KLAYGE_DECLTYPE(vertices_)& verts = vertices_;
+		KLAYGE_DECLTYPE(indices_)& inds = indices_;
 
 		uint32_t const clr32 = clr.ABGR();
 		float const h = font_height * yScale;
@@ -459,8 +459,8 @@ namespace KlayGE
 
 		uint16_t lastIndex(static_cast<uint16_t>(verts.size()));
 
-		typedef BOOST_TYPEOF(text) TextType;
-		BOOST_FOREACH(TextType::const_reference ch, text)
+		typedef KLAYGE_DECLTYPE(text) TextType;
+		KLAYGE_FOREACH(TextType::const_reference ch, text)
 		{
 			if (ch != L'\n')
 			{
@@ -474,7 +474,7 @@ namespace KlayGE
 					float width = ci.width * rel_size_x;
 					float height = ci.height * rel_size_y;
 
-					BOOST_AUTO(cmiter, cim.find(ch));
+					KLAYGE_AUTO(cmiter, cim.find(ch));
 					Rect_T<float> const & texRect(cmiter->second.rc);
 					Rect_T<float> pos_rc(x + left, y + top, x + left + width, y + top + height);
 
@@ -541,20 +541,20 @@ namespace KlayGE
 		uint32_t const tex_size = dist_texture_->Width(0);
 
 		KFont& kl = *kfont_loader_;
-		BOOST_TYPEOF(char_info_map_)& cim = char_info_map_;
+		KLAYGE_DECLTYPE(char_info_map_)& cim = char_info_map_;
 
 		uint32_t const kfont_char_size = kl.CharSize();
 
 		uint32_t const num_chars_a_row = tex_size / kfont_char_size;
 		uint32_t const num_total_chars = num_chars_a_row * num_chars_a_row;
 
-		typedef BOOST_TYPEOF(text) TextType;
-		BOOST_FOREACH(TextType::const_reference ch, text)
+		typedef KLAYGE_DECLTYPE(text) TextType;
+		KLAYGE_FOREACH(TextType::const_reference ch, text)
 		{
 			int32_t offset = kl.CharIndex(ch);
 			if (offset != -1)
 			{
-				BOOST_AUTO(cmiter, cim.find(ch));
+				KLAYGE_AUTO(cmiter, cim.find(ch));
 				if (cmiter != cim.end())
 				{
 					// 在现有纹理中找到了
@@ -598,8 +598,8 @@ namespace KlayGE
 						// 找到使用最长时间没有使用的字
 
 						uint64_t min_tick = cim.begin()->second.tick;
-						BOOST_AUTO(min_chiter, cim.begin());
-						for (BOOST_AUTO(chiter, cim.begin()); chiter != cim.end(); ++ chiter)
+						KLAYGE_AUTO(min_chiter, cim.begin());
+						for (KLAYGE_AUTO(chiter, cim.begin()); chiter != cim.end(); ++ chiter)
 						{
 							if (chiter->second.tick < min_tick)
 							{
@@ -613,7 +613,7 @@ namespace KlayGE
 						charInfo.rc.left() = min_chiter->second.rc.left();
 						charInfo.rc.top() = min_chiter->second.rc.top();
 
-						for (BOOST_AUTO(chiter, cim.begin()); chiter != cim.end(); ++ chiter)
+						for (KLAYGE_AUTO(chiter, cim.begin()); chiter != cim.end(); ++ chiter)
 						{
 							if (chiter->second.tick == min_tick)
 							{
@@ -622,7 +622,7 @@ namespace KlayGE
 								uint32_t const x = static_cast<int32_t>(chiter->second.rc.left() * tex_size);
 								uint32_t const y = static_cast<int32_t>(chiter->second.rc.top() * tex_size);
 								uint32_t const id = y * num_chars_a_row + x;
-								BOOST_AUTO(freeiter, char_free_list_.begin());
+								KLAYGE_AUTO(freeiter, char_free_list_.begin());
 								while ((freeiter != char_free_list_.end()) && (freeiter->second <= id))
 								{
 									++ freeiter;
@@ -630,9 +630,9 @@ namespace KlayGE
 								char_free_list_.insert(freeiter, std::make_pair(id, id + 1));
 							}
 						}
-						for (BOOST_AUTO(freeiter, char_free_list_.begin()); freeiter != char_free_list_.end();)
+						for (KLAYGE_AUTO(freeiter, char_free_list_.begin()); freeiter != char_free_list_.end();)
 						{
-							BOOST_AUTO(nextiter, freeiter);
+							KLAYGE_AUTO(nextiter, freeiter);
 							++ nextiter;
 
 							if (freeiter->second == nextiter->first)

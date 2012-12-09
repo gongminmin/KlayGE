@@ -1168,8 +1168,8 @@ namespace KlayGE
 		if ((pass_type != PT_Lighting) && (pass_type != PT_IndirectLighting)
 			&& (pass_type != PT_OpaqueShading) && (pass_type != PT_TransparencyBackShading) && (pass_type != PT_TransparencyFrontShading))
 		{
-			typedef BOOST_TYPEOF(visible_scene_objs_) VisibleSceneObjsType;
-			BOOST_FOREACH(VisibleSceneObjsType::reference deo, visible_scene_objs_)
+			typedef KLAYGE_DECLTYPE(visible_scene_objs_) VisibleSceneObjsType;
+			KLAYGE_FOREACH(VisibleSceneObjsType::reference deo, visible_scene_objs_)
 			{
 				deo->Pass(static_cast<PassType>(pass_type));
 			}
@@ -1330,8 +1330,8 @@ namespace KlayGE
 					{
 						PassType pt = mrt_g_buffer_support_ ? PT_OpaqueGBufferMRT : PT_OpaqueGBufferRT0;
 						re.BindFrameBuffer(pvp.g_buffers[Opaque_GBuffer]);
-						typedef BOOST_TYPEOF(decals_) DecalsType;
-						BOOST_FOREACH(DecalsType::reference de, decals_)
+						typedef KLAYGE_DECLTYPE(decals_) DecalsType;
+						KLAYGE_FOREACH(DecalsType::reference de, decals_)
 						{
 							de->Pass(pt);
 							de->Render();
@@ -1399,8 +1399,8 @@ namespace KlayGE
 				if (!decals_.empty())
 				{
 					re.BindFrameBuffer(pvp.g_buffers_rt1[Opaque_GBuffer]);
-					typedef BOOST_TYPEOF(decals_) DecalsType;
-					BOOST_FOREACH(DecalsType::reference de, decals_)
+					typedef KLAYGE_DECLTYPE(decals_) DecalsType;
+					KLAYGE_FOREACH(DecalsType::reference de, decals_)
 					{
 						de->Pass(PT_OpaqueGBufferRT1);
 						de->Render();
@@ -1591,8 +1591,8 @@ namespace KlayGE
 					uint32_t urv;
 					if (has_simple_forward_objs_ && !(pvp.attrib & VPAM_NoSimpleForward))
 					{
-						typedef BOOST_TYPEOF(visible_scene_objs_) VisibleSceneObjsType;
-						BOOST_FOREACH(VisibleSceneObjsType::reference deo, visible_scene_objs_)
+						typedef KLAYGE_DECLTYPE(visible_scene_objs_) VisibleSceneObjsType;
+						KLAYGE_FOREACH(VisibleSceneObjsType::reference deo, visible_scene_objs_)
 						{
 							deo->Pass(PT_SimpleForward);
 						}

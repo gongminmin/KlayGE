@@ -615,7 +615,7 @@ namespace KlayGE
 	{
 		if (data_blocks_.empty())
 		{
-			typedef BOOST_TYPEOF(decoded_block_cache_) DecodedBlockCacheType;
+			typedef KLAYGE_DECLTYPE(decoded_block_cache_) DecodedBlockCacheType;
 			DecodedBlockCacheType::iterator iter = decoded_block_cache_.find(data_index);
 			if (iter != decoded_block_cache_.end())
 			{
@@ -1251,10 +1251,10 @@ namespace KlayGE
 		std::vector<uint32_t> neighbor_ids;
 		std::vector<uint32_t> tile_attrs(tile_ids.size());
 		std::vector<bool> in_same_image(tile_ids.size() * 9, false);
-		BOOST_TYPEOF(tile_info_map_)& tim = tile_info_map_;
+		KLAYGE_DECLTYPE(tile_info_map_)& tim = tile_info_map_;
 		for (size_t i = 0; i < tile_ids.size(); ++ i)
 		{
-			BOOST_AUTO(tmiter, tim.find(tile_ids[i]));
+			KLAYGE_AUTO(tmiter, tim.find(tile_ids[i]));
 			if (tmiter != tim.end())
 			{
 				// Exists in cache
@@ -1397,8 +1397,8 @@ namespace KlayGE
 				// Find tiles that are not used for the longest time
 
 				uint64_t min_tick = tim.begin()->second.tick;
-				BOOST_AUTO(min_tileiter, tim.begin());
-				for (BOOST_AUTO(tileiter, tim.begin()); tileiter != tim.end(); ++ tileiter)
+				KLAYGE_AUTO(min_tileiter, tim.begin());
+				for (KLAYGE_AUTO(tileiter, tim.begin()); tileiter != tim.end(); ++ tileiter)
 				{
 					if (tileiter->second.tick < min_tick)
 					{
@@ -1411,14 +1411,14 @@ namespace KlayGE
 				tile_info.y = min_tileiter->second.y;
 				tile_info.z = min_tileiter->second.z;
 
-				for (BOOST_AUTO(tileiter, tim.begin()); tileiter != tim.end(); ++ tileiter)
+				for (KLAYGE_AUTO(tileiter, tim.begin()); tileiter != tim.end(); ++ tileiter)
 				{
 					if (tileiter->second.tick == min_tick)
 					{
 						tim.erase(tileiter);
 
 						uint32_t const id = tileiter->second.z * num_cache_tiles_a_layer + tileiter->second.y * num_cache_tiles_a_row + tileiter->second.x;
-						BOOST_AUTO(freeiter, tile_free_list_.begin());
+						KLAYGE_AUTO(freeiter, tile_free_list_.begin());
 						while ((freeiter != tile_free_list_.end()) && (freeiter->second <= id))
 						{
 							++ freeiter;
@@ -1426,9 +1426,9 @@ namespace KlayGE
 						tile_free_list_.insert(freeiter, std::make_pair(id, id + 1));
 					}
 				}
-				for (BOOST_AUTO(freeiter, tile_free_list_.begin()); freeiter != tile_free_list_.end();)
+				for (KLAYGE_AUTO(freeiter, tile_free_list_.begin()); freeiter != tile_free_list_.end();)
 				{
-					BOOST_AUTO(nextiter, freeiter);
+					KLAYGE_AUTO(nextiter, freeiter);
 					++ nextiter;
 
 					if (freeiter->second == nextiter->first)

@@ -468,8 +468,8 @@ namespace KlayGE
 	ID3D11InputLayoutPtr const & D3D11RenderEngine::CreateD3D11InputLayout(std::vector<D3D11_INPUT_ELEMENT_DESC> const & elems, size_t signature, std::vector<uint8_t> const & vs_code)
 	{
 		size_t elems_signature = 0;
-		typedef BOOST_TYPEOF(elems) ElemsType;
-		BOOST_FOREACH(ElemsType::const_reference elem, elems)
+		typedef KLAYGE_DECLTYPE(elems) ElemsType;
+		KLAYGE_FOREACH(ElemsType::const_reference elem, elems)
 		{
 			size_t seed = boost::hash_range(elem.SemanticName, elem.SemanticName + strlen(elem.SemanticName));
 			boost::hash_combine(seed, elem.SemanticIndex);
@@ -484,7 +484,7 @@ namespace KlayGE
 
 		boost::hash_combine(signature, elems_signature);
 
-		BOOST_AUTO(iter, input_layout_bank_.find(signature));
+		KLAYGE_AUTO(iter, input_layout_bank_.find(signature));
 		if (iter != input_layout_bank_.end())
 		{
 			return iter->second;
@@ -495,7 +495,7 @@ namespace KlayGE
 			TIF(d3d_device_->CreateInputLayout(&elems[0], static_cast<UINT>(elems.size()), &vs_code[0], vs_code.size(), &ia));
 			ID3D11InputLayoutPtr ret = MakeCOMPtr(ia);
 
-			BOOST_AUTO(in, input_layout_bank_.insert(std::make_pair(signature, ret)));
+			KLAYGE_AUTO(in, input_layout_bank_.insert(std::make_pair(signature, ret)));
 
 			return in.first->second;
 		}
@@ -854,11 +854,11 @@ namespace KlayGE
 
 	bool D3D11RenderEngine::RenderTargetFormatSupport(ElementFormat elem_fmt, uint32_t sample_count, uint32_t sample_quality)
 	{
-		BOOST_AUTO(iter, rendertarget_format_.find(elem_fmt));
+		KLAYGE_AUTO(iter, rendertarget_format_.find(elem_fmt));
 		if (iter != rendertarget_format_.end())
 		{
-			typedef BOOST_TYPEOF(iter->second) RTType;
-			BOOST_FOREACH(RTType::const_reference p, iter->second)
+			typedef KLAYGE_DECLTYPE(iter->second) RTType;
+			KLAYGE_FOREACH(RTType::const_reference p, iter->second)
 			{
 				if ((sample_count == p.first) && (sample_quality < p.second))
 				{
