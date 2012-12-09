@@ -109,13 +109,13 @@ float4 ReflectSpecialShadingPS(
 	float4 ssr;
 	if (reflect_vec_front.z > 0)
 	{
-		ssr = CalcSSR(tc_front, normal_es_front, pos_es_front, pos_es_front, 1);
+		ssr = CalcSSR(tc_front, normal_es_front, pos_es_front, pos_es_front, 1, 1);
 	}
 	else
 	{
 		if (reflect_vec_back.z < 0)
 		{
-			ssr = CalcSSR(tc_back, normal_es_back, pos_es_back, pos_es_back - eye_in_back_camera, 0);
+			ssr = CalcSSR(tc_back, normal_es_back, pos_es_back, pos_es_back - eye_in_back_camera, 0, 1);
 		}
 		else
 		{
