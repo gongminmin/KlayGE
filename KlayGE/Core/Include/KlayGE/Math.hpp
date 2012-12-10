@@ -54,8 +54,6 @@
 #include <algorithm>
 #include <iterator>
 
-#include <boost/static_assert.hpp>
-
 namespace KlayGE
 {
 	// 常量定义

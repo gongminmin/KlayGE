@@ -19,8 +19,6 @@
 
 #include <cstring>
 
-#include <boost/typeof/typeof.hpp>
-
 #include <glloader/glloader.h>
 
 #include <KlayGE/OpenGLES/OGLESMapping.hpp>

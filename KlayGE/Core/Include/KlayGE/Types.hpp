@@ -19,13 +19,19 @@
 #pragma once
 
 #include <boost/cstdint.hpp>
-#include <boost/static_assert.hpp>
-#include <boost/typeof/typeof.hpp>
-#include <boost/foreach.hpp>
+#ifndef KLAYGE_STATIC_ASSERT_SUPPORT
+	#include <boost/static_assert.hpp>
+#endif
+#ifndef KLAYGE_DECLTYPE_SUPPORT
+	#include <boost/typeof/typeof.hpp>
+#endif
+#ifndef KLAYGE_FOREACH_SUPPORT
+	#include <boost/foreach.hpp>
+#endif
 #ifdef KLAYGE_TYPE_TRAITS_SUPPORT
-#include <type_traits>
+	#include <type_traits>
 #else
-#include <boost/type_traits/remove_reference.hpp>
+	#include <boost/type_traits/remove_reference.hpp>
 #endif
 
 #ifndef KLAYGE_NULLPTR_SUPPORT

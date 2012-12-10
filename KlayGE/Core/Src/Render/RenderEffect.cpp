@@ -57,8 +57,6 @@
 #include <sstream>
 #include <fstream>
 #include <boost/assert.hpp>
-#include <boost/typeof/typeof.hpp>
-#include <boost/foreach.hpp>
 #include <boost/bind.hpp>
 #include <boost/thread/mutex.hpp>
 #include <boost/algorithm/string/split.hpp>

@@ -31,8 +31,6 @@
 #pragma warning(pop)
 #endif
 #include <boost/bind.hpp>
-#include <boost/typeof/typeof.hpp>
-#include <boost/foreach.hpp>
 
 #include <KlayGE/DSound/DSAudio.hpp>
 

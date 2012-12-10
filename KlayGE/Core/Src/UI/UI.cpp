@@ -41,8 +41,6 @@
 #include <cstring>
 #include <fstream>
 #include <boost/bind.hpp>
-#include <boost/typeof/typeof.hpp>
-#include <boost/foreach.hpp>
 
 #include <KlayGE/UI.hpp>
 

@@ -32,9 +32,6 @@
 #include <KlayGE/SSVOPostProcess.hpp>
 #include <KlayGE/SSRPostProcess.hpp>
 
-#include <boost/typeof/typeof.hpp>
-#include <boost/foreach.hpp>
-
 #include <KlayGE/DeferredRenderingLayer.hpp>
 
 #define USE_NEW_LIGHT_SAMPLING

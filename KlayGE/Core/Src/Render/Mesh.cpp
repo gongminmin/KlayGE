@@ -36,8 +36,6 @@
 #include <fstream>
 #include <sstream>
 #include <boost/tuple/tuple.hpp>
-#include <boost/typeof/typeof.hpp>
-#include <boost/foreach.hpp>
 
 #include <MeshMLLib/MeshMLLib.hpp>
 

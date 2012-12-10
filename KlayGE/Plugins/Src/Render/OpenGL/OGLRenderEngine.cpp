@@ -59,8 +59,6 @@
 #include <sstream>
 #include <cstring>
 #include <boost/assert.hpp>
-#include <boost/typeof/typeof.hpp>
-#include <boost/foreach.hpp>
 
 #include <KlayGE/OpenGL/OGLMapping.hpp>
 #include <KlayGE/OpenGL/OGLRenderWindow.hpp>

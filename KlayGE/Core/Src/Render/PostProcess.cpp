@@ -32,8 +32,6 @@
 #include <KlayGE/XMLDom.hpp>
 
 #include <cstring>
-#include <boost/foreach.hpp>
-#include <boost/typeof/typeof.hpp>
 
 #include <KlayGE/PostProcess.hpp>
 

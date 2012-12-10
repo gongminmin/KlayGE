@@ -31,8 +31,6 @@
 #ifdef KLAYGE_COMPILER_MSVC
 #pragma warning(pop)
 #endif
-#include <boost/typeof/typeof.hpp>
-#include <boost/foreach.hpp>
 
 namespace KlayGE
 {

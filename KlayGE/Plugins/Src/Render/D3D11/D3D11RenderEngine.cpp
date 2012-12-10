@@ -41,8 +41,6 @@
 #include <algorithm>
 #include <boost/assert.hpp>
 #include <boost/bind.hpp>
-#include <boost/typeof/typeof.hpp>
-#include <boost/foreach.hpp>
 
 #include <KlayGE/D3D11/D3D11RenderEngine.hpp>
 

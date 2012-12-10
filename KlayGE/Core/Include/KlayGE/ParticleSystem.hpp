@@ -19,8 +19,6 @@
 #include <KlayGE/Math.hpp>
 
 #include <vector>
-#include <boost/typeof/typeof.hpp>
-#include <boost/foreach.hpp>
 
 namespace KlayGE
 {

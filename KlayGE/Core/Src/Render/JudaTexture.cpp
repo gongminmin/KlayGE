@@ -20,7 +20,6 @@
 #include <fstream>
 #include <sstream>
 #include <boost/assert.hpp>
-#include <boost/typeof/typeof.hpp>
 
 #include <KlayGE/JudaTexture.hpp>
 

@@ -13,7 +13,6 @@
 #ifndef _VECTOR_HPP
 #define _VECTOR_HPP
 
-#include <boost/static_assert.hpp>
 #ifdef KLAYGE_COMPILER_MSVC
 #pragma warning(push)
 #pragma warning(disable: 6385)

@@ -16,8 +16,6 @@
 
 #include <fstream>
 #include <sstream>
-#include <boost/typeof/typeof.hpp>
-#include <boost/foreach.hpp>
 #ifndef KLAYGE_PLATFORM_WINDOWS_METRO
 #include <boost/filesystem.hpp>
 #endif

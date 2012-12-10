@@ -35,8 +35,6 @@
 
 #include <algorithm>
 #include <functional>
-#include <boost/typeof/typeof.hpp>
-#include <boost/foreach.hpp>
 #include <boost/assert.hpp>
 
 #ifdef KLAYGE_DRAW_NODES

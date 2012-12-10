@@ -17,8 +17,6 @@
 #include <algorithm>
 #include <cstring>
 #include <boost/assert.hpp>
-#include <boost/typeof/typeof.hpp>
-#include <boost/foreach.hpp>
 
 #include <KlayGE/D3D11/D3D11Adapter.hpp>
 

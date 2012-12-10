@@ -45,7 +45,6 @@
 #endif
 #include <boost/assign/std/vector.hpp>
 #include <boost/bind.hpp>
-#include <boost/typeof/typeof.hpp>
 
 #include <KlayGE/CameraController.hpp>
 

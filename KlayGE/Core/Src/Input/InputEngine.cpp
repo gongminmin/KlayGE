@@ -22,8 +22,6 @@
 #include <vector>
 
 #include <boost/assert.hpp>
-#include <boost/typeof/typeof.hpp>
-#include <boost/foreach.hpp>
 
 #include <KlayGE/Input.hpp>
 

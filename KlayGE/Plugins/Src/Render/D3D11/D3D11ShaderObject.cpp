@@ -30,8 +30,6 @@
 #include <algorithm>
 #include <sstream>
 #include <boost/assert.hpp>
-#include <boost/typeof/typeof.hpp>
-#include <boost/foreach.hpp>
 #ifdef KLAYGE_COMPILER_MSVC
 #pragma warning(push)
 #pragma warning(disable: 6011 6334)

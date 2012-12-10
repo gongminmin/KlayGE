@@ -25,8 +25,6 @@
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/Context.hpp>
 
-#include <boost/typeof/typeof.hpp>
-#include <boost/foreach.hpp>
 #include <glloader/glloader.h>
 
 #include <KlayGE/OpenGL/OGLMapping.hpp>

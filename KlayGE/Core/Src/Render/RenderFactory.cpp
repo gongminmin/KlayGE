@@ -27,9 +27,6 @@
 #include <KlayGE/ShaderObject.hpp>
 #include <KlayGE/RenderLayout.hpp>
 
-#include <boost/foreach.hpp>
-#include <boost/typeof/typeof.hpp>
-
 #include <KlayGE/RenderFactory.hpp>
 
 namespace KlayGE

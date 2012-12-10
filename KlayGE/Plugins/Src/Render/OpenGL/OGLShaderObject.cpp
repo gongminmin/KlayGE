@@ -45,8 +45,6 @@
 #endif
 #include <boost/assign.hpp>
 #include <boost/assign/std/vector.hpp>
-#include <boost/typeof/typeof.hpp>
-#include <boost/foreach.hpp>
 #include <boost/bind.hpp>
 #ifdef KLAYGE_COMPILER_MSVC
 #pragma warning(push)

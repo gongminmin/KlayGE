@@ -71,8 +71,6 @@
 #include <fstream>
 #include <iostream>
 #include <boost/assert.hpp>
-#include <boost/typeof/typeof.hpp>
-#include <boost/foreach.hpp>
 
 #include <kfont/kfont.hpp>
 

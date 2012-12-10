@@ -16,8 +16,6 @@
 #include <algorithm>
 #include <ctime>
 #include <cstring>
-#include <boost/typeof/typeof.hpp>
-#include <boost/foreach.hpp>
 
 #include <KlayGE/NetMsg.hpp>
 #include <KlayGE/Lobby.hpp>

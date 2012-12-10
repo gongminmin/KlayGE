@@ -15,8 +15,6 @@
 
 #pragma once
 
-#include <boost/static_assert.hpp>
-
 namespace KlayGE
 {
 	template <typename T, int N>

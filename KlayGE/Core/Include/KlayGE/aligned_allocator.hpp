@@ -16,7 +16,6 @@
 #pragma once
 
 #include <limits>
-#include <boost/static_assert.hpp>
 #ifdef KLAYGE_TYPE_TRAITS_SUPPORT
 	#include <type_traits>
 #else

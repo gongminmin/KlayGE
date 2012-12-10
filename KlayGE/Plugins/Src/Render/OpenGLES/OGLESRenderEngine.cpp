@@ -35,8 +35,6 @@
 #include <sstream>
 #include <cstring>
 #include <boost/assert.hpp>
-#include <boost/typeof/typeof.hpp>
-#include <boost/foreach.hpp>
 
 #include <KlayGE/OpenGLES/OGLESMapping.hpp>
 #include <KlayGE/OpenGLES/OGLESRenderWindow.hpp>
