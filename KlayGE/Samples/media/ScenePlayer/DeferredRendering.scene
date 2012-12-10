@@ -3,8 +3,8 @@
 <scene name="Deferred Rendering">
 	<light type="point" name="point">
 		<position x="2" y="10" z="0"/>
-		<color x="0.8" y="0.96" z="1"/>
-		<fall_off x="1" y="0.5" z="0"/>
+		<color x="25.6" y="30.72" z="32"/>
+		<fall_off x="1" y="0" z="1"/>
 		<proxy scale="0.1"/>
 		<projective name="../ShadowCubeMap/lamp.dds"/>
 		<update>
@@ -17,8 +17,8 @@ def update(app_time, elapsed_time):
 	<light type="spot" name="red spot">
 		<position x="0" y="4" z="0"/>
 		<direction x="1" y="0" z="0"/>
-		<color x="2" y="0" z="0"/>
-		<fall_off x="1" y="0.5" z="0"/>
+		<color x="64" y="0" z="0"/>
+		<fall_off x="1" y="0" z="1"/>
 		<angle outer="0.523599" inner="0.392699"/>
 		<proxy scale="0.1"/>
 		<update>
@@ -32,8 +32,8 @@ def update(app_time, elapsed_time):
 	<light type="spot" name="green spot">
 		<position x="0" y="3.4" z="0"/>
 		<direction x="-1" y="0" z="0"/>
-		<color x="0" y="2" z="0"/>
-		<fall_off x="1" y="0.5" z="0"/>
+		<color x="0" y="64" z="0"/>
+		<fall_off x="1" y="0" z="1"/>
 		<angle outer="0.785398" inner="0.523599"/>
 		<proxy scale="0.1"/>
 		<update>
@@ -48,8 +48,8 @@ def update(app_time, elapsed_time):
 		<attribute value="indirect"/>
 		<position x="0" y="16" z="-4.8"/>
 		<direction x="0" y="0" z="1"/>
-		<color x="6.0" y="5.88" z="4.38"/>
-		<fall_off x="1" y="0.1" z="0"/>
+		<color x="192" y="188.16" z="140.16"/>
+		<fall_off x="1" y="0" z="1"/>
 		<angle outer="0.523599" inner="0.392699"/>
 		<proxy scale="0.1"/>
 		<update>

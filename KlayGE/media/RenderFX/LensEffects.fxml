@@ -18,13 +18,13 @@ float4 BrightPassPS(float2 tc : TEXCOORD0) : SV_Target
 	{
 		clr.xyz = 0;
 	}
-	return clr;
+	return clamp(clr, 0, 32);
 }
 
 float4 SqrBrightPS(float2 tc : TEXCOORD0) : SV_Target
 {
 	float4 clr = src_tex.Sample(bilinear_sampler, tc);
-	return clr * (clr / 3);
+	return clamp(clr * (clr / 3), 0, 32);
 }
 		]]>
 	</shader>

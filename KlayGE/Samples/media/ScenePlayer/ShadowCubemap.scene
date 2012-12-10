@@ -3,8 +3,8 @@
 <scene name="Shadow cubemap">
 	<light type="point" name="point">
 		<position x="2" y="12" z="4"/>
-		<color x="1" y="1" z="1"/>
-		<fall_off x="1" y="0.05" z="0"/>
+		<color x="64" y="64" z="64"/>
+		<fall_off x="1" y="0" z="1"/>
 		<proxy scale="0.5"/>
 		<projective name="../ShadowCubeMap/lamp.dds"/>
 		<update>
