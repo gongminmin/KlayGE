@@ -1,0 +1,28 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GL_NV_draw_texture" reg_no="430">
+	<tokens>
+		<token name="GL_TEXTURE_MEMORY_LAYOUT_INTEL" value="0x83FF"/>
+		<token name="GL_LAYOUT_DEFAULT_INTEL" value="0"/>
+		<token name="GL_LAYOUT_LINEAR_INTEL" value="1"/>
+		<token name="GL_LAYOUT_LINEAR_CPU_CACHED_INTEL" value="2"/>
+	</tokens>
+
+	<functions>
+		<function name="glDrawTextureNV" return="void">
+			<params>
+				<param type="GLuint" name="texture"/>
+				<param type="GLuint" name="sampler"/>
+				<param type="GLfloat" name="x0"/>
+				<param type="GLfloat" name="y0"/>
+				<param type="GLfloat" name="x1"/>
+				<param type="GLfloat" name="y1"/>
+				<param type="GLfloat" name="z"/>
+				<param type="GLfloat" name="s0"/>
+				<param type="GLfloat" name="t0"/>
+				<param type="GLfloat" name="s1"/>
+				<param type="GLfloat" name="t1"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

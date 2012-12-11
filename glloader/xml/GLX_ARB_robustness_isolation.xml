@@ -1,0 +1,7 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GLX_ARB_robustness_isolation" reg_no="142">
+	<tokens>
+		<token name="GLX_CONTEXT_RESET_ISOLATION_BIT_ARB" value="0x00000008"/>
+	</tokens>
+</gl_extension>

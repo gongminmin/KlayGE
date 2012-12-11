@@ -1,0 +1,12 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GL_NVX_conditional_render" reg_no="425">
+	<functions>
+		<function name="glBeginConditionalRenderNVX" return="void">
+			<params>
+				<param type="GLuint" name="id"/>
+			</params>
+		</function>
+		<function name="glEndConditionalRenderNVX" return="void"/>
+	</functions>
+</gl_extension>

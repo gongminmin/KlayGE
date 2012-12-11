@@ -1,0 +1,41 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GL_AMD_sparse_texture" reg_no="426">
+	<tokens>
+		<token name="GL_TEXTURE_STORAGE_SPARSE_BIT_AMD" value="0x00000001"/>
+		<token name="GL_VIRTUAL_PAGE_SIZE_X_AMD" value="0x9195"/>
+		<token name="GL_VIRTUAL_PAGE_SIZE_Y_AMD" value="0x9196"/>
+		<token name="GL_VIRTUAL_PAGE_SIZE_Z_AMD" value="0x9197"/>
+		<token name="GL_MAX_SPARSE_TEXTURE_SIZE_AMD" value="0x9198"/>
+		<token name="GL_MAX_SPARSE_3D_TEXTURE_SIZE_AMD" value="0x9199"/>
+		<token name="GL_MAX_SPARSE_ARRAY_TEXTURE_LAYERS_AMD" value="0x919A"/>
+		<token name="GL_MIN_SPARSE_LEVEL_AMD" value="0x919B"/>
+		<token name="GL_MIN_LOD_WARNING_AMD" value="0x919C"/>
+	</tokens>
+
+	<functions>
+		<function name="glTexStorageSparseAMD" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLenum" name="internalFormat"/>
+				<param type="GLsizei" name="width"/>
+				<param type="GLsizei" name="height"/>
+				<param type="GLsizei" name="depth"/>
+				<param type="GLsizei" name="layers"/>
+				<param type="GLbitfield" name="flags"/>
+			</params>
+		</function>
+		<function name="glTextureStorageSparseAMD" return="void">
+			<params>
+				<param type="GLuint" name="texture"/>
+				<param type="GLenum" name="target"/>
+				<param type="GLenum" name="internalFormat"/>
+				<param type="GLsizei" name="width"/>
+				<param type="GLsizei" name="height"/>
+				<param type="GLsizei" name="depth"/>
+				<param type="GLsizei" name="layers"/>
+				<param type="GLbitfield" name="flags"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

@@ -1,0 +1,7 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GLX_EXT_buffer_age" reg_no="427">
+	<tokens>
+		<token name="GLX_BACK_BUFFER_AGE_EXT" value="0x20F4"/>
+	</tokens>
+</gl_extension>

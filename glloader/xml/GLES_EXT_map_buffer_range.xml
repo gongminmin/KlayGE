@@ -1,0 +1,30 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GLES_EXT_map_buffer_range" reg_no="121">
+	<tokens>
+		<token name="GL_MAP_READ_BIT_EXT" value="0x0001"/>
+		<token name="GL_MAP_WRITE_BIT_EXT" value="0x0002"/>
+		<token name="GL_MAP_INVALIDATE_RANGE_BIT_EXT" value="0x0004"/>
+		<token name="GL_MAP_INVALIDATE_BUFFER_BIT_EXT" value="0x0008"/>
+		<token name="GL_MAP_FLUSH_EXPLICIT_BIT_EXT" value="0x0010"/>
+		<token name="GL_MAP_UNSYNCHRONIZED_BIT_EXT" value="0x0020"/>
+	</tokens>
+
+	<functions>
+		<function name="glMapBufferRangeEXT" return="void*">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLintptr" name="offset"/>
+				<param type="GLsizeiptr" name="length"/>
+				<param type="GLbitfield" name="access"/>
+			</params>
+		</function>
+		<function name="glFlushMappedBufferRangeEXT" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLintptr" name="offset"/>
+				<param type="GLsizeiptr" name="length"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

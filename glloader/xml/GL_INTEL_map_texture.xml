@@ -1,0 +1,33 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GL_INTEL_map_texture" reg_no="429">
+	<tokens>
+		<token name="GL_TEXTURE_MEMORY_LAYOUT_INTEL" value="0x83FF"/>
+		<token name="GL_LAYOUT_DEFAULT_INTEL" value="0"/>
+		<token name="GL_LAYOUT_LINEAR_INTEL" value="1"/>
+		<token name="GL_LAYOUT_LINEAR_CPU_CACHED_INTEL" value="2"/>
+	</tokens>
+
+	<functions>
+		<function name="glMapTexture2DINTEL" return="void*">
+			<params>
+				<param type="GLuint" name="texture"/>
+				<param type="GLint" name="level"/>
+				<param type="GLbitfield" name="access"/>
+				<param type="GLint*" name="stride"/>
+				<param type="GLenum*" name="layout"/>
+			</params>
+		</function>
+		<function name="glUnmapTexture2DINTEL" return="void">
+			<params>
+				<param type="GLuint" name="texture"/>
+				<param type="GLint" name="level"/>
+			</params>
+		</function>
+		<function name="glSyncTextureINTEL" return="void">
+			<params>
+				<param type="GLuint" name="texture"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

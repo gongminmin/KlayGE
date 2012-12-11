@@ -1,0 +1,26 @@
+<?xml version='1.0'?>
+
+<gl_extension name="EGL_KHR_stream_cross_process_fd" reg_no="41">
+	<typedefs>
+		<typedef type="int" synonym="EGLNativeFileDescriptorKHR"/>
+	</typedefs>
+
+	<tokens>
+		<token name="EGL_NO_FILE_DESCRIPTOR_KHR" value="((EGLNativeFileDescriptorKHR)(-1))"/>
+	</tokens>
+
+	<functions>
+		<function name="eglGetStreamFileDescriptorKHR" return="EGLNativeFileDescriptorKHR">
+			<params>
+				<param type="EGLDisplay" name="dpy"/>
+				<param type="EGLStreamKHR" name="stream"/>
+			</params>
+		</function>
+		<function name="eglCreateStreamFromFileDescriptorKHR" return="EGLStreamKHR">
+			<params>
+				<param type="EGLDisplay" name="dpy"/>
+				<param type="EGLNativeFileDescriptorKHR" name="file_descriptor"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

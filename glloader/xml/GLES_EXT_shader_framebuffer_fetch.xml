@@ -1,0 +1,7 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GLES_EXT_shader_framebuffer_fetch" reg_no="122">
+	<tokens>
+		<token name="GL_FRAGMENT_SHADER_DISCARDS_SAMPLES_EXT" value="0x8A52"/>
+	</tokens>
+</gl_extension>

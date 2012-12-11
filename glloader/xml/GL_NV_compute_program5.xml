@@ -1,0 +1,8 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GL_NV_compute_program5" reg_no="421">
+	<tokens>
+		<token name="GL_COMPUTE_PROGRAM_NV" value="0x90FB"/>
+		<token name="GL_COMPUTE_PROGRAM_PARAMETER_BUFFER_NV" value="0x90FC"/>
+	</tokens>
+</gl_extension>

@@ -1,0 +1,7 @@
+<?xml version='1.0'?>
+
+<gl_extension name="EGL_EXT_multiview_window" reg_no="42">
+	<tokens>
+		<token name="EGL_MULTIVIEW_VIEW_COUNT_EXT" value="0x3134"/>
+	</tokens>
+</gl_extension>

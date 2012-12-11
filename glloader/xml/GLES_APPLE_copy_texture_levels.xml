@@ -1,0 +1,14 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GLES_APPLE_copy_texture_levels" reg_no="123">
+	<functions>
+		<function name="glCopyTextureLevelsAPPLE" return="void">
+			<params>
+				<param type="GLuint" name="destinationTexture"/>
+				<param type="GLuint" name="sourceTexture"/>
+				<param type="GLint" name="sourceBaseLevel"/>
+				<param type="GLsizei" name="sourceLevelCount"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

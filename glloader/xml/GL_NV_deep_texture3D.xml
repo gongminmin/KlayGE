@@ -1,0 +1,8 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GL_NV_deep_texture3D" reg_no="424">
+	<tokens>
+		<token name="GL_MAX_DEEP_3D_TEXTURE_WIDTH_HEIGHT_NV" value="0x90D0"/>
+		<token name="GL_MAX_DEEP_3D_TEXTURE_DEPTH_NV" value="0x90D1"/>
+	</tokens>
+</gl_extension>

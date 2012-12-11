@@ -1,0 +1,34 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GLES_EXT_multiview_draw_buffers" reg_no="125">
+	<tokens>
+		<token name="GL_COLOR_ATTACHMENT_EXT" value="0x90F0"/>
+		<token name="GL_MULTIVIEW_EXT" value="0x90F1"/>
+		<token name="GL_DRAW_BUFFER_EXT" value="0x0C01"/>
+		<token name="GL_READ_BUFFER_EXT" value="0x0C02"/>
+		<token name="GL_MAX_MULTIVIEW_BUFFERS_EXT" value="0x90F2"/>
+	</tokens>
+
+	<functions>
+		<function name="glReadBufferIndexedEXT" return="void">
+			<params>
+				<param type="GLenum" name="src"/>
+				<param type="GLint" name="index"/>
+			</params>
+		</function>
+		<function name="glDrawBuffersIndexedEXT" return="void">
+			<params>
+				<param type="GLint" name="n"/>
+				<param type="const GLenum*" name="location"/>
+				<param type="const GLint*" name="indices"/>
+			</params>
+		</function>
+		<function name="GetIntegeri_vEXT" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLuint" name="index"/>
+				<param type="GLint*" name="data"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

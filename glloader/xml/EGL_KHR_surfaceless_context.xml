@@ -1,0 +1,4 @@
+<?xml version='1.0'?>
+
+<gl_extension name="EGL_KHR_surfaceless_context" reg_no="40">
+</gl_extension>

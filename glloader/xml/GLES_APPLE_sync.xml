@@ -1,0 +1,74 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GLES_APPLE_sync" reg_no="124">
+	<typedefs>
+		<typedef type="struct __GLsync*" synonym="GLsync"/>
+	</typedefs>
+
+	<tokens>
+		<token name="GL_MAX_SERVER_WAIT_TIMEOUT_APPLE" value="0x9111"/>
+		<token name="GL_OBJECT_TYPE_APPLE" value="0x9112"/>
+		<token name="GL_SYNC_CONDITION_APPLE" value="0x9113"/>
+		<token name="GL_SYNC_STATUS_APPLE" value="0x9114"/>
+		<token name="GL_SYNC_FLAGS_APPLE" value="0x9115"/>
+		<token name="GL_SYNC_FENCE_APPLE" value="0x9116"/>
+		<token name="GL_SYNC_GPU_COMMANDS_COMPLETE_APPLE" value="0x9117"/>
+		<token name="GL_UNSIGNALED_APPLE" value="0x9118"/>
+		<token name="GL_SIGNALED_APPLE" value="0x9119"/>
+		<token name="GL_ALREADY_SIGNALED_APPLE" value="0x911A"/>
+		<token name="GL_TIMEOUT_EXPIRED_APPLE" value="0x911B"/>
+		<token name="GL_CONDITION_SATISFIED_APPLE" value="0x911C"/>
+		<token name="GL_WAIT_FAILED_APPLE" value="0x911D"/>
+		<token name="GL_SYNC_OBJECT_APPLE" value="0x8A53"/>
+		<token name="GL_SYNC_FLUSH_COMMANDS_BIT_APPLE" value="0x00000001"/>
+		<token name="GL_TIMEOUT_IGNORED_APPLE" value="0xFFFFFFFFFFFFFFFFull"/>
+	</tokens>
+
+	<functions>
+		<function name="glFenceSyncAPPLE" return="GLsync">
+			<params>
+				<param type="GLenum" name="condition"/>
+				<param type="GLbitfield" name="flags"/>
+			</params>
+		</function>
+		<function name="glIsSyncAPPLE" return="GLboolean">
+			<params>
+				<param type="GLsync" name="sync"/>
+			</params>
+		</function>
+		<function name="glDeleteSyncAPPLE" return="void">
+			<params>
+				<param type="GLsync" name="sync"/>
+			</params>
+		</function>
+		<function name="glClientWaitSyncAPPLE" return="GLenum">
+			<params>
+				<param type="GLsync" name="sync"/>
+				<param type="GLbitfield" name="flags"/>
+				<param type="GLuint64" name="timeout"/>
+			</params>
+		</function>
+		<function name="glWaitSyncAPPLE" return="void">
+			<params>
+				<param type="GLsync" name="sync"/>
+				<param type="GLbitfield" name="flags"/>
+				<param type="GLuint64" name="timeout"/>
+			</params>
+		</function>
+		<function name="glGetInteger64vAPPLE" return="void">
+			<params>
+				<param type="GLenum" name="pname"/>
+				<param type="GLint64*" name="params"/>
+			</params>
+		</function>
+		<function name="glGetSyncivAPPLE" return="void">
+			<params>
+				<param type="GLsync" name="sync"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLsizei" name="bufSize"/>
+				<param type="GLsizei*" name="length"/>
+				<param type="GLint*" name="values"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

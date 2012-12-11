@@ -1,0 +1,13 @@
+<?xml version='1.0'?>
+
+<gl_extension name="EGL_KHR_wait_sync" reg_no="41">
+	<functions>
+		<function name="eglWaitSyncKHR" return="EGLint">
+			<params>
+				<param type="EGLDisplay" name="dpy"/>
+				<param type="EGLSyncKHR" name="sync"/>
+				<param type="EGLint" name="flags"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>
