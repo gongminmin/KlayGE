@@ -4,7 +4,7 @@
   <Properties>
     <DisplayName>Text</DisplayName>
     <PublisherDisplayName>KlayGE</PublisherDisplayName>
-    <Logo>Assets\StoreLogo.png</Logo>
+    <Logo>StoreLogo.png</Logo>
   </Properties>
   <Prerequisites>
     <OSMinVersion>6.2.1</OSMinVersion>
@@ -15,9 +15,9 @@
   </Resources>
   <Applications>
     <Application Id="App" Executable="$targetnametoken$.exe" EntryPoint="Text.App">
-      <VisualElements DisplayName="Text" Logo="Assets\Logo.png" SmallLogo="Assets\SmallLogo.png" Description="KlayGE Sample: Text" ForegroundText="light" BackgroundColor="#336699">
+      <VisualElements DisplayName="Text" Logo="Logo.png" SmallLogo="SmallLogo.png" Description="KlayGE Sample: Text" ForegroundText="light" BackgroundColor="#336699">
         <DefaultTile ShowName="allLogos" ShortName="Text" />
-        <SplashScreen Image="Assets\SplashScreen.png" />
+        <SplashScreen Image="SplashScreen.png" />
       </VisualElements>
     </Application>
   </Applications>

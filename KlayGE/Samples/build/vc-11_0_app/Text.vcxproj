@@ -299,10 +299,10 @@
     <Image Include="..\..\..\media\Textures\2D\powered_by_klayge.dds" />
     <Image Include="..\..\..\media\Textures\2D\ui.dds" />
     <Image Include="..\..\..\media\Textures\3D\color_grading.dds" />
-    <Image Include="Assets\Logo.png" />
-    <Image Include="Assets\SmallLogo.png" />
-    <Image Include="Assets\SplashScreen.png" />
-    <Image Include="Assets\StoreLogo.png" />
+    <Image Include="..\..\media\Common\Assets\Logo.png" />
+    <Image Include="..\..\media\Common\Assets\SmallLogo.png" />
+    <Image Include="..\..\media\Common\Assets\SplashScreen.png" />
+    <Image Include="..\..\media\Common\Assets\StoreLogo.png" />
     <None Include="..\..\..\bin\KlayGE.cfg">
       <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">true</DeploymentContent>
       <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">true</DeploymentContent>

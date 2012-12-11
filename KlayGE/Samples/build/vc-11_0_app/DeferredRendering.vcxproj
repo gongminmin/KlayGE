@@ -303,6 +303,10 @@
     <Image Include="..\..\..\media\Textures\3D\color_grading.dds" />
     <Image Include="..\..\..\media\Textures\Cube\Lake_CraterLake03_c.dds" />
     <Image Include="..\..\..\media\Textures\Cube\Lake_CraterLake03_y.dds" />
+    <Image Include="..\..\media\Common\Assets\Logo.png" />
+    <Image Include="..\..\media\Common\Assets\SmallLogo.png" />
+    <Image Include="..\..\media\Common\Assets\SplashScreen.png" />
+    <Image Include="..\..\media\Common\Assets\StoreLogo.png" />
     <Image Include="..\..\media\Common\sponza_crytek\background.dds" />
     <Image Include="..\..\media\Common\sponza_crytek\background_ddn.dds" />
     <Image Include="..\..\media\Common\sponza_crytek\chain_texture.dds" />
@@ -351,10 +355,6 @@
     <Image Include="..\..\media\Common\sponza_crytek\vase_round.dds" />
     <Image Include="..\..\media\Common\sponza_crytek\vase_round_ddn.dds" />
     <Image Include="..\..\media\Common\sponza_crytek\vase_round_spec.dds" />
-    <Image Include="Assets\Logo.png" />
-    <Image Include="Assets\SmallLogo.png" />
-    <Image Include="Assets\SplashScreen.png" />
-    <Image Include="Assets\StoreLogo.png" />
     <None Include="..\..\..\bin\KlayGE.cfg">
       <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">true</DeploymentContent>
       <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">true</DeploymentContent>

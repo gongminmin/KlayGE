@@ -18,18 +18,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <Image Include="Assets\Logo.png">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="Assets\SmallLogo.png">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="Assets\SplashScreen.png">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="Assets\StoreLogo.png">
-      <Filter>Resource Files</Filter>
-    </Image>
     <Image Include="..\..\..\media\Textures\2D\powered_by_klayge.dds">
       <Filter>Resource Files</Filter>
     </Image>
@@ -193,6 +181,18 @@
       <Filter>Resource Files</Filter>
     </Image>
     <Image Include="..\..\media\Common\sponza_crytek\vase_round_spec.dds">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\..\media\Common\Assets\Logo.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\..\media\Common\Assets\SmallLogo.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\..\media\Common\Assets\SplashScreen.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\..\media\Common\Assets\StoreLogo.png">
       <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>
