@@ -1,9 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <camera_path frame_rate="30">
-	<curve type="linear" num_frames="121">
-		<key frame="0" eye="0.0 2.0 -5.0" target="0.0 1.0 0.0" up="0 1 0"/>
-		<key frame="60" eye="2.0 2.0 -5.0" target="0.0 1.0 0.0" up="0 1 0"/>
-		<key frame="120" eye="0.0 2.0 -5.0" target="0.0 1.0 0.0" up="0 1 0"/>
+	<curve type="bezier" num_frames="241">
+		<key frame="0" eye="-2.0 2.0 -4.5" target="0.0 1.0 0.0" up="0 1 0"/>
+		<key frame="40" eye="0.0 2.0 -5.0" target="0.0 1.0 0.0" up="0 1 0"/>
+		<key frame="80" eye="2.0 2.0 -5.0" target="0.0 1.0 0.0" up="0 1 0"/>
+		<key frame="120" eye="2.0 2.0 -4.5" target="0.0 1.0 0.0" up="0 1 0"/>
+		<key frame="160" eye="2.0 2.0 -5.0" target="0.0 1.0 0.0" up="0 1 0"/>
+		<key frame="200" eye="0.0 2.0 -5.0" target="0.0 1.0 0.0" up="0 1 0"/>
+		<key frame="240" eye="-2.0 2.0 -4.5" target="0.0 1.0 0.0" up="0 1 0"/>
 	</curve>
 </camera_path>

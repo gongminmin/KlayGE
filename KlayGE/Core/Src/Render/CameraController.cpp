@@ -653,7 +653,7 @@ namespace KlayGE
 					break;
 
 				case IT_CatmullRom:
-					for (size_t j = 0; j < curve.eye_ctrl_pts.size() - 3; ++ j)
+					for (size_t j = 0; j < curve.eye_ctrl_pts.size() - 3; j += 3)
 					{
 						if ((frame >= curve.frame_ids[j + 0])
 							&& (frame < curve.frame_ids[j + 3]))
@@ -667,6 +667,56 @@ namespace KlayGE
 								curve.target_ctrl_pts[j + 1], curve.target_ctrl_pts[j + 2],
 								curve.target_ctrl_pts[j + 3], factor);
 							float3 up = MathLib::catmull_rom(curve.up_ctrl_pts[j + 0],
+								curve.up_ctrl_pts[j + 1], curve.up_ctrl_pts[j + 2], 
+								curve.up_ctrl_pts[j + 3], factor);
+
+							camera_->ViewParams(eye, target, up);
+
+							break;
+						}
+					}
+					break;
+
+				case IT_BSpline:
+					for (size_t j = 0; j < curve.eye_ctrl_pts.size() - 3; j += 3)
+					{
+						if ((frame >= curve.frame_ids[j + 0])
+							&& (frame < curve.frame_ids[j + 3]))
+						{
+							float factor = (frame - curve.frame_ids[j + 0])
+								/ (curve.frame_ids[j + 3] - curve.frame_ids[j + 0]);
+							float3 eye = MathLib::cubic_b_spline(curve.eye_ctrl_pts[j + 0],
+								curve.eye_ctrl_pts[j + 1], curve.eye_ctrl_pts[j + 2],
+								curve.eye_ctrl_pts[j + 3], factor);
+							float3 target = MathLib::cubic_b_spline(curve.target_ctrl_pts[j + 0],
+								curve.target_ctrl_pts[j + 1], curve.target_ctrl_pts[j + 2],
+								curve.target_ctrl_pts[j + 3], factor);
+							float3 up = MathLib::cubic_b_spline(curve.up_ctrl_pts[j + 0],
+								curve.up_ctrl_pts[j + 1], curve.up_ctrl_pts[j + 2], 
+								curve.up_ctrl_pts[j + 3], factor);
+
+							camera_->ViewParams(eye, target, up);
+
+							break;
+						}
+					}
+					break;
+
+				case IT_Bezier:
+					for (size_t j = 0; j < curve.eye_ctrl_pts.size() - 3; j += 3)
+					{
+						if ((frame >= curve.frame_ids[j + 0])
+							&& (frame < curve.frame_ids[j + 3]))
+						{
+							float factor = (frame - curve.frame_ids[j + 0])
+								/ (curve.frame_ids[j + 3] - curve.frame_ids[j + 0]);
+							float3 eye = MathLib::cubic_bezier(curve.eye_ctrl_pts[j + 0],
+								curve.eye_ctrl_pts[j + 1], curve.eye_ctrl_pts[j + 2],
+								curve.eye_ctrl_pts[j + 3], factor);
+							float3 target = MathLib::cubic_bezier(curve.target_ctrl_pts[j + 0],
+								curve.target_ctrl_pts[j + 1], curve.target_ctrl_pts[j + 2],
+								curve.target_ctrl_pts[j + 3], factor);
+							float3 up = MathLib::cubic_bezier(curve.up_ctrl_pts[j + 0],
 								curve.up_ctrl_pts[j + 1], curve.up_ctrl_pts[j + 2], 
 								curve.up_ctrl_pts[j + 3], factor);
 
@@ -715,6 +765,14 @@ namespace KlayGE
 			else if ("catmull_rom" == type_str)
 			{
 				type = CameraPathController::IT_CatmullRom;
+			}
+			else if ("b_spline" == type_str)
+			{
+				type = CameraPathController::IT_BSpline;
+			}
+			else if ("bezier" == type_str)
+			{
+				type = CameraPathController::IT_Bezier;
 			}
 			else
 			{
@@ -782,6 +840,14 @@ namespace KlayGE
 
 			case CameraPathController::IT_CatmullRom:
 				type_str = "catmull_rom";
+				break;
+
+			case CameraPathController::IT_BSpline:
+				type_str = "b_spline";
+				break;
+
+			case CameraPathController::IT_Bezier:
+				type_str = "bezier";
 				break;
 
 			default:

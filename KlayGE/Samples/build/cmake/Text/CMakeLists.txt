@@ -25,6 +25,7 @@ IF(KLAYGE_WITH_WINRT)
 	)
 ELSE()
 	SET(RESOURCE_FILES
+		${KLAYGE_PROJECT_DIR}/Samples/media/Text/text.txt
 		${KLAYGE_PROJECT_DIR}/Samples/media/Common/KlayGESample.rc
 		${KLAYGE_PROJECT_DIR}/klayge_logo.ico
 	)

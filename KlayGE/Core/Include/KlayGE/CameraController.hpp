@@ -119,7 +119,9 @@ namespace KlayGE
 		enum InterpolateType
 		{
 			IT_Linear,
-			IT_CatmullRom
+			IT_CatmullRom,
+			IT_BSpline,
+			IT_Bezier
 		};
 
 	public:

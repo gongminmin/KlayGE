@@ -236,8 +236,8 @@ void ScreenSpaceReflectionApp::InitObjects()
 	tb_controller_.Scalers(0.003f, 0.05f);
 
 	screen_camera_path_ = LoadCameraPath(ResLoader::Instance().Open("Reflection.cam_path"));
-	//screen_camera_path_->AttachCamera(this->ActiveCamera());
-	//this->ActiveCamera().AddToSceneManager();
+	screen_camera_path_->AttachCamera(this->ActiveCamera());
+	this->ActiveCamera().AddToSceneManager();
 
 	point_light_ = MakeSharedPtr<PointLightSource>();
 	point_light_->Attrib(LSA_NoShadow);

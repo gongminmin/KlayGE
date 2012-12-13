@@ -1,6 +1,5 @@
 SET(SOURCE_FILES
 	${KLAYGE_PROJECT_DIR}/Samples/src/Reflection/Reflection.cpp
-	${KLAYGE_PROJECT_DIR}/Samples/media/Reflection/Reflection.cam_path
 )
 
 SET(HEADER_FILES
@@ -17,6 +16,7 @@ SET(UI_FILES
 )
 
 SET(RESOURCE_FILES
+	${KLAYGE_PROJECT_DIR}/Samples/media/Reflection/Reflection.cam_path
 	${KLAYGE_PROJECT_DIR}/Samples/media/Common/KlayGESample.rc
 	${KLAYGE_PROJECT_DIR}/klayge_logo.ico
 )
