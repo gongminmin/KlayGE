@@ -392,6 +392,14 @@ namespace KlayGE
 		Vector_T<T, N> hermite(Vector_T<T, N> const & v1, Vector_T<T, N> const & t1,
 			Vector_T<T, N> const & v2, Vector_T<T, N> const & t2, T s);
 
+		template <typename T, int N>
+		Vector_T<T, N> cubic_b_spline(Vector_T<T, N> const & v0, Vector_T<T, N> const & v1,
+			Vector_T<T, N> const & v2, Vector_T<T, N> const & v3, T s);
+
+		template <typename T, int N>
+		Vector_T<T, N> cubic_bezier(Vector_T<T, N> const & v0, Vector_T<T, N> const & v1,
+			Vector_T<T, N> const & v2, Vector_T<T, N> const & v3, T s);
+
 
 		// 2D œÚ¡ø
 		///////////////////////////////////////////////////////////////////////////////

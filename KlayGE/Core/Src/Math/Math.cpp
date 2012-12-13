@@ -358,8 +358,8 @@ namespace KlayGE
 			float4 const & v3, float s);
 
 		template <typename T, int N>
-		Vector_T<T, N> catmull_rom(Vector_T<T, N> const & v0, Vector_T<T, N> const & v1, Vector_T<T, N> const & v2,
-			Vector_T<T, N> const & v3, T s)
+		Vector_T<T, N> catmull_rom(Vector_T<T, N> const & v0, Vector_T<T, N> const & v1,
+			Vector_T<T, N> const & v2, Vector_T<T, N> const & v3, T s)
 		{
 			T const s2 = s * s;
 			T const s3 = s2 * s;
@@ -386,6 +386,44 @@ namespace KlayGE
 		    T const h4 = s3 - s2;
 
 		    return h1 * v1 + h2 * t1 + h3 * v2 + h4 * t2;
+		}
+
+		template KLAYGE_CORE_API float2 cubic_b_spline(float2 const & v0, float2 const & v1, float2 const & v2,
+			float2 const & v3, float s);
+		template KLAYGE_CORE_API float3 cubic_b_spline(float3 const & v0, float3 const & v1, float3 const & v2,
+			float3 const & v3, float s);
+		template KLAYGE_CORE_API float4 cubic_b_spline(float4 const & v0, float4 const & v1, float4 const & v2,
+			float4 const & v3, float s);
+
+		template <typename T, int N>
+		Vector_T<T, N> cubic_b_spline(Vector_T<T, N> const & v0, Vector_T<T, N> const & v1,
+			Vector_T<T, N> const & v2, Vector_T<T, N> const & v3, T s)
+		{
+			// From http://en.wikipedia.org/wiki/B-spline
+
+			T const s2 = s * s;
+			T const s3 = s2 * s;
+			return ((-s3 + 3 * s2 - 3 * s + 1) * v0 + (3 * s3 - 6 * s2 + 4) * v1
+				+ (-3 * s3 + 3 * s2 + 3 * s + 1) * v2 + s3 * v3) / T(6);
+		}
+
+		template KLAYGE_CORE_API float2 cubic_bezier(float2 const & v0, float2 const & v1, float2 const & v2,
+			float2 const & v3, float s);
+		template KLAYGE_CORE_API float3 cubic_bezier(float3 const & v0, float3 const & v1, float3 const & v2,
+			float3 const & v3, float s);
+		template KLAYGE_CORE_API float4 cubic_bezier(float4 const & v0, float4 const & v1, float4 const & v2,
+			float4 const & v3, float s);
+
+		template <typename T, int N>
+		Vector_T<T, N> cubic_bezier(Vector_T<T, N> const & v0, Vector_T<T, N> const & v1,
+			Vector_T<T, N> const & v2, Vector_T<T, N> const & v3, T s)
+		{
+			// From http://en.wikipedia.org/wiki/B%C3%A9zier_curve
+
+			T const s2 = s * s;
+			T const s3 = s2 * s;
+			return ((-s3 + 3 * s2 - 3 * s + 1) * v0 + (3 * s3 - 6 * s2 + 3 * s) * v1
+				+ (-3 * s3 + 3 * s2) * v2 + s3 * v3);
 		}
 
 		// 2D Vector
