@@ -331,7 +331,7 @@ if __name__ == "__main__":
 	else:
 		compiler = ""
 	if len(sys.argv) > 2:
-		arch = sys.argv[2]
+		arch = (sys.argv[2], )
 	else:
 		arch = ""
 	if len(sys.argv) > 3:
