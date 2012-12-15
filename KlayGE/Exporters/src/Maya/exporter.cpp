@@ -42,6 +42,93 @@
 #include <boost/foreach.hpp>
 #include <boost/assert.hpp>
 
+#include <KlayGE/Config.hpp>
+#include <KlayGE/Types.hpp>
+
+namespace KlayGE
+{
+	template <typename T>
+	class Matrix4_T;
+	typedef Matrix4_T<float> float4x4;
+
+	template <typename T>
+	class Quaternion_T;
+	typedef Quaternion_T<float> Quaternion;
+
+	namespace MathLib
+	{
+		template <typename T>
+		Matrix4_T<T> transpose(Matrix4_T<T> const & rhs);
+
+		template <typename T>
+		Matrix4_T<T> mul(Matrix4_T<T> const & lhs, Matrix4_T<T> const & rhs);
+
+		template <typename T>
+		Quaternion_T<T> mul(Quaternion_T<T> const & lhs, Quaternion_T<T> const & rhs);
+	}
+}
+
+#include <KlayGE/Matrix.hpp>
+
+namespace KlayGE
+{
+	namespace MathLib
+	{
+		template float4x4 transpose(float4x4 const & rhs);
+
+		template <typename T>
+		Matrix4_T<T> transpose(Matrix4_T<T> const & rhs)
+		{
+			return Matrix4_T<T>(
+				rhs(0, 0), rhs(1, 0), rhs(2, 0), rhs(3, 0),
+				rhs(0, 1), rhs(1, 1), rhs(2, 1), rhs(3, 1),
+				rhs(0, 2), rhs(1, 2), rhs(2, 2), rhs(3, 2),
+				rhs(0, 3), rhs(1, 3), rhs(2, 3), rhs(3, 3));
+		}
+
+		template float4x4 mul(float4x4 const & lhs, float4x4 const & rhs);
+
+		template <typename T>
+		Matrix4_T<T> mul(Matrix4_T<T> const & lhs, Matrix4_T<T> const & rhs)
+		{
+			Matrix4_T<T> const tmp(transpose(rhs));
+
+			return Matrix4_T<T>(
+				lhs(0, 0) * tmp(0, 0) + lhs(0, 1) * tmp(0, 1) + lhs(0, 2) * tmp(0, 2) + lhs(0, 3) * tmp(0, 3),
+				lhs(0, 0) * tmp(1, 0) + lhs(0, 1) * tmp(1, 1) + lhs(0, 2) * tmp(1, 2) + lhs(0, 3) * tmp(1, 3),
+				lhs(0, 0) * tmp(2, 0) + lhs(0, 1) * tmp(2, 1) + lhs(0, 2) * tmp(2, 2) + lhs(0, 3) * tmp(2, 3),
+				lhs(0, 0) * tmp(3, 0) + lhs(0, 1) * tmp(3, 1) + lhs(0, 2) * tmp(3, 2) + lhs(0, 3) * tmp(3, 3),
+
+				lhs(1, 0) * tmp(0, 0) + lhs(1, 1) * tmp(0, 1) + lhs(1, 2) * tmp(0, 2) + lhs(1, 3) * tmp(0, 3),
+				lhs(1, 0) * tmp(1, 0) + lhs(1, 1) * tmp(1, 1) + lhs(1, 2) * tmp(1, 2) + lhs(1, 3) * tmp(1, 3),
+				lhs(1, 0) * tmp(2, 0) + lhs(1, 1) * tmp(2, 1) + lhs(1, 2) * tmp(2, 2) + lhs(1, 3) * tmp(2, 3),
+				lhs(1, 0) * tmp(3, 0) + lhs(1, 1) * tmp(3, 1) + lhs(1, 2) * tmp(3, 2) + lhs(1, 3) * tmp(3, 3),
+
+				lhs(2, 0) * tmp(0, 0) + lhs(2, 1) * tmp(0, 1) + lhs(2, 2) * tmp(0, 2) + lhs(2, 3) * tmp(0, 3),
+				lhs(2, 0) * tmp(1, 0) + lhs(2, 1) * tmp(1, 1) + lhs(2, 2) * tmp(1, 2) + lhs(2, 3) * tmp(1, 3),
+				lhs(2, 0) * tmp(2, 0) + lhs(2, 1) * tmp(2, 1) + lhs(2, 2) * tmp(2, 2) + lhs(2, 3) * tmp(2, 3),
+				lhs(2, 0) * tmp(3, 0) + lhs(2, 1) * tmp(3, 1) + lhs(2, 2) * tmp(3, 2) + lhs(2, 3) * tmp(3, 3),
+
+				lhs(3, 0) * tmp(0, 0) + lhs(3, 1) * tmp(0, 1) + lhs(3, 2) * tmp(0, 2) + lhs(3, 3) * tmp(0, 3),
+				lhs(3, 0) * tmp(1, 0) + lhs(3, 1) * tmp(1, 1) + lhs(3, 2) * tmp(1, 2) + lhs(3, 3) * tmp(1, 3),
+				lhs(3, 0) * tmp(2, 0) + lhs(3, 1) * tmp(2, 1) + lhs(3, 2) * tmp(2, 2) + lhs(3, 3) * tmp(2, 3),
+				lhs(3, 0) * tmp(3, 0) + lhs(3, 1) * tmp(3, 1) + lhs(3, 2) * tmp(3, 2) + lhs(3, 3) * tmp(3, 3));
+		}
+
+		template Quaternion mul(Quaternion const & lhs, Quaternion const & rhs);
+
+		template <typename T>
+		Quaternion_T<T> mul(Quaternion_T<T> const & lhs, Quaternion_T<T> const & rhs)
+		{
+			return Quaternion_T<T>(
+				lhs.x() * rhs.w() - lhs.y() * rhs.z() + lhs.z() * rhs.y() + lhs.w() * rhs.x(),
+				lhs.x() * rhs.z() + lhs.y() * rhs.w() - lhs.z() * rhs.x() + lhs.w() * rhs.y(),
+				lhs.y() * rhs.x() - lhs.x() * rhs.y() + lhs.z() * rhs.w() + lhs.w() * rhs.z(),
+				lhs.w() * rhs.w() - lhs.x() * rhs.x() - lhs.y() * rhs.y() - lhs.z() * rhs.z());
+		}
+	}
+}
+
 #include <MeshMLLib/MeshMLLib.hpp>
 
 using namespace KlayGE;
@@ -110,7 +197,7 @@ private:
 	int ExportMaterialAndTexture(MObject* shader, MObjectArray const & textures);
 	int AddDefaultMaterial();
 
-	MeshMLObj meshml_obj_;
+	MeshMLLib::MeshMLObj meshml_obj_;
 
 	std::map<std::string, int> joint_to_id_;
 	std::map<int, MDagPath> joint_id_to_path_;

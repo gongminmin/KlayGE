@@ -81,7 +81,7 @@ namespace KlayGE
 		void get_material(std::vector<int>& mtls_id, std::vector<std::map<int, std::pair<Matrix3, int> > >& uv_transss, Mtl* max_mtl);
 
 	private:
-		MeshMLObj meshml_obj_;
+		MeshMLLib::MeshMLObj meshml_obj_;
 		std::vector<int> objs_mtl_id_;
 		std::map<INode*, int> joint_node_to_id_;
 
