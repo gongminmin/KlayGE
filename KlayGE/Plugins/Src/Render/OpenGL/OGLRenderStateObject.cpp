@@ -547,10 +547,8 @@ namespace KlayGE
 		}
 	}
 
-	void OGLSamplerStateObject::Active(uint32_t stage, TexturePtr const & texture)
+	void OGLSamplerStateObject::Active(TexturePtr const & texture)
 	{
-		OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-
 		OGLTexture& tex = *checked_cast<OGLTexture*>(texture.get());
 
 		tex.TexParameteri(GL_TEXTURE_WRAP_S, ogl_addr_mode_u_);
@@ -585,6 +583,6 @@ namespace KlayGE
 		}
 		tex.TexParameteri(GL_TEXTURE_COMPARE_FUNC, OGLMapping::Mapping(desc_.cmp_func));
 
-		re.MipMapLodBias(stage, desc_.mip_map_lod_bias);
+		tex.TexParameterf(GL_TEXTURE_LOD_BIAS, desc_.mip_map_lod_bias);
 	}
 }

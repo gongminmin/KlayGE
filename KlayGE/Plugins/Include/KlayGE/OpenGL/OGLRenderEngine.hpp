@@ -88,7 +88,6 @@ namespace KlayGE
 
 		void AdjustPerspectiveMatrix(float4x4& pers_mat);
 
-		void MipMapLodBias(uint32_t stage, float bias);
 		void ActiveTexture(GLenum tex_unit);
 		void BindBuffer(GLenum target, GLuint buffer);
 		void DeleteBuffers(GLsizei n, GLuint const * buffers);
@@ -182,7 +181,6 @@ namespace KlayGE
 		std::vector<char const *> so_vars_ptrs_;
 		std::vector<GLuint> so_buffs_;
 
-		std::vector<GLfloat> mip_map_lod_bias_;
 		GLenum active_tex_unit_;
 		std::map<GLenum, GLuint> binded_buffer_;
 

@@ -974,7 +974,7 @@ namespace
 			if ((*samplers_)[stage_].first)
 			{
 				re.ActiveTexture(GL_TEXTURE0 + stage_);
-				checked_pointer_cast<OGLSamplerStateObject>((*samplers_)[stage_].second)->Active(stage_, (*samplers_)[stage_].first);
+				checked_pointer_cast<OGLSamplerStateObject>((*samplers_)[stage_].second)->Active((*samplers_)[stage_].first);
 				GLuint const tex_type = checked_pointer_cast<OGLTexture>((*samplers_)[stage_].first)->GLType();
 				GLuint const gl_tex = checked_pointer_cast<OGLTexture>((*samplers_)[stage_].first)->GLTexture();
 				glBindTexture(tex_type, gl_tex);

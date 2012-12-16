@@ -391,7 +391,7 @@ namespace KlayGE
 		}
 	}
 
-	void OGLESSamplerStateObject::Active(uint32_t /*stage*/, TexturePtr const & texture)
+	void OGLESSamplerStateObject::Active(TexturePtr const & texture)
 	{
 		OGLESTexture& tex = *checked_pointer_cast<OGLESTexture>(texture);
 

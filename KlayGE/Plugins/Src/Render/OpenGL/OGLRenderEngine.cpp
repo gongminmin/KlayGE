@@ -237,22 +237,6 @@ namespace KlayGE
 			glEnable(GL_PRIMITIVE_RESTART);
 		}
 
-		mip_map_lod_bias_.resize(std::max(std::max(caps_.max_vertex_texture_units, caps_.max_pixel_texture_units), caps_.max_geometry_texture_units), 0);
-		for (uint32_t stage = 0; stage < mip_map_lod_bias_.size(); ++ stage)
-		{
-			float bias = mip_map_lod_bias_[stage];
-			GLenum tex_unit = GL_TEXTURE0 + stage;
-			if (glloader_GL_EXT_direct_state_access())
-			{
-				glMultiTexEnvfEXT(tex_unit, GL_TEXTURE_FILTER_CONTROL, GL_TEXTURE_LOD_BIAS, bias);
-			}
-			else
-			{
-				this->ActiveTexture(tex_unit);
-				glTexEnvf(GL_TEXTURE_FILTER_CONTROL, GL_TEXTURE_LOD_BIAS, bias);
-			}
-		}
-
 		active_tex_unit_ = GL_TEXTURE0;
 		glActiveTexture(active_tex_unit_);
 
@@ -262,25 +246,6 @@ namespace KlayGE
 		if (glloader_GL_ARB_framebuffer_sRGB())
 		{
 			glDisable(GL_FRAMEBUFFER_SRGB);
-		}
-	}
-
-	void OGLRenderEngine::MipMapLodBias(uint32_t stage, float bias)
-	{
-		if (mip_map_lod_bias_[stage] != bias)
-		{
-			GLenum tex_unit = GL_TEXTURE0 + stage;
-			if (glloader_GL_EXT_direct_state_access())
-			{
-				glMultiTexEnvfEXT(tex_unit, GL_TEXTURE_FILTER_CONTROL, GL_TEXTURE_LOD_BIAS, bias);
-			}
-			else
-			{
-				this->ActiveTexture(tex_unit);
-				glTexEnvf(GL_TEXTURE_FILTER_CONTROL, GL_TEXTURE_LOD_BIAS, bias);
-			}
-
-			mip_map_lod_bias_[stage] = bias;
 		}
 	}
 
