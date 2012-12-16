@@ -138,6 +138,10 @@ namespace KlayGE
 		{
 			return hack_for_ati_;
 		}
+		bool HackForIntel() const
+		{
+			return hack_for_intel_;
+		}
 
 	private:
 		void DoCreateRenderWindow(std::string const & name, RenderSettings const & settings);
@@ -189,12 +193,13 @@ namespace KlayGE
 		std::set<ElementFormat> rendertarget_format_;
 		uint32_t max_samples_;
 
-		std::map<GLuint, std::vector<int4> > uniformi_cache_;
-		std::map<GLuint, std::vector<float4> > uniformf_cache_;
+		std::map<GLuint, std::map<GLint, int4> > uniformi_cache_;
+		std::map<GLuint, std::map<GLint, float4> > uniformf_cache_;
 		bool fb_srgb_cache_;
 
 		bool hack_for_nv_;
 		bool hack_for_ati_;
+		bool hack_for_intel_;
 	};
 
 	typedef boost::shared_ptr<OGLRenderEngine> OGLRenderEnginePtr;

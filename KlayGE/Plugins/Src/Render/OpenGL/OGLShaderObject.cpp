@@ -1325,6 +1325,8 @@ namespace KlayGE
 
 	std::string OGLShaderObject::ConvertToGLSL(std::string const & glsl, ShaderType type, uint32_t gs_input_vertices, bool has_gs)
 	{
+		OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+
 		char predefined_gs_in_varyings_add_num[1024];
 		sprintf(predefined_gs_in_varyings_add_num, predefined_gs_in_varyings,
 			gs_input_vertices, gs_input_vertices, gs_input_vertices, gs_input_vertices,
@@ -1366,7 +1368,10 @@ namespace KlayGE
 			ss << predefined_varyings << std::endl;
 			if (glloader_GL_VERSION_3_1())
 			{
-				ss << predefined_ps_out_varyings_add_num << std::endl;
+				if (!re.HackForIntel())
+				{
+					ss << predefined_ps_out_varyings_add_num << std::endl;
+				}
 			}
 			break;
 
@@ -1484,7 +1489,14 @@ namespace KlayGE
 							{
 								if (glloader_GL_VERSION_3_1())
 								{
-									ss << "v_gl_FragData_0";
+									if (!re.HackForIntel())
+									{
+										ss << "v_gl_FragData_0";
+									}
+									else
+									{
+										ss << this_token;
+									}
 								}
 								else
 								{
@@ -1497,14 +1509,21 @@ namespace KlayGE
 								{
 									if (glloader_GL_VERSION_3_1())
 									{
-										std::string tmp_token[3];
-										for (int t = 0; t < 3; ++ t)
+										if (!re.HackForIntel())
 										{
-											++ beg;
-											tmp_token[t] = *beg;
-										}
+											std::string tmp_token[3];
+											for (int t = 0; t < 3; ++ t)
+											{
+												++ beg;
+												tmp_token[t] = *beg;
+											}
 
-										ss << "v_gl_FragData_" << tmp_token[1];
+											ss << "v_gl_FragData_" << tmp_token[1];
+										}
+										else
+										{
+											ss << this_token;
+										}
 									}
 									else
 									{

@@ -472,11 +472,11 @@ namespace KlayGE
 		}
 		if (desc.logic_op_enable[0])
 		{
-			glEnable(GL_LOGIC_OP_MODE);
+			glEnable(GL_COLOR_LOGIC_OP);
 		}
 		else
 		{
-			glDisable(GL_LOGIC_OP_MODE);
+			glDisable(GL_COLOR_LOGIC_OP);
 		}
 		glBlendEquationSeparate(OGLMapping::Mapping(desc.blend_op[0]), OGLMapping::Mapping(desc.blend_op_alpha[0]));
 		glBlendFuncSeparate(OGLMapping::Mapping(desc.src_blend[0]), OGLMapping::Mapping(desc.dest_blend[0]),
