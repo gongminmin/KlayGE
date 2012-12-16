@@ -183,7 +183,7 @@ namespace KlayGE
 
 	KLAYGE_CORE_API uint32_t LastError();
 
-#ifdef _IDENTITY_SUPPORT
+#ifdef KLAYGE_IDENTITY_SUPPORT
 	template <typename arg_type>
 	struct identity : public std::unary_function<arg_type, arg_type>
 	{
@@ -194,9 +194,9 @@ namespace KlayGE
 	};
 #else
 	using std::identity;
-#endif		// _IDENTITY_SUPPORT
+#endif		// KLAYGE_IDENTITY_SUPPORT
 
-#ifdef _SELECT1ST2ND_SUPPORT
+#ifdef KLAYGE_SELECT1ST2ND_SUPPORT
 	template <typename pair_type>
 	struct select1st : public std::unary_function<pair_type, typename pair_type::first_type>
 	{
@@ -217,9 +217,9 @@ namespace KlayGE
 #else
 	using std::select1st;
 	using std::select2nd;
-#endif		// _SELECT1ST2ND_SUPPORT
+#endif		// KLAYGE_SELECT1ST2ND_SUPPORT
 
-#ifdef _PROJECT1ST2ND_SUPPORT
+#ifdef KLAYGE_PROJECT1ST2ND_SUPPORT
 	template <typename arg1_type, typename arg2_type>
 	struct project1st : public std::binary_function<arg1_type, arg2_type, arg1_type>
 	{
@@ -240,9 +240,9 @@ namespace KlayGE
 #else
 	using std::project1st;
 	using std::project2nd;
-#endif		// _PROJECT1ST2ND_SUPPORT
+#endif		// KLAYGE_PROJECT1ST2ND_SUPPORT
 
-#ifdef _COPYIF_SUPPORT
+#ifdef KLAYGE_COPYIF_SUPPORT
 	template<typename InputIterator, typename OutputIterator, typename Predicate>
 	OutputIterator copy_if(InputIterator first, InputIterator last,
 							OutputIterator dest_first,
@@ -261,7 +261,7 @@ namespace KlayGE
 	}
 #else
 	using std::copyif;
-#endif
+#endif	// KLAYGE_COPYIF_SUPPORT
 
 	std::string ReadShortString(ResIdentifierPtr const & res);
 	void WriteShortString(std::ostream& os, std::string const & str);

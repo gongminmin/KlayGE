@@ -1,3 +1,33 @@
+/**
+ * @file Config.hpp
+ * @author Minmin Gong
+ *
+ * @section DESCRIPTION
+ *
+ * This source file is part of KlayGE
+ * For the latest info, see http://www.klayge.org
+ *
+ * @section LICENSE
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published
+ * by the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ * You may alternatively use this source under the terms of
+ * the KlayGE Proprietary License (KPL). You can obtained such a license
+ * from http://www.klayge.org/licensing/.
+ */
+
 #ifndef _CONFIG_HPP
 #define _CONFIG_HPP
 
@@ -37,12 +67,14 @@
 		#if __GNUC_MINOR__ >= 3
 			#ifdef __GXX_EXPERIMENTAL_CXX0X__
 				#define KLAYGE_CXX11_SUPPORT
-				#define KLAYGE_NULLPTR_SUPPORT
-				#define KLAYGE_STRONGLY_TYPED_ENUMS_SUPPORT
 				#define KLAYGE_TYPE_TRAITS_SUPPORT
+				#define KLAYGE_STATIC_ASSERT_SUPPORT
+				#define KLAYGE_DECLTYPE_SUPPORT
+				#if __GNUC_MINOR__ >= 4
+					#define KLAYGE_STRONGLY_TYPED_ENUMS_SUPPORT
+				#endif
 				#if __GNUC_MINOR__ >= 6
-					#define KLAYGE_STATIC_ASSERT_SUPPORT
-					#define KLAYGE_DECLTYPE_SUPPORT
+					#define KLAYGE_NULLPTR_SUPPORT
 					#define KLAYGE_FOREACH_SUPPORT
 				#endif
 			#endif
@@ -197,37 +229,60 @@
 	#define KLAYGE_BIG_ENDIAN
 #endif
 
-#define _IDENTITY_SUPPORT
-#define _SELECT1ST2ND_SUPPORT
-#define _PROJECT1ST2ND_SUPPORT
-#define _COPYIF_SUPPORT
+#define KLAYGE_IDENTITY_SUPPORT
+#define KLAYGE_SELECT1ST2ND_SUPPORT
+#define KLAYGE_PROJECT1ST2ND_SUPPORT
+#define KLAYGE_COPYIF_SUPPORT
 
 // Defines some MACROs from compile options
 #ifdef KLAYGE_CPU_X64
-	#define _SSE_SUPPORT
-	#define _SSE2_SUPPORT
-	#define _X64_SUPPORT
+	#define KLAYGE_SSE_SUPPORT
+	#define KLAYGE_SSE2_SUPPORT
+	#define KLAYGE_X64_SUPPORT
 #elif defined KLAYGE_CPU_X86
 	#if defined(KLAYGE_COMPILER_MSVC)
 		#if _M_IX86 == 600
-			#define _MMX_SUPPORT
+			#define KLAYGE_MMX_SUPPORT
 		#endif
 
 		#if _M_IX86_FP == 1
-			#define _SSE_SUPPORT
+			#define KLAYGE_SSE_SUPPORT
 		#elif _M_IX86_FP == 2
-			#define _SSE_SUPPORT
-			#define _SSE2_SUPPORT
+			#define KLAYGE_SSE_SUPPORT
+			#define KLAYGE_SSE2_SUPPORT
 		#endif
 	#elif defined(KLAYGE_COMPILER_GCC)
 		#ifdef __MMX__
-			#define _MMX_SUPPORT
+			#define KLAYGE_MMX_SUPPORT
 		#endif
 		#ifdef __SSE__
-			#define _SSE_SUPPORT
+			#define KLAYGE_SSE_SUPPORT
 		#endif
 		#ifdef __SSE2__
-			#define _SSE2_SUPPORT
+			#define KLAYGE_SSE2_SUPPORT
+		#endif
+		#ifdef __SSE3__
+			#define KLAYGE_SSE3_SUPPORT
+		#endif
+		#ifdef __SSSE3__
+			#define KLAYGE_SSSE3_SUPPORT
+		#endif
+		#ifdef __SSE4_1__
+			#define KLAYGE_SSE4_1_SUPPORT
+		#endif
+		#ifdef __SSE4_2__
+			#define KLAYGE_SSE4_2_SUPPORT
+		#endif
+		#ifdef __AVX__
+			#define KLAYGE_AVX_SUPPORT
+		#endif
+	#endif
+#elif defined KLAYGE_CPU_ARM
+	#if defined(KLAYGE_COMPILER_MSVC)
+		#define KLAYGE_NEON_SUPPORT
+	#elif defined(KLAYGE_COMPILER_GCC)
+		#ifdef __ARM_NEON__
+			#define KLAYGE_NEON_SUPPORT
 		#endif
 	#endif
 #endif
