@@ -63,8 +63,13 @@ namespace
 
 			RenderLayoutPtr rl = this->Mesh(0)->GetRenderLayout();
 
-			GraphicsBufferPtr pos_vb;
-			GraphicsBufferPtr tangent_vb;
+			AABBox const & pos_bb = this->PosBound();
+			AABBox const & tc_bb = this->TexcoordBound();
+			float3 const pos_center = pos_bb.Center();
+			float3 const pos_extent = pos_bb.HalfSize();
+			float3 const tc_center = tc_bb.Center();
+			float3 const tc_extent = tc_bb.HalfSize();
+
 			std::vector<float3> positions(rl->NumVertices());
 			std::vector<float2> texs(rl->NumVertices());
 			for (uint32_t i = 0; i < rl->NumVertexStreams(); ++ i)
@@ -73,15 +78,19 @@ namespace
 				switch (rl->VertexStreamFormat(i)[0].usage)
 				{
 				case VEU_Position:
-					pos_vb = vb;
 					{
 						GraphicsBufferPtr vb_cpu = rf.MakeVertexBuffer(BU_Static, EAH_CPU_Read, nullptr);
 						vb_cpu->Resize(vb->Size());
 						vb->CopyToBuffer(*vb_cpu);
 
 						GraphicsBuffer::Mapper mapper(*vb_cpu, BA_Read_Only);
-						float3* p = mapper.Pointer<float3>();
-						memcpy(&positions[0], p, positions.size() * sizeof(positions[0]));
+						int16_t const * p_16 = mapper.Pointer<int16_t>();
+						for (uint32_t j = 0; j < rl->NumVertices(); ++ j)
+						{
+							positions[j].x() = ((p_16[j * 4 + 0] + 32768) / 65535.0f * 2 - 1) * pos_extent.x() + pos_center.x();
+							positions[j].y() = ((p_16[j * 4 + 1] + 32768) / 65535.0f * 2 - 1) * pos_extent.y() + pos_center.y();
+							positions[j].z() = ((p_16[j * 4 + 2] + 32768) / 65535.0f * 2 - 1) * pos_extent.z() + pos_center.z();
+						}
 					}
 					break;
 
@@ -93,13 +102,13 @@ namespace
 						vb->CopyToBuffer(*vb_cpu);
 
 						GraphicsBuffer::Mapper mapper(*vb_cpu, BA_Read_Only);
-						float2* p = mapper.Pointer<float2>();
-						memcpy(&texs[0], p, texs.size() * sizeof(texs[0]));
+						int16_t const * t_16 = mapper.Pointer<int16_t>();
+						for (uint32_t j = 0; j < rl->NumVertices(); ++ j)
+						{
+							texs[j].x() = ((t_16[j * 2 + 0] + 32768) / 65535.0f * 2 - 1) * tc_extent.x() + tc_center.x();
+							texs[j].y() = ((t_16[j * 2 + 1] + 32768) / 65535.0f * 2 - 1) * tc_extent.y() + tc_center.y();
+						}
 					}
-					break;
-
-				case VEU_Tangent:
-					tangent_vb = vb;
 					break;
 
 				default:

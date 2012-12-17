@@ -581,12 +581,8 @@ void DetailedSkinnedModel::BuildModelInfo()
 				vb_cpu->Resize(vb->Size());
 				vb->CopyToBuffer(*vb_cpu);
 
-				std::vector<short> p_16(total_num_vertices * 4);
-				{
-					GraphicsBuffer::Mapper mapper(*vb_cpu, BA_Read_Only);
-					std::copy(mapper.Pointer<short>(), mapper.Pointer<short>() + p_16.size(), p_16.begin());
-				}
-
+				GraphicsBuffer::Mapper mapper(*vb_cpu, BA_Read_Only);
+				int16_t const * p_16 = mapper.Pointer<int16_t>();
 				for (uint32_t j = 0; j < total_num_vertices; ++ j)
 				{
 					positions[j].x() = ((p_16[j * 4 + 0] + 32768) / 65535.0f * 2 - 1) * pos_extent.x() + pos_center.x();
@@ -602,12 +598,8 @@ void DetailedSkinnedModel::BuildModelInfo()
 				vb_cpu->Resize(vb->Size());
 				vb->CopyToBuffer(*vb_cpu);
 
-				std::vector<short> t_16(total_num_vertices * 2);
-				{
-					GraphicsBuffer::Mapper mapper(*vb_cpu, BA_Read_Only);
-					std::copy(mapper.Pointer<short>(), mapper.Pointer<short>() + t_16.size(), t_16.begin());
-				}
-
+				GraphicsBuffer::Mapper mapper(*vb_cpu, BA_Read_Only);
+				int16_t const * t_16 = mapper.Pointer<int16_t>();
 				for (uint32_t j = 0; j < total_num_vertices; ++ j)
 				{
 					texcoords[j].x() = ((t_16[j * 2 + 0] + 32768) / 65535.0f * 2 - 1) * tc_extent.x() + tc_center.x();
@@ -622,12 +614,8 @@ void DetailedSkinnedModel::BuildModelInfo()
 				vb_cpu->Resize(vb->Size());
 				vb->CopyToBuffer(*vb_cpu);
 
-				std::vector<uint32_t> n_32(total_num_vertices);
-				{
-					GraphicsBuffer::Mapper mapper(*vb_cpu, BA_Read_Only);
-					std::copy(mapper.Pointer<uint32_t>(), mapper.Pointer<uint32_t>() + n_32.size(), n_32.begin());
-				}
-
+				GraphicsBuffer::Mapper mapper(*vb_cpu, BA_Read_Only);
+				uint32_t const * n_32 = mapper.Pointer<uint32_t>();
 				if (EF_A2BGR10 == rl->VertexStreamFormat(i)[0].format)
 				{
 					for (uint32_t j = 0; j < total_num_vertices; ++ j)
@@ -667,20 +655,16 @@ void DetailedSkinnedModel::BuildModelInfo()
 				vb_cpu->Resize(vb->Size());
 				vb->CopyToBuffer(*vb_cpu);
 
-				std::vector<uint32_t> n_32(total_num_vertices);
-				{
-					GraphicsBuffer::Mapper mapper(*vb_cpu, BA_Read_Only);
-					std::copy(mapper.Pointer<uint32_t>(), mapper.Pointer<uint32_t>() + n_32.size(), n_32.begin());
-				}
-
+				GraphicsBuffer::Mapper mapper(*vb_cpu, BA_Read_Only);
+				uint32_t const * t_32 = mapper.Pointer<uint32_t>();
 				if (EF_ABGR8 == rl->VertexStreamFormat(i)[0].format)
 				{
 					for (uint32_t j = 0; j < total_num_vertices; ++ j)
 					{
-						tangent_quats[j].x() = ((n_32[j] >>  0) & 0xFF) / 255.0f * 2 - 1;
-						tangent_quats[j].y() = ((n_32[j] >>  8) & 0xFF) / 255.0f * 2 - 1;
-						tangent_quats[j].z() = ((n_32[j] >> 16) & 0xFF) / 255.0f * 2 - 1;
-						tangent_quats[j].w() = ((n_32[j] >> 24) & 0xFF) / 255.0f * 2 - 1;
+						tangent_quats[j].x() = ((t_32[j] >>  0) & 0xFF) / 255.0f * 2 - 1;
+						tangent_quats[j].y() = ((t_32[j] >>  8) & 0xFF) / 255.0f * 2 - 1;
+						tangent_quats[j].z() = ((t_32[j] >> 16) & 0xFF) / 255.0f * 2 - 1;
+						tangent_quats[j].w() = ((t_32[j] >> 24) & 0xFF) / 255.0f * 2 - 1;
 					}
 				}
 				else
@@ -689,10 +673,10 @@ void DetailedSkinnedModel::BuildModelInfo()
 
 					for (uint32_t j = 0; j < total_num_vertices; ++ j)
 					{
-						tangent_quats[j].x() = ((n_32[j] >> 16) & 0xFF) / 255.0f * 2 - 1;
-						tangent_quats[j].y() = ((n_32[j] >>  8) & 0xFF) / 255.0f * 2 - 1;
-						tangent_quats[j].z() = ((n_32[j] >>  0) & 0xFF) / 255.0f * 2 - 1;
-						tangent_quats[j].w() = ((n_32[j] >> 24) & 0xFF) / 255.0f * 2 - 1;
+						tangent_quats[j].x() = ((t_32[j] >> 16) & 0xFF) / 255.0f * 2 - 1;
+						tangent_quats[j].y() = ((t_32[j] >>  8) & 0xFF) / 255.0f * 2 - 1;
+						tangent_quats[j].z() = ((t_32[j] >>  0) & 0xFF) / 255.0f * 2 - 1;
+						tangent_quats[j].w() = ((t_32[j] >> 24) & 0xFF) / 255.0f * 2 - 1;
 					}
 				}
 			}
