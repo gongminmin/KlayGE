@@ -520,7 +520,17 @@ namespace KlayGE
 			}
 			else
 			{
-				ElementFormat fmt = ds_view->Format();
+				ElementFormat fmt;
+				if (caps.rendertarget_format_support(render_settings_.depth_stencil_fmt, 1, 0))
+				{
+					fmt = render_settings_.depth_stencil_fmt;
+				}
+				else
+				{
+					BOOST_ASSERT(caps.rendertarget_format_support(EF_D16, 1, 0));
+
+					fmt = EF_D16;
+				}
 				ds_view = rf.Make2DDepthStencilRenderView(width, height, fmt, 1, 0);
 			}
 		}
