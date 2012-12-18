@@ -276,19 +276,10 @@
     <None Include="..\..\..\media\RenderFX\DepthToSM.kfx">
       <Filter>Resource Files</Filter>
     </None>
-    <None Include="..\..\..\media\RenderFX\FFT.kfx">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="..\..\..\media\RenderFX\Fog.kfx">
-      <Filter>Resource Files</Filter>
-    </None>
     <None Include="..\..\..\media\RenderFX\GBuffer.kfx">
       <Filter>Resource Files</Filter>
     </None>
     <None Include="..\..\..\media\RenderFX\LightSourceProxy.kfx">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="..\..\..\media\RenderFX\RenderableHelper.kfx">
       <Filter>Resource Files</Filter>
     </None>
     <None Include="..\..\..\media\RenderFX\RSM2VPLs.kfx">

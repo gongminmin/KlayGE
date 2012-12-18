@@ -1495,7 +1495,7 @@ namespace KlayGE
 							{
 								if ("gl_FragData" == this_token)
 								{
-									if (glloader_GL_VERSION_3_1())
+									if (glloader_GL_VERSION_4_2())
 									{
 										std::string tmp_token[3];
 										for (int t = 0; t < 3; ++ t)
