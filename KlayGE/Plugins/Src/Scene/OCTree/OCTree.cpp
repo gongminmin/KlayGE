@@ -100,9 +100,6 @@ namespace KlayGE
 	OCTree::OCTree()
 		: max_tree_depth_(4), rebuild_tree_(false)
 	{
-		base_address_.resize(2);
-		base_address_[0] = 0;
-		base_address_[1] = 1;
 	}
 
 	void OCTree::MaxTreeDepth(uint32_t max_tree_depth)
@@ -137,71 +134,7 @@ namespace KlayGE
 			}
 			octree_[0].bb = bb_root;
 
-			base_address_.resize(2);
-			for (uint32_t d = 1; d <= max_tree_depth_; ++ d)
-			{
-				size_t const original_size = octree_.size();
-				for (size_t i = base_address_[d - 1]; i < base_address_[d]; ++ i)
-				{
-					if (octree_[i].obj_ptrs.size() > 1)
-					{
-						size_t const this_size = octree_.size();
-						float3 const parent_center = octree_[i].bb.Center();
-						float3 const new_half_size = octree_[i].bb.HalfSize() / 2.0f;
-						octree_[i].first_child_index = static_cast<int>(base_address_[d] + this_size - original_size);
-						octree_[i].visible = BO_No;
-
-						octree_.resize(this_size + 8);
-						for (size_t j = 0; j < 8; ++ j)
-						{
-							octree_node_t& new_node = octree_[this_size + j];
-							new_node.first_child_index = -1;
-							SceneObjAABBsType& new_node_obj_ptrs = new_node.obj_ptrs;
-							SceneObjAABBsType& parent_obj_ptrs = octree_[i].obj_ptrs;
-
-							float3 bb_center = parent_center;
-							if (j & 1)
-							{
-								bb_center.x() += new_half_size.x();
-							}
-							else
-							{
-								bb_center.x() -= new_half_size.x();
-							}
-							if (j & 2)
-							{
-								bb_center.y() += new_half_size.y();
-							}
-							else
-							{
-								bb_center.y() -= new_half_size.y();
-							}
-							if (j & 4)
-							{
-								bb_center.z() += new_half_size.z();
-							}
-							else
-							{
-								bb_center.z() -= new_half_size.z();
-							}
-							new_node.bb = AABBox(bb_center - new_half_size, bb_center + new_half_size);
-
-							KLAYGE_FOREACH(SceneObjAABBPtrType const & soaabb, parent_obj_ptrs)
-							{
-								if (MathLib::intersect_aabb_aabb(*soaabb->aabb_ws, new_node.bb))
-								{
-									new_node_obj_ptrs.push_back(soaabb);
-								}
-							}
-						}
-
-						SceneObjAABBsType empty;
-						octree_[i].obj_ptrs.swap(empty);
-					}
-				}
-
-				base_address_.push_back(base_address_.back() + octree_.size() - original_size);
-			}
+			this->DivideNode(0, 1);
 
 			rebuild_tree_ = false;
 		}
@@ -295,6 +228,70 @@ namespace KlayGE
 			{
 				rebuild_tree_ = true;
 			}
+		}
+	}
+
+	void OCTree::DivideNode(size_t index, uint32_t curr_depth)
+	{
+		if (octree_[index].obj_ptrs.size() > 1)
+		{
+			size_t const this_size = octree_.size();
+			float3 const parent_center = octree_[index].bb.Center();
+			float3 const new_half_size = octree_[index].bb.HalfSize() / 2.0f;
+			octree_[index].first_child_index = static_cast<int>(this_size);
+			octree_[index].visible = BO_No;
+
+			octree_.resize(this_size + 8);
+			for (size_t j = 0; j < 8; ++ j)
+			{
+				octree_node_t& new_node = octree_[this_size + j];
+				new_node.first_child_index = -1;
+				SceneObjAABBsType& new_node_obj_ptrs = new_node.obj_ptrs;
+				SceneObjAABBsType& parent_obj_ptrs = octree_[index].obj_ptrs;
+
+				float3 bb_center = parent_center;
+				if (j & 1)
+				{
+					bb_center.x() += new_half_size.x();
+				}
+				else
+				{
+					bb_center.x() -= new_half_size.x();
+				}
+				if (j & 2)
+				{
+					bb_center.y() += new_half_size.y();
+				}
+				else
+				{
+					bb_center.y() -= new_half_size.y();
+				}
+				if (j & 4)
+				{
+					bb_center.z() += new_half_size.z();
+				}
+				else
+				{
+					bb_center.z() -= new_half_size.z();
+				}
+				new_node.bb = AABBox(bb_center - new_half_size, bb_center + new_half_size);
+
+				KLAYGE_FOREACH(SceneObjAABBPtrType const & soaabb, parent_obj_ptrs)
+				{
+					if (MathLib::intersect_aabb_aabb(*soaabb->aabb_ws, new_node.bb))
+					{
+						new_node_obj_ptrs.push_back(soaabb);
+					}
+				}
+
+				if (curr_depth < max_tree_depth_)
+				{
+					this->DivideNode(this_size + j, curr_depth + 1);
+				}
+			}
+
+			SceneObjAABBsType empty;
+			octree_[index].obj_ptrs.swap(empty);
 		}
 	}
 

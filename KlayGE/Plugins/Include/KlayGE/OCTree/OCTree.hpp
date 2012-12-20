@@ -61,6 +61,7 @@ namespace KlayGE
 		void OnAddSceneObject(SceneObjectPtr const & obj);
 		void OnDelSceneObject(SceneObjAABBsType::iterator iter);
 
+		void DivideNode(size_t index, uint32_t curr_depth);
 		void NodeVisible(size_t index);
 		void MarkNodeObjs(size_t index, bool force);
 
@@ -84,7 +85,6 @@ namespace KlayGE
 		};
 
 		std::vector<octree_node_t, boost::pool_allocator<octree_node_t> > octree_;
-		std::vector<size_t, boost::pool_allocator<size_t> > base_address_;
 
 		uint32_t max_tree_depth_;
 
