@@ -237,52 +237,83 @@ namespace KlayGE
 		{
 			size_t const this_size = octree_.size();
 			float3 const parent_center = octree_[index].bb.Center();
-			float3 const new_half_size = octree_[index].bb.HalfSize() / 2.0f;
+			float3 const new_extent = octree_[index].bb.HalfSize() / 2.0f;
 			octree_[index].first_child_index = static_cast<int>(this_size);
 			octree_[index].visible = BO_No;
 
 			octree_.resize(this_size + 8);
+			KLAYGE_FOREACH(SceneObjAABBPtrType const & soaabb, octree_[index].obj_ptrs)
+			{
+				float3 const & so_center = soaabb->aabb_ws->Center();
+				float3 const & so_extent = soaabb->aabb_ws->HalfSize();
+				for (int j = 0; j < 8; ++ j)
+				{
+					float3 so_corner = so_center;
+					if (j & 1)
+					{
+						so_corner.x() += so_extent.x();
+					}
+					else
+					{
+						so_corner.x() -= so_extent.x();
+					}
+					if (j & 2)
+					{
+						so_corner.y() += so_extent.y();
+					}
+					else
+					{
+						so_corner.y() -= so_extent.y();
+					}
+					if (j & 4)
+					{
+						so_corner.z() += so_extent.z();
+					}
+					else
+					{
+						so_corner.z() -= so_extent.z();
+					}
+
+					if (j == ((so_corner.x() >= parent_center.x()) ? 1 : 0)
+						+ ((so_corner.y() >= parent_center.y()) ? 2 : 0)
+						+ ((so_corner.z() >= parent_center.z()) ? 4 : 0))
+					{
+						octree_[this_size + j].obj_ptrs.push_back(soaabb);
+					}
+				}
+			}
+
 			for (size_t j = 0; j < 8; ++ j)
 			{
 				octree_node_t& new_node = octree_[this_size + j];
 				new_node.first_child_index = -1;
-				SceneObjAABBsType& new_node_obj_ptrs = new_node.obj_ptrs;
-				SceneObjAABBsType& parent_obj_ptrs = octree_[index].obj_ptrs;
 
 				float3 bb_center = parent_center;
 				if (j & 1)
 				{
-					bb_center.x() += new_half_size.x();
+					bb_center.x() += new_extent.x();
 				}
 				else
 				{
-					bb_center.x() -= new_half_size.x();
+					bb_center.x() -= new_extent.x();
 				}
 				if (j & 2)
 				{
-					bb_center.y() += new_half_size.y();
+					bb_center.y() += new_extent.y();
 				}
 				else
 				{
-					bb_center.y() -= new_half_size.y();
+					bb_center.y() -= new_extent.y();
 				}
 				if (j & 4)
 				{
-					bb_center.z() += new_half_size.z();
+					bb_center.z() += new_extent.z();
 				}
 				else
 				{
-					bb_center.z() -= new_half_size.z();
+					bb_center.z() -= new_extent.z();
 				}
-				new_node.bb = AABBox(bb_center - new_half_size, bb_center + new_half_size);
-
-				KLAYGE_FOREACH(SceneObjAABBPtrType const & soaabb, parent_obj_ptrs)
-				{
-					if (MathLib::intersect_aabb_aabb(*soaabb->aabb_ws, new_node.bb))
-					{
-						new_node_obj_ptrs.push_back(soaabb);
-					}
-				}
+				new_node.bb = AABBox(bb_center - new_extent, bb_center + new_extent);
 
 				if (curr_depth < max_tree_depth_)
 				{
