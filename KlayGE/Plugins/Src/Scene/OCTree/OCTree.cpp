@@ -236,47 +236,28 @@ namespace KlayGE
 		if (octree_[index].obj_ptrs.size() > 1)
 		{
 			size_t const this_size = octree_.size();
-			float3 const parent_center = octree_[index].bb.Center();
-			float3 const new_extent = octree_[index].bb.HalfSize() / 2.0f;
+			AABBox const & parent_bb = octree_[index].bb;
+			float3 const parent_center = parent_bb.Center();
+			float3 const new_extent = parent_bb.HalfSize() / 2.0f;
 			octree_[index].first_child_index = static_cast<int>(this_size);
 			octree_[index].visible = BO_No;
 
 			octree_.resize(this_size + 8);
 			KLAYGE_FOREACH(SceneObjAABBPtrType const & soaabb, octree_[index].obj_ptrs)
 			{
-				float3 const & so_center = soaabb->aabb_ws->Center();
-				float3 const & so_extent = soaabb->aabb_ws->HalfSize();
+				AABBox const & aabb = *soaabb->aabb_ws;
+				int mark[6];
+				mark[0] = aabb.Min().x() >= parent_center.x() ? 1 : 0;
+				mark[1] = aabb.Min().y() >= parent_center.y() ? 2 : 0;
+				mark[2] = aabb.Min().z() >= parent_center.z() ? 4 : 0;
+				mark[3] = aabb.Max().x() >= parent_center.x() ? 1 : 0;
+				mark[4] = aabb.Max().y() >= parent_center.y() ? 2 : 0;
+				mark[5] = aabb.Max().z() >= parent_center.z() ? 4 : 0;
 				for (int j = 0; j < 8; ++ j)
 				{
-					float3 so_corner = so_center;
-					if (j & 1)
-					{
-						so_corner.x() += so_extent.x();
-					}
-					else
-					{
-						so_corner.x() -= so_extent.x();
-					}
-					if (j & 2)
-					{
-						so_corner.y() += so_extent.y();
-					}
-					else
-					{
-						so_corner.y() -= so_extent.y();
-					}
-					if (j & 4)
-					{
-						so_corner.z() += so_extent.z();
-					}
-					else
-					{
-						so_corner.z() -= so_extent.z();
-					}
-
-					if (j == ((so_corner.x() >= parent_center.x()) ? 1 : 0)
-						+ ((so_corner.y() >= parent_center.y()) ? 2 : 0)
-						+ ((so_corner.z() >= parent_center.z()) ? 4 : 0))
+					if (j == ((j & 1) ? mark[3] : mark[0])
+						+ ((j & 2) ? mark[4] : mark[1])
+						+ ((j & 4) ? mark[5] : mark[2]))
 					{
 						octree_[this_size + j].obj_ptrs.push_back(soaabb);
 					}
@@ -287,33 +268,12 @@ namespace KlayGE
 			{
 				octree_node_t& new_node = octree_[this_size + j];
 				new_node.first_child_index = -1;
-
-				float3 bb_center = parent_center;
-				if (j & 1)
-				{
-					bb_center.x() += new_extent.x();
-				}
-				else
-				{
-					bb_center.x() -= new_extent.x();
-				}
-				if (j & 2)
-				{
-					bb_center.y() += new_extent.y();
-				}
-				else
-				{
-					bb_center.y() -= new_extent.y();
-				}
-				if (j & 4)
-				{
-					bb_center.z() += new_extent.z();
-				}
-				else
-				{
-					bb_center.z() -= new_extent.z();
-				}
-				new_node.bb = AABBox(bb_center - new_extent, bb_center + new_extent);
+				new_node.bb = AABBox(float3((j & 1) ? parent_center.x() : parent_bb.Min().x(),
+						(j & 2) ? parent_center.y() : parent_bb.Min().y(),
+						(j & 4) ? parent_center.z() : parent_bb.Min().z()),
+					float3((j & 1) ? parent_center.x() : parent_bb.Max().x(),
+						(j & 2) ? parent_center.y() : parent_bb.Max().y(),
+						(j & 4) ? parent_center.z() : parent_bb.Max().z()));
 
 				if (curr_depth < max_tree_depth_)
 				{
@@ -494,68 +454,23 @@ namespace KlayGE
 				if (node.first_child_index != -1)
 				{
 					float3 const center = node.bb.Center();
-					bool mark[6];
-					mark[0] = aabb.Min().x() < center.x();
-					mark[1] = aabb.Min().y() < center.y();
-					mark[2] = aabb.Min().z() < center.z();
-					mark[3] = aabb.Max().x() > center.x();
-					mark[4] = aabb.Max().y() > center.y();
-					mark[5] = aabb.Max().z() > center.z();
-
-					if (mark[0] && mark[1] && mark[2])
+					int mark[6];
+					mark[0] = aabb.Min().x() >= center.x() ? 1 : 0;
+					mark[1] = aabb.Min().y() >= center.y() ? 2 : 0;
+					mark[2] = aabb.Min().z() >= center.z() ? 4 : 0;
+					mark[3] = aabb.Max().x() >= center.x() ? 1 : 0;
+					mark[4] = aabb.Max().y() >= center.y() ? 2 : 0;
+					mark[5] = aabb.Max().z() >= center.z() ? 4 : 0;
+					for (int j = 0; j < 8; ++ j)
 					{
-						if (this->BoundVisible(node.first_child_index + 0, aabb))
+						if (j == ((j & 1) ? mark[3] : mark[0])
+							+ ((j & 2) ? mark[4] : mark[1])
+							+ ((j & 4) ? mark[5] : mark[2]))
 						{
-							return true;
-						}
-					}
-					if (mark[3] && mark[1] && mark[2])
-					{
-						if (this->BoundVisible(node.first_child_index + 1, aabb))
-						{
-							return true;
-						}
-					}
-					if (mark[0] && mark[4] && mark[2])
-					{
-						if (this->BoundVisible(node.first_child_index + 2, aabb))
-						{
-							return true;
-						}
-					}
-					if (mark[3] && mark[4] && mark[2])
-					{
-						if (this->BoundVisible(node.first_child_index + 3, aabb))
-						{
-							return true;
-						}
-					}
-					if (mark[0] && mark[1] && mark[5])
-					{
-						if (this->BoundVisible(node.first_child_index + 4, aabb))
-						{
-							return true;
-						}
-					}
-					if (mark[3] && mark[1] && mark[5])
-					{
-						if (this->BoundVisible(node.first_child_index + 5, aabb))
-						{
-							return true;
-						}
-					}
-					if (mark[0] && mark[4] && mark[5])
-					{
-						if (this->BoundVisible(node.first_child_index + 6, aabb))
-						{
-							return true;
-						}
-					}
-					if (mark[3] && mark[4] && mark[5])
-					{
-						if (this->BoundVisible(node.first_child_index + 7, aabb))
-						{
-							return true;
+							if (this->BoundVisible(node.first_child_index + j, aabb))
+							{
+								return true;
+							}
 						}
 					}
 
