@@ -309,7 +309,7 @@ void DetailedSkinnedMesh::Render()
 			RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 			re.BindSOBuffers(skinned_rl_);
 			rl_ = point_rl_;
-			technique_ = technique_->Effect().TechniqueByName("SkinnedStreamOut");
+			technique_ = technique_->Effect().TechniqueByName(has_skinned_ ? "SkinnedStreamOutTech" : "StreamOutTech");
 			SkinnedMesh::Render();
 			re.BindSOBuffers(RenderLayoutPtr());
 

@@ -2168,6 +2168,29 @@ void SmoothDS(HS_CONSTANT_DATA_OUTPUT HSConstantData,
 
 	<shader type="vertex_shader" version="4">
 		<![CDATA[
+void StreamOutVS(float4 pos : POSITION,
+					float2 texcoord0 : TEXCOORD0,
+					float4 tangent_quat : Tangent,
+
+					out float4 oPosOS : SV_Position,
+					out float2 oTex0 : TEXCOORD0,
+					out float4 oTangentQuat : TANGENT)
+{
+	pos = float4(pos.xyz * pos_extent + pos_center, 1);
+	texcoord0 = texcoord0 * tc_extent + tc_center;
+	tangent_quat = tangent_quat * 2 - 1;
+	
+	float3 result_pos;
+	float4 result_tangent_quat;
+	CalcMesh(texcoord0, pos,
+				tangent_quat,
+				oTex0, result_pos,
+				result_tangent_quat);
+				
+	oPosOS = float4(result_pos, 1);				
+	oTangentQuat = result_tangent_quat / 2 + 0.5f;
+}
+
 void SkinnedStreamOutVS(float4 pos : POSITION,
 					float2 texcoord0 : TEXCOORD0,
 					float4 tangent_quat : Tangent,
@@ -2270,7 +2293,21 @@ void InstTessSmoothVisualizeVertexVS(float2 barycentric : TEXCOORD1,
 		]]>
 	</shader>
 
-	<technique name="SkinnedStreamOut">
+	<technique name="StreamOutTech">
+		<pass name="p0">
+			<state name="depth_write_mask" value="false"/>
+
+			<state name="vertex_shader" value="StreamOutVS()">
+				<stream_output>
+					<slot usage="POSITION" component="xyzw"/>
+					<slot usage="TEXCOORD" usage_index="0" component="xy"/>
+					<slot usage="TANGENT" component="xyzw"/>
+				</stream_output>
+			</state>
+		</pass>
+	</technique>
+
+	<technique name="SkinnedStreamOutTech">
 		<pass name="p0">
 			<state name="depth_write_mask" value="false"/>
 
