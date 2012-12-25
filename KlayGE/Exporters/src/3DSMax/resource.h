@@ -8,7 +8,6 @@
 #define IDC_COMBINE_MESHES_CHECK        1024
 #define IDC_TANGENT_COMBO               1025
 #define IDC_TEXCOORD_CHECK              1026
-#define IDC_FULL_JOINT_MATRICES_CHECK   1027
 
 // Next default values for new objects
 // 

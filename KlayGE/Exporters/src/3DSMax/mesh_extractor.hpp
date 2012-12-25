@@ -51,8 +51,6 @@ namespace KlayGE
 		bool normal;
 		bool tangent_quat;
 		bool tex;
-
-		bool full_joint_matrices;
 	};
 
 	class meshml_extractor
