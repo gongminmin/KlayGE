@@ -1725,7 +1725,7 @@ namespace KlayGE
 			}
 
 			samplers_[type].resize(shader_desc_[type].num_samplers);
-			srvsrcs_[type].resize(shader_desc_[type].num_srvs, boost::make_tuple(nullptr, 0, 0));
+			srvsrcs_[type].resize(shader_desc_[type].num_srvs, boost::make_tuple(static_cast<void*>(nullptr), 0, 0));
 			srvs_[type].resize(shader_desc_[type].num_srvs);
 			uavsrcs_[type].resize(shader_desc_[type].num_uavs, nullptr);
 			uavs_[type].resize(shader_desc_[type].num_uavs);
@@ -1826,7 +1826,7 @@ namespace KlayGE
 			}
 
 			samplers_[type].resize(so.samplers_[type].size());
-			srvsrcs_[type].resize(so.srvs_[type].size(), boost::make_tuple(nullptr, 0, 0));
+			srvsrcs_[type].resize(so.srvs_[type].size(), boost::make_tuple(static_cast<void*>(nullptr), 0, 0));
 			srvs_[type].resize(so.srvs_[type].size());
 			uavsrcs_[type].resize(so.uavs_[type].size(), nullptr);
 			uavs_[type].resize(so.uavs_[type].size());
@@ -1891,7 +1891,7 @@ namespace KlayGE
 			ret->shader_desc_[i] = shader_desc_[i];
 
 			ret->samplers_[i].resize(samplers_[i].size());
-			ret->srvsrcs_[i].resize(srvsrcs_[i].size(), boost::make_tuple(nullptr, 0, 0));
+			ret->srvsrcs_[i].resize(srvsrcs_[i].size(), boost::make_tuple(static_cast<void*>(nullptr), 0, 0));
 			ret->srvs_[i].resize(srvs_[i].size());
 			ret->uavsrcs_[i].resize(uavsrcs_[i].size(), nullptr);
 			ret->uavs_[i].resize(uavs_[i].size());
