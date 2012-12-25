@@ -347,6 +347,7 @@
         <IncludePath Value="../../../External/7z"/>
         <IncludePath Value="../../Core/Include"/>
         <IncludePath Value="../../../kfont/include"/>
+        <IncludePath Value="../../../MeshMLLib/include"/>
         <Preprocessor Value="_DEBUG"/>
         <Preprocessor Value="KLAYGE_BUILD_DLL"/>
         <Preprocessor Value="KLAYGE_CORE_SOURCE"/>
@@ -356,13 +357,15 @@
         <LibraryPath Value="../../../External/Python/libs/amd64"/>
         <LibraryPath Value="../../lib/linux_x64"/>
         <LibraryPath Value="../../../kfont/lib/linux_x64"/>
+        <LibraryPath Value="../../../MeshMLLib/lib/linux_x64"/>
         <Library Value="boost_filesystem"/>
         <Library Value="boost_system"/>
         <Library Value="boost_signals"/>
         <Library Value="boost_thread"/>
         <Library Value="python2.6"/>
         <Library Value="X11"/>
-        <Library Value="kfont_mgw_x64_d"/>
+        <Library Value="kfont_gcc_x64_d"/>
+        <Library Value="MeshMLLib_gcc_x64_d"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
       <General OutputFile="../../lib/linux_x64/libKlayGE_Core_gcc_d.so" IntermediateDirectory="Debug/linux_x64/$(ProjectName)" Command="" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
@@ -405,6 +408,7 @@
         <IncludePath Value="../../../External/7z"/>
         <IncludePath Value="../../Core/Include"/>
         <IncludePath Value="../../../kfont/include"/>
+        <IncludePath Value="../../../MeshMLLib/include"/>
         <Preprocessor Value="_DEBUG"/>
         <Preprocessor Value="KLAYGE_BUILD_DLL"/>
         <Preprocessor Value="KLAYGE_CORE_SOURCE"/>
@@ -414,13 +418,15 @@
         <LibraryPath Value="../../../External/Python/libs"/>
         <LibraryPath Value="../../lib/linux_x86"/>
         <LibraryPath Value="../../../kfont/lib/linux_x86"/>
+        <LibraryPath Value="../../../MeshMLLib/lib/linux_x86"/>
         <Library Value="boost_filesystem"/>
         <Library Value="boost_system"/>
         <Library Value="boost_signals"/>
         <Library Value="boost_thread"/>
         <Library Value="python2.6"/>
         <Library Value="X11"/>
-        <Library Value="kfont_mgw_x86_d"/>
+        <Library Value="kfont_gcc_x86_d"/>
+        <Library Value="MeshMLLib_gcc_x86_d"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
       <General OutputFile="../../lib/linux_x86/libKlayGE_Core_gcc_d.so" IntermediateDirectory="Debug/linux_x86/$(ProjectName)" Command="" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
@@ -463,6 +469,7 @@
         <IncludePath Value="../../../External/7z"/>
         <IncludePath Value="../../Core/Include"/>
         <IncludePath Value="../../../kfont/include"/>
+        <IncludePath Value="../../../MeshMLLib/include"/>
         <Preprocessor Value="WIN64"/>
         <Preprocessor Value="_DEBUG"/>
         <Preprocessor Value="_USRDLL"/>
@@ -474,6 +481,7 @@
         <LibraryPath Value="../../../External/Python/libs/amd64"/>
         <LibraryPath Value="../../lib/win_x64"/>
         <LibraryPath Value="../../../kfont/lib/win_x64"/>
+        <LibraryPath Value="../../../MeshMLLib/lib/win_x64"/>
         <Library Value="boost_filesystem-mgw47-mt-d-1_51"/>
         <Library Value="boost_system-mgw47-mt-d-1_51"/>
         <Library Value="boost_signals-mgw47-mt-d-1_51"/>
@@ -483,6 +491,7 @@
         <Library Value="wsock32"/>
         <Library Value="python32_d"/>
         <Library Value="kfont_mgw_x64_d"/>
+        <Library Value="MeshMLLib_mgw_x64_d"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
       <General OutputFile="../../lib/win_x64/libKlayGE_Core_mgw_d.dll" IntermediateDirectory="Debug/win_x64/$(ProjectName)" Command="" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
@@ -525,6 +534,7 @@
         <IncludePath Value="../../../External/7z"/>
         <IncludePath Value="../../Core/Include"/>
         <IncludePath Value="../../../kfont/include"/>
+        <IncludePath Value="../../../MeshMLLib/include"/>
         <Preprocessor Value="WIN32"/>
         <Preprocessor Value="_DEBUG"/>
         <Preprocessor Value="_USRDLL"/>
@@ -536,6 +546,7 @@
         <LibraryPath Value="../../../External/Python/libs"/>
         <LibraryPath Value="../../lib/win_x86"/>
         <LibraryPath Value="../../../kfont/lib/win_x86"/>
+        <LibraryPath Value="../../../MeshMLLib/lib/win_x86"/>
         <Library Value="boost_filesystem-mgw47-mt-d-1_51"/>
         <Library Value="boost_system-mgw47-mt-d-1_51"/>
         <Library Value="boost_signals-mgw47-mt-d-1_51"/>
@@ -545,6 +556,7 @@
         <Library Value="wsock32"/>
         <Library Value="python32_d"/>
         <Library Value="kfont_mgw_x86_d"/>
+        <Library Value="MeshMLLib_mgw_x86_d"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
       <General OutputFile="../../lib/win_x86/libKlayGE_Core_mgw_d.dll" IntermediateDirectory="Debug/win_x86/$(ProjectName)" Command="" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
@@ -587,6 +599,7 @@
         <IncludePath Value="../../../External/7z"/>
         <IncludePath Value="../../Core/Include"/>
         <IncludePath Value="../../../kfont/include"/>
+        <IncludePath Value="../../../MeshMLLib/include"/>
         <Preprocessor Value="NDEBUG"/>
         <Preprocessor Value="KLAYGE_BUILD_DLL"/>
         <Preprocessor Value="KLAYGE_CORE_SOURCE"/>
@@ -596,13 +609,15 @@
         <LibraryPath Value="../../../External/Python/libs/amd64"/>
         <LibraryPath Value="../../lib/linux_x64"/>
         <LibraryPath Value="../../../kfont/lib/linux_x64"/>
+        <LibraryPath Value="../../../MeshMLLib/lib/linux_x64"/>
         <Library Value="boost_filesystem"/>
         <Library Value="boost_system"/>
         <Library Value="boost_signals"/>
         <Library Value="boost_thread"/>
         <Library Value="python2.6"/>
         <Library Value="X11"/>
-        <Library Value="kfont_mgw_x64"/>
+        <Library Value="kfont_gcc_x64"/>
+        <Library Value="MeshMLLib_gcc_x64"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
       <General OutputFile="../../lib/linux_x64/libKlayGE_Core_gcc.so" IntermediateDirectory="Release/linux_x64/$(ProjectName)" Command="" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
@@ -645,6 +660,7 @@
         <IncludePath Value="../../../External/7z"/>
         <IncludePath Value="../../Core/Include"/>
         <IncludePath Value="../../../kfont/include"/>
+        <IncludePath Value="../../../MeshMLLib/include"/>
         <Preprocessor Value="NDEBUG"/>
         <Preprocessor Value="KLAYGE_BUILD_DLL"/>
         <Preprocessor Value="KLAYGE_CORE_SOURCE"/>
@@ -654,13 +670,15 @@
         <LibraryPath Value="../../../External/Python/libs"/>
         <LibraryPath Value="../../lib/linux_x86"/>
         <LibraryPath Value="../../../kfont/lib/linux_x86"/>
+        <LibraryPath Value="../../../MeshMLLib/lib/linux_x86"/>
         <Library Value="boost_filesystem"/>
         <Library Value="boost_system"/>
         <Library Value="boost_signals"/>
         <Library Value="boost_thread"/>
         <Library Value="python2.6"/>
         <Library Value="X11"/>
-        <Library Value="kfont_mgw_x86"/>
+        <Library Value="kfont_gcc_x86"/>
+        <Library Value="MeshMLLib_gcc_x86"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
       <General OutputFile="../../lib/linux_x86/libKlayGE_Core_gcc.so" IntermediateDirectory="Release/linux_x86/$(ProjectName)" Command="" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
@@ -703,6 +721,7 @@
         <IncludePath Value="../../../External/7z"/>
         <IncludePath Value="../../Core/Include"/>
         <IncludePath Value="../../../kfont/include"/>
+        <IncludePath Value="../../../MeshMLLib/include"/>
         <Preprocessor Value="WIN64"/>
         <Preprocessor Value="NDEBUG"/>
         <Preprocessor Value="_USRDLL"/>
@@ -714,6 +733,7 @@
         <LibraryPath Value="../../../External/Python/libs/amd64"/>
         <LibraryPath Value="../../lib/win_x64"/>
         <LibraryPath Value="../../../kfont/lib/win_x64"/>
+        <LibraryPath Value="../../../MeshMLLib/lib/win_x64"/>
         <Library Value="boost_filesystem-mgw47-mt-1_51"/>
         <Library Value="boost_system-mgw47-mt-1_51"/>
         <Library Value="boost_signals-mgw47-mt-1_51"/>
@@ -723,6 +743,7 @@
         <Library Value="wsock32"/>
         <Library Value="python32"/>
         <Library Value="kfont_mgw_x64"/>
+        <Library Value="MeshMLLib_mgw_x64"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
       <General OutputFile="../../lib/win_x64/libKlayGE_Core_mgw.dll" IntermediateDirectory="Release/win_x64/$(ProjectName)" Command="" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
@@ -765,6 +786,7 @@
         <IncludePath Value="../../../External/7z"/>
         <IncludePath Value="../../Core/Include"/>
         <IncludePath Value="../../../kfont/include"/>
+        <IncludePath Value="../../../MeshMLLib/include"/>
         <Preprocessor Value="WIN32"/>
         <Preprocessor Value="NDEBUG"/>
         <Preprocessor Value="_USRDLL"/>
@@ -776,6 +798,7 @@
         <LibraryPath Value="../../../External/Python/libs"/>
         <LibraryPath Value="../../lib/win_x86"/>
         <LibraryPath Value="../../../kfont/lib/win_x86"/>
+        <LibraryPath Value="../../../MeshMLLib/lib/win_x86"/>
         <Library Value="boost_filesystem-mgw47-mt-1_51"/>
         <Library Value="boost_system-mgw47-mt-1_51"/>
         <Library Value="boost_signals-mgw47-mt-1_51"/>
@@ -785,6 +808,7 @@
         <Library Value="wsock32"/>
         <Library Value="python32"/>
         <Library Value="kfont_mgw_x86"/>
+        <Library Value="MeshMLLib_mgw_x86"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
       <General OutputFile="../../lib/win_x86/libKlayGE_Core_mgw.dll" IntermediateDirectory="Release/win_x86/$(ProjectName)" Command="" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
