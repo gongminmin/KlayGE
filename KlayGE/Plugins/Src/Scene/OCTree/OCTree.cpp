@@ -238,7 +238,6 @@ namespace KlayGE
 			size_t const this_size = octree_.size();
 			AABBox const & parent_bb = octree_[index].bb;
 			float3 const parent_center = parent_bb.Center();
-			float3 const new_extent = parent_bb.HalfSize() / 2.0f;
 			octree_[index].first_child_index = static_cast<int>(this_size);
 			octree_[index].visible = BO_No;
 
@@ -271,9 +270,9 @@ namespace KlayGE
 				new_node.bb = AABBox(float3((j & 1) ? parent_center.x() : parent_bb.Min().x(),
 						(j & 2) ? parent_center.y() : parent_bb.Min().y(),
 						(j & 4) ? parent_center.z() : parent_bb.Min().z()),
-					float3((j & 1) ? parent_center.x() : parent_bb.Max().x(),
-						(j & 2) ? parent_center.y() : parent_bb.Max().y(),
-						(j & 4) ? parent_center.z() : parent_bb.Max().z()));
+					float3((j & 1) ? parent_bb.Max().x() : parent_center.x(),
+						(j & 2) ? parent_bb.Max().y() : parent_center.y(),
+						(j & 4) ? parent_bb.Max().z() : parent_center.z()));
 
 				if (curr_depth < max_tree_depth_)
 				{
