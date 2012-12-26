@@ -260,8 +260,8 @@ def build_external_libs(compiler_name, compiler_version, compiler_arch, generato
 			subdir = "amd64/"
 		else:
 			subdir = ""
-		copy_to_dst("External/Python/DLLs/%spython32.%s" % (subdir, dll_suffix), dst_dir)
-		copy_to_dst("External/Python/DLLs/%spython32_d.%s" % (subdir, dll_suffix), dst_dir)
+		for fname in glob.iglob("External/Python/Dlls/%spython32*.%s" % (subdir, dll_suffix)):
+			copy_to_dst(fname, dst_dir)
 
 		if not os.path.exists("%sLib" % dst_dir):
 			os.mkdir("%sLib" % dst_dir)
