@@ -190,6 +190,9 @@ namespace MeshMLLib
 		{
 			return v + cross(quat.v(), cross(quat.v(), v) + quat.w() * v) * T(2);
 		}
+		
+		template <typename T>
+		Quaternion_T<T> to_quaternion(Matrix4_T<T> const & mat);
 
 		template <typename T>
 		void decompose(Vector_T<T, 3>& scale, Quaternion_T<T>& rot, Vector_T<T, 3>& trans, Matrix4_T<T> const & rhs)

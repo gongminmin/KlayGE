@@ -318,7 +318,6 @@ POINT TRIANGLE_OUT void SeparateBokehGS4(AttribArray<float3> in_clr : TEXCOORD0,
 void SeparateBokehGS4(point float3 in_clr[1] : TEXCOORD0, point float4 in_pos[1] : SV_Position, inout TriangleStream<PS_IN> out_stream)
 {
 #endif
-	static const float2 offset[4] = { float2(-1, -1), float2(+1, -1), float2(-1, +1), float2(+1, +1) };
 	if (in_pos[0].w > 0.5f)
 	{
 		float2 center_pos = in_pos[0].xy;
@@ -326,12 +325,14 @@ void SeparateBokehGS4(point float3 in_clr[1] : TEXCOORD0, point float4 in_pos[1]
 		[unroll]
 		for (int index = 0; index < 4; ++ index)
 		{
+			float2 offset = float2((index & 1) ? 1 : -1, (index & 2) ? -1 : 1);
+			
 			PS_IN gs_out;
 
-			gs_out.pos = float4(((center_pos + offset[index] * max_radius) * bokeh_width_height.zw) * 2 - 1, 0, 1);
+			gs_out.pos = float4(((center_pos + offset * max_radius) * bokeh_width_height.zw) * 2 - 1, 0, 1);
 			gs_out.pos.y *= KLAYGE_FLIPPING;
 			gs_out.clr = clr;
-			gs_out.tc = offset[index] * 0.5f + 0.5f;
+			gs_out.tc = offset * 0.5f + 0.5f;
 		
 #if KLAYGE_OPENGL
 			emitVertex(gs_out.tc : TEXCOORD0, gs_out.clr : TEXCOORD1, gs_out.pos : POSITION);

@@ -472,11 +472,11 @@ namespace KlayGE
 		}
 		if (desc.logic_op_enable[0])
 		{
-			glEnable(GL_LOGIC_OP_MODE);
+			glEnable(GL_COLOR_LOGIC_OP);
 		}
 		else
 		{
-			glDisable(GL_LOGIC_OP_MODE);
+			glDisable(GL_COLOR_LOGIC_OP);
 		}
 		glBlendEquationSeparate(OGLMapping::Mapping(desc.blend_op[0]), OGLMapping::Mapping(desc.blend_op_alpha[0]));
 		glBlendFuncSeparate(OGLMapping::Mapping(desc.src_blend[0]), OGLMapping::Mapping(desc.dest_blend[0]),
@@ -547,10 +547,8 @@ namespace KlayGE
 		}
 	}
 
-	void OGLSamplerStateObject::Active(uint32_t stage, TexturePtr const & texture)
+	void OGLSamplerStateObject::Active(TexturePtr const & texture)
 	{
-		OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-
 		OGLTexture& tex = *checked_cast<OGLTexture*>(texture.get());
 
 		tex.TexParameteri(GL_TEXTURE_WRAP_S, ogl_addr_mode_u_);
@@ -585,6 +583,6 @@ namespace KlayGE
 		}
 		tex.TexParameteri(GL_TEXTURE_COMPARE_FUNC, OGLMapping::Mapping(desc_.cmp_func));
 
-		re.MipMapLodBias(stage, desc_.mip_map_lod_bias);
+		tex.TexParameterf(GL_TEXTURE_LOD_BIAS, desc_.mip_map_lod_bias);
 	}
 }

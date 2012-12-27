@@ -88,7 +88,6 @@ namespace KlayGE
 
 		void AdjustPerspectiveMatrix(float4x4& pers_mat);
 
-		void MipMapLodBias(uint32_t stage, float bias);
 		void ActiveTexture(GLenum tex_unit);
 		void BindBuffer(GLenum target, GLuint buffer);
 		void DeleteBuffers(GLsizei n, GLuint const * buffers);
@@ -138,6 +137,10 @@ namespace KlayGE
 		{
 			return hack_for_ati_;
 		}
+		bool HackForIntel() const
+		{
+			return hack_for_intel_;
+		}
 
 	private:
 		void DoCreateRenderWindow(std::string const & name, RenderSettings const & settings);
@@ -178,7 +181,6 @@ namespace KlayGE
 		std::vector<char const *> so_vars_ptrs_;
 		std::vector<GLuint> so_buffs_;
 
-		std::vector<GLfloat> mip_map_lod_bias_;
 		GLenum active_tex_unit_;
 		std::map<GLenum, GLuint> binded_buffer_;
 
@@ -189,12 +191,13 @@ namespace KlayGE
 		std::set<ElementFormat> rendertarget_format_;
 		uint32_t max_samples_;
 
-		std::map<GLuint, std::vector<int4> > uniformi_cache_;
-		std::map<GLuint, std::vector<float4> > uniformf_cache_;
+		std::map<GLuint, std::map<GLint, int4> > uniformi_cache_;
+		std::map<GLuint, std::map<GLint, float4> > uniformf_cache_;
 		bool fb_srgb_cache_;
 
 		bool hack_for_nv_;
 		bool hack_for_ati_;
+		bool hack_for_intel_;
 	};
 
 	typedef boost::shared_ptr<OGLRenderEngine> OGLRenderEnginePtr;

@@ -974,7 +974,7 @@ namespace
 			if ((*samplers_)[stage_].first)
 			{
 				re.ActiveTexture(GL_TEXTURE0 + stage_);
-				checked_pointer_cast<OGLSamplerStateObject>((*samplers_)[stage_].second)->Active(stage_, (*samplers_)[stage_].first);
+				checked_pointer_cast<OGLSamplerStateObject>((*samplers_)[stage_].second)->Active((*samplers_)[stage_].first);
 				GLuint const tex_type = checked_pointer_cast<OGLTexture>((*samplers_)[stage_].first)->GLType();
 				GLuint const gl_tex = checked_pointer_cast<OGLTexture>((*samplers_)[stage_].first)->GLTexture();
 				glBindTexture(tex_type, gl_tex);
@@ -1364,7 +1364,7 @@ namespace KlayGE
 
 		case ST_PixelShader:
 			ss << predefined_varyings << std::endl;
-			if (glloader_GL_VERSION_3_1())
+			if (glloader_GL_VERSION_4_2())
 			{
 				ss << predefined_ps_out_varyings_add_num << std::endl;
 			}
@@ -1482,7 +1482,7 @@ namespace KlayGE
 						{
 							if ("gl_FragColor" == this_token)
 							{
-								if (glloader_GL_VERSION_3_1())
+								if (glloader_GL_VERSION_4_2())
 								{
 									ss << "v_gl_FragData_0";
 								}
@@ -1495,7 +1495,7 @@ namespace KlayGE
 							{
 								if ("gl_FragData" == this_token)
 								{
-									if (glloader_GL_VERSION_3_1())
+									if (glloader_GL_VERSION_4_2())
 									{
 										std::string tmp_token[3];
 										for (int t = 0; t < 3; ++ t)

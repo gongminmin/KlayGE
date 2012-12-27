@@ -166,7 +166,6 @@ namespace KlayGE
 			::SendMessage(::GetDlgItem(wnd, IDC_TANGENT_COMBO), CB_SETCURSEL, 0, 0);
 			::SendMessage(::GetDlgItem(wnd, IDC_TEXCOORD_CHECK), BM_SETCHECK, BST_CHECKED, NULL);
 			::SendMessage(::GetDlgItem(wnd, IDC_COMBINE_MESHES_CHECK), BM_SETCHECK, BST_UNCHECKED, NULL);
-			::SendMessage(::GetDlgItem(wnd, IDC_FULL_JOINT_MATRICES_CHECK), BM_SETCHECK, BST_UNCHECKED, NULL);
 		}
 		else
 		{
@@ -193,7 +192,6 @@ namespace KlayGE
 						eva.tangent_quat = (0 == ::SendMessage(::GetDlgItem(wnd, IDC_TANGENT_COMBO), CB_GETCURSEL, NULL, NULL));
 						eva.normal = (1 == ::SendMessage(::GetDlgItem(wnd, IDC_TANGENT_COMBO), CB_GETCURSEL, NULL, NULL));
 						eva.tex = (BST_CHECKED == ::SendMessage(::GetDlgItem(wnd, IDC_TEXCOORD_CHECK), BM_GETCHECK, NULL, NULL));
-						eva.full_joint_matrices = (BST_CHECKED == ::SendMessage(::GetDlgItem(wnd, IDC_FULL_JOINT_MATRICES_CHECK), BM_GETCHECK, NULL, NULL));
 
 						extractor.export_objects(instance->export_nodes_);
 						extractor.write_xml(instance->file_name_, eva);
