@@ -29,7 +29,7 @@
 #include <KlayGE/PreDeclare.hpp>
 
 #include <KlayGE/Renderable.hpp>
-#include <KlayGE/Frustum.hpp>
+#include <KFL/Frustum.hpp>
 
 #include <vector>
 

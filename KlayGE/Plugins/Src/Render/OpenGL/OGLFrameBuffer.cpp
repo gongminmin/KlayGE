@@ -14,16 +14,16 @@
 /////////////////////////////////////////////////////////////////////////////////
 
 #include <KlayGE/KlayGE.hpp>
-#include <KlayGE/ThrowErr.hpp>
-#include <KlayGE/Math.hpp>
+#include <KFL/ThrowErr.hpp>
+#include <KFL/Math.hpp>
 #include <KlayGE/Context.hpp>
 #include <KlayGE/Texture.hpp>
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/RenderEngine.hpp>
-#include <KlayGE/Math.hpp>
+#include <KFL/Math.hpp>
 #include <KlayGE/FrameBuffer.hpp>
-#include <KlayGE/Util.hpp>
-#include <KlayGE/Color.hpp>
+#include <KFL/Util.hpp>
+#include <KFL/Color.hpp>
 
 #include <glloader/glloader.h>
 

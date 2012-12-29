@@ -1,11 +1,11 @@
 #include <KlayGE/KlayGE.hpp>
-#include <KlayGE/Util.hpp>
-#include <KlayGE/Timer.hpp>
+#include <KFL/Util.hpp>
+#include <KFL/Timer.hpp>
 #include <KlayGE/Context.hpp>
-#include <KlayGE/ResLoader.hpp>
+#include <KFL/ResLoader.hpp>
 #include <KlayGE/Texture.hpp>
 #include <KlayGE/Mesh.hpp>
-#include <KlayGE/Math.hpp>
+#include <KFL/Math.hpp>
 #include <KlayGE/App3D.hpp>
 #include <KlayGE/RenderFactory.hpp>
 

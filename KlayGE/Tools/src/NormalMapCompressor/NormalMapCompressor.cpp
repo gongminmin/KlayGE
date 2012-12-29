@@ -1,9 +1,9 @@
 #include <KlayGE/KlayGE.hpp>
-#include <KlayGE/Util.hpp>
+#include <KFL/Util.hpp>
 #include <KlayGE/Context.hpp>
-#include <KlayGE/ResLoader.hpp>
+#include <KFL/ResLoader.hpp>
 #include <KlayGE/Texture.hpp>
-#include <KlayGE/Math.hpp>
+#include <KFL/Math.hpp>
 #include <KlayGE/BlockCompression.hpp>
 
 #include <iostream>

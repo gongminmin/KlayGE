@@ -2,7 +2,7 @@
 #define _OCEAN_SIMULATOR_HPP
 
 #include <KlayGE/PreDeclare.hpp>
-#include <KlayGE/Math.hpp>
+#include <KFL/Math.hpp>
 
 namespace KlayGE
 {

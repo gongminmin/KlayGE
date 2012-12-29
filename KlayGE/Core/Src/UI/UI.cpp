@@ -14,8 +14,8 @@
 /////////////////////////////////////////////////////////////////////////////////
 
 #include <KlayGE/KlayGE.hpp>
-#include <KlayGE/Math.hpp>
-#include <KlayGE/Util.hpp>
+#include <KFL/Math.hpp>
+#include <KFL/Util.hpp>
 #include <KlayGE/App3D.hpp>
 #include <KlayGE/Window.hpp>
 #include <KlayGE/Font.hpp>
@@ -27,9 +27,9 @@
 #include <KlayGE/FrameBuffer.hpp>
 #include <KlayGE/InputFactory.hpp>
 #include <KlayGE/Context.hpp>
-#include <KlayGE/ResLoader.hpp>
+#include <KFL/ResLoader.hpp>
 #include <KlayGE/SceneObjectHelper.hpp>
-#include <KlayGE/XMLDom.hpp>
+#include <KFL/XMLDom.hpp>
 #include <KlayGE/Font.hpp>
 
 #include <KlayGE/Input.hpp>

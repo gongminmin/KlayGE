@@ -16,74 +16,6 @@ namespace KlayGE
 {
 	struct ContextCfg;
 	class Context;
-	class ResIdentifier;
-	typedef boost::shared_ptr<ResIdentifier> ResIdentifierPtr;
-	class ResLoadingDesc;
-	typedef boost::shared_ptr<ResLoadingDesc> ResLoadingDescPtr;
-	class ResLoader;
-
-	class XMLDocument;
-	typedef boost::shared_ptr<XMLDocument> XMLDocumentPtr;
-	class XMLNode;
-	typedef boost::shared_ptr<XMLNode> XMLNodePtr;
-	class XMLAttribute;
-	typedef boost::shared_ptr<XMLAttribute> XMLAttributePtr;
-
-	class half;
-	template <typename T, int N>
-	class Vector_T;
-	typedef Vector_T<int32_t, 1> int1;
-	typedef Vector_T<int32_t, 2> int2;
-	typedef Vector_T<int32_t, 3> int3;
-	typedef Vector_T<int32_t, 4> int4;
-	typedef Vector_T<uint32_t, 1> uint1;
-	typedef Vector_T<uint32_t, 2> uint2;
-	typedef Vector_T<uint32_t, 3> uint3;
-	typedef Vector_T<uint32_t, 4> uint4;
-	typedef Vector_T<float, 1> float1;
-	typedef Vector_T<float, 2> float2;
-	typedef Vector_T<float, 3> float3;
-	typedef Vector_T<float, 4> float4;
-	template <typename T>
-	class Matrix4_T;
-	typedef Matrix4_T<float> float4x4;
-	template <typename T>
-	class Quaternion_T;
-	typedef Quaternion_T<float> Quaternion;
-	template <typename T>
-	class Plane_T;
-	typedef Plane_T<float> Plane;
-	template <typename T>
-	class Color_T;
-	typedef Color_T<float> Color;
-	template <typename T>
-	class Size_T;
-	typedef Size_T<float> Size;
-	typedef boost::shared_ptr<Size> SizePtr;
-	template <typename T>
-	class Rect_T;
-	typedef Rect_T<float> Rect;
-	typedef boost::shared_ptr<Rect> RectPtr;
-	template <typename T>
-	class Bound_T;
-	typedef Bound_T<float> Bound;
-	typedef boost::shared_ptr<Bound> BoundPtr;
-	template <typename T>
-	class Sphere_T;
-	typedef Sphere_T<float> Sphere;
-	typedef boost::shared_ptr<Sphere> SpherePtr;
-	template <typename T>
-	class AABBox_T;
-	typedef AABBox_T<float> AABBox;
-	typedef boost::shared_ptr<AABBox> AABBoxPtr;
-	template <typename T>
-	class Frustum_T;
-	typedef Frustum_T<float> Frustum;
-	typedef boost::shared_ptr<Frustum> FrustumPtr;
-	template <typename T>
-	class OBBox_T;
-	typedef OBBox_T<float> OBBox;
-	typedef boost::shared_ptr<OBBox> OBBoxPtr;
 
 	class SceneManager;
 	typedef boost::shared_ptr<SceneManager> SceneManagerPtr;
@@ -361,8 +293,6 @@ namespace KlayGE
 	class ScriptModule;
 	class RegisterModule;
 	class ScriptEngine;
-
-	class LZMACodec;
 }
 
 #endif			// _PREDECLARE_HPP

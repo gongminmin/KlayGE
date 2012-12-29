@@ -4,7 +4,7 @@
  *
  * @section DESCRIPTION
  *
- * This source file is part of KlayGE's subproject MeshMLLib
+ * This source file is part of MeshMLLib, a subproject of KlayGE
  * For the latest info, see http://www.klayge.org
  *
  * @section LICENSE
@@ -28,8 +28,8 @@
  * from http://www.klayge.org/licensing/.
  */
 
-#ifndef _MESHMLLIB_HPP
-#define _MESHMLLIB_HPP
+#ifndef _MESHMLLIB_MESHMLLIB_HPP
+#define _MESHMLLIB_MESHMLLIB_HPP
 
 #pragma once
 
@@ -38,24 +38,12 @@
 #include <map>
 #include <iostream>
 
-#include <KlayGE/Vector.hpp>
-#include <KlayGE/Quaternion.hpp>
+#include <KFL/Vector.hpp>
+#include <KFL/Quaternion.hpp>
+#include <KFL/Matrix.hpp>
 
 namespace KlayGE
 {
-	template <typename T>
-	class Matrix4_T;
-	typedef Matrix4_T<float> float4x4;
-}
-
-namespace MeshMLLib
-{
-	using KlayGE::float2;
-	using KlayGE::float3;
-	using KlayGE::float4;
-	using KlayGE::float4x4;
-	using KlayGE::Quaternion;
-
 	class MeshMLObj
 	{
 	public:
@@ -245,4 +233,4 @@ namespace MeshMLLib
 	};
 }
 
-#endif  // _MESHMLLIB_HPP
+#endif  // _MESHMLLIB_MESHMLLIB_HPP

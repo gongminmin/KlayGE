@@ -24,14 +24,14 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 #include <KlayGE/KlayGE.hpp>
-#include <KlayGE/Util.hpp>
+#include <KFL/Util.hpp>
 #include <KlayGE/Context.hpp>
 #include <KlayGE/InputFactory.hpp>
-#include <KlayGE/Math.hpp>
-#include <KlayGE/Color.hpp>
+#include <KFL/Math.hpp>
+#include <KFL/Color.hpp>
 #include <KlayGE/UI.hpp>
 #include <KlayGE/Camera.hpp>
-#include <KlayGE/XMLDom.hpp>
+#include <KFL/XMLDom.hpp>
 #include <KlayGE/App3D.hpp>
 
 #include <sstream>

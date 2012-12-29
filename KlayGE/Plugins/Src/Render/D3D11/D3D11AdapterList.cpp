@@ -11,9 +11,9 @@
 /////////////////////////////////////////////////////////////////////////////////
 
 #include <KlayGE/KlayGE.hpp>
-#include <KlayGE/Util.hpp>
-#include <KlayGE/ThrowErr.hpp>
-#include <KlayGE/COMPtr.hpp>
+#include <KFL/Util.hpp>
+#include <KFL/ThrowErr.hpp>
+#include <KFL/COMPtr.hpp>
 
 #include <vector>
 #include <boost/assert.hpp>

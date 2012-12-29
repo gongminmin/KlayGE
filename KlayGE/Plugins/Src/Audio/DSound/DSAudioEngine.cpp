@@ -12,8 +12,8 @@
 
 #include <KlayGE/KlayGE.hpp>
 #define INITGUID
-#include <KlayGE/COMPtr.hpp>
-#include <KlayGE/ThrowErr.hpp>
+#include <KFL/COMPtr.hpp>
+#include <KFL/ThrowErr.hpp>
 #include <KlayGE/AudioDataSource.hpp>
 
 #include <cmath>

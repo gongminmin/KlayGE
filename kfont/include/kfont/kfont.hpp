@@ -1,49 +1,41 @@
-#ifndef _KFONT_HPP
-#define _KFONT_HPP
+/**
+ * @file kfont.hpp
+ * @author Minmin Gong
+ *
+ * @section DESCRIPTION
+ *
+ * This source file is part of kfont, a subproject of KlayGE
+ * For the latest info, see http://www.klayge.org
+ *
+ * @section LICENSE
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published
+ * by the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ * You may alternatively use this source under the terms of
+ * the KlayGE Proprietary License (KPL). You can obtained such a license
+ * from http://www.klayge.org/licensing/.
+ */
+
+#ifndef _KFONT_KFONT_HPP
+#define _KFONT_KFONT_HPP
 
 #pragma once
-
-#if defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
-	#define KFONT_PLATFORM_WINDOWS
-
-	#ifndef NOMINMAX
-		#define NOMINMAX
-	#endif
-
-	// Forces all boost's libraries to be linked as dll
-	#ifndef BOOST_ALL_DYN_LINK
-		#define BOOST_ALL_DYN_LINK
-	#endif
-
-	#if defined(__MINGW32__)
-		#define KLAYGE_COMPILER_NAME mgw
-		#include <_mingw.h>
-	#else
-		#include <sdkddkver.h>
-	#endif
-
-	#if (_WIN32_WINNT >= 0x0602 /*_WIN32_WINNT_WIN8*/)
-		#include <winapifamily.h>
-		#if WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_DESKTOP)
-			#define KFONT_PLATFORM_WINDOWS_DESKTOP
-		#else
-			#define KFONT_PLATFORM_WINDOWS_METRO
-		#endif
-	#else
-		#define KFONT_PLATFORM_WINDOWS_DESKTOP
-	#endif
-#elif defined(__ANDROID__)
-	#define KFONT_PLATFORM_ANDROID
-#endif
 
 #include <vector>
 #include <istream>
 
-#ifdef KFONT_PLATFORM_WINDOWS
-#include <windows.h>
-#endif
-
-#include <boost/cstdint.hpp>
 #if defined(_MSC_VER)
 #pragma warning(push)
 #pragma warning(disable: 4100 6011 6334)
@@ -63,87 +55,21 @@
 #pragma warning(pop)
 #endif
 
-#if defined(DEBUG) | defined(_DEBUG)
-    #define KFONT_DEBUG
-#endif
-
-#if defined(_MSC_VER)
-	#define KFONT_HAS_DECLSPEC
-
-	#if _MSC_VER >= 1400
-		#pragma warning(disable: 4251 4275 4819)
-
-		#ifndef _CRT_SECURE_NO_DEPRECATE
-			#define _CRT_SECURE_NO_DEPRECATE
-		#endif
-		#ifndef _SCL_SECURE_NO_DEPRECATE
-			#define _SCL_SECURE_NO_DEPRECATE
-		#endif
-	#endif
-
+#ifdef KLAYGE_COMPILER_MSVC
 	#ifndef KFONT_SOURCE
-		#ifdef KFONT_PLATFORM_WINDOWS_DESKTOP
-			#if defined(_M_X64)
-				#if defined(KFONT_DEBUG)
-					#pragma comment(lib, "kfont_vc_x64_d.lib")
-				#else
-					#pragma comment(lib, "kfont_vc_x64.lib")
-				#endif
-			#elif(_M_IX86)
-				#if defined(KFONT_DEBUG)
-					#pragma comment(lib, "kfont_vc_x86_d.lib")
-				#else
-					#pragma comment(lib, "kfont_vc_x86.lib")
-				#endif
-			#endif
+		#ifdef KLAYGE_DEBUG
+		#define LIB_FILE_NAME "kfont_" KFL_STRINGIZE(KLAYGE_COMPILER_NAME) "_" KFL_STRINGIZE(KLAYGE_COMPILER_TARGET) "_d.lib"
 		#else
-			#if defined(_M_X64)
-				#if defined(KFONT_DEBUG)
-					#pragma comment(lib, "kfont_vc_x64_app_d.lib")
-				#else
-					#pragma comment(lib, "kfont_vc_x64_app.lib")
-				#endif
-			#elif(_M_IX86)
-				#if defined(KFONT_DEBUG)
-					#pragma comment(lib, "kfont_vc_x86_app_d.lib")
-				#else
-					#pragma comment(lib, "kfont_vc_x86_app.lib")
-				#endif
-			#elif(_M_ARM)
-				#if defined(KFONT_DEBUG)
-					#pragma comment(lib, "kfont_vc_arm_app_d.lib")
-				#else
-					#pragma comment(lib, "kfont_vc_arm_app.lib")
-				#endif
-			#endif
+		#define LIB_FILE_NAME "kfont_" KFL_STRINGIZE(KLAYGE_COMPILER_NAME) "_" KFL_STRINGIZE(KLAYGE_COMPILER_TARGET) ".lib"
 		#endif
-	#endif
-#endif
 
-// Defines the native endian
-#if defined(_M_ARM) || defined(__arm__)
-	#ifdef __ARMEB__
-		#define KFONT_BIG_ENDIAN
-	#else
-		#define KFONT_LITTLE_ENDIAN
-	#endif
-#elif defined(_M_IX86) || defined(_M_X64) || defined(KFONT_PLATFORM_WINDOWS) || defined(__x86_64__) || defined(__i386__)
-	#define KFONT_LITTLE_ENDIAN
-#else
-	#define KFONT_BIG_ENDIAN
-#endif
+		#pragma comment(lib, LIB_FILE_NAME)
+		//#pragma message("Linking to lib file: " LIB_FILE_NAME)
+		#undef LIB_FILE_NAME
+	#endif	// KFONT_SOURCE
+#endif	// KLAYGE_COMPILER_MSVC
 
-#if defined(KFONT_PLATFORM_WINDOWS)
-	#if !defined(__GNUC__) && !defined(KFONT_HAS_DECLSPEC)
-		#define KFONT_HAS_DECLSPEC
-	#endif
-
-	#if defined(__MINGW32__)
-		#define KFONT_HAS_DECLSPEC
-	#endif
-#endif
-
-#ifdef KFONT_HAS_DECLSPEC
+#ifdef KLAYGE_HAS_DECLSPEC
 	#ifdef KFONT_SOURCE		// Build dll
 		#define KFONT_API __declspec(dllexport)
 	#else							// Use dll
@@ -153,30 +79,9 @@
 	#define KFONT_API
 #endif // KFONT_HAS_DECLSPEC
 
-#if defined(__GNUC__) || defined(_MSC_VER)
-	#define KFONT_HAS_STRUCT_PACK
-#endif
-
 namespace KlayGE
 {
-#ifdef _MSC_VER
-	#ifndef _WCHAR_T_DEFINED
-		typedef unsigned short		wchar_t;
-		#define _WCHAR_T_DEFINED
-	#endif		// _WCHAR_T_DEFINED
-#endif
-
-	using boost::uint64_t;
-	using boost::uint32_t;
-	using boost::uint16_t;
-	using boost::uint8_t;
-
-	using boost::int64_t;
-	using boost::int32_t;
-	using boost::int16_t;
-	using boost::int8_t;
-
-#ifdef KFONT_HAS_STRUCT_PACK
+#ifdef KLAYGE_HAS_STRUCT_PACK
 	#pragma pack(push, 1)
 #endif
 	struct kfont_header
@@ -191,14 +96,14 @@ namespace KlayGE
 		int16_t base;
 		int16_t scale;
 	};
-#ifdef KFONT_HAS_STRUCT_PACK
+#ifdef KLAYGE_HAS_STRUCT_PACK
 	#pragma pack(pop)
 #endif
 
 	class KFONT_API KFont
 	{
 	public:
-#ifdef KFONT_HAS_STRUCT_PACK
+#ifdef KLAYGE_HAS_STRUCT_PACK
 	#pragma pack(push, 1)
 #endif
 		struct font_info
@@ -208,7 +113,7 @@ namespace KlayGE
 			uint16_t width;
 			uint16_t height;
 		};
-#ifdef KFONT_HAS_STRUCT_PACK
+#ifdef KLAYGE_HAS_STRUCT_PACK
 	#pragma pack(pop)
 #endif
 
@@ -250,4 +155,4 @@ namespace KlayGE
 	};
 }
 
-#endif		// _KFONT_HPP
+#endif		// _KFONT_KFONT_HPP

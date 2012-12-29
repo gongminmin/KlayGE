@@ -27,7 +27,7 @@
 #include <KlayGE/PreDeclare.hpp>
 #include <KlayGE/SceneNode.hpp>
 #include <KlayGE/SceneManager.hpp>
-#include <KlayGE/AABBox.hpp>
+#include <KFL/AABBox.hpp>
 
 #ifdef KLAYGE_COMPILER_MSVC
 #pragma warning(push)

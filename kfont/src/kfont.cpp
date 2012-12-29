@@ -1,3 +1,34 @@
+/**
+ * @file kfont.cpp
+ * @author Minmin Gong
+ *
+ * @section DESCRIPTION
+ *
+ * This source file is part of kfont, a subproject of KlayGE
+ * For the latest info, see http://www.klayge.org
+ *
+ * @section LICENSE
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published
+ * by the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ * You may alternatively use this source under the terms of
+ * the KlayGE Proprietary License (KPL). You can obtained such a license
+ * from http://www.klayge.org/licensing/.
+ */
+
+#include <KFL/KFL.hpp>
 #include <kfont/kfont.hpp>
 
 #include <fstream>
@@ -5,12 +36,10 @@
 #include <algorithm>
 
 #include <boost/assert.hpp>
-#include <boost/typeof/typeof.hpp>
-#include <boost/foreach.hpp>
 
 #include <C/LzmaLib.h>
 
-#ifdef KFONT_PLATFORM_WINDOWS
+#ifdef KLAYGE_PLATFORM_WINDOWS
 #include <windows.h>
 #else
 #include <dlfcn.h>
@@ -127,9 +156,9 @@ namespace KlayGE
 	private:
 		LZMALoader()
 		{
-#ifndef KFONT_PLATFORM_ANDROID
-#ifdef KFONT_PLATFORM_WINDOWS
-#ifdef KFONT_PLATFORM_WINDOWS_DESKTOP
+#ifndef KLAYGE_PLATFORM_ANDROID
+#ifdef KLAYGE_PLATFORM_WINDOWS
+#ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
 			dll_handle_ = static_cast<void*>(::LoadLibraryA("LZMA.dll"));
 #else
 			dll_handle_ = static_cast<void*>(::LoadPackagedLibrary(L"LZMA.dll", 0));
@@ -148,17 +177,11 @@ namespace KlayGE
 		}
 
 	private:
-#ifndef KFONT_PLATFORM_ANDROID
+#ifndef KLAYGE_PLATFORM_ANDROID
 		void* dll_handle_;
 		LzmaCompressFunc lzmaCompressFunc_;
 		LzmaUncompressFunc lzmaUncompressFunc_;
 #endif
-	};
-
-	template <unsigned char ch0, unsigned char ch1, unsigned char ch2, unsigned char ch3>
-	struct MakeFourCC
-	{
-		enum { value = (ch0 << 0) + (ch1 << 8) + (ch2 << 16) + (ch3 << 24) };
 	};
 
 	KFont::KFont()
@@ -199,21 +222,21 @@ namespace KlayGE
 				std::vector<std::pair<int32_t, uint32_t> > temp_char_advance(header.validate_chars);
 				kfont_input.read(reinterpret_cast<char*>(&temp_char_advance[0]), static_cast<std::streamsize>(temp_char_advance.size() * sizeof(temp_char_advance[0])));
 
-				typedef BOOST_TYPEOF(temp_char_index) TCIType;
-				BOOST_FOREACH(TCIType::reference ci, temp_char_index)
+				typedef KLAYGE_DECLTYPE(temp_char_index) TCIType;
+				KLAYGE_FOREACH(TCIType::reference ci, temp_char_index)
 				{
 					LittleEndianToNative<sizeof(ci.first)>(&ci.first);
 					LittleEndianToNative<sizeof(ci.second)>(&ci.second);
 
 					char_index_advance_.insert(std::make_pair(ci.first, std::make_pair(ci.second, 0)));
 				}
-				typedef BOOST_TYPEOF(temp_char_advance) TCAType;
-				BOOST_FOREACH(TCAType::reference ca, temp_char_advance)
+				typedef KLAYGE_DECLTYPE(temp_char_advance) TCAType;
+				KLAYGE_FOREACH(TCAType::reference ca, temp_char_advance)
 				{
 					LittleEndianToNative<sizeof(ca.first)>(&ca.first);
 					LittleEndianToNative<sizeof(ca.second)>(&ca.second);
 
-					BOOST_AUTO(iter, char_index_advance_.find(ca.first));
+					KLAYGE_AUTO(iter, char_index_advance_.find(ca.first));
 					if (iter != char_index_advance_.end())
 					{
 						iter->second.second = ca.second;
@@ -227,8 +250,8 @@ namespace KlayGE
 				char_info_.resize(header.non_empty_chars);
 				kfont_input.read(reinterpret_cast<char*>(&char_info_[0]), static_cast<std::streamsize>(char_info_.size() * sizeof(char_info_[0])));
 
-				typedef BOOST_TYPEOF(char_info_) CIType;
-				BOOST_FOREACH(CIType::reference ci, char_info_)
+				typedef KLAYGE_DECLTYPE(char_info_) CIType;
+				KLAYGE_FOREACH(CIType::reference ci, char_info_)
 				{
 					LittleEndianToNative<sizeof(ci.left)>(&ci.left);
 					LittleEndianToNative<sizeof(ci.top)>(&ci.top);
@@ -288,8 +311,8 @@ namespace KlayGE
 			kfont_output.write(reinterpret_cast<char*>(&header), sizeof(header));
 
 			std::vector<int32_t> chars;
-			typedef BOOST_TYPEOF(char_index_advance_) CIAType;
-			BOOST_FOREACH(CIAType::reference cia, char_index_advance_)
+			typedef KLAYGE_DECLTYPE(char_index_advance_) CIAType;
+			KLAYGE_FOREACH(CIAType::reference cia, char_index_advance_)
 			{
 				chars.push_back(cia.first);
 			}
@@ -297,8 +320,8 @@ namespace KlayGE
 
 			std::vector<std::pair<int32_t, int32_t> > temp_char_index;
 			std::vector<std::pair<int32_t, uint32_t> > temp_char_advance;
-			typedef BOOST_TYPEOF(chars) CharsType;
-			BOOST_FOREACH(CharsType::reference ch, chars)
+			typedef KLAYGE_DECLTYPE(chars) CharsType;
+			KLAYGE_FOREACH(CharsType::reference ch, chars)
 			{
 				std::pair<int32_t, uint32_t> const & ci = char_index_advance_[ch];
 
@@ -311,8 +334,8 @@ namespace KlayGE
 			BOOST_ASSERT(temp_char_index.size() == char_info_.size());
 			BOOST_ASSERT(temp_char_advance.size() == char_index_advance_.size());
 
-			typedef BOOST_TYPEOF(temp_char_index) TCIType;
-			BOOST_FOREACH(TCIType::reference ci, temp_char_index)
+			typedef KLAYGE_DECLTYPE(temp_char_index) TCIType;
+			KLAYGE_FOREACH(TCIType::reference ci, temp_char_index)
 			{
 				TCIType::value_type tci = ci;
 				NativeToLittleEndian<sizeof(tci.first)>(&tci.first);
@@ -320,8 +343,8 @@ namespace KlayGE
 
 				kfont_output.write(reinterpret_cast<char*>(&tci), sizeof(tci));
 			}
-			typedef BOOST_TYPEOF(temp_char_advance) TCAType;
-			BOOST_FOREACH(TCAType::reference ca, temp_char_advance)
+			typedef KLAYGE_DECLTYPE(temp_char_advance) TCAType;
+			KLAYGE_FOREACH(TCAType::reference ca, temp_char_advance)
 			{
 				TCAType::value_type tca = ca;
 				NativeToLittleEndian<sizeof(tca.first)>(&tca.first);
@@ -382,7 +405,7 @@ namespace KlayGE
 
 	std::pair<int32_t, uint32_t> const & KFont::CharIndexAdvance(wchar_t ch) const
 	{
-		BOOST_AUTO(iter, char_index_advance_.find(ch));
+		KLAYGE_AUTO(iter, char_index_advance_.find(ch));
 		if (iter != char_index_advance_.end())
 		{
 			return iter->second;
@@ -496,8 +519,8 @@ namespace KlayGE
 	void KFont::Compact()
 	{
 		std::vector<int32_t> chars;
-		typedef BOOST_TYPEOF(char_index_advance_) CIAType;
-		BOOST_FOREACH(CIAType::reference cia, char_index_advance_)
+		typedef KLAYGE_DECLTYPE(char_index_advance_) CIAType;
+		KLAYGE_FOREACH(CIAType::reference cia, char_index_advance_)
 		{
 			chars.push_back(cia.first);
 		}
@@ -508,8 +531,8 @@ namespace KlayGE
 		std::vector<font_info> new_char_info;
 		std::vector<size_t> new_distances_addr;
 		std::vector<uint8_t> new_distances_lzma;
-		typedef BOOST_TYPEOF(chars) CharsType;
-		BOOST_FOREACH(CharsType::reference ch, chars)
+		typedef KLAYGE_DECLTYPE(chars) CharsType;
+		KLAYGE_FOREACH(CharsType::reference ch, chars)
 		{
 			std::pair<int32_t, uint32_t> const & ci = char_index_advance_[ch];
 			int32_t new_ci;

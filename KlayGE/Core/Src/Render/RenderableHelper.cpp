@@ -26,8 +26,8 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 #include <KlayGE/KlayGE.hpp>
-#include <KlayGE/Math.hpp>
-#include <KlayGE/Util.hpp>
+#include <KFL/Math.hpp>
+#include <KFL/Util.hpp>
 #include <KlayGE/GraphicsBuffer.hpp>
 #include <KlayGE/RenderEffect.hpp>
 #include <KlayGE/Context.hpp>

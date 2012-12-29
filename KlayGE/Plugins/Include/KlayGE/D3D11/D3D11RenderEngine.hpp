@@ -21,8 +21,8 @@
 
 #pragma once
 
-#include <KlayGE/Vector.hpp>
-#include <KlayGE/Color.hpp>
+#include <KFL/Vector.hpp>
+#include <KFL/Color.hpp>
 
 #include <KlayGE/D3D11/D3D11MinGWDefs.hpp>
 #include <D3D11Shader.h>

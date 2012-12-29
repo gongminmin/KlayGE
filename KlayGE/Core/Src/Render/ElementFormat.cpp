@@ -34,8 +34,8 @@
 
 #include <boost/assert.hpp>
 
-#include <KlayGE/Math.hpp>
-#include <KlayGE/half.hpp>
+#include <KFL/Math.hpp>
+#include <KFL/Half.hpp>
 
 namespace KlayGE
 {

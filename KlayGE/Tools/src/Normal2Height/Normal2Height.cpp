@@ -1,6 +1,6 @@
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/Context.hpp>
-#include <KlayGE/Math.hpp>
+#include <KFL/Math.hpp>
 #include <KlayGE/Texture.hpp>
 #include <KlayGE/BlockCompression.hpp>
 

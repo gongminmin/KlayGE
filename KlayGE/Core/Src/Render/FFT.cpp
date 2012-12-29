@@ -11,11 +11,11 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 #include <KlayGE/KlayGE.hpp>
-#include <KlayGE/ResLoader.hpp>
+#include <KFL/ResLoader.hpp>
 #include <KlayGE/PostProcess.hpp>
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/RenderEngine.hpp>
-#include <KlayGE/half.hpp>
+#include <KFL/Half.hpp>
 #include <KlayGE/RenderEffect.hpp>
 #include <KlayGE/FrameBuffer.hpp>
 

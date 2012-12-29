@@ -5,6 +5,7 @@ from __future__ import print_function
 import os, sys
 from build_external import build_external_libs
 from blib_util import *
+from build_KFL import *
 from build_glloader import *
 from build_kfont import *
 from build_MeshMLLib import *
@@ -33,6 +34,10 @@ if __name__ == "__main__":
 	print("Building external libs...")
 	for arch in compiler_info[2]:
 		build_external_libs(compiler_info[0], compiler_info[1], arch[0], arch[1], compiler_info[3], compiler_info[4])
+
+	print("Building KFL...")
+	for arch in compiler_info[2]:
+		build_KFL(compiler_info[0], compiler_info[1], arch[0], arch[1], compiler_info[3])
 
 	print("Building glloader...")
 	for arch in compiler_info[2]:

@@ -14,7 +14,7 @@
 /////////////////////////////////////////////////////////////////////////////////
 
 #include <KlayGE/KlayGE.hpp>
-#include <KlayGE/Util.hpp>
+#include <KFL/Util.hpp>
 #include <KlayGE/InputFactory.hpp>
 
 #include <KlayGE/DInput/DInput.hpp>

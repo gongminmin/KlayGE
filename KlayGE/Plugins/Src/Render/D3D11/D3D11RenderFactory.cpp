@@ -11,8 +11,8 @@
 /////////////////////////////////////////////////////////////////////////////////
 
 #include <KlayGE/KlayGE.hpp>
-#include <KlayGE/Util.hpp>
-#include <KlayGE/Math.hpp>
+#include <KFL/Util.hpp>
+#include <KFL/Math.hpp>
 
 #include <KlayGE/D3D11/D3D11RenderEngine.hpp>
 #include <KlayGE/D3D11/D3D11Texture.hpp>

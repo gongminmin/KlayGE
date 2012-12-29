@@ -45,14 +45,14 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 #include <KlayGE/KlayGE.hpp>
-#include <KlayGE/Util.hpp>
-#include <KlayGE/ResLoader.hpp>
+#include <KFL/Util.hpp>
+#include <KFL/ResLoader.hpp>
 #include <KlayGE/Context.hpp>
-#include <KlayGE/Math.hpp>
+#include <KFL/Math.hpp>
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/RenderStateObject.hpp>
 #include <KlayGE/ShaderObject.hpp>
-#include <KlayGE/XMLDom.hpp>
+#include <KFL/XMLDom.hpp>
 
 #include <sstream>
 #include <fstream>

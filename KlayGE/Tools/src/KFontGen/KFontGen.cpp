@@ -1,13 +1,13 @@
 #include <KlayGE/KlayGE.hpp>
-#include <KlayGE/Util.hpp>
-#include <KlayGE/Timer.hpp>
-#include <KlayGE/Math.hpp>
-#include <KlayGE/thread.hpp>
-#include <KlayGE/CpuInfo.hpp>
-#include <KlayGE/ResLoader.hpp>
-#include <KlayGE/LZMACodec.hpp>
-#include <KlayGE/aligned_allocator.hpp>
-#include <KlayGE/atomic.hpp>
+#include <KFL/Util.hpp>
+#include <KFL/Timer.hpp>
+#include <KFL/Math.hpp>
+#include <KFL/Thread.hpp>
+#include <KFL/CpuInfo.hpp>
+#include <KFL/ResLoader.hpp>
+#include <KFL/LZMACodec.hpp>
+#include <KFL/AlignedAllocator.hpp>
+#include <KFL/Atomic.hpp>
 
 #include <kfont/kfont.hpp>
 
@@ -37,7 +37,7 @@
 #include FT_STROKER_H
 
 #ifdef KLAYGE_COMPILER_MSVC
-#define FREETYPE_VER_STR KLAYGE_STRINGIZE(FREETYPE_MAJOR)KLAYGE_STRINGIZE(FREETYPE_MINOR)KLAYGE_STRINGIZE(FREETYPE_PATCH)
+#define FREETYPE_VER_STR KFL_STRINGIZE(FREETYPE_MAJOR)KFL_STRINGIZE(FREETYPE_MINOR)KFL_STRINGIZE(FREETYPE_PATCH)
 
 #ifdef KLAYGE_DEBUG
 #define FREETYPE_DBG_SUFFIX "_D"
@@ -45,7 +45,7 @@
 #define FREETYPE_DBG_SUFFIX ""
 #endif
 
-#define FREETYPE_LIB_STR KLAYGE_STRINGIZE("freetype")KLAYGE_STRINGIZE(FREETYPE_VER_STR)KLAYGE_STRINGIZE(FREETYPE_DBG_SUFFIX)KLAYGE_STRINGIZE(".lib")
+#define FREETYPE_LIB_STR "freetype"KFL_STRINGIZE(FREETYPE_VER_STR)KFL_STRINGIZE(FREETYPE_DBG_SUFFIX)".lib"
 
 #pragma comment(lib, FREETYPE_LIB_STR)
 #endif

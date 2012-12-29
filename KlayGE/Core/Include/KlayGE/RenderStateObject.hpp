@@ -32,7 +32,7 @@
 #pragma warning(pop)
 #endif
 
-#include <KlayGE/Color.hpp>
+#include <KFL/Color.hpp>
 
 namespace KlayGE
 {

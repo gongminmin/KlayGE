@@ -36,7 +36,7 @@
 #endif
 #include <boost/date_time/date_defs.hpp>
 
-#include <KlayGE/thread.hpp>
+#include <KFL/Thread.hpp>
 #include <KlayGE/Socket.hpp>
 
 #ifndef KLAYGE_PLATFORM_WINDOWS_METRO

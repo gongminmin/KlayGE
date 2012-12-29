@@ -11,7 +11,7 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 #include <KlayGE/KlayGE.hpp>
-#include <KlayGE/ResLoader.hpp>
+#include <KFL/ResLoader.hpp>
 #include <KlayGE/App3D.hpp>
 #include <KlayGE/Camera.hpp>
 #include <KlayGE/RenderEffect.hpp>

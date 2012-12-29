@@ -37,7 +37,7 @@
 #pragma once
 
 #include <KlayGE/PreDeclare.hpp>
-#include <KlayGE/Timer.hpp>
+#include <KFL/Timer.hpp>
 
 namespace KlayGE
 {

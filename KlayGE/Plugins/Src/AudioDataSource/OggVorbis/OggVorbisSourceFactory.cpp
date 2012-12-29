@@ -11,7 +11,7 @@
 /////////////////////////////////////////////////////////////////////////////////
 
 #include <KlayGE/KlayGE.hpp>
-#include <KlayGE/Util.hpp>
+#include <KFL/Util.hpp>
 
 #include <KlayGE/OggVorbis/OggVorbisSource.hpp>
 #include <KlayGE/OggVorbis/OggVorbisSourceFactory.hpp>

@@ -24,7 +24,7 @@
 #endif
 
 #include <KlayGE/PreDeclare.hpp>
-#include <KlayGE/Vector.hpp>
+#include <KFL/Vector.hpp>
 
 #include <map>
 

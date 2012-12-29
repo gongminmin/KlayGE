@@ -32,7 +32,7 @@
 
 #include <KlayGE/PreDeclare.hpp>
 #include <KlayGE/Renderable.hpp>
-#include <KlayGE/AABBox.hpp>
+#include <KFL/AABBox.hpp>
 
 namespace KlayGE
 {

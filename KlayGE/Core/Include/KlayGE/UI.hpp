@@ -25,7 +25,7 @@
 #endif
 
 #include <KlayGE/PreDeclare.hpp>
-#include <KlayGE/Timer.hpp>
+#include <KFL/Timer.hpp>
 
 #ifdef KLAYGE_COMPILER_MSVC
 #pragma warning(push)

@@ -2,68 +2,18 @@ SET(LIB_NAME ${KLAYGE_CORELIB_NAME})
 
 SET(KERNEL_SOURCE_FILES
 	${KLAYGE_PROJECT_DIR}/Core/Src/Kernel/Context.cpp
-	${KLAYGE_PROJECT_DIR}/Core/Src/Kernel/CpuInfo.cpp
-	${KLAYGE_PROJECT_DIR}/Core/Src/Kernel/DllLoader.cpp
 	${KLAYGE_PROJECT_DIR}/Core/Src/Kernel/KlayGE.cpp
-	${KLAYGE_PROJECT_DIR}/Core/Src/Kernel/Log.cpp
-	${KLAYGE_PROJECT_DIR}/Core/Src/Kernel/ResLoader.cpp
-	${KLAYGE_PROJECT_DIR}/Core/Src/Kernel/ThrowErr.cpp
-	${KLAYGE_PROJECT_DIR}/Core/Src/Kernel/Timer.cpp
-	${KLAYGE_PROJECT_DIR}/Core/Src/Kernel/Util.cpp
-	${KLAYGE_PROJECT_DIR}/Core/Src/Kernel/XMLDom.cpp
 )
 
 SET(KERNEL_HEADER_FILES
-	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/aligned_allocator.hpp
-	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/atomic.hpp
 	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/config/auto_link.hpp
-	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/COMPtr.hpp
-	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/Config.hpp
 	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/Context.hpp
-	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/CpuInfo.hpp
-	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/DllLoader.hpp
 	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/KlayGE.hpp
-	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/Log.hpp
 	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/PreDeclare.hpp
-	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/ResLoader.hpp
-	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/thread.hpp
-	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/ThrowErr.hpp
-	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/Timer.hpp
-	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/Trace.hpp
-	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/Types.hpp
-	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/Util.hpp
-	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/XMLDom.hpp
 )
 
 SOURCE_GROUP("Kernel\\Source Files" FILES ${KERNEL_SOURCE_FILES})
 SOURCE_GROUP("Kernel\\Header Files" FILES ${KERNEL_HEADER_FILES})
-
-
-SET(MATH_SOURCE_FILES
-	${KLAYGE_PROJECT_DIR}/Core/Src/Math/Math.cpp
-)
-
-SET(MATH_HEADER_FILES
-	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/Detail/MathHelper.hpp
-	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/AABBox.hpp
-	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/Bound.hpp
-	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/Color.hpp
-	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/Frustum.hpp
-	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/half.hpp
-	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/Math.hpp
-	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/Matrix.hpp
-	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/Noise.hpp
-	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/OBBox.hpp
-	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/Plane.hpp
-	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/Quaternion.hpp
-	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/Rect.hpp
-	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/Size.hpp
-	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/Sphere.hpp
-	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/Vector.hpp
-)
-
-SOURCE_GROUP("Math Library\\Source Files" FILES ${MATH_SOURCE_FILES})
-SOURCE_GROUP("Math Library\\Header Files" FILES ${MATH_HEADER_FILES})
 
 
 SET(RENDERING_SOURCE_FILES
@@ -313,26 +263,6 @@ SOURCE_GROUP("Scene Management\\Source Files" FILES ${SCENE_SOURCE_FILES})
 SOURCE_GROUP("Scene Management\\Header Files" FILES ${SCENE_HEADER_FILES})
 
 
-SET(PACKING_SOURCE_FILES
-	${KLAYGE_PROJECT_DIR}/Core/Src/Pack/ArchiveExtractCallback.cpp
-	${KLAYGE_PROJECT_DIR}/Core/Src/Pack/ArchiveOpenCallback.cpp
-	${KLAYGE_PROJECT_DIR}/Core/Src/Pack/Extract7z.cpp
-	${KLAYGE_PROJECT_DIR}/Core/Src/Pack/LZMACodec.cpp
-	${KLAYGE_PROJECT_DIR}/Core/Src/Pack/Streams.cpp
-)
-
-SET(PACKING_HEADER_FILES
-	${KLAYGE_PROJECT_DIR}/Core/Src/Pack/ArchiveExtractCallback.hpp
-	${KLAYGE_PROJECT_DIR}/Core/Src/Pack/ArchiveOpenCallback.hpp
-	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/Extract7z.hpp
-	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/LZMACodec.hpp
-	${KLAYGE_PROJECT_DIR}/Core/Src/Pack/Streams.hpp
-)
-
-SOURCE_GROUP("Packing System\\Source Files" FILES ${PACKING_SOURCE_FILES})
-SOURCE_GROUP("Packing System\\Header Files" FILES ${PACKING_HEADER_FILES})
-
-
 SET(UI_SOURCE_FILES
 	${KLAYGE_PROJECT_DIR}/Core/Src/UI/UI.cpp
 	${KLAYGE_PROJECT_DIR}/Core/Src/UI/UIButton.cpp
@@ -385,7 +315,9 @@ INCLUDE_DIRECTORIES(${KLAYGE_PROJECT_DIR}/../External/boost)
 INCLUDE_DIRECTORIES(${KLAYGE_PROJECT_DIR}/../External/Python/include)
 INCLUDE_DIRECTORIES(${KLAYGE_PROJECT_DIR}/../External/rapidxml)
 INCLUDE_DIRECTORIES(${KLAYGE_PROJECT_DIR}/../External/7z)
+INCLUDE_DIRECTORIES(${KLAYGE_PROJECT_DIR}/../KFL/include)
 INCLUDE_DIRECTORIES(${KLAYGE_PROJECT_DIR}/Core/Include)
+INCLUDE_DIRECTORIES(${KLAYGE_PROJECT_DIR}/../KFL/include)
 INCLUDE_DIRECTORIES(${KLAYGE_PROJECT_DIR}/../kfont/include)
 INCLUDE_DIRECTORIES(${KLAYGE_PROJECT_DIR}/../MeshMLLib/include)
 LINK_DIRECTORIES(${KLAYGE_PROJECT_DIR}/../External/boost/lib_${KLAYGE_COMPILER_NAME}${KLAYGE_COMPILER_VERSION}_${KLAYGE_ARCH_NAME}/lib)
@@ -397,12 +329,12 @@ ELSE()
 	LINK_DIRECTORIES(${KLAYGE_PROJECT_DIR}/../External/Python/libs)
 ENDIF()
 LINK_DIRECTORIES(${KLAYGE_PROJECT_DIR}/lib/${KLAYGE_PLATFORM_NAME})
+LINK_DIRECTORIES(${KLAYGE_PROJECT_DIR}/../KFL/lib/${KLAYGE_PLATFORM_NAME})
 LINK_DIRECTORIES(${KLAYGE_PROJECT_DIR}/../kfont/lib/${KLAYGE_PLATFORM_NAME})
 LINK_DIRECTORIES(${KLAYGE_PROJECT_DIR}/../MeshMLLib/lib/${KLAYGE_PLATFORM_NAME})
 
 ADD_LIBRARY(${LIB_NAME} SHARED
 	${KERNEL_SOURCE_FILES} ${KERNEL_HEADER_FILES}
-	${MATH_SOURCE_FILES} ${MATH_HEADER_FILES}
 	${RENDERING_SOURCE_FILES} ${RENDERING_HEADER_FILES} ${RENDERING_EFFECT_FILES} ${RENDERING_POSTPROCESSOR_FILES}
 	${AUDIO_SOURCE_FILES} ${AUDIO_HEADER_FILES}
 	${NETWORK_SOURCE_FILES} ${NETWORK_HEADER_FILES}

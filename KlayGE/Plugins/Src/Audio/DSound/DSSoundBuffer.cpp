@@ -11,9 +11,9 @@
 /////////////////////////////////////////////////////////////////////////////////
 
 #include <KlayGE/KlayGE.hpp>
-#include <KlayGE/ThrowErr.hpp>
-#include <KlayGE/COMPtr.hpp>
-#include <KlayGE/Util.hpp>
+#include <KFL/ThrowErr.hpp>
+#include <KFL/COMPtr.hpp>
+#include <KFL/Util.hpp>
 #include <KlayGE/Context.hpp>
 #include <KlayGE/AudioFactory.hpp>
 #include <KlayGE/AudioDataSource.hpp>

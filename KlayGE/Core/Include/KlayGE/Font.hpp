@@ -43,7 +43,7 @@
 
 #include <KlayGE/PreDeclare.hpp>
 
-#include <KlayGE/Rect.hpp>
+#include <KFL/Rect.hpp>
 #include <KlayGE/Renderable.hpp>
 #include <KlayGE/RenderableHelper.hpp>
 

@@ -19,7 +19,7 @@
 #pragma once
 
 #include <KlayGE/PreDeclare.hpp>
-#include <KlayGE/thread.hpp>
+#include <KFL/Thread.hpp>
 
 #ifdef KLAYGE_PLATFORM_WINDOWS
 #include <al.h>

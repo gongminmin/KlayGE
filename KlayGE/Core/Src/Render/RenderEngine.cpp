@@ -37,15 +37,15 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 #include <KlayGE/KlayGE.hpp>
-#include <KlayGE/Util.hpp>
-#include <KlayGE/Math.hpp>
+#include <KFL/Util.hpp>
+#include <KFL/Math.hpp>
 #include <KlayGE/Context.hpp>
 #include <KlayGE/Viewport.hpp>
 #include <KlayGE/Camera.hpp>
 #include <KlayGE/FrameBuffer.hpp>
 #include <KlayGE/GraphicsBuffer.hpp>
 #include <KlayGE/RenderStateObject.hpp>
-#include <KlayGE/ResLoader.hpp>
+#include <KFL/ResLoader.hpp>
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/RenderEffect.hpp>
 #include <KlayGE/PostProcess.hpp>

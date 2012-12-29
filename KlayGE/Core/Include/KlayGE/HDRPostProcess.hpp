@@ -22,7 +22,7 @@
 
 #include <vector>
 
-#include <KlayGE/Timer.hpp>
+#include <KFL/Timer.hpp>
 #include <KlayGE/PostProcess.hpp>
 
 namespace KlayGE

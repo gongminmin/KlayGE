@@ -48,11 +48,11 @@
 /////////////////////////////////////////////////////////////////////////////////
 
 #include <KlayGE/KlayGE.hpp>
-#include <KlayGE/ThrowErr.hpp>
-#include <KlayGE/Util.hpp>
-#include <KlayGE/half.hpp>
+#include <KFL/ThrowErr.hpp>
+#include <KFL/Util.hpp>
+#include <KFL/Half.hpp>
 #include <KlayGE/RenderLayout.hpp>
-#include <KlayGE/Math.hpp>
+#include <KFL/Math.hpp>
 #include <KlayGE/Viewport.hpp>
 #include <KlayGE/FrameBuffer.hpp>
 #include <KlayGE/Texture.hpp>
@@ -60,10 +60,10 @@
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/RenderEffect.hpp>
 #include <KlayGE/Context.hpp>
-#include <KlayGE/AABBox.hpp>
-#include <KlayGE/ResLoader.hpp>
+#include <KFL/AABBox.hpp>
+#include <KFL/ResLoader.hpp>
 #include <KlayGE/SceneObjectHelper.hpp>
-#include <KlayGE/LZMACodec.hpp>
+#include <KFL/LZMACodec.hpp>
 
 #include <algorithm>
 #include <vector>

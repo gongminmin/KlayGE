@@ -11,9 +11,9 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 #include <KlayGE/KlayGE.hpp>
-#include <KlayGE/Math.hpp>
-#include <KlayGE/Util.hpp>
-#include <KlayGE/ResLoader.hpp>
+#include <KFL/Math.hpp>
+#include <KFL/Util.hpp>
+#include <KFL/ResLoader.hpp>
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/Context.hpp>
 #include <KlayGE/RenderEffect.hpp>

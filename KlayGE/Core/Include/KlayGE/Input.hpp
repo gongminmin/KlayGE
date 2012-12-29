@@ -28,8 +28,8 @@
 
 #include <KlayGE/PreDeclare.hpp>
 
-#include <KlayGE/Vector.hpp>
-#include <KlayGE/Timer.hpp>
+#include <KFL/Vector.hpp>
+#include <KFL/Timer.hpp>
 
 #include <boost/container/flat_map.hpp>
 #ifdef KLAYGE_COMPILER_MSVC

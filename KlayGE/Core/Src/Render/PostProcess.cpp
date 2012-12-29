@@ -21,15 +21,15 @@
 
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/Context.hpp>
-#include <KlayGE/Math.hpp>
-#include <KlayGE/Util.hpp>
+#include <KFL/Math.hpp>
+#include <KFL/Util.hpp>
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/RenderEffect.hpp>
 #include <KlayGE/RenderableHelper.hpp>
 #include <KlayGE/FrameBuffer.hpp>
 #include <KlayGE/RenderLayout.hpp>
-#include <KlayGE/XMLDom.hpp>
+#include <KFL/XMLDom.hpp>
 
 #include <cstring>
 

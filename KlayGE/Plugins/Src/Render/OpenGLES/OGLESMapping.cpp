@@ -11,11 +11,11 @@
 /////////////////////////////////////////////////////////////////////////////////
 
 #include <KlayGE/KlayGE.hpp>
-#include <KlayGE/ThrowErr.hpp>
-#include <KlayGE/Math.hpp>
-#include <KlayGE/Vector.hpp>
-#include <KlayGE/Matrix.hpp>
-#include <KlayGE/Color.hpp>
+#include <KFL/ThrowErr.hpp>
+#include <KFL/Math.hpp>
+#include <KFL/Vector.hpp>
+#include <KFL/Matrix.hpp>
+#include <KFL/Color.hpp>
 #include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/RenderLayout.hpp>
 

@@ -23,11 +23,11 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 #include <KlayGE/KlayGE.hpp>
-#include <KlayGE/Util.hpp>
-#include <KlayGE/Math.hpp>
-#include <KlayGE/Vector.hpp>
-#include <KlayGE/Matrix.hpp>
-#include <KlayGE/Plane.hpp>
+#include <KFL/Util.hpp>
+#include <KFL/Math.hpp>
+#include <KFL/Vector.hpp>
+#include <KFL/Matrix.hpp>
+#include <KFL/Plane.hpp>
 #include <KlayGE/SceneObject.hpp>
 #include <KlayGE/RenderableHelper.hpp>
 #include <KlayGE/Camera.hpp>

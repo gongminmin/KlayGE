@@ -34,9 +34,9 @@
 #endif
 #include <boost/function.hpp>
 
-#include <KlayGE/Frustum.hpp>
-#include <KlayGE/Vector.hpp>
-#include <KlayGE/Matrix.hpp>
+#include <KFL/Frustum.hpp>
+#include <KFL/Vector.hpp>
+#include <KFL/Matrix.hpp>
 
 namespace KlayGE
 {

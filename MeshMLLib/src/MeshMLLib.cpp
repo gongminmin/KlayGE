@@ -4,7 +4,7 @@
  *
  * @section DESCRIPTION
  *
- * This source file is part of KlayGE's subproject MeshMLLib
+ * This source file is part of MeshMLLib, a subproject of KlayGE
  * For the latest info, see http://www.klayge.org
  *
  * @section LICENSE
@@ -28,30 +28,7 @@
  * from http://www.klayge.org/licensing/.
  */
 
-#include <KlayGE/Config.hpp>
-#include <KlayGE/Types.hpp>
-
-namespace KlayGE
-{
-	template <typename T>
-	class Matrix4_T;
-	typedef Matrix4_T<float> float4x4;
-
-	template <typename T>
-	class Quaternion_T;
-	typedef Quaternion_T<float> Quaternion;
-
-	namespace MathLib
-	{
-		template <typename T>
-		Matrix4_T<T> mul(Matrix4_T<T> const & lhs, Matrix4_T<T> const & rhs);
-
-		template <typename T>
-		Quaternion_T<T> mul(Quaternion_T<T> const & lhs, Quaternion_T<T> const & rhs);
-	}
-}
-
-#include <KlayGE/Matrix.hpp>
+#include <KFL/KFL.hpp>
 #include <MeshMLLib/MeshMLLib.hpp>
 
 #include <set>
@@ -61,8 +38,6 @@ namespace KlayGE
 #include <limits>
 
 #include <boost/assert.hpp>
-#include <boost/typeof/typeof.hpp>
-#include <boost/foreach.hpp>
 
 namespace
 {
@@ -74,577 +49,7 @@ namespace
 	}
 }
 
-namespace MeshMLLib
-{
-	using KlayGE::Vector_T;
-	using KlayGE::Quaternion_T;
-	using KlayGE::Matrix4_T;
-
-	namespace MathLib
-	{
-		template <typename T>
-		T abs(T const & x)
-		{
-			return x < T(0) ? -x : x;
-		}
-
-		template <typename T>
-		T sgn(T const & x)
-		{
-			return x < T(0) ? T(-1) : (x > T(0) ? T(1) : T(0));
-		}
-
-		float sqrt(float x)
-		{
-			return std::sqrt(x);
-		}
-
-		// From Quake III. But the magic number is from http://www.lomont.org/Math/Papers/2003/InvSqrt.pdf
-		float recip_sqrt(float number)
-		{
-			float const threehalfs = 1.5f;
-
-			float x2 = number * 0.5f;
-			union FNI
-			{
-				float f;
-				int32_t i;
-			} fni;
-			fni.f = number;											// evil floating point bit level hacking
-			fni.i = 0x5f375a86 - (fni.i >> 1);						// what the fuck?
-			fni.f = fni.f * (threehalfs - (x2 * fni.f * fni.f));	// 1st iteration
-			fni.f = fni.f * (threehalfs - (x2 * fni.f * fni.f));		// 2nd iteration, this can be removed
-
-			return fni.f;
-		}
-
-		float sin(float x)
-		{
-			return std::sin(x);
-		}
-
-		float acos(float x)
-		{
-			return std::acos(x);
-		}
-
-		template <typename T>
-		bool equal(T const & lhs, T const & rhs)
-		{
-			return (lhs == rhs);
-		}
-		template <>
-		bool equal<float>(float const & lhs, float const & rhs)
-		{
-			return (std::abs(lhs - rhs)
-				<= std::numeric_limits<float>::epsilon());
-		}
-
-		void sincos(float x, float& s, float& c)
-		{
-			s = sin(x);
-			c = cos(x);
-		}
-
-		template <typename T>
-		typename T::value_type dot(T const & lhs, T const & rhs)
-		{
-			return KlayGE::detail::dot_helper<typename T::value_type,
-							T::elem_num>::Do(&lhs[0], &rhs[0]);
-		}
-
-		template <typename T>
-		typename T::value_type length_sq(T const & rhs)
-		{
-			return dot(rhs, rhs);
-		}
-
-		template <typename T>
-		typename T::value_type length(T const & rhs)
-		{
-			return sqrt(length_sq(rhs));
-		}
-
-		template <typename T>
-		T lerp(T const & lhs, T const & rhs, float s)
-		{
-			return lhs + (rhs - lhs) * s;
-		}
-
-		template <typename T>
-		T normalize(T const & rhs)
-		{
-			return rhs * recip_sqrt(length_sq(rhs));
-		}
-		
-		template <typename T>
-		Vector_T<T, 3> cross(Vector_T<T, 3> const & lhs, Vector_T<T, 3> const & rhs)
-		{
-			return Vector_T<T, 3>(lhs.y() * rhs.z() - lhs.z() * rhs.y(),
-				lhs.z() * rhs.x() - lhs.x() * rhs.z(),
-				lhs.x() * rhs.y() - lhs.y() * rhs.x());
-		}
-
-		template <typename T>
-		Vector_T<T, 3> transform_quat(Vector_T<T, 3> const & v, Quaternion_T<T> const & quat)
-		{
-			return v + cross(quat.v(), cross(quat.v(), v) + quat.w() * v) * T(2);
-		}
-		
-		template <typename T>
-		Quaternion_T<T> to_quaternion(Matrix4_T<T> const & mat);
-
-		template <typename T>
-		void decompose(Vector_T<T, 3>& scale, Quaternion_T<T>& rot, Vector_T<T, 3>& trans, Matrix4_T<T> const & rhs)
-		{
-			scale.x() = sqrt(rhs(0, 0) * rhs(0, 0) + rhs(0, 1) * rhs(0, 1) + rhs(0, 2) * rhs(0, 2));
-			scale.y() = sqrt(rhs(1, 0) * rhs(1, 0) + rhs(1, 1) * rhs(1, 1) + rhs(1, 2) * rhs(1, 2));
-			scale.z() = sqrt(rhs(2, 0) * rhs(2, 0) + rhs(2, 1) * rhs(2, 1) + rhs(2, 2) * rhs(2, 2));
-
-			trans = Vector_T<T, 3>(rhs(3, 0), rhs(3, 1), rhs(3, 2));
-
-			Matrix4_T<T> rot_mat;
-			rot_mat(0, 0) = rhs(0, 0) / scale.x();
-			rot_mat(0, 1) = rhs(0, 1) / scale.x();
-			rot_mat(0, 2) = rhs(0, 2) / scale.x();
-			rot_mat(0, 3) = 0;
-			rot_mat(1, 0) = rhs(1, 0) / scale.y();
-			rot_mat(1, 1) = rhs(1, 1) / scale.y();
-			rot_mat(1, 2) = rhs(1, 2) / scale.y();
-			rot_mat(1, 3) = 0;
-			rot_mat(2, 0) = rhs(2, 0) / scale.z();
-			rot_mat(2, 1) = rhs(2, 1) / scale.z();
-			rot_mat(2, 2) = rhs(2, 2) / scale.z();
-			rot_mat(2, 3) = 0;
-			rot_mat(3, 0) = 0;
-			rot_mat(3, 1) = 0;
-			rot_mat(3, 2) = 0;
-			rot_mat(3, 3) = 1;
-			rot = to_quaternion(rot_mat);
-		}
-
-		template <typename T>
-		Matrix4_T<T> mul(Matrix4_T<T> const & lhs, Matrix4_T<T> const & rhs)
-		{
-			Matrix4_T<T> const tmp(transpose(rhs));
-
-			return Matrix4_T<T>(
-				lhs(0, 0) * tmp(0, 0) + lhs(0, 1) * tmp(0, 1) + lhs(0, 2) * tmp(0, 2) + lhs(0, 3) * tmp(0, 3),
-				lhs(0, 0) * tmp(1, 0) + lhs(0, 1) * tmp(1, 1) + lhs(0, 2) * tmp(1, 2) + lhs(0, 3) * tmp(1, 3),
-				lhs(0, 0) * tmp(2, 0) + lhs(0, 1) * tmp(2, 1) + lhs(0, 2) * tmp(2, 2) + lhs(0, 3) * tmp(2, 3),
-				lhs(0, 0) * tmp(3, 0) + lhs(0, 1) * tmp(3, 1) + lhs(0, 2) * tmp(3, 2) + lhs(0, 3) * tmp(3, 3),
-
-				lhs(1, 0) * tmp(0, 0) + lhs(1, 1) * tmp(0, 1) + lhs(1, 2) * tmp(0, 2) + lhs(1, 3) * tmp(0, 3),
-				lhs(1, 0) * tmp(1, 0) + lhs(1, 1) * tmp(1, 1) + lhs(1, 2) * tmp(1, 2) + lhs(1, 3) * tmp(1, 3),
-				lhs(1, 0) * tmp(2, 0) + lhs(1, 1) * tmp(2, 1) + lhs(1, 2) * tmp(2, 2) + lhs(1, 3) * tmp(2, 3),
-				lhs(1, 0) * tmp(3, 0) + lhs(1, 1) * tmp(3, 1) + lhs(1, 2) * tmp(3, 2) + lhs(1, 3) * tmp(3, 3),
-
-				lhs(2, 0) * tmp(0, 0) + lhs(2, 1) * tmp(0, 1) + lhs(2, 2) * tmp(0, 2) + lhs(2, 3) * tmp(0, 3),
-				lhs(2, 0) * tmp(1, 0) + lhs(2, 1) * tmp(1, 1) + lhs(2, 2) * tmp(1, 2) + lhs(2, 3) * tmp(1, 3),
-				lhs(2, 0) * tmp(2, 0) + lhs(2, 1) * tmp(2, 1) + lhs(2, 2) * tmp(2, 2) + lhs(2, 3) * tmp(2, 3),
-				lhs(2, 0) * tmp(3, 0) + lhs(2, 1) * tmp(3, 1) + lhs(2, 2) * tmp(3, 2) + lhs(2, 3) * tmp(3, 3),
-
-				lhs(3, 0) * tmp(0, 0) + lhs(3, 1) * tmp(0, 1) + lhs(3, 2) * tmp(0, 2) + lhs(3, 3) * tmp(0, 3),
-				lhs(3, 0) * tmp(1, 0) + lhs(3, 1) * tmp(1, 1) + lhs(3, 2) * tmp(1, 2) + lhs(3, 3) * tmp(1, 3),
-				lhs(3, 0) * tmp(2, 0) + lhs(3, 1) * tmp(2, 1) + lhs(3, 2) * tmp(2, 2) + lhs(3, 3) * tmp(2, 3),
-				lhs(3, 0) * tmp(3, 0) + lhs(3, 1) * tmp(3, 1) + lhs(3, 2) * tmp(3, 2) + lhs(3, 3) * tmp(3, 3));
-		}
-
-		template <typename T>
-		T determinant(Matrix4_T<T> const & rhs)
-		{
-			T const _3142_3241(rhs(2, 0) * rhs(3, 1) - rhs(2, 1) * rhs(3, 0));
-			T const _3143_3341(rhs(2, 0) * rhs(3, 2) - rhs(2, 2) * rhs(3, 0));
-			T const _3144_3441(rhs(2, 0) * rhs(3, 3) - rhs(2, 3) * rhs(3, 0));
-			T const _3243_3342(rhs(2, 1) * rhs(3, 2) - rhs(2, 2) * rhs(3, 1));
-			T const _3244_3442(rhs(2, 1) * rhs(3, 3) - rhs(2, 3) * rhs(3, 1));
-			T const _3344_3443(rhs(2, 2) * rhs(3, 3) - rhs(2, 3) * rhs(3, 2));
-
-			return rhs(0, 0) * (rhs(1, 1) * _3344_3443 - rhs(1, 2) * _3244_3442 + rhs(1, 3) * _3243_3342)
-				- rhs(0, 1) * (rhs(1, 0) * _3344_3443 - rhs(1, 2) * _3144_3441 + rhs(1, 3) * _3143_3341)
-				+ rhs(0, 2) * (rhs(1, 0) * _3244_3442 - rhs(1, 1) * _3144_3441 + rhs(1, 3) * _3142_3241)
-				- rhs(0, 3) * (rhs(1, 0) * _3243_3342 - rhs(1, 1) * _3143_3341 + rhs(1, 2) * _3142_3241);
-		}
-
-		template <typename T>
-		Matrix4_T<T> inverse(Matrix4_T<T> const & rhs)
-		{
-			T const _2132_2231(rhs(1, 0) * rhs(2, 1) - rhs(1, 1) * rhs(2, 0));
-			T const _2133_2331(rhs(1, 0) * rhs(2, 2) - rhs(1, 2) * rhs(2, 0));
-			T const _2134_2431(rhs(1, 0) * rhs(2, 3) - rhs(1, 3) * rhs(2, 0));
-			T const _2142_2241(rhs(1, 0) * rhs(3, 1) - rhs(1, 1) * rhs(3, 0));
-			T const _2143_2341(rhs(1, 0) * rhs(3, 2) - rhs(1, 2) * rhs(3, 0));
-			T const _2144_2441(rhs(1, 0) * rhs(3, 3) - rhs(1, 3) * rhs(3, 0));
-			T const _2233_2332(rhs(1, 1) * rhs(2, 2) - rhs(1, 2) * rhs(2, 1));
-			T const _2234_2432(rhs(1, 1) * rhs(2, 3) - rhs(1, 3) * rhs(2, 1));
-			T const _2243_2342(rhs(1, 1) * rhs(3, 2) - rhs(1, 2) * rhs(3, 1));
-			T const _2244_2442(rhs(1, 1) * rhs(3, 3) - rhs(1, 3) * rhs(3, 1));
-			T const _2334_2433(rhs(1, 2) * rhs(2, 3) - rhs(1, 3) * rhs(2, 2));
-			T const _2344_2443(rhs(1, 2) * rhs(3, 3) - rhs(1, 3) * rhs(3, 2));
-			T const _3142_3241(rhs(2, 0) * rhs(3, 1) - rhs(2, 1) * rhs(3, 0));
-			T const _3143_3341(rhs(2, 0) * rhs(3, 2) - rhs(2, 2) * rhs(3, 0));
-			T const _3144_3441(rhs(2, 0) * rhs(3, 3) - rhs(2, 3) * rhs(3, 0));
-			T const _3243_3342(rhs(2, 1) * rhs(3, 2) - rhs(2, 2) * rhs(3, 1));
-			T const _3244_3442(rhs(2, 1) * rhs(3, 3) - rhs(2, 3) * rhs(3, 1));
-			T const _3344_3443(rhs(2, 2) * rhs(3, 3) - rhs(2, 3) * rhs(3, 2));
-
-			// 行列式的值
-			T const det(determinant(rhs));
-			if (!equal<T>(det, 0))
-			{
-				T invDet(T(1) / det);
-
-				return Matrix4_T<T>(
-					+invDet * (rhs(1, 1) * _3344_3443 - rhs(1, 2) * _3244_3442 + rhs(1, 3) * _3243_3342),
-					-invDet * (rhs(0, 1) * _3344_3443 - rhs(0, 2) * _3244_3442 + rhs(0, 3) * _3243_3342),
-					+invDet * (rhs(0, 1) * _2344_2443 - rhs(0, 2) * _2244_2442 + rhs(0, 3) * _2243_2342),
-					-invDet * (rhs(0, 1) * _2334_2433 - rhs(0, 2) * _2234_2432 + rhs(0, 3) * _2233_2332),
-
-					-invDet * (rhs(1, 0) * _3344_3443 - rhs(1, 2) * _3144_3441 + rhs(1, 3) * _3143_3341),
-					+invDet * (rhs(0, 0) * _3344_3443 - rhs(0, 2) * _3144_3441 + rhs(0, 3) * _3143_3341),
-					-invDet * (rhs(0, 0) * _2344_2443 - rhs(0, 2) * _2144_2441 + rhs(0, 3) * _2143_2341),
-					+invDet * (rhs(0, 0) * _2334_2433 - rhs(0, 2) * _2134_2431 + rhs(0, 3) * _2133_2331),
-
-					+invDet * (rhs(1, 0) * _3244_3442 - rhs(1, 1) * _3144_3441 + rhs(1, 3) * _3142_3241),
-					-invDet * (rhs(0, 0) * _3244_3442 - rhs(0, 1) * _3144_3441 + rhs(0, 3) * _3142_3241),
-					+invDet * (rhs(0, 0) * _2244_2442 - rhs(0, 1) * _2144_2441 + rhs(0, 3) * _2142_2241),
-					-invDet * (rhs(0, 0) * _2234_2432 - rhs(0, 1) * _2134_2431 + rhs(0, 3) * _2132_2231),
-
-					-invDet * (rhs(1, 0) * _3243_3342 - rhs(1, 1) * _3143_3341 + rhs(1, 2) * _3142_3241),
-					+invDet * (rhs(0, 0) * _3243_3342 - rhs(0, 1) * _3143_3341 + rhs(0, 2) * _3142_3241),
-					-invDet * (rhs(0, 0) * _2243_2342 - rhs(0, 1) * _2143_2341 + rhs(0, 2) * _2142_2241),
-					+invDet * (rhs(0, 0) * _2233_2332 - rhs(0, 1) * _2133_2331 + rhs(0, 2) * _2132_2231));
-			}
-			else
-			{
-				return rhs;
-			}
-		}
-
-		template <typename T>
-		Matrix4_T<T> scaling(T const & sx, T const & sy, T const & sz)
-		{
-			return Matrix4_T<T>(
-				sx,	0,	0,	0,
-				0,	sy,	0,	0,
-				0,	0,	sz,	0,
-				0,	0,	0,	1);
-		}
-
-		template <typename T>
-		Matrix4_T<T> to_matrix(Quaternion_T<T> const & quat)
-		{
-			// calculate coefficients
-			T const x2(quat.x() + quat.x());
-			T const y2(quat.y() + quat.y());
-			T const z2(quat.z() + quat.z());
-
-			T const xx2(quat.x() * x2), xy2(quat.x() * y2), xz2(quat.x() * z2);
-			T const yy2(quat.y() * y2), yz2(quat.y() * z2), zz2(quat.z() * z2);
-			T const wx2(quat.w() * x2), wy2(quat.w() * y2), wz2(quat.w() * z2);
-
-			return Matrix4_T<T>(
-				1 - yy2 - zz2,	xy2 + wz2,		xz2 - wy2,		0,
-				xy2 - wz2,		1 - xx2 - zz2,	yz2 + wx2,		0,
-				xz2 + wy2,		yz2 - wx2,		1 - xx2 - yy2,	0,
-				0,				0,				0,				1);
-		}
-
-		template <typename T>
-		Matrix4_T<T> translation(T const & x, T const & y, T const & z)
-		{
-			return Matrix4_T<T>(
-				1,	0,	0,	0,
-				0,	1,	0,	0,
-				0,	0,	1,	0,
-				x,	y,	z,	1);
-		}
-
-		template <typename T>
-		Matrix4_T<T> translation(Vector_T<T, 3> const & pos)
-		{
-			return translation(pos.x(), pos.y(), pos.z());
-		}
-
-		template <typename T>
-		Matrix4_T<T> transpose(Matrix4_T<T> const & rhs)
-		{
-			return Matrix4_T<T>(
-				rhs(0, 0), rhs(1, 0), rhs(2, 0), rhs(3, 0),
-				rhs(0, 1), rhs(1, 1), rhs(2, 1), rhs(3, 1),
-				rhs(0, 2), rhs(1, 2), rhs(2, 2), rhs(3, 2),
-				rhs(0, 3), rhs(1, 3), rhs(2, 3), rhs(3, 3));
-		}
-
-		template <typename T>
-		Quaternion_T<T> conjugate(Quaternion_T<T> const & rhs)
-		{
-			return Quaternion_T<T>(-rhs.x(), -rhs.y(), -rhs.z(), rhs.w());
-		}
-
-		template <typename T>
-		Quaternion_T<T> mul(Quaternion_T<T> const & lhs, Quaternion_T<T> const & rhs)
-		{
-			return Quaternion_T<T>(
-				lhs.x() * rhs.w() - lhs.y() * rhs.z() + lhs.z() * rhs.y() + lhs.w() * rhs.x(),
-				lhs.x() * rhs.z() + lhs.y() * rhs.w() - lhs.z() * rhs.x() + lhs.w() * rhs.y(),
-				lhs.y() * rhs.x() - lhs.x() * rhs.y() + lhs.z() * rhs.w() + lhs.w() * rhs.z(),
-				lhs.w() * rhs.w() - lhs.x() * rhs.x() - lhs.y() * rhs.y() - lhs.z() * rhs.z());
-		}
-
-		template <typename T>
-		Quaternion_T<T> to_quaternion(Matrix4_T<T> const & mat)
-		{
-			Quaternion_T<T> quat;
-			T s;
-			T const tr = mat(0, 0) + mat(1, 1) + mat(2, 2) + 1;
-
-			// check the diagonal
-			if (tr > 1)
-			{
-				s = sqrt(tr);
-				quat.w() = s * T(0.5);
-				s = T(0.5) / s;
-				quat.x() = (mat(1, 2) - mat(2, 1)) * s;
-				quat.y() = (mat(2, 0) - mat(0, 2)) * s;
-				quat.z() = (mat(0, 1) - mat(1, 0)) * s;
-			}
-			else
-			{
-				int maxi = 0;
-				T maxdiag = mat(0, 0);
-				for (int i = 1; i < 3; ++ i)
-				{
-					if (mat(i, i) > maxdiag)
-					{
-						maxi = i;
-						maxdiag = mat(i, i);
-					}
-				}
-
-				switch (maxi)
-				{
-				case 0:
-					s = sqrt((mat(0, 0) - (mat(1, 1) + mat(2, 2))) + 1);
-
-					quat.x() = s * T(0.5);
-
-					if (!equal<T>(s, 0))
-					{
-						s = T(0.5) / s;
-					}
-
-					quat.w() = (mat(1, 2) - mat(2, 1)) * s;
-					quat.y() = (mat(1, 0) + mat(0, 1)) * s;
-					quat.z() = (mat(2, 0) + mat(0, 2)) * s;
-					break;
-
-				case 1:
-					s = sqrt((mat(1, 1) - (mat(2, 2) + mat(0, 0))) + 1);
-					quat.y() = s * T(0.5);
-
-					if (!equal<T>(s, 0))
-					{
-						s = T(0.5) / s;
-					}
-
-					quat.w() = (mat(2, 0) - mat(0, 2)) * s;
-					quat.z() = (mat(2, 1) + mat(1, 2)) * s;
-					quat.x() = (mat(0, 1) + mat(1, 0)) * s;
-					break;
-
-				case 2:
-				default:
-					s = sqrt((mat(2, 2) - (mat(0, 0) + mat(1, 1))) + 1);
-
-					quat.z() = s * T(0.5);
-
-					if (!equal<T>(s, 0))
-					{
-						s = T(0.5) / s;
-					}
-
-					quat.w() = (mat(0, 1) - mat(1, 0)) * s;
-					quat.x() = (mat(0, 2) + mat(2, 0)) * s;
-					quat.y() = (mat(1, 2) + mat(2, 1)) * s;
-					break;
-				}
-			}
-
-			return normalize(quat);
-		}
-
-		template <typename T>
-		Quaternion_T<T> to_quaternion(Vector_T<T, 3> const & tangent, Vector_T<T, 3> const & binormal, Vector_T<T, 3> const & normal, int bits)
-		{
-			T k = 1;
-			if (dot(binormal, cross(normal, tangent)) < 0)
-			{
-				k = -1;
-			}
-
-			Matrix4_T<T> tangent_frame(tangent.x(), tangent.y(), tangent.z(), 0,
-				k * binormal.x(), k * binormal.y(), k * binormal.z(), 0,
-				normal.x(), normal.y(), normal.z(), 0,
-				0, 0, 0, 1);
-			Quaternion_T<T> tangent_quat = to_quaternion(tangent_frame);
-			if (tangent_quat.w() < 0)
-			{
-				tangent_quat = -tangent_quat;
-			}
-			T const bias = T(1) / ((1UL << (bits - 1)) - 1);
-			if (tangent_quat.w() < bias)
-			{
-				T const factor = sqrt(1 - bias * bias);
-				tangent_quat.x() *= factor;
-				tangent_quat.y() *= factor;
-				tangent_quat.z() *= factor;
-				tangent_quat.w() = bias;
-			}
-			if (k < 0)
-			{
-				tangent_quat = -tangent_quat;
-			}
-
-			return tangent_quat;
-		}
-
-		template <typename T>
-		std::pair<Quaternion_T<T>, Quaternion_T<T> > conjugate(Quaternion_T<T> const & real, Quaternion_T<T> const & dual)
-		{
-			return std::make_pair(conjugate(real), conjugate(dual));
-		}
-
-		template <typename T>
-		Quaternion_T<T> quat_trans_to_udq(Quaternion_T<T> const & q, Vector_T<T, 3> const & t)
-		{
-			return mul(q, Quaternion_T<T>(T(0.5) * t.x(), T(0.5) * t.y(), T(0.5) * t.z(), T(0.0)));
-		}
-
-		template <typename T>
-		Vector_T<T, 3> udq_to_trans(Quaternion_T<T> const & real, Quaternion_T<T> const & dual)
-		{
-			Quaternion_T<T> qeq0 = mul(conjugate(real), dual);
-			return T(2.0) * Vector_T<T, 3>(qeq0.x(), qeq0.y(), qeq0.z());
-		}
-
-		template <typename T>
-		std::pair<Quaternion_T<T>, Quaternion_T<T> > inverse(Quaternion_T<T> const & real, Quaternion_T<T> const & dual)
-		{
-			float sqr_len_0 = dot(real, real);
-			float sqr_len_e = 2.0f * dot(real, dual);
-			float inv_sqr_len_0 = 1.0f / sqr_len_0;
-			float inv_sqr_len_e = -sqr_len_e / (sqr_len_0 * sqr_len_0);
-			std::pair<Quaternion_T<T>, Quaternion_T<T> > conj = conjugate(real, dual);
-			return std::make_pair(inv_sqr_len_0 * conj.first, inv_sqr_len_0 * conj.second + inv_sqr_len_e * conj.first);
-		}
-
-		template <typename T>
-		Quaternion_T<T> mul_real(Quaternion_T<T> const & lhs_real, Quaternion_T<T> const & rhs_real)
-		{
-			return lhs_real * rhs_real;
-		}
-
-		template <typename T>
-		Quaternion_T<T> mul_dual(Quaternion_T<T> const & lhs_real, Quaternion_T<T> const & lhs_dual,
-			Quaternion_T<T> const & rhs_real, Quaternion_T<T> const & rhs_dual)
-		{
-			return lhs_real * rhs_dual + lhs_dual * rhs_real;
-		}
-
-		template <typename T>
-		void udq_to_screw(T& angle, T& pitch, Vector_T<T, 3>& dir, Vector_T<T, 3>& moment,
-			Quaternion_T<T> const & real, Quaternion_T<T> const & dual)
-		{
-			if (abs(real.w()) >= 1)
-			{
-				// pure translation
-
-				angle = 0;
-				dir = dual.v();
-
-				T dir_sq_len = length_sq(dir);
-
-				if (dir_sq_len > T(1e-6))
-				{
-					T dir_len = sqrt(dir_sq_len);
-					pitch = 2 * dir_len;
-					dir /= dir_len;
-				}
-				else
-				{
-					pitch = 0;
-				}
-
-				moment = Vector_T<T, 3>::Zero();
-			}
-			else
-			{ 
-				angle = 2 * acos(real.w());
-
-				float s = length_sq(real.v());
-				if (s < T(1e-6))
-				{
-					dir = Vector_T<T, 3>::Zero();
-					pitch = 0;
-					moment = Vector_T<T, 3>::Zero();
-				}
-				else
-				{
-					float oos = recip_sqrt(s);
-					dir = real.v() * oos;
-
-					pitch = -2 * dual.w() * oos;
-
-					moment = (dual.v() - dir * pitch * real.w() * T(0.5)) * oos;
-				}
-			}
-		}
-
-		template <typename T>
-		std::pair<Quaternion_T<T>, Quaternion_T<T> > udq_from_screw(T const & angle, T const & pitch, Vector_T<T, 3> const & dir, Vector_T<T, 3> const & moment)
-		{
-			T sa, ca;
-			sincos(angle * T(0.5), sa, ca);
-			return std::make_pair(Quaternion_T<T>(dir * sa, ca),
-				Quaternion_T<T>(sa * moment + T(0.5) * pitch * ca * dir, -pitch * sa * T(0.5)));
-		}
-
-		template <typename T>
-		std::pair<Quaternion_T<T>, Quaternion_T<T> > sclerp(Quaternion_T<T> const & lhs_real, Quaternion_T<T> const & lhs_dual,
-			Quaternion_T<T> const & rhs_real, Quaternion_T<T> const & rhs_dual, float const & slerp)
-		{
-			// Make sure dot product is >= 0
-			float quat_dot = dot(lhs_real, rhs_real);
-			Quaternion to_sign_corrected_real = rhs_real;
-			Quaternion to_sign_corrected_dual = rhs_dual;
-			if (quat_dot < 0)
-			{
-				to_sign_corrected_real = -to_sign_corrected_real;
-				to_sign_corrected_dual = -to_sign_corrected_dual;
-			}
-
-			std::pair<Quaternion_T<T>, Quaternion_T<T> > dif_dq = inverse(lhs_real, lhs_dual);
-			dif_dq.second = mul_dual(dif_dq.first, dif_dq.second, to_sign_corrected_real, to_sign_corrected_dual);
-			dif_dq.first = mul_real(dif_dq.first, to_sign_corrected_real);
-	
-			float angle, pitch;
-			float3 direction, moment;
-			udq_to_screw(angle, pitch, direction, moment, dif_dq.first, dif_dq.second);
-
-			angle *= slerp; 
-			pitch *= slerp;
-			dif_dq = udq_from_screw(angle, pitch, direction, moment);
-
-			dif_dq.second = mul_dual(lhs_real, lhs_dual, dif_dq.first, dif_dq.second);
-			dif_dq.first = mul_real(lhs_real, dif_dq.first);
-
-			return dif_dq;
-		}
-	}
-}
-
-namespace MeshMLLib
+namespace KlayGE
 {
 	bool MeshMLObj::Material::operator==(MeshMLObj::Material const & rhs) const
 	{
@@ -684,7 +89,7 @@ namespace MeshMLLib
 	{
 		frame = std::fmod(frame, static_cast<float>(frame_ids.back() + 1));
 
-		BOOST_AUTO(iter, std::upper_bound(frame_ids.begin(), frame_ids.end(), frame));
+		KLAYGE_AUTO(iter, std::upper_bound(frame_ids.begin(), frame_ids.end(), frame));
 		int index = static_cast<int>(iter - frame_ids.begin());
 
 		int index0 = index - 1;
@@ -975,8 +380,8 @@ namespace MeshMLLib
 		std::vector<int> joint_index_to_id;
 		if (!joints_.empty())
 		{
-			typedef BOOST_TYPEOF(joints_) JointsType;
-			BOOST_FOREACH(JointsType::const_reference joint, joints_)
+			typedef KLAYGE_DECLTYPE(joints_) JointsType;
+			KLAYGE_FOREACH(JointsType::const_reference joint, joints_)
 			{
 				joint_index_to_id.push_back(joint.first);
 			}
@@ -987,12 +392,12 @@ namespace MeshMLLib
 			}
 
 			// Replace parent_id
-			typedef BOOST_TYPEOF(joints_) JointsType;
-			BOOST_FOREACH(JointsType::reference joint, joints_)
+			typedef KLAYGE_DECLTYPE(joints_) JointsType;
+			KLAYGE_FOREACH(JointsType::reference joint, joints_)
 			{
 				if (joint.second.parent_id != -1)
 				{
-					BOOST_AUTO(fiter, joint_id_to_index.find(joint.second.parent_id));
+					KLAYGE_AUTO(fiter, joint_id_to_index.find(joint.second.parent_id));
 					BOOST_ASSERT(fiter != joint_id_to_index.end());
 
 					joint.second.parent_id = fiter->second;
@@ -1000,16 +405,16 @@ namespace MeshMLLib
 			}
 
 			// Replace joint_id in weight
-			typedef BOOST_TYPEOF(meshes_) MeshesType;
-			BOOST_FOREACH(MeshesType::reference mesh, meshes_)
+			typedef KLAYGE_DECLTYPE(meshes_) MeshesType;
+			KLAYGE_FOREACH(MeshesType::reference mesh, meshes_)
 			{
-				typedef BOOST_TYPEOF(mesh.vertices) VerticesType;
-				BOOST_FOREACH(VerticesType::reference vertex, mesh.vertices)
+				typedef KLAYGE_DECLTYPE(mesh.vertices) VerticesType;
+				KLAYGE_FOREACH(VerticesType::reference vertex, mesh.vertices)
 				{
-					typedef BOOST_TYPEOF(vertex.binds) BindsType;
-					BOOST_FOREACH(BindsType::reference bind, vertex.binds)
+					typedef KLAYGE_DECLTYPE(vertex.binds) BindsType;
+					KLAYGE_FOREACH(BindsType::reference bind, vertex.binds)
 					{
-						BOOST_AUTO(fiter, joint_id_to_index.find(bind.first));
+						KLAYGE_AUTO(fiter, joint_id_to_index.find(bind.first));
 						BOOST_ASSERT(fiter != joint_id_to_index.end());
 
 						bind.first = fiter->second;
@@ -1018,9 +423,9 @@ namespace MeshMLLib
 			}
 
 			// Replace joint_id in keyframes and remove unused keyframes
-			for (BOOST_AUTO(iter, keyframes_.begin()); iter != keyframes_.end();)
+			for (KLAYGE_AUTO(iter, keyframes_.begin()); iter != keyframes_.end();)
 			{
-				BOOST_AUTO(fiter, joint_id_to_index.find(iter->joint_id));
+				KLAYGE_AUTO(fiter, joint_id_to_index.find(iter->joint_id));
 				if (fiter != joint_id_to_index.end())
 				{
 					iter->joint_id = fiter->second;
@@ -1074,8 +479,8 @@ namespace MeshMLLib
 	void MeshMLObj::WriteJointChunk(std::ostream& os)
 	{
 		os << "\t<bones_chunk>" << std::endl;
-		typedef BOOST_TYPEOF(joints_) JointsType;
-		BOOST_FOREACH(JointsType::const_reference joint, joints_)
+		typedef KLAYGE_DECLTYPE(joints_) JointsType;
+		KLAYGE_FOREACH(JointsType::const_reference joint, joints_)
 		{
 			os << "\t\t<bone name=\"" << RemoveQuote(joint.second.name);
 
@@ -1097,8 +502,8 @@ namespace MeshMLLib
 	void MeshMLObj::WriteMaterialChunk(std::ostream& os)
 	{
 		os << "\t<materials_chunk>" << std::endl;
-		typedef BOOST_TYPEOF(materials_) MaterialsType;
-		BOOST_FOREACH(MaterialsType::const_reference mtl, materials_)
+		typedef KLAYGE_DECLTYPE(materials_) MaterialsType;
+		KLAYGE_FOREACH(MaterialsType::const_reference mtl, materials_)
 		{
 			os << "\t\t<material ambient=\"" << mtl.ambient[0]
 				<< " " << mtl.ambient[1]
@@ -1120,8 +525,8 @@ namespace MeshMLLib
 			{
 				os << ">" << std::endl;
 
-				typedef BOOST_TYPEOF(mtl.texture_slots) TextureSlotsType;
-				BOOST_FOREACH(TextureSlotsType::const_reference tl, mtl.texture_slots)
+				typedef KLAYGE_DECLTYPE(mtl.texture_slots) TextureSlotsType;
+				KLAYGE_FOREACH(TextureSlotsType::const_reference tl, mtl.texture_slots)
 				{
 					os << "\t\t\t<texture type=\"" << RemoveQuote(tl.first)
 						<< "\" name=\"" << RemoveQuote(tl.second) << "\"/>" << std::endl;
@@ -1140,15 +545,15 @@ namespace MeshMLLib
 	void MeshMLObj::WriteMeshChunk(std::ostream& os, int vertex_export_settings)
 	{
 		os << "\t<meshes_chunk>" << std::endl;
-		typedef BOOST_TYPEOF(meshes_) MeshesType;
-		BOOST_FOREACH(MeshesType::const_reference mesh, meshes_)
+		typedef KLAYGE_DECLTYPE(meshes_) MeshesType;
+		KLAYGE_FOREACH(MeshesType::const_reference mesh, meshes_)
 		{
 			os << "\t\t<mesh name=\"" << RemoveQuote(mesh.name)
 				<< "\" mtl_id=\"" << mesh.material_id << "\">" << std::endl;
 
 			os << "\t\t\t<vertices_chunk>" << std::endl;
 
-			typedef BOOST_TYPEOF(mesh.vertices) VerticesType;
+			typedef KLAYGE_DECLTYPE(mesh.vertices) VerticesType;
 			float3 pos_min_bb = mesh.vertices[0].position;
 			float3 pos_max_bb = pos_min_bb;
 			float2 tc_min_bb(-1, -1);
@@ -1157,7 +562,7 @@ namespace MeshMLLib
 			{
 				tc_min_bb = tc_max_bb = mesh.vertices[0].texcoords[0];
 			}
-			BOOST_FOREACH(VerticesType::const_reference vertex, mesh.vertices)
+			KLAYGE_FOREACH(VerticesType::const_reference vertex, mesh.vertices)
 			{
 				pos_min_bb.x() = std::min(pos_min_bb.x(), vertex.position.x());
 				pos_min_bb.y() = std::min(pos_min_bb.y(), vertex.position.y());
@@ -1187,7 +592,7 @@ namespace MeshMLLib
 			}
 			os << std::endl;
 
-			BOOST_FOREACH(VerticesType::const_reference vertex, mesh.vertices)
+			KLAYGE_FOREACH(VerticesType::const_reference vertex, mesh.vertices)
 			{
 				os << "\t\t\t\t<vertex v=\"" << vertex.position.x()
 					<< " " << vertex.position.y()
@@ -1213,18 +618,18 @@ namespace MeshMLLib
 
 					if (vertex_export_settings & VES_Texcoord)
 					{
-						typedef BOOST_TYPEOF(vertex.texcoords) TexcoordsType;
+						typedef KLAYGE_DECLTYPE(vertex.texcoords) TexcoordsType;
 						switch (vertex.texcoord_components)
 						{
 						case 1:
-							BOOST_FOREACH(TexcoordsType::const_reference tc, vertex.texcoords)
+							KLAYGE_FOREACH(TexcoordsType::const_reference tc, vertex.texcoords)
 							{
 								os << "\t\t\t\t\t<tex_coord v=\"" << tc.x() << "\"/>" << std::endl;
 							}
 							break;
 
 						case 2:
-							BOOST_FOREACH(TexcoordsType::const_reference tc, vertex.texcoords)
+							KLAYGE_FOREACH(TexcoordsType::const_reference tc, vertex.texcoords)
 							{
 								os << "\t\t\t\t\t<tex_coord v=\"" << tc.x()
 									<< " " << tc.y() << "\"/>" << std::endl;
@@ -1232,7 +637,7 @@ namespace MeshMLLib
 							break;
 
 						case 3:
-							BOOST_FOREACH(TexcoordsType::const_reference tc, vertex.texcoords)
+							KLAYGE_FOREACH(TexcoordsType::const_reference tc, vertex.texcoords)
 							{
 								os << "\t\t\t\t\t<tex_coord v=\"" << tc.x()
 									<< " " << tc.y() << " " << tc.z() << "\"/>" << std::endl;
@@ -1277,8 +682,8 @@ namespace MeshMLLib
 			os << "\t\t\t</vertices_chunk>" << std::endl;
 
 			os << "\t\t\t<triangles_chunk>" << std::endl;
-			typedef BOOST_TYPEOF(mesh.triangles) TrianglesType;
-			BOOST_FOREACH(TrianglesType::const_reference tri, mesh.triangles)
+			typedef KLAYGE_DECLTYPE(mesh.triangles) TrianglesType;
+			KLAYGE_FOREACH(TrianglesType::const_reference tri, mesh.triangles)
 			{
 				os << "\t\t\t\t<triangle index=\"" << tri.vertex_index[0]
 					<< " " << tri.vertex_index[1]
@@ -1305,7 +710,7 @@ namespace MeshMLLib
 			<< "\" frame_rate=\"" << frame_rate_ << "\">" << std::endl;
 		for (int joint_index = 0; joint_index < static_cast<int>(joints_.size()); ++ joint_index)
 		{
-			BOOST_AUTO(iter, joint_index_to_kf.find(joint_index));
+			KLAYGE_AUTO(iter, joint_index_to_kf.find(joint_index));
 			BOOST_ASSERT(iter != joint_index_to_kf.end());
 
 			Keyframes kf = keyframes_[iter->second];
@@ -1536,14 +941,14 @@ namespace MeshMLLib
 		std::set<int> joints_used;
 
 		// Find all joints used in the mesh list
-		typedef BOOST_TYPEOF(meshes_) MeshesType;
-		BOOST_FOREACH(MeshesType::const_reference mesh, meshes_)
+		typedef KLAYGE_DECLTYPE(meshes_) MeshesType;
+		KLAYGE_FOREACH(MeshesType::const_reference mesh, meshes_)
 		{
-			typedef BOOST_TYPEOF(mesh.vertices) VerticesType;
-			BOOST_FOREACH(VerticesType::const_reference vertex, mesh.vertices)
+			typedef KLAYGE_DECLTYPE(mesh.vertices) VerticesType;
+			KLAYGE_FOREACH(VerticesType::const_reference vertex, mesh.vertices)
 			{
-				typedef BOOST_TYPEOF(vertex.binds) BindsType;
-				BOOST_FOREACH(BindsType::const_reference bind, vertex.binds)
+				typedef KLAYGE_DECLTYPE(vertex.binds) BindsType;
+				KLAYGE_FOREACH(BindsType::const_reference bind, vertex.binds)
 				{
 					joints_used.insert(bind.first);
 				}
@@ -1552,8 +957,8 @@ namespace MeshMLLib
 
 		// Traverse the joint list and see if used joints' parents can be added
 		std::set<int> parent_joints_used;
-		typedef BOOST_TYPEOF(joints_) JointsType;
-		BOOST_FOREACH(JointsType::const_reference joint, joints_)
+		typedef KLAYGE_DECLTYPE(joints_) JointsType;
+		KLAYGE_FOREACH(JointsType::const_reference joint, joints_)
 		{
 			if (joints_used.find(joint.first) != joints_used.end())
 			{
@@ -1569,7 +974,7 @@ namespace MeshMLLib
 		joints_used.insert(parent_joints_used.begin(), parent_joints_used.end());
 
 		// Traverse the joint list and erase those never recorded by joints_used
-		for (BOOST_AUTO(iter, joints_.begin()); iter != joints_.end();)
+		for (KLAYGE_AUTO(iter, joints_.begin()); iter != joints_.end();)
 		{
 			if (joints_used.find(iter->first) == joints_used.end())
 			{
@@ -1610,8 +1015,8 @@ namespace MeshMLLib
 
 		materials_ = mtls_used;
 
-		typedef BOOST_TYPEOF(meshes_) MeshesType;
-		BOOST_FOREACH(MeshesType::reference mesh, meshes_)
+		typedef KLAYGE_DECLTYPE(meshes_) MeshesType;
+		KLAYGE_FOREACH(MeshesType::reference mesh, meshes_)
 		{
 			mesh.material_id = mtl_mapping[mesh.material_id];
 		}
@@ -1646,15 +1051,15 @@ namespace MeshMLLib
 					opt_mesh.material_id = static_cast<int>(i);
 					opt_mesh.name = ss.str();
 
-					typedef BOOST_TYPEOF(meshes_to_combine) MeshesType;
-					BOOST_FOREACH(MeshesType::const_reference mesh, meshes_to_combine)
+					typedef KLAYGE_DECLTYPE(meshes_to_combine) MeshesType;
+					KLAYGE_FOREACH(MeshesType::const_reference mesh, meshes_to_combine)
 					{
 						int base = static_cast<int>(opt_mesh.vertices.size());
 						opt_mesh.vertices.insert(opt_mesh.vertices.end(),
 							mesh.vertices.begin(), mesh.vertices.end());
 
-						typedef BOOST_TYPEOF(mesh.triangles) TrianglesType;
-						BOOST_FOREACH(TrianglesType::const_reference tri, mesh.triangles)
+						typedef KLAYGE_DECLTYPE(mesh.triangles) TrianglesType;
+						KLAYGE_FOREACH(TrianglesType::const_reference tri, mesh.triangles)
 						{
 							Triangle opt_tri;
 							opt_tri.vertex_index[0] = tri.vertex_index[0] + base;
@@ -1717,8 +1122,8 @@ namespace MeshMLLib
 	void MeshMLObj::UpdateJoints(int frame, std::vector<Quaternion>& bind_reals, std::vector<Quaternion>& bind_duals) const
 	{
 		std::vector<Joint> bind_joints;
-		typedef BOOST_TYPEOF(joints_) JointsType;
-		BOOST_FOREACH(JointsType::const_reference joint, joints_)
+		typedef KLAYGE_DECLTYPE(joints_) JointsType;
+		KLAYGE_FOREACH(JointsType::const_reference joint, joints_)
 		{
 			bind_joints.push_back(joint.second);
 		}

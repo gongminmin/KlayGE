@@ -27,16 +27,16 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 #include <KlayGE/KlayGE.hpp>
-#include <KlayGE/ThrowErr.hpp>
-#include <KlayGE/Math.hpp>
+#include <KFL/ThrowErr.hpp>
+#include <KFL/Math.hpp>
 #include <KlayGE/Context.hpp>
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/RenderView.hpp>
-#include <KlayGE/ResLoader.hpp>
-#include <KlayGE/Util.hpp>
+#include <KFL/ResLoader.hpp>
+#include <KFL/Util.hpp>
 #include <KlayGE/BlockCompression.hpp>
-#include <KlayGE/half.hpp>
+#include <KFL/Half.hpp>
 
 #include <cstring>
 #include <fstream>

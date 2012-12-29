@@ -1,12 +1,12 @@
 #include <KlayGE/KlayGE.hpp>
-#include <KlayGE/Math.hpp>
+#include <KFL/Math.hpp>
 #include <KlayGE/Context.hpp>
-#include <KlayGE/ResLoader.hpp>
+#include <KFL/ResLoader.hpp>
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/App3D.hpp>
 #include <KlayGE/RenderSettings.hpp>
 #include <KlayGE/RenderEffect.hpp>
-#include <KlayGE/XMLDom.hpp>
+#include <KFL/XMLDom.hpp>
 
 #include <iostream>
 #include <fstream>

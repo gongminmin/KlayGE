@@ -11,7 +11,7 @@
 /////////////////////////////////////////////////////////////////////////////////
 
 #include <KlayGE/KlayGE.hpp>
-#include <KlayGE/Util.hpp>
+#include <KFL/Util.hpp>
 #include <KlayGE/App3D.hpp>
 #include <KlayGE/RenderLayout.hpp>
 #include <KlayGE/RenderFactory.hpp>

@@ -18,8 +18,8 @@
 /////////////////////////////////////////////////////////////////////////////////
 
 #include <KlayGE/KlayGE.hpp>
-#include <KlayGE/ThrowErr.hpp>
-#include <KlayGE/Util.hpp>
+#include <KFL/ThrowErr.hpp>
+#include <KFL/Util.hpp>
 #include <KlayGE/InputFactory.hpp>
 #include <KlayGE/Context.hpp>
 

@@ -16,10 +16,10 @@
 
 #include <KlayGE/KlayGE.hpp>
 #define INITGUID
-#include <KlayGE/ThrowErr.hpp>
-#include <KlayGE/Util.hpp>
-#include <KlayGE/Math.hpp>
-#include <KlayGE/COMPtr.hpp>
+#include <KFL/ThrowErr.hpp>
+#include <KFL/Util.hpp>
+#include <KFL/Math.hpp>
+#include <KFL/COMPtr.hpp>
 #include <KlayGE/Context.hpp>
 #include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/RenderFactory.hpp>

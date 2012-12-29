@@ -1,7 +1,7 @@
 #include <KlayGE/KlayGE.hpp>
-#include <KlayGE/Util.hpp>
-#include <KlayGE/ThrowErr.hpp>
-#include <KlayGE/Math.hpp>
+#include <KFL/Util.hpp>
+#include <KFL/ThrowErr.hpp>
+#include <KFL/Math.hpp>
 #include <KlayGE/Font.hpp>
 #include <KlayGE/GraphicsBuffer.hpp>
 #include <KlayGE/Renderable.hpp>
@@ -11,7 +11,7 @@
 #include <KlayGE/FrameBuffer.hpp>
 #include <KlayGE/SceneManager.hpp>
 #include <KlayGE/Context.hpp>
-#include <KlayGE/ResLoader.hpp>
+#include <KFL/ResLoader.hpp>
 #include <KlayGE/RenderSettings.hpp>
 #include <KlayGE/SceneObjectHelper.hpp>
 #include <KlayGE/UI.hpp>

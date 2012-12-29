@@ -17,7 +17,7 @@
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/SceneManager.hpp>
 #include <KlayGE/Context.hpp>
-#include <KlayGE/Math.hpp>
+#include <KFL/Math.hpp>
 #include <KlayGE/Renderable.hpp>
 
 #include <boost/assert.hpp>

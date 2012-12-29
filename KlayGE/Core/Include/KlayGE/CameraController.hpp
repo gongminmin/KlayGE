@@ -29,8 +29,8 @@
 #include <KlayGE/config/auto_link.hpp>
 #endif
 
-#include <KlayGE/Math.hpp>
-#include <KlayGE/Timer.hpp>
+#include <KFL/Math.hpp>
+#include <KFL/Timer.hpp>
 #include <KlayGE/Input.hpp>
 
 namespace KlayGE

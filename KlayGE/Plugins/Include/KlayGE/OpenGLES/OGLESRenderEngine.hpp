@@ -18,7 +18,7 @@
 
 #pragma once
 
-#include <KlayGE/Vector.hpp>
+#include <KFL/Vector.hpp>
 
 #include <vector>
 #include <map>

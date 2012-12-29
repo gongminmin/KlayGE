@@ -14,7 +14,7 @@
 /////////////////////////////////////////////////////////////////////////////////
 
 #include <KlayGE/KlayGE.hpp>
-#include <KlayGE/ThrowErr.hpp>
+#include <KFL/ThrowErr.hpp>
 
 #include <boost/assert.hpp>
 
@@ -23,7 +23,7 @@
 #ifndef KLAYGE_PLATFORM_WINDOWS_METRO
 
 #ifdef KLAYGE_COMPILER_MSVC
-#define PYTHON_VER_STR KLAYGE_STRINGIZE(PY_MAJOR_VERSION)KLAYGE_STRINGIZE(PY_MINOR_VERSION)
+#define PYTHON_VER_STR KFL_STRINGIZE(PY_MAJOR_VERSION)KFL_STRINGIZE(PY_MINOR_VERSION)
 
 #ifdef KLAYGE_DEBUG
 #define PYTHON_DBG_SUFFIX "_d"
@@ -31,7 +31,7 @@
 #define PYTHON_DBG_SUFFIX ""
 #endif
 
-#define PYTHON_LIB_STR KLAYGE_STRINGIZE("python")KLAYGE_STRINGIZE(FREETYPE_VER_STR)KLAYGE_STRINGIZE(FREETYPE_DBG_SUFFIX)KLAYGE_STRINGIZE(".lib")
+#define PYTHON_LIB_STR KFL_STRINGIZE("python")KFL_STRINGIZE(FREETYPE_VER_STR)KFL_STRINGIZE(FREETYPE_DBG_SUFFIX)KFL_STRINGIZE(".lib")
 #endif
 
 namespace KlayGE

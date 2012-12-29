@@ -33,14 +33,25 @@
 
 #pragma once
 
-#include <KlayGE/Config.hpp>
-#include <KlayGE/Types.hpp>
+#include <KFL/KFL.hpp>
 
 #define KLAYGE_NAME			KlayGE
 #define KLAYGE_VER_MAJOR	4
 #define KLAYGE_VER_MINOR	2
 #define KLAYGE_VER_RELEASE	0
-#define KLAYGE_VER_STR		KLAYGE_STRINGIZE(KLAYGE_NAME)" "KLAYGE_STRINGIZE(KLAYGE_VER_MAJOR)"."KLAYGE_STRINGIZE(KLAYGE_VER_MINOR)"."KLAYGE_STRINGIZE(KLAYGE_VER_RELEASE)
+#define KLAYGE_VER_STR		KFL_STRINGIZE(KLAYGE_NAME)" "KFL_STRINGIZE(KLAYGE_VER_MAJOR)"."KFL_STRINGIZE(KLAYGE_VER_MINOR)"."KFL_STRINGIZE(KLAYGE_VER_RELEASE)
+
+#define KLAYGE_COMPILER_TOOLSET KFL_STRINGIZE(KFL_JOIN(KLAYGE_COMPILER_NAME, KLAYGE_COMPILER_VERSION))
+
+#ifdef KLAYGE_HAS_DECLSPEC
+	#ifdef KLAYGE_CORE_SOURCE		// Build dll
+		#define KLAYGE_CORE_API __declspec(dllexport)
+	#else							// Use dll
+		#define KLAYGE_CORE_API __declspec(dllimport)
+	#endif
+#else
+	#define KLAYGE_CORE_API
+#endif // KLAYGE_HAS_DECLSPEC
 
 #include <vector>
 #include <string>
@@ -48,9 +59,6 @@
 #include <boost/assert.hpp>
 
 #include <KlayGE/PreDeclare.hpp>
-#include <KlayGE/ThrowErr.hpp>
-#include <KlayGE/Util.hpp>
 #include <KlayGE/Context.hpp>
-#include <KlayGE/Math.hpp>
 
 #endif		// _KLAYGE_HPP

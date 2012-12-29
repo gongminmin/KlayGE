@@ -16,7 +16,7 @@
 #pragma once
 
 #include <KlayGE/PreDeclare.hpp>
-#include <KlayGE/atomic.hpp>
+#include <KFL/Atomic.hpp>
 
 #include <d3d9.h>
 #include <strmif.h>

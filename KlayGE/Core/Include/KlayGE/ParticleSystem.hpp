@@ -16,7 +16,7 @@
 #pragma once
 
 #include <KlayGE/PreDeclare.hpp>
-#include <KlayGE/Math.hpp>
+#include <KFL/Math.hpp>
 
 #include <vector>
 

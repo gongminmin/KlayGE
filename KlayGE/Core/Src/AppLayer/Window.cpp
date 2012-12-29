@@ -17,8 +17,8 @@
 /////////////////////////////////////////////////////////////////////////////////
 
 #include <KlayGE/KlayGE.hpp>
-#include <KlayGE/Math.hpp>
-#include <KlayGE/Util.hpp>
+#include <KFL/Math.hpp>
+#include <KFL/Util.hpp>
 
 #include <KlayGE/Window.hpp>
 

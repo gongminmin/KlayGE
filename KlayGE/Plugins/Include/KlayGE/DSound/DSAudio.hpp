@@ -16,7 +16,7 @@
 #pragma once
 
 #include <KlayGE/PreDeclare.hpp>
-#include <KlayGE/thread.hpp>
+#include <KFL/Thread.hpp>
 
 #include <vector>
 #include <windows.h>

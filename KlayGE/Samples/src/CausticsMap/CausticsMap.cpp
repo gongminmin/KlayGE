@@ -1,5 +1,5 @@
 #include <KlayGE/KlayGE.hpp>
-#include <KlayGE/ResLoader.hpp>
+#include <KFL/ResLoader.hpp>
 #include <KlayGE/Context.hpp>
 #include <KlayGE/Input.hpp>
 #include <KlayGE/InputFactory.hpp>
@@ -8,7 +8,7 @@
 #include <KlayGE/RenderEffect.hpp>
 #include <KlayGE/FrameBuffer.hpp>
 #include <KlayGE/GraphicsBuffer.hpp>
-#include <KlayGE/Math.hpp>
+#include <KFL/Math.hpp>
 #include <KlayGE/SceneObjectHelper.hpp>
 #include <KlayGE/RenderStateObject.hpp>
 #include <KlayGE/Query.hpp>

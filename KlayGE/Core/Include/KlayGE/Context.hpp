@@ -43,7 +43,7 @@
 #endif
 
 #include <KlayGE/RenderSettings.hpp>
-#include <KlayGE/DllLoader.hpp>
+#include <KFL/DllLoader.hpp>
 
 namespace KlayGE
 {

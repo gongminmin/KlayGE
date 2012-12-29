@@ -35,7 +35,7 @@
 #include <KlayGE/PreDeclare.hpp>
 #include <KlayGE/Renderable.hpp>
 #include <KlayGE/RenderLayout.hpp>
-#include <KlayGE/Math.hpp>
+#include <KFL/Math.hpp>
 
 #include <vector>
 #include <string>

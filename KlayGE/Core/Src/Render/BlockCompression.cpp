@@ -16,7 +16,7 @@
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/Context.hpp>
 #include <KlayGE/RenderFactory.hpp>
-#include <KlayGE/Color.hpp>
+#include <KFL/Color.hpp>
 #include <klayGE/Texture.hpp>
 
 #include <vector>

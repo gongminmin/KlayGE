@@ -14,7 +14,7 @@
 /////////////////////////////////////////////////////////////////////////////////
 
 #include <KlayGE/KlayGE.hpp>
-#include <KlayGE/Vector.hpp>
+#include <KFL/Vector.hpp>
 
 #include <KlayGE/HeightMap.hpp>
 

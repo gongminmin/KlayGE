@@ -12,8 +12,8 @@
 
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/Context.hpp>
-#include <KlayGE/ResLoader.hpp>
-#include <KlayGE/Util.hpp>
+#include <KFL/ResLoader.hpp>
+#include <KFL/Util.hpp>
 
 #include <windows.h>
 #include <tchar.h>

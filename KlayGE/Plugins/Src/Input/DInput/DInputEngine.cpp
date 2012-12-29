@@ -12,9 +12,9 @@
 
 #include <KlayGE/KlayGE.hpp>
 #define INITGUID
-#include <KlayGE/Util.hpp>
-#include <KlayGE/ThrowErr.hpp>
-#include <KlayGE/COMPtr.hpp>
+#include <KFL/Util.hpp>
+#include <KFL/ThrowErr.hpp>
+#include <KFL/COMPtr.hpp>
 #include <KlayGE/Context.hpp>
 #include <KlayGE/App3D.hpp>
 #include <KlayGE/Window.hpp>

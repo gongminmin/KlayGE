@@ -14,7 +14,7 @@
 /////////////////////////////////////////////////////////////////////////////////
 
 #include <KlayGE/KlayGE.hpp>
-#include <KlayGE/ThrowErr.hpp>
+#include <KFL/ThrowErr.hpp>
 
 #include <cstring>
 #include <boost/assert.hpp>

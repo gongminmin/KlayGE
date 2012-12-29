@@ -20,17 +20,17 @@
 /////////////////////////////////////////////////////////////////////////////////
 
 #include <KlayGE/KlayGE.hpp>
-#include <KlayGE/Util.hpp>
-#include <KlayGE/Math.hpp>
-#include <KlayGE/Log.hpp>
+#include <KFL/Util.hpp>
+#include <KFL/Math.hpp>
+#include <KFL/Log.hpp>
 #include <KlayGE/SceneManager.hpp>
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/AudioFactory.hpp>
 #include <KlayGE/InputFactory.hpp>
 #include <KlayGE/ShowFactory.hpp>
 #include <KlayGE/AudioDataSource.hpp>
-#include <KlayGE/ResLoader.hpp>
-#include <KlayGE/XMLDom.hpp>
+#include <KFL/ResLoader.hpp>
+#include <KFL/XMLDom.hpp>
 #include <KlayGE/DeferredRenderingLayer.hpp>
 
 #include <fstream>
@@ -77,7 +77,7 @@ namespace KlayGE
 		show_factory_ = ShowFactory::NullObject();
 		audio_data_src_factory_ = AudioDataSourceFactory::NullObject();
 
-		dll_suffix_ = KLAYGE_STRINGIZE(KLAYGE_COMPILER_NAME);
+		dll_suffix_ = KFL_STRINGIZE(KLAYGE_COMPILER_NAME);
 #ifdef KLAYGE_DEBUG
 		dll_suffix_ += "_d";
 #endif
@@ -622,7 +622,7 @@ namespace KlayGE
 		render_loader_.Free();
 
 		std::string render_path = ResLoader::Instance().Locate("Render");
-		std::string fn = KLAYGE_STRINGIZE(KLAYGE_NAME) + std::string("_RenderEngine_") + rf_name + "_" + dll_suffix_;
+		std::string fn = KFL_STRINGIZE(KLAYGE_NAME) + std::string("_RenderEngine_") + rf_name + "_" + dll_suffix_;
 #ifdef KLAYGE_COMPILER_GCC
 		fn = "lib" + fn;
 #endif
@@ -651,7 +651,7 @@ namespace KlayGE
 		audio_loader_.Free();
 
 		std::string audio_path = ResLoader::Instance().Locate("Audio");
-		std::string fn = KLAYGE_STRINGIZE(KLAYGE_NAME) + std::string("_AudioEngine_") + af_name + "_" + dll_suffix_;
+		std::string fn = KFL_STRINGIZE(KLAYGE_NAME) + std::string("_AudioEngine_") + af_name + "_" + dll_suffix_;
 #ifdef KLAYGE_COMPILER_GCC
 		fn = "lib" + fn;
 #endif
@@ -677,7 +677,7 @@ namespace KlayGE
 		input_loader_.Free();
 
 		std::string input_path = ResLoader::Instance().Locate("Input");
-		std::string fn = KLAYGE_STRINGIZE(KLAYGE_NAME) + std::string("_InputEngine_") + if_name + "_" + dll_suffix_;
+		std::string fn = KFL_STRINGIZE(KLAYGE_NAME) + std::string("_InputEngine_") + if_name + "_" + dll_suffix_;
 #ifdef KLAYGE_COMPILER_GCC
 		fn = "lib" + fn;
 #endif
@@ -703,7 +703,7 @@ namespace KlayGE
 		show_loader_.Free();
 
 		std::string show_path = ResLoader::Instance().Locate("Show");
-		std::string fn = KLAYGE_STRINGIZE(KLAYGE_NAME) + std::string("_ShowEngine_") + sf_name + "_" + dll_suffix_;
+		std::string fn = KFL_STRINGIZE(KLAYGE_NAME) + std::string("_ShowEngine_") + sf_name + "_" + dll_suffix_;
 #ifdef KLAYGE_COMPILER_GCC
 		fn = "lib" + fn;
 #endif
@@ -730,7 +730,7 @@ namespace KlayGE
 		sm_loader_.Free();
 
 		std::string sm_path = ResLoader::Instance().Locate("Scene");
-		std::string fn = KLAYGE_STRINGIZE(KLAYGE_NAME) + std::string("_Scene_") + sm_name + "_" + dll_suffix_;
+		std::string fn = KFL_STRINGIZE(KLAYGE_NAME) + std::string("_Scene_") + sm_name + "_" + dll_suffix_;
 #ifdef KLAYGE_COMPILER_GCC
 		fn = "lib" + fn;
 #endif
@@ -759,7 +759,7 @@ namespace KlayGE
 		ads_loader_.Free();
 
 		std::string adsf_path = ResLoader::Instance().Locate("Audio");
-		std::string fn = KLAYGE_STRINGIZE(KLAYGE_NAME) + std::string("_AudioDataSource_") + adsf_name + "_" + dll_suffix_;
+		std::string fn = KFL_STRINGIZE(KLAYGE_NAME) + std::string("_AudioDataSource_") + adsf_name + "_" + dll_suffix_;
 #ifdef KLAYGE_COMPILER_GCC
 		fn = "lib" + fn;
 #endif

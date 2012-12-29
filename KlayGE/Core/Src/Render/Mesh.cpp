@@ -20,16 +20,16 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 #include <KlayGE/KlayGE.hpp>
-#include <KlayGE/Math.hpp>
+#include <KFL/Math.hpp>
 #include <KlayGE/Context.hpp>
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/Texture.hpp>
 #include <KlayGE/RenderEffect.hpp>
-#include <KlayGE/ResLoader.hpp>
+#include <KFL/ResLoader.hpp>
 #include <KlayGE/App3D.hpp>
 #include <KlayGE/Camera.hpp>
-#include <KlayGE/XMLDom.hpp>
-#include <KlayGE/LZMACodec.hpp>
+#include <KFL/XMLDom.hpp>
+#include <KFL/LZMACodec.hpp>
 #include <KlayGE/Light.hpp>
 
 #include <algorithm>
@@ -2310,7 +2310,7 @@ namespace KlayGE
 		std::vector<Joint> const & joints, boost::shared_ptr<AnimationActionsType> const & actions,
 		boost::shared_ptr<KeyFramesType> const & kfs, uint32_t num_frames, uint32_t frame_rate)
 	{
-		MeshMLLib::MeshMLObj obj(1);
+		MeshMLObj obj(1);
 		obj.NumFrames(num_frames);
 		obj.FrameRate(frame_rate);
 

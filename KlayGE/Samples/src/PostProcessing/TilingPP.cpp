@@ -1,8 +1,8 @@
 #include <KlayGE/KlayGE.hpp>
-#include <KlayGE/Util.hpp>
+#include <KFL/Util.hpp>
 #include <KlayGE/Context.hpp>
-#include <KlayGE/Math.hpp>
-#include <KlayGE/ResLoader.hpp>
+#include <KFL/Math.hpp>
+#include <KFL/ResLoader.hpp>
 #include <KlayGE/FrameBuffer.hpp>
 #include <KlayGE/RenderEffect.hpp>
 #include <KlayGE/RenderEngine.hpp>
