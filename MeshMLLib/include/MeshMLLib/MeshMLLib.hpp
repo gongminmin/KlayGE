@@ -38,6 +38,7 @@
 #include <map>
 #include <iostream>
 
+#include <KFL/PreDeclare.hpp>
 #include <KFL/Vector.hpp>
 #include <KFL/Quaternion.hpp>
 #include <KFL/Matrix.hpp>

@@ -42,7 +42,6 @@
 #include <boost/assert.hpp>
 
 #include <KFL/PreDeclare.hpp>
-#include <KFL/ThrowErr.hpp>
 #include <KFL/Util.hpp>
 #include <KFL/Math.hpp>
 

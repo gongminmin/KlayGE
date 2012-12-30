@@ -30,6 +30,11 @@
 #include <iskin.h>
 #pragma warning(pop)
 
+#ifdef PI
+#undef PI
+#endif
+#include <KFL/KFL.hpp>
+
 #include <fstream>
 #include <sstream>
 #include <algorithm>
@@ -37,96 +42,6 @@
 #include <vector>
 #include <limits>
 #include <functional>
-
-#include <boost/typeof/typeof.hpp>
-#include <boost/foreach.hpp>
-
-#include <KlayGE/Config.hpp>
-#include <KlayGE/Types.hpp>
-
-namespace KlayGE
-{
-	template <typename T>
-	class Matrix4_T;
-	typedef Matrix4_T<float> float4x4;
-
-	template <typename T>
-	class Quaternion_T;
-	typedef Quaternion_T<float> Quaternion;
-
-	namespace MathLib
-	{
-		template <typename T>
-		Matrix4_T<T> transpose(Matrix4_T<T> const & rhs);
-
-		template <typename T>
-		Matrix4_T<T> mul(Matrix4_T<T> const & lhs, Matrix4_T<T> const & rhs);
-
-		template <typename T>
-		Quaternion_T<T> mul(Quaternion_T<T> const & lhs, Quaternion_T<T> const & rhs);
-	}
-}
-
-#include <KlayGE/Matrix.hpp>
-
-namespace KlayGE
-{
-	namespace MathLib
-	{
-		template float4x4 transpose(float4x4 const & rhs);
-
-		template <typename T>
-		Matrix4_T<T> transpose(Matrix4_T<T> const & rhs)
-		{
-			return Matrix4_T<T>(
-				rhs(0, 0), rhs(1, 0), rhs(2, 0), rhs(3, 0),
-				rhs(0, 1), rhs(1, 1), rhs(2, 1), rhs(3, 1),
-				rhs(0, 2), rhs(1, 2), rhs(2, 2), rhs(3, 2),
-				rhs(0, 3), rhs(1, 3), rhs(2, 3), rhs(3, 3));
-		}
-
-		template float4x4 mul(float4x4 const & lhs, float4x4 const & rhs);
-
-		template <typename T>
-		Matrix4_T<T> mul(Matrix4_T<T> const & lhs, Matrix4_T<T> const & rhs)
-		{
-			Matrix4_T<T> const tmp(transpose(rhs));
-
-			return Matrix4_T<T>(
-				lhs(0, 0) * tmp(0, 0) + lhs(0, 1) * tmp(0, 1) + lhs(0, 2) * tmp(0, 2) + lhs(0, 3) * tmp(0, 3),
-				lhs(0, 0) * tmp(1, 0) + lhs(0, 1) * tmp(1, 1) + lhs(0, 2) * tmp(1, 2) + lhs(0, 3) * tmp(1, 3),
-				lhs(0, 0) * tmp(2, 0) + lhs(0, 1) * tmp(2, 1) + lhs(0, 2) * tmp(2, 2) + lhs(0, 3) * tmp(2, 3),
-				lhs(0, 0) * tmp(3, 0) + lhs(0, 1) * tmp(3, 1) + lhs(0, 2) * tmp(3, 2) + lhs(0, 3) * tmp(3, 3),
-
-				lhs(1, 0) * tmp(0, 0) + lhs(1, 1) * tmp(0, 1) + lhs(1, 2) * tmp(0, 2) + lhs(1, 3) * tmp(0, 3),
-				lhs(1, 0) * tmp(1, 0) + lhs(1, 1) * tmp(1, 1) + lhs(1, 2) * tmp(1, 2) + lhs(1, 3) * tmp(1, 3),
-				lhs(1, 0) * tmp(2, 0) + lhs(1, 1) * tmp(2, 1) + lhs(1, 2) * tmp(2, 2) + lhs(1, 3) * tmp(2, 3),
-				lhs(1, 0) * tmp(3, 0) + lhs(1, 1) * tmp(3, 1) + lhs(1, 2) * tmp(3, 2) + lhs(1, 3) * tmp(3, 3),
-
-				lhs(2, 0) * tmp(0, 0) + lhs(2, 1) * tmp(0, 1) + lhs(2, 2) * tmp(0, 2) + lhs(2, 3) * tmp(0, 3),
-				lhs(2, 0) * tmp(1, 0) + lhs(2, 1) * tmp(1, 1) + lhs(2, 2) * tmp(1, 2) + lhs(2, 3) * tmp(1, 3),
-				lhs(2, 0) * tmp(2, 0) + lhs(2, 1) * tmp(2, 1) + lhs(2, 2) * tmp(2, 2) + lhs(2, 3) * tmp(2, 3),
-				lhs(2, 0) * tmp(3, 0) + lhs(2, 1) * tmp(3, 1) + lhs(2, 2) * tmp(3, 2) + lhs(2, 3) * tmp(3, 3),
-
-				lhs(3, 0) * tmp(0, 0) + lhs(3, 1) * tmp(0, 1) + lhs(3, 2) * tmp(0, 2) + lhs(3, 3) * tmp(0, 3),
-				lhs(3, 0) * tmp(1, 0) + lhs(3, 1) * tmp(1, 1) + lhs(3, 2) * tmp(1, 2) + lhs(3, 3) * tmp(1, 3),
-				lhs(3, 0) * tmp(2, 0) + lhs(3, 1) * tmp(2, 1) + lhs(3, 2) * tmp(2, 2) + lhs(3, 3) * tmp(2, 3),
-				lhs(3, 0) * tmp(3, 0) + lhs(3, 1) * tmp(3, 1) + lhs(3, 2) * tmp(3, 2) + lhs(3, 3) * tmp(3, 3));
-		}
-
-		template Quaternion mul(Quaternion const & lhs, Quaternion const & rhs);
-
-		template <typename T>
-		Quaternion_T<T> mul(Quaternion_T<T> const & lhs, Quaternion_T<T> const & rhs)
-		{
-			return Quaternion_T<T>(
-				lhs.x() * rhs.w() - lhs.y() * rhs.z() + lhs.z() * rhs.y() + lhs.w() * rhs.x(),
-				lhs.x() * rhs.z() + lhs.y() * rhs.w() - lhs.z() * rhs.x() + lhs.w() * rhs.y(),
-				lhs.y() * rhs.x() - lhs.x() * rhs.y() + lhs.z() * rhs.w() + lhs.w() * rhs.z(),
-				lhs.w() * rhs.w() - lhs.x() * rhs.x() - lhs.y() * rhs.y() - lhs.z() * rhs.z());
-		}
-	}
-}
 
 #include "util.hpp"
 #include "mesh_extractor.hpp"
@@ -223,8 +138,6 @@ namespace
 
 namespace KlayGE
 {
-	using namespace MeshMLLib;
-
 	meshml_extractor::meshml_extractor(INode* root_node, int joints_per_ver, int cur_time, int start_frame, int end_frame, bool combine_meshes)
 						: meshml_obj_(static_cast<float>(GetMasterScale(UNITS_METERS))),
 							root_node_(root_node),
@@ -279,8 +192,8 @@ namespace KlayGE
 			physique_mods_.clear();
 			skins_.clear();
 			skin_mods_.clear();
-			typedef BOOST_TYPEOF(nodes) nodes_type;
-			BOOST_FOREACH(nodes_type::const_reference node, nodes)
+			typedef KLAYGE_DECLTYPE(nodes) nodes_type;
+			KLAYGE_FOREACH(nodes_type::const_reference node, nodes)
 			{
 				Object* obj_ref = node->GetObjectRef();
 				while ((obj_ref != NULL) && (GEN_DERIVOB_CLASS_ID == obj_ref->SuperClassID()))
@@ -324,16 +237,16 @@ namespace KlayGE
 		std::vector<INode*> jnodes;
 		std::vector<INode*> mnodes;
 
-		typedef BOOST_TYPEOF(joint_nodes_) jn_type;
-		BOOST_FOREACH(jn_type::const_reference jn, joint_nodes_)
+		typedef KLAYGE_DECLTYPE(joint_nodes_) jn_type;
+		KLAYGE_FOREACH(jn_type::const_reference jn, joint_nodes_)
 		{
 			if (is_bone(jn.first))
 			{
 				jnodes.push_back(jn.first);
 			}
 		}
-		typedef BOOST_TYPEOF(nodes) nodes_type;
-		BOOST_FOREACH(nodes_type::const_reference node, nodes)
+		typedef KLAYGE_DECLTYPE(nodes) nodes_type;
+		KLAYGE_FOREACH(nodes_type::const_reference node, nodes)
 		{
 			if (is_bone(node))
 			{
@@ -353,14 +266,14 @@ namespace KlayGE
 		std::sort(mnodes.begin(), mnodes.end());
 		mnodes.erase(std::unique(mnodes.begin(), mnodes.end()), mnodes.end());
 
-		typedef BOOST_TYPEOF(jnodes) jnodes_type;
-		BOOST_FOREACH(jnodes_type::const_reference jnode, jnodes)
+		typedef KLAYGE_DECLTYPE(jnodes) jnodes_type;
+		KLAYGE_FOREACH(jnodes_type::const_reference jnode, jnodes)
 		{
 			this->extract_bone(jnode);
 		}
 		
-		typedef BOOST_TYPEOF(mnodes) mnodes_type;
-		BOOST_FOREACH(mnodes_type::const_reference mnode, mnodes)
+		typedef KLAYGE_DECLTYPE(mnodes) mnodes_type;
+		KLAYGE_FOREACH(mnodes_type::const_reference mnode, mnodes)
 		{
 			this->extract_object(mnode);
 		}
@@ -378,10 +291,10 @@ namespace KlayGE
 				uv_transss.push_back(std::map<int, std::pair<Matrix3, int> >());
 				std::map<int, std::pair<Matrix3, int> >& uv_transs = uv_transss.back();
 
-				Color ambient = max_mtl->GetAmbient();
-				Color diffuse = max_mtl->GetDiffuse();
-				Color specular = max_mtl->GetSpecular();
-				Color emit;
+				::Color ambient = max_mtl->GetAmbient();
+				::Color diffuse = max_mtl->GetDiffuse();
+				::Color specular = max_mtl->GetSpecular();
+				::Color emit;
 				if (max_mtl->GetSelfIllumColorOn())
 				{
 					emit = max_mtl->GetSelfIllumColor();
@@ -638,8 +551,8 @@ namespace KlayGE
 					}
 
 					vertex_index.pos_index = pos_indices[offset];
-					typedef BOOST_TYPEOF(tex_indices) ti_type;
-					BOOST_FOREACH(ti_type::const_reference tex_index, tex_indices)
+					typedef KLAYGE_DECLTYPE(tex_indices) ti_type;
+					KLAYGE_FOREACH(ti_type::const_reference tex_index, tex_indices)
 					{
 						vertex_index.tex_indices.push_back(tex_index.second[offset]);
 					}
@@ -696,8 +609,8 @@ namespace KlayGE
 				}
 
 				Matrix3 tm = node->GetObjTMAfterWSM(0);
-				typedef BOOST_TYPEOF(positions) positions_type;
-				BOOST_FOREACH(positions_type::reference pos_binds, positions)
+				typedef KLAYGE_DECLTYPE(positions) positions_type;
+				KLAYGE_FOREACH(positions_type::reference pos_binds, positions)
 				{
 					if (pos_binds.second.empty())
 					{
@@ -742,8 +655,8 @@ namespace KlayGE
 			}
 			else
 			{
-				typedef BOOST_TYPEOF(positions) positions_type;
-				BOOST_FOREACH(positions_type::reference pos_binds, positions)
+				typedef KLAYGE_DECLTYPE(positions) positions_type;
+				KLAYGE_FOREACH(positions_type::reference pos_binds, positions)
 				{
 					pos_binds.first = pos_binds.first * obj_matrix;
 				}
@@ -766,8 +679,8 @@ namespace KlayGE
 
 			obj_vertices.resize(vertex_indices.size());
 			int ver_index = 0;
-			typedef BOOST_TYPEOF(vertex_indices) vi_type;
-			BOOST_FOREACH(vi_type::const_reference vertex_index, vertex_indices)
+			typedef KLAYGE_DECLTYPE(vertex_indices) vi_type;
+			KLAYGE_FOREACH(vi_type::const_reference vertex_index, vertex_indices)
 			{
 				vertex_t& vertex = obj_vertices[ver_index];
 
@@ -928,8 +841,8 @@ namespace KlayGE
 
 	void meshml_extractor::extract_all_joint_tms()
 	{
-		typedef BOOST_TYPEOF(joint_nodes_) jn_type;
-		BOOST_FOREACH(jn_type::reference jn, joint_nodes_)
+		typedef KLAYGE_DECLTYPE(joint_nodes_) jn_type;
+		KLAYGE_FOREACH(jn_type::reference jn, joint_nodes_)
 		{
 			INode* parent_node = jn.first->GetParentNode();
 			if (!is_bone(parent_node))
@@ -970,9 +883,9 @@ namespace KlayGE
 
 			jn.second = Inverse(jn.first->GetNodeTM(0)) * skin_init_tm;
 
-			BOOST_AUTO(iter, joint_node_to_id_.find(jn.first));
+			KLAYGE_AUTO(iter, joint_node_to_id_.find(jn.first));
 			assert(iter != joint_node_to_id_.end());
-			BOOST_AUTO(par_iter, joint_node_to_id_.find(parent_node));
+			KLAYGE_AUTO(par_iter, joint_node_to_id_.find(parent_node));
 			assert(par_iter != joint_node_to_id_.end());
 			meshml_obj_.SetJoint(iter->second, tstr_to_str(jn.first->GetName()), par_iter->second,
 				this->rh_to_lh(skin_init_tm));
@@ -984,8 +897,8 @@ namespace KlayGE
 		if (weight > 0)
 		{
 			bool repeat = false;
-			typedef BOOST_TYPEOF(binds) binds_type;
-			BOOST_FOREACH(binds_type::reference bind, binds)
+			typedef KLAYGE_DECLTYPE(binds) binds_type;
+			KLAYGE_FOREACH(binds_type::reference bind, binds)
 			{
 				if (bind.first == joint_node)
 				{
