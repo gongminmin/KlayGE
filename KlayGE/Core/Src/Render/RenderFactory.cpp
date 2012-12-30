@@ -21,7 +21,7 @@
 #include <KlayGE/RenderEffect.hpp>
 #include <KlayGE/FrameBuffer.hpp>
 #include <KlayGE/Query.hpp>
-#include <KFL/ResLoader.hpp>
+#include <KlayGE/ResLoader.hpp>
 #include <KlayGE/Font.hpp>
 #include <KlayGE/RenderStateObject.hpp>
 #include <KlayGE/ShaderObject.hpp>

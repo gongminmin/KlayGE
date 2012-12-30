@@ -29,7 +29,7 @@
 #include <KlayGE/InputFactory.hpp>
 #include <KlayGE/ShowFactory.hpp>
 #include <KlayGE/AudioDataSource.hpp>
-#include <KFL/ResLoader.hpp>
+#include <KlayGE/ResLoader.hpp>
 #include <KFL/XMLDom.hpp>
 #include <KlayGE/DeferredRenderingLayer.hpp>
 

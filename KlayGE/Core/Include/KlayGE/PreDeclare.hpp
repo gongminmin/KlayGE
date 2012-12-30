@@ -16,6 +16,9 @@ namespace KlayGE
 {
 	struct ContextCfg;
 	class Context;
+	class ResLoadingDesc;
+	typedef boost::shared_ptr<ResLoadingDesc> ResLoadingDescPtr;
+	class ResLoader;
 
 	class SceneManager;
 	typedef boost::shared_ptr<SceneManager> SceneManagerPtr;

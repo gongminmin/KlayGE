@@ -61,9 +61,9 @@
 #include <KlayGE/RenderEffect.hpp>
 #include <KlayGE/Context.hpp>
 #include <KFL/AABBox.hpp>
-#include <KFL/ResLoader.hpp>
+#include <KlayGE/ResLoader.hpp>
 #include <KlayGE/SceneObjectHelper.hpp>
-#include <KFL/LZMACodec.hpp>
+#include <KlayGE/LZMACodec.hpp>
 
 #include <algorithm>
 #include <vector>

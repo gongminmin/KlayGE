@@ -8,7 +8,7 @@
 #include <KlayGE/RenderEffect.hpp>
 #include <KlayGE/SceneManager.hpp>
 #include <KlayGE/Context.hpp>
-#include <KFL/ResLoader.hpp>
+#include <KlayGE/ResLoader.hpp>
 #include <KlayGE/RenderSettings.hpp>
 #include <KlayGE/Mesh.hpp>
 #include <KlayGE/SceneObjectHelper.hpp>

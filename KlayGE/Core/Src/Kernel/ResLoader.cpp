@@ -4,7 +4,7 @@
  *
  * @section DESCRIPTION
  *
- * This source file is part of KFL, a subproject of KlayGE
+ * This source file is part of KlayGE
  * For the latest info, see http://www.klayge.org
  *
  * @section LICENSE
@@ -28,9 +28,9 @@
  * from http://www.klayge.org/licensing/.
  */
 
-#include <KFL/KFL.hpp>
+#include <KlayGE/KlayGE.hpp>
 #include <KFL/Util.hpp>
-#include <KFL/Extract7z.hpp>
+#include <KlayGE/Extract7z.hpp>
 
 #include <fstream>
 #include <sstream>
@@ -46,7 +46,7 @@
 #include <android/asset_manager.h>
 #endif
 
-#include <KFL/ResLoader.hpp>
+#include <KlayGE/ResLoader.hpp>
 
 namespace KlayGE
 {

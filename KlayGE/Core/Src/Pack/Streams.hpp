@@ -4,7 +4,7 @@
  *
  * @section DESCRIPTION
  *
- * This source file is part of KFL, a subproject of KlayGE
+ * This source file is part of KlayGE
  * For the latest info, see http://www.klayge.org
  *
  * @section LICENSE
@@ -33,7 +33,7 @@
 
 #pragma once
 
-#include <KFL/PreDeclare.hpp>
+#include <KlayGE/PreDeclare.hpp>
 #include <KFL/Atomic.hpp>
 
 #include <fstream>

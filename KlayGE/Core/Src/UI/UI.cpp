@@ -27,7 +27,7 @@
 #include <KlayGE/FrameBuffer.hpp>
 #include <KlayGE/InputFactory.hpp>
 #include <KlayGE/Context.hpp>
-#include <KFL/ResLoader.hpp>
+#include <KlayGE/ResLoader.hpp>
 #include <KlayGE/SceneObjectHelper.hpp>
 #include <KFL/XMLDom.hpp>
 #include <KlayGE/Font.hpp>

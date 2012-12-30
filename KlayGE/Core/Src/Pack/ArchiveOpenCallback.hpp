@@ -4,7 +4,7 @@
  *
  * @section DESCRIPTION
  *
- * This source file is part of KFL, a subproject of KlayGE
+ * This source file is part of KlayGE
  * For the latest info, see http://www.klayge.org
  *
  * @section LICENSE

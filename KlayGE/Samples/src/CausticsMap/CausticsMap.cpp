@@ -1,5 +1,5 @@
 #include <KlayGE/KlayGE.hpp>
-#include <KFL/ResLoader.hpp>
+#include <KlayGE/ResLoader.hpp>
 #include <KlayGE/Context.hpp>
 #include <KlayGE/Input.hpp>
 #include <KlayGE/InputFactory.hpp>

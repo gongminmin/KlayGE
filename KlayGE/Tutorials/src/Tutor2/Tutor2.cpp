@@ -1,6 +1,6 @@
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/App3D.hpp>
-#include <KFL/ResLoader.hpp>
+#include <KlayGE/ResLoader.hpp>
 #include <KlayGE/Context.hpp>
 #include <KlayGE/CameraController.hpp>
 #include <KlayGE/Font.hpp>

@@ -33,7 +33,7 @@
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/RenderView.hpp>
-#include <KFL/ResLoader.hpp>
+#include <KlayGE/ResLoader.hpp>
 #include <KFL/Util.hpp>
 #include <KlayGE/BlockCompression.hpp>
 #include <KFL/Half.hpp>

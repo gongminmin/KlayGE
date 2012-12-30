@@ -29,7 +29,7 @@
  */
 
 #include <KFL/KFL.hpp>
-#include <KFL/ResLoader.hpp>
+#include <KFL/ResIdentifier.hpp>
 
 #ifdef KLAYGE_COMPILER_MSVC
 #pragma warning(push)

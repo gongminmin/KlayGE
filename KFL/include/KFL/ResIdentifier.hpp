@@ -1,5 +1,5 @@
 /**
- * @file ResLoader.hpp
+ * @file ResIdentifier.hpp
  * @author Minmin Gong
  *
  * @section DESCRIPTION
@@ -28,8 +28,8 @@
  * from http://www.klayge.org/licensing/.
  */
 
-#ifndef _KFL_RESLOADER_HPP
-#define _KFL_RESLOADER_HPP
+#ifndef _KFL_RESIDENTIFIER_HPP
+#define _KFL_RESIDENTIFIER_HPP
 
 #pragma once
 
@@ -115,61 +115,6 @@ namespace KlayGE
 		uint64_t timestamp_;
 		boost::shared_ptr<std::istream> istream_;
 	};
-
-	class ResLoadingDesc
-	{
-	public:
-		virtual ~ResLoadingDesc()
-		{
-		}
-
-		virtual void SubThreadStage() = 0;
-		virtual void* MainThreadStage() = 0;
-
-		virtual bool HasSubThreadStage() const = 0;
-	};
-
-	class ResLoader
-	{
-	public:
-		static ResLoader& Instance();
-
-		void AddPath(std::string const & path);
-
-		ResIdentifierPtr Open(std::string const & name);
-		std::string Locate(std::string const & name);
-
-		void* SyncQuery(ResLoadingDescPtr const & res_desc);
-		boost::function<void*()> ASyncQuery(ResLoadingDescPtr const & res_desc);
-
-		template <typename T>
-		boost::shared_ptr<T> SyncQueryT(ResLoadingDescPtr const & res_desc)
-		{
-			return *static_cast<boost::shared_ptr<T>*>(this->SyncQuery(res_desc));
-		}
-
-		template <typename T>
-		boost::function<boost::shared_ptr<T>()> ASyncQueryT(ResLoadingDescPtr const & res_desc)
-		{
-			return boost::bind(&ResLoader::EmptyToT<T>, this->ASyncQuery(res_desc));
-		}
-
-	private:		
-		void ASyncSubThreadFunc(ResLoadingDescPtr const & res_desc);
-		void* ASyncFunc(ResLoadingDescPtr const & res_desc, boost::shared_ptr<joiner<void> > const & loading_thread);
-
-		template <typename T>
-		static boost::shared_ptr<T> EmptyToT(boost::function<void*()> func)
-		{
-			return *static_cast<boost::shared_ptr<T>*>(func());
-		}
-
-	private:
-		ResLoader();
-
-		std::string exe_path_;
-		std::vector<std::string> paths_;
-	};
 }
 
-#endif			// _KFL_RESLOADER_HPP
+#endif			// _KFL_RESIDENTIFIER_HPP

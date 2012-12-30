@@ -105,7 +105,7 @@ SET(KERNEL_HEADER_FILES
 	${KFL_PROJECT_DIR}/include/KFL/KFL.hpp
 	${KFL_PROJECT_DIR}/include/KFL/Log.hpp
 	${KFL_PROJECT_DIR}/include/KFL/PreDeclare.hpp
-	${KFL_PROJECT_DIR}/include/KFL/ResLoader.hpp
+	${KFL_PROJECT_DIR}/include/KFL/ResIdentifier.hpp
 	${KFL_PROJECT_DIR}/include/KFL/Thread.hpp
 	${KFL_PROJECT_DIR}/include/KFL/ThrowErr.hpp
 	${KFL_PROJECT_DIR}/include/KFL/Timer.hpp
@@ -119,7 +119,6 @@ SET(KERNEL_SOURCE_FILES
 	${KFL_PROJECT_DIR}/src/Kernel/DllLoader.cpp
 	${KFL_PROJECT_DIR}/src/Kernel/KFL.cpp
 	${KFL_PROJECT_DIR}/src/Kernel/Log.cpp
-	${KFL_PROJECT_DIR}/src/Kernel/ResLoader.cpp
 	${KFL_PROJECT_DIR}/src/Kernel/ThrowErr.cpp
 	${KFL_PROJECT_DIR}/src/Kernel/Timer.cpp
 	${KFL_PROJECT_DIR}/src/Kernel/Util.cpp
@@ -148,27 +147,10 @@ SET(MATH_SOURCE_FILES
 	${KFL_PROJECT_DIR}/src/Math/Math.cpp
 )
 
-SET(PACKING_SOURCE_FILES
-	${KFL_PROJECT_DIR}/src/Pack/ArchiveExtractCallback.cpp
-	${KFL_PROJECT_DIR}/src/Pack/ArchiveOpenCallback.cpp
-	${KFL_PROJECT_DIR}/src/Pack/Extract7z.cpp
-	${KFL_PROJECT_DIR}/src/Pack/LZMACodec.cpp
-	${KFL_PROJECT_DIR}/src/Pack/Streams.cpp
-)
-SET(PACKING_HEADER_FILES
-	${KFL_PROJECT_DIR}/src/Pack/ArchiveExtractCallback.hpp
-	${KFL_PROJECT_DIR}/src/Pack/ArchiveOpenCallback.hpp
-	${KFL_PROJECT_DIR}/include/KFL/Extract7z.hpp
-	${KFL_PROJECT_DIR}/include/KFL/LZMACodec.hpp
-	${KFL_PROJECT_DIR}/src/Pack/Streams.hpp
-)
-
 SOURCE_GROUP("Kernel\\Source Files" FILES ${KERNEL_SOURCE_FILES})
 SOURCE_GROUP("Kernel\\Header Files" FILES ${KERNEL_HEADER_FILES})
 SOURCE_GROUP("Math\\Source Files" FILES ${MATH_SOURCE_FILES})
 SOURCE_GROUP("Math\\Header Files" FILES ${MATH_HEADER_FILES})
-SOURCE_GROUP("Packing System\\Source Files" FILES ${PACKING_SOURCE_FILES})
-SOURCE_GROUP("Packing System\\Header Files" FILES ${PACKING_HEADER_FILES})
 
 ADD_DEFINITIONS(-DKFL_SOURCE)
 IF(KFL_WITH_WINRT)
@@ -183,7 +165,6 @@ LINK_DIRECTORIES(${KFL_PROJECT_DIR}/../External/boost/lib_${KFL_COMPILER_NAME}${
 ADD_LIBRARY(${LIB_NAME} STATIC
 	${KERNEL_SOURCE_FILES} ${KERNEL_HEADER_FILES}
 	${MATH_SOURCE_FILES} ${MATH_HEADER_FILES}
-	${PACKING_SOURCE_FILES} ${PACKING_HEADER_FILES}
 )
 
 SET(LIB_OUTPUT_NAME ${LIB_NAME}_${KFL_COMPILER_NAME}_${KFL_ARCH_NAME})

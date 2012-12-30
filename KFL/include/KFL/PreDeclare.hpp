@@ -46,9 +46,6 @@ namespace KlayGE
 {
 	class ResIdentifier;
 	typedef boost::shared_ptr<ResIdentifier> ResIdentifierPtr;
-	class ResLoadingDesc;
-	typedef boost::shared_ptr<ResLoadingDesc> ResLoadingDescPtr;
-	class ResLoader;
 	class DllLoader;
 
 	class XMLDocument;

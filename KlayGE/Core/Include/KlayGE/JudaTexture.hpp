@@ -63,7 +63,7 @@
 #pragma warning(pop)
 #endif
 
-#include <KFL/LZMACodec.hpp>
+#include <KlayGE/LZMACodec.hpp>
 
 namespace KlayGE
 {

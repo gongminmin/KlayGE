@@ -1,7 +1,7 @@
 #include <KlayGE/KlayGE.hpp>
 #include <KFL/Half.hpp>
 #include <KlayGE/Context.hpp>
-#include <KFL/ResLoader.hpp>
+#include <KlayGE/ResLoader.hpp>
 #include <KFL/Math.hpp>
 #include <KlayGE/Texture.hpp>
 #include <KlayGE/BlockCompression.hpp>

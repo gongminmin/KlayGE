@@ -3,6 +3,7 @@ SET(LIB_NAME ${KLAYGE_CORELIB_NAME})
 SET(KERNEL_SOURCE_FILES
 	${KLAYGE_PROJECT_DIR}/Core/Src/Kernel/Context.cpp
 	${KLAYGE_PROJECT_DIR}/Core/Src/Kernel/KlayGE.cpp
+	${KLAYGE_PROJECT_DIR}/Core/Src/Kernel/ResLoader.cpp
 )
 
 SET(KERNEL_HEADER_FILES
@@ -10,6 +11,7 @@ SET(KERNEL_HEADER_FILES
 	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/Context.hpp
 	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/KlayGE.hpp
 	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/PreDeclare.hpp
+	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/ResLoader.hpp
 )
 
 SOURCE_GROUP("Kernel\\Source Files" FILES ${KERNEL_SOURCE_FILES})
@@ -261,6 +263,26 @@ SET(SCENE_HEADER_FILES
 
 SOURCE_GROUP("Scene Management\\Source Files" FILES ${SCENE_SOURCE_FILES})
 SOURCE_GROUP("Scene Management\\Header Files" FILES ${SCENE_HEADER_FILES})
+
+
+SET(PACKING_SOURCE_FILES
+	${KLAYGE_PROJECT_DIR}/Core/Src/Pack/ArchiveExtractCallback.cpp
+	${KLAYGE_PROJECT_DIR}/Core/Src/Pack/ArchiveOpenCallback.cpp
+	${KLAYGE_PROJECT_DIR}/Core/Src/Pack/Extract7z.cpp
+	${KLAYGE_PROJECT_DIR}/Core/Src/Pack/LZMACodec.cpp
+	${KLAYGE_PROJECT_DIR}/Core/Src/Pack/Streams.cpp
+)
+
+SET(PACKING_HEADER_FILES
+	${KLAYGE_PROJECT_DIR}/Core/Src/Pack/ArchiveExtractCallback.hpp
+	${KLAYGE_PROJECT_DIR}/Core/Src/Pack/ArchiveOpenCallback.hpp
+	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/Extract7z.hpp
+	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/LZMACodec.hpp
+	${KLAYGE_PROJECT_DIR}/Core/Src/Pack/Streams.hpp
+)
+
+SOURCE_GROUP("Packing System\\Source Files" FILES ${PACKING_SOURCE_FILES})
+SOURCE_GROUP("Packing System\\Header Files" FILES ${PACKING_HEADER_FILES})
 
 
 SET(UI_SOURCE_FILES

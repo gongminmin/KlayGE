@@ -46,7 +46,7 @@
 
 #include <KlayGE/KlayGE.hpp>
 #include <KFL/Util.hpp>
-#include <KFL/ResLoader.hpp>
+#include <KlayGE/ResLoader.hpp>
 #include <KlayGE/Context.hpp>
 #include <KFL/Math.hpp>
 #include <KlayGE/RenderFactory.hpp>

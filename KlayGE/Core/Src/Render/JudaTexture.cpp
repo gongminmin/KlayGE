@@ -12,7 +12,7 @@
 
 #include <KlayGE/KlayGE.hpp>
 #include <KFL/ThrowErr.hpp>
-#include <KFL/ResLoader.hpp>
+#include <KlayGE/ResLoader.hpp>
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/RenderEffect.hpp>

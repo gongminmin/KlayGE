@@ -29,7 +29,7 @@
  */
 
 #include <KFL/KFL.hpp>
-#include <KFL/ResLoader.hpp>
+#include <KFL/ResIdentifier.hpp>
 
 #ifdef KLAYGE_PLATFORM_WINDOWS
 #include <windows.h>
@@ -53,22 +53,16 @@ namespace KlayGE
 
 	bool DllLoader::Load(std::string const & dll_name)
 	{
-		std::string name = ResLoader::Instance().Locate(dll_name);
-		if (name.empty())
-		{
-			return false;
-		}
-
 #ifdef KLAYGE_PLATFORM_WINDOWS
 #ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
-		dll_handle_ = static_cast<void*>(::LoadLibraryA(name.c_str()));
+		dll_handle_ = static_cast<void*>(::LoadLibraryA(dll_name.c_str()));
 #else
 		std::wstring wname;
-		Convert(wname, name);
+		Convert(wname, dll_name);
 		dll_handle_ = static_cast<void*>(::LoadPackagedLibrary(wname.c_str(), 0));
 #endif
 #else
-		dll_handle_ = ::dlopen(name.c_str(), RTLD_LAZY);
+		dll_handle_ = ::dlopen(dll_name.c_str(), RTLD_LAZY);
 #endif
 
 		return (dll_handle_ != nullptr);

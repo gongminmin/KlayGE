@@ -15,7 +15,7 @@
 
 #include <KlayGE/KlayGE.hpp>
 #include <KFL/ThrowErr.hpp>
-#include <KFL/ResLoader.hpp>
+#include <KlayGE/ResLoader.hpp>
 #include <KlayGE/AudioDataSource.hpp>
 
 #include <vector>

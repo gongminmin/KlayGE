@@ -9,7 +9,7 @@
 #include <KlayGE/FrameBuffer.hpp>
 #include <KlayGE/SceneManager.hpp>
 #include <KlayGE/Context.hpp>
-#include <KFL/ResLoader.hpp>
+#include <KlayGE/ResLoader.hpp>
 #include <KlayGE/Texture.hpp>
 #include <KlayGE/RenderableHelper.hpp>
 #include <KlayGE/RenderSettings.hpp>

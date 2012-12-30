@@ -4,8 +4,8 @@
 #include <KFL/Math.hpp>
 #include <KFL/Thread.hpp>
 #include <KFL/CpuInfo.hpp>
-#include <KFL/ResLoader.hpp>
-#include <KFL/LZMACodec.hpp>
+#include <KlayGE/ResLoader.hpp>
+#include <KlayGE/LZMACodec.hpp>
 #include <KFL/AlignedAllocator.hpp>
 #include <KFL/Atomic.hpp>
 

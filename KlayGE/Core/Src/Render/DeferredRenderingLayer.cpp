@@ -13,7 +13,7 @@
 #include <KlayGE/KlayGE.hpp>
 #include <KFL/Util.hpp>
 #include <KFL/Math.hpp>
-#include <KFL/ResLoader.hpp>
+#include <KlayGE/ResLoader.hpp>
 #include <KlayGE/Renderable.hpp>
 #include <KlayGE/RenderableHelper.hpp>
 #include <KlayGE/RenderEngine.hpp>

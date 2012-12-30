@@ -12,7 +12,7 @@
 
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/Context.hpp>
-#include <KFL/ResLoader.hpp>
+#include <KlayGE/ResLoader.hpp>
 #include <KFL/Util.hpp>
 
 #include <windows.h>

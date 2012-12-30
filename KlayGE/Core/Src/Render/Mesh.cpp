@@ -25,11 +25,11 @@
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/Texture.hpp>
 #include <KlayGE/RenderEffect.hpp>
-#include <KFL/ResLoader.hpp>
+#include <KlayGE/ResLoader.hpp>
 #include <KlayGE/App3D.hpp>
 #include <KlayGE/Camera.hpp>
 #include <KFL/XMLDom.hpp>
-#include <KFL/LZMACodec.hpp>
+#include <KlayGE/LZMACodec.hpp>
 #include <KlayGE/Light.hpp>
 
 #include <algorithm>

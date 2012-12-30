@@ -11,7 +11,7 @@
 #include <KlayGE/FrameBuffer.hpp>
 #include <KlayGE/SceneManager.hpp>
 #include <KlayGE/Context.hpp>
-#include <KFL/ResLoader.hpp>
+#include <KlayGE/ResLoader.hpp>
 #include <KlayGE/RenderSettings.hpp>
 #include <KlayGE/SceneObjectHelper.hpp>
 #include <KlayGE/UI.hpp>

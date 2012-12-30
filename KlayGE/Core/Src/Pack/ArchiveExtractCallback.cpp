@@ -1,10 +1,10 @@
 /**
- * @file ArchiveOpenCallback.cpp
+ * @file ArchiveExtractCallback.hpp
  * @author Minmin Gong
  *
  * @section DESCRIPTION
  *
- * This source file is part of KFL, a subproject of KlayGE
+ * This source file is part of KlayGE
  * For the latest info, see http://www.klayge.org
  *
  * @section LICENSE
@@ -28,26 +28,57 @@
  * from http://www.klayge.org/licensing/.
  */
 
-#include <KFL/KFL.hpp>
+#include <KlayGE/KlayGE.hpp>
 #include <KFL/Util.hpp>
 
 #include <CPP/Common/MyWindows.h>
 
-#include "ArchiveOpenCallback.hpp"
+#include "ArchiveExtractCallback.hpp"
 
 namespace KlayGE
 {
-	STDMETHODIMP CArchiveOpenCallback::SetTotal(const uint64_t* /*files*/, const uint64_t* /*bytes*/)
+	STDMETHODIMP CArchiveExtractCallback::SetTotal(uint64_t /*size*/)
 	{
 		return S_OK;
 	}
 
-	STDMETHODIMP CArchiveOpenCallback::SetCompleted(const uint64_t* /*files*/, const uint64_t* /*bytes*/)
+	STDMETHODIMP CArchiveExtractCallback::SetCompleted(const uint64_t* /*completeValue*/)
 	{
 		return S_OK;
 	}
 
-	STDMETHODIMP CArchiveOpenCallback::CryptoGetTextPassword(BSTR* password)
+	STDMETHODIMP CArchiveExtractCallback::GetStream(uint32_t /*index*/, ISequentialOutStream** outStream, int32_t askExtractMode)
+	{
+		enum 
+		{
+			kExtract = 0,
+			kTest,
+			kSkip,
+		};
+
+		if (kExtract == askExtractMode)
+		{
+			_outFileStream->AddRef();
+			*outStream = _outFileStream.get();
+		}
+		else
+		{
+			*outStream = nullptr;
+		}
+		return S_OK;
+	}
+
+	STDMETHODIMP CArchiveExtractCallback::PrepareOperation(int32_t /*askExtractMode*/)
+	{
+		return S_OK;
+	}
+
+	STDMETHODIMP CArchiveExtractCallback::SetOperationResult(int32_t /*operationResult*/)
+	{
+		return S_OK;
+	}
+
+	STDMETHODIMP CArchiveExtractCallback::CryptoGetTextPassword(BSTR* password)
 	{
 		if (!password_is_defined_)
 		{
@@ -64,8 +95,10 @@ namespace KlayGE
 		}
 	}
 
-	void CArchiveOpenCallback::Init(std::string const & pw)
+	void CArchiveExtractCallback::Init(std::string const & pw, boost::shared_ptr<ISequentialOutStream> const & outFileStream)
 	{
+		_outFileStream = outFileStream;
+
 		password_is_defined_ = !pw.empty();
 		Convert(password_, pw);
 	}

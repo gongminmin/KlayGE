@@ -4,7 +4,7 @@
  *
  * @section DESCRIPTION
  *
- * This source file is part of KFL, a subproject of KlayGE
+ * This source file is part of KlayGE
  * For the latest info, see http://www.klayge.org
  *
  * @section LICENSE
@@ -33,16 +33,16 @@
 
 #pragma once
 
-#include <KFL/PreDeclare.hpp>
+#include <KlayGE/PreDeclare.hpp>
 
 #include <string>
 
 namespace KlayGE
 {
-	uint32_t Find7z(ResIdentifierPtr const & archive_is,
+	KLAYGE_CORE_API uint32_t Find7z(ResIdentifierPtr const & archive_is,
 		std::string const & password,
 		std::string const & extract_file_path);
-	void Extract7z(ResIdentifierPtr const & archive_is,
+	KLAYGE_CORE_API void Extract7z(ResIdentifierPtr const & archive_is,
 		std::string const & password,
 		std::string const & extract_file_path,
 		boost::shared_ptr<std::ostream> const & os);

@@ -4,7 +4,7 @@
  *
  * @section DESCRIPTION
  *
- * This source file is part of KFL, a subproject of KlayGE
+ * This source file is part of KlayGE
  * For the latest info, see http://www.klayge.org
  *
  * @section LICENSE
@@ -28,8 +28,8 @@
  * from http://www.klayge.org/licensing/.
  */
 
-#include <KFL/KFL.hpp>
-#include <KFL/ResLoader.hpp>
+#include <KlayGE/KlayGE.hpp>
+#include <KlayGE/ResLoader.hpp>
 
 #include <boost/assert.hpp>
 

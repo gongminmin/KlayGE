@@ -2,7 +2,7 @@
 #include <KFL/Util.hpp>
 #include <KFL/Timer.hpp>
 #include <KlayGE/Context.hpp>
-#include <KFL/ResLoader.hpp>
+#include <KlayGE/ResLoader.hpp>
 #include <KlayGE/Texture.hpp>
 #include <KFL/Math.hpp>
 #include <KFL/XMLDom.hpp>

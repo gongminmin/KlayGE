@@ -4,7 +4,7 @@
  *
  * @section DESCRIPTION
  *
- * This source file is part of KFL, a subproject of KlayGE
+ * This source file is part of KlayGE
  * For the latest info, see http://www.klayge.org
  *
  * @section LICENSE
@@ -28,7 +28,7 @@
  * from http://www.klayge.org/licensing/.
  */
 
-#include <KFL/KFL.hpp>
+#include <KlayGE/KlayGE.hpp>
 #define INITGUID
 #include <KFL/Util.hpp>
 #include <KFL/ThrowErr.hpp>
@@ -50,7 +50,7 @@
 #include "ArchiveExtractCallback.hpp"
 #include "ArchiveOpenCallback.hpp"
 
-#include <KFL/Extract7z.hpp>
+#include <KlayGE/Extract7z.hpp>
 
 #ifndef WINAPI
 #ifdef _MSC_VER

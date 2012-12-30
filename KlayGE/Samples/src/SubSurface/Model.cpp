@@ -9,7 +9,7 @@
 #include <KlayGE/ElementFormat.hpp>
 #include <KlayGE/Context.hpp>
 #include <KlayGE/App3D.hpp>
-#include <KFL/ResLoader.hpp>
+#include <KlayGE/ResLoader.hpp>
 #include <KlayGE/Camera.hpp>
 #include <KlayGE/FrameBuffer.hpp>
 

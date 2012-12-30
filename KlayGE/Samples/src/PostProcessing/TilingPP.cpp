@@ -2,7 +2,7 @@
 #include <KFL/Util.hpp>
 #include <KlayGE/Context.hpp>
 #include <KFL/Math.hpp>
-#include <KFL/ResLoader.hpp>
+#include <KlayGE/ResLoader.hpp>
 #include <KlayGE/FrameBuffer.hpp>
 #include <KlayGE/RenderEffect.hpp>
 #include <KlayGE/RenderEngine.hpp>

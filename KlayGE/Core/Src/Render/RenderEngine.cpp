@@ -45,7 +45,7 @@
 #include <KlayGE/FrameBuffer.hpp>
 #include <KlayGE/GraphicsBuffer.hpp>
 #include <KlayGE/RenderStateObject.hpp>
-#include <KFL/ResLoader.hpp>
+#include <KlayGE/ResLoader.hpp>
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/RenderEffect.hpp>
 #include <KlayGE/PostProcess.hpp>
