@@ -29,6 +29,7 @@
  */
 
 #include <KFL/KFL.hpp>
+#include <KFL/DllLoader.hpp>
 #include <kfont/kfont.hpp>
 
 #include <fstream>
@@ -44,67 +45,6 @@
 #else
 #include <dlfcn.h>
 #endif
-
-namespace
-{
-	using namespace KlayGE;
-
-	template <int size>
-	void EndianSwitch(void* p);
-
-	template <>
-	void EndianSwitch<2>(void* p)
-	{
-		uint8_t* bytes = static_cast<uint8_t*>(p);
-		std::swap(bytes[0], bytes[1]);
-	}
-	template <>
-	void EndianSwitch<4>(void* p)
-	{
-		uint8_t* bytes = static_cast<uint8_t*>(p);
-		std::swap(bytes[0], bytes[3]);
-		std::swap(bytes[1], bytes[2]);
-	}
-	template <>
-	void EndianSwitch<8>(void* p)
-	{
-		uint8_t* bytes = static_cast<uint8_t*>(p);
-		std::swap(bytes[0], bytes[7]);
-		std::swap(bytes[1], bytes[6]);
-		std::swap(bytes[2], bytes[5]);
-		std::swap(bytes[3], bytes[4]);
-	}
-
-	template <int size>
-	void NativeToBigEndian(void* p)
-	{
-#ifdef KFONT_LITTLE_ENDIAN
-		EndianSwitch<size>(p);
-#else
-		p;
-#endif
-	}
-	template <int size>
-	void NativeToLittleEndian(void* p)
-	{
-#ifdef KFONT_LITTLE_ENDIAN
-		p;
-#else
-		EndianSwitch<size>(p);
-#endif
-	}
-
-	template <int size>
-	void BigEndianToNative(void* p)
-	{
-		NativeToBigEndian<size>(p);
-	}
-	template <int size>
-	void LittleEndianToNative(void* p)
-	{
-		NativeToLittleEndian<size>(p);
-	}
-}
 
 namespace KlayGE
 {
@@ -158,18 +98,14 @@ namespace KlayGE
 		{
 #ifndef KLAYGE_PLATFORM_ANDROID
 #ifdef KLAYGE_PLATFORM_WINDOWS
-#ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
-			dll_handle_ = static_cast<void*>(::LoadLibraryA("LZMA.dll"));
+			std::string lzma_name = "LZMA.dll";
 #else
-			dll_handle_ = static_cast<void*>(::LoadPackagedLibrary(L"LZMA.dll", 0));
+			std::string lzma_name = "LZMA.so";
 #endif
-			lzmaCompressFunc_ = (LzmaCompressFunc)reinterpret_cast<void*>(::GetProcAddress(static_cast<HMODULE>(dll_handle_), "LzmaCompress"));
-			lzmaUncompressFunc_ = (LzmaUncompressFunc)reinterpret_cast<void*>(::GetProcAddress(static_cast<HMODULE>(dll_handle_), "LzmaUncompress"));
-#else
-			dll_handle_ = ::dlopen("LZMA.so", RTLD_LAZY);
-			lzmaCompressFunc_ = (LzmaCompressFunc)::dlsym(dll_handle_, "LzmaCompress");
-			lzmaUncompressFunc_ = (LzmaUncompressFunc)::dlsym(dll_handle_, "LzmaUncompress");
-#endif
+
+			dll_loader_.Load(lzma_name);
+			lzmaCompressFunc_ = (LzmaCompressFunc)dll_loader_.GetProcAddress("LzmaCompress");
+			lzmaUncompressFunc_ = (LzmaUncompressFunc)dll_loader_.GetProcAddress("LzmaUncompress");
 
 			BOOST_ASSERT(lzmaCompressFunc_);
 			BOOST_ASSERT(lzmaUncompressFunc_);
@@ -178,7 +114,7 @@ namespace KlayGE
 
 	private:
 #ifndef KLAYGE_PLATFORM_ANDROID
-		void* dll_handle_;
+		DllLoader dll_loader_;
 		LzmaCompressFunc lzmaCompressFunc_;
 		LzmaUncompressFunc lzmaUncompressFunc_;
 #endif
