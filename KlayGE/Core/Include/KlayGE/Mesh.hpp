@@ -45,7 +45,6 @@
 #pragma warning(push)
 #pragma warning(disable: 4100 6011 6334)
 #endif
-#include <boost/unordered_map.hpp>
 #include <boost/functional/hash.hpp>
 #ifdef KLAYGE_COMPILER_MSVC
 #pragma warning(pop)
@@ -248,7 +247,7 @@ namespace KlayGE
 		typedef std::vector<StaticMeshPtr> StaticMeshesPtrType;
 		StaticMeshesPtrType meshes_;
 
-		boost::unordered_map<std::string, TexturePtr> tex_pool_;
+		unordered_map<std::string, TexturePtr> tex_pool_;
 	};
 
 

@@ -40,7 +40,6 @@
 #pragma warning(push)
 #pragma warning(disable: 4100 6011 6334)
 #endif
-#include <boost/unordered_map.hpp>
 #include <boost/functional/hash.hpp>
 #ifdef KLAYGE_COMPILER_MSVC
 #pragma warning(pop)
@@ -219,7 +218,7 @@ namespace KlayGE
 			{
 			}
 		};
-		boost::unordered_map<uint32_t, DecodedBlockInfo, boost::hash<uint32_t>, std::equal_to<uint32_t>,
+		unordered_map<uint32_t, DecodedBlockInfo, boost::hash<uint32_t>, std::equal_to<uint32_t>,
 				boost::fast_pool_allocator<std::pair<uint32_t, DecodedBlockInfo> > > decoded_block_cache_;
 		uint64_t decode_tick_;
 
@@ -238,7 +237,7 @@ namespace KlayGE
 			uint32_t attr;
 			uint64_t tick;
 		};
-		boost::unordered_map<uint32_t, TileInfo, boost::hash<uint32_t>, std::equal_to<uint32_t>,
+		unordered_map<uint32_t, TileInfo, boost::hash<uint32_t>, std::equal_to<uint32_t>,
 				boost::fast_pool_allocator<std::pair<uint32_t, TileInfo> > > tile_info_map_;
 		std::deque<std::pair<uint32_t, uint32_t> > tile_free_list_;
 		uint64_t tile_tick_;

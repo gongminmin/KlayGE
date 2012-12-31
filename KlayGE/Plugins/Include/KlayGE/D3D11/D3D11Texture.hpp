@@ -16,7 +16,6 @@
 #pragma once
 
 #include <boost/smart_ptr.hpp>
-#include <boost/unordered_map.hpp>
 
 #include <KlayGE/Texture.hpp>
 #include <KlayGE/D3D11/D3D11Typedefs.hpp>
@@ -96,10 +95,10 @@ namespace KlayGE
 		ID3D11DevicePtr				d3d_device_;
 		ID3D11DeviceContextPtr		d3d_imm_ctx_;
 
-		boost::unordered_map<size_t, ID3D11ShaderResourceViewPtr> d3d_sr_views_;
-		boost::unordered_map<size_t, ID3D11UnorderedAccessViewPtr> d3d_ua_views_;
-		boost::unordered_map<size_t, ID3D11RenderTargetViewPtr> d3d_rt_views_;
-		boost::unordered_map<size_t, ID3D11DepthStencilViewPtr> d3d_ds_views_;
+		unordered_map<size_t, ID3D11ShaderResourceViewPtr> d3d_sr_views_;
+		unordered_map<size_t, ID3D11UnorderedAccessViewPtr> d3d_ua_views_;
+		unordered_map<size_t, ID3D11RenderTargetViewPtr> d3d_rt_views_;
+		unordered_map<size_t, ID3D11DepthStencilViewPtr> d3d_ds_views_;
 	};
 
 	typedef boost::shared_ptr<D3D11Texture> D3D11TexturePtr;

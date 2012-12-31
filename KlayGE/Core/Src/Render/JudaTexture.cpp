@@ -1246,7 +1246,7 @@ namespace KlayGE
 		uint32_t const num_cache_tiles_a_layer = num_cache_tiles_a_row * tex_height / tile_with_border_size;
 		uint32_t const num_cache_total_tiles = num_cache_tiles_a_layer * tex_layer;
 
-		boost::unordered_map<uint32_t, uint32_t> neighbor_id_map;
+		unordered_map<uint32_t, uint32_t> neighbor_id_map;
 		std::vector<uint32_t> all_neighbor_ids;
 		std::vector<uint32_t> neighbor_ids;
 		std::vector<uint32_t> tile_attrs(tile_ids.size());

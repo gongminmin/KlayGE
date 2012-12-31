@@ -53,7 +53,6 @@
 #pragma warning(push)
 #pragma warning(disable: 4100 6011 6334)
 #endif
-#include <boost/unordered_map.hpp>
 #include <boost/functional/hash.hpp>
 #ifdef KLAYGE_COMPILER_MSVC
 #pragma warning(pop)
@@ -133,7 +132,7 @@ namespace KlayGE
 		bool restart_;
 		bool dirty_;
 
-		boost::unordered_map<wchar_t, CharInfo, boost::hash<wchar_t>, std::equal_to<wchar_t>,
+		unordered_map<wchar_t, CharInfo, boost::hash<wchar_t>, std::equal_to<wchar_t>,
 			boost::fast_pool_allocator<std::pair<wchar_t, CharInfo> > > char_info_map_;
 		std::list<std::pair<uint32_t, uint32_t> > char_free_list_;
 

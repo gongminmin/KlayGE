@@ -33,20 +33,58 @@
 
 #pragma once
 
-#ifndef KLAYGE_STATIC_ASSERT_SUPPORT
+#ifndef KLAYGE_NULLPTR_SUPPORT
+const class nullptr_t
+{
+public:
+	template <typename T>
+	operator T*() const
+	{
+		return reinterpret_cast<T*>(0);
+	}
+
+	template <typename C, typename T>
+	operator T C::*() const
+	{
+		return reinterpret_cast<T C::*>(0);
+	}
+
+private:
+	void operator&() const;
+} nullptr = {};
+#endif
+
+#ifdef KLAYGE_STATIC_ASSERT_SUPPORT
+	#define KLAYGE_STATIC_ASSERT(x) static_assert(x, #x)
+#else
 	#include <boost/static_assert.hpp>
+	#define KLAYGE_STATIC_ASSERT(x) BOOST_STATIC_ASSERT(x)
 #endif
-#ifndef KLAYGE_DECLTYPE_SUPPORT
+
+#ifdef KLAYGE_DECLTYPE_SUPPORT
+	#define KLAYGE_AUTO(var, expr) auto var = expr
+	#define KLAYGE_DECLTYPE(expr) KlayGE::remove_reference<decltype(expr)>::type
+#else
 	#include <boost/typeof/typeof.hpp>
+	#define KLAYGE_AUTO(Var, Expr) BOOST_AUTO(Var, Expr)
+	#define KLAYGE_DECLTYPE(expr) BOOST_TYPEOF(expr)
 #endif
-#ifndef KLAYGE_FOREACH_SUPPORT
+
+#ifdef KLAYGE_FOREACH_SUPPORT
+	#define KLAYGE_FOREACH(var, col) for (var : col)
+#else
 	#include <boost/foreach.hpp>
+	#define KLAYGE_FOREACH(var, col) BOOST_FOREACH(var, col)
 #endif
+
+
 #ifdef KLAYGE_CXX11_LIBRARY_SUPPORT
 	#include <array>
 	#include <cstdint>
 	#include <tuple>
 	#include <type_traits>
+	#include <unordered_map>
+	#include <unordered_set>
 
 	namespace KlayGE
 	{
@@ -70,6 +108,11 @@
 		using std::has_trivial_destructor;
 		using std::is_same;
 		using std::remove_reference;
+
+		using std::unordered_map;
+		using std::unordered_multimap;
+		using std::unordered_set;
+		using std::unordered_multiset;
 	}
 #else
 	#ifdef KLAYGE_COMPILER_MSVC
@@ -83,6 +126,15 @@
 	#include <boost/cstdint.hpp>
 	#include <boost/tuple/tuple.hpp>
 	#include <boost/type_traits.hpp>
+	#ifdef KLAYGE_COMPILER_MSVC
+		#pragma warning(push)
+		#pragma warning(disable: 4100 6011 6334)
+	#endif
+		#include <boost/unordered_map.hpp>
+		#include <boost/unordered_set.hpp>
+	#ifdef KLAYGE_COMPILER_MSVC
+		#pragma warning(pop)
+	#endif
 
 	namespace KlayGE
 	{
@@ -110,48 +162,12 @@
 		using boost::has_trivial_destructor;
 		using boost::is_same;
 		using boost::remove_reference;
+
+		using boost::unordered_map;
+		using boost::unordered_multimap;
+		using boost::unordered_set;
+		using boost::unordered_multiset;
 	}
-#endif
-
-#ifndef KLAYGE_NULLPTR_SUPPORT
-const class nullptr_t
-{
-public:
-	template <typename T>
-	operator T*() const
-	{
-		return reinterpret_cast<T*>(0);
-	}
-
-	template <typename C, typename T>
-	operator T C::*() const
-	{
-		return reinterpret_cast<T C::*>(0);
-	}
-
-private:
-	void operator&() const;
-} nullptr = {};
-#endif
-
-#ifdef KLAYGE_STATIC_ASSERT_SUPPORT
-	#define KLAYGE_STATIC_ASSERT(x) static_assert(x, #x)
-#else
-	#define KLAYGE_STATIC_ASSERT(x) BOOST_STATIC_ASSERT(x)
-#endif
-
-#ifdef KLAYGE_DECLTYPE_SUPPORT
-	#define KLAYGE_AUTO(var, expr) auto var = expr
-	#define KLAYGE_DECLTYPE(expr) KlayGE::remove_reference<decltype(expr)>::type
-#else
-	#define KLAYGE_AUTO(Var, Expr) BOOST_AUTO(Var, Expr)
-	#define KLAYGE_DECLTYPE(expr) BOOST_TYPEOF(expr)
-#endif
-
-#ifdef KLAYGE_FOREACH_SUPPORT
-	#define KLAYGE_FOREACH(var, col) for (var : col)
-#else
-	#define KLAYGE_FOREACH(var, col) BOOST_FOREACH(var, col)
 #endif
 
 namespace KlayGE
