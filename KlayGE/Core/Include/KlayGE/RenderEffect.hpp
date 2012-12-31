@@ -65,7 +65,6 @@
 #include <algorithm>
 
 #include <boost/noncopyable.hpp>
-#include <boost/tuple/tuple.hpp>
 
 #include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/Texture.hpp>
@@ -147,7 +146,7 @@ namespace KlayGE
 		virtual RenderVariable& operator=(float4 const & value);
 		virtual RenderVariable& operator=(float4x4 const & value);
 		virtual RenderVariable& operator=(TexturePtr const & value);
-		virtual RenderVariable& operator=(boost::tuple<TexturePtr, uint32_t, uint32_t, uint32_t, uint32_t> const & value);
+		virtual RenderVariable& operator=(tuple<TexturePtr, uint32_t, uint32_t, uint32_t, uint32_t> const & value);
 		virtual RenderVariable& operator=(SamplerStateObjectPtr const & value);
 		virtual RenderVariable& operator=(GraphicsBufferPtr const & value);
 		virtual RenderVariable& operator=(std::string const & value);
@@ -182,7 +181,7 @@ namespace KlayGE
 		virtual void Value(float4& val) const;
 		virtual void Value(float4x4& val) const;
 		virtual void Value(TexturePtr& val) const;
-		virtual void Value(boost::tuple<TexturePtr, uint32_t, uint32_t, uint32_t, uint32_t>& val) const;
+		virtual void Value(tuple<TexturePtr, uint32_t, uint32_t, uint32_t, uint32_t>& val) const;
 		virtual void Value(SamplerStateObjectPtr& val) const;
 		virtual void Value(GraphicsBufferPtr& value) const;
 		virtual void Value(std::string& val) const;
@@ -255,16 +254,16 @@ namespace KlayGE
 				array_size = value->ArraySize();
 				mipmap = value->NumMipMaps();
 			}
-			return this->operator=(boost::make_tuple(value, 0, array_size, 0, mipmap));
+			return this->operator=(make_tuple(value, 0, array_size, 0, mipmap));
 		}
 
-		RenderVariable& operator=(boost::tuple<TexturePtr, uint32_t, uint32_t, uint32_t, uint32_t> const & value)
+		RenderVariable& operator=(tuple<TexturePtr, uint32_t, uint32_t, uint32_t, uint32_t> const & value)
 		{
-			val_ = value.get<0>();
-			first_array_index_ = value.get<1>();
-			num_items_ = value.get<2>();
-			first_level_ = value.get<3>();
-			num_levels_ = value.get<4>();
+			val_ = get<0>(value);
+			first_array_index_ = get<1>(value);
+			num_items_ = get<2>(value);
+			first_level_ = get<3>(value);
+			num_levels_ = get<4>(value);
 			return *this;
 		}
 
@@ -273,9 +272,9 @@ namespace KlayGE
 			val = val_;
 		}
 
-		void Value(boost::tuple<TexturePtr, uint32_t, uint32_t, uint32_t, uint32_t>& val) const
+		void Value(tuple<TexturePtr, uint32_t, uint32_t, uint32_t, uint32_t>& val) const
 		{
-			val = boost::make_tuple(val_, first_array_index_, num_items_, first_level_, num_levels_);
+			val = KlayGE::make_tuple(val_, first_array_index_, num_items_, first_level_, num_levels_);
 		}
 
 		RenderVariable& operator=(std::string const & value)

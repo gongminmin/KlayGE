@@ -20,7 +20,6 @@
 #include <KlayGE/ShaderObject.hpp>
 
 #include <boost/function.hpp>
-#include <boost/tuple/tuple.hpp>
 
 namespace KlayGE
 {
@@ -82,7 +81,7 @@ namespace KlayGE
 
 		std::vector<std::pair<TexturePtr, SamplerStateObjectPtr> > samplers_;
 
-		std::vector<boost::tuple<std::string, RenderEffectParameterPtr, RenderEffectParameterPtr, uint32_t> > tex_sampler_binds_;
+		std::vector<tuple<std::string, RenderEffectParameterPtr, RenderEffectParameterPtr, uint32_t> > tex_sampler_binds_;
 
 		std::map<std::pair<VertexElementUsage, uint8_t>, GLint> attrib_locs_;
 	};

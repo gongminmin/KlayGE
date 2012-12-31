@@ -40,7 +40,6 @@
 #include <vector>
 #include <map>
 #include <set>
-#include <boost/tuple/tuple.hpp>
 
 #include <glloader/glloader.h>
 

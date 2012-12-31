@@ -122,7 +122,7 @@ namespace KlayGE
 		mvp_ep_ = effect_->ParameterByName("mvp");
 
 		vb_ = rf.MakeVertexBuffer(BU_Dynamic, EAH_CPU_Write | EAH_GPU_Read, nullptr);
-		rl_->BindVertexStream(vb_, boost::make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F),
+		rl_->BindVertexStream(vb_, make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F),
 										vertex_element(VEU_Diffuse, 0, EF_ABGR8),
 										vertex_element(VEU_TextureCoord, 0, EF_GR32F)));
 

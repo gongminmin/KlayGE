@@ -26,7 +26,6 @@
 #include <cstring>
 #include <boost/assert.hpp>
 #include <boost/bind.hpp>
-#include <boost/tuple/tuple.hpp>
 
 #include <KlayGE/D3D11/D3D11RenderEngine.hpp>
 #include <KlayGE/D3D11/D3D11Mapping.hpp>
@@ -136,11 +135,11 @@ namespace KlayGE
 			create_device_flags |= D3D11_CREATE_DEVICE_DEBUG;
 #endif
 
-			std::vector<boost::tuple<D3D_DRIVER_TYPE, std::wstring> > dev_type_behaviors;
-			dev_type_behaviors.push_back(boost::make_tuple(D3D_DRIVER_TYPE_HARDWARE, std::wstring(L"HW")));
-			dev_type_behaviors.push_back(boost::make_tuple(D3D_DRIVER_TYPE_WARP, std::wstring(L"WARP")));
-			dev_type_behaviors.push_back(boost::make_tuple(D3D_DRIVER_TYPE_SOFTWARE, std::wstring(L"SW")));
-			dev_type_behaviors.push_back(boost::make_tuple(D3D_DRIVER_TYPE_REFERENCE, std::wstring(L"REF")));
+			std::vector<tuple<D3D_DRIVER_TYPE, std::wstring> > dev_type_behaviors;
+			dev_type_behaviors.push_back(make_tuple(D3D_DRIVER_TYPE_HARDWARE, std::wstring(L"HW")));
+			dev_type_behaviors.push_back(make_tuple(D3D_DRIVER_TYPE_WARP, std::wstring(L"WARP")));
+			dev_type_behaviors.push_back(make_tuple(D3D_DRIVER_TYPE_SOFTWARE, std::wstring(L"SW")));
+			dev_type_behaviors.push_back(make_tuple(D3D_DRIVER_TYPE_REFERENCE, std::wstring(L"REF")));
 
 #if (_WIN32_WINNT >= 0x0602 /*_WIN32_WINNT_WIN8*/)
 			bool d3d_11_1 = false;
@@ -171,7 +170,7 @@ namespace KlayGE
 				ID3D11Device* d3d_device = nullptr;
 				ID3D11DeviceContext* d3d_imm_ctx = nullptr;
 				IDXGIAdapter* dx_adapter = nullptr;
-				D3D_DRIVER_TYPE dev_type = boost::get<0>(dev_type_beh);
+				D3D_DRIVER_TYPE dev_type = get<0>(dev_type_beh);
 				if (D3D_DRIVER_TYPE_HARDWARE == dev_type)
 				{
 					dx_adapter = adapter_->Adapter().get();
@@ -211,7 +210,7 @@ namespace KlayGE
 						}
 
 						std::wostringstream oss;
-						oss << adapter_->Description() << L" " << boost::get<1>(dev_type_beh);
+						oss << adapter_->Description() << L" " << get<1>(dev_type_beh);
 						switch (out_feature_level)
 						{
 #if (_WIN32_WINNT >= 0x0602 /*_WIN32_WINNT_WIN8*/)

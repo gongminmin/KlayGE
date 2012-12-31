@@ -26,7 +26,6 @@
 
 #include <vector>
 #include <sstream>
-#include <boost/tuple/tuple.hpp>
 #include <boost/bind.hpp>
 
 #include "VideoTexture.hpp"

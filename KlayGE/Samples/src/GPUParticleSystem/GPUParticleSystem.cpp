@@ -26,7 +26,6 @@
 #include <vector>
 #include <sstream>
 #include <fstream>
-#include <boost/tuple/tuple.hpp>
 #ifdef KLAYGE_COMPILER_MSVC
 #pragma warning(push)
 #pragma warning(disable: 4127 4512 6297 6326 6385)
@@ -198,7 +197,7 @@ namespace
 					init_data.data = &p_in_tex[0];
 					GraphicsBufferPtr pos = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, &init_data);
 
-					rl_->BindVertexStream(pos, boost::make_tuple(vertex_element(VEU_Position, 0, EF_GR32F)));
+					rl_->BindVertexStream(pos, make_tuple(vertex_element(VEU_Position, 0, EF_GR32F)));
 					technique_ = effect->TechniqueByName("ParticlesWithGS");
 				}
 			}
@@ -226,9 +225,9 @@ namespace
 				GraphicsBufferPtr ib = rf.MakeIndexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, &init_data);
 
 				rl_->TopologyType(RenderLayout::TT_TriangleStrip);
-				rl_->BindVertexStream(tex0, boost::make_tuple(vertex_element(VEU_TextureCoord, 0, EF_GR32F)),
+				rl_->BindVertexStream(tex0, make_tuple(vertex_element(VEU_TextureCoord, 0, EF_GR32F)),
 										RenderLayout::ST_Geometry, max_num_particles);
-				rl_->BindVertexStream(pos, boost::make_tuple(vertex_element(VEU_Position, 0, EF_GR32F)),
+				rl_->BindVertexStream(pos, make_tuple(vertex_element(VEU_Position, 0, EF_GR32F)),
 										RenderLayout::ST_Instance, 1);
 				rl_->BindIndexStream(ib, EF_R16UI);
 
@@ -342,10 +341,10 @@ namespace
 				particle_vel_vb_[0]->Resize(max_num_particles_ * sizeof(float4));
 				particle_vel_vb_[1]->Resize(max_num_particles_ * sizeof(float4));
 
-				particle_rl_[0]->BindVertexStream(particle_pos_vb_[0], boost::make_tuple(vertex_element(VEU_Position, 0, EF_ABGR32F)));
-				particle_rl_[0]->BindVertexStream(particle_vel_vb_[0], boost::make_tuple(vertex_element(VEU_TextureCoord, 0, EF_ABGR32F)));
-				particle_rl_[1]->BindVertexStream(particle_pos_vb_[1], boost::make_tuple(vertex_element(VEU_Position, 0, EF_ABGR32F)));
-				particle_rl_[1]->BindVertexStream(particle_vel_vb_[1], boost::make_tuple(vertex_element(VEU_TextureCoord, 0, EF_ABGR32F)));
+				particle_rl_[0]->BindVertexStream(particle_pos_vb_[0], make_tuple(vertex_element(VEU_Position, 0, EF_ABGR32F)));
+				particle_rl_[0]->BindVertexStream(particle_vel_vb_[0], make_tuple(vertex_element(VEU_TextureCoord, 0, EF_ABGR32F)));
+				particle_rl_[1]->BindVertexStream(particle_pos_vb_[1], make_tuple(vertex_element(VEU_Position, 0, EF_ABGR32F)));
+				particle_rl_[1]->BindVertexStream(particle_vel_vb_[1], make_tuple(vertex_element(VEU_TextureCoord, 0, EF_ABGR32F)));
 
 				for (int i = 0; i < max_num_particles_; ++ i)
 				{
@@ -383,7 +382,7 @@ namespace
 					init_data.data = &xyzs[0];
 
 					GraphicsBufferPtr pos_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, &init_data);
-					rl_->BindVertexStream(pos_vb, boost::make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F)));
+					rl_->BindVertexStream(pos_vb, make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F)));
 
 					pos_aabb_ = MathLib::compute_aabbox(&xyzs[0], &xyzs[4]);
 				}
@@ -401,7 +400,7 @@ namespace
 					init_data.data = &texs[0];
 
 					GraphicsBufferPtr tex_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, &init_data);
-					rl_->BindVertexStream(tex_vb, boost::make_tuple(vertex_element(VEU_TextureCoord, 0, EF_GR32F)));
+					rl_->BindVertexStream(tex_vb, make_tuple(vertex_element(VEU_TextureCoord, 0, EF_GR32F)));
 
 					tc_aabb_ = AABBox(float3(0, 0, 0), float3(1, 1, 0));
 				}

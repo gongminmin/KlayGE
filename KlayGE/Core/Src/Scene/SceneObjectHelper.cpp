@@ -34,7 +34,6 @@
 #include <KlayGE/Camera.hpp>
 
 #include <boost/assert.hpp>
-#include <boost/tuple/tuple.hpp>
 
 #include <KlayGE/SceneObjectHelper.hpp>
 

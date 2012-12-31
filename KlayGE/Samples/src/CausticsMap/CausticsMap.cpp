@@ -130,7 +130,7 @@ namespace
 			init_data.slice_pitch = 0;
 			init_data.data = &itangent[0];
 			GraphicsBufferPtr tangents_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data);
-			rl_->BindVertexStream(tangents_vb, boost::make_tuple(vertex_element(VEU_Tangent, 0, fmt)));
+			rl_->BindVertexStream(tangents_vb, make_tuple(vertex_element(VEU_Tangent, 0, fmt)));
 
 			RenderEffectPtr effect = rf.LoadEffect("Scene.fxml");
 			technique_ = effect->TechniqueByName("DistanceMapping2a");
@@ -502,7 +502,7 @@ namespace
 				init_data.slice_pitch = 0;
 				init_data.data = &xys[0];
 				GraphicsBufferPtr point_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, &init_data);
-				rl_->BindVertexStream(point_vb, boost::make_tuple(vertex_element(VEU_Position, 0, EF_GR32F)));
+				rl_->BindVertexStream(point_vb, make_tuple(vertex_element(VEU_Position, 0, EF_GR32F)));
 
 				single_caustics_pass_ = effect->TechniqueByName("GenSingleFaceCausticsMapWithGS");
 				BOOST_ASSERT(single_caustics_pass_->Validate());
@@ -518,7 +518,7 @@ namespace
 				init_data.slice_pitch = 0;
 				init_data.data = &xys[0];
 				GraphicsBufferPtr point_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, &init_data);
-				rl_->BindVertexStream(point_vb, boost::make_tuple(vertex_element(VEU_Position, 0, EF_GR32F)), RenderLayout::ST_Instance, 1);
+				rl_->BindVertexStream(point_vb, make_tuple(vertex_element(VEU_Position, 0, EF_GR32F)), RenderLayout::ST_Instance, 1);
 
 				float2 texs[] =
 				{
@@ -537,7 +537,7 @@ namespace
 				init_data.slice_pitch = 0;
 				init_data.data = texs;
 				GraphicsBufferPtr tex_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, &init_data);
-				rl_->BindVertexStream(tex_vb, boost::make_tuple(vertex_element(VEU_TextureCoord, 0, EF_GR32F)), RenderLayout::ST_Geometry, static_cast<uint32_t>(xys.size()));
+				rl_->BindVertexStream(tex_vb, make_tuple(vertex_element(VEU_TextureCoord, 0, EF_GR32F)), RenderLayout::ST_Geometry, static_cast<uint32_t>(xys.size()));
 
 				init_data.row_pitch = sizeof(indices);
 				init_data.slice_pitch = 0;

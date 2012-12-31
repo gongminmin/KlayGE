@@ -148,9 +148,9 @@ void DetailedSkinnedMesh::BuildMeshInfo()
 		skinned_pos_vb_->Resize(this->NumVertices() * sizeof(float4));
 		skinned_tex_vb_->Resize(this->NumVertices() * sizeof(float2));
 		skinned_tangent_vb_->Resize(this->NumVertices() * sizeof(float4));
-		skinned_rl_->BindVertexStream(skinned_pos_vb_, boost::make_tuple(vertex_element(VEU_Position, 0, EF_ABGR32F)));
-		skinned_rl_->BindVertexStream(skinned_tex_vb_, boost::make_tuple(vertex_element(VEU_TextureCoord, 0, EF_GR32F)));
-		skinned_rl_->BindVertexStream(skinned_tangent_vb_, boost::make_tuple(vertex_element(VEU_Tangent, 2, EF_ABGR32F)));
+		skinned_rl_->BindVertexStream(skinned_pos_vb_, make_tuple(vertex_element(VEU_Position, 0, EF_ABGR32F)));
+		skinned_rl_->BindVertexStream(skinned_tex_vb_, make_tuple(vertex_element(VEU_TextureCoord, 0, EF_GR32F)));
+		skinned_rl_->BindVertexStream(skinned_tangent_vb_, make_tuple(vertex_element(VEU_Tangent, 2, EF_ABGR32F)));
 		skinned_rl_->BindIndexStream(rl_->GetIndexStream(), rl_->IndexStreamFormat());
 
 		for (uint32_t i = 0; i < rl_->NumVertexStreams(); ++ i)
@@ -253,7 +253,7 @@ void DetailedSkinnedMesh::SetTessFactor(int32_t tess_factor)
 		tess_factor = std::min(tess_factor, static_cast<int32_t>(tess_pattern_vbs.size()));
 
 		tess_pattern_rl_->BindIndexStream(tess_pattern_ibs[tess_factor - 1], EF_R16UI);
-		tess_pattern_rl_->BindVertexStream(tess_pattern_vbs[tess_factor - 1], boost::make_tuple(vertex_element(VEU_TextureCoord, 1, EF_GR32F)),
+		tess_pattern_rl_->BindVertexStream(tess_pattern_vbs[tess_factor - 1], make_tuple(vertex_element(VEU_TextureCoord, 1, EF_GR32F)),
 			RenderLayout::ST_Geometry, mesh_rl_->NumIndices() * 3);
 	}
 

@@ -39,7 +39,6 @@
 #include <KlayGE/Camera.hpp>
 
 #include <cstring>
-#include <boost/tuple/tuple.hpp>
 
 #include <KlayGE/RenderableHelper.hpp>
 
@@ -95,7 +94,7 @@ namespace KlayGE
 		init_data.data = &v;
 
 		GraphicsBufferPtr vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, &init_data);
-		rl_->BindVertexStream(vb, boost::make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F)));
+		rl_->BindVertexStream(vb, make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F)));
 
 		pos_aabb_ = MathLib::compute_aabbox(&v, &v + 1);
 		tc_aabb_ = AABBox(float3(0, 0, 0), float3(0, 0, 0));
@@ -138,7 +137,7 @@ namespace KlayGE
 		rl_->TopologyType(RenderLayout::TT_LineList);
 
 		GraphicsBufferPtr vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, &init_data);
-		rl_->BindVertexStream(vb, boost::make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F)));
+		rl_->BindVertexStream(vb, make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F)));
 
 		pos_aabb_ = MathLib::compute_aabbox(&xyzs[0], &xyzs[0] + sizeof(xyzs) / sizeof(xyzs[0]));
 		tc_aabb_ = AABBox(float3(0, 0, 0), float3(0, 0, 0));
@@ -181,7 +180,7 @@ namespace KlayGE
 		rl_->TopologyType(RenderLayout::TT_TriangleList);
 
 		GraphicsBufferPtr vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, &init_data);
-		rl_->BindVertexStream(vb, boost::make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F)));
+		rl_->BindVertexStream(vb, make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F)));
 
 		pos_aabb_ = MathLib::compute_aabbox(&xyzs[0], &xyzs[0] + sizeof(xyzs) / sizeof(xyzs[0]));
 		tc_aabb_ = AABBox(float3(0, 0, 0), float3(0, 0, 0));
@@ -237,7 +236,7 @@ namespace KlayGE
 		init_data.data = xyzs;
 
 		GraphicsBufferPtr vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, &init_data);
-		rl_->BindVertexStream(vb, boost::make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F)));
+		rl_->BindVertexStream(vb, make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F)));
 
 		init_data.row_pitch = sizeof(indices);
 		init_data.slice_pitch = 0;
@@ -294,7 +293,7 @@ namespace KlayGE
 		init_data.data = xyzs;
 
 		GraphicsBufferPtr vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, &init_data);
-		rl_->BindVertexStream(vb, boost::make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F)));
+		rl_->BindVertexStream(vb, make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F)));
 
 		init_data.row_pitch = sizeof(indices);
 		init_data.slice_pitch = 0;
@@ -359,7 +358,7 @@ namespace KlayGE
 		rl_->TopologyType(RenderLayout::TT_TriangleStrip);
 
 		GraphicsBufferPtr vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, &init_data);
-		rl_->BindVertexStream(vb, boost::make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F)));
+		rl_->BindVertexStream(vb, make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F)));
 
 		pos_aabb_ = MathLib::compute_aabbox(&xyzs[0], &xyzs[4]);
 		tc_aabb_ = AABBox(float3(0, 0, 0), float3(0, 0, 0));
@@ -477,7 +476,7 @@ namespace KlayGE
 		init_data.data = &pos[0];
 
 		GraphicsBufferPtr pos_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, &init_data);
-		rl_->BindVertexStream(pos_vb, boost::make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F)));
+		rl_->BindVertexStream(pos_vb, make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F)));
 
 		if (has_tex_coord)
 		{
@@ -496,7 +495,7 @@ namespace KlayGE
 			init_data.data = &tex[0];
 
 			GraphicsBufferPtr tex_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, &init_data);
-			rl_->BindVertexStream(tex_vb, boost::make_tuple(vertex_element(VEU_TextureCoord, 0, EF_GR32F)));
+			rl_->BindVertexStream(tex_vb, make_tuple(vertex_element(VEU_TextureCoord, 0, EF_GR32F)));
 		}
 
 		std::vector<uint16_t> index;
@@ -566,7 +565,7 @@ namespace KlayGE
 		init_data.data = xyzs;
 
 		GraphicsBufferPtr vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, &init_data);
-		rl_->BindVertexStream(vb, boost::make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F)));
+		rl_->BindVertexStream(vb, make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F)));
 
 		init_data.row_pitch = sizeof(indices);
 		init_data.slice_pitch = 0;

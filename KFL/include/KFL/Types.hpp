@@ -45,6 +45,7 @@
 #ifdef KLAYGE_CXX11_LIBRARY_SUPPORT
 	#include <array>
 	#include <cstdint>
+	#include <tuple>
 	#include <type_traits>
 
 	namespace KlayGE
@@ -59,6 +60,11 @@
 		using std::int32_t;
 		using std::int16_t;
 		using std::int8_t;
+
+		using std::tuple;
+		using std::get;
+		using std::make_tuple;
+		using std::tuple_size;
 
 		using std::add_reference;
 		using std::has_trivial_destructor;
@@ -75,6 +81,7 @@
 		#pragma warning(pop)
 	#endif
 	#include <boost/cstdint.hpp>
+	#include <boost/tuple/tuple.hpp>
 	#include <boost/type_traits.hpp>
 
 	namespace KlayGE
@@ -89,6 +96,15 @@
 		using boost::int32_t;
 		using boost::int16_t;
 		using boost::int8_t;
+
+		using boost::tuple;
+		using boost::get;
+		using std::make_tuple;
+		template<class tuple_type>
+		struct tuple_size
+		{
+			static const size_t value = boost::tuples::length<tuple_type>::value;
+		};
 
 		using boost::add_reference;
 		using boost::has_trivial_destructor;

@@ -338,29 +338,29 @@ namespace
 	class SetD3D11ShaderParameter<TexturePtr, ID3D11ShaderResourceViewPtr>
 	{
 	public:
-		SetD3D11ShaderParameter(boost::tuple<void*, uint32_t, uint32_t>& srvsrc, ID3D11ShaderResourceViewPtr& srv, RenderEffectParameterPtr const & param)
+		SetD3D11ShaderParameter(tuple<void*, uint32_t, uint32_t>& srvsrc, ID3D11ShaderResourceViewPtr& srv, RenderEffectParameterPtr const & param)
 			: srvsrc_(&srvsrc), srv_(&srv), param_(param)
 		{
 		}
 
 		void operator()()
 		{
-			boost::tuple<TexturePtr, uint32_t, uint32_t, uint32_t, uint32_t> tex_tuple;
+			tuple<TexturePtr, uint32_t, uint32_t, uint32_t, uint32_t> tex_tuple;
 			param_->Value(tex_tuple);
-			if (tex_tuple.get<0>())
+			if (get<0>(tex_tuple))
 			{
-				*srvsrc_ = boost::make_tuple(tex_tuple.get<0>().get(), tex_tuple.get<1>() * tex_tuple.get<0>()->NumMipMaps() + tex_tuple.get<3>(),
-					tex_tuple.get<2>() * tex_tuple.get<4>());
-				*srv_ = checked_cast<D3D11Texture*>(tex_tuple.get<0>().get())->RetriveD3DShaderResourceView(tex_tuple.get<1>(), tex_tuple.get<2>(), tex_tuple.get<3>(), tex_tuple.get<4>());
+				*srvsrc_ = make_tuple(get<0>(tex_tuple).get(), get<1>(tex_tuple) * get<0>(tex_tuple)->NumMipMaps() + get<3>(tex_tuple),
+					get<2>(tex_tuple) * get<4>(tex_tuple));
+				*srv_ = checked_cast<D3D11Texture*>(get<0>(tex_tuple).get())->RetriveD3DShaderResourceView(get<1>(tex_tuple), get<2>(tex_tuple), get<3>(tex_tuple), get<4>(tex_tuple));
 			}
 			else
 			{
-				boost::get<0>(*srvsrc_) = nullptr;
+				get<0>(*srvsrc_) = nullptr;
 			}
 		}
 
 	private:
-		boost::tuple<void*, uint32_t, uint32_t>* srvsrc_;
+		tuple<void*, uint32_t, uint32_t>* srvsrc_;
 		ID3D11ShaderResourceViewPtr* srv_;
 		RenderEffectParameterPtr param_;
 	};
@@ -369,7 +369,7 @@ namespace
 	class SetD3D11ShaderParameter<GraphicsBufferPtr, ID3D11ShaderResourceViewPtr>
 	{
 	public:
-		SetD3D11ShaderParameter(boost::tuple<void*, uint32_t, uint32_t>& srvsrc, ID3D11ShaderResourceViewPtr& srv, RenderEffectParameterPtr const & param)
+		SetD3D11ShaderParameter(tuple<void*, uint32_t, uint32_t>& srvsrc, ID3D11ShaderResourceViewPtr& srv, RenderEffectParameterPtr const & param)
 			: srvsrc_(&srvsrc), srv_(&srv), param_(param)
 		{
 		}
@@ -380,17 +380,17 @@ namespace
 			param_->Value(buf);
 			if (buf)
 			{
-				*srvsrc_ = boost::make_tuple(buf.get(), 0, 1);
+				*srvsrc_ = make_tuple(buf.get(), 0, 1);
 				*srv_ = checked_cast<D3D11GraphicsBuffer*>(buf.get())->D3DShaderResourceView();
 			}
 			else
 			{
-				boost::get<0>(*srvsrc_) = nullptr;
+				get<0>(*srvsrc_) = nullptr;
 			}
 		}
 
 	private:
-		boost::tuple<void*, uint32_t, uint32_t>* srvsrc_;
+		tuple<void*, uint32_t, uint32_t>* srvsrc_;
 		ID3D11ShaderResourceViewPtr* srv_;
 		RenderEffectParameterPtr param_;
 	};
@@ -406,12 +406,12 @@ namespace
 
 		void operator()()
 		{
-			boost::tuple<TexturePtr, uint32_t, uint32_t, uint32_t, uint32_t> tex_tuple;
+			tuple<TexturePtr, uint32_t, uint32_t, uint32_t, uint32_t> tex_tuple;
 			param_->Value(tex_tuple);
-			if (tex_tuple.get<0>())
+			if (get<0>(tex_tuple))
 			{
-				*uavsrc_ = tex_tuple.get<0>().get();
-				*uav_ = checked_cast<D3D11Texture*>(tex_tuple.get<0>().get())->RetriveD3DUnorderedAccessView(tex_tuple.get<1>(), tex_tuple.get<2>(), tex_tuple.get<3>());
+				*uavsrc_ = get<0>(tex_tuple).get();
+				*uav_ = checked_cast<D3D11Texture*>(get<0>(tex_tuple).get())->RetriveD3DUnorderedAccessView(get<1>(tex_tuple), get<2>(tex_tuple), get<3>(tex_tuple));
 			}
 			else
 			{
@@ -1725,7 +1725,7 @@ namespace KlayGE
 			}
 
 			samplers_[type].resize(shader_desc_[type].num_samplers);
-			srvsrcs_[type].resize(shader_desc_[type].num_srvs, boost::make_tuple(static_cast<void*>(nullptr), 0, 0));
+			srvsrcs_[type].resize(shader_desc_[type].num_srvs, make_tuple(static_cast<void*>(nullptr), 0, 0));
 			srvs_[type].resize(shader_desc_[type].num_srvs);
 			uavsrcs_[type].resize(shader_desc_[type].num_uavs, nullptr);
 			uavs_[type].resize(shader_desc_[type].num_uavs);
@@ -1826,7 +1826,7 @@ namespace KlayGE
 			}
 
 			samplers_[type].resize(so.samplers_[type].size());
-			srvsrcs_[type].resize(so.srvs_[type].size(), boost::make_tuple(static_cast<void*>(nullptr), 0, 0));
+			srvsrcs_[type].resize(so.srvs_[type].size(), make_tuple(static_cast<void*>(nullptr), 0, 0));
 			srvs_[type].resize(so.srvs_[type].size());
 			uavsrcs_[type].resize(so.uavs_[type].size(), nullptr);
 			uavs_[type].resize(so.uavs_[type].size());
@@ -1891,7 +1891,7 @@ namespace KlayGE
 			ret->shader_desc_[i] = shader_desc_[i];
 
 			ret->samplers_[i].resize(samplers_[i].size());
-			ret->srvsrcs_[i].resize(srvsrcs_[i].size(), boost::make_tuple(static_cast<void*>(nullptr), 0, 0));
+			ret->srvsrcs_[i].resize(srvsrcs_[i].size(), make_tuple(static_cast<void*>(nullptr), 0, 0));
 			ret->srvs_[i].resize(srvs_[i].size());
 			ret->uavsrcs_[i].resize(uavsrcs_[i].size(), nullptr);
 			ret->uavs_[i].resize(uavs_[i].size());

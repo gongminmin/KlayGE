@@ -1245,7 +1245,7 @@ namespace KlayGE
 		}
 	}
 
-	void D3D11RenderEngine::SetShaderResources(ShaderObject::ShaderType st, std::vector<boost::tuple<void*, uint32_t, uint32_t> > const & srvsrcs, std::vector<ID3D11ShaderResourceViewPtr> const & srvs)
+	void D3D11RenderEngine::SetShaderResources(ShaderObject::ShaderType st, std::vector<tuple<void*, uint32_t, uint32_t> > const & srvsrcs, std::vector<ID3D11ShaderResourceViewPtr> const & srvs)
 	{
 		if (shader_srv_cache_[st] != srvs)
 		{
@@ -1328,12 +1328,12 @@ namespace KlayGE
 			bool cleared = false;
 			for (uint32_t i = 0; i < shader_srvsrc_cache_[st].size(); ++ i)
 			{
-				if (shader_srvsrc_cache_[st][i].get<0>())
+				if (get<0>(shader_srvsrc_cache_[st][i]))
 				{
-					if (shader_srvsrc_cache_[st][i].get<0>() == rtv_src)
+					if (get<0>(shader_srvsrc_cache_[st][i]) == rtv_src)
 					{
-						uint32_t const first = shader_srvsrc_cache_[st][i].get<1>();
-						uint32_t const last = first + shader_srvsrc_cache_[st][i].get<2>();
+						uint32_t const first = get<1>(shader_srvsrc_cache_[st][i]);
+						uint32_t const last = first + get<2>(shader_srvsrc_cache_[st][i]);
 						uint32_t const rt_first = rt_first_subres;
 						uint32_t const rt_last = rt_first_subres + rt_num_subres;
 						if (((first >= rt_first) && (first < rt_last))

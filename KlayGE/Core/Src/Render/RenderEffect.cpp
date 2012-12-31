@@ -4598,7 +4598,7 @@ namespace KlayGE
 		return *this;
 	}
 
-	RenderVariable& RenderVariable::operator=(boost::tuple<TexturePtr, uint32_t, uint32_t, uint32_t, uint32_t> const & /*value*/)
+	RenderVariable& RenderVariable::operator=(tuple<TexturePtr, uint32_t, uint32_t, uint32_t, uint32_t> const & /*value*/)
 	{
 		BOOST_ASSERT(false);
 		return *this;
@@ -4787,7 +4787,7 @@ namespace KlayGE
 		BOOST_ASSERT(false);
 	}
 
-	void RenderVariable::Value(boost::tuple<TexturePtr, uint32_t, uint32_t, uint32_t, uint32_t>& /*value*/) const
+	void RenderVariable::Value(tuple<TexturePtr, uint32_t, uint32_t, uint32_t, uint32_t>& /*value*/) const
 	{
 		BOOST_ASSERT(false);
 	}

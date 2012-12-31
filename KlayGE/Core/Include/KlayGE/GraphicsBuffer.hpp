@@ -50,7 +50,6 @@
 #include <KlayGE/PreDeclare.hpp>
 #include <vector>
 #include <boost/noncopyable.hpp>
-#include <boost/tuple/tuple.hpp>
 
 namespace KlayGE
 {

@@ -35,7 +35,6 @@
 #include <algorithm>
 #include <fstream>
 #include <sstream>
-#include <boost/tuple/tuple.hpp>
 
 #include <MeshMLLib/MeshMLLib.hpp>
 
@@ -472,7 +471,7 @@ namespace KlayGE
 
 	void StaticMesh::AddVertexStream(GraphicsBufferPtr const & buffer, vertex_element const & ve)
 	{
-		rl_->BindVertexStream(buffer, boost::make_tuple(ve));
+		rl_->BindVertexStream(buffer, make_tuple(ve));
 	}
 
 	void StaticMesh::AddIndexStream(void const * buf, uint32_t size, ElementFormat format, uint32_t access_hint)

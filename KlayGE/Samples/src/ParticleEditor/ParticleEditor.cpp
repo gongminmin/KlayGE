@@ -32,7 +32,6 @@
 #include <sstream>
 #include <fstream>
 #include <boost/bind.hpp>
-#include <boost/tuple/tuple.hpp>
 #ifdef KLAYGE_COMPILER_MSVC
 #pragma warning(push)
 #pragma warning(disable: 4127 4512 6297 6326 6385)
@@ -86,7 +85,7 @@ namespace
 			init_data.slice_pitch = 0;
 			init_data.data = &vertices[0];
 			GraphicsBufferPtr pos_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, &init_data);
-			rl_->BindVertexStream(pos_vb, boost::make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F)));
+			rl_->BindVertexStream(pos_vb, make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F)));
 
 			pos_aabb_ = MathLib::compute_aabbox(vertices, vertices + sizeof(vertices) / sizeof(vertices[0]));
 			tc_aabb_ = AABBox(float3(0, 0, 0), float3(0, 0, 0));
@@ -147,7 +146,7 @@ namespace
 				rl_->TopologyType(RenderLayout::TT_PointList);
 
 				GraphicsBufferPtr pos_vb = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Read | EAH_CPU_Write, nullptr);
-				rl_->BindVertexStream(pos_vb, boost::make_tuple(vertex_element(VEU_Position, 0, EF_ABGR32F),
+				rl_->BindVertexStream(pos_vb, make_tuple(vertex_element(VEU_Position, 0, EF_ABGR32F),
 					vertex_element(VEU_TextureCoord, 0, EF_R32F)));
 
 				technique_ = rf.LoadEffect("ParticleEditor.fxml")->TechniqueByName("ParticleWithGS");
@@ -161,11 +160,11 @@ namespace
 				init_data.slice_pitch = 0;
 				init_data.data = texs;
 				GraphicsBufferPtr tex_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, &init_data);
-				rl_->BindVertexStream(tex_vb, boost::make_tuple(vertex_element(VEU_Position, 0, EF_GR32F)));
+				rl_->BindVertexStream(tex_vb, make_tuple(vertex_element(VEU_Position, 0, EF_GR32F)));
 
 				GraphicsBufferPtr pos_vb = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Read | EAH_CPU_Write, nullptr);
 				rl_->BindVertexStream(pos_vb,
-					boost::make_tuple(vertex_element(VEU_TextureCoord, 0, EF_ABGR32F),
+					make_tuple(vertex_element(VEU_TextureCoord, 0, EF_ABGR32F),
 						vertex_element(VEU_TextureCoord, 1, EF_R32F)),
 					RenderLayout::ST_Instance);
 

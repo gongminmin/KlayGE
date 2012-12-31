@@ -19,7 +19,6 @@
 #include <KlayGE/ShaderObject.hpp>
 
 #include <boost/function.hpp>
-#include <boost/tuple/tuple.hpp>
 
 #include <D3D11Shader.h>
 
@@ -148,7 +147,7 @@ namespace KlayGE
 		array<D3D11ShaderDesc, ST_NumShaderTypes> shader_desc_;
 
 		array<std::vector<ID3D11SamplerStatePtr>, ST_NumShaderTypes> samplers_;
-		array<std::vector<boost::tuple<void*, uint32_t, uint32_t> >, ST_NumShaderTypes> srvsrcs_;
+		array<std::vector<tuple<void*, uint32_t, uint32_t> >, ST_NumShaderTypes> srvsrcs_;
 		array<std::vector<ID3D11ShaderResourceViewPtr>, ST_NumShaderTypes> srvs_;
 		array<std::vector<void*>, ST_NumShaderTypes> uavsrcs_;
 		array<std::vector<ID3D11UnorderedAccessViewPtr>, ST_NumShaderTypes> uavs_;

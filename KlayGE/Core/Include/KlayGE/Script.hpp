@@ -34,8 +34,6 @@
 #pragma warning(pop)
 #endif
 
-#include <boost/tuple/tuple.hpp>
-
 namespace KlayGE
 {
 	typedef boost::shared_ptr<PyObject> PyObjectPtr;
@@ -65,17 +63,24 @@ namespace KlayGE
 	class KLAYGE_CORE_API ScriptModule
 	{
 	private:
-		template <typename TupleType>
-		std::vector<PyObjectPtr> Tuple2Vector(TupleType const & t)
+		template <typename tuple_type, int N>
+		struct Tuple2Vector
 		{
-			std::vector<PyObjectPtr> ret;
-			ret.push_back(CppType2PyObjectPtr(boost::tuples::get<0>(t)));
-
-			std::vector<PyObjectPtr> tail(Tuple2Vector(t.get_tail()));
-			ret.insert(ret.end(), tail.begin(), tail.end());
-
-			return ret;
-		}
+			static std::vector<PyObjectPtr> Do(tuple_type const & t)
+			{
+				std::vector<PyObjectPtr> ret = Tuple2Vector<tuple_type, N - 1>::Do(t);
+				ret.push_back(CppType2PyObjectPtr(get<N - 1>(t)));
+				return ret;
+			}
+		};
+		template <typename tuple_type>
+		struct Tuple2Vector<tuple_type, 1>
+		{
+			static std::vector<PyObjectPtr> Do(tuple_type const & t)
+			{
+				return std::vector<PyObjectPtr>(1, CppType2PyObjectPtr(get<0>(t)));
+			}
+		};
 
 	public:
 		ScriptModule();
@@ -87,7 +92,7 @@ namespace KlayGE
 		template <typename TupleType>
 		PyObjectPtr Call(std::string const & func_name, TupleType const & t)
 		{
-			std::vector<PyObjectPtr> v(Tuple2Vector(t));
+			std::vector<PyObjectPtr> v(Tuple2Vector<TupleType, tuple_size<TupleType>::value>::Do(t));
 			return this->Call(func_name, &v.front(), &v.back() + 1);
 		}
 
@@ -99,13 +104,6 @@ namespace KlayGE
 		PyObjectPtr module_;
 		PyObjectPtr dict_;
 	};
-
-	template <>
-	inline std::vector<PyObjectPtr>
-	ScriptModule::Tuple2Vector<boost::tuples::null_type>(boost::tuples::null_type const & /*t*/)
-	{
-		return std::vector<PyObjectPtr>();
-	}
 
 	// 注册一个可以在Python中调用的模块
 	/////////////////////////////////////////////////////////////////////////////////

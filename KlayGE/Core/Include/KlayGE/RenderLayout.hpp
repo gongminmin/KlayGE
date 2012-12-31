@@ -26,7 +26,6 @@
 #include <KlayGE/PreDeclare.hpp>
 
 #include <vector>
-#include <boost/tuple/tuple.hpp>
 
 #include <KlayGE/GraphicsBuffer.hpp>
 #include <KlayGE/ElementFormat.hpp>
@@ -161,7 +160,7 @@ namespace KlayGE
 		void BindVertexStream(GraphicsBufferPtr const & buffer, tuple_type const & vertex_elems,
 			stream_type type = ST_Geometry, uint32_t freq = 1)
 		{
-			this->BindVertexStream(buffer, Tuple2Vector(vertex_elems), type, freq);
+			this->BindVertexStream(buffer, Tuple2Vector<tuple_type, tuple_size<tuple_type>::value>::Do(vertex_elems), type, freq);
 		}
 		void BindVertexStream(GraphicsBufferPtr const & buffer, vertex_elements_type const & vet,
 			stream_type type = ST_Geometry, uint32_t freq = 1);
@@ -250,17 +249,24 @@ namespace KlayGE
 		void ExpandInstance(GraphicsBufferPtr& hint, uint32_t inst_no) const;
 
 	private:
-		template <typename tuple_type>
-		vertex_elements_type Tuple2Vector(tuple_type const & t)
+		template <typename tuple_type, int N>
+		struct Tuple2Vector
 		{
-			vertex_elements_type ret;
-			ret.push_back(boost::tuples::get<0>(t));
-
-			vertex_elements_type tail(Tuple2Vector(t.get_tail()));
-			ret.insert(ret.end(), tail.begin(), tail.end());
-
-			return ret;
-		}
+			static vertex_elements_type Do(tuple_type const & t)
+			{
+				vertex_elements_type ret = Tuple2Vector<tuple_type, N - 1>::Do(t);
+				ret.push_back(get<N - 1>(t));
+				return ret;
+			}
+		};
+		template <typename tuple_type>
+		struct Tuple2Vector<tuple_type, 1>
+		{
+			static vertex_elements_type Do(tuple_type const & t)
+			{
+				return vertex_elements_type(1, get<0>(t));
+			}
+		};
 
 	protected:
 		topology_type topo_type_;
@@ -290,13 +296,6 @@ namespace KlayGE
 		int32_t base_vertex_location_;
 		uint32_t start_instance_location_;
 	};
-
-	template <>
-	inline vertex_elements_type
-	RenderLayout::Tuple2Vector<boost::tuples::null_type>(boost::tuples::null_type const & /*t*/)
-	{
-		return vertex_elements_type();
-	}
 }
 
 #endif		// _RENDERLAYOUT_HPP

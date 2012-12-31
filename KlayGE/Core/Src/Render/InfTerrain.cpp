@@ -80,7 +80,7 @@ namespace KlayGE
 		init_data.slice_pitch = init_data.row_pitch = static_cast<uint32_t>(vertices.size() * sizeof(vertices[0]));
 
 		GraphicsBufferPtr pos_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, &init_data);
-		rl_->BindVertexStream(pos_vb, boost::make_tuple(vertex_element(VEU_Position, 0, EF_GR32F)));
+		rl_->BindVertexStream(pos_vb, make_tuple(vertex_element(VEU_Position, 0, EF_GR32F)));
 
 		std::vector<uint32_t> indices;
 		for (uint32_t y = 0; y < num_grids - 1; ++ y)
