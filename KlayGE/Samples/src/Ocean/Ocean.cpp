@@ -23,7 +23,6 @@
 
 #include <sstream>
 #include <boost/bind.hpp>
-#include <boost/typeof/typeof.hpp>
 
 #include "OceanSimulator.hpp"
 #include "Ocean.hpp"

@@ -23,15 +23,6 @@
 
 #include <KlayGE/PreDeclare.hpp>
 
-#ifdef KLAYGE_COMPILER_MSVC
-#pragma warning(push)
-#pragma warning(disable: 6385)
-#endif
-#include <boost/array.hpp>
-#ifdef KLAYGE_COMPILER_MSVC
-#pragma warning(pop)
-#endif
-
 #include <KFL/Color.hpp>
 
 namespace KlayGE
@@ -264,16 +255,16 @@ namespace KlayGE
 		bool				alpha_to_coverage_enable;
 		bool				independent_blend_enable;
 
-		boost::array<bool, 8>				blend_enable;
-		boost::array<bool, 8>				logic_op_enable;
-		boost::array<BlendOperation, 8>		blend_op;
-		boost::array<AlphaBlendFactor, 8>	src_blend;
-		boost::array<AlphaBlendFactor, 8>	dest_blend;
-		boost::array<BlendOperation, 8>		blend_op_alpha;
-		boost::array<AlphaBlendFactor, 8>	src_blend_alpha;
-		boost::array<AlphaBlendFactor, 8>	dest_blend_alpha;
-		boost::array<LogicOperation, 8>		logic_op;
-		boost::array<uint8_t, 8>			color_write_mask;
+		array<bool, 8>				blend_enable;
+		array<bool, 8>				logic_op_enable;
+		array<BlendOperation, 8>		blend_op;
+		array<AlphaBlendFactor, 8>	src_blend;
+		array<AlphaBlendFactor, 8>	dest_blend;
+		array<BlendOperation, 8>		blend_op_alpha;
+		array<AlphaBlendFactor, 8>	src_blend_alpha;
+		array<AlphaBlendFactor, 8>	dest_blend_alpha;
+		array<LogicOperation, 8>		logic_op;
+		array<uint8_t, 8>			color_write_mask;
 
 		BlendStateDesc();
 

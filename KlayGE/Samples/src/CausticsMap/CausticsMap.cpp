@@ -21,8 +21,6 @@
 
 #include <sstream>
 #include <boost/bind.hpp>
-#include <boost/foreach.hpp>
-#include <boost/typeof/typeof.hpp>
 
 #include "CausticsMap.hpp"
 
@@ -82,9 +80,9 @@ namespace
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-			BOOST_AUTO(diffuse_loader, ASyncLoadTexture("diffuse.dds", EAH_GPU_Read));
-			BOOST_AUTO(normal_loader, ASyncLoadTexture("normal.dds", EAH_GPU_Read));
-			BOOST_AUTO(dist_loader, ASyncLoadTexture("distance.dds", EAH_GPU_Read));
+			KLAYGE_AUTO(diffuse_loader, ASyncLoadTexture("diffuse.dds", EAH_GPU_Read));
+			KLAYGE_AUTO(normal_loader, ASyncLoadTexture("normal.dds", EAH_GPU_Read));
+			KLAYGE_AUTO(dist_loader, ASyncLoadTexture("distance.dds", EAH_GPU_Read));
 
 			uint32_t vertex_num = rl_->NumVertices();
 			vector<Quaternion> tangent_quats(vertex_num);
@@ -429,8 +427,8 @@ namespace
 
 		void BindLight(LightSourcePtr const & light)
 		{
-			typedef BOOST_TYPEOF(meshes_) MeshesType;
-			BOOST_FOREACH(MeshesType::reference mesh, meshes_)
+			typedef KLAYGE_DECLTYPE(meshes_) MeshesType;
+			KLAYGE_FOREACH(MeshesType::reference mesh, meshes_)
 			{
 				checked_pointer_cast<RefractMesh>(mesh)->BindLight(light);
 			}
@@ -438,8 +436,8 @@ namespace
 
 		void SceneTexture(TexturePtr const & scene_texture)
 		{
-			typedef BOOST_TYPEOF(meshes_) MeshesType;
-			BOOST_FOREACH(MeshesType::reference mesh, meshes_)
+			typedef KLAYGE_DECLTYPE(meshes_) MeshesType;
+			KLAYGE_FOREACH(MeshesType::reference mesh, meshes_)
 			{
 				checked_pointer_cast<RefractMesh>(mesh)->SceneTexture(scene_texture);
 			}
@@ -447,8 +445,8 @@ namespace
 
 		void ModelMatrix(float4x4 const & model)
 		{
-			typedef BOOST_TYPEOF(meshes_) MeshesType;
-			BOOST_FOREACH(MeshesType::reference mesh, meshes_)
+			typedef KLAYGE_DECLTYPE(meshes_) MeshesType;
+			KLAYGE_FOREACH(MeshesType::reference mesh, meshes_)
 			{
 				checked_pointer_cast<RefractMesh>(mesh)->ModelMatrix(model);
 			}
@@ -456,8 +454,8 @@ namespace
 
 		void SetEnvCube(TexturePtr const & texture)
 		{
-			typedef BOOST_TYPEOF(meshes_) MeshesType;
-			BOOST_FOREACH(MeshesType::reference mesh, meshes_)
+			typedef KLAYGE_DECLTYPE(meshes_) MeshesType;
+			KLAYGE_FOREACH(MeshesType::reference mesh, meshes_)
 			{
 				checked_pointer_cast<RefractMesh>(mesh)->SetEnvCube(texture);
 			}
@@ -465,8 +463,8 @@ namespace
 
 		void Pass(uint32_t pass)
 		{
-			typedef BOOST_TYPEOF(meshes_) MeshesType;
-			BOOST_FOREACH(MeshesType::reference mesh, meshes_)
+			typedef KLAYGE_DECLTYPE(meshes_) MeshesType;
+			KLAYGE_FOREACH(MeshesType::reference mesh, meshes_)
 			{
 				checked_pointer_cast<RefractMesh>(mesh)->Pass(pass);
 			}
@@ -481,7 +479,7 @@ namespace
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 			
-			BOOST_AUTO(point_texture_loader, ASyncLoadTexture("point.dds", EAH_GPU_Read | EAH_Immutable));
+			KLAYGE_AUTO(point_texture_loader, ASyncLoadTexture("point.dds", EAH_GPU_Read | EAH_Immutable));
 			
 			std::vector<float2> xys(CAUSTICS_GRID_SIZE * CAUSTICS_GRID_SIZE);
 			for (uint32_t i = 0; i < CAUSTICS_GRID_SIZE; ++ i)

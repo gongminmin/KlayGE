@@ -32,14 +32,6 @@
 #include <map>
 #ifdef KLAYGE_COMPILER_MSVC
 #pragma warning(push)
-#pragma warning(disable: 6385)
-#endif
-#include <boost/array.hpp>
-#ifdef KLAYGE_COMPILER_MSVC
-#pragma warning(pop)
-#endif
-#ifdef KLAYGE_COMPILER_MSVC
-#pragma warning(push)
 #pragma warning(disable: 4100 6011 6334)
 #endif
 #include <boost/unordered_map.hpp>
@@ -233,13 +225,13 @@ namespace KlayGE
 		std::vector<UINT> vb_offset_cache_;
 		ID3D11BufferPtr ib_cache_;
 
-		boost::array<std::vector<boost::tuple<void*, uint32_t, uint32_t> >, ShaderObject::ST_NumShaderTypes> shader_srvsrc_cache_;
-		boost::array<std::vector<ID3D11ShaderResourceView*>, ShaderObject::ST_NumShaderTypes> shader_srv_ptr_cache_;
-		boost::array<std::vector<ID3D11SamplerState*>, ShaderObject::ST_NumShaderTypes> shader_sampler_ptr_cache_;
-		boost::array<std::vector<ID3D11Buffer*>, ShaderObject::ST_NumShaderTypes> shader_cb_ptr_cache_;
-		boost::array<std::vector<ID3D11ShaderResourceViewPtr>, ShaderObject::ST_NumShaderTypes> shader_srv_cache_;
-		boost::array<std::vector<ID3D11SamplerStatePtr>, ShaderObject::ST_NumShaderTypes> shader_sampler_cache_;
-		boost::array<std::vector<ID3D11BufferPtr>, ShaderObject::ST_NumShaderTypes> shader_cb_cache_;
+		array<std::vector<boost::tuple<void*, uint32_t, uint32_t> >, ShaderObject::ST_NumShaderTypes> shader_srvsrc_cache_;
+		array<std::vector<ID3D11ShaderResourceView*>, ShaderObject::ST_NumShaderTypes> shader_srv_ptr_cache_;
+		array<std::vector<ID3D11SamplerState*>, ShaderObject::ST_NumShaderTypes> shader_sampler_ptr_cache_;
+		array<std::vector<ID3D11Buffer*>, ShaderObject::ST_NumShaderTypes> shader_cb_ptr_cache_;
+		array<std::vector<ID3D11ShaderResourceViewPtr>, ShaderObject::ST_NumShaderTypes> shader_srv_cache_;
+		array<std::vector<ID3D11SamplerStatePtr>, ShaderObject::ST_NumShaderTypes> shader_sampler_cache_;
+		array<std::vector<ID3D11BufferPtr>, ShaderObject::ST_NumShaderTypes> shader_cb_cache_;
 
 		boost::unordered_map<size_t, ID3D11InputLayoutPtr, boost::hash<size_t>, std::equal_to<size_t>,
 			boost::fast_pool_allocator<std::pair<size_t, ID3D11InputLayoutPtr > > > input_layout_bank_;

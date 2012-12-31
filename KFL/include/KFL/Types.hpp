@@ -33,7 +33,6 @@
 
 #pragma once
 
-#include <boost/cstdint.hpp>
 #ifndef KLAYGE_STATIC_ASSERT_SUPPORT
 	#include <boost/static_assert.hpp>
 #endif
@@ -43,10 +42,59 @@
 #ifndef KLAYGE_FOREACH_SUPPORT
 	#include <boost/foreach.hpp>
 #endif
-#ifdef KLAYGE_TYPE_TRAITS_SUPPORT
+#ifdef KLAYGE_CXX11_LIBRARY_SUPPORT
+	#include <array>
+	#include <cstdint>
 	#include <type_traits>
+
+	namespace KlayGE
+	{
+		using std::array;
+
+		using std::uint64_t;
+		using std::uint32_t;
+		using std::uint16_t;
+		using std::uint8_t;
+		using std::int64_t;
+		using std::int32_t;
+		using std::int16_t;
+		using std::int8_t;
+
+		using std::add_reference;
+		using std::has_trivial_destructor;
+		using std::is_same;
+		using std::remove_reference;
+	}
 #else
-	#include <boost/type_traits/remove_reference.hpp>
+	#ifdef KLAYGE_COMPILER_MSVC
+		#pragma warning(push)
+		#pragma warning(disable: 6385)
+	#endif
+	#include <boost/array.hpp>
+	#ifdef KLAYGE_COMPILER_MSVC
+		#pragma warning(pop)
+	#endif
+	#include <boost/cstdint.hpp>
+	#include <boost/type_traits.hpp>
+
+	namespace KlayGE
+	{
+		using boost::array;
+
+		using boost::uint64_t;
+		using boost::uint32_t;
+		using boost::uint16_t;
+		using boost::uint8_t;
+		using boost::int64_t;
+		using boost::int32_t;
+		using boost::int16_t;
+		using boost::int8_t;
+
+		using boost::add_reference;
+		using boost::has_trivial_destructor;
+		using boost::is_same;
+		using boost::remove_reference;
+	}
 #endif
 
 #ifndef KLAYGE_NULLPTR_SUPPORT
@@ -78,11 +126,7 @@ private:
 
 #ifdef KLAYGE_DECLTYPE_SUPPORT
 	#define KLAYGE_AUTO(var, expr) auto var = expr
-	#ifdef KLAYGE_TYPE_TRAITS_SUPPORT
-		#define KLAYGE_DECLTYPE(expr) std::remove_reference<decltype(expr)>::type
-	#else
-		#define KLAYGE_DECLTYPE(expr) boost::remove_reference<decltype(expr)>::type
-	#endif
+	#define KLAYGE_DECLTYPE(expr) KlayGE::remove_reference<decltype(expr)>::type
 #else
 	#define KLAYGE_AUTO(Var, Expr) BOOST_AUTO(Var, Expr)
 	#define KLAYGE_DECLTYPE(expr) BOOST_TYPEOF(expr)
@@ -102,16 +146,6 @@ namespace KlayGE
 		#define _WCHAR_T_DEFINED
 	#endif		// _WCHAR_T_DEFINED
 #endif
-
-	using boost::uint64_t;
-	using boost::uint32_t;
-	using boost::uint16_t;
-	using boost::uint8_t;
-
-	using boost::int64_t;
-	using boost::int32_t;
-	using boost::int16_t;
-	using boost::int8_t;
 
 	typedef uint32_t FourCC;
 }

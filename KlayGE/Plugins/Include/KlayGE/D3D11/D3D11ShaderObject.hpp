@@ -136,7 +136,7 @@ namespace KlayGE
 			std::vector<uint32_t> const & shader_desc_ids, boost::shared_ptr<std::vector<uint8_t> > const & code_blob);
 
 	private:
-		boost::array<parameter_binds_t, ST_NumShaderTypes> param_binds_;
+		array<parameter_binds_t, ST_NumShaderTypes> param_binds_;
 
 		ID3D11VertexShaderPtr vertex_shader_;
 		ID3D11PixelShaderPtr pixel_shader_;
@@ -144,18 +144,18 @@ namespace KlayGE
 		ID3D11ComputeShaderPtr compute_shader_;
 		ID3D11HullShaderPtr hull_shader_;
 		ID3D11DomainShaderPtr domain_shader_;
-		boost::array<std::pair<boost::shared_ptr<std::vector<uint8_t> >, std::string>, ST_NumShaderTypes> shader_code_;
-		boost::array<D3D11ShaderDesc, ST_NumShaderTypes> shader_desc_;
+		array<std::pair<boost::shared_ptr<std::vector<uint8_t> >, std::string>, ST_NumShaderTypes> shader_code_;
+		array<D3D11ShaderDesc, ST_NumShaderTypes> shader_desc_;
 
-		boost::array<std::vector<ID3D11SamplerStatePtr>, ST_NumShaderTypes> samplers_;
-		boost::array<std::vector<boost::tuple<void*, uint32_t, uint32_t> >, ST_NumShaderTypes> srvsrcs_;
-		boost::array<std::vector<ID3D11ShaderResourceViewPtr>, ST_NumShaderTypes> srvs_;
-		boost::array<std::vector<void*>, ST_NumShaderTypes> uavsrcs_;
-		boost::array<std::vector<ID3D11UnorderedAccessViewPtr>, ST_NumShaderTypes> uavs_;
-		boost::array<std::vector<ID3D11BufferPtr>, ST_NumShaderTypes> cbufs_;
+		array<std::vector<ID3D11SamplerStatePtr>, ST_NumShaderTypes> samplers_;
+		array<std::vector<boost::tuple<void*, uint32_t, uint32_t> >, ST_NumShaderTypes> srvsrcs_;
+		array<std::vector<ID3D11ShaderResourceViewPtr>, ST_NumShaderTypes> srvs_;
+		array<std::vector<void*>, ST_NumShaderTypes> uavsrcs_;
+		array<std::vector<ID3D11UnorderedAccessViewPtr>, ST_NumShaderTypes> uavs_;
+		array<std::vector<ID3D11BufferPtr>, ST_NumShaderTypes> cbufs_;
 
-		boost::array<std::vector<char>, ST_NumShaderTypes> dirty_;
-		boost::array<std::vector<std::vector<uint8_t> >, ST_NumShaderTypes> mem_cbufs_;
+		array<std::vector<char>, ST_NumShaderTypes> dirty_;
+		array<std::vector<std::vector<uint8_t> >, ST_NumShaderTypes> mem_cbufs_;
 
 		uint32_t vs_signature_;
 	};

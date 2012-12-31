@@ -110,7 +110,7 @@ namespace KlayGE
 
 	void DecodeBC1Internal(uint32_t* argb, BC1_layout const & bc1)
 	{
-		boost::array<Color, 4> clr;
+		array<Color, 4> clr;
 		clr[0] = RGB565_to_Color(bc1.clr_0);
 		clr[1] = RGB565_to_Color(bc1.clr_1);
 		if (bc1.clr_0 > bc1.clr_1)
@@ -135,7 +135,7 @@ namespace KlayGE
 
 	void DecodeBC4Internal(uint8_t* alpha_block, BC4_layout const & bc4)
 	{
-		boost::array<uint8_t, 8> alpha;
+		array<uint8_t, 8> alpha;
 		float falpha0 = bc4.alpha_0 / 255.0f;
 		float falpha1 = bc4.alpha_1 / 255.0f;
 		alpha[0] = bc4.alpha_0;
@@ -659,7 +659,7 @@ namespace KlayGE
 
 		DecodeBC1(argb, reinterpret_cast<uint8_t const *>(&bc3_layout->bc1));
 
-		boost::array<uint8_t, 16> alpha_block;
+		array<uint8_t, 16> alpha_block;
 		DecodeBC4Internal(&alpha_block[0], bc3_layout->alpha);
 
 		for (size_t i = 0; i < alpha_block.size(); ++ i)
@@ -678,9 +678,9 @@ namespace KlayGE
 	{
 		BC5_layout const * bc5_layout = reinterpret_cast<BC5_layout const *>(bc5);
 
-		boost::array<uint8_t, 16> block_0;
+		array<uint8_t, 16> block_0;
 		DecodeBC4(&block_0[0], reinterpret_cast<uint8_t const *>(&bc5_layout->red));
-		boost::array<uint8_t, 16> block_1;
+		array<uint8_t, 16> block_1;
 		DecodeBC4(&block_1[0], reinterpret_cast<uint8_t const *>(&bc5_layout->green));
 
 		for (size_t i = 0; i < block_0.size(); ++ i)
@@ -744,7 +744,7 @@ namespace KlayGE
 
 		DecodeBC1_sRGB(argb, reinterpret_cast<uint8_t const *>(&bc3_layout->bc1));
 
-		boost::array<uint8_t, 16> alpha_block;
+		array<uint8_t, 16> alpha_block;
 		DecodeBC4Internal(&alpha_block[0], bc3_layout->alpha);
 
 		for (size_t i = 0; i < alpha_block.size(); ++ i)
@@ -773,9 +773,9 @@ namespace KlayGE
 	{
 		BC5_layout const * bc5_layout = reinterpret_cast<BC5_layout const *>(bc5);
 
-		boost::array<uint8_t, 16> block_0;
+		array<uint8_t, 16> block_0;
 		DecodeBC4_sRGB(&block_0[0], reinterpret_cast<uint8_t const *>(&bc5_layout->red));
-		boost::array<uint8_t, 16> block_1;
+		array<uint8_t, 16> block_1;
 		DecodeBC4_sRGB(&block_1[0], reinterpret_cast<uint8_t const *>(&bc5_layout->green));
 
 		for (size_t i = 0; i < block_0.size(); ++ i)
@@ -1161,7 +1161,7 @@ namespace KlayGE
 
 	void EncodeBC1(BC1_layout& bc1, uint32_t const * argb, EBCMethod method)
 	{
-		boost::array<uint32_t, 16> tmp_argb;
+		array<uint32_t, 16> tmp_argb;
 		bool alpha = false;
 		for (size_t i = 0; i < tmp_argb.size(); ++ i)
 		{
@@ -1181,8 +1181,8 @@ namespace KlayGE
 
 	void EncodeBC2(BC2_layout& bc2, uint32_t const * argb, EBCMethod method)
 	{
-		boost::array<uint8_t, 16> alpha;
-		boost::array<uint32_t, 16> xrgb;
+		array<uint8_t, 16> alpha;
+		array<uint32_t, 16> xrgb;
 		for (size_t i = 0; i < xrgb.size(); ++ i)
 		{
 			xrgb[i] = argb[i] | 0xFF000000;
@@ -1200,8 +1200,8 @@ namespace KlayGE
 
 	void EncodeBC3(BC3_layout& bc3, uint32_t const * argb, EBCMethod method)
 	{
-		boost::array<uint8_t, 16> alpha;
-		boost::array<uint32_t, 16> xrgb;
+		array<uint8_t, 16> alpha;
+		array<uint32_t, 16> xrgb;
 		for (size_t i = 0; i < xrgb.size(); ++ i)
 		{
 			xrgb[i] = argb[i] | 0xFF000000;
@@ -1225,7 +1225,7 @@ namespace KlayGE
 
 	void EncodeBC1_sRGB(BC1_layout& bc1, uint32_t const * argb, EBCMethod method)
 	{
-		boost::array<uint32_t, 16> tmp_argb;
+		array<uint32_t, 16> tmp_argb;
 		bool alpha = false;
 		for (size_t i = 0; i < tmp_argb.size(); ++ i)
 		{
@@ -1268,8 +1268,8 @@ namespace KlayGE
 
 	void EncodeBC2_sRGB(BC2_layout& bc2, uint32_t const * argb, EBCMethod method)
 	{
-		boost::array<uint8_t, 16> alpha;
-		boost::array<uint32_t, 16> xrgb;
+		array<uint8_t, 16> alpha;
+		array<uint32_t, 16> xrgb;
 		for (size_t i = 0; i < xrgb.size(); ++ i)
 		{
 			Color clr(argb[i]);
@@ -1304,8 +1304,8 @@ namespace KlayGE
 
 	void EncodeBC3_sRGB(BC3_layout& bc3, uint32_t const * argb, EBCMethod method)
 	{
-		boost::array<uint8_t, 16> alpha;
-		boost::array<uint32_t, 16> xrgb;
+		array<uint8_t, 16> alpha;
+		array<uint32_t, 16> xrgb;
 		for (size_t i = 0; i < xrgb.size(); ++ i)
 		{
 			Color clr(argb[i]);
@@ -1335,7 +1335,7 @@ namespace KlayGE
 
 	void EncodeBC4_sRGB(BC4_layout& bc4, uint8_t const * r)
 	{
-		boost::array<uint8_t, 16> sr;
+		array<uint8_t, 16> sr;
 		for (size_t i = 0; i < 16; ++ i)
 		{
 			sr[i] = static_cast<uint8_t>(MathLib::clamp(static_cast<int>(MathLib::srgb_to_linear(r[i] / 255.0f) * 255 + 0.5f), 0, 255));

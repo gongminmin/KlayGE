@@ -16,8 +16,6 @@
 
 #include <boost/shared_ptr.hpp>
 #include <boost/enable_shared_from_this.hpp>
-#include <boost/foreach.hpp>
-#include <boost/typeof/typeof.hpp>
 
 #include <boost/filesystem.hpp>
 #include <boost/regex.hpp>
@@ -368,7 +366,7 @@ int main(int argc, char* argv[])
 
 		boost::char_separator<char> sep("", ",;");
 		boost::tokenizer<boost::char_separator<char> > tok(input_name_str, sep);
-		for (BOOST_AUTO(beg, tok.begin()); beg != tok.end(); ++ beg)
+		for (KLAYGE_AUTO(beg, tok.begin()); beg != tok.end(); ++ beg)
 		{
 			std::string arg = *beg;
 			if ((std::string::npos == arg.find("*")) && (std::string::npos == arg.find("?")))

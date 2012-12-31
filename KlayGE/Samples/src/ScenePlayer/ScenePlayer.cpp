@@ -28,7 +28,6 @@
 #include <sstream>
 #include <fstream>
 #include <boost/bind.hpp>
-#include <boost/typeof/typeof.hpp>
 #ifdef KLAYGE_COMPILER_MSVC
 #pragma warning(push)
 #pragma warning(disable: 4702)
@@ -366,7 +365,7 @@ void ScenePlayerApp::LoadScene(std::string const & name)
 					boost::char_separator<char> sep("", " \t|");
 					boost::tokenizer<boost::char_separator<char> > tok(attribute_str, sep);
 					std::string this_token;
-					for (BOOST_AUTO(beg, tok.begin()); beg != tok.end(); ++ beg)
+					for (KLAYGE_AUTO(beg, tok.begin()); beg != tok.end(); ++ beg)
 					{
 						this_token = *beg;
 						if ("noshadow" == this_token)
@@ -615,7 +614,7 @@ void ScenePlayerApp::LoadScene(std::string const & name)
 					boost::char_separator<char> sep("", " \t|");
 					boost::tokenizer<boost::char_separator<char> > tok(attribute_str, sep);
 					std::string this_token;
-					for (BOOST_AUTO(beg, tok.begin()); beg != tok.end(); ++ beg)
+					for (KLAYGE_AUTO(beg, tok.begin()); beg != tok.end(); ++ beg)
 					{
 						this_token = *beg;
 						if ("cullable" == this_token)

@@ -41,7 +41,6 @@
 #ifdef KLAYGE_COMPILER_MSVC
 #pragma warning(pop)
 #endif
-#include <boost/typeof/typeof.hpp>
 
 #include "ParticleEditor.hpp"
 
@@ -65,7 +64,7 @@ namespace
 		TerrainRenderable()
 			: RenderableHelper(L"Terrain")
 		{
-			BOOST_AUTO(grass, ASyncLoadTexture("grass.dds", EAH_GPU_Read | EAH_Immutable));
+			KLAYGE_AUTO(grass, ASyncLoadTexture("grass.dds", EAH_GPU_Read | EAH_Immutable));
 
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 

@@ -56,12 +56,6 @@
 #include <boost/bind.hpp>
 #include <boost/mpl/if.hpp>
 #include <boost/mpl/void.hpp>
-#ifdef KLAYGE_TYPE_TRAITS_SUPPORT
-	#include <type_traits>
-#else
-	#include <boost/type_traits/is_same.hpp>
-	#include <boost/type_traits/add_reference.hpp>
-#endif
 #include <boost/utility/result_of.hpp>
 #include <exception>
 #include <vector>
@@ -107,25 +101,14 @@ namespace KlayGE
 		//		boost::optional<boost::mpl::void_>
 		//	else
 		//		boost::optional<result_type>
-#ifdef KLAYGE_TYPE_TRAITS_SUPPORT
 		typedef boost::optional<
-			typename boost::mpl::if_c<std::is_same<result_type, void>::value,
+			typename boost::mpl::if_c<is_same<result_type, void>::value,
 				boost::mpl::void_, result_type>::type
 			>  result_opt;
 
-		typedef typename boost::mpl::if_c<std::is_same<result_type, void>::value,
-			result_type, typename std::add_reference<result_type>::type
+		typedef typename boost::mpl::if_c<is_same<result_type, void>::value,
+			result_type, typename add_reference<result_type>::type
 			>::type const_result_type_ref;
-#else
-		typedef boost::optional<
-			typename boost::mpl::if_c<boost::is_same<result_type, void>::value,
-				boost::mpl::void_, result_type>::type
-			>  result_opt;
-
-		typedef typename boost::mpl::if_c<boost::is_same<result_type, void>::value,
-			result_type, typename boost::add_reference<result_type>::type
-			>::type const_result_type_ref;
-#endif
 
 	public:
 		joiner_impl_base()

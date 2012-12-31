@@ -13,9 +13,6 @@
 #include <sstream>
 #include <string>
 
-#include <boost/typeof/typeof.hpp>
-#include <boost/foreach.hpp>
-
 using namespace KlayGE;
 using namespace std;
 
@@ -55,15 +52,15 @@ public:
 		}
 		ofs << "\r\n";
 
-		BOOST_AUTO(cbuffers, effect->CBuffers());
-		typedef BOOST_TYPEOF(cbuffers) CBuffersType;
-		BOOST_FOREACH(CBuffersType::const_reference cbuff, cbuffers)
+		KLAYGE_AUTO(cbuffers, effect->CBuffers());
+		typedef KLAYGE_DECLTYPE(cbuffers) CBuffersType;
+		KLAYGE_FOREACH(CBuffersType::const_reference cbuff, cbuffers)
 		{
 			ofs << "cbuffer " << cbuff.first << "\r\n";
 			ofs << "{" << "\r\n";
 
-			typedef BOOST_TYPEOF(cbuff.second) CBuffersSecondType;
-			BOOST_FOREACH(CBuffersSecondType::const_reference param_index, cbuff.second)
+			typedef KLAYGE_DECLTYPE(cbuff.second) CBuffersSecondType;
+			KLAYGE_FOREACH(CBuffersSecondType::const_reference param_index, cbuff.second)
 			{
 				RenderEffectParameter& param = *(effect->ParameterByIndex(param_index));
 				switch (param.type())

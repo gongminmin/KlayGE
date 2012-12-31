@@ -26,8 +26,6 @@
 #endif
 #include <boost/bind.hpp>
 #include <boost/function.hpp>
-#include <boost/typeof/typeof.hpp>
-#include <boost/foreach.hpp>
 
 #include <mmintrin.h>
 #include <emmintrin.h>
@@ -1062,7 +1060,7 @@ int main(int argc, char* argv[])
 			}
 			for (size_t i = 0; i < char_index.size(); ++ i)
 			{
-				BOOST_AUTO(iter, char_index_advance.find(char_index[i].first));
+				KLAYGE_AUTO(iter, char_index_advance.find(char_index[i].first));
 				BOOST_ASSERT(iter != char_index_advance.end());
 
 				iter->second.first = char_index[i].second;
@@ -1087,8 +1085,8 @@ int main(int argc, char* argv[])
 				}
 			}
 		
-			typedef BOOST_TYPEOF(char_index_advance) CIAType;
-			BOOST_FOREACH(CIAType::reference cia, char_index_advance)
+			typedef KLAYGE_DECLTYPE(char_index_advance) CIAType;
+			KLAYGE_FOREACH(CIAType::reference cia, char_index_advance)
 			{
 				int const ch = cia.first;
 				int const index = cia.second.first;

@@ -6,8 +6,6 @@
 #include <KlayGE/CameraController.hpp>
 #include <KlayGE/UI.hpp>
 
-#include <boost/array.hpp>
-
 class DepthPeelingApp : public KlayGE::App3DFramework
 {
 public:
@@ -36,10 +34,10 @@ private:
 	std::vector<KlayGE::TexturePtr> peeled_texs_;
 	std::vector<KlayGE::RenderViewPtr> peeled_views_;
 	
-	boost::array<KlayGE::TexturePtr, 2> depth_texs_;
-	boost::array<KlayGE::RenderViewPtr, 2> depth_view_;
+	KlayGE::array<KlayGE::TexturePtr, 2> depth_texs_;
+	KlayGE::array<KlayGE::RenderViewPtr, 2> depth_view_;
 
-	boost::array<KlayGE::ConditionalRenderPtr, 2> oc_queries_;
+	KlayGE::array<KlayGE::ConditionalRenderPtr, 2> oc_queries_;
 
 	KlayGE::PostProcessPtr blend_pp_;
 

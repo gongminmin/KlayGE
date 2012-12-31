@@ -22,7 +22,6 @@
 #include <vector>
 #include <sstream>
 #include <boost/bind.hpp>
-#include <boost/typeof/typeof.hpp>
 
 #include "VertexDisplacement.hpp"
 
@@ -47,7 +46,7 @@ namespace
 		FlagRenderable(int length_segs, int width_segs)
 			: RenderablePlane(static_cast<float>(LENGTH), static_cast<float>(WIDTH), length_segs, width_segs, true)
 		{
-			BOOST_AUTO(flag_tl, ASyncLoadTexture("powered_by_klayge.dds", EAH_GPU_Read | EAH_Immutable));
+			KLAYGE_AUTO(flag_tl, ASyncLoadTexture("powered_by_klayge.dds", EAH_GPU_Read | EAH_Immutable));
 
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 

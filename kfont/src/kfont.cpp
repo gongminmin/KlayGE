@@ -40,15 +40,11 @@
 
 #include <C/LzmaLib.h>
 
-#ifdef KLAYGE_PLATFORM_WINDOWS
-#include <windows.h>
-#else
-#include <dlfcn.h>
-#endif
-
 namespace KlayGE
 {
 	int const KFONT_VERSION = 2;
+
+	boost::mutex singleton_mutex;
 
 	typedef int (MY_STD_CALL *LzmaCompressFunc)(unsigned char* dest, size_t* destLen, unsigned char const * src, size_t srcLen,
 		unsigned char* outProps, size_t* outPropsSize, /* *outPropsSize must be = 5 */
@@ -67,15 +63,22 @@ namespace KlayGE
 	public:
 		static LZMALoader& Instance()
 		{
-			static LZMALoader ret;
-			return ret;
+			if (!instance_)
+			{
+				boost::mutex::scoped_lock lock(singleton_mutex);
+				if (!instance_)
+				{
+					instance_ = MakeSharedPtr<LZMALoader>();
+				}
+			}
+			return *instance_;
 		}
 
 		int LzmaCompress(unsigned char* dest, size_t* destLen, unsigned char const * src, size_t srcLen,
 			unsigned char* outProps, size_t* outPropsSize, int level, unsigned int dictSize,
 			int lc, int lp, int pb, int fb, int numThreads)
 		{
-#ifndef KFONT_PLATFORM_ANDROID
+#ifndef KLAYGE_PLATFORM_ANDROID
 			return lzmaCompressFunc_(dest, destLen, src, srcLen, outProps, outPropsSize, level, dictSize,
 				lc, lp, pb, fb, numThreads);
 #else
@@ -86,24 +89,21 @@ namespace KlayGE
 		int LzmaUncompress(unsigned char* dest, size_t* destLen, unsigned char const * src, SizeT* srcLen,
 			unsigned char const * props, size_t propsSize)
 		{
-#ifndef KFONT_PLATFORM_ANDROID
+#ifndef KLAYGE_PLATFORM_ANDROID
 			return lzmaUncompressFunc_(dest, destLen, src, srcLen, props, propsSize);
 #else
 			return ::LzmaUncompress(dest, destLen, src, srcLen, props, propsSize);
 #endif
 		}
 
-	private:
 		LZMALoader()
 		{
 #ifndef KLAYGE_PLATFORM_ANDROID
 #ifdef KLAYGE_PLATFORM_WINDOWS
-			std::string lzma_name = "LZMA.dll";
-#else
-			std::string lzma_name = "LZMA.so";
+			dll_loader_.Load("LZMA.dll");
+#elif defined KLAYGE_PLATFORM_LINUX
+			dll_loader_.Load("LZMA.so");
 #endif
-
-			dll_loader_.Load(lzma_name);
 			lzmaCompressFunc_ = (LzmaCompressFunc)dll_loader_.GetProcAddress("LzmaCompress");
 			lzmaUncompressFunc_ = (LzmaUncompressFunc)dll_loader_.GetProcAddress("LzmaUncompress");
 
@@ -118,7 +118,10 @@ namespace KlayGE
 		LzmaCompressFunc lzmaCompressFunc_;
 		LzmaUncompressFunc lzmaUncompressFunc_;
 #endif
+
+		static boost::shared_ptr<LZMALoader> instance_;
 	};
+	boost::shared_ptr<LZMALoader> LZMALoader::instance_;
 
 	KFont::KFont()
 		: distances_addr_(1, 0)

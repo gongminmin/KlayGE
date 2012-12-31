@@ -71,9 +71,9 @@ namespace KlayGE
 
 	private:
 		GLuint glsl_program_;
-		boost::shared_ptr<boost::array<boost::shared_ptr<std::string>, ST_NumShaderTypes> > glsl_srcs_;
-		boost::shared_ptr<boost::array<boost::shared_ptr<std::vector<std::string> >, ST_NumShaderTypes> > pnames_;
-		boost::shared_ptr<boost::array<boost::shared_ptr<std::vector<std::string> >, ST_NumShaderTypes> > glsl_res_names_;
+		boost::shared_ptr<array<boost::shared_ptr<std::string>, ST_NumShaderTypes> > glsl_srcs_;
+		boost::shared_ptr<array<boost::shared_ptr<std::vector<std::string> >, ST_NumShaderTypes> > pnames_;
+		boost::shared_ptr<array<boost::shared_ptr<std::vector<std::string> >, ST_NumShaderTypes> > glsl_res_names_;
 		boost::shared_ptr<std::vector<VertexElementUsage> > vs_usages_;
 		boost::shared_ptr<std::vector<uint8_t> > vs_usage_indices_;
 		boost::shared_ptr<std::vector<std::string> > glsl_vs_attrib_names_;

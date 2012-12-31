@@ -443,7 +443,7 @@ namespace KlayGE
 		std::vector<TexturePtr> texture_cache_;   // Shared textures
 		std::vector<std::pair<FontPtr, uint32_t> > font_cache_;         // Shared fonts
 
-		boost::array<std::vector<Rect_T<int32_t> >, UICT_Num_Control_Types> elem_texture_rcs_;
+		array<std::vector<Rect_T<int32_t> >, UICT_Num_Control_Types> elem_texture_rcs_;
 
 		std::map<TexturePtr, RenderablePtr> rects_;
 

@@ -23,14 +23,6 @@
 #include <vector>
 #include <map>
 #include <set>
-#ifdef KLAYGE_COMPILER_MSVC
-#pragma warning(push)
-#pragma warning(disable: 6385)
-#endif
-#include <boost/array.hpp>
-#ifdef KLAYGE_COMPILER_MSVC
-#pragma warning(pop)
-#endif
 
 #include <glloader/glloader.h>
 
@@ -104,7 +96,7 @@ namespace KlayGE
 		void CheckConfig();
 
 	private:
-		boost::array<GLfloat, 4> clear_clr_;
+		array<GLfloat, 4> clear_clr_;
 		GLfloat clear_depth_;
 		GLuint clear_stencil_;
 

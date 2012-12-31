@@ -1267,7 +1267,7 @@ namespace KlayGE
 				uint32_t level, tile_x, tile_y;
 				this->DecodeTileID(level, tile_x, tile_y, tile_ids[i]);
 
-				boost::array<uint32_t, 9> new_tile_id_with_neighbors;
+				array<uint32_t, 9> new_tile_id_with_neighbors;
 				std::fill(new_tile_id_with_neighbors.begin(), new_tile_id_with_neighbors.end(), 0xFFFFFFFF);
                 new_tile_id_with_neighbors[0] = tile_ids[i];
 				in_same_image[i * 9 + 0] = true;
@@ -1276,8 +1276,8 @@ namespace KlayGE
 				tile_attrs[i] = attr;
 				if (attr != 0xFFFFFFFF)
 				{
-					boost::array<int32_t, 9> new_tile_id_x;
-					boost::array<int32_t, 9> new_tile_id_y;
+					array<int32_t, 9> new_tile_id_x;
+					array<int32_t, 9> new_tile_id_y;
 
 					int32_t left = tile_x - 1;
 					int32_t right = tile_x + 1;
@@ -1443,7 +1443,7 @@ namespace KlayGE
 				}
 			}
 
-			boost::array<uint32_t, 9> index_with_neighbors;
+			array<uint32_t, 9> index_with_neighbors;
 			for (size_t j = 0; j < index_with_neighbors.size(); ++ j)
 			{
 				if (all_neighbor_ids[i + j] != 0xFFFFFFFF)
@@ -1464,7 +1464,7 @@ namespace KlayGE
 			uint32_t mip_border_size = cache_tile_border_size_;
 			for (uint32_t l = 0; l < mipmaps; ++ l)
 			{
-				boost::array<uint8_t const *, 9> neighbor_data_ptr;
+				array<uint8_t const *, 9> neighbor_data_ptr;
 				for (uint32_t j = 0; j < neighbor_data_ptr.size(); ++ j)
 				{
 					if (index_with_neighbors[j] != 0xFFFFFFFF)

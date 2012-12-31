@@ -12,9 +12,6 @@
 #include <KlayGE/ResLoader.hpp>
 #include <KlayGE/Camera.hpp>
 
-#include <boost/typeof/typeof.hpp>
-#include <boost/foreach.hpp>
-
 #include "Model.hpp"
 
 using namespace KlayGE;
@@ -550,8 +547,8 @@ void DetailedSkinnedModel::BuildModelInfo()
 
 	uint32_t total_num_vertices = 0;
 	uint32_t total_num_indices = 0;
-	typedef BOOST_TYPEOF(meshes_) MeshesType;
-	BOOST_FOREACH(MeshesType::const_reference mesh, meshes_)
+	typedef KLAYGE_DECLTYPE(meshes_) MeshesType;
+	KLAYGE_FOREACH(MeshesType::const_reference mesh, meshes_)
 	{
 		total_num_vertices += mesh->NumVertices();
 		total_num_indices += mesh->NumTriangles() * 3;
@@ -705,7 +702,7 @@ void DetailedSkinnedModel::BuildModelInfo()
 			texcoords[i] = float2(positions[i].x(), positions[i].y());
 		}
 
-		BOOST_FOREACH(MeshesType::const_reference mesh, meshes_)
+		KLAYGE_FOREACH(MeshesType::const_reference mesh, meshes_)
 		{
 			mesh->AddVertexStream(&texcoords[0], static_cast<uint32_t>(sizeof(texcoords[0]) * texcoords.size()),
 				vertex_element(VEU_TextureCoord, 0, EF_GR32F), EAH_GPU_Read);
@@ -714,7 +711,7 @@ void DetailedSkinnedModel::BuildModelInfo()
 
 	if (!has_normal && !has_tc)
 	{
-		BOOST_FOREACH(MeshesType::const_reference mesh, meshes_)
+		KLAYGE_FOREACH(MeshesType::const_reference mesh, meshes_)
 		{
 			MathLib::compute_normal(normals.begin() + mesh->StartVertexLocation(),
 				indices.begin() + mesh->StartIndexLocation(), indices.begin() + mesh->StartIndexLocation() + mesh->NumTriangles() * 3,
@@ -759,7 +756,7 @@ void DetailedSkinnedModel::BuildModelInfo()
 			}
 		}
 
-		BOOST_FOREACH(MeshesType::const_reference mesh, meshes_)
+		KLAYGE_FOREACH(MeshesType::const_reference mesh, meshes_)
 		{
 			mesh->AddVertexStream(&compacted[0], static_cast<uint32_t>(sizeof(compacted[0]) * compacted.size()),
 				vertex_element(VEU_Normal, 0, fmt), EAH_GPU_Read);
@@ -771,7 +768,7 @@ void DetailedSkinnedModel::BuildModelInfo()
 		std::vector<float3> binormals(total_num_vertices);
 		
 		// Compute TBN
-		BOOST_FOREACH(MeshesType::const_reference mesh, meshes_)
+		KLAYGE_FOREACH(MeshesType::const_reference mesh, meshes_)
 		{
 			MathLib::compute_tangent(tangents.begin() + mesh->StartVertexLocation(), binormals.begin() + mesh->StartVertexLocation(),
 				indices.begin() + mesh->StartIndexLocation(), indices.begin() + mesh->StartIndexLocation() + mesh->NumTriangles() * 3,
@@ -811,7 +808,7 @@ void DetailedSkinnedModel::BuildModelInfo()
 			}
 		}
 
-		BOOST_FOREACH(MeshesType::const_reference mesh, meshes_)
+		KLAYGE_FOREACH(MeshesType::const_reference mesh, meshes_)
 		{
 			mesh->AddVertexStream(&compacted[0], static_cast<uint32_t>(sizeof(compacted[0]) * compacted.size()),
 				vertex_element(VEU_Tangent, 0, fmt), EAH_GPU_Read);
@@ -839,7 +836,7 @@ void DetailedSkinnedModel::BuildModelInfo()
 			blend_weights_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, &init_data);
 		}
 
-		BOOST_FOREACH(MeshesType::const_reference mesh, meshes_)
+		KLAYGE_FOREACH(MeshesType::const_reference mesh, meshes_)
 		{
 			mesh->AddVertexStream(blend_indices_vb,	vertex_element(VEU_BlendIndex, 0, EF_ABGR8));
 			mesh->AddVertexStream(blend_weights_vb, vertex_element(VEU_BlendWeight, 0, EF_ABGR8));

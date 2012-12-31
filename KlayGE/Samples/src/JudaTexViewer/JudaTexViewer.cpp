@@ -22,7 +22,6 @@
 #include <vector>
 #include <sstream>
 #include <boost/bind.hpp>
-#include <boost/typeof/typeof.hpp>
 
 #include "JudaTexViewer.hpp"
 

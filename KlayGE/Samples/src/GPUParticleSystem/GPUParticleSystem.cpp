@@ -36,7 +36,6 @@
 #pragma warning(pop)
 #endif
 #include <boost/bind.hpp>
-#include <boost/typeof/typeof.hpp>
 
 #include "GPUParticleSystem.hpp"
 
@@ -155,7 +154,7 @@ namespace
 			: RenderableHelper(L"RenderParticles"),
 				tex_width_(256), tex_height_((max_num_particles + 255) / 256)
 		{
-			BOOST_AUTO(pt, ASyncLoadTexture("particle.dds", EAH_GPU_Read | EAH_Immutable));
+			KLAYGE_AUTO(pt, ASyncLoadTexture("particle.dds", EAH_GPU_Read | EAH_Immutable));
 
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 			
@@ -663,7 +662,7 @@ namespace
 		explicit TerrainRenderable(TexturePtr const & height_map, TexturePtr const & normal_map)
 			: RenderablePlane(4, 4, 64, 64, true)
 		{
-			BOOST_AUTO(grass, ASyncLoadTexture("grass.dds", EAH_GPU_Read | EAH_Immutable));
+			KLAYGE_AUTO(grass, ASyncLoadTexture("grass.dds", EAH_GPU_Read | EAH_Immutable));
 
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
@@ -766,8 +765,8 @@ void GPUParticleSystemApp::InitObjects()
 
 	font_ = Context::Instance().RenderFactoryInstance().MakeFont("gkai00mp.kfont");
 
-	BOOST_AUTO(terrain_height, ASyncLoadTexture("terrain_height.dds", EAH_GPU_Read | EAH_Immutable));
-	BOOST_AUTO(terrain_normal, ASyncLoadTexture("terrain_normal.dds", EAH_GPU_Read | EAH_Immutable));
+	KLAYGE_AUTO(terrain_height, ASyncLoadTexture("terrain_height.dds", EAH_GPU_Read | EAH_Immutable));
+	KLAYGE_AUTO(terrain_normal, ASyncLoadTexture("terrain_normal.dds", EAH_GPU_Read | EAH_Immutable));
 
 	this->LookAt(float3(-1.2f, 2.2f, -1.2f), float3(0, 0.5f, 0));
 	this->Proj(0.01f, 100);

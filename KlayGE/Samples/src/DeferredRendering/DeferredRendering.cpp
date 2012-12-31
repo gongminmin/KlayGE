@@ -20,7 +20,6 @@
 
 #include <sstream>
 #include <boost/bind.hpp>
-#include <boost/typeof/typeof.hpp>
 
 #include "DeferredRendering.hpp"
 

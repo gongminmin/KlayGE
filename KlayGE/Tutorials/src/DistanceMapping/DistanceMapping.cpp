@@ -24,7 +24,6 @@
 #include <vector>
 #include <sstream>
 #include <boost/bind.hpp>
-#include <boost/typeof/typeof.hpp>
 
 #include "DistanceMapping.hpp"
 
@@ -46,9 +45,9 @@ namespace
 		RenderPolygon()
 			: RenderableHelper(L"Polygon")
 		{
-			BOOST_AUTO(diffuse_loader, ASyncLoadTexture("diffuse.dds", EAH_GPU_Read | EAH_Immutable));
-			BOOST_AUTO(normal_loader, ASyncLoadTexture("normal.dds", EAH_GPU_Read | EAH_Immutable));
-			BOOST_AUTO(dist_loader, ASyncLoadTexture("distance.dds", EAH_GPU_Read | EAH_Immutable));
+			KLAYGE_AUTO(diffuse_loader, ASyncLoadTexture("diffuse.dds", EAH_GPU_Read | EAH_Immutable));
+			KLAYGE_AUTO(normal_loader, ASyncLoadTexture("normal.dds", EAH_GPU_Read | EAH_Immutable));
+			KLAYGE_AUTO(dist_loader, ASyncLoadTexture("distance.dds", EAH_GPU_Read | EAH_Immutable));
 
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 

@@ -30,14 +30,6 @@
 #ifdef KLAYGE_COMPILER_MSVC
 #pragma warning(pop)
 #endif
-#ifdef KLAYGE_COMPILER_MSVC
-#pragma warning(push)
-#pragma warning(disable: 6385)
-#endif
-#include <boost/array.hpp>
-#ifdef KLAYGE_COMPILER_MSVC
-#pragma warning(pop)
-#endif
 #include <boost/function.hpp>
 
 namespace KlayGE
@@ -156,8 +148,8 @@ namespace KlayGE
 
 		TexturePtr projective_tex_;
 
-		boost::array<ConditionalRenderPtr, 7> crs_;
-		boost::array<CameraPtr, 6> sm_cameras_;
+		array<ConditionalRenderPtr, 7> crs_;
+		array<CameraPtr, 6> sm_cameras_;
 	};
 
 	class KLAYGE_CORE_API SpotLightSource : public LightSource

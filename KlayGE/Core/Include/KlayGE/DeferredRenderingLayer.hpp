@@ -23,8 +23,6 @@
 #include <KlayGE/PreDeclare.hpp>
 #include <KlayGE/Light.hpp>
 
-#include <boost/array.hpp>
-
 namespace KlayGE
 {
 	enum
@@ -58,34 +56,34 @@ namespace KlayGE
 
 		FrameBufferPtr frame_buffer;
 
-		boost::array<bool, Num_GBuffers> g_buffer_enables;
+		array<bool, Num_GBuffers> g_buffer_enables;
 
-		boost::array<FrameBufferPtr, Num_GBuffers> pre_depth_buffers;
+		array<FrameBufferPtr, Num_GBuffers> pre_depth_buffers;
 
-		boost::array<FrameBufferPtr, Num_GBuffers> g_buffers;
-		boost::array<FrameBufferPtr, Num_GBuffers> g_buffers_rt1;
-		boost::array<TexturePtr, Num_GBuffers> g_buffer_rt0_texs;
-		boost::array<TexturePtr, Num_GBuffers> g_buffer_rt1_texs;
-		boost::array<TexturePtr, Num_GBuffers> g_buffer_ds_texs;
-		boost::array<TexturePtr, Num_GBuffers> g_buffer_depth_texs;
+		array<FrameBufferPtr, Num_GBuffers> g_buffers;
+		array<FrameBufferPtr, Num_GBuffers> g_buffers_rt1;
+		array<TexturePtr, Num_GBuffers> g_buffer_rt0_texs;
+		array<TexturePtr, Num_GBuffers> g_buffer_rt1_texs;
+		array<TexturePtr, Num_GBuffers> g_buffer_ds_texs;
+		array<TexturePtr, Num_GBuffers> g_buffer_depth_texs;
 
-		boost::array<FrameBufferPtr, Num_GBuffers> lighting_buffers;
-		boost::array<TexturePtr, Num_GBuffers> lighting_texs;
+		array<FrameBufferPtr, Num_GBuffers> lighting_buffers;
+		array<TexturePtr, Num_GBuffers> lighting_texs;
 
 		FrameBufferPtr shadowing_buffer;
 		TexturePtr shadowing_tex;
 
-		boost::array<FrameBufferPtr, Num_GBuffers> shading_buffers;
-		boost::array<TexturePtr, Num_GBuffers> shading_texs;
+		array<FrameBufferPtr, Num_GBuffers> shading_buffers;
+		array<TexturePtr, Num_GBuffers> shading_texs;
 
-		boost::array<FrameBufferPtr, Num_GBuffers> curr_merged_shading_buffers;
+		array<FrameBufferPtr, Num_GBuffers> curr_merged_shading_buffers;
 		TexturePtr curr_merged_shading_tex;
-		boost::array<FrameBufferPtr, Num_GBuffers> curr_merged_depth_buffers;
+		array<FrameBufferPtr, Num_GBuffers> curr_merged_depth_buffers;
 		TexturePtr curr_merged_depth_tex;
 
-		boost::array<FrameBufferPtr, Num_GBuffers> prev_merged_shading_buffers;
+		array<FrameBufferPtr, Num_GBuffers> prev_merged_shading_buffers;
 		TexturePtr prev_merged_shading_tex;
-		boost::array<FrameBufferPtr, Num_GBuffers> prev_merged_depth_buffers;
+		array<FrameBufferPtr, Num_GBuffers> prev_merged_depth_buffers;
 		TexturePtr prev_merged_depth_tex;
 
 		TexturePtr small_ssgi_tex;
@@ -251,7 +249,7 @@ namespace KlayGE
 		RenderEffectPtr g_buffer_effect_;
 		RenderEffectPtr dr_effect_;
 
-		boost::array<PerViewport, 8> viewports_;
+		array<PerViewport, 8> viewports_;
 		uint32_t active_viewport_;
 
 		PostProcessPtr ssgi_pp_;
@@ -280,15 +278,15 @@ namespace KlayGE
 
 		std::vector<uint32_t> pass_scaned_;
 
-		boost::array<RenderTechniquePtr, LT_NumLightTypes> technique_shadows_;
-		boost::array<RenderTechniquePtr, LT_NumLightTypes> technique_lights_;
+		array<RenderTechniquePtr, LT_NumLightTypes> technique_shadows_;
+		array<RenderTechniquePtr, LT_NumLightTypes> technique_lights_;
 		RenderTechniquePtr technique_light_depth_only_;
 		RenderTechniquePtr technique_light_stencil_;
 		RenderTechniquePtr technique_clear_stencil_;
 		RenderTechniquePtr technique_no_lighting_;
 		RenderTechniquePtr technique_shading_;
-		boost::array<RenderTechniquePtr, 2> technique_merge_shadings_;
-		boost::array<RenderTechniquePtr, 2> technique_merge_depths_;
+		array<RenderTechniquePtr, 2> technique_merge_shadings_;
+		array<RenderTechniquePtr, 2> technique_merge_depths_;
 		RenderTechniquePtr technique_copy_shading_depth_;
 		RenderTechniquePtr technique_copy_depth_;
 
@@ -298,7 +296,7 @@ namespace KlayGE
 		TexturePtr blur_sm_tex_;
 		TexturePtr sm_cube_tex_;
 
-		boost::array<PostProcessPtr, 7> sm_filter_pps_;
+		array<PostProcessPtr, 7> sm_filter_pps_;
 		PostProcessPtr depth_to_vsm_pp_;
 		PostProcessPtr depth_to_linear_pp_;
 
@@ -330,9 +328,9 @@ namespace KlayGE
 		PostProcessPtr atmospheric_pp_;
 
 		FrameBufferPtr rsm_buffer_;
-		boost::array<TexturePtr, 2> rsm_texs_;
+		array<TexturePtr, 2> rsm_texs_;
 
-		boost::array<PostProcessPtr, LT_NumLightTypes> rsm_to_vpls_pps_;
+		array<PostProcessPtr, LT_NumLightTypes> rsm_to_vpls_pps_;
 		TexturePtr vpl_tex_;
 				
 		RenderTechniquePtr subsplat_stencil_tech_;

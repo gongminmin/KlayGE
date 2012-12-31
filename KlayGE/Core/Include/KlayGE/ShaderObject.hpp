@@ -139,7 +139,7 @@ namespace KlayGE
 		}
 
 	protected:
-		boost::array<bool, ST_NumShaderTypes> is_shader_validate_;
+		array<bool, ST_NumShaderTypes> is_shader_validate_;
 		
 		bool is_validate_;
 		bool has_discard_;

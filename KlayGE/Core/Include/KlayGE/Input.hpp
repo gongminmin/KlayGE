@@ -44,15 +44,6 @@
 #include <vector>
 #include <string>
 
-#ifdef KLAYGE_COMPILER_MSVC
-#pragma warning(push)
-#pragma warning(disable: 6385)
-#endif
-#include <boost/array.hpp>
-#ifdef KLAYGE_COMPILER_MSVC
-#pragma warning(pop)
-#endif
-
 namespace KlayGE
 {
 	// ¼üÅÌ¶¯×÷
@@ -367,7 +358,7 @@ namespace KlayGE
 		void ActionMap(uint32_t id, InputActionMap const & actionMap);
 
 	protected:
-		boost::array<boost::array<bool, 256>, 2> keys_;
+		array<array<bool, 256>, 2> keys_;
 		bool index_;
 	};
 
@@ -400,7 +391,7 @@ namespace KlayGE
 		Vector_T<long, 2> abs_pos_;
 		Vector_T<long, 3> offset_;
 
-		boost::array<boost::array<bool, 8>, 2> buttons_;
+		array<array<bool, 8>, 2> buttons_;
 		bool index_;
 	};
 
@@ -435,7 +426,7 @@ namespace KlayGE
 
 		Vector_T<long, 2> slider_;		// extra axes positions
 
-		boost::array<boost::array<bool, 32>, 2> buttons_;	// 32 buttons
+		array<array<bool, 32>, 2> buttons_;	// 32 buttons
 		bool index_;
 	};
 }

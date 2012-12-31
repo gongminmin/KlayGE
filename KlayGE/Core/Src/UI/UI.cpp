@@ -1262,7 +1262,7 @@ namespace KlayGE
 			|| (bottom_right_clr_.a() != 0) || (bottom_left_clr_.a() != 0);
 		if (!minimized_ && bBackgroundIsVisible)
 		{
-			boost::array<Color, 4> clrs;
+			array<Color, 4> clrs;
 			clrs[0] = top_left_clr_;
 			clrs[1] = top_right_clr_;
 			clrs[2] = bottom_right_clr_;

@@ -17,7 +17,6 @@
 #include <map>
 
 #include <boost/shared_ptr.hpp>
-#include <boost/typeof/typeof.hpp>
 
 #include <KlayGE/JudaTexture.hpp>
 

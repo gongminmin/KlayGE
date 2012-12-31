@@ -13,9 +13,6 @@
 #include <KlayGE/Camera.hpp>
 #include <KlayGE/FrameBuffer.hpp>
 
-#include <boost/typeof/typeof.hpp>
-#include <boost/foreach.hpp>
-
 #include "Model.hpp"
 
 using namespace KlayGE;

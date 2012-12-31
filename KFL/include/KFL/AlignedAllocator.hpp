@@ -34,11 +34,6 @@
 #pragma once
 
 #include <limits>
-#ifdef KLAYGE_TYPE_TRAITS_SUPPORT
-	#include <type_traits>
-#else
-	#include <boost/type_traits/has_trivial_destructor.hpp>
-#endif
 
 namespace KlayGE
 {
@@ -150,11 +145,7 @@ namespace KlayGE
 
 		void destroy(pointer p)
 		{
-#ifdef KLAYGE_TYPE_TRAITS_SUPPORT
-			destroy_t<pointer, std::has_trivial_destructor<value_type>::value>()(p);
-#else
-			destroy_t<pointer, boost::has_trivial_destructor<value_type>::value>()(p);
-#endif
+			destroy_t<pointer, has_trivial_destructor<value_type>::value>()(p);
 		}
 
 		size_type max_size() const throw()
