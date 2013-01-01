@@ -30,22 +30,20 @@
 
 #include <KFL/KFL.hpp>
 #include <KFL/ResIdentifier.hpp>
+#include <KFL/Thread.hpp>
 
-#ifdef KLAYGE_COMPILER_MSVC
-#pragma warning(push)
-#pragma warning(disable: 4127 4244 4512 6328 6330)
-#endif
-#include <boost/date_time.hpp>
-#ifdef KLAYGE_COMPILER_MSVC
-#pragma warning(pop)
-#endif
-#ifdef KLAYGE_COMPILER_MSVC
-#pragma warning(push)
-#pragma warning(disable: 4244)
-#endif
-#include <boost/thread/thread.hpp>
-#ifdef KLAYGE_COMPILER_MSVC
-#pragma warning(pop)
+#ifdef KLAYGE_CXX11_LIBRARY_SUPPORT
+#include <chrono>
+namespace KlayGE
+{
+	namespace chrono = std::chrono;
+}
+#else
+#include <boost/chrono.hpp>
+namespace KlayGE
+{
+	namespace chrono = boost::chrono;
+}
 #endif
 
 #ifdef KLAYGE_PLATFORM_WINDOWS
@@ -129,7 +127,7 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void Sleep(uint32_t ms)
 	{
-		boost::this_thread::sleep(boost::posix_time::milliseconds(ms));
+		this_thread::sleep_for(chrono::milliseconds(ms));
 	}
 
 	// EndianµÄÇÐ»»

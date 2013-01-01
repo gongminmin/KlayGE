@@ -38,10 +38,6 @@
 #include <vector>
 #include <string>
 
-#include <boost/bind.hpp>
-
-#include <KFL/Thread.hpp>
-
 namespace KlayGE
 {
 	class ResIdentifier

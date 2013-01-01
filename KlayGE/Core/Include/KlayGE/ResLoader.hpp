@@ -39,9 +39,9 @@
 #include <string>
 
 #include <boost/bind.hpp>
+#include <boost/function.hpp>
 
 #include <KFL/ResIdentifier.hpp>
-#include <KFL/Thread.hpp>
 
 namespace KlayGE
 {

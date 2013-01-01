@@ -89,7 +89,7 @@ namespace KlayGE
 
 	void DSMusicBuffer::LoopUpdateBuffer()
 	{
-		boost::mutex::scoped_lock lock(play_mutex_);
+		unique_lock<mutex> lock(play_mutex_);
 		while (!played_)
 		{
 			play_cond_.wait(lock);
@@ -185,7 +185,7 @@ namespace KlayGE
 
 		stopped_ = false;
 		{
-			boost::mutex::scoped_lock lock(play_mutex_);
+			unique_lock<mutex> lock(play_mutex_);
 			played_ = true;
 		}
 		play_cond_.notify_one();

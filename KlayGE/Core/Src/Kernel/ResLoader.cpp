@@ -31,6 +31,7 @@
 #include <KlayGE/KlayGE.hpp>
 #include <KFL/Util.hpp>
 #include <KlayGE/Extract7z.hpp>
+#include <KFL/Thread.hpp>
 
 #include <fstream>
 #include <sstream>

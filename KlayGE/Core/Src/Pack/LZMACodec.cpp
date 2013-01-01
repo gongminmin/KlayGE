@@ -32,6 +32,7 @@
 #include <KFL/ThrowErr.hpp>
 #include <KlayGE/ResLoader.hpp>
 #include <KFL/DllLoader.hpp>
+#include <KFL/Thread.hpp>
 
 #include <cstring>
 
@@ -43,7 +44,7 @@ namespace
 {
 	using namespace KlayGE;
 
-	boost::mutex singleton_mutex;
+	mutex singleton_mutex;
 
 	typedef int (MY_STD_CALL *LzmaCompressFunc)(unsigned char* dest, size_t* destLen, unsigned char const * src, size_t srcLen,
 		unsigned char* outProps, size_t* outPropsSize, /* *outPropsSize must be = 5 */
@@ -64,7 +65,7 @@ namespace
 		{
 			if (!instance_)
 			{
-				boost::mutex::scoped_lock lock(singleton_mutex);
+				unique_lock<mutex> lock(singleton_mutex);
 				if (!instance_)
 				{
 					instance_ = MakeSharedPtr<LZMALoader>();

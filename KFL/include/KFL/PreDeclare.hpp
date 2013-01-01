@@ -55,6 +55,12 @@ namespace KlayGE
 	class XMLAttribute;
 	typedef boost::shared_ptr<XMLAttribute> XMLAttributePtr;
 
+	class bad_join;
+	template <typename ResultType>
+	class joiner;
+	class threader;
+	class thread_pool;
+
 	class half;
 	template <typename T, int N>
 	class Vector_T;

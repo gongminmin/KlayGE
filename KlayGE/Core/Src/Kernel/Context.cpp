@@ -32,9 +32,9 @@
 #include <KlayGE/ResLoader.hpp>
 #include <KFL/XMLDom.hpp>
 #include <KlayGE/DeferredRenderingLayer.hpp>
+#include <KFL/Thread.hpp>
 
 #include <fstream>
-#include <boost/thread/mutex.hpp>
 
 #ifdef KLAYGE_PLATFORM_ANDROID
 #include <KlayGE/OpenGLES/OGLESRenderFactory.hpp>
@@ -45,7 +45,7 @@
 
 namespace
 {
-	boost::mutex singleton_mutex;
+	KlayGE::mutex singleton_mutex;
 }
 
 namespace KlayGE
@@ -783,7 +783,7 @@ namespace KlayGE
 	{
 		if (SceneManager::NullObject() == scene_mgr_)
 		{
-			boost::mutex::scoped_lock lock(singleton_mutex);
+			unique_lock<mutex> lock(singleton_mutex);
 			if (SceneManager::NullObject() == scene_mgr_)
 			{
 				this->LoadSceneManager(cfg_.scene_manager_name);
@@ -796,7 +796,7 @@ namespace KlayGE
 	{
 		if (RenderFactory::NullObject() == render_factory_)
 		{
-			boost::mutex::scoped_lock lock(singleton_mutex);
+			unique_lock<mutex> lock(singleton_mutex);
 			if (RenderFactory::NullObject() == render_factory_)
 			{
 				this->LoadRenderFactory(cfg_.render_factory_name);
@@ -809,7 +809,7 @@ namespace KlayGE
 	{
 		if (AudioFactory::NullObject() == audio_factory_)
 		{
-			boost::mutex::scoped_lock lock(singleton_mutex);
+			unique_lock<mutex> lock(singleton_mutex);
 			if (AudioFactory::NullObject() == audio_factory_)
 			{
 				this->LoadAudioFactory(cfg_.audio_factory_name);
@@ -822,7 +822,7 @@ namespace KlayGE
 	{
 		if (InputFactory::NullObject() == input_factory_)
 		{
-			boost::mutex::scoped_lock lock(singleton_mutex);
+			unique_lock<mutex> lock(singleton_mutex);
 			if (InputFactory::NullObject() == input_factory_)
 			{
 				this->LoadInputFactory(cfg_.input_factory_name);
@@ -835,7 +835,7 @@ namespace KlayGE
 	{
 		if (ShowFactory::NullObject() == show_factory_)
 		{
-			boost::mutex::scoped_lock lock(singleton_mutex);
+			unique_lock<mutex> lock(singleton_mutex);
 			if (ShowFactory::NullObject() == show_factory_)
 			{
 				this->LoadShowFactory(cfg_.show_factory_name);
@@ -848,7 +848,7 @@ namespace KlayGE
 	{
 		if (AudioDataSourceFactory::NullObject() == audio_data_src_factory_)
 		{
-			boost::mutex::scoped_lock lock(singleton_mutex);
+			unique_lock<mutex> lock(singleton_mutex);
 			if (AudioDataSourceFactory::NullObject() == audio_data_src_factory_)
 			{
 				this->LoadAudioDataSourceFactory(cfg_.audio_data_source_factory_name);

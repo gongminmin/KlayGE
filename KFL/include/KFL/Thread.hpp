@@ -34,6 +34,19 @@
 #pragma once
 
 #include <boost/assert.hpp>
+#ifdef KLAYGE_CXX11_LIBRARY_SUPPORT
+#include <thread>
+#include <condition_variable>
+#include <mutex>
+namespace KlayGE
+{
+	using std::thread;
+	using std::condition_variable;
+	using std::mutex;
+	using std::unique_lock;
+	namespace this_thread = std::this_thread;
+}
+#else
 #ifdef KLAYGE_COMPILER_MSVC
 #pragma warning(push)
 #pragma warning(disable: 4244 4512 4267 6011 6246 28197)
@@ -41,6 +54,15 @@
 #include <boost/thread.hpp>
 #ifdef KLAYGE_COMPILER_MSVC
 #pragma warning(pop)
+#endif
+namespace KlayGE
+{
+	using boost::thread;
+	using boost::condition_variable;
+	using boost::mutex;
+	using boost::unique_lock;
+	namespace this_thread = boost::this_thread;
+}
 #endif
 #include <boost/function.hpp>
 #include <boost/optional.hpp>
@@ -65,12 +87,12 @@
 
 namespace KlayGE
 {
-	typedef boost::thread::id thread_id;
+	typedef thread::id thread_id;
 
 	// Threadof operator simulation for threadof(0) expression
 	inline thread_id threadof(int)
 	{
-		return boost::this_thread::get_id();
+		return this_thread::get_id();
 	}
 
 	// Threadof operator simulation for threadof(joiner) expression
@@ -132,7 +154,7 @@ namespace KlayGE
 			//  thread from different threads.
 			try
 			{
-				boost::mutex::scoped_lock locker(joiner_mutex_);
+				unique_lock<mutex> locker(joiner_mutex_);
 
 				// Check if already joined
 				if (!joined_)
@@ -146,7 +168,7 @@ namespace KlayGE
 					joined_ = true;
 				}
 			}
-			catch (boost::lock_error const &)
+			catch (...)
 			{
 				throw bad_join();
 			}
@@ -171,7 +193,7 @@ namespace KlayGE
 		//  different threads) and the launched thread that joiners represent
 		boost::shared_ptr<result_opt>	result_;
 		volatile bool					joined_;
-		boost::mutex					joiner_mutex_;
+		mutex							joiner_mutex_;
 		thread_id						id_;
 	};
 
@@ -322,7 +344,7 @@ namespace KlayGE
 		{
 		public:
 			joiner_simple_thread_impl(boost::shared_ptr<typename joiner_impl_base<result_type>::result_opt> const & result_op,
-											boost::function0<void> const & func)
+											boost::function<void()> const & func)
 				: thread_(func)
 			{
 				joiner_impl_base<result_type>::result_ = result_op;
@@ -336,7 +358,7 @@ namespace KlayGE
 			}
 
 		private:
-			boost::thread thread_;
+			thread thread_;
 		};
 
 	public:
@@ -388,7 +410,7 @@ namespace KlayGE
 			// Used by joiner to wait until the thread from the pool completes its task
 			void join()
 			{
-				boost::mutex::scoped_lock lock(join_mut_);
+				unique_lock<mutex> lock(join_mut_);
 				while (!join_now_)
 				{
 					cond_.wait(lock);
@@ -399,7 +421,7 @@ namespace KlayGE
 			// Used by a thread from the pool to wake up a blocked joiner()
 			void notify_join()
 			{
-				boost::mutex::scoped_lock lock(join_mut_);
+				unique_lock<mutex> lock(join_mut_);
 				join_now_ = true;
 				cond_.notify_one();
 			}
@@ -407,7 +429,7 @@ namespace KlayGE
 			// Used by the last joiner to notify to the thread from the pool that it can be recycled for the next task
 			void recycle()
 			{
-				boost::mutex::scoped_lock lock(join_mut_);
+				unique_lock<mutex> lock(join_mut_);
 				can_recycle_thread_ = true;
 				cond_.notify_one();
 			}
@@ -416,7 +438,7 @@ namespace KlayGE
 			//  from the pool can be recycled
 			void wait_recycle()
 			{
-				boost::mutex::scoped_lock lock(join_mut_);
+				unique_lock<mutex> lock(join_mut_);
 				while (!can_recycle_thread_)
 				{
 					cond_.wait(lock);
@@ -427,8 +449,8 @@ namespace KlayGE
 		private:
 			volatile bool     join_now_;
 			volatile bool     can_recycle_thread_;
-			boost::condition_variable  cond_;
-			boost::mutex      join_mut_;
+			condition_variable  cond_;
+			mutex      join_mut_;
 		};
 
 		// A class used to storage information of a pooled thread. Each object of this class represents a pooled thread.
@@ -449,7 +471,7 @@ namespace KlayGE
 				thpool_join_info_ = pthpool_join_info;
 				func_ = func;
 				{
-					boost::mutex::scoped_lock lock(wake_up_mut_);
+					unique_lock<mutex> lock(wake_up_mut_);
 					wake_up_ = true;
 					wake_up_cond_.notify_one();
 				}
@@ -458,7 +480,7 @@ namespace KlayGE
 			// Wakes up a pooled thread saying it should die
 			void kill()
 			{
-				boost::mutex::scoped_lock lock(wake_up_mut_);
+				unique_lock<mutex> lock(wake_up_mut_);
 				func_.clear();
 				wake_up_ = true;
 				wake_up_cond_.notify_one();
@@ -469,18 +491,20 @@ namespace KlayGE
 				return id_;
 			}
 
-			void set_thread_id(thread_id id)
+			void set_joiner(joiner<void> const & j)
 			{
-				id_ = id;
+				joiner_ = j;
+				id_ = joiner_.get_thread_id();
 			}
 
 			boost::shared_ptr<thread_pool_join_info> thpool_join_info_;
-			boost::function0<void>	func_;
+			boost::function<void()>	func_;
 			bool					wake_up_;
-			boost::mutex			wake_up_mut_;
-			boost::condition_variable		wake_up_cond_;
+			mutex					wake_up_mut_;
+			condition_variable		wake_up_cond_;
 			boost::shared_ptr<thread_pool_common_data_t>	data_;
 			thread_id				id_;
+			joiner<void>			joiner_;
 		};
 
 		// A class used to storage information of the thread pool. It stores the pooled thread information container
@@ -505,7 +529,7 @@ namespace KlayGE
 					for (;;)
 					{
 						{
-							boost::mutex::scoped_lock lock(info_->wake_up_mut_);
+							unique_lock<mutex> lock(info_->wake_up_mut_);
 
 							// Sleep until someone has a job to do or the pool is being destroyed
 							while (!info_->wake_up_ && !info_->data_->general_cleanup_)
@@ -541,7 +565,7 @@ namespace KlayGE
 
 						// Locked code to try to insert the thread again in the thread pool
 						{
-							boost::mutex::scoped_lock lock(info_->data_->mut_);
+							unique_lock<mutex> lock(info_->data_->mut_);
 
 							// If there is a general cleanup request, finish
 							if (info_->data_->general_cleanup_)
@@ -578,21 +602,21 @@ namespace KlayGE
 			}
 
 			// Creates and adds more threads to the pool. Can throw
-			static void add_waiting_threads(boost::shared_ptr<thread_pool_common_data_t> pdata, size_t number)
+			static void add_waiting_threads(boost::shared_ptr<thread_pool_common_data_t> const & pdata, size_t number)
 			{
-				boost::mutex::scoped_lock lock(pdata->mut_);
+				unique_lock<mutex> lock(pdata->mut_);
 				add_waiting_threads_no_lock(pdata, number);
 			}
 
 			// Creates and adds more threads to the pool. This function does not lock the pool mutex and that be
 			//  only called when we externally have locked that mutex. Can throw
-			static void add_waiting_threads_no_lock(boost::shared_ptr<thread_pool_common_data_t> data, size_t number)
+			static void add_waiting_threads_no_lock(boost::shared_ptr<thread_pool_common_data_t> const & data, size_t number)
 			{
 				for (size_t i = 0; i < number; ++ i)
 				{
 					boost::shared_ptr<thread_pool_thread_info> th_info = MakeSharedPtr<thread_pool_thread_info>(data);
 					joiner<void> j = data->threader_(wait_function(th_info));
-					th_info->set_thread_id(threadof(j));
+					th_info->set_joiner(j);
 					data->threads_.push_back(th_info);
 				}
 			}
@@ -600,7 +624,7 @@ namespace KlayGE
 			// Notifies all pooled threads that this is the end
 			void kill_all()
 			{
-				boost::mutex::scoped_lock lock(mut_);
+				unique_lock<mutex> lock(mut_);
 
 				// Notify cleanup command to not queued threads
 				general_cleanup_ = true;
@@ -614,7 +638,7 @@ namespace KlayGE
 				}
 			}
 
-			boost::mutex& mut()
+			mutex& mut()
 			{
 				return mut_;
 			}
@@ -630,7 +654,7 @@ namespace KlayGE
 			}
 			void num_min_cached_threads(size_t num)
 			{
-				boost::mutex::scoped_lock lock(mut_);
+				unique_lock<mutex> lock(mut_);
 
 				if (num > num_min_cached_threads_)
 				{
@@ -661,7 +685,7 @@ namespace KlayGE
 			// Shared data between thread_pool, all threads and joiners
 			size_t						num_min_cached_threads_;
 			size_t						num_max_cached_threads_;
-			boost::mutex				mut_;
+			mutex						mut_;
 			bool						general_cleanup_;
 			thread_info_queue_t			threads_;
 			threader					threader_;
@@ -675,7 +699,7 @@ namespace KlayGE
 
 		public:
 			template <typename Threadable>
-			joiner_thread_pool_impl(boost::shared_ptr<thread_pool_common_data_t> data,
+			joiner_thread_pool_impl(boost::shared_ptr<thread_pool_common_data_t> const & data,
 						boost::shared_ptr<typename joiner_impl_base<result_type>::result_opt> const & result_op,
 						Threadable const & func)
 				: thread_pool_join_info_(MakeSharedPtr<thread_pool_join_info>())
@@ -683,7 +707,7 @@ namespace KlayGE
 				joiner_impl_base<result_type>::result_ = result_op;
 
 				boost::shared_ptr<thread_pool_thread_info> th_info;
-				boost::mutex::scoped_lock lock(data->mut());
+				unique_lock<mutex> lock(data->mut());
 
 				// If there are no threads, add more to the pool
 				if (data->threads().empty())

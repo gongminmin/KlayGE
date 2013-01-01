@@ -17,20 +17,12 @@
 
 #include <KlayGE/PreDeclare.hpp>
 #include <KFL/Atomic.hpp>
+#include <KFL/Thread.hpp>
 
 #include <d3d9.h>
 #include <strmif.h>
 #include <vmr9.h>
 #include <vector>
-
-#ifdef KLAYGE_COMPILER_MSVC
-#pragma warning(push)
-#pragma warning(disable: 4244)
-#endif
-#include <boost/thread/mutex.hpp>
-#ifdef KLAYGE_COMPILER_MSVC
-#pragma warning(pop)
-#endif
 
 namespace KlayGE
 {
@@ -92,7 +84,7 @@ namespace KlayGE
 
 	private:
 		// needed to make this a thread safe object
-		boost::mutex	mutex_;
+		mutex			mutex_;
 		HWND			wnd_;
 		atomic<int32_t>	ref_count_;
 
