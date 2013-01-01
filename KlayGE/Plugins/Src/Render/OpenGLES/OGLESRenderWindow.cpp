@@ -167,7 +167,7 @@ namespace KlayGE
 
 		if (!glloader_GLES_VERSION_2_0())
 		{
-			THR(boost::system::posix_error::not_supported);
+			THR(errc::not_supported);
 		}
 
 		eglSwapInterval(display_, 0);

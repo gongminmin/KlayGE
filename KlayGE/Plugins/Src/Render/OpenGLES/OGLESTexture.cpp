@@ -31,7 +31,7 @@ namespace KlayGE
 	{
 		if (array_size > 1)
 		{
-			THR(boost::system::posix_error::not_supported);
+			THR(errc::not_supported);
 		}
 
 		switch (type_)
@@ -44,7 +44,7 @@ namespace KlayGE
 		case TT_3D:
 			if (!glloader_GLES_OES_texture_3D())
 			{
-				THR(boost::system::posix_error::not_supported);
+				THR(errc::not_supported);
 			}
 			target_type_ = GL_TEXTURE_3D_OES;
 			break;

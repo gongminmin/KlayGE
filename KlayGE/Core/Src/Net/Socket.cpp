@@ -77,7 +77,7 @@ namespace KlayGE
 			}
 			else
 			{
-				THR(boost::system::posix_error::address_not_available);
+				THR(errc::address_not_available);
 			}
 		}
 

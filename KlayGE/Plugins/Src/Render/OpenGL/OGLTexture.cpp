@@ -48,7 +48,7 @@ namespace KlayGE
 
 		if ((array_size > 1) && (!(glloader_GL_VERSION_3_0() || glloader_GL_EXT_texture_array())))
 		{
-			THR(boost::system::posix_error::not_supported);
+			THR(errc::not_supported);
 		}
 
 		switch (type_)
@@ -230,7 +230,7 @@ namespace KlayGE
 		}
 		else
 		{
-			THR(boost::system::posix_error::not_supported);
+			THR(errc::not_supported);
 		}
 	}
 

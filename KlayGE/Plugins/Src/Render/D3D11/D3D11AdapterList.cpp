@@ -84,7 +84,7 @@ namespace KlayGE
 		// 如果没有找到兼容的设备则抛出错误
 		if (adapters_.empty())
 		{
-			THR(boost::system::posix_error::not_supported);
+			THR(errc::not_supported);
 		}
 	}
 }

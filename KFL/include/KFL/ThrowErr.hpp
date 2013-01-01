@@ -36,8 +36,26 @@
 #include <string>
 #include <stdexcept>
 
-#include <boost/system/error_code.hpp>
-#include <boost/system/system_error.hpp>
+#ifdef KLAYGE_CXX11_LIBRARY_SUPPORT
+	#include <system_error>
+
+	namespace KlayGE
+	{
+		using std::system_error;
+		using std::make_error_code;
+		namespace errc = std::errc;
+	}
+#else
+	#include <boost/system/error_code.hpp>
+	#include <boost/system/system_error.hpp>
+
+	namespace KlayGE
+	{
+		using boost::system::system_error;
+		using boost::system::make_error_code;
+		namespace errc = boost::system::errc;
+	}
+#endif
 
 #ifndef _HRESULT_DEFINED
 #define _HRESULT_DEFINED
@@ -49,18 +67,21 @@ namespace KlayGE
 	std::string CombineFileLine(std::string const & file, int line);
 }
 
-#define THR(x)			{ throw boost::system::system_error(boost::system::posix_error::make_error_code(x), KlayGE::CombineFileLine(__FILE__, __LINE__)); }
+#define THR(x)			{ throw KlayGE::system_error(KlayGE::make_error_code(x), KlayGE::CombineFileLine(__FILE__, __LINE__)); }
 
 // Èç¹û´íÎó£¬¾ÍÅ×³ö´íÎó´úÂë
 #define TIF(x)			{ HRESULT _hr = x; if (static_cast<HRESULT>(_hr) < 0) { throw std::runtime_error(KlayGE::CombineFileLine(__FILE__, __LINE__)); } }
 
-// ¶ÏÑÔ
-inline void
-Verify(bool x)
+namespace KlayGE
 {
-	if (!x)
+	// ¶ÏÑÔ
+	inline void
+	Verify(bool x)
 	{
-		THR(boost::system::posix_error::not_supported);
+		if (!x)
+		{
+			THR(errc::not_supported);
+		}
 	}
 }
 

@@ -502,7 +502,7 @@ namespace
 			return EF_BC7_SRGB;
 
 		default:
-			THR(boost::system::posix_error::not_supported);
+			THR(errc::not_supported);
 		}
 #ifdef KLAYGE_COMPILER_MSVC
 #pragma warning(pop)
@@ -689,7 +689,7 @@ namespace
 			return DXGI_FORMAT_BC3_UNORM_SRGB;
 
 		default:
-			THR(boost::system::posix_error::not_supported);
+			THR(errc::not_supported);
 		}
 	}
 

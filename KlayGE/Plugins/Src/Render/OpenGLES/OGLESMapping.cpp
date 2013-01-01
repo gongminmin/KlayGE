@@ -175,7 +175,7 @@ namespace KlayGE
 			}
 			else
 			{
-				THR(boost::system::posix_error::not_supported);
+				THR(errc::not_supported);
 			}
 
 		case BOP_Max:
@@ -185,7 +185,7 @@ namespace KlayGE
 			}
 			else
 			{
-				THR(boost::system::posix_error::not_supported);
+				THR(errc::not_supported);
 			}
 
 		default:
@@ -249,7 +249,7 @@ namespace KlayGE
 			break;
 
 		default:
-			THR(boost::system::posix_error::not_supported);
+			THR(errc::not_supported);
 		}
 	}
 
@@ -278,7 +278,7 @@ namespace KlayGE
 			}
 			else
 			{
-				THR(boost::system::posix_error::not_supported);
+				THR(errc::not_supported);
 			}
 			break;
 
@@ -303,7 +303,7 @@ namespace KlayGE
 			}
 			else
 			{
-				THR(boost::system::posix_error::not_supported);
+				THR(errc::not_supported);
 			}
 			break;
 
@@ -322,7 +322,7 @@ namespace KlayGE
 			}
 			else
 			{
-				THR(boost::system::posix_error::not_supported);
+				THR(errc::not_supported);
 			}
 			break;
 
@@ -335,7 +335,7 @@ namespace KlayGE
 			}
 			else
 			{
-				THR(boost::system::posix_error::not_supported);
+				THR(errc::not_supported);
 			}
 			break;
 
@@ -348,7 +348,7 @@ namespace KlayGE
 			}
 			else
 			{
-				THR(boost::system::posix_error::not_supported);
+				THR(errc::not_supported);
 			}
 			break;
 
@@ -361,7 +361,7 @@ namespace KlayGE
 			}
 			else
 			{
-				THR(boost::system::posix_error::not_supported);
+				THR(errc::not_supported);
 			}
 			break;
 
@@ -374,7 +374,7 @@ namespace KlayGE
 			}
 			else
 			{
-				THR(boost::system::posix_error::not_supported);
+				THR(errc::not_supported);
 			}
 			break;
 
@@ -387,7 +387,7 @@ namespace KlayGE
 			}
 			else
 			{
-				THR(boost::system::posix_error::not_supported);
+				THR(errc::not_supported);
 			}
 			break;
 
@@ -400,7 +400,7 @@ namespace KlayGE
 			}
 			else
 			{
-				THR(boost::system::posix_error::not_supported);
+				THR(errc::not_supported);
 			}
 			break;
 
@@ -413,7 +413,7 @@ namespace KlayGE
 			}
 			else
 			{
-				THR(boost::system::posix_error::not_supported);
+				THR(errc::not_supported);
 			}
 			break;
 
@@ -426,7 +426,7 @@ namespace KlayGE
 			}
 			else
 			{
-				THR(boost::system::posix_error::not_supported);
+				THR(errc::not_supported);
 			}
 			break;
 
@@ -439,7 +439,7 @@ namespace KlayGE
 			}
 			else
 			{
-				THR(boost::system::posix_error::not_supported);
+				THR(errc::not_supported);
 			}
 			break;
 
@@ -452,7 +452,7 @@ namespace KlayGE
 			}
 			else
 			{
-				THR(boost::system::posix_error::not_supported);
+				THR(errc::not_supported);
 			}
 			break;
 
@@ -465,7 +465,7 @@ namespace KlayGE
 			}
 			else
 			{
-				THR(boost::system::posix_error::not_supported);
+				THR(errc::not_supported);
 			}
 			break;
 
@@ -478,7 +478,7 @@ namespace KlayGE
 			}
 			else
 			{
-				THR(boost::system::posix_error::not_supported);
+				THR(errc::not_supported);
 			}
 			break;
 
@@ -491,7 +491,7 @@ namespace KlayGE
 			}
 			else
 			{
-				THR(boost::system::posix_error::not_supported);
+				THR(errc::not_supported);
 			}
 			break;
 
@@ -504,7 +504,7 @@ namespace KlayGE
 			}
 			else
 			{
-				THR(boost::system::posix_error::not_supported);
+				THR(errc::not_supported);
 			}
 			break;
 
@@ -517,7 +517,7 @@ namespace KlayGE
 			}
 			else
 			{
-				THR(boost::system::posix_error::not_supported);
+				THR(errc::not_supported);
 			}
 			break;
 
@@ -536,12 +536,12 @@ namespace KlayGE
 			}
 			else
 			{
-				THR(boost::system::posix_error::not_supported);
+				THR(errc::not_supported);
 			}
 			break;
 
 		default:
-			THR(boost::system::posix_error::not_supported);
+			THR(errc::not_supported);
 		}
 	}
 
@@ -591,7 +591,7 @@ namespace KlayGE
 			}
 			else
 			{
-				THR(boost::system::posix_error::not_supported);
+				THR(errc::not_supported);
 			}
 			break;
 
@@ -603,7 +603,7 @@ namespace KlayGE
 			}
 			else
 			{
-				THR(boost::system::posix_error::not_supported);
+				THR(errc::not_supported);
 			}
 			break;
 
@@ -672,7 +672,7 @@ namespace KlayGE
 			break;
 
 		default:
-			THR(boost::system::posix_error::not_supported);
+			THR(errc::not_supported);
 		}
 	}
 }

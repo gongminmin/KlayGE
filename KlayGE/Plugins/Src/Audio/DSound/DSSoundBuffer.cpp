@@ -186,7 +186,7 @@ namespace KlayGE
 	void DSSoundBuffer::Stop()
 	{
 		std::for_each(sources_.begin(), sources_.end(),
-			boost::bind<HRESULT>(boost::mem_fn(&IDirectSoundBuffer::Stop), _1));
+			boost::bind(&IDirectSoundBuffer::Stop, _1));
 	}
 
 	// ÉùÒô»º³åÇø¸´Î»
