@@ -1080,7 +1080,7 @@ namespace KlayGE
 							}
 							if (!found)
 							{
-								tex_sampler_binds_.push_back(make_tuple(combined_sampler_name,
+								tex_sampler_binds_.push_back(KlayGE::make_tuple(combined_sampler_name,
 									param, effect.ParameterByName(sample_tokens[4]), 1UL << type));
 							}
 
@@ -1642,7 +1642,7 @@ namespace KlayGE
 								}
 								if (!found)
 								{
-									tex_sampler_binds_.push_back(make_tuple(combined_sampler_name,
+									tex_sampler_binds_.push_back(KlayGE::make_tuple(combined_sampler_name,
 										effect.ParameterByName(tex_name), effect.ParameterByName(sampler_name), 1UL << type));
 								}
 							}
@@ -2180,7 +2180,7 @@ namespace KlayGE
 					}
 					if (!found)
 					{
-						tex_sampler_binds_.push_back(make_tuple(combined_sampler_name,
+						tex_sampler_binds_.push_back(KlayGE::make_tuple(combined_sampler_name,
 							get<1>(so->tex_sampler_binds_[j]), get<2>(so->tex_sampler_binds_[j]), 1UL << type));
 					}
 				}

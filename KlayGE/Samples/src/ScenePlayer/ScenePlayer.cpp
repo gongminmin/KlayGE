@@ -78,7 +78,7 @@ namespace
 		{
 			module_->RunString(*script_);
 
-			return module_->Call("update", make_tuple(app_time, elapsed_time));
+			return module_->Call("update", KlayGE::make_tuple(app_time, elapsed_time));
 		}
 
 	private:

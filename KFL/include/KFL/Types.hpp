@@ -76,7 +76,22 @@ private:
 	#include <boost/foreach.hpp>
 	#define KLAYGE_FOREACH(var, col) BOOST_FOREACH(var, col)
 #endif
-
+#ifdef KLAYGE_NOEXCEPT_SUPPORT
+	#define KLAYGE_NOEXCEPT noexcept
+	#define KLAYGE_NOEXCEPT_IF(Predicate) noexcept((Predicate))
+	#define KLAYGE_NOEXCEPT_EXPR(Expression) noexcept((Expression))
+#else
+	#define KLAYGE_NOEXCEPT
+	#define KLAYGE_NOEXCEPT_IF(Predicate)
+	#define KLAYGE_NOEXCEPT_EXPR(Expression) false
+#endif
+#ifdef KLAYGE_OVERRIDE_SUPPORT
+	#define KLAYGE_OVERRIDE override
+	#define KLAYGE_FINAL final
+#else
+	#define KLAYGE_OVERRIDE
+	#define KLAYGE_FINAL
+#endif
 
 #ifdef KLAYGE_CXX11_LIBRARY_SUPPORT
 	#include <array>
@@ -151,8 +166,8 @@ private:
 
 		using boost::tuple;
 		using boost::get;
-		using std::make_tuple;
-		template<class tuple_type>
+		using boost::make_tuple;
+		template <typename tuple_type>
 		struct tuple_size
 		{
 			static const size_t value = boost::tuples::length<tuple_type>::value;

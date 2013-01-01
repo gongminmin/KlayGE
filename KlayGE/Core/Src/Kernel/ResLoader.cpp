@@ -402,9 +402,9 @@ namespace KlayGE
 		boost::shared_ptr<joiner<void> > async_thread;
 		if (res_desc->HasSubThreadStage())
 		{
-			async_thread = MakeSharedPtr<joiner<void> >(GlobalThreadPool()(boost::bind(&ResLoader::ASyncSubThreadFunc, this, boost::cref(res_desc))));
+			async_thread = MakeSharedPtr<joiner<void> >(GlobalThreadPool()(boost::bind(&ResLoader::ASyncSubThreadFunc, this, res_desc)));
 		}
-		return boost::bind(&ResLoader::ASyncFunc, this, boost::cref(res_desc), boost::cref(async_thread));
+		return boost::bind(&ResLoader::ASyncFunc, this, res_desc, async_thread);
 	}
 
 	void ResLoader::ASyncSubThreadFunc(ResLoadingDescPtr const & res_desc)

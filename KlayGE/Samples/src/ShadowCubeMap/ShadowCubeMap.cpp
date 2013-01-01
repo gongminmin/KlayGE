@@ -458,7 +458,7 @@ namespace
 				tess_factor = std::min(tess_factor, static_cast<int32_t>(tess_pattern_vbs.size()));
 
 				tess_pattern_rl_->BindIndexStream(tess_pattern_ibs[tess_factor - 1], EF_R16UI);
-				tess_pattern_rl_->BindVertexStream(tess_pattern_vbs[tess_factor - 1], make_tuple(vertex_element(VEU_TextureCoord, 1, EF_GR32F)),
+				tess_pattern_rl_->BindVertexStream(tess_pattern_vbs[tess_factor - 1], KlayGE::make_tuple(vertex_element(VEU_TextureCoord, 1, EF_GR32F)),
 					RenderLayout::ST_Geometry, mesh_rl_->NumIndices() * 3);
 			}
 

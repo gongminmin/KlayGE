@@ -66,7 +66,6 @@
 
 		#if __GNUC_MINOR__ >= 3
 			#ifdef __GXX_EXPERIMENTAL_CXX0X__
-				#define KLAYGE_CXX11_SUPPORT
 				#define KLAYGE_CXX11_LIBRARY_SUPPORT
 				#define KLAYGE_STATIC_ASSERT_SUPPORT
 				#define KLAYGE_DECLTYPE_SUPPORT
@@ -76,6 +75,10 @@
 				#if __GNUC_MINOR__ >= 6
 					#define KLAYGE_NULLPTR_SUPPORT
 					#define KLAYGE_FOREACH_SUPPORT
+					#define KLAYGE_NOEXCEPT_SUPPORT
+				#endif
+				#if __GNUC_MINOR__ >= 7
+					#define KLAYGE_OVERRIDE_SUPPORT
 				#endif
 			#endif
 		#endif
@@ -109,7 +112,6 @@
 	#endif
 
 	#if _MSC_VER >= 1600
-		#define KLAYGE_CXX11_SUPPORT
 		#define KLAYGE_CXX11_LIBRARY_SUPPORT
 		#define KLAYGE_NULLPTR_SUPPORT
 		#define KLAYGE_STATIC_ASSERT_SUPPORT
@@ -117,6 +119,7 @@
 		#if _MSC_VER >= 1700
 			#define KLAYGE_STRONGLY_TYPED_ENUMS_SUPPORT
 			#define KLAYGE_FOREACH_SUPPORT
+			#define KLAYGE_OVERRIDE_SUPPORT
 		#endif
 	#endif
 

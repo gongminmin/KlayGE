@@ -375,7 +375,7 @@ namespace
 					init_data.row_pitch = sizeof(pos);
 					init_data.data = &pos[0];
 					GraphicsBufferPtr pos_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data);
-					normalization_rl_->BindVertexStream(pos_vb, make_tuple(vertex_element(VEU_Position, 0, EF_ABGR32F)));
+					normalization_rl_->BindVertexStream(pos_vb, KlayGE::make_tuple(vertex_element(VEU_Position, 0, EF_ABGR32F)));
 				}
 
 				sat_pp_->InputPin(0, spread_tex_);
@@ -534,7 +534,7 @@ namespace
 					init_data.row_pitch = static_cast<uint32_t>(points.size() * sizeof(points[0]));
 					init_data.slice_pitch = 0;
 					GraphicsBufferPtr pos_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data);
-					bokeh_rl_->BindVertexStream(pos_vb, make_tuple(vertex_element(VEU_Position, 0, EF_GR32F)));
+					bokeh_rl_->BindVertexStream(pos_vb, KlayGE::make_tuple(vertex_element(VEU_Position, 0, EF_GR32F)));
 				}
 				else
 				{
@@ -596,7 +596,7 @@ namespace
 					init_data.row_pitch = static_cast<uint32_t>(points.size() * sizeof(points[0]));
 					init_data.slice_pitch = 0;
 					GraphicsBufferPtr pos_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data);
-					bokeh_rl_->BindVertexStream(pos_vb, make_tuple(vertex_element(VEU_Position, 0, EF_ABGR32F)));
+					bokeh_rl_->BindVertexStream(pos_vb, KlayGE::make_tuple(vertex_element(VEU_Position, 0, EF_ABGR32F)));
 
 					init_data.data = &indices[0];
 					init_data.row_pitch = static_cast<uint32_t>(indices.size() * sizeof(indices[0]));
@@ -816,14 +816,14 @@ void MotionBlurDoFApp::InitObjects()
 	{
 		for (int32_t j = 0; j < NUM_INSTANCE / NUM_LINE; ++ j)
 		{
-			PyObjectPtr py_pos = module.Call("get_pos", make_tuple(i, j, NUM_INSTANCE, NUM_LINE));
+			PyObjectPtr py_pos = module.Call("get_pos", KlayGE::make_tuple(i, j, NUM_INSTANCE, NUM_LINE));
 
 			float3 pos;
 			pos.x() = static_cast<float>(PyFloat_AsDouble(PyTuple_GetItem(py_pos.get(), 0)));
 			pos.y() = static_cast<float>(PyFloat_AsDouble(PyTuple_GetItem(py_pos.get(), 1)));
 			pos.z() = static_cast<float>(PyFloat_AsDouble(PyTuple_GetItem(py_pos.get(), 2)));
 
-			PyObjectPtr py_clr = module.Call("get_clr", make_tuple(i, j, NUM_INSTANCE, NUM_LINE));
+			PyObjectPtr py_clr = module.Call("get_clr", KlayGE::make_tuple(i, j, NUM_INSTANCE, NUM_LINE));
 
 			Color clr;
 			clr.r() = static_cast<float>(PyFloat_AsDouble(PyTuple_GetItem(py_clr.get(), 0)));

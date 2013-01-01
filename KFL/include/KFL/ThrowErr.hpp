@@ -52,7 +52,7 @@
 	namespace KlayGE
 	{
 		using boost::system::system_error;
-		using boost::system::make_error_code;
+		using boost::system::errc::make_error_code;
 		namespace errc = boost::system::errc;
 	}
 #endif

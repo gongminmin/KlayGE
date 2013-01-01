@@ -136,10 +136,10 @@ namespace KlayGE
 #endif
 
 			std::vector<tuple<D3D_DRIVER_TYPE, std::wstring> > dev_type_behaviors;
-			dev_type_behaviors.push_back(make_tuple(D3D_DRIVER_TYPE_HARDWARE, std::wstring(L"HW")));
-			dev_type_behaviors.push_back(make_tuple(D3D_DRIVER_TYPE_WARP, std::wstring(L"WARP")));
-			dev_type_behaviors.push_back(make_tuple(D3D_DRIVER_TYPE_SOFTWARE, std::wstring(L"SW")));
-			dev_type_behaviors.push_back(make_tuple(D3D_DRIVER_TYPE_REFERENCE, std::wstring(L"REF")));
+			dev_type_behaviors.push_back(KlayGE::make_tuple(D3D_DRIVER_TYPE_HARDWARE, std::wstring(L"HW")));
+			dev_type_behaviors.push_back(KlayGE::make_tuple(D3D_DRIVER_TYPE_WARP, std::wstring(L"WARP")));
+			dev_type_behaviors.push_back(KlayGE::make_tuple(D3D_DRIVER_TYPE_SOFTWARE, std::wstring(L"SW")));
+			dev_type_behaviors.push_back(KlayGE::make_tuple(D3D_DRIVER_TYPE_REFERENCE, std::wstring(L"REF")));
 
 #if (_WIN32_WINNT >= 0x0602 /*_WIN32_WINNT_WIN8*/)
 			bool d3d_11_1 = false;

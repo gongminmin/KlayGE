@@ -18,7 +18,25 @@
 #include <boost/enable_shared_from_this.hpp>
 
 #include <boost/filesystem.hpp>
-#include <boost/regex.hpp>
+#ifdef KLAYGE_CXX11_LIBRARY_SUPPORT
+	#include <regex>
+
+	namespace KlayGE
+	{
+		using std::regex;
+		using std::regex_match;
+		using std::smatch;
+	}
+#else
+	#include <boost/regex.hpp>
+
+	namespace KlayGE
+	{
+		using boost::regex;
+		using boost::regex_match;
+		using boost::smatch;
+	}
+#endif
 
 #ifdef KLAYGE_COMPILER_MSVC
 #pragma warning(push)
@@ -375,16 +393,16 @@ int main(int argc, char* argv[])
 			}
 			else
 			{
-				boost::regex const filter(DosWildcardToRegex(arg));
+				regex const filter(DosWildcardToRegex(arg));
 
 				boost::filesystem::directory_iterator end_itr;
 				for (boost::filesystem::directory_iterator i("."); i != end_itr; ++ i)
 				{
 					if (boost::filesystem::is_regular_file(i->status()))
 					{
-						boost::smatch what;
+						smatch what;
 						std::string const name = i->path().filename().string();
-						if (boost::regex_match(name, what, filter))
+						if (regex_match(name, what, filter))
 						{
 							tex_names.push_back(name);
 						}
