@@ -30,6 +30,7 @@
 
 #include <KFL/KFL.hpp>
 #include <KFL/DllLoader.hpp>
+#include <KFL/Thread.hpp>
 #include <kfont/kfont.hpp>
 
 #include <fstream>
@@ -44,7 +45,7 @@ namespace KlayGE
 {
 	int const KFONT_VERSION = 2;
 
-	boost::mutex singleton_mutex;
+	mutex singleton_mutex;
 
 	typedef int (MY_STD_CALL *LzmaCompressFunc)(unsigned char* dest, size_t* destLen, unsigned char const * src, size_t srcLen,
 		unsigned char* outProps, size_t* outPropsSize, /* *outPropsSize must be = 5 */
@@ -65,7 +66,7 @@ namespace KlayGE
 		{
 			if (!instance_)
 			{
-				boost::mutex::scoped_lock lock(singleton_mutex);
+				unique_lock<mutex> lock(singleton_mutex);
 				if (!instance_)
 				{
 					instance_ = MakeSharedPtr<LZMALoader>();
@@ -465,7 +466,7 @@ namespace KlayGE
 		}
 		std::sort(chars.begin(), chars.end());
 
-		boost::unordered_map<int32_t, std::pair<int32_t, uint32_t>, boost::hash<int32_t>, std::equal_to<int32_t>,
+		unordered_map<int32_t, std::pair<int32_t, uint32_t>, boost::hash<int32_t>, std::equal_to<int32_t>,
 			boost::fast_pool_allocator<std::pair<int32_t, std::pair<int32_t, uint32_t> > > > new_char_index_advance;
 		std::vector<font_info> new_char_info;
 		std::vector<size_t> new_distances_addr;

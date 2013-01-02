@@ -40,7 +40,6 @@
 #pragma warning(push)
 #pragma warning(disable: 4100 6011 6334)
 #endif
-#include <boost/unordered_map.hpp>
 #include <boost/functional/hash.hpp>
 #if defined(_MSC_VER)
 #pragma warning(pop)
@@ -147,7 +146,7 @@ namespace KlayGE
 		uint32_t char_size_;
 		int16_t dist_base_;
 		int16_t dist_scale_;
-		boost::unordered_map<int32_t, std::pair<int32_t, uint32_t>, boost::hash<int32_t>, std::equal_to<int32_t>,
+		unordered_map<int32_t, std::pair<int32_t, uint32_t>, boost::hash<int32_t>, std::equal_to<int32_t>,
 			boost::fast_pool_allocator<std::pair<int32_t, std::pair<int32_t, uint32_t> > > > char_index_advance_;
 		std::vector<font_info> char_info_;
 		std::vector<size_t> distances_addr_;
