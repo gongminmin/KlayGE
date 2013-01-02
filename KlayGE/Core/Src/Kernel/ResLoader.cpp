@@ -36,7 +36,21 @@
 #include <fstream>
 #include <sstream>
 #ifndef KLAYGE_PLATFORM_WINDOWS_METRO
-#include <boost/filesystem.hpp>
+#ifdef KLAYGE_FILESYSTEM_V2_SUPPORT
+	#include <filesystem>
+
+	namespace KlayGE
+	{
+		namespace filesystem = std::tr2::sys;
+	}
+#else
+	#include <boost/filesystem.hpp>
+
+	namespace KlayGE
+	{
+		namespace filesystem = boost::filesystem;
+	}
+#endif
 #endif
 
 #if defined KLAYGE_PLATFORM_WINDOWS
@@ -125,15 +139,23 @@ namespace KlayGE
 	void ResLoader::AddPath(std::string const & path)
 	{
 #ifndef KLAYGE_PLATFORM_WINDOWS_METRO
-		boost::filesystem::path new_path(path);
+		filesystem::path new_path(path);
+#ifdef KLAYGE_FILESYSTEM_V2_SUPPORT
+		if (!new_path.is_complete())
+#else
 		if (!new_path.is_absolute())
+#endif
 		{
-			boost::filesystem::path full_path = exe_path_ / new_path;
-			if (!boost::filesystem::exists(full_path))
+			filesystem::path full_path = filesystem::path(exe_path_) / new_path;
+			if (!filesystem::exists(full_path))
 			{
 #ifndef KLAYGE_PLATFORM_ANDROID
-				full_path = boost::filesystem::current_path() / new_path;
-				if (!boost::filesystem::exists(full_path))
+#ifdef KLAYGE_FILESYSTEM_V2_SUPPORT
+				full_path = filesystem::current_path<filesystem::path>() / new_path;
+#else
+				full_path = filesystem::current_path() / new_path;
+#endif
+				if (!filesystem::exists(full_path))
 				{
 					return;
 				}
@@ -159,7 +181,7 @@ namespace KlayGE
 		if (('/' == name[0]) || ('\\' == name[0]))
 		{
 #ifndef KLAYGE_PLATFORM_WINDOWS_METRO
-			if (boost::filesystem::exists(name))
+			if (filesystem::exists(filesystem::path(name)))
 #else
 			WIN32_FILE_ATTRIBUTE_DATA info;
 			if (::GetFileAttributesExA(name.c_str(), GetFileExInfoStandard, &info))
@@ -176,7 +198,7 @@ namespace KlayGE
 				std::string const res_name(path + name);
 
 #ifndef KLAYGE_PLATFORM_WINDOWS_METRO
-				if (boost::filesystem::exists(res_name))
+				if (filesystem::exists(filesystem::path(res_name)))
 #else
 				WIN32_FILE_ATTRIBUTE_DATA info;
 				if (::GetFileAttributesExA(res_name.c_str(), GetFileExInfoStandard, &info))
@@ -191,9 +213,10 @@ namespace KlayGE
 					{
 						std::string pkt_name = res_name.substr(0, pkt_offset);
 #ifndef KLAYGE_PLATFORM_WINDOWS_METRO
-						if (boost::filesystem::exists(pkt_name)
-								&& (boost::filesystem::is_regular_file(pkt_name)
-										|| boost::filesystem::is_symlink(pkt_name)))
+						filesystem::path pkt_path(pkt_name);
+						if (filesystem::exists(pkt_path)
+								&& (filesystem::is_regular_file(pkt_path)
+										|| filesystem::is_symlink(pkt_path)))
 #else
 						WIN32_FILE_ATTRIBUTE_DATA info;
 						BOOL exists = ::GetFileAttributesExA(pkt_name.c_str(), GetFileExInfoStandard, &info);
@@ -210,7 +233,7 @@ namespace KlayGE
 							std::string const file_name = res_name.substr(pkt_offset + 2);
 
 #ifndef KLAYGE_PLATFORM_WINDOWS_METRO
-							uint64_t timestamp = boost::filesystem::last_write_time(pkt_name);
+							uint64_t timestamp = filesystem::last_write_time(pkt_path);
 #else
 							uint64_t timestamp = info.ftLastWriteTime.dwHighDateTime * 0x100000000ULL + info.ftLastWriteTime.dwLowDateTime;
 #endif
@@ -265,14 +288,15 @@ namespace KlayGE
 		if (('/' == name[0]) || ('\\' == name[0]))
 		{
 #ifndef KLAYGE_PLATFORM_WINDOWS_METRO
-			if (boost::filesystem::exists(name))
+			filesystem::path res_path(name);
+			if (filesystem::exists(res_path))
 #else
 			WIN32_FILE_ATTRIBUTE_DATA info;
 			if (::GetFileAttributesExA(name.c_str(), GetFileExInfoStandard, &info))
 #endif
 			{
 #ifndef KLAYGE_PLATFORM_WINDOWS_METRO
-				uint64_t timestamp = boost::filesystem::last_write_time(name);
+				uint64_t timestamp = filesystem::last_write_time(res_path);
 #else
 				uint64_t timestamp = info.ftLastWriteTime.dwHighDateTime * 0x100000000ULL + info.ftLastWriteTime.dwLowDateTime;
 #endif
@@ -288,14 +312,15 @@ namespace KlayGE
 				std::string const res_name(path + name);
 
 #ifndef KLAYGE_PLATFORM_WINDOWS_METRO
-				if (boost::filesystem::exists(res_name))
+				filesystem::path res_path(res_name);
+				if (filesystem::exists(res_path))
 #else
 				WIN32_FILE_ATTRIBUTE_DATA info;
 				if (::GetFileAttributesExA(res_name.c_str(), GetFileExInfoStandard, &info))
 #endif
 				{
 #ifndef KLAYGE_PLATFORM_WINDOWS_METRO
-					uint64_t timestamp = boost::filesystem::last_write_time(res_name);
+					uint64_t timestamp = filesystem::last_write_time(res_path);
 #else
 					uint64_t timestamp = info.ftLastWriteTime.dwHighDateTime * 0x100000000ULL + info.ftLastWriteTime.dwLowDateTime;
 #endif
@@ -309,9 +334,10 @@ namespace KlayGE
 					{
 						std::string pkt_name = res_name.substr(0, pkt_offset);
 #ifndef KLAYGE_PLATFORM_WINDOWS_METRO
-						if (boost::filesystem::exists(pkt_name)
-								&& (boost::filesystem::is_regular_file(pkt_name)
-										|| boost::filesystem::is_symlink(pkt_name)))
+						filesystem::path pkt_path(pkt_name);
+						if (filesystem::exists(pkt_path)
+								&& (filesystem::is_regular_file(pkt_path)
+										|| filesystem::is_symlink(pkt_path)))
 #else
 						WIN32_FILE_ATTRIBUTE_DATA info;
 						BOOL exists = ::GetFileAttributesExA(pkt_name.c_str(), GetFileExInfoStandard, &info);
@@ -328,7 +354,7 @@ namespace KlayGE
 							std::string const file_name = res_name.substr(pkt_offset + 2);
 
 #ifndef KLAYGE_PLATFORM_WINDOWS_METRO
-							uint64_t timestamp = boost::filesystem::last_write_time(pkt_name);
+							uint64_t timestamp = filesystem::last_write_time(pkt_path);
 #else
 							uint64_t timestamp = info.ftLastWriteTime.dwHighDateTime * 0x100000000ULL + info.ftLastWriteTime.dwLowDateTime;
 #endif
