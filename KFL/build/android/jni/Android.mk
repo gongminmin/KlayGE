@@ -9,7 +9,7 @@ LOCAL_C_INCLUDES := $(KFL_SRC_PATH)/../../External/boost \
 		$(KFL_SRC_PATH)/../../External/android_native_app_glue \
 		$(KFL_SRC_PATH)/../include \
 		
-LOCAL_MODULE := KFL_gcc
+LOCAL_MODULE := KFL
 LOCAL_PATH := $(KFL_SRC_PATH)
 LOCAL_SRC_FILES := \
 		Kernel/CpuInfo.cpp \

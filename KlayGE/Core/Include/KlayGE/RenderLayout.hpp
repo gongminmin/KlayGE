@@ -180,7 +180,7 @@ namespace KlayGE
 		template <typename tuple_type>
 		void VertexStreamFormat(uint32_t index, tuple_type const & vertex_elems)
 		{
-			this->VertexStreamFormat(index, Tuple2Vector(vertex_elems));
+			this->VertexStreamFormat(index, Tuple2Vector<tuple_type, tuple_size<tuple_type>::value>::Do(vertex_elems));
 		}
 		void VertexStreamFormat(uint32_t index, vertex_elements_type const & vet)
 		{

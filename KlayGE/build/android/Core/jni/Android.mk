@@ -6,15 +6,15 @@ include $(CLEAR_VARS)
 
 LOCAL_C_INCLUDES := $(KLAYGE_SRC_PATH)/../../../External/boost \
 		$(KLAYGE_SRC_PATH)/../../../External/Python/include \
-		$(KLAYGE_SRC_PATH)/../../../External/rapidxml \
 		$(KLAYGE_SRC_PATH)/../../../External/android_native_app_glue \
 		$(KLAYGE_SRC_PATH)/../../../External/7z \
+		$(KLAYGE_SRC_PATH)/../../../KFL/include \
 		$(KLAYGE_SRC_PATH)/../../../kfont/include \
 		$(KLAYGE_SRC_PATH)/../../../MeshMLLib/include \
 		$(KLAYGE_SRC_PATH)/../Include \
 		$(KLAYGE_SRC_PATH)/../../Plugins/Include \
 		
-LOCAL_MODULE := KlayGE_Core_gcc
+LOCAL_MODULE := KlayGE_Core
 LOCAL_PATH := $(KLAYGE_SRC_PATH)
 LOCAL_SRC_FILES := \
 		AppLayer/App3D.cpp \
@@ -33,16 +33,8 @@ LOCAL_SRC_FILES := \
 		Input/Keyboard.cpp \
 		Input/Mouse.cpp \
 		Kernel/Context.cpp \
-		Kernel/CpuInfo.cpp \
-		Kernel/DllLoader.cpp \
 		Kernel/KlayGE.cpp \
-		Kernel/Log.cpp \
 		Kernel/ResLoader.cpp \
-		Kernel/ThrowErr.cpp \
-		Kernel/Timer.cpp \
-		Kernel/Util.cpp \
-		Kernel/XMLDom.cpp \
-		Math/Math.cpp \
 		Net/Lobby.cpp \
 		Net/Player.cpp \
 		Net/Socket.cpp \

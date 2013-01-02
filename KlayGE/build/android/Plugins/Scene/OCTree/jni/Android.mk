@@ -6,11 +6,12 @@ KLAYGE_PLUGIN_OCTREE_SRC_PATH := $(LOCAL_PATH)/../../../../../../Plugins/Src/Sce
 include $(CLEAR_VARS)
 
 LOCAL_C_INCLUDES := $(KLAYGE_PLUGIN_OCTREE_SRC_PATH)/../../../../../External/boost \
+		$(KLAYGE_PLUGIN_OCTREE_SRC_PATH)/../../../../../KFL/include \
 		$(KLAYGE_PLUGIN_OCTREE_SRC_PATH)/../../../../Core/Include \
 		$(KLAYGE_PLUGIN_OCTREE_SRC_PATH)/../../../Include \
 		$(KLAYGE_PLUGIN_OCTREE_SRC_PATH)/../../../../../External/android_native_app_glue
 		
-LOCAL_MODULE := KlayGE_Scene_OCTree_gcc
+LOCAL_MODULE := KlayGE_Scene_OCTree
 LOCAL_PATH := $(KLAYGE_PLUGIN_OCTREE_SRC_PATH)
 LOCAL_SRC_FILES := \
 		OCTree.cpp \

@@ -6,6 +6,7 @@ include $(CLEAR_VARS)
 
 LOCAL_C_INCLUDES := $(KFONT_SRC_PATH)/../../External/boost \
 	$(KFONT_SRC_PATH)/../../External/7z \
+	$(KFONT_SRC_PATH)/../../KFL/include \
 	$(KFONT_SRC_PATH)/../include \
 	
 LOCAL_MODULE := kfont

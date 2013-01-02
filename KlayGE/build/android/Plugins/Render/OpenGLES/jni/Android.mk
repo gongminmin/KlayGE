@@ -6,12 +6,13 @@ KLAYGE_PLUGIN_OPENGLES_SRC_PATH := $(LOCAL_PATH)/../../../../../../Plugins/Src/R
 include $(CLEAR_VARS)
 
 LOCAL_C_INCLUDES := $(KLAYGE_PLUGIN_OPENGLES_SRC_PATH)/../../../../../External/boost \
+		$(KLAYGE_PLUGIN_OPENGLES_SRC_PATH)/../../../../../KFL/include \
 		$(KLAYGE_PLUGIN_OPENGLES_SRC_PATH)/../../../../Core/Include \
 		$(KLAYGE_PLUGIN_OPENGLES_SRC_PATH)/../../../Include \
 		$(KLAYGE_PLUGIN_OPENGLES_SRC_PATH)/../../../../../glloader/include \
 		$(KLAYGE_PLUGIN_OPENGLES_SRC_PATH)/../../../../../External/android_native_app_glue
 		
-LOCAL_MODULE := KlayGE_RenderEngine_OpenGLES_gcc
+LOCAL_MODULE := KlayGE_RenderEngine_OpenGLES
 LOCAL_PATH := $(KLAYGE_PLUGIN_OPENGLES_SRC_PATH)
 LOCAL_SRC_FILES := \
 		OGLESFrameBuffer.cpp \

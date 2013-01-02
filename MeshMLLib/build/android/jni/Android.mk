@@ -5,14 +5,12 @@ MESHMLLIB_SRC_PATH := $(LOCAL_PATH)/../../../src
 include $(CLEAR_VARS)
 
 LOCAL_C_INCLUDES := $(MESHMLLIB_SRC_PATH)/../../External/boost \
-		$(MESHMLLIB_SRC_PATH)/../../KlayGE/Core/Include \
+		$(MESHMLLIB_SRC_PATH)/../../KFL/include \
 		$(MESHMLLIB_SRC_PATH)/../include \
 		
-LOCAL_MODULE := MeshMLLib_gcc
+LOCAL_MODULE := MeshMLLib
 LOCAL_PATH := $(MESHMLLIB_SRC_PATH)
-LOCAL_SRC_FILES := \
-		MeshMLLib.cpp \
-
+LOCAL_SRC_FILES := MeshMLLib.cpp
 		
 LOCAL_CFLAGS := -DMESHMLLIB_SOURCE
 
