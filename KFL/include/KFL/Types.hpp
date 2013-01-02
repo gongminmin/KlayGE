@@ -92,6 +92,21 @@ private:
 	#define KLAYGE_OVERRIDE
 	#define KLAYGE_FINAL
 #endif
+#ifdef KLAYGE_RVALUE_REFERENCES_SUPPORT
+	#include <utility>
+
+	namespace KlayGE
+	{
+		using std::move;
+	}
+#else
+	#include <boost/move/move.hpp>
+
+	namespace KlayGE
+	{
+		using boost::move;
+	}
+#endif
 
 #ifdef KLAYGE_CXX11_LIBRARY_SUPPORT
 	#include <array>
@@ -123,6 +138,7 @@ private:
 		using std::has_trivial_destructor;
 		using std::is_same;
 		using std::remove_reference;
+		using std::result_of;
 
 		using std::unordered_map;
 		using std::unordered_multimap;
@@ -141,6 +157,7 @@ private:
 	#include <boost/cstdint.hpp>
 	#include <boost/tuple/tuple.hpp>
 	#include <boost/type_traits.hpp>
+	#include <boost/utility/result_of.hpp>
 	#ifdef KLAYGE_COMPILER_MSVC
 		#pragma warning(push)
 		#pragma warning(disable: 4100 6011 6334)
@@ -177,6 +194,7 @@ private:
 		using boost::has_trivial_destructor;
 		using boost::is_same;
 		using boost::remove_reference;
+		using boost::result_of;
 
 		using boost::unordered_map;
 		using boost::unordered_multimap;

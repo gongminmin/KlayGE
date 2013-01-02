@@ -76,14 +76,28 @@ namespace KlayGE
 #endif
 #include <boost/enable_shared_from_this.hpp>
 #include <boost/bind.hpp>
-#include <boost/mpl/if.hpp>
+#ifdef KLAYGE_CXX11_LIBRARY_SUPPORT
+	#include <type_traits>
+
+	namespace KlayGE
+	{
+		using std::conditional;
+	}
+#else
+	#include <boost/mpl/if.hpp>
+
+	namespace KlayGE
+	{
+		template <bool B, typename T, typename F>
+		struct conditional
+		{
+			typedef typename boost::mpl::if_c<B, T, F>::type type;
+		};
+	}
+#endif
 #include <boost/mpl/void.hpp>
-#include <boost/utility/result_of.hpp>
 #include <exception>
 #include <vector>
-
-#include <KFL/Util.hpp>
-
 
 namespace KlayGE
 {
@@ -124,11 +138,11 @@ namespace KlayGE
 		//	else
 		//		boost::optional<result_type>
 		typedef boost::optional<
-			typename boost::mpl::if_c<is_same<result_type, void>::value,
+			typename conditional<is_same<result_type, void>::value,
 				boost::mpl::void_, result_type>::type
 			>  result_opt;
 
-		typedef typename boost::mpl::if_c<is_same<result_type, void>::value,
+		typedef typename conditional<is_same<result_type, void>::value,
 			result_type, typename add_reference<result_type>::type
 			>::type const_result_type_ref;
 
@@ -285,7 +299,7 @@ namespace KlayGE
 		class threaded
 		{
 			typedef threaded<Threadable, JoinerImpl>				threaded_t;
-			typedef typename boost::result_of<Threadable()>::type	result_t;
+			typedef typename result_of<Threadable()>::type			result_t;
 			typedef JoinerImpl										joiner_impl_t;
 			typedef typename JoinerImpl::result_opt					result_opt;
 			typedef boost::mpl::void_								void_t;
@@ -364,9 +378,9 @@ namespace KlayGE
 	public:
 		// Launches threadable function in a new thread. Returns a joiner that can be used to wait thread completion.
 		template <typename Threadable>
-		joiner<typename boost::result_of<Threadable()>::type> operator()(Threadable const & function)
+		joiner<typename result_of<Threadable()>::type> operator()(Threadable const & function)
 		{
-			typedef typename boost::result_of<Threadable()>::type	result_t;
+			typedef typename result_of<Threadable()>::type			result_t;
 			typedef joiner<result_t>								joiner_t;
 			typedef joiner_simple_thread_impl<result_t>				joiner_impl_t;
 			typedef typename joiner_impl_t::result_opt				result_opt;
@@ -384,7 +398,7 @@ namespace KlayGE
 	// Threader function that creates a new thread to execute the Threadable. Just creates a temporary object of class threader
 	//  and uses operator()(Threadable)
 	template <typename Threadable>
-	inline joiner<typename boost::result_of<Threadable()>::type> create_thread(Threadable const & function)
+	inline joiner<typename result_of<Threadable()>::type> create_thread(Threadable const & function)
 	{
 		return threader()(function);
 	}
@@ -757,9 +771,9 @@ namespace KlayGE
 
 		// Launches threadable function in a new thread. If there is a pooled thread available, reuses that thread.
 		template <typename Threadable>
-		joiner<typename boost::result_of<Threadable()>::type> operator()(Threadable const & function)
+		joiner<typename result_of<Threadable()>::type> operator()(Threadable const & function)
 		{
-			typedef typename boost::result_of<Threadable()>::type	result_t;
+			typedef typename result_of<Threadable()>::type			result_t;
 			typedef joiner<result_t>								joiner_t;
 			typedef joiner_thread_pool_impl<result_t>				joiner_impl_t;
 			typedef typename joiner_impl_t::result_opt				result_opt;
