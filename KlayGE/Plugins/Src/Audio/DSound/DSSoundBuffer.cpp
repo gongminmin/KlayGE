@@ -202,7 +202,7 @@ namespace KlayGE
 	bool DSSoundBuffer::IsPlaying() const
 	{
 		return (std::find_if(sources_.begin(), sources_.end(),
-			!boost::bind(IsSourceFree, _1)) != sources_.end());
+			boost::bind(std::logical_not<bool>(), boost::bind(IsSourceFree, _1))) != sources_.end());
 	}
 
 	// …Ë÷√“Ù¡ø

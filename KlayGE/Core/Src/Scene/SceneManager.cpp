@@ -326,7 +326,7 @@ namespace KlayGE
 		{
 			RenderTechniquePtr const & tech = obj->GetRenderTechnique()->Effect().PrototypeEffect()->TechniqueByName(obj->GetRenderTechnique()->Name());
 			KLAYGE_AUTO(iter, std::find_if(render_queue_.begin(), render_queue_.end(),
-				boost::bind(select1st<RenderQueueType::value_type>(), _1) == tech));
+				boost::bind(std::equal_to<RenderTechniquePtr>(), boost::bind(select1st<RenderQueueType::value_type>(), _1), tech)));
 			if (iter != render_queue_.end())
 			{
 				iter->second.push_back(obj);
