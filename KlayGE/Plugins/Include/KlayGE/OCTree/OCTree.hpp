@@ -29,15 +29,6 @@
 #include <KlayGE/SceneManager.hpp>
 #include <KFL/AABBox.hpp>
 
-#ifdef KLAYGE_COMPILER_MSVC
-#pragma warning(push)
-#pragma warning(disable: 4127)
-#endif
-#include <boost/pool/pool_alloc.hpp>
-#ifdef KLAYGE_COMPILER_MSVC
-#pragma warning(pop)
-#endif
-
 #include <vector>
 
 namespace KlayGE
@@ -84,7 +75,7 @@ namespace KlayGE
 			SceneObjAABBsType obj_ptrs;
 		};
 
-		std::vector<octree_node_t, boost::pool_allocator<octree_node_t> > octree_;
+		std::vector<octree_node_t> octree_;
 
 		uint32_t max_tree_depth_;
 

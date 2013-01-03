@@ -1052,8 +1052,7 @@ int main(int argc, char* argv[])
 
 		if (!advance.empty())
 		{
-			unordered_map<int32_t, std::pair<int32_t, uint32_t>, boost::hash<int32_t>, std::equal_to<int32_t>,
-				boost::fast_pool_allocator<std::pair<int32_t, std::pair<int32_t, uint32_t> > > > char_index_advance;
+			unordered_map<int32_t, std::pair<int32_t, uint32_t> > char_index_advance;
 			for (size_t i = 0; i < advance.size(); ++ i)
 			{
 				char_index_advance.insert(std::make_pair(advance[i].first, std::make_pair(-1, (advance[i].second.second << 16) + advance[i].second.first)));

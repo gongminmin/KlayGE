@@ -54,6 +54,14 @@
 #include <map>
 #include <algorithm>
 #include <boost/bind.hpp>
+#ifdef KLAYGE_COMPILER_MSVC
+#pragma warning(push)
+#pragma warning(disable: 4100 6011 6334)
+#endif
+#include <boost/functional/hash.hpp>
+#ifdef KLAYGE_COMPILER_MSVC
+#pragma warning(pop)
+#endif
 
 #include <KlayGE/SceneManager.hpp>
 
@@ -544,10 +552,8 @@ namespace KlayGE
 			}
 		}
 
-		std::vector<std::pair<RenderablePtr, std::vector<SceneObjectPtr> >,
-			boost::pool_allocator<std::pair<RenderablePtr, std::vector<SceneObjectPtr> > > > renderables;
-		std::map<RenderablePtr, size_t, std::less<RenderablePtr>,
-			boost::fast_pool_allocator<std::pair<RenderablePtr const, size_t> > > renderables_map;
+		std::vector<std::pair<RenderablePtr, std::vector<SceneObjectPtr> > > renderables;
+		std::map<RenderablePtr, size_t> renderables_map;
 		KLAYGE_FOREACH(SceneObjAABBsType::const_reference scene_obj, scene_objs_)
 		{
 			if (scene_obj->visible)

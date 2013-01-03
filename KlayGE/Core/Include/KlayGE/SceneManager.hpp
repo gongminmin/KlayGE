@@ -34,22 +34,6 @@
 #include <vector>
 
 #include <boost/noncopyable.hpp>
-#ifdef KLAYGE_COMPILER_MSVC
-#pragma warning(push)
-#pragma warning(disable: 4100 6011 6334)
-#endif
-#include <boost/functional/hash.hpp>
-#ifdef KLAYGE_COMPILER_MSVC
-#pragma warning(pop)
-#endif
-#ifdef KLAYGE_COMPILER_MSVC
-#pragma warning(push)
-#pragma warning(disable: 4127)
-#endif
-#include <boost/pool/pool_alloc.hpp>
-#ifdef KLAYGE_COMPILER_MSVC
-#pragma warning(pop)
-#endif
 
 namespace KlayGE
 {
@@ -132,8 +116,7 @@ namespace KlayGE
 		std::vector<LightSourcePtr> lights_;
 		SceneObjAABBsType scene_objs_;
 
-		unordered_map<size_t, boost::shared_ptr<std::vector<char> >, boost::hash<size_t>, std::equal_to<size_t>,
-			boost::fast_pool_allocator<std::pair<size_t, boost::shared_ptr<std::vector<char> > > > > visible_marks_map_;
+		unordered_map<size_t, boost::shared_ptr<std::vector<char> > > visible_marks_map_;
 
 	private:
 		void FlushScene();

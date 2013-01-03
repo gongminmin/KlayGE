@@ -466,8 +466,7 @@ namespace KlayGE
 		}
 		std::sort(chars.begin(), chars.end());
 
-		unordered_map<int32_t, std::pair<int32_t, uint32_t>, boost::hash<int32_t>, std::equal_to<int32_t>,
-			boost::fast_pool_allocator<std::pair<int32_t, std::pair<int32_t, uint32_t> > > > new_char_index_advance;
+		unordered_map<int32_t, std::pair<int32_t, uint32_t> > new_char_index_advance;
 		std::vector<font_info> new_char_info;
 		std::vector<size_t> new_distances_addr;
 		std::vector<uint8_t> new_distances_lzma;

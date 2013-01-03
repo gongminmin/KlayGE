@@ -36,24 +36,6 @@
 #include <vector>
 #include <istream>
 
-#if defined(_MSC_VER)
-#pragma warning(push)
-#pragma warning(disable: 4100 6011 6334)
-#endif
-#include <boost/functional/hash.hpp>
-#if defined(_MSC_VER)
-#pragma warning(pop)
-#endif
-
-#if defined(_MSC_VER)
-#pragma warning(push)
-#pragma warning(disable: 4127)
-#endif
-#include <boost/pool/pool_alloc.hpp>
-#if defined(_MSC_VER)
-#pragma warning(pop)
-#endif
-
 #ifdef KLAYGE_COMPILER_MSVC
 	#ifndef KFONT_SOURCE
 		#ifdef KLAYGE_DEBUG
@@ -146,8 +128,7 @@ namespace KlayGE
 		uint32_t char_size_;
 		int16_t dist_base_;
 		int16_t dist_scale_;
-		unordered_map<int32_t, std::pair<int32_t, uint32_t>, boost::hash<int32_t>, std::equal_to<int32_t>,
-			boost::fast_pool_allocator<std::pair<int32_t, std::pair<int32_t, uint32_t> > > > char_index_advance_;
+		unordered_map<int32_t, std::pair<int32_t, uint32_t> > char_index_advance_;
 		std::vector<font_info> char_info_;
 		std::vector<size_t> distances_addr_;
 		std::vector<uint8_t> distances_lzma_;

@@ -236,7 +236,7 @@ namespace KlayGE
 		if (octree_[index].obj_ptrs.size() > 1)
 		{
 			size_t const this_size = octree_.size();
-			AABBox const & parent_bb = octree_[index].bb;
+			AABBox const parent_bb = octree_[index].bb;
 			float3 const parent_center = parent_bb.Center();
 			octree_[index].first_child_index = static_cast<int>(this_size);
 			octree_[index].visible = BO_No;

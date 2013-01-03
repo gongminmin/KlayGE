@@ -30,22 +30,6 @@
 #include <vector>
 #include <set>
 #include <map>
-#ifdef KLAYGE_COMPILER_MSVC
-#pragma warning(push)
-#pragma warning(disable: 4100 6011 6334)
-#endif
-#include <boost/functional/hash.hpp>
-#ifdef KLAYGE_COMPILER_MSVC
-#pragma warning(pop)
-#endif
-#ifdef KLAYGE_COMPILER_MSVC
-#pragma warning(push)
-#pragma warning(disable: 4127)
-#endif
-#include <boost/pool/pool_alloc.hpp>
-#ifdef KLAYGE_COMPILER_MSVC
-#pragma warning(pop)
-#endif
 #include <boost/function.hpp>
 #include <boost/smart_ptr.hpp>
 
@@ -232,8 +216,7 @@ namespace KlayGE
 		array<std::vector<ID3D11SamplerStatePtr>, ShaderObject::ST_NumShaderTypes> shader_sampler_cache_;
 		array<std::vector<ID3D11BufferPtr>, ShaderObject::ST_NumShaderTypes> shader_cb_cache_;
 
-		unordered_map<size_t, ID3D11InputLayoutPtr, boost::hash<size_t>, std::equal_to<size_t>,
-			boost::fast_pool_allocator<std::pair<size_t, ID3D11InputLayoutPtr > > > input_layout_bank_;
+		unordered_map<size_t, ID3D11InputLayoutPtr> input_layout_bank_;
 
 		std::string vs_profile_, ps_profile_, gs_profile_, cs_profile_, hs_profile_, ds_profile_;
 
