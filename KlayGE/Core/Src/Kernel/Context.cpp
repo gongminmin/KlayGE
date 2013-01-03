@@ -628,7 +628,7 @@ namespace KlayGE
 #endif
 
 		std::string path = render_path + "/" + fn;
-		render_loader_.Load(path);
+		render_loader_.Load(ResLoader::Instance().Locate(path));
 
 		MakeRenderFactoryFunc mrf = (MakeRenderFactoryFunc)render_loader_.GetProcAddress("MakeRenderFactory");
 		if (mrf != nullptr)
@@ -657,7 +657,7 @@ namespace KlayGE
 #endif
 
 		std::string path = audio_path + "/" + fn;
-		audio_loader_.Load(path);
+		audio_loader_.Load(ResLoader::Instance().Locate(path));
 
 		MakeAudioFactoryFunc maf = (MakeAudioFactoryFunc)audio_loader_.GetProcAddress("MakeAudioFactory");
 		if (maf != nullptr)
@@ -683,7 +683,7 @@ namespace KlayGE
 #endif
 
 		std::string path = input_path + "/" + fn;
-		input_loader_.Load(path);
+		input_loader_.Load(ResLoader::Instance().Locate(path));
 
 		MakeInputFactoryFunc mif = (MakeInputFactoryFunc)input_loader_.GetProcAddress("MakeInputFactory");
 		if (mif != nullptr)
@@ -709,7 +709,7 @@ namespace KlayGE
 #endif
 
 		std::string path = show_path + "/" + fn;
-		show_loader_.Load(path);
+		show_loader_.Load(ResLoader::Instance().Locate(path));
 
 		MakeShowFactoryFunc msf = (MakeShowFactoryFunc)show_loader_.GetProcAddress("MakeShowFactory");
 		if (msf != nullptr)
@@ -736,7 +736,7 @@ namespace KlayGE
 #endif
 
 		std::string path = sm_path + "/" + fn;
-		sm_loader_.Load(path);
+		sm_loader_.Load(ResLoader::Instance().Locate(path));
 
 		MakeSceneManagerFunc msm = (MakeSceneManagerFunc)sm_loader_.GetProcAddress("MakeSceneManager");
 		if (msm != nullptr)
@@ -765,7 +765,7 @@ namespace KlayGE
 #endif
 
 		std::string path = adsf_path + "/" + fn;
-		ads_loader_.Load(path);
+		ads_loader_.Load(ResLoader::Instance().Locate(path));
 
 		MakeAudioDataSourceFactoryFunc madsf = (MakeAudioDataSourceFactoryFunc)ads_loader_.GetProcAddress("MakeAudioDataSourceFactory");
 		if (madsf != nullptr)
