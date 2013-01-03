@@ -374,7 +374,7 @@ IF(MSVC)
 	ENDIF()
 ELSE()
 	SET(EXTRA_LINKED_LIBRARIES
-		boost_filesystem boost_signals boost_system boost_thread
+		boost_filesystem boost_system boost_thread
 	)
 ENDIF()
 

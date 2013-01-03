@@ -14,7 +14,7 @@ LOCAL_PATH := $(FRACTAL_SRC_PATH)
 LOCAL_SRC_FILES := Fractal.cpp
 LOCAL_LDLIBS := -llog -landroid
 LOCAL_STATIC_LIBRARIES := KlayGE_Core KlayGE_RenderEngine_OpenGLES KlayGE_Scene_OCTree KFL glloader kfont MeshMLLib \
-		boost_date_time boost_filesystem boost_signals boost_system boost_thread \
+		boost_date_time boost_filesystem boost_system boost_thread \
 		LZMA my_android_native_app_glue
 
 include $(BUILD_SHARED_LIBRARY)
