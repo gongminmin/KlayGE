@@ -41,14 +41,6 @@
 #include <string>
 
 #include <boost/function.hpp>
-#ifdef KLAYGE_COMPILER_MSVC
-#pragma warning(push)
-#pragma warning(disable: 4100 6011 6334)
-#endif
-#include <boost/functional/hash.hpp>
-#ifdef KLAYGE_COMPILER_MSVC
-#pragma warning(pop)
-#endif
 
 namespace KlayGE
 {

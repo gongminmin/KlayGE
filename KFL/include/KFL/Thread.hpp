@@ -34,35 +34,35 @@
 #pragma once
 
 #include <boost/assert.hpp>
-#ifdef KLAYGE_CXX11_LIBRARY_SUPPORT
-#include <thread>
-#include <condition_variable>
-#include <mutex>
-namespace KlayGE
-{
-	using std::thread;
-	using std::condition_variable;
-	using std::mutex;
-	using std::unique_lock;
-	namespace this_thread = std::this_thread;
-}
+#ifdef KLAYGE_CXX11_LIBRARY_THREAD_SUPPORT
+	#include <thread>
+	#include <condition_variable>
+	#include <mutex>
+	namespace KlayGE
+	{
+		using std::thread;
+		using std::condition_variable;
+		using std::mutex;
+		using std::unique_lock;
+		namespace this_thread = std::this_thread;
+	}
 #else
-#ifdef KLAYGE_COMPILER_MSVC
-#pragma warning(push)
-#pragma warning(disable: 4244 4512 4267 6011 6246 28197)
-#endif
-#include <boost/thread.hpp>
-#ifdef KLAYGE_COMPILER_MSVC
-#pragma warning(pop)
-#endif
-namespace KlayGE
-{
-	using boost::thread;
-	using boost::condition_variable;
-	using boost::mutex;
-	using boost::unique_lock;
-	namespace this_thread = boost::this_thread;
-}
+	#ifdef KLAYGE_COMPILER_MSVC
+		#pragma warning(push)
+		#pragma warning(disable: 4244 4512 4267 6011 6246 28197)
+	#endif
+	#include <boost/thread.hpp>
+	#ifdef KLAYGE_COMPILER_MSVC
+		#pragma warning(pop)
+	#endif
+	namespace KlayGE
+	{
+		using boost::thread;
+		using boost::condition_variable;
+		using boost::mutex;
+		using boost::unique_lock;
+		namespace this_thread = boost::this_thread;
+	}
 #endif
 #include <boost/function.hpp>
 #include <boost/optional.hpp>
@@ -76,25 +76,6 @@ namespace KlayGE
 #endif
 #include <boost/enable_shared_from_this.hpp>
 #include <boost/bind.hpp>
-#ifdef KLAYGE_CXX11_LIBRARY_SUPPORT
-	#include <type_traits>
-
-	namespace KlayGE
-	{
-		using std::conditional;
-	}
-#else
-	#include <boost/mpl/if.hpp>
-
-	namespace KlayGE
-	{
-		template <bool B, typename T, typename F>
-		struct conditional
-		{
-			typedef typename boost::mpl::if_c<B, T, F>::type type;
-		};
-	}
-#endif
 #include <boost/mpl/void.hpp>
 #include <exception>
 #include <vector>

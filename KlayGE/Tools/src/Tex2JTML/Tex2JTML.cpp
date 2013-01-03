@@ -17,10 +17,21 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/enable_shared_from_this.hpp>
 
-#include <boost/filesystem.hpp>
-#ifdef KLAYGE_CXX11_LIBRARY_SUPPORT
+#ifdef KLAYGE_TR2_LIBRARY_FILESYSTEM_V2_SUPPORT
+	#include <filesystem>
+	namespace KlayGE
+	{
+		namespace filesystem = std::tr2::sys;
+	}
+#else
+	#include <boost/filesystem.hpp>
+	namespace KlayGE
+	{
+		namespace filesystem = boost::filesystem;
+	}
+#endif
+#ifdef KLAYGE_CXX11_LIBRARY_REGEX_SUPPORT
 	#include <regex>
-
 	namespace KlayGE
 	{
 		using std::regex;
@@ -29,7 +40,6 @@
 	}
 #else
 	#include <boost/regex.hpp>
-
 	namespace KlayGE
 	{
 		using boost::regex;
@@ -395,13 +405,17 @@ int main(int argc, char* argv[])
 			{
 				regex const filter(DosWildcardToRegex(arg));
 
-				boost::filesystem::directory_iterator end_itr;
-				for (boost::filesystem::directory_iterator i("."); i != end_itr; ++ i)
+				filesystem::directory_iterator end_itr;
+				for (filesystem::directory_iterator i("."); i != end_itr; ++ i)
 				{
-					if (boost::filesystem::is_regular_file(i->status()))
+					if (filesystem::is_regular_file(i->status()))
 					{
 						smatch what;
+#ifdef KLAYGE_TR2_LIBRARY_FILESYSTEM_V2_SUPPORT
+						std::string const name = i->path().filename();
+#else
 						std::string const name = i->path().filename().string();
+#endif
 						if (regex_match(name, what, filter))
 						{
 							tex_names.push_back(name);

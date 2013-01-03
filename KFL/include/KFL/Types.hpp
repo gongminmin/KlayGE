@@ -33,7 +33,7 @@
 
 #pragma once
 
-#ifndef KLAYGE_NULLPTR_SUPPORT
+#ifndef KLAYGE_CXX11_CORE_NULLPTR_SUPPORT
 const class nullptr_t
 {
 public:
@@ -54,14 +54,14 @@ private:
 } nullptr = {};
 #endif
 
-#ifdef KLAYGE_STATIC_ASSERT_SUPPORT
+#ifdef KLAYGE_CXX11_CORE_STATIC_ASSERT_SUPPORT
 	#define KLAYGE_STATIC_ASSERT(x) static_assert(x, #x)
 #else
 	#include <boost/static_assert.hpp>
 	#define KLAYGE_STATIC_ASSERT(x) BOOST_STATIC_ASSERT(x)
 #endif
 
-#ifdef KLAYGE_DECLTYPE_SUPPORT
+#ifdef KLAYGE_CXX11_CORE_DECLTYPE_SUPPORT
 	#define KLAYGE_AUTO(var, expr) auto var = expr
 	#define KLAYGE_DECLTYPE(expr) KlayGE::remove_reference<decltype(expr)>::type
 #else
@@ -70,13 +70,13 @@ private:
 	#define KLAYGE_DECLTYPE(expr) BOOST_TYPEOF(expr)
 #endif
 
-#ifdef KLAYGE_FOREACH_SUPPORT
+#ifdef KLAYGE_CXX11_CORE_FOREACH_SUPPORT
 	#define KLAYGE_FOREACH(var, col) for (var : col)
 #else
 	#include <boost/foreach.hpp>
 	#define KLAYGE_FOREACH(var, col) BOOST_FOREACH(var, col)
 #endif
-#ifdef KLAYGE_NOEXCEPT_SUPPORT
+#ifdef KLAYGE_CXX11_CORE_NOEXCEPT_SUPPORT
 	#define KLAYGE_NOEXCEPT noexcept
 	#define KLAYGE_NOEXCEPT_IF(Predicate) noexcept((Predicate))
 	#define KLAYGE_NOEXCEPT_EXPR(Expression) noexcept((Expression))
@@ -85,65 +85,32 @@ private:
 	#define KLAYGE_NOEXCEPT_IF(Predicate)
 	#define KLAYGE_NOEXCEPT_EXPR(Expression) false
 #endif
-#ifdef KLAYGE_OVERRIDE_SUPPORT
+#ifdef KLAYGE_CXX11_CORE_OVERRIDE_SUPPORT
 	#define KLAYGE_OVERRIDE override
 	#define KLAYGE_FINAL final
 #else
 	#define KLAYGE_OVERRIDE
 	#define KLAYGE_FINAL
 #endif
-#ifdef KLAYGE_RVALUE_REFERENCES_SUPPORT
+#ifdef KLAYGE_CXX11_CORE_RVALUE_REFERENCES_SUPPORT
 	#include <utility>
-
 	namespace KlayGE
 	{
 		using std::move;
 	}
 #else
 	#include <boost/move/move.hpp>
-
 	namespace KlayGE
 	{
 		using boost::move;
 	}
 #endif
 
-#ifdef KLAYGE_CXX11_LIBRARY_SUPPORT
+#ifdef KLAYGE_CXX11_LIBRARY_ARRAY_SUPPORT
 	#include <array>
-	#include <cstdint>
-	#include <tuple>
-	#include <type_traits>
-	#include <unordered_map>
-	#include <unordered_set>
-
 	namespace KlayGE
 	{
 		using std::array;
-
-		using std::uint64_t;
-		using std::uint32_t;
-		using std::uint16_t;
-		using std::uint8_t;
-		using std::int64_t;
-		using std::int32_t;
-		using std::int16_t;
-		using std::int8_t;
-
-		using std::tuple;
-		using std::get;
-		using std::make_tuple;
-		using std::tuple_size;
-
-		using std::add_reference;
-		using std::has_trivial_destructor;
-		using std::is_same;
-		using std::remove_reference;
-		using std::result_of;
-
-		using std::unordered_map;
-		using std::unordered_multimap;
-		using std::unordered_set;
-		using std::unordered_multiset;
 	}
 #else
 	#ifdef KLAYGE_COMPILER_MSVC
@@ -154,10 +121,116 @@ private:
 	#ifdef KLAYGE_COMPILER_MSVC
 		#pragma warning(pop)
 	#endif
+	namespace KlayGE
+	{
+		using boost::array;
+	}
+#endif
+
+#ifdef KLAYGE_CXX11_LIBRARY_CSTDINT_SUPPORT
+	#include <cstdint>
+	namespace KlayGE
+	{
+		using std::uint64_t;
+		using std::uint32_t;
+		using std::uint16_t;
+		using std::uint8_t;
+		using std::int64_t;
+		using std::int32_t;
+		using std::int16_t;
+		using std::int8_t;
+	}
+#else
 	#include <boost/cstdint.hpp>
-	#include <boost/tuple/tuple.hpp>
-	#include <boost/type_traits.hpp>
+	namespace KlayGE
+	{
+		using boost::uint64_t;
+		using boost::uint32_t;
+		using boost::uint16_t;
+		using boost::uint8_t;
+		using boost::int64_t;
+		using boost::int32_t;
+		using boost::int16_t;
+		using boost::int8_t;
+	}
+#endif
+
+#ifdef KLAYGE_CXX11_LIBRARY_FUNCTIONAL_SUPPORT
+	#include <functional>
+	namespace KlayGE
+	{
+		using std::result_of;
+	}
+#else
 	#include <boost/utility/result_of.hpp>
+	namespace KlayGE
+	{
+		using boost::result_of;
+	}
+#endif
+
+#ifdef KLAYGE_CXX11_LIBRARY_TYPE_TRAITS_SUPPORT
+	#include <type_traits>
+	namespace KlayGE
+	{
+		using std::add_reference;
+		using std::has_trivial_destructor;
+		using std::is_same;
+		using std::remove_reference;
+		using std::conditional;
+	}
+#else
+	#include <boost/type_traits.hpp>
+	#include <boost/mpl/if.hpp>
+	namespace KlayGE
+	{
+		using boost::add_reference;
+		using boost::has_trivial_destructor;
+		using boost::is_same;
+		using boost::remove_reference;
+		template <bool B, typename T, typename F>
+		struct conditional
+		{
+			typedef typename boost::mpl::if_c<B, T, F>::type type;
+		};
+	}
+#endif
+
+#ifdef KLAYGE_CXX11_LIBRARY_TUPLE_SUPPORT
+	#include <tuple>
+	namespace KlayGE
+	{
+		using std::tuple;
+		using std::get;
+		using std::make_tuple;
+		using std::tuple_size;
+	}
+#else
+	#include <boost/tuple/tuple.hpp>
+	namespace KlayGE
+	{
+		using boost::tuple;
+		using boost::get;
+		using boost::make_tuple;
+		template <typename tuple_type>
+		struct tuple_size
+		{
+			static const size_t value = boost::tuples::length<tuple_type>::value;
+		};
+	}
+#endif
+
+#ifdef KLAYGE_CXX11_LIBRARY_UNORDERED_SUPPORT
+	#include <unordered_map>
+	#include <unordered_set>
+	namespace KlayGE
+	{
+		using std::unordered_map;
+		using std::unordered_multimap;
+		using std::unordered_set;
+		using std::unordered_multiset;
+	}
+#else
 	#ifdef KLAYGE_COMPILER_MSVC
 		#pragma warning(push)
 		#pragma warning(disable: 4100 6011 6334)
@@ -167,35 +240,8 @@ private:
 	#ifdef KLAYGE_COMPILER_MSVC
 		#pragma warning(pop)
 	#endif
-
 	namespace KlayGE
 	{
-		using boost::array;
-
-		using boost::uint64_t;
-		using boost::uint32_t;
-		using boost::uint16_t;
-		using boost::uint8_t;
-		using boost::int64_t;
-		using boost::int32_t;
-		using boost::int16_t;
-		using boost::int8_t;
-
-		using boost::tuple;
-		using boost::get;
-		using boost::make_tuple;
-		template <typename tuple_type>
-		struct tuple_size
-		{
-			static const size_t value = boost::tuples::length<tuple_type>::value;
-		};
-
-		using boost::add_reference;
-		using boost::has_trivial_destructor;
-		using boost::is_same;
-		using boost::remove_reference;
-		using boost::result_of;
-
 		using boost::unordered_map;
 		using boost::unordered_multimap;
 		using boost::unordered_set;

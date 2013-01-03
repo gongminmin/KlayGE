@@ -41,6 +41,14 @@
 #include <algorithm>
 #include <boost/assert.hpp>
 #include <boost/bind.hpp>
+#ifdef KLAYGE_COMPILER_MSVC
+#pragma warning(push)
+#pragma warning(disable: 6011 6334)
+#endif
+#include <boost/functional/hash.hpp>
+#ifdef KLAYGE_COMPILER_MSVC
+#pragma warning(pop)
+#endif
 
 #include <KlayGE/D3D11/D3D11RenderEngine.hpp>
 

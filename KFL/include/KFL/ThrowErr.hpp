@@ -36,7 +36,7 @@
 #include <string>
 #include <stdexcept>
 
-#ifdef KLAYGE_CXX11_LIBRARY_SUPPORT
+#ifdef KLAYGE_CXX11_LIBRARY_SYSTEM_ERROR_SUPPORT
 	#include <system_error>
 
 	namespace KlayGE

@@ -32,7 +32,7 @@
 #include <KFL/ResIdentifier.hpp>
 #include <KFL/Thread.hpp>
 
-#ifdef KLAYGE_CXX11_LIBRARY_SUPPORT
+#ifdef KLAYGE_CXX11_LIBRARY_CHRONO_SUPPORT
 #include <chrono>
 namespace KlayGE
 {
