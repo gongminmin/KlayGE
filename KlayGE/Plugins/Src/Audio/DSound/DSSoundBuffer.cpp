@@ -22,13 +22,27 @@
 #include <cstring>
 
 #include <boost/assert.hpp>
-#ifdef KLAYGE_COMPILER_MSVC
-#pragma warning(push)
-#pragma warning(disable: 4100 4127 4512 6297 6326 6385)
-#endif
-#include <boost/random.hpp>
-#ifdef KLAYGE_COMPILER_MSVC
-#pragma warning(pop)
+
+#ifdef KLAYGE_CXX11_LIBRARY_RANDOM_SUPPORT
+	#include <random>
+	namespace KlayGE
+	{
+		using std::ranlux24_base;
+		using std::uniform_int_distribution;
+	}
+#else
+	#ifdef KLAYGE_COMPILER_MSVC
+		#pragma warning(push)
+		#pragma warning(disable: 4100 4127 4512 6297 6326 6385)
+	#endif
+	#include <boost/random.hpp>
+	#ifdef KLAYGE_COMPILER_MSVC
+		#pragma warning(pop)
+	#endif
+	namespace KlayGE
+	{
+		using boost::random;
+	}
 #endif
 #include <boost/bind.hpp>
 
@@ -147,9 +161,9 @@ namespace KlayGE
 		if (iter == sources_.end())
 		{
 			iter = sources_.begin();
-			std::advance(iter,
-				boost::variate_generator<boost::lagged_fibonacci607, boost::uniform_int<> >(boost::lagged_fibonacci607(),
-					boost::uniform_int<>(0, static_cast<int>(sources_.size())))());
+			ranlux24_base gen;
+			uniform_int_distribution<> dis(0, static_cast<int>(sources_.size()));
+			std::advance(iter, dis(gen));
 		}
 
 		return iter;
