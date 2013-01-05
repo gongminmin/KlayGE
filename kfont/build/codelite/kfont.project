@@ -27,6 +27,7 @@
       <Compiler Options="-m64 -Wall -g" C_Options="-m64 -Wall -g" Required="yes" PreCompiledHeader="" PCHInCommandLine="no" UseDifferentPCHFlags="no" PCHFlags="">
         <IncludePath Value="../../../External/boost"/>
         <IncludePath Value="../../../External/7z"/>
+        <IncludePath Value="../../../KFL/include"/>
         <IncludePath Value="../../include"/>
         <Preprocessor Value="WIN32"/>
         <Preprocessor Value="_DEBUG"/>
@@ -35,7 +36,9 @@
       </Compiler>
       <Linker Options="" Required="yes">
         <LibraryPath Value="../../../External/boost/lib_gcc_x64/lib"/>
+        <LibraryPath Value="../../../KFL/lib/linux_x64"/>
         <Library Value="boost_system"/>
+        <Library Value="KFL_gcc_x64_d"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
       <General OutputFile="../../lib/linux_x64/libkfont_gcc_x64_d.dll" IntermediateDirectory="Debug/x64" Command="" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="no"/>
@@ -73,6 +76,7 @@
       <Compiler Options="-m32 -Wall -g" C_Options="-m32 -Wall -g" Required="yes" PreCompiledHeader="" PCHInCommandLine="no" UseDifferentPCHFlags="no" PCHFlags="">
         <IncludePath Value="../../../External/boost"/>
         <IncludePath Value="../../../External/7z"/>
+        <IncludePath Value="../../../KFL/include"/>
         <IncludePath Value="../../include"/>
         <Preprocessor Value="WIN32"/>
         <Preprocessor Value="_DEBUG"/>
@@ -81,7 +85,9 @@
       </Compiler>
       <Linker Options="" Required="yes">
         <LibraryPath Value="../../../External/boost/lib_gcc_x86/lib"/>
+        <LibraryPath Value="../../../KFL/lib/linux_x86"/>
         <Library Value="boost_system"/>
+        <Library Value="KFL_gcc_x86_d"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
       <General OutputFile="../../lib/linux_x86/libkfont_gcc_x86_d.dll" IntermediateDirectory="Debug/x86" Command="" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="no"/>
@@ -119,6 +125,7 @@
       <Compiler Options="-m64 -Wall -g" C_Options="-m64 -Wall -g" Required="yes" PreCompiledHeader="" PCHInCommandLine="no" UseDifferentPCHFlags="no" PCHFlags="">
         <IncludePath Value="../../../External/boost"/>
         <IncludePath Value="../../../External/7z"/>
+        <IncludePath Value="../../../KFL/include"/>
         <IncludePath Value="../../include"/>
         <Preprocessor Value="WIN32"/>
         <Preprocessor Value="_DEBUG"/>
@@ -127,7 +134,9 @@
       </Compiler>
       <Linker Options="" Required="yes">
         <LibraryPath Value="../../../External/boost/lib_gcc_x64/lib"/>
+        <LibraryPath Value="../../../KFL/lib/win_x64"/>
         <Library Value="boost_system-mgw47-mt-1_51"/>
+        <Library Value="KFL_mgw_x64_d"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
       <General OutputFile="../../lib/win_x64/libkfont_mgw_x64_d.dll" IntermediateDirectory="Debug/x64" Command="" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="no"/>
@@ -165,6 +174,7 @@
       <Compiler Options="-m32 -Wall -g" C_Options="-m32 -Wall -g" Required="yes" PreCompiledHeader="" PCHInCommandLine="no" UseDifferentPCHFlags="no" PCHFlags="">
         <IncludePath Value="../../../External/boost"/>
         <IncludePath Value="../../../External/7z"/>
+        <IncludePath Value="../../../KFL/include"/>
         <IncludePath Value="../../include"/>
         <Preprocessor Value="WIN32"/>
         <Preprocessor Value="_DEBUG"/>
@@ -173,7 +183,9 @@
       </Compiler>
       <Linker Options="" Required="yes">
         <LibraryPath Value="../../../External/boost/lib_gcc_x86/lib"/>
+        <LibraryPath Value="../../../KFL/lib/win_x86"/>
         <Library Value="boost_system-mgw47-mt-1_51"/>
+        <Library Value="KFL_mgw_x86_d"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
       <General OutputFile="../../lib/win_x86/libkfont_mgw_x86_d.dll" IntermediateDirectory="Debug/x86" Command="" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="no"/>
@@ -211,6 +223,7 @@
       <Compiler Options="-m64 -Wall -O2" C_Options="-m64 -Wall -O2" Required="yes" PreCompiledHeader="" PCHInCommandLine="no" UseDifferentPCHFlags="no" PCHFlags="">
         <IncludePath Value="../../../External/boost"/>
         <IncludePath Value="../../../External/7z"/>
+        <IncludePath Value="../../../KFL/include"/>
         <IncludePath Value="../../include"/>
         <Preprocessor Value="WIN32"/>
         <Preprocessor Value="NDEBUG"/>
@@ -219,7 +232,9 @@
       </Compiler>
       <Linker Options="-s" Required="yes">
         <LibraryPath Value="../../../External/boost/lib_gcc_x64/lib"/>
+        <LibraryPath Value="../../../KFL/lib/linux_x64"/>
         <Library Value="boost_system"/>
+        <Library Value="KFL_gcc_x64"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
       <General OutputFile="../../lib/linux_x64/libkfont_gcc_x64.dll" IntermediateDirectory="Release/x64" Command="" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="no"/>
@@ -257,6 +272,7 @@
       <Compiler Options="-m32 -Wall -O2" C_Options="-m32 -Wall -O2" Required="yes" PreCompiledHeader="" PCHInCommandLine="no" UseDifferentPCHFlags="no" PCHFlags="">
         <IncludePath Value="../../../External/boost"/>
         <IncludePath Value="../../../External/7z"/>
+        <IncludePath Value="../../../KFL/include"/>
         <IncludePath Value="../../include"/>
         <Preprocessor Value="WIN32"/>
         <Preprocessor Value="NDEBUG"/>
@@ -265,7 +281,9 @@
       </Compiler>
       <Linker Options="-s" Required="yes">
         <LibraryPath Value="../../../External/boost/lib_gcc_x86/lib"/>
+        <LibraryPath Value="../../../KFL/lib/linux_x86"/>
         <Library Value="boost_system"/>
+        <Library Value="KFL_gcc_x86"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
       <General OutputFile="../../lib/linux_x86/libkfont_gcc_x86.dll" IntermediateDirectory="Release/x86" Command="" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="no"/>
@@ -303,6 +321,7 @@
       <Compiler Options="-m64 -Wall -O2" C_Options="-m64 -Wall -O2" Required="yes" PreCompiledHeader="" PCHInCommandLine="no" UseDifferentPCHFlags="no" PCHFlags="">
         <IncludePath Value="../../../External/boost"/>
         <IncludePath Value="../../../External/7z"/>
+        <IncludePath Value="../../../KFL/include"/>
         <IncludePath Value="../../include"/>
         <Preprocessor Value="WIN32"/>
         <Preprocessor Value="NDEBUG"/>
@@ -311,7 +330,9 @@
       </Compiler>
       <Linker Options="-s" Required="yes">
         <LibraryPath Value="../../../External/boost/lib_gcc_x64/lib"/>
+        <LibraryPath Value="../../../KFL/lib/win_x64"/>
         <Library Value="boost_system-mgw47-mt-1_51"/>
+        <Library Value="KFL_mgw_x64"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
       <General OutputFile="../../lib/win_x64/libkfont_mgw_x64.dll" IntermediateDirectory="Release/x64" Command="" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="no"/>
@@ -349,6 +370,7 @@
       <Compiler Options="-m32 -Wall -O2" C_Options="-m32 -Wall -O2" Required="yes" PreCompiledHeader="" PCHInCommandLine="no" UseDifferentPCHFlags="no" PCHFlags="">
         <IncludePath Value="../../../External/boost"/>
         <IncludePath Value="../../../External/7z"/>
+        <IncludePath Value="../../../KFL/include"/>
         <IncludePath Value="../../include"/>
         <Preprocessor Value="WIN32"/>
         <Preprocessor Value="NDEBUG"/>
@@ -357,7 +379,9 @@
       </Compiler>
       <Linker Options="-s" Required="yes">
         <LibraryPath Value="../../../External/boost/lib_gcc_x86/lib"/>
+        <LibraryPath Value="../../../KFL/lib/win_x86"/>
         <Library Value="boost_system-mgw47-mt-1_51"/>
+        <Library Value="KFL_mgw_x86"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
       <General OutputFile="../../lib/win_x86/libkfont_mgw_x86.dll" IntermediateDirectory="Release/x86" Command="" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="no"/>
