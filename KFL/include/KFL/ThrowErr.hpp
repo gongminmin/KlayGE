@@ -43,7 +43,11 @@
 	{
 		using std::system_error;
 		using std::make_error_code;
+#ifdef KLAYGE_COMPILER_MSVC
 		namespace errc = std::errc;
+#else
+		using std::errc;
+#endif
 	}
 #else
 	#include <boost/system/error_code.hpp>

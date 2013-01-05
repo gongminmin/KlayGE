@@ -173,7 +173,7 @@ private:
 	#include <type_traits>
 	namespace KlayGE
 	{
-		using std::add_reference;
+		using std::add_lvalue_reference;
 		using std::has_trivial_destructor;
 		using std::is_same;
 		using std::remove_reference;
@@ -184,7 +184,7 @@ private:
 	#include <boost/mpl/if.hpp>
 	namespace KlayGE
 	{
-		using boost::add_reference;
+		using boost::add_lvalue_reference;
 		using boost::has_trivial_destructor;
 		using boost::is_same;
 		using boost::remove_reference;

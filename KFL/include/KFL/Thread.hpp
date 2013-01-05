@@ -124,7 +124,7 @@ namespace KlayGE
 			>  result_opt;
 
 		typedef typename conditional<is_same<result_type, void>::value,
-			result_type, typename add_reference<result_type>::type
+			result_type, typename add_lvalue_reference<result_type>::type
 			>::type const_result_type_ref;
 
 	public:
