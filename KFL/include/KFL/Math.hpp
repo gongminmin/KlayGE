@@ -207,19 +207,8 @@ namespace KlayGE
 		inline T
 		wrap(T const & val, T const & low, T const & high)
 		{
-			T ret(val);
-			T rang(high - low);
-
-			while (ret >= high)
-			{
-				ret -= rang;
-			}
-			while (ret < low)
-			{
-				ret += rang;
-			}
-
-			return ret;
+			T range = high - low;
+			return val - floor(val / range) * range;
 		}
 
 		// 镜像处理
@@ -227,25 +216,9 @@ namespace KlayGE
 		inline T
 		mirror(T const & val, T const & low, T const & high)
 		{
-			T ret(val);
-			T rang(high - low);
-
-			while ((ret > high) || (ret < low))
-			{
-				if (ret > high)
-				{
-					ret = 2 * high - val;
-				}
-				else
-				{
-					if (ret < low)
-					{
-						ret = 2 * low - val;
-					}
-				}
-			}
-
-			return ret;
+			T range = high - low;
+			int selection_coord = static_cast<int>(floor(val / range));
+			return (selection_coord & 1 ? (1 + selection_coord) * range - val : val - selection_coord * range);
 		}
 
 		// 奇数则返回true
