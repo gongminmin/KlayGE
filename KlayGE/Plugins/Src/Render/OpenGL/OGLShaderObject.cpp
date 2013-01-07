@@ -1006,7 +1006,7 @@ namespace KlayGE
 	{
 		has_discard_ = false;
 		has_tessellation_ = false;
-		is_shader_validate_.assign(true);
+		is_shader_validate_.fill(true);
 
 		glsl_program_ = glCreateProgram();
 

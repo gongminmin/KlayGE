@@ -24,8 +24,8 @@ namespace KlayGE
 	InputJoystick::InputJoystick()
 		: index_(false)
 	{
-		buttons_[0].assign(false);
-		buttons_[1].assign(false);
+		buttons_[0].fill(false);
+		buttons_[1].fill(false);
 	}
 
 	// Îö¹¹º¯Êý

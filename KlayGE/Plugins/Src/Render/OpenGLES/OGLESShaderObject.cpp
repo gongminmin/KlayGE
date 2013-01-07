@@ -892,7 +892,7 @@ namespace KlayGE
 	{
 		has_discard_ = false;
 		has_tessellation_ = false;
-		is_shader_validate_.assign(true);
+		is_shader_validate_.fill(true);
 
 		glsl_srcs_ = MakeSharedPtr<array<boost::shared_ptr<std::string>, ST_NumShaderTypes> >();
 

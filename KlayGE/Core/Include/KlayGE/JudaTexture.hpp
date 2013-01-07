@@ -75,13 +75,13 @@ namespace KlayGE
 			}
 		};
 
-		static int const MAX_TREE_LEVEL = 12;
-		static int const MAX_NUM_TILES = 1UL << MAX_TREE_LEVEL;
-		static int const TILE_MASK = (1UL << MAX_TREE_LEVEL) - 1;
-		static int const MAX_TILE_SIZE = 256;
-		static int const MAX_NUM_CHANNELS = 4;
+		static uint32_t const MAX_TREE_LEVEL = 12;
+		static uint32_t const MAX_NUM_TILES = 1UL << MAX_TREE_LEVEL;
+		static uint32_t const TILE_MASK = (1UL << MAX_TREE_LEVEL) - 1;
+		static uint32_t const MAX_TILE_SIZE = 256;
+		static uint32_t const MAX_NUM_CHANNELS = 4;
 
-		static int const LEVEL_SHIFT = 28;
+		static uint32_t const LEVEL_SHIFT = 28;
 
 	public:
 		JudaTexture(uint32_t num_tiles, uint32_t tile_size, ElementFormat format);

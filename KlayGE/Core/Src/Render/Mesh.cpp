@@ -2544,6 +2544,9 @@ namespace KlayGE
 							break;
 						}
 						break;
+
+					default:
+						break;
 					}
 				}
 				if (has_normal)

@@ -201,7 +201,8 @@ namespace KlayGE
 			module_name_.c_str(),
 			nullptr,
 			-1,
-			&methods_[0]
+			&methods_[0],
+			0, 0, 0, 0
 		};
 
 		PyModule_Create(&module);

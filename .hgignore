@@ -23,7 +23,8 @@ cfg_build.py
 */build/codelite/Debug*
 */build/codelite/Release*
 */build/codelite/*.workspace.*
-*/build/mingw*/
+*/build/mgw-*/
+*/build/gcc-*/
 */build/vc-*/
 */lib/
 glloader/doc/html/

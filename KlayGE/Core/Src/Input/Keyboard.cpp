@@ -24,8 +24,8 @@ namespace KlayGE
 	InputKeyboard::InputKeyboard()
 		: index_(false)
 	{
-		keys_[0].assign(false);
-		keys_[1].assign(false);
+		keys_[0].fill(false);
+		keys_[1].fill(false);
 	}
 
 	InputKeyboard::~InputKeyboard()

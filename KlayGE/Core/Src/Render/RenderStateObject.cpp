@@ -77,16 +77,16 @@ namespace KlayGE
 		: alpha_to_coverage_enable(false),
 			independent_blend_enable(false)
 	{
-		blend_enable.assign(false);
-		logic_op_enable.assign(false);
-		blend_op.assign(BOP_Add);
-		src_blend.assign(ABF_One);
-		dest_blend.assign(ABF_Zero);
-		blend_op_alpha.assign(BOP_Add);
-		src_blend_alpha.assign(ABF_One);
-		dest_blend_alpha.assign(ABF_Zero);
-		color_write_mask.assign(CMASK_All);
-		logic_op.assign(LOP_Noop);
+		blend_enable.fill(false);
+		logic_op_enable.fill(false);
+		blend_op.fill(BOP_Add);
+		src_blend.fill(ABF_One);
+		dest_blend.fill(ABF_Zero);
+		blend_op_alpha.fill(BOP_Add);
+		src_blend_alpha.fill(ABF_One);
+		dest_blend_alpha.fill(ABF_Zero);
+		color_write_mask.fill(CMASK_All);
+		logic_op.fill(LOP_Noop);
 	}
 
 	bool operator<(BlendStateDesc const & lhs, BlendStateDesc const & rhs)

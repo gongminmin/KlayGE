@@ -462,7 +462,7 @@ namespace KlayGE
 	{
 		has_discard_ = true;
 		has_tessellation_ = false;
-		is_shader_validate_.assign(true);
+		is_shader_validate_.fill(true);
 	}
 
 	std::string D3D11ShaderObject::GenShaderText(RenderEffect const & effect, ShaderType cur_type) const

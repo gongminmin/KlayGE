@@ -97,7 +97,7 @@ namespace KlayGE
 			vp_x_(0), vp_y_(0), vp_width_(0), vp_height_(0),
 			cur_fbo_(0), restart_index_(0)
 	{
-		clear_clr_.assign(0);
+		clear_clr_.fill(0);
 	}
 
 	// Îö¹¹º¯Êý
