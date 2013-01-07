@@ -11,7 +11,7 @@ except:
 # !!!! DO NOT DELETE ANY FIELD OF THIS FILE !!!!
 ################################################
 
-compiler		= "auto"		# could be "vc11", "vc10", "vc9", "mingw", "auto".
+compiler		= "auto"		# could be "vc11", "vc10", "vc9", "mingw", "gcc", "auto".
 arch			= ("x86", )		# could be "x86", "x64", "arm_app", "x86_app"
 config			= ("Debug", "RelWithDebInfo") # could be "Debug", "Release", "MinSizeRel", "RelWithDebInfo"
 	""")
@@ -83,6 +83,16 @@ def get_compiler_info(compiler, archs, cfg):
 				arch_list.append((arch, "Visual Studio 9 2008"))
 			elif "x64" == arch:
 				arch_list.append((arch, "Visual Studio 9 2008 Win64"))
+	elif "mingw" == compiler:
+		compiler_name = "mgw"
+		compiler_version = 0
+		for arch in archs:
+			arch_list.append((arch, "MinGW Makefiles"))
+	elif "gcc" == compiler:
+		compiler_name = "gcc"
+		compiler_version = 0
+		for arch in archs:
+			arch_list.append((arch, "Unix Makefiles"))
 	else:
 		return ()
 		

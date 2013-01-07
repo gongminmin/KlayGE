@@ -8,7 +8,10 @@ from blib_util import *
 def build_kfont(compiler_name, compiler_version, compiler_arch, generator_name, config_list):
 	curdir = os.path.abspath(os.curdir)
 
-	build_dir = "kfont/build/%s-%d_0-%s" % (compiler_name, compiler_version, compiler_arch)
+	if "vc" == compiler_name:
+		build_dir = "kfont/build/%s-%d_0-%s" % (compiler_name, compiler_version, compiler_arch)
+	else:
+		build_dir = "kfont/build/%s-%s" % (compiler_name, compiler_arch)
 	if not os.path.exists(build_dir):
 		os.makedirs(build_dir)
 
@@ -30,10 +33,15 @@ def build_kfont(compiler_name, compiler_version, compiler_arch, generator_name, 
 		compiler_arch = "x86_amd64"
 
 	build_cmd = batch_command()
-	build_cmd.add_command('CALL "%%VS%d0COMNTOOLS%%..\\..\\VC\\vcvarsall.bat" %s' % (compiler_version, compiler_arch))
-	for config in config_list:
-		build_cmd.add_command('devenv kfont.sln /Build %s /project ALL_BUILD' % config)
-		build_cmd.add_command('devenv kfont.sln /Build %s /project Install' % config)
+	if "vc" == compiler_name:
+		build_cmd.add_command('CALL "%%VS%d0COMNTOOLS%%..\\..\\VC\\vcvarsall.bat" %s' % (compiler_version, compiler_arch))
+		for config in config_list:
+			build_cmd.add_command('devenv kfont.sln /Build %s /project ALL_BUILD' % config)
+			build_cmd.add_command('devenv kfont.sln /Build %s /project Install' % config)
+	elif "mgw" == compiler_name:
+		build_cmd.add_command('mingw32-make.exe install')
+	else:
+		build_cmd.add_command('make install')
 	build_cmd.execute()
 
 	os.chdir(curdir)

@@ -8,7 +8,10 @@ from blib_util import *
 def build_KFL(compiler_name, compiler_version, compiler_arch, generator_name, config_list):
 	curdir = os.path.abspath(os.curdir)
 
-	build_dir = "KFL/build/%s-%d_0-%s" % (compiler_name, compiler_version, compiler_arch)
+	if "vc" == compiler_name:
+		build_dir = "KFL/build/%s-%d_0-%s" % (compiler_name, compiler_version, compiler_arch)
+	else:
+		build_dir = "KFL/build/%s-%s" % (compiler_name, compiler_arch)
 	if not os.path.exists(build_dir):
 		os.makedirs(build_dir)
 
@@ -30,9 +33,14 @@ def build_KFL(compiler_name, compiler_version, compiler_arch, generator_name, co
 		compiler_arch = "x86_amd64"
 
 	build_cmd = batch_command()
-	build_cmd.add_command('CALL "%%VS%d0COMNTOOLS%%..\\..\\VC\\vcvarsall.bat" %s' % (compiler_version, compiler_arch))
-	for config in config_list:
-		build_cmd.add_command('devenv KFL.sln /Build %s /project ALL_BUILD' % config)
+	if "vc" == compiler_name:
+		build_cmd.add_command('CALL "%%VS%d0COMNTOOLS%%..\\..\\VC\\vcvarsall.bat" %s' % (compiler_version, compiler_arch))
+		for config in config_list:
+			build_cmd.add_command('devenv KFL.sln /Build %s /project ALL_BUILD' % config)
+	elif "mgw" == compiler_name:
+		build_cmd.add_command('mingw32-make.exe')
+	else:
+		build_cmd.add_command('make')
 	build_cmd.execute()
 
 	os.chdir(curdir)

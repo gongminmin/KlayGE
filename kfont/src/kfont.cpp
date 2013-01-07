@@ -43,7 +43,7 @@
 
 namespace KlayGE
 {
-	int const KFONT_VERSION = 2;
+	uint32_t const KFONT_VERSION = 2;
 
 	mutex singleton_mutex;
 

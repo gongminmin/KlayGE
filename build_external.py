@@ -2,7 +2,7 @@
 #-*- coding: ascii -*-
 
 from __future__ import print_function
-import sys
+import os, sys
 from blib_util import *
 
 def copy_to_dst(src_name, dst_dir):
@@ -41,9 +41,14 @@ def build_Boost(compiler_name, compiler_version, compiler_arch, config_list, pla
 		config += " debug"
 	if ("Release" in config_list) or ("RelWithDebInfo" in config_list) or ("MinSizeRel" in config_list):
 		config += " release"
+		
+	if "vc" == compiler_name:
+		compiler_version_str = "%d" % compiler_version
+	else:
+		compiler_version_str = ""
 
 	build_cmd = batch_command()
-	build_cmd.add_command('bjam.exe --toolset=%s --stagedir=./lib_%s%d_%s --builddir=./ address-model=%d %s link=shared runtime-link=shared threading=multi stage %s' % (boost_toolset, compiler_name, compiler_version, compiler_arch, address_model, options, config))
+	build_cmd.add_command('bjam.exe --toolset=%s --stagedir=./lib_%s%s_%s --builddir=./ address-model=%d %s link=shared runtime-link=shared threading=multi stage %s' % (boost_toolset, compiler_name, compiler_version_str, compiler_arch, address_model, options, config))
 	build_cmd.execute()
 
 	os.chdir("../../")
@@ -235,10 +240,10 @@ def build_external_libs(compiler_name, compiler_version, compiler_arch, generato
 			ide_version = 2008
 		elif 8 == compiler_version:
 			ide_version = 2005
-	elif "mingw" == compiler:
+	elif "mgw" == compiler_name:
 		ide_name = "mingw"
 		ide_version = 0
-	elif "gcc" == compiler:
+	elif "gcc" == compiler_name:
 		ide_name = "gcc"
 		ide_version = 0
 	else:
@@ -249,8 +254,15 @@ def build_external_libs(compiler_name, compiler_version, compiler_arch, generato
 	print("\nBuilding boost...\n")
 	build_Boost(compiler_name, compiler_version, compiler_arch, config_list, platform)
 
-	for fname in glob.iglob("External/boost/lib_%s%d_%s/lib/*.%s" % (compiler_name, compiler_version, compiler_arch, dll_suffix)):
+	if "vc" == compiler_name:
+		compiler_version_str = "%d" % compiler_version
+	else:
+		compiler_version_str = ""
+	for fname in glob.iglob("External/boost/lib_%s%s_%s/lib/*.%s" % (compiler_name, compiler_version_str, compiler_arch, dll_suffix)):
 		copy_to_dst(fname, dst_dir)
+
+	if "vc" != compiler_name:
+		return
 
 	if (compiler_arch != "x86_app") and (compiler_arch != "arm_app"):
 		print("\nBuilding Python...\n")

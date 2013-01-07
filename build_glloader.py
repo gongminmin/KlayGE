@@ -3,14 +3,15 @@
 
 from __future__ import print_function
 import os, sys
-from build_external import build_external_libs
-from build_external import copy_to_dst
 from blib_util import *
 
 def build_glloader(compiler_name, compiler_version, compiler_arch, generator_name, config_list):
 	curdir = os.path.abspath(os.curdir)
 
-	build_dir = "glloader/build/%s-%d_0-%s" % (compiler_name, compiler_version, compiler_arch)
+	if "vc" == compiler_name:
+		build_dir = "glloader/build/%s-%d_0-%s" % (compiler_name, compiler_version, compiler_arch)
+	else:
+		build_dir = "glloader/build/%s-%s" % (compiler_name, compiler_arch)
 	if not os.path.exists(build_dir):
 		os.makedirs(build_dir)
 
@@ -21,15 +22,23 @@ def build_glloader(compiler_name, compiler_version, compiler_arch, generator_nam
 	cmake_cmd.execute()
 
 	build_cmd = batch_command()
-	build_cmd.add_command('CALL "%%VS%d0COMNTOOLS%%..\\..\\VC\\vcvarsall.bat" %s' % (compiler_version, compiler_arch))
-	for config in config_list:
-		build_cmd.add_command('devenv glloader.sln /Build %s /project ALL_BUILD' % config)
-		build_cmd.add_command('devenv glloader.sln /Build %s /project Install' % config)
+	if "vc" == compiler_name:
+		build_cmd.add_command('CALL "%%VS%d0COMNTOOLS%%..\\..\\VC\\vcvarsall.bat" %s' % (compiler_version, compiler_arch))
+		for config in config_list:
+			build_cmd.add_command('devenv glloader.sln /Build %s /project ALL_BUILD' % config)
+			build_cmd.add_command('devenv glloader.sln /Build %s /project Install' % config)
+	elif "mgw" == compiler_name:
+		build_cmd.add_command('mingw32-make.exe install')
+	else:
+		build_cmd.add_command('make install')
 	build_cmd.execute()
 
 	os.chdir(curdir)
 
-	build_dir = "glloader/build/%s-%d_0-%s-es" % (compiler_name, compiler_version, compiler_arch)
+	if "vc" == compiler_name:
+		build_dir = "glloader/build/%s-%d_0-%s-es" % (compiler_name, compiler_version, compiler_arch)
+	else:
+		build_dir = "glloader/build/%s-%s-es" % (compiler_name, compiler_arch)
 	if not os.path.exists(build_dir):
 		os.makedirs(build_dir)
 
@@ -40,10 +49,15 @@ def build_glloader(compiler_name, compiler_version, compiler_arch, generator_nam
 	cmake_cmd.execute()
 
 	build_cmd = batch_command()
-	build_cmd.add_command('CALL "%%VS%d0COMNTOOLS%%..\\..\\VC\\vcvarsall.bat" %s' % (compiler_version, compiler_arch))
-	for config in config_list:
-		build_cmd.add_command('devenv glloader.sln /Build %s /project ALL_BUILD' % config)
-		build_cmd.add_command('devenv glloader.sln /Build %s /project Install' % config)
+	if "vc" == compiler_name:
+		build_cmd.add_command('CALL "%%VS%d0COMNTOOLS%%..\\..\\VC\\vcvarsall.bat" %s' % (compiler_version, compiler_arch))
+		for config in config_list:
+			build_cmd.add_command('devenv glloader.sln /Build %s /project ALL_BUILD' % config)
+			build_cmd.add_command('devenv glloader.sln /Build %s /project Install' % config)
+	elif "mgw" == compiler_name:
+		build_cmd.add_command('mingw32-make.exe install')
+	else:
+		build_cmd.add_command('make install')
 	build_cmd.execute()
 
 	os.chdir(curdir)
