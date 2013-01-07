@@ -80,6 +80,9 @@ namespace
 					*(technique_->Effect().ParameterByName("inv_view")) = camera.InverseViewMatrix();
 				}
 				break;
+
+			default:
+				break;
 			}
 		}
 

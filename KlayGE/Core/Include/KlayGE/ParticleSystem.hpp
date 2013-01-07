@@ -51,7 +51,7 @@ namespace KlayGE
 			inv_emit_freq_ = 1.0f / freq;
 
 			float time = 0;
-			typedef KLAYGE_DECLTYPE(particles_) ParticlesType;
+			typedef typename KLAYGE_DECLTYPE(particles_) ParticlesType;
 			KLAYGE_FOREACH(typename ParticlesType::reference particle, particles_)
 			{
 				particle.life = -1;
@@ -73,7 +73,7 @@ namespace KlayGE
 				accumulate_time_ = 0;
 			}
 
-			typedef KLAYGE_DECLTYPE(particles_) ParticlesType;
+			typedef typename KLAYGE_DECLTYPE(particles_) ParticlesType;
 			KLAYGE_FOREACH(typename ParticlesType::reference particle, particles_)
 			{
 				if (particle.life > 0)

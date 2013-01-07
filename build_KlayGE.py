@@ -8,7 +8,10 @@ from blib_util import *
 def build_KlayGE(compiler_name, compiler_version, compiler_arch, generator_name, config_list):
 	curdir = os.path.abspath(os.curdir)
 
-	build_dir = "KlayGE/Build/%s-%d_0-%s" % (compiler_name, compiler_version, compiler_arch)
+	if "vc" == compiler_name:
+		build_dir = "KlayGE/Build/%s-%d_0-%s" % (compiler_name, compiler_version, compiler_arch)
+	else:
+		build_dir = "KlayGE/Build/%s-%s" % (compiler_name, compiler_arch)
 	if not os.path.exists(build_dir):
 		os.makedirs(build_dir)
 
@@ -30,10 +33,15 @@ def build_KlayGE(compiler_name, compiler_version, compiler_arch, generator_name,
 		compiler_arch = "x86_amd64"
 
 	build_cmd = batch_command()
-	build_cmd.add_command('CALL "%%VS%d0COMNTOOLS%%..\\..\\VC\\vcvarsall.bat" %s' % (compiler_version, compiler_arch))
-	for config in config_list:
-		build_cmd.add_command('devenv KlayGE.sln /Build %s /project ALL_BUILD' % config)
-		build_cmd.add_command('devenv KlayGE.sln /Build %s /project Install' % config)
+	if "vc" == compiler_name:
+		build_cmd.add_command('CALL "%%VS%d0COMNTOOLS%%..\\..\\VC\\vcvarsall.bat" %s' % (compiler_version, compiler_arch))
+		for config in config_list:
+			build_cmd.add_command('devenv KlayGE.sln /Build %s /project ALL_BUILD' % config)
+			build_cmd.add_command('devenv KlayGE.sln /Build %s /project Install' % config)
+	elif "mgw" == compiler_name:
+		build_cmd.add_command('mingw32-make.exe install')
+	else:
+		build_cmd.add_command('make install')
 	build_cmd.execute()
 
 	os.chdir(curdir)
@@ -41,7 +49,10 @@ def build_KlayGE(compiler_name, compiler_version, compiler_arch, generator_name,
 def build_Samples(compiler_name, compiler_version, compiler_arch, generator_name, config_list):
 	curdir = os.path.abspath(os.curdir)
 
-	build_dir = "KlayGE/Samples/build/%s-%d_0-%s" % (compiler_name, compiler_version, compiler_arch)
+	if "vc" == compiler_name:
+		build_dir = "KlayGE/Samples/build/%s-%d_0-%s" % (compiler_name, compiler_version, compiler_arch)
+	else:
+		build_dir = "KlayGE/Samples/build/%s-%s" % (compiler_name, compiler_arch)
 	if not os.path.exists(build_dir):
 		os.makedirs(build_dir)
 
@@ -63,10 +74,15 @@ def build_Samples(compiler_name, compiler_version, compiler_arch, generator_name
 		compiler_arch = "x86_amd64"
 
 	build_cmd = batch_command()
-	build_cmd.add_command('CALL "%%VS%d0COMNTOOLS%%..\\..\\VC\\vcvarsall.bat" %s' % (compiler_version, compiler_arch))
-	for config in config_list:
-		build_cmd.add_command('devenv Samples.sln /Build %s /project ALL_BUILD' % config)
-		build_cmd.add_command('devenv Samples.sln /Build %s /project Install' % config)
+	if "vc" == compiler_name:
+		build_cmd.add_command('CALL "%%VS%d0COMNTOOLS%%..\\..\\VC\\vcvarsall.bat" %s' % (compiler_version, compiler_arch))
+		for config in config_list:
+			build_cmd.add_command('devenv Samples.sln /Build %s /project ALL_BUILD' % config)
+			build_cmd.add_command('devenv Samples.sln /Build %s /project Install' % config)
+	elif "mgw" == compiler_name:
+		build_cmd.add_command('mingw32-make.exe install')
+	else:
+		build_cmd.add_command('make install')
 	build_cmd.execute()
 
 	os.chdir(curdir)
@@ -74,7 +90,10 @@ def build_Samples(compiler_name, compiler_version, compiler_arch, generator_name
 def build_Tools(compiler_name, compiler_version, compiler_arch, generator_name, config_list):
 	curdir = os.path.abspath(os.curdir)
 
-	build_dir = "KlayGE/Tools/build/%s-%d_0-%s" % (compiler_name, compiler_version, compiler_arch)
+	if "vc" == compiler_name:
+		build_dir = "KlayGE/Tools/build/%s-%d_0-%s" % (compiler_name, compiler_version, compiler_arch)
+	else:
+		build_dir = "KlayGE/Tools/build/%s-%s" % (compiler_name, compiler_arch)
 	if not os.path.exists(build_dir):
 		os.makedirs(build_dir)
 
@@ -85,10 +104,15 @@ def build_Tools(compiler_name, compiler_version, compiler_arch, generator_name, 
 	cmake_cmd.execute()
 
 	build_cmd = batch_command()
-	build_cmd.add_command('CALL "%%VS%d0COMNTOOLS%%..\\..\\VC\\vcvarsall.bat" %s' % (compiler_version, compiler_arch))
-	for config in config_list:
-		build_cmd.add_command('devenv Tools.sln /Build %s /project ALL_BUILD' % config)
-		build_cmd.add_command('devenv Tools.sln /Build %s /project Install' % config)
+	if "vc" == compiler_name:
+		build_cmd.add_command('CALL "%%VS%d0COMNTOOLS%%..\\..\\VC\\vcvarsall.bat" %s' % (compiler_version, compiler_arch))
+		for config in config_list:
+			build_cmd.add_command('devenv Tools.sln /Build %s /project ALL_BUILD' % config)
+			build_cmd.add_command('devenv Tools.sln /Build %s /project Install' % config)
+	elif "mgw" == compiler_name:
+		build_cmd.add_command('mingw32-make.exe install')
+	else:
+		build_cmd.add_command('make install')
 	build_cmd.execute()
 
 	os.chdir(curdir)
@@ -96,7 +120,10 @@ def build_Tools(compiler_name, compiler_version, compiler_arch, generator_name, 
 def build_Tutorials(compiler_name, compiler_version, compiler_arch, generator_name, config_list):
 	curdir = os.path.abspath(os.curdir)
 
-	build_dir = "KlayGE/Tutorials/build/%s-%d_0-%s" % (compiler_name, compiler_version, compiler_arch)
+	if "vc" == compiler_name:
+		build_dir = "KlayGE/Tutorials/build/%s-%d_0-%s" % (compiler_name, compiler_version, compiler_arch)
+	else:
+		build_dir = "KlayGE/Tutorials/build/%s-%s" % (compiler_name, compiler_arch)
 	if not os.path.exists(build_dir):
 		os.makedirs(build_dir)
 
@@ -118,10 +145,15 @@ def build_Tutorials(compiler_name, compiler_version, compiler_arch, generator_na
 		compiler_arch = "x86_amd64"
 
 	build_cmd = batch_command()
-	build_cmd.add_command('CALL "%%VS%d0COMNTOOLS%%..\\..\\VC\\vcvarsall.bat" %s' % (compiler_version, compiler_arch))
-	for config in config_list:
-		build_cmd.add_command('devenv Tutorials.sln /Build %s /project ALL_BUILD' % config)
-		build_cmd.add_command('devenv Tutorials.sln /Build %s /project Install' % config)
+	if "vc" == compiler_name:
+		build_cmd.add_command('CALL "%%VS%d0COMNTOOLS%%..\\..\\VC\\vcvarsall.bat" %s' % (compiler_version, compiler_arch))
+		for config in config_list:
+			build_cmd.add_command('devenv Tutorials.sln /Build %s /project ALL_BUILD' % config)
+			build_cmd.add_command('devenv Tutorials.sln /Build %s /project Install' % config)
+	elif "mgw" == compiler_name:
+		build_cmd.add_command('mingw32-make.exe install')
+	else:
+		build_cmd.add_command('make install')
 	build_cmd.execute()
 
 	os.chdir(curdir)

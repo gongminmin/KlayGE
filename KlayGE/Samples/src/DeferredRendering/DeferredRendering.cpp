@@ -196,8 +196,8 @@ int main()
 
 DeferredRenderingApp::DeferredRenderingApp()
 			: App3DFramework("DeferredRendering"),
-				il_scale_(1.0f),
 				anti_alias_enabled_(1),
+				il_scale_(1.0f),
 				num_objs_rendered_(0), num_renderable_rendered_(0),
 				num_primitives_rendered_(0), num_vertices_rendered_(0)
 {

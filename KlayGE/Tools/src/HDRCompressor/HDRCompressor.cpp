@@ -9,13 +9,18 @@
 #include <iostream>
 #include <fstream>
 #include <vector>
-#ifdef KLAYGE_COMPILER_MSVC
-#pragma warning(push)
-#pragma warning(disable: 4245)
-#endif
-#include <boost/filesystem.hpp>
-#ifdef KLAYGE_COMPILER_MSVC
-#pragma warning(pop)
+#ifdef KLAYGE_TR2_LIBRARY_FILESYSTEM_V2_SUPPORT
+	#include <filesystem>
+	namespace KlayGE
+	{
+		namespace filesystem = std::tr2::sys;
+	}
+#else
+	#include <boost/filesystem.hpp>
+	namespace KlayGE
+	{
+		namespace filesystem = boost::filesystem;
+	}
 #endif
 #include <boost/assert.hpp>
 
@@ -368,7 +373,6 @@ namespace
 int main(int argc, char* argv[])
 {
 	using namespace KlayGE;
-	using namespace boost::filesystem;
 
 	if (argc < 2)
 	{
@@ -398,9 +402,9 @@ int main(int argc, char* argv[])
 
 	ResLoader::Instance().AddPath("../../../bin");
 
-	path output_path(argv[1]);
-	std::string y_file = basename(output_path) + "_y" + extension(output_path);
-	std::string c_file = basename(output_path) + "_c" + extension(output_path);
+	filesystem::path output_path(argv[1]);
+	std::string y_file = filesystem::basename(output_path) + "_y" + filesystem::extension(output_path);
+	std::string c_file = filesystem::basename(output_path) + "_c" + filesystem::extension(output_path);
 
 	CompressHDR(argv[1], y_file, c_file, y_format, c_format);
 

@@ -372,10 +372,18 @@ IF(MSVC)
 	IF(KLAYGE_ARCH_NAME MATCHES "x86" OR KLAYGE_ARCH_NAME MATCHES "x64")
 		SET(EXTRA_LINKED_LIBRARIES wsock32)
 	ENDIF()
+ELSEIF(MINGW)
+	SET(EXTRA_LINKED_LIBRARIES wsock32
+		debug kfont_${KLAYGE_COMPILER_NAME}_${KLAYGE_ARCH_NAME}_d optimized kfont_${KLAYGE_COMPILER_NAME}_${KLAYGE_ARCH_NAME}
+		debug KFL_${KLAYGE_COMPILER_NAME}_${KLAYGE_ARCH_NAME}_d optimized KFL_${KLAYGE_COMPILER_NAME}_${KLAYGE_ARCH_NAME}
+		debug boost_filesystem-mgw47-mt-d-1_51 optimized boost_filesystem-mgw47-mt-1_51
+		debug boost_thread-mgw47-mt-d-1_51 optimized boost_thread-mgw47-mt-1_51
+		debug boost_system-mgw47-mt-d-1_51 optimized boost_system-mgw47-mt-1_51)
 ELSE()
 	SET(EXTRA_LINKED_LIBRARIES
-		boost_filesystem boost_system boost_thread
-	)
+		debug kfont_${KLAYGE_COMPILER_NAME}_${KLAYGE_ARCH_NAME}_d optimized kfont_${KLAYGE_COMPILER_NAME}_${KLAYGE_ARCH_NAME}
+		debug KFL_${KLAYGE_COMPILER_NAME}_${KLAYGE_ARCH_NAME}_d optimized KFL_${KLAYGE_COMPILER_NAME}_${KLAYGE_ARCH_NAME}
+		boost_filesystem boost_thread boost_system)
 ENDIF()
 
 SET_TARGET_PROPERTIES(${LIB_NAME} PROPERTIES
