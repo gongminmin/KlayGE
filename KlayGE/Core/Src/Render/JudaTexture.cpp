@@ -652,7 +652,7 @@ namespace KlayGE
 				}
 
 				uint32_t const full_tile_bytes = tile_size_ * tile_size_ * texel_size_;
-				boost::shared_array<uint8_t> data(new uint8_t[full_tile_bytes]);
+				boost::shared_ptr<std::vector<uint8_t> > data = MakeSharedPtr<std::vector<uint8_t> >(full_tile_bytes);
 				if (data_index != EMPTY_DATA_INDEX)
 				{
 					uint32_t const comed_len = static_cast<uint32_t>(data_blocks_pos_[data_index + 1] - data_blocks_pos_[data_index]);
@@ -667,7 +667,7 @@ namespace KlayGE
 				iter = p.first;
 			}
 
-			return &iter->second.data[0];
+			return &(*iter->second.data)[0];
 		}
 		else
 		{

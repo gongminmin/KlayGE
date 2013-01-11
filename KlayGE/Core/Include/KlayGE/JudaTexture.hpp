@@ -192,10 +192,10 @@ namespace KlayGE
 		LZMACodec lzma_dec_;
 		struct DecodedBlockInfo
 		{
-			boost::shared_array<uint8_t> data;
+			boost::shared_ptr<std::vector<uint8_t> > data;
 			uint64_t tick;
 
-			DecodedBlockInfo(boost::shared_array<uint8_t> const & d, uint64_t t)
+			DecodedBlockInfo(boost::shared_ptr<std::vector<uint8_t> > const & d, uint64_t t)
 				: data(d), tick(t)
 			{
 			}
