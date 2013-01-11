@@ -27,7 +27,6 @@
 #include <vector>
 #include <deque>
 
-#include <boost/smart_ptr.hpp>
 #ifdef KLAYGE_COMPILER_MSVC
 #pragma warning(push)
 #pragma warning(disable: 6244 6248 6282 6385 6386)

@@ -31,7 +31,6 @@
 #include <set>
 #include <map>
 #include <boost/function.hpp>
-#include <boost/smart_ptr.hpp>
 
 #include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/ShaderObject.hpp>

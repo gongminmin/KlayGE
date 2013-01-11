@@ -16,7 +16,6 @@
 #pragma once
 
 #include <KlayGE/PreDeclare.hpp>
-#include <boost/smart_ptr.hpp>
 #include <KlayGE/D3D11/D3D11Adapter.hpp>
 
 namespace KlayGE

@@ -74,13 +74,13 @@ namespace KlayGE
 		template <typename T>
 		boost::shared_ptr<T> SyncQueryT(ResLoadingDescPtr const & res_desc)
 		{
-			return *static_cast<boost::shared_ptr<T>*>(this->SyncQuery(res_desc));
+			return this->EmptyToT<T>(this->SyncQuery(res_desc));
 		}
 
 		template <typename T>
 		boost::function<boost::shared_ptr<T>()> ASyncQueryT(ResLoadingDescPtr const & res_desc)
 		{
-			return boost::bind(&ResLoader::EmptyToT<T>, this->ASyncQuery(res_desc));
+			return boost::bind(&ResLoader::EmptyFuncToT<T>, this->ASyncQuery(res_desc));
 		}
 
 	private:		
@@ -88,9 +88,15 @@ namespace KlayGE
 		void* ASyncFunc(ResLoadingDescPtr const & res_desc, boost::shared_ptr<joiner<void> > const & loading_thread);
 
 		template <typename T>
-		static boost::shared_ptr<T> EmptyToT(boost::function<void*()> func)
+		static boost::shared_ptr<T> EmptyToT(void* p)
 		{
-			return *static_cast<boost::shared_ptr<T>*>(func());
+			return *static_cast<boost::shared_ptr<T>*>(p);
+		}
+
+		template <typename T>
+		static boost::shared_ptr<T> EmptyFuncToT(boost::function<void*()> const & func)
+		{
+			return EmptyToT<T>(func());
 		}
 
 	private:

@@ -14,9 +14,6 @@
 #include <sstream>
 #include <vector>
 
-#include <boost/shared_ptr.hpp>
-#include <boost/enable_shared_from_this.hpp>
-
 #ifdef KLAYGE_TR2_LIBRARY_FILESYSTEM_V2_SUPPORT
 	#include <filesystem>
 	namespace KlayGE

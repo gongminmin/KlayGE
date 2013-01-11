@@ -16,8 +16,6 @@
 #include <list>
 #include <map>
 
-#include <boost/shared_ptr.hpp>
-
 #include <KlayGE/JudaTexture.hpp>
 
 using namespace std;

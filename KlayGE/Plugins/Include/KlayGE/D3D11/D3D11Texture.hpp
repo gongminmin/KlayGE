@@ -15,8 +15,6 @@
 
 #pragma once
 
-#include <boost/smart_ptr.hpp>
-
 #include <KlayGE/Texture.hpp>
 #include <KlayGE/D3D11/D3D11Typedefs.hpp>
 #include <KlayGE/D3D11/D3D11RenderView.hpp>

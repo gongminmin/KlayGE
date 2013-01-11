@@ -24,7 +24,6 @@
 #include <dinput.h>
 
 #include <KlayGE/Input.hpp>
-#include <boost/smart_ptr.hpp>
 
 namespace KlayGE
 {

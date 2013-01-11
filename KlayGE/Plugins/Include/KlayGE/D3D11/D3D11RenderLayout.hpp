@@ -15,8 +15,6 @@
 
 #pragma once
 
-#include <boost/smart_ptr.hpp>
-
 #include <vector>
 #include <D3D11Shader.h>
 

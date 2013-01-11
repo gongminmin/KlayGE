@@ -23,7 +23,6 @@
 
 #include <string>
 
-#include <boost/smart_ptr.hpp>
 #include <boost/noncopyable.hpp>
 
 #include <KlayGE/Show.hpp>

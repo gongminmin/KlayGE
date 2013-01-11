@@ -66,15 +66,6 @@
 #endif
 #include <boost/function.hpp>
 #include <boost/optional.hpp>
-#ifdef KLAYGE_COMPILER_MSVC
-#pragma warning(push)
-#pragma warning(disable: 6011)
-#endif
-#include <boost/shared_ptr.hpp>
-#ifdef KLAYGE_COMPILER_MSVC
-#pragma warning(pop)
-#endif
-#include <boost/enable_shared_from_this.hpp>
 #include <boost/bind.hpp>
 #include <boost/mpl/void.hpp>
 #include <exception>
@@ -476,7 +467,7 @@ namespace KlayGE
 			void kill()
 			{
 				unique_lock<mutex> lock(wake_up_mut_);
-				func_.clear();
+				func_ = boost::function<void()>();
 				wake_up_ = true;
 				wake_up_cond_.notify_one();
 			}
@@ -546,7 +537,7 @@ namespace KlayGE
 						info_->func_();
 
 						// Reset execution functor
-						info_->func_.clear();
+						info_->func_ = boost::function<void()>();
 
 						// First notify joiner_thread_pool_impl that data is ready and wake-up if it's blocked waiting for data
 						info_->thpool_join_info_->notify_join();

@@ -39,14 +39,6 @@
 #include <functional>
 
 #include <boost/assert.hpp>
-#ifdef KLAYGE_COMPILER_MSVC
-#pragma warning(push)
-#pragma warning(disable: 6011)
-#endif
-#include <boost/smart_ptr.hpp>
-#ifdef KLAYGE_COMPILER_MSVC
-#pragma warning(pop)
-#endif
 #include <boost/checked_delete.hpp>
 
 #define UNREF_PARAM(x) (void)(x)

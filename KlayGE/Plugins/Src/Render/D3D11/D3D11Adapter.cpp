@@ -12,8 +12,6 @@
 
 #include <KlayGE/KlayGE.hpp>
 
-#include <boost/smart_ptr.hpp>
-
 #include <algorithm>
 #include <cstring>
 #include <boost/assert.hpp>
