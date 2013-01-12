@@ -22,6 +22,11 @@
 #include <vector>
 #include <sstream>
 
+#ifdef PI
+#undef PI
+#endif
+#include <KFL/KFL.hpp>
+
 #include "util.hpp"
 #include "export_main.hpp"
 #include "mesh_extractor.hpp"
