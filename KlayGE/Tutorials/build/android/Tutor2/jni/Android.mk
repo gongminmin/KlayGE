@@ -5,9 +5,9 @@ TUTOR2_SRC_PATH := $(LOCAL_PATH)/../../../../src/Tutor2
 
 include $(CLEAR_VARS)
 
-LOCAL_C_INCLUDES := $(TUTOR2_SRC_PATH)/../../../External/boost \
-		$(TUTOR2_SRC_PATH)/../../../KFL/include \
-		$(TUTOR2_SRC_PATH)/../../Core/Include \
+LOCAL_C_INCLUDES := $(TUTOR2_SRC_PATH)/../../../../External/boost \
+		$(TUTOR2_SRC_PATH)/../../../../KFL/include \
+		$(TUTOR2_SRC_PATH)/../../../Core/Include \
 		
 LOCAL_MODULE := Tutor2
 LOCAL_PATH := $(TUTOR2_SRC_PATH)

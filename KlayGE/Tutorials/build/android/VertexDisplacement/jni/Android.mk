@@ -5,9 +5,9 @@ VERTEXDISPLACEMENT_SRC_PATH := $(LOCAL_PATH)/../../../../src/VertexDisplacement
 
 include $(CLEAR_VARS)
 
-LOCAL_C_INCLUDES := $(VERTEXDISPLACEMENT_SRC_PATH)/../../../External/boost \
-		$(VERTEXDISPLACEMENT_SRC_PATH)/../../../KFL/include \
-		$(VERTEXDISPLACEMENT_SRC_PATH)/../../Core/Include \
+LOCAL_C_INCLUDES := $(VERTEXDISPLACEMENT_SRC_PATH)/../../../../External/boost \
+		$(VERTEXDISPLACEMENT_SRC_PATH)/../../../../KFL/include \
+		$(VERTEXDISPLACEMENT_SRC_PATH)/../../../Core/Include \
 		
 LOCAL_MODULE := VertexDisplacement
 LOCAL_PATH := $(VERTEXDISPLACEMENT_SRC_PATH)

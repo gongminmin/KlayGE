@@ -5,9 +5,9 @@ TEXT_SRC_PATH := $(LOCAL_PATH)/../../../../src/Text
 
 include $(CLEAR_VARS)
 
-LOCAL_C_INCLUDES := $(TEXT_SRC_PATH)/../../../External/boost \
-		$(TEXT_SRC_PATH)/../../../KFL/include \
-		$(TEXT_SRC_PATH)/../../Core/Include \
+LOCAL_C_INCLUDES := $(TEXT_SRC_PATH)/../../../../External/boost \
+		$(TEXT_SRC_PATH)/../../../../KFL/include \
+		$(TEXT_SRC_PATH)/../../../Core/Include \
 		
 LOCAL_MODULE := Text
 LOCAL_PATH := $(TEXT_SRC_PATH)

@@ -126,8 +126,8 @@ ENDFUNCTION()
 # Required variables:
 # - SOURCE_FILES/HEADER_FILES/RESOURCE_FILES
 # - EFFECT_FILES/POST_PROCESSORS/UI_FILES
-# - EXTRA_INCLUDE_DIRS: dependencies required besides KlarGE_Core and boost
-# - EXTRA_LINKED_LIBRARIES: dependencies required besides KlarGE_Core and boost
+# - EXTRA_INCLUDE_DIRS: dependencies required besides KlayGE_Core and boost
+# - EXTRA_LINKED_LIBRARIES: dependencies required besides KlayGE_Core and boost
 #
 MACRO(SETUP_TOOL EXE_NAME)
 	SET(RESOURCE_FILES

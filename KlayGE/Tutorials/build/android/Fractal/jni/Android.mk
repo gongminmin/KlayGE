@@ -5,9 +5,9 @@ FRACTAL_SRC_PATH := $(LOCAL_PATH)/../../../../src/Fractal
 
 include $(CLEAR_VARS)
 
-LOCAL_C_INCLUDES := $(FRACTAL_SRC_PATH)/../../../External/boost \
-		$(FRACTAL_SRC_PATH)/../../../KFL/include \
-		$(FRACTAL_SRC_PATH)/../../Core/Include \
+LOCAL_C_INCLUDES := $(FRACTAL_SRC_PATH)/../../../../External/boost \
+		$(FRACTAL_SRC_PATH)/../../../../KFL/include \
+		$(FRACTAL_SRC_PATH)/../../../Core/Include \
 		
 LOCAL_MODULE := Fractal
 LOCAL_PATH := $(FRACTAL_SRC_PATH)
