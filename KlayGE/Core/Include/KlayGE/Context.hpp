@@ -203,8 +203,6 @@ namespace KlayGE
 		DllLoader show_loader_;
 		DllLoader sm_loader_;
 		DllLoader ads_loader_;
-
-		std::string dll_suffix_;
 	};
 }
 

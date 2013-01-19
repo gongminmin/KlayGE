@@ -43,6 +43,25 @@
 
 #include <KlayGE/Context.hpp>
 
+#ifdef KLAYGE_COMPILER_GCC
+	#define LIB_PREFIX_NAME "lib"
+#else
+	#define LIB_PREFIX_NAME ""
+#endif
+#ifdef KLAYGE_DEBUG
+	#define DBG_SUFFIX "_d"
+#else
+	#define DBG_SUFFIX ""
+#endif
+#ifdef KLAYGE_PLATFORM_WINDOWS
+	#define DLL_EXT_NAME "dll"
+#else
+	#define DLL_EXT_NAME "so"
+#endif
+
+#define DLL_PREFIX LIB_PREFIX_NAME KFL_STRINGIZE(KLAYGE_NAME)
+#define DLL_SUFFIX "_"KFL_STRINGIZE(KLAYGE_COMPILER_NAME)DBG_SUFFIX"."DLL_EXT_NAME
+
 namespace
 {
 	KlayGE::mutex singleton_mutex;
@@ -76,16 +95,6 @@ namespace KlayGE
 		input_factory_ = InputFactory::NullObject();
 		show_factory_ = ShowFactory::NullObject();
 		audio_data_src_factory_ = AudioDataSourceFactory::NullObject();
-
-		dll_suffix_ = KFL_STRINGIZE(KLAYGE_COMPILER_NAME);
-#ifdef KLAYGE_DEBUG
-		dll_suffix_ += "_d";
-#endif
-#ifdef KLAYGE_PLATFORM_WINDOWS
-		dll_suffix_ += ".dll";
-#else
-		dll_suffix_ += ".so";
-#endif
 	}
 
 	Context::~Context()
@@ -410,10 +419,13 @@ namespace KlayGE
 			}
 
 			XMLNodePtr options_node = graphics_node->FirstNode("options");
-			attr = options_node->Attrib("str");
-			if (attr)
+			if (options_node)
 			{
-				graphics_options = attr->ValueString();
+				attr = options_node->Attrib("str");
+				if (attr)
+				{
+					graphics_options = attr->ValueString();
+				}
 			}
 		}
 
@@ -631,10 +643,7 @@ namespace KlayGE
 		render_loader_.Free();
 
 		std::string render_path = ResLoader::Instance().Locate("Render");
-		std::string fn = KFL_STRINGIZE(KLAYGE_NAME) + std::string("_RenderEngine_") + rf_name + "_" + dll_suffix_;
-#ifdef KLAYGE_COMPILER_GCC
-		fn = "lib" + fn;
-#endif
+		std::string fn = DLL_PREFIX"_RenderEngine_" + rf_name + DLL_SUFFIX;
 
 		std::string path = render_path + "/" + fn;
 		render_loader_.Load(ResLoader::Instance().Locate(path));
@@ -660,10 +669,7 @@ namespace KlayGE
 		audio_loader_.Free();
 
 		std::string audio_path = ResLoader::Instance().Locate("Audio");
-		std::string fn = KFL_STRINGIZE(KLAYGE_NAME) + std::string("_AudioEngine_") + af_name + "_" + dll_suffix_;
-#ifdef KLAYGE_COMPILER_GCC
-		fn = "lib" + fn;
-#endif
+		std::string fn = DLL_PREFIX"_AudioEngine_" + af_name + DLL_SUFFIX;
 
 		std::string path = audio_path + "/" + fn;
 		audio_loader_.Load(ResLoader::Instance().Locate(path));
@@ -686,10 +692,7 @@ namespace KlayGE
 		input_loader_.Free();
 
 		std::string input_path = ResLoader::Instance().Locate("Input");
-		std::string fn = KFL_STRINGIZE(KLAYGE_NAME) + std::string("_InputEngine_") + if_name + "_" + dll_suffix_;
-#ifdef KLAYGE_COMPILER_GCC
-		fn = "lib" + fn;
-#endif
+		std::string fn = DLL_PREFIX"_InputEngine_" + if_name + DLL_SUFFIX;
 
 		std::string path = input_path + "/" + fn;
 		input_loader_.Load(ResLoader::Instance().Locate(path));
@@ -712,10 +715,7 @@ namespace KlayGE
 		show_loader_.Free();
 
 		std::string show_path = ResLoader::Instance().Locate("Show");
-		std::string fn = KFL_STRINGIZE(KLAYGE_NAME) + std::string("_ShowEngine_") + sf_name + "_" + dll_suffix_;
-#ifdef KLAYGE_COMPILER_GCC
-		fn = "lib" + fn;
-#endif
+		std::string fn = DLL_PREFIX"_ShowEngine_" + sf_name + DLL_SUFFIX;
 
 		std::string path = show_path + "/" + fn;
 		show_loader_.Load(ResLoader::Instance().Locate(path));
@@ -739,10 +739,7 @@ namespace KlayGE
 		sm_loader_.Free();
 
 		std::string sm_path = ResLoader::Instance().Locate("Scene");
-		std::string fn = KFL_STRINGIZE(KLAYGE_NAME) + std::string("_Scene_") + sm_name + "_" + dll_suffix_;
-#ifdef KLAYGE_COMPILER_GCC
-		fn = "lib" + fn;
-#endif
+		std::string fn = DLL_PREFIX"_Scene_" + sm_name + DLL_SUFFIX;
 
 		std::string path = sm_path + "/" + fn;
 		sm_loader_.Load(ResLoader::Instance().Locate(path));
@@ -768,10 +765,7 @@ namespace KlayGE
 		ads_loader_.Free();
 
 		std::string adsf_path = ResLoader::Instance().Locate("Audio");
-		std::string fn = KFL_STRINGIZE(KLAYGE_NAME) + std::string("_AudioDataSource_") + adsf_name + "_" + dll_suffix_;
-#ifdef KLAYGE_COMPILER_GCC
-		fn = "lib" + fn;
-#endif
+		std::string fn = DLL_PREFIX"_AudioDataSource_" + adsf_name + DLL_SUFFIX;
 
 		std::string path = adsf_path + "/" + fn;
 		ads_loader_.Load(ResLoader::Instance().Locate(path));
