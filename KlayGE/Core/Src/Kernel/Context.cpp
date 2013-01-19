@@ -122,6 +122,7 @@ namespace KlayGE
 		bool color_grading = false;
 		int stereo_method = 0;
 		float stereo_separation = 0;
+		std::string graphics_options;
 
 #ifdef KLAYGE_PLATFORM_WINDOWS
 		std::string rf_name = "D3D11";
@@ -407,6 +408,13 @@ namespace KlayGE
 			{
 				stereo_separation = attr->ValueFloat();
 			}
+
+			XMLNodePtr options_node = graphics_node->FirstNode("options");
+			attr = options_node->Attrib("str");
+			if (attr)
+			{
+				graphics_options = attr->ValueString();
+			}
 		}
 
 		cfg_.render_factory_name = rf_name;
@@ -432,6 +440,7 @@ namespace KlayGE
 		cfg_.graphics_cfg.color_grading = color_grading;
 		cfg_.graphics_cfg.stereo_method = static_cast<StereoMethod>(stereo_method);
 		cfg_.graphics_cfg.stereo_separation = stereo_separation;
+		cfg_.graphics_cfg.options = graphics_options;
 
 		cfg_.deferred_rendering = false;
 	}

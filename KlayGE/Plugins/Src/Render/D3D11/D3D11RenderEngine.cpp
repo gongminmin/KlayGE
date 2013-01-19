@@ -340,9 +340,18 @@ namespace KlayGE
 			ds_profile_ = "";
 			break;
 
-		default:
+		case D3D_FEATURE_LEVEL_9_3:
 			vs_profile_ = "vs_4_0_level_9_3";
 			ps_profile_ = "ps_4_0_level_9_3";
+			gs_profile_ = "";
+			cs_profile_ = "";
+			hs_profile_ = "";
+			ds_profile_ = "";
+			break;
+
+		default:
+			vs_profile_ = "vs_4_0_level_9_1";
+			ps_profile_ = "ps_4_0_level_9_1";
 			gs_profile_ = "";
 			cs_profile_ = "";
 			hs_profile_ = "";

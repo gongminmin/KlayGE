@@ -59,6 +59,8 @@ namespace KlayGE
 
 		StereoMethod stereo_method;
 		float stereo_separation;
+
+		std::string options;
 	};
 }
 

@@ -26,6 +26,8 @@
 #include <cstring>
 #include <boost/assert.hpp>
 #include <boost/bind.hpp>
+#include <boost/algorithm/string/split.hpp>
+#include <boost/algorithm/string/trim.hpp>
 
 #include <KlayGE/D3D11/D3D11RenderEngine.hpp>
 #include <KlayGE/D3D11/D3D11Mapping.hpp>
@@ -152,17 +154,55 @@ namespace KlayGE
 			}
 #endif
 
-			std::vector<D3D_FEATURE_LEVEL> feature_levels;
+			std::vector<std::pair<std::string, D3D_FEATURE_LEVEL> > available_feature_levels;	
 #if (_WIN32_WINNT >= 0x0602 /*_WIN32_WINNT_WIN8*/)
 			if (d3d_11_1)
 			{
-				feature_levels.push_back(D3D_FEATURE_LEVEL_11_1);
+				available_feature_levels.push_back(std::make_pair("11_1", D3D_FEATURE_LEVEL_11_1));
 			}
 #endif
-			feature_levels.push_back(D3D_FEATURE_LEVEL_11_0);
-			feature_levels.push_back(D3D_FEATURE_LEVEL_10_1);
-			feature_levels.push_back(D3D_FEATURE_LEVEL_10_0);
-			feature_levels.push_back(D3D_FEATURE_LEVEL_9_3);
+			available_feature_levels.push_back(std::make_pair("11_0", D3D_FEATURE_LEVEL_11_0));
+			available_feature_levels.push_back(std::make_pair("10_1", D3D_FEATURE_LEVEL_10_1));
+			available_feature_levels.push_back(std::make_pair("10_0", D3D_FEATURE_LEVEL_10_0));
+			available_feature_levels.push_back(std::make_pair("9_3", D3D_FEATURE_LEVEL_9_3));
+			available_feature_levels.push_back(std::make_pair("9_2", D3D_FEATURE_LEVEL_9_2));
+			available_feature_levels.push_back(std::make_pair("9_1", D3D_FEATURE_LEVEL_9_1));
+
+			std::vector<std::string> strs;
+			boost::algorithm::split(strs, settings.options, boost::bind(std::equal_to<char>(), ',', _1));
+			for (size_t index = 0; index < strs.size(); ++ index)
+			{
+				std::string& opt = strs[index];
+				boost::algorithm::trim(opt);
+				std::string::size_type loc = opt.find(':');
+				std::string opt_name = opt.substr(0, loc);
+				std::string opt_val = opt.substr(loc + 1);
+
+				if ("level" == opt_name)
+				{
+					size_t feature_index = 0;
+					for (size_t i = 0; i < available_feature_levels.size(); ++ i)
+					{
+						if (available_feature_levels[i].first == opt_val)
+						{
+							feature_index = i;
+							break;
+						}
+					}
+
+					if (feature_index > 0)
+					{
+						available_feature_levels.erase(available_feature_levels.begin(),
+							available_feature_levels.begin() + feature_index);
+					}
+				}
+			}
+
+			std::vector<D3D_FEATURE_LEVEL> feature_levels;
+			for (size_t i = 0; i < available_feature_levels.size(); ++ i)
+			{
+				feature_levels.push_back(available_feature_levels[i].second);
+			}
 
 			typedef KLAYGE_DECLTYPE(dev_type_behaviors) DevTypeBehaviorsType;
 			KLAYGE_FOREACH(DevTypeBehaviorsType::reference dev_type_beh, dev_type_behaviors)
