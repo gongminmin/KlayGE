@@ -320,14 +320,15 @@ public:
 				ci.advance_x = static_cast<uint16_t>(ft_slot->advance.x / 64.0f / INTERNAL_CHAR_SIZE * char_size_);
 				ci.advance_y = static_cast<uint16_t>(ft_slot->advance.y / 64.0f / INTERNAL_CHAR_SIZE * char_size_);
 
-				FT_Outline_Get_CBox(&ft_slot->outline, &raster_user.bbox);
-				raster_user.bbox.xMin = (raster_user.bbox.xMin + 63) / 64;
-				raster_user.bbox.xMax = (raster_user.bbox.xMax + 63) / 64;
-				raster_user.bbox.yMin = (raster_user.bbox.yMin + 63) / 64;
-				raster_user.bbox.yMax = (raster_user.bbox.yMax + 63) / 64;
+				FT_BBox& bbox = raster_user.bbox;
+				FT_Outline_Get_CBox(&ft_slot->outline, &bbox);
+				bbox.xMin = MathLib::sgn(bbox.xMin) * (MathLib::abs(bbox.xMin) + 63) / 64;
+				bbox.xMax = MathLib::sgn(bbox.xMax) * (MathLib::abs(bbox.xMax) + 63) / 64;
+				bbox.yMin = MathLib::sgn(bbox.yMin) * (MathLib::abs(bbox.yMin) + 63) / 64;
+				bbox.yMax = MathLib::sgn(bbox.yMax) * (MathLib::abs(bbox.yMax) + 63) / 64;
 
-				int const buf_width = std::min(static_cast<int>(raster_user.bbox.xMax - raster_user.bbox.xMin), static_cast<int>(INTERNAL_CHAR_SIZE));
-				int const buf_height = std::min(static_cast<int>(raster_user.bbox.yMax - raster_user.bbox.yMin), static_cast<int>(INTERNAL_CHAR_SIZE));
+				int const buf_width = std::min(static_cast<int>(bbox.xMax - bbox.xMin), static_cast<int>(INTERNAL_CHAR_SIZE));
+				int const buf_height = std::min(static_cast<int>(bbox.yMax - bbox.yMin), static_cast<int>(INTERNAL_CHAR_SIZE));
 				raster_user.buf_width = buf_width;
 				raster_user.buf_height = buf_height;
 				raster_user.non_empty = false;
@@ -344,12 +345,12 @@ public:
 					{
 						edge_extract(buf_width, &char_bitmap[0], y, dmap, tmp_dist, x_offset, y_offset);
 					}
-				
+
 					std::vector<float> distances(char_size_ * char_size_);
 					ComputeDistanceField(distances, char_size_, char_size_, dmap);
 
-					ci.left = static_cast<int16_t>((raster_user.bbox.xMin - x_offset) / INTERNAL_CHAR_SIZE * char_size_ + 0.5f);
-					ci.top = static_cast<int16_t>((3 / 4.0f - (raster_user.bbox.yMax + y_offset) / INTERNAL_CHAR_SIZE) * char_size_ + 0.5f);
+					ci.left = static_cast<int16_t>((bbox.xMin - x_offset) / INTERNAL_CHAR_SIZE * char_size_ + 0.5f);
+					ci.top = static_cast<int16_t>((3 / 4.0f - (bbox.yMax + y_offset) / INTERNAL_CHAR_SIZE) * char_size_ + 0.5f);
 					ci.width = static_cast<uint16_t>(std::min<float>(1.0f, (buf_width + x_offset) / INTERNAL_CHAR_SIZE) * char_size_ + 0.5f);
 					ci.height = static_cast<uint16_t>(std::min<float>(1.0f, (buf_height + y_offset) / INTERNAL_CHAR_SIZE) * char_size_ + 0.5f);
 
