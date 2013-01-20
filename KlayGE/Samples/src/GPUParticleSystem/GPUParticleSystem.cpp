@@ -837,6 +837,8 @@ void GPUParticleSystemApp::InputHandler(InputEngine const & /*sender*/, InputAct
 
 void GPUParticleSystemApp::DoUpdateOverlay()
 {
+	UIManager::Instance().Render();
+
 	std::wostringstream stream;
 	stream.precision(2);
 	stream << std::fixed << this->FPS() << " FPS";
@@ -847,8 +849,6 @@ void GPUParticleSystemApp::DoUpdateOverlay()
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 	RenderEngine& re = rf.RenderEngineInstance();
 	font_->RenderText(0, 36, Color(1, 1, 0, 1), re.ScreenFrameBuffer()->Description(), 16);
-
-	UIManager::Instance().Render();
 }
 
 uint32_t GPUParticleSystemApp::DoUpdate(uint32_t pass)

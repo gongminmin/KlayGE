@@ -175,6 +175,8 @@ void VertexDisplacement::InputHandler(InputEngine const & /*sender*/, InputActio
 
 void VertexDisplacement::DoUpdateOverlay()
 {
+	UIManager::Instance().Render();
+
 	RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 
 	std::wostringstream stream;
@@ -191,8 +193,6 @@ void VertexDisplacement::DoUpdateOverlay()
 		<< sceneMgr.NumVerticesRendered() << " Vertices";
 	font_->RenderText(0, 36, Color(1, 1, 1, 1), stream.str(), 16);
 	font_->RenderText(0, 54, Color(1, 1, 0, 1), renderEngine.Name(), 16);
-
-	UIManager::Instance().Render();
 }
 
 uint32_t VertexDisplacement::DoUpdate(uint32_t /*pass*/)

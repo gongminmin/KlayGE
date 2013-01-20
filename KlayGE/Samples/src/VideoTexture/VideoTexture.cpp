@@ -226,14 +226,14 @@ void VideoTextureApp::InputHandler(InputEngine const & /*sender*/, InputAction c
 
 void VideoTextureApp::DoUpdateOverlay()
 {
+	UIManager::Instance().Render();
+
 	std::wostringstream stream;
 	stream.precision(2);
 	stream << std::fixed << this->FPS() << " FPS";
 
 	font_->RenderText(0, 0, Color(1, 1, 0, 1), L"Video Texture", 16);
 	font_->RenderText(0, 18, Color(1, 1, 0, 1), stream.str(), 16);
-
-	UIManager::Instance().Render();
 }
 
 uint32_t VideoTextureApp::DoUpdate(uint32_t /*pass*/)
