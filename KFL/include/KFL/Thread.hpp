@@ -166,6 +166,11 @@ namespace KlayGE
 			return const_result_type_ref(result_->get());
 		}
 
+		void detach()
+		{
+			this->do_detach();
+		}
+
 		thread_id get_thread_id() const
 		{
 			return id_;
@@ -173,6 +178,7 @@ namespace KlayGE
 
 	private:
 		virtual void do_join() = 0;
+		virtual void do_detach() = 0;
 
 	protected:
 		// This is a shared pointer to the optional<result> and it's shared between joiners (that can be in
@@ -226,6 +232,11 @@ namespace KlayGE
 				throw bad_join();
 			}
 			return handle_->join();
+		}
+
+		void detach()
+		{
+			handle_->detach();
 		}
 
 	public:
@@ -341,6 +352,11 @@ namespace KlayGE
 			void do_join()
 			{
 				thread_.join();
+			}
+
+			void do_detach()
+			{
+				thread_.detach();
 			}
 
 		private:
@@ -477,10 +493,9 @@ namespace KlayGE
 				return id_;
 			}
 
-			void set_joiner(joiner<void> const & j)
+			void set_thread_id(thread_id id)
 			{
-				joiner_ = j;
-				id_ = joiner_.get_thread_id();
+				id_ = id;
 			}
 
 			boost::shared_ptr<thread_pool_join_info> thpool_join_info_;
@@ -602,8 +617,9 @@ namespace KlayGE
 				{
 					boost::shared_ptr<thread_pool_thread_info> th_info = MakeSharedPtr<thread_pool_thread_info>(data);
 					joiner<void> j = data->threader_(wait_function(th_info));
-					th_info->set_joiner(j);
+					th_info->set_thread_id(j.get_thread_id());
 					data->threads_.push_back(th_info);
+					j.detach();
 				}
 			}
 
@@ -721,6 +737,10 @@ namespace KlayGE
 			void do_join()
 			{
 				thread_pool_join_info_->join();
+			}
+
+			void do_detach()
+			{
 			}
 
 		private:
