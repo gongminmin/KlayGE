@@ -324,9 +324,7 @@ def build_external_libs(compiler_name, compiler_version, compiler_arch, generato
 		if "win32" == platform:
 			print("\nSeting up OpenAL SDK...\n")
 
-			os.chdir("External/OpenALSDK/redist")
-			os.system("oalinst.exe")
-			os.chdir("../../../")
+			copy_to_dst("External/OpenALSDK/redist/%s/OpenAL32.%s" % (compiler_arch, dll_suffix), dst_dir)
 
 	if (compiler_arch != "x86_app") and (compiler_arch != "arm_app"):
 		print("\nSeting up Cg...\n")
