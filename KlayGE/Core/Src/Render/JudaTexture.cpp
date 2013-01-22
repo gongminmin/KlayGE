@@ -656,11 +656,11 @@ namespace KlayGE
 				if (data_index != EMPTY_DATA_INDEX)
 				{
 					uint32_t const comed_len = static_cast<uint32_t>(data_blocks_pos_[data_index + 1] - data_blocks_pos_[data_index]);
-					lzma_dec_.Decode(data.get(), &input_buf_[data_blocks_pos_[data_index]], comed_len, full_tile_bytes);
+					lzma_dec_.Decode(&(*data)[0], &input_buf_[data_blocks_pos_[data_index]], comed_len, full_tile_bytes);
 				}
 				else
 				{
-					memset(data.get(), 0, full_tile_bytes);
+					memset(&(*data)[0], 0, full_tile_bytes);
 				}
 
 				std::pair<DecodedBlockCacheType::iterator, bool> p = decoded_block_cache_.insert(std::make_pair(data_index, DecodedBlockInfo(data, decode_tick_)));
