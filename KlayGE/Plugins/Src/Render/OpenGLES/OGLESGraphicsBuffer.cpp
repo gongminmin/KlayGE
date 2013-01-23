@@ -123,10 +123,8 @@ namespace KlayGE
 
 	void OGLESGraphicsBuffer::Active()
 	{
-		// TODO: fix me
-		glBindBuffer(target_, vb_);
-		//OGLESRenderEngine& re = *checked_cast<OGLESRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-		//re.BindBuffer(target_, vb_);
+		OGLESRenderEngine& re = *checked_cast<OGLESRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+		re.BindBuffer(target_, vb_);
 	}
 
 	void OGLESGraphicsBuffer::CopyToBuffer(GraphicsBuffer& rhs)

@@ -80,7 +80,7 @@ namespace KlayGE
 		void AdjustPerspectiveMatrix(float4x4& pers_mat);
 
 		void ActiveTexture(GLenum tex_unit);
-		void BindBuffer(GLenum target, GLuint buffer);
+		void BindBuffer(GLenum target, GLuint buffer, bool force = false);
 		void DeleteBuffers(GLsizei n, GLuint const * buffers);
 
 		void ClearColor(GLfloat r, GLfloat g, GLfloat b, GLfloat a);

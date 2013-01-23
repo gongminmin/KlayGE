@@ -40,7 +40,7 @@ namespace KlayGE
 
 		void CopyToBuffer(GraphicsBuffer& rhs);
 
-		void Active();
+		void Active(bool force);
 
 		GLuint GLvbo() const
 		{

@@ -94,7 +94,7 @@ namespace KlayGE
 					OGLMapping::MappingVertexFormat(type, normalized, vs_elem.format);
 					normalized = (((VEU_Diffuse == vs_elem.usage) || (VEU_Specular == vs_elem.usage)) && !IsFloatFormat(vs_elem.format)) ? GL_TRUE : normalized;
 
-					stream.Active();
+					stream.Active(use_vao_);
 					glVertexAttribPointer(attr, num_components, type, normalized, size, offset);
 					glEnableVertexAttribArray(attr);
 
@@ -116,7 +116,7 @@ namespace KlayGE
 		if (this->UseIndices())
 		{
 			OGLGraphicsBuffer& stream(*checked_pointer_cast<OGLGraphicsBuffer>(this->GetIndexStream()));
-			stream.Active();
+			stream.Active(use_vao_);
 		}
 	}
 

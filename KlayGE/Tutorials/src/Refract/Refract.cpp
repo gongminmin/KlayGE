@@ -280,19 +280,22 @@ void Refract::OnResize(uint32_t width, uint32_t height)
 	}
 
 	ElementFormat depth_fmt;
-	if (rf.RenderEngineInstance().DeviceCaps().texture_format_support(EF_R16F))
+	if (rf.RenderEngineInstance().DeviceCaps().texture_format_support(EF_R16F)
+		&& rf.RenderEngineInstance().DeviceCaps().rendertarget_format_support(EF_R16F, 1, 0))
 	{
 		depth_fmt = EF_R16F;
 	}
 	else
 	{
-		if (rf.RenderEngineInstance().DeviceCaps().texture_format_support(EF_GR16F))
+		if (rf.RenderEngineInstance().DeviceCaps().texture_format_support(EF_GR16F)
+			&& rf.RenderEngineInstance().DeviceCaps().rendertarget_format_support(EF_GR16F, 1, 0))
 		{
 			depth_fmt = EF_GR16F;
 		}
 		else
 		{
-			BOOST_ASSERT(rf.RenderEngineInstance().DeviceCaps().texture_format_support(EF_ABGR16F));
+			BOOST_ASSERT(rf.RenderEngineInstance().DeviceCaps().texture_format_support(EF_ABGR16F)
+				&& rf.RenderEngineInstance().DeviceCaps().rendertarget_format_support(EF_ABGR16F, 1, 0));
 
 			depth_fmt = EF_ABGR16F;
 		}

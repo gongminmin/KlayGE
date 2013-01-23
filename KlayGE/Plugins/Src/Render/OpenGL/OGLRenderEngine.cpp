@@ -258,10 +258,10 @@ namespace KlayGE
 		}
 	}
 
-	void OGLRenderEngine::BindBuffer(GLenum target, GLuint buffer)
+	void OGLRenderEngine::BindBuffer(GLenum target, GLuint buffer, bool force)
 	{
 		KLAYGE_AUTO(iter, binded_buffer_.find(target));
-		if ((iter == binded_buffer_.end()) || (iter->second != buffer))
+		if (force || (iter == binded_buffer_.end()) || (iter->second != buffer))
 		{
 			glBindBuffer(target, buffer);
 			binded_buffer_[target] = buffer;
@@ -927,7 +927,7 @@ namespace KlayGE
 					normalized = (((VEU_Diffuse == vs_elem.usage) || (VEU_Specular == vs_elem.usage)) && !IsFloatFormat(vs_elem.format)) ? GL_TRUE : normalized;
 					GLvoid* offset = static_cast<GLvoid*>(elem_offset + rl.StartInstanceLocation() * instance_size);
 
-					stream.Active();
+					stream.Active(false);
 					glVertexAttribPointer(attr, num_components, type, normalized, instance_size, offset);
 					glEnableVertexAttribArray(attr);
 
