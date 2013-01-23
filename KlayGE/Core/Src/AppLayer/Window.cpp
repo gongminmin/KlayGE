@@ -752,15 +752,10 @@ namespace KlayGE
 			} while ((nullptr == a_window_) && (ident >= 0));
 		}
 
-		ANativeWindow_Buffer buffer;
-		if (ANativeWindow_lock(a_window_, &buffer, nullptr) >= 0)
-		{
-			ANativeWindow_unlockAndPost(a_window_);
-		}
 		left_ = settings.left;
 		top_ = settings.top;
-		width_ = buffer.width;
-		height_ = buffer.height;
+		width_ = ANativeWindow_getWidth(a_window_);
+		height_ = ANativeWindow_getHeight(a_window_);
 	}
 
 	Window::~Window()

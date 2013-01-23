@@ -2215,7 +2215,9 @@ namespace KlayGE
 		is_shader_validate_[type] &= compiled ? true : false;
 
 		glAttachShader(glsl_program_, object);
+#ifndef KLAYGE_PLATFORM_ANDROID
 		glDeleteShader(object);
+#endif
 	}
 
 	void OGLESShaderObject::LinkGLSL()

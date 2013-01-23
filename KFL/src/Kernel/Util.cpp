@@ -50,11 +50,11 @@ namespace KlayGE
 	#include <windows.h>
 #else
 	#include <cerrno>
+	#include <cstdlib>
+	#include <cwchar>
+	#include <clocale>
 #endif
 
-#include <cstdlib>
-#include <cwchar>
-#include <clocale>
 #include <vector>
 #include <algorithm>
 #include <boost/assert.hpp>
@@ -67,10 +67,26 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	std::string& Convert(std::string& dest, std::wstring const & src)
 	{
-#ifdef KLAYGE_PLATFORM_WINDOWS
+#if defined KLAYGE_PLATFORM_WINDOWS
 		int const mbs_len = WideCharToMultiByte(CP_ACP, 0, src.c_str(), static_cast<int>(src.size()), nullptr, 0, nullptr, nullptr);
 		std::vector<char> tmp(mbs_len + 1);
 		WideCharToMultiByte(CP_ACP, 0, src.c_str(), static_cast<int>(src.size()), &tmp[0], mbs_len, nullptr, nullptr);
+#elif defined KLAYGE_PLATFORM_ANDROID
+		// Hack for wcstombs
+		std::vector<char> tmp;
+		KLAYGE_FOREACH(std::wstring::const_reference ch, src)
+		{
+			if (ch < 0x80)
+			{
+				tmp.push_back(static_cast<char>(ch));
+			}
+			else
+			{
+				tmp.push_back(static_cast<char>((ch >> 0) & 0xFF));
+				tmp.push_back(static_cast<char>((ch >> 8) & 0xFF));
+			}
+		}
+		tmp.push_back('\0');
 #else
 		std::setlocale(LC_CTYPE, "");
 
@@ -97,10 +113,30 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	std::wstring& Convert(std::wstring& dest, std::string const & src)
 	{
-#ifdef KLAYGE_PLATFORM_WINDOWS
+#if defined KLAYGE_PLATFORM_WINDOWS
 		int const wcs_len = MultiByteToWideChar(CP_ACP, 0, src.c_str(), static_cast<int>(src.size()), nullptr, 0);
 		std::vector<wchar_t> tmp(wcs_len + 1);
 		MultiByteToWideChar(CP_ACP, 0, src.c_str(), static_cast<int>(src.size()), &tmp[0], wcs_len);
+#elif defined KLAYGE_PLATFORM_ANDROID
+		// Hack for mbstowcs
+		std::vector<char> tmp;
+		for (std::string::const_iterator iter = src.begin(); iter != src.end(); ++ iter)
+		{
+			char ch = *iter;
+			wchar_t wch;
+			if (ch < 0x80)
+			{
+				wch = ch;
+			}
+			else
+			{
+				wchar_t wch = ch;
+				++ iter;
+				wch |= (*iter) << 8;
+			}
+			tmp.push_back(wch);
+		}
+		tmp.push_back('\0');
 #else
 		std::setlocale(LC_CTYPE, "");
 
