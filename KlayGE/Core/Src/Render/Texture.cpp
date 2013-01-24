@@ -786,8 +786,34 @@ namespace
 					tex_desc_.format = EF_BC3;
 				}
 			}
-			if (((EF_BC1 == tex_desc_.format) && !caps.texture_format_support(EF_BC1))
-				|| ((EF_BC1_SRGB == tex_desc_.format) && !caps.texture_format_support(EF_BC1_SRGB)))
+			if ((EF_BC1_SRGB == tex_desc_.format) && !caps.texture_format_support(EF_BC1_SRGB))
+			{
+				for (size_t index = 0; index < array_size; ++ index)
+				{
+					uint32_t width = tex_desc_.width;
+					uint32_t height = tex_desc_.height;
+					for (size_t level = 0; level < tex_desc_.num_mipmaps; ++ level)
+					{
+						size_t i = index * tex_desc_.num_mipmaps + level;
+
+						BC1_layout* p = static_cast<BC1_layout*>(const_cast<void*>(tex_desc_.tex_data[i].data));
+						for (uint32_t block_y = 0; block_y < height; block_y += 4)
+						{
+							for (uint32_t block_x = 0; block_x < width; block_x += 4)
+							{
+								BC1sRGBToBC1(*p, *p);
+								++ p;
+							}
+						}
+
+						width = std::max<uint32_t>(1U, width / 2);
+						height = std::max<uint32_t>(1U, height / 2);
+					}
+				}
+
+				tex_desc_.format = EF_BC1;
+			}
+			if ((EF_BC1 == tex_desc_.format) && !caps.texture_format_support(EF_BC1))
 			{
 				std::vector<uint8_t> rgba_data_block;
 
@@ -809,14 +835,7 @@ namespace
 						{
 							for (uint32_t block_x = 0; block_x < width; block_x += 4)
 							{
-								if (IsSRGB(tex_desc_.format))
-								{
-									DecodeBC1_sRGB(rgba, p);
-								}
-								else
-								{
-									DecodeBC1(rgba, p);
-								}
+								DecodeBC1(rgba, p);
 								p += sizeof(BC1_layout);
 
 								for (int y = 0; y < 4; ++ y)
@@ -831,14 +850,7 @@ namespace
 					}
 				}
 
-				if (IsSRGB(tex_desc_.format))
-				{
-					tex_desc_.format = EF_ARGB8_SRGB;
-				}
-				else
-				{
-					tex_desc_.format = EF_ARGB8;
-				}
+				tex_desc_.format = EF_ARGB8;
 				tex_desc_.data_block = rgba_data_block;
 				size_t start = 0;
 				for (size_t index = 0; index < array_size; ++ index)
@@ -860,8 +872,34 @@ namespace
 					}
 				}
 			}
-			if (((EF_BC2 == tex_desc_.format) && !caps.texture_format_support(EF_BC2))
-				|| ((EF_BC2_SRGB == tex_desc_.format) && !caps.texture_format_support(EF_BC2_SRGB)))
+			if ((EF_BC2_SRGB == tex_desc_.format) && !caps.texture_format_support(EF_BC2_SRGB))
+			{
+				for (size_t index = 0; index < array_size; ++ index)
+				{
+					uint32_t width = tex_desc_.width;
+					uint32_t height = tex_desc_.height;
+					for (size_t level = 0; level < tex_desc_.num_mipmaps; ++ level)
+					{
+						size_t i = index * tex_desc_.num_mipmaps + level;
+
+						BC2_layout* p = static_cast<BC2_layout*>(const_cast<void*>(tex_desc_.tex_data[i].data));
+						for (uint32_t block_y = 0; block_y < height; block_y += 4)
+						{
+							for (uint32_t block_x = 0; block_x < width; block_x += 4)
+							{
+								BC2sRGBToBC2(*p, *p);
+								++ p;
+							}
+						}
+
+						width = std::max<uint32_t>(1U, width / 2);
+						height = std::max<uint32_t>(1U, height / 2);
+					}
+				}
+
+				tex_desc_.format = EF_BC2;
+			}
+			if ((EF_BC2 == tex_desc_.format) && !caps.texture_format_support(EF_BC2))
 			{
 				std::vector<uint8_t> rgba_data_block;
 
@@ -883,14 +921,7 @@ namespace
 						{
 							for (uint32_t block_x = 0; block_x < width; block_x += 4)
 							{
-								if (IsSRGB(tex_desc_.format))
-								{
-									DecodeBC2_sRGB(rgba, p);
-								}
-								else
-								{
-									DecodeBC2(rgba, p);
-								}
+								DecodeBC2(rgba, p);
 								p += sizeof(BC2_layout);
 
 								for (int y = 0; y < 4; ++ y)
@@ -905,14 +936,7 @@ namespace
 					}
 				}
 
-				if (IsSRGB(tex_desc_.format))
-				{
-					tex_desc_.format = EF_ARGB8_SRGB;
-				}
-				else
-				{
-					tex_desc_.format = EF_ARGB8;
-				}
+				tex_desc_.format = EF_ARGB8;
 				tex_desc_.data_block = rgba_data_block;
 				size_t start = 0;
 				for (size_t index = 0; index < array_size; ++ index)
@@ -934,8 +958,34 @@ namespace
 					}
 				}
 			}
-			if (((EF_BC3 == tex_desc_.format) && !caps.texture_format_support(EF_BC3))
-				|| ((EF_BC3_SRGB == tex_desc_.format) && !caps.texture_format_support(EF_BC3_SRGB)))
+			if ((EF_BC3_SRGB == tex_desc_.format) && !caps.texture_format_support(EF_BC3_SRGB))
+			{
+				for (size_t index = 0; index < array_size; ++ index)
+				{
+					uint32_t width = tex_desc_.width;
+					uint32_t height = tex_desc_.height;
+					for (size_t level = 0; level < tex_desc_.num_mipmaps; ++ level)
+					{
+						size_t i = index * tex_desc_.num_mipmaps + level;
+
+						BC3_layout * p = static_cast<BC3_layout*>(const_cast<void*>(tex_desc_.tex_data[i].data));
+						for (uint32_t block_y = 0; block_y < height; block_y += 4)
+						{
+							for (uint32_t block_x = 0; block_x < width; block_x += 4)
+							{
+								BC3sRGBToBC3(*p, *p);
+								++ p;
+							}
+						}
+
+						width = std::max<uint32_t>(1U, width / 2);
+						height = std::max<uint32_t>(1U, height / 2);
+					}
+				}
+
+				tex_desc_.format = EF_BC3;
+			}
+			if ((EF_BC3 == tex_desc_.format) && !caps.texture_format_support(EF_BC3))
 			{
 				std::vector<uint8_t> rgba_data_block;
 
@@ -957,14 +1007,7 @@ namespace
 						{
 							for (uint32_t block_x = 0; block_x < width; block_x += 4)
 							{
-								if (IsSRGB(tex_desc_.format))
-								{
-									DecodeBC3_sRGB(rgba, p);
-								}
-								else
-								{
-									DecodeBC3(rgba, p);
-								}
+								DecodeBC3(rgba, p);
 								p += sizeof(BC3_layout);
 
 								for (int y = 0; y < 4; ++ y)
@@ -979,14 +1022,7 @@ namespace
 					}
 				}
 
-				if (IsSRGB(tex_desc_.format))
-				{
-					tex_desc_.format = EF_ARGB8_SRGB;
-				}
-				else
-				{
-					tex_desc_.format = EF_ARGB8;
-				}
+				tex_desc_.format = EF_ARGB8;
 				tex_desc_.data_block = rgba_data_block;
 				size_t start = 0;
 				for (size_t index = 0; index < array_size; ++ index)

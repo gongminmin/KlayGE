@@ -125,6 +125,11 @@ namespace KlayGE
 	KLAYGE_CORE_API void EncodeBC5(TexturePtr const & bc_tex, TexturePtr const & src_tex);
 
 	KLAYGE_CORE_API void BC4ToBC1G(BC1_layout& bc1, BC4_layout const & bc4);
+	KLAYGE_CORE_API void BC1sRGBToBC1(BC1_layout& bc1, BC1_layout const & bc1srgb);
+	KLAYGE_CORE_API void BC2sRGBToBC2(BC2_layout& bc2, BC2_layout const & bc2srgb);
+	KLAYGE_CORE_API void BC3sRGBToBC3(BC3_layout& bc3, BC3_layout const & bc3srgb);
+	KLAYGE_CORE_API void BC4sRGBToBC4(BC4_layout& bc4, BC4_layout const & bc4srgb);
+	KLAYGE_CORE_API void BC5sRGBToBC5(BC5_layout& bc5, BC5_layout const & bc5srgb);
 }
 
 #endif		// _BLOCKCOMPRESSION_HPP

@@ -306,7 +306,7 @@ namespace KlayGE
 			PerViewport& pvp = viewports_[vpi];
 			for (size_t i = 0; i < pvp.g_buffers.size(); ++ i)
 			{
-				if (depth_texture_support_)
+				if (!depth_texture_support_)
 				{
 					pvp.pre_depth_buffers[i] = rf.MakeFrameBuffer();
 				}
@@ -477,7 +477,7 @@ namespace KlayGE
 
 		taa_pp_ = LoadPostProcess(ResLoader::Instance().Open("TAA.ppml"), "taa");
 
-		if (caps.max_simultaneous_rts > 1)
+		if (mrt_g_buffer_support_)
 		{
 			rsm_buffer_ = rf.MakeFrameBuffer();
 
@@ -732,7 +732,7 @@ namespace KlayGE
 				pvp.g_buffers_rt1[i]->Attach(FrameBuffer::ATT_DepthStencil, ds_views[i]);
 			}
 
-			if (depth_texture_support_)
+			if (!depth_texture_support_)
 			{
 				pvp.pre_depth_buffers[i]->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*pvp.g_buffer_depth_texs[i], 0, 1, 0));
 				pvp.pre_depth_buffers[i]->Attach(FrameBuffer::ATT_DepthStencil, ds_views[i]);
@@ -1179,7 +1179,7 @@ namespace KlayGE
 			CameraPtr const & camera = pvp.frame_buffer->GetViewport()->camera;
 			for (size_t i = 0; i < pvp.g_buffers.size(); ++ i)
 			{
-				if (depth_texture_support_)
+				if (!depth_texture_support_)
 				{
 					pvp.pre_depth_buffers[i]->GetViewport()->camera = camera;
 				}
@@ -1244,7 +1244,7 @@ namespace KlayGE
 				CameraPtr const & camera = pvp.frame_buffer->GetViewport()->camera;
 				for (size_t i = 0; i < pvp.g_buffers.size(); ++ i)
 				{
-					if (depth_texture_support_)
+					if (!depth_texture_support_)
 					{
 						pvp.pre_depth_buffers[i]->GetViewport()->camera = camera;
 					}

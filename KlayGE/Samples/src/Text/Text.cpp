@@ -91,16 +91,23 @@ bool TextApp::ConfirmDevice() const
 
 void TextApp::InitObjects()
 {
-	// ½¨Á¢×ÖÌå
 	font_ = Context::Instance().RenderFactoryInstance().MakeFont("gkai00mp.kfont");
 
 	{
+		// text.txt is in UCS2 little endian
 		ResIdentifierPtr text_input = ResLoader::Instance().Open("text.txt");
 		text_input->seekg(0, std::ios_base::end);
 		uint32_t size = static_cast<uint32_t>(text_input->tellg());
-		text_.resize(size / sizeof(text_[0]), '\0');
+		std::vector<uint16_t> ucs2_text(size / 2, '\0');
 		text_input->seekg(0, std::ios_base::beg);
-		text_input->read(&text_[0], size);
+		text_input->read(&ucs2_text[0], size);
+
+		text_.resize(ucs2_text.size(), L'\0');
+		for (size_t i = 0; i < ucs2_text.size(); ++ i)
+		{
+			LittleEndianToNative<sizeof(ucs2_text[i])>(&ucs2_text[i]);
+			text_[i] = ucs2_text[i];
+		}
 	}
 
 	this->LookAt(float3(-0.3f, 0.4f, -0.3f), float3(0, 0, 0));

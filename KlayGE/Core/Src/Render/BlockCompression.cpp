@@ -1839,4 +1839,49 @@ namespace KlayGE
 			bc1.bitmap[i] = mask;
 		}
 	}
+
+	void BC1sRGBToBC1(BC1_layout& bc1, BC1_layout const & bc1srgb)
+	{
+		Color clr = RGB565_to_Color(bc1srgb.clr_0);
+		clr.r() = MathLib::srgb_to_linear(clr.r());
+		clr.g() = MathLib::srgb_to_linear(clr.g());
+		clr.b() = MathLib::srgb_to_linear(clr.b());
+		bc1.clr_0 = Color_to_RGB565(clr);
+
+		clr = RGB565_to_Color(bc1srgb.clr_1);
+		clr.r() = MathLib::srgb_to_linear(clr.r());
+		clr.g() = MathLib::srgb_to_linear(clr.g());
+		clr.b() = MathLib::srgb_to_linear(clr.b());
+		bc1.clr_1 = Color_to_RGB565(clr);
+
+		memcpy(bc1.bitmap, bc1srgb.bitmap, sizeof(bc1srgb.bitmap));
+	}
+
+	void BC2sRGBToBC2(BC2_layout& bc2, BC2_layout const & bc2srgb)
+	{
+		BC1sRGBToBC1(bc2.bc1, bc2srgb.bc1);
+
+		memcpy(bc2.alpha, bc2srgb.alpha, sizeof(bc2srgb.alpha));
+	}
+
+	void BC3sRGBToBC3(BC3_layout& bc3, BC3_layout const & bc3srgb)
+	{
+		BC1sRGBToBC1(bc3.bc1, bc3srgb.bc1);
+
+		bc3.alpha = bc3srgb.alpha;
+	}
+
+	void BC4sRGBToBC4(BC4_layout& bc4, BC4_layout const & bc4srgb)
+	{
+		bc4.alpha_0 = static_cast<uint8_t>(MathLib::clamp(static_cast<int>(MathLib::srgb_to_linear(bc4srgb.alpha_0 / 255.0f) * 255 + 0.5f), 0, 255));
+		bc4.alpha_1 = static_cast<uint8_t>(MathLib::clamp(static_cast<int>(MathLib::srgb_to_linear(bc4srgb.alpha_1 / 255.0f) * 255 + 0.5f), 0, 255));
+
+		memcpy(bc4.bitmap, bc4srgb.bitmap, sizeof(bc4srgb.bitmap));
+	}
+
+	void BC5sRGBToBC5(BC5_layout& bc5, BC5_layout const & bc5srgb)
+	{
+		BC4sRGBToBC4(bc5.red, bc5srgb.red);
+		BC4sRGBToBC4(bc5.green, bc5srgb.green);
+	}
 }
