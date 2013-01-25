@@ -35,7 +35,7 @@ namespace KlayGE
 
 	std::wstring const & OGLESRenderFactory::Name() const
 	{
-		static std::wstring const name(L"OpenGL ES 2 Render Factory");
+		static std::wstring const name(L"OpenGL ES Render Factory");
 		return name;
 	}
 

@@ -85,7 +85,7 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	std::wstring const & OGLESRenderEngine::Name() const
 	{
-		static const std::wstring name(L"OpenGL ES 2 Render Engine");
+		static const std::wstring name(L"OpenGL ES Render Engine");
 		return name;
 	}
 
