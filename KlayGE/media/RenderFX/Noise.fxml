@@ -284,7 +284,7 @@ float fBm(float3 p, int octaves, float lacunarity = 2.0f, float gain = 0.5f)
 	return sum / amp_sum;
 }
 
-float fBm(float4 p, int octaves, float lacunarity = 2.0, float gain = 0.5)
+float fBm(float4 p, int octaves, float lacunarity = 2.0f, float gain = 0.5f)
 {
 	float sum = 0;
 	float amp = 1;
@@ -299,7 +299,7 @@ float fBm(float4 p, int octaves, float lacunarity = 2.0, float gain = 0.5)
 	return sum / amp_sum;
 }
 
-float turbulence(float2 p, int octaves, float lacunarity = 2.0, float gain = 0.5)
+float turbulence(float2 p, int octaves, float lacunarity = 2.0f, float gain = 0.5f)
 {
 	float sum = 0;
 	float amp = 1;
@@ -314,7 +314,7 @@ float turbulence(float2 p, int octaves, float lacunarity = 2.0, float gain = 0.5
 	return sum / amp_sum;
 }
 
-float turbulence(float3 p, int octaves, float lacunarity = 2.0, float gain = 0.5)
+float turbulence(float3 p, int octaves, float lacunarity = 2.0f, float gain = 0.5f)
 {
 	float sum = 0;
 	float amp = 1;
@@ -329,7 +329,7 @@ float turbulence(float3 p, int octaves, float lacunarity = 2.0, float gain = 0.5
 	return sum / amp_sum;
 }
 
-float turbulence(float4 p, int octaves, float lacunarity = 2.0, float gain = 0.5)
+float turbulence(float4 p, int octaves, float lacunarity = 2.0f, float gain = 0.5f)
 {
 	float sum = 0;
 	float amp = 1;
@@ -354,7 +354,7 @@ float ridge(float h, float offset)
     return h;
 }
 
-float ridgedmf(float2 p, int octaves, float lacunarity = 2.0, float gain = 0.5, float offset = 1.0)
+float ridgedmf(float2 p, int octaves, float lacunarity = 2.0f, float gain = 0.5f, float offset = 1.0f)
 {
 	float sum = 0;
 	float amp = 1;

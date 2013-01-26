@@ -58,7 +58,8 @@ namespace KlayGE
 			CF_POPCNT = 1UL << 13,
 			CF_AES = 1UL << 14,
 			CF_AVX = 1UL << 15,
-			CF_LZCNT = 1UL << 16
+			CF_LZCNT = 1UL << 16,
+			CF_AVX2 = 1UL << 17
 		};
 
 	public:

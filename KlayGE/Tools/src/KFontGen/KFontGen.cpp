@@ -313,7 +313,7 @@ public:
 				uint32_t const ch = validate_chars_[c];
 				font_info& ci = char_info_[ch];
 
-				std::fill(char_bitmap.begin(), char_bitmap.end(), 0);
+				memset(&char_bitmap[0], 0, char_bitmap.size());
 
 				FT_UInt gindex = FT_Get_Char_Index(ft_face_, ch);
 				FT_Load_Glyph(ft_face_, gindex, FT_LOAD_NO_BITMAP);
@@ -451,38 +451,24 @@ private:
 #ifdef KLAYGE_CPU_X64
 					uint64_t m64[2];
 					_mm_storeu_si128(reinterpret_cast<__m128i*>(m64), mask);
-					while (bsf64(index, m64[0]))
+					for (int i = 0; i < 2; ++ i)
 					{
-						this->add_edge_point(x + 64 * 0 + index, y, dmap, dist_cache, x_offset, y_offset);
-						m64[0] &= m64[0] - 1;
-					}
-					while (bsf64(index, m64[1]))
-					{
-						this->add_edge_point(x + 64 * 1 + index, y, dmap, dist_cache, x_offset, y_offset);
-						m64[1] &= m64[1] - 1;
+						while (bsf64(index, m64[i]))
+						{
+							this->add_edge_point(x + 64 * i + index, y, dmap, dist_cache, x_offset, y_offset);
+							m64[i] &= m64[i] - 1;
+						}
 					}
 #else
 					uint32_t m32[4];
 					_mm_storeu_si128(reinterpret_cast<__m128i*>(m32), mask);
-					while (bsf32(index, m32[0]))
+					for (int i = 0; i < 4; ++ i)
 					{
-						this->add_edge_point(x + 32 * 0 + index, y, dmap, dist_cache, x_offset, y_offset);
-						m32[0] &= m32[0] - 1;
-					}
-					while (bsf32(index, m32[1]))
-					{
-						this->add_edge_point(x + 32 * 1 + index, y, dmap, dist_cache, x_offset, y_offset);
-						m32[1] &= m32[1] - 1;
-					}
-					while (bsf32(index, m32[2]))
-					{
-						this->add_edge_point(x + 32 * 2 + index, y, dmap, dist_cache, x_offset, y_offset);
-						m32[2] &= m32[2] - 1;
-					}
-					while (bsf32(index, m32[3]))
-					{
-						this->add_edge_point(x + 32 * 3 + index, y, dmap, dist_cache, x_offset, y_offset);
-						m32[3] &= m32[3] - 1;
+						while (bsf32(index, m32[i]))
+						{
+							this->add_edge_point(x + 32 * i + index, y, dmap, dist_cache, x_offset, y_offset);
+							m32[i] &= m32[i] - 1;
+						}
 					}
 #endif
 				}
@@ -530,15 +516,13 @@ private:
 					}
 #else
 					uint32_t* m32 = reinterpret_cast<uint32_t*>(&mask);
-					while (bsf32(index, m32[0]))
+					for (int i = 0; i < 2; ++ i)
 					{
-						this->add_edge_point(x + 32 * 0 + index, y, dmap, dist_cache, x_offset, y_offset);
-						m32[0] &= m32[0] - 1;
-					}
-					while (bsf32(index, m32[1]))
-					{
-						this->add_edge_point(x + 32 * 1 + index, y, dmap, dist_cache, x_offset, y_offset);
-						m32[1] &= m32[1] - 1;
+						while (bsf32(index, m32[i]))
+						{
+							this->add_edge_point(x + 32 * i + index, y, dmap, dist_cache, x_offset, y_offset);
+							m32[i] &= m32[i] - 1;
+						}
 					}
 #endif
 				}
@@ -962,13 +946,6 @@ int main(int argc, char* argv[])
 	if (cpu.IsFeatureSupport(CPUInfo::CF_SSE2))
 	{
 		cout << "SSE2 is used." << endl;
-	}
-	else
-	{
-		if (cpu.IsFeatureSupport(CPUInfo::CF_MMX))
-		{
-			cout << "MMX is used." << endl;
-		}
 	}
 	cout << endl;
 

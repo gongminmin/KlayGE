@@ -118,6 +118,9 @@ namespace
 		CFM_SSE2		= 1UL << 26,	// SSE2
 		CFM_HTT			= 1UL << 28,	// Hyper-threading technology
 
+		// In EBX of type 7
+		CFM_AVX2		= 1UL << 5,
+
 		// In EAX of type 4. Intel only.
 		CFM_NC_Intel                = 0xFC000000,
 
@@ -328,7 +331,7 @@ namespace KlayGE
 		*reinterpret_cast<uint32_t*>(&cpu_string_[4]) = cpuid.Edx();
 		*reinterpret_cast<uint32_t*>(&cpu_string_[8]) = cpuid.Ecx();
 
-		if (cpuid.Eax() >= 1)
+		if (max_std_fn >= 1)
 		{
 			cpuid.Call(1);
 
@@ -345,6 +348,13 @@ namespace KlayGE
 			feature_mask_ |= cpuid.Ecx() & CFM_POPCNT ? CF_POPCNT : 0;
 			feature_mask_ |= cpuid.Ecx() & CFM_AES ? CF_AES : 0;
 			feature_mask_ |= (cpuid.Ecx() & CFM_OSXSAVE) && (cpuid.Ecx() & CFM_AVX) ? CF_AVX : 0;
+
+			if (max_std_fn >= 7)
+			{
+				cpuid.Call(7);
+
+				feature_mask_ |= cpuid.Ebx() & CFM_AVX2 ? CF_AVX2 : 0;
+			}
 		}
 
 		cpuid.Call(0x80000000);
