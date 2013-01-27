@@ -53,13 +53,15 @@ namespace KlayGE
 			CF_SSE4A = 1UL << 8,
 			CF_MisalignedSSE = 1UL << 9,
 			CF_X64 = 1UL << 10,
-			CF_FMA = 1UL << 11,
+			CF_FMA3 = 1UL << 11,
 			CF_MOVBE = 1UL << 12,
 			CF_POPCNT = 1UL << 13,
 			CF_AES = 1UL << 14,
 			CF_AVX = 1UL << 15,
 			CF_LZCNT = 1UL << 16,
-			CF_AVX2 = 1UL << 17
+			CF_AVX2 = 1UL << 17,
+			CF_FMA4 = 1UL << 18,
+			CF_F16C = 1UL << 19
 		};
 
 	public:

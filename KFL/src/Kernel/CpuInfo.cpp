@@ -103,14 +103,15 @@ namespace
 		// In ECX of type 1
 		CFM_SSE3		= 1UL << 0,		// SSE3
 		CFM_SSSE3		= 1UL << 9,		// SSSE3
-		CFM_FMA			= 1UL << 12,	// 256-bit FMA (Intel)
-		CFM_SSE41		= 1UL << 19,	// SSE4.1
-		CFM_SSE42		= 1UL << 20,	// SSE4.2
+		CFM_FMA3		= 1UL << 12,	// 256-bit FMA (Intel Haswell, AMD Piledriver)
+		CFM_SSE41		= 1UL << 19,	// SSE4.1 (Intel Core 2 Penryn, Intel Core i7 Nehalem, AMD Bulldozer)
+		CFM_SSE42		= 1UL << 20,	// SSE4.2 (Intel Core i7 Nehalem, AMD Bulldozer)
 		CFM_MOVBE		= 1UL << 22,	// MOVBE (Intel)
 		CFM_POPCNT		= 1UL << 23,	// POPCNT
 		CFM_AES			= 1UL << 25,	// AES support (Intel)
 		CFM_OSXSAVE		= 1UL << 27,	// OSX save
-		CFM_AVX			= 1UL << 28,	// 256-bit AVX
+		CFM_AVX			= 1UL << 28,	// 256-bit AVX (Intel Sandy Bridge, AMD Bulldozer)
+		CFM_F16C		= 1UL << 29,	// F16C (Intel Ivy Bridge, AMD Piledriver)
 
 		// In EDX of type 1
 		CFM_MMX			= 1UL << 23,	// MMX Technology
@@ -129,6 +130,7 @@ namespace
 		CFM_LZCNT_AMD				= 1UL << 5,
 		CFM_SSE4A_AMD				= 1UL << 6,
 		CFM_MisalignedSSE_AMD		= 1UL << 7,
+		CFM_FMA4					= 1UL << 16,	// FMA4 (AMD Bulldozer)
 
 		// In EDX of type 0x80000001
 		CFM_X64						= 1UL << 29,
@@ -343,11 +345,12 @@ namespace KlayGE
 			feature_mask_ |= cpuid.Ecx() & CFM_SSSE3 ? CF_SSSE3 : 0;
 			feature_mask_ |= cpuid.Ecx() & CFM_SSE41 ? CF_SSE41 : 0;
 			feature_mask_ |= cpuid.Ecx() & CFM_SSE42 ? CF_SSE42 : 0;
-			feature_mask_ |= cpuid.Ecx() & CFM_FMA ? CF_FMA : 0;
+			feature_mask_ |= (cpuid.Ecx() & CFM_OSXSAVE) && (cpuid.Ecx() & CFM_FMA3 ? CF_FMA3 : 0);
 			feature_mask_ |= cpuid.Ecx() & CFM_MOVBE ? CF_MOVBE : 0;
 			feature_mask_ |= cpuid.Ecx() & CFM_POPCNT ? CF_POPCNT : 0;
 			feature_mask_ |= cpuid.Ecx() & CFM_AES ? CF_AES : 0;
 			feature_mask_ |= (cpuid.Ecx() & CFM_OSXSAVE) && (cpuid.Ecx() & CFM_AVX) ? CF_AVX : 0;
+			feature_mask_ |= (cpuid.Ecx() & CFM_OSXSAVE) && (cpuid.Ecx() & CFM_F16C ? CF_F16C : 0);
 
 			if (max_std_fn >= 7)
 			{
@@ -371,6 +374,7 @@ namespace KlayGE
 					feature_mask_ |= cpuid.Ecx() & CFM_MisalignedSSE_AMD ? CF_MisalignedSSE : 0;
 				}
 				feature_mask_ |= cpuid.Edx() & CFM_X64 ? CF_X64 : 0;
+				feature_mask_ |= (cpuid.Ecx() & CFM_OSXSAVE) && (cpuid.Ecx() & CFM_FMA4 ? CF_FMA4 : 0);
 			}
 
 			if (max_ext_fn >= 0x80000004)
