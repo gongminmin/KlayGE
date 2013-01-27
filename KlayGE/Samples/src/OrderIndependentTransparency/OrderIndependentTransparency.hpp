@@ -50,7 +50,7 @@ private:
 	KlayGE::uint32_t num_layers_;
 
 	OITMode oit_mode_;
-	KlayGE::UIDialogPtr dialog_peeling_;
+	KlayGE::UIDialogPtr dialog_oit_;
 	KlayGE::UIDialogPtr dialog_layer_;
 	int id_oit_mode_;
 	int id_ctrl_camera_;

@@ -286,18 +286,18 @@ void OrderIndependentTransparencyApp::InitObjects()
 	blend_pp_ = LoadPostProcess(ResLoader::Instance().Open("Blend.ppml"), "blend");
 
 	UIManager::Instance().Load(ResLoader::Instance().Open("OrderIndependentTransparency.uiml"));
-	dialog_peeling_ = UIManager::Instance().GetDialogs()[0];
+	dialog_oit_ = UIManager::Instance().GetDialogs()[0];
 	dialog_layer_ = UIManager::Instance().GetDialogs()[1];
 
-	id_oit_mode_ = dialog_peeling_->IDFromName("OITMode");
-	id_ctrl_camera_ = dialog_peeling_->IDFromName("CtrlCamera");
+	id_oit_mode_ = dialog_oit_->IDFromName("OITMode");
+	id_ctrl_camera_ = dialog_oit_->IDFromName("CtrlCamera");
 	id_layer_combo_ = dialog_layer_->IDFromName("LayerCombo");
 	id_layer_tex_ = dialog_layer_->IDFromName("LayerTexButton");
 
-	dialog_peeling_->Control<UIComboBox>(id_oit_mode_)->OnSelectionChangedEvent().connect(boost::bind(&OrderIndependentTransparencyApp::OITModeHandler, this, _1));
-	this->OITModeHandler(*dialog_peeling_->Control<UIComboBox>(id_oit_mode_));
-	dialog_peeling_->Control<UICheckBox>(id_ctrl_camera_)->OnChangedEvent().connect(boost::bind(&OrderIndependentTransparencyApp::CtrlCameraHandler, this, _1));
-	this->CtrlCameraHandler(*dialog_peeling_->Control<UICheckBox>(id_ctrl_camera_));
+	dialog_oit_->Control<UIComboBox>(id_oit_mode_)->OnSelectionChangedEvent().connect(boost::bind(&OrderIndependentTransparencyApp::OITModeHandler, this, _1));
+	this->OITModeHandler(*dialog_oit_->Control<UIComboBox>(id_oit_mode_));
+	dialog_oit_->Control<UICheckBox>(id_ctrl_camera_)->OnChangedEvent().connect(boost::bind(&OrderIndependentTransparencyApp::CtrlCameraHandler, this, _1));
+	this->CtrlCameraHandler(*dialog_oit_->Control<UICheckBox>(id_ctrl_camera_));
 
 	dialog_layer_->Control<UIComboBox>(id_layer_combo_)->OnSelectionChangedEvent().connect(boost::bind(&OrderIndependentTransparencyApp::LayerChangedHandler, this, _1));
 	this->LayerChangedHandler(*dialog_layer_->Control<UIComboBox>(id_layer_combo_));

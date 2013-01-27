@@ -1,0 +1,35 @@
+<?xml version='1.0'?>
+
+<effect>
+	<include name="PostProcess.fxml"/>
+	
+	<parameter type="texture2D" name="src_tex"/>
+	<parameter type="sampler" name="point_sampler">
+		<state name="filtering" value="min_mag_mip_point"/>
+		<state name="address_u" value="clamp"/>
+		<state name="address_v" value="clamp"/>
+	</parameter>
+
+	<shader>
+		<![CDATA[
+float4 BlendPS(float2 tex : TEXCOORD0) : SV_Target
+{
+	return src_tex.Sample(point_sampler, tex);
+}
+		]]>
+	</shader>
+
+	<technique name="Blend">
+		<pass name="p0">
+			<state name="blend_enable" value="true"/>
+			<state name="src_blend" value="src_alpha"/>
+			<state name="dest_blend" value="inv_src_alpha"/>
+
+			<state name="depth_enable" value="false"/>
+			<state name="depth_write_mask" value="0"/>
+
+			<state name="vertex_shader" value="PostProcessVS()"/>
+			<state name="pixel_shader" value="BlendPS()"/>
+		</pass>
+	</technique>
+</effect>
