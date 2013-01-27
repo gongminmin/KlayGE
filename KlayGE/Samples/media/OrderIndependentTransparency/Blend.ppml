@@ -8,6 +8,6 @@
 		<output>
 			<pin name="output"/>
 		</output>
-		<shader effect="DepthPeeling.fxml" tech="Blend"/>
+		<shader effect="Blend.fxml" tech="Blend"/>
 	</post_processor>
 </post_processors>

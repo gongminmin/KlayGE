@@ -1,0 +1,73 @@
+<?xml version='1.0'?>
+
+<effect>
+	<include name="Lighting.fxml"/>
+	<include name="util.fxml"/>
+	<include name="Quaternion.fxml"/>
+	<include name="NoOIT.fxml"/>
+
+	<cbuffer name="per_frame">
+		<parameter type="float2" name="near_q"/>
+	</cbuffer>
+
+	<parameter type="sampler" name="point_sampler">
+		<state name="filtering" value="min_mag_mip_point"/>
+		<state name="address_u" value="clamp"/>
+		<state name="address_v" value="clamp"/>
+	</parameter>
+
+	<parameter type="texture2D" name="last_depth_tex"/>
+
+	<shader>
+		<![CDATA[
+void DepthPeelingVS(float4 pos				: POSITION,
+					float2 texcoord			: TEXCOORD0,
+					float4 tangent_quat		: TANGENT,
+					out float4 oL			: TEXCOORD0,
+					out float4 oH			: TEXCOORD1,
+					out float4 oPosSS		: TEXCOORD2,
+					out float4 oPos			: SV_Position)
+{
+	Transform(pos, texcoord, tangent_quat,
+		oL, oH, oPos);
+
+	oPosSS = oPos;
+}
+
+float4 DepthPeeling1stPS(float4 L : TEXCOORD0,
+					float4 H : TEXCOORD1) : SV_Target
+{
+	return Shading(L, H);
+}
+
+float4 DepthPeelingNthPS(float4 L : TEXCOORD0,
+					float4 H : TEXCOORD1,
+					float4 pos_ss : TEXCOORD2) : SV_Target
+{
+	float2 tex_coord = pos_ss.xy / pos_ss.w;
+	tex_coord.y *= KLAYGE_FLIPPING;
+	tex_coord = tex_coord / 2 + 0.5f;
+
+	float last_depth = non_linear_depth_to_linear(last_depth_tex.Sample(point_sampler, tex_coord).r, near_q.x, near_q.y);
+	clip(pos_ss.w - (last_depth + 1e-3f));
+
+	return Shading(L, H);
+}
+		]]>
+	</shader>
+
+	<technique name="DepthPeeling1st">
+		<pass name="p0">
+			<state name="cull_mode" value="none"/>
+
+			<state name="vertex_shader" value="DepthPeelingVS()"/>
+			<state name="pixel_shader" value="DepthPeeling1stPS()"/>
+		</pass>
+	</technique>
+
+	<technique name="DepthPeelingNth" inherit="DepthPeeling1st">
+		<pass name="p0">
+			<state name="pixel_shader" value="DepthPeelingNthPS()"/>
+		</pass>
+	</technique>
+</effect>

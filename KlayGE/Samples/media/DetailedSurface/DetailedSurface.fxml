@@ -37,27 +37,27 @@ void CalcTBN(float4 pos,
 					float2 texcoord0,
 					float4 T,
 					out float4 oL,
-					out float4 oV,
-					out float3 oH,
+					out float4 oH,
+					out float3 oV,
 					out float4 oPos)
 {
 	oPos = mul(pos, mvp);
 	
-	float3x3 objToTangentSpace;
-	objToTangentSpace[0] = transform_quat(float3(1, 0, 0), T);
-	objToTangentSpace[1] = transform_quat(float3(0, 1, 0), T) * sign(T.w);
-	objToTangentSpace[2] = transform_quat(float3(0, 0, 1), T);
+	float3x3 obj_to_tangent;
+	obj_to_tangent[0] = transform_quat(float3(1, 0, 0), T);
+	obj_to_tangent[1] = transform_quat(float3(0, 1, 0), T) * sign(T.w);
+	obj_to_tangent[2] = transform_quat(float3(0, 0, 1), T);
 
-	float3 lightVec = light_pos - pos.xyz;
-	float3 viewVec = eye_pos - pos.xyz;
-	float3 halfVec = normalize(lightVec) + normalize(viewVec);
+	float3 light_vec = light_pos - pos.xyz;
+	float3 view_vec = eye_pos - pos.xyz;
+	float3 half_vec = normalize(light_vec) + normalize(view_vec);
 
-	oL.xyz = mul(objToTangentSpace, lightVec);
-	oV.xyz = mul(objToTangentSpace, viewVec);
-	oH = mul(objToTangentSpace, halfVec);
+	oL.xyz = mul(obj_to_tangent, light_vec);
+	oH.xyz = mul(obj_to_tangent, half_vec);
+	oV = mul(obj_to_tangent, view_vec);
 	
 	oL.w = texcoord0.x;
-	oV.w = texcoord0.y;
+	oH.w = texcoord0.y;
 }
 
 void CalcTBNVS(float4 pos				: POSITION,
@@ -65,8 +65,8 @@ void CalcTBNVS(float4 pos				: POSITION,
 					float4 tangent_quat : TANGENT,
 					float distortion	: TEXCOORD1,
 					out float4 oL			: TEXCOORD0,	// in tangent space
-					out float4 oV			: TEXCOORD1,	// in tangent space
-					out float3 oH			: TEXCOORD2,	// in tangent space
+					out float4 oH			: TEXCOORD1,	// in tangent space
+					out float3 oV			: TEXCOORD2,
 					out float oDistortion	: TEXCOORD3,
 					out float4 oPos			: SV_Position)
 {
@@ -75,51 +75,50 @@ void CalcTBNVS(float4 pos				: POSITION,
 	tangent_quat = tangent_quat * 2 - 1;
 
 	CalcTBN(pos, texcoord0, tangent_quat,
-		oL, oV, oH, oPos);
+		oL, oH, oV, oPos);
 
 	oDistortion = distortion;
 }
 
-float4 Shading(float4 L, float3 H, float2 uv, float3 normal)
+float4 Shading(float3 L, float3 H, float2 uv, float3 normal)
 {
 	float atten = attenuation_term(0, -L.xyz, light_falloff);
 
 	float3 diffuse = judatex2d_wrap(diffuse_tex_bb, uv).rgb;
 
-	float3 light_vec = normalize(L.xyz);
+	float3 light_vec = normalize(L);
 	float3 halfway = normalize(H);
 
 	return float4(0.2f * diffuse + atten * light_color * calc_brdf(diffuse, 0.1f, 32, light_vec, halfway, normal), 1);
 }
 
 float4 NonePS(float4 L		: TEXCOORD0,
-					float4 V		: TEXCOORD1,
-					float3 H		: TEXCOORD2) : SV_Target
+					float4 H		: TEXCOORD1) : SV_Target
 {
-	return Shading(L, H, float2(L.w, V.w), float3(0, 0, 1));
+	float2 uv = float2(L.w, H.w);
+	return Shading(L.xyz, H.xyz, uv, float3(0, 0, 1));
 }
 
 float4 BumpMappingPS(float4 L		: TEXCOORD0,
-					float4 V		: TEXCOORD1,
-					float3 H		: TEXCOORD2) : SV_Target
+					float4 H		: TEXCOORD1) : SV_Target
 {
-	float2 uv = float2(L.w, V.w);
-	return Shading(L, H, uv, normalize(judatex2d_wrap(normal_tex_bb, uv).rgb * 2 - 1));
+	float2 uv = float2(L.w, H.w);
+	return Shading(L.xyz, H.xyz, uv, normalize(judatex2d_wrap(normal_tex_bb, uv).rgb * 2 - 1));
 }
 
 float4 ParallaxMappingPS(float4 L		: TEXCOORD0,
-					float4 V			: TEXCOORD1,
-					float3 H			: TEXCOORD2,
+					float4 H			: TEXCOORD1,
+					float3 V			: TEXCOORD2,
 					float distortion	: TEXCOORD3) : SV_Target
 {
-	float2 texCoord0 = float2(L.w, V.w);
+	float2 texCoord0 = float2(L.w, H.w);
 	
-	float3 view = normalize(V.xyz);
+	float3 view = normalize(V);
 	
 	float height = (judatex2d_wrap(height_tex_bb, texCoord0).r - 1) * height_scale;
 	float2 texUV = texCoord0 + (view.xy * height);
 
-	return Shading(L, H, texUV, normalize(judatex2d_wrap(normal_tex_bb, texUV).rgb * 2 - 1));
+	return Shading(L.xyz, H.xyz, texUV, normalize(judatex2d_wrap(normal_tex_bb, texUV).rgb * 2 - 1));
 }
 
 void ParallaxOcclusionMappingVS(float4 pos				: POSITION,
@@ -127,8 +126,8 @@ void ParallaxOcclusionMappingVS(float4 pos				: POSITION,
 					float4 tangent_quat			: TANGENT,
 					float distortion	: TEXCOORD1,
 					out float4 oL			: TEXCOORD0,	// in tangent space
-					out float4 oV			: TEXCOORD1,	// in tangent space
-					out float3 oH			: TEXCOORD2,	// in tangent space
+					out float4 oH			: TEXCOORD1,	// in tangent space
+					out float3 oV			: TEXCOORD2,	// in tangent space
 					out float4 oParallaxOffsetTS : TEXCOORD3,   // Parallax offset vector in tangent space
 					out float4 oPos			: SV_Position)
 {
@@ -137,19 +136,19 @@ void ParallaxOcclusionMappingVS(float4 pos				: POSITION,
 	tangent_quat = tangent_quat * 2 - 1;
 
 	CalcTBN(pos, texcoord0, tangent_quat,
-		oL, oV, oH, oPos);
+		oL, oH, oV, oPos);
 
-	oParallaxOffsetTS = float4(normalize(oV.xyz).xy, normalize(oL.xyz).xy) * height_scale;
+	oParallaxOffsetTS = float4(normalize(oV).xy, normalize(oL.xyz).xy) * height_scale;
 }
 
 float4 ParallaxOcclusionMappingPS(float4 L		: TEXCOORD0,
-					float4 V					: TEXCOORD1,
-					float3 H					: TEXCOORD2,
+					float4 H					: TEXCOORD1,
+					float3 V					: TEXCOORD2,
 					float4 vParallaxOffsetTS	: TEXCOORD3,
 					float distortion			: TEXCOORD4) : SV_Target
 {
-	float3 view = normalize(V.xyz);
-	float2 texCoord = float2(L.w, V.w);
+	float3 view = normalize(V);
+	float2 texCoord = float2(L.w, H.w);
 
 	float level = mipmap_level(texCoord, tex_size);
 
@@ -244,7 +243,7 @@ float4 ParallaxOcclusionMappingPS(float4 L		: TEXCOORD0,
 		}
 	}
 
-	return Shading(L, H, texUV, normalize(judatex2d_level_wrap(normal_tex_bb, texUV, level).rgb * 2 - 1)) * fOcclusionShadow;
+	return Shading(L.xyz, H.xyz, texUV, normalize(judatex2d_level_wrap(normal_tex_bb, texUV, level).rgb * 2 - 1)) * fOcclusionShadow;
 }
 		]]>
 	</shader>
@@ -386,8 +385,8 @@ void TessellationDS(HS_CONSTANT_DATA_OUTPUT HSConstantData,
 							const OutputPatch<VS_CONTROL_POINT_OUTPUT, 3> patch,
 
 							out float4 oL : TEXCOORD0,
-							out float4 oV : TEXCOORD1,
-							out float3 oH : TEXCOORD2,
+							out float4 oH : TEXCOORD1,
+							out float3 oV : TEXCOORD2,
 							out float4 oPos : SV_Position)
 {
 	// The barycentric coordinates
@@ -423,21 +422,21 @@ void TessellationDS(HS_CONSTANT_DATA_OUTPUT HSConstantData,
 	
 	oPos = mul(float4(pos, 1), mvp);
 	
-	float3x3 objToTangentSpace;
-	objToTangentSpace[0] = tangent;
-	objToTangentSpace[1] = binormal;
-	objToTangentSpace[2] = normal;
+	float3x3 obj_to_tangent;
+	obj_to_tangent[0] = tangent;
+	obj_to_tangent[1] = binormal;
+	obj_to_tangent[2] = normal;
 
-	float3 lightVec = light_pos - pos.xyz;
-	float3 viewVec = eye_pos - pos.xyz;
-	float3 halfVec = normalize(lightVec) + normalize(viewVec);
+	float3 light_vec = light_pos - pos.xyz;
+	float3 view_vec = eye_pos - pos.xyz;
+	float3 half_vec = normalize(light_vec) + normalize(view_vec);
 
-	oL.xyz = mul(objToTangentSpace, lightVec);
-	oV.xyz = mul(objToTangentSpace, viewVec);
-	oH = mul(objToTangentSpace, halfVec);
+	oL.xyz = mul(obj_to_tangent, light_vec);
+	oH.xyz = mul(obj_to_tangent, half_vec);
+	oV = mul(obj_to_tangent, view_vec);
 	
 	oL.w = texcoord0.x;
-	oV.w = texcoord0.y;
+	oH.w = texcoord0.y;
 }
 		]]>
 	</shader>

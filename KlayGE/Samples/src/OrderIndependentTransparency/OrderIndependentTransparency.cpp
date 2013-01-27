@@ -26,7 +26,7 @@
 #include <sstream>
 #include <boost/bind.hpp>
 
-#include "DepthPeeling.hpp"
+#include "OrderIndependentTransparency.hpp"
 
 using namespace std;
 using namespace KlayGE;
@@ -48,21 +48,51 @@ namespace
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-			technique_ = rf.LoadEffect("DepthPeeling.fxml")->TechniqueByName("DepthPeeling1st");
+			no_oit_tech_ = rf.LoadEffect("NoOIT.fxml")->TechniqueByName("NoOIT");
+			depth_peeling_1st_tech_ = rf.LoadEffect("DepthPeeling.fxml")->TechniqueByName("DepthPeeling1st");
+			depth_peeling_nth_tech_ = depth_peeling_1st_tech_->Effect().TechniqueByName("DepthPeelingNth");
+			technique_ = depth_peeling_1st_tech_;
 		}
 
 		void BuildMeshInfo()
 		{
-			AABBox const & bb = this->PosBound();
-			*(technique_->Effect().ParameterByName("pos_center")) = bb.Center();
-			*(technique_->Effect().ParameterByName("pos_extent")) = bb.HalfSize();
+			AABBox const & pos_bb = this->PosBound();
+			*(no_oit_tech_->Effect().ParameterByName("pos_center")) = pos_bb.Center();
+			*(no_oit_tech_->Effect().ParameterByName("pos_extent")) = pos_bb.HalfSize();
+			*(depth_peeling_1st_tech_->Effect().ParameterByName("pos_center")) = pos_bb.Center();
+			*(depth_peeling_1st_tech_->Effect().ParameterByName("pos_extent")) = pos_bb.HalfSize();
+
+			AABBox const & tc_bb = this->TexcoordBound();
+			*(no_oit_tech_->Effect().ParameterByName("tc_center")) = float2(tc_bb.Center().x(), tc_bb.Center().y());
+			*(no_oit_tech_->Effect().ParameterByName("tc_extent")) = float2(tc_bb.HalfSize().x(), tc_bb.HalfSize().y());
+			*(depth_peeling_1st_tech_->Effect().ParameterByName("tc_center")) = float2(tc_bb.Center().x(), tc_bb.Center().y());
+			*(depth_peeling_1st_tech_->Effect().ParameterByName("tc_extent")) = float2(tc_bb.HalfSize().x(), tc_bb.HalfSize().y());
+
+			TexturePtr diffuse_tex = SyncLoadTexture("robot-clean_diffuse.dds", EAH_GPU_Read | EAH_Immutable);
+			TexturePtr specular_tex = SyncLoadTexture("robot-clean_specular.dds", EAH_GPU_Read | EAH_Immutable);
+			TexturePtr normal_tex = SyncLoadTexture("robot-clean_normal.dds", EAH_GPU_Read | EAH_Immutable);
+			TexturePtr emit_tex = SyncLoadTexture("robot-clean_selfillumination.dds", EAH_GPU_Read | EAH_Immutable);
+
+			*(no_oit_tech_->Effect().ParameterByName("diffuse_tex")) = diffuse_tex;
+			*(no_oit_tech_->Effect().ParameterByName("specular_tex")) = specular_tex;
+			*(no_oit_tech_->Effect().ParameterByName("normal_tex")) = normal_tex;
+			*(no_oit_tech_->Effect().ParameterByName("emit_tex")) = emit_tex;
+			*(depth_peeling_1st_tech_->Effect().ParameterByName("diffuse_tex")) = diffuse_tex;
+			*(depth_peeling_1st_tech_->Effect().ParameterByName("specular_tex")) = specular_tex;
+			*(depth_peeling_1st_tech_->Effect().ParameterByName("normal_tex")) = normal_tex;
+			*(depth_peeling_1st_tech_->Effect().ParameterByName("emit_tex")) = emit_tex;
 		}
 
 		void DepthPeelingEnabled(bool dp)
 		{
 			if (!dp)
 			{
-				technique_ = technique_->Effect().TechniqueByName("NoDepthPeeling");
+				mode_ = OM_No;
+				technique_ = no_oit_tech_;
+			}
+			else
+			{
+				mode_ = OM_DepthPeeling;
 			}
 		}
 
@@ -70,11 +100,11 @@ namespace
 		{
 			if (fp)
 			{
-				technique_ = technique_->Effect().TechniqueByName("DepthPeeling1st");
+				technique_ = depth_peeling_1st_tech_;
 			}
 			else
 			{
-				technique_ = technique_->Effect().TechniqueByName("DepthPeelingNth");
+				technique_ = depth_peeling_nth_tech_;
 			}
 		}
 
@@ -91,15 +121,26 @@ namespace
 			float4x4 const & model = float4x4::Identity();
 
 			*(technique_->Effect().ParameterByName("mvp")) = model * camera.ViewProjMatrix();
+			*(technique_->Effect().ParameterByName("eye_pos")) = camera.EyePos();
 
-			float q = camera.FarPlane() / (camera.FarPlane() - camera.NearPlane());
-			*(technique_->Effect().ParameterByName("near_q")) = float2(camera.NearPlane() * q, q);
+			if (mode_ != OM_No)
+			{
+				float q = camera.FarPlane() / (camera.FarPlane() - camera.NearPlane());
+				*(technique_->Effect().ParameterByName("near_q")) = float2(camera.NearPlane() * q, q);
+			}
 		}
 
 		void LightPos(float3 const & light_pos)
 		{
-			*(technique_->Effect().ParameterByName("light_pos")) = light_pos;
+			*(no_oit_tech_->Effect().ParameterByName("light_pos")) = light_pos;
+			*(depth_peeling_1st_tech_->Effect().ParameterByName("light_pos")) = light_pos;
 		}
+
+	private:
+		OITMode mode_;
+		RenderTechniquePtr no_oit_tech_;
+		RenderTechniquePtr depth_peeling_1st_tech_;
+		RenderTechniquePtr depth_peeling_nth_tech_;
 	};
 
 	class PolygonObject : public SceneObjectHelper
@@ -108,7 +149,7 @@ namespace
 		PolygonObject()
 			: SceneObjectHelper(SOA_Cullable)
 		{
-			renderable_ = SyncLoadModel("teapot.meshml", EAH_GPU_Read | EAH_Immutable, CreateModelFactory<RenderModel>(), CreateMeshFactory<RenderPolygon>());
+			renderable_ = SyncLoadModel("robot_clean.meshml", EAH_GPU_Read | EAH_Immutable, CreateModelFactory<RenderModel>(), CreateMeshFactory<RenderPolygon>());
 		}
 
 		void LightPos(float3 const & light_pos)
@@ -178,21 +219,21 @@ int main()
 
 	Context::Instance().LoadCfg("KlayGE.cfg");
 
-	DepthPeelingApp app;
+	OrderIndependentTransparencyApp app;
 	app.Create();
 	app.Run();
 
 	return 0;
 }
 
-DepthPeelingApp::DepthPeelingApp()
-			: App3DFramework("DepthPeeling"),
+OrderIndependentTransparencyApp::OrderIndependentTransparencyApp()
+			: App3DFramework("Order Independent Transparency"),
 				num_layers_(0)
 {
-	ResLoader::Instance().AddPath("../../Samples/media/DepthPeeling");
+	ResLoader::Instance().AddPath("../../Samples/media/OrderIndependentTransparency");
 }
 
-bool DepthPeelingApp::ConfirmDevice() const
+bool OrderIndependentTransparencyApp::ConfirmDevice() const
 {
 	RenderDeviceCaps const & caps = Context::Instance().RenderFactoryInstance().RenderEngineInstance().DeviceCaps();
 	if (caps.max_shader_model < 2)
@@ -203,16 +244,16 @@ bool DepthPeelingApp::ConfirmDevice() const
 	return true;
 }
 
-void DepthPeelingApp::InitObjects()
+void OrderIndependentTransparencyApp::InitObjects()
 {
 	// ½¨Á¢×ÖÌå
 	font_ = Context::Instance().RenderFactoryInstance().MakeFont("gkai00mp.kfont");
 
 	polygon_ = MakeSharedPtr<PolygonObject>();
-	checked_pointer_cast<PolygonObject>(polygon_)->LightPos(float3(0, 2, -1));
+	checked_pointer_cast<PolygonObject>(polygon_)->LightPos(float3(-1, 2, 1));
 	polygon_->AddToSceneManager();
 
-	this->LookAt(float3(-0.3f, 0.4f, -0.3f), float3(0, 0, 0));
+	this->LookAt(float3(-2.0f, 2.0f, 2.0f), float3(0, 1, 0));
 	this->Proj(0.1f, 10);
 
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
@@ -232,33 +273,33 @@ void DepthPeelingApp::InitObjects()
 		oc_queries_[i] = checked_pointer_cast<ConditionalRender>(rf.MakeConditionalRender());
 	}
 
-	fpcController_.Scalers(0.05f, 0.01f);
+	fpcController_.Scalers(0.01f, 0.03f);
 
 	InputEngine& inputEngine(Context::Instance().InputFactoryInstance().InputEngineInstance());
 	InputActionMap actionMap;
 	actionMap.AddActions(actions, actions + sizeof(actions) / sizeof(actions[0]));
 
 	action_handler_t input_handler = MakeSharedPtr<input_signal>();
-	input_handler->connect(boost::bind(&DepthPeelingApp::InputHandler, this, _1, _2));
+	input_handler->connect(boost::bind(&OrderIndependentTransparencyApp::InputHandler, this, _1, _2));
 	inputEngine.ActionMap(actionMap, input_handler, true);
 
 	blend_pp_ = LoadPostProcess(ResLoader::Instance().Open("Blend.ppml"), "blend");
 
-	UIManager::Instance().Load(ResLoader::Instance().Open("DepthPeeling.uiml"));
+	UIManager::Instance().Load(ResLoader::Instance().Open("OrderIndependentTransparency.uiml"));
 	dialog_peeling_ = UIManager::Instance().GetDialogs()[0];
 	dialog_layer_ = UIManager::Instance().GetDialogs()[1];
 
-	id_use_depth_peeling_ = dialog_peeling_->IDFromName("UseDepthPeeling");
+	id_oit_mode_ = dialog_peeling_->IDFromName("OITMode");
 	id_ctrl_camera_ = dialog_peeling_->IDFromName("CtrlCamera");
 	id_layer_combo_ = dialog_layer_->IDFromName("LayerCombo");
 	id_layer_tex_ = dialog_layer_->IDFromName("LayerTexButton");
 
-	dialog_peeling_->Control<UICheckBox>(id_use_depth_peeling_)->OnChangedEvent().connect(boost::bind(&DepthPeelingApp::UsePeelingHandler, this, _1));
-	this->UsePeelingHandler(*dialog_peeling_->Control<UICheckBox>(id_use_depth_peeling_));
-	dialog_peeling_->Control<UICheckBox>(id_ctrl_camera_)->OnChangedEvent().connect(boost::bind(&DepthPeelingApp::CtrlCameraHandler, this, _1));
+	dialog_peeling_->Control<UIComboBox>(id_oit_mode_)->OnSelectionChangedEvent().connect(boost::bind(&OrderIndependentTransparencyApp::OITModeHandler, this, _1));
+	this->OITModeHandler(*dialog_peeling_->Control<UIComboBox>(id_oit_mode_));
+	dialog_peeling_->Control<UICheckBox>(id_ctrl_camera_)->OnChangedEvent().connect(boost::bind(&OrderIndependentTransparencyApp::CtrlCameraHandler, this, _1));
 	this->CtrlCameraHandler(*dialog_peeling_->Control<UICheckBox>(id_ctrl_camera_));
 
-	dialog_layer_->Control<UIComboBox>(id_layer_combo_)->OnSelectionChangedEvent().connect(boost::bind(&DepthPeelingApp::LayerChangedHandler, this, _1));
+	dialog_layer_->Control<UIComboBox>(id_layer_combo_)->OnSelectionChangedEvent().connect(boost::bind(&OrderIndependentTransparencyApp::LayerChangedHandler, this, _1));
 	this->LayerChangedHandler(*dialog_layer_->Control<UIComboBox>(id_layer_combo_));
 
 	for (uint32_t i = 0; i < peeled_texs_.size(); ++ i)
@@ -269,7 +310,7 @@ void DepthPeelingApp::InitObjects()
 	}
 }
 
-void DepthPeelingApp::OnResize(uint32_t width, uint32_t height)
+void OrderIndependentTransparencyApp::OnResize(uint32_t width, uint32_t height)
 {
 	App3DFramework::OnResize(width, height);
 
@@ -291,7 +332,11 @@ void DepthPeelingApp::OnResize(uint32_t width, uint32_t height)
 	}
 
 	ElementFormat peel_format;
-	if (rf.RenderEngineInstance().DeviceCaps().rendertarget_format_support(EF_ABGR8, 1, 0))
+	if (rf.RenderEngineInstance().DeviceCaps().rendertarget_format_support(EF_ABGR16F, 1, 0))
+	{
+		peel_format = EF_ABGR16F;
+	}
+	else if (rf.RenderEngineInstance().DeviceCaps().rendertarget_format_support(EF_ABGR8, 1, 0))
 	{
 		peel_format = EF_ABGR8;
 	}
@@ -311,7 +356,7 @@ void DepthPeelingApp::OnResize(uint32_t width, uint32_t height)
 	UIManager::Instance().SettleCtrls(width, height);
 }
 
-void DepthPeelingApp::InputHandler(InputEngine const & /*sender*/, InputAction const & action)
+void OrderIndependentTransparencyApp::InputHandler(InputEngine const & /*sender*/, InputAction const & action)
 {
 	switch (action.first)
 	{
@@ -321,12 +366,12 @@ void DepthPeelingApp::InputHandler(InputEngine const & /*sender*/, InputAction c
 	}
 }
 
-void DepthPeelingApp::UsePeelingHandler(UICheckBox const & sender)
+void OrderIndependentTransparencyApp::OITModeHandler(KlayGE::UIComboBox const & sender)
 {
-	use_depth_peeling_ = sender.GetChecked();
+	oit_mode_ = static_cast<OITMode>(sender.GetSelectedIndex());
 }
 
-void DepthPeelingApp::CtrlCameraHandler(KlayGE::UICheckBox const & sender)
+void OrderIndependentTransparencyApp::CtrlCameraHandler(KlayGE::UICheckBox const & sender)
 {
 	if (sender.GetChecked())
 	{
@@ -338,7 +383,7 @@ void DepthPeelingApp::CtrlCameraHandler(KlayGE::UICheckBox const & sender)
 	}
 }
 
-void DepthPeelingApp::LayerChangedHandler(KlayGE::UIComboBox const & sender)
+void OrderIndependentTransparencyApp::LayerChangedHandler(KlayGE::UIComboBox const & sender)
 {
 	if (sender.GetSelectedIndex() >= 0)
 	{
@@ -346,7 +391,7 @@ void DepthPeelingApp::LayerChangedHandler(KlayGE::UIComboBox const & sender)
 	}
 }
 
-void DepthPeelingApp::DoUpdateOverlay()
+void OrderIndependentTransparencyApp::DoUpdateOverlay()
 {
 	SceneManager& sceneMgr(Context::Instance().SceneManagerInstance());
 
@@ -356,7 +401,7 @@ void DepthPeelingApp::DoUpdateOverlay()
 	stream.precision(2);
 	stream << std::fixed << this->FPS() << " FPS";
 
-	font_->RenderText(0, 0, Color(1, 1, 0, 1), L"Depth Peeling", 16);
+	font_->RenderText(0, 0, Color(1, 1, 0, 1), L"Order Independent Transparency", 16);
 	font_->RenderText(0, 18, Color(1, 1, 0, 1), stream.str(), 16);
 
 	stream.str(L"");
@@ -370,11 +415,11 @@ void DepthPeelingApp::DoUpdateOverlay()
 	font_->RenderText(0, 54, Color(1, 1, 0, 1), stream.str(), 16);
 }
 
-uint32_t DepthPeelingApp::DoUpdate(uint32_t pass)
+uint32_t OrderIndependentTransparencyApp::DoUpdate(uint32_t pass)
 {
 	RenderEngine& re(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 
-	if (use_depth_peeling_)
+	if (OM_DepthPeeling == oit_mode_)
 	{
 		switch (pass)
 		{
