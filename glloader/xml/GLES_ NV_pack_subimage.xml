@@ -1,0 +1,9 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GLES_NV_pack_subimage" reg_no="132">
+	<tokens>
+		<token name="GL_PACK_ROW_LENGTH_NV" value="0x0D02"/>
+		<token name="GL_PACK_SKIP_ROWS_NV" value="0x0D03"/>
+		<token name="GL_PACK_SKIP_PIXELS_NV" value="0x0D04"/>
+	</tokens>
+</gl_extension>

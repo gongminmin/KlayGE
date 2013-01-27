@@ -1,0 +1,19 @@
+<?xml version='1.0'?>
+
+<gl_extension name="EGL_ANDROID_blob_cache" reg_no="48">
+	<typedefs>
+		<typedef type="khronos_ssize_t" synonym="EGLsizeiANDROID"/>
+		<typedef type="void" synonym="(*EGLSetBlobFuncANDROID)(const void* key, EGLsizeiANDROID keySize, const void* value, EGLsizeiANDROID valueSize)"/>
+		<typedef type="EGLsizeiANDROID" synonym="(*EGLGetBlobFuncANDROID)(const void* key, EGLsizeiANDROID keySize, void* value, EGLsizeiANDROID valueSize)"/>
+	</typedefs>
+
+	<functions>
+		<function name="eglSetBlobCacheFuncsANDROID" return="void">
+			<params>
+				<param type="EGLDisplay" name="dpy"/>
+				<param type="EGLSetBlobFuncANDROID" name="set"/>
+				<param type="EGLGetBlobFuncANDROID" name="get"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

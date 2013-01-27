@@ -1,0 +1,28 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GLES_NV_3dvision_settings" reg_no="129">
+	<tokens>
+		<token name="GL_3DVISION_STEREO_NV" value="0x90F4"/>
+		<token name="GL_STEREO_SEPARATION_NV" value="0x90F5"/>
+		<token name="GL_STEREO_CONVERGENCE_NV" value="0x90F6"/>
+		<token name="GL_STEREO_CUTOFF_NV" value="0x90F7"/>
+		<token name="GL_STEREO_PROJECTION_NV" value="0x90F8"/>
+		<token name="GL_STEREO_PROJECTION_PERSPECTIVE_NV" value="0x90F9"/>
+		<token name="GL_STEREO_PROJECTION_ORTHO_NV" value="0x90FA"/>
+	</tokens>
+
+	<functions>
+		<function name="glStereoParameterfNV" return="void">
+			<params>
+				<param type="GLenum" name="pname"/>
+				<param type="GLfloat" name="param"/>
+			</params>
+		</function>
+		<function name="glStereoParameteriNV" return="void">
+			<params>
+				<param type="GLenum" name="pname"/>
+				<param type="GLint" name="param"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

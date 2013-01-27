@@ -1,0 +1,19 @@
+<?xml version='1.0'?>
+
+<gl_extension name="EGL_ANDROID_native_fence_sync" reg_no="50">
+	<tokens>
+		<token name="GL_EGL_SYNC_NATIVE_FENCE_ANDROID" value="0x3144"/>
+		<token name="GL_EGL_SYNC_NATIVE_FENCE_FD_ANDROID" value="0x3145"/>
+		<token name="GL_EGL_NO_NATIVE_FENCE_FD_ANDROID" value="-1"/>
+		<token name="GL_EGL_SYNC_NATIVE_FENCE_SIGNALED_ANDROID" value="0x3146"/>
+	</tokens>
+	
+	<functions>
+		<function name="eglDupNativeFenceFDANDROID" return="EGLint">
+			<params>
+				<param type="EGLDisplay" name="dpy"/>
+				<param type="EGLSyncKHR" name="sync"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

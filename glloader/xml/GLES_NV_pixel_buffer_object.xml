@@ -1,0 +1,10 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GLES_NV_pixel_buffer_object" reg_no="134">
+	<tokens>
+		<token name="GL_PIXEL_PACK_BUFFER_NV" value="0x88EB"/>
+		<token name="GL_PIXEL_UNPACK_BUFFER_NV" value="0x88EC"/>
+		<token name="GL_PIXEL_PACK_BUFFER_BINDING_NV" value="0x88ED"/>
+		<token name="GL_PIXEL_UNPACK_BUFFER_BINDING_NV" value="0x88EF"/>
+	</tokens>
+</gl_extension>

@@ -1,0 +1,10 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GLES_NV_texture_compression_latc" reg_no="130">
+	<tokens>
+		<token name="GL_COMPRESSED_LUMINANCE_LATC1_NV" value="0x8C70"/>
+		<token name="GL_COMPRESSED_SIGNED_LUMINANCE_LATC1_NV" value="0x8C71"/>
+		<token name="GL_COMPRESSED_LUMINANCE_ALPHA_LATC2_NV" value="0x8C72"/>
+		<token name="GL_COMPRESSED_SIGNED_LUMINANCE_ALPHA_LATC2_NV" value="0x8C73"/>
+	</tokens>
+</gl_extension>

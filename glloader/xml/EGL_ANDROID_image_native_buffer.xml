@@ -1,0 +1,7 @@
+<?xml version='1.0'?>
+
+<gl_extension name="EGL_ANDROID_image_native_buffer" reg_no="49">
+	<tokens>
+		<token name="EGL_NATIVE_BUFFER_ANDROID" value="0x3140"/>
+	</tokens>                            
+</gl_extension>

@@ -1,0 +1,7 @@
+<?xml version='1.0'?>
+
+<gl_extension name="EGL_ANDROID_recordable" reg_no="51">
+	<tokens>
+		<token name="EGL_RECORDABLE_ANDROID" value="0x3142"/>
+	</tokens>
+</gl_extension>

@@ -1,0 +1,7 @@
+<?xml version='1.0'?>
+
+<gl_extension name="EGL_NV_3dvision_surface" reg_no="46">
+	<tokens>
+		<token name="EGL_AUTO_STEREO_NV" value="0x3136"/>
+	</tokens>
+</gl_extension>

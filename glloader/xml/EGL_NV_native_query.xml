@@ -1,0 +1,26 @@
+<?xml version='1.0'?>
+
+<gl_extension name="EGL_NV_native_query" reg_no="45">
+	<functions>
+		<function name="eglQueryNativeDisplayNV" return="EGLBoolean">
+			<params>
+				<param type="EGLDisplay" name="dpy"/>
+				<param type="EGLNativeDisplayType*" name="display_id"/>
+			</params>
+		</function>
+		<function name="eglQueryNativeWindowNV" return="EGLBoolean">
+			<params>
+				<param type="EGLDisplay" name="dpy"/>
+				<param type="EGLSurface" name="surf"/>
+				<param type="EGLNativeWindowType*" name="window"/>
+			</params>
+		</function>
+		<function name="eglQueryNativePixmapNV" return="EGLBoolean">
+			<params>
+				<param type="EGLDisplay" name="dpy"/>
+				<param type="EGLSurface" name="surf"/>
+				<param type="EGLNativePixmapType*" name="pixmap"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

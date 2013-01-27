@@ -1,0 +1,7 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GLES_NV_platform_binary" reg_no="131">
+	<tokens>
+		<token name="GL_NVIDIA_PLATFORM_BINARY_NV" value="0x890B"/>
+	</tokens>
+</gl_extension>

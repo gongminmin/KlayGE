@@ -1,0 +1,8 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GLES_NV_packed_float" reg_no="127">
+	<tokens>
+		<token name="GL_R11F_G11F_B10F_NV" value="0x8C3A"/>
+		<token name="GL_UNSIGNED_INT_10F_11F_11F_REV_NV" value="0x8C3B"/>
+	</tokens>
+</gl_extension>

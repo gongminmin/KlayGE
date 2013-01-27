@@ -1,0 +1,7 @@
+<?xml version='1.0'?>
+
+<gl_extension name="EGL_ANDROID_framebuffer_target" reg_no="47">
+	<tokens>
+		<token name="EGL_FRAMEBUFFER_TARGET_ANDROID" value="0x3147"/>
+	</tokens>
+</gl_extension>

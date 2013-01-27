@@ -1,0 +1,11 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GLES_OES_depth_texture_cube_map" reg_no="136">
+	<tokens>
+		<token name="GL_DEPTH_COMPONENT" value="0x1902"/>
+		<token name="GL_DEPTH_STENCIL_OES" value="0x84F9"/>
+		<token name="GL_UNSIGNED_SHORT" value="0x1403"/>
+		<token name="GL_UNSIGNED_INT" value="0x1405"/>
+		<token name="GL_DEPTH24_STENCIL8_OES" value="0x88F0"/>
+	</tokens>
+</gl_extension>

@@ -1,0 +1,7 @@
+<?xml version='1.0'?>
+
+<gl_extension name="EGL_EXT_buffer_age" reg_no="52">
+	<tokens>
+		<token name="EGL_BUFFER_AGE_EXT" value="0x313D"/>
+	</tokens>
+</gl_extension>

@@ -1,0 +1,7 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GLES_NV_bgr" reg_no="135">
+	<tokens>
+		<token name="GL_BGR_NV" value="0x80E0"/>
+	</tokens>
+</gl_extension>
