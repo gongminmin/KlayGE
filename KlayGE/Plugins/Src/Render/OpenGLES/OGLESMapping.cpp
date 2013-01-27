@@ -522,7 +522,7 @@ namespace KlayGE
 			break;
 
 		case EF_D16:
-			internalFormat = GL_DEPTH_COMPONENT16;
+			internalFormat = GL_DEPTH_COMPONENT;
 			glformat = GL_DEPTH_COMPONENT;
 			gltype = GL_UNSIGNED_SHORT;
 			break;
@@ -530,7 +530,7 @@ namespace KlayGE
 		case EF_D24S8:
 			if (glloader_GLES_OES_packed_depth_stencil())
 			{
-				internalFormat = GL_DEPTH24_STENCIL8_OES;
+				internalFormat = GL_DEPTH_STENCIL_OES;
 				glformat = GL_DEPTH_STENCIL_OES;
 				gltype = GL_UNSIGNED_INT_24_8_OES;
 			}

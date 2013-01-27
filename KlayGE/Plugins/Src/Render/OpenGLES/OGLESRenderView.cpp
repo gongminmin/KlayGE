@@ -612,6 +612,20 @@ namespace KlayGE
 		GLenum gltype;
 		OGLESMapping::MappingFormat(internalFormat, glformat, gltype, pf_);
 
+		switch (internalFormat)
+		{
+		case GL_DEPTH_COMPONENT:
+			internalFormat = GL_DEPTH_COMPONENT16;
+			break;
+
+		case GL_DEPTH_STENCIL_OES:
+			internalFormat = GL_DEPTH24_STENCIL8_OES;
+			break;
+
+		default:
+			break;
+		}
+
 		glGenRenderbuffers(1, &rbo_);
 		glBindRenderbuffer(GL_RENDERBUFFER, rbo_);
 		glRenderbufferStorage(GL_RENDERBUFFER,
