@@ -44,11 +44,6 @@ namespace KlayGE
 
 		if (init_data != nullptr)
 		{
-			D3D11_BUFFER_DESC desc;
-			this->GetD3DFlags(desc.Usage, desc.CPUAccessFlags, desc.BindFlags, desc.MiscFlags);
-			desc.ByteWidth = init_data->row_pitch;
-			desc.StructureByteStride = NumFormatBytes(fmt_as_shader_res_);
-
 			size_in_byte_ = init_data->row_pitch;
 
 			D3D11_SUBRESOURCE_DATA subres_init;
@@ -56,37 +51,7 @@ namespace KlayGE
 			subres_init.SysMemPitch = init_data->row_pitch;
 			subres_init.SysMemSlicePitch = init_data->slice_pitch;
 
-			ID3D11Buffer* buffer;
-			TIF(d3d_device_->CreateBuffer(&desc, &subres_init, &buffer));
-			buffer_ = MakeCOMPtr(buffer);
-			hw_buf_size_ = this->Size();
-
-			if ((access_hint_ & EAH_GPU_Read) && (fmt_as_shader_res_ != EF_Unknown))
-			{
-				D3D11_SHADER_RESOURCE_VIEW_DESC sr_desc;
-				sr_desc.Format = (access_hint_ & EAH_GPU_Structured) ? DXGI_FORMAT_UNKNOWN : D3D11Mapping::MappingFormat(fmt_as_shader_res_);
-				sr_desc.ViewDimension = D3D11_SRV_DIMENSION_BUFFER;
-				sr_desc.Buffer.ElementOffset = 0;
-				sr_desc.Buffer.ElementWidth = size_in_byte_ / NumFormatBytes(fmt_as_shader_res_);
-
-				ID3D11ShaderResourceView* d3d_sr_view;
-				TIF(d3d_device_->CreateShaderResourceView(buffer_.get(), &sr_desc, &d3d_sr_view));
-				d3d_sr_view_ = MakeCOMPtr(d3d_sr_view);
-			}
-
-			if ((access_hint_ & EAH_GPU_Unordered) && (fmt_as_shader_res_ != EF_Unknown))
-			{
-				D3D11_UNORDERED_ACCESS_VIEW_DESC uav_desc;
-				uav_desc.Format = DXGI_FORMAT_UNKNOWN;
-				uav_desc.ViewDimension = D3D11_UAV_DIMENSION_BUFFER;
-				uav_desc.Buffer.FirstElement = 0;
-				uav_desc.Buffer.NumElements = this->Size() / desc.StructureByteStride;
-				uav_desc.Buffer.Flags = 0;
-
-				ID3D11UnorderedAccessView* d3d_ua_view;
-				TIF(d3d_device_->CreateUnorderedAccessView(buffer_.get(), &uav_desc, &d3d_ua_view));
-				d3d_ua_view_ = MakeCOMPtr(d3d_ua_view);
-			}
+			this->CreateBuffer(&subres_init);
 		}
 	}
 
@@ -164,42 +129,47 @@ namespace KlayGE
 
 		if (this->Size() > hw_buf_size_)
 		{
-			D3D11_BUFFER_DESC desc;
-			this->GetD3DFlags(desc.Usage, desc.CPUAccessFlags, desc.BindFlags, desc.MiscFlags);
-			desc.ByteWidth = size_in_byte_;
-			desc.StructureByteStride = NumFormatBytes(fmt_as_shader_res_);
+			this->CreateBuffer(NULL);
+		}
+	}
 
-			ID3D11Buffer* buffer;
-			TIF(d3d_device_->CreateBuffer(&desc, nullptr, &buffer));
-			buffer_ = MakeCOMPtr(buffer);
-			hw_buf_size_ = this->Size();
+	void D3D11GraphicsBuffer::CreateBuffer(D3D11_SUBRESOURCE_DATA const * subres_init)
+	{
+		D3D11_BUFFER_DESC desc;
+		this->GetD3DFlags(desc.Usage, desc.CPUAccessFlags, desc.BindFlags, desc.MiscFlags);
+		desc.ByteWidth = size_in_byte_;
+		desc.StructureByteStride = NumFormatBytes(fmt_as_shader_res_);
 
-			if ((access_hint_ & EAH_GPU_Read) && (fmt_as_shader_res_ != EF_Unknown))
-			{
-				D3D11_SHADER_RESOURCE_VIEW_DESC sr_desc;
-				sr_desc.Format = (access_hint_ & EAH_GPU_Structured) ? DXGI_FORMAT_UNKNOWN : D3D11Mapping::MappingFormat(fmt_as_shader_res_);
-				sr_desc.ViewDimension = D3D11_SRV_DIMENSION_BUFFER;
-				sr_desc.Buffer.ElementOffset = 0;
-				sr_desc.Buffer.ElementWidth = size_in_byte_ / NumFormatBytes(fmt_as_shader_res_);
+		ID3D11Buffer* buffer;
+		TIF(d3d_device_->CreateBuffer(&desc, subres_init, &buffer));
+		buffer_ = MakeCOMPtr(buffer);
+		hw_buf_size_ = this->Size();
 
-				ID3D11ShaderResourceView* d3d_sr_view;
-				TIF(d3d_device_->CreateShaderResourceView(buffer_.get(), &sr_desc, &d3d_sr_view));
-				d3d_sr_view_ = MakeCOMPtr(d3d_sr_view);
-			}
+		if ((access_hint_ & EAH_GPU_Read) && (fmt_as_shader_res_ != EF_Unknown))
+		{
+			D3D11_SHADER_RESOURCE_VIEW_DESC sr_desc;
+			sr_desc.Format = (access_hint_ & EAH_GPU_Structured) ? DXGI_FORMAT_UNKNOWN : D3D11Mapping::MappingFormat(fmt_as_shader_res_);
+			sr_desc.ViewDimension = D3D11_SRV_DIMENSION_BUFFER;
+			sr_desc.Buffer.ElementOffset = 0;
+			sr_desc.Buffer.ElementWidth = size_in_byte_ / desc.StructureByteStride;
 
-			if ((access_hint_ & EAH_GPU_Unordered) && (fmt_as_shader_res_ != EF_Unknown))
-			{
-				D3D11_UNORDERED_ACCESS_VIEW_DESC uav_desc;
-				uav_desc.Format = DXGI_FORMAT_UNKNOWN;
-				uav_desc.ViewDimension = D3D11_UAV_DIMENSION_BUFFER;
-				uav_desc.Buffer.FirstElement = 0;
-				uav_desc.Buffer.NumElements = this->Size() / desc.StructureByteStride;
-				uav_desc.Buffer.Flags = 0;
+			ID3D11ShaderResourceView* d3d_sr_view;
+			TIF(d3d_device_->CreateShaderResourceView(buffer_.get(), &sr_desc, &d3d_sr_view));
+			d3d_sr_view_ = MakeCOMPtr(d3d_sr_view);
+		}
 
-				ID3D11UnorderedAccessView* d3d_ua_view;
-				TIF(d3d_device_->CreateUnorderedAccessView(buffer_.get(), &uav_desc, &d3d_ua_view));
-				d3d_ua_view_ = MakeCOMPtr(d3d_ua_view);
-			}
+		if ((access_hint_ & EAH_GPU_Unordered) && (fmt_as_shader_res_ != EF_Unknown))
+		{
+			D3D11_UNORDERED_ACCESS_VIEW_DESC uav_desc;
+			uav_desc.Format = (access_hint_ & EAH_GPU_Structured) ? DXGI_FORMAT_UNKNOWN : D3D11Mapping::MappingFormat(fmt_as_shader_res_);
+			uav_desc.ViewDimension = D3D11_UAV_DIMENSION_BUFFER;
+			uav_desc.Buffer.FirstElement = 0;
+			uav_desc.Buffer.NumElements = size_in_byte_ / desc.StructureByteStride;
+			uav_desc.Buffer.Flags = 0;
+
+			ID3D11UnorderedAccessView* d3d_ua_view;
+			TIF(d3d_device_->CreateUnorderedAccessView(buffer_.get(), &uav_desc, &d3d_ua_view));
+			d3d_ua_view_ = MakeCOMPtr(d3d_ua_view);
 		}
 	}
 

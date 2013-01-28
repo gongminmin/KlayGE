@@ -48,6 +48,7 @@ namespace KlayGE
 
 	private:
 		void DoResize();
+		void CreateBuffer(D3D11_SUBRESOURCE_DATA const * subres_init);
 
 		void* Map(BufferAccess ba);
 		void Unmap();
