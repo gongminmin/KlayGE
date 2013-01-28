@@ -38,10 +38,9 @@ private:
 
 	std::vector<KlayGE::FrameBufferPtr> peeling_fbs_;
 	std::vector<KlayGE::TexturePtr> peeled_texs_;
-	std::vector<KlayGE::RenderViewPtr> peeled_views_;
 	
 	KlayGE::array<KlayGE::TexturePtr, 2> depth_texs_;
-	KlayGE::array<KlayGE::RenderViewPtr, 2> depth_view_;
+	KlayGE::array<KlayGE::RenderViewPtr, 2> depth_views_;
 
 	KlayGE::array<KlayGE::ConditionalRenderPtr, 2> oc_queries_;
 

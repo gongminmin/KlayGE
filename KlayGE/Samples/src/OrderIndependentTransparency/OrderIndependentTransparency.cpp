@@ -49,8 +49,10 @@ namespace
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
 			no_oit_tech_ = rf.LoadEffect("NoOIT.fxml")->TechniqueByName("NoOIT");
+
 			depth_peeling_1st_tech_ = rf.LoadEffect("DepthPeeling.fxml")->TechniqueByName("DepthPeeling1st");
 			depth_peeling_nth_tech_ = depth_peeling_1st_tech_->Effect().TechniqueByName("DepthPeelingNth");
+			
 			technique_ = depth_peeling_1st_tech_;
 		}
 
@@ -83,28 +85,46 @@ namespace
 			*(depth_peeling_1st_tech_->Effect().ParameterByName("emit_tex")) = emit_tex;
 		}
 
-		void DepthPeelingEnabled(bool dp)
+		void SetOITMode(OITMode mode)
 		{
-			if (!dp)
-			{
-				mode_ = OM_No;
-				technique_ = no_oit_tech_;
-			}
-			else
-			{
-				mode_ = OM_DepthPeeling;
-			}
+			mode_ = mode;
 		}
 
 		void FirstPass(bool fp)
 		{
 			if (fp)
 			{
-				technique_ = depth_peeling_1st_tech_;
+				switch (mode_)
+				{
+				case OM_No:
+					technique_ = no_oit_tech_;
+					break;
+
+				case OM_DepthPeeling:
+					technique_ = depth_peeling_1st_tech_;
+					break;
+
+				default:
+					BOOST_ASSERT(false);
+					break;
+				}
 			}
 			else
 			{
-				technique_ = depth_peeling_nth_tech_;
+				switch (mode_)
+				{
+				case OM_No:
+					technique_ = no_oit_tech_;
+					break;
+
+				case OM_DepthPeeling:
+					technique_ = depth_peeling_nth_tech_;
+					break;
+
+				default:
+					BOOST_ASSERT(false);
+					break;
+				}
 			}
 		}
 
@@ -138,7 +158,9 @@ namespace
 
 	private:
 		OITMode mode_;
+		
 		RenderTechniquePtr no_oit_tech_;
+
 		RenderTechniquePtr depth_peeling_1st_tech_;
 		RenderTechniquePtr depth_peeling_nth_tech_;
 	};
@@ -161,12 +183,12 @@ namespace
 			}
 		}
 
-		void DepthPeelingEnabled(bool dp)
+		void SetOITMode(OITMode mode)
 		{
 			RenderModelPtr model = checked_pointer_cast<RenderModel>(renderable_);
 			for (uint32_t i = 0; i < model->NumMeshes(); ++ i)
 			{
-				checked_pointer_cast<RenderPolygon>(model->Mesh(i))->DepthPeelingEnabled(dp);
+				checked_pointer_cast<RenderPolygon>(model->Mesh(i))->SetOITMode(mode);
 			}
 		}
 
@@ -266,7 +288,6 @@ void OrderIndependentTransparencyApp::InitObjects()
 		peeling_fbs_[i]->GetViewport()->camera = re.CurFrameBuffer()->GetViewport()->camera;
 	}
 	peeled_texs_.resize(peeling_fbs_.size());
-	peeled_views_.resize(peeled_texs_.size());
 
 	for (size_t i = 0; i < oc_queries_.size(); ++ i)
 	{
@@ -305,7 +326,7 @@ void OrderIndependentTransparencyApp::InitObjects()
 	for (uint32_t i = 0; i < peeled_texs_.size(); ++ i)
 	{
 		std::wostringstream stream;
-		stream << i << " Layer";
+		stream << "Layer " << i;
 		dialog_layer_->Control<UIComboBox>(id_layer_combo_)->AddItem(stream.str());
 	}
 }
@@ -328,7 +349,7 @@ void OrderIndependentTransparencyApp::OnResize(uint32_t width, uint32_t height)
 	for (size_t i = 0; i < depth_texs_.size(); ++ i)
 	{
 		depth_texs_[i] = rf.MakeTexture2D(width, height, 1, 1, depth_format, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
-		depth_view_[i] = rf.Make2DDepthStencilRenderView(*depth_texs_[i], 0, 1, 0);
+		depth_views_[i] = rf.Make2DDepthStencilRenderView(*depth_texs_[i], 0, 1, 0);
 	}
 
 	ElementFormat peel_format;
@@ -347,10 +368,9 @@ void OrderIndependentTransparencyApp::OnResize(uint32_t width, uint32_t height)
 	for (size_t i = 0; i < peeling_fbs_.size(); ++ i)
 	{
 		peeled_texs_[i] = rf.MakeTexture2D(width, height, 1, 1, peel_format, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
-		peeled_views_[i] = rf.Make2DRenderView(*peeled_texs_[i], 0, 1, 0);
 
-		peeling_fbs_[i]->Attach(FrameBuffer::ATT_Color0, peeled_views_[i]);
-		peeling_fbs_[i]->Attach(FrameBuffer::ATT_DepthStencil, depth_view_[i % 2]);
+		peeling_fbs_[i]->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*peeled_texs_[i], 0, 1, 0));
+		peeling_fbs_[i]->Attach(FrameBuffer::ATT_DepthStencil, depth_views_[i % 2]);
 	}
 
 	UIManager::Instance().SettleCtrls(width, height);
@@ -419,6 +439,8 @@ uint32_t OrderIndependentTransparencyApp::DoUpdate(uint32_t pass)
 {
 	RenderEngine& re(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 
+	checked_pointer_cast<PolygonObject>(polygon_)->SetOITMode(oit_mode_);
+	
 	if (OM_DepthPeeling == oit_mode_)
 	{
 		switch (pass)
@@ -516,7 +538,7 @@ uint32_t OrderIndependentTransparencyApp::DoUpdate(uint32_t pass)
 	}
 	else
 	{
-		checked_pointer_cast<PolygonObject>(polygon_)->DepthPeelingEnabled(false);
+		checked_pointer_cast<PolygonObject>(polygon_)->FirstPass(true);
 
 		re.BindFrameBuffer(FrameBufferPtr());
 		Color clear_clr(0.2f, 0.4f, 0.6f, 1);
