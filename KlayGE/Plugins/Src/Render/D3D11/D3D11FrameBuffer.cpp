@@ -164,13 +164,17 @@ namespace KlayGE
 		}
 		else
 		{
-			d3d_imm_ctx->OMSetRenderTargetsAndUnorderedAccessViews(static_cast<UINT>(rt_view.size()), &rt_view[0], this->D3DDSView().get(),
+			ID3D11RenderTargetView** rts = rt_view.empty() ? nullptr : &rt_view[0];
+			d3d_imm_ctx->OMSetRenderTargetsAndUnorderedAccessViews(static_cast<UINT>(rt_view.size()), rts, this->D3DDSView().get(),
 				0, static_cast<UINT>(ua_view.size()), &ua_view[0], &ua_init_count[0]);
 		}
-		
-		d3d_viewport_.Width = static_cast<float>(viewport_->width);
-		d3d_viewport_.Height = static_cast<float>(viewport_->height);
-		re.RSSetViewports(1, &d3d_viewport_);
+	
+		if (!rt_view.empty())
+		{
+			d3d_viewport_.Width = static_cast<float>(viewport_->width);
+			d3d_viewport_.Height = static_cast<float>(viewport_->height);
+			re.RSSetViewports(1, &d3d_viewport_);
+		}
 	}
 
 	void D3D11FrameBuffer::OnUnbind()

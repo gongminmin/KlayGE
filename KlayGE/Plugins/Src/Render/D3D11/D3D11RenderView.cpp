@@ -248,6 +248,10 @@ namespace KlayGE
 	D3D11UnorderedAccessView::D3D11UnorderedAccessView(Texture& texture, int first_array_index, int array_size, int level)
 		: ua_src_(&texture), ua_first_subres_(first_array_index * texture.NumMipMaps() + level), ua_num_subres_(1)
 	{
+		D3D11RenderEngine& renderEngine(*checked_cast<D3D11RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance()));
+		d3d_device_ = renderEngine.D3DDevice();
+		d3d_imm_ctx_ = renderEngine.D3DDeviceImmContext();
+
 		ua_view_ = checked_cast<D3D11Texture*>(&texture)->RetriveD3DUnorderedAccessView(first_array_index, array_size, level);
 
 		width_ = texture.Width(level);
@@ -258,6 +262,10 @@ namespace KlayGE
 	D3D11UnorderedAccessView::D3D11UnorderedAccessView(Texture& texture_3d, int array_index, uint32_t first_slice, uint32_t num_slices, int level)
 		: ua_src_(&texture_3d), ua_first_subres_((array_index * texture_3d.Depth(level) + first_slice) * texture_3d.NumMipMaps() + level), ua_num_subres_(num_slices * texture_3d.NumMipMaps() + level)
 	{
+		D3D11RenderEngine& renderEngine(*checked_cast<D3D11RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance()));
+		d3d_device_ = renderEngine.D3DDevice();
+		d3d_imm_ctx_ = renderEngine.D3DDeviceImmContext();
+
 		ua_view_ = checked_cast<D3D11Texture*>(&texture_3d)->RetriveD3DUnorderedAccessView(array_index, first_slice, num_slices, level);
 
 		width_ = texture_3d.Width(level);
@@ -268,6 +276,10 @@ namespace KlayGE
 	D3D11UnorderedAccessView::D3D11UnorderedAccessView(Texture& texture_cube, int array_index, Texture::CubeFaces face, int level)
 		: ua_src_(&texture_cube), ua_first_subres_((array_index * 6 + face) * texture_cube.NumMipMaps() + level), ua_num_subres_(1)
 	{
+		D3D11RenderEngine& renderEngine(*checked_cast<D3D11RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance()));
+		d3d_device_ = renderEngine.D3DDevice();
+		d3d_imm_ctx_ = renderEngine.D3DDeviceImmContext();
+
 		ua_view_ = checked_cast<D3D11Texture*>(&texture_cube)->RetriveD3DUnorderedAccessView(array_index, face, level);
 
 		width_ = texture_cube.Width(level);
@@ -280,18 +292,13 @@ namespace KlayGE
 	{
 		BOOST_ASSERT(gb.AccessHint() & EAH_GPU_Write);
 
-		D3D11_UNORDERED_ACCESS_VIEW_DESC desc;
-		desc.Format = DXGI_FORMAT_UNKNOWN;
-		desc.ViewDimension = D3D11_UAV_DIMENSION_BUFFER;
-		desc.Buffer.FirstElement = 0;
-		desc.Buffer.NumElements = gb.Size() / NumFormatBytes(pf);
-		desc.Buffer.Flags = 0;
+		D3D11RenderEngine& renderEngine(*checked_cast<D3D11RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance()));
+		d3d_device_ = renderEngine.D3DDevice();
+		d3d_imm_ctx_ = renderEngine.D3DDeviceImmContext();
 
-		ID3D11UnorderedAccessView* ua_view;
-		TIF(d3d_device_->CreateUnorderedAccessView(checked_cast<D3D11GraphicsBuffer*>(&gb)->D3DBuffer().get(), &desc, &ua_view));
-		ua_view_ = MakeCOMPtr(ua_view);
+		ua_view_ = checked_cast<D3D11GraphicsBuffer*>(&gb)->D3DUnorderedAccessView();
 
-		width_ = desc.Buffer.NumElements;
+		width_ = gb.Size() / NumFormatBytes(pf);
 		height_ = 1;
 		pf_ = pf;
 	}
@@ -299,6 +306,10 @@ namespace KlayGE
 	D3D11UnorderedAccessView::D3D11UnorderedAccessView(ID3D11UnorderedAccessViewPtr const & view, uint32_t width, uint32_t height, ElementFormat pf)
 		: ua_view_(view), ua_src_(nullptr), ua_first_subres_(0), ua_num_subres_(0)
 	{
+		D3D11RenderEngine& renderEngine(*checked_cast<D3D11RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance()));
+		d3d_device_ = renderEngine.D3DDevice();
+		d3d_imm_ctx_ = renderEngine.D3DDeviceImmContext();
+
 		width_ = width;
 		height_ = height;
 		pf_ = pf;

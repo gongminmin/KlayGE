@@ -107,7 +107,10 @@ namespace KlayGE
 			}
 			if (access_hint_ & EAH_GPU_Write)
 			{
-				bind_flags |= D3D11_BIND_STREAM_OUTPUT;
+				if (!((access_hint_ & EAH_GPU_Structured) || (access_hint_ & EAH_GPU_Unordered)))
+				{
+					bind_flags |= D3D11_BIND_STREAM_OUTPUT;
+				}
 			}
 			if (access_hint_ & EAH_GPU_Unordered)
 			{
@@ -161,11 +164,34 @@ namespace KlayGE
 		if ((access_hint_ & EAH_GPU_Unordered) && (fmt_as_shader_res_ != EF_Unknown))
 		{
 			D3D11_UNORDERED_ACCESS_VIEW_DESC uav_desc;
-			uav_desc.Format = (access_hint_ & EAH_GPU_Structured) ? DXGI_FORMAT_UNKNOWN : D3D11Mapping::MappingFormat(fmt_as_shader_res_);
+			if (access_hint_ & EAH_Raw)
+			{
+				uav_desc.Format = DXGI_FORMAT_R32_TYPELESS;
+			}
+			else if (access_hint_ & EAH_GPU_Structured)
+			{
+				uav_desc.Format = DXGI_FORMAT_UNKNOWN;
+			}
+			else
+			{
+				D3D11Mapping::MappingFormat(fmt_as_shader_res_);
+			}
 			uav_desc.ViewDimension = D3D11_UAV_DIMENSION_BUFFER;
 			uav_desc.Buffer.FirstElement = 0;
 			uav_desc.Buffer.NumElements = size_in_byte_ / desc.StructureByteStride;
 			uav_desc.Buffer.Flags = 0;
+			if (access_hint_ & EAH_Raw)
+			{
+				uav_desc.Buffer.Flags |= D3D11_BUFFER_UAV_FLAG_RAW;
+			}
+			if (access_hint_ & EAH_Append)
+			{
+				uav_desc.Buffer.Flags |= D3D11_BUFFER_UAV_FLAG_APPEND;
+			}
+			if (access_hint_ & EAH_Counter)
+			{
+				uav_desc.Buffer.Flags |= D3D11_BUFFER_UAV_FLAG_COUNTER;
+			}
 
 			ID3D11UnorderedAccessView* d3d_ua_view;
 			TIF(d3d_device_->CreateUnorderedAccessView(buffer_.get(), &uav_desc, &d3d_ua_view));
