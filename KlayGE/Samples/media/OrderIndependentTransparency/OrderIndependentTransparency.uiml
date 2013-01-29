@@ -3,8 +3,9 @@
 <ui>
 	<dialog id="OIT" caption="OIT" x="-240" y="230" align_x="right" width="240" height="130">
 		<control type="combo_box" id="OITMode" x="30" y="30" width="180" height="24" is_default="0" selected="1">
-			<item name="No OIT" />
-			<item name="Depth peeling" />
+			<item name="No OIT"/>
+			<item name="Depth Peeling"/>
+			<item name="Per Pixel Linked List"/>
 		</control>
 		<control type="check_box" id="CtrlCamera" caption="Control camera" x="30" y="80" width="160" height="24" checked="0" hotkey="0" is_default="0"/>
 	</dialog>

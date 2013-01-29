@@ -10,6 +10,7 @@ SET(EFFECT_FILES
 	${KLAYGE_PROJECT_DIR}/Samples/media/OrderIndependentTransparency/Blend.fxml
 	${KLAYGE_PROJECT_DIR}/Samples/media/OrderIndependentTransparency/DepthPeeling.fxml
 	${KLAYGE_PROJECT_DIR}/Samples/media/OrderIndependentTransparency/NoOIT.fxml
+	${KLAYGE_PROJECT_DIR}/Samples/media/OrderIndependentTransparency/PerPixelLinkedList.fxml
 )
 
 SET(POST_PROCESSORS

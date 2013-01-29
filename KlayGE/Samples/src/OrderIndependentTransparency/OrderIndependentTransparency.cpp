@@ -43,7 +43,7 @@ namespace
 	class RenderPolygon : public StaticMesh
 	{
 	public:
-		RenderPolygon(RenderModelPtr model, std::wstring const & name)
+		RenderPolygon(RenderModelPtr const & model, std::wstring const & name)
 			: StaticMesh(model, name)
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
@@ -52,6 +52,12 @@ namespace
 
 			depth_peeling_1st_tech_ = rf.LoadEffect("DepthPeeling.fxml")->TechniqueByName("DepthPeeling1st");
 			depth_peeling_nth_tech_ = depth_peeling_1st_tech_->Effect().TechniqueByName("DepthPeelingNth");
+
+			gen_per_pixel_linked_list_tech_ = rf.LoadEffect("PerPixelLinkedList.fxml")->TechniqueByName("GenPerPixelLinkedList");
+			render_per_pixel_linked_list_tech_ = gen_per_pixel_linked_list_tech_->Effect().TechniqueByName("RenderPerPixelLinkedList");
+			rl_quad_ = rf.MakeRenderLayout();
+			rl_quad_->TopologyType(RenderLayout::TT_TriangleStrip);
+			rl_quad_->NumVertices(4);
 			
 			technique_ = depth_peeling_1st_tech_;
 		}
@@ -63,12 +69,16 @@ namespace
 			*(no_oit_tech_->Effect().ParameterByName("pos_extent")) = pos_bb.HalfSize();
 			*(depth_peeling_1st_tech_->Effect().ParameterByName("pos_center")) = pos_bb.Center();
 			*(depth_peeling_1st_tech_->Effect().ParameterByName("pos_extent")) = pos_bb.HalfSize();
+			*(gen_per_pixel_linked_list_tech_->Effect().ParameterByName("pos_center")) = pos_bb.Center();
+			*(gen_per_pixel_linked_list_tech_->Effect().ParameterByName("pos_extent")) = pos_bb.HalfSize();
 
 			AABBox const & tc_bb = this->TexcoordBound();
 			*(no_oit_tech_->Effect().ParameterByName("tc_center")) = float2(tc_bb.Center().x(), tc_bb.Center().y());
 			*(no_oit_tech_->Effect().ParameterByName("tc_extent")) = float2(tc_bb.HalfSize().x(), tc_bb.HalfSize().y());
 			*(depth_peeling_1st_tech_->Effect().ParameterByName("tc_center")) = float2(tc_bb.Center().x(), tc_bb.Center().y());
 			*(depth_peeling_1st_tech_->Effect().ParameterByName("tc_extent")) = float2(tc_bb.HalfSize().x(), tc_bb.HalfSize().y());
+			*(gen_per_pixel_linked_list_tech_->Effect().ParameterByName("tc_center")) = float2(tc_bb.Center().x(), tc_bb.Center().y());
+			*(gen_per_pixel_linked_list_tech_->Effect().ParameterByName("tc_extent")) = float2(tc_bb.HalfSize().x(), tc_bb.HalfSize().y());
 
 			TexturePtr diffuse_tex = SyncLoadTexture("robot-clean_diffuse.dds", EAH_GPU_Read | EAH_Immutable);
 			TexturePtr specular_tex = SyncLoadTexture("robot-clean_specular.dds", EAH_GPU_Read | EAH_Immutable);
@@ -83,6 +93,10 @@ namespace
 			*(depth_peeling_1st_tech_->Effect().ParameterByName("specular_tex")) = specular_tex;
 			*(depth_peeling_1st_tech_->Effect().ParameterByName("normal_tex")) = normal_tex;
 			*(depth_peeling_1st_tech_->Effect().ParameterByName("emit_tex")) = emit_tex;
+			*(gen_per_pixel_linked_list_tech_->Effect().ParameterByName("diffuse_tex")) = diffuse_tex;
+			*(gen_per_pixel_linked_list_tech_->Effect().ParameterByName("specular_tex")) = specular_tex;
+			*(gen_per_pixel_linked_list_tech_->Effect().ParameterByName("normal_tex")) = normal_tex;
+			*(gen_per_pixel_linked_list_tech_->Effect().ParameterByName("emit_tex")) = emit_tex;
 		}
 
 		void SetOITMode(OITMode mode)
@@ -104,6 +118,10 @@ namespace
 					technique_ = depth_peeling_1st_tech_;
 					break;
 
+				case OM_PerPixelLinkedList:
+					technique_ = gen_per_pixel_linked_list_tech_;
+					break;
+
 				default:
 					BOOST_ASSERT(false);
 					break;
@@ -121,6 +139,10 @@ namespace
 					technique_ = depth_peeling_nth_tech_;
 					break;
 
+				case OM_PerPixelLinkedList:
+					technique_ = render_per_pixel_linked_list_tech_;
+					break;
+
 				default:
 					BOOST_ASSERT(false);
 					break;
@@ -133,6 +155,20 @@ namespace
 			*(technique_->Effect().ParameterByName("last_depth_tex")) = depth_tex;
 		}
 
+		void LinkedListBuffer(GraphicsBufferPtr const & fragment_link_buf, GraphicsBufferPtr const & start_offset_buf)
+		{
+			*(gen_per_pixel_linked_list_tech_->Effect().ParameterByName("rw_frags_buffer")) = fragment_link_buf;
+			*(gen_per_pixel_linked_list_tech_->Effect().ParameterByName("rw_start_offset_buffer")) = start_offset_buf;
+			*(render_per_pixel_linked_list_tech_->Effect().ParameterByName("frags_buffer")) = fragment_link_buf;
+			*(render_per_pixel_linked_list_tech_->Effect().ParameterByName("start_offset_buffer")) = start_offset_buf;
+		}
+
+		void RenderQuad()
+		{
+			RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+			re.Render(*render_per_pixel_linked_list_tech_, *rl_quad_);
+		}
+
 		void Update()
 		{
 			App3DFramework const & app = Context::Instance().AppInstance();
@@ -143,10 +179,24 @@ namespace
 			*(technique_->Effect().ParameterByName("mvp")) = model * camera.ViewProjMatrix();
 			*(technique_->Effect().ParameterByName("eye_pos")) = camera.EyePos();
 
-			if (mode_ != OM_No)
+			if (OM_DepthPeeling == mode_)
 			{
 				float q = camera.FarPlane() / (camera.FarPlane() - camera.NearPlane());
 				*(technique_->Effect().ParameterByName("near_q")) = float2(camera.NearPlane() * q, q);
+			}
+			else if (OM_PerPixelLinkedList == mode_)
+			{
+				RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+				*(technique_->Effect().ParameterByName("frame_width")) = static_cast<int32_t>(re.CurFrameBuffer()->Width());
+
+				float4 bg_color(0.2f, 0.4f, 0.6f, 1);
+				if (Context::Instance().Config().graphics_cfg.gamma)
+				{
+					bg_color.x() = 0.029f;
+					bg_color.y() = 0.133f;
+					bg_color.z() = 0.325f;
+				}
+				*(technique_->Effect().ParameterByName("bg_color")) = bg_color;
 			}
 		}
 
@@ -154,6 +204,7 @@ namespace
 		{
 			*(no_oit_tech_->Effect().ParameterByName("light_pos")) = light_pos;
 			*(depth_peeling_1st_tech_->Effect().ParameterByName("light_pos")) = light_pos;
+			*(gen_per_pixel_linked_list_tech_->Effect().ParameterByName("light_pos")) = light_pos;
 		}
 
 	private:
@@ -163,6 +214,10 @@ namespace
 
 		RenderTechniquePtr depth_peeling_1st_tech_;
 		RenderTechniquePtr depth_peeling_nth_tech_;
+
+		RenderTechniquePtr gen_per_pixel_linked_list_tech_;
+		RenderTechniquePtr render_per_pixel_linked_list_tech_;
+		RenderLayoutPtr rl_quad_;
 	};
 
 	class PolygonObject : public SceneObjectHelper
@@ -208,6 +263,21 @@ namespace
 			{
 				checked_pointer_cast<RenderPolygon>(model->Mesh(i))->LastDepth(depth_tex);
 			}
+		}
+
+		void LinkedListBuffer(GraphicsBufferPtr const & fragment_link_buf, GraphicsBufferPtr const & start_offset_buf)
+		{
+			RenderModelPtr model = checked_pointer_cast<RenderModel>(renderable_);
+			for (uint32_t i = 0; i < model->NumMeshes(); ++ i)
+			{
+				checked_pointer_cast<RenderPolygon>(model->Mesh(i))->LinkedListBuffer(fragment_link_buf, start_offset_buf);
+			}
+		}
+
+		void RenderQuad()
+		{
+			RenderModelPtr model = checked_pointer_cast<RenderModel>(renderable_);
+			checked_pointer_cast<RenderPolygon>(model->Mesh(0))->RenderQuad();
 		}
 
 		void Update(float app_time, float elapsed_time)
@@ -294,6 +364,11 @@ void OrderIndependentTransparencyApp::InitObjects()
 		oc_queries_[i] = checked_pointer_cast<ConditionalRender>(rf.MakeConditionalRender());
 	}
 
+	frag_link_buf_ = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Read | EAH_GPU_Write | EAH_GPU_Unordered | EAH_GPU_Structured | EAH_Counter, nullptr, EF_ABGR32F);
+	start_offset_buf_ = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Read | EAH_GPU_Write | EAH_GPU_Unordered | EAH_Raw, nullptr, EF_R32UI);
+	linked_list_fb_ = rf.MakeFrameBuffer();
+	linked_list_fb_->GetViewport()->camera = re.CurFrameBuffer()->GetViewport()->camera;
+
 	fpcController_.Scalers(0.01f, 0.03f);
 
 	InputEngine& inputEngine(Context::Instance().InputFactoryInstance().InputEngineInstance());
@@ -373,6 +448,13 @@ void OrderIndependentTransparencyApp::OnResize(uint32_t width, uint32_t height)
 		peeling_fbs_[i]->Attach(FrameBuffer::ATT_DepthStencil, depth_views_[i % 2]);
 	}
 
+	frag_link_buf_->Resize(width * height * 8 * sizeof(float4));
+	start_offset_buf_->Resize(width * height * sizeof(uint32_t));
+	frag_link_uav_ = rf.MakeGraphicsBufferUnorderedAccessView(*frag_link_buf_, EF_ABGR32F);
+	start_offset_uav_ = rf.MakeGraphicsBufferUnorderedAccessView(*start_offset_buf_, EF_R32UI);
+	linked_list_fb_->AttachUAV(0, frag_link_uav_);
+	linked_list_fb_->AttachUAV(1, start_offset_uav_);
+
 	UIManager::Instance().SettleCtrls(width, height);
 }
 
@@ -440,8 +522,37 @@ uint32_t OrderIndependentTransparencyApp::DoUpdate(uint32_t pass)
 	RenderEngine& re(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 
 	checked_pointer_cast<PolygonObject>(polygon_)->SetOITMode(oit_mode_);
-	
-	if (OM_DepthPeeling == oit_mode_)
+
+	if (OM_PerPixelLinkedList == oit_mode_)
+	{
+		checked_pointer_cast<PolygonObject>(polygon_)->LinkedListBuffer(frag_link_buf_, start_offset_buf_);
+
+		switch (pass)
+		{
+		case 0:
+			checked_pointer_cast<PolygonObject>(polygon_)->FirstPass(true);
+			
+			re.BindFrameBuffer(linked_list_fb_);
+			start_offset_uav_->Clear(uint4(0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF));
+			return App3DFramework::URV_Need_Flush;
+
+		default:
+			checked_pointer_cast<PolygonObject>(polygon_)->FirstPass(false);
+
+			re.BindFrameBuffer(FrameBufferPtr());
+			Color clear_clr(0.2f, 0.4f, 0.6f, 1);
+			if (Context::Instance().Config().graphics_cfg.gamma)
+			{
+				clear_clr.r() = 0.029f;
+				clear_clr.g() = 0.133f;
+				clear_clr.b() = 0.325f;
+			}
+			re.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, clear_clr, 1, 0);
+			checked_pointer_cast<PolygonObject>(polygon_)->RenderQuad();
+			return App3DFramework::URV_Flushed | App3DFramework::URV_Finished;
+		}
+	}
+	else if (OM_DepthPeeling == oit_mode_)
 	{
 		switch (pass)
 		{
@@ -454,10 +565,7 @@ uint32_t OrderIndependentTransparencyApp::DoUpdate(uint32_t pass)
 			return App3DFramework::URV_Need_Flush;
 
 		default:
-			if (1 == pass)
-			{
-				checked_pointer_cast<PolygonObject>(polygon_)->FirstPass(false);
-			}
+			checked_pointer_cast<PolygonObject>(polygon_)->FirstPass(false);
 
 			{
 				bool finished = false;

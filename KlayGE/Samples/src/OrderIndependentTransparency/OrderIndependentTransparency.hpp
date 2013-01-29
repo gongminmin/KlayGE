@@ -9,7 +9,8 @@
 enum OITMode
 {
 	OM_No = 0,
-	OM_DepthPeeling
+	OM_DepthPeeling,
+	OM_PerPixelLinkedList
 };
 
 class OrderIndependentTransparencyApp : public KlayGE::App3DFramework
@@ -41,6 +42,12 @@ private:
 	
 	KlayGE::array<KlayGE::TexturePtr, 2> depth_texs_;
 	KlayGE::array<KlayGE::RenderViewPtr, 2> depth_views_;
+
+	KlayGE::FrameBufferPtr linked_list_fb_;
+	KlayGE::GraphicsBufferPtr frag_link_buf_;
+	KlayGE::GraphicsBufferPtr start_offset_buf_;
+	KlayGE::UnorderedAccessViewPtr frag_link_uav_;
+	KlayGE::UnorderedAccessViewPtr start_offset_uav_;
 
 	KlayGE::array<KlayGE::ConditionalRenderPtr, 2> oc_queries_;
 
