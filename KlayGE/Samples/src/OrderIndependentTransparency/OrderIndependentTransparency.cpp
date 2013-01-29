@@ -60,6 +60,8 @@ namespace
 			rl_quad_->NumVertices(4);
 			
 			technique_ = depth_peeling_1st_tech_;
+
+			effect_attrs_ = EA_TransparencyFront;
 		}
 
 		void BuildMeshInfo()
@@ -152,15 +154,28 @@ namespace
 
 		void LastDepth(TexturePtr const & depth_tex)
 		{
-			*(technique_->Effect().ParameterByName("last_depth_tex")) = depth_tex;
+			if (OM_DepthPeeling == mode_)
+			{
+				*(technique_->Effect().ParameterByName("last_depth_tex")) = depth_tex;
+			}
 		}
 
+		void BackgroundTex(TexturePtr const & bg_tex)
+		{
+			if (OM_PerPixelLinkedList == mode_)
+			{
+				*(technique_->Effect().ParameterByName("bg_tex")) = bg_tex;
+			}
+		}
 		void LinkedListBuffer(GraphicsBufferPtr const & fragment_link_buf, GraphicsBufferPtr const & start_offset_buf)
 		{
-			*(gen_per_pixel_linked_list_tech_->Effect().ParameterByName("rw_frags_buffer")) = fragment_link_buf;
-			*(gen_per_pixel_linked_list_tech_->Effect().ParameterByName("rw_start_offset_buffer")) = start_offset_buf;
-			*(render_per_pixel_linked_list_tech_->Effect().ParameterByName("frags_buffer")) = fragment_link_buf;
-			*(render_per_pixel_linked_list_tech_->Effect().ParameterByName("start_offset_buffer")) = start_offset_buf;
+			if (OM_PerPixelLinkedList == mode_)
+			{
+				*(gen_per_pixel_linked_list_tech_->Effect().ParameterByName("rw_frags_buffer")) = fragment_link_buf;
+				*(gen_per_pixel_linked_list_tech_->Effect().ParameterByName("rw_start_offset_buffer")) = start_offset_buf;
+				*(render_per_pixel_linked_list_tech_->Effect().ParameterByName("frags_buffer")) = fragment_link_buf;
+				*(render_per_pixel_linked_list_tech_->Effect().ParameterByName("start_offset_buffer")) = start_offset_buf;
+			}
 		}
 
 		void RenderQuad()
@@ -169,7 +184,7 @@ namespace
 			re.Render(*render_per_pixel_linked_list_tech_, *rl_quad_);
 		}
 
-		void Update()
+		void OnRenderBegin()
 		{
 			App3DFramework const & app = Context::Instance().AppInstance();
 			Camera const & camera = app.ActiveCamera();
@@ -187,16 +202,7 @@ namespace
 			else if (OM_PerPixelLinkedList == mode_)
 			{
 				RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-				*(technique_->Effect().ParameterByName("frame_width")) = static_cast<int32_t>(re.CurFrameBuffer()->Width());
-
-				float4 bg_color(0.2f, 0.4f, 0.6f, 1);
-				if (Context::Instance().Config().graphics_cfg.gamma)
-				{
-					bg_color.x() = 0.029f;
-					bg_color.y() = 0.133f;
-					bg_color.z() = 0.325f;
-				}
-				*(technique_->Effect().ParameterByName("bg_color")) = bg_color;
+				*(technique_->Effect().ParameterByName("frame_width")) = static_cast<int32_t>(re.CurFrameBuffer()->GetViewport()->width);
 			}
 		}
 
@@ -265,6 +271,14 @@ namespace
 			}
 		}
 
+		void BackgroundTex(TexturePtr const & bg_tex)
+		{
+			RenderModelPtr model = checked_pointer_cast<RenderModel>(renderable_);
+			for (uint32_t i = 0; i < model->NumMeshes(); ++ i)
+			{
+				checked_pointer_cast<RenderPolygon>(model->Mesh(i))->BackgroundTex(bg_tex);
+			}
+		}
 		void LinkedListBuffer(GraphicsBufferPtr const & fragment_link_buf, GraphicsBufferPtr const & start_offset_buf)
 		{
 			RenderModelPtr model = checked_pointer_cast<RenderModel>(renderable_);
@@ -278,17 +292,6 @@ namespace
 		{
 			RenderModelPtr model = checked_pointer_cast<RenderModel>(renderable_);
 			checked_pointer_cast<RenderPolygon>(model->Mesh(0))->RenderQuad();
-		}
-
-		void Update(float app_time, float elapsed_time)
-		{
-			SceneObjectHelper::Update(app_time, elapsed_time);
-
-			RenderModelPtr model = checked_pointer_cast<RenderModel>(renderable_);
-			for (uint32_t i = 0; i < model->NumMeshes(); ++ i)
-			{
-				checked_pointer_cast<RenderPolygon>(model->Mesh(i))->Update();
-			}
 		}
 	};
 
@@ -351,6 +354,12 @@ void OrderIndependentTransparencyApp::InitObjects()
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 	RenderEngine& re = rf.RenderEngineInstance();
 
+	TexturePtr y_cube_map = SyncLoadTexture("uffizi_cross_y.dds", EAH_GPU_Read | EAH_Immutable);
+	TexturePtr c_cube_map = SyncLoadTexture("uffizi_cross_c.dds", EAH_GPU_Read | EAH_Immutable);
+	sky_box_ = MakeSharedPtr<SceneObjectHDRSkyBox>(0);
+	checked_pointer_cast<SceneObjectHDRSkyBox>(sky_box_)->CompressedCubeMap(y_cube_map, c_cube_map);
+	sky_box_->AddToSceneManager();
+
 	peeling_fbs_.resize(9);
 	for (size_t i = 0; i < peeling_fbs_.size(); ++ i)
 	{
@@ -364,12 +373,14 @@ void OrderIndependentTransparencyApp::InitObjects()
 		oc_queries_[i] = checked_pointer_cast<ConditionalRender>(rf.MakeConditionalRender());
 	}
 
+	opaque_bg_fb_ = rf.MakeFrameBuffer();
+	opaque_bg_fb_->GetViewport()->camera = re.CurFrameBuffer()->GetViewport()->camera;
 	frag_link_buf_ = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Read | EAH_GPU_Write | EAH_GPU_Unordered | EAH_GPU_Structured | EAH_Counter, nullptr, EF_ABGR32F);
 	start_offset_buf_ = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Read | EAH_GPU_Write | EAH_GPU_Unordered | EAH_Raw, nullptr, EF_R32UI);
 	linked_list_fb_ = rf.MakeFrameBuffer();
 	linked_list_fb_->GetViewport()->camera = re.CurFrameBuffer()->GetViewport()->camera;
 
-	fpcController_.Scalers(0.01f, 0.03f);
+	fpcController_.Scalers(0.05f, 0.1f);
 
 	InputEngine& inputEngine(Context::Instance().InputFactoryInstance().InputEngineInstance());
 	InputActionMap actionMap;
@@ -448,12 +459,26 @@ void OrderIndependentTransparencyApp::OnResize(uint32_t width, uint32_t height)
 		peeling_fbs_[i]->Attach(FrameBuffer::ATT_DepthStencil, depth_views_[i % 2]);
 	}
 
+	ElementFormat opaque_bg_format;
+	if (rf.RenderEngineInstance().DeviceCaps().rendertarget_format_support(EF_B10G11R11F, 1, 0))
+	{
+		opaque_bg_format = EF_B10G11R11F;
+	}
+	else
+	{
+		opaque_bg_format = peel_format;
+	}
+	opaque_bg_tex_ = rf.MakeTexture2D(width, height, 1, 1, opaque_bg_format, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
+	opaque_bg_fb_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*opaque_bg_tex_, 0, 1, 0));
+	opaque_bg_fb_->Attach(FrameBuffer::ATT_DepthStencil, rf.Make2DDepthStencilRenderView(width, height, depth_format, 1, 0));
 	frag_link_buf_->Resize(width * height * 8 * sizeof(float4));
 	start_offset_buf_->Resize(width * height * sizeof(uint32_t));
 	frag_link_uav_ = rf.MakeGraphicsBufferUnorderedAccessView(*frag_link_buf_, EF_ABGR32F);
 	start_offset_uav_ = rf.MakeGraphicsBufferUnorderedAccessView(*start_offset_buf_, EF_R32UI);
 	linked_list_fb_->AttachUAV(0, frag_link_uav_);
 	linked_list_fb_->AttachUAV(1, start_offset_uav_);
+	linked_list_fb_->GetViewport()->width = width;
+	linked_list_fb_->GetViewport()->height = height;
 
 	UIManager::Instance().SettleCtrls(width, height);
 }
@@ -471,6 +496,7 @@ void OrderIndependentTransparencyApp::InputHandler(InputEngine const & /*sender*
 void OrderIndependentTransparencyApp::OITModeHandler(KlayGE::UIComboBox const & sender)
 {
 	oit_mode_ = static_cast<OITMode>(sender.GetSelectedIndex());
+	checked_pointer_cast<PolygonObject>(polygon_)->SetOITMode(oit_mode_);
 }
 
 void OrderIndependentTransparencyApp::CtrlCameraHandler(KlayGE::UICheckBox const & sender)
@@ -512,16 +538,17 @@ void OrderIndependentTransparencyApp::DoUpdateOverlay()
 		<< sceneMgr.NumVerticesRendered() << " Vertices";
 	font_->RenderText(0, 36, Color(1, 1, 1, 1), stream.str(), 16);
 
-	stream.str(L"");
-	stream << num_layers_ << " Layers";
-	font_->RenderText(0, 54, Color(1, 1, 0, 1), stream.str(), 16);
+	if (OM_DepthPeeling == oit_mode_)
+	{
+		stream.str(L"");
+		stream << num_layers_ << " Layers";
+		font_->RenderText(0, 54, Color(1, 1, 0, 1), stream.str(), 16);
+	}
 }
 
 uint32_t OrderIndependentTransparencyApp::DoUpdate(uint32_t pass)
 {
 	RenderEngine& re(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-
-	checked_pointer_cast<PolygonObject>(polygon_)->SetOITMode(oit_mode_);
 
 	if (OM_PerPixelLinkedList == oit_mode_)
 	{
@@ -530,24 +557,22 @@ uint32_t OrderIndependentTransparencyApp::DoUpdate(uint32_t pass)
 		switch (pass)
 		{
 		case 0:
+			re.BindFrameBuffer(opaque_bg_fb_);
+			re.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->ClearDepthStencil(1, 0);
+			return App3DFramework::URV_Opaque_Only | App3DFramework::URV_Need_Flush;
+
+		case 1:
 			checked_pointer_cast<PolygonObject>(polygon_)->FirstPass(true);
 			
 			re.BindFrameBuffer(linked_list_fb_);
 			start_offset_uav_->Clear(uint4(0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF));
-			return App3DFramework::URV_Need_Flush;
+			return App3DFramework::URV_Transparency_Front_Only | App3DFramework::URV_Need_Flush;
 
 		default:
 			checked_pointer_cast<PolygonObject>(polygon_)->FirstPass(false);
+			checked_pointer_cast<PolygonObject>(polygon_)->BackgroundTex(opaque_bg_tex_);
 
 			re.BindFrameBuffer(FrameBufferPtr());
-			Color clear_clr(0.2f, 0.4f, 0.6f, 1);
-			if (Context::Instance().Config().graphics_cfg.gamma)
-			{
-				clear_clr.r() = 0.029f;
-				clear_clr.g() = 0.133f;
-				clear_clr.b() = 0.325f;
-			}
-			re.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, clear_clr, 1, 0);
 			checked_pointer_cast<PolygonObject>(polygon_)->RenderQuad();
 			return App3DFramework::URV_Flushed | App3DFramework::URV_Finished;
 		}
@@ -557,12 +582,17 @@ uint32_t OrderIndependentTransparencyApp::DoUpdate(uint32_t pass)
 		switch (pass)
 		{
 		case 0:
+			re.BindFrameBuffer(FrameBufferPtr());
+			re.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->ClearDepthStencil(1, 0);
+			return App3DFramework::URV_Opaque_Only | App3DFramework::URV_Need_Flush;
+
+		case 1:
 			num_layers_ = 1;
 
 			checked_pointer_cast<PolygonObject>(polygon_)->FirstPass(true);
 			re.BindFrameBuffer(peeling_fbs_[0]);
-			peeling_fbs_[0]->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(0, 0, 0, 0), 1, 0);
-			return App3DFramework::URV_Need_Flush;
+			re.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(0, 0, 0, 0), 1, 0);
+			return App3DFramework::URV_Transparency_Front_Only | App3DFramework::URV_Need_Flush;
 
 		default:
 			checked_pointer_cast<PolygonObject>(polygon_)->FirstPass(false);
@@ -570,8 +600,8 @@ uint32_t OrderIndependentTransparencyApp::DoUpdate(uint32_t pass)
 			{
 				bool finished = false;
 
-				size_t layer_batch = (pass - 1) / oc_queries_.size() * oc_queries_.size() + 1;
-				size_t oc_index = (pass - 1) % oc_queries_.size();
+				size_t layer_batch = (pass - 2) / oc_queries_.size() * oc_queries_.size() + 1;
+				size_t oc_index = (pass - 2) % oc_queries_.size();
 				size_t layer = layer_batch + oc_index;
 				if (oc_index > 0)
 				{
@@ -621,14 +651,6 @@ uint32_t OrderIndependentTransparencyApp::DoUpdate(uint32_t pass)
 				if (finished)
 				{
 					re.BindFrameBuffer(FrameBufferPtr());
-					Color clear_clr(0.2f, 0.4f, 0.6f, 1);
-					if (Context::Instance().Config().graphics_cfg.gamma)
-					{
-						clear_clr.r() = 0.029f;
-						clear_clr.g() = 0.133f;
-						clear_clr.b() = 0.325f;
-					}
-					re.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, clear_clr, 1, 0);
 					for (size_t i = 0; i < num_layers_; ++ i)
 					{
 						blend_pp_->InputPin(0, peeled_texs_[num_layers_ - 1 - i]);
@@ -639,7 +661,7 @@ uint32_t OrderIndependentTransparencyApp::DoUpdate(uint32_t pass)
 				}
 				else
 				{
-					return App3DFramework::URV_Need_Flush;
+					return App3DFramework::URV_Transparency_Front_Only | App3DFramework::URV_Need_Flush;
 				}
 			}
 		}
@@ -649,14 +671,7 @@ uint32_t OrderIndependentTransparencyApp::DoUpdate(uint32_t pass)
 		checked_pointer_cast<PolygonObject>(polygon_)->FirstPass(true);
 
 		re.BindFrameBuffer(FrameBufferPtr());
-		Color clear_clr(0.2f, 0.4f, 0.6f, 1);
-		if (Context::Instance().Config().graphics_cfg.gamma)
-		{
-			clear_clr.r() = 0.029f;
-			clear_clr.g() = 0.133f;
-			clear_clr.b() = 0.325f;
-		}
-		re.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, clear_clr, 1, 0);
+		re.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->ClearDepthStencil(1, 0);
 		return App3DFramework::URV_Need_Flush | App3DFramework::URV_Finished;
 	}
 }
