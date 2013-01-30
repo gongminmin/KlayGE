@@ -62,7 +62,7 @@ float4 Shading(float4 L, float4 H)
 	float3 diffuse = diffuse_tex.Sample(linear_sampler, uv).xyz;
 	float specular = specular_tex.Sample(linear_sampler, uv).x;
 	float3 normal = decompress_normal(normal_tex.Sample(linear_sampler, uv));
-	float3 emit = emit_tex.Sample(linear_sampler, uv).xyz;
+	float3 emit = emit_tex.Sample(linear_sampler, uv).xyz * 16;
 
 	float3 light_vec = normalize(L.xyz);
 	float3 halfway = normalize(H.xyz);

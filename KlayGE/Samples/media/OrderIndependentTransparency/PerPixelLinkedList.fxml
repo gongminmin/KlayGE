@@ -95,14 +95,12 @@ float4 RenderPerPixelLinkedListPS(float2 tex : TEXCOORD0, float4 pos : SV_Positi
 	if (next != 0xFFFFFFFF)
 	{
 		float4 temp_data[TEMPORARY_BUFFER_MAX];
-		uint temp_index[TEMPORARY_BUFFER_MAX];
 		uint num_frags = 0;
 
 		while ((num_frags < TEMPORARY_BUFFER_MAX) && (next != 0xFFFFFFFF))
 		{
 			float4 frag_data = frags_buffer[next];
 			temp_data[num_frags] = frag_data;
-			temp_index[num_frags] = num_frags;
 			++ num_frags;
 			next = asuint(frag_data.w);
 		}
@@ -111,7 +109,6 @@ float4 RenderPerPixelLinkedListPS(float2 tex : TEXCOORD0, float4 pos : SV_Positi
 
 		for (uint i = num_frags; i < n2; ++ i)
 		{
-			temp_index[i] = i;
 			temp_data[i].z = 1.1f;
 		}
 
@@ -124,17 +121,17 @@ float4 RenderPerPixelLinkedListPS(float2 tex : TEXCOORD0, float4 pos : SV_Positi
 					uint swap_elem = elem ^ merge_sub_size;
 					if (swap_elem > elem)
 					{
-						if ((0 == (elem & merge_size)) && (temp_data[temp_index[elem]].z > temp_data[temp_index[swap_elem]].z))
+						if ((0 == (elem & merge_size)) && (temp_data[elem].z > temp_data[swap_elem].z))
 						{
-							uint temp = temp_index[elem];
-							temp_index[elem] = temp_index[swap_elem];
-							temp_index[swap_elem] = temp;
+							float4 temp = temp_data[elem];
+							temp_data[elem] = temp_data[swap_elem];
+							temp_data[swap_elem] = temp;
 						}
-						if (((elem & merge_size) != 0) && (temp_data[temp_index[elem]].z <= temp_data[temp_index[swap_elem]].z))
+						if (((elem & merge_size) != 0) && (temp_data[elem].z < temp_data[swap_elem].z))
 						{
-							uint temp = temp_index[elem];
-							temp_index[elem] = temp_index[swap_elem];
-							temp_index[swap_elem] = temp;
+							float4 temp = temp_data[elem];
+							temp_data[elem] = temp_data[swap_elem];
+							temp_data[swap_elem] = temp;
 						}
 					}
 				}
@@ -143,7 +140,7 @@ float4 RenderPerPixelLinkedListPS(float2 tex : TEXCOORD0, float4 pos : SV_Positi
 
 		for (int x = num_frags - 1; x >= 0; -- x)
 		{
-			uint2 u16_color = asuint(temp_data[temp_index[x]].xy);
+			uint2 u16_color = asuint(temp_data[x].xy);
 			float4 color;        
 			color.r = f16tof32(u16_color.x & 0xFFFF);
 			color.g = f16tof32(u16_color.x >> 16);
