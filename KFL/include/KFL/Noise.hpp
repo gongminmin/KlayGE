@@ -51,12 +51,12 @@ namespace KlayGE
 
 			T noise(T const & x, T const & y)
 			{
-				T const F2 = 0.366025403784;//(sqrt(3) - 1) / 2
-				T const G2 = 0.211324865405;//(3 - sqrt(3)) / 6
+				T const F2 = T(0.366025403784);//(sqrt(3) - 1) / 2
+				T const G2 = T(0.211324865405);//(3 - sqrt(3)) / 6
 
 				T s = (x + y) * F2;
-				int i = floor(x + s);
-				int j = floor(y + s);
+				int i = static_cast<int>(floor(x + s));
+				int j = static_cast<int>(floor(y + s));
 				T t = (i + j) * G2;
 				T X0 = i - t;
 				T Y0 = j - t;
@@ -113,9 +113,9 @@ namespace KlayGE
 				T const G3 = 1 / T(6);
 
 				T s = (x + y + z) * F3;
-				int i = floor(x + s);
-				int j = floor(y + s);
-				int k = floor(z + s);
+				int i = static_cast<int>(floor(x + s));
+				int j = static_cast<int>(floor(y + s));
+				int k = static_cast<int>(floor(z + s));
 				T t = (i + j + k) * G3; 
 				T X0 = i - t;
 				T Y0 = j - t;

@@ -19,13 +19,14 @@ namespace
 	{
 		for (size_t i = 0; i < com_normals.size() / 4; ++ i)
 		{
-			float x = com_normals[i * 4 + 3] / 255.0f * 2 - 1;
+			float x = com_normals[i * 4 + 2] / 255.0f * 2 - 1;
 			float y = com_normals[i * 4 + 1] / 255.0f * 2 - 1;
+			float z = sqrt(1 - x * x - y * y);
 
+			res_normals[i * 4 + 0] = static_cast<uint8_t>(MathLib::clamp(static_cast<int>((z * 0.5f + 0.5f) * 255 + 0.5f), 0, 255));
 			res_normals[i * 4 + 1] = com_normals[i * 4 + 1];
-			res_normals[i * 4 + 2] = com_normals[i * 4 + 3];
-			res_normals[i * 4 + 0] = static_cast<uint8_t>(MathLib::clamp((sqrt(1 - x * x - y * y) / 2 + 1) * 255, 0.0f, 255.0f));
-			res_normals[i * 4 + 3] = 0;		
+			res_normals[i * 4 + 2] = com_normals[i * 4 + 2];
+			res_normals[i * 4 + 3] = 0;
 		}
 	}
 
