@@ -193,7 +193,11 @@ void PostProcessingApp::OnResize(uint32_t width, uint32_t height)
 
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 	ElementFormat fmt;
-	if (rf.RenderEngineInstance().DeviceCaps().texture_format_support(EF_ABGR8))
+	if (rf.RenderEngineInstance().DeviceCaps().texture_format_support(EF_B10G11R11F))
+	{
+		fmt = EF_B10G11R11F;
+	}
+	else if (rf.RenderEngineInstance().DeviceCaps().texture_format_support(EF_ABGR8))
 	{
 		fmt = EF_ABGR8;
 	}
@@ -203,7 +207,7 @@ void PostProcessingApp::OnResize(uint32_t width, uint32_t height)
 
 		fmt = EF_ARGB8;
 	}
-	color_tex_ = rf.MakeTexture2D(width, height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
+	color_tex_ = rf.MakeTexture2D(width, height, 4, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write | EAH_Generate_Mips, nullptr);
 	color_fb_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*color_tex_, 0, 1, 0));
 
 	deferred_rendering_->SetupViewport(0, color_fb_, 0);
@@ -327,6 +331,7 @@ uint32_t PostProcessingApp::DoUpdate(uint32_t pass)
 	uint32_t ret = deferred_rendering_->Update(pass);
 	if (ret & App3DFramework::URV_Finished)
 	{
+		color_tex_->BuildMipSubLevels();
 		re.BindFrameBuffer(FrameBufferPtr());
 		re.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->ClearDepth(1.0f);
 		active_pp_->Apply();

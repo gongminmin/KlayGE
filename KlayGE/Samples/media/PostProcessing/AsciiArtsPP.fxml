@@ -25,7 +25,8 @@
 		<![CDATA[
 float4 AsciiArtsPS(float2 tex_coord0 : TEXCOORD0) : SV_Target
 {
-	float lum = src_tex.SampleLevel(src_sampler, tex_coord0, 3).r;
+	const float3 RGB_TO_LUM = float3(0.2126f, 0.7152f, 0.0722f);
+	float lum = saturate(dot(src_tex.SampleLevel(src_sampler, tex_coord0, 3).rgb, RGB_TO_LUM));
 	float2 t = float2(floor(lum * 31) / 32, 0) + frac(tex_coord0 / cell_per_row_line) / float2(32, 1);
 	return lum * lums_tex.Sample(lums_sampler, t).r;
 }

@@ -80,7 +80,7 @@ void CalcTBNVS(float4 pos				: POSITION,
 	oDistortion = distortion;
 }
 
-float4 Shading(float3 L, float3 H, float2 uv, float3 normal)
+float4 Shading(float3 L, float3 H, float2 uv, float3 normal, float shadow)
 {
 	float atten = attenuation_term(0, -L.xyz, light_falloff);
 
@@ -89,21 +89,21 @@ float4 Shading(float3 L, float3 H, float2 uv, float3 normal)
 	float3 light_vec = normalize(L);
 	float3 halfway = normalize(H);
 
-	return float4(0.2f * diffuse + atten * light_color * calc_brdf(diffuse, 0.1f, 32, light_vec, halfway, normal), 1);
+	return float4(0.2f * diffuse + shadow * atten * light_color * calc_brdf(diffuse, 0.1f, 32, light_vec, halfway, normal), 1);
 }
 
 float4 NonePS(float4 L		: TEXCOORD0,
 					float4 H		: TEXCOORD1) : SV_Target
 {
 	float2 uv = float2(L.w, H.w);
-	return Shading(L.xyz, H.xyz, uv, float3(0, 0, 1));
+	return Shading(L.xyz, H.xyz, uv, float3(0, 0, 1), 1);
 }
 
 float4 BumpMappingPS(float4 L		: TEXCOORD0,
 					float4 H		: TEXCOORD1) : SV_Target
 {
 	float2 uv = float2(L.w, H.w);
-	return Shading(L.xyz, H.xyz, uv, normalize(judatex2d_wrap(normal_tex_bb, uv).rgb * 2 - 1));
+	return Shading(L.xyz, H.xyz, uv, normalize(judatex2d_wrap(normal_tex_bb, uv).rgb * 2 - 1), 1);
 }
 
 float4 ParallaxMappingPS(float4 L		: TEXCOORD0,
@@ -118,7 +118,7 @@ float4 ParallaxMappingPS(float4 L		: TEXCOORD0,
 	float height = (judatex2d_wrap(height_tex_bb, texCoord0).r - 1) * height_scale;
 	float2 texUV = texCoord0 + (view.xy * height);
 
-	return Shading(L.xyz, H.xyz, texUV, normalize(judatex2d_wrap(normal_tex_bb, texUV).rgb * 2 - 1));
+	return Shading(L.xyz, H.xyz, texUV, normalize(judatex2d_wrap(normal_tex_bb, texUV).rgb * 2 - 1), 1);
 }
 
 void ParallaxOcclusionMappingVS(float4 pos				: POSITION,
@@ -243,7 +243,7 @@ float4 ParallaxOcclusionMappingPS(float4 L		: TEXCOORD0,
 		}
 	}
 
-	return Shading(L.xyz, H.xyz, texUV, normalize(judatex2d_level_wrap(normal_tex_bb, texUV, level).rgb * 2 - 1)) * fOcclusionShadow;
+	return Shading(L.xyz, H.xyz, texUV, normalize(judatex2d_level_wrap(normal_tex_bb, texUV, level).rgb * 2 - 1), fOcclusionShadow);
 }
 		]]>
 	</shader>
