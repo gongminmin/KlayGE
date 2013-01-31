@@ -107,8 +107,8 @@ namespace
 					{
 						for (int x = 0; x < 4; ++ x)
 						{
-							com_normals[((y_base + y) * new_data.row_pitch + (x_base + x)) * 2 + 0] = uncom_x[y * 4 + x];
-							com_normals[((y_base + y) * new_data.row_pitch + (x_base + x)) * 2 + 1] = uncom_y[y * 4 + x];
+							com_normals[(y_base + y) * new_data.row_pitch + (x_base + x) * 2 + 0] = uncom_x[y * 4 + x];
+							com_normals[(y_base + y) * new_data.row_pitch + (x_base + x) * 2 + 1] = uncom_y[y * 4 + x];
 						}
 					}
 				}
@@ -120,7 +120,6 @@ namespace
 		ElementInitData& restored_data, std::vector<uint8_t>& restored_data_block, ElementFormat com_format, ElementInitData const & com_data)
 	{
 		UNREF_PARAM(restored_format);
-		BOOST_ASSERT(EF_ARGB8 == restored_format);
 
 		std::vector<uint8_t> normals(width * height * 4);
 
@@ -180,6 +179,14 @@ namespace
 					normals[(y * width + x) * 4 + 3] = 0xFF;
 				}
 			}
+		}
+
+		if (restored_format != EF_ARGB8)
+		{
+			std::vector<uint8_t> argb8_normals(width * height * 4);
+			ResizeTexture(&argb8_normals[0], width * 4, width * height * 4, EF_ARGB8, width, height, 1,
+				&normals[0], width * 4, width * height * 4, restored_format, width, height, 1, false);
+			normals.swap(argb8_normals);
 		}
 
 		restored_data_block.resize(width * height * 4);
