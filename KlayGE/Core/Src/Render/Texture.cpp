@@ -2023,6 +2023,11 @@ namespace KlayGE
 					desc.pixel_format.b_bit_mask = 0x0000000F;
 					break;
 
+				case EF_GR8:
+					desc.pixel_format.flags |= DDSPF_FOURCC;
+					desc.pixel_format.four_cc = MakeFourCC<'D', 'X', '1', '0'>::value;
+					break;
+
 				case EF_SIGNED_GR8:
 					desc.pixel_format.flags |= DDSPF_BUMPDUDV;
 					desc.pixel_format.rgb_bit_count = 16;

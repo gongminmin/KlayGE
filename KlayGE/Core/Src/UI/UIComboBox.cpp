@@ -730,7 +730,7 @@ namespace KlayGE
 
 	void UIComboBox::SetSelectedByIndex(uint32_t index)
 	{
-		BOOST_ASSERT(index < GetNumItems());
+		BOOST_ASSERT(index < this->GetNumItems());
 
 		focused_ = selected_ = index;
 		this->OnSelectionChangedEvent()(*this);

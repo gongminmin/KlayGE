@@ -128,9 +128,9 @@ void PostProcessingApp::InitObjects()
 
 	point_light_ = MakeSharedPtr<PointLightSource>();
 	point_light_->Attrib(LSA_NoShadow);
-	point_light_->Color(float3(1, 1, 1));
+	point_light_->Color(float3(18, 18, 18));
 	point_light_->Position(float3(0, 0, 0));
-	point_light_->Falloff(float3(1, 0, 0));
+	point_light_->Falloff(float3(1, 0, 1));
 	point_light_->BindUpdateFunc(PointLightSourceUpdate());
 	point_light_->AddToSceneManager();
 
