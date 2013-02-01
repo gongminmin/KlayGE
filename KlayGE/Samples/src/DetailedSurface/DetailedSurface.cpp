@@ -190,6 +190,7 @@ namespace
 			*(technique_->Effect().ParameterByName("normal_tex_bb")) = tile_bb_[1];
 			*(technique_->Effect().ParameterByName("height_tex_bb")) = tile_bb_[2];
 			*(technique_->Effect().ParameterByName("tex_size")) = int2(512, 512);
+			*(technique_->Effect().ParameterByName("na_length_tex")) = SyncLoadTexture("na_length.dds", EAH_GPU_Read | EAH_Immutable);
 		}
 
 		void BuildMeshInfo()
@@ -262,6 +263,11 @@ namespace
 		{
 			detail_type_ = dt;
 			this->UpdateTech();
+		}
+
+		void NaLength(bool len)
+		{
+			*(technique_->Effect().ParameterByName("use_na_length")) = len;
 		}
 
 		void Wireframe(bool wf)
@@ -385,6 +391,15 @@ namespace
 			}
 		}
 
+		void NaLength(bool len)
+		{
+			RenderModelPtr model = checked_pointer_cast<RenderModel>(renderable_);
+			for (uint32_t i = 0; i < model->NumMeshes(); ++ i)
+			{
+				checked_pointer_cast<RenderPolygon>(model->Mesh(i))->NaLength(len);
+			}
+		}
+
 		void Wireframe(bool wf)
 		{
 			RenderModelPtr model = checked_pointer_cast<RenderModel>(renderable_);
@@ -503,6 +518,11 @@ void DetailedSurfaceApp::DetailTypeChangedHandler(KlayGE::UIComboBox const & sen
 	checked_pointer_cast<PolygonObject>(polygon_)->DetailType(sender.GetSelectedIndex());
 }
 
+void DetailedSurfaceApp::NaLengthHandler(KlayGE::UICheckBox const & sender)
+{
+	checked_pointer_cast<PolygonObject>(polygon_)->NaLength(sender.GetChecked());
+}
+
 void DetailedSurfaceApp::WireframeHandler(KlayGE::UICheckBox const & sender)
 {
 	checked_pointer_cast<PolygonObject>(polygon_)->Wireframe(sender.GetChecked());
@@ -612,6 +632,7 @@ uint32_t DetailedSurfaceApp::DoUpdate(uint32_t /*pass*/)
 			id_scale_slider_ = dialog_->IDFromName("ScaleSlider");
 			id_detail_type_static_ = dialog_->IDFromName("DetailTypeStatic");
 			id_detail_type_combo_ = dialog_->IDFromName("DetailTypeCombo");
+			id_na_length_ = dialog_->IDFromName("NaLength");
 			id_wireframe_ = dialog_->IDFromName("Wireframe");
 			id_ctrl_camera_ = dialog_->IDFromName("CtrlCamera");
 
@@ -623,8 +644,12 @@ uint32_t DetailedSurfaceApp::DoUpdate(uint32_t /*pass*/)
 			dialog_->Control<UIComboBox>(id_detail_type_combo_)->OnSelectionChangedEvent().connect(boost::bind(&DetailedSurfaceApp::DetailTypeChangedHandler, this, _1));
 			this->DetailTypeChangedHandler(*dialog_->Control<UIComboBox>(id_detail_type_combo_));
 
+			dialog_->Control<UICheckBox>(id_na_length_)->OnChangedEvent().connect(boost::bind(&DetailedSurfaceApp::NaLengthHandler, this, _1));
+			this->NaLengthHandler(*dialog_->Control<UICheckBox>(id_na_length_));
 			dialog_->Control<UICheckBox>(id_wireframe_)->OnChangedEvent().connect(boost::bind(&DetailedSurfaceApp::WireframeHandler, this, _1));
+			this->WireframeHandler(*dialog_->Control<UICheckBox>(id_wireframe_));
 			dialog_->Control<UICheckBox>(id_ctrl_camera_)->OnChangedEvent().connect(boost::bind(&DetailedSurfaceApp::CtrlCameraHandler, this, _1));
+			this->CtrlCameraHandler(*dialog_->Control<UICheckBox>(id_ctrl_camera_));
 
 			loading_percentage_ = 100;
 			progress_bar->SetValue(loading_percentage_);

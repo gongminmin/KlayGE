@@ -24,6 +24,7 @@ private:
 	void ScaleChangedHandler(KlayGE::UISlider const & sender);
 	void BiasChangedHandler(KlayGE::UISlider const & sender);
 	void DetailTypeChangedHandler(KlayGE::UIComboBox const & sender);
+	void NaLengthHandler(KlayGE::UICheckBox const & sender);
 	void WireframeHandler(KlayGE::UICheckBox const & sender);
 	void CtrlCameraHandler(KlayGE::UICheckBox const & sender);
 
@@ -44,6 +45,7 @@ private:
 	int id_scale_slider_;
 	int id_detail_type_static_;
 	int id_detail_type_combo_;
+	int id_na_length_;
 	int id_wireframe_;
 	int id_ctrl_camera_;
 
