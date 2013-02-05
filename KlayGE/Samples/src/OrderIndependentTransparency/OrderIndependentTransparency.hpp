@@ -10,7 +10,7 @@ enum OITMode
 {
 	OM_No = 0,
 	OM_DepthPeeling,
-	OM_PerPixelLinkedList
+	OM_PerPixelLinkedLists
 };
 
 class OrderIndependentTransparencyApp : public KlayGE::App3DFramework
