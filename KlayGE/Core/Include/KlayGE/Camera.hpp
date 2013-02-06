@@ -26,7 +26,7 @@
 
 #ifdef KLAYGE_COMPILER_MSVC
 #pragma warning(push)
-#pragma warning(disable: 6011)
+#pragma warning(disable: 4913 6011)
 #endif
 #include <boost/circular_buffer.hpp>
 #ifdef KLAYGE_COMPILER_MSVC
