@@ -80,8 +80,6 @@
 
 #include <KlayGE/RenderEffect.hpp>
 
-using namespace std;
-
 namespace
 {
 	using namespace KlayGE;

@@ -240,8 +240,7 @@ namespace KlayGE
 		typedef KLAYGE_DECLTYPE(font_pool_) FontPoolType;
 		KLAYGE_FOREACH(FontPoolType::reference font, font_pool_)
 		{
-			font.second.first.reset();
-			font.second.second.reset();
+			font.second.reset();
 		}
 		typedef KLAYGE_DECLTYPE(rs_pool_) RSPoolType;
 		KLAYGE_FOREACH(RSPoolType::reference rs, rs_pool_)
@@ -290,14 +289,12 @@ namespace KlayGE
 		KLAYGE_AUTO(fiter, font_pool_.find(fontName));
 		if (fiter == font_pool_.end())
 		{
-			RenderablePtr font_renderable = MakeSharedPtr<FontRenderable>(fontName);
-
-			ret = MakeSharedPtr<Font>(font_renderable, flags);
-			font_pool_[fontName] = std::make_pair(font_renderable, ret);
+			ret = MakeSharedPtr<Font>(fontName, flags);
+			font_pool_[fontName] = ret;
 		}
 		else
 		{
-			ret = fiter->second.second;
+			ret = fiter->second;
 		}
 
 		return ret;

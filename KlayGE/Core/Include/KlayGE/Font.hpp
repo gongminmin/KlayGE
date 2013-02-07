@@ -52,91 +52,7 @@
 
 namespace KlayGE
 {
-	class KFont;
-
-	class KLAYGE_CORE_API FontRenderable : public RenderableHelper
-	{
-	public:
-		explicit FontRenderable(std::string const & font_name);
-
-		RenderTechniquePtr const & GetRenderTechnique() const;
-
-		void UpdateBuffers();
-		void OnRenderBegin();
-		void OnRenderEnd();
-
-		void Render();
-
-		Size_T<uint32_t> CalcSize(std::wstring const & text, uint32_t font_height);
-
-		void AddText2D(float sx, float sy, float sz,
-			float xScale, float yScale, Color const & clr, std::wstring const & text, uint32_t font_height);
-		void AddText2D(Rect const & rc, float sz,
-			float xScale, float yScale, Color const & clr, std::wstring const & text, uint32_t font_height, uint32_t align);
-		void AddText3D(float4x4 const & mvp, Color const & clr, std::wstring const & text, uint32_t font_height);
-
-	private:
-		void AddText(Rect const & rc, float sz,
-			float xScale, float yScale, Color const & clr, std::wstring const & text, uint32_t font_height, uint32_t align);
-
-		void AddText(float sx, float sy, float sz,
-			float xScale, float yScale, Color const & clr, std::wstring const & text, uint32_t font_height);
-
-		void UpdateTexture(std::wstring const & text);
-
-	private:
-		struct CharInfo
-		{
-			Rect_T<float> rc;
-			uint64_t tick;
-		};
-
-#ifdef KLAYGE_HAS_STRUCT_PACK
-	#pragma pack(push, 1)
-#endif
-		struct FontVert
-		{
-			float3 pos;
-			uint32_t clr;
-			float2 tex;
-
-			FontVert()
-			{
-			}
-			FontVert(float3 const & pos, uint32_t clr, float2 const & tex)
-				: pos(pos), clr(clr), tex(tex)
-			{
-			}
-		};
-#ifdef KLAYGE_HAS_STRUCT_PACK
-	#pragma pack(pop)
-#endif
-
-		bool restart_;
-		bool dirty_;
-
-		unordered_map<wchar_t, CharInfo> char_info_map_;
-		std::list<std::pair<uint32_t, uint32_t> > char_free_list_;
-
-		bool three_dim_;
-
-		std::vector<FontVert>	vertices_;
-		std::vector<uint16_t>	indices_;
-
-		GraphicsBufferPtr vb_;
-		GraphicsBufferPtr ib_;
-
-		TexturePtr		dist_texture_;
-		TexturePtr		a_char_texture_;
-		RenderEffectPtr	effect_;
-
-		RenderEffectParameterPtr half_width_height_ep_;
-		RenderEffectParameterPtr mvp_ep_;
-
-		boost::shared_ptr<KFont> kfont_loader_;
-
-		uint64_t tick_;
-	};
+	class FontRenderable;
 
 	// 在3D环境中画出文字
 	/////////////////////////////////////////////////////////////////////////////////
@@ -162,7 +78,8 @@ namespace KlayGE
 		};
 
 	public:
-		Font(RenderablePtr const & font_renderable, uint32_t flags = 0);
+		explicit Font(std::string const & font_name);
+		explicit Font(std::string const & font_name, uint32_t flags);
 
 		Size_T<uint32_t> CalcSize(std::wstring const & text, uint32_t font_size);
 		void RenderText(float x, float y, Color const & clr,
@@ -174,7 +91,7 @@ namespace KlayGE
 		void RenderText(float4x4 const & mvp, Color const & clr, std::wstring const & text, uint32_t font_size);
 
 	private:
-		RenderablePtr	font_renderable_;
+		boost::shared_ptr<FontRenderable> font_renderable_;
 		uint32_t		fso_attrib_;
 	};
 }

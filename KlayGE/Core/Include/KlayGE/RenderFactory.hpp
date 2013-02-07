@@ -114,7 +114,7 @@ namespace KlayGE
 		RenderEnginePtr re_;
 
 		std::map<std::pair<std::string, std::pair<std::string, std::string>* >, std::vector<RenderEffectPtr> > effect_pool_;
-		std::map<std::string, std::pair<RenderablePtr, FontPtr> > font_pool_;
+		std::map<std::string, FontPtr> font_pool_;
 		std::map<RasterizerStateDesc, RasterizerStateObjectPtr> rs_pool_;
 		std::map<DepthStencilStateDesc, DepthStencilStateObjectPtr> dss_pool_;
 		std::map<BlendStateDesc, BlendStateObjectPtr> bs_pool_;
