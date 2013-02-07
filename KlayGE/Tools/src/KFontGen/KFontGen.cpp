@@ -7,7 +7,6 @@
 #include <KlayGE/ResLoader.hpp>
 #include <KlayGE/LZMACodec.hpp>
 #include <KFL/AlignedAllocator.hpp>
-#include <KFL/Atomic.hpp>
 
 #include <kfont/kfont.hpp>
 

@@ -81,7 +81,7 @@ private:
 	#define KLAYGE_NOEXCEPT_IF(Predicate) noexcept((Predicate))
 	#define KLAYGE_NOEXCEPT_EXPR(Expression) noexcept((Expression))
 #else
-	#define KLAYGE_NOEXCEPT
+	#define KLAYGE_NOEXCEPT throw()
 	#define KLAYGE_NOEXCEPT_IF(Predicate)
 	#define KLAYGE_NOEXCEPT_EXPR(Expression) false
 #endif
@@ -124,6 +124,38 @@ private:
 	namespace KlayGE
 	{
 		using boost::array;
+	}
+#endif
+
+#ifdef KLAYGE_CXX11_LIBRARY_ATOMIC_SUPPORT
+	#include <atomic>
+	namespace KlayGE
+	{
+		using std::atomic;
+		using std::atomic_thread_fence;
+		using std::atomic_signal_fence;
+
+		using std::memory_order_relaxed;
+		using std::memory_order_release;
+		using std::memory_order_acquire;
+		using std::memory_order_consume;
+		using std::memory_order_acq_rel;
+		using std::memory_order_seq_cst;
+	}
+#else
+	#include <boost/atomic.hpp>
+	namespace KlayGE
+	{
+		using boost::atomic;
+		using boost::atomic_thread_fence;
+		using boost::atomic_signal_fence;
+
+		using boost::memory_order_relaxed;
+		using boost::memory_order_release;
+		using boost::memory_order_acquire;
+		using boost::memory_order_consume;
+		using boost::memory_order_acq_rel;
+		using boost::memory_order_seq_cst;
 	}
 #endif
 

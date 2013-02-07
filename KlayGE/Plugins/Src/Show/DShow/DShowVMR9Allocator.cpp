@@ -377,19 +377,19 @@ namespace KlayGE
 	ULONG DShowVMR9Allocator::AddRef()
 	{
 		++ ref_count_;
-		return ref_count_.value();
+		return ref_count_;
 	}
 
 	ULONG DShowVMR9Allocator::Release()
 	{
 		-- ref_count_;
-		if (0 == ref_count_.value())
+		if (0 == ref_count_)
 		{
 			delete this;
 			return 0;
 		}
 
-		return ref_count_.value();
+		return ref_count_;
 	}
 
 	TexturePtr DShowVMR9Allocator::PresentTexture()

@@ -16,7 +16,6 @@
 #pragma once
 
 #include <KlayGE/PreDeclare.hpp>
-#include <KFL/Atomic.hpp>
 #include <KFL/Thread.hpp>
 
 #include <d3d9.h>

@@ -33,8 +33,6 @@
 
 #pragma once
 
-#include <KFL/Atomic.hpp>
-
 #include <string>
 
 #include <CPP/7zip/Archive/IArchive.h>
@@ -48,17 +46,17 @@ namespace KlayGE
 		STDMETHOD_(ULONG, AddRef)()
 		{
 			++ ref_count_;
-			return ref_count_.value();
+			return ref_count_;
 		}
 		STDMETHOD_(ULONG, Release)()
 		{
 			-- ref_count_;
-			if (0 == ref_count_.value())
+			if (0 == ref_count_)
 			{
 				delete this;
 				return 0;
 			}
-			return ref_count_.value();
+			return ref_count_;
 		}
 
 		STDMETHOD(QueryInterface)(REFGUID iid, void** outObject)
