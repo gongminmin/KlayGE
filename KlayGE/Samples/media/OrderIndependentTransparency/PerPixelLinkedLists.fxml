@@ -67,6 +67,9 @@ void GenPerPixelLinkedListsPS(float4 L : TEXCOORD0,
 		<pass name="p0">
 			<state name="cull_mode" value="none"/>
 
+			<state name="depth_enable" value="false"/>
+			<state name="depth_write_mask" value="0"/>
+
 			<state name="vertex_shader" value="GenPerPixelLinkedListsVS()"/>
 			<state name="pixel_shader" value="GenPerPixelLinkedListsPS()"/>
 		</pass>

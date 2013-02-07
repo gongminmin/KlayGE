@@ -33,6 +33,7 @@
 namespace KlayGE
 {
 	Renderable::Renderable()
+		: effect_attrs_(0)
 	{
 		DeferredRenderingLayerPtr const & drl = Context::Instance().DeferredRenderingLayerInstance();
 		if (drl)
@@ -42,7 +43,6 @@ namespace KlayGE
 			model_mat_ = float4x4::Identity();
 
 			opacity_map_enabled_ = false;
-			effect_attrs_ = 0;
 		}
 	}
 
