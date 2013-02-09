@@ -754,9 +754,9 @@ uint32_t ModelViewerApp::DoUpdate(KlayGE::uint32_t pass)
 	if (play_)
 	{
 		float this_time = this->AppTime();
-		if (this_time - last_time_ > 0.1f / model->FrameRate())
+		if (this_time - last_time_ > 0.02f)
 		{
-			frame_ += 0.1f;
+			frame_ += 0.02f * model->FrameRate();
 			frame_ = fmod(frame_, static_cast<float>(model->NumFrames()));
 
 			last_time_ = this_time;

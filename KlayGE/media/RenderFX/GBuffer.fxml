@@ -1006,7 +1006,7 @@ float4 SpecialShadingPS(float2 texcoord : TEXCOORD0) : SV_Target
 	float3 emit;
 	if (emit_clr.w > 0.5f)
 	{
-		emit = emit_tex.Sample(aniso_sampler, texcoord).rgb;
+		emit = emit_tex.Sample(aniso_sampler, texcoord).rgb * 16;
 	}
 	else
 	{
@@ -1020,7 +1020,7 @@ float4 SpecialShadingAlphaBlendPS(float2 texcoord : TEXCOORD0) : SV_Target
 	float3 emit;
 	if (emit_clr.w > 0.5f)
 	{
-		emit = emit_tex.Sample(aniso_sampler, texcoord).rgb;
+		emit = emit_tex.Sample(aniso_sampler, texcoord).rgb * 16;
 	}
 	else
 	{

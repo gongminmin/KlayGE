@@ -452,7 +452,7 @@ float4 VisualizeTextureRT1PS(float2 tex0 : TEXCOORD0) : SV_Target
 	{
 		if (emit_clr.w > 0.5f)
 		{
-			ret = float4(emit_tex.Sample(linear_sampler, tex0).rgb, 1);
+			ret = float4(emit_tex.Sample(linear_sampler, tex0).rgb * 16, 1);
 		}
 		else
 		{
@@ -515,7 +515,7 @@ void VisualizeTextureMRTPS(float2 tex0 : TEXCOORD0,
 	{
 		if (emit_clr.w > 0.5f)
 		{
-			mrt_1 = float4(emit_tex.Sample(linear_sampler, tex0).rgb, 1);
+			mrt_1 = float4(emit_tex.Sample(linear_sampler, tex0).rgb * 16, 1);
 		}
 		else
 		{
