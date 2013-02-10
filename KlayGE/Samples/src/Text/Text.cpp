@@ -25,17 +25,11 @@
 #include <fstream>
 #include <boost/bind.hpp>
 
+#include "SampleCommon.hpp"
 #include "Text.hpp"
 
 using namespace std;
 using namespace KlayGE;
-
-#ifdef KLAYGE_COMPILER_MSVC
-extern "C"
-{
-	_declspec(dllexport) uint32_t NvOptimusEnablement = 0x00000001;
-}
-#endif
 
 namespace
 {
@@ -53,17 +47,8 @@ namespace
 }
 
 
-#ifdef KLAYGE_PLATFORM_WINDOWS_METRO
-[Platform::MTAThread]
-int main(Platform::Array<Platform::String^>^ /*args*/)
-#else
-int main()
-#endif
+int SampleMain()
 {
-	ResLoader::Instance().AddPath("../../Samples/media/Common");
-
-	Context::Instance().LoadCfg("KlayGE.cfg");
-
 	TextApp app;
 	app.Create();
 	app.Run();

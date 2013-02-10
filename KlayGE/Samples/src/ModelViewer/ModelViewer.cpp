@@ -25,17 +25,11 @@
 #include <sstream>
 #include <boost/bind.hpp>
 
+#include "SampleCommon.hpp"
 #include "ModelViewer.hpp"
 
 using namespace KlayGE;
 using namespace std;
-
-#ifdef KLAYGE_COMPILER_MSVC
-extern "C"
-{
-	_declspec(dllexport) uint32_t NvOptimusEnablement = 0x00000001;
-}
-#endif
 
 namespace
 {
@@ -259,12 +253,8 @@ namespace
 	};
 }
 
-int main()
+int SampleMain()
 {
-	ResLoader::Instance().AddPath("../../Samples/media/Common");
-
-	Context::Instance().LoadCfg("KlayGE.cfg");
-
 	ContextCfg cfg = Context::Instance().Config();
 	cfg.deferred_rendering = true;
 	Context::Instance().Config(cfg);
