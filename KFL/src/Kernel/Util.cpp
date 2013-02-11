@@ -32,20 +32,6 @@
 #include <KFL/ResIdentifier.hpp>
 #include <KFL/Thread.hpp>
 
-#ifdef KLAYGE_CXX11_LIBRARY_CHRONO_SUPPORT
-#include <chrono>
-namespace KlayGE
-{
-	namespace chrono = std::chrono;
-}
-#else
-#include <boost/chrono.hpp>
-namespace KlayGE
-{
-	namespace chrono = boost::chrono;
-}
-#endif
-
 #ifdef KLAYGE_PLATFORM_WINDOWS
 	#include <windows.h>
 #else

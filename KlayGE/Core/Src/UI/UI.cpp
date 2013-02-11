@@ -1009,7 +1009,7 @@ namespace KlayGE
 			vertices[3].clr, vertices[3].tex));
 	}
 
-	void UIManager::DrawText(std::wstring const & strText, uint32_t font_index,
+	void UIManager::DrawString(std::wstring const & strText, uint32_t font_index,
 		Rect_T<int32_t> const & rc, float depth, Color const & clr, uint32_t align)
 	{
 		strings_[font_index].push_back(string_cache());
@@ -1311,7 +1311,7 @@ namespace KlayGE
 			this->DrawQuad(&vertices[0], 0, TexturePtr());
 			rc.left() += 5; // Make a left margin
 
-			this->DrawText(wstrOutput, cap_element_, rc, true);
+			this->DrawString(wstrOutput, cap_element_, rc, true);
 		}
 
 		// If the dialog is minimized, skip rendering
@@ -1639,7 +1639,7 @@ namespace KlayGE
 			static_cast<float>(rcScreen.Height()), &clrs[0], rcTexture, tex);
 	}
 
-	void UIDialog::DrawText(std::wstring const & strText, UIElement const & uie, Rect_T<int32_t> const & rc, bool bShadow, float depth_bias)
+	void UIDialog::DrawString(std::wstring const & strText, UIElement const & uie, Rect_T<int32_t> const & rc, bool bShadow, float depth_bias)
 	{
 		if (bShadow)
 		{
@@ -1653,7 +1653,7 @@ namespace KlayGE
 				r += Vector_T<int32_t, 2>(0, this->GetCaptionHeight());
 			}
 
-			UIManager::Instance().DrawText(strText, uie.FontIndex(), r, depth_base_ + depth_bias - 0.01f,
+			UIManager::Instance().DrawString(strText, uie.FontIndex(), r, depth_base_ + depth_bias - 0.01f,
 				Color(0, 0, 0, uie.FontColor().Current.a()), uie.TextAlign());
 		}
 
@@ -1664,7 +1664,7 @@ namespace KlayGE
 			r += Vector_T<int32_t, 2>(0, this->GetCaptionHeight());
 		}
 
-		UIManager::Instance().DrawText(strText, uie.FontIndex(), r, depth_base_ + depth_bias - 0.01f,
+		UIManager::Instance().DrawString(strText, uie.FontIndex(), r, depth_base_ + depth_bias - 0.01f,
 			uie.FontColor().Current, uie.TextAlign());
 	}
 

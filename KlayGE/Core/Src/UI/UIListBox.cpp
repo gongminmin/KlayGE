@@ -716,11 +716,11 @@ namespace KlayGE
 					rcSel.top() = rc.top();
 					rcSel.bottom() = rc.bottom();
 					this->GetDialog()->DrawSprite(*pSelElement, rcSel);
-					this->GetDialog()->DrawText(pItem->strText, *pSelElement, rc);
+					this->GetDialog()->DrawString(pItem->strText, *pSelElement, rc);
 				}
 				else
 				{
-					this->GetDialog()->DrawText(pItem->strText, *pElement, rc);
+					this->GetDialog()->DrawString(pItem->strText, *pElement, rc);
 				}
 
 				rc += Vector_T<int32_t, 2>(0, text_height_);

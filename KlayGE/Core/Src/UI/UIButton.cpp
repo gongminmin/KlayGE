@@ -178,7 +178,7 @@ namespace KlayGE
 		pElement->FontColor().SetState(iState);
 
 		this->GetDialog()->DrawSprite(*pElement, rcWindow);
-		this->GetDialog()->DrawText(text_, *pElement, rcWindow);
+		this->GetDialog()->DrawString(text_, *pElement, rcWindow);
 
 		// Main button
 		pElement = elements_[1];
@@ -189,7 +189,7 @@ namespace KlayGE
 		pElement->FontColor().SetState(iState);
 
 		this->GetDialog()->DrawSprite(*pElement, rcWindow);
-		this->GetDialog()->DrawText(text_, *pElement, rcWindow);
+		this->GetDialog()->DrawString(text_, *pElement, rcWindow);
 	}
 
 	std::wstring const & UIButton::GetText() const

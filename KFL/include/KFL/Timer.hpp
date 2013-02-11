@@ -33,12 +33,6 @@
 
 #pragma once
 
-#ifdef KLAYGE_PLATFORM_WINDOWS
-	#include <windows.h>
-#else
-	#include <ctime>
-#endif
-
 namespace KlayGE
 {
 	class Timer

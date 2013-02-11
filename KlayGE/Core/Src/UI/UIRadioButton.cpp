@@ -196,7 +196,7 @@ namespace KlayGE
 		pElement->FontColor().SetState(iState);
 
 		this->GetDialog()->DrawSprite(*pElement, button_rc_);
-		this->GetDialog()->DrawText(text_, *pElement, text_rc_, true);
+		this->GetDialog()->DrawString(text_, *pElement, text_rc_, true);
 
 		if (!checked_)
 		{

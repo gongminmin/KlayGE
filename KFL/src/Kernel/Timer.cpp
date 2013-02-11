@@ -36,23 +36,6 @@
 
 namespace KlayGE
 {
-	uint64_t CPS()
-	{
-		static uint64_t cps = 0;
-		if (0 == cps)
-		{
-#ifdef KLAYGE_PLATFORM_WINDOWS
-			LARGE_INTEGER frequency;
-			QueryPerformanceFrequency(&frequency);
-			cps = static_cast<uint64_t>(frequency.QuadPart);
-#else
-			cps = CLOCKS_PER_SEC;
-#endif
-		}
-
-		return cps;
-	}		
-
 	Timer::Timer()
 	{
 		this->restart();
@@ -72,27 +55,18 @@ namespace KlayGE
 	// return estimated maximum value for elapsed()
 	double Timer::elapsed_max() const
 	{
-#ifdef KLAYGE_PLATFORM_WINDOWS
-		return static_cast<double>(std::numeric_limits<uint64_t>::max()) / CPS() - start_time_;
-#else
-		return static_cast<double>(std::numeric_limits<std::clock_t>::max()) / CPS() - start_time_;
-#endif
+		return chrono::duration<double>::max().count();
 	}
 
 	// return minimum value for elapsed()
 	double Timer::elapsed_min() const
 	{
-		return 1.0 / CPS();
+		return chrono::duration<double>::min().count();
 	}
 
 	double Timer::current_time() const
 	{
-#ifdef KLAYGE_PLATFORM_WINDOWS
-		LARGE_INTEGER count;
-		QueryPerformanceCounter(&count);
-		return static_cast<double>(count.QuadPart) / CPS();
-#else
-		return static_cast<double>(std::clock()) / CPS();
-#endif
+		chrono::high_resolution_clock::time_point tp = chrono::high_resolution_clock::now();
+		return chrono::duration_cast<chrono::duration<double> >(tp.time_since_epoch()).count();
 	}
 }

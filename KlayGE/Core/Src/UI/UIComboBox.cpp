@@ -499,11 +499,11 @@ namespace KlayGE
 					{
 						Rect_T<int32_t> rc(dropdown_rc_.left(), pItem->rcActive.top() - 2, dropdown_rc_.right(), pItem->rcActive.bottom() + 2);
 						this->GetDialog()->DrawSprite(*pSelectionElement, rc, depth_bias);
-						this->GetDialog()->DrawText(pItem->strText, *pSelectionElement, pItem->rcActive, false, depth_bias);
+						this->GetDialog()->DrawString(pItem->strText, *pSelectionElement, pItem->rcActive, false, depth_bias);
 					}
 					else
 					{
-						this->GetDialog()->DrawText(pItem->strText, *pElement, pItem->rcActive, false, depth_bias);
+						this->GetDialog()->DrawString(pItem->strText, *pElement, pItem->rcActive, false, depth_bias);
 					}
 				}
 			}
@@ -572,7 +572,7 @@ namespace KlayGE
 			boost::shared_ptr<UIComboBoxItem> const & pItem = items_[selected_];
 			if (pItem)
 			{
-				this->GetDialog()->DrawText(pItem->strText, *pElement, text_rc_, false, depth_bias);
+				this->GetDialog()->DrawString(pItem->strText, *pElement, text_rc_, false, depth_bias);
 			}
 		}
 	}

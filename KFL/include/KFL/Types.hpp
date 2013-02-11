@@ -159,6 +159,20 @@ private:
 	}
 #endif
 
+#ifdef KLAYGE_CXX11_LIBRARY_CHRONO_SUPPORT
+	#include <chrono>
+	namespace KlayGE
+	{
+		namespace chrono = std::chrono;
+	}
+#else
+#include <boost/chrono.hpp>
+	namespace KlayGE
+	{
+		namespace chrono = boost::chrono;
+	}
+#endif
+
 #ifdef KLAYGE_CXX11_LIBRARY_CSTDINT_SUPPORT
 	#include <cstdint>
 	namespace KlayGE

@@ -72,7 +72,7 @@ namespace KlayGE
 
 		UIElement& element = *elements_[0];
 		element.FontColor().SetState(iState);
-		this->GetDialog()->DrawText(text_, element, bounding_box_);
+		this->GetDialog()->DrawString(text_, element, bounding_box_);
 	}
 
 	void UIStatic::SetText(std::wstring const & strText)

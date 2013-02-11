@@ -881,7 +881,7 @@ namespace KlayGE
 		//
 		// Element 0 for text
 		elements_[0]->FontColor().Current = text_color_;
-		this->GetDialog()->DrawText(buffer_.GetBuffer().substr(first_visible_), *elements_[0], text_rc_);
+		this->GetDialog()->DrawString(buffer_.GetBuffer().substr(first_visible_), *elements_[0], text_rc_);
 
 		// Render the selected text
 		if (caret_pos_ != sel_start_)
@@ -889,7 +889,7 @@ namespace KlayGE
 			int nFirstToRender = std::max(first_visible_, std::min(sel_start_, caret_pos_));
 			int nNumChatToRender = std::max(sel_start_, caret_pos_) - nFirstToRender;
 			elements_[0]->FontColor().Current = sel_text_color_;
-			this->GetDialog()->DrawText(buffer_.GetBuffer().substr(nFirstToRender, nNumChatToRender),
+			this->GetDialog()->DrawString(buffer_.GetBuffer().substr(nFirstToRender, nNumChatToRender),
 				*elements_[0], rcSelection);
 		}
 
