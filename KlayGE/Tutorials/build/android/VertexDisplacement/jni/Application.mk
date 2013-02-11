@@ -1,4 +1,4 @@
-NDK_MODULE_PATH := $(call my-dir)/../../../../../../External/boost/android$(HOST_DIRSEP)$(call my-dir)/../../../../../../External$(HOST_DIRSEP)$(call my-dir)/../../../../../../External/7z/build/android/LZMA$(HOST_DIRSEP)$(call my-dir)/../../../../../Build/android$(HOST_DIRSEP)$(call my-dir)/../../../../../../KFL/build/android$(HOST_DIRSEP)$(call my-dir)/../../../../../../glloader/build/android$(HOST_DIRSEP)$(call my-dir)/../../../../../../kfont/build/android$(HOST_DIRSEP)$(call my-dir)/../../../../../../MeshMLLib/build/android
+NDK_MODULE_PATH := $(call my-dir)/../../../../../../External/boost/android$(HOST_DIRSEP)$(call my-dir)/../../../../../../External$(HOST_DIRSEP)$(call my-dir)/../../../../../../External/7z/build/android/LZMA$(HOST_DIRSEP)$(call my-dir)/../../../../../build/android$(HOST_DIRSEP)$(call my-dir)/../../../../../../KFL/build/android$(HOST_DIRSEP)$(call my-dir)/../../../../../../glloader/build/android$(HOST_DIRSEP)$(call my-dir)/../../../../../../kfont/build/android$(HOST_DIRSEP)$(call my-dir)/../../../../../../MeshMLLib/build/android
 
 APP_BUILD_SCRIPT := $(call my-dir)/Android.mk
 

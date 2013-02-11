@@ -14,8 +14,8 @@ LOCAL_PATH := $(TEXT_SRC_PATH)
 LOCAL_SRC_FILES := Text.cpp
 LOCAL_LDLIBS := -llog -landroid
 LOCAL_STATIC_LIBRARIES := KlayGE_Core KlayGE_RenderEngine_OpenGLES KlayGE_Scene_OCTree KFL glloader kfont MeshMLLib \
-		boost_date_time boost_filesystem boost_system boost_thread \
-		LZMA my_android_native_app_glue
+		boost_chrono boost_filesystem boost_system boost_thread \
+		LZMA my_android_native_app_glue SampleCommon
 
 include $(BUILD_SHARED_LIBRARY)
 
@@ -28,4 +28,5 @@ $(call import-module, Plugins/Scene/OCTree/KlayGE_Scene_OCTree)
 $(call import-module, glloader)
 $(call import-module, kfont)
 $(call import-module, MeshMLLib)
+$(call import-module, SampleCommon)
 $(call import-module, android_native_app_glue)
