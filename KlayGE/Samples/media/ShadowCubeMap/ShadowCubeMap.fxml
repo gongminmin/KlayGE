@@ -597,14 +597,14 @@ float4 RenderScenePS(float2 Texcoord : TEXCOORD0, float3 LightWorldPos : TEXCOOR
 			tex.x += 0.5f;
 		}
 
-		moments = shadow_dual_tex.SampleLevel(linear_clamp_sampler, tex, 0).xy;
+		moments = shadow_dual_tex.Sample(linear_clamp_sampler, tex).xy;
 	}
 	else
 	{
 		dist = length(LightWorldPos);
 
 		float3 shadow_dir = float3(LightWorldPos.x, -KLAYGE_FLIPPING * LightWorldPos.y, LightWorldPos.z);
-		moments = shadow_cube_tex.SampleLevel(linear_clamp_sampler, shadow_dir, 0).xy;
+		moments = shadow_cube_tex.Sample(linear_clamp_sampler, shadow_dir).xy;
 	}
 
 	float p = (dist <= moments.x);

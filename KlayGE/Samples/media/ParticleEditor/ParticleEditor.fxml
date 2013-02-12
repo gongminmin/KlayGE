@@ -62,6 +62,9 @@ float GetTransparencyOverLife(float p)
 {
 	float ret = 0;
 	p /= init_life;
+#if KLAYGE_D3D11
+	[loop]
+#endif
 	for (int i = 0; (i < 7) && (i < num_transparency_over_life - 1); ++ i)
 	{
 		if (transparency_over_life[i + 1].x >= p)
@@ -131,10 +134,10 @@ float4 ParticlePS(PS_IN ps_in) : SV_Target
 		tex_coord.y *= KLAYGE_FLIPPING;
 		tex_coord = tex_coord / 2 + 0.5f;
 		
-		float depth = scene_tex.SampleLevel(scene_sampler, tex_coord, 0).a * depth_near_far_invfar.y;
+		float depth = scene_tex.Sample(scene_sampler, tex_coord).a * depth_near_far_invfar.y;
 
-		clr.a *= lerp(particle_alpha_from_tex.SampleLevel(particle_sampler, ps_in.tex.xy, 0).r,
-						particle_alpha_to_tex.SampleLevel(particle_sampler, ps_in.tex.xy, 0).r,
+		clr.a *= lerp(particle_alpha_from_tex.Sample(particle_sampler, ps_in.tex.xy).r,
+						particle_alpha_to_tex.Sample(particle_sampler, ps_in.tex.xy).r,
 						ps_in.tex.z);
 		float intersect_z = (v - sqrt(disc)) * ps_in.view_dir.z;
 		clr.a *= saturate((depth - intersect_z) * 5);

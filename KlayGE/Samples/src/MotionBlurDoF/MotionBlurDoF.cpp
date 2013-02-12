@@ -759,7 +759,10 @@ void MotionBlurDoFApp::InitObjects()
 	inputEngine.ActionMap(actionMap, input_handler, true);
 
 	depth_of_field_ = MakeSharedPtr<DepthOfField>();
-	bokeh_filter_ = MakeSharedPtr<BokehFilter>();
+	if (re.DeviceCaps().max_shader_model >= 3)
+	{
+		bokeh_filter_ = MakeSharedPtr<BokehFilter>();
+	}
 	depth_of_field_copy_pp_ = LoadPostProcess(ResLoader::Instance().Open("Copy.ppml"), "copy");
 	
 	motion_blur_ = MakeSharedPtr<MotionBlur>();
@@ -933,8 +936,11 @@ void MotionBlurDoFApp::OnResize(uint32_t width, uint32_t height)
 	depth_of_field_->InputPin(1, depth_tex_);
 	depth_of_field_copy_pp_->InputPin(0, mbed_tex_);
 
-	bokeh_filter_->InputPin(0, mbed_tex_);
-	bokeh_filter_->InputPin(1, depth_tex_);
+	if (bokeh_filter_)
+	{
+		bokeh_filter_->InputPin(0, mbed_tex_);
+		bokeh_filter_->InputPin(1, depth_tex_);
+	}
 
 	UIManager::Instance().SettleCtrls(width, height);
 }
@@ -969,13 +975,19 @@ void MotionBlurDoFApp::BokehOnHandler(KlayGE::UICheckBox const & sender)
 void MotionBlurDoFApp::FocusPlaneChangedHandler(KlayGE::UISlider const & sender)
 {
 	checked_pointer_cast<DepthOfField>(depth_of_field_)->FocusPlane(sender.GetValue() / 50.0f);
-	checked_pointer_cast<BokehFilter>(bokeh_filter_)->FocusPlane(sender.GetValue() / 50.0f);
+	if (bokeh_filter_)
+	{
+		checked_pointer_cast<BokehFilter>(bokeh_filter_)->FocusPlane(sender.GetValue() / 50.0f);
+	}
 }
 
 void MotionBlurDoFApp::FocusRangeChangedHandler(KlayGE::UISlider const & sender)
 {
 	checked_pointer_cast<DepthOfField>(depth_of_field_)->FocusRange(sender.GetValue() / 50.0f);
-	checked_pointer_cast<BokehFilter>(bokeh_filter_)->FocusRange(sender.GetValue() / 50.0f);
+	if (bokeh_filter_)
+	{
+		checked_pointer_cast<BokehFilter>(bokeh_filter_)->FocusRange(sender.GetValue() / 50.0f);
+	}
 }
 
 void MotionBlurDoFApp::BlurFactorHandler(KlayGE::UICheckBox const & sender)
@@ -1132,7 +1144,7 @@ uint32_t MotionBlurDoFApp::DoUpdate(uint32_t pass)
 		if (dof_on_)
 		{
 			depth_of_field_->Apply();
-			if (bokeh_on_)
+			if (bokeh_on_ && bokeh_filter_)
 			{
 				bokeh_filter_->Apply();
 			}
