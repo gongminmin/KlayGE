@@ -1873,13 +1873,19 @@ namespace KlayGE
 		args.push_back(nullptr);
 		args.push_back(flipping_str.c_str());
 		args.push_back(standard_derivatives_str.c_str());
-		if (!re.DeviceCaps().texture_format_support(EF_BC5))
+		if (!re.DeviceCaps().texture_format_support(EF_BC5)
+			|| !re.DeviceCaps().texture_format_support(EF_BC5_SRGB))
 		{
 			args.push_back("-DKLAYGE_BC5_AS_AG");
 		}
 		else
 		{
 			args.push_back("-DKLAYGE_BC5_AS_GA");
+		}
+		if (!re.DeviceCaps().texture_format_support(EF_BC4)
+			|| !re.DeviceCaps().texture_format_support(EF_BC4_SRGB))
+		{
+			args.push_back("-DKLAYGE_BC4_AS_G");
 		}
 		args.push_back(nullptr);
 

@@ -207,7 +207,7 @@ ScreenSpaceReflectionApp::ScreenSpaceReflectionApp()
 bool ScreenSpaceReflectionApp::ConfirmDevice() const
 {
 	RenderDeviceCaps const & caps = Context::Instance().RenderFactoryInstance().RenderEngineInstance().DeviceCaps();
-	if (caps.max_shader_model < 3)
+	if (caps.max_shader_model < 2)
 	{
 		return false;
 	}

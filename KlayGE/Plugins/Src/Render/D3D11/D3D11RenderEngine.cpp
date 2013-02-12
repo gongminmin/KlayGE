@@ -1096,38 +1096,58 @@ namespace KlayGE
 						break;
 					}
 
-					d3d_device_->CheckFormatSupport(depth_fmt, &s);
-					if (s != 0)
+					UINT s1;
+					d3d_device_->CheckFormatSupport(depth_fmt, &s1);
+					if (s1 != 0)
 					{
-						vertex_format_.insert(fmts[i].first);
-						texture_format_.insert(fmts[i].first);
+						if (s1 & D3D11_FORMAT_SUPPORT_IA_VERTEX_BUFFER)
+						{
+							vertex_format_.insert(fmts[i].first);
+						}
+						if (s1 & (D3D11_FORMAT_SUPPORT_TEXTURE1D | D3D11_FORMAT_SUPPORT_TEXTURE2D
+							| D3D11_FORMAT_SUPPORT_TEXTURE3D | D3D11_FORMAT_SUPPORT_TEXTURECUBE
+							| D3D11_FORMAT_SUPPORT_SHADER_LOAD | D3D11_FORMAT_SUPPORT_SHADER_SAMPLE))
+						{
+							texture_format_.insert(fmts[i].first);
+						}
 					}
 				}
 				else
 				{
-					vertex_format_.insert(fmts[i].first);
-					texture_format_.insert(fmts[i].first);
+					if (s & D3D11_FORMAT_SUPPORT_IA_VERTEX_BUFFER)
+					{
+						vertex_format_.insert(fmts[i].first);
+					}
+					if (s & (D3D11_FORMAT_SUPPORT_TEXTURE1D | D3D11_FORMAT_SUPPORT_TEXTURE2D
+						| D3D11_FORMAT_SUPPORT_TEXTURE3D | D3D11_FORMAT_SUPPORT_TEXTURECUBE
+						| D3D11_FORMAT_SUPPORT_SHADER_LOAD | D3D11_FORMAT_SUPPORT_SHADER_SAMPLE))
+					{
+						texture_format_.insert(fmts[i].first);
+					}
 				}
 
-				UINT count = 1;
-				UINT quality;
-				while (count <= D3D11_MAX_MULTISAMPLE_SAMPLE_COUNT)
+				if (s & (D3D11_FORMAT_SUPPORT_RENDER_TARGET | D3D11_FORMAT_SUPPORT_MULTISAMPLE_RENDERTARGET))
 				{
-					if (SUCCEEDED(d3d_device_->CheckMultisampleQualityLevels(fmts[i].second, count, &quality)))
+					UINT count = 1;
+					UINT quality;
+					while (count <= D3D11_MAX_MULTISAMPLE_SAMPLE_COUNT)
 					{
-						if (quality > 0)
+						if (SUCCEEDED(d3d_device_->CheckMultisampleQualityLevels(fmts[i].second, count, &quality)))
 						{
-							rendertarget_format_[fmts[i].first].push_back(std::make_pair(count, quality));
-							count <<= 1;
+							if (quality > 0)
+							{
+								rendertarget_format_[fmts[i].first].push_back(std::make_pair(count, quality));
+								count <<= 1;
+							}
+							else
+							{
+								break;
+							}
 						}
 						else
 						{
 							break;
 						}
-					}
-					else
-					{
-						break;
 					}
 				}
 			}

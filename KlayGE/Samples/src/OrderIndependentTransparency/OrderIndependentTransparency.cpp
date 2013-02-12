@@ -509,13 +509,9 @@ void OrderIndependentTransparencyApp::InputHandler(InputEngine const & /*sender*
 
 void OrderIndependentTransparencyApp::OITModeHandler(KlayGE::UIComboBox const & sender)
 {
-	RenderDeviceCaps const & caps = Context::Instance().RenderFactoryInstance().RenderEngineInstance().DeviceCaps();
-	if (caps.max_shader_model >= 5)
-	{
-		oit_mode_ = static_cast<OITMode>(sender.GetSelectedIndex());
-		checked_pointer_cast<PolygonObject>(polygon_)->SetOITMode(oit_mode_);
-		dialog_layer_->SetVisible(OM_DepthPeeling == oit_mode_);
-	}
+	oit_mode_ = static_cast<OITMode>(sender.GetSelectedIndex());
+	checked_pointer_cast<PolygonObject>(polygon_)->SetOITMode(oit_mode_);
+	dialog_layer_->SetVisible(OM_DepthPeeling == oit_mode_);
 }
 
 void OrderIndependentTransparencyApp::CtrlCameraHandler(KlayGE::UICheckBox const & sender)

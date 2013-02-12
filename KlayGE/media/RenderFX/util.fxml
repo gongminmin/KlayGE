@@ -3,6 +3,15 @@
 <effect>
 	<shader>
 		<![CDATA[
+float get_x_channel(float4 v)
+{
+#ifdef KLAYGE_BC4_AS_G
+	return v.g;
+#else
+	return v.r;
+#endif
+}
+
 float2 get_xy_channel(float4 v)
 {
 #ifdef KLAYGE_BC5_AS_AG

@@ -29,6 +29,9 @@ namespace KlayGE
 	D3D11RasterizerStateObject::D3D11RasterizerStateObject(RasterizerStateDesc const & desc)
 		: RasterizerStateObject(desc)
 	{
+		D3D11RenderEngine& re = *checked_cast<D3D11RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+		ID3D11DevicePtr const & d3d_device = re.D3DDevice();
+
 		D3D11_RASTERIZER_DESC d3d_desc;
 		d3d_desc.FillMode = D3D11Mapping::Mapping(desc.polygon_mode);
 		d3d_desc.CullMode = D3D11Mapping::Mapping(desc.cull_mode);
@@ -36,12 +39,10 @@ namespace KlayGE
 		d3d_desc.DepthBias = static_cast<int>(desc.polygon_offset_units);
 		d3d_desc.DepthBiasClamp = desc.polygon_offset_units;
 		d3d_desc.SlopeScaledDepthBias = desc.polygon_offset_factor;
-		d3d_desc.DepthClipEnable = desc.depth_clip_enable;
+		d3d_desc.DepthClipEnable = re.DeviceFeatureLevel() >= D3D_FEATURE_LEVEL_10_0 ? desc.depth_clip_enable : true;;
 		d3d_desc.ScissorEnable = desc.scissor_enable;
 		d3d_desc.MultisampleEnable = desc.multisample_enable;
 		d3d_desc.AntialiasedLineEnable = false;
-
-		ID3D11DevicePtr const & d3d_device = checked_cast<D3D11RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance())->D3DDevice();
 
 #if (_WIN32_WINNT >= 0x0602 /*_WIN32_WINNT_WIN8*/)
 		ID3D11Device1* d3d_device_1;

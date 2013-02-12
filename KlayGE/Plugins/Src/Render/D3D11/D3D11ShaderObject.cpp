@@ -1255,6 +1255,9 @@ namespace KlayGE
 			{
 				D3D_SHADER_MACRO macro_bc5_as_bc3 = { "KLAYGE_BC5_AS_AG", "1" };
 				macros.push_back(macro_bc5_as_bc3);
+
+				D3D_SHADER_MACRO macro_bc4_as_bc1 = { "KLAYGE_BC4_AS_G", "1" };
+				macros.push_back(macro_bc4_as_bc1);
 			}
 			{
 				D3D_SHADER_MACRO macro_end = { nullptr, nullptr };

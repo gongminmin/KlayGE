@@ -786,6 +786,29 @@ namespace
 					tex_desc_.format = EF_BC3;
 				}
 			}
+			if (((EF_BC4 == tex_desc_.format) && !caps.texture_format_support(EF_BC4))
+				|| ((EF_BC4_SRGB == tex_desc_.format) && !caps.texture_format_support(EF_BC4_SRGB)))
+			{
+				BC1_layout tmp;
+				for (size_t i = 0; i < tex_desc_.tex_data.size(); ++ i)
+				{
+					for (size_t j = 0; j < tex_desc_.tex_data[i].slice_pitch; j += sizeof(BC4_layout))
+					{
+						char* p = static_cast<char*>(const_cast<void*>(tex_desc_.tex_data[i].data)) + j;
+
+						BC4ToBC1G(tmp, *reinterpret_cast<BC4_layout const *>(p));
+					}
+				}
+
+				if (IsSRGB(tex_desc_.format))
+				{
+					tex_desc_.format = EF_BC1_SRGB;
+				}
+				else
+				{
+					tex_desc_.format = EF_BC1;
+				}
+			}
 			if ((EF_BC1_SRGB == tex_desc_.format) && !caps.texture_format_support(EF_BC1_SRGB))
 			{
 				for (size_t index = 0; index < array_size; ++ index)
