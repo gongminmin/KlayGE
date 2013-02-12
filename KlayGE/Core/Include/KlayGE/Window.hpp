@@ -70,6 +70,7 @@ namespace KlayGE
 	{
 	public:
 		Window(std::string const & name, RenderSettings const & settings);
+		Window(std::string const & name, RenderSettings const & settings, void* native_wnd);
 		~Window();
 
 #if defined KLAYGE_PLATFORM_WINDOWS
@@ -282,6 +283,8 @@ namespace KlayGE
 #elif defined KLAYGE_PLATFORM_ANDROID
 		::ANativeWindow* a_window_;
 #endif
+
+		bool external_wnd_;
 	};
 }
 

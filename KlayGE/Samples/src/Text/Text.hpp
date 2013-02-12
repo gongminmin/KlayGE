@@ -1,5 +1,5 @@
-#ifndef _PARALLAX_HPP
-#define _PARALLAX_HPP
+#ifndef _TEXT_HPP
+#define _TEXT_HPP
 
 #include <KlayGE/App3D.hpp>
 #include <KlayGE/Font.hpp>
@@ -27,4 +27,4 @@ private:
 	float scale_;
 };
 
-#endif		// _PARALLAX_HPP
+#endif		// _TEXT_HPP

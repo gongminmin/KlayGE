@@ -118,6 +118,8 @@ namespace KlayGE
 			rc.right - rc.left, rc.bottom - rc.top, 0, 0, hInst, nullptr);
 #endif
 
+		external_wnd_ = false;
+
 		::GetClientRect(wnd_, &rc);
 		left_ = settings.left;
 		top_ = settings.top;
@@ -137,36 +139,22 @@ namespace KlayGE
 		::UpdateWindow(wnd_);
 	}
 
-	Window::~Window()
+	Window::Window(std::string const & name, RenderSettings const & settings, void* native_wnd)
 	{
-		if (wnd_ != nullptr)
-		{
-			::DestroyWindow(wnd_);
-			wnd_ = nullptr;
-		}
-	}
-
-	void Window::Recreate()
-	{
-		HINSTANCE hInst = ::GetModuleHandle(nullptr);
-
-		uint32_t style = static_cast<uint32_t>(::GetWindowLongPtrW(wnd_, GWL_STYLE));
-		RECT rc = { 0, 0, static_cast<LONG>(width_), static_cast<LONG>(height_) };
-		::AdjustWindowRect(&rc, style, false);
-
-		::DestroyWindow(wnd_);
-
+		// Register the window class
 #ifdef KLAYGE_COMPILER_GCC
-		wnd_ = ::CreateWindowA(name_.c_str(), name_.c_str(),
-			style, left_, top_,
-			rc.right - rc.left, rc.bottom - rc.top, 0, 0, hInst, nullptr);
+		name_ = name;
 #else
-		wnd_ = ::CreateWindowW(wname_.c_str(), wname_.c_str(),
-			style, left_, top_,
-			rc.right - rc.left, rc.bottom - rc.top, 0, 0, hInst, nullptr);
+		Convert(wname_, name);
 #endif
 
+		wnd_ = static_cast<HWND>(native_wnd);
+		external_wnd_ = true;
+
+		RECT rc;
 		::GetClientRect(wnd_, &rc);
+		left_ = settings.left;
+		top_ = settings.top;
 		width_ = rc.right - rc.left;
 		height_ = rc.bottom - rc.top;
 
@@ -179,8 +167,56 @@ namespace KlayGE
 #pragma warning(pop)
 #endif
 
-		::ShowWindow(wnd_, SW_SHOWNORMAL);
 		::UpdateWindow(wnd_);
+	}
+
+	Window::~Window()
+	{
+		if ((wnd_ != nullptr) && !external_wnd_)
+		{
+			::DestroyWindow(wnd_);
+			wnd_ = nullptr;
+		}
+	}
+
+	void Window::Recreate()
+	{
+		if (!external_wnd_)
+		{
+			HINSTANCE hInst = ::GetModuleHandle(nullptr);
+
+			uint32_t style = static_cast<uint32_t>(::GetWindowLongPtrW(wnd_, GWL_STYLE));
+			RECT rc = { 0, 0, static_cast<LONG>(width_), static_cast<LONG>(height_) };
+			::AdjustWindowRect(&rc, style, false);
+
+			::DestroyWindow(wnd_);
+
+#ifdef KLAYGE_COMPILER_GCC
+			wnd_ = ::CreateWindowA(name_.c_str(), name_.c_str(),
+				style, left_, top_,
+				rc.right - rc.left, rc.bottom - rc.top, 0, 0, hInst, nullptr);
+#else
+			wnd_ = ::CreateWindowW(wname_.c_str(), wname_.c_str(),
+				style, left_, top_,
+				rc.right - rc.left, rc.bottom - rc.top, 0, 0, hInst, nullptr);
+#endif
+
+			::GetClientRect(wnd_, &rc);
+			width_ = rc.right - rc.left;
+			height_ = rc.bottom - rc.top;
+
+#ifdef KLAYGE_COMPILER_MSVC
+#pragma warning(push)
+#pragma warning(disable: 4244)
+#endif
+			::SetWindowLongPtrW(wnd_, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(this));
+#ifdef KLAYGE_COMPILER_MSVC
+#pragma warning(pop)
+#endif
+
+			::ShowWindow(wnd_, SW_SHOWNORMAL);
+			::UpdateWindow(wnd_);
+		}
 	}
 
 	LRESULT Window::MsgProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)

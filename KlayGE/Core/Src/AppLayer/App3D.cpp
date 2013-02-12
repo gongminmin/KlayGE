@@ -194,6 +194,24 @@ namespace KlayGE
 #endif
 	}
 
+	App3DFramework::App3DFramework(std::string const & name, void* native_wnd)
+						: name_(name),
+							fps_(0), accumulate_time_(0), num_frames_(0),
+							app_time_(0), frame_time_(0)
+	{
+		Context::Instance().AppInstance(*this);
+
+		ContextCfg cfg = Context::Instance().Config();
+		main_wnd_ = this->MakeWindow(name_, cfg.graphics_cfg, native_wnd);
+#ifndef KLAYGE_PLATFORM_WINDOWS_METRO
+		cfg.graphics_cfg.left = main_wnd_->Left();
+		cfg.graphics_cfg.top = main_wnd_->Top();
+		cfg.graphics_cfg.width = main_wnd_->Width();
+		cfg.graphics_cfg.height = main_wnd_->Height();
+		Context::Instance().Config(cfg);
+#endif
+	}
+
 	App3DFramework::~App3DFramework()
 	{
 		this->Destroy();
@@ -249,6 +267,11 @@ namespace KlayGE
 	WindowPtr App3DFramework::MakeWindow(std::string const & name, RenderSettings const & settings)
 	{
 		return MakeSharedPtr<Window>(name, settings);
+	}
+
+	WindowPtr App3DFramework::MakeWindow(std::string const & name, RenderSettings const & settings, void* native_wnd)
+	{
+		return MakeSharedPtr<Window>(name, settings, native_wnd);
 	}
 
 #if defined KLAYGE_PLATFORM_WINDOWS_METRO

@@ -76,6 +76,7 @@ namespace KlayGE
 
 	public:
 		explicit App3DFramework(std::string const & name);
+		App3DFramework(std::string const & name, void* native_wnd);
 		virtual ~App3DFramework();
 
 		virtual void Create();
@@ -87,6 +88,7 @@ namespace KlayGE
 		}
 
 		WindowPtr MakeWindow(std::string const & name, RenderSettings const & settings);
+		WindowPtr MakeWindow(std::string const & name, RenderSettings const & settings, void* native_wnd);
 		WindowPtr MainWnd() const
 		{
 			return main_wnd_;
