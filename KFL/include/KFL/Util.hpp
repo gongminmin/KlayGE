@@ -240,27 +240,6 @@ namespace KlayGE
 	using std::project2nd;
 #endif		// KLAYGE_PROJECT1ST2ND_SUPPORT
 
-#ifdef KLAYGE_COPYIF_SUPPORT
-	template<typename InputIterator, typename OutputIterator, typename Predicate>
-	OutputIterator copy_if(InputIterator first, InputIterator last,
-							OutputIterator dest_first,
-							Predicate p)
-	{
-		for (InputIterator iter = first; iter != last; ++ iter)
-		{
-			if (p(*iter))
-			{
-				*dest_first = *iter;
-				++ dest_first;
-			}
-		}
-
-		return dest_first;
-	}
-#else
-	using std::copyif;
-#endif	// KLAYGE_COPYIF_SUPPORT
-
 	std::string ReadShortString(ResIdentifierPtr const & res);
 	void WriteShortString(std::ostream& os, std::string const & str);
 

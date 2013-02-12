@@ -127,6 +127,34 @@ private:
 	}
 #endif
 
+#ifdef KLAYGE_CXX11_LIBRARY_ALGORITHM
+	#include <algorithm>
+	namespace KlayGE
+	{
+		using std::copy_if;
+	}
+#else
+	namespace KlayGE
+	{
+		template<typename InputIterator, typename OutputIterator, typename Predicate>
+		OutputIterator copy_if(InputIterator first, InputIterator last,
+								OutputIterator dest_first,
+								Predicate p)
+		{
+			for (InputIterator iter = first; iter != last; ++ iter)
+			{
+				if (p(*iter))
+				{
+					*dest_first = *iter;
+					++ dest_first;
+				}
+			}
+
+			return dest_first;
+		}
+	}
+#endif
+
 #ifdef KLAYGE_CXX11_LIBRARY_ATOMIC_SUPPORT
 	#include <atomic>
 	namespace KlayGE
@@ -166,7 +194,7 @@ private:
 		namespace chrono = std::chrono;
 	}
 #else
-#include <boost/chrono.hpp>
+	#include <boost/chrono.hpp>
 	namespace KlayGE
 	{
 		namespace chrono = boost::chrono;
