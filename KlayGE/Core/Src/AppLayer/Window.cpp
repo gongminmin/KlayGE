@@ -502,6 +502,14 @@ namespace KlayGE
 		Convert(wname_, name);
 	}
 
+	Window::Window(std::string const & name, RenderSettings const & /*settings*/, void* /*native_wnd*/)
+		: msgs_(ref new MetroMsgs)
+	{
+		msgs_->BindWindow(this);
+
+		Convert(wname_, name);
+	}
+
 	Window::~Window()
 	{
 	}
