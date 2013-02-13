@@ -60,6 +60,7 @@ namespace KlayGE
 	}
 
 	Window::Window(std::string const & name, RenderSettings const & settings)
+		: closed_(false)
 	{
 		HINSTANCE hInst = ::GetModuleHandle(nullptr);
 
@@ -118,6 +119,7 @@ namespace KlayGE
 			rc.right - rc.left, rc.bottom - rc.top, 0, 0, hInst, nullptr);
 #endif
 
+		default_wnd_proc_ = ::DefWindowProc;
 		external_wnd_ = false;
 
 		::GetClientRect(wnd_, &rc);
@@ -140,6 +142,7 @@ namespace KlayGE
 	}
 
 	Window::Window(std::string const & name, RenderSettings const & settings, void* native_wnd)
+		: closed_(false)
 	{
 		// Register the window class
 #ifdef KLAYGE_COMPILER_GCC
@@ -149,6 +152,8 @@ namespace KlayGE
 #endif
 
 		wnd_ = static_cast<HWND>(native_wnd);
+		default_wnd_proc_ = reinterpret_cast<WNDPROC>(::GetWindowLongPtrW(wnd_, GWLP_WNDPROC));
+		::SetWindowLongPtrW(wnd_, GWLP_WNDPROC, reinterpret_cast<LONG_PTR>(WndProc));
 		external_wnd_ = true;
 
 		RECT rc;
@@ -487,15 +492,17 @@ namespace KlayGE
 
 		case WM_CLOSE:
 			this->OnClose()(*this);
+			closed_ = true;
 			::PostQuitMessage(0);
 			return 0;
 		}
 
-		return ::DefWindowProc(hWnd, uMsg, wParam, lParam);
+		return default_wnd_proc_(hWnd, uMsg, wParam, lParam);
 	}
 #else
 	Window::Window(std::string const & name, RenderSettings const & /*settings*/)
-		: msgs_(ref new MetroMsgs)
+		: closed_(false),
+			msgs_(ref new MetroMsgs)
 	{
 		msgs_->BindWindow(this);
 
@@ -503,7 +510,8 @@ namespace KlayGE
 	}
 
 	Window::Window(std::string const & name, RenderSettings const & /*settings*/, void* /*native_wnd*/)
-		: msgs_(ref new MetroMsgs)
+		: closed_(false),
+			msgs_(ref new MetroMsgs)
 	{
 		msgs_->BindWindow(this);
 
@@ -558,6 +566,7 @@ namespace KlayGE
 	void Window::MetroMsgs::OnWindowClosed(CoreWindow^ /*sender*/, CoreWindowEventArgs^ /*args*/)
 	{
 		win_->OnClose()(*win_);
+		win_->closed_ = true;
 	}
 
 	void Window::MetroMsgs::OnPointerPressed(CoreWindow^ /*sender*/, PointerEventArgs^ /*args*/)
@@ -575,6 +584,7 @@ namespace KlayGE
 #endif
 #elif defined KLAYGE_PLATFORM_LINUX
 	Window::Window(std::string const & name, RenderSettings const & settings)
+		: closed_(false)
 	{
 		x_display_ = XOpenDisplay(nullptr);
 
@@ -699,6 +709,130 @@ namespace KlayGE
 		XSetWMProtocols(x_display_, x_window_, &wm_delete_window_, 1);
 	}
 
+	Window::Window(std::string const & name, RenderSettings const & settings, void* native_wnd)
+		: closed_(false)
+	{
+		x_display_ = XOpenDisplay(nullptr);
+
+		int r_size, g_size, b_size, a_size, d_size, s_size;
+		switch (settings.color_fmt)
+		{
+		case EF_ARGB8:
+		case EF_ABGR8:
+			r_size = 8;
+			g_size = 8;
+			b_size = 8;
+			a_size = 8;
+			break;
+
+		case EF_A2BGR10:
+			r_size = 10;
+			g_size = 10;
+			b_size = 10;
+			a_size = 2;
+			break;
+
+		default:
+			BOOST_ASSERT(false);
+			break;
+		}
+		switch (settings.depth_stencil_fmt)
+		{
+		case EF_D16:
+			d_size = 16;
+			s_size = 0;
+			break;
+
+		case EF_D24S8:
+			d_size = 24;
+			s_size = 8;
+			break;
+
+		case EF_D32F:
+			d_size = 32;
+			s_size = 0;
+			break;
+
+		default:
+			d_size = 0;
+			s_size = 0;
+			break;
+		}
+
+		std::vector<int> visual_attr;
+		//visual_attr.push_back(GLX_RENDER_TYPE);
+		//visual_attr.push_back(GLX_RGBA_BIT);
+		visual_attr.push_back(GLX_RGBA);
+		visual_attr.push_back(GLX_RED_SIZE);
+		visual_attr.push_back(r_size);
+		visual_attr.push_back(GLX_GREEN_SIZE);
+		visual_attr.push_back(g_size);
+		visual_attr.push_back(GLX_BLUE_SIZE);
+		visual_attr.push_back(b_size);
+		visual_attr.push_back(GLX_ALPHA_SIZE);
+		visual_attr.push_back(a_size);
+		//visual_attr.push_back(GLX_DRAWABLE_TYPE);
+		//visual_attr.push_back(GLX_WINDOW_BIT);
+		if (d_size > 0)
+		{
+			visual_attr.push_back(GLX_DEPTH_SIZE);
+			visual_attr.push_back(d_size);
+		}
+		if (s_size > 0)
+		{
+			visual_attr.push_back(GLX_STENCIL_SIZE);
+			visual_attr.push_back(s_size);
+		}
+		visual_attr.push_back(GLX_DOUBLEBUFFER);
+		visual_attr.push_back(True);
+		if (settings.sample_count > 1)
+		{
+			visual_attr.push_back(GLX_SAMPLE_BUFFERS);
+			visual_attr.push_back(1);
+			visual_attr.push_back(GLX_BUFFER_SIZE);
+			visual_attr.push_back(settings.sample_count);
+		}
+		visual_attr.push_back(None);				// end of list
+
+		glXChooseFBConfig = (glXChooseFBConfigFUNC)(glloader_get_gl_proc_address("glXChooseFBConfig"));
+		glXGetVisualFromFBConfig = (glXGetVisualFromFBConfigFUNC)(glloader_get_gl_proc_address("glXGetVisualFromFBConfig"));
+
+		//int num_elements;
+		//fbc_ = glXChooseFBConfig(x_display_, DefaultScreen(x_display_), &visual_attr[0], &num_elements);
+
+		//vi_ = glXGetVisualFromFBConfig(x_display_, fbc_[0]);
+		vi_ = glXChooseVisual(x_display_, DefaultScreen(x_display_), &visual_attr[0]);
+
+		XSetWindowAttributes attr;
+		attr.colormap     = XCreateColormap(x_display_, RootWindow(x_display_, vi_->screen), vi_->visual, AllocNone);
+		attr.border_pixel = 0;
+		attr.event_mask   = ExposureMask
+								| VisibilityChangeMask
+								| KeyPressMask
+								| KeyReleaseMask
+								| ButtonPressMask
+								| ButtonReleaseMask
+								| PointerMotionMask
+								| StructureNotifyMask
+								| SubstructureNotifyMask
+								| FocusChangeMask
+								| ResizeRedirectMask;
+		x_window_ = static_cast<::Window>(native_wnd);
+		XStoreName(x_display_, x_window_, name.c_str());
+		XMapWindow(x_display_, x_window_);
+		XFlush(x_display_);
+
+		XWindowAttributes win_attr;
+		XGetWindowAttributes(x_display_, x_window_, &win_attr);
+		left_ = win_attr.x;
+		top_ = win_attr.y;
+		width_ = win_attr.width;
+		height_ = win_attr.height;
+
+		wm_delete_window_ = XInternAtom(x_display_, "WM_DELETE_WINDOW", false);
+		XSetWMProtocols(x_display_, x_window_, &wm_delete_window_, 1);
+	}
+
 	Window::~Window()
 	{
 		//XFree(fbc_);
@@ -755,6 +889,7 @@ namespace KlayGE
 			if (wm_delete_window_ == static_cast<Atom>(event.xclient.data.l[0]))
 			{
 				this->OnClose()(*this);
+				closed_ = true;
 				XDestroyWindow(x_display_, x_window_);
 				XCloseDisplay(x_display_);
 				exit(0);
@@ -764,8 +899,49 @@ namespace KlayGE
 	}
 #elif defined KLAYGE_PLATFORM_ANDROID
 	Window::Window(std::string const & /*name*/, RenderSettings const & settings)
+		: closed_(false)
 	{
 		a_window_ = nullptr;
+
+		android_app* state = Context::Instance().AppState();
+		state->userData = this;
+		state->onAppCmd = MsgProc;
+
+		while (nullptr == a_window_)
+		{
+			// Read all pending events.
+			int ident;
+			int events;
+			android_poll_source* source;
+
+			do
+			{
+				ident = ALooper_pollAll(0, nullptr, &events, reinterpret_cast<void**>(&source));
+
+				// Process this event.
+				if (source != nullptr)
+				{
+					source->process(state, source);
+				}
+
+				// Check if we are exiting.
+				if (state->destroyRequested != 0)
+				{
+					return;
+				}
+			} while ((nullptr == a_window_) && (ident >= 0));
+		}
+
+		left_ = settings.left;
+		top_ = settings.top;
+		width_ = ANativeWindow_getWidth(a_window_);
+		height_ = ANativeWindow_getHeight(a_window_);
+	}
+
+	Window::Window(std::string const & /*name*/, RenderSettings const & settings, void* native_wnd)
+		: closed_(false)
+	{
+		a_window_ = static_cast<::ANativeWindow*>(native_wnd);
 
 		android_app* state = Context::Instance().AppState();
 		state->userData = this;
@@ -820,6 +996,7 @@ namespace KlayGE
         
 		case APP_CMD_TERM_WINDOW:
 			win->OnClose()(*win);
+			closed_ = true;
 			break;
 
 		case APP_CMD_GAINED_FOCUS:

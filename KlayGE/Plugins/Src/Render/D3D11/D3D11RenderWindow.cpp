@@ -45,7 +45,7 @@ namespace KlayGE
 #else
 						:
 #endif
-                            ready_(false), closed_(false),
+                            ready_(false),
                             adapter_(adapter),
                             gi_factory_(gi_factory)
 	{
@@ -395,11 +395,6 @@ namespace KlayGE
 		this->Destroy();
 	}
 
-	bool D3D11RenderWindow::Closed() const
-	{
-		return closed_;
-	}
-
 	bool D3D11RenderWindow::Ready() const
 	{
 		return ready_;
@@ -696,6 +691,5 @@ namespace KlayGE
 	void D3D11RenderWindow::OnClose(Window const & /*win*/)
 	{
 		this->Destroy();
-		closed_ = true;
 	}
 }

@@ -122,67 +122,6 @@ namespace KlayGE
 		return name;
 	}
 
-	// 开始渲染
-	/////////////////////////////////////////////////////////////////////////////////
-	void OGLRenderEngine::StartRendering()
-	{
-#if defined KLAYGE_PLATFORM_WINDOWS
-		bool gotMsg;
-		MSG  msg;
-
-		::PeekMessage(&msg, nullptr, 0, 0, PM_NOREMOVE);
-
-		FrameBuffer& fb = *this->ScreenFrameBuffer();
-		while (WM_QUIT != msg.message)
-		{
-			// 如果窗口是激活的，用 PeekMessage()以便我们可以用空闲时间渲染场景
-			// 不然, 用 GetMessage() 减少 CPU 占用率
-			if (fb.Active())
-			{
-				gotMsg = ::PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE) ? true : false;
-			}
-			else
-			{
-				gotMsg = ::GetMessage(&msg, nullptr, 0, 0) ? true : false;
-			}
-
-			if (gotMsg)
-			{
-				::TranslateMessage(&msg);
-				::DispatchMessage(&msg);
-			}
-			else
-			{
-				// 在空余时间渲染帧 (没有等待的消息)
-				if (fb.Active())
-				{
-					Context::Instance().SceneManagerInstance().Update();
-					fb.SwapBuffers();
-				}
-			}
-		}
-#elif defined KLAYGE_PLATFORM_LINUX
-		WindowPtr main_wnd = Context::Instance().AppInstance().MainWnd();
-		::Display* x_display = main_wnd->XDisplay();
-		XEvent event;
-		for (;;)
-		{
-			do
-			{
-				XNextEvent(x_display, &event);
-				main_wnd->MsgProc(event);
-			} while(XPending(x_display));
-
-			FrameBuffer& fb = *this->CurFrameBuffer();
-			if (fb.Active())
-			{
-				Context::Instance().SceneManagerInstance().Update();
-				fb.SwapBuffers();
-			}
-		}
-#endif
-	}
-
 	// 建立渲染窗口
 	/////////////////////////////////////////////////////////////////////////////////
 	void OGLRenderEngine::DoCreateRenderWindow(std::string const & name,

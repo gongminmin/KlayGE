@@ -62,8 +62,6 @@ namespace KlayGE
 		D3D_FEATURE_LEVEL DeviceFeatureLevel() const;
 		void D3DDevice(ID3D11DevicePtr const & device, ID3D11DeviceContextPtr const & imm_ctx, D3D_FEATURE_LEVEL feature_level);
 
-		void StartRendering();
-
 		void BeginFrame();
 		void EndFrame();
 		void BeginPass();

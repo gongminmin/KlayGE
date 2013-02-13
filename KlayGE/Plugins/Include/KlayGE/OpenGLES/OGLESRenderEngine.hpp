@@ -44,8 +44,6 @@ namespace KlayGE
 			return false;
 		}
 
-		void StartRendering();
-
 		void BeginFrame();
 		void EndFrame();
 		void BeginPass();

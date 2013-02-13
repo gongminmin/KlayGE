@@ -50,6 +50,7 @@
 #include <KlayGE/RenderEffect.hpp>
 #include <KlayGE/PostProcess.hpp>
 #include <KlayGE/HDRPostProcess.hpp>
+#include <KlayGE/SceneManager.hpp>
 
 #include <KlayGE/RenderEngine.hpp>
 
@@ -67,10 +68,6 @@ namespace KlayGE
 		bool RequiresFlipping() const
 		{
 			return false;
-		}
-
-		void StartRendering()
-		{
 		}
 
 		void BeginFrame()
@@ -659,6 +656,16 @@ namespace KlayGE
 		if (color_grading_pp_)
 		{
 			color_grading_pp_->SetParam(0, int2(render_settings_.gamma, cg));
+		}
+	}
+
+	void RenderEngine::Refresh()
+	{
+		FrameBuffer& fb = *this->ScreenFrameBuffer();
+		if (fb.Active())
+		{
+			Context::Instance().SceneManagerInstance().Update();
+			fb.SwapBuffers();
 		}
 	}
 

@@ -129,6 +129,11 @@ namespace KlayGE
 			return height_;
 		}
 
+		bool Closed() const
+		{
+			return closed_;
+		}
+
 	public:
 		typedef boost::signals2::signal<void(Window const &, bool)> ActiveEvent;
 		typedef boost::signals2::signal<void(Window const &)> PaintEvent;
@@ -261,6 +266,8 @@ namespace KlayGE
 		uint32_t width_;
 		uint32_t height_;
 
+		bool closed_;
+
 #if defined KLAYGE_PLATFORM_WINDOWS
 #ifdef KLAYGE_COMPILER_GCC
 		std::string name_;
@@ -270,6 +277,7 @@ namespace KlayGE
 
 #if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
 		HWND wnd_;
+		WNDPROC default_wnd_proc_;
 #else
 		Platform::Agile<Windows::UI::Core::CoreWindow> wnd_;
 		MetroMsgs^ msgs_;

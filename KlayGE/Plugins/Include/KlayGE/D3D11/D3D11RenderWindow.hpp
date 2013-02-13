@@ -35,8 +35,6 @@ namespace KlayGE
 
 		void Destroy();
 
-		bool Closed() const;
-
 		bool Ready() const;
 		void Ready(bool ready);
 
@@ -92,7 +90,6 @@ namespace KlayGE
 		Platform::Agile<Windows::UI::Core::CoreWindow> wnd_;
 #endif
 		bool	ready_;				// Is ready i.e. available for update
-		bool	closed_;
 		bool	isFullScreen_;
 		uint32_t sync_interval_;
 

@@ -99,8 +99,6 @@ namespace KlayGE
 
 		virtual bool RequiresFlipping() const = 0;
 
-		virtual void StartRendering() = 0;
-
 		virtual void BeginFrame() = 0;
 		virtual void BeginPass() = 0;
 		void Render(RenderTechnique const & tech, RenderLayout const & rl);
@@ -145,6 +143,9 @@ namespace KlayGE
 		void HDREnabled(bool hdr);
 		void PPAAEnabled(int aa);
 		void ColorGradingEnabled(bool cg);
+
+		// Render a frame when no pending message
+		virtual void Refresh();
 
 		virtual void AdjustPerspectiveMatrix(float4x4& /*pers_mat*/)
 		{

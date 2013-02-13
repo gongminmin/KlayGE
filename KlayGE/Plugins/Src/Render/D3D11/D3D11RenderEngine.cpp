@@ -241,63 +241,6 @@ namespace KlayGE
 		return adapterList_.Adapter(adapterList_.CurrentAdapterIndex());
 	}
 
-	// 开始渲染
-	/////////////////////////////////////////////////////////////////////////////////
-	void D3D11RenderEngine::StartRendering()
-	{
-#ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
-		bool gotMsg;
-		MSG  msg;
-
-		::PeekMessage(&msg, nullptr, 0, 0, PM_NOREMOVE);
-
-		FrameBuffer& fb = *this->ScreenFrameBuffer();
-		while (WM_QUIT != msg.message)
-		{
-			// 如果窗口是激活的，用 PeekMessage()以便我们可以用空闲时间渲染场景
-			// 不然, 用 GetMessage() 减少 CPU 占用率
-			if (fb.Active())
-			{
-				gotMsg = (::PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE) != 0);
-			}
-			else
-			{
-				gotMsg = (::GetMessage(&msg, nullptr, 0, 0) != 0);
-			}
-
-			if (gotMsg)
-			{
-				::TranslateMessage(&msg);
-				::DispatchMessage(&msg);
-			}
-			else
-			{
-				// 在空余时间渲染帧 (没有等待的消息)
-				if (fb.Active())
-				{
-					Context::Instance().SceneManagerInstance().Update();
-					fb.SwapBuffers();
-				}
-			}
-		}
-#else
-		FrameBufferPtr fb = this->ScreenFrameBuffer();
-		while (!checked_pointer_cast<D3D11RenderWindow>(fb)->Closed())
-		{
-			if (fb->Active())
-			{
-				CoreWindow::GetForCurrentThread()->Dispatcher->ProcessEvents(CoreProcessEventsOption::ProcessAllIfPresent);
-				Context::Instance().SceneManagerInstance().Update();
-				fb->SwapBuffers();
-			}
-			else
-			{
-				CoreWindow::GetForCurrentThread()->Dispatcher->ProcessEvents(CoreProcessEventsOption::ProcessOneAndAllPending);
-			}
-		}
-#endif
-	}
-
 	// 建立渲染窗口
 	/////////////////////////////////////////////////////////////////////////////////
 	void D3D11RenderEngine::DoCreateRenderWindow(std::string const & name,

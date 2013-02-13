@@ -287,7 +287,94 @@ namespace KlayGE
 	void App3DFramework::Run()
 #endif
 	{
-		Context::Instance().RenderFactoryInstance().RenderEngineInstance().StartRendering();
+		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+		FrameBufferPtr fb = re.ScreenFrameBuffer();
+
+#if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
+		bool gotMsg;
+		MSG  msg;
+
+		::PeekMessage(&msg, nullptr, 0, 0, PM_NOREMOVE);
+
+		while (WM_QUIT != msg.message)
+		{
+			// 如果窗口是激活的，用 PeekMessage()以便我们可以用空闲时间渲染场景
+			// 不然, 用 GetMessage() 减少 CPU 占用率
+			if (fb->Active())
+			{
+				gotMsg = (::PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE) != 0);
+			}
+			else
+			{
+				gotMsg = (::GetMessage(&msg, nullptr, 0, 0) != 0);
+			}
+
+			if (gotMsg)
+			{
+				::TranslateMessage(&msg);
+				::DispatchMessage(&msg);
+			}
+			else
+			{
+				re.Refresh();
+			}
+		}
+#elif defined KLAYGE_PLATFORM_WINDOWS_METRO
+		while (!main_wnd_->Closed())
+		{
+			if (fb->Active())
+			{
+				CoreWindow::GetForCurrentThread()->Dispatcher->ProcessEvents(CoreProcessEventsOption::ProcessAllIfPresent);
+				re.Refresh();
+			}
+			else
+			{
+				CoreWindow::GetForCurrentThread()->Dispatcher->ProcessEvents(CoreProcessEventsOption::ProcessOneAndAllPending);
+			}
+		}
+#elif defined KLAYGE_PLATFORM_LINUX
+		::Display* x_display = main_wnd_->XDisplay();
+		XEvent event;
+		while (!main_wnd_->Closed())
+		{
+			do
+			{
+				XNextEvent(x_display, &event);
+				main_wnd_->MsgProc(event);
+			} while(XPending(x_display));
+
+			re.Refresh();
+		}
+#elif defined KLAYGE_PLATFORM_ANDROID
+		while (!main_wnd_->Closed())
+		{
+			// Read all pending events.
+			int ident;
+			int events;
+			android_poll_source* source;
+
+			android_app* state = Context::Instance().AppState();
+
+			do
+			{
+				ident = ALooper_pollAll(fb->Active() ? 0 : -1, nullptr, &events, reinterpret_cast<void**>(&source));
+
+				// Process this event.
+				if (source != nullptr)
+				{
+					source->process(state, source);
+				}
+
+				// Check if we are exiting.
+				if (state->destroyRequested != 0)
+				{
+					return;
+				}
+			} while (ident >= 0);
+
+			re.Refresh();
+		}
+#endif
 
 		this->DelObjects();
 	}
