@@ -941,7 +941,7 @@ namespace KlayGE
 	Window::Window(std::string const & /*name*/, RenderSettings const & settings, void* native_wnd)
 		: closed_(false)
 	{
-		a_window_ = static_cast<::ANativeWindow*>(native_wnd);
+		a_window_ = static_cast<ANativeWindow*>(native_wnd);
 
 		android_app* state = Context::Instance().AppState();
 		state->userData = this;
@@ -996,7 +996,7 @@ namespace KlayGE
         
 		case APP_CMD_TERM_WINDOW:
 			win->OnClose()(*win);
-			closed_ = true;
+			win->closed_ = true;
 			break;
 
 		case APP_CMD_GAINED_FOCUS:

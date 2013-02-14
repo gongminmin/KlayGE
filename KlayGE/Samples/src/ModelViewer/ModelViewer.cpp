@@ -646,6 +646,7 @@ void ModelViewerApp::MeshChangedHandler(KlayGE::UIComboBox const & sender)
 	dialog_model_->Control<UIComboBox>(id_visualize_)->AddItem(L"Vertex Specular", VEU_Specular);
 	dialog_model_->Control<UIComboBox>(id_visualize_)->AddItem(L"Vertex Blend weight", VEU_BlendWeight);
 	dialog_model_->Control<UIComboBox>(id_visualize_)->AddItem(L"Vertex Blend index", VEU_BlendIndex);
+	dialog_model_->Control<UIComboBox>(id_visualize_)->AddItem(L"Vertex Texcoord", VEU_TextureCoord);
 	dialog_model_->Control<UIComboBox>(id_visualize_)->AddItem(L"Vertex Tangent", VEU_Tangent);
 	dialog_model_->Control<UIComboBox>(id_visualize_)->AddItem(L"Vertex Binormal", VEU_Binormal);
 
