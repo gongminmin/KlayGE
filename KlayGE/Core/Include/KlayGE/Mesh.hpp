@@ -243,7 +243,7 @@ namespace KlayGE
 	};
 
 
-	struct Joint
+	struct KLAYGE_CORE_API Joint
 	{
 		std::string name;
 
