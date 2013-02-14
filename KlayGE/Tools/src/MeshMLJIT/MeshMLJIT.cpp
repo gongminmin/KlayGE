@@ -43,27 +43,67 @@ namespace
 		{
 			RenderMaterial mtl;
 
+			XMLAttributePtr attr = mtl_node->Attrib("ambient");
+			if (attr)
 			{
-				std::istringstream attr_ss(mtl_node->Attrib("ambient")->ValueString());
+				std::istringstream attr_ss(attr->ValueString());
 				attr_ss >> mtl.ambient.x() >> mtl.ambient.y() >> mtl.ambient.z();
 			}
+			else
 			{
-				std::istringstream attr_ss(mtl_node->Attrib("diffuse")->ValueString());
+				mtl.ambient.x() = mtl_node->Attrib("ambient_r")->ValueFloat();
+				mtl.ambient.y() = mtl_node->Attrib("ambient_g")->ValueFloat();
+				mtl.ambient.z() = mtl_node->Attrib("ambient_b")->ValueFloat();
+			}
+			attr = mtl_node->Attrib("diffuse");
+			if (attr)
+			{
+				std::istringstream attr_ss(attr->ValueString());
 				attr_ss >> mtl.diffuse.x() >> mtl.diffuse.y() >> mtl.diffuse.z();
 			}
+			else
 			{
-				std::istringstream attr_ss(mtl_node->Attrib("specular")->ValueString());
+				mtl.diffuse.x() = mtl_node->Attrib("diffuse_r")->ValueFloat();
+				mtl.diffuse.y() = mtl_node->Attrib("diffuse_g")->ValueFloat();
+				mtl.diffuse.z() = mtl_node->Attrib("diffuse_b")->ValueFloat();
+			}
+			attr = mtl_node->Attrib("specular");
+			if (attr)
+			{
+				std::istringstream attr_ss(attr->ValueString());
 				attr_ss >> mtl.specular.x() >> mtl.specular.y() >> mtl.specular.z();
 			}
+			else
 			{
-				std::istringstream attr_ss(mtl_node->Attrib("emit")->ValueString());
+				mtl.specular.x() = mtl_node->Attrib("specular_r")->ValueFloat();
+				mtl.specular.y() = mtl_node->Attrib("specular_g")->ValueFloat();
+				mtl.specular.z() = mtl_node->Attrib("specular_b")->ValueFloat();
+			}
+			attr = mtl_node->Attrib("emit");
+			if (attr)
+			{
+				std::istringstream attr_ss(attr->ValueString());
 				attr_ss >> mtl.emit.x() >> mtl.emit.y() >> mtl.emit.z();
+			}
+			else
+			{
+				mtl.emit.x() = mtl_node->Attrib("emit_r")->ValueFloat();
+				mtl.emit.y() = mtl_node->Attrib("emit_g")->ValueFloat();
+				mtl.emit.z() = mtl_node->Attrib("emit_b")->ValueFloat();
 			}
 			mtl.opacity = mtl_node->Attrib("opacity")->ValueFloat();
 			mtl.specular_level = mtl_node->Attrib("specular_level")->ValueFloat();
 			mtl.shininess = mtl_node->Attrib("shininess")->ValueFloat();
 
 			XMLNodePtr tex_node = mtl_node->FirstNode("texture");
+			if (!tex_node)
+			{
+				XMLNodePtr textures_chunk = mtl_node->FirstNode("textures_chunk");
+				if (textures_chunk)
+				{
+					tex_node = textures_chunk->FirstNode("texture");
+				}
+			}
 			if (tex_node)
 			{
 				for (; tex_node; tex_node = tex_node->NextSibling("texture"))
@@ -103,13 +143,33 @@ namespace
 			float3 pos_min_bb, pos_max_bb;
 			{
 				XMLAttributePtr attr = pos_bb_node->Attrib("min");
-				std::istringstream attr_ss(attr->ValueString());
-				attr_ss >> pos_min_bb[0] >> pos_min_bb[1] >> pos_min_bb[2];
+				if (attr)
+				{
+					std::istringstream attr_ss(attr->ValueString());
+					attr_ss >> pos_min_bb.x() >> pos_min_bb.y() >> pos_min_bb.z();
+				}
+				else
+				{
+					XMLNodePtr pos_min_node = pos_bb_node->FirstNode("min");
+					pos_min_bb.x() = pos_min_node->Attrib("x")->ValueFloat();
+					pos_min_bb.y() = pos_min_node->Attrib("y")->ValueFloat();
+					pos_min_bb.z() = pos_min_node->Attrib("z")->ValueFloat();
+				}
 			}
 			{
 				XMLAttributePtr attr = pos_bb_node->Attrib("max");
-				std::istringstream attr_ss(attr->ValueString());
-				attr_ss >> pos_max_bb[0] >> pos_max_bb[1] >> pos_max_bb[2];
+				if (attr)
+				{
+					std::istringstream attr_ss(attr->ValueString());
+					attr_ss >> pos_max_bb.x() >> pos_max_bb.y() >> pos_max_bb.z();
+				}
+				else
+				{
+					XMLNodePtr pos_max_node = pos_bb_node->FirstNode("max");
+					pos_max_bb.x() = pos_max_node->Attrib("x")->ValueFloat();
+					pos_max_bb.y() = pos_max_node->Attrib("y")->ValueFloat();
+					pos_max_bb.z() = pos_max_node->Attrib("z")->ValueFloat();
+				}
 			}
 			pos_bb = AABBox(pos_min_bb, pos_max_bb);
 
@@ -127,14 +187,33 @@ namespace
 			float3 tc_min_bb, tc_max_bb;
 			{
 				XMLAttributePtr attr = tc_bb_node->Attrib("min");
-				std::istringstream attr_ss(attr->ValueString());
-				attr_ss >> tc_min_bb[0] >> tc_min_bb[1];
+				if (attr)
+				{
+					std::istringstream attr_ss(attr->ValueString());
+					attr_ss >> tc_min_bb.x() >> tc_min_bb.y();
+				}
+				else
+				{
+					XMLNodePtr tc_min_node = tc_bb_node->FirstNode("min");
+					tc_min_bb.x() = tc_min_node->Attrib("x")->ValueFloat();
+					tc_min_bb.y() = tc_min_node->Attrib("y")->ValueFloat();
+				}
 			}
 			{
 				XMLAttributePtr attr = tc_bb_node->Attrib("max");
-				std::istringstream attr_ss(attr->ValueString());
-				attr_ss >> tc_max_bb[0] >> tc_max_bb[1];
+				if (attr)
+				{
+					std::istringstream attr_ss(attr->ValueString());
+					attr_ss >> tc_max_bb.x() >> tc_max_bb.y();
+				}
+				else
+				{
+					XMLNodePtr tc_max_node = tc_bb_node->FirstNode("max");							
+					tc_max_bb.x() = tc_max_node->Attrib("x")->ValueFloat();
+					tc_max_bb.y() = tc_max_node->Attrib("y")->ValueFloat();
+				}
 			}
+
 			tc_min_bb.z() = 0;
 			tc_max_bb.z() = 0;
 			tc_bb = AABBox(tc_min_bb, tc_max_bb);
@@ -159,8 +238,18 @@ namespace
 		{
 			{
 				float3 pos;
-				std::istringstream attr_ss(vertex_node->Attrib("v")->ValueString());
-				attr_ss >> pos.x() >> pos.y() >> pos.z();
+				XMLAttributePtr attr = vertex_node->Attrib("v");
+				if (attr)
+				{
+					std::istringstream attr_ss(attr->ValueString());
+					attr_ss >> pos.x() >> pos.y() >> pos.z();
+				}
+				else
+				{
+					pos.x() = vertex_node->Attrib("x")->ValueFloat();
+					pos.y() = vertex_node->Attrib("y")->ValueFloat();
+					pos.z() = vertex_node->Attrib("z")->ValueFloat();
+				}
 				mesh_positions.push_back(pos);
 			}
 
@@ -170,8 +259,19 @@ namespace
 				has_diffuse = true;
 
 				float4 diffuse;
-				std::istringstream attr_ss(diffuse_node->Attrib("v")->ValueString());
-				attr_ss >> diffuse.x() >> diffuse.y() >> diffuse.z() >> diffuse.w();
+				XMLAttributePtr attr = diffuse_node->Attrib("v");
+				if (attr)
+				{
+					std::istringstream attr_ss(attr->ValueString());
+					attr_ss >> diffuse.x() >> diffuse.y() >> diffuse.z() >> diffuse.w();
+				}
+				else
+				{
+					diffuse.x() = diffuse_node->Attrib("r")->ValueFloat();
+					diffuse.y() = diffuse_node->Attrib("g")->ValueFloat();
+					diffuse.z() = diffuse_node->Attrib("b")->ValueFloat();
+					diffuse.w() = diffuse_node->Attrib("a")->ValueFloat();										
+				}
 				mesh_diffuses.push_back(diffuse);
 			}
 
@@ -181,8 +281,18 @@ namespace
 				has_specular = true;
 
 				float3 specular;
-				std::istringstream attr_ss(specular_node->Attrib("v")->ValueString());
-				attr_ss >> specular.x() >> specular.y() >> specular.z();
+				XMLAttributePtr attr = specular_node->Attrib("v");
+				if (attr)
+				{
+					std::istringstream attr_ss(attr->ValueString());
+					attr_ss >> specular.x() >> specular.y() >> specular.z();
+				}
+				else
+				{
+					specular.x() = specular_node->Attrib("r")->ValueFloat();
+					specular.y() = specular_node->Attrib("g")->ValueFloat();
+					specular.z() = specular_node->Attrib("b")->ValueFloat();
+				}
 				mesh_speculars.push_back(specular);
 			}
 
@@ -192,8 +302,17 @@ namespace
 				has_tex_coord = true;
 
 				float2 tex_coord;
-				std::istringstream attr_ss(tex_coord_node->Attrib("v")->ValueString());
-				attr_ss >> tex_coord.x() >> tex_coord.y();
+				XMLAttributePtr attr = tex_coord_node->Attrib("u");
+				if (attr)
+				{
+					tex_coord.x() = tex_coord_node->Attrib("u")->ValueFloat();
+					tex_coord.y() = tex_coord_node->Attrib("v")->ValueFloat();
+				}
+				else
+				{
+					std::istringstream attr_ss(tex_coord_node->Attrib("v")->ValueString());
+					attr_ss >> tex_coord.x() >> tex_coord.y();
+				}
 				mesh_tex_coords.push_back(tex_coord);
 			}
 
@@ -202,16 +321,36 @@ namespace
 			{
 				has_weight = true;
 
-				std::istringstream attr_ss_index(weight_node->Attrib("joint")->ValueString());
-				std::istringstream attr_ss_weight(weight_node->Attrib("weight")->ValueString());
 				uint32_t bone_index32[4] = { 0, 0, 0, 0 };
 				float bone_weight32[4] = { 0, 0, 0, 0 };
+
 				uint32_t num_blend = 0;
-				while (attr_ss_index && attr_ss_weight && (num_blend < 4))
+				XMLAttributePtr attr = weight_node->Attrib("joint");
+				if (!attr)
 				{
-					attr_ss_index >> bone_index32[num_blend];
-					attr_ss_weight >> bone_weight32[num_blend];
-					++ num_blend;
+					attr = weight_node->Attrib("bone_index");
+				}
+				if (attr)
+				{
+					std::istringstream attr_ss_index(attr->ValueString());
+					std::istringstream attr_ss_weight(weight_node->Attrib("weight")->ValueString());
+					while (attr_ss_index && attr_ss_weight && (num_blend < 4))
+					{
+						attr_ss_index >> bone_index32[num_blend];
+						attr_ss_weight >> bone_weight32[num_blend];
+						++ num_blend;
+					}
+				}
+				else
+				{
+					while (weight_node && (num_blend < 4))
+					{
+						bone_index32[num_blend] = weight_node->Attrib("bone_index")->ValueUInt();
+						bone_weight32[num_blend] = weight_node->Attrib("weight")->ValueFloat();
+
+						weight_node = weight_node->NextSibling("weight");
+						++ num_blend;
+					}
 				}
 
 				uint32_t index32 = 0;
@@ -234,8 +373,18 @@ namespace
 				has_normal = true;
 
 				float3 normal;
-				std::istringstream attr_ss(normal_node->Attrib("v")->ValueString());
-				attr_ss >> normal.x() >> normal.y() >> normal.z();
+				XMLAttributePtr attr = normal_node->Attrib("v");
+				if (attr)
+				{
+					std::istringstream attr_ss(attr->ValueString());
+					attr_ss >> normal.x() >> normal.y() >> normal.z();
+				}
+				else
+				{
+					normal.x() = normal_node->Attrib("x")->ValueFloat();
+					normal.y() = normal_node->Attrib("y")->ValueFloat();
+					normal.z() = normal_node->Attrib("z")->ValueFloat();
+				}
 				mesh_normals.push_back(normal);
 			}
 
@@ -245,8 +394,27 @@ namespace
 				has_tangent = true;
 
 				float4 tangent;
-				std::istringstream attr_ss(tangent_node->Attrib("v")->ValueString());
-				attr_ss >> tangent.x() >> tangent.y() >> tangent.z() >> tangent.w();
+				XMLAttributePtr attr = tangent_node->Attrib("v");
+				if (attr)
+				{
+					std::istringstream attr_ss(attr->ValueString());
+					attr_ss >> tangent.x() >> tangent.y() >> tangent.z() >> tangent.w();
+				}
+				else
+				{
+					tangent.x() = tangent_node->Attrib("x")->ValueFloat();
+					tangent.y() = tangent_node->Attrib("y")->ValueFloat();
+					tangent.z() = tangent_node->Attrib("z")->ValueFloat();
+					attr = tangent_node->Attrib("w");
+					if (attr)
+					{
+						tangent.w() = attr->ValueFloat();
+					}
+					else
+					{
+						tangent.w() = 1;
+					}
+				}
 				mesh_tangents.push_back(tangent);
 			}
 
@@ -256,8 +424,18 @@ namespace
 				has_binormal = true;
 
 				float3 binormal;
-				std::istringstream attr_ss(binormal_node->Attrib("v")->ValueString());
-				attr_ss >> binormal.x() >> binormal.y() >> binormal.z();
+				XMLAttributePtr attr = binormal_node->Attrib("v");
+				if (attr)
+				{
+					std::istringstream attr_ss(attr->ValueString());
+					attr_ss >> binormal.x() >> binormal.y() >> binormal.z();
+				}
+				else
+				{
+					binormal.x() = binormal_node->Attrib("x")->ValueFloat();
+					binormal.y() = binormal_node->Attrib("y")->ValueFloat();
+					binormal.z() = binormal_node->Attrib("z")->ValueFloat();
+				}
 				mesh_binormals.push_back(binormal);
 			}
 
@@ -267,8 +445,19 @@ namespace
 				has_tangent_quat = true;
 
 				Quaternion tangent_quat;
-				std::istringstream attr_ss(tangent_quat_node->Attrib("v")->ValueString());
-				attr_ss >> tangent_quat.x() >> tangent_quat.y() >> tangent_quat.z() >> tangent_quat.w();
+				XMLAttributePtr attr = tangent_quat_node->Attrib("v");
+				if (attr)
+				{
+					std::istringstream attr_ss(tangent_quat_node->Attrib("v")->ValueString());
+					attr_ss >> tangent_quat.x() >> tangent_quat.y() >> tangent_quat.z() >> tangent_quat.w();
+				}
+				else
+				{
+					tangent_quat.x() = tangent_quat_node->Attrib("x")->ValueFloat();
+					tangent_quat.y() = tangent_quat_node->Attrib("y")->ValueFloat();
+					tangent_quat.z() = tangent_quat_node->Attrib("z")->ValueFloat();
+					tangent_quat.w() = tangent_quat_node->Attrib("w")->ValueFloat();
+				}
 				mesh_tangent_quats.push_back(tangent_quat);
 			}
 		}
@@ -519,9 +708,19 @@ namespace
 		is_index_16 = true;
 		for (XMLNodePtr tri_node = triangles_chunk->FirstNode("triangle"); tri_node; tri_node = tri_node->NextSibling("triangle"))
 		{
-			std::istringstream attr_ss(tri_node->Attrib("index")->ValueString());
 			uint32_t a, b, c;
-			attr_ss >> a >> b >> c;
+			XMLAttributePtr attr = tri_node->Attrib("index");
+			if (attr)
+			{
+				std::istringstream attr_ss(attr->ValueString());
+				attr_ss >> a >> b >> c;
+			}
+			else
+			{
+				a = tri_node->Attrib("a")->ValueUInt();
+				b = tri_node->Attrib("b")->ValueUInt();
+				c = tri_node->Attrib("c")->ValueUInt();
+			}
 			mesh_triangle_indices.push_back(a);
 			mesh_triangle_indices.push_back(b);
 			mesh_triangle_indices.push_back(c);
@@ -871,19 +1070,63 @@ namespace
 			joint.name = bone_node->Attrib("name")->ValueString();
 			joint.parent = static_cast<int16_t>(bone_node->Attrib("parent")->ValueInt());
 
-			XMLNodePtr bind_real_node = bone_node->FirstNode("real");
+			XMLNodePtr bind_pos_node = bone_node->FirstNode("bind_pos");
+			if (bind_pos_node)
 			{
-				std::istringstream attr_ss(bind_real_node->Attrib("v")->ValueString());
-				attr_ss >> joint.bind_real.x() >> joint.bind_real.y()
-					>> joint.bind_real.z() >> joint.bind_real.w();
+				float3 bind_pos(bind_pos_node->Attrib("x")->ValueFloat(), bind_pos_node->Attrib("y")->ValueFloat(),
+					bind_pos_node->Attrib("z")->ValueFloat());
+
+				XMLNodePtr bind_quat_node = bone_node->FirstNode("bind_quat");
+				Quaternion bind_quat(bind_quat_node->Attrib("x")->ValueFloat(), bind_quat_node->Attrib("y")->ValueFloat(),
+					bind_quat_node->Attrib("z")->ValueFloat(), bind_quat_node->Attrib("w")->ValueFloat());
+
+				float scale = MathLib::length(bind_quat);
+				bind_quat /= scale;
+
+				joint.bind_dual = MathLib::quat_trans_to_udq(bind_quat, bind_pos);
+				joint.bind_real = bind_quat * scale;
 			}
-							
-			Quaternion bind_dual;
-			XMLNodePtr bind_dual_node = bone_node->FirstNode("dual");
+			else
 			{
-				std::istringstream attr_ss(bind_dual_node->Attrib("v")->ValueString());
-				attr_ss >> joint.bind_dual.x() >> joint.bind_dual.y()
-					>> joint.bind_dual.z() >> joint.bind_dual.w();
+				XMLNodePtr bind_real_node = bone_node->FirstNode("real");
+				if (!bind_real_node)
+				{
+					bind_real_node = bone_node->FirstNode("bind_real");
+				}
+				XMLAttributePtr attr = bind_real_node->Attrib("v");
+				if (attr)
+				{
+					std::istringstream attr_ss(attr->ValueString());
+					attr_ss >> joint.bind_real.x() >> joint.bind_real.y()
+						>> joint.bind_real.z() >> joint.bind_real.w();
+				}
+				else
+				{
+					joint.bind_real.x() = bind_real_node->Attrib("x")->ValueFloat();
+					joint.bind_real.y() = bind_real_node->Attrib("y")->ValueFloat();
+					joint.bind_real.z() = bind_real_node->Attrib("z")->ValueFloat();
+					joint.bind_real.w() = bind_real_node->Attrib("w")->ValueFloat();
+				}
+
+				XMLNodePtr bind_dual_node = bone_node->FirstNode("dual");
+				if (!bind_dual_node)
+				{
+					bind_dual_node = bone_node->FirstNode("bind_dual");
+				}
+				attr = bind_dual_node->Attrib("v");
+				if (attr)
+				{
+					std::istringstream attr_ss(attr->ValueString());
+					attr_ss >> joint.bind_dual.x() >> joint.bind_dual.y()
+						>> joint.bind_dual.z() >> joint.bind_dual.w();
+				}
+				else
+				{
+					joint.bind_dual.x() = bind_dual_node->Attrib("x")->ValueFloat();
+					joint.bind_dual.y() = bind_dual_node->Attrib("y")->ValueFloat();
+					joint.bind_dual.z() = bind_dual_node->Attrib("z")->ValueFloat();
+					joint.bind_dual.w() = bind_dual_node->Attrib("w")->ValueFloat();
+				}
 			}
 
 			joints.push_back(joint);
@@ -895,7 +1138,16 @@ namespace
 		std::vector<KeyFrames>& kfss)
 	{
 		XMLAttributePtr nf_attr = key_frames_chunk->Attrib("num_frames");
-		num_frames = nf_attr->ValueUInt();
+		if (nf_attr)
+		{
+			num_frames = nf_attr->ValueUInt();
+		}
+		else
+		{
+			int32_t start_frame = key_frames_chunk->Attrib("start_frame")->ValueInt();
+			int32_t end_frame = key_frames_chunk->Attrib("end_frame")->ValueInt();
+			num_frames = end_frame - start_frame;
+		}
 		frame_rate = key_frames_chunk->Attrib("frame_rate")->ValueUInt();
 
 		KeyFrames kfs;
@@ -920,26 +1172,70 @@ namespace
 				}
 				kfs.frame_id.push_back(frame_id);
 
-				Quaternion bind_real;
-				XMLNodePtr bind_real_node = key_node->FirstNode("real");
+				Quaternion bind_real, bind_dual;
+				float bind_scale;
+				XMLNodePtr pos_node = key_node->FirstNode("pos");
+				if (pos_node)
 				{
-					std::istringstream attr_ss(bind_real_node->Attrib("v")->ValueString());
-					attr_ss >> bind_real.x() >> bind_real.y() >> bind_real.z() >> bind_real.w();
-				}
-							
-				Quaternion bind_dual;
-				XMLNodePtr bind_dual_node = key_node->FirstNode("dual");
-				{
-					std::istringstream attr_ss(bind_dual_node->Attrib("v")->ValueString());
-					attr_ss >> bind_dual.x() >> bind_dual.y() >> bind_dual.z() >> bind_dual.w();
-				}
+					float3 bind_pos(pos_node->Attrib("x")->ValueFloat(), pos_node->Attrib("y")->ValueFloat(),
+						pos_node->Attrib("z")->ValueFloat());
 
-				float bind_scale = MathLib::length(bind_real);
-				bind_real /= bind_scale;
-				if (bind_real.w() < 0)
+					XMLNodePtr quat_node = key_node->FirstNode("quat");
+					bind_real = Quaternion(quat_node->Attrib("x")->ValueFloat(), quat_node->Attrib("y")->ValueFloat(),
+						quat_node->Attrib("z")->ValueFloat(), quat_node->Attrib("w")->ValueFloat());
+
+					bind_scale = MathLib::length(bind_real);
+					bind_real /= bind_scale;
+
+					bind_dual = MathLib::quat_trans_to_udq(bind_real, bind_pos);
+				}
+				else
 				{
-					bind_real = -bind_real;
-					bind_scale = -bind_scale;
+					XMLNodePtr bind_real_node = key_node->FirstNode("real");
+					if (!bind_real_node)
+					{
+						bind_real_node = key_node->FirstNode("bind_real");
+					}
+					XMLAttributePtr attr = bind_real_node->Attrib("v");
+					if (attr)
+					{
+						std::istringstream attr_ss(attr->ValueString());
+						attr_ss >> bind_real.x() >> bind_real.y() >> bind_real.z() >> bind_real.w();
+					}
+					else
+					{
+						bind_real.x() = bind_real_node->Attrib("x")->ValueFloat();
+						bind_real.y() = bind_real_node->Attrib("y")->ValueFloat();
+						bind_real.z() = bind_real_node->Attrib("z")->ValueFloat();
+						bind_real.w() = bind_real_node->Attrib("w")->ValueFloat();
+					}
+							
+					XMLNodePtr bind_dual_node = key_node->FirstNode("dual");
+					if (!bind_dual_node)
+					{
+						bind_dual_node = key_node->FirstNode("bind_dual");
+					}
+					attr = bind_dual_node->Attrib("v");
+					if (attr)
+					{
+						std::istringstream attr_ss(attr->ValueString());
+						attr_ss >> bind_dual.x() >> bind_dual.y() >> bind_dual.z() >> bind_dual.w();
+					}
+					else
+					{
+						bind_dual.x() = bind_dual_node->Attrib("x")->ValueFloat();
+						bind_dual.y() = bind_dual_node->Attrib("y")->ValueFloat();
+						bind_dual.z() = bind_dual_node->Attrib("z")->ValueFloat();
+						bind_dual.w() = bind_dual_node->Attrib("w")->ValueFloat();
+					}
+
+					bind_scale = MathLib::length(bind_real);
+					bind_real /= bind_scale;
+					if (bind_real.w() < 0)
+					{
+						bind_real = -bind_real;
+						bind_scale = -bind_scale;
+					}
 				}
 
 				kfs.bind_real.push_back(bind_real);
@@ -978,15 +1274,31 @@ namespace
 					bb_kfs.frame_id.push_back(frame_id);
 
 					float3 bb_min, bb_max;
+					XMLAttributePtr attr = key_node->Attrib("min");
+					if (attr)
 					{
-						XMLAttributePtr attr = key_node->Attrib("min");
 						std::istringstream attr_ss(attr->ValueString());
-						attr_ss >> bb_min[0] >> bb_min[1] >> bb_min[2];
+						attr_ss >> bb_min.x() >> bb_min.y() >> bb_min.z();
 					}
+					else
 					{
-						XMLAttributePtr attr = key_node->Attrib("max");
+						XMLNodePtr min_node = key_node->FirstNode("min");
+						bb_min.x() = min_node->Attrib("x")->ValueFloat();
+						bb_min.y() = min_node->Attrib("y")->ValueFloat();
+						bb_min.z() = min_node->Attrib("z")->ValueFloat();
+					}
+					attr = key_node->Attrib("max");
+					if (attr)
+					{
 						std::istringstream attr_ss(attr->ValueString());
 						attr_ss >> bb_max[0] >> bb_max[1] >> bb_max[2];
+					}
+					else
+					{
+						XMLNodePtr max_node = key_node->FirstNode("max");
+						bb_max.x() = max_node->Attrib("x")->ValueFloat();
+						bb_max.y() = max_node->Attrib("y")->ValueFloat();
+						bb_max.z() = max_node->Attrib("z")->ValueFloat();
 					}
 
 					bb_kfs.bb.push_back(AABBox(bb_min, bb_max));
@@ -1290,7 +1602,7 @@ namespace
 		XMLDocument doc;
 		XMLNodePtr root = doc.Parse(file);
 
-		BOOST_ASSERT(root->Attrib("version") && (root->Attrib("version")->ValueInt() >= 6));
+		BOOST_ASSERT(root->Attrib("version") && (root->Attrib("version")->ValueInt() >= 4));
 
 		XMLNodePtr materials_chunk = root->FirstNode("materials_chunk");
 		std::vector<RenderMaterial> mtls;
