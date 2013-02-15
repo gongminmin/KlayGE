@@ -2075,11 +2075,15 @@ namespace KlayGE
 			Vector_T<T, 3> min(+1e10f, +1e10f, +1e10f);
 			Vector_T<T, 3> max(-1e10f, -1e10f, -1e10f);
 
-			Vector_T<T, 3> const & r = obb.HalfSize();
+			Vector_T<T, 3> const & center = obb.Center();
+			Vector_T<T, 3> const & extent = obb.HalfSize();
+			Vector_T<T, 3> const extent_x = extent.x() * obb.Axis(0);
+			Vector_T<T, 3> const extent_y = extent.y() * obb.Axis(1);
+			Vector_T<T, 3> const extent_z = extent.z() * obb.Axis(2);
 			for (int i = 0; i < 8; ++ i)
 			{
-				Vector_T<T, 3> corner = obb.Center() + ((i & 1) ? r.x() : -r.x()) * obb.Axis(0)
-					+ ((i & 2) ? r.y() : -r.y()) * obb.Axis(1) + ((i & 4) ? r.z() : -r.z()) * obb.Axis(2);
+				Vector_T<T, 3> corner = center + ((i & 1) ? extent_x : -extent_x)
+					+ ((i & 2) ? extent_y : -extent_y) + ((i & 4) ? extent_z : -extent_z);
 
 				min = minimize(min, corner);
 				max = maximize(max, corner);

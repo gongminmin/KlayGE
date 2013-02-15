@@ -136,18 +136,21 @@ namespace KlayGE
 		BoundOverlap Intersect(OBBox_T<T> const & obb) const
 		{
 			Vector_T<T, 3> const & center = obb.Center();
-			Vector_T<T, 3> const & half_size = obb.HalfSize();
-			Vector_T<T, 3> diag = half_size[0] * obb.Axis(0) + half_size[1] * obb.Axis(1) + half_size[2] * obb.Axis(2);
-			for (int i = 0; i < 3; ++ i)
-			{
-				if (diag[i] < 0)
-				{
-					diag[i] = -diag[i];
-				}
-			}
+			Vector_T<T, 3> const & extent = obb.HalfSize();
+			Vector_T<T, 3> const extent_x = extent.x() * obb.Axis(0);
+			Vector_T<T, 3> const extent_y = extent.y() * obb.Axis(1);
+			Vector_T<T, 3> const extent_z = extent.z() * obb.Axis(2);
 
-			Vector_T<T, 3> const min_pt = center - diag;
-			Vector_T<T, 3> const max_pt = center + diag;
+			Vector_T<T, 3> min_pt(+1e10f, +1e10f, +1e10f);
+			Vector_T<T, 3> max_pt(-1e10f, -1e10f, -1e10f);
+			for (int i = 0; i < 8; ++ i)
+			{
+				Vector_T<T, 3> corner = center + ((i & 1) ? extent_x : -extent_x)
+					+ ((i & 2) ? extent_y : -extent_y) + ((i & 4) ? extent_z : -extent_z);
+
+				min_pt = MathLib::minimize(min_pt, corner);
+				max_pt = MathLib::maximize(max_pt, corner);
+			}
 
 			bool intersect = false;
 			for (int i = 0; i < 6; ++ i)

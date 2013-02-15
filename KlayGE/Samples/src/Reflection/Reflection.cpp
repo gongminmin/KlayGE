@@ -295,7 +295,7 @@ void ScreenSpaceReflectionApp::OnResize(KlayGE::uint32_t width, KlayGE::uint32_t
 	UIManager::Instance().SettleCtrls(width, height);
 
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-	RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+	RenderEngine& re = rf.RenderEngineInstance();
 
 	deferred_rendering_->SetupViewport(1, re.CurFrameBuffer(), VPAM_NoSSVO | VPAM_NoSSGI);
 	
