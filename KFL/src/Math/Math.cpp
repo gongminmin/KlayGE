@@ -2185,6 +2185,10 @@ namespace KlayGE
 			{
 				ret.FrustumPlane(i, normalize(mul(frustum.FrustumPlane(i), mat)));
 			}
+			for (int i = 0; i < 8; ++ i)
+			{
+				ret.Corner(i, transform_coord(frustum.Corner(i), mat));
+			}
 
 			return ret;
 		}
@@ -2579,36 +2583,200 @@ namespace KlayGE
 		}
 
 
-		template BoundOverlap intersect_aabb_frustum(AABBox const & lhs, Frustum const & frustum);
+		template BoundOverlap intersect_aabb_frustum(AABBox const & aabb, Frustum const & frustum);
 
 		template <typename T>
-		BoundOverlap intersect_aabb_frustum(AABBox_T<T> const & lhs, Frustum_T<T> const & frustum)
+		BoundOverlap intersect_aabb_frustum(AABBox_T<T> const & aabb, Frustum_T<T> const & frustum)
 		{
-			return frustum.Intersect(lhs);
+			Vector_T<T, 3> const & min_pt = aabb.Min();
+			Vector_T<T, 3> const & max_pt = aabb.Max();
+
+			bool intersect = false;
+			for (int i = 0; i < 6; ++ i)
+			{
+				Plane_T<T> const & plane = frustum.FrustumPlane(i);
+
+				// v1 is diagonally opposed to v0
+				Vector_T<T, 3> v0((plane.a() < 0) ? min_pt.x() : max_pt.x(), (plane.b() < 0) ? min_pt.y() : max_pt.y(), (plane.c() < 0) ? min_pt.z() : max_pt.z());
+				Vector_T<T, 3> v1((plane.a() < 0) ? max_pt.x() : min_pt.x(), (plane.b() < 0) ? max_pt.y() : min_pt.y(), (plane.c() < 0) ? max_pt.z() : min_pt.z());
+
+				if (dot_coord(plane, v0) < 0)
+				{
+					return BO_No;
+				}
+				if (dot_coord(plane, v1) < 0)
+				{
+					intersect = true;
+				}
+			}
+
+			return intersect ? BO_Partial : BO_Yes;
 		}
 
-		template BoundOverlap intersect_obb_frustum(OBBox const & lhs, Frustum const & frustum);
+		template BoundOverlap intersect_obb_frustum(OBBox const & obb, Frustum const & frustum);
 
 		template <typename T>
-		BoundOverlap intersect_obb_frustum(OBBox_T<T> const & lhs, Frustum_T<T> const & frustum)
+		BoundOverlap intersect_obb_frustum(OBBox_T<T> const & obb, Frustum_T<T> const & frustum)
 		{
-			return frustum.Intersect(lhs);
+			Vector_T<T, 3> const & center = obb.Center();
+			Vector_T<T, 3> const & extent = obb.HalfSize();
+			Vector_T<T, 3> const extent_x = extent.x() * obb.Axis(0);
+			Vector_T<T, 3> const extent_y = extent.y() * obb.Axis(1);
+			Vector_T<T, 3> const extent_z = extent.z() * obb.Axis(2);
+
+			Vector_T<T, 3> min_pt(+1e10f, +1e10f, +1e10f);
+			Vector_T<T, 3> max_pt(-1e10f, -1e10f, -1e10f);
+			for (int i = 0; i < 8; ++ i)
+			{
+				Vector_T<T, 3> corner = center + ((i & 1) ? extent_x : -extent_x)
+					+ ((i & 2) ? extent_y : -extent_y) + ((i & 4) ? extent_z : -extent_z);
+
+				min_pt = minimize(min_pt, corner);
+				max_pt = maximize(max_pt, corner);
+			}
+
+			bool intersect = false;
+			for (int i = 0; i < 6; ++ i)
+			{
+				Plane_T<T> const & plane = frustum.FrustumPlane(i);
+
+				// v1 is diagonally opposed to v0
+				Vector_T<T, 3> v0((plane.a() < 0) ? min_pt.x() : max_pt.x(), (plane.b() < 0) ? min_pt.y() : max_pt.y(), (plane.c() < 0) ? min_pt.z() : max_pt.z());
+				Vector_T<T, 3> v1((plane.a() < 0) ? max_pt.x() : min_pt.x(), (plane.b() < 0) ? max_pt.y() : min_pt.y(), (plane.c() < 0) ? max_pt.z() : min_pt.z());
+
+				if (dot_coord(plane, v0) < 0)
+				{
+					return BO_No;
+				}
+				if (dot_coord(plane, v1) < 0)
+				{
+					intersect = true;
+				}
+			}
+
+			return intersect ? BO_Partial : BO_Yes;
 		}
 
-		template BoundOverlap intersect_sphere_frustum(Sphere const & lhs, Frustum const & frustum);
+		template BoundOverlap intersect_sphere_frustum(Sphere const & sphere, Frustum const & frustum);
 
 		template <typename T>
-		BoundOverlap intersect_sphere_frustum(Sphere_T<T> const & lhs, Frustum_T<T> const & frustum)
+		BoundOverlap intersect_sphere_frustum(Sphere_T<T> const & sphere, Frustum_T<T> const & frustum)
 		{
-			return frustum.Intersect(lhs);
+			bool intersect = false;
+			for (int i = 0; i < 6; ++ i)
+			{
+				Plane_T<T> const & plane = frustum.FrustumPlane(i);
+
+				float d = dot_coord(plane, sphere.Center());
+				if (d <= -sphere.Radius())
+				{
+					return BO_No;
+				}
+				if (d > sphere.Radius())
+				{
+					intersect = true;
+				}
+			}
+
+			return intersect ? BO_Partial : BO_Yes;
 		}
 
-		template BoundOverlap intersect_frustum_frustum(Frustum const & lhs, Frustum const & frustum);
+		template BoundOverlap intersect_frustum_frustum(Frustum const & lhs, Frustum const & rhs);
 
 		template <typename T>
-		BoundOverlap intersect_frustum_frustum(Frustum_T<T> const & lhs, Frustum_T<T> const & frustum)
+		BoundOverlap intersect_frustum_frustum(Frustum_T<T> const & lhs, Frustum_T<T> const & rhs)
 		{
-			return frustum.Intersect(lhs);
+			bool outside = false;
+			bool inside_all = true;
+			for (int i = 0; i < 6; ++ i)
+			{
+				Plane_T<T> const & p = lhs.FrustumPlane(i);
+
+				T min_p, max_p;
+				min_p = max_p = dot_coord(p, rhs.Corner(0));
+				for (int j = 1; j < 8; ++ j)
+				{
+					T tmp = dot_coord(p, rhs.Corner(j));
+					min_p = std::min(min_p, tmp);
+					max_p = std::max(max_p, tmp);
+				}
+
+				outside |= (min_p > 0);
+				inside_all &= (max_p <= 0);
+			}
+			if (outside)
+			{
+				return BO_No;
+			}
+			if (inside_all)
+			{
+				return BO_Yes;
+			}
+
+			for (int i = 0; i < 6; ++ i)
+			{
+				Plane_T<T> const & p = rhs.FrustumPlane(i);
+
+				T min_p = dot_coord(p, lhs.Corner(0));
+				for (int j = 1; j < 8; ++ j)
+				{
+					T tmp = dot_coord(p, lhs.Corner(j));
+					min_p = std::min(min_p, tmp);
+				}
+
+				outside |= (min_p > 0);
+			}
+			if (outside)
+			{
+				return BO_No;
+			}
+
+			Vector_T<T, 3> edge_axis_l[6];
+			edge_axis_l[0] = rhs.Corner(6);
+			edge_axis_l[1] = rhs.Corner(4);
+			edge_axis_l[2] = rhs.Corner(5);
+			edge_axis_l[3] = rhs.Corner(7);
+			edge_axis_l[4] = rhs.Corner(6) - rhs.Corner(5);
+			edge_axis_l[5] = rhs.Corner(7) - rhs.Corner(5);
+
+			Vector_T<T, 3> edge_axis_r[6];
+			edge_axis_r[0] = lhs.Corner(6);
+			edge_axis_r[1] = lhs.Corner(4);
+			edge_axis_r[2] = lhs.Corner(5);
+			edge_axis_r[3] = lhs.Corner(7);
+			edge_axis_r[4] = lhs.Corner(6) - lhs.Corner(5);
+			edge_axis_r[5] = lhs.Corner(7) - lhs.Corner(5);
+
+			for (int i = 0; i < 6; ++ i)
+			{
+				for (int j = 0; j < 6; ++ j)
+				{
+					Vector_T<T, 3> Axis = cross(edge_axis_l[i], edge_axis_r[j]);
+
+					T min_l, max_l, min_r, max_r;
+					min_l = max_l = dot(Axis, rhs.Corner(0));
+					min_r = max_r = dot(Axis, lhs.Corner(0));
+					for (int k = 1; k < 8; ++ k)
+					{
+						T tmp = dot(Axis, rhs.Corner(k));
+						min_l = std::min(min_l, tmp);
+						max_l = std::max(max_l, tmp);
+
+						tmp = dot(Axis, lhs.Corner(k));
+						min_r = std::min(min_r, tmp);
+						max_r = std::max(max_r, tmp);
+					}
+
+					outside |= min_l > max_r;
+					outside |= min_r > max_l;
+				}
+			}
+			if (outside)
+			{
+				return BO_No;
+			}
+
+			return BO_Partial;
 		}
 
 
