@@ -238,17 +238,26 @@ namespace
 		{
 			{
 				float3 pos;
-				XMLAttributePtr attr = vertex_node->Attrib("v");
+				XMLAttributePtr attr = vertex_node->Attrib("x");
 				if (attr)
-				{
-					std::istringstream attr_ss(attr->ValueString());
-					attr_ss >> pos.x() >> pos.y() >> pos.z();
-				}
-				else
 				{
 					pos.x() = vertex_node->Attrib("x")->ValueFloat();
 					pos.y() = vertex_node->Attrib("y")->ValueFloat();
 					pos.z() = vertex_node->Attrib("z")->ValueFloat();
+
+					attr = vertex_node->Attrib("u");
+					if (attr)
+					{
+						float2 tex_coord;
+						tex_coord.x() = vertex_node->Attrib("u")->ValueFloat();
+						tex_coord.y() = vertex_node->Attrib("v")->ValueFloat();
+						mesh_tex_coords.push_back(tex_coord);
+					}
+				}
+				else
+				{
+					std::istringstream attr_ss(vertex_node->Attrib("v")->ValueString());
+					attr_ss >> pos.x() >> pos.y() >> pos.z();
 				}
 				mesh_positions.push_back(pos);
 			}
@@ -296,24 +305,27 @@ namespace
 				mesh_speculars.push_back(specular);
 			}
 
-			XMLNodePtr tex_coord_node = vertex_node->FirstNode("tex_coord");
-			if (tex_coord_node)
+			if (!vertex_node->Attrib("u"))
 			{
-				has_tex_coord = true;
+				XMLNodePtr tex_coord_node = vertex_node->FirstNode("tex_coord");
+				if (tex_coord_node)
+				{
+					has_tex_coord = true;
 
-				float2 tex_coord;
-				XMLAttributePtr attr = tex_coord_node->Attrib("u");
-				if (attr)
-				{
-					tex_coord.x() = tex_coord_node->Attrib("u")->ValueFloat();
-					tex_coord.y() = tex_coord_node->Attrib("v")->ValueFloat();
+					float2 tex_coord;
+					XMLAttributePtr attr = tex_coord_node->Attrib("u");
+					if (attr)
+					{
+						tex_coord.x() = tex_coord_node->Attrib("u")->ValueFloat();
+						tex_coord.y() = tex_coord_node->Attrib("v")->ValueFloat();
+					}
+					else
+					{
+						std::istringstream attr_ss(tex_coord_node->Attrib("v")->ValueString());
+						attr_ss >> tex_coord.x() >> tex_coord.y();
+					}
+					mesh_tex_coords.push_back(tex_coord);
 				}
-				else
-				{
-					std::istringstream attr_ss(tex_coord_node->Attrib("v")->ValueString());
-					attr_ss >> tex_coord.x() >> tex_coord.y();
-				}
-				mesh_tex_coords.push_back(tex_coord);
 			}
 
 			XMLNodePtr weight_node = vertex_node->FirstNode("weight");
@@ -1602,7 +1614,7 @@ namespace
 		XMLDocument doc;
 		XMLNodePtr root = doc.Parse(file);
 
-		BOOST_ASSERT(root->Attrib("version") && (root->Attrib("version")->ValueInt() >= 4));
+		BOOST_ASSERT(root->Attrib("version") && (root->Attrib("version")->ValueInt() >= 1));
 
 		XMLNodePtr materials_chunk = root->FirstNode("materials_chunk");
 		std::vector<RenderMaterial> mtls;
