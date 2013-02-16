@@ -1,0 +1,65 @@
+<?xml version='1.0'?>
+
+<effect>
+	<include name="Lighting.fxml"/>
+	<include name="util.fxml"/>
+	<include name="Quaternion.fxml"/>
+	<include name="NoOIT.fxml"/>
+
+	<cbuffer name="per_frame">
+		<parameter type="int" name="frame_width"/>
+	</cbuffer>
+
+	<parameter type="rw_structured_buffer" elem_type="float4" name="rw_frags_buffer"/>
+	<parameter type="rw_byte_address_buffer" name="rw_start_offset_buffer"/>
+
+	<shader version="5">
+		<![CDATA[
+void GenPerPixelLinkedListsVS(float4 pos				: POSITION,
+					float2 texcoord			: TEXCOORD0,
+					float4 tangent_quat		: TANGENT,
+					out float4 oL			: TEXCOORD0,
+					out float4 oH			: TEXCOORD1,
+					out float4 oPos			: SV_Position)
+{
+	Transform(pos, texcoord, tangent_quat,
+		oL, oH, oPos);
+}
+
+[earlydepthstencil]
+void GenPerPixelLinkedListsPS(float4 L : TEXCOORD0,
+					float4 H : TEXCOORD1,
+					float4 pos : SV_Position)
+{
+	float4 color = Shading(L, H);
+	uint4 u16_color = f32tof16(color);
+
+	float4 frag_data;
+	frag_data.xy = asfloat(u16_color.xz | (u16_color.yw << 16));
+	frag_data.z = pos.z;
+
+	uint pixel_count = rw_frags_buffer.IncrementCounter();
+
+	uint index = (uint)pos.y * frame_width + (uint)pos.x;
+	uint start_offset_address = index * 4;
+	uint old_start_offset;
+	rw_start_offset_buffer.InterlockedExchange(start_offset_address, pixel_count, old_start_offset);
+
+	frag_data.w = asfloat(old_start_offset);
+	rw_frags_buffer[pixel_count] = frag_data;
+}
+		]]>
+	</shader>
+
+	<technique name="GenPerPixelLinkedLists">
+		<pass name="p0">
+			<state name="cull_mode" value="none"/>
+
+			<state name="depth_enable" value="false"/>
+			<state name="depth_write_mask" value="0"/>
+
+			<state name="vertex_shader" value="GenPerPixelLinkedListsVS()"/>
+			<state name="pixel_shader" value="GenPerPixelLinkedListsPS()"/>
+		</pass>
+	</technique>
+</effect>

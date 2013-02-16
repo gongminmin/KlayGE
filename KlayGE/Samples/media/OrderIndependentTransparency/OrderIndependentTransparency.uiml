@@ -1,13 +1,18 @@
 <?xml version='1.0' encoding='utf-8' standalone='no'?>
 
 <ui>
-	<dialog id="OIT" caption="OIT" x="-240" y="230" align_x="right" width="240" height="130">
+	<dialog id="OIT" caption="OIT" x="-240" y="200" align_x="right" width="240" height="200">
 		<control type="combo_box" id="OITMode" x="30" y="30" width="180" height="24" is_default="0" selected="1">
 			<item name="No OIT"/>
 			<item name="Depth Peeling"/>
 			<item name="Per-Pixel Linked Lists"/>
+			<item name="Adaptive Transparency"/>
 		</control>
-		<control type="check_box" id="CtrlCamera" caption="Control camera" x="30" y="80" width="160" height="24" checked="0" hotkey="0" is_default="0"/>
+		
+		<control type="static" id="AlphaStatic" caption="Alpha:" x="30" y="80" width="180" height="24" is_default="0" />
+		<control type="slider" id="Alpha" x="30" y="100" width="180" height="24" min="0" max="100" value="30" is_default="0" />
+		
+		<control type="check_box" id="CtrlCamera" caption="Control camera" x="30" y="150" width="160" height="24" checked="0" hotkey="0" is_default="0"/>
 	</dialog>
 
 	<dialog id="Layer" caption="Layer" x="-240" y="-265" align_x="right" align_y="bottom" width="240" height="225">

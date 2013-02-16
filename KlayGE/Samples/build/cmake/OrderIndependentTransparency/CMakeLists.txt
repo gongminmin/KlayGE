@@ -7,8 +7,10 @@ SET(HEADER_FILES
 )
 
 SET(EFFECT_FILES
+	${KLAYGE_PROJECT_DIR}/Samples/media/OrderIndependentTransparency/AdaptiveTransparency.fxml
 	${KLAYGE_PROJECT_DIR}/Samples/media/OrderIndependentTransparency/Blend.fxml
 	${KLAYGE_PROJECT_DIR}/Samples/media/OrderIndependentTransparency/DepthPeeling.fxml
+	${KLAYGE_PROJECT_DIR}/Samples/media/OrderIndependentTransparency/FragmentList.fxml
 	${KLAYGE_PROJECT_DIR}/Samples/media/OrderIndependentTransparency/NoOIT.fxml
 	${KLAYGE_PROJECT_DIR}/Samples/media/OrderIndependentTransparency/PerPixelLinkedLists.fxml
 )

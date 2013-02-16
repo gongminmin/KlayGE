@@ -1,0 +1,263 @@
+<?xml version='1.0'?>
+
+<effect>
+	<include name="Lighting.fxml"/>
+	<include name="util.fxml"/>
+	<include name="Quaternion.fxml"/>
+	<include name="NoOIT.fxml"/>
+
+	<macro name="TEMPORARY_BUFFER_MAX" value="16"/>
+
+	<cbuffer name="per_frame">
+		<parameter type="int" name="frame_width"/>
+	</cbuffer>
+
+	<parameter type="structured_buffer" elem_type="float4" name="frags_buffer"/>
+	<parameter type="buffer" elem_type="uint" name="start_offset_buffer"/>
+
+	<shader version="5">
+		<![CDATA[
+struct AOITFragment
+{
+	uint index;
+	float depth;
+	float trans;
+};
+
+AOITFragment AOITFindFragment(float2 oit_data[TEMPORARY_BUFFER_MAX], float frag_depth)
+{
+	int index;
+	float4 depth, trans;
+	float left_depth;
+	float left_trans;
+
+	AOITFragment ret;
+
+	if (frag_depth > oit_data[11].x)
+	{
+		depth = float4(oit_data[12].x, oit_data[13].x, oit_data[14].x, oit_data[15].x);
+		trans = float4(oit_data[12].y, oit_data[13].y, oit_data[14].y, oit_data[15].y);
+		left_depth = oit_data[11].x;
+		left_trans = oit_data[11].y;
+		ret.index = 12;
+	}
+	else if (frag_depth > oit_data[7].x)
+	{
+		depth = float4(oit_data[8].x, oit_data[9].x, oit_data[10].x, oit_data[11].x);
+		trans = float4(oit_data[8].y, oit_data[9].y, oit_data[10].y, oit_data[11].y);
+		left_depth = oit_data[7].x;
+		left_trans = oit_data[7].y;
+		ret.index = 8;
+	}
+	else if (frag_depth > oit_data[3].x)
+	{
+		depth = float4(oit_data[4].x, oit_data[5].x, oit_data[6].x, oit_data[7].x);
+		trans = float4(oit_data[4].y, oit_data[5].y, oit_data[6].y, oit_data[7].y);
+		left_depth = oit_data[3].x;
+		left_trans = oit_data[3].y;
+		ret.index = 4;
+	}
+	else
+	{
+		depth = float4(oit_data[0].x, oit_data[1].x, oit_data[2].x, oit_data[3].x);
+		trans = float4(oit_data[0].y, oit_data[1].y, oit_data[2].y, oit_data[3].y);
+		left_depth = oit_data[0].x;
+		left_trans = oit_data[0].y;
+		ret.index = 0;
+	}
+
+	if (frag_depth <= depth.x)
+	{
+		ret.depth = left_depth;
+		ret.trans = left_trans;
+	}
+	else if (frag_depth <= depth.y)
+	{
+		ret.index += 1;
+		ret.depth = depth.x;
+		ret.trans = trans.x;
+	}
+	else if (frag_depth <= depth.z)
+	{
+		ret.index += 2;
+		ret.depth = depth.y;
+		ret.trans = trans.y;
+	}
+	else if (frag_depth <= depth.w)
+	{
+		ret.index += 3;
+		ret.depth = depth.z;
+		ret.trans = trans.z;
+	}
+	else
+	{
+		ret.index += 4;
+		ret.depth = depth.w;
+		ret.trans = trans.w;
+	}
+
+	return ret;
+}
+
+void AOITInsertFragment(float frag_depth,
+						float frag_trans,
+						inout float2 oit_data[TEMPORARY_BUFFER_MAX])
+{	
+	float depth[TEMPORARY_BUFFER_MAX + 1];
+	float trans[TEMPORARY_BUFFER_MAX + 1];
+	for (uint i = 0; i < TEMPORARY_BUFFER_MAX; ++ i)
+	{
+		depth[i] = oit_data[i].x;
+		trans[i] = oit_data[i].y;
+	}
+
+	AOITFragment tempFragment = AOITFindFragment(oit_data, frag_depth);
+	const uint index = tempFragment.index;
+	const float prev_trans = index != 0 ? tempFragment.trans : 1.0f;
+
+	for (int j = TEMPORARY_BUFFER_MAX - 1; j >= 0; -- j)
+	{
+		if (index <= (uint)j)
+		{
+			depth[j + 1] = depth[j];
+			trans[j + 1] = trans[j] * frag_trans;
+		}
+	}
+
+	for (i = 0; i <= TEMPORARY_BUFFER_MAX; ++ i)
+	{
+		if (index == i)
+		{
+			depth[i] = frag_depth;
+			trans[i] = frag_trans * prev_trans;
+		}
+	}
+
+	if (depth[TEMPORARY_BUFFER_MAX] <= 1)
+	{
+		const uint start_removal_idx = TEMPORARY_BUFFER_MAX / 2;
+
+		float node_under_err[TEMPORARY_BUFFER_MAX];
+		for (i = start_removal_idx; i < TEMPORARY_BUFFER_MAX; ++ i)
+		{
+			node_under_err[i] = (depth[i] - depth[i - 1]) * (trans[i - 1] - trans[i]);
+		}
+
+		uint smallest_err_idx = start_removal_idx;
+		float smallest_err = node_under_err[smallest_err_idx];
+
+		for (i = start_removal_idx + 1; i < TEMPORARY_BUFFER_MAX; ++ i)
+		{
+			if (node_under_err[i] < smallest_err)
+			{
+				smallest_err = node_under_err[i];
+				smallest_err_idx = i;
+			}
+		}
+
+		for (i = start_removal_idx; i < TEMPORARY_BUFFER_MAX; ++ i)
+		{
+			if (smallest_err_idx <= i)
+			{
+				depth[i] = depth[i + 1];
+			}
+		}
+		for (i = start_removal_idx - 1; i < TEMPORARY_BUFFER_MAX; ++ i)
+		{
+			if (smallest_err_idx - 1 <= i)
+			{
+				trans[i] = trans[i + 1];
+			}
+		}
+	}
+
+	for (i = 0; i < TEMPORARY_BUFFER_MAX; ++ i)
+	{
+		oit_data[i].x = depth[i];
+		oit_data[i].y = trans[i];
+	}
+}
+
+void RenderAdaptiveTransparencyVS(uint vertex_id : SV_VertexID,
+					out float2 oTex : TEXCOORD0,
+					out float4 oPos : SV_Position)
+{
+	float2 quad_texs[4] = { float2(0, 0), float2(1, 0), float2(0, 1), float2(1, 1) };
+	oTex = quad_texs[vertex_id];
+	
+	oPos.xy = oTex * 2 - 1;
+	oPos.y *= KLAYGE_FLIPPING;
+	oPos.zw = float2(0, 1);
+}
+
+float4 RenderAdaptiveTransparencyPS(float2 tex : TEXCOORD0, float4 pos : SV_Position) : SV_Target
+{
+	uint index = (uint)pos.y * frame_width + (uint)pos.x;
+
+	float4 result = float4(0, 0, 0, 1);
+	uint start = start_offset_buffer[index];
+	if (start != 0xFFFFFFFF)
+	{
+		float2 oit_data[TEMPORARY_BUFFER_MAX];
+		for (uint i = 0; i < TEMPORARY_BUFFER_MAX; ++ i)
+		{
+			oit_data[i].x = 1.1f;
+			oit_data[i].y = 1.0f;
+		}
+
+		uint next = start;
+		while (next != 0xFFFFFFFF)
+		{
+			float4 frag_data = frags_buffer[next];
+
+			float depth = frag_data.z;
+			float trans = f16tof32(asuint(frag_data.y) >> 16);
+			AOITInsertFragment(depth, saturate(1 - trans), oit_data);
+
+			next = asuint(frag_data.w);
+		}
+		
+		float3 color = 0;
+		next = start;
+		while (next != 0xFFFFFFFF)
+		{
+			float4 frag_data = frags_buffer[next];
+
+			float depth = frag_data.z;
+
+			uint2 u16_color = asuint(frag_data.xy);
+			float4 node_color;
+			node_color.r = f16tof32(u16_color.x & 0xFFFF);
+			node_color.g = f16tof32(u16_color.x >> 16);
+			node_color.b = f16tof32(u16_color.y & 0xFFFF);
+			node_color.a = f16tof32(u16_color.y >> 16);
+			
+			AOITFragment frag = AOITFindFragment(oit_data, depth);
+			float vis = (0 == frag.index) ? 1 : frag.trans;
+			color += node_color.rgb * node_color.a * vis;
+
+			next = asuint(frag_data.w);
+		}
+		
+		result = float4(color, oit_data[TEMPORARY_BUFFER_MAX - 1].y);
+	}
+
+	return result;
+}
+		]]>
+	</shader>
+
+	<technique name="RenderAdaptiveTransparency">
+		<pass name="p0">
+			<state name="depth_enable" value="false"/>
+			<state name="depth_write_mask" value="0"/>
+
+			<state name="blend_enable" value="true"/>
+			<state name="src_blend" value="one"/>
+			<state name="dest_blend" value="src_alpha"/>
+
+			<state name="vertex_shader" value="RenderAdaptiveTransparencyVS()"/>
+			<state name="pixel_shader" value="RenderAdaptiveTransparencyPS()"/>
+		</pass>
+	</technique>
+</effect>

@@ -44,20 +44,23 @@ namespace
 
 			no_oit_tech_ = rf.LoadEffect("NoOIT.fxml")->TechniqueByName("NoOIT");
 
-			depth_peeling_1st_tech_ = rf.LoadEffect("DepthPeeling.fxml")->TechniqueByName("DepthPeeling1st");
-			depth_peeling_nth_tech_ = depth_peeling_1st_tech_->Effect().TechniqueByName("DepthPeelingNth");
+			dp_1st_tech_ = rf.LoadEffect("DepthPeeling.fxml")->TechniqueByName("DepthPeeling1st");
+			dp_nth_tech_ = dp_1st_tech_->Effect().TechniqueByName("DepthPeelingNth");
 
 			RenderDeviceCaps const & caps = rf.RenderEngineInstance().DeviceCaps();
 			if (caps.max_shader_model >= 5)
 			{
-				gen_per_pixel_linked_lists_tech_ = rf.LoadEffect("PerPixelLinkedLists.fxml")->TechniqueByName("GenPerPixelLinkedLists");
-				render_per_pixel_linked_lists_tech_ = gen_per_pixel_linked_lists_tech_->Effect().TechniqueByName("RenderPerPixelLinkedLists");
+				gen_ppll_tech_ = rf.LoadEffect("FragmentList.fxml")->TechniqueByName("GenPerPixelLinkedLists");
 				rl_quad_ = rf.MakeRenderLayout();
 				rl_quad_->TopologyType(RenderLayout::TT_TriangleStrip);
 				rl_quad_->NumVertices(4);
+
+				ppll_render_tech_ = rf.LoadEffect("PerPixelLinkedLists.fxml")->TechniqueByName("RenderPerPixelLinkedLists");
+
+				at_render_tech_ = rf.LoadEffect("AdaptiveTransparency.fxml")->TechniqueByName("RenderAdaptiveTransparency");
 			}
 			
-			technique_ = depth_peeling_1st_tech_;
+			technique_ = dp_1st_tech_;
 
 			effect_attrs_ = EA_TransparencyFront;
 		}
@@ -67,23 +70,23 @@ namespace
 			AABBox const & pos_bb = this->PosBound();
 			*(no_oit_tech_->Effect().ParameterByName("pos_center")) = pos_bb.Center();
 			*(no_oit_tech_->Effect().ParameterByName("pos_extent")) = pos_bb.HalfSize();
-			*(depth_peeling_1st_tech_->Effect().ParameterByName("pos_center")) = pos_bb.Center();
-			*(depth_peeling_1st_tech_->Effect().ParameterByName("pos_extent")) = pos_bb.HalfSize();
-			if (gen_per_pixel_linked_lists_tech_)
+			*(dp_1st_tech_->Effect().ParameterByName("pos_center")) = pos_bb.Center();
+			*(dp_1st_tech_->Effect().ParameterByName("pos_extent")) = pos_bb.HalfSize();
+			if (gen_ppll_tech_)
 			{
-				*(gen_per_pixel_linked_lists_tech_->Effect().ParameterByName("pos_center")) = pos_bb.Center();
-				*(gen_per_pixel_linked_lists_tech_->Effect().ParameterByName("pos_extent")) = pos_bb.HalfSize();
+				*(gen_ppll_tech_->Effect().ParameterByName("pos_center")) = pos_bb.Center();
+				*(gen_ppll_tech_->Effect().ParameterByName("pos_extent")) = pos_bb.HalfSize();
 			}
 
 			AABBox const & tc_bb = this->TexcoordBound();
 			*(no_oit_tech_->Effect().ParameterByName("tc_center")) = float2(tc_bb.Center().x(), tc_bb.Center().y());
 			*(no_oit_tech_->Effect().ParameterByName("tc_extent")) = float2(tc_bb.HalfSize().x(), tc_bb.HalfSize().y());
-			*(depth_peeling_1st_tech_->Effect().ParameterByName("tc_center")) = float2(tc_bb.Center().x(), tc_bb.Center().y());
-			*(depth_peeling_1st_tech_->Effect().ParameterByName("tc_extent")) = float2(tc_bb.HalfSize().x(), tc_bb.HalfSize().y());
-			if (gen_per_pixel_linked_lists_tech_)
+			*(dp_1st_tech_->Effect().ParameterByName("tc_center")) = float2(tc_bb.Center().x(), tc_bb.Center().y());
+			*(dp_1st_tech_->Effect().ParameterByName("tc_extent")) = float2(tc_bb.HalfSize().x(), tc_bb.HalfSize().y());
+			if (gen_ppll_tech_)
 			{
-				*(gen_per_pixel_linked_lists_tech_->Effect().ParameterByName("tc_center")) = float2(tc_bb.Center().x(), tc_bb.Center().y());
-				*(gen_per_pixel_linked_lists_tech_->Effect().ParameterByName("tc_extent")) = float2(tc_bb.HalfSize().x(), tc_bb.HalfSize().y());
+				*(gen_ppll_tech_->Effect().ParameterByName("tc_center")) = float2(tc_bb.Center().x(), tc_bb.Center().y());
+				*(gen_ppll_tech_->Effect().ParameterByName("tc_extent")) = float2(tc_bb.HalfSize().x(), tc_bb.HalfSize().y());
 			}
 
 			TexturePtr diffuse_tex = SyncLoadTexture("robot-clean_diffuse.dds", EAH_GPU_Read | EAH_Immutable);
@@ -95,22 +98,32 @@ namespace
 			*(no_oit_tech_->Effect().ParameterByName("specular_tex")) = specular_tex;
 			*(no_oit_tech_->Effect().ParameterByName("normal_tex")) = normal_tex;
 			*(no_oit_tech_->Effect().ParameterByName("emit_tex")) = emit_tex;
-			*(depth_peeling_1st_tech_->Effect().ParameterByName("diffuse_tex")) = diffuse_tex;
-			*(depth_peeling_1st_tech_->Effect().ParameterByName("specular_tex")) = specular_tex;
-			*(depth_peeling_1st_tech_->Effect().ParameterByName("normal_tex")) = normal_tex;
-			*(depth_peeling_1st_tech_->Effect().ParameterByName("emit_tex")) = emit_tex;
-			if (gen_per_pixel_linked_lists_tech_)
+			*(dp_1st_tech_->Effect().ParameterByName("diffuse_tex")) = diffuse_tex;
+			*(dp_1st_tech_->Effect().ParameterByName("specular_tex")) = specular_tex;
+			*(dp_1st_tech_->Effect().ParameterByName("normal_tex")) = normal_tex;
+			*(dp_1st_tech_->Effect().ParameterByName("emit_tex")) = emit_tex;
+			if (gen_ppll_tech_)
 			{
-				*(gen_per_pixel_linked_lists_tech_->Effect().ParameterByName("diffuse_tex")) = diffuse_tex;
-				*(gen_per_pixel_linked_lists_tech_->Effect().ParameterByName("specular_tex")) = specular_tex;
-				*(gen_per_pixel_linked_lists_tech_->Effect().ParameterByName("normal_tex")) = normal_tex;
-				*(gen_per_pixel_linked_lists_tech_->Effect().ParameterByName("emit_tex")) = emit_tex;
+				*(gen_ppll_tech_->Effect().ParameterByName("diffuse_tex")) = diffuse_tex;
+				*(gen_ppll_tech_->Effect().ParameterByName("specular_tex")) = specular_tex;
+				*(gen_ppll_tech_->Effect().ParameterByName("normal_tex")) = normal_tex;
+				*(gen_ppll_tech_->Effect().ParameterByName("emit_tex")) = emit_tex;
 			}
 		}
 
 		void SetOITMode(OITMode mode)
 		{
 			mode_ = mode;
+		}
+
+		void SetAlpha(float alpha)
+		{
+			*(no_oit_tech_->Effect().ParameterByName("alpha")) = alpha;
+			*(dp_1st_tech_->Effect().ParameterByName("alpha")) = alpha;
+			if (gen_ppll_tech_)
+			{
+				*(gen_ppll_tech_->Effect().ParameterByName("alpha")) = alpha;
+			}
 		}
 
 		void FirstPass(bool fp)
@@ -124,11 +137,12 @@ namespace
 					break;
 
 				case OM_DepthPeeling:
-					technique_ = depth_peeling_1st_tech_;
+					technique_ = dp_1st_tech_;
 					break;
 
 				case OM_PerPixelLinkedLists:
-					technique_ = gen_per_pixel_linked_lists_tech_;
+				case OM_AdaptiveTransparency:
+					technique_ = gen_ppll_tech_;
 					break;
 
 				default:
@@ -145,11 +159,15 @@ namespace
 					break;
 
 				case OM_DepthPeeling:
-					technique_ = depth_peeling_nth_tech_;
+					technique_ = dp_nth_tech_;
 					break;
 
 				case OM_PerPixelLinkedLists:
-					technique_ = render_per_pixel_linked_lists_tech_;
+					technique_ = ppll_render_tech_;
+					break;
+
+				case OM_AdaptiveTransparency:
+					technique_ = at_render_tech_;
 					break;
 
 				default:
@@ -161,34 +179,58 @@ namespace
 
 		void LastDepth(TexturePtr const & depth_tex)
 		{
-			if (OM_DepthPeeling == mode_)
+			if (dp_nth_tech_)
 			{
-				*(technique_->Effect().ParameterByName("last_depth_tex")) = depth_tex;
+				*(dp_nth_tech_->Effect().ParameterByName("last_depth_tex")) = depth_tex;
 			}
 		}
 
 		void BackgroundTex(TexturePtr const & bg_tex)
 		{
-			if (OM_PerPixelLinkedLists == mode_)
+			if (ppll_render_tech_)
 			{
-				*(technique_->Effect().ParameterByName("bg_tex")) = bg_tex;
+				*(ppll_render_tech_->Effect().ParameterByName("bg_tex")) = bg_tex;
 			}
 		}
 		void LinkedListBuffer(GraphicsBufferPtr const & fragment_link_buf, GraphicsBufferPtr const & start_offset_buf)
 		{
-			if (OM_PerPixelLinkedLists == mode_)
+			if (gen_ppll_tech_)
 			{
-				*(gen_per_pixel_linked_lists_tech_->Effect().ParameterByName("rw_frags_buffer")) = fragment_link_buf;
-				*(gen_per_pixel_linked_lists_tech_->Effect().ParameterByName("rw_start_offset_buffer")) = start_offset_buf;
-				*(render_per_pixel_linked_lists_tech_->Effect().ParameterByName("frags_buffer")) = fragment_link_buf;
-				*(render_per_pixel_linked_lists_tech_->Effect().ParameterByName("start_offset_buffer")) = start_offset_buf;
+				*(gen_ppll_tech_->Effect().ParameterByName("rw_frags_buffer")) = fragment_link_buf;
+				*(gen_ppll_tech_->Effect().ParameterByName("rw_start_offset_buffer")) = start_offset_buf;
+			}
+
+			if (ppll_render_tech_)
+			{
+				*(ppll_render_tech_->Effect().ParameterByName("frags_buffer")) = fragment_link_buf;
+				*(ppll_render_tech_->Effect().ParameterByName("start_offset_buffer")) = start_offset_buf;
+			}
+			if (at_render_tech_)
+			{
+				*(at_render_tech_->Effect().ParameterByName("frags_buffer")) = fragment_link_buf;
+				*(at_render_tech_->Effect().ParameterByName("start_offset_buffer")) = start_offset_buf;
 			}
 		}
 
 		void RenderQuad()
 		{
+			RenderTechniquePtr tech;
+			RenderLayoutPtr rl;
+			if (OM_PerPixelLinkedLists == mode_)
+			{
+				tech = ppll_render_tech_;
+				rl = rl_quad_;
+			}
+			else if (OM_AdaptiveTransparency == mode_)
+			{
+				tech = at_render_tech_;
+				rl = rl_quad_;
+			}
+
 			RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-			re.Render(*render_per_pixel_linked_lists_tech_, *rl_quad_);
+			*(tech->Effect().ParameterByName("frame_width")) = static_cast<int32_t>(re.CurFrameBuffer()->GetViewport()->width);
+
+			re.Render(*tech, *rl);
 		}
 
 		void OnRenderBegin()
@@ -201,25 +243,36 @@ namespace
 			*(technique_->Effect().ParameterByName("mvp")) = model * camera.ViewProjMatrix();
 			*(technique_->Effect().ParameterByName("eye_pos")) = camera.EyePos();
 
-			if (OM_DepthPeeling == mode_)
+			switch (mode_)
 			{
-				float q = camera.FarPlane() / (camera.FarPlane() - camera.NearPlane());
-				*(technique_->Effect().ParameterByName("near_q")) = float2(camera.NearPlane() * q, q);
-			}
-			else if (OM_PerPixelLinkedLists == mode_)
-			{
-				RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-				*(technique_->Effect().ParameterByName("frame_width")) = static_cast<int32_t>(re.CurFrameBuffer()->GetViewport()->width);
+			case OM_DepthPeeling:
+				{
+					float q = camera.FarPlane() / (camera.FarPlane() - camera.NearPlane());
+					*(technique_->Effect().ParameterByName("near_q")) = float2(camera.NearPlane() * q, q);
+					break;
+				}
+			
+			case OM_PerPixelLinkedLists:
+			case OM_AdaptiveTransparency:
+				{
+					RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+					*(technique_->Effect().ParameterByName("frame_width")) = static_cast<int32_t>(re.CurFrameBuffer()->GetViewport()->width);
+					break;
+				}
+
+			default:
+				BOOST_ASSERT(false);
+				break;
 			}
 		}
 
 		void LightPos(float3 const & light_pos)
 		{
 			*(no_oit_tech_->Effect().ParameterByName("light_pos")) = light_pos;
-			*(depth_peeling_1st_tech_->Effect().ParameterByName("light_pos")) = light_pos;
-			if (gen_per_pixel_linked_lists_tech_)
+			*(dp_1st_tech_->Effect().ParameterByName("light_pos")) = light_pos;
+			if (gen_ppll_tech_)
 			{
-				*(gen_per_pixel_linked_lists_tech_->Effect().ParameterByName("light_pos")) = light_pos;
+				*(gen_ppll_tech_->Effect().ParameterByName("light_pos")) = light_pos;
 			}
 		}
 
@@ -228,12 +281,15 @@ namespace
 		
 		RenderTechniquePtr no_oit_tech_;
 
-		RenderTechniquePtr depth_peeling_1st_tech_;
-		RenderTechniquePtr depth_peeling_nth_tech_;
+		RenderTechniquePtr dp_1st_tech_;
+		RenderTechniquePtr dp_nth_tech_;
 
-		RenderTechniquePtr gen_per_pixel_linked_lists_tech_;
-		RenderTechniquePtr render_per_pixel_linked_lists_tech_;
+		RenderTechniquePtr gen_ppll_tech_;
 		RenderLayoutPtr rl_quad_;
+
+		RenderTechniquePtr ppll_render_tech_;
+		
+		RenderTechniquePtr at_render_tech_;
 	};
 
 	class PolygonObject : public SceneObjectHelper
@@ -260,6 +316,15 @@ namespace
 			for (uint32_t i = 0; i < model->NumMeshes(); ++ i)
 			{
 				checked_pointer_cast<RenderPolygon>(model->Mesh(i))->SetOITMode(mode);
+			}
+		}
+
+		void SetAlpha(float alpha)
+		{
+			RenderModelPtr model = checked_pointer_cast<RenderModel>(renderable_);
+			for (uint32_t i = 0; i < model->NumMeshes(); ++ i)
+			{
+				checked_pointer_cast<RenderPolygon>(model->Mesh(i))->SetAlpha(alpha);
 			}
 		}
 
@@ -347,7 +412,6 @@ bool OrderIndependentTransparencyApp::ConfirmDevice() const
 
 void OrderIndependentTransparencyApp::InitObjects()
 {
-	// ½¨Á¢×ÖÌå
 	font_ = Context::Instance().RenderFactoryInstance().MakeFont("gkai00mp.kfont");
 
 	polygon_ = MakeSharedPtr<PolygonObject>();
@@ -367,7 +431,7 @@ void OrderIndependentTransparencyApp::InitObjects()
 	checked_pointer_cast<SceneObjectHDRSkyBox>(sky_box_)->CompressedCubeMap(y_cube_map, c_cube_map);
 	sky_box_->AddToSceneManager();
 
-	peeling_fbs_.resize(9);
+	peeling_fbs_.resize(17);
 	for (size_t i = 0; i < peeling_fbs_.size(); ++ i)
 	{
 		peeling_fbs_[i] = rf.MakeFrameBuffer();
@@ -407,12 +471,16 @@ void OrderIndependentTransparencyApp::InitObjects()
 	dialog_layer_ = UIManager::Instance().GetDialogs()[1];
 
 	id_oit_mode_ = dialog_oit_->IDFromName("OITMode");
+	id_alpha_static_ = dialog_oit_->IDFromName("AlphaStatic");
+	id_alpha_slider_ = dialog_oit_->IDFromName("Alpha");
 	id_ctrl_camera_ = dialog_oit_->IDFromName("CtrlCamera");
 	id_layer_combo_ = dialog_layer_->IDFromName("LayerCombo");
 	id_layer_tex_ = dialog_layer_->IDFromName("LayerTexButton");
 
 	dialog_oit_->Control<UIComboBox>(id_oit_mode_)->OnSelectionChangedEvent().connect(boost::bind(&OrderIndependentTransparencyApp::OITModeHandler, this, _1));
 	this->OITModeHandler(*dialog_oit_->Control<UIComboBox>(id_oit_mode_));
+	dialog_oit_->Control<UISlider>(id_alpha_slider_)->OnValueChangedEvent().connect(boost::bind(&OrderIndependentTransparencyApp::AlphaHandler, this, _1));
+	this->AlphaHandler(*dialog_oit_->Control<UISlider>(id_alpha_slider_));
 	dialog_oit_->Control<UICheckBox>(id_ctrl_camera_)->OnChangedEvent().connect(boost::bind(&OrderIndependentTransparencyApp::CtrlCameraHandler, this, _1));
 	this->CtrlCameraHandler(*dialog_oit_->Control<UICheckBox>(id_ctrl_camera_));
 
@@ -492,6 +560,8 @@ void OrderIndependentTransparencyApp::OnResize(uint32_t width, uint32_t height)
 		linked_list_fb_->AttachUAV(1, start_offset_uav_);
 		linked_list_fb_->GetViewport()->width = width;
 		linked_list_fb_->GetViewport()->height = height;
+
+		checked_pointer_cast<PolygonObject>(polygon_)->BackgroundTex(opaque_bg_tex_);
 	}
 
 	UIManager::Instance().SettleCtrls(width, height);
@@ -512,6 +582,16 @@ void OrderIndependentTransparencyApp::OITModeHandler(KlayGE::UIComboBox const & 
 	oit_mode_ = static_cast<OITMode>(sender.GetSelectedIndex());
 	checked_pointer_cast<PolygonObject>(polygon_)->SetOITMode(oit_mode_);
 	dialog_layer_->SetVisible(OM_DepthPeeling == oit_mode_);
+}
+
+void OrderIndependentTransparencyApp::AlphaHandler(KlayGE::UISlider const & sender)
+{
+	float alpha = sender.GetValue() * 0.01f;
+	checked_pointer_cast<PolygonObject>(polygon_)->SetAlpha(alpha);
+	std::wostringstream stream;
+	stream.precision(2);
+	stream << std::fixed << "Alpha: " << alpha;
+	dialog_oit_->Control<UIStatic>(id_alpha_static_)->SetText(stream.str());
 }
 
 void OrderIndependentTransparencyApp::CtrlCameraHandler(KlayGE::UICheckBox const & sender)
@@ -565,14 +645,21 @@ uint32_t OrderIndependentTransparencyApp::DoUpdate(uint32_t pass)
 {
 	RenderEngine& re(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 
-	if (OM_PerPixelLinkedLists == oit_mode_)
+	if ((OM_PerPixelLinkedLists == oit_mode_) || (OM_AdaptiveTransparency == oit_mode_))
 	{
 		checked_pointer_cast<PolygonObject>(polygon_)->LinkedListBuffer(frag_link_buf_, start_offset_buf_);
 
 		switch (pass)
 		{
 		case 0:
-			re.BindFrameBuffer(opaque_bg_fb_);
+			if (OM_PerPixelLinkedLists == oit_mode_)
+			{
+				re.BindFrameBuffer(opaque_bg_fb_);
+			}
+			else
+			{
+				re.BindFrameBuffer(FrameBufferPtr());
+			}
 			re.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->ClearDepthStencil(1, 0);
 			return App3DFramework::URV_Opaque_Only | App3DFramework::URV_Need_Flush;
 
@@ -585,7 +672,6 @@ uint32_t OrderIndependentTransparencyApp::DoUpdate(uint32_t pass)
 
 		default:
 			checked_pointer_cast<PolygonObject>(polygon_)->FirstPass(false);
-			checked_pointer_cast<PolygonObject>(polygon_)->BackgroundTex(opaque_bg_tex_);
 
 			re.BindFrameBuffer(FrameBufferPtr());
 			checked_pointer_cast<PolygonObject>(polygon_)->RenderQuad();
