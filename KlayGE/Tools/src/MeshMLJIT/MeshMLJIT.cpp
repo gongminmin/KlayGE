@@ -117,7 +117,7 @@ namespace
 		}
 	}
 
-	void CompileMeshesVerticesChunk(XMLNodePtr const & vertices_chunk,
+	void CompileMeshesVerticesChunk(XMLNodePtr const & vertices_chunk, bool normal_in_8_bit,
 		AABBox& pos_bb, AABBox& tc_bb, std::vector<vertex_element>& vertex_elements,
 		std::vector<int16_t>& positions, std::vector<uint32_t>& normals,
 		std::vector<uint32_t>& tangent_quats, 
@@ -536,7 +536,7 @@ namespace
 				{
 					ve.usage = VEU_Normal;
 					ve.usage_index = 0;
-					ve.format = EF_A2BGR10;
+					ve.format = normal_in_8_bit ? EF_ABGR8 : EF_A2BGR10;
 					vertex_elements.push_back(ve);
 				}
 				else
@@ -675,7 +675,8 @@ namespace
 			float3 const & specular = mesh_speculars[index];
 			uint32_t compact = (MathLib::clamp<uint32_t>(static_cast<uint32_t>((specular.x() * 0.5f + 0.5f) * 255), 0, 255) << 0)
 				| (MathLib::clamp<uint32_t>(static_cast<uint32_t>((specular.y() * 0.5f + 0.5f) * 255), 0, 255) << 8)
-				| (MathLib::clamp<uint32_t>(static_cast<uint32_t>((specular.z() * 0.5f + 0.5f) * 255), 0, 255) << 16);
+				| (MathLib::clamp<uint32_t>(static_cast<uint32_t>((specular.z() * 0.5f + 0.5f) * 255), 0, 255) << 16)
+				| 0xFF000000;
 			speculars.push_back(compact);
 		}
 		for (uint32_t index = 0; index < mesh_tex_coords.size(); ++ index)
@@ -703,9 +704,19 @@ namespace
 		for (uint32_t index = 0; index < mesh_normals.size(); ++ index)
 		{
 			float3 const normal = MathLib::normalize(mesh_normals[index]) * 0.5f + 0.5f;
-			uint32_t compact = MathLib::clamp<uint32_t>(static_cast<uint32_t>(normal.x() * 1023), 0, 1023)
-				| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(normal.y() * 1023), 0, 1023) << 10)
-				| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(normal.z() * 1023), 0, 1023) << 20);
+			uint32_t compact;
+			if (normal_in_8_bit)
+			{
+				compact = MathLib::clamp<uint32_t>(static_cast<uint32_t>(normal.x() * 255), 0, 255)
+					| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(normal.y() * 255), 0, 255) << 8)
+					| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(normal.z() * 255), 0, 255) << 16);
+			}
+			else
+			{
+				compact = MathLib::clamp<uint32_t>(static_cast<uint32_t>(normal.x() * 1023), 0, 1023)
+					| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(normal.y() * 1023), 0, 1023) << 10)
+					| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(normal.z() * 1023), 0, 1023) << 20);
+			}
 			normals.push_back(compact);					
 		}
 		bone_indices = mesh_bone_indices;
@@ -978,7 +989,7 @@ namespace
 		}
 	}
 
-	void CompileMeshesChunk(XMLNodePtr const & meshes_chunk,
+	void CompileMeshesChunk(XMLNodePtr const & meshes_chunk, bool normal_in_8_bit,
 		std::vector<std::string>& mesh_names, std::vector<int32_t>& mtl_ids,
 		std::vector<AABBox>& pos_bbs, std::vector<AABBox>& tc_bbs, 
 		std::vector<uint32_t>& mesh_num_vertices, std::vector<uint32_t>& mesh_base_vertices,
@@ -1032,7 +1043,7 @@ namespace
 			XMLNodePtr vertices_chunk = mesh_node->FirstNode("vertices_chunk");
 			if (vertices_chunk)
 			{
-				CompileMeshesVerticesChunk(vertices_chunk,
+				CompileMeshesVerticesChunk(vertices_chunk, normal_in_8_bit,
 					pos_bbs[mesh_index], tc_bbs[mesh_index], ves,
 					positions, normals,	tangent_quats,
 					diffuses, speculars, tex_coords,
@@ -1606,7 +1617,7 @@ namespace
 		}
 	}
 
-	void MeshMLJIT(std::string const & meshml_name)
+	void MeshMLJIT(std::string const & meshml_name, std::string const & output_name, bool normal_in_8_bit)
 	{
 		boost::shared_ptr<std::stringstream> ss = MakeSharedPtr<std::stringstream>();
 
@@ -1643,7 +1654,7 @@ namespace
 		char is_index_16_bit = true;
 		if (meshes_chunk)
 		{
-			CompileMeshesChunk(meshes_chunk, mesh_names, mtl_ids, pos_bbs, tc_bbs,
+			CompileMeshesChunk(meshes_chunk, normal_in_8_bit, mesh_names, mtl_ids, pos_bbs, tc_bbs,
 				mesh_num_vertices, mesh_base_vertices,
 				mesh_num_indices, mesh_start_indices,
 				merged_ves, merged_vertices, merged_indices,
@@ -1721,7 +1732,7 @@ namespace
 			WriteActionsChunk(actions, *ss);
 		}
 
-		std::ofstream ofs((meshml_name + JIT_EXT_NAME).c_str(), std::ios_base::binary);
+		std::ofstream ofs(output_name.c_str(), std::ios_base::binary);
 		BOOST_ASSERT(ofs);
 		uint32_t fourcc = MakeFourCC<'K', 'L', 'M', ' '>::value;
 		NativeToLittleEndian<sizeof(fourcc)>(&fourcc);
@@ -1752,13 +1763,40 @@ int main(int argc, char* argv[])
 {
 	if (argc < 2)
 	{
-		cout << "Usage: MeshMLJIT xxx.meshml" << endl;
+		cout << "Usage: MeshMLJIT xxx.meshml [N8|N10] [xxx.meshml.model_bin] [-q]" << endl;
 		return 1;
 	}
 
-	MeshMLJIT(argv[1]);
+	std::string meshml_name = argv[1];
 
-	cout << "Binary model is saved to " << argv[1] << JIT_EXT_NAME << endl;
+	bool normal_in_8_bit = false;
+	if ((argc >= 3) && ("N8" == std::string(argv[2])))
+	{
+		normal_in_8_bit = true;
+	}
+
+	std::string output_name;
+	if (argc >= 4)
+	{
+		output_name = argv[3];
+	}
+	else
+	{
+		output_name = meshml_name + JIT_EXT_NAME;
+	}
+
+	bool quiet = false;
+	if ((argc >= 5) && ("-q" == std::string(argv[4])))
+	{
+		quiet = true;
+	}
+
+	MeshMLJIT(meshml_name, output_name, normal_in_8_bit);
+
+	if (!quiet)
+	{
+		cout << "Binary model has been saved to " << output_name << "." << endl;
+	}
 
 	return 0;
 }

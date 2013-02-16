@@ -1,13 +1,7 @@
 #include <KlayGE/KlayGE.hpp>
 #include <KFL/Util.hpp>
-#include <KFL/Timer.hpp>
 #include <KlayGE/Context.hpp>
-#include <KlayGE/ResLoader.hpp>
-#include <KlayGE/Texture.hpp>
-#include <KlayGE/Mesh.hpp>
-#include <KFL/Math.hpp>
-#include <KlayGE/App3D.hpp>
-#include <KlayGE/RenderFactory.hpp>
+#include <KlayGE/JudaTexture.hpp>
 
 #include <iostream>
 #include <fstream>
@@ -63,8 +57,6 @@
 #ifdef KLAYGE_COMPILER_MSVC
 #pragma warning(pop)
 #endif
-
-#include <KlayGE/JudaTexture.hpp>
 
 using namespace std;
 using namespace KlayGE;
@@ -159,7 +151,7 @@ void Deploy(std::vector<std::string> const & res_names, std::string const & res_
 		{
 			for (size_t i = 0; i < res_names.size(); ++ i)
 			{
-				SyncLoadModel(res_names[i], EAH_GPU_Read | EAH_Immutable);
+				ofs << "MeshMLJIT \"" << res_names[i] << std::endl;
 			}
 		}
 	}
@@ -207,7 +199,7 @@ void Deploy(std::vector<std::string> const & res_names, std::string const & res_
 		{
 			for (size_t i = 0; i < res_names.size(); ++ i)
 			{
-				SyncLoadModel(res_names[i], EAH_GPU_Read | EAH_Immutable);
+				ofs << "MeshMLJIT \"" << res_names[i] << "\" N8" << std::endl;
 			}
 		}
 	}
@@ -254,7 +246,7 @@ void Deploy(std::vector<std::string> const & res_names, std::string const & res_
 		{
 			for (size_t i = 0; i < res_names.size(); ++ i)
 			{
-				SyncLoadModel(res_names[i], EAH_GPU_Read | EAH_Immutable);
+				ofs << "MeshMLJIT \"" << res_names[i] << "\" N8" << std::endl;
 			}
 		}
 	}
