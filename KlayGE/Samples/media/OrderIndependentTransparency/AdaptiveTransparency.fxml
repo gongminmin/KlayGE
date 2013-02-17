@@ -1,11 +1,6 @@
 <?xml version='1.0'?>
 
 <effect>
-	<include name="Lighting.fxml"/>
-	<include name="util.fxml"/>
-	<include name="Quaternion.fxml"/>
-	<include name="NoOIT.fxml"/>
-
 	<macro name="TEMPORARY_BUFFER_MAX" value="16"/>
 
 	<cbuffer name="per_frame">
@@ -17,135 +12,101 @@
 
 	<shader version="5">
 		<![CDATA[
-struct AOITFragment
+void FindFragment(float oit_depth[TEMPORARY_BUFFER_MAX + 1], float oit_trans[TEMPORARY_BUFFER_MAX + 1], float frag_depth,
+		out uint index, out float ret_trans)
 {
-	uint index;
-	float depth;
-	float trans;
-};
-
-AOITFragment AOITFindFragment(float2 oit_data[TEMPORARY_BUFFER_MAX], float frag_depth)
-{
-	int index;
 	float4 depth, trans;
-	float left_depth;
-	float left_trans;
 
-	AOITFragment ret;
-
-	if (frag_depth > oit_data[11].x)
+	if (frag_depth > oit_depth[11])
 	{
-		depth = float4(oit_data[12].x, oit_data[13].x, oit_data[14].x, oit_data[15].x);
-		trans = float4(oit_data[12].y, oit_data[13].y, oit_data[14].y, oit_data[15].y);
-		left_depth = oit_data[11].x;
-		left_trans = oit_data[11].y;
-		ret.index = 12;
+		depth = float4(oit_depth[12], oit_depth[13], oit_depth[14], oit_depth[15]);
+		trans = float4(oit_trans[12], oit_trans[13], oit_trans[14], oit_trans[15]);
+		index = 12;
 	}
-	else if (frag_depth > oit_data[7].x)
+	else if (frag_depth > oit_depth[7])
 	{
-		depth = float4(oit_data[8].x, oit_data[9].x, oit_data[10].x, oit_data[11].x);
-		trans = float4(oit_data[8].y, oit_data[9].y, oit_data[10].y, oit_data[11].y);
-		left_depth = oit_data[7].x;
-		left_trans = oit_data[7].y;
-		ret.index = 8;
+		depth = float4(oit_depth[8], oit_depth[9], oit_depth[10], oit_depth[11]);
+		trans = float4(oit_trans[8], oit_trans[9], oit_trans[10], oit_trans[11]);
+		index = 8;
 	}
-	else if (frag_depth > oit_data[3].x)
+	else if (frag_depth > oit_depth[3])
 	{
-		depth = float4(oit_data[4].x, oit_data[5].x, oit_data[6].x, oit_data[7].x);
-		trans = float4(oit_data[4].y, oit_data[5].y, oit_data[6].y, oit_data[7].y);
-		left_depth = oit_data[3].x;
-		left_trans = oit_data[3].y;
-		ret.index = 4;
+		depth = float4(oit_depth[4], oit_depth[5], oit_depth[6], oit_depth[7]);
+		trans = float4(oit_trans[4], oit_trans[5], oit_trans[6], oit_trans[7]);
+		index = 4;
 	}
 	else
 	{
-		depth = float4(oit_data[0].x, oit_data[1].x, oit_data[2].x, oit_data[3].x);
-		trans = float4(oit_data[0].y, oit_data[1].y, oit_data[2].y, oit_data[3].y);
-		left_depth = oit_data[0].x;
-		left_trans = oit_data[0].y;
-		ret.index = 0;
+		depth = float4(oit_depth[0], oit_depth[1], oit_depth[2], oit_depth[3]);
+		trans = float4(oit_trans[0], oit_trans[1], oit_trans[2], oit_trans[3]);
+		index = 0;
 	}
 
 	if (frag_depth <= depth.x)
 	{
-		ret.depth = left_depth;
-		ret.trans = left_trans;
+		ret_trans = oit_trans[max(0, index - 1)];
 	}
 	else if (frag_depth <= depth.y)
 	{
-		ret.index += 1;
-		ret.depth = depth.x;
-		ret.trans = trans.x;
+		index += 1;
+		ret_trans = trans.x;
 	}
 	else if (frag_depth <= depth.z)
 	{
-		ret.index += 2;
-		ret.depth = depth.y;
-		ret.trans = trans.y;
+		index += 2;
+		ret_trans = trans.y;
 	}
 	else if (frag_depth <= depth.w)
 	{
-		ret.index += 3;
-		ret.depth = depth.z;
-		ret.trans = trans.z;
+		index += 3;
+		ret_trans = trans.z;
 	}
 	else
 	{
-		ret.index += 4;
-		ret.depth = depth.w;
-		ret.trans = trans.w;
+		index += 4;
+		ret_trans = trans.w;
 	}
-
-	return ret;
 }
 
-void AOITInsertFragment(float frag_depth,
+void InsertFragment(float frag_depth,
 						float frag_trans,
-						inout float2 oit_data[TEMPORARY_BUFFER_MAX])
-{	
-	float depth[TEMPORARY_BUFFER_MAX + 1];
-	float trans[TEMPORARY_BUFFER_MAX + 1];
-	for (uint i = 0; i < TEMPORARY_BUFFER_MAX; ++ i)
-	{
-		depth[i] = oit_data[i].x;
-		trans[i] = oit_data[i].y;
-	}
+						inout float oit_depth[TEMPORARY_BUFFER_MAX + 1],
+						inout float oit_trans[TEMPORARY_BUFFER_MAX + 1])
+{
+	uint index;
+	float find_trans;
+	FindFragment(oit_depth, oit_trans, frag_depth, index, find_trans);
+	float prev_trans = index != 0 ? find_trans : 1;
 
-	AOITFragment tempFragment = AOITFindFragment(oit_data, frag_depth);
-	const uint index = tempFragment.index;
-	const float prev_trans = index != 0 ? tempFragment.trans : 1.0f;
-
-	for (int j = TEMPORARY_BUFFER_MAX - 1; j >= 0; -- j)
+	for (uint i = TEMPORARY_BUFFER_MAX; i > 0; -- i)
 	{
-		if (index <= (uint)j)
+		if (index <= i - 1)
 		{
-			depth[j + 1] = depth[j];
-			trans[j + 1] = trans[j] * frag_trans;
+			oit_depth[i] = oit_depth[i - 1];
+			oit_trans[i] = oit_trans[i - 1] * frag_trans;
 		}
 	}
-
 	for (i = 0; i <= TEMPORARY_BUFFER_MAX; ++ i)
 	{
 		if (index == i)
 		{
-			depth[i] = frag_depth;
-			trans[i] = frag_trans * prev_trans;
+			oit_depth[i] = frag_depth;
+			oit_trans[i] = frag_trans * prev_trans;
 		}
 	}
 
-	if (depth[TEMPORARY_BUFFER_MAX] <= 1)
+	if (oit_depth[TEMPORARY_BUFFER_MAX] <= 1)
 	{
 		const uint start_removal_idx = TEMPORARY_BUFFER_MAX / 2;
 
 		float node_under_err[TEMPORARY_BUFFER_MAX];
 		for (i = start_removal_idx; i < TEMPORARY_BUFFER_MAX; ++ i)
 		{
-			node_under_err[i] = (depth[i] - depth[i - 1]) * (trans[i - 1] - trans[i]);
+			node_under_err[i] = (oit_depth[i] - oit_depth[i - 1]) * (oit_trans[i - 1] - oit_trans[i]);
 		}
 
 		uint smallest_err_idx = start_removal_idx;
 		float smallest_err = node_under_err[smallest_err_idx];
-
 		for (i = start_removal_idx + 1; i < TEMPORARY_BUFFER_MAX; ++ i)
 		{
 			if (node_under_err[i] < smallest_err)
@@ -157,24 +118,18 @@ void AOITInsertFragment(float frag_depth,
 
 		for (i = start_removal_idx; i < TEMPORARY_BUFFER_MAX; ++ i)
 		{
-			if (smallest_err_idx <= i)
+			if (i >= smallest_err_idx)
 			{
-				depth[i] = depth[i + 1];
+				oit_depth[i] = oit_depth[i + 1];
 			}
 		}
 		for (i = start_removal_idx - 1; i < TEMPORARY_BUFFER_MAX; ++ i)
 		{
-			if (smallest_err_idx - 1 <= i)
+			if (i >= smallest_err_idx - 1)
 			{
-				trans[i] = trans[i + 1];
+				oit_trans[i] = oit_trans[i + 1];
 			}
 		}
-	}
-
-	for (i = 0; i < TEMPORARY_BUFFER_MAX; ++ i)
-	{
-		oit_data[i].x = depth[i];
-		oit_data[i].y = trans[i];
 	}
 }
 
@@ -198,11 +153,12 @@ float4 RenderAdaptiveTransparencyPS(float2 tex : TEXCOORD0, float4 pos : SV_Posi
 	uint start = start_offset_buffer[index];
 	if (start != 0xFFFFFFFF)
 	{
-		float2 oit_data[TEMPORARY_BUFFER_MAX];
+		float oit_depth[TEMPORARY_BUFFER_MAX + 1];
+		float oit_trans[TEMPORARY_BUFFER_MAX + 1];
 		for (uint i = 0; i < TEMPORARY_BUFFER_MAX; ++ i)
 		{
-			oit_data[i].x = 1.1f;
-			oit_data[i].y = 1.0f;
+			oit_depth[i] = 1.1f;
+			oit_trans[i] = 1.0f;
 		}
 
 		uint next = start;
@@ -212,11 +168,11 @@ float4 RenderAdaptiveTransparencyPS(float2 tex : TEXCOORD0, float4 pos : SV_Posi
 
 			float depth = frag_data.z;
 			float trans = f16tof32(asuint(frag_data.y) >> 16);
-			AOITInsertFragment(depth, saturate(1 - trans), oit_data);
+			InsertFragment(depth, 1 - trans, oit_depth, oit_trans);
 
 			next = asuint(frag_data.w);
 		}
-		
+
 		float3 color = 0;
 		next = start;
 		while (next != 0xFFFFFFFF)
@@ -231,15 +187,17 @@ float4 RenderAdaptiveTransparencyPS(float2 tex : TEXCOORD0, float4 pos : SV_Posi
 			node_color.g = f16tof32(u16_color.x >> 16);
 			node_color.b = f16tof32(u16_color.y & 0xFFFF);
 			node_color.a = f16tof32(u16_color.y >> 16);
-			
-			AOITFragment frag = AOITFindFragment(oit_data, depth);
-			float vis = (0 == frag.index) ? 1 : frag.trans;
+
+			uint frag_index;
+			float frag_trans;
+			FindFragment(oit_depth, oit_trans, depth, frag_index, frag_trans);
+			float vis = (0 == frag_index) ? 1 : frag_trans;
 			color += node_color.rgb * node_color.a * vis;
 
 			next = asuint(frag_data.w);
 		}
-		
-		result = float4(color, oit_data[TEMPORARY_BUFFER_MAX - 1].y);
+
+		result = float4(color, oit_trans[TEMPORARY_BUFFER_MAX - 1]);
 	}
 
 	return result;

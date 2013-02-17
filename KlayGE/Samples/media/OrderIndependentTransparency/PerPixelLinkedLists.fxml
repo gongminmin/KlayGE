@@ -1,11 +1,6 @@
 <?xml version='1.0'?>
 
 <effect>
-	<include name="Lighting.fxml"/>
-	<include name="util.fxml"/>
-	<include name="Quaternion.fxml"/>
-	<include name="NoOIT.fxml"/>
-
 	<macro name="TEMPORARY_BUFFER_MAX" value="16"/>
 
 	<cbuffer name="per_frame">
