@@ -24,10 +24,10 @@
 		<parameter type="float4" name="light_attrib"/>
 	</cbuffer>
 
-	<parameter type="texture2D" name="shadow_map_tex"/>
+	<parameter type="texture2D" name="shadow_map_2d_tex"/>
 	<parameter type="textureCUBE" name="shadow_map_cube_tex"/>
 
-	<parameter type="texture2D" name="projective_map_tex"/>
+	<parameter type="texture2D" name="projective_map_2d_tex"/>
 	<parameter type="textureCUBE" name="projective_map_cube_tex"/>
 
 	<parameter type="texture2D" name="shadowing_tex"/>
@@ -122,14 +122,14 @@ float4 VSM_Directional(float3 pos_es, float len)
 	float shadow = 1;
 	if (light_attrib.z > 0)
 	{
-		float2 moments = shadow_map_tex.Sample(linear_sampler, light_proj_pos.xy).xy;
+		float2 moments = shadow_map_2d_tex.Sample(linear_sampler, light_proj_pos.xy).xy;
 		shadow = Calc_VSM(moments, len);
 	}
 	
 	float4 projective = 1;
 	if (light_attrib.w > 0)
 	{
-		projective = projective_map_tex.Sample(linear_sampler, light_proj_pos.xy);
+		projective = projective_map_2d_tex.Sample(linear_sampler, light_proj_pos.xy);
 	}
 	
 	return projective * shadow;

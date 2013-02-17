@@ -12,7 +12,7 @@
 	<parameter type="float3" name="light_falloff"/>
 	<parameter type="int2" name="light_is_projective"/>
 
-	<parameter type="texture2D" name="projective_map_tex"/>
+	<parameter type="texture2D" name="projective_map_2d_tex"/>
 	<parameter type="textureCUBE" name="projective_map_cube_tex"/>
 
 	<parameter type="sampler" name="linear_sampler">
@@ -58,7 +58,7 @@ float4 LightSourceProxyPS(float3 pos_os : TEXCOORD0, float3 normal : TEXCOORD1) 
 			light_proj_pos /= light_proj_pos.w;
 			light_proj_pos.y *= KLAYGE_FLIPPING;
 			light_proj_pos.xy = light_proj_pos.xy / 2 + 0.5f;
-			proj_clr = projective_map_tex.Sample(linear_sampler, light_proj_pos.xy);
+			proj_clr = projective_map_2d_tex.Sample(linear_sampler, light_proj_pos.xy);
 		}
 		clr *= proj_clr;
 	}
@@ -139,7 +139,7 @@ float4 LightSourceProxySpecialShadingPS(float2 texcoord : TEXCOORD0,
 			light_proj_pos /= light_proj_pos.w;
 			light_proj_pos.y *= KLAYGE_FLIPPING;
 			light_proj_pos.xy = light_proj_pos.xy / 2 + 0.5f;
-			proj_clr = projective_map_tex.Sample(linear_sampler, light_proj_pos.xy);
+			proj_clr = projective_map_2d_tex.Sample(linear_sampler, light_proj_pos.xy);
 		}
 		clr *= proj_clr;
 	}

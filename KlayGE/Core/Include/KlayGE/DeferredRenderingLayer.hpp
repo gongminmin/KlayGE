@@ -290,13 +290,17 @@ namespace KlayGE
 		RenderTechniquePtr technique_copy_shading_depth_;
 		RenderTechniquePtr technique_copy_depth_;
 
+		static int const NUM_SHADOWED_SPOT_LIGHTS = 4;
+		static int const NUM_SHADOWED_POINT_LIGHTS = 1;
+
+		std::vector<int32_t> sm_light_indices_;
 		FrameBufferPtr sm_buffer_;
 		TexturePtr sm_tex_;
 		TexturePtr sm_depth_tex_;
-		TexturePtr blur_sm_tex_;
-		TexturePtr sm_cube_tex_;
+		array<TexturePtr, NUM_SHADOWED_SPOT_LIGHTS> blur_sm_2d_texs_;
+		array<TexturePtr, NUM_SHADOWED_POINT_LIGHTS> blur_sm_cube_texs_;
 
-		array<PostProcessPtr, 7> sm_filter_pps_;
+		PostProcessPtr sm_filter_pp_;
 		PostProcessPtr depth_to_vsm_pp_;
 		PostProcessPtr depth_to_linear_pp_;
 
@@ -315,8 +319,10 @@ namespace KlayGE
 		RenderEffectParameterPtr view_to_light_model_param_;
 		RenderEffectParameterPtr light_pos_es_param_;
 		RenderEffectParameterPtr light_dir_es_param_;
-		RenderEffectParameterPtr projective_map_tex_param_;
+		RenderEffectParameterPtr projective_map_2d_tex_param_;
 		RenderEffectParameterPtr projective_map_cube_tex_param_;
+		RenderEffectParameterPtr shadow_map_2d_tex_param_;
+		RenderEffectParameterPtr shadow_map_cube_tex_param_;
 		RenderEffectParameterPtr inv_width_height_param_;
 		RenderEffectParameterPtr shadowing_tex_param_;
 		RenderEffectParameterPtr near_q_param_;

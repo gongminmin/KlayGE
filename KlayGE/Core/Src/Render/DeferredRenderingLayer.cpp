@@ -281,25 +281,7 @@ namespace KlayGE
 			}
 		}
 
-		if (!depth_texture_support_)
-		{
-			pass_scaned_.push_back(this->ComposePassScanCode(0, PT_OpaqueDepth, 0, 0));
-		}
-
 		mrt_g_buffer_support_ = (caps.max_simultaneous_rts > 1);
-
-		if (mrt_g_buffer_support_)
-		{
-			pass_scaned_.push_back(this->ComposePassScanCode(0, PT_OpaqueGBufferMRT, 0, 0));
-			pass_scaned_.push_back(this->ComposePassScanCode(0, PT_OpaqueGBufferMRT, 0, 1));
-		}
-		else
-		{
-			pass_scaned_.push_back(this->ComposePassScanCode(0, PT_OpaqueGBufferRT0, 0, 0));
-			pass_scaned_.push_back(this->ComposePassScanCode(0, PT_OpaqueGBufferRT0, 0, 1));
-			pass_scaned_.push_back(this->ComposePassScanCode(0, PT_OpaqueGBufferRT1, 0, 0));
-			pass_scaned_.push_back(this->ComposePassScanCode(0, PT_OpaqueGBufferRT1, 0, 1));
-		}
 
 		for (size_t vpi = 0; vpi < viewports_.size(); ++ vpi)
 		{
@@ -462,8 +444,14 @@ namespace KlayGE
 		}
 		sm_buffer_->Attach(FrameBuffer::ATT_DepthStencil, sm_depth_view);
 
-		blur_sm_tex_ = rf.MakeTexture2D(SM_SIZE, SM_SIZE, 1, 1, sm_tex_->Format(), 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
-		sm_cube_tex_ = rf.MakeTextureCube(SM_SIZE, 1, 1, sm_tex_->Format(), 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
+		for (uint32_t i = 0; i < NUM_SHADOWED_SPOT_LIGHTS; ++ i)
+		{
+			blur_sm_2d_texs_[i] = rf.MakeTexture2D(SM_SIZE, SM_SIZE, 1, 1, sm_tex_->Format(), 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
+		}
+		for (uint32_t i = 0; i < NUM_SHADOWED_POINT_LIGHTS; ++ i)
+		{
+			blur_sm_cube_texs_[i] = rf.MakeTextureCube(SM_SIZE, 1, 1, sm_tex_->Format(), 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
+		}
 
 		ssgi_pp_ = MakeSharedPtr<SSGIPostProcess>();
 		ssgi_blur_pp_ = MakeSharedPtr<BlurPostProcess<SeparableBilateralFilterPostProcess> >(4, 1.0f,
@@ -567,17 +555,7 @@ namespace KlayGE
 		}
 
 
-		for (int i = 0; i < 7; ++ i)
-		{
-			sm_filter_pps_[i] = MakeSharedPtr<BlurPostProcess<SeparableGaussianFilterPostProcess> >(8, 1.0f);
-		}
-		sm_filter_pps_[0]->InputPin(0, sm_tex_);
-		sm_filter_pps_[0]->OutputPin(0, blur_sm_tex_);
-		for (int i = 1; i < 7; ++ i)
-		{
-			sm_filter_pps_[i]->InputPin(0, sm_tex_);
-			sm_filter_pps_[i]->OutputPin(0, sm_cube_tex_, 0, 0, i - 1);
-		}
+		sm_filter_pp_ = MakeSharedPtr<BlurPostProcess<SeparableGaussianFilterPostProcess> >(8, 1.0f);
 		if (depth_texture_support_)
 		{
 			depth_to_vsm_pp_ = LoadPostProcess(ResLoader::Instance().Open("DepthToSM.ppml"), "DepthToVSM");
@@ -586,9 +564,6 @@ namespace KlayGE
 
 			depth_to_linear_pp_ = LoadPostProcess(ResLoader::Instance().Open("DepthToSM.ppml"), "DepthToSM");
 		}
-
-		*(dr_effect_->ParameterByName("shadow_map_tex")) = blur_sm_tex_;
-		*(dr_effect_->ParameterByName("shadow_map_cube_tex")) = sm_cube_tex_;
 
 		g_buffer_tex_param_ = dr_effect_->ParameterByName("g_buffer_tex");
 		g_buffer_1_tex_param_ = dr_effect_->ParameterByName("g_buffer_1_tex");
@@ -605,8 +580,10 @@ namespace KlayGE
 		view_to_light_model_param_ = dr_effect_->ParameterByName("view_to_light_model");
 		light_pos_es_param_ = dr_effect_->ParameterByName("light_pos_es");
 		light_dir_es_param_ = dr_effect_->ParameterByName("light_dir_es");
-		projective_map_tex_param_ = dr_effect_->ParameterByName("projective_map_tex");
+		projective_map_2d_tex_param_ = dr_effect_->ParameterByName("projective_map_2d_tex");
 		projective_map_cube_tex_param_ = dr_effect_->ParameterByName("projective_map_cube_tex");
+		shadow_map_2d_tex_param_ = dr_effect_->ParameterByName("shadow_map_2d_tex");
+		shadow_map_cube_tex_param_ = dr_effect_->ParameterByName("shadow_map_cube_tex");
 		inv_width_height_param_ = dr_effect_->ParameterByName("inv_width_height");
 		shadowing_tex_param_ = dr_effect_->ParameterByName("shadowing_tex");
 		near_q_param_ = dr_effect_->ParameterByName("near_q");
@@ -869,17 +846,11 @@ namespace KlayGE
 		SceneManager& scene_mgr = Context::Instance().SceneManagerInstance();
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 		RenderEngine& re = rf.RenderEngineInstance();
-
-		uint32_t vp_index;
-		int32_t pass_type, org_no, index_in_pass;
-		this->DecomposePassScanCode(vp_index, pass_type, org_no, index_in_pass, pass_scaned_[pass]);
-
-		active_viewport_ = vp_index;
-
-		PerViewport& pvp = viewports_[vp_index];
+		
 		if (0 == pass)
 		{
-			lights_.resize(0);
+			lights_.clear();
+			sm_light_indices_.clear();
 			uint32_t const num_lights = scene_mgr.NumLights();
 			bool with_ambient = false;
 			for (uint32_t i = 0; i < num_lights; ++ i)
@@ -895,14 +866,47 @@ namespace KlayGE
 				LightSourcePtr ambient_light = MakeSharedPtr<AmbientLightSource>();
 				ambient_light->Color(float3(0.1f, 0.1f, 0.1f));
 				lights_.push_back(ambient_light);
+				sm_light_indices_.push_back(-1);
 			}
 
+			uint32_t num_sm_2d_lights = 0;
+			uint32_t num_sm_cube_lights = 0;
 			for (uint32_t i = 0; i < num_lights; ++ i)
 			{
 				LightSourcePtr const & light = scene_mgr.GetLight(i);
 				if (light->Enabled())
 				{
 					lights_.push_back(light);
+
+					if (0 == (light->Attrib() & LSA_NoShadow))
+					{
+						switch (light->Type())
+						{
+						case LT_Spot:
+							if (num_sm_2d_lights < NUM_SHADOWED_SPOT_LIGHTS)
+							{
+								sm_light_indices_.push_back(num_sm_2d_lights);
+								++ num_sm_2d_lights;
+							}
+							break;
+
+						case LT_Point:
+							if (num_sm_cube_lights < NUM_SHADOWED_POINT_LIGHTS)
+							{
+								sm_light_indices_.push_back(num_sm_cube_lights);
+								++ num_sm_cube_lights;
+							}
+							break;
+
+						default:
+							sm_light_indices_.push_back(-1);
+							break;
+						}
+					}
+					else
+					{
+						sm_light_indices_.push_back(-1);
+					}
 				}
 			}
 
@@ -955,6 +959,102 @@ namespace KlayGE
 			}
 
 			pass_scaned_.clear();
+			for (uint32_t i = 0; i < lights_.size(); ++ i)
+			{
+				uint32_t vpi = 0;
+				LightSourcePtr const & light = lights_[i];
+				if (light->Enabled())
+				{
+					int type = light->Type();
+					int32_t attr = light->Attrib();
+					switch (type)
+					{
+					case LT_Spot:
+						{
+							int sm_seq;
+							if (attr & LSA_IndirectLighting)
+							{
+								if (rsm_buffer_ && (illum_ != 1))
+								{
+									sm_seq = 2;
+								}
+								else
+								{
+									sm_seq = 1;
+								}
+							}
+							else
+							{
+								if (0 == (attr & LSA_NoShadow))
+								{
+									sm_seq = 1;
+								}
+								else
+								{
+									sm_seq = 0;
+								}
+							}
+
+							switch (sm_seq)
+							{
+							case 1:
+								if (depth_texture_support_)
+								{
+									pass_scaned_.push_back(this->ComposePassScanCode(vpi, PT_GenShadowMap, i, 0));
+									pass_scaned_.push_back(this->ComposePassScanCode(vpi, PT_GenShadowMap, i, 1));
+								}
+								else
+								{
+									pass_scaned_.push_back(this->ComposePassScanCode(vpi, PT_GenShadowMapWODepthTexture, i, 0));
+									pass_scaned_.push_back(this->ComposePassScanCode(vpi, PT_GenShadowMapWODepthTexture, i, 1));
+								}
+								break;
+
+							case 2:
+								pass_scaned_.push_back(this->ComposePassScanCode(vpi, PT_GenReflectiveShadowMap, i, 0));
+								pass_scaned_.push_back(this->ComposePassScanCode(vpi, PT_GenReflectiveShadowMap, i, 1));
+								break;
+
+							default:
+								break;
+							}
+						}
+						break;
+
+					case LT_Point:
+						if (0 == (attr & LSA_NoShadow))
+						{
+							for (int j = 0; j < 7; ++ j)
+							{
+								if (depth_texture_support_)
+								{
+									pass_scaned_.push_back(this->ComposePassScanCode(vpi, PT_GenShadowMap, i, j));
+								}
+								else
+								{
+									pass_scaned_.push_back(this->ComposePassScanCode(vpi, PT_GenShadowMapWODepthTexture, i, j));
+								}
+							}
+						}
+						break;
+
+					default:
+						if (0 == (attr & LSA_NoShadow))
+						{							
+							if (depth_texture_support_)
+							{
+								pass_scaned_.push_back(this->ComposePassScanCode(vpi, PT_GenShadowMap, i, 0));
+							}
+							else
+							{
+								pass_scaned_.push_back(this->ComposePassScanCode(vpi, PT_GenShadowMapWODepthTexture, i, 0));
+							}
+						}
+						break;
+					}
+				}
+			}
+
 			for (uint32_t vpi = 0; vpi < viewports_.size(); ++ vpi)
 			{
 				PerViewport& pvp = viewports_[vpi];
@@ -1048,31 +1148,7 @@ namespace KlayGE
 										{
 											if (rsm_buffer_ && (illum_ != 1))
 											{
-												pass_scaned_.push_back(this->ComposePassScanCode(vpi, PT_GenReflectiveShadowMap, i, 0));
 												pass_scaned_.push_back(this->ComposePassScanCode(vpi, PT_IndirectLighting, i, 0));
-											}
-											else
-											{
-												if (depth_texture_support_)
-												{
-													pass_scaned_.push_back(this->ComposePassScanCode(vpi, PT_GenShadowMap, i, 0));
-												}
-												else
-												{
-													pass_scaned_.push_back(this->ComposePassScanCode(vpi, PT_GenShadowMapWODepthTexture, i, 0));
-												}
-											}
-										}
-
-										if ((0 == (attr & LSA_NoShadow)) && (0 == (attr & LSA_IndirectLighting)))
-										{
-											if (depth_texture_support_)
-											{
-												pass_scaned_.push_back(this->ComposePassScanCode(vpi, PT_GenShadowMap, i, 0));
-											}
-											else
-											{
-												pass_scaned_.push_back(this->ComposePassScanCode(vpi, PT_GenShadowMapWODepthTexture, i, 0));
 											}
 										}
 										pass_scaned_.push_back(this->ComposePassScanCode(vpi, PT_Lighting, i, 0));
@@ -1093,27 +1169,7 @@ namespace KlayGE
 
 									if (scene_mgr.OBBVisible(MathLib::transform_obb(box_obb_, light_model)))
 									{
-										for (int j = 0; j < 6; ++ j)
-										{
-											light_model = light->SMCamera(j)->InverseViewMatrix();
-
-											//if (scene_mgr.OBBVisible(MathLib::transform_obb(pyramid_obb_, light_model)))
-											{
-												if (0 == (attr & LSA_NoShadow))
-												{
-													if (depth_texture_support_)
-													{
-														pass_scaned_.push_back(this->ComposePassScanCode(vpi, PT_GenShadowMap, i, j));
-													}
-													else
-													{
-														pass_scaned_.push_back(this->ComposePassScanCode(vpi, PT_GenShadowMapWODepthTexture, i, j));
-													}
-												}
-											}
-										}
-
-										pass_scaned_.push_back(this->ComposePassScanCode(vpi, PT_Lighting, i, 6));
+										pass_scaned_.push_back(this->ComposePassScanCode(vpi, PT_Lighting, i, 0));
 									}
 									else
 									{
@@ -1123,17 +1179,6 @@ namespace KlayGE
 								break;
 
 							default:
-								if (0 == (attr & LSA_NoShadow))
-								{
-									if (depth_texture_support_)
-									{
-										pass_scaned_.push_back(this->ComposePassScanCode(vpi, PT_GenShadowMap, i, 0));
-									}
-									else
-									{
-										pass_scaned_.push_back(this->ComposePassScanCode(vpi, PT_GenShadowMapWODepthTexture, i, 0));
-									}
-								}
 								pass_scaned_.push_back(this->ComposePassScanCode(vpi, PT_Lighting, i, 0));
 								break;
 							}
@@ -1161,6 +1206,14 @@ namespace KlayGE
 				}
 			}
 		}
+
+		uint32_t vp_index;
+		int32_t pass_type, org_no, index_in_pass;
+		this->DecomposePassScanCode(vp_index, pass_type, org_no, index_in_pass, pass_scaned_[pass]);
+
+		active_viewport_ = vp_index;
+
+		PerViewport& pvp = viewports_[vp_index];
 
 		if ((pass_type != PT_Lighting) && (pass_type != PT_IndirectLighting)
 			&& (pass_type != PT_OpaqueShading) && (pass_type != PT_TransparencyBackShading) && (pass_type != PT_TransparencyFrontShading))
@@ -1598,6 +1651,7 @@ namespace KlayGE
 						if (pass_scaned_.size() - 1 == pass)
 						{
 							lights_.clear();
+							sm_light_indices_.clear();
 							urv |= App3DFramework::URV_Finished;
 						}
 					}
@@ -1607,6 +1661,7 @@ namespace KlayGE
 						if (pass_scaned_.size() - 1 == pass)
 						{
 							lights_.clear();
+							sm_light_indices_.clear();
 							urv = App3DFramework::URV_Finished;
 						}
 					}
@@ -1641,6 +1696,12 @@ namespace KlayGE
 								std::pair<float3, float3> ad = CubeMapViewVector<float>(static_cast<Texture::CubeFaces>(index_in_pass));
 								dir_es = MathLib::transform_normal(MathLib::transform_quat(ad.first, light->Rotation()), pvp.view);
 								sm_camera = light->SMCamera(index_in_pass);
+							}
+							else
+							{
+								std::pair<float3, float3> ad = CubeMapViewVector<float>(static_cast<Texture::CubeFaces>(5));
+								dir_es = MathLib::transform_normal(MathLib::transform_quat(ad.first, light->Rotation()), pvp.view);
+								sm_camera = light->SMCamera(5);
 							}
 						}
 						float4 light_dir_es_actived = float4(dir_es.x(), dir_es.y(), dir_es.z(), 0);
@@ -1741,6 +1802,40 @@ namespace KlayGE
 					break;
 				}
 
+				if ((index_in_pass > 0)
+					&& ((PT_GenShadowMap == pass_type) || (PT_GenShadowMapWODepthTexture == pass_type)
+						|| (PT_GenReflectiveShadowMap == pass_type)))
+				{
+					if (0 == (attr & LSA_NoShadow))
+					{
+						if (depth_texture_support_)
+						{
+							depth_to_vsm_pp_->Apply();
+						}
+
+						if (LT_Point == type)
+						{
+							sm_filter_pp_->InputPin(0, sm_tex_);
+							sm_filter_pp_->OutputPin(0, blur_sm_cube_texs_[sm_light_indices_[org_no]], 0, 0, index_in_pass - 1);
+							sm_filter_pp_->Apply();
+							if (6 == index_in_pass)
+							{
+								return App3DFramework::URV_Flushed;
+							}
+						}
+						else
+						{
+							sm_filter_pp_->InputPin(0, sm_tex_);
+							sm_filter_pp_->OutputPin(0, blur_sm_2d_texs_[sm_light_indices_[org_no]]);
+							sm_filter_pp_->Apply();
+							if (1 == index_in_pass)
+							{
+								return App3DFramework::URV_Flushed;
+							}
+						}
+					}
+				}
+
 				if (PT_GenReflectiveShadowMap == pass_type)
 				{
 					rsm_buffer_->GetViewport()->camera = sm_buffer_->GetViewport()->camera;
@@ -1766,29 +1861,6 @@ namespace KlayGE
 					return App3DFramework::URV_Flushed;
 				}
 
-				if ((index_in_pass > 0) || (PT_Lighting == pass_type))
-				{
-					if (0 == (attr & LSA_NoShadow))
-					{
-						if (!((light->Attrib() & LSA_IndirectLighting) && (illum_ != 1)))
-						{
-							if (depth_texture_support_)
-							{
-								depth_to_vsm_pp_->Apply();
-							}
-						}
-
-						if (LT_Point == type)
-						{
-							sm_filter_pps_[index_in_pass]->Apply();
-						}
-						else
-						{
-							sm_filter_pps_[0]->Apply();
-						}
-					}
-				}
-
 				if ((PT_GenShadowMap == pass_type) || (PT_GenShadowMapWODepthTexture == pass_type))
 				{
 					// Shadow map generation
@@ -1805,7 +1877,7 @@ namespace KlayGE
 					}
 					else
 					{
-						*projective_map_tex_param_ = light->ProjectiveTexture();
+						*projective_map_2d_tex_param_ = light->ProjectiveTexture();
 					}
 
 					*light_attrib_param_ = float4(attr & LSA_NoDiffuse ? 0.0f : 1.0f, attr & LSA_NoSpecular ? 0.0f : 1.0f,
@@ -1818,6 +1890,24 @@ namespace KlayGE
 						if (pvp.g_buffer_enables[i])
 						{
 							// Shadowing
+
+							int32_t light_index = sm_light_indices_[org_no];
+							if ((light_index >= 0) && (0 == (light->Attrib() & LSA_NoShadow)))
+							{
+								switch (light->Type())
+								{
+								case LT_Spot:
+									*shadow_map_2d_tex_param_ = blur_sm_2d_texs_[light_index];
+									break;
+
+								case LT_Point:
+									*shadow_map_cube_tex_param_ = blur_sm_cube_texs_[light_index];
+									break;
+
+								default:
+									break;
+								}
+							}
 
 							re.BindFrameBuffer(pvp.shadowing_buffer);
 							re.CurFrameBuffer()->Attached(FrameBuffer::ATT_Color0)->ClearColor(Color(1, 1, 1, 1));

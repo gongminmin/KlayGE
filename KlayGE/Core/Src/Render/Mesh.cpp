@@ -1760,7 +1760,7 @@ namespace KlayGE
 			light_color_param_ = technique_->Effect().ParameterByName("light_color");
 			light_falloff_param_ = technique_->Effect().ParameterByName("light_falloff");
 			light_is_projective_param_ = technique_->Effect().ParameterByName("light_is_projective");
-			projective_map_tex_param_ = technique_->Effect().ParameterByName("projective_map_tex");
+			projective_map_2d_tex_param_ = technique_->Effect().ParameterByName("projective_map_2d_tex");
 			projective_map_cube_tex_param_ = technique_->Effect().ParameterByName("projective_map_cube_tex");
 		}
 	}
@@ -1788,9 +1788,9 @@ namespace KlayGE
 		}
 		else
 		{
-			if (projective_map_tex_param_)
+			if (projective_map_2d_tex_param_)
 			{
-				*projective_map_tex_param_ = light_->ProjectiveTexture();
+				*projective_map_2d_tex_param_ = light_->ProjectiveTexture();
 			}
 		}
 	}
