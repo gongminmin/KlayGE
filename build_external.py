@@ -27,7 +27,14 @@ def build_Boost(compiler_name, compiler_version, compiler_arch, config_list, pla
 	address_model = 32
 	if "x64" == compiler_arch:
 		address_model = 64
+	
 	options = ""
+	if "vc" == compiler_name: 
+		if compiler_version >= 10:
+			options += " --without-regex --without-system"
+		if compiler_version >= 11:
+			options += " --without-atomic --without-chrono --without-filesystem --without-thread"
+
 	if ("x86" == compiler_arch) or ("x64" == compiler_arch):
 		options += " --disable-filesystem2"
 	elif ("x86_app" == compiler_arch):
@@ -36,6 +43,7 @@ def build_Boost(compiler_name, compiler_version, compiler_arch, config_list, pla
 		options += " architecture=arm --without-filesystem --without-program_options define=\"WINAPI_FAMILY=WINAPI_FAMILY_APP\" define=BOOST_NO_ANSI_APIS cxxflags=\"/ZW /EHsc\""
 	if "vc" == compiler_name:
 		options += " cxxflags=-wd4819 cxxflags=-wd4910 define=_CRT_SECURE_NO_DEPRECATE define=_SCL_SECURE_NO_DEPRECATE"
+
 	config = ""
 	if "Debug" in config_list:
 		config += " debug"
