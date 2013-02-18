@@ -48,11 +48,6 @@
 namespace KlayGE
 {
 	int const VPL_COUNT_SQRT = 16;
-	
-	float const VPL_DELTA = 1.0f / VPL_COUNT_SQRT;
-	float const VPL_OFFSET = 0.5f * VPL_DELTA;
-
-	int const MAX_IL_MIPMAP_LEVELS = 3;
 
 #ifdef USE_NEW_LIGHT_SAMPLING
 	int const MIN_RSM_MIPMAP_SIZE = 8; // minimum mipmap size is 8x8
@@ -176,6 +171,8 @@ namespace KlayGE
 		uint32_t const width = rt0_tex->Width(0);
 		uint32_t const height = rt0_tex->Height(0);
 
+		int const MAX_IL_MIPMAP_LEVELS = 3;
+
 		depth_deriative_tex_ = rf.MakeTexture2D(width / 2, height / 2, MAX_IL_MIPMAP_LEVELS, 1, depth_fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
 		normal_cone_tex_ = rf.MakeTexture2D(width / 2, height / 2, MAX_IL_MIPMAP_LEVELS, 1, fmt8, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
 		if (depth_deriative_tex_->NumMipMaps() > 1)
@@ -200,10 +197,6 @@ namespace KlayGE
 
 	void MultiResSILLayer::RSM(TexturePtr const & rt0_tex, TexturePtr const & rt1_tex, TexturePtr const & depth_tex)
 	{
-		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-		RenderEngine& re = rf.RenderEngineInstance();
-		RenderDeviceCaps const & caps = re.DeviceCaps();
-
 #ifdef USE_NEW_LIGHT_SAMPLING
 		std::string RSM2VPLsSpotName = "RSM2VPLsSpotNew";
 #else
@@ -221,6 +214,9 @@ namespace KlayGE
 		rsm_to_vpls_pps_[LT_Spot]->OutputPin(0, vpl_tex_);
 
 #ifdef USE_NEW_LIGHT_SAMPLING
+		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+		RenderDeviceCaps const & caps = rf.RenderEngineInstance().DeviceCaps();
+
 		ElementFormat fmt;
 		if (caps.rendertarget_format_support(EF_GR32F, 1, 0))
 		{
@@ -359,6 +355,9 @@ namespace KlayGE
 
 	void MultiResSILLayer::ExtractVPLs(CameraPtr const & rsm_camera, LightSourcePtr const & light)
 	{
+		float const VPL_DELTA = 1.0f / VPL_COUNT_SQRT;
+		float const VPL_OFFSET = 0.5f * VPL_DELTA;
+
 		rsm_texs_[0]->BuildMipSubLevels();
 		rsm_texs_[1]->BuildMipSubLevels();
 		float4x4 ls_to_es = rsm_camera->InverseViewMatrix() * g_buffer_camera_->ViewMatrix();

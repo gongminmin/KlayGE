@@ -45,14 +45,24 @@ namespace KlayGE
 	class KLAYGE_CORE_API IndirectLightingLayer
 	{
 	public:
+		virtual ~IndirectLightingLayer()
+		{
+		}
+
 		virtual void GBuffer(TexturePtr const & rt0_tex, TexturePtr const & rt1_tex, TexturePtr const & depth_tex) = 0;
 		virtual void RSM(TexturePtr const & rt0_tex, TexturePtr const & rt1_tex, TexturePtr const & depth_tex) = 0;
 
-		virtual TexturePtr IndirectLightingTex() const = 0;
+		TexturePtr IndirectLightingTex() const
+		{
+			return indirect_lighting_tex_;
+		}
 
 		virtual void UpdateGBuffer(CameraPtr const & vp_camera) = 0;
 		virtual void UpdateRSM(CameraPtr const & rsm_camera, LightSourcePtr const & light) = 0;
 		virtual void CalcIndirectLighting(TexturePtr const & prev_shading_tex, float4x4 const & proj_to_prev) = 0;
+
+	protected:
+		TexturePtr indirect_lighting_tex_;
 	};
 
 	class KLAYGE_CORE_API MultiResSILLayer : public IndirectLightingLayer
@@ -60,17 +70,12 @@ namespace KlayGE
 	public:
 		MultiResSILLayer();
 
-		void GBuffer(TexturePtr const & rt0_tex, TexturePtr const & rt1_tex, TexturePtr const & depth_tex);
-		void RSM(TexturePtr const & rt0_tex, TexturePtr const & rt1_tex, TexturePtr const & depth_tex);
+		virtual void GBuffer(TexturePtr const & rt0_tex, TexturePtr const & rt1_tex, TexturePtr const & depth_tex);
+		virtual void RSM(TexturePtr const & rt0_tex, TexturePtr const & rt1_tex, TexturePtr const & depth_tex);
 
-		TexturePtr IndirectLightingTex() const
-		{
-			return indirect_lighting_tex_;
-		}
-
-		void UpdateGBuffer(CameraPtr const & vp_camera);
-		void UpdateRSM(CameraPtr const & rsm_camera, LightSourcePtr const & light);
-		void CalcIndirectLighting(TexturePtr const & prev_shading_tex, float4x4 const & proj_to_prev);
+		virtual void UpdateGBuffer(CameraPtr const & vp_camera);
+		virtual void UpdateRSM(CameraPtr const & rsm_camera, LightSourcePtr const & light);
+		virtual void CalcIndirectLighting(TexturePtr const & prev_shading_tex, float4x4 const & proj_to_prev);
 
 	private:
 		void CreateDepthDerivativeMipMap();
@@ -98,7 +103,6 @@ namespace KlayGE
 		TexturePtr normal_cone_tex_;
 		TexturePtr normal_cone_small_tex_;
 
-		TexturePtr indirect_lighting_tex_;
 		TexturePtr indirect_lighting_pingpong_tex_;
 		std::vector<FrameBufferPtr> vpls_lighting_fbs_;
 				
@@ -145,17 +149,12 @@ namespace KlayGE
 	public:
 		SSGILayer();
 
-		void GBuffer(TexturePtr const & rt0_tex, TexturePtr const & rt1_tex, TexturePtr const & depth_tex);
-		void RSM(TexturePtr const & rt0_tex, TexturePtr const & rt1_tex, TexturePtr const & depth_tex);
+		virtual void GBuffer(TexturePtr const & rt0_tex, TexturePtr const & rt1_tex, TexturePtr const & depth_tex);
+		virtual void RSM(TexturePtr const & rt0_tex, TexturePtr const & rt1_tex, TexturePtr const & depth_tex);
 
-		TexturePtr IndirectLightingTex() const
-		{
-			return indirect_lighting_tex_;
-		}
-
-		void UpdateGBuffer(CameraPtr const & vp_camera);
-		void UpdateRSM(CameraPtr const & rsm_camera, LightSourcePtr const & light);
-		void CalcIndirectLighting(TexturePtr const & prev_shading_tex, float4x4 const & proj_to_prev);
+		virtual void UpdateGBuffer(CameraPtr const & vp_camera);
+		virtual void UpdateRSM(CameraPtr const & rsm_camera, LightSourcePtr const & light);
+		virtual void CalcIndirectLighting(TexturePtr const & prev_shading_tex, float4x4 const & proj_to_prev);
 
 	private:
 		array<TexturePtr, 2> g_buffer_texs_;
@@ -166,7 +165,6 @@ namespace KlayGE
 		PostProcessPtr ssgi_blur_pp_;
 
 		TexturePtr small_ssgi_tex_;
-		TexturePtr indirect_lighting_tex_;
 	};
 }
 
