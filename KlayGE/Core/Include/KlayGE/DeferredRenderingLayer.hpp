@@ -42,8 +42,7 @@ namespace KlayGE
 		VPAM_NoTransparencyFront = 1UL << 3,
 		VPAM_NoSimpleForward = 1UL << 4,
 		VPAM_NoGI = 1UL << 5,
-		VPAM_NoSSVO = 1UL << 6,
-		VPAM_NoSSGI = 1UL << 7
+		VPAM_NoSSVO = 1UL << 6
 	};
 
 	struct PerViewport
@@ -93,6 +92,7 @@ namespace KlayGE
 		float4x4 view, proj;
 		float4x4 inv_view, inv_proj;
 		float3 depth_near_far_invfar;
+		float4x4 proj_to_prev;
 
 		IndirectLightingLayerPtr il_layer;
 		bool ssgi_enable;

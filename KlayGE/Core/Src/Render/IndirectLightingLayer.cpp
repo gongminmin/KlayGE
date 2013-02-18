@@ -272,7 +272,7 @@ namespace KlayGE
 		this->VPLsLighting(light);
 	}
 
-	void MultiResSILLayer::CalcIndirectLighting(TexturePtr const & /*prev_shading_tex*/, CameraPtr const & /*prev_camera*/)
+	void MultiResSILLayer::CalcIndirectLighting(TexturePtr const & /*prev_shading_tex*/, float4x4 const & /*proj_to_prev*/)
 	{
 		this->UpsampleMultiresLighting();
 	}
@@ -530,7 +530,7 @@ namespace KlayGE
 	{
 	}
 
-	void SSGILayer::CalcIndirectLighting(TexturePtr const & prev_shading_tex, CameraPtr const & /*prev_camera*/)
+	void SSGILayer::CalcIndirectLighting(TexturePtr const & prev_shading_tex, float4x4 const & /*proj_to_prev*/)
 	{
 		ssgi_pp_->InputPin(0, g_buffer_texs_[0]);
 		ssgi_pp_->InputPin(1, g_buffer_depth_tex_);

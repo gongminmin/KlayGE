@@ -28,7 +28,6 @@
 #include <KlayGE/Query.hpp>
 #include <KlayGE/Camera.hpp>
 #include <KlayGE/Mesh.hpp>
-#include <KlayGE/SSGIPostProcess.hpp>
 #include <KlayGE/SSVOPostProcess.hpp>
 #include <KlayGE/SSRPostProcess.hpp>
 
@@ -1150,10 +1149,11 @@ namespace KlayGE
 			}
 			pvp.shadowing_buffer->GetViewport()->camera = camera;
 
-			pvp.view = camera->ViewMatrix();
-			pvp.proj = camera->ProjMatrix();
 			pvp.inv_view = camera->InverseViewMatrix();
 			pvp.inv_proj = camera->InverseProjMatrix();
+			pvp.proj_to_prev = pvp.inv_proj * pvp.inv_view * pvp.view * pvp.proj;
+			pvp.view = camera->ViewMatrix();
+			pvp.proj = camera->ProjMatrix();
 			pvp.depth_near_far_invfar = float3(camera->NearPlane(), camera->FarPlane(), 1 / camera->FarPlane());
 
 			if (depth_texture_support_)
@@ -1370,12 +1370,12 @@ namespace KlayGE
 					case PT_OpaqueShading:
 						if ((indirect_lighting_enabled_ && !(pvp.attrib & VPAM_NoGI)) && (illum_ != 1))
 						{
-							pvp.il_layer->CalcIndirectLighting(pvp.prev_merged_shading_tex, CameraPtr());
+							pvp.il_layer->CalcIndirectLighting(pvp.prev_merged_shading_tex, pvp.proj_to_prev);
 							this->AccumulateToLightingTex(vp_index);
 						}
 
 						if (pvp.ssvo_enabled && !(pvp.attrib & VPAM_NoSSVO))
-						{							
+						{
 							ssvo_pp_->InputPin(0, pvp.g_buffer_rt0_texs[Opaque_GBuffer]);
 							ssvo_pp_->InputPin(1, pvp.g_buffer_depth_texs[Opaque_GBuffer]);
 							ssvo_pp_->OutputPin(0, pvp.small_ssvo_tex);

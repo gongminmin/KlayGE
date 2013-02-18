@@ -52,7 +52,7 @@ namespace KlayGE
 
 		virtual void UpdateGBuffer(CameraPtr const & vp_camera) = 0;
 		virtual void UpdateRSM(CameraPtr const & rsm_camera, LightSourcePtr const & light) = 0;
-		virtual void CalcIndirectLighting(TexturePtr const & prev_shading_tex, CameraPtr const & prev_camera) = 0;
+		virtual void CalcIndirectLighting(TexturePtr const & prev_shading_tex, float4x4 const & proj_to_prev) = 0;
 	};
 
 	class KLAYGE_CORE_API MultiResSILLayer : public IndirectLightingLayer
@@ -70,7 +70,7 @@ namespace KlayGE
 
 		void UpdateGBuffer(CameraPtr const & vp_camera);
 		void UpdateRSM(CameraPtr const & rsm_camera, LightSourcePtr const & light);
-		void CalcIndirectLighting(TexturePtr const & prev_shading_tex, CameraPtr const & prev_camera);
+		void CalcIndirectLighting(TexturePtr const & prev_shading_tex, float4x4 const & proj_to_prev);
 
 	private:
 		void CreateDepthDerivativeMipMap();
@@ -155,7 +155,7 @@ namespace KlayGE
 
 		void UpdateGBuffer(CameraPtr const & vp_camera);
 		void UpdateRSM(CameraPtr const & rsm_camera, LightSourcePtr const & light);
-		void CalcIndirectLighting(TexturePtr const & prev_shading_tex, CameraPtr const & prev_camera);
+		void CalcIndirectLighting(TexturePtr const & prev_shading_tex, float4x4 const & proj_to_prev);
 
 	private:
 		array<TexturePtr, 2> g_buffer_texs_;
