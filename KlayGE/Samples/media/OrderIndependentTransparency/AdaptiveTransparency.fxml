@@ -1,7 +1,7 @@
 <?xml version='1.0'?>
 
 <effect>
-	<macro name="TEMPORARY_BUFFER_MAX" value="16"/>
+	<macro name="TEMPORARY_BUFFER_MAX" value="8"/>
 
 	<cbuffer name="per_frame">
 		<parameter type="int" name="frame_width"/>
@@ -17,19 +17,7 @@ void FindFragment(float oit_depth[TEMPORARY_BUFFER_MAX + 1], float oit_trans[TEM
 {
 	float4 depth, trans;
 
-	if (frag_depth > oit_depth[11])
-	{
-		depth = float4(oit_depth[12], oit_depth[13], oit_depth[14], oit_depth[15]);
-		trans = float4(oit_trans[12], oit_trans[13], oit_trans[14], oit_trans[15]);
-		index = 12;
-	}
-	else if (frag_depth > oit_depth[7])
-	{
-		depth = float4(oit_depth[8], oit_depth[9], oit_depth[10], oit_depth[11]);
-		trans = float4(oit_trans[8], oit_trans[9], oit_trans[10], oit_trans[11]);
-		index = 8;
-	}
-	else if (frag_depth > oit_depth[3])
+	if (frag_depth > oit_depth[3])
 	{
 		depth = float4(oit_depth[4], oit_depth[5], oit_depth[6], oit_depth[7]);
 		trans = float4(oit_trans[4], oit_trans[5], oit_trans[6], oit_trans[7]);
