@@ -30,6 +30,7 @@ SET(RENDERING_SOURCE_FILES
 	${KLAYGE_PROJECT_DIR}/Core/Src/Render/GraphicsBuffer.cpp
 	${KLAYGE_PROJECT_DIR}/Core/Src/Render/HDRPostProcess.cpp
 	${KLAYGE_PROJECT_DIR}/Core/Src/Render/HeightMap.cpp
+	${KLAYGE_PROJECT_DIR}/Core/Src/Render/IndirectLightingLayer.cpp
 	${KLAYGE_PROJECT_DIR}/Core/Src/Render/InfTerrain.cpp
 	${KLAYGE_PROJECT_DIR}/Core/Src/Render/JudaTexture.cpp
 	${KLAYGE_PROJECT_DIR}/Core/Src/Render/LensFlare.cpp
@@ -67,6 +68,7 @@ SET(RENDERING_HEADER_FILES
 	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/GraphicsBuffer.hpp
 	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/HDRPostProcess.hpp
 	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/Heightmap.hpp
+	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/IndirectLightingLayer.hpp
 	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/InfTerrain.hpp
 	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/JudaTexture.hpp
 	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/LensFlare.hpp

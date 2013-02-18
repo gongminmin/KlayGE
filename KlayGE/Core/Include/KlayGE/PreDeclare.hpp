@@ -197,6 +197,12 @@ namespace KlayGE
 	typedef boost::shared_ptr<LensFlareSceneObject> LensFlareSceneObjectPtr;
 	class DeferredRenderingLayer;
 	typedef boost::shared_ptr<DeferredRenderingLayer> DeferredRenderingLayerPtr;
+	class IndirectLightingLayer;
+	typedef boost::shared_ptr<IndirectLightingLayer> IndirectLightingLayerPtr;
+	class MultiResSILLayer;
+	typedef boost::shared_ptr<MultiResSILLayer> MultiResSILLayerPtr;
+	class SSGILayer;
+	typedef boost::shared_ptr<SSGILayer> SSGILayerPtr;
 	class GpuFft;
 	typedef boost::shared_ptr<GpuFft> GpuFftPtr;
 	class GpuFftPS;

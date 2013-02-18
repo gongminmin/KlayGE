@@ -22,6 +22,7 @@
 
 #include <KlayGE/PreDeclare.hpp>
 #include <KlayGE/Light.hpp>
+#include <KlayGE/IndirectLightingLayer.hpp>
 
 namespace KlayGE
 {
@@ -48,7 +49,7 @@ namespace KlayGE
 	struct PerViewport
 	{
 		PerViewport()
-			: attrib(0), ssgi_enabled(false), ssvo_enabled(true)
+			: attrib(0), ssvo_enabled(true), ssgi_enable(false)
 		{
 		}
 
@@ -86,9 +87,6 @@ namespace KlayGE
 		array<FrameBufferPtr, Num_GBuffers> prev_merged_depth_buffers;
 		TexturePtr prev_merged_depth_tex;
 
-		TexturePtr small_ssgi_tex;
-		bool ssgi_enabled;
-
 		TexturePtr small_ssvo_tex;
 		bool ssvo_enabled;
 
@@ -96,14 +94,8 @@ namespace KlayGE
 		float4x4 inv_view, inv_proj;
 		float3 depth_near_far_invfar;
 
-		TexturePtr depth_deriative_tex;
-		TexturePtr depth_deriative_small_tex;
-		TexturePtr normal_cone_tex;
-		TexturePtr normal_cone_small_tex;
-
-		TexturePtr indirect_lighting_tex;
-		TexturePtr indirect_lighting_pingpong_tex;
-		std::vector<FrameBufferPtr> vpls_lighting_fbs;
+		IndirectLightingLayerPtr il_layer;
+		bool ssgi_enable;
 
 		std::vector<bool> light_visibles;
 	};
@@ -231,12 +223,7 @@ namespace KlayGE
 		}
 
 	private:
-		void CreateDepthDerivativeMipMap(uint32_t vp);
-		void CreateNormalConeMipMap(uint32_t vp);
-		void SetSubsplatStencil(uint32_t vp);
-		void ExtractVPLs(uint32_t vp, CameraPtr const & rsm_camera, LightSourcePtr const & light);
-		void VPLsLighting(uint32_t vp, LightSourcePtr const & light);
-		void UpsampleMultiresLighting(uint32_t vp);
+		void SetupViewportGI(uint32_t vp);
 		void AccumulateToLightingTex(uint32_t vp);
 
 		uint32_t ComposePassScanCode(uint32_t vp_index, int32_t pass_type, int32_t org_no, int32_t index_in_pass);
@@ -251,9 +238,6 @@ namespace KlayGE
 
 		array<PerViewport, 8> viewports_;
 		uint32_t active_viewport_;
-
-		PostProcessPtr ssgi_pp_;
-		PostProcessPtr ssgi_blur_pp_;
 
 		PostProcessPtr ssvo_pp_;
 		PostProcessPtr ssvo_blur_pp_;
@@ -336,51 +320,12 @@ namespace KlayGE
 		FrameBufferPtr rsm_buffer_;
 		array<TexturePtr, 2> rsm_texs_;
 
-		array<PostProcessPtr, LT_NumLightTypes> rsm_to_vpls_pps_;
-		TexturePtr vpl_tex_;
-				
-		RenderTechniquePtr subsplat_stencil_tech_;
-		RenderTechniquePtr vpls_lighting_instance_id_tech_;
-		RenderTechniquePtr vpls_lighting_no_instance_id_tech_;
-		bool indirect_lighting_enabled_;	
-
-		PostProcessPtr gbuffer_to_depth_derivate_pp_;
-		PostProcessPtr depth_derivate_mipmap_pp_;
-		PostProcessPtr gbuffer_to_normal_cone_pp_;
-		PostProcessPtr normal_cone_mipmap_pp_;
-
-		PostProcessPtr upsampling_pp_;
+		bool indirect_lighting_enabled_;
 
 		int illum_;
 		float indirect_scale_;
 		PostProcessPtr copy_to_light_buffer_pp_;
 		PostProcessPtr copy_to_light_buffer_i_pp_;
-
-		RenderEffectParameterPtr subsplat_cur_lower_level_param_;
-		RenderEffectParameterPtr subsplat_is_not_first_last_level_param_;
-		RenderEffectParameterPtr subsplat_depth_deriv_tex_param_;
-		RenderEffectParameterPtr subsplat_normal_cone_tex_param_;
-		RenderEffectParameterPtr subsplat_depth_normal_threshold_param_;
-
-		RenderEffectParameterPtr vpl_view_param_;
-		RenderEffectParameterPtr vpl_proj_param_;
-		RenderEffectParameterPtr vpl_depth_near_far_invfar_param_;
-		RenderEffectParameterPtr vpl_light_pos_es_param_;
-		RenderEffectParameterPtr vpl_light_color_param_;
-		RenderEffectParameterPtr vpl_light_falloff_param_;
-		RenderEffectParameterPtr vpl_x_coord_param_;
-		RenderEffectParameterPtr vpl_gbuffer_tex_param_;
-		RenderEffectParameterPtr vpl_depth_tex_param_;
-
-		RenderLayoutPtr rl_vpl_;
-
-		// USE_NEW_LIGHT_SAMPLING
-	private:
-		void ExtractVPLsNew(uint32_t vp, CameraPtr const & rsm_camera, LightSourcePtr const & light);
-
-	private:
-		TexturePtr rsm_depth_derivative_tex_;
-		PostProcessPtr rsm_to_depth_derivate_pp_;
 	};
 }
 
