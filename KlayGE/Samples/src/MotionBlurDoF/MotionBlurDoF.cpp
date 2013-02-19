@@ -368,7 +368,7 @@ namespace
 					ElementInitData init_data;
 					init_data.row_pitch = sizeof(pos);
 					init_data.data = &pos[0];
-					GraphicsBufferPtr pos_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data);
+					GraphicsBufferPtr pos_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, &init_data);
 					normalization_rl_->BindVertexStream(pos_vb, KlayGE::make_tuple(vertex_element(VEU_Position, 0, EF_ABGR32F)));
 				}
 
@@ -527,7 +527,7 @@ namespace
 					init_data.data = &points[0];
 					init_data.row_pitch = static_cast<uint32_t>(points.size() * sizeof(points[0]));
 					init_data.slice_pitch = 0;
-					GraphicsBufferPtr pos_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data);
+					GraphicsBufferPtr pos_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, &init_data);
 					bokeh_rl_->BindVertexStream(pos_vb, KlayGE::make_tuple(vertex_element(VEU_Position, 0, EF_GR32F)));
 				}
 				else
@@ -589,13 +589,13 @@ namespace
 					init_data.data = &points[0];
 					init_data.row_pitch = static_cast<uint32_t>(points.size() * sizeof(points[0]));
 					init_data.slice_pitch = 0;
-					GraphicsBufferPtr pos_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data);
+					GraphicsBufferPtr pos_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, &init_data);
 					bokeh_rl_->BindVertexStream(pos_vb, KlayGE::make_tuple(vertex_element(VEU_Position, 0, EF_ABGR32F)));
 
 					init_data.data = &indices[0];
 					init_data.row_pitch = static_cast<uint32_t>(indices.size() * sizeof(indices[0]));
 					init_data.slice_pitch = 0;
-					GraphicsBufferPtr pos_ib = rf.MakeIndexBuffer(BU_Static, EAH_GPU_Read, &init_data);
+					GraphicsBufferPtr pos_ib = rf.MakeIndexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, &init_data);
 					bokeh_rl_->BindIndexStream(pos_ib, EF_R32UI);
 				}
 

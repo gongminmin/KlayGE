@@ -922,7 +922,7 @@ void ParticleEditorApp::LoadParticleAlpha(int id, std::string const & name)
 		init_data.data = &data[0];
 		init_data.row_pitch = tex->Width(0) * 4;
 		tex_for_button = rf.MakeTexture2D(cpu_tex->Width(0), cpu_tex->Height(0), 1, 1,
-			rf.RenderEngineInstance().DeviceCaps().texture_format_support(EF_ABGR8) ? EF_ABGR8 : EF_ARGB8, 1, 0, EAH_GPU_Read, &init_data);
+			rf.RenderEngineInstance().DeviceCaps().texture_format_support(EF_ABGR8) ? EF_ABGR8 : EF_ARGB8, 1, 0, EAH_GPU_Read | EAH_Immutable, &init_data);
 	}
 	else
 	{
@@ -955,7 +955,7 @@ void ParticleEditorApp::LoadParticleColor(int id, KlayGE::Color const & clr)
 	ElementInitData init_data;
 	init_data.data = &data;
 	init_data.row_pitch = 4;
-	tex_for_button = rf.MakeTexture2D(1, 1, 1, 1, fmt, 1, 0, EAH_GPU_Read, &init_data);
+	tex_for_button = rf.MakeTexture2D(1, 1, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_Immutable, &init_data);
 
 	dialog_->Control<UITexButton>(id)->SetTexture(tex_for_button);
 }

@@ -117,7 +117,7 @@ namespace
 		{
 			if (rf.RenderEngineInstance().DeviceCaps().texture_format_support(EF_ABGR8))
 			{
-				ret = rf.MakeTexture3D(vol_size, vol_size, vol_size, 1, 1, EF_ABGR8, 1, 0, EAH_GPU_Read, &init_data);
+				ret = rf.MakeTexture3D(vol_size, vol_size, vol_size, 1, 1, EF_ABGR8, 1, 0, EAH_GPU_Read | EAH_Immutable, &init_data);
 			}
 			else
 			{
@@ -126,7 +126,7 @@ namespace
 					std::swap(data_block[i * 4 + 0], data_block[i * 4 + 2]);
 				}
 
-				ret = rf.MakeTexture3D(vol_size, vol_size, vol_size, 1, 1, EF_ARGB8, 1, 0, EAH_GPU_Read, &init_data);
+				ret = rf.MakeTexture3D(vol_size, vol_size, vol_size, 1, 1, EF_ARGB8, 1, 0, EAH_GPU_Read | EAH_Immutable, &init_data);
 			}
 		}
 
@@ -477,7 +477,7 @@ namespace
 				vel_init.row_pitch = tex_width_ * sizeof(half) * 4;
 				vel_init.slice_pitch = 0;
 
-				TexturePtr particle_init_vel = rf.MakeTexture2D(tex_width_, tex_height_, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read, &vel_init);
+				TexturePtr particle_init_vel = rf.MakeTexture2D(tex_width_, tex_height_, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_Immutable, &vel_init);
 				*(technique_->Effect().ParameterByName("particle_init_vel_tex")) = particle_init_vel;
 
 				particle_pos_tex_param_ = technique_->Effect().ParameterByName("particle_pos_tex");
@@ -531,7 +531,7 @@ namespace
 			{
 				init_data.row_pitch = tex_width_ * sizeof(half);
 
-				TexturePtr particle_birth_time_tex = rf.MakeTexture2D(tex_width_, tex_height_, 1, 1, EF_R16F, 1, 0, EAH_GPU_Read, &init_data);
+				TexturePtr particle_birth_time_tex = rf.MakeTexture2D(tex_width_, tex_height_, 1, 1, EF_R16F, 1, 0, EAH_GPU_Read | EAH_Immutable, &init_data);
 				*(technique_->Effect().ParameterByName("particle_birth_time_tex")) = particle_birth_time_tex;
 			}
 		}
@@ -665,7 +665,7 @@ namespace
 			RenderDeviceCaps const & caps = re.DeviceCaps();
 			if (3 == caps.max_shader_model)
 			{
-				TexturePtr height_32f = rf.MakeTexture2D(height_map->Width(0), height_map->Height(0), 1, 1, EF_R32F, 1, 0, EAH_GPU_Read, nullptr);
+				TexturePtr height_32f = rf.MakeTexture2D(height_map->Width(0), height_map->Height(0), 1, 1, EF_R32F, 1, 0, EAH_GPU_Read | EAH_Immutable, nullptr);
 				height_map->CopyToTexture(*height_32f);
 				*(technique_->Effect().ParameterByName("height_map_tex")) = height_32f;
 			}

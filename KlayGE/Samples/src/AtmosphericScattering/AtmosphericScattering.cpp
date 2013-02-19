@@ -170,12 +170,12 @@ void AtmosphericScatteringApp::InitObjects()
 	tb_controller_.AttachCamera(this->ActiveCamera());
 	tb_controller_.Scalers(0.003f, 0.003f);
 
-	RenderModelPtr model_planet = SyncLoadModel("geosphere.7z//geosphere.meshml", EAH_GPU_Read,
+	RenderModelPtr model_planet = SyncLoadModel("geosphere.7z//geosphere.meshml", EAH_GPU_Read | EAH_Immutable,
 		CreateModelFactory<RenderModel>(), CreateMeshFactory<PlanetMesh>());
 	planet_ = MakeSharedPtr<SceneObjectHelper>(model_planet->Mesh(0), SceneObjectHelper::SOA_Cullable);
 	planet_->AddToSceneManager();
 
-	RenderModelPtr model_atmosphere = SyncLoadModel("geosphere.7z//geosphere.meshml", EAH_GPU_Read,
+	RenderModelPtr model_atmosphere = SyncLoadModel("geosphere.7z//geosphere.meshml", EAH_GPU_Read | EAH_Immutable,
 		CreateModelFactory<RenderModel>(), CreateMeshFactory<AtmosphereMesh>());
 	atmosphere_ = MakeSharedPtr<SceneObjectHelper>(model_atmosphere->Mesh(0), SceneObjectHelper::SOA_Cullable);
 	atmosphere_->AddToSceneManager();
@@ -251,7 +251,7 @@ void AtmosphericScatteringApp::LoadBeta(Color const & clr)
 	ElementInitData init_data;
 	init_data.data = &data;
 	init_data.row_pitch = 4;
-	TexturePtr tex_for_button = rf.MakeTexture2D(1, 1, 1, 1, fmt, 1, 0, EAH_GPU_Read, &init_data);
+	TexturePtr tex_for_button = rf.MakeTexture2D(1, 1, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_Immutable, &init_data);
 	dialog_param_->Control<UITexButton>(id_beta_button_)->SetTexture(tex_for_button);
 }
 
@@ -280,7 +280,7 @@ void AtmosphericScatteringApp::LoadAbsorb(Color const & clr)
 	ElementInitData init_data;
 	init_data.data = &data;
 	init_data.row_pitch = 4;
-	TexturePtr tex_for_button = rf.MakeTexture2D(1, 1, 1, 1, fmt, 1, 0, EAH_GPU_Read, &init_data);
+	TexturePtr tex_for_button = rf.MakeTexture2D(1, 1, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_Immutable, &init_data);
 	dialog_param_->Control<UITexButton>(id_absorb_button_)->SetTexture(tex_for_button);
 }
 

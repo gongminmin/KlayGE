@@ -341,7 +341,7 @@ void ModelViewerApp::InitObjects()
 		init_data[i].slice_pitch = init_data[i].row_pitch;	
 	}
 	sky_box_ = MakeSharedPtr<SceneObjectSkyBox>();
-	checked_pointer_cast<SceneObjectSkyBox>(sky_box_)->CubeMap(rf.MakeTextureCube(1, 1, 1, fmt, 1, 0, EAH_GPU_Read, init_data));
+	checked_pointer_cast<SceneObjectSkyBox>(sky_box_)->CubeMap(rf.MakeTextureCube(1, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_Immutable, init_data));
 	sky_box_->AddToSceneManager();
 
 	UIManager::Instance().Load(ResLoader::Instance().Open("ModelViewer.uiml"));

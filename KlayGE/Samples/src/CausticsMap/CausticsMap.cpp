@@ -73,9 +73,9 @@ namespace
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-			KLAYGE_AUTO(diffuse_loader, ASyncLoadTexture("diffuse.dds", EAH_GPU_Read));
-			KLAYGE_AUTO(normal_loader, ASyncLoadTexture("normal.dds", EAH_GPU_Read));
-			KLAYGE_AUTO(dist_loader, ASyncLoadTexture("distance.dds", EAH_GPU_Read));
+			KLAYGE_AUTO(diffuse_loader, ASyncLoadTexture("diffuse.dds", EAH_GPU_Read | EAH_Immutable));
+			KLAYGE_AUTO(normal_loader, ASyncLoadTexture("normal.dds", EAH_GPU_Read | EAH_Immutable));
+			KLAYGE_AUTO(dist_loader, ASyncLoadTexture("distance.dds", EAH_GPU_Read | EAH_Immutable));
 
 			uint32_t vertex_num = rl_->NumVertices();
 			vector<Quaternion> tangent_quats(vertex_num);
@@ -122,7 +122,7 @@ namespace
 			init_data.row_pitch = vertex_num * sizeof(itangent[0]);
 			init_data.slice_pitch = 0;
 			init_data.data = &itangent[0];
-			GraphicsBufferPtr tangents_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data);
+			GraphicsBufferPtr tangents_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, &init_data);
 			rl_->BindVertexStream(tangents_vb, KlayGE::make_tuple(vertex_element(VEU_Tangent, 0, fmt)));
 
 			RenderEffectPtr effect = rf.LoadEffect("Scene.fxml");
@@ -737,8 +737,8 @@ void CausticsMapApp::InitObjects()
 	caustics_grid_ = MakeSharedPtr<CausticsGrid>();
 
 	//Sky Box
-	y_cube_map_ = SyncLoadTexture("uffizi_cross_y.dds", EAH_GPU_Read);
-	c_cube_map_ = SyncLoadTexture("uffizi_cross_c.dds", EAH_GPU_Read);
+	y_cube_map_ = SyncLoadTexture("uffizi_cross_y.dds", EAH_GPU_Read | EAH_Immutable);
+	c_cube_map_ = SyncLoadTexture("uffizi_cross_c.dds", EAH_GPU_Read | EAH_Immutable);
 	sky_box_ = MakeSharedPtr<SceneObjectHDRSkyBox>(0);
 	checked_pointer_cast<SceneObjectHDRSkyBox>(sky_box_)->CompressedCubeMap(y_cube_map_, c_cube_map_);
 	sky_box_->AddToSceneManager();

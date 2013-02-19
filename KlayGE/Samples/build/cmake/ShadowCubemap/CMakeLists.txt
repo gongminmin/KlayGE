@@ -19,4 +19,4 @@ SET(RESOURCE_FILES
 	${KLAYGE_PROJECT_DIR}/klayge_logo.ico
 )
 
-SETUP_SAMPLE(ShadowCubemap)
+SETUP_SAMPLE(ShadowCubeMap)

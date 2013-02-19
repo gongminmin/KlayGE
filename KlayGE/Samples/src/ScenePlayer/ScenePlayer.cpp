@@ -723,7 +723,7 @@ void ScenePlayerApp::LoadScene(std::string const & name)
 				}
 
 				sky_box_ = MakeSharedPtr<SceneObjectSkyBox>();
-				checked_pointer_cast<SceneObjectSkyBox>(sky_box_)->CubeMap(rf.MakeTextureCube(1, 1, 1, fmt, 1, 0, EAH_GPU_Read, init_data));
+				checked_pointer_cast<SceneObjectSkyBox>(sky_box_)->CubeMap(rf.MakeTextureCube(1, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_Immutable, init_data));
 			}
 		}
 
