@@ -102,27 +102,30 @@ namespace
 			}
 		}
 
-		c_data.row_pitch = (width / 2 + 3) / 4 * 16;
-		c_data.slice_pitch = y_data.row_pitch * (height / 2 + 3) / 4;
+		uint32_t c_width = (width + 1) / 2;
+		uint32_t c_height = (height + 1) / 2;
+
+		c_data.row_pitch = (c_width + 3) / 4 * 16;
+		c_data.slice_pitch = c_data.row_pitch * (c_height + 3) / 4;
 		c_data_block.resize(c_data.slice_pitch);
 		c_data.data = &c_data_block[0];
 		uint8_t* c_dst = &c_data_block[0];
 
-		for (uint32_t y_base = 0; y_base < height / 2; y_base += 4)
+		for (uint32_t y_base = 0; y_base < c_height; y_base += 4)
 		{
-			for (uint32_t x_base = 0; x_base < width / 2; x_base += 4)
+			for (uint32_t x_base = 0; x_base < c_width; x_base += 4)
 			{
 				uint8_t uncom_u[16];
 				uint8_t uncom_v[16];
 				for (int y = 0; y < 4; ++ y)
 				{
-					uint32_t const y0 = (y_base + y) * 2 + 0;
-					uint32_t const y1 = (y_base + y) * 2 + 1;
+					uint32_t const y0 = MathLib::clamp((y_base + y) * 2 + 0, 0U, c_height - 1);
+					uint32_t const y1 = MathLib::clamp((y_base + y) * 2 + 1, 0U, c_height - 1);
 
 					for (int x = 0; x < 4; ++ x)
 					{
-						uint32_t const x0 = (x_base + x) * 2 + 0;
-						uint32_t const x1 = (x_base + x) * 2 + 1;
+						uint32_t const x0 = MathLib::clamp((x_base + x) * 2 + 0, 0U, c_width - 1);
+						uint32_t const x1 = MathLib::clamp((x_base + x) * 2 + 1, 0U, c_width - 1);
 
 						float R = hdr_src[(y0 * width + x0) * 4 + 0]
 							+ hdr_src[(y0 * width + x1) * 4 + 0]
@@ -189,12 +192,15 @@ namespace
 		hdr_data_block.resize(hdr_data.slice_pitch);
 		hdr_data.data = &hdr_data_block[0];
 
-		std::vector<uint8_t> c_data_uncom(width * height);
-		for (uint32_t y_base = 0; y_base < height / 2; y_base += 4)
+		uint32_t c_width = (width + 1) / 2;
+		uint32_t c_height = (height + 1) / 2;
+
+		std::vector<uint8_t> c_data_uncom(c_width * c_height * 4);
+		for (uint32_t y_base = 0; y_base < c_height; y_base += 4)
 		{
-			for (uint32_t x_base = 0; x_base < width / 2; x_base += 4)
+			for (uint32_t x_base = 0; x_base < c_width; x_base += 4)
 			{
-				uint8_t const * src = static_cast<uint8_t const *>(c_data.data) + ((y_base / 4) * width / 2 / 4 + x_base / 4) * 16;
+				uint8_t const * src = static_cast<uint8_t const *>(c_data.data) + ((y_base / 4) * c_width / 4 + x_base / 4) * 16;
 
 				uint32_t argb[16];
 				if (EF_BC5 == c_format)
@@ -214,9 +220,15 @@ namespace
 
 				for (int y = 0; y < 4; ++ y)
 				{
-					for (int x = 0; x < 4; ++ x)
+					if (y_base + y < c_height)
 					{
-						memcpy(&c_data_uncom[((y_base + y) * width / 2 + (x_base + x)) * 4], &argb[y * 4 + x], sizeof(uint32_t));
+						for (int x = 0; x < 4; ++ x)
+						{
+							if (x_base + x < c_width)
+							{
+								memcpy(&c_data_uncom[((y_base + y) * c_width + (x_base + x)) * 4], &argb[y * 4 + x], sizeof(uint32_t));
+							}
+						}
 					}
 				}
 			}
@@ -231,8 +243,8 @@ namespace
 				for (uint32_t x = 0; x < width; ++ x)
 				{
 					float Y = exp((y_src[y * width + x] / 2048.0f - 16) * log2);
-					float B = c_data_uncom[(y / 2 * width / 2 + x / 2) * 4 + 2] / 256.0f;
-					float R = c_data_uncom[(y / 2 * width / 2 + x / 2) * 4 + 1] / 256.0f;
+					float B = c_data_uncom[(y / 2 * c_width + x / 2) * 4 + 2] / 256.0f;
+					float R = c_data_uncom[(y / 2 * c_width + x / 2) * 4 + 1] / 256.0f;
 					B = B * B * Y;
 					R = R * R * Y;
 					float G = (Y - R - B) / lum_weight.y();
@@ -253,8 +265,8 @@ namespace
 				for (uint32_t x = 0; x < width; ++ x)
 				{
 					float Y = exp((y_src[y * width + x] * 65535 / 2048.0f - 16) * log2);
-					float B = c_data_uncom[(y / 2 * width / 2 + x / 2) * 4 + 2] / 256.0f;
-					float R = c_data_uncom[(y / 2 * width / 2 + x / 2) * 4 + 1] / 256.0f;
+					float B = c_data_uncom[(y / 2 * c_width + x / 2) * 4 + 2] / 256.0f;
+					float R = c_data_uncom[(y / 2 * c_width + x / 2) * 4 + 1] / 256.0f;
 					B = B * B * Y;
 					R = R * R * Y;
 					float G = (Y - R - B) / lum_weight.y();
@@ -329,7 +341,15 @@ namespace
 		}
 
 		SaveTexture(out_y_file, in_type, in_width, in_height, in_depth, in_num_mipmaps, in_array_size, y_format, y_data);
-		SaveTexture(out_c_file, in_type, in_width / 2, in_height / 2, in_depth, in_num_mipmaps, in_array_size, c_format, c_data);
+
+		uint32_t c_width = (in_width + 1) / 2;
+		uint32_t c_height = (in_height + 1) / 2;
+		if (IsCompressedFormat(c_format))
+		{
+			c_width = (c_width + 3) & -3;
+			c_height = (c_height + 3) & -3;
+		}
+		SaveTexture(out_c_file, in_type, c_width, c_height, in_depth, in_num_mipmaps, in_array_size, c_format, c_data);
 
 		float mse = 0;
 		int n = 0;
