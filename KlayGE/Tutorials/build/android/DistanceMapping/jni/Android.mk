@@ -11,7 +11,8 @@ LOCAL_C_INCLUDES := $(DISTANCEMAPPING_SRC_PATH)/../../../../External/boost \
 		
 LOCAL_MODULE := DistanceMapping
 LOCAL_PATH := $(DISTANCEMAPPING_SRC_PATH)
-LOCAL_SRC_FILES := DistanceMapping.cpp
+CPP_FILE_LIST := $(wildcard $(LOCAL_PATH)/*.cpp)
+LOCAL_SRC_FILES := $(CPP_FILE_LIST:$(LOCAL_PATH)/%=%)
 LOCAL_LDLIBS := -llog -landroid
 LOCAL_STATIC_LIBRARIES := KlayGE_Core KlayGE_RenderEngine_OpenGLES KlayGE_Scene_OCTree KFL glloader kfont MeshMLLib \
 		boost_chrono boost_filesystem boost_system boost_thread \

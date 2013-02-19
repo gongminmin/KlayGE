@@ -12,7 +12,8 @@ LOCAL_C_INCLUDES := $(SAMPLE_COMMON_SRC_PATH)/../../../../External/boost \
 		
 LOCAL_MODULE := SampleCommon
 LOCAL_PATH := $(SAMPLE_COMMON_SRC_PATH)
-LOCAL_SRC_FILES := SampleCommon.cpp
+CPP_FILE_LIST := $(wildcard $(LOCAL_PATH)/*.cpp)
+LOCAL_SRC_FILES := $(CPP_FILE_LIST:$(LOCAL_PATH)/%=%)
 
 include $(BUILD_STATIC_LIBRARY)
 

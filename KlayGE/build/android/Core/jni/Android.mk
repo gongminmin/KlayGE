@@ -16,88 +16,18 @@ LOCAL_C_INCLUDES := $(KLAYGE_SRC_PATH)/../../../External/boost \
 		
 LOCAL_MODULE := KlayGE_Core
 LOCAL_PATH := $(KLAYGE_SRC_PATH)
-LOCAL_SRC_FILES := \
-		AppLayer/App3D.cpp \
-		AppLayer/Window.cpp \
-		Audio/AudioBuffer.cpp \
-		Audio/AudioDataSource.cpp \
-		Audio/AudioEngine.cpp \
-		Audio/AudioFactory.cpp \
-		Audio/MusicBuffer.cpp \
-		Audio/SoundBuffer.cpp \
-		Input/InputActionMap.cpp \
-		Input/InputDevice.cpp \
-		Input/InputEngine.cpp \
-		Input/InputFactory.cpp \
-		Input/Joystick.cpp \
-		Input/Keyboard.cpp \
-		Input/Mouse.cpp \
-		Kernel/Context.cpp \
-		Kernel/KlayGE.cpp \
-		Kernel/ResLoader.cpp \
-		Net/Lobby.cpp \
-		Net/Player.cpp \
-		Net/Socket.cpp \
-		Pack/ArchiveExtractCallback.cpp \
-		Pack/ArchiveOpenCallback.cpp \
-		Pack/Extract7z.cpp \
-		Pack/LZMACodec.cpp \
-		Pack/Streams.cpp \
-		Render/BlockCompression.cpp \
-		Render/Camera.cpp \
-		Render/CameraController.cpp \
-		Render/DeferredRenderingLayer.cpp \
-		Render/ElementFormat.cpp \
-		Render/FFT.cpp \
-		Render/Font.cpp \
-		Render/FrameBuffer.cpp \
-		Render/GraphicsBuffer.cpp \
-		Render/HDRPostProcess.cpp \
-		Render/HeightMap.cpp \
-		Render/IndirectLightingLayer.cpp \
-		Render/InfTerrain.cpp \
-		Render/JudaTexture.cpp \
-		Render/LensFlare.cpp \
-		Render/Light.cpp \
-		Render/LightShaft.cpp \
-		Render/Mesh.cpp \
-		Render/PostProcess.cpp \
-		Render/Query.cpp \
-		Render/Renderable.cpp \
-		Render/RenderableHelper.cpp \
-		Render/RenderEffect.cpp \
-		Render/RenderEngine.cpp \
-		Render/RenderFactory.cpp \
-		Render/RenderLayout.cpp \
-		Render/RenderStateObject.cpp \
-		Render/RenderView.cpp \
-		Render/SATPostProcess.cpp \
-		Render/ShaderObject.cpp \
-		Render/SSGIPostProcess.cpp \
-		Render/SSRPostProcess.cpp \
-		Render/SSVOPostProcess.cpp \
-		Render/Texture.cpp \
-		Render/Viewport.cpp \
-		Script/Script.cpp \
-		Show/ShowEngine.cpp \
-		Show/ShowFactory.cpp \
-		Scene/SceneManager.cpp \
-		Scene/SceneObject.cpp \
-		Scene/SceneObjectHelper.cpp \
-		UI/UI.cpp \
-		UI/UIButton.cpp \
-		UI/UICheckBox.cpp \
-		UI/UIComboBox.cpp \
-		UI/UIEditBox.cpp \
-		UI/UIListBox.cpp \
-		UI/UIPolylineEditBox.cpp \
-		UI/UIProgressBar.cpp \
-		UI/UIRadioButton.cpp \
-		UI/UIScrollBar.cpp \
-		UI/UISlider.cpp \
-		UI/UIStatic.cpp \
-		UI/UITexButton.cpp \
-
+CPP_FILE_LIST := $(wildcard $(LOCAL_PATH)/AppLayer/*.cpp) \
+				$(wildcard $(LOCAL_PATH)/Audio/*.cpp) \
+				$(wildcard $(LOCAL_PATH)/Input/*.cpp) \
+				$(wildcard $(LOCAL_PATH)/Kernel/*.cpp) \
+				$(wildcard $(LOCAL_PATH)/Net/*.cpp) \
+				$(wildcard $(LOCAL_PATH)/Pack/*.cpp) \
+				$(wildcard $(LOCAL_PATH)/Render/*.cpp) \
+				$(wildcard $(LOCAL_PATH)/Script/*.cpp) \
+				$(wildcard $(LOCAL_PATH)/Show/*.cpp) \
+				$(wildcard $(LOCAL_PATH)/Scene/*.cpp) \
+				$(wildcard $(LOCAL_PATH)/UI/*.cpp)
+LOCAL_SRC_FILES := $(CPP_FILE_LIST:$(LOCAL_PATH)/%=%)
 		
 LOCAL_CFLAGS := -DKLAYGE_BUILD_DLL -DKLAYGE_CORE_SOURCE
 

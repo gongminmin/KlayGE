@@ -14,25 +14,11 @@ LOCAL_C_INCLUDES := $(KLAYGE_PLUGIN_OPENGLES_SRC_PATH)/../../../../../External/b
 		
 LOCAL_MODULE := KlayGE_RenderEngine_OpenGLES
 LOCAL_PATH := $(KLAYGE_PLUGIN_OPENGLES_SRC_PATH)
-LOCAL_SRC_FILES := \
-		OGLESFrameBuffer.cpp \
-		OGLESGraphicsBuffer.cpp \
-		OGLESMapping.cpp \
-		OGLESQuery.cpp \
-		OGLESRenderEngine.cpp \
-		OGLESRenderFactory.cpp \
-		OGLESRenderLayout.cpp \
-		OGLESRenderStateObject.cpp \
-		OGLESRenderView.cpp \
-		OGLESRenderWindow.cpp \
-		OGLESShaderObject.cpp \
-		OGLESTexture.cpp \
-		OGLESTexture1D.cpp \
-		OGLESTexture2D.cpp \
-		OGLESTexture3D.cpp \
-		OGLESTextureCube.cpp \
-
+CPP_FILE_LIST := $(wildcard $(LOCAL_PATH)/*.cpp)
+LOCAL_SRC_FILES := $(CPP_FILE_LIST:$(LOCAL_PATH)/%=%)
 		
 LOCAL_CFLAGS := -DKLAYGE_BUILD_DLL -DKLAYGE_OGLES_RE_SOURCE -DGLLOADER_GLES_SUPPORT
+
+LOCAL_LDLIBS := -llog
 
 include $(BUILD_STATIC_LIBRARY)

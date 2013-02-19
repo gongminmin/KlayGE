@@ -11,17 +11,9 @@ LOCAL_C_INCLUDES := $(KFL_SRC_PATH)/../../External/boost \
 		
 LOCAL_MODULE := KFL
 LOCAL_PATH := $(KFL_SRC_PATH)
-LOCAL_SRC_FILES := \
-		Kernel/CpuInfo.cpp \
-		Kernel/DllLoader.cpp \
-		Kernel/KFL.cpp \
-		Kernel/Log.cpp \
-		Kernel/ThrowErr.cpp \
-		Kernel/Timer.cpp \
-		Kernel/Util.cpp \
-		Kernel/XMLDom.cpp \
-		Math/Math.cpp \
-
+CPP_FILE_LIST := $(wildcard $(LOCAL_PATH)/Kernel/*.cpp) \
+				$(wildcard $(LOCAL_PATH)/Math/*.cpp)
+LOCAL_SRC_FILES := $(CPP_FILE_LIST:$(LOCAL_PATH)/%=%)
 		
 LOCAL_CFLAGS := -DKFL_SOURCE
 

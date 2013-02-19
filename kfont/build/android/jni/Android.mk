@@ -10,7 +10,12 @@ LOCAL_C_INCLUDES := $(KFONT_SRC_PATH)/../../External/boost \
 	$(KFONT_SRC_PATH)/../include \
 	
 LOCAL_MODULE := kfont
-LOCAL_SRC_FILES := kfont.cpp
 LOCAL_PATH := $(KFONT_SRC_PATH)
+CPP_FILE_LIST := $(wildcard $(LOCAL_PATH)/*.cpp)
+LOCAL_SRC_FILES := $(CPP_FILE_LIST:$(LOCAL_PATH)/%=%)
+
 LOCAL_CFLAGS := -DKFONT_SOURCE
+
+LOCAL_LDLIBS := -llog
+
 include $(BUILD_STATIC_LIBRARY)
