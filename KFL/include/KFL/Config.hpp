@@ -344,4 +344,9 @@
 	#define KLAYGE_HAS_STRUCT_PACK
 #endif
 
+// Prevent Boost to link the Boost.DateTime
+#ifndef BOOST_DATE_TIME_NO_LIB
+	#define BOOST_DATE_TIME_NO_LIB
+#endif
+
 #endif		// _KFL_CONFIG_HPP

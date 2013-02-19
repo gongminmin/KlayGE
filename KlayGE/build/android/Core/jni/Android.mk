@@ -54,6 +54,7 @@ LOCAL_SRC_FILES := \
 		Render/GraphicsBuffer.cpp \
 		Render/HDRPostProcess.cpp \
 		Render/HeightMap.cpp \
+		Render/IndirectLightingLayer.cpp \
 		Render/InfTerrain.cpp \
 		Render/JudaTexture.cpp \
 		Render/LensFlare.cpp \
