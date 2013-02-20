@@ -71,18 +71,6 @@ namespace
 			pos_aabb_ = MathLib::compute_aabbox(&xyzs[0], &xyzs[sizeof(xyzs) / sizeof(xyzs[0])]);
 			tc_aabb_ = AABBox(float3(0, 0, 0), float3(0, 0, 0));
 		}
-
-		void OnRenderBegin()
-		{
-			RenderableHelper::OnRenderBegin();
-
-			App3DFramework const & app = Context::Instance().AppInstance();
-			Camera const & camera = app.ActiveCamera();
-
-			float4x4 scaling = MathLib::scaling(0.006f, 0.006f, 0.006f);
-			float4x4 trans = MathLib::translation(MathLib::transform_coord(float3(0.8f, -0.8f, 0.1f), camera.InverseViewProjMatrix()));
-			*mvp_param_ = scaling * trans * camera.ViewProjMatrix();
-		}
 	};
 
 	class RenderGrid : public RenderableHelper
@@ -122,14 +110,6 @@ namespace
 
 			pos_aabb_ = MathLib::compute_aabbox(&xyzs[0], &xyzs[sizeof(xyzs) / sizeof(xyzs[0])]);
 			tc_aabb_ = AABBox(float3(0, 0, 0), float3(0, 0, 0));
-		}
-
-		void OnRenderBegin()
-		{
-			RenderableHelper::OnRenderBegin();
-
-			App3DFramework const & app = Context::Instance().AppInstance();
-			*mvp_param_ = app.ActiveCamera().ViewProjMatrix();
 		}
 	};
 
@@ -726,34 +706,45 @@ void ModelViewerApp::DoUpdateOverlay()
 
 uint32_t ModelViewerApp::DoUpdate(KlayGE::uint32_t pass)
 {
-	/*Box const & bb = model_->Bound();
-	float near_plane = 1e10f;
-	float far_plane = 1e-10f;
-	for (int i = 0; i < 8; ++ i)
+	if (0 == pass)
 	{
-		App3DFramework& app = Context::Instance().AppInstance();
-		float4x4 const & view = app.ActiveCamera().ViewMatrix();
+		Camera const & camera = this->ActiveCamera();
 
-		float3 v = MathLib::transform_coord(bb[i], view);
-		near_plane = std::min(near_plane, v.z() * 0.8f);
-		near_plane = std::max(0.01f, near_plane);
-		far_plane = std::max(near_plane + 0.1f, std::max(far_plane, v.z() * 1.2f));
-	}
-	this->Proj(near_plane, far_plane);*/
+		AABBox bb = MathLib::transform_aabb(model_->PosBound(), camera.ViewMatrix())
+			| MathLib::transform_aabb(grid_->PosBound(), camera.ViewMatrix());
+		float near_plane = std::max(0.01f, bb.Min().z() * 0.8f);
+		float far_plane = std::max(near_plane + 0.1f, bb.Max().z() * 1.2f);
+		this->Proj(near_plane, far_plane);
 
-	boost::shared_ptr<ModelObject> model = checked_pointer_cast<ModelObject>(model_);
-	if (play_)
-	{
-		float this_time = this->AppTime();
-		if (this_time - last_time_ > 0.02f)
+		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+		uint32_t width = re.CurFrameBuffer()->Width();
+		uint32_t height = re.CurFrameBuffer()->Height();
+		float x = (width - 70.5f) / width * 2 - 1;
+		float y = 1 - (height - 70.5f) / height * 2;
+		float3 origin = MathLib::transform_coord(float3(x, y, 0.1f), camera.InverseViewProjMatrix());
+
+		float x1 = (width - 20.5f) / width * 2 - 1;
+		float3 x_dir = MathLib::transform_coord(float3(x1, y, 0.1f), camera.InverseViewProjMatrix());
+		float len = MathLib::length(x_dir - origin);
+
+		float4x4 scaling = MathLib::scaling(len, len, len);
+		float4x4 trans = MathLib::translation(origin);
+		axis_->ModelMatrix(scaling * trans);
+
+		boost::shared_ptr<ModelObject> model = checked_pointer_cast<ModelObject>(model_);
+		if (play_)
 		{
-			frame_ += 0.02f * model->FrameRate();
-			frame_ = fmod(frame_, static_cast<float>(model->NumFrames()));
+			float this_time = this->AppTime();
+			if (this_time - last_time_ > 0.02f)
+			{
+				frame_ += 0.02f * model->FrameRate();
+				frame_ = fmod(frame_, static_cast<float>(model->NumFrames()));
 
-			last_time_ = this_time;
+				last_time_ = this_time;
+			}
+
+			dialog_animation_->Control<UISlider>(id_frame_slider_)->SetValue(static_cast<int>(frame_ * 10 + 0.5f));
 		}
-
-		dialog_animation_->Control<UISlider>(id_frame_slider_)->SetValue(static_cast<int>(frame_ * 10 + 0.5f));
 	}
 
 	return deferred_rendering_->Update(pass);
