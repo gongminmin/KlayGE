@@ -15,9 +15,6 @@
 		<state name="address_v" value="wrap"/>
 	</parameter>
 
-	<parameter type="float4" name="ambient_clr"/>
-	<parameter type="float4" name="specular_clr"/>
-
 	<cbuffer name="less_freq">
 		<parameter type="int" name="vertex_usage"/>
 		<parameter type="int" name="vertex_usage_index"/>
@@ -1301,6 +1298,8 @@ void SkinnedMeshSpecialShadingVS(float4 pos : POSITION,
 
 	<parameter type="bool" name="adaptive_tess"/>
 	<parameter type="float4" name="tess_factors"/>
+	<parameter type="int2" name="frame_size"/>
+	<parameter type="float3" name="view_vec"/>
 
 	<shader>
 		<![CDATA[
@@ -1415,6 +1414,29 @@ struct HS_CONSTANT_DATA_OUTPUT
 	float inside	: SV_InsideTessFactor;
 };
 
+float2 ScreenCoord(float3 pos)
+{
+	float4 p = mul(float4(pos, 1), mvp);
+	p /= p.w;
+	p.y *= KLAYGE_FLIPPING;
+	return (p.xy * 0.5f + 0.5f) * frame_size;
+}
+
+float3 OrientationFactor(float3 orientation)
+{
+	const float ORIENTATION_THRESHOLD = 0.25f;
+
+	float3 f = 1 - abs(orientation);
+	return (f - ORIENTATION_THRESHOLD) / (1 - ORIENTATION_THRESHOLD);
+}
+
+float EdgeFactor(float2 p0_ss, float2 p1_ss, float3 p0_ws, float3 p1_ws)
+{
+	float np = distance(p0_ss, p1_ss);
+	float dist = length(mul(float4((p0_ws + p1_ws) / 2, 1), model_view).xyz);
+	return np / dist;
+}
+
 //--------------------------------------------------------------------------------------
 // Constant data function for the SmoothHS.  This is executed once per patch.
 //--------------------------------------------------------------------------------------
@@ -1424,23 +1446,46 @@ HS_CONSTANT_DATA_OUTPUT SmoothConstantsHS(InputPatch<CONTROL_POINT, 3> ip)
     
 	if (adaptive_tess)
 	{
-		// Calculate the tessellation factor per edge, based on distance from camera
-		float dist;
-		float3 mid_point;
-		// Edge 0
-		mid_point = mul(float4((ip[2].Pos + ip[0].Pos) / 2, 1), model_view).xyz;
-		dist = length(mid_point) - tess_factors.z;
-		output.edges[0] = tess_factors.x * (1 - clamp(dist / tess_factors.w, 0, 1 - (1 / tess_factors.x)));
-		// Edge 1
-		mid_point = mul(float4((ip[0].Pos + ip[1].Pos) / 2, 1), model_view).xyz;
-		dist = length(mid_point) - tess_factors.z;
-		output.edges[1] = tess_factors.x * (1 - clamp(dist / tess_factors.w, 0, 1 - (1 / tess_factors.x)));
-		// Edge 2
-		mid_point = mul(float4((ip[1].Pos + ip[2].Pos) / 2, 1), model_view).xyz;
-		dist = length(mid_point) - tess_factors.z;
-		output.edges[2] = tess_factors.x * (1 - clamp(dist / tess_factors.w, 0, 1 - (1 / tess_factors.x)));
-		// Inside
-		output.inside = (output.edges[0] + output.edges[1] + output.edges[2]) / 3;
+		const float BACK_FACE_THRESHOLD = 0.4f;
+		
+		float3 normal0 = transform_quat(float3(0, 0, 1), ip[0].TangentQuat);
+		float3 normal1 = transform_quat(float3(0, 0, 1), ip[1].TangentQuat);
+		float3 normal2 = transform_quat(float3(0, 0, 1), ip[2].TangentQuat);
+		
+		float3 edge0_normal = (normal2 + normal0) * 0.5f;
+		float3 edge1_normal = (normal0 + normal1) * 0.5f;
+		float3 edge2_normal = (normal1 + normal2) * 0.5f;
+
+		float3 orientation;
+		orientation.x = dot(edge0_normal, view_vec);
+		orientation.y = dot(edge1_normal, view_vec);
+		orientation.z = dot(edge2_normal, view_vec);
+		
+		if (all(orientation > BACK_FACE_THRESHOLD))
+		{
+			output.inside = 0;
+			output.edges[0] = 0;
+			output.edges[1] = 0;
+			output.edges[2] = 0;
+		}
+		else
+		{
+			float2 p0 = ScreenCoord(ip[0].Pos);
+			float2 p1 = ScreenCoord(ip[1].Pos);
+			float2 p2 = ScreenCoord(ip[2].Pos);
+
+			float3 edges_factors = OrientationFactor(orientation)
+				* float3(EdgeFactor(p2, p0, ip[2].Pos, ip[0].Pos),
+					EdgeFactor(p0, p1, ip[0].Pos, ip[1].Pos),
+					EdgeFactor(p1, p2, ip[1].Pos, ip[2].Pos))
+				* tess_factors.x * 0.3f;
+
+			output.edges[0] = clamp(edges_factors.x, tess_factors.z, tess_factors.w);
+			output.edges[1] = clamp(edges_factors.y, tess_factors.z, tess_factors.w);
+			output.edges[2] = clamp(edges_factors.z, tess_factors.z, tess_factors.w);
+			output.inside = clamp((edges_factors.x + edges_factors.y + edges_factors.z) / 3,
+				tess_factors.z, tess_factors.w);
+		}
 	}
 	else
 	{
@@ -1502,6 +1547,8 @@ void SmoothDS(HS_CONSTANT_DATA_OUTPUT HSConstantData,
 
 	<technique name="DepthFillSmooth5Tech" inherit="DepthFillTech">
 		<pass name="p0">
+			<state name="cull_mode" value="none"/>
+
 			<state name="vertex_shader" value="SmoothVS()"/>
 			<state name="hull_shader" value="SmoothHS()"/>
 			<state name="domain_shader" value="SmoothDS()"/>
@@ -1510,6 +1557,8 @@ void SmoothDS(HS_CONSTANT_DATA_OUTPUT HSConstantData,
 
 	<technique name="DepthFillSkinnedSmooth5Tech" inherit="DepthFillTech">
 		<pass name="p0">
+			<state name="cull_mode" value="none"/>
+
 			<state name="vertex_shader" value="SmoothSkinnedVS()"/>
 			<state name="hull_shader" value="SmoothHS()"/>
 			<state name="domain_shader" value="SmoothDS()"/>
@@ -1518,6 +1567,8 @@ void SmoothDS(HS_CONSTANT_DATA_OUTPUT HSConstantData,
 
 	<technique name="DepthFillAlphaTestSmooth5Tech" inherit="DepthFillAlphaTestTech">
 		<pass name="p0">
+			<state name="cull_mode" value="none"/>
+
 			<state name="vertex_shader" value="SmoothVS()"/>
 			<state name="hull_shader" value="SmoothHS()"/>
 			<state name="domain_shader" value="SmoothDS()"/>
@@ -1526,6 +1577,8 @@ void SmoothDS(HS_CONSTANT_DATA_OUTPUT HSConstantData,
 
 	<technique name="DepthFillSkinnedAlphaTestSmooth5Tech" inherit="DepthFillAlphaTestTech">
 		<pass name="p0">
+			<state name="cull_mode" value="none"/>
+
 			<state name="vertex_shader" value="SmoothSkinnedVS()"/>
 			<state name="hull_shader" value="SmoothHS()"/>
 			<state name="domain_shader" value="SmoothDS()"/>
@@ -1564,6 +1617,8 @@ void SmoothDS(HS_CONSTANT_DATA_OUTPUT HSConstantData,
 
 	<technique name="GBufferFillSmooth5RT0Tech" inherit="GBufferFillRT0Tech">
 		<pass name="p0">
+			<state name="cull_mode" value="none"/>
+
 			<state name="vertex_shader" value="SmoothVS()"/>
 			<state name="hull_shader" value="SmoothHS()"/>
 			<state name="domain_shader" value="SmoothDS()"/>
@@ -1572,6 +1627,8 @@ void SmoothDS(HS_CONSTANT_DATA_OUTPUT HSConstantData,
 
 	<technique name="GBufferFillSkinnedSmooth5RT0Tech" inherit="GBufferFillRT0Tech">
 		<pass name="p0">
+			<state name="cull_mode" value="none"/>
+
 			<state name="vertex_shader" value="SmoothSkinnedVS()"/>
 			<state name="hull_shader" value="SmoothHS()"/>
 			<state name="domain_shader" value="SmoothDS()"/>
@@ -1580,6 +1637,8 @@ void SmoothDS(HS_CONSTANT_DATA_OUTPUT HSConstantData,
 
 	<technique name="GBufferFillAlphaTestSmooth5RT0Tech" inherit="GBufferFillAlphaTestRT0Tech">
 		<pass name="p0">
+			<state name="cull_mode" value="none"/>
+
 			<state name="vertex_shader" value="SmoothVS()"/>
 			<state name="hull_shader" value="SmoothHS()"/>
 			<state name="domain_shader" value="SmoothDS()"/>
@@ -1588,6 +1647,8 @@ void SmoothDS(HS_CONSTANT_DATA_OUTPUT HSConstantData,
 
 	<technique name="GBufferFillSkinnedAlphaTestSmooth5RT0Tech" inherit="GBufferFillAlphaTestRT0Tech">
 		<pass name="p0">
+			<state name="cull_mode" value="none"/>
+
 			<state name="vertex_shader" value="SmoothSkinnedVS()"/>
 			<state name="hull_shader" value="SmoothHS()"/>
 			<state name="domain_shader" value="SmoothDS()"/>
@@ -1626,6 +1687,8 @@ void SmoothDS(HS_CONSTANT_DATA_OUTPUT HSConstantData,
 
 	<technique name="GBufferFillSmooth5RT1Tech" inherit="GBufferFillRT1Tech">
 		<pass name="p0">
+			<state name="cull_mode" value="none"/>
+
 			<state name="vertex_shader" value="SmoothVS()"/>
 			<state name="hull_shader" value="SmoothHS()"/>
 			<state name="domain_shader" value="SmoothDS()"/>
@@ -1634,6 +1697,8 @@ void SmoothDS(HS_CONSTANT_DATA_OUTPUT HSConstantData,
 
 	<technique name="GBufferFillSkinnedSmooth5RT1Tech" inherit="GBufferFillRT1Tech">
 		<pass name="p0">
+			<state name="cull_mode" value="none"/>
+
 			<state name="vertex_shader" value="SmoothSkinnedVS()"/>
 			<state name="hull_shader" value="SmoothHS()"/>
 			<state name="domain_shader" value="SmoothDS()"/>
@@ -1642,6 +1707,8 @@ void SmoothDS(HS_CONSTANT_DATA_OUTPUT HSConstantData,
 
 	<technique name="GBufferFillAlphaTestSmooth5RT1Tech" inherit="GBufferFillAlphaTestRT1Tech">
 		<pass name="p0">
+			<state name="cull_mode" value="none"/>
+
 			<state name="vertex_shader" value="SmoothVS()"/>
 			<state name="hull_shader" value="SmoothHS()"/>
 			<state name="domain_shader" value="SmoothDS()"/>
@@ -1650,6 +1717,8 @@ void SmoothDS(HS_CONSTANT_DATA_OUTPUT HSConstantData,
 
 	<technique name="GBufferFillSkinnedAlphaTestSmooth5RT1Tech" inherit="GBufferFillAlphaTestRT1Tech">
 		<pass name="p0">
+			<state name="cull_mode" value="none"/>
+
 			<state name="vertex_shader" value="SmoothSkinnedVS()"/>
 			<state name="hull_shader" value="SmoothHS()"/>
 			<state name="domain_shader" value="SmoothDS()"/>
@@ -1688,6 +1757,8 @@ void SmoothDS(HS_CONSTANT_DATA_OUTPUT HSConstantData,
 
 	<technique name="GBufferFillSmooth5MRTTech" inherit="GBufferFillMRTTech">
 		<pass name="p0">
+			<state name="cull_mode" value="none"/>
+
 			<state name="vertex_shader" value="SmoothVS()"/>
 			<state name="hull_shader" value="SmoothHS()"/>
 			<state name="domain_shader" value="SmoothDS()"/>
@@ -1696,6 +1767,8 @@ void SmoothDS(HS_CONSTANT_DATA_OUTPUT HSConstantData,
 
 	<technique name="GBufferFillSkinnedSmooth5MRTTech" inherit="GBufferFillMRTTech">
 		<pass name="p0">
+			<state name="cull_mode" value="none"/>
+
 			<state name="vertex_shader" value="SmoothSkinnedVS()"/>
 			<state name="hull_shader" value="SmoothHS()"/>
 			<state name="domain_shader" value="SmoothDS()"/>
@@ -1704,6 +1777,8 @@ void SmoothDS(HS_CONSTANT_DATA_OUTPUT HSConstantData,
 
 	<technique name="GBufferFillAlphaTestSmooth5MRTTech" inherit="GBufferFillAlphaTestMRTTech">
 		<pass name="p0">
+			<state name="cull_mode" value="none"/>
+
 			<state name="vertex_shader" value="SmoothVS()"/>
 			<state name="hull_shader" value="SmoothHS()"/>
 			<state name="domain_shader" value="SmoothDS()"/>
@@ -1780,6 +1855,8 @@ void SmoothDS(HS_CONSTANT_DATA_OUTPUT HSConstantData,
 
 	<technique name="VisualizeTextureFillSmooth5RT0Tech" inherit="VisualizeTextureFillRT0Tech">
 		<pass name="p0">
+			<state name="cull_mode" value="none"/>
+
 			<state name="vertex_shader" value="SmoothVS()"/>
 			<state name="hull_shader" value="SmoothHS()"/>
 			<state name="domain_shader" value="SmoothDS()"/>
@@ -1788,6 +1865,8 @@ void SmoothDS(HS_CONSTANT_DATA_OUTPUT HSConstantData,
 
 	<technique name="VisualizeTextureFillSkinnedSmooth5RT0Tech" inherit="VisualizeTextureFillSkinnedRT0Tech">
 		<pass name="p0">
+			<state name="cull_mode" value="none"/>
+
 			<state name="vertex_shader" value="SmoothSkinnedVS()"/>
 			<state name="hull_shader" value="SmoothHS()"/>
 			<state name="domain_shader" value="SmoothDS()"/>
@@ -1796,6 +1875,8 @@ void SmoothDS(HS_CONSTANT_DATA_OUTPUT HSConstantData,
 
 	<technique name="VisualizeTextureFillSmooth5RT1Tech" inherit="VisualizeTextureFillRT1Tech">
 		<pass name="p0">
+			<state name="cull_mode" value="none"/>
+
 			<state name="vertex_shader" value="SmoothVS()"/>
 			<state name="hull_shader" value="SmoothHS()"/>
 			<state name="domain_shader" value="SmoothDS()"/>
@@ -1804,6 +1885,8 @@ void SmoothDS(HS_CONSTANT_DATA_OUTPUT HSConstantData,
 
 	<technique name="VisualizeTextureFillSkinnedSmooth5RT1Tech" inherit="VisualizeTextureFillSkinnedRT1Tech">
 		<pass name="p0">
+			<state name="cull_mode" value="none"/>
+
 			<state name="vertex_shader" value="SmoothSkinnedVS()"/>
 			<state name="hull_shader" value="SmoothHS()"/>
 			<state name="domain_shader" value="SmoothDS()"/>
@@ -1812,6 +1895,8 @@ void SmoothDS(HS_CONSTANT_DATA_OUTPUT HSConstantData,
 
 	<technique name="VisualizeTextureFillSmooth5MRTTech" inherit="VisualizeTextureFillMRTTech">
 		<pass name="p0">
+			<state name="cull_mode" value="none"/>
+
 			<state name="vertex_shader" value="SmoothVS()"/>
 			<state name="hull_shader" value="SmoothHS()"/>
 			<state name="domain_shader" value="SmoothDS()"/>
@@ -1820,6 +1905,8 @@ void SmoothDS(HS_CONSTANT_DATA_OUTPUT HSConstantData,
 
 	<technique name="VisualizeTextureFillSkinnedSmooth5MRTTech" inherit="VisualizeTextureFillSkinnedMRTTech">
 		<pass name="p0">
+			<state name="cull_mode" value="none"/>
+
 			<state name="vertex_shader" value="SmoothSkinnedVS()"/>
 			<state name="hull_shader" value="SmoothHS()"/>
 			<state name="domain_shader" value="SmoothDS()"/>
@@ -2085,6 +2172,8 @@ void SmoothDS(HS_CONSTANT_DATA_OUTPUT HSConstantData,
 
 	<technique name="SpecialShadingFillSmooth5Tech" inherit="SpecialShadingFillTech">
 		<pass name="p0">
+			<state name="cull_mode" value="none"/>
+
 			<state name="vertex_shader" value="SmoothVS()"/>
 			<state name="hull_shader" value="SmoothHS()"/>
 			<state name="domain_shader" value="SmoothDS()"/>
@@ -2107,6 +2196,8 @@ void SmoothDS(HS_CONSTANT_DATA_OUTPUT HSConstantData,
 
 	<technique name="SpecialShadingFillSkinnedSmooth5Tech" inherit="SpecialShadingFillSkinnedTech">
 		<pass name="p0">
+			<state name="cull_mode" value="none"/>
+
 			<state name="vertex_shader" value="SmoothSkinnedVS()"/>
 			<state name="hull_shader" value="SmoothHS()"/>
 			<state name="domain_shader" value="SmoothDS()"/>
@@ -2114,7 +2205,6 @@ void SmoothDS(HS_CONSTANT_DATA_OUTPUT HSConstantData,
 	</technique>
 	<technique name="SpecialShadingFillSkinnedBlendBackSmooth5Tech" inherit="SpecialShadingFillSkinnedBlendBackTech">
 		<pass name="p0">
-
 			<state name="vertex_shader" value="SmoothSkinnedVS()"/>
 			<state name="hull_shader" value="SmoothHS()"/>
 			<state name="domain_shader" value="SmoothDS()"/>
@@ -2324,24 +2414,32 @@ void InstTessSmoothVisualizeVertexVS(float2 barycentric : TEXCOORD1,
 
 	<technique name="GBufferFillSmooth4RT0Tech" inherit="GBufferFillRT0Tech">
 		<pass name="p0">
+			<state name="cull_mode" value="none"/>
+
 			<state name="vertex_shader" value="InstTessSmoothVS()"/>
 		</pass>
 	</technique>
 
 	<technique name="GBufferFillSkinnedSmooth4RT0Tech" inherit="GBufferFillSkinnedRT0Tech">
 		<pass name="p0">
+			<state name="cull_mode" value="none"/>
+
 			<state name="vertex_shader" value="InstTessSmoothVS()"/>
 		</pass>
 	</technique>
 
 	<technique name="GBufferFillAlphaTestSmooth4RT0Tech" inherit="GBufferFillAlphaTestRT0Tech">
 		<pass name="p0">
+			<state name="cull_mode" value="none"/>
+
 			<state name="vertex_shader" value="InstTessSmoothVS()"/>
 		</pass>
 	</technique>
 
 	<technique name="GBufferFillSkinnedAlphaTestSmooth4RT0Tech" inherit="GBufferFillSkinnedAlphaTestRT0Tech">
 		<pass name="p0">
+			<state name="cull_mode" value="none"/>
+
 			<state name="vertex_shader" value="InstTessSmoothVS()"/>
 		</pass>
 	</technique>
@@ -2370,24 +2468,32 @@ void InstTessSmoothVisualizeVertexVS(float2 barycentric : TEXCOORD1,
 
 	<technique name="GBufferFillSmooth4RT1Tech" inherit="GBufferFillRT1Tech">
 		<pass name="p0">
+			<state name="cull_mode" value="none"/>
+
 			<state name="vertex_shader" value="InstTessSmoothVS()"/>
 		</pass>
 	</technique>
 
 	<technique name="GBufferFillSkinnedSmooth4RT1Tech" inherit="GBufferFillSkinnedRT1Tech">
 		<pass name="p0">
+			<state name="cull_mode" value="none"/>
+
 			<state name="vertex_shader" value="InstTessSmoothVS()"/>
 		</pass>
 	</technique>
 
 	<technique name="GBufferFillAlphaTestSmooth4RT1Tech" inherit="GBufferFillAlphaTestRT1Tech">
 		<pass name="p0">
+			<state name="cull_mode" value="none"/>
+
 			<state name="vertex_shader" value="InstTessSmoothVS()"/>
 		</pass>
 	</technique>
 
 	<technique name="GBufferFillSkinnedAlphaTestSmooth4RT1Tech" inherit="GBufferFillSkinnedAlphaTestRT1Tech">
 		<pass name="p0">
+			<state name="cull_mode" value="none"/>
+
 			<state name="vertex_shader" value="InstTessSmoothVS()"/>
 		</pass>
 	</technique>
@@ -2416,24 +2522,32 @@ void InstTessSmoothVisualizeVertexVS(float2 barycentric : TEXCOORD1,
 
 	<technique name="GBufferFillSmooth4MRTTech" inherit="GBufferFillMRTTech">
 		<pass name="p0">
+			<state name="cull_mode" value="none"/>
+
 			<state name="vertex_shader" value="InstTessSmoothVS()"/>
 		</pass>
 	</technique>
 
 	<technique name="GBufferFillSkinnedSmooth4MRTTech" inherit="GBufferFillSkinnedMRTTech">
 		<pass name="p0">
+			<state name="cull_mode" value="none"/>
+
 			<state name="vertex_shader" value="InstTessSmoothVS()"/>
 		</pass>
 	</technique>
 
 	<technique name="GBufferFillAlphaTestSmooth4MRTTech" inherit="GBufferFillAlphaTestMRTTech">
 		<pass name="p0">
+			<state name="cull_mode" value="none"/>
+
 			<state name="vertex_shader" value="InstTessSmoothVS()"/>
 		</pass>
 	</technique>
 
 	<technique name="GBufferFillSkinnedAlphaTestSmooth4MRTTech" inherit="GBufferFillSkinnedAlphaTestMRTTech">
 		<pass name="p0">
+			<state name="cull_mode" value="none"/>
+
 			<state name="vertex_shader" value="InstTessSmoothVS()"/>
 		</pass>
 	</technique>
@@ -2745,6 +2859,8 @@ void InstTessSmoothVisualizeVertexVS(float2 barycentric : TEXCOORD1,
 
 	<technique name="SpecialShadingFillSmooth4Tech" inherit="SpecialShadingFillTech">
 		<pass name="p0">
+			<state name="cull_mode" value="none"/>
+
 			<state name="vertex_shader" value="InstTessSmoothVS()"/>
 		</pass>
 	</technique>
@@ -2761,6 +2877,8 @@ void InstTessSmoothVisualizeVertexVS(float2 barycentric : TEXCOORD1,
 
 	<technique name="SpecialShadingFillSkinnedSmooth4Tech" inherit="SpecialShadingFillSkinnedTech">
 		<pass name="p0">
+			<state name="cull_mode" value="none"/>
+
 			<state name="vertex_shader" value="InstTessSmoothVS()"/>
 		</pass>
 	</technique>

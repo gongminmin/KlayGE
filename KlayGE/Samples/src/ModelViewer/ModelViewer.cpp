@@ -393,8 +393,22 @@ void ModelViewerApp::OpenModel(std::string const & name)
 	boost::shared_ptr<ModelObject> model = checked_pointer_cast<ModelObject>(model_);
 
 	frame_ = 0;
-	dialog_animation_->Control<UISlider>(id_frame_slider_)->SetRange(0, model->NumFrames() * 10 - 1);
-	dialog_animation_->Control<UISlider>(id_frame_slider_)->SetValue(static_cast<int>(frame_ * 10 + 0.5f));
+	if (model->NumFrames() > 0)
+	{
+		dialog_animation_->Control<UICheckBox>(id_skinned_)->SetEnabled(true);
+		dialog_animation_->Control<UICheckBox>(id_play_)->SetEnabled(true);
+		dialog_animation_->Control<UISlider>(id_frame_slider_)->SetEnabled(true);
+		dialog_animation_->Control<UISlider>(id_frame_slider_)->SetRange(0, model->NumFrames() * 10 - 1);
+		dialog_animation_->Control<UISlider>(id_frame_slider_)->SetValue(static_cast<int>(frame_ * 10 + 0.5f));
+	}
+	else
+	{
+		dialog_animation_->Control<UICheckBox>(id_skinned_)->SetEnabled(false);
+		dialog_animation_->Control<UICheckBox>(id_play_)->SetEnabled(false);
+		dialog_animation_->Control<UISlider>(id_frame_slider_)->SetEnabled(false);
+		dialog_animation_->Control<UISlider>(id_frame_slider_)->SetRange(0, 1);
+		dialog_animation_->Control<UISlider>(id_frame_slider_)->SetValue(0);
+	}
 
 	dialog_model_->Control<UIComboBox>(id_mesh_)->RemoveAllItems();
 	for (uint32_t i = 0; i < model->NumMeshes(); ++ i)
