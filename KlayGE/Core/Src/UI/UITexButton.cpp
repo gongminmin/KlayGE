@@ -112,7 +112,7 @@ namespace KlayGE
 		}
 	}
 
-	void UITexButton::MouseDownHandler(UIDialog const & /*sender*/, uint32_t buttons, Vector_T<int32_t, 2> const & /*pt*/)
+	void UITexButton::MouseDownHandler(UIDialog const & /*sender*/, uint32_t buttons, int2 const & /*pt*/)
 	{
 		if (buttons & MB_Left)
 		{
@@ -125,7 +125,7 @@ namespace KlayGE
 		}
 	}
 
-	void UITexButton::MouseUpHandler(UIDialog const & /*sender*/, uint32_t buttons, Vector_T<int32_t, 2> const & pt)
+	void UITexButton::MouseUpHandler(UIDialog const & /*sender*/, uint32_t buttons, int2 const & pt)
 	{
 		if (buttons & MB_Left)
 		{

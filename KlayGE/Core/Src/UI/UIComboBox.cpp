@@ -154,7 +154,7 @@ namespace KlayGE
 		if (opened_)
 		{
 			dropdown_rc_ = text_rc_;
-			dropdown_rc_ += Vector_T<int32_t, 2>(2, text_rc_.Height());
+			dropdown_rc_ += int2(2, text_rc_.Height());
 			dropdown_rc_.bottom() += drop_height_;
 
 			dropdown_text_rc_ = dropdown_rc_;
@@ -260,7 +260,7 @@ namespace KlayGE
 		scroll_bar_.KeyUpHandler(sender, key);
 	}
 
-	void UIComboBox::MouseOverHandler(UIDialog const & sender, uint32_t buttons, Vector_T<int32_t, 2> const & pt)
+	void UIComboBox::MouseOverHandler(UIDialog const & sender, uint32_t buttons, int2 const & pt)
 	{
 		scroll_bar_.MouseOverHandler(sender, buttons, pt);
 
@@ -278,7 +278,7 @@ namespace KlayGE
 		}
 	}
 
-	void UIComboBox::MouseDownHandler(UIDialog const & sender, uint32_t buttons, Vector_T<int32_t, 2> const & pt)
+	void UIComboBox::MouseDownHandler(UIDialog const & sender, uint32_t buttons, int2 const & pt)
 	{
 		scroll_bar_.MouseDownHandler(sender, buttons, pt);
 
@@ -339,7 +339,7 @@ namespace KlayGE
 		}
 	}
 
-	void UIComboBox::MouseUpHandler(UIDialog const & sender, uint32_t buttons, Vector_T<int32_t, 2> const & pt)
+	void UIComboBox::MouseUpHandler(UIDialog const & sender, uint32_t buttons, int2 const & pt)
 	{
 		scroll_bar_.MouseUpHandler(sender, buttons, pt);
 
@@ -373,7 +373,7 @@ namespace KlayGE
 		}
 	}
 
-	void UIComboBox::MouseWheelHandler(UIDialog const & sender, uint32_t buttons, Vector_T<int32_t, 2> const & pt, int32_t z_delta)
+	void UIComboBox::MouseWheelHandler(UIDialog const & sender, uint32_t buttons, int2 const & pt, int32_t z_delta)
 	{
 		scroll_bar_.MouseWheelHandler(sender, buttons, pt, z_delta);
 

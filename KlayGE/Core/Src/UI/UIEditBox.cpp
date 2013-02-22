@@ -622,7 +622,7 @@ namespace KlayGE
 		}
 	}
 
-	void UIEditBox::MouseOverHandler(UIDialog const & /*sender*/, uint32_t /*buttons*/, Vector_T<int32_t, 2> const & pt)
+	void UIEditBox::MouseOverHandler(UIDialog const & /*sender*/, uint32_t /*buttons*/, int2 const & pt)
 	{
 		if (mouse_drag_)
 		{
@@ -764,7 +764,7 @@ namespace KlayGE
 #endif
 	}
 
-	void UIEditBox::MouseDownHandler(UIDialog const & /*sender*/, uint32_t buttons, Vector_T<int32_t, 2> const & pt)
+	void UIEditBox::MouseDownHandler(UIDialog const & /*sender*/, uint32_t buttons, int2 const & pt)
 	{
 		if (buttons & MB_Left)
 		{
@@ -797,7 +797,7 @@ namespace KlayGE
 		}
 	}
 
-	void UIEditBox::MouseUpHandler(UIDialog const & /*sender*/, uint32_t buttons, Vector_T<int32_t, 2> const & /*pt*/)
+	void UIEditBox::MouseUpHandler(UIDialog const & /*sender*/, uint32_t buttons, int2 const & /*pt*/)
 	{
 		if (buttons & MB_Left)
 		{
@@ -870,7 +870,7 @@ namespace KlayGE
 			}
 
 			rcSelection = Rect_T<int32_t>(nSelLeftX, text_rc_.top(), nSelRightX, text_rc_.bottom());
-			rcSelection += Vector_T<int32_t, 2>(text_rc_.left() - nXFirst, 0);
+			rcSelection += int2(text_rc_.left() - nXFirst, 0);
 			rcSelection &= text_rc_;
 
 			this->GetDialog()->DrawRect(rcSelection, -0.005f, sel_bk_color_);

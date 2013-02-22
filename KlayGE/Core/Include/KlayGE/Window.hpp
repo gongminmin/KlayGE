@@ -144,10 +144,10 @@ namespace KlayGE
 		typedef boost::signals2::signal<void(Window const &, wchar_t)> CharEvent;
 		typedef boost::signals2::signal<void(Window const &, wchar_t)> KeyDownEvent;
 		typedef boost::signals2::signal<void(Window const &, wchar_t)> KeyUpEvent;
-		typedef boost::signals2::signal<void(Window const &, uint32_t, Vector_T<int32_t, 2> const &)> MouseDownEvent;
-		typedef boost::signals2::signal<void(Window const &, uint32_t, Vector_T<int32_t, 2> const &)> MouseUpEvent;
-		typedef boost::signals2::signal<void(Window const &, uint32_t, Vector_T<int32_t, 2> const &, int32_t)> MouseWheelEvent;
-		typedef boost::signals2::signal<void(Window const &, uint32_t, Vector_T<int32_t, 2> const &)> MouseOverEvent;
+		typedef boost::signals2::signal<void(Window const &, uint32_t, int2 const &)> MouseDownEvent;
+		typedef boost::signals2::signal<void(Window const &, uint32_t, int2 const &)> MouseUpEvent;
+		typedef boost::signals2::signal<void(Window const &, uint32_t, int2 const &, int32_t)> MouseWheelEvent;
+		typedef boost::signals2::signal<void(Window const &, uint32_t, int2 const &)> MouseOverEvent;
 		typedef boost::signals2::signal<void(Window const &)> CloseEvent;
 
 		ActiveEvent& OnActive()

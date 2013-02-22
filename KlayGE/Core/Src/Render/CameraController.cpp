@@ -132,7 +132,7 @@ namespace KlayGE
 				std::vector<UIDialogPtr> const & dlgs = UIManager::Instance().GetDialogs();
 				for (size_t i = 0; i < dlgs.size(); ++ i)
 				{
-					if (dlgs[i]->GetVisible() && dlgs[i]->ContainsPoint(Vector_T<int32_t, 2>(mouse->AbsX(), mouse->AbsY())))
+					if (dlgs[i]->GetVisible() && dlgs[i]->ContainsPoint(int2(mouse->AbsX(), mouse->AbsY())))
 					{
 						mouse_on_ui = true;
 						break;
@@ -332,7 +332,7 @@ namespace KlayGE
 				std::vector<UIDialogPtr> const & dlgs = UIManager::Instance().GetDialogs();
 				for (size_t i = 0; i < dlgs.size(); ++ i)
 				{
-					if (dlgs[i]->GetVisible() && dlgs[i]->ContainsPoint(Vector_T<int32_t, 2>(mouse->AbsX(), mouse->AbsY())))
+					if (dlgs[i]->GetVisible() && dlgs[i]->ContainsPoint(int2(mouse->AbsX(), mouse->AbsY())))
 					{
 						mouse_on_ui = true;
 						break;

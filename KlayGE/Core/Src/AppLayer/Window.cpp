@@ -23,6 +23,8 @@
 #include <KlayGE/Window.hpp>
 
 #ifdef KLAYGE_PLATFORM_WINDOWS
+#include <windowsx.h>
+
 #ifndef GET_KEYSTATE_WPARAM
 #define GET_KEYSTATE_WPARAM(wParam) (LOWORD(wParam))
 #endif
@@ -310,7 +312,7 @@ namespace KlayGE
 					buttons |= MB_Shift;
 				}
 
-				this->OnMouseDown()(*this, buttons, Vector_T<int32_t, 2>(LOWORD(lParam), HIWORD(lParam)));
+				this->OnMouseDown()(*this, buttons, int2(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam)));
 			}
 			break;
 
@@ -334,7 +336,7 @@ namespace KlayGE
 					buttons |= MB_Shift;
 				}
 
-				this->OnMouseDown()(*this, buttons, Vector_T<int32_t, 2>(LOWORD(lParam), HIWORD(lParam)));
+				this->OnMouseDown()(*this, buttons, int2(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam)));
 			}
 			break;
 
@@ -358,7 +360,7 @@ namespace KlayGE
 					buttons |= MB_Shift;
 				}
 
-				this->OnMouseDown()(*this, buttons, Vector_T<int32_t, 2>(LOWORD(lParam), HIWORD(lParam)));
+				this->OnMouseDown()(*this, buttons, int2(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam)));
 			}
 			break;
 
@@ -382,7 +384,7 @@ namespace KlayGE
 					buttons |= MB_Shift;
 				}
 
-				this->OnMouseUp()(*this, buttons, Vector_T<int32_t, 2>(LOWORD(lParam), HIWORD(lParam)));
+				this->OnMouseUp()(*this, buttons, int2(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam)));
 			}
 			break;
 
@@ -406,7 +408,7 @@ namespace KlayGE
 					buttons |= MB_Shift;
 				}
 
-				this->OnMouseUp()(*this, buttons, Vector_T<int32_t, 2>(LOWORD(lParam), HIWORD(lParam)));
+				this->OnMouseUp()(*this, buttons, int2(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam)));
 			}
 			break;
 
@@ -430,7 +432,7 @@ namespace KlayGE
 					buttons |= MB_Shift;
 				}
 
-				this->OnMouseUp()(*this, buttons, Vector_T<int32_t, 2>(LOWORD(lParam), HIWORD(lParam)));
+				this->OnMouseUp()(*this, buttons, int2(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam)));
 			}
 			break;
 
@@ -458,7 +460,8 @@ namespace KlayGE
 					buttons |= MB_Shift;
 				}
 
-				this->OnMouseWheel()(*this, buttons, Vector_T<int32_t, 2>(LOWORD(lParam), HIWORD(lParam)), GET_WHEEL_DELTA_WPARAM(wParam));
+				this->OnMouseWheel()(*this, buttons, int2(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam)),
+					GET_WHEEL_DELTA_WPARAM(wParam));
 			}
 			break;
 
@@ -486,7 +489,7 @@ namespace KlayGE
 					buttons |= MB_Shift;
 				}
 
-				this->OnMouseOver()(*this, buttons, Vector_T<int32_t, 2>(LOWORD(lParam), HIWORD(lParam)));
+				this->OnMouseOver()(*this, buttons, int2(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam)));
 			}
 			break;
 

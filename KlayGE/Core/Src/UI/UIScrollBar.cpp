@@ -203,7 +203,7 @@ namespace KlayGE
 		this->UpdateThumbRect();
 	}
 
-	void UIScrollBar::MouseOverHandler(UIDialog const & /*sender*/, uint32_t /*buttons*/, Vector_T<int32_t, 2> const & pt)
+	void UIScrollBar::MouseOverHandler(UIDialog const & /*sender*/, uint32_t /*buttons*/, int2 const & pt)
 	{
 		last_mouse_ = pt;
 		is_mouse_over_ = true;
@@ -214,13 +214,13 @@ namespace KlayGE
 			thumb_rc_.top() = pt.y() - thumb_offset_y_;
 			if (thumb_rc_.top() < track_rc_.top())
 			{
-				thumb_rc_ += Vector_T<int32_t, 2>(0, track_rc_.top() - thumb_rc_.top());
+				thumb_rc_ += int2(0, track_rc_.top() - thumb_rc_.top());
 			}
 			else
 			{
 				if (thumb_rc_.bottom() > track_rc_.bottom())
 				{
-					thumb_rc_ += Vector_T<int32_t, 2>(0, track_rc_.bottom() - thumb_rc_.bottom());
+					thumb_rc_ += int2(0, track_rc_.bottom() - thumb_rc_.bottom());
 				}
 			}
 
@@ -236,7 +236,7 @@ namespace KlayGE
 		}
 	}
 
-	void UIScrollBar::MouseDownHandler(UIDialog const & /*sender*/, uint32_t buttons, Vector_T<int32_t, 2> const & pt)
+	void UIScrollBar::MouseDownHandler(UIDialog const & /*sender*/, uint32_t buttons, int2 const & pt)
 	{
 		last_mouse_ = pt;
 		if (buttons & MB_Left)
@@ -295,7 +295,7 @@ namespace KlayGE
 		}
 	}
 
-	void UIScrollBar::MouseUpHandler(UIDialog const & /*sender*/, uint32_t buttons, Vector_T<int32_t, 2> const & pt)
+	void UIScrollBar::MouseUpHandler(UIDialog const & /*sender*/, uint32_t buttons, int2 const & pt)
 	{
 		last_mouse_ = pt;
 		if (buttons & MB_Left)

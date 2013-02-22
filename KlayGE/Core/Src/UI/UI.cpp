@@ -1053,7 +1053,7 @@ namespace KlayGE
 		}
 	}
 
-	void UIManager::MouseDownHandler(uint32_t buttons, Vector_T<int32_t, 2> const & pt)
+	void UIManager::MouseDownHandler(uint32_t buttons, int2 const & pt)
 	{
 		typedef KLAYGE_DECLTYPE(dialogs_) DialogsType;
 		KLAYGE_FOREACH(DialogsType::reference dialog, dialogs_)
@@ -1065,7 +1065,7 @@ namespace KlayGE
 		}
 	}
 
-	void UIManager::MouseUpHandler(uint32_t buttons, Vector_T<int32_t, 2> const & pt)
+	void UIManager::MouseUpHandler(uint32_t buttons, int2 const & pt)
 	{
 		typedef KLAYGE_DECLTYPE(dialogs_) DialogsType;
 		KLAYGE_FOREACH(DialogsType::reference dialog, dialogs_)
@@ -1077,7 +1077,7 @@ namespace KlayGE
 		}
 	}
 
-	void UIManager::MouseWheelHandler(uint32_t buttons, Vector_T<int32_t, 2> const & pt, int32_t z_delta)
+	void UIManager::MouseWheelHandler(uint32_t buttons, int2 const & pt, int32_t z_delta)
 	{
 		typedef KLAYGE_DECLTYPE(dialogs_) DialogsType;
 		KLAYGE_FOREACH(DialogsType::reference dialog, dialogs_)
@@ -1089,7 +1089,7 @@ namespace KlayGE
 		}
 	}
 
-	void UIManager::MouseOverHandler(uint32_t buttons, Vector_T<int32_t, 2> const & pt)
+	void UIManager::MouseOverHandler(uint32_t buttons, int2 const & pt)
 	{
 		typedef KLAYGE_DECLTYPE(dialogs_) DialogsType;
 		KLAYGE_FOREACH(DialogsType::reference dialog, dialogs_)
@@ -1200,7 +1200,7 @@ namespace KlayGE
 		return ret;
 	}
 
-	UIControlPtr const & UIDialog::GetControlAtPoint(Vector_T<int32_t, 2> const & pt) const
+	UIControlPtr const & UIDialog::GetControlAtPoint(int2 const & pt) const
 	{
 		// Search through all child controls for the first one which
 		// contains the mouse point
@@ -1272,7 +1272,7 @@ namespace KlayGE
 			Rect_T<int32_t> rcScreen = rc + this->GetLocation();
 			if (this->IsCaptionEnabled())
 			{
-				rcScreen += Vector_T<int32_t, 2>(0, this->GetCaptionHeight());
+				rcScreen += int2(0, this->GetCaptionHeight());
 			}
 
 			float3 pos(static_cast<float>(rcScreen.left()), static_cast<float>(rcScreen.top()), depth_base_);
@@ -1409,9 +1409,9 @@ namespace KlayGE
 		bottom_right_clr_ = colorBottomRight;
 	}
 
-	Vector_T<int32_t, 2> UIDialog::ToLocal(Vector_T<int32_t, 2> const & pt) const
+	int2 UIDialog::ToLocal(int2 const & pt) const
 	{
-		Vector_T<int32_t, 2> ret = pt - this->GetLocation();
+		int2 ret = pt - this->GetLocation();
 		if (this->IsCaptionEnabled())
 		{
 			ret.y() -= caption_height_;
@@ -1595,7 +1595,7 @@ namespace KlayGE
 		Rect_T<int32_t> rcScreen = rc + this->GetLocation();
 		if (this->IsCaptionEnabled())
 		{
-			rcScreen += Vector_T<int32_t, 2>(0, this->GetCaptionHeight());
+			rcScreen += int2(0, this->GetCaptionHeight());
 		}
 
 		float3 pos(static_cast<float>(rcScreen.left()), static_cast<float>(rcScreen.top()), depth_base_ + depth);
@@ -1630,7 +1630,7 @@ namespace KlayGE
 		// If caption is enabled, offset the Y position by its height.
 		if (this->IsCaptionEnabled())
 		{
-			rcScreen += Vector_T<int32_t, 2>(0, this->GetCaptionHeight());
+			rcScreen += int2(0, this->GetCaptionHeight());
 		}
 
 		float3 pos(static_cast<float>(rcScreen.left()), static_cast<float>(rcScreen.top()), depth_base_ + depth_bias);
@@ -1644,13 +1644,13 @@ namespace KlayGE
 		if (bShadow)
 		{
 			Rect_T<int32_t> rcShadow = rc;
-			rcShadow += Vector_T<int32_t, 2>(1, 1);
+			rcShadow += int2(1, 1);
 
 			Rect_T<int32_t> r = rcShadow;
 			r += this->GetLocation();
 			if (this->IsCaptionEnabled())
 			{
-				r += Vector_T<int32_t, 2>(0, this->GetCaptionHeight());
+				r += int2(0, this->GetCaptionHeight());
 			}
 
 			UIManager::Instance().DrawString(strText, uie.FontIndex(), r, depth_base_ + depth_bias - 0.01f,
@@ -1661,7 +1661,7 @@ namespace KlayGE
 		r += this->GetLocation();
 		if (this->IsCaptionEnabled())
 		{
-			r += Vector_T<int32_t, 2>(0, this->GetCaptionHeight());
+			r += int2(0, this->GetCaptionHeight());
 		}
 
 		UIManager::Instance().DrawString(strText, uie.FontIndex(), r, depth_base_ + depth_bias - 0.01f,
@@ -1674,7 +1674,7 @@ namespace KlayGE
 		r += this->GetLocation();
 		if (this->IsCaptionEnabled())
 		{
-			r += Vector_T<int32_t, 2>(0, this->GetCaptionHeight());
+			r += int2(0, this->GetCaptionHeight());
 		}
 
 		Size_T<uint32_t> size = UIManager::Instance().CalcSize(strText, uie.FontIndex(), r, uie.TextAlign());
@@ -1879,9 +1879,9 @@ namespace KlayGE
 		}
 	}
 
-	void UIDialog::MouseDownHandler(uint32_t buttons, Vector_T<int32_t, 2> const & pt)
+	void UIDialog::MouseDownHandler(uint32_t buttons, int2 const & pt)
 	{
-		Vector_T<int32_t, 2> pt_local = pt;
+		int2 pt_local = pt;
 		pt_local -= this->GetLocation();
 
 		UIControlPtr control;
@@ -1910,7 +1910,7 @@ namespace KlayGE
 		}
 	}
 
-	void UIDialog::MouseUpHandler(uint32_t buttons, Vector_T<int32_t, 2> const & pt)
+	void UIDialog::MouseUpHandler(uint32_t buttons, int2 const & pt)
 	{
 		UIControlPtr control;
 		if (control_focus_.lock() && control_focus_.lock()->GetEnabled()
@@ -1938,7 +1938,7 @@ namespace KlayGE
 		}
 	}
 
-	void UIDialog::MouseWheelHandler(uint32_t buttons, Vector_T<int32_t, 2> const & pt, int32_t z_delta)
+	void UIDialog::MouseWheelHandler(uint32_t buttons, int2 const & pt, int32_t z_delta)
 	{
 		UIControlPtr control;
 		if (control_focus_.lock() && control_focus_.lock()->GetEnabled()
@@ -1966,7 +1966,7 @@ namespace KlayGE
 		}
 	}
 
-	void UIDialog::MouseOverHandler(uint32_t buttons, Vector_T<int32_t, 2> const & pt)
+	void UIDialog::MouseOverHandler(uint32_t buttons, int2 const & pt)
 	{
 		UIControlPtr control;
 		if (control_focus_.lock() && control_focus_.lock()->GetEnabled()

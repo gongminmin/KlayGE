@@ -395,7 +395,7 @@ namespace KlayGE
 		scroll_bar_.KeyUpHandler(sender, key);
 	}
 
-	void UIListBox::MouseOverHandler(UIDialog const & sender, uint32_t buttons, Vector_T<int32_t, 2> const & pt)
+	void UIListBox::MouseOverHandler(UIDialog const & sender, uint32_t buttons, int2 const & pt)
 	{
 		// Let the scroll bar handle it first.
 		scroll_bar_.MouseOverHandler(sender, buttons, pt);
@@ -446,7 +446,7 @@ namespace KlayGE
 		}
 	}
 
-	void UIListBox::MouseDownHandler(UIDialog const & sender, uint32_t buttons, Vector_T<int32_t, 2> const & pt)
+	void UIListBox::MouseDownHandler(UIDialog const & sender, uint32_t buttons, int2 const & pt)
 	{
 		if (buttons & MB_Left)
 		{
@@ -582,7 +582,7 @@ namespace KlayGE
 		}
 	}
 
-	void UIListBox::MouseUpHandler(UIDialog const & sender, uint32_t buttons, Vector_T<int32_t, 2> const & pt)
+	void UIListBox::MouseUpHandler(UIDialog const & sender, uint32_t buttons, int2 const & pt)
 	{
 		// Let the scroll bar handle it first.
 		scroll_bar_.MouseUpHandler(sender, buttons, pt);
@@ -616,7 +616,7 @@ namespace KlayGE
 		}
 	}
 
-	void UIListBox::MouseWheelHandler(UIDialog const & sender, uint32_t buttons, Vector_T<int32_t, 2> const & pt, int32_t z_delta)
+	void UIListBox::MouseWheelHandler(UIDialog const & sender, uint32_t buttons, int2 const & pt, int32_t z_delta)
 	{
 		// Let the scroll bar handle it first.
 		scroll_bar_.MouseWheelHandler(sender, buttons, pt, z_delta);
@@ -723,7 +723,7 @@ namespace KlayGE
 					this->GetDialog()->DrawString(pItem->strText, *pElement, rc);
 				}
 
-				rc += Vector_T<int32_t, 2>(0, text_height_);
+				rc += int2(0, text_height_);
 			}
 		}
 

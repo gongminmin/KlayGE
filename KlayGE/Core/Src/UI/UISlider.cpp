@@ -105,7 +105,7 @@ namespace KlayGE
 		}
 	}
 
-	void UISlider::MouseOverHandler(UIDialog const & /*sender*/, uint32_t /*buttons*/, Vector_T<int32_t, 2> const & pt)
+	void UISlider::MouseOverHandler(UIDialog const & /*sender*/, uint32_t /*buttons*/, int2 const & pt)
 	{
 		if (pressed_)
 		{
@@ -113,7 +113,7 @@ namespace KlayGE
 		}
 	}
 
-	void UISlider::MouseDownHandler(UIDialog const & /*sender*/, uint32_t buttons, Vector_T<int32_t, 2> const & pt)
+	void UISlider::MouseDownHandler(UIDialog const & /*sender*/, uint32_t buttons, int2 const & pt)
 	{
 		if (buttons & MB_Left)
 		{
@@ -162,7 +162,7 @@ namespace KlayGE
 		}
 	}
 
-	void UISlider::MouseUpHandler(UIDialog const & /*sender*/, uint32_t buttons, Vector_T<int32_t, 2> const & /*pt*/)
+	void UISlider::MouseUpHandler(UIDialog const & /*sender*/, uint32_t buttons, int2 const & /*pt*/)
 	{
 		if (buttons & MB_Left)
 		{
@@ -174,7 +174,7 @@ namespace KlayGE
 		}
 	}
 
-	void UISlider::MouseWheelHandler(UIDialog const & /*sender*/, uint32_t /*buttons*/, Vector_T<int32_t, 2> const & /*pt*/, int32_t z_delta)
+	void UISlider::MouseWheelHandler(UIDialog const & /*sender*/, uint32_t /*buttons*/, int2 const & /*pt*/, int32_t z_delta)
 	{
 		this->SetValueInternal(value_ - z_delta);
 	}
@@ -187,10 +187,10 @@ namespace KlayGE
 
 		button_rc_ = slider_rc_;
 		button_rc_.right() = button_rc_.left() + button_rc_.Height();
-		button_rc_ += Vector_T<int32_t, 2>(-button_rc_.Width() / 2, 0);
+		button_rc_ += int2(-button_rc_.Width() / 2, 0);
 
 		button_x_ = static_cast<int>((value_ - min_) * static_cast<float>(slider_rc_.Width()) / (max_ - min_));
-		button_rc_ += Vector_T<int32_t, 2>(button_x_, 0);
+		button_rc_ += int2(button_x_, 0);
 
 		bounding_box_ = button_rc_ | slider_rc_;
 	}

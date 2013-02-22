@@ -212,7 +212,7 @@ namespace KlayGE
 	{
 	}
 
-	void UIPolylineEditBox::MouseDownHandler(UIDialog const & /*sender*/, uint32_t buttons, Vector_T<int32_t, 2> const & pt)
+	void UIPolylineEditBox::MouseDownHandler(UIDialog const & /*sender*/, uint32_t buttons, int2 const & pt)
 	{
 		if (buttons & MB_Left)
 		{
@@ -250,7 +250,7 @@ namespace KlayGE
 		}
 	}
 
-	void UIPolylineEditBox::MouseUpHandler(UIDialog const & /*sender*/, uint32_t buttons, Vector_T<int32_t, 2> const & pt)
+	void UIPolylineEditBox::MouseUpHandler(UIDialog const & /*sender*/, uint32_t buttons, int2 const & pt)
 	{
 		if (buttons & MB_Left)
 		{
@@ -278,7 +278,7 @@ namespace KlayGE
 		}
 	}
 
-	void UIPolylineEditBox::MouseOverHandler(UIDialog const & /*sender*/, uint32_t buttons, Vector_T<int32_t, 2> const & pt)
+	void UIPolylineEditBox::MouseOverHandler(UIDialog const & /*sender*/, uint32_t buttons, int2 const & pt)
 	{
 		if (move_point_ || this->ContainsPoint(pt))
 		{

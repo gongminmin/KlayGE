@@ -570,7 +570,7 @@ namespace KlayGE
 						uint32_t width = ci.width;
 						uint32_t height = ci.height;
 
-						Vector_T<int32_t, 2> char_pos;
+						int2 char_pos;
 						CharInfo charInfo;
 						if (cim.size() < num_total_chars)
 						{
