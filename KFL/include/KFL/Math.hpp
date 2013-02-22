@@ -86,7 +86,9 @@ namespace KlayGE
 		abs(T const & x)
 		{
 			return x < T(0) ? -x : x;
-		}
+		}		
+		template <typename T, int N>
+		Vector_T<T, N> abs(Vector_T<T, N> const & x);
 
 		// 取符号
 		template <typename T>
@@ -95,6 +97,8 @@ namespace KlayGE
 		{
 			return x < T(0) ? T(-1) : (x > T(0) ? T(1) : T(0));
 		}
+		template <typename T, int N>
+		Vector_T<T, N> sgn(Vector_T<T, N> const & x);
 
 		// 平方
 		template <typename T>
@@ -103,6 +107,8 @@ namespace KlayGE
 		{
 			return x * x;
 		}
+		template <typename T, int N>
+		Vector_T<T, N> sqr(Vector_T<T, N> const & x);
 		// 立方
 		template <typename T>
 		inline T
@@ -110,6 +116,8 @@ namespace KlayGE
 		{
 			return sqr(x) * x;
 		}
+		template <typename T, int N>
+		Vector_T<T, N> cube(Vector_T<T, N> const & x);
 
 		// 角度化弧度
 		template <typename T>

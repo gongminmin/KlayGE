@@ -125,15 +125,6 @@ namespace KlayGE
 			return AABBox_T<T>(-this->Max(), -this->Min());
 		}
 
-		Vector_T<T, 3> operator[](size_t i) const
-		{
-			BOOST_ASSERT(i < 8);
-
-			return Vector_T<T, 3>((i & 1UL) ? this->Max().x() : this->Min().x(),
-				(i & 2UL) ? this->Max().y() : this->Min().y(),
-				(i & 4UL) ? this->Max().z() : this->Min().z());
-		}
-
 		//  Ù–‘
 		T Width() const
 		{
@@ -234,6 +225,15 @@ namespace KlayGE
 		bool Intersect(Frustum_T<T> const & frustum) const
 		{
 			return MathLib::intersect_aabb_frustum(*this, frustum) != BO_No;
+		}
+
+		Vector_T<T, 3> Corner(size_t index) const
+		{
+			BOOST_ASSERT(index < 8);
+
+			return Vector_T<T, 3>((index & 1UL) ? this->Max().x() : this->Min().x(),
+				(index & 2UL) ? this->Max().y() : this->Min().y(),
+				(index & 4UL) ? this->Max().z() : this->Min().z());
 		}
 
 		friend bool

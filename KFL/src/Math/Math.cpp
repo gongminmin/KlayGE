@@ -37,6 +37,86 @@ namespace KlayGE
 {
 	namespace MathLib
 	{
+		template int1 abs(int1 const & x);
+		template int2 abs(int2 const & x);
+		template int3 abs(int3 const & x);
+		template int4 abs(int4 const & x);
+		template float1 abs(float1 const & x);
+		template float2 abs(float2 const & x);
+		template float3 abs(float3 const & x);
+		template float4 abs(float4 const & x);
+
+		template <typename T, int N>
+		Vector_T<T, N> abs(Vector_T<T, N> const & x)
+		{
+			Vector_T<T, N> ret;
+			for (int i = 0; i < N; ++ i)
+			{
+				ret[i] = MathLib::abs(x[i]);
+			}
+			return ret;
+		}
+
+		template int1 sgn(int1 const & x);
+		template int2 sgn(int2 const & x);
+		template int3 sgn(int3 const & x);
+		template int4 sgn(int4 const & x);
+		template float1 sgn(float1 const & x);
+		template float2 sgn(float2 const & x);
+		template float3 sgn(float3 const & x);
+		template float4 sgn(float4 const & x);
+		
+		template <typename T, int N>
+		Vector_T<T, N> sgn(Vector_T<T, N> const & x)
+		{
+			Vector_T<T, N> ret;
+			for (int i = 0; i < N; ++ i)
+			{
+				ret[i] = MathLib::sgn(x[i]);
+			}
+			return ret;
+		}
+
+		template int1 sqr(int1 const & x);
+		template int2 sqr(int2 const & x);
+		template int3 sqr(int3 const & x);
+		template int4 sqr(int4 const & x);
+		template float1 sqr(float1 const & x);
+		template float2 sqr(float2 const & x);
+		template float3 sqr(float3 const & x);
+		template float4 sqr(float4 const & x);
+
+		template <typename T, int N>
+		Vector_T<T, N> sqr(Vector_T<T, N> const & x)
+		{
+			Vector_T<T, N> ret;
+			for (int i = 0; i < N; ++ i)
+			{
+				ret[i] = MathLib::sqr(x[i]);
+			}
+			return ret;
+		}
+
+		template int1 cube(int1 const & x);
+		template int2 cube(int2 const & x);
+		template int3 cube(int3 const & x);
+		template int4 cube(int4 const & x);
+		template float1 cube(float1 const & x);
+		template float2 cube(float2 const & x);
+		template float3 cube(float3 const & x);
+		template float4 cube(float4 const & x);
+
+		template <typename T, int N>
+		Vector_T<T, N> cube(Vector_T<T, N> const & x)
+		{
+			Vector_T<T, N> ret;
+			for (int i = 0; i < N; ++ i)
+			{
+				ret[i] = MathLib::cube(x[i]);
+			}
+			return ret;
+		}
+
 		float abs(float x)
 		{
 			union FNI
@@ -2119,10 +2199,10 @@ namespace KlayGE
 		AABBox_T<T> transform_aabb(AABBox_T<T> const & aabb, Vector_T<T, 3> const & scale, Quaternion_T<T> const & rot, Vector_T<T, 3> const & trans)
 		{
 			Vector_T<T, 3> min, max;
-			min = max = transform_quat(aabb[0] * scale, rot) + trans;
+			min = max = transform_quat(aabb.Corner(0) * scale, rot) + trans;
 			for (size_t j = 1; j < 8; ++ j)
 			{
-				Vector_T<T, 3> vec = transform_quat(aabb[j] * scale, rot) + trans;
+				Vector_T<T, 3> vec = transform_quat(aabb.Corner(j) * scale, rot) + trans;
 				min = minimize(min, vec);
 				max = maximize(max, vec);
 			}
@@ -2618,18 +2698,11 @@ namespace KlayGE
 		template <typename T>
 		BoundOverlap intersect_obb_frustum(OBBox_T<T> const & obb, Frustum_T<T> const & frustum)
 		{
-			Vector_T<T, 3> const & center = obb.Center();
-			Vector_T<T, 3> const & extent = obb.HalfSize();
-			Vector_T<T, 3> const extent_x = extent.x() * obb.Axis(0);
-			Vector_T<T, 3> const extent_y = extent.y() * obb.Axis(1);
-			Vector_T<T, 3> const extent_z = extent.z() * obb.Axis(2);
-
-			Vector_T<T, 3> min_pt(+1e10f, +1e10f, +1e10f);
-			Vector_T<T, 3> max_pt(-1e10f, -1e10f, -1e10f);
-			for (int i = 0; i < 8; ++ i)
+			Vector_T<T, 3> min_pt = obb.Corner(0);
+			Vector_T<T, 3> max_pt = min_pt;
+			for (int i = 1; i < 8; ++ i)
 			{
-				Vector_T<T, 3> corner = center + ((i & 1) ? extent_x : -extent_x)
-					+ ((i & 2) ? extent_y : -extent_y) + ((i & 4) ? extent_z : -extent_z);
+				Vector_T<T, 3> corner = obb.Corner(i);
 
 				min_pt = minimize(min_pt, corner);
 				max_pt = maximize(max_pt, corner);

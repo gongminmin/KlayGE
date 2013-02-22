@@ -61,62 +61,129 @@ namespace KlayGE
 		RenderLayoutPtr rl_;
 
 		RenderEffectParameterPtr color_ep_;
-		RenderEffectParameterPtr matViewProj_ep_;
+		RenderEffectParameterPtr mvp_ep_;
 	};
 
 	class KLAYGE_CORE_API RenderablePoint : public RenderableHelper
 	{
 	public:
+		RenderablePoint();
 		RenderablePoint(float3 const & v, Color const & clr);
 		virtual ~RenderablePoint()
 		{
 		}
 
+		void SetPoint(float3 const & v);
+		void SetColor(Color const & clr);
+
 		void OnRenderBegin();
+
+	private:
+		void Init();
+
+	private:
+		RenderEffectParameterPtr v0_ep_;
 	};
 
 	class KLAYGE_CORE_API RenderableLine : public RenderableHelper
 	{
 	public:
-		explicit RenderableLine(float3 const & v0, float3 const & v1, Color const & clr);
+		RenderableLine();
+		RenderableLine(float3 const & v0, float3 const & v1, Color const & clr);
 		virtual ~RenderableLine()
 		{
 		}
 
+		void SetLine(float3 const & v0, float3 const & v1);
+		void SetColor(Color const & clr);
+
 		void OnRenderBegin();
+
+	private:
+		void Init();
+
+	private:
+		RenderEffectParameterPtr v0_ep_;
+		RenderEffectParameterPtr v1_ep_;
 	};
 
 	class KLAYGE_CORE_API RenderableTriangle : public RenderableHelper
 	{
 	public:
+		RenderableTriangle();
 		RenderableTriangle(float3 const & v0, float3 const & v1, float3 const & v2, Color const & clr);
 		virtual ~RenderableTriangle()
 		{
 		}
 
+		void SetTriangle(float3 const & v0, float3 const & v1, float3 const & v2);
+		void SetColor(Color const & clr);
+
 		void OnRenderBegin();
+
+	private:
+		void Init();
+
+	private:
+		RenderEffectParameterPtr v0_ep_;
+		RenderEffectParameterPtr v1_ep_;
+		RenderEffectParameterPtr v2_ep_;
 	};
 
 	class KLAYGE_CORE_API RenderableTriBox : public RenderableHelper
 	{
 	public:
-		explicit RenderableTriBox(AABBox const & aabb, Color const & clr);
+		RenderableTriBox();
+		RenderableTriBox(OBBox const & obb, Color const & clr);
 		virtual ~RenderableTriBox()
 		{
 		}
 
+		void SetBox(OBBox const & obb);
+		void SetColor(Color const & clr);
+
 		void OnRenderBegin();
+
+	private:
+		void Init();
+
+	private:
+		RenderEffectParameterPtr v0_ep_;
+		RenderEffectParameterPtr v1_ep_;
+		RenderEffectParameterPtr v2_ep_;
+		RenderEffectParameterPtr v3_ep_;
+		RenderEffectParameterPtr v4_ep_;
+		RenderEffectParameterPtr v5_ep_;
+		RenderEffectParameterPtr v6_ep_;
+		RenderEffectParameterPtr v7_ep_;
 	};
 
 	class KLAYGE_CORE_API RenderableLineBox : public RenderableHelper
 	{
 	public:
-		explicit RenderableLineBox(AABBox const & aabb, Color const & clr);
+		RenderableLineBox();
+		RenderableLineBox(OBBox const & obb, Color const & clr);
 		virtual ~RenderableLineBox()
 		{
 		}
 
+		void SetBox(OBBox const & obb);
+		void SetColor(Color const & clr);
+
 		void OnRenderBegin();
+
+	private:
+		void Init();
+
+	private:
+		RenderEffectParameterPtr v0_ep_;
+		RenderEffectParameterPtr v1_ep_;
+		RenderEffectParameterPtr v2_ep_;
+		RenderEffectParameterPtr v3_ep_;
+		RenderEffectParameterPtr v4_ep_;
+		RenderEffectParameterPtr v5_ep_;
+		RenderEffectParameterPtr v6_ep_;
+		RenderEffectParameterPtr v7_ep_;
 	};
 
 	class KLAYGE_CORE_API RenderableSkyBox : public RenderableHelper

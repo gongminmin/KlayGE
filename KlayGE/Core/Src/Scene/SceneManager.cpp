@@ -607,7 +607,7 @@ namespace KlayGE
 							MathLib::dot(mat.Row(3), view_mat_z));
 						for (int k = 0; k < 8; ++ k)
 						{
-							float3 const v = box[k];
+							float3 const v = box.Corner(k);
 							md = std::min(md, v.x() * zvec.x() + v.y() * zvec.y() + v.z() * zvec.z() + zvec.w());
 						}
 					}

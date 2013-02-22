@@ -170,6 +170,21 @@ namespace KlayGE
 			return MathLib::intersect_obb_frustum(*this, frustum) != BO_No;
 		}
 
+		Vector_T<T, 3> Corner(uint32_t index) const
+		{
+			BOOST_ASSERT(index < 8);
+
+			float3 const & center = this->Center();
+			float3 const & extent = this->HalfSize();
+			float3 const extent_x = MathLib::abs(extent.x() * this->Axis(0));
+			float3 const extent_y = MathLib::abs(extent.y() * this->Axis(1));
+			float3 const extent_z = MathLib::abs(extent.z() * this->Axis(2));
+
+			return center + ((index & 1UL) ? +extent_x : -extent_x)
+				+ ((index & 2UL) ? +extent_y : -extent_y)
+				+ ((index & 4UL) ? +extent_z : -extent_z);
+		}
+
 		friend bool
 		operator==(OBBox_T<T> const & lhs, OBBox_T<T> const & rhs)
 		{
