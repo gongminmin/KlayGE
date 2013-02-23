@@ -361,21 +361,57 @@ namespace KlayGE
 
 	void* ResLoader::SyncQuery(ResLoadingDescPtr const & res_desc)
 	{
-		if (res_desc->HasSubThreadStage())
+		void* queried = nullptr;
+		bool found = false;
+		typedef KLAYGE_DECLTYPE(cached_sync_res_) CachedSyncResType;
+		KLAYGE_FOREACH(CachedSyncResType::const_reference res, cached_sync_res_)
 		{
-			res_desc->SubThreadStage();
+			if (res.first->Match(*res_desc))
+			{
+				queried = res.second;
+				found = true;
+				break;
+			}
 		}
-		return res_desc->MainThreadStage();
+		if (!found)
+		{
+			if (res_desc->HasSubThreadStage())
+			{
+				res_desc->SubThreadStage();
+			}
+			queried = res_desc->MainThreadStage();
+			cached_sync_res_.push_back(std::make_pair(res_desc, queried));
+		}
+
+		return queried;
 	}
 
 	boost::function<void*()> ResLoader::ASyncQuery(ResLoadingDescPtr const & res_desc)
 	{
-		boost::shared_ptr<joiner<void> > async_thread;
-		if (res_desc->HasSubThreadStage())
+		boost::function<void*()> queried;
+		bool found = false;
+		typedef KLAYGE_DECLTYPE(cached_async_res_) CachedAsyncResType;
+		KLAYGE_FOREACH(CachedAsyncResType::const_reference res, cached_async_res_)
 		{
-			async_thread = MakeSharedPtr<joiner<void> >(GlobalThreadPool()(boost::bind(&ResLoader::ASyncSubThreadFunc, this, res_desc)));
+			if (res.first->Match(*res_desc))
+			{
+				queried = res.second;
+				found = true;
+				break;
+			}
 		}
-		return boost::bind(&ResLoader::ASyncFunc, this, res_desc, async_thread);
+		if (!found)
+		{
+			boost::shared_ptr<joiner<void> > async_thread;
+			if (res_desc->HasSubThreadStage())
+			{
+				async_thread = MakeSharedPtr<joiner<void> >(GlobalThreadPool()(boost::bind(&ResLoader::ASyncSubThreadFunc, this, res_desc)));
+			}
+			queried = boost::bind(&ResLoader::ASyncFunc, this, res_desc, async_thread);
+			cached_async_res_.push_back(std::make_pair(res_desc, queried));
+		}
+
+		return queried;
 	}
 
 	void ResLoader::ASyncSubThreadFunc(ResLoadingDescPtr const & res_desc)

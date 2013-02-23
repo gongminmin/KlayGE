@@ -52,10 +52,14 @@ namespace KlayGE
 		{
 		}
 
+		virtual std::wstring const & Name() const = 0;
+
 		virtual void SubThreadStage() = 0;
 		virtual void* MainThreadStage() = 0;
 
 		virtual bool HasSubThreadStage() const = 0;
+
+		virtual bool Match(ResLoadingDesc const & rhs) const = 0;
 	};
 
 	class KLAYGE_CORE_API ResLoader
@@ -104,6 +108,9 @@ namespace KlayGE
 
 		std::string exe_path_;
 		std::vector<std::string> paths_;
+
+		std::vector<std::pair<ResLoadingDescPtr, void*> > cached_sync_res_;
+		std::vector<std::pair<ResLoadingDescPtr, boost::function<void*()> > > cached_async_res_;
 	};
 }
 

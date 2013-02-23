@@ -719,6 +719,12 @@ namespace
 			tex_desc_.access_hint = access_hint;
 		}
 
+		std::wstring const & Name() const
+		{
+			static std::wstring const name(L"TextureLoadingDesc");
+			return name;
+		}
+
 		void SubThreadStage()
 		{
 			this->LoadDDS();
@@ -736,6 +742,17 @@ namespace
 		bool HasSubThreadStage() const
 		{
 			return true;
+		}
+
+		bool Match(ResLoadingDesc const & rhs) const
+		{
+			if (this->Name() == rhs.Name())
+			{
+				TextureLoadingDesc const & tld = static_cast<TextureLoadingDesc const &>(rhs);
+				return (tex_desc_.res_name == tld.tex_desc_.res_name)
+					&& (tex_desc_.access_hint == tld.tex_desc_.access_hint);
+			}
+			return false;
 		}
 
 	private:

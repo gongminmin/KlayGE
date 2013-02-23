@@ -91,6 +91,12 @@ namespace
 			model_desc_.CreateMeshFactoryFunc = CreateMeshFactoryFunc;
 		}
 
+		std::wstring const & Name() const
+		{
+			static std::wstring const name(L"RenderModelLoadingDesc");
+			return name;
+		}
+
 		void SubThreadStage()
 		{
 			this->LoadKModel();
@@ -115,6 +121,17 @@ namespace
 		bool HasSubThreadStage() const
 		{
 			return true;
+		}
+
+		bool Match(ResLoadingDesc const & rhs) const
+		{
+			if (this->Name() == rhs.Name())
+			{
+				RenderModelLoadingDesc const & rmld = static_cast<RenderModelLoadingDesc const &>(rhs);
+				return (model_desc_.res_name == rmld.model_desc_.res_name)
+					&& (model_desc_.access_hint == rmld.model_desc_.access_hint);
+			}
+			return false;
 		}
 
 	private:
