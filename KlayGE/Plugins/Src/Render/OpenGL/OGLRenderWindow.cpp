@@ -57,7 +57,7 @@ namespace KlayGE
 		uint32_t depth_bits	= NumDepthBits(settings.depth_stencil_fmt);
 		uint32_t stencil_bits = NumStencilBits(settings.depth_stencil_fmt);
 
-		WindowPtr main_wnd = Context::Instance().AppInstance().MainWnd();
+		WindowPtr const & main_wnd = Context::Instance().AppInstance().MainWnd();
 		main_wnd->OnActive().connect(boost::bind(&OGLRenderWindow::OnActive, this, _1, _2));
 		main_wnd->OnPaint().connect(boost::bind(&OGLRenderWindow::OnPaint, this, _1));
 		main_wnd->OnEnterSizeMove().connect(boost::bind(&OGLRenderWindow::OnEnterSizeMove, this, _1));
@@ -336,7 +336,7 @@ namespace KlayGE
 
 	OGLRenderWindow::~OGLRenderWindow()
 	{
-		WindowPtr main_wnd = Context::Instance().AppInstance().MainWnd();
+		WindowPtr const & main_wnd = Context::Instance().AppInstance().MainWnd();
 		main_wnd->OnActive().disconnect(boost::bind(&OGLRenderWindow::OnActive, this, _1, _2));
 		main_wnd->OnPaint().disconnect(boost::bind(&OGLRenderWindow::OnPaint, this, _1));
 		main_wnd->OnEnterSizeMove().disconnect(boost::bind(&OGLRenderWindow::OnEnterSizeMove, this, _1));

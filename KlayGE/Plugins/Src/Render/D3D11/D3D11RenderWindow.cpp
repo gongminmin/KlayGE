@@ -58,7 +58,7 @@ namespace KlayGE
 
 		ElementFormat format = settings.color_fmt;
 
-		WindowPtr main_wnd = Context::Instance().AppInstance().MainWnd();
+		WindowPtr const & main_wnd = Context::Instance().AppInstance().MainWnd();
 #ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
 		hWnd_ = main_wnd->HWnd();
 #else
@@ -383,7 +383,7 @@ namespace KlayGE
 
 	D3D11RenderWindow::~D3D11RenderWindow()
 	{
-		WindowPtr main_wnd = Context::Instance().AppInstance().MainWnd();
+		WindowPtr const & main_wnd = Context::Instance().AppInstance().MainWnd();
 		main_wnd->OnActive().disconnect(boost::bind(&D3D11RenderWindow::OnActive, this, _1, _2));
 		main_wnd->OnPaint().disconnect(boost::bind(&D3D11RenderWindow::OnPaint, this, _1));
 		main_wnd->OnEnterSizeMove().disconnect(boost::bind(&D3D11RenderWindow::OnEnterSizeMove, this, _1));

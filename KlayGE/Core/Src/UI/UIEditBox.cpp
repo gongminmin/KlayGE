@@ -345,7 +345,7 @@ namespace KlayGE
 			elements_.push_back(MakeSharedPtr<UIElement>(Element));
 		}
 
-		WindowPtr main_wnd = Context::Instance().AppInstance().MainWnd();
+		WindowPtr const & main_wnd = Context::Instance().AppInstance().MainWnd();
 		main_wnd->OnChar().connect(boost::bind(&UIEditBox::CharHandler, this, _1, _2));
 	}
 

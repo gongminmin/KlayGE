@@ -337,7 +337,7 @@ namespace KlayGE
 		elem_texture_rcs_[UICT_TexButton].push_back(Rect_T<int32_t>(141, 49, 247, 54));
 		elem_texture_rcs_[UICT_TexButton].push_back(Rect_T<int32_t>(247, 49, 252, 54));
 
-		WindowPtr main_wnd = Context::Instance().AppInstance().MainWnd();
+		WindowPtr const & main_wnd = Context::Instance().AppInstance().MainWnd();
 		main_wnd->OnKeyDown().connect(boost::bind(&UIManager::KeyDownHandler, this, _2));
 		main_wnd->OnKeyUp().connect(boost::bind(&UIManager::KeyUpHandler, this, _2));
 		main_wnd->OnMouseDown().connect(boost::bind(&UIManager::MouseDownHandler, this, _2, _3));

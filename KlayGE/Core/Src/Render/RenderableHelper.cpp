@@ -103,11 +103,8 @@ namespace KlayGE
 
 	void RenderablePoint::OnRenderBegin()
 	{
-		App3DFramework const & app = Context::Instance().AppInstance();
-		Camera const & camera = app.ActiveCamera();
-
-		float4x4 view_proj = camera.ViewMatrix() * camera.ProjMatrix();
-		*mvp_ep_ = view_proj;
+		Camera const & camera = Context::Instance().AppInstance().ActiveCamera();
+		*mvp_ep_ = model_mat_ * camera.ViewProjMatrix();
 	}
 
 	void RenderablePoint::Init()
@@ -184,11 +181,8 @@ namespace KlayGE
 
 	void RenderableLine::OnRenderBegin()
 	{
-		App3DFramework const & app = Context::Instance().AppInstance();
-		Camera const & camera = app.ActiveCamera();
-
-		float4x4 view_proj = camera.ViewMatrix() * camera.ProjMatrix();
-		*mvp_ep_ = view_proj;
+		Camera const & camera = Context::Instance().AppInstance().ActiveCamera();
+		*mvp_ep_ = model_mat_ * camera.ViewProjMatrix();
 	}
 
 	void RenderableLine::Init()
@@ -271,11 +265,8 @@ namespace KlayGE
 
 	void RenderableTriangle::OnRenderBegin()
 	{
-		App3DFramework const & app = Context::Instance().AppInstance();
-		Camera const & camera = app.ActiveCamera();
-
-		float4x4 view_proj = camera.ViewMatrix() * camera.ProjMatrix();
-		*mvp_ep_ = view_proj;
+		Camera const & camera = Context::Instance().AppInstance().ActiveCamera();
+		*mvp_ep_ = model_mat_ * camera.ViewProjMatrix();
 	}
 
 	void RenderableTriangle::Init()
@@ -360,11 +351,8 @@ namespace KlayGE
 
 	void RenderableTriBox::OnRenderBegin()
 	{
-		App3DFramework const & app = Context::Instance().AppInstance();
-		Camera const & camera = app.ActiveCamera();
-
-		float4x4 view_proj = camera.ViewMatrix() * camera.ProjMatrix();
-		*mvp_ep_ = view_proj;
+		Camera const & camera = Context::Instance().AppInstance().ActiveCamera();
+		*mvp_ep_ = model_mat_ * camera.ViewProjMatrix();
 	}
 
 	void RenderableTriBox::Init()
@@ -471,11 +459,8 @@ namespace KlayGE
 
 	void RenderableLineBox::OnRenderBegin()
 	{
-		App3DFramework const & app = Context::Instance().AppInstance();
-		Camera const & camera = app.ActiveCamera();
-
-		float4x4 view_proj = camera.ViewMatrix() * camera.ProjMatrix();
-		*mvp_ep_ = view_proj;
+		Camera const & camera = Context::Instance().AppInstance().ActiveCamera();
+		*mvp_ep_ = model_mat_ * camera.ViewProjMatrix();
 	}
 
 	void RenderableLineBox::Init()

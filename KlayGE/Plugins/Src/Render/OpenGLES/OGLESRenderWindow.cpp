@@ -44,7 +44,7 @@ namespace KlayGE
 		isFullScreen_		= settings.full_screen;
 		color_bits_			= NumFormatBits(settings.color_fmt);
 
-		WindowPtr main_wnd = Context::Instance().AppInstance().MainWnd();
+		WindowPtr const & main_wnd = Context::Instance().AppInstance().MainWnd();
 		main_wnd->OnActive().connect(boost::bind(&OGLESRenderWindow::OnActive, this, _1, _2));
 		main_wnd->OnPaint().connect(boost::bind(&OGLESRenderWindow::OnPaint, this, _1));
 		main_wnd->OnEnterSizeMove().connect(boost::bind(&OGLESRenderWindow::OnEnterSizeMove, this, _1));
@@ -198,7 +198,7 @@ namespace KlayGE
 
 	OGLESRenderWindow::~OGLESRenderWindow()
 	{
-		WindowPtr main_wnd = Context::Instance().AppInstance().MainWnd();
+		WindowPtr const & main_wnd = Context::Instance().AppInstance().MainWnd();
 		main_wnd->OnActive().disconnect(boost::bind(&OGLESRenderWindow::OnActive, this, _1, _2));
 		main_wnd->OnPaint().disconnect(boost::bind(&OGLESRenderWindow::OnPaint, this, _1));
 		main_wnd->OnEnterSizeMove().disconnect(boost::bind(&OGLESRenderWindow::OnEnterSizeMove, this, _1));

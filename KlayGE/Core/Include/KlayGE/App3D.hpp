@@ -89,7 +89,7 @@ namespace KlayGE
 
 		WindowPtr MakeWindow(std::string const & name, RenderSettings const & settings);
 		WindowPtr MakeWindow(std::string const & name, RenderSettings const & settings, void* native_wnd);
-		WindowPtr MainWnd() const
+		WindowPtr const & MainWnd() const
 		{
 			return main_wnd_;
 		}
