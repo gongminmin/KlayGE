@@ -42,6 +42,7 @@ namespace
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
 			this->BindDeferredEffect(rf.LoadEffect("MVUtil.fxml"));
+			mvp_ep_ = deferred_effect_->ParameterByName("mvp");
 			depth_tech_ = deferred_effect_->TechniqueByName("AxisDepthTech");
 			gbuffer_rt0_tech_ = deferred_effect_->TechniqueByName("AxisRT0Tech");
 			gbuffer_rt1_tech_ = deferred_effect_->TechniqueByName("AxisRT1Tech");
@@ -71,6 +72,12 @@ namespace
 			pos_aabb_ = MathLib::compute_aabbox(&xyzs[0], &xyzs[sizeof(xyzs) / sizeof(xyzs[0])]);
 			tc_aabb_ = AABBox(float3(0, 0, 0), float3(0, 0, 0));
 		}
+
+		void OnRenderBegin()
+		{
+			Camera& camera = Context::Instance().AppInstance().ActiveCamera();
+			*mvp_ep_ = model_mat_ * camera.ViewProjMatrix();
+		}
 	};
 
 	class RenderGrid : public RenderableHelper
@@ -82,6 +89,7 @@ namespace
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
 			this->BindDeferredEffect(rf.LoadEffect("MVUtil.fxml"));
+			mvp_ep_ = deferred_effect_->ParameterByName("mvp");
 			depth_tech_ = deferred_effect_->TechniqueByName("GridDepthTech");
 			gbuffer_rt0_tech_ = deferred_effect_->TechniqueByName("GridRT0Tech");
 			gbuffer_rt1_tech_ = deferred_effect_->TechniqueByName("GridRT1Tech");
@@ -110,6 +118,12 @@ namespace
 
 			pos_aabb_ = MathLib::compute_aabbox(&xyzs[0], &xyzs[sizeof(xyzs) / sizeof(xyzs[0])]);
 			tc_aabb_ = AABBox(float3(0, 0, 0), float3(0, 0, 0));
+		}
+
+		void OnRenderBegin()
+		{
+			Camera& camera = Context::Instance().AppInstance().ActiveCamera();
+			*mvp_ep_ = model_mat_ * camera.ViewProjMatrix();
 		}
 	};
 

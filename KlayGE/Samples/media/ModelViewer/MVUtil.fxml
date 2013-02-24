@@ -1,10 +1,7 @@
 <?xml version='1.0'?>
 
 <effect>
-	<include name="DeferredRenderingUtil.fxml"/>
-	<include name="util.fxml"/>
-	<include name="Quaternion.fxml"/>
-	<include name="GBuffer.fxml"/>
+	<parameter type="float4x4" name="mvp"/>
 
 	<shader>
 		<![CDATA[
@@ -64,6 +61,8 @@ void AxisMRTPS(float4 clr : COLOR0,
 
 	<technique name="AxisDepthTech">
 		<pass name="p0">
+			<state name="depth_func" value="always_pass"/>
+			
 			<state name="front_stencil_enable" value="true"/>
 			<state name="front_stencil_func" value="always_pass"/>
 			<state name="front_stencil_ref" value="128"/>
@@ -80,6 +79,8 @@ void AxisMRTPS(float4 clr : COLOR0,
 
 	<technique name="AxisRT0Tech">
 		<pass name="p0">
+			<state name="depth_func" value="always_pass"/>
+			
 			<state name="front_stencil_enable" value="true"/>
 			<state name="front_stencil_func" value="always_pass"/>
 			<state name="front_stencil_ref" value="128"/>
@@ -96,8 +97,7 @@ void AxisMRTPS(float4 clr : COLOR0,
 
 	<technique name="AxisRT1Tech">
 		<pass name="p0">
-			<state name="depth_func" value="equal"/>
-			<state name="depth_write_mask" value="false"/>
+			<state name="depth_func" value="always_pass"/>
 			
 			<state name="front_stencil_enable" value="true"/>
 			<state name="front_stencil_func" value="always_pass"/>
@@ -115,6 +115,8 @@ void AxisMRTPS(float4 clr : COLOR0,
 
 	<technique name="AxisMRTTech">
 		<pass name="p0">
+			<state name="depth_func" value="always_pass"/>
+			
 			<state name="front_stencil_enable" value="true"/>
 			<state name="front_stencil_func" value="always_pass"/>
 			<state name="front_stencil_ref" value="128"/>
@@ -213,6 +215,22 @@ void GridMRTPS(float2 mark : TEXCOORD0,
 		]]>
 	</shader>
 
+	<technique name="GridDepthTech">
+		<pass name="p0">
+			<state name="front_stencil_enable" value="true"/>
+			<state name="front_stencil_func" value="always_pass"/>
+			<state name="front_stencil_ref" value="128"/>
+			<state name="front_stencil_pass" value="replace"/>
+			<state name="back_stencil_enable" value="true"/>
+			<state name="back_stencil_func" value="always_pass"/>
+			<state name="back_stencil_ref" value="128"/>
+			<state name="back_stencil_pass" value="replace"/>
+
+			<state name="vertex_shader" value="GridDepthVS()"/>
+			<state name="pixel_shader" value="GridDepthPS()"/>
+		</pass>
+	</technique>
+	
 	<technique name="GridRT0Tech">
 		<pass name="p0">
 			<state name="front_stencil_enable" value="true"/>
@@ -245,22 +263,6 @@ void GridMRTPS(float2 mark : TEXCOORD0,
 
 			<state name="vertex_shader" value="GridVS()"/>
 			<state name="pixel_shader" value="GridRT1PS()"/>
-		</pass>
-	</technique>
-
-	<technique name="GridDepthTech">
-		<pass name="p0">
-			<state name="front_stencil_enable" value="true"/>
-			<state name="front_stencil_func" value="always_pass"/>
-			<state name="front_stencil_ref" value="128"/>
-			<state name="front_stencil_pass" value="replace"/>
-			<state name="back_stencil_enable" value="true"/>
-			<state name="back_stencil_func" value="always_pass"/>
-			<state name="back_stencil_ref" value="128"/>
-			<state name="back_stencil_pass" value="replace"/>
-
-			<state name="vertex_shader" value="GridDepthVS()"/>
-			<state name="pixel_shader" value="GridDepthPS()"/>
 		</pass>
 	</technique>
 
