@@ -378,7 +378,7 @@ namespace KlayGE
 		UIManager();
 
 		static UIManager& Instance();
-		static void ForceDestroy();
+		static void Destroy();
 
 		void Load(ResIdentifierPtr const & source);
 

@@ -102,7 +102,7 @@ namespace
 			this->LoadKModel();
 		}
 
-		void* MainThreadStage()
+		boost::shared_ptr<void> MainThreadStage()
 		{
 			if (!model_desc_.model)
 			{
@@ -115,7 +115,7 @@ namespace
 				model_desc_.model->Mesh(i)->BuildMeshInfo();
 			}
 
-			return &model_desc_.model;
+			return boost::static_pointer_cast<void>(model_desc_.model);
 		}
 
 		bool HasSubThreadStage() const

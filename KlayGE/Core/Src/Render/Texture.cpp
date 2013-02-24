@@ -730,13 +730,13 @@ namespace
 			this->LoadDDS();
 		}
 
-		void* MainThreadStage()
+		boost::shared_ptr<void> MainThreadStage()
 		{
 			if (!tex_desc_.texture)
 			{
 				this->CreateTexture();
 			}
-			return &tex_desc_.texture;
+			return boost::static_pointer_cast<void>(tex_desc_.texture);
 		}
 
 		bool HasSubThreadStage() const

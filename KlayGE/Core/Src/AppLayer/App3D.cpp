@@ -30,6 +30,7 @@
 #include <KFL/ThrowErr.hpp>
 #include <KFL/Math.hpp>
 #include <KlayGE/Context.hpp>
+#include <KlayGE/ResLoader.hpp>
 #include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/RenderSettings.hpp>
@@ -255,11 +256,13 @@ namespace KlayGE
 	{
 		this->DelObjects();
 
+		ResLoader::Destroy();
+
 		Context::Instance().SceneManagerInstance(SceneManagerPtr());
 		Context::Instance().AudioFactoryInstance(AudioFactoryPtr());
 		Context::Instance().ShowFactoryInstance(ShowFactoryPtr());
 
-		UIManager::ForceDestroy();
+		UIManager::Destroy();
 		Context::Instance().DeferredRenderingLayerInstance(DeferredRenderingLayerPtr());
 		Context::Instance().RenderFactoryInstance(RenderFactoryPtr());
 	}

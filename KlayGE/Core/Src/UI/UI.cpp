@@ -31,6 +31,7 @@
 #include <KlayGE/SceneObjectHelper.hpp>
 #include <KFL/XMLDom.hpp>
 #include <KlayGE/Font.hpp>
+#include <KFL/Thread.hpp>
 
 #include <KlayGE/Input.hpp>
 
@@ -46,6 +47,8 @@
 
 namespace
 {
+	KlayGE::mutex singleton_mutex;
+
 	bool ReadBool(KlayGE::XMLNodePtr& node, std::string const & name, bool default_val)
 	{
 		bool ret = default_val;
@@ -273,13 +276,17 @@ namespace KlayGE
 	{
 		if (!ui_mgr_instance_)
 		{
-			ui_mgr_instance_ = MakeSharedPtr<UIManager>();
+			unique_lock<mutex> lock(singleton_mutex);
+			if (!ui_mgr_instance_)
+			{
+				ui_mgr_instance_ = MakeSharedPtr<UIManager>();
+			}
 		}
 
 		return *ui_mgr_instance_;
 	}
 
-	void UIManager::ForceDestroy()
+	void UIManager::Destroy()
 	{
 		if (ui_mgr_instance_)
 		{

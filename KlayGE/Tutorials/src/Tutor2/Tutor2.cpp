@@ -76,7 +76,7 @@ void TutorFramework::InitObjects()
 {
 	font_ = KlayGE::Context::Instance().RenderFactoryInstance().MakeFont("gkai00mp.kfont");
 
-	KlayGE::AABBox boxRange(KlayGE::float3(-1.0f,-0.25f,-0.25f), KlayGE::float3(-0.5f, 0.25f, 0.25f));
+	KlayGE::OBBox boxRange(KlayGE::MathLib::convert_to_obbox(KlayGE::AABBox(KlayGE::float3(-1.0f, -0.25f, -0.25f), KlayGE::float3(-0.5f, 0.25f, 0.25f))));
 	KlayGE::Color boxColor(1.0f, 0.0f, 0.0f, 1.0f);
 
 	renderableBox_ = KlayGE::MakeSharedPtr<KlayGE::SceneObjectHelper>(
@@ -184,7 +184,7 @@ RenderPolygon::RenderPolygon(KlayGE::RenderModelPtr const & model, std::wstring 
 	KlayGE::RenderFactory& rf = KlayGE::Context::Instance().RenderFactoryInstance();
 	KlayGE::RenderEffectPtr effect = rf.LoadEffect("RenderableHelper.fxml");
 
-	this->SetRenderTechnique(effect->TechniqueByName("TriangleTec"));
+	this->SetRenderTechnique(effect->TechniqueByName("HelperTec"));
 
 	*(effect->ParameterByName("color")) = KlayGE::float4(1.0f, 0.0f, 0.0f, 1.0f);
 }
@@ -200,6 +200,6 @@ void RenderPolygon::OnRenderBegin()
 {
 	KlayGE::App3DFramework const & app = KlayGE::Context::Instance().AppInstance();
 
-	KlayGE::float4x4 view_proj = app.ActiveCamera().ViewMatrix() * app.ActiveCamera().ProjMatrix();
-	*(this->GetRenderTechnique()->Effect().ParameterByName("matViewProj")) = view_proj;
+	KlayGE::float4x4 view_proj = app.ActiveCamera().ViewProjMatrix();
+	*(technique_->Effect().ParameterByName("mvp")) = view_proj;
 }

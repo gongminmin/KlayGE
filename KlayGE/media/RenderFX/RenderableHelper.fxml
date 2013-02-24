@@ -354,6 +354,16 @@ float4 HelperPS() : SV_Target0
 			<state name="pixel_shader" value="PrimitiveDeferredMRTPS()"/>
 		</pass>
 	</technique>
+
+	<technique name="HelperTec">
+		<pass name="p0">
+			<state name="polygon_mode" value="line"/>
+			<state name="cull_mode" value="none"/>
+
+			<state name="vertex_shader" value="HelperVS()"/>
+			<state name="pixel_shader" value="HelperPS()"/>
+		</pass>
+	</technique>
 	
 
 	<parameter type="float4x4" name="inv_mvp"/>

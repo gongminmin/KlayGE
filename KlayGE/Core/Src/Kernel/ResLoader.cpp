@@ -59,12 +59,34 @@
 
 #include <KlayGE/ResLoader.hpp>
 
+namespace
+{
+	KlayGE::mutex singleton_mutex;
+}
+
 namespace KlayGE
 {
+	boost::shared_ptr<ResLoader> ResLoader::res_loader_instance_;
+
 	ResLoader& ResLoader::Instance()
 	{
-		static ResLoader resLoader;
-		return resLoader;
+		if (!res_loader_instance_)
+		{
+			unique_lock<mutex> lock(singleton_mutex);
+			if (!res_loader_instance_)
+			{
+				res_loader_instance_ = MakeSharedPtr<ResLoader>();
+			}
+		}
+		return *res_loader_instance_;
+	}
+
+	void ResLoader::Destroy()
+	{
+		if (res_loader_instance_)
+		{
+			res_loader_instance_.reset();
+		}
 	}
 
 	ResLoader::ResLoader()
@@ -359,9 +381,9 @@ namespace KlayGE
 #endif		
 	}
 
-	void* ResLoader::SyncQuery(ResLoadingDescPtr const & res_desc)
+	boost::shared_ptr<void> ResLoader::SyncQuery(ResLoadingDescPtr const & res_desc)
 	{
-		void* queried = nullptr;
+		boost::shared_ptr<void> queried;
 		bool found = false;
 		typedef KLAYGE_DECLTYPE(cached_sync_res_) CachedSyncResType;
 		KLAYGE_FOREACH(CachedSyncResType::const_reference res, cached_sync_res_)
@@ -386,9 +408,9 @@ namespace KlayGE
 		return queried;
 	}
 
-	boost::function<void*()> ResLoader::ASyncQuery(ResLoadingDescPtr const & res_desc)
+	boost::function<boost::shared_ptr<void>()> ResLoader::ASyncQuery(ResLoadingDescPtr const & res_desc)
 	{
-		boost::function<void*()> queried;
+		boost::function<boost::shared_ptr<void>()> queried;
 		bool found = false;
 		typedef KLAYGE_DECLTYPE(cached_async_res_) CachedAsyncResType;
 		KLAYGE_FOREACH(CachedAsyncResType::const_reference res, cached_async_res_)
@@ -419,7 +441,8 @@ namespace KlayGE
 		res_desc->SubThreadStage();
 	}
 
-	void* ResLoader::ASyncFunc(ResLoadingDescPtr const & res_desc, boost::shared_ptr<joiner<void> > const & loading_thread)
+	boost::shared_ptr<void> ResLoader::ASyncFunc(ResLoadingDescPtr const & res_desc,
+		boost::shared_ptr<joiner<void> > const & loading_thread)
 	{
 		if (res_desc->HasSubThreadStage())
 		{
