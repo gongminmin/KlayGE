@@ -58,7 +58,7 @@ namespace KlayGE
 	class KLAYGE_CORE_API FirstPersonCameraController : public CameraController
 	{
 	public:
-		FirstPersonCameraController();
+		explicit FirstPersonCameraController(bool use_input_engine = true);
 
 		virtual void AttachCamera(Camera& camera);
 
@@ -95,9 +95,13 @@ namespace KlayGE
 	class KLAYGE_CORE_API TrackballCameraController : public CameraController
 	{
 	public:
-		TrackballCameraController();
+		explicit TrackballCameraController(bool use_input_engine = true);
 
 		virtual void AttachCamera(Camera& camera);
+
+		void Move(float offset_x, float offset_y);
+		void Rotate(float offset_x, float offset_y);
+		void Zoom(float offset_x, float offset_y);
 
 	private:
 		bool reverse_target_;

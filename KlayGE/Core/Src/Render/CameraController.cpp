@@ -77,32 +77,35 @@ namespace KlayGE
 	}
 
 
-	FirstPersonCameraController::FirstPersonCameraController()
+	FirstPersonCameraController::FirstPersonCameraController(bool use_input_engine)
 		: left_button_down_(false)
 	{
-		using namespace boost::assign;
+		if (use_input_engine)
+		{
+			using namespace boost::assign;
 
-		std::vector<InputActionDefine> actions;
-		actions += InputActionDefine(TurnLeftRight, MS_X),
-					InputActionDefine(TurnUpDown, MS_Y),
-					InputActionDefine(RollLeft, KS_Q),
-					InputActionDefine(RollRight, KS_E),
-					InputActionDefine(Forward, KS_W),
-					InputActionDefine(Backward, KS_S),
-					InputActionDefine(MoveLeft, KS_A),
-					InputActionDefine(MoveRight, KS_D),
-					InputActionDefine(Forward, KS_UpArrow),
-					InputActionDefine(Backward, KS_DownArrow),
-					InputActionDefine(MoveLeft, KS_LeftArrow),
-					InputActionDefine(MoveRight, KS_RightArrow);
+			std::vector<InputActionDefine> actions;
+			actions += InputActionDefine(TurnLeftRight, MS_X),
+						InputActionDefine(TurnUpDown, MS_Y),
+						InputActionDefine(RollLeft, KS_Q),
+						InputActionDefine(RollRight, KS_E),
+						InputActionDefine(Forward, KS_W),
+						InputActionDefine(Backward, KS_S),
+						InputActionDefine(MoveLeft, KS_A),
+						InputActionDefine(MoveRight, KS_D),
+						InputActionDefine(Forward, KS_UpArrow),
+						InputActionDefine(Backward, KS_DownArrow),
+						InputActionDefine(MoveLeft, KS_LeftArrow),
+						InputActionDefine(MoveRight, KS_RightArrow);
 
-		InputEngine& inputEngine(Context::Instance().InputFactoryInstance().InputEngineInstance());
-		InputActionMap actionMap;
-		actionMap.AddActions(actions.begin(), actions.end());
+			InputEngine& inputEngine(Context::Instance().InputFactoryInstance().InputEngineInstance());
+			InputActionMap actionMap;
+			actionMap.AddActions(actions.begin(), actions.end());
 
-		action_handler_t input_handler = MakeSharedPtr<input_signal>();
-		input_handler->connect(boost::bind(&FirstPersonCameraController::InputHandler, this, _1, _2));
-		inputEngine.ActionMap(actionMap, input_handler, true);
+			action_handler_t input_handler = MakeSharedPtr<input_signal>();
+			input_handler->connect(boost::bind(&FirstPersonCameraController::InputHandler, this, _1, _2));
+			inputEngine.ActionMap(actionMap, input_handler, true);
+		}
 	}
 
 	void FirstPersonCameraController::RequiresLeftButtonDown(bool lbd)
@@ -291,21 +294,24 @@ namespace KlayGE
 	}
 
 
-	TrackballCameraController::TrackballCameraController()
+	TrackballCameraController::TrackballCameraController(bool use_input_engine)
 	{
-		using namespace boost::assign;
+		if (use_input_engine)
+		{
+			using namespace boost::assign;
 
-		std::vector<InputActionDefine> actions;
-		actions += InputActionDefine(Turn, MS_X),
-					InputActionDefine(Turn, MS_Y);
+			std::vector<InputActionDefine> actions;
+			actions += InputActionDefine(Turn, MS_X),
+						InputActionDefine(Turn, MS_Y);
 
-		InputEngine& inputEngine(Context::Instance().InputFactoryInstance().InputEngineInstance());
-		InputActionMap actionMap;
-		actionMap.AddActions(actions.begin(), actions.end());
+			InputEngine& inputEngine(Context::Instance().InputFactoryInstance().InputEngineInstance());
+			InputActionMap actionMap;
+			actionMap.AddActions(actions.begin(), actions.end());
 
-		action_handler_t input_handler = MakeSharedPtr<input_signal>();
-		input_handler->connect(boost::bind(&TrackballCameraController::InputHandler, this, _1, _2));
-		inputEngine.ActionMap(actionMap, input_handler, true);
+			action_handler_t input_handler = MakeSharedPtr<input_signal>();
+			input_handler->connect(boost::bind(&TrackballCameraController::InputHandler, this, _1, _2));
+			inputEngine.ActionMap(actionMap, input_handler, true);
+		}
 	}
 
 	void TrackballCameraController::InputHandler(InputEngine const & ie, InputAction const & /*action*/)
@@ -343,62 +349,19 @@ namespace KlayGE
 				{
 					if (mouse->LeftButton())
 					{
-						Quaternion q = MathLib::rotation_axis(right_, yd * rotationScaler_);
-						float4x4 mat = MathLib::transformation<float>(nullptr, nullptr, nullptr, &target_, &q, nullptr);
-						float3 pos = MathLib::transform_coord(camera_->EyePos(), mat);
-
-						q = MathLib::rotation_axis(float3(0.0f, MathLib::dot(camera_->UpVec(), float3(0, 1, 0)) < 0 ? -1.0f : 1.0f, 0.0f), xd * rotationScaler_);
-						mat = MathLib::transformation<float>(nullptr, nullptr, nullptr, &target_, &q, nullptr);
-						pos = MathLib::transform_coord(pos, mat);
-
-						right_ = MathLib::transform_quat(right_, q);
-
-						float3 dir;
-						if (reverse_target_)
-						{
-							dir = pos - target_;
-						}
-						else
-						{
-							dir = target_ - pos;
-						}
-						dir = MathLib::normalize(dir);
-						float3 up = MathLib::cross(dir, right_);
-
-						camera_->ViewParams(pos, pos + dir, up);
+						this->Rotate(xd, yd);
 					}
 					else
 					{
 						if (mouse->MiddleButton())
 						{
-							float3 offset = right_ * (-xd * moveScaler_ * 2);
-							float3 pos = camera_->EyePos() + offset;
-							target_ += offset;
-
-							offset = camera_->UpVec() * (yd * moveScaler_ * 2);
-							pos += offset;
-							target_ += offset;
-
-							camera_->ViewParams(pos, target_, camera_->UpVec());
-
+							this->Move(xd, yd);
 						}
 						else
 						{
 							if (mouse->RightButton())
 							{
-								float3 offset = camera_->ViewVec() * ((xd + yd) * moveScaler_ * 2);
-								float3 pos = camera_->EyePos() + offset;
-
-								if (MathLib::dot(target_ - pos, camera_->ViewVec()) <= 0)
-								{
-									reverse_target_ = true;
-								}
-								else
-								{
-									reverse_target_ = false;
-								}
-
-								camera_->ViewParams(pos, pos + camera_->ViewVec(), camera_->UpVec());
+								this->Zoom(xd, yd);
 							}
 						}
 					}
@@ -413,7 +376,64 @@ namespace KlayGE
 
 		reverse_target_ = false;
 		target_ = camera_->LookAt();
-		right_ = MathLib::normalize(MathLib::cross(float3(0, 1, 0), -camera_->EyePos()));
+		right_ = MathLib::cross(camera_->UpVec(), camera_->ViewVec());
+	}
+
+	void TrackballCameraController::Move(float offset_x, float offset_y)
+	{
+		float3 offset = right_ * (-offset_x * moveScaler_ * 2);
+		float3 pos = camera_->EyePos() + offset;
+		target_ += offset;
+
+		offset = camera_->UpVec() * (offset_y * moveScaler_ * 2);
+		pos += offset;
+		target_ += offset;
+
+		camera_->ViewParams(pos, target_, camera_->UpVec());
+	}
+
+	void TrackballCameraController::Rotate(float offset_x, float offset_y)
+	{
+		Quaternion q = MathLib::rotation_axis(right_, offset_y * rotationScaler_);
+		float4x4 mat = MathLib::transformation<float>(nullptr, nullptr, nullptr, &target_, &q, nullptr);
+		float3 pos = MathLib::transform_coord(camera_->EyePos(), mat);
+
+		q = MathLib::rotation_axis(float3(0.0f, MathLib::sgn(camera_->UpVec().y()), 0.0f), offset_x * rotationScaler_);
+		mat = MathLib::transformation<float>(nullptr, nullptr, nullptr, &target_, &q, nullptr);
+		pos = MathLib::transform_coord(pos, mat);
+
+		right_ = MathLib::transform_quat(right_, q);
+
+		float3 dir;
+		if (reverse_target_)
+		{
+			dir = pos - target_;
+		}
+		else
+		{
+			dir = target_ - pos;
+		}
+		dir = MathLib::normalize(dir);
+		float3 up = MathLib::cross(dir, right_);
+
+		camera_->ViewParams(pos, pos + dir, up);
+	}
+
+	void TrackballCameraController::Zoom(float offset_x, float offset_y)
+	{
+		float3 offset = camera_->ViewVec() * ((offset_x + offset_y) * moveScaler_ * 2);
+		float3 pos = camera_->EyePos() + offset;
+
+		if (MathLib::dot(target_ - pos, camera_->ViewVec()) <= 0)
+		{
+			reverse_target_ = true;
+		}
+		else
+		{
+			reverse_target_ = false;
+		}
+
+		camera_->ViewParams(pos, pos + camera_->ViewVec(), camera_->UpVec());
 	}
 
 

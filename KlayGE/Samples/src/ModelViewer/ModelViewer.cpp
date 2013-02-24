@@ -440,7 +440,7 @@ void ModelViewerApp::OpenModel(std::string const & name)
 	this->FPSCameraHandler(*dialog_animation_->Control<UICheckBox>(id_fps_camera_));
 
 	tbController_.Scalers(0.01f, MathLib::length(half_size) * 0.001f);
-	fpsController_.Scalers(0.01f, MathLib::length(half_size) * 0.001f);
+	fpsController_.Scalers(0.01f, 0.2f);
 
 	this->MeshChangedHandler(*dialog_model_->Control<UIComboBox>(id_mesh_));
 	this->FrameChangedHandler(*dialog_animation_->Control<UISlider>(id_frame_slider_));
