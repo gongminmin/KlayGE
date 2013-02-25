@@ -449,12 +449,12 @@ namespace KlayGE
 
 		this->UpdateSurfacesPtrs();
 
-		App3DFramework& app = Context::Instance().AppInstance();
-		app.OnResize(width, height);
-
 		checked_cast<D3D11RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance())->ResetRenderStates();
 
 		this->OnBind();
+
+		App3DFramework& app = Context::Instance().AppInstance();
+		app.OnResize(width, height);
 	}
 
 	// 改变窗口位置

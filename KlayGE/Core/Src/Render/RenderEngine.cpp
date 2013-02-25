@@ -501,8 +501,6 @@ namespace KlayGE
 
 	void RenderEngine::Resize(uint32_t width, uint32_t height)
 	{
-		this->DoResize(width, height);
-		
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 		RenderDeviceCaps const & caps = rf.RenderEngineInstance().DeviceCaps();
 
@@ -562,6 +560,8 @@ namespace KlayGE
 		}
 
 		this->AssemblePostProcessChain();
+
+		this->DoResize(width, height);
 	}
 
 	void RenderEngine::PostProcess(bool skip)
