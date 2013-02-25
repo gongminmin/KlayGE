@@ -25,7 +25,9 @@ namespace KlayGE
 {
 	LightSource::LightSource(LightType type)
 		: type_(type), attrib_(0), enabled_(true),
-			color_(0, 0, 0, 0)
+			color_(0, 0, 0, 0),
+			quat_(Quaternion::Identity()),
+			pos_(float3::Zero())
 	{
 	}
 
@@ -94,42 +96,48 @@ namespace KlayGE
 
 	float3 const & LightSource::Position() const
 	{
-		return float3::Zero();
+		return pos_;
 	}
 
-	void LightSource::Position(float3 const & /*pos*/)
+	void LightSource::Position(float3 const & pos)
 	{
+		pos_ = pos;
 	}
 
 	float3 LightSource::Direction() const
 	{
-		return float3::Zero();
+		return MathLib::transform_quat(float3(0, 0, 1), quat_);
 	}
 	
-	void LightSource::Direction(float3 const & /*dir*/)
+	void LightSource::Direction(float3 const & dir)
 	{
+		quat_ = MathLib::unit_axis_to_unit_axis(float3(0, 0, 1), dir);
 	}
 
 	Quaternion const & LightSource::Rotation() const
 	{
-		return Quaternion::Identity();
+		return quat_;
 	}
 
-	void LightSource::Rotation(Quaternion const & /*quat*/)
+	void LightSource::Rotation(Quaternion const & quat)
 	{
+		quat_ = quat;
 	}
 
-	void LightSource::ModelMatrix(float4x4 const & /*model*/)
+	void LightSource::ModelMatrix(float4x4 const & model)
 	{
+		float3 scale;
+		MathLib::decompose(scale, quat_, pos_, model);
 	}
 
 	float3 const & LightSource::Falloff() const
 	{
-		return float3::Zero();
+		return falloff_;
 	}
 
-	void LightSource::Falloff(float3 const & /*fall_off*/)
+	void LightSource::Falloff(float3 const & fall_off)
 	{
+		falloff_ = fall_off;
 	}
 
 	float LightSource::CosInnerAngle() const
@@ -200,9 +208,7 @@ namespace KlayGE
 
 
 	PointLightSource::PointLightSource()
-		: LightSource(LT_Point),
-			quat_(Quaternion::Identity()),
-			pos_(float3::Zero())
+		: LightSource(LT_Point)
 	{
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 		for (int i = 0; i < 7; ++ i)
@@ -220,43 +226,27 @@ namespace KlayGE
 	{
 	}
 
-	float3 const & PointLightSource::Position() const
-	{
-		return pos_;
-	}
-
 	void PointLightSource::Position(float3 const & pos)
 	{
-		pos_ = pos;
+		LightSource::Position(pos);
 		this->UpdateCameras();
-	}
-
-	float3 PointLightSource::Direction() const
-	{
-		return MathLib::transform_quat(float3(0, 0, 1), quat_);
 	}
 	
 	void PointLightSource::Direction(float3 const & dir)
 	{
-		quat_ = MathLib::unit_axis_to_unit_axis(float3(0, 0, 1), dir);
+		LightSource::Direction(dir);
 		this->UpdateCameras();
-	}
-
-	Quaternion const & PointLightSource::Rotation() const
-	{
-		return quat_;
 	}
 
 	void PointLightSource::Rotation(Quaternion const & quat)
 	{
-		quat_ = quat;
+		LightSource::Rotation(quat);
 		this->UpdateCameras();
 	}
 	
 	void PointLightSource::ModelMatrix(float4x4 const & model)
 	{
-		float3 scale;
-		MathLib::decompose(scale, quat_, pos_, model);
+		LightSource::ModelMatrix(model);
 		this->UpdateCameras();
 	}
 
@@ -277,16 +267,6 @@ namespace KlayGE
 			sm_cameras_[j]->ViewParams(pos_, pos_ + lookat, up);
 			sm_cameras_[j]->ProjParams(PI / 2, 1, camera->NearPlane(), camera->FarPlane());
 		}
-	}
-
-	float3 const & PointLightSource::Falloff() const
-	{
-		return falloff_;
-	}
-
-	void PointLightSource::Falloff(float3 const & falloff)
-	{
-		falloff_ = falloff;
 	}
 
 	TexturePtr const & PointLightSource::ProjectiveTexture() const
@@ -314,8 +294,6 @@ namespace KlayGE
 
 	SpotLightSource::SpotLightSource()
 		: LightSource(LT_Spot),
-			quat_(Quaternion::Identity()),
-			pos_(float3::Zero()),
 			sm_camera_(MakeSharedPtr<Camera>())
 	{
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
@@ -326,43 +304,27 @@ namespace KlayGE
 	{
 	}
 
-	float3 const & SpotLightSource::Position() const
-	{
-		return pos_;
-	}
-
 	void SpotLightSource::Position(float3 const & pos)
 	{
-		pos_ = pos;
+		LightSource::Position(pos);
 		this->UpdateCamera();
-	}
-
-	float3 SpotLightSource::Direction() const
-	{
-		return MathLib::transform_quat(float3(0, 0, 1), quat_);
 	}
 	
 	void SpotLightSource::Direction(float3 const & dir)
 	{
-		quat_ = MathLib::unit_axis_to_unit_axis(float3(0, 0, 1), dir);
+		LightSource::Direction(dir);
 		this->UpdateCamera();
-	}
-
-	Quaternion const & SpotLightSource::Rotation() const
-	{
-		return quat_;
 	}
 
 	void SpotLightSource::Rotation(Quaternion const & quat)
 	{
-		quat_ = quat;
+		LightSource::Rotation(quat);
 		this->UpdateCamera();
 	}
 
 	void SpotLightSource::ModelMatrix(float4x4 const & model)
 	{
-		float3 scale;
-		MathLib::decompose(scale, quat_, pos_, model);
+		LightSource::ModelMatrix(model);
 		this->UpdateCamera();
 	}
 
@@ -376,16 +338,6 @@ namespace KlayGE
 		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 		CameraPtr const & camera = re.CurFrameBuffer()->GetViewport()->camera;
 		sm_camera_->ProjParams(cos_outer_inner_.z(), 1, camera->NearPlane(), camera->FarPlane());
-	}
-
-	float3 const & SpotLightSource::Falloff() const
-	{
-		return falloff_;
-	}
-
-	void SpotLightSource::Falloff(float3 const & falloff)
-	{
-		falloff_ = falloff;
 	}
 
 	float SpotLightSource::CosInnerAngle() const
@@ -439,8 +391,7 @@ namespace KlayGE
 
 
 	DirectionalLightSource::DirectionalLightSource()
-		: LightSource(LT_Directional),
-			quat_(Quaternion::Identity())
+		: LightSource(LT_Directional)
 	{
 		attrib_ = LSA_NoShadow;
 	}
@@ -456,41 +407,5 @@ namespace KlayGE
 		// Disable shadow and GI
 		attrib_ |= LSA_NoShadow;
 		attrib_ &= ~LSA_IndirectLighting;
-	}
-
-	Quaternion const & DirectionalLightSource::Rotation() const
-	{
-		return quat_;
-	}
-
-	float3 DirectionalLightSource::Direction() const
-	{
-		return MathLib::transform_quat(float3(0, 0, 1), quat_);
-	}
-	
-	void DirectionalLightSource::Direction(float3 const & dir)
-	{
-		quat_ = MathLib::unit_axis_to_unit_axis(float3(0, 0, 1), MathLib::normalize(dir));
-	}
-
-	void DirectionalLightSource::Rotation(Quaternion const & quat)
-	{
-		quat_ = quat;
-	}
-
-	void DirectionalLightSource::ModelMatrix(float4x4 const & model)
-	{
-		float3 scale, pos;
-		MathLib::decompose(scale, quat_, pos, model);
-	}
-
-	float3 const & DirectionalLightSource::Falloff() const
-	{
-		return falloff_;
-	}
-
-	void DirectionalLightSource::Falloff(float3 const & falloff)
-	{
-		falloff_ = falloff;
 	}
 }
