@@ -376,6 +376,7 @@ namespace KlayGE
 		};
 
 		UIManager();
+		~UIManager();
 
 		static UIManager& Instance();
 		static void Destroy();

@@ -69,6 +69,8 @@ namespace
 
 namespace KlayGE
 {
+	boost::shared_ptr<Context> Context::context_instance_;
+
 	typedef void (*MakeRenderFactoryFunc)(RenderFactoryPtr& ptr);
 	typedef void (*MakeAudioFactoryFunc)(AudioFactoryPtr& ptr);
 	typedef void (*MakeInputFactoryFunc)(InputFactoryPtr& ptr);
@@ -106,12 +108,25 @@ namespace KlayGE
 		input_factory_.reset();
 		show_factory_.reset();
 		audio_data_src_factory_.reset();
+		deferred_rendering_layer_.reset();
 	}
 
 	Context& Context::Instance()
 	{
-		static Context context;
-		return context;
+		if (!context_instance_)
+		{
+			unique_lock<mutex> lock(singleton_mutex);
+			if (!context_instance_)
+			{
+				context_instance_ = MakeSharedPtr<Context>();
+			}
+		}
+		return *context_instance_;
+	}
+
+	void Context::Destroy()
+	{
+		context_instance_.reset();
 	}
 
 	void Context::LoadCfg(std::string const & cfg_file)

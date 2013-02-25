@@ -63,9 +63,11 @@ namespace KlayGE
 	class KLAYGE_CORE_API Context
 	{
 	public:
+		Context();
 		~Context();
 
 		static Context& Instance();
+		static void Destroy();
 		
 #ifdef KLAYGE_PLATFORM_ANDROID
 		android_app* AppState() const
@@ -178,7 +180,7 @@ namespace KlayGE
 		}
 
 	private:
-		Context();
+		static boost::shared_ptr<Context> context_instance_;
 
 		ContextCfg cfg_;
 

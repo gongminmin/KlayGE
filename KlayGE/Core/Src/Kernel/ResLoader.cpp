@@ -68,27 +68,6 @@ namespace KlayGE
 {
 	boost::shared_ptr<ResLoader> ResLoader::res_loader_instance_;
 
-	ResLoader& ResLoader::Instance()
-	{
-		if (!res_loader_instance_)
-		{
-			unique_lock<mutex> lock(singleton_mutex);
-			if (!res_loader_instance_)
-			{
-				res_loader_instance_ = MakeSharedPtr<ResLoader>();
-			}
-		}
-		return *res_loader_instance_;
-	}
-
-	void ResLoader::Destroy()
-	{
-		if (res_loader_instance_)
-		{
-			res_loader_instance_.reset();
-		}
-	}
-
 	ResLoader::ResLoader()
 	{
 #if defined KLAYGE_PLATFORM_WINDOWS
@@ -152,6 +131,29 @@ namespace KlayGE
 		this->AddPath("../../media/Fonts/");
 		this->AddPath("../../media/PostProcessors/");
 #endif
+	}
+
+	ResLoader::~ResLoader()
+	{
+		this->Destroy();
+	}
+
+	ResLoader& ResLoader::Instance()
+	{
+		if (!res_loader_instance_)
+		{
+			unique_lock<mutex> lock(singleton_mutex);
+			if (!res_loader_instance_)
+			{
+				res_loader_instance_ = MakeSharedPtr<ResLoader>();
+			}
+		}
+		return *res_loader_instance_;
+	}
+
+	void ResLoader::Destroy()
+	{
+		res_loader_instance_.reset();
 	}
 
 	void ResLoader::AddPath(std::string const & path)

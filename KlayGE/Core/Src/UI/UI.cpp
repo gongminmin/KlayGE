@@ -272,28 +272,6 @@ namespace KlayGE
 	}
 
 
-	UIManager& UIManager::Instance()
-	{
-		if (!ui_mgr_instance_)
-		{
-			unique_lock<mutex> lock(singleton_mutex);
-			if (!ui_mgr_instance_)
-			{
-				ui_mgr_instance_ = MakeSharedPtr<UIManager>();
-			}
-		}
-
-		return *ui_mgr_instance_;
-	}
-
-	void UIManager::Destroy()
-	{
-		if (ui_mgr_instance_)
-		{
-			ui_mgr_instance_.reset();
-		}
-	}
-
 	UIManager::UIManager()
 	{
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
@@ -351,6 +329,30 @@ namespace KlayGE
 		main_wnd->OnMouseUp().connect(boost::bind(&UIManager::MouseUpHandler, this, _2, _3));
 		main_wnd->OnMouseWheel().connect(boost::bind(&UIManager::MouseWheelHandler, this, _2, _3, _4));
 		main_wnd->OnMouseOver().connect(boost::bind(&UIManager::MouseOverHandler, this, _2, _3));
+	}
+
+	UIManager::~UIManager()
+	{
+		this->Destroy();
+	}
+	
+	UIManager& UIManager::Instance()
+	{
+		if (!ui_mgr_instance_)
+		{
+			unique_lock<mutex> lock(singleton_mutex);
+			if (!ui_mgr_instance_)
+			{
+				ui_mgr_instance_ = MakeSharedPtr<UIManager>();
+			}
+		}
+
+		return *ui_mgr_instance_;
+	}
+
+	void UIManager::Destroy()
+	{
+		ui_mgr_instance_.reset();
 	}
 
 	void UIManager::Load(ResIdentifierPtr const & source)

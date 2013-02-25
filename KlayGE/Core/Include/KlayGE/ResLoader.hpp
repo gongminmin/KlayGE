@@ -66,6 +66,7 @@ namespace KlayGE
 	{
 	public:
 		ResLoader();
+		~ResLoader();
 
 		static ResLoader& Instance();
 		static void Destroy();
