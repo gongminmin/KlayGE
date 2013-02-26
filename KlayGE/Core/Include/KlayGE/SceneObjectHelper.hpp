@@ -24,6 +24,7 @@
 #include <KlayGE/PreDeclare.hpp>
 #include <KlayGE/SceneObject.hpp>
 #include <KFL/AABBox.hpp>
+#include <KlayGE/Mesh.hpp>
 
 namespace KlayGE
 {
@@ -64,7 +65,8 @@ namespace KlayGE
 	class KLAYGE_CORE_API SceneObjectLightSourceProxy : public SceneObjectHelper
 	{
 	public:
-		explicit SceneObjectLightSourceProxy(LightSourcePtr const & light);
+		explicit SceneObjectLightSourceProxy(LightSourcePtr const & light,
+			boost::function<StaticMeshPtr(RenderModelPtr const &, std::wstring const &)> CreateMeshFactoryFunc = CreateMeshFactory<RenderableLightSourceProxy>());
 
 		void Update(float app_time, float elapsed_time);
 

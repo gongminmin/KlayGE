@@ -642,7 +642,7 @@ void ScenePlayerApp::LoadScene(std::string const & name)
 		XMLAttributePtr attr = model_node->Attrib("name");
 		BOOST_ASSERT(attr);
 
-		RenderModelPtr model = SyncLoadModel(attr->ValueString(), EAH_GPU_Read | EAH_Immutable, CreateModelFactory<RenderModel>(), CreateMeshFactory<StaticMesh>());
+		RenderModelPtr model = SyncLoadModel(attr->ValueString(), EAH_GPU_Read | EAH_Immutable);
 		scene_models_.push_back(model);
 		for (size_t i = 0; i < model->NumMeshes(); ++ i)
 		{

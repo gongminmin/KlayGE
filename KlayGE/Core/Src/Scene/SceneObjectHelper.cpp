@@ -86,7 +86,8 @@ namespace KlayGE
 	}
 
 
-	SceneObjectLightSourceProxy::SceneObjectLightSourceProxy(LightSourcePtr const & light)
+	SceneObjectLightSourceProxy::SceneObjectLightSourceProxy(LightSourcePtr const & light,
+			boost::function<StaticMeshPtr(RenderModelPtr const &, std::wstring const &)> CreateMeshFactoryFunc)
 		: SceneObjectHelper(SOA_Cullable | SOA_Moveable | SOA_NotCastShadow),
 			light_(light)
 	{
@@ -113,7 +114,7 @@ namespace KlayGE
 			BOOST_ASSERT(false);
 			break;
 		}
-		renderable_ = SyncLoadModel(mesh_name.c_str(), EAH_GPU_Read, CreateModelFactory<RenderModel>(), CreateMeshFactory<RenderableLightSourceProxy>())->Mesh(0);
+		renderable_ = SyncLoadModel(mesh_name.c_str(), EAH_GPU_Read, CreateModelFactory<RenderModel>(), CreateMeshFactoryFunc)->Mesh(0);
 		model_scaling_ = model_translation_ = float4x4::Identity();
 
 		checked_pointer_cast<RenderableLightSourceProxy>(renderable_)->AttachLightSrc(light);
