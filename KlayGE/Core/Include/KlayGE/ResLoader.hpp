@@ -114,7 +114,7 @@ namespace KlayGE
 		std::string exe_path_;
 		std::vector<std::string> paths_;
 
-		std::vector<std::pair<ResLoadingDescPtr, boost::shared_ptr<void>> > cached_sync_res_;
+		std::vector<std::pair<ResLoadingDescPtr, boost::shared_ptr<void> > > cached_sync_res_;
 		std::vector<std::pair<ResLoadingDescPtr, boost::function<boost::shared_ptr<void>()> > > cached_async_res_;
 	};
 }
