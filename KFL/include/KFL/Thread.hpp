@@ -49,7 +49,7 @@
 #else
 	#ifdef KLAYGE_COMPILER_MSVC
 		#pragma warning(push)
-		#pragma warning(disable: 4244 4512 4267 6011 6246 28197)
+		#pragma warning(disable: 4244 4512 4267 4913 6011 6246 28197)
 	#endif
 	#include <boost/thread.hpp>
 	#ifdef KLAYGE_COMPILER_MSVC

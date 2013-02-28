@@ -33,7 +33,7 @@ def build_Boost(compiler_name, compiler_version, compiler_arch, config_list, pla
 		if compiler_version >= 10:
 			options += " --without-regex --without-system"
 		if compiler_version >= 11:
-			options += " --without-atomic --without-chrono --without-filesystem --without-thread"
+			options += " --without-date_time --without-atomic --without-chrono --without-filesystem --without-thread"
 
 	if ("x86" == compiler_arch) or ("x64" == compiler_arch):
 		options += " --disable-filesystem2"
