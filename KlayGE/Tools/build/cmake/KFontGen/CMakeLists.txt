@@ -59,6 +59,11 @@ ELSEIF(MINGW)
 		debug kfont_${KLAYGE_COMPILER_NAME}_${KLAYGE_ARCH_NAME}${CMAKE_DEBUG_POSTFIX} optimized kfont_${KLAYGE_COMPILER_NAME}_${KLAYGE_ARCH_NAME}
 		debug boost_program_options-mgw47-mt-d-1_53 optimized boost_program_options-mgw47-mt-1_53)
 ELSE()
+	SET(EXTRA_LINKED_DIRS
+		${KLAYGE_PROJECT_DIR}/../External/freetype/objs
+		${KLAYGE_PROJECT_DIR}/../kfont/lib/${KLAYGE_PLATFORM_NAME}
+	)
+
 	SET(EXTRA_LINKED_LIBRARIES ${EXTRA_LINKED_LIBRARIES}
 		freetype
 		debug kfont_${KLAYGE_COMPILER_NAME}_${KLAYGE_ARCH_NAME}${CMAKE_DEBUG_POSTFIX} optimized kfont_${KLAYGE_COMPILER_NAME}_${KLAYGE_ARCH_NAME}

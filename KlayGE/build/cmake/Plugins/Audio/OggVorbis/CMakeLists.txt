@@ -39,8 +39,13 @@ INCLUDE_DIRECTORIES(${KLAYGE_PROJECT_DIR}/../KFL/include)
 INCLUDE_DIRECTORIES(${KLAYGE_PROJECT_DIR}/Core/Include)
 INCLUDE_DIRECTORIES(${KLAYGE_PROJECT_DIR}/Plugins/Include)
 LINK_DIRECTORIES(${KLAYGE_PROJECT_DIR}/../External/boost/lib_${KLAYGE_COMPILER_NAME}${KLAYGE_COMPILER_VERSION}_${KLAYGE_ARCH_NAME}/lib)
-LINK_DIRECTORIES(${KLAYGE_PROJECT_DIR}/../External/libogg/lib/${OV_PLATFORM_NAME})
-LINK_DIRECTORIES(${KLAYGE_PROJECT_DIR}/../External/libvorbis/libs/${OV_PLATFORM_NAME})
+IF(MSVC)
+	LINK_DIRECTORIES(${KLAYGE_PROJECT_DIR}/../External/libogg/lib/${OV_PLATFORM_NAME})
+	LINK_DIRECTORIES(${KLAYGE_PROJECT_DIR}/../External/libvorbis/libs/${OV_PLATFORM_NAME})
+ELSE()
+	LINK_DIRECTORIES(${KLAYGE_PROJECT_DIR}/../External/libogg/lib)
+	LINK_DIRECTORIES(${KLAYGE_PROJECT_DIR}/../External/libvorbis/libs)
+ENDIF()
 LINK_DIRECTORIES(${KLAYGE_PROJECT_DIR}/../KFL/lib/${KLAYGE_PLATFORM_NAME})
 LINK_DIRECTORIES(${KLAYGE_PROJECT_DIR}/lib/${KLAYGE_PLATFORM_NAME})
 
@@ -59,17 +64,13 @@ ELSEIF(MINGW)
 		debug KlayGE_Core_${KLAYGE_COMPILER_NAME}_d optimized KlayGE_Core_${KLAYGE_COMPILER_NAME}
 		debug KFL_${KLAYGE_COMPILER_NAME}_${KLAYGE_ARCH_NAME}_d optimized KFL_${KLAYGE_COMPILER_NAME}_${KLAYGE_ARCH_NAME}
 		debug boost_system-mgw47-mt-d-1_53 optimized boost_system-mgw47-mt-1_53
-		debug ogg_static_d optimized ogg_static
-		debug vorbis_static_d optimized vorbis_static
-		debug vorbisfile_static_d optimized vorbisfile_static)
+		vorbisfile vorbis ogg)
 ELSE()
 	SET(EXTRA_LINKED_LIBRARIES
 		debug KlayGE_Core_${KLAYGE_COMPILER_NAME}_d optimized KlayGE_Core_${KLAYGE_COMPILER_NAME}
 		debug KFL_${KLAYGE_COMPILER_NAME}_${KLAYGE_ARCH_NAME}_d optimized KFL_${KLAYGE_COMPILER_NAME}_${KLAYGE_ARCH_NAME}
 		boost_system
-		debug ogg_static_d optimized ogg_static
-		debug vorbis_static_d optimized vorbis_static
-		debug vorbisfile_static_d optimized vorbisfile_static)
+		vorbisfile vorbis ogg)
 ENDIF()
 
 SET_TARGET_PROPERTIES(${LIB_NAME} PROPERTIES

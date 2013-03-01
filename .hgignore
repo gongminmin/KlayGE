@@ -152,6 +152,7 @@ External/libvorbis/*/*/Makefile
 External/libvorbis/libtool
 External/libvorbis/vorbis*.pc
 External/libvorbis/stamp-h1
+External/libvorbis/doc/Doxyfile
 External/7z/build/vc-*/Release
 External/7z/build/vc-*/Debug
 External/7z/build/vc-*/x64

@@ -180,6 +180,7 @@ def build_libvorbis(compiler_name, compiler_version, compiler_arch, config_list,
 			os.system("sh ./configure --disable-shared --with-ogg=\"%s\"" % (os.path.realpath(os.path.abspath(".") + "\\../libogg")).replace('\\', '/'))
 			os.system("mingw32-make.exe")
 			copy_to_dst("lib\\.libs\\libvorbis.a", "libs\\libvorbis.a")
+			copy_to_dst("lib\\.libs\\libvorbisfile.a", "libs\\libvorbisfile.a")
 			os.system("mingw32-make.exe clean")
 			os.chdir("../../")
 	elif "linux" == platform:
@@ -187,6 +188,7 @@ def build_libvorbis(compiler_name, compiler_version, compiler_arch, config_list,
 		os.system("./configure --disable-shared --with-ogg=\"%s\"" % (os.path.realpath(os.path.abspath(".") + "/../libogg")))
 		os.system("make")
 		copy_to_dst("lib/.libs/libvorbis.a", "libs/libvorbis.a")
+		copy_to_dst("lib/.libs/libvorbisfile.a", "libs/libvorbisfile.a")
 		os.system("make clean")
 		os.chdir("../../")
 
