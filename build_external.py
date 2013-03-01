@@ -34,7 +34,7 @@ def build_Boost(compiler_name, compiler_version, compiler_arch, config_list, pla
 			options += " --without-regex"
 		if compiler_version >= 11:
 			options += " --without-atomic --without-chrono --without-date_time --without-filesystem --without-system --without-thread"
-	elif:
+	else:
 		options += " --without-atomic --without-regex"
 
 	if ("x86" == compiler_arch) or ("x64" == compiler_arch):
@@ -172,24 +172,31 @@ def build_libvorbis(compiler_name, compiler_version, compiler_arch, config_list,
 
 def build_freetype(compiler_name, compiler_version, compiler_arch, config_list, platform, ide_version):
 	if "win32" == platform:
-		if "x64" == compiler_arch:
-			arch = "x64"
-			compiler_arch = "x86_amd64"
-		else:
-			arch = "Win32"
-		configs = []
-		if "Debug" in config_list:
-			configs.append("Debug")
-		if ("Release" in config_list) or ("RelWithDebInfo" in config_list) or ("MinSizeRel" in config_list):
-			configs.append("Release")
+		if "vc" == compiler_name:
+			if "x64" == compiler_arch:
+				arch = "x64"
+				compiler_arch = "x86_amd64"
+			else:
+				arch = "Win32"
+			configs = []
+			if "Debug" in config_list:
+				configs.append("Debug")
+			if ("Release" in config_list) or ("RelWithDebInfo" in config_list) or ("MinSizeRel" in config_list):
+				configs.append("Release")
 
-		os.chdir("External/freetype/builds/win32/vc%s" % ide_version)
-		build_cmd = batch_command()
-		build_cmd.add_command('CALL "%%VS%d0COMNTOOLS%%..\\..\\VC\\vcvarsall.bat" %s' % (compiler_version, compiler_arch))
-		for cfg in configs:
-			build_cmd.add_command('devenv freetype.sln /Build "%s|%s"' % (cfg, arch))
-		build_cmd.execute()
-		os.chdir("../../../../../")
+			os.chdir("External/freetype/builds/win32/vc%s" % ide_version)
+			build_cmd = batch_command()
+			build_cmd.add_command('CALL "%%VS%d0COMNTOOLS%%..\\..\\VC\\vcvarsall.bat" %s' % (compiler_version, compiler_arch))
+			for cfg in configs:
+				build_cmd.add_command('devenv freetype.sln /Build "%s|%s"' % (cfg, arch))
+			build_cmd.execute()
+			os.chdir("../../../../../")
+		elif "mgw" == compiler_name:
+			os.chdir("External/freetype")
+			os.system("mingw32-make.exe")
+			os.system("mingw32-make.exe")
+			copy_to_dst("objs\\freetype.a", "objs\\libfreetype.a")
+			os.chdir("../../")
 	elif "linux" == platform:
 		os.chdir("External/freetype")
 		os.system("./configure")
@@ -271,10 +278,7 @@ def build_external_libs(compiler_name, compiler_version, compiler_arch, generato
 	for fname in glob.iglob("External/boost/lib_%s%s_%s/lib/*.%s" % (compiler_name, compiler_version_str, compiler_arch, dll_suffix)):
 		copy_to_dst(fname, dst_dir)
 
-	if "vc" != compiler_name:
-		return
-
-	if (compiler_arch != "x86_app") and (compiler_arch != "arm_app"):
+	if ("vc" == compiler_name) and (compiler_arch != "x86_app") and (compiler_arch != "arm_app"):
 		print("\nBuilding Python...\n")
 		build_Python(compiler_name, compiler_version, compiler_arch, config_list, platform)
 
@@ -294,35 +298,36 @@ def build_external_libs(compiler_name, compiler_version, compiler_arch, generato
 		for fname in glob.iglob("External/Python/Lib/encodings/*.py"):
 			copy_to_dst(fname, "%sLib/encodings/" % dst_dir)
 
-	if (compiler_arch != "x86_app") and (compiler_arch != "arm_app"):
+	if ("vc" == compiler_name) and (compiler_arch != "x86_app") and (compiler_arch != "arm_app"):
 		print("\nBuilding libogg...\n")
 		build_libogg(compiler_name, compiler_version, compiler_arch, config_list, platform, ide_name, ide_version)
 
-	if (compiler_arch != "x86_app") and (compiler_arch != "arm_app"):
+	if ("vc" == compiler_name) and (compiler_arch != "x86_app") and (compiler_arch != "arm_app"):
 		print("\nBuilding libvorbis...\n")
 		build_libvorbis(compiler_name, compiler_version, compiler_arch, config_list, platform, ide_name, ide_version)
 
 	if (compiler_arch != "x86_app") and (compiler_arch != "arm_app"):
 		print("\nBuilding freetype...\n")
 		build_freetype(compiler_name, compiler_version, compiler_arch, config_list, platform, ide_version)
-		
-	print("\nBuilding 7z...\n")
-	build_7z(compiler_name, compiler_version, compiler_arch, config_list, platform)
 
-	if "x64" == compiler_arch:
-		subdir = "x64/"
-		folder_suffix = ""
-	elif "arm_app" == compiler_arch:
-		subdir = "ARM/"
-		folder_suffix = "_app"
-	elif "x86_app" == compiler_arch:
-		subdir = ""
-		folder_suffix = "_app"
-	else:
-		subdir = ""
-		folder_suffix = ""
-	copy_to_dst("External/7z/build/%s-%d_0%s/%sRelease/7zxa.%s" % (compiler_name, compiler_version, folder_suffix, subdir, dll_suffix), dst_dir)
-	copy_to_dst("External/7z/build/%s-%d_0%s/%sRelease/LZMA.%s" % (compiler_name, compiler_version, folder_suffix, subdir, dll_suffix), dst_dir)
+	if ("vc" == compiler_name):
+		print("\nBuilding 7z...\n")
+		build_7z(compiler_name, compiler_version, compiler_arch, config_list, platform)
+
+		if "x64" == compiler_arch:
+			subdir = "x64/"
+			folder_suffix = ""
+		elif "arm_app" == compiler_arch:
+			subdir = "ARM/"
+			folder_suffix = "_app"
+		elif "x86_app" == compiler_arch:
+			subdir = ""
+			folder_suffix = "_app"
+		else:
+			subdir = ""
+			folder_suffix = ""
+		copy_to_dst("External/7z/build/%s-%d_0%s/%sRelease/7zxa.%s" % (compiler_name, compiler_version, folder_suffix, subdir, dll_suffix), dst_dir)
+		copy_to_dst("External/7z/build/%s-%d_0%s/%sRelease/LZMA.%s" % (compiler_name, compiler_version, folder_suffix, subdir, dll_suffix), dst_dir)
 
 	if (compiler_arch != "x86_app") and (compiler_arch != "arm_app"):
 		if "win32" == platform:

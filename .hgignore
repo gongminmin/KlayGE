@@ -113,10 +113,16 @@ External/Python/vc-11_0/obj/
 External/Python/vc-11_0/amd64/
 External/Python/vc-11_0/*-temp-*/
 External/Python/vc-11_0/*-pgi/
+External/freetype/config.mk
 External/freetype/objs/debug
 External/freetype/objs/release
 External/freetype/objs/win32
 External/freetype/objs/x64
+External/freetype/objs/*.o
+External/freetype/objs/*.exe
+External/freetype/objs/*.a
+External/freetype/objs/*.def
+External/freetype/objs/*.h
 External/libogg/lib/*/*.lib
 External/libogg/win32/*/Win32
 External/libogg/win32/*/x64
