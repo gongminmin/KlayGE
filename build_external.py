@@ -109,65 +109,85 @@ def build_Python(compiler_name, compiler_version, compiler_arch, config_list, pl
 
 def build_libogg(compiler_name, compiler_version, compiler_arch, config_list, platform, ide_name, ide_version):
 	if "win32" == platform:
-		if "x64" == compiler_arch:
-			arch = "x64"
-			compiler_arch = "x86_amd64"
-		else:
-			arch = "Win32"
-		configs = []
-		if "Debug" in config_list:
-			configs.append("Debug")
-		if ("Release" in config_list) or ("RelWithDebInfo" in config_list) or ("MinSizeRel" in config_list):
-			configs.append("Release")
-			
-		os.chdir("External/libogg/win32/%s%d" % (ide_name, ide_version))
-		build_cmd = batch_command()
-		build_cmd.add_command('CALL "%%VS%d0COMNTOOLS%%..\\..\\VC\\vcvarsall.bat" %s' % (compiler_version, compiler_arch))
-		for cfg in configs:
-			build_cmd.add_command('devenv libogg_static.sln /Build "%s|%s"' % (cfg, arch))
-			if "Debug" == cfg:
-				suffix = "_d"
+		if "vc" == compiler_name:
+			if "x64" == compiler_arch:
+				arch = "x64"
+				compiler_arch = "x86_amd64"
 			else:
-				suffix = ""
-			build_cmd.add_command('move /Y %s\\%s\\libogg_static.lib ..\\..\\lib\\%s\\libogg_static%s.lib' % (arch, cfg, arch, suffix))
-		build_cmd.execute()
-		os.chdir("../../../../")
+				arch = "Win32"
+			configs = []
+			if "Debug" in config_list:
+				configs.append("Debug")
+			if ("Release" in config_list) or ("RelWithDebInfo" in config_list) or ("MinSizeRel" in config_list):
+				configs.append("Release")
+				
+			os.chdir("External/libogg/win32/%s%d" % (ide_name, ide_version))
+			build_cmd = batch_command()
+			build_cmd.add_command('CALL "%%VS%d0COMNTOOLS%%..\\..\\VC\\vcvarsall.bat" %s' % (compiler_version, compiler_arch))
+			for cfg in configs:
+				build_cmd.add_command('devenv libogg_static.sln /Build "%s|%s"' % (cfg, arch))
+				if "Debug" == cfg:
+					suffix = "_d"
+				else:
+					suffix = ""
+				build_cmd.add_command('move /Y %s\\%s\\libogg_static.lib ..\\..\\lib\\%s\\libogg_static%s.lib' % (arch, cfg, arch, suffix))
+			build_cmd.execute()
+			os.chdir("../../../../")
+		elif "mgw" == compiler_name:
+			os.chdir("External/libogg")
+			os.system("sh ./configure --disable-shared")
+			os.system("mingw32-make.exe")
+			copy_to_dst("src\\.libs\\libogg.a", "lib\\libogg.a")
+			os.system("mingw32-make.exe clean")
+			os.chdir("../../")
 	elif "linux" == platform:
 		os.chdir("External/libogg")
-		os.system("./configure")
+		os.system("./configure --disable-shared")
 		os.system("make")
+		copy_to_dst("src/.libs/libogg.a", "lib/libogg.a")
+		os.system("make clean")
 		os.chdir("../../")
 
 def build_libvorbis(compiler_name, compiler_version, compiler_arch, config_list, platform, ide_name, ide_version):
 	if "win32" == platform:
-		if "x64" == compiler_arch:
-			arch = "x64"
-			compiler_arch = "x86_amd64"
-		else:
-			arch = "Win32"
-		configs = []
-		if "Debug" in config_list:
-			configs.append("Debug")
-		if ("Release" in config_list) or ("RelWithDebInfo" in config_list) or ("MinSizeRel" in config_list):
-			configs.append("Release")
-
-		os.chdir("External/libvorbis/win32/%s%d" % (ide_name, ide_version))
-		build_cmd = batch_command()
-		build_cmd.add_command('CALL "%%VS%d0COMNTOOLS%%..\\..\\VC\\vcvarsall.bat" %s' % (compiler_version, compiler_arch))
-		for cfg in configs:
-			build_cmd.add_command('devenv vorbis_static.sln /Build "%s|%s"' % (cfg, arch))
-			if "Debug" == cfg:
-				suffix = "_d"
+		if "vc" == compiler_name:
+			if "x64" == compiler_arch:
+				arch = "x64"
+				compiler_arch = "x86_amd64"
 			else:
-				suffix = ""
-			build_cmd.add_command('move /Y %s\\%s\\libvorbis_static%s.lib ..\\..\\libs\\%s\\libvorbis_static%s.lib' % (arch, cfg, suffix, arch, suffix))
-			build_cmd.add_command('move /Y %s\\%s\\libvorbisfile_static%s.lib ..\\..\\libs\\%s\\libvorbisfile_static%s.lib' % (arch, cfg, suffix, arch, suffix))
-		build_cmd.execute()
-		os.chdir("../../../../")
+				arch = "Win32"
+			configs = []
+			if "Debug" in config_list:
+				configs.append("Debug")
+			if ("Release" in config_list) or ("RelWithDebInfo" in config_list) or ("MinSizeRel" in config_list):
+				configs.append("Release")
+
+			os.chdir("External/libvorbis/win32/%s%d" % (ide_name, ide_version))
+			build_cmd = batch_command()
+			build_cmd.add_command('CALL "%%VS%d0COMNTOOLS%%..\\..\\VC\\vcvarsall.bat" %s' % (compiler_version, compiler_arch))
+			for cfg in configs:
+				build_cmd.add_command('devenv vorbis_static.sln /Build "%s|%s"' % (cfg, arch))
+				if "Debug" == cfg:
+					suffix = "_d"
+				else:
+					suffix = ""
+				build_cmd.add_command('move /Y %s\\%s\\libvorbis_static%s.lib ..\\..\\libs\\%s\\libvorbis_static%s.lib' % (arch, cfg, suffix, arch, suffix))
+				build_cmd.add_command('move /Y %s\\%s\\libvorbisfile_static%s.lib ..\\..\\libs\\%s\\libvorbisfile_static%s.lib' % (arch, cfg, suffix, arch, suffix))
+			build_cmd.execute()
+			os.chdir("../../../../")
+		elif "mgw" == compiler_name:
+			os.chdir("External/libvorbis")
+			os.system("sh ./configure --disable-shared --with-ogg=\"%s\"" % (os.path.realpath(os.path.abspath(".") + "\\../libogg")).replace('\\', '/'))
+			os.system("mingw32-make.exe")
+			copy_to_dst("lib\\.libs\\libvorbis.a", "libs\\libvorbis.a")
+			os.system("mingw32-make.exe clean")
+			os.chdir("../../")
 	elif "linux" == platform:
 		os.chdir("External/libvorbis")
-		os.system("./configure")
+		os.system("./configure --disable-shared --with-ogg=\"%s\"" % (os.path.realpath(os.path.abspath(".") + "/../libogg")))
 		os.system("make")
+		copy_to_dst("lib/.libs/libvorbis.a", "libs/libvorbis.a")
+		os.system("make clean")
 		os.chdir("../../")
 
 def build_freetype(compiler_name, compiler_version, compiler_arch, config_list, platform, ide_version):
@@ -298,11 +318,11 @@ def build_external_libs(compiler_name, compiler_version, compiler_arch, generato
 		for fname in glob.iglob("External/Python/Lib/encodings/*.py"):
 			copy_to_dst(fname, "%sLib/encodings/" % dst_dir)
 
-	if ("vc" == compiler_name) and (compiler_arch != "x86_app") and (compiler_arch != "arm_app"):
+	if (compiler_arch != "x86_app") and (compiler_arch != "arm_app"):
 		print("\nBuilding libogg...\n")
 		build_libogg(compiler_name, compiler_version, compiler_arch, config_list, platform, ide_name, ide_version)
 
-	if ("vc" == compiler_name) and (compiler_arch != "x86_app") and (compiler_arch != "arm_app"):
+	if (compiler_arch != "x86_app") and (compiler_arch != "arm_app"):
 		print("\nBuilding libvorbis...\n")
 		build_libvorbis(compiler_name, compiler_version, compiler_arch, config_list, platform, ide_name, ide_version)
 
