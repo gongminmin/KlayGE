@@ -58,12 +58,12 @@ namespace KlayGE
 		uint32_t stencil_bits = NumStencilBits(settings.depth_stencil_fmt);
 
 		WindowPtr const & main_wnd = Context::Instance().AppInstance().MainWnd();
-		main_wnd->OnActive().connect(boost::bind(&OGLRenderWindow::OnActive, this, _1, _2));
-		main_wnd->OnPaint().connect(boost::bind(&OGLRenderWindow::OnPaint, this, _1));
-		main_wnd->OnEnterSizeMove().connect(boost::bind(&OGLRenderWindow::OnEnterSizeMove, this, _1));
-		main_wnd->OnExitSizeMove().connect(boost::bind(&OGLRenderWindow::OnExitSizeMove, this, _1));
-		main_wnd->OnSize().connect(boost::bind(&OGLRenderWindow::OnSize, this, _1, _2));
-		main_wnd->OnClose().connect(boost::bind(&OGLRenderWindow::OnClose, this, _1));
+		on_active_connect_ = main_wnd->OnActive().connect(boost::bind(&OGLRenderWindow::OnActive, this, _1, _2));
+		on_paint_connect_ = main_wnd->OnPaint().connect(boost::bind(&OGLRenderWindow::OnPaint, this, _1));
+		on_enter_size_move_connect_ = main_wnd->OnEnterSizeMove().connect(boost::bind(&OGLRenderWindow::OnEnterSizeMove, this, _1));
+		on_exit_size_move_connect_ = main_wnd->OnExitSizeMove().connect(boost::bind(&OGLRenderWindow::OnExitSizeMove, this, _1));
+		on_size_connect_ = main_wnd->OnSize().connect(boost::bind(&OGLRenderWindow::OnSize, this, _1, _2));
+		on_close_connect_ = main_wnd->OnClose().connect(boost::bind(&OGLRenderWindow::OnClose, this, _1));
 
 #if defined KLAYGE_PLATFORM_WINDOWS
 		hWnd_ = main_wnd->HWnd();
@@ -336,13 +336,12 @@ namespace KlayGE
 
 	OGLRenderWindow::~OGLRenderWindow()
 	{
-		WindowPtr const & main_wnd = Context::Instance().AppInstance().MainWnd();
-		main_wnd->OnActive().disconnect(boost::bind(&OGLRenderWindow::OnActive, this, _1, _2));
-		main_wnd->OnPaint().disconnect(boost::bind(&OGLRenderWindow::OnPaint, this, _1));
-		main_wnd->OnEnterSizeMove().disconnect(boost::bind(&OGLRenderWindow::OnEnterSizeMove, this, _1));
-		main_wnd->OnExitSizeMove().disconnect(boost::bind(&OGLRenderWindow::OnExitSizeMove, this, _1));
-		main_wnd->OnSize().disconnect(boost::bind(&OGLRenderWindow::OnSize, this, _1, _2));
-		main_wnd->OnClose().disconnect(boost::bind(&OGLRenderWindow::OnClose, this, _1));
+		on_active_connect_.disconnect();
+		on_paint_connect_.disconnect();
+		on_enter_size_move_connect_.disconnect();
+		on_exit_size_move_connect_.disconnect();
+		on_size_connect_.disconnect();
+		on_close_connect_.disconnect();
 
 		this->Destroy();
 	}

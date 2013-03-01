@@ -346,11 +346,12 @@ namespace KlayGE
 		}
 
 		WindowPtr const & main_wnd = Context::Instance().AppInstance().MainWnd();
-		main_wnd->OnChar().connect(boost::bind(&UIEditBox::CharHandler, this, _1, _2));
+		on_char_connect_ = main_wnd->OnChar().connect(boost::bind(&UIEditBox::CharHandler, this, _1, _2));
 	}
 
 	UIEditBox::~UIEditBox()
 	{
+		on_char_connect_.disconnect();
 	}
 
 	// PlaceCaret: Set the caret to a character position, and adjust the scrolling if

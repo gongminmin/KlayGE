@@ -457,6 +457,13 @@ namespace KlayGE
 			uint32_t align;
 		};
 		std::map<size_t, std::vector<string_cache> > strings_;
+
+		boost::signals2::connection on_key_down_connect_;
+		boost::signals2::connection on_key_up_connect_;
+		boost::signals2::connection on_mouse_down_connect_;
+		boost::signals2::connection on_mouse_up_connect_;
+		boost::signals2::connection on_mouse_wheel_connect_;
+		boost::signals2::connection on_mouse_over_connect_;
 	};
 
 	class KLAYGE_CORE_API UIDialog
@@ -1572,6 +1579,8 @@ namespace KlayGE
 
 		// Mouse-specific
 		bool mouse_drag_;       // True to indicate drag in progress
+
+		boost::signals2::connection on_char_connect_;
 
 		// Static
 		static bool hide_caret_;   // If true, we don't render the caret.

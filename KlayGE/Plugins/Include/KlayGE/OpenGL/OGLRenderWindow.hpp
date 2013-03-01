@@ -21,6 +21,15 @@
 #include <KlayGE/PreDeclare.hpp>
 #include <KlayGE/OpenGL/OGLFrameBuffer.hpp>
 
+#ifdef KLAYGE_COMPILER_MSVC
+#pragma warning(push)
+#pragma warning(disable: 4100 4512 4913 6011)
+#endif
+#include <boost/signals2.hpp>
+#ifdef KLAYGE_COMPILER_MSVC
+#pragma warning(pop)
+#endif
+
 namespace KlayGE
 {
 	struct RenderSettings;
@@ -80,6 +89,13 @@ namespace KlayGE
 		uint32_t color_bits_;
 
 		std::wstring			description_;
+
+		boost::signals2::connection on_active_connect_;
+		boost::signals2::connection on_paint_connect_;
+		boost::signals2::connection on_enter_size_move_connect_;
+		boost::signals2::connection on_exit_size_move_connect_;
+		boost::signals2::connection on_size_connect_;
+		boost::signals2::connection on_close_connect_;
 	};
 }
 

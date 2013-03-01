@@ -64,13 +64,13 @@ namespace KlayGE
 #else
 		wnd_ = main_wnd->GetWindow();
 #endif
-		main_wnd->OnActive().connect(boost::bind(&D3D11RenderWindow::OnActive, this, _1, _2));
-		main_wnd->OnPaint().connect(boost::bind(&D3D11RenderWindow::OnPaint, this, _1));
-		main_wnd->OnEnterSizeMove().connect(boost::bind(&D3D11RenderWindow::OnEnterSizeMove, this, _1));
-		main_wnd->OnExitSizeMove().connect(boost::bind(&D3D11RenderWindow::OnExitSizeMove, this, _1));
-		main_wnd->OnSize().connect(boost::bind(&D3D11RenderWindow::OnSize, this, _1, _2));
-		main_wnd->OnSetCursor().connect(boost::bind(&D3D11RenderWindow::OnSetCursor, this, _1));
-		main_wnd->OnClose().connect(boost::bind(&D3D11RenderWindow::OnClose, this, _1));
+		on_active_connect_ = main_wnd->OnActive().connect(boost::bind(&D3D11RenderWindow::OnActive, this, _1, _2));
+		on_paint_connect_ = main_wnd->OnPaint().connect(boost::bind(&D3D11RenderWindow::OnPaint, this, _1));
+		on_enter_size_move_connect_ = main_wnd->OnEnterSizeMove().connect(boost::bind(&D3D11RenderWindow::OnEnterSizeMove, this, _1));
+		on_exit_size_move_connect_ = main_wnd->OnExitSizeMove().connect(boost::bind(&D3D11RenderWindow::OnExitSizeMove, this, _1));
+		on_size_connect_ = main_wnd->OnSize().connect(boost::bind(&D3D11RenderWindow::OnSize, this, _1, _2));
+		on_set_cursor_connect_ = main_wnd->OnSetCursor().connect(boost::bind(&D3D11RenderWindow::OnSetCursor, this, _1));
+		on_close_connect_ = main_wnd->OnClose().connect(boost::bind(&D3D11RenderWindow::OnClose, this, _1));
 
 		if (this->FullScreen())
 		{
@@ -383,14 +383,13 @@ namespace KlayGE
 
 	D3D11RenderWindow::~D3D11RenderWindow()
 	{
-		WindowPtr const & main_wnd = Context::Instance().AppInstance().MainWnd();
-		main_wnd->OnActive().disconnect(boost::bind(&D3D11RenderWindow::OnActive, this, _1, _2));
-		main_wnd->OnPaint().disconnect(boost::bind(&D3D11RenderWindow::OnPaint, this, _1));
-		main_wnd->OnEnterSizeMove().disconnect(boost::bind(&D3D11RenderWindow::OnEnterSizeMove, this, _1));
-		main_wnd->OnExitSizeMove().disconnect(boost::bind(&D3D11RenderWindow::OnExitSizeMove, this, _1));
-		main_wnd->OnSize().disconnect(boost::bind(&D3D11RenderWindow::OnSize, this, _1, _2));
-		main_wnd->OnSetCursor().disconnect(boost::bind(&D3D11RenderWindow::OnSetCursor, this, _1));
-		main_wnd->OnClose().disconnect(boost::bind(&D3D11RenderWindow::OnClose, this, _1));
+		on_active_connect_.disconnect();
+		on_paint_connect_.disconnect();
+		on_enter_size_move_connect_.disconnect();
+		on_exit_size_move_connect_.disconnect();
+		on_size_connect_.disconnect();
+		on_set_cursor_connect_.disconnect();
+		on_close_connect_.disconnect();
 
 		this->Destroy();
 	}
