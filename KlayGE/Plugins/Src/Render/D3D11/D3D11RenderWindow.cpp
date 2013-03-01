@@ -312,9 +312,9 @@ namespace KlayGE
 #endif
 		swap_chain_ = MakeCOMPtr(sc);
 
-		Verify(swap_chain_);
-		Verify(d3d_device_);
-		Verify(d3d_imm_ctx_);
+		Verify(!!swap_chain_);
+		Verify(!!d3d_device_);
+		Verify(!!d3d_imm_ctx_);
 
 		bool isDepthBuffered = IsDepthFormat(settings.depth_stencil_fmt);
 		uint32_t depthBits = NumDepthBits(settings.depth_stencil_fmt);

@@ -75,16 +75,16 @@ IF(WIN32)
 			SET(CMAKE_CXX_FLAGS_MINSIZEREL "${CMAKE_CXX_FLAGS_MINSIZEREL} /Qpar")
 		ENDIF()
 	ELSEIF(MINGW)
-		SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -W -Wall -Wno-unused -std=c11")
-		SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -W -Wall -Wno-unused -std=c++11")
+		SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -W -Wall -Wno-unused -march=core2 -std=c11")
+		SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -W -Wall -Wno-unused -march=core2 -std=c++11")
 		SET(CMAKE_MODULE_LINKER_FLAGS_RELEASE "-s")
 		
 		SET(KFONT_COMPILER_NAME "mgw")
 		SET(KFONT_COMPILER_VERSION "")
 	ENDIF()
 ELSE()
-	SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -W -Wall -Wno-unused -std=c11")
-	SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -W -Wall -Wno-unused -std=c++11")
+	SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -W -Wall -Wno-unused -march=core2 -std=c11")
+	SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -W -Wall -Wno-unused -march=core2 -std=c++11")
 	SET(CMAKE_MODULE_LINKER_FLAGS_RELEASE "-s")
 	
 	SET(KFL_COMPILER_NAME "gcc")
@@ -137,7 +137,7 @@ IF(MSVC)
 ELSEIF(MINGW)
 	SET(EXTRA_LINKED_LIBRARIES 
 		debug KFL_${KFONT_COMPILER_NAME}_${KFONT_ARCH_NAME}_d optimized KFL_${KFONT_COMPILER_NAME}_${KFONT_ARCH_NAME}
-		debug boost_system-mgw47-mt-d-1_51 optimized boost_system-mgw47-mt-1_51)
+		debug boost_system-mgw47-mt-d-1_53 optimized boost_system-mgw47-mt-1_53)
 ELSE()
 	SET(EXTRA_LINKED_LIBRARIES
 		debug KFL_${KFONT_COMPILER_NAME}_${KFONT_ARCH_NAME}_d optimized KFL_${KFONT_COMPILER_NAME}_${KFONT_ARCH_NAME}

@@ -169,7 +169,7 @@ namespace
 					new_data[array_index * in_num_mipmaps + 0].data = &new_lengths[0];
 
 					array<uint8_t, 16> uncom_len;
-					uncom_len.assign(255);
+					uncom_len.fill(255);
 					BC4_layout len_bc4;
 					EncodeBC4(len_bc4, &uncom_len[0]);
 

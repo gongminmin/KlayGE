@@ -3,7 +3,7 @@
 
 #pragma once
 
-#ifdef KLAYGE_COMPILER_MSVC
+/*#ifdef KLAYGE_COMPILER_MSVC
 	#ifdef KLAYGE_DEBUG
 		#define DEBUG_SUFFIX "_d"
 	#else
@@ -16,7 +16,7 @@
 
 	#undef LIB_FILE_NAME
 	#undef DEBUG_SUFFIX
-#endif
+#endif*/
 
 #ifdef KLAYGE_COMPILER_MSVC
 extern "C"

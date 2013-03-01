@@ -274,8 +274,8 @@ namespace KlayGE
 		RenderTechniquePtr technique_copy_shading_depth_;
 		RenderTechniquePtr technique_copy_depth_;
 
-		static int const NUM_SHADOWED_SPOT_LIGHTS = 4;
-		static int const NUM_SHADOWED_POINT_LIGHTS = 1;
+		static uint32_t const NUM_SHADOWED_SPOT_LIGHTS = 4;
+		static uint32_t const NUM_SHADOWED_POINT_LIGHTS = 1;
 
 		std::vector<int32_t> sm_light_indices_;
 		FrameBufferPtr sm_buffer_;

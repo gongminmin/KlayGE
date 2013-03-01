@@ -6,7 +6,7 @@ IF(MSVC)
 	SET(EXTRA_LINKED_LIBRARIES "")
 ELSEIF(MINGW)
 	SET(EXTRA_LINKED_LIBRARIES 
-		debug boost_filesystem-mgw47-mt-d-1_51 optimized boost_filesystem-mgw47-mt-1_51)
+		debug boost_filesystem-mgw47-mt-d-1_53 optimized boost_filesystem-mgw47-mt-1_53)
 ELSE()
 	SET(EXTRA_LINKED_LIBRARIES
 		boost_filesystem)

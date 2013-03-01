@@ -116,7 +116,7 @@ namespace KlayGE
 		}
 		bool SceneManagerValid() const
 		{
-			return scene_mgr_;
+			return !!scene_mgr_;
 		}
 		SceneManager& SceneManagerInstance();
 
@@ -126,7 +126,7 @@ namespace KlayGE
 		}
 		bool RenderFactoryValid() const
 		{
-			return render_factory_;
+			return !!render_factory_;
 		}
 		RenderFactory& RenderFactoryInstance();
 
@@ -136,7 +136,7 @@ namespace KlayGE
 		}
 		bool AudioFactoryValid() const
 		{
-			return audio_factory_;
+			return !!audio_factory_;
 		}
 		AudioFactory& AudioFactoryInstance();
 
@@ -146,7 +146,7 @@ namespace KlayGE
 		}
 		bool InputFactoryValid() const
 		{
-			return input_factory_;
+			return !!input_factory_;
 		}
 		InputFactory& InputFactoryInstance();
 
@@ -156,7 +156,7 @@ namespace KlayGE
 		}
 		bool ShowFactoryValid() const
 		{
-			return show_factory_;
+			return !!show_factory_;
 		}
 		ShowFactory& ShowFactoryInstance();
 
@@ -166,7 +166,7 @@ namespace KlayGE
 		}
 		bool AudioDataSourceFactoryValid() const
 		{
-			return audio_data_src_factory_;
+			return !!audio_data_src_factory_;
 		}
 		AudioDataSourceFactory& AudioDataSourceFactoryInstance();
 

@@ -85,16 +85,16 @@ IF(WIN32)
 			SET(CMAKE_CXX_FLAGS_MINSIZEREL "${CMAKE_CXX_FLAGS_MINSIZEREL} /Qpar")
 		ENDIF()
 	ELSEIF(MINGW)
-		SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -W -Wall -Wno-unused -std=c11")
-		SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -W -Wall -Wno-unused -std=c++11")
+		SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -W -Wall -Wno-unused -march=core2 -std=c11")
+		SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -W -Wall -Wno-unused -march=core2 -std=c++11")
 		SET(CMAKE_MODULE_LINKER_FLAGS_RELEASE "-s")
 
 		SET(KLAYGE_COMPILER_NAME "mgw")
 		SET(KLAYGE_COMPILER_VERSION "")
 	ENDIF()
 ELSE()
-	SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -W -Wall -Wno-unused -std=c11")
-	SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -W -Wall -Wno-unused -std=c++11")
+	SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -W -Wall -Wno-unused -march=core2 -std=c11")
+	SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -W -Wall -Wno-unused -march=core2 -std=c++11")
 	SET(CMAKE_MODULE_LINKER_FLAGS_RELEASE "-s")
 
 	SET(KLAYGE_COMPILER_NAME "gcc")
@@ -189,13 +189,14 @@ MACRO(SETUP_TUTORIAL EXE_NAME)
 		SET(EXTRA_LINKED_LIBRARIES ${EXTRA_LINKED_LIBRARIES}
 			debug KlayGE_Core_${KLAYGE_COMPILER_NAME}_d optimized KlayGE_Core_${KLAYGE_COMPILER_NAME}
 			debug KFL_${KLAYGE_COMPILER_NAME}_${KLAYGE_ARCH_NAME}_d optimized KFL_${KLAYGE_COMPILER_NAME}_${KLAYGE_ARCH_NAME}
-			debug boost_thread-mgw47-mt-d-1_51 optimized boost_thread-mgw47-mt-1_51
-			debug boost_system-mgw47-mt-d-1_51 optimized boost_system-mgw47-mt-1_51)
+			debug boost_chrono-mgw47-mt-d-1_53 optimized boost_chrono-mgw47-mt-1_53
+			debug boost_thread-mgw47-mt-d-1_53 optimized boost_thread-mgw47-mt-1_53
+			debug boost_system-mgw47-mt-d-1_53 optimized boost_system-mgw47-mt-1_53)
 	ELSE()
 		SET(EXTRA_LINKED_LIBRARIES ${EXTRA_LINKED_LIBRARIES}
 			debug KlayGE_Core_${KLAYGE_COMPILER_NAME}_d optimized KlayGE_Core_${KLAYGE_COMPILER_NAME}
 			debug KFL_${KLAYGE_COMPILER_NAME}_${KLAYGE_ARCH_NAME}_d optimized KFL_${KLAYGE_COMPILER_NAME}_${KLAYGE_ARCH_NAME}
-			boost_thread boost_system)
+			boost_chrono boost_thread boost_system)
 	ENDIF()
 
 	TARGET_LINK_LIBRARIES(${EXE_NAME} ${EXTRA_LINKED_LIBRARIES})

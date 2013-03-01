@@ -58,7 +58,7 @@ ELSEIF(MINGW)
 	SET(EXTRA_LINKED_LIBRARIES
 		debug KlayGE_Core_${KLAYGE_COMPILER_NAME}_d optimized KlayGE_Core_${KLAYGE_COMPILER_NAME}
 		debug KFL_${KLAYGE_COMPILER_NAME}_${KLAYGE_ARCH_NAME}_d optimized KFL_${KLAYGE_COMPILER_NAME}_${KLAYGE_ARCH_NAME}
-		debug boost_system-mgw47-mt-d-1_51 optimized boost_system-mgw47-mt-1_51
+		debug boost_system-mgw47-mt-d-1_53 optimized boost_system-mgw47-mt-1_53
 		debug ogg_static_d optimized ogg_static
 		debug vorbis_static_d optimized vorbis_static
 		debug vorbisfile_static_d optimized vorbisfile_static)

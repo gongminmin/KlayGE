@@ -378,14 +378,15 @@ ELSEIF(MINGW)
 	SET(EXTRA_LINKED_LIBRARIES wsock32
 		debug kfont_${KLAYGE_COMPILER_NAME}_${KLAYGE_ARCH_NAME}_d optimized kfont_${KLAYGE_COMPILER_NAME}_${KLAYGE_ARCH_NAME}
 		debug KFL_${KLAYGE_COMPILER_NAME}_${KLAYGE_ARCH_NAME}_d optimized KFL_${KLAYGE_COMPILER_NAME}_${KLAYGE_ARCH_NAME}
-		debug boost_filesystem-mgw47-mt-d-1_51 optimized boost_filesystem-mgw47-mt-1_51
-		debug boost_thread-mgw47-mt-d-1_51 optimized boost_thread-mgw47-mt-1_51
-		debug boost_system-mgw47-mt-d-1_51 optimized boost_system-mgw47-mt-1_51)
+		debug boost_chrono-mgw47-mt-d-1_53 optimized boost_chrono-mgw47-mt-1_53
+		debug boost_filesystem-mgw47-mt-d-1_53 optimized boost_filesystem-mgw47-mt-1_53
+		debug boost_thread-mgw47-mt-d-1_53 optimized boost_thread-mgw47-mt-1_53
+		debug boost_system-mgw47-mt-d-1_53 optimized boost_system-mgw47-mt-1_53)
 ELSE()
 	SET(EXTRA_LINKED_LIBRARIES
 		debug kfont_${KLAYGE_COMPILER_NAME}_${KLAYGE_ARCH_NAME}_d optimized kfont_${KLAYGE_COMPILER_NAME}_${KLAYGE_ARCH_NAME}
 		debug KFL_${KLAYGE_COMPILER_NAME}_${KLAYGE_ARCH_NAME}_d optimized KFL_${KLAYGE_COMPILER_NAME}_${KLAYGE_ARCH_NAME}
-		boost_filesystem boost_thread boost_system)
+		boost_atomic boost_filesystem boost_thread boost_system)
 ENDIF()
 
 SET_TARGET_PROPERTIES(${LIB_NAME} PROPERTIES

@@ -69,13 +69,14 @@ ELSEIF(MINGW)
 	SET(EXTRA_LINKED_LIBRARIES cg
 		debug KlayGE_Core_${KLAYGE_COMPILER_NAME}_d optimized KlayGE_Core_${KLAYGE_COMPILER_NAME}
 		debug KFL_${KLAYGE_COMPILER_NAME}_${KLAYGE_ARCH_NAME}_d optimized KFL_${KLAYGE_COMPILER_NAME}_${KLAYGE_ARCH_NAME}
-		debug boost_thread-mgw47-mt-d-1_51 optimized boost_thread-mgw47-mt-1_51
-		debug boost_system-mgw47-mt-d-1_51 optimized boost_system-mgw47-mt-1_51)
+		debug boost_chrono-mgw47-mt-d-1_53 optimized boost_chrono-mgw47-mt-1_53
+		debug boost_thread-mgw47-mt-d-1_53 optimized boost_thread-mgw47-mt-1_53
+		debug boost_system-mgw47-mt-d-1_53 optimized boost_system-mgw47-mt-1_53)
 ELSE()
 	SET(EXTRA_LINKED_LIBRARIES cg
 		debug KlayGE_Core_${KLAYGE_COMPILER_NAME}_d optimized KlayGE_Core_${KLAYGE_COMPILER_NAME}
 		debug KFL_${KLAYGE_COMPILER_NAME}_${KLAYGE_ARCH_NAME}_d optimized KFL_${KLAYGE_COMPILER_NAME}_${KLAYGE_ARCH_NAME}
-		boost_thread boost_system)
+		boost_chrono boost_thread boost_system)
 ENDIF()
 
 SET_TARGET_PROPERTIES(${LIB_NAME} PROPERTIES

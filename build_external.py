@@ -29,11 +29,13 @@ def build_Boost(compiler_name, compiler_version, compiler_arch, config_list, pla
 		address_model = 64
 	
 	options = ""
-	if "vc" == compiler_name: 
+	if "vc" == compiler_name:
 		if compiler_version >= 10:
-			options += " --without-regex --without-system"
+			options += " --without-regex"
 		if compiler_version >= 11:
-			options += " --without-date_time --without-atomic --without-chrono --without-filesystem --without-thread"
+			options += " --without-atomic --without-chrono --without-date_time --without-filesystem --without-system --without-thread"
+	elif:
+		options += " --without-atomic --without-regex"
 
 	if ("x86" == compiler_arch) or ("x64" == compiler_arch):
 		options += " --disable-filesystem2"
