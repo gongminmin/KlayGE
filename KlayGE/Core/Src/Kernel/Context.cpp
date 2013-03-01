@@ -89,14 +89,6 @@ namespace KlayGE
 		_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 #endif
 #endif
-
-		scene_mgr_ = SceneManager::NullObject();
-
-		render_factory_ = RenderFactory::NullObject();
-		audio_factory_ = AudioFactory::NullObject();
-		input_factory_ = InputFactory::NullObject();
-		show_factory_ = ShowFactory::NullObject();
-		audio_data_src_factory_ = AudioDataSourceFactory::NullObject();
 	}
 
 	Context::~Context()
@@ -749,8 +741,9 @@ namespace KlayGE
 
 	void Context::LoadSceneManager(std::string const & sm_name)
 	{
-#ifndef KLAYGE_PLATFORM_ANDROID
 		scene_mgr_ = SceneManager::NullObject();
+
+#ifndef KLAYGE_PLATFORM_ANDROID
 		sm_loader_.Free();
 
 		std::string sm_path = ResLoader::Instance().Locate("Scene");
@@ -799,10 +792,10 @@ namespace KlayGE
 
 	SceneManager& Context::SceneManagerInstance()
 	{
-		if (SceneManager::NullObject() == scene_mgr_)
+		if (!scene_mgr_)
 		{
 			unique_lock<mutex> lock(singleton_mutex);
-			if (SceneManager::NullObject() == scene_mgr_)
+			if (!scene_mgr_)
 			{
 				this->LoadSceneManager(cfg_.scene_manager_name);
 			}
@@ -812,10 +805,10 @@ namespace KlayGE
 
 	RenderFactory& Context::RenderFactoryInstance()
 	{
-		if (RenderFactory::NullObject() == render_factory_)
+		if (!render_factory_)
 		{
 			unique_lock<mutex> lock(singleton_mutex);
-			if (RenderFactory::NullObject() == render_factory_)
+			if (!render_factory_)
 			{
 				this->LoadRenderFactory(cfg_.render_factory_name);
 			}
@@ -825,10 +818,10 @@ namespace KlayGE
 
 	AudioFactory& Context::AudioFactoryInstance()
 	{
-		if (AudioFactory::NullObject() == audio_factory_)
+		if (!audio_factory_)
 		{
 			unique_lock<mutex> lock(singleton_mutex);
-			if (AudioFactory::NullObject() == audio_factory_)
+			if (!audio_factory_)
 			{
 				this->LoadAudioFactory(cfg_.audio_factory_name);
 			}
@@ -838,10 +831,10 @@ namespace KlayGE
 
 	InputFactory& Context::InputFactoryInstance()
 	{
-		if (InputFactory::NullObject() == input_factory_)
+		if (!input_factory_)
 		{
 			unique_lock<mutex> lock(singleton_mutex);
-			if (InputFactory::NullObject() == input_factory_)
+			if (!input_factory_)
 			{
 				this->LoadInputFactory(cfg_.input_factory_name);
 			}
@@ -851,10 +844,10 @@ namespace KlayGE
 
 	ShowFactory& Context::ShowFactoryInstance()
 	{
-		if (ShowFactory::NullObject() == show_factory_)
+		if (!show_factory_)
 		{
 			unique_lock<mutex> lock(singleton_mutex);
-			if (ShowFactory::NullObject() == show_factory_)
+			if (!show_factory_)
 			{
 				this->LoadShowFactory(cfg_.show_factory_name);
 			}
@@ -864,10 +857,10 @@ namespace KlayGE
 
 	AudioDataSourceFactory& Context::AudioDataSourceFactoryInstance()
 	{
-		if (AudioDataSourceFactory::NullObject() == audio_data_src_factory_)
+		if (!audio_data_src_factory_)
 		{
 			unique_lock<mutex> lock(singleton_mutex);
-			if (AudioDataSourceFactory::NullObject() == audio_data_src_factory_)
+			if (!audio_data_src_factory_)
 			{
 				this->LoadAudioDataSourceFactory(cfg_.audio_data_source_factory_name);
 			}
