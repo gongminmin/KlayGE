@@ -25,7 +25,6 @@
 #include <vector>
 #include <sstream>
 #include <fstream>
-#include <boost/bind.hpp>
 
 #include "SampleCommon.hpp"
 #include "GlobalIllumination.hpp"
@@ -90,9 +89,9 @@ void GlobalIlluminationApp::InitObjects()
 	this->LookAt(float3(-14.5f, 18, -3), float3(-13.6f, 17.55f, -2.8f));
 	this->Proj(0.1f, 500.0f);
 
-	boost::function<RenderModelPtr()> model_ml = ASyncLoadModel("sponza_crytek.7z//sponza_crytek.meshml", EAH_GPU_Read | EAH_Immutable);
-	boost::function<TexturePtr()> y_cube_tl = ASyncLoadTexture("Lake_CraterLake03_y.dds", EAH_GPU_Read | EAH_Immutable);
-	boost::function<TexturePtr()> c_cube_tl = ASyncLoadTexture("Lake_CraterLake03_c.dds", EAH_GPU_Read | EAH_Immutable);
+	function<RenderModelPtr()> model_ml = ASyncLoadModel("sponza_crytek.7z//sponza_crytek.meshml", EAH_GPU_Read | EAH_Immutable);
+	function<TexturePtr()> y_cube_tl = ASyncLoadTexture("Lake_CraterLake03_y.dds", EAH_GPU_Read | EAH_Immutable);
+	function<TexturePtr()> c_cube_tl = ASyncLoadTexture("Lake_CraterLake03_c.dds", EAH_GPU_Read | EAH_Immutable);
 
 	font_ = Context::Instance().RenderFactoryInstance().MakeFont("gkai00mp.kfont");
 
@@ -120,7 +119,7 @@ void GlobalIlluminationApp::InitObjects()
 	actionMap.AddActions(actions, actions + sizeof(actions) / sizeof(actions[0]));
 
 	action_handler_t input_handler = MakeSharedPtr<input_signal>();
-	input_handler->connect(boost::bind(&GlobalIlluminationApp::InputHandler, this, _1, _2));
+	input_handler->connect(KlayGE::bind(&GlobalIlluminationApp::InputHandler, this, KlayGE::placeholders::_1, KlayGE::placeholders::_2));
 	inputEngine.ActionMap(actionMap, input_handler, true);
 
 	UIManager::Instance().Load(ResLoader::Instance().Open("GlobalIllumination.uiml"));
@@ -136,29 +135,29 @@ void GlobalIlluminationApp::InitObjects()
 	id_cg_ = dialog_->IDFromName("CG");
 	id_ctrl_camera_ = dialog_->IDFromName("CtrlCamera");
 
-	dialog_->Control<UIComboBox>(id_illum_combo_)->OnSelectionChangedEvent().connect(boost::bind(&GlobalIlluminationApp::IllumChangedHandler, this, _1));
+	dialog_->Control<UIComboBox>(id_illum_combo_)->OnSelectionChangedEvent().connect(KlayGE::bind(&GlobalIlluminationApp::IllumChangedHandler, this, KlayGE::placeholders::_1));
 	this->IllumChangedHandler(*dialog_->Control<UIComboBox>(id_illum_combo_));
 
 	dialog_->Control<UISlider>(id_il_scale_slider_)->SetValue(static_cast<int>(il_scale_ * 10));
-	dialog_->Control<UISlider>(id_il_scale_slider_)->OnValueChangedEvent().connect(boost::bind(&GlobalIlluminationApp::ILScaleChangedHandler, this, _1));
+	dialog_->Control<UISlider>(id_il_scale_slider_)->OnValueChangedEvent().connect(KlayGE::bind(&GlobalIlluminationApp::ILScaleChangedHandler, this, KlayGE::placeholders::_1));
 	this->ILScaleChangedHandler(*dialog_->Control<UISlider>(id_il_scale_slider_));
 
-	dialog_->Control<UICheckBox>(id_ssgi_)->OnChangedEvent().connect(boost::bind(&GlobalIlluminationApp::SSGIHandler, this, _1));
+	dialog_->Control<UICheckBox>(id_ssgi_)->OnChangedEvent().connect(KlayGE::bind(&GlobalIlluminationApp::SSGIHandler, this, KlayGE::placeholders::_1));
 	this->SSGIHandler(*dialog_->Control<UICheckBox>(id_ssgi_));
 
-	dialog_->Control<UICheckBox>(id_ssvo_)->OnChangedEvent().connect(boost::bind(&GlobalIlluminationApp::SSVOHandler, this, _1));
+	dialog_->Control<UICheckBox>(id_ssvo_)->OnChangedEvent().connect(KlayGE::bind(&GlobalIlluminationApp::SSVOHandler, this, KlayGE::placeholders::_1));
 	this->SSVOHandler(*dialog_->Control<UICheckBox>(id_ssvo_));
 
-	dialog_->Control<UICheckBox>(id_hdr_)->OnChangedEvent().connect(boost::bind(&GlobalIlluminationApp::HDRHandler, this, _1));
+	dialog_->Control<UICheckBox>(id_hdr_)->OnChangedEvent().connect(KlayGE::bind(&GlobalIlluminationApp::HDRHandler, this, KlayGE::placeholders::_1));
 	this->HDRHandler(*dialog_->Control<UICheckBox>(id_hdr_));
 
-	dialog_->Control<UICheckBox>(id_aa_)->OnChangedEvent().connect(boost::bind(&GlobalIlluminationApp::AAHandler, this, _1));
+	dialog_->Control<UICheckBox>(id_aa_)->OnChangedEvent().connect(KlayGE::bind(&GlobalIlluminationApp::AAHandler, this, KlayGE::placeholders::_1));
 	this->AAHandler(*dialog_->Control<UICheckBox>(id_aa_));
 
-	dialog_->Control<UICheckBox>(id_cg_)->OnChangedEvent().connect(boost::bind(&GlobalIlluminationApp::ColorGradingHandler, this, _1));
+	dialog_->Control<UICheckBox>(id_cg_)->OnChangedEvent().connect(KlayGE::bind(&GlobalIlluminationApp::ColorGradingHandler, this, KlayGE::placeholders::_1));
 	this->ColorGradingHandler(*dialog_->Control<UICheckBox>(id_cg_));
 
-	dialog_->Control<UICheckBox>(id_ctrl_camera_)->OnChangedEvent().connect(boost::bind(&GlobalIlluminationApp::CtrlCameraHandler, this, _1));
+	dialog_->Control<UICheckBox>(id_ctrl_camera_)->OnChangedEvent().connect(KlayGE::bind(&GlobalIlluminationApp::CtrlCameraHandler, this, KlayGE::placeholders::_1));
 
 	scene_model_ = model_ml();
 	scene_objs_.resize(scene_model_->NumMeshes());

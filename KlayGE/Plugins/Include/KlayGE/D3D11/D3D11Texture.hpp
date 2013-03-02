@@ -99,7 +99,7 @@ namespace KlayGE
 		unordered_map<size_t, ID3D11DepthStencilViewPtr> d3d_ds_views_;
 	};
 
-	typedef boost::shared_ptr<D3D11Texture> D3D11TexturePtr;
+	typedef shared_ptr<D3D11Texture> D3D11TexturePtr;
 
 
 	class D3D11Texture1D : public D3D11Texture

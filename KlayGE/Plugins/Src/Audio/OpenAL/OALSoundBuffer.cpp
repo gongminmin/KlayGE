@@ -14,28 +14,6 @@
 #include <KlayGE/AudioDataSource.hpp>
 
 #include <boost/assert.hpp>
-#ifdef KLAYGE_CXX11_LIBRARY_RANDOM_SUPPORT
-	#include <random>
-	namespace KlayGE
-	{
-		using std::ranlux24_base;
-		using std::uniform_int_distribution;
-	}
-#else
-	#ifdef KLAYGE_COMPILER_MSVC
-		#pragma warning(push)
-		#pragma warning(disable: 4100 4127 4512 6297 6326 6385)
-	#endif
-	#include <boost/random.hpp>
-	#ifdef KLAYGE_COMPILER_MSVC
-		#pragma warning(pop)
-	#endif
-	namespace KlayGE
-	{
-		using boost::random;
-	}
-#endif
-#include <boost/bind.hpp>
 
 #include <KlayGE/OpenAL/OALAudio.hpp>
 
@@ -146,7 +124,7 @@ namespace KlayGE
 	bool OALSoundBuffer::IsPlaying() const
 	{
 		return (std::find_if(sources_.begin(), sources_.end(),
-			boost::bind(std::logical_not<bool>(), boost::bind(IsSourceFree, _1))) != sources_.end());
+			KlayGE::bind(std::logical_not<bool>(), KlayGE::bind(IsSourceFree, KlayGE::placeholders::_1))) != sources_.end());
 	}
 
 	// 设置音量
@@ -154,7 +132,7 @@ namespace KlayGE
 	void OALSoundBuffer::Volume(float vol)
 	{
 		std::for_each(sources_.begin(), sources_.end(),
-			boost::bind(alSourcef, _1, AL_GAIN, vol));
+			KlayGE::bind(alSourcef, KlayGE::placeholders::_1, AL_GAIN, vol));
 	}
 
 	// 获取声源位置

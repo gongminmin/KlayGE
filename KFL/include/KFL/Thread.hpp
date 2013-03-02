@@ -64,9 +64,7 @@
 		namespace this_thread = boost::this_thread;
 	}
 #endif
-#include <boost/function.hpp>
 #include <boost/optional.hpp>
-#include <boost/bind.hpp>
 #include <boost/mpl/void.hpp>
 #include <exception>
 #include <vector>
@@ -183,7 +181,7 @@ namespace KlayGE
 	protected:
 		// This is a shared pointer to the optional<result> and it's shared between joiners (that can be in
 		//  different threads) and the launched thread that joiners represent
-		boost::shared_ptr<result_opt>	result_;
+		shared_ptr<result_opt>			result_;
 		volatile bool					joined_;
 		mutex							joiner_mutex_;
 		thread_id						id_;
@@ -209,7 +207,7 @@ namespace KlayGE
 		{
 		}
 
-		explicit joiner(boost::shared_ptr<joiner_impl_base<ResultType> > const & handle)
+		explicit joiner(shared_ptr<joiner_impl_base<ResultType> > const & handle)
 			: handle_(handle)
 		{
 		}
@@ -271,7 +269,7 @@ namespace KlayGE
 		}
 
 	private:
-		boost::shared_ptr<joiner_impl_base<ResultType> >  handle_;
+		shared_ptr<joiner_impl_base<ResultType> > handle_;
 	};
 
 	namespace detail
@@ -305,14 +303,14 @@ namespace KlayGE
 
 		public:
 			threaded(Threadable const & main,
-						boost::shared_ptr<result_opt> const & result)
+						shared_ptr<result_opt> const & result)
 				: main_(main), result_(result)
 			{
 			}
 
 			// This function is the function executed by the underlying thread system. It takes ownership of
 			//  the threaded object, calls user's Threadable
-			static void needle(boost::shared_ptr<threaded_t> const & that)
+			static void needle(shared_ptr<threaded_t> const & that)
 			{
 				// Call Threadable
 				try
@@ -327,8 +325,8 @@ namespace KlayGE
 			}
 
 		private:
-			Threadable                    main_;
-			boost::shared_ptr<result_opt> result_;
+			Threadable				main_;
+			shared_ptr<result_opt>	result_;
 		};
 	}
 
@@ -340,8 +338,8 @@ namespace KlayGE
 		class joiner_simple_thread_impl : public joiner_impl_base<result_type>
 		{
 		public:
-			joiner_simple_thread_impl(boost::shared_ptr<typename joiner_impl_base<result_type>::result_opt> const & result_op,
-											boost::function<void()> const & func)
+			joiner_simple_thread_impl(shared_ptr<typename joiner_impl_base<result_type>::result_opt> const & result_op,
+											function<void()> const & func)
 				: thread_(func)
 			{
 				joiner_impl_base<result_type>::result_ = result_op;
@@ -374,10 +372,10 @@ namespace KlayGE
 			typedef typename joiner_impl_t::result_opt				result_opt;
 			typedef detail::threaded<Threadable, joiner_impl_t>		threaded_t;
 
-			boost::shared_ptr<result_opt> myreturn = MakeSharedPtr<result_opt>();
-			boost::shared_ptr<threaded_t> mythreaded = MakeSharedPtr<threaded_t>(function, myreturn);
-			boost::shared_ptr<joiner_impl_base<result_t> > myjoiner_data = MakeSharedPtr<joiner_impl_t>(myreturn,
-				boost::bind(&threaded_t::needle, mythreaded));
+			shared_ptr<result_opt> myreturn = MakeSharedPtr<result_opt>();
+			shared_ptr<threaded_t> mythreaded = MakeSharedPtr<threaded_t>(function, myreturn);
+			shared_ptr<joiner_impl_base<result_t> > myjoiner_data = MakeSharedPtr<joiner_impl_t>(myreturn,
+				bind(&threaded_t::needle, mythreaded));
 
 			return joiner_t(myjoiner_data);
 		}
@@ -460,14 +458,14 @@ namespace KlayGE
 		//  to definitively tell to the thread that it should die.
 		struct thread_pool_thread_info
 		{
-			explicit thread_pool_thread_info(boost::shared_ptr<thread_pool_common_data_t> const & pdata)
+			explicit thread_pool_thread_info(shared_ptr<thread_pool_common_data_t> const & pdata)
 				:  wake_up_(false), data_(pdata)
 			{
 			}
 
 			// Wakes up a pooled thread assigning a task to it
 			template <typename Threadable>
-			void wake_up(Threadable const & func, boost::shared_ptr<thread_pool_join_info> const & pthpool_join_info)
+			void wake_up(Threadable const & func, shared_ptr<thread_pool_join_info> const & pthpool_join_info)
 			{
 				// Assign function to execute and joiner notifier
 				thpool_join_info_ = pthpool_join_info;
@@ -483,7 +481,7 @@ namespace KlayGE
 			void kill()
 			{
 				unique_lock<mutex> lock(wake_up_mut_);
-				func_ = boost::function<void()>();
+				func_ = function<void()>();
 				wake_up_ = true;
 				wake_up_cond_.notify_one();
 			}
@@ -498,19 +496,19 @@ namespace KlayGE
 				id_ = id;
 			}
 
-			boost::shared_ptr<thread_pool_join_info> thpool_join_info_;
-			boost::function<void()>	func_;
+			shared_ptr<thread_pool_join_info> thpool_join_info_;
+			function<void()>		func_;
 			bool					wake_up_;
 			mutex					wake_up_mut_;
 			condition_variable		wake_up_cond_;
-			boost::shared_ptr<thread_pool_common_data_t>	data_;
+			shared_ptr<thread_pool_common_data_t>	data_;
 			thread_id				id_;
 			joiner<void>			joiner_;
 		};
 
 		// A class used to storage information of the thread pool. It stores the pooled thread information container
 		//  and the functor that will envelop users Threadable to return it to the pool.
-		class thread_pool_common_data_t : public boost::enable_shared_from_this<thread_pool_common_data_t>
+		class thread_pool_common_data_t : public enable_shared_from_this<thread_pool_common_data_t>
 		{
 			// This functor is the functor that implements thread pooling logic. Waits until someone fills
 			//  the func_ and thpool_join_info_ using the wake_up(...) function of the pooled thread's info.
@@ -518,7 +516,7 @@ namespace KlayGE
 			{
 			public:
 				// Stores a shared_ptr with the data that holds the thread pool.
-				explicit wait_function(boost::shared_ptr<thread_pool_thread_info> const & info)
+				explicit wait_function(shared_ptr<thread_pool_thread_info> const & info)
 					:  info_(info)
 				{
 				}
@@ -552,7 +550,7 @@ namespace KlayGE
 						info_->func_();
 
 						// Reset execution functor
-						info_->func_ = boost::function<void()>();
+						info_->func_ = function<void()>();
 
 						// First notify joiner_thread_pool_impl that data is ready and wake-up if it's blocked waiting for data
 						info_->thpool_join_info_->notify_join();
@@ -589,11 +587,11 @@ namespace KlayGE
 				}
 
 			private:
-				boost::shared_ptr<thread_pool_thread_info> info_;
+				shared_ptr<thread_pool_thread_info> info_;
 			};
 
 		public:
-			typedef std::vector<boost::shared_ptr<thread_pool_thread_info> > thread_info_queue_t;
+			typedef std::vector<shared_ptr<thread_pool_thread_info> > thread_info_queue_t;
 
 			thread_pool_common_data_t(size_t num_min_cached_threads, size_t num_max_cached_threads)
 				: num_min_cached_threads_(num_min_cached_threads),
@@ -603,7 +601,7 @@ namespace KlayGE
 			}
 
 			// Creates and adds more threads to the pool. Can throw
-			static void add_waiting_threads(boost::shared_ptr<thread_pool_common_data_t> const & pdata, size_t number)
+			static void add_waiting_threads(shared_ptr<thread_pool_common_data_t> const & pdata, size_t number)
 			{
 				unique_lock<mutex> lock(pdata->mut_);
 				add_waiting_threads_no_lock(pdata, number);
@@ -611,11 +609,11 @@ namespace KlayGE
 
 			// Creates and adds more threads to the pool. This function does not lock the pool mutex and that be
 			//  only called when we externally have locked that mutex. Can throw
-			static void add_waiting_threads_no_lock(boost::shared_ptr<thread_pool_common_data_t> const & data, size_t number)
+			static void add_waiting_threads_no_lock(shared_ptr<thread_pool_common_data_t> const & data, size_t number)
 			{
 				for (size_t i = 0; i < number; ++ i)
 				{
-					boost::shared_ptr<thread_pool_thread_info> th_info = MakeSharedPtr<thread_pool_thread_info>(data);
+					shared_ptr<thread_pool_thread_info> th_info = MakeSharedPtr<thread_pool_thread_info>(data);
 					joiner<void> j = data->threader_(wait_function(th_info));
 					th_info->set_thread_id(j.get_thread_id());
 					data->threads_.push_back(th_info);
@@ -701,14 +699,14 @@ namespace KlayGE
 
 		public:
 			template <typename Threadable>
-			joiner_thread_pool_impl(boost::shared_ptr<thread_pool_common_data_t> const & data,
-						boost::shared_ptr<typename joiner_impl_base<result_type>::result_opt> const & result_op,
+			joiner_thread_pool_impl(shared_ptr<thread_pool_common_data_t> const & data,
+						shared_ptr<typename joiner_impl_base<result_type>::result_opt> const & result_op,
 						Threadable const & func)
 				: thread_pool_join_info_(MakeSharedPtr<thread_pool_join_info>())
 			{
 				joiner_impl_base<result_type>::result_ = result_op;
 
-				boost::shared_ptr<thread_pool_thread_info> th_info;
+				shared_ptr<thread_pool_thread_info> th_info;
 				unique_lock<mutex> lock(data->mut());
 
 				// If there are no threads, add more to the pool
@@ -744,7 +742,7 @@ namespace KlayGE
 			}
 
 		private:
-			boost::shared_ptr<thread_pool_join_info>  thread_pool_join_info_;
+			shared_ptr<thread_pool_join_info> thread_pool_join_info_;
 		};
 
 	public:
@@ -771,10 +769,10 @@ namespace KlayGE
 			typedef typename joiner_impl_t::result_opt				result_opt;
 			typedef detail::threaded<Threadable, joiner_impl_t>		threaded_t;
 
-			boost::shared_ptr<result_opt> myreturn = MakeSharedPtr<result_opt>();
-			boost::shared_ptr<threaded_t> mythreaded = MakeSharedPtr<threaded_t>(function, myreturn);
-			boost::shared_ptr<joiner_impl_base<result_t> > myjoiner_data = MakeSharedPtr<joiner_impl_t>(data_,
-				myreturn, boost::bind(&threaded_t::needle, mythreaded));
+			shared_ptr<result_opt> myreturn = MakeSharedPtr<result_opt>();
+			shared_ptr<threaded_t> mythreaded = MakeSharedPtr<threaded_t>(function, myreturn);
+			shared_ptr<joiner_impl_base<result_t> > myjoiner_data = MakeSharedPtr<joiner_impl_t>(data_,
+				myreturn, bind(&threaded_t::needle, mythreaded));
 
 			return joiner_t(myjoiner_data);
 		}
@@ -798,7 +796,7 @@ namespace KlayGE
 		}
 
 	private:
-		boost::shared_ptr<thread_pool_common_data_t> data_;
+		shared_ptr<thread_pool_common_data_t> data_;
 	};
 
 	inline thread_pool& GlobalThreadPool()

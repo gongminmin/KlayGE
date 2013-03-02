@@ -105,7 +105,7 @@ namespace KlayGE
 		{
 		}
 
-		void Init(std::string const & pw, boost::shared_ptr<ISequentialOutStream> const & outFileStream);
+		void Init(std::string const & pw, shared_ptr<ISequentialOutStream> const & outFileStream);
 
 	private:
 		atomic<int32_t> ref_count_;
@@ -113,7 +113,7 @@ namespace KlayGE
 		bool password_is_defined_;
 		std::wstring password_;
 
-		boost::shared_ptr<ISequentialOutStream> _outFileStream;
+		shared_ptr<ISequentialOutStream> _outFileStream;
 	};
 }
 

@@ -58,7 +58,6 @@
 #include <sstream>
 #include <fstream>
 #include <boost/assert.hpp>
-#include <boost/bind.hpp>
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string/trim.hpp>
 #ifdef KLAYGE_COMPILER_MSVC
@@ -182,9 +181,9 @@ namespace
 	private:
 		std::vector<std::string> types_;
 
-		static boost::shared_ptr<type_define> instance_;
+		static shared_ptr<type_define> instance_;
 	};
-	boost::shared_ptr<type_define> type_define::instance_;
+	shared_ptr<type_define> type_define::instance_;
 
 	class shade_mode_define
 	{
@@ -224,9 +223,9 @@ namespace
 	private:
 		std::vector<std::string> sms_;
 
-		static boost::shared_ptr<shade_mode_define> instance_;
+		static shared_ptr<shade_mode_define> instance_;
 	};
-	boost::shared_ptr<shade_mode_define> shade_mode_define::instance_;
+	shared_ptr<shade_mode_define> shade_mode_define::instance_;
 
 	class compare_function_define
 	{
@@ -272,9 +271,9 @@ namespace
 	private:
 		std::vector<std::string> cfs_;
 
-		static boost::shared_ptr<compare_function_define> instance_;
+		static shared_ptr<compare_function_define> instance_;
 	};
-	boost::shared_ptr<compare_function_define> compare_function_define::instance_;
+	shared_ptr<compare_function_define> compare_function_define::instance_;
 
 	class cull_mode_define
 	{
@@ -315,9 +314,9 @@ namespace
 	private:
 		std::vector<std::string> cms_;
 
-		static boost::shared_ptr<cull_mode_define> instance_;
+		static shared_ptr<cull_mode_define> instance_;
 	};
-	boost::shared_ptr<cull_mode_define> cull_mode_define::instance_;
+	shared_ptr<cull_mode_define> cull_mode_define::instance_;
 
 	class polygon_mode_define
 	{
@@ -358,9 +357,9 @@ namespace
 	private:
 		std::vector<std::string> pms_;
 
-		static boost::shared_ptr<polygon_mode_define> instance_;
+		static shared_ptr<polygon_mode_define> instance_;
 	};
-	boost::shared_ptr<polygon_mode_define> polygon_mode_define::instance_;
+	shared_ptr<polygon_mode_define> polygon_mode_define::instance_;
 
 	class alpha_blend_factor_define
 	{
@@ -409,9 +408,9 @@ namespace
 	private:
 		std::vector<std::string> abfs_;
 
-		static boost::shared_ptr<alpha_blend_factor_define> instance_;
+		static shared_ptr<alpha_blend_factor_define> instance_;
 	};
-	boost::shared_ptr<alpha_blend_factor_define> alpha_blend_factor_define::instance_;
+	shared_ptr<alpha_blend_factor_define> alpha_blend_factor_define::instance_;
 
 	class blend_operation_define
 	{
@@ -454,9 +453,9 @@ namespace
 	private:
 		std::vector<std::string> bops_;
 
-		static boost::shared_ptr<blend_operation_define> instance_;
+		static shared_ptr<blend_operation_define> instance_;
 	};
-	boost::shared_ptr<blend_operation_define> blend_operation_define::instance_;
+	shared_ptr<blend_operation_define> blend_operation_define::instance_;
 
 	class stencil_operation_define
 	{
@@ -502,9 +501,9 @@ namespace
 	private:
 		std::vector<std::string> sops_;
 
-		static boost::shared_ptr<stencil_operation_define> instance_;
+		static shared_ptr<stencil_operation_define> instance_;
 	};
-	boost::shared_ptr<stencil_operation_define> stencil_operation_define::instance_;
+	shared_ptr<stencil_operation_define> stencil_operation_define::instance_;
 
 	class texture_filter_mode_define
 	{
@@ -566,9 +565,9 @@ namespace
 	private:
 		std::vector<std::string> tfs_;
 
-		static boost::shared_ptr<texture_filter_mode_define> instance_;
+		static shared_ptr<texture_filter_mode_define> instance_;
 	};
-	boost::shared_ptr<texture_filter_mode_define> texture_filter_mode_define::instance_;
+	shared_ptr<texture_filter_mode_define> texture_filter_mode_define::instance_;
 
 	class texture_addr_mode_define
 	{
@@ -610,9 +609,9 @@ namespace
 	private:
 		std::vector<std::string> tams_;
 
-		static boost::shared_ptr<texture_addr_mode_define> instance_;
+		static shared_ptr<texture_addr_mode_define> instance_;
 	};
-	boost::shared_ptr<texture_addr_mode_define> texture_addr_mode_define::instance_;
+	shared_ptr<texture_addr_mode_define> texture_addr_mode_define::instance_;
 
 	class logic_operation_define
 	{
@@ -666,9 +665,9 @@ namespace
 	private:
 		std::vector<std::string> lops_;
 
-		static boost::shared_ptr<logic_operation_define> instance_;
+		static shared_ptr<logic_operation_define> instance_;
 	};
-	boost::shared_ptr<logic_operation_define> logic_operation_define::instance_;
+	shared_ptr<logic_operation_define> logic_operation_define::instance_;
 
 	bool bool_from_str(std::string const & name)
 	{
@@ -761,7 +760,7 @@ namespace
 					{
 						std::string value_str = value_node->ValueString();
 						std::vector<std::string> strs;
-						boost::algorithm::split(strs, value_str, boost::bind(std::equal_to<char>(), ',', _1));
+						boost::algorithm::split(strs, value_str, boost::is_any_of(","));
 						std::vector<uint32_t> init_val(std::min(array_size, static_cast<uint32_t>(strs.size())), 0);
 						for (size_t index = 0; index < init_val.size(); ++ index)
 						{
@@ -802,7 +801,7 @@ namespace
 					{
 						std::string value_str = value_node->ValueString();
 						std::vector<std::string> strs;
-						boost::algorithm::split(strs, value_str, boost::bind(std::equal_to<char>(), ',', _1));
+						boost::algorithm::split(strs, value_str, boost::is_any_of(","));
 						std::vector<int32_t> init_val(std::min(array_size, static_cast<uint32_t>(strs.size())), 0);
 						for (size_t index = 0; index < init_val.size(); ++ index)
 						{
@@ -976,7 +975,7 @@ namespace
 					{
 						std::string value_str = value_node->ValueString();
 						std::vector<std::string> strs;
-						boost::algorithm::split(strs, value_str, boost::bind(std::equal_to<char>(), ',', _1));
+						boost::algorithm::split(strs, value_str, boost::is_any_of(","));
 						std::vector<float> init_val(std::min(array_size, static_cast<uint32_t>(strs.size())), 0.0f);
 						for (size_t index = 0; index < init_val.size(); ++ index)
 						{
@@ -1022,7 +1021,7 @@ namespace
 					{
 						std::string value_str = value_node->ValueString();
 						std::vector<std::string> strs;
-						boost::algorithm::split(strs, value_str, boost::bind(std::equal_to<char>(), ',', _1));
+						boost::algorithm::split(strs, value_str, boost::is_any_of(","));
 						std::vector<uint2> init_val(std::min(array_size, static_cast<uint32_t>((strs.size() + 1) / 2)), int2(0, 0));
 						for (size_t index = 0; index < init_val.size(); ++ index)
 						{
@@ -1076,7 +1075,7 @@ namespace
 					{
 						std::string value_str = value_node->ValueString();
 						std::vector<std::string> strs;
-						boost::algorithm::split(strs, value_str, boost::bind(std::equal_to<char>(), ',', _1));
+						boost::algorithm::split(strs, value_str, boost::is_any_of(","));
 						std::vector<uint3> init_val(std::min(array_size, static_cast<uint32_t>((strs.size() + 2) / 3)), int3(0, 0, 0));
 						for (size_t index = 0; index < init_val.size(); ++ index)
 						{
@@ -1135,7 +1134,7 @@ namespace
 					{
 						std::string value_str = value_node->ValueString();
 						std::vector<std::string> strs;
-						boost::algorithm::split(strs, value_str, boost::bind(std::equal_to<char>(), ',', _1));
+						boost::algorithm::split(strs, value_str, boost::is_any_of(","));
 						std::vector<int4> init_val(std::min(array_size, static_cast<uint32_t>((strs.size() + 3) / 4)), int4(0, 0, 0, 0));
 						for (size_t index = 0; index < init_val.size(); ++ index)
 						{
@@ -1184,7 +1183,7 @@ namespace
 					{
 						std::string value_str = value_node->ValueString();
 						std::vector<std::string> strs;
-						boost::algorithm::split(strs, value_str, boost::bind(std::equal_to<char>(), ',', _1));
+						boost::algorithm::split(strs, value_str, boost::is_any_of(","));
 						std::vector<int2> init_val(std::min(array_size, static_cast<uint32_t>((strs.size() + 1) / 2)), int2(0, 0));
 						for (size_t index = 0; index < init_val.size(); ++ index)
 						{
@@ -1238,7 +1237,7 @@ namespace
 					{
 						std::string value_str = value_node->ValueString();
 						std::vector<std::string> strs;
-						boost::algorithm::split(strs, value_str, boost::bind(std::equal_to<char>(), ',', _1));
+						boost::algorithm::split(strs, value_str, boost::is_any_of(","));
 						std::vector<int3> init_val(std::min(array_size, static_cast<uint32_t>((strs.size() + 2) / 3)), int3(0, 0, 0));
 						for (size_t index = 0; index < init_val.size(); ++ index)
 						{
@@ -1297,7 +1296,7 @@ namespace
 					{
 						std::string value_str = value_node->ValueString();
 						std::vector<std::string> strs;
-						boost::algorithm::split(strs, value_str, boost::bind(std::equal_to<char>(), ',', _1));
+						boost::algorithm::split(strs, value_str, boost::is_any_of(","));
 						std::vector<int4> init_val(std::min(array_size, static_cast<uint32_t>((strs.size() + 3) / 4)), int4(0, 0, 0, 0));
 						for (size_t index = 0; index < init_val.size(); ++ index)
 						{
@@ -1346,7 +1345,7 @@ namespace
 					{
 						std::string value_str = value_node->ValueString();
 						std::vector<std::string> strs;
-						boost::algorithm::split(strs, value_str, boost::bind(std::equal_to<char>(), ',', _1));
+						boost::algorithm::split(strs, value_str, boost::is_any_of(","));
 						std::vector<float2> init_val(std::min(array_size, static_cast<uint32_t>((strs.size() + 1) / 2)), float2(0, 0));
 						for (size_t index = 0; index < init_val.size(); ++ index)
 						{
@@ -1400,7 +1399,7 @@ namespace
 					{
 						std::string value_str = value_node->ValueString();
 						std::vector<std::string> strs;
-						boost::algorithm::split(strs, value_str, boost::bind(std::equal_to<char>(), ',', _1));
+						boost::algorithm::split(strs, value_str, boost::is_any_of(","));
 						std::vector<float3> init_val(std::min(array_size, static_cast<uint32_t>((strs.size() + 2) / 3)), float3(0, 0, 0));
 						for (size_t index = 0; index < init_val.size(); ++ index)
 						{
@@ -1459,7 +1458,7 @@ namespace
 					{
 						std::string value_str = value_node->ValueString();
 						std::vector<std::string> strs;
-						boost::algorithm::split(strs, value_str, boost::bind(std::equal_to<char>(), ',', _1));
+						boost::algorithm::split(strs, value_str, boost::is_any_of(","));
 						std::vector<float4> init_val(std::min(array_size, static_cast<uint32_t>((strs.size() + 3) / 4)), float4(0, 0, 0, 0));
 						for (size_t index = 0; index < init_val.size(); ++ index)
 						{
@@ -1511,7 +1510,7 @@ namespace
 					{
 						std::string value_str = value_node->ValueString();
 						std::vector<std::string> strs;
-						boost::algorithm::split(strs, value_str, boost::bind(std::equal_to<char>(), ',', _1));
+						boost::algorithm::split(strs, value_str, boost::is_any_of(","));
 						std::vector<float4> init_val(std::min(array_size, static_cast<uint32_t>((strs.size() + 3) / 4)), float4(0, 0, 0, 0));
 						for (size_t index = 0; index < init_val.size(); ++ index)
 						{

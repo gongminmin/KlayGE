@@ -40,7 +40,6 @@
 
 #include <algorithm>
 #include <boost/assert.hpp>
-#include <boost/bind.hpp>
 #ifdef KLAYGE_COMPILER_MSVC
 #pragma warning(push)
 #pragma warning(disable: 6011 6334)
@@ -60,7 +59,7 @@ namespace
 {
 	using namespace KlayGE;
 
-	boost::function<void(ID3D11DeviceContext*, UINT, UINT, ID3D11ShaderResourceView * const *)> ShaderSetShaderResources[ShaderObject::ST_NumShaderTypes] =
+	function<void(ID3D11DeviceContext*, UINT, UINT, ID3D11ShaderResourceView * const *)> ShaderSetShaderResources[ShaderObject::ST_NumShaderTypes] =
 	{
 		boost::mem_fn(&ID3D11DeviceContext::VSSetShaderResources),
 		boost::mem_fn(&ID3D11DeviceContext::PSSetShaderResources),
@@ -70,7 +69,7 @@ namespace
 		boost::mem_fn(&ID3D11DeviceContext::DSSetShaderResources)
 	};
 	
-	boost::function<void(ID3D11DeviceContext*, UINT, UINT, ID3D11SamplerState * const *)> ShaderSetSamplers[ShaderObject::ST_NumShaderTypes] =
+	function<void(ID3D11DeviceContext*, UINT, UINT, ID3D11SamplerState * const *)> ShaderSetSamplers[ShaderObject::ST_NumShaderTypes] =
 	{
 		boost::mem_fn(&ID3D11DeviceContext::VSSetSamplers),
 		boost::mem_fn(&ID3D11DeviceContext::PSSetSamplers),
@@ -80,7 +79,7 @@ namespace
 		boost::mem_fn(&ID3D11DeviceContext::DSSetSamplers)
 	};
 
-	boost::function<void(ID3D11DeviceContext*, UINT, UINT, ID3D11Buffer * const *)> ShaderSetConstantBuffers[ShaderObject::ST_NumShaderTypes] =
+	function<void(ID3D11DeviceContext*, UINT, UINT, ID3D11Buffer * const *)> ShaderSetConstantBuffers[ShaderObject::ST_NumShaderTypes] =
 	{
 		boost::mem_fn(&ID3D11DeviceContext::VSSetConstantBuffers),
 		boost::mem_fn(&ID3D11DeviceContext::PSSetConstantBuffers),
@@ -1096,9 +1095,12 @@ namespace KlayGE
 			}
 		}
 
-		caps_.vertex_format_support = boost::bind<bool>(&D3D11RenderEngine::VertexFormatSupport, this, _1);
-		caps_.texture_format_support = boost::bind<bool>(&D3D11RenderEngine::TextureFormatSupport, this, _1);
-		caps_.rendertarget_format_support = boost::bind<bool>(&D3D11RenderEngine::RenderTargetFormatSupport, this, _1, _2, _3);
+		caps_.vertex_format_support = bind<bool>(&D3D11RenderEngine::VertexFormatSupport, this,
+			placeholders::_1);
+		caps_.texture_format_support = bind<bool>(&D3D11RenderEngine::TextureFormatSupport, this,
+			placeholders::_1);
+		caps_.rendertarget_format_support = bind<bool>(&D3D11RenderEngine::RenderTargetFormatSupport, this,
+			placeholders::_1, placeholders::_2, placeholders::_3);
 	}
 
 	void D3D11RenderEngine::StereoscopicForLCDShutter()

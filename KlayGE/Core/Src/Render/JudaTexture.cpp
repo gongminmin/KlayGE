@@ -652,7 +652,7 @@ namespace KlayGE
 				}
 
 				uint32_t const full_tile_bytes = tile_size_ * tile_size_ * texel_size_;
-				boost::shared_ptr<std::vector<uint8_t> > data = MakeSharedPtr<std::vector<uint8_t> >(full_tile_bytes);
+				shared_ptr<std::vector<uint8_t> > data = MakeSharedPtr<std::vector<uint8_t> >(full_tile_bytes);
 				if (data_index != EMPTY_DATA_INDEX)
 				{
 					uint32_t const comed_len = static_cast<uint32_t>(data_blocks_pos_[data_index + 1] - data_blocks_pos_[data_index]);
@@ -865,8 +865,8 @@ namespace KlayGE
 		uint32_t tile_size;
 		ElementFormat format;
 
-		boost::shared_ptr<boost::interprocess::file_mapping> file = MakeSharedPtr<boost::interprocess::file_mapping>(ResLoader::Instance().Locate(file_name).c_str(), boost::interprocess::read_only);
-		boost::shared_ptr<boost::interprocess::mapped_region> region = MakeSharedPtr<boost::interprocess::mapped_region>(*file, boost::interprocess::read_only);
+		shared_ptr<boost::interprocess::file_mapping> file = MakeSharedPtr<boost::interprocess::file_mapping>(ResLoader::Instance().Locate(file_name).c_str(), boost::interprocess::read_only);
+		shared_ptr<boost::interprocess::mapped_region> region = MakeSharedPtr<boost::interprocess::mapped_region>(*file, boost::interprocess::read_only);
 		uint8_t* buf = static_cast<uint8_t*>(region->get_address());
 		uint8_t* ptr = buf;
 
@@ -1007,7 +1007,7 @@ namespace KlayGE
 		std::vector<JudaTexture::quadtree_node_ptr> this_level;
 		std::vector<JudaTexture::quadtree_node_ptr> next_level;
 
-		boost::shared_ptr<std::ostream> ofs = MakeSharedPtr<std::ofstream>(file_name.c_str(), std::ios_base::out | std::ios_base::binary);
+		shared_ptr<std::ostream> ofs = MakeSharedPtr<std::ofstream>(file_name.c_str(), std::ios_base::out | std::ios_base::binary);
 		
 		uint32_t fourcc = MakeFourCC<'J', 'D', 'T', ' '>::value;
 		ofs->write(reinterpret_cast<char const *>(&fourcc), sizeof(fourcc));

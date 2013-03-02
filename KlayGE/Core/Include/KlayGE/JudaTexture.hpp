@@ -60,7 +60,7 @@ namespace KlayGE
 		static uint32_t const EMPTY_DATA_INDEX = static_cast<uint32_t>(-1);
 
 		struct quadtree_node;
-		typedef boost::shared_ptr<quadtree_node> quadtree_node_ptr;
+		typedef shared_ptr<quadtree_node> quadtree_node_ptr;
 
 		struct quadtree_node
 		{
@@ -185,17 +185,17 @@ namespace KlayGE
 
 	private:
 		// Input only
-		boost::shared_ptr<boost::interprocess::file_mapping> input_file_;
-		boost::shared_ptr<boost::interprocess::mapped_region> input_region_;
+		shared_ptr<boost::interprocess::file_mapping> input_file_;
+		shared_ptr<boost::interprocess::mapped_region> input_region_;
 		uint8_t* input_buf_;
 		uint64_t* data_blocks_pos_;
 		LZMACodec lzma_dec_;
 		struct DecodedBlockInfo
 		{
-			boost::shared_ptr<std::vector<uint8_t> > data;
+			shared_ptr<std::vector<uint8_t> > data;
 			uint64_t tick;
 
-			DecodedBlockInfo(boost::shared_ptr<std::vector<uint8_t> > const & d, uint64_t t)
+			DecodedBlockInfo(shared_ptr<std::vector<uint8_t> > const & d, uint64_t t)
 				: data(d), tick(t)
 			{
 			}

@@ -1712,8 +1712,11 @@ namespace KlayGE
 			rendertarget_format_.insert(EF_ABGR8_SRGB);
 		}
 
-		caps_.vertex_format_support = boost::bind<bool>(&OGLRenderEngine::VertexFormatSupport, this, _1);
-		caps_.texture_format_support = boost::bind<bool>(&OGLRenderEngine::TextureFormatSupport, this, _1);
-		caps_.rendertarget_format_support = boost::bind<bool>(&OGLRenderEngine::RenderTargetFormatSupport, this, _1, _2, _3);
+		caps_.vertex_format_support = bind<bool>(&OGLRenderEngine::VertexFormatSupport, this,
+			placeholders::_1);
+		caps_.texture_format_support = bind<bool>(&OGLRenderEngine::TextureFormatSupport, this,
+			placeholders::_1);
+		caps_.rendertarget_format_support = bind<bool>(&OGLRenderEngine::RenderTargetFormatSupport, this,
+			placeholders::_1, placeholders::_2, placeholders::_3);
 	}
 }

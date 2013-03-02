@@ -91,7 +91,7 @@ namespace KlayGE
 		void RenderText(float4x4 const & mvp, Color const & clr, std::wstring const & text, uint32_t font_size);
 
 	private:
-		boost::shared_ptr<FontRenderable> font_renderable_;
+		shared_ptr<FontRenderable> font_renderable_;
 		uint32_t		fso_attrib_;
 	};
 }

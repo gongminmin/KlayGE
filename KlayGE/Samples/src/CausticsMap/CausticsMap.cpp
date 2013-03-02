@@ -20,7 +20,6 @@
 #include <KlayGE/PostProcess.hpp>
 
 #include <sstream>
-#include <boost/bind.hpp>
 
 #include "SampleCommon.hpp"
 #include "CausticsMap.hpp"
@@ -711,7 +710,7 @@ void CausticsMapApp::InitObjects()
 	InputActionMap action_map;
 	action_map.AddActions(actions, actions + sizeof(actions) / sizeof(actions[0]));
 	action_handler_t input_handler = MakeSharedPtr<input_signal>();
-	input_handler->connect(boost::bind(&CausticsMapApp::InputHandler, this, _1, _2));
+	input_handler->connect(KlayGE::bind(&CausticsMapApp::InputHandler, this, KlayGE::placeholders::_1, KlayGE::placeholders::_2));
 	ie.ActionMap(action_map, input_handler, true);
 
 	//Model
@@ -972,23 +971,23 @@ void CausticsMapApp::InitUI()
 
 	int ui_id = 0;
 	ui_id = dialog_->IDFromName("Light_Density_Slider");
-	dialog_->Control<UISlider>(ui_id)->OnValueChangedEvent().connect(boost::bind(&CausticsMapApp::LightDensityHandler, this, _1));
+	dialog_->Control<UISlider>(ui_id)->OnValueChangedEvent().connect(KlayGE::bind(&CausticsMapApp::LightDensityHandler, this, KlayGE::placeholders::_1));
 	LightDensityHandler(*(dialog_->Control<UISlider>(ui_id)));
 
 	ui_id = dialog_->IDFromName("Refraction_Index_Slider");
-	dialog_->Control<UISlider>(ui_id)->OnValueChangedEvent().connect(boost::bind(&CausticsMapApp::RefractIndexHandler, this, _1));
+	dialog_->Control<UISlider>(ui_id)->OnValueChangedEvent().connect(KlayGE::bind(&CausticsMapApp::RefractIndexHandler, this, KlayGE::placeholders::_1));
 	RefractIndexHandler(*(dialog_->Control<UISlider>(ui_id)));
 
 	ui_id = dialog_->IDFromName("Point_Size_Slider");
-	dialog_->Control<UISlider>(ui_id)->OnValueChangedEvent().connect(boost::bind(&CausticsMapApp::PointSizeHandler, this, _1));
+	dialog_->Control<UISlider>(ui_id)->OnValueChangedEvent().connect(KlayGE::bind(&CausticsMapApp::PointSizeHandler, this, KlayGE::placeholders::_1));
 	PointSizeHandler(*(dialog_->Control<UISlider>(ui_id)));
 
 	ui_id = dialog_->IDFromName("Dual_Caustics_Checkbox");
-	dialog_->Control<UICheckBox>(ui_id)->OnChangedEvent().connect(boost::bind(&CausticsMapApp::DualFaceCausticsCheckBoxHandler, this, _1));
+	dialog_->Control<UICheckBox>(ui_id)->OnChangedEvent().connect(KlayGE::bind(&CausticsMapApp::DualFaceCausticsCheckBoxHandler, this, KlayGE::placeholders::_1));
 	DualFaceCausticsCheckBoxHandler(*(dialog_->Control<UICheckBox>(ui_id)));
 
 	ui_id = dialog_->IDFromName("Model_Combobox");
-	dialog_->Control<UIComboBox>(ui_id)->OnSelectionChangedEvent().connect(boost::bind(&CausticsMapApp::ModelSelectionComboBox, this, _1));
+	dialog_->Control<UIComboBox>(ui_id)->OnSelectionChangedEvent().connect(KlayGE::bind(&CausticsMapApp::ModelSelectionComboBox, this, KlayGE::placeholders::_1));
 	ModelSelectionComboBox(*(dialog_->Control<UIComboBox>(ui_id)));
 }
 

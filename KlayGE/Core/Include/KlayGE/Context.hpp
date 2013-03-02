@@ -180,7 +180,7 @@ namespace KlayGE
 		}
 
 	private:
-		static boost::shared_ptr<Context> context_instance_;
+		static shared_ptr<Context> context_instance_;
 
 		ContextCfg cfg_;
 

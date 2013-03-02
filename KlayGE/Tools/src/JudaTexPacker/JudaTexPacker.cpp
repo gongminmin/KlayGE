@@ -77,7 +77,7 @@ struct calc_border : public address_calculator
 	}
 };
 
-boost::shared_ptr<address_calculator> address_calculators[4] = 
+shared_ptr<address_calculator> address_calculators[4] = 
 {
 	MakeSharedPtr<calc_wrap>(),
 	MakeSharedPtr<calc_mirror>(),
@@ -151,7 +151,7 @@ void PackJTML(std::string const & jtml_name)
 		}
 
 		TexAddressingMode addr_u, addr_v;
-		boost::shared_ptr<address_calculator> calc_u, calc_v;
+		shared_ptr<address_calculator> calc_u, calc_v;
 		if ("mirror" == address_u_str)
 		{
 			addr_u = TAM_Mirror;

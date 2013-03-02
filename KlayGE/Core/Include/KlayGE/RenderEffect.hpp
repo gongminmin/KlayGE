@@ -438,7 +438,7 @@ namespace KlayGE
 		uint32_t type_;
 		std::string name_;
 
-		boost::shared_ptr<RenderVariable> var_;
+		shared_ptr<RenderVariable> var_;
 	};
 
 	class KLAYGE_CORE_API RenderShaderFunc
@@ -562,20 +562,20 @@ namespace KlayGE
 		std::string const & TypeName(uint32_t code) const;
 
 	private:
-		boost::shared_ptr<std::string> res_name_;
+		shared_ptr<std::string> res_name_;
 		uint64_t timestamp_;
 		uint64_t predefined_macros_hash_;
 
 		std::vector<RenderEffectParameterPtr> params_;
-		boost::shared_ptr<std::vector<std::pair<std::string, std::vector<uint32_t> > > > cbuffers_;
+		shared_ptr<std::vector<std::pair<std::string, std::vector<uint32_t> > > > cbuffers_;
 		std::vector<RenderTechniquePtr> techniques_;
 
-		boost::shared_ptr<std::vector<std::pair<std::pair<std::string, std::string>, bool> > > macros_;
-		boost::shared_ptr<std::vector<RenderShaderFunc> > shaders_;
+		shared_ptr<std::vector<std::pair<std::pair<std::string, std::string>, bool> > > macros_;
+		shared_ptr<std::vector<RenderShaderFunc> > shaders_;
 
 		RenderEffectPtr prototype_effect_;
 
-		boost::shared_ptr<std::vector<shader_desc> > shader_descs_;
+		shared_ptr<std::vector<shader_desc> > shader_descs_;
 	};
 
 	class KLAYGE_CORE_API RenderTechnique : boost::noncopyable
@@ -651,10 +651,10 @@ namespace KlayGE
 
 	private:
 		RenderEffect& effect_;
-		boost::shared_ptr<std::string> name_;
+		shared_ptr<std::string> name_;
 
 		std::vector<RenderPassPtr> passes_;
-		boost::shared_ptr<std::vector<RenderEffectAnnotationPtr> > annotations_;
+		shared_ptr<std::vector<RenderEffectAnnotationPtr> > annotations_;
 
 		float weight_;
 		bool transparent_;
@@ -726,9 +726,9 @@ namespace KlayGE
 	private:
 		RenderEffect& effect_;
 
-		boost::shared_ptr<std::string> name_;
-		boost::shared_ptr<std::vector<RenderEffectAnnotationPtr> > annotations_;
-		boost::shared_ptr<std::vector<uint32_t> > shader_desc_ids_;
+		shared_ptr<std::string> name_;
+		shared_ptr<std::vector<RenderEffectAnnotationPtr> > annotations_;
+		shared_ptr<std::vector<uint32_t> > shader_desc_ids_;
 
 		RasterizerStateObjectPtr rasterizer_state_obj_;
 		DepthStencilStateObjectPtr depth_stencil_state_obj_;
@@ -764,16 +764,16 @@ namespace KlayGE
 			return var_;
 		}
 
-		boost::shared_ptr<std::string> const & ArraySize() const
+		shared_ptr<std::string> const & ArraySize() const
 		{
 			return array_size_;
 		}
 
-		boost::shared_ptr<std::string> const & Name() const
+		shared_ptr<std::string> const & Name() const
 		{
 			return name_;
 		}
-		boost::shared_ptr<std::string> const & Semantic() const
+		shared_ptr<std::string> const & Semantic() const
 		{
 			return semantic_;
 		}
@@ -804,14 +804,14 @@ namespace KlayGE
 	private:
 		RenderEffect& effect_;
 
-		boost::shared_ptr<std::string> name_;
-		boost::shared_ptr<std::string> semantic_;
+		shared_ptr<std::string> name_;
+		shared_ptr<std::string> semantic_;
 
 		uint32_t type_;
-		boost::shared_ptr<RenderVariable> var_;
-		boost::shared_ptr<std::string> array_size_;
+		shared_ptr<RenderVariable> var_;
+		shared_ptr<std::string> array_size_;
 
-		boost::shared_ptr<std::vector<RenderEffectAnnotationPtr> > annotations_;
+		shared_ptr<std::vector<RenderEffectAnnotationPtr> > annotations_;
 	};
 }
 

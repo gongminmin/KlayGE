@@ -148,7 +148,7 @@ namespace KlayGE
 		{
 		}
 
-		void Attach(boost::shared_ptr<std::ostream> const & os);
+		void Attach(shared_ptr<std::ostream> const & os);
 
 		STDMETHOD(Write)(const void* data, uint32_t size, uint32_t* processedSize);
 		STDMETHOD(Seek)(int64_t offset, uint32_t seekOrigin, uint64_t* newPosition);
@@ -157,7 +157,7 @@ namespace KlayGE
 	private:
 		atomic<int32_t> ref_count_;
 
-		boost::shared_ptr<std::ostream> os_;
+		shared_ptr<std::ostream> os_;
 	};
 }
 

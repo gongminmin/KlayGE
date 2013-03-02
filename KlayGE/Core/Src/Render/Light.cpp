@@ -60,7 +60,7 @@ namespace KlayGE
 		enabled_ = enabled;
 	}
 
-	void LightSource::BindUpdateFunc(boost::function<void(LightSource&, float, float)> const & update_func)
+	void LightSource::BindUpdateFunc(function<void(LightSource&, float, float)> const & update_func)
 	{
 		update_func_ = update_func;
 	}

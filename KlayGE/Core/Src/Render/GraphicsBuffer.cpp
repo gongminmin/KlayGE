@@ -25,8 +25,6 @@
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/RenderView.hpp>
 
-#include <boost/bind.hpp>
-
 #include <KlayGE/GraphicsBuffer.hpp>
 
 namespace KlayGE

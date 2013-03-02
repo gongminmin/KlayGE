@@ -45,7 +45,7 @@ namespace KlayGE
 		void DeviceData(size_t size, DIDEVICEOBJECTDATA* rgdod, uint32_t& num_elements);
 
 	protected:
-		boost::shared_ptr<IDirectInputDevice8W> device_;
+		shared_ptr<IDirectInputDevice8W> device_;
 	};
 }
 

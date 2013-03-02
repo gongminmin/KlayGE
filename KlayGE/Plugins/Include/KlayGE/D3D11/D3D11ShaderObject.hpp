@@ -18,8 +18,6 @@
 #include <KlayGE/PreDeclare.hpp>
 #include <KlayGE/ShaderObject.hpp>
 
-#include <boost/function.hpp>
-
 #include <D3D11Shader.h>
 
 #include <KlayGE/D3D11/D3D11Typedefs.hpp>
@@ -108,7 +106,7 @@ namespace KlayGE
 		void Bind();
 		void Unbind();
 
-		boost::shared_ptr<std::vector<uint8_t> > const & VSCode() const
+		shared_ptr<std::vector<uint8_t> > const & VSCode() const
 		{
 			return shader_code_[ST_VertexShader].first;
 		}
@@ -123,16 +121,16 @@ namespace KlayGE
 		{
 			RenderEffectParameterPtr param;
 			D3D11ShaderParameterHandle p_handle;
-			boost::function<void()> func;
+			function<void()> func;
 		};
 		typedef std::vector<parameter_bind_t> parameter_binds_t;
 
 		parameter_bind_t GetBindFunc(D3D11ShaderParameterHandle const & p_handle, RenderEffectParameterPtr const & param);
 
 		std::string GetShaderProfile(ShaderType type, RenderEffect const & effect, uint32_t shader_desc_id);
-		boost::shared_ptr<std::vector<uint8_t> > CompiteToBytecode(ShaderType type, RenderEffect const & effect, std::vector<uint32_t> const & shader_desc_ids);
+		shared_ptr<std::vector<uint8_t> > CompiteToBytecode(ShaderType type, RenderEffect const & effect, std::vector<uint32_t> const & shader_desc_ids);
 		void AttachShaderBytecode(ShaderType type, RenderEffect const & effect,
-			std::vector<uint32_t> const & shader_desc_ids, boost::shared_ptr<std::vector<uint8_t> > const & code_blob);
+			std::vector<uint32_t> const & shader_desc_ids, shared_ptr<std::vector<uint8_t> > const & code_blob);
 
 	private:
 		array<parameter_binds_t, ST_NumShaderTypes> param_binds_;
@@ -143,7 +141,7 @@ namespace KlayGE
 		ID3D11ComputeShaderPtr compute_shader_;
 		ID3D11HullShaderPtr hull_shader_;
 		ID3D11DomainShaderPtr domain_shader_;
-		array<std::pair<boost::shared_ptr<std::vector<uint8_t> >, std::string>, ST_NumShaderTypes> shader_code_;
+		array<std::pair<shared_ptr<std::vector<uint8_t> >, std::string>, ST_NumShaderTypes> shader_code_;
 		array<D3D11ShaderDesc, ST_NumShaderTypes> shader_desc_;
 
 		array<std::vector<ID3D11SamplerStatePtr>, ST_NumShaderTypes> samplers_;
@@ -159,7 +157,7 @@ namespace KlayGE
 		uint32_t vs_signature_;
 	};
 
-	typedef boost::shared_ptr<D3D11ShaderObject> D3D11ShaderObjectPtr;
+	typedef shared_ptr<D3D11ShaderObject> D3D11ShaderObjectPtr;
 }
 
 #endif			// _D3D11SHADEROBJECT_HPP

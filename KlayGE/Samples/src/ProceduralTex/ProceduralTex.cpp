@@ -23,7 +23,6 @@
 
 #include <vector>
 #include <sstream>
-#include <boost/bind.hpp>
 
 #include "SampleCommon.hpp"
 #include "ProceduralTex.hpp"
@@ -326,7 +325,7 @@ uint32_t ProceduralTexApp::DoUpdate(uint32_t /*pass*/)
 			actionMap.AddActions(actions, actions + sizeof(actions) / sizeof(actions[0]));
 
 			action_handler_t input_handler = MakeSharedPtr<input_signal>();
-			input_handler->connect(boost::bind(&ProceduralTexApp::InputHandler, this, _1, _2));
+			input_handler->connect(KlayGE::bind(&ProceduralTexApp::InputHandler, this, KlayGE::placeholders::_1, KlayGE::placeholders::_2));
 			inputEngine.ActionMap(actionMap, input_handler, true);
 
 			loading_percentage_ = 90;
@@ -341,14 +340,14 @@ uint32_t ProceduralTexApp::DoUpdate(uint32_t /*pass*/)
 			id_freq_slider_ = dialog_->IDFromName("FreqSlider");
 			id_ctrl_camera_ = dialog_->IDFromName("CtrlCamera");
 
-			dialog_->Control<UIComboBox>(id_type_combo_)->OnSelectionChangedEvent().connect(boost::bind(&ProceduralTexApp::TypeChangedHandler, this, _1));
+			dialog_->Control<UIComboBox>(id_type_combo_)->OnSelectionChangedEvent().connect(KlayGE::bind(&ProceduralTexApp::TypeChangedHandler, this, KlayGE::placeholders::_1));
 			this->TypeChangedHandler(*dialog_->Control<UIComboBox>(id_type_combo_));
 
 			dialog_->Control<UISlider>(id_freq_slider_)->SetValue(static_cast<int>(procedural_freq_));
-			dialog_->Control<UISlider>(id_freq_slider_)->OnValueChangedEvent().connect(boost::bind(&ProceduralTexApp::FreqChangedHandler, this, _1));
+			dialog_->Control<UISlider>(id_freq_slider_)->OnValueChangedEvent().connect(KlayGE::bind(&ProceduralTexApp::FreqChangedHandler, this, KlayGE::placeholders::_1));
 			this->FreqChangedHandler(*dialog_->Control<UISlider>(id_freq_slider_));
 
-			dialog_->Control<UICheckBox>(id_ctrl_camera_)->OnChangedEvent().connect(boost::bind(&ProceduralTexApp::CtrlCameraHandler, this, _1));
+			dialog_->Control<UICheckBox>(id_ctrl_camera_)->OnChangedEvent().connect(KlayGE::bind(&ProceduralTexApp::CtrlCameraHandler, this, KlayGE::placeholders::_1));
 
 			loading_percentage_ = 100;
 			progress_bar->SetValue(loading_percentage_);

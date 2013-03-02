@@ -87,7 +87,7 @@ namespace KlayGE
 
 
 	SceneObjectLightSourceProxy::SceneObjectLightSourceProxy(LightSourcePtr const & light,
-			boost::function<StaticMeshPtr(RenderModelPtr const &, std::wstring const &)> CreateMeshFactoryFunc)
+			function<StaticMeshPtr(RenderModelPtr const &, std::wstring const &)> CreateMeshFactoryFunc)
 		: SceneObjectHelper(SOA_Cullable | SOA_Moveable | SOA_NotCastShadow),
 			light_(light)
 	{

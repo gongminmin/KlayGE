@@ -22,7 +22,6 @@
 #include <KlayGE/LightShaft.hpp>
 
 #include <sstream>
-#include <boost/bind.hpp>
 
 #include "SampleCommon.hpp"
 #include "OceanSimulator.hpp"
@@ -660,7 +659,7 @@ namespace
 
 		Plane ocean_plane_;
 
-		boost::shared_ptr<OceanSimulator> ocean_simulator_;
+		shared_ptr<OceanSimulator> ocean_simulator_;
 
 		bool use_tex_array_;
 		std::vector<TexturePtr> displacement_tex_;
@@ -758,8 +757,8 @@ void OceanApp::InitObjects()
 	this->LookAt(float3(0, 14, 0), float3(0, 13.8f, 1));
 	this->Proj(0.1f, 3000);
 
-	boost::function<TexturePtr()> y_cube_tl = ASyncLoadTexture("DH001cross_y.dds", EAH_GPU_Read | EAH_Immutable);
-	boost::function<TexturePtr()> c_cube_tl = ASyncLoadTexture("DH001cross_c.dds", EAH_GPU_Read | EAH_Immutable);
+	function<TexturePtr()> y_cube_tl = ASyncLoadTexture("DH001cross_y.dds", EAH_GPU_Read | EAH_Immutable);
+	function<TexturePtr()> c_cube_tl = ASyncLoadTexture("DH001cross_c.dds", EAH_GPU_Read | EAH_Immutable);
 
 	font_ = Context::Instance().RenderFactoryInstance().MakeFont("gkai00mp.kfont");
 
@@ -811,7 +810,7 @@ void OceanApp::InitObjects()
 	actionMap.AddActions(actions, actions + sizeof(actions) / sizeof(actions[0]));
 
 	action_handler_t input_handler = MakeSharedPtr<input_signal>();
-	input_handler->connect(boost::bind(&OceanApp::InputHandler, this, _1, _2));
+	input_handler->connect(KlayGE::bind(&OceanApp::InputHandler, this, KlayGE::placeholders::_1, KlayGE::placeholders::_2));
 	inputEngine.ActionMap(actionMap, input_handler, true);
 
 	UIManager::Instance().Load(ResLoader::Instance().Open("Ocean.uiml"));
@@ -835,33 +834,33 @@ void OceanApp::InitObjects()
 	id_light_shaft_ = dialog_params_->IDFromName("LightShaft");
 	id_fps_camera_ = dialog_params_->IDFromName("FPSCamera");
 
-	dialog_params_->Control<UISlider>(id_dmap_dim_slider_)->OnValueChangedEvent().connect(boost::bind(&OceanApp::DMapDimChangedHandler, this, _1));
+	dialog_params_->Control<UISlider>(id_dmap_dim_slider_)->OnValueChangedEvent().connect(KlayGE::bind(&OceanApp::DMapDimChangedHandler, this, KlayGE::placeholders::_1));
 	this->DMapDimChangedHandler(*dialog_params_->Control<UISlider>(id_dmap_dim_slider_));
 
-	dialog_params_->Control<UISlider>(id_patch_length_slider_)->OnValueChangedEvent().connect(boost::bind(&OceanApp::PatchLengthChangedHandler, this, _1));
+	dialog_params_->Control<UISlider>(id_patch_length_slider_)->OnValueChangedEvent().connect(KlayGE::bind(&OceanApp::PatchLengthChangedHandler, this, KlayGE::placeholders::_1));
 	this->PatchLengthChangedHandler(*dialog_params_->Control<UISlider>(id_patch_length_slider_));
 
-	dialog_params_->Control<UISlider>(id_time_scale_slider_)->OnValueChangedEvent().connect(boost::bind(&OceanApp::TimeScaleChangedHandler, this, _1));
+	dialog_params_->Control<UISlider>(id_time_scale_slider_)->OnValueChangedEvent().connect(KlayGE::bind(&OceanApp::TimeScaleChangedHandler, this, KlayGE::placeholders::_1));
 	this->TimeScaleChangedHandler(*dialog_params_->Control<UISlider>(id_time_scale_slider_));
 
-	dialog_params_->Control<UISlider>(id_wave_amplitude_slider_)->OnValueChangedEvent().connect(boost::bind(&OceanApp::WaveAmplitudeChangedHandler, this, _1));
+	dialog_params_->Control<UISlider>(id_wave_amplitude_slider_)->OnValueChangedEvent().connect(KlayGE::bind(&OceanApp::WaveAmplitudeChangedHandler, this, KlayGE::placeholders::_1));
 	this->WaveAmplitudeChangedHandler(*dialog_params_->Control<UISlider>(id_wave_amplitude_slider_));
 
-	dialog_params_->Control<UISlider>(id_wind_speed_x_slider_)->OnValueChangedEvent().connect(boost::bind(&OceanApp::WindSpeedXChangedHandler, this, _1));
+	dialog_params_->Control<UISlider>(id_wind_speed_x_slider_)->OnValueChangedEvent().connect(KlayGE::bind(&OceanApp::WindSpeedXChangedHandler, this, KlayGE::placeholders::_1));
 	this->WindSpeedXChangedHandler(*dialog_params_->Control<UISlider>(id_wind_speed_x_slider_));
 
-	dialog_params_->Control<UISlider>(id_wind_speed_y_slider_)->OnValueChangedEvent().connect(boost::bind(&OceanApp::WindSpeedYChangedHandler, this, _1));
+	dialog_params_->Control<UISlider>(id_wind_speed_y_slider_)->OnValueChangedEvent().connect(KlayGE::bind(&OceanApp::WindSpeedYChangedHandler, this, KlayGE::placeholders::_1));
 	this->WindSpeedYChangedHandler(*dialog_params_->Control<UISlider>(id_wind_speed_y_slider_));
 
-	dialog_params_->Control<UISlider>(id_wind_dependency_slider_)->OnValueChangedEvent().connect(boost::bind(&OceanApp::WindDependencyChangedHandler, this, _1));
+	dialog_params_->Control<UISlider>(id_wind_dependency_slider_)->OnValueChangedEvent().connect(KlayGE::bind(&OceanApp::WindDependencyChangedHandler, this, KlayGE::placeholders::_1));
 	this->WindDependencyChangedHandler(*dialog_params_->Control<UISlider>(id_wind_dependency_slider_));
 
-	dialog_params_->Control<UISlider>(id_choppy_scale_slider_)->OnValueChangedEvent().connect(boost::bind(&OceanApp::ChoppyScaleChangedHandler, this, _1));
+	dialog_params_->Control<UISlider>(id_choppy_scale_slider_)->OnValueChangedEvent().connect(KlayGE::bind(&OceanApp::ChoppyScaleChangedHandler, this, KlayGE::placeholders::_1));
 	this->ChoppyScaleChangedHandler(*dialog_params_->Control<UISlider>(id_choppy_scale_slider_));
 
-	dialog_params_->Control<UICheckBox>(id_light_shaft_)->OnChangedEvent().connect(boost::bind(&OceanApp::LightShaftHandler, this, _1));
+	dialog_params_->Control<UICheckBox>(id_light_shaft_)->OnChangedEvent().connect(KlayGE::bind(&OceanApp::LightShaftHandler, this, KlayGE::placeholders::_1));
 
-	dialog_params_->Control<UICheckBox>(id_fps_camera_)->OnChangedEvent().connect(boost::bind(&OceanApp::FPSCameraHandler, this, _1));
+	dialog_params_->Control<UICheckBox>(id_fps_camera_)->OnChangedEvent().connect(KlayGE::bind(&OceanApp::FPSCameraHandler, this, KlayGE::placeholders::_1));
 }
 
 void OceanApp::OnResize(uint32_t width, uint32_t height)

@@ -53,7 +53,6 @@
 
 #include <map>
 #include <algorithm>
-#include <boost/bind.hpp>
 #ifdef KLAYGE_COMPILER_MSVC
 #pragma warning(push)
 #pragma warning(disable: 4100 6011 6334)
@@ -334,7 +333,7 @@ namespace KlayGE
 		{
 			RenderTechniquePtr const & tech = obj->GetRenderTechnique()->Effect().PrototypeEffect()->TechniqueByName(obj->GetRenderTechnique()->Name());
 			KLAYGE_AUTO(iter, std::find_if(render_queue_.begin(), render_queue_.end(),
-				boost::bind(std::equal_to<RenderTechniquePtr>(), boost::bind(select1st<RenderQueueType::value_type>(), _1), tech)));
+				KlayGE::bind(std::equal_to<RenderTechniquePtr>(), KlayGE::bind(select1st<RenderQueueType::value_type>(), KlayGE::placeholders::_1), tech)));
 			if (iter != render_queue_.end())
 			{
 				iter->second.push_back(obj);
@@ -524,7 +523,7 @@ namespace KlayGE
 			{
 				this->ClipScene();
 
-				boost::shared_ptr<std::vector<char> > visible_marks = MakeSharedPtr<std::vector<char> >(scene_objs_.size());
+				shared_ptr<std::vector<char> > visible_marks = MakeSharedPtr<std::vector<char> >(scene_objs_.size());
 				for (size_t i = 0; i < scene_objs_.size(); ++ i)
 				{
 					(*visible_marks)[i] = scene_objs_[i]->visible;

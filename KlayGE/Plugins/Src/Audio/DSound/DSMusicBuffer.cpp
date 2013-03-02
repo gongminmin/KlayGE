@@ -42,7 +42,7 @@ namespace KlayGE
 
 		bool const mono(1 == wfx.nChannels);
 
-		boost::shared_ptr<IDirectSound> const & dsound = checked_cast<DSAudioEngine const *>(&Context::Instance().AudioFactoryInstance().AudioEngineInstance())->DSound();
+		shared_ptr<IDirectSound> const & dsound = checked_cast<DSAudioEngine const *>(&Context::Instance().AudioFactoryInstance().AudioEngineInstance())->DSound();
 
 		// 建立 DirectSound 缓冲区，要尽量减少使用建立标志，
 		// 因为使用太多不必要的标志会影响硬件加速性能
@@ -179,7 +179,7 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void DSMusicBuffer::DoPlay(bool loop)
 	{
-		play_thread_ = GlobalThreadPool()(boost::bind(&DSMusicBuffer::LoopUpdateBuffer, this));
+		play_thread_ = GlobalThreadPool()(bind(&DSMusicBuffer::LoopUpdateBuffer, this));
 
 		loop_ = loop;
 

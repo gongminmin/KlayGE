@@ -123,7 +123,7 @@ namespace KlayGE
 
 	int UIListBox::AddItem(std::wstring const & strText)
 	{
-		boost::shared_ptr<UIListBoxItem> pNewItem = MakeSharedPtr<UIListBoxItem>();
+		shared_ptr<UIListBoxItem> pNewItem = MakeSharedPtr<UIListBoxItem>();
 		pNewItem->strText = strText;
 		pNewItem->rcActive = Rect_T<int32_t>(0, 0, 0, 0);
 		pNewItem->bSelected = false;
@@ -143,7 +143,7 @@ namespace KlayGE
 
 	int UIListBox::AddItem(std::wstring const & strText, boost::any const & data)
 	{
-		boost::shared_ptr<UIListBoxItem> pNewItem = MakeSharedPtr<UIListBoxItem>();
+		shared_ptr<UIListBoxItem> pNewItem = MakeSharedPtr<UIListBoxItem>();
 		pNewItem->strText = strText;
 		pNewItem->data = data;
 		pNewItem->rcActive = Rect_T<int32_t>(0, 0, 0, 0);
@@ -159,7 +159,7 @@ namespace KlayGE
 
 	void UIListBox::InsertItem(int nIndex, std::wstring const & strText, boost::any const & data)
 	{
-		boost::shared_ptr<UIListBoxItem> pNewItem = MakeSharedPtr<UIListBoxItem>();
+		shared_ptr<UIListBoxItem> pNewItem = MakeSharedPtr<UIListBoxItem>();
 		pNewItem->strText = strText;
 		pNewItem->data = data;
 		pNewItem->rcActive = Rect_T<int32_t>(0, 0, 0, 0);
@@ -189,7 +189,7 @@ namespace KlayGE
 		scroll_bar_.SetTrackRange(0, 1);
 	}
 
-	boost::shared_ptr<UIListBoxItem> UIListBox::GetItem(int nIndex) const
+	shared_ptr<UIListBoxItem> UIListBox::GetItem(int nIndex) const
 	{
 		BOOST_ASSERT((nIndex >= 0) && (nIndex < static_cast<int>(items_.size())));
 
@@ -276,7 +276,7 @@ namespace KlayGE
 			InputEngine& ie = Context::Instance().InputFactoryInstance().InputEngineInstance();
 			for (uint32_t i = 0; i < ie.NumDevices(); ++ i)
 			{
-				InputKeyboardPtr k = boost::dynamic_pointer_cast<InputKeyboard>(ie.Device(i));
+				InputKeyboardPtr k = dynamic_pointer_cast<InputKeyboard>(ie.Device(i));
 				if (k)
 				{
 					key_board = k;
@@ -497,7 +497,7 @@ namespace KlayGE
 					{
 						// Determine behavior based on the state of Shift and Ctrl
 
-						boost::shared_ptr<UIListBoxItem> const & pSelItem = items_[selected_];
+						shared_ptr<UIListBoxItem> const & pSelItem = items_[selected_];
 						if (MB_Ctrl == (buttons & (MB_Shift | MB_Ctrl)))
 						{
 							// Control click. Reverse the selection of this item.
@@ -681,7 +681,7 @@ namespace KlayGE
 					break;
 				}
 
-				boost::shared_ptr<UIListBoxItem> const & pItem = items_[i];
+				shared_ptr<UIListBoxItem> const & pItem = items_[i];
 
 				// Determine if we need to render this item with the
 				// selected element.

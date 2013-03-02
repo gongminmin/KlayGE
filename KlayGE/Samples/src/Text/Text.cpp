@@ -23,7 +23,6 @@
 #include <vector>
 #include <sstream>
 #include <fstream>
-#include <boost/bind.hpp>
 
 #include "SampleCommon.hpp"
 #include "Text.hpp"
@@ -103,7 +102,7 @@ void TextApp::InitObjects()
 	actionMap.AddActions(actions, actions + sizeof(actions) / sizeof(actions[0]));
 
 	action_handler_t input_handler = MakeSharedPtr<input_signal>();
-	input_handler->connect(boost::bind(&TextApp::InputHandler, this, _1, _2));
+	input_handler->connect(KlayGE::bind(&TextApp::InputHandler, this, KlayGE::placeholders::_1, KlayGE::placeholders::_2));
 	inputEngine.ActionMap(actionMap, input_handler, true);
 
 	UIManager::Instance().Load(ResLoader::Instance().Open("Text.uiml"));

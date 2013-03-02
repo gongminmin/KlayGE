@@ -111,7 +111,7 @@ namespace KlayGE
 		std::set<ElementFormat> rendertarget_format_;
 	};
 
-	typedef boost::shared_ptr<OGLESRenderEngine> OGLES2RenderEnginePtr;
+	typedef shared_ptr<OGLESRenderEngine> OGLES2RenderEnginePtr;
 }
 
 #endif			// _OGLESRENDERENGINE_HPP

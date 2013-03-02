@@ -119,9 +119,9 @@ namespace
 		LzmaUncompressFunc lzmaUncompressFunc_;
 #endif
 
-		static boost::shared_ptr<LZMALoader> instance_;
+		static shared_ptr<LZMALoader> instance_;
 	};
-	boost::shared_ptr<LZMALoader> LZMALoader::instance_;
+	shared_ptr<LZMALoader> LZMALoader::instance_;
 }
 
 namespace KlayGE

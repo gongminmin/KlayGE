@@ -26,7 +26,6 @@
 
 #include <vector>
 #include <sstream>
-#include <boost/bind.hpp>
 
 #include "SampleCommon.hpp"
 #include "ShadowCubeMap.hpp"
@@ -561,8 +560,8 @@ void ShadowCubeMap::InitObjects()
 	// ½¨Á¢×ÖÌå
 	font_ = rf.MakeFont("gkai00mp.kfont");
 
-	boost::function<RenderModelPtr()> model_ml = ASyncLoadModel("ScifiRoom.7z//ScifiRoom.meshml", EAH_GPU_Read | EAH_Immutable, CreateModelFactory<RenderModel>(), CreateMeshFactory<OccluderMesh>());
-	boost::function<RenderModelPtr()> teapot_ml = ASyncLoadModel("teapot.meshml", EAH_GPU_Read | EAH_Immutable, CreateModelFactory<RenderModel>(), CreateMeshFactory<OccluderMesh>());
+	function<RenderModelPtr()> model_ml = ASyncLoadModel("ScifiRoom.7z//ScifiRoom.meshml", EAH_GPU_Read | EAH_Immutable, CreateModelFactory<RenderModel>(), CreateMeshFactory<OccluderMesh>());
+	function<RenderModelPtr()> teapot_ml = ASyncLoadModel("teapot.meshml", EAH_GPU_Read | EAH_Immutable, CreateModelFactory<RenderModel>(), CreateMeshFactory<OccluderMesh>());
 
 	this->LookAt(float3(0.0f, 10.0f, -25.0f), float3(0, 10.0f, 0));
 	this->Proj(0.01f, 500);
@@ -669,7 +668,7 @@ void ShadowCubeMap::InitObjects()
 	actionMap.AddActions(actions, actions + sizeof(actions) / sizeof(actions[0]));
 
 	action_handler_t input_handler = MakeSharedPtr<input_signal>();
-	input_handler->connect(boost::bind(&ShadowCubeMap::InputHandler, this, _1, _2));
+	input_handler->connect(KlayGE::bind(&ShadowCubeMap::InputHandler, this, KlayGE::placeholders::_1, KlayGE::placeholders::_2));
 	inputEngine.ActionMap(actionMap, input_handler, true);
 
 	UIManager::Instance().Load(ResLoader::Instance().Open("ShadowCubemap.uiml"));
@@ -683,10 +682,10 @@ void ShadowCubeMap::InitObjects()
 	id_sm_type_combo_ = dialog_->IDFromName("SMCombo");
 	id_ctrl_camera_ = dialog_->IDFromName("CtrlCamera");
 
-	dialog_->Control<UISlider>(id_min_variance_slider_)->OnValueChangedEvent().connect(boost::bind(&ShadowCubeMap::MinVarianceChangedHandler, this, _1));
-	dialog_->Control<UISlider>(id_bleeding_reduce_slider_)->OnValueChangedEvent().connect(boost::bind(&ShadowCubeMap::BleedingReduceChangedHandler, this, _1));
-	dialog_->Control<UIComboBox>(id_sm_type_combo_)->OnSelectionChangedEvent().connect(boost::bind(&ShadowCubeMap::SMTypeChangedHandler, this, _1));
-	dialog_->Control<UICheckBox>(id_ctrl_camera_)->OnChangedEvent().connect(boost::bind(&ShadowCubeMap::CtrlCameraHandler, this, _1));
+	dialog_->Control<UISlider>(id_min_variance_slider_)->OnValueChangedEvent().connect(KlayGE::bind(&ShadowCubeMap::MinVarianceChangedHandler, this, KlayGE::placeholders::_1));
+	dialog_->Control<UISlider>(id_bleeding_reduce_slider_)->OnValueChangedEvent().connect(KlayGE::bind(&ShadowCubeMap::BleedingReduceChangedHandler, this, KlayGE::placeholders::_1));
+	dialog_->Control<UIComboBox>(id_sm_type_combo_)->OnSelectionChangedEvent().connect(KlayGE::bind(&ShadowCubeMap::SMTypeChangedHandler, this, KlayGE::placeholders::_1));
+	dialog_->Control<UICheckBox>(id_ctrl_camera_)->OnChangedEvent().connect(KlayGE::bind(&ShadowCubeMap::CtrlCameraHandler, this, KlayGE::placeholders::_1));
 
 	this->MinVarianceChangedHandler(*dialog_->Control<UISlider>(id_min_variance_slider_));
 	this->BleedingReduceChangedHandler(*dialog_->Control<UISlider>(id_bleeding_reduce_slider_));

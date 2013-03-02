@@ -18,8 +18,6 @@
 #include <KlayGE/PreDeclare.hpp>
 #include <KlayGE/ElementFormat.hpp>
 
-#include <boost/function.hpp>
-
 namespace KlayGE
 {
 	enum TessellationMethod
@@ -66,9 +64,9 @@ namespace KlayGE
 
 		TessellationMethod tess_method;
 
-		boost::function<bool(ElementFormat)> vertex_format_support;
-		boost::function<bool(ElementFormat)> texture_format_support;
-		boost::function<bool(ElementFormat, uint32_t, uint32_t)> rendertarget_format_support;
+		function<bool(ElementFormat)> vertex_format_support;
+		function<bool(ElementFormat)> texture_format_support;
+		function<bool(ElementFormat, uint32_t, uint32_t)> rendertarget_format_support;
 	};
 }
 

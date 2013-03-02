@@ -35,7 +35,6 @@
 #include <map>
 #include <sstream>
 #include <boost/assert.hpp>
-#include <boost/bind.hpp>
 
 #include <glloader/glloader.h>
 
@@ -58,12 +57,18 @@ namespace KlayGE
 		uint32_t stencil_bits = NumStencilBits(settings.depth_stencil_fmt);
 
 		WindowPtr const & main_wnd = Context::Instance().AppInstance().MainWnd();
-		on_active_connect_ = main_wnd->OnActive().connect(boost::bind(&OGLRenderWindow::OnActive, this, _1, _2));
-		on_paint_connect_ = main_wnd->OnPaint().connect(boost::bind(&OGLRenderWindow::OnPaint, this, _1));
-		on_enter_size_move_connect_ = main_wnd->OnEnterSizeMove().connect(boost::bind(&OGLRenderWindow::OnEnterSizeMove, this, _1));
-		on_exit_size_move_connect_ = main_wnd->OnExitSizeMove().connect(boost::bind(&OGLRenderWindow::OnExitSizeMove, this, _1));
-		on_size_connect_ = main_wnd->OnSize().connect(boost::bind(&OGLRenderWindow::OnSize, this, _1, _2));
-		on_close_connect_ = main_wnd->OnClose().connect(boost::bind(&OGLRenderWindow::OnClose, this, _1));
+		on_active_connect_ = main_wnd->OnActive().connect(bind(&OGLRenderWindow::OnActive, this,
+			placeholders::_1, placeholders::_2));
+		on_paint_connect_ = main_wnd->OnPaint().connect(bind(&OGLRenderWindow::OnPaint, this,
+			placeholders::_1));
+		on_enter_size_move_connect_ = main_wnd->OnEnterSizeMove().connect(bind(&OGLRenderWindow::OnEnterSizeMove, this,
+			placeholders::_1));
+		on_exit_size_move_connect_ = main_wnd->OnExitSizeMove().connect(bind(&OGLRenderWindow::OnExitSizeMove, this,
+			placeholders::_1));
+		on_size_connect_ = main_wnd->OnSize().connect(bind(&OGLRenderWindow::OnSize, this,
+			placeholders::_1, placeholders::_2));
+		on_close_connect_ = main_wnd->OnClose().connect(bind(&OGLRenderWindow::OnClose, this,
+			placeholders::_1));
 
 #if defined KLAYGE_PLATFORM_WINDOWS
 		hWnd_ = main_wnd->HWnd();

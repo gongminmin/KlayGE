@@ -66,7 +66,7 @@ namespace KlayGE
 	{
 	public:
 		explicit SceneObjectLightSourceProxy(LightSourcePtr const & light,
-			boost::function<StaticMeshPtr(RenderModelPtr const &, std::wstring const &)> CreateMeshFactoryFunc = CreateMeshFactory<RenderableLightSourceProxy>());
+			function<StaticMeshPtr(RenderModelPtr const &, std::wstring const &)> CreateMeshFactoryFunc = CreateMeshFactory<RenderableLightSourceProxy>());
 
 		void Update(float app_time, float elapsed_time);
 

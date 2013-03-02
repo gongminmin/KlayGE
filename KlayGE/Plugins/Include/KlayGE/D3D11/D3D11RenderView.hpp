@@ -41,7 +41,7 @@ namespace KlayGE
 		ID3D11DevicePtr d3d_device_;
 		ID3D11DeviceContextPtr d3d_imm_ctx_;
 	};
-	typedef boost::shared_ptr<D3D11RenderView> D3D11RenderViewPtr;
+	typedef shared_ptr<D3D11RenderView> D3D11RenderViewPtr;
 
 	class D3D11RenderTargetRenderView : public D3D11RenderView
 	{
@@ -84,7 +84,7 @@ namespace KlayGE
 		uint32_t rt_first_subres_;
 		uint32_t rt_num_subres_;
 	};
-	typedef boost::shared_ptr<D3D11RenderTargetRenderView> D3D11RenderTargetRenderViewPtr;
+	typedef shared_ptr<D3D11RenderTargetRenderView> D3D11RenderTargetRenderViewPtr;
 
 	class D3D11DepthStencilRenderView : public D3D11RenderView
 	{
@@ -127,7 +127,7 @@ namespace KlayGE
 		uint32_t rt_first_subres_;
 		uint32_t rt_num_subres_;
 	};
-	typedef boost::shared_ptr<D3D11DepthStencilRenderView> D3D11DepthStencilRenderViewPtr;
+	typedef shared_ptr<D3D11DepthStencilRenderView> D3D11DepthStencilRenderViewPtr;
 
 
 	class D3D11UnorderedAccessView : public UnorderedAccessView
@@ -173,7 +173,7 @@ namespace KlayGE
 		uint32_t ua_first_subres_;
 		uint32_t ua_num_subres_;
 	};
-	typedef boost::shared_ptr<D3D11UnorderedAccessView> D3D11UnorderedAccessViewPtr;
+	typedef shared_ptr<D3D11UnorderedAccessView> D3D11UnorderedAccessViewPtr;
 }
 
 #endif			// _D3D11RENDERVIEW_HPP

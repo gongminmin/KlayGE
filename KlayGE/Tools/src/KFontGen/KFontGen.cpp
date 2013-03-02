@@ -23,8 +23,6 @@
 #ifdef KLAYGE_COMPILER_MSVC
 #pragma warning(pop)
 #endif
-#include <boost/bind.hpp>
-#include <boost/function.hpp>
 
 #include <mmintrin.h>
 #include <emmintrin.h>
@@ -260,6 +258,17 @@ void RasterCallback(int y, int count, FT_Span const * const spans, void* const u
 
 class ttf_to_dist
 {
+	struct edge_extract_param
+	{
+		int width;
+		uint8_t const * char_bitmap;
+		int y;
+		DistanceMap* dmap;
+		std::vector<float>* dist_cache;
+		float x_offset;
+		float y_offset;
+	};
+
 public:
 	ttf_to_dist(FT_Library ft_lib, FT_Face ft_face, uint32_t char_size, uint32_t const * validate_chars,
 		font_info* char_info, float* char_dist_data,
@@ -274,11 +283,13 @@ public:
 		CPUInfo cpu;
 		if (cpu.IsFeatureSupport(CPUInfo::CF_SSE2))
 		{
-			edge_extract = boost::bind(&ttf_to_dist::edge_extract_sse2, this, _1, _2, _3, _4, _5, _6, _7);
+			edge_extract = KlayGE::bind(&ttf_to_dist::edge_extract_sse2, this,
+				KlayGE::placeholders::_1);
 		}
 		else
 		{
-			edge_extract = boost::bind(&ttf_to_dist::edge_extract_cpp, this, _1, _2, _3, _4, _5, _6, _7);
+			edge_extract = KlayGE::bind(&ttf_to_dist::edge_extract_cpp, this,
+				KlayGE::placeholders::_1);
 		}
 	}
 
@@ -340,9 +351,17 @@ public:
 					std::vector<float> tmp_dist(char_size_ * char_size_, static_cast<float>(max_dist_sq));
 					float const x_offset = (INTERNAL_CHAR_SIZE - buf_width) / 2.0f;
 					float const y_offset = (INTERNAL_CHAR_SIZE - buf_height) / 2.0f;
+					edge_extract_param eep;
+					eep.width = buf_width;
+					eep.char_bitmap = &char_bitmap[0];
+					eep.dmap = &dmap;
+					eep.dist_cache = &tmp_dist;
+					eep.x_offset = x_offset;
+					eep.y_offset = y_offset;
 					for (int y = 0; y < buf_height; ++ y)
 					{
-						edge_extract(buf_width, &char_bitmap[0], y, dmap, tmp_dist, x_offset, y_offset);
+						eep.y = y;
+						edge_extract(eep);
 					}
 
 					std::vector<float> distances(char_size_ * char_size_);
@@ -389,18 +408,20 @@ public:
 	}
 
 private:
-	void edge_extract_sse2(int width, uint8_t const * char_bitmap, int y, DistanceMap& dmap, std::vector<float>& dist_cache, float x_offset, float y_offset)
+	void edge_extract_sse2(edge_extract_param& param)
 	{
+		int const y = param.y;
+
 		__m128i zero = _mm_setzero_si128();
-		for (int x = 0; x < width; x += sizeof(__m128i) * 8)
+		for (int x = 0; x < param.width; x += sizeof(__m128i) * 8)
 		{
-			__m128i center = _mm_load_si128(reinterpret_cast<__m128i const *>(&char_bitmap[(y * INTERNAL_CHAR_SIZE + x) / 8]));
+			__m128i center = _mm_load_si128(reinterpret_cast<__m128i const *>(&param.char_bitmap[(y * INTERNAL_CHAR_SIZE + x) / 8]));
 			if (_mm_movemask_epi8(_mm_cmpeq_epi32(center, zero)) != 0xFFFF)
 			{
 				__m128i up;
 				if (y != 0)
 				{
-					up = _mm_load_si128(reinterpret_cast<__m128i const *>(&char_bitmap[((y - 1) * INTERNAL_CHAR_SIZE + x) / 8]));
+					up = _mm_load_si128(reinterpret_cast<__m128i const *>(&param.char_bitmap[((y - 1) * INTERNAL_CHAR_SIZE + x) / 8]));
 				}
 				else
 				{
@@ -409,7 +430,7 @@ private:
 				__m128i down;
 				if (y != INTERNAL_CHAR_SIZE - 1)
 				{
-					down = _mm_load_si128(reinterpret_cast<__m128i const *>(&char_bitmap[((y + 1) * INTERNAL_CHAR_SIZE + x) / 8]));
+					down = _mm_load_si128(reinterpret_cast<__m128i const *>(&param.char_bitmap[((y + 1) * INTERNAL_CHAR_SIZE + x) / 8]));
 				}
 				else
 				{
@@ -418,7 +439,7 @@ private:
 				__m128i left = _mm_slli_epi64(center, 1);
 				if (x != 0)
 				{
-					__m128i t = _mm_loadu_si128(reinterpret_cast<__m128i const *>(&char_bitmap[(y * INTERNAL_CHAR_SIZE + x) / 8 - 8]));
+					__m128i t = _mm_loadu_si128(reinterpret_cast<__m128i const *>(&param.char_bitmap[(y * INTERNAL_CHAR_SIZE + x) / 8 - 8]));
 					left = _mm_or_si128(left, _mm_srli_epi64(t, 63));
 				}
 				else
@@ -429,7 +450,7 @@ private:
 				__m128i right = _mm_srli_epi64(center, 1);
 				if (x != INTERNAL_CHAR_SIZE - 1)
 				{
-					__m128i t = _mm_loadu_si128(reinterpret_cast<__m128i const *>(&char_bitmap[(y * INTERNAL_CHAR_SIZE + x) / 8 + 8]));
+					__m128i t = _mm_loadu_si128(reinterpret_cast<__m128i const *>(&param.char_bitmap[(y * INTERNAL_CHAR_SIZE + x) / 8 + 8]));
 					right = _mm_or_si128(right, _mm_slli_epi64(t, 63));
 				}
 				else
@@ -465,7 +486,7 @@ private:
 					{
 						while (bsf32(index, m32[i]))
 						{
-							this->add_edge_point(x + 32 * i + index, y, dmap, dist_cache, x_offset, y_offset);
+							this->add_edge_point(x + 32 * i + index, y, *param.dmap, *param.dist_cache, param.x_offset, param.y_offset);
 							m32[i] &= m32[i] - 1;
 						}
 					}
@@ -475,32 +496,34 @@ private:
 		}
 	}
 
-	void edge_extract_cpp(int width, uint8_t const * char_bitmap, int y, DistanceMap& dmap, std::vector<float>& dist_cache, float x_offset, float y_offset)
+	void edge_extract_cpp(edge_extract_param& param)
 	{
-		for (int x = 0; x < width; x += sizeof(uint64_t) * 8)
+		int const y = param.y;
+
+		for (int x = 0; x < param.width; x += sizeof(uint64_t) * 8)
 		{
-			uint64_t center = *reinterpret_cast<uint64_t const *>(&char_bitmap[(y * INTERNAL_CHAR_SIZE + x) / 8]);
+			uint64_t center = *reinterpret_cast<uint64_t const *>(&param.char_bitmap[(y * INTERNAL_CHAR_SIZE + x) / 8]);
 			if (center != 0)
 			{
 				uint64_t up = 0;
 				if (y != 0)
 				{
-					up = *reinterpret_cast<uint64_t const *>(&char_bitmap[((y - 1) * INTERNAL_CHAR_SIZE + x) / 8]);
+					up = *reinterpret_cast<uint64_t const *>(&param.char_bitmap[((y - 1) * INTERNAL_CHAR_SIZE + x) / 8]);
 				}
 				uint64_t down = 0;
 				if (y != INTERNAL_CHAR_SIZE - 1)
 				{
-					down = *reinterpret_cast<uint64_t const *>(&char_bitmap[((y + 1) * INTERNAL_CHAR_SIZE + x) / 8]);
+					down = *reinterpret_cast<uint64_t const *>(&param.char_bitmap[((y + 1) * INTERNAL_CHAR_SIZE + x) / 8]);
 				}
 				uint64_t left = center << 1;
 				if (x != 0)
 				{
-					left |= char_bitmap[(y * INTERNAL_CHAR_SIZE + x) / 8 - 1] >> 7;
+					left |= param.char_bitmap[(y * INTERNAL_CHAR_SIZE + x) / 8 - 1] >> 7;
 				}
 				uint64_t right = center >> 1;
 				if (x != INTERNAL_CHAR_SIZE - 1)
 				{
-					right |= static_cast<uint64_t>(char_bitmap[(y * INTERNAL_CHAR_SIZE + x) / 8 + sizeof(uint64_t)] & 0x1) << (sizeof(uint64_t) * 8 - 1);
+					right |= static_cast<uint64_t>(param.char_bitmap[(y * INTERNAL_CHAR_SIZE + x) / 8 + sizeof(uint64_t)] & 0x1) << (sizeof(uint64_t) * 8 - 1);
 				}
 				uint64_t mask = center & up & down & left & right;
 				mask = center & (center ^ mask);
@@ -519,7 +542,7 @@ private:
 					{
 						while (bsf32(index, m32[i]))
 						{
-							this->add_edge_point(x + 32 * i + index, y, dmap, dist_cache, x_offset, y_offset);
+							this->add_edge_point(x + 32 * i + index, y, *param.dmap, *param.dist_cache, param.x_offset, param.y_offset);
 							m32[i] &= m32[i] - 1;
 						}
 					}
@@ -596,7 +619,7 @@ private:
 	uint32_t num_threads_;
 	uint32_t num_chars_per_package_;
 
-	boost::function<void(int, uint8_t const *, int, DistanceMap&, std::vector<float>&, float, float)> edge_extract;
+	KlayGE::function<void(edge_extract_param&)> edge_extract;
 };
 
 void compute_distance(std::vector<font_info>& char_info, std::vector<float>& char_dist_data,
@@ -690,18 +713,26 @@ void compute_distance(std::vector<font_info>& char_info, std::vector<float>& cha
 	}
 }
 
-void stat_min_max(float& min_value, float& max_value, std::pair<int32_t, int32_t> const * char_index,
-	font_info const * char_info, float const * char_dist_data, uint32_t char_size_sq,
-	uint32_t s, uint32_t e)
+struct stat_min_max_param
+{
+	std::pair<int32_t, int32_t> const * char_index;
+	font_info const * char_info;
+	float const * char_dist_data;
+	uint32_t char_size_sq;
+	uint32_t s;
+	uint32_t e;
+};
+
+void stat_min_max(float& min_value, float& max_value, stat_min_max_param const & param)
 {
 	max_value = -1;
 	min_value = 1;
 
-	for (uint32_t i = s; i < e; ++ i)
+	for (uint32_t i = param.s; i < param.e; ++ i)
 	{
-		int const ch = char_index[i].first;
-		float const * dist = &char_dist_data[char_info[ch].dist_index];
-		for (size_t j = 0; j < char_size_sq; ++ j)
+		int const ch = param.char_index[i].first;
+		float const * dist = &param.char_dist_data[param.char_info[ch].dist_index];
+		for (size_t j = 0; j < param.char_size_sq; ++ j)
 		{
 			float value = dist[j];
 
@@ -711,27 +742,38 @@ void stat_min_max(float& min_value, float& max_value, std::pair<int32_t, int32_t
 	}
 }
 
-void quantizer_chars(std::vector<uint8_t>& lzma_dist, float& mse, float4 const & min_value_inv_scale_frscale_fbase,
-	std::pair<int32_t, int32_t> const * char_index,
-	font_info const * char_info, float const * char_dist_data, uint32_t char_size_sq,
-	uint32_t s, uint32_t e)
+struct quantizer_chars_param
+{
+	float min_value;
+	float inv_scale;
+	float frscale;
+	float fbase;
+	std::pair<int32_t, int32_t> const * char_index;
+	font_info const * char_info;
+	float const * char_dist_data;
+	uint32_t char_size_sq;
+	uint32_t s;
+	uint32_t e;
+};
+
+void quantizer_chars(std::vector<uint8_t>& lzma_dist, float& mse, quantizer_chars_param const & param)
 {
 	lzma_dist.clear();
 	mse = 0;
 
-	float const min_value = min_value_inv_scale_frscale_fbase.x();
-	float const inv_scale = min_value_inv_scale_frscale_fbase.y();
-	float const frscale = min_value_inv_scale_frscale_fbase.z();
-	float const fbase = min_value_inv_scale_frscale_fbase.w();
+	float const min_value = param.min_value;
+	float const inv_scale = param.inv_scale;
+	float const frscale = param.frscale;
+	float const fbase = param.fbase;
 
 	LZMACodec lzma_enc;
-	std::vector<uint8_t> uint8_dist(char_size_sq);
+	std::vector<uint8_t> uint8_dist(param.char_size_sq);
 	std::vector<uint8_t> char_lzma_dist;
-	for (uint32_t i = s; i < e; ++ i)
+	for (uint32_t i = param.s; i < param.e; ++ i)
 	{
-		int const ch = char_index[i].first;
-		float const * dist = &char_dist_data[char_info[ch].dist_index];
-		for (size_t j = 0; j < char_size_sq; ++ j)
+		int const ch = param.char_index[i].first;
+		float const * dist = &param.char_dist_data[param.char_info[ch].dist_index];
+		for (size_t j = 0; j < param.char_size_sq; ++ j)
 		{
 			uint8_dist[j] = static_cast<uint8_t>(MathLib::clamp(static_cast<int>((dist[j] - min_value) * inv_scale + 0.5f), 0, 255));
 
@@ -764,9 +806,14 @@ void quantizer(std::vector<uint8_t>& lzma_dist, uint32_t non_empty_chars,
 		uint32_t s = i * n;
 		uint32_t e = std::min(s + n, non_empty_chars);
 
-		joiners[i] = tp(boost::bind(stat_min_max, boost::ref(min_values[i]), boost::ref(max_values[i]), char_index,
-			char_info, char_dist_data, char_size_sq,
-			s, e));
+		stat_min_max_param param;
+		param.char_index = char_index;
+		param.char_info = char_info;
+		param.char_dist_data = char_dist_data;
+		param.char_size_sq = char_size_sq;
+		param.s = s;
+		param.e = e;
+		joiners[i] = tp(KlayGE::bind(stat_min_max, KlayGE::ref(min_values[i]), KlayGE::ref(max_values[i]), param));
 	}
 
 	float max_value = -1;
@@ -800,10 +847,18 @@ void quantizer(std::vector<uint8_t>& lzma_dist, uint32_t non_empty_chars,
 		uint32_t s = i * n;
 		uint32_t e = std::min(s + n, non_empty_chars);
 
-		joiners[i] = tp(boost::bind(quantizer_chars, boost::ref(lzma_dists[i]), boost::ref(mses[i]),
-			boost::cref(float4(min_value, inv_scale, frscale, fbase)),
-			char_index, char_info, char_dist_data, char_size_sq,
-			s, e));
+		quantizer_chars_param param;
+		param.min_value = min_value;
+		param.inv_scale = inv_scale;
+		param.frscale = frscale;
+		param.fbase = fbase;
+		param.char_index = char_index;
+		param.char_info = char_info;
+		param.char_dist_data = char_dist_data;
+		param.char_size_sq = char_size_sq;
+		param.s = s;
+		param.e = e;
+		joiners[i] = tp(KlayGE::bind(quantizer_chars, KlayGE::ref(lzma_dists[i]), KlayGE::ref(mses[i]), param));
 	}
 
 	float mse = 0;

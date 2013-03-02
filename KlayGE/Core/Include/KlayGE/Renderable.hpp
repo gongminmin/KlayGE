@@ -74,7 +74,7 @@ namespace KlayGE
 	};
 
 	// Abstract class defining the interface all renderable objects must implement.
-	class KLAYGE_CORE_API Renderable : public boost::enable_shared_from_this<Renderable>
+	class KLAYGE_CORE_API Renderable : public enable_shared_from_this<Renderable>
 	{
 	public:
 		enum EffectAttribute
@@ -171,7 +171,7 @@ namespace KlayGE
 		virtual RenderTechniquePtr const & PassTech(PassType type) const;
 
 	protected:
-		std::vector<boost::weak_ptr<SceneObject> > instances_;
+		std::vector<weak_ptr<SceneObject> > instances_;
 
 		RenderTechniquePtr technique_;
 

@@ -16,7 +16,6 @@
 #include <KlayGE/AudioDataSource.hpp>
 
 #include <boost/assert.hpp>
-#include <boost/bind.hpp>
 
 #include <KlayGE/Audio.hpp>
 
@@ -102,8 +101,8 @@ namespace KlayGE
 	void AudioEngine::PlayAll(bool loop)
 	{
 		std::for_each(audioBufs_.begin(), audioBufs_.end(),
-			boost::bind(&AudioBuffer::Play,
-				boost::bind(select2nd<AudioBufs::value_type>(), _1), loop));
+			KlayGE::bind(&AudioBuffer::Play,
+				KlayGE::bind(select2nd<AudioBufs::value_type>(), KlayGE::placeholders::_1), loop));
 	}
 
 	// 停止所有的声音
@@ -111,8 +110,8 @@ namespace KlayGE
 	void AudioEngine::StopAll()
 	{
 		std::for_each(audioBufs_.begin(), audioBufs_.end(),
-			boost::bind(&AudioBuffer::Stop,
-				boost::bind(select2nd<AudioBufs::value_type>(), _1)));
+			KlayGE::bind(&AudioBuffer::Stop,
+				KlayGE::bind(select2nd<AudioBufs::value_type>(), KlayGE::placeholders::_1)));
 	}
 
 	// 列表里缓冲区的数目

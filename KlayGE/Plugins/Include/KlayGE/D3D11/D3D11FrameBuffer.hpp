@@ -41,7 +41,7 @@ namespace KlayGE
 		D3D11_VIEWPORT d3d_viewport_;
 	};
 
-	typedef boost::shared_ptr<D3D11FrameBuffer> D3D11FrameBufferPtr;
+	typedef shared_ptr<D3D11FrameBuffer> D3D11FrameBufferPtr;
 }
 
 #endif			// _D3D11RENDERTEXTURE_HPP

@@ -36,15 +36,15 @@
 namespace KlayGE
 {
 	class ResIdentifier;
-	typedef boost::shared_ptr<ResIdentifier> ResIdentifierPtr;
+	typedef shared_ptr<ResIdentifier> ResIdentifierPtr;
 	class DllLoader;
 
 	class XMLDocument;
-	typedef boost::shared_ptr<XMLDocument> XMLDocumentPtr;
+	typedef shared_ptr<XMLDocument> XMLDocumentPtr;
 	class XMLNode;
-	typedef boost::shared_ptr<XMLNode> XMLNodePtr;
+	typedef shared_ptr<XMLNode> XMLNodePtr;
 	class XMLAttribute;
-	typedef boost::shared_ptr<XMLAttribute> XMLAttributePtr;
+	typedef shared_ptr<XMLAttribute> XMLAttributePtr;
 
 	class bad_join;
 	template <typename ResultType>
@@ -82,31 +82,31 @@ namespace KlayGE
 	template <typename T>
 	class Size_T;
 	typedef Size_T<float> Size;
-	typedef boost::shared_ptr<Size> SizePtr;
+	typedef shared_ptr<Size> SizePtr;
 	template <typename T>
 	class Rect_T;
 	typedef Rect_T<float> Rect;
-	typedef boost::shared_ptr<Rect> RectPtr;
+	typedef shared_ptr<Rect> RectPtr;
 	template <typename T>
 	class Bound_T;
 	typedef Bound_T<float> Bound;
-	typedef boost::shared_ptr<Bound> BoundPtr;
+	typedef shared_ptr<Bound> BoundPtr;
 	template <typename T>
 	class Sphere_T;
 	typedef Sphere_T<float> Sphere;
-	typedef boost::shared_ptr<Sphere> SpherePtr;
+	typedef shared_ptr<Sphere> SpherePtr;
 	template <typename T>
 	class AABBox_T;
 	typedef AABBox_T<float> AABBox;
-	typedef boost::shared_ptr<AABBox> AABBoxPtr;
+	typedef shared_ptr<AABBox> AABBoxPtr;
 	template <typename T>
 	class Frustum_T;
 	typedef Frustum_T<float> Frustum;
-	typedef boost::shared_ptr<Frustum> FrustumPtr;
+	typedef shared_ptr<Frustum> FrustumPtr;
 	template <typename T>
 	class OBBox_T;
 	typedef OBBox_T<float> OBBox;
-	typedef boost::shared_ptr<OBBox> OBBoxPtr;
+	typedef shared_ptr<OBBox> OBBoxPtr;
 }
 
 #endif			// _KFL_PREDECLARE_HPP

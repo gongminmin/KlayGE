@@ -44,7 +44,6 @@
 #pragma warning(pop)
 #endif
 #include <boost/assign/std/vector.hpp>
-#include <boost/bind.hpp>
 
 #include <KlayGE/CameraController.hpp>
 
@@ -103,7 +102,8 @@ namespace KlayGE
 			actionMap.AddActions(actions.begin(), actions.end());
 
 			action_handler_t input_handler = MakeSharedPtr<input_signal>();
-			input_handler->connect(boost::bind(&FirstPersonCameraController::InputHandler, this, _1, _2));
+			input_handler->connect(KlayGE::bind(&FirstPersonCameraController::InputHandler, this,
+				KlayGE::placeholders::_1, KlayGE::placeholders::_2));
 			inputEngine.ActionMap(actionMap, input_handler, true);
 		}
 	}
@@ -121,7 +121,7 @@ namespace KlayGE
 			InputMousePtr mouse;
 			for (uint32_t i = 0; i < ie.NumDevices(); ++ i)
 			{
-				InputMousePtr m = boost::dynamic_pointer_cast<InputMouse>(ie.Device(i));
+				InputMousePtr m = dynamic_pointer_cast<InputMouse>(ie.Device(i));
 				if (m)
 				{
 					mouse = m;
@@ -309,7 +309,8 @@ namespace KlayGE
 			actionMap.AddActions(actions.begin(), actions.end());
 
 			action_handler_t input_handler = MakeSharedPtr<input_signal>();
-			input_handler->connect(boost::bind(&TrackballCameraController::InputHandler, this, _1, _2));
+			input_handler->connect(KlayGE::bind(&TrackballCameraController::InputHandler, this,
+				KlayGE::placeholders::_1, KlayGE::placeholders::_2));
 			inputEngine.ActionMap(actionMap, input_handler, true);
 		}
 	}
@@ -321,7 +322,7 @@ namespace KlayGE
 			InputMousePtr mouse;
 			for (uint32_t i = 0; i < ie.NumDevices(); ++ i)
 			{
-				InputMousePtr m = boost::dynamic_pointer_cast<InputMouse>(ie.Device(i));
+				InputMousePtr m = dynamic_pointer_cast<InputMouse>(ie.Device(i));
 				if (m)
 				{
 					mouse = m;
@@ -618,12 +619,13 @@ namespace KlayGE
 		CameraController::AttachCamera(camera);
 
 		start_time_ = Context::Instance().AppInstance().AppTime();
-		camera.BindUpdateFunc(boost::bind(&CameraPathController::UpdateCameraFunc, this, _1, _2, _3));
+		camera.BindUpdateFunc(bind(&CameraPathController::UpdateCameraFunc, this,
+			KlayGE::placeholders::_1, KlayGE::placeholders::_2, KlayGE::placeholders::_3));
 	}
 
 	void CameraPathController::DetachCamera()
 	{
-		camera_->BindUpdateFunc(boost::function<void(Camera&, float, float)>());
+		camera_->BindUpdateFunc(function<void(Camera&, float, float)>());
 
 		CameraController::DetachCamera();
 	}

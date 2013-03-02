@@ -52,7 +52,7 @@ namespace KlayGE
 			}
 		};
 
-		typedef boost::shared_ptr<SceneObjAABB> SceneObjAABBPtrType;
+		typedef shared_ptr<SceneObjAABB> SceneObjAABBPtrType;
 		typedef std::vector<SceneObjAABBPtrType> SceneObjAABBsType;
 		typedef std::vector<RenderablePtr> RenderItemsType;
 		typedef std::vector<std::pair<RenderTechniquePtr, RenderItemsType> > RenderQueueType;
@@ -116,7 +116,7 @@ namespace KlayGE
 		std::vector<LightSourcePtr> lights_;
 		SceneObjAABBsType scene_objs_;
 
-		unordered_map<size_t, boost::shared_ptr<std::vector<char> > > visible_marks_map_;
+		unordered_map<size_t, shared_ptr<std::vector<char> > > visible_marks_map_;
 
 	private:
 		void FlushScene();

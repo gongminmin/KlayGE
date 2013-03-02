@@ -269,7 +269,7 @@ void DetailedSkinnedMesh::SetTessFactor(int32_t tess_factor)
 
 void DetailedSkinnedMesh::UpdateTech()
 {
-	boost::shared_ptr<DetailedSkinnedModel> model = checked_pointer_cast<DetailedSkinnedModel>(model_.lock());
+	shared_ptr<DetailedSkinnedModel> model = checked_pointer_cast<DetailedSkinnedModel>(model_.lock());
 
 	depth_tech_ = model->depth_techs_[visualize_][line_mode_][smooth_mesh_][has_skinned_];
 	depth_alpha_test_tech_ = model->depth_alpha_test_techs_[visualize_][line_mode_][smooth_mesh_][has_skinned_];

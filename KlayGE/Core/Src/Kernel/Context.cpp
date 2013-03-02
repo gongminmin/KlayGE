@@ -69,7 +69,7 @@ namespace
 
 namespace KlayGE
 {
-	boost::shared_ptr<Context> Context::context_instance_;
+	shared_ptr<Context> Context::context_instance_;
 
 	typedef void (*MakeRenderFactoryFunc)(RenderFactoryPtr& ptr);
 	typedef void (*MakeAudioFactoryFunc)(AudioFactoryPtr& ptr);

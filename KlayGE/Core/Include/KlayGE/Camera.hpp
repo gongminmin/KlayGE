@@ -32,7 +32,6 @@
 #ifdef KLAYGE_COMPILER_MSVC
 #pragma warning(pop)
 #endif
-#include <boost/function.hpp>
 
 #include <KFL/Frustum.hpp>
 #include <KFL/Vector.hpp>
@@ -42,7 +41,7 @@ namespace KlayGE
 {
 	// 3DÉãÏñ»ú²Ù×÷
 	//////////////////////////////////////////////////////////////////////////////////
-	class KLAYGE_CORE_API Camera : public boost::enable_shared_from_this<Camera>
+	class KLAYGE_CORE_API Camera : public enable_shared_from_this<Camera>
 	{
 	public:
 		Camera();
@@ -69,7 +68,7 @@ namespace KlayGE
 		void ViewParams(float3 const & eye_pos, float3 const & look_at, float3 const & up_vec);
 		void ProjParams(float fov, float aspect, float near_plane, float far_plane);
 
-		void BindUpdateFunc(boost::function<void(Camera&, float, float)> const & update_func);
+		void BindUpdateFunc(function<void(Camera&, float, float)> const & update_func);
 
 		void Update(float app_time, float elapsed_time);
 
@@ -120,7 +119,7 @@ namespace KlayGE
 		uint32_t	mode_;
 		int cur_jitter_index_;
 
-		boost::function<void(Camera&, float, float)> update_func_;
+		function<void(Camera&, float, float)> update_func_;
 	};
 }
 

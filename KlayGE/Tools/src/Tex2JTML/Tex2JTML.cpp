@@ -73,7 +73,7 @@ struct TextureDesc
 	uint32_t width;
 	uint32_t height;
 };
-typedef boost::shared_ptr<TextureDesc> TextureDescPtr;
+typedef shared_ptr<TextureDesc> TextureDescPtr;
 
 std::string DosWildcardToRegex(std::string const & wildcard)
 {
@@ -116,7 +116,7 @@ std::string DosWildcardToRegex(std::string const & wildcard)
 }
 
 // From http://www.blackpawn.com/texts/lightmaps/default.html
-class TexPackNode : public boost::enable_shared_from_this<TexPackNode>
+class TexPackNode : public enable_shared_from_this<TexPackNode>
 {
 public:
 	TexPackNode()
@@ -124,12 +124,12 @@ public:
 	{
 	}
 	
-	boost::shared_ptr<TexPackNode> Insert(TextureDescPtr const & tex_desc)
+	shared_ptr<TexPackNode> Insert(TextureDescPtr const & tex_desc)
 	{
 		if (!this->IsLeaf())
 		{
 			// try first child
-			boost::shared_ptr<TexPackNode> new_node = child_[0]->Insert(tex_desc);
+			shared_ptr<TexPackNode> new_node = child_[0]->Insert(tex_desc);
 			if (new_node)
 			{
 				return new_node;
@@ -142,7 +142,7 @@ public:
 			// room don't fit or already have picture here
 			if (!this->CanInsert(tex_desc))
 			{
-				return boost::shared_ptr<TexPackNode>();
+				return shared_ptr<TexPackNode>();
 			}
 			// result comes form perfecly fit
 			if (this->CanPerfectlyInsert(tex_desc))
@@ -194,7 +194,7 @@ public:
 		return (rect_.Width() == tex_desc->width) && (rect_.Height() == tex_desc->height);
 	}
 
-	boost::shared_ptr<TexPackNode> Child(uint32_t index)
+	shared_ptr<TexPackNode> Child(uint32_t index)
 	{
 		BOOST_ASSERT(index < 2);
 		return child_[index];
@@ -219,13 +219,13 @@ public:
 	}
 
 private:
-	boost::shared_ptr<TexPackNode> child_[2];
+	shared_ptr<TexPackNode> child_[2];
 	KlayGE::Rect_T<uint32_t> rect_;
 	TextureDescPtr tex_desc_;
 };
 
 
-void CalcPackInfo(std::vector<TextureDescPtr>& ta, int num_tiles, int tile_size, boost::shared_ptr<TexPackNode>& root)
+void CalcPackInfo(std::vector<TextureDescPtr>& ta, int num_tiles, int tile_size, shared_ptr<TexPackNode>& root)
 {
 	root = MakeSharedPtr<TexPackNode>();
 	int size = num_tiles * tile_size;
@@ -234,7 +234,7 @@ void CalcPackInfo(std::vector<TextureDescPtr>& ta, int num_tiles, int tile_size,
 	// It returns the pointer of the node the lightmap can go into or null to say it can't fit.
 	for (size_t i = 0; i < ta.size(); ++ i)
 	{
-		boost::shared_ptr<TexPackNode> node = root->Insert(ta[i]);
+		shared_ptr<TexPackNode> node = root->Insert(ta[i]);
 		if (node)
 		{
 			node->TextureDesc(ta[i]);
@@ -269,7 +269,7 @@ struct JTMLImageRecord
 };
 typedef std::vector<JTMLImageRecord> JTMLImageRecordArray;
 
-void ConvertTreeToJTML(boost::shared_ptr<TexPackNode> const & node, JTMLImageRecordArray& jirs, int tile_size)
+void ConvertTreeToJTML(shared_ptr<TexPackNode> const & node, JTMLImageRecordArray& jirs, int tile_size)
 {
 	if (node->TextureDesc())
 	{
@@ -290,7 +290,7 @@ void ConvertTreeToJTML(boost::shared_ptr<TexPackNode> const & node, JTMLImageRec
 	}
 }
 
-void WriteJTML(boost::shared_ptr<TexPackNode> const & root, std::string const & jtml_name, int num_tiles, int tile_size, ElementFormat fmt)
+void WriteJTML(shared_ptr<TexPackNode> const & root, std::string const & jtml_name, int num_tiles, int tile_size, ElementFormat fmt)
 {
 	JTMLImageRecordArray jirs;
 	ConvertTreeToJTML(root, jirs, tile_size);
@@ -349,7 +349,7 @@ void Tex2JTML(std::vector<std::string>& tex_names, uint32_t num_tiles, uint32_t 
 		cout << " DONE" << endl;
 	}
 
-	boost::shared_ptr<TexPackNode> root;
+	shared_ptr<TexPackNode> root;
 	CalcPackInfo(tex_descs, num_tiles, tile_size, root);
 
 	WriteJTML(root, jtml_name, num_tiles, tile_size, EF_ABGR8);

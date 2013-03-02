@@ -26,15 +26,6 @@
 #include <vector>
 #include <sstream>
 #include <fstream>
-#ifdef KLAYGE_COMPILER_MSVC
-#pragma warning(push)
-#pragma warning(disable: 4127 4512 6297 6326 6385)
-#endif
-#include <boost/random.hpp>
-#ifdef KLAYGE_COMPILER_MSVC
-#pragma warning(pop)
-#endif
-#include <boost/bind.hpp>
 
 #include "SampleCommon.hpp"
 #include "GPUParticleSystem.hpp"
@@ -74,7 +65,8 @@ namespace
 
 	TexturePtr CreateNoiseVolume(uint32_t vol_size)
 	{
-		boost::variate_generator<boost::lagged_fibonacci607, boost::uniform_real<float> > random_gen(boost::lagged_fibonacci607(), boost::uniform_real<float>(0, 255));
+		ranlux24_base gen;
+		uniform_int_distribution<> dis(0, 255);
 
 		std::vector<uint8_t> data_block(vol_size * vol_size * vol_size * 4);
 		ElementInitData init_data;
@@ -85,7 +77,7 @@ namespace
 		// Gen a bunch of random values
 		for (size_t i = 0; i < data_block.size() / 4; ++ i)
 		{
-			data_block[i * 4 + 3] = static_cast<uint8_t>(random_gen());
+			data_block[i * 4 + 3] = static_cast<uint8_t>(dis(gen));
 		}
 
 		// Generate normals from the density gradient
@@ -300,7 +292,7 @@ namespace
 				tex_width_(256), tex_height_((max_num_particles + 255) / 256),
 				model_mat_(float4x4::Identity()),
 				rt_index_(true), accumulate_time_(0),
-				random_gen_(boost::lagged_fibonacci607(), boost::uniform_real<float>(-0.05f, 0.05f))
+				random_dis_(-500, +500)
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 			RenderEngine& re = rf.RenderEngineInstance();
@@ -342,10 +334,10 @@ namespace
 
 				for (int i = 0; i < max_num_particles_; ++ i)
 				{
-					float const angel = random_gen_() / 0.05f * PI;
-					float const r = random_gen_() * 3;
+					float const angel = this->RandomGen() / 0.05f * PI;
+					float const r = this->RandomGen() * 3;
 
-					p[i] = float4(r * cos(angel), 0.2f + abs(random_gen_()) * 3, r * sin(angel), 0);
+					p[i] = float4(r * cos(angel), 0.2f + abs(this->RandomGen()) * 3, r * sin(angel), 0);
 				}
 				ElementInitData vel_init;
 				vel_init.data = &p[0];
@@ -464,11 +456,11 @@ namespace
 			
 				for (int i = 0; i < tex_width_ * tex_height_; ++ i)
 				{
-					float const angel = random_gen_() / 0.05f * PI;
-					float const r = random_gen_() * 3;
+					float const angel = this->RandomGen() / 0.05f * PI;
+					float const r = this->RandomGen() * 3;
 
 					p[i * 4 + 0] = half(r * cos(angel));
-					p[i * 4 + 1] = half(0.2f + abs(random_gen_()) * 3);
+					p[i * 4 + 1] = half(0.2f + abs(this->RandomGen()) * 3);
 					p[i * 4 + 2] = half(r * sin(angel));
 					p[i * 4 + 3] = half(0.0f);
 				}
@@ -613,6 +605,12 @@ namespace
 		}
 
 	private:
+		float RandomGen()
+		{
+			return MathLib::clamp(random_dis_(gen_) * 0.0001f, -0.05f, +0.05f);
+		}
+
+	private:
 		int max_num_particles_;
 		int tex_width_, tex_height_;
 
@@ -634,7 +632,8 @@ namespace
 		float accumulate_time_;
 		float inv_emit_freq_;
 
-		boost::variate_generator<boost::lagged_fibonacci607, boost::uniform_real<float> > random_gen_;
+		ranlux24_base gen_;
+		uniform_int_distribution<> random_dis_;
 
 		RenderTechniquePtr update_so_tech_;
 		RenderTechniquePtr update_mrt_tech_;
@@ -701,7 +700,7 @@ namespace
 		}
 	};
 
-	boost::shared_ptr<GPUParticleSystem> gpu_ps;
+	shared_ptr<GPUParticleSystem> gpu_ps;
 
 
 	enum
@@ -768,7 +767,7 @@ void GPUParticleSystemApp::InitObjects()
 	actionMap.AddActions(actions, actions + sizeof(actions) / sizeof(actions[0]));
 
 	action_handler_t input_handler = MakeSharedPtr<input_signal>();
-	input_handler->connect(boost::bind(&GPUParticleSystemApp::InputHandler, this, _1, _2));
+	input_handler->connect(KlayGE::bind(&GPUParticleSystemApp::InputHandler, this, KlayGE::placeholders::_1, KlayGE::placeholders::_2));
 	inputEngine.ActionMap(actionMap, input_handler, true);
 
 	particles_ = MakeSharedPtr<ParticlesObject>(NUM_PARTICLE);

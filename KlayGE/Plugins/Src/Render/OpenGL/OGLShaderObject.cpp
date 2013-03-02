@@ -45,7 +45,6 @@
 #endif
 #include <boost/assign.hpp>
 #include <boost/assign/std/vector.hpp>
-#include <boost/bind.hpp>
 #ifdef KLAYGE_COMPILER_MSVC
 #pragma warning(push)
 #pragma warning(disable: 4127 6328)
@@ -1010,10 +1009,10 @@ namespace KlayGE
 
 		glsl_program_ = glCreateProgram();
 
-		glsl_srcs_ = MakeSharedPtr<array<boost::shared_ptr<std::string>, ST_NumShaderTypes> >();
+		glsl_srcs_ = MakeSharedPtr<array<shared_ptr<std::string>, ST_NumShaderTypes> >();
 
-		pnames_ = MakeSharedPtr<array<boost::shared_ptr<std::vector<std::string> >, ST_NumShaderTypes> >();
-		glsl_res_names_ = MakeSharedPtr<array<boost::shared_ptr<std::vector<std::string> >, ST_NumShaderTypes> >();
+		pnames_ = MakeSharedPtr<array<shared_ptr<std::vector<std::string> >, ST_NumShaderTypes> >();
+		glsl_res_names_ = MakeSharedPtr<array<shared_ptr<std::vector<std::string> >, ST_NumShaderTypes> >();
 
 		vs_usages_ = MakeSharedPtr<std::vector<VertexElementUsage> >();
 		vs_usage_indices_ = MakeSharedPtr<std::vector<uint8_t> >();

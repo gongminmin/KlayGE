@@ -67,7 +67,7 @@ namespace KlayGE
 		ModeType modes_;
 	};
 
-	typedef boost::shared_ptr<D3D11Adapter> D3D11AdapterPtr;
+	typedef shared_ptr<D3D11Adapter> D3D11AdapterPtr;
 }
 
 #endif			// _D3D11ADAPTER_HPP

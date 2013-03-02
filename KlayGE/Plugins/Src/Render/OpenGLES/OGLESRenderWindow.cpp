@@ -25,7 +25,6 @@
 #include <map>
 #include <sstream>
 #include <boost/assert.hpp>
-#include <boost/bind.hpp>
 
 #include <glloader/glloader.h>
 
@@ -45,12 +44,18 @@ namespace KlayGE
 		color_bits_			= NumFormatBits(settings.color_fmt);
 
 		WindowPtr const & main_wnd = Context::Instance().AppInstance().MainWnd();		
-		on_active_connect_ = main_wnd->OnActive().connect(boost::bind(&OGLESRenderWindow::OnActive, this, _1, _2));
-		on_paint_connect_ = main_wnd->OnPaint().connect(boost::bind(&OGLESRenderWindow::OnPaint, this, _1));
-		on_enter_size_move_connect_ = main_wnd->OnEnterSizeMove().connect(boost::bind(&OGLESRenderWindow::OnEnterSizeMove, this, _1));
-		on_exit_size_move_connect_ = main_wnd->OnExitSizeMove().connect(boost::bind(&OGLESRenderWindow::OnExitSizeMove, this, _1));
-		on_size_connect_ = main_wnd->OnSize().connect(boost::bind(&OGLESRenderWindow::OnSize, this, _1, _2));
-		on_close_connect_ = main_wnd->OnClose().connect(boost::bind(&OGLESRenderWindow::OnClose, this, _1));
+		on_active_connect_ = main_wnd->OnActive().connect(bind(&OGLESRenderWindow::OnActive, this,
+			placeholders::_1, placeholders::_2));
+		on_paint_connect_ = main_wnd->OnPaint().connect(bind(&OGLESRenderWindow::OnPaint, this,
+			placeholders::_1));
+		on_enter_size_move_connect_ = main_wnd->OnEnterSizeMove().connect(bind(&OGLESRenderWindow::OnEnterSizeMove, this,
+			placeholders::_1));
+		on_exit_size_move_connect_ = main_wnd->OnExitSizeMove().connect(bind(&OGLESRenderWindow::OnExitSizeMove, this,
+			placeholders::_1));
+		on_size_connect_ = main_wnd->OnSize().connect(bind(&OGLESRenderWindow::OnSize, this,
+			placeholders::_1, placeholders::_2));
+		on_close_connect_ = main_wnd->OnClose().connect(bind(&OGLESRenderWindow::OnClose, this,
+			placeholders::_1));
 
 		if (isFullScreen_)
 		{

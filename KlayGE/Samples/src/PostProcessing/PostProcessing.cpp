@@ -23,7 +23,6 @@
 #include <KlayGE/InputFactory.hpp>
 
 #include <sstream>
-#include <boost/bind.hpp>
 
 #include "SampleCommon.hpp"
 #include "AsciiArtsPP.hpp"
@@ -101,9 +100,9 @@ void PostProcessingApp::InitObjects()
 	this->LookAt(float3(0, 0.5f, -2), float3(0, 0, 0));
 	this->Proj(0.1f, 150.0f);
 
-	boost::function<RenderModelPtr()> model_ml = ASyncLoadModel("dino50.7z//dino50.meshml", EAH_GPU_Read | EAH_Immutable);
-	boost::function<TexturePtr()> y_cube_tl = ASyncLoadTexture("rnl_cross_y.dds", EAH_GPU_Read | EAH_Immutable);
-	boost::function<TexturePtr()> c_cube_tl = ASyncLoadTexture("rnl_cross_c.dds", EAH_GPU_Read | EAH_Immutable);
+	function<RenderModelPtr()> model_ml = ASyncLoadModel("dino50.7z//dino50.meshml", EAH_GPU_Read | EAH_Immutable);
+	function<TexturePtr()> y_cube_tl = ASyncLoadTexture("rnl_cross_y.dds", EAH_GPU_Read | EAH_Immutable);
+	function<TexturePtr()> c_cube_tl = ASyncLoadTexture("rnl_cross_c.dds", EAH_GPU_Read | EAH_Immutable);
 
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 	RenderEngine& re = rf.RenderEngineInstance();
@@ -131,7 +130,7 @@ void PostProcessingApp::InitObjects()
 	actionMap.AddActions(actions, actions + sizeof(actions) / sizeof(actions[0]));
 
 	action_handler_t input_handler = MakeSharedPtr<input_signal>();
-	input_handler->connect(boost::bind(&PostProcessingApp::InputHandler, this, _1, _2));
+	input_handler->connect(KlayGE::bind(&PostProcessingApp::InputHandler, this, KlayGE::placeholders::_1, KlayGE::placeholders::_2));
 	inputEngine.ActionMap(actionMap, input_handler, true);
 
 	copy_ = LoadPostProcess(ResLoader::Instance().Open("Copy.ppml"), "copy");
@@ -154,14 +153,14 @@ void PostProcessingApp::InitObjects()
 	id_night_vision_ = dialog_->IDFromName("NightVisionPP");
 	id_old_fashion_ = dialog_->IDFromName("OldFashionPP");
 
-	dialog_->Control<UICheckBox>(id_fps_camera_)->OnChangedEvent().connect(boost::bind(&PostProcessingApp::FPSCameraHandler, this, _1));
-	dialog_->Control<UIRadioButton>(id_copy_)->OnChangedEvent().connect(boost::bind(&PostProcessingApp::CopyHandler, this, _1));
-	dialog_->Control<UIRadioButton>(id_ascii_arts_)->OnChangedEvent().connect(boost::bind(&PostProcessingApp::AsciiArtsHandler, this, _1));
-	dialog_->Control<UIRadioButton>(id_cartoon_)->OnChangedEvent().connect(boost::bind(&PostProcessingApp::CartoonHandler, this, _1));
-	dialog_->Control<UIRadioButton>(id_tiling_)->OnChangedEvent().connect(boost::bind(&PostProcessingApp::TilingHandler, this, _1));
-	dialog_->Control<UIRadioButton>(id_hdr_)->OnChangedEvent().connect(boost::bind(&PostProcessingApp::HDRHandler, this, _1));
-	dialog_->Control<UIRadioButton>(id_night_vision_)->OnChangedEvent().connect(boost::bind(&PostProcessingApp::NightVisionHandler, this, _1));
-	dialog_->Control<UIRadioButton>(id_old_fashion_)->OnChangedEvent().connect(boost::bind(&PostProcessingApp::OldFashionHandler, this, _1));
+	dialog_->Control<UICheckBox>(id_fps_camera_)->OnChangedEvent().connect(KlayGE::bind(&PostProcessingApp::FPSCameraHandler, this, KlayGE::placeholders::_1));
+	dialog_->Control<UIRadioButton>(id_copy_)->OnChangedEvent().connect(KlayGE::bind(&PostProcessingApp::CopyHandler, this, KlayGE::placeholders::_1));
+	dialog_->Control<UIRadioButton>(id_ascii_arts_)->OnChangedEvent().connect(KlayGE::bind(&PostProcessingApp::AsciiArtsHandler, this, KlayGE::placeholders::_1));
+	dialog_->Control<UIRadioButton>(id_cartoon_)->OnChangedEvent().connect(KlayGE::bind(&PostProcessingApp::CartoonHandler, this, KlayGE::placeholders::_1));
+	dialog_->Control<UIRadioButton>(id_tiling_)->OnChangedEvent().connect(KlayGE::bind(&PostProcessingApp::TilingHandler, this, KlayGE::placeholders::_1));
+	dialog_->Control<UIRadioButton>(id_hdr_)->OnChangedEvent().connect(KlayGE::bind(&PostProcessingApp::HDRHandler, this, KlayGE::placeholders::_1));
+	dialog_->Control<UIRadioButton>(id_night_vision_)->OnChangedEvent().connect(KlayGE::bind(&PostProcessingApp::NightVisionHandler, this, KlayGE::placeholders::_1));
+	dialog_->Control<UIRadioButton>(id_old_fashion_)->OnChangedEvent().connect(KlayGE::bind(&PostProcessingApp::OldFashionHandler, this, KlayGE::placeholders::_1));
 	this->CartoonHandler(*dialog_->Control<UIRadioButton>(id_cartoon_));
 
 	RenderModelPtr scene_model = model_ml();

@@ -27,8 +27,8 @@ namespace KlayGE
 	{
 	public:
 		ParticleSystem(uint32_t max_num_particles,
-						boost::function<void(ParticleType& par, float4x4 const & mat)> const & gen_func,
-						boost::function<void(ParticleType& par, float elapse_time)> const & update_func)
+						function<void(ParticleType& par, float4x4 const & mat)> const & gen_func,
+						function<void(ParticleType& par, float elapse_time)> const & update_func)
 			: gen_func_(gen_func), update_func_(update_func),
 				particles_(max_num_particles),
 				inv_emit_freq_(0), accumulate_time_(0),
@@ -108,8 +108,8 @@ namespace KlayGE
 		}
 
 	protected:
-		boost::function<void(ParticleType& par, float4x4 const & mat)> gen_func_;
-		boost::function<void(ParticleType& par, float elapse_time)> update_func_;
+		function<void(ParticleType& par, float4x4 const & mat)> gen_func_;
+		function<void(ParticleType& par, float elapse_time)> update_func_;
 
 		std::vector<ParticleType> particles_;
 

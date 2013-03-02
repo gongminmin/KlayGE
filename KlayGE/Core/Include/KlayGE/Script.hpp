@@ -28,7 +28,7 @@
 
 namespace KlayGE
 {
-	typedef boost::shared_ptr<PyObject> PyObjectPtr;
+	typedef shared_ptr<PyObject> PyObjectPtr;
 
 	// PyObject÷∏’Î
 	/////////////////////////////////////////////////////////////////////////////////

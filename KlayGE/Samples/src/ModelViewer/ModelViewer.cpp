@@ -23,7 +23,6 @@
 #include <KlayGE/InputFactory.hpp>
 
 #include <sstream>
-#include <boost/bind.hpp>
 
 #include "SampleCommon.hpp"
 #include "ModelViewer.hpp"
@@ -364,23 +363,23 @@ void ModelViewerApp::InitObjects()
 	actionMap.AddActions(actions, actions + sizeof(actions) / sizeof(actions[0]));
 
 	action_handler_t input_handler = MakeSharedPtr<input_signal>();
-	input_handler->connect(boost::bind(&ModelViewerApp::InputHandler, this, _1, _2));
+	input_handler->connect(KlayGE::bind(&ModelViewerApp::InputHandler, this, KlayGE::placeholders::_1, KlayGE::placeholders::_2));
 	inputEngine.ActionMap(actionMap, input_handler, true);
 
-	dialog_animation_->Control<UICheckBox>(id_skinned_)->OnChangedEvent().connect(boost::bind(&ModelViewerApp::SkinnedHandler, this, _1));
+	dialog_animation_->Control<UICheckBox>(id_skinned_)->OnChangedEvent().connect(KlayGE::bind(&ModelViewerApp::SkinnedHandler, this, KlayGE::placeholders::_1));
 
-	dialog_animation_->Control<UISlider>(id_frame_slider_)->OnValueChangedEvent().connect(boost::bind(&ModelViewerApp::FrameChangedHandler, this, _1));
+	dialog_animation_->Control<UISlider>(id_frame_slider_)->OnValueChangedEvent().connect(KlayGE::bind(&ModelViewerApp::FrameChangedHandler, this, KlayGE::placeholders::_1));
 
-	dialog_animation_->Control<UICheckBox>(id_play_)->OnChangedEvent().connect(boost::bind(&ModelViewerApp::PlayHandler, this, _1));
-	dialog_animation_->Control<UICheckBox>(id_smooth_mesh_)->OnChangedEvent().connect(boost::bind(&ModelViewerApp::SmoothMeshHandler, this, _1));
-	dialog_animation_->Control<UICheckBox>(id_fps_camera_)->OnChangedEvent().connect(boost::bind(&ModelViewerApp::FPSCameraHandler, this, _1));
+	dialog_animation_->Control<UICheckBox>(id_play_)->OnChangedEvent().connect(KlayGE::bind(&ModelViewerApp::PlayHandler, this, KlayGE::placeholders::_1));
+	dialog_animation_->Control<UICheckBox>(id_smooth_mesh_)->OnChangedEvent().connect(KlayGE::bind(&ModelViewerApp::SmoothMeshHandler, this, KlayGE::placeholders::_1));
+	dialog_animation_->Control<UICheckBox>(id_fps_camera_)->OnChangedEvent().connect(KlayGE::bind(&ModelViewerApp::FPSCameraHandler, this, KlayGE::placeholders::_1));
 
-	dialog_model_->Control<UIButton>(id_open_)->OnClickedEvent().connect(boost::bind(&ModelViewerApp::OpenHandler, this, _1));
-	dialog_model_->Control<UIButton>(id_save_as_)->OnClickedEvent().connect(boost::bind(&ModelViewerApp::SaveAsHandler, this, _1));
+	dialog_model_->Control<UIButton>(id_open_)->OnClickedEvent().connect(KlayGE::bind(&ModelViewerApp::OpenHandler, this, KlayGE::placeholders::_1));
+	dialog_model_->Control<UIButton>(id_save_as_)->OnClickedEvent().connect(KlayGE::bind(&ModelViewerApp::SaveAsHandler, this, KlayGE::placeholders::_1));
 
-	dialog_model_->Control<UIComboBox>(id_mesh_)->OnSelectionChangedEvent().connect(boost::bind(&ModelViewerApp::MeshChangedHandler, this, _1));
-	dialog_model_->Control<UIComboBox>(id_visualize_)->OnSelectionChangedEvent().connect(boost::bind(&ModelViewerApp::VisualizeChangedHandler, this, _1));
-	dialog_model_->Control<UICheckBox>(id_line_mode_)->OnChangedEvent().connect(boost::bind(&ModelViewerApp::LineModeChangedHandler, this, _1));
+	dialog_model_->Control<UIComboBox>(id_mesh_)->OnSelectionChangedEvent().connect(KlayGE::bind(&ModelViewerApp::MeshChangedHandler, this, KlayGE::placeholders::_1));
+	dialog_model_->Control<UIComboBox>(id_visualize_)->OnSelectionChangedEvent().connect(KlayGE::bind(&ModelViewerApp::VisualizeChangedHandler, this, KlayGE::placeholders::_1));
+	dialog_model_->Control<UICheckBox>(id_line_mode_)->OnChangedEvent().connect(KlayGE::bind(&ModelViewerApp::LineModeChangedHandler, this, KlayGE::placeholders::_1));
 
 	this->OpenModel("archer_attacking.meshml");
 }
@@ -404,7 +403,7 @@ void ModelViewerApp::OpenModel(std::string const & name)
 	model_ = MakeSharedPtr<ModelObject>(name);
 	model_->AddToSceneManager();
 
-	boost::shared_ptr<ModelObject> model = checked_pointer_cast<ModelObject>(model_);
+	shared_ptr<ModelObject> model = checked_pointer_cast<ModelObject>(model_);
 
 	frame_ = 0;
 	if (model->NumFrames() > 0)
@@ -659,7 +658,7 @@ void ModelViewerApp::MeshChangedHandler(KlayGE::UIComboBox const & sender)
 	dialog_model_->Control<UIComboBox>(id_visualize_)->AddItem(L"Vertex Binormal", VEU_Binormal);
 
 	dialog_model_->Control<UIListBox>(id_textures_)->RemoveAllItems();
-	boost::shared_ptr<ModelObject> model = checked_pointer_cast<ModelObject>(model_);
+	shared_ptr<ModelObject> model = checked_pointer_cast<ModelObject>(model_);
 	TextureSlotsType const & texture_slots = model->GetMaterial(model->Mesh(mi)->MaterialID())->texture_slots;
 	for (size_t i = 0; i < texture_slots.size(); ++ i)
 	{
@@ -759,7 +758,7 @@ uint32_t ModelViewerApp::DoUpdate(KlayGE::uint32_t pass)
 		float4x4 trans = MathLib::translation(origin);
 		axis_->ModelMatrix(scaling * trans);
 
-		boost::shared_ptr<ModelObject> model = checked_pointer_cast<ModelObject>(model_);
+		shared_ptr<ModelObject> model = checked_pointer_cast<ModelObject>(model_);
 		if (play_)
 		{
 			float this_time = this->AppTime();

@@ -135,7 +135,7 @@ namespace KlayGE
 		boost::signals2::connection on_close_connect_;
 	};
 
-	typedef boost::shared_ptr<D3D11RenderWindow> D3D11RenderWindowPtr;
+	typedef shared_ptr<D3D11RenderWindow> D3D11RenderWindowPtr;
 }
 
 #endif			// _D3D11RENDERWINDOW_HPP

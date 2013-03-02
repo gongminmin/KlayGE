@@ -28,7 +28,7 @@
 
 namespace KlayGE
 {
-	typedef boost::shared_ptr<IDirectSoundBuffer> IDSBufferPtr;
+	typedef shared_ptr<IDirectSoundBuffer> IDSBufferPtr;
 
 	WAVEFORMATEX WaveFormatEx(AudioDataSourcePtr const & dataSource);
 	long LinearGainToDB(float vol);
@@ -56,7 +56,7 @@ namespace KlayGE
 		void Direction(float3 const & v);
 
 	private:
-		boost::shared_ptr<IDirectSound3DBuffer> Get3DBufferInterface(std::vector<IDSBufferPtr>::iterator iter);
+		shared_ptr<IDirectSound3DBuffer> Get3DBufferInterface(std::vector<IDSBufferPtr>::iterator iter);
 
 		void DoReset();
 		std::vector<IDSBufferPtr>::iterator FreeSource();
@@ -101,7 +101,7 @@ namespace KlayGE
 		uint32_t		fillCount_;
 		uint32_t		writePos_;
 
-		boost::shared_ptr<IDirectSound3DBuffer> ds3DBuffer_;
+		shared_ptr<IDirectSound3DBuffer> ds3DBuffer_;
 
 		bool		loop_;
 
@@ -120,7 +120,7 @@ namespace KlayGE
 		DSAudioEngine();
 		~DSAudioEngine();
 
-		boost::shared_ptr<IDirectSound> const & DSound() const
+		shared_ptr<IDirectSound> const & DSound() const
 			{ return dsound_; }
 
 		std::wstring const & Name() const;
@@ -133,8 +133,8 @@ namespace KlayGE
 		void SetListenerOri(float3 const & face, float3 const & up);
 
 	private:
-		boost::shared_ptr<IDirectSound>				dsound_;
-		boost::shared_ptr<IDirectSound3DListener>	ds3dListener_;
+		shared_ptr<IDirectSound>				dsound_;
+		shared_ptr<IDirectSound3DListener>	ds3dListener_;
 
 		HMODULE mod_dsound_;
 		typedef HRESULT (WINAPI *DirectSoundCreateFunc)(LPCGUID pcGuidDevice, LPDIRECTSOUND *ppDS, LPUNKNOWN pUnkOuter);

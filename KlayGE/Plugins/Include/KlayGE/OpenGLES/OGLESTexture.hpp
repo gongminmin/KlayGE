@@ -96,7 +96,7 @@ namespace KlayGE
 		std::map<GLenum, GLfloat> tex_param_f_;
 	};
 
-	typedef boost::shared_ptr<OGLESTexture> OGLES2TexturePtr;
+	typedef shared_ptr<OGLESTexture> OGLES2TexturePtr;
 
 
 	class OGLESTexture1D : public OGLESTexture

@@ -189,7 +189,7 @@ namespace KlayGE
 		bool hack_for_intel_;
 	};
 
-	typedef boost::shared_ptr<OGLRenderEngine> OGLRenderEnginePtr;
+	typedef shared_ptr<OGLRenderEngine> OGLRenderEnginePtr;
 }
 
 #endif			// _OGLRENDERENGINE_HPP

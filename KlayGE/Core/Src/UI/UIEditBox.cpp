@@ -8,8 +8,6 @@
 #include <KlayGE/Window.hpp>
 #include <KlayGE/Font.hpp>
 
-#include <boost/bind.hpp>
-
 #include <KlayGE/UI.hpp>
 
 namespace KlayGE
@@ -346,7 +344,8 @@ namespace KlayGE
 		}
 
 		WindowPtr const & main_wnd = Context::Instance().AppInstance().MainWnd();
-		on_char_connect_ = main_wnd->OnChar().connect(boost::bind(&UIEditBox::CharHandler, this, _1, _2));
+		on_char_connect_ = main_wnd->OnChar().connect(bind(&UIEditBox::CharHandler, this,
+			placeholders::_1, placeholders::_2));
 	}
 
 	UIEditBox::~UIEditBox()
@@ -492,7 +491,7 @@ namespace KlayGE
 			InputEngine& ie = Context::Instance().InputFactoryInstance().InputEngineInstance();
 			for (uint32_t i = 0; i < ie.NumDevices(); ++ i)
 			{
-				InputKeyboardPtr k = boost::dynamic_pointer_cast<InputKeyboard>(ie.Device(i));
+				InputKeyboardPtr k = dynamic_pointer_cast<InputKeyboard>(ie.Device(i));
 				if (k)
 				{
 					key_board = k;

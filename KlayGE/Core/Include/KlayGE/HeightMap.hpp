@@ -8,7 +8,7 @@
 // 合并入Core (2010.8.21)
 //
 // 3.4.0
-// 使用boost::function (2006.7.23)
+// 使用function (2006.7.23)
 //
 // 2.0.0
 // 初次建立 (2003.10.5)
@@ -27,7 +27,6 @@
 #endif
 
 #include <vector>
-#include <boost/function.hpp>
 
 namespace KlayGE
 {
@@ -38,7 +37,7 @@ namespace KlayGE
 	public:
 		void BuildTerrain(float start_x, float start_y, float end_x, float end_y, float span_x, float span_y,
 			std::vector<float3>& vertices, std::vector<uint16_t>& indices,
-			boost::function<float(float, float)> HeightFunc);
+			function<float(float, float)> HeightFunc);
 	};
 }
 

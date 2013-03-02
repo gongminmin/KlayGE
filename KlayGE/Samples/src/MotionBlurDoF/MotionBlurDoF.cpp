@@ -32,7 +32,6 @@
 #ifdef KLAYGE_COMPILER_MSVC
 #pragma warning(pop)
 #endif
-#include <boost/bind.hpp>
 
 #include "SampleCommon.hpp"
 #include "MotionBlurDoF.hpp"
@@ -729,8 +728,8 @@ bool MotionBlurDoFApp::ConfirmDevice() const
 
 void MotionBlurDoFApp::InitObjects()
 {
-	boost::function<RenderModelPtr()> model_instance_ml = ASyncLoadModel("teapot.meshml", EAH_GPU_Read | EAH_Immutable, CreateModelFactory<RenderModel>(), CreateMeshFactory<RenderInstanceMesh>());
-	boost::function<RenderModelPtr()> model_mesh_ml = ASyncLoadModel("teapot.meshml", EAH_GPU_Read | EAH_Immutable, CreateModelFactory<RenderModel>(), CreateMeshFactory<RenderNonInstancedMesh>());
+	function<RenderModelPtr()> model_instance_ml = ASyncLoadModel("teapot.meshml", EAH_GPU_Read | EAH_Immutable, CreateModelFactory<RenderModel>(), CreateMeshFactory<RenderInstanceMesh>());
+	function<RenderModelPtr()> model_mesh_ml = ASyncLoadModel("teapot.meshml", EAH_GPU_Read | EAH_Immutable, CreateModelFactory<RenderModel>(), CreateMeshFactory<RenderNonInstancedMesh>());
 
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
@@ -755,7 +754,7 @@ void MotionBlurDoFApp::InitObjects()
 	actionMap.AddActions(actions, actions + sizeof(actions) / sizeof(actions[0]));
 
 	action_handler_t input_handler = MakeSharedPtr<input_signal>();
-	input_handler->connect(boost::bind(&MotionBlurDoFApp::InputHandler, this, _1, _2));
+	input_handler->connect(KlayGE::bind(&MotionBlurDoFApp::InputHandler, this, KlayGE::placeholders::_1, KlayGE::placeholders::_2));
 	inputEngine.ActionMap(actionMap, input_handler, true);
 
 	depth_of_field_ = MakeSharedPtr<DepthOfField>();
@@ -785,16 +784,16 @@ void MotionBlurDoFApp::InitObjects()
 	id_use_instancing_ = app_dialog_->IDFromName("UseInstancing");
 	id_ctrl_camera_ = app_dialog_->IDFromName("CtrlCamera");
 
-	dof_dialog_->Control<UICheckBox>(id_dof_on_)->OnChangedEvent().connect(boost::bind(&MotionBlurDoFApp::DoFOnHandler, this, _1));
-	dof_dialog_->Control<UICheckBox>(id_bokeh_on_)->OnChangedEvent().connect(boost::bind(&MotionBlurDoFApp::BokehOnHandler, this, _1));
-	dof_dialog_->Control<UISlider>(id_focus_plane_slider_)->OnValueChangedEvent().connect(boost::bind(&MotionBlurDoFApp::FocusPlaneChangedHandler, this, _1));
-	dof_dialog_->Control<UISlider>(id_focus_range_slider_)->OnValueChangedEvent().connect(boost::bind(&MotionBlurDoFApp::FocusRangeChangedHandler, this, _1));
-	dof_dialog_->Control<UICheckBox>(id_blur_factor_)->OnChangedEvent().connect(boost::bind(&MotionBlurDoFApp::BlurFactorHandler, this, _1));
+	dof_dialog_->Control<UICheckBox>(id_dof_on_)->OnChangedEvent().connect(KlayGE::bind(&MotionBlurDoFApp::DoFOnHandler, this, KlayGE::placeholders::_1));
+	dof_dialog_->Control<UICheckBox>(id_bokeh_on_)->OnChangedEvent().connect(KlayGE::bind(&MotionBlurDoFApp::BokehOnHandler, this, KlayGE::placeholders::_1));
+	dof_dialog_->Control<UISlider>(id_focus_plane_slider_)->OnValueChangedEvent().connect(KlayGE::bind(&MotionBlurDoFApp::FocusPlaneChangedHandler, this, KlayGE::placeholders::_1));
+	dof_dialog_->Control<UISlider>(id_focus_range_slider_)->OnValueChangedEvent().connect(KlayGE::bind(&MotionBlurDoFApp::FocusRangeChangedHandler, this, KlayGE::placeholders::_1));
+	dof_dialog_->Control<UICheckBox>(id_blur_factor_)->OnChangedEvent().connect(KlayGE::bind(&MotionBlurDoFApp::BlurFactorHandler, this, KlayGE::placeholders::_1));
 
-	mb_dialog_->Control<UICheckBox>(id_mb_on_)->OnChangedEvent().connect(boost::bind(&MotionBlurDoFApp::MBOnHandler, this, _1));
-	mb_dialog_->Control<UICheckBox>(id_motion_vec_)->OnChangedEvent().connect(boost::bind(&MotionBlurDoFApp::MotionVecHandler, this, _1));
+	mb_dialog_->Control<UICheckBox>(id_mb_on_)->OnChangedEvent().connect(KlayGE::bind(&MotionBlurDoFApp::MBOnHandler, this, KlayGE::placeholders::_1));
+	mb_dialog_->Control<UICheckBox>(id_motion_vec_)->OnChangedEvent().connect(KlayGE::bind(&MotionBlurDoFApp::MotionVecHandler, this, KlayGE::placeholders::_1));
 
-	app_dialog_->Control<UICheckBox>(id_ctrl_camera_)->OnChangedEvent().connect(boost::bind(&MotionBlurDoFApp::CtrlCameraHandler, this, _1));
+	app_dialog_->Control<UICheckBox>(id_ctrl_camera_)->OnChangedEvent().connect(KlayGE::bind(&MotionBlurDoFApp::CtrlCameraHandler, this, KlayGE::placeholders::_1));
 
 	this->DoFOnHandler(*dof_dialog_->Control<UICheckBox>(id_dof_on_));
 	this->BokehOnHandler(*dof_dialog_->Control<UICheckBox>(id_bokeh_on_));
@@ -802,7 +801,7 @@ void MotionBlurDoFApp::InitObjects()
 	this->FocusRangeChangedHandler(*dof_dialog_->Control<UISlider>(id_focus_range_slider_));
 	this->BlurFactorHandler(*dof_dialog_->Control<UICheckBox>(id_blur_factor_));
 
-	app_dialog_->Control<UICheckBox>(id_use_instancing_)->OnChangedEvent().connect(boost::bind(&MotionBlurDoFApp::UseInstancingHandler, this, _1));
+	app_dialog_->Control<UICheckBox>(id_use_instancing_)->OnChangedEvent().connect(KlayGE::bind(&MotionBlurDoFApp::UseInstancingHandler, this, KlayGE::placeholders::_1));
 
 	renderInstance_ = model_instance_ml()->Mesh(0);
 	for (int32_t i = 0; i < NUM_LINE; ++ i)

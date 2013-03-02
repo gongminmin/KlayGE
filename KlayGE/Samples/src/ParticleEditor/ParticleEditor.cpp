@@ -31,15 +31,6 @@
 #include <vector>
 #include <sstream>
 #include <fstream>
-#include <boost/bind.hpp>
-#ifdef KLAYGE_COMPILER_MSVC
-#pragma warning(push)
-#pragma warning(disable: 4127 4512 6297 6326 6385)
-#endif
-#include <boost/random.hpp>
-#ifdef KLAYGE_COMPILER_MSVC
-#pragma warning(pop)
-#endif
 
 #include "SampleCommon.hpp"
 #include "ParticleEditor.hpp"
@@ -318,7 +309,7 @@ namespace
 	{
 	public:
 		GenParticle()
-			: random_gen_(boost::lagged_fibonacci607(), boost::uniform_real<float>(-1, 1)),
+			: random_dis_(-10000, +10000),
 				angle_(PI / 3), life_(3)
 		{
 		}
@@ -361,23 +352,30 @@ namespace
 
 		void operator()(ParticleType& par, float4x4 const & mat)
 		{
-			float x = random_gen_() * max_position_deviation_.x();
-			float y = random_gen_() * max_position_deviation_.y();
-			float z = random_gen_() * max_position_deviation_.z();
+			float x = this->RandomGen() * max_position_deviation_.x();
+			float y = this->RandomGen()* max_position_deviation_.y();
+			float z = this->RandomGen()* max_position_deviation_.z();
 			par.pos = MathLib::transform_coord(float3(x, y, z), mat);
-			float theta = random_gen_() * PI;
-			float phi = abs(random_gen_()) * angle_ / 2;
-			float velocity = (random_gen_() * 0.5f + 0.5f) * (max_velocity_ - min_velocity_) + min_velocity_;
+			float theta = this->RandomGen() * PI;
+			float phi = abs(this->RandomGen()) * angle_ / 2;
+			float velocity = (this->RandomGen() * 0.5f + 0.5f) * (max_velocity_ - min_velocity_) + min_velocity_;
 			float vx = cos(theta) * sin(phi);
 			float vz = sin(theta) * sin(phi);
 			float vy = cos(phi);
 			par.vel = MathLib::transform_normal(float3(vx, vy, vz) * velocity, mat);
 			par.life = life_;
-			par.spin = random_gen_() * PI / 2;
+			par.spin = this->RandomGen() * PI / 2;
 		}
 
 	private:
-		boost::variate_generator<boost::lagged_fibonacci607, boost::uniform_real<float> > random_gen_;
+		float RandomGen()
+		{
+			return MathLib::clamp(random_dis_(gen_) * 0.0001f, -1.0f, +1.0f);
+		}
+
+	private:
+		ranlux24_base gen_;
+		uniform_int_distribution<> random_dis_;
 
 		float3 max_position_deviation_;
 		float angle_;
@@ -516,7 +514,7 @@ void ParticleEditorApp::InitObjects()
 	actionMap.AddActions(actions, actions + sizeof(actions) / sizeof(actions[0]));
 
 	action_handler_t input_handler = MakeSharedPtr<input_signal>();
-	input_handler->connect(boost::bind(&ParticleEditorApp::InputHandler, this, _1, _2));
+	input_handler->connect(KlayGE::bind(&ParticleEditorApp::InputHandler, this, KlayGE::placeholders::_1, KlayGE::placeholders::_2));
 	inputEngine.ActionMap(actionMap, input_handler, true);
 
 	particles_ = MakeSharedPtr<ParticlesObject>();
@@ -527,8 +525,8 @@ void ParticleEditorApp::InitObjects()
 
 	update_particle.MediaDensity(0.5f);
 
-	ps_ = MakeSharedPtr<ParticleSystem<Particle> >(NUM_PARTICLE, boost::bind(&GenParticle<Particle>::operator(), &gen_particle, _1, _2),
-		boost::bind(&UpdateParticle<Particle>::operator(), &update_particle, _1, _2));
+	ps_ = MakeSharedPtr<ParticleSystem<Particle> >(NUM_PARTICLE, KlayGE::bind(&GenParticle<Particle>::operator(), &gen_particle, KlayGE::placeholders::_1, KlayGE::placeholders::_2),
+		bind(&UpdateParticle<Particle>::operator(), &update_particle, KlayGE::placeholders::_1, KlayGE::placeholders::_2));
 
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 	RenderEngine& re = rf.RenderEngineInstance();
@@ -564,28 +562,28 @@ void ParticleEditorApp::InitObjects()
 	id_weight_over_life_ = dialog_->IDFromName("WeightOverLifePolyline");
 	id_transparency_over_life_ = dialog_->IDFromName("TransparencyOverLifePolyline");
 
-	dialog_->Control<UIButton>(id_open_)->OnClickedEvent().connect(boost::bind(&ParticleEditorApp::OpenHandler, this, _1));
-	dialog_->Control<UIButton>(id_save_as_)->OnClickedEvent().connect(boost::bind(&ParticleEditorApp::SaveAsHandler, this, _1));
+	dialog_->Control<UIButton>(id_open_)->OnClickedEvent().connect(KlayGE::bind(&ParticleEditorApp::OpenHandler, this, KlayGE::placeholders::_1));
+	dialog_->Control<UIButton>(id_save_as_)->OnClickedEvent().connect(KlayGE::bind(&ParticleEditorApp::SaveAsHandler, this, KlayGE::placeholders::_1));
 
-	dialog_->Control<UISlider>(id_angle_slider_)->OnValueChangedEvent().connect(boost::bind(&ParticleEditorApp::AngleChangedHandler, this, _1));
+	dialog_->Control<UISlider>(id_angle_slider_)->OnValueChangedEvent().connect(KlayGE::bind(&ParticleEditorApp::AngleChangedHandler, this, KlayGE::placeholders::_1));
 	this->AngleChangedHandler(*dialog_->Control<UISlider>(id_angle_slider_));
-	dialog_->Control<UISlider>(id_life_slider_)->OnValueChangedEvent().connect(boost::bind(&ParticleEditorApp::LifeChangedHandler, this, _1));
+	dialog_->Control<UISlider>(id_life_slider_)->OnValueChangedEvent().connect(KlayGE::bind(&ParticleEditorApp::LifeChangedHandler, this, KlayGE::placeholders::_1));
 	this->LifeChangedHandler(*dialog_->Control<UISlider>(id_life_slider_));
-	dialog_->Control<UISlider>(id_density_slider_)->OnValueChangedEvent().connect(boost::bind(&ParticleEditorApp::DensityChangedHandler, this, _1));
+	dialog_->Control<UISlider>(id_density_slider_)->OnValueChangedEvent().connect(KlayGE::bind(&ParticleEditorApp::DensityChangedHandler, this, KlayGE::placeholders::_1));
 	this->DensityChangedHandler(*dialog_->Control<UISlider>(id_density_slider_));
-	dialog_->Control<UISlider>(id_min_velocity_slider_)->OnValueChangedEvent().connect(boost::bind(&ParticleEditorApp::MinVelocityChangedHandler, this, _1));
+	dialog_->Control<UISlider>(id_min_velocity_slider_)->OnValueChangedEvent().connect(KlayGE::bind(&ParticleEditorApp::MinVelocityChangedHandler, this, KlayGE::placeholders::_1));
 	this->MinVelocityChangedHandler(*dialog_->Control<UISlider>(id_min_velocity_slider_));
-	dialog_->Control<UISlider>(id_max_velocity_slider_)->OnValueChangedEvent().connect(boost::bind(&ParticleEditorApp::MaxVelocityChangedHandler, this, _1));
+	dialog_->Control<UISlider>(id_max_velocity_slider_)->OnValueChangedEvent().connect(KlayGE::bind(&ParticleEditorApp::MaxVelocityChangedHandler, this, KlayGE::placeholders::_1));
 	this->MaxVelocityChangedHandler(*dialog_->Control<UISlider>(id_max_velocity_slider_));
 
-	dialog_->Control<UICheckBox>(id_fps_camera_)->OnChangedEvent().connect(boost::bind(&ParticleEditorApp::FPSCameraHandler, this, _1));
+	dialog_->Control<UICheckBox>(id_fps_camera_)->OnChangedEvent().connect(KlayGE::bind(&ParticleEditorApp::FPSCameraHandler, this, KlayGE::placeholders::_1));
 
-	dialog_->Control<UITexButton>(id_particle_alpha_from_button_)->OnClickedEvent().connect(boost::bind(&ParticleEditorApp::ChangeParticleAlphaFromHandler, this, _1));
-	dialog_->Control<UITexButton>(id_particle_alpha_to_button_)->OnClickedEvent().connect(boost::bind(&ParticleEditorApp::ChangeParticleAlphaToHandler, this, _1));
-	dialog_->Control<UITexButton>(id_particle_color_from_button_)->OnClickedEvent().connect(boost::bind(&ParticleEditorApp::ChangeParticleColorFromHandler, this, _1));
-	dialog_->Control<UITexButton>(id_particle_color_to_button_)->OnClickedEvent().connect(boost::bind(&ParticleEditorApp::ChangeParticleColorToHandler, this, _1));
+	dialog_->Control<UITexButton>(id_particle_alpha_from_button_)->OnClickedEvent().connect(KlayGE::bind(&ParticleEditorApp::ChangeParticleAlphaFromHandler, this, KlayGE::placeholders::_1));
+	dialog_->Control<UITexButton>(id_particle_alpha_to_button_)->OnClickedEvent().connect(KlayGE::bind(&ParticleEditorApp::ChangeParticleAlphaToHandler, this, KlayGE::placeholders::_1));
+	dialog_->Control<UITexButton>(id_particle_color_from_button_)->OnClickedEvent().connect(KlayGE::bind(&ParticleEditorApp::ChangeParticleColorFromHandler, this, KlayGE::placeholders::_1));
+	dialog_->Control<UITexButton>(id_particle_color_to_button_)->OnClickedEvent().connect(KlayGE::bind(&ParticleEditorApp::ChangeParticleColorToHandler, this, KlayGE::placeholders::_1));
 
-	dialog_->Control<UIComboBox>(id_curve_type_)->OnSelectionChangedEvent().connect(boost::bind(&ParticleEditorApp::CurveTypeChangedHandler, this, _1));
+	dialog_->Control<UIComboBox>(id_curve_type_)->OnSelectionChangedEvent().connect(KlayGE::bind(&ParticleEditorApp::CurveTypeChangedHandler, this, KlayGE::placeholders::_1));
 
 	this->LoadParticleSystem(ResLoader::Instance().Locate("Fire.psml"));
 

@@ -30,7 +30,6 @@
 #include <vector>
 #include <set>
 #include <map>
-#include <boost/function.hpp>
 
 #include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/ShaderObject.hpp>
@@ -224,7 +223,7 @@ namespace KlayGE
 		std::map<ElementFormat, std::vector<std::pair<uint32_t, uint32_t> > > rendertarget_format_;
 	};
 
-	typedef boost::shared_ptr<D3D11RenderEngine> D3D11RenderEnginePtr;
+	typedef shared_ptr<D3D11RenderEngine> D3D11RenderEnginePtr;
 }
 
 #endif			// _D3D11RENDERENGINE_HPP

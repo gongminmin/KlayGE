@@ -25,7 +25,6 @@
 #include <KlayGE/AudioDataSource.hpp>
 
 #include <boost/assert.hpp>
-#include <boost/bind.hpp>
 
 #include <KlayGE/OpenAL/OALAudio.hpp>
 
@@ -163,7 +162,7 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void OALMusicBuffer::DoPlay(bool loop)
 	{
-		play_thread_ = GlobalThreadPool()(boost::bind(&OALMusicBuffer::LoopUpdateBuffer, this));
+		play_thread_ = GlobalThreadPool()(bind(&OALMusicBuffer::LoopUpdateBuffer, this));
 
 		loop_ = loop;
 

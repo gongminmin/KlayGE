@@ -38,9 +38,6 @@
 #include <vector>
 #include <string>
 
-#include <boost/bind.hpp>
-#include <boost/function.hpp>
-
 #include <KFL/ResIdentifier.hpp>
 
 namespace KlayGE
@@ -55,7 +52,7 @@ namespace KlayGE
 		virtual std::wstring const & Name() const = 0;
 
 		virtual void SubThreadStage() = 0;
-		virtual boost::shared_ptr<void> MainThreadStage() = 0;
+		virtual shared_ptr<void> MainThreadStage() = 0;
 
 		virtual bool HasSubThreadStage() const = 0;
 
@@ -64,6 +61,24 @@ namespace KlayGE
 
 	class KLAYGE_CORE_API ResLoader
 	{
+		template <typename T>
+		class EmptyFuncToT
+		{
+		public:
+			explicit EmptyFuncToT(function<shared_ptr<void>()> const & func)
+				: func_(func)
+			{
+			}
+
+			shared_ptr<T> operator()()
+			{
+				return static_pointer_cast<T>(func_());
+			}
+
+		private:
+			function<shared_ptr<void>()> func_;
+		};
+
 	public:
 		ResLoader();
 		~ResLoader();
@@ -76,46 +91,34 @@ namespace KlayGE
 		ResIdentifierPtr Open(std::string const & name);
 		std::string Locate(std::string const & name);
 
-		boost::shared_ptr<void> SyncQuery(ResLoadingDescPtr const & res_desc);
-		boost::function<boost::shared_ptr<void>()> ASyncQuery(ResLoadingDescPtr const & res_desc);
+		shared_ptr<void> SyncQuery(ResLoadingDescPtr const & res_desc);
+		function<shared_ptr<void>()> ASyncQuery(ResLoadingDescPtr const & res_desc);
 
 		template <typename T>
-		boost::shared_ptr<T> SyncQueryT(ResLoadingDescPtr const & res_desc)
+		shared_ptr<T> SyncQueryT(ResLoadingDescPtr const & res_desc)
 		{
-			return this->EmptyToT<T>(this->SyncQuery(res_desc));
+			return static_pointer_cast<T>(this->SyncQuery(res_desc));
 		}
 
 		template <typename T>
-		boost::function<boost::shared_ptr<T>()> ASyncQueryT(ResLoadingDescPtr const & res_desc)
+		function<shared_ptr<T>()> ASyncQueryT(ResLoadingDescPtr const & res_desc)
 		{
-			return boost::bind(&ResLoader::EmptyFuncToT<T>, this->ASyncQuery(res_desc));
+			return EmptyFuncToT<T>(this->ASyncQuery(res_desc));
 		}
 
 	private:		
 		void ASyncSubThreadFunc(ResLoadingDescPtr const & res_desc);
-		boost::shared_ptr<void> ASyncFunc(ResLoadingDescPtr const & res_desc,
-			boost::shared_ptr<joiner<void> > const & loading_thread);
-
-		template <typename T>
-		static boost::shared_ptr<T> EmptyToT(boost::shared_ptr<void> const & p)
-		{
-			return boost::static_pointer_cast<T>(p);
-		}
-
-		template <typename T>
-		static boost::shared_ptr<T> EmptyFuncToT(boost::function<boost::shared_ptr<void>()> const & func)
-		{
-			return EmptyToT<T>(func());
-		}
+		shared_ptr<void> ASyncFunc(ResLoadingDescPtr const & res_desc,
+			shared_ptr<joiner<void> > const & loading_thread);
 
 	private:
-		static boost::shared_ptr<ResLoader> res_loader_instance_;
+		static shared_ptr<ResLoader> res_loader_instance_;
 
 		std::string exe_path_;
 		std::vector<std::string> paths_;
 
-		std::vector<std::pair<ResLoadingDescPtr, boost::shared_ptr<void> > > cached_sync_res_;
-		std::vector<std::pair<ResLoadingDescPtr, boost::function<boost::shared_ptr<void>()> > > cached_async_res_;
+		std::vector<std::pair<ResLoadingDescPtr, shared_ptr<void> > > cached_sync_res_;
+		std::vector<std::pair<ResLoadingDescPtr, function<shared_ptr<void>()> > > cached_async_res_;
 	};
 }
 

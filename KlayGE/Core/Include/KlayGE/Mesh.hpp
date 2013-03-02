@@ -40,8 +40,6 @@
 #include <vector>
 #include <string>
 
-#include <boost/function.hpp>
-
 namespace KlayGE
 {
 	class KLAYGE_CORE_API StaticMesh : public Renderable
@@ -138,7 +136,7 @@ namespace KlayGE
 
 		int32_t mtl_id_;
 
-		boost::weak_ptr<RenderModel> model_;
+		weak_ptr<RenderModel> model_;
 	};
 
 	class KLAYGE_CORE_API RenderModel : public Renderable
@@ -330,11 +328,11 @@ namespace KlayGE
 		{
 			return bind_duals_;
 		}
-		void AttachKeyFrames(boost::shared_ptr<KeyFramesType> const & kf)
+		void AttachKeyFrames(shared_ptr<KeyFramesType> const & kf)
 		{
 			key_frames_ = kf;
 		}
-		boost::shared_ptr<KeyFramesType> const & GetKeyFrames() const
+		shared_ptr<KeyFramesType> const & GetKeyFrames() const
 		{
 			return key_frames_;
 		}
@@ -363,8 +361,8 @@ namespace KlayGE
 
 		virtual AABBox FramePosBound(uint32_t frame) const;
 
-		void AttachActions(boost::shared_ptr<AnimationActionsType> const & actions);
-		boost::shared_ptr<AnimationActionsType> const & GetActions() const
+		void AttachActions(shared_ptr<AnimationActionsType> const & actions);
+		shared_ptr<AnimationActionsType> const & GetActions() const
 		{
 			return actions_;
 		}
@@ -380,13 +378,13 @@ namespace KlayGE
 		RotationsType bind_reals_;
 		RotationsType bind_duals_;
 
-		boost::shared_ptr<KeyFramesType> key_frames_;
+		shared_ptr<KeyFramesType> key_frames_;
 		float last_frame_;
 
 		uint32_t num_frames_;
 		uint32_t frame_rate_;
 
-		boost::shared_ptr<AnimationActionsType> actions_;
+		shared_ptr<AnimationActionsType> actions_;
 	};
 
 	class KLAYGE_CORE_API SkinnedMesh : public StaticMesh
@@ -398,14 +396,14 @@ namespace KlayGE
 		}
 
 		virtual AABBox FramePosBound(uint32_t frame) const;
-		void AttachFramePosBounds(boost::shared_ptr<AABBKeyFrames> const & frame_pos_aabbs);
-		boost::shared_ptr<AABBKeyFrames> const & GetFramePosBounds() const
+		void AttachFramePosBounds(shared_ptr<AABBKeyFrames> const & frame_pos_aabbs);
+		shared_ptr<AABBKeyFrames> const & GetFramePosBounds() const
 		{
 			return frame_pos_aabbs_;
 		}
 
 	private:
-		boost::shared_ptr<AABBKeyFrames> frame_pos_aabbs_;
+		shared_ptr<AABBKeyFrames> frame_pos_aabbs_;
 	};
 
 
@@ -434,15 +432,15 @@ namespace KlayGE
 		std::vector<AABBox>& pos_bbs, std::vector<AABBox>& tc_bbs,
 		std::vector<uint32_t>& mesh_num_vertices, std::vector<uint32_t>& mesh_base_vertices,
 		std::vector<uint32_t>& mesh_num_triangles, std::vector<uint32_t>& mesh_base_triangles,
-		std::vector<Joint>& joints, boost::shared_ptr<AnimationActionsType>& actions,
-		boost::shared_ptr<KeyFramesType>& kfs, uint32_t& num_frames, uint32_t& frame_rate,
-		std::vector<boost::shared_ptr<AABBKeyFrames> >& frame_pos_bbs);
+		std::vector<Joint>& joints, shared_ptr<AnimationActionsType>& actions,
+		shared_ptr<KeyFramesType>& kfs, uint32_t& num_frames, uint32_t& frame_rate,
+		std::vector<shared_ptr<AABBKeyFrames> >& frame_pos_bbs);
 	KLAYGE_CORE_API RenderModelPtr SyncLoadModel(std::string const & meshml_name, uint32_t access_hint,
-		boost::function<RenderModelPtr(std::wstring const &)> CreateModelFactoryFunc = CreateModelFactory<RenderModel>(),
-		boost::function<StaticMeshPtr(RenderModelPtr const &, std::wstring const &)> CreateMeshFactoryFunc = CreateMeshFactory<StaticMesh>());
-	KLAYGE_CORE_API boost::function<RenderModelPtr()> ASyncLoadModel(std::string const & meshml_name, uint32_t access_hint,
-		boost::function<RenderModelPtr(std::wstring const &)> CreateModelFactoryFunc = CreateModelFactory<RenderModel>(),
-		boost::function<StaticMeshPtr(RenderModelPtr const &, std::wstring const &)> CreateMeshFactoryFunc = CreateMeshFactory<StaticMesh>());
+		function<RenderModelPtr(std::wstring const &)> CreateModelFactoryFunc = CreateModelFactory<RenderModel>(),
+		function<StaticMeshPtr(RenderModelPtr const &, std::wstring const &)> CreateMeshFactoryFunc = CreateMeshFactory<StaticMesh>());
+	KLAYGE_CORE_API function<RenderModelPtr()> ASyncLoadModel(std::string const & meshml_name, uint32_t access_hint,
+		function<RenderModelPtr(std::wstring const &)> CreateModelFactoryFunc = CreateModelFactory<RenderModel>(),
+		function<StaticMeshPtr(RenderModelPtr const &, std::wstring const &)> CreateMeshFactoryFunc = CreateMeshFactory<StaticMesh>());
 
 	KLAYGE_CORE_API void SaveModel(std::string const & meshml_name, std::vector<RenderMaterialPtr> const & mtls,
 		std::vector<vertex_element> const & merged_ves, char all_is_index_16_bit, 
@@ -451,8 +449,8 @@ namespace KlayGE
 		std::vector<AABBox> const & pos_bbs, std::vector<AABBox> const & tc_bbs,
 		std::vector<uint32_t>& mesh_num_vertices, std::vector<uint32_t>& mesh_base_vertices,
 		std::vector<uint32_t>& mesh_num_triangles, std::vector<uint32_t>& mesh_base_triangles,
-		std::vector<Joint> const & joints, boost::shared_ptr<AnimationActionsType> const & actions,
-		boost::shared_ptr<KeyFramesType> const & kfs, uint32_t num_frames, uint32_t frame_rate);
+		std::vector<Joint> const & joints, shared_ptr<AnimationActionsType> const & actions,
+		shared_ptr<KeyFramesType> const & kfs, uint32_t num_frames, uint32_t frame_rate);
 	KLAYGE_CORE_API void SaveModel(RenderModelPtr const & model, std::string const & meshml_name);
 
 

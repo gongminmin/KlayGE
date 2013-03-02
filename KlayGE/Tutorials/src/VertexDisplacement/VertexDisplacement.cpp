@@ -21,7 +21,6 @@
 
 #include <vector>
 #include <sstream>
-#include <boost/bind.hpp>
 
 #include "VertexDisplacement.hpp"
 
@@ -150,7 +149,7 @@ void VertexDisplacement::InitObjects()
 	actionMap.AddActions(actions, actions + sizeof(actions) / sizeof(actions[0]));
 
 	action_handler_t input_handler = MakeSharedPtr<input_signal>();
-	input_handler->connect(boost::bind(&VertexDisplacement::InputHandler, this, _1, _2));
+	input_handler->connect(KlayGE::bind(&VertexDisplacement::InputHandler, this, KlayGE::placeholders::_1, KlayGE::placeholders::_2));
 	inputEngine.ActionMap(actionMap, input_handler, true);
 
 	UIManager::Instance().Load(ResLoader::Instance().Open("VertexDisplacement.uiml"));

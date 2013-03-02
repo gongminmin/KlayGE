@@ -25,8 +25,6 @@
 #include <KlayGE/RenderLayout.hpp>
 #include <KlayGE/ShaderObject.hpp>
 
-#include <boost/function.hpp>
-
 namespace KlayGE
 {
 	class OGLShaderObject : public ShaderObject
@@ -64,7 +62,7 @@ namespace KlayGE
 			int location;
 			int shader_type;
 			int tex_sampler_bind_index;
-			boost::function<void()> func;
+			function<void()> func;
 		};
 		typedef std::vector<parameter_bind_t> parameter_binds_t;
 
@@ -75,14 +73,14 @@ namespace KlayGE
 
 	private:
 		GLuint glsl_program_;
-		boost::shared_ptr<std::vector<GLint> > glsl_bin_formats_;
-		boost::shared_ptr<std::vector<uint8_t> > glsl_bin_program_;
-		boost::shared_ptr<array<boost::shared_ptr<std::string>, ST_NumShaderTypes> > glsl_srcs_;
-		boost::shared_ptr<array<boost::shared_ptr<std::vector<std::string> >, ST_NumShaderTypes> > pnames_;
-		boost::shared_ptr<array<boost::shared_ptr<std::vector<std::string> >, ST_NumShaderTypes> > glsl_res_names_;
-		boost::shared_ptr<std::vector<VertexElementUsage> > vs_usages_;
-		boost::shared_ptr<std::vector<uint8_t> > vs_usage_indices_;
-		boost::shared_ptr<std::vector<std::string> > glsl_vs_attrib_names_;
+		shared_ptr<std::vector<GLint> > glsl_bin_formats_;
+		shared_ptr<std::vector<uint8_t> > glsl_bin_program_;
+		shared_ptr<array<shared_ptr<std::string>, ST_NumShaderTypes> > glsl_srcs_;
+		shared_ptr<array<shared_ptr<std::vector<std::string> >, ST_NumShaderTypes> > pnames_;
+		shared_ptr<array<shared_ptr<std::vector<std::string> >, ST_NumShaderTypes> > glsl_res_names_;
+		shared_ptr<std::vector<VertexElementUsage> > vs_usages_;
+		shared_ptr<std::vector<uint8_t> > vs_usage_indices_;
+		shared_ptr<std::vector<std::string> > glsl_vs_attrib_names_;
 		GLint gs_input_type_, gs_output_type_;
 
 		parameter_binds_t param_binds_;
@@ -94,7 +92,7 @@ namespace KlayGE
 		std::map<std::pair<VertexElementUsage, uint8_t>, GLint> attrib_locs_;
 	};
 
-	typedef boost::shared_ptr<OGLShaderObject> OGLShaderObjectPtr;
+	typedef shared_ptr<OGLShaderObject> OGLShaderObjectPtr;
 }
 
 #endif			// _OGLSHADEROBJECT_HPP

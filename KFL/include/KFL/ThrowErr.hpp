@@ -38,7 +38,6 @@
 
 #ifdef KLAYGE_CXX11_LIBRARY_SYSTEM_ERROR_SUPPORT
 	#include <system_error>
-
 	namespace KlayGE
 	{
 		using std::system_error;
@@ -52,7 +51,6 @@
 #else
 	#include <boost/system/error_code.hpp>
 	#include <boost/system/system_error.hpp>
-
 	namespace KlayGE
 	{
 		using boost::system::system_error;

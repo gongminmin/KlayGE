@@ -57,7 +57,7 @@ namespace KlayGE
 
 	// 获取DirectInput接口
 	/////////////////////////////////////////////////////////////////////////////////
-	boost::shared_ptr<IDirectInput8W> const & DInputEngine::DInput() const
+	shared_ptr<IDirectInput8W> const & DInputEngine::DInput() const
 	{
 		return dinput_;
 	}

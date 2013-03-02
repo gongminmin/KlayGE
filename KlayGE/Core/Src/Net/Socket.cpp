@@ -178,7 +178,7 @@ namespace KlayGE
 	{
 		BOOST_ASSERT(this->socket_ != INVALID_SOCKET);
 
-		Verify(bind(this->socket_, reinterpret_cast<sockaddr const *>(&sockAddr),
+		Verify(::bind(this->socket_, reinterpret_cast<sockaddr const *>(&sockAddr),
 			sizeof(sockAddr)) != SOCKET_ERROR);
 	}
 

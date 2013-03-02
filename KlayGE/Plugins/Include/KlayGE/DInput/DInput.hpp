@@ -45,11 +45,11 @@ namespace KlayGE
 		std::wstring const & Name() const;
 		void EnumDevices();
 
-		boost::shared_ptr<IDirectInput8W> const & DInput() const;
+		shared_ptr<IDirectInput8W> const & DInput() const;
 		HWND HWnd() const;
 
 	private:
-		boost::shared_ptr<IDirectInput8W> dinput_;
+		shared_ptr<IDirectInput8W> dinput_;
 		HWND hwnd_;
 
 		HMODULE mod_dinput8_;

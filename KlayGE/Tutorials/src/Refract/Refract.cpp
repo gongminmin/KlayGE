@@ -24,7 +24,6 @@
 
 #include <vector>
 #include <sstream>
-#include <boost/bind.hpp>
 
 #include "Refract.hpp"
 
@@ -226,7 +225,7 @@ void Refract::InitObjects()
 	actionMap.AddActions(actions, actions + sizeof(actions) / sizeof(actions[0]));
 
 	action_handler_t input_handler = MakeSharedPtr<input_signal>();
-	input_handler->connect(boost::bind(&Refract::InputHandler, this, _1, _2));
+	input_handler->connect(KlayGE::bind(&Refract::InputHandler, this, KlayGE::placeholders::_1, KlayGE::placeholders::_2));
 	inputEngine.ActionMap(actionMap, input_handler, true);
 
 	if (rf.RenderEngineInstance().DeviceCaps().texture_format_support(EF_D16))

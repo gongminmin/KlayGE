@@ -28,11 +28,9 @@
 #include <KlayGE/RenderLayout.hpp>
 #include <KlayGE/Renderable.hpp>
 
-#include <boost/function.hpp>
-
 namespace KlayGE
 {
-	class KLAYGE_CORE_API SceneObject : public boost::enable_shared_from_this<SceneObject>
+	class KLAYGE_CORE_API SceneObject : public enable_shared_from_this<SceneObject>
 	{
 	public:
 		enum SOAttrib
@@ -58,7 +56,7 @@ namespace KlayGE
 		virtual void AddToSceneManager();
 		virtual void DelFromSceneManager();
 
-		void BindUpdateFunc(boost::function<void(SceneObject&, float, float)> const & update_func);
+		void BindUpdateFunc(function<void(SceneObject&, float, float)> const & update_func);
 
 		virtual void Update(float app_time, float elapsed_time);
 
@@ -97,7 +95,7 @@ namespace KlayGE
 
 		float4x4 model_;
 
-		boost::function<void(SceneObject&, float, float)> update_func_;
+		function<void(SceneObject&, float, float)> update_func_;
 	};
 }
 

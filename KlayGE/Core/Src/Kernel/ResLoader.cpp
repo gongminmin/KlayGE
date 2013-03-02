@@ -66,7 +66,7 @@ namespace
 
 namespace KlayGE
 {
-	boost::shared_ptr<ResLoader> ResLoader::res_loader_instance_;
+	shared_ptr<ResLoader> ResLoader::res_loader_instance_;
 
 	ResLoader::ResLoader()
 	{
@@ -331,7 +331,7 @@ namespace KlayGE
 								MakeSharedPtr<std::ifstream>(pkt_name.c_str(), std::ios_base::binary));
 							if (*pkt_file)
 							{
-								boost::shared_ptr<std::iostream> packet_file = MakeSharedPtr<std::stringstream>();
+								shared_ptr<std::iostream> packet_file = MakeSharedPtr<std::stringstream>();
 								Extract7z(pkt_file, password, file_name, packet_file);
 								return MakeSharedPtr<ResIdentifier>(name, timestamp, packet_file);
 							}
@@ -347,7 +347,7 @@ namespace KlayGE
 		AAsset* asset = AAssetManager_open(am, name.c_str(), AASSET_MODE_UNKNOWN);
 		if (asset != nullptr)
 		{
-			boost::shared_ptr<std::stringstream> asset_file = MakeSharedPtr<std::stringstream>(std::ios_base::in | std::ios_base::out | std::ios_base::binary);
+			shared_ptr<std::stringstream> asset_file = MakeSharedPtr<std::stringstream>(std::ios_base::in | std::ios_base::out | std::ios_base::binary);
 
 			int bytes = 0;
 			char buf[1024];
@@ -383,9 +383,9 @@ namespace KlayGE
 #endif		
 	}
 
-	boost::shared_ptr<void> ResLoader::SyncQuery(ResLoadingDescPtr const & res_desc)
+	shared_ptr<void> ResLoader::SyncQuery(ResLoadingDescPtr const & res_desc)
 	{
-		boost::shared_ptr<void> queried;
+		shared_ptr<void> queried;
 		bool found = false;
 		typedef KLAYGE_DECLTYPE(cached_sync_res_) CachedSyncResType;
 		KLAYGE_FOREACH(CachedSyncResType::const_reference res, cached_sync_res_)
@@ -410,9 +410,9 @@ namespace KlayGE
 		return queried;
 	}
 
-	boost::function<boost::shared_ptr<void>()> ResLoader::ASyncQuery(ResLoadingDescPtr const & res_desc)
+	function<shared_ptr<void>()> ResLoader::ASyncQuery(ResLoadingDescPtr const & res_desc)
 	{
-		boost::function<boost::shared_ptr<void>()> queried;
+		function<shared_ptr<void>()> queried;
 		bool found = false;
 		typedef KLAYGE_DECLTYPE(cached_async_res_) CachedAsyncResType;
 		KLAYGE_FOREACH(CachedAsyncResType::const_reference res, cached_async_res_)
@@ -426,12 +426,12 @@ namespace KlayGE
 		}
 		if (!found)
 		{
-			boost::shared_ptr<joiner<void> > async_thread;
+			shared_ptr<joiner<void> > async_thread;
 			if (res_desc->HasSubThreadStage())
 			{
-				async_thread = MakeSharedPtr<joiner<void> >(GlobalThreadPool()(boost::bind(&ResLoader::ASyncSubThreadFunc, this, res_desc)));
+				async_thread = MakeSharedPtr<joiner<void> >(GlobalThreadPool()(bind(&ResLoader::ASyncSubThreadFunc, this, res_desc)));
 			}
-			queried = boost::bind(&ResLoader::ASyncFunc, this, res_desc, async_thread);
+			queried = bind(&ResLoader::ASyncFunc, this, res_desc, async_thread);
 			cached_async_res_.push_back(std::make_pair(res_desc, queried));
 		}
 
@@ -443,8 +443,8 @@ namespace KlayGE
 		res_desc->SubThreadStage();
 	}
 
-	boost::shared_ptr<void> ResLoader::ASyncFunc(ResLoadingDescPtr const & res_desc,
-		boost::shared_ptr<joiner<void> > const & loading_thread)
+	shared_ptr<void> ResLoader::ASyncFunc(ResLoadingDescPtr const & res_desc,
+		shared_ptr<joiner<void> > const & loading_thread)
 	{
 		if (res_desc->HasSubThreadStage())
 		{

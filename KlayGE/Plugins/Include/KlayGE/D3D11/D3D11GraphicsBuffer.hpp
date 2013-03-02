@@ -64,7 +64,7 @@ namespace KlayGE
 		uint32_t hw_buf_size_;
 		ElementFormat fmt_as_shader_res_;
 	};
-	typedef boost::shared_ptr<D3D11GraphicsBuffer> D3D11GraphicsBufferPtr;
+	typedef shared_ptr<D3D11GraphicsBuffer> D3D11GraphicsBufferPtr;
 }
 
 #endif			// _D3D11GRAPHICSBUFFER_HPP

@@ -24,7 +24,6 @@
 
 #include <vector>
 #include <sstream>
-#include <boost/bind.hpp>
 
 #include "SampleCommon.hpp"
 #include "DetailedSurface.hpp"
@@ -609,7 +608,7 @@ uint32_t DetailedSurfaceApp::DoUpdate(uint32_t /*pass*/)
 			actionMap.AddActions(actions, actions + sizeof(actions) / sizeof(actions[0]));
 
 			action_handler_t input_handler = MakeSharedPtr<input_signal>();
-			input_handler->connect(boost::bind(&DetailedSurfaceApp::InputHandler, this, _1, _2));
+			input_handler->connect(KlayGE::bind(&DetailedSurfaceApp::InputHandler, this, KlayGE::placeholders::_1, KlayGE::placeholders::_2));
 			inputEngine.ActionMap(actionMap, input_handler, true);
 
 			loading_percentage_ = 90;
@@ -627,18 +626,18 @@ uint32_t DetailedSurfaceApp::DoUpdate(uint32_t /*pass*/)
 			id_ctrl_camera_ = dialog_->IDFromName("CtrlCamera");
 
 			dialog_->Control<UISlider>(id_scale_slider_)->SetValue(static_cast<int>(height_scale_ * 100));
-			dialog_->Control<UISlider>(id_scale_slider_)->OnValueChangedEvent().connect(boost::bind(&DetailedSurfaceApp::ScaleChangedHandler, this, _1));
+			dialog_->Control<UISlider>(id_scale_slider_)->OnValueChangedEvent().connect(KlayGE::bind(&DetailedSurfaceApp::ScaleChangedHandler, this, KlayGE::placeholders::_1));
 			this->ScaleChangedHandler(*dialog_->Control<UISlider>(id_scale_slider_));
 
 			dialog_->Control<UIComboBox>(id_detail_type_combo_)->SetSelectedByIndex(2);
-			dialog_->Control<UIComboBox>(id_detail_type_combo_)->OnSelectionChangedEvent().connect(boost::bind(&DetailedSurfaceApp::DetailTypeChangedHandler, this, _1));
+			dialog_->Control<UIComboBox>(id_detail_type_combo_)->OnSelectionChangedEvent().connect(KlayGE::bind(&DetailedSurfaceApp::DetailTypeChangedHandler, this, KlayGE::placeholders::_1));
 			this->DetailTypeChangedHandler(*dialog_->Control<UIComboBox>(id_detail_type_combo_));
 
-			dialog_->Control<UICheckBox>(id_na_length_)->OnChangedEvent().connect(boost::bind(&DetailedSurfaceApp::NaLengthHandler, this, _1));
+			dialog_->Control<UICheckBox>(id_na_length_)->OnChangedEvent().connect(KlayGE::bind(&DetailedSurfaceApp::NaLengthHandler, this, KlayGE::placeholders::_1));
 			this->NaLengthHandler(*dialog_->Control<UICheckBox>(id_na_length_));
-			dialog_->Control<UICheckBox>(id_wireframe_)->OnChangedEvent().connect(boost::bind(&DetailedSurfaceApp::WireframeHandler, this, _1));
+			dialog_->Control<UICheckBox>(id_wireframe_)->OnChangedEvent().connect(KlayGE::bind(&DetailedSurfaceApp::WireframeHandler, this, KlayGE::placeholders::_1));
 			this->WireframeHandler(*dialog_->Control<UICheckBox>(id_wireframe_));
-			dialog_->Control<UICheckBox>(id_ctrl_camera_)->OnChangedEvent().connect(boost::bind(&DetailedSurfaceApp::CtrlCameraHandler, this, _1));
+			dialog_->Control<UICheckBox>(id_ctrl_camera_)->OnChangedEvent().connect(KlayGE::bind(&DetailedSurfaceApp::CtrlCameraHandler, this, KlayGE::placeholders::_1));
 			this->CtrlCameraHandler(*dialog_->Control<UICheckBox>(id_ctrl_camera_));
 
 			loading_percentage_ = 100;

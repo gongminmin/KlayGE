@@ -9,8 +9,6 @@
 #include <KlayGE/PostProcess.hpp>
 #include <KlayGE/UI.hpp>
 
-#include <boost/function.hpp>
-
 struct Particle
 {
 	KlayGE::float3 pos;
@@ -61,7 +59,7 @@ private:
 
 	KlayGE::FirstPersonCameraController fpsController_;
 
-	boost::shared_ptr<KlayGE::ParticleSystem<Particle> > ps_;
+	KlayGE::shared_ptr<KlayGE::ParticleSystem<Particle> > ps_;
 	float init_life_;
 
 	std::string particle_alpha_from_tex_;

@@ -100,7 +100,7 @@ namespace KlayGE
 	//////////////////////////
 	// COutStream
 
-	void COutStream::Attach(boost::shared_ptr<std::ostream> const & os)
+	void COutStream::Attach(shared_ptr<std::ostream> const & os)
 	{
 		os_ = os;
 	}

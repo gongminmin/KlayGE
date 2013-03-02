@@ -716,7 +716,7 @@ namespace KlayGE
 		RenderEffectParameterPtr half_width_height_ep_;
 		RenderEffectParameterPtr mvp_ep_;
 
-		boost::shared_ptr<KFont> kfont_loader_;
+		shared_ptr<KFont> kfont_loader_;
 
 		uint64_t tick_;
 	};
@@ -784,7 +784,7 @@ namespace KlayGE
 	{
 		if (!text.empty())
 		{
-			boost::shared_ptr<FontObject> font_obj = MakeSharedPtr<FontObject>(font_renderable_, fso_attrib_);
+			shared_ptr<FontObject> font_obj = MakeSharedPtr<FontObject>(font_renderable_, fso_attrib_);
 			font_renderable_->AddText2D(x, y, z, xScale, yScale, clr, text, font_size);
 			font_obj->AddToSceneManager();
 		}
@@ -798,7 +798,7 @@ namespace KlayGE
 	{
 		if (!text.empty())
 		{
-			boost::shared_ptr<FontObject> font_obj = MakeSharedPtr<FontObject>(font_renderable_, fso_attrib_);
+			shared_ptr<FontObject> font_obj = MakeSharedPtr<FontObject>(font_renderable_, fso_attrib_);
 			font_renderable_->AddText2D(rc, z, xScale, yScale, clr, text, font_size, align);
 			font_obj->AddToSceneManager();
 		}
@@ -810,7 +810,7 @@ namespace KlayGE
 	{
 		if (!text.empty())
 		{
-			boost::shared_ptr<FontObject> font_obj = MakeSharedPtr<FontObject>(font_renderable_, fso_attrib_);
+			shared_ptr<FontObject> font_obj = MakeSharedPtr<FontObject>(font_renderable_, fso_attrib_);
 			font_renderable_->AddText3D(mvp, clr, text, font_size);
 			font_obj->AddToSceneManager();
 		}

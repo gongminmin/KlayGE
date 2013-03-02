@@ -21,7 +21,6 @@
 
 #include <vector>
 #include <sstream>
-#include <boost/bind.hpp>
 
 #include "SampleCommon.hpp"
 #include "JudaTexViewer.hpp"
@@ -316,14 +315,14 @@ void JudaTexViewer::InitObjects()
 	actionMap.AddActions(actions, actions + sizeof(actions) / sizeof(actions[0]));
 
 	action_handler_t input_handler = MakeSharedPtr<input_signal>();
-	input_handler->connect(boost::bind(&JudaTexViewer::InputHandler, this, _1, _2));
+	input_handler->connect(KlayGE::bind(&JudaTexViewer::InputHandler, this, KlayGE::placeholders::_1, KlayGE::placeholders::_2));
 	inputEngine.ActionMap(actionMap, input_handler, true);
 
 	UIManager::Instance().Load(ResLoader::Instance().Open("JudaTexViewer.uiml"));
 	dialog_ = UIManager::Instance().GetDialogs()[0];
 
 	id_open_ = dialog_->IDFromName("Open");
-	dialog_->Control<UIButton>(id_open_)->OnClickedEvent().connect(boost::bind(&JudaTexViewer::OpenHandler, this, _1));
+	dialog_->Control<UIButton>(id_open_)->OnClickedEvent().connect(KlayGE::bind(&JudaTexViewer::OpenHandler, this, KlayGE::placeholders::_1));
 }
 
 void JudaTexViewer::OnResize(uint32_t width, uint32_t height)
@@ -338,7 +337,7 @@ void JudaTexViewer::InputHandler(InputEngine const & sender, InputAction const &
 	InputMousePtr mouse;
 	for (uint32_t i = 0; i < sender.NumDevices(); ++ i)
 	{
-		InputMousePtr m = boost::dynamic_pointer_cast<InputMouse>(sender.Device(i));
+		InputMousePtr m = dynamic_pointer_cast<InputMouse>(sender.Device(i));
 		if (m)
 		{
 			mouse = m;

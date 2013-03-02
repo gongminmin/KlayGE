@@ -41,7 +41,6 @@
 
 #include <cstring>
 #include <fstream>
-#include <boost/bind.hpp>
 
 #include <KlayGE/UI.hpp>
 
@@ -323,12 +322,18 @@ namespace KlayGE
 		elem_texture_rcs_[UICT_TexButton].push_back(Rect_T<int32_t>(247, 49, 252, 54));
 
 		WindowPtr const & main_wnd = Context::Instance().AppInstance().MainWnd();
-		on_key_down_connect_ = main_wnd->OnKeyDown().connect(boost::bind(&UIManager::KeyDownHandler, this, _2));
-		on_key_up_connect_ = main_wnd->OnKeyUp().connect(boost::bind(&UIManager::KeyUpHandler, this, _2));
-		on_mouse_down_connect_ = main_wnd->OnMouseDown().connect(boost::bind(&UIManager::MouseDownHandler, this, _2, _3));
-		on_mouse_up_connect_ = main_wnd->OnMouseUp().connect(boost::bind(&UIManager::MouseUpHandler, this, _2, _3));
-		on_mouse_wheel_connect_ = main_wnd->OnMouseWheel().connect(boost::bind(&UIManager::MouseWheelHandler, this, _2, _3, _4));
-		on_mouse_over_connect_ = main_wnd->OnMouseOver().connect(boost::bind(&UIManager::MouseOverHandler, this, _2, _3));
+		on_key_down_connect_ = main_wnd->OnKeyDown().connect(KlayGE::bind(&UIManager::KeyDownHandler, this,
+			KlayGE::placeholders::_2));
+		on_key_up_connect_ = main_wnd->OnKeyUp().connect(KlayGE::bind(&UIManager::KeyUpHandler, this,
+			KlayGE::placeholders::_2));
+		on_mouse_down_connect_ = main_wnd->OnMouseDown().connect(KlayGE::bind(&UIManager::MouseDownHandler, this,
+			KlayGE::placeholders::_2, KlayGE::placeholders::_3));
+		on_mouse_up_connect_ = main_wnd->OnMouseUp().connect(KlayGE::bind(&UIManager::MouseUpHandler, this,
+			KlayGE::placeholders::_2, KlayGE::placeholders::_3));
+		on_mouse_wheel_connect_ = main_wnd->OnMouseWheel().connect(KlayGE::bind(&UIManager::MouseWheelHandler, this,
+			KlayGE::placeholders::_2, KlayGE::placeholders::_3, KlayGE::placeholders::_4));
+		on_mouse_over_connect_ = main_wnd->OnMouseOver().connect(KlayGE::bind(&UIManager::MouseOverHandler, this,
+			KlayGE::placeholders::_2, KlayGE::placeholders::_3));
 	}
 
 	UIManager::~UIManager()
@@ -897,7 +902,7 @@ namespace KlayGE
 		{
 			if (!checked_pointer_cast<UIRectRenderable>(rect.second)->Empty())
 			{
-				boost::shared_ptr<UIRectObject> ui_rect_obj = MakeSharedPtr<UIRectObject>(rect.second, SceneObject::SOA_Overlay);
+				shared_ptr<UIRectObject> ui_rect_obj = MakeSharedPtr<UIRectObject>(rect.second, SceneObject::SOA_Overlay);
 				ui_rect_obj->AddToSceneManager();
 			}
 		}
@@ -929,7 +934,7 @@ namespace KlayGE
 			texcoord = Rect(0, 0, 0, 0);
 		}
 
-		boost::shared_ptr<UIRectRenderable> renderable;
+		shared_ptr<UIRectRenderable> renderable;
 		if (rects_.find(texture) == rects_.end())
 		{
 			renderable = MakeSharedPtr<UIRectRenderable>(texture, effect_);
@@ -978,7 +983,7 @@ namespace KlayGE
 
 	void UIManager::DrawQuad(float3 const & offset, VertexFormat const * vertices, TexturePtr const & texture)
 	{
-		boost::shared_ptr<UIRectRenderable> renderable;
+		shared_ptr<UIRectRenderable> renderable;
 		if (rects_.find(texture) == rects_.end())
 		{
 			renderable = MakeSharedPtr<UIRectRenderable>(texture, effect_);

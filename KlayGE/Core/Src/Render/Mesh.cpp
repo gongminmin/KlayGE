@@ -54,8 +54,8 @@ namespace
 			std::string res_name;
 
 			uint32_t access_hint;
-			boost::function<RenderModelPtr(std::wstring const &)> CreateModelFactoryFunc;
-			boost::function<StaticMeshPtr(RenderModelPtr const &, std::wstring const &)> CreateMeshFactoryFunc;
+			function<RenderModelPtr(std::wstring const &)> CreateModelFactoryFunc;
+			function<StaticMeshPtr(RenderModelPtr const &, std::wstring const &)> CreateMeshFactoryFunc;
 
 			std::vector<RenderMaterialPtr> mtls;
 			std::vector<vertex_element> merged_ves;
@@ -71,19 +71,19 @@ namespace
 			std::vector<uint32_t> mesh_num_indices;
 			std::vector<uint32_t> mesh_start_indices;
 			std::vector<Joint> joints;
-			boost::shared_ptr<AnimationActionsType> actions;
-			boost::shared_ptr<KeyFramesType> kfs;
+			shared_ptr<AnimationActionsType> actions;
+			shared_ptr<KeyFramesType> kfs;
 			uint32_t num_frames;
 			uint32_t frame_rate;
-			std::vector<boost::shared_ptr<AABBKeyFrames> > frame_pos_bbs;
+			std::vector<shared_ptr<AABBKeyFrames> > frame_pos_bbs;
 
 			RenderModelPtr model;
 		};
 
 	public:
 		RenderModelLoadingDesc(std::string const & res_name, uint32_t access_hint, 
-			boost::function<RenderModelPtr(std::wstring const &)> CreateModelFactoryFunc,
-			boost::function<StaticMeshPtr(RenderModelPtr const &, std::wstring const &)> CreateMeshFactoryFunc)
+			function<RenderModelPtr(std::wstring const &)> CreateModelFactoryFunc,
+			function<StaticMeshPtr(RenderModelPtr const &, std::wstring const &)> CreateMeshFactoryFunc)
 		{
 			model_desc_.res_name = res_name;
 			model_desc_.access_hint = access_hint;
@@ -102,7 +102,7 @@ namespace
 			this->LoadKModel();
 		}
 
-		boost::shared_ptr<void> MainThreadStage()
+		shared_ptr<void> MainThreadStage()
 		{
 			if (!model_desc_.model)
 			{
@@ -115,7 +115,7 @@ namespace
 				model_desc_.model->Mesh(i)->BuildMeshInfo();
 			}
 
-			return boost::static_pointer_cast<void>(model_desc_.model);
+			return static_pointer_cast<void>(model_desc_.model);
 		}
 
 		bool HasSubThreadStage() const
@@ -724,7 +724,7 @@ namespace KlayGE
 		return pos_aabb;
 	}
 
-	void SkinnedModel::AttachActions(boost::shared_ptr<AnimationActionsType> const & actions)
+	void SkinnedModel::AttachActions(shared_ptr<AnimationActionsType> const & actions)
 	{
 		actions_ = actions;
 	}
@@ -766,7 +766,7 @@ namespace KlayGE
 		return frame_pos_aabbs_->Frame(static_cast<float>(frame));
 	}
 	
-	void SkinnedMesh::AttachFramePosBounds(boost::shared_ptr<AABBKeyFrames> const & frame_pos_aabbs)
+	void SkinnedMesh::AttachFramePosBounds(shared_ptr<AABBKeyFrames> const & frame_pos_aabbs)
 	{
 		frame_pos_aabbs_ = frame_pos_aabbs;
 	}
@@ -847,9 +847,9 @@ namespace KlayGE
 		std::vector<AABBox>& pos_bbs, std::vector<AABBox>& tc_bbs,
 		std::vector<uint32_t>& mesh_num_vertices, std::vector<uint32_t>& mesh_base_vertices,
 		std::vector<uint32_t>& mesh_num_triangles, std::vector<uint32_t>& mesh_base_triangles,
-		std::vector<Joint>& joints, boost::shared_ptr<AnimationActionsType>& actions,
-		boost::shared_ptr<KeyFramesType>& kfs, uint32_t& num_frames, uint32_t& frame_rate,
-		std::vector<boost::shared_ptr<AABBKeyFrames> >& frame_pos_bbs)
+		std::vector<Joint>& joints, shared_ptr<AnimationActionsType>& actions,
+		shared_ptr<KeyFramesType>& kfs, uint32_t& num_frames, uint32_t& frame_rate,
+		std::vector<shared_ptr<AABBKeyFrames> >& frame_pos_bbs)
 	{
 		ResIdentifierPtr lzma_file;
 		if (meshml_name.rfind(jit_ext_name) + jit_ext_name.size() == meshml_name.size())
@@ -887,7 +887,7 @@ namespace KlayGE
 		LittleEndianToNative<sizeof(ver)>(&ver);
 		BOOST_ASSERT(MODEL_BIN_VERSION == ver);
 
-		boost::shared_ptr<std::stringstream> ss = MakeSharedPtr<std::stringstream>();
+		shared_ptr<std::stringstream> ss = MakeSharedPtr<std::stringstream>();
 
 		uint64_t original_len, len;
 		lzma_file->read(&original_len, sizeof(original_len));
@@ -1247,8 +1247,8 @@ namespace KlayGE
 	}
 
 	RenderModelPtr SyncLoadModel(std::string const & meshml_name, uint32_t access_hint,
-		boost::function<RenderModelPtr(std::wstring const &)> CreateModelFactoryFunc,
-		boost::function<StaticMeshPtr(RenderModelPtr const &, std::wstring const &)> CreateMeshFactoryFunc)
+		function<RenderModelPtr(std::wstring const &)> CreateModelFactoryFunc,
+		function<StaticMeshPtr(RenderModelPtr const &, std::wstring const &)> CreateMeshFactoryFunc)
 	{
 		BOOST_ASSERT(CreateModelFactoryFunc);
 		BOOST_ASSERT(CreateMeshFactoryFunc);
@@ -1257,9 +1257,9 @@ namespace KlayGE
 			access_hint, CreateModelFactoryFunc, CreateMeshFactoryFunc));
 	}
 
-	boost::function<RenderModelPtr()> ASyncLoadModel(std::string const & meshml_name, uint32_t access_hint,
-		boost::function<RenderModelPtr(std::wstring const &)> CreateModelFactoryFunc,
-		boost::function<StaticMeshPtr(RenderModelPtr const &, std::wstring const &)> CreateMeshFactoryFunc)
+	function<RenderModelPtr()> ASyncLoadModel(std::string const & meshml_name, uint32_t access_hint,
+		function<RenderModelPtr(std::wstring const &)> CreateModelFactoryFunc,
+		function<StaticMeshPtr(RenderModelPtr const &, std::wstring const &)> CreateMeshFactoryFunc)
 	{
 		BOOST_ASSERT(CreateModelFactoryFunc);
 		BOOST_ASSERT(CreateMeshFactoryFunc);
@@ -1275,8 +1275,8 @@ namespace KlayGE
 		std::vector<AABBox> const & pos_bbs, std::vector<AABBox> const & tc_bbs,
 		std::vector<uint32_t>& mesh_num_vertices, std::vector<uint32_t>& mesh_base_vertices,
 		std::vector<uint32_t>& mesh_num_triangles, std::vector<uint32_t>& mesh_base_triangles,
-		std::vector<Joint> const & joints, boost::shared_ptr<AnimationActionsType> const & actions,
-		boost::shared_ptr<KeyFramesType> const & kfs, uint32_t num_frames, uint32_t frame_rate)
+		std::vector<Joint> const & joints, shared_ptr<AnimationActionsType> const & actions,
+		shared_ptr<KeyFramesType> const & kfs, uint32_t num_frames, uint32_t frame_rate)
 	{
 		MeshMLObj obj(1);
 		obj.NumFrames(num_frames);
@@ -1686,11 +1686,11 @@ namespace KlayGE
 		}
 
 		std::vector<Joint> joints;
-		boost::shared_ptr<AnimationActionsType> actions;
-		boost::shared_ptr<KeyFramesType> kfs;
+		shared_ptr<AnimationActionsType> actions;
+		shared_ptr<KeyFramesType> kfs;
 		uint32_t num_frame = 0;
 		uint32_t frame_rate = 0;
-		std::vector<boost::shared_ptr<AABBKeyFrames> > frame_pos_bbs;
+		std::vector<shared_ptr<AABBKeyFrames> > frame_pos_bbs;
 		if (model->IsSkinned())
 		{
 			SkinnedModelPtr skinned = checked_pointer_cast<SkinnedModel>(model);

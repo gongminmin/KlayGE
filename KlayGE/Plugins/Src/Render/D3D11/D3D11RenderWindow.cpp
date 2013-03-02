@@ -25,7 +25,6 @@
 #include <sstream>
 #include <cstring>
 #include <boost/assert.hpp>
-#include <boost/bind.hpp>
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string/trim.hpp>
 
@@ -64,13 +63,20 @@ namespace KlayGE
 #else
 		wnd_ = main_wnd->GetWindow();
 #endif
-		on_active_connect_ = main_wnd->OnActive().connect(boost::bind(&D3D11RenderWindow::OnActive, this, _1, _2));
-		on_paint_connect_ = main_wnd->OnPaint().connect(boost::bind(&D3D11RenderWindow::OnPaint, this, _1));
-		on_enter_size_move_connect_ = main_wnd->OnEnterSizeMove().connect(boost::bind(&D3D11RenderWindow::OnEnterSizeMove, this, _1));
-		on_exit_size_move_connect_ = main_wnd->OnExitSizeMove().connect(boost::bind(&D3D11RenderWindow::OnExitSizeMove, this, _1));
-		on_size_connect_ = main_wnd->OnSize().connect(boost::bind(&D3D11RenderWindow::OnSize, this, _1, _2));
-		on_set_cursor_connect_ = main_wnd->OnSetCursor().connect(boost::bind(&D3D11RenderWindow::OnSetCursor, this, _1));
-		on_close_connect_ = main_wnd->OnClose().connect(boost::bind(&D3D11RenderWindow::OnClose, this, _1));
+		on_active_connect_ = main_wnd->OnActive().connect(bind(&D3D11RenderWindow::OnActive, this,
+			placeholders::_1, placeholders::_2));
+		on_paint_connect_ = main_wnd->OnPaint().connect(bind(&D3D11RenderWindow::OnPaint, this,
+			placeholders::_1));
+		on_enter_size_move_connect_ = main_wnd->OnEnterSizeMove().connect(bind(&D3D11RenderWindow::OnEnterSizeMove, this,
+			placeholders::_1));
+		on_exit_size_move_connect_ = main_wnd->OnExitSizeMove().connect(bind(&D3D11RenderWindow::OnExitSizeMove, this,
+			placeholders::_1));
+		on_size_connect_ = main_wnd->OnSize().connect(bind(&D3D11RenderWindow::OnSize, this,
+			placeholders::_1, placeholders::_2));
+		on_set_cursor_connect_ = main_wnd->OnSetCursor().connect(bind(&D3D11RenderWindow::OnSetCursor, this,
+			placeholders::_1));
+		on_close_connect_ = main_wnd->OnClose().connect(bind(&D3D11RenderWindow::OnClose, this,
+			placeholders::_1));
 
 		if (this->FullScreen())
 		{
@@ -169,7 +175,7 @@ namespace KlayGE
 			available_feature_levels.push_back(std::make_pair("9_1", D3D_FEATURE_LEVEL_9_1));
 
 			std::vector<std::string> strs;
-			boost::algorithm::split(strs, settings.options, boost::bind(std::equal_to<char>(), ',', _1));
+			boost::algorithm::split(strs, settings.options, boost::is_any_of(","));
 			for (size_t index = 0; index < strs.size(); ++ index)
 			{
 				std::string& opt = strs[index];

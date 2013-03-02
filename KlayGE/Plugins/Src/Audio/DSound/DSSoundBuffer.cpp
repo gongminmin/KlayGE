@@ -23,29 +23,6 @@
 
 #include <boost/assert.hpp>
 
-#ifdef KLAYGE_CXX11_LIBRARY_RANDOM_SUPPORT
-	#include <random>
-	namespace KlayGE
-	{
-		using std::ranlux24_base;
-		using std::uniform_int_distribution;
-	}
-#else
-	#ifdef KLAYGE_COMPILER_MSVC
-		#pragma warning(push)
-		#pragma warning(disable: 4100 4127 4512 6297 6326 6385)
-	#endif
-	#include <boost/random.hpp>
-	#ifdef KLAYGE_COMPILER_MSVC
-		#pragma warning(pop)
-	#endif
-	namespace KlayGE
-	{
-		using boost::random;
-	}
-#endif
-#include <boost/bind.hpp>
-
 #include <KlayGE/DSound/DSAudio.hpp>
 
 const GUID GUID_NULL = { 0, 0, 0, { 0, 0, 0, 0, 0, 0, 0, 0 } };
@@ -88,7 +65,7 @@ namespace KlayGE
 		dsbd.dwBufferBytes		= static_cast<uint32_t>(dataSource->Size());
 		dsbd.lpwfxFormat		= &wfx;
 
-		boost::shared_ptr<IDirectSound> const & dsound = checked_cast<DSAudioEngine const *>(&Context::Instance().AudioFactoryInstance().AudioEngineInstance())->DSound();
+		shared_ptr<IDirectSound> const & dsound = checked_cast<DSAudioEngine const *>(&Context::Instance().AudioFactoryInstance().AudioEngineInstance())->DSound();
 
 		// DirectSound只能播放 PCM 数据。其他格式可能不能工作。
 		IDirectSoundBuffer* temp;
@@ -171,7 +148,7 @@ namespace KlayGE
 
 	// 返回3D缓冲区的接口
 	/////////////////////////////////////////////////////////////////////////////////
-	boost::shared_ptr<IDirectSound3DBuffer> DSSoundBuffer::Get3DBufferInterface(std::vector<IDSBufferPtr>::iterator iter)
+	shared_ptr<IDirectSound3DBuffer> DSSoundBuffer::Get3DBufferInterface(std::vector<IDSBufferPtr>::iterator iter)
 	{
 		IDirectSound3DBuffer* ds3DBuffer;
 		(*iter)->QueryInterface(IID_IDirectSound3DBuffer, reinterpret_cast<void**>(&ds3DBuffer));
@@ -199,16 +176,22 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void DSSoundBuffer::Stop()
 	{
-		std::for_each(sources_.begin(), sources_.end(),
-			boost::bind(&IDirectSoundBuffer::Stop, _1));
+		typedef KLAYGE_DECLTYPE(sources_) SourcesType;
+		KLAYGE_FOREACH(SourcesType::reference src, sources_)
+		{
+			src->Stop();
+		}
 	}
 
 	// 声音缓冲区复位
 	/////////////////////////////////////////////////////////////////////////////////
 	void DSSoundBuffer::DoReset()
 	{
-		std::for_each(sources_.begin(), sources_.end(),
-			boost::bind(&IDirectSoundBuffer::SetCurrentPosition, _1, 0));
+		typedef KLAYGE_DECLTYPE(sources_) SourcesType;
+		KLAYGE_FOREACH(SourcesType::reference src, sources_)
+		{
+			src->SetCurrentPosition(0);
+		}
 	}
 
 	// 检查缓冲区是否在播放
@@ -216,7 +199,7 @@ namespace KlayGE
 	bool DSSoundBuffer::IsPlaying() const
 	{
 		return (std::find_if(sources_.begin(), sources_.end(),
-			boost::bind(std::logical_not<bool>(), boost::bind(IsSourceFree, _1))) != sources_.end());
+			KlayGE::bind(std::logical_not<bool>(), KlayGE::bind(IsSourceFree, KlayGE::placeholders::_1))) != sources_.end());
 	}
 
 	// 设置音量
@@ -224,8 +207,11 @@ namespace KlayGE
 	void DSSoundBuffer::Volume(float vol)
 	{
 		long const dB(LinearGainToDB(vol));
-		std::for_each(sources_.begin(), sources_.end(),
-			boost::bind(&IDirectSoundBuffer::SetVolume, _1, dB));
+		typedef KLAYGE_DECLTYPE(sources_) SourcesType;
+		KLAYGE_FOREACH(SourcesType::reference src, sources_)
+		{
+			src->SetVolume(dB);
+		}
 	}
 
 	// 获取声源位置

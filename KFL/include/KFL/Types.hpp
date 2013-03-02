@@ -243,6 +243,117 @@ private:
 	}
 #endif
 
+#ifdef KLAYGE_CXX11_LIBRARY_RANDOM_SUPPORT
+	#include <random>
+	namespace KlayGE
+	{
+		using std::ranlux24_base;
+		using std::uniform_int_distribution;
+	}
+#else
+	#ifdef KLAYGE_COMPILER_MSVC
+		#pragma warning(push)
+		#pragma warning(disable: 4100 4127 4512 6297 6326 6385)
+	#endif
+	#include <boost/random.hpp>
+	#ifdef KLAYGE_COMPILER_MSVC
+		#pragma warning(pop)
+	#endif
+	namespace KlayGE
+	{
+		using boost::random;
+	}
+#endif
+
+#ifdef KLAYGE_CXX11_LIBRARY_SMART_PTR_SUPPORT
+	#include <functional>
+	#include <memory>
+	namespace KlayGE
+	{
+		using std::bind;
+		using std::mem_fn;
+		using std::function;
+		namespace placeholders
+		{
+			using std::placeholders::_1;
+			using std::placeholders::_2;
+			using std::placeholders::_3;
+			using std::placeholders::_4;
+			using std::placeholders::_5;
+			using std::placeholders::_6;
+			using std::placeholders::_7;
+			using std::placeholders::_8;
+			using std::placeholders::_9;
+		}
+
+		using std::shared_ptr;
+		using std::weak_ptr;
+		using std::enable_shared_from_this;
+		using std::static_pointer_cast;
+		using std::dynamic_pointer_cast;
+		using std::ref;
+		using std::cref;
+	}
+#else
+	#ifdef KLAYGE_PLATFORM_WIN32
+		#ifndef KLAYGE_CPU_ARM
+			#ifndef BOOST_MEM_FN_ENABLE_STDCALL
+				#define BOOST_MEM_FN_ENABLE_STDCALL
+			#endif
+		#endif
+	#endif
+	#include <boost/mem_fn.hpp>
+	#include <boost/bind.hpp>
+	#include <boost/function.hpp>
+	#include <boost/ref.hpp>
+	#ifdef KLAYGE_COMPILER_MSVC
+		#pragma warning(push)
+		#pragma warning(disable: 6011)
+	#endif
+	#include <boost/smart_ptr.hpp>
+	#ifdef KLAYGE_COMPILER_MSVC
+		#pragma warning(pop)
+	#endif
+	namespace KlayGE
+	{
+		using boost::bind;
+		using boost::mem_fn;
+		using boost::function;
+		namespace placeholders
+		{
+			#ifdef KLAYGE_COMPILER_MSVC
+				static boost::arg<1> _1;
+				static boost::arg<2> _2;
+				static boost::arg<3> _3;
+				static boost::arg<4> _4;
+				static boost::arg<5> _5;
+				static boost::arg<6> _6;
+				static boost::arg<7> _7;
+				static boost::arg<8> _8;
+				static boost::arg<9> _9;
+			#else
+				boost::arg<1> _1;
+				boost::arg<2> _2;
+				boost::arg<3> _3;
+				boost::arg<4> _4;
+				boost::arg<5> _5;
+				boost::arg<6> _6;
+				boost::arg<7> _7;
+				boost::arg<8> _8;
+				boost::arg<9> _9;
+			#endif
+		}
+
+		using boost::shared_ptr;
+		using boost::weak_ptr;
+		using boost::enable_shared_from_this;
+		using boost::static_pointer_cast;
+		using boost::dynamic_pointer_cast;
+		using boost::ref;
+		using boost::cref;
+	}
+#endif
+
 #ifdef KLAYGE_CXX11_LIBRARY_TYPE_TRAITS_SUPPORT
 	#include <type_traits>
 	namespace KlayGE
@@ -321,15 +432,6 @@ private:
 		using boost::unordered_set;
 		using boost::unordered_multiset;
 	}
-#endif
-
-#ifdef KLAYGE_COMPILER_MSVC
-#pragma warning(push)
-#pragma warning(disable: 6011)
-#endif
-#include <boost/smart_ptr.hpp>
-#ifdef KLAYGE_COMPILER_MSVC
-#pragma warning(pop)
 #endif
 
 namespace KlayGE

@@ -19,7 +19,6 @@
 #include <KlayGE/SSRPostProcess.hpp>
 
 #include <sstream>
-#include <boost/bind.hpp>
 
 #include "SampleCommon.hpp"
 #include "Reflection.hpp"
@@ -218,8 +217,8 @@ void ScreenSpaceReflectionApp::InitObjects()
 {
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-	boost::function<TexturePtr()> y_cube_tl = ASyncLoadTexture("Lake_CraterLake03_y.dds", EAH_GPU_Read | EAH_Immutable);
-	boost::function<TexturePtr()> c_cube_tl = ASyncLoadTexture("Lake_CraterLake03_c.dds", EAH_GPU_Read | EAH_Immutable);
+	function<TexturePtr()> y_cube_tl = ASyncLoadTexture("Lake_CraterLake03_y.dds", EAH_GPU_Read | EAH_Immutable);
+	function<TexturePtr()> c_cube_tl = ASyncLoadTexture("Lake_CraterLake03_c.dds", EAH_GPU_Read | EAH_Immutable);
 
 	this->LookAt(float3(2.0f, 2.0f, -5.0f), float3(0.0f, 1.0f, 0.0f), float3(0, 1, 0));
 	this->Proj(0.1f, 500.0f);
@@ -267,7 +266,7 @@ void ScreenSpaceReflectionApp::InitObjects()
 	actionMap.AddActions(actions, actions + sizeof(actions) / sizeof(actions[0]));
 
 	action_handler_t input_handler = MakeSharedPtr<input_signal>();
-	input_handler->connect(boost::bind(&ScreenSpaceReflectionApp::InputHandler, this, _1, _2));
+	input_handler->connect(KlayGE::bind(&ScreenSpaceReflectionApp::InputHandler, this, KlayGE::placeholders::_1, KlayGE::placeholders::_2));
 	inputEngine.ActionMap(actionMap, input_handler, true);
 
 	UIManager::Instance().Load(ResLoader::Instance().Open("Reflection.uiml"));
@@ -275,16 +274,16 @@ void ScreenSpaceReflectionApp::InitObjects()
 
 	id_min_sample_num_static_ = parameter_dialog_->IDFromName("min_sample_num_static");
 	id_min_sample_num_slider_ = parameter_dialog_->IDFromName("min_sample_num_slider");
-	parameter_dialog_->Control<UISlider>(id_min_sample_num_slider_)->OnValueChangedEvent().connect(boost::bind(&ScreenSpaceReflectionApp::MinSampleNumHandler, this, _1));
+	parameter_dialog_->Control<UISlider>(id_min_sample_num_slider_)->OnValueChangedEvent().connect(KlayGE::bind(&ScreenSpaceReflectionApp::MinSampleNumHandler, this, KlayGE::placeholders::_1));
 	this->MinSampleNumHandler(*(parameter_dialog_->Control<UISlider>(id_min_sample_num_slider_)));
 
 	id_max_sample_num_static_ = parameter_dialog_->IDFromName("max_sample_num_static");
 	id_max_sample_num_slider_ = parameter_dialog_->IDFromName("max_sample_num_slider");
-	parameter_dialog_->Control<UISlider>(id_max_sample_num_slider_)->OnValueChangedEvent().connect(boost::bind(&ScreenSpaceReflectionApp::MaxSampleNumHandler, this, _1));
+	parameter_dialog_->Control<UISlider>(id_max_sample_num_slider_)->OnValueChangedEvent().connect(KlayGE::bind(&ScreenSpaceReflectionApp::MaxSampleNumHandler, this, KlayGE::placeholders::_1));
 	this->MaxSampleNumHandler(*(parameter_dialog_->Control<UISlider>(id_max_sample_num_slider_)));
 
 	id_enable_reflection_ = parameter_dialog_->IDFromName("enable_reflection");
-	parameter_dialog_->Control<UICheckBox>(id_enable_reflection_)->OnChangedEvent().connect(boost::bind(&ScreenSpaceReflectionApp::EnbleReflectionHandler, this, _1));
+	parameter_dialog_->Control<UICheckBox>(id_enable_reflection_)->OnChangedEvent().connect(KlayGE::bind(&ScreenSpaceReflectionApp::EnbleReflectionHandler, this, KlayGE::placeholders::_1));
 	this->EnbleReflectionHandler(*(parameter_dialog_->Control<UICheckBox>(id_enable_reflection_)));
 }
 

@@ -22,7 +22,7 @@ private:
 	KlayGE::uint32_t DoUpdate(KlayGE::uint32_t pass);
 
 	KlayGE::FontPtr font_;
-	boost::shared_ptr<KlayGE::Renderable> renderFractal_;
+	KlayGE::RenderablePtr renderFractal_;
 };
 
 #endif		// _FRACTAL_HPP

@@ -141,7 +141,7 @@ namespace KlayGE
 		UIStatesColor font_color_;
 	};
 
-	class KLAYGE_CORE_API UIControl : public boost::enable_shared_from_this<UIControl>
+	class KLAYGE_CORE_API UIControl : public enable_shared_from_this<UIControl>
 	{
 	public:
 		UIControl(uint32_t type, UIDialogPtr const & dialog)
@@ -337,7 +337,7 @@ namespace KlayGE
 		int width_, height_;
 
 		// These members are set by the container
-		boost::weak_ptr<UIDialog> dialog_;    // Parent container
+		weak_ptr<UIDialog> dialog_;    // Parent container
 		uint32_t index_;              // Index within the control list
 
 		std::vector<UIElementPtr> elements_;  // All display elements
@@ -357,7 +357,7 @@ namespace KlayGE
 		Rect_T<int32_t> bounding_box_;		// Rectangle defining the active region of the control
 	};
 
-	class KLAYGE_CORE_API UIManager : public boost::enable_shared_from_this<UIManager>
+	class KLAYGE_CORE_API UIManager : public enable_shared_from_this<UIManager>
 	{
 	public:
 		struct VertexFormat
@@ -504,7 +504,7 @@ namespace KlayGE
 
 		// Control retrieval
 		template <typename T>
-		boost::shared_ptr<T> Control(int ID) const
+		shared_ptr<T> Control(int ID) const
 		{
 			return checked_pointer_cast<T>(this->GetControl(ID, T::Type));
 		}
@@ -660,8 +660,8 @@ namespace KlayGE
 		// Control events
 		bool OnCycleFocus(bool bForward);
 
-		boost::weak_ptr<UIControl> control_focus_;				// The control which has focus
-		boost::weak_ptr<UIControl> control_mouse_over_;			// The control which is hovered over
+		weak_ptr<UIControl> control_focus_;				// The control which has focus
+		weak_ptr<UIControl> control_mouse_over_;			// The control which is hovered over
 
 		bool visible_;
 		bool show_caption_;
@@ -1230,9 +1230,9 @@ namespace KlayGE
 		void RemoveItem(int nIndex);
 		void RemoveAllItems();
 
-		boost::shared_ptr<UIListBoxItem> GetItem(int nIndex) const;
+		shared_ptr<UIListBoxItem> GetItem(int nIndex) const;
 		int GetSelectedIndex(int nPreviousSelected = -1) const;
-		boost::shared_ptr<UIListBoxItem> GetSelectedItem(int nPreviousSelected = -1) const
+		shared_ptr<UIListBoxItem> GetSelectedItem(int nPreviousSelected = -1) const
 		{
 			return this->GetItem(this->GetSelectedIndex(nPreviousSelected));
 		}
@@ -1275,7 +1275,7 @@ namespace KlayGE
 		int sel_start_;    // Index of the item where selection starts (for handling multi-selection)
 		bool drag_;       // Whether the user is dragging the mouse to select
 
-		std::vector<boost::shared_ptr<UIListBoxItem> > items_;
+		std::vector<shared_ptr<UIListBoxItem> > items_;
 	};
 
 	struct UIComboBoxItem
@@ -1338,14 +1338,14 @@ namespace KlayGE
 		}
 
 		boost::any const GetSelectedData() const;
-		boost::shared_ptr<UIComboBoxItem> GetSelectedItem() const;
+		shared_ptr<UIComboBoxItem> GetSelectedItem() const;
 		int GetSelectedIndex() const;
 
 		uint32_t GetNumItems() const
 		{
 			return static_cast<uint32_t>(items_.size());
 		}
-		boost::shared_ptr<UIComboBoxItem> GetItem(uint32_t index) const
+		shared_ptr<UIComboBoxItem> GetItem(uint32_t index) const
 		{
 			return items_[index];
 		}
@@ -1358,7 +1358,7 @@ namespace KlayGE
 		{
 			for (uint32_t i = 0; i < items_.size(); ++ i)
 			{
-				boost::shared_ptr<UIComboBoxItem> pItem = items_[i];
+				shared_ptr<UIComboBoxItem> pItem = items_[i];
 
 				if ((pItem->data.type() == typeid(data)) && (boost::any_cast<T>(pItem->data) == data))
 				{
@@ -1401,7 +1401,7 @@ namespace KlayGE
 		Rect_T<int32_t> dropdown_rc_;
 		Rect_T<int32_t> dropdown_text_rc_;
 
-		std::vector<boost::shared_ptr<UIComboBoxItem> > items_;
+		std::vector<shared_ptr<UIComboBoxItem> > items_;
 
 		bool pressed_;
 	};

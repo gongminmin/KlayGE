@@ -24,7 +24,6 @@
 
 #include <vector>
 #include <sstream>
-#include <boost/bind.hpp>
 
 #include "SampleCommon.hpp"
 #include "OrderIndependentTransparency.hpp"
@@ -461,7 +460,7 @@ void OrderIndependentTransparencyApp::InitObjects()
 	actionMap.AddActions(actions, actions + sizeof(actions) / sizeof(actions[0]));
 
 	action_handler_t input_handler = MakeSharedPtr<input_signal>();
-	input_handler->connect(boost::bind(&OrderIndependentTransparencyApp::InputHandler, this, _1, _2));
+	input_handler->connect(KlayGE::bind(&OrderIndependentTransparencyApp::InputHandler, this, KlayGE::placeholders::_1, KlayGE::placeholders::_2));
 	inputEngine.ActionMap(actionMap, input_handler, true);
 
 	blend_pp_ = LoadPostProcess(ResLoader::Instance().Open("Blend.ppml"), "blend");
@@ -477,14 +476,14 @@ void OrderIndependentTransparencyApp::InitObjects()
 	id_layer_combo_ = dialog_layer_->IDFromName("LayerCombo");
 	id_layer_tex_ = dialog_layer_->IDFromName("LayerTexButton");
 
-	dialog_oit_->Control<UIComboBox>(id_oit_mode_)->OnSelectionChangedEvent().connect(boost::bind(&OrderIndependentTransparencyApp::OITModeHandler, this, _1));
+	dialog_oit_->Control<UIComboBox>(id_oit_mode_)->OnSelectionChangedEvent().connect(KlayGE::bind(&OrderIndependentTransparencyApp::OITModeHandler, this, KlayGE::placeholders::_1));
 	this->OITModeHandler(*dialog_oit_->Control<UIComboBox>(id_oit_mode_));
-	dialog_oit_->Control<UISlider>(id_alpha_slider_)->OnValueChangedEvent().connect(boost::bind(&OrderIndependentTransparencyApp::AlphaHandler, this, _1));
+	dialog_oit_->Control<UISlider>(id_alpha_slider_)->OnValueChangedEvent().connect(KlayGE::bind(&OrderIndependentTransparencyApp::AlphaHandler, this, KlayGE::placeholders::_1));
 	this->AlphaHandler(*dialog_oit_->Control<UISlider>(id_alpha_slider_));
-	dialog_oit_->Control<UICheckBox>(id_ctrl_camera_)->OnChangedEvent().connect(boost::bind(&OrderIndependentTransparencyApp::CtrlCameraHandler, this, _1));
+	dialog_oit_->Control<UICheckBox>(id_ctrl_camera_)->OnChangedEvent().connect(KlayGE::bind(&OrderIndependentTransparencyApp::CtrlCameraHandler, this, KlayGE::placeholders::_1));
 	this->CtrlCameraHandler(*dialog_oit_->Control<UICheckBox>(id_ctrl_camera_));
 
-	dialog_layer_->Control<UIComboBox>(id_layer_combo_)->OnSelectionChangedEvent().connect(boost::bind(&OrderIndependentTransparencyApp::LayerChangedHandler, this, _1));
+	dialog_layer_->Control<UIComboBox>(id_layer_combo_)->OnSelectionChangedEvent().connect(KlayGE::bind(&OrderIndependentTransparencyApp::LayerChangedHandler, this, KlayGE::placeholders::_1));
 	this->LayerChangedHandler(*dialog_layer_->Control<UIComboBox>(id_layer_combo_));
 
 	for (uint32_t i = 0; i < peeled_texs_.size(); ++ i)

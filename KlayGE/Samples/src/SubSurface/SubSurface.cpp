@@ -21,7 +21,6 @@
 #include <KlayGE/InputFactory.hpp>
 
 #include <sstream>
-#include <boost/bind.hpp>
 
 #include "SampleCommon.hpp"
 #include "SubSurface.hpp"
@@ -147,7 +146,7 @@ void SubSurfaceApp::InitObjects()
 	actionMap.AddActions(actions, actions + sizeof(actions) / sizeof(actions[0]));
 
 	action_handler_t input_handler = MakeSharedPtr<input_signal>();
-	input_handler->connect(boost::bind(&SubSurfaceApp::InputHandler, this, _1, _2));
+	input_handler->connect(KlayGE::bind(&SubSurfaceApp::InputHandler, this, KlayGE::placeholders::_1, KlayGE::placeholders::_2));
 	inputEngine.ActionMap(actionMap, input_handler, true);
 
 	UIManager::Instance().Load(ResLoader::Instance().Open("SubSurface.uiml"));
@@ -157,10 +156,10 @@ void SubSurfaceApp::InitObjects()
 	id_mtl_thickness_static_ = dialog_params_->IDFromName("MtlThicknessStatic");
 	id_mtl_thickness_slider_ = dialog_params_->IDFromName("MtlThicknessSlider");
 
-	dialog_params_->Control<UISlider>(id_sigma_slider_)->OnValueChangedEvent().connect(boost::bind(&SubSurfaceApp::SigmaChangedHandler, this, _1));
+	dialog_params_->Control<UISlider>(id_sigma_slider_)->OnValueChangedEvent().connect(KlayGE::bind(&SubSurfaceApp::SigmaChangedHandler, this, KlayGE::placeholders::_1));
 	this->SigmaChangedHandler(*dialog_params_->Control<UISlider>(id_sigma_slider_));
 
-	dialog_params_->Control<UISlider>(id_mtl_thickness_slider_)->OnValueChangedEvent().connect(boost::bind(&SubSurfaceApp::MtlThicknessChangedHandler, this, _1));
+	dialog_params_->Control<UISlider>(id_mtl_thickness_slider_)->OnValueChangedEvent().connect(KlayGE::bind(&SubSurfaceApp::MtlThicknessChangedHandler, this, KlayGE::placeholders::_1));
 	this->MtlThicknessChangedHandler(*dialog_params_->Control<UISlider>(id_mtl_thickness_slider_));
 }
 

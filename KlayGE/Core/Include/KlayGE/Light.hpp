@@ -22,8 +22,6 @@
 
 #include <KlayGE/PreDeclare.hpp>
 
-#include <boost/function.hpp>
-
 namespace KlayGE
 {
 	enum LightType
@@ -44,7 +42,7 @@ namespace KlayGE
 		LSA_IndirectLighting = 1UL << 3
 	};
 
-	class KLAYGE_CORE_API LightSource : public boost::enable_shared_from_this<LightSource>
+	class KLAYGE_CORE_API LightSource : public enable_shared_from_this<LightSource>
 	{
 	public:
 		explicit LightSource(LightType type);
@@ -58,7 +56,7 @@ namespace KlayGE
 		bool Enabled() const;
 		void Enabled(bool enabled);
 
-		void BindUpdateFunc(boost::function<void(LightSource&, float, float)> const & update_func);
+		void BindUpdateFunc(function<void(LightSource&, float, float)> const & update_func);
 
 		virtual void Update(float app_time, float elapsed_time);
 
@@ -98,7 +96,7 @@ namespace KlayGE
 		float3 pos_;
 		float3 falloff_;
 
-		boost::function<void(LightSource&, float, float)> update_func_;
+		function<void(LightSource&, float, float)> update_func_;
 	};
 
 	class KLAYGE_CORE_API AmbientLightSource : public LightSource

@@ -41,8 +41,6 @@
 #include <cstring>
 #include <fstream>
 
-#include <boost/bind.hpp>
-
 #include <KlayGE/Texture.hpp>
 
 namespace
@@ -730,13 +728,13 @@ namespace
 			this->LoadDDS();
 		}
 
-		boost::shared_ptr<void> MainThreadStage()
+		shared_ptr<void> MainThreadStage()
 		{
 			if (!tex_desc_.texture)
 			{
 				this->CreateTexture();
 			}
-			return boost::static_pointer_cast<void>(tex_desc_.texture);
+			return static_pointer_cast<void>(tex_desc_.texture);
 		}
 
 		bool HasSubThreadStage() const
@@ -1921,7 +1919,7 @@ namespace KlayGE
 		return ResLoader::Instance().SyncQueryT<Texture>(MakeSharedPtr<TextureLoadingDesc>(tex_name, access_hint));
 	}
 
-	boost::function<TexturePtr()> ASyncLoadTexture(std::string const & tex_name, uint32_t access_hint)
+	function<TexturePtr()> ASyncLoadTexture(std::string const & tex_name, uint32_t access_hint)
 	{
 		return ResLoader::Instance().ASyncQueryT<Texture>(MakeSharedPtr<TextureLoadingDesc>(tex_name, access_hint));
 	}
