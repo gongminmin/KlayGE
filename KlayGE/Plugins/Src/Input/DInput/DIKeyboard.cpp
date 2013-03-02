@@ -19,8 +19,8 @@
 #include <KlayGE/KlayGE.hpp>
 #include <KFL/Util.hpp>
 
+#include <algorithm>
 #include <boost/assert.hpp>
-#include <boost/lambda/lambda.hpp>
 
 #include <KlayGE/DInput/DInput.hpp>
 #include <KlayGE/DInput/DInputDevice.hpp>
@@ -336,6 +336,6 @@ namespace KlayGE
 
 		index_ = !index_;
 		std::transform(keys.begin(), keys.end(), keys_[index_].begin(),
-			(boost::lambda::_1 & 0x80) != 0);
+			bind(std::not_equal_to<BYTE>(), 0, bind(std::logical_and<BYTE>(), placeholders::_1, 0x80)));
 	}
 }

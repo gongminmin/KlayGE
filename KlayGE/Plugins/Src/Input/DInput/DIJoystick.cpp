@@ -17,7 +17,6 @@
 #include <KFL/Util.hpp>
 
 #include <algorithm>
-#include <boost/lambda/lambda.hpp>
 
 #include <KlayGE/DInput/DInput.hpp>
 #include <KlayGE/DInput/DInputDevice.hpp>
@@ -155,6 +154,6 @@ namespace KlayGE
 		index_ = !index_;
 		std::copy(diJoyState.rglSlider, diJoyState.rglSlider + slider_.size(), slider_.begin());
 		std::transform(diJoyState.rgbButtons, diJoyState.rgbButtons + buttons_[index_].size(),
-			buttons_[index_].begin(), boost::lambda::_1 != 0);
+			buttons_[index_].begin(), bind(std::not_equal_to<BYTE>(), 0, placeholders::_1));
 	}
 }
