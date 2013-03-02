@@ -81,13 +81,6 @@ namespace
 			RenderFactory & rf = Context::Instance().RenderFactoryInstance();
 			RenderEffectPtr effect = rf.LoadEffect("AtmosphericScattering.fxml");
 			technique_ = effect->TechniqueByName("AtmosphereTech");
-
-			RenderablePtr mesh = model->Mesh(0);
-			rl_ =  mesh->GetRenderLayout();
-			pos_aabb_ = mesh->PosBound();
-			tc_aabb_ = mesh->TexcoordBound();
-
-			this->BuildMeshInfo();
 		}
 
 		void BuildMeshInfo()
@@ -181,8 +174,9 @@ void AtmosphericScatteringApp::InitObjects()
 	planet_ = MakeSharedPtr<SceneObjectHelper>(model_planet->Mesh(0), SceneObjectHelper::SOA_Cullable);
 	planet_->AddToSceneManager();
 
-	RenderablePtr mesh_atmosphere = MakeSharedPtr<AtmosphereMesh>(model_planet, L"atmosphere");
-	atmosphere_ = MakeSharedPtr<SceneObjectHelper>(mesh_atmosphere, SceneObjectHelper::SOA_Cullable);
+	RenderModelPtr model_atmosphere = SyncLoadModel("geosphere.7z//geosphere.meshml", EAH_GPU_Read | EAH_Immutable,
+		CreateModelFactory<RenderModel>(), CreateMeshFactory<AtmosphereMesh>());
+	atmosphere_ = MakeSharedPtr<SceneObjectHelper>(model_atmosphere->Mesh(0), SceneObjectHelper::SOA_Cullable);
 	atmosphere_->AddToSceneManager();
 
 	UIManager::Instance().Load(ResLoader::Instance().Open("AtmosphericScattering.uiml"));

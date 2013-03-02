@@ -697,15 +697,19 @@ namespace
 		struct TexDesc
 		{
 			std::string res_name;
-
 			uint32_t access_hint;
-			Texture::TextureType type;
-			uint32_t width, height, depth;
-			uint32_t num_mipmaps;
-			uint32_t array_size;
-			ElementFormat format;
-			std::vector<ElementInitData> tex_data;
-			std::vector<uint8_t> data_block;
+
+			struct TexData
+			{
+				Texture::TextureType type;
+				uint32_t width, height, depth;
+				uint32_t num_mipmaps;
+				uint32_t array_size;
+				ElementFormat format;
+				std::vector<ElementInitData> init_data;
+				std::vector<uint8_t> data_block;
+			};
+			shared_ptr<TexData> tex_data;
 
 			TexturePtr texture;
 		};
@@ -715,6 +719,7 @@ namespace
 		{
 			tex_desc_.res_name = res_name;
 			tex_desc_.access_hint = access_hint;
+			tex_desc_.tex_data = MakeSharedPtr<TexDesc::TexData>();
 		}
 
 		std::wstring const & Name() const
@@ -753,88 +758,100 @@ namespace
 			return false;
 		}
 
+		void CopyFrom(ResLoadingDesc const & rhs)
+		{
+			BOOST_ASSERT(this->Name() == rhs.Name());
+
+			TextureLoadingDesc const & tld = static_cast<TextureLoadingDesc const &>(rhs);
+			tex_desc_.res_name = tld.tex_desc_.res_name;
+			tex_desc_.access_hint = tld.tex_desc_.access_hint;
+			tex_desc_.tex_data = tld.tex_desc_.tex_data;
+		}
+
 	private:
 		void LoadDDS()
 		{
-			LoadTexture(tex_desc_.res_name, tex_desc_.type, tex_desc_.width, tex_desc_.height, tex_desc_.depth,
-				tex_desc_.num_mipmaps, tex_desc_.array_size, tex_desc_.format, tex_desc_.tex_data, tex_desc_.data_block);
+			LoadTexture(tex_desc_.res_name, tex_desc_.tex_data->type,
+				tex_desc_.tex_data->width, tex_desc_.tex_data->height, tex_desc_.tex_data->depth,
+				tex_desc_.tex_data->num_mipmaps, tex_desc_.tex_data->array_size, tex_desc_.tex_data->format,
+				tex_desc_.tex_data->init_data, tex_desc_.tex_data->data_block);
 
 			RenderFactory& renderFactory = Context::Instance().RenderFactoryInstance();
 			RenderDeviceCaps const & caps = renderFactory.RenderEngineInstance().DeviceCaps();
 
-			if ((Texture::TT_3D == tex_desc_.type) && (caps.max_texture_depth < tex_desc_.depth))
+			if ((Texture::TT_3D == tex_desc_.tex_data->type) && (caps.max_texture_depth < tex_desc_.tex_data->depth))
 			{
-				tex_desc_.type = Texture::TT_2D;
-				tex_desc_.height *= tex_desc_.depth;
-				tex_desc_.depth = 1;
-				tex_desc_.num_mipmaps = 1;
-				tex_desc_.tex_data.resize(1);
+				tex_desc_.tex_data->type = Texture::TT_2D;
+				tex_desc_.tex_data->height *= tex_desc_.tex_data->depth;
+				tex_desc_.tex_data->depth = 1;
+				tex_desc_.tex_data->num_mipmaps = 1;
+				tex_desc_.tex_data->init_data.resize(1);
 			}
 
-			uint32_t array_size = tex_desc_.array_size;
-			if (Texture::TT_Cube == tex_desc_.type)
+			uint32_t array_size = tex_desc_.tex_data->array_size;
+			if (Texture::TT_Cube == tex_desc_.tex_data->type)
 			{
 				array_size *= 6;
 			}
 
-			if (((EF_BC5 == tex_desc_.format) && !caps.texture_format_support(EF_BC5))
-				|| ((EF_BC5_SRGB == tex_desc_.format) && !caps.texture_format_support(EF_BC5_SRGB)))
+			if (((EF_BC5 == tex_desc_.tex_data->format) && !caps.texture_format_support(EF_BC5))
+				|| ((EF_BC5_SRGB == tex_desc_.tex_data->format) && !caps.texture_format_support(EF_BC5_SRGB)))
 			{
 				BC1_layout tmp;
-				for (size_t i = 0; i < tex_desc_.tex_data.size(); ++ i)
+				for (size_t i = 0; i < tex_desc_.tex_data->init_data.size(); ++ i)
 				{
-					for (size_t j = 0; j < tex_desc_.tex_data[i].slice_pitch; j += sizeof(BC4_layout) * 2)
+					for (size_t j = 0; j < tex_desc_.tex_data->init_data[i].slice_pitch; j += sizeof(BC4_layout) * 2)
 					{
-						char* p = static_cast<char*>(const_cast<void*>(tex_desc_.tex_data[i].data)) + j;
+						char* p = static_cast<char*>(const_cast<void*>(tex_desc_.tex_data->init_data[i].data)) + j;
 
 						BC4ToBC1G(tmp, *reinterpret_cast<BC4_layout const *>(p + sizeof(BC4_layout)));
 						memcpy(p + sizeof(BC4_layout), &tmp, sizeof(BC1_layout));
 					}
 				}
 
-				if (IsSRGB(tex_desc_.format))
+				if (IsSRGB(tex_desc_.tex_data->format))
 				{
-					tex_desc_.format = EF_BC3_SRGB;
+					tex_desc_.tex_data->format = EF_BC3_SRGB;
 				}
 				else
 				{
-					tex_desc_.format = EF_BC3;
+					tex_desc_.tex_data->format = EF_BC3;
 				}
 			}
-			if (((EF_BC4 == tex_desc_.format) && !caps.texture_format_support(EF_BC4))
-				|| ((EF_BC4_SRGB == tex_desc_.format) && !caps.texture_format_support(EF_BC4_SRGB)))
+			if (((EF_BC4 == tex_desc_.tex_data->format) && !caps.texture_format_support(EF_BC4))
+				|| ((EF_BC4_SRGB == tex_desc_.tex_data->format) && !caps.texture_format_support(EF_BC4_SRGB)))
 			{
 				BC1_layout tmp;
-				for (size_t i = 0; i < tex_desc_.tex_data.size(); ++ i)
+				for (size_t i = 0; i < tex_desc_.tex_data->init_data.size(); ++ i)
 				{
-					for (size_t j = 0; j < tex_desc_.tex_data[i].slice_pitch; j += sizeof(BC4_layout))
+					for (size_t j = 0; j < tex_desc_.tex_data->init_data[i].slice_pitch; j += sizeof(BC4_layout))
 					{
-						char* p = static_cast<char*>(const_cast<void*>(tex_desc_.tex_data[i].data)) + j;
+						char* p = static_cast<char*>(const_cast<void*>(tex_desc_.tex_data->init_data[i].data)) + j;
 
 						BC4ToBC1G(tmp, *reinterpret_cast<BC4_layout const *>(p));
 					}
 				}
 
-				if (IsSRGB(tex_desc_.format))
+				if (IsSRGB(tex_desc_.tex_data->format))
 				{
-					tex_desc_.format = EF_BC1_SRGB;
+					tex_desc_.tex_data->format = EF_BC1_SRGB;
 				}
 				else
 				{
-					tex_desc_.format = EF_BC1;
+					tex_desc_.tex_data->format = EF_BC1;
 				}
 			}
-			if ((EF_BC1_SRGB == tex_desc_.format) && !caps.texture_format_support(EF_BC1_SRGB))
+			if ((EF_BC1_SRGB == tex_desc_.tex_data->format) && !caps.texture_format_support(EF_BC1_SRGB))
 			{
 				for (size_t index = 0; index < array_size; ++ index)
 				{
-					uint32_t width = tex_desc_.width;
-					uint32_t height = tex_desc_.height;
-					for (size_t level = 0; level < tex_desc_.num_mipmaps; ++ level)
+					uint32_t width = tex_desc_.tex_data->width;
+					uint32_t height = tex_desc_.tex_data->height;
+					for (size_t level = 0; level < tex_desc_.tex_data->num_mipmaps; ++ level)
 					{
-						size_t i = index * tex_desc_.num_mipmaps + level;
+						size_t i = index * tex_desc_.tex_data->num_mipmaps + level;
 
-						BC1_layout* p = static_cast<BC1_layout*>(const_cast<void*>(tex_desc_.tex_data[i].data));
+						BC1_layout* p = static_cast<BC1_layout*>(const_cast<void*>(tex_desc_.tex_data->init_data[i].data));
 						for (uint32_t block_y = 0; block_y < height; block_y += 4)
 						{
 							for (uint32_t block_x = 0; block_x < width; block_x += 4)
@@ -849,26 +866,26 @@ namespace
 					}
 				}
 
-				tex_desc_.format = EF_BC1;
+				tex_desc_.tex_data->format = EF_BC1;
 			}
-			if ((EF_BC1 == tex_desc_.format) && !caps.texture_format_support(EF_BC1))
+			if ((EF_BC1 == tex_desc_.tex_data->format) && !caps.texture_format_support(EF_BC1))
 			{
 				std::vector<uint8_t> rgba_data_block;
 
 				uint32_t rgba[16];
 				for (size_t index = 0; index < array_size; ++ index)
 				{
-					uint32_t width = tex_desc_.width;
-					uint32_t height = tex_desc_.height;
-					for (size_t level = 0; level < tex_desc_.num_mipmaps; ++ level)
+					uint32_t width = tex_desc_.tex_data->width;
+					uint32_t height = tex_desc_.tex_data->height;
+					for (size_t level = 0; level < tex_desc_.tex_data->num_mipmaps; ++ level)
 					{
 						size_t const old_size = rgba_data_block.size();
 						rgba_data_block.resize(old_size + width * height * 4);
 						uint8_t* sub_rgba_data_block = &rgba_data_block[old_size];
 
-						size_t i = index * tex_desc_.num_mipmaps + level;
+						size_t i = index * tex_desc_.tex_data->num_mipmaps + level;
 
-						uint8_t const * p = static_cast<uint8_t const *>(tex_desc_.tex_data[i].data);
+						uint8_t const * p = static_cast<uint8_t const *>(tex_desc_.tex_data->init_data[i].data);
 						for (uint32_t block_y = 0; block_y < height; block_y += 4)
 						{
 							for (uint32_t block_x = 0; block_x < width; block_x += 4)
@@ -888,39 +905,39 @@ namespace
 					}
 				}
 
-				tex_desc_.format = EF_ARGB8;
-				tex_desc_.data_block = rgba_data_block;
+				tex_desc_.tex_data->format = EF_ARGB8;
+				tex_desc_.tex_data->data_block = rgba_data_block;
 				size_t start = 0;
 				for (size_t index = 0; index < array_size; ++ index)
 				{
-					uint32_t width = tex_desc_.width;
-					uint32_t height = tex_desc_.height;
-					for (size_t level = 0; level < tex_desc_.num_mipmaps; ++ level)
+					uint32_t width = tex_desc_.tex_data->width;
+					uint32_t height = tex_desc_.tex_data->height;
+					for (size_t level = 0; level < tex_desc_.tex_data->num_mipmaps; ++ level)
 					{
-						size_t i = index * tex_desc_.num_mipmaps + level;
+						size_t i = index * tex_desc_.tex_data->num_mipmaps + level;
 
-						tex_desc_.tex_data[i].row_pitch = width * 4;
-						tex_desc_.tex_data[i].slice_pitch = width * height * 4;
-						tex_desc_.tex_data[i].data = &tex_desc_.data_block[start];
+						tex_desc_.tex_data->init_data[i].row_pitch = width * 4;
+						tex_desc_.tex_data->init_data[i].slice_pitch = width * height * 4;
+						tex_desc_.tex_data->init_data[i].data = &tex_desc_.tex_data->data_block[start];
 
-						start += tex_desc_.tex_data[i].slice_pitch;
+						start += tex_desc_.tex_data->init_data[i].slice_pitch;
 
 						width = std::max<uint32_t>(1U, width / 2);
 						height = std::max<uint32_t>(1U, height / 2);
 					}
 				}
 			}
-			if ((EF_BC2_SRGB == tex_desc_.format) && !caps.texture_format_support(EF_BC2_SRGB))
+			if ((EF_BC2_SRGB == tex_desc_.tex_data->format) && !caps.texture_format_support(EF_BC2_SRGB))
 			{
 				for (size_t index = 0; index < array_size; ++ index)
 				{
-					uint32_t width = tex_desc_.width;
-					uint32_t height = tex_desc_.height;
-					for (size_t level = 0; level < tex_desc_.num_mipmaps; ++ level)
+					uint32_t width = tex_desc_.tex_data->width;
+					uint32_t height = tex_desc_.tex_data->height;
+					for (size_t level = 0; level < tex_desc_.tex_data->num_mipmaps; ++ level)
 					{
-						size_t i = index * tex_desc_.num_mipmaps + level;
+						size_t i = index * tex_desc_.tex_data->num_mipmaps + level;
 
-						BC2_layout* p = static_cast<BC2_layout*>(const_cast<void*>(tex_desc_.tex_data[i].data));
+						BC2_layout* p = static_cast<BC2_layout*>(const_cast<void*>(tex_desc_.tex_data->init_data[i].data));
 						for (uint32_t block_y = 0; block_y < height; block_y += 4)
 						{
 							for (uint32_t block_x = 0; block_x < width; block_x += 4)
@@ -935,26 +952,26 @@ namespace
 					}
 				}
 
-				tex_desc_.format = EF_BC2;
+				tex_desc_.tex_data->format = EF_BC2;
 			}
-			if ((EF_BC2 == tex_desc_.format) && !caps.texture_format_support(EF_BC2))
+			if ((EF_BC2 == tex_desc_.tex_data->format) && !caps.texture_format_support(EF_BC2))
 			{
 				std::vector<uint8_t> rgba_data_block;
 
 				uint32_t rgba[16];
 				for (size_t index = 0; index < array_size; ++ index)
 				{
-					uint32_t width = tex_desc_.width;
-					uint32_t height = tex_desc_.height;
-					for (size_t level = 0; level < tex_desc_.num_mipmaps; ++ level)
+					uint32_t width = tex_desc_.tex_data->width;
+					uint32_t height = tex_desc_.tex_data->height;
+					for (size_t level = 0; level < tex_desc_.tex_data->num_mipmaps; ++ level)
 					{
 						size_t const old_size = rgba_data_block.size();
 						rgba_data_block.resize(old_size + width * height * 4);
 						uint8_t* sub_rgba_data_block = &rgba_data_block[old_size];
 
-						size_t i = index * tex_desc_.num_mipmaps + level;
+						size_t i = index * tex_desc_.tex_data->num_mipmaps + level;
 
-						uint8_t const * p = static_cast<uint8_t const *>(tex_desc_.tex_data[i].data);
+						uint8_t const * p = static_cast<uint8_t const *>(tex_desc_.tex_data->init_data[i].data);
 						for (uint32_t block_y = 0; block_y < height; block_y += 4)
 						{
 							for (uint32_t block_x = 0; block_x < width; block_x += 4)
@@ -974,39 +991,39 @@ namespace
 					}
 				}
 
-				tex_desc_.format = EF_ARGB8;
-				tex_desc_.data_block = rgba_data_block;
+				tex_desc_.tex_data->format = EF_ARGB8;
+				tex_desc_.tex_data->data_block = rgba_data_block;
 				size_t start = 0;
 				for (size_t index = 0; index < array_size; ++ index)
 				{
-					uint32_t width = tex_desc_.width;
-					uint32_t height = tex_desc_.height;
-					for (size_t level = 0; level < tex_desc_.num_mipmaps; ++ level)
+					uint32_t width = tex_desc_.tex_data->width;
+					uint32_t height = tex_desc_.tex_data->height;
+					for (size_t level = 0; level < tex_desc_.tex_data->num_mipmaps; ++ level)
 					{
-						size_t i = index * tex_desc_.num_mipmaps + level;
+						size_t i = index * tex_desc_.tex_data->num_mipmaps + level;
 
-						tex_desc_.tex_data[i].row_pitch = width * 4;
-						tex_desc_.tex_data[i].slice_pitch = width * height * 4;
-						tex_desc_.tex_data[i].data = &tex_desc_.data_block[start];
+						tex_desc_.tex_data->init_data[i].row_pitch = width * 4;
+						tex_desc_.tex_data->init_data[i].slice_pitch = width * height * 4;
+						tex_desc_.tex_data->init_data[i].data = &tex_desc_.tex_data->data_block[start];
 
-						start += tex_desc_.tex_data[i].slice_pitch;
+						start += tex_desc_.tex_data->init_data[i].slice_pitch;
 
 						width = std::max<uint32_t>(1U, width / 2);
 						height = std::max<uint32_t>(1U, height / 2);
 					}
 				}
 			}
-			if ((EF_BC3_SRGB == tex_desc_.format) && !caps.texture_format_support(EF_BC3_SRGB))
+			if ((EF_BC3_SRGB == tex_desc_.tex_data->format) && !caps.texture_format_support(EF_BC3_SRGB))
 			{
 				for (size_t index = 0; index < array_size; ++ index)
 				{
-					uint32_t width = tex_desc_.width;
-					uint32_t height = tex_desc_.height;
-					for (size_t level = 0; level < tex_desc_.num_mipmaps; ++ level)
+					uint32_t width = tex_desc_.tex_data->width;
+					uint32_t height = tex_desc_.tex_data->height;
+					for (size_t level = 0; level < tex_desc_.tex_data->num_mipmaps; ++ level)
 					{
-						size_t i = index * tex_desc_.num_mipmaps + level;
+						size_t i = index * tex_desc_.tex_data->num_mipmaps + level;
 
-						BC3_layout * p = static_cast<BC3_layout*>(const_cast<void*>(tex_desc_.tex_data[i].data));
+						BC3_layout * p = static_cast<BC3_layout*>(const_cast<void*>(tex_desc_.tex_data->init_data[i].data));
 						for (uint32_t block_y = 0; block_y < height; block_y += 4)
 						{
 							for (uint32_t block_x = 0; block_x < width; block_x += 4)
@@ -1021,26 +1038,26 @@ namespace
 					}
 				}
 
-				tex_desc_.format = EF_BC3;
+				tex_desc_.tex_data->format = EF_BC3;
 			}
-			if ((EF_BC3 == tex_desc_.format) && !caps.texture_format_support(EF_BC3))
+			if ((EF_BC3 == tex_desc_.tex_data->format) && !caps.texture_format_support(EF_BC3))
 			{
 				std::vector<uint8_t> rgba_data_block;
 
 				uint32_t rgba[16];
 				for (size_t index = 0; index < array_size; ++ index)
 				{
-					uint32_t width = tex_desc_.width;
-					uint32_t height = tex_desc_.height;
-					for (size_t level = 0; level < tex_desc_.num_mipmaps; ++ level)
+					uint32_t width = tex_desc_.tex_data->width;
+					uint32_t height = tex_desc_.tex_data->height;
+					for (size_t level = 0; level < tex_desc_.tex_data->num_mipmaps; ++ level)
 					{
 						size_t const old_size = rgba_data_block.size();
 						rgba_data_block.resize(old_size + width * height * 4);
 						uint8_t* sub_rgba_data_block = &rgba_data_block[old_size];
 
-						size_t i = index * tex_desc_.num_mipmaps + level;
+						size_t i = index * tex_desc_.tex_data->num_mipmaps + level;
 
-						uint8_t const * p = static_cast<uint8_t const *>(tex_desc_.tex_data[i].data);
+						uint8_t const * p = static_cast<uint8_t const *>(tex_desc_.tex_data->init_data[i].data);
 						for (uint32_t block_y = 0; block_y < height; block_y += 4)
 						{
 							for (uint32_t block_x = 0; block_x < width; block_x += 4)
@@ -1060,39 +1077,39 @@ namespace
 					}
 				}
 
-				tex_desc_.format = EF_ARGB8;
-				tex_desc_.data_block = rgba_data_block;
+				tex_desc_.tex_data->format = EF_ARGB8;
+				tex_desc_.tex_data->data_block = rgba_data_block;
 				size_t start = 0;
 				for (size_t index = 0; index < array_size; ++ index)
 				{
-					uint32_t width = tex_desc_.width;
-					uint32_t height = tex_desc_.height;
-					for (size_t level = 0; level < tex_desc_.num_mipmaps; ++ level)
+					uint32_t width = tex_desc_.tex_data->width;
+					uint32_t height = tex_desc_.tex_data->height;
+					for (size_t level = 0; level < tex_desc_.tex_data->num_mipmaps; ++ level)
 					{
-						size_t i = index * tex_desc_.num_mipmaps + level;
+						size_t i = index * tex_desc_.tex_data->num_mipmaps + level;
 
-						tex_desc_.tex_data[i].row_pitch = width * 4;
-						tex_desc_.tex_data[i].slice_pitch = width * height * 4;
-						tex_desc_.tex_data[i].data = &tex_desc_.data_block[start];
+						tex_desc_.tex_data->init_data[i].row_pitch = width * 4;
+						tex_desc_.tex_data->init_data[i].slice_pitch = width * height * 4;
+						tex_desc_.tex_data->init_data[i].data = &tex_desc_.tex_data->data_block[start];
 
-						start += tex_desc_.tex_data[i].slice_pitch;
+						start += tex_desc_.tex_data->init_data[i].slice_pitch;
 
 						width = std::max<uint32_t>(1U, width / 2);
 						height = std::max<uint32_t>(1U, height / 2);
 					}
 				}
 			}
-			if ((EF_ARGB8_SRGB == tex_desc_.format) && !caps.texture_format_support(EF_ARGB8_SRGB))
+			if ((EF_ARGB8_SRGB == tex_desc_.tex_data->format) && !caps.texture_format_support(EF_ARGB8_SRGB))
 			{
 				for (size_t index = 0; index < array_size; ++ index)
 				{
-					uint32_t width = tex_desc_.width;
-					uint32_t height = tex_desc_.height;
-					for (size_t level = 0; level < tex_desc_.num_mipmaps; ++ level)
+					uint32_t width = tex_desc_.tex_data->width;
+					uint32_t height = tex_desc_.tex_data->height;
+					for (size_t level = 0; level < tex_desc_.tex_data->num_mipmaps; ++ level)
 					{
-						size_t i = index * tex_desc_.num_mipmaps + level;
+						size_t i = index * tex_desc_.tex_data->num_mipmaps + level;
 
-						uint8_t* p = static_cast<uint8_t*>(const_cast<void*>(tex_desc_.tex_data[i].data));
+						uint8_t* p = static_cast<uint8_t*>(const_cast<void*>(tex_desc_.tex_data->init_data[i].data));
 						for (size_t y = 0; y < height; ++ y)
 						{
 							for (size_t x = 0; x < width; ++ x)
@@ -1101,7 +1118,7 @@ namespace
 								p[x * 4 + 1] = static_cast<uint8_t>(MathLib::clamp<int>(static_cast<int>(MathLib::srgb_to_linear(p[x * 4 + 1] / 255.0f) * 255.0f), 0, 255));
 								p[x * 4 + 2] = static_cast<uint8_t>(MathLib::clamp<int>(static_cast<int>(MathLib::srgb_to_linear(p[x * 4 + 2] / 255.0f) * 255.0f), 0, 255));
 							}
-							p += tex_desc_.tex_data[i].row_pitch;
+							p += tex_desc_.tex_data->init_data[i].row_pitch;
 						}
 
 						width = std::max<uint32_t>(1U, width / 2);
@@ -1109,26 +1126,26 @@ namespace
 					}
 				}
 
-				tex_desc_.format = EF_ARGB8;
+				tex_desc_.tex_data->format = EF_ARGB8;
 			}
-			if ((EF_ARGB8 == tex_desc_.format) && !caps.texture_format_support(EF_ARGB8))
+			if ((EF_ARGB8 == tex_desc_.tex_data->format) && !caps.texture_format_support(EF_ARGB8))
 			{
 				for (size_t index = 0; index < array_size; ++ index)
 				{
-					uint32_t width = tex_desc_.width;
-					uint32_t height = tex_desc_.height;
-					for (size_t level = 0; level < tex_desc_.num_mipmaps; ++ level)
+					uint32_t width = tex_desc_.tex_data->width;
+					uint32_t height = tex_desc_.tex_data->height;
+					for (size_t level = 0; level < tex_desc_.tex_data->num_mipmaps; ++ level)
 					{
-						size_t i = index * tex_desc_.num_mipmaps + level;
+						size_t i = index * tex_desc_.tex_data->num_mipmaps + level;
 
-						uint8_t* p = static_cast<uint8_t*>(const_cast<void*>(tex_desc_.tex_data[i].data));
+						uint8_t* p = static_cast<uint8_t*>(const_cast<void*>(tex_desc_.tex_data->init_data[i].data));
 						for (size_t y = 0; y < height; ++ y)
 						{
 							for (size_t x = 0; x < width; ++ x)
 							{
 								std::swap(p[x * 4 + 0], p[x * 4 + 2]);
 							}
-							p += tex_desc_.tex_data[i].row_pitch;
+							p += tex_desc_.tex_data->init_data[i].row_pitch;
 						}
 
 						width = std::max<uint32_t>(1U, width / 2);
@@ -1136,23 +1153,23 @@ namespace
 					}
 				}
 
-				tex_desc_.format = EF_ABGR8;
+				tex_desc_.tex_data->format = EF_ABGR8;
 			}
-			if ((EF_R16 == tex_desc_.format) && !caps.texture_format_support(EF_R16))
+			if ((EF_R16 == tex_desc_.tex_data->format) && !caps.texture_format_support(EF_R16))
 			{
 				if (caps.texture_format_support(EF_R16F))
 				{
-					for (size_t index = 0; index < tex_desc_.tex_data.size(); ++ index)
+					for (size_t index = 0; index < tex_desc_.tex_data->init_data.size(); ++ index)
 					{
-						uint16_t* p = static_cast<uint16_t*>(const_cast<void*>(tex_desc_.tex_data[index].data));
+						uint16_t* p = static_cast<uint16_t*>(const_cast<void*>(tex_desc_.tex_data->init_data[index].data));
 
-						for (size_t j = 0; j < tex_desc_.tex_data[index].slice_pitch / sizeof(uint16_t); ++ j)
+						for (size_t j = 0; j < tex_desc_.tex_data->init_data[index].slice_pitch / sizeof(uint16_t); ++ j)
 						{
 							*reinterpret_cast<half*>(&p[j]) = half(p[j] / 65535.0f);
 						}
 					}
 
-					tex_desc_.format = EF_R16F;
+					tex_desc_.tex_data->format = EF_R16F;
 				}
 				else if (caps.texture_format_support(EF_R8))
 				{
@@ -1160,17 +1177,17 @@ namespace
 
 					for (size_t index = 0; index < array_size; ++ index)
 					{
-						uint32_t width = tex_desc_.width;
-						uint32_t height = tex_desc_.height;
-						for (size_t level = 0; level < tex_desc_.num_mipmaps; ++ level)
+						uint32_t width = tex_desc_.tex_data->width;
+						uint32_t height = tex_desc_.tex_data->height;
+						for (size_t level = 0; level < tex_desc_.tex_data->num_mipmaps; ++ level)
 						{
 							size_t const old_size = r8_data_block.size();
 							r8_data_block.resize(old_size + width * height);
 							uint8_t* sub_r8_data_block = &r8_data_block[old_size];
 
-							size_t i = index * tex_desc_.num_mipmaps + level;
+							size_t i = index * tex_desc_.tex_data->num_mipmaps + level;
 
-							uint16_t* p = static_cast<uint16_t*>(const_cast<void*>(tex_desc_.tex_data[i].data));
+							uint16_t* p = static_cast<uint16_t*>(const_cast<void*>(tex_desc_.tex_data->init_data[i].data));
 							for (size_t y = 0; y < height; ++ y)
 							{
 								for (size_t x = 0; x < width; ++ x)
@@ -1178,7 +1195,7 @@ namespace
 									sub_r8_data_block[x] = static_cast<uint8_t>(MathLib::clamp(static_cast<int>((p[x] / 65535.0f) * 255 + 0.5f), 0, 255));
 								}
 								sub_r8_data_block += width;
-								p += (tex_desc_.tex_data[i].row_pitch) / sizeof(uint16_t);
+								p += (tex_desc_.tex_data->init_data[i].row_pitch) / sizeof(uint16_t);
 							}
 
 							width = std::max<uint32_t>(1U, width / 2);
@@ -1186,22 +1203,22 @@ namespace
 						}
 					}
 
-					tex_desc_.format = EF_R8;
-					tex_desc_.data_block = r8_data_block;
+					tex_desc_.tex_data->format = EF_R8;
+					tex_desc_.tex_data->data_block = r8_data_block;
 					size_t start = 0;
 					for (size_t index = 0; index < array_size; ++ index)
 					{
-						uint32_t width = tex_desc_.width;
-						uint32_t height = tex_desc_.height;
-						for (size_t level = 0; level < tex_desc_.num_mipmaps; ++ level)
+						uint32_t width = tex_desc_.tex_data->width;
+						uint32_t height = tex_desc_.tex_data->height;
+						for (size_t level = 0; level < tex_desc_.tex_data->num_mipmaps; ++ level)
 						{
-							size_t i = index * tex_desc_.num_mipmaps + level;
+							size_t i = index * tex_desc_.tex_data->num_mipmaps + level;
 
-							tex_desc_.tex_data[i].row_pitch = width;
-							tex_desc_.tex_data[i].slice_pitch = width * height;
-							tex_desc_.tex_data[i].data = &tex_desc_.data_block[start];
+							tex_desc_.tex_data->init_data[i].row_pitch = width;
+							tex_desc_.tex_data->init_data[i].slice_pitch = width * height;
+							tex_desc_.tex_data->init_data[i].data = &tex_desc_.tex_data->data_block[start];
 
-							start += tex_desc_.tex_data[i].slice_pitch;
+							start += tex_desc_.tex_data->init_data[i].slice_pitch;
 
 							width = std::max<uint32_t>(1U, width / 2);
 							height = std::max<uint32_t>(1U, height / 2);
@@ -1220,26 +1237,26 @@ namespace
 		{
 			TexturePtr texture;
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-			switch (tex_desc_.type)
+			switch (tex_desc_.tex_data->type)
 			{
 			case Texture::TT_1D:
-				texture = rf.MakeTexture1D(tex_desc_.width, tex_desc_.num_mipmaps, tex_desc_.array_size,
-					tex_desc_.format, 1, 0, tex_desc_.access_hint, &tex_desc_.tex_data[0]);
+				texture = rf.MakeTexture1D(tex_desc_.tex_data->width, tex_desc_.tex_data->num_mipmaps, tex_desc_.tex_data->array_size,
+					tex_desc_.tex_data->format, 1, 0, tex_desc_.access_hint, &tex_desc_.tex_data->init_data[0]);
 				break;
 
 			case Texture::TT_2D:
-				texture = rf.MakeTexture2D(tex_desc_.width, tex_desc_.height, tex_desc_.num_mipmaps, tex_desc_.array_size,
-					tex_desc_.format, 1, 0, tex_desc_.access_hint, &tex_desc_.tex_data[0]);
+				texture = rf.MakeTexture2D(tex_desc_.tex_data->width, tex_desc_.tex_data->height, tex_desc_.tex_data->num_mipmaps, tex_desc_.tex_data->array_size,
+					tex_desc_.tex_data->format, 1, 0, tex_desc_.access_hint, &tex_desc_.tex_data->init_data[0]);
 				break;
 
 			case Texture::TT_3D:
-				texture = rf.MakeTexture3D(tex_desc_.width, tex_desc_.height, tex_desc_.depth, tex_desc_.num_mipmaps, tex_desc_.array_size,
-					tex_desc_.format, 1, 0, tex_desc_.access_hint, &tex_desc_.tex_data[0]);
+				texture = rf.MakeTexture3D(tex_desc_.tex_data->width, tex_desc_.tex_data->height, tex_desc_.tex_data->depth, tex_desc_.tex_data->num_mipmaps, tex_desc_.tex_data->array_size,
+					tex_desc_.tex_data->format, 1, 0, tex_desc_.access_hint, &tex_desc_.tex_data->init_data[0]);
 				break;
 
 			case Texture::TT_Cube:
-				texture = rf.MakeTextureCube(tex_desc_.width, tex_desc_.num_mipmaps, tex_desc_.array_size,
-					tex_desc_.format, 1, 0, tex_desc_.access_hint, &tex_desc_.tex_data[0]);
+				texture = rf.MakeTextureCube(tex_desc_.tex_data->width, tex_desc_.tex_data->num_mipmaps, tex_desc_.tex_data->array_size,
+					tex_desc_.tex_data->format, 1, 0, tex_desc_.access_hint, &tex_desc_.tex_data->init_data[0]);
 				break;
 
 			default:

@@ -52,30 +52,33 @@ namespace
 		struct ModelDesc
 		{
 			std::string res_name;
-
 			uint32_t access_hint;
 			function<RenderModelPtr(std::wstring const &)> CreateModelFactoryFunc;
 			function<StaticMeshPtr(RenderModelPtr const &, std::wstring const &)> CreateMeshFactoryFunc;
 
-			std::vector<RenderMaterialPtr> mtls;
-			std::vector<vertex_element> merged_ves;
-			char all_is_index_16_bit;
-			std::vector<std::vector<uint8_t> > merged_buff;
-			std::vector<uint8_t> merged_indices;
-			std::vector<std::string> mesh_names;
-			std::vector<int32_t> mtl_ids;
-			std::vector<AABBox> pos_bbs;
-			std::vector<AABBox> tc_bbs;
-			std::vector<uint32_t> mesh_num_vertices;
-			std::vector<uint32_t> mesh_base_vertices;
-			std::vector<uint32_t> mesh_num_indices;
-			std::vector<uint32_t> mesh_start_indices;
-			std::vector<Joint> joints;
-			shared_ptr<AnimationActionsType> actions;
-			shared_ptr<KeyFramesType> kfs;
-			uint32_t num_frames;
-			uint32_t frame_rate;
-			std::vector<shared_ptr<AABBKeyFrames> > frame_pos_bbs;
+			struct ModelData
+			{
+				std::vector<RenderMaterialPtr> mtls;
+				std::vector<vertex_element> merged_ves;
+				char all_is_index_16_bit;
+				std::vector<std::vector<uint8_t> > merged_buff;
+				std::vector<uint8_t> merged_indices;
+				std::vector<std::string> mesh_names;
+				std::vector<int32_t> mtl_ids;
+				std::vector<AABBox> pos_bbs;
+				std::vector<AABBox> tc_bbs;
+				std::vector<uint32_t> mesh_num_vertices;
+				std::vector<uint32_t> mesh_base_vertices;
+				std::vector<uint32_t> mesh_num_indices;
+				std::vector<uint32_t> mesh_start_indices;
+				std::vector<Joint> joints;
+				shared_ptr<AnimationActionsType> actions;
+				shared_ptr<KeyFramesType> kfs;
+				uint32_t num_frames;
+				uint32_t frame_rate;
+				std::vector<shared_ptr<AABBKeyFrames> > frame_pos_bbs;
+			};
+			shared_ptr<ModelData> model_data;
 
 			RenderModelPtr model;
 		};
@@ -89,6 +92,7 @@ namespace
 			model_desc_.access_hint = access_hint;
 			model_desc_.CreateModelFactoryFunc = CreateModelFactoryFunc;
 			model_desc_.CreateMeshFactoryFunc = CreateMeshFactoryFunc;
+			model_desc_.model_data = MakeSharedPtr<ModelDesc::ModelData>();
 		}
 
 		std::wstring const & Name() const
@@ -104,10 +108,7 @@ namespace
 
 		shared_ptr<void> MainThreadStage()
 		{
-			if (!model_desc_.model)
-			{
-				this->CreateModel();
-			}
+			this->CreateModel();
 
 			model_desc_.model->BuildModelInfo();
 			for (uint32_t i = 0; i < model_desc_.model->NumMeshes(); ++ i)
@@ -134,27 +135,35 @@ namespace
 			return false;
 		}
 
+		void CopyFrom(ResLoadingDesc const & rhs)
+		{
+			BOOST_ASSERT(this->Name() == rhs.Name());
+
+			RenderModelLoadingDesc const & rmld = static_cast<RenderModelLoadingDesc const &>(rhs);
+			model_desc_.res_name = rmld.model_desc_.res_name;
+			model_desc_.access_hint = rmld.model_desc_.access_hint;
+			model_desc_.model_data = rmld.model_desc_.model_data;
+		}
+
 	private:
 		void LoadKModel()
 		{
-			LoadModel(model_desc_.res_name, model_desc_.mtls, model_desc_.merged_ves, model_desc_.all_is_index_16_bit,
-				model_desc_.merged_buff, model_desc_.merged_indices,
-				model_desc_.mesh_names, model_desc_.mtl_ids, model_desc_.pos_bbs, model_desc_.tc_bbs,
-				model_desc_.mesh_num_vertices, model_desc_.mesh_base_vertices, model_desc_.mesh_num_indices, model_desc_.mesh_start_indices, 
-				model_desc_.joints, model_desc_.actions, model_desc_.kfs,
-				model_desc_.num_frames, model_desc_.frame_rate, model_desc_.frame_pos_bbs);
-
-			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-			if (rf.RenderEngineInstance().DeviceCaps().multithread_res_creating_support)
-			{
-				this->CreateModel();
-			}
+			LoadModel(model_desc_.res_name, model_desc_.model_data->mtls, model_desc_.model_data->merged_ves,
+				model_desc_.model_data->all_is_index_16_bit,
+				model_desc_.model_data->merged_buff, model_desc_.model_data->merged_indices,
+				model_desc_.model_data->mesh_names, model_desc_.model_data->mtl_ids,
+				model_desc_.model_data->pos_bbs, model_desc_.model_data->tc_bbs,
+				model_desc_.model_data->mesh_num_vertices, model_desc_.model_data->mesh_base_vertices,
+				model_desc_.model_data->mesh_num_indices, model_desc_.model_data->mesh_start_indices, 
+				model_desc_.model_data->joints, model_desc_.model_data->actions, model_desc_.model_data->kfs,
+				model_desc_.model_data->num_frames, model_desc_.model_data->frame_rate,
+				model_desc_.model_data->frame_pos_bbs);
 		}
 
 		void CreateModel()
 		{
 			std::wstring model_name;
-			if (!model_desc_.joints.empty())
+			if (!model_desc_.model_data->joints.empty())
 			{
 				model_name = L"SkinnedMesh";
 			}
@@ -164,73 +173,73 @@ namespace
 			}
 			RenderModelPtr model = model_desc_.CreateModelFactoryFunc(model_name);
 
-			model->NumMaterials(model_desc_.mtls.size());
-			for (uint32_t mtl_index = 0; mtl_index < model_desc_.mtls.size(); ++ mtl_index)
+			model->NumMaterials(model_desc_.model_data->mtls.size());
+			for (uint32_t mtl_index = 0; mtl_index < model_desc_.model_data->mtls.size(); ++ mtl_index)
 			{
-				model->GetMaterial(mtl_index) = model_desc_.mtls[mtl_index];
+				model->GetMaterial(mtl_index) = model_desc_.model_data->mtls[mtl_index];
 			}
 
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
 			ElementInitData init_data;
-			std::vector<GraphicsBufferPtr> merged_vbs(model_desc_.merged_buff.size());
-			for (size_t i = 0; i < model_desc_.merged_buff.size(); ++ i)
+			std::vector<GraphicsBufferPtr> merged_vbs(model_desc_.model_data->merged_buff.size());
+			for (size_t i = 0; i < model_desc_.model_data->merged_buff.size(); ++ i)
 			{
-				init_data.data = &model_desc_.merged_buff[i][0];
-				init_data.row_pitch = static_cast<uint32_t>(model_desc_.merged_buff[i].size());
+				init_data.data = &model_desc_.model_data->merged_buff[i][0];
+				init_data.row_pitch = static_cast<uint32_t>(model_desc_.model_data->merged_buff[i].size());
 				init_data.slice_pitch = 0;
 				merged_vbs[i] = rf.MakeVertexBuffer(BU_Static, model_desc_.access_hint, &init_data);
 			}
 
 			GraphicsBufferPtr merged_ib;
 			{
-				init_data.data = &model_desc_.merged_indices[0];
-				init_data.row_pitch = static_cast<uint32_t>(model_desc_.merged_indices.size());
+				init_data.data = &model_desc_.model_data->merged_indices[0];
+				init_data.row_pitch = static_cast<uint32_t>(model_desc_.model_data->merged_indices.size());
 				init_data.slice_pitch = 0;
 				merged_ib = rf.MakeIndexBuffer(BU_Static, model_desc_.access_hint, &init_data);
 			}
 
-			std::vector<StaticMeshPtr> meshes(model_desc_.mesh_names.size());
-			for (uint32_t mesh_index = 0; mesh_index < model_desc_.mesh_names.size(); ++ mesh_index)
+			std::vector<StaticMeshPtr> meshes(model_desc_.model_data->mesh_names.size());
+			for (uint32_t mesh_index = 0; mesh_index < model_desc_.model_data->mesh_names.size(); ++ mesh_index)
 			{
 				std::wstring wname;
-				Convert(wname, model_desc_.mesh_names[mesh_index]);
+				Convert(wname, model_desc_.model_data->mesh_names[mesh_index]);
 
 				meshes[mesh_index] = model_desc_.CreateMeshFactoryFunc(model, wname);
 				StaticMeshPtr& mesh = meshes[mesh_index];
 
-				mesh->MaterialID(model_desc_.mtl_ids[mesh_index]);
-				mesh->PosBound(model_desc_.pos_bbs[mesh_index]);
-				mesh->TexcoordBound(model_desc_.tc_bbs[mesh_index]);
+				mesh->MaterialID(model_desc_.model_data->mtl_ids[mesh_index]);
+				mesh->PosBound(model_desc_.model_data->pos_bbs[mesh_index]);
+				mesh->TexcoordBound(model_desc_.model_data->tc_bbs[mesh_index]);
 
-				for (uint32_t ve_index = 0; ve_index < model_desc_.merged_buff.size(); ++ ve_index)
+				for (uint32_t ve_index = 0; ve_index < model_desc_.model_data->merged_buff.size(); ++ ve_index)
 				{
-					mesh->AddVertexStream(merged_vbs[ve_index], model_desc_.merged_ves[ve_index]);
+					mesh->AddVertexStream(merged_vbs[ve_index], model_desc_.model_data->merged_ves[ve_index]);
 				}
-				mesh->AddIndexStream(merged_ib, model_desc_.all_is_index_16_bit ? EF_R16UI : EF_R32UI);
+				mesh->AddIndexStream(merged_ib, model_desc_.model_data->all_is_index_16_bit ? EF_R16UI : EF_R32UI);
 
-				mesh->NumVertices(model_desc_.mesh_num_vertices[mesh_index]);
-				mesh->NumTriangles(model_desc_.mesh_num_indices[mesh_index] / 3);
-				mesh->StartVertexLocation(model_desc_.mesh_base_vertices[mesh_index]);
-				mesh->StartIndexLocation(model_desc_.mesh_start_indices[mesh_index]);
+				mesh->NumVertices(model_desc_.model_data->mesh_num_vertices[mesh_index]);
+				mesh->NumTriangles(model_desc_.model_data->mesh_num_indices[mesh_index] / 3);
+				mesh->StartVertexLocation(model_desc_.model_data->mesh_base_vertices[mesh_index]);
+				mesh->StartIndexLocation(model_desc_.model_data->mesh_start_indices[mesh_index]);
 			}
 
-			if (model_desc_.kfs && !model_desc_.kfs->empty())
+			if (model_desc_.model_data->kfs && !model_desc_.model_data->kfs->empty())
 			{
 				if (model->IsSkinned())
 				{
 					SkinnedModelPtr skinned_model = checked_pointer_cast<SkinnedModel>(model);
 
-					skinned_model->AssignJoints(model_desc_.joints.begin(), model_desc_.joints.end());
-					skinned_model->AttachKeyFrames(model_desc_.kfs);
+					skinned_model->AssignJoints(model_desc_.model_data->joints.begin(), model_desc_.model_data->joints.end());
+					skinned_model->AttachKeyFrames(model_desc_.model_data->kfs);
 
-					skinned_model->NumFrames(model_desc_.num_frames);
-					skinned_model->FrameRate(model_desc_.frame_rate);
+					skinned_model->NumFrames(model_desc_.model_data->num_frames);
+					skinned_model->FrameRate(model_desc_.model_data->frame_rate);
 
 					for (size_t mesh_index = 0; mesh_index < meshes.size(); ++ mesh_index)
 					{
 						SkinnedMeshPtr skinned_mesh = checked_pointer_cast<SkinnedMesh>(meshes[mesh_index]);
-						skinned_mesh->AttachFramePosBounds(model_desc_.frame_pos_bbs[mesh_index]);
+						skinned_mesh->AttachFramePosBounds(model_desc_.model_data->frame_pos_bbs[mesh_index]);
 					}
 				}
 			}

@@ -57,6 +57,7 @@ namespace KlayGE
 		virtual bool HasSubThreadStage() const = 0;
 
 		virtual bool Match(ResLoadingDesc const & rhs) const = 0;
+		virtual void CopyFrom(ResLoadingDesc const & rhs) = 0;
 	};
 
 	class KLAYGE_CORE_API ResLoader
@@ -117,8 +118,8 @@ namespace KlayGE
 		std::string exe_path_;
 		std::vector<std::string> paths_;
 
-		std::vector<std::pair<ResLoadingDescPtr, shared_ptr<void> > > cached_sync_res_;
-		std::vector<std::pair<ResLoadingDescPtr, function<shared_ptr<void>()> > > cached_async_res_;
+		std::vector<ResLoadingDescPtr> cached_sync_res_;
+		std::vector<std::pair<ResLoadingDescPtr, shared_ptr<joiner<void> > > > cached_async_res_;
 	};
 }
 
