@@ -289,11 +289,11 @@ namespace KlayGE
 
 		if (!glloader_GL_VERSION_2_0() || !glloader_GL_EXT_framebuffer_object())
 		{
-			THR(errc::not_supported);
+			THR(errc::function_not_supported);
 		}
 		if (!glloader_GL_VERSION_3_2() && (glloader_GL_VERSION_3_1() && !glloader_GL_ARB_compatibility()))
 		{
-			THR(errc::not_supported);
+			THR(errc::function_not_supported);
 		}
 
 		if (glloader_GL_ARB_color_buffer_float())

@@ -867,7 +867,7 @@ namespace KlayGE
 			return DXGI_FORMAT_BC7_UNORM_SRGB;
 
 		default:
-			THR(errc::not_supported);
+			THR(errc::function_not_supported);
 		}
 	}
 
@@ -1069,7 +1069,7 @@ namespace KlayGE
 			return EF_BC7_SRGB;
 
 		default:
-			THR(errc::not_supported);
+			THR(errc::function_not_supported);
 		}
 #ifdef KLAYGE_COMPILER_MSVC
 #pragma warning(pop)

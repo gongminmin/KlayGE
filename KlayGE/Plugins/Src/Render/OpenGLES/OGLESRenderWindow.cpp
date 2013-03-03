@@ -172,7 +172,7 @@ namespace KlayGE
 
 		if (!glloader_GLES_VERSION_2_0())
 		{
-			THR(errc::not_supported);
+			THR(errc::function_not_supported);
 		}
 
 		eglSwapInterval(display_, 0);

@@ -244,13 +244,13 @@ namespace KlayGE
 
 		if (array_index > 0)
 		{
-			THR(errc::not_supported);
+			THR(errc::function_not_supported);
 		}
 
 		uint32_t const channels = NumComponents(texture_1d.Format());
 		if ((1 == channels) || (2 == channels))
 		{
-			THR(errc::not_supported);
+			THR(errc::function_not_supported);
 		}
 
 		tex_ = texture_1d_.GLTexture();
@@ -316,13 +316,13 @@ namespace KlayGE
 
 		if (array_index > 0)
 		{
-			THR(errc::not_supported);
+			THR(errc::function_not_supported);
 		}
 
 		uint32_t const channels = NumComponents(texture_2d.Format());
 		if ((1 == channels) || (2 == channels))
 		{
-			THR(errc::not_supported);
+			THR(errc::function_not_supported);
 		}
 
 		tex_ = texture_2d_.GLTexture();
@@ -393,7 +393,7 @@ namespace KlayGE
 		uint32_t const channels = NumComponents(texture_3d.Format());
 		if ((1 == channels) || (2 == channels))
 		{
-			THR(errc::not_supported);
+			THR(errc::function_not_supported);
 		}
 
 		tex_ = texture_3d_.GLTexture();
@@ -533,7 +533,7 @@ namespace KlayGE
 		uint32_t const channels = NumComponents(texture_cube.Format());
 		if ((1 == channels) || (2 == channels))
 		{
-			THR(errc::not_supported);
+			THR(errc::function_not_supported);
 		}
 
 		tex_ = texture_cube_.GLTexture();
@@ -640,7 +640,7 @@ namespace KlayGE
 
 		if (array_index > 0)
 		{
-			THR(errc::not_supported);
+			THR(errc::function_not_supported);
 		}
 
 		width_ = texture.Width(level);
@@ -762,7 +762,7 @@ namespace KlayGE
 
 		if (array_index > 0)
 		{
-			THR(errc::not_supported);
+			THR(errc::function_not_supported);
 		}
 
 		width_ = texture_cube.Width(level);

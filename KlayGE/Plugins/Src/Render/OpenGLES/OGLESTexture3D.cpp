@@ -35,7 +35,7 @@ namespace KlayGE
 	{
 		if (!glloader_GLES_OES_texture_3D())
 		{
-			THR(errc::not_supported);
+			THR(errc::function_not_supported);
 		}
 
 		if (IsSRGB(format))

@@ -77,7 +77,7 @@ namespace KlayGE
 			}
 			else
 			{
-				THR(errc::address_not_available);
+				THR(errc::bad_address);
 			}
 		}
 

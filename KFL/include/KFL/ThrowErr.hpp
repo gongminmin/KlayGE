@@ -82,7 +82,7 @@ namespace KlayGE
 	{
 		if (!x)
 		{
-			THR(errc::not_supported);
+			THR(errc::function_not_supported);
 		}
 	}
 }

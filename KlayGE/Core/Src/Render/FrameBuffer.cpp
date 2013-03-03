@@ -133,7 +133,7 @@ namespace KlayGE
 				RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 				if (att >= static_cast<uint32_t>(ATT_Color0 + re.DeviceCaps().max_simultaneous_rts))
 				{
-					THR(errc::not_supported);
+					THR(errc::function_not_supported);
 				}
 
 				uint32_t clr_id = att - ATT_Color0;
@@ -191,7 +191,7 @@ namespace KlayGE
 				RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 				if (att >= static_cast<uint32_t>(ATT_Color0 + re.DeviceCaps().max_simultaneous_rts))
 				{
-					THR(errc::not_supported);
+					THR(errc::function_not_supported);
 				}
 
 				uint32_t clr_id = att - ATT_Color0;
@@ -234,7 +234,7 @@ namespace KlayGE
 		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 		if (att >= static_cast<uint32_t>(re.DeviceCaps().max_simultaneous_uavs))
 		{
-			THR(errc::not_supported);
+			THR(errc::function_not_supported);
 		}
 
 		if ((att < ua_views_.size()) && ua_views_[att])
@@ -260,7 +260,7 @@ namespace KlayGE
 		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 		if (att >= static_cast<uint32_t>(ATT_Color0 + re.DeviceCaps().max_simultaneous_rts))
 		{
-			THR(errc::not_supported);
+			THR(errc::function_not_supported);
 		}
 
 		if ((ua_views_.size() < att + 1) && ua_views_[att])

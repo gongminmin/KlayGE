@@ -75,7 +75,7 @@ namespace KlayGE
 		GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
 		if (status != GL_FRAMEBUFFER_COMPLETE)
 		{
-			THR(errc::not_supported);
+			THR(errc::function_not_supported);
 		}
 	}
 
