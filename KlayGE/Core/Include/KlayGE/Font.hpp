@@ -81,14 +81,14 @@ namespace KlayGE
 		explicit Font(std::string const & font_name);
 		explicit Font(std::string const & font_name, uint32_t flags);
 
-		Size_T<uint32_t> CalcSize(std::wstring const & text, uint32_t font_size);
+		Size_T<float> CalcSize(std::wstring const & text, float font_size);
 		void RenderText(float x, float y, Color const & clr,
-			std::wstring const & text, uint32_t font_size);
+			std::wstring const & text, float font_size);
 		void RenderText(float x, float y, float z, float xScale, float yScale, Color const & clr,
-			std::wstring const & text, uint32_t font_size);
+			std::wstring const & text, float font_size);
 		void RenderText(Rect const & rc, float z, float xScale, float yScale, Color const & clr,
-			std::wstring const & text, uint32_t font_size, uint32_t align);
-		void RenderText(float4x4 const & mvp, Color const & clr, std::wstring const & text, uint32_t font_size);
+			std::wstring const & text, float font_size, uint32_t align);
+		void RenderText(float4x4 const & mvp, Color const & clr, std::wstring const & text, float font_size);
 
 	private:
 		shared_ptr<FontRenderable> font_renderable_;

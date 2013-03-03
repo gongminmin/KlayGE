@@ -108,10 +108,10 @@ namespace KlayGE
 		scroll_bar_.SetLocation(x_ + width_ - sb_width_, y_);
 		scroll_bar_.SetSize(sb_width_, height_);
 		FontPtr font = UIManager::Instance().GetFont(elements_[0]->FontIndex());
-		uint32_t font_size = UIManager::Instance().GetFontSize(elements_[0]->FontIndex());
+		float font_size = UIManager::Instance().GetFontSize(elements_[0]->FontIndex());
 		if (font && (font_size != 0))
 		{
-			scroll_bar_.SetPageSize(text_rc_.Height() / font_size);
+			scroll_bar_.SetPageSize(static_cast<size_t>(text_rc_.Height() / font_size));
 
 			// The selected item may have been scrolled off the page.
 			// Ensure that it is in page again.
@@ -653,7 +653,7 @@ namespace KlayGE
 			// Find out the height of a single line of text
 			Rect_T<int32_t> rc = text_rc_;
 			Rect_T<int32_t> rcSel = selection_rc_;
-			rc.bottom() = rc.top() + UIManager::Instance().GetFontSize(pElement->FontIndex());
+			rc.bottom() = static_cast<int32_t>(rc.top() + UIManager::Instance().GetFontSize(pElement->FontIndex()));
 
 			// Update the line height formation
 			text_height_ = rc.Height();

@@ -79,7 +79,7 @@ namespace KlayGE
 			for (size_t i = 0; i < char_width_.size(); ++ i)
 			{
 				std::wstring str = buffer_.substr(0, i);
-				char_width_[i] = font_->CalcSize(str, font_size_).cx();
+				char_width_[i] = static_cast<uint32_t>(font_->CalcSize(str, font_size_).cx());
 			}
 
 			analyse_required_ = false;

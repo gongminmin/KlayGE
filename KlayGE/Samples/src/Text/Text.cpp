@@ -35,13 +35,17 @@ namespace
 	enum
 	{
 		Exit,
-		Scale_Text
+		Move,
+		Scale
 	};
 
 	InputActionDefine actions[] =
 	{
 		InputActionDefine(Exit, KS_Escape),
-		InputActionDefine(Scale_Text, MS_Z),
+
+		InputActionDefine(Move, MS_X),
+		InputActionDefine(Move, MS_Y),
+		InputActionDefine(Scale, MS_Z),
 	};
 }
 
@@ -57,7 +61,7 @@ int SampleMain()
 
 TextApp::TextApp()
 			: App3DFramework("Text"),
-				scale_(1)
+				last_mouse_pt_(-1, -1), position_(0, 0), scale_(1)
 {
 	ResLoader::Instance().AddPath("../../Samples/media/Text");
 }
@@ -115,12 +119,50 @@ void TextApp::OnResize(uint32_t width, uint32_t height)
 	UIManager::Instance().SettleCtrls(width, height);
 }
 
-void TextApp::InputHandler(InputEngine const & /*sender*/, InputAction const & action)
+void TextApp::InputHandler(InputEngine const & sender, InputAction const & action)
 {
+	InputMousePtr mouse;
+	for (uint32_t i = 0; i < sender.NumDevices(); ++ i)
+	{
+		InputMousePtr m = dynamic_pointer_cast<InputMouse>(sender.Device(i));
+		if (m)
+		{
+			mouse = m;
+			break;
+		}
+	}
+
 	switch (action.first)
 	{
-	case Scale_Text:
-		scale_ += action.second / 720.0f;
+	case Move:
+		if (mouse)
+		{
+			int2 this_mouse_pt(mouse->AbsX(), mouse->AbsY());
+			if (mouse->LeftButton())
+			{
+				if ((last_mouse_pt_.x() != -1) || (last_mouse_pt_.y() != -1))
+				{
+					position_ += float2(this_mouse_pt - last_mouse_pt_) / scale_;
+				}
+			}
+
+			last_mouse_pt_ = this_mouse_pt;
+		}
+		break;
+
+	case Scale:
+		if (mouse)
+		{
+			float f = 1.0f + (mouse->Z() * 0.1f) / 120;
+			float2 p = float2(static_cast<float>(-mouse->AbsX()), static_cast<float>(-mouse->AbsY())) / scale_ + position_;
+			float2 new_position = (position_ - p * (1 - f)) / f;
+			float new_scale = scale_ * f;
+			if ((new_scale > 0.25f) && (new_scale < 32))
+			{
+				position_ = new_position;
+				scale_ = new_scale;
+			}
+		}
 		break;
 
 	case Exit:
@@ -140,7 +182,9 @@ void TextApp::DoUpdateOverlay()
 	font_->RenderText(0, 0, Color(1, 1, 0, 1), L"Text", 16);
 	font_->RenderText(0, 18, Color(1, 1, 0, 1), renderEngine.ScreenFrameBuffer()->Description(), 16);
 	font_->RenderText(0, 36, Color(1, 1, 0, 1), stream.str(), 16);
-	font_->RenderText(0, 56, 0.5f, 1, 1, Color(1, 1, 1, 1), text_, static_cast<uint32_t>(32 * scale_));
+
+	float2 fxy = position_ * scale_;
+	font_->RenderText(fxy.x(), fxy.y(), 0.5f, 1, 1, Color(1, 1, 1, 1), text_, 32 * scale_);
 
 	UIManager::Instance().Render();
 }

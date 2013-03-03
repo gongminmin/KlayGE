@@ -275,8 +275,7 @@ int SampleMain()
 JudaTexViewer::JudaTexViewer()
 			: App3DFramework("JudaTexViewer"),
 				sx_(0), sy_(0), ex_(0), ey_(0),
-				last_mouse_x_(-1), last_mouse_y_(-1),
-				position_(0, 0), scale_(1)
+				last_mouse_pt_(-1, -1), position_(0, 0), scale_(1)
 {
 	ResLoader::Instance().AddPath("../../Samples/media/JudaTexViewer");
 }
@@ -354,22 +353,19 @@ void JudaTexViewer::InputHandler(InputEngine const & sender, InputAction const &
 	case Move:
 		if (mouse)
 		{
-			int32_t x = mouse->AbsX();
-			int32_t y = mouse->AbsY();
+			int2 this_mouse_pt(mouse->AbsX(), mouse->AbsY());
 			if (mouse->LeftButton())
 			{
-				if ((last_mouse_x_ != -1) || (last_mouse_y_ != -1))
+				if ((last_mouse_pt_.x() != -1) || (last_mouse_pt_.y() != -1))
 				{
-					position_.x() += (last_mouse_x_ - x) / scale_;
-					position_.y() += (y - last_mouse_y_) / scale_;
-				}
+					position_ += float2(this_mouse_pt - last_mouse_pt_) / scale_;
 
-				checked_pointer_cast<TileObject>(tile_)->Position(position_);
-				checked_pointer_cast<GridBorderObject>(grid_border_)->Position(position_);
+					checked_pointer_cast<TileObject>(tile_)->Position(position_);
+					checked_pointer_cast<GridBorderObject>(grid_border_)->Position(position_);
+				}
 			}
 
-			last_mouse_x_ = x;
-			last_mouse_y_ = y;
+			last_mouse_pt_ = this_mouse_pt;
 		}
 		break;
 
@@ -377,7 +373,7 @@ void JudaTexViewer::InputHandler(InputEngine const & sender, InputAction const &
 		if (mouse)
 		{
 			float f = 1.0f + (mouse->Z() * 0.1f) / 120;
-			float2 p = float2(static_cast<float>(mouse->AbsX()), static_cast<float>(-mouse->AbsY())) / scale_ + position_;
+			float2 p = float2(static_cast<float>(-mouse->AbsX()), static_cast<float>(-mouse->AbsY())) / scale_ + position_;
 			float2 new_position = (position_ - p * (1 - f)) / f;
 			float new_scale = scale_ * f;
 			if (tile_size_ * new_scale > 64)
@@ -487,8 +483,8 @@ void JudaTexViewer::DoUpdateOverlay()
 			stream << x << ',' << y;
 			std::wstring str = stream.str();
 			Size_T<uint32_t> s = font_->CalcSize(str, 16);
-			float fx = (-position_.x() + (x + 0.5f) * tile_size_) * scale_;
-			float fy = (+position_.y() + (y + 0.5f) * tile_size_) * scale_;
+			float fx = (position_.x() + (x + 0.5f) * tile_size_) * scale_;
+			float fy = (position_.y() + (y + 0.5f) * tile_size_) * scale_;
 			font_->RenderText(fx - s.cx() / 2.0f, fy - s.cy() / 2.0f, 0.7f, 1.0f, 1.0f, Color(1, 0, 1, 0.5f), str, 16);
 		}
 	}

@@ -739,7 +739,7 @@ namespace KlayGE
 		return texture_cache_.size() - 1;
 	}
 
-	size_t UIManager::AddFont(FontPtr const & font, uint32_t font_size)
+	size_t UIManager::AddFont(FontPtr const & font, float font_size)
 	{
 		font_cache_.push_back(std::make_pair(font, font_size));
 		return font_cache_.size() - 1;
@@ -771,7 +771,7 @@ namespace KlayGE
 		}
 	}
 
-	uint32_t UIManager::GetFontSize(size_t index) const
+	float UIManager::GetFontSize(size_t index) const
 	{
 		if (index < font_cache_.size())
 		{
@@ -1042,7 +1042,7 @@ namespace KlayGE
 		sc.align = align;
 	}
 
-	Size_T<uint32_t> UIManager::CalcSize(std::wstring const & strText, uint32_t font_index,
+	Size_T<float> UIManager::CalcSize(std::wstring const & strText, uint32_t font_index,
 		Rect_T<int32_t> const & /*rc*/, uint32_t /*align*/)
 	{
 		typedef KLAYGE_DECLTYPE(font_cache_) FontCacheType;
@@ -1571,7 +1571,7 @@ namespace KlayGE
 
 	// Shared resource access. Indexed fonts and textures are shared among
 	// all the controls.
-	void UIDialog::SetFont(size_t index, FontPtr const & font, uint32_t font_size)
+	void UIDialog::SetFont(size_t index, FontPtr const & font, float font_size)
 	{
 		// Make sure the list is at least as large as the index being set
 		if (index + 1 > fonts_.size())
@@ -1586,7 +1586,7 @@ namespace KlayGE
 		return UIManager::Instance().GetFont(fonts_[index]);
 	}
 
-	uint32_t UIDialog::GetFontSize(size_t index) const
+	float UIDialog::GetFontSize(size_t index) const
 	{
 		return UIManager::Instance().GetFontSize(fonts_[index]);
 	}

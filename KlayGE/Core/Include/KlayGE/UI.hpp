@@ -386,11 +386,11 @@ namespace KlayGE
 		UIDialogPtr MakeDialog(TexturePtr const & control_tex = TexturePtr());
 
 		size_t AddTexture(TexturePtr const & texture);
-		size_t AddFont(FontPtr const & font, uint32_t font_size);
+		size_t AddFont(FontPtr const & font, float font_size);
 
 		TexturePtr const & GetTexture(size_t index) const;
 		FontPtr const & GetFont(size_t index) const;
-		uint32_t GetFontSize(size_t index) const;
+		float GetFontSize(size_t index) const;
 
 		bool RegisterDialog(UIDialogPtr const & dialog);
 		void UnregisterDialog(UIDialogPtr const & dialog);
@@ -417,7 +417,7 @@ namespace KlayGE
 		void DrawQuad(float3 const & offset, VertexFormat const * vertices, TexturePtr const & texture);
 		void DrawString(std::wstring const & strText, uint32_t font_index,
 			Rect_T<int32_t> const & rc, float depth, Color const & clr, uint32_t align);
-		Size_T<uint32_t> CalcSize(std::wstring const & strText, uint32_t font_index,
+		Size_T<float> CalcSize(std::wstring const & strText, uint32_t font_index,
 			Rect_T<int32_t> const & rc, uint32_t align);
 
 		Rect_T<int32_t> const & ElementTextureRect(uint32_t ctrl, uint32_t elem_index);
@@ -442,7 +442,7 @@ namespace KlayGE
 		std::vector<UIDialogPtr> dialogs_;            // Dialogs registered
 
 		std::vector<TexturePtr> texture_cache_;   // Shared textures
-		std::vector<std::pair<FontPtr, uint32_t> > font_cache_;         // Shared fonts
+		std::vector<std::pair<FontPtr, float> > font_cache_;         // Shared fonts
 
 		array<std::vector<Rect_T<int32_t> >, UICT_Num_Control_Types> elem_texture_rcs_;
 
@@ -628,9 +628,9 @@ namespace KlayGE
 
 		// Shared resource access. Indexed fonts and textures are shared among
 		// all the controls.
-		void SetFont(size_t index, FontPtr const & font, uint32_t font_size);
+		void SetFont(size_t index, FontPtr const & font, float font_size);
 		FontPtr const & GetFont(size_t index) const;
-		uint32_t GetFontSize(size_t index) const;
+		float GetFontSize(size_t index) const;
 
 		void FocusDefaultControl();
 
@@ -1433,7 +1433,7 @@ namespace KlayGE
 		{
 			return font_;
 		}
-		void SetFont(FontPtr const & font, uint32_t font_size)
+		void SetFont(FontPtr const & font, float font_size)
 		{
 			font_ = font;
 			font_size_ = font_size;
@@ -1459,7 +1459,7 @@ namespace KlayGE
 
 		// Uniscribe-specific
 		FontPtr font_;				// Font node for the font that this buffer uses
-		uint32_t font_size_;
+		float font_size_;
 		bool analyse_required_;			// True if the string has changed since last analysis.
 	};
 

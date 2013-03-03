@@ -167,10 +167,10 @@ namespace KlayGE
 			scroll_bar_.SetLocation(dropdown_rc_.right(), dropdown_rc_.top() + 2);
 			scroll_bar_.SetSize(sb_width_, dropdown_rc_.Height() - 2);
 			FontPtr const & font = UIManager::Instance().GetFont(elements_[2]->FontIndex());
-			uint32_t font_size = UIManager::Instance().GetFontSize(elements_[2]->FontIndex());
+			float font_size = UIManager::Instance().GetFontSize(elements_[2]->FontIndex());
 			if (font && (font_size != 0))
 			{
-				scroll_bar_.SetPageSize(dropdown_text_rc_.Height() / font_size);
+				scroll_bar_.SetPageSize(static_cast<size_t>(dropdown_text_rc_.Height() / font_size));
 
 				// The selected item may have been scrolled off the page.
 				// Ensure that it is in page again.
@@ -433,7 +433,7 @@ namespace KlayGE
 			// Update the page size of the scroll bar
 			if (UIManager::Instance().GetFontSize(pElement->FontIndex()) != 0)
 			{
-				scroll_bar_.SetPageSize(dropdown_text_rc_.Height() / UIManager::Instance().GetFontSize(pElement->FontIndex()));
+				scroll_bar_.SetPageSize(static_cast<size_t>(dropdown_text_rc_.Height() / UIManager::Instance().GetFontSize(pElement->FontIndex())));
 			}
 			else
 			{
@@ -466,7 +466,7 @@ namespace KlayGE
 		pSelectionElement->FontColor().Current = pSelectionElement->FontColor().States[UICS_Normal];
 
 		FontPtr const & font = this->GetDialog()->GetFont(pElement->FontIndex());
-		uint32_t font_size = this->GetDialog()->GetFontSize(pElement->FontIndex());
+		uint32_t font_size = static_cast<uint32_t>(this->GetDialog()->GetFontSize(pElement->FontIndex()) + 0.5f);
 		if (font)
 		{
 			int curY = dropdown_text_rc_.top();

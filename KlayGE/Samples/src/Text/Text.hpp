@@ -24,6 +24,9 @@ private:
 
 	KlayGE::FontPtr font_;
 	std::wstring text_;
+
+	KlayGE::int2 last_mouse_pt_;
+	KlayGE::float2 position_;
 	float scale_;
 };
 
