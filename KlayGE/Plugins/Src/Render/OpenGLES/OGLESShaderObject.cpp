@@ -28,6 +28,7 @@
 #include <algorithm>
 #include <sstream>
 #include <fstream>
+#include <cstring>
 #include <boost/assert.hpp>
 #ifdef KLAYGE_COMPILER_MSVC
 #pragma warning(push)
@@ -1272,88 +1273,88 @@ namespace KlayGE
 		{
 			uint8_t const * nsbp = &native_shader_block[0];
 			uint32_t fourcc;
-			memcpy(&fourcc, nsbp, sizeof(fourcc));
+			std::memcpy(&fourcc, nsbp, sizeof(fourcc));
 			nsbp += sizeof(fourcc);
 			LittleEndianToNative<sizeof(fourcc)>(&fourcc);
 			if (MakeFourCC<'E', 'S', 'S', 'L'>::value == fourcc)
 			{
 				uint32_t ver;
-				memcpy(&ver, nsbp, sizeof(ver));
+				std::memcpy(&ver, nsbp, sizeof(ver));
 				nsbp += sizeof(ver);
 				LittleEndianToNative<sizeof(ver)>(&ver);
 				if (1 == ver)
 				{
 					uint64_t timestamp;
-					memcpy(&timestamp, nsbp, sizeof(timestamp));
+					std::memcpy(&timestamp, nsbp, sizeof(timestamp));
 					nsbp += sizeof(timestamp);
 					LittleEndianToNative<sizeof(timestamp)>(&timestamp);
 					if (timestamp >= effect.Timestamp())
 					{
 						uint64_t hash_val;
-						memcpy(&hash_val, nsbp, sizeof(hash_val));
+						std::memcpy(&hash_val, nsbp, sizeof(hash_val));
 						nsbp += sizeof(timestamp);
 						LittleEndianToNative<sizeof(hash_val)>(&hash_val);
 						if (effect.PredefinedMacrosHash() == hash_val)
 						{
 							uint32_t len32;
-							memcpy(&len32, nsbp, sizeof(len32));
+							std::memcpy(&len32, nsbp, sizeof(len32));
 							nsbp += sizeof(len32);
 							LittleEndianToNative<sizeof(len32)>(&len32);
 							(*glsl_srcs_)[type] = MakeSharedPtr<std::string>(len32, '\0');
-							memcpy(&(*(*glsl_srcs_)[type])[0], nsbp, len32);
+							std::memcpy(&(*(*glsl_srcs_)[type])[0], nsbp, len32);
 							nsbp += len32;
 
 							uint16_t num16;
-							memcpy(&num16, nsbp, sizeof(num16));
+							std::memcpy(&num16, nsbp, sizeof(num16));
 							nsbp += sizeof(num16);
 							LittleEndianToNative<sizeof(num16)>(&num16);
 							(*pnames_)[type] = MakeSharedPtr<std::vector<std::string> >(num16);
 							for (size_t i = 0; i < num16; ++ i)
 							{
 								uint8_t len8;
-								memcpy(&len8, nsbp, sizeof(len8));
+								std::memcpy(&len8, nsbp, sizeof(len8));
 								nsbp += sizeof(len8);
 											
 								(*(*pnames_)[type])[i].resize(len8);
-								memcpy(&(*(*pnames_)[type])[i][0], nsbp, len8);
+								std::memcpy(&(*(*pnames_)[type])[i][0], nsbp, len8);
 								nsbp += len8;
 							}
 
-							memcpy(&num16, nsbp, sizeof(num16));
+							std::memcpy(&num16, nsbp, sizeof(num16));
 							nsbp += sizeof(num16);
 							LittleEndianToNative<sizeof(num16)>(&num16);
 							(*glsl_res_names_)[type] = MakeSharedPtr<std::vector<std::string> >(num16);
 							for (size_t i = 0; i < num16; ++ i)
 							{
 								uint8_t len8;
-								memcpy(&len8, nsbp, sizeof(len8));
+								std::memcpy(&len8, nsbp, sizeof(len8));
 								nsbp += sizeof(len8);
 
 								(*(*glsl_res_names_)[type])[i].resize(len8);
-								memcpy(&(*(*glsl_res_names_)[type])[i][0], nsbp, len8);
+								std::memcpy(&(*(*glsl_res_names_)[type])[i][0], nsbp, len8);
 								nsbp += len8;
 							}
 
-							memcpy(&num16, nsbp, sizeof(num16));
+							std::memcpy(&num16, nsbp, sizeof(num16));
 							nsbp += sizeof(num16);
 							LittleEndianToNative<sizeof(num16)>(&num16);
 							for (size_t i = 0; i < num16; ++ i)
 							{
 								uint8_t len8;
-								memcpy(&len8, nsbp, sizeof(len8));
+								std::memcpy(&len8, nsbp, sizeof(len8));
 								nsbp += sizeof(len8);
 
 								std::string tex_name;
 								tex_name.resize(len8);
-								memcpy(&tex_name[0], nsbp, len8);
+								std::memcpy(&tex_name[0], nsbp, len8);
 								nsbp += len8;
 
-								memcpy(&len8, nsbp, sizeof(len8));
+								std::memcpy(&len8, nsbp, sizeof(len8));
 								nsbp += sizeof(len8);
 
 								std::string sampler_name;
 								sampler_name.resize(len8);
-								memcpy(&sampler_name[0], nsbp, len8);
+								std::memcpy(&sampler_name[0], nsbp, len8);
 								nsbp += len8;
 
 								std::string combined_sampler_name = tex_name + "__" + sampler_name;
@@ -1378,35 +1379,35 @@ namespace KlayGE
 							if (ST_VertexShader == type)
 							{
 								uint8_t num8;
-								memcpy(&num8, nsbp, sizeof(num8));
+								std::memcpy(&num8, nsbp, sizeof(num8));
 								nsbp += sizeof(num8);
 								vs_usages_->resize(num8);
 								for (size_t i = 0; i < num8; ++ i)
 								{
 									uint8_t veu;
-									memcpy(&veu, nsbp, sizeof(veu));
+									std::memcpy(&veu, nsbp, sizeof(veu));
 									nsbp += sizeof(veu);
 
 									(*vs_usages_)[i] = static_cast<VertexElementUsage>(veu);
 								}
 
-								memcpy(&num8, nsbp, sizeof(num8));
+								std::memcpy(&num8, nsbp, sizeof(num8));
 								nsbp += sizeof(num8);
 								vs_usage_indices_->resize(num8);
-								memcpy(&(*vs_usage_indices_)[0], nsbp, num8 * sizeof((*vs_usage_indices_)[0]));
+								std::memcpy(&(*vs_usage_indices_)[0], nsbp, num8 * sizeof((*vs_usage_indices_)[0]));
 								nsbp += num8 * sizeof((*vs_usage_indices_)[0]);
 
-								memcpy(&num8, nsbp, sizeof(num8));
+								std::memcpy(&num8, nsbp, sizeof(num8));
 								nsbp += sizeof(num8);
 								glsl_vs_attrib_names_->resize(num8);
 								for (size_t i = 0; i < num8; ++ i)
 								{
 									uint8_t len8;
-									memcpy(&len8, nsbp, sizeof(len8));
+									std::memcpy(&len8, nsbp, sizeof(len8));
 									nsbp += sizeof(len8);
 
 									(*glsl_vs_attrib_names_)[i].resize(len8);
-									memcpy(&(*glsl_vs_attrib_names_)[i][0], nsbp, len8);
+									std::memcpy(&(*glsl_vs_attrib_names_)[i][0], nsbp, len8);
 									nsbp += len8;
 								}
 							}
@@ -1522,7 +1523,7 @@ namespace KlayGE
 
 			std::string out_str = oss.str();
 			native_shader_block.resize(out_str.size());
-			memcpy(&native_shader_block[0], &out_str[0], out_str.size());
+			std::memcpy(&native_shader_block[0], &out_str[0], out_str.size());
 		}
 	}
 

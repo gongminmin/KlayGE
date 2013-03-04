@@ -104,7 +104,7 @@ namespace KlayGE
 					else
 					{
 						tex_data_[face * num_mip_maps_ + level].resize(image_size);
-						memcpy(&tex_data_[face * num_mip_maps_ + level][0], init_data[face * num_mip_maps_ + level].data, image_size);
+						std::memcpy(&tex_data_[face * num_mip_maps_ + level][0], init_data[face * num_mip_maps_ + level].data, image_size);
 					}
 					glCompressedTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + face, level, glinternalFormat,
 						s, s, 0, image_size, &tex_data_[face * num_mip_maps_ + level][0]);
@@ -120,7 +120,7 @@ namespace KlayGE
 					else
 					{
 						tex_data_[face * num_mip_maps_ + level].resize(image_size);
-						memcpy(&tex_data_[face * num_mip_maps_ + level][0], init_data[face * num_mip_maps_ + level].data, image_size);
+						std::memcpy(&tex_data_[face * num_mip_maps_ + level][0], init_data[face * num_mip_maps_ + level].data, image_size);
 					}
 					glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + face, level, glinternalFormat,
 						s, s, 0, glformat, gltype, &tex_data_[face * num_mip_maps_ + level][0]);
@@ -178,7 +178,7 @@ namespace KlayGE
 
 						GLsizei const image_size = ((this->Width(level) + 3) / 4) * ((this->Width(level) + 3) / 4) * block_size;
 
-						memcpy(&gles_target.tex_data_[face * num_mip_maps_ + level][0], &tex_data_[face * num_mip_maps_ + level][0], image_size);
+						std::memcpy(&gles_target.tex_data_[face * num_mip_maps_ + level][0], &tex_data_[face * num_mip_maps_ + level][0], image_size);
 						glCompressedTexSubImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + face, level, 0, 0,
 							this->Width(level), this->Width(level), gl_format, image_size, &tex_data_[face * num_mip_maps_ + level][0]);
 					}
@@ -186,7 +186,7 @@ namespace KlayGE
 					{
 						GLsizei const image_size = target.Width(level) * target.Width(level) * texel_size;
 
-						memcpy(&gles_target.tex_data_[face * num_mip_maps_ + level][0], &tex_data_[face * num_mip_maps_ + level][0], image_size);
+						std::memcpy(&gles_target.tex_data_[face * num_mip_maps_ + level][0], &tex_data_[face * num_mip_maps_ + level][0], image_size);
 						glTexSubImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + face, level, 0, 0, this->Width(level), this->Width(level),
 								gl_format, gl_type, &tex_data_[face * num_mip_maps_ + level][0]);
 					}
@@ -243,7 +243,7 @@ namespace KlayGE
 				uint8_t* d = mapper_dst.Pointer<uint8_t>() + (dst_y_offset / 4) * mapper_dst.RowPitch() + (dst_x_offset / 4 * block_size);
 				for (uint32_t y = 0; y < src_height; y += 4)
 				{
-					memcpy(d, s, src_width / 4 * block_size);
+					std::memcpy(d, s, src_width / 4 * block_size);
 
 					s += mapper_src.RowPitch();
 					d += mapper_dst.RowPitch();
@@ -259,7 +259,7 @@ namespace KlayGE
 				uint8_t* d = mapper_dst.Pointer<uint8_t>();
 				for (uint32_t y = 0; y < src_height; ++ y)
 				{
-					memcpy(d, s, src_width * format_size);
+					std::memcpy(d, s, src_width * format_size);
 
 					s += mapper_src.RowPitch();
 					d += mapper_dst.RowPitch();

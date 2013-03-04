@@ -35,6 +35,7 @@
 #include <algorithm>
 #include <fstream>
 #include <sstream>
+#include <cstring>
 
 #include <MeshMLLib/MeshMLLib.hpp>
 
@@ -1371,7 +1372,7 @@ namespace KlayGE
 						case EF_BGR32F:
 						case EF_GR32F:
 						case EF_R32F:
-							memcpy(&pos, src, std::min<int>(merged_ves[ve].element_size(), sizeof(pos)));
+							std::memcpy(&pos, src, std::min<int>(merged_ves[ve].element_size(), sizeof(pos)));
 							break;
 
 						default:
@@ -1395,7 +1396,7 @@ namespace KlayGE
 						case EF_BGR32F:
 						case EF_GR32F:
 						case EF_R32F:
-							memcpy(&texcoords.back(), src, std::min<int>(merged_ves[ve].element_size(), sizeof(texcoords.back())));
+							std::memcpy(&texcoords.back(), src, std::min<int>(merged_ves[ve].element_size(), sizeof(texcoords.back())));
 							break;
 
 						default:
@@ -1416,7 +1417,7 @@ namespace KlayGE
 						{
 						case EF_ABGR32F:
 						case EF_BGR32F:
-							memcpy(&normal, src, std::min<int>(merged_ves[ve].element_size(), sizeof(normal)));
+							std::memcpy(&normal, src, std::min<int>(merged_ves[ve].element_size(), sizeof(normal)));
 							break;
 
 						case EF_A2BGR10:
@@ -1455,7 +1456,7 @@ namespace KlayGE
 						switch (merged_ves[ve].format)
 						{
 						case EF_ABGR32F:
-							memcpy(&tangent_quat, src, std::min<int>(merged_ves[ve].element_size(), sizeof(tangent_quat)));
+							std::memcpy(&tangent_quat, src, std::min<int>(merged_ves[ve].element_size(), sizeof(tangent_quat)));
 							break;
 
 						case EF_ABGR8:
@@ -1650,7 +1651,7 @@ namespace KlayGE
 					merged_buffs[j].resize(size);
 
 					GraphicsBuffer::Mapper mapper(*vb_cpu, BA_Read_Only);
-					memcpy(&merged_buffs[j][0], mapper.Pointer<uint8_t>(), size);
+					std::memcpy(&merged_buffs[j][0], mapper.Pointer<uint8_t>(), size);
 				}
 
 				if (EF_R16UI == rl->IndexStreamFormat())
@@ -1673,7 +1674,7 @@ namespace KlayGE
 					merged_indices.resize(size);
 
 					GraphicsBuffer::Mapper mapper(*ib_cpu, BA_Read_Only);
-					memcpy(&merged_indices[0], mapper.Pointer<uint8_t>(), size);
+					std::memcpy(&merged_indices[0], mapper.Pointer<uint8_t>(), size);
 				}
 			}
 

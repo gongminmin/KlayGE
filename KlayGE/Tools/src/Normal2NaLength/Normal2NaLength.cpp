@@ -9,6 +9,7 @@
 #include <iostream>
 #include <fstream>
 #include <vector>
+#include <cstring>
 
 using namespace std;
 using namespace KlayGE;
@@ -70,7 +71,7 @@ namespace
 							{
 								if (x_base + x < width)
 								{
-									memcpy(&normals[((y_base + y) * width + (x_base + x)) * 4], &argb[y * 4 + x], sizeof(uint32_t));
+									std::memcpy(&normals[((y_base + y) * width + (x_base + x)) * 4], &argb[y * 4 + x], sizeof(uint32_t));
 								}
 							}
 						}
@@ -180,7 +181,7 @@ namespace
 						{
 							if (EF_BC4 == new_format)
 							{
-								memcpy(&new_lengths[dest], &len_bc4, sizeof(len_bc4));
+								std::memcpy(&new_lengths[dest], &len_bc4, sizeof(len_bc4));
 								dest += sizeof(len_bc4);
 							}
 							else
@@ -190,7 +191,7 @@ namespace
 								BC1_layout len_bc1;
 								BC4ToBC1G(len_bc1, len_bc4);
 
-								memcpy(&new_lengths[dest], &len_bc1, sizeof(len_bc1));
+								std::memcpy(&new_lengths[dest], &len_bc1, sizeof(len_bc1));
 								dest += sizeof(len_bc1);
 							}
 						}
@@ -260,7 +261,7 @@ namespace
 
 							if (EF_BC4 == new_format)
 							{
-								memcpy(&new_lengths[dest], &len_bc4, sizeof(len_bc4));
+								std::memcpy(&new_lengths[dest], &len_bc4, sizeof(len_bc4));
 								dest += sizeof(len_bc4);
 							}
 							else
@@ -270,7 +271,7 @@ namespace
 								BC1_layout len_bc1;
 								BC4ToBC1G(len_bc1, len_bc4);
 
-								memcpy(&new_lengths[dest], &len_bc1, sizeof(len_bc1));
+								std::memcpy(&new_lengths[dest], &len_bc1, sizeof(len_bc1));
 								dest += sizeof(len_bc1);
 							}
 						}

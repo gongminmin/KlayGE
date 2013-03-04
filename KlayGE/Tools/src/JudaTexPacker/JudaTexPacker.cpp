@@ -15,6 +15,7 @@
 #include <vector>
 #include <list>
 #include <map>
+#include <cstring>
 
 #include <KlayGE/JudaTexture.hpp>
 
@@ -41,6 +42,10 @@ public:
 
 struct address_calculator
 {
+	virtual ~address_calculator()
+	{
+	}
+
 	virtual int32_t operator()(int32_t x, uint32_t h) = 0;
 };
 
@@ -246,13 +251,13 @@ void PackJTML(std::string const & jtml_name)
 							int32_t tex_x = (*calc_u)(static_cast<int32_t>(bx * tile_size + dx), in_width);
 							if (tex_x >= 0)
 							{
-								memcpy(&tiles[xindex][(dy * tile_size + dx) * pixel_size],
+								std::memcpy(&tiles[xindex][(dy * tile_size + dx) * pixel_size],
 									&in_data_p[tex_y * mapper.RowPitch() + tex_x * pixel_size],
 									pixel_size);
 							}
 							else
 							{
-								memcpy(&tiles[xindex][(dy * tile_size + dx) * pixel_size],
+								std::memcpy(&tiles[xindex][(dy * tile_size + dx) * pixel_size],
 									&border_clr_u8,
 									pixel_size);
 							}
@@ -262,7 +267,7 @@ void PackJTML(std::string const & jtml_name)
 					{
 						for (size_t dx = 0; dx < tile_size; ++ dx)
 						{
-							memcpy(&tiles[xindex][(dy * tile_size + dx) * pixel_size],
+							std::memcpy(&tiles[xindex][(dy * tile_size + dx) * pixel_size],
 								&border_clr_u8,
 								pixel_size);
 						}

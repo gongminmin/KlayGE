@@ -805,7 +805,7 @@ namespace
 						char* p = static_cast<char*>(const_cast<void*>(tex_desc_.tex_data->init_data[i].data)) + j;
 
 						BC4ToBC1G(tmp, *reinterpret_cast<BC4_layout const *>(p + sizeof(BC4_layout)));
-						memcpy(p + sizeof(BC4_layout), &tmp, sizeof(BC1_layout));
+						std::memcpy(p + sizeof(BC4_layout), &tmp, sizeof(BC1_layout));
 					}
 				}
 
@@ -895,7 +895,7 @@ namespace
 
 								for (int y = 0; y < 4; ++ y)
 								{
-									memcpy(&sub_rgba_data_block[((block_y + y) * width + block_x) * 4], &rgba[y * 4], sizeof(uint8_t) * 16);
+									std::memcpy(&sub_rgba_data_block[((block_y + y) * width + block_x) * 4], &rgba[y * 4], sizeof(uint8_t) * 16);
 								}
 							}
 						}
@@ -981,7 +981,7 @@ namespace
 
 								for (int y = 0; y < 4; ++ y)
 								{
-									memcpy(&sub_rgba_data_block[((block_y + y) * width + block_x) * 4], &rgba[y * 4], sizeof(uint8_t) * 16);
+									std::memcpy(&sub_rgba_data_block[((block_y + y) * width + block_x) * 4], &rgba[y * 4], sizeof(uint8_t) * 16);
 								}
 							}
 						}
@@ -1067,7 +1067,7 @@ namespace
 
 								for (int y = 0; y < 4; ++ y)
 								{
-									memcpy(&sub_rgba_data_block[((block_y + y) * width + block_x) * 4], &rgba[y * 4], sizeof(uint8_t) * 16);
+									std::memcpy(&sub_rgba_data_block[((block_y + y) * width + block_x) * 4], &rgba[y * 4], sizeof(uint8_t) * 16);
 								}
 							}
 						}
@@ -2585,7 +2585,7 @@ namespace KlayGE
 							Texture::Mapper mapper(*texture_sys_mem, array_index, level, TMA_Read_Only, 0, texture_sys_mem->Width(level));
 							base[index] = data_block.size();
 							data_block.resize(data_block.size() + image_size);
-							memcpy(&data_block[base[index]], mapper.Pointer<char>(), image_size);
+							std::memcpy(&data_block[base[index]], mapper.Pointer<char>(), image_size);
 						}
 					}
 				}
@@ -2628,7 +2628,7 @@ namespace KlayGE
 								data_block.resize(data_block.size() + image_size);
 								for (uint32_t y = 0; y < (height + 3) / 4; ++ y)
 								{
-									memcpy(&data_block[base[index] + y * ((width + 3) / 4) * block_size], data, (width + 3) / 4 * block_size);
+									std::memcpy(&data_block[base[index] + y * ((width + 3) / 4) * block_size], data, (width + 3) / 4 * block_size);
 									data += mapper.RowPitch();
 								}
 							}
@@ -2642,7 +2642,7 @@ namespace KlayGE
 							data_block.resize(data_block.size() + width * height * format_size);
 							for (uint32_t y = 0; y < height; ++ y)
 							{
-								memcpy(&data_block[base[index] + y * width * format_size], data, width * format_size);
+								std::memcpy(&data_block[base[index] + y * width * format_size], data, width * format_size);
 								data += mapper.RowPitch();
 							}
 						}
@@ -2690,7 +2690,7 @@ namespace KlayGE
 								{
 									for (uint32_t y = 0; y < (height + 3) / 4; ++ y)
 									{
-										memcpy(&data_block[base[index] + (z * ((height + 3) / 4) + y) * ((width + 3) / 4) * block_size], data, (width + 3) / 4 * block_size);
+										std::memcpy(&data_block[base[index] + (z * ((height + 3) / 4) + y) * ((width + 3) / 4) * block_size], data, (width + 3) / 4 * block_size);
 										data += mapper.RowPitch();
 									}
 
@@ -2709,7 +2709,7 @@ namespace KlayGE
 							{
 								for (uint32_t y = 0; y < height; ++ y)
 								{
-									memcpy(&data_block[base[index] + (z * height + y) * width * format_size], data, width * format_size);
+									std::memcpy(&data_block[base[index] + (z * height + y) * width * format_size], data, width * format_size);
 									data += mapper.RowPitch();
 								}
 
@@ -2758,7 +2758,7 @@ namespace KlayGE
 									data_block.resize(data_block.size() + image_size);
 									for (uint32_t y = 0; y < (height + 3) / 4; ++ y)
 									{
-										memcpy(&data_block[base[index] + y * ((width + 3) / 4) * block_size], data, (width + 3) / 4 * block_size);
+										std::memcpy(&data_block[base[index] + y * ((width + 3) / 4) * block_size], data, (width + 3) / 4 * block_size);
 										data += mapper.RowPitch();
 									}
 								}
@@ -2772,7 +2772,7 @@ namespace KlayGE
 								data_block.resize(data_block.size() + width * height * format_size);
 								for (uint32_t y = 0; y < height; ++ y)
 								{
-									memcpy(&data_block[base[index] + y * width * format_size], data, width * format_size);
+									std::memcpy(&data_block[base[index] + y * width * format_size], data, width * format_size);
 									data += mapper.RowPitch();
 								}
 							}
@@ -3920,7 +3920,7 @@ namespace KlayGE
 
 					if (src_width == dst_width)
 					{
-						memcpy(dst_p, src_p, src_width * src_elem_size);
+						std::memcpy(dst_p, src_p, src_width * src_elem_size);
 					}
 					else
 					{
@@ -3928,7 +3928,7 @@ namespace KlayGE
 						{
 							float fx = static_cast<float>(x) / dst_width * src_width;
 							uint32_t sx = static_cast<uint32_t>(fx + 0.5f);
-							memcpy(dst_p, src_p + sx * src_elem_size, src_elem_size);
+							std::memcpy(dst_p, src_p + sx * src_elem_size, src_elem_size);
 						}
 					}
 				}

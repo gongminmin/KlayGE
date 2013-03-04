@@ -8,6 +8,7 @@
 #include <iostream>
 #include <fstream>
 #include <vector>
+#include <cstring>
 
 using namespace std;
 using namespace KlayGE;
@@ -62,7 +63,7 @@ namespace
 				uint8_t* dst = &new_data_block[sub_res * num_full_mip_maps][0];
 				for (uint32_t y = 0; y < the_height; ++ y)
 				{
-					memcpy(dst, src, dst_data.row_pitch);
+					std::memcpy(dst, src, dst_data.row_pitch);
 
 					src += src_data.row_pitch;
 					dst += dst_data.row_pitch;

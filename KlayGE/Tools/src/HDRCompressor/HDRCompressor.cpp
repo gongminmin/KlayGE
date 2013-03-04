@@ -9,6 +9,7 @@
 #include <iostream>
 #include <fstream>
 #include <vector>
+#include <cstring>
 #ifdef KLAYGE_TR2_LIBRARY_FILESYSTEM_V2_SUPPORT
 	#include <filesystem>
 	namespace KlayGE
@@ -155,7 +156,7 @@ namespace
 					EncodeBC4(com_bc5.red, uncom_u);
 					EncodeBC4(com_bc5.green, uncom_v);
 
-					memcpy(c_dst, &com_bc5, sizeof(com_bc5));
+					std::memcpy(c_dst, &com_bc5, sizeof(com_bc5));
 					c_dst += sizeof(com_bc5);
 				}
 				else
@@ -172,7 +173,7 @@ namespace
 					BC3_layout com_bc3;
 					EncodeBC3(com_bc3, uncom_argb, EBCM_Quality);
 
-					memcpy(c_dst, &com_bc3, sizeof(com_bc3));
+					std::memcpy(c_dst, &com_bc3, sizeof(com_bc3));
 					c_dst += sizeof(com_bc3);
 				}
 			}
@@ -226,7 +227,7 @@ namespace
 						{
 							if (x_base + x < c_width)
 							{
-								memcpy(&c_data_uncom[((y_base + y) * c_width + (x_base + x)) * 4], &argb[y * 4 + x], sizeof(uint32_t));
+								std::memcpy(&c_data_uncom[((y_base + y) * c_width + (x_base + x)) * 4], &argb[y * 4 + x], sizeof(uint32_t));
 							}
 						}
 					}

@@ -101,7 +101,7 @@ namespace KlayGE
 				else
 				{
 					tex_data_[level].resize(image_size);
-					memcpy(&tex_data_[level][0], init_data[level].data, image_size);
+					std::memcpy(&tex_data_[level][0], init_data[level].data, image_size);
 				}
 				glCompressedTexImage2D(target_type_, level, glinternalFormat,
 					width, 1, 0, image_size, &tex_data_[level][0]);
@@ -117,7 +117,7 @@ namespace KlayGE
 				else
 				{
 					tex_data_[level].resize(image_size);
-					memcpy(&tex_data_[level][0], init_data[level].data, image_size);
+					std::memcpy(&tex_data_[level][0], init_data[level].data, image_size);
 				}
 				glTexImage2D(target_type_, level, glinternalFormat, width, 1, 0, glformat, gltype, &tex_data_[level][0]);
 			}
@@ -166,7 +166,7 @@ namespace KlayGE
 
 					GLsizei const image_size = ((this->Width(level) + 3) / 4) * block_size;
 
-					memcpy(&gles_target.tex_data_[level][0], &tex_data_[level][0], image_size);
+					std::memcpy(&gles_target.tex_data_[level][0], &tex_data_[level][0], image_size);
 					glCompressedTexSubImage2D(target_type_, level, 0, 0,
 						this->Width(level), 1, gl_format, image_size, &tex_data_[level][0]);
 				}
@@ -174,7 +174,7 @@ namespace KlayGE
 				{
 					GLsizei const image_size = target.Width(level) * texel_size;
 
-					memcpy(&gles_target.tex_data_[level][0], &tex_data_[level][0], image_size);
+					std::memcpy(&gles_target.tex_data_[level][0], &tex_data_[level][0], image_size);
 					glTexSubImage2D(target_type_, level, 0, 0, this->Width(level), 1, gl_format, gl_type, &tex_data_[level][0]);
 				}
 			}
@@ -224,7 +224,7 @@ namespace KlayGE
 
 				uint8_t const * s = mapper_src.Pointer<uint8_t>() + (src_x_offset / 4 * block_size);
 				uint8_t* d = mapper_dst.Pointer<uint8_t>() + (dst_x_offset / 4 * block_size);
-				memcpy(d, s, src_width / 4 * block_size);
+				std::memcpy(d, s, src_width / 4 * block_size);
 			}
 			else
 			{
@@ -235,7 +235,7 @@ namespace KlayGE
 				uint8_t const * s = mapper_src.Pointer<uint8_t>();
 				uint8_t* d = mapper_dst.Pointer<uint8_t>();
 
-				memcpy(d, s, src_width * format_size);
+				std::memcpy(d, s, src_width * format_size);
 			}
 		}
 		else

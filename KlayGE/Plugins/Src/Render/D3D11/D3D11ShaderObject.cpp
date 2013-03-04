@@ -29,6 +29,7 @@
 #include <map>
 #include <algorithm>
 #include <sstream>
+#include <cstring>
 #include <boost/assert.hpp>
 #ifdef KLAYGE_COMPILER_MSVC
 #pragma warning(push)
@@ -139,9 +140,9 @@ namespace
 			param_->Value(v);
 
 			v = MathLib::transpose(v);
-			if (memcmp(target_, &v[0], size_))
+			if (std::memcmp(target_, &v[0], size_))
 			{
-				memcpy(target_, &v[0], size_);
+				std::memcpy(target_, &v[0], size_);
 				*dirty_ = true;
 			}
 		}
@@ -205,7 +206,7 @@ namespace
 				{
 					v4[i] = Vector_T<T, 4>(v[i].x(), v[i].y(), 0, 0);
 				}
-				memcpy(target_, &v4[0], std::min(size_, v4.size() * sizeof(v4[0])));
+				std::memcpy(target_, &v4[0], std::min(size_, v4.size() * sizeof(v4[0])));
 			}
 			*dirty_ = true;
 		}
@@ -238,7 +239,7 @@ namespace
 				{
 					v4[i] = Vector_T<T, 4>(v[i].x(), v[i].y(), v[i].z(), 0);
 				}
-				memcpy(target_, &v4[0], std::min(size_, v4.size() * sizeof(v4[0])));
+				std::memcpy(target_, &v4[0], std::min(size_, v4.size() * sizeof(v4[0])));
 			}
 			*dirty_ = true;
 		}
@@ -266,7 +267,7 @@ namespace
 
 			if (!v.empty())
 			{
-				memcpy(target_, &v[0], std::min(size_, v.size() * sizeof(v[0])));
+				std::memcpy(target_, &v[0], std::min(size_, v.size() * sizeof(v[0])));
 			}
 			*dirty_ = true;
 		}
@@ -297,7 +298,7 @@ namespace
 			KLAYGE_FOREACH(VType::reference mat, v)
 			{
 				mat = MathLib::transpose(mat);
-				memcpy(&target_[start], &mat[0], rows_ * sizeof(float4));
+				std::memcpy(&target_[start], &mat[0], rows_ * sizeof(float4));
 				start += rows_;
 			}
 			*dirty_ = true;
@@ -810,25 +811,25 @@ namespace KlayGE
 			uint8_t const * nsbp = &native_shader_block[0];
 
 			uint32_t fourcc;
-			memcpy(&fourcc, nsbp, sizeof(fourcc));
+			std::memcpy(&fourcc, nsbp, sizeof(fourcc));
 			nsbp += sizeof(fourcc);
 			LittleEndianToNative<sizeof(fourcc)>(&fourcc);
 			if (MakeFourCC<'D', 'X', 'B', 'C'>::value == fourcc)
 			{
 				uint32_t ver;
-				memcpy(&ver, nsbp, sizeof(ver));
+				std::memcpy(&ver, nsbp, sizeof(ver));
 				nsbp += sizeof(ver);
 				LittleEndianToNative<sizeof(ver)>(&ver);
 				if (3 == ver)
 				{
 					uint64_t timestamp;
-					memcpy(&timestamp, nsbp, sizeof(timestamp));
+					std::memcpy(&timestamp, nsbp, sizeof(timestamp));
 					nsbp += sizeof(timestamp);
 					LittleEndianToNative<sizeof(timestamp)>(&timestamp);
 					if (timestamp >= effect.Timestamp())
 					{
 						uint64_t hash_val;
-						memcpy(&hash_val, nsbp, sizeof(hash_val));
+						std::memcpy(&hash_val, nsbp, sizeof(hash_val));
 						nsbp += sizeof(hash_val);
 						LittleEndianToNative<sizeof(hash_val)>(&hash_val);
 						if (effect.PredefinedMacrosHash() == hash_val)
@@ -837,33 +838,33 @@ namespace KlayGE
 							++ nsbp;
 							std::string profile;
 							profile.resize(len);
-							memcpy(&profile[0], nsbp, len);
+							std::memcpy(&profile[0], nsbp, len);
 							nsbp += len;
 							if (profile == shader_profile)
 							{
 								uint32_t blob_size;
-								memcpy(&blob_size, nsbp, sizeof(blob_size));
+								std::memcpy(&blob_size, nsbp, sizeof(blob_size));
 								nsbp += sizeof(blob_size);
 								shared_ptr<std::vector<uint8_t> > code_blob = MakeSharedPtr<std::vector<uint8_t> >(blob_size);
 
-								memcpy(&((*code_blob)[0]), nsbp, blob_size);
+								std::memcpy(&((*code_blob)[0]), nsbp, blob_size);
 								nsbp += blob_size;
 
 								D3D11ShaderDesc& sd = shader_desc_[type];
 
 								uint16_t cb_desc_size;
-								memcpy(&cb_desc_size, nsbp, sizeof(cb_desc_size));
+								std::memcpy(&cb_desc_size, nsbp, sizeof(cb_desc_size));
 								nsbp += sizeof(cb_desc_size);
 								LittleEndianToNative<sizeof(cb_desc_size)>(&cb_desc_size);
 								sd.cb_desc.resize(cb_desc_size);
 								for (size_t i = 0; i < sd.cb_desc.size(); ++ i)
 								{
-									memcpy(&sd.cb_desc[i].size, nsbp, sizeof(sd.cb_desc[i].size));
+									std::memcpy(&sd.cb_desc[i].size, nsbp, sizeof(sd.cb_desc[i].size));
 									nsbp += sizeof(sd.cb_desc[i].size);
 									LittleEndianToNative<sizeof(sd.cb_desc[i].size)>(&sd.cb_desc[i].size);
 
 									uint16_t var_desc_size;
-									memcpy(&var_desc_size, nsbp, sizeof(var_desc_size));
+									std::memcpy(&var_desc_size, nsbp, sizeof(var_desc_size));
 									nsbp += sizeof(var_desc_size);
 									LittleEndianToNative<sizeof(var_desc_size)>(&var_desc_size);
 									sd.cb_desc[i].var_desc.resize(var_desc_size);
@@ -872,36 +873,36 @@ namespace KlayGE
 										len = *nsbp;
 										++ nsbp;
 										sd.cb_desc[i].var_desc[j].name.resize(len);
-										memcpy(&sd.cb_desc[i].var_desc[j].name[0], nsbp, len);
+										std::memcpy(&sd.cb_desc[i].var_desc[j].name[0], nsbp, len);
 										nsbp += len;
 
-										memcpy(&sd.cb_desc[i].var_desc[j].start_offset, nsbp, sizeof(sd.cb_desc[i].var_desc[j].start_offset));
+										std::memcpy(&sd.cb_desc[i].var_desc[j].start_offset, nsbp, sizeof(sd.cb_desc[i].var_desc[j].start_offset));
 										nsbp += sizeof(sd.cb_desc[i].var_desc[j].start_offset);
 										LittleEndianToNative<sizeof(sd.cb_desc[i].var_desc[j].start_offset)>(&sd.cb_desc[i].var_desc[j].start_offset);
-										memcpy(&sd.cb_desc[i].var_desc[j].type, nsbp, sizeof(sd.cb_desc[i].var_desc[j].type));
+										std::memcpy(&sd.cb_desc[i].var_desc[j].type, nsbp, sizeof(sd.cb_desc[i].var_desc[j].type));
 										nsbp += sizeof(sd.cb_desc[i].var_desc[j].type);
-										memcpy(&sd.cb_desc[i].var_desc[j].rows, nsbp, sizeof(sd.cb_desc[i].var_desc[j].rows));
+										std::memcpy(&sd.cb_desc[i].var_desc[j].rows, nsbp, sizeof(sd.cb_desc[i].var_desc[j].rows));
 										nsbp += sizeof(sd.cb_desc[i].var_desc[j].rows);
-										memcpy(&sd.cb_desc[i].var_desc[j].columns, nsbp, sizeof(sd.cb_desc[i].var_desc[j].columns));
+										std::memcpy(&sd.cb_desc[i].var_desc[j].columns, nsbp, sizeof(sd.cb_desc[i].var_desc[j].columns));
 										nsbp += sizeof(sd.cb_desc[i].var_desc[j].columns);
-										memcpy(&sd.cb_desc[i].var_desc[j].elements, nsbp, sizeof(sd.cb_desc[i].var_desc[j].elements));
+										std::memcpy(&sd.cb_desc[i].var_desc[j].elements, nsbp, sizeof(sd.cb_desc[i].var_desc[j].elements));
 										nsbp += sizeof(sd.cb_desc[i].var_desc[j].elements);
 										LittleEndianToNative<sizeof(sd.cb_desc[i].var_desc[j].elements)>(&sd.cb_desc[i].var_desc[j].elements);
 									}
 								}
 
-								memcpy(&sd.num_samplers, nsbp, sizeof(sd.num_samplers));
+								std::memcpy(&sd.num_samplers, nsbp, sizeof(sd.num_samplers));
 								nsbp += sizeof(sd.num_samplers);
 								LittleEndianToNative<sizeof(sd.num_samplers)>(&sd.num_samplers);
-								memcpy(&sd.num_srvs, nsbp, sizeof(sd.num_srvs));
+								std::memcpy(&sd.num_srvs, nsbp, sizeof(sd.num_srvs));
 								nsbp += sizeof(sd.num_srvs);
 								LittleEndianToNative<sizeof(sd.num_srvs)>(&sd.num_srvs);
-								memcpy(&sd.num_uavs, nsbp, sizeof(sd.num_uavs));
+								std::memcpy(&sd.num_uavs, nsbp, sizeof(sd.num_uavs));
 								nsbp += sizeof(sd.num_uavs);
 								LittleEndianToNative<sizeof(sd.num_uavs)>(&sd.num_uavs);
 
 								uint16_t res_desc_size;
-								memcpy(&res_desc_size, nsbp, sizeof(res_desc_size));
+								std::memcpy(&res_desc_size, nsbp, sizeof(res_desc_size));
 								nsbp += sizeof(res_desc_size);
 								LittleEndianToNative<sizeof(res_desc_size)>(&res_desc_size);
 								sd.res_desc.resize(res_desc_size);
@@ -910,37 +911,37 @@ namespace KlayGE
 									len = *nsbp;
 									++ nsbp;
 									sd.res_desc[i].name.resize(len);
-									memcpy(&sd.res_desc[i].name[0], nsbp, len);
+									std::memcpy(&sd.res_desc[i].name[0], nsbp, len);
 									nsbp += len;
 
-									memcpy(&sd.res_desc[i].type, nsbp, sizeof(sd.res_desc[i].type));
+									std::memcpy(&sd.res_desc[i].type, nsbp, sizeof(sd.res_desc[i].type));
 									nsbp += sizeof(sd.res_desc[i].type);
 
-									memcpy(&sd.res_desc[i].dimension, nsbp, sizeof(sd.res_desc[i].dimension));
+									std::memcpy(&sd.res_desc[i].dimension, nsbp, sizeof(sd.res_desc[i].dimension));
 									nsbp += sizeof(sd.res_desc[i].dimension);
 
-									memcpy(&sd.res_desc[i].bind_point, nsbp, sizeof(sd.res_desc[i].bind_point));
+									std::memcpy(&sd.res_desc[i].bind_point, nsbp, sizeof(sd.res_desc[i].bind_point));
 									nsbp += sizeof(sd.res_desc[i].bind_point);
 									LittleEndianToNative<sizeof(sd.res_desc[i].bind_point)>(&sd.res_desc[i].bind_point);
 								}
 
 								if (ST_VertexShader == type)
 								{
-									memcpy(&vs_signature_, nsbp, sizeof(vs_signature_));
+									std::memcpy(&vs_signature_, nsbp, sizeof(vs_signature_));
 									nsbp += sizeof(vs_signature_);
 									LittleEndianToNative<sizeof(vs_signature_)>(&vs_signature_);
 								}
 								else if (ST_ComputeShader == type)
 								{
-									memcpy(&cs_block_size_x_, nsbp, sizeof(cs_block_size_x_));
+									std::memcpy(&cs_block_size_x_, nsbp, sizeof(cs_block_size_x_));
 									nsbp += sizeof(cs_block_size_x_);
 									LittleEndianToNative<sizeof(cs_block_size_x_)>(&cs_block_size_x_);
 
-									memcpy(&cs_block_size_y_, nsbp, sizeof(cs_block_size_y_));
+									std::memcpy(&cs_block_size_y_, nsbp, sizeof(cs_block_size_y_));
 									nsbp += sizeof(cs_block_size_y_);
 									LittleEndianToNative<sizeof(cs_block_size_y_)>(&cs_block_size_y_);
 
-									memcpy(&cs_block_size_z_, nsbp, sizeof(cs_block_size_z_));
+									std::memcpy(&cs_block_size_z_, nsbp, sizeof(cs_block_size_z_));
 									nsbp += sizeof(cs_block_size_z_);
 									LittleEndianToNative<sizeof(cs_block_size_z_)>(&cs_block_size_z_);
 								}
@@ -1073,7 +1074,7 @@ namespace KlayGE
 
 			std::string out_str = oss.str();
 			native_shader_block.resize(out_str.size());
-			memcpy(&native_shader_block[0], &out_str[0], out_str.size());
+			std::memcpy(&native_shader_block[0], &out_str[0], out_str.size());
 		}
 	}
 
@@ -1472,7 +1473,7 @@ namespace KlayGE
 		if (code)
 		{
 			ret = MakeSharedPtr<std::vector<uint8_t> >(code->GetBufferSize());
-			memcpy(&((*ret)[0]), code->GetBufferPointer(), code->GetBufferSize());
+			std::memcpy(&((*ret)[0]), code->GetBufferPointer(), code->GetBufferSize());
 			code->Release();
 		}
 
@@ -1931,7 +1932,7 @@ namespace KlayGE
 	{
 		parameter_bind_t ret;
 		ret.param = param;
-		memcpy(&ret.p_handle, &p_handle, sizeof(p_handle));
+		std::memcpy(&ret.p_handle, &p_handle, sizeof(p_handle));
 
 		switch (param->type())
 		{
@@ -2289,7 +2290,7 @@ namespace KlayGE
 				{
 					D3D11_MAPPED_SUBRESOURCE mapped;
 					d3d_imm_ctx->Map(cbufs_[i][j].get(), D3D11CalcSubresource(0, 0, 1), D3D11_MAP_WRITE_DISCARD, 0, &mapped);
-					memcpy(mapped.pData, &mem_cbufs_[i][j][0], static_cast<UINT>(mem_cbufs_[i][j].size()));
+					std::memcpy(mapped.pData, &mem_cbufs_[i][j][0], static_cast<UINT>(mem_cbufs_[i][j].size()));
 					d3d_imm_ctx->Unmap(cbufs_[i][j].get(), D3D11CalcSubresource(0, 0, 1));
 
 					dirty_[i][j] = false;

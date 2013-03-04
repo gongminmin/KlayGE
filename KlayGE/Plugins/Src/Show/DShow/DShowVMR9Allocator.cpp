@@ -21,6 +21,7 @@
 #include <KlayGE/RenderEngine.hpp>
 #include <KFL/Thread.hpp>
 
+#include <cstring>
 #include <d3d9.h>
 #include <boost/assert.hpp>
 
@@ -421,7 +422,7 @@ namespace KlayGE
 				{
 					for (uint32_t y = 0; y < height; ++ y)
 					{
-						memcpy(dst, src, width * texel_size);
+						std::memcpy(dst, src, width * texel_size);
 						dst += mapper.RowPitch();
 						src += d3dlocked_rc.Pitch;
 					}

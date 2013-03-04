@@ -20,6 +20,7 @@
 
 #include <fstream>
 #include <sstream>
+#include <cstring>
 #include <boost/assert.hpp>
 
 #include <KlayGE/JudaTexture.hpp>
@@ -46,7 +47,7 @@ namespace
 	template <int N>
 	void u8_copy_array(uint8_t* output, uint8_t const * rhs, uint32_t num)
 	{
-		memcpy(output, rhs, num * N * sizeof(uint8_t));
+		std::memcpy(output, rhs, num * N * sizeof(uint8_t));
 	}
 
 	template <int N>
@@ -443,7 +444,7 @@ namespace KlayGE
 		quadtree_node_ptr node = root_;
 		if (0 == target_level)
 		{
-			memcpy(&data[0][0], this->RetriveATile(root_->data_index), full_tile_bytes);
+			std::memcpy(&data[0][0], this->RetriveATile(root_->data_index), full_tile_bytes);
 		}
 		else
 		{
@@ -539,7 +540,7 @@ namespace KlayGE
 
 					if (i > target_level - mipmaps)
 					{
-						memcpy(&data[target_level - i][0], &tile_data[0], tile_data.size() * sizeof(tile_data[0]));
+						std::memcpy(&data[target_level - i][0], &tile_data[0], tile_data.size() * sizeof(tile_data[0]));
 					}
 				}
 			}
@@ -896,7 +897,7 @@ namespace KlayGE
 			uint16_t len = *reinterpret_cast<uint16_t*>(ptr);
 			ptr += sizeof(len);
 			image_entries[i].name.resize(len);
-			memcpy(&image_entries[i].name[0], ptr, len);
+			std::memcpy(&image_entries[i].name[0], ptr, len);
 			ptr += len;
 
 			image_entries[i].x = *reinterpret_cast<uint16_t*>(ptr);
@@ -2531,7 +2532,7 @@ namespace KlayGE
 
 						for (uint32_t y = 0; y < (mip_tile_with_border_size + 3) / 4; ++ y)
 						{
-							memcpy(dst, src, src_pitch);
+							std::memcpy(dst, src, src_pitch);
 							src += src_pitch;
 							dst += dst_pitch;
 						}
@@ -2550,7 +2551,7 @@ namespace KlayGE
 
 					for (uint32_t y = 0; y < mip_tile_with_border_size; ++ y)
 					{
-						memcpy(dst, src, src_pitch);
+						std::memcpy(dst, src, src_pitch);
 						src += src_pitch;
 						dst += dst_pitch;
 					}

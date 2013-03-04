@@ -13,6 +13,7 @@
 #include <fstream>
 #include <sstream>
 #include <vector>
+#include <cstring>
 
 using namespace std;
 using namespace KlayGE;
@@ -766,7 +767,7 @@ namespace
 		else
 		{
 			triangle_indices.resize(mesh_triangle_indices.size() * 4);
-			memcpy(&triangle_indices[0], &mesh_triangle_indices[0], triangle_indices.size());
+			std::memcpy(&triangle_indices[0], &mesh_triangle_indices[0], triangle_indices.size());
 		}
 	}
 
@@ -833,7 +834,7 @@ namespace
 							NativeToLittleEndian<sizeof(s_pos[1])>(&s_pos[1]);
 							NativeToLittleEndian<sizeof(s_pos[2])>(&s_pos[2]);
 							NativeToLittleEndian<sizeof(s_pos[3])>(&s_pos[3]);
-							memcpy(&merged_vertices[buf_index][(base_vertices + vert_index) * merged_ves[buf_index].element_size()],
+							std::memcpy(&merged_vertices[buf_index][(base_vertices + vert_index) * merged_ves[buf_index].element_size()],
 								s_pos, sizeof(s_pos));
 							break;
 						}
@@ -849,7 +850,7 @@ namespace
 							uint32_t buf_index = ves_mapping[i];
 							uint32_t compact = diffuses[vert_index];
 							NativeToLittleEndian<sizeof(compact)>(&compact);
-							memcpy(&merged_vertices[buf_index][(base_vertices + vert_index) * merged_ves[buf_index].element_size()],
+							std::memcpy(&merged_vertices[buf_index][(base_vertices + vert_index) * merged_ves[buf_index].element_size()],
 								&compact, sizeof(compact));
 							break;
 						}
@@ -865,7 +866,7 @@ namespace
 							uint32_t buf_index = ves_mapping[i];
 							uint32_t compact = speculars[vert_index];
 							NativeToLittleEndian<sizeof(compact)>(&compact);
-							memcpy(&merged_vertices[buf_index][(base_vertices + vert_index) * merged_ves[buf_index].element_size()],
+							std::memcpy(&merged_vertices[buf_index][(base_vertices + vert_index) * merged_ves[buf_index].element_size()],
 								&compact, sizeof(compact));
 							break;
 						}
@@ -881,7 +882,7 @@ namespace
 							uint32_t buf_index = ves_mapping[i];
 							uint32_t compact = bone_indices[vert_index];
 							NativeToLittleEndian<sizeof(compact)>(&compact);
-							memcpy(&merged_vertices[buf_index][(base_vertices + vert_index) * merged_ves[buf_index].element_size()],
+							std::memcpy(&merged_vertices[buf_index][(base_vertices + vert_index) * merged_ves[buf_index].element_size()],
 								&compact, sizeof(compact));
 							break;
 						}
@@ -893,7 +894,7 @@ namespace
 							uint32_t buf_index = ves_mapping[i];
 							uint32_t compact = bone_weights[vert_index];
 							NativeToLittleEndian<sizeof(compact)>(&compact);
-							memcpy(&merged_vertices[buf_index][(base_vertices + vert_index) * merged_ves[buf_index].element_size()],
+							std::memcpy(&merged_vertices[buf_index][(base_vertices + vert_index) * merged_ves[buf_index].element_size()],
 								&compact, sizeof(compact));
 							break;
 						}
@@ -914,7 +915,7 @@ namespace
 							};
 							NativeToLittleEndian<sizeof(s_tc[0])>(&s_tc[0]);
 							NativeToLittleEndian<sizeof(s_tc[1])>(&s_tc[1]);
-							memcpy(&merged_vertices[buf_index][(base_vertices + vert_index) * merged_ves[buf_index].element_size()],
+							std::memcpy(&merged_vertices[buf_index][(base_vertices + vert_index) * merged_ves[buf_index].element_size()],
 								&s_tc, sizeof(s_tc));
 							break;
 						}
@@ -930,7 +931,7 @@ namespace
 							uint32_t buf_index = ves_mapping[i];
 							uint32_t compact = tangent_quats[vert_index];
 							NativeToLittleEndian<sizeof(compact)>(&compact);
-							memcpy(&merged_vertices[buf_index][(base_vertices + vert_index) * merged_ves[buf_index].element_size()],
+							std::memcpy(&merged_vertices[buf_index][(base_vertices + vert_index) * merged_ves[buf_index].element_size()],
 								&compact, sizeof(compact));
 							break;
 						}
@@ -947,7 +948,7 @@ namespace
 								uint32_t buf_index = ves_mapping[i];
 								uint32_t compact = normals[vert_index];
 								NativeToLittleEndian<sizeof(compact)>(&compact);
-								memcpy(&merged_vertices[buf_index][(base_vertices + vert_index) * merged_ves[buf_index].element_size()],
+								std::memcpy(&merged_vertices[buf_index][(base_vertices + vert_index) * merged_ves[buf_index].element_size()],
 									&compact, sizeof(compact));
 								break;
 							}
@@ -978,12 +979,12 @@ namespace
 			if (is_index_16s)
 			{
 				uint32_t ind32 = *reinterpret_cast<uint16_t const *>(&triangle_indices[ind_index * sizeof(uint16_t)]);
-				memcpy(&merged_indices[(start_indicees + ind_index) * 4],
+				std::memcpy(&merged_indices[(start_indicees + ind_index) * 4],
 					&ind32, sizeof(ind32));
 			}
 			else
 			{
-				memcpy(&merged_indices[(start_indicees + ind_index) * 4],
+				std::memcpy(&merged_indices[(start_indicees + ind_index) * 4],
 					&triangle_indices[ind_index * sizeof(uint32_t)], sizeof(uint32_t));
 			}
 		}
@@ -1077,7 +1078,7 @@ namespace
 			{
 				uint16_t ind16 = static_cast<uint16_t>(*reinterpret_cast<uint32_t*>(&merged_indices[ind_index * sizeof(uint32_t)]));
 				NativeToLittleEndian<sizeof(ind16)>(&ind16);
-				memcpy(&merged_indices_16[ind_index * sizeof(uint16_t)], &ind16, sizeof(ind16));
+				std::memcpy(&merged_indices_16[ind_index * sizeof(uint16_t)], &ind16, sizeof(ind16));
 			}
 
 			merged_indices.swap(merged_indices_16);

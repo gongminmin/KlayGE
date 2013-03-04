@@ -14,6 +14,7 @@
 #include <string>
 #include <vector>
 #include <fstream>
+#include <cstring>
 
 #ifdef KLAYGE_COMPILER_MSVC
 #pragma warning(push)
@@ -1106,7 +1107,7 @@ int main(int argc, char* argv[])
 				for (uint32_t i = 0; i < char_index.size(); ++ i)
 				{
 					uint64_t len;
-					memcpy(&len, p, sizeof(len));
+					std::memcpy(&len, p, sizeof(len));
 					p += sizeof(len);
 
 					distances_size[i] = static_cast<size_t>(len);

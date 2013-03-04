@@ -9,6 +9,7 @@
 #include <iostream>
 #include <fstream>
 #include <vector>
+#include <cstring>
 
 using namespace std;
 using namespace KlayGE;
@@ -83,7 +84,7 @@ namespace
 						com_bc5.red = x_bc4;
 						com_bc5.green = y_bc4;
 
-						memcpy(&com_normals[dest], &com_bc5, sizeof(com_bc5));
+						std::memcpy(&com_normals[dest], &com_bc5, sizeof(com_bc5));
 						dest += sizeof(com_bc5);
 					}
 					else
@@ -95,7 +96,7 @@ namespace
 
 						BC4ToBC1G(com_bc3.bc1, y_bc4);
 
-						memcpy(&com_normals[dest], &com_bc3, sizeof(com_bc3));
+						std::memcpy(&com_normals[dest], &com_bc3, sizeof(com_bc3));
 						dest += sizeof(com_bc3);
 					}
 				}
@@ -156,7 +157,7 @@ namespace
 							{
 								if (x_base + x < width)
 								{
-									memcpy(&normals[((y_base + y) * width + (x_base + x)) * 4], &argb[y * 4 + x], sizeof(uint32_t));
+									std::memcpy(&normals[((y_base + y) * width + (x_base + x)) * 4], &argb[y * 4 + x], sizeof(uint32_t));
 								}
 							}
 						}

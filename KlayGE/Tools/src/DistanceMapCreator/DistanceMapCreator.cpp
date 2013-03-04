@@ -15,8 +15,9 @@
 #include <sstream>
 #include <string>
 #include <vector>
-#include <cassert>
 #include <ctime>
+#include <cstring>
+#include <boost/assert.hpp>
 
 using namespace std;
 using namespace KlayGE;
@@ -290,7 +291,7 @@ int main(int argc, char* argv[])
 			uint8_t* data = mapper.Pointer<uint8_t>();
 			for (int y = 0; y < height; ++ y)
 			{
-				memcpy(&height_map[y * width], data, width * texel_size);
+				std::memcpy(&height_map[y * width], data, width * texel_size);
 				data += mapper.RowPitch();
 			}
 		}
@@ -328,7 +329,7 @@ int main(int argc, char* argv[])
 		{
 			for (int y = 0; y < height; ++ y)
 			{
-				memcpy(&volume[z * width * height + y * width], data, width * texel_size);
+				std::memcpy(&volume[z * width * height + y * width], data, width * texel_size);
 				data += mapper.RowPitch();
 			}
 			data += mapper.SlicePitch() - mapper.RowPitch() * height;
@@ -353,7 +354,7 @@ int main(int argc, char* argv[])
 		{
 			for (int y = 0; y < height; ++ y)
 			{
-				memcpy(data, &distances[z * width * height + y * width], width * texel_size);
+				std::memcpy(data, &distances[z * width * height + y * width], width * texel_size);
 				data += mapper.RowPitch();
 			}
 			data += mapper.SlicePitch() - mapper.RowPitch() * height;

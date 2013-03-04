@@ -310,7 +310,7 @@ namespace KlayGE
 
 						uint8_t const * s = mapper_src.Pointer<uint8_t>() + (src_x_offset / 4 * block_size);
 						uint8_t* d = mapper_dst.Pointer<uint8_t>() + (dst_x_offset / 4 * block_size);
-						memcpy(d, s, src_width / 4 * block_size);
+						std::memcpy(d, s, src_width / 4 * block_size);
 					}
 					else
 					{
@@ -321,7 +321,7 @@ namespace KlayGE
 						uint8_t const * s = mapper_src.Pointer<uint8_t>();
 						uint8_t* d = mapper_dst.Pointer<uint8_t>();
 
-						memcpy(d, s, src_width * format_size);
+						std::memcpy(d, s, src_width * format_size);
 					}
 				}
 				else

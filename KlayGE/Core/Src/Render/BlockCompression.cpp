@@ -20,6 +20,7 @@
 #include <klayGE/Texture.hpp>
 
 #include <vector>
+#include <cstring>
 #include <boost/assert.hpp>
 
 #include <KlayGE/BlockCompression.hpp>
@@ -575,7 +576,7 @@ namespace KlayGE
 			bc1.clr_0 = max16;
 			bc1.clr_1 = min16;
 		}
-		memcpy(bc1.bitmap, &mask, sizeof(mask));
+		std::memcpy(bc1.bitmap, &mask, sizeof(mask));
 	}
 
 	// Alpha block compression (this is easy for a change)
@@ -1854,14 +1855,14 @@ namespace KlayGE
 		clr.b() = MathLib::srgb_to_linear(clr.b());
 		bc1.clr_1 = Color_to_RGB565(clr);
 
-		memcpy(bc1.bitmap, bc1srgb.bitmap, sizeof(bc1srgb.bitmap));
+		std::memcpy(bc1.bitmap, bc1srgb.bitmap, sizeof(bc1srgb.bitmap));
 	}
 
 	void BC2sRGBToBC2(BC2_layout& bc2, BC2_layout const & bc2srgb)
 	{
 		BC1sRGBToBC1(bc2.bc1, bc2srgb.bc1);
 
-		memcpy(bc2.alpha, bc2srgb.alpha, sizeof(bc2srgb.alpha));
+		std::memcpy(bc2.alpha, bc2srgb.alpha, sizeof(bc2srgb.alpha));
 	}
 
 	void BC3sRGBToBC3(BC3_layout& bc3, BC3_layout const & bc3srgb)
@@ -1876,7 +1877,7 @@ namespace KlayGE
 		bc4.alpha_0 = static_cast<uint8_t>(MathLib::clamp(static_cast<int>(MathLib::srgb_to_linear(bc4srgb.alpha_0 / 255.0f) * 255 + 0.5f), 0, 255));
 		bc4.alpha_1 = static_cast<uint8_t>(MathLib::clamp(static_cast<int>(MathLib::srgb_to_linear(bc4srgb.alpha_1 / 255.0f) * 255 + 0.5f), 0, 255));
 
-		memcpy(bc4.bitmap, bc4srgb.bitmap, sizeof(bc4srgb.bitmap));
+		std::memcpy(bc4.bitmap, bc4srgb.bitmap, sizeof(bc4srgb.bitmap));
 	}
 
 	void BC5sRGBToBC5(BC5_layout& bc5, BC5_layout const & bc5srgb)

@@ -338,7 +338,7 @@ namespace KlayGE
 					uint8_t* d = mapper_dst.Pointer<uint8_t>();
 					for (uint32_t y = 0; y < src_height; y += 4)
 					{
-						memcpy(d, s, src_width / 4 * block_size);
+						std::memcpy(d, s, src_width / 4 * block_size);
 
 						s += mapper_src.RowPitch();
 						d += mapper_dst.RowPitch();
@@ -356,7 +356,7 @@ namespace KlayGE
 						uint8_t* d = mapper_dst.Pointer<uint8_t>();
 						for (uint32_t y = 0; y < src_height; ++ y)
 						{
-							memcpy(d, s, src_width * format_size);
+							std::memcpy(d, s, src_width * format_size);
 
 							s += mapper_src.RowPitch();
 							d += mapper_dst.RowPitch();
@@ -464,7 +464,7 @@ namespace KlayGE
 						uint8_t* d = mapper_dst.Pointer<uint8_t>();
 						for (uint32_t y = 0; y < src_height; y += 4)
 						{
-							memcpy(d, s, src_width / 4 * block_size);
+							std::memcpy(d, s, src_width / 4 * block_size);
 
 							s += mapper_src.RowPitch();
 							d += mapper_dst.RowPitch();
@@ -480,7 +480,7 @@ namespace KlayGE
 						uint8_t* d = mapper_dst.Pointer<uint8_t>();
 						for (uint32_t y = 0; y < src_height; ++ y)
 						{
-							memcpy(d, s, src_width * format_size);
+							std::memcpy(d, s, src_width * format_size);
 
 							s += mapper_src.RowPitch();
 							d += mapper_dst.RowPitch();
