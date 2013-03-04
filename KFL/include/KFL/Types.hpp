@@ -261,7 +261,8 @@ private:
 	#endif
 	namespace KlayGE
 	{
-		using boost::random;
+		using boost::random::ranlux24_base;
+		using boost::random::uniform_int_distribution;
 	}
 #endif
 
