@@ -659,7 +659,7 @@ namespace
 
 		Plane ocean_plane_;
 
-		shared_ptr<OceanSimulator> ocean_simulator_;
+		KlayGE::shared_ptr<OceanSimulator> ocean_simulator_;
 
 		bool use_tex_array_;
 		std::vector<TexturePtr> displacement_tex_;
@@ -757,8 +757,8 @@ void OceanApp::InitObjects()
 	this->LookAt(float3(0, 14, 0), float3(0, 13.8f, 1));
 	this->Proj(0.1f, 3000);
 
-	function<TexturePtr()> y_cube_tl = ASyncLoadTexture("DH001cross_y.dds", EAH_GPU_Read | EAH_Immutable);
-	function<TexturePtr()> c_cube_tl = ASyncLoadTexture("DH001cross_c.dds", EAH_GPU_Read | EAH_Immutable);
+	KlayGE::function<TexturePtr()> y_cube_tl = ASyncLoadTexture("DH001cross_y.dds", EAH_GPU_Read | EAH_Immutable);
+	KlayGE::function<TexturePtr()> c_cube_tl = ASyncLoadTexture("DH001cross_c.dds", EAH_GPU_Read | EAH_Immutable);
 
 	font_ = Context::Instance().RenderFactoryInstance().MakeFont("gkai00mp.kfont");
 

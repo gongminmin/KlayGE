@@ -560,8 +560,8 @@ void ShadowCubeMap::InitObjects()
 	// ½¨Á¢×ÖÌå
 	font_ = rf.MakeFont("gkai00mp.kfont");
 
-	function<RenderModelPtr()> model_ml = ASyncLoadModel("ScifiRoom.7z//ScifiRoom.meshml", EAH_GPU_Read | EAH_Immutable, CreateModelFactory<RenderModel>(), CreateMeshFactory<OccluderMesh>());
-	function<RenderModelPtr()> teapot_ml = ASyncLoadModel("teapot.meshml", EAH_GPU_Read | EAH_Immutable, CreateModelFactory<RenderModel>(), CreateMeshFactory<OccluderMesh>());
+	KlayGE::function<RenderModelPtr()> model_ml = ASyncLoadModel("ScifiRoom.7z//ScifiRoom.meshml", EAH_GPU_Read | EAH_Immutable, CreateModelFactory<RenderModel>(), CreateMeshFactory<OccluderMesh>());
+	KlayGE::function<RenderModelPtr()> teapot_ml = ASyncLoadModel("teapot.meshml", EAH_GPU_Read | EAH_Immutable, CreateModelFactory<RenderModel>(), CreateMeshFactory<OccluderMesh>());
 
 	this->LookAt(float3(0.0f, 10.0f, -25.0f), float3(0, 10.0f, 0));
 	this->Proj(0.01f, 500);

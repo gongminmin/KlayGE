@@ -728,8 +728,8 @@ bool MotionBlurDoFApp::ConfirmDevice() const
 
 void MotionBlurDoFApp::InitObjects()
 {
-	function<RenderModelPtr()> model_instance_ml = ASyncLoadModel("teapot.meshml", EAH_GPU_Read | EAH_Immutable, CreateModelFactory<RenderModel>(), CreateMeshFactory<RenderInstanceMesh>());
-	function<RenderModelPtr()> model_mesh_ml = ASyncLoadModel("teapot.meshml", EAH_GPU_Read | EAH_Immutable, CreateModelFactory<RenderModel>(), CreateMeshFactory<RenderNonInstancedMesh>());
+	KlayGE::function<RenderModelPtr()> model_instance_ml = ASyncLoadModel("teapot.meshml", EAH_GPU_Read | EAH_Immutable, CreateModelFactory<RenderModel>(), CreateMeshFactory<RenderInstanceMesh>());
+	KlayGE::function<RenderModelPtr()> model_mesh_ml = ASyncLoadModel("teapot.meshml", EAH_GPU_Read | EAH_Immutable, CreateModelFactory<RenderModel>(), CreateMeshFactory<RenderNonInstancedMesh>());
 
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 

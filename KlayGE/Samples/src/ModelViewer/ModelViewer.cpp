@@ -403,7 +403,7 @@ void ModelViewerApp::OpenModel(std::string const & name)
 	model_ = MakeSharedPtr<ModelObject>(name);
 	model_->AddToSceneManager();
 
-	shared_ptr<ModelObject> model = checked_pointer_cast<ModelObject>(model_);
+	KlayGE::shared_ptr<ModelObject> model = checked_pointer_cast<ModelObject>(model_);
 
 	frame_ = 0;
 	if (model->NumFrames() > 0)
@@ -658,7 +658,7 @@ void ModelViewerApp::MeshChangedHandler(KlayGE::UIComboBox const & sender)
 	dialog_model_->Control<UIComboBox>(id_visualize_)->AddItem(L"Vertex Binormal", VEU_Binormal);
 
 	dialog_model_->Control<UIListBox>(id_textures_)->RemoveAllItems();
-	shared_ptr<ModelObject> model = checked_pointer_cast<ModelObject>(model_);
+	KlayGE::shared_ptr<ModelObject> model = checked_pointer_cast<ModelObject>(model_);
 	TextureSlotsType const & texture_slots = model->GetMaterial(model->Mesh(mi)->MaterialID())->texture_slots;
 	for (size_t i = 0; i < texture_slots.size(); ++ i)
 	{
@@ -758,7 +758,7 @@ uint32_t ModelViewerApp::DoUpdate(KlayGE::uint32_t pass)
 		float4x4 trans = MathLib::translation(origin);
 		axis_->ModelMatrix(scaling * trans);
 
-		shared_ptr<ModelObject> model = checked_pointer_cast<ModelObject>(model_);
+		KlayGE::shared_ptr<ModelObject> model = checked_pointer_cast<ModelObject>(model_);
 		if (play_)
 		{
 			float this_time = this->AppTime();

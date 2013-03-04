@@ -1619,7 +1619,7 @@ namespace
 
 	void MeshMLJIT(std::string const & meshml_name, std::string const & output_name, bool normal_in_8_bit)
 	{
-		shared_ptr<std::stringstream> ss = MakeSharedPtr<std::stringstream>();
+		KlayGE::shared_ptr<std::stringstream> ss = MakeSharedPtr<std::stringstream>();
 
 		ResIdentifierPtr file = ResLoader::Instance().Open(meshml_name);
 		XMLDocument doc;

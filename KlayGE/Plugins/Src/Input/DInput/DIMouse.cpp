@@ -109,7 +109,9 @@ namespace KlayGE
 		offset_ = Vector_T<long, 3>(diMouseState.lX, diMouseState.lY, diMouseState.lZ);
 
 		index_ = !index_;
-		std::transform(diMouseState.rgbButtons, diMouseState.rgbButtons + buttons_[index_].size(),
-			buttons_[index_].begin(), bind(std::not_equal_to<BYTE>(), 0, placeholders::_1));
+		for (size_t i = 0; i < buttons_[index_].size(); ++ i)
+		{
+			buttons_[index_][i] = (diMouseState.rgbButtons[i] & 0x80) ? true : false;
+		}
 	}
 }

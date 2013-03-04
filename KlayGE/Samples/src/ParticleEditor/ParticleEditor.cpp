@@ -526,7 +526,7 @@ void ParticleEditorApp::InitObjects()
 	update_particle.MediaDensity(0.5f);
 
 	ps_ = MakeSharedPtr<ParticleSystem<Particle> >(NUM_PARTICLE, KlayGE::bind(&GenParticle<Particle>::operator(), &gen_particle, KlayGE::placeholders::_1, KlayGE::placeholders::_2),
-		bind(&UpdateParticle<Particle>::operator(), &update_particle, KlayGE::placeholders::_1, KlayGE::placeholders::_2));
+		KlayGE::bind(&UpdateParticle<Particle>::operator(), &update_particle, KlayGE::placeholders::_1, KlayGE::placeholders::_2));
 
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 	RenderEngine& re = rf.RenderEngineInstance();

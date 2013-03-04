@@ -700,7 +700,7 @@ namespace
 		}
 	};
 
-	shared_ptr<GPUParticleSystem> gpu_ps;
+	KlayGE::shared_ptr<GPUParticleSystem> gpu_ps;
 
 
 	enum

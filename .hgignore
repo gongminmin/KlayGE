@@ -138,6 +138,8 @@ External/libogg/include/ogg/config_types.h
 External/libogg/libtool
 External/libogg/ogg*.pc
 External/libogg/stamp-h1
+External/libogg/conftest.make
+External/libogg/confdefs.h
 External/libvorbis/libs/*/*.lib
 External/libvorbis/libs/*.a
 External/libvorbis/win32/*/*/Win32

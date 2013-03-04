@@ -335,7 +335,9 @@ namespace KlayGE
 		this->DeviceState(&keys[0], keys.size());
 
 		index_ = !index_;
-		std::transform(keys.begin(), keys.end(), keys_[index_].begin(),
-			bind(std::not_equal_to<BYTE>(), 0, bind(std::logical_and<BYTE>(), placeholders::_1, 0x80)));
+		for (size_t i = 0; i < keys_[index_].size(); ++ i)
+		{
+			keys_[index_][i] = (keys[i] & 0x80) ? true : false;
+		}
 	}
 }

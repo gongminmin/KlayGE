@@ -75,8 +75,8 @@ namespace
 		}
 
 	private:
-		shared_ptr<ScriptModule> module_;
-		shared_ptr<std::string> script_;
+		KlayGE::shared_ptr<ScriptModule> module_;
+		KlayGE::shared_ptr<std::string> script_;
 	};
 
 	class LightSourceUpdate : public PyScriptUpdate

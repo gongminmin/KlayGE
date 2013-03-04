@@ -772,7 +772,7 @@ namespace KlayGE
 			shared_ptr<result_opt> myreturn = MakeSharedPtr<result_opt>();
 			shared_ptr<threaded_t> mythreaded = MakeSharedPtr<threaded_t>(function, myreturn);
 			shared_ptr<joiner_impl_base<result_t> > myjoiner_data = MakeSharedPtr<joiner_impl_t>(data_,
-				myreturn, bind(&threaded_t::needle, mythreaded));
+				myreturn, KlayGE::bind(&threaded_t::needle, mythreaded));
 
 			return joiner_t(myjoiner_data);
 		}
