@@ -18,10 +18,20 @@
     <File Name="../../Plugins/Include/KlayGE/DSound/DSAudioFactory.hpp"/>
   </VirtualDirectory>
   <Settings Type="Dynamic Library">
+    <GlobalSettings>
+      <Compiler Options="-Wall -march=core2 -std=c++11" C_Options="-Wall -march=core2 -std=c11">
+        <IncludePath Value="."/>
+      </Compiler>
+      <Linker Options="">
+        <LibraryPath Value="."/>
+      </Linker>
+      <ResourceCompiler Options=""/>
+    </GlobalSettings>
     <Configuration Name="Debug_win_x64" CompilerType="gnu g++" DebuggerType="GNU gdb debugger" Type="Dynamic Library" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
-      <Compiler Options="-m64 -Wall -g -O0" Required="yes" PreCompiledHeader="../../Core/Include/KlayGE/KlayGE.hpp">
-		<IncludePath Value="../../../External/boost"/>
-		<IncludePath Value="../../../External/DXSDK/include"/>
+      <Compiler Options="-m64 -g -O0" C_Options="-m64 -g -O0" Required="yes" PreCompiledHeader="../../Core/Include/KlayGE/KlayGE.hpp">
+        <IncludePath Value="../../../External/boost"/>
+        <IncludePath Value="../../../External/DXSDK/include"/>
+        <IncludePath Value="../../../KFL/include"/>
         <IncludePath Value="../../Core/Include"/>
         <IncludePath Value="../../Plugins/Include"/>
         <Preprocessor Value="WIN64"/>
@@ -31,11 +41,14 @@
         <Preprocessor Value="KLAYGE_DSOUND_AE_SOURCE"/>
       </Compiler>
       <Linker Options="" Required="yes">
-		<LibraryPath Value="../../../External/boost/lib_gcc_x64/lib"/>
+        <LibraryPath Value="../../../External/boost/lib_mgw_x64/lib"/>
+        <LibraryPath Value="../../../KFL/lib/win_x64"/>
         <LibraryPath Value="../../lib/win_x64"/>
         <Library Value="KlayGE_Core_mgw_d"/>
-        <Library Value="boost_system-mgw47-mt-d-1_51"/>
-        <Library Value="boost_thread-mgw47-mt-1_51"/>
+        <Library Value="KFL_mgw_x64_d"/>
+        <Library Value="boost_chrono-mgw47-mt-d-1_53"/>
+        <Library Value="boost_thread-mgw47-mt-d-1_53"/>
+        <Library Value="boost_system-mgw47-mt-d-1_53"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
       <General OutputFile="../../lib/win_x64/libKlayGE_AudioEngine_DSound_mgw_d.dll" IntermediateDirectory="Debug/win_x64/DSound" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
@@ -63,9 +76,10 @@
       </AdditionalRules>
     </Configuration>
     <Configuration Name="Debug_win_x86" CompilerType="gnu g++" DebuggerType="GNU gdb debugger" Type="Dynamic Library" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
-      <Compiler Options="-m32 -Wall -g -O0" Required="yes" PreCompiledHeader="../../Core/Include/KlayGE/KlayGE.hpp">
-		<IncludePath Value="../../../External/boost"/>
-		<IncludePath Value="../../../External/DXSDK/include"/>
+      <Compiler Options="-m32 -g -O0" C_Options="-m32 -g -O0" Required="yes" PreCompiledHeader="../../Core/Include/KlayGE/KlayGE.hpp">
+        <IncludePath Value="../../../External/boost"/>
+        <IncludePath Value="../../../External/DXSDK/include"/>
+        <IncludePath Value="../../../KFL/include"/>
         <IncludePath Value="../../Core/Include"/>
         <IncludePath Value="../../Plugins/Include"/>
         <Preprocessor Value="WIN32"/>
@@ -75,11 +89,14 @@
         <Preprocessor Value="KLAYGE_DSOUND_AE_SOURCE"/>
       </Compiler>
       <Linker Options="" Required="yes">
-		<LibraryPath Value="../../../External/boost/lib_gcc_x86/lib"/>
+        <LibraryPath Value="../../../External/boost/lib_mgw_x86/lib"/>
+        <LibraryPath Value="../../../KFL/lib/win_x86"/>
         <LibraryPath Value="../../lib/win_x86"/>
         <Library Value="KlayGE_Core_mgw_d"/>
-        <Library Value="boost_system-mgw47-mt-d-1_51"/>
-        <Library Value="boost_thread-mgw47-mt-1_51"/>
+        <Library Value="KFL_mgw_x86_d"/>
+        <Library Value="boost_chrono-mgw47-mt-d-1_53"/>
+        <Library Value="boost_thread-mgw47-mt-d-1_53"/>
+        <Library Value="boost_system-mgw47-mt-d-1_53"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
       <General OutputFile="../../lib/win_x86/libKlayGE_AudioEngine_DSound_mgw_d.dll" IntermediateDirectory="Debug/win_x86/DSound" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
@@ -107,9 +124,10 @@
       </AdditionalRules>
     </Configuration>
     <Configuration Name="Release_win_x64" CompilerType="gnu g++" DebuggerType="GNU gdb debugger" Type="Dynamic Library" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
-      <Compiler Options="-m64 -Wall -O2" Required="yes" PreCompiledHeader="../../Core/Include/KlayGE/KlayGE.hpp">
-		<IncludePath Value="../../../External/boost"/>
-		<IncludePath Value="../../../External/DXSDK/include"/>
+      <Compiler Options="-m64 -O2" C_Options="-m64 -O2" Required="yes" PreCompiledHeader="../../Core/Include/KlayGE/KlayGE.hpp">
+        <IncludePath Value="../../../External/boost"/>
+        <IncludePath Value="../../../External/DXSDK/include"/>
+        <IncludePath Value="../../../KFL/include"/>
         <IncludePath Value="../../Core/Include"/>
         <IncludePath Value="../../Plugins/Include"/>
         <Preprocessor Value="WIN64"/>
@@ -119,11 +137,14 @@
         <Preprocessor Value="KLAYGE_DSOUND_AE_SOURCE"/>
       </Compiler>
       <Linker Options="-s" Required="yes">
-		<LibraryPath Value="../../../External/boost/lib_gcc_x64/lib"/>
+        <LibraryPath Value="../../../External/boost/lib_mgw_x64/lib"/>
+        <LibraryPath Value="../../../KFL/lib/win_x64"/>
         <LibraryPath Value="../../lib/win_x64"/>
         <Library Value="KlayGE_Core_mgw"/>
-        <Library Value="boost_system-mgw47-mt-1_51"/>
-        <Library Value="boost_thread-mgw47-mt-1_51"/>
+        <Library Value="KFL_mgw_x64"/>
+        <Library Value="boost_chrono-mgw47-mt-1_53"/>
+        <Library Value="boost_thread-mgw47-mt-1_53"/>
+        <Library Value="boost_system-mgw47-mt-1_53"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
       <General OutputFile="../../lib/win_x64/libKlayGE_AudioEngine_DSound_mgw.dll" IntermediateDirectory="Release/win_x64/DSound" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
@@ -151,9 +172,10 @@
       </AdditionalRules>
     </Configuration>
     <Configuration Name="Release_win_x86" CompilerType="gnu g++" DebuggerType="GNU gdb debugger" Type="Dynamic Library" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
-      <Compiler Options="-m32 -Wall -O2" Required="yes" PreCompiledHeader="../../Core/Include/KlayGE/KlayGE.hpp">
-		<IncludePath Value="../../../External/boost"/>
-		<IncludePath Value="../../../External/DXSDK/include"/>
+      <Compiler Options="-m32 -O2" C_Options="-m32 -O2" Required="yes" PreCompiledHeader="../../Core/Include/KlayGE/KlayGE.hpp">
+        <IncludePath Value="../../../External/boost"/>
+        <IncludePath Value="../../../External/DXSDK/include"/>
+        <IncludePath Value="../../../KFL/include"/>
         <IncludePath Value="../../Core/Include"/>
         <IncludePath Value="../../Plugins/Include"/>
         <Preprocessor Value="WIN32"/>
@@ -163,11 +185,14 @@
         <Preprocessor Value="KLAYGE_DSOUND_AE_SOURCE"/>
       </Compiler>
       <Linker Options="-s" Required="yes">
-		<LibraryPath Value="../../../External/boost/lib_gcc_x86/lib"/>
+        <LibraryPath Value="../../../External/boost/lib_mgw_x86/lib"/>
+        <LibraryPath Value="../../../KFL/lib/win_x86"/>
         <LibraryPath Value="../../lib/win_x86"/>
         <Library Value="KlayGE_Core_mgw"/>
-        <Library Value="boost_system-mgw47-mt-1_51"/>
-        <Library Value="boost_thread-mgw47-mt-1_51"/>
+        <Library Value="KFL_mgw_x86"/>
+        <Library Value="boost_chrono-mgw47-mt-1_53"/>
+        <Library Value="boost_thread-mgw47-mt-1_53"/>
+        <Library Value="boost_system-mgw47-mt-1_53"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
       <General OutputFile="../../lib/win_x86/libKlayGE_AudioEngine_DSound_mgw.dll" IntermediateDirectory="Release/win_x86/DSound" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
@@ -194,14 +219,5 @@
         <CustomPreBuild/>
       </AdditionalRules>
     </Configuration>
-    <GlobalSettings>
-      <Compiler Options="">
-        <IncludePath Value="."/>
-      </Compiler>
-      <Linker Options="">
-        <LibraryPath Value="."/>
-      </Linker>
-      <ResourceCompiler Options=""/>
-    </GlobalSettings>
   </Settings>
 </CodeLite_Project>
