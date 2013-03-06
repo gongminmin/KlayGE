@@ -19,7 +19,7 @@ def build_kfont(compiler_name, compiler_version, compiler_arch, generator_name, 
 	
 	additional_options = ""
 	if (compiler_arch.find("_app") > 0):
-		additional_options += "-D KFONT_WITH_WINRT:BOOL=\"TRUE\""
+		additional_options += "-D KLAYGE_WITH_WINRT:BOOL=\"TRUE\""
 
 	cmake_cmd = batch_command()
 	cmake_cmd.add_command('cmake -G "%s" %s %s' % (generator_name, additional_options, "../cmake"))
