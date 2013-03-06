@@ -123,6 +123,11 @@ namespace KlayGE
 	void SceneObjectLightSourceProxy::Update(float /*app_time*/, float /*elapsed_time*/)
 	{
 		model_ = model_scaling_ * MathLib::to_matrix(light_->Rotation()) * MathLib::translation(light_->Position()) * model_translation_;
+		if (LT_Spot == light_->Type())
+		{
+			float radius = tan(acos(light_->CosOuterAngle()) * 0.5f);
+			model_ = MathLib::scaling(radius, radius, 1.0f) * model_;
+		}
 		checked_pointer_cast<RenderableLightSourceProxy>(renderable_)->ModelMatrix(model_);
 
 		checked_pointer_cast<RenderableLightSourceProxy>(renderable_)->Update();
