@@ -39,7 +39,7 @@ namespace KlayGE
 	class KLAYGE_CORE_API RenderableHelper : public Renderable
 	{
 	public:
-		RenderableHelper(std::wstring const & name);
+		explicit RenderableHelper(std::wstring const & name);
 		virtual ~RenderableHelper()
 		{
 		}
@@ -67,8 +67,8 @@ namespace KlayGE
 	class KLAYGE_CORE_API RenderablePoint : public RenderableHelper
 	{
 	public:
-		RenderablePoint();
-		RenderablePoint(float3 const & v, Color const & clr);
+		explicit RenderablePoint(bool is_overlay = false);
+		RenderablePoint(float3 const & v, Color const & clr, bool is_overlay = false);
 		virtual ~RenderablePoint()
 		{
 		}
@@ -79,7 +79,7 @@ namespace KlayGE
 		void OnRenderBegin();
 
 	private:
-		void Init();
+		void Init(bool is_overlay);
 
 	private:
 		RenderEffectParameterPtr v0_ep_;
@@ -88,8 +88,8 @@ namespace KlayGE
 	class KLAYGE_CORE_API RenderableLine : public RenderableHelper
 	{
 	public:
-		RenderableLine();
-		RenderableLine(float3 const & v0, float3 const & v1, Color const & clr);
+		explicit RenderableLine(bool is_overlay = false);
+		RenderableLine(float3 const & v0, float3 const & v1, Color const & clr, bool is_overlay = false);
 		virtual ~RenderableLine()
 		{
 		}
@@ -100,7 +100,7 @@ namespace KlayGE
 		void OnRenderBegin();
 
 	private:
-		void Init();
+		void Init(bool is_overlay);
 
 	private:
 		RenderEffectParameterPtr v0_ep_;
@@ -110,8 +110,8 @@ namespace KlayGE
 	class KLAYGE_CORE_API RenderableTriangle : public RenderableHelper
 	{
 	public:
-		RenderableTriangle();
-		RenderableTriangle(float3 const & v0, float3 const & v1, float3 const & v2, Color const & clr);
+		explicit RenderableTriangle(bool is_overlay = false);
+		RenderableTriangle(float3 const & v0, float3 const & v1, float3 const & v2, Color const & clr, bool is_overlay = false);
 		virtual ~RenderableTriangle()
 		{
 		}
@@ -122,7 +122,7 @@ namespace KlayGE
 		void OnRenderBegin();
 
 	private:
-		void Init();
+		void Init(bool is_overlay);
 
 	private:
 		RenderEffectParameterPtr v0_ep_;
@@ -133,8 +133,8 @@ namespace KlayGE
 	class KLAYGE_CORE_API RenderableTriBox : public RenderableHelper
 	{
 	public:
-		RenderableTriBox();
-		RenderableTriBox(OBBox const & obb, Color const & clr);
+		explicit RenderableTriBox(bool is_overlay = false);
+		RenderableTriBox(OBBox const & obb, Color const & clr, bool is_overlay = false);
 		virtual ~RenderableTriBox()
 		{
 		}
@@ -145,7 +145,7 @@ namespace KlayGE
 		void OnRenderBegin();
 
 	private:
-		void Init();
+		void Init(bool is_overlay);
 
 	private:
 		RenderEffectParameterPtr v0_ep_;
@@ -161,8 +161,8 @@ namespace KlayGE
 	class KLAYGE_CORE_API RenderableLineBox : public RenderableHelper
 	{
 	public:
-		RenderableLineBox();
-		RenderableLineBox(OBBox const & obb, Color const & clr);
+		explicit RenderableLineBox(bool is_overlay = false);
+		RenderableLineBox(OBBox const & obb, Color const & clr, bool is_overlay = false);
 		virtual ~RenderableLineBox()
 		{
 		}
@@ -173,7 +173,7 @@ namespace KlayGE
 		void OnRenderBegin();
 
 	private:
-		void Init();
+		void Init(bool is_overlay);
 
 	private:
 		RenderEffectParameterPtr v0_ep_;

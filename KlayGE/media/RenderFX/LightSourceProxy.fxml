@@ -54,11 +54,9 @@ float4 LightSourceProxyPS(float3 pos_os : TEXCOORD0, float3 normal : TEXCOORD1) 
 		}
 		else
 		{
-			float4 light_proj_pos = mul(float4(pos_os, 1), mvp);
-			light_proj_pos /= light_proj_pos.w;
-			light_proj_pos.y *= KLAYGE_FLIPPING;
-			light_proj_pos.xy = light_proj_pos.xy / 2 + 0.5f;
-			proj_clr = projective_map_2d_tex.Sample(linear_sampler, light_proj_pos.xy);
+			float2 tc = pos_os.xy;
+			tc.y *= KLAYGE_FLIPPING;
+			proj_clr = projective_map_2d_tex.Sample(linear_sampler, tc * 0.5f + 0.5f);
 		}
 		clr *= proj_clr;
 	}
@@ -135,11 +133,9 @@ float4 LightSourceProxySpecialShadingPS(float2 texcoord : TEXCOORD0,
 		}
 		else
 		{
-			float4 light_proj_pos = mul(float4(pos_os, 1), mvp);
-			light_proj_pos /= light_proj_pos.w;
-			light_proj_pos.y *= KLAYGE_FLIPPING;
-			light_proj_pos.xy = light_proj_pos.xy / 2 + 0.5f;
-			proj_clr = projective_map_2d_tex.Sample(linear_sampler, light_proj_pos.xy);
+			float2 tc = pos_os.xy;
+			tc.y *= KLAYGE_FLIPPING;
+			proj_clr = projective_map_2d_tex.Sample(linear_sampler, tc * 0.5f + 0.5f);
 		}
 		clr *= proj_clr;
 	}

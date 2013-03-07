@@ -75,16 +75,16 @@ namespace KlayGE
 	}
 
 
-	RenderablePoint::RenderablePoint()
+	RenderablePoint::RenderablePoint(bool is_overlay)
 		: RenderableHelper(L"Point")
 	{
-		this->Init();
+		this->Init(is_overlay);
 	}
 
-	RenderablePoint::RenderablePoint(float3 const & v, Color const & clr)
+	RenderablePoint::RenderablePoint(float3 const & v, Color const & clr, bool is_overlay)
 		: RenderableHelper(L"Point")
 	{
-		this->Init();
+		this->Init(is_overlay);
 
 		this->SetPoint(v);
 		this->SetColor(clr);
@@ -107,12 +107,12 @@ namespace KlayGE
 		*mvp_ep_ = model_mat_ * camera.ViewProjMatrix();
 	}
 
-	void RenderablePoint::Init()
+	void RenderablePoint::Init(bool is_overlay)
 	{
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
 		RenderEffectPtr effect = rf.LoadEffect("RenderableHelper.fxml");
-		if (deferred_effect_)
+		if (deferred_effect_ && !is_overlay)
 		{
 			this->BindDeferredEffect(effect);
 			depth_tech_ = effect->TechniqueByName("PointDepthTech");
@@ -147,16 +147,16 @@ namespace KlayGE
 	}
 
 
-	RenderableLine::RenderableLine()
+	RenderableLine::RenderableLine(bool is_overlay)
 		: RenderableHelper(L"Line")
 	{
-		this->Init();
+		this->Init(is_overlay);
 	}
 	
-	RenderableLine::RenderableLine(float3 const & v0, float3 const & v1, Color const & clr)
+	RenderableLine::RenderableLine(float3 const & v0, float3 const & v1, Color const & clr, bool is_overlay)
 		: RenderableHelper(L"Line")
 	{
-		this->Init();
+		this->Init(is_overlay);
 
 		this->SetLine(v0, v1);
 		this->SetColor(clr);
@@ -185,12 +185,12 @@ namespace KlayGE
 		*mvp_ep_ = model_mat_ * camera.ViewProjMatrix();
 	}
 
-	void RenderableLine::Init()
+	void RenderableLine::Init(bool is_overlay)
 	{
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
 		RenderEffectPtr effect = rf.LoadEffect("RenderableHelper.fxml");
-		if (deferred_effect_)
+		if (deferred_effect_ && !is_overlay)
 		{
 			this->BindDeferredEffect(effect);
 			depth_tech_ = effect->TechniqueByName("LineDepthTech");
@@ -230,16 +230,16 @@ namespace KlayGE
 	}
 
 
-	RenderableTriangle::RenderableTriangle()
+	RenderableTriangle::RenderableTriangle(bool is_overlay)
 		: RenderableHelper(L"Triangle")
 	{
-		this->Init();
+		this->Init(is_overlay);
 	}
 
-	RenderableTriangle::RenderableTriangle(float3 const & v0, float3 const & v1, float3 const & v2, Color const & clr)
+	RenderableTriangle::RenderableTriangle(float3 const & v0, float3 const & v1, float3 const & v2, Color const & clr, bool is_overlay)
 		: RenderableHelper(L"Triangle")
 	{
-		this->Init();
+		this->Init(is_overlay);
 
 		this->SetTriangle(v0, v1, v2);
 		this->SetColor(clr);
@@ -269,12 +269,12 @@ namespace KlayGE
 		*mvp_ep_ = model_mat_ * camera.ViewProjMatrix();
 	}
 
-	void RenderableTriangle::Init()
+	void RenderableTriangle::Init(bool is_overlay)
 	{
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
 		RenderEffectPtr effect = rf.LoadEffect("RenderableHelper.fxml");
-		if (deferred_effect_)
+		if (deferred_effect_ && !is_overlay)
 		{
 			this->BindDeferredEffect(effect);
 			depth_tech_ = effect->TechniqueByName("LineDepthTech");
@@ -315,16 +315,16 @@ namespace KlayGE
 	}
 
 
-	RenderableTriBox::RenderableTriBox()
+	RenderableTriBox::RenderableTriBox(bool is_overlay)
 		: RenderableHelper(L"TriBox")
 	{
-		this->Init();
+		this->Init(is_overlay);
 	}
 
-	RenderableTriBox::RenderableTriBox(OBBox const & obb, Color const & clr)
+	RenderableTriBox::RenderableTriBox(OBBox const & obb, Color const & clr, bool is_overlay)
 		: RenderableHelper(L"TriBox")
 	{
-		this->Init();
+		this->Init(is_overlay);
 
 		this->SetBox(obb);
 		this->SetColor(clr);
@@ -355,12 +355,12 @@ namespace KlayGE
 		*mvp_ep_ = model_mat_ * camera.ViewProjMatrix();
 	}
 
-	void RenderableTriBox::Init()
+	void RenderableTriBox::Init(bool is_overlay)
 	{		
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
 		RenderEffectPtr effect = rf.LoadEffect("RenderableHelper.fxml");
-		if (deferred_effect_)
+		if (deferred_effect_ && !is_overlay)
 		{
 			this->BindDeferredEffect(effect);
 			depth_tech_ = effect->TechniqueByName("LineDepthTech");
@@ -423,16 +423,16 @@ namespace KlayGE
 	}
 
 
-	RenderableLineBox::RenderableLineBox()
+	RenderableLineBox::RenderableLineBox(bool is_overlay)
 		: RenderableHelper(L"LineBox")
 	{
-		this->Init();
+		this->Init(is_overlay);
 	}
 	
-	RenderableLineBox::RenderableLineBox(OBBox const & obb, Color const & clr)
+	RenderableLineBox::RenderableLineBox(OBBox const & obb, Color const & clr, bool is_overlay)
 		: RenderableHelper(L"LineBox")
 	{
-		this->Init();
+		this->Init(is_overlay);
 
 		this->SetBox(obb);
 		this->SetColor(clr);
@@ -463,12 +463,12 @@ namespace KlayGE
 		*mvp_ep_ = model_mat_ * camera.ViewProjMatrix();
 	}
 
-	void RenderableLineBox::Init()
+	void RenderableLineBox::Init(bool is_overlay)
 	{
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
 		RenderEffectPtr effect = rf.LoadEffect("RenderableHelper.fxml");
-		if (deferred_effect_)
+		if (deferred_effect_ && !is_overlay)
 		{
 			this->BindDeferredEffect(effect);
 			depth_tech_ = effect->TechniqueByName("LineDepthTech");
