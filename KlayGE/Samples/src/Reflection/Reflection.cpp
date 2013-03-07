@@ -253,8 +253,8 @@ void ScreenSpaceReflectionApp::InitObjects()
 	TexturePtr y_cube_tex = y_cube_tl();
 	TexturePtr c_cube_tex = c_cube_tl();
 
-	sky_box_ = MakeSharedPtr<SceneObjectHDRSkyBox>();
-	checked_pointer_cast<SceneObjectHDRSkyBox>(sky_box_)->CompressedCubeMap(y_cube_tex, c_cube_tex);
+	sky_box_ = MakeSharedPtr<SceneObjectSkyBox>();
+	checked_pointer_cast<SceneObjectSkyBox>(sky_box_)->CompressedCubeMap(y_cube_tex, c_cube_tex);
 	sky_box_->AddToSceneManager();
 
 	checked_pointer_cast<ReflectMesh>(teapot_->GetRenderable())->SkyBox(y_cube_tex, c_cube_tex);

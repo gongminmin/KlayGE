@@ -665,8 +665,8 @@ void ScenePlayerApp::LoadScene(std::string const & name)
 			XMLAttributePtr c_cube_attr = skybox_node->Attrib("c_cube");
 			BOOST_ASSERT(c_cube_attr);
 
-			sky_box_ = MakeSharedPtr<SceneObjectHDRSkyBox>();
-			checked_pointer_cast<SceneObjectHDRSkyBox>(sky_box_)->CompressedCubeMap(
+			sky_box_ = MakeSharedPtr<SceneObjectSkyBox>();
+			checked_pointer_cast<SceneObjectSkyBox>(sky_box_)->CompressedCubeMap(
 				SyncLoadTexture(y_cube_attr->ValueString(), EAH_GPU_Read | EAH_Immutable),
 				SyncLoadTexture(c_cube_attr->ValueString(), EAH_GPU_Read | EAH_Immutable));
 		}

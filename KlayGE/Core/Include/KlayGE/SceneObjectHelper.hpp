@@ -48,17 +48,6 @@ namespace KlayGE
 
 		void Technique(RenderTechniquePtr const & tech);
 		void CubeMap(TexturePtr const & cube);
-	};
-
-	class KLAYGE_CORE_API SceneObjectHDRSkyBox : public SceneObjectSkyBox
-	{
-	public:
-		SceneObjectHDRSkyBox(uint32_t attrib = 0);
-		virtual ~SceneObjectHDRSkyBox()
-		{
-		}
-
-		void Technique(RenderTechniquePtr const & tech);
 		void CompressedCubeMap(TexturePtr const & y_cube, TexturePtr const & c_cube);
 	};
 

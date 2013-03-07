@@ -7,6 +7,7 @@
 	<include name="Noise.fxml"/>
 	<include name="Quaternion.fxml"/>
 	<include name="GBuffer.fxml"/>
+	<include name="SkyBox.fxml"/>
 	<include name="InfTerrain.fxml"/>
 	<include name="PostProcess.fxml"/>
 	<include name="SSR.fxml"/>
@@ -404,7 +405,7 @@ float4 SpecialShadingFoggySkyBoxPS(float3 texCoord0 : TEXCOORD0) : SV_Target
 		</pass>
 	</technique>
 
-	<technique name="SpecialShadingFoggySkyBox" inherit="ShadingSkyBoxTech">
+	<technique name="SpecialShadingFoggySkyBox" inherit="SkyBoxTech">
 		<pass name="p0">
 			<state name="vertex_shader" value="FoggySkyBoxVS()"/>
 			<state name="pixel_shader" value="SpecialShadingFoggySkyBoxPS()"/>

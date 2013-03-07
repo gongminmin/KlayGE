@@ -1,8 +1,6 @@
 <?xml version='1.0'?>
 
-<effect>
-	<include name="util.fxml"/>
-	
+<effect>	
 	<parameter type="float4x4" name="mvp"/>
 	<parameter type="float4" name="color"/>
 
@@ -362,63 +360,6 @@ float4 HelperPS() : SV_Target0
 
 			<state name="vertex_shader" value="HelperVS()"/>
 			<state name="pixel_shader" value="HelperPS()"/>
-		</pass>
-	</technique>
-	
-
-	<parameter type="float4x4" name="inv_mvp"/>
-	<parameter type="textureCUBE" name="skybox_tex"/>
-	<parameter type="textureCUBE" name="skybox_C_tex"/>
-	<parameter type="sampler" name="skybox_cubeMapSampler">
-		<state name="filtering" value="min_mag_linear_mip_point"/>
-		<state name="address_u" value="clamp"/>
-		<state name="address_v" value="clamp"/>
-		<state name="address_w" value="clamp"/>
-	</parameter>
-
-	<shader>
-		<![CDATA[
-void SkyBoxVS(float4 pos : POSITION,
-			out float3 texcoord0 : TEXCOORD0,
-			out float4 oPos : SV_Position)
-{
-	oPos = pos;
-	texcoord0 = mul(pos, inv_mvp).xyz;
-}
-
-float4 SkyBoxPS(float3 texCoord0 : TEXCOORD0) : SV_Target
-{
-	return skybox_tex.Sample(skybox_cubeMapSampler, texCoord0);
-}
-
-float4 HDRSkyBoxPS(float3 texCoord0 : TEXCOORD0) : SV_Target
-{
-	float3 rgb = decode_hdr_yc(skybox_tex.Sample(skybox_cubeMapSampler, texCoord0).r,
-					skybox_C_tex.Sample(skybox_cubeMapSampler, texCoord0)).rgb;
-	
-	return float4(rgb, 1);
-}
-		]]>
-	</shader>
-	
-	<technique name="SkyBoxTec">
-		<pass name="p0">
-			<state name="cull_mode" value="none"/>
-			<state name="depth_write_mask" value="0"/>
-			<state name="depth_func" value="equal"/>
-
-			<state name="vertex_shader" value="SkyBoxVS()"/>
-			<state name="pixel_shader" value="SkyBoxPS()"/>
-		</pass>
-	</technique>
-	<technique name="HDRSkyBoxTec">
-		<pass name="p0">
-			<state name="cull_mode" value="none"/>
-			<state name="depth_write_mask" value="0"/>
-			<state name="depth_func" value="equal"/>
-
-			<state name="vertex_shader" value="SkyBoxVS()"/>
-			<state name="pixel_shader" value="HDRSkyBoxPS()"/>
 		</pass>
 	</technique>
 </effect>

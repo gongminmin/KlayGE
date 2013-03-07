@@ -168,8 +168,8 @@ void PostProcessingApp::InitObjects()
 	scene_obj_->BindUpdateFunc(ObjectUpdate());
 	scene_obj_->AddToSceneManager();
 
-	sky_box_ = MakeSharedPtr<SceneObjectHDRSkyBox>();
-	checked_pointer_cast<SceneObjectHDRSkyBox>(sky_box_)->CompressedCubeMap(y_cube_tl(), c_cube_tl());
+	sky_box_ = MakeSharedPtr<SceneObjectSkyBox>();
+	checked_pointer_cast<SceneObjectSkyBox>(sky_box_)->CompressedCubeMap(y_cube_tl(), c_cube_tl());
 	sky_box_->AddToSceneManager();
 
 	color_fb_ = rf.MakeFrameBuffer();

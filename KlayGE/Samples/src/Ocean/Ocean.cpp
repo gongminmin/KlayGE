@@ -20,6 +20,7 @@
 #include <KlayGE/InputFactory.hpp>
 #include <KlayGE/DeferredRenderingLayer.hpp>
 #include <KlayGE/LightShaft.hpp>
+#include <KlayGE/SkyBox.hpp>
 
 #include <sstream>
 
@@ -669,10 +670,10 @@ namespace
 		std::vector<float3> displacement_params_;
 	};
 
-	class RenderableFoggyHDRSkyBox : public RenderableHDRSkyBox
+	class RenderableFoggySkyBox : public RenderableSkyBox
 	{
 	public:
-		RenderableFoggyHDRSkyBox()
+		RenderableFoggySkyBox()
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 			RenderEffectPtr effect = rf.LoadEffect("Ocean.fxml");
@@ -681,12 +682,7 @@ namespace
 			gbuffer_rt1_tech_ = effect->TechniqueByName("GBufferFoggySkyBoxRT1");
 			gbuffer_mrt_tech_ = effect->TechniqueByName("GBufferFoggySkyBoxMRT");
 			special_shading_tech_ = effect->TechniqueByName("SpecialShadingFoggySkyBox");
-			technique_ = gbuffer_mrt_tech_;
-
-			skybox_Ccube_tex_ep_ = effect->ParameterByName("skybox_C_tex");
-			skybox_cube_tex_ep_ = effect->ParameterByName("skybox_tex");
-			depth_far_ep_ = effect->ParameterByName("depth_far");
-			inv_mvp_ep_ = effect->ParameterByName("inv_mvp");
+			this->Technique(gbuffer_mrt_tech_);
 		}
 		
 		void FogColor(Color const & clr)
@@ -695,18 +691,18 @@ namespace
 		}
 	};
 
-	class SceneObjectFoggyHDRSkyBox : public SceneObjectHDRSkyBox
+	class SceneObjectFoggySkyBox : public SceneObjectSkyBox
 	{
 	public:
-		SceneObjectFoggyHDRSkyBox(uint32_t attrib = 0)
-			: SceneObjectHDRSkyBox(attrib)
+		SceneObjectFoggySkyBox(uint32_t attrib = 0)
+			: SceneObjectSkyBox(attrib)
 		{
-			renderable_ = MakeSharedPtr<RenderableFoggyHDRSkyBox>();
+			renderable_ = MakeSharedPtr<RenderableFoggySkyBox>();
 		}
 
 		void FogColor(Color const & clr)
 		{
-			checked_pointer_cast<RenderableFoggyHDRSkyBox>(renderable_)->FogColor(clr);
+			checked_pointer_cast<RenderableFoggySkyBox>(renderable_)->FogColor(clr);
 		}
 	};
 
@@ -785,9 +781,9 @@ void OceanApp::InitObjects()
 	ocean_ = MakeSharedPtr<OceanObject>();
 	ocean_->AddToSceneManager();
 
-	sky_box_ = MakeSharedPtr<SceneObjectFoggyHDRSkyBox>();
-	checked_pointer_cast<SceneObjectFoggyHDRSkyBox>(sky_box_)->CompressedCubeMap(y_cube_tl(), c_cube_tl());
-	checked_pointer_cast<SceneObjectFoggyHDRSkyBox>(sky_box_)->FogColor(fog_color);
+	sky_box_ = MakeSharedPtr<SceneObjectFoggySkyBox>();
+	checked_pointer_cast<SceneObjectFoggySkyBox>(sky_box_)->CompressedCubeMap(y_cube_tl(), c_cube_tl());
+	checked_pointer_cast<SceneObjectFoggySkyBox>(sky_box_)->FogColor(fog_color);
 	sky_box_->AddToSceneManager();
 
 	sun_flare_ = MakeSharedPtr<LensFlareSceneObject>();

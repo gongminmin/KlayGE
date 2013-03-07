@@ -29,6 +29,7 @@
 #include <KFL/Util.hpp>
 #include <KFL/Math.hpp>
 #include <KlayGE/RenderableHelper.hpp>
+#include <KlayGE/SkyBox.hpp>
 #include <KlayGE/Mesh.hpp>
 #include <KlayGE/Light.hpp>
 #include <KlayGE/Camera.hpp>
@@ -69,20 +70,9 @@ namespace KlayGE
 		checked_pointer_cast<RenderableSkyBox>(renderable_)->CubeMap(cube);
 	}
 
-	SceneObjectHDRSkyBox::SceneObjectHDRSkyBox(uint32_t attrib)
-		: SceneObjectSkyBox(attrib)
+	void SceneObjectSkyBox::CompressedCubeMap(TexturePtr const & y_cube, TexturePtr const & c_cube)
 	{
-		renderable_ = MakeSharedPtr<RenderableHDRSkyBox>();
-	}
-
-	void SceneObjectHDRSkyBox::Technique(RenderTechniquePtr const & tech)
-	{
-		checked_pointer_cast<RenderableHDRSkyBox>(renderable_)->Technique(tech);
-	}
-
-	void SceneObjectHDRSkyBox::CompressedCubeMap(TexturePtr const & y_cube, TexturePtr const & c_cube)
-	{
-		checked_pointer_cast<RenderableHDRSkyBox>(renderable_)->CompressedCubeMap(y_cube, c_cube);
+		checked_pointer_cast<RenderableSkyBox>(renderable_)->CompressedCubeMap(y_cube, c_cube);
 	}
 
 
@@ -125,7 +115,7 @@ namespace KlayGE
 		model_ = model_scaling_ * MathLib::to_matrix(light_->Rotation()) * MathLib::translation(light_->Position()) * model_translation_;
 		if (LT_Spot == light_->Type())
 		{
-			float radius = tan(acos(light_->CosOuterAngle()) * 0.5f);
+			float radius = light_->CosOuterInner().w();
 			model_ = MathLib::scaling(radius, radius, 1.0f) * model_;
 		}
 		checked_pointer_cast<RenderableLightSourceProxy>(renderable_)->ModelMatrix(model_);

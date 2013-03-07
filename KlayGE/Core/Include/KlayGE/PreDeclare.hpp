@@ -21,8 +21,6 @@ namespace KlayGE
 	typedef shared_ptr<SceneObjectHelper> SceneObjectHelperPtr;
 	class SceneObjectSkyBox;
 	typedef shared_ptr<SceneObjectSkyBox> SceneObjectSkyBoxPtr;
-	class SceneObjectHDRSkyBox;
-	typedef shared_ptr<SceneObjectHDRSkyBox> SceneObjectHDRSkyBoxPtr;
 	class SceneObjectLightSourceProxy;
 	typedef shared_ptr<SceneObjectLightSourceProxy> SceneObjectLightSourceProxyPtr;
 	class SceneObjectCameraProxy;
@@ -62,8 +60,6 @@ namespace KlayGE
 	typedef shared_ptr<RenderableLineBox> RenderableLineBoxPtr;
 	class RenderableSkyBox;
 	typedef shared_ptr<RenderableSkyBox> RenderableSkyBoxPtr;
-	class RenderableHDRSkyBox;
-	typedef shared_ptr<RenderableHDRSkyBox> RenderableHDRSkyBoxPtr;
 	class RenderablePlane;
 	typedef shared_ptr<RenderablePlane> RenderablePlanePtr;
 	class RenderDecal;

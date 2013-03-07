@@ -49,6 +49,7 @@ SET(RENDERING_SOURCE_FILES
 	${KLAYGE_PROJECT_DIR}/Core/Src/Render/RenderView.cpp
 	${KLAYGE_PROJECT_DIR}/Core/Src/Render/SATPostProcess.cpp
 	${KLAYGE_PROJECT_DIR}/Core/Src/Render/ShaderObject.cpp
+	${KLAYGE_PROJECT_DIR}/Core/Src/Render/SkyBox.cpp
 	${KLAYGE_PROJECT_DIR}/Core/Src/Render/SSGIPostProcess.cpp
 	${KLAYGE_PROJECT_DIR}/Core/Src/Render/SSRPostProcess.cpp
 	${KLAYGE_PROJECT_DIR}/Core/Src/Render/SSVOPostProcess.cpp
@@ -90,6 +91,7 @@ SET(RENDERING_HEADER_FILES
 	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/RenderView.hpp
 	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/SATPostProcess.hpp
 	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/ShaderObject.hpp
+	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/SkyBox.hpp
 	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/SSGIPostProcess.hpp
 	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/SSRPostProcess.hpp
 	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/SSVOPostProcess.hpp
@@ -129,6 +131,7 @@ SET(RENDERING_EFFECT_FILES
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/RenderableHelper.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/RSM2VPLs.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/SetSubsplatStencil.fxml
+	${KLAYGE_PROJECT_DIR}/media/RenderFX/SkyBox.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/Sort.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/SSGI.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/SSR.fxml

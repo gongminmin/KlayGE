@@ -186,44 +186,6 @@ namespace KlayGE
 		RenderEffectParameterPtr v7_ep_;
 	};
 
-	class KLAYGE_CORE_API RenderableSkyBox : public RenderableHelper
-	{
-	public:
-		RenderableSkyBox();
-		virtual ~RenderableSkyBox()
-		{
-		}
-
-		virtual void Technique(RenderTechniquePtr const & tech);
-		void CubeMap(TexturePtr const & cube);
-
-		void OnRenderBegin();
-
-		// For deferred only
-
-		virtual void Pass(PassType type);
-
-	protected:
-		RenderEffectParameterPtr depth_far_ep_;
-		RenderEffectParameterPtr inv_mvp_ep_;
-		RenderEffectParameterPtr skybox_cube_tex_ep_;
-	};
-
-	class KLAYGE_CORE_API RenderableHDRSkyBox : public RenderableSkyBox
-	{
-	public:
-		RenderableHDRSkyBox();
-		virtual ~RenderableHDRSkyBox()
-		{
-		}
-
-		virtual void Technique(RenderTechniquePtr const & tech);
-		void CompressedCubeMap(TexturePtr const & y_cube, TexturePtr const & c_cube);
-
-	protected:
-		RenderEffectParameterPtr skybox_Ccube_tex_ep_;
-	};
-
 	class KLAYGE_CORE_API RenderablePlane : public RenderableHelper
 	{
 	public:
