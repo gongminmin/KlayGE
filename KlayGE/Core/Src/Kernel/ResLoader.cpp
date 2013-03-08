@@ -156,7 +156,7 @@ namespace KlayGE
 		res_loader_instance_.reset();
 	}
 
-	void ResLoader::AddPath(std::string const & path)
+	std::string ResLoader::RealPath(std::string const & path)
 	{
 		filesystem::path new_path(path);
 #ifdef KLAYGE_TR2_LIBRARY_FILESYSTEM_V2_SUPPORT
@@ -176,10 +176,10 @@ namespace KlayGE
 #endif
 				if (!filesystem::exists(full_path))
 				{
-					return;
+					return "";
 				}
 #else
-				return;
+				return "";
 #endif
 			}
 			new_path = full_path;
@@ -190,7 +190,30 @@ namespace KlayGE
 		{
 			path_str.push_back('/');
 		}
-		paths_.push_back(path_str);
+
+		return path_str;
+	}
+
+	void ResLoader::AddPath(std::string const & path)
+	{
+		std::string real_path = this->RealPath(path);
+		if (!real_path.empty())
+		{
+			paths_.push_back(real_path);
+		}
+	}
+
+	void ResLoader::DelPath(std::string const & path)
+	{
+		std::string real_path = this->RealPath(path);
+		if (!real_path.empty())
+		{
+			KLAYGE_AUTO(iter, std::find(paths_.begin(), paths_.end(), real_path));
+			if (iter != paths_.end())
+			{
+				paths_.erase(iter);
+			}
+		}
 	}
 
 	std::string ResLoader::Locate(std::string const & name)
@@ -385,6 +408,27 @@ namespace KlayGE
 
 	shared_ptr<void> ResLoader::SyncQuery(ResLoadingDescPtr const & res_desc)
 	{
+		for (KLAYGE_AUTO(iter, cached_desc_.begin()); iter != cached_desc_.end();)
+		{
+			shared_ptr<void> sh_res = iter->second.lock();
+			if (!sh_res)
+			{
+				for (KLAYGE_AUTO(s_iter, cached_sync_res_.begin()); s_iter != cached_sync_res_.end();)
+				{
+					if (*s_iter == iter->first)
+					{
+						s_iter = cached_sync_res_.erase(s_iter);
+						break;
+					}
+				}
+				iter = cached_desc_.erase(iter);
+			}
+			else
+			{
+				++ iter;
+			}
+		}
+
 		bool found = false;
 		typedef KLAYGE_DECLTYPE(cached_sync_res_) CachedSyncResType;
 		KLAYGE_FOREACH(CachedSyncResType::const_reference res, cached_sync_res_)
@@ -410,6 +454,27 @@ namespace KlayGE
 
 	function<shared_ptr<void>()> ResLoader::ASyncQuery(ResLoadingDescPtr const & res_desc)
 	{
+		for (KLAYGE_AUTO(iter, cached_desc_.begin()); iter != cached_desc_.end();)
+		{
+			shared_ptr<void> sh_res = iter->second.lock();
+			if (!sh_res)
+			{
+				for (KLAYGE_AUTO(s_iter, cached_async_res_.begin()); s_iter != cached_async_res_.end();)
+				{
+					if (s_iter->first == iter->first)
+					{
+						s_iter = cached_async_res_.erase(s_iter);
+						break;
+					}
+				}
+				iter = cached_desc_.erase(iter);
+			}
+			else
+			{
+				++ iter;
+			}
+		}
+
 		shared_ptr<joiner<void> > async_thread;
 		bool found = false;
 		typedef KLAYGE_DECLTYPE(cached_async_res_) CachedAsyncResType;
@@ -448,5 +513,23 @@ namespace KlayGE
 			(*loading_thread)();
 		}
 		return res_desc->MainThreadStage();
+	}
+
+	void ResLoader::SetFinalResource(ResLoadingDescPtr const & res_desc, shared_ptr<void> const & res)
+	{
+		bool found = false;
+		typedef KLAYGE_DECLTYPE(cached_desc_) CachedDescType;
+		KLAYGE_FOREACH(CachedDescType::reference c_desc, cached_desc_)
+		{
+			if (c_desc.first == res_desc)
+			{
+				c_desc.second = weak_ptr<void>(res);
+				found = true;
+			}
+		}
+		if (!found)
+		{
+			cached_desc_.push_back(std::make_pair(res_desc, weak_ptr<void>(res)));
+		}
 	}
 }

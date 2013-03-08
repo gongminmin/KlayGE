@@ -66,18 +66,21 @@ namespace KlayGE
 		class EmptyFuncToT
 		{
 		public:
-			explicit EmptyFuncToT(function<shared_ptr<void>()> const & func)
-				: func_(func)
+			EmptyFuncToT(function<shared_ptr<void>()> const & func, ResLoadingDescPtr const & res_desc)
+				: func_(func), res_desc_(res_desc)
 			{
 			}
 
 			shared_ptr<T> operator()()
 			{
-				return static_pointer_cast<T>(func_());
+				shared_ptr<void> res = func_();
+				ResLoader::Instance().SetFinalResource(res_desc_, res);
+				return static_pointer_cast<T>(res);
 			}
 
 		private:
 			function<shared_ptr<void>()> func_;
+			ResLoadingDescPtr res_desc_;
 		};
 
 	public:
@@ -88,6 +91,7 @@ namespace KlayGE
 		static void Destroy();
 
 		void AddPath(std::string const & path);
+		void DelPath(std::string const & path);
 
 		ResIdentifierPtr Open(std::string const & name);
 		std::string Locate(std::string const & name);
@@ -98,19 +102,25 @@ namespace KlayGE
 		template <typename T>
 		shared_ptr<T> SyncQueryT(ResLoadingDescPtr const & res_desc)
 		{
-			return static_pointer_cast<T>(this->SyncQuery(res_desc));
+			shared_ptr<void> res = this->SyncQuery(res_desc);
+			this->SetFinalResource(res_desc, res);
+			return static_pointer_cast<T>(res);
 		}
 
 		template <typename T>
 		function<shared_ptr<T>()> ASyncQueryT(ResLoadingDescPtr const & res_desc)
 		{
-			return EmptyFuncToT<T>(this->ASyncQuery(res_desc));
+			return EmptyFuncToT<T>(this->ASyncQuery(res_desc), res_desc);
 		}
 
-	private:		
+	private:
+		std::string RealPath(std::string const & path);
+
 		void ASyncSubThreadFunc(ResLoadingDescPtr const & res_desc);
 		shared_ptr<void> ASyncFunc(ResLoadingDescPtr const & res_desc,
 			shared_ptr<joiner<void> > const & loading_thread);
+
+		void SetFinalResource(ResLoadingDescPtr const & res_desc, shared_ptr<void> const & res);
 
 	private:
 		static shared_ptr<ResLoader> res_loader_instance_;
@@ -120,6 +130,8 @@ namespace KlayGE
 
 		std::vector<ResLoadingDescPtr> cached_sync_res_;
 		std::vector<std::pair<ResLoadingDescPtr, shared_ptr<joiner<void> > > > cached_async_res_;
+
+		std::vector<std::pair<ResLoadingDescPtr, weak_ptr<void> > > cached_desc_;
 	};
 }
 
