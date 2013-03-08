@@ -18,7 +18,7 @@ def build_glloader(compiler_name, compiler_version, compiler_arch, generator_nam
 	os.chdir(build_dir)
 
 	cmake_cmd = batch_command()
-	cmake_cmd.add_command('cmake -G "%s" -D GLLOADER_USE_GLES:BOOL="FALSE" %s' % (generator_name, "../cmake"))
+	cmake_cmd.add_command('cmake -G "%s" -D GLLOADER_USE_GLES:BOOL="FALSE" -D PYTHON_EXE:STRING="%s" %s' % (generator_name, sys.executable, "../cmake"))
 	cmake_cmd.execute()
 
 	build_cmd = batch_command()
@@ -45,7 +45,7 @@ def build_glloader(compiler_name, compiler_version, compiler_arch, generator_nam
 	os.chdir(build_dir)
 
 	cmake_cmd = batch_command()
-	cmake_cmd.add_command('cmake -G "%s" -D GLLOADER_USE_GLES:BOOL="TRUE" %s' % (generator_name, "../cmake"))
+	cmake_cmd.add_command('cmake -G "%s" -D GLLOADER_USE_GLES:BOOL="TRUE" -D PYTHON_EXE:STRING="%s" %s' % (generator_name, sys.executable, "../cmake"))
 	cmake_cmd.execute()
 
 	build_cmd = batch_command()
