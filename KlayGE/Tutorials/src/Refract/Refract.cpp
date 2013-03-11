@@ -207,8 +207,8 @@ void Refract::InitObjects()
 	refractor_ = MakeSharedPtr<RefractorObject>(y_cube_map_, c_cube_map_);
 	refractor_->AddToSceneManager();
 
-	sky_box_ = MakeSharedPtr<SceneObjectHDRSkyBox>(0);
-	checked_pointer_cast<SceneObjectHDRSkyBox>(sky_box_)->CompressedCubeMap(y_cube_map_, c_cube_map_);
+	sky_box_ = MakeSharedPtr<SceneObjectSkyBox>(0);
+	checked_pointer_cast<SceneObjectSkyBox>(sky_box_)->CompressedCubeMap(y_cube_map_, c_cube_map_);
 	sky_box_->AddToSceneManager();
 
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
