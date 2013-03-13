@@ -23,7 +23,9 @@
 
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/InputFactory.hpp>
+#include <KlayGE/ScriptFactory.hpp>
 
+#include <Python.h>
 #include <vector>
 #include <sstream>
 #include <fstream>
@@ -52,12 +54,14 @@ using namespace KlayGE;
 
 namespace
 {
+	typedef KlayGE::shared_ptr<PyObject> PyObjectPtr;
 	class PyScriptUpdate
 	{
 	public:
 		PyScriptUpdate(std::string const & script)
 		{
-			module_ = MakeSharedPtr<ScriptModule>();
+			ScriptEngine& scriptEngine = Context::Instance().ScriptFactoryInstance().ScriptEngineInstance();
+			module_ = scriptEngine.CreateModule("");
 			module_->RunString("from ScenePlayer import *");
 
 			script_ = MakeSharedPtr<std::string>(script);
@@ -71,7 +75,7 @@ namespace
 		{
 			module_->RunString(*script_);
 
-			return module_->Call("update", KlayGE::make_tuple(app_time, elapsed_time));
+			return boost::any_cast<PyObjectPtr>(module_->Call("update", KlayGE::make_tuple(app_time, elapsed_time)));
 		}
 
 	private:
@@ -276,6 +280,7 @@ namespace
 int SampleMain()
 {
 	ContextCfg cfg = Context::Instance().Config();
+	cfg.script_factory_name = "Python";
 	cfg.deferred_rendering = true;
 	cfg.graphics_cfg.fft_lens_effects = true;
 	Context::Instance().Config(cfg);

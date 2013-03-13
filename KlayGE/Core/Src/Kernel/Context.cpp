@@ -28,6 +28,7 @@
 #include <KlayGE/AudioFactory.hpp>
 #include <KlayGE/InputFactory.hpp>
 #include <KlayGE/ShowFactory.hpp>
+#include <KlayGE/ScriptFactory.hpp>
 #include <KlayGE/AudioDataSource.hpp>
 #include <KlayGE/ResLoader.hpp>
 #include <KFL/XMLDom.hpp>
@@ -75,6 +76,7 @@ namespace KlayGE
 	typedef void (*MakeAudioFactoryFunc)(AudioFactoryPtr& ptr);
 	typedef void (*MakeInputFactoryFunc)(InputFactoryPtr& ptr);
 	typedef void (*MakeShowFactoryFunc)(ShowFactoryPtr& ptr);
+	typedef void (*MakeScriptFactoryFunc)(ScriptFactoryPtr& ptr);
 	typedef void (*MakeSceneManagerFunc)(SceneManagerPtr& ptr);
 	typedef void (*MakeAudioDataSourceFactoryFunc)(AudioDataSourceFactoryPtr& ptr);
 
@@ -99,6 +101,7 @@ namespace KlayGE
 		audio_factory_.reset();
 		input_factory_.reset();
 		show_factory_.reset();
+		script_factory_.reset();
 		audio_data_src_factory_.reset();
 		deferred_rendering_layer_.reset();
 	}
@@ -156,6 +159,11 @@ namespace KlayGE
 #else
 		std::string sf_name;
 #endif
+#ifdef KLAYGE_PLATFORM_WINDOWS
+		std::string scf_name = "Python";
+#else
+		std::string scf_name;
+#endif
 		std::string sm_name;
 		std::string adsf_name;
 
@@ -164,6 +172,7 @@ namespace KlayGE
 		XMLNodePtr af_node;
 		XMLNodePtr if_node;
 		XMLNodePtr sf_node;
+		XMLNodePtr scf_node;
 		XMLNodePtr sm_node;
 		XMLNodePtr adsf_node;
 
@@ -204,6 +213,14 @@ namespace KlayGE
 			if (sf_node)
 			{
 				sf_name = sf_node->Attrib("name")->ValueString();
+			}
+#endif
+
+#ifdef KLAYGE_PLATFORM_WINDOWS
+			scf_node = context_node->FirstNode("script_factory");
+			if (scf_node)
+			{
+				scf_name = scf_node->Attrib("name")->ValueString();
 			}
 #endif
 
@@ -440,6 +457,7 @@ namespace KlayGE
 		cfg_.audio_factory_name = af_name;
 		cfg_.input_factory_name = if_name;
 		cfg_.show_factory_name = sf_name;
+		cfg_.script_factory_name = scf_name;
 		cfg_.scene_manager_name = sm_name;
 		cfg_.audio_data_source_factory_name = adsf_name;
 
@@ -491,6 +509,10 @@ namespace KlayGE
 			XMLNodePtr sf_node = cfg_doc.AllocNode(XNT_Element, "show_factory");
 			sf_node->AppendAttrib(cfg_doc.AllocAttribString("name", cfg_.show_factory_name));
 			context_node->AppendNode(sf_node);
+
+			XMLNodePtr scf_node = cfg_doc.AllocNode(XNT_Element, "script_factory");
+			scf_node->AppendAttrib(cfg_doc.AllocAttribString("name", cfg_.script_factory_name));
+			context_node->AppendNode(scf_node);
 
 			XMLNodePtr adsf_node = cfg_doc.AllocNode(XNT_Element, "audio_data_source_factory");
 			adsf_node->AppendAttrib(cfg_doc.AllocAttribString("name", cfg_.audio_data_source_factory_name));
@@ -739,6 +761,29 @@ namespace KlayGE
 		}
 	}
 
+	void Context::LoadScriptFactory(std::string const & sf_name)
+	{
+		script_factory_ = ScriptFactory::NullObject();
+		script_loader_.Free();
+
+		std::string script_path = ResLoader::Instance().Locate("Script");
+		std::string fn = DLL_PREFIX"_ScriptEngine_" + sf_name + DLL_SUFFIX;
+
+		std::string path = script_path + "/" + fn;
+		script_loader_.Load(ResLoader::Instance().Locate(path));
+
+		MakeScriptFactoryFunc msf = (MakeScriptFactoryFunc)script_loader_.GetProcAddress("MakeScriptFactory");
+		if (msf != nullptr)
+		{
+			msf(script_factory_);
+		}
+		else
+		{
+			LogError("Loading %s failed", path.c_str());
+			script_loader_.Free();
+		}
+	}
+
 	void Context::LoadSceneManager(std::string const & sm_name)
 	{
 		scene_mgr_ = SceneManager::NullObject();
@@ -853,6 +898,19 @@ namespace KlayGE
 			}
 		}
 		return *show_factory_;
+	}
+
+	ScriptFactory& Context::ScriptFactoryInstance()
+	{
+		if (!script_factory_)
+		{
+			unique_lock<mutex> lock(singleton_mutex);
+			if (!script_factory_)
+			{
+				this->LoadScriptFactory(cfg_.script_factory_name);
+			}
+		}
+		return *script_factory_;
 	}
 
 	AudioDataSourceFactory& Context::AudioDataSourceFactoryInstance()

@@ -53,6 +53,7 @@ namespace KlayGE
 		std::string audio_factory_name;
 		std::string input_factory_name;
 		std::string show_factory_name;
+		std::string script_factory_name;
 		std::string scene_manager_name;
 		std::string audio_data_source_factory_name;
 
@@ -86,6 +87,7 @@ namespace KlayGE
 		void LoadAudioFactory(std::string const & af_name);
 		void LoadInputFactory(std::string const & if_name);
 		void LoadShowFactory(std::string const & sf_name);
+		void LoadScriptFactory(std::string const & sf_name);
 		void LoadSceneManager(std::string const & sm_name);
 		void LoadAudioDataSourceFactory(std::string const & adsf_name);
 
@@ -160,6 +162,16 @@ namespace KlayGE
 		}
 		ShowFactory& ShowFactoryInstance();
 
+		void ScriptFactoryInstance(ScriptFactoryPtr const & factory)
+		{
+			script_factory_ = factory;
+		}
+		bool ScriptFactoryValid() const
+		{
+			return !!script_factory_;
+		}
+		ScriptFactory& ScriptFactoryInstance();
+
 		void AudioDataSourceFactoryInstance(AudioDataSourceFactoryPtr const & factory)
 		{
 			audio_data_src_factory_ = factory;
@@ -196,6 +208,7 @@ namespace KlayGE
 		AudioFactoryPtr		audio_factory_;
 		InputFactoryPtr		input_factory_;
 		ShowFactoryPtr		show_factory_;
+		ScriptFactoryPtr	script_factory_;
 		AudioDataSourceFactoryPtr audio_data_src_factory_;
 		DeferredRenderingLayerPtr deferred_rendering_layer_;
 
@@ -203,6 +216,7 @@ namespace KlayGE
 		DllLoader audio_loader_;
 		DllLoader input_loader_;
 		DllLoader show_loader_;
+		DllLoader script_loader_;
 		DllLoader sm_loader_;
 		DllLoader ads_loader_;
 	};

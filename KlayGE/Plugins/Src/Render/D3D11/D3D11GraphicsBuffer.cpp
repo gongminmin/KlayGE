@@ -132,7 +132,7 @@ namespace KlayGE
 
 		if (this->Size() > hw_buf_size_)
 		{
-			this->CreateBuffer(NULL);
+			this->CreateBuffer(nullptr);
 		}
 	}
 

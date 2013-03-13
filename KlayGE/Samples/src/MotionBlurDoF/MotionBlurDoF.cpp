@@ -21,7 +21,9 @@
 
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/InputFactory.hpp>
+#include <KlayGE/ScriptFactory.hpp>
 
+#include <Python.h>
 #include <sstream>
 
 #ifdef KLAYGE_COMPILER_MSVC
@@ -41,6 +43,7 @@ using namespace KlayGE;
 
 namespace
 {
+	typedef KlayGE::shared_ptr<PyObject> PyObjectPtr;
 	int32_t const NUM_LINE = 10;
 	int32_t const NUM_INSTANCE = 400;
 
@@ -696,6 +699,10 @@ namespace
 
 int SampleMain()
 {
+	ContextCfg cfg = Context::Instance().Config();
+	cfg.script_factory_name = "Python";
+	Context::Instance().Config(cfg);
+
 	MotionBlurDoFApp app;
 	app.Create();
 	app.Run();
@@ -735,8 +742,8 @@ void MotionBlurDoFApp::InitObjects()
 
 	font_ = rf.MakeFont("gkai00mp.kfont");
 
-	ScriptEngine scriptEng;
-	ScriptModule module("MotionBlurDoF_init");
+	ScriptEngine& scriptEngine = Context::Instance().ScriptFactoryInstance().ScriptEngineInstance();
+	ScriptModulePtr module = scriptEngine.CreateModule("MotionBlurDoF_init");
 
 	this->LookAt(float3(-1.8f, 1.9f, -1.8f), float3(0, 0, 0));
 	this->Proj(0.1f, 100);
@@ -808,14 +815,14 @@ void MotionBlurDoFApp::InitObjects()
 	{
 		for (int32_t j = 0; j < NUM_INSTANCE / NUM_LINE; ++ j)
 		{
-			PyObjectPtr py_pos = module.Call("get_pos", KlayGE::make_tuple(i, j, NUM_INSTANCE, NUM_LINE));
+			PyObjectPtr py_pos = boost::any_cast<PyObjectPtr>(module->Call("get_pos", KlayGE::make_tuple(i, j, NUM_INSTANCE, NUM_LINE)));
 
 			float3 pos;
 			pos.x() = static_cast<float>(PyFloat_AsDouble(PyTuple_GetItem(py_pos.get(), 0)));
 			pos.y() = static_cast<float>(PyFloat_AsDouble(PyTuple_GetItem(py_pos.get(), 1)));
 			pos.z() = static_cast<float>(PyFloat_AsDouble(PyTuple_GetItem(py_pos.get(), 2)));
 
-			PyObjectPtr py_clr = module.Call("get_clr", KlayGE::make_tuple(i, j, NUM_INSTANCE, NUM_LINE));
+			PyObjectPtr py_clr = boost::any_cast<PyObjectPtr>(module->Call("get_clr", KlayGE::make_tuple(i, j, NUM_INSTANCE, NUM_LINE)));
 
 			Color clr;
 			clr.r() = static_cast<float>(PyFloat_AsDouble(PyTuple_GetItem(py_clr.get(), 0)));

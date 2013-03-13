@@ -286,9 +286,10 @@ namespace KlayGE
 	class ShowFactory;
 	typedef shared_ptr<ShowFactory> ShowFactoryPtr;
 
-	class ScriptModule;
-	class RegisterModule;
 	class ScriptEngine;
+	typedef shared_ptr<ScriptEngine> ScriptEnginePtr;
+	class ScriptFactory;
+	typedef shared_ptr<ScriptFactory> ScriptFactoryPtr;
 }
 
 #endif			// _PREDECLARE_HPP

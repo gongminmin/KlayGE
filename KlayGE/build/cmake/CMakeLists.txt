@@ -50,6 +50,8 @@ IF(WIN32)
 		ADD_SUBDIRECTORY(Plugins/Input/DInput)
 	
 		ADD_SUBDIRECTORY(Plugins/Show/DShow)
+        
+		ADD_SUBDIRECTORY(Plugins/Script/Python)
 	ENDIF()
 	
 	ADD_SUBDIRECTORY(Plugins/Render/D3D11)
