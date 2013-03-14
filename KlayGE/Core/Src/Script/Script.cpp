@@ -56,19 +56,19 @@ namespace KlayGE
 	{
 	}
 
-	boost::any ScriptModule::Value(std::string const &)
+	boost::any ScriptModule::Value(std::string const & /*name*/)
 	{
-		return boost::any(nullptr);
+		return boost::any();
 	}
 
-	boost::any ScriptModule::Call(std::string const &, const AnyDataListType&)
+	boost::any ScriptModule::Call(std::string const & /*func_name*/, const AnyDataListType& /*args*/)
 	{
-		return boost::any(nullptr);
+		return boost::any();
 	}
 
-	boost::any ScriptModule::RunString(std::string const &)
+	boost::any ScriptModule::RunString(std::string const & /*script*/)
 	{
-		return boost::any(nullptr);
+		return boost::any();
 	}
 
 	// ¹¹Ôìº¯Êý
