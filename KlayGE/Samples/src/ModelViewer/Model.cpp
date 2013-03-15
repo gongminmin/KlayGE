@@ -851,15 +851,6 @@ void DetailedSkinnedModel::BuildModelInfo()
 	}
 }
 
-void DetailedSkinnedModel::Pass(PassType type)
-{
-	SkinnedModel::Pass(type);
-	for (StaticMeshesPtrType::iterator iter = meshes_.begin(); iter != meshes_.end(); ++ iter)
-	{
-		checked_pointer_cast<DetailedSkinnedMesh>(*iter)->Pass(type);
-	}
-}
-
 void DetailedSkinnedModel::SetTime(float time)
 {
 	this->SetFrame(time * frame_rate_);

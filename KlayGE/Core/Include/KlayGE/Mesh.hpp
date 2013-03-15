@@ -215,6 +215,8 @@ namespace KlayGE
 
 		TexturePtr const & RetriveTexture(std::string const & name);
 
+		virtual void Pass(PassType type);
+
 		virtual bool SpecialShading() const;
 		virtual bool TransparencyBackFace() const;
 		virtual bool TransparencyFrontFace() const;

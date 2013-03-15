@@ -16,8 +16,6 @@ public:
 
 	void BuildModelInfo();
 
-	void Pass(KlayGE::PassType type);
-
 	void SetTime(float time);
 
 	void VisualizeLighting();

@@ -80,8 +80,6 @@ namespace
 				std::vector<shared_ptr<AABBKeyFrames> > frame_pos_bbs;
 			};
 			shared_ptr<ModelData> model_data;
-
-			RenderModelPtr model;
 		};
 
 	public:
@@ -109,15 +107,15 @@ namespace
 
 		shared_ptr<void> MainThreadStage()
 		{
-			this->CreateModel();
+			RenderModelPtr model = this->CreateModel();
 
-			model_desc_.model->BuildModelInfo();
-			for (uint32_t i = 0; i < model_desc_.model->NumMeshes(); ++ i)
+			model->BuildModelInfo();
+			for (uint32_t i = 0; i < model->NumMeshes(); ++ i)
 			{
-				model_desc_.model->Mesh(i)->BuildMeshInfo();
+				model->Mesh(i)->BuildMeshInfo();
 			}
 
-			return static_pointer_cast<void>(model_desc_.model);
+			return static_pointer_cast<void>(model);
 		}
 
 		bool HasSubThreadStage() const
@@ -161,7 +159,7 @@ namespace
 				model_desc_.model_data->frame_pos_bbs);
 		}
 
-		void CreateModel()
+		RenderModelPtr CreateModel()
 		{
 			std::wstring model_name;
 			if (!model_desc_.model_data->joints.empty())
@@ -247,7 +245,7 @@ namespace
 
 			model->AssignMeshes(meshes.begin(), meshes.end());
 
-			model_desc_.model = model;
+			return model;
 		}
 
 	private:
@@ -321,6 +319,16 @@ namespace KlayGE
 		}
 
 		return iter->second;
+	}
+
+	void RenderModel::Pass(PassType type)
+	{
+		Renderable::Pass(type);
+		typedef KLAYGE_DECLTYPE(meshes_) MeshesType;
+		KLAYGE_FOREACH(MeshesType::const_reference mesh, meshes_)
+		{
+			mesh->Pass(type);
+		}
 	}
 
 	bool RenderModel::SpecialShading() const

@@ -710,8 +710,6 @@ namespace
 				std::vector<uint8_t> data_block;
 			};
 			shared_ptr<TexData> tex_data;
-
-			TexturePtr texture;
 		};
 
 	public:
@@ -735,11 +733,7 @@ namespace
 
 		shared_ptr<void> MainThreadStage()
 		{
-			if (!tex_desc_.texture)
-			{
-				this->CreateTexture();
-			}
-			return static_pointer_cast<void>(tex_desc_.texture);
+			return static_pointer_cast<void>(this->CreateTexture());
 		}
 
 		bool HasSubThreadStage() const
@@ -1226,14 +1220,9 @@ namespace
 					}
 				}
 			}
-
-			if (caps.multithread_res_creating_support)
-			{
-				this->CreateTexture();
-			}
 		}
 
-		void CreateTexture()
+		TexturePtr CreateTexture()
 		{
 			TexturePtr texture;
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
@@ -1264,7 +1253,7 @@ namespace
 				break;
 			}
 
-			tex_desc_.texture = texture;
+			return texture;
 		}
 
 	private:

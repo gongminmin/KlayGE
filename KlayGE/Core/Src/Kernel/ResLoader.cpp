@@ -420,6 +420,10 @@ namespace KlayGE
 						s_iter = cached_sync_res_.erase(s_iter);
 						break;
 					}
+					else
+					{
+						++ s_iter;
+					}
 				}
 				iter = cached_desc_.erase(iter);
 			}
@@ -465,6 +469,10 @@ namespace KlayGE
 					{
 						s_iter = cached_async_res_.erase(s_iter);
 						break;
+					}
+					else
+					{
+						++ s_iter;
 					}
 				}
 				iter = cached_desc_.erase(iter);
