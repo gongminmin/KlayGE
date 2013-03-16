@@ -213,8 +213,6 @@ namespace KlayGE
 
 		void AddToRenderQueue();
 
-		TexturePtr const & RetriveTexture(std::string const & name);
-
 		virtual void Pass(PassType type);
 
 		virtual bool SpecialShading() const;
@@ -238,8 +236,6 @@ namespace KlayGE
 
 		typedef std::vector<StaticMeshPtr> StaticMeshesPtrType;
 		StaticMeshesPtrType meshes_;
-
-		unordered_map<std::string, TexturePtr> tex_pool_;
 	};
 
 

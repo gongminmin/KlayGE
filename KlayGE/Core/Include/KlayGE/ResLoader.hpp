@@ -50,7 +50,9 @@ namespace KlayGE
 		{
 		}
 
-		virtual std::wstring const & Name() const = 0;
+		virtual uint64_t Type() const = 0;
+
+		virtual bool StateLess() const = 0;
 
 		virtual void SubThreadStage() = 0;
 		virtual shared_ptr<void> MainThreadStage() = 0;
@@ -115,7 +117,8 @@ namespace KlayGE
 		std::string RealPath(std::string const & path);
 
 		void ASyncSubThreadFunc(ResLoadingDescPtr const & res_desc, shared_ptr<volatile bool> const & is_done);
-		shared_ptr<void> ASyncFunc(ResLoadingDescPtr const & res_desc, shared_ptr<volatile bool> const & is_done);
+		shared_ptr<void> ASyncFunc(ResLoadingDescPtr const & res_desc, shared_ptr<volatile bool> const & is_done,
+			shared_ptr<void> const & cached_res);
 
 		void SetFinalResource(ResLoadingDescPtr const & res_desc, shared_ptr<void> const & res);
 

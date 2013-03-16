@@ -36,6 +36,7 @@
 #include <fstream>
 #include <sstream>
 #include <cstring>
+#include <boost/functional/hash.hpp>
 
 #include <MeshMLLib/MeshMLLib.hpp>
 
@@ -94,10 +95,15 @@ namespace
 			model_desc_.model_data = MakeSharedPtr<ModelDesc::ModelData>();
 		}
 
-		std::wstring const & Name() const
+		uint64_t Type() const
 		{
-			static std::wstring const name(L"RenderModelLoadingDesc");
-			return name;
+			static uint64_t const type = static_cast<uint64_t>(boost::hash_value("RenderModelLoadingDesc"));
+			return type;
+		}
+
+		bool StateLess() const
+		{
+			return false;
 		}
 
 		void SubThreadStage()
@@ -125,7 +131,7 @@ namespace
 
 		bool Match(ResLoadingDesc const & rhs) const
 		{
-			if (this->Name() == rhs.Name())
+			if (this->Type() == rhs.Type())
 			{
 				RenderModelLoadingDesc const & rmld = static_cast<RenderModelLoadingDesc const &>(rhs);
 				return (model_desc_.res_name == rmld.model_desc_.res_name)
@@ -136,7 +142,7 @@ namespace
 
 		void CopyFrom(ResLoadingDesc const & rhs)
 		{
-			BOOST_ASSERT(this->Name() == rhs.Name());
+			BOOST_ASSERT(this->Type() == rhs.Type());
 
 			RenderModelLoadingDesc const & rmld = static_cast<RenderModelLoadingDesc const &>(rhs);
 			model_desc_.res_name = rmld.model_desc_.res_name;
@@ -309,18 +315,6 @@ namespace KlayGE
 		}
 	}
 
-	TexturePtr const & RenderModel::RetriveTexture(std::string const & name)
-	{
-		KLAYGE_AUTO(iter, tex_pool_.find(name));
-		if (tex_pool_.end() == iter)
-		{
-			TexturePtr tex = SyncLoadTexture(name, EAH_GPU_Read | EAH_Immutable);
-			iter = tex_pool_.insert(std::make_pair(name, tex)).first;
-		}
-
-		return iter->second;
-	}
-
 	void RenderModel::Pass(PassType type)
 	{
 		Renderable::Pass(type);
@@ -413,7 +407,7 @@ namespace KlayGE
 			TexturePtr tex;
 			if (!ResLoader::Instance().Locate(iter->second).empty())
 			{
-				tex = model->RetriveTexture(iter->second);
+				tex = SyncLoadTexture(iter->second, EAH_GPU_Read | EAH_Immutable);
 			}
 
 			if (("Diffuse Color" == iter->first) || ("Diffuse Color Map" == iter->first))

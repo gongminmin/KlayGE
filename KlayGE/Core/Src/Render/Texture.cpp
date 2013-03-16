@@ -40,6 +40,7 @@
 
 #include <cstring>
 #include <fstream>
+#include <boost/functional/hash.hpp>
 
 #include <KlayGE/Texture.hpp>
 
@@ -720,10 +721,15 @@ namespace
 			tex_desc_.tex_data = MakeSharedPtr<TexDesc::TexData>();
 		}
 
-		std::wstring const & Name() const
+		uint64_t Type() const
 		{
-			static std::wstring const name(L"TextureLoadingDesc");
-			return name;
+			static uint64_t const type = static_cast<uint64_t>(boost::hash_value("TextureLoadingDesc"));
+			return type;
+		}
+
+		bool StateLess() const
+		{
+			return true;
 		}
 
 		void SubThreadStage()
@@ -743,7 +749,7 @@ namespace
 
 		bool Match(ResLoadingDesc const & rhs) const
 		{
-			if (this->Name() == rhs.Name())
+			if (this->Type() == rhs.Type())
 			{
 				TextureLoadingDesc const & tld = static_cast<TextureLoadingDesc const &>(rhs);
 				return (tex_desc_.res_name == tld.tex_desc_.res_name)
@@ -754,7 +760,7 @@ namespace
 
 		void CopyFrom(ResLoadingDesc const & rhs)
 		{
-			BOOST_ASSERT(this->Name() == rhs.Name());
+			BOOST_ASSERT(this->Type() == rhs.Type());
 
 			TextureLoadingDesc const & tld = static_cast<TextureLoadingDesc const &>(rhs);
 			tex_desc_.res_name = tld.tex_desc_.res_name;
