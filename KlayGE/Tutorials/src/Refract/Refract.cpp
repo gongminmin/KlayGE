@@ -198,8 +198,7 @@ bool Refract::ConfirmDevice() const
 
 void Refract::InitObjects()
 {
-	// ½¨Á¢×ÖÌå
-	font_ = Context::Instance().RenderFactoryInstance().MakeFont("gkai00mp.kfont");
+	font_ = SyncLoadFont("gkai00mp.kfont");
 
 	y_cube_map_ = SyncLoadTexture("uffizi_cross_y.dds", EAH_GPU_Read | EAH_Immutable);
 	c_cube_map_ = SyncLoadTexture("uffizi_cross_c.dds", EAH_GPU_Read | EAH_Immutable);

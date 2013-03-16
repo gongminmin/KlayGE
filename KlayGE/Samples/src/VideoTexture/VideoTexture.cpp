@@ -158,8 +158,7 @@ bool VideoTextureApp::ConfirmDevice() const
 
 void VideoTextureApp::InitObjects()
 {
-	// ½¨Á¢×ÖÌå
-	font_ = Context::Instance().RenderFactoryInstance().MakeFont("gkai00mp.kfont");
+	font_ = SyncLoadFont("gkai00mp.kfont");
 
 	this->LookAt(float3(-0.2f, 0.3f, -0.2f), float3(0, 0, 0));
 	this->Proj(0.01f, 100);

@@ -562,8 +562,7 @@ void ShadowCubeMap::InitObjects()
 	RenderEngine& re = rf.RenderEngineInstance();
 	RenderDeviceCaps const & caps = re.DeviceCaps();
 
-	// ½¨Á¢×ÖÌå
-	font_ = rf.MakeFont("gkai00mp.kfont");
+	font_ = SyncLoadFont("gkai00mp.kfont");
 
 	this->LookAt(float3(0.0f, 10.0f, -25.0f), float3(0, 10.0f, 0));
 	this->Proj(0.01f, 500);

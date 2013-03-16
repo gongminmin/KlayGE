@@ -445,8 +445,7 @@ bool DetailedSurfaceApp::ConfirmDevice() const
 
 void DetailedSurfaceApp::InitObjects()
 {
-	// ½¨Á¢×ÖÌå
-	font_ = Context::Instance().RenderFactoryInstance().MakeFont("gkai00mp.kfont");
+	font_ = SyncLoadFont("gkai00mp.kfont");
 	UIManager::Instance().Load(ResLoader::Instance().Open("DetailedSurface.uiml"));
 
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();

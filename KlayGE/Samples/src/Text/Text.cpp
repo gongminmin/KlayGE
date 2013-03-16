@@ -79,7 +79,7 @@ bool TextApp::ConfirmDevice() const
 
 void TextApp::InitObjects()
 {
-	font_ = Context::Instance().RenderFactoryInstance().MakeFont("gkai00mp.kfont");
+	font_ = SyncLoadFont("gkai00mp.kfont");
 
 	{
 		// text.txt is in UCS2 little endian

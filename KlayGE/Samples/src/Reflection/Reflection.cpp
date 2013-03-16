@@ -243,7 +243,7 @@ void ScreenSpaceReflectionApp::InitObjects()
 
 	deferred_rendering_ = Context::Instance().DeferredRenderingLayerInstance();
 
-	font_ = Context::Instance().RenderFactoryInstance().MakeFont("gkai00mp.kfont");
+	font_ = SyncLoadFont("gkai00mp.kfont");
 
 	sky_box_ = MakeSharedPtr<SceneObjectSkyBox>();
 	sky_box_->AddToSceneManager();

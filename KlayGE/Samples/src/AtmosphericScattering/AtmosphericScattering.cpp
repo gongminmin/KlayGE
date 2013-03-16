@@ -161,7 +161,7 @@ bool AtmosphericScatteringApp::ConfirmDevice() const
 
 void AtmosphericScatteringApp::InitObjects()
 {
-	font_ = Context::Instance().RenderFactoryInstance().MakeFont("gkai00mp.kfont");
+	font_ = SyncLoadFont("gkai00mp.kfont");
 
 	this->LookAt(float3(0, 0, -4.0f), float3(0, 0, 0), float3(0, 1, 0));
 	this->Proj(0.01f, 500.0f);

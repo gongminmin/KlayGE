@@ -509,8 +509,7 @@ void ParticleEditorApp::InitObjects()
 {
 	use_gs = Context::Instance().RenderFactoryInstance().RenderEngineInstance().DeviceCaps().gs_support;
 
-	// ½¨Á¢×ÖÌå
-	font_ = Context::Instance().RenderFactoryInstance().MakeFont("gkai00mp.kfont");
+	font_ = SyncLoadFont("gkai00mp.kfont");
 
 	this->LookAt(float3(-1.2f, 0.5f, -1.2f), float3(0, 0.5f, 0));
 	this->Proj(0.01f, 100);

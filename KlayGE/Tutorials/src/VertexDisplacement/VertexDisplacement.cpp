@@ -142,7 +142,7 @@ bool VertexDisplacement::ConfirmDevice() const
 
 void VertexDisplacement::InitObjects()
 {
-	font_ = Context::Instance().RenderFactoryInstance().MakeFont("gkai00mp.kfont");
+	font_ = SyncLoadFont("gkai00mp.kfont");
 
 	flag_ = MakeSharedPtr<FlagObject>(8, 6);
 	flag_->AddToSceneManager();

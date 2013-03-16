@@ -851,7 +851,7 @@ void ScenePlayerApp::InitObjects()
 {
 	this->LoadScene("DeferredRendering.scene");
 
-	font_ = Context::Instance().RenderFactoryInstance().MakeFont("gkai00mp.kfont");
+	font_ = SyncLoadFont("gkai00mp.kfont");
 
 	deferred_rendering_ = Context::Instance().DeferredRenderingLayerInstance();
 

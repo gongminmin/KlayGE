@@ -55,7 +55,7 @@ TutorFramework::TutorFramework()
 
 void TutorFramework::InitObjects()
 {
-	font_ = KlayGE::Context::Instance().RenderFactoryInstance().MakeFont("gkai00mp.kfont");
+	font_ = KlayGE::SyncLoadFont("gkai00mp.kfont");
 }
 
 void TutorFramework::DoUpdateOverlay()

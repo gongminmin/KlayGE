@@ -1710,7 +1710,7 @@ namespace KlayGE
 	// Initialize default Elements
 	void UIDialog::InitDefaultElements()
 	{
-		this->SetFont(0, Context::Instance().RenderFactoryInstance().MakeFont("gkai00mp.kfont"), 12);
+		this->SetFont(0, SyncLoadFont("gkai00mp.kfont"), 12);
 
 		// Element for the caption
 		cap_element_.SetFont(0);

@@ -741,7 +741,7 @@ void MotionBlurDoFApp::InitObjects()
 
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-	font_ = rf.MakeFont("gkai00mp.kfont");
+	font_ = SyncLoadFont("gkai00mp.kfont");
 
 	ScriptEngine& scriptEngine = Context::Instance().ScriptFactoryInstance().ScriptEngineInstance();
 	script_module_ = scriptEngine.CreateModule("MotionBlurDoF_init");

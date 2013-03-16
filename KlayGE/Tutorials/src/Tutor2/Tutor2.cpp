@@ -74,7 +74,7 @@ TutorFramework::TutorFramework()
 
 void TutorFramework::InitObjects()
 {
-	font_ = KlayGE::Context::Instance().RenderFactoryInstance().MakeFont("gkai00mp.kfont");
+	font_ = KlayGE::SyncLoadFont("gkai00mp.kfont");
 
 	KlayGE::OBBox boxRange(KlayGE::MathLib::convert_to_obbox(KlayGE::AABBox(KlayGE::float3(-1.0f, -0.25f, -0.25f), KlayGE::float3(-0.5f, 0.25f, 0.25f))));
 	KlayGE::Color boxColor(1.0f, 0.0f, 0.0f, 1.0f);

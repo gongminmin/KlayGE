@@ -303,8 +303,7 @@ bool DistanceMapping::ConfirmDevice() const
 
 void DistanceMapping::InitObjects()
 {
-	// ½¨Á¢×ÖÌå
-	font_ = Context::Instance().RenderFactoryInstance().MakeFont("gkai00mp.kfont");
+	font_ = SyncLoadFont("gkai00mp.kfont");
 
 	polygon_ = MakeSharedPtr<PolygonObject>();
 	polygon_->ModelMatrix(MathLib::rotation_x(-0.5f));

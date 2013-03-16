@@ -696,7 +696,7 @@ void CausticsMapApp::InitObjects()
 	}
 
 	//Font config
-	font_ = rf.MakeFont("gkai00mp.kfont");
+	font_ = SyncLoadFont("gkai00mp.kfont");
 
 	//Default Camera
 	this->LookAt(float3(30, 30, -30), float3(0.0f, 0.0f, 0.0f));

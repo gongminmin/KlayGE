@@ -71,6 +71,7 @@
 #include <fstream>
 #include <iostream>
 #include <boost/assert.hpp>
+#include <boost/functional/hash.hpp>
 
 #include <kfont/kfont.hpp>
 
@@ -81,16 +82,13 @@ namespace KlayGE
 	class FontRenderable : public RenderableHelper
 	{
 	public:
-		explicit FontRenderable(std::string const & font_name)
+		explicit FontRenderable(shared_ptr<KFont> const & kfl)
 				: RenderableHelper(L"Font"),
 					dirty_(false),
 					three_dim_(false),
-					kfont_loader_(MakeSharedPtr<KFont>()),
+					kfont_loader_(kfl),
 					tick_(0)
 		{
-			ResIdentifierPtr kfont_input = ResLoader::Instance().Open(font_name);
-			kfont_loader_->Load(kfont_input->input_stream());
-
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
 			restart_ = rf.RenderEngineInstance().DeviceCaps().primitive_restart_support;
@@ -734,18 +732,97 @@ namespace KlayGE
 			checked_pointer_cast<FontRenderable>(renderable_)->UpdateBuffers();
 		}
 	};
+}
 
+namespace
+{
+	using namespace KlayGE;
 
+	class FontLoadingDesc : public ResLoadingDesc
+	{
+	private:
+		struct FontDesc
+		{
+			std::string res_name;
+			uint32_t flag;
+
+			shared_ptr<KFont> kfont_loader;
+		};
+
+	public:
+		FontLoadingDesc(std::string const & res_name, uint32_t flag)
+		{
+			font_desc_.res_name = res_name;
+			font_desc_.flag = flag;
+			font_desc_.kfont_loader = MakeSharedPtr<KFont>();
+		}
+
+		uint64_t Type() const
+		{
+			static uint64_t const type = static_cast<uint64_t>(boost::hash_value("FontLoadingDesc"));
+			return type;
+		}
+
+		bool StateLess() const
+		{
+			return true;
+		}
+
+		void SubThreadStage()
+		{
+			ResIdentifierPtr kfont_input = ResLoader::Instance().Open(font_desc_.res_name);
+			font_desc_.kfont_loader->Load(kfont_input->input_stream());
+		}
+
+		shared_ptr<void> MainThreadStage()
+		{
+			shared_ptr<FontRenderable> fr = MakeSharedPtr<FontRenderable>(font_desc_.kfont_loader);
+			return static_pointer_cast<void>(MakeSharedPtr<Font>(fr, font_desc_.flag));
+		}
+
+		bool HasSubThreadStage() const
+		{
+			return true;
+		}
+
+		bool Match(ResLoadingDesc const & rhs) const
+		{
+			if (this->Type() == rhs.Type())
+			{
+				FontLoadingDesc const & fld = static_cast<FontLoadingDesc const &>(rhs);
+				return (font_desc_.res_name == fld.font_desc_.res_name)
+					&& (font_desc_.flag == fld.font_desc_.flag);
+			}
+			return false;
+		}
+
+		void CopyFrom(ResLoadingDesc const & rhs)
+		{
+			BOOST_ASSERT(this->Type() == rhs.Type());
+
+			FontLoadingDesc const & fld = static_cast<FontLoadingDesc const &>(rhs);
+			font_desc_.res_name = fld.font_desc_.res_name;
+			font_desc_.flag = fld.font_desc_.flag;
+			font_desc_.kfont_loader = fld.font_desc_.kfont_loader;
+		}
+
+	private:
+		FontDesc font_desc_;
+	};
+}
+
+namespace KlayGE
+{
 	// ¹¹Ôìº¯Êý
 	/////////////////////////////////////////////////////////////////////////////////
-	Font::Font(std::string const & font_name)
-			: font_renderable_(MakeSharedPtr<FontRenderable>(font_name))
+	Font::Font(shared_ptr<FontRenderable> const & fr)
+			: font_renderable_(fr)
 	{
 		fso_attrib_ = SceneObject::SOA_Overlay;
 	}
 
-	Font::Font(std::string const & font_name, uint32_t flags)
-			: font_renderable_(MakeSharedPtr<FontRenderable>(font_name))
+	Font::Font(shared_ptr<FontRenderable> const & fr, uint32_t flags)
+			: font_renderable_(fr)
 	{
 		fso_attrib_ = SceneObject::SOA_Overlay;
 		if (flags & Font::FS_Cullable)
@@ -814,5 +891,15 @@ namespace KlayGE
 			font_renderable_->AddText3D(mvp, clr, text, font_size);
 			font_obj->AddToSceneManager();
 		}
+	}
+
+	FontPtr SyncLoadFont(std::string const & font_name, uint32_t flags)
+	{
+		return ResLoader::Instance().SyncQueryT<Font>(MakeSharedPtr<FontLoadingDesc>(font_name, flags));
+	}
+
+	function<FontPtr()> ASyncLoadFont(std::string const & font_name, uint32_t flags)
+	{
+		return ResLoader::Instance().ASyncQueryT<Font>(MakeSharedPtr<FontLoadingDesc>(font_name, flags));
 	}
 }

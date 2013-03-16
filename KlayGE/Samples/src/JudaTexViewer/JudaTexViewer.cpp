@@ -295,7 +295,7 @@ void JudaTexViewer::InitObjects()
 {
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-	font_ = rf.MakeFont("gkai00mp.kfont");
+	font_ = SyncLoadFont("gkai00mp.kfont");
 
 	tile_pos_vb_ = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Read | EAH_CPU_Write, nullptr);
 

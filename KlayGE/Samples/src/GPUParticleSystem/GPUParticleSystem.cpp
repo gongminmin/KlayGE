@@ -762,7 +762,7 @@ void GPUParticleSystemApp::InitObjects()
 	use_so = caps.stream_output_support;
 	use_mrt = caps.max_simultaneous_rts > 1;
 
-	font_ = Context::Instance().RenderFactoryInstance().MakeFont("gkai00mp.kfont");
+	font_ = SyncLoadFont("gkai00mp.kfont");
 
 	KLAYGE_AUTO(terrain_height, ASyncLoadTexture("terrain_height.dds", EAH_GPU_Read | EAH_Immutable));
 	KLAYGE_AUTO(terrain_normal, ASyncLoadTexture("terrain_normal.dds", EAH_GPU_Read | EAH_Immutable));

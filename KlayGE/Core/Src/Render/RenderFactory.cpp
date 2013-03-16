@@ -237,11 +237,6 @@ namespace KlayGE
 		{
 			effect.second.clear();
 		}
-		typedef KLAYGE_DECLTYPE(font_pool_) FontPoolType;
-		KLAYGE_FOREACH(FontPoolType::reference font, font_pool_)
-		{
-			font.second.reset();
-		}
 		typedef KLAYGE_DECLTYPE(rs_pool_) RSPoolType;
 		KLAYGE_FOREACH(RSPoolType::reference rs, rs_pool_)
 		{
@@ -280,24 +275,6 @@ namespace KlayGE
 		}
 
 		return *re_;
-	}
-
-	FontPtr RenderFactory::MakeFont(std::string const & fontName, uint32_t flags)
-	{
-		FontPtr ret;
-
-		KLAYGE_AUTO(fiter, font_pool_.find(fontName));
-		if (fiter == font_pool_.end())
-		{
-			ret = MakeSharedPtr<Font>(fontName, flags);
-			font_pool_[fontName] = ret;
-		}
-		else
-		{
-			ret = fiter->second;
-		}
-
-		return ret;
 	}
 
 	RenderEffectPtr RenderFactory::LoadEffect(std::string const & effectName, std::pair<std::string, std::string>* macros)

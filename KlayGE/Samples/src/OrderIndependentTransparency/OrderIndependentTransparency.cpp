@@ -411,7 +411,7 @@ bool OrderIndependentTransparencyApp::ConfirmDevice() const
 
 void OrderIndependentTransparencyApp::InitObjects()
 {
-	font_ = Context::Instance().RenderFactoryInstance().MakeFont("gkai00mp.kfont");
+	font_ = SyncLoadFont("gkai00mp.kfont");
 
 	polygon_ = MakeSharedPtr<PolygonObject>();
 	checked_pointer_cast<PolygonObject>(polygon_)->LightPos(float3(-1, 2, 1));

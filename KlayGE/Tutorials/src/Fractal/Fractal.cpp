@@ -131,7 +131,7 @@ bool Fractal::ConfirmDevice() const
 
 void Fractal::InitObjects()
 {
-	font_ = Context::Instance().RenderFactoryInstance().MakeFont("gkai00mp.kfont");
+	font_ = SyncLoadFont("gkai00mp.kfont");
 
 	renderFractal_ = MakeSharedPtr<RenderFractal>();
 

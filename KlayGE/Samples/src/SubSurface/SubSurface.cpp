@@ -119,7 +119,7 @@ bool SubSurfaceApp::ConfirmDevice() const
 
 void SubSurfaceApp::InitObjects()
 {
-	font_ = Context::Instance().RenderFactoryInstance().MakeFont("gkai00mp.kfont");
+	font_ = SyncLoadFont("gkai00mp.kfont");
 
 	model_ = MakeSharedPtr<ModelObject>();
 	model_->AddToSceneManager();
