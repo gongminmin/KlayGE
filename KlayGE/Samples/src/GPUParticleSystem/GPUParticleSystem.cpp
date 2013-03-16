@@ -139,7 +139,7 @@ namespace
 			: RenderableHelper(L"RenderParticles"),
 				tex_width_(256), tex_height_((max_num_particles + 255) / 256)
 		{
-			KLAYGE_AUTO(pt, ASyncLoadTexture("particle.dds", EAH_GPU_Read | EAH_Immutable));
+			particle_tl_ = ASyncLoadTexture("particle.dds", EAH_GPU_Read | EAH_Immutable);
 
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 			
@@ -223,8 +223,6 @@ namespace
 			noise_vol_tex_ = CreateNoiseVolume(32);
 			*(technique_->Effect().ParameterByName("noise_vol_tex")) = noise_vol_tex_;
 
-			*(technique_->Effect().ParameterByName("particle_tex")) = particle_tex_ = pt();
-
 			*(technique_->Effect().ParameterByName("point_radius")) = 0.1f;
 			*(technique_->Effect().ParameterByName("init_pos_life")) = float4(0, 0, 0, 8);
 		}
@@ -236,6 +234,12 @@ namespace
 
 		void OnRenderBegin()
 		{
+			if (!particle_tex_)
+			{
+				particle_tex_ = particle_tl_();
+				*(technique_->Effect().ParameterByName("particle_tex")) = particle_tex_;
+			}
+
 			App3DFramework const & app = Context::Instance().AppInstance();
 			Camera const & camera = app.ActiveCamera();
 
@@ -262,6 +266,8 @@ namespace
 
 		TexturePtr particle_tex_;
 		TexturePtr noise_vol_tex_;
+
+		function<TexturePtr()> particle_tl_;
 	};
 
 	class ParticlesObject : public SceneObjectHelper
@@ -654,7 +660,7 @@ namespace
 		explicit TerrainRenderable(TexturePtr const & height_map, TexturePtr const & normal_map)
 			: RenderablePlane(4, 4, 64, 64, true)
 		{
-			KLAYGE_AUTO(grass, ASyncLoadTexture("grass.dds", EAH_GPU_Read | EAH_Immutable));
+			grass_tl_ = ASyncLoadTexture("grass.dds", EAH_GPU_Read | EAH_Immutable);
 
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
@@ -674,12 +680,16 @@ namespace
 			}
 
 			*(technique_->Effect().ParameterByName("normal_map_tex")) = normal_map;
-
-			*(technique_->Effect().ParameterByName("grass_tex")) = grass();
 		}
 
 		void OnRenderBegin()
 		{
+			if (!grass_tex_)
+			{
+				grass_tex_ = grass_tl_();
+				*(technique_->Effect().ParameterByName("grass_tex")) = grass_tex_;
+			}
+
 			App3DFramework const & app = Context::Instance().AppInstance();
 			Camera const & camera = app.ActiveCamera();
 
@@ -688,7 +698,8 @@ namespace
 		}
 
 	private:
-		float4x4 model_;
+		function<TexturePtr()> grass_tl_;
+		TexturePtr grass_tex_;
 	};
 
 	class TerrainObject : public SceneObjectHelper
@@ -773,10 +784,21 @@ void GPUParticleSystemApp::InitObjects()
 	particles_ = MakeSharedPtr<ParticlesObject>(NUM_PARTICLE);
 	particles_->AddToSceneManager();
 
-	gpu_ps = MakeSharedPtr<GPUParticleSystem>(NUM_PARTICLE, terrain_height(), terrain_normal());
+	TexturePtr terrain_height_tex;
+	while (!terrain_height_tex)
+	{
+		terrain_height_tex = terrain_height();
+	}
+	TexturePtr terrain_normal_tex;
+	while (!terrain_normal_tex)
+	{
+		terrain_normal_tex = terrain_normal();
+	}
+
+	gpu_ps = MakeSharedPtr<GPUParticleSystem>(NUM_PARTICLE, terrain_height_tex, terrain_normal_tex);
 	gpu_ps->AutoEmit(256);
 
-	terrain_ = MakeSharedPtr<TerrainObject>(terrain_height(), terrain_normal());
+	terrain_ = MakeSharedPtr<TerrainObject>(terrain_height_tex, terrain_normal_tex);
 	terrain_->AddToSceneManager();
 
 	FrameBufferPtr screen_buffer = re.CurFrameBuffer();

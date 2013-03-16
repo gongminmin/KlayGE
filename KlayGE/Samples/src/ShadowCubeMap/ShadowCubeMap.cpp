@@ -553,6 +553,11 @@ bool ShadowCubeMap::ConfirmDevice() const
 
 void ShadowCubeMap::InitObjects()
 {
+	loading_percentage_ = 0;
+	model_ml_ = ASyncLoadModel("ScifiRoom.7z//ScifiRoom.meshml", EAH_GPU_Read | EAH_Immutable, CreateModelFactory<RenderModel>(), CreateMeshFactory<OccluderMesh>());
+	teapot_ml_ = ASyncLoadModel("teapot.meshml", EAH_GPU_Read | EAH_Immutable, CreateModelFactory<RenderModel>(), CreateMeshFactory<OccluderMesh>());
+	lamp_tl_ = ASyncLoadTexture("lamp.dds", EAH_GPU_Read | EAH_Immutable);
+
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 	RenderEngine& re = rf.RenderEngineInstance();
 	RenderDeviceCaps const & caps = re.DeviceCaps();
@@ -560,28 +565,8 @@ void ShadowCubeMap::InitObjects()
 	// ½¨Á¢×ÖÌå
 	font_ = rf.MakeFont("gkai00mp.kfont");
 
-	KlayGE::function<RenderModelPtr()> model_ml = ASyncLoadModel("ScifiRoom.7z//ScifiRoom.meshml", EAH_GPU_Read | EAH_Immutable, CreateModelFactory<RenderModel>(), CreateMeshFactory<OccluderMesh>());
-	KlayGE::function<RenderModelPtr()> teapot_ml = ASyncLoadModel("teapot.meshml", EAH_GPU_Read | EAH_Immutable, CreateModelFactory<RenderModel>(), CreateMeshFactory<OccluderMesh>());
-
 	this->LookAt(float3(0.0f, 10.0f, -25.0f), float3(0, 10.0f, 0));
 	this->Proj(0.01f, 500);
-
-	lamp_tex_ = SyncLoadTexture("lamp.dds", EAH_GPU_Read | EAH_Immutable);
-
-	RenderModelPtr scene_model = model_ml();
-	scene_objs_.resize(scene_model->NumMeshes() + 1);
-	for (size_t i = 0; i < scene_model->NumMeshes(); ++ i)
-	{
-		scene_objs_[i] = MakeSharedPtr<SceneObjectHelper>(scene_model->Mesh(i), SceneObject::SOA_Cullable);
-	}
-	scene_objs_.back() = MakeSharedPtr<SceneObjectHelper>(teapot_ml()->Mesh(0), SceneObject::SOA_Cullable | SceneObject::SOA_Moveable);
-	scene_objs_.back()->BindUpdateFunc(OccluderObjectUpdate());
-
-	for (size_t i = 0; i < scene_objs_.size(); ++ i)
-	{
-		scene_objs_[i]->AddToSceneManager();
-		checked_pointer_cast<OccluderMesh>(scene_objs_[i]->GetRenderable())->LampTexture(lamp_tex_);
-	}
 
 	ElementFormat fmt;
 	if (caps.rendertarget_format_support(EF_D24S8, 1, 0))
@@ -635,17 +620,10 @@ void ShadowCubeMap::InitObjects()
 	}
 	shadow_dual_tex_ = rf.MakeTexture2D(SHADOW_MAP_SIZE * 2,  SHADOW_MAP_SIZE, 1, 1, fmt, 1, 0, EAH_GPU_Read, nullptr);
 
-	for (size_t i = 0; i < scene_objs_.size(); ++ i)
-	{
-		checked_pointer_cast<OccluderMesh>(scene_objs_[i]->GetRenderable())->CubeSMTexture(shadow_cube_tex_);
-		checked_pointer_cast<OccluderMesh>(scene_objs_[i]->GetRenderable())->DPSMTexture(shadow_dual_tex_);
-	}
-
 	light_ = MakeSharedPtr<PointLightSource>();
 	light_->Attrib(0);
 	light_->Color(float3(1, 1, 1));
 	light_->Falloff(float3(1, 0.05f, 0));
-	light_->ProjectiveTexture(lamp_tex_);
 	light_->BindUpdateFunc(PointLightSourceUpdate());
 	light_->AddToSceneManager();
 
@@ -758,6 +736,55 @@ void ShadowCubeMap::DoUpdateOverlay()
 
 uint32_t ShadowCubeMap::DoUpdate(uint32_t pass)
 {
+	if (0 == pass)
+	{
+		if (loading_percentage_ < 100)
+		{
+			if (loading_percentage_ < 20)
+			{
+				lamp_tex_ = lamp_tl_();
+				if (lamp_tex_)
+				{
+					light_->ProjectiveTexture(lamp_tex_);
+					loading_percentage_ = 20;
+				}
+			}
+			else if (loading_percentage_ < 90)
+			{
+				RenderModelPtr scene_model = model_ml_();
+				if (scene_model)
+				{
+					scene_objs_.resize(scene_model->NumMeshes());
+					for (size_t i = 0; i < scene_model->NumMeshes(); ++ i)
+					{
+						scene_objs_[i] = MakeSharedPtr<SceneObjectHelper>(scene_model->Mesh(i), SceneObject::SOA_Cullable);
+						scene_objs_[i]->AddToSceneManager();
+						checked_pointer_cast<OccluderMesh>(scene_objs_[i]->GetRenderable())->LampTexture(lamp_tex_);
+						checked_pointer_cast<OccluderMesh>(scene_objs_[i]->GetRenderable())->CubeSMTexture(shadow_cube_tex_);
+						checked_pointer_cast<OccluderMesh>(scene_objs_[i]->GetRenderable())->DPSMTexture(shadow_dual_tex_);
+					}
+
+					loading_percentage_ = 90;
+				}
+			}
+			else
+			{
+				RenderModelPtr teapot_model = teapot_ml_();
+				if (teapot_model)
+				{
+					scene_objs_.push_back(MakeSharedPtr<SceneObjectHelper>(teapot_model->Mesh(0), SceneObject::SOA_Cullable | SceneObject::SOA_Moveable));
+					scene_objs_.back()->BindUpdateFunc(OccluderObjectUpdate());
+					scene_objs_.back()->AddToSceneManager();
+					checked_pointer_cast<OccluderMesh>(scene_objs_.back()->GetRenderable())->LampTexture(lamp_tex_);
+					checked_pointer_cast<OccluderMesh>(scene_objs_.back()->GetRenderable())->CubeSMTexture(shadow_cube_tex_);
+					checked_pointer_cast<OccluderMesh>(scene_objs_.back()->GetRenderable())->DPSMTexture(shadow_dual_tex_);
+
+					loading_percentage_ = 100;
+				}
+			}
+		}
+	}
+
 	RenderEngine& renderEngine = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 
 	switch (sm_type_)

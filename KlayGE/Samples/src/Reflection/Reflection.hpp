@@ -46,6 +46,12 @@ private:
 	KlayGE::CameraPtr screen_camera_;
 	KlayGE::CameraPathControllerPtr screen_camera_path_;
 
+	KlayGE::function<KlayGE::RenderModelPtr()> teapot_ml_;
+	KlayGE::function<KlayGE::RenderModelPtr()> dino_ml_;
+	KlayGE::function<KlayGE::TexturePtr()> y_cube_tl_;
+	KlayGE::function<KlayGE::TexturePtr()> c_cube_tl_;
+	uint32_t loading_percentage_;
+
 	KlayGE::UIDialogPtr parameter_dialog_;
 	int id_min_sample_num_static_;
 	int id_min_sample_num_slider_;

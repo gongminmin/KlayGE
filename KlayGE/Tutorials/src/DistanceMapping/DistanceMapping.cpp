@@ -44,9 +44,9 @@ namespace
 		RenderPolygon()
 			: RenderableHelper(L"Polygon")
 		{
-			KLAYGE_AUTO(diffuse_loader, ASyncLoadTexture("diffuse.dds", EAH_GPU_Read | EAH_Immutable));
-			KLAYGE_AUTO(normal_loader, ASyncLoadTexture("normal.dds", EAH_GPU_Read | EAH_Immutable));
-			KLAYGE_AUTO(dist_loader, ASyncLoadTexture("distance.dds", EAH_GPU_Read | EAH_Immutable));
+			diffuse_tl_ = ASyncLoadTexture("diffuse.dds", EAH_GPU_Read | EAH_Immutable);
+			normal_tl_ = ASyncLoadTexture("normal.dds", EAH_GPU_Read | EAH_Immutable);
+			dist_tl_ = ASyncLoadTexture("distance.dds", EAH_GPU_Read | EAH_Immutable);
 
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
@@ -57,10 +57,6 @@ namespace
 			{
 				technique_ = effect->TechniqueByName("DistanceMapping20");
 			}
-
-			*(technique_->Effect().ParameterByName("diffuse_tex")) = diffuse_loader();
-			*(technique_->Effect().ParameterByName("normal_tex")) = normal_loader();
-			*(technique_->Effect().ParameterByName("distance_tex")) = dist_loader();
 
 			float3 xyzs[] =
 			{
@@ -191,6 +187,22 @@ namespace
 
 		void OnRenderBegin()
 		{
+			if (!diffuse_tex_)
+			{
+				diffuse_tex_ = diffuse_tl_();
+				*(technique_->Effect().ParameterByName("diffuse_tex")) = diffuse_tex_;
+			}
+			if (!normal_tex_)
+			{
+				normal_tex_ = normal_tl_();
+				*(technique_->Effect().ParameterByName("normal_tex")) = normal_tex_;
+			}
+			if (!dist_tex_)
+			{
+				dist_tex_ = dist_tl_();
+				*(technique_->Effect().ParameterByName("distance_tex")) = dist_tex_;
+			}
+
 			App3DFramework const & app = Context::Instance().AppInstance();
 
 			*(technique_->Effect().ParameterByName("worldviewproj")) = model_mat_ * app.ActiveCamera().ViewProjMatrix();
@@ -199,6 +211,13 @@ namespace
 
 	private:
 		float4x4 inv_model_mat_;
+
+		function<TexturePtr()> diffuse_tl_;
+		function<TexturePtr()> normal_tl_;
+		function<TexturePtr()> dist_tl_;
+		TexturePtr diffuse_tex_;
+		TexturePtr normal_tex_;
+		TexturePtr dist_tex_;
 	};
 
 	class PolygonObject : public SceneObjectHelper

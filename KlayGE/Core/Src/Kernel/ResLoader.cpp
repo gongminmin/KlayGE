@@ -408,16 +408,15 @@ namespace KlayGE
 
 	shared_ptr<void> ResLoader::SyncQuery(ResLoadingDescPtr const & res_desc)
 	{
-		for (KLAYGE_AUTO(iter, cached_desc_.begin()); iter != cached_desc_.end();)
+		for (KLAYGE_AUTO(iter, loaded_res_.begin()); iter != loaded_res_.end();)
 		{
-			shared_ptr<void> sh_res = iter->second.lock();
-			if (!sh_res)
+			if (!iter->second.lock())
 			{
-				for (KLAYGE_AUTO(s_iter, cached_sync_res_.begin()); s_iter != cached_sync_res_.end();)
+				for (KLAYGE_AUTO(s_iter, cached_sync_desc_.begin()); s_iter != cached_sync_desc_.end();)
 				{
 					if (*s_iter == iter->first)
 					{
-						s_iter = cached_sync_res_.erase(s_iter);
+						s_iter = cached_sync_desc_.erase(s_iter);
 						break;
 					}
 					else
@@ -425,7 +424,7 @@ namespace KlayGE
 						++ s_iter;
 					}
 				}
-				iter = cached_desc_.erase(iter);
+				iter = loaded_res_.erase(iter);
 			}
 			else
 			{
@@ -434,8 +433,8 @@ namespace KlayGE
 		}
 
 		bool found = false;
-		typedef KLAYGE_DECLTYPE(cached_sync_res_) CachedSyncResType;
-		KLAYGE_FOREACH(CachedSyncResType::const_reference res, cached_sync_res_)
+		typedef KLAYGE_DECLTYPE(cached_sync_desc_) CachedSyncResType;
+		KLAYGE_FOREACH(CachedSyncResType::const_reference res, cached_sync_desc_)
 		{
 			if (res->Match(*res_desc))
 			{
@@ -450,24 +449,25 @@ namespace KlayGE
 			{
 				res_desc->SubThreadStage();
 			}
-			cached_sync_res_.push_back(res_desc);
+			cached_sync_desc_.push_back(res_desc);
 		}
 
-		return res_desc->MainThreadStage();
+		shared_ptr<void> res = res_desc->MainThreadStage();
+		this->SetFinalResource(res_desc, res);
+		return res;
 	}
 
 	function<shared_ptr<void>()> ResLoader::ASyncQuery(ResLoadingDescPtr const & res_desc)
 	{
-		for (KLAYGE_AUTO(iter, cached_desc_.begin()); iter != cached_desc_.end();)
+		for (KLAYGE_AUTO(iter, loaded_res_.begin()); iter != loaded_res_.end();)
 		{
-			shared_ptr<void> sh_res = iter->second.lock();
-			if (!sh_res)
+			if (!iter->second.lock())
 			{
-				for (KLAYGE_AUTO(s_iter, cached_async_res_.begin()); s_iter != cached_async_res_.end();)
+				for (KLAYGE_AUTO(s_iter, cached_async_desc_.begin()); s_iter != cached_async_desc_.end();)
 				{
 					if (s_iter->first == iter->first)
 					{
-						s_iter = cached_async_res_.erase(s_iter);
+						s_iter = cached_async_desc_.erase(s_iter);
 						break;
 					}
 					else
@@ -475,7 +475,7 @@ namespace KlayGE
 						++ s_iter;
 					}
 				}
-				iter = cached_desc_.erase(iter);
+				iter = loaded_res_.erase(iter);
 			}
 			else
 			{
@@ -483,15 +483,15 @@ namespace KlayGE
 			}
 		}
 
-		shared_ptr<joiner<void> > async_thread;
+		shared_ptr<volatile bool> async_is_done;
 		bool found = false;
-		typedef KLAYGE_DECLTYPE(cached_async_res_) CachedAsyncResType;
-		KLAYGE_FOREACH(CachedAsyncResType::const_reference res, cached_async_res_)
+		typedef KLAYGE_DECLTYPE(cached_async_desc_) CachedAsyncResType;
+		KLAYGE_FOREACH(CachedAsyncResType::const_reference res, cached_async_desc_)
 		{
 			if (res.first->Match(*res_desc))
 			{
 				res_desc->CopyFrom(*res.first);
-				async_thread = res.second;
+				async_is_done = res.second;
 				found = true;
 				break;
 			}
@@ -500,44 +500,75 @@ namespace KlayGE
 		{
 			if (res_desc->HasSubThreadStage())
 			{
-				async_thread = MakeSharedPtr<joiner<void> >(GlobalThreadPool()(bind(&ResLoader::ASyncSubThreadFunc, this, res_desc)));
+				async_is_done = MakeSharedPtr<bool>(false);
+				shared_ptr<joiner<void> > async_thread = MakeSharedPtr<joiner<void> >(
+					GlobalThreadPool()(bind(&ResLoader::ASyncSubThreadFunc,
+					this, res_desc, async_is_done)));
+				loading_async_res_.push_back(std::make_pair(async_thread, async_is_done));
 			}
-			cached_async_res_.push_back(std::make_pair(res_desc, async_thread));
+			else
+			{
+				async_is_done = MakeSharedPtr<bool>(true);
+			}
+			cached_async_desc_.push_back(std::make_pair(res_desc, async_is_done));
 		}
 
-		return bind(&ResLoader::ASyncFunc, this, res_desc, async_thread);
+		return bind(&ResLoader::ASyncFunc, this, res_desc, async_is_done);
 	}
 
-	void ResLoader::ASyncSubThreadFunc(ResLoadingDescPtr const & res_desc)
+	void ResLoader::ASyncSubThreadFunc(ResLoadingDescPtr const & res_desc, shared_ptr<volatile bool> const & is_done)
 	{
 		res_desc->SubThreadStage();
+		*is_done = true;
 	}
 
-	shared_ptr<void> ResLoader::ASyncFunc(ResLoadingDescPtr const & res_desc,
-		shared_ptr<joiner<void> > const & loading_thread)
+	shared_ptr<void> ResLoader::ASyncFunc(ResLoadingDescPtr const & res_desc, shared_ptr<volatile bool> const & is_done)
 	{
-		if (res_desc->HasSubThreadStage())
+		if (*is_done)
 		{
-			(*loading_thread)();
+			shared_ptr<void> res = res_desc->MainThreadStage();
+			this->SetFinalResource(res_desc, res);
+			return res;
 		}
-		return res_desc->MainThreadStage();
+		else
+		{
+			static shared_ptr<void> null_ret;
+			return null_ret;
+		}
 	}
 
 	void ResLoader::SetFinalResource(ResLoadingDescPtr const & res_desc, shared_ptr<void> const & res)
 	{
 		bool found = false;
-		typedef KLAYGE_DECLTYPE(cached_desc_) CachedDescType;
-		KLAYGE_FOREACH(CachedDescType::reference c_desc, cached_desc_)
+		typedef KLAYGE_DECLTYPE(loaded_res_) CachedDescType;
+		KLAYGE_FOREACH(CachedDescType::reference c_desc, loaded_res_)
 		{
 			if (c_desc.first == res_desc)
 			{
 				c_desc.second = weak_ptr<void>(res);
 				found = true;
+				break;
 			}
 		}
 		if (!found)
 		{
-			cached_desc_.push_back(std::make_pair(res_desc, weak_ptr<void>(res)));
+			loaded_res_.push_back(std::make_pair(res_desc, weak_ptr<void>(res)));
+		}
+	}
+
+	void ResLoader::Update()
+	{
+		for (KLAYGE_AUTO(iter, loading_async_res_.begin()); iter != loading_async_res_.end();)
+		{
+			if (*iter->second)
+			{
+				(*iter->first)();
+				iter = loading_async_res_.erase(iter);
+			}
+			else
+			{
+				++ iter;
+			}
 		}
 	}
 }

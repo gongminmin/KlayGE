@@ -14,6 +14,15 @@
 	<parameter type="float4x4" name="inv_view"/>
 	<parameter type="float3" name="eye_in_back_camera"/>
 
+	<parameter type="textureCUBE" name="skybox_tex"/>
+	<parameter type="textureCUBE" name="skybox_C_tex"/>
+	<parameter type="sampler" name="skybox_cubeMapSampler">
+		<state name="filtering" value="min_mag_linear_mip_point"/>
+		<state name="address_u" value="clamp"/>
+		<state name="address_v" value="clamp"/>
+		<state name="address_w" value="clamp"/>
+	</parameter>
+
 	<shader>
 		<![CDATA[
 void ReflectSpecialShadingVS(float4 pos : POSITION,

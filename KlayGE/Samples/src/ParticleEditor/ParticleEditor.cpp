@@ -48,7 +48,7 @@ namespace
 		TerrainRenderable()
 			: RenderableHelper(L"Terrain")
 		{
-			KLAYGE_AUTO(grass, ASyncLoadTexture("grass.dds", EAH_GPU_Read | EAH_Immutable));
+			grass_tl_ = ASyncLoadTexture("grass.dds", EAH_GPU_Read | EAH_Immutable);
 
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
@@ -74,12 +74,16 @@ namespace
 
 			pos_aabb_ = MathLib::compute_aabbox(vertices, vertices + sizeof(vertices) / sizeof(vertices[0]));
 			tc_aabb_ = AABBox(float3(0, 0, 0), float3(0, 0, 0));
-
-			*(technique_->Effect().ParameterByName("grass_tex")) = grass();
 		}
 
 		void OnRenderBegin()
 		{
+			if (!grass_tex_)
+			{
+				grass_tex_ = grass_tl_();
+				*(technique_->Effect().ParameterByName("grass_tex")) = grass_tex_;
+			}
+
 			App3DFramework const & app = Context::Instance().AppInstance();
 
 			float4x4 view = app.ActiveCamera().ViewMatrix();
@@ -91,6 +95,10 @@ namespace
 			Camera const & camera = Context::Instance().AppInstance().ActiveCamera();
 			*(technique_->Effect().ParameterByName("depth_near_far_invfar")) = float3(camera.NearPlane(), camera.FarPlane(), 1.0f / camera.FarPlane());
 		}
+
+	private:
+		function<TexturePtr()> grass_tl_;
+		TexturePtr grass_tex_;
 	};
 
 	class TerrainObject : public SceneObjectHelper

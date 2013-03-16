@@ -100,9 +100,10 @@ void PostProcessingApp::InitObjects()
 	this->LookAt(float3(0, 0.5f, -2), float3(0, 0, 0));
 	this->Proj(0.1f, 150.0f);
 
-	KlayGE::function<RenderModelPtr()> model_ml = ASyncLoadModel("dino50.7z//dino50.meshml", EAH_GPU_Read | EAH_Immutable);
-	KlayGE::function<TexturePtr()> y_cube_tl = ASyncLoadTexture("rnl_cross_y.dds", EAH_GPU_Read | EAH_Immutable);
-	KlayGE::function<TexturePtr()> c_cube_tl = ASyncLoadTexture("rnl_cross_c.dds", EAH_GPU_Read | EAH_Immutable);
+	loading_percentage_ = 0;
+	model_ml_ = ASyncLoadModel("dino50.7z//dino50.meshml", EAH_GPU_Read | EAH_Immutable);
+	y_cube_tl_ = ASyncLoadTexture("rnl_cross_y.dds", EAH_GPU_Read | EAH_Immutable);
+	c_cube_tl_ = ASyncLoadTexture("rnl_cross_c.dds", EAH_GPU_Read | EAH_Immutable);
 
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 	RenderEngine& re = rf.RenderEngineInstance();
@@ -162,14 +163,8 @@ void PostProcessingApp::InitObjects()
 	dialog_->Control<UIRadioButton>(id_night_vision_)->OnChangedEvent().connect(KlayGE::bind(&PostProcessingApp::NightVisionHandler, this, KlayGE::placeholders::_1));
 	dialog_->Control<UIRadioButton>(id_old_fashion_)->OnChangedEvent().connect(KlayGE::bind(&PostProcessingApp::OldFashionHandler, this, KlayGE::placeholders::_1));
 	this->CartoonHandler(*dialog_->Control<UIRadioButton>(id_cartoon_));
-
-	RenderModelPtr scene_model = model_ml();
-	scene_obj_ = MakeSharedPtr<SceneObjectHelper>(scene_model->Mesh(0), SceneObject::SOA_Cullable | SceneObject::SOA_Moveable);
-	scene_obj_->BindUpdateFunc(ObjectUpdate());
-	scene_obj_->AddToSceneManager();
-
+	
 	sky_box_ = MakeSharedPtr<SceneObjectSkyBox>();
-	checked_pointer_cast<SceneObjectSkyBox>(sky_box_)->CompressedCubeMap(y_cube_tl(), c_cube_tl());
 	sky_box_->AddToSceneManager();
 
 	color_fb_ = rf.MakeFrameBuffer();
@@ -315,6 +310,34 @@ void PostProcessingApp::DoUpdateOverlay()
 
 uint32_t PostProcessingApp::DoUpdate(uint32_t pass)
 {
+	if (0 == pass)
+	{
+		if (loading_percentage_ < 100)
+		{
+			if (loading_percentage_ < 10)
+			{
+				TexturePtr y_cube_tex = y_cube_tl_();
+				TexturePtr c_cube_tex = c_cube_tl_();
+				checked_pointer_cast<SceneObjectSkyBox>(sky_box_)->CompressedCubeMap(y_cube_tex, c_cube_tex);
+				if (!!y_cube_tex && !!c_cube_tex)
+				{
+					loading_percentage_ = 10;
+				}
+			}
+			else
+			{
+				RenderModelPtr scene_model = model_ml_();
+				if (scene_model)
+				{
+					scene_obj_ = MakeSharedPtr<SceneObjectHelper>(scene_model->Mesh(0), SceneObject::SOA_Cullable | SceneObject::SOA_Moveable);
+					scene_obj_->BindUpdateFunc(ObjectUpdate());
+					scene_obj_->AddToSceneManager();
+					loading_percentage_ = 100;
+				}
+			}
+		}
+	}
+
 	RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 		
 	uint32_t ret = deferred_rendering_->Update(pass);

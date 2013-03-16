@@ -217,8 +217,13 @@ void ScreenSpaceReflectionApp::InitObjects()
 {
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-	function<TexturePtr()> y_cube_tl = ASyncLoadTexture("Lake_CraterLake03_y.dds", EAH_GPU_Read | EAH_Immutable);
-	function<TexturePtr()> c_cube_tl = ASyncLoadTexture("Lake_CraterLake03_c.dds", EAH_GPU_Read | EAH_Immutable);
+	loading_percentage_ = 0;
+	teapot_ml_ = ASyncLoadModel("teapot.meshml", EAH_GPU_Read | EAH_Immutable,
+		CreateModelFactory<RenderModel>(), CreateMeshFactory<ReflectMesh>());
+	dino_ml_ = ASyncLoadModel("dino50.7z//dino50.meshml", EAH_GPU_Read | EAH_Immutable,
+		CreateModelFactory<RenderModel>(), CreateMeshFactory<DinoMesh>());
+	y_cube_tl_ = ASyncLoadTexture("Lake_CraterLake03_y.dds", EAH_GPU_Read | EAH_Immutable);
+	c_cube_tl_ = ASyncLoadTexture("Lake_CraterLake03_c.dds", EAH_GPU_Read | EAH_Immutable);
 
 	this->LookAt(float3(2.0f, 2.0f, -5.0f), float3(0.0f, 1.0f, 0.0f), float3(0, 1, 0));
 	this->Proj(0.1f, 500.0f);
@@ -236,28 +241,12 @@ void ScreenSpaceReflectionApp::InitObjects()
 	point_light_->Falloff(float3(1, 0, 0.3f));
 	point_light_->AddToSceneManager();
 
-	teapot_ = MakeSharedPtr<SceneObjectHelper>(SyncLoadModel("teapot.meshml", EAH_GPU_Read | EAH_Immutable,
-		CreateModelFactory<RenderModel>(), CreateMeshFactory<ReflectMesh>())->Mesh(0), SceneObjectHelper::SOA_Cullable);
-	teapot_->ModelMatrix(MathLib::scaling(float3(15, 15, 15)));
-	teapot_->AddToSceneManager();
-
-	dino_ = MakeSharedPtr<SceneObjectHelper>(SyncLoadModel("dino50.7z//dino50.meshml", EAH_GPU_Read | EAH_Immutable,
-		CreateModelFactory<RenderModel>(), CreateMeshFactory<DinoMesh>())->Mesh(0), SceneObjectHelper::SOA_Cullable);
-	dino_->ModelMatrix(MathLib::scaling(float3(2, 2, 2)) * MathLib::translation(0.0f, 1.0f, -2.5f));
-	dino_->AddToSceneManager();
-
 	deferred_rendering_ = Context::Instance().DeferredRenderingLayerInstance();
 
 	font_ = Context::Instance().RenderFactoryInstance().MakeFont("gkai00mp.kfont");
 
-	TexturePtr y_cube_tex = y_cube_tl();
-	TexturePtr c_cube_tex = c_cube_tl();
-
 	sky_box_ = MakeSharedPtr<SceneObjectSkyBox>();
-	checked_pointer_cast<SceneObjectSkyBox>(sky_box_)->CompressedCubeMap(y_cube_tex, c_cube_tex);
 	sky_box_->AddToSceneManager();
-
-	checked_pointer_cast<ReflectMesh>(teapot_->GetRenderable())->SkyBox(y_cube_tex, c_cube_tex);
 
 	back_refl_fb_ = rf.MakeFrameBuffer();
 
@@ -373,38 +362,86 @@ uint32_t ScreenSpaceReflectionApp::DoUpdate(KlayGE::uint32_t pass)
 
 	if (0 == pass)
 	{
-		CameraPtr const & back_camera = back_refl_fb_->GetViewport()->camera;
+		if (loading_percentage_ < 100)
+		{
+			if (loading_percentage_ < 30)
+			{
+				RenderModelPtr model = teapot_ml_();
+				if (model)
+				{
+					teapot_ = MakeSharedPtr<SceneObjectHelper>(model->Mesh(0), SceneObjectHelper::SOA_Cullable);
+					teapot_->ModelMatrix(MathLib::scaling(float3(15, 15, 15)));
+					teapot_->AddToSceneManager();
 
-		float3 eye = screen_camera_->EyePos();
-		float3 at = screen_camera_->LookAt();
+					this->MinSampleNumHandler(*(parameter_dialog_->Control<UISlider>(id_min_sample_num_slider_)));
+					this->MaxSampleNumHandler(*(parameter_dialog_->Control<UISlider>(id_max_sample_num_slider_)));
+					this->EnbleReflectionHandler(*(parameter_dialog_->Control<UICheckBox>(id_enable_reflection_)));
 
-		float3 center = MathLib::transform_coord(teapot_->PosBound().Center(), teapot_->ModelMatrix());
-		float3 direction = eye - at;
-		Plane refl_plane = MathLib::normalize(MathLib::from_point_normal(center, direction));
-		float4x4 refl_mat = MathLib::reflect(refl_plane);
+					loading_percentage_ = 30;
+				}
+			}
+			else if (loading_percentage_ < 40)
+			{
+				TexturePtr y_cube_tex = y_cube_tl_();
+				TexturePtr c_cube_tex = c_cube_tl_();
+				checked_pointer_cast<SceneObjectSkyBox>(sky_box_)->CompressedCubeMap(y_cube_tex, c_cube_tex);
+				checked_pointer_cast<ReflectMesh>(teapot_->GetRenderable())->SkyBox(y_cube_tex, c_cube_tex);
+				if (!!y_cube_tex && !!c_cube_tex)
+				{
+					loading_percentage_ = 40;
+				}
+			}
+			else if (loading_percentage_ < 90)
+			{
+				RenderModelPtr model = dino_ml_();
+				if (model)
+				{
+					dino_ = MakeSharedPtr<SceneObjectHelper>(model->Mesh(0), SceneObjectHelper::SOA_Cullable);
+					dino_->ModelMatrix(MathLib::scaling(float3(2, 2, 2)) * MathLib::translation(0.0f, 1.0f, -2.5f));
+					dino_->AddToSceneManager();
 
-		float3 refl_eye_pos = MathLib::transform_coord(eye, refl_mat);
-		float3 refl_eye_at = MathLib::transform_coord(at, refl_mat);
-		back_camera->ViewParams(center, center + direction, screen_camera_->UpVec());
-		back_camera->ProjParams(PI / 2, 1, screen_camera_->NearPlane(), screen_camera_->FarPlane());
+					loading_percentage_ = 100;
+				}
+			}
+		}
+		else
+		{
+			CameraPtr const & back_camera = back_refl_fb_->GetViewport()->camera;
 
-		checked_pointer_cast<ReflectMesh>(teapot_->GetRenderable())->BackCamera(back_camera);
+			float3 eye = screen_camera_->EyePos();
+			float3 at = screen_camera_->LookAt();
 
-		checked_pointer_cast<ReflectMesh>(teapot_->GetRenderable())->FrontReflectionTex(deferred_rendering_->PrevFrameShadingTex(1));
-		checked_pointer_cast<ReflectMesh>(teapot_->GetRenderable())->FrontReflectionDepthTex(deferred_rendering_->PrevFrameDepthTex(1));
-		checked_pointer_cast<ReflectMesh>(teapot_->GetRenderable())->BackReflectionTex(deferred_rendering_->CurrFrameShadingTex(0));
-		checked_pointer_cast<ReflectMesh>(teapot_->GetRenderable())->BackReflectionDepthTex(deferred_rendering_->CurrFrameDepthTex(0));
+			float3 center = MathLib::transform_coord(teapot_->PosBound().Center(), teapot_->ModelMatrix());
+			float3 direction = eye - at;
+			Plane refl_plane = MathLib::normalize(MathLib::from_point_normal(center, direction));
+			float4x4 refl_mat = MathLib::reflect(refl_plane);
+
+			float3 refl_eye_pos = MathLib::transform_coord(eye, refl_mat);
+			float3 refl_eye_at = MathLib::transform_coord(at, refl_mat);
+			back_camera->ViewParams(center, center + direction, screen_camera_->UpVec());
+			back_camera->ProjParams(PI / 2, 1, screen_camera_->NearPlane(), screen_camera_->FarPlane());
+
+			checked_pointer_cast<ReflectMesh>(teapot_->GetRenderable())->BackCamera(back_camera);
+
+			checked_pointer_cast<ReflectMesh>(teapot_->GetRenderable())->FrontReflectionTex(deferred_rendering_->PrevFrameShadingTex(1));
+			checked_pointer_cast<ReflectMesh>(teapot_->GetRenderable())->FrontReflectionDepthTex(deferred_rendering_->PrevFrameDepthTex(1));
+			checked_pointer_cast<ReflectMesh>(teapot_->GetRenderable())->BackReflectionTex(deferred_rendering_->CurrFrameShadingTex(0));
+			checked_pointer_cast<ReflectMesh>(teapot_->GetRenderable())->BackReflectionDepthTex(deferred_rendering_->CurrFrameDepthTex(0));
+		}
 	}
 
 	urt = deferred_rendering_->Update(pass);
 
-	if (0 == deferred_rendering_->ActiveViewport())
+	if (teapot_)
 	{
-		teapot_->Visible(false);
-	}
-	else
-	{
-		teapot_->Visible(true);
+		if (0 == deferred_rendering_->ActiveViewport())
+		{
+			teapot_->Visible(false);
+		}
+		else
+		{
+			teapot_->Visible(true);
+		}
 	}
 
 	return urt;

@@ -735,15 +735,16 @@ bool MotionBlurDoFApp::ConfirmDevice() const
 
 void MotionBlurDoFApp::InitObjects()
 {
-	KlayGE::function<RenderModelPtr()> model_instance_ml = ASyncLoadModel("teapot.meshml", EAH_GPU_Read | EAH_Immutable, CreateModelFactory<RenderModel>(), CreateMeshFactory<RenderInstanceMesh>());
-	KlayGE::function<RenderModelPtr()> model_mesh_ml = ASyncLoadModel("teapot.meshml", EAH_GPU_Read | EAH_Immutable, CreateModelFactory<RenderModel>(), CreateMeshFactory<RenderNonInstancedMesh>());
+	loading_percentage_ = 0;
+	model_instance_ml_ = ASyncLoadModel("teapot.meshml", EAH_GPU_Read | EAH_Immutable, CreateModelFactory<RenderModel>(), CreateMeshFactory<RenderInstanceMesh>());
+	model_mesh_ml_ = ASyncLoadModel("teapot.meshml", EAH_GPU_Read | EAH_Immutable, CreateModelFactory<RenderModel>(), CreateMeshFactory<RenderNonInstancedMesh>());
 
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
 	font_ = rf.MakeFont("gkai00mp.kfont");
 
 	ScriptEngine& scriptEngine = Context::Instance().ScriptFactoryInstance().ScriptEngineInstance();
-	ScriptModulePtr module = scriptEngine.CreateModule("MotionBlurDoF_init");
+	script_module_ = scriptEngine.CreateModule("MotionBlurDoF_init");
 
 	this->LookAt(float3(-1.8f, 1.9f, -1.8f), float3(0, 0, 0));
 	this->Proj(0.1f, 100);
@@ -810,37 +811,7 @@ void MotionBlurDoFApp::InitObjects()
 
 	app_dialog_->Control<UICheckBox>(id_use_instancing_)->OnChangedEvent().connect(KlayGE::bind(&MotionBlurDoFApp::UseInstancingHandler, this, KlayGE::placeholders::_1));
 
-	renderInstance_ = model_instance_ml()->Mesh(0);
-	for (int32_t i = 0; i < NUM_LINE; ++ i)
-	{
-		for (int32_t j = 0; j < NUM_INSTANCE / NUM_LINE; ++ j)
-		{
-			PyObjectPtr py_pos = boost::any_cast<PyObjectPtr>(module->Call("get_pos", KlayGE::make_tuple(i, j, NUM_INSTANCE, NUM_LINE)));
-
-			float3 pos;
-			pos.x() = static_cast<float>(PyFloat_AsDouble(PyTuple_GetItem(py_pos.get(), 0)));
-			pos.y() = static_cast<float>(PyFloat_AsDouble(PyTuple_GetItem(py_pos.get(), 1)));
-			pos.z() = static_cast<float>(PyFloat_AsDouble(PyTuple_GetItem(py_pos.get(), 2)));
-
-			PyObjectPtr py_clr = boost::any_cast<PyObjectPtr>(module->Call("get_clr", KlayGE::make_tuple(i, j, NUM_INSTANCE, NUM_LINE)));
-
-			Color clr;
-			clr.r() = static_cast<float>(PyFloat_AsDouble(PyTuple_GetItem(py_clr.get(), 0)));
-			clr.g() = static_cast<float>(PyFloat_AsDouble(PyTuple_GetItem(py_clr.get(), 1)));
-			clr.b() = static_cast<float>(PyFloat_AsDouble(PyTuple_GetItem(py_clr.get(), 2)));
-			clr.a() = static_cast<float>(PyFloat_AsDouble(PyTuple_GetItem(py_clr.get(), 3)));
-
-			SceneObjectPtr so = MakeSharedPtr<Teapot>();
-			checked_pointer_cast<Teapot>(so)->Instance(MathLib::translation(pos), clr);
-
-			checked_pointer_cast<Teapot>(so)->SetRenderable(renderInstance_);
-			so->AddToSceneManager();
-			scene_objs_.push_back(so);
-		}
-	}
 	use_instance_ = true;
-
-	renderMesh_ = model_mesh_ml()->Mesh(0);
 }
 
 void MotionBlurDoFApp::OnResize(uint32_t width, uint32_t height)
@@ -1019,14 +990,14 @@ void MotionBlurDoFApp::UseInstancingHandler(UICheckBox const & /*sender*/)
 
 	if (use_instance_)
 	{
-		for (int i = 0; i < NUM_INSTANCE; ++ i)
+		for (size_t i = 0; i < scene_objs_.size(); ++ i)
 		{
 			checked_pointer_cast<Teapot>(scene_objs_[i])->SetRenderable(renderInstance_);
 		}
 	}
 	else
 	{
-		for (int i = 0; i < NUM_INSTANCE; ++ i)
+		for (size_t i = 0; i < scene_objs_.size(); ++ i)
 		{
 			checked_pointer_cast<Teapot>(scene_objs_[i])->SetRenderable(renderMesh_);
 		}
@@ -1078,6 +1049,61 @@ void MotionBlurDoFApp::DoUpdateOverlay()
 
 uint32_t MotionBlurDoFApp::DoUpdate(uint32_t pass)
 {
+	if (0 == pass)
+	{
+		if (loading_percentage_ < 100)
+		{
+			if (loading_percentage_ < 80)
+			{
+				RenderModelPtr model = model_instance_ml_();
+				if (model)
+				{
+					renderInstance_ = model_instance_ml_()->Mesh(0);
+					for (int32_t i = 0; i < NUM_LINE; ++ i)
+					{
+						for (int32_t j = 0; j < NUM_INSTANCE / NUM_LINE; ++ j)
+						{
+							PyObjectPtr py_pos = boost::any_cast<PyObjectPtr>(script_module_->Call("get_pos", KlayGE::make_tuple(i, j, NUM_INSTANCE, NUM_LINE)));
+
+							float3 pos;
+							pos.x() = static_cast<float>(PyFloat_AsDouble(PyTuple_GetItem(py_pos.get(), 0)));
+							pos.y() = static_cast<float>(PyFloat_AsDouble(PyTuple_GetItem(py_pos.get(), 1)));
+							pos.z() = static_cast<float>(PyFloat_AsDouble(PyTuple_GetItem(py_pos.get(), 2)));
+
+							PyObjectPtr py_clr = boost::any_cast<PyObjectPtr>(script_module_->Call("get_clr", KlayGE::make_tuple(i, j, NUM_INSTANCE, NUM_LINE)));
+
+							Color clr;
+							clr.r() = static_cast<float>(PyFloat_AsDouble(PyTuple_GetItem(py_clr.get(), 0)));
+							clr.g() = static_cast<float>(PyFloat_AsDouble(PyTuple_GetItem(py_clr.get(), 1)));
+							clr.b() = static_cast<float>(PyFloat_AsDouble(PyTuple_GetItem(py_clr.get(), 2)));
+							clr.a() = static_cast<float>(PyFloat_AsDouble(PyTuple_GetItem(py_clr.get(), 3)));
+
+							SceneObjectPtr so = MakeSharedPtr<Teapot>();
+							checked_pointer_cast<Teapot>(so)->Instance(MathLib::translation(pos), clr);
+
+							checked_pointer_cast<Teapot>(so)->SetRenderable(renderInstance_);
+							so->AddToSceneManager();
+							scene_objs_.push_back(so);
+
+							so->Update(0, 0);
+						}
+					}
+
+					loading_percentage_ = 80;
+				}
+			}
+			else
+			{
+				RenderModelPtr model = model_mesh_ml_();
+				if (model)
+				{
+					renderMesh_ = model->Mesh(0);
+					loading_percentage_ = 100;
+				}
+			}
+		}
+	}
+
 	Context& context = Context::Instance();
 	App3DFramework& app = context.AppInstance();
 	SceneManager& sceneMgr = context.SceneManagerInstance();
@@ -1110,7 +1136,7 @@ uint32_t MotionBlurDoFApp::DoUpdate(uint32_t pass)
 			}
 			renderEngine.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, clear_clr, 1.0f, 0);
 		}
-		for (int i = 0; i < NUM_INSTANCE; ++ i)
+		for (size_t i = 0; i < scene_objs_.size(); ++ i)
 		{
 			checked_pointer_cast<Teapot>(scene_objs_[i])->MotionVecPass(false);
 		}
@@ -1124,7 +1150,7 @@ uint32_t MotionBlurDoFApp::DoUpdate(uint32_t pass)
 
 		renderEngine.BindFrameBuffer(motion_vec_fb_);
 		renderEngine.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(0.5f, 0.5f, 0.5f, 1), 1.0f, 0);
-		for (int i = 0; i < NUM_INSTANCE; ++ i)
+		for (size_t i = 0; i < scene_objs_.size(); ++ i)
 		{
 			checked_pointer_cast<Teapot>(scene_objs_[i])->MotionVecPass(true);
 		}

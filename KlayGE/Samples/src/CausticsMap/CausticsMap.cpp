@@ -72,9 +72,9 @@ namespace
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-			KLAYGE_AUTO(diffuse_loader, ASyncLoadTexture("diffuse.dds", EAH_GPU_Read | EAH_Immutable));
-			KLAYGE_AUTO(normal_loader, ASyncLoadTexture("normal.dds", EAH_GPU_Read | EAH_Immutable));
-			KLAYGE_AUTO(dist_loader, ASyncLoadTexture("distance.dds", EAH_GPU_Read | EAH_Immutable));
+			diffuse_tl_ = ASyncLoadTexture("diffuse.dds", EAH_GPU_Read | EAH_Immutable);
+			normal_tl_ = ASyncLoadTexture("normal.dds", EAH_GPU_Read | EAH_Immutable);
+			dist_tl_ = ASyncLoadTexture("distance.dds", EAH_GPU_Read | EAH_Immutable);
 
 			uint32_t vertex_num = rl_->NumVertices();
 			vector<Quaternion> tangent_quats(vertex_num);
@@ -124,25 +124,21 @@ namespace
 			GraphicsBufferPtr tangents_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, &init_data);
 			rl_->BindVertexStream(tangents_vb, KlayGE::make_tuple(vertex_element(VEU_Tangent, 0, fmt)));
 
-			RenderEffectPtr effect = rf.LoadEffect("Scene.fxml");
-			technique_ = effect->TechniqueByName("DistanceMapping2a");
+			scene_effect_ = rf.LoadEffect("Scene.fxml");
+			technique_ = scene_effect_->TechniqueByName("DistanceMapping2a");
 			default_tech_ = technique_;
 			if (!technique_->Validate())
 			{
-				technique_ = effect->TechniqueByName("DistanceMapping20");
+				technique_ = scene_effect_->TechniqueByName("DistanceMapping20");
 				BOOST_ASSERT(technique_->Validate());
 			}
-			*(technique_->Effect().ParameterByName("diffuse_tex")) = diffuse_loader();
-			*(technique_->Effect().ParameterByName("normal_tex")) = normal_loader();
-			*(technique_->Effect().ParameterByName("distance_tex")) = dist_loader();
 
-			effect = rf.LoadEffect("Scene.fxml");
-			depth_wodt_pass_ = effect->TechniqueByName("DepthTexWODT");
+			depth_wodt_pass_ = scene_effect_->TechniqueByName("DepthTexWODT");
 			BOOST_ASSERT(depth_wodt_pass_->Validate());
-			position_pass_ = effect->TechniqueByName("PositionTex");
+			position_pass_ = scene_effect_->TechniqueByName("PositionTex");
 			BOOST_ASSERT(position_pass_->Validate());
 
-			effect = rf.LoadEffect("ShadowCubeMap.fxml");
+			RenderEffectPtr effect = rf.LoadEffect("ShadowCubeMap.fxml");
 			gen_cube_sm_tech_ = effect->TechniqueByName("GenCubeShadowMap");
 			BOOST_ASSERT(gen_cube_sm_tech_->Validate());
 		}
@@ -190,6 +186,22 @@ namespace
 
 		void OnRenderBegin()
 		{
+			if (!diffuse_tex_)
+			{
+				diffuse_tex_ = diffuse_tl_();
+				*(scene_effect_->ParameterByName("diffuse_tex")) = diffuse_tex_;
+			}
+			if (!normal_tex_)
+			{
+				normal_tex_ = normal_tl_();
+				*(scene_effect_->ParameterByName("normal_tex")) = normal_tex_;
+			}
+			if (!dist_tex_)
+			{
+				dist_tex_ = dist_tl_();
+				*(scene_effect_->ParameterByName("distance_tex")) = dist_tex_;
+			}
+
 			App3DFramework const & app = Context::Instance().AppInstance();
 			Camera const & camera = app.ActiveCamera();
 
@@ -226,12 +238,12 @@ namespace
 				*(technique_->Effect().ParameterByName("caustics_tex")) = caustics_map_;
 				*(technique_->Effect().ParameterByName("obj_model_to_light_model")) = model * inv_light_model;
 				*(technique_->Effect().ParameterByName("obj_model_to_light_view")) = model * first_light_view;
-			}			
-			
+			}
 		}
 
 	private:
 		uint32_t pass_;
+		RenderEffectPtr scene_effect_;
 		RenderTechniquePtr default_tech_;
 		RenderTechniquePtr depth_wodt_pass_;
 		RenderTechniquePtr position_pass_;
@@ -240,6 +252,13 @@ namespace
 		LightSourcePtr caustics_light_;
 		TexturePtr sm_texture_;
 		TexturePtr caustics_map_;
+
+		function<TexturePtr()> diffuse_tl_;
+		function<TexturePtr()> normal_tl_;
+		function<TexturePtr()> dist_tl_;
+		TexturePtr diffuse_tex_;
+		TexturePtr normal_tex_;
+		TexturePtr dist_tex_;
 	};
 
 	class PlaneObject : public SceneObjectHelper
@@ -471,7 +490,7 @@ namespace
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 			
-			KLAYGE_AUTO(point_texture_loader, ASyncLoadTexture("point.dds", EAH_GPU_Read | EAH_Immutable));
+			point_tl_ = ASyncLoadTexture("point.dds", EAH_GPU_Read | EAH_Immutable);
 			
 			std::vector<float2> xys(CAUSTICS_GRID_SIZE * CAUSTICS_GRID_SIZE);
 			for (uint32_t i = 0; i < CAUSTICS_GRID_SIZE; ++ i)
@@ -543,8 +562,6 @@ namespace
 				BOOST_ASSERT(dual_caustics_pass_->Validate());
 			}
 
-			point_texture_ = point_texture_loader();
-
 			pos_aabb_ = AABBox(float3(0.0f, 0.0f, 0.0f), float3(1.0f, 1.0f, 0.0f));
 			tc_aabb_ = AABBox(float3(0, 0, 0), float3(0, 0, 0));
 		}
@@ -590,7 +607,11 @@ namespace
 				*(technique_->Effect().ParameterByName("light_color")) = light_clr;
 				*(technique_->Effect().ParameterByName("light_density")) = light_density;
 				*(technique_->Effect().ParameterByName("point_size")) = pt_size;
-				*(technique_->Effect().ParameterByName("pt_texture")) = point_texture_;
+				if (!point_texture_)
+				{
+					point_texture_ = point_tl_();
+					*(technique_->Effect().ParameterByName("pt_texture")) = point_texture_;
+				}
 				*(technique_->Effect().ParameterByName("refract_idx")) = float2(refract_idx, 1.0f / refract_idx);
 				*(technique_->Effect().ParameterByName("absorption_idx")) = absorption_idx;
 				*(technique_->Effect().ParameterByName("inv_occlusion_pixs")) = 1.0f / (CAUSTICS_GRID_SIZE * CAUSTICS_GRID_SIZE / 2);
@@ -620,6 +641,8 @@ namespace
 		uint32_t pass_;
 		RenderTechniquePtr single_caustics_pass_;
 		RenderTechniquePtr dual_caustics_pass_;
+
+		function<TexturePtr()> point_tl_;
 		TexturePtr point_texture_;
 	};
 }

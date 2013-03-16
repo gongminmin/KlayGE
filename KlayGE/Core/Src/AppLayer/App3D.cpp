@@ -451,6 +451,8 @@ namespace KlayGE
 		{
 			this->UpdateStats();
 			this->DoUpdateOverlay();
+
+			ResLoader::Instance().Update();
 		}
 
 		return this->DoUpdate(pass);
