@@ -370,7 +370,7 @@ def gl_compatibility(vendor, renderer, major_ver, minor_ver, glsl_major_ver, gls
 	exts = ext_str.split(' ')
 
 	print('OpenGL Compatibility Viewer')
-	print('Copyright(C) 2004-2012 Minmin Gong\n')
+	print('Copyright(C) 2004-2013 Minmin Gong\n')
 
 	info = information()
 	info.make_reports(vendor, renderer, major_ver, minor_ver, glsl_major_ver, glsl_minor_ver, exts)

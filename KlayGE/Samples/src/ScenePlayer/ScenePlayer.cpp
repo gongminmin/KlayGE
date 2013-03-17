@@ -25,7 +25,6 @@
 #include <KlayGE/InputFactory.hpp>
 #include <KlayGE/ScriptFactory.hpp>
 
-#include <Python.h>
 #include <vector>
 #include <sstream>
 #include <fstream>
@@ -54,7 +53,6 @@ using namespace KlayGE;
 
 namespace
 {
-	typedef KlayGE::shared_ptr<PyObject> PyObjectPtr;
 	class PyScriptUpdate
 	{
 	public:
@@ -71,11 +69,11 @@ namespace
 		{
 		}
 
-		PyObjectPtr Run(float app_time, float elapsed_time)
+		boost::any Run(float app_time, float elapsed_time)
 		{
 			module_->RunString(*script_);
 
-			return boost::any_cast<PyObjectPtr>(module_->Call("update", KlayGE::make_tuple(app_time, elapsed_time)));
+			return module_->Call("update", KlayGE::make_tuple(app_time, elapsed_time));
 		}
 
 	private:
@@ -93,62 +91,79 @@ namespace
 
 		void operator()(LightSource& light, float app_time, float elapsed_time)
 		{
-			PyObjectPtr py_ret = this->Run(app_time, elapsed_time);
-			if (py_ret)
+			boost::any py_ret = this->Run(app_time, elapsed_time);
+			if (typeid(std::vector<boost::any>) == py_ret.type())
 			{
-				size_t s = PyTuple_Size(py_ret.get());
+				std::vector<boost::any> ret = boost::any_cast<std::vector<boost::any> >(py_ret);
+				size_t s = ret.size();
 
 				if (s > 0)
 				{
-					PyObject* py_mat = PyTuple_GetItem(py_ret.get(), 0);
-					if (py_mat && (PyList_Size(py_mat) > 0))
+					boost::any py_mat = ret[0];
+					if (typeid(std::vector<boost::any>) == py_mat.type())
 					{
-						float4x4 light_mat;
-						for (int i = 0; i < 16; ++ i)
+						std::vector<boost::any> mat = boost::any_cast<std::vector<boost::any> >(py_mat);
+						if (!mat.empty())
 						{
-							light_mat[i] = static_cast<float>(PyFloat_AsDouble(PyList_GetItem(py_mat, i)));
+							float4x4 light_mat;
+							for (int i = 0; i < 16; ++ i)
+							{
+								light_mat[i] = boost::any_cast<float>(mat[i]);
+							}
+							light.ModelMatrix(light_mat);
 						}
-						light.ModelMatrix(light_mat);
 					}
 				}
 				if (s > 1)
 				{
-					PyObject* py_clr = PyTuple_GetItem(py_ret.get(), 1);
-					if (py_clr && (PyList_Size(py_clr) > 0))
+					boost::any py_clr = ret[1];
+					if (typeid(std::vector<boost::any>) == py_clr.type())
 					{
-						float3 light_clr;
-						for (int i = 0; i < 3; ++ i)
+						std::vector<boost::any> clr = boost::any_cast<std::vector<boost::any> >(py_clr);
+						if (!clr.empty())
 						{
-							light_clr[i] = static_cast<float>(PyFloat_AsDouble(PyList_GetItem(py_clr, i)));
+							float3 light_clr;
+							for (int i = 0; i < 3; ++ i)
+							{
+								light_clr[i] = boost::any_cast<float>(clr[i]);
+							}
+							light.Color(light_clr);
 						}
-						light.Color(light_clr);
 					}
 				}				
 				if (s > 2)
 				{
-					PyObject* py_fo = PyTuple_GetItem(py_ret.get(), 1);
-					if (py_fo && (PyList_Size(py_fo) > 0))
+					boost::any py_fo = ret[2];
+					if (typeid(std::vector<boost::any>) == py_fo.type())
 					{
-						float3 light_fall_off;
-						for (int i = 0; i < 3; ++ i)
+						std::vector<boost::any> fo = boost::any_cast<std::vector<boost::any> >(py_fo);
+						if (!fo.empty())
 						{
-							light_fall_off[i] = static_cast<float>(PyFloat_AsDouble(PyList_GetItem(py_fo, i)));
+							float3 light_fall_off;
+							for (int i = 0; i < 3; ++ i)
+							{
+								light_fall_off[i] = boost::any_cast<float>(fo[i]);
+							}
+							light.Falloff(light_fall_off);
 						}
-						light.Falloff(light_fall_off);
 					}
 				}
 				if (s > 3)
 				{
-					PyObject* py_oi = PyTuple_GetItem(py_ret.get(), 1);
-					if (py_oi && (PyList_Size(py_oi) > 0))
+					boost::any py_oi = ret[3];
+					if (typeid(std::vector<boost::any>) == py_oi.type())
 					{
-						float2 light_outer_inner;
-						for (int i = 0; i < 2; ++ i)
+						std::vector<boost::any> oi = boost::any_cast<std::vector<boost::any> >(py_oi);
+						if (!oi.empty())
 						{
-							light_outer_inner[i] = static_cast<float>(PyFloat_AsDouble(PyList_GetItem(py_oi, i)));
+							float2 light_outer_inner;
+							for (int i = 0; i < 2; ++ i)
+							{
+								light_outer_inner[i] = boost::any_cast<float>(oi[i]);
+							}
+							light.OuterAngle(light_outer_inner.x());
+							light.InnerAngle(light_outer_inner.y());
 						}
-						light.OuterAngle(light_outer_inner.x());
-						light.InnerAngle(light_outer_inner.y());
 					}
 				}
 			}
@@ -165,22 +180,27 @@ namespace
 
 		void operator()(SceneObject& obj, float app_time, float elapsed_time)
 		{
-			PyObjectPtr py_ret = this->Run(app_time, elapsed_time);
-			if (py_ret)
+			boost::any py_ret = this->Run(app_time, elapsed_time);
+			if (typeid(std::vector<boost::any>) == py_ret.type())
 			{
-				size_t s = PyTuple_Size(py_ret.get());
+				std::vector<boost::any> ret = boost::any_cast<std::vector<boost::any> >(py_ret);
+				size_t s = ret.size();
 
 				if (s > 0)
 				{
-					PyObject* py_mat = PyTuple_GetItem(py_ret.get(), 0);
-					if (py_mat && (PyList_Size(py_mat) > 0))
+					boost::any py_mat = ret[0];
+					if (typeid(std::vector<boost::any>) == py_mat.type())
 					{
-						float4x4 obj_mat;
-						for (int i = 0; i < 16; ++ i)
+						std::vector<boost::any> mat = boost::any_cast<std::vector<boost::any> >(py_mat);
+						if (!mat.empty())
 						{
-							obj_mat[i] = static_cast<float>(PyFloat_AsDouble(PyList_GetItem(py_mat, i)));
+							float4x4 obj_mat;
+							for (int i = 0; i < 16; ++ i)
+							{
+								obj_mat[i] = boost::any_cast<float>(mat[i]);
+							}
+							obj.ModelMatrix(obj_mat);
 						}
-						obj.ModelMatrix(obj_mat);
 					}
 				}
 			}
@@ -197,71 +217,84 @@ namespace
 
 		void operator()(Camera& camera, float app_time, float elapsed_time)
 		{
-			PyObjectPtr py_ret = this->Run(app_time, elapsed_time);
-			if (py_ret)
+			boost::any py_ret = this->Run(app_time, elapsed_time);
+			if (typeid(std::vector<boost::any>) == py_ret.type())
 			{
-				size_t s = PyTuple_Size(py_ret.get());
+				std::vector<boost::any> ret = boost::any_cast<std::vector<boost::any> >(py_ret);
+				size_t s = ret.size();
 
-				float3 eye = camera.EyePos();
-				float3 lookat = camera.LookAt();
-				float3 up = camera.UpVec();
-				float fov = camera.FOV();
-				float aspect = camera.Aspect();
-				float np = camera.NearPlane();
-				float fp = camera.FarPlane();
+				float3 cam_eye = camera.EyePos();
+				float3 cam_lookat = camera.LookAt();
+				float3 cam_up = camera.UpVec();
+				float cam_fov = camera.FOV();
+				float cam_aspect = camera.Aspect();
+				float cam_np = camera.NearPlane();
+				float cam_fp = camera.FarPlane();
 				
 				if (s > 0)
 				{
-					PyObject* py_eye = PyTuple_GetItem(py_ret.get(), 0);
-					if (py_eye && (PyList_Size(py_eye) > 0))
+					boost::any py_eye = ret[0];
+					if (typeid(std::vector<boost::any>) == py_eye.type())
 					{
-						for (int i = 0; i < 3; ++ i)
+						std::vector<boost::any> eye = boost::any_cast<std::vector<boost::any> >(py_eye);
+						if (!eye.empty())
 						{
-							eye[i] = static_cast<float>(PyFloat_AsDouble(PyList_GetItem(py_eye, i)));
+							for (int i = 0; i < 3; ++ i)
+							{
+								cam_eye[i] = boost::any_cast<float>(eye[i]);
+							}
 						}
 					}
 				}
 				if (s > 1)
 				{
-					PyObject* py_lookat = PyTuple_GetItem(py_ret.get(), 0);
-					if (py_lookat && (PyList_Size(py_lookat) > 0))
+					boost::any py_lookat = ret[1];
+					if (typeid(std::vector<boost::any>) == py_lookat.type())
 					{
-						for (int i = 0; i < 3; ++ i)
+						std::vector<boost::any> lookat = boost::any_cast<std::vector<boost::any> >(py_lookat);
+						if (!lookat.empty())
 						{
-							lookat[i] = static_cast<float>(PyFloat_AsDouble(PyList_GetItem(py_lookat, i)));
+							for (int i = 0; i < 3; ++ i)
+							{
+								cam_lookat[i] = boost::any_cast<float>(lookat[i]);
+							}
 						}
 					}
 				}
 				if (s > 2)
 				{
-					PyObject* py_up = PyTuple_GetItem(py_ret.get(), 0);
-					if (py_up && (PyList_Size(py_up) > 0))
+					boost::any py_up = ret[2];
+					if (typeid(std::vector<boost::any>) == py_up.type())
 					{
-						for (int i = 0; i < 3; ++ i)
+						std::vector<boost::any> up = boost::any_cast<std::vector<boost::any> >(py_up);
+						if (!up.empty())
 						{
-							up[i] = static_cast<float>(PyFloat_AsDouble(PyList_GetItem(py_up, i)));
+							for (int i = 0; i < 3; ++ i)
+							{
+								cam_up[i] = boost::any_cast<float>(up[i]);
+							}
 						}
 					}
 				}
 				if (s > 3)
 				{
-					PyObject* py_np = PyTuple_GetItem(py_ret.get(), 0);
-					if (py_np)
+					boost::any py_np = ret[3];
+					if (typeid(float) == py_np.type())
 					{
-						np = static_cast<float>(PyFloat_AsDouble(py_np));
+						cam_np = boost::any_cast<float>(py_np);
 					}
 				}
 				if (s > 4)
 				{
-					PyObject* py_fp = PyTuple_GetItem(py_ret.get(), 0);
-					if (py_fp)
+					boost::any py_fp = ret[3];
+					if (typeid(float) == py_fp.type())
 					{
-						fp = static_cast<float>(PyFloat_AsDouble(py_fp));
+						cam_fp = boost::any_cast<float>(py_fp);
 					}
 				}
 
-				camera.ViewParams(eye, lookat, up);
-				camera.ProjParams(fov, aspect, np, fp);
+				camera.ViewParams(cam_eye, cam_lookat, cam_up);
+				camera.ProjParams(cam_fov, cam_aspect, cam_np, cam_fp);
 			}
 		}
 	};

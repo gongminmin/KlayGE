@@ -7,6 +7,7 @@
 #include <KlayGE/App3D.hpp>
 #include <KlayGE/RenderSettings.hpp>
 #include <KlayGE/Script.hpp>
+#include <KlayGE/ScriptFactory.hpp>
 
 #include <iostream>
 #include <vector>
@@ -65,16 +66,16 @@ namespace
 			}
 		}
 
-		std::vector<PyObjectPtr> store_to_py()
+		std::vector<boost::any> store_to_py()
 		{
-			std::vector<PyObjectPtr> ret;
+			std::vector<boost::any> ret;
 
-			ret.push_back(CppType2PyObjectPtr(vendor_));
-			ret.push_back(CppType2PyObjectPtr(renderer_));
-			ret.push_back(CppType2PyObjectPtr(major_ver_));
-			ret.push_back(CppType2PyObjectPtr(minor_ver_));
-			ret.push_back(CppType2PyObjectPtr(glsl_major_ver_));
-			ret.push_back(CppType2PyObjectPtr(glsl_minor_ver_));
+			ret.push_back(vendor_);
+			ret.push_back(renderer_);
+			ret.push_back(major_ver_);
+			ret.push_back(minor_ver_);
+			ret.push_back(glsl_major_ver_);
+			ret.push_back(glsl_minor_ver_);
 
 			std::string ext_str;
 			for (std::vector<std::string>::const_iterator iter = extensions_.begin();
@@ -82,7 +83,7 @@ namespace
 			{
 				ext_str += *iter + ' ';
 			}
-			ret.push_back(CppType2PyObjectPtr(ext_str));
+			ret.push_back(ext_str);
 
 			return ret;
 		}
@@ -128,6 +129,7 @@ int main()
 	Context::Instance().LoadCfg("KlayGE.cfg");
 	ContextCfg context_cfg = Context::Instance().Config();
 	context_cfg.render_factory_name = "OpenGL";
+	context_cfg.script_factory_name = "Python";
 	context_cfg.graphics_cfg.hdr = false;
 	Context::Instance().Config(context_cfg);
 
@@ -135,12 +137,12 @@ int main()
 	app.Create();
 
 	information info;
-	std::vector<PyObjectPtr> for_py = info.store_to_py();
+	std::vector<boost::any> for_py = info.store_to_py();
 
-	ScriptEngine scriptEng;
-	ScriptModule module("GLCompatibility");
+	ScriptEngine& scriptEng = Context::Instance().ScriptFactoryInstance().ScriptEngineInstance();
+	ScriptModulePtr module = scriptEng.CreateModule("GLCompatibility");
 
-	module.Call("gl_compatibility", &for_py.front(), &for_py.back() + 1);
+	module->Call("gl_compatibility", for_py);
 
 	return 0;
 }

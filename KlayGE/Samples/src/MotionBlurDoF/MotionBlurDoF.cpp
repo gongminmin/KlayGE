@@ -23,7 +23,6 @@
 #include <KlayGE/InputFactory.hpp>
 #include <KlayGE/ScriptFactory.hpp>
 
-#include <Python.h>
 #include <sstream>
 
 #ifdef KLAYGE_COMPILER_MSVC
@@ -43,7 +42,6 @@ using namespace KlayGE;
 
 namespace
 {
-	typedef KlayGE::shared_ptr<PyObject> PyObjectPtr;
 	int32_t const NUM_LINE = 10;
 	int32_t const NUM_INSTANCE = 400;
 
@@ -1063,20 +1061,20 @@ uint32_t MotionBlurDoFApp::DoUpdate(uint32_t pass)
 					{
 						for (int32_t j = 0; j < NUM_INSTANCE / NUM_LINE; ++ j)
 						{
-							PyObjectPtr py_pos = boost::any_cast<PyObjectPtr>(script_module_->Call("get_pos", KlayGE::make_tuple(i, j, NUM_INSTANCE, NUM_LINE)));
+							std::vector<boost::any> scr_pos = boost::any_cast<std::vector<boost::any> >(script_module_->Call("get_pos", KlayGE::make_tuple(i, j, NUM_INSTANCE, NUM_LINE)));
 
 							float3 pos;
-							pos.x() = static_cast<float>(PyFloat_AsDouble(PyTuple_GetItem(py_pos.get(), 0)));
-							pos.y() = static_cast<float>(PyFloat_AsDouble(PyTuple_GetItem(py_pos.get(), 1)));
-							pos.z() = static_cast<float>(PyFloat_AsDouble(PyTuple_GetItem(py_pos.get(), 2)));
+							pos.x() = boost::any_cast<float>(scr_pos[0]);
+							pos.y() = boost::any_cast<float>(scr_pos[1]);
+							pos.z() = boost::any_cast<float>(scr_pos[2]);
 
-							PyObjectPtr py_clr = boost::any_cast<PyObjectPtr>(script_module_->Call("get_clr", KlayGE::make_tuple(i, j, NUM_INSTANCE, NUM_LINE)));
+							std::vector<boost::any> scr_clr = boost::any_cast<std::vector<boost::any> >(script_module_->Call("get_clr", KlayGE::make_tuple(i, j, NUM_INSTANCE, NUM_LINE)));
 
 							Color clr;
-							clr.r() = static_cast<float>(PyFloat_AsDouble(PyTuple_GetItem(py_clr.get(), 0)));
-							clr.g() = static_cast<float>(PyFloat_AsDouble(PyTuple_GetItem(py_clr.get(), 1)));
-							clr.b() = static_cast<float>(PyFloat_AsDouble(PyTuple_GetItem(py_clr.get(), 2)));
-							clr.a() = static_cast<float>(PyFloat_AsDouble(PyTuple_GetItem(py_clr.get(), 3)));
+							clr.r() = boost::any_cast<float>(scr_clr[0]);
+							clr.g() = boost::any_cast<float>(scr_clr[1]);
+							clr.b() = boost::any_cast<float>(scr_clr[2]);
+							clr.a() = boost::any_cast<float>(scr_clr[3]);
 
 							SceneObjectPtr so = MakeSharedPtr<Teapot>();
 							checked_pointer_cast<Teapot>(so)->Instance(MathLib::translation(pos), clr);

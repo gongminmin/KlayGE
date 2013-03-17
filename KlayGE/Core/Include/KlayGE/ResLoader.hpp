@@ -119,9 +119,12 @@ namespace KlayGE
 
 		void ASyncSubThreadFunc(ResLoadingDescPtr const & res_desc, shared_ptr<volatile bool> const & is_done);
 		shared_ptr<void> ASyncFunc(ResLoadingDescPtr const & res_desc, shared_ptr<volatile bool> const & is_done);
+		shared_ptr<void> ASyncFuncClone(ResLoadingDescPtr const & res_desc, shared_ptr<volatile bool> const & is_done);
 		shared_ptr<void> ASyncFuncFromLoaded(shared_ptr<void> const & loaded_res);
 
 		void SetFinalResource(ResLoadingDescPtr const & res_desc, shared_ptr<void> const & res);
+		shared_ptr<void> FindMatchLoadedResource(ResLoadingDescPtr const & res_desc);
+		void RemoveUnrefResources();
 
 	private:
 		static shared_ptr<ResLoader> res_loader_instance_;
@@ -129,11 +132,8 @@ namespace KlayGE
 		std::string exe_path_;
 		std::vector<std::string> paths_;
 
-		std::vector<ResLoadingDescPtr> cached_sync_desc_;
-		std::vector<std::pair<ResLoadingDescPtr, shared_ptr<volatile bool> > > cached_async_desc_;
-
 		std::vector<std::pair<ResLoadingDescPtr, weak_ptr<void> > > loaded_res_;
-		std::list<std::pair<shared_ptr<joiner<void> >, shared_ptr<volatile bool> > > loading_async_res_;
+		std::list<tuple<ResLoadingDescPtr, shared_ptr<joiner<void> >, shared_ptr<volatile bool> > > loading_res_queue_;
 	};
 }
 

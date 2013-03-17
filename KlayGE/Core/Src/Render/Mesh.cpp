@@ -198,16 +198,22 @@ namespace
 					SkinnedModelPtr rhs_skinned_model = checked_pointer_cast<SkinnedModel>(rhs_model);
 					SkinnedModelPtr skinned_model = checked_pointer_cast<SkinnedModel>(model);
 
-					skinned_model->AssignJoints(model_desc_.model_data->joints.begin(), model_desc_.model_data->joints.end());
-					skinned_model->AttachKeyFrames(model_desc_.model_data->kfs);
+					std::vector<Joint> joints(rhs_skinned_model->NumJoints());
+					for (uint32_t i = 0; i < rhs_skinned_model->NumJoints(); ++ i)
+					{
+						joints[i] = rhs_skinned_model->GetJoint(i);
+					}
+					skinned_model->AssignJoints(joints.begin(), joints.end());
+					skinned_model->AttachKeyFrames(rhs_skinned_model->GetKeyFrames());
 
 					skinned_model->NumFrames(rhs_skinned_model->NumFrames());
 					skinned_model->FrameRate(rhs_skinned_model->FrameRate());
 
 					for (size_t mesh_index = 0; mesh_index < meshes.size(); ++ mesh_index)
 					{
+						SkinnedMeshPtr rhs_skinned_mesh = checked_pointer_cast<SkinnedMesh>(rhs_skinned_model->Mesh(mesh_index));
 						SkinnedMeshPtr skinned_mesh = checked_pointer_cast<SkinnedMesh>(meshes[mesh_index]);
-						skinned_mesh->AttachFramePosBounds(model_desc_.model_data->frame_pos_bbs[mesh_index]);
+						skinned_mesh->AttachFramePosBounds(rhs_skinned_mesh->GetFramePosBounds());
 					}
 				}
 

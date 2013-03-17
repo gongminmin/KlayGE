@@ -220,6 +220,52 @@ namespace KlayGE
 		}
 	}
 
+	boost::any PyObjectPtr2CppType(PyObjectPtr const & t)
+	{
+		boost::any ret;
+		if (PyObject_TypeCheck(t.get(), &PyUnicode_Type))
+		{
+			ret = boost::any(std::string(PyBytes_AsString(PyUnicode_AsASCIIString(t.get()))));
+		}
+		else if (PyObject_TypeCheck(t.get(), &PyLong_Type))
+		{
+			ret = boost::any(static_cast<int32_t>(PyLong_AsLong(t.get())));
+		}
+		else if (PyObject_TypeCheck(t.get(), &PyFloat_Type))
+		{
+			ret = boost::any(static_cast<float>(PyFloat_AsDouble(t.get())));
+		}
+		else if (PyObject_TypeCheck(t.get(), &PyList_Type))
+		{
+			size_t len = PyList_Size(t.get());
+			std::vector<boost::any> v(len);
+			for (size_t i = 0; i < len; ++ i)
+			{
+				PyObjectPtr py_obj = MakePyObjectPtr(PyList_GetItem(t.get(), i));
+				Py_IncRef(py_obj.get());
+				v[i] = PyObjectPtr2CppType(py_obj);
+			}
+			ret = boost::any(v);
+		}
+		else if (PyObject_TypeCheck(t.get(), &PyTuple_Type))
+		{
+			size_t len = PyTuple_Size(t.get());
+			std::vector<boost::any> v(len);
+			for (size_t i = 0; i < len; ++ i)
+			{
+				PyObjectPtr py_obj = MakePyObjectPtr(PyTuple_GetItem(t.get(), i));
+				Py_IncRef(py_obj.get());
+				v[i] = PyObjectPtr2CppType(py_obj);
+			}
+			ret = boost::any(v);
+		}
+		else
+		{
+			BOOST_ASSERT(false);
+		}
+		return ret;
+	}
+
 	PythonScriptModule::PythonScriptModule()
 	{
 		module_	= MakePyObjectPtr(PyImport_AddModule("__main__"));
@@ -260,7 +306,7 @@ namespace KlayGE
 		}
 
 		PyObjectPtr func = boost::any_cast<PyObjectPtr>(this->Value(func_name));
-		return MakePyObjectPtr(PyObject_CallObject(func.get(), py_args.get()));
+		return PyObjectPtr2CppType(MakePyObjectPtr(PyObject_CallObject(func.get(), py_args.get())));
 	}
 
 	boost::any PythonScriptModule::RunString(std::string const & script)
