@@ -54,8 +54,10 @@ namespace KlayGE
 	class KLAYGE_CORE_API SceneObjectLightSourceProxy : public SceneObjectHelper
 	{
 	public:
-		explicit SceneObjectLightSourceProxy(LightSourcePtr const & light,
-			function<StaticMeshPtr(RenderModelPtr const &, std::wstring const &)> CreateMeshFactoryFunc = CreateMeshFactory<RenderableLightSourceProxy>());
+		explicit SceneObjectLightSourceProxy(LightSourcePtr const & light);
+		SceneObjectLightSourceProxy(LightSourcePtr const & light, RenderModelPtr const & light_model);
+		SceneObjectLightSourceProxy(LightSourcePtr const & light,
+			function<StaticMeshPtr(RenderModelPtr const &, std::wstring const &)> CreateMeshFactoryFunc);
 
 		void Update(float app_time, float elapsed_time);
 
@@ -63,6 +65,11 @@ namespace KlayGE
 		void Scaling(float3 const & s);
 		void Translation(float x, float y, float z);
 		void Translation(float3 const & t);
+
+	private:
+		void Init(LightSourcePtr const & light, RenderModelPtr const & light_model);
+		void Init(LightSourcePtr const & light,
+			function<StaticMeshPtr(RenderModelPtr const &, std::wstring const &)> CreateMeshFactoryFunc);
 
 	protected:
 		float4x4 model_scaling_;

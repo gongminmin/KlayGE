@@ -76,10 +76,80 @@ namespace KlayGE
 	}
 
 
+	SceneObjectLightSourceProxy::SceneObjectLightSourceProxy(LightSourcePtr const & light)
+		: SceneObjectHelper(SOA_Cullable | SOA_Moveable | SOA_NotCastShadow),
+			light_(light)
+	{
+		this->Init(light, CreateMeshFactory<RenderableLightSourceProxy>());
+	}
+
+	SceneObjectLightSourceProxy::SceneObjectLightSourceProxy(LightSourcePtr const & light, RenderModelPtr const & light_model)
+		: SceneObjectHelper(SOA_Cullable | SOA_Moveable | SOA_NotCastShadow),
+			light_(light)
+	{
+		this->Init(light, light_model);
+	}
+
 	SceneObjectLightSourceProxy::SceneObjectLightSourceProxy(LightSourcePtr const & light,
 			function<StaticMeshPtr(RenderModelPtr const &, std::wstring const &)> CreateMeshFactoryFunc)
 		: SceneObjectHelper(SOA_Cullable | SOA_Moveable | SOA_NotCastShadow),
 			light_(light)
+	{
+		this->Init(light, CreateMeshFactoryFunc);
+	}
+
+	void SceneObjectLightSourceProxy::Update(float /*app_time*/, float /*elapsed_time*/)
+	{
+		model_ = model_scaling_ * MathLib::to_matrix(light_->Rotation()) * MathLib::translation(light_->Position())
+			* model_translation_;
+		if (LT_Spot == light_->Type())
+		{
+			float radius = light_->CosOuterInner().w();
+			model_ = MathLib::scaling(radius, radius, 1.0f) * model_;
+		}
+
+		RenderModelPtr light_model = checked_pointer_cast<RenderModel>(renderable_);
+		for (uint32_t i = 0; i < light_model->NumMeshes(); ++ i)
+		{
+			RenderableLightSourceProxyPtr light_mesh = checked_pointer_cast<RenderableLightSourceProxy>(light_model->Mesh(i));
+			light_mesh->ModelMatrix(model_);
+			light_mesh->Update();
+		}
+	}
+
+	void SceneObjectLightSourceProxy::Scaling(float x, float y, float z)
+	{
+		model_scaling_ = MathLib::scaling(x, y, z);
+	}
+
+	void SceneObjectLightSourceProxy::Scaling(float3 const & s)
+	{
+		model_scaling_ = MathLib::scaling(s);
+	}
+	
+	void SceneObjectLightSourceProxy::Translation(float x, float y, float z)
+	{
+		model_translation_ = MathLib::translation(x, y, z);
+	}
+
+	void SceneObjectLightSourceProxy::Translation(float3 const & t)
+	{
+		model_translation_ = MathLib::translation(t);
+	}
+
+	void SceneObjectLightSourceProxy::Init(LightSourcePtr const & light, RenderModelPtr const & light_model)
+	{
+		renderable_ = light_model;
+		model_scaling_ = model_translation_ = float4x4::Identity();
+
+		for (uint32_t i = 0; i < light_model->NumMeshes(); ++ i)
+		{
+			checked_pointer_cast<RenderableLightSourceProxy>(light_model->Mesh(i))->AttachLightSrc(light);
+		}
+	}
+
+	void SceneObjectLightSourceProxy::Init(LightSourcePtr const & light,
+			function<StaticMeshPtr(RenderModelPtr const &, std::wstring const &)> CreateMeshFactoryFunc)
 	{
 		std::string mesh_name;
 		switch (light->Type())
@@ -104,44 +174,9 @@ namespace KlayGE
 			BOOST_ASSERT(false);
 			break;
 		}
-		renderable_ = SyncLoadModel(mesh_name.c_str(), EAH_GPU_Read | EAH_Immutable,
-			CreateModelFactory<RenderModel>(), CreateMeshFactoryFunc)->Mesh(0);
-		model_scaling_ = model_translation_ = float4x4::Identity();
-
-		checked_pointer_cast<RenderableLightSourceProxy>(renderable_)->AttachLightSrc(light);
-	}
-
-	void SceneObjectLightSourceProxy::Update(float /*app_time*/, float /*elapsed_time*/)
-	{
-		model_ = model_scaling_ * MathLib::to_matrix(light_->Rotation()) * MathLib::translation(light_->Position()) * model_translation_;
-		if (LT_Spot == light_->Type())
-		{
-			float radius = light_->CosOuterInner().w();
-			model_ = MathLib::scaling(radius, radius, 1.0f) * model_;
-		}
-		checked_pointer_cast<RenderableLightSourceProxy>(renderable_)->ModelMatrix(model_);
-
-		checked_pointer_cast<RenderableLightSourceProxy>(renderable_)->Update();
-	}
-
-	void SceneObjectLightSourceProxy::Scaling(float x, float y, float z)
-	{
-		model_scaling_ = MathLib::scaling(x, y, z);
-	}
-
-	void SceneObjectLightSourceProxy::Scaling(float3 const & s)
-	{
-		model_scaling_ = MathLib::scaling(s);
-	}
-	
-	void SceneObjectLightSourceProxy::Translation(float x, float y, float z)
-	{
-		model_translation_ = MathLib::translation(x, y, z);
-	}
-
-	void SceneObjectLightSourceProxy::Translation(float3 const & t)
-	{
-		model_translation_ = MathLib::translation(t);
+		RenderModelPtr light_model = SyncLoadModel(mesh_name.c_str(), EAH_GPU_Read | EAH_Immutable,
+			CreateModelFactory<RenderModel>(), CreateMeshFactoryFunc);
+		this->Init(light, light_model);
 	}
 
 
