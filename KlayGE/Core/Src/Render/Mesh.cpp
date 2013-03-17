@@ -150,6 +150,79 @@ namespace
 			model_desc_.model_data = rmld.model_desc_.model_data;
 		}
 
+		shared_ptr<void> CloneFrom(shared_ptr<void> const & resource)
+		{
+			RenderModelPtr rhs_model = static_pointer_cast<RenderModel>(resource);
+
+			RenderModelPtr model = model_desc_.CreateModelFactoryFunc(rhs_model->Name());
+
+			model->NumMaterials(rhs_model->NumMaterials());
+			for (uint32_t mtl_index = 0; mtl_index < model->NumMaterials(); ++ mtl_index)
+			{
+				model->GetMaterial(mtl_index) = rhs_model->GetMaterial(mtl_index);
+			}
+
+			if (rhs_model->NumMeshes() > 0)
+			{
+				RenderLayoutPtr rhs_rl = rhs_model->Mesh(0)->GetRenderLayout();
+			
+				std::vector<StaticMeshPtr> meshes(rhs_model->NumMeshes());
+				for (uint32_t mesh_index = 0; mesh_index < rhs_model->NumMeshes(); ++ mesh_index)
+				{
+					StaticMeshPtr rhs_mesh = rhs_model->Mesh(mesh_index);
+
+					meshes[mesh_index] = model_desc_.CreateMeshFactoryFunc(model, rhs_mesh->Name());
+					StaticMeshPtr& mesh = meshes[mesh_index];
+
+					mesh->MaterialID(rhs_mesh->MaterialID());
+					mesh->PosBound(rhs_mesh->PosBound());
+					mesh->TexcoordBound(rhs_mesh->TexcoordBound());
+
+					for (uint32_t ve_index = 0; ve_index < rhs_rl->NumVertexStreams(); ++ ve_index)
+					{
+						mesh->AddVertexStream(rhs_rl->GetVertexStream(ve_index),
+							rhs_rl->VertexStreamFormat(ve_index)[0]);
+					}
+					mesh->AddIndexStream(rhs_rl->GetIndexStream(), rhs_rl->IndexStreamFormat());
+
+					mesh->NumVertices(rhs_mesh->NumVertices());
+					mesh->NumTriangles(rhs_mesh->NumTriangles());
+					mesh->StartVertexLocation(rhs_mesh->StartVertexLocation());
+					mesh->StartIndexLocation(rhs_mesh->StartIndexLocation());
+				}
+
+				BOOST_ASSERT(model->IsSkinned() == rhs_model->IsSkinned());
+
+				if (rhs_model->IsSkinned())
+				{
+					SkinnedModelPtr rhs_skinned_model = checked_pointer_cast<SkinnedModel>(rhs_model);
+					SkinnedModelPtr skinned_model = checked_pointer_cast<SkinnedModel>(model);
+
+					skinned_model->AssignJoints(model_desc_.model_data->joints.begin(), model_desc_.model_data->joints.end());
+					skinned_model->AttachKeyFrames(model_desc_.model_data->kfs);
+
+					skinned_model->NumFrames(rhs_skinned_model->NumFrames());
+					skinned_model->FrameRate(rhs_skinned_model->FrameRate());
+
+					for (size_t mesh_index = 0; mesh_index < meshes.size(); ++ mesh_index)
+					{
+						SkinnedMeshPtr skinned_mesh = checked_pointer_cast<SkinnedMesh>(meshes[mesh_index]);
+						skinned_mesh->AttachFramePosBounds(model_desc_.model_data->frame_pos_bbs[mesh_index]);
+					}
+				}
+
+				model->AssignMeshes(meshes.begin(), meshes.end());
+			}
+
+			model->BuildModelInfo();
+			for (uint32_t i = 0; i < model->NumMeshes(); ++ i)
+			{
+				model->Mesh(i)->BuildMeshInfo();
+			}
+
+			return static_pointer_cast<void>(model);
+		}
+
 	private:
 		void LoadKModel()
 		{

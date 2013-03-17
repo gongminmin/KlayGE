@@ -806,6 +806,11 @@ namespace
 			font_desc_.kfont_loader = fld.font_desc_.kfont_loader;
 		}
 
+		shared_ptr<void> CloneFrom(shared_ptr<void> const & resource)
+		{
+			return resource;
+		}
+
 	private:
 		FontDesc font_desc_;
 	};

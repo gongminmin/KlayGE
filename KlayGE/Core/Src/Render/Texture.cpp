@@ -768,6 +768,11 @@ namespace
 			tex_desc_.tex_data = tld.tex_desc_.tex_data;
 		}
 
+		shared_ptr<void> CloneFrom(shared_ptr<void> const & resource)
+		{
+			return resource;
+		}
+
 	private:
 		void LoadDDS()
 		{

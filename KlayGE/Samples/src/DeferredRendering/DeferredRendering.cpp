@@ -452,20 +452,28 @@ uint32_t DeferredRenderingApp::DoUpdate(uint32_t pass)
 					loading_percentage_ = 10;
 				}
 			}
-			else
+			else if (loading_percentage_ < 80)
 			{
 				scene_model_ = model_ml_();
 				if (scene_model_)
 				{
-					scene_objs_.resize(scene_model_->NumMeshes());
-					for (size_t i = 0; i < scene_model_->NumMeshes(); ++ i)
-					{
-						scene_objs_[i] = MakeSharedPtr<SceneObjectHelper>(scene_model_->Mesh(i), SceneObject::SOA_Cullable);
-						scene_objs_[i]->AddToSceneManager();
-					}
-
-					loading_percentage_ = 100;
+					loading_percentage_ = 80;
 				}
+			}
+			else
+			{
+				uint32_t n = (scene_model_->NumMeshes() + 20 - 1) / 20;
+				uint32_t s = (loading_percentage_ - 80) * n;
+				uint32_t e = std::min(s + n, scene_model_->NumMeshes());
+				for (uint32_t i = s; i < e; ++ i)
+				{
+					SceneObjectPtr so = MakeSharedPtr<SceneObjectHelper>(scene_model_->Mesh(i),
+						SceneObject::SOA_Cullable);
+					so->AddToSceneManager();
+					scene_objs_.push_back(so);
+				}
+
+				++ loading_percentage_;
 			}
 		}
 	}

@@ -61,6 +61,7 @@ namespace KlayGE
 
 		virtual bool Match(ResLoadingDesc const & rhs) const = 0;
 		virtual void CopyFrom(ResLoadingDesc const & rhs) = 0;
+		virtual shared_ptr<void> CloneFrom(shared_ptr<void> const & resource) = 0;
 	};
 
 	class KLAYGE_CORE_API ResLoader
@@ -117,8 +118,8 @@ namespace KlayGE
 		std::string RealPath(std::string const & path);
 
 		void ASyncSubThreadFunc(ResLoadingDescPtr const & res_desc, shared_ptr<volatile bool> const & is_done);
-		shared_ptr<void> ASyncFunc(ResLoadingDescPtr const & res_desc, shared_ptr<volatile bool> const & is_done,
-			shared_ptr<void> const & cached_res);
+		shared_ptr<void> ASyncFunc(ResLoadingDescPtr const & res_desc, shared_ptr<volatile bool> const & is_done);
+		shared_ptr<void> ASyncFuncFromLoaded(shared_ptr<void> const & loaded_res);
 
 		void SetFinalResource(ResLoadingDescPtr const & res_desc, shared_ptr<void> const & res);
 
