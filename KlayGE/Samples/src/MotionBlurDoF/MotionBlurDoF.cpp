@@ -1051,44 +1051,46 @@ uint32_t MotionBlurDoFApp::DoUpdate(uint32_t pass)
 	{
 		if (loading_percentage_ < 100)
 		{
-			if (loading_percentage_ < 80)
+			if (loading_percentage_ < 80 - NUM_LINE)
 			{
 				RenderModelPtr model = model_instance_ml_();
 				if (model)
 				{
-					renderInstance_ = model_instance_ml_()->Mesh(0);
-					for (int32_t i = 0; i < NUM_LINE; ++ i)
-					{
-						for (int32_t j = 0; j < NUM_INSTANCE / NUM_LINE; ++ j)
-						{
-							std::vector<boost::any> scr_pos = boost::any_cast<std::vector<boost::any> >(script_module_->Call("get_pos", KlayGE::make_tuple(i, j, NUM_INSTANCE, NUM_LINE)));
-
-							float3 pos;
-							pos.x() = boost::any_cast<float>(scr_pos[0]);
-							pos.y() = boost::any_cast<float>(scr_pos[1]);
-							pos.z() = boost::any_cast<float>(scr_pos[2]);
-
-							std::vector<boost::any> scr_clr = boost::any_cast<std::vector<boost::any> >(script_module_->Call("get_clr", KlayGE::make_tuple(i, j, NUM_INSTANCE, NUM_LINE)));
-
-							Color clr;
-							clr.r() = boost::any_cast<float>(scr_clr[0]);
-							clr.g() = boost::any_cast<float>(scr_clr[1]);
-							clr.b() = boost::any_cast<float>(scr_clr[2]);
-							clr.a() = boost::any_cast<float>(scr_clr[3]);
-
-							SceneObjectPtr so = MakeSharedPtr<Teapot>();
-							checked_pointer_cast<Teapot>(so)->Instance(MathLib::translation(pos), clr);
-
-							checked_pointer_cast<Teapot>(so)->SetRenderable(renderInstance_);
-							so->AddToSceneManager();
-							scene_objs_.push_back(so);
-
-							so->Update(0, 0);
-						}
-					}
-
-					loading_percentage_ = 80;
+					renderInstance_ = model->Mesh(0);
+					loading_percentage_ = 80 - NUM_LINE;
 				}
+			}
+			else if (loading_percentage_ < 80)
+			{
+				int32_t i = loading_percentage_ - (80 - NUM_LINE);
+				for (int32_t j = 0; j < NUM_INSTANCE / NUM_LINE; ++ j)
+				{
+					std::vector<boost::any> scr_pos = boost::any_cast<std::vector<boost::any> >(script_module_->Call("get_pos", KlayGE::make_tuple(i, j, NUM_INSTANCE, NUM_LINE)));
+
+					float3 pos;
+					pos.x() = boost::any_cast<float>(scr_pos[0]);
+					pos.y() = boost::any_cast<float>(scr_pos[1]);
+					pos.z() = boost::any_cast<float>(scr_pos[2]);
+
+					std::vector<boost::any> scr_clr = boost::any_cast<std::vector<boost::any> >(script_module_->Call("get_clr", KlayGE::make_tuple(i, j, NUM_INSTANCE, NUM_LINE)));
+
+					Color clr;
+					clr.r() = boost::any_cast<float>(scr_clr[0]);
+					clr.g() = boost::any_cast<float>(scr_clr[1]);
+					clr.b() = boost::any_cast<float>(scr_clr[2]);
+					clr.a() = boost::any_cast<float>(scr_clr[3]);
+
+					SceneObjectPtr so = MakeSharedPtr<Teapot>();
+					checked_pointer_cast<Teapot>(so)->Instance(MathLib::translation(pos), clr);
+
+					checked_pointer_cast<Teapot>(so)->SetRenderable(renderInstance_);
+					so->AddToSceneManager();
+					scene_objs_.push_back(so);
+
+					so->Update(0, 0);
+				}
+
+				++ loading_percentage_;
 			}
 			else
 			{

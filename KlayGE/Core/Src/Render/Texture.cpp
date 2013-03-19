@@ -758,7 +758,7 @@ namespace
 			return false;
 		}
 
-		void CopyFrom(ResLoadingDesc const & rhs)
+		void CopyDataFrom(ResLoadingDesc const & rhs)
 		{
 			BOOST_ASSERT(this->Type() == rhs.Type());
 
@@ -768,7 +768,7 @@ namespace
 			tex_desc_.tex_data = tld.tex_desc_.tex_data;
 		}
 
-		shared_ptr<void> CloneFrom(shared_ptr<void> const & resource)
+		shared_ptr<void> CloneResourceFrom(shared_ptr<void> const & resource)
 		{
 			return resource;
 		}

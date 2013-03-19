@@ -403,7 +403,7 @@ namespace KlayGE
 		{
 			return ResIdentifierPtr();
 		}
-#endif		
+#endif
 	}
 
 	shared_ptr<void> ResLoader::SyncQuery(ResLoadingDescPtr const & res_desc)
@@ -420,7 +420,7 @@ namespace KlayGE
 			}
 
 			res = res_desc->MainThreadStage();
-			this->SetFinalResource(res_desc, res);
+			this->AddLoadedResource(res_desc, res);
 		}
 		else
 		{
@@ -430,8 +430,7 @@ namespace KlayGE
 			}
 			else
 			{
-				res = res_desc->CloneFrom(loaded_res);
-				this->SetFinalResource(res_desc, res);
+				res = res_desc->CloneResourceFrom(loaded_res);
 			}
 		}
 
@@ -452,7 +451,7 @@ namespace KlayGE
 			{
 				if (get<0>(lrq)->Match(*res_desc))
 				{
-					res_desc->CopyFrom(*get<0>(lrq));
+					res_desc->CopyDataFrom(*get<0>(lrq));
 					async_is_done = get<2>(lrq);
 					found = true;
 					break;
@@ -477,7 +476,7 @@ namespace KlayGE
 				else
 				{
 					shared_ptr<void> res = res_desc->MainThreadStage();
-					this->SetFinalResource(res_desc, res);
+					this->AddLoadedResource(res_desc, res);
 					return bind(&ResLoader::ASyncFuncFromLoaded, this, res);
 				}
 			}
@@ -491,8 +490,7 @@ namespace KlayGE
 			}
 			else
 			{
-				res = res_desc->CloneFrom(loaded_res);
-				this->SetFinalResource(res_desc, res);
+				res = res_desc->CloneResourceFrom(loaded_res);
 			}
 			return bind(&ResLoader::ASyncFuncFromLoaded, this, loaded_res);
 		}
@@ -509,7 +507,7 @@ namespace KlayGE
 		if (*is_done)
 		{
 			shared_ptr<void> res = res_desc->MainThreadStage();
-			this->SetFinalResource(res_desc, res);
+			this->AddLoadedResource(res_desc, res);
 			return res;
 		}
 		else
@@ -528,7 +526,7 @@ namespace KlayGE
 			if (!loaded_res)
 			{
 				res = res_desc->MainThreadStage();
-				this->SetFinalResource(res_desc, res);
+				this->AddLoadedResource(res_desc, res);
 			}
 			else
 			{
@@ -538,8 +536,7 @@ namespace KlayGE
 				}
 				else
 				{
-					res = res_desc->CloneFrom(loaded_res);
-					this->SetFinalResource(res_desc, res);
+					res = res_desc->CloneResourceFrom(loaded_res);
 				}
 			}
 			return res;
@@ -556,7 +553,7 @@ namespace KlayGE
 		return loaded_res;
 	}
 
-	void ResLoader::SetFinalResource(ResLoadingDescPtr const & res_desc, shared_ptr<void> const & res)
+	void ResLoader::AddLoadedResource(ResLoadingDescPtr const & res_desc, shared_ptr<void> const & res)
 	{
 		bool found = false;
 		typedef KLAYGE_DECLTYPE(loaded_res_) CachedDescType;

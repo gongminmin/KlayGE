@@ -796,7 +796,7 @@ namespace
 			return false;
 		}
 
-		void CopyFrom(ResLoadingDesc const & rhs)
+		void CopyDataFrom(ResLoadingDesc const & rhs)
 		{
 			BOOST_ASSERT(this->Type() == rhs.Type());
 
@@ -806,7 +806,7 @@ namespace
 			font_desc_.kfont_loader = fld.font_desc_.kfont_loader;
 		}
 
-		shared_ptr<void> CloneFrom(shared_ptr<void> const & resource)
+		shared_ptr<void> CloneResourceFrom(shared_ptr<void> const & resource)
 		{
 			return resource;
 		}

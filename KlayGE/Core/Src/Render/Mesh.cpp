@@ -108,7 +108,16 @@ namespace
 
 		void SubThreadStage()
 		{
-			this->LoadKModel();
+			LoadModel(model_desc_.res_name, model_desc_.model_data->mtls, model_desc_.model_data->merged_ves,
+				model_desc_.model_data->all_is_index_16_bit,
+				model_desc_.model_data->merged_buff, model_desc_.model_data->merged_indices,
+				model_desc_.model_data->mesh_names, model_desc_.model_data->mtl_ids,
+				model_desc_.model_data->pos_bbs, model_desc_.model_data->tc_bbs,
+				model_desc_.model_data->mesh_num_vertices, model_desc_.model_data->mesh_base_vertices,
+				model_desc_.model_data->mesh_num_indices, model_desc_.model_data->mesh_start_indices, 
+				model_desc_.model_data->joints, model_desc_.model_data->actions, model_desc_.model_data->kfs,
+				model_desc_.model_data->num_frames, model_desc_.model_data->frame_rate,
+				model_desc_.model_data->frame_pos_bbs);
 		}
 
 		shared_ptr<void> MainThreadStage()
@@ -140,7 +149,7 @@ namespace
 			return false;
 		}
 
-		void CopyFrom(ResLoadingDesc const & rhs)
+		void CopyDataFrom(ResLoadingDesc const & rhs)
 		{
 			BOOST_ASSERT(this->Type() == rhs.Type());
 
@@ -150,10 +159,9 @@ namespace
 			model_desc_.model_data = rmld.model_desc_.model_data;
 		}
 
-		shared_ptr<void> CloneFrom(shared_ptr<void> const & resource)
+		shared_ptr<void> CloneResourceFrom(shared_ptr<void> const & resource)
 		{
 			RenderModelPtr rhs_model = static_pointer_cast<RenderModel>(resource);
-
 			RenderModelPtr model = model_desc_.CreateModelFactoryFunc(rhs_model->Name());
 
 			model->NumMaterials(rhs_model->NumMaterials());
@@ -230,20 +238,6 @@ namespace
 		}
 
 	private:
-		void LoadKModel()
-		{
-			LoadModel(model_desc_.res_name, model_desc_.model_data->mtls, model_desc_.model_data->merged_ves,
-				model_desc_.model_data->all_is_index_16_bit,
-				model_desc_.model_data->merged_buff, model_desc_.model_data->merged_indices,
-				model_desc_.model_data->mesh_names, model_desc_.model_data->mtl_ids,
-				model_desc_.model_data->pos_bbs, model_desc_.model_data->tc_bbs,
-				model_desc_.model_data->mesh_num_vertices, model_desc_.model_data->mesh_base_vertices,
-				model_desc_.model_data->mesh_num_indices, model_desc_.model_data->mesh_start_indices, 
-				model_desc_.model_data->joints, model_desc_.model_data->actions, model_desc_.model_data->kfs,
-				model_desc_.model_data->num_frames, model_desc_.model_data->frame_rate,
-				model_desc_.model_data->frame_pos_bbs);
-		}
-
 		RenderModelPtr CreateModel()
 		{
 			std::wstring model_name;
@@ -483,39 +477,49 @@ namespace KlayGE
 		for (TextureSlotsType::const_iterator iter = texture_slots.begin();
 			iter != texture_slots.end(); ++ iter)
 		{
-			TexturePtr tex;
+			function<TexturePtr()> tl;
 			if (!ResLoader::Instance().Locate(iter->second).empty())
 			{
-				tex = SyncLoadTexture(iter->second, EAH_GPU_Read | EAH_Immutable);
+				tl = ASyncLoadTexture(iter->second, EAH_GPU_Read | EAH_Immutable);
 			}
 
 			if (("Diffuse Color" == iter->first) || ("Diffuse Color Map" == iter->first))
 			{
-				diffuse_tex_ = tex;
+				diffuse_tl_ = tl;
 			}
 			else if (("Specular Level" == iter->first) || ("Reflection Glossiness Map" == iter->first))
 			{
-				specular_tex_ = tex;
+				specular_tl_ = tl;
 			}
 			else if (("Bump" == iter->first) || ("Bump Map" == iter->first))
 			{
-				normal_tex_ = tex;
+				normal_tl_ = tl;
 			}
 			else if (("Height" == iter->first) || ("Height Map" == iter->first))
 			{
-				height_tex_ = tex;
+				height_tl_ = tl;
 			}
 			else if ("Self-Illumination" == iter->first)
 			{
-				emit_tex_ = tex;
+				emit_tl_ = tl;
 			}
 			else if ("Opacity" == iter->first)
 			{
-				if (tex)
+				ResIdentifierPtr tex_file = ResLoader::Instance().Open(iter->second);
+				if (tex_file)
 				{
+					Texture::TextureType type;
+					uint32_t width, height, depth;
+					uint32_t num_mipmaps;
+					uint32_t array_size;
+					ElementFormat format;
+					uint32_t row_pitch, slice_pitch;
+					GetImageInfo(tex_file, type, width, height, depth, num_mipmaps, array_size, format,
+						row_pitch, slice_pitch);
+
 					opacity_map_enabled_ = true;
 
-					if ((EF_BC1 == tex->Format()) || (EF_BC1_SRGB == tex->Format()))
+					if ((EF_BC1 == format) || (EF_BC1_SRGB == format))
 					{
 						effect_attrs_ |= EA_AlphaTest;
 					}
@@ -544,6 +548,32 @@ namespace KlayGE
 	std::wstring const & StaticMesh::Name() const
 	{
 		return name_;
+	}
+
+	void StaticMesh::OnRenderBegin()
+	{
+		if (diffuse_tl_ && !diffuse_tex_)
+		{
+			diffuse_tex_ = diffuse_tl_();
+		}
+		if (specular_tl_ && !specular_tex_)
+		{
+			specular_tex_ = specular_tl_();
+		}
+		if (normal_tl_ && !normal_tex_)
+		{
+			normal_tex_ = normal_tl_();
+		}
+		if (height_tl_ && !height_tex_)
+		{
+			height_tex_ = height_tl_();
+		}
+		if (emit_tl_ && !emit_tex_)
+		{
+			emit_tex_ = emit_tl_();
+		}
+
+		Renderable::OnRenderBegin();
 	}
 
 	AABBox const & StaticMesh::PosBound() const

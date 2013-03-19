@@ -67,6 +67,8 @@ namespace KlayGE
 
 		virtual std::wstring const & Name() const;
 
+		virtual void OnRenderBegin();
+
 		void NumVertices(uint32_t n)
 		{
 			rl_->NumVertices(n);
@@ -137,6 +139,12 @@ namespace KlayGE
 		int32_t mtl_id_;
 
 		weak_ptr<RenderModel> model_;
+
+		function<TexturePtr()> diffuse_tl_;
+		function<TexturePtr()> specular_tl_;
+		function<TexturePtr()> normal_tl_;
+		function<TexturePtr()> height_tl_;
+		function<TexturePtr()> emit_tl_;
 	};
 
 	class KLAYGE_CORE_API RenderModel : public Renderable
