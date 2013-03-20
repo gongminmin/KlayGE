@@ -753,8 +753,8 @@ void OceanApp::InitObjects()
 	this->LookAt(float3(0, 14, 0), float3(0, 13.8f, 1));
 	this->Proj(0.1f, 3000);
 
-	KlayGE::function<TexturePtr()> y_cube_tl = ASyncLoadTexture("DH001cross_y.dds", EAH_GPU_Read | EAH_Immutable);
-	KlayGE::function<TexturePtr()> c_cube_tl = ASyncLoadTexture("DH001cross_c.dds", EAH_GPU_Read | EAH_Immutable);
+	y_cube_tl_ = ASyncLoadTexture("DH001cross_y.dds", EAH_GPU_Read | EAH_Immutable);
+	c_cube_tl_ = ASyncLoadTexture("DH001cross_c.dds", EAH_GPU_Read | EAH_Immutable);
 
 	font_ = SyncLoadFont("gkai00mp.kfont");
 
@@ -782,7 +782,6 @@ void OceanApp::InitObjects()
 	ocean_->AddToSceneManager();
 
 	sky_box_ = MakeSharedPtr<SceneObjectFoggySkyBox>();
-	checked_pointer_cast<SceneObjectFoggySkyBox>(sky_box_)->CompressedCubeMap(y_cube_tl(), c_cube_tl());
 	checked_pointer_cast<SceneObjectFoggySkyBox>(sky_box_)->FogColor(fog_color);
 	sky_box_->AddToSceneManager();
 
@@ -1009,6 +1008,11 @@ void OceanApp::DoUpdateOverlay()
 
 uint32_t OceanApp::DoUpdate(uint32_t pass)
 {
+	if (0 == pass)
+	{
+		checked_pointer_cast<SceneObjectSkyBox>(sky_box_)->CompressedCubeMap(y_cube_tl_(), c_cube_tl_());
+	}
+
 	uint32_t ret = deferred_rendering_->Update(pass);
 	if (ret & App3DFramework::URV_Finished)
 	{

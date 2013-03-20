@@ -346,13 +346,16 @@ namespace
 
 		void operator()()
 		{
-			tuple<TexturePtr, uint32_t, uint32_t, uint32_t, uint32_t> tex_tuple;
-			param_->Value(tex_tuple);
-			if (get<0>(tex_tuple))
+			TextureSubresource tex_subres;
+			param_->Value(tex_subres);
+			if (tex_subres.tex)
 			{
-				*srvsrc_ = make_tuple(get<0>(tex_tuple).get(), get<1>(tex_tuple) * get<0>(tex_tuple)->NumMipMaps() + get<3>(tex_tuple),
-					get<2>(tex_tuple) * get<4>(tex_tuple));
-				*srv_ = checked_cast<D3D11Texture*>(get<0>(tex_tuple).get())->RetriveD3DShaderResourceView(get<1>(tex_tuple), get<2>(tex_tuple), get<3>(tex_tuple), get<4>(tex_tuple));
+				*srvsrc_ = make_tuple(tex_subres.tex.get(),
+					tex_subres.first_array_index * tex_subres.tex->NumMipMaps() + tex_subres.first_level,
+					tex_subres.num_items * tex_subres.num_levels);
+				*srv_ = checked_cast<D3D11Texture*>(tex_subres.tex.get())->RetriveD3DShaderResourceView(
+					tex_subres.first_array_index, tex_subres.num_items,
+					tex_subres.first_level, tex_subres.num_levels);
 			}
 			else
 			{
@@ -407,12 +410,13 @@ namespace
 
 		void operator()()
 		{
-			tuple<TexturePtr, uint32_t, uint32_t, uint32_t, uint32_t> tex_tuple;
-			param_->Value(tex_tuple);
-			if (get<0>(tex_tuple))
+			TextureSubresource tex_subres;
+			param_->Value(tex_subres);
+			if (tex_subres.tex)
 			{
-				*uavsrc_ = get<0>(tex_tuple).get();
-				*uav_ = checked_cast<D3D11Texture*>(get<0>(tex_tuple).get())->RetriveD3DUnorderedAccessView(get<1>(tex_tuple), get<2>(tex_tuple), get<3>(tex_tuple));
+				*uavsrc_ = tex_subres.tex.get();
+				*uav_ = checked_cast<D3D11Texture*>(tex_subres.tex.get())->RetriveD3DUnorderedAccessView(
+					tex_subres.first_array_index, tex_subres.num_items, tex_subres.first_level);
 			}
 			else
 			{

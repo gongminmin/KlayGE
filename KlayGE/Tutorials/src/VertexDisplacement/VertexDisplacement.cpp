@@ -45,12 +45,11 @@ namespace
 		FlagRenderable(int length_segs, int width_segs)
 			: RenderablePlane(static_cast<float>(LENGTH), static_cast<float>(WIDTH), length_segs, width_segs, true)
 		{
-			flag_tl_ = ASyncLoadTexture("powered_by_klayge.dds", EAH_GPU_Read | EAH_Immutable);
-
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
 			technique_ = rf.LoadEffect("VertexDisplacement.fxml")->TechniqueByName("VertexDisplacement");
 
+			*(technique_->Effect().ParameterByName("flag_tex")) = ASyncLoadTexture("powered_by_klayge.dds", EAH_GPU_Read | EAH_Immutable);
 			*(technique_->Effect().ParameterByName("half_length")) = LENGTH / 2.0f;
 			*(technique_->Effect().ParameterByName("half_width")) = WIDTH / 2.0f;
 			*(technique_->Effect().ParameterByName("lightDir")) = float3(1, 0, -1);
@@ -63,12 +62,6 @@ namespace
 
 		void OnRenderBegin()
 		{
-			if (!flag_tex_)
-			{
-				flag_tex_ = flag_tl_();
-				*(technique_->Effect().ParameterByName("flag_tex")) = flag_tex_;
-			}
-
 			App3DFramework const & app = Context::Instance().AppInstance();
 			Camera const & camera = app.ActiveCamera();
 
@@ -76,10 +69,6 @@ namespace
 			*(technique_->Effect().ParameterByName("proj")) = camera.ProjMatrix();
 			*(technique_->Effect().ParameterByName("mvp")) = camera.ViewProjMatrix();
 		}
-
-	private:
-		function<TexturePtr()> flag_tl_;
-		TexturePtr flag_tex_;
 	};
 
 	class FlagObject : public SceneObjectHelper

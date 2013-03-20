@@ -4595,7 +4595,13 @@ namespace KlayGE
 		return *this;
 	}
 
-	RenderVariable& RenderVariable::operator=(tuple<TexturePtr, uint32_t, uint32_t, uint32_t, uint32_t> const & /*value*/)
+	RenderVariable& RenderVariable::operator=(TextureSubresource const & /*value*/)
+	{
+		BOOST_ASSERT(false);
+		return *this;
+	}
+
+	RenderVariable& RenderVariable::operator=(function<TexturePtr()> const & /*value*/)
 	{
 		BOOST_ASSERT(false);
 		return *this;
@@ -4784,7 +4790,7 @@ namespace KlayGE
 		BOOST_ASSERT(false);
 	}
 
-	void RenderVariable::Value(tuple<TexturePtr, uint32_t, uint32_t, uint32_t, uint32_t>& /*value*/) const
+	void RenderVariable::Value(TextureSubresource& /*value*/) const
 	{
 		BOOST_ASSERT(false);
 	}
@@ -4877,5 +4883,145 @@ namespace KlayGE
 	void RenderVariable::Value(std::vector<float4x4>& /*value*/) const
 	{
 		BOOST_ASSERT(false);
+	}
+
+	RenderVariablePtr RenderVariableTexture::Clone()
+	{
+		RenderVariablePtr ret = MakeSharedPtr<RenderVariableTexture>();
+		TexturePtr val;
+		this->Value(val);
+		*ret = val;
+		std::string elem_type;
+		this->Value(elem_type);
+		*ret = elem_type;
+		return ret;
+	}
+
+	RenderVariable& RenderVariableTexture::operator=(TexturePtr const & value)
+	{
+		uint32_t array_size = 1;
+		uint32_t mipmap = 1;
+		if (value)
+		{
+			array_size = value->ArraySize();
+			mipmap = value->NumMipMaps();
+		}
+		return this->operator=(TextureSubresource(value, 0, array_size, 0, mipmap));
+	}
+
+	RenderVariable& RenderVariableTexture::operator=(TextureSubresource const & value)
+	{
+		val_ = value;
+		return *this;
+	}
+
+	RenderVariable& RenderVariableTexture::operator=(function<TexturePtr()> const & value)
+	{
+		tl_ = value;
+		return this->operator=(tl_());
+	}
+
+	void RenderVariableTexture::Value(TexturePtr& val) const
+	{
+		if (tl_ && !val_.tex)
+		{
+			val_.tex = tl_();
+			if (val_.tex)
+			{
+				val_.num_items = val_.tex->ArraySize();
+				val_.num_levels = val_.tex->NumMipMaps();
+			}
+		}
+		val = val_.tex;
+	}
+
+	void RenderVariableTexture::Value(TextureSubresource& val) const
+	{
+		if (tl_ && !val_.tex)
+		{
+			val_.tex = tl_();
+		}
+		val = val_;
+	}
+
+	RenderVariable& RenderVariableTexture::operator=(std::string const & value)
+	{
+		elem_type_ = value;
+		return *this;
+	}
+
+	void RenderVariableTexture::Value(std::string& val) const
+	{
+		val = elem_type_;
+	}
+
+
+	RenderVariablePtr RenderVariableBuffer::Clone()
+	{
+		RenderVariablePtr ret = MakeSharedPtr<RenderVariableBuffer>();
+		GraphicsBufferPtr val;
+		this->Value(val);
+		*ret = val;
+		std::string elem_type;
+		this->Value(elem_type);
+		*ret = elem_type;
+		return ret;
+	}
+
+	RenderVariable& RenderVariableBuffer::operator=(GraphicsBufferPtr const & value)
+	{
+		val_ = value;
+		return *this;
+	}
+
+	void RenderVariableBuffer::Value(GraphicsBufferPtr& val) const
+	{
+		val = val_;
+	}
+
+	RenderVariable& RenderVariableBuffer::operator=(std::string const & value)
+	{
+		elem_type_ = value;
+		return *this;
+	}
+
+	void RenderVariableBuffer::Value(std::string& val) const
+	{
+		val = elem_type_;
+	}
+
+
+	RenderVariablePtr RenderVariableByteAddressBuffer::Clone()
+	{
+		RenderVariablePtr ret = MakeSharedPtr<RenderVariableByteAddressBuffer>();
+		GraphicsBufferPtr val;
+		this->Value(val);
+		*ret = val;
+		std::string elem_type;
+		this->Value(elem_type);
+		*ret = elem_type;
+		return ret;
+	}
+
+	RenderVariable& RenderVariableByteAddressBuffer::operator=(GraphicsBufferPtr const & value)
+	{
+		val_ = value;
+		return *this;
+	}
+
+	void RenderVariableByteAddressBuffer::Value(GraphicsBufferPtr& val) const
+	{
+		val = val_;
+	}
+
+	RenderVariable& RenderVariableByteAddressBuffer::operator=(std::string const & value)
+	{
+		elem_type_ = value;
+		return *this;
+	}
+
+	void RenderVariableByteAddressBuffer::Value(std::string& val) const
+	{
+		val = elem_type_;
 	}
 }

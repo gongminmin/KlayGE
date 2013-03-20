@@ -139,8 +139,6 @@ namespace
 			: RenderableHelper(L"RenderParticles"),
 				tex_width_(256), tex_height_((max_num_particles + 255) / 256)
 		{
-			particle_tl_ = ASyncLoadTexture("particle.dds", EAH_GPU_Read | EAH_Immutable);
-
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 			
 			float2 texs[] =
@@ -161,6 +159,7 @@ namespace
 			rl_ = rf.MakeRenderLayout();
 
 			RenderEffectPtr effect = rf.LoadEffect("GPUParticleSystem.fxml");
+			*(effect->ParameterByName("particle_tex")) = ASyncLoadTexture("particle.dds", EAH_GPU_Read | EAH_Immutable);
 			if (use_gs)
 			{
 				rl_->TopologyType(RenderLayout::TT_PointList);
@@ -234,12 +233,6 @@ namespace
 
 		void OnRenderBegin()
 		{
-			if (!particle_tex_)
-			{
-				particle_tex_ = particle_tl_();
-				*(technique_->Effect().ParameterByName("particle_tex")) = particle_tex_;
-			}
-
 			App3DFramework const & app = Context::Instance().AppInstance();
 			Camera const & camera = app.ActiveCamera();
 
@@ -264,10 +257,7 @@ namespace
 	private:
 		int tex_width_, tex_height_;
 
-		TexturePtr particle_tex_;
 		TexturePtr noise_vol_tex_;
-
-		function<TexturePtr()> particle_tl_;
 	};
 
 	class ParticlesObject : public SceneObjectHelper
@@ -660,11 +650,10 @@ namespace
 		explicit TerrainRenderable(TexturePtr const & height_map, TexturePtr const & normal_map)
 			: RenderablePlane(4, 4, 64, 64, true)
 		{
-			grass_tl_ = ASyncLoadTexture("grass.dds", EAH_GPU_Read | EAH_Immutable);
-
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
 			technique_ = rf.LoadEffect("Terrain.fxml")->TechniqueByName("Terrain");
+			*(technique_->Effect().ParameterByName("grass_tex")) = ASyncLoadTexture("grass.dds", EAH_GPU_Read | EAH_Immutable);
 
 			RenderEngine& re = rf.RenderEngineInstance();
 			RenderDeviceCaps const & caps = re.DeviceCaps();
@@ -684,22 +673,12 @@ namespace
 
 		void OnRenderBegin()
 		{
-			if (!grass_tex_)
-			{
-				grass_tex_ = grass_tl_();
-				*(technique_->Effect().ParameterByName("grass_tex")) = grass_tex_;
-			}
-
 			App3DFramework const & app = Context::Instance().AppInstance();
 			Camera const & camera = app.ActiveCamera();
 
 			*(technique_->Effect().ParameterByName("mvp")) = camera.ViewProjMatrix();
 			*(technique_->Effect().ParameterByName("inv_far")) = 1 / camera.FarPlane();
 		}
-
-	private:
-		function<TexturePtr()> grass_tl_;
-		TexturePtr grass_tex_;
 	};
 
 	class TerrainObject : public SceneObjectHelper

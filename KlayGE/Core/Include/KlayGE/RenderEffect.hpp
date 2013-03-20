@@ -123,6 +123,24 @@ namespace KlayGE
 		REDT_consume_structured_buffer
 	};
 
+	struct KLAYGE_CORE_API TextureSubresource
+	{
+		TexturePtr tex;
+		uint32_t first_array_index;
+		uint32_t num_items;
+		uint32_t first_level;
+		uint32_t num_levels;
+
+		TextureSubresource()
+		{
+		}
+
+		TextureSubresource(TexturePtr const & t, uint32_t fai, uint32_t ni, uint32_t fl, uint32_t nl)
+			: tex(t), first_array_index(fai), num_items(ni), first_level(fl), num_levels(nl)
+		{
+		}
+	};
+
 	class KLAYGE_CORE_API RenderVariable
 	{
 	public:
@@ -146,7 +164,8 @@ namespace KlayGE
 		virtual RenderVariable& operator=(float4 const & value);
 		virtual RenderVariable& operator=(float4x4 const & value);
 		virtual RenderVariable& operator=(TexturePtr const & value);
-		virtual RenderVariable& operator=(tuple<TexturePtr, uint32_t, uint32_t, uint32_t, uint32_t> const & value);
+		virtual RenderVariable& operator=(TextureSubresource const & value);
+		virtual RenderVariable& operator=(function<TexturePtr()> const & value);
 		virtual RenderVariable& operator=(SamplerStateObjectPtr const & value);
 		virtual RenderVariable& operator=(GraphicsBufferPtr const & value);
 		virtual RenderVariable& operator=(std::string const & value);
@@ -181,7 +200,7 @@ namespace KlayGE
 		virtual void Value(float4& val) const;
 		virtual void Value(float4x4& val) const;
 		virtual void Value(TexturePtr& val) const;
-		virtual void Value(tuple<TexturePtr, uint32_t, uint32_t, uint32_t, uint32_t>& val) const;
+		virtual void Value(TextureSubresource& val) const;
 		virtual void Value(SamplerStateObjectPtr& val) const;
 		virtual void Value(GraphicsBufferPtr& value) const;
 		virtual void Value(std::string& val) const;
@@ -206,7 +225,7 @@ namespace KlayGE
 	class RenderVariableConcrete : public RenderVariable
 	{
 	public:
-		RenderVariablePtr Clone()
+		virtual RenderVariablePtr Clone()
 		{
 			RenderVariablePtr ret = MakeSharedPtr<RenderVariableConcrete<T> >();
 			T val;
@@ -215,13 +234,13 @@ namespace KlayGE
 			return ret;
 		}
 
-		RenderVariable& operator=(T const & value)
+		virtual RenderVariable& operator=(T const & value)
 		{
 			val_ = value;
 			return *this;
 		}
 
-		void Value(T& val) const
+		virtual void Value(T& val) const
 		{
 			val = val_;
 		}
@@ -233,106 +252,33 @@ namespace KlayGE
 	class RenderVariableTexture : public RenderVariable
 	{
 	public:
-		RenderVariablePtr Clone()
-		{
-			RenderVariablePtr ret = MakeSharedPtr<RenderVariableTexture>();
-			TexturePtr val;
-			this->Value(val);
-			*ret = val;
-			std::string elem_type;
-			this->Value(elem_type);
-			*ret = elem_type;
-			return ret;
-		}
+		virtual RenderVariablePtr Clone();
 
-		RenderVariable& operator=(TexturePtr const & value)
-		{
-			uint32_t array_size = 0;
-			uint32_t mipmap = 0;
-			if (value)
-			{
-				array_size = value->ArraySize();
-				mipmap = value->NumMipMaps();
-			}
-			return this->operator=(make_tuple(value, 0, array_size, 0, mipmap));
-		}
+		virtual RenderVariable& operator=(TexturePtr const & value);
+		virtual RenderVariable& operator=(TextureSubresource const & value);
+		virtual RenderVariable& operator=(function<TexturePtr()> const & value);
+		virtual RenderVariable& operator=(std::string const & value);
 
-		RenderVariable& operator=(tuple<TexturePtr, uint32_t, uint32_t, uint32_t, uint32_t> const & value)
-		{
-			val_ = get<0>(value);
-			first_array_index_ = get<1>(value);
-			num_items_ = get<2>(value);
-			first_level_ = get<3>(value);
-			num_levels_ = get<4>(value);
-			return *this;
-		}
-
-		void Value(TexturePtr& val) const
-		{
-			val = val_;
-		}
-
-		void Value(tuple<TexturePtr, uint32_t, uint32_t, uint32_t, uint32_t>& val) const
-		{
-			val = KlayGE::make_tuple(val_, first_array_index_, num_items_, first_level_, num_levels_);
-		}
-
-		RenderVariable& operator=(std::string const & value)
-		{
-			elem_type_ = value;
-			return *this;
-		}
-
-		void Value(std::string& val) const
-		{
-			val = elem_type_;
-		}
+		virtual void Value(TexturePtr& val) const;
+		virtual void Value(TextureSubresource& val) const;
+		virtual void Value(std::string& val) const;
 
 	protected:
-		TexturePtr val_;
-		uint32_t first_array_index_;
-		uint32_t num_items_;
-		uint32_t first_level_;
-		uint32_t num_levels_;
+		function<TexturePtr()> tl_;
+		mutable TextureSubresource val_;
 		std::string elem_type_;
 	};
 
 	class RenderVariableBuffer : public RenderVariable
 	{
 	public:
-		RenderVariablePtr Clone()
-		{
-			RenderVariablePtr ret = MakeSharedPtr<RenderVariableBuffer>();
-			GraphicsBufferPtr val;
-			this->Value(val);
-			*ret = val;
-			std::string elem_type;
-			this->Value(elem_type);
-			*ret = elem_type;
-			return ret;
-		}
+		RenderVariablePtr Clone();
 
-		RenderVariable& operator=(GraphicsBufferPtr const & value)
-		{
-			val_ = value;
-			return *this;
-		}
+		virtual RenderVariable& operator=(GraphicsBufferPtr const & value);
+		virtual RenderVariable& operator=(std::string const & value);
 
-		void Value(GraphicsBufferPtr& val) const
-		{
-			val = val_;
-		}
-
-		RenderVariable& operator=(std::string const & value)
-		{
-			elem_type_ = value;
-			return *this;
-		}
-
-		void Value(std::string& val) const
-		{
-			val = elem_type_;
-		}
+		virtual void Value(GraphicsBufferPtr& val) const;
+		virtual void Value(std::string& val) const;
 
 	protected:
 		GraphicsBufferPtr val_;
@@ -342,39 +288,13 @@ namespace KlayGE
 	class RenderVariableByteAddressBuffer : public RenderVariable
 	{
 	public:
-		RenderVariablePtr Clone()
-		{
-			RenderVariablePtr ret = MakeSharedPtr<RenderVariableByteAddressBuffer>();
-			GraphicsBufferPtr val;
-			this->Value(val);
-			*ret = val;
-			std::string elem_type;
-			this->Value(elem_type);
-			*ret = elem_type;
-			return ret;
-		}
+		virtual RenderVariablePtr Clone();
 
-		RenderVariable& operator=(GraphicsBufferPtr const & value)
-		{
-			val_ = value;
-			return *this;
-		}
+		virtual RenderVariable& operator=(GraphicsBufferPtr const & value);
+		virtual RenderVariable& operator=(std::string const & value);
 
-		void Value(GraphicsBufferPtr& val) const
-		{
-			val = val_;
-		}
-
-		RenderVariable& operator=(std::string const & value)
-		{
-			elem_type_ = value;
-			return *this;
-		}
-
-		void Value(std::string& val) const
-		{
-			val = elem_type_;
-		}
+		virtual void Value(GraphicsBufferPtr& val) const;
+		virtual void Value(std::string& val) const;
 
 	protected:
 		GraphicsBufferPtr val_;

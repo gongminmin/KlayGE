@@ -46,6 +46,9 @@ private:
 	bool light_shaft_on_;
 	KlayGE::PostProcessPtr light_shaft_pp_;
 
+	KlayGE::function<KlayGE::TexturePtr()> y_cube_tl_;
+	KlayGE::function<KlayGE::TexturePtr()> c_cube_tl_;
+
 	KlayGE::UIDialogPtr dialog_params_;
 	int id_dmap_dim_static_;
 	int id_dmap_dim_slider_;

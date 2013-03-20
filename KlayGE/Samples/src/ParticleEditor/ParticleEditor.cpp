@@ -48,11 +48,10 @@ namespace
 		TerrainRenderable()
 			: RenderableHelper(L"Terrain")
 		{
-			grass_tl_ = ASyncLoadTexture("grass.dds", EAH_GPU_Read | EAH_Immutable);
-
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
 			technique_ = rf.LoadEffect("ParticleEditor.fxml")->TechniqueByName("Terrain");
+			*(technique_->Effect().ParameterByName("grass_tex")) = ASyncLoadTexture("grass.dds", EAH_GPU_Read | EAH_Immutable);
 
 			rl_ = rf.MakeRenderLayout();
 			rl_->TopologyType(RenderLayout::TT_TriangleStrip);
@@ -78,12 +77,6 @@ namespace
 
 		void OnRenderBegin()
 		{
-			if (!grass_tex_)
-			{
-				grass_tex_ = grass_tl_();
-				*(technique_->Effect().ParameterByName("grass_tex")) = grass_tex_;
-			}
-
 			App3DFramework const & app = Context::Instance().AppInstance();
 
 			float4x4 view = app.ActiveCamera().ViewMatrix();
@@ -95,10 +88,6 @@ namespace
 			Camera const & camera = Context::Instance().AppInstance().ActiveCamera();
 			*(technique_->Effect().ParameterByName("depth_near_far_invfar")) = float3(camera.NearPlane(), camera.FarPlane(), 1.0f / camera.FarPlane());
 		}
-
-	private:
-		function<TexturePtr()> grass_tl_;
-		TexturePtr grass_tex_;
 	};
 
 	class TerrainObject : public SceneObjectHelper
