@@ -73,7 +73,7 @@ namespace KlayGE
 
 	public:
 		ScriptModule();
-		~ScriptModule();
+		virtual ~ScriptModule();
 
 		template <typename TupleType>
 		boost::any Call(std::string const & func_name, TupleType const & t)
@@ -95,7 +95,7 @@ namespace KlayGE
 	{
 	public:
 		ScriptEngine();
-		~ScriptEngine();
+		virtual ~ScriptEngine();
 
 		static ScriptEnginePtr NullObject();
 
