@@ -41,22 +41,22 @@ namespace
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-			no_oit_tech_ = rf.LoadEffect("NoOIT.fxml")->TechniqueByName("NoOIT");
+			no_oit_tech_ = SyncLoadRenderEffect("NoOIT.fxml")->TechniqueByName("NoOIT");
 
-			dp_1st_tech_ = rf.LoadEffect("DepthPeeling.fxml")->TechniqueByName("DepthPeeling1st");
+			dp_1st_tech_ = SyncLoadRenderEffect("DepthPeeling.fxml")->TechniqueByName("DepthPeeling1st");
 			dp_nth_tech_ = dp_1st_tech_->Effect().TechniqueByName("DepthPeelingNth");
 
 			RenderDeviceCaps const & caps = rf.RenderEngineInstance().DeviceCaps();
 			if (caps.max_shader_model >= 5)
 			{
-				gen_ppll_tech_ = rf.LoadEffect("FragmentList.fxml")->TechniqueByName("GenPerPixelLinkedLists");
+				gen_ppll_tech_ = SyncLoadRenderEffect("FragmentList.fxml")->TechniqueByName("GenPerPixelLinkedLists");
 				rl_quad_ = rf.MakeRenderLayout();
 				rl_quad_->TopologyType(RenderLayout::TT_TriangleStrip);
 				rl_quad_->NumVertices(4);
 
-				ppll_render_tech_ = rf.LoadEffect("PerPixelLinkedLists.fxml")->TechniqueByName("RenderPerPixelLinkedLists");
+				ppll_render_tech_ = SyncLoadRenderEffect("PerPixelLinkedLists.fxml")->TechniqueByName("RenderPerPixelLinkedLists");
 
-				at_render_tech_ = rf.LoadEffect("AdaptiveTransparency.fxml")->TechniqueByName("RenderAdaptiveTransparency");
+				at_render_tech_ = SyncLoadRenderEffect("AdaptiveTransparency.fxml")->TechniqueByName("RenderAdaptiveTransparency");
 			}
 			
 			technique_ = dp_1st_tech_;

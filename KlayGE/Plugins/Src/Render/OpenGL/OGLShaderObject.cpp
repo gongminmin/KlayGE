@@ -1048,10 +1048,10 @@ namespace KlayGE
 
 					RenderEffectParameterPtr const & param = effect.ParameterByName(this_token);
 					if (param &&
-						((REDT_texture1D == param->type()) || (REDT_texture2D == param->type()) || (REDT_texture3D == param->type())
-							|| (REDT_textureCUBE == param->type())
-							|| (REDT_texture1DArray == param->type()) || (REDT_texture2DArray == param->type()) || (REDT_texture3DArray == param->type())
-							|| (REDT_textureCUBEArray == param->type())))
+						((REDT_texture1D == param->Type()) || (REDT_texture2D == param->Type()) || (REDT_texture3D == param->Type())
+							|| (REDT_textureCUBE == param->Type())
+							|| (REDT_texture1DArray == param->Type()) || (REDT_texture2DArray == param->Type()) || (REDT_texture3DArray == param->Type())
+							|| (REDT_textureCUBEArray == param->Type())))
 					{
 						std::vector<std::string> sample_tokens;
 						sample_tokens.push_back(this_token);
@@ -1089,7 +1089,7 @@ namespace KlayGE
 								sample_helper = true;
 							}
 
-							switch (param->type())
+							switch (param->Type())
 							{
 							case REDT_texture1D:
 							case REDT_texture2D:
@@ -1101,7 +1101,7 @@ namespace KlayGE
 							case REDT_textureCUBEArray:
 								shader_ss << "tex";
 
-								switch (param->type())
+								switch (param->Type())
 								{
 								case REDT_texture1D:
 									shader_ss << "1D";
@@ -1240,7 +1240,7 @@ namespace KlayGE
 			{
 				RenderEffectParameter& param = *effect.ParameterByIndex(param_index);
 
-				switch (param.type())
+				switch (param.Type())
 				{
 				case REDT_buffer:
 				case REDT_structured_buffer:
@@ -1259,7 +1259,7 @@ namespace KlayGE
 					break;
 
 				default:
-					ss << effect.TypeName(param.type()) << " " << *param.Name();
+					ss << effect.TypeName(param.Type()) << " " << *param.Name();
 					if (param.ArraySize())
 					{
 						ss << "[" << *param.ArraySize() << "]";
@@ -1274,7 +1274,7 @@ namespace KlayGE
 		{
 			RenderEffectParameterPtr const & param = get<1>(tex_sampler_binds_[i]);
 			ss << "sampler";
-			switch (param->type())
+			switch (param->Type())
 			{
 			case REDT_texture1D:
 				ss << "1D";
@@ -2445,7 +2445,7 @@ namespace KlayGE
 		ret.param = param;
 		ret.location = location;
 
-		switch (param->type())
+		switch (param->Type())
 		{
 		case REDT_bool:
 			if (param->ArraySize())

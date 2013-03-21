@@ -2638,6 +2638,94 @@ namespace
 
 namespace KlayGE
 {
+	class EffectLoadingDesc : public ResLoadingDesc
+	{
+	private:
+		struct EffectDesc
+		{
+			std::string res_name;
+			std::vector<std::pair<std::string, std::string> > macros;
+
+			RenderEffectPtr effect;
+		};
+
+	public:
+		EffectLoadingDesc(std::string const & name, std::pair<std::string, std::string>* macros)
+		{
+			effect_desc_.res_name = name;
+			if (macros)
+			{
+				size_t m = 0;
+				while (!macros[m].first.empty())
+				{
+					effect_desc_.macros.push_back(macros[m]);
+					++ m;
+				}
+			}
+		}
+
+		uint64_t Type() const
+		{
+			static uint64_t const type = static_cast<uint64_t>(boost::hash_value("EffectLoadingDesc"));
+			return type;
+		}
+
+		bool StateLess() const
+		{
+			return false;
+		}
+
+		void SubThreadStage()
+		{
+		}
+
+		shared_ptr<void> MainThreadStage()
+		{
+			RenderEffectPtr prototype = MakeSharedPtr<RenderEffect>();
+			prototype->Load(effect_desc_.res_name, effect_desc_.macros.empty() ? nullptr : &effect_desc_.macros[0]);
+			effect_desc_.effect = prototype->Clone();
+			effect_desc_.effect->PrototypeEffect(prototype);
+			return static_pointer_cast<void>(effect_desc_.effect);
+		}
+
+		bool HasSubThreadStage() const
+		{
+			return false;
+		}
+
+		bool Match(ResLoadingDesc const & rhs) const
+		{
+			if (this->Type() == rhs.Type())
+			{
+				EffectLoadingDesc const & eld = static_cast<EffectLoadingDesc const &>(rhs);
+				return (effect_desc_.res_name == eld.effect_desc_.res_name)
+					&& (effect_desc_.macros == eld.effect_desc_.macros);
+			}
+			return false;
+		}
+
+		void CopyDataFrom(ResLoadingDesc const & rhs)
+		{
+			BOOST_ASSERT(this->Type() == rhs.Type());
+
+			EffectLoadingDesc const & eld = static_cast<EffectLoadingDesc const &>(rhs);
+			effect_desc_.res_name = eld.effect_desc_.res_name;
+			effect_desc_.macros = eld.effect_desc_.macros;
+		}
+
+		shared_ptr<void> CloneResourceFrom(shared_ptr<void> const & resource)
+		{
+			RenderEffectPtr prototype = static_pointer_cast<RenderEffect>(resource)->PrototypeEffect();
+			effect_desc_.effect = prototype->Clone();
+			effect_desc_.effect->PrototypeEffect(prototype);
+			return static_pointer_cast<void>(effect_desc_.effect);
+		}
+
+	private:
+		EffectDesc effect_desc_;
+	};
+
+
 	void RenderEffectAnnotation::Load(XMLNodePtr const & node)
 	{
 		type_ = type_define::instance().type_code(node->Attrib("type")->ValueString());
@@ -2673,7 +2761,7 @@ namespace KlayGE
 		if (fxml_name.empty())
 		{
 			fxml_name = name;
-		}		
+		}
 		std::string kfx_name = fxml_name.substr(0, fxml_name.rfind(".")) + ".kfx";
 
 		ResIdentifierPtr source = ResLoader::Instance().Open(fxml_name);
@@ -4918,7 +5006,23 @@ namespace KlayGE
 	RenderVariable& RenderVariableTexture::operator=(function<TexturePtr()> const & value)
 	{
 		tl_ = value;
-		return this->operator=(tl_());
+		if (tl_)
+		{
+			val_.tex = tl_();
+			val_.first_array_index = 0;
+			val_.first_level = 0;
+			if (val_.tex)
+			{
+				val_.num_items = val_.tex->ArraySize();
+				val_.num_levels = val_.tex->NumMipMaps();
+			}
+			else
+			{
+				val_.num_items = 1;
+				val_.num_levels = 1;
+			}
+		}
+		return *this;
 	}
 
 	void RenderVariableTexture::Value(TexturePtr& val) const
@@ -4940,6 +5044,11 @@ namespace KlayGE
 		if (tl_ && !val_.tex)
 		{
 			val_.tex = tl_();
+			if (val_.tex)
+			{
+				val_.num_items = val_.tex->ArraySize();
+				val_.num_levels = val_.tex->NumMipMaps();
+			}
 		}
 		val = val_;
 	}
@@ -5023,5 +5132,18 @@ namespace KlayGE
 	void RenderVariableByteAddressBuffer::Value(std::string& val) const
 	{
 		val = elem_type_;
+	}
+
+
+	RenderEffectPtr SyncLoadRenderEffect(std::string const & effect_name,
+		std::pair<std::string, std::string>* macros)
+	{
+		return ResLoader::Instance().SyncQueryT<RenderEffect>(MakeSharedPtr<EffectLoadingDesc>(effect_name, macros));
+	}
+
+	function<RenderEffectPtr()> ASyncLoadRenderEffect(std::string const & effect_name,
+		std::pair<std::string, std::string>* macros)
+	{
+		return ResLoader::Instance().ASyncQueryT<RenderEffect>(MakeSharedPtr<EffectLoadingDesc>(effect_name, macros));
 	}
 }

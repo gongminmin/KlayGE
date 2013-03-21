@@ -120,7 +120,7 @@ namespace
 			GraphicsBufferPtr tangents_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, &init_data);
 			rl_->BindVertexStream(tangents_vb, KlayGE::make_tuple(vertex_element(VEU_Tangent, 0, fmt)));
 
-			RenderEffectPtr effect = rf.LoadEffect("Scene.fxml");
+			RenderEffectPtr effect = SyncLoadRenderEffect("Scene.fxml");
 			technique_ = effect->TechniqueByName("DistanceMapping2a");
 			default_tech_ = technique_;
 			if (!technique_->Validate())
@@ -138,7 +138,7 @@ namespace
 			position_pass_ = effect->TechniqueByName("PositionTex");
 			BOOST_ASSERT(position_pass_->Validate());
 
-			effect = rf.LoadEffect("ShadowCubeMap.fxml");
+			effect = SyncLoadRenderEffect("ShadowCubeMap.fxml");
 			gen_cube_sm_tech_ = effect->TechniqueByName("GenCubeShadowMap");
 			BOOST_ASSERT(gen_cube_sm_tech_->Validate());
 		}
@@ -257,9 +257,7 @@ namespace
 		RefractMesh(RenderModelPtr const & model, std::wstring const & name)
 			: StaticMesh(model, name)
 		{
-			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-
-			RenderEffectPtr effect = rf.LoadEffect("Scene.fxml");
+			RenderEffectPtr effect = SyncLoadRenderEffect("Scene.fxml");
 			depth_wodt_tech_f_ = effect->TechniqueByName("DepthTexWODTFront");
 			BOOST_ASSERT(depth_wodt_tech_f_->Validate());
 			depth_wodt_tech_b_ = effect->TechniqueByName("DepthTexWODTBack");
@@ -276,7 +274,7 @@ namespace
 			refract_tech_ = effect->TechniqueByName("RefractEffect");
 			BOOST_ASSERT(refract_tech_->Validate());
 
-			effect = rf.LoadEffect("ShadowCubeMap.fxml");
+			effect = SyncLoadRenderEffect("ShadowCubeMap.fxml");
 			gen_cube_sm_tech_ = effect->TechniqueByName("GenCubeShadowMap");
 			BOOST_ASSERT(gen_cube_sm_tech_->Validate());
 		}
@@ -477,7 +475,7 @@ namespace
 
 			rl_ = rf.MakeRenderLayout();
 
-			RenderEffectPtr effect = rf.LoadEffect("Caustics.fxml");
+			RenderEffectPtr effect = SyncLoadRenderEffect("Caustics.fxml");
 			*(effect->ParameterByName("pt_texture")) = ASyncLoadTexture("point.dds", EAH_GPU_Read | EAH_Immutable);
 			if (use_gs)
 			{

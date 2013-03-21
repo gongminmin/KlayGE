@@ -232,11 +232,6 @@ namespace KlayGE
 
 	RenderFactory::~RenderFactory()
 	{
-		typedef KLAYGE_DECLTYPE(effect_pool_) EffectPoolType;
-		KLAYGE_FOREACH(EffectPoolType::reference effect, effect_pool_)
-		{
-			effect.second.clear();
-		}
 		typedef KLAYGE_DECLTYPE(rs_pool_) RSPoolType;
 		KLAYGE_FOREACH(RSPoolType::reference rs, rs_pool_)
 		{
@@ -275,31 +270,6 @@ namespace KlayGE
 		}
 
 		return *re_;
-	}
-
-	RenderEffectPtr RenderFactory::LoadEffect(std::string const & effectName, std::pair<std::string, std::string>* macros)
-	{
-		RenderEffectPtr prototype;
-
-		KLAYGE_AUTO(entry, std::make_pair(effectName, macros));
-		KLAYGE_AUTO(iter, effect_pool_.find(entry));
-		if (iter == effect_pool_.end())
-		{
-			prototype = MakeSharedPtr<RenderEffect>();
-			prototype->Load(effectName, macros);
-			effect_pool_[entry].push_back(prototype);
-		}
-		else
-		{
-			BOOST_ASSERT(!iter->second.empty());
-			prototype = iter->second[0];
-		}
-
-		RenderEffectPtr ret = prototype->Clone();
-		ret->PrototypeEffect(prototype);
-		effect_pool_[entry].push_back(ret);
-
-		return ret;
 	}
 
 	RasterizerStateObjectPtr RenderFactory::MakeRasterizerStateObject(RasterizerStateDesc const & desc)

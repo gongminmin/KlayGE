@@ -39,8 +39,7 @@ namespace
 		RenderTerrain(float base_level, float strength)
 			: InfTerrainRenderable(L"Terrain")
 		{
-			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-			this->BindDeferredEffect(rf.LoadEffect("Terrain.fxml"));
+			this->BindDeferredEffect(SyncLoadRenderEffect("Terrain.fxml"));
 			gbuffer_rt0_tech_ = deferred_effect_->TechniqueByName("TerrainGBufferRT0");
 			gbuffer_rt1_tech_ = deferred_effect_->TechniqueByName("TerrainGBufferRT1");
 			gbuffer_mrt_tech_ = deferred_effect_->TechniqueByName("TerrainGBufferMRT");
@@ -94,8 +93,7 @@ namespace
 		RenderOcean(float base_level, float strength)
 			: InfTerrainRenderable(L"Ocean")
 		{
-			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-			this->BindDeferredEffect(rf.LoadEffect("Ocean.fxml"));
+			this->BindDeferredEffect(SyncLoadRenderEffect("Ocean.fxml"));
 			gbuffer_alpha_blend_front_rt0_tech_ = deferred_effect_->TechniqueByName("OceanGBufferAlphaBlendFrontRT0");
 			gbuffer_alpha_blend_front_rt1_tech_ = deferred_effect_->TechniqueByName("OceanGBufferAlphaBlendFrontRT1");
 			gbuffer_alpha_blend_front_mrt_tech_ = deferred_effect_->TechniqueByName("OceanGBufferAlphaBlendFrontMRT");
@@ -675,8 +673,7 @@ namespace
 	public:
 		RenderableFoggySkyBox()
 		{
-			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-			RenderEffectPtr effect = rf.LoadEffect("Ocean.fxml");
+			RenderEffectPtr effect = SyncLoadRenderEffect("Ocean.fxml");
 
 			gbuffer_rt0_tech_ = effect->TechniqueByName("GBufferFoggySkyBoxRT0");
 			gbuffer_rt1_tech_ = effect->TechniqueByName("GBufferFoggySkyBoxRT1");
@@ -1010,7 +1007,16 @@ uint32_t OceanApp::DoUpdate(uint32_t pass)
 {
 	if (0 == pass)
 	{
-		checked_pointer_cast<SceneObjectSkyBox>(sky_box_)->CompressedCubeMap(y_cube_tl_(), c_cube_tl_());
+		if (loading_percentage_ < 100)
+		{
+			TexturePtr y_cube_tex = y_cube_tl_();
+			TexturePtr c_cube_tex = c_cube_tl_();
+			checked_pointer_cast<SceneObjectSkyBox>(sky_box_)->CompressedCubeMap(y_cube_tex, c_cube_tex);
+			if (!!y_cube_tex && !!c_cube_tex)
+			{
+				loading_percentage_ = 100;
+			}
+		}
 	}
 
 	uint32_t ret = deferred_rendering_->Update(pass);

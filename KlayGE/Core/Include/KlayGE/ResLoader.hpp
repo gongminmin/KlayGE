@@ -119,7 +119,6 @@ namespace KlayGE
 		std::string RealPath(std::string const & path);
 
 		shared_ptr<void> ASyncFuncCreate(ResLoadingDescPtr const & res_desc, shared_ptr<volatile bool> const & is_done);
-		shared_ptr<void> ASyncFuncClone(ResLoadingDescPtr const & res_desc, shared_ptr<volatile bool> const & is_done);
 		shared_ptr<void> ASyncFuncReuse(shared_ptr<void> const & loaded_res);
 
 		void AddLoadedResource(ResLoadingDescPtr const & res_desc, shared_ptr<void> const & res);

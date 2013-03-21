@@ -436,6 +436,10 @@ namespace KlayGE
 			else
 			{
 				res = res_desc->CloneResourceFrom(loaded_res);
+				if (res != loaded_res)
+				{
+					this->AddLoadedResource(res_desc, res);
+				}
 			}
 		}
 
@@ -465,7 +469,7 @@ namespace KlayGE
 
 			if (found)
 			{
-				return bind(&ResLoader::ASyncFuncClone, this, res_desc, async_is_done);
+				return bind(&ResLoader::ASyncFuncCreate, this, res_desc, async_is_done);
 			}
 			else
 			{
@@ -494,27 +498,16 @@ namespace KlayGE
 			else
 			{
 				res = res_desc->CloneResourceFrom(loaded_res);
+				if (res != loaded_res)
+				{
+					this->AddLoadedResource(res_desc, res);
+				}
 			}
 			return bind(&ResLoader::ASyncFuncReuse, this, loaded_res);
 		}
 	}
 
 	shared_ptr<void> ResLoader::ASyncFuncCreate(ResLoadingDescPtr const & res_desc, shared_ptr<volatile bool> const & is_done)
-	{
-		if (*is_done)
-		{
-			shared_ptr<void> res = res_desc->MainThreadStage();
-			this->AddLoadedResource(res_desc, res);
-			return res;
-		}
-		else
-		{
-			static shared_ptr<void> null_ret;
-			return null_ret;
-		}
-	}
-
-	shared_ptr<void> ResLoader::ASyncFuncClone(ResLoadingDescPtr const & res_desc, shared_ptr<volatile bool> const & is_done)
 	{
 		if (*is_done)
 		{
@@ -534,6 +527,10 @@ namespace KlayGE
 				else
 				{
 					res = res_desc->CloneResourceFrom(loaded_res);
+					if (res != loaded_res)
+					{
+						this->AddLoadedResource(res_desc, res);
+					}
 				}
 			}
 			return res;

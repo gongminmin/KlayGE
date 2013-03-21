@@ -49,7 +49,7 @@ private:
 	int id_wireframe_;
 	int id_ctrl_camera_;
 
-	int loading_percentage_;
+	uint32_t loading_percentage_;
 };
 
 #endif		// _DETAILEDSURFACE_HPP

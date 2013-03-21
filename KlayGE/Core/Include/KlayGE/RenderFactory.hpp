@@ -60,8 +60,6 @@ namespace KlayGE
 			ElementFormat format, uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint, ElementInitData const * init_data) = 0;
 		virtual FrameBufferPtr MakeFrameBuffer() = 0;
 
-		RenderEffectPtr LoadEffect(std::string const & effectName, std::pair<std::string, std::string>* macros = nullptr);
-
 		virtual RenderLayoutPtr MakeRenderLayout() = 0;
 
 		virtual GraphicsBufferPtr MakeVertexBuffer(BufferUsage usage, uint32_t access_hint, ElementInitData const * init_data, ElementFormat fmt = EF_Unknown) = 0;
@@ -111,7 +109,6 @@ namespace KlayGE
 	protected:
 		RenderEnginePtr re_;
 
-		std::map<std::pair<std::string, std::pair<std::string, std::string>* >, std::vector<RenderEffectPtr> > effect_pool_;
 		std::map<RasterizerStateDesc, RasterizerStateObjectPtr> rs_pool_;
 		std::map<DepthStencilStateDesc, DepthStencilStateObjectPtr> dss_pool_;
 		std::map<BlendStateDesc, BlendStateObjectPtr> bs_pool_;

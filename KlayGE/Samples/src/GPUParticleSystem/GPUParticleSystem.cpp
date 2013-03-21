@@ -158,7 +158,7 @@ namespace
 
 			rl_ = rf.MakeRenderLayout();
 
-			RenderEffectPtr effect = rf.LoadEffect("GPUParticleSystem.fxml");
+			RenderEffectPtr effect = SyncLoadRenderEffect("GPUParticleSystem.fxml");
 			*(effect->ParameterByName("particle_tex")) = ASyncLoadTexture("particle.dds", EAH_GPU_Read | EAH_Immutable);
 			if (use_gs)
 			{
@@ -293,7 +293,7 @@ namespace
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 			RenderEngine& re = rf.RenderEngineInstance();
 
-			RenderEffectPtr effect = rf.LoadEffect("GPUParticleSystem.fxml");
+			RenderEffectPtr effect = SyncLoadRenderEffect("GPUParticleSystem.fxml");
 			if (use_so)
 			{
 				rl_ = rf.MakeRenderLayout();
@@ -652,7 +652,7 @@ namespace
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-			technique_ = rf.LoadEffect("Terrain.fxml")->TechniqueByName("Terrain");
+			technique_ = SyncLoadRenderEffect("Terrain.fxml")->TechniqueByName("Terrain");
 			*(technique_->Effect().ParameterByName("grass_tex")) = ASyncLoadTexture("grass.dds", EAH_GPU_Read | EAH_Immutable);
 
 			RenderEngine& re = rf.RenderEngineInstance();

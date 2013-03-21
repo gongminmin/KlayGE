@@ -38,7 +38,7 @@ namespace
 		RenderPolygon(RenderModelPtr const & model, std::wstring const & name)
 			: StaticMesh(model, name)
 		{
-			technique_ = Context::Instance().RenderFactoryInstance().LoadEffect("ProceduralTex.fxml")->TechniqueByName("ProceduralMarbleTex");
+			technique_ = SyncLoadRenderEffect("ProceduralTex.fxml")->TechniqueByName("ProceduralMarbleTex");
 		}
 
 		void BuildMeshInfo()

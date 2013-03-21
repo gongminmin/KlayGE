@@ -37,8 +37,7 @@ namespace KlayGE
 		params_.push_back(std::make_pair("depth_clip", RenderEffectParameterPtr()));
 		params_.push_back(std::make_pair("cutoff_decay_weight", RenderEffectParameterPtr()));
 
-		RenderFactory & rf = Context::Instance().RenderFactoryInstance();
-		RenderEffectPtr effect = rf.LoadEffect("LightShaft.fxml");
+		RenderEffectPtr effect = SyncLoadRenderEffect("LightShaft.fxml");
 		this->Technique(effect->TechniqueByName("ApplyLightShaft"));
 
 		ResIdentifierPtr res = ResLoader::Instance().Open("LightShaft.ppml");

@@ -45,9 +45,7 @@ namespace
 		FlagRenderable(int length_segs, int width_segs)
 			: RenderablePlane(static_cast<float>(LENGTH), static_cast<float>(WIDTH), length_segs, width_segs, true)
 		{
-			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-
-			technique_ = rf.LoadEffect("VertexDisplacement.fxml")->TechniqueByName("VertexDisplacement");
+			technique_ = SyncLoadRenderEffect("VertexDisplacement.fxml")->TechniqueByName("VertexDisplacement");
 
 			*(technique_->Effect().ParameterByName("flag_tex")) = ASyncLoadTexture("powered_by_klayge.dds", EAH_GPU_Read | EAH_Immutable);
 			*(technique_->Effect().ParameterByName("half_length")) = LENGTH / 2.0f;

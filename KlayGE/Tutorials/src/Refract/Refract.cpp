@@ -45,9 +45,7 @@ namespace
 		RefractorRenderable(RenderModelPtr model, std::wstring const & /*name*/)
 			: StaticMesh(model, L"Refractor")
 		{
-			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-
-			RenderEffectPtr effect = rf.LoadEffect("Refract.fxml");
+			RenderEffectPtr effect = SyncLoadRenderEffect("Refract.fxml");
 			front_face_tech_ = effect->TechniqueByName("Refract");
 			back_face_tech_ = effect->TechniqueByName("RefractBackFace");
 			back_face_depth_tech_ = effect->TechniqueByName("RefractBackFaceDepth");

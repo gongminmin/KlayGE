@@ -66,7 +66,7 @@ namespace KlayGE
 		GraphicsBufferPtr ib = rf.MakeIndexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, &init_data);
 		rl_->BindIndexStream(ib, EF_R32UI);
 
-		technique_ = rf.LoadEffect("LensFlare.fxml")->TechniqueByName("LensFlare");
+		technique_ = SyncLoadRenderEffect("LensFlare.fxml")->TechniqueByName("LensFlare");
 
 		effect_attrs_ |= EA_SimpleForward;
 	}

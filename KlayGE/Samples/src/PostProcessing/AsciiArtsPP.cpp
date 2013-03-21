@@ -224,7 +224,7 @@ AsciiArtsPostProcess::AsciiArtsPostProcess()
 			std::vector<std::string>(),
 			std::vector<std::string>(1, "src_tex"),
 			std::vector<std::string>(1, "output"),
-			Context::Instance().RenderFactoryInstance().LoadEffect("AsciiArtsPP.fxml")->TechniqueByName("AsciiArts"))
+			SyncLoadRenderEffect("AsciiArtsPP.fxml")->TechniqueByName("AsciiArts"))
 {
 	ascii_lums_builder builder(INPUT_NUM_ASCII, OUTPUT_NUM_ASCII, ASCII_WIDTH, ASCII_HEIGHT);
 

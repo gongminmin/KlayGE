@@ -40,7 +40,7 @@ namespace
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-			this->BindDeferredEffect(rf.LoadEffect("MVUtil.fxml"));
+			this->BindDeferredEffect(SyncLoadRenderEffect("MVUtil.fxml"));
 			mvp_ep_ = deferred_effect_->ParameterByName("mvp");
 			depth_tech_ = deferred_effect_->TechniqueByName("AxisDepthTech");
 			gbuffer_rt0_tech_ = deferred_effect_->TechniqueByName("AxisRT0Tech");
@@ -87,7 +87,7 @@ namespace
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-			this->BindDeferredEffect(rf.LoadEffect("MVUtil.fxml"));
+			this->BindDeferredEffect(SyncLoadRenderEffect("MVUtil.fxml"));
 			mvp_ep_ = deferred_effect_->ParameterByName("mvp");
 			depth_tech_ = deferred_effect_->TechniqueByName("GridDepthTech");
 			gbuffer_rt0_tech_ = deferred_effect_->TechniqueByName("GridRT0Tech");

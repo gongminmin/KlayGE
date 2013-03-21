@@ -492,7 +492,7 @@ namespace KlayGE
 			KLAYGE_FOREACH(CBuffersSecondType::const_reference param_index, cbuff.second)
 			{
 				RenderEffectParameter& param = *effect.ParameterByIndex(param_index);
-				switch (param.type())
+				switch (param.Type())
 				{
 				case REDT_texture1D:
 				case REDT_texture2D:
@@ -519,7 +519,7 @@ namespace KlayGE
 					break;
 
 				default:
-					ss << effect.TypeName(param.type()) << " " << *param.Name();
+					ss << effect.TypeName(param.Type()) << " " << *param.Name();
 					if (param.ArraySize())
 					{
 						ss << "[" << *param.ArraySize() << "]";
@@ -537,12 +537,12 @@ namespace KlayGE
 		{
 			RenderEffectParameter& param = *effect.ParameterByIndex(i);
 
-			switch (param.type())
+			switch (param.Type())
 			{
 			case REDT_texture1D:
 				{
 					std::string elem_type;
-					param.var()->Value(elem_type);
+					param.Var()->Value(elem_type);
 					ss << "Texture1D<" << elem_type << "> " << *param.Name() << ";" << std::endl;
 				}
 				break;
@@ -550,7 +550,7 @@ namespace KlayGE
 			case REDT_texture2D:
 				{
 					std::string elem_type;
-					param.var()->Value(elem_type);
+					param.Var()->Value(elem_type);
 					ss << "Texture2D<" << elem_type << "> " << *param.Name() << ";" << std::endl;
 				}
 				break;
@@ -558,7 +558,7 @@ namespace KlayGE
 			case REDT_texture3D:
 				{
 					std::string elem_type;
-					param.var()->Value(elem_type);
+					param.Var()->Value(elem_type);
 					ss << "Texture3D<" << elem_type << "> " << *param.Name() << ";" << std::endl;
 				}
 				break;
@@ -566,7 +566,7 @@ namespace KlayGE
 			case REDT_textureCUBE:
 				{
 					std::string elem_type;
-					param.var()->Value(elem_type);
+					param.Var()->Value(elem_type);
 					ss << "TextureCube<" << elem_type << "> " << *param.Name() << ";" << std::endl;
 				}
 				break;
@@ -575,7 +575,7 @@ namespace KlayGE
 				if (caps.max_shader_model >= 4)
 				{
 					std::string elem_type;
-					param.var()->Value(elem_type);
+					param.Var()->Value(elem_type);
 					ss << "Texture1DArray<" << elem_type << "> " << *param.Name() << ";" << std::endl;
 				}
 				break;
@@ -584,7 +584,7 @@ namespace KlayGE
 				if (caps.max_shader_model >= 4)
 				{
 					std::string elem_type;
-					param.var()->Value(elem_type);
+					param.Var()->Value(elem_type);
 					ss << "Texture2DArray<" << elem_type << "> " << *param.Name() << ";" << std::endl;
 				}
 				break;
@@ -593,7 +593,7 @@ namespace KlayGE
 				if (caps.max_shader_model >= 4)
 				{
 					std::string elem_type;
-					param.var()->Value(elem_type);
+					param.Var()->Value(elem_type);
 					ss << "TextureCubeArray<" << elem_type << "> " << *param.Name() << ";" << std::endl;
 				}
 				break;
@@ -602,7 +602,7 @@ namespace KlayGE
 				if (caps.max_shader_model >= 4)
 				{
 					std::string elem_type;
-					param.var()->Value(elem_type);
+					param.Var()->Value(elem_type);
 					ss << "Buffer<" << elem_type << "> " << *param.Name() << ";" << std::endl;
 				}
 				break;
@@ -615,7 +615,7 @@ namespace KlayGE
 				if (caps.max_shader_model >= 4)
 				{
 					std::string elem_type;
-					param.var()->Value(elem_type);
+					param.Var()->Value(elem_type);
 					ss << "StructuredBuffer<" << elem_type << "> " << *param.Name() << ";" << std::endl;
 				}
 				break;
@@ -631,7 +631,7 @@ namespace KlayGE
 				if (caps.max_shader_model >= 5)
 				{
 					std::string elem_type;
-					param.var()->Value(elem_type);
+					param.Var()->Value(elem_type);
 					ss << "RWBuffer<" << elem_type << "> " << *param.Name() << ";" << std::endl;
 				}
 				break;
@@ -640,7 +640,7 @@ namespace KlayGE
 				if (caps.max_shader_model >= 4)
 				{
 					std::string elem_type;
-					param.var()->Value(elem_type);
+					param.Var()->Value(elem_type);
 					ss << "RWStructuredBuffer<" << elem_type << "> " << *param.Name() << ";" << std::endl;
 				}
 				break;
@@ -649,7 +649,7 @@ namespace KlayGE
 				if (caps.max_shader_model >= 5)
 				{
 					std::string elem_type;
-					param.var()->Value(elem_type);
+					param.Var()->Value(elem_type);
 					ss << "RWTexture1D<" << elem_type << "> " << *param.Name() << ";" << std::endl;
 				}
 				break;
@@ -658,7 +658,7 @@ namespace KlayGE
 				if (caps.max_shader_model >= 5)
 				{
 					std::string elem_type;
-					param.var()->Value(elem_type);
+					param.Var()->Value(elem_type);
 					ss << "RWTexture2D<" << elem_type << "> " << *param.Name() << ";" << std::endl;
 				}
 				break;
@@ -667,7 +667,7 @@ namespace KlayGE
 				if (caps.max_shader_model >= 5)
 				{
 					std::string elem_type;
-					param.var()->Value(elem_type);
+					param.Var()->Value(elem_type);
 					ss << "RWTexture3D<" << elem_type << "> " << *param.Name() << ";" << std::endl;
 				}
 				break;
@@ -675,7 +675,7 @@ namespace KlayGE
 				if (caps.max_shader_model >= 5)
 				{
 					std::string elem_type;
-					param.var()->Value(elem_type);
+					param.Var()->Value(elem_type);
 					ss << "RWTexture1DArray<" << elem_type << "> " << *param.Name() << ";" << std::endl;
 				}
 				break;
@@ -684,7 +684,7 @@ namespace KlayGE
 				if (caps.max_shader_model >= 5)
 				{
 					std::string elem_type;
-					param.var()->Value(elem_type);
+					param.Var()->Value(elem_type);
 					ss << "RWTexture2DArray<" << elem_type << "> " << *param.Name() << ";" << std::endl;
 				}
 				break;
@@ -700,7 +700,7 @@ namespace KlayGE
 				if (caps.max_shader_model >= 5)
 				{
 					std::string elem_type;
-					param.var()->Value(elem_type);
+					param.Var()->Value(elem_type);
 					ss << "AppendStructuredBuffer<" << elem_type << "> " << *param.Name() << ";" << std::endl;
 				}
 				break;
@@ -709,7 +709,7 @@ namespace KlayGE
 				if (caps.max_shader_model >= 5)
 				{
 					std::string elem_type;
-					param.var()->Value(elem_type);
+					param.Var()->Value(elem_type);
 					ss << "ConsumeStructuredBuffer<" << elem_type << "> " << *param.Name() << ";" << std::endl;
 				}
 				break;
@@ -1938,7 +1938,7 @@ namespace KlayGE
 		ret.param = param;
 		std::memcpy(&ret.p_handle, &p_handle, sizeof(p_handle));
 
-		switch (param->type())
+		switch (param->Type())
 		{
 		case REDT_bool:
 			if (param->ArraySize())

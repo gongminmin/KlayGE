@@ -171,9 +171,7 @@ namespace
 			: StaticMesh(model, name),
 				detail_type_(DT_Parallax), wireframe_(false)
 		{
-			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-
-			technique_ = rf.LoadEffect("DetailedSurface.fxml")->TechniqueByName("Parallax");
+			technique_ = SyncLoadRenderEffect("DetailedSurface.fxml")->TechniqueByName("Parallax");
 
 			tile_bb_[0] = int4(0, 0, 4, 4);
 			tile_bb_[1] = int4(4, 0, 4, 4);

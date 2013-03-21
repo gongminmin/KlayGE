@@ -49,7 +49,7 @@ namespace KlayGE
 	{
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-		RenderEffectPtr effect = rf.LoadEffect("SkyBox.fxml");
+		RenderEffectPtr effect = SyncLoadRenderEffect("SkyBox.fxml");
 		if (deferred_effect_)
 		{
 			this->BindDeferredEffect(effect);

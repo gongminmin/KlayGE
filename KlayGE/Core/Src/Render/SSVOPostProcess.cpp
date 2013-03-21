@@ -16,7 +16,7 @@ namespace KlayGE
 
 		output_pins_.push_back(std::make_pair("out_tex", TexturePtr()));
 
-		this->Technique(Context::Instance().RenderFactoryInstance().LoadEffect("SSVO.fxml")->TechniqueByName("SSVO"));
+		this->Technique(SyncLoadRenderEffect("SSVO.fxml")->TechniqueByName("SSVO"));
 
 		depth_near_far_invfar_param_ = technique_->Effect().ParameterByName("depth_near_far_invfar");
 		proj_param_ = technique_->Effect().ParameterByName("proj");

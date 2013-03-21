@@ -45,7 +45,7 @@ namespace
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-			technique_ = rf.LoadEffect("Fractal.fxml")->TechniqueByName("Mandelbrot");
+			technique_ = SyncLoadRenderEffect("Fractal.fxml")->TechniqueByName("Mandelbrot");
 
 			float2 pos[] =
 			{

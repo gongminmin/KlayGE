@@ -130,6 +130,7 @@ namespace
 				model->Mesh(i)->BuildMeshInfo();
 			}
 
+			model_desc_.model_data.reset();
 			return static_pointer_cast<void>(model);
 		}
 
@@ -1872,7 +1873,7 @@ namespace KlayGE
 	RenderableLightSourceProxy::RenderableLightSourceProxy(RenderModelPtr const & model, std::wstring const & name)
 			: StaticMesh(model, name)
 	{
-		RenderEffectPtr effect = Context::Instance().RenderFactoryInstance().LoadEffect("LightSourceProxy.fxml");
+		RenderEffectPtr effect = SyncLoadRenderEffect("LightSourceProxy.fxml");
 
 		if (deferred_effect_)
 		{

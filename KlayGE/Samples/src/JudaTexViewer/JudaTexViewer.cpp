@@ -52,7 +52,7 @@ namespace
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-			technique_ = rf.LoadEffect("JudaTexViewer.fxml")->TechniqueByName("Render");
+			technique_ = SyncLoadRenderEffect("JudaTexViewer.fxml")->TechniqueByName("Render");
 
 			float2 texs[] =
 			{
@@ -147,7 +147,7 @@ namespace
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-			technique_ = rf.LoadEffect("JudaTexViewer.fxml")->TechniqueByName("GridBorder");
+			technique_ = SyncLoadRenderEffect("JudaTexViewer.fxml")->TechniqueByName("GridBorder");
 
 			float2 texs[] =
 			{

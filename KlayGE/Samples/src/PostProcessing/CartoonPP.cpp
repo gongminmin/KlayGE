@@ -15,7 +15,7 @@ CartoonPostProcess::CartoonPostProcess()
 	input_pins_.push_back(std::make_pair("depth_tex", TexturePtr()));
 	input_pins_.push_back(std::make_pair("color_tex", TexturePtr()));
 
-	this->Technique(Context::Instance().RenderFactoryInstance().LoadEffect("CartoonPP.fxml")->TechniqueByName("Cartoon"));
+	this->Technique(SyncLoadRenderEffect("CartoonPP.fxml")->TechniqueByName("Cartoon"));
 }
 
 void CartoonPostProcess::InputPin(uint32_t index, TexturePtr const & tex)

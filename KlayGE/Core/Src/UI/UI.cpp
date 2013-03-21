@@ -273,8 +273,7 @@ namespace KlayGE
 
 	UIManager::UIManager()
 	{
-		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-		effect_ = rf.LoadEffect("UI.fxml");
+		effect_ = SyncLoadRenderEffect("UI.fxml");
 
 		elem_texture_rcs_[UICT_Button].push_back(Rect_T<int32_t>(0, 0, 136, 54));
 		elem_texture_rcs_[UICT_Button].push_back(Rect_T<int32_t>(136, 0, 252, 54));

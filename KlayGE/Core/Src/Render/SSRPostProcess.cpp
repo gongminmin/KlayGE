@@ -20,8 +20,7 @@ namespace KlayGE
 		params_.push_back(std::make_pair("min_samples", RenderEffectParameterPtr()));
 		params_.push_back(std::make_pair("max_samples", RenderEffectParameterPtr()));
 
-		RenderFactory & rf = Context::Instance().RenderFactoryInstance();
-		RenderEffectPtr effect = rf.LoadEffect("SSR.fxml");
+		RenderEffectPtr effect = SyncLoadRenderEffect("SSR.fxml");
 		this->Technique(effect->TechniqueByName("ScreenSpaceReflectionPostProcess"));
 
 		if (technique_ && technique_->Validate())

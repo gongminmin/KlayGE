@@ -61,7 +61,7 @@ namespace KlayGE
 	{
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-		RenderEffectPtr effect = rf.LoadEffect("OceanSimulator.fxml");
+		RenderEffectPtr effect = SyncLoadRenderEffect("OceanSimulator.fxml");
 		update_spectrum_tech_ = effect->TechniqueByName("UpdateSpectrum");
 		update_displacement_tech_ = effect->TechniqueByName("UpdateDisplacement");
 		gen_gradient_folding_tech_ = effect->TechniqueByName("GenGradientFolding");

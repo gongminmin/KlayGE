@@ -33,8 +33,7 @@ public:
 
 	void InitObjects()
 	{
-		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-		RenderEffectPtr effect = rf.LoadEffect(fxml_name);
+		RenderEffectPtr effect = SyncLoadRenderEffect(fxml_name);
 
 		ofstream ofs((fxml_name + ".shader").c_str(), std::ios_base::binary);
 		ofs << "#define CONSTANT_BUFFER" << "\r\n";
@@ -63,7 +62,7 @@ public:
 			KLAYGE_FOREACH(CBuffersSecondType::const_reference param_index, cbuff.second)
 			{
 				RenderEffectParameter& param = *(effect->ParameterByIndex(param_index));
-				switch (param.type())
+				switch (param.Type())
 				{
 				case REDT_texture1D:
 				case REDT_texture2D:
@@ -90,7 +89,7 @@ public:
 					break;
 
 				default:
-					ofs << "\t" << effect->TypeName(param.type()) << " " << *param.Name();
+					ofs << "\t" << effect->TypeName(param.Type()) << " " << *param.Name();
 					if (param.ArraySize())
 					{
 						ofs << "[" << *param.ArraySize() << "]";
@@ -107,12 +106,12 @@ public:
 		{
 			RenderEffectParameter& param = *(effect->ParameterByIndex(i));
 
-			switch (param.type())
+			switch (param.Type())
 			{
 			case REDT_texture1D:
 				{
 					std::string elem_type;
-					param.var()->Value(elem_type);
+					param.Var()->Value(elem_type);
 					ofs << "Texture1D<" << elem_type << "> " << *param.Name() << ";" << "\r\n";
 				}
 				break;
@@ -120,7 +119,7 @@ public:
 			case REDT_texture2D:
 				{
 					std::string elem_type;
-					param.var()->Value(elem_type);
+					param.Var()->Value(elem_type);
 					ofs << "Texture2D<" << elem_type << "> " << *param.Name() << ";" << "\r\n";
 				}
 				break;
@@ -128,7 +127,7 @@ public:
 			case REDT_texture3D:
 				{
 					std::string elem_type;
-					param.var()->Value(elem_type);
+					param.Var()->Value(elem_type);
 					ofs << "Texture3D<" << elem_type << "> " << *param.Name() << ";" << "\r\n";
 				}
 				break;
@@ -136,7 +135,7 @@ public:
 			case REDT_textureCUBE:
 				{
 					std::string elem_type;
-					param.var()->Value(elem_type);
+					param.Var()->Value(elem_type);
 					ofs << "TextureCube<" << elem_type << "> " << *param.Name() << ";" << "\r\n";
 				}
 				break;
@@ -144,7 +143,7 @@ public:
 			case REDT_texture1DArray:
 				{
 					std::string elem_type;
-					param.var()->Value(elem_type);
+					param.Var()->Value(elem_type);
 					ofs << "Texture1DArray<" << elem_type << "> " << *param.Name() << ";" << "\r\n";
 				}
 				break;
@@ -152,7 +151,7 @@ public:
 			case REDT_texture2DArray:
 				{
 					std::string elem_type;
-					param.var()->Value(elem_type);
+					param.Var()->Value(elem_type);
 					ofs << "Texture2DArray<" << elem_type << "> " << *param.Name() << ";" << "\r\n";
 				}
 				break;
@@ -160,7 +159,7 @@ public:
 			case REDT_textureCUBEArray:
 				{
 					std::string elem_type;
-					param.var()->Value(elem_type);
+					param.Var()->Value(elem_type);
 					ofs << "TextureCubeArray<" << elem_type << "> " << *param.Name() << ";" << "\r\n";
 				}
 				break;
@@ -168,7 +167,7 @@ public:
 			case REDT_buffer:
 				{
 					std::string elem_type;
-					param.var()->Value(elem_type);
+					param.Var()->Value(elem_type);
 					ofs << "Buffer<" << elem_type << "> " << *param.Name() << ";" << "\r\n";
 				}
 				break;
@@ -180,7 +179,7 @@ public:
 			case REDT_structured_buffer:
 				{
 					std::string elem_type;
-					param.var()->Value(elem_type);
+					param.Var()->Value(elem_type);
 					ofs << "StructuredBuffer<" << elem_type << "> " << *param.Name() << ";" << "\r\n";
 				}
 				break;
@@ -194,7 +193,7 @@ public:
 			case REDT_rw_buffer:
 				{
 					std::string elem_type;
-					param.var()->Value(elem_type);
+					param.Var()->Value(elem_type);
 					ofs << "RWBuffer<" << elem_type << "> " << *param.Name() << ";" << "\r\n";
 				}
 				break;
@@ -202,7 +201,7 @@ public:
 			case REDT_rw_structured_buffer:
 				{
 					std::string elem_type;
-					param.var()->Value(elem_type);
+					param.Var()->Value(elem_type);
 					ofs << "RWStructuredBuffer<" << elem_type << "> " << *param.Name() << ";" << "\r\n";
 				}
 				break;
@@ -210,7 +209,7 @@ public:
 			case REDT_rw_texture1D:
 				{
 					std::string elem_type;
-					param.var()->Value(elem_type);
+					param.Var()->Value(elem_type);
 					ofs << "RWTexture1D<" << elem_type << "> " << *param.Name() << ";" << "\r\n";
 				}
 				break;
@@ -218,7 +217,7 @@ public:
 			case REDT_rw_texture2D:
 				{
 					std::string elem_type;
-					param.var()->Value(elem_type);
+					param.Var()->Value(elem_type);
 					ofs << "RWTexture2D<" << elem_type << "> " << *param.Name() << ";" << "\r\n";
 				}
 				break;
@@ -226,14 +225,14 @@ public:
 			case REDT_rw_texture3D:
 				{
 					std::string elem_type;
-					param.var()->Value(elem_type);
+					param.Var()->Value(elem_type);
 					ofs << "RWTexture3D<" << elem_type << "> " << *param.Name() << ";" << "\r\n";
 				}
 				break;
 			case REDT_rw_texture1DArray:
 				{
 					std::string elem_type;
-					param.var()->Value(elem_type);
+					param.Var()->Value(elem_type);
 					ofs << "RWTexture1DArray<" << elem_type << "> " << *param.Name() << ";" << "\r\n";
 				}
 				break;
@@ -241,7 +240,7 @@ public:
 			case REDT_rw_texture2DArray:
 				{
 					std::string elem_type;
-					param.var()->Value(elem_type);
+					param.Var()->Value(elem_type);
 					ofs << "RWTexture2DArray<" << elem_type << "> " << *param.Name() << ";" << "\r\n";
 				}
 				break;
@@ -255,7 +254,7 @@ public:
 			case REDT_append_structured_buffer:
 				{
 					std::string elem_type;
-					param.var()->Value(elem_type);
+					param.Var()->Value(elem_type);
 					ofs << "AppendStructuredBuffer<" << elem_type << "> " << *param.Name() << ";" << "\r\n";
 				}
 				break;
@@ -263,7 +262,7 @@ public:
 			case REDT_consume_structured_buffer:
 				{
 					std::string elem_type;
-					param.var()->Value(elem_type);
+					param.Var()->Value(elem_type);
 					ofs << "ConsumeStructuredBuffer<" << elem_type << "> " << *param.Name() << ";" << "\r\n";
 				}
 				break;

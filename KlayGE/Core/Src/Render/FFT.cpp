@@ -241,7 +241,7 @@ namespace KlayGE
 
 		tex_fb_ = rf.MakeFrameBuffer();
 
-		effect_ = rf.LoadEffect("FFT.fxml");
+		effect_ = SyncLoadRenderEffect("FFT.fxml");
 		buf2tex_tech_ = effect_->TechniqueByName("Buf2Tex");
 		radix008a_tech_ = effect_->TechniqueByName("FFTRadix008A4");
 		radix008a_first_tech_ = effect_->TechniqueByName("FFTRadix008AFirst4");
@@ -394,7 +394,7 @@ namespace KlayGE
 		tmp_real_tex_[1] = rf.MakeTexture2D(width, height, 1, 1, EF_ABGR32F, 1, 0, EAH_GPU_Read | EAH_GPU_Unordered, nullptr);
 		tmp_imag_tex_[1] = rf.MakeTexture2D(width, height, 1, 1, EF_ABGR32F, 1, 0, EAH_GPU_Read | EAH_GPU_Unordered, nullptr);
 
-		effect_ = rf.LoadEffect("FFT.fxml");
+		effect_ = SyncLoadRenderEffect("FFT.fxml");
 		radix008a_tech_ = effect_->TechniqueByName("FFTRadix008A5");
 		radix008a_final_x_tech_ = effect_->TechniqueByName("FFTRadix008AFinalX5");
 		radix008a_final_y_tech_ = effect_->TechniqueByName("FFTRadix008AFinalY5");

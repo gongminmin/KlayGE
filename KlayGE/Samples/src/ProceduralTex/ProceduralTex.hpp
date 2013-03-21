@@ -43,7 +43,7 @@ private:
 	int id_freq_slider_;
 	int id_ctrl_camera_;
 
-	int loading_percentage_;
+	uint32_t loading_percentage_;
 };
 
 #endif		// _PARALLAX_HPP

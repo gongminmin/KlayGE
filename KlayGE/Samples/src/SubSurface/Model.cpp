@@ -21,7 +21,7 @@ using namespace KlayGE;
 DetailedMesh::DetailedMesh(RenderModelPtr const & model, std::wstring const & name)
 	: StaticMesh(model, name)
 {
-	technique_ = Context::Instance().RenderFactoryInstance().LoadEffect("SubSurface.fxml")->TechniqueByName("SubSurfaceTech");
+	technique_ = SyncLoadRenderEffect("SubSurface.fxml")->TechniqueByName("SubSurfaceTech");
 }
 
 void DetailedMesh::BuildMeshInfo()

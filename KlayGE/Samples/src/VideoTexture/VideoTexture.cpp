@@ -41,9 +41,7 @@ namespace
 		RenderTeapot(RenderModelPtr model, std::wstring const & /*name*/)
 			: StaticMesh(model, L"Teapot")
 		{
-			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-
-			technique_ = rf.LoadEffect("VideoTexture.fxml")->TechniqueByName("Object");
+			technique_ = SyncLoadRenderEffect("VideoTexture.fxml")->TechniqueByName("Object");
 		}
 
 		void BuildMeshInfo()

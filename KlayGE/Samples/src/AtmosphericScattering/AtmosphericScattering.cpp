@@ -35,8 +35,7 @@ namespace
 		PlanetMesh(RenderModelPtr const & model, std::wstring const & name)
 			: StaticMesh(model, name)
 		{
-			RenderFactory & rf = Context::Instance().RenderFactoryInstance();
-			RenderEffectPtr effect = rf.LoadEffect("AtmosphericScattering.fxml");
+			RenderEffectPtr effect = SyncLoadRenderEffect("AtmosphericScattering.fxml");
 			technique_ = effect->TechniqueByName("PlanetTech");
 		}
 
@@ -78,8 +77,7 @@ namespace
 		AtmosphereMesh(RenderModelPtr const & model, std::wstring const & name)
 			: StaticMesh(model, name)
 		{
-			RenderFactory & rf = Context::Instance().RenderFactoryInstance();
-			RenderEffectPtr effect = rf.LoadEffect("AtmosphericScattering.fxml");
+			RenderEffectPtr effect = SyncLoadRenderEffect("AtmosphericScattering.fxml");
 			technique_ = effect->TechniqueByName("AtmosphereTech");
 		}
 

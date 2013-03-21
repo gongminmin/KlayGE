@@ -739,7 +739,9 @@ namespace
 
 		shared_ptr<void> MainThreadStage()
 		{
-			return static_pointer_cast<void>(this->CreateTexture());
+			shared_ptr<void> ret = static_pointer_cast<void>(this->CreateTexture());
+			tex_desc_.tex_data.reset();
+			return ret;
 		}
 
 		bool HasSubThreadStage() const

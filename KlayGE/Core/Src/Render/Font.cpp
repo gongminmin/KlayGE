@@ -113,7 +113,7 @@ namespace KlayGE
 
 			char_free_list_.push_back(std::make_pair(0, size * size / kfont_char_size / kfont_char_size));
 
-			effect_ = rf.LoadEffect("Font.fxml");
+			effect_ = SyncLoadRenderEffect("Font.fxml");
 			*(effect_->ParameterByName("distance_tex")) = dist_texture_;
 			*(effect_->ParameterByName("distance_base_scale")) = float2(kfont_loader_->DistBase() / 32768.0f * 32 + 1, (kfont_loader_->DistScale() / 32768.0f + 1.0f) * 32);
 
@@ -897,6 +897,7 @@ namespace KlayGE
 			font_obj->AddToSceneManager();
 		}
 	}
+
 
 	FontPtr SyncLoadFont(std::string const & font_name, uint32_t flags)
 	{

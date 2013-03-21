@@ -674,12 +674,12 @@ namespace KlayGE
 
 		RenderEffectParameterPtr Clone(RenderEffect& effect);
 
-		uint32_t type() const
+		uint32_t Type() const
 		{
 			return type_;
 		}
 
-		RenderVariablePtr const & var() const
+		RenderVariablePtr const & Var() const
 		{
 			return var_;
 		}
@@ -733,6 +733,11 @@ namespace KlayGE
 
 		shared_ptr<std::vector<RenderEffectAnnotationPtr> > annotations_;
 	};
+
+	KLAYGE_CORE_API RenderEffectPtr SyncLoadRenderEffect(std::string const & effect_name,
+		std::pair<std::string, std::string>* macros = nullptr);
+	KLAYGE_CORE_API function<RenderEffectPtr()> ASyncLoadRenderEffect(std::string const & effect_name,
+		std::pair<std::string, std::string>* macros = nullptr);
 }
 
 #endif		// _RENDEREFFECT_HPP

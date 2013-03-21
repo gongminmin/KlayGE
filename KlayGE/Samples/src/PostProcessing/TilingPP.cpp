@@ -23,7 +23,7 @@ TilingPostProcess::TilingPostProcess()
 		std::vector<std::string>(),
 		std::vector<std::string>(1, "src_tex"),
 		std::vector<std::string>(1, "output"),
-		Context::Instance().RenderFactoryInstance().LoadEffect("TilingPP.fxml")->TechniqueByName("Tiling"))
+		SyncLoadRenderEffect("TilingPP.fxml")->TechniqueByName("Tiling"))
 {
 	downsampler_ = LoadPostProcess(ResLoader::Instance().Open("Copy.ppml"), "bilinear_copy");
 

@@ -64,9 +64,7 @@ namespace
 		RenderInstanceMesh(RenderModelPtr const & model, std::wstring const & /*name*/)
 			: MotionBlurRenderMesh(model, L"InstancedMesh")
 		{
-			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-
-			technique_ = rf.LoadEffect("MotionBlurDoF.fxml")->TechniqueByName("ColorDepthInstanced");
+			technique_ = SyncLoadRenderEffect("MotionBlurDoF.fxml")->TechniqueByName("ColorDepthInstanced");
 		}
 
 		void BuildMeshInfo()
@@ -121,9 +119,7 @@ namespace
 		RenderNonInstancedMesh(RenderModelPtr const & model, std::wstring const & /*name*/)
 			: MotionBlurRenderMesh(model, L"NonInstancedMesh")
 		{
-			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-
-			technique_ = rf.LoadEffect("MotionBlurDoF.fxml")->TechniqueByName("ColorDepthNonInstanced");
+			technique_ = SyncLoadRenderEffect("MotionBlurDoF.fxml")->TechniqueByName("ColorDepthNonInstanced");
 		}
 
 		void BuildMeshInfo()
@@ -275,7 +271,7 @@ namespace
 			RenderDeviceCaps const & caps = Context::Instance().RenderFactoryInstance().RenderEngineInstance().DeviceCaps();
 			cs_support_ = caps.cs_support && (caps.max_shader_model >= 5);
 
-			RenderEffectPtr effect = Context::Instance().RenderFactoryInstance().LoadEffect("DepthOfFieldPP.fxml");
+			RenderEffectPtr effect = SyncLoadRenderEffect("DepthOfFieldPP.fxml");
 			this->Technique(effect->TechniqueByName("DepthOfFieldNormalization"));
 
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
@@ -438,7 +434,7 @@ namespace
 			RenderDeviceCaps const & caps = Context::Instance().RenderFactoryInstance().RenderEngineInstance().DeviceCaps();
 			gs_support_ = (caps.max_shader_model >= 4);
 
-			RenderEffectPtr effect = Context::Instance().RenderFactoryInstance().LoadEffect("DepthOfFieldPP.fxml");
+			RenderEffectPtr effect = SyncLoadRenderEffect("DepthOfFieldPP.fxml");
 			if (gs_support_)
 			{
 				this->Technique(effect->TechniqueByName("SeparateBokeh4"));
@@ -656,7 +652,7 @@ namespace
 
 			output_pins_.push_back(std::make_pair("output", TexturePtr()));
 
-			this->Technique(Context::Instance().RenderFactoryInstance().LoadEffect("MotionBlurPP.fxml")->TechniqueByName("MotionBlur"));
+			this->Technique(SyncLoadRenderEffect("MotionBlurPP.fxml")->TechniqueByName("MotionBlur"));
 		}
 
 		void ShowMotionVector(bool show)

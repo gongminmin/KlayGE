@@ -262,7 +262,7 @@ namespace
 				ShadowMapped(SHADOW_MAP_SIZE),
 				smooth_mesh_(false), tess_factor_(5)
 		{
-			effect_ = Context::Instance().RenderFactoryInstance().LoadEffect("ShadowCubeMap.fxml");
+			effect_ = SyncLoadRenderEffect("ShadowCubeMap.fxml");
 
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 			RenderDeviceCaps const & caps = rf.RenderEngineInstance().DeviceCaps();
@@ -279,14 +279,14 @@ namespace
 		{
 			StaticMesh::BuildMeshInfo();
 
-			*(effect_->ParameterByName("diffuse_tex")) = diffuse_tex_;
-			*(effect_->ParameterByName("specular_tex")) = specular_tex_;
-			*(effect_->ParameterByName("emit_tex")) = emit_tex_;
+			*(effect_->ParameterByName("diffuse_tex")) = diffuse_tl_;
+			*(effect_->ParameterByName("specular_tex")) = specular_tl_;
+			*(effect_->ParameterByName("emit_tex")) = emit_tl_;
 
 			*(effect_->ParameterByName("ambient_clr")) = float4(mtl_->ambient.x(), mtl_->ambient.y(), mtl_->ambient.z(), 1);
-			*(effect_->ParameterByName("diffuse_clr")) = float4(mtl_->diffuse.x(), mtl_->diffuse.y(), mtl_->diffuse.z(), bool(diffuse_tex_));
-			*(effect_->ParameterByName("specular_clr")) = float4(mtl_->specular.x(), mtl_->specular.y(), mtl_->specular.z(), bool(specular_tex_));
-			*(effect_->ParameterByName("emit_clr")) = float4(mtl_->emit.x(), mtl_->emit.y(), mtl_->emit.z(), bool(emit_tex_));
+			*(effect_->ParameterByName("diffuse_clr")) = float4(mtl_->diffuse.x(), mtl_->diffuse.y(), mtl_->diffuse.z(), bool(diffuse_tl_));
+			*(effect_->ParameterByName("specular_clr")) = float4(mtl_->specular.x(), mtl_->specular.y(), mtl_->specular.z(), bool(specular_tl_));
+			*(effect_->ParameterByName("emit_clr")) = float4(mtl_->emit.x(), mtl_->emit.y(), mtl_->emit.z(), bool(emit_tl_));
 
 			*(effect_->ParameterByName("specular_level")) = mtl_->specular_level;
 			*(effect_->ParameterByName("shininess")) = std::max(1e-6f, mtl_->shininess);

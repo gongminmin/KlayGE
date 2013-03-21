@@ -101,7 +101,7 @@ namespace
 			input_pins_.push_back(std::make_pair("lighting_tex", TexturePtr()));
 			input_pins_.push_back(std::make_pair("ssvo_tex", TexturePtr()));
 
-			this->Technique(Context::Instance().RenderFactoryInstance().LoadEffect("DeferredRenderingDebug.fxml")->TechniqueByName("ShowPosition"));
+			this->Technique(SyncLoadRenderEffect("DeferredRenderingDebug.fxml")->TechniqueByName("ShowPosition"));
 		}
 
 		void ShowType(int show_type)

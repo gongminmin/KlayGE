@@ -181,8 +181,7 @@ uint32_t TutorFramework::DoUpdate(uint32_t /*pass*/)
 RenderPolygon::RenderPolygon(KlayGE::RenderModelPtr const & model, std::wstring const& name)
 	: KlayGE::StaticMesh(model, name)
 {
-	KlayGE::RenderFactory& rf = KlayGE::Context::Instance().RenderFactoryInstance();
-	KlayGE::RenderEffectPtr effect = rf.LoadEffect("RenderableHelper.fxml");
+	KlayGE::RenderEffectPtr effect = KlayGE::SyncLoadRenderEffect("RenderableHelper.fxml");
 
 	this->SetRenderTechnique(effect->TechniqueByName("HelperTec"));
 

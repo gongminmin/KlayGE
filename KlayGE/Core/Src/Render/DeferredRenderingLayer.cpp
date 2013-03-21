@@ -386,8 +386,8 @@ namespace KlayGE
 				make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F)));
 		}
 
-		g_buffer_effect_ = rf.LoadEffect("GBuffer.fxml");
-		dr_effect_ = rf.LoadEffect("DeferredRendering.fxml");
+		g_buffer_effect_ = SyncLoadRenderEffect("GBuffer.fxml");
+		dr_effect_ = SyncLoadRenderEffect("DeferredRendering.fxml");
 
 		technique_shadows_[LT_Ambient] = dr_effect_->TechniqueByName("DeferredShadowingAmbient");
 		technique_shadows_[LT_Directional] = dr_effect_->TechniqueByName("DeferredShadowingDirectional");
@@ -454,7 +454,8 @@ namespace KlayGE
 
 		ssvo_pp_ = MakeSharedPtr<SSVOPostProcess>();
 		ssvo_blur_pp_ = MakeSharedPtr<BlurPostProcess<SeparableBilateralFilterPostProcess> >(8, 1.0f,
-			rf.LoadEffect("SSVO.fxml")->TechniqueByName("SSVOBlurX"), rf.LoadEffect("SSVO.fxml")->TechniqueByName("SSVOBlurY"));
+			SyncLoadRenderEffect("SSVO.fxml")->TechniqueByName("SSVOBlurX"),
+			SyncLoadRenderEffect("SSVO.fxml")->TechniqueByName("SSVOBlurY"));
 
 		ssr_pp_ = MakeSharedPtr<SSRPostProcess>();
 

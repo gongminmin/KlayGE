@@ -93,7 +93,7 @@ namespace KlayGE
 		gbuffer_to_normal_cone_pp_ =  LoadPostProcess(ResLoader::Instance().Open("CustomMipMap.ppml"), "GBuffer2NormalCone");
 		normal_cone_mipmap_pp_ =  LoadPostProcess(ResLoader::Instance().Open("CustomMipMap.ppml"), "NormalConeMipMap");
 
-		RenderEffectPtr subsplat_stencil_effect = rf.LoadEffect("SetSubsplatStencil.fxml");
+		RenderEffectPtr subsplat_stencil_effect = SyncLoadRenderEffect("SetSubsplatStencil.fxml");
 		subsplat_stencil_tech_ = subsplat_stencil_effect->TechniqueByName("SetSubsplatStencil");
 
 		subsplat_cur_lower_level_param_ = subsplat_stencil_effect->ParameterByName("cur_lower_level");
@@ -102,7 +102,7 @@ namespace KlayGE
 		subsplat_normal_cone_tex_param_ = subsplat_stencil_effect->ParameterByName("normal_cone_tex");
 		subsplat_depth_normal_threshold_param_ = subsplat_stencil_effect->ParameterByName("depth_normal_threshold");
 
-		RenderEffectPtr vpls_lighting_effect = rf.LoadEffect("VPLsLighting.fxml");
+		RenderEffectPtr vpls_lighting_effect = SyncLoadRenderEffect("VPLsLighting.fxml");
 		vpls_lighting_instance_id_tech_ = vpls_lighting_effect->TechniqueByName("VPLsLightingInstanceID");
 		vpls_lighting_no_instance_id_tech_ = vpls_lighting_effect->TechniqueByName("VPLsLightingNoInstanceID");
 
@@ -481,11 +481,10 @@ namespace KlayGE
 
 	SSGILayer::SSGILayer()
 	{
-		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-
 		ssgi_pp_ = MakeSharedPtr<SSGIPostProcess>();
 		ssgi_blur_pp_ = MakeSharedPtr<BlurPostProcess<SeparableBilateralFilterPostProcess> >(4, 1.0f,
-			rf.LoadEffect("SSGI.fxml")->TechniqueByName("SSGIBlurX"), rf.LoadEffect("SSGI.fxml")->TechniqueByName("SSGIBlurY"));
+			SyncLoadRenderEffect("SSGI.fxml")->TechniqueByName("SSGIBlurX"),
+			SyncLoadRenderEffect("SSGI.fxml")->TechniqueByName("SSGIBlurY"));
 	}
 
 	void SSGILayer::GBuffer(TexturePtr const & rt0_tex, TexturePtr const & rt1_tex, TexturePtr const & depth_tex)

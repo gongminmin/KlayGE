@@ -661,7 +661,7 @@ namespace KlayGE
 				{
 					std::string effect_name = shader_chunk->Attrib("effect")->ValueString();
 					std::string tech_name = shader_chunk->Attrib("tech")->ValueString();
-					tech = Context::Instance().RenderFactoryInstance().LoadEffect(effect_name)->TechniqueByName(tech_name);
+					tech = SyncLoadRenderEffect(effect_name)->TechniqueByName(tech_name);
 
 					XMLAttributePtr attr = shader_chunk->Attrib("cs_data_per_thread_x");
 					if (attr)
@@ -1069,7 +1069,7 @@ namespace KlayGE
 				std::vector<std::string>(),
 				std::vector<std::string>(1, "src_tex"),
 				std::vector<std::string>(1, "output"),
-				tech ? tech : Context::Instance().RenderFactoryInstance().LoadEffect("Blur.fxml")->TechniqueByName(x_dir ? "BlurX" : "BlurY")),
+				tech ? tech : SyncLoadRenderEffect("Blur.fxml")->TechniqueByName(x_dir ? "BlurX" : "BlurY")),
 			kernel_radius_(kernel_radius), multiplier_(multiplier), x_dir_(x_dir)
 	{
 		BOOST_ASSERT((kernel_radius > 0) && (kernel_radius <= 8));
@@ -1117,7 +1117,7 @@ namespace KlayGE
 					std::vector<std::string>(),
 					std::vector<std::string>(1, "src_tex"),
 					std::vector<std::string>(1, "output"),
-					tech ? tech : Context::Instance().RenderFactoryInstance().LoadEffect("Blur.fxml")->TechniqueByName(x_dir ? "BlurX" : "BlurY")),
+					tech ? tech : SyncLoadRenderEffect("Blur.fxml")->TechniqueByName(x_dir ? "BlurX" : "BlurY")),
 				kernel_radius_(kernel_radius), multiplier_(multiplier), x_dir_(x_dir)
 	{
 		BOOST_ASSERT((kernel_radius > 0) && (kernel_radius <= 8));
@@ -1202,7 +1202,7 @@ namespace KlayGE
 
 		output_pins_.push_back(std::make_pair("out_tex", TexturePtr()));
 
-		this->Technique(tech ? tech : Context::Instance().RenderFactoryInstance().LoadEffect("BilateralBlur.fxml")->TechniqueByName(x_dir ? "BlurX4" : "BlurY4"));
+		this->Technique(tech ? tech : SyncLoadRenderEffect("BilateralBlur.fxml")->TechniqueByName(x_dir ? "BlurX4" : "BlurY4"));
 
 		kernel_radius_ep_ = technique_->Effect().ParameterByName("kernel_radius");
 		src_tex_size_ep_ = technique_->Effect().ParameterByName("src_tex_size");

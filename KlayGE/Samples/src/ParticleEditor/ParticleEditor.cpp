@@ -50,7 +50,7 @@ namespace
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-			technique_ = rf.LoadEffect("ParticleEditor.fxml")->TechniqueByName("Terrain");
+			technique_ = SyncLoadRenderEffect("ParticleEditor.fxml")->TechniqueByName("Terrain");
 			*(technique_->Effect().ParameterByName("grass_tex")) = ASyncLoadTexture("grass.dds", EAH_GPU_Read | EAH_Immutable);
 
 			rl_ = rf.MakeRenderLayout();
@@ -131,7 +131,7 @@ namespace
 				rl_->BindVertexStream(pos_vb, KlayGE::make_tuple(vertex_element(VEU_Position, 0, EF_ABGR32F),
 					vertex_element(VEU_TextureCoord, 0, EF_R32F)));
 
-				technique_ = rf.LoadEffect("ParticleEditor.fxml")->TechniqueByName("ParticleWithGS");
+				technique_ = SyncLoadRenderEffect("ParticleEditor.fxml")->TechniqueByName("ParticleWithGS");
 			}
 			else
 			{
@@ -156,7 +156,7 @@ namespace
 				GraphicsBufferPtr ib = rf.MakeIndexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, &init_data);
 				rl_->BindIndexStream(ib, EF_R16UI);
 
-				technique_ = rf.LoadEffect("ParticleEditor.fxml")->TechniqueByName("Particle");
+				technique_ = SyncLoadRenderEffect("ParticleEditor.fxml")->TechniqueByName("Particle");
 			}
 
 			*(technique_->Effect().ParameterByName("point_radius")) = 0.08f;

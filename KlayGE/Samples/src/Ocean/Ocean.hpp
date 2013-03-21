@@ -48,6 +48,7 @@ private:
 
 	KlayGE::function<KlayGE::TexturePtr()> y_cube_tl_;
 	KlayGE::function<KlayGE::TexturePtr()> c_cube_tl_;
+	uint32_t loading_percentage_;
 
 	KlayGE::UIDialogPtr dialog_params_;
 	int id_dmap_dim_static_;

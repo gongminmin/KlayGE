@@ -84,13 +84,13 @@ namespace KlayGE
 
 
 	SumLumLogPostProcess::SumLumLogPostProcess()
-			: SumLumPostProcess(Context::Instance().RenderFactoryInstance().LoadEffect("SumLum.fxml")->TechniqueByName("SumLumLog"))
+			: SumLumPostProcess(SyncLoadRenderEffect("SumLum.fxml")->TechniqueByName("SumLumLog"))
 	{
 	}
 
 
 	SumLumLogPostProcessCS::SumLumLogPostProcessCS()
-			: SumLumPostProcess(Context::Instance().RenderFactoryInstance().LoadEffect("SumLum.fxml")->TechniqueByName("SumLumLogCS"))
+			: SumLumPostProcess(SyncLoadRenderEffect("SumLum.fxml")->TechniqueByName("SumLumLogCS"))
 	{
 	}
 
@@ -108,7 +108,7 @@ namespace KlayGE
 
 
 	SumLumIterativePostProcess::SumLumIterativePostProcess()
-			: SumLumPostProcess(Context::Instance().RenderFactoryInstance().LoadEffect("SumLum.fxml")->TechniqueByName("SumLumIterative"))
+			: SumLumPostProcess(SyncLoadRenderEffect("SumLum.fxml")->TechniqueByName("SumLumIterative"))
 	{
 	}
 
@@ -118,7 +118,7 @@ namespace KlayGE
 					std::vector<std::string>(),
 					std::vector<std::string>(1, "src_tex"),
 					std::vector<std::string>(1, "output"),
-					Context::Instance().RenderFactoryInstance().LoadEffect("SumLum.fxml")->TechniqueByName("AdaptedLum")),
+					SyncLoadRenderEffect("SumLum.fxml")->TechniqueByName("AdaptedLum")),
 				last_index_(false)
 	{
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
@@ -181,7 +181,7 @@ namespace KlayGE
 					std::vector<std::string>(),
 					std::vector<std::string>(1, "src_tex"),
 					std::vector<std::string>(1, "out_tex"),
-					Context::Instance().RenderFactoryInstance().LoadEffect("SumLum.fxml")->TechniqueByName("AdaptedLumCS"))
+					SyncLoadRenderEffect("SumLum.fxml")->TechniqueByName("AdaptedLumCS"))
 	{
 		frame_delta_ep_ = technique_->Effect().ParameterByName("frame_delta");
 	}
@@ -213,7 +213,7 @@ namespace KlayGE
 
 		output_pins_.push_back(std::make_pair("out_tex", TexturePtr()));
 		
-		RenderEffectPtr effect = Context::Instance().RenderFactoryInstance().LoadEffect("ToneMapping.fxml");
+		RenderEffectPtr effect = SyncLoadRenderEffect("ToneMapping.fxml");
 		RenderTechniquePtr tech = effect->TechniqueByName("ToneMapping30");
 		if (!tech->Validate())
 		{

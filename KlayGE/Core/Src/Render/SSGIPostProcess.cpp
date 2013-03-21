@@ -17,7 +17,7 @@ namespace KlayGE
 
 		output_pins_.push_back(std::make_pair("out_tex", TexturePtr()));
 
-		this->Technique(Context::Instance().RenderFactoryInstance().LoadEffect("SSGI.fxml")->TechniqueByName("SSGI"));
+		this->Technique(SyncLoadRenderEffect("SSGI.fxml")->TechniqueByName("SSGI"));
 
 		depth_near_far_invfar_param_ = technique_->Effect().ParameterByName("depth_near_far_invfar");
 		proj_param_ = technique_->Effect().ParameterByName("proj");

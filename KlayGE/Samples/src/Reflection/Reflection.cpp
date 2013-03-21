@@ -33,8 +33,7 @@ namespace
 		ReflectMesh(RenderModelPtr const & model, std::wstring const & name)
 			: StaticMesh(model, name)
 		{
-			RenderFactory & rf = Context::Instance().RenderFactoryInstance();
-			RenderEffectPtr effect = rf.LoadEffect("Reflection.fxml");
+			RenderEffectPtr effect = SyncLoadRenderEffect("Reflection.fxml");
 			this->BindDeferredEffect(effect);
 
 			special_shading_tech_ = effect->TechniqueByName("ReflectSpecialShadingTech");

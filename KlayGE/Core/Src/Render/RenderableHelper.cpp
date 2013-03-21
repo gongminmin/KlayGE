@@ -111,7 +111,7 @@ namespace KlayGE
 	{
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-		RenderEffectPtr effect = rf.LoadEffect("RenderableHelper.fxml");
+		RenderEffectPtr effect = SyncLoadRenderEffect("RenderableHelper.fxml");
 		if (deferred_effect_ && !is_overlay)
 		{
 			this->BindDeferredEffect(effect);
@@ -189,7 +189,7 @@ namespace KlayGE
 	{
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-		RenderEffectPtr effect = rf.LoadEffect("RenderableHelper.fxml");
+		RenderEffectPtr effect = SyncLoadRenderEffect("RenderableHelper.fxml");
 		if (deferred_effect_ && !is_overlay)
 		{
 			this->BindDeferredEffect(effect);
@@ -273,7 +273,7 @@ namespace KlayGE
 	{
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-		RenderEffectPtr effect = rf.LoadEffect("RenderableHelper.fxml");
+		RenderEffectPtr effect = SyncLoadRenderEffect("RenderableHelper.fxml");
 		if (deferred_effect_ && !is_overlay)
 		{
 			this->BindDeferredEffect(effect);
@@ -359,7 +359,7 @@ namespace KlayGE
 	{		
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-		RenderEffectPtr effect = rf.LoadEffect("RenderableHelper.fxml");
+		RenderEffectPtr effect = SyncLoadRenderEffect("RenderableHelper.fxml");
 		if (deferred_effect_ && !is_overlay)
 		{
 			this->BindDeferredEffect(effect);
@@ -467,7 +467,7 @@ namespace KlayGE
 	{
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-		RenderEffectPtr effect = rf.LoadEffect("RenderableHelper.fxml");
+		RenderEffectPtr effect = SyncLoadRenderEffect("RenderableHelper.fxml");
 		if (deferred_effect_ && !is_overlay)
 		{
 			this->BindDeferredEffect(effect);
