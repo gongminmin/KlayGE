@@ -37,9 +37,10 @@
 #include <istream>
 #include <vector>
 #include <string>
-#include <list>
+#include <boost/lockfree/spsc_queue.hpp>
 
 #include <KFL/ResIdentifier.hpp>
+#include <KFL/Thread.hpp>
 
 namespace KlayGE
 {
@@ -117,14 +118,15 @@ namespace KlayGE
 	private:
 		std::string RealPath(std::string const & path);
 
-		void ASyncSubThreadFunc(ResLoadingDescPtr const & res_desc, shared_ptr<volatile bool> const & is_done);
-		shared_ptr<void> ASyncFunc(ResLoadingDescPtr const & res_desc, shared_ptr<volatile bool> const & is_done);
+		shared_ptr<void> ASyncFuncCreate(ResLoadingDescPtr const & res_desc, shared_ptr<volatile bool> const & is_done);
 		shared_ptr<void> ASyncFuncClone(ResLoadingDescPtr const & res_desc, shared_ptr<volatile bool> const & is_done);
-		shared_ptr<void> ASyncFuncFromLoaded(shared_ptr<void> const & loaded_res);
+		shared_ptr<void> ASyncFuncReuse(shared_ptr<void> const & loaded_res);
 
 		void AddLoadedResource(ResLoadingDescPtr const & res_desc, shared_ptr<void> const & res);
 		shared_ptr<void> FindMatchLoadedResource(ResLoadingDescPtr const & res_desc);
 		void RemoveUnrefResources();
+
+		void LoadingThreadFunc();
 
 	private:
 		static shared_ptr<ResLoader> res_loader_instance_;
@@ -133,7 +135,12 @@ namespace KlayGE
 		std::vector<std::string> paths_;
 
 		std::vector<std::pair<ResLoadingDescPtr, weak_ptr<void> > > loaded_res_;
-		std::list<tuple<ResLoadingDescPtr, shared_ptr<joiner<void> >, shared_ptr<volatile bool> > > loading_res_queue_;
+		std::vector<std::pair<ResLoadingDescPtr, shared_ptr<volatile bool> > > loading_res_;
+		boost::lockfree::spsc_queue<std::pair<ResLoadingDescPtr, shared_ptr<volatile bool> >,
+			boost::lockfree::capacity<1024> > loading_res_queue_;
+
+		joiner<void> loading_thread_;
+		bool quit_;
 	};
 }
 
