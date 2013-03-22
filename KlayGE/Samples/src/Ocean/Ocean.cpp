@@ -750,6 +750,7 @@ void OceanApp::InitObjects()
 	this->LookAt(float3(0, 14, 0), float3(0, 13.8f, 1));
 	this->Proj(0.1f, 3000);
 
+	loading_percentage_ = 0;
 	y_cube_tl_ = ASyncLoadTexture("DH001cross_y.dds", EAH_GPU_Read | EAH_Immutable);
 	c_cube_tl_ = ASyncLoadTexture("DH001cross_c.dds", EAH_GPU_Read | EAH_Immutable);
 

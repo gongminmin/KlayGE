@@ -31,6 +31,7 @@
 #include <KlayGE/KlayGE.hpp>
 #include <KFL/Util.hpp>
 #include <KlayGE/Extract7z.hpp>
+#include <KFL/Thread.hpp>
 
 #include <fstream>
 #include <sstream>
@@ -132,13 +133,14 @@ namespace KlayGE
 		this->AddPath("../../media/PostProcessors/");
 #endif
 
-		loading_thread_ = GlobalThreadPool()(bind(&ResLoader::LoadingThreadFunc, this));
+		loading_thread_ = MakeSharedPtr<joiner<void> >(GlobalThreadPool()(bind(&ResLoader::LoadingThreadFunc, this)));
 	}
 
 	ResLoader::~ResLoader()
 	{
 		quit_ = true;
-		loading_thread_();
+		// the thread pool may have ready been destructed, so don't join this thread
+		//(*loading_thread_)();
 
 		this->Destroy();
 	}
@@ -469,7 +471,7 @@ namespace KlayGE
 
 			if (found)
 			{
-				return bind(&ResLoader::ASyncFuncCreate, this, res_desc, async_is_done);
+				return bind(ResLoader::ASyncFunctor(loaded_res), res_desc, async_is_done);
 			}
 			else
 			{
@@ -478,13 +480,13 @@ namespace KlayGE
 					async_is_done = MakeSharedPtr<bool>(false);
 					loading_res_.push_back(std::make_pair(res_desc, async_is_done));
 					loading_res_queue_.push(std::make_pair(res_desc, async_is_done));
-					return bind(&ResLoader::ASyncFuncCreate, this, res_desc, async_is_done);
+					return bind(ResLoader::ASyncFunctor(loaded_res), res_desc, async_is_done);
 				}
 				else
 				{
 					shared_ptr<void> res = res_desc->MainThreadStage();
 					this->AddLoadedResource(res_desc, res);
-					return bind(&ResLoader::ASyncFuncReuse, this, res);
+					return ResLoader::ASyncFunctor(res);
 				}
 			}
 		}
@@ -503,48 +505,8 @@ namespace KlayGE
 					this->AddLoadedResource(res_desc, res);
 				}
 			}
-			return bind(&ResLoader::ASyncFuncReuse, this, loaded_res);
+			return ResLoader::ASyncFunctor(res);
 		}
-	}
-
-	shared_ptr<void> ResLoader::ASyncFuncCreate(ResLoadingDescPtr const & res_desc, shared_ptr<volatile bool> const & is_done)
-	{
-		if (*is_done)
-		{
-			shared_ptr<void> loaded_res = this->FindMatchLoadedResource(res_desc);
-			shared_ptr<void> res;
-			if (!loaded_res)
-			{
-				res = res_desc->MainThreadStage();
-				this->AddLoadedResource(res_desc, res);
-			}
-			else
-			{
-				if (res_desc->StateLess())
-				{
-					res = loaded_res;
-				}
-				else
-				{
-					res = res_desc->CloneResourceFrom(loaded_res);
-					if (res != loaded_res)
-					{
-						this->AddLoadedResource(res_desc, res);
-					}
-				}
-			}
-			return res;
-		}
-		else
-		{
-			static shared_ptr<void> null_ret;
-			return null_ret;
-		}
-	}
-
-	shared_ptr<void> ResLoader::ASyncFuncReuse(shared_ptr<void> const & loaded_res)
-	{
-		return loaded_res;
 	}
 
 	void ResLoader::AddLoadedResource(ResLoadingDescPtr const & res_desc, shared_ptr<void> const & res)
@@ -621,6 +583,53 @@ namespace KlayGE
 				res_pair.first->SubThreadStage();
 				*res_pair.second = true;
 			}
+
+			Sleep(10);
 		}
+	}
+
+
+	ResLoader::ASyncFunctor::ASyncFunctor(shared_ptr<void> const & res)
+		: res_(res)
+	{
+	}
+
+	shared_ptr<void> ResLoader::ASyncFunctor::operator()(ResLoadingDescPtr const & res_desc,
+		shared_ptr<volatile bool> const & is_done)
+	{
+		if (!res_)
+		{
+			if (*is_done)
+			{
+				ResLoader& rl = ResLoader::Instance();
+				shared_ptr<void> loaded_res = rl.FindMatchLoadedResource(res_desc);
+				if (!loaded_res)
+				{
+					res_ = res_desc->MainThreadStage();
+					rl.AddLoadedResource(res_desc, res_);
+				}
+				else
+				{
+					if (res_desc->StateLess())
+					{
+						res_ = loaded_res;
+					}
+					else
+					{
+						res_ = res_desc->CloneResourceFrom(loaded_res);
+						if (res_ != loaded_res)
+						{
+							rl.AddLoadedResource(res_desc, res_);
+						}
+					}
+				}
+			}
+		}
+		return res_;
+	}
+
+	shared_ptr<void> ResLoader::ASyncFunctor::operator()()
+	{
+		return res_;
 	}
 }
