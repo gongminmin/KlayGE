@@ -179,7 +179,7 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void DSMusicBuffer::DoPlay(bool loop)
 	{
-		play_thread_ = GlobalThreadPool()(bind(&DSMusicBuffer::LoopUpdateBuffer, this));
+		play_thread_ = GlobalThreadPool::Instance()(bind(&DSMusicBuffer::LoopUpdateBuffer, this));
 
 		loop_ = loop;
 

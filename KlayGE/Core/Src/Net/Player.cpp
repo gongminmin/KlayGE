@@ -139,7 +139,7 @@ namespace KlayGE
 		}
 
 		receiveLoop_ = true;
-		receiveThread_ = GlobalThreadPool()(ReceiveThreadFunc(this));
+		receiveThread_ = GlobalThreadPool::Instance()(ReceiveThreadFunc(this));
 
 		return true;
 	}

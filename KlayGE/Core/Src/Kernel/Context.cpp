@@ -104,6 +104,8 @@ namespace KlayGE
 		script_factory_.reset();
 		audio_data_src_factory_.reset();
 		deferred_rendering_layer_.reset();
+
+		GlobalThreadPool::Destroy();
 	}
 
 	Context& Context::Instance()

@@ -51,6 +51,7 @@ SET(KERNEL_SOURCE_FILES
 	${KFL_PROJECT_DIR}/src/Kernel/KFL.cpp
 	${KFL_PROJECT_DIR}/src/Kernel/Log.cpp
 	${KFL_PROJECT_DIR}/src/Kernel/ThrowErr.cpp
+	${KFL_PROJECT_DIR}/src/Kernel/Thread.cpp
 	${KFL_PROJECT_DIR}/src/Kernel/Timer.cpp
 	${KFL_PROJECT_DIR}/src/Kernel/Util.cpp
 	${KFL_PROJECT_DIR}/src/Kernel/XMLDom.cpp

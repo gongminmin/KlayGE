@@ -799,11 +799,15 @@ namespace KlayGE
 		shared_ptr<thread_pool_common_data_t> data_;
 	};
 
-	inline thread_pool& GlobalThreadPool()
+	class GlobalThreadPool
 	{
-		static thread_pool ret(1, 16);
-		return ret;
-	}
+	public:
+		static thread_pool& Instance();
+		static void Destroy();
+
+	private:
+		static shared_ptr<thread_pool> gtp_instance_;
+	};
 }
 
 

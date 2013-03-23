@@ -162,7 +162,7 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void OALMusicBuffer::DoPlay(bool loop)
 	{
-		play_thread_ = GlobalThreadPool()(bind(&OALMusicBuffer::LoopUpdateBuffer, this));
+		play_thread_ = GlobalThreadPool::Instance()(bind(&OALMusicBuffer::LoopUpdateBuffer, this));
 
 		loop_ = loop;
 

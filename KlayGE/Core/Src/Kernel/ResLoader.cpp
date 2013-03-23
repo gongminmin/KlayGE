@@ -133,7 +133,8 @@ namespace KlayGE
 		this->AddPath("../../media/PostProcessors/");
 #endif
 
-		loading_thread_ = MakeSharedPtr<joiner<void> >(GlobalThreadPool()(bind(&ResLoader::LoadingThreadFunc, this)));
+		loading_thread_ = MakeSharedPtr<joiner<void> >(GlobalThreadPool::Instance()(
+			bind(&ResLoader::LoadingThreadFunc, this)));
 	}
 
 	ResLoader::~ResLoader()
@@ -141,8 +142,6 @@ namespace KlayGE
 		quit_ = true;
 		// the thread pool may have ready been destructed, so don't join this thread
 		//(*loading_thread_)();
-
-		this->Destroy();
 	}
 
 	ResLoader& ResLoader::Instance()
