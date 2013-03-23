@@ -101,9 +101,9 @@ void PostProcessingApp::InitObjects()
 	this->Proj(0.1f, 150.0f);
 
 	loading_percentage_ = 0;
-	model_ml_ = ASyncLoadModel("dino50.7z//dino50.meshml", EAH_GPU_Read | EAH_Immutable);
-	y_cube_tl_ = ASyncLoadTexture("rnl_cross_y.dds", EAH_GPU_Read | EAH_Immutable);
 	c_cube_tl_ = ASyncLoadTexture("rnl_cross_c.dds", EAH_GPU_Read | EAH_Immutable);
+	y_cube_tl_ = ASyncLoadTexture("rnl_cross_y.dds", EAH_GPU_Read | EAH_Immutable);
+	model_ml_ = ASyncLoadModel("dino50.7z//dino50.meshml", EAH_GPU_Read | EAH_Immutable);
 
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 	RenderEngine& re = rf.RenderEngineInstance();
@@ -134,13 +134,13 @@ void PostProcessingApp::InitObjects()
 	input_handler->connect(KlayGE::bind(&PostProcessingApp::InputHandler, this, KlayGE::placeholders::_1, KlayGE::placeholders::_2));
 	inputEngine.ActionMap(actionMap, input_handler, true);
 
-	copy_ = LoadPostProcess(ResLoader::Instance().Open("Copy.ppml"), "copy");
+	copy_ = SyncLoadPostProcess("Copy.ppml", "copy");
 	ascii_arts_ = MakeSharedPtr<AsciiArtsPostProcess>();
 	cartoon_ = MakeSharedPtr<CartoonPostProcess>();
 	tiling_ = MakeSharedPtr<TilingPostProcess>();
 	hdr_ = MakeSharedPtr<HDRPostProcess>(false);
 	night_vision_ = MakeSharedPtr<NightVisionPostProcess>();
-	old_fashion_ = LoadPostProcess(ResLoader::Instance().Open("OldFashion.ppml"), "old_fashion");
+	old_fashion_ = SyncLoadPostProcess("OldFashion.ppml", "old_fashion");
 
 	UIManager::Instance().Load(ResLoader::Instance().Open("PostProcessing.uiml"));
 	dialog_ = UIManager::Instance().GetDialogs()[0];

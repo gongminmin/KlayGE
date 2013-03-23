@@ -463,7 +463,7 @@ void OrderIndependentTransparencyApp::InitObjects()
 	input_handler->connect(KlayGE::bind(&OrderIndependentTransparencyApp::InputHandler, this, KlayGE::placeholders::_1, KlayGE::placeholders::_2));
 	inputEngine.ActionMap(actionMap, input_handler, true);
 
-	blend_pp_ = LoadPostProcess(ResLoader::Instance().Open("Blend.ppml"), "blend");
+	blend_pp_ = SyncLoadPostProcess("Blend.ppml", "blend");
 
 	UIManager::Instance().Load(ResLoader::Instance().Open("OrderIndependentTransparency.uiml"));
 	dialog_oit_ = UIManager::Instance().GetDialogs()[0];

@@ -751,8 +751,8 @@ void OceanApp::InitObjects()
 	this->Proj(0.1f, 3000);
 
 	loading_percentage_ = 0;
-	y_cube_tl_ = ASyncLoadTexture("DH001cross_y.dds", EAH_GPU_Read | EAH_Immutable);
 	c_cube_tl_ = ASyncLoadTexture("DH001cross_c.dds", EAH_GPU_Read | EAH_Immutable);
+	y_cube_tl_ = ASyncLoadTexture("DH001cross_y.dds", EAH_GPU_Read | EAH_Immutable);
 
 	font_ = SyncLoadFont("gkai00mp.kfont");
 
@@ -787,7 +787,7 @@ void OceanApp::InitObjects()
 	checked_pointer_cast<LensFlareSceneObject>(sun_flare_)->Direction(float3(-0.267835f, 0.0517653f, 0.960315f));
 	sun_flare_->AddToSceneManager();
 
-	fog_pp_ = LoadPostProcess(ResLoader::Instance().Open("Fog.ppml"), "fog");
+	fog_pp_ = SyncLoadPostProcess("Fog.ppml", "fog");
 	fog_pp_->SetParam(1, float3(fog_color.r(), fog_color.g(), fog_color.b()));
 	fog_pp_->SetParam(2, 1.0f / 1200);
 	deferred_rendering_->AtmosphericPostProcess(fog_pp_);

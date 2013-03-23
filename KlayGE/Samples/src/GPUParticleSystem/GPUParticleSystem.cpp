@@ -787,7 +787,7 @@ void GPUParticleSystemApp::InitObjects()
 	fog_buffer_ = rf.MakeFrameBuffer();
 	fog_buffer_->GetViewport()->camera = screen_buffer->GetViewport()->camera;
 
-	blend_pp_ = LoadPostProcess(ResLoader::Instance().Open("Blend.ppml"), "blend");
+	blend_pp_ = SyncLoadPostProcess("Blend.ppml", "blend");
 
 	UIManager::Instance().Load(ResLoader::Instance().Open("GPUParticleSystem.uiml"));
 }

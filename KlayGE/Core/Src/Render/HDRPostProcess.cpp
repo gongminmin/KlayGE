@@ -358,14 +358,14 @@ namespace KlayGE
 	LensEffectsPostProcess::LensEffectsPostProcess()
 		: PostProcess(L"LensEffects")
 	{
-		bright_pass_downsampler_ = LoadPostProcess(ResLoader::Instance().Open("LensEffects.ppml"), "sqr_bright");
-		downsamplers_[0] = LoadPostProcess(ResLoader::Instance().Open("Copy.ppml"), "bilinear_copy");
-		downsamplers_[1] = LoadPostProcess(ResLoader::Instance().Open("Copy.ppml"), "bilinear_copy");
+		bright_pass_downsampler_ = SyncLoadPostProcess("LensEffects.ppml", "sqr_bright");
+		downsamplers_[0] = SyncLoadPostProcess("Copy.ppml", "bilinear_copy");
+		downsamplers_[1] = SyncLoadPostProcess("Copy.ppml", "bilinear_copy");
 		blurs_[0] = MakeSharedPtr<BlurPostProcess<SeparableGaussianFilterPostProcess> >(8, 1.0f);
 		blurs_[1] = MakeSharedPtr<BlurPostProcess<SeparableGaussianFilterPostProcess> >(8, 1.0f);
 		blurs_[2] = MakeSharedPtr<BlurPostProcess<SeparableGaussianFilterPostProcess> >(8, 1.0f);
 
-		glow_merger_ = LoadPostProcess(ResLoader::Instance().Open("LensEffects.ppml"), "glow_merger");
+		glow_merger_ = SyncLoadPostProcess("LensEffects.ppml", "glow_merger");
 	}
 
 	void LensEffectsPostProcess::InputPin(uint32_t index, TexturePtr const & tex)
@@ -502,12 +502,12 @@ namespace KlayGE
 		mul_real_tex_ = rf.MakeTexture2D(WIDTH, HEIGHT, 1, 1, EF_ABGR32F, 1, 0, tex_creation_flags, nullptr);
 		mul_imag_tex_ = rf.MakeTexture2D(WIDTH, HEIGHT, 1, 1, EF_ABGR32F, 1, 0, tex_creation_flags, nullptr);
 
-		bilinear_copy_pp_ = LoadPostProcess(ResLoader::Instance().Open("Copy.ppml"), "bilinear_copy");
+		bilinear_copy_pp_ = SyncLoadPostProcess("Copy.ppml", "bilinear_copy");
 
-		bright_pass_pp_ = LoadPostProcess(ResLoader::Instance().Open("LensEffects.ppml"), "scaled_bright_pass");
+		bright_pass_pp_ = SyncLoadPostProcess("LensEffects.ppml", "scaled_bright_pass");
 		bright_pass_pp_->OutputPin(0, resized_tex_);
 
-		complex_mul_pp_ = LoadPostProcess(ResLoader::Instance().Open("LensEffects.ppml"), "complex_mul");
+		complex_mul_pp_ = SyncLoadPostProcess("LensEffects.ppml", "complex_mul");
 		complex_mul_pp_->InputPin(0, freq_real_tex_);
 		complex_mul_pp_->InputPin(1, freq_imag_tex_);
 		complex_mul_pp_->InputPin(2, pattern_real_tex_);
@@ -515,7 +515,7 @@ namespace KlayGE
 		complex_mul_pp_->OutputPin(0, mul_real_tex_);
 		complex_mul_pp_->OutputPin(1, mul_imag_tex_);
 
-		scaled_copy_pp_ = LoadPostProcess(ResLoader::Instance().Open("LensEffects.ppml"), "scaled_copy");
+		scaled_copy_pp_ = SyncLoadPostProcess("LensEffects.ppml", "scaled_copy");
 		scaled_copy_pp_->InputPin(0, mul_real_tex_);
 	}
 

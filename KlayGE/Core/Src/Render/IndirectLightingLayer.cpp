@@ -88,10 +88,10 @@ namespace KlayGE
 
 		vpl_tex_ = rf.MakeTexture2D(VPL_COUNT, 4, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);	
 
-		gbuffer_to_depth_derivate_pp_ = LoadPostProcess(ResLoader::Instance().Open("CustomMipMap.ppml"), "GBuffer2DepthDerivate");
-		depth_derivate_mipmap_pp_ =  LoadPostProcess(ResLoader::Instance().Open("CustomMipMap.ppml"), "DepthDerivateMipMap");
-		gbuffer_to_normal_cone_pp_ =  LoadPostProcess(ResLoader::Instance().Open("CustomMipMap.ppml"), "GBuffer2NormalCone");
-		normal_cone_mipmap_pp_ =  LoadPostProcess(ResLoader::Instance().Open("CustomMipMap.ppml"), "NormalConeMipMap");
+		gbuffer_to_depth_derivate_pp_ = SyncLoadPostProcess("CustomMipMap.ppml", "GBuffer2DepthDerivate");
+		depth_derivate_mipmap_pp_ =  SyncLoadPostProcess("CustomMipMap.ppml", "DepthDerivateMipMap");
+		gbuffer_to_normal_cone_pp_ =  SyncLoadPostProcess("CustomMipMap.ppml", "GBuffer2NormalCone");
+		normal_cone_mipmap_pp_ =  SyncLoadPostProcess("CustomMipMap.ppml", "NormalConeMipMap");
 
 		RenderEffectPtr subsplat_stencil_effect = SyncLoadRenderEffect("SetSubsplatStencil.fxml");
 		subsplat_stencil_tech_ = subsplat_stencil_effect->TechniqueByName("SetSubsplatStencil");
@@ -118,7 +118,7 @@ namespace KlayGE
 		*(vpls_lighting_effect->ParameterByName("vpls_tex")) = vpl_tex_;
 		*(vpls_lighting_effect->ParameterByName("vpl_params")) = float2(1.0f / VPL_COUNT, 0.5f / VPL_COUNT);
 
-		upsampling_pp_ = LoadPostProcess(ResLoader::Instance().Open("Upsampling.ppml"), "Upsampling");
+		upsampling_pp_ = SyncLoadPostProcess("Upsampling.ppml", "Upsampling");
 
 		rl_vpl_ = SyncLoadModel("indirect_light_proxy.meshml", EAH_GPU_Read | EAH_Immutable, CreateModelFactory<RenderModel>(), CreateMeshFactory<StaticMesh>())->Mesh(0)->GetRenderLayout();
 		if (caps.instance_id_support)
@@ -207,7 +207,7 @@ namespace KlayGE
 		rsm_texs_[1] = rt1_tex;
 		rsm_depth_tex_ = depth_tex;
 
-		rsm_to_vpls_pps_[LT_Spot] = LoadPostProcess(ResLoader::Instance().Open("RSM2VPLs.ppml"), RSM2VPLsSpotName);
+		rsm_to_vpls_pps_[LT_Spot] = SyncLoadPostProcess("RSM2VPLs.ppml", RSM2VPLsSpotName);
 		rsm_to_vpls_pps_[LT_Spot]->InputPin(0, rsm_texs_[0]);
 		rsm_to_vpls_pps_[LT_Spot]->InputPin(1, rsm_texs_[1]);
 		rsm_to_vpls_pps_[LT_Spot]->InputPin(2, rsm_depth_tex_);
@@ -239,7 +239,7 @@ namespace KlayGE
 
 		rsm_depth_derivative_tex_ = rf.MakeTexture2D(MIN_RSM_MIPMAP_SIZE, MIN_RSM_MIPMAP_SIZE, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
 
-		rsm_to_depth_derivate_pp_ =  LoadPostProcess(ResLoader::Instance().Open("CustomMipMap.ppml"), "GBuffer2DepthDerivate");
+		rsm_to_depth_derivate_pp_ = SyncLoadPostProcess("CustomMipMap.ppml", "GBuffer2DepthDerivate");
 		rsm_to_depth_derivate_pp_->InputPin(1, rsm_depth_tex_);
 		rsm_to_depth_derivate_pp_->OutputPin(0, rsm_depth_derivative_tex_);
 		float delta_x = 1.0f / rsm_depth_derivative_tex_->Width(0);

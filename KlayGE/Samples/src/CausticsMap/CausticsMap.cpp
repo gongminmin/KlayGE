@@ -730,10 +730,10 @@ void CausticsMapApp::InitObjects()
 	checked_pointer_cast<SceneObjectSkyBox>(sky_box_)->CompressedCubeMap(y_cube_map_, c_cube_map_);
 	sky_box_->AddToSceneManager();
 
-	copy_pp_ = LoadPostProcess(ResLoader::Instance().Open("Copy.ppml"), "copy");
+	copy_pp_ = SyncLoadPostProcess("Copy.ppml", "copy");
 	if (depth_texture_)
 	{
-		depth_to_linear_pp_ = LoadPostProcess(ResLoader::Instance().Open("DepthToSM.ppml"), "DepthToSM");
+		depth_to_linear_pp_ = SyncLoadPostProcess("DepthToSM.ppml", "DepthToSM");
 	}
 
 	this->InitUI();
@@ -899,7 +899,7 @@ void CausticsMapApp::InitEnvCube()
 
 	for (int i = 0; i < 6; ++ i)
 	{
-		env_filter_pps_[i] = LoadPostProcess(ResLoader::Instance().Open("Copy.ppml"), "copy");
+		env_filter_pps_[i] = SyncLoadPostProcess("Copy.ppml", "copy");
 
 		env_filter_pps_[i]->InputPin(0, env_tex_);
 		env_filter_pps_[i]->OutputPin(0, env_cube_tex_, 0, 0, i);

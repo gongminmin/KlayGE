@@ -237,10 +237,9 @@ namespace KlayGE
 			TexturePtr inter_tex = rf.MakeTexture2D(tex_width, tex_height, 1, 1, EF_ABGR16F, 1, 0,
 				EAH_GPU_Read | EAH_GPU_Write | EAH_GPU_Unordered, nullptr);
 
-			ResIdentifierPtr sat_ppml = ResLoader::Instance().Open("SAT.ppml");
 			{
 				int32_t const wave_x = (tex_width + BLOCK_SIZE - 1) / BLOCK_SIZE;
-				PostProcessPtr pp = LoadPostProcess(sat_ppml, "in_block_scan_cs_x");
+				PostProcessPtr pp = SyncLoadPostProcess("SAT.ppml", "in_block_scan_cs_x");
 				pp->CSPixelPerThreadX(wave_x);
 				pp->SetParam(0, wave_x);
 				pp->InputPin(0, tex);
@@ -249,7 +248,7 @@ namespace KlayGE
 			}
 			{
 				int32_t const wave_y = (tex_height + BLOCK_SIZE - 1) / BLOCK_SIZE;
-				PostProcessPtr pp = LoadPostProcess(sat_ppml, "in_block_scan_cs_y");
+				PostProcessPtr pp = SyncLoadPostProcess("SAT.ppml", "in_block_scan_cs_y");
 				pp->CSPixelPerThreadY(wave_y);
 				pp->SetParam(0, wave_y);
 				pp->InputPin(0, inter_tex);

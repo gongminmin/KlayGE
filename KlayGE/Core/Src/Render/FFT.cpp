@@ -74,8 +74,8 @@ namespace KlayGE
 		tmp_imag_tex_[0] = rf.MakeTexture2D(width_, height_, 1, 1, EF_ABGR32F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
 		tmp_imag_tex_[1] = rf.MakeTexture2D(width_, height_, 1, 1, EF_ABGR32F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
 
-		fft_x_pp_ = LoadPostProcess(ResLoader::Instance().Open("FFT.ppml"), "fft_x");
-		fft_y_pp_ = LoadPostProcess(ResLoader::Instance().Open("FFT.ppml"), "fft_y");
+		fft_x_pp_ = SyncLoadPostProcess("FFT.ppml", "fft_x");
+		fft_y_pp_ = SyncLoadPostProcess("FFT.ppml", "fft_y");
 	}
 
 	void GpuFftPS::Execute(TexturePtr const & out_real, TexturePtr const & out_imag,

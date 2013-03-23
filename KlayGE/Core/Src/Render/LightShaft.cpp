@@ -40,16 +40,14 @@ namespace KlayGE
 		RenderEffectPtr effect = SyncLoadRenderEffect("LightShaft.fxml");
 		this->Technique(effect->TechniqueByName("ApplyLightShaft"));
 
-		ResIdentifierPtr res = ResLoader::Instance().Open("LightShaft.ppml");
-
 		for (uint32_t i = 0; i < BLUR_ITERATE_NUM; ++ i)
 		{
-			PostProcessPtr radial_blur_pp = LoadPostProcess(res, 0 == i ? "LightShaftRadialBlurCombine" : "LightShaftRadialBlur");
+			PostProcessPtr radial_blur_pp = SyncLoadPostProcess("LightShaft.ppml", 0 == i ? "LightShaftRadialBlurCombine" : "LightShaftRadialBlur");
 			radial_blur_pp->SetParam(0, float2(static_cast<float>(RADIAL_SAMPLE_NUM), 1.0f / RADIAL_SAMPLE_NUM));
 			radial_blur_pps_.push_back(radial_blur_pp);
 		}
 
-		apply_pp_ = LoadPostProcess(res, "ApplyLightShaftEffect");
+		apply_pp_ = SyncLoadPostProcess("LightShaft.ppml", "ApplyLightShaftEffect");
 	}
 
 	void LightShaftPostProcess::InputPin(uint32_t index, TexturePtr const & tex)

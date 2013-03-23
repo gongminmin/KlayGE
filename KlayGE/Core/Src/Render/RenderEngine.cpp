@@ -175,29 +175,29 @@ namespace KlayGE
 		if (render_settings_.hdr)
 		{
 			hdr_pp_ = MakeSharedPtr<HDRPostProcess>(render_settings_.fft_lens_effects);
-			skip_hdr_pp_ = LoadPostProcess(ResLoader::Instance().Open("Copy.ppml"), "copy");
+			skip_hdr_pp_ = SyncLoadPostProcess("Copy.ppml", "copy");
 		}
 		hdr_enabled_ = render_settings_.hdr;
 		if (render_settings_.ppaa)
 		{
-			ppaa_pp_ = LoadPostProcess(ResLoader::Instance().Open("FXAA.ppml"), "fxaa");
-			ppaa_show_edge_pp_ = LoadPostProcess(ResLoader::Instance().Open("FXAA.ppml"), "fxaa_show_edge");
-			skip_ppaa_pp_ = LoadPostProcess(ResLoader::Instance().Open("Copy.ppml"), "copy");
+			ppaa_pp_ = SyncLoadPostProcess("FXAA.ppml", "fxaa");
+			ppaa_show_edge_pp_ = SyncLoadPostProcess("FXAA.ppml", "fxaa_show_edge");
+			skip_ppaa_pp_ = SyncLoadPostProcess("Copy.ppml", "copy");
 		}
 		ppaa_enabled_ = render_settings_.ppaa ? 1 : 0;
 		if (render_settings_.color_grading)
 		{
-			color_grading_pp_ = LoadPostProcess(ResLoader::Instance().Open("ColorGrading.ppml"), "color_grading");
+			color_grading_pp_ = SyncLoadPostProcess("ColorGrading.ppml", "color_grading");
 			color_grading_pp_->SetParam(0, int2(render_settings_.gamma, render_settings_.color_grading));
-			skip_color_grading_pp_ = LoadPostProcess(ResLoader::Instance().Open("Copy.ppml"), "copy");
+			skip_color_grading_pp_ = SyncLoadPostProcess("Copy.ppml", "copy");
 		}
 		else
 		{
 			if (render_settings_.gamma)
 			{
-				color_grading_pp_ = LoadPostProcess(ResLoader::Instance().Open("GammaCorrection.ppml"), "gamma_correction");
+				color_grading_pp_ = SyncLoadPostProcess("GammaCorrection.ppml", "gamma_correction");
 				color_grading_pp_->SetParam(0, 1 / 2.2f);
-				skip_color_grading_pp_ = LoadPostProcess(ResLoader::Instance().Open("Copy.ppml"), "copy");
+				skip_color_grading_pp_ = SyncLoadPostProcess("Copy.ppml", "copy");
 			}
 		}
 
@@ -700,7 +700,6 @@ namespace KlayGE
 		stereo_method_ = method;
 		if (stereo_method_ != STM_None)
 		{
-			ResIdentifierPtr stereo_ppml = ResLoader::Instance().Open("Stereoscopic.ppml");
 			std::string pp_name;
 			switch (stereo_method_)
 			{
@@ -741,7 +740,7 @@ namespace KlayGE
 				break;
 			}
 
-			stereoscopic_pp_ = LoadPostProcess(stereo_ppml, pp_name);
+			stereoscopic_pp_ = SyncLoadPostProcess("Stereoscopic.ppml", pp_name);
 
 			if (STM_LCDShutter == stereo_method_)
 			{

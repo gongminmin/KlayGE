@@ -279,11 +279,11 @@ namespace
 
 			if (cs_support_)
 			{
-				spreading_pp_ = LoadPostProcess(ResLoader::Instance().Open("DepthOfField.ppml"), "spreading_cs");
+				spreading_pp_ = SyncLoadPostProcess("DepthOfField.ppml", "spreading_cs");
 			}
 			else
 			{
-				spreading_pp_ = LoadPostProcess(ResLoader::Instance().Open("DepthOfField.ppml"), "spreading");
+				spreading_pp_ = SyncLoadPostProcess("DepthOfField.ppml", "spreading");
 			}
 			spreading_pp_->SetParam(1, static_cast<float>(max_radius_));
 
@@ -451,7 +451,7 @@ namespace
 
 			bokeh_rl_ = rf.MakeRenderLayout();
 
-			merge_bokeh_pp_ = LoadPostProcess(ResLoader::Instance().Open("DepthOfField.ppml"), "merge_bokeh");
+			merge_bokeh_pp_ = SyncLoadPostProcess("DepthOfField.ppml", "merge_bokeh");
 			merge_bokeh_pp_->SetParam(2, static_cast<float>(max_radius_));
 		}
 
@@ -764,10 +764,10 @@ void MotionBlurDoFApp::InitObjects()
 	{
 		bokeh_filter_ = MakeSharedPtr<BokehFilter>();
 	}
-	depth_of_field_copy_pp_ = LoadPostProcess(ResLoader::Instance().Open("Copy.ppml"), "copy");
+	depth_of_field_copy_pp_ = SyncLoadPostProcess("Copy.ppml", "copy");
 	
 	motion_blur_ = MakeSharedPtr<MotionBlur>();
-	motion_blur_copy_pp_ = LoadPostProcess(ResLoader::Instance().Open("Copy.ppml"), "copy");
+	motion_blur_copy_pp_ = SyncLoadPostProcess("Copy.ppml", "copy");
 
 	UIManager::Instance().Load(ResLoader::Instance().Open("MotionBlurDoF.uiml"));
 	dof_dialog_ = UIManager::Instance().GetDialogs()[0];
@@ -850,7 +850,7 @@ void MotionBlurDoFApp::OnResize(uint32_t width, uint32_t height)
 
 	if (depth_texture_support_)
 	{
-		depth_to_linear_pp_ = LoadPostProcess(ResLoader::Instance().Open("DepthToSM.ppml"), "DepthToSM");
+		depth_to_linear_pp_ = SyncLoadPostProcess("DepthToSM.ppml", "DepthToSM");
 		depth_to_linear_pp_->InputPin(0, ds_tex_);
 		depth_to_linear_pp_->OutputPin(0, depth_tex_);
 	}

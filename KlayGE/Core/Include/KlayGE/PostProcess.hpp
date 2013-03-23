@@ -49,6 +49,8 @@ namespace KlayGE
 		{
 		}
 
+		virtual PostProcessPtr Clone();
+
 		void Technique(RenderTechniquePtr const & tech);
 
 		virtual uint32_t NumParams() const;
@@ -183,7 +185,8 @@ namespace KlayGE
 		RenderEffectParameterPtr inv_width_height_ep_;
 	};
 
-	KLAYGE_CORE_API PostProcessPtr LoadPostProcess(ResIdentifierPtr const & ppml, std::string const & pp_name);
+	KLAYGE_CORE_API PostProcessPtr SyncLoadPostProcess(std::string const & ppml_name, std::string const & pp_name);
+	KLAYGE_CORE_API function<PostProcessPtr()> ASyncLoadPostProcess(std::string const & ppml_name, std::string const & pp_name);
 
 
 	class KLAYGE_CORE_API PostProcessChain : public PostProcess

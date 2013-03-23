@@ -459,7 +459,7 @@ namespace KlayGE
 
 		ssr_pp_ = MakeSharedPtr<SSRPostProcess>();
 
-		taa_pp_ = LoadPostProcess(ResLoader::Instance().Open("TAA.ppml"), "taa");
+		taa_pp_ = SyncLoadPostProcess("TAA.ppml", "taa");
 
 		if (mrt_g_buffer_support_)
 		{
@@ -483,19 +483,19 @@ namespace KlayGE
 			rsm_buffer_->Attach(FrameBuffer::ATT_Color1, rf.Make2DRenderView(*rsm_texs_[1], 0, 1, 0)); // normal (light space)
 			rsm_buffer_->Attach(FrameBuffer::ATT_DepthStencil, sm_depth_view);
 			
-			copy_to_light_buffer_pp_ = LoadPostProcess(ResLoader::Instance().Open("Copy2LightBuffer.ppml"), "CopyToLightBuffer");
-			copy_to_light_buffer_i_pp_ = LoadPostProcess(ResLoader::Instance().Open("Copy2LightBuffer.ppml"), "CopyToLightBufferI");
+			copy_to_light_buffer_pp_ = SyncLoadPostProcess("Copy2LightBuffer.ppml", "CopyToLightBuffer");
+			copy_to_light_buffer_i_pp_ = SyncLoadPostProcess("Copy2LightBuffer.ppml", "CopyToLightBufferI");
 		}
 
 
 		sm_filter_pp_ = MakeSharedPtr<BlurPostProcess<SeparableGaussianFilterPostProcess> >(8, 1.0f);
 		if (depth_texture_support_)
 		{
-			depth_to_vsm_pp_ = LoadPostProcess(ResLoader::Instance().Open("DepthToSM.ppml"), "DepthToVSM");
+			depth_to_vsm_pp_ = SyncLoadPostProcess("DepthToSM.ppml", "DepthToVSM");
 			depth_to_vsm_pp_->InputPin(0, sm_depth_tex_);
 			depth_to_vsm_pp_->OutputPin(0, sm_tex_);
 
-			depth_to_linear_pp_ = LoadPostProcess(ResLoader::Instance().Open("DepthToSM.ppml"), "DepthToSM");
+			depth_to_linear_pp_ = SyncLoadPostProcess("DepthToSM.ppml", "DepthToSM");
 		}
 
 		g_buffer_tex_param_ = dr_effect_->ParameterByName("g_buffer_tex");

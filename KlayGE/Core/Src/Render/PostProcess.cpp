@@ -30,10 +30,175 @@
 #include <KlayGE/FrameBuffer.hpp>
 #include <KlayGE/RenderLayout.hpp>
 #include <KFL/XMLDom.hpp>
+#include <KlayGE/ResLoader.hpp>
 
 #include <cstring>
+#include <boost/functional/hash.hpp>
 
 #include <KlayGE/PostProcess.hpp>
+
+namespace
+{
+	using namespace KlayGE;
+
+	class PostProcessLoadingDesc : public ResLoadingDesc
+	{
+	private:
+		struct PostProcessDesc
+		{
+			std::string res_name;
+			std::string pp_name;
+
+			struct PostProcessData
+			{
+				std::wstring name;
+				std::vector<std::string> param_names;
+				std::vector<std::string> input_pin_names;
+				std::vector<std::string> output_pin_names;
+				uint32_t cs_data_per_thread_x;
+				uint32_t cs_data_per_thread_y;
+				uint32_t cs_data_per_thread_z;
+				std::string effect_name;
+				std::string tech_name;
+			};
+			shared_ptr<PostProcessData> pp_data;
+		};
+
+	public:
+		PostProcessLoadingDesc(std::string const & res_name, std::string const & pp_name)
+		{
+			pp_desc_.res_name = res_name;
+			pp_desc_.pp_name = pp_name;
+			pp_desc_.pp_data = MakeSharedPtr<PostProcessDesc::PostProcessData>();
+		}
+
+		uint64_t Type() const
+		{
+			static uint64_t const type = static_cast<uint64_t>(boost::hash_value("PostProcessLoadingDesc"));
+			return type;
+		}
+
+		bool StateLess() const
+		{
+			return false;
+		}
+
+		void SubThreadStage()
+		{
+			ResIdentifierPtr ppmm_input = ResLoader::Instance().Open(pp_desc_.res_name);
+
+			XMLDocument doc;
+			XMLNodePtr root = doc.Parse(ppmm_input);
+
+			pp_desc_.pp_data->cs_data_per_thread_x = 1;
+			pp_desc_.pp_data->cs_data_per_thread_y = 1;
+			pp_desc_.pp_data->cs_data_per_thread_z = 1;
+
+			for (XMLNodePtr pp_node = root->FirstNode("post_processor"); pp_node; pp_node = pp_node->NextSibling("post_processor"))
+			{
+				std::string name = pp_node->Attrib("name")->ValueString();
+				if (pp_desc_.pp_name == name)
+				{
+					Convert(pp_desc_.pp_data->name, name);
+
+					XMLNodePtr params_chunk = pp_node->FirstNode("params");
+					if (params_chunk)
+					{
+						for (XMLNodePtr p_node = params_chunk->FirstNode("param"); p_node; p_node = p_node->NextSibling("param"))
+						{
+							pp_desc_.pp_data->param_names.push_back(p_node->Attrib("name")->ValueString());
+						}
+					}
+					XMLNodePtr input_chunk = pp_node->FirstNode("input");
+					if (input_chunk)
+					{
+						for (XMLNodePtr pin_node = input_chunk->FirstNode("pin"); pin_node; pin_node = pin_node->NextSibling("pin"))
+						{
+							pp_desc_.pp_data->input_pin_names.push_back(pin_node->Attrib("name")->ValueString());
+						}
+					}
+					XMLNodePtr output_chunk = pp_node->FirstNode("output");
+					if (output_chunk)
+					{
+						for (XMLNodePtr pin_node = output_chunk->FirstNode("pin"); pin_node; pin_node = pin_node->NextSibling("pin"))
+						{
+							pp_desc_.pp_data->output_pin_names.push_back(pin_node->Attrib("name")->ValueString());
+						}
+					}
+					XMLNodePtr shader_chunk = pp_node->FirstNode("shader");
+					if (shader_chunk)
+					{
+						pp_desc_.pp_data->effect_name = shader_chunk->Attrib("effect")->ValueString();
+						pp_desc_.pp_data->tech_name = shader_chunk->Attrib("tech")->ValueString();
+
+						XMLAttributePtr attr = shader_chunk->Attrib("cs_data_per_thread_x");
+						if (attr)
+						{
+							pp_desc_.pp_data->cs_data_per_thread_x = attr->ValueUInt();
+						}
+						attr = shader_chunk->Attrib("cs_data_per_thread_y");
+						if (attr)
+						{
+							pp_desc_.pp_data->cs_data_per_thread_y = attr->ValueUInt();
+						}
+						attr = shader_chunk->Attrib("cs_data_per_thread_z");
+						if (attr)
+						{
+							pp_desc_.pp_data->cs_data_per_thread_z = attr->ValueUInt();
+						}
+					}
+				}
+			}
+		}
+
+		shared_ptr<void> MainThreadStage()
+		{
+			RenderTechniquePtr tech = SyncLoadRenderEffect(pp_desc_.pp_data->effect_name)->TechniqueByName(pp_desc_.pp_data->tech_name);
+
+			PostProcessPtr pp = MakeSharedPtr<PostProcess>(pp_desc_.pp_data->name, pp_desc_.pp_data->param_names,
+				pp_desc_.pp_data->input_pin_names, pp_desc_.pp_data->output_pin_names, tech);
+			pp->CSPixelPerThreadX(pp_desc_.pp_data->cs_data_per_thread_x);
+			pp->CSPixelPerThreadY(pp_desc_.pp_data->cs_data_per_thread_y);
+			pp->CSPixelPerThreadZ(pp_desc_.pp_data->cs_data_per_thread_z);
+			return static_pointer_cast<void>(pp);
+		}
+
+		bool HasSubThreadStage() const
+		{
+			return true;
+		}
+
+		bool Match(ResLoadingDesc const & rhs) const
+		{
+			if (this->Type() == rhs.Type())
+			{
+				PostProcessLoadingDesc const & ppld = static_cast<PostProcessLoadingDesc const &>(rhs);
+				return (pp_desc_.res_name == ppld.pp_desc_.res_name)
+					&& (pp_desc_.pp_name == ppld.pp_desc_.pp_name);
+			}
+			return false;
+		}
+
+		void CopyDataFrom(ResLoadingDesc const & rhs)
+		{
+			BOOST_ASSERT(this->Type() == rhs.Type());
+
+			PostProcessLoadingDesc const & ppld = static_cast<PostProcessLoadingDesc const &>(rhs);
+			pp_desc_.res_name = ppld.pp_desc_.res_name;
+			pp_desc_.pp_name = ppld.pp_desc_.pp_name;
+			pp_desc_.pp_data = ppld.pp_desc_.pp_data;
+		}
+
+		shared_ptr<void> CloneResourceFrom(shared_ptr<void> const & resource)
+		{
+			PostProcessPtr rhs_pp = static_pointer_cast<PostProcess>(resource);
+			return static_pointer_cast<void>(rhs_pp->Clone());
+		}
+
+	private:
+		PostProcessDesc pp_desc_;
+	};
+}
 
 namespace KlayGE
 {
@@ -70,6 +235,37 @@ namespace KlayGE
 			params_[i].first = param_names[i];
 		}
 		this->Technique(tech);
+	}
+
+	PostProcessPtr PostProcess::Clone()
+	{
+		RenderEffectPtr effect = technique_->Effect().Clone();
+		RenderTechniquePtr tech = effect->TechniqueByName(technique_->Name());
+
+		std::vector<std::string> param_names(params_.size());
+		for (size_t i = 0; i < param_names.size(); ++ i)
+		{
+			param_names[i] = params_[i].first;
+		}
+
+		std::vector<std::string> input_pin_names(input_pins_.size());
+		for (size_t i = 0; i < input_pin_names.size(); ++ i)
+		{
+			input_pin_names[i] = input_pins_[i].first;
+		}
+
+		std::vector<std::string> output_pin_names(output_pins_.size());
+		for (size_t i = 0; i < output_pin_names.size(); ++ i)
+		{
+			output_pin_names[i] = output_pins_[i].first;
+		}
+
+		PostProcessPtr pp = MakeSharedPtr<PostProcess>(this->Name(),
+			param_names, input_pin_names, output_pin_names, tech);
+		pp->CSPixelPerThreadX(cs_pixel_per_thread_x_);
+		pp->CSPixelPerThreadY(cs_pixel_per_thread_y_);
+		pp->CSPixelPerThreadZ(cs_pixel_per_thread_z_);
+		return pp;
 	}
 
 	void PostProcess::Technique(RenderTechniquePtr const & tech)
@@ -611,82 +807,14 @@ namespace KlayGE
 	}
 
 
-	PostProcessPtr LoadPostProcess(ResIdentifierPtr const & ppml, std::string const & pp_name)
+	PostProcessPtr SyncLoadPostProcess(std::string const & ppml_name, std::string const & pp_name)
 	{
-		XMLDocument doc;
-		XMLNodePtr root = doc.Parse(ppml);
+		return ResLoader::Instance().SyncQueryT<PostProcess>(MakeSharedPtr<PostProcessLoadingDesc>(ppml_name, pp_name));
+	}
 
-		std::wstring wname;
-		std::vector<std::string> param_names;
-		std::vector<std::string> input_pin_names;
-		std::vector<std::string> output_pin_names;
-		RenderTechniquePtr tech;
-		uint32_t cs_data_per_thread_x = 1;
-		uint32_t cs_data_per_thread_y = 1;
-		uint32_t cs_data_per_thread_z = 1;
-
-		for (XMLNodePtr pp_node = root->FirstNode("post_processor"); pp_node; pp_node = pp_node->NextSibling("post_processor"))
-		{
-			std::string name = pp_node->Attrib("name")->ValueString();
-			if (pp_name == name)
-			{
-				Convert(wname, name);
-
-				XMLNodePtr params_chunk = pp_node->FirstNode("params");
-				if (params_chunk)
-				{
-					for (XMLNodePtr p_node = params_chunk->FirstNode("param"); p_node; p_node = p_node->NextSibling("param"))
-					{
-						param_names.push_back(p_node->Attrib("name")->ValueString());
-					}
-				}
-				XMLNodePtr input_chunk = pp_node->FirstNode("input");
-				if (input_chunk)
-				{
-					for (XMLNodePtr pin_node = input_chunk->FirstNode("pin"); pin_node; pin_node = pin_node->NextSibling("pin"))
-					{
-						input_pin_names.push_back(pin_node->Attrib("name")->ValueString());
-					}
-				}
-				XMLNodePtr output_chunk = pp_node->FirstNode("output");
-				if (output_chunk)
-				{
-					for (XMLNodePtr pin_node = output_chunk->FirstNode("pin"); pin_node; pin_node = pin_node->NextSibling("pin"))
-					{
-						output_pin_names.push_back(pin_node->Attrib("name")->ValueString());
-					}
-				}
-				XMLNodePtr shader_chunk = pp_node->FirstNode("shader");
-				if (shader_chunk)
-				{
-					std::string effect_name = shader_chunk->Attrib("effect")->ValueString();
-					std::string tech_name = shader_chunk->Attrib("tech")->ValueString();
-					tech = SyncLoadRenderEffect(effect_name)->TechniqueByName(tech_name);
-
-					XMLAttributePtr attr = shader_chunk->Attrib("cs_data_per_thread_x");
-					if (attr)
-					{
-						cs_data_per_thread_x = attr->ValueUInt();
-					}
-					attr = shader_chunk->Attrib("cs_data_per_thread_y");
-					if (attr)
-					{
-						cs_data_per_thread_y = attr->ValueUInt();
-					}
-					attr = shader_chunk->Attrib("cs_data_per_thread_z");
-					if (attr)
-					{
-						cs_data_per_thread_z = attr->ValueUInt();
-					}
-				}
-			}
-		}
-
-		PostProcessPtr pp = MakeSharedPtr<PostProcess>(wname, param_names, input_pin_names, output_pin_names, tech);
-		pp->CSPixelPerThreadX(cs_data_per_thread_x);
-		pp->CSPixelPerThreadY(cs_data_per_thread_y);
-		pp->CSPixelPerThreadZ(cs_data_per_thread_z);
-		return pp;
+	function<PostProcessPtr()> ASyncLoadPostProcess(std::string const & ppml_name, std::string const & pp_name)
+	{
+		return ResLoader::Instance().ASyncQueryT<PostProcess>(MakeSharedPtr<PostProcessLoadingDesc>(ppml_name, pp_name));
 	}
 
 

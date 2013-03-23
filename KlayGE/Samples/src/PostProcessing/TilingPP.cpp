@@ -25,7 +25,7 @@ TilingPostProcess::TilingPostProcess()
 		std::vector<std::string>(1, "output"),
 		SyncLoadRenderEffect("TilingPP.fxml")->TechniqueByName("Tiling"))
 {
-	downsampler_ = LoadPostProcess(ResLoader::Instance().Open("Copy.ppml"), "bilinear_copy");
+	downsampler_ = SyncLoadPostProcess("Copy.ppml", "bilinear_copy");
 
 	tile_per_row_line_ep_ = technique_->Effect().ParameterByName("tile_per_row_line");
 }
