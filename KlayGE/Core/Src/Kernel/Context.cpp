@@ -81,6 +81,7 @@ namespace KlayGE
 	typedef void (*MakeAudioDataSourceFactoryFunc)(AudioDataSourceFactoryPtr& ptr);
 
 	Context::Context()
+		: app_(nullptr)
 	{
 #ifdef KLAYGE_PLATFORM_ANDROID
 		state_ = get_app();
@@ -91,10 +92,14 @@ namespace KlayGE
 		_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 #endif
 #endif
+
+		gtp_instance_ = MakeSharedPtr<thread_pool>(1, 16);
 	}
 
 	Context::~Context()
 	{
+		ResLoader::Destroy();
+
 		scene_mgr_.reset();
 
 		render_factory_.reset();
@@ -105,7 +110,7 @@ namespace KlayGE
 		audio_data_src_factory_.reset();
 		deferred_rendering_layer_.reset();
 
-		GlobalThreadPool::Destroy();
+		gtp_instance_.reset();
 	}
 
 	Context& Context::Instance()

@@ -402,49 +402,20 @@ namespace KlayGE
 		class thread_pool_join_info
 		{
 		public:
-			thread_pool_join_info()
-				: join_now_(false), can_recycle_thread_(false)
-			{
-			}
+			thread_pool_join_info();
 
 			// Used by joiner to wait until the thread from the pool completes its task
-			void join()
-			{
-				unique_lock<mutex> lock(join_mut_);
-				while (!join_now_)
-				{
-					cond_.wait(lock);
-				}
-				join_now_ = false;
-			}
+			void join();
 
 			// Used by a thread from the pool to wake up a blocked joiner()
-			void notify_join()
-			{
-				unique_lock<mutex> lock(join_mut_);
-				join_now_ = true;
-				cond_.notify_one();
-			}
+			void notify_join();
 
 			// Used by the last joiner to notify to the thread from the pool that it can be recycled for the next task
-			void recycle()
-			{
-				unique_lock<mutex> lock(join_mut_);
-				can_recycle_thread_ = true;
-				cond_.notify_one();
-			}
+			void recycle();
 
 			// Used by the thread from the pool to wait until the last joiner is destroyed and notifies that the thread
 			//  from the pool can be recycled
-			void wait_recycle()
-			{
-				unique_lock<mutex> lock(join_mut_);
-				while (!can_recycle_thread_)
-				{
-					cond_.wait(lock);
-				}
-				can_recycle_thread_ = false;
-			}
+			void wait_recycle();
 
 		private:
 			volatile bool     join_now_;
@@ -458,10 +429,7 @@ namespace KlayGE
 		//  to definitively tell to the thread that it should die.
 		struct thread_pool_thread_info
 		{
-			explicit thread_pool_thread_info(shared_ptr<thread_pool_common_data_t> const & pdata)
-				:  wake_up_(false), data_(pdata)
-			{
-			}
+			explicit thread_pool_thread_info(shared_ptr<thread_pool_common_data_t> const & pdata);
 
 			// Wakes up a pooled thread assigning a task to it
 			template <typename Threadable>
@@ -478,13 +446,7 @@ namespace KlayGE
 			}
 
 			// Wakes up a pooled thread saying it should die
-			void kill()
-			{
-				unique_lock<mutex> lock(wake_up_mut_);
-				func_ = function<void()>();
-				wake_up_ = true;
-				wake_up_cond_.notify_one();
-			}
+			void kill();
 
 			thread_id get_thread_id() const
 			{
@@ -501,9 +463,8 @@ namespace KlayGE
 			bool					wake_up_;
 			mutex					wake_up_mut_;
 			condition_variable		wake_up_cond_;
-			shared_ptr<thread_pool_common_data_t>	data_;
+			weak_ptr<thread_pool_common_data_t>	data_;
 			thread_id				id_;
-			joiner<void>			joiner_;
 		};
 
 		// A class used to storage information of the thread pool. It stores the pooled thread information container
@@ -516,75 +477,11 @@ namespace KlayGE
 			{
 			public:
 				// Stores a shared_ptr with the data that holds the thread pool.
-				explicit wait_function(shared_ptr<thread_pool_thread_info> const & info)
-					:  info_(info)
-				{
-				}
+				explicit wait_function(shared_ptr<thread_pool_thread_info> const & info);
 
 				// This is the thread pool loop. Waits for task, executes it and if there are not enough threads
 				//  in the pool, enqueues itself again in the queue.
-				void operator()()
-				{
-					for (;;)
-					{
-						{
-							unique_lock<mutex> lock(info_->wake_up_mut_);
-
-							// Sleep until someone has a job to do or the pool is being destroyed
-							while (!info_->wake_up_ && !info_->data_->general_cleanup_)
-							{
-								info_->wake_up_cond_.wait(lock);
-							}
-
-							// This is an invitation to leave the pool
-							if (!info_->func_ || info_->data_->general_cleanup_)
-							{
-								return;
-							}
-
-							// If function is zero, this is a exit request
-							info_->wake_up_ = false;
-						}
-
-						// Execute requested functor
-						info_->func_();
-
-						// Reset execution functor
-						info_->func_ = function<void()>();
-
-						// First notify joiner_thread_pool_impl that data is ready and wake-up if it's blocked waiting for data
-						info_->thpool_join_info_->notify_join();
-
-						// Now we have to wait until joiner_thread_pool_impl is destroyed and it notifies that this thread
-						//  can pick another job
-						info_->thpool_join_info_->wait_recycle();
-
-						// Reset synchronization object
-						info_->thpool_join_info_.reset();
-
-						// Locked code to try to insert the thread again in the thread pool
-						{
-							unique_lock<mutex> lock(info_->data_->mut_);
-
-							// If there is a general cleanup request, finish
-							if (info_->data_->general_cleanup_)
-							{
-								return;
-							}
-
-							// Now return thread data to the queue if there are less than num_max_cached_threads_ threads
-							if (info_->data_->threads_.size() < info_->data_->num_max_cached_threads_)
-							{
-								info_->data_->threads_.push_back(info_);
-							}
-							else
-							{
-								// This thread shouldn't be cached since we have enough cached threads
-								return;
-							}
-						}
-					}
-				}
+				void operator()();
 
 			private:
 				shared_ptr<thread_pool_thread_info> info_;
@@ -593,50 +490,17 @@ namespace KlayGE
 		public:
 			typedef std::vector<shared_ptr<thread_pool_thread_info> > thread_info_queue_t;
 
-			thread_pool_common_data_t(size_t num_min_cached_threads, size_t num_max_cached_threads)
-				: num_min_cached_threads_(num_min_cached_threads),
-					num_max_cached_threads_(num_max_cached_threads),
-					general_cleanup_(false)
-			{
-			}
+			thread_pool_common_data_t(size_t num_min_cached_threads, size_t num_max_cached_threads);
 
 			// Creates and adds more threads to the pool. Can throw
-			static void add_waiting_threads(shared_ptr<thread_pool_common_data_t> const & pdata, size_t number)
-			{
-				unique_lock<mutex> lock(pdata->mut_);
-				add_waiting_threads_no_lock(pdata, number);
-			}
+			static void add_waiting_threads(shared_ptr<thread_pool_common_data_t> const & pdata, size_t number);
 
 			// Creates and adds more threads to the pool. This function does not lock the pool mutex and that be
 			//  only called when we externally have locked that mutex. Can throw
-			static void add_waiting_threads_no_lock(shared_ptr<thread_pool_common_data_t> const & data, size_t number)
-			{
-				for (size_t i = 0; i < number; ++ i)
-				{
-					shared_ptr<thread_pool_thread_info> th_info = MakeSharedPtr<thread_pool_thread_info>(data);
-					joiner<void> j = data->threader_(wait_function(th_info));
-					th_info->set_thread_id(j.get_thread_id());
-					data->threads_.push_back(th_info);
-					j.detach();
-				}
-			}
+			static void add_waiting_threads_no_lock(shared_ptr<thread_pool_common_data_t> const & data, size_t number);
 
 			// Notifies all pooled threads that this is the end
-			void kill_all()
-			{
-				unique_lock<mutex> lock(mut_);
-
-				// Notify cleanup command to not queued threads
-				general_cleanup_ = true;
-
-				// Wake up queued threads
-				size_t num_cached = threads_.size();
-				for (size_t i = 0; i < num_cached; ++ i)
-				{
-					threads_.back()->kill();
-					threads_.pop_back();
-				}
-			}
+			void kill_all();
 
 			mutex& mut()
 			{
@@ -652,25 +516,7 @@ namespace KlayGE
 			{
 				return num_min_cached_threads_;
 			}
-			void num_min_cached_threads(size_t num)
-			{
-				unique_lock<mutex> lock(mut_);
-
-				if (num > num_min_cached_threads_)
-				{
-					this->add_waiting_threads_no_lock(this->shared_from_this(), num - num_min_cached_threads_);
-				}
-				else
-				{
-					for (size_t i = 0; i < num_min_cached_threads_ - num; ++ i)
-					{
-						threads_.back()->kill();
-						threads_.pop_back();
-					}
-				}
-
-				num_min_cached_threads_ = num;
-			}
+			void num_min_cached_threads(size_t num);
 
 			size_t num_max_cached_threads() const
 			{
@@ -746,18 +592,8 @@ namespace KlayGE
 		};
 
 	public:
-		thread_pool(size_t num_min_cached_threads, size_t num_max_cached_threads)
-			: data_(MakeSharedPtr<thread_pool_common_data_t>(num_min_cached_threads, num_max_cached_threads))
-		{
-			BOOST_ASSERT(num_max_cached_threads >= num_min_cached_threads);
-
-			thread_pool_common_data_t::add_waiting_threads(data_, num_min_cached_threads);
-		}
-
-		~thread_pool()
-		{
-			data_->kill_all();
-		}
+		thread_pool(size_t num_min_cached_threads, size_t num_max_cached_threads);
+		~thread_pool();
 
 		// Launches threadable function in a new thread. If there is a pooled thread available, reuses that thread.
 		template <typename Threadable>
@@ -798,17 +634,6 @@ namespace KlayGE
 	private:
 		shared_ptr<thread_pool_common_data_t> data_;
 	};
-
-	class GlobalThreadPool
-	{
-	public:
-		static thread_pool& Instance();
-		static void Destroy();
-
-	private:
-		static shared_ptr<thread_pool> gtp_instance_;
-	};
 }
-
 
 #endif		// _KFL_THREAD_HPP

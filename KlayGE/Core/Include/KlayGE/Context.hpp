@@ -191,6 +191,11 @@ namespace KlayGE
 			return deferred_rendering_layer_;
 		}
 
+		thread_pool& ThreadPool()
+		{
+			return *gtp_instance_;
+		}
+
 	private:
 		static shared_ptr<Context> context_instance_;
 
@@ -219,6 +224,8 @@ namespace KlayGE
 		DllLoader script_loader_;
 		DllLoader sm_loader_;
 		DllLoader ads_loader_;
+
+		shared_ptr<thread_pool> gtp_instance_;
 	};
 }
 

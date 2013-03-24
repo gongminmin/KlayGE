@@ -133,8 +133,8 @@ namespace KlayGE
 		this->AddPath("../../media/PostProcessors/");
 #endif
 
-		loading_thread_ = MakeSharedPtr<joiner<void> >(GlobalThreadPool::Instance()(
-			bind(&ResLoader::LoadingThreadFunc, this)));
+		loading_thread_ = MakeSharedPtr<joiner<void> >(Context::Instance().ThreadPool()(
+				bind(&ResLoader::LoadingThreadFunc, this)));
 	}
 
 	ResLoader::~ResLoader()
