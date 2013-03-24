@@ -17,3 +17,9 @@ echo "Building KlayGE OCTree plugin..."
 cd Plugins/Scene/OCTree
 ./build.sh
 cd ../../..
+
+echo "Building KlayGE Script plugin..."
+
+cd Plugins/Script/Python
+./build.sh
+cd ../../..

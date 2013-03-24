@@ -5,7 +5,6 @@ KLAYGE_SRC_PATH := $(LOCAL_PATH)/../../../../Core/Src
 include $(CLEAR_VARS)
 
 LOCAL_C_INCLUDES := $(KLAYGE_SRC_PATH)/../../../External/boost \
-		$(KLAYGE_SRC_PATH)/../../../External/Python/include \
 		$(KLAYGE_SRC_PATH)/../../../External/android_native_app_glue \
 		$(KLAYGE_SRC_PATH)/../../../External/7z \
 		$(KLAYGE_SRC_PATH)/../../../KFL/include \

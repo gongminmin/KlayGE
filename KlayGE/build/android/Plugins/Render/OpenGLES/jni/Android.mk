@@ -12,7 +12,7 @@ LOCAL_C_INCLUDES := $(KLAYGE_PLUGIN_OPENGLES_SRC_PATH)/../../../../../External/b
 		$(KLAYGE_PLUGIN_OPENGLES_SRC_PATH)/../../../../../glloader/include \
 		$(KLAYGE_PLUGIN_OPENGLES_SRC_PATH)/../../../../../External/android_native_app_glue
 		
-LOCAL_MODULE := KlayGE_RenderEngine_OpenGLES
+LOCAL_MODULE := KlayGE_Render_OpenGLES
 LOCAL_PATH := $(KLAYGE_PLUGIN_OPENGLES_SRC_PATH)
 CPP_FILE_LIST := $(wildcard $(LOCAL_PATH)/*.cpp)
 LOCAL_SRC_FILES := $(CPP_FILE_LIST:$(LOCAL_PATH)/%=%)
