@@ -2661,6 +2661,7 @@ namespace KlayGE
 					effect_desc_.macros.push_back(macros[m]);
 					++ m;
 				}
+				effect_desc_.macros.push_back(macros[m]);
 			}
 		}
 

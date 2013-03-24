@@ -62,6 +62,8 @@ namespace
 				std::string tech_name;
 			};
 			shared_ptr<PostProcessData> pp_data;
+
+			PostProcessPtr pp;
 		};
 
 	public:
@@ -160,6 +162,7 @@ namespace
 			pp->CSPixelPerThreadX(pp_desc_.pp_data->cs_data_per_thread_x);
 			pp->CSPixelPerThreadY(pp_desc_.pp_data->cs_data_per_thread_y);
 			pp->CSPixelPerThreadZ(pp_desc_.pp_data->cs_data_per_thread_z);
+			pp_desc_.pp = pp;
 			return static_pointer_cast<void>(pp);
 		}
 
