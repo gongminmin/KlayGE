@@ -17,6 +17,7 @@
       <File Name="../../src/Kernel/Timer.cpp"/>
       <File Name="../../src/Kernel/Util.cpp"/>
       <File Name="../../src/Kernel/XMLDom.cpp"/>
+      <File Name="../../src/Kernel/Thread.cpp"/>
     </VirtualDirectory>
     <VirtualDirectory Name="Header Files">
       <File Name="../../include/KFL/AlignedAllocator.hpp"/>

@@ -44,6 +44,7 @@
       <File Name="../../Core/Src/Render/SSVOPostProcess.cpp"/>
       <File Name="../../Core/Src/Render/Texture.cpp"/>
       <File Name="../../Core/Src/Render/Viewport.cpp"/>
+      <File Name="../../Core/Src/Render/SkyBox.cpp"/>
     </VirtualDirectory>
     <VirtualDirectory Name="Header Files">
       <File Name="../../Core/Include/KlayGE/BlockCompression.hpp"/>
@@ -84,6 +85,7 @@
       <File Name="../../Core/Include/KlayGE/SSVOPostProcess.hpp"/>
       <File Name="../../Core/Include/KlayGE/Texture.hpp"/>
       <File Name="../../Core/Include/KlayGE/Viewport.hpp"/>
+      <File Name="../../Core/Include/KlayGE/SkyBox.hpp"/>
     </VirtualDirectory>
     <VirtualDirectory Name="Effect Files">
       <File Name="../../media/RenderFX/2D.fxml"/>
@@ -191,9 +193,11 @@
   <VirtualDirectory Name="Script System">
     <VirtualDirectory Name="Source Files">
       <File Name="../../Core/Src/Script/Script.cpp"/>
+      <File Name="../../Core/Src/Script/ScriptFactory.cpp"/>
     </VirtualDirectory>
     <VirtualDirectory Name="Header Files">
       <File Name="../../Core/Include/KlayGE/Script.hpp"/>
+      <File Name="../../Core/Include/KlayGE/ScriptFactory.hpp"/>
     </VirtualDirectory>
   </VirtualDirectory>
   <VirtualDirectory Name="Show System">
@@ -296,7 +300,6 @@
     <Configuration Name="Debug_linux_x64" CompilerType="gnu g++" DebuggerType="GNU gdb debugger" Type="Dynamic Library" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
       <Compiler Options="-m64 -g -O0" C_Options="-m64 -g -O0" Required="yes" PreCompiledHeader="../../Core/Include/KlayGE/KlayGE.hpp" PCHInCommandLine="no" UseDifferentPCHFlags="no" PCHFlags="">
         <IncludePath Value="../../../External/boost"/>
-        <IncludePath Value="../../../External/Python/include"/>
         <IncludePath Value="../../../External/7z"/>
         <IncludePath Value="../../../KFL/include"/>
         <IncludePath Value="../../Core/Include"/>
@@ -308,12 +311,10 @@
       </Compiler>
       <Linker Options="" Required="yes">
         <LibraryPath Value="../../../External/boost/lib_gcc_x64/lib"/>
-        <LibraryPath Value="../../../External/Python/libs/amd64"/>
         <LibraryPath Value="../../../KFL/lib/linux_x64"/>
         <LibraryPath Value="../../lib/linux_x64"/>
         <LibraryPath Value="../../../kfont/lib/linux_x64"/>
         <LibraryPath Value="../../../MeshMLLib/lib/linux_x64"/>
-        <Library Value="python2.6"/>
         <Library Value="X11"/>
         <Library Value="kfont_gcc_x64_d"/>
         <Library Value="MeshMLLib_gcc_x64_d"/>
@@ -359,7 +360,6 @@
     <Configuration Name="Debug_linux_x86" CompilerType="gnu g++" DebuggerType="GNU gdb debugger" Type="Dynamic Library" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
       <Compiler Options="-m32 -g -O0" C_Options="-m32 -g -O0" Required="yes" PreCompiledHeader="../../Core/Include/KlayGE/KlayGE.hpp" PCHInCommandLine="no" UseDifferentPCHFlags="no" PCHFlags="">
         <IncludePath Value="../../../External/boost"/>
-        <IncludePath Value="../../../External/Python/include"/>
         <IncludePath Value="../../../External/7z"/>
         <IncludePath Value="../../../KFL/include"/>
         <IncludePath Value="../../Core/Include"/>
@@ -371,12 +371,10 @@
       </Compiler>
       <Linker Options="" Required="yes">
         <LibraryPath Value="../../../External/boost/lib_gcc_x86/lib"/>
-        <LibraryPath Value="../../../External/Python/libs"/>
         <LibraryPath Value="../../../KFL/lib/linux_x86"/>
         <LibraryPath Value="../../lib/linux_x86"/>
         <LibraryPath Value="../../../kfont/lib/linux_x86"/>
         <LibraryPath Value="../../../MeshMLLib/lib/linux_x86"/>
-        <Library Value="python2.6"/>
         <Library Value="X11"/>
         <Library Value="kfont_gcc_x86_d"/>
         <Library Value="MeshMLLib_gcc_x86_d"/>
@@ -422,7 +420,6 @@
     <Configuration Name="Debug_win_x64" CompilerType="gnu g++" DebuggerType="GNU gdb debugger" Type="Dynamic Library" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
       <Compiler Options="-m64 -g -O0" C_Options="-m64 -g -O0" Required="yes" PreCompiledHeader="../../Core/Include/KlayGE/KlayGE.hpp" PCHInCommandLine="no" UseDifferentPCHFlags="no" PCHFlags="">
         <IncludePath Value="../../../External/boost"/>
-        <IncludePath Value="../../../External/Python/include"/>
         <IncludePath Value="../../../External/7z"/>
         <IncludePath Value="../../../KFL/include"/>
         <IncludePath Value="../../Core/Include"/>
@@ -436,7 +433,6 @@
       </Compiler>
       <Linker Options="" Required="yes">
         <LibraryPath Value="../../../External/boost/lib_mgw_x64/lib"/>
-        <LibraryPath Value="../../../External/Python/libs/amd64"/>
         <LibraryPath Value="../../../KFL/lib/win_x64"/>
         <LibraryPath Value="../../lib/win_x64"/>
         <LibraryPath Value="../../../kfont/lib/win_x64"/>
@@ -444,7 +440,6 @@
         <Library Value="gdi32"/>
         <Library Value="oleaut32"/>
         <Library Value="wsock32"/>
-        <Library Value="python32_d"/>
         <Library Value="kfont_mgw_x64_d"/>
         <Library Value="MeshMLLib_mgw_x64_d"/>
         <Library Value="KFL_mgw_x64_d"/>
@@ -489,7 +484,6 @@
     <Configuration Name="Debug_win_x86" CompilerType="gnu g++" DebuggerType="GNU gdb debugger" Type="Dynamic Library" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
       <Compiler Options="-m32 -g -O0" C_Options="-m32 -g -O0" Required="yes" PreCompiledHeader="../../Core/Include/KlayGE/KlayGE.hpp" PCHInCommandLine="no" UseDifferentPCHFlags="no" PCHFlags="">
         <IncludePath Value="../../../External/boost"/>
-        <IncludePath Value="../../../External/Python/include"/>
         <IncludePath Value="../../../External/7z"/>
         <IncludePath Value="../../../KFL/include"/>
         <IncludePath Value="../../Core/Include"/>
@@ -503,7 +497,6 @@
       </Compiler>
       <Linker Options="" Required="yes">
         <LibraryPath Value="../../../External/boost/lib_mgw_x86/lib"/>
-        <LibraryPath Value="../../../External/Python/libs"/>
         <LibraryPath Value="../../../KFL/lib/win_x86"/>
         <LibraryPath Value="../../lib/win_x86"/>
         <LibraryPath Value="../../../kfont/lib/win_x86"/>
@@ -511,7 +504,6 @@
         <Library Value="gdi32"/>
         <Library Value="oleaut32"/>
         <Library Value="wsock32"/>
-        <Library Value="python32_d"/>
         <Library Value="kfont_mgw_x86_d"/>
         <Library Value="MeshMLLib_mgw_x86_d"/>
         <Library Value="KFL_mgw_x86_d"/>
@@ -556,7 +548,6 @@
     <Configuration Name="Release_linux_x64" CompilerType="gnu g++" DebuggerType="GNU gdb debugger" Type="Dynamic Library" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
       <Compiler Options="-m64 -O2" C_Options="-m64 -O2" Required="yes" PreCompiledHeader="../../Core/Include/KlayGE/KlayGE.hpp" PCHInCommandLine="no" UseDifferentPCHFlags="no" PCHFlags="">
         <IncludePath Value="../../../External/boost"/>
-        <IncludePath Value="../../../External/Python/include"/>
         <IncludePath Value="../../../External/7z"/>
         <IncludePath Value="../../../KFL/include"/>
         <IncludePath Value="../../Core/Include"/>
@@ -568,12 +559,10 @@
       </Compiler>
       <Linker Options="-s" Required="yes">
         <LibraryPath Value="../../../External/boost/lib_gcc_x64/lib"/>
-        <LibraryPath Value="../../../External/Python/libs/amd64"/>
         <LibraryPath Value="../../../KFL/lib/linux_x64"/>
         <LibraryPath Value="../../lib/linux_x64"/>
         <LibraryPath Value="../../../kfont/lib/linux_x64"/>
         <LibraryPath Value="../../../MeshMLLib/lib/linux_x64"/>
-        <Library Value="python2.6"/>
         <Library Value="X11"/>
         <Library Value="kfont_gcc_x64"/>
         <Library Value="MeshMLLib_gcc_x64"/>
@@ -619,7 +608,6 @@
     <Configuration Name="Release_linux_x86" CompilerType="gnu g++" DebuggerType="GNU gdb debugger" Type="Dynamic Library" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
       <Compiler Options="-m32 -O2" C_Options="-m32 -O2" Required="yes" PreCompiledHeader="../../Core/Include/KlayGE/KlayGE.hpp" PCHInCommandLine="no" UseDifferentPCHFlags="no" PCHFlags="">
         <IncludePath Value="../../../External/boost"/>
-        <IncludePath Value="../../../External/Python/include"/>
         <IncludePath Value="../../../External/7z"/>
         <IncludePath Value="../../../KFL/include"/>
         <IncludePath Value="../../Core/Include"/>
@@ -631,7 +619,6 @@
       </Compiler>
       <Linker Options="-s" Required="yes">
         <LibraryPath Value="../../../External/boost/lib_gcc_x86/lib"/>
-        <LibraryPath Value="../../../External/Python/libs"/>
         <LibraryPath Value="../../../KFL/lib/linux_x86"/>
         <LibraryPath Value="../../lib/linux_x86"/>
         <LibraryPath Value="../../../kfont/lib/linux_x86"/>
@@ -640,7 +627,6 @@
         <Library Value="boost_system"/>
         <Library Value="boost_thread"/>
         <Library Value="boost_chrono"/>
-        <Library Value="python2.6"/>
         <Library Value="X11"/>
         <Library Value="KFL_gcc_x86"/>
         <Library Value="kfont_gcc_x86"/>
@@ -682,7 +668,6 @@
     <Configuration Name="Release_win_x64" CompilerType="gnu g++" DebuggerType="GNU gdb debugger" Type="Dynamic Library" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
       <Compiler Options="-m64 -O2" C_Options="-m64 -O2" Required="yes" PreCompiledHeader="../../Core/Include/KlayGE/KlayGE.hpp" PCHInCommandLine="no" UseDifferentPCHFlags="no" PCHFlags="">
         <IncludePath Value="../../../External/boost"/>
-        <IncludePath Value="../../../External/Python/include"/>
         <IncludePath Value="../../../External/7z"/>
         <IncludePath Value="../../../KFL/include"/>
         <IncludePath Value="../../Core/Include"/>
@@ -696,7 +681,6 @@
       </Compiler>
       <Linker Options="-s" Required="yes">
         <LibraryPath Value="../../../External/boost/lib_mgw_x64/lib"/>
-        <LibraryPath Value="../../../External/Python/libs/amd64"/>
         <LibraryPath Value="../../../KFL/lib/win_x64"/>
         <LibraryPath Value="../../lib/win_x64"/>
         <LibraryPath Value="../../../kfont/lib/win_x64"/>
@@ -708,7 +692,6 @@
         <Library Value="gdi32"/>
         <Library Value="oleaut32"/>
         <Library Value="wsock32"/>
-        <Library Value="python32"/>
         <Library Value="KFL_mgw_x64"/>
         <Library Value="kfont_mgw_x64"/>
         <Library Value="MeshMLLib_mgw_x64"/>
@@ -749,7 +732,6 @@
     <Configuration Name="Release_win_x86" CompilerType="gnu g++" DebuggerType="GNU gdb debugger" Type="Dynamic Library" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
       <Compiler Options="-m32 -O2" C_Options="-m32 -O2" Required="yes" PreCompiledHeader="../../Core/Include/KlayGE/KlayGE.hpp" PCHInCommandLine="no" UseDifferentPCHFlags="no" PCHFlags="">
         <IncludePath Value="../../../External/boost"/>
-        <IncludePath Value="../../../External/Python/include"/>
         <IncludePath Value="../../../External/7z"/>
         <IncludePath Value="../../../KFL/include"/>
         <IncludePath Value="../../Core/Include"/>
@@ -763,7 +745,6 @@
       </Compiler>
       <Linker Options="-s" Required="yes">
         <LibraryPath Value="../../../External/boost/lib_mgw_x86/lib"/>
-        <LibraryPath Value="../../../External/Python/libs"/>
         <LibraryPath Value="../../../KFL/lib/win_x86"/>
         <LibraryPath Value="../../lib/win_x86"/>
         <LibraryPath Value="../../../kfont/lib/win_x86"/>
@@ -771,7 +752,6 @@
         <Library Value="gdi32"/>
         <Library Value="oleaut32"/>
         <Library Value="wsock32"/>
-        <Library Value="python32"/>
         <Library Value="kfont_mgw_x86"/>
         <Library Value="MeshMLLib_mgw_x86"/>
         <Library Value="KFL_mgw_x86"/>
