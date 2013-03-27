@@ -3,10 +3,6 @@ SET(SOURCE_FILES
 	${KLAYGE_PROJECT_DIR}/Tools/src/GLCompatibility/GLCompatibility.py
 )
 
-SET(EXTRA_INCLUDE_DIRS
-	${KLAYGE_PROJECT_DIR}/../External/Python/Include
-)
-
 IF(CMAKE_GENERATOR MATCHES "Win64")
 	SET(EXTRA_LINKED_DIRS
 		${KLAYGE_PROJECT_DIR}/../External/Python/libs/amd64

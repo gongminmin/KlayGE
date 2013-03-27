@@ -1,6 +1,5 @@
 #include <KlayGE/KlayGE.hpp>
 #include <KFL/Util.hpp>
-#include <KlayGE/Context.hpp>
 #include <KlayGE/JudaTexture.hpp>
 
 #include <iostream>
@@ -154,6 +153,13 @@ void Deploy(std::vector<std::string> const & res_names, std::string const & res_
 				ofs << "MeshMLJIT \"" << res_names[i] << std::endl;
 			}
 		}
+		else if ("effect" == res_type)
+		{
+			for (size_t i = 0; i < res_names.size(); ++ i)
+			{
+				ofs << "FXMLJIT " << platform << " \"" << res_names[i] << std::endl;
+			}
+		}
 	}
 	else if (("pc_dx9" == platform) || ("pc_gl2" == platform))
 	{
@@ -202,6 +208,13 @@ void Deploy(std::vector<std::string> const & res_names, std::string const & res_
 				ofs << "MeshMLJIT \"" << res_names[i] << "\" N8" << std::endl;
 			}
 		}
+		else if ("effect" == res_type)
+		{
+			for (size_t i = 0; i < res_names.size(); ++ i)
+			{
+				ofs << "FXMLJIT " << platform << " \"" << res_names[i] << std::endl;
+			}
+		}
 	}
 	else if ("android_tegra3" == platform)
 	{
@@ -247,6 +260,13 @@ void Deploy(std::vector<std::string> const & res_names, std::string const & res_
 			for (size_t i = 0; i < res_names.size(); ++ i)
 			{
 				ofs << "MeshMLJIT \"" << res_names[i] << "\" N8" << std::endl;
+			}
+		}
+		else if ("effect" == res_type)
+		{
+			for (size_t i = 0; i < res_names.size(); ++ i)
+			{
+				ofs << "FXMLJIT " << platform << " \"" << res_names[i] << std::endl;
 			}
 		}
 	}
@@ -362,22 +382,6 @@ int main(int argc, char* argv[])
 
 	boost::algorithm::to_lower(res_type);
 	boost::algorithm::to_lower(platform);
-
-	Context::Instance().LoadCfg("KlayGE.cfg");
-	ContextCfg context_cfg = Context::Instance().Config();
-	if (("pc_dx11" == platform) || ("pc_dx10" == platform) || ("pc_dx9" == platform))
-	{
-		context_cfg.render_factory_name = "D3D11";
-	}
-	if (("pc_gl4" == platform) || ("pc_gl3" == platform) || ("pc_gl2" == platform))
-	{
-		context_cfg.render_factory_name = "OpenGL";
-	}
-	if ("android_tegra3" == platform)
-	{
-		context_cfg.render_factory_name = "OpenGLES";
-	}
-	Context::Instance().Config(context_cfg);
 
 	Deploy(res_names, res_type, platform);
 

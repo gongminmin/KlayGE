@@ -508,6 +508,18 @@ namespace KlayGE
 		}
 	}
 
+	void ResLoader::Unload(shared_ptr<void> const & res)
+	{
+		for (KLAYGE_AUTO(iter, loaded_res_.begin()); iter != loaded_res_.end(); ++ iter)
+		{
+			if (res == iter->second.lock())
+			{
+				loaded_res_.erase(iter);
+				break;
+			}
+		}
+	}
+
 	void ResLoader::AddLoadedResource(ResLoadingDescPtr const & res_desc, shared_ptr<void> const & res)
 	{
 		bool found = false;

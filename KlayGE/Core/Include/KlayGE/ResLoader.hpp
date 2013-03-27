@@ -111,6 +111,7 @@ namespace KlayGE
 
 		shared_ptr<void> SyncQuery(ResLoadingDescPtr const & res_desc);
 		function<shared_ptr<void>()> ASyncQuery(ResLoadingDescPtr const & res_desc);
+		void Unload(shared_ptr<void> const & res);
 
 		template <typename T>
 		shared_ptr<T> SyncQueryT(ResLoadingDescPtr const & res_desc)
@@ -122,6 +123,12 @@ namespace KlayGE
 		function<shared_ptr<T>()> ASyncQueryT(ResLoadingDescPtr const & res_desc)
 		{
 			return EmptyFuncToT<T>(this->ASyncQuery(res_desc));
+		}
+
+		template <typename T>
+		void Unload(shared_ptr<T> const & res)
+		{
+			this->Unload(static_pointer_cast<void>(res));
 		}
 
 		void Update();
