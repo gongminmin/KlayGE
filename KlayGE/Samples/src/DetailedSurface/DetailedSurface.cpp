@@ -606,7 +606,7 @@ uint32_t DetailedSurfaceApp::DoUpdate(uint32_t /*pass*/)
 
 			action_handler_t input_handler = MakeSharedPtr<input_signal>();
 			input_handler->connect(KlayGE::bind(&DetailedSurfaceApp::InputHandler, this, KlayGE::placeholders::_1, KlayGE::placeholders::_2));
-			inputEngine.ActionMap(actionMap, input_handler, true);
+			inputEngine.ActionMap(actionMap, input_handler);
 
 			loading_percentage_ = 90;
 			progress_bar->SetValue(loading_percentage_);

@@ -317,8 +317,7 @@ namespace KlayGE
 		void Update();
 		float ElapsedTime() const;
 
-		void ActionMap(InputActionMap const & actionMap,
-			action_handler_t handler, bool reenumerate = false);
+		void ActionMap(InputActionMap const & actionMap, action_handler_t handler);
 
 		size_t NumDevices() const;
 		InputDevicePtr Device(size_t index) const;

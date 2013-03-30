@@ -325,7 +325,7 @@ uint32_t ProceduralTexApp::DoUpdate(uint32_t /*pass*/)
 
 			action_handler_t input_handler = MakeSharedPtr<input_signal>();
 			input_handler->connect(KlayGE::bind(&ProceduralTexApp::InputHandler, this, KlayGE::placeholders::_1, KlayGE::placeholders::_2));
-			inputEngine.ActionMap(actionMap, input_handler, true);
+			inputEngine.ActionMap(actionMap, input_handler);
 
 			loading_percentage_ = 90;
 			progress_bar->SetValue(loading_percentage_);

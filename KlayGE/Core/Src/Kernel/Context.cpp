@@ -100,6 +100,8 @@ namespace KlayGE
 	{
 		ResLoader::Destroy();
 
+		app_ = nullptr;
+
 		scene_mgr_.reset();
 
 		render_factory_.reset();

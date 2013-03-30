@@ -461,7 +461,7 @@ void OrderIndependentTransparencyApp::InitObjects()
 
 	action_handler_t input_handler = MakeSharedPtr<input_signal>();
 	input_handler->connect(KlayGE::bind(&OrderIndependentTransparencyApp::InputHandler, this, KlayGE::placeholders::_1, KlayGE::placeholders::_2));
-	inputEngine.ActionMap(actionMap, input_handler, true);
+	inputEngine.ActionMap(actionMap, input_handler);
 
 	blend_pp_ = SyncLoadPostProcess("Blend.ppml", "blend");
 

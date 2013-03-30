@@ -315,7 +315,7 @@ void JudaTexViewer::InitObjects()
 
 	action_handler_t input_handler = MakeSharedPtr<input_signal>();
 	input_handler->connect(KlayGE::bind(&JudaTexViewer::InputHandler, this, KlayGE::placeholders::_1, KlayGE::placeholders::_2));
-	inputEngine.ActionMap(actionMap, input_handler, true);
+	inputEngine.ActionMap(actionMap, input_handler);
 
 	UIManager::Instance().Load(ResLoader::Instance().Open("JudaTexViewer.uiml"));
 	dialog_ = UIManager::Instance().GetDialogs()[0];

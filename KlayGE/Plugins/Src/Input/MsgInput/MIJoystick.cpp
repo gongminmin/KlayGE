@@ -53,7 +53,7 @@ namespace KlayGE
 			MsgInputEngine const & mie = *checked_cast<MsgInputEngine const *>(&Context::Instance().InputFactoryInstance().InputEngineInstance());
 
 			UINT size;
-			if (0 == GetRawInputDeviceInfo(ri.header.hDevice, RIDI_PREPARSEDDATA, NULL, &size))
+			if (0 == GetRawInputDeviceInfo(ri.header.hDevice, RIDI_PREPARSEDDATA, nullptr, &size))
 			{
 				std::vector<uint8_t> buf(size);
 				if (GetRawInputDeviceInfo(ri.header.hDevice, RIDI_PREPARSEDDATA, &buf[0], &size) >= 0)

@@ -757,7 +757,7 @@ void MotionBlurDoFApp::InitObjects()
 
 	action_handler_t input_handler = MakeSharedPtr<input_signal>();
 	input_handler->connect(KlayGE::bind(&MotionBlurDoFApp::InputHandler, this, KlayGE::placeholders::_1, KlayGE::placeholders::_2));
-	inputEngine.ActionMap(actionMap, input_handler, true);
+	inputEngine.ActionMap(actionMap, input_handler);
 
 	depth_of_field_ = MakeSharedPtr<DepthOfField>();
 	if (re.DeviceCaps().max_shader_model >= 3)

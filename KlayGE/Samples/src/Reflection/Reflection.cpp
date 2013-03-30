@@ -255,7 +255,7 @@ void ScreenSpaceReflectionApp::InitObjects()
 
 	action_handler_t input_handler = MakeSharedPtr<input_signal>();
 	input_handler->connect(KlayGE::bind(&ScreenSpaceReflectionApp::InputHandler, this, KlayGE::placeholders::_1, KlayGE::placeholders::_2));
-	inputEngine.ActionMap(actionMap, input_handler, true);
+	inputEngine.ActionMap(actionMap, input_handler);
 
 	UIManager::Instance().Load(ResLoader::Instance().Open("Reflection.uiml"));
 	parameter_dialog_ = UIManager::Instance().GetDialog("Reflection");

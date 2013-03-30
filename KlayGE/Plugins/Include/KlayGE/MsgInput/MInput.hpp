@@ -114,7 +114,7 @@ namespace KlayGE
 	class MsgInputMouse : public InputMouse, public MsgInputDevice
 	{
 	public:
-		MsgInputMouse();
+		explicit MsgInputMouse();
 
 		virtual std::wstring const & Name() const KLAYGE_OVERRIDE;
 		virtual void OnRawInput(RAWINPUT const & ri) KLAYGE_OVERRIDE;

@@ -758,7 +758,7 @@ void GPUParticleSystemApp::InitObjects()
 
 	action_handler_t input_handler = MakeSharedPtr<input_signal>();
 	input_handler->connect(KlayGE::bind(&GPUParticleSystemApp::InputHandler, this, KlayGE::placeholders::_1, KlayGE::placeholders::_2));
-	inputEngine.ActionMap(actionMap, input_handler, true);
+	inputEngine.ActionMap(actionMap, input_handler);
 
 	particles_ = MakeSharedPtr<ParticlesObject>(NUM_PARTICLE);
 	particles_->AddToSceneManager();

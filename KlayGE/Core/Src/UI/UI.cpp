@@ -345,8 +345,6 @@ namespace KlayGE
 		on_mouse_up_connect_.disconnect();
 		on_mouse_wheel_connect_.disconnect();
 		on_mouse_over_connect_.disconnect();
-
-		this->Destroy();
 	}
 	
 	UIManager& UIManager::Instance()

@@ -699,7 +699,7 @@ void CausticsMapApp::InitObjects()
 	action_map.AddActions(actions, actions + sizeof(actions) / sizeof(actions[0]));
 	action_handler_t input_handler = MakeSharedPtr<input_signal>();
 	input_handler->connect(KlayGE::bind(&CausticsMapApp::InputHandler, this, KlayGE::placeholders::_1, KlayGE::placeholders::_2));
-	ie.ActionMap(action_map, input_handler, true);
+	ie.ActionMap(action_map, input_handler);
 
 	//Model
 	plane_object_ = MakeSharedPtr<PlaneObject>(50.f, 50.f);

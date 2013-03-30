@@ -57,20 +57,13 @@ namespace KlayGE
 
 	// 设置动作格式
 	//////////////////////////////////////////////////////////////////////////////////
-	void InputEngine::ActionMap(InputActionMap const & actionMap,
-		action_handler_t handler, bool reenumerate)
+	void InputEngine::ActionMap(InputActionMap const & actionMap, action_handler_t handler)
 	{
 		// 保存新的动作格式
 		action_handlers_.push_back(std::make_pair(actionMap, handler));
 
-		// 只有当调用时指定要重新枚举时才销毁并重枚举设备
-		// 设备列表有可能在循环中使用，如果这时枚举设备有可能造成问题
-		if (reenumerate)
+		if (devices_.empty())
 		{
-			// 清除以前枚举的设备
-			devices_.clear();
-
-			// 重新枚举合适的设备
 			this->EnumDevices();
 		}
 

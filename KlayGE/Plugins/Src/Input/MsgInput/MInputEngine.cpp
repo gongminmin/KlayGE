@@ -77,7 +77,7 @@ namespace KlayGE
 		HWND hwnd = main_wnd->HWnd();
 			
 		UINT devices;
-		if (GetRawInputDeviceList(NULL, &devices, sizeof(RAWINPUTDEVICELIST)) != 0)
+		if (GetRawInputDeviceList(nullptr, &devices, sizeof(RAWINPUTDEVICELIST)) != 0)
 		{
 			THR(errc::function_not_supported);
 		}
@@ -145,7 +145,7 @@ namespace KlayGE
 	{
 		HRAWINPUT ri = reinterpret_cast<HRAWINPUT>(param);
 		UINT size;
-		if (0 == GetRawInputData(ri, RID_INPUT, NULL, &size, sizeof(RAWINPUTHEADER)))
+		if (0 == GetRawInputData(ri, RID_INPUT, nullptr, &size, sizeof(RAWINPUTHEADER)))
 		{
 			std::vector<uint8_t> data(size);
 			if (GetRawInputData(ri, RID_INPUT, &data[0], &size, sizeof(RAWINPUTHEADER)) >= 0)

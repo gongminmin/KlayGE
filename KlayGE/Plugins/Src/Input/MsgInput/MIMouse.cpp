@@ -66,12 +66,12 @@ namespace KlayGE
 
 			if (MOUSE_MOVE_RELATIVE == ri.data.mouse.usFlags)
 			{
-				offset_state_.x() = ri.data.mouse.lLastX;
-				offset_state_.y() = ri.data.mouse.lLastY;
+				offset_state_.x() += ri.data.mouse.lLastX;
+				offset_state_.y() += ri.data.mouse.lLastY;
 			}
 			if (ri.data.mouse.usButtonFlags & RI_MOUSE_WHEEL)
 			{
-				offset_state_.z() = static_cast<short>(ri.data.mouse.usButtonData);
+				offset_state_.z() += static_cast<short>(ri.data.mouse.usButtonData);
 			}
 		}
 	}
