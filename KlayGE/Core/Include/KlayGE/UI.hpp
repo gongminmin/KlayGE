@@ -425,6 +425,11 @@ namespace KlayGE
 
 		void SettleCtrls(uint32_t width, uint32_t height);
 
+		bool MouseOnUI() const
+		{
+			return mouse_on_ui_;
+		}
+
 	private:
 		void KeyDownHandler(wchar_t key);
 		void KeyUpHandler(wchar_t key);
@@ -464,6 +469,8 @@ namespace KlayGE
 		boost::signals2::connection on_mouse_up_connect_;
 		boost::signals2::connection on_mouse_wheel_connect_;
 		boost::signals2::connection on_mouse_over_connect_;
+
+		bool mouse_on_ui_;
 	};
 
 	class KLAYGE_CORE_API UIDialog

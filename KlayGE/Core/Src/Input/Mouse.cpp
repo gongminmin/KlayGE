@@ -23,7 +23,7 @@
 namespace KlayGE
 {
 	InputMouse::InputMouse()
-		: index_(false)
+		: abs_pos_(0, 0), offset_(0, 0, 0), index_(false)
 	{
 		buttons_[0].fill(false);
 		buttons_[1].fill(false);

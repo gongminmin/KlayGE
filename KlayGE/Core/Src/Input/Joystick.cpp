@@ -22,7 +22,7 @@
 namespace KlayGE
 {
 	InputJoystick::InputJoystick()
-		: index_(false)
+		: pos_(0, 0, 0), rot_(0, 0, 0), slider_(0, 0), index_(false)
 	{
 		buttons_[0].fill(false);
 		buttons_[1].fill(false);

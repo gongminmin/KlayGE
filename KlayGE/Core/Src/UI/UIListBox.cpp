@@ -276,10 +276,10 @@ namespace KlayGE
 			InputEngine& ie = Context::Instance().InputFactoryInstance().InputEngineInstance();
 			for (uint32_t i = 0; i < ie.NumDevices(); ++ i)
 			{
-				InputKeyboardPtr k = dynamic_pointer_cast<InputKeyboard>(ie.Device(i));
-				if (k)
+				InputDevicePtr device = ie.Device(i);
+				if (InputEngine::IDT_Keyboard == device->Type())
 				{
-					key_board = k;
+					key_board = checked_pointer_cast<InputKeyboard>(device);
 					break;
 				}
 			}

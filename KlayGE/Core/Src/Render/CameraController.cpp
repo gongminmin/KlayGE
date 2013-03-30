@@ -121,28 +121,17 @@ namespace KlayGE
 			InputMousePtr mouse;
 			for (uint32_t i = 0; i < ie.NumDevices(); ++ i)
 			{
-				InputMousePtr m = dynamic_pointer_cast<InputMouse>(ie.Device(i));
-				if (m)
+				InputDevicePtr device = ie.Device(i);
+				if (InputEngine::IDT_Mouse == device->Type())
 				{
-					mouse = m;
+					mouse = checked_pointer_cast<InputMouse>(device);
 					break;
 				}
 			}
 
 			if (mouse)
 			{
-				bool mouse_on_ui = false;
-				std::vector<UIDialogPtr> const & dlgs = UIManager::Instance().GetDialogs();
-				for (size_t i = 0; i < dlgs.size(); ++ i)
-				{
-					if (dlgs[i]->GetVisible() && dlgs[i]->ContainsPoint(int2(mouse->AbsX(), mouse->AbsY())))
-					{
-						mouse_on_ui = true;
-						break;
-					}
-				}
-
-				if (!mouse_on_ui)
+				if (!UIManager::Instance().MouseOnUI())
 				{
 					if (mouse->LeftButton())
 					{
@@ -322,10 +311,10 @@ namespace KlayGE
 			InputMousePtr mouse;
 			for (uint32_t i = 0; i < ie.NumDevices(); ++ i)
 			{
-				InputMousePtr m = dynamic_pointer_cast<InputMouse>(ie.Device(i));
-				if (m)
+				InputDevicePtr device = ie.Device(i);
+				if (InputEngine::IDT_Mouse == device->Type())
 				{
-					mouse = m;
+					mouse = checked_pointer_cast<InputMouse>(device);
 					break;
 				}
 			}
@@ -335,18 +324,7 @@ namespace KlayGE
 				float xd = static_cast<float>(mouse->X());
 				float yd = static_cast<float>(mouse->Y());
 
-				bool mouse_on_ui = false;
-				std::vector<UIDialogPtr> const & dlgs = UIManager::Instance().GetDialogs();
-				for (size_t i = 0; i < dlgs.size(); ++ i)
-				{
-					if (dlgs[i]->GetVisible() && dlgs[i]->ContainsPoint(int2(mouse->AbsX(), mouse->AbsY())))
-					{
-						mouse_on_ui = true;
-						break;
-					}
-				}
-
-				if (!mouse_on_ui)
+				if (!UIManager::Instance().MouseOnUI())
 				{
 					if (mouse->LeftButton())
 					{

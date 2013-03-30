@@ -336,10 +336,10 @@ void JudaTexViewer::InputHandler(InputEngine const & sender, InputAction const &
 	InputMousePtr mouse;
 	for (uint32_t i = 0; i < sender.NumDevices(); ++ i)
 	{
-		InputMousePtr m = dynamic_pointer_cast<InputMouse>(sender.Device(i));
-		if (m)
+		InputDevicePtr device = sender.Device(i);
+		if (InputEngine::IDT_Mouse == device->Type())
 		{
-			mouse = m;
+			mouse = checked_pointer_cast<InputMouse>(device);
 			break;
 		}
 	}

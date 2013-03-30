@@ -333,6 +333,8 @@ namespace KlayGE
 			KlayGE::placeholders::_2, KlayGE::placeholders::_3, KlayGE::placeholders::_4));
 		on_mouse_over_connect_ = main_wnd->OnMouseOver().connect(KlayGE::bind(&UIManager::MouseOverHandler, this,
 			KlayGE::placeholders::_2, KlayGE::placeholders::_3));
+
+		mouse_on_ui_ = false;
 	}
 
 	UIManager::~UIManager()
@@ -1075,11 +1077,13 @@ namespace KlayGE
 
 	void UIManager::MouseDownHandler(uint32_t buttons, int2 const & pt)
 	{
+		mouse_on_ui_ = false;
 		typedef KLAYGE_DECLTYPE(dialogs_) DialogsType;
 		KLAYGE_FOREACH(DialogsType::reference dialog, dialogs_)
 		{
-			if (dialog->GetVisible())
+			if (dialog->GetVisible() && dialog->ContainsPoint(pt))
 			{
+				mouse_on_ui_ = true;
 				dialog->MouseDownHandler(buttons, dialog->ToLocal(pt));
 			}
 		}
@@ -1087,11 +1091,13 @@ namespace KlayGE
 
 	void UIManager::MouseUpHandler(uint32_t buttons, int2 const & pt)
 	{
+		mouse_on_ui_ = false;
 		typedef KLAYGE_DECLTYPE(dialogs_) DialogsType;
 		KLAYGE_FOREACH(DialogsType::reference dialog, dialogs_)
 		{
-			if (dialog->GetVisible())
+			if (dialog->GetVisible() && dialog->ContainsPoint(pt))
 			{
+				mouse_on_ui_ = true;
 				dialog->MouseUpHandler(buttons, dialog->ToLocal(pt));
 			}
 		}
@@ -1099,11 +1105,13 @@ namespace KlayGE
 
 	void UIManager::MouseWheelHandler(uint32_t buttons, int2 const & pt, int32_t z_delta)
 	{
+		mouse_on_ui_ = false;
 		typedef KLAYGE_DECLTYPE(dialogs_) DialogsType;
 		KLAYGE_FOREACH(DialogsType::reference dialog, dialogs_)
 		{
-			if (dialog->GetVisible())
+			if (dialog->GetVisible() && dialog->ContainsPoint(pt))
 			{
+				mouse_on_ui_ = true;
 				dialog->MouseWheelHandler(buttons, dialog->ToLocal(pt), z_delta);
 			}
 		}
@@ -1111,11 +1119,13 @@ namespace KlayGE
 
 	void UIManager::MouseOverHandler(uint32_t buttons, int2 const & pt)
 	{
+		mouse_on_ui_ = false;
 		typedef KLAYGE_DECLTYPE(dialogs_) DialogsType;
 		KLAYGE_FOREACH(DialogsType::reference dialog, dialogs_)
 		{
-			if (dialog->GetVisible())
+			if (dialog->GetVisible() && dialog->ContainsPoint(pt))
 			{
+				mouse_on_ui_ = true;
 				dialog->MouseOverHandler(buttons, dialog->ToLocal(pt));
 			}
 		}
@@ -1498,7 +1508,7 @@ namespace KlayGE
 
 			if (UICT_RadioButton == pControl->GetType())
 			{
-				UIRadioButton* pRadioButton = dynamic_cast<UIRadioButton*>(pControl.get());
+				UIRadioButton* pRadioButton = checked_cast<UIRadioButton*>(pControl.get());
 
 				if (pRadioButton->GetButtonGroup() == nButtonGroup)
 				{

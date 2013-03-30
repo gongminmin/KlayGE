@@ -216,8 +216,6 @@ namespace KlayGE
 	App3DFramework::~App3DFramework()
 	{
 		this->Destroy();
-
-		main_wnd_.reset();
 	}
 
 	// 建立应用程序主窗口
@@ -256,15 +254,11 @@ namespace KlayGE
 	{
 		this->DelObjects();
 
+		main_wnd_.reset();
+
 		ResLoader::Destroy();
-
-		Context::Instance().SceneManagerInstance(SceneManagerPtr());
-		Context::Instance().AudioFactoryInstance(AudioFactoryPtr());
-		Context::Instance().ShowFactoryInstance(ShowFactoryPtr());
-
 		UIManager::Destroy();
-		Context::Instance().DeferredRenderingLayerInstance(DeferredRenderingLayerPtr());
-		Context::Instance().RenderFactoryInstance(RenderFactoryPtr());
+		Context::Destroy();
 	}
 
 	WindowPtr App3DFramework::MakeWindow(std::string const & name, RenderSettings const & settings)

@@ -298,6 +298,14 @@ namespace KlayGE
 		typedef std::vector<std::pair<InputActionMap, action_handler_t> > action_handlers_t;
 
 	public:
+		enum InputDeviceType
+		{
+			IDT_Keyboard,
+			IDT_Mouse,
+			IDT_Joystick
+		};
+
+	public:
 		virtual ~InputEngine();
 
 		static InputEnginePtr NullObject();
@@ -331,6 +339,7 @@ namespace KlayGE
 		virtual ~InputDevice();
 
 		virtual std::wstring const & Name() const = 0;
+		virtual InputEngine::InputDeviceType Type() const = 0;
 
 		virtual void UpdateInputs() = 0;
 		virtual InputActionsType UpdateActionMap(uint32_t id) = 0;
@@ -347,6 +356,11 @@ namespace KlayGE
 		InputKeyboard();
 		virtual ~InputKeyboard();
 
+		virtual InputEngine::InputDeviceType Type() const KLAYGE_OVERRIDE
+		{
+			return InputEngine::IDT_Keyboard;
+		}
+
 		size_t NumKeys() const;
 		bool Key(size_t n) const;
 		bool const * Keys() const;
@@ -354,8 +368,8 @@ namespace KlayGE
 		bool KeyDown(size_t n) const;
 		bool KeyUp(size_t n) const;
 
-		InputActionsType UpdateActionMap(uint32_t id);
-		void ActionMap(uint32_t id, InputActionMap const & actionMap);
+		virtual InputActionsType UpdateActionMap(uint32_t id) KLAYGE_OVERRIDE;
+		virtual void ActionMap(uint32_t id, InputActionMap const & actionMap) KLAYGE_OVERRIDE;
 
 	protected:
 		array<array<bool, 256>, 2> keys_;
@@ -367,6 +381,11 @@ namespace KlayGE
 	public:
 		InputMouse();
 		virtual ~InputMouse();
+
+		virtual InputEngine::InputDeviceType Type() const KLAYGE_OVERRIDE
+		{
+			return InputEngine::IDT_Mouse;
+		}
 
 		long AbsX() const;
 		long AbsY() const;
@@ -384,8 +403,8 @@ namespace KlayGE
 		bool ButtonDown(size_t n) const;
 		bool ButtonUp(size_t n) const;
 
-		InputActionsType UpdateActionMap(uint32_t id);
-		void ActionMap(uint32_t id, InputActionMap const & actionMap);
+		virtual InputActionsType UpdateActionMap(uint32_t id) KLAYGE_OVERRIDE;
+		virtual void ActionMap(uint32_t id, InputActionMap const & actionMap) KLAYGE_OVERRIDE;
 
 	protected:
 		Vector_T<long, 2> abs_pos_;
@@ -400,6 +419,11 @@ namespace KlayGE
 	public:
 		InputJoystick();
 		virtual ~InputJoystick();
+
+		virtual InputEngine::InputDeviceType Type() const KLAYGE_OVERRIDE
+		{
+			return InputEngine::IDT_Joystick;
+		}
 
 		long XPos() const;
 		long YPos() const;
@@ -417,8 +441,8 @@ namespace KlayGE
 		bool ButtonDown(size_t n) const;
 		bool ButtonUp(size_t n) const;
 
-		InputActionsType UpdateActionMap(uint32_t id);
-		void ActionMap(uint32_t id, InputActionMap const & actionMap);
+		virtual InputActionsType UpdateActionMap(uint32_t id) KLAYGE_OVERRIDE;
+		virtual void ActionMap(uint32_t id, InputActionMap const & actionMap) KLAYGE_OVERRIDE;
 
 	protected:
 		Vector_T<long, 3> pos_;		// x, y, z axis position

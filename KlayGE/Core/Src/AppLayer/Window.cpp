@@ -493,6 +493,10 @@ namespace KlayGE
 			}
 			break;
 
+		case WM_INPUT:
+			this->OnRawInput()(*this, static_cast<uint64_t>(lParam));
+			break;
+
 		case WM_CLOSE:
 			this->OnClose()(*this);
 			closed_ = true;
