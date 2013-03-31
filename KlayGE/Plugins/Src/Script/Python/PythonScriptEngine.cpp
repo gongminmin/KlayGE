@@ -259,10 +259,6 @@ namespace KlayGE
 			}
 			ret = boost::any(v);
 		}
-		else
-		{
-			BOOST_ASSERT(false);
-		}
 		return ret;
 	}
 

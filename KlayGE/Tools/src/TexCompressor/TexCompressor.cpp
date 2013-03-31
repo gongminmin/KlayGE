@@ -1,7 +1,5 @@
 #include <KlayGE/KlayGE.hpp>
 #include <KFL/Util.hpp>
-#include <KlayGE/Context.hpp>
-#include <KlayGE/ResLoader.hpp>
 #include <KlayGE/Texture.hpp>
 #include <KFL/Math.hpp>
 
@@ -88,8 +86,6 @@ int main(int argc, char* argv[])
 		cout << "Usage: TexCompressor BC1|BC2|BC3|BC4|BC5 xxx.dds [yyy.dds]" << endl;
 		return 1;
 	}
-
-	ResLoader::Instance().AddPath("../../../bin");
 
 	std::string fmt_str = argv[1];
 	ElementFormat fmt;

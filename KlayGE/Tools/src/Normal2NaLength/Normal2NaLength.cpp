@@ -1,7 +1,5 @@
 #include <KlayGE/KlayGE.hpp>
 #include <KFL/Util.hpp>
-#include <KlayGE/Context.hpp>
-#include <KlayGE/ResLoader.hpp>
 #include <KlayGE/Texture.hpp>
 #include <KFL/Math.hpp>
 #include <KlayGE/BlockCompression.hpp>
@@ -308,8 +306,6 @@ int main(int argc, char* argv[])
 		cout << "Usage: Normal2NaLength xxx.dds yyy.dds [BC4 | BC1 | R]" << endl;
 		return 1;
 	}
-
-	ResLoader::Instance().AddPath("../../../bin");
 
 	ElementFormat new_format = EF_BC4;
 	if (argc >= 4)

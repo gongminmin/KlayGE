@@ -1,7 +1,5 @@
 #include <KlayGE/KlayGE.hpp>
 #include <KFL/Util.hpp>
-#include <KlayGE/Context.hpp>
-#include <KlayGE/ResLoader.hpp>
 #include <KlayGE/Texture.hpp>
 #include <KFL/Math.hpp>
 
@@ -108,8 +106,6 @@ int main(int argc, char* argv[])
 		cout << "Usage: Mipmapper xxx.dds [yyy.dds]" << endl;
 		return 1;
 	}
-
-	ResLoader::Instance().AddPath("../../../bin");
 
 	std::string in_file = argv[1];
 	std::string out_file;

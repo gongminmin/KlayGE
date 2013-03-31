@@ -1,7 +1,5 @@
 #include <KlayGE/KlayGE.hpp>
 #include <KFL/Util.hpp>
-#include <KlayGE/Context.hpp>
-#include <KlayGE/ResLoader.hpp>
 #include <KlayGE/Texture.hpp>
 #include <KFL/Math.hpp>
 #include <KlayGE/BlockCompression.hpp>
@@ -294,8 +292,6 @@ int main(int argc, char* argv[])
 		cout << "Usage: NormalMapCompressor xxx.dds yyy.dds [BC3 | BC5 | GR]" << endl;
 		return 1;
 	}
-
-	ResLoader::Instance().AddPath("../../../bin");
 
 	ElementFormat new_format = EF_BC5;
 	if (argc >= 4)

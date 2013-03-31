@@ -102,7 +102,7 @@ INT_PTR CALLBACK Graphics_Tab_DlgProc(HWND hDlg, UINT uMsg, WPARAM /*wParam*/, L
 			}
 			if (mod_gles2)
 			{
-				SendMessage(hFactoryCombo, CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(TEXT("OpenGLES2")));
+				SendMessage(hFactoryCombo, CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(TEXT("OpenGLES")));
 				FreeLibrary(mod_gles2);
 			}
 
@@ -380,6 +380,9 @@ INT_PTR CALLBACK Input_Tab_DlgProc(HWND hDlg, UINT uMsg, WPARAM /*wParam*/, LPAR
 	case WM_INITDIALOG:
 		{
 			HWND hFactoryCombo = GetDlgItem(hDlg, IDC_FACTORY_COMBO);
+			{
+				SendMessage(hFactoryCombo, CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(TEXT("MsgInput")));
+			}
 			HMODULE mod_dinput = LoadLibrary(TEXT("dinput8.dll"));
 			if (mod_dinput)
 			{
@@ -793,6 +796,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE /*hPrevInstance*/, LPSTR /*lps
 		Context::Instance().Config(cfg);
 		Context::Instance().SaveCfg(cfg_path);
 	}
+
+	Context::Destroy();
 
 	return 0;
 }

@@ -124,8 +124,6 @@ int main()
 {
 	using namespace KlayGE;
 
-	ResLoader::Instance().AddPath("../../../bin");
-
 	Context::Instance().LoadCfg("KlayGE.cfg");
 	ContextCfg context_cfg = Context::Instance().Config();
 	context_cfg.render_factory_name = "OpenGL";

@@ -92,9 +92,9 @@ namespace KlayGE
 			this->w() = w;
 		}
 
-		static const Quaternion_T& Identity()
+		static Quaternion_T const & Identity()
 		{
-			static const Quaternion_T out(0, 0, 0, 1);
+			static Quaternion_T const out(0, 0, 0, 1);
 			return out;
 		}
 

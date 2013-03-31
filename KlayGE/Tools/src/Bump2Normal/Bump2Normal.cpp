@@ -1,7 +1,5 @@
 #include <KlayGE/KlayGE.hpp>
 #include <KFL/Util.hpp>
-#include <KlayGE/Context.hpp>
-#include <KlayGE/ResLoader.hpp>
 #include <KlayGE/Texture.hpp>
 #include <KFL/Math.hpp>
 
@@ -94,8 +92,6 @@ int main(int argc, char* argv[])
 		cout << "Usage: Bump2Normal xxx.dds yyy.dds [offset=0.5]" << endl;
 		return 1;
 	}
-
-	ResLoader::Instance().AddPath("../../../bin");
 
 	float offset = 0.5f;
 	if (argc >= 4)

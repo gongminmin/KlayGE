@@ -2,7 +2,6 @@
 #include <KFL/Math.hpp>
 #include <KFL/Util.hpp>
 #include <KFL/XMLDom.hpp>
-#include <KlayGE/Context.hpp>
 #include <KlayGE/ResLoader.hpp>
 #include <KlayGE/RenderLayout.hpp>
 #include <KlayGE/LZMACodec.hpp>

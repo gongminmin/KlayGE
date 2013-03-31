@@ -135,7 +135,7 @@ namespace KlayGE
 
 		static Vector_T const & Zero()
 		{
-			static Vector_T<T, N> zero(T(0));
+			static Vector_T<T, N> const zero(T(0));
 			return zero;
 		}
 

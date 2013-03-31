@@ -140,8 +140,7 @@ namespace KlayGE
 	ResLoader::~ResLoader()
 	{
 		quit_ = true;
-		// the thread pool may have ready been destructed, so don't join this thread
-		//(*loading_thread_)();
+		(*loading_thread_)();
 	}
 
 	ResLoader& ResLoader::Instance()

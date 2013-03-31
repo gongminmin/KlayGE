@@ -28,7 +28,6 @@ public:
 	EmptyApp()
 		: App3DFramework("FXML2Shader")
 	{
-		ResLoader::Instance().AddPath("../../../media/RenderFX");
 	}
 
 	void InitObjects()
@@ -300,8 +299,6 @@ int main(int argc, char* argv[])
 	}
 
 	fxml_name = argv[1];
-
-	ResLoader::Instance().AddPath("../../../bin");
 
 	Context::Instance().LoadCfg("KlayGE.cfg");
 	ContextCfg context_cfg = Context::Instance().Config();

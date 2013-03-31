@@ -38,14 +38,13 @@ public:
 
 int main(int argc, char* argv[])
 {
-	std::string src_name("input.dds");
-
-	if (argc > 1)
+	if (argc < 2)
 	{
-		src_name = argv[1];
+		cout << "Usage: FFTLensEffectsGen xxx.dds" << endl;
+		return 1;
 	}
 
-	ResLoader::Instance().AddPath("../../../bin");
+	std::string src_name = argv[1];
 
 	Context::Instance().LoadCfg("KlayGE.cfg");
 	ContextCfg context_cfg = Context::Instance().Config();

@@ -1,7 +1,5 @@
 #include <KlayGE/KlayGE.hpp>
 #include <KFL/Half.hpp>
-#include <KlayGE/Context.hpp>
-#include <KlayGE/ResLoader.hpp>
 #include <KFL/Math.hpp>
 #include <KlayGE/Texture.hpp>
 #include <KlayGE/BlockCompression.hpp>
@@ -420,8 +418,6 @@ int main(int argc, char* argv[])
 			c_format = EF_BC3;
 		}
 	}
-
-	ResLoader::Instance().AddPath("../../../bin");
 
 	filesystem::path output_path(argv[1]);
 	std::string y_file = filesystem::basename(output_path) + "_y" + filesystem::extension(output_path);

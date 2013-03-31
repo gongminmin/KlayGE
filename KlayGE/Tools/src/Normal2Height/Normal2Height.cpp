@@ -1,5 +1,4 @@
 #include <KlayGE/KlayGE.hpp>
-#include <KlayGE/Context.hpp>
 #include <KFL/Math.hpp>
 #include <KlayGE/Texture.hpp>
 #include <KlayGE/BlockCompression.hpp>

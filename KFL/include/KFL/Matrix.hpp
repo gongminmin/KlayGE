@@ -100,7 +100,7 @@ namespace KlayGE
 
 		static Matrix4_T const & Zero()
 		{
-			static Matrix4_T out(
+			static Matrix4_T const out(
 				0, 0, 0, 0,
 				0, 0, 0, 0,
 				0, 0, 0, 0,
@@ -110,7 +110,7 @@ namespace KlayGE
 
 		static Matrix4_T const & Identity()
 		{
-			static Matrix4_T out(
+			static Matrix4_T const out(
 				1, 0, 0, 0,
 				0, 1, 0, 0,
 				0, 0, 1, 0,
