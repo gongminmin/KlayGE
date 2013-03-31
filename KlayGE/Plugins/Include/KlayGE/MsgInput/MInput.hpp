@@ -87,23 +87,13 @@ namespace KlayGE
 		void OnRawInput(Window const & wnd, uint64_t param);
 	};
 
-	class MsgInputDevice
-	{
-	public:
-		virtual ~MsgInputDevice()
-		{
-		}
-
-		virtual void OnRawInput(RAWINPUT const & ri) = 0;
-	};
-
-	class MsgInputKeyboard : public InputKeyboard, public MsgInputDevice
+	class MsgInputKeyboard : public InputKeyboard
 	{
 	public:
 		MsgInputKeyboard();
 
 		virtual std::wstring const & Name() const KLAYGE_OVERRIDE;
-		virtual void OnRawInput(RAWINPUT const & ri) KLAYGE_OVERRIDE;
+		void OnRawInput(RAWINPUT const & ri);
 
 	private:
 		virtual void UpdateInputs() KLAYGE_OVERRIDE;
@@ -111,13 +101,13 @@ namespace KlayGE
 		array<bool, 256> keys_state_;
 	};
 
-	class MsgInputMouse : public InputMouse, public MsgInputDevice
+	class MsgInputMouse : public InputMouse
 	{
 	public:
 		explicit MsgInputMouse();
 
 		virtual std::wstring const & Name() const KLAYGE_OVERRIDE;
-		virtual void OnRawInput(RAWINPUT const & ri) KLAYGE_OVERRIDE;
+		void OnRawInput(RAWINPUT const & ri);
 
 	private:
 		virtual void UpdateInputs() KLAYGE_OVERRIDE;
@@ -126,13 +116,13 @@ namespace KlayGE
 		array<bool, 8> buttons_state_;
 	};
 
-	class MsgInputJoystick : public InputJoystick, public MsgInputDevice
+	class MsgInputJoystick : public InputJoystick
 	{
 	public:
 		MsgInputJoystick();
 
 		virtual std::wstring const & Name() const KLAYGE_OVERRIDE;
-		virtual void OnRawInput(RAWINPUT const & ri) KLAYGE_OVERRIDE;
+		void OnRawInput(RAWINPUT const & ri);
 
 	private:
 		virtual void UpdateInputs() KLAYGE_OVERRIDE;

@@ -155,7 +155,23 @@ namespace KlayGE
 				typedef KLAYGE_DECLTYPE(devices_) DevicesType;
 				KLAYGE_FOREACH(DevicesType::reference device, devices_)
 				{
-					dynamic_pointer_cast<MsgInputDevice>(device)->OnRawInput(*raw);
+					switch (raw->header.dwType)
+					{
+					case RIM_TYPEKEYBOARD:
+						checked_pointer_cast<MsgInputKeyboard>(device)->OnRawInput(*raw);
+						break;
+
+					case RIM_TYPEMOUSE:
+						checked_pointer_cast<MsgInputMouse>(device)->OnRawInput(*raw);
+						break;
+
+					case RIM_TYPEHID:
+						checked_pointer_cast<MsgInputJoystick>(device)->OnRawInput(*raw);
+						break;
+
+					default:
+						break;
+					}
 				}
 			}
 		}
