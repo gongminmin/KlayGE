@@ -90,7 +90,7 @@ namespace KlayGE
 	class MsgInputKeyboard : public InputKeyboard
 	{
 	public:
-		MsgInputKeyboard();
+		explicit MsgInputKeyboard(HANDLE device);
 
 		virtual std::wstring const & Name() const KLAYGE_OVERRIDE;
 		void OnRawInput(RAWINPUT const & ri);
@@ -98,13 +98,15 @@ namespace KlayGE
 	private:
 		virtual void UpdateInputs() KLAYGE_OVERRIDE;
 
+	private:
+		HANDLE device_;
 		array<bool, 256> keys_state_;
 	};
 
 	class MsgInputMouse : public InputMouse
 	{
 	public:
-		explicit MsgInputMouse();
+		explicit MsgInputMouse(HANDLE device);
 
 		virtual std::wstring const & Name() const KLAYGE_OVERRIDE;
 		void OnRawInput(RAWINPUT const & ri);
@@ -112,6 +114,8 @@ namespace KlayGE
 	private:
 		virtual void UpdateInputs() KLAYGE_OVERRIDE;
 
+	private:
+		HANDLE device_;
 		Vector_T<long, 3> offset_state_;
 		array<bool, 8> buttons_state_;
 	};
@@ -119,7 +123,7 @@ namespace KlayGE
 	class MsgInputJoystick : public InputJoystick
 	{
 	public:
-		MsgInputJoystick();
+		explicit MsgInputJoystick(HANDLE device);
 
 		virtual std::wstring const & Name() const KLAYGE_OVERRIDE;
 		void OnRawInput(RAWINPUT const & ri);
@@ -127,6 +131,8 @@ namespace KlayGE
 	private:
 		virtual void UpdateInputs() KLAYGE_OVERRIDE;
 
+	private:
+		HANDLE device_;
 		Vector_T<long, 3> pos_state_;
 		Vector_T<long, 3> rot_state_;
 		Vector_T<long, 2> slider_state_;

@@ -115,32 +115,6 @@ namespace KlayGE
 
 	void FirstPersonCameraController::InputHandler(InputEngine const & ie, InputAction const & action)
 	{
-		bool ldb = false;
-		if (camera_)
-		{
-			InputMousePtr mouse;
-			for (uint32_t i = 0; i < ie.NumDevices(); ++ i)
-			{
-				InputDevicePtr device = ie.Device(i);
-				if (InputEngine::IDT_Mouse == device->Type())
-				{
-					mouse = checked_pointer_cast<InputMouse>(device);
-					break;
-				}
-			}
-
-			if (mouse)
-			{
-				if (!UIManager::Instance().MouseOnUI())
-				{
-					if (mouse->LeftButton())
-					{
-						ldb = true;
-					}
-				}
-			}
-		}
-
 		float elapsed_time = ie.ElapsedTime();
 		if (camera_)
 		{
@@ -149,31 +123,31 @@ namespace KlayGE
 			switch (action.first)
 			{
 			case TurnLeftRight:
-				if ((left_button_down_ && ldb) || !left_button_down_)
 				{
-					this->Rotate(action.second * scaler, 0, 0);
+					InputMouse::ActionParam param = boost::any_cast<InputMouse::ActionParam>(action.second);
+					if ((left_button_down_ && (param.buttons & 1UL)) || !left_button_down_)
+					{
+						this->Rotate(param.move_vec.x() * scaler, 0, 0);
+					}
 				}
 				break;
 
 			case TurnUpDown:
-				if ((left_button_down_ && ldb) || !left_button_down_)
 				{
-					this->Rotate(0, action.second * scaler, 0);
+					InputMouse::ActionParam param = boost::any_cast<InputMouse::ActionParam>(action.second);
+					if ((left_button_down_ && (param.buttons & 1UL)) || !left_button_down_)
+					{
+						this->Rotate(0, param.move_vec.y() * scaler, 0);
+					}
 				}
 				break;
 
 			case RollLeft:
-				if ((left_button_down_ && ldb) || !left_button_down_)
-				{
-					this->Rotate(0, 0, -scaler);
-				}
+				this->Rotate(0, 0, -scaler);
 				break;
 
 			case RollRight:
-				if ((left_button_down_ && ldb) || !left_button_down_)
-				{
-					this->Rotate(0, 0, scaler);
-				}
+				this->Rotate(0, 0, scaler);
 				break;
 
 			case Forward:
@@ -304,44 +278,32 @@ namespace KlayGE
 		}
 	}
 
-	void TrackballCameraController::InputHandler(InputEngine const & ie, InputAction const & /*action*/)
+	void TrackballCameraController::InputHandler(InputEngine const & /*ie*/, InputAction const & action)
 	{
 		if (camera_)
 		{
-			InputMousePtr mouse;
-			for (uint32_t i = 0; i < ie.NumDevices(); ++ i)
+			InputMouse::ActionParam param = boost::any_cast<InputMouse::ActionParam>(action.second);
+
+			float xd = static_cast<float>(param.move_vec.x());
+			float yd = static_cast<float>(param.move_vec.y());
+
+			if (!UIManager::Instance().MouseOnUI())
 			{
-				InputDevicePtr device = ie.Device(i);
-				if (InputEngine::IDT_Mouse == device->Type())
+				if (param.buttons & 1UL)
 				{
-					mouse = checked_pointer_cast<InputMouse>(device);
-					break;
+					this->Rotate(xd, yd);
 				}
-			}
-
-			if (mouse)
-			{
-				float xd = static_cast<float>(mouse->X());
-				float yd = static_cast<float>(mouse->Y());
-
-				if (!UIManager::Instance().MouseOnUI())
+				else
 				{
-					if (mouse->LeftButton())
+					if (param.buttons & 4UL)
 					{
-						this->Rotate(xd, yd);
+						this->Move(xd, yd);
 					}
 					else
 					{
-						if (mouse->MiddleButton())
+						if (param.buttons & 2UL)
 						{
-							this->Move(xd, yd);
-						}
-						else
-						{
-							if (mouse->RightButton())
-							{
-								this->Zoom(xd, yd);
-							}
+							this->Zoom(xd, yd);
 						}
 					}
 				}

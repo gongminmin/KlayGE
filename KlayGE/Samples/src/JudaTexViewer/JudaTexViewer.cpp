@@ -331,19 +331,8 @@ void JudaTexViewer::OnResize(uint32_t width, uint32_t height)
 	UIManager::Instance().SettleCtrls(width, height);
 }
 
-void JudaTexViewer::InputHandler(InputEngine const & sender, InputAction const & action)
+void JudaTexViewer::InputHandler(InputEngine const & /*sender*/, InputAction const & action)
 {
-	InputMousePtr mouse;
-	for (uint32_t i = 0; i < sender.NumDevices(); ++ i)
-	{
-		InputDevicePtr device = sender.Device(i);
-		if (InputEngine::IDT_Mouse == device->Type())
-		{
-			mouse = checked_pointer_cast<InputMouse>(device);
-			break;
-		}
-	}
-
 	switch (action.first)
 	{
 	case Exit:
@@ -351,10 +340,10 @@ void JudaTexViewer::InputHandler(InputEngine const & sender, InputAction const &
 		break;
 
 	case Move:
-		if (mouse)
 		{
-			int2 this_mouse_pt(mouse->AbsX(), mouse->AbsY());
-			if (mouse->LeftButton())
+			InputMouse::ActionParam param = boost::any_cast<InputMouse::ActionParam>(action.second);
+			int2 this_mouse_pt(param.abs_coord);
+			if (param.buttons & 1UL)
 			{
 				if ((last_mouse_pt_.x() != -1) || (last_mouse_pt_.y() != -1))
 				{
@@ -370,10 +359,10 @@ void JudaTexViewer::InputHandler(InputEngine const & sender, InputAction const &
 		break;
 
 	case Scale:
-		if (mouse)
 		{
-			float f = 1.0f + (mouse->Z() * 0.1f) / 120;
-			float2 p = float2(static_cast<float>(-mouse->AbsX()), static_cast<float>(-mouse->AbsY())) / scale_ + position_;
+			InputMouse::ActionParam param = boost::any_cast<InputMouse::ActionParam>(action.second);
+			float f = 1.0f + (param.wheel_delta * 0.1f) / 120;
+			float2 p = float2(static_cast<float>(-param.abs_coord.x()), static_cast<float>(-param.abs_coord.y())) / scale_ + position_;
 			float2 new_position = (position_ - p * (1 - f)) / f;
 			float new_scale = scale_ * f;
 			if (tile_size_ * new_scale > 64)

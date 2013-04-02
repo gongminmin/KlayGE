@@ -37,7 +37,8 @@
 
 namespace KlayGE
 {
-	MsgInputMouse::MsgInputMouse()
+	MsgInputMouse::MsgInputMouse(HANDLE device)
+		: device_(device)
 	{
 		buttons_state_.fill(false);
 	}
@@ -50,7 +51,7 @@ namespace KlayGE
 
 	void MsgInputMouse::OnRawInput(RAWINPUT const & ri)
 	{
-		if (RIM_TYPEMOUSE == ri.header.dwType)
+		if ((RIM_TYPEMOUSE == ri.header.dwType) && (ri.header.hDevice == device_))
 		{
 			for (int i = 0; i < 5; ++ i)
 			{

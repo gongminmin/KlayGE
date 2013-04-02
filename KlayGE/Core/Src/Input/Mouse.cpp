@@ -142,23 +142,33 @@ namespace KlayGE
 
 		InputActionMap& iam = actionMaps_[id];
 
+		ActionParam param;
+		param.move_vec = int2(this->X(), this->Y());
+		param.wheel_delta = this->Z();
+		param.abs_coord = int2(this->AbsX(), this->AbsY());
+		param.buttons = 0;
+		for (size_t i = 0; i < this->NumButtons(); ++ i)
+		{
+			param.buttons |= this->Button(i) ? (1UL << i) : 0;
+		}
+
 		if (this->X() != 0)
 		{
-			iam.UpdateInputActions(ret, MS_X, this->X());
+			iam.UpdateInputActions(ret, MS_X, param);
 		}
 		if (this->Y() != 0)
 		{
-			iam.UpdateInputActions(ret, MS_Y, this->Y());
+			iam.UpdateInputActions(ret, MS_Y, param);
 		}
 		if (this->Z() != 0)
 		{
-			iam.UpdateInputActions(ret, MS_Z, this->Z());
+			iam.UpdateInputActions(ret, MS_Z, param);
 		}
 		for (uint16_t i = 0; i < this->NumButtons(); ++ i)
 		{
 			if (this->Button(i))
 			{
-				iam.UpdateInputActions(ret, static_cast<uint16_t>(MS_Button0 + i));
+				iam.UpdateInputActions(ret, static_cast<uint16_t>(MS_Button0 + i), param);
 			}
 		}
 

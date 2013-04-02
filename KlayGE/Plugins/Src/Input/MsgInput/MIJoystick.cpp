@@ -36,7 +36,8 @@
 
 namespace KlayGE
 {
-	MsgInputJoystick::MsgInputJoystick()
+	MsgInputJoystick::MsgInputJoystick(HANDLE device)
+		: device_(device)
 	{
 	}
 	
@@ -48,15 +49,15 @@ namespace KlayGE
 
 	void MsgInputJoystick::OnRawInput(RAWINPUT const & ri)
 	{
-		if (RIM_TYPEHID == ri.header.dwType)
+		if ((RIM_TYPEHID == ri.header.dwType) && (ri.header.hDevice == device_))
 		{
 			MsgInputEngine const & mie = *checked_cast<MsgInputEngine const *>(&Context::Instance().InputFactoryInstance().InputEngineInstance());
 
 			UINT size;
-			if (0 == GetRawInputDeviceInfo(ri.header.hDevice, RIDI_PREPARSEDDATA, nullptr, &size))
+			if (0 == ::GetRawInputDeviceInfo(ri.header.hDevice, RIDI_PREPARSEDDATA, nullptr, &size))
 			{
 				std::vector<uint8_t> buf(size);
-				if (GetRawInputDeviceInfo(ri.header.hDevice, RIDI_PREPARSEDDATA, &buf[0], &size) >= 0)
+				if (::GetRawInputDeviceInfo(ri.header.hDevice, RIDI_PREPARSEDDATA, &buf[0], &size) >= 0)
 				{
 					PHIDP_PREPARSED_DATA preparsed_data = reinterpret_cast<PHIDP_PREPARSED_DATA>(&buf[0]);
 

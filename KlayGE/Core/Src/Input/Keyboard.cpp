@@ -94,7 +94,7 @@ namespace KlayGE
 		{
 			if (this->Key(i))
 			{
-				iam.UpdateInputActions(ret, i);
+				iam.UpdateInputActions(ret, i, boost::any());
 			}
 		}
 

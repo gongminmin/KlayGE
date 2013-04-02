@@ -27,7 +27,7 @@ namespace KlayGE
 
 	// 更新输入动作
 	//////////////////////////////////////////////////////////////////////////////////
-	void InputActionMap::UpdateInputActions(InputActionsType& actions, uint16_t key, long value)
+	void InputActionMap::UpdateInputActions(InputActionsType& actions, uint16_t key, boost::any value)
 	{
 		if (this->HasAction(key))
 		{

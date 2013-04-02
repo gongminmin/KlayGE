@@ -31,6 +31,7 @@
 #include <KFL/Vector.hpp>
 #include <KFL/Timer.hpp>
 
+#include <boost/any.hpp>
 #include <boost/container/flat_map.hpp>
 #ifdef KLAYGE_COMPILER_MSVC
 #pragma warning(push)
@@ -257,7 +258,7 @@ namespace KlayGE
 	};
 
 	typedef std::pair<uint16_t, uint16_t> InputActionDefine;
-	typedef std::pair<uint16_t, long> InputAction;
+	typedef std::pair<uint16_t, boost::any> InputAction;
 	typedef std::vector<InputAction> InputActionsType;
 
 
@@ -277,7 +278,7 @@ namespace KlayGE
 			}
 		}
 
-		void UpdateInputActions(InputActionsType& actions, uint16_t key, long value = 0);
+		void UpdateInputActions(InputActionsType& actions, uint16_t key, boost::any value);
 
 		bool HasAction(uint16_t key) const;
 		uint16_t Action(uint16_t key) const;
@@ -377,6 +378,15 @@ namespace KlayGE
 
 	class KLAYGE_CORE_API InputMouse : public InputDevice
 	{
+	public:
+		struct ActionParam
+		{
+			int2 move_vec;
+			int32_t wheel_delta;
+			int2 abs_coord;
+			uint32_t buttons;
+		};
+
 	public:
 		InputMouse();
 		virtual ~InputMouse();

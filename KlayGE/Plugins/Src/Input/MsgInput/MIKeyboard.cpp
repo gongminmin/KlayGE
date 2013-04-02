@@ -34,7 +34,8 @@
 
 namespace KlayGE
 {
-	MsgInputKeyboard::MsgInputKeyboard()
+	MsgInputKeyboard::MsgInputKeyboard(HANDLE device)
+		: device_(device)
 	{
 		keys_state_.fill(false);
 	}
@@ -47,7 +48,7 @@ namespace KlayGE
 
 	void MsgInputKeyboard::OnRawInput(RAWINPUT const & ri)
 	{
-		if (RIM_TYPEKEYBOARD == ri.header.dwType)
+		if ((RIM_TYPEKEYBOARD == ri.header.dwType) && (ri.header.hDevice == device_))
 		{
 			switch (ri.data.keyboard.Flags)
 			{

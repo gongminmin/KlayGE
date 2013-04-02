@@ -77,13 +77,13 @@ namespace KlayGE
 		HWND hwnd = main_wnd->HWnd();
 			
 		UINT devices;
-		if (GetRawInputDeviceList(nullptr, &devices, sizeof(RAWINPUTDEVICELIST)) != 0)
+		if (::GetRawInputDeviceList(nullptr, &devices, sizeof(RAWINPUTDEVICELIST)) != 0)
 		{
 			THR(errc::function_not_supported);
 		}
 
 		std::vector<RAWINPUTDEVICELIST> raw_input_devices(devices);
-		GetRawInputDeviceList(&raw_input_devices[0], &devices, sizeof(raw_input_devices[0]));
+		::GetRawInputDeviceList(&raw_input_devices[0], &devices, sizeof(raw_input_devices[0]));
 
 		RAWINPUTDEVICE rid;
 		std::vector<RAWINPUTDEVICE> rids;
@@ -93,7 +93,7 @@ namespace KlayGE
 			switch (raw_input_devices[i].dwType)
 			{
 			case RIM_TYPEKEYBOARD:
-				device = MakeSharedPtr<MsgInputKeyboard>();
+				device = MakeSharedPtr<MsgInputKeyboard>(raw_input_devices[i].hDevice);
 				rid.usUsagePage = HID_USAGE_PAGE_GENERIC;
 				rid.usUsage = HID_USAGE_GENERIC_KEYBOARD;
 				rid.dwFlags = RIDEV_INPUTSINK;
@@ -102,7 +102,7 @@ namespace KlayGE
 				break;
 
 			case RIM_TYPEMOUSE:
-				device = MakeSharedPtr<MsgInputMouse>();
+				device = MakeSharedPtr<MsgInputMouse>(raw_input_devices[i].hDevice);
 				rid.usUsagePage = HID_USAGE_PAGE_GENERIC;
 				rid.usUsage = HID_USAGE_GENERIC_MOUSE;
 				rid.dwFlags = 0;
@@ -111,7 +111,7 @@ namespace KlayGE
 				break;
 
 			case RIM_TYPEHID:
-				device = MakeSharedPtr<MsgInputJoystick>();
+				device = MakeSharedPtr<MsgInputJoystick>(raw_input_devices[i].hDevice);
 				rid.usUsagePage = HID_USAGE_PAGE_GENERIC;
 				rid.usUsage = HID_USAGE_GENERIC_GAMEPAD;
 				rid.dwFlags = RIDEV_INPUTSINK;
@@ -134,7 +134,7 @@ namespace KlayGE
 			}
 		}
 
-		if (RegisterRawInputDevices(&rids[0], rids.size(), sizeof(rids[0])))
+		if (::RegisterRawInputDevices(&rids[0], rids.size(), sizeof(rids[0])))
 		{
 			on_raw_input_ = main_wnd->OnRawInput().connect(bind(&MsgInputEngine::OnRawInput, this,
 				placeholders::_1, placeholders::_2));
@@ -158,15 +158,24 @@ namespace KlayGE
 					switch (raw->header.dwType)
 					{
 					case RIM_TYPEKEYBOARD:
-						checked_pointer_cast<MsgInputKeyboard>(device)->OnRawInput(*raw);
+						if (IDT_Keyboard == device->Type())
+						{
+							checked_pointer_cast<MsgInputKeyboard>(device)->OnRawInput(*raw);
+						}
 						break;
 
 					case RIM_TYPEMOUSE:
-						checked_pointer_cast<MsgInputMouse>(device)->OnRawInput(*raw);
+						if (IDT_Mouse == device->Type())
+						{
+							checked_pointer_cast<MsgInputMouse>(device)->OnRawInput(*raw);
+						}
 						break;
 
 					case RIM_TYPEHID:
-						checked_pointer_cast<MsgInputJoystick>(device)->OnRawInput(*raw);
+						if (IDT_Joystick == device->Type())
+						{
+							checked_pointer_cast<MsgInputJoystick>(device)->OnRawInput(*raw);
+						}
 						break;
 
 					default:

@@ -13,6 +13,7 @@ cfg_build.py
 */build/android/*/bin
 */build/android/*/libs
 */build/android/*/obj
+*/build/android/*/*/*/obj
 */build/android/*/assets
 */build/android/obj/
 */build/codelite/*.mk
@@ -47,11 +48,6 @@ KlayGE/bin/*/*.so
 KlayGE/bin/*/*.exe
 KlayGE/bin/*/*.py
 KlayGE/bin/*/Lib
-KlayGE/build/android/Core/obj
-KlayGE/build/android/Plugins/Render/OpenGLES/libs
-KlayGE/build/android/Plugins/Render/OpenGLES/obj
-KlayGE/build/android/Plugins/Scene/OCTree/libs
-KlayGE/build/android/Plugins/Scene/OCTree/obj
 KlayGE/Core/Include/KlayGE/*.gch
 KlayGE/Exporters/3DSMax/MeshML/build/*/Debug/
 KlayGE/Exporters/3DSMax/MeshML/build/*/Release/

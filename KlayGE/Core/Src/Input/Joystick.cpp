@@ -158,7 +158,7 @@ namespace KlayGE
 		{
 			if (this->Button(i))
 			{
-				actionMaps_[id].UpdateInputActions(ret, static_cast<uint16_t>(JS_Button0 + i));
+				actionMaps_[id].UpdateInputActions(ret, static_cast<uint16_t>(JS_Button0 + i), boost::any());
 			}
 		}
 
