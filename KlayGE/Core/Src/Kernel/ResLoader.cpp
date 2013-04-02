@@ -469,7 +469,7 @@ namespace KlayGE
 
 			if (found)
 			{
-				return bind(ResLoader::ASyncFunctor(loaded_res), res_desc, async_is_done);
+				return ResLoader::ASyncRecreateFunctor(loaded_res, res_desc, async_is_done);
 			}
 			else
 			{
@@ -478,13 +478,13 @@ namespace KlayGE
 					async_is_done = MakeSharedPtr<bool>(false);
 					loading_res_.push_back(std::make_pair(res_desc, async_is_done));
 					loading_res_queue_.push(std::make_pair(res_desc, async_is_done));
-					return bind(ResLoader::ASyncFunctor(loaded_res), res_desc, async_is_done);
+					return ResLoader::ASyncRecreateFunctor(loaded_res, res_desc, async_is_done);
 				}
 				else
 				{
 					shared_ptr<void> res = res_desc->MainThreadStage();
 					this->AddLoadedResource(res_desc, res);
-					return ResLoader::ASyncFunctor(res);
+					return ResLoader::ASyncReuseFunctor(res);
 				}
 			}
 		}
@@ -503,7 +503,7 @@ namespace KlayGE
 					this->AddLoadedResource(res_desc, res);
 				}
 			}
-			return ResLoader::ASyncFunctor(res);
+			return ResLoader::ASyncReuseFunctor(res);
 		}
 	}
 
@@ -599,37 +599,37 @@ namespace KlayGE
 	}
 
 
-	ResLoader::ASyncFunctor::ASyncFunctor(shared_ptr<void> const & res)
-		: res_(res)
+	ResLoader::ASyncRecreateFunctor::ASyncRecreateFunctor(shared_ptr<void> const & res,
+				ResLoadingDescPtr const & res_desc, shared_ptr<volatile bool> const & is_done)
+		: res_(res), res_desc_(res_desc), is_done_(is_done)
 	{
 	}
 
-	shared_ptr<void> ResLoader::ASyncFunctor::operator()(ResLoadingDescPtr const & res_desc,
-		shared_ptr<volatile bool> const & is_done)
+	shared_ptr<void> ResLoader::ASyncRecreateFunctor::operator()()
 	{
 		if (!res_)
 		{
-			if (*is_done)
+			if (*is_done_)
 			{
 				ResLoader& rl = ResLoader::Instance();
-				shared_ptr<void> loaded_res = rl.FindMatchLoadedResource(res_desc);
+				shared_ptr<void> loaded_res = rl.FindMatchLoadedResource(res_desc_);
 				if (!loaded_res)
 				{
-					res_ = res_desc->MainThreadStage();
-					rl.AddLoadedResource(res_desc, res_);
+					res_ = res_desc_->MainThreadStage();
+					rl.AddLoadedResource(res_desc_, res_);
 				}
 				else
 				{
-					if (res_desc->StateLess())
+					if (res_desc_->StateLess())
 					{
 						res_ = loaded_res;
 					}
 					else
 					{
-						res_ = res_desc->CloneResourceFrom(loaded_res);
+						res_ = res_desc_->CloneResourceFrom(loaded_res);
 						if (res_ != loaded_res)
 						{
-							rl.AddLoadedResource(res_desc, res_);
+							rl.AddLoadedResource(res_desc_, res_);
 						}
 					}
 				}
@@ -638,7 +638,12 @@ namespace KlayGE
 		return res_;
 	}
 
-	shared_ptr<void> ResLoader::ASyncFunctor::operator()()
+	ResLoader::ASyncReuseFunctor::ASyncReuseFunctor(shared_ptr<void> const & res)
+		: res_(res)
+	{
+	}
+
+	shared_ptr<void> ResLoader::ASyncReuseFunctor::operator()()
 	{
 		return res_;
 	}

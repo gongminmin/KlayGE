@@ -84,12 +84,25 @@ namespace KlayGE
 			function<shared_ptr<void>()> func_;
 		};
 
-		class ASyncFunctor
+		class ASyncRecreateFunctor
 		{
 		public:
-			explicit ASyncFunctor(shared_ptr<void> const & res);
+			ASyncRecreateFunctor(shared_ptr<void> const & res,
+				ResLoadingDescPtr const & res_desc, shared_ptr<volatile bool> const & is_done);
 
-			shared_ptr<void> operator()(ResLoadingDescPtr const & res_desc, shared_ptr<volatile bool> const & is_done);
+			shared_ptr<void> operator()();
+
+		private:
+			shared_ptr<void> res_;
+			ResLoadingDescPtr res_desc_;
+			shared_ptr<volatile bool> is_done_;
+		};
+
+		class ASyncReuseFunctor
+		{
+		public:
+			explicit ASyncReuseFunctor(shared_ptr<void> const & res);
+
 			shared_ptr<void> operator()();
 
 		private:
