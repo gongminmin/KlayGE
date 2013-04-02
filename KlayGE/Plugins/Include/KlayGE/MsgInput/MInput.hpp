@@ -199,6 +199,7 @@ typedef struct _HIDP_VALUE_CAPS
 #endif
 
 #include <KlayGE/Input.hpp>
+#include <KFL/Timer.hpp>
 #include <boost/noncopyable.hpp>
 
 namespace KlayGE
@@ -226,6 +227,7 @@ namespace KlayGE
 
 	private:
 		boost::signals2::connection on_raw_input_;
+		boost::signals2::connection on_touch_;
 
 		HMODULE mod_hid_;
 		typedef NTSTATUS (WINAPI *HidP_GetCapsFunc)(PHIDP_PREPARSED_DATA PreparsedData, PHIDP_CAPS Capabilities);
@@ -247,6 +249,7 @@ namespace KlayGE
 
 	private:
 		void OnRawInput(Window const & wnd, uint64_t param);
+		void OnTouch(Window const & wnd, uint64_t lparam, uint32_t wparam);
 	};
 
 	class MsgInputKeyboard : public InputKeyboard
@@ -299,6 +302,21 @@ namespace KlayGE
 		Vector_T<long, 3> rot_state_;
 		Vector_T<long, 2> slider_state_;
 		array<bool, 32> buttons_state_;
+	};
+
+	class MsgInputTouch : public InputTouch
+	{
+	public:
+		MsgInputTouch();
+
+		virtual std::wstring const & Name() const KLAYGE_OVERRIDE;
+		void OnTouch(std::vector<TOUCHINPUT> const & inputs);
+
+	private:
+		virtual void UpdateInputs() KLAYGE_OVERRIDE;
+
+		Timer timer_;
+		std::vector<TouchInput> input_state_;
 	};
 }
 

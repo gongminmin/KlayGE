@@ -6,6 +6,7 @@ SET(MSGINPUT_IE_SOURCE_FILES
 	${KLAYGE_PROJECT_DIR}/Plugins/Src/Input/MsgInput/MIMouse.cpp
 	${KLAYGE_PROJECT_DIR}/Plugins/Src/Input/MsgInput/MInputEngine.cpp
 	${KLAYGE_PROJECT_DIR}/Plugins/Src/Input/MsgInput/MInputFactory.cpp
+	${KLAYGE_PROJECT_DIR}/Plugins/Src/Input/MsgInput/MITouch.cpp
 )
 
 SET(MSGINPUT_IE_HEADER_FILES

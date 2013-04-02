@@ -497,6 +497,12 @@ namespace KlayGE
 			this->OnRawInput()(*this, static_cast<uint64_t>(lParam));
 			break;
 
+#if (_WIN32_WINNT >= 0x0601 /*_WIN32_WINNT_WIN7*/)
+		case WM_TOUCH:
+			this->OnTouch()(*this, static_cast<uint64_t>(lParam), static_cast<uint32_t>(wParam));
+			break;
+#endif
+
 		case WM_CLOSE:
 			this->OnClose()(*this);
 			closed_ = true;

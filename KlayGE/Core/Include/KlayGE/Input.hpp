@@ -257,6 +257,16 @@ namespace KlayGE
 		JS_Button31			= 0x227,
 	};
 
+	enum TouchSemantic
+	{
+		TS_Pan				= 0x300,
+		TS_Tap				= 0x301,
+		TS_PressAndTap		= 0x302,
+		TS_Zoom				= 0x303,
+		TS_Rotate			= 0x304,
+		TS_Flick			= 0x305
+	};
+
 	typedef std::pair<uint16_t, uint16_t> InputActionDefine;
 	typedef std::pair<uint16_t, boost::any> InputAction;
 	typedef std::vector<InputAction> InputActionsType;
@@ -303,7 +313,8 @@ namespace KlayGE
 		{
 			IDT_Keyboard,
 			IDT_Mouse,
-			IDT_Joystick
+			IDT_Joystick,
+			IDT_Touch
 		};
 
 	public:
@@ -461,6 +472,89 @@ namespace KlayGE
 
 		array<array<bool, 32>, 2> buttons_;	// 32 buttons
 		bool index_;
+	};
+
+	class KLAYGE_CORE_API InputTouch : public InputDevice
+	{
+	public:
+		struct ActionParam
+		{
+			int2 center;
+			float2 move_vec;
+			float rotate_angle;
+		};
+
+	public:
+		InputTouch();
+		virtual ~InputTouch();
+
+		virtual InputEngine::InputDeviceType Type() const KLAYGE_OVERRIDE
+		{
+			return InputEngine::IDT_Touch;
+		}
+
+		bool HasGesture() const;
+		TouchSemantic Gesture() const;
+		
+		virtual InputActionsType UpdateActionMap(uint32_t id) KLAYGE_OVERRIDE;
+		virtual void ActionMap(uint32_t id, InputActionMap const & actionMap) KLAYGE_OVERRIDE;
+
+	protected:
+		enum GestureState
+		{
+			GS_None = 0,
+			GS_Pan,
+			GS_Tap,
+			GS_PressAndTap,
+			GS_TwoFingerIntermediate,
+			GS_Zoom,
+			GS_Rotate,
+
+			GS_NumGestures
+		};
+
+		void GestureNone(float elapsed_time);
+		void GesturePan(float elapsed_time);
+		void GestureTap(float elapsed_time);
+		void GesturePressAndTap(float elapsed_time);
+		void GestureTwoFingerIntermediate(float elapsed_time);
+		void GestureZoom(float elapsed_time);
+		void GestureRotate(float elapsed_time);
+
+		void CurrState(GestureState state);
+
+	protected:
+		enum TouchInputFlag
+		{
+			TIF_Move = 1UL << 0,
+			TIF_Down = 1UL << 1,
+			TIF_Up = 1UL << 2
+		};
+		struct TouchInput
+		{
+			int2 coord;
+			uint32_t flags;
+			uint32_t finger_id;
+		};
+		std::vector<TouchInput> inputs_;
+		uint32_t num_available_input_;
+
+		TouchSemantic gesture_;
+		bool has_gesture_;
+		ActionParam gesture_param_;
+
+		GestureState curr_state_;
+		function<void(float)> curr_gesture_;
+		function<void(float)> gesture_funcs_[GS_NumGestures];
+
+		// 1-finger
+		float one_finger_tap_timer_;
+		float2 one_finger_start_pos_;
+
+		// 2-finger
+		float two_finger_tap_timer_;
+		float two_finger_start_len_;
+		float2 two_finger_vec_;
 	};
 }
 

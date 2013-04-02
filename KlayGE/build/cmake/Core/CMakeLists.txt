@@ -244,6 +244,7 @@ SET(INPUT_SOURCE_FILES
 	${KLAYGE_PROJECT_DIR}/Core/Src/Input/Joystick.cpp
 	${KLAYGE_PROJECT_DIR}/Core/Src/Input/Keyboard.cpp
 	${KLAYGE_PROJECT_DIR}/Core/Src/Input/Mouse.cpp
+	${KLAYGE_PROJECT_DIR}/Core/Src/Input/Touch.cpp
 )
 
 SET(INPUT_HEADER_FILES
