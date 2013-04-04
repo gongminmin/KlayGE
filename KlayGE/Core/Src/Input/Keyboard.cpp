@@ -22,10 +22,13 @@
 namespace KlayGE
 {
 	InputKeyboard::InputKeyboard()
-		: index_(false)
+		: index_(false),
+			action_param_(MakeSharedPtr<InputKeyboardActionParam>())
 	{
 		keys_[0].fill(false);
 		keys_[1].fill(false);
+
+		action_param_->type = InputEngine::IDT_Keyboard;
 	}
 
 	InputKeyboard::~InputKeyboard()
@@ -94,7 +97,7 @@ namespace KlayGE
 		{
 			if (this->Key(i))
 			{
-				iam.UpdateInputActions(ret, i, boost::any());
+				iam.UpdateInputActions(ret, i, action_param_);
 			}
 		}
 

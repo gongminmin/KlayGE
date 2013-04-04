@@ -287,7 +287,7 @@ namespace KlayGE
 
 	private:
 		HANDLE device_;
-		Vector_T<long, 3> offset_state_;
+		int3 offset_state_;
 		array<bool, 8> buttons_state_;
 	};
 
@@ -304,9 +304,9 @@ namespace KlayGE
 
 	private:
 		HANDLE device_;
-		Vector_T<long, 3> pos_state_;
-		Vector_T<long, 3> rot_state_;
-		Vector_T<long, 2> slider_state_;
+		int3 pos_state_;
+		int3 rot_state_;
+		int2 slider_state_;
 		array<bool, 32> buttons_state_;
 	};
 

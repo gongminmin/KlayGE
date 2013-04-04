@@ -22,10 +22,13 @@
 namespace KlayGE
 {
 	InputJoystick::InputJoystick()
-		: pos_(0, 0, 0), rot_(0, 0, 0), slider_(0, 0), index_(false)
+		: pos_(0, 0, 0), rot_(0, 0, 0), slider_(0, 0), index_(false),
+			action_param_(MakeSharedPtr<InputJoystickActionParam>())
 	{
 		buttons_[0].fill(false);
 		buttons_[1].fill(false);
+
+		action_param_->type = InputEngine::IDT_Joystick;
 	}
 
 	// Îö¹¹º¯Êý
@@ -143,22 +146,31 @@ namespace KlayGE
 	{
 		InputActionsType ret;
 
-		actionMaps_[id].UpdateInputActions(ret, JS_XPos, this->XPos());
-		actionMaps_[id].UpdateInputActions(ret, JS_YPos, this->YPos());
-		actionMaps_[id].UpdateInputActions(ret, JS_ZPos, this->ZPos());
-		actionMaps_[id].UpdateInputActions(ret, JS_XRot, this->XRot());
-		actionMaps_[id].UpdateInputActions(ret, JS_YRot, this->YRot());
-		actionMaps_[id].UpdateInputActions(ret, JS_ZRot, this->ZRot());
-
-		for (uint16_t i = 0; i < this->NumSliders(); ++ i)
+		action_param_->pos = pos_;
+		action_param_->rot = rot_;
+		action_param_->slider = slider_;
+		action_param_->buttons = 0;
+		for (size_t i = 0; i < buttons_[index_].size(); ++ i)
 		{
-			actionMaps_[id].UpdateInputActions(ret, static_cast<uint16_t>(JS_Slider0 + i), this->Slider(i));
+			action_param_->buttons |= (buttons_[index_][i] ? (1UL << i) : 0);
 		}
-		for (uint16_t i = 0; i < this->NumButtons(); ++ i)
+
+		actionMaps_[id].UpdateInputActions(ret, JS_XPos, action_param_);
+		actionMaps_[id].UpdateInputActions(ret, JS_YPos, action_param_);
+		actionMaps_[id].UpdateInputActions(ret, JS_ZPos, action_param_);
+		actionMaps_[id].UpdateInputActions(ret, JS_XRot, action_param_);
+		actionMaps_[id].UpdateInputActions(ret, JS_YRot, action_param_);
+		actionMaps_[id].UpdateInputActions(ret, JS_ZRot, action_param_);
+
+		for (uint16_t i = 0; i < slider_.size(); ++ i)
 		{
-			if (this->Button(i))
+			actionMaps_[id].UpdateInputActions(ret, static_cast<uint16_t>(JS_Slider0 + i), action_param_);
+		}
+		for (uint16_t i = 0; i < buttons_[index_].size(); ++ i)
+		{
+			if (buttons_[index_][i])
 			{
-				actionMaps_[id].UpdateInputActions(ret, static_cast<uint16_t>(JS_Button0 + i), boost::any());
+				actionMaps_[id].UpdateInputActions(ret, static_cast<uint16_t>(JS_Button0 + i), action_param_);
 			}
 		}
 

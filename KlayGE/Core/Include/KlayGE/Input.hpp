@@ -31,7 +31,6 @@
 #include <KFL/Vector.hpp>
 #include <KFL/Timer.hpp>
 
-#include <boost/any.hpp>
 #include <boost/container/flat_map.hpp>
 #ifdef KLAYGE_COMPILER_MSVC
 #pragma warning(push)
@@ -269,7 +268,7 @@ namespace KlayGE
 	};
 
 	typedef std::pair<uint16_t, uint16_t> InputActionDefine;
-	typedef std::pair<uint16_t, boost::any> InputAction;
+	typedef std::pair<uint16_t, InputActionParamPtr> InputAction;
 	typedef std::vector<InputAction> InputActionsType;
 
 
@@ -289,7 +288,7 @@ namespace KlayGE
 			}
 		}
 
-		void UpdateInputActions(InputActionsType& actions, uint16_t key, boost::any value);
+		void UpdateInputActions(InputActionsType& actions, uint16_t key, InputActionParamPtr const & param);
 
 		bool HasAction(uint16_t key) const;
 		uint16_t Action(uint16_t key) const;
@@ -386,19 +385,12 @@ namespace KlayGE
 	protected:
 		array<array<bool, 256>, 2> keys_;
 		bool index_;
+
+		InputKeyboardActionParamPtr action_param_;
 	};
 
 	class KLAYGE_CORE_API InputMouse : public InputDevice
 	{
-	public:
-		struct ActionParam
-		{
-			int2 move_vec;
-			int32_t wheel_delta;
-			int2 abs_coord;
-			uint32_t buttons;
-		};
-
 	public:
 		InputMouse();
 		virtual ~InputMouse();
@@ -428,11 +420,13 @@ namespace KlayGE
 		virtual void ActionMap(uint32_t id, InputActionMap const & actionMap) KLAYGE_OVERRIDE;
 
 	protected:
-		Vector_T<long, 2> abs_pos_;
-		Vector_T<long, 3> offset_;
+		int2 abs_pos_;
+		int3 offset_;
 
 		array<array<bool, 8>, 2> buttons_;
 		bool index_;
+
+		InputMouseActionParamPtr action_param_;
 	};
 
 	class KLAYGE_CORE_API InputJoystick : public InputDevice
@@ -466,25 +460,19 @@ namespace KlayGE
 		virtual void ActionMap(uint32_t id, InputActionMap const & actionMap) KLAYGE_OVERRIDE;
 
 	protected:
-		Vector_T<long, 3> pos_;		// x, y, z axis position
-		Vector_T<long, 3> rot_;		// x, y, z axis rotation
+		int3 pos_;		// x, y, z axis position
+		int3 rot_;		// x, y, z axis rotation
 
-		Vector_T<long, 2> slider_;		// extra axes positions
+		int2 slider_;		// extra axes positions
 
 		array<array<bool, 32>, 2> buttons_;	// 32 buttons
 		bool index_;
+
+		InputJoystickActionParamPtr action_param_;
 	};
 
 	class KLAYGE_CORE_API InputTouch : public InputDevice
 	{
-	public:
-		struct ActionParam
-		{
-			int2 center;
-			float2 move_vec;
-			float rotate_angle;
-		};
-
 	public:
 		InputTouch();
 		virtual ~InputTouch();
@@ -532,7 +520,7 @@ namespace KlayGE
 
 		TouchSemantic gesture_;
 		bool has_gesture_;
-		ActionParam gesture_param_;
+		InputTouchActionParamPtr action_param_;
 
 		GestureState curr_state_;
 		function<void(float)> curr_gesture_;
@@ -546,6 +534,44 @@ namespace KlayGE
 		float two_finger_tap_timer_;
 		float two_finger_start_len_;
 		float2 two_finger_vec_;
+	};
+
+
+	struct KLAYGE_CORE_API InputActionParam
+	{
+		virtual ~InputActionParam()
+		{
+		};
+
+		InputEngine::InputDeviceType type;
+	};
+
+	struct KLAYGE_CORE_API InputKeyboardActionParam : public InputActionParam
+	{
+	};
+
+	struct KLAYGE_CORE_API InputMouseActionParam : public InputActionParam
+	{
+		int2 move_vec;
+		int32_t wheel_delta;
+		int2 abs_coord;
+		uint32_t buttons;
+	};
+
+	struct KLAYGE_CORE_API InputJoystickActionParam : public InputActionParam
+	{
+		int3 pos;
+		int3 rot;
+		int2 slider;
+		uint32_t buttons;
+	};
+	
+	struct KLAYGE_CORE_API InputTouchActionParam : public InputActionParam
+	{
+		int2 center;
+		int2 move_vec;
+		float zoom;
+		float rotate_angle;
 	};
 }
 

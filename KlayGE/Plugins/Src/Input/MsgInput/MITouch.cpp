@@ -150,7 +150,7 @@ namespace KlayGE
 		}
 
 		has_gesture_ = false;
-		gesture_param_.move_vec = float2(0.0f, 0.0f);
+		action_param_->move_vec = float2(0.0f, 0.0f);
 		curr_gesture_(static_cast<float>(timer_.elapsed()));
 		timer_.restart();
 	}

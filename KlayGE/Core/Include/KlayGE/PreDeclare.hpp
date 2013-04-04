@@ -278,8 +278,20 @@ namespace KlayGE
 	typedef shared_ptr<InputMouse> InputMousePtr;
 	class InputJoystick;
 	typedef shared_ptr<InputJoystick> InputJoystickPtr;
+	class InputTouch;
+	typedef shared_ptr<InputTouch> InputTouchPtr;
 	class InputFactory;
 	typedef shared_ptr<InputFactory> InputFactoryPtr;
+	struct InputActionParam;
+	typedef shared_ptr<InputActionParam> InputActionParamPtr;
+	struct InputKeyboardActionParam;
+	typedef shared_ptr<InputKeyboardActionParam> InputKeyboardActionParamPtr;
+	struct InputMouseActionParam;
+	typedef shared_ptr<InputMouseActionParam> InputMouseActionParamPtr;
+	struct InputJoystickActionParam;
+	typedef shared_ptr<InputJoystickActionParam> InputJoystickActionParamPtr;
+	struct InputTouchActionParam;
+	typedef shared_ptr<InputTouchActionParam> InputTouchActionParamPtr;
 
 	class ShowEngine;
 	typedef shared_ptr<ShowEngine> ShowEnginePtr;

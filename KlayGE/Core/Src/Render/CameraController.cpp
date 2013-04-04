@@ -124,20 +124,20 @@ namespace KlayGE
 			{
 			case TurnLeftRight:
 				{
-					InputMouse::ActionParam param = boost::any_cast<InputMouse::ActionParam>(action.second);
-					if ((left_button_down_ && (param.buttons & 1UL)) || !left_button_down_)
+					InputMouseActionParamPtr param = checked_pointer_cast<InputMouseActionParam>(action.second);
+					if ((left_button_down_ && (param->buttons & 1UL)) || !left_button_down_)
 					{
-						this->Rotate(param.move_vec.x() * scaler, 0, 0);
+						this->Rotate(param->move_vec.x() * scaler, 0, 0);
 					}
 				}
 				break;
 
 			case TurnUpDown:
 				{
-					InputMouse::ActionParam param = boost::any_cast<InputMouse::ActionParam>(action.second);
-					if ((left_button_down_ && (param.buttons & 1UL)) || !left_button_down_)
+					InputMouseActionParamPtr param = checked_pointer_cast<InputMouseActionParam>(action.second);
+					if ((left_button_down_ && (param->buttons & 1UL)) || !left_button_down_)
 					{
-						this->Rotate(0, param.move_vec.y() * scaler, 0);
+						this->Rotate(0, param->move_vec.y() * scaler, 0);
 					}
 				}
 				break;
@@ -282,26 +282,26 @@ namespace KlayGE
 	{
 		if (camera_)
 		{
-			InputMouse::ActionParam param = boost::any_cast<InputMouse::ActionParam>(action.second);
+			InputMouseActionParamPtr param = checked_pointer_cast<InputMouseActionParam>(action.second);
 
-			float xd = static_cast<float>(param.move_vec.x());
-			float yd = static_cast<float>(param.move_vec.y());
+			float xd = static_cast<float>(param->move_vec.x());
+			float yd = static_cast<float>(param->move_vec.y());
 
 			if (!UIManager::Instance().MouseOnUI())
 			{
-				if (param.buttons & 1UL)
+				if (param->buttons & 1UL)
 				{
 					this->Rotate(xd, yd);
 				}
 				else
 				{
-					if (param.buttons & 4UL)
+					if (param->buttons & 4UL)
 					{
 						this->Move(xd, yd);
 					}
 					else
 					{
-						if (param.buttons & 2UL)
+						if (param->buttons & 2UL)
 						{
 							this->Zoom(xd, yd);
 						}

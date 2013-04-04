@@ -47,10 +47,12 @@ namespace KlayGE
 {
 	InputTouch::InputTouch()
 		: index_(false), num_available_touch_(0),
-			has_gesture_(false),
+			has_gesture_(false), action_param_(MakeSharedPtr<InputTouchActionParam>()),
 			curr_state_(GS_None),
 			one_finger_tap_timer_(0), two_finger_tap_timer_(0)
 	{
+		action_param_->type = InputEngine::IDT_Touch;
+
 		touch_downs_[0].fill(false);
 		touch_downs_[1].fill(false);
 
@@ -101,7 +103,7 @@ namespace KlayGE
 		if (has_gesture_)
 		{
 			InputActionMap& iam = actionMaps_[id];
-			iam.UpdateInputActions(ret, static_cast<uint16_t>(gesture_), gesture_param_);
+			iam.UpdateInputActions(ret, static_cast<uint16_t>(gesture_), action_param_);
 		}
 
 		return ret;
@@ -155,14 +157,14 @@ namespace KlayGE
 
 		gesture_ = TS_Pan;
 		has_gesture_ = true;
-		gesture_param_.center = touch_coords_[index_][0];
+		action_param_->center = touch_coords_[index_][0];
 		if (touch_downs_[index_][0] && touch_downs_[!index_][0])
 		{
-			gesture_param_.move_vec = float2(touch_coords_[index_][0] - touch_coords_[!index_][0]);
+			action_param_->move_vec = touch_coords_[index_][0] - touch_coords_[!index_][0];
 		}
 		else
 		{
-			gesture_param_.move_vec = float2(0.0f, 0.0f);
+			action_param_->move_vec = int2(0, 0);
 		}
 	}
 
@@ -185,8 +187,8 @@ namespace KlayGE
 					gesture_ = TS_Tap;
 				}
 				has_gesture_ = true;
-				gesture_param_.center = touch_coords_[index_][0];
-				gesture_param_.move_vec = vec;
+				action_param_->center = touch_coords_[index_][0];
+				action_param_->move_vec = int2(vec);
 				this->CurrState(GS_None);
 			}
 			break;
@@ -216,7 +218,7 @@ namespace KlayGE
 		{
 			gesture_ = TS_Press;
 			has_gesture_ = true;
-			gesture_param_.center = touch_coords_[index_][0];
+			action_param_->center = touch_coords_[index_][0];
 		}
 		else if ((one_finger_tap_timer_ > TAP_TIMER_THRESHOLD) && (dist > 2))
 		{
@@ -234,7 +236,7 @@ namespace KlayGE
 			{
 				gesture_ = TS_PressAndTap;
 				has_gesture_ = true;
-				gesture_param_.center = float2(touch_coords_[index_][0] + touch_coords_[index_][1]) / 2.0f;
+				action_param_->center = float2(touch_coords_[index_][0] + touch_coords_[index_][1]) / 2.0f;
 			}
 			this->CurrState(GS_None);
 			break;
@@ -272,7 +274,7 @@ namespace KlayGE
 			{
 				gesture_ = TS_Tap;
 				has_gesture_ = true;
-				gesture_param_.center = float2(touch_coords_[index_][0] + touch_coords_[index_][1]) / 2.0f;
+				action_param_->center = float2(touch_coords_[index_][0] + touch_coords_[index_][1]) / 2.0f;
 			}
 			this->CurrState(GS_None);
 			break;
@@ -315,8 +317,8 @@ namespace KlayGE
 				float vec_len = MathLib::length(float2(touch_coords_[index_][0] - touch_coords_[index_][1]));
 				gesture_ = TS_Zoom;
 				has_gesture_ = true;
-				gesture_param_.center = float2(touch_coords_[index_][0] + touch_coords_[index_][1]) / 2.0f;
-				gesture_param_.move_vec.x() = vec_len / two_finger_start_len_;
+				action_param_->center = float2(touch_coords_[index_][0] + touch_coords_[index_][1]) / 2.0f;
+				action_param_->zoom = vec_len / two_finger_start_len_;
 				two_finger_start_len_ = vec_len;
 			}
 			break;
@@ -342,8 +344,8 @@ namespace KlayGE
 					two_finger_vec_ = vec;
 					gesture_ = TS_Rotate;
 					has_gesture_ = true;
-					gesture_param_.center = float2(touch_coords_[index_][0] + touch_coords_[index_][1]) / 2.0f;
-					gesture_param_.rotate_angle = delta_angle;
+					action_param_->center = float2(touch_coords_[index_][0] + touch_coords_[index_][1]) / 2.0f;
+					action_param_->rotate_angle = delta_angle;
 				}
 			}
 			break;

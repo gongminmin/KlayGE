@@ -103,10 +103,10 @@ namespace KlayGE
 		this->DeviceState(&diMouseState, sizeof(diMouseState));
 
 		POINT pt;
-		GetCursorPos(&pt);
-		ScreenToClient(checked_cast<DInputEngine const *>(&Context::Instance().InputFactoryInstance().InputEngineInstance())->HWnd(), &pt);
-		abs_pos_ = Vector_T<long, 2>(pt.x, pt.y);
-		offset_ = Vector_T<long, 3>(diMouseState.lX, diMouseState.lY, diMouseState.lZ);
+		::GetCursorPos(&pt);
+		::ScreenToClient(checked_cast<DInputEngine const *>(&Context::Instance().InputFactoryInstance().InputEngineInstance())->HWnd(), &pt);
+		abs_pos_ = int2(pt.x, pt.y);
+		offset_ = int3(diMouseState.lX, diMouseState.lY, diMouseState.lZ);
 
 		index_ = !index_;
 		for (size_t i = 0; i < buttons_[index_].size(); ++ i)

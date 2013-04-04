@@ -23,10 +23,13 @@
 namespace KlayGE
 {
 	InputMouse::InputMouse()
-		: abs_pos_(0, 0), offset_(0, 0, 0), index_(false)
+		: abs_pos_(0, 0), offset_(0, 0, 0), index_(false),
+			action_param_(MakeSharedPtr<InputMouseActionParam>())
 	{
 		buttons_[0].fill(false);
 		buttons_[1].fill(false);
+
+		action_param_->type = InputEngine::IDT_Mouse;
 	}
 
 	InputMouse::~InputMouse()
@@ -142,33 +145,32 @@ namespace KlayGE
 
 		InputActionMap& iam = actionMaps_[id];
 
-		ActionParam param;
-		param.move_vec = int2(this->X(), this->Y());
-		param.wheel_delta = this->Z();
-		param.abs_coord = int2(this->AbsX(), this->AbsY());
-		param.buttons = 0;
-		for (size_t i = 0; i < this->NumButtons(); ++ i)
+		action_param_->move_vec = int2(offset_.x(), offset_.y());
+		action_param_->wheel_delta = offset_.z();
+		action_param_->abs_coord = abs_pos_;
+		action_param_->buttons = 0;
+		for (size_t i = 0; i < buttons_[index_].size(); ++ i)
 		{
-			param.buttons |= this->Button(i) ? (1UL << i) : 0;
+			action_param_->buttons |= (buttons_[index_][i] ? (1UL << i) : 0);
 		}
 
-		if (this->X() != 0)
+		if (offset_.x() != 0)
 		{
-			iam.UpdateInputActions(ret, MS_X, param);
+			iam.UpdateInputActions(ret, MS_X, action_param_);
 		}
-		if (this->Y() != 0)
+		if (offset_.y() != 0)
 		{
-			iam.UpdateInputActions(ret, MS_Y, param);
+			iam.UpdateInputActions(ret, MS_Y, action_param_);
 		}
-		if (this->Z() != 0)
+		if (offset_.z() != 0)
 		{
-			iam.UpdateInputActions(ret, MS_Z, param);
+			iam.UpdateInputActions(ret, MS_Z, action_param_);
 		}
-		for (uint16_t i = 0; i < this->NumButtons(); ++ i)
+		for (uint16_t i = 0; i < buttons_[index_].size(); ++ i)
 		{
-			if (this->Button(i))
+			if (buttons_[index_][i])
 			{
-				iam.UpdateInputActions(ret, static_cast<uint16_t>(MS_Button0 + i), param);
+				iam.UpdateInputActions(ret, static_cast<uint16_t>(MS_Button0 + i), action_param_);
 			}
 		}
 

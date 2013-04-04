@@ -80,14 +80,14 @@ namespace KlayGE
 	void MsgInputMouse::UpdateInputs()
 	{
 		POINT pt;
-		GetCursorPos(&pt);
-		ScreenToClient(Context::Instance().AppInstance().MainWnd()->HWnd(), &pt);
-		abs_pos_ = Vector_T<long, 2>(pt.x, pt.y);
+		::GetCursorPos(&pt);
+		::ScreenToClient(Context::Instance().AppInstance().MainWnd()->HWnd(), &pt);
+		abs_pos_ = int2(pt.x, pt.y);
 		offset_ = offset_state_;
 
 		index_ = !index_;
 		buttons_[index_] = buttons_state_;
 
-		offset_state_ = Vector_T<long, 3>(0, 0, 0);
+		offset_state_ = int3(0, 0, 0);
 	}
 }

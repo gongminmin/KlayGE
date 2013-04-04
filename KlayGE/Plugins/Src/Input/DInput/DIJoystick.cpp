@@ -148,8 +148,8 @@ namespace KlayGE
 		DIJOYSTATE diJoyState;
 		this->DeviceState(&diJoyState, sizeof(diJoyState));
 
-		pos_ = Vector_T<long, 3>(diJoyState.lX, diJoyState.lY, diJoyState.lZ);
-		rot_ = Vector_T<long, 3>(diJoyState.lRx, diJoyState.lRy, diJoyState.lRz);
+		pos_ = int3(diJoyState.lX, diJoyState.lY, diJoyState.lZ);
+		rot_ = int3(diJoyState.lRx, diJoyState.lRy, diJoyState.lRz);
 
 		index_ = !index_;
 		std::copy(diJoyState.rglSlider, diJoyState.rglSlider + slider_.size(), slider_.begin());

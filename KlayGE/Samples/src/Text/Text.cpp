@@ -44,8 +44,10 @@ namespace
 	{
 		InputActionDefine(Exit, KS_Escape),
 
+		InputActionDefine(Move, TS_Pan),
 		InputActionDefine(Move, MS_X),
 		InputActionDefine(Move, MS_Y),
+		InputActionDefine(Scale, TS_Zoom),
 		InputActionDefine(Scale, MS_Z),
 	};
 }
@@ -125,33 +127,73 @@ void TextApp::InputHandler(InputEngine const & /*sender*/, InputAction const & a
 	switch (action.first)
 	{
 	case Move:
+		switch (action.second->type)
 		{
-			InputMouse::ActionParam param = boost::any_cast<InputMouse::ActionParam>(action.second);
-			int2 this_mouse_pt(param.abs_coord);
-			if (param.buttons & 1UL)
+		case InputEngine::IDT_Mouse:
 			{
-				if ((last_mouse_pt_.x() != -1) || (last_mouse_pt_.y() != -1))
+				InputMouseActionParamPtr param = checked_pointer_cast<InputMouseActionParam>(action.second);
+				int2 this_mouse_pt(param->abs_coord);
+				if (param->buttons & 1UL)
 				{
-					position_ += float2(this_mouse_pt - last_mouse_pt_) / scale_;
+					if ((last_mouse_pt_.x() != -1) || (last_mouse_pt_.y() != -1))
+					{
+						position_ += float2(this_mouse_pt - last_mouse_pt_) / scale_;
+					}
 				}
-			}
 
-			last_mouse_pt_ = this_mouse_pt;
+				last_mouse_pt_ = this_mouse_pt;
+			}
+			break;
+
+		case InputEngine::IDT_Touch:
+			{
+				InputTouchActionParamPtr param = checked_pointer_cast<InputTouchActionParam>(action.second);
+				position_ += float2(param->move_vec) / scale_;
+			}
+			break;
+
+		default:
+			BOOST_ASSERT(false);
+			break;
 		}
 		break;
 
 	case Scale:
+		switch (action.second->type)
 		{
-			InputMouse::ActionParam param = boost::any_cast<InputMouse::ActionParam>(action.second);
-			float f = 1.0f + (param.wheel_delta * 0.1f) / 120;
-			float2 p = float2(static_cast<float>(-param.abs_coord.x()), static_cast<float>(-param.abs_coord.y())) / scale_ + position_;
-			float2 new_position = (position_ - p * (1 - f)) / f;
-			float new_scale = scale_ * f;
-			if ((new_scale > 0.25f) && (new_scale < 32))
+		case InputEngine::IDT_Mouse:
 			{
-				position_ = new_position;
-				scale_ = new_scale;
+				InputMouseActionParamPtr param = checked_pointer_cast<InputMouseActionParam>(action.second);
+				float f = 1.0f + (param->wheel_delta * 0.1f) / 120;
+				float2 p = float2(-param->abs_coord) / scale_ + position_;
+				float2 new_position = (position_ - p * (1 - f)) / f;
+				float new_scale = scale_ * f;
+				if ((new_scale > 0.25f) && (new_scale < 32))
+				{
+					position_ = new_position;
+					scale_ = new_scale;
+				}
 			}
+			break;
+
+		case InputEngine::IDT_Touch:
+			{
+				InputTouchActionParamPtr param = checked_pointer_cast<InputTouchActionParam>(action.second);
+				float f = param->zoom;
+				float2 p = float2(-param->center) / scale_ + position_;
+				float2 new_position = (position_ - p * (1 - f)) / f;
+				float new_scale = scale_ * f;
+				if ((new_scale > 0.25f) && (new_scale < 32))
+				{
+					position_ = new_position;
+					scale_ = new_scale;
+				}
+			}
+			break;
+
+		default:
+			BOOST_ASSERT(false);
+			break;
 		}
 		break;
 

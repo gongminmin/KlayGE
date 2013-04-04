@@ -569,8 +569,6 @@ namespace
 			float3 light_clr = app.GetLightSource()->Color();
 			float light_density = app.LightDensity();
 
-			CausticsInputTexture const & input_tex = app.GetCausticsInputTexture();
-
 			if ((Single_Caustics_Pass == pass_) || (Dual_Caustics_Pass == pass_))
 			{			
 				*(technique_->Effect().ParameterByName("light_view")) = light_view;
@@ -584,9 +582,9 @@ namespace
 				*(technique_->Effect().ParameterByName("absorption_idx")) = absorption_idx;
 				*(technique_->Effect().ParameterByName("inv_occlusion_pixs")) = 1.0f / (CAUSTICS_GRID_SIZE * CAUSTICS_GRID_SIZE / 2);
 
-				*(technique_->Effect().ParameterByName("t_background_depth")) = input_tex.background_depth_tex;
-				*(technique_->Effect().ParameterByName("t_first_depth")) = input_tex.refract_obj_depth_tex_f;
-				*(technique_->Effect().ParameterByName("t_first_normals")) = input_tex.refract_obj_N_texture_f;
+				*(technique_->Effect().ParameterByName("t_background_depth")) = app.GetBackgroundDepthTex();
+				*(technique_->Effect().ParameterByName("t_first_depth")) = app.GetRefractObjDepthFrontTex();
+				*(technique_->Effect().ParameterByName("t_first_normals")) = app.GetRefractObjNormalFrontTex();
 
 				float3 ttow_center = MathLib::transform_normal(MathLib::transform_coord(float3(0, 0, 1), inv_light_proj), inv_light_view);
 				float3 ttow_left = MathLib::transform_coord(MathLib::transform_coord(float3(-1, 0, 1), inv_light_proj), inv_light_view);
@@ -599,8 +597,8 @@ namespace
 
 				if (Dual_Caustics_Pass == pass_)
 				{
-					*(technique_->Effect().ParameterByName("t_second_depth")) = input_tex.refract_obj_depth_tex_b;
-					*(technique_->Effect().ParameterByName("t_second_normals")) = input_tex.refract_obj_N_texture_b;
+					*(technique_->Effect().ParameterByName("t_second_depth")) = app.GetRefractObjDepthBackTex();
+					*(technique_->Effect().ParameterByName("t_second_normals")) = app.GetRefractObjNormalBackTex();
 				}
 			}
 		}

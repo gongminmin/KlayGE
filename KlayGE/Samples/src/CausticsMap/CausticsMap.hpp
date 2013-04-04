@@ -5,15 +5,6 @@
 #include <KlayGE\Font.hpp>
 #include <KlayGE\CameraController.hpp>
 
-struct CausticsInputTexture
-{
-	KlayGE::TexturePtr refract_obj_N_texture_f;
-	KlayGE::TexturePtr refract_obj_N_texture_b;
-	KlayGE::TexturePtr refract_obj_depth_tex_f;
-	KlayGE::TexturePtr refract_obj_depth_tex_b;
-	KlayGE::TexturePtr background_depth_tex;
-};
-
 class CausticsMapApp : public KlayGE::App3DFramework
 {
 public:
@@ -42,17 +33,25 @@ public:
 	{
 		return light_;
 	}
-	CausticsInputTexture const & GetCausticsInputTexture()
+	KlayGE::TexturePtr const & GetBackgroundDepthTex() const
 	{
-		static CausticsInputTexture input_texture;
-
-		input_texture.background_depth_tex = background_depth_tex_;
-		input_texture.refract_obj_N_texture_f = refract_obj_N_texture_f_;
-		input_texture.refract_obj_depth_tex_f = refract_obj_depth_tex_f_;
-		input_texture.refract_obj_N_texture_b = refract_obj_N_texture_b_;
-		input_texture.refract_obj_depth_tex_b = refract_obj_depth_tex_b_;
-
-		return input_texture;
+		return background_depth_tex_;
+	}
+	KlayGE::TexturePtr const & GetRefractObjNormalFrontTex() const
+	{
+		return refract_obj_N_texture_f_;
+	}
+	KlayGE::TexturePtr const & GetRefractObjDepthFrontTex() const
+	{
+		return refract_obj_depth_tex_f_;
+	}
+	KlayGE::TexturePtr const & GetRefractObjNormalBackTex() const
+	{
+		return refract_obj_N_texture_b_;
+	}
+	KlayGE::TexturePtr const & GetRefractObjDepthBackTex() const
+	{
+		return refract_obj_depth_tex_b_;
 	}
 	KlayGE::TexturePtr GetCausticsMap()
 	{

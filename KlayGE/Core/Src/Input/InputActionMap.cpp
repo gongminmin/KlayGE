@@ -27,11 +27,11 @@ namespace KlayGE
 
 	// 更新输入动作
 	//////////////////////////////////////////////////////////////////////////////////
-	void InputActionMap::UpdateInputActions(InputActionsType& actions, uint16_t key, boost::any value)
+	void InputActionMap::UpdateInputActions(InputActionsType& actions, uint16_t key, InputActionParamPtr const & param)
 	{
 		if (this->HasAction(key))
 		{
-			actions.push_back(std::make_pair(this->Action(key), value));
+			actions.push_back(std::make_pair(this->Action(key), param));
 		}
 	}
 

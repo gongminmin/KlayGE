@@ -119,7 +119,7 @@ namespace
 		void Position(float2 const & pos)
 		{
 			position_ = pos;
-			mat_translation_ = MathLib::translation(-position_.x(), -position_.y(), 0.0f);
+			mat_translation_ = MathLib::translation(+position_.x(), -position_.y(), 0.0f);
 			checked_pointer_cast<RenderTile>(renderable_)->SetModel(mat_tile_scaling_ * mat_translation_ * mat_scaling_);
 		}
 
@@ -225,7 +225,7 @@ namespace
 		void Position(float2 const & pos)
 		{
 			position_ = pos;
-			mat_translation_ = MathLib::translation(-position_.x(), -position_.y(), 0.0f);
+			mat_translation_ = MathLib::translation(+position_.x(), -position_.y(), 0.0f);
 			checked_pointer_cast<RenderGridBorder>(renderable_)->SetModel(mat_tile_scaling_ * mat_translation_ * mat_scaling_);
 		}
 
@@ -341,9 +341,9 @@ void JudaTexViewer::InputHandler(InputEngine const & /*sender*/, InputAction con
 
 	case Move:
 		{
-			InputMouse::ActionParam param = boost::any_cast<InputMouse::ActionParam>(action.second);
-			int2 this_mouse_pt(param.abs_coord);
-			if (param.buttons & 1UL)
+			InputMouseActionParamPtr param = checked_pointer_cast<InputMouseActionParam>(action.second);
+			int2 this_mouse_pt(param->abs_coord);
+			if (param->buttons & 1UL)
 			{
 				if ((last_mouse_pt_.x() != -1) || (last_mouse_pt_.y() != -1))
 				{
@@ -360,9 +360,9 @@ void JudaTexViewer::InputHandler(InputEngine const & /*sender*/, InputAction con
 
 	case Scale:
 		{
-			InputMouse::ActionParam param = boost::any_cast<InputMouse::ActionParam>(action.second);
-			float f = 1.0f + (param.wheel_delta * 0.1f) / 120;
-			float2 p = float2(static_cast<float>(-param.abs_coord.x()), static_cast<float>(-param.abs_coord.y())) / scale_ + position_;
+			InputMouseActionParamPtr param = checked_pointer_cast<InputMouseActionParam>(action.second);
+			float f = 1.0f + (param->wheel_delta * 0.1f) / 120;
+			float2 p = float2(-param->abs_coord) / scale_ + position_;
 			float2 new_position = (position_ - p * (1 - f)) / f;
 			float new_scale = scale_ * f;
 			if (tile_size_ * new_scale > 64)
@@ -485,9 +485,9 @@ uint32_t JudaTexViewer::DoUpdate(uint32_t /*pass*/)
 	
 	uint32_t const level = juda_tex_->TreeLevels() - 1;
 		
-	sx_ = static_cast<uint32_t>(std::max(0, static_cast<int>(position_.x() / tile_size_)));
+	sx_ = static_cast<uint32_t>(std::max(0, static_cast<int>(-position_.x() / tile_size_)));
 	sy_ = static_cast<uint32_t>(std::max(0, static_cast<int>(-position_.y() / tile_size_)));
-	ex_ = std::min(num_tiles_, static_cast<uint32_t>(std::ceil((re.CurFrameBuffer()->Width() / scale_ + position_.x()) / tile_size_ + 1)));
+	ex_ = std::min(num_tiles_, static_cast<uint32_t>(std::ceil((re.CurFrameBuffer()->Width() / scale_ - position_.x()) / tile_size_ + 1)));
 	ey_ = std::min(num_tiles_, static_cast<uint32_t>(std::ceil((re.CurFrameBuffer()->Height() / scale_ - position_.y()) / tile_size_ + 1)));
 	uint32_t nx = ex_ - sx_;
 	uint32_t ny = ey_ - sy_;
