@@ -37,8 +37,10 @@
 namespace KlayGE
 {
 	MsgInputJoystick::MsgInputJoystick(HANDLE device)
-		: device_(device)
+		: device_(device),
+			pos_state_(0, 0, 0), rot_state_(0, 0, 0), slider_state_(0, 0)
 	{
+		buttons_state_.fill(false);
 	}
 	
 	const std::wstring& MsgInputJoystick::Name() const

@@ -38,7 +38,8 @@
 namespace KlayGE
 {
 	MsgInputMouse::MsgInputMouse(HANDLE device)
-		: device_(device)
+		: device_(device),
+			offset_state_(0, 0, 0)
 	{
 		buttons_state_.fill(false);
 	}
