@@ -261,10 +261,11 @@ namespace KlayGE
 	{
 		TS_Pan				= 0x300,
 		TS_Tap				= 0x301,
-		TS_PressAndTap		= 0x302,
-		TS_Zoom				= 0x303,
-		TS_Rotate			= 0x304,
-		TS_Flick			= 0x305
+		TS_Press			= 0x302,
+		TS_PressAndTap		= 0x303,
+		TS_Zoom				= 0x304,
+		TS_Rotate			= 0x305,
+		TS_Flick			= 0x306
 	};
 
 	typedef std::pair<uint16_t, uint16_t> InputActionDefine;
@@ -524,20 +525,10 @@ namespace KlayGE
 		void CurrState(GestureState state);
 
 	protected:
-		enum TouchInputFlag
-		{
-			TIF_Move = 1UL << 0,
-			TIF_Down = 1UL << 1,
-			TIF_Up = 1UL << 2
-		};
-		struct TouchInput
-		{
-			int2 coord;
-			uint32_t flags;
-			uint32_t finger_id;
-		};
-		std::vector<TouchInput> inputs_;
-		uint32_t num_available_input_;
+		array<array<int2, 16>, 2> touch_coords_;
+		array<array<bool, 16>, 2> touch_downs_;
+		bool index_;
+		uint32_t num_available_touch_;
 
 		TouchSemantic gesture_;
 		bool has_gesture_;
@@ -549,7 +540,7 @@ namespace KlayGE
 
 		// 1-finger
 		float one_finger_tap_timer_;
-		float2 one_finger_start_pos_;
+		int2 one_finger_start_pos_;
 
 		// 2-finger
 		float two_finger_tap_timer_;

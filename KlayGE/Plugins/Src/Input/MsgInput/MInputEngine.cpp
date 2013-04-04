@@ -61,6 +61,9 @@ namespace KlayGE
 	{
 		on_raw_input_.disconnect();
 		on_touch_.disconnect();
+		on_pointer_down_.disconnect();
+		on_pointer_up_.disconnect();
+		on_pointer_update_.disconnect();
 		devices_.clear();
 
 		::FreeLibrary(mod_hid_);
@@ -140,13 +143,22 @@ namespace KlayGE
 			on_raw_input_ = main_wnd->OnRawInput().connect(bind(&MsgInputEngine::OnRawInput, this,
 				placeholders::_1, placeholders::_2));
 		}
-#if (_WIN32_WINNT >= 0x0601 /*_WIN32_WINNT_WIN7*/)
+#if (_WIN32_WINNT >= 0x0602 /*_WIN32_WINNT_WIN8*/)
+		on_pointer_down_ = main_wnd->OnPointerDown().connect(bind(&MsgInputEngine::OnPointerDown, this,
+			placeholders::_1, placeholders::_2, placeholders::_3));
+		on_pointer_up_ = main_wnd->OnPointerUp().connect(bind(&MsgInputEngine::OnPointerUp, this,
+			placeholders::_1, placeholders::_2, placeholders::_3));
+		on_pointer_update_ = main_wnd->OnPointerUpdate().connect(bind(&MsgInputEngine::OnPointerUpdate, this,
+			placeholders::_1, placeholders::_2, placeholders::_3));
+		devices_.push_back(MakeSharedPtr<MsgInputTouch>());
+#elif (_WIN32_WINNT >= 0x0601 /*_WIN32_WINNT_WIN7*/)
 		if (::GetSystemMetrics(SM_DIGITIZER) & NID_READY)
 		{
 			if (::RegisterTouchWindow(hwnd, TWF_WANTPALM))
 			{
 				on_touch_ = main_wnd->OnTouch().connect(bind(&MsgInputEngine::OnTouch, this,
 					placeholders::_1, placeholders::_2, placeholders::_3));
+				devices_.push_back(MakeSharedPtr<MsgInputTouch>());
 			}
 		}
 #endif
@@ -200,32 +212,65 @@ namespace KlayGE
 	void MsgInputEngine::OnTouch(Window const & wnd, uint64_t lparam, uint32_t wparam)
 	{
 #if (_WIN32_WINNT >= 0x0601 /*_WIN32_WINNT_WIN7*/)
-		uint32_t num_inputs = LOWORD(wparam);
-        std::vector<TOUCHINPUT> inputs(num_inputs);
-
-		HTOUCHINPUT hti = reinterpret_cast<HTOUCHINPUT>(lparam);
-
-        if (::GetTouchInputInfo(hti, num_inputs, &inputs[0], sizeof(inputs[0])))
-        {
-            for (uint32_t i = 0; i < num_inputs; ++ i)
-            {
-                POINT pt = { TOUCH_COORD_TO_PIXEL(inputs[i].x), TOUCH_COORD_TO_PIXEL(inputs[i].y) };
-				::MapWindowPoints(NULL, wnd.HWnd(), &pt, 1);
-                inputs[i].x = pt.x;
-                inputs[i].y = pt.y;
-            }
-
-			typedef KLAYGE_DECLTYPE(devices_) DevicesType;
-			KLAYGE_FOREACH(DevicesType::reference device, devices_)
+		typedef KLAYGE_DECLTYPE(devices_) DevicesType;
+		KLAYGE_FOREACH(DevicesType::reference device, devices_)
+		{
+			if (InputEngine::IDT_Touch == device->Type())
 			{
-				if (InputEngine::IDT_Touch == device->Type())
-				{
-					checked_pointer_cast<MsgInputTouch>(device)->OnTouch(inputs);
-				}
+				checked_pointer_cast<MsgInputTouch>(device)->OnTouch(wnd, lparam, wparam);
 			}
+		}
+#else
+		UNREF_PARAM(lparam);
+		UNREF_PARAM(wparam);
+#endif
+	}
 
-			::CloseTouchInputHandle(hti);
-        }
+	void MsgInputEngine::OnPointerDown(Window const & wnd, uint64_t lparam, uint32_t wparam)
+	{
+#if (_WIN32_WINNT >= 0x0602 /*_WIN32_WINNT_WIN8*/)
+		typedef KLAYGE_DECLTYPE(devices_) DevicesType;
+		KLAYGE_FOREACH(DevicesType::reference device, devices_)
+		{
+			if (InputEngine::IDT_Touch == device->Type())
+			{
+				checked_pointer_cast<MsgInputTouch>(device)->OnPointerDown(wnd, lparam, wparam);
+			}
+		}
+#else
+		UNREF_PARAM(lparam);
+		UNREF_PARAM(wparam);
+#endif
+	}
+
+	void MsgInputEngine::OnPointerUp(Window const & wnd, uint64_t lparam, uint32_t wparam)
+	{
+#if (_WIN32_WINNT >= 0x0602 /*_WIN32_WINNT_WIN8*/)
+		typedef KLAYGE_DECLTYPE(devices_) DevicesType;
+		KLAYGE_FOREACH(DevicesType::reference device, devices_)
+		{
+			if (InputEngine::IDT_Touch == device->Type())
+			{
+				checked_pointer_cast<MsgInputTouch>(device)->OnPointerUp(wnd, lparam, wparam);
+			}
+		}
+#else
+		UNREF_PARAM(lparam);
+		UNREF_PARAM(wparam);
+#endif
+	}
+	
+	void MsgInputEngine::OnPointerUpdate(Window const & wnd, uint64_t lparam, uint32_t wparam)
+	{
+#if (_WIN32_WINNT >= 0x0602 /*_WIN32_WINNT_WIN8*/)
+		typedef KLAYGE_DECLTYPE(devices_) DevicesType;
+		KLAYGE_FOREACH(DevicesType::reference device, devices_)
+		{
+			if (InputEngine::IDT_Touch == device->Type())
+			{
+				checked_pointer_cast<MsgInputTouch>(device)->OnPointerUpdate(wnd, lparam, wparam);
+			}
+		}
 #else
 		UNREF_PARAM(lparam);
 		UNREF_PARAM(wparam);

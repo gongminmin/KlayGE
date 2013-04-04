@@ -37,6 +37,7 @@
 namespace
 {	
 	float const TAP_TIMER_THRESHOLD = 0.2f;
+	float const PRESS_TIMER_THRESHOLD = 2;
 	float const ROTATE_THRESHOLD = 0.995f;
 	float const ZOOM_THRESHOLD = 0.999f;
 	float const ZOOM_DISTANCE_THRESHOLD = 0.02f;
@@ -45,10 +46,14 @@ namespace
 namespace KlayGE
 {
 	InputTouch::InputTouch()
-		: num_available_input_(0), has_gesture_(false),
+		: index_(false), num_available_touch_(0),
+			has_gesture_(false),
 			curr_state_(GS_None),
 			one_finger_tap_timer_(0), two_finger_tap_timer_(0)
 	{
+		touch_downs_[0].fill(false);
+		touch_downs_[1].fill(false);
+
 		gesture_funcs_[GS_None] = bind(&InputTouch::GestureNone, this, placeholders::_1);
 		gesture_funcs_[GS_Pan] = bind(&InputTouch::GesturePan, this, placeholders::_1);
 		gesture_funcs_[GS_Tap] = bind(&InputTouch::GestureTap, this, placeholders::_1);
@@ -112,23 +117,23 @@ namespace KlayGE
 
 	void InputTouch::GestureNone(float /*elapsed_time*/)
 	{
-		switch (num_available_input_)
+		switch (num_available_touch_)
 		{
 		case 1:
-			if (inputs_[0].flags & (TIF_Move | TIF_Down))
+			if (touch_downs_[index_][0])
 			{
 				this->CurrState(GS_Tap);
 				one_finger_tap_timer_ = 0;
-				one_finger_start_pos_ = float2(inputs_[0].coord);
+				one_finger_start_pos_ = touch_coords_[index_][0];
 			}
 			break;
 
 		case 2:
-			if ((inputs_[0].flags & (TIF_Move | TIF_Down)) && (inputs_[1].flags & (TIF_Move | TIF_Down)))
+			if (touch_downs_[index_][0] && touch_downs_[index_][1])
 			{
 				this->CurrState(GS_TwoFingerIntermediate);
 				two_finger_tap_timer_ = 0;
-				two_finger_vec_ = float2(inputs_[0].coord - inputs_[1].coord);
+				two_finger_vec_ = float2(touch_coords_[index_][0] - touch_coords_[index_][1]);
 				two_finger_start_len_ = MathLib::length(two_finger_vec_);
 				two_finger_vec_ /= two_finger_start_len_;
 			}
@@ -141,7 +146,7 @@ namespace KlayGE
 
 	void InputTouch::GesturePan(float /*elapsed_time*/)
 	{
-		switch (num_available_input_)
+		switch (num_available_touch_)
 		{
 		case 0:
 			this->CurrState(GS_None);
@@ -150,39 +155,46 @@ namespace KlayGE
 
 		gesture_ = TS_Pan;
 		has_gesture_ = true;
-		gesture_param_.center = inputs_[0].coord;
+		gesture_param_.center = touch_coords_[index_][0];
+		if (touch_downs_[index_][0] && touch_downs_[!index_][0])
+		{
+			gesture_param_.move_vec = float2(touch_coords_[index_][0] - touch_coords_[!index_][0]);
+		}
+		else
+		{
+			gesture_param_.move_vec = float2(0.0f, 0.0f);
+		}
 	}
 
 	void InputTouch::GestureTap(float elapsed_time)
 	{
-		switch (num_available_input_)
+		switch (num_available_touch_)
 		{
 		case 0:
 			{
-				float2 vec = float2(inputs_[0].coord) - one_finger_start_pos_;
+				float2 vec = float2(touch_coords_[index_][0] - one_finger_start_pos_);
 				float vec_len = MathLib::length(vec);
 				float distance = vec_len / one_finger_tap_timer_;
 				if (distance > 1000.0f)
 				{
 					vec /= vec_len;
 					gesture_ = TS_Flick;
-					has_gesture_ = true;
-					gesture_param_.move_vec = vec;
 				}
 				else
 				{
 					gesture_ = TS_Tap;
-					has_gesture_ = true;
 				}
-				gesture_param_.center = inputs_[0].coord;
+				has_gesture_ = true;
+				gesture_param_.center = touch_coords_[index_][0];
+				gesture_param_.move_vec = vec;
 				this->CurrState(GS_None);
 			}
 			break;
 
 		case 2:
-			if ((inputs_[0].flags & (TIF_Move | TIF_Down)) && (inputs_[1].flags & (TIF_Move | TIF_Down)))
+			if (touch_downs_[index_][0] && touch_downs_[index_][1])
 			{
-				if(one_finger_tap_timer_ < 0.5f)
+				if (one_finger_tap_timer_ < 0.5f)
 				{
 					this->CurrState(GS_TwoFingerIntermediate);
 				}
@@ -190,8 +202,8 @@ namespace KlayGE
 				{
 					this->CurrState(GS_PressAndTap);
 				}
-				two_finger_tap_timer_ = 0.0f;
-				two_finger_vec_ = float2(inputs_[0].coord - inputs_[1].coord);
+				two_finger_tap_timer_ = 0;
+				two_finger_vec_ = float2(touch_coords_[index_][0] - touch_coords_[index_][1]);
 				two_finger_start_len_ = MathLib::length(two_finger_vec_);
 				two_finger_vec_ /= two_finger_start_len_;
 			}
@@ -199,19 +211,22 @@ namespace KlayGE
 		}
 
 		one_finger_tap_timer_ += elapsed_time;
-		if(one_finger_tap_timer_ > TAP_TIMER_THRESHOLD)
+		float dist = MathLib::length(float2(touch_coords_[index_][0] - one_finger_start_pos_));
+		if ((1 == num_available_touch_) && (one_finger_tap_timer_ > PRESS_TIMER_THRESHOLD) && (dist < 2))
 		{
-			float2 vec = float2(inputs_[0].coord) - one_finger_start_pos_;
-			if (MathLib::length(vec) > 2)
-			{
-				this->CurrState(GS_Pan);
-			}
+			gesture_ = TS_Press;
+			has_gesture_ = true;
+			gesture_param_.center = touch_coords_[index_][0];
+		}
+		else if ((one_finger_tap_timer_ > TAP_TIMER_THRESHOLD) && (dist > 2))
+		{
+			this->CurrState(GS_Pan);
 		}
 	}
 
 	void InputTouch::GesturePressAndTap(float elapsed_time)
 	{
-		switch (num_available_input_)
+		switch (num_available_touch_)
 		{
 		case 0:
 		case 1:
@@ -219,26 +234,26 @@ namespace KlayGE
 			{
 				gesture_ = TS_PressAndTap;
 				has_gesture_ = true;
-				gesture_param_.center = float2(inputs_[0].coord + inputs_[1].coord) / 2.0f;
+				gesture_param_.center = float2(touch_coords_[index_][0] + touch_coords_[index_][1]) / 2.0f;
 			}
 			this->CurrState(GS_None);
 			break;
 
 		case 2:
 			{
-				float2 vec = float2(inputs_[0].coord - inputs_[1].coord);
+				float2 vec = float2(touch_coords_[index_][0] - touch_coords_[index_][1]);
 				float vec_len = MathLib::length(vec);
 				vec /= vec_len;
 
-				float d = MathLib::dot(two_finger_vec_, vec);
-				if (abs(d) > ZOOM_THRESHOLD)
+				float d = abs(MathLib::dot(two_finger_vec_, vec));
+				if (d > ZOOM_THRESHOLD)
 				{
 					if (abs(1 - abs(vec_len / two_finger_start_len_)) > ZOOM_DISTANCE_THRESHOLD)
 					{
 						this->CurrState(GS_Zoom);
 					}
 				}
-				if (abs(d) < ROTATE_THRESHOLD)
+				if (d < ROTATE_THRESHOLD)
 				{
 					this->CurrState(GS_Rotate);
 				}
@@ -250,33 +265,33 @@ namespace KlayGE
 
 	void InputTouch::GestureTwoFingerIntermediate(float elapsed_time)
 	{
-		switch (num_available_input_)
+		switch (num_available_touch_)
 		{
 		case 0:
 			if (two_finger_tap_timer_ < TAP_TIMER_THRESHOLD)
 			{
 				gesture_ = TS_Tap;
 				has_gesture_ = true;
-				gesture_param_.center = float2(inputs_[0].coord + inputs_[1].coord) / 2.0f;
+				gesture_param_.center = float2(touch_coords_[index_][0] + touch_coords_[index_][1]) / 2.0f;
 			}
 			this->CurrState(GS_None);
 			break;
 
 		case 2:
 			{
-				float2 vec = float2(inputs_[0].coord - inputs_[1].coord);
+				float2 vec = float2(touch_coords_[index_][0] - touch_coords_[index_][1]);
 				float vec_len = MathLib::length(vec);
 				vec /= vec_len;
 
-				float d = MathLib::dot(two_finger_vec_, vec);
-				if (abs(d) > ZOOM_THRESHOLD)
+				float d = abs(MathLib::dot(two_finger_vec_, vec));
+				if (d > ZOOM_THRESHOLD)
 				{
 					if (abs(1 - abs(vec_len / two_finger_start_len_)) > ZOOM_DISTANCE_THRESHOLD)
 					{
 						this->CurrState(GS_Zoom);
 					}
 				}
-				if (abs(d) < ROTATE_THRESHOLD)
+				if (d < ROTATE_THRESHOLD)
 				{
 					this->CurrState(GS_Rotate);
 				}
@@ -288,7 +303,7 @@ namespace KlayGE
 
 	void InputTouch::GestureZoom(float elapsed_time)
 	{
-		switch (num_available_input_)
+		switch (num_available_touch_)
 		{
 		case 0:
 		case 1:
@@ -297,10 +312,10 @@ namespace KlayGE
 
 		case 2:
 			{
-				float vec_len = MathLib::length(float2(inputs_[0].coord - inputs_[1].coord));
+				float vec_len = MathLib::length(float2(touch_coords_[index_][0] - touch_coords_[index_][1]));
 				gesture_ = TS_Zoom;
 				has_gesture_ = true;
-				gesture_param_.center = float2(inputs_[0].coord + inputs_[1].coord) / 2.0f;
+				gesture_param_.center = float2(touch_coords_[index_][0] + touch_coords_[index_][1]) / 2.0f;
 				gesture_param_.move_vec.x() = vec_len / two_finger_start_len_;
 				two_finger_start_len_ = vec_len;
 			}
@@ -311,7 +326,7 @@ namespace KlayGE
 
 	void InputTouch::GestureRotate(float elapsed_time)
 	{
-		switch (num_available_input_)
+		switch (num_available_touch_)
 		{
 		case 0:
 		case 1:
@@ -320,14 +335,14 @@ namespace KlayGE
 
 		case 2:
 			{
-				float2 vec = MathLib::normalize(float2(inputs_[0].coord - inputs_[1].coord));
+				float2 vec = MathLib::normalize(float2(touch_coords_[index_][0] - touch_coords_[index_][1]));
 				float delta_angle = atan2(two_finger_vec_.y(), two_finger_vec_.x()) - atan2(vec.y(), vec.x());
 				if (abs(delta_angle) > 0.01f)
 				{
 					two_finger_vec_ = vec;
 					gesture_ = TS_Rotate;
 					has_gesture_ = true;
-					gesture_param_.center = float2(inputs_[0].coord + inputs_[1].coord) / 2.0f;
+					gesture_param_.center = float2(touch_coords_[index_][0] + touch_coords_[index_][1]) / 2.0f;
 					gesture_param_.rotate_angle = delta_angle;
 				}
 			}

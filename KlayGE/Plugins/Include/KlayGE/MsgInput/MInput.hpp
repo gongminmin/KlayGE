@@ -228,6 +228,9 @@ namespace KlayGE
 	private:
 		boost::signals2::connection on_raw_input_;
 		boost::signals2::connection on_touch_;
+		boost::signals2::connection on_pointer_down_;
+		boost::signals2::connection on_pointer_up_;
+		boost::signals2::connection on_pointer_update_;
 
 		HMODULE mod_hid_;
 		typedef NTSTATUS (WINAPI *HidP_GetCapsFunc)(PHIDP_PREPARSED_DATA PreparsedData, PHIDP_CAPS Capabilities);
@@ -250,6 +253,9 @@ namespace KlayGE
 	private:
 		void OnRawInput(Window const & wnd, uint64_t param);
 		void OnTouch(Window const & wnd, uint64_t lparam, uint32_t wparam);
+		void OnPointerDown(Window const & wnd, uint64_t lparam, uint32_t wparam);
+		void OnPointerUp(Window const & wnd, uint64_t lparam, uint32_t wparam);
+		void OnPointerUpdate(Window const & wnd, uint64_t lparam, uint32_t wparam);
 	};
 
 	class MsgInputKeyboard : public InputKeyboard
@@ -310,13 +316,17 @@ namespace KlayGE
 		MsgInputTouch();
 
 		virtual std::wstring const & Name() const KLAYGE_OVERRIDE;
-		void OnTouch(std::vector<TOUCHINPUT> const & inputs);
+		void OnTouch(Window const & wnd, uint64_t lparam, uint32_t wparam);
+		void OnPointerDown(Window const & wnd, uint64_t lparam, uint32_t wparam);
+		void OnPointerUp(Window const & wnd, uint64_t lparam, uint32_t wparam);
+		void OnPointerUpdate(Window const & wnd, uint64_t lparam, uint32_t wparam);
 
 	private:
 		virtual void UpdateInputs() KLAYGE_OVERRIDE;
 
 		Timer timer_;
-		std::vector<TouchInput> input_state_;
+		array<int2, 16> touch_coord_state_;
+		array<bool, 16> touch_down_state_;
 	};
 }
 

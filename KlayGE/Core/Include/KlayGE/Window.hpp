@@ -150,6 +150,9 @@ namespace KlayGE
 		typedef boost::signals2::signal<void(Window const &, uint32_t, int2 const &)> MouseOverEvent;
 		typedef boost::signals2::signal<void(Window const &, uint64_t)> RawInputEvent;
 		typedef boost::signals2::signal<void(Window const &, uint64_t, uint32_t)> TouchEvent;
+		typedef boost::signals2::signal<void(Window const &, uint64_t, uint32_t)> PointerDownEvent;
+		typedef boost::signals2::signal<void(Window const &, uint64_t, uint32_t)> PointerUpEvent;
+		typedef boost::signals2::signal<void(Window const &, uint64_t, uint32_t)> PointerUpdateEvent;
 		typedef boost::signals2::signal<void(Window const &)> CloseEvent;
 
 		ActiveEvent& OnActive()
@@ -212,6 +215,18 @@ namespace KlayGE
 		{
 			return touch_event_;
 		}
+		PointerDownEvent& OnPointerDown()
+		{
+			return pointer_down_event_;
+		}
+		PointerUpEvent& OnPointerUp()
+		{
+			return pointer_up_event_;
+		}
+		PointerUpdateEvent& OnPointerUpdate()
+		{
+			return pointer_update_event_;
+		}
 		CloseEvent& OnClose()
 		{
 			return close_event_;
@@ -233,6 +248,9 @@ namespace KlayGE
 		MouseOverEvent mouse_over_event_;
 		RawInputEvent raw_input_event_;
 		TouchEvent touch_event_;
+		PointerDownEvent pointer_down_event_;
+		PointerUpEvent pointer_up_event_;
+		PointerUpdateEvent pointer_update_event_;
 		CloseEvent close_event_;
 
 #if defined KLAYGE_PLATFORM_WINDOWS

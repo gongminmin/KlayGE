@@ -497,9 +497,22 @@ namespace KlayGE
 			this->OnRawInput()(*this, static_cast<uint64_t>(lParam));
 			break;
 
-#if (_WIN32_WINNT >= 0x0601 /*_WIN32_WINNT_WIN7*/)
+#if (_WIN32_WINNT >= 0x0602 /*_WIN32_WINNT_WIN8*/)
+		case WM_POINTERDOWN:
+			this->OnPointerDown()(*this, static_cast<uint64_t>(lParam), static_cast<uint32_t>(wParam));
+			break;
+
+		case WM_POINTERUP:
+			this->OnPointerUp()(*this, static_cast<uint64_t>(lParam), static_cast<uint32_t>(wParam));
+			break;
+
+		case WM_POINTERUPDATE:
+			this->OnPointerUpdate()(*this, static_cast<uint64_t>(lParam), static_cast<uint32_t>(wParam));
+			break;
+
+#elif (_WIN32_WINNT >= 0x0601 /*_WIN32_WINNT_WIN7*/)
 		case WM_TOUCH:
-			this->OnTouch()(*this, static_cast<uint64_t>(lParam), static_cast<uint32_t>(wParam));
+			this->OnTouch()(*this, static_cast<uint32_t>(lParam), static_cast<uint32_t>(wParam));
 			break;
 #endif
 

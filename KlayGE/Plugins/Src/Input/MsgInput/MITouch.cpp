@@ -31,6 +31,9 @@
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/Context.hpp>
 #include <KlayGE/InputFactory.hpp>
+#include <KlayGE/Window.hpp>
+
+#include <windowsx.h>
 
 #include <KlayGE/MsgInput/MInput.hpp>
 
@@ -38,6 +41,7 @@ namespace KlayGE
 {
 	MsgInputTouch::MsgInputTouch()
 	{
+		touch_down_state_.fill(false);
 	}
 	
 	const std::wstring& MsgInputTouch::Name() const
@@ -46,49 +50,108 @@ namespace KlayGE
 		return name;
 	}
 
-	void MsgInputTouch::OnTouch(std::vector<TOUCHINPUT> const & inputs)
+	void MsgInputTouch::OnTouch(Window const & wnd, uint64_t lparam, uint32_t wparam)
 	{
-		num_available_input_ = static_cast<uint32_t>(inputs.size());
-		input_state_.resize(num_available_input_);
+#if (_WIN32_WINNT >= 0x0601 /*_WIN32_WINNT_WIN7*/)
+		uint32_t num_inputs = LOWORD(wparam);
+		std::vector<TOUCHINPUT> inputs(num_inputs);
 
-		bool all_up = true;
-		for (uint32_t i = 0; i < num_available_input_; ++ i)
+		HTOUCHINPUT hti = reinterpret_cast<HTOUCHINPUT>(lparam);
+		if (::GetTouchInputInfo(hti, num_inputs, &inputs[0], sizeof(inputs[0])))
 		{
-			input_state_[i].coord = int2(inputs[i].x, inputs[i].y);
-			input_state_[i].flags = 0;
-			if (inputs[i].dwFlags & TOUCHEVENTF_MOVE)
+			typedef KLAYGE_DECLTYPE(inputs) InputsType;
+			KLAYGE_FOREACH(InputsType::const_reference ti, inputs)
 			{
-				input_state_[i].flags |= TIF_Move;
+				POINT pt = { TOUCH_COORD_TO_PIXEL(ti.x), TOUCH_COORD_TO_PIXEL(ti.y) };
+				::MapWindowPoints(NULL, wnd.HWnd(), &pt, 1);
+				touch_coord_state_[ti.dwID] = int2(pt.x, pt.y);
+				touch_down_state_[ti.dwID] = (ti.dwFlags & (TOUCHEVENTF_MOVE | TOUCHEVENTF_DOWN)) ? true : false;
 			}
-			if (inputs[i].dwFlags & TOUCHEVENTF_DOWN)
-			{
-				input_state_[i].flags |= TIF_Down;
-			}
-			if (inputs[i].dwFlags & TOUCHEVENTF_UP)
-			{
-				input_state_[i].flags |= TIF_Up;
-			}
-			input_state_[i].finger_id = inputs[i].dwID;
 
-			if (!(inputs[i].dwFlags & TOUCHEVENTF_UP))
+			::CloseTouchInputHandle(hti);
+		}
+#else
+		UNREF_PARAM(wnd);
+		UNREF_PARAM(lparam);
+		UNREF_PARAM(wparam);
+#endif
+	}
+
+	void MsgInputTouch::OnPointerDown(Window const & wnd, uint64_t lparam, uint32_t wparam)
+	{
+#if (_WIN32_WINNT >= 0x0602 /*_WIN32_WINNT_WIN8*/)
+		for (uint32_t f = 0; f < 5; ++ f)
+		{
+			if (IS_POINTER_FLAG_SET_WPARAM(wparam, static_cast<uint32_t>(POINTER_MESSAGE_FLAG_FIRSTBUTTON << f)))
 			{
-				all_up = false;
+				POINT pt = { GET_X_LPARAM(lparam), GET_Y_LPARAM(lparam) };
+				::ScreenToClient(wnd.HWnd(), &pt);
+				touch_coord_state_[f] = int2(pt.x, pt.y);
+				touch_down_state_[f] = true;
 			}
 		}
-		if (all_up)
-		{
-			num_available_input_ = 0;
-		}
+#else
+		UNREF_PARAM(wnd);
+		UNREF_PARAM(lparam);
+		UNREF_PARAM(wparam);
+#endif
+	}
 
-		curr_gesture_(static_cast<float>(timer_.elapsed()));
-		timer_.restart();
+	void MsgInputTouch::OnPointerUp(Window const & wnd, uint64_t lparam, uint32_t wparam)
+	{
+#if (_WIN32_WINNT >= 0x0602 /*_WIN32_WINNT_WIN8*/)
+		for (uint32_t f = 0; f < 5; ++ f)
+		{
+			if (!IS_POINTER_FLAG_SET_WPARAM(wparam, static_cast<uint32_t>(POINTER_MESSAGE_FLAG_FIRSTBUTTON << f)))
+			{
+				POINT pt = { GET_X_LPARAM(lparam), GET_Y_LPARAM(lparam) };
+				::ScreenToClient(wnd.HWnd(), &pt);
+				touch_coord_state_[f] = int2(pt.x, pt.y);
+				touch_down_state_[f] = false;
+			}
+		}
+#else
+		UNREF_PARAM(wnd);
+		UNREF_PARAM(lparam);
+		UNREF_PARAM(wparam);
+#endif
+	}
+
+	void MsgInputTouch::OnPointerUpdate(Window const & wnd, uint64_t lparam, uint32_t wparam)
+	{
+#if (_WIN32_WINNT >= 0x0602 /*_WIN32_WINNT_WIN8*/)
+		for (uint32_t f = 0; f < 5; ++ f)
+		{
+			if (IS_POINTER_FLAG_SET_WPARAM(wparam, static_cast<uint32_t>(POINTER_MESSAGE_FLAG_FIRSTBUTTON << f)))
+			{
+				POINT pt = { GET_X_LPARAM(lparam), GET_Y_LPARAM(lparam) };
+				::ScreenToClient(wnd.HWnd(), &pt);
+				touch_coord_state_[f] = int2(pt.x, pt.y);
+				touch_down_state_[f] = true;
+			}
+		}
+#else
+		UNREF_PARAM(wnd);
+		UNREF_PARAM(lparam);
+		UNREF_PARAM(wparam);
+#endif
 	}
 
 	void MsgInputTouch::UpdateInputs()
 	{
-		inputs_ = input_state_;
+		index_ = !index_;
+		touch_coords_[index_] = touch_coord_state_;
+		touch_downs_[index_] = touch_down_state_;
+		num_available_touch_ = 0;
+		typedef KLAYGE_DECLTYPE(touch_down_state_) TDSType;
+		KLAYGE_FOREACH(TDSType::const_reference tds, touch_down_state_)
+		{
+			num_available_touch_ += tds;
+		}
 
-		input_state_.clear();
 		has_gesture_ = false;
+		gesture_param_.move_vec = float2(0.0f, 0.0f);
+		curr_gesture_(static_cast<float>(timer_.elapsed()));
+		timer_.restart();
 	}
 }
