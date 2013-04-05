@@ -24,6 +24,7 @@ namespace KlayGE
 {
 	InputMouse::InputMouse()
 		: abs_pos_(0, 0), offset_(0, 0, 0), index_(false),
+			shift_ctrl_alt_(0),
 			action_param_(MakeSharedPtr<InputMouseActionParam>())
 	{
 		buttons_[0].fill(false);
@@ -148,10 +149,14 @@ namespace KlayGE
 		action_param_->move_vec = int2(offset_.x(), offset_.y());
 		action_param_->wheel_delta = offset_.z();
 		action_param_->abs_coord = abs_pos_;
-		action_param_->buttons = 0;
-		for (size_t i = 0; i < buttons_[index_].size(); ++ i)
+		action_param_->buttons_state = 0;
+		action_param_->buttons_down = 0;
+		action_param_->buttons_up = shift_ctrl_alt_;
+		for (size_t i = 0; i < this->NumButtons(); ++ i)
 		{
-			action_param_->buttons |= (buttons_[index_][i] ? (1UL << i) : 0);
+			action_param_->buttons_state |= (this->Button(i) ? (1UL << i) : 0);
+			action_param_->buttons_down |= (this->ButtonDown(i) ? (1UL << i) : 0);
+			action_param_->buttons_up |= (this->ButtonUp(i) ? (1UL << i) : 0);
 		}
 
 		if (offset_.x() != 0)
@@ -166,12 +171,18 @@ namespace KlayGE
 		{
 			iam.UpdateInputActions(ret, MS_Z, action_param_);
 		}
+		bool any_key = false;
 		for (uint16_t i = 0; i < buttons_[index_].size(); ++ i)
 		{
-			if (buttons_[index_][i])
+			if (buttons_[index_][i] || buttons_[!index_][i])
 			{
 				iam.UpdateInputActions(ret, static_cast<uint16_t>(MS_Button0 + i), action_param_);
+				any_key = true;
 			}
+		}
+		if (any_key)
+		{
+			iam.UpdateInputActions(ret, MS_AnyKey, action_param_);
 		}
 
 		return ret;

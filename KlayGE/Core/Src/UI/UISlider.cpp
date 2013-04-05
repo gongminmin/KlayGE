@@ -73,9 +73,9 @@ namespace KlayGE
 		}
 	}
 
-	void UISlider::KeyDownHandler(UIDialog const & /*sender*/, wchar_t key)
+	void UISlider::KeyDownHandler(UIDialog const & /*sender*/, uint32_t key)
 	{
-		switch (key)
+		switch (key & 0xFF)
 		{
 		case KS_Home:
 			this->SetValueInternal(min_);

@@ -269,25 +269,11 @@ namespace KlayGE
 		this->OnSelectionEvent()(*this);
 	}
 
-	void UIListBox::KeyDownHandler(UIDialog const & sender, wchar_t key)
+	void UIListBox::KeyDownHandler(UIDialog const & sender, uint32_t key)
 	{
-		InputKeyboardPtr key_board;
-		{
-			InputEngine& ie = Context::Instance().InputFactoryInstance().InputEngineInstance();
-			for (uint32_t i = 0; i < ie.NumDevices(); ++ i)
-			{
-				InputDevicePtr device = ie.Device(i);
-				if (InputEngine::IDT_Keyboard == device->Type())
-				{
-					key_board = checked_pointer_cast<InputKeyboard>(device);
-					break;
-				}
-			}
-		}
-
 		scroll_bar_.KeyDownHandler(sender, key);
 
-		switch (key)
+		switch (key & 0xFF)
 		{
 		case KS_UpArrow:
 		case KS_DownArrow:
@@ -305,7 +291,7 @@ namespace KlayGE
 				int nOldSelected = selected_;
 
 				// Adjust selected_
-				switch (key)
+				switch (key & 0xFF)
 				{
 				case KS_UpArrow:
 					-- selected_;
@@ -354,7 +340,7 @@ namespace KlayGE
 							items_[i]->bSelected = false;
 						}
 
-						if (key_board && (key_board->Key(KS_LeftShift) || key_board->Key(KS_RightShift)))
+						if (key & MB_Shift)
 						{
 							// Select all items from sel_start_ to
 							// selected_
@@ -390,7 +376,7 @@ namespace KlayGE
 		}
 	}
 
-	void UIListBox::KeyUpHandler(UIDialog const & sender, wchar_t key)
+	void UIListBox::KeyUpHandler(UIDialog const & sender, uint32_t key)
 	{
 		scroll_bar_.KeyUpHandler(sender, key);
 	}

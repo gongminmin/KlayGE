@@ -146,13 +146,19 @@ namespace KlayGE
 	{
 		InputActionsType ret;
 
+		InputActionMap& iam = actionMaps_[id];
+
 		action_param_->pos = pos_;
 		action_param_->rot = rot_;
 		action_param_->slider = slider_;
-		action_param_->buttons = 0;
-		for (size_t i = 0; i < buttons_[index_].size(); ++ i)
+		action_param_->buttons_state = 0;
+		action_param_->buttons_down = 0;
+		action_param_->buttons_up = 0;
+		for (size_t i = 0; i < this->NumButtons(); ++ i)
 		{
-			action_param_->buttons |= (buttons_[index_][i] ? (1UL << i) : 0);
+			action_param_->buttons_state |= (this->Button(i)? (1UL << i) : 0);
+			action_param_->buttons_down |= (this->ButtonDown(i)? (1UL << i) : 0);
+			action_param_->buttons_up |= (this->ButtonUp(i)? (1UL << i) : 0);
 		}
 
 		actionMaps_[id].UpdateInputActions(ret, JS_XPos, action_param_);
@@ -164,14 +170,20 @@ namespace KlayGE
 
 		for (uint16_t i = 0; i < slider_.size(); ++ i)
 		{
-			actionMaps_[id].UpdateInputActions(ret, static_cast<uint16_t>(JS_Slider0 + i), action_param_);
+			iam.UpdateInputActions(ret, static_cast<uint16_t>(JS_Slider0 + i), action_param_);
 		}
+		bool any_key = false;
 		for (uint16_t i = 0; i < buttons_[index_].size(); ++ i)
 		{
-			if (buttons_[index_][i])
+			if (buttons_[index_][i] || buttons_[!index_][i])
 			{
-				actionMaps_[id].UpdateInputActions(ret, static_cast<uint16_t>(JS_Button0 + i), action_param_);
+				iam.UpdateInputActions(ret, static_cast<uint16_t>(JS_Button0 + i), action_param_);
+				any_key = true;
 			}
+		}
+		if (any_key)
+		{
+			iam.UpdateInputActions(ret, MS_AnyKey, action_param_);
 		}
 
 		return ret;

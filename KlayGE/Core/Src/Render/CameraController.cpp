@@ -125,7 +125,7 @@ namespace KlayGE
 			case TurnLeftRight:
 				{
 					InputMouseActionParamPtr param = checked_pointer_cast<InputMouseActionParam>(action.second);
-					if ((left_button_down_ && (param->buttons & 1UL)) || !left_button_down_)
+					if ((left_button_down_ && (param->buttons_state & MB_Left)) || !left_button_down_)
 					{
 						this->Rotate(param->move_vec.x() * scaler, 0, 0);
 					}
@@ -135,7 +135,7 @@ namespace KlayGE
 			case TurnUpDown:
 				{
 					InputMouseActionParamPtr param = checked_pointer_cast<InputMouseActionParam>(action.second);
-					if ((left_button_down_ && (param->buttons & 1UL)) || !left_button_down_)
+					if ((left_button_down_ && (param->buttons_state & MB_Left)) || !left_button_down_)
 					{
 						this->Rotate(0, param->move_vec.y() * scaler, 0);
 					}
@@ -289,23 +289,17 @@ namespace KlayGE
 
 			if (!UIManager::Instance().MouseOnUI())
 			{
-				if (param->buttons & 1UL)
+				if (param->buttons_state & MB_Left)
 				{
 					this->Rotate(xd, yd);
 				}
-				else
+				else if (param->buttons_state & MB_Right)
 				{
-					if (param->buttons & 4UL)
-					{
-						this->Move(xd, yd);
-					}
-					else
-					{
-						if (param->buttons & 2UL)
-						{
-							this->Zoom(xd, yd);
-						}
-					}
+					this->Zoom(xd, yd);
+				}
+				else if (param->buttons_state & MB_Middle)
+				{
+					this->Move(xd, yd);
 				}
 			}
 		}

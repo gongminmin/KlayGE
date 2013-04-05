@@ -92,17 +92,17 @@ namespace KlayGE
 		}
 	}
 
-	void UITexButton::KeyDownHandler(UIDialog const & /*sender*/, wchar_t key)
+	void UITexButton::KeyDownHandler(UIDialog const & /*sender*/, uint32_t key)
 	{
-		if (KS_Space == key)
+		if (KS_Space == (key & 0xFF))
 		{
 			pressed_ = true;
 		}
 	}
 
-	void UITexButton::KeyUpHandler(UIDialog const & /*sender*/, wchar_t key)
+	void UITexButton::KeyUpHandler(UIDialog const & /*sender*/, uint32_t key)
 	{
-		if (KS_Space == key)
+		if (KS_Space == (key & 0xFF))
 		{
 			if (pressed_)
 			{

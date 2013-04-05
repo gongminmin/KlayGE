@@ -204,11 +204,11 @@ namespace KlayGE
 		return -1;
 	}
 
-	void UIPolylineEditBox::KeyDownHandler(UIDialog const & /*sender*/, wchar_t /*key*/)
+	void UIPolylineEditBox::KeyDownHandler(UIDialog const & /*sender*/, uint32_t /*key*/)
 	{
 	}
 
-	void UIPolylineEditBox::KeyUpHandler(UIDialog const & /*sender*/, wchar_t /*key*/)
+	void UIPolylineEditBox::KeyUpHandler(UIDialog const & /*sender*/, uint32_t /*key*/)
 	{
 	}
 

@@ -95,10 +95,23 @@ namespace KlayGE
 
 		for (uint16_t i = 0; i < this->NumKeys(); ++ i)
 		{
-			if (this->Key(i))
+			action_param_->buttons_state[i] = this->Key(i);
+			action_param_->buttons_down[i] = this->KeyDown(i);
+			action_param_->buttons_up[i] = this->KeyUp(i);
+		}
+
+		bool any_key = false;
+		for (uint16_t i = 0; i < this->NumKeys(); ++ i)
+		{
+			if (keys_[index_][i] || keys_[!index_][i])
 			{
 				iam.UpdateInputActions(ret, i, action_param_);
+				any_key = true;
 			}
+		}
+		if (any_key)
+		{
+			iam.UpdateInputActions(ret, KS_AnyKey, action_param_);
 		}
 
 		return ret;

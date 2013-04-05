@@ -265,8 +265,10 @@ namespace KlayGE
 	private:
 #if defined KLAYGE_PLATFORM_WINDOWS
 #if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
-		void OnRawInput(Window const & wnd, uint64_t param);
-		void OnTouch(Window const & wnd, uint64_t lparam, uint32_t wparam);
+		void OnRawInput(Window const & wnd, HRAWINPUT ri);
+#if (_WIN32_WINNT >= 0x0601 /*_WIN32_WINNT_WIN7*/)
+		void OnTouch(Window const & wnd, HTOUCHINPUT hti, uint32_t num_inputs);
+#endif
 #endif
 #endif
 		void OnPointerDown(int2 const & pt, uint32_t id);
@@ -337,8 +339,8 @@ namespace KlayGE
 
 		virtual std::wstring const & Name() const KLAYGE_OVERRIDE;
 #if defined KLAYGE_PLATFORM_WINDOWS
-#if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
-		void OnTouch(Window const & wnd, uint64_t lparam, uint32_t wparam);
+#if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP && (_WIN32_WINNT >= 0x0601 /*_WIN32_WINNT_WIN7*/)
+		void OnTouch(Window const & wnd, HTOUCHINPUT hti, uint32_t num_inputs);
 #endif
 #endif
 		void OnPointerDown(int2 const & pt, uint32_t id);

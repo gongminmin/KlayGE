@@ -91,6 +91,10 @@ namespace KlayGE
 		index_ = !index_;
 		buttons_[index_] = buttons_state_;
 
+		shift_ctrl_alt_ = ((GetKeyState(VK_SHIFT) & 0x80) ? MB_Shift : 0)
+			| ((GetKeyState(VK_CONTROL) & 0x80) ? MB_Ctrl : 0)
+			| ((GetKeyState(VK_MENU) & 0x80) ? MB_Alt : 0);
+
 		offset_state_ = int3(0, 0, 0);
 	}
 }

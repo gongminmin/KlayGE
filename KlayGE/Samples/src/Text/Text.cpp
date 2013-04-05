@@ -133,7 +133,7 @@ void TextApp::InputHandler(InputEngine const & /*sender*/, InputAction const & a
 			{
 				InputMouseActionParamPtr param = checked_pointer_cast<InputMouseActionParam>(action.second);
 				int2 this_mouse_pt(param->abs_coord);
-				if (param->buttons & 1UL)
+				if (param->buttons_state & MB_Left)
 				{
 					if ((last_mouse_pt_.x() != -1) || (last_mouse_pt_.y() != -1))
 					{

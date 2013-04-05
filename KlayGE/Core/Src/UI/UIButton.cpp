@@ -79,17 +79,17 @@ namespace KlayGE
 		}
 	}
 
-	void UIButton::KeyDownHandler(UIDialog const & /*sender*/, wchar_t key)
+	void UIButton::KeyDownHandler(UIDialog const & /*sender*/, uint32_t key)
 	{
-		if (KS_Space == key)
+		if (KS_Space == (key & 0xFF))
 		{
 			pressed_ = true;
 		}
 	}
 
-	void UIButton::KeyUpHandler(UIDialog const & /*sender*/, wchar_t key)
+	void UIButton::KeyUpHandler(UIDialog const & /*sender*/, uint32_t key)
 	{
-		if (KS_Space == key)
+		if (KS_Space == (key & 0xFF))
 		{
 			if (pressed_)
 			{

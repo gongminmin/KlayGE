@@ -33,10 +33,17 @@
 #include <KlayGE/Font.hpp>
 #include <KFL/Thread.hpp>
 
-#include <KlayGE/Input.hpp>
-
 #ifdef Bool
 #undef Bool		// for boost::foreach
+#endif
+
+#ifdef KLAYGE_COMPILER_MSVC
+#pragma warning(push)
+#pragma warning(disable: 4512)
+#endif
+#include <boost/assign.hpp>
+#ifdef KLAYGE_COMPILER_MSVC
+#pragma warning(pop)
 #endif
 
 #include <cstring>
@@ -69,6 +76,14 @@ namespace
 
 		return ret;
 	}
+
+	enum
+	{
+		Key,
+		Move,
+		Wheel,
+		Click
+	};
 }
 
 namespace KlayGE
@@ -320,31 +335,29 @@ namespace KlayGE
 		elem_texture_rcs_[UICT_TexButton].push_back(Rect_T<int32_t>(141, 49, 247, 54));
 		elem_texture_rcs_[UICT_TexButton].push_back(Rect_T<int32_t>(247, 49, 252, 54));
 
-		WindowPtr const & main_wnd = Context::Instance().AppInstance().MainWnd();
-		on_key_down_connect_ = main_wnd->OnKeyDown().connect(KlayGE::bind(&UIManager::KeyDownHandler, this,
-			KlayGE::placeholders::_2));
-		on_key_up_connect_ = main_wnd->OnKeyUp().connect(KlayGE::bind(&UIManager::KeyUpHandler, this,
-			KlayGE::placeholders::_2));
-		on_mouse_down_connect_ = main_wnd->OnMouseDown().connect(KlayGE::bind(&UIManager::MouseDownHandler, this,
-			KlayGE::placeholders::_2, KlayGE::placeholders::_3));
-		on_mouse_up_connect_ = main_wnd->OnMouseUp().connect(KlayGE::bind(&UIManager::MouseUpHandler, this,
-			KlayGE::placeholders::_2, KlayGE::placeholders::_3));
-		on_mouse_wheel_connect_ = main_wnd->OnMouseWheel().connect(KlayGE::bind(&UIManager::MouseWheelHandler, this,
-			KlayGE::placeholders::_2, KlayGE::placeholders::_3, KlayGE::placeholders::_4));
-		on_mouse_over_connect_ = main_wnd->OnMouseOver().connect(KlayGE::bind(&UIManager::MouseOverHandler, this,
-			KlayGE::placeholders::_2, KlayGE::placeholders::_3));
+		using namespace boost::assign;
+
+		std::vector<InputActionDefine> actions;
+		actions += InputActionDefine(Key, KS_AnyKey),
+					InputActionDefine(Move, MS_X),
+					InputActionDefine(Move, MS_Y),
+					InputActionDefine(Wheel, MS_Z),
+					InputActionDefine(Click, MS_Button0),
+					InputActionDefine(Click, TS_Tap);
+
+		InputEngine& inputEngine(Context::Instance().InputFactoryInstance().InputEngineInstance());
+		InputActionMap actionMap;
+		actionMap.AddActions(actions.begin(), actions.end());
+
+		action_handler_t input_handler = MakeSharedPtr<input_signal>();
+		input_handler->connect(KlayGE::bind(&UIManager::InputHandler, this, KlayGE::placeholders::_1, KlayGE::placeholders::_2));
+		inputEngine.ActionMap(actionMap, input_handler);
 
 		mouse_on_ui_ = false;
 	}
 
 	UIManager::~UIManager()
 	{
-		on_key_down_connect_.disconnect();
-		on_key_up_connect_.disconnect();
-		on_mouse_down_connect_.disconnect();
-		on_mouse_up_connect_.disconnect();
-		on_mouse_wheel_connect_.disconnect();
-		on_mouse_over_connect_.disconnect();
 	}
 	
 	UIManager& UIManager::Instance()
@@ -1049,83 +1062,137 @@ namespace KlayGE
 		return font.first->CalcSize(strText, font.second);
 	}
 
-	void UIManager::KeyDownHandler(wchar_t key)
+	void UIManager::InputHandler(InputEngine const & /*sender*/, InputAction const & action)
 	{
-		typedef KLAYGE_DECLTYPE(dialogs_) DialogsType;
-		KLAYGE_FOREACH(DialogsType::reference dialog, dialogs_)
+		switch (action.first)
 		{
-			if (dialog->GetVisible())
+		case Key:
+			switch (action.second->type)
 			{
-				dialog->KeyDownHandler(key);
-			}
-		}
-	}
+			case InputEngine::IDT_Keyboard:
+				{
+					InputKeyboardActionParamPtr param = checked_pointer_cast<InputKeyboardActionParam>(action.second);
+					uint16_t shift_ctrl_alt = ((param->buttons_down[KS_LeftShift] || param->buttons_down[KS_RightShift]) ? MB_Shift : 0)
+						| ((param->buttons_down[KS_LeftCtrl] || param->buttons_down[KS_RightCtrl]) ? MB_Ctrl : 0)
+						| ((param->buttons_down[KS_LeftAlt] || param->buttons_down[KS_RightAlt]) ? MB_Alt : 0);
+					typedef KLAYGE_DECLTYPE(dialogs_) DialogsType;
+					KLAYGE_FOREACH(DialogsType::reference dialog, dialogs_)
+					{
+						if (dialog->GetVisible())
+						{
+							for (uint32_t i = 0; i < 256; ++ i)
+							{
+								if (param->buttons_down[i])
+								{
+									dialog->KeyDownHandler(i | shift_ctrl_alt);
+								}
+								if (param->buttons_up[i])
+								{
+									dialog->KeyUpHandler(i | shift_ctrl_alt);
+								}
+							}
+						}
+					}
+				}
+				break;
 
-	void UIManager::KeyUpHandler(wchar_t key)
-	{
-		typedef KLAYGE_DECLTYPE(dialogs_) DialogsType;
-		KLAYGE_FOREACH(DialogsType::reference dialog, dialogs_)
-		{
-			if (dialog->GetVisible())
-			{
-				dialog->KeyUpHandler(key);
+			default:
+				break;
 			}
-		}
-	}
+			break;
 
-	void UIManager::MouseDownHandler(uint32_t buttons, int2 const & pt)
-	{
-		mouse_on_ui_ = false;
-		typedef KLAYGE_DECLTYPE(dialogs_) DialogsType;
-		KLAYGE_FOREACH(DialogsType::reference dialog, dialogs_)
-		{
-			if (dialog->GetVisible() && dialog->ContainsPoint(pt))
+		case Move:
+			switch (action.second->type)
 			{
-				mouse_on_ui_ = true;
-				dialog->MouseDownHandler(buttons, dialog->ToLocal(pt));
-			}
-		}
-	}
+			case InputEngine::IDT_Mouse:
+				{
+					InputMouseActionParamPtr param = checked_pointer_cast<InputMouseActionParam>(action.second);
+					mouse_on_ui_ = false;
+					typedef KLAYGE_DECLTYPE(dialogs_) DialogsType;
+					KLAYGE_FOREACH(DialogsType::reference dialog, dialogs_)
+					{
+						if (dialog->GetVisible() && dialog->ContainsPoint(param->abs_coord))
+						{
+							mouse_on_ui_ = true;
+							dialog->MouseOverHandler(param->buttons_state, dialog->ToLocal(param->abs_coord));
+						}
+					}
+				}
+				break;
 
-	void UIManager::MouseUpHandler(uint32_t buttons, int2 const & pt)
-	{
-		mouse_on_ui_ = false;
-		typedef KLAYGE_DECLTYPE(dialogs_) DialogsType;
-		KLAYGE_FOREACH(DialogsType::reference dialog, dialogs_)
-		{
-			if (dialog->GetVisible() && dialog->ContainsPoint(pt))
-			{
-				mouse_on_ui_ = true;
-				dialog->MouseUpHandler(buttons, dialog->ToLocal(pt));
+			default:
+				break;
 			}
-		}
-	}
+			break;
 
-	void UIManager::MouseWheelHandler(uint32_t buttons, int2 const & pt, int32_t z_delta)
-	{
-		mouse_on_ui_ = false;
-		typedef KLAYGE_DECLTYPE(dialogs_) DialogsType;
-		KLAYGE_FOREACH(DialogsType::reference dialog, dialogs_)
-		{
-			if (dialog->GetVisible() && dialog->ContainsPoint(pt))
+		case Wheel:
+			switch (action.second->type)
 			{
-				mouse_on_ui_ = true;
-				dialog->MouseWheelHandler(buttons, dialog->ToLocal(pt), z_delta);
-			}
-		}
-	}
+			case InputEngine::IDT_Mouse:
+				{
+					InputMouseActionParamPtr param = checked_pointer_cast<InputMouseActionParam>(action.second);
+					mouse_on_ui_ = false;
+					typedef KLAYGE_DECLTYPE(dialogs_) DialogsType;
+					KLAYGE_FOREACH(DialogsType::reference dialog, dialogs_)
+					{
+						if (dialog->GetVisible() && dialog->ContainsPoint(param->abs_coord))
+						{
+							mouse_on_ui_ = true;
+							dialog->MouseWheelHandler(param->buttons_state, dialog->ToLocal(param->abs_coord), param->wheel_delta);
+						}
+					}
+				}
+				break;
 
-	void UIManager::MouseOverHandler(uint32_t buttons, int2 const & pt)
-	{
-		mouse_on_ui_ = false;
-		typedef KLAYGE_DECLTYPE(dialogs_) DialogsType;
-		KLAYGE_FOREACH(DialogsType::reference dialog, dialogs_)
-		{
-			if (dialog->GetVisible() && dialog->ContainsPoint(pt))
-			{
-				mouse_on_ui_ = true;
-				dialog->MouseOverHandler(buttons, dialog->ToLocal(pt));
+			default:
+				break;
 			}
+			break;
+
+		case Click:
+			switch (action.second->type)
+			{
+			case InputEngine::IDT_Mouse:
+				{
+					InputMouseActionParamPtr param = checked_pointer_cast<InputMouseActionParam>(action.second);
+					mouse_on_ui_ = false;
+					typedef KLAYGE_DECLTYPE(dialogs_) DialogsType;
+					KLAYGE_FOREACH(DialogsType::reference dialog, dialogs_)
+					{
+						if (dialog->GetVisible() && dialog->ContainsPoint(param->abs_coord))
+						{
+							mouse_on_ui_ = true;
+							if (param->buttons_down & MB_Left)
+							{
+								dialog->MouseDownHandler(param->buttons_down, dialog->ToLocal(param->abs_coord));
+							}
+							else if (param->buttons_up & MB_Left)
+							{
+								dialog->MouseUpHandler(param->buttons_up, dialog->ToLocal(param->abs_coord));
+							}
+						}
+					}
+				}
+				break;
+
+			case InputEngine::IDT_Touch:
+				{
+					InputTouchActionParamPtr param = checked_pointer_cast<InputTouchActionParam>(action.second);
+					mouse_on_ui_ = false;
+					typedef KLAYGE_DECLTYPE(dialogs_) DialogsType;
+					KLAYGE_FOREACH(DialogsType::reference dialog, dialogs_)
+					{
+						if (dialog->GetVisible() && dialog->ContainsPoint(param->center))
+						{
+							mouse_on_ui_ = true;
+							dialog->MouseDownHandler(MB_Left, dialog->ToLocal(param->center));
+							dialog->MouseUpHandler(MB_Left, dialog->ToLocal(param->center));
+						}
+					}
+				}
+				break;
+			}
+			break;
 		}
 	}
 
@@ -1844,7 +1911,7 @@ namespace KlayGE
 		}
 	}
 
-	void UIDialog::KeyDownHandler(wchar_t key)
+	void UIDialog::KeyDownHandler(uint32_t key)
 	{
 		if (control_focus_.lock() && control_focus_.lock()->GetEnabled())
 		{
@@ -1861,7 +1928,7 @@ namespace KlayGE
 				typedef KLAYGE_DECLTYPE(controls_) ControlsType;
 				KLAYGE_FOREACH(ControlsType::reference control, controls_)
 				{
-					if (control->GetHotkey() == static_cast<uint8_t>(key))
+					if (control->GetHotkey() == static_cast<uint8_t>(key & 0xFF))
 					{
 						control->OnHotkey();
 						handled = true;
@@ -1874,7 +1941,7 @@ namespace KlayGE
 			if (!handled)
 			{
 				// If keyboard input is not enabled, this message should be ignored
-				if ((KS_RightArrow == key) || (KS_DownArrow == key))
+				if ((KS_RightArrow == (key & 0xFF)) || (KS_DownArrow == (key & 0xFF)))
 				{
 					if (control_focus_.lock())
 					{
@@ -1882,7 +1949,7 @@ namespace KlayGE
 					}
 				}
 
-				if ((KS_LeftArrow == key) || (KS_UpArrow == key))
+				if ((KS_LeftArrow == (key & 0xFF)) || (KS_UpArrow == (key & 0xFF)))
 				{
 					if (control_focus_.lock())
 					{
@@ -1890,16 +1957,15 @@ namespace KlayGE
 					}
 				}
 
-				if (KS_Tab == key)
+				if (KS_Tab == (key & 0xFF))
 				{
-					bool shift_down = (KS_LeftShift == key) | (KS_RightShift == key);
-					this->OnCycleFocus(!shift_down);
+					this->OnCycleFocus(!(key & MB_Shift));
 				}
 			}
 		}
 	}
 
-	void UIDialog::KeyUpHandler(wchar_t key)
+	void UIDialog::KeyUpHandler(uint32_t key)
 	{
 		if (control_focus_.lock() && control_focus_.lock()->GetEnabled())
 		{
@@ -1909,9 +1975,6 @@ namespace KlayGE
 
 	void UIDialog::MouseDownHandler(uint32_t buttons, int2 const & pt)
 	{
-		int2 pt_local = pt;
-		pt_local -= this->GetLocation();
-
 		UIControlPtr control;
 		if (control_focus_.lock() && control_focus_.lock()->GetEnabled()
 			&& control_focus_.lock()->ContainsPoint(pt))

@@ -484,23 +484,9 @@ namespace KlayGE
 	{
 	}
 
-	void UIEditBox::KeyDownHandler(UIDialog const & /*sender*/, wchar_t key)
+	void UIEditBox::KeyDownHandler(UIDialog const & /*sender*/, uint32_t key)
 	{
-		InputKeyboardPtr key_board;
-		{
-			InputEngine& ie = Context::Instance().InputFactoryInstance().InputEngineInstance();
-			for (uint32_t i = 0; i < ie.NumDevices(); ++ i)
-			{
-				InputDevicePtr device = ie.Device(i);
-				if (InputEngine::IDT_Keyboard == device->Type())
-				{
-					key_board = checked_pointer_cast<InputKeyboard>(device);
-					break;
-				}
-			}
-		}
-
-		switch (key)
+		switch (key & 0xFF)
 		{
 		case KS_Tab:
 			// We don't process Tab in case keyboard input is enabled and the user
@@ -509,7 +495,7 @@ namespace KlayGE
 
 		case KS_Home:
 			this->PlaceCaret(0);
-			if (key_board && (!(key_board->Key(KS_LeftShift) || key_board->Key(KS_RightShift))))
+			if (!(key & MB_Shift))
 			{
 				// Shift is not down. Update selection
 				// start along with the caret.
@@ -520,7 +506,7 @@ namespace KlayGE
 
 		case KS_End:
 			this->PlaceCaret(buffer_.GetTextSize());
-			if (key_board && (!(key_board->Key(KS_LeftShift) || key_board->Key(KS_RightShift))))
+			if (!(key & MB_Shift))
 			{
 				// Shift is not down. Update selection
 				// start along with the caret.
@@ -530,14 +516,14 @@ namespace KlayGE
 			break;
 
 		case KS_Insert:
-			if (key_board && (key_board->Key(KS_LeftCtrl) || key_board->Key(KS_RightCtrl)))
+			if (key & MB_Ctrl)
 			{
 				// Control Insert. Copy to clipboard
 				this->CopyToClipboard();
 			}
 			else
 			{
-				if (key_board && (key_board->Key(KS_LeftShift) || key_board->Key(KS_RightShift)))
+				if (key & MB_Shift)
 				{
 					// Shift Insert. Paste from clipboard
 					this->PasteFromClipboard();
@@ -567,7 +553,7 @@ namespace KlayGE
 			break;
 
 		case KS_LeftArrow:
-			if (key_board && (key_board->Key(KS_LeftCtrl) || key_board->Key(KS_RightCtrl)))
+			if (key & MB_Ctrl)
 			{
 				// Control is down. Move the caret to a new item
 				// instead of a character.
@@ -581,7 +567,7 @@ namespace KlayGE
 					this->PlaceCaret(caret_pos_ - 1);
 				}
 			}
-			if (key_board && (!(key_board->Key(KS_LeftShift) || key_board->Key(KS_RightShift))))
+			if (!(key & MB_Shift))
 			{
 				// Shift is not down. Update selection
 				// start along with the caret.
@@ -591,7 +577,7 @@ namespace KlayGE
 			break;
 
 		case KS_RightArrow:
-			if (key_board && (key_board->Key(KS_LeftCtrl) || key_board->Key(KS_RightCtrl)))
+			if (key & MB_Ctrl)
 			{
 				// Control is down. Move the caret to a new item
 				// instead of a character.
@@ -605,7 +591,7 @@ namespace KlayGE
 					this->PlaceCaret(caret_pos_ + 1);
 				}
 			}
-			if (key_board && (!(key_board->Key(KS_LeftShift) || key_board->Key(KS_RightShift))))
+			if (!(key & MB_Shift))
 			{
 				// Shift is not down. Update selection
 				// start along with the caret.

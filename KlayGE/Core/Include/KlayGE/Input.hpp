@@ -43,6 +43,7 @@
 
 #include <vector>
 #include <string>
+#include <bitset>
 
 namespace KlayGE
 {
@@ -193,6 +194,8 @@ namespace KlayGE
 		KS_MyComputer		= 0xEB,		// My Computer
 		KS_Mail				= 0xEC,		// Mail
 		KS_MediaSelect		= 0xED,		// Media Select
+
+		KS_AnyKey
 	};
 
 	// 鼠标动作
@@ -209,6 +212,8 @@ namespace KlayGE
 		MS_Button5			= 0x108,
 		MS_Button6			= 0x109,
 		MS_Button7			= 0x10A,
+
+		MS_AnyKey
 	};
 
 	// 游戏杆动作
@@ -254,6 +259,8 @@ namespace KlayGE
 		JS_Button29			= 0x225,
 		JS_Button30			= 0x226,
 		JS_Button31			= 0x227,
+
+		JS_AnyKey
 	};
 
 	enum TouchSemantic
@@ -426,6 +433,8 @@ namespace KlayGE
 		array<array<bool, 8>, 2> buttons_;
 		bool index_;
 
+		uint16_t shift_ctrl_alt_;
+
 		InputMouseActionParamPtr action_param_;
 	};
 
@@ -548,14 +557,36 @@ namespace KlayGE
 
 	struct KLAYGE_CORE_API InputKeyboardActionParam : public InputActionParam
 	{
+		std::bitset<256> buttons_state;
+		std::bitset<256>  buttons_down;
+		std::bitset<256>  buttons_up;
 	};
 
+	enum MouseButtons
+	{
+		MB_Left = 1UL << 0,
+		MB_Right = 1UL << 1,
+		MB_Middle = 1UL << 2,
+		MB_Button0 = 1UL << 0,
+		MB_Button1 = 1UL << 1,
+		MB_Button2 = 1UL << 2,
+		MB_Button3 = 1UL << 3,
+		MB_Button4 = 1UL << 4,
+		MB_Button5 = 1UL << 5,
+		MB_Button6 = 1UL << 6,
+		MB_Button7 = 1UL << 7,
+		MB_Shift = 1UL << 8,
+		MB_Ctrl = 1UL << 9,
+		MB_Alt = 1UL << 10
+	};
 	struct KLAYGE_CORE_API InputMouseActionParam : public InputActionParam
 	{
 		int2 move_vec;
 		int32_t wheel_delta;
 		int2 abs_coord;
-		uint32_t buttons;
+		uint16_t buttons_state;
+		uint16_t buttons_down;
+		uint16_t buttons_up;
 	};
 
 	struct KLAYGE_CORE_API InputJoystickActionParam : public InputActionParam
@@ -563,7 +594,9 @@ namespace KlayGE
 		int3 pos;
 		int3 rot;
 		int2 slider;
-		uint32_t buttons;
+		uint16_t buttons_state;
+		uint16_t buttons_down;
+		uint16_t buttons_up;
 	};
 	
 	struct KLAYGE_CORE_API InputTouchActionParam : public InputActionParam

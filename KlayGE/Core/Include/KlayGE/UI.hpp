@@ -26,6 +26,7 @@
 
 #include <KlayGE/PreDeclare.hpp>
 #include <KFL/Timer.hpp>
+#include <KlayGE/Input.hpp>
 
 #ifdef KLAYGE_COMPILER_MSVC
 #pragma warning(push)
@@ -307,10 +308,10 @@ namespace KlayGE
 			return dialog_.lock();
 		}
 
-		virtual void KeyDownHandler(UIDialog const & /*sender*/, wchar_t /*key*/)
+		virtual void KeyDownHandler(UIDialog const & /*sender*/, uint32_t /*key*/)
 		{
 		}
-		virtual void KeyUpHandler(UIDialog const & /*sender*/, wchar_t /*key*/)
+		virtual void KeyUpHandler(UIDialog const & /*sender*/, uint32_t /*key*/)
 		{
 		}
 		virtual void MouseDownHandler(UIDialog const & /*sender*/, uint32_t /*buttons*/, int2 const & /*pt*/)
@@ -431,12 +432,7 @@ namespace KlayGE
 		}
 
 	private:
-		void KeyDownHandler(wchar_t key);
-		void KeyUpHandler(wchar_t key);
-		void MouseDownHandler(uint32_t buttons, int2 const & pt);
-		void MouseUpHandler(uint32_t buttons, int2 const & pt);
-		void MouseWheelHandler(uint32_t buttons, int2 const & pt, int32_t z_delta);
-		void MouseOverHandler(uint32_t buttons, int2 const & pt);
+		void InputHandler(InputEngine const & sender, InputAction const & action);
 
 	private:
 		static UIManagerPtr ui_mgr_instance_;
@@ -462,13 +458,6 @@ namespace KlayGE
 			uint32_t align;
 		};
 		std::map<size_t, std::vector<string_cache> > strings_;
-
-		boost::signals2::connection on_key_down_connect_;
-		boost::signals2::connection on_key_up_connect_;
-		boost::signals2::connection on_mouse_down_connect_;
-		boost::signals2::connection on_mouse_up_connect_;
-		boost::signals2::connection on_mouse_wheel_connect_;
-		boost::signals2::connection on_mouse_over_connect_;
 
 		bool mouse_on_ui_;
 	};
@@ -648,8 +637,8 @@ namespace KlayGE
 		Size_T<uint32_t> CalcSize(std::wstring const & strText, UIElement const & uie, Rect_T<int32_t> const & rc, bool bShadow = false);
 
 	private:
-		void KeyDownHandler(wchar_t key);
-		void KeyUpHandler(wchar_t key);
+		void KeyDownHandler(uint32_t key);
+		void KeyUpHandler(uint32_t key);
 		void MouseDownHandler(uint32_t buttons, int2 const & pt);
 		void MouseUpHandler(uint32_t buttons, int2 const & pt);
 		void MouseWheelHandler(uint32_t buttons, int2 const & pt, int32_t z_delta);
@@ -771,8 +760,8 @@ namespace KlayGE
 			return clicked_event_;
 		}
 
-		void KeyDownHandler(UIDialog const & sender, wchar_t key);
-		void KeyUpHandler(UIDialog const & sender, wchar_t key);
+		void KeyDownHandler(UIDialog const & sender, uint32_t key);
+		void KeyUpHandler(UIDialog const & sender, uint32_t key);
 		void MouseDownHandler(UIDialog const & sender, uint32_t buttons, int2 const & pt);
 		void MouseUpHandler(UIDialog const & sender, uint32_t buttons, int2 const & pt);
 
@@ -826,8 +815,8 @@ namespace KlayGE
 			return clicked_event_;
 		}
 
-		void KeyDownHandler(UIDialog const & sender, wchar_t key);
-		void KeyUpHandler(UIDialog const & sender, wchar_t key);
+		void KeyDownHandler(UIDialog const & sender, uint32_t key);
+		void KeyUpHandler(UIDialog const & sender, uint32_t key);
 		void MouseDownHandler(UIDialog const & sender, uint32_t buttons, int2 const & pt);
 		void MouseUpHandler(UIDialog const & sender, uint32_t buttons, int2 const & pt);
 
@@ -891,8 +880,8 @@ namespace KlayGE
 			return changed_event_;
 		}
 
-		void KeyDownHandler(UIDialog const & sender, wchar_t key);
-		void KeyUpHandler(UIDialog const & sender, wchar_t key);
+		void KeyDownHandler(UIDialog const & sender, uint32_t key);
+		void KeyUpHandler(UIDialog const & sender, uint32_t key);
 		void MouseDownHandler(UIDialog const & sender, uint32_t buttons, int2 const & pt);
 		void MouseUpHandler(UIDialog const & sender, uint32_t buttons, int2 const & pt);
 
@@ -970,8 +959,8 @@ namespace KlayGE
 			return changed_event_;
 		}
 
-		void KeyDownHandler(UIDialog const & sender, wchar_t key);
-		void KeyUpHandler(UIDialog const & sender, wchar_t key);
+		void KeyDownHandler(UIDialog const & sender, uint32_t key);
+		void KeyUpHandler(UIDialog const & sender, uint32_t key);
 		void MouseDownHandler(UIDialog const & sender, uint32_t buttons, int2 const & pt);
 		void MouseUpHandler(UIDialog const & sender, uint32_t buttons, int2 const & pt);
 
@@ -1046,7 +1035,7 @@ namespace KlayGE
 			return value_changed_event_;
 		}
 
-		void KeyDownHandler(UIDialog const & sender, wchar_t key);
+		void KeyDownHandler(UIDialog const & sender, uint32_t key);
 		void MouseOverHandler(UIDialog const & sender, uint32_t buttons, int2 const & pt);
 		void MouseDownHandler(UIDialog const & sender, uint32_t buttons, int2 const & pt);
 		void MouseUpHandler(UIDialog const & sender, uint32_t buttons, int2 const & pt);
@@ -1256,8 +1245,8 @@ namespace KlayGE
 			return selection_end_event_;
 		}
 
-		void KeyDownHandler(UIDialog const & sender, wchar_t key);
-		void KeyUpHandler(UIDialog const & sender, wchar_t key);
+		void KeyDownHandler(UIDialog const & sender, uint32_t key);
+		void KeyUpHandler(UIDialog const & sender, uint32_t key);
 		void MouseOverHandler(UIDialog const & sender, uint32_t buttons, int2 const & pt);
 		void MouseDownHandler(UIDialog const & sender, uint32_t buttons, int2 const & pt);
 		void MouseUpHandler(UIDialog const & sender, uint32_t buttons, int2 const & pt);
@@ -1381,8 +1370,8 @@ namespace KlayGE
 			return selection_changed_event_;
 		}
 
-		void KeyDownHandler(UIDialog const & sender, wchar_t key);
-		void KeyUpHandler(UIDialog const & sender, wchar_t key);
+		void KeyDownHandler(UIDialog const & sender, uint32_t key);
+		void KeyUpHandler(UIDialog const & sender, uint32_t key);
 		void MouseOverHandler(UIDialog const & sender, uint32_t buttons, int2 const & pt);
 		void MouseDownHandler(UIDialog const & sender, uint32_t buttons, int2 const & pt);
 		void MouseUpHandler(UIDialog const & sender, uint32_t buttons, int2 const & pt);
@@ -1547,7 +1536,7 @@ namespace KlayGE
 			return string_event_;
 		}
 
-		void KeyDownHandler(UIDialog const & sender, wchar_t key);
+		void KeyDownHandler(UIDialog const & sender, uint32_t key);
 		void MouseOverHandler(UIDialog const & sender, uint32_t buttons, int2 const & pt);
 		void MouseDownHandler(UIDialog const & sender, uint32_t buttons, int2 const & pt);
 		void MouseUpHandler(UIDialog const & sender, uint32_t buttons, int2 const & pt);
@@ -1638,8 +1627,8 @@ namespace KlayGE
 		float GetValue(float pos) const;
 
 	public:
-		void KeyDownHandler(UIDialog const & sender, wchar_t key);
-		void KeyUpHandler(UIDialog const & sender, wchar_t key);
+		void KeyDownHandler(UIDialog const & sender, uint32_t key);
+		void KeyUpHandler(UIDialog const & sender, uint32_t key);
 		void MouseDownHandler(UIDialog const & sender, uint32_t buttons, int2 const & pt);
 		void MouseUpHandler(UIDialog const & sender, uint32_t buttons, int2 const & pt);
 		void MouseOverHandler(UIDialog const & sender, uint32_t buttons, int2 const & pt);

@@ -55,17 +55,6 @@
 
 namespace KlayGE
 {
-	enum MouseButtons
-	{
-		MB_None = 0,
-		MB_Left = 1UL << 0,
-		MB_Right = 1UL << 1,
-		MB_Middle = 1UL << 2,
-		MB_Shift = 1UL << 3,
-		MB_Ctrl = 1UL << 4,
-		MB_Alt = 1UL << 5
-	};
-
 	class KLAYGE_CORE_API Window
 	{
 	public:
@@ -142,14 +131,14 @@ namespace KlayGE
 		typedef boost::signals2::signal<void(Window const & wnd, bool active)> SizeEvent;
 		typedef boost::signals2::signal<void(Window const & wnd)> SetCursorEvent;
 		typedef boost::signals2::signal<void(Window const & wnd, wchar_t ch)> CharEvent;
-		typedef boost::signals2::signal<void(Window const & wnd, wchar_t ch)> KeyDownEvent;
-		typedef boost::signals2::signal<void(Window const & wnd, wchar_t ch)> KeyUpEvent;
-		typedef boost::signals2::signal<void(Window const & wnd, uint32_t bottons, int2 const & pt)> MouseDownEvent;
-		typedef boost::signals2::signal<void(Window const & wnd, uint32_t bottons, int2 const & pt)> MouseUpEvent;
-		typedef boost::signals2::signal<void(Window const & wnd, uint32_t bottons, int2 const & pt, int32_t wheel)> MouseWheelEvent;
-		typedef boost::signals2::signal<void(Window const & wnd, uint32_t bottons, int2 const & pt)> MouseOverEvent;
-		typedef boost::signals2::signal<void(Window const & wnd, uint64_t lparam)> RawInputEvent;
-		typedef boost::signals2::signal<void(Window const & wnd, uint64_t lparam, uint32_t wparam)> TouchEvent;
+#if defined KLAYGE_PLATFORM_WINDOWS
+#if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
+		typedef boost::signals2::signal<void(Window const & wnd, HRAWINPUT ri)> RawInputEvent;
+#if (_WIN32_WINNT >= 0x0601 /*_WIN32_WINNT_WIN7*/)
+		typedef boost::signals2::signal<void(Window const & wnd, HTOUCHINPUT hti, uint32_t num_inputs)> TouchEvent;
+#endif
+#endif
+#endif
 		typedef boost::signals2::signal<void(Window const & wnd, int2 const & pt, uint32_t id)> PointerDownEvent;
 		typedef boost::signals2::signal<void(Window const & wnd, int2 const & pt, uint32_t id)> PointerUpEvent;
 		typedef boost::signals2::signal<void(Window const & wnd, int2 const & pt, uint32_t id, bool down)> PointerUpdateEvent;
@@ -183,38 +172,20 @@ namespace KlayGE
 		{
 			return char_event_;
 		}
-		KeyDownEvent& OnKeyDown()
-		{
-			return key_down_event_;
-		}
-		KeyUpEvent& OnKeyUp()
-		{
-			return key_up_event_;
-		}
-		MouseDownEvent& OnMouseDown()
-		{
-			return mouse_down_event_;
-		}
-		MouseUpEvent& OnMouseUp()
-		{
-			return mouse_up_event_;
-		}
-		MouseWheelEvent& OnMouseWheel()
-		{
-			return mouse_wheel_event_;
-		}
-		MouseOverEvent& OnMouseOver()
-		{
-			return mouse_over_event_;
-		}
+#if defined KLAYGE_PLATFORM_WINDOWS
+#if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
 		RawInputEvent& OnRawInput()
 		{
 			return raw_input_event_;
 		}
+#if (_WIN32_WINNT >= 0x0601 /*_WIN32_WINNT_WIN7*/)
 		TouchEvent& OnTouch()
 		{
 			return touch_event_;
 		}
+#endif
+#endif
+#endif
 		PointerDownEvent& OnPointerDown()
 		{
 			return pointer_down_event_;
@@ -240,14 +211,14 @@ namespace KlayGE
 		SizeEvent size_event_;
 		SetCursorEvent set_cursor_event_;
 		CharEvent char_event_;
-		KeyDownEvent key_down_event_;
-		KeyUpEvent key_up_event_;
-		MouseDownEvent mouse_down_event_;
-		MouseUpEvent mouse_up_event_;
-		MouseWheelEvent mouse_wheel_event_;
-		MouseOverEvent mouse_over_event_;
+#if defined KLAYGE_PLATFORM_WINDOWS
+#if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
 		RawInputEvent raw_input_event_;
+#if (_WIN32_WINNT >= 0x0601 /*_WIN32_WINNT_WIN7*/)
 		TouchEvent touch_event_;
+#endif
+#endif
+#endif
 		PointerDownEvent pointer_down_event_;
 		PointerUpEvent pointer_up_event_;
 		PointerUpdateEvent pointer_update_event_;

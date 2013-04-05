@@ -185,11 +185,11 @@ namespace KlayGE
 		}
 	}
 
-	void UIComboBox::KeyDownHandler(UIDialog const & sender, wchar_t key)
+	void UIComboBox::KeyDownHandler(UIDialog const & sender, uint32_t key)
 	{
 		scroll_bar_.KeyDownHandler(sender, key);
 
-		switch (key)
+		switch (key & 0xFF)
 		{
 		case KS_Enter:
 			if (opened_)
@@ -255,7 +255,7 @@ namespace KlayGE
 		}
 	}
 
-	void UIComboBox::KeyUpHandler(UIDialog const & sender, wchar_t key)
+	void UIComboBox::KeyUpHandler(UIDialog const & sender, uint32_t key)
 	{
 		scroll_bar_.KeyUpHandler(sender, key);
 	}

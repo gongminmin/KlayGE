@@ -186,9 +186,8 @@ namespace KlayGE
 
 #if defined KLAYGE_PLATFORM_WINDOWS
 #if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
-	void MsgInputEngine::OnRawInput(Window const & /*wnd*/, uint64_t param)
+	void MsgInputEngine::OnRawInput(Window const & /*wnd*/, HRAWINPUT ri)
 	{
-		HRAWINPUT ri = reinterpret_cast<HRAWINPUT>(param);
 		UINT size;
 		if (0 == ::GetRawInputData(ri, RID_INPUT, nullptr, &size, sizeof(RAWINPUTHEADER)))
 		{
@@ -231,14 +230,14 @@ namespace KlayGE
 		}
 	}
 
-	void MsgInputEngine::OnTouch(Window const & wnd, uint64_t lparam, uint32_t wparam)
+	void MsgInputEngine::OnTouch(Window const & wnd, HTOUCHINPUT hti, uint32_t num_inputs)
 	{
 		typedef KLAYGE_DECLTYPE(devices_) DevicesType;
 		KLAYGE_FOREACH(DevicesType::reference device, devices_)
 		{
 			if (InputEngine::IDT_Touch == device->Type())
 			{
-				checked_pointer_cast<MsgInputTouch>(device)->OnTouch(wnd, lparam, wparam);
+				checked_pointer_cast<MsgInputTouch>(device)->OnTouch(wnd, hti, num_inputs);
 			}
 		}
 	}
