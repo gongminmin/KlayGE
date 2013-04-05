@@ -46,7 +46,7 @@ namespace
 namespace KlayGE
 {
 	InputTouch::InputTouch()
-		: index_(false), num_available_touch_(0),
+		: wheel_delta_(0), index_(false), num_available_touch_(0),
 			has_gesture_(false), action_param_(MakeSharedPtr<InputTouchActionParam>()),
 			curr_state_(GS_None),
 			one_finger_tap_timer_(0), two_finger_tap_timer_(0)
@@ -87,7 +87,7 @@ namespace KlayGE
 	{
 		InputActionMap& iam = actionMaps_[id];
 
-		for (uint16_t i = TS_Pan; i < TS_Flick + 1; ++ i)
+		for (uint16_t i = TS_Pan; i < TS_Wheel + 1; ++ i)
 		{
 			if (actionMap.HasAction(i))
 			{
@@ -100,9 +100,21 @@ namespace KlayGE
 	{
 		InputActionsType ret;
 
+		InputActionMap& iam = actionMaps_[id];
+
+		action_param_->gesture = gesture_;
+		action_param_->wheel_delta = wheel_delta_;
+
+		if (wheel_delta_ != 0)
+		{
+			action_param_->center = touch_coords_[index_][0];
+			action_param_->move_vec = int2(0, 0);
+			action_param_->zoom = 1;
+			action_param_->rotate_angle = 0;
+			iam.UpdateInputActions(ret, TS_Wheel, action_param_);
+		}
 		if (has_gesture_)
 		{
-			InputActionMap& iam = actionMaps_[id];
 			iam.UpdateInputActions(ret, static_cast<uint16_t>(gesture_), action_param_);
 		}
 

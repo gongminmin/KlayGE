@@ -142,6 +142,7 @@ namespace KlayGE
 		typedef boost::signals2::signal<void(Window const & wnd, int2 const & pt, uint32_t id)> PointerDownEvent;
 		typedef boost::signals2::signal<void(Window const & wnd, int2 const & pt, uint32_t id)> PointerUpEvent;
 		typedef boost::signals2::signal<void(Window const & wnd, int2 const & pt, uint32_t id, bool down)> PointerUpdateEvent;
+		typedef boost::signals2::signal<void(Window const & wnd, int2 const & pt, uint32_t id, int32_t wheel_delta)> PointerWheelEvent;
 		typedef boost::signals2::signal<void(Window const & wnd)> CloseEvent;
 
 		ActiveEvent& OnActive()
@@ -198,6 +199,10 @@ namespace KlayGE
 		{
 			return pointer_update_event_;
 		}
+		PointerWheelEvent& OnPointerWheel()
+		{
+			return pointer_wheel_event_;
+		}
 		CloseEvent& OnClose()
 		{
 			return close_event_;
@@ -222,6 +227,7 @@ namespace KlayGE
 		PointerDownEvent pointer_down_event_;
 		PointerUpEvent pointer_up_event_;
 		PointerUpdateEvent pointer_update_event_;
+		PointerWheelEvent pointer_wheel_event_;
 		CloseEvent close_event_;
 
 #if defined KLAYGE_PLATFORM_WINDOWS
@@ -247,6 +253,7 @@ namespace KlayGE
 			void OnPointerPressed(Windows::UI::Core::CoreWindow^ sender, Windows::UI::Core::PointerEventArgs^ args);
 			void OnPointerReleased(Windows::UI::Core::CoreWindow^ sender, Windows::UI::Core::PointerEventArgs^ args);
 			void OnPointerMoved(Windows::UI::Core::CoreWindow^ sender, Windows::UI::Core::PointerEventArgs^ args);
+			void OnPointerWheelChanged(Windows::UI::Core::CoreWindow^ sender, Windows::UI::Core::PointerEventArgs^ args);
 
 			void BindWindow(Window* win);
 

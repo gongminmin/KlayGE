@@ -48,6 +48,7 @@ namespace
 		InputActionDefine(Move, MS_X),
 		InputActionDefine(Move, MS_Y),
 		InputActionDefine(Scale, TS_Zoom),
+		InputActionDefine(Scale, TS_Wheel),
 		InputActionDefine(Scale, MS_Z),
 	};
 }
@@ -179,7 +180,15 @@ void TextApp::InputHandler(InputEngine const & /*sender*/, InputAction const & a
 		case InputEngine::IDT_Touch:
 			{
 				InputTouchActionParamPtr param = checked_pointer_cast<InputTouchActionParam>(action.second);
-				float f = param->zoom;
+				float f;
+				if (TS_Zoom == param->gesture)
+				{
+					f = param->zoom;
+				}
+				else
+				{
+					f = 1.0f + (param->wheel_delta * 0.1f) / 120;
+				}
 				float2 p = float2(-param->center) / scale_ + position_;
 				float2 new_position = (position_ - p * (1 - f)) / f;
 				float new_scale = scale_ * f;

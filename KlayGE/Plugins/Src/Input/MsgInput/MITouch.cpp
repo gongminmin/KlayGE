@@ -38,6 +38,7 @@
 namespace KlayGE
 {
 	MsgInputTouch::MsgInputTouch()
+		: wheel_delta_state_(0)
 	{
 		touch_down_state_.fill(false);
 	}
@@ -79,20 +80,42 @@ namespace KlayGE
 
 	void MsgInputTouch::OnPointerDown(int2 const & pt, uint32_t id)
 	{
-		touch_coord_state_[id] = pt;
-		touch_down_state_[id] = true;
+		if (id > 0)
+		{
+			-- id;
+			touch_coord_state_[id] = pt;
+			touch_down_state_[id] = true;
+		}
 	}
 
 	void MsgInputTouch::OnPointerUp(int2 const & pt, uint32_t id)
 	{
-		touch_coord_state_[id] = pt;
-		touch_down_state_[id] = false;
+		if (id > 0)
+		{
+			-- id;
+			touch_coord_state_[id] = pt;
+			touch_down_state_[id] = false;
+		}
 	}
 
 	void MsgInputTouch::OnPointerUpdate(int2 const & pt, uint32_t id, bool down)
 	{
-		touch_coord_state_[id] = pt;
-		touch_down_state_[id] = down;
+		if (id > 0)
+		{
+			-- id;
+			touch_coord_state_[id] = pt;
+			touch_down_state_[id] = down;
+		}
+	}
+
+	void MsgInputTouch::OnPointerWheel(int2 const & pt, uint32_t id, int32_t wheel_delta)
+	{
+		if (id > 0)
+		{
+			-- id;
+			touch_coord_state_[id] = pt;
+		}
+		wheel_delta_state_ += wheel_delta;
 	}
 
 	void MsgInputTouch::UpdateInputs()
@@ -100,6 +123,7 @@ namespace KlayGE
 		index_ = !index_;
 		touch_coords_[index_] = touch_coord_state_;
 		touch_downs_[index_] = touch_down_state_;
+		wheel_delta_ = wheel_delta_state_;
 		num_available_touch_ = 0;
 		typedef KLAYGE_DECLTYPE(touch_down_state_) TDSType;
 		KLAYGE_FOREACH(TDSType::const_reference tds, touch_down_state_)
@@ -107,6 +131,7 @@ namespace KlayGE
 			num_available_touch_ += tds;
 		}
 
+		wheel_delta_state_ = 0;
 		has_gesture_ = false;
 		action_param_->move_vec = float2(0.0f, 0.0f);
 		curr_gesture_(static_cast<float>(timer_.elapsed()));

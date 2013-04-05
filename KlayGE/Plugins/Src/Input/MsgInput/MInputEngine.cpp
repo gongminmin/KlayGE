@@ -68,6 +68,7 @@ namespace KlayGE
 		on_pointer_down_.disconnect();
 		on_pointer_up_.disconnect();
 		on_pointer_update_.disconnect();
+		on_pointer_wheel_.disconnect();
 		devices_.clear();
 
 #if defined KLAYGE_PLATFORM_WINDOWS
@@ -154,11 +155,14 @@ namespace KlayGE
 				placeholders::_1, placeholders::_2));
 		}
 #if (_WIN32_WINNT >= 0x0602 /*_WIN32_WINNT_WIN8*/)
+		::EnableMouseInPointer(true);
 		on_pointer_down_ = main_wnd->OnPointerDown().connect(KlayGE::bind(&MsgInputEngine::OnPointerDown, this,
 			KlayGE::placeholders::_2, placeholders::_3));
 		on_pointer_up_ = main_wnd->OnPointerUp().connect(KlayGE::bind(&MsgInputEngine::OnPointerUp, this,
 			KlayGE::placeholders::_2, KlayGE::placeholders::_3));
 		on_pointer_update_ = main_wnd->OnPointerUpdate().connect(KlayGE::bind(&MsgInputEngine::OnPointerUpdate, this,
+			KlayGE::placeholders::_2, KlayGE::placeholders::_3, KlayGE::placeholders::_4));
+		on_pointer_wheel_ = main_wnd->OnPointerWheel().connect(KlayGE::bind(&MsgInputEngine::OnPointerWheel, this,
 			KlayGE::placeholders::_2, KlayGE::placeholders::_3, KlayGE::placeholders::_4));
 		devices_.push_back(MakeSharedPtr<MsgInputTouch>());
 #elif (_WIN32_WINNT >= 0x0601 /*_WIN32_WINNT_WIN7*/)
@@ -178,6 +182,8 @@ namespace KlayGE
 		on_pointer_up_ = main_wnd->OnPointerUp().connect(KlayGE::bind(&MsgInputEngine::OnPointerUp, this,
 			KlayGE::placeholders::_2, KlayGE::placeholders::_3));
 		on_pointer_update_ = main_wnd->OnPointerUpdate().connect(KlayGE::bind(&MsgInputEngine::OnPointerUpdate, this,
+			KlayGE::placeholders::_2, KlayGE::placeholders::_3, KlayGE::placeholders::_4));
+		on_pointer_wheel_ = main_wnd->OnPointerWheel().connect(KlayGE::bind(&MsgInputEngine::OnPointerWheel, this,
 			KlayGE::placeholders::_2, KlayGE::placeholders::_3, KlayGE::placeholders::_4));
 		devices_.push_back(MakeSharedPtr<MsgInputTouch>());
 #endif
@@ -276,6 +282,18 @@ namespace KlayGE
 			if (InputEngine::IDT_Touch == device->Type())
 			{
 				checked_pointer_cast<MsgInputTouch>(device)->OnPointerUpdate(pt, id, down);
+			}
+		}
+	}
+	
+	void MsgInputEngine::OnPointerWheel(int2 const & pt, uint32_t id, int32_t wheel_delta)
+	{
+		typedef KLAYGE_DECLTYPE(devices_) DevicesType;
+		KLAYGE_FOREACH(DevicesType::reference device, devices_)
+		{
+			if (InputEngine::IDT_Touch == device->Type())
+			{
+				checked_pointer_cast<MsgInputTouch>(device)->OnPointerWheel(pt, id, wheel_delta);
 			}
 		}
 	}

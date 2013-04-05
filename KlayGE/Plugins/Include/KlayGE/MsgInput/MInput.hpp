@@ -239,6 +239,7 @@ namespace KlayGE
 		boost::signals2::connection on_pointer_down_;
 		boost::signals2::connection on_pointer_up_;
 		boost::signals2::connection on_pointer_update_;
+		boost::signals2::connection on_pointer_wheel_;
 
 #if defined KLAYGE_PLATFORM_WINDOWS
 #if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
@@ -274,6 +275,7 @@ namespace KlayGE
 		void OnPointerDown(int2 const & pt, uint32_t id);
 		void OnPointerUp(int2 const & pt, uint32_t id);
 		void OnPointerUpdate(int2 const & pt, uint32_t id, bool down);
+		void OnPointerWheel(int2 const & pt, uint32_t id, int32_t wheel_delta);
 	};
 
 #if defined KLAYGE_PLATFORM_WINDOWS
@@ -346,6 +348,7 @@ namespace KlayGE
 		void OnPointerDown(int2 const & pt, uint32_t id);
 		void OnPointerUp(int2 const & pt, uint32_t id);
 		void OnPointerUpdate(int2 const & pt, uint32_t id, bool down);
+		void OnPointerWheel(int2 const & pt, uint32_t id, int32_t wheel_delta);
 
 	private:
 		virtual void UpdateInputs() KLAYGE_OVERRIDE;
@@ -353,6 +356,7 @@ namespace KlayGE
 		Timer timer_;
 		array<int2, 16> touch_coord_state_;
 		array<bool, 16> touch_down_state_;
+		int32_t wheel_delta_state_;
 	};
 }
 

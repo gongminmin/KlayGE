@@ -271,7 +271,8 @@ namespace KlayGE
 		TS_PressAndTap		= 0x303,
 		TS_Zoom				= 0x304,
 		TS_Rotate			= 0x305,
-		TS_Flick			= 0x306
+		TS_Flick			= 0x306,
+		TS_Wheel			= 0x307
 	};
 
 	typedef std::pair<uint16_t, uint16_t> InputActionDefine;
@@ -301,7 +302,7 @@ namespace KlayGE
 		uint16_t Action(uint16_t key) const;
 
 	private:
-		boost::container::flat_map<uint16_t, uint16_t> actionMap_;
+		std::map<uint16_t, uint16_t> actionMap_;
 	};
 
 	typedef boost::signals2::signal<void(InputEngine const & sender, InputAction const & action)> input_signal;
@@ -524,6 +525,7 @@ namespace KlayGE
 	protected:
 		array<array<int2, 16>, 2> touch_coords_;
 		array<array<bool, 16>, 2> touch_downs_;
+		int32_t wheel_delta_;
 		bool index_;
 		uint32_t num_available_touch_;
 
@@ -601,10 +603,12 @@ namespace KlayGE
 	
 	struct KLAYGE_CORE_API InputTouchActionParam : public InputActionParam
 	{
+		TouchSemantic gesture;
 		int2 center;
 		int2 move_vec;
 		float zoom;
 		float rotate_angle;
+		int32_t wheel_delta;
 	};
 }
 

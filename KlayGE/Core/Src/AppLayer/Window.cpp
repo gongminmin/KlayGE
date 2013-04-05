@@ -293,7 +293,7 @@ namespace KlayGE
 			{
 				POINT pt = { GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam) };
 				::ScreenToClient(this->HWnd(), &pt);
-				this->OnPointerDown()(*this, int2(pt.x, pt.y), GET_POINTERID_WPARAM(wParam) - 1);
+				this->OnPointerDown()(*this, int2(pt.x, pt.y), GET_POINTERID_WPARAM(wParam));
 			}
 			break;
 
@@ -301,7 +301,7 @@ namespace KlayGE
 			{
 				POINT pt = { GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam) };
 				::ScreenToClient(this->HWnd(), &pt);
-				this->OnPointerUp()(*this, int2(pt.x, pt.y), GET_POINTERID_WPARAM(wParam) - 1);
+				this->OnPointerUp()(*this, int2(pt.x, pt.y), GET_POINTERID_WPARAM(wParam));
 			}
 			break;
 
@@ -309,8 +309,17 @@ namespace KlayGE
 			{
 				POINT pt = { GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam) };
 				::ScreenToClient(this->HWnd(), &pt);
-				this->OnPointerUpdate()(*this, int2(pt.x, pt.y), GET_POINTERID_WPARAM(wParam) - 1,
+				this->OnPointerUpdate()(*this, int2(pt.x, pt.y), GET_POINTERID_WPARAM(wParam),
 					IS_POINTER_INCONTACT_WPARAM(wParam));
+			}
+			break;
+
+		case WM_POINTERWHEEL:			
+			{
+				POINT pt = { GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam) };
+				::ScreenToClient(this->HWnd(), &pt);
+				this->OnPointerWheel()(*this, int2(pt.x, pt.y), GET_POINTERID_WPARAM(wParam),
+					GET_WHEEL_DELTA_WPARAM(wParam));
 			}
 			break;
 
@@ -378,6 +387,8 @@ namespace KlayGE
 			ref new TypedEventHandler<CoreWindow^, PointerEventArgs^>(msgs_, &MetroMsgs::OnPointerReleased);
 		window->PointerMoved +=
 			ref new TypedEventHandler<CoreWindow^, PointerEventArgs^>(msgs_, &MetroMsgs::OnPointerMoved);
+		window->PointerWheelChanged +=
+			ref new TypedEventHandler<CoreWindow^, PointerEventArgs^>(msgs_, &MetroMsgs::OnPointerWheelChanged);
 	}
 
 	Window::MetroMsgs::MetroMsgs()
@@ -404,21 +415,28 @@ namespace KlayGE
 	{
 		win_->OnPointerDown()(*win_,
 			int2(static_cast<int>(args->CurrentPoint->Position.X), static_cast<int>(args->CurrentPoint->Position.Y)),
-			args->CurrentPoint->PointerId - 1);
+			args->CurrentPoint->PointerId);
 	}
 
 	void Window::MetroMsgs::OnPointerReleased(CoreWindow^ /*sender*/, PointerEventArgs^ args)
 	{
 		win_->OnPointerUp()(*win_,
 			int2(static_cast<int>(args->CurrentPoint->Position.X), static_cast<int>(args->CurrentPoint->Position.Y)),
-			args->CurrentPoint->PointerId - 1);
+			args->CurrentPoint->PointerId);
 	}
 
 	void Window::MetroMsgs::OnPointerMoved(CoreWindow^ /*sender*/, PointerEventArgs^ args)
 	{
 		win_->OnPointerUpdate()(*win_,
 			int2(static_cast<int>(args->CurrentPoint->Position.X), static_cast<int>(args->CurrentPoint->Position.Y)),
-			args->CurrentPoint->PointerId - 1, args->CurrentPoint->IsInContact);
+			args->CurrentPoint->PointerId, args->CurrentPoint->IsInContact);
+	}
+
+	void Window::MetroMsgs::OnPointerWheelChanged(CoreWindow^ /*sender*/, PointerEventArgs^ args)
+	{
+		win_->OnPointerWheel()(*win_,
+			int2(static_cast<int>(args->CurrentPoint->Position.X), static_cast<int>(args->CurrentPoint->Position.Y)),
+			args->CurrentPoint->PointerId, args->CurrentPoint->Properties->MouseWheelDelta);
 	}
 
 	void Window::MetroMsgs::BindWindow(Window* win)
