@@ -10,7 +10,7 @@
   <Project Name="DShow Show System" Path="DShow.project"/>
   <Project Name="KGEConfig" Path="KGEConfig.project" Active="Yes"/>
   <Project Name="OpenGL Rendering System" Path="OpenGL.project"/>
-  <Project Name="DInput Input System" Path="DInput.project"/>
+  <Project Name="MsgInput Input System" Path="MsgInput.project"/>
   <Project Name="Python Script System" Path="Python.project"/>
   <BuildMatrix>
     <WorkspaceConfiguration Name="Debug_win_x86" Selected="no">
@@ -22,7 +22,7 @@
       <Project Name="KGEConfig" ConfigName="Debug_win_x86"/>
       <Project Name="DSound Audio System" ConfigName="Debug_win_x86"/>
       <Project Name="DShow Show System" ConfigName="Debug_win_x86"/>
-      <Project Name="DInput Input System" ConfigName="Debug_win_x86"/>
+      <Project Name="MsgInput Input System" ConfigName="Debug_win_x86"/>
       <Project Name="D3D11 Rendering System" ConfigName="Debug_win_x86"/>
       <Project Name="Core" ConfigName="Debug_win_x86"/>
       <Project Name="Python Script System" ConfigName="Debug_win_x86"/>
@@ -36,7 +36,7 @@
       <Project Name="KGEConfig" ConfigName="Release_win_x86"/>
       <Project Name="DSound Audio System" ConfigName="Release_win_x86"/>
       <Project Name="DShow Show System" ConfigName="Release_win_x86"/>
-      <Project Name="DInput Input System" ConfigName="Release_win_x86"/>
+      <Project Name="MsgInput Input System" ConfigName="Release_win_x86"/>
       <Project Name="D3D11 Rendering System" ConfigName="Release_win_x86"/>
       <Project Name="Core" ConfigName="Release_win_x86"/>
       <Project Name="Python Script System" ConfigName="Release_win_x86"/>
@@ -50,7 +50,7 @@
       <Project Name="KGEConfig" ConfigName="Debug_win_x64"/>
       <Project Name="DSound Audio System" ConfigName="Debug_win_x64"/>
       <Project Name="DShow Show System" ConfigName="Debug_win_x64"/>
-      <Project Name="DInput Input System" ConfigName="Debug_win_x64"/>
+      <Project Name="MsgInput Input System" ConfigName="Debug_win_x64"/>
       <Project Name="D3D11 Rendering System" ConfigName="Debug_win_x64"/>
       <Project Name="Core" ConfigName="Debug_win_x64"/>
       <Project Name="Python Script System" ConfigName="Debug_win_x64"/>
@@ -64,7 +64,7 @@
       <Project Name="KGEConfig" ConfigName="Release_win_x64"/>
       <Project Name="DSound Audio System" ConfigName="Release_win_x64"/>
       <Project Name="DShow Show System" ConfigName="Release_win_x64"/>
-      <Project Name="DInput Input System" ConfigName="Release_win_x64"/>
+      <Project Name="MsgInput Input System" ConfigName="Release_win_x64"/>
       <Project Name="D3D11 Rendering System" ConfigName="Release_win_x64"/>
       <Project Name="Core" ConfigName="Release_win_x64"/>
       <Project Name="Python Script System" ConfigName="Release_win_x64"/>
@@ -78,7 +78,7 @@
       <Project Name="KGEConfig" ConfigName="Debug_win_x86"/>
       <Project Name="DSound Audio System" ConfigName="Debug_win_x86"/>
       <Project Name="DShow Show System" ConfigName="Debug_win_x86"/>
-      <Project Name="DInput Input System" ConfigName="Debug_win_x86"/>
+      <Project Name="MsgInput Input System" ConfigName="Debug_win_x86"/>
       <Project Name="D3D11 Rendering System" ConfigName="Debug_win_x86"/>
       <Project Name="Core" ConfigName="Debug_linux_x86"/>
       <Project Name="Python Script System" ConfigName="Debug_linux_x86"/>
@@ -92,7 +92,7 @@
       <Project Name="KGEConfig" ConfigName="Release_win_x86"/>
       <Project Name="DSound Audio System" ConfigName="Release_win_x86"/>
       <Project Name="DShow Show System" ConfigName="Release_win_x86"/>
-      <Project Name="DInput Input System" ConfigName="Release_win_x86"/>
+      <Project Name="MsgInput Input System" ConfigName="Release_win_x86"/>
       <Project Name="D3D11 Rendering System" ConfigName="Release_win_x86"/>
       <Project Name="Core" ConfigName="Release_linux_x86"/>
       <Project Name="Python Script System" ConfigName="Release_linux_x86"/>
@@ -106,7 +106,7 @@
       <Project Name="KGEConfig" ConfigName="Debug_win_x64"/>
       <Project Name="DSound Audio System" ConfigName="Debug_win_x64"/>
       <Project Name="DShow Show System" ConfigName="Debug_win_x64"/>
-      <Project Name="DInput Input System" ConfigName="Debug_win_x64"/>
+      <Project Name="MsgInput Input System" ConfigName="Debug_win_x64"/>
       <Project Name="D3D11 Rendering System" ConfigName="Debug_win_x64"/>
       <Project Name="Core" ConfigName="Debug_linux_x64"/>
       <Project Name="Python Script System" ConfigName="Debug_linux_x64"/>
@@ -120,7 +120,7 @@
       <Project Name="KGEConfig" ConfigName="Release_win_x64"/>
       <Project Name="DSound Audio System" ConfigName="Release_win_x64"/>
       <Project Name="DShow Show System" ConfigName="Release_win_x64"/>
-      <Project Name="DInput Input System" ConfigName="Release_win_x64"/>
+      <Project Name="MsgInput Input System" ConfigName="Release_win_x64"/>
       <Project Name="D3D11 Rendering System" ConfigName="Release_win_x64"/>
       <Project Name="Core" ConfigName="Release_linux_x64"/>
       <Project Name="Python Script System" ConfigName="Release_linux_x64"/>

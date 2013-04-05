@@ -4,7 +4,6 @@
 #include <KFL/Math.hpp>
 #include <KFL/Thread.hpp>
 #include <KFL/CpuInfo.hpp>
-#include <KlayGE/ResLoader.hpp>
 #include <KlayGE/LZMACodec.hpp>
 #include <KFL/AlignedAllocator.hpp>
 

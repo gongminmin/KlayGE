@@ -954,12 +954,17 @@ namespace KlayGE
 			}
 		}
 
+#if (defined KLAYGE_PLATFORM_WINDOWS_DESKTOP) || (defined KLAYGE_PLATFORM_LINUX)
 		if (jit)
 		{
-#if (defined KLAYGE_PLATFORM_WINDOWS_DESKTOP) || (defined KLAYGE_PLATFORM_LINUX)
-			system(("MeshMLJIT \"" + meshml_name + "\" N10 " + "\"" + path_name + jit_ext_name + "\" -q").c_str());
-#endif
+			if (system(("MeshMLJIT \"" + meshml_name + "\" N10 " + "\"" + path_name + jit_ext_name + "\" -q").c_str()) != 0)
+			{
+				LogError("MeshMLJIT failed. Forgot to build Tools?");
+			}
 		}
+#else
+		BOOST_ASSERT(!jit);
+#endif
 	}
 
 	void LoadModel(std::string const & meshml_name, std::vector<RenderMaterialPtr>& mtls,

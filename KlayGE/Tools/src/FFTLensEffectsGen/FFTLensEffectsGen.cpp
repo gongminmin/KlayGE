@@ -4,7 +4,6 @@
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/Context.hpp>
 #include <KlayGE/RenderSettings.hpp>
-#include <KlayGE/ResLoader.hpp>
 #include <KlayGE/FFT.hpp>
 
 #include <cmath>
@@ -154,4 +153,6 @@ int main(int argc, char* argv[])
 
 	SaveTexture(pattern_real_tex, "lens_effects_real.dds");
 	SaveTexture(pattern_imag_tex, "lens_effects_imag.dds");
+
+	Context::Destroy();
 }

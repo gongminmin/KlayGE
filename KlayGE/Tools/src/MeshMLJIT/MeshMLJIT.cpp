@@ -1798,5 +1798,7 @@ int main(int argc, char* argv[])
 		cout << "Binary model has been saved to " << output_name << "." << endl;
 	}
 
+	ResLoader::Destroy();
+
 	return 0;
 }

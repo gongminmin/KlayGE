@@ -1,7 +1,6 @@
 #include <KlayGE/KlayGE.hpp>
 #include <KFL/Math.hpp>
 #include <KlayGE/Context.hpp>
-#include <KlayGE/ResLoader.hpp>
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/App3D.hpp>
 #include <KlayGE/RenderSettings.hpp>
@@ -307,6 +306,8 @@ int main(int argc, char* argv[])
 
 	EmptyApp app;
 	app.Create();
+
+	Context::Destroy();
 
 	return 0;
 }

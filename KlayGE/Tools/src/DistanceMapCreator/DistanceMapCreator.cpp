@@ -8,7 +8,6 @@
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/Context.hpp>
 #include <KlayGE/RenderSettings.hpp>
-#include <KlayGE/ResLoader.hpp>
 
 #include <cmath>
 #include <iostream>
@@ -362,4 +361,6 @@ int main(int argc, char* argv[])
 	SaveTexture(distance_map_texture, distance_name);
 
 	cout << "Distance map is saved to " << distance_name << endl;
+
+	Context::Destroy();
 }

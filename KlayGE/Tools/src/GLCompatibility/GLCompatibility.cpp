@@ -1,7 +1,6 @@
 #include <KlayGE/KlayGE.hpp>
 #include <KFL/Math.hpp>
 #include <KlayGE/Context.hpp>
-#include <KlayGE/ResLoader.hpp>
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/App3D.hpp>
@@ -141,6 +140,8 @@ int main()
 	ScriptModulePtr module = scriptEng.CreateModule("GLCompatibility");
 
 	module->Call("gl_compatibility", for_py);
+
+	Context::Destroy();
 
 	return 0;
 }
