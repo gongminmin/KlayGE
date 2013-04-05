@@ -297,7 +297,7 @@ namespace KlayGE
 		boost::container::flat_map<uint16_t, uint16_t> actionMap_;
 	};
 
-	typedef boost::signals2::signal<void(InputEngine const &, InputAction const &)> input_signal;
+	typedef boost::signals2::signal<void(InputEngine const & sender, InputAction const & action)> input_signal;
 	typedef shared_ptr<input_signal> action_handler_t;
 	typedef boost::container::flat_map<uint32_t, InputActionMap> action_maps_t;
 

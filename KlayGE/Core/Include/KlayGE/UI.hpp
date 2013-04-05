@@ -765,7 +765,7 @@ namespace KlayGE
 		void SetText(std::wstring const & strText);
 
 	public:
-		typedef boost::signals2::signal<void(UIButton const &)> ClickedEvent;
+		typedef boost::signals2::signal<void(UIButton const & sender)> ClickedEvent;
 		ClickedEvent& OnClickedEvent()
 		{
 			return clicked_event_;
@@ -820,7 +820,7 @@ namespace KlayGE
 		void SetTexture(TexturePtr const & tex);
 
 	public:
-		typedef boost::signals2::signal<void(UITexButton const &)> ClickedEvent;
+		typedef boost::signals2::signal<void(UITexButton const & sender)> ClickedEvent;
 		ClickedEvent& OnClickedEvent()
 		{
 			return clicked_event_;
@@ -885,7 +885,7 @@ namespace KlayGE
 		void SetText(std::wstring const & strText);
 
 	public:
-		typedef boost::signals2::signal<void(UICheckBox const &)> ChangedEvent;
+		typedef boost::signals2::signal<void(UICheckBox const & sender)> ChangedEvent;
 		ChangedEvent& OnChangedEvent()
 		{
 			return changed_event_;
@@ -964,7 +964,7 @@ namespace KlayGE
 		void SetText(std::wstring const & strText);
 
 	public:
-		typedef boost::signals2::signal<void(UIRadioButton const &)> ChangedEvent;
+		typedef boost::signals2::signal<void(UIRadioButton const & sender)> ChangedEvent;
 		ChangedEvent& OnChangedEvent()
 		{
 			return changed_event_;
@@ -1040,7 +1040,7 @@ namespace KlayGE
 		void SetRange(int nMin, int nMax);
 
 	public:
-		typedef boost::signals2::signal<void(UISlider const &)> ValueChangedEvent;
+		typedef boost::signals2::signal<void(UISlider const & sender)> ValueChangedEvent;
 		ValueChangedEvent& OnValueChangedEvent()
 		{
 			return value_changed_event_;
@@ -1246,7 +1246,7 @@ namespace KlayGE
 		void SelectItem(int nNewIndex);
 
 	public:
-		typedef boost::signals2::signal<void(UIListBox const &)> SelectionEvent;
+		typedef boost::signals2::signal<void(UIListBox const & sender)> SelectionEvent;
 		SelectionEvent& OnSelectionEvent()
 		{
 			return selection_event_;
@@ -1375,7 +1375,7 @@ namespace KlayGE
 		}
 
 	public:
-		typedef boost::signals2::signal<void(UIComboBox const &)> SelectionChangedEvent;
+		typedef boost::signals2::signal<void(UIComboBox const & sender)> SelectionChangedEvent;
 		SelectionChangedEvent& OnSelectionChangedEvent()
 		{
 			return selection_changed_event_;
@@ -1537,7 +1537,7 @@ namespace KlayGE
 		}
 
 	public:
-		typedef boost::signals2::signal<void(UIEditBox const &)> EditBoxEvent;
+		typedef boost::signals2::signal<void(UIEditBox const & sender)> EditBoxEvent;
 		EditBoxEvent& OnChangedEvent()
 		{
 			return changed_event_;

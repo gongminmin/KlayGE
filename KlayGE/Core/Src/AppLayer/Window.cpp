@@ -499,15 +499,28 @@ namespace KlayGE
 
 #if (_WIN32_WINNT >= 0x0602 /*_WIN32_WINNT_WIN8*/)
 		case WM_POINTERDOWN:
-			this->OnPointerDown()(*this, static_cast<uint64_t>(lParam), static_cast<uint32_t>(wParam));
+			{
+				POINT pt = { GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam) };
+				::ScreenToClient(this->HWnd(), &pt);
+				this->OnPointerDown()(*this, int2(pt.x, pt.y), GET_POINTERID_WPARAM(wParam) - 1);
+			}
 			break;
 
 		case WM_POINTERUP:
-			this->OnPointerUp()(*this, static_cast<uint64_t>(lParam), static_cast<uint32_t>(wParam));
+			{
+				POINT pt = { GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam) };
+				::ScreenToClient(this->HWnd(), &pt);
+				this->OnPointerUp()(*this, int2(pt.x, pt.y), GET_POINTERID_WPARAM(wParam) - 1);
+			}
 			break;
 
-		case WM_POINTERUPDATE:
-			this->OnPointerUpdate()(*this, static_cast<uint64_t>(lParam), static_cast<uint32_t>(wParam));
+		case WM_POINTERUPDATE:			
+			{
+				POINT pt = { GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam) };
+				::ScreenToClient(this->HWnd(), &pt);
+				this->OnPointerUpdate()(*this, int2(pt.x, pt.y), GET_POINTERID_WPARAM(wParam) - 1,
+					IS_POINTER_INCONTACT_WPARAM(wParam));
+			}
 			break;
 
 #elif (_WIN32_WINNT >= 0x0601 /*_WIN32_WINNT_WIN7*/)
@@ -570,7 +583,8 @@ namespace KlayGE
 
 		window->PointerPressed +=
 			ref new TypedEventHandler<CoreWindow^, PointerEventArgs^>(msgs_, &MetroMsgs::OnPointerPressed);
-
+		window->PointerReleased +=
+			ref new TypedEventHandler<CoreWindow^, PointerEventArgs^>(msgs_, &MetroMsgs::OnPointerReleased);
 		window->PointerMoved +=
 			ref new TypedEventHandler<CoreWindow^, PointerEventArgs^>(msgs_, &MetroMsgs::OnPointerMoved);
 	}
@@ -595,12 +609,25 @@ namespace KlayGE
 		win_->closed_ = true;
 	}
 
-	void Window::MetroMsgs::OnPointerPressed(CoreWindow^ /*sender*/, PointerEventArgs^ /*args*/)
+	void Window::MetroMsgs::OnPointerPressed(CoreWindow^ /*sender*/, PointerEventArgs^ args)
 	{
+		win_->OnPointerDown()(*win_,
+			int2(static_cast<int>(args->CurrentPoint->Position.X), static_cast<int>(args->CurrentPoint->Position.Y)),
+			args->CurrentPoint->PointerId - 1);
 	}
 
-	void Window::MetroMsgs::OnPointerMoved(CoreWindow^ /*sender*/, PointerEventArgs^ /*args*/)
+	void Window::MetroMsgs::OnPointerReleased(CoreWindow^ /*sender*/, PointerEventArgs^ args)
 	{
+		win_->OnPointerUp()(*win_,
+			int2(static_cast<int>(args->CurrentPoint->Position.X), static_cast<int>(args->CurrentPoint->Position.Y)),
+			args->CurrentPoint->PointerId - 1);
+	}
+
+	void Window::MetroMsgs::OnPointerMoved(CoreWindow^ /*sender*/, PointerEventArgs^ args)
+	{
+		win_->OnPointerUpdate()(*win_,
+			int2(static_cast<int>(args->CurrentPoint->Position.X), static_cast<int>(args->CurrentPoint->Position.Y)),
+			args->CurrentPoint->PointerId - 1, args->CurrentPoint->IsInContact);
 	}
 
 	void Window::MetroMsgs::BindWindow(Window* win)

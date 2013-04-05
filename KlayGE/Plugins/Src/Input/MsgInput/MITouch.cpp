@@ -33,8 +33,6 @@
 #include <KlayGE/InputFactory.hpp>
 #include <KlayGE/Window.hpp>
 
-#include <windowsx.h>
-
 #include <KlayGE/MsgInput/MInput.hpp>
 
 namespace KlayGE
@@ -50,6 +48,8 @@ namespace KlayGE
 		return name;
 	}
 
+#if defined KLAYGE_PLATFORM_WINDOWS
+#if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
 	void MsgInputTouch::OnTouch(Window const & wnd, uint64_t lparam, uint32_t wparam)
 	{
 #if (_WIN32_WINNT >= 0x0601 /*_WIN32_WINNT_WIN7*/)
@@ -76,65 +76,25 @@ namespace KlayGE
 		UNREF_PARAM(wparam);
 #endif
 	}
-
-	void MsgInputTouch::OnPointerDown(Window const & wnd, uint64_t lparam, uint32_t wparam)
-	{
-#if (_WIN32_WINNT >= 0x0602 /*_WIN32_WINNT_WIN8*/)
-		for (uint32_t f = 0; f < 5; ++ f)
-		{
-			if (IS_POINTER_FLAG_SET_WPARAM(wparam, static_cast<uint32_t>(POINTER_MESSAGE_FLAG_FIRSTBUTTON << f)))
-			{
-				POINT pt = { GET_X_LPARAM(lparam), GET_Y_LPARAM(lparam) };
-				::ScreenToClient(wnd.HWnd(), &pt);
-				touch_coord_state_[f] = int2(pt.x, pt.y);
-				touch_down_state_[f] = true;
-			}
-		}
-#else
-		UNREF_PARAM(wnd);
-		UNREF_PARAM(lparam);
-		UNREF_PARAM(wparam);
 #endif
+#endif
+
+	void MsgInputTouch::OnPointerDown(int2 const & pt, uint32_t id)
+	{
+		touch_coord_state_[id] = pt;
+		touch_down_state_[id] = true;
 	}
 
-	void MsgInputTouch::OnPointerUp(Window const & wnd, uint64_t lparam, uint32_t wparam)
+	void MsgInputTouch::OnPointerUp(int2 const & pt, uint32_t id)
 	{
-#if (_WIN32_WINNT >= 0x0602 /*_WIN32_WINNT_WIN8*/)
-		for (uint32_t f = 0; f < 5; ++ f)
-		{
-			if (!IS_POINTER_FLAG_SET_WPARAM(wparam, static_cast<uint32_t>(POINTER_MESSAGE_FLAG_FIRSTBUTTON << f)))
-			{
-				POINT pt = { GET_X_LPARAM(lparam), GET_Y_LPARAM(lparam) };
-				::ScreenToClient(wnd.HWnd(), &pt);
-				touch_coord_state_[f] = int2(pt.x, pt.y);
-				touch_down_state_[f] = false;
-			}
-		}
-#else
-		UNREF_PARAM(wnd);
-		UNREF_PARAM(lparam);
-		UNREF_PARAM(wparam);
-#endif
+		touch_coord_state_[id] = pt;
+		touch_down_state_[id] = false;
 	}
 
-	void MsgInputTouch::OnPointerUpdate(Window const & wnd, uint64_t lparam, uint32_t wparam)
+	void MsgInputTouch::OnPointerUpdate(int2 const & pt, uint32_t id, bool down)
 	{
-#if (_WIN32_WINNT >= 0x0602 /*_WIN32_WINNT_WIN8*/)
-		for (uint32_t f = 0; f < 5; ++ f)
-		{
-			if (IS_POINTER_FLAG_SET_WPARAM(wparam, static_cast<uint32_t>(POINTER_MESSAGE_FLAG_FIRSTBUTTON << f)))
-			{
-				POINT pt = { GET_X_LPARAM(lparam), GET_Y_LPARAM(lparam) };
-				::ScreenToClient(wnd.HWnd(), &pt);
-				touch_coord_state_[f] = int2(pt.x, pt.y);
-				touch_down_state_[f] = true;
-			}
-		}
-#else
-		UNREF_PARAM(wnd);
-		UNREF_PARAM(lparam);
-		UNREF_PARAM(wparam);
-#endif
+		touch_coord_state_[id] = pt;
+		touch_down_state_[id] = down;
 	}
 
 	void MsgInputTouch::UpdateInputs()

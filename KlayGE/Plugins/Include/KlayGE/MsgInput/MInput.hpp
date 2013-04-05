@@ -33,6 +33,8 @@
 
 #pragma once
 
+#if defined KLAYGE_PLATFORM_WINDOWS
+#if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
 #include <windows.h>
 #if (_WIN32_WINNT >= 0x0602 /*_WIN32_WINNT_WIN8*/)
 #include <hidsdi.h>
@@ -197,6 +199,8 @@ typedef struct _HIDP_VALUE_CAPS
 
 #define HIDP_STATUS_SUCCESS                  (HIDP_ERROR_CODES(0x0,0))
 #endif
+#endif
+#endif
 
 #include <KlayGE/Input.hpp>
 #include <KFL/Timer.hpp>
@@ -213,6 +217,8 @@ namespace KlayGE
 		std::wstring const & Name() const;
 		void EnumDevices();
 
+#if defined KLAYGE_PLATFORM_WINDOWS
+#if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
 		NTSTATUS HidP_GetCaps(PHIDP_PREPARSED_DATA PreparsedData, PHIDP_CAPS Capabilities) const;
 		NTSTATUS HidP_GetButtonCaps(HIDP_REPORT_TYPE ReportType, PHIDP_BUTTON_CAPS ButtonCaps,
 			PUSHORT ButtonCapsLength, PHIDP_PREPARSED_DATA PreparsedData) const;
@@ -224,6 +230,8 @@ namespace KlayGE
 		NTSTATUS HidP_GetUsageValue(HIDP_REPORT_TYPE ReportType, USAGE UsagePage,
 			USHORT LinkCollection, USAGE Usage, PULONG UsageValue, PHIDP_PREPARSED_DATA PreparsedData,
 			PCHAR Report, ULONG ReportLength) const;
+#endif
+#endif
 
 	private:
 		boost::signals2::connection on_raw_input_;
@@ -232,6 +240,8 @@ namespace KlayGE
 		boost::signals2::connection on_pointer_up_;
 		boost::signals2::connection on_pointer_update_;
 
+#if defined KLAYGE_PLATFORM_WINDOWS
+#if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
 		HMODULE mod_hid_;
 		typedef NTSTATUS (WINAPI *HidP_GetCapsFunc)(PHIDP_PREPARSED_DATA PreparsedData, PHIDP_CAPS Capabilities);
 		typedef NTSTATUS (WINAPI *HidP_GetButtonCapsFunc)(HIDP_REPORT_TYPE ReportType, PHIDP_BUTTON_CAPS ButtonCaps,
@@ -249,15 +259,23 @@ namespace KlayGE
 		HidP_GetValueCapsFunc DynamicHidP_GetValueCaps_;
 		HidP_GetUsagesFunc DynamicHidP_GetUsages_;
 		HidP_GetUsageValueFunc DynamicHidP_GetUsageValue_;
+#endif
+#endif
 
 	private:
+#if defined KLAYGE_PLATFORM_WINDOWS
+#if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
 		void OnRawInput(Window const & wnd, uint64_t param);
 		void OnTouch(Window const & wnd, uint64_t lparam, uint32_t wparam);
-		void OnPointerDown(Window const & wnd, uint64_t lparam, uint32_t wparam);
-		void OnPointerUp(Window const & wnd, uint64_t lparam, uint32_t wparam);
-		void OnPointerUpdate(Window const & wnd, uint64_t lparam, uint32_t wparam);
+#endif
+#endif
+		void OnPointerDown(int2 const & pt, uint32_t id);
+		void OnPointerUp(int2 const & pt, uint32_t id);
+		void OnPointerUpdate(int2 const & pt, uint32_t id, bool down);
 	};
 
+#if defined KLAYGE_PLATFORM_WINDOWS
+#if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
 	class MsgInputKeyboard : public InputKeyboard
 	{
 	public:
@@ -309,6 +327,8 @@ namespace KlayGE
 		int2 slider_state_;
 		array<bool, 32> buttons_state_;
 	};
+#endif
+#endif
 
 	class MsgInputTouch : public InputTouch
 	{
@@ -316,10 +336,14 @@ namespace KlayGE
 		MsgInputTouch();
 
 		virtual std::wstring const & Name() const KLAYGE_OVERRIDE;
+#if defined KLAYGE_PLATFORM_WINDOWS
+#if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
 		void OnTouch(Window const & wnd, uint64_t lparam, uint32_t wparam);
-		void OnPointerDown(Window const & wnd, uint64_t lparam, uint32_t wparam);
-		void OnPointerUp(Window const & wnd, uint64_t lparam, uint32_t wparam);
-		void OnPointerUpdate(Window const & wnd, uint64_t lparam, uint32_t wparam);
+#endif
+#endif
+		void OnPointerDown(int2 const & pt, uint32_t id);
+		void OnPointerUp(int2 const & pt, uint32_t id);
+		void OnPointerUpdate(int2 const & pt, uint32_t id, bool down);
 
 	private:
 		virtual void UpdateInputs() KLAYGE_OVERRIDE;

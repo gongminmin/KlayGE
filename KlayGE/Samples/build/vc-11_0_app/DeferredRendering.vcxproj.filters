@@ -288,6 +288,9 @@
     <None Include="..\..\..\media\RenderFX\SetSubsplatStencil.kfx">
       <Filter>Resource Files</Filter>
     </None>
+    <None Include="..\..\..\media\RenderFX\SkyBox.kfx">
+      <Filter>Resource Files</Filter>
+    </None>
     <None Include="..\..\..\media\RenderFX\SSGI.kfx">
       <Filter>Resource Files</Filter>
     </None>
@@ -367,6 +370,12 @@
       <Filter>Resource Files</Filter>
     </None>
     <None Include="..\..\..\bin\win_x86_app\Scene\KlayGE_Scene_OCTree_vc_d.dll">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\..\..\bin\win_x86_app\Input\KlayGE_InputEngine_MsgInput_vc.dll">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\..\..\bin\win_x86_app\Input\KlayGE_InputEngine_MsgInput_vc_d.dll">
       <Filter>Resource Files</Filter>
     </None>
   </ItemGroup>

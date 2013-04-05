@@ -135,25 +135,25 @@ namespace KlayGE
 		}
 
 	public:
-		typedef boost::signals2::signal<void(Window const &, bool)> ActiveEvent;
-		typedef boost::signals2::signal<void(Window const &)> PaintEvent;
-		typedef boost::signals2::signal<void(Window const &)> EnterSizeMoveEvent;
-		typedef boost::signals2::signal<void(Window const &)> ExitSizeMoveEvent;
-		typedef boost::signals2::signal<void(Window const &, bool)> SizeEvent;
-		typedef boost::signals2::signal<void(Window const &)> SetCursorEvent;
-		typedef boost::signals2::signal<void(Window const &, wchar_t)> CharEvent;
-		typedef boost::signals2::signal<void(Window const &, wchar_t)> KeyDownEvent;
-		typedef boost::signals2::signal<void(Window const &, wchar_t)> KeyUpEvent;
-		typedef boost::signals2::signal<void(Window const &, uint32_t, int2 const &)> MouseDownEvent;
-		typedef boost::signals2::signal<void(Window const &, uint32_t, int2 const &)> MouseUpEvent;
-		typedef boost::signals2::signal<void(Window const &, uint32_t, int2 const &, int32_t)> MouseWheelEvent;
-		typedef boost::signals2::signal<void(Window const &, uint32_t, int2 const &)> MouseOverEvent;
-		typedef boost::signals2::signal<void(Window const &, uint64_t)> RawInputEvent;
-		typedef boost::signals2::signal<void(Window const &, uint64_t, uint32_t)> TouchEvent;
-		typedef boost::signals2::signal<void(Window const &, uint64_t, uint32_t)> PointerDownEvent;
-		typedef boost::signals2::signal<void(Window const &, uint64_t, uint32_t)> PointerUpEvent;
-		typedef boost::signals2::signal<void(Window const &, uint64_t, uint32_t)> PointerUpdateEvent;
-		typedef boost::signals2::signal<void(Window const &)> CloseEvent;
+		typedef boost::signals2::signal<void(Window const & wnd, bool active)> ActiveEvent;
+		typedef boost::signals2::signal<void(Window const & wnd)> PaintEvent;
+		typedef boost::signals2::signal<void(Window const & wnd)> EnterSizeMoveEvent;
+		typedef boost::signals2::signal<void(Window const & wnd)> ExitSizeMoveEvent;
+		typedef boost::signals2::signal<void(Window const & wnd, bool active)> SizeEvent;
+		typedef boost::signals2::signal<void(Window const & wnd)> SetCursorEvent;
+		typedef boost::signals2::signal<void(Window const & wnd, wchar_t ch)> CharEvent;
+		typedef boost::signals2::signal<void(Window const & wnd, wchar_t ch)> KeyDownEvent;
+		typedef boost::signals2::signal<void(Window const & wnd, wchar_t ch)> KeyUpEvent;
+		typedef boost::signals2::signal<void(Window const & wnd, uint32_t bottons, int2 const & pt)> MouseDownEvent;
+		typedef boost::signals2::signal<void(Window const & wnd, uint32_t bottons, int2 const & pt)> MouseUpEvent;
+		typedef boost::signals2::signal<void(Window const & wnd, uint32_t bottons, int2 const & pt, int32_t wheel)> MouseWheelEvent;
+		typedef boost::signals2::signal<void(Window const & wnd, uint32_t bottons, int2 const & pt)> MouseOverEvent;
+		typedef boost::signals2::signal<void(Window const & wnd, uint64_t lparam)> RawInputEvent;
+		typedef boost::signals2::signal<void(Window const & wnd, uint64_t lparam, uint32_t wparam)> TouchEvent;
+		typedef boost::signals2::signal<void(Window const & wnd, int2 const & pt, uint32_t id)> PointerDownEvent;
+		typedef boost::signals2::signal<void(Window const & wnd, int2 const & pt, uint32_t id)> PointerUpEvent;
+		typedef boost::signals2::signal<void(Window const & wnd, int2 const & pt, uint32_t id, bool down)> PointerUpdateEvent;
+		typedef boost::signals2::signal<void(Window const & wnd)> CloseEvent;
 
 		ActiveEvent& OnActive()
 		{
@@ -274,6 +274,7 @@ namespace KlayGE
 			void OnWindowClosed(Windows::UI::Core::CoreWindow^ sender, Windows::UI::Core::CoreWindowEventArgs^ args);
 			void OnVisibilityChanged(Windows::UI::Core::CoreWindow^ sender, Windows::UI::Core::VisibilityChangedEventArgs^ args);
 			void OnPointerPressed(Windows::UI::Core::CoreWindow^ sender, Windows::UI::Core::PointerEventArgs^ args);
+			void OnPointerReleased(Windows::UI::Core::CoreWindow^ sender, Windows::UI::Core::PointerEventArgs^ args);
 			void OnPointerMoved(Windows::UI::Core::CoreWindow^ sender, Windows::UI::Core::PointerEventArgs^ args);
 
 			void BindWindow(Window* win);

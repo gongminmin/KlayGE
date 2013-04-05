@@ -48,8 +48,10 @@ IF(WIN32)
 		ADD_SUBDIRECTORY(Plugins/Audio/DSound)
 	
 		ADD_SUBDIRECTORY(Plugins/Input/DInput)
+	ENDIF()
 		ADD_SUBDIRECTORY(Plugins/Input/MsgInput)
 
+	IF(NOT KLAYGE_WITH_WINRT)
 		ADD_SUBDIRECTORY(Plugins/Show/DShow)
         
 		ADD_SUBDIRECTORY(Plugins/Script/Python)

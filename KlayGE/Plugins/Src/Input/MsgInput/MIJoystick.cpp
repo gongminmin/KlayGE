@@ -34,6 +34,8 @@
 
 #include <KlayGE/MsgInput/MInput.hpp>
 
+#if defined KLAYGE_PLATFORM_WINDOWS
+#if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
 namespace KlayGE
 {
 	MsgInputJoystick::MsgInputJoystick(HANDLE device)
@@ -156,3 +158,5 @@ namespace KlayGE
 		buttons_state_.fill(false);
 	}
 }
+#endif
+#endif

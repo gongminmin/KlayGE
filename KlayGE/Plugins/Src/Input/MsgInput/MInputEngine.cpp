@@ -41,6 +41,8 @@ namespace KlayGE
 {
 	MsgInputEngine::MsgInputEngine()
 	{
+#if defined KLAYGE_PLATFORM_WINDOWS
+#if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
 		mod_hid_ = ::LoadLibraryW(L"hid.dll");
 		if (nullptr == mod_hid_)
 		{
@@ -55,6 +57,8 @@ namespace KlayGE
 			DynamicHidP_GetUsages_ = reinterpret_cast<HidP_GetUsagesFunc>(::GetProcAddress(mod_hid_, "HidP_GetUsages"));
 			DynamicHidP_GetUsageValue_ = reinterpret_cast<HidP_GetUsageValueFunc>(::GetProcAddress(mod_hid_, "HidP_GetUsageValue"));
 		}
+#endif
+#endif
 	}
 
 	MsgInputEngine::~MsgInputEngine()
@@ -66,7 +70,11 @@ namespace KlayGE
 		on_pointer_update_.disconnect();
 		devices_.clear();
 
+#if defined KLAYGE_PLATFORM_WINDOWS
+#if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
 		::FreeLibrary(mod_hid_);
+#endif
+#endif
 	}
 
 	std::wstring const & MsgInputEngine::Name() const
@@ -78,6 +86,8 @@ namespace KlayGE
 	void MsgInputEngine::EnumDevices()
 	{
 		WindowPtr const & main_wnd = Context::Instance().AppInstance().MainWnd();
+#if defined KLAYGE_PLATFORM_WINDOWS
+#if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
 		HWND hwnd = main_wnd->HWnd();
 			
 		UINT devices;
@@ -144,26 +154,38 @@ namespace KlayGE
 				placeholders::_1, placeholders::_2));
 		}
 #if (_WIN32_WINNT >= 0x0602 /*_WIN32_WINNT_WIN8*/)
-		on_pointer_down_ = main_wnd->OnPointerDown().connect(bind(&MsgInputEngine::OnPointerDown, this,
-			placeholders::_1, placeholders::_2, placeholders::_3));
-		on_pointer_up_ = main_wnd->OnPointerUp().connect(bind(&MsgInputEngine::OnPointerUp, this,
-			placeholders::_1, placeholders::_2, placeholders::_3));
-		on_pointer_update_ = main_wnd->OnPointerUpdate().connect(bind(&MsgInputEngine::OnPointerUpdate, this,
-			placeholders::_1, placeholders::_2, placeholders::_3));
+		on_pointer_down_ = main_wnd->OnPointerDown().connect(KlayGE::bind(&MsgInputEngine::OnPointerDown, this,
+			KlayGE::placeholders::_2, placeholders::_3));
+		on_pointer_up_ = main_wnd->OnPointerUp().connect(KlayGE::bind(&MsgInputEngine::OnPointerUp, this,
+			KlayGE::placeholders::_2, KlayGE::placeholders::_3));
+		on_pointer_update_ = main_wnd->OnPointerUpdate().connect(KlayGE::bind(&MsgInputEngine::OnPointerUpdate, this,
+			KlayGE::placeholders::_2, KlayGE::placeholders::_3, KlayGE::placeholders::_4));
 		devices_.push_back(MakeSharedPtr<MsgInputTouch>());
 #elif (_WIN32_WINNT >= 0x0601 /*_WIN32_WINNT_WIN7*/)
 		if (::GetSystemMetrics(SM_DIGITIZER) & NID_READY)
 		{
 			if (::RegisterTouchWindow(hwnd, TWF_WANTPALM))
 			{
-				on_touch_ = main_wnd->OnTouch().connect(bind(&MsgInputEngine::OnTouch, this,
-					placeholders::_1, placeholders::_2, placeholders::_3));
+				on_touch_ = main_wnd->OnTouch().connect(KlayGE::bind(&MsgInputEngine::OnTouch, this,
+					KlayGE::placeholders::_1, KlayGE::placeholders::_2, KlayGE::placeholders::_3));
 				devices_.push_back(MakeSharedPtr<MsgInputTouch>());
 			}
 		}
 #endif
+#elif defined KLAYGE_PLATFORM_WINDOWS_METRO
+		on_pointer_down_ = main_wnd->OnPointerDown().connect(KlayGE::bind(&MsgInputEngine::OnPointerDown, this,
+			KlayGE::placeholders::_2, placeholders::_3));
+		on_pointer_up_ = main_wnd->OnPointerUp().connect(KlayGE::bind(&MsgInputEngine::OnPointerUp, this,
+			KlayGE::placeholders::_2, KlayGE::placeholders::_3));
+		on_pointer_update_ = main_wnd->OnPointerUpdate().connect(KlayGE::bind(&MsgInputEngine::OnPointerUpdate, this,
+			KlayGE::placeholders::_2, KlayGE::placeholders::_3, KlayGE::placeholders::_4));
+		devices_.push_back(MakeSharedPtr<MsgInputTouch>());
+#endif
+#endif
 	}
 
+#if defined KLAYGE_PLATFORM_WINDOWS
+#if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
 	void MsgInputEngine::OnRawInput(Window const & /*wnd*/, uint64_t param)
 	{
 		HRAWINPUT ri = reinterpret_cast<HRAWINPUT>(param);
@@ -211,7 +233,6 @@ namespace KlayGE
 
 	void MsgInputEngine::OnTouch(Window const & wnd, uint64_t lparam, uint32_t wparam)
 	{
-#if (_WIN32_WINNT >= 0x0601 /*_WIN32_WINNT_WIN7*/)
 		typedef KLAYGE_DECLTYPE(devices_) DevicesType;
 		KLAYGE_FOREACH(DevicesType::reference device, devices_)
 		{
@@ -220,63 +241,48 @@ namespace KlayGE
 				checked_pointer_cast<MsgInputTouch>(device)->OnTouch(wnd, lparam, wparam);
 			}
 		}
-#else
-		UNREF_PARAM(lparam);
-		UNREF_PARAM(wparam);
-#endif
 	}
+#endif
+#endif
 
-	void MsgInputEngine::OnPointerDown(Window const & wnd, uint64_t lparam, uint32_t wparam)
+	void MsgInputEngine::OnPointerDown(int2 const & pt, uint32_t id)
 	{
-#if (_WIN32_WINNT >= 0x0602 /*_WIN32_WINNT_WIN8*/)
 		typedef KLAYGE_DECLTYPE(devices_) DevicesType;
 		KLAYGE_FOREACH(DevicesType::reference device, devices_)
 		{
 			if (InputEngine::IDT_Touch == device->Type())
 			{
-				checked_pointer_cast<MsgInputTouch>(device)->OnPointerDown(wnd, lparam, wparam);
+				checked_pointer_cast<MsgInputTouch>(device)->OnPointerDown(pt, id);
 			}
 		}
-#else
-		UNREF_PARAM(lparam);
-		UNREF_PARAM(wparam);
-#endif
 	}
 
-	void MsgInputEngine::OnPointerUp(Window const & wnd, uint64_t lparam, uint32_t wparam)
+	void MsgInputEngine::OnPointerUp(int2 const & pt, uint32_t id)
 	{
-#if (_WIN32_WINNT >= 0x0602 /*_WIN32_WINNT_WIN8*/)
 		typedef KLAYGE_DECLTYPE(devices_) DevicesType;
 		KLAYGE_FOREACH(DevicesType::reference device, devices_)
 		{
 			if (InputEngine::IDT_Touch == device->Type())
 			{
-				checked_pointer_cast<MsgInputTouch>(device)->OnPointerUp(wnd, lparam, wparam);
+				checked_pointer_cast<MsgInputTouch>(device)->OnPointerUp(pt, id);
 			}
 		}
-#else
-		UNREF_PARAM(lparam);
-		UNREF_PARAM(wparam);
-#endif
 	}
 	
-	void MsgInputEngine::OnPointerUpdate(Window const & wnd, uint64_t lparam, uint32_t wparam)
+	void MsgInputEngine::OnPointerUpdate(int2 const & pt, uint32_t id, bool down)
 	{
-#if (_WIN32_WINNT >= 0x0602 /*_WIN32_WINNT_WIN8*/)
 		typedef KLAYGE_DECLTYPE(devices_) DevicesType;
 		KLAYGE_FOREACH(DevicesType::reference device, devices_)
 		{
 			if (InputEngine::IDT_Touch == device->Type())
 			{
-				checked_pointer_cast<MsgInputTouch>(device)->OnPointerUpdate(wnd, lparam, wparam);
+				checked_pointer_cast<MsgInputTouch>(device)->OnPointerUpdate(pt, id, down);
 			}
 		}
-#else
-		UNREF_PARAM(lparam);
-		UNREF_PARAM(wparam);
-#endif
 	}
 
+#if defined KLAYGE_PLATFORM_WINDOWS
+#if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
 	NTSTATUS MsgInputEngine::HidP_GetCaps(PHIDP_PREPARSED_DATA PreparsedData, PHIDP_CAPS Capabilities) const
 	{
 		return DynamicHidP_GetCaps_(PreparsedData, Capabilities);
@@ -309,4 +315,6 @@ namespace KlayGE
 		return DynamicHidP_GetUsageValue_(ReportType, UsagePage, LinkCollection, Usage, UsageValue, PreparsedData,
 			Report, ReportLength);
 	}
+#endif
+#endif
 }
