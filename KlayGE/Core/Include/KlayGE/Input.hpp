@@ -302,7 +302,7 @@ namespace KlayGE
 		uint16_t Action(uint16_t key) const;
 
 	private:
-		std::map<uint16_t, uint16_t> actionMap_;
+		boost::container::flat_map<uint16_t, uint16_t> actionMap_;
 	};
 
 	typedef boost::signals2::signal<void(InputEngine const & sender, InputAction const & action)> input_signal;
