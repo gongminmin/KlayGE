@@ -68,7 +68,7 @@ namespace KlayGE
 				}
 			}
 
-			if (MOUSE_MOVE_RELATIVE == ri.data.mouse.usFlags)
+			if (MOUSE_MOVE_RELATIVE == (ri.data.mouse.usFlags & 1UL))
 			{
 				offset_state_.x() += ri.data.mouse.lLastX;
 				offset_state_.y() += ri.data.mouse.lLastY;

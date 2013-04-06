@@ -76,7 +76,7 @@ namespace KlayGE
 		KS_O				= 0x18,
 		KS_P				= 0x19,
 		KS_LeftBracket		= 0x1A,
-		KS_ReftBracket		= 0x1B,
+		KS_RightBracket		= 0x1B,
 		KS_Enter			= 0x1C,		// Enter on main keyboard
 		KS_LeftCtrl			= 0x1D,
 		KS_A				= 0x1E,
@@ -126,7 +126,7 @@ namespace KlayGE
 		KS_NumPadMinus		= 0x4A,		// - on numeric keypad
 		KS_NumPad4			= 0x4B,
 		KS_NumPad5			= 0x4C,
-		KS_NumPadD6			= 0x4D,
+		KS_NumPad6			= 0x4D,
 		KS_NumPadPlus		= 0x4E,		// + on numeric keypad
 		KS_NumPad1			= 0x4F,
 		KS_NumPad2			= 0x50,
