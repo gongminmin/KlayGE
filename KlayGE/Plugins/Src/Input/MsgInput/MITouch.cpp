@@ -49,7 +49,6 @@ namespace KlayGE
 		return name;
 	}
 
-#if defined KLAYGE_PLATFORM_WINDOWS
 #if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
 	void MsgInputTouch::OnTouch(Window const & wnd, HTOUCHINPUT hti, uint32_t num_inputs)
 	{
@@ -75,7 +74,6 @@ namespace KlayGE
 		UNREF_PARAM(num_inputs);
 #endif
 	}
-#endif
 #endif
 
 	void MsgInputTouch::OnPointerDown(int2 const & pt, uint32_t id)

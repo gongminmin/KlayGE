@@ -32,7 +32,6 @@
 
 #include <KlayGE/MsgInput/MInput.hpp>
 
-#if defined KLAYGE_PLATFORM_WINDOWS
 #if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
 namespace
 {
@@ -330,5 +329,4 @@ namespace KlayGE
 		keys_[index_] = keys_state_;
 	}
 }
-#endif
 #endif

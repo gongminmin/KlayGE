@@ -383,12 +383,6 @@ INT_PTR CALLBACK Input_Tab_DlgProc(HWND hDlg, UINT uMsg, WPARAM /*wParam*/, LPAR
 			{
 				SendMessage(hFactoryCombo, CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(TEXT("MsgInput")));
 			}
-			HMODULE mod_dinput = LoadLibrary(TEXT("dinput8.dll"));
-			if (mod_dinput)
-			{
-				SendMessage(hFactoryCombo, CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(TEXT("DInput")));
-				FreeLibrary(mod_dinput);
-			}
 
 			TCHAR buf[256];
 			int n = static_cast<int>(SendMessage(hFactoryCombo, CB_GETCOUNT, 0, 0));

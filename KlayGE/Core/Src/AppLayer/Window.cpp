@@ -325,7 +325,7 @@ namespace KlayGE
 
 #elif (_WIN32_WINNT >= 0x0601 /*_WIN32_WINNT_WIN7*/)
 		case WM_TOUCH:
-			this->OnTouch()(*this, reinterpret_cast<HTOUCHINPUT>(lparam), LOWORD(wparam));
+			this->OnTouch()(*this, reinterpret_cast<HTOUCHINPUT>(lParam), LOWORD(wParam));
 			break;
 #endif
 
@@ -767,7 +767,8 @@ namespace KlayGE
 
 		android_app* state = Context::Instance().AppState();
 		state->userData = this;
-		state->onAppCmd = MsgProc;
+		state->onAppCmd = HandleCMD;
+		state->onInputEvent = HandleInput;
 
 		while (nullptr == a_window_)
 		{
@@ -807,7 +808,8 @@ namespace KlayGE
 
 		android_app* state = Context::Instance().AppState();
 		state->userData = this;
-		state->onAppCmd = MsgProc;
+		state->onAppCmd = HandleCMD;
+		state->onInputEvent = HandleInput;
 
 		while (nullptr == a_window_)
 		{
@@ -844,7 +846,7 @@ namespace KlayGE
 	{
 	}
 
-	void Window::MsgProc(android_app* app, int32_t cmd)
+	void Window::HandleCMD(android_app* app, int32_t cmd)
 	{
 		Window* win = static_cast<Window*>(app->userData);
 		switch (cmd)
@@ -878,6 +880,48 @@ namespace KlayGE
 			win->OnSize()(*win, true);
 			break;
 		}
+	}
+	
+	int32_t Window::HandleInput(android_app* app, AInputEvent* event)
+	{
+		Window* win = static_cast<Window*>(app->userData);
+		if (AINPUT_EVENT_TYPE_MOTION == AInputEvent_getType(event))
+		{
+			int32_t action = AMotionEvent_getAction(event);
+			int32_t action_code = action & AMOTION_EVENT_ACTION_MASK;
+			int32_t pointer_id = (action & AMOTION_EVENT_ACTION_POINTER_INDEX_MASK)
+				>> AMOTION_EVENT_ACTION_POINTER_INDEX_SHIFT;
+			switch (action_code)
+			{
+			case AMOTION_EVENT_ACTION_DOWN:
+			case AMOTION_EVENT_ACTION_POINTER_DOWN:
+				win->OnPointerDown()(*win,
+					int2(AMotionEvent_getX(event, pointer_id), AMotionEvent_getY(event, pointer_id)),
+					pointer_id);
+				break;
+
+			case AMOTION_EVENT_ACTION_UP:
+			case AMOTION_EVENT_ACTION_POINTER_UP:
+				win->OnPointerUp()(*win,
+					int2(AMotionEvent_getX(event, pointer_id), AMotionEvent_getY(event, pointer_id)),
+					pointer_id);
+				break;
+
+			case AMOTION_EVENT_ACTION_MOVE:
+				for (size_t i = 0; i < AMotionEvent_getPointerCount(event); ++i)
+				{
+					win->OnPointerUpdate()(*win,
+						int2(AMotionEvent_getX(event, i), AMotionEvent_getY(event, i)), i, true);
+				}
+				break;
+
+			default:
+				break;
+			}
+
+			return 1;
+		}
+		return 0;
 	}
 #endif
 }

@@ -266,7 +266,8 @@ namespace KlayGE
 		void MsgProc(XEvent const & event);
 #elif defined KLAYGE_PLATFORM_ANDROID
 	public:
-		static void MsgProc(android_app* app, int32_t cmd);
+		static void HandleCMD(android_app* app, int32_t cmd);
+		static int32_t HandleInput(android_app* app, AInputEvent* event);
 #endif
 
 	private:

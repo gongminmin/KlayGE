@@ -21,3 +21,9 @@ echo "Building KlayGE Python plugin..."
 cd Plugins/Script/Python
 call build.bat
 cd ../../..
+
+echo "Building KlayGE MsgInput plugin..."
+
+cd Plugins/Input/MsgInput
+call build.bat
+cd ../../..

@@ -41,7 +41,6 @@ namespace KlayGE
 {
 	MsgInputEngine::MsgInputEngine()
 	{
-#if defined KLAYGE_PLATFORM_WINDOWS
 #if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
 		mod_hid_ = ::LoadLibraryW(L"hid.dll");
 		if (nullptr == mod_hid_)
@@ -58,7 +57,6 @@ namespace KlayGE
 			DynamicHidP_GetUsageValue_ = reinterpret_cast<HidP_GetUsageValueFunc>(::GetProcAddress(mod_hid_, "HidP_GetUsageValue"));
 		}
 #endif
-#endif
 	}
 
 	MsgInputEngine::~MsgInputEngine()
@@ -71,10 +69,8 @@ namespace KlayGE
 		on_pointer_wheel_.disconnect();
 		devices_.clear();
 
-#if defined KLAYGE_PLATFORM_WINDOWS
 #if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
 		::FreeLibrary(mod_hid_);
-#endif
 #endif
 	}
 
@@ -87,7 +83,6 @@ namespace KlayGE
 	void MsgInputEngine::EnumDevices()
 	{
 		WindowPtr const & main_wnd = Context::Instance().AppInstance().MainWnd();
-#if defined KLAYGE_PLATFORM_WINDOWS
 #if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
 		HWND hwnd = main_wnd->HWnd();
 			
@@ -155,7 +150,6 @@ namespace KlayGE
 				placeholders::_1, placeholders::_2));
 		}
 #if (_WIN32_WINNT >= 0x0602 /*_WIN32_WINNT_WIN8*/)
-		::EnableMouseInPointer(true);
 		on_pointer_down_ = main_wnd->OnPointerDown().connect(KlayGE::bind(&MsgInputEngine::OnPointerDown, this,
 			KlayGE::placeholders::_2, placeholders::_3));
 		on_pointer_up_ = main_wnd->OnPointerUp().connect(KlayGE::bind(&MsgInputEngine::OnPointerUp, this,
@@ -176,7 +170,7 @@ namespace KlayGE
 			}
 		}
 #endif
-#elif defined KLAYGE_PLATFORM_WINDOWS_METRO
+#elif (defined KLAYGE_PLATFORM_WINDOWS_METRO) || (defined KLAYGE_PLATFORM_ANDROID)
 		on_pointer_down_ = main_wnd->OnPointerDown().connect(KlayGE::bind(&MsgInputEngine::OnPointerDown, this,
 			KlayGE::placeholders::_2, placeholders::_3));
 		on_pointer_up_ = main_wnd->OnPointerUp().connect(KlayGE::bind(&MsgInputEngine::OnPointerUp, this,
@@ -187,10 +181,8 @@ namespace KlayGE
 			KlayGE::placeholders::_2, KlayGE::placeholders::_3, KlayGE::placeholders::_4));
 		devices_.push_back(MakeSharedPtr<MsgInputTouch>());
 #endif
-#endif
 	}
 
-#if defined KLAYGE_PLATFORM_WINDOWS
 #if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
 	void MsgInputEngine::OnRawInput(Window const & /*wnd*/, HRAWINPUT ri)
 	{
@@ -248,7 +240,6 @@ namespace KlayGE
 		}
 	}
 #endif
-#endif
 
 	void MsgInputEngine::OnPointerDown(int2 const & pt, uint32_t id)
 	{
@@ -298,7 +289,6 @@ namespace KlayGE
 		}
 	}
 
-#if defined KLAYGE_PLATFORM_WINDOWS
 #if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
 	NTSTATUS MsgInputEngine::HidP_GetCaps(PHIDP_PREPARSED_DATA PreparsedData, PHIDP_CAPS Capabilities) const
 	{
@@ -332,6 +322,5 @@ namespace KlayGE
 		return DynamicHidP_GetUsageValue_(ReportType, UsagePage, LinkCollection, Usage, UsageValue, PreparsedData,
 			Report, ReportLength);
 	}
-#endif
 #endif
 }
