@@ -26,12 +26,11 @@ private:
 	void DetailTypeChangedHandler(KlayGE::UIComboBox const & sender);
 	void NaLengthHandler(KlayGE::UICheckBox const & sender);
 	void WireframeHandler(KlayGE::UICheckBox const & sender);
-	void CtrlCameraHandler(KlayGE::UICheckBox const & sender);
 
 	KlayGE::FontPtr font_;
 	KlayGE::SceneObjectPtr polygon_;
 
-	KlayGE::FirstPersonCameraController fpcController_;
+	KlayGE::TrackballCameraController tb_controller_;
 
 	KlayGE::SceneObjectPtr light_proxy_;
 	KlayGE::LightSourcePtr light_;
@@ -47,7 +46,6 @@ private:
 	int id_detail_type_combo_;
 	int id_na_length_;
 	int id_wireframe_;
-	int id_ctrl_camera_;
 
 	uint32_t loading_percentage_;
 };

@@ -36,7 +36,9 @@ private:
 	void CtrlCameraHandler(KlayGE::UICheckBox const & sender);
 
 	KlayGE::FontPtr font_;
-
+	
+	KlayGE::RenderModelPtr scene_model_;
+	KlayGE::RenderModelPtr teapot_model_;
 	std::vector<KlayGE::SceneObjectPtr> scene_objs_;
 
 	KlayGE::FirstPersonCameraController fpcController_;

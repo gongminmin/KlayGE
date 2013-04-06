@@ -514,18 +514,6 @@ void DetailedSurfaceApp::WireframeHandler(KlayGE::UICheckBox const & sender)
 	checked_pointer_cast<PolygonObject>(polygon_)->Wireframe(sender.GetChecked());
 }
 
-void DetailedSurfaceApp::CtrlCameraHandler(KlayGE::UICheckBox const & sender)
-{
-	if (sender.GetChecked())
-	{
-		fpcController_.AttachCamera(this->ActiveCamera());
-	}
-	else
-	{
-		fpcController_.DetachCamera();
-	}
-}
-
 void DetailedSurfaceApp::DoUpdateOverlay()
 {
 	UIManager::Instance().Render();
@@ -575,7 +563,8 @@ uint32_t DetailedSurfaceApp::DoUpdate(uint32_t /*pass*/)
 			this->LookAt(float3(-0.18f, 0.24f, -0.18f), float3(0, 0.05f, 0));
 			this->Proj(0.01f, 100);
 
-			fpcController_.Scalers(0.05f, 0.01f);
+			tb_controller_.AttachCamera(this->ActiveCamera());
+			tb_controller_.Scalers(0.01f, 0.003f);
 
 			loading_percentage_ = 60;
 			progress_bar->SetValue(loading_percentage_);
@@ -620,7 +609,6 @@ uint32_t DetailedSurfaceApp::DoUpdate(uint32_t /*pass*/)
 			id_detail_type_combo_ = dialog_->IDFromName("DetailTypeCombo");
 			id_na_length_ = dialog_->IDFromName("NaLength");
 			id_wireframe_ = dialog_->IDFromName("Wireframe");
-			id_ctrl_camera_ = dialog_->IDFromName("CtrlCamera");
 
 			dialog_->Control<UISlider>(id_scale_slider_)->SetValue(static_cast<int>(height_scale_ * 100));
 			dialog_->Control<UISlider>(id_scale_slider_)->OnValueChangedEvent().connect(KlayGE::bind(&DetailedSurfaceApp::ScaleChangedHandler, this, KlayGE::placeholders::_1));
@@ -634,8 +622,6 @@ uint32_t DetailedSurfaceApp::DoUpdate(uint32_t /*pass*/)
 			this->NaLengthHandler(*dialog_->Control<UICheckBox>(id_na_length_));
 			dialog_->Control<UICheckBox>(id_wireframe_)->OnChangedEvent().connect(KlayGE::bind(&DetailedSurfaceApp::WireframeHandler, this, KlayGE::placeholders::_1));
 			this->WireframeHandler(*dialog_->Control<UICheckBox>(id_wireframe_));
-			dialog_->Control<UICheckBox>(id_ctrl_camera_)->OnChangedEvent().connect(KlayGE::bind(&DetailedSurfaceApp::CtrlCameraHandler, this, KlayGE::placeholders::_1));
-			this->CtrlCameraHandler(*dialog_->Control<UICheckBox>(id_ctrl_camera_));
 
 			loading_percentage_ = 100;
 			progress_bar->SetValue(loading_percentage_);
@@ -663,6 +649,11 @@ uint32_t DetailedSurfaceApp::DoUpdate(uint32_t /*pass*/)
 		float3 lightPos(2, 0, 1);
 		float4x4 matRot(MathLib::rotation_y(degree));
 		lightPos = MathLib::transform_coord(lightPos, matRot);*/
+
+		float3 light_pos(0.25f, 0.5f, -1.0f);
+		light_pos = MathLib::transform_coord(light_pos, this->ActiveCamera().InverseViewMatrix());
+		light_pos = MathLib::normalize(light_pos);
+		light_->Position(light_pos);
 
 		checked_pointer_cast<PolygonObject>(polygon_)->LightPos(light_->Position());
 		checked_pointer_cast<PolygonObject>(polygon_)->LightColor(light_->Color());

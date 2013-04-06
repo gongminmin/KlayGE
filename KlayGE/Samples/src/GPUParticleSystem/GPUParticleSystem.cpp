@@ -711,6 +711,8 @@ int SampleMain()
 	app.Create();
 	app.Run();
 
+	gpu_ps.reset();
+
 	return 0;
 }
 

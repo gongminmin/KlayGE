@@ -23,12 +23,11 @@ private:
 	void InputHandler(KlayGE::InputEngine const & sender, KlayGE::InputAction const & action);
 	void TypeChangedHandler(KlayGE::UIComboBox const & sender);
 	void FreqChangedHandler(KlayGE::UISlider const & sender);
-	void CtrlCameraHandler(KlayGE::UICheckBox const & sender);
 
 	KlayGE::FontPtr font_;
 	KlayGE::SceneObjectPtr polygon_;
 
-	KlayGE::FirstPersonCameraController fpcController_;
+	KlayGE::TrackballCameraController tb_controller_;
 
 	KlayGE::SceneObjectPtr light_proxy_;
 	KlayGE::LightSourcePtr light_;
@@ -41,7 +40,6 @@ private:
 	int id_type_combo_;
 	int id_freq_static_;
 	int id_freq_slider_;
-	int id_ctrl_camera_;
 
 	uint32_t loading_percentage_;
 };

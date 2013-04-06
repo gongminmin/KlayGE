@@ -554,9 +554,9 @@ bool ShadowCubeMap::ConfirmDevice() const
 void ShadowCubeMap::InitObjects()
 {
 	loading_percentage_ = 0;
+	lamp_tl_ = ASyncLoadTexture("lamp.dds", EAH_GPU_Read | EAH_Immutable);
 	model_ml_ = ASyncLoadModel("ScifiRoom.7z//ScifiRoom.meshml", EAH_GPU_Read | EAH_Immutable, CreateModelFactory<RenderModel>(), CreateMeshFactory<OccluderMesh>());
 	teapot_ml_ = ASyncLoadModel("teapot.meshml", EAH_GPU_Read | EAH_Immutable, CreateModelFactory<RenderModel>(), CreateMeshFactory<OccluderMesh>());
-	lamp_tl_ = ASyncLoadTexture("lamp.dds", EAH_GPU_Read | EAH_Immutable);
 
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 	RenderEngine& re = rf.RenderEngineInstance();
@@ -739,47 +739,59 @@ uint32_t ShadowCubeMap::DoUpdate(uint32_t pass)
 	{
 		if (loading_percentage_ < 100)
 		{
-			if (loading_percentage_ < 20)
+			if (loading_percentage_ < 10)
 			{
 				lamp_tex_ = lamp_tl_();
 				if (lamp_tex_)
 				{
 					light_->ProjectiveTexture(lamp_tex_);
-					loading_percentage_ = 20;
+					loading_percentage_ = 10;
+				}
+			}
+			else if (loading_percentage_ < 80)
+			{
+				scene_model_ = model_ml_();
+				if (scene_model_)
+				{
+					loading_percentage_ = 80;
 				}
 			}
 			else if (loading_percentage_ < 90)
 			{
-				RenderModelPtr scene_model = model_ml_();
-				if (scene_model)
+				uint32_t n = (scene_model_->NumMeshes() + 10 - 1) / 10;
+				uint32_t s = (loading_percentage_ - 80) * n;
+				uint32_t e = std::min(s + n, scene_model_->NumMeshes());
+				for (uint32_t i = s; i < e; ++ i)
 				{
-					scene_objs_.resize(scene_model->NumMeshes());
-					for (size_t i = 0; i < scene_model->NumMeshes(); ++ i)
-					{
-						scene_objs_[i] = MakeSharedPtr<SceneObjectHelper>(scene_model->Mesh(i), SceneObject::SOA_Cullable);
-						scene_objs_[i]->AddToSceneManager();
-						checked_pointer_cast<OccluderMesh>(scene_objs_[i]->GetRenderable())->LampTexture(lamp_tex_);
-						checked_pointer_cast<OccluderMesh>(scene_objs_[i]->GetRenderable())->CubeSMTexture(shadow_cube_tex_);
-						checked_pointer_cast<OccluderMesh>(scene_objs_[i]->GetRenderable())->DPSMTexture(shadow_dual_tex_);
-					}
+					SceneObjectPtr so = MakeSharedPtr<SceneObjectHelper>(scene_model_->Mesh(i), SceneObject::SOA_Cullable);
+					so->AddToSceneManager();
+					checked_pointer_cast<OccluderMesh>(so->GetRenderable())->LampTexture(lamp_tex_);
+					checked_pointer_cast<OccluderMesh>(so->GetRenderable())->CubeSMTexture(shadow_cube_tex_);
+					checked_pointer_cast<OccluderMesh>(so->GetRenderable())->DPSMTexture(shadow_dual_tex_);
+					scene_objs_.push_back(so);
+				}
 
-					loading_percentage_ = 90;
+				++ loading_percentage_;
+			}
+			else if (loading_percentage_ < 95)
+			{
+				teapot_model_ = teapot_ml_();
+				if (teapot_model_)
+				{
+					loading_percentage_ = 95;
 				}
 			}
 			else
 			{
-				RenderModelPtr teapot_model = teapot_ml_();
-				if (teapot_model)
-				{
-					scene_objs_.push_back(MakeSharedPtr<SceneObjectHelper>(teapot_model->Mesh(0), SceneObject::SOA_Cullable | SceneObject::SOA_Moveable));
-					scene_objs_.back()->BindUpdateFunc(OccluderObjectUpdate());
-					scene_objs_.back()->AddToSceneManager();
-					checked_pointer_cast<OccluderMesh>(scene_objs_.back()->GetRenderable())->LampTexture(lamp_tex_);
-					checked_pointer_cast<OccluderMesh>(scene_objs_.back()->GetRenderable())->CubeSMTexture(shadow_cube_tex_);
-					checked_pointer_cast<OccluderMesh>(scene_objs_.back()->GetRenderable())->DPSMTexture(shadow_dual_tex_);
+				SceneObjectPtr so = MakeSharedPtr<SceneObjectHelper>(teapot_model_->Mesh(0), SceneObject::SOA_Cullable | SceneObject::SOA_Moveable);
+				so->BindUpdateFunc(OccluderObjectUpdate());
+				so->AddToSceneManager();
+				checked_pointer_cast<OccluderMesh>(scene_objs_.back()->GetRenderable())->LampTexture(lamp_tex_);
+				checked_pointer_cast<OccluderMesh>(scene_objs_.back()->GetRenderable())->CubeSMTexture(shadow_cube_tex_);
+				checked_pointer_cast<OccluderMesh>(scene_objs_.back()->GetRenderable())->DPSMTexture(shadow_dual_tex_);
+				scene_objs_.push_back(so);
 
-					loading_percentage_ = 100;
-				}
+				loading_percentage_ = 100;
 			}
 		}
 	}

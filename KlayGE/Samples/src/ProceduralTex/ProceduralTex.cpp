@@ -234,18 +234,6 @@ void ProceduralTexApp::FreqChangedHandler(KlayGE::UISlider const & sender)
 	dialog_->Control<UIStatic>(id_freq_static_)->SetText(stream.str());
 }
 
-void ProceduralTexApp::CtrlCameraHandler(KlayGE::UICheckBox const & sender)
-{
-	if (sender.GetChecked())
-	{
-		fpcController_.AttachCamera(this->ActiveCamera());
-	}
-	else
-	{
-		fpcController_.DetachCamera();
-	}
-}
-
 void ProceduralTexApp::DoUpdateOverlay()
 {
 	UIManager::Instance().Render();
@@ -291,10 +279,11 @@ uint32_t ProceduralTexApp::DoUpdate(uint32_t /*pass*/)
 			polygon_ = MakeSharedPtr<PolygonObject>();
 			polygon_->AddToSceneManager();
 
-			this->LookAt(float3(-0.3f, 0.4f, -0.3f), float3(0, 0, 0));
+			this->LookAt(float3(-0.18f, 0.24f, -0.18f), float3(0, 0.05f, 0));
 			this->Proj(0.01f, 100);
-	
-			fpcController_.Scalers(0.05f, 0.01f);
+
+			tb_controller_.AttachCamera(this->ActiveCamera());
+			tb_controller_.Scalers(0.01f, 0.003f);
 
 			loading_percentage_ = 60;
 			progress_bar->SetValue(loading_percentage_);
@@ -337,7 +326,6 @@ uint32_t ProceduralTexApp::DoUpdate(uint32_t /*pass*/)
 			id_type_combo_ = dialog_->IDFromName("TypeCombo");
 			id_freq_static_ = dialog_->IDFromName("FreqStatic");
 			id_freq_slider_ = dialog_->IDFromName("FreqSlider");
-			id_ctrl_camera_ = dialog_->IDFromName("CtrlCamera");
 
 			dialog_->Control<UIComboBox>(id_type_combo_)->OnSelectionChangedEvent().connect(KlayGE::bind(&ProceduralTexApp::TypeChangedHandler, this, KlayGE::placeholders::_1));
 			this->TypeChangedHandler(*dialog_->Control<UIComboBox>(id_type_combo_));
@@ -345,8 +333,6 @@ uint32_t ProceduralTexApp::DoUpdate(uint32_t /*pass*/)
 			dialog_->Control<UISlider>(id_freq_slider_)->SetValue(static_cast<int>(procedural_freq_));
 			dialog_->Control<UISlider>(id_freq_slider_)->OnValueChangedEvent().connect(KlayGE::bind(&ProceduralTexApp::FreqChangedHandler, this, KlayGE::placeholders::_1));
 			this->FreqChangedHandler(*dialog_->Control<UISlider>(id_freq_slider_));
-
-			dialog_->Control<UICheckBox>(id_ctrl_camera_)->OnChangedEvent().connect(KlayGE::bind(&ProceduralTexApp::CtrlCameraHandler, this, KlayGE::placeholders::_1));
 
 			loading_percentage_ = 100;
 			progress_bar->SetValue(loading_percentage_);
@@ -369,6 +355,11 @@ uint32_t ProceduralTexApp::DoUpdate(uint32_t /*pass*/)
 			clear_clr.b() = 0.325f;
 		}
 		renderEngine.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, clear_clr, 1.0f, 0);
+
+		float3 light_pos(0.25f, 0.5f, -1.0f);
+		light_pos = MathLib::transform_coord(light_pos, this->ActiveCamera().InverseViewMatrix());
+		light_pos = MathLib::normalize(light_pos) * 1.2f;
+		light_->Position(light_pos);
 
 		checked_pointer_cast<PolygonObject>(polygon_)->LightPos(light_->Position());
 		checked_pointer_cast<PolygonObject>(polygon_)->LightColor(light_->Color());
