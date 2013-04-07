@@ -331,6 +331,18 @@ namespace KlayGE
 		}
 	}
 
+	void D3D11RenderEngine::CheckConfig()
+	{
+		if (d3d_feature_level_ <= D3D_FEATURE_LEVEL_9_2)
+		{
+			render_settings_.ppaa = false;
+		}
+		if (d3d_feature_level_ <= D3D_FEATURE_LEVEL_9_1)
+		{
+			render_settings_.hdr = false;
+		}
+	}
+
 	void D3D11RenderEngine::D3DDevice(ID3D11DevicePtr const & device, ID3D11DeviceContextPtr const & imm_ctx, D3D_FEATURE_LEVEL feature_level)
 	{
 		d3d_device_ = device;

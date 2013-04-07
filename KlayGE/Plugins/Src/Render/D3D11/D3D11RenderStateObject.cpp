@@ -193,11 +193,26 @@ namespace KlayGE
 
 		D3D11_SAMPLER_DESC d3d_desc;
 		d3d_desc.Filter = D3D11Mapping::Mapping(desc.filter);
-		d3d_desc.AddressU = D3D11Mapping::Mapping(desc.addr_mode_u);
-		d3d_desc.AddressV = D3D11Mapping::Mapping(desc.addr_mode_v);
-		d3d_desc.AddressW = D3D11Mapping::Mapping(desc.addr_mode_w);
+		TexAddressingMode addr_mode_u = desc.addr_mode_u;
+		if ((feature_level <= D3D_FEATURE_LEVEL_9_2) && (TAM_Border == desc.addr_mode_u))
+		{
+			addr_mode_u = TAM_Clamp;
+		}
+		d3d_desc.AddressU = D3D11Mapping::Mapping(addr_mode_u);
+		TexAddressingMode addr_mode_v = desc.addr_mode_v;
+		if ((feature_level <= D3D_FEATURE_LEVEL_9_2) && (TAM_Border == desc.addr_mode_u))
+		{
+			addr_mode_v = TAM_Clamp;
+		}
+		d3d_desc.AddressV = D3D11Mapping::Mapping(addr_mode_v);
+		TexAddressingMode addr_mode_w = desc.addr_mode_u;
+		if ((feature_level <= D3D_FEATURE_LEVEL_9_2) && (TAM_Border == desc.addr_mode_u))
+		{
+			addr_mode_w = TAM_Clamp;
+		}
+		d3d_desc.AddressW = D3D11Mapping::Mapping(addr_mode_w);
 		d3d_desc.MipLODBias = desc.mip_map_lod_bias;
-		d3d_desc.MaxAnisotropy = desc.max_anisotropy;
+		d3d_desc.MaxAnisotropy = (feature_level <= D3D_FEATURE_LEVEL_9_1) ? 1 : desc.max_anisotropy;
 		d3d_desc.ComparisonFunc = D3D11Mapping::Mapping(desc.cmp_func);
 		d3d_desc.BorderColor[0] = desc.border_clr.r();
 		d3d_desc.BorderColor[1] = desc.border_clr.g();
