@@ -224,12 +224,10 @@ namespace KlayGE
 		TexturePtr hdr_tex_;
 		FrameBufferPtr ldr_frame_buffer_;
 		TexturePtr ldr_tex_;
-		FrameBufferPtr cg_frame_buffer_;
-		TexturePtr cg_tex_;
 		FrameBufferPtr mono_frame_buffer_;
 		TexturePtr mono_tex_;
 		TexturePtr stereo_lr_tex_;
-		FrameBufferPtr default_frame_buffers_[5];
+		FrameBufferPtr default_frame_buffers_[4];
 
 		RenderLayoutPtr so_buffers_;
 
@@ -254,12 +252,11 @@ namespace KlayGE
 		PostProcessPtr hdr_pp_;
 		PostProcessPtr skip_hdr_pp_;
 		bool hdr_enabled_;
-		PostProcessPtr ppaa_pp_;
-		PostProcessPtr ppaa_show_edge_pp_;
-		PostProcessPtr skip_ppaa_pp_;
+		PostProcessPtr ldr_pp_;
+		PostProcessPtr skip_ldr_pp_;
 		int ppaa_enabled_;
-		PostProcessPtr color_grading_pp_;
-		PostProcessPtr skip_color_grading_pp_;
+		bool gamma_enabled_;
+		bool color_grading_enabled_;
 		PostProcessPtr stereoscopic_pp_;
 		int fb_stage_;
 	};

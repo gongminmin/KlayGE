@@ -172,36 +172,25 @@ namespace KlayGE
 		RenderDeviceCaps const & caps = this->DeviceCaps();
 
 		screen_frame_buffer_ = cur_frame_buffer_;
+
+		hdr_enabled_ = render_settings_.hdr;
 		if (render_settings_.hdr)
 		{
 			hdr_pp_ = MakeSharedPtr<HDRPostProcess>(render_settings_.fft_lens_effects);
 			skip_hdr_pp_ = SyncLoadPostProcess("Copy.ppml", "copy");
 		}
-		hdr_enabled_ = render_settings_.hdr;
-		if (render_settings_.ppaa)
-		{
-			ppaa_pp_ = SyncLoadPostProcess("FXAA.ppml", "fxaa");
-			ppaa_show_edge_pp_ = SyncLoadPostProcess("FXAA.ppml", "fxaa_show_edge");
-			skip_ppaa_pp_ = SyncLoadPostProcess("Copy.ppml", "copy");
-		}
+
 		ppaa_enabled_ = render_settings_.ppaa ? 1 : 0;
-		if (render_settings_.color_grading)
+		gamma_enabled_ = render_settings_.gamma;
+		color_grading_enabled_ = render_settings_.color_grading;
+		if (render_settings_.ppaa || render_settings_.color_grading || render_settings_.gamma)
 		{
-			color_grading_pp_ = SyncLoadPostProcess("ColorGrading.ppml", "color_grading");
-			color_grading_pp_->SetParam(0, int2(render_settings_.gamma, render_settings_.color_grading));
-			skip_color_grading_pp_ = SyncLoadPostProcess("Copy.ppml", "copy");
-		}
-		else
-		{
-			if (render_settings_.gamma)
-			{
-				color_grading_pp_ = SyncLoadPostProcess("GammaCorrection.ppml", "gamma_correction");
-				color_grading_pp_->SetParam(0, 1 / 2.2f);
-				skip_color_grading_pp_ = SyncLoadPostProcess("Copy.ppml", "copy");
-			}
+			ldr_pp_ = SyncLoadPostProcess("PostToneMapping.ppml", "PostToneMapping");
+			ldr_pp_->SetParam(0, int3(ppaa_enabled_, gamma_enabled_, color_grading_enabled_));
+			skip_ldr_pp_ = SyncLoadPostProcess("Copy.ppml", "copy");
 		}
 
-		for (int i = 0; i < 5; ++ i)
+		for (int i = 0; i < 4; ++ i)
 		{
 			default_frame_buffers_[i] = screen_frame_buffer_;
 		}
@@ -212,7 +201,7 @@ namespace KlayGE
 		uint32_t const height = screen_frame_buffer_->Height();
 
 		RenderViewPtr ds_view;
-		if (hdr_pp_ || ppaa_pp_ || color_grading_pp_ || (render_settings_.stereo_method != STM_None))
+		if (hdr_pp_ || hdr_pp_ || (render_settings_.stereo_method != STM_None))
 		{
 			if (caps.texture_format_support(EF_D24S8) || caps.texture_format_support(EF_D16))
 			{
@@ -277,39 +266,10 @@ namespace KlayGE
 			mono_frame_buffer_->Attach(FrameBuffer::ATT_DepthStencil, ds_view);
 
 			default_frame_buffers_[0] = default_frame_buffers_[1]
-				= default_frame_buffers_[2] = default_frame_buffers_[3] = mono_frame_buffer_;
+				= default_frame_buffers_[2] = mono_frame_buffer_;
 		}
-
-		if (color_grading_pp_)
-		{
-			cg_frame_buffer_ = rf.MakeFrameBuffer();
-			cg_frame_buffer_->GetViewport()->camera = cur_frame_buffer_->GetViewport()->camera;
-
-			ElementFormat fmt;
-			if (caps.rendertarget_format_support(EF_ABGR8, 1, 0))
-			{
-				fmt = EF_ABGR8;
-			}
-			else
-			{
-				BOOST_ASSERT(caps.rendertarget_format_support(EF_ARGB8, 1, 0));
-
-				fmt = EF_ARGB8;
-			}
-			ElementFormat fmt_srgb = MakeSRGB(fmt);
-			if (caps.rendertarget_format_support(fmt_srgb, 1, 0))
-			{
-				fmt = fmt_srgb;
-			}
-
-			cg_tex_ = rf.MakeTexture2D(width, height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
-			cg_frame_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*cg_tex_, 0, 1, 0));
-			cg_frame_buffer_->Attach(FrameBuffer::ATT_DepthStencil, ds_view);
-
-			default_frame_buffers_[0] = default_frame_buffers_[1] = default_frame_buffers_[2] = cg_frame_buffer_;
-		}
-
-		if (ppaa_pp_)
+		
+		if (ldr_pp_)
 		{
 			ldr_frame_buffer_ = rf.MakeFrameBuffer();
 			ldr_frame_buffer_->GetViewport()->camera = cur_frame_buffer_->GetViewport()->camera;
@@ -505,7 +465,7 @@ namespace KlayGE
 		RenderDeviceCaps const & caps = rf.RenderEngineInstance().DeviceCaps();
 
 		RenderViewPtr ds_view;
-		if (hdr_pp_ || ppaa_pp_ || color_grading_pp_ || (stereo_method_ != STM_None))
+		if (hdr_pp_ || ldr_pp_ || (stereo_method_ != STM_None))
 		{
 			if (caps.texture_format_support(EF_D24S8) || caps.texture_format_support(EF_D16))
 			{
@@ -537,14 +497,7 @@ namespace KlayGE
 			mono_frame_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*mono_tex_, 0, 1, 0));
 			mono_frame_buffer_->Attach(FrameBuffer::ATT_DepthStencil, ds_view);
 		}
-		if (color_grading_pp_)
-		{
-			ElementFormat fmt = cg_tex_->Format();
-			cg_tex_ = rf.MakeTexture2D(width, height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
-			cg_frame_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*cg_tex_, 0, 1, 0));
-			cg_frame_buffer_->Attach(FrameBuffer::ATT_DepthStencil, ds_view);
-		}
-		if (ppaa_pp_)
+		if (ldr_pp_)
 		{
 			ElementFormat fmt = ldr_tex_->Format();
 			ldr_tex_ = rf.MakeTexture2D(width, height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
@@ -590,40 +543,26 @@ namespace KlayGE
 
 		fb_stage_ = 2;
 
-		if (ppaa_enabled_)
+		if (ppaa_enabled_ || gamma_enabled_ || color_grading_enabled_)
 		{
 			if (skip)
 			{
-				skip_ppaa_pp_->Apply();
+				skip_ldr_pp_->Apply();
 			}
 			else
 			{
-				if (ppaa_enabled_ > 1)
-				{
-					ppaa_show_edge_pp_->Apply();
-				}
-				else
-				{
-					ppaa_pp_->Apply();
-				}
+				ldr_pp_->Apply();
 			}
 		}
 		else
 		{
-			if (skip_ppaa_pp_)
+			if (skip_ldr_pp_)
 			{
-				skip_ppaa_pp_->Apply();
+				skip_ldr_pp_->Apply();
 			}
 		}
 
 		fb_stage_ = 3;
-
-		if (color_grading_pp_)
-		{
-			color_grading_pp_->Apply();
-		}
-		
-		fb_stage_ = 4;
 
 		if (stereo_method_ != STM_None)
 		{
@@ -645,17 +584,19 @@ namespace KlayGE
 
 	void RenderEngine::PPAAEnabled(int aa)
 	{
-		if (ppaa_pp_)
+		if (ldr_pp_)
 		{
 			ppaa_enabled_ = aa;
+			ldr_pp_->SetParam(0, int3(ppaa_enabled_, gamma_enabled_, color_grading_enabled_));
 		}
 	}
 
 	void RenderEngine::ColorGradingEnabled(bool cg)
 	{
-		if (color_grading_pp_)
+		if (ldr_pp_)
 		{
-			color_grading_pp_->SetParam(0, int2(render_settings_.gamma, cg));
+			color_grading_enabled_ = cg;
+			ldr_pp_->SetParam(0, int3(ppaa_enabled_, gamma_enabled_, color_grading_enabled_));
 		}
 	}
 
@@ -758,16 +699,10 @@ namespace KlayGE
 		{
 			if (stereoscopic_pp_)
 			{
-				if (color_grading_pp_)
+				if (ldr_pp_)
 				{
-					color_grading_pp_->OutputPin(0, mono_tex_);
-					skip_color_grading_pp_->OutputPin(0, mono_tex_);
-				}
-				if (ppaa_pp_)
-				{
-					ppaa_pp_->OutputPin(0, mono_tex_);
-					ppaa_show_edge_pp_->OutputPin(0, mono_tex_);
-					skip_ppaa_pp_->OutputPin(0, mono_tex_);
+					ldr_pp_->OutputPin(0, mono_tex_);
+					skip_ldr_pp_->OutputPin(0, mono_tex_);
 				}
 				if (hdr_pp_)
 				{
@@ -789,16 +724,10 @@ namespace KlayGE
 		}
 		else
 		{
-			if (color_grading_pp_)
+			if (ldr_pp_)
 			{
-				color_grading_pp_->OutputPin(0, TexturePtr());
-				skip_color_grading_pp_->OutputPin(0, TexturePtr());
-			}
-			if (ppaa_pp_)
-			{
-				ppaa_pp_->OutputPin(0, TexturePtr());
-				ppaa_show_edge_pp_->OutputPin(0, TexturePtr());
-				skip_ppaa_pp_->OutputPin(0, TexturePtr());
+				ldr_pp_->OutputPin(0, TexturePtr());
+				skip_ldr_pp_->OutputPin(0, TexturePtr());
 			}
 			if (hdr_pp_)
 			{
@@ -807,24 +736,7 @@ namespace KlayGE
 			}
 		}
 
-		if (color_grading_pp_)
-		{
-			if (ppaa_pp_)
-			{
-				ppaa_pp_->OutputPin(0, cg_tex_);
-				ppaa_show_edge_pp_->OutputPin(0, cg_tex_);
-				skip_ppaa_pp_->OutputPin(0, cg_tex_);
-			}
-			if (hdr_pp_)
-			{
-				hdr_pp_->OutputPin(0, cg_tex_);
-				skip_hdr_pp_->OutputPin(0, cg_tex_);
-			}
-
-			color_grading_pp_->InputPin(0, cg_tex_);
-		}
-
-		if (ppaa_pp_)
+		if (ldr_pp_)
 		{
 			if (hdr_pp_)
 			{
@@ -832,9 +744,8 @@ namespace KlayGE
 				skip_hdr_pp_->OutputPin(0, ldr_tex_);
 			}
 
-			ppaa_pp_->InputPin(0, ldr_tex_);
-			ppaa_show_edge_pp_->InputPin(0, ldr_tex_);
-			skip_ppaa_pp_->InputPin(0, ldr_tex_);
+			ldr_pp_->InputPin(0, ldr_tex_);
+			skip_ldr_pp_->InputPin(0, ldr_tex_);
 		}
 
 		if (hdr_pp_)

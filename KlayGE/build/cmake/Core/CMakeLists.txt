@@ -127,6 +127,7 @@ SET(RENDERING_EFFECT_FILES
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/Noise.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/PointSprite.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/PostProcess.fxml
+	${KLAYGE_PROJECT_DIR}/media/RenderFX/PostToneMapping.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/Quaternion.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/RenderableHelper.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/RSM2VPLs.fxml
@@ -158,6 +159,7 @@ SET(RENDERING_POSTPROCESSOR_FILES
 	${KLAYGE_PROJECT_DIR}/media/PostProcessors/GammaCorrection.ppml
 	${KLAYGE_PROJECT_DIR}/media/PostProcessors/LensEffects.ppml
 	${KLAYGE_PROJECT_DIR}/media/PostProcessors/LightShaft.ppml
+	${KLAYGE_PROJECT_DIR}/media/PostProcessors/PostToneMapping.ppml
 	${KLAYGE_PROJECT_DIR}/media/PostProcessors/RSM2VPLs.ppml
 	${KLAYGE_PROJECT_DIR}/media/PostProcessors/SAT.ppml
 	${KLAYGE_PROJECT_DIR}/media/PostProcessors/Sort.ppml

@@ -1304,11 +1304,15 @@ namespace KlayGE
 						++ line;
 					}
 					LogError("...");
-					LogError(err_str.c_str());
 				}
-				else
 				{
-					LogError(err_str.c_str());
+					std::istringstream iss(err_str);
+					std::string s;
+					while (iss)
+					{
+						std::getline(iss, s);
+						LogError(s.c_str());
+					}
 				}
 
 				err_msg->Release();

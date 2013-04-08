@@ -4,12 +4,12 @@
 	<include name="PostProcess.fxml"/>
 	<include name="util.fxml"/>
 
-	<parameter type="sampler" name="point_sampler">
+	<parameter type="sampler" name="point_clamp_sampler">
 		<state name="filtering" value="min_mag_mip_point"/>
 		<state name="address_u" value="clamp"/>
 		<state name="address_v" value="clamp"/>
 	</parameter>
-	<parameter type="sampler" name="linear_sampler">
+	<parameter type="sampler" name="linear_clamp_sampler">
 		<state name="filtering" value="min_mag_linear_mip_point"/>
 		<state name="address_u" value="clamp"/>
 		<state name="address_v" value="clamp"/>
@@ -24,38 +24,45 @@
 
 	<shader>
 		<![CDATA[
-float4 ColorGradingPS(float2 tc : TEXCOORD0) : SV_Target
+float3 SRGBCorrection(float3 rgb)
 {
-	float3 rgb = src_tex.Sample(point_sampler, tc).xyz;
-	if (gamma_grading.x)
-	{
-		rgb = linear_to_srgb(max(rgb, 1e-6f));
-	}
-	
+	return linear_to_srgb(max(rgb, 1e-6f));
+}
+
+float3 ColorGrading(float3 rgb)
+{
 	rgb = saturate(rgb);
 	
 	const float DIM = 16;
 	
+#if !KLAYGE_OPENGLES
+	return color_grading_tex.Sample(linear_clamp_sampler, (rgb * (DIM - 1) + 0.5f) / DIM).xyz;
+#else
+	rgb.xy = (rgb.xy * (DIM - 1) + 0.5f) / DIM;
+	float slice = rgb.z * (DIM - 1);
+	float s = frac(slice);
+	slice -= s;
+	rgb.y = (rgb.y + slice) / DIM;
+
+	float3 col0 = color_grading_tex.Sample(linear_clamp_sampler, rgb.xy).xyz;
+ 	float3 col1 = color_grading_tex.Sample(linear_clamp_sampler, float2(rgb.x, rgb.y + 1.0f / DIM)).xyz;
+	return lerp(col0, col1, s);
+#endif
+}
+
+float4 ColorGradingPS(float2 tc : TEXCOORD0) : SV_Target
+{
+	float3 rgb = src_tex.Sample(point_clamp_sampler, tc).xyz;
+	if (gamma_grading.x)
+	{
+		rgb = SRGBCorrection(rgb);
+	}
 	if (gamma_grading.y)
 	{
-#if !KLAYGE_OPENGLES
-		return color_grading_tex.Sample(linear_sampler, (rgb * (DIM - 1) + 0.5f) / DIM);
-#else
-		rgb.xy = (rgb.xy * (DIM - 1) + 0.5f) / DIM;
-		float slice = rgb.z * (DIM - 1);
-		float s = frac(slice);
-		slice -= s;
-		rgb.y = (rgb.y + slice) / DIM;
-
-		float3 col0 = color_grading_tex.Sample(linear_sampler, rgb.xy).xyz;
- 		float3 col1 = color_grading_tex.Sample(linear_sampler, float2(rgb.x, rgb.y + 1.0f / DIM)).xyz;
-		return float4(lerp(col0, col1, s), 1);
-#endif
+		rgb = ColorGrading(rgb);
 	}
-	else
-	{
-		return float4(rgb, 1);
-	}
+		
+	return float4(rgb, 1);
 }
 		]]>
 	</shader>

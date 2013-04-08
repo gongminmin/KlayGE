@@ -1,0 +1,16 @@
+<?xml version='1.0'?>
+
+<post_processors>
+	<post_processor name="PostToneMapping">
+		<params>
+			<param name="psaa_gamma_grading"/>
+		</params>
+		<input>
+			<pin name="color_tex"/>
+		</input>
+		<output>
+			<pin name="output"/>
+		</output>
+		<shader effect="PostToneMapping.fxml" tech="PostToneMapping"/>
+	</post_processor>
+</post_processors>

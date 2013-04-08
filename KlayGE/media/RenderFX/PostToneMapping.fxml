@@ -1,0 +1,53 @@
+<?xml version='1.0'?>
+
+<effect>
+	<include name="PostProcess.fxml"/>
+	<include name="util.fxml"/>
+	<include name="FXAA.fxml"/>
+	<include name="ColorGrading.fxml"/>
+
+	<parameter type="int3" name="psaa_gamma_grading"/>
+	
+	<shader>
+		<![CDATA[
+float4 PostToneMappingPS(float2 tc0 : TEXCOORD0) : SV_Target
+{
+	float3 rgb = 0;
+	if (psaa_gamma_grading.x > 1)
+	{
+		rgb = DebugFxaaPixelShader(tc0);
+	}
+	else if (1 == psaa_gamma_grading.x)
+	{
+		rgb = FxaaPixelShader(tc0);
+	}
+	else
+	{
+		rgb = color_tex.Sample(linear_wrap_sampler, tc0).xyz;
+	}
+	
+	if (psaa_gamma_grading.y)
+	{
+		rgb = SRGBCorrection(rgb);
+	}
+	
+	if (psaa_gamma_grading.z)
+	{
+		rgb = ColorGrading(rgb);
+	}
+	
+	return float4(rgb, 1);
+}
+		]]>
+	</shader>
+
+	<technique name="PostToneMapping">
+		<pass name="p0">
+			<state name="depth_enable" value="false"/>
+			<state name="depth_write_mask" value="false"/>
+
+			<state name="vertex_shader" value="PostProcessVS()"/>
+			<state name="pixel_shader" value="PostToneMappingPS()"/>
+		</pass>
+	</technique>
+</effect>
