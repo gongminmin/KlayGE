@@ -77,7 +77,9 @@ External/Python/DLLs/amd64/*.pyd
 External/Python/DLLs/amd64/*.dll
 External/Python/Include/pyconfig.h
 External/Python/libs/*.lib
+External/Python/libs/*.a
 External/Python/libs/amd64/*.lib
+External/Python/libs/amd64/*.a
 External/Python/Lib/__pycache__/
 External/Python/Lib/encodings/__pycache__/
 External/Python/PC/python3dll.obj

@@ -65,42 +65,51 @@ def build_Boost(compiler_name, compiler_version, compiler_arch, config_list, pla
 
 def build_Python(compiler_name, compiler_version, compiler_arch, config_list, platform):
 	if "win32" == platform:
-		if ("vc" == compiler_name) and (compiler_version >= 11):
-			os.chdir("External/Python/vc-11_0")
-		else:
-			os.chdir("External/Python/PCbuild")
-		if (compiler_version >= 10):
-			sln_suffix = "%d" % compiler_version
-		else:
-			sln_suffix = ""
-
-		if "x64" == compiler_arch:
-			arch = "x64"
-			subdir = "amd64\\"
-			compiler_arch = "x86_amd64"
-		else:
-			arch = "Win32"
-			subdir = ""
-		configs = []
-		if "Debug" in config_list:
-			configs.append("Debug")
-		if ("Release" in config_list) or ("RelWithDebInfo" in config_list) or ("MinSizeRel" in config_list):
-			configs.append("Release")
-
-		build_cmd = batch_command()
-		build_cmd.add_command('CALL "%%VS%d0COMNTOOLS%%..\\..\\VC\\vcvarsall.bat" %s' % (compiler_version, compiler_arch))
-		for cfg in configs:
-			build_cmd.add_command('devenv pcbuild%s.sln /Build "%s|%s"' % (sln_suffix, cfg, arch))
-			build_cmd.add_command('move /Y %s*.pyd ..\\DLLs\\%s' % (subdir, subdir))
-			build_cmd.add_command('move /Y %s*.dll ..\\DLLs\\%s' % (subdir, subdir))
-			build_cmd.add_command('move /Y %s*.lib ..\\libs\\%s' % (subdir, subdir))
-			if "Debug" == cfg:
-				suffix = "_d"
+		if "vc" == compiler_name:
+			if compiler_version >= 11:
+				os.chdir("External/Python/vc-11_0")
 			else:
-				suffix = ""
-			build_cmd.add_command('move /Y %spython%s.exe ..\\%s' % (subdir, suffix, subdir))
-		build_cmd.execute()
-		os.chdir("../../../")
+				os.chdir("External/Python/PCbuild")
+			if compiler_version >= 10:
+				sln_suffix = "%d" % compiler_version
+			else:
+				sln_suffix = ""
+
+			if "x64" == compiler_arch:
+				arch = "x64"
+				subdir = "amd64\\"
+				compiler_arch = "x86_amd64"
+			else:
+				arch = "Win32"
+				subdir = ""
+			configs = []
+			if "Debug" in config_list:
+				configs.append("Debug")
+			if ("Release" in config_list) or ("RelWithDebInfo" in config_list) or ("MinSizeRel" in config_list):
+				configs.append("Release")
+
+			build_cmd = batch_command()
+			build_cmd.add_command('CALL "%%VS%d0COMNTOOLS%%..\\..\\VC\\vcvarsall.bat" %s' % (compiler_version, compiler_arch))
+			for cfg in configs:
+				build_cmd.add_command('devenv pcbuild%s.sln /Build "%s|%s"' % (sln_suffix, cfg, arch))
+				build_cmd.add_command('move /Y %s*.pyd ..\\DLLs\\%s' % (subdir, subdir))
+				build_cmd.add_command('move /Y %s*.dll ..\\DLLs\\%s' % (subdir, subdir))
+				build_cmd.add_command('move /Y %s*.lib ..\\libs\\%s' % (subdir, subdir))
+				if "Debug" == cfg:
+					suffix = "_d"
+				else:
+					suffix = ""
+				build_cmd.add_command('move /Y %spython%s.exe ..\\%s' % (subdir, suffix, subdir))
+			build_cmd.execute()
+			os.chdir("../../../")
+		elif "mgw" == compiler_name:
+			print("Currently Python can't be build by MinGW directly. Please build it by MSVC first\n");
+			os.chdir("External/Python/DLLs")
+			os.system("dlltool -D python32.dll -d python32.def -l libpython32.a")
+			os.system("move /Y libpython32.a ..\libs\"")
+			os.system("dlltool -D python32_d.dll -d python32_d.def -l libpython32_d.a")
+			os.system("move /Y libpython32_d.a ..\libs\"")
+			os.chdir("../../../")
 	elif "linux" == platform:
 		os.chdir("External/Python")
 		os.system("./configure")
@@ -306,7 +315,7 @@ def build_external_libs(compiler_name, compiler_version, compiler_arch, generato
 	for fname in glob.iglob("External/boost/lib_%s%s_%s/lib/*.%s" % (compiler_name, compiler_version_str, compiler_arch, dll_suffix)):
 		copy_to_dst(fname, dst_dir)
 
-	if ("vc" == compiler_name) and (compiler_arch != "x86_app") and (compiler_arch != "arm_app"):
+	if (compiler_arch != "x86_app") and (compiler_arch != "arm_app"):
 		print("\nBuilding Python...\n")
 		build_Python(compiler_name, compiler_version, compiler_arch, config_list, platform)
 
