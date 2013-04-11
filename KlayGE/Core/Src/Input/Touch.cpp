@@ -47,7 +47,7 @@ namespace KlayGE
 {
 	InputTouch::InputTouch()
 		: wheel_delta_(0), index_(false), num_available_touch_(0),
-			has_gesture_(false), action_param_(MakeSharedPtr<InputTouchActionParam>()),
+			gesture_(TS_None), action_param_(MakeSharedPtr<InputTouchActionParam>()),
 			curr_state_(GS_None),
 			one_finger_tap_timer_(0), two_finger_tap_timer_(0)
 	{
@@ -71,15 +71,8 @@ namespace KlayGE
 	{
 	}
 
-	bool InputTouch::HasGesture() const
-	{
-		return has_gesture_;
-	}
-
 	TouchSemantic InputTouch::Gesture() const
 	{
-		BOOST_ASSERT(has_gesture_);
-
 		return gesture_;
 	}
 
@@ -87,7 +80,7 @@ namespace KlayGE
 	{
 		InputActionMap& iam = actionMaps_[id];
 
-		for (uint16_t i = TS_Pan; i < TS_Wheel + 1; ++ i)
+		for (uint16_t i = TS_None; i <= TS_AnyTouch; ++ i)
 		{
 			if (actionMap.HasAction(i))
 			{
@@ -104,6 +97,16 @@ namespace KlayGE
 
 		action_param_->gesture = gesture_;
 		action_param_->wheel_delta = wheel_delta_;
+		action_param_->touches_coord = touch_coords_[index_];
+		action_param_->touches_state = 0;
+		action_param_->touches_down = 0;
+		action_param_->touches_up = 0;
+		for (size_t i = 0; i < 16; ++ i)
+		{
+			action_param_->touches_state |= (touch_downs_[index_][i] ? (1UL << i) : 0);
+			action_param_->touches_down |= ((touch_downs_[index_][i] && !touch_downs_[!index_][i]) ? (1UL << i) : 0);
+			action_param_->touches_up |= ((!touch_downs_[index_][i] && touch_downs_[!index_][i]) ? (1UL << i) : 0);
+		}
 
 		if (wheel_delta_ != 0)
 		{
@@ -113,9 +116,22 @@ namespace KlayGE
 			action_param_->rotate_angle = 0;
 			iam.UpdateInputActions(ret, TS_Wheel, action_param_);
 		}
-		if (has_gesture_)
+		if (gesture_ != TS_None)
 		{
 			iam.UpdateInputActions(ret, static_cast<uint16_t>(gesture_), action_param_);
+		}
+		bool any_touch = false;
+		for (uint16_t i = 0; i < touch_coords_[index_].size(); ++ i)
+		{
+			if (touch_downs_[index_][i] || touch_downs_[!index_][i])
+			{
+				iam.UpdateInputActions(ret, static_cast<uint16_t>(TS_Touch0 + i), action_param_);
+				any_touch = true;
+			}
+		}
+		if (any_touch)
+		{
+			iam.UpdateInputActions(ret, TS_AnyTouch, action_param_);
 		}
 
 		return ret;
@@ -168,7 +184,6 @@ namespace KlayGE
 		}
 
 		gesture_ = TS_Pan;
-		has_gesture_ = true;
 		action_param_->center = touch_coords_[index_][0];
 		if (touch_downs_[index_][0] && touch_downs_[!index_][0])
 		{
@@ -198,7 +213,6 @@ namespace KlayGE
 				{
 					gesture_ = TS_Tap;
 				}
-				has_gesture_ = true;
 				action_param_->center = touch_coords_[index_][0];
 				action_param_->move_vec = int2(vec);
 				this->CurrState(GS_None);
@@ -229,7 +243,6 @@ namespace KlayGE
 		if ((1 == num_available_touch_) && (one_finger_tap_timer_ > PRESS_TIMER_THRESHOLD) && (dist < 2))
 		{
 			gesture_ = TS_Press;
-			has_gesture_ = true;
 			action_param_->center = touch_coords_[index_][0];
 		}
 		else if ((one_finger_tap_timer_ > TAP_TIMER_THRESHOLD) && (dist > 2))
@@ -247,7 +260,6 @@ namespace KlayGE
 			if (two_finger_tap_timer_ < TAP_TIMER_THRESHOLD)
 			{
 				gesture_ = TS_PressAndTap;
-				has_gesture_ = true;
 				action_param_->center = float2(touch_coords_[index_][0] + touch_coords_[index_][1]) / 2.0f;
 			}
 			this->CurrState(GS_None);
@@ -285,7 +297,6 @@ namespace KlayGE
 			if (two_finger_tap_timer_ < TAP_TIMER_THRESHOLD)
 			{
 				gesture_ = TS_Tap;
-				has_gesture_ = true;
 				action_param_->center = float2(touch_coords_[index_][0] + touch_coords_[index_][1]) / 2.0f;
 			}
 			this->CurrState(GS_None);
@@ -328,7 +339,6 @@ namespace KlayGE
 			{
 				float vec_len = MathLib::length(float2(touch_coords_[index_][0] - touch_coords_[index_][1]));
 				gesture_ = TS_Zoom;
-				has_gesture_ = true;
 				action_param_->center = float2(touch_coords_[index_][0] + touch_coords_[index_][1]) / 2.0f;
 				action_param_->zoom = vec_len / two_finger_start_len_;
 				two_finger_start_len_ = vec_len;
@@ -355,7 +365,6 @@ namespace KlayGE
 				{
 					two_finger_vec_ = vec;
 					gesture_ = TS_Rotate;
-					has_gesture_ = true;
 					action_param_->center = float2(touch_coords_[index_][0] + touch_coords_[index_][1]) / 2.0f;
 					action_param_->rotate_angle = delta_angle;
 				}

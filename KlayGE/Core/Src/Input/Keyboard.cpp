@@ -76,7 +76,7 @@ namespace KlayGE
 	{
 		InputActionMap& iam = actionMaps_[id];
 
-		for (uint16_t i = 0; i < this->NumKeys(); ++ i)
+		for (uint16_t i = KS_Escape; i <= KS_AnyKey; ++ i)
 		{
 			if (actionMap.HasAction(i))
 			{

@@ -43,6 +43,17 @@ namespace KlayGE
 			offset_state_(0, 0, 0)
 	{
 		buttons_state_.fill(false);
+
+		UINT size;
+		if (0 == ::GetRawInputDeviceInfo(device, RIDI_DEVICEINFO, nullptr, &size))
+		{
+			std::vector<uint8_t> buf(size);
+			if (::GetRawInputDeviceInfo(device, RIDI_DEVICEINFO, &buf[0], &size) >= 0)
+			{
+				RID_DEVICE_INFO* info = reinterpret_cast<RID_DEVICE_INFO*>(&buf[0]);
+				num_buttons_ = std::min(buttons_[0].size(), static_cast<uint32_t>(info->mouse.dwNumberOfButtons));
+			}
+		}
 	}
 
 	std::wstring const & MsgInputMouse::Name() const

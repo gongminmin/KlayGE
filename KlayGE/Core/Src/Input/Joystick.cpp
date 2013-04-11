@@ -22,7 +22,7 @@
 namespace KlayGE
 {
 	InputJoystick::InputJoystick()
-		: pos_(0, 0, 0), rot_(0, 0, 0), slider_(0, 0), index_(false),
+		: pos_(0, 0, 0), rot_(0, 0, 0), slider_(0, 0), num_buttons_(0), index_(false),
 			action_param_(MakeSharedPtr<InputJoystickActionParam>())
 	{
 		buttons_[0].fill(false);
@@ -99,7 +99,7 @@ namespace KlayGE
 	//////////////////////////////////////////////////////////////////////////////////
 	size_t InputJoystick::NumButtons() const
 	{
-		return buttons_[index_].size();
+		return num_buttons_;
 	}
 	
 	// 获取指定键是否按下
@@ -131,7 +131,7 @@ namespace KlayGE
 	{
 		InputActionMap& iam = actionMaps_[id];
 
-		for (uint16_t i = JS_XPos; i < JS_Button0 + this->NumButtons(); ++ i)
+		for (uint16_t i = JS_XPos; i <= JS_AnyButton; ++ i)
 		{
 			if (actionMap.HasAction(i))
 			{
@@ -172,18 +172,18 @@ namespace KlayGE
 		{
 			iam.UpdateInputActions(ret, static_cast<uint16_t>(JS_Slider0 + i), action_param_);
 		}
-		bool any_key = false;
-		for (uint16_t i = 0; i < buttons_[index_].size(); ++ i)
+		bool any_button = false;
+		for (uint16_t i = 0; i < this->NumButtons(); ++ i)
 		{
 			if (buttons_[index_][i] || buttons_[!index_][i])
 			{
 				iam.UpdateInputActions(ret, static_cast<uint16_t>(JS_Button0 + i), action_param_);
-				any_key = true;
+				any_button = true;
 			}
 		}
-		if (any_key)
+		if (any_button)
 		{
-			iam.UpdateInputActions(ret, MS_AnyKey, action_param_);
+			iam.UpdateInputActions(ret, JS_AnyButton, action_param_);
 		}
 
 		return ret;

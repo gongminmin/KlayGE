@@ -23,7 +23,7 @@
 namespace KlayGE
 {
 	InputMouse::InputMouse()
-		: abs_pos_(0, 0), offset_(0, 0, 0), index_(false),
+		: abs_pos_(0, 0), offset_(0, 0, 0), num_buttons_(0), index_(false),
 			shift_ctrl_alt_(0),
 			action_param_(MakeSharedPtr<InputMouseActionParam>())
 	{
@@ -97,7 +97,7 @@ namespace KlayGE
 	//////////////////////////////////////////////////////////////////////////////////
 	size_t InputMouse::NumButtons() const
 	{
-		return buttons_[index_].size();
+		return num_buttons_;
 	}
 
 	// 获取某按钮是否按下
@@ -129,7 +129,7 @@ namespace KlayGE
 	{
 		InputActionMap& iam = actionMaps_[id];
 
-		for (uint16_t i = MS_X; i < MS_Button0 + this->NumButtons(); ++ i)
+		for (uint16_t i = MS_X; i <= MS_AnyButton; ++ i)
 		{
 			if (actionMap.HasAction(i))
 			{
@@ -171,18 +171,18 @@ namespace KlayGE
 		{
 			iam.UpdateInputActions(ret, MS_Z, action_param_);
 		}
-		bool any_key = false;
-		for (uint16_t i = 0; i < buttons_[index_].size(); ++ i)
+		bool any_button = false;
+		for (uint16_t i = 0; i < this->NumButtons(); ++ i)
 		{
 			if (buttons_[index_][i] || buttons_[!index_][i])
 			{
 				iam.UpdateInputActions(ret, static_cast<uint16_t>(MS_Button0 + i), action_param_);
-				any_key = true;
+				any_button = true;
 			}
 		}
-		if (any_key)
+		if (any_button)
 		{
-			iam.UpdateInputActions(ret, MS_AnyKey, action_param_);
+			iam.UpdateInputActions(ret, MS_AnyButton, action_param_);
 		}
 
 		return ret;
