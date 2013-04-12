@@ -1,0 +1,432 @@
+<?xml version="1.0" encoding="utf-8"?>
+<CodeLite_Project Name="InputCaps">
+  <Plugins>
+    <Plugin Name="qmake">
+      <![CDATA[00010001N0015Release_win_x86000000000000]]>
+    </Plugin>
+  </Plugins>
+  <Description/>
+  <Dependencies/>
+  <VirtualDirectory Name="Source Files">
+    <File Name="../../src/InputCaps/InputCaps.cpp"/>
+  </VirtualDirectory>
+  <VirtualDirectory Name="Resource Files">
+    <File Name="../../../klayge_logo.ico"/>
+    <File Name="../../../Samples/media/Common/KlayGESample.rc"/>
+  </VirtualDirectory>
+  <Settings Type="Executable">
+    <GlobalSettings>
+      <Compiler Options="-Wall -march=core2 -std=c++11" C_Options="-Wall -march=core2 -std=c11">
+        <IncludePath Value="."/>
+      </Compiler>
+      <Linker Options="">
+        <LibraryPath Value="."/>
+      </Linker>
+      <ResourceCompiler Options=""/>
+    </GlobalSettings>
+    <Configuration Name="Debug_linux_x64" CompilerType="gnu g++" DebuggerType="GNU gdb debugger" Type="Executable" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
+      <Compiler Options="-m64 -g -O0" C_Options="-m64 -g -O0" Required="yes" PreCompiledHeader="" PCHInCommandLine="no" UseDifferentPCHFlags="no" PCHFlags="">
+        <IncludePath Value="../../../../External/boost"/>
+        <IncludePath Value="../../../../KFL/Include"/>
+        <IncludePath Value="../../../Core/Include"/>
+        <Preprocessor Value="_DEBUG"/>
+        <Preprocessor Value="_CONSOLE"/>
+      </Compiler>
+      <Linker Options="" Required="yes">
+        <LibraryPath Value="../../../../External/boost/lib_gcc_x64/lib"/>
+        <LibraryPath Value="../../../../KFL/lib/linux_x64"/>
+        <LibraryPath Value="../../../lib/linux_x64"/>
+        <Library Value="KlayGE_Core_gcc_d"/>
+        <Library Value="KFL_gcc_x64_d"/>
+        <Library Value="boost_chrono"/>
+        <Library Value="boost_thread"/>
+        <Library Value="boost_system"/>
+      </Linker>
+      <ResourceCompiler Options="" Required="no"/>
+      <General OutputFile="../../../bin/linux_x64/$(ProjectName)_d" IntermediateDirectory="Debug/linux_x64/$(ProjectName)" Command="" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
+      <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;">
+        <![CDATA[]]>
+      </Environment>
+      <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
+        <PostConnectCommands/>
+        <StartupCommands/>
+      </Debugger>
+      <PreBuild/>
+      <PostBuild/>
+      <CustomBuild Enabled="no">
+        <RebuildCommand/>
+        <CleanCommand/>
+        <BuildCommand/>
+        <PreprocessFileCommand/>
+        <SingleFileCommand/>
+        <MakefileGenerationCommand/>
+        <ThirdPartyToolName>None</ThirdPartyToolName>
+        <WorkingDirectory/>
+      </CustomBuild>
+      <AdditionalRules>
+        <CustomPostBuild/>
+        <CustomPreBuild/>
+      </AdditionalRules>
+      <Completion EnableCpp11="no">
+        <ClangCmpFlagsC/>
+        <ClangCmpFlags/>
+        <ClangPP/>
+        <SearchPaths/>
+      </Completion>
+    </Configuration>
+    <Configuration Name="Debug_linux_x86" CompilerType="gnu g++" DebuggerType="GNU gdb debugger" Type="Executable" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
+      <Compiler Options="-m32 -g -O0" C_Options="-m32 -g -O0" Required="yes" PreCompiledHeader="" PCHInCommandLine="no" UseDifferentPCHFlags="no" PCHFlags="">
+        <IncludePath Value="../../../../External/boost"/>
+        <IncludePath Value="../../../../KFL/Include"/>
+        <IncludePath Value="../../../Core/Include"/>
+        <Preprocessor Value="_DEBUG"/>
+        <Preprocessor Value="_CONSOLE"/>
+      </Compiler>
+      <Linker Options="" Required="yes">
+        <LibraryPath Value="../../../../External/boost/lib_gcc_x86/lib"/>
+        <LibraryPath Value="../../../../KFL/lib/linux_x86"/>
+        <LibraryPath Value="../../../lib/linux_x86"/>
+        <Library Value="KlayGE_Core_gcc_d"/>
+        <Library Value="KFL_gcc_x86_d"/>
+        <Library Value="boost_chrono"/>
+        <Library Value="boost_thread"/>
+        <Library Value="boost_system"/>
+      </Linker>
+      <ResourceCompiler Options="" Required="no"/>
+      <General OutputFile="../../../bin/linux_x86/$(ProjectName)_d" IntermediateDirectory="Debug/linux_x86/$(ProjectName)" Command="" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
+      <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;">
+        <![CDATA[]]>
+      </Environment>
+      <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
+        <PostConnectCommands/>
+        <StartupCommands/>
+      </Debugger>
+      <PreBuild/>
+      <PostBuild/>
+      <CustomBuild Enabled="no">
+        <RebuildCommand/>
+        <CleanCommand/>
+        <BuildCommand/>
+        <PreprocessFileCommand/>
+        <SingleFileCommand/>
+        <MakefileGenerationCommand/>
+        <ThirdPartyToolName>None</ThirdPartyToolName>
+        <WorkingDirectory/>
+      </CustomBuild>
+      <AdditionalRules>
+        <CustomPostBuild/>
+        <CustomPreBuild/>
+      </AdditionalRules>
+      <Completion EnableCpp11="no">
+        <ClangCmpFlagsC/>
+        <ClangCmpFlags/>
+        <ClangPP/>
+        <SearchPaths/>
+      </Completion>
+    </Configuration>
+    <Configuration Name="Debug_win_x64" CompilerType="gnu g++" DebuggerType="GNU gdb debugger" Type="Executable" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
+      <Compiler Options="-m64 -g -O0" C_Options="-m64 -g -O0" Required="yes" PreCompiledHeader="" PCHInCommandLine="no" UseDifferentPCHFlags="no" PCHFlags="">
+        <IncludePath Value="../../../../External/boost"/>
+        <IncludePath Value="../../../../KFL/Include"/>
+        <IncludePath Value="../../../Core/Include"/>
+        <Preprocessor Value="WIN64"/>
+        <Preprocessor Value="_DEBUG"/>
+        <Preprocessor Value="_CONSOLE"/>
+      </Compiler>
+      <Linker Options="" Required="yes">
+        <LibraryPath Value="../../../../External/boost/lib_mgw_x64/lib"/>
+        <LibraryPath Value="../../../../KFL/lib/win_x64"/>
+        <LibraryPath Value="../../../lib/win_x64"/>
+        <Library Value="KlayGE_Core_mgw_d"/>
+        <Library Value="KFL_mgw_x64_d"/>
+        <Library Value="boost_chrono-mgw47-mt-d-1_53"/>
+        <Library Value="boost_thread-mgw47-mt-d-1_53"/>
+        <Library Value="boost_system-mgw47-mt-d-1_53"/>
+      </Linker>
+      <ResourceCompiler Options="" Required="yes"/>
+      <General OutputFile="../../../bin/win_x64/$(ProjectName)_d.exe" IntermediateDirectory="Debug/win_x64/$(ProjectName)" Command="" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
+      <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;">
+        <![CDATA[]]>
+      </Environment>
+      <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
+        <PostConnectCommands/>
+        <StartupCommands/>
+      </Debugger>
+      <PreBuild/>
+      <PostBuild/>
+      <CustomBuild Enabled="no">
+        <RebuildCommand/>
+        <CleanCommand/>
+        <BuildCommand/>
+        <PreprocessFileCommand/>
+        <SingleFileCommand/>
+        <MakefileGenerationCommand/>
+        <ThirdPartyToolName>None</ThirdPartyToolName>
+        <WorkingDirectory/>
+      </CustomBuild>
+      <AdditionalRules>
+        <CustomPostBuild/>
+        <CustomPreBuild/>
+      </AdditionalRules>
+      <Completion EnableCpp11="no">
+        <ClangCmpFlagsC/>
+        <ClangCmpFlags/>
+        <ClangPP/>
+        <SearchPaths/>
+      </Completion>
+    </Configuration>
+    <Configuration Name="Debug_win_x86" CompilerType="gnu g++" DebuggerType="GNU gdb debugger" Type="Executable" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
+      <Compiler Options="-m32 -g -O0" C_Options="-m32 -g -O0" Required="yes" PreCompiledHeader="" PCHInCommandLine="no" UseDifferentPCHFlags="no" PCHFlags="">
+        <IncludePath Value="../../../../External/boost"/>
+        <IncludePath Value="../../../../KFL/Include"/>
+        <IncludePath Value="../../../Core/Include"/>
+        <Preprocessor Value="WIN32"/>
+        <Preprocessor Value="_DEBUG"/>
+        <Preprocessor Value="_CONSOLE"/>
+      </Compiler>
+      <Linker Options="" Required="yes">
+        <LibraryPath Value="../../../../External/boost/lib_mgw_x86/lib"/>
+        <LibraryPath Value="../../../../KFL/lib/win_x86"/>
+        <LibraryPath Value="../../../lib/win_x86"/>
+        <Library Value="KlayGE_Core_mgw_d"/>
+        <Library Value="KFL_mgw_x86_d"/>
+        <Library Value="boost_chrono-mgw47-mt-d-1_53"/>
+        <Library Value="boost_thread-mgw47-mt-d-1_53"/>
+        <Library Value="boost_system-mgw47-mt-d-1_53"/>
+      </Linker>
+      <ResourceCompiler Options="" Required="yes"/>
+      <General OutputFile="../../../bin/win_x86/$(ProjectName)_d.exe" IntermediateDirectory="Debug/win_x86/$(ProjectName)" Command="" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
+      <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;">
+        <![CDATA[]]>
+      </Environment>
+      <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
+        <PostConnectCommands/>
+        <StartupCommands/>
+      </Debugger>
+      <PreBuild/>
+      <PostBuild/>
+      <CustomBuild Enabled="no">
+        <RebuildCommand/>
+        <CleanCommand/>
+        <BuildCommand/>
+        <PreprocessFileCommand/>
+        <SingleFileCommand/>
+        <MakefileGenerationCommand/>
+        <ThirdPartyToolName>None</ThirdPartyToolName>
+        <WorkingDirectory/>
+      </CustomBuild>
+      <AdditionalRules>
+        <CustomPostBuild/>
+        <CustomPreBuild/>
+      </AdditionalRules>
+      <Completion EnableCpp11="no">
+        <ClangCmpFlagsC/>
+        <ClangCmpFlags/>
+        <ClangPP/>
+        <SearchPaths/>
+      </Completion>
+    </Configuration>
+    <Configuration Name="Release_linux_x64" CompilerType="gnu g++" DebuggerType="GNU gdb debugger" Type="Executable" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
+      <Compiler Options="-m64 -O2" C_Options="-m64 -O2" Required="yes" PreCompiledHeader="" PCHInCommandLine="no" UseDifferentPCHFlags="no" PCHFlags="">
+        <IncludePath Value="../../../../External/boost"/>
+        <IncludePath Value="../../../../KFL/Include"/>
+        <IncludePath Value="../../../Core/Include"/>
+        <Preprocessor Value="NDEBUG"/>
+        <Preprocessor Value="_CONSOLE"/>
+      </Compiler>
+      <Linker Options="-s" Required="yes">
+        <LibraryPath Value="../../../../External/boost/lib_gcc_x64/lib"/>
+        <LibraryPath Value="../../../../KFL/lib/linux_x64"/>
+        <LibraryPath Value="../../../lib/linux_x64"/>
+        <Library Value="KlayGE_Core_gcc"/>
+        <Library Value="KFL_gcc_x64"/>
+        <Library Value="boost_chrono"/>
+        <Library Value="boost_thread"/>
+        <Library Value="boost_system"/>
+      </Linker>
+      <ResourceCompiler Options="" Required="no"/>
+      <General OutputFile="../../../bin/linux_x64/$(ProjectName)" IntermediateDirectory="Release/linux_x64/$(ProjectName)" Command="" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
+      <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;">
+        <![CDATA[]]>
+      </Environment>
+      <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
+        <PostConnectCommands/>
+        <StartupCommands/>
+      </Debugger>
+      <PreBuild/>
+      <PostBuild/>
+      <CustomBuild Enabled="no">
+        <RebuildCommand/>
+        <CleanCommand/>
+        <BuildCommand/>
+        <PreprocessFileCommand/>
+        <SingleFileCommand/>
+        <MakefileGenerationCommand/>
+        <ThirdPartyToolName>None</ThirdPartyToolName>
+        <WorkingDirectory/>
+      </CustomBuild>
+      <AdditionalRules>
+        <CustomPostBuild/>
+        <CustomPreBuild/>
+      </AdditionalRules>
+      <Completion EnableCpp11="no">
+        <ClangCmpFlagsC/>
+        <ClangCmpFlags/>
+        <ClangPP/>
+        <SearchPaths/>
+      </Completion>
+    </Configuration>
+    <Configuration Name="Release_linux_x86" CompilerType="gnu g++" DebuggerType="GNU gdb debugger" Type="Executable" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
+      <Compiler Options="-m32 -O2" C_Options="-m32 -O2" Required="yes" PreCompiledHeader="" PCHInCommandLine="no" UseDifferentPCHFlags="no" PCHFlags="">
+        <IncludePath Value="../../../../External/boost"/>
+        <IncludePath Value="../../../../KFL/Include"/>
+        <IncludePath Value="../../../Core/Include"/>
+        <Preprocessor Value="NDEBUG"/>
+        <Preprocessor Value="_CONSOLE"/>
+      </Compiler>
+      <Linker Options="-s" Required="yes">
+        <LibraryPath Value="../../../../External/boost/lib_gcc_x86/lib"/>
+        <LibraryPath Value="../../../../KFL/lib/linux_x86"/>
+        <LibraryPath Value="../../../lib/linux_x86"/>
+        <Library Value="KlayGE_Core_gcc"/>
+        <Library Value="KFL_gcc_x86"/>
+        <Library Value="boost_chrono"/>
+        <Library Value="boost_thread"/>
+        <Library Value="boost_system"/>
+      </Linker>
+      <ResourceCompiler Options="" Required="no"/>
+      <General OutputFile="../../../bin/linux_x86/$(ProjectName)" IntermediateDirectory="Release/linux_x86/$(ProjectName)" Command="" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
+      <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;">
+        <![CDATA[]]>
+      </Environment>
+      <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
+        <PostConnectCommands/>
+        <StartupCommands/>
+      </Debugger>
+      <PreBuild/>
+      <PostBuild/>
+      <CustomBuild Enabled="no">
+        <RebuildCommand/>
+        <CleanCommand/>
+        <BuildCommand/>
+        <PreprocessFileCommand/>
+        <SingleFileCommand/>
+        <MakefileGenerationCommand/>
+        <ThirdPartyToolName>None</ThirdPartyToolName>
+        <WorkingDirectory/>
+      </CustomBuild>
+      <AdditionalRules>
+        <CustomPostBuild/>
+        <CustomPreBuild/>
+      </AdditionalRules>
+      <Completion EnableCpp11="no">
+        <ClangCmpFlagsC/>
+        <ClangCmpFlags/>
+        <ClangPP/>
+        <SearchPaths/>
+      </Completion>
+    </Configuration>
+    <Configuration Name="Release_win_x64" CompilerType="gnu g++" DebuggerType="GNU gdb debugger" Type="Executable" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
+      <Compiler Options="-m64 -O2" C_Options="-m64 -O2" Required="yes" PreCompiledHeader="" PCHInCommandLine="no" UseDifferentPCHFlags="no" PCHFlags="">
+        <IncludePath Value="../../../../External/boost"/>
+        <IncludePath Value="../../../../KFL/Include"/>
+        <IncludePath Value="../../../Core/Include"/>
+        <Preprocessor Value="WIN64"/>
+        <Preprocessor Value="NDEBUG"/>
+        <Preprocessor Value="_CONSOLE"/>
+      </Compiler>
+      <Linker Options="-s" Required="yes">
+        <LibraryPath Value="../../../../External/boost/lib_mgw_x64/lib"/>
+        <LibraryPath Value="../../../../KFL/lib/win_x64"/>
+        <LibraryPath Value="../../../lib/win_x64"/>
+        <Library Value="KlayGE_Core_mgw"/>
+        <Library Value="KFL_mgw_x64"/>
+        <Library Value="boost_chrono-mgw47-mt-1_53"/>
+        <Library Value="boost_thread-mgw47-mt-1_53"/>
+        <Library Value="boost_system-mgw47-mt-1_53"/>
+      </Linker>
+      <ResourceCompiler Options="" Required="yes"/>
+      <General OutputFile="../../../bin/win_x64/$(ProjectName).exe" IntermediateDirectory="Release/win_x64/$(ProjectName)" Command="" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
+      <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;">
+        <![CDATA[]]>
+      </Environment>
+      <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
+        <PostConnectCommands/>
+        <StartupCommands/>
+      </Debugger>
+      <PreBuild/>
+      <PostBuild/>
+      <CustomBuild Enabled="no">
+        <RebuildCommand/>
+        <CleanCommand/>
+        <BuildCommand/>
+        <PreprocessFileCommand/>
+        <SingleFileCommand/>
+        <MakefileGenerationCommand/>
+        <ThirdPartyToolName>None</ThirdPartyToolName>
+        <WorkingDirectory/>
+      </CustomBuild>
+      <AdditionalRules>
+        <CustomPostBuild/>
+        <CustomPreBuild/>
+      </AdditionalRules>
+      <Completion EnableCpp11="no">
+        <ClangCmpFlagsC/>
+        <ClangCmpFlags/>
+        <ClangPP/>
+        <SearchPaths/>
+      </Completion>
+    </Configuration>
+    <Configuration Name="Release_win_x86" CompilerType="gnu g++" DebuggerType="GNU gdb debugger" Type="Executable" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
+      <Compiler Options="-m32 -O2" C_Options="-m32 -O2" Required="yes" PreCompiledHeader="" PCHInCommandLine="no" UseDifferentPCHFlags="no" PCHFlags="">
+        <IncludePath Value="../../../../External/boost"/>
+        <IncludePath Value="../../../../KFL/Include"/>
+        <IncludePath Value="../../../Core/Include"/>
+        <Preprocessor Value="WIN32"/>
+        <Preprocessor Value="NDEBUG"/>
+        <Preprocessor Value="_CONSOLE"/>
+      </Compiler>
+      <Linker Options="-s" Required="yes">
+        <LibraryPath Value="../../../../External/boost/lib_mgw_x86/lib"/>
+        <LibraryPath Value="../../../../KFL/lib/win_x86"/>
+        <LibraryPath Value="../../../lib/win_x86"/>
+        <Library Value="KlayGE_Core_mgw"/>
+        <Library Value="KFL_mgw_x86"/>
+        <Library Value="boost_chrono-mgw47-mt-1_53"/>
+        <Library Value="boost_thread-mgw47-mt-1_53"/>
+        <Library Value="boost_system-mgw47-mt-1_53"/>
+      </Linker>
+      <ResourceCompiler Options="" Required="yes"/>
+      <General OutputFile="../../../bin/win_x86/$(ProjectName).exe" IntermediateDirectory="Release/win_x86/$(ProjectName)" Command="" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
+      <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;">
+        <![CDATA[]]>
+      </Environment>
+      <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
+        <PostConnectCommands/>
+        <StartupCommands/>
+      </Debugger>
+      <PreBuild/>
+      <PostBuild/>
+      <CustomBuild Enabled="no">
+        <RebuildCommand/>
+        <CleanCommand/>
+        <BuildCommand/>
+        <PreprocessFileCommand/>
+        <SingleFileCommand/>
+        <MakefileGenerationCommand/>
+        <ThirdPartyToolName>None</ThirdPartyToolName>
+        <WorkingDirectory/>
+      </CustomBuild>
+      <AdditionalRules>
+        <CustomPostBuild/>
+        <CustomPreBuild/>
+      </AdditionalRules>
+      <Completion EnableCpp11="no">
+        <ClangCmpFlagsC/>
+        <ClangCmpFlags/>
+        <ClangPP/>
+        <SearchPaths/>
+      </Completion>
+    </Configuration>
+  </Settings>
+</CodeLite_Project>
