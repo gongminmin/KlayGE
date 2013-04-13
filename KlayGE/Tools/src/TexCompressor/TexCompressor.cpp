@@ -2,6 +2,7 @@
 #include <KFL/Util.hpp>
 #include <KlayGE/Texture.hpp>
 #include <KFL/Math.hpp>
+#include <KlayGE/ResLoader.hpp>
 
 #include <iostream>
 #include <fstream>
@@ -56,8 +57,11 @@ namespace
 					block_size = 16;
 				}
 
-				dst_data.row_pitch = ((the_width + 3) / 4) * block_size;
-				dst_data.slice_pitch = dst_data.row_pitch* ((the_height + 3) / 4);
+				uint32_t dst_width = (the_width + 3) & ~3;
+				uint32_t dst_height = (the_height + 3) & ~3;
+
+				dst_data.row_pitch = ((dst_width + 3) / 4) * block_size;
+				dst_data.slice_pitch = dst_data.row_pitch * ((dst_height + 3) / 4);
 
 				new_data_block[sub_res * in_num_mipmaps + mip].resize(dst_data.slice_pitch);
 
@@ -65,13 +69,13 @@ namespace
 
 				ResizeTexture(&new_data_block[sub_res * in_num_mipmaps + mip][0],
 					dst_data.row_pitch, dst_data.slice_pitch,
-					fmt, the_width, the_height, 1,
+					fmt, dst_width, dst_height, 1,
 					src_data.data, src_data.row_pitch, src_data.slice_pitch,
 					in_format, the_width, the_height, 1,
 					false);
 
-				the_width = (the_width + 1) / 2;
-				the_height = (the_height + 1) / 2;
+				the_width = std::max(the_width / 2, 1U);
+				the_height = std::max(the_height / 2, 1U);
 			}
 		}
 
@@ -116,6 +120,13 @@ int main(int argc, char* argv[])
 	}
 
 	std::string in_file = argv[2];
+	if (ResLoader::Instance().Locate(in_file).empty())
+	{
+		cout << "Couldn't locate " << in_file << endl;
+		ResLoader::Destroy();
+		return 1;
+	}
+
 	std::string out_file;
 	if (argc < 4)
 	{
@@ -129,6 +140,8 @@ int main(int argc, char* argv[])
 	CompressTex(in_file, out_file, fmt);
 
 	cout << "Compressed texture is saved." << endl;
+
+	ResLoader::Destroy();
 
 	return 0;
 }

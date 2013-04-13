@@ -1718,6 +1718,17 @@ namespace KlayGE
 		GetImageInfo(tex_res, type, width, height, depth, num_mipmaps, array_size, format,
 			row_pitch, slice_pitch);
 
+		uint32_t const fmt_size = NumFormatBytes(format);
+		bool padding = false;
+		if (!IsCompressedFormat(format))
+		{
+			if (row_pitch != width * fmt_size)
+			{
+				BOOST_ASSERT(row_pitch == ((width + 3) & ~3) * fmt_size);
+				padding = true;
+			}
+		}
+
 		std::vector<size_t> base;
 		switch (type)
 		{
@@ -1749,7 +1760,7 @@ namespace KlayGE
 						}
 						else
 						{
-							image_size = slice_pitch / (1UL << (level * 2));
+							image_size = (padding ? ((the_width + 3) & ~3) : the_width) * fmt_size;
 						}
 
 						base[index] = data_block.size();
@@ -1802,12 +1813,13 @@ namespace KlayGE
 						}
 						else
 						{
-							init_data[index].row_pitch = row_pitch >> level;
+							init_data[index].row_pitch = (padding ? ((the_width + 3) & ~3) : the_width) * fmt_size;
 							init_data[index].slice_pitch = init_data[index].row_pitch * the_height;
 							base[index] = data_block.size();
 							data_block.resize(base[index] + init_data[index].slice_pitch);
 
 							tex_res->read(&data_block[base[index]], static_cast<std::streamsize>(init_data[index].slice_pitch));
+							BOOST_ASSERT(tex_res->gcount() == static_cast<int>(init_data[index].slice_pitch));
 						}
 
 						the_width = std::max<uint32_t>(the_width / 2, 1);
@@ -1854,7 +1866,7 @@ namespace KlayGE
 						}
 						else
 						{
-							init_data[index].row_pitch = row_pitch >> level;
+							init_data[index].row_pitch = (padding ? ((the_width + 3) & ~3) : the_width) * fmt_size;
 							init_data[index].slice_pitch = init_data[index].row_pitch * the_height;
 							base[index] = data_block.size();
 							data_block.resize(base[index] + init_data[index].slice_pitch * the_depth);
@@ -1909,7 +1921,7 @@ namespace KlayGE
 							}
 							else
 							{
-								init_data[index].row_pitch = row_pitch >> level;;
+								init_data[index].row_pitch = (padding ? ((the_width + 3) & ~3) : the_width) * fmt_size;
 								init_data[index].slice_pitch = init_data[index].row_pitch * the_width;
 								base[index] = data_block.size();
 								data_block.resize(base[index] + init_data[index].slice_pitch);

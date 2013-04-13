@@ -1,6 +1,7 @@
 #include <KlayGE/KlayGE.hpp>
 #include <KFL/Math.hpp>
 #include <KlayGE/Texture.hpp>
+#include <KlayGE/ResLoader.hpp>
 
 #include <iostream>
 #include <fstream>
@@ -115,6 +116,8 @@ int main(int argc, char* argv[])
 		convert_flatten_to_vol(argv[2], argv[3]);
 		cout << "Color grading 3D texture is saved to " << argv[2] << endl;
 	}
+
+	ResLoader::Destroy();
 
 	return 0;
 }

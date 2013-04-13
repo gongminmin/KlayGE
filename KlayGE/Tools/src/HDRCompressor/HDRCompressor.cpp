@@ -3,6 +3,7 @@
 #include <KFL/Math.hpp>
 #include <KlayGE/Texture.hpp>
 #include <KlayGE/BlockCompression.hpp>
+#include <KlayGE/ResLoader.hpp>
 
 #include <iostream>
 #include <fstream>
@@ -101,8 +102,8 @@ namespace
 			}
 		}
 
-		uint32_t c_width = (width + 1) / 2;
-		uint32_t c_height = (height + 1) / 2;
+		uint32_t c_width = std::max(width / 2, 1U);
+		uint32_t c_height = std::max(height / 2, 1U);
 
 		c_data.row_pitch = (c_width + 3) / 4 * 16;
 		c_data.slice_pitch = c_data.row_pitch * (c_height + 3) / 4;
@@ -191,8 +192,8 @@ namespace
 		hdr_data_block.resize(hdr_data.slice_pitch);
 		hdr_data.data = &hdr_data_block[0];
 
-		uint32_t c_width = (width + 1) / 2;
-		uint32_t c_height = (height + 1) / 2;
+		uint32_t c_width = std::max(width / 2, 1U);
+		uint32_t c_height = std::max(height / 2, 1U);
 
 		std::vector<uint8_t> c_data_uncom(c_width * c_height * 4);
 		for (uint32_t y_base = 0; y_base < c_height; y_base += 4)
@@ -341,8 +342,8 @@ namespace
 
 		SaveTexture(out_y_file, in_type, in_width, in_height, in_depth, in_num_mipmaps, in_array_size, y_format, y_data);
 
-		uint32_t c_width = (in_width + 1) / 2;
-		uint32_t c_height = (in_height + 1) / 2;
+		uint32_t c_width = std::max(in_width / 2, 1U);
+		uint32_t c_height = std::max(in_height / 2, 1U);
 		if (IsCompressedFormat(c_format))
 		{
 			c_width = (c_width + 3) & -3;
@@ -426,6 +427,8 @@ int main(int argc, char* argv[])
 	CompressHDR(argv[1], y_file, c_file, y_format, c_format);
 
 	cout << "HDR texture is compressed into " << y_file << " and " << c_file << endl;
+
+	ResLoader::Destroy();
 
 	return 0;
 }

@@ -3,6 +3,7 @@
 #include <KlayGE/Texture.hpp>
 #include <KFL/Math.hpp>
 #include <KlayGE/BlockCompression.hpp>
+#include <KlayGE/ResLoader.hpp>
 
 #include <iostream>
 #include <fstream>
@@ -209,8 +210,8 @@ namespace
 			uint32_t the_height = in_height;
 			for (uint32_t level = 1; level < in_num_mipmaps; ++ level)
 			{
-				uint32_t new_width = std::max((the_width + 1) / 2, 1U);
-				uint32_t new_height = std::max((the_height + 1) / 2, 1U);
+				uint32_t new_width = std::max(the_width / 2, 1U);
+				uint32_t new_height = std::max(the_height / 2, 1U);
 				std::vector<float3> new_normals(new_width * new_height);
 				if (IsCompressedFormat(new_format))
 				{
@@ -307,6 +308,14 @@ int main(int argc, char* argv[])
 		return 1;
 	}
 
+	std::string in_file = argv[1];
+	if (ResLoader::Instance().Locate(in_file).empty())
+	{
+		cout << "Couldn't locate " << in_file << endl;
+		ResLoader::Destroy();
+		return 1;
+	}
+
 	ElementFormat new_format = EF_BC4;
 	if (argc >= 4)
 	{
@@ -325,9 +334,11 @@ int main(int argc, char* argv[])
 		}
 	}
 
-	Normal2NaLength(argv[1], argv[2], new_format);
+	Normal2NaLength(in_file, argv[2], new_format);
 
 	cout << "Na Length map is saved to " << argv[2] << endl;
+
+	ResLoader::Destroy();
 
 	return 0;
 }

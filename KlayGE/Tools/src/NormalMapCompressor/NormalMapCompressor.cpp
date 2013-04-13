@@ -3,6 +3,7 @@
 #include <KlayGE/Texture.hpp>
 #include <KFL/Math.hpp>
 #include <KlayGE/BlockCompression.hpp>
+#include <KlayGE/ResLoader.hpp>
 
 #include <iostream>
 #include <fstream>
@@ -293,6 +294,14 @@ int main(int argc, char* argv[])
 		return 1;
 	}
 
+	std::string in_file = argv[1];
+	if (ResLoader::Instance().Locate(in_file).empty())
+	{
+		cout << "Couldn't locate " << in_file << endl;
+		ResLoader::Destroy();
+		return 1;
+	}
+
 	ElementFormat new_format = EF_BC5;
 	if (argc >= 4)
 	{
@@ -307,9 +316,11 @@ int main(int argc, char* argv[])
 		}
 	}
 
-	CompressNormalMap(argv[1], argv[2], new_format);
+	CompressNormalMap(in_file, argv[2], new_format);
 
 	cout << "Normal map is saved to " << argv[2] << endl;
+
+	ResLoader::Destroy();
 
 	return 0;
 }

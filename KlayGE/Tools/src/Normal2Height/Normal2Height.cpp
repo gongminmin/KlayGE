@@ -2,6 +2,7 @@
 #include <KFL/Math.hpp>
 #include <KlayGE/Texture.hpp>
 #include <KlayGE/BlockCompression.hpp>
+#include <KlayGE/ResLoader.hpp>
 
 #include <iostream>
 #include <fstream>
@@ -151,8 +152,8 @@ namespace
 
 				AccumulateDDM(heights[i], ddm, the_width, the_height, 4, 9);
 
-				the_width = (the_width + 1) / 2;
-				the_height = (the_height + 1) / 2;
+				the_width = std::max(the_width / 2, 1U);
+				the_height = std::max(the_height / 2, 1U);
 			}
 
 			float min_height = +1e10f;
@@ -198,8 +199,8 @@ namespace
 				heights_data[i].row_pitch = the_width;
 				heights_data[i].slice_pitch = the_width * the_height;
 
-				the_width = (the_width + 1) / 2;
-				the_height = (the_height + 1) / 2;
+				the_width = std::max(the_width / 2, 1U);
+				the_height = std::max(the_height / 2, 1U);
 			}
 
 			SaveTexture(out_file, type, width, height, depth, num_mipmaps, array_size, EF_R8, heights_data);
@@ -221,15 +222,25 @@ int main(int argc, char* argv[])
 		return 1;
 	}
 
+	std::string in_file = argv[1];
+	if (ResLoader::Instance().Locate(in_file).empty())
+	{
+		cout << "Couldn't locate " << in_file << endl;
+		ResLoader::Destroy();
+		return 1;
+	}
+
 	float min_z = 1e-6f;
 	if (argc >= 4)
 	{
 		min_z = static_cast<float>(atof(argv[3]));
 	}
 
-	CreateHeightMap(argv[1], argv[2], min_z);
+	CreateHeightMap(in_file, argv[2], min_z);
 
 	cout << "Height map is saved to " << argv[2] << endl;
+
+	ResLoader::Destroy();
 
 	return 0;
 }

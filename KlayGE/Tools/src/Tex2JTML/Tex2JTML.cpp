@@ -6,6 +6,7 @@
 #include <KFL/XMLDom.hpp>
 #include <KlayGE/App3D.hpp>
 #include <KlayGE/RenderFactory.hpp>
+#include <KlayGE/ResLoader.hpp>
 
 #include <iostream>
 #include <fstream>
@@ -436,6 +437,8 @@ int main(int argc, char* argv[])
 	}
 
 	Tex2JTML(tex_names, num_tiles, tile_size, jtml_name);
+
+	ResLoader::Destroy();
 
 	return 0;
 }
