@@ -50,16 +50,16 @@ namespace KlayGE
 	class Frustum_T : public Bound_T<T>
 	{
 	public:
-		void ClipMatrix(Matrix4_T<T> const & clip)
+		void ClipMatrix(Matrix4_T<T> const & clip, Matrix4_T<T> const & inv_clip)
 		{
-			corners_[0] = MathLib::transform_coord(Vector_T<T, 3>(-1, -1, 0), clip); // left bottom near
-			corners_[1] = MathLib::transform_coord(Vector_T<T, 3>(+1, -1, 0), clip); // right bottom near
-			corners_[2] = MathLib::transform_coord(Vector_T<T, 3>(-1, +1, 0), clip); // left top near
-			corners_[3] = MathLib::transform_coord(Vector_T<T, 3>(+1, +1, 0), clip); // right top near
-			corners_[4] = MathLib::transform_coord(Vector_T<T, 3>(-1, -1, 1), clip); // left bottom far
-			corners_[5] = MathLib::transform_coord(Vector_T<T, 3>(+1, -1, 1), clip); // right bottom far
-			corners_[6] = MathLib::transform_coord(Vector_T<T, 3>(-1, +1, 1), clip); // left top far
-			corners_[7] = MathLib::transform_coord(Vector_T<T, 3>(+1, +1, 1), clip); // right top far
+			corners_[0] = MathLib::transform_coord(Vector_T<T, 3>(-1, -1, 0), inv_clip); // left bottom near
+			corners_[1] = MathLib::transform_coord(Vector_T<T, 3>(+1, -1, 0), inv_clip); // right bottom near
+			corners_[2] = MathLib::transform_coord(Vector_T<T, 3>(-1, +1, 0), inv_clip); // left top near
+			corners_[3] = MathLib::transform_coord(Vector_T<T, 3>(+1, +1, 0), inv_clip); // right top near
+			corners_[4] = MathLib::transform_coord(Vector_T<T, 3>(-1, -1, 1), inv_clip); // left bottom far
+			corners_[5] = MathLib::transform_coord(Vector_T<T, 3>(+1, -1, 1), inv_clip); // right bottom far
+			corners_[6] = MathLib::transform_coord(Vector_T<T, 3>(-1, +1, 1), inv_clip); // left top far
+			corners_[7] = MathLib::transform_coord(Vector_T<T, 3>(+1, +1, 1), inv_clip); // right top far
 
 			Vector_T<T, 4> const & column1(clip.Col(0));
 			Vector_T<T, 4> const & column2(clip.Col(1));

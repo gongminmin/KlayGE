@@ -32,6 +32,8 @@
 	<cbuffer name="per_frame">
 		<parameter type="float4x4" name="mvp"/>
 		<parameter type="float" name="inv_far"/>
+		<parameter type="float3" name="pos_center"/>
+		<parameter type="float3" name="pos_extent"/>
 	</cbuffer>
 
 	<shader>
@@ -42,6 +44,8 @@ void TerrainVS(float4 pos			: POSITION,
 					out float4 oLightVec_Depth : TEXCOORD1,
 					out float4 oPos		: SV_Position)
 {
+	pos = float4(pos.xyz * pos_extent + pos_center, 1);
+
 	oTex.xy = float2(tex.x, 1 - tex.y);
 	oTex.zw = oTex.xy * 8;
 

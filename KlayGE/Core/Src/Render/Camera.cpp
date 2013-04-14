@@ -198,7 +198,7 @@ namespace KlayGE
 	{
 		if (frustum_dirty_)
 		{
-			frustum_.ClipMatrix(this->ViewProjMatrix());
+			frustum_.ClipMatrix(this->ViewProjMatrix(), this->InverseViewProjMatrix());
 			frustum_dirty_ = false;
 		}
 		return frustum_;

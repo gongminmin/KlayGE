@@ -648,7 +648,7 @@ namespace
 	{
 	public:
 		explicit TerrainRenderable(TexturePtr const & height_map, TexturePtr const & normal_map)
-			: RenderablePlane(4, 4, 64, 64, true)
+			: RenderablePlane(4, 4, 64, 64, true, false)
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
@@ -678,6 +678,9 @@ namespace
 
 			*(technique_->Effect().ParameterByName("mvp")) = camera.ViewProjMatrix();
 			*(technique_->Effect().ParameterByName("inv_far")) = 1 / camera.FarPlane();
+
+			*(technique_->Effect().ParameterByName("pos_center")) = pos_aabb_.Center();
+			*(technique_->Effect().ParameterByName("pos_extent")) = pos_aabb_.HalfSize();
 		}
 	};
 

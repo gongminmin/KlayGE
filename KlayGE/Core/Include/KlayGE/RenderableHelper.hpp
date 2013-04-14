@@ -189,7 +189,8 @@ namespace KlayGE
 	class KLAYGE_CORE_API RenderablePlane : public RenderableHelper
 	{
 	public:
-		RenderablePlane(float length, float width, int length_segs, int width_segs, bool has_tex_coord);
+		RenderablePlane(float length, float width, int length_segs, int width_segs,
+			bool has_tex_coord, bool has_tangent);
 		virtual ~RenderablePlane()
 		{
 		}

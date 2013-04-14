@@ -132,7 +132,11 @@ namespace KlayGE
 					octree_[0].obj_ptrs.push_back(soaabb);
 				}
 			}
-			octree_[0].bb = bb_root;
+			float3 const & center = bb_root.Center();
+			float3 const & extent = bb_root.HalfSize();
+			float longest_dim = std::max(std::max(extent.x(), extent.y()), extent.z());
+			float3 new_extent(longest_dim, longest_dim, longest_dim);
+			octree_[0].bb = AABBox(center - new_extent, center + new_extent);
 
 			this->DivideNode(0, 1);
 
