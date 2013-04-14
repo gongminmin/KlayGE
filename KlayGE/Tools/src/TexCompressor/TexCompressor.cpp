@@ -24,6 +24,19 @@ namespace
 		std::vector<uint8_t> in_data_block;
 		LoadTexture(in_file, in_type, in_width, in_height, in_depth, in_num_mipmaps, in_array_size, in_format, in_data, in_data_block);
 
+		if (IsCompressedFormat(in_format))
+		{
+			cout << "This texture is already in compressed format." << endl;
+			if (in_file != out_file)
+			{
+				SaveTexture(out_file, in_type, in_width, in_height, in_depth, in_num_mipmaps, in_array_size, in_format, in_data);
+			}
+			return;
+		}
+
+		uint32_t out_width = (in_width + 3) & ~3;
+		uint32_t out_height = (in_height + 3) & ~3;
+
 		if (IsSigned(in_format))
 		{
 			fmt = MakeSigned(fmt);
@@ -38,8 +51,11 @@ namespace
 
 		for (size_t sub_res = 0; sub_res < in_array_size; ++ sub_res)
 		{
-			uint32_t the_width = in_width;
-			uint32_t the_height = in_height;
+			uint32_t src_width = in_width;
+			uint32_t src_height = in_height;
+
+			uint32_t dst_width = out_width;
+			uint32_t dst_height = out_height;
 
 			for (uint32_t mip = 0; mip < in_num_mipmaps; ++ mip)
 			{
@@ -57,9 +73,6 @@ namespace
 					block_size = 16;
 				}
 
-				uint32_t dst_width = (the_width + 3) & ~3;
-				uint32_t dst_height = (the_height + 3) & ~3;
-
 				dst_data.row_pitch = ((dst_width + 3) / 4) * block_size;
 				dst_data.slice_pitch = dst_data.row_pitch * ((dst_height + 3) / 4);
 
@@ -71,15 +84,18 @@ namespace
 					dst_data.row_pitch, dst_data.slice_pitch,
 					fmt, dst_width, dst_height, 1,
 					src_data.data, src_data.row_pitch, src_data.slice_pitch,
-					in_format, the_width, the_height, 1,
+					in_format, src_width, src_height, 1,
 					false);
 
-				the_width = std::max(the_width / 2, 1U);
-				the_height = std::max(the_height / 2, 1U);
+				src_width = std::max(src_width / 2, 1U);
+				src_height = std::max(src_height / 2, 1U);
+
+				dst_width = std::max(dst_width / 2, 1U);
+				dst_height = std::max(dst_height / 2, 1U);
 			}
 		}
 
-		SaveTexture(out_file, in_type, in_width, in_height, in_depth, in_num_mipmaps, in_array_size, fmt, new_data);
+		SaveTexture(out_file, in_type, out_width, out_height, in_depth, in_num_mipmaps, in_array_size, fmt, new_data);
 	}
 }
 
@@ -141,7 +157,7 @@ int main(int argc, char* argv[])
 
 	cout << "Compressed texture is saved." << endl;
 
-	ResLoader::Destroy();
+	Context::Destroy();
 
 	return 0;
 }

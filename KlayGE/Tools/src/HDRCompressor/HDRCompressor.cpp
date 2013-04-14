@@ -346,8 +346,8 @@ namespace
 		uint32_t c_height = std::max(in_height / 2, 1U);
 		if (IsCompressedFormat(c_format))
 		{
-			c_width = (c_width + 3) & -3;
-			c_height = (c_height + 3) & -3;
+			c_width = (c_width + 3) & ~3;
+			c_height = (c_height + 3) & ~3;
 		}
 		SaveTexture(out_c_file, in_type, c_width, c_height, in_depth, in_num_mipmaps, in_array_size, c_format, c_data);
 
