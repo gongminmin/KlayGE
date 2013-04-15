@@ -2,6 +2,7 @@
 #include <KFL/Util.hpp>
 #include <KlayGE/Texture.hpp>
 #include <KFL/Math.hpp>
+#include <KlayGE/ResLoader.hpp>
 
 #include <iostream>
 #include <fstream>
@@ -70,8 +71,8 @@ namespace
 
 			for (uint32_t mip = 0; mip < num_full_mip_maps - 1; ++ mip)
 			{
-				uint32_t new_width = (the_width + 1) / 2;
-				uint32_t new_height = (the_height + 1) / 2;
+				uint32_t new_width = std::max(the_width / 2, 1U);
+				uint32_t new_height = std::max(the_height / 2, 1U);
 
 				ElementInitData& src_data = new_data[sub_res * num_full_mip_maps + mip];
 				ElementInitData& dst_data = new_data[sub_res * num_full_mip_maps + mip + 1];
@@ -108,6 +109,13 @@ int main(int argc, char* argv[])
 	}
 
 	std::string in_file = argv[1];
+	if (ResLoader::Instance().Locate(in_file).empty())
+	{
+		cout << "Couldn't locate " << in_file << endl;
+		ResLoader::Destroy();
+		return 1;
+	}
+
 	std::string out_file;
 	if (argc < 3)
 	{
@@ -121,6 +129,8 @@ int main(int argc, char* argv[])
 	GenMipmap(in_file, out_file);
 
 	cout << "Mipmapped texture is saved." << endl;
+
+	ResLoader::Destroy();
 
 	return 0;
 }

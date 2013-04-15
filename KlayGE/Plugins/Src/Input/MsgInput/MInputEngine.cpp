@@ -96,6 +96,8 @@ namespace KlayGE
 		::GetRawInputDeviceList(&raw_input_devices[0], &devices, sizeof(raw_input_devices[0]));
 
 		RAWINPUTDEVICE rid;
+		rid.usUsagePage = HID_USAGE_PAGE_GENERIC;
+		rid.hwndTarget = hwnd;
 		std::vector<RAWINPUTDEVICE> rids;
 		for (size_t i = 0; i < raw_input_devices.size(); ++ i)
 		{
@@ -104,34 +106,42 @@ namespace KlayGE
 			{
 			case RIM_TYPEKEYBOARD:
 				device = MakeSharedPtr<MsgInputKeyboard>(raw_input_devices[i].hDevice);
-				rid.usUsagePage = HID_USAGE_PAGE_GENERIC;
 				rid.usUsage = HID_USAGE_GENERIC_KEYBOARD;
 				rid.dwFlags = RIDEV_INPUTSINK;
-				rid.hwndTarget = hwnd;
 				rids.push_back(rid);
 				break;
 
 			case RIM_TYPEMOUSE:
 				device = MakeSharedPtr<MsgInputMouse>(raw_input_devices[i].hDevice);
-				rid.usUsagePage = HID_USAGE_PAGE_GENERIC;
 				rid.usUsage = HID_USAGE_GENERIC_MOUSE;
 				rid.dwFlags = 0;
-				rid.hwndTarget = hwnd;
 				rids.push_back(rid);
 				break;
 
 			case RIM_TYPEHID:
-				device = MakeSharedPtr<MsgInputJoystick>(raw_input_devices[i].hDevice);
-				rid.usUsagePage = HID_USAGE_PAGE_GENERIC;
-				rid.usUsage = HID_USAGE_GENERIC_GAMEPAD;
-				rid.dwFlags = RIDEV_INPUTSINK;
-				rid.hwndTarget = hwnd;
-				rids.push_back(rid);
-				rid.usUsagePage = HID_USAGE_PAGE_GENERIC;
-				rid.usUsage = HID_USAGE_GENERIC_JOYSTICK;
-				rid.dwFlags = RIDEV_INPUTSINK;
-				rid.hwndTarget = hwnd;
-				rids.push_back(rid);
+				{
+					UINT size;
+					if (0 == ::GetRawInputDeviceInfo(raw_input_devices[i].hDevice, RIDI_DEVICEINFO, nullptr, &size))
+					{
+						std::vector<uint8_t> buf(size);
+						if (::GetRawInputDeviceInfo(raw_input_devices[i].hDevice, RIDI_DEVICEINFO, &buf[0], &size) >= 0)
+						{
+							RID_DEVICE_INFO* info = reinterpret_cast<RID_DEVICE_INFO*>(&buf[0]);
+							if ((HID_USAGE_PAGE_GENERIC == info->hid.usUsagePage)
+								&& ((HID_USAGE_GENERIC_GAMEPAD == info->hid.usUsage)
+									|| (HID_USAGE_GENERIC_JOYSTICK == info->hid.usUsage)))
+							{
+								device = MakeSharedPtr<MsgInputJoystick>(raw_input_devices[i].hDevice);
+								rid.usUsage = HID_USAGE_GENERIC_GAMEPAD;
+								rid.dwFlags = RIDEV_INPUTSINK;
+								rids.push_back(rid);
+								rid.usUsage = HID_USAGE_GENERIC_JOYSTICK;
+								rid.dwFlags = RIDEV_INPUTSINK;
+								rids.push_back(rid);
+							}
+						}
+					}
+				}
 				break;
 
 			default:

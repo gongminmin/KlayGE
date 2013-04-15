@@ -3,6 +3,7 @@
 #include <KlayGE/Texture.hpp>
 #include <KFL/Math.hpp>
 #include <KlayGE/BlockCompression.hpp>
+#include <KlayGE/ResLoader.hpp>
 
 #include <iostream>
 #include <fstream>
@@ -33,6 +34,10 @@ namespace
 		if (IsSRGB(in_format))
 		{
 			cout << "This texture is already in sRGB format." << endl;
+			if (in_file != out_file)
+			{
+				SaveTexture(out_file, in_type, in_width, in_height, in_depth, in_num_mipmaps, in_array_size, in_format, in_data);
+			}
 			return;
 		}
 		ElementFormat new_format = MakeSRGB(in_format);
@@ -84,7 +89,7 @@ namespace
 		for (size_t index = 0; index < num_sub_res; ++ index)
 		{
 			linear_data.resize(in_width * in_height * 4);
-			linear_data_small.resize(((in_width + 1) / 2) * ((in_height + 1) / 2) * 4);
+			linear_data_small.resize(std::max(in_width / 2, 1U) * std::max(in_height / 2, 1U) * 4);
 
 			new_data[index * in_num_mipmaps].row_pitch = in_width * 4;
 			new_data[index * in_num_mipmaps].slice_pitch = new_data[index * in_num_mipmaps].row_pitch * in_height;
@@ -121,8 +126,8 @@ namespace
 			uint32_t the_height = in_height;
 			for (uint32_t l = 1; l < in_num_mipmaps; ++ l)
 			{
-				uint32_t new_width = (the_width + 1) / 2;
-				uint32_t new_height = (the_height + 1) / 2;
+				uint32_t new_width = std::max(the_width / 2, 1U);
+				uint32_t new_height = std::max(the_height / 2, 1U);
 
 				new_data[index * in_num_mipmaps + l].row_pitch = new_width * 4;
 				new_data[index * in_num_mipmaps + l].slice_pitch = new_data[index * in_num_mipmaps + l].row_pitch * new_height;
@@ -211,8 +216,8 @@ namespace
 						break;
 					}
 
-					the_width = (the_width + 1) / 2;
-					the_height = (the_height + 1) / 2;
+					the_width = std::max(the_width / 2, 1U);
+					the_height = std::max(the_height / 2, 1U);
 				}
 			}
 
@@ -232,6 +237,13 @@ int main(int argc, char* argv[])
 	}
 
 	std::string in_file = argv[1];
+	if (ResLoader::Instance().Locate(in_file).empty())
+	{
+		cout << "Couldn't locate " << in_file << endl;
+		ResLoader::Destroy();
+		return 1;
+	}
+
 	std::string out_file;
 	if (argc >= 3)
 	{
@@ -245,6 +257,8 @@ int main(int argc, char* argv[])
 	ForceTexSRGB(in_file, out_file);
 
 	cout << "sRGB texture is saved to " << out_file << endl;
+
+	ResLoader::Destroy();
 
 	return 0;
 }

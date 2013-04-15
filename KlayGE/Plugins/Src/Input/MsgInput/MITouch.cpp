@@ -130,7 +130,7 @@ namespace KlayGE
 		}
 
 		wheel_delta_state_ = 0;
-		has_gesture_ = false;
+		gesture_ = TS_None;
 		action_param_->move_vec = float2(0.0f, 0.0f);
 		curr_gesture_(static_cast<float>(timer_.elapsed()));
 		timer_.restart();

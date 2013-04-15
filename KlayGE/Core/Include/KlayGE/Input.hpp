@@ -213,7 +213,7 @@ namespace KlayGE
 		MS_Button6			= 0x109,
 		MS_Button7			= 0x10A,
 
-		MS_AnyKey
+		MS_AnyButton
 	};
 
 	// ÓÎÏ·¸Ë¶¯×÷
@@ -260,19 +260,38 @@ namespace KlayGE
 		JS_Button30			= 0x226,
 		JS_Button31			= 0x227,
 
-		JS_AnyKey
+		JS_AnyButton
 	};
 
 	enum TouchSemantic
 	{
-		TS_Pan				= 0x300,
-		TS_Tap				= 0x301,
-		TS_Press			= 0x302,
-		TS_PressAndTap		= 0x303,
-		TS_Zoom				= 0x304,
-		TS_Rotate			= 0x305,
-		TS_Flick			= 0x306,
-		TS_Wheel			= 0x307
+		TS_None				= 0x300,
+		TS_Pan				= 0x301,
+		TS_Tap				= 0x302,
+		TS_Press			= 0x303,
+		TS_PressAndTap		= 0x304,
+		TS_Zoom				= 0x305,
+		TS_Rotate			= 0x306,
+		TS_Flick			= 0x307,
+		TS_Wheel			= 0x308,
+		TS_Touch0			= 0x309,
+		TS_Touch1			= 0x30A,
+		TS_Touch2			= 0x30B,
+		TS_Touch3			= 0x30C,
+		TS_Touch4			= 0x30D,
+		TS_Touch5			= 0x30E,
+		TS_Touch6			= 0x30F,
+		TS_Touch7			= 0x300,
+		TS_Touch8			= 0x311,
+		TS_Touch9			= 0x312,
+		TS_Touch10			= 0x313,
+		TS_Touch11			= 0x314,
+		TS_Touch12			= 0x315,
+		TS_Touch13			= 0x316,
+		TS_Touch14			= 0x317,
+		TS_Touch15			= 0x318,
+
+		TS_AnyTouch
 	};
 
 	typedef std::pair<uint16_t, uint16_t> InputActionDefine;
@@ -431,6 +450,7 @@ namespace KlayGE
 		int2 abs_pos_;
 		int3 offset_;
 
+		uint32_t num_buttons_;
 		array<array<bool, 8>, 2> buttons_;
 		bool index_;
 
@@ -475,6 +495,7 @@ namespace KlayGE
 
 		int2 slider_;		// extra axes positions
 
+		uint32_t num_buttons_;
 		array<array<bool, 32>, 2> buttons_;	// 32 buttons
 		bool index_;
 
@@ -492,7 +513,6 @@ namespace KlayGE
 			return InputEngine::IDT_Touch;
 		}
 
-		bool HasGesture() const;
 		TouchSemantic Gesture() const;
 		
 		virtual InputActionsType UpdateActionMap(uint32_t id) KLAYGE_OVERRIDE;
@@ -530,7 +550,6 @@ namespace KlayGE
 		uint32_t num_available_touch_;
 
 		TouchSemantic gesture_;
-		bool has_gesture_;
 		InputTouchActionParamPtr action_param_;
 
 		GestureState curr_state_;
@@ -596,9 +615,9 @@ namespace KlayGE
 		int3 pos;
 		int3 rot;
 		int2 slider;
-		uint16_t buttons_state;
-		uint16_t buttons_down;
-		uint16_t buttons_up;
+		uint32_t buttons_state;
+		uint32_t buttons_down;
+		uint32_t buttons_up;
 	};
 	
 	struct KLAYGE_CORE_API InputTouchActionParam : public InputActionParam
@@ -609,6 +628,10 @@ namespace KlayGE
 		float zoom;
 		float rotate_angle;
 		int32_t wheel_delta;
+		array<int2, 16> touches_coord;
+		uint16_t touches_state;
+		uint16_t touches_down;
+		uint16_t touches_up;
 	};
 }
 

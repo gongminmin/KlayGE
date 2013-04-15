@@ -42,6 +42,30 @@ namespace KlayGE
 			pos_state_(0, 0, 0), rot_state_(0, 0, 0), slider_state_(0, 0)
 	{
 		buttons_state_.fill(false);
+
+		MsgInputEngine const & mie = *checked_cast<MsgInputEngine const *>(&Context::Instance().InputFactoryInstance().InputEngineInstance());
+
+		UINT size;
+		if (0 == ::GetRawInputDeviceInfo(device, RIDI_PREPARSEDDATA, nullptr, &size))
+		{
+			std::vector<uint8_t> buf(size);
+			if (::GetRawInputDeviceInfo(device, RIDI_PREPARSEDDATA, &buf[0], &size) >= 0)
+			{
+				PHIDP_PREPARSED_DATA preparsed_data = reinterpret_cast<PHIDP_PREPARSED_DATA>(&buf[0]);
+
+				HIDP_CAPS caps;
+				if (HIDP_STATUS_SUCCESS == mie.HidP_GetCaps(preparsed_data, &caps))
+				{
+					std::vector<HIDP_BUTTON_CAPS> button_caps(caps.NumberInputButtonCaps);
+
+					uint16_t caps_length = caps.NumberInputButtonCaps;
+					if (HIDP_STATUS_SUCCESS == mie.HidP_GetButtonCaps(HidP_Input, &button_caps[0], &caps_length, preparsed_data))
+					{
+						num_buttons_ = std::min<uint32_t>(buttons_[0].size(), button_caps[0].Range.UsageMax - button_caps[0].Range.UsageMin + 1);
+					}
+				}
+			}
+		}
 	}
 	
 	const std::wstring& MsgInputJoystick::Name() const
@@ -72,14 +96,12 @@ namespace KlayGE
 						uint16_t caps_length = caps.NumberInputButtonCaps;
 						if (HIDP_STATUS_SUCCESS == mie.HidP_GetButtonCaps(HidP_Input, &button_caps[0], &caps_length, preparsed_data))
 						{
-							int num_buttons = std::min<int>(32, button_caps[0].Range.UsageMax - button_caps[0].Range.UsageMin + 1);
-
 							std::vector<HIDP_VALUE_CAPS> value_caps(caps.NumberInputValueCaps);
 							caps_length = caps.NumberInputValueCaps;
 							if (HIDP_STATUS_SUCCESS == mie.HidP_GetValueCaps(HidP_Input, &value_caps[0], &caps_length, preparsed_data))
 							{
 								USAGE usage[32];
-								ULONG usage_length = num_buttons;
+								ULONG usage_length = num_buttons_;
 								if (HIDP_STATUS_SUCCESS == mie.HidP_GetUsages(HidP_Input, button_caps[0].UsagePage,
 									0, usage, &usage_length, preparsed_data,
 									reinterpret_cast<CHAR*>(const_cast<BYTE*>(ri.data.hid.bRawData)), ri.data.hid.dwSizeHid))

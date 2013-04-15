@@ -1,6 +1,7 @@
 #include <KlayGE/KlayGE.hpp>
 #include <KFL/Math.hpp>
 #include <KlayGE/Texture.hpp>
+#include <KlayGE/ResLoader.hpp>
 
 #include <iostream>
 #include <fstream>
@@ -104,13 +105,23 @@ int main(int argc, char* argv[])
 
 	if (argc != 3)
 	{
-		cout << "使用方法: NormalMapGen xxx.dds yyy.dds" << endl;
+		cout << "Usage: NormalMapGen xxx.dds yyy.dds" << endl;
 		return 1;
 	}
 
-	CreateNormalMap(argv[1], argv[2]);
+	std::string in_file = argv[1];
+	if (ResLoader::Instance().Locate(in_file).empty())
+	{
+		cout << "Couldn't locate " << in_file << endl;
+		ResLoader::Destroy();
+		return 1;
+	}
+
+	CreateNormalMap(in_file, argv[2]);
 
 	cout << "Normal map is saved to " << argv[2] << endl;
+
+	ResLoader::Destroy();
 
 	return 0;
 }

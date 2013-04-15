@@ -8,6 +8,7 @@ SET(HEADER_FILES
 
 SET(EFFECT_FILES
 	${KLAYGE_PROJECT_DIR}/Samples/media/GPUParticleSystem/GPUParticleSystem.fxml
+	${KLAYGE_PROJECT_DIR}/Samples/media/GPUParticleSystem/Terrain.fxml
 )
 
 SET(POST_PROCESSORS

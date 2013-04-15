@@ -529,7 +529,7 @@ namespace KlayGE
 
 
 	RenderablePlane::RenderablePlane(float length, float width,
-				int length_segs, int width_segs, bool has_tex_coord)
+				int length_segs, int width_segs, bool has_tex_coord, bool has_tangent)
 			: RenderableHelper(L"RenderablePlane")
 	{
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
@@ -537,42 +537,86 @@ namespace KlayGE
 		rl_ = rf.MakeRenderLayout();
 		rl_->TopologyType(RenderLayout::TT_TriangleList);
 
-		std::vector<float3> pos;
+		std::vector<int16_t> positions;
 		for (int y = 0; y < width_segs + 1; ++ y)
 		{
 			for (int x = 0; x < length_segs + 1; ++ x)
 			{
-				pos.push_back(float3(x * (length / length_segs) - length / 2,
-					-y * (width / width_segs) + width / 2, 0.0f));
+				float3 pos(static_cast<float>(x) / length_segs, 1 - (static_cast<float>(y) / width_segs), 0.5f);
+				int16_t s_pos[4] = 
+				{
+					static_cast<int16_t>(MathLib::clamp<int32_t>(static_cast<int32_t>(pos.x() * 65535 - 32768), -32768, 32767)),
+					static_cast<int16_t>(MathLib::clamp<int32_t>(static_cast<int32_t>(pos.y() * 65535 - 32768), -32768, 32767)),
+					static_cast<int16_t>(MathLib::clamp<int32_t>(static_cast<int32_t>(pos.z() * 65535 - 32768), -32768, 32767)),
+					32767
+				};
+
+				positions.push_back(s_pos[0]);
+				positions.push_back(s_pos[1]);
+				positions.push_back(s_pos[2]);
+				positions.push_back(s_pos[3]);
 			}
 		}
 
 		ElementInitData init_data;
-		init_data.row_pitch = static_cast<uint32_t>(pos.size() * sizeof(pos[0]));
+		init_data.row_pitch = static_cast<uint32_t>(positions.size() * sizeof(positions[0]));
 		init_data.slice_pitch = 0;
-		init_data.data = &pos[0];
+		init_data.data = &positions[0];
 
 		GraphicsBufferPtr pos_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, &init_data);
-		rl_->BindVertexStream(pos_vb, make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F)));
+		rl_->BindVertexStream(pos_vb, make_tuple(vertex_element(VEU_Position, 0, EF_SIGNED_ABGR16)));
 
 		if (has_tex_coord)
 		{
-			std::vector<float2> tex;
+			std::vector<int16_t> tex_coords;
 			for (int y = 0; y < width_segs + 1; ++ y)
 			{
 				for (int x = 0; x < length_segs + 1; ++ x)
 				{
-					tex.push_back(float2(static_cast<float>(x) / length_segs,
-						static_cast<float>(y) / width_segs));
+					float3 tex_coord(static_cast<float>(x) / length_segs * 0.5f + 0.5f,
+						static_cast<float>(y) / width_segs * 0.5f + 0.5f, 0.5f);
+					int16_t s_tc[2] = 
+					{
+						static_cast<int16_t>(MathLib::clamp<int32_t>(static_cast<int32_t>(tex_coord.x() * 65535 - 32768), -32768, 32767)),
+						static_cast<int16_t>(MathLib::clamp<int32_t>(static_cast<int32_t>(tex_coord.y() * 65535 - 32768), -32768, 32767)),
+					};
+
+					tex_coords.push_back(s_tc[0]);
+					tex_coords.push_back(s_tc[1]);
 				}
 			}
 
-			init_data.row_pitch = static_cast<uint32_t>(tex.size() * sizeof(tex[0]));
+			init_data.row_pitch = static_cast<uint32_t>(tex_coords.size() * sizeof(tex_coords[0]));
 			init_data.slice_pitch = 0;
-			init_data.data = &tex[0];
+			init_data.data = &tex_coords[0];
 
 			GraphicsBufferPtr tex_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, &init_data);
-			rl_->BindVertexStream(tex_vb, make_tuple(vertex_element(VEU_TextureCoord, 0, EF_GR32F)));
+			rl_->BindVertexStream(tex_vb, make_tuple(vertex_element(VEU_TextureCoord, 0, EF_SIGNED_GR16)));
+		}
+
+		if (has_tangent)
+		{
+			std::vector<uint32_t> tangent(positions.size() / 4);
+			ElementFormat fmt;
+			if (rf.RenderEngineInstance().DeviceCaps().vertex_format_support(EF_ABGR8))
+			{
+				fmt = EF_ABGR8;
+				tangent.assign(tangent.size(), 0x807F7FFE);
+			}
+			else
+			{
+				BOOST_ASSERT(rf.RenderEngineInstance().DeviceCaps().vertex_format_support(EF_ARGB8));
+
+				fmt = EF_ARGB8;
+				tangent.assign(tangent.size(), 0x80FE7F7F);
+			}
+
+			init_data.row_pitch = static_cast<uint32_t>(tangent.size() * sizeof(tangent[0]));
+			init_data.slice_pitch = 0;
+			init_data.data = &tangent[0];
+
+			GraphicsBufferPtr tex_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, &init_data);
+			rl_->BindVertexStream(tex_vb, make_tuple(vertex_element(VEU_Tangent, 0, fmt)));
 		}
 
 		std::vector<uint16_t> index;
@@ -597,7 +641,7 @@ namespace KlayGE
 		GraphicsBufferPtr ib = rf.MakeIndexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, &init_data);
 		rl_->BindIndexStream(ib, EF_R16UI);
 
-		pos_aabb_ = MathLib::compute_aabbox(pos.begin(), pos.end());
+		pos_aabb_ = AABBox(float3(-length / 2, -width / 2, 0), float3(+length / 2, +width / 2, 0));
 		tc_aabb_ = AABBox(float3(0, 0, 0), float3(1, 1, 0));
 	}
 

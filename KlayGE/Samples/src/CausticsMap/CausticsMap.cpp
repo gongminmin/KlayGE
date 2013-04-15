@@ -68,58 +68,8 @@ namespace
 	{
 	public:
 		ReceivePlane(float length, float width)
-			: RenderablePlane(length, width, 2, 2, true)
+			: RenderablePlane(length, width, 1, 1, true, true)
 		{
-			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-
-			uint32_t vertex_num = rl_->NumVertices();
-			vector<Quaternion> tangent_quats(vertex_num);
-			for (uint32_t i = 0; i < vertex_num; ++i)
-			{
-				float3 normal = float3(0, 0, -1);
-				float3 tangent = float3(1, 0, 0);
-				float3 binormal = MathLib::cross(normal, tangent);
-
-				tangent_quats[i] = MathLib::to_quaternion(tangent, binormal, normal, 8);
-			}
-
-			// convert to int
-			vector<uint32_t> itangent(vertex_num);
-			ElementFormat fmt;
-			if (rf.RenderEngineInstance().DeviceCaps().vertex_format_support(EF_ABGR8))
-			{
-				fmt = EF_ABGR8;
-
-				for (uint32_t j = 0; j < vertex_num; ++ j)
-				{
-					itangent[j] = (MathLib::clamp<uint32_t>(static_cast<uint32_t>((tangent_quats[j].x() * 0.5f + 0.5f) * 255), 0, 255) << 0)
-						| (MathLib::clamp<uint32_t>(static_cast<uint32_t>((tangent_quats[j].y() * 0.5f + 0.5f) * 255), 0, 255) << 8)
-						| (MathLib::clamp<uint32_t>(static_cast<uint32_t>((tangent_quats[j].z() * 0.5f + 0.5f) * 255), 0, 255) << 16)
-						| (MathLib::clamp<uint32_t>(static_cast<uint32_t>((tangent_quats[j].w() * 0.5f + 0.5f) * 255), 0, 255) << 24);
-				}
-			}
-			else
-			{
-				BOOST_ASSERT(rf.RenderEngineInstance().DeviceCaps().vertex_format_support(EF_ARGB8));
-
-				fmt = EF_ARGB8;
-
-				for (uint32_t j = 0; j < vertex_num; ++ j)
-				{
-					itangent[j] = (MathLib::clamp<uint32_t>(static_cast<uint32_t>((tangent_quats[j].x() * 0.5f + 0.5f) * 255), 0, 255) << 16)
-						| (MathLib::clamp<uint32_t>(static_cast<uint32_t>((tangent_quats[j].y() * 0.5f + 0.5f) * 255), 0, 255) << 8)
-						| (MathLib::clamp<uint32_t>(static_cast<uint32_t>((tangent_quats[j].z() * 0.5f + 0.5f) * 255), 0, 255) << 0)
-						| (MathLib::clamp<uint32_t>(static_cast<uint32_t>((tangent_quats[j].w() * 0.5f + 0.5f) * 255), 0, 255) << 24);
-				}
-			}
-
-			ElementInitData init_data;
-			init_data.row_pitch = vertex_num * sizeof(itangent[0]);
-			init_data.slice_pitch = 0;
-			init_data.data = &itangent[0];
-			GraphicsBufferPtr tangents_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, &init_data);
-			rl_->BindVertexStream(tangents_vb, KlayGE::make_tuple(vertex_element(VEU_Tangent, 0, fmt)));
-
 			RenderEffectPtr effect = SyncLoadRenderEffect("Scene.fxml");
 			technique_ = effect->TechniqueByName("DistanceMapping2a");
 			default_tech_ = technique_;
@@ -194,8 +144,8 @@ namespace
 			*(technique_->Effect().ParameterByName("mvp")) = model * camera.ViewProjMatrix();
 			*(technique_->Effect().ParameterByName("model")) = model;
 
-			*(technique_->Effect().ParameterByName("pos_center")) = float3(0, 0, 0);
-			*(technique_->Effect().ParameterByName("pos_extent")) = float3(1, 1, 1);
+			*(technique_->Effect().ParameterByName("pos_center")) = pos_aabb_.Center();
+			*(technique_->Effect().ParameterByName("pos_extent")) = pos_aabb_.HalfSize();
 
 			if ((Depth_WODT_Pass == pass_) || (Position_Pass == pass_))
 			{
