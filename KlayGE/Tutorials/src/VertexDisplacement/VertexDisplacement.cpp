@@ -43,7 +43,7 @@ namespace
 	{
 	public:
 		FlagRenderable(int length_segs, int width_segs)
-			: RenderablePlane(static_cast<float>(LENGTH), static_cast<float>(WIDTH), length_segs, width_segs, true)
+			: RenderablePlane(static_cast<float>(LENGTH), static_cast<float>(WIDTH), length_segs, width_segs, true, false)
 		{
 			technique_ = SyncLoadRenderEffect("VertexDisplacement.fxml")->TechniqueByName("VertexDisplacement");
 
@@ -51,6 +51,10 @@ namespace
 			*(technique_->Effect().ParameterByName("half_length")) = LENGTH / 2.0f;
 			*(technique_->Effect().ParameterByName("half_width")) = WIDTH / 2.0f;
 			*(technique_->Effect().ParameterByName("lightDir")) = float3(1, 0, -1);
+
+			AABBox const & pos_bb = this->PosBound();
+			*(technique_->Effect().ParameterByName("pos_center")) = pos_bb.Center();
+			*(technique_->Effect().ParameterByName("pos_extent")) = pos_bb.HalfSize();
 		}
 
 		void SetAngle(float angle)

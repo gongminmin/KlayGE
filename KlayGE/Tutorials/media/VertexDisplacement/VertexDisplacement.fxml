@@ -12,6 +12,9 @@
 	<parameter type="float" name="half_length"/>
 	<parameter type="float" name="half_width"/>
 
+	<parameter type="float3" name="pos_center"/>
+	<parameter type="float3" name="pos_extent"/>
+
 	<parameter type="texture2D" name="flag_tex"/>
 	<parameter type="sampler" name="flagSampler">
 		<state name="filtering" value="min_mag_linear_mip_point"/>
@@ -27,6 +30,8 @@ void VertexDisplacementVS(float4 pos			: POSITION,
 								out float3 oNormal		: TEXCOORD1,
 								out float4 oPos			: SV_Position)
 {
+	pos = float4(pos.xyz * pos_extent + pos_center, 1);
+
 	float4 v = pos;
 	float2 offset = pos.xy + float2(half_length, -half_width);
 	v.z = (cos(offset.x + currentAngle) + sin(offset.y + currentAngle)) * offset.x * 0.2f;
