@@ -477,14 +477,14 @@ uint32_t DeferredRenderingApp::DoUpdate(uint32_t pass)
 			}
 		}
 	}
-	else if (14 == pass)
+	else if (1 == pass)
 	{
 		num_objs_rendered_ = sceneMgr.NumObjectsRendered();
 		num_renderable_rendered_ = sceneMgr.NumRenderablesRendered();
 		num_primitives_rendered_ = sceneMgr.NumPrimitivesRendered();
 		num_vertices_rendered_ = sceneMgr.NumVerticesRendered();
 	}
-	else if (15 == pass)
+	else if (2 == pass)
 	{
 		if ((1 == buffer_type_) || (2 == buffer_type_) || (3 == buffer_type_))
 		{

@@ -859,6 +859,78 @@ namespace KlayGE
 			}
 
 			pass_scaned_.clear();
+			for (uint32_t vpi = 0; vpi < viewports_.size(); ++ vpi)
+			{
+				PerViewport& pvp = viewports_[vpi];
+				if (pvp.attrib & VPAM_Enabled)
+				{
+					pvp.g_buffer_enables[Opaque_GBuffer] = (pvp.attrib & VPAM_NoOpaque) ? false : has_opaque_objs;
+					pvp.g_buffer_enables[TransparencyBack_GBuffer] = (pvp.attrib & VPAM_NoTransparencyBack) ? false : has_transparency_back_objs;
+					pvp.g_buffer_enables[TransparencyFront_GBuffer] = (pvp.attrib & VPAM_NoTransparencyFront) ? false : has_transparency_front_objs;
+
+					pvp.light_visibles.assign(lights_.size(), true);
+
+					if (pvp.g_buffer_enables[Opaque_GBuffer])
+					{
+						if (!depth_texture_support_)
+						{
+							pass_scaned_.push_back(this->ComposePassScanCode(vpi, PT_OpaqueDepth, 0, 0));
+						}
+
+						if (mrt_g_buffer_support_)
+						{
+							pass_scaned_.push_back(this->ComposePassScanCode(vpi, PT_OpaqueGBufferMRT, 0, 0));
+							pass_scaned_.push_back(this->ComposePassScanCode(vpi, PT_OpaqueGBufferMRT, 0, 1));
+						}
+						else
+						{
+							pass_scaned_.push_back(this->ComposePassScanCode(vpi, PT_OpaqueGBufferRT0, 0, 0));
+							pass_scaned_.push_back(this->ComposePassScanCode(vpi, PT_OpaqueGBufferRT0, 0, 1));
+							pass_scaned_.push_back(this->ComposePassScanCode(vpi, PT_OpaqueGBufferRT1, 0, 0));
+							pass_scaned_.push_back(this->ComposePassScanCode(vpi, PT_OpaqueGBufferRT1, 0, 1));
+						}
+					}
+					if (pvp.g_buffer_enables[TransparencyBack_GBuffer])
+					{
+						if (!depth_texture_support_)
+						{
+							pass_scaned_.push_back(this->ComposePassScanCode(vpi, PT_TransparencyBackDepth, 0, 0));
+						}
+
+						if (mrt_g_buffer_support_)
+						{
+							pass_scaned_.push_back(this->ComposePassScanCode(vpi, PT_TransparencyBackGBufferMRT, 0, 0));
+							pass_scaned_.push_back(this->ComposePassScanCode(vpi, PT_TransparencyBackGBufferMRT, 0, 1));
+						}
+						else
+						{
+							pass_scaned_.push_back(this->ComposePassScanCode(vpi, PT_TransparencyBackGBufferRT0, 0, 0));
+							pass_scaned_.push_back(this->ComposePassScanCode(vpi, PT_TransparencyBackGBufferRT0, 0, 1));
+							pass_scaned_.push_back(this->ComposePassScanCode(vpi, PT_TransparencyBackGBufferRT1, 0, 0));
+						}
+					}
+					if (pvp.g_buffer_enables[TransparencyFront_GBuffer])
+					{
+						if (!depth_texture_support_)
+						{
+							pass_scaned_.push_back(this->ComposePassScanCode(vpi, PT_TransparencyFrontDepth, 0, 0));
+						}
+
+						if (mrt_g_buffer_support_)
+						{
+							pass_scaned_.push_back(this->ComposePassScanCode(vpi, PT_TransparencyFrontGBufferMRT, 0, 0));
+							pass_scaned_.push_back(this->ComposePassScanCode(vpi, PT_TransparencyFrontGBufferMRT, 0, 1));
+						}
+						else
+						{
+							pass_scaned_.push_back(this->ComposePassScanCode(vpi, PT_TransparencyFrontGBufferRT0, 0, 0));
+							pass_scaned_.push_back(this->ComposePassScanCode(vpi, PT_TransparencyFrontGBufferRT0, 0, 1));
+							pass_scaned_.push_back(this->ComposePassScanCode(vpi, PT_TransparencyFrontGBufferRT1, 0, 0));
+						}
+					}
+				}
+			}
+
 			for (uint32_t i = 0; i < lights_.size(); ++ i)
 			{
 				uint32_t vpi = 0;
@@ -960,71 +1032,6 @@ namespace KlayGE
 				PerViewport& pvp = viewports_[vpi];
 				if (pvp.attrib & VPAM_Enabled)
 				{
-					pvp.g_buffer_enables[Opaque_GBuffer] = (pvp.attrib & VPAM_NoOpaque) ? false : has_opaque_objs;
-					pvp.g_buffer_enables[TransparencyBack_GBuffer] = (pvp.attrib & VPAM_NoTransparencyBack) ? false : has_transparency_back_objs;
-					pvp.g_buffer_enables[TransparencyFront_GBuffer] = (pvp.attrib & VPAM_NoTransparencyFront) ? false : has_transparency_front_objs;
-
-					pvp.light_visibles.assign(lights_.size(), true);
-
-					if (pvp.g_buffer_enables[Opaque_GBuffer])
-					{
-						if (!depth_texture_support_)
-						{
-							pass_scaned_.push_back(this->ComposePassScanCode(vpi, PT_OpaqueDepth, 0, 0));
-						}
-
-						if (mrt_g_buffer_support_)
-						{
-							pass_scaned_.push_back(this->ComposePassScanCode(vpi, PT_OpaqueGBufferMRT, 0, 0));
-							pass_scaned_.push_back(this->ComposePassScanCode(vpi, PT_OpaqueGBufferMRT, 0, 1));
-						}
-						else
-						{
-							pass_scaned_.push_back(this->ComposePassScanCode(vpi, PT_OpaqueGBufferRT0, 0, 0));
-							pass_scaned_.push_back(this->ComposePassScanCode(vpi, PT_OpaqueGBufferRT0, 0, 1));
-							pass_scaned_.push_back(this->ComposePassScanCode(vpi, PT_OpaqueGBufferRT1, 0, 0));
-							pass_scaned_.push_back(this->ComposePassScanCode(vpi, PT_OpaqueGBufferRT1, 0, 1));
-						}
-					}
-					if (pvp.g_buffer_enables[TransparencyBack_GBuffer])
-					{
-						if (!depth_texture_support_)
-						{
-							pass_scaned_.push_back(this->ComposePassScanCode(vpi, PT_TransparencyBackDepth, 0, 0));
-						}
-
-						if (mrt_g_buffer_support_)
-						{
-							pass_scaned_.push_back(this->ComposePassScanCode(vpi, PT_TransparencyBackGBufferMRT, 0, 0));
-							pass_scaned_.push_back(this->ComposePassScanCode(vpi, PT_TransparencyBackGBufferMRT, 0, 1));
-						}
-						else
-						{
-							pass_scaned_.push_back(this->ComposePassScanCode(vpi, PT_TransparencyBackGBufferRT0, 0, 0));
-							pass_scaned_.push_back(this->ComposePassScanCode(vpi, PT_TransparencyBackGBufferRT0, 0, 1));
-							pass_scaned_.push_back(this->ComposePassScanCode(vpi, PT_TransparencyBackGBufferRT1, 0, 0));
-						}
-					}
-					if (pvp.g_buffer_enables[TransparencyFront_GBuffer])
-					{
-						if (!depth_texture_support_)
-						{
-							pass_scaned_.push_back(this->ComposePassScanCode(vpi, PT_TransparencyFrontDepth, 0, 0));
-						}
-
-						if (mrt_g_buffer_support_)
-						{
-							pass_scaned_.push_back(this->ComposePassScanCode(vpi, PT_TransparencyFrontGBufferMRT, 0, 0));
-							pass_scaned_.push_back(this->ComposePassScanCode(vpi, PT_TransparencyFrontGBufferMRT, 0, 1));
-						}
-						else
-						{
-							pass_scaned_.push_back(this->ComposePassScanCode(vpi, PT_TransparencyFrontGBufferRT0, 0, 0));
-							pass_scaned_.push_back(this->ComposePassScanCode(vpi, PT_TransparencyFrontGBufferRT0, 0, 1));
-							pass_scaned_.push_back(this->ComposePassScanCode(vpi, PT_TransparencyFrontGBufferRT1, 0, 0));
-						}
-					}
-
 					for (uint32_t i = 0; i < lights_.size(); ++ i)
 					{
 						LightSourcePtr const & light = lights_[i];
