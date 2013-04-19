@@ -106,14 +106,34 @@ namespace KlayGE
 									0, usage, &usage_length, preparsed_data,
 									reinterpret_cast<CHAR*>(const_cast<BYTE*>(ri.data.hid.bRawData)), ri.data.hid.dwSizeHid))
 								{
-									buttons_[!index_].fill(false);
+									buttons_state_.fill(false);
 									for (uint32_t i = 0; i < usage_length; ++ i)
 									{
-										buttons_[!index_][usage[i] - button_caps[0].Range.UsageMin] = true;
+										buttons_state_[usage[i] - button_caps[0].Range.UsageMin] = true;
 									}
 
 									for (uint32_t i = 0; i < caps.NumberInputValueCaps; ++ i)
 									{
+										long center;
+										long shift;
+										switch (value_caps[i].BitField)
+										{
+										case 1:
+											center = 0x80;
+											shift = 0;
+											break;
+
+										case 2:
+											center = 0x8000;
+											shift = 8;
+											break;
+
+										default:
+											center = 0;
+											shift = 0;
+											break;
+										}
+
 										ULONG value;
 										if (HIDP_STATUS_SUCCESS == mie.HidP_GetUsageValue(HidP_Input, value_caps[i].UsagePage,
 											0, value_caps[i].Range.UsageMin, &value, preparsed_data,
@@ -122,35 +142,35 @@ namespace KlayGE
 											switch (value_caps[i].Range.UsageMin)
 											{
 											case HID_USAGE_GENERIC_X:
-												pos_state_.x() = static_cast<long>(value) - 128;
+												pos_state_.x() = (static_cast<long>(value) - center) >> shift;
 												break;
 
 											case HID_USAGE_GENERIC_Y:
-												pos_state_.y() = static_cast<long>(value) - 128;
+												pos_state_.y() = (static_cast<long>(value) - center) >> shift;
 												break;
 
 											case HID_USAGE_GENERIC_Z:
-												pos_state_.z() = static_cast<long>(value) - 128;
+												pos_state_.z() = (static_cast<long>(value) - center) >> shift;
 												break;
 
 											case HID_USAGE_GENERIC_RX:
-												rot_state_.x() = static_cast<long>(value) - 128;
+												rot_state_.x() = (static_cast<long>(value) - center) >> shift;
 												break;
 
 											case HID_USAGE_GENERIC_RY:
-												rot_state_.y() = static_cast<long>(value) - 128;
+												rot_state_.y() = (static_cast<long>(value) - center) >> shift;
 												break;
 
 											case HID_USAGE_GENERIC_RZ:
-												rot_state_.z() = static_cast<long>(value) - 128;
+												rot_state_.z() = (static_cast<long>(value) - center) >> shift;
 												break;
 
 											case HID_USAGE_GENERIC_SLIDER:
-												slider_state_.x() = static_cast<long>(value) - 128;
+												slider_state_.x() = (static_cast<long>(value) - center) >> shift;
 												break;
 
 											case HID_USAGE_GENERIC_DIAL:
-												slider_state_.y() = static_cast<long>(value) - 128;
+												slider_state_.y() = (static_cast<long>(value) - center) >> shift;
 												break;
 
 											default:
@@ -175,8 +195,6 @@ namespace KlayGE
 
 		index_ = !index_;
 		buttons_[index_] = buttons_state_;
-
-		buttons_state_.fill(false);
 	}
 }
 #endif
