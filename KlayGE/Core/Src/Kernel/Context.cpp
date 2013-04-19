@@ -40,6 +40,7 @@
 #ifdef KLAYGE_PLATFORM_ANDROID
 #include <KlayGE/OpenGLES/OGLESRenderFactory.hpp>
 #include <KlayGE/OCTree/OCTreeFactory.hpp>
+#include <KlayGE/MsgInput/MInputFactory.hpp>
 #endif
 
 #include <KlayGE/Context.hpp>
@@ -727,6 +728,8 @@ namespace KlayGE
 	void Context::LoadInputFactory(std::string const & if_name)
 	{
 		input_factory_ = InputFactory::NullObject();
+
+#ifndef KLAYGE_PLATFORM_ANDROID
 		input_loader_.Free();
 
 		std::string input_path = ResLoader::Instance().Locate("Input");
@@ -745,6 +748,9 @@ namespace KlayGE
 			LogError("Loading %s failed", path.c_str());
 			input_loader_.Free();
 		}
+#else
+		MakeInputFactory(input_factory_);
+#endif
 	}
 
 	void Context::LoadShowFactory(std::string const & sf_name)

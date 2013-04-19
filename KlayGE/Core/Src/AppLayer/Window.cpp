@@ -896,14 +896,14 @@ namespace KlayGE
 			case AMOTION_EVENT_ACTION_DOWN:
 			case AMOTION_EVENT_ACTION_POINTER_DOWN:
 				win->OnPointerDown()(*win,
-					int2(AMotionEvent_getX(event, pointer_id), AMotionEvent_getY(event, pointer_id)),
+					int2(AMotionEvent_getX(event, pointer_id), AMotionEvent_getY(event, pointer_id + 1)),
 					pointer_id);
 				break;
 
 			case AMOTION_EVENT_ACTION_UP:
 			case AMOTION_EVENT_ACTION_POINTER_UP:
 				win->OnPointerUp()(*win,
-					int2(AMotionEvent_getX(event, pointer_id), AMotionEvent_getY(event, pointer_id)),
+					int2(AMotionEvent_getX(event, pointer_id), AMotionEvent_getY(event, pointer_id + 1)),
 					pointer_id);
 				break;
 
@@ -911,7 +911,7 @@ namespace KlayGE
 				for (size_t i = 0; i < AMotionEvent_getPointerCount(event); ++i)
 				{
 					win->OnPointerUpdate()(*win,
-						int2(AMotionEvent_getX(event, i), AMotionEvent_getY(event, i)), i, true);
+						int2(AMotionEvent_getX(event, i), AMotionEvent_getY(event, i)), i + 1, true);
 				}
 				break;
 
