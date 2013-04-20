@@ -4,4 +4,3 @@ EXPORTS
 
 	initializePlugin	@1
 	uninitializePlugin	@2
-	MApiVersion			@3

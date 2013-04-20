@@ -896,15 +896,15 @@ namespace KlayGE
 			case AMOTION_EVENT_ACTION_DOWN:
 			case AMOTION_EVENT_ACTION_POINTER_DOWN:
 				win->OnPointerDown()(*win,
-					int2(AMotionEvent_getX(event, pointer_id), AMotionEvent_getY(event, pointer_id + 1)),
-					pointer_id);
+					int2(AMotionEvent_getX(event, pointer_id), AMotionEvent_getY(event, pointer_id)),
+					pointer_id + 1);
 				break;
 
 			case AMOTION_EVENT_ACTION_UP:
 			case AMOTION_EVENT_ACTION_POINTER_UP:
 				win->OnPointerUp()(*win,
-					int2(AMotionEvent_getX(event, pointer_id), AMotionEvent_getY(event, pointer_id + 1)),
-					pointer_id);
+					int2(AMotionEvent_getX(event, pointer_id), AMotionEvent_getY(event, pointer_id)),
+					pointer_id + 1);
 				break;
 
 			case AMOTION_EVENT_ACTION_MOVE:

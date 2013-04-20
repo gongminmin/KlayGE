@@ -844,7 +844,7 @@ namespace KlayGE
 			{
 				internalFormat = GL_RGBA32UI;
 				glformat = GL_RGBA_INTEGER;
-				gltype = GL_UNSIGNED_SHORT;
+				gltype = GL_UNSIGNED_INT;
 			}
 			else
 			{
@@ -857,7 +857,7 @@ namespace KlayGE
 			{
 				internalFormat = GL_RGBA32I;
 				glformat = GL_RGBA_INTEGER;
-				gltype = GL_SHORT;
+				gltype = GL_INT;
 			}
 			else
 			{

@@ -20,6 +20,9 @@
 #endif
 #pragma warning(pop)
 
+#ifdef UNICODE
+#include <vector>
+#endif
 #include "util.hpp"
 
 namespace KlayGE
@@ -27,9 +30,10 @@ namespace KlayGE
 	std::string tstr_to_str(std::basic_string<TCHAR> const & tstr)
 	{
 	#ifdef UNICODE
-		std::vector<char> temp(wcstombs(NULL, tstr.c_str(), 0));
-		wcstombs(&temp[0], tstr.c_str(), temp.size());
-		return std::string(temp.begin(), temp.end());
+		int const mbs_len = WideCharToMultiByte(CP_ACP, 0, tstr.c_str(), static_cast<int>(tstr.size()), NULL, 0, NULL, NULL);
+		std::vector<char> tmp(mbs_len + 1);
+		WideCharToMultiByte(CP_ACP, 0, tstr.c_str(), static_cast<int>(tstr.size()), &tmp[0], mbs_len, NULL, NULL);
+		return std::string(tmp.begin(), tmp.end() - 1);
 	#else
 		return tstr;
 	#endif

@@ -136,7 +136,7 @@ namespace KlayGE
 		if (::DialogBoxParam(dll_instance, MAKEINTRESOURCE(IDD_MESHML_EXPORT), max_wnd,
 			export_wnd_proc, reinterpret_cast<LPARAM>(this)))
 		{
-			MessageBox(max_wnd, TEXT("导出成功！"), TEXT("MeshML Export"), MB_OK);
+			::MessageBox(max_wnd, TEXT("导出成功！"), TEXT("MeshML Export"), MB_OK);
 		}
 
 		return 1;
