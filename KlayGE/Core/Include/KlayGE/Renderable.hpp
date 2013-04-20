@@ -31,33 +31,99 @@
 
 namespace KlayGE
 {
+	enum PassCategory
+	{
+		PC_Depth = 0,
+		PC_GBuffer,
+		PC_ShadowMap,
+		PC_Lighting,
+		PC_IndirectLighting,
+		PC_Shading,
+		PC_SpecialShading,
+		PC_SimpleForward,
+		PC_None
+	};
+
+	enum PassTargetBuffer
+	{
+		PTB_Opaque = 0,
+		PTB_TransparencyBack,
+		PTB_TransparencyFront,
+		PTB_None
+	};
+
+	enum PassRT
+	{
+		PRT_RT0 = 0,
+		PRT_RT1,
+		PRT_MRT,
+		PRT_ShadowMap,
+		PRT_ShadowMapWODepth,
+		PRT_ReflectiveShadowMap,
+		PRT_None
+	};
+
+	// pass type is a 32-bit value:
+	// 0000000000000000000000 C3 C2 C1 C0 TB1 TB0 RT3 RT2 RT1 RT0
+
+	template <PassRT rt, PassTargetBuffer tb, PassCategory cat>
+	struct MakePassType
+	{
+		static uint32_t const value = (rt << 0) | (tb << 4) | (cat << 6);
+	};
+
 	enum PassType
 	{
-		PT_OpaqueDepth,
-		PT_TransparencyBackDepth,
-		PT_TransparencyFrontDepth,
-		PT_OpaqueGBufferRT0,
-		PT_TransparencyBackGBufferRT0,
-		PT_TransparencyFrontGBufferRT0,
-		PT_OpaqueGBufferRT1,
-		PT_TransparencyBackGBufferRT1,
-		PT_TransparencyFrontGBufferRT1,
-		PT_OpaqueGBufferMRT,
-		PT_TransparencyBackGBufferMRT,
-		PT_TransparencyFrontGBufferMRT,
-		PT_GenShadowMap,
-		PT_GenShadowMapWODepthTexture,
-		PT_GenReflectiveShadowMap,
-		PT_Lighting,
-		PT_IndirectLighting,
-		PT_OpaqueShading,
-		PT_TransparencyBackShading,
-		PT_TransparencyFrontShading,
-		PT_OpaqueSpecialShading,
-		PT_TransparencyBackSpecialShading,
-		PT_TransparencyFrontSpecialShading,
-		PT_SimpleForward
+		PT_OpaqueDepth = MakePassType<PRT_None, PTB_Opaque, PC_Depth>::value,
+		PT_TransparencyBackDepth = MakePassType<PRT_None, PTB_TransparencyBack, PC_Depth>::value,
+		PT_TransparencyFrontDepth = MakePassType<PRT_None, PTB_TransparencyFront, PC_Depth>::value,
+		
+		PT_OpaqueGBufferRT0 = MakePassType<PRT_RT0, PTB_Opaque, PC_GBuffer>::value,
+		PT_TransparencyBackGBufferRT0 = MakePassType<PRT_RT0, PTB_TransparencyBack, PC_GBuffer>::value,
+		PT_TransparencyFrontGBufferRT0 = MakePassType<PRT_RT0, PTB_TransparencyFront, PC_GBuffer>::value,
+		PT_OpaqueGBufferRT1 = MakePassType<PRT_RT1, PTB_Opaque, PC_GBuffer>::value,
+		PT_TransparencyBackGBufferRT1 = MakePassType<PRT_RT1, PTB_TransparencyBack, PC_GBuffer>::value,
+		PT_TransparencyFrontGBufferRT1 = MakePassType<PRT_RT1, PTB_TransparencyFront, PC_GBuffer>::value,
+		PT_OpaqueGBufferMRT = MakePassType<PRT_MRT, PTB_Opaque, PC_GBuffer>::value,
+		PT_TransparencyBackGBufferMRT = MakePassType<PRT_MRT, PTB_TransparencyBack, PC_GBuffer>::value,
+		PT_TransparencyFrontGBufferMRT = MakePassType<PRT_MRT, PTB_TransparencyFront, PC_GBuffer>::value,
+		
+		PT_GenShadowMap = MakePassType<PRT_ShadowMap, PTB_None, PC_ShadowMap>::value,
+		PT_GenShadowMapWODepthTexture = MakePassType<PRT_ShadowMapWODepth, PTB_None, PC_ShadowMap>::value,
+		PT_GenReflectiveShadowMap = MakePassType<PRT_ReflectiveShadowMap, PTB_None, PC_ShadowMap>::value,
+		
+		PT_Lighting = MakePassType<PRT_None, PTB_None, PC_Lighting>::value,
+		
+		PT_IndirectLighting = MakePassType<PRT_None, PTB_None, PC_IndirectLighting>::value,
+		
+		PT_OpaqueShading = MakePassType<PRT_None, PTB_Opaque, PC_Shading>::value,
+		PT_TransparencyBackShading = MakePassType<PRT_None, PTB_TransparencyBack, PC_Shading>::value,
+		PT_TransparencyFrontShading = MakePassType<PRT_None, PTB_TransparencyFront, PC_Shading>::value,
+		
+		PT_OpaqueSpecialShading = MakePassType<PRT_None, PTB_Opaque, PC_SpecialShading>::value,
+		PT_TransparencyBackSpecialShading = MakePassType<PRT_None, PTB_TransparencyBack, PC_SpecialShading>::value,
+		PT_TransparencyFrontSpecialShading = MakePassType<PRT_None, PTB_TransparencyFront, PC_SpecialShading>::value,
+		
+		PT_SimpleForward = MakePassType<PRT_None, PTB_None, PC_SimpleForward>::value
 	};
+
+	inline PassRT GetPassRT(PassType pt)
+	{
+		return static_cast<PassRT>(pt & 0xF);
+	}
+	inline PassTargetBuffer GetPassTargetBuffer(PassType pt)
+	{
+		return static_cast<PassTargetBuffer>((pt >> 4) & 0x3);
+	}
+	inline PassCategory GetPassCategory(PassType pt)
+	{
+		return static_cast<PassCategory>((pt >> 6) & 0xF);
+	}
+	inline PassType ComposePassType(PassRT rt, PassTargetBuffer tb, PassCategory cat)
+	{
+		return static_cast<PassType>((rt << 0) | (tb << 4) | (cat << 6));
+	}
+
 
 	typedef std::vector<std::pair<std::string, std::string> > TextureSlotsType;
 	struct KLAYGE_CORE_API RenderMaterial

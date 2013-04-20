@@ -224,10 +224,33 @@ namespace KlayGE
 
 	private:
 		void SetupViewportGI(uint32_t vp);
-		void AccumulateToLightingTex(uint32_t vp);
+		void AccumulateToLightingTex(PerViewport const & pvp);
 
-		uint32_t ComposePassScanCode(uint32_t vp_index, int32_t pass_type, int32_t org_no, int32_t index_in_pass);
-		void DecomposePassScanCode(uint32_t& vp_index, int32_t& pass_type, int32_t& org_no, int32_t& index_in_pass, uint32_t code);
+		uint32_t ComposePassScanCode(uint32_t vp_index, PassType pass_type, int32_t org_no, int32_t index_in_pass);
+		void DecomposePassScanCode(uint32_t& vp_index, PassType& pass_type, int32_t& org_no, int32_t& index_in_pass, uint32_t code);
+
+		void BuildLightList();
+		void BuildVisibleSceneObjList(bool& has_opaque_objs, bool& has_transparency_back_objs, bool& has_transparency_front_objs);
+		void BuildPassScanList(bool has_opaque_objs, bool has_transparency_back_objs, bool has_transparency_front_objs);
+		void AppendGBufferPassScanCode(uint32_t vp_index, uint32_t g_buffer_index);
+		void AppendShadowPassScanCode(uint32_t light_index);
+		void AppendLightingPassScanCode(uint32_t vp_index, uint32_t light_index);
+		void AppendShadingPassScanCode(uint32_t vp_index);
+		void PreparePVP(PerViewport& pvp);
+		void GenerateDepthBuffer(PerViewport const & pvp, uint32_t g_buffer_index);
+		void GenerateGBuffer(PerViewport const & pvp, uint32_t g_buffer_index);
+		void PostGenerateGBuffer(PerViewport const & pvp, uint32_t g_buffer_index);
+		void RenderDecals(PerViewport const & pvp, PassType pass_type);
+		RenderLayoutPtr PrepareLightCamera(PerViewport const & pvp, LightSourcePtr const & light,
+			int32_t index_in_pass, PassType pass_type);
+		void PostGenerateShadowMap(int32_t org_no, int32_t index_in_pass);
+		void UpdateShadowing(PerViewport const & pvp, uint32_t g_buffer_index, int32_t org_no, RenderLayoutPtr const & rl);
+		void UpdateLighting(PerViewport const & pvp, uint32_t g_buffer_index, LightType type, RenderLayoutPtr const & rl);
+		void UpdateIndirectAndSSVO(PerViewport const & pvp);
+		void UpdateShading(PerViewport const & pvp, uint32_t g_buffer_index);
+		void AddSSR(PerViewport const & pvp);
+		void AddAtmospheric(PerViewport const & pvp);
+		void MergeShadingAndDepth(PerViewport const & pvp);
 
 	private:
 		bool mrt_g_buffer_support_;
