@@ -781,7 +781,7 @@ namespace
 		std::vector<vertex_element>& merged_ves,
 		std::vector<std::vector<uint8_t> >& merged_vertices)
 	{
-		uint32_t num_vertices = positions.size() / 4;
+		uint32_t num_vertices = static_cast<uint32_t>(positions.size() / 4);
 		uint32_t base_vertices = mesh_base_vertices.back();
 		mesh_num_vertices.push_back(num_vertices);
 		mesh_base_vertices.push_back(base_vertices + num_vertices);
@@ -966,7 +966,7 @@ namespace
 	{
 		is_index_16_bit &= is_index_16s;
 
-		uint32_t num_indices = triangle_indices.size() / (is_index_16s ? 2 : 4);
+		uint32_t num_indices = static_cast<uint32_t>(triangle_indices.size() / (is_index_16s ? 2 : 4));
 		uint32_t start_indicees = mesh_start_indices.back();
 		mesh_num_indices.push_back(num_indices);
 		mesh_start_indices.push_back(start_indicees + num_indices);

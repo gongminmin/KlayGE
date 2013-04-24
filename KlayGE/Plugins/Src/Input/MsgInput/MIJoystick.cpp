@@ -61,7 +61,8 @@ namespace KlayGE
 					uint16_t caps_length = caps.NumberInputButtonCaps;
 					if (HIDP_STATUS_SUCCESS == mie.HidP_GetButtonCaps(HidP_Input, &button_caps[0], &caps_length, preparsed_data))
 					{
-						num_buttons_ = std::min<uint32_t>(buttons_[0].size(), button_caps[0].Range.UsageMax - button_caps[0].Range.UsageMin + 1);
+						num_buttons_ = std::min<uint32_t>(static_cast<uint32_t>(buttons_[0].size()),
+							button_caps[0].Range.UsageMax - button_caps[0].Range.UsageMin + 1);
 					}
 				}
 			}

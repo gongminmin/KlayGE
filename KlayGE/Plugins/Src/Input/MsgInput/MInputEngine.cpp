@@ -154,7 +154,7 @@ namespace KlayGE
 			}
 		}
 
-		if (::RegisterRawInputDevices(&rids[0], rids.size(), sizeof(rids[0])))
+		if (::RegisterRawInputDevices(&rids[0], static_cast<UINT>(rids.size()), sizeof(rids[0])))
 		{
 			on_raw_input_ = main_wnd->OnRawInput().connect(bind(&MsgInputEngine::OnRawInput, this,
 				placeholders::_1, placeholders::_2));

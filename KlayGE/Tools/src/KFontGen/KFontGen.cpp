@@ -475,7 +475,7 @@ private:
 					{
 						while (bsf64(index, m64[i]))
 						{
-							this->add_edge_point(x + 64 * i + index, y, dmap, dist_cache, x_offset, y_offset);
+							this->add_edge_point(x + 64 * i + index, y, *param.dmap, *param.dist_cache, param.x_offset, param.y_offset);
 							m64[i] &= m64[i] - 1;
 						}
 					}
@@ -533,7 +533,7 @@ private:
 #ifdef KLAYGE_CPU_X64
 					while (bsf64(index, mask))
 					{
-						this->add_edge_point(x + index, y, dmap, dist_cache, x_offset, y_offset);
+						this->add_edge_point(x + index, y, *param.dmap, *param.dist_cache, param.x_offset, param.y_offset);
 						mask &= mask - 1;
 					}
 #else
