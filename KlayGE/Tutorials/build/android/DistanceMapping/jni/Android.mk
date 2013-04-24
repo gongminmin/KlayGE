@@ -14,7 +14,8 @@ LOCAL_PATH := $(DISTANCEMAPPING_SRC_PATH)
 CPP_FILE_LIST := $(wildcard $(LOCAL_PATH)/*.cpp)
 LOCAL_SRC_FILES := $(CPP_FILE_LIST:$(LOCAL_PATH)/%=%)
 LOCAL_LDLIBS := -llog -landroid
-LOCAL_STATIC_LIBRARIES := KlayGE_Core KlayGE_Render_OpenGLES KlayGE_Scene_OCTree KlayGE_Input_MsgInput KlayGE_Core KFL glloader kfont MeshMLLib \
+LOCAL_WHOLE_STATIC_LIBRARIES := KlayGE_Render_OpenGLES KlayGE_Scene_OCTree KlayGE_Input_MsgInput
+LOCAL_STATIC_LIBRARIES := KlayGE_Core KFL glloader kfont MeshMLLib \
 		boost_chrono boost_filesystem boost_system boost_thread \
 		LZMA my_android_native_app_glue
 
