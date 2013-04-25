@@ -241,11 +241,11 @@ namespace KlayGE
 		void GenerateGBuffer(PerViewport const & pvp, uint32_t g_buffer_index);
 		void PostGenerateGBuffer(PerViewport const & pvp, uint32_t g_buffer_index);
 		void RenderDecals(PerViewport const & pvp, PassType pass_type);
-		RenderLayoutPtr PrepareLightCamera(PerViewport const & pvp, LightSourcePtr const & light,
+		void PrepareLightCamera(PerViewport const & pvp, LightSourcePtr const & light,
 			int32_t index_in_pass, PassType pass_type);
 		void PostGenerateShadowMap(int32_t org_no, int32_t index_in_pass);
-		void UpdateShadowing(PerViewport const & pvp, uint32_t g_buffer_index, int32_t org_no, RenderLayoutPtr const & rl);
-		void UpdateLighting(PerViewport const & pvp, uint32_t g_buffer_index, LightType type, RenderLayoutPtr const & rl);
+		void UpdateShadowing(PerViewport const & pvp, uint32_t g_buffer_index, int32_t org_no);
+		void UpdateLighting(PerViewport const & pvp, uint32_t g_buffer_index, LightType type);
 		void UpdateIndirectAndSSVO(PerViewport const & pvp);
 		void UpdateShading(PerViewport const & pvp, uint32_t g_buffer_index);
 		void AddSSR(PerViewport const & pvp);
@@ -276,6 +276,7 @@ namespace KlayGE
 		RenderLayoutPtr rl_pyramid_;
 		RenderLayoutPtr rl_box_;
 		RenderLayoutPtr rl_quad_;
+		array<RenderLayoutPtr, LT_NumLightTypes> light_volume_rl_;
 		OBBox cone_obb_;
 		OBBox pyramid_obb_;
 		OBBox box_obb_;

@@ -386,6 +386,11 @@ namespace KlayGE
 				make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F)));
 		}
 
+		light_volume_rl_[LT_Ambient] = rl_quad_;
+		light_volume_rl_[LT_Directional] = rl_quad_;
+		light_volume_rl_[LT_Point] = rl_box_;
+		light_volume_rl_[LT_Spot] = rl_cone_;
+
 		g_buffer_effect_ = SyncLoadRenderEffect("GBuffer.fxml");
 		dr_effect_ = SyncLoadRenderEffect("DeferredRendering.fxml");
 
@@ -848,7 +853,7 @@ namespace KlayGE
 		case PC_ShadowMap:
 			{
 				LightSourcePtr const & light = lights_[org_no];
-				RenderLayoutPtr rl = this->PrepareLightCamera(pvp, light, index_in_pass, pass_type);
+				this->PrepareLightCamera(pvp, light, index_in_pass, pass_type);
 
 				if (index_in_pass > 0)
 				{
@@ -899,7 +904,7 @@ namespace KlayGE
 				LightType type = light->Type();
 				int32_t attr = light->Attrib();
 
-				RenderLayoutPtr rl = this->PrepareLightCamera(pvp, light, index_in_pass, pass_type);
+				this->PrepareLightCamera(pvp, light, index_in_pass, pass_type);
 
 				if (LT_Point == type)
 				{
@@ -919,8 +924,8 @@ namespace KlayGE
 				{
 					if (pvp.g_buffer_enables[i])
 					{
-						this->UpdateShadowing(pvp, i, org_no, rl);
-						this->UpdateLighting(pvp, i, type, rl);							
+						this->UpdateShadowing(pvp, i, org_no);
+						this->UpdateLighting(pvp, i, type);							
 					}
 				}
 
@@ -1421,12 +1426,11 @@ namespace KlayGE
 		}
 	}
 
-	RenderLayoutPtr DeferredRenderingLayer::PrepareLightCamera(PerViewport const & pvp,
+	void DeferredRenderingLayer::PrepareLightCamera(PerViewport const & pvp,
 		LightSourcePtr const & light, int32_t index_in_pass, PassType pass_type)
 	{
 		LightType const type = light->Type();
 
-		RenderLayoutPtr rl;
 		switch (type)
 		{
 		case LT_Point:
@@ -1441,43 +1445,28 @@ namespace KlayGE
 				}
 				else
 				{
-					if (index_in_pass < 6)
-					{
-						std::pair<float3, float3> ad = CubeMapViewVector<float>(static_cast<Texture::CubeFaces>(index_in_pass));
-						dir_es = MathLib::transform_normal(MathLib::transform_quat(ad.first, light->Rotation()), pvp.view);
-						sm_camera = light->SMCamera(index_in_pass);
-					}
-					else
-					{
-						std::pair<float3, float3> ad = CubeMapViewVector<float>(static_cast<Texture::CubeFaces>(5));
-						dir_es = MathLib::transform_normal(MathLib::transform_quat(ad.first, light->Rotation()), pvp.view);
-						sm_camera = light->SMCamera(5);
-					}
+					int32_t face = std::min(index_in_pass, 5);
+					std::pair<float3, float3> ad = CubeMapViewVector<float>(static_cast<Texture::CubeFaces>(face));
+					dir_es = MathLib::transform_normal(MathLib::transform_quat(ad.first, light->Rotation()), pvp.view);
+					sm_camera = light->SMCamera(face);
 				}
 				float4 light_dir_es_actived = float4(dir_es.x(), dir_es.y(), dir_es.z(), 0);
 
-				float4x4 light_to_view, light_to_proj;
-				if (sm_camera)
+				sm_buffer_->GetViewport()->camera = sm_camera;
+
+				*light_view_proj_param_ = pvp.inv_view * sm_camera->ViewProjMatrix();
+
+				float4x4 light_to_view = sm_camera->InverseViewMatrix() * pvp.view;
+				float4x4 light_to_proj = light_to_view * pvp.proj;
+
+				if (depth_texture_support_ && ((PT_GenShadowMap == pass_type) || (PT_GenReflectiveShadowMap == pass_type)))
 				{
-					sm_buffer_->GetViewport()->camera = sm_camera;
+					float q = sm_camera->FarPlane() / (sm_camera->FarPlane() - sm_camera->NearPlane());
+					float2 near_q(sm_camera->NearPlane() * q, q);
+					depth_to_vsm_pp_->SetParam(0, near_q);
 
-					*light_view_proj_param_ = pvp.inv_view * sm_camera->ViewMatrix() * sm_camera->ProjMatrix();
-
-					light_to_view = sm_camera->InverseViewMatrix() * pvp.view;
-					light_to_proj = light_to_view * pvp.proj;
-				}
-
-				if ((PT_GenShadowMap == pass_type) || (PT_GenReflectiveShadowMap == pass_type))
-				{
-					if (depth_texture_support_)
-					{
-						float q = sm_camera->FarPlane() / (sm_camera->FarPlane() - sm_camera->NearPlane());
-						float2 near_q(sm_camera->NearPlane() * q, q);
-						depth_to_vsm_pp_->SetParam(0, near_q);
-							
-						float4x4 inv_sm_proj = sm_camera->InverseProjMatrix();
-						depth_to_vsm_pp_->SetParam(1, inv_sm_proj);
-					}
+					float4x4 inv_sm_proj = sm_camera->InverseProjMatrix();
+					depth_to_vsm_pp_->SetParam(1, inv_sm_proj);
 				}
 
 				float3 const & p = light->Position();
@@ -1491,7 +1480,6 @@ namespace KlayGE
 						light_pos_es_actived.w() = light->CosOuterInner().x();
 						light_dir_es_actived.w() = light->CosOuterInner().y();
 
-						rl = rl_cone_;
 						float const scale = light->CosOuterInner().w();
 						float4x4 light_model = MathLib::scaling(scale * light_scale_, scale * light_scale_, light_scale_);
 						*light_volume_mv_param_ = light_model * light_to_view;
@@ -1502,7 +1490,6 @@ namespace KlayGE
 				case LT_Point:
 					if (PT_Lighting == pass_type)
 					{
-						rl = rl_box_;
 						float4x4 light_model = MathLib::scaling(light_scale_, light_scale_, light_scale_)
 							* MathLib::to_matrix(light->Rotation()) * MathLib::translation(p);
 						*light_volume_mv_param_ = light_model * pvp.view;
@@ -1511,7 +1498,6 @@ namespace KlayGE
 					}
 					else
 					{
-						rl = rl_pyramid_;
 						*light_volume_mv_param_ = light_to_view;
 						*light_volume_mvp_param_ = light_to_proj;
 					}
@@ -1532,7 +1518,6 @@ namespace KlayGE
 				float3 dir_es = MathLib::transform_normal(light->Direction(), pvp.view);
 				*light_dir_es_param_ = float4(dir_es.x(), dir_es.y(), dir_es.z(), 0);
 			}
-			rl = rl_quad_;
 			*light_volume_mv_param_ = pvp.inv_proj;
 			*light_volume_mvp_param_ = float4x4::Identity();
 			break;
@@ -1542,7 +1527,6 @@ namespace KlayGE
 				float3 dir_es = MathLib::transform_normal(float3(0, 1, 0), pvp.view);
 				*light_dir_es_param_ = float4(dir_es.x(), dir_es.y(), dir_es.z(), 0);
 			}
-			rl = rl_quad_;
 			*light_volume_mv_param_ = pvp.inv_proj;
 			*light_volume_mvp_param_ = float4x4::Identity();
 			break;
@@ -1551,8 +1535,6 @@ namespace KlayGE
 			BOOST_ASSERT(false);
 			break;
 		}
-
-		return rl;
 	}
 
 	void DeferredRenderingLayer::PostGenerateShadowMap(int32_t org_no, int32_t index_in_pass)
@@ -1562,31 +1544,30 @@ namespace KlayGE
 			depth_to_vsm_pp_->Apply();
 		}
 
+		sm_filter_pp_->InputPin(0, sm_tex_);
 		if (LT_Point == lights_[org_no]->Type())
 		{
-			sm_filter_pp_->InputPin(0, sm_tex_);
 			sm_filter_pp_->OutputPin(0, blur_sm_cube_texs_[sm_light_indices_[org_no]], 0, 0, index_in_pass - 1);
-			sm_filter_pp_->Apply();
 		}
 		else
 		{
-			sm_filter_pp_->InputPin(0, sm_tex_);
 			sm_filter_pp_->OutputPin(0, blur_sm_2d_texs_[sm_light_indices_[org_no]]);
-			sm_filter_pp_->Apply();
 		}
+		sm_filter_pp_->Apply();
 	}
 
 	void DeferredRenderingLayer::UpdateShadowing(PerViewport const & pvp, uint32_t g_buffer_index,
-		int32_t org_no, RenderLayoutPtr const & rl)
+		int32_t org_no)
 	{
 		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 		
 		LightSourcePtr const & light = lights_[org_no];
+		LightType type = light->Type();
 
 		int32_t light_index = sm_light_indices_[org_no];
 		if ((light_index >= 0) && (0 == (light->Attrib() & LSA_NoShadow)))
 		{
-			switch (light->Type())
+			switch (type)
 			{
 			case LT_Spot:
 				*shadow_map_2d_tex_param_ = blur_sm_2d_texs_[light_index];
@@ -1612,18 +1593,20 @@ namespace KlayGE
 
 		if (0 == (light->Attrib() & LSA_NoShadow))
 		{
-			re.Render(*technique_shadows_[light->Type()], *rl);
+			re.Render(*technique_shadows_[type], *light_volume_rl_[type]);
 		}
 	}
 
 	void DeferredRenderingLayer::UpdateLighting(PerViewport const & pvp, uint32_t g_buffer_index,
-		LightType type, RenderLayoutPtr const & rl)
+		LightType type)
 	{
 		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 
 		re.BindFrameBuffer(pvp.lighting_buffers[g_buffer_index]);
 		// Clear stencil to 0 with write mask
 		re.Render(*technique_clear_stencil_, *rl_quad_);
+
+		RenderLayoutPtr const & rl = light_volume_rl_[type];
 
 		if ((LT_Point == type) || (LT_Spot == type))
 		{

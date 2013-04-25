@@ -415,7 +415,6 @@ namespace KlayGE
 	{
 		BOOST_ASSERT(nearPlane != 0);
 		BOOST_ASSERT(farPlane != 0);
-		BOOST_ASSERT(farPlane > nearPlane);
 
 		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 		FrameBuffer& fb = *re.CurFrameBuffer();

@@ -126,8 +126,9 @@ namespace KlayGE
 			float dy = -pixel_dy[cur_jitter_index_] * height / win_height;
 			proj_mat_ = MathLib::perspective_off_center_lh(left + dx, right + dx, bottom + dy, top + dy,
 								near_plane_, far_plane_);
-
 			re.AdjustPerspectiveMatrix(proj_mat_);
+			inv_proj_mat_ = MathLib::inverse(proj_mat_);
+			view_proj_mat_dirty_ = true;
 			frustum_dirty_ = true;
 		}
 	}
