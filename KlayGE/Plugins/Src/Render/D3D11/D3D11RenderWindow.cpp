@@ -45,8 +45,7 @@ namespace KlayGE
 						:
 #endif
                             ready_(false),
-                            adapter_(adapter),
-                            gi_factory_(gi_factory)
+                            adapter_(adapter)
 	{
 		// Store info
 		name_				= name;
@@ -128,11 +127,26 @@ namespace KlayGE
 		viewport_->height	= height_;
 
 
+#if (_WIN32_WINNT >= 0x0602 /*_WIN32_WINNT_WIN8*/)
+		IDXGIFactory2Ptr gi_factory_2;
+		{
+			IDXGIFactory2* factory;
+			gi_factory->QueryInterface(IID_IDXGIFactory2, reinterpret_cast<void**>(&factory));
+			if (factory != nullptr)
+			{
+				gi_factory_2 = MakeCOMPtr(factory);
+			}
+		}
+#endif
+
+		ID3D11DevicePtr d3d_device;
+		ID3D11DeviceContextPtr d3d_imm_ctx;
+
 		D3D11RenderEngine& re(*checked_cast<D3D11RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance()));
 		if (re.D3DDevice())
 		{
-			d3d_device_ = re.D3DDevice();
-			d3d_imm_ctx_ = re.D3DDeviceImmContext();
+			d3d_device = re.D3DDevice();
+			d3d_imm_ctx = re.D3DDeviceImmContext();
 
 			main_wnd_ = false;
 		}
@@ -151,12 +165,9 @@ namespace KlayGE
 
 #if (_WIN32_WINNT >= 0x0602 /*_WIN32_WINNT_WIN8*/)
 			bool d3d_11_1 = false;
-			IDXGIFactory2* gi_factory_2;
-			gi_factory->QueryInterface(IID_IDXGIFactory2, reinterpret_cast<void**>(&gi_factory_2));
-			if (gi_factory_2 != nullptr)
+			if (!!gi_factory_2)
 			{
 				d3d_11_1 = true;
-				gi_factory_2->Release();
 			}
 #endif
 
@@ -213,8 +224,8 @@ namespace KlayGE
 			typedef KLAYGE_DECLTYPE(dev_type_behaviors) DevTypeBehaviorsType;
 			KLAYGE_FOREACH(DevTypeBehaviorsType::reference dev_type_beh, dev_type_behaviors)
 			{
-				ID3D11Device* d3d_device = nullptr;
-				ID3D11DeviceContext* d3d_imm_ctx = nullptr;
+				ID3D11Device* device = nullptr;
+				ID3D11DeviceContext* imm_ctx = nullptr;
 				IDXGIAdapter* dx_adapter = nullptr;
 				D3D_DRIVER_TYPE dev_type = get<0>(dev_type_beh);
 				if (D3D_DRIVER_TYPE_HARDWARE == dev_type)
@@ -224,24 +235,24 @@ namespace KlayGE
 				}
 				D3D_FEATURE_LEVEL out_feature_level;
 				if (SUCCEEDED(re.D3D11CreateDevice(dx_adapter, dev_type, nullptr, create_device_flags,
-					&feature_levels[0], static_cast<UINT>(feature_levels.size()), D3D11_SDK_VERSION, &d3d_device,
-					&out_feature_level, &d3d_imm_ctx)))
+					&feature_levels[0], static_cast<UINT>(feature_levels.size()), D3D11_SDK_VERSION, &device,
+					&out_feature_level, &imm_ctx)))
 				{
-					d3d_device_ = MakeCOMPtr(d3d_device);
-					d3d_imm_ctx_ = MakeCOMPtr(d3d_imm_ctx);
-					re.D3DDevice(d3d_device_, d3d_imm_ctx_, out_feature_level);
+					d3d_device = MakeCOMPtr(device);
+					d3d_imm_ctx = MakeCOMPtr(imm_ctx);
+					re.D3DDevice(d3d_device, d3d_imm_ctx, out_feature_level);
 
 					if (!Context::Instance().AppInstance().ConfirmDevice())
 					{
-						d3d_device_.reset();
-						d3d_imm_ctx_.reset();
+						d3d_device.reset();
+						d3d_imm_ctx.reset();
 					}
 					else
 					{
 						if (dev_type != D3D_DRIVER_TYPE_HARDWARE)
 						{
 							IDXGIDevice1* dxgi_device = nullptr;
-							HRESULT hr = d3d_device_->QueryInterface(IID_IDXGIDevice1, reinterpret_cast<void**>(&dxgi_device));
+							HRESULT hr = d3d_device->QueryInterface(IID_IDXGIDevice1, reinterpret_cast<void**>(&dxgi_device));
 							if (SUCCEEDED(hr) && (dxgi_device != nullptr))
 							{
 								IDXGIAdapter* ada;
@@ -304,23 +315,17 @@ namespace KlayGE
 
 #ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
 		IDXGISwapChain* sc = nullptr;
-		gi_factory_->CreateSwapChain(d3d_device_.get(), &sc_desc_, &sc);
+		gi_factory->CreateSwapChain(d3d_device.get(), &sc_desc_, &sc);
 #else
 		IDXGISwapChain1* sc = nullptr;
-		IDXGIFactory2* gi_factory_2;
-		gi_factory->QueryInterface(IID_IDXGIFactory2, reinterpret_cast<void**>(&gi_factory_2));
-		if (gi_factory_2 != nullptr)
-		{
-			gi_factory_2->CreateSwapChainForCoreWindow(d3d_device_.get(),
-				reinterpret_cast<IUnknown*>(wnd_.Get()), &sc_desc_, nullptr, &sc);
-			gi_factory_2->Release();
-		}
+		gi_factory_2->CreateSwapChainForCoreWindow(d3d_device_.get(),
+			reinterpret_cast<IUnknown*>(wnd_.Get()), &sc_desc_, nullptr, &sc);
 #endif
 		swap_chain_ = MakeCOMPtr(sc);
 
 		Verify(!!swap_chain_);
-		Verify(!!d3d_device_);
-		Verify(!!d3d_imm_ctx_);
+		Verify(!!d3d_device);
+		Verify(!!d3d_imm_ctx);
 
 		bool isDepthBuffered = IsDepthFormat(settings.depth_stencil_fmt);
 		uint32_t depthBits = NumDepthBits(settings.depth_stencil_fmt);
@@ -337,7 +342,7 @@ namespace KlayGE
 				BOOST_ASSERT(0 == stencilBits);
 
 				// Try 32-bit zbuffer
-				d3d_device_->CheckFormatSupport(DXGI_FORMAT_D32_FLOAT, &format_support);
+				d3d_device->CheckFormatSupport(DXGI_FORMAT_D32_FLOAT, &format_support);
 				if (format_support & D3D11_FORMAT_SUPPORT_DEPTH_STENCIL)
 				{
 					depth_stencil_format_ = DXGI_FORMAT_D32_FLOAT;
@@ -350,7 +355,7 @@ namespace KlayGE
 			}
 			if (24 == depthBits)
 			{
-				d3d_device_->CheckFormatSupport(DXGI_FORMAT_D24_UNORM_S8_UINT, &format_support);
+				d3d_device->CheckFormatSupport(DXGI_FORMAT_D24_UNORM_S8_UINT, &format_support);
 				if (format_support & D3D11_FORMAT_SUPPORT_DEPTH_STENCIL)
 				{
 					depth_stencil_format_ = DXGI_FORMAT_D24_UNORM_S8_UINT;
@@ -363,7 +368,7 @@ namespace KlayGE
 			}
 			if (16 == depthBits)
 			{
-				d3d_device_->CheckFormatSupport(DXGI_FORMAT_D16_UNORM, &format_support);
+				d3d_device->CheckFormatSupport(DXGI_FORMAT_D16_UNORM, &format_support);
 				if (format_support & D3D11_FORMAT_SUPPORT_DEPTH_STENCIL)
 				{
 					depth_stencil_format_ = DXGI_FORMAT_D16_UNORM;
@@ -377,7 +382,7 @@ namespace KlayGE
 		}
 
 #ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
-		gi_factory_->MakeWindowAssociation(hWnd_, DXGI_MWA_NO_WINDOW_CHANGES | DXGI_MWA_NO_ALT_ENTER);
+		gi_factory->MakeWindowAssociation(hWnd_, DXGI_MWA_NO_WINDOW_CHANGES | DXGI_MWA_NO_ALT_ENTER);
 		swap_chain_->SetFullscreenState(this->FullScreen(), nullptr);
 #endif
 
@@ -426,9 +431,11 @@ namespace KlayGE
 		viewport_->width = width;
 		viewport_->height = height;
 
-		if (d3d_imm_ctx_)
+		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+		ID3D11DeviceContextPtr d3d_imm_ctx = checked_cast<D3D11RenderEngine*>(&re)->D3DDeviceImmContext();
+		if (d3d_imm_ctx)
 		{
-			d3d_imm_ctx_->ClearState();
+			d3d_imm_ctx->ClearState();
 		}
 
 		for (size_t i = 0; i < clr_views_.size(); ++ i)
@@ -559,9 +566,11 @@ namespace KlayGE
 
 	void D3D11RenderWindow::Destroy()
 	{
-		if (d3d_imm_ctx_)
+		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+		ID3D11DeviceContextPtr d3d_imm_ctx = checked_cast<D3D11RenderEngine*>(&re)->D3DDeviceImmContext();
+		if (d3d_imm_ctx)
 		{
-			d3d_imm_ctx_->ClearState();
+			d3d_imm_ctx->ClearState();
 		}
 
 #ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
@@ -576,13 +585,13 @@ namespace KlayGE
 		back_buffer_.reset();
 		depth_stencil_.reset();
 		swap_chain_.reset();
-		d3d_imm_ctx_.reset();
-		d3d_device_.reset();
-		gi_factory_.reset();
 	}
 
 	void D3D11RenderWindow::UpdateSurfacesPtrs()
 	{
+		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+		ID3D11DevicePtr d3d_device = checked_cast<D3D11RenderEngine*>(&re)->D3DDevice();
+
 		// Create a render target view
 		ID3D11Texture2D* back_buffer;
 		TIF(swap_chain_->GetBuffer(0, IID_ID3D11Texture2D, reinterpret_cast<void**>(&back_buffer)));
@@ -590,7 +599,7 @@ namespace KlayGE
 		D3D11_TEXTURE2D_DESC bb_desc;
 		back_buffer_->GetDesc(&bb_desc);
 		ID3D11RenderTargetView* render_target_view;
-		TIF(d3d_device_->CreateRenderTargetView(back_buffer_.get(), nullptr, &render_target_view));
+		TIF(d3d_device->CreateRenderTargetView(back_buffer_.get(), nullptr, &render_target_view));
 		render_target_view_ = MakeCOMPtr(render_target_view);
 
 		// Create depth stencil texture
@@ -607,7 +616,7 @@ namespace KlayGE
 		ds_desc.CPUAccessFlags = 0;
 		ds_desc.MiscFlags = 0;
 		ID3D11Texture2D* depth_stencil;
-		TIF(d3d_device_->CreateTexture2D(&ds_desc, nullptr, &depth_stencil));
+		TIF(d3d_device->CreateTexture2D(&ds_desc, nullptr, &depth_stencil));
 		depth_stencil_ = MakeCOMPtr(depth_stencil);
 
 		// Create the depth stencil view
@@ -624,7 +633,7 @@ namespace KlayGE
 		dsv_desc.Flags = 0;
 		dsv_desc.Texture2D.MipSlice = 0;
 		ID3D11DepthStencilView* depth_stencil_view;
-		TIF(d3d_device_->CreateDepthStencilView(depth_stencil_.get(), &dsv_desc, &depth_stencil_view));
+		TIF(d3d_device->CreateDepthStencilView(depth_stencil_.get(), &dsv_desc, &depth_stencil_view));
 		depth_stencil_view_ = MakeCOMPtr(depth_stencil_view);
 
 		this->Attach(ATT_Color0, MakeSharedPtr<D3D11RenderTargetRenderView>(render_target_view_,
@@ -638,7 +647,7 @@ namespace KlayGE
 
 	void D3D11RenderWindow::SwapBuffers()
 	{
-		if (d3d_device_)
+		if (swap_chain_)
 		{
 			TIF(swap_chain_->Present(sync_interval_, 0));
 		}

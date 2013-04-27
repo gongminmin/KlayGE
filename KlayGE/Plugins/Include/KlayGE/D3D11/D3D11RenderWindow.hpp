@@ -61,10 +61,6 @@ namespace KlayGE
 		{
 			return *adapter_;
 		}
-		ID3D11DevicePtr const & D3DDevice() const
-		{
-			return d3d_device_;
-		}
 		ID3D11Texture2DPtr const & D3DBackBuffer() const
 		{
 			return back_buffer_;
@@ -104,10 +100,6 @@ namespace KlayGE
 
 		D3D11AdapterPtr			adapter_;
 
-		// Pointer to the 3D device specific for this window
-		IDXGIFactory1Ptr		gi_factory_;
-		ID3D11DevicePtr			d3d_device_;
-		ID3D11DeviceContextPtr	d3d_imm_ctx_;
 #ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
 		DXGI_SWAP_CHAIN_DESC	sc_desc_;
 #else

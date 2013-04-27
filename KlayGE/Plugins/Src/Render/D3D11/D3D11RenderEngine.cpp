@@ -148,12 +148,11 @@ namespace KlayGE
 
 		IDXGIFactory1* gi_factory;
 		TIF(DynamicCreateDXGIFactory1_(IID_IDXGIFactory1, reinterpret_cast<void**>(&gi_factory)));
-		gi_factory_ = MakeCOMPtr(gi_factory);
 #else
 		IDXGIFactory2* gi_factory;
 		TIF(CreateDXGIFactory1(IID_IDXGIFactory2, reinterpret_cast<void**>(&gi_factory)));
-		gi_factory_ = MakeCOMPtr(gi_factory);
 #endif
+		gi_factory_ = MakeCOMPtr(gi_factory);
 
 		adapterList_.Enumerate(gi_factory_);
 	}
@@ -348,7 +347,7 @@ namespace KlayGE
 		d3d_device_ = device;
 		d3d_imm_ctx_ = imm_ctx;
 		d3d_feature_level_ = feature_level;
-		Verify(d3d_device_ != ID3D11DevicePtr());
+		Verify(!!d3d_device_);
 
 		this->FillRenderDeviceCaps();
 	}
