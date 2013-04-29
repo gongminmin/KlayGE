@@ -117,7 +117,7 @@ namespace KlayGE
 		float4x4 const & proj = camera.ProjMatrix();
 
 		float3 sun_vec = MathLib::normalize(dir_);
-		float3 const & view_vec = camera.ViewVec();
+		float3 const & view_vec = camera.ForwardVec();
 
 		float angle = MathLib::dot(view_vec, sun_vec);
 

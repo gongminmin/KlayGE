@@ -43,10 +43,7 @@ namespace KlayGE
 		prev_view_mats_.resize(num_motion_frames);
 		prev_proj_mats_.resize(num_motion_frames);
 
-		// 设置观察矩阵的参数
 		this->ViewParams(float3(0, 0, 0), float3(0, 0, 1), float3(0, 1, 0));
-
-		// 设置投射矩阵的参数
 		this->ProjParams(PI / 4, 1, 1, 1000);
 	}
 
@@ -60,13 +57,9 @@ namespace KlayGE
 	void Camera::ViewParams(float3 const & eye_pos, float3 const & look_at,
 										float3 const & up_vec)
 	{
-		// 设置观察矩阵的参数
-		eye_pos_	= eye_pos;
-		look_at_	= look_at;
-		up_vec_		= up_vec;
+		look_at_dist_ = MathLib::length(look_at - eye_pos);
 
-		view_vec_ = MathLib::normalize(look_at_ - eye_pos_);
-		view_mat_ = MathLib::look_at_lh(eye_pos_, look_at_, up_vec);
+		view_mat_ = MathLib::look_at_lh(eye_pos, look_at, up_vec);
 		inv_view_mat_ = MathLib::inverse(view_mat_);
 		view_proj_mat_dirty_ = true;
 		frustum_dirty_ = true;
@@ -76,13 +69,27 @@ namespace KlayGE
 	//////////////////////////////////////////////////////////////////////////////////
 	void Camera::ProjParams(float fov, float aspect, float near_plane, float far_plane)
 	{
-		// 设置投射矩阵的参数
 		fov_		= fov;
 		aspect_		= aspect;
 		near_plane_	= near_plane;
 		far_plane_	= far_plane;
 
 		proj_mat_ = MathLib::perspective_fov_lh(fov, aspect, near_plane, far_plane);
+		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+		re.AdjustPerspectiveMatrix(proj_mat_);
+		inv_proj_mat_ = MathLib::inverse(proj_mat_);
+		view_proj_mat_dirty_ = true;
+		frustum_dirty_ = true;
+	}
+
+	void Camera::ProjOrthoParams(float w, float h, float near_plane, float far_plane)
+	{
+		fov_		= 0;
+		aspect_		= w / h;
+		near_plane_	= near_plane;
+		far_plane_	= far_plane;
+
+		proj_mat_ = MathLib::ortho_lh(w, h, near_plane, far_plane);
 		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 		re.AdjustPerspectiveMatrix(proj_mat_);
 		inv_proj_mat_ = MathLib::inverse(proj_mat_);

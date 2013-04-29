@@ -840,6 +840,17 @@ namespace KlayGE
 		pp_chain_.push_back(pp);
 	}
 
+	uint32_t PostProcessChain::NumPostProcesses() const
+	{
+		return static_cast<uint32_t>(pp_chain_.size());
+	}
+
+	PostProcessPtr const & PostProcessChain::GetPostProcess(uint32_t index) const
+	{
+		BOOST_ASSERT(index < pp_chain_.size());
+		return pp_chain_[index];
+	}
+
 	uint32_t PostProcessChain::NumParams() const
 	{
 		return pp_chain_.front()->NumParams();
@@ -1223,10 +1234,30 @@ namespace KlayGE
 		}
 	}
 
+	void SeparableBoxFilterPostProcess::KernelRadius(int radius)
+	{
+		kernel_radius_ = radius;
+		TexturePtr const & tex = this->InputPin(0);
+		if (!!tex)
+		{
+			this->CalSampleOffsets(x_dir_ ? tex->Width(0) : tex->Height(0));
+		}
+	}
+
+	void SeparableBoxFilterPostProcess::Multiplier(float multiplier)
+	{
+		multiplier_ = multiplier;
+		TexturePtr const & tex = this->InputPin(0);
+		if (!!tex)
+		{
+			this->CalSampleOffsets(x_dir_ ? tex->Width(0) : tex->Height(0));
+		}
+	}
+
 	void SeparableBoxFilterPostProcess::CalSampleOffsets(uint32_t tex_size)
 	{
-		std::vector<float> color_weight(kernel_radius_ + 1, multiplier_ / (2 * kernel_radius_ + 1));
-		std::vector<float> tex_coord_offset(kernel_radius_ + 1, 0);
+		std::vector<float> color_weight(8, multiplier_ / (2 * kernel_radius_ + 1));
+		std::vector<float> tex_coord_offset(8, 0);
 
 		float const tu = 1.0f / tex_size;
 
@@ -1271,6 +1302,26 @@ namespace KlayGE
 		}
 	}
 
+	void SeparableGaussianFilterPostProcess::KernelRadius(int radius)
+	{
+		kernel_radius_ = radius;
+		TexturePtr const & tex = this->InputPin(0);
+		if (!!tex)
+		{
+			this->CalSampleOffsets(x_dir_ ? tex->Width(0) : tex->Height(0), 3.0f);
+		}
+	}
+
+	void SeparableGaussianFilterPostProcess::Multiplier(float multiplier)
+	{
+		multiplier_ = multiplier;
+		TexturePtr const & tex = this->InputPin(0);
+		if (!!tex)
+		{
+			this->CalSampleOffsets(x_dir_ ? tex->Width(0) : tex->Height(0), 3.0f);
+		}
+	}
+
 	float SeparableGaussianFilterPostProcess::GaussianDistribution(float x, float y, float rho)
 	{
 		float g = 1.0f / sqrt(2.0f * PI * rho * rho);
@@ -1280,8 +1331,8 @@ namespace KlayGE
 
 	void SeparableGaussianFilterPostProcess::CalSampleOffsets(uint32_t tex_size, float deviation)
 	{
-		std::vector<float> color_weight(kernel_radius_, 0);
-		std::vector<float> tex_coord_offset(kernel_radius_, 0);
+		std::vector<float> color_weight(8, 0);
+		std::vector<float> tex_coord_offset(8, 0);
 
 		std::vector<float> tmp_weights(kernel_radius_ * 2, 0);
 		std::vector<float> tmp_offset(kernel_radius_ * 2, 0);
@@ -1351,15 +1402,39 @@ namespace KlayGE
 		PostProcess::InputPin(index, tex);
 		if (0 == index)
 		{
-			*kernel_radius_ep_ = static_cast<int32_t>(kernel_radius_);
-			float tex_size = static_cast<float>(x_dir_ ? tex->Width(0) : tex->Height(0));
-			*src_tex_size_ep_ = float2(tex_size, 1.0f / tex_size);
-			
-			float rho = kernel_radius_ / 4.0f;
-			*init_g_ep_ = multiplier_ / std::sqrt(2.0f * PI * rho * rho);
-			float f = 1 / (2 * rho * rho);
-			*blur_factor_ep_ = f;
-			*sharpness_factor_ep_ = f;
+			this->CalSampleOffsets(x_dir_ ? tex->Width(0) : tex->Height(0));
 		}
+	}
+
+	void SeparableBilateralFilterPostProcess::KernelRadius(int radius)
+	{
+		kernel_radius_ = radius;
+		TexturePtr const & tex = this->InputPin(0);
+		if (!!tex)
+		{
+			this->CalSampleOffsets(x_dir_ ? tex->Width(0) : tex->Height(0));
+		}
+	}
+
+	void SeparableBilateralFilterPostProcess::Multiplier(float multiplier)
+	{
+		multiplier_ = multiplier;
+		TexturePtr const & tex = this->InputPin(0);
+		if (!!tex)
+		{
+			this->CalSampleOffsets(x_dir_ ? tex->Width(0) : tex->Height(0));
+		}
+	}
+
+	void SeparableBilateralFilterPostProcess::CalSampleOffsets(uint32_t tex_size)
+	{
+		*kernel_radius_ep_ = static_cast<int32_t>(kernel_radius_);
+		*src_tex_size_ep_ = float2(static_cast<float>(tex_size), 1.0f / tex_size);
+			
+		float rho = kernel_radius_ / 4.0f;
+		*init_g_ep_ = multiplier_ / std::sqrt(2.0f * PI * rho * rho);
+		float f = 1 / (2 * rho * rho);
+		*blur_factor_ep_ = f;
+		*sharpness_factor_ep_ = f;
 	}
 }

@@ -47,13 +47,15 @@ namespace KlayGE
 		Camera();
 
 		float3 const & EyePos() const
-			{ return eye_pos_; }
-		float3 const & LookAt() const
-			{ return look_at_; }
+			{ return *reinterpret_cast<float3 const *>(&inv_view_mat_.Row(3)); }
+		float3 LookAt() const
+			{ return this->EyePos() + this->ForwardVec() * look_at_dist_; }
+		float3 const & RightVec() const
+			{ return *reinterpret_cast<float3 const *>(&inv_view_mat_.Row(0)); }
 		float3 const & UpVec() const
-			{ return up_vec_; }
-		float3 const & ViewVec() const
-			{ return view_vec_; }
+			{ return *reinterpret_cast<float3 const *>(&inv_view_mat_.Row(1)); }
+		float3 const & ForwardVec() const
+			{ return *reinterpret_cast<float3 const *>(&inv_view_mat_.Row(2)); }
 
 		float FOV() const
 			{ return fov_; }
@@ -67,6 +69,7 @@ namespace KlayGE
 		void ViewParams(float3 const & eye_pos, float3 const & look_at);
 		void ViewParams(float3 const & eye_pos, float3 const & look_at, float3 const & up_vec);
 		void ProjParams(float fov, float aspect, float near_plane, float far_plane);
+		void ProjOrthoParams(float w, float h, float near_plane, float far_plane);
 
 		void BindUpdateFunc(function<void(Camera&, float, float)> const & update_func);
 
@@ -92,14 +95,11 @@ namespace KlayGE
 		void JitterMode(bool jitter);
 
 	private:
-		float3		eye_pos_;		// 观察矩阵的属性
-		float3		look_at_;
-		float3		up_vec_;
-		float3		view_vec_;
+		float		look_at_dist_;
 		float4x4	view_mat_;
 		float4x4	inv_view_mat_;
 
-		float		fov_;			// 投射矩阵的属性
+		float		fov_;
 		float		aspect_;
 		float		near_plane_;
 		float		far_plane_;

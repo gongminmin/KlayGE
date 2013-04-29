@@ -199,6 +199,12 @@ namespace KlayGE
 	typedef shared_ptr<MultiResSILLayer> MultiResSILLayerPtr;
 	class SSGILayer;
 	typedef shared_ptr<SSGILayer> SSGILayerPtr;
+	class CascadedShadowLayer;
+	typedef shared_ptr<CascadedShadowLayer> CascadedShadowLayerPtr;
+	class PSSMCascadedShadowLayer;
+	typedef shared_ptr<PSSMCascadedShadowLayer> PSSMCascadedShadowLayerPtr;
+	class SDSMCascadedShadowLayer;
+	typedef shared_ptr<SDSMCascadedShadowLayer> SDSMCascadedShadowLayerPtr;
 	class GpuFft;
 	typedef shared_ptr<GpuFft> GpuFftPtr;
 	class GpuFftPS;

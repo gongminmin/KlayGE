@@ -203,6 +203,8 @@ namespace KlayGE
 		}
 
 		void Append(PostProcessPtr const & pp);
+		uint32_t NumPostProcesses() const;
+		PostProcessPtr const & GetPostProcess(uint32_t index) const;
 
 		virtual uint32_t NumParams() const;
 		virtual uint32_t ParamByName(std::string const & name) const;
@@ -292,6 +294,9 @@ namespace KlayGE
 		void InputPin(uint32_t index, TexturePtr const & tex);
 		using PostProcess::InputPin;
 
+		void KernelRadius(int radius);
+		void Multiplier(float multiplier);
+
 	protected:
 		void CalSampleOffsets(uint32_t tex_size);
 
@@ -313,6 +318,9 @@ namespace KlayGE
 
 		void InputPin(uint32_t index, TexturePtr const & tex);
 		using PostProcess::InputPin;
+
+		void KernelRadius(int radius);
+		void Multiplier(float multiplier);
 
 	protected:
 		float GaussianDistribution(float x, float y, float rho);
@@ -336,6 +344,12 @@ namespace KlayGE
 
 		void InputPin(uint32_t index, TexturePtr const & tex);
 		using PostProcess::InputPin;
+
+		void KernelRadius(int radius);
+		void Multiplier(float multiplier);
+
+	protected:
+		void CalSampleOffsets(uint32_t tex_size);
 
 	protected:
 		int kernel_radius_;

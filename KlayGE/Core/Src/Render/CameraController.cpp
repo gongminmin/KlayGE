@@ -223,7 +223,7 @@ namespace KlayGE
 
 			float3 new_eye_pos = camera_->EyePos() + MathLib::transform_quat(movement, inv_rot_);
 
-			camera_->ViewParams(new_eye_pos, new_eye_pos + camera_->ViewVec(), camera_->UpVec());
+			camera_->ViewParams(new_eye_pos, new_eye_pos + camera_->ForwardVec(), camera_->UpVec());
 		}
 	}
 
@@ -311,7 +311,7 @@ namespace KlayGE
 
 		reverse_target_ = false;
 		target_ = camera_->LookAt();
-		right_ = MathLib::cross(camera_->UpVec(), camera_->ViewVec());
+		right_ = camera_->RightVec();
 	}
 
 	void TrackballCameraController::Move(float offset_x, float offset_y)
@@ -356,10 +356,10 @@ namespace KlayGE
 
 	void TrackballCameraController::Zoom(float offset_x, float offset_y)
 	{
-		float3 offset = camera_->ViewVec() * ((offset_x + offset_y) * moveScaler_ * 2);
+		float3 offset = camera_->ForwardVec() * ((offset_x + offset_y) * moveScaler_ * 2);
 		float3 pos = camera_->EyePos() + offset;
 
-		if (MathLib::dot(target_ - pos, camera_->ViewVec()) <= 0)
+		if (MathLib::dot(target_ - pos, camera_->ForwardVec()) <= 0)
 		{
 			reverse_target_ = true;
 		}
@@ -368,7 +368,7 @@ namespace KlayGE
 			reverse_target_ = false;
 		}
 
-		camera_->ViewParams(pos, pos + camera_->ViewVec(), camera_->UpVec());
+		camera_->ViewParams(pos, pos + camera_->ForwardVec(), camera_->UpVec());
 	}
 
 

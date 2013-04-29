@@ -22,6 +22,7 @@ SET(RENDERING_SOURCE_FILES
 	${KLAYGE_PROJECT_DIR}/Core/Src/Render/BlockCompression.cpp
 	${KLAYGE_PROJECT_DIR}/Core/Src/Render/Camera.cpp
 	${KLAYGE_PROJECT_DIR}/Core/Src/Render/CameraController.cpp
+	${KLAYGE_PROJECT_DIR}/Core/Src/Render/CascadedShadowLayer.cpp
 	${KLAYGE_PROJECT_DIR}/Core/Src/Render/DeferredRenderingLayer.cpp
 	${KLAYGE_PROJECT_DIR}/Core/Src/Render/ElementFormat.cpp
 	${KLAYGE_PROJECT_DIR}/Core/Src/Render/FFT.cpp
@@ -61,6 +62,7 @@ SET(RENDERING_HEADER_FILES
 	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/BlockCompression.hpp
 	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/Camera.hpp
 	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/CameraController.hpp
+	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/CascadedShadowLayer.hpp
 	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/DeferredRenderingLayer.hpp
 	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/ElementFormat.hpp
 	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/FFT.hpp
