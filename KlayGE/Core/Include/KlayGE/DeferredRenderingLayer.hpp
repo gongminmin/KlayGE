@@ -354,6 +354,12 @@ namespace KlayGE
 		RenderEffectParameterPtr inv_width_height_param_;
 		RenderEffectParameterPtr shadowing_tex_param_;
 		RenderEffectParameterPtr near_q_param_;
+		RenderEffectParameterPtr cascade_intervals_param_;
+		RenderEffectParameterPtr cascade_scale_bias_param_;
+		RenderEffectParameterPtr num_cascades_param_;
+		RenderEffectParameterPtr view_z_to_light_view_param_;
+		RenderEffectParameterPtr cascaded_shadow_map_tex_array_param_;
+		array<RenderEffectParameterPtr, PerViewport::MAX_NUM_CASCADES> cascaded_shadow_map_texs_param_;
 
 		std::vector<SceneObject*> visible_scene_objs_;
 		bool has_reflective_objs_;

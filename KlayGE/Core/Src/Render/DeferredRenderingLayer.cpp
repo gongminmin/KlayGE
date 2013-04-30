@@ -535,6 +535,21 @@ namespace KlayGE
 		inv_width_height_param_ = dr_effect_->ParameterByName("inv_width_height");
 		shadowing_tex_param_ = dr_effect_->ParameterByName("shadowing_tex");
 		near_q_param_ = dr_effect_->ParameterByName("near_q");
+		cascade_intervals_param_ = dr_effect_->ParameterByName("cascade_intervals");
+		cascade_scale_bias_param_ = dr_effect_->ParameterByName("cascade_scale_bias");
+		num_cascades_param_ = dr_effect_->ParameterByName("num_cascades");
+		view_z_to_light_view_param_ = dr_effect_->ParameterByName("view_z_to_light_view");
+		if (tex_array_support_)
+		{
+			cascaded_shadow_map_tex_array_param_ = dr_effect_->ParameterByName("cascaded_shadow_map_tex_array");
+		}
+		else
+		{
+			cascaded_shadow_map_texs_param_[0] = dr_effect_->ParameterByName("cascaded_shadow_map_0_tex");
+			cascaded_shadow_map_texs_param_[1] = dr_effect_->ParameterByName("cascaded_shadow_map_1_tex");
+			cascaded_shadow_map_texs_param_[2] = dr_effect_->ParameterByName("cascaded_shadow_map_2_tex");
+			cascaded_shadow_map_texs_param_[3] = dr_effect_->ParameterByName("cascaded_shadow_map_3_tex");
+		}
 
 		cascaded_shadow_layer_ = MakeSharedPtr<PSSMCascadedShadowLayer>();
 	}
@@ -1751,8 +1766,7 @@ namespace KlayGE
 				{
 					CameraPtr const & sm_camera = lights_[cascaded_shadow_index_]->SMCamera(0);
 
-					float4x4 light_view_proj = pvp.inv_view * sm_camera->ViewProjMatrix();
-					*(dr_effect_->ParameterByName("light_view_proj")) = light_view_proj;
+					*light_view_proj_param_ = pvp.inv_view * sm_camera->ViewProjMatrix();
 
 					std::vector<float2> cascade_intervals(pvp.num_cascades);
 					std::vector<float4> cascade_scale_bias(pvp.num_cascades);
@@ -1763,23 +1777,23 @@ namespace KlayGE
 						cascade_scale_bias[i] = float4(cascade.scale.x(), cascade.scale.y(),
 							cascade.bias.x(), cascade.bias.y());
 					}
-					*(dr_effect_->ParameterByName("cascade_intervals")) = cascade_intervals;
-					*(dr_effect_->ParameterByName("cascade_scale_bias")) = cascade_scale_bias;
-					*(dr_effect_->ParameterByName("num_cascades")) = static_cast<int32_t>(pvp.num_cascades);
+					*cascade_intervals_param_ = cascade_intervals;
+					*cascade_scale_bias_param_ = cascade_scale_bias;
+					*num_cascades_param_ = static_cast<int32_t>(pvp.num_cascades);
 
 					float4x4 light_view = pvp.inv_view * sm_camera->ViewMatrix();
-					*(dr_effect_->ParameterByName("view_z_to_light_view")) = light_view.Col(2);
+					*view_z_to_light_view_param_ = light_view.Col(2);
 				}
 				if (tex_array_support_)
 				{
-					*(dr_effect_->ParameterByName("cascaded_shadow_map_tex_array")) = pvp.blur_cascaded_sm_texs[0];
+					*cascaded_shadow_map_tex_array_param_ = pvp.blur_cascaded_sm_texs[0];
 				}
 				else
 				{
-					*(dr_effect_->ParameterByName("cascaded_shadow_map_0_tex")) = pvp.blur_cascaded_sm_texs[0];
-					*(dr_effect_->ParameterByName("cascaded_shadow_map_1_tex")) = pvp.blur_cascaded_sm_texs[1];
-					*(dr_effect_->ParameterByName("cascaded_shadow_map_2_tex")) = pvp.blur_cascaded_sm_texs[2];
-					*(dr_effect_->ParameterByName("cascaded_shadow_map_3_tex")) = pvp.blur_cascaded_sm_texs[3];
+					for (uint32_t i = 0; i < pvp.num_cascades; ++ i)
+					{
+						*cascaded_shadow_map_texs_param_[i] = pvp.blur_cascaded_sm_texs[i];
+					}
 				}
 				break;
 
