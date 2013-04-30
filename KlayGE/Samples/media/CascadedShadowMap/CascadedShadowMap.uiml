@@ -1,0 +1,22 @@
+<?xml version='1.0' encoding='utf-8' standalone='no'?>
+
+<ui>
+	<dialog id="DeferredRendering" caption="Deferred Rendering" x="-160" y="200" align_x="right" width="160" height="350">
+		<control type="static" id="PSSMFactorStatic" caption="PSSM Factor:" x="20" y="80" width="120" height="24" is_default="0"/>
+		<control type="slider" id="PSSMFactorSlider" x="20" y="100" width="120" height="24" min="0" max="100" value="80" is_default="0"/>
+
+		<control type="static" id="CascadesStatic" caption="Cascades:" x="20" y="140" width="120" height="24" is_default="0"/>
+		<control type="combo_box" id="CascadesCombo" x="20" y="160" width="120" height="24" hotkey="0" selected="3" is_default="0">
+			<item name="1-level"/>
+			<item name="2-level"/>
+			<item name="3-level"/>
+			<item name="4-level"/>
+		</control>
+		
+		<control type="check_box" id="CtrlCamera" caption="Control camera" x="20" y="306" width="350" height="24" checked="0" hotkey="0" is_default="0"/>
+	</dialog>
+
+	<dialog id="Logo" caption="Logo" x="-128" y="-128" align_x="right" align_y="bottom" width="128" height="128" show_caption="false" bg_color_a="0">
+		<control type="tex_button" id="LogoButton" texture="powered_by_klayge.dds" x="0" y="0" width="128" height="128" is_default="0"/>
+	</dialog>
+</ui>

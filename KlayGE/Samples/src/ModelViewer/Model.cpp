@@ -202,7 +202,7 @@ void DetailedSkinnedMesh::OnRenderBegin()
 		FrameBufferPtr const & fb = re.CurFrameBuffer();
 		*(technique_->Effect().ParameterByName("frame_size")) = int2(fb->Width(), fb->Height());
 
-		*(technique_->Effect().ParameterByName("view_vec")) = Context::Instance().AppInstance().ActiveCamera().ViewVec();
+		*(technique_->Effect().ParameterByName("view_vec")) = Context::Instance().AppInstance().ActiveCamera().ForwardVec();
 
 		if (TM_Instanced == caps.tess_method)
 		{

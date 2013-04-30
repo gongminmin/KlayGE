@@ -800,7 +800,7 @@ void GenShadowMapVS(float4 pos : POSITION,
 {
 	pos = float4(pos.xyz * pos_extent + pos_center, 1);
 	texcoord = texcoord * tc_extent + tc_center;
-	
+
 	oPos = mul(pos, mvp);
 	oTc = texcoord;
 }
@@ -824,10 +824,10 @@ void GenShadowMapWODepthTextureVS(float4 pos : POSITION,
 {
 	pos = float4(pos.xyz * pos_extent + pos_center, 1);
 	texcoord = texcoord * tc_extent + tc_center;
-	
+
 	oPos = mul(pos, mvp);
 	oTc = texcoord;
-	
+
 	oViewDir = mul(pos, model_view).xyz;
 }
 
@@ -855,6 +855,43 @@ float4 GenShadowMapWODepthTextureAlphaTestPS(float2 tc : TEXCOORD0, float3 view_
 	float2 dxdy = 0;
 #endif
 	return float4(dist, dist * dist + 0.2f * dot(dxdy, dxdy), 0, 1);
+}
+
+void GenCascadedShadowMapVS(float4 pos : POSITION,
+						float2 texcoord : TEXCOORD0,
+						out float2 oTc : TEXCOORD0,
+						out float oDepth : TEXCOORD1,
+						out float4 oPos : SV_Position)
+{
+	pos = float4(pos.xyz * pos_extent + pos_center, 1);
+	texcoord = texcoord * tc_extent + tc_center;
+	
+	oPos = mul(pos, mvp);
+	oTc = texcoord;
+
+	oDepth = mul(pos, model_view).z;
+}
+
+float4 GenCascadedShadowMapPS(float2 tc : TEXCOORD0, float depth : TEXCOORD1) : SV_Target
+{
+#if KLAYGE_DERIVATIVES
+	float2 dxdy = float2(ddx(depth), ddy(depth));
+#else
+	float2 dxdy = 0;
+#endif
+	return float4(depth, depth * depth + 0.2f * dot(dxdy, dxdy), 0, 1);
+}
+
+float4 GenCascadedShadowMapAlphaTestPS(float2 tc : TEXCOORD0, float depth : TEXCOORD1) : SV_Target
+{
+	clip(diffuse_tex.Sample(bilinear_sampler, tc).a - ALPHA_TEST_THRESHOLD);
+
+#if KLAYGE_DERIVATIVES
+	float2 dxdy = float2(ddx(depth), ddy(depth));
+#else
+	float2 dxdy = 0;
+#endif
+	return float4(depth, depth * depth + 0.2f * dot(dxdy, dxdy), 0, 1);
 }
 		]]>
 	</shader>
@@ -885,6 +922,21 @@ float4 GenShadowMapWODepthTextureAlphaTestPS(float2 tc : TEXCOORD0, float3 view_
 	<technique name="GenShadowMapWODepthTextureAlphaTestTech" inherit="GenShadowMapTech">
 		<pass name="p0">
 			<state name="pixel_shader" value="GenShadowMapWODepthTextureAlphaTestPS()"/>
+		</pass>
+	</technique>
+
+	<technique name="GenCascadedShadowMapTech">
+		<pass name="p0">
+			<state name="cull_mode" value="none"/>
+			<state name="depth_clip_enable" value="false"/>
+
+			<state name="vertex_shader" value="GenCascadedShadowMapVS()"/>
+			<state name="pixel_shader" value="GenCascadedShadowMapPS()"/>
+		</pass>
+	</technique>
+	<technique name="GenCascadedShadowMapAlphaTestTech" inherit="GenCascadedShadowMapTech">
+		<pass name="p0">
+			<state name="pixel_shader" value="GenCascadedShadowMapAlphaTestPS()"/>
 		</pass>
 	</technique>
 

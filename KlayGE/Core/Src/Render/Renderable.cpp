@@ -59,7 +59,13 @@ namespace KlayGE
 			Camera const & camera = *re.CurFrameBuffer()->GetViewport()->camera;
 
 			float4x4 const & view = camera.ViewMatrix();
-			float4x4 const & proj = camera.ProjMatrix();
+			float4x4 proj = camera.ProjMatrix();
+
+			int32_t cas_index = drl->CurrCascadeIndex();
+			if (cas_index >= 0)
+			{
+				proj *= drl->GetCascadedShadowLayer()->GetCascadeInfo(cas_index).crop_mat;
+			}
 
 			float4x4 const mv = model_mat_ * view;
 			*mvp_param_ = mv * proj;
@@ -107,6 +113,7 @@ namespace KlayGE
 				break;
 
 			case PT_GenShadowMap:
+			case PT_GenCascadedShadowMap:
 			case PT_GenShadowMapWODepthTexture:
 				*diffuse_tex_param_ = diffuse_tex_;
 				break;
@@ -274,6 +281,8 @@ namespace KlayGE
 		gen_rsm_alpha_test_tech_ = deferred_effect_->TechniqueByName("GenReflectiveShadowMapAlphaTestTech");
 		gen_sm_tech_ = deferred_effect_->TechniqueByName("GenShadowMapTech");
 		gen_sm_alpha_test_tech_ = deferred_effect_->TechniqueByName("GenShadowMapAlphaTestTech");
+		gen_cascaded_sm_tech_ = deferred_effect_->TechniqueByName("GenCascadedShadowMapTech");
+		gen_cascaded_sm_alpha_test_tech_ = deferred_effect_->TechniqueByName("GenCascadedShadowMapAlphaTestTech");
 		gen_sm_wo_dt_tech_ = deferred_effect_->TechniqueByName("GenShadowMapWODepthTextureTech");
 		gen_sm_wo_dt_alpha_test_tech_ = deferred_effect_->TechniqueByName("GenShadowMapWODepthTextureAlphaTestTech");
 		special_shading_tech_ = deferred_effect_->TechniqueByName("SpecialShadingTech");
@@ -388,6 +397,16 @@ namespace KlayGE
 			else
 			{
 				return gen_sm_tech_;
+			}
+
+		case PT_GenCascadedShadowMap:
+			if (this->AlphaTest())
+			{
+				return gen_cascaded_sm_alpha_test_tech_;
+			}
+			else
+			{
+				return gen_cascaded_sm_tech_;
 			}
 
 		case PT_GenShadowMapWODepthTexture:

@@ -59,6 +59,7 @@ namespace KlayGE
 		PRT_MRT,
 		PRT_ShadowMap,
 		PRT_ShadowMapWODepth,
+		PRT_CascadedShadowMap,
 		PRT_ReflectiveShadowMap,
 		PRT_None
 	};
@@ -90,6 +91,7 @@ namespace KlayGE
 		
 		PT_GenShadowMap = MakePassType<PRT_ShadowMap, PTB_None, PC_ShadowMap>::value,
 		PT_GenShadowMapWODepthTexture = MakePassType<PRT_ShadowMapWODepth, PTB_None, PC_ShadowMap>::value,
+		PT_GenCascadedShadowMap = MakePassType<PRT_CascadedShadowMap, PTB_None, PC_ShadowMap>::value,
 		PT_GenReflectiveShadowMap = MakePassType<PRT_ReflectiveShadowMap, PTB_None, PC_ShadowMap>::value,
 		
 		PT_Lighting = MakePassType<PRT_None, PTB_None, PC_Lighting>::value,
@@ -265,6 +267,8 @@ namespace KlayGE
 		RenderTechniquePtr gen_sm_alpha_test_tech_;
 		RenderTechniquePtr gen_sm_wo_dt_tech_;
 		RenderTechniquePtr gen_sm_wo_dt_alpha_test_tech_;
+		RenderTechniquePtr gen_cascaded_sm_tech_;
+		RenderTechniquePtr gen_cascaded_sm_alpha_test_tech_;
 		RenderTechniquePtr gen_rsm_tech_;
 		RenderTechniquePtr gen_rsm_alpha_test_tech_;
 		RenderTechniquePtr special_shading_tech_;

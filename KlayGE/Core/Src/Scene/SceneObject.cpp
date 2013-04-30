@@ -123,7 +123,7 @@ namespace KlayGE
 		renderable_->Pass(type);
 		if (attrib_ & SOA_NotCastShadow)
 		{
-			this->Visible((PT_GenShadowMap != type) && (PT_GenShadowMapWODepthTexture != type) && (PT_GenReflectiveShadowMap != type));
+			this->Visible(PC_ShadowMap != GetPassCategory(type));
 		}
 	}
 }

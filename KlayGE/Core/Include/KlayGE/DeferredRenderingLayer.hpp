@@ -23,6 +23,7 @@
 #include <KlayGE/PreDeclare.hpp>
 #include <KlayGE/Light.hpp>
 #include <KlayGE/IndirectLightingLayer.hpp>
+#include <KlayGE/CascadedShadowLayer.hpp>
 
 namespace KlayGE
 {
@@ -75,6 +76,11 @@ namespace KlayGE
 
 		array<FrameBufferPtr, Num_GBuffers> shading_buffers;
 		array<TexturePtr, Num_GBuffers> shading_texs;
+
+		static uint32_t const MAX_NUM_CASCADES = 4;
+		uint32_t num_cascades;
+		float pssm_factor;
+		array<TexturePtr, MAX_NUM_CASCADES> blur_cascaded_sm_texs;
 
 		array<FrameBufferPtr, Num_GBuffers> curr_merged_shading_buffers;
 		TexturePtr curr_merged_shading_tex;
@@ -222,6 +228,16 @@ namespace KlayGE
 			light_scale_ = dist * 0.01f;
 		}
 
+		CascadedShadowLayerPtr const & GetCascadedShadowLayer() const
+		{
+			return cascaded_shadow_layer_;
+		}
+		int32_t CurrCascadeIndex() const
+		{
+			return curr_cascade_index_;
+		}
+		void SetViewportCascades(uint32_t vp, uint32_t num_cascades, float factor);
+
 	private:
 		void SetupViewportGI(uint32_t vp);
 		void AccumulateToLightingTex(PerViewport const & pvp);
@@ -234,6 +250,7 @@ namespace KlayGE
 		void BuildPassScanList(bool has_opaque_objs, bool has_transparency_back_objs, bool has_transparency_front_objs);
 		void AppendGBufferPassScanCode(uint32_t vp_index, uint32_t g_buffer_index);
 		void AppendShadowPassScanCode(uint32_t light_index);
+		void AppendCascadedShadowPassScanCode(PerViewport const & pvp, uint32_t light_index);
 		void AppendLightingPassScanCode(uint32_t vp_index, uint32_t light_index);
 		void AppendShadingPassScanCode(uint32_t vp_index);
 		void PreparePVP(PerViewport& pvp);
@@ -243,7 +260,7 @@ namespace KlayGE
 		void RenderDecals(PerViewport const & pvp, PassType pass_type);
 		void PrepareLightCamera(PerViewport const & pvp, LightSourcePtr const & light,
 			int32_t index_in_pass, PassType pass_type);
-		void PostGenerateShadowMap(int32_t org_no, int32_t index_in_pass);
+		void PostGenerateShadowMap(PerViewport const & pvp, int32_t org_no, int32_t index_in_pass);
 		void UpdateShadowing(PerViewport const & pvp, uint32_t g_buffer_index, int32_t org_no);
 		void UpdateLighting(PerViewport const & pvp, uint32_t g_buffer_index, LightType type);
 		void UpdateIndirectAndSSVO(PerViewport const & pvp);
@@ -345,11 +362,16 @@ namespace KlayGE
 		array<TexturePtr, 2> rsm_texs_;
 
 		bool indirect_lighting_enabled_;
+		int32_t cascaded_shadow_index_;
 
 		int illum_;
 		float indirect_scale_;
 		PostProcessPtr copy_to_light_buffer_pp_;
 		PostProcessPtr copy_to_light_buffer_i_pp_;
+
+		CascadedShadowLayerPtr cascaded_shadow_layer_;
+		float2 blur_size_light_space_;
+		int32_t curr_cascade_index_;
 	};
 }
 
