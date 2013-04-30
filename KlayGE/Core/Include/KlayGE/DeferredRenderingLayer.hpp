@@ -272,6 +272,7 @@ namespace KlayGE
 	private:
 		bool mrt_g_buffer_support_;
 		bool depth_texture_support_;
+		bool tex_array_support_;
 
 		RenderEffectPtr g_buffer_effect_;
 		RenderEffectPtr dr_effect_;
@@ -315,15 +316,17 @@ namespace KlayGE
 		RenderTechniquePtr technique_copy_shading_depth_;
 		RenderTechniquePtr technique_copy_depth_;
 
-		static uint32_t const NUM_SHADOWED_SPOT_LIGHTS = 4;
-		static uint32_t const NUM_SHADOWED_POINT_LIGHTS = 1;
+		static uint32_t const MAX_NUM_SHADOWED_SPOT_LIGHTS = 4;
+		static uint32_t const MAX_NUM_SHADOWED_POINT_LIGHTS = 1;
 
 		std::vector<int32_t> sm_light_indices_;
 		FrameBufferPtr sm_buffer_;
 		TexturePtr sm_tex_;
 		TexturePtr sm_depth_tex_;
-		array<TexturePtr, NUM_SHADOWED_SPOT_LIGHTS> blur_sm_2d_texs_;
-		array<TexturePtr, NUM_SHADOWED_POINT_LIGHTS> blur_sm_cube_texs_;
+		FrameBufferPtr cascaded_sm_buffer_;
+		TexturePtr cascaded_sm_tex_;
+		array<TexturePtr, MAX_NUM_SHADOWED_SPOT_LIGHTS> blur_sm_2d_texs_;
+		array<TexturePtr, MAX_NUM_SHADOWED_POINT_LIGHTS> blur_sm_cube_texs_;
 
 		PostProcessPtr sm_filter_pp_;
 		PostProcessPtr depth_to_vsm_pp_;

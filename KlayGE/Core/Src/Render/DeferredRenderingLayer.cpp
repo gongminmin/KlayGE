@@ -281,6 +281,7 @@ namespace KlayGE
 		}
 
 		mrt_g_buffer_support_ = (caps.max_simultaneous_rts > 1);
+		tex_array_support_ = (caps.max_texture_array_length >= 4);
 
 		for (size_t vpi = 0; vpi < viewports_.size(); ++ vpi)
 		{
@@ -451,11 +452,17 @@ namespace KlayGE
 		}
 		sm_buffer_->Attach(FrameBuffer::ATT_DepthStencil, sm_depth_view);
 
-		for (uint32_t i = 0; i < NUM_SHADOWED_SPOT_LIGHTS; ++ i)
+		cascaded_sm_buffer_ = rf.MakeFrameBuffer();
+		cascaded_sm_tex_ = rf.MakeTexture2D(SM_SIZE * 2, SM_SIZE * 2, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
+		cascaded_sm_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*cascaded_sm_tex_, 0, 1, 0));
+		cascaded_sm_buffer_->Attach(FrameBuffer::ATT_DepthStencil,
+			rf.Make2DDepthStencilRenderView(SM_SIZE * 2, SM_SIZE * 2, ds_fmt, 1, 0));
+
+		for (uint32_t i = 0; i < MAX_NUM_SHADOWED_SPOT_LIGHTS; ++ i)
 		{
 			blur_sm_2d_texs_[i] = rf.MakeTexture2D(SM_SIZE, SM_SIZE, 1, 1, sm_tex_->Format(), 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
 		}
-		for (uint32_t i = 0; i < NUM_SHADOWED_POINT_LIGHTS; ++ i)
+		for (uint32_t i = 0; i < MAX_NUM_SHADOWED_POINT_LIGHTS; ++ i)
 		{
 			blur_sm_cube_texs_[i] = rf.MakeTextureCube(SM_SIZE, 1, 1, sm_tex_->Format(), 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
 		}
@@ -681,10 +688,18 @@ namespace KlayGE
 
 			fmt = EF_ABGR16F;
 		}
-		for (size_t i = 0; i < pvp.blur_cascaded_sm_texs.size(); ++ i)
+		if (tex_array_support_)
 		{
-			pvp.blur_cascaded_sm_texs[i] = rf.MakeTexture2D(SM_SIZE, SM_SIZE, 3, 1, fmt, 1, 0,
-				EAH_GPU_Read | EAH_GPU_Write | EAH_Generate_Mips, nullptr);
+			pvp.blur_cascaded_sm_texs[0] = rf.MakeTexture2D(SM_SIZE * 2, SM_SIZE * 2, 3,
+				PerViewport::MAX_NUM_CASCADES, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write | EAH_Generate_Mips, nullptr);
+		}
+		else
+		{
+			for (size_t i = 0; i < pvp.blur_cascaded_sm_texs.size(); ++ i)
+			{
+				pvp.blur_cascaded_sm_texs[i] = rf.MakeTexture2D(SM_SIZE * 2, SM_SIZE * 2, 3, 1, fmt, 1, 0,
+					EAH_GPU_Read | EAH_GPU_Write | EAH_Generate_Mips, nullptr);
+			}
 		}
 
 		if (caps.rendertarget_format_support(EF_B10G11R11F, 1, 0))
@@ -875,7 +890,7 @@ namespace KlayGE
 
 							checked_pointer_cast<SunLightSource>(lights_[cascaded_shadow_index_])->UpdateSMCamera(*scene_camera);
 
-							float const BLUR_FACTOR = 0.4f;
+							float const BLUR_FACTOR = 0.2f;
 							blur_size_light_space_.x() = BLUR_FACTOR * 0.5f * light_camera->ProjMatrix()(0, 0);
 							blur_size_light_space_.y() = BLUR_FACTOR * 0.5f * light_camera->ProjMatrix()(1, 1);
 							
@@ -922,8 +937,13 @@ namespace KlayGE
 					{
 					case PRT_ShadowMap:
 					case PRT_ShadowMapWODepth:
-					case PRT_CascadedShadowMap:
 						re.BindFrameBuffer(sm_buffer_);
+						re.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->ClearDepth(1.0f);
+						break;
+
+					case PRT_CascadedShadowMap:
+						cascaded_sm_buffer_->GetViewport()->camera = sm_buffer_->GetViewport()->camera;
+						re.BindFrameBuffer(cascaded_sm_buffer_);
 						re.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->ClearDepth(1.0f);
 						break;
 
@@ -1101,7 +1121,7 @@ namespace KlayGE
 						break;
 
 					case LT_Spot:
-						if (num_sm_2d_lights < NUM_SHADOWED_SPOT_LIGHTS)
+						if (num_sm_2d_lights < MAX_NUM_SHADOWED_SPOT_LIGHTS)
 						{
 							sm_light_indices_.push_back(num_sm_2d_lights);
 							++ num_sm_2d_lights;
@@ -1109,7 +1129,7 @@ namespace KlayGE
 						break;
 
 					case LT_Point:
-						if (num_sm_cube_lights < NUM_SHADOWED_POINT_LIGHTS)
+						if (num_sm_cube_lights < MAX_NUM_SHADOWED_POINT_LIGHTS)
 						{
 							sm_light_indices_.push_back(num_sm_cube_lights);
 							++ num_sm_cube_lights;
@@ -1652,7 +1672,7 @@ namespace KlayGE
 		if (LT_Sun == type)
 		{
 			float3 scale = cascaded_shadow_layer_->GetCascadeInfo(index_in_pass - 1).scale;
-			float2 blur_kernel_size = blur_size_light_space_ * float2(scale.x(), scale.y()) * static_cast<float>(sm_tex_->Width(0));
+			float2 blur_kernel_size = blur_size_light_space_ * float2(scale.x(), scale.y()) * static_cast<float>(cascaded_sm_tex_->Width(0));
 			int2 kernel_size(MathLib::clamp(static_cast<int32_t>(blur_kernel_size.x() + 0.5f), 1, 8),
 				MathLib::clamp(static_cast<int32_t>(blur_kernel_size.y() + 0.5f), 1, 8));
 			pp_x_dir->KernelRadius(kernel_size.x());
@@ -1664,24 +1684,45 @@ namespace KlayGE
 			pp_y_dir->KernelRadius(8);
 		}
 
-		sm_filter_pp_->InputPin(0, sm_tex_);
-		if (LT_Point == type)
+		if (LT_Sun == type)
 		{
-			sm_filter_pp_->OutputPin(0, blur_sm_cube_texs_[sm_light_indices_[org_no]], 0, 0, index_in_pass - 1);
-		}
-		else if (LT_Sun == type)
-		{
-			sm_filter_pp_->OutputPin(0, pvp.blur_cascaded_sm_texs[index_in_pass - 1]);
+			sm_filter_pp_->InputPin(0, cascaded_sm_tex_);
+			if (tex_array_support_)
+			{
+				sm_filter_pp_->OutputPin(0, pvp.blur_cascaded_sm_texs[0], 0, index_in_pass - 1, 0);
+			}
+			else
+			{
+				sm_filter_pp_->OutputPin(0, pvp.blur_cascaded_sm_texs[index_in_pass - 1]);
+			}
 		}
 		else
 		{
-			sm_filter_pp_->OutputPin(0, blur_sm_2d_texs_[sm_light_indices_[org_no]]);
+			sm_filter_pp_->InputPin(0, sm_tex_);
+			if (LT_Point == type)
+			{
+				sm_filter_pp_->OutputPin(0, blur_sm_cube_texs_[sm_light_indices_[org_no]], 0, 0, index_in_pass - 1);
+			}
+			else 
+			{
+				sm_filter_pp_->OutputPin(0, blur_sm_2d_texs_[sm_light_indices_[org_no]]);
+			}
 		}
 		sm_filter_pp_->Apply();
 
 		if (LT_Sun == type)
 		{
-			pvp.blur_cascaded_sm_texs[index_in_pass - 1]->BuildMipSubLevels();
+			if (tex_array_support_)
+			{
+				if (static_cast<int32_t>(pvp.num_cascades) == index_in_pass)
+				{
+					pvp.blur_cascaded_sm_texs[0]->BuildMipSubLevels();
+				}
+			}
+			else
+			{
+				pvp.blur_cascaded_sm_texs[index_in_pass - 1]->BuildMipSubLevels();
+			}
 		}
 	}
 
@@ -1713,28 +1754,33 @@ namespace KlayGE
 					float4x4 light_view_proj = pvp.inv_view * sm_camera->ViewProjMatrix();
 					*(dr_effect_->ParameterByName("light_view_proj")) = light_view_proj;
 
-					std::vector<float4x4> light_mvps(pvp.num_cascades);
 					std::vector<float2> cascade_intervals(pvp.num_cascades);
-					std::vector<float2> cascade_scales(pvp.num_cascades);
-					for (size_t i = 0; i < light_mvps.size(); ++ i)
+					std::vector<float4> cascade_scale_bias(pvp.num_cascades);
+					for (uint32_t i = 0; i < pvp.num_cascades; ++ i)
 					{
 						CascadeInfo const & cascade = cascaded_shadow_layer_->GetCascadeInfo(i);
-						light_mvps[i] = light_view_proj * cascade.crop_mat;
 						cascade_intervals[i] = cascade.interval;
-						cascade_scales[i] = cascade.scale;
+						cascade_scale_bias[i] = float4(cascade.scale.x(), cascade.scale.y(),
+							cascade.bias.x(), cascade.bias.y());
 					}
-					*(dr_effect_->ParameterByName("cascaded_light_view_projs")) = light_mvps;
 					*(dr_effect_->ParameterByName("cascade_intervals")) = cascade_intervals;
-					*(dr_effect_->ParameterByName("cascade_scales")) = cascade_scales;
+					*(dr_effect_->ParameterByName("cascade_scale_bias")) = cascade_scale_bias;
 					*(dr_effect_->ParameterByName("num_cascades")) = static_cast<int32_t>(pvp.num_cascades);
 
 					float4x4 light_view = pvp.inv_view * sm_camera->ViewMatrix();
 					*(dr_effect_->ParameterByName("view_z_to_light_view")) = light_view.Col(2);
 				}
-				*(dr_effect_->ParameterByName("cascaded_shadow_map_0_tex")) = pvp.blur_cascaded_sm_texs[0];
-				*(dr_effect_->ParameterByName("cascaded_shadow_map_1_tex")) = pvp.blur_cascaded_sm_texs[1];
-				*(dr_effect_->ParameterByName("cascaded_shadow_map_2_tex")) = pvp.blur_cascaded_sm_texs[2];
-				*(dr_effect_->ParameterByName("cascaded_shadow_map_3_tex")) = pvp.blur_cascaded_sm_texs[3];
+				if (tex_array_support_)
+				{
+					*(dr_effect_->ParameterByName("cascaded_shadow_map_tex_array")) = pvp.blur_cascaded_sm_texs[0];
+				}
+				else
+				{
+					*(dr_effect_->ParameterByName("cascaded_shadow_map_0_tex")) = pvp.blur_cascaded_sm_texs[0];
+					*(dr_effect_->ParameterByName("cascaded_shadow_map_1_tex")) = pvp.blur_cascaded_sm_texs[1];
+					*(dr_effect_->ParameterByName("cascaded_shadow_map_2_tex")) = pvp.blur_cascaded_sm_texs[2];
+					*(dr_effect_->ParameterByName("cascaded_shadow_map_3_tex")) = pvp.blur_cascaded_sm_texs[3];
+				}
 				break;
 
 			default:

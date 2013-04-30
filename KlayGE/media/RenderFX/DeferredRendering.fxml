@@ -25,15 +25,15 @@
 	</cbuffer>
 
 	<cbuffer name="cascaded_light_sources">
-		<parameter type="float4x4" name="cascaded_light_view_projs" array_size="4"/>
-		<parameter type="float2" name="cascade_intervals" array_size="4"/>
-		<parameter type="float2" name="cascade_scales" array_size="4"/>
-		<parameter type="int" name="num_cascades"/>
 		<parameter type="float4" name="view_z_to_light_view"/>
+		<parameter type="float4" name="cascade_scale_bias" array_size="4"/>
+		<parameter type="float2" name="cascade_intervals" array_size="4"/>
+		<parameter type="int" name="num_cascades"/>
 	</cbuffer>
 
 	<parameter type="texture2D" name="shadow_map_2d_tex"/>
 	<parameter type="textureCUBE" name="shadow_map_cube_tex"/>
+	<parameter type="texture2DArray" name="cascaded_shadow_map_tex_array"/>
 	<parameter type="texture2D" name="cascaded_shadow_map_0_tex"/>
 	<parameter type="texture2D" name="cascaded_shadow_map_1_tex"/>
 	<parameter type="texture2D" name="cascaded_shadow_map_2_tex"/>
@@ -49,7 +49,13 @@
 		<state name="address_u" value="clamp"/>
 		<state name="address_v" value="clamp"/>
 	</parameter>
-	
+	<parameter type="sampler" name="aniso_sampler">
+		<state name="filtering" value="anisotropic"/>
+		<state name="address_u" value="clamp"/>
+		<state name="address_v" value="clamp"/>
+		<state name="max_anisotropy" value="4"/>
+	</parameter>
+
 	<shader>
 		<![CDATA[
 float linstep(float min, float max, float v)
@@ -150,7 +156,9 @@ float4 VSM_Directional(float3 pos_es, float len)
 float4 VSM_Sun(float3 pos_es, float len)
 {
 	float2 light_proj_pos = mul(float4(pos_es, 1), light_view_proj).xy;
-	float4 tc_ddx_ddy = float4(ddx(light_proj_pos), ddy(light_proj_pos)) * 0.5f;
+	light_proj_pos.y *= KLAYGE_FLIPPING;
+	light_proj_pos = light_proj_pos * 0.5f + 0.5f;
+	float4 tc_ddx_ddy = float4(ddx(light_proj_pos), ddy(light_proj_pos));
 	
 	float shadow = 0;
 	if ((pos_es.z >= cascade_intervals[0].x) && (pos_es.z < cascade_intervals[num_cascades - 1].y))
@@ -159,29 +167,36 @@ float4 VSM_Sun(float3 pos_es, float len)
 		{
 			if ((pos_es.z >= cascade_intervals[i].x) && (pos_es.z < cascade_intervals[i].y))
 			{
-				float2 shadow_tc = mul(float4(pos_es, 1), cascaded_light_view_projs[i]).xy;
-				shadow_tc.y *= KLAYGE_FLIPPING;
-				shadow_tc.xy = shadow_tc.xy / 2 + 0.5f;
+				float2 shadow_tc = light_proj_pos * cascade_scale_bias[i].xy + cascade_scale_bias[i].zw;
 
-				float4 shadow_tc_ddx_ddy = tc_ddx_ddy * cascade_scales[i].xyxy;
-		
+				float4 shadow_tc_ddx_ddy = tc_ddx_ddy * cascade_scale_bias[i].xyxy;
+
+#if KLAYGE_MAX_TEX_ARRAY_LEN >= 4
+				float2 moments = cascaded_shadow_map_tex_array.SampleGrad(aniso_sampler, float3(shadow_tc, i),
+					shadow_tc_ddx_ddy.xy, shadow_tc_ddx_ddy.zw).xy;
+#else
 				float2 moments;
 				if (0 == i)
 				{
-					moments = cascaded_shadow_map_0_tex.SampleGrad(linear_sampler, shadow_tc, shadow_tc_ddx_ddy.xy, shadow_tc_ddx_ddy.zw).xy;
+					moments = cascaded_shadow_map_0_tex.SampleGrad(aniso_sampler, shadow_tc,
+						shadow_tc_ddx_ddy.xy, shadow_tc_ddx_ddy.zw).xy;
 				}
 				else if (1 == i)
 				{
-					moments = cascaded_shadow_map_1_tex.SampleGrad(linear_sampler, shadow_tc, shadow_tc_ddx_ddy.xy, shadow_tc_ddx_ddy.zw).xy;
+					moments = cascaded_shadow_map_1_tex.SampleGrad(aniso_sampler, shadow_tc,
+						shadow_tc_ddx_ddy.xy, shadow_tc_ddx_ddy.zw).xy;
 				}
 				else if (2 == i)
 				{
-					moments = cascaded_shadow_map_2_tex.SampleGrad(linear_sampler, shadow_tc, shadow_tc_ddx_ddy.xy, shadow_tc_ddx_ddy.zw).xy;
+					moments = cascaded_shadow_map_2_tex.SampleGrad(aniso_sampler, shadow_tc,
+						shadow_tc_ddx_ddy.xy, shadow_tc_ddx_ddy.zw).xy;
 				}
 				else
 				{
-					moments = cascaded_shadow_map_3_tex.SampleGrad(linear_sampler, shadow_tc, shadow_tc_ddx_ddy.xy, shadow_tc_ddx_ddy.zw).xy;
+					moments = cascaded_shadow_map_3_tex.SampleGrad(aniso_sampler, shadow_tc,
+						shadow_tc_ddx_ddy.xy, shadow_tc_ddx_ddy.zw).xy;
 				}
+#endif
 				shadow += Calc_VSM(moments, len);
 			}
 		}
