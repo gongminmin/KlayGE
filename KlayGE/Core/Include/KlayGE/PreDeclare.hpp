@@ -130,6 +130,8 @@ namespace KlayGE
 	typedef shared_ptr<SpotLightSource> SpotLightSourcePtr;
 	class DirectionalLightSource;
 	typedef shared_ptr<DirectionalLightSource> DirectionalLightSourcePtr;
+	class SunLightSource;
+	typedef shared_ptr<SunLightSource> SunLightSourcePtr;
 	struct RenderDeviceCaps;
 	class Query;
 	typedef shared_ptr<Query> QueryPtr;

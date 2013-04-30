@@ -161,8 +161,9 @@ namespace KlayGE
 		case LT_Point:
 			mesh_name = "point_light_proxy.meshml";
 			break;
-		
+
 		case LT_Directional:
+		case LT_Sun:
 			mesh_name = "directional_light_proxy.meshml";
 			break;
 

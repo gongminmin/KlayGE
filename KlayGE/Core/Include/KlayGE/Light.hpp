@@ -30,6 +30,7 @@ namespace KlayGE
 		LT_Point,
 		LT_Directional,
 		LT_Spot,
+		LT_Sun,
 
 		LT_NumLightTypes
 	};
@@ -179,6 +180,22 @@ namespace KlayGE
 		virtual ~DirectionalLightSource();
 
 		void Attrib(int32_t attrib);
+	};
+
+	class KLAYGE_CORE_API SunLightSource : public LightSource
+	{
+	public:
+		SunLightSource();
+		virtual ~SunLightSource();
+
+		virtual void Attrib(int32_t attrib) KLAYGE_OVERRIDE;
+
+		virtual CameraPtr const & SMCamera(uint32_t index) const KLAYGE_OVERRIDE;
+
+		void UpdateSMCamera(Camera const & scene_camera);
+
+	protected:
+		CameraPtr sm_camera_;
 	};
 }
 

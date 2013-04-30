@@ -18,6 +18,7 @@
 #include <KlayGE/FrameBuffer.hpp>
 #include <KlayGE/Query.hpp>
 #include <KlayGE/Camera.hpp>
+#include <KlayGE/CascadedShadowLayer.hpp>
 
 #include <KlayGE/Light.hpp>
 
@@ -407,5 +408,57 @@ namespace KlayGE
 		// Disable shadow and GI
 		attrib_ |= LSA_NoShadow;
 		attrib_ &= ~LSA_IndirectLighting;
+	}
+
+
+	SunLightSource::SunLightSource()
+		: LightSource(LT_Sun),
+			sm_camera_(MakeSharedPtr<Camera>())
+	{
+		attrib_ = 0;
+	}
+
+	SunLightSource::~SunLightSource()
+	{
+	}
+
+	void SunLightSource::Attrib(int32_t attrib)
+	{
+		LightSource::Attrib(attrib);
+
+		// Enable shadow and disable GI
+		attrib_ &= ~LSA_NoShadow;
+		attrib_ &= LSA_IndirectLighting;
+	}
+
+	CameraPtr const & SunLightSource::SMCamera(uint32_t /*index*/) const
+	{
+		return sm_camera_;
+	}
+
+	void SunLightSource::UpdateSMCamera(Camera const & scene_camera)
+	{
+		float3 const dir = this->Direction();
+
+		float3 up_vec;
+		if (abs(MathLib::dot(-dir, scene_camera.UpVec())) > 0.95f)
+		{
+			up_vec = scene_camera.RightVec();
+		}
+		else
+		{
+			up_vec = scene_camera.UpVec();
+		}
+
+		float4x4 light_view = MathLib::look_at_lh(-dir, float3(0, 0, 0), up_vec);
+
+		AABBox const aabb = CalcFrustumExtents(scene_camera, scene_camera.NearPlane(), scene_camera.FarPlane(), light_view);
+
+		float3 const & center = aabb.Center();
+		float3 view_pos = MathLib::transform_coord(float3(center.x(), center.y(), aabb.Min().z()), MathLib::inverse(light_view));
+		sm_camera_->ViewParams(view_pos, view_pos + dir, up_vec);
+
+		float3 dimensions = aabb.Max() - aabb.Min();
+		sm_camera_->ProjOrthoParams(dimensions.x(), dimensions.y(), 0.0f, dimensions.z());
 	}
 }
