@@ -951,16 +951,28 @@ namespace KlayGE
 					switch (pass_rt)
 					{
 					case PRT_ShadowMap:
-					case PRT_ShadowMapWODepth:
 						re.BindFrameBuffer(sm_buffer_);
 						re.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->ClearDepth(1.0f);
 						break;
 
+					case PRT_ShadowMapWODepth:
 					case PRT_CascadedShadowMap:
-						cascaded_sm_buffer_->GetViewport()->camera = sm_buffer_->GetViewport()->camera;
-						re.BindFrameBuffer(cascaded_sm_buffer_);
-						re.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->ClearDepth(1.0f);
-						break;
+						{
+							CameraPtr const & light_camera = sm_buffer_->GetViewport()->camera;
+							if (PRT_ShadowMapWODepth == pass_rt)
+							{
+								re.BindFrameBuffer(sm_buffer_);
+							}
+							else
+							{
+								cascaded_sm_buffer_->GetViewport()->camera = light_camera;
+								re.BindFrameBuffer(cascaded_sm_buffer_);
+							}
+							float const far_plane = light_camera->FarPlane();
+							re.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth,
+								Color(far_plane, far_plane * far_plane, 0, 0), 1.0f, 0);
+						}
+ 						break;
 
 					default:
 						BOOST_ASSERT(PRT_ReflectiveShadowMap == pass_rt);

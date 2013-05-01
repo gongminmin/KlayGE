@@ -93,7 +93,7 @@ void CascadedShadowMapApp::InitObjects()
 	sun_light_->Color(float3(1, 1, 1));
 	sun_light_->AddToSceneManager();
 
-	fpcController_.Scalers(0.05f, 0.5f);
+	fpcController_.Scalers(0.05f, 1.0f);
 
 	InputEngine& inputEngine(Context::Instance().InputFactoryInstance().InputEngineInstance());
 	InputActionMap actionMap;
