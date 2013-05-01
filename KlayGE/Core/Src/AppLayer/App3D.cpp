@@ -232,14 +232,14 @@ namespace KlayGE
 		cfg.graphics_cfg.top = main_wnd_->Top();
 		cfg.graphics_cfg.width = main_wnd_->Width();
 		cfg.graphics_cfg.height = main_wnd_->Height();
-		Context::Instance().Config(cfg);
 #else
 	void App3DFramework::Create()
 	{
-		ContextCfg const & cfg = Context::Instance().Config();
+		ContextCfg cfg = Context::Instance().Config();
 #endif
 		Context::Instance().RenderFactoryInstance().RenderEngineInstance().CreateRenderWindow(name_,
 			cfg.graphics_cfg);
+		Context::Instance().Config(cfg);
 
 		if (cfg.deferred_rendering)
 		{

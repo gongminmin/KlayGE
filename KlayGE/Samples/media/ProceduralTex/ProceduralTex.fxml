@@ -102,7 +102,7 @@ float4 MarblePS(float3 pos_os : TEXCOORD0,
 
 	float atten = attenuation_term(light_pos, pos_os, light_falloff);
 
-	float3 clr = max(0, marble(tex_coord).xyz);
+	float3 clr = max(0.0f, marble(tex_coord).xyz);
 
 	return float4(clr * 0.05f + atten * light_color * calc_brdf(clr, 0.4f, 16, light_os, halfway_os, normal_os), 1);
 }
@@ -117,7 +117,7 @@ float4 CloudPS(float3 pos_os : TEXCOORD0,
 	
 	normal_os = normalize(normal_os);
 	
-	return cloud(tex_coord) * max(0, dot(normal_os, light_os));
+	return cloud(tex_coord) * max(0.0f, dot(normal_os, light_os));
 }
 
 float4 ElectroPS(float3 pos_os : TEXCOORD0,
@@ -130,7 +130,7 @@ float4 ElectroPS(float3 pos_os : TEXCOORD0,
 	
 	normal_os = normalize(normal_os);
 	
-	return electro(tex_coord) * max(0, dot(normal_os, light_os));
+	return electro(tex_coord) * max(0.0f, dot(normal_os, light_os));
 }
 		]]>
 	</shader>

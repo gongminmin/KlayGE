@@ -112,7 +112,7 @@ namespace KlayGE
 		size_t NumPrimitivesJustRendered();
 		size_t NumVerticesJustRendered();
 
-		void CreateRenderWindow(std::string const & name, RenderSettings const & settings);
+		void CreateRenderWindow(std::string const & name, RenderSettings& settings);
 
 		void SetStateObjects(RasterizerStateObjectPtr const & rs_obj,
 			DepthStencilStateObjectPtr const & dss_obj, uint16_t front_stencil_ref, uint16_t back_stencil_ref,
@@ -210,13 +210,11 @@ namespace KlayGE
 		virtual void DoResize(uint32_t width, uint32_t height) = 0;
 
 	private:
-		virtual void CheckConfig();
+		virtual void CheckConfig(RenderSettings& settings);
 		virtual void StereoscopicForLCDShutter();
 		void AssemblePostProcessChain();
 
 	protected:
-		RenderSettings render_settings_;
-
 		FrameBufferPtr cur_frame_buffer_;
 		FrameBufferPtr screen_frame_buffer_;
 		TexturePtr ds_tex_;

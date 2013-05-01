@@ -112,11 +112,11 @@ namespace KlayGE
 		this->BindFrameBuffer(win);
 	}
 
-	void OGLESRenderEngine::CheckConfig()
+	void OGLESRenderEngine::CheckConfig(RenderSettings& settings)
 	{
 		if (!glloader_GLES_OES_texture_half_float() && !glloader_GLES_OES_texture_float())
 		{
-			render_settings_.hdr = false;
+			settings.hdr = false;
 		}
 	}
 

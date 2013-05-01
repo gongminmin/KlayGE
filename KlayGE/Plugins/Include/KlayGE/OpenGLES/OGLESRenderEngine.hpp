@@ -91,7 +91,7 @@ namespace KlayGE
 		bool TextureFormatSupport(ElementFormat elem_fmt);
 		bool RenderTargetFormatSupport(ElementFormat elem_fmt, uint32_t sample_count, uint32_t sample_quality);
 
-		void CheckConfig();
+		void CheckConfig(RenderSettings& settings) KLAYGE_OVERRIDE;
 
 	private:
 		array<GLfloat, 4> clear_clr_;

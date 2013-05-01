@@ -145,7 +145,7 @@ namespace KlayGE
 		bool TextureFormatSupport(ElementFormat elem_fmt);
 		bool RenderTargetFormatSupport(ElementFormat elem_fmt, uint32_t sample_count, uint32_t sample_quality);
 
-		virtual void CheckConfig() KLAYGE_OVERRIDE;
+		virtual void CheckConfig(RenderSettings& settings) KLAYGE_OVERRIDE;
 
 	private:
 		D3D11AdapterList const & D3DAdapters() const;

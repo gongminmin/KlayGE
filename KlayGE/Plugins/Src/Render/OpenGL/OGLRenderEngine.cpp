@@ -150,11 +150,19 @@ namespace KlayGE
 		use_gl3_tfb_ = glloader_GL_VERSION_3_0() ? true : false;
 	}
 
-	void OGLRenderEngine::CheckConfig()
+	void OGLRenderEngine::CheckConfig(RenderSettings& settings)
 	{
 		if (!glloader_GL_VERSION_3_0() && !glloader_GL_ARB_texture_float())
 		{
-			render_settings_.hdr = false;
+			settings.hdr = false;
+		}
+
+		if (this->HackForIntel())
+		{
+			settings.hdr = false;
+			settings.ppaa = false;
+			settings.gamma = false;
+			settings.color_grading = false;
 		}
 	}
 

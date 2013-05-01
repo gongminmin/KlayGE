@@ -268,14 +268,13 @@ namespace KlayGE
 		}
 		else
 		{
+			ds_fmt = EF_D16;
 			if (caps.texture_format_support(EF_D16))
 			{				
-				ds_fmt = EF_D16;
 				depth_texture_support_ = true;
 			}
 			else
 			{
-				ds_fmt = EF_Unknown;
 				depth_texture_support_ = false;
 			}
 		}

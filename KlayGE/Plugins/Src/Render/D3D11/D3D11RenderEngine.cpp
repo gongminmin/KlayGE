@@ -304,16 +304,16 @@ namespace KlayGE
 		this->ResetRenderStates();
 		this->BindFrameBuffer(win);
 
-		if (STM_LCDShutter == render_settings_.stereo_method)
+		if (STM_LCDShutter == settings.stereo_method)
 		{
 			uint32_t const w = win->Width();
 			uint32_t const h = win->Height();
 			stereo_lr_3d_vision_tex_ = Context::Instance().RenderFactoryInstance().MakeTexture2D(w * 2, h + 1, 1, 1,
-				render_settings_.color_fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
+				settings.color_fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
 
 			NVSTEREOIMAGEHEADER sih;
 			sih.dwSignature = NVSTEREO_IMAGE_SIGNATURE;
-			sih.dwBPP = NumFormatBits(render_settings_.color_fmt);
+			sih.dwBPP = NumFormatBits(settings.color_fmt);
 			sih.dwFlags = SIH_SWAP_EYES;
 			sih.dwWidth = w * 2; 
 			sih.dwHeight = h;
@@ -322,8 +322,8 @@ namespace KlayGE
 			init_data.data = &sih;
 			init_data.row_pitch = sizeof(sih);
 			init_data.slice_pitch = init_data.row_pitch;
-			TexturePtr sih_tex = Context::Instance().RenderFactoryInstance().MakeTexture2D(sizeof(sih) / NumFormatBytes(render_settings_.color_fmt),
-				1, 1, 1, render_settings_.color_fmt, 1, 0, EAH_GPU_Read, &init_data);
+			TexturePtr sih_tex = Context::Instance().RenderFactoryInstance().MakeTexture2D(sizeof(sih) / NumFormatBytes(settings.color_fmt),
+				1, 1, 1, settings.color_fmt, 1, 0, EAH_GPU_Read, &init_data);
 
 			sih_tex->CopyToSubTexture2D(*stereo_lr_3d_vision_tex_,
 				0, 0, 0, h, sih_tex->Width(0), 1,
@@ -331,15 +331,15 @@ namespace KlayGE
 		}
 	}
 
-	void D3D11RenderEngine::CheckConfig()
+	void D3D11RenderEngine::CheckConfig(RenderSettings& settings)
 	{
 		if (d3d_feature_level_ <= D3D_FEATURE_LEVEL_9_2)
 		{
-			render_settings_.ppaa = false;
+			settings.ppaa = false;
 		}
 		if (d3d_feature_level_ <= D3D_FEATURE_LEVEL_9_1)
 		{
-			render_settings_.hdr = false;
+			settings.hdr = false;
 		}
 	}
 

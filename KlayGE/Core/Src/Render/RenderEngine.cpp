@@ -163,27 +163,26 @@ namespace KlayGE
 
 	// ½¨Á¢äÖÈ¾´°¿Ú
 	/////////////////////////////////////////////////////////////////////////////////
-	void RenderEngine::CreateRenderWindow(std::string const & name, RenderSettings const & settings)
+	void RenderEngine::CreateRenderWindow(std::string const & name, RenderSettings& settings)
 	{
-		render_settings_ = settings;
 		stereo_separation_ = settings.stereo_separation;
-		this->DoCreateRenderWindow(name, render_settings_);
-		this->CheckConfig();
+		this->DoCreateRenderWindow(name, settings);
+		this->CheckConfig(settings);
 		RenderDeviceCaps const & caps = this->DeviceCaps();
 
 		screen_frame_buffer_ = cur_frame_buffer_;
 
-		hdr_enabled_ = render_settings_.hdr;
-		if (render_settings_.hdr)
+		hdr_enabled_ = settings.hdr;
+		if (settings.hdr)
 		{
-			hdr_pp_ = MakeSharedPtr<HDRPostProcess>(render_settings_.fft_lens_effects);
+			hdr_pp_ = MakeSharedPtr<HDRPostProcess>(settings.fft_lens_effects);
 			skip_hdr_pp_ = SyncLoadPostProcess("Copy.ppml", "copy");
 		}
 
-		ppaa_enabled_ = render_settings_.ppaa ? 1 : 0;
-		gamma_enabled_ = render_settings_.gamma;
-		color_grading_enabled_ = render_settings_.color_grading;
-		if (render_settings_.ppaa || render_settings_.color_grading || render_settings_.gamma)
+		ppaa_enabled_ = settings.ppaa ? 1 : 0;
+		gamma_enabled_ = settings.gamma;
+		color_grading_enabled_ = settings.color_grading;
+		if (settings.ppaa || settings.color_grading || settings.gamma)
 		{
 			ldr_pp_ = SyncLoadPostProcess("PostToneMapping.ppml", "PostToneMapping");
 			ldr_pp_->SetParam(0, int3(ppaa_enabled_, gamma_enabled_, color_grading_enabled_));
@@ -201,14 +200,14 @@ namespace KlayGE
 		uint32_t const height = screen_frame_buffer_->Height();
 
 		RenderViewPtr ds_view;
-		if (hdr_pp_ || hdr_pp_ || (render_settings_.stereo_method != STM_None))
+		if (hdr_pp_ || hdr_pp_ || (settings.stereo_method != STM_None))
 		{
 			if (caps.texture_format_support(EF_D24S8) || caps.texture_format_support(EF_D16))
 			{
 				ElementFormat fmt;
-				if (caps.texture_format_support(render_settings_.depth_stencil_fmt))
+				if (caps.texture_format_support(settings.depth_stencil_fmt))
 				{
-					fmt = render_settings_.depth_stencil_fmt;
+					fmt = settings.depth_stencil_fmt;
 				}
 				else
 				{
@@ -222,9 +221,9 @@ namespace KlayGE
 			else
 			{
 				ElementFormat fmt;
-				if (caps.rendertarget_format_support(render_settings_.depth_stencil_fmt, 1, 0))
+				if (caps.rendertarget_format_support(settings.depth_stencil_fmt, 1, 0))
 				{
-					fmt = render_settings_.depth_stencil_fmt;
+					fmt = settings.depth_stencil_fmt;
 				}
 				else
 				{
@@ -236,15 +235,15 @@ namespace KlayGE
 			}
 		}
 
-		if (render_settings_.stereo_method != STM_None)
+		if (settings.stereo_method != STM_None)
 		{
 			mono_frame_buffer_ = rf.MakeFrameBuffer();
 			mono_frame_buffer_->GetViewport()->camera = cur_frame_buffer_->GetViewport()->camera;
 
 			ElementFormat fmt;
-			if (caps.rendertarget_format_support(render_settings_.color_fmt, 1, 0))
+			if (caps.rendertarget_format_support(settings.color_fmt, 1, 0))
 			{
-				fmt = render_settings_.color_fmt;
+				fmt = settings.color_fmt;
 			}
 			else
 			{
@@ -325,7 +324,7 @@ namespace KlayGE
 		this->Stereo(settings.stereo_method);
 	}
 
-	void RenderEngine::CheckConfig()
+	void RenderEngine::CheckConfig(RenderSettings& /*settings*/)
 	{
 	}
 
@@ -461,6 +460,7 @@ namespace KlayGE
 
 	void RenderEngine::Resize(uint32_t width, uint32_t height)
 	{
+		RenderSettings const & settings = Context::Instance().Config().graphics_cfg;
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 		RenderDeviceCaps const & caps = rf.RenderEngineInstance().DeviceCaps();
 
@@ -476,9 +476,9 @@ namespace KlayGE
 			else
 			{
 				ElementFormat fmt;
-				if (caps.rendertarget_format_support(render_settings_.depth_stencil_fmt, 1, 0))
+				if (caps.rendertarget_format_support(settings.depth_stencil_fmt, 1, 0))
 				{
-					fmt = render_settings_.depth_stencil_fmt;
+					fmt = settings.depth_stencil_fmt;
 				}
 				else
 				{

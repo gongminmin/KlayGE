@@ -216,16 +216,10 @@
     <None Include="..\..\..\media\RenderFX\Blur.kfx">
       <Filter>Resource Files</Filter>
     </None>
-    <None Include="..\..\..\media\RenderFX\ColorGrading.kfx">
-      <Filter>Resource Files</Filter>
-    </None>
     <None Include="..\..\..\media\RenderFX\Copy.kfx">
       <Filter>Resource Files</Filter>
     </None>
     <None Include="..\..\..\media\RenderFX\Font.kfx">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="..\..\..\media\RenderFX\FXAA.kfx">
       <Filter>Resource Files</Filter>
     </None>
     <None Include="..\..\..\media\RenderFX\LensEffects.kfx">
@@ -243,13 +237,7 @@
     <None Include="..\..\..\media\Fonts\gkai00mp.kfont">
       <Filter>Resource Files</Filter>
     </None>
-    <None Include="..\..\..\media\PostProcessors\ColorGrading.ppml">
-      <Filter>Resource Files</Filter>
-    </None>
     <None Include="..\..\..\media\PostProcessors\Copy.ppml">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="..\..\..\media\PostProcessors\FXAA.ppml">
       <Filter>Resource Files</Filter>
     </None>
     <None Include="..\..\..\media\PostProcessors\LensEffects.ppml">
@@ -376,6 +364,12 @@
       <Filter>Resource Files</Filter>
     </None>
     <None Include="..\..\..\bin\win_x86_app\Input\KlayGE_InputEngine_MsgInput_vc_d.dll">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\..\..\media\RenderFX\PostToneMapping.kfx">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\..\..\media\PostProcessors\PostToneMapping.ppml">
       <Filter>Resource Files</Filter>
     </None>
   </ItemGroup>
