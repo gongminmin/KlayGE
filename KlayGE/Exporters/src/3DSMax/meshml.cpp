@@ -76,7 +76,7 @@ namespace KlayGE
 
 	TCHAR const * meshml_export::CopyrightMessage()
 	{
-		return TEXT("Copyright 2005-2011");
+		return TEXT("Copyright 2005-2013");
 	}
 
 	TCHAR const * meshml_export::OtherMessage1()
@@ -96,7 +96,7 @@ namespace KlayGE
 
 	void meshml_export::ShowAbout(HWND hWnd)
 	{
-		::MessageBox(hWnd, TEXT("Minmin Gong, Copyright 2005-2011"), TEXT("About"), MB_OK);
+		::MessageBox(hWnd, TEXT("Minmin Gong, Copyright 2005-2013"), TEXT("About"), MB_OK);
 	}
 
 	BOOL meshml_export::SupportsOptions(int ext, DWORD options)
@@ -136,7 +136,7 @@ namespace KlayGE
 		if (::DialogBoxParam(dll_instance, MAKEINTRESOURCE(IDD_MESHML_EXPORT), max_wnd,
 			export_wnd_proc, reinterpret_cast<LPARAM>(this)))
 		{
-			::MessageBox(max_wnd, TEXT("导出成功！"), TEXT("MeshML Export"), MB_OK);
+			::MessageBox(max_wnd, TEXT("Export Successful!"), TEXT("MeshML Export"), MB_OK);
 		}
 
 		return 1;

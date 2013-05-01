@@ -30,6 +30,9 @@
 #include <iskin.h>
 #pragma warning(pop)
 
+#ifdef base_type
+#undef base_type
+#endif
 #ifdef PI
 #undef PI
 #endif
@@ -281,7 +284,7 @@ namespace KlayGE
 
 	void meshml_extractor::get_material(std::vector<int>& mtls_id, std::vector<std::map<int, std::pair<Matrix3, int> > >& uv_transss, Mtl* max_mtl)
 	{
-		if (max_mtl)
+		if (max_mtl != NULL)
 		{
 			if (0 == max_mtl->NumSubMtls())
 			{
@@ -364,6 +367,19 @@ namespace KlayGE
 				}
 			}
 		}
+		else
+		{
+			int mtl_id = meshml_obj_.AllocMaterial();
+			mtls_id.push_back(mtl_id);
+
+			uv_transss.push_back(std::map<int, std::pair<Matrix3, int> >());
+
+			meshml_obj_.SetMaterial(mtl_id, float3(0.5f, 0.5f, 0.5f),
+				float3(0.5f, 0.5f, 0.5f),
+				float3(0, 0, 0),
+				float3(0, 0, 0), 1,
+				0, 1);
+		}
 	}
 
 	void meshml_extractor::extract_object(INode* node)
@@ -386,11 +402,7 @@ namespace KlayGE
 		std::vector<std::map<int, std::pair<Matrix3, int> > > uv_transs;
 
 		size_t mtl_base_index = objs_mtl_id_.size();
-		Mtl* mtl = node->GetMtl();
-		if (mtl != NULL)
-		{
-			this->get_material(objs_mtl_id_, uv_transs, mtl);
-		}
+		this->get_material(objs_mtl_id_, uv_transs, node->GetMtl());
 
 		std::vector<unsigned int> face_sm_group;
 		std::vector<unsigned int> face_mtl_id;

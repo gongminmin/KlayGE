@@ -20,23 +20,20 @@
 #endif
 #pragma warning(pop)
 
-#ifdef UNICODE
-#include <vector>
+#ifdef PI
+#undef PI
 #endif
+#include <KFL/KFL.hpp>
+
 #include "util.hpp"
 
 namespace KlayGE
 {
 	std::string tstr_to_str(std::basic_string<TCHAR> const & tstr)
 	{
-	#ifdef UNICODE
-		int const mbs_len = WideCharToMultiByte(CP_ACP, 0, tstr.c_str(), static_cast<int>(tstr.size()), NULL, 0, NULL, NULL);
-		std::vector<char> tmp(mbs_len + 1);
-		WideCharToMultiByte(CP_ACP, 0, tstr.c_str(), static_cast<int>(tstr.size()), &tmp[0], mbs_len, NULL, NULL);
-		return std::string(tmp.begin(), tmp.end() - 1);
-	#else
-		return tstr;
-	#endif
+		std::string ret;
+		Convert(ret, tstr);
+		return ret;
 	}
 
 	bool is_mesh(INode* node)
