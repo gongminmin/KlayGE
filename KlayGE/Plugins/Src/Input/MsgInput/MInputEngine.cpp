@@ -238,6 +238,7 @@ namespace KlayGE
 		}
 	}
 
+#if (_WIN32_WINNT >= 0x0601 /*_WIN32_WINNT_WIN7*/)
 	void MsgInputEngine::OnTouch(Window const & wnd, HTOUCHINPUT hti, uint32_t num_inputs)
 	{
 		typedef KLAYGE_DECLTYPE(devices_) DevicesType;
@@ -249,6 +250,7 @@ namespace KlayGE
 			}
 		}
 	}
+#endif
 #endif
 
 	void MsgInputEngine::OnPointerDown(int2 const & pt, uint32_t id)

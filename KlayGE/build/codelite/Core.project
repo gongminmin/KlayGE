@@ -12,6 +12,7 @@
       <File Name="../../Core/Src/Render/BlockCompression.cpp"/>
       <File Name="../../Core/Src/Render/Camera.cpp"/>
       <File Name="../../Core/Src/Render/CameraController.cpp"/>
+      <File Name="../../Core/Src/Render/CascadedShadowLayer.cpp"/>
       <File Name="../../Core/Src/Render/DeferredRenderingLayer.cpp"/>
       <File Name="../../Core/Src/Render/ElementFormat.cpp"/>
       <File Name="../../Core/Src/Render/FFT.cpp"/>
@@ -50,6 +51,7 @@
       <File Name="../../Core/Include/KlayGE/BlockCompression.hpp"/>
       <File Name="../../Core/Include/KlayGE/Camera.hpp"/>
       <File Name="../../Core/Include/KlayGE/CameraController.hpp"/>
+      <File Name="../../Core/Include/KlayGE/CascadedShadowLayer.hpp"/>
       <File Name="../../Core/Include/KlayGE/DeferredRenderingLayer.hpp"/>
       <File Name="../../Core/Include/KlayGE/ElementFormat.hpp"/>
       <File Name="../../Core/Include/KlayGE/FFT.hpp"/>
@@ -219,6 +221,7 @@
       <File Name="../../Core/Src/Input/Joystick.cpp"/>
       <File Name="../../Core/Src/Input/Keyboard.cpp"/>
       <File Name="../../Core/Src/Input/Mouse.cpp"/>
+      <File Name="../../Core/Src/Input/Touch.cpp"/>
     </VirtualDirectory>
     <VirtualDirectory Name="Header Files">
       <File Name="../../Core/Include/KlayGE/Input.hpp"/>

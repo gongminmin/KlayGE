@@ -39,6 +39,10 @@
 #if (_WIN32_WINNT >= 0x0602 /*_WIN32_WINNT_WIN8*/)
 #include <hidsdi.h>
 #else
+#ifndef _NTDEF_
+typedef LONG NTSTATUS;
+#endif
+
 typedef USHORT USAGE, *PUSAGE;
 
 #define HID_USAGE_PAGE_UNDEFINED                        ((USAGE) 0x00)

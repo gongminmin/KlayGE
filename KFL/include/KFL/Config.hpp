@@ -194,6 +194,9 @@
 	#if defined(__MINGW32__)
 		#define KLAYGE_COMPILER_NAME mgw
 		#include <_mingw.h>
+		#ifndef WINVER
+			#define WINVER 0x0501
+		#endif
 	#else
 		#include <sdkddkver.h>
 	#endif

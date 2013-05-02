@@ -49,10 +49,9 @@ namespace KlayGE
 		return name;
 	}
 
-#if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
+#if (defined KLAYGE_PLATFORM_WINDOWS_DESKTOP) && (_WIN32_WINNT >= 0x0601 /*_WIN32_WINNT_WIN7*/)
 	void MsgInputTouch::OnTouch(Window const & wnd, HTOUCHINPUT hti, uint32_t num_inputs)
 	{
-#if (_WIN32_WINNT >= 0x0601 /*_WIN32_WINNT_WIN7*/)
 		std::vector<TOUCHINPUT> inputs(num_inputs);
 
 		if (::GetTouchInputInfo(hti, num_inputs, &inputs[0], sizeof(inputs[0])))
@@ -68,11 +67,6 @@ namespace KlayGE
 
 			::CloseTouchInputHandle(hti);
 		}
-#else
-		UNREF_PARAM(wnd);
-		UNREF_PARAM(hti);
-		UNREF_PARAM(num_inputs);
-#endif
 	}
 #endif
 

@@ -11,13 +11,12 @@
     <File Name="../../Plugins/Src/Input/MsgInput/MIJoystick.cpp"/>
     <File Name="../../Plugins/Src/Input/MsgInput/MIKeyboard.cpp"/>
     <File Name="../../Plugins/Src/Input/MsgInput/MIMouse.cpp"/>
-    <File Name="../../Plugins/Src/Input/MsgInput/MInputDevice.cpp"/>
+    <File Name="../../Plugins/Src/Input/MsgInput/MITouch.cpp"/>
     <File Name="../../Plugins/Src/Input/MsgInput/MInputEngine.cpp"/>
     <File Name="../../Plugins/Src/Input/MsgInput/MInputFactory.cpp"/>
   </VirtualDirectory>
   <VirtualDirectory Name="Header Files">
     <File Name="../../Plugins/Include/KlayGE/MsgInput/MInput.hpp"/>
-    <File Name="../../Plugins/Include/KlayGE/MsgInput/MInputDevice.hpp"/>
     <File Name="../../Plugins/Include/KlayGE/MsgInput/MInputFactory.hpp"/>
   </VirtualDirectory>
   <Settings Type="Dynamic Library">
