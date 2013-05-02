@@ -200,7 +200,7 @@ namespace KlayGE
 		uint32_t const height = screen_frame_buffer_->Height();
 
 		RenderViewPtr ds_view;
-		if (hdr_pp_ || hdr_pp_ || (settings.stereo_method != STM_None))
+		if (hdr_pp_ || ldr_pp_ || (settings.stereo_method != STM_None))
 		{
 			if (caps.texture_format_support(EF_D24S8) || caps.texture_format_support(EF_D16))
 			{

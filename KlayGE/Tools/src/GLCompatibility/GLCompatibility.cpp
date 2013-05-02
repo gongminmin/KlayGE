@@ -141,7 +141,5 @@ int main()
 
 	module->Call("gl_compatibility", for_py);
 
-	Context::Destroy();
-
 	return 0;
 }

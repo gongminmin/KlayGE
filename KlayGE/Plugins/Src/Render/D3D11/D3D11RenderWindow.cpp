@@ -566,13 +566,6 @@ namespace KlayGE
 
 	void D3D11RenderWindow::Destroy()
 	{
-		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-		ID3D11DeviceContextPtr d3d_imm_ctx = checked_cast<D3D11RenderEngine*>(&re)->D3DDeviceImmContext();
-		if (d3d_imm_ctx)
-		{
-			d3d_imm_ctx->ClearState();
-		}
-
 #ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
 		if (swap_chain_)
 		{
