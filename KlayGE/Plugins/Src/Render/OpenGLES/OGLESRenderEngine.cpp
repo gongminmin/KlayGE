@@ -118,6 +118,13 @@ namespace KlayGE
 		{
 			settings.hdr = false;
 		}
+
+#if defined KLAYGE_PLATFORM_ANDROID
+		settings.hdr = false;
+		settings.ppaa = false;
+		settings.gamma = false;
+		settings.color_grading = false;
+#endif
 	}
 
 	void OGLESRenderEngine::InitRenderStates()
