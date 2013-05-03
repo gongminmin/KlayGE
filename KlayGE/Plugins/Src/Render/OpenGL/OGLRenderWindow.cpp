@@ -113,6 +113,10 @@ namespace KlayGE
 		pfd.nSize		= sizeof(pfd);
 		pfd.nVersion	= 1;
 		pfd.dwFlags		= PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER;
+		if (STM_LCDShutter == settings.stereo_method)
+		{
+			pfd.dwFlags |= PFD_STEREO;
+		}
 		pfd.iPixelType	= PFD_TYPE_RGBA;
 		pfd.cColorBits	= static_cast<BYTE>(color_bits_);
 		pfd.cDepthBits	= static_cast<BYTE>(depth_bits);
