@@ -317,6 +317,7 @@ void InputCaps::InputHandler(InputEngine const & /*sender*/, InputAction const &
 		{
 			InputMouseActionParamPtr param = checked_pointer_cast<InputMouseActionParam>(action.second);
 			std::wostringstream stream;
+			stream << param->abs_coord.x() << ' ' << param->abs_coord.y() << ' ';
 			stream << param->move_vec.x() << ' ' << param->move_vec.y() << ' ' << param->wheel_delta << ' ';
 			for (uint32_t i = 0; i < 8; ++ i)
 			{

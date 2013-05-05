@@ -142,13 +142,13 @@ namespace KlayGE
 		void FillRenderDeviceCaps();
 		void InitRenderStates();
 
-		void StereoscopicForLCDShutter();
+		virtual void StereoscopicForLCDShutter(int32_t eye) KLAYGE_OVERRIDE;
 
 		bool VertexFormatSupport(ElementFormat elem_fmt);
 		bool TextureFormatSupport(ElementFormat elem_fmt);
 		bool RenderTargetFormatSupport(ElementFormat elem_fmt, uint32_t sample_count, uint32_t sample_quality);
 
-		void CheckConfig(RenderSettings& settings) KLAYGE_OVERRIDE;
+		virtual void CheckConfig(RenderSettings& settings) KLAYGE_OVERRIDE;
 
 	private:
 		GLuint fbo_blit_src_;
@@ -189,11 +189,6 @@ namespace KlayGE
 		bool hack_for_nv_;
 		bool hack_for_ati_;
 		bool hack_for_intel_;
-
-		RenderLayoutPtr copy_left_rl_;
-		RenderLayoutPtr copy_right_rl_;
-		RenderTechniquePtr copy_tech_;
-		RenderEffectParameterPtr copy_src_tex_param_;
 	};
 
 	typedef shared_ptr<OGLRenderEngine> OGLRenderEnginePtr;

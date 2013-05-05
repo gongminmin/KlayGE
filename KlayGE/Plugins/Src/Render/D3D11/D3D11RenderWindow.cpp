@@ -114,13 +114,13 @@ namespace KlayGE
 			sc_desc1_.Width = this->Width();
 			sc_desc1_.Height = this->Height();
 			sc_desc1_.Format = back_buffer_format_;
-			sc_desc1_.Stereo = STM_LCDShutter == settings.stereo_method;
+			sc_desc1_.Stereo = (STM_LCDShutter == settings.stereo_method) && gi_factory_2->IsWindowedStereoEnabled();
 			sc_desc1_.SampleDesc.Count = std::min(static_cast<uint32_t>(D3D11_MAX_MULTISAMPLE_SAMPLE_COUNT), settings.sample_count);
 			sc_desc1_.SampleDesc.Quality = settings.sample_quality;
 			sc_desc1_.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
 			sc_desc1_.Scaling = DXGI_SCALING_STRETCH;
 			sc_desc1_.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
-			sc_desc1_.Flags = 0;
+			sc_desc1_.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
 
 			sc_fs_desc_.RefreshRate.Numerator = 60;
 			sc_fs_desc_.RefreshRate.Denominator = 1;
@@ -154,7 +154,7 @@ namespace KlayGE
 		sc_desc1_.Width = this->Width();
 		sc_desc1_.Height = this->Height();
 		sc_desc1_.Format = back_buffer_format_;
-		sc_desc1_.Stereo = STM_LCDShutter == settings.stereo_method;
+		sc_desc1_.Stereo = (STM_LCDShutter == settings.stereo_method) && gi_factory_2->IsWindowedStereoEnabled();
 		sc_desc1_.SampleDesc.Count = std::min(static_cast<uint32_t>(D3D11_MAX_MULTISAMPLE_SAMPLE_COUNT), settings.sample_count);
 		sc_desc1_.SampleDesc.Quality = settings.sample_quality;
 		sc_desc1_.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;

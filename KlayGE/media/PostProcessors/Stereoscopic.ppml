@@ -104,6 +104,7 @@
 		<params>
 			<param name="separation"/>
 			<param name="zpd"/>
+			<param name="eye"/>
 		</params>
 		<input>
 			<pin name="color_tex"/>
@@ -112,6 +113,6 @@
 		<output>
 			<pin name="output"/>
 		</output>
-		<shader effect="Stereoscopic.fxml" tech="Horizontal"/>
+		<shader effect="Stereoscopic.fxml" tech="LCDShutterOneEye"/>
 	</post_processor>
 </post_processors>

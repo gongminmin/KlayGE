@@ -139,7 +139,7 @@ namespace KlayGE
 
 		void FillRenderDeviceCaps();
 
-		void StereoscopicForLCDShutter();
+		virtual void StereoscopicForLCDShutter(int32_t eye) KLAYGE_OVERRIDE;
 
 		bool VertexFormatSupport(ElementFormat elem_fmt);
 		bool TextureFormatSupport(ElementFormat elem_fmt);
@@ -218,6 +218,7 @@ namespace KlayGE
 
 		std::string vs_profile_, ps_profile_, gs_profile_, cs_profile_, hs_profile_, ds_profile_;
 
+		FrameBufferPtr stereo_lr_3d_vision_fb_;
 		TexturePtr stereo_lr_3d_vision_tex_;
 
 		std::set<ElementFormat> vertex_format_;

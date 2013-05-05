@@ -49,6 +49,7 @@
 #include <KlayGE/Context.hpp>
 #include <KFL/Util.hpp>
 #include <KlayGE/RenderFactory.hpp>
+#include <KlayGE/PostProcess.hpp>
 
 #include <glloader/glloader.h>
 #ifdef Bool
@@ -194,40 +195,6 @@ namespace KlayGE
 		{
 			glDisable(GL_FRAMEBUFFER_SRGB);
 		}
-
-		float2 left_vertices[] = 
-		{
-			float2(-1, +1),
-			float2(0, +1),
-			float2(-1, -1),
-			float2(0, -1),
-		};
-		float2 right_vertices[] = 
-		{
-			float2(0, +1),
-			float2(+1, +1),
-			float2(0, -1),
-			float2(+1, -1),
-		};
-
-		ElementInitData init_data;
-		init_data.data = &left_vertices[0];
-		init_data.row_pitch = sizeof(left_vertices);
-		init_data.slice_pitch = init_data.row_pitch;
-		GraphicsBufferPtr left_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, &init_data);
-		init_data.data = &right_vertices[0];
-		GraphicsBufferPtr right_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, &init_data);
-
-		copy_left_rl_ = rf.MakeRenderLayout();
-		copy_left_rl_->TopologyType(RenderLayout::TT_TriangleStrip);
-		copy_left_rl_->BindVertexStream(left_vb, make_tuple(vertex_element(VEU_Position, 0, EF_GR32F)));
-
-		copy_right_rl_ = rf.MakeRenderLayout();
-		copy_right_rl_->TopologyType(RenderLayout::TT_TriangleStrip);
-		copy_right_rl_->BindVertexStream(right_vb, make_tuple(vertex_element(VEU_Position, 0, EF_GR32F)));
-
-		copy_tech_ = SyncLoadRenderEffect("Copy.fxml")->TechniqueByName("Copy");
-		copy_src_tex_param_ = copy_tech_->Effect().ParameterByName("src_tex");
 	}
 
 	void OGLRenderEngine::ActiveTexture(GLenum tex_unit)
@@ -1762,17 +1729,13 @@ namespace KlayGE
 			placeholders::_1, placeholders::_2, placeholders::_3);
 	}
 
-	void OGLRenderEngine::StereoscopicForLCDShutter()
+	void OGLRenderEngine::StereoscopicForLCDShutter(int32_t eye)
 	{
-		*copy_src_tex_param_ = stereo_lr_tex_;
-
 		this->BindFramebuffer(0);
 		this->EnableFramebufferSRGB(false);
 
-		glDrawBuffer(GL_BACK_RIGHT);
-		this->Render(*copy_tech_, *copy_right_rl_);
-
-		glDrawBuffer(GL_BACK_LEFT);
-		this->Render(*copy_tech_, *copy_left_rl_);
+		glDrawBuffer((0 == eye) ? GL_BACK_LEFT : GL_BACK_RIGHT);
+		stereoscopic_pp_->SetParam(2, eye);
+		stereoscopic_pp_->Render();
 	}
 }

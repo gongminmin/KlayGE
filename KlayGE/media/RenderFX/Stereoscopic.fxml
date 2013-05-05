@@ -5,6 +5,7 @@
 
 	<parameter type="float" name="separation"/>
 	<parameter type="float" name="zpd"/>
+	<parameter type="int" name="eye"/>
 	
 	<parameter type="sampler" name="point_sampler">
 		<state name="filtering" value="min_mag_mip_point"/>
@@ -41,93 +42,64 @@ float4 CalcStereoCoord(float2 tc : TEXCOORD0)
 
 float4 RedCyanPS(float2 tex : TEXCOORD0) : SV_Target
 {
-	float4 coord = CalcStereoCoord(tex);
-	float4 left = color_tex.Sample(point_sampler, coord.xy);
-	float4 right = color_tex.Sample(point_sampler, coord.zw);	
+	float4 lr_coord = CalcStereoCoord(tex);
+	float4 left = color_tex.Sample(point_sampler, lr_coord.xy);
+	float4 right = color_tex.Sample(point_sampler, lr_coord.zw);	
 	return float4(dot(left.gb, float2(0.7f, 0.3f)), right.gb, 1);
 }
 
 float4 YellowBluePS(float2 tex : TEXCOORD0) : SV_Target
 {
-	float4 coord = CalcStereoCoord(tex);
-	float4 left = color_tex.Sample(point_sampler, coord.xy);
-	float4 right = color_tex.Sample(point_sampler, coord.zw);
+	float4 lr_coord = CalcStereoCoord(tex);
+	float4 left = color_tex.Sample(point_sampler, lr_coord.xy);
+	float4 right = color_tex.Sample(point_sampler, lr_coord.zw);
 	return float4(left.rg, right.b, 1);
 }
 
 float4 GreenRedPS(float2 tex : TEXCOORD0) : SV_Target
 {
-	float4 coord = CalcStereoCoord(tex);
-	float4 left = color_tex.Sample(point_sampler, coord.xy);
-	float4 right = color_tex.Sample(point_sampler, coord.zw);
+	float4 lr_coord = CalcStereoCoord(tex);
+	float4 left = color_tex.Sample(point_sampler, lr_coord.xy);
+	float4 right = color_tex.Sample(point_sampler, lr_coord.zw);
 	return float4(right.r, left.gb, 1);
 }
 
 
 float4 HorInterlacingPS(float2 tex : TEXCOORD0) : SV_Target
 {
-	float4 coord = CalcStereoCoord(tex);
-	
-	float4 clr;
+	float4 lr_coord = CalcStereoCoord(tex);	
 	uint u = tex.x * width_height.x;
-	if (u % 2)
-	{
-		clr = color_tex.Sample(point_sampler, coord.xy);
-	}
-	else
-	{
-		clr = color_tex.Sample(point_sampler, coord.zw);
-	}
-	return clr;
+	float2 coord = (u % 2) ? lr_coord.xy : lr_coord.zw;
+	return color_tex.Sample(point_sampler, coord);
 }
 
 float4 VerInterlacingPS(float2 tex : TEXCOORD0) : SV_Target
 {
-	float4 coord = CalcStereoCoord(tex);
-	
-	float4 clr;
+	float4 lr_coord = CalcStereoCoord(tex);	
 	uint v = tex.y * width_height.y;
-	if (v % 2)
-	{
-		clr = color_tex.Sample(point_sampler, coord.xy);
-	}
-	else
-	{
-		clr = color_tex.Sample(point_sampler, coord.zw);
-	}
-	return clr;
+	float2 coord = (v % 2) ? lr_coord.xy : lr_coord.zw;
+	return color_tex.Sample(point_sampler, coord);
 }
 
 float4 HorizontalPS(float2 tex : TEXCOORD0) : SV_Target
 {
-	float4 clr;
-	if (tex.x < 0.5f)
-	{
-		float4 coord = CalcStereoCoord(float2(tex.x * 2, tex.y));
-		clr = color_tex.Sample(point_sampler, coord.xy);
-	}
-	else
-	{
-		float4 coord = CalcStereoCoord(float2((tex.x - 0.5f) * 2, tex.y));
-		clr = color_tex.Sample(point_sampler, coord.zw);
-	}
-	return clr;
+	float2 coord = (tex.x < 0.5f) ? CalcStereoCoord(float2(tex.x * 2, tex.y)).xy
+		: CalcStereoCoord(float2((tex.x - 0.5f) * 2, tex.y)).zw;
+	return color_tex.Sample(point_sampler, coord);
 }
 
 float4 VerticalPS(float2 tex : TEXCOORD0) : SV_Target
 {
-	float4 clr;
-	if (tex.y < 0.5f)
-	{
-		float4 coord = CalcStereoCoord(float2(tex.x, tex.y * 2));
-		clr = color_tex.Sample(point_sampler, coord.xy);
-	}
-	else
-	{
-		float4 coord = CalcStereoCoord(float2(tex.x, (tex.y - 0.5f) * 2));
-		clr = color_tex.Sample(point_sampler, coord.zw);
-	}
-	return clr;
+	float2 coord = (tex.y < 0.5f) ? CalcStereoCoord(float2(tex.x, tex.y * 2)).xy
+		: CalcStereoCoord(float2(tex.x, (tex.y - 0.5f) * 2)).zw;
+	return color_tex.Sample(point_sampler, coord);
+}
+
+float4 LCDShutterOneEyePS(float2 tex : TEXCOORD0) : SV_Target
+{
+	float4 lr_coord = CalcStereoCoord(tex);
+	float2 coord = (0 == eye) ? lr_coord.xy : lr_coord.zw;
+	return color_tex.Sample(point_sampler, coord);
 }
 		]]>
 	</shader>
@@ -199,6 +171,16 @@ float4 VerticalPS(float2 tex : TEXCOORD0) : SV_Target
 
 			<state name="vertex_shader" value="PostProcessVS()"/>
 			<state name="pixel_shader" value="VerticalPS()"/>
+		</pass>
+	</technique>
+
+	<technique name="LCDShutterOneEye">
+		<pass name="p0">
+			<state name="depth_enable" value="false"/>
+			<state name="depth_write_mask" value="0"/>
+
+			<state name="vertex_shader" value="PostProcessVS()"/>
+			<state name="pixel_shader" value="LCDShutterOneEyePS()"/>
 		</pass>
 	</technique>
 </effect>

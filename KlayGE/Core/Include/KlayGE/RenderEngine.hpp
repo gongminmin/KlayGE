@@ -211,7 +211,7 @@ namespace KlayGE
 
 	private:
 		virtual void CheckConfig(RenderSettings& settings);
-		virtual void StereoscopicForLCDShutter();
+		virtual void StereoscopicForLCDShutter(int32_t eye);
 		void AssemblePostProcessChain();
 
 	protected:
@@ -224,7 +224,6 @@ namespace KlayGE
 		TexturePtr ldr_tex_;
 		FrameBufferPtr mono_frame_buffer_;
 		TexturePtr mono_tex_;
-		TexturePtr stereo_lr_tex_;
 		FrameBufferPtr default_frame_buffers_[4];
 
 		RenderLayoutPtr so_buffers_;

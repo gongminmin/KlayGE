@@ -626,13 +626,14 @@ namespace KlayGE
 		}
 		else
 		{
-			stereoscopic_pp_->Apply();
-			this->StereoscopicForLCDShutter();
+			this->StereoscopicForLCDShutter(1);
+			this->StereoscopicForLCDShutter(0);
+
 			this->BindFrameBuffer(screen_frame_buffer_);
 		}
 	}
 
-	void RenderEngine::StereoscopicForLCDShutter()
+	void RenderEngine::StereoscopicForLCDShutter(int32_t /*eye*/)
 	{
 	}
 
@@ -682,12 +683,6 @@ namespace KlayGE
 			}
 
 			stereoscopic_pp_ = SyncLoadPostProcess("Stereoscopic.ppml", pp_name);
-
-			if (STM_LCDShutter == stereo_method_)
-			{
-				stereo_lr_tex_ = Context::Instance().RenderFactoryInstance().MakeTexture2D(mono_tex_->Width(0) * 2,
-					mono_tex_->Height(0), 1, 1, mono_tex_->Format(), 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
-			}
 		}
 
 		this->AssemblePostProcessChain();
@@ -712,14 +707,6 @@ namespace KlayGE
 
 				stereoscopic_pp_->InputPin(0, mono_tex_);
 				stereoscopic_pp_->InputPin(1, ds_tex_);
-				if (STM_LCDShutter == stereo_method_)
-				{
-					stereoscopic_pp_->OutputPin(0, stereo_lr_tex_);
-				}
-				else
-				{
-					stereoscopic_pp_->OutputPin(0, TexturePtr());
-				}
 			}
 		}
 		else
