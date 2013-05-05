@@ -27,7 +27,7 @@ namespace KlayGE
 		{
 			proj_param_ = effect->ParameterByName("proj");
 			inv_proj_param_ = effect->ParameterByName("inv_proj");
-			near_q_param_ = effect->ParameterByName("near_q");
+			near_q_far_param_ = effect->ParameterByName("near_q_far");
 			ray_length_param_ = effect->ParameterByName("ray_length");
 		}
 
@@ -42,7 +42,7 @@ namespace KlayGE
 
 		*proj_param_ = camera.ProjMatrix();
 		*inv_proj_param_ = camera.InverseProjMatrix();
-		*near_q_param_ = float3(camera.NearPlane() * q, q, camera.FarPlane());
+		*near_q_far_param_ = float3(camera.NearPlane() * q, q, camera.FarPlane());
 		*ray_length_param_ = camera.FarPlane() - camera.NearPlane();
 
 		this->Render();

@@ -9,7 +9,7 @@
 	<cbuffer name="per_frame">
 		<parameter type="float4x4" name="proj"/>
 		<parameter type="float4x4" name="inv_proj"/>
-		<parameter type="float3" name="near_q"/>
+		<parameter type="float3" name="near_q_far"/>
 		<parameter type="float" name="ray_length"/>
 	</cbuffer>
 
@@ -46,7 +46,7 @@ float4 CalcSSR(float2 tc, float3 normal, float3 pos_es, float3 indicent_es, bool
 	float3 view_dir = normalize(pos_es); // eye space view direction
 	
 	float linear_depth = pos_es.z;
-	float non_linear_depth = linear_depth_to_non_linear(linear_depth, near_q.x, near_q.y);
+	float non_linear_depth = linear_depth_to_non_linear(linear_depth, near_q_far.x, near_q_far.y);
 	float3 tex_pos = float3(tc, non_linear_depth); // let z component be projected nonlinear depth, so we can do linear interpolation in screen space
 
 	float3 reflect_vec = normalize(reflect(indicent_es, normal)); // eye space reflect vector
@@ -109,7 +109,7 @@ float4 CalcSSR(float2 tc, float3 normal, float3 pos_es, float3 indicent_es, bool
 		{
 			cur_sample_depth = back_side_depth_tex.SampleLevel(ssr_linear_sampler, cur_tex_pos.xy, 0).r;
 		}
-		float cur_ray_march_depth = non_linear_depth_to_linear(cur_tex_pos.z, near_q.x, near_q.y);
+		float cur_ray_march_depth = non_linear_depth_to_linear(cur_tex_pos.z, near_q_far.x, near_q_far.y);
 	
 		t += step;
 		
@@ -151,8 +151,8 @@ float4 CalcSSR(float2 tc, float3 normal, float3 pos_es, float3 indicent_es, bool
 	}
 
 	float4 ret;
-	if (!strictness || ((sample_z < near_q.z - 1e-6f)
-		&& (abs(sample_z - non_linear_depth_to_linear(sample_tex_pos.z, near_q.x, near_q.y)) < 0.1f)))
+	if (!strictness || ((sample_z < near_q_far.z - 1e-6f)
+		&& (abs(sample_z - non_linear_depth_to_linear(sample_tex_pos.z, near_q_far.x, near_q_far.y)) < 0.1f)))
 	{
 		float reflect_dir_fade_out_factor = 1 - orientation_factor;
 		float screen_edge_fade_out_factor = saturate((distance(sample_tex_pos.xy, 0.5f) - 0.4f) * 3);

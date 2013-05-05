@@ -46,7 +46,7 @@ namespace KlayGE
 	private:
 		RenderEffectParameterPtr proj_param_;
 		RenderEffectParameterPtr inv_proj_param_;
-		RenderEffectParameterPtr near_q_param_;
+		RenderEffectParameterPtr near_q_far_param_;
 		RenderEffectParameterPtr ray_length_param_;
 	};
 }
