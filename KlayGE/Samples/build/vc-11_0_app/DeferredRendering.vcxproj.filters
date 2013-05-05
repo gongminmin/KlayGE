@@ -372,5 +372,8 @@
     <None Include="..\..\..\media\PostProcessors\PostToneMapping.ppml">
       <Filter>Resource Files</Filter>
     </None>
+    <None Include="..\..\..\media\RenderFX\CascadedShadow.kfx">
+      <Filter>Resource Files</Filter>
+    </None>
   </ItemGroup>
 </Project>

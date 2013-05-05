@@ -90,42 +90,7 @@ namespace KlayGE
 
 		back_buffer_format_ = D3D11Mapping::MappingFormat(format);
 
-		std::memset(&sc_desc_, 0, sizeof(sc_desc_));
-#ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
-		sc_desc_.BufferCount = 1;
-		sc_desc_.BufferDesc.Width = this->Width();
-		sc_desc_.BufferDesc.Height = this->Height();
-		sc_desc_.BufferDesc.Format = back_buffer_format_;
-		sc_desc_.BufferDesc.ScanlineOrdering = DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED;
-		sc_desc_.BufferDesc.Scaling = DXGI_MODE_SCALING_UNSPECIFIED;
-		sc_desc_.BufferDesc.RefreshRate.Numerator = 60;
-		sc_desc_.BufferDesc.RefreshRate.Denominator = 1;
-		sc_desc_.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
-		sc_desc_.OutputWindow = hWnd_;
-		sc_desc_.SampleDesc.Count = std::min(static_cast<uint32_t>(D3D11_MAX_MULTISAMPLE_SAMPLE_COUNT), settings.sample_count);
-		sc_desc_.SampleDesc.Quality = settings.sample_quality;
-		sc_desc_.Windowed = !this->FullScreen();
-		sc_desc_.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
-		sc_desc_.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
-#else
-		sc_desc_.BufferCount = 2;
-		sc_desc_.Width = this->Width();
-		sc_desc_.Height = this->Height();
-		sc_desc_.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
-		sc_desc_.Stereo = false;
-		sc_desc_.SampleDesc.Count = 1;
-		sc_desc_.SampleDesc.Quality = 0;
-		sc_desc_.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
-		sc_desc_.Scaling = DXGI_SCALING_NONE;
-		sc_desc_.SwapEffect = DXGI_SWAP_EFFECT_FLIP_SEQUENTIAL;
-		sc_desc_.Flags = 0;
-#endif
-
-		viewport_->left		= 0;
-		viewport_->top		= 0;
-		viewport_->width	= width_;
-		viewport_->height	= height_;
-
+		has_dxgi_1_2_ = false;
 
 #if (_WIN32_WINNT >= 0x0602 /*_WIN32_WINNT_WIN8*/)
 		IDXGIFactory2Ptr gi_factory_2;
@@ -135,9 +100,73 @@ namespace KlayGE
 			if (factory != nullptr)
 			{
 				gi_factory_2 = MakeCOMPtr(factory);
+				has_dxgi_1_2_ = true;
 			}
 		}
 #endif
+
+#ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
+#if (_WIN32_WINNT >= 0x0602 /*_WIN32_WINNT_WIN8*/)
+		if (has_dxgi_1_2_)
+		{
+			std::memset(&sc_desc1_, 0, sizeof(sc_desc1_));
+			sc_desc1_.BufferCount = 1;
+			sc_desc1_.Width = this->Width();
+			sc_desc1_.Height = this->Height();
+			sc_desc1_.Format = back_buffer_format_;
+			sc_desc1_.Stereo = STM_LCDShutter == settings.stereo_method;
+			sc_desc1_.SampleDesc.Count = std::min(static_cast<uint32_t>(D3D11_MAX_MULTISAMPLE_SAMPLE_COUNT), settings.sample_count);
+			sc_desc1_.SampleDesc.Quality = settings.sample_quality;
+			sc_desc1_.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
+			sc_desc1_.Scaling = DXGI_SCALING_STRETCH;
+			sc_desc1_.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
+			sc_desc1_.Flags = 0;
+
+			sc_fs_desc_.RefreshRate.Numerator = 60;
+			sc_fs_desc_.RefreshRate.Denominator = 1;
+			sc_fs_desc_.ScanlineOrdering = DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED;
+			sc_fs_desc_.Scaling = DXGI_MODE_SCALING_UNSPECIFIED;
+			sc_fs_desc_.Windowed = !this->FullScreen();
+		}
+		else
+#endif
+		{
+			std::memset(&sc_desc_, 0, sizeof(sc_desc_));
+			sc_desc_.BufferCount = 1;
+			sc_desc_.BufferDesc.Width = this->Width();
+			sc_desc_.BufferDesc.Height = this->Height();
+			sc_desc_.BufferDesc.Format = back_buffer_format_;
+			sc_desc_.BufferDesc.ScanlineOrdering = DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED;
+			sc_desc_.BufferDesc.Scaling = DXGI_MODE_SCALING_UNSPECIFIED;
+			sc_desc_.BufferDesc.RefreshRate.Numerator = 60;
+			sc_desc_.BufferDesc.RefreshRate.Denominator = 1;
+			sc_desc_.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
+			sc_desc_.OutputWindow = hWnd_;
+			sc_desc_.SampleDesc.Count = std::min(static_cast<uint32_t>(D3D11_MAX_MULTISAMPLE_SAMPLE_COUNT), settings.sample_count);
+			sc_desc_.SampleDesc.Quality = settings.sample_quality;
+			sc_desc_.Windowed = !this->FullScreen();
+			sc_desc_.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
+			sc_desc_.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
+		}
+#else
+		std::memset(&sc_desc1_, 0, sizeof(sc_desc1_));
+		sc_desc1_.BufferCount = 2;
+		sc_desc1_.Width = this->Width();
+		sc_desc1_.Height = this->Height();
+		sc_desc1_.Format = back_buffer_format_;
+		sc_desc1_.Stereo = STM_LCDShutter == settings.stereo_method;
+		sc_desc1_.SampleDesc.Count = std::min(static_cast<uint32_t>(D3D11_MAX_MULTISAMPLE_SAMPLE_COUNT), settings.sample_count);
+		sc_desc1_.SampleDesc.Quality = settings.sample_quality;
+		sc_desc1_.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
+		sc_desc1_.Scaling = DXGI_SCALING_NONE;
+		sc_desc1_.SwapEffect = DXGI_SWAP_EFFECT_FLIP_SEQUENTIAL;
+		sc_desc1_.Flags = 0;
+#endif
+
+		viewport_->left		= 0;
+		viewport_->top		= 0;
+		viewport_->width	= width_;
+		viewport_->height	= height_;
 
 		ID3D11DevicePtr d3d_device;
 		ID3D11DeviceContextPtr d3d_imm_ctx;
@@ -163,17 +192,9 @@ namespace KlayGE
 			dev_type_behaviors.push_back(KlayGE::make_tuple(D3D_DRIVER_TYPE_SOFTWARE, std::wstring(L"SW")));
 			dev_type_behaviors.push_back(KlayGE::make_tuple(D3D_DRIVER_TYPE_REFERENCE, std::wstring(L"REF")));
 
-#if (_WIN32_WINNT >= 0x0602 /*_WIN32_WINNT_WIN8*/)
-			bool d3d_11_1 = false;
-			if (!!gi_factory_2)
-			{
-				d3d_11_1 = true;
-			}
-#endif
-
 			std::vector<std::pair<std::string, D3D_FEATURE_LEVEL> > available_feature_levels;	
 #if (_WIN32_WINNT >= 0x0602 /*_WIN32_WINNT_WIN8*/)
-			if (d3d_11_1)
+			if (has_dxgi_1_2_)
 			{
 				available_feature_levels.push_back(std::make_pair("11_1", D3D_FEATURE_LEVEL_11_1));
 			}
@@ -314,14 +335,27 @@ namespace KlayGE
 		}
 
 #ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
-		IDXGISwapChain* sc = nullptr;
-		gi_factory->CreateSwapChain(d3d_device.get(), &sc_desc_, &sc);
+#if (_WIN32_WINNT >= 0x0602 /*_WIN32_WINNT_WIN8*/)
+		if (has_dxgi_1_2_)
+		{
+			IDXGISwapChain1* sc = nullptr;
+			gi_factory_2->CreateSwapChainForHwnd(d3d_device.get(), hWnd_,
+				&sc_desc1_, &sc_fs_desc_, nullptr, &sc);
+			swap_chain_ = MakeCOMPtr(sc);
+		}
+		else
+#endif
+		{
+			IDXGISwapChain* sc = nullptr;
+			gi_factory->CreateSwapChain(d3d_device.get(), &sc_desc_, &sc);
+			swap_chain_ = MakeCOMPtr(sc);
+		}
 #else
 		IDXGISwapChain1* sc = nullptr;
 		gi_factory_2->CreateSwapChainForCoreWindow(d3d_device.get(),
-			reinterpret_cast<IUnknown*>(wnd_.Get()), &sc_desc_, nullptr, &sc);
-#endif
+			reinterpret_cast<IUnknown*>(wnd_.Get()), &sc_desc1_, nullptr, &sc);
 		swap_chain_ = MakeCOMPtr(sc);
+#endif
 
 		Verify(!!swap_chain_);
 		Verify(!!d3d_device);
@@ -494,7 +528,16 @@ namespace KlayGE
 			left_ = 0;
 			top_ = 0;
 
-			sc_desc_.Windowed = !fs;
+#if (_WIN32_WINNT >= 0x0602 /*_WIN32_WINNT_WIN8*/)
+			if (has_dxgi_1_2_)
+			{
+				sc_fs_desc_.Windowed = !fs;
+			}
+			else
+#endif
+			{
+				sc_desc_.Windowed = !fs;
+			}
 
 			uint32_t style;
 			if (fs)
@@ -591,8 +634,41 @@ namespace KlayGE
 		back_buffer_ = MakeCOMPtr(back_buffer);
 		D3D11_TEXTURE2D_DESC bb_desc;
 		back_buffer_->GetDesc(&bb_desc);
+
+		D3D11_RENDER_TARGET_VIEW_DESC rtv_desc;
+		rtv_desc.Format = bb_desc.Format;
+#if (_WIN32_WINNT >= 0x0602 /*_WIN32_WINNT_WIN8*/)
+		if (has_dxgi_1_2_)
+		{
+			if (bb_desc.SampleDesc.Count > 1)
+			{
+				rtv_desc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2DMSARRAY;
+				rtv_desc.Texture2DMSArray.FirstArraySlice = 0;
+				rtv_desc.Texture2DMSArray.ArraySize = 1;
+			}
+			else
+			{
+				rtv_desc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2DARRAY;
+				rtv_desc.Texture2DArray.MipSlice = 0;
+				rtv_desc.Texture2DArray.FirstArraySlice = 0;
+				rtv_desc.Texture2DArray.ArraySize = 1;
+			}
+		}
+		else
+#endif
+		{
+			if (bb_desc.SampleDesc.Count > 1)
+			{
+				rtv_desc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2DMS;
+			}
+			else
+			{
+				rtv_desc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2D;
+				rtv_desc.Texture2D.MipSlice = 0;
+			}
+		}
 		ID3D11RenderTargetView* render_target_view;
-		TIF(d3d_device->CreateRenderTargetView(back_buffer_.get(), nullptr, &render_target_view));
+		TIF(d3d_device->CreateRenderTargetView(back_buffer_.get(), &rtv_desc, &render_target_view));
 		render_target_view_ = MakeCOMPtr(render_target_view);
 
 		// Create depth stencil texture

@@ -100,10 +100,15 @@ namespace KlayGE
 
 		D3D11AdapterPtr			adapter_;
 
+		bool has_dxgi_1_2_;
 #ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
-		DXGI_SWAP_CHAIN_DESC	sc_desc_;
+		DXGI_SWAP_CHAIN_DESC sc_desc_;
+#if (_WIN32_WINNT >= 0x0602 /*_WIN32_WINNT_WIN8*/)
+		DXGI_SWAP_CHAIN_DESC1 sc_desc1_;
+		DXGI_SWAP_CHAIN_FULLSCREEN_DESC sc_fs_desc_;
+#endif
 #else
-		DXGI_SWAP_CHAIN_DESC1	sc_desc_;
+		DXGI_SWAP_CHAIN_DESC1 sc_desc1_;
 #endif
 		IDXGISwapChainPtr		swap_chain_;
 		bool					main_wnd_;
