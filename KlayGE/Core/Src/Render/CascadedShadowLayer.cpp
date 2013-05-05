@@ -33,6 +33,7 @@
 #include <KlayGE/Context.hpp>
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/Camera.hpp>
+#include <KlayGE/RenderEffect.hpp>
 
 #include <algorithm>
 
@@ -72,42 +73,75 @@ namespace KlayGE
 	}
 
 
+	uint32_t CascadedShadowLayer::NumCascades() const
+	{
+		return static_cast<uint32_t>(intervals_.size());
+	}
+
+	void CascadedShadowLayer::NumCascades(uint32_t num_cascades)
+	{
+		intervals_.resize(num_cascades);
+		scales_.resize(num_cascades);
+		biases_.resize(num_cascades);
+		crop_mats_.resize(num_cascades);
+		inv_crop_mats_.resize(num_cascades);
+	}
+
+	std::vector<float2> const & CascadedShadowLayer::CascadeIntervals() const
+	{
+		return intervals_;
+	}
+
+	std::vector<float3> const & CascadedShadowLayer::CascadeScales() const
+	{
+		return scales_;
+	}
+
+	std::vector<float3> const & CascadedShadowLayer::CascadeBiases() const
+	{
+		return biases_;
+	}
+
+	float4x4 const & CascadedShadowLayer::CascadeCropMatrix(uint32_t index) const
+	{
+		BOOST_ASSERT(index < crop_mats_.size());
+		return crop_mats_[index];
+	}
+
+	float4x4 const & CascadedShadowLayer::CascadeInverseCropMatrix(uint32_t index) const
+	{
+		BOOST_ASSERT(index < inv_crop_mats_.size());
+		return inv_crop_mats_[index];
+	}
+
+
 	PSSMCascadedShadowLayer::PSSMCascadedShadowLayer()
+		: lambda_(0.8f)
 	{
 	}
 
-	PSSMCascadedShadowLayer::PSSMCascadedShadowLayer(uint32_t num_cascades)
+	void PSSMCascadedShadowLayer::Lambda(float lambda)
 	{
-		this->NumCascades(num_cascades);
-	}
-
-	uint32_t PSSMCascadedShadowLayer::NumCascades() const
-	{
-		return static_cast<uint32_t>(cascades_.size());
-	}
-
-	void PSSMCascadedShadowLayer::NumCascades(uint32_t num_cascades)
-	{
-		cascades_.resize(num_cascades);
+		lambda_ = lambda;
 	}
 
 	void PSSMCascadedShadowLayer::UpdateCascades(Camera const & camera, float4x4 const & light_view_proj,
-			float lambda, float3 const & light_space_border)
+			float3 const & light_space_border)
 	{
 		float const range = camera.FarPlane() - camera.NearPlane();
 		float const ratio = camera.FarPlane() / camera.NearPlane();
 
-		std::vector<float> distances(cascades_.size() + 1);
-		for (size_t i = 0; i < cascades_.size(); ++ i)
+		std::vector<float> distances(intervals_.size() + 1);
+		for (size_t i = 0; i < intervals_.size(); ++ i)
 		{
-			float p = i / static_cast<float>(cascades_.size());
+			float p = i / static_cast<float>(intervals_.size());
 			float log = camera.NearPlane() * std::pow(ratio, p);
 			float uniform = camera.NearPlane() + range * p;
-			distances[i] = lambda * (log - uniform) + uniform;
+			distances[i] = lambda_ * (log - uniform) + uniform;
 		}
-		distances[cascades_.size()] = camera.FarPlane();
+		distances[intervals_.size()] = camera.FarPlane();
 
-		for (size_t i = 0; i < cascades_.size(); ++ i)
+		for (size_t i = 0; i < intervals_.size(); ++ i)
 		{
 			AABBox aabb = CalcFrustumExtents(camera, distances[i], distances[i + 1],
 								  light_view_proj);
@@ -127,19 +161,148 @@ namespace KlayGE
 			float3 const scale = float3(1.0f, 1.0f, 1.0f) / (aabb.Max() - aabb.Min());
 			float3 const bias = -aabb.Min() * scale;
 
-			cascades_[i].interval = float2(distances[i], distances[i + 1]);
-			cascades_[i].scale = scale;
-			cascades_[i].bias = bias;
-			cascades_[i].crop_mat = MathLib::scaling(scale)
+			intervals_[i] = float2(distances[i], distances[i + 1]);
+			scales_[i] = scale;
+			biases_[i] = bias;
+			crop_mats_[i] = MathLib::scaling(scale)
 				* MathLib::translation(+(2.0f * bias.x() + scale.x() - 1.0f),
 					-(2.0f * bias.y() + scale.y() - 1.0f), bias.z());
-			cascades_[i].inv_crop_mat = MathLib::inverse(cascades_[i].crop_mat);
+			inv_crop_mats_[i] = MathLib::inverse(crop_mats_[i]);
 		}
 	}
 
-	CascadeInfo const & PSSMCascadedShadowLayer::GetCascadeInfo(uint32_t index) const
+
+	SDSMCascadedShadowLayer::SDSMCascadedShadowLayer()
 	{
-		BOOST_ASSERT(index < cascades_.size());
-		return cascades_[index];
+		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+		interval_buff_ = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Read | EAH_GPU_Write | EAH_GPU_Unordered | EAH_GPU_Structured, nullptr, EF_GR32F);
+		scale_buff_ = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Write | EAH_GPU_Unordered | EAH_GPU_Structured, nullptr, EF_BGR32F);
+		bias_buff_ = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Write | EAH_GPU_Unordered | EAH_GPU_Structured, nullptr, EF_BGR32F);
+		cascade_min_buff_ = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Read | EAH_GPU_Write | EAH_GPU_Unordered | EAH_GPU_Structured, nullptr, EF_BGR32F);
+		cascade_max_buff_ = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Read | EAH_GPU_Write | EAH_GPU_Unordered | EAH_GPU_Structured, nullptr, EF_BGR32F);
+
+		interval_cpu_buff_ = rf.MakeVertexBuffer(BU_Dynamic, EAH_CPU_Read, nullptr);
+		scale_cpu_buff_ = rf.MakeVertexBuffer(BU_Dynamic, EAH_CPU_Read, nullptr);
+		bias_cpu_buff_ = rf.MakeVertexBuffer(BU_Dynamic, EAH_CPU_Read, nullptr);
+
+		int const MAX_NUM_CASCADES = 4;
+
+		interval_buff_->Resize(MAX_NUM_CASCADES * sizeof(float2));
+		scale_buff_->Resize(MAX_NUM_CASCADES * sizeof(float3));
+		bias_buff_->Resize(MAX_NUM_CASCADES * sizeof(float3));
+		cascade_min_buff_->Resize(MAX_NUM_CASCADES * sizeof(float3));
+		cascade_max_buff_->Resize(MAX_NUM_CASCADES * sizeof(float3));
+
+		interval_cpu_buff_->Resize(interval_buff_->Size());
+		scale_cpu_buff_->Resize(scale_buff_->Size());
+		bias_cpu_buff_->Resize(bias_buff_->Size());
+
+		RenderEffectPtr effect = SyncLoadRenderEffect("CascadedShadow.fxml");
+
+		clear_z_bounds_tech_ = effect->TechniqueByName("ClearZBounds");
+		reduce_z_bounds_from_depth_tech_ = effect->TechniqueByName("ReduceZBoundsFromDepth");
+		compute_log_cascades_from_z_bounds_tech_ = effect->TechniqueByName("ComputeLogCascadesFromZBounds");
+		clear_cascade_bounds_tech_ = effect->TechniqueByName("ClearCascadeBounds");
+		reduce_bounds_from_depth_tech_ = effect->TechniqueByName("ReduceBoundsFromDepth");
+		compute_custom_cascades_tech_ = effect->TechniqueByName("ComputeCustomCascades");
+
+		interval_buff_param_ = effect->ParameterByName("interval_buff");
+		interval_buff_uint_param_ = effect->ParameterByName("interval_buff_uint");
+		interval_buff_read_param_ = effect->ParameterByName("interval_buff_read");
+		scale_buff_param_ = effect->ParameterByName("scale_buff");
+		bias_buff_param_ = effect->ParameterByName("bias_buff");
+		cascade_min_buff_uint_param_ = effect->ParameterByName("cascade_min_buff_uint");
+		cascade_max_buff_uint_param_ = effect->ParameterByName("cascade_max_buff_uint");
+		cascade_min_buff_read_param_ = effect->ParameterByName("cascade_min_buff_read");
+		cascade_max_buff_read_param_ = effect->ParameterByName("cascade_max_buff_read");
+		depth_tex_param_ = effect->ParameterByName("depth_tex");
+		num_cascades_param_ = effect->ParameterByName("num_cascades");
+		depth_width_height_param_ = effect->ParameterByName("depth_width_height");
+		near_far_param_ = effect->ParameterByName("near_far");
+		upper_left_param_ = effect->ParameterByName("upper_left");
+		xy_dir_param_ = effect->ParameterByName("xy_dir");
+		view_to_light_view_proj_param_ = effect->ParameterByName("view_to_light_view_proj");
+		light_space_border_param_ = effect->ParameterByName("light_space_border");
+		max_cascade_scale_param_ = effect->ParameterByName("max_cascade_scale");
+	}
+
+	void SDSMCascadedShadowLayer::DepthTexture(TexturePtr const & depth_tex)
+	{
+		depth_tex_ = depth_tex;
+	}
+
+	void SDSMCascadedShadowLayer::UpdateCascades(Camera const & camera, float4x4 const & light_view_proj,
+			float3 const & light_space_border)
+	{
+		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+		RenderEngine& re = rf.RenderEngineInstance();
+
+		re.BindFrameBuffer(FrameBufferPtr());
+
+		float max_blur_light_space = 8.0f / 1024;
+		float3 max_cascade_scale(max_blur_light_space / light_space_border.x(),
+			max_blur_light_space / light_space_border.y(),
+			std::numeric_limits<float>::max());
+
+		int const TILE_DIM = 128;
+
+		int dispatch_x = (depth_tex_->Width(0) + TILE_DIM - 1) / TILE_DIM;
+		int dispatch_y = (depth_tex_->Height(0) + TILE_DIM - 1) / TILE_DIM;
+
+		*interval_buff_param_ = interval_buff_;
+		*interval_buff_uint_param_ = interval_buff_;
+		*interval_buff_read_param_ = interval_buff_;
+		*cascade_min_buff_uint_param_ = cascade_min_buff_;
+		*cascade_max_buff_uint_param_ = cascade_max_buff_;
+		*cascade_min_buff_read_param_ = cascade_min_buff_;
+		*cascade_max_buff_read_param_ = cascade_max_buff_;
+		*scale_buff_param_ = scale_buff_;
+		*bias_buff_param_ = bias_buff_;
+		*depth_tex_param_ = depth_tex_;
+		*num_cascades_param_ = static_cast<uint32_t>(intervals_.size());
+		*depth_width_height_param_ = int2(depth_tex_->Width(0), depth_tex_->Height(0));
+		*near_far_param_ = float2(camera.NearPlane(), camera.FarPlane());
+		float4x4 const & inv_proj = camera.InverseProjMatrix();
+		float3 upper_left = MathLib::transform_coord(float3(-1, +1, 1), inv_proj);
+		float3 upper_right = MathLib::transform_coord(float3(+1, +1, 1), inv_proj);
+		float3 lower_left = MathLib::transform_coord(float3(-1, -1, 1), inv_proj);
+		*upper_left_param_ = upper_left;
+		*xy_dir_param_ = float2(upper_right.x() - upper_left.x(), lower_left.y() - upper_left.y());
+		*view_to_light_view_proj_param_ = camera.InverseViewMatrix() * light_view_proj;
+		*light_space_border_param_ = light_space_border;
+		*max_cascade_scale_param_ = max_cascade_scale;
+
+		re.Dispatch(*clear_z_bounds_tech_, 1, 1, 1);
+		re.Dispatch(*reduce_z_bounds_from_depth_tech_, dispatch_x, dispatch_y, 1);
+		re.Dispatch(*compute_log_cascades_from_z_bounds_tech_, 1, 1, 1);
+		re.Dispatch(*clear_cascade_bounds_tech_, 1, 1, 1);
+		re.Dispatch(*reduce_bounds_from_depth_tech_, dispatch_x, dispatch_y, 1);
+		re.Dispatch(*compute_custom_cascades_tech_, 1, 1, 1);
+
+		interval_buff_->CopyToBuffer(*interval_cpu_buff_);
+		scale_buff_->CopyToBuffer(*scale_cpu_buff_);
+		bias_buff_->CopyToBuffer(*bias_cpu_buff_);
+
+		GraphicsBuffer::Mapper interval_mapper(*interval_cpu_buff_, BA_Read_Only);
+		GraphicsBuffer::Mapper scale_mapper(*scale_cpu_buff_, BA_Read_Only);
+		GraphicsBuffer::Mapper bias_mapper(*bias_cpu_buff_, BA_Read_Only);
+		float2* interval_ptr = interval_mapper.Pointer<float2>();
+		float3* scale_ptr = scale_mapper.Pointer<float3>();
+		float3* bias_ptr = bias_mapper.Pointer<float3>();
+
+		for (size_t i = 0; i < intervals_.size(); ++ i)
+		{
+			float3 const & scale = scale_ptr[i];
+			float3 const & bias = bias_ptr[i];
+
+			intervals_[i] = interval_ptr[i];
+			scales_[i] = scale;
+			biases_[i] = bias;
+
+			crop_mats_[i] = MathLib::scaling(scale)
+				* MathLib::translation(+(2.0f * bias.x() + scale.x() - 1.0f),
+					-(2.0f * bias.y() + scale.y() - 1.0f), bias.z());
+			inv_crop_mats_[i] = MathLib::inverse(crop_mats_[i]);
+		}
 	}
 }

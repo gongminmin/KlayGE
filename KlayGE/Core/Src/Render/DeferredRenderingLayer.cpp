@@ -550,7 +550,7 @@ namespace KlayGE
 			cascaded_shadow_map_texs_param_[3] = dr_effect_->ParameterByName("cascaded_shadow_map_3_tex");
 		}
 
-		cascaded_shadow_layer_ = MakeSharedPtr<PSSMCascadedShadowLayer>();
+		this->SetCascadedShadowType(CSLT_Auto);
 	}
 
 	void DeferredRenderingLayer::SSGIEnabled(uint32_t vp, bool ssgi)
@@ -911,8 +911,13 @@ namespace KlayGE
 							float3 cascade_border(blur_size_light_space_.x(), blur_size_light_space_.y(),
 								light_camera->ProjMatrix()(2, 2));
 							cascaded_shadow_layer_->NumCascades(pvp.num_cascades);
+							if (CSLT_SDSM == cascaded_shadow_layer_->Type())
+							{
+								checked_pointer_cast<SDSMCascadedShadowLayer>(cascaded_shadow_layer_)->DepthTexture(
+									pvp.g_buffer_depth_texs[Opaque_GBuffer]);
+							}
 							cascaded_shadow_layer_->UpdateCascades(*scene_camera, light_camera->ViewProjMatrix(),
-								pvp.pssm_factor, cascade_border);
+								cascade_border);
 						}
 					}
 				}
@@ -1697,7 +1702,7 @@ namespace KlayGE
 		SeparableGaussianFilterPostProcessPtr pp_y_dir = checked_pointer_cast<SeparableGaussianFilterPostProcess>(pp_chain->GetPostProcess(1));
 		if (LT_Sun == type)
 		{
-			float3 scale = cascaded_shadow_layer_->GetCascadeInfo(index_in_pass - 1).scale;
+			float3 const & scale = cascaded_shadow_layer_->CascadeScales()[index_in_pass - 1];
 			float2 blur_kernel_size = blur_size_light_space_ * float2(scale.x(), scale.y()) * static_cast<float>(cascaded_sm_tex_->Width(0));
 			int2 kernel_size(MathLib::clamp(static_cast<int32_t>(blur_kernel_size.x() + 0.5f), 1, 8),
 				MathLib::clamp(static_cast<int32_t>(blur_kernel_size.y() + 0.5f), 1, 8));
@@ -1779,16 +1784,15 @@ namespace KlayGE
 
 					*light_view_proj_param_ = pvp.inv_view * sm_camera->ViewProjMatrix();
 
-					std::vector<float2> cascade_intervals(pvp.num_cascades);
 					std::vector<float4> cascade_scale_bias(pvp.num_cascades);
 					for (uint32_t i = 0; i < pvp.num_cascades; ++ i)
 					{
-						CascadeInfo const & cascade = cascaded_shadow_layer_->GetCascadeInfo(i);
-						cascade_intervals[i] = cascade.interval;
-						cascade_scale_bias[i] = float4(cascade.scale.x(), cascade.scale.y(),
-							cascade.bias.x(), cascade.bias.y());
+						float3 const & scale = cascaded_shadow_layer_->CascadeScales()[i];
+						float3 const & bias = cascaded_shadow_layer_->CascadeBiases()[i];
+						cascade_scale_bias[i] = float4(scale.x(), scale.y(),
+							bias.x(), bias.y());
 					}
-					*cascade_intervals_param_ = cascade_intervals;
+					*cascade_intervals_param_ = cascaded_shadow_layer_->CascadeIntervals();
 					*cascade_scale_bias_param_ = cascade_scale_bias;
 					*num_cascades_param_ = static_cast<int32_t>(pvp.num_cascades);
 
@@ -2001,11 +2005,44 @@ namespace KlayGE
 		}
 	}
 
-	void DeferredRenderingLayer::SetViewportCascades(uint32_t vp, uint32_t num_cascades, float factor)
+	void DeferredRenderingLayer::SetCascadedShadowType(CascadedShadowLayerType type)
+	{
+		switch (type)
+		{
+		case CSLT_Auto:
+			{
+				RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+				RenderDeviceCaps const & caps = re.DeviceCaps();
+				if (caps.cs_support && (caps.max_shader_model >= 5))
+				{
+					cascaded_shadow_layer_ = MakeSharedPtr<SDSMCascadedShadowLayer>();
+				}
+				else
+				{
+					cascaded_shadow_layer_ = MakeSharedPtr<PSSMCascadedShadowLayer>();
+				}
+			}
+			break;
+
+		case CSLT_PSSM:
+			cascaded_shadow_layer_ = MakeSharedPtr<PSSMCascadedShadowLayer>();
+			break;
+
+		case CSLT_SDSM:
+		default:
+			cascaded_shadow_layer_ = MakeSharedPtr<SDSMCascadedShadowLayer>();
+			break;
+		}
+	}
+
+	void DeferredRenderingLayer::SetViewportCascades(uint32_t vp, uint32_t num_cascades, float pssm_lambda)
 	{
 		PerViewport& pvp = viewports_[vp];
 		pvp.num_cascades = num_cascades;
-		pvp.pssm_factor = factor;
+		if (CSLT_PSSM == cascaded_shadow_layer_->Type())
+		{
+			checked_pointer_cast<PSSMCascadedShadowLayer>(cascaded_shadow_layer_)->Lambda(pssm_lambda);
+		}
 	}
 
 	void DeferredRenderingLayer::AccumulateToLightingTex(PerViewport const & pvp)

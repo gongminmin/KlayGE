@@ -1,0 +1,273 @@
+<?xml version='1.0'?>
+
+<effect>
+	<macro name="MAX_NUM_CASCADES" value="4"/>
+	<macro name="BLOCK_X" value="16"/>
+	<macro name="BLOCK_Y" value="8"/>
+	<macro name="BLOCK_SIZE" value="(BLOCK_X * BLOCK_Y)"/>
+	<macro name="REDUCE_ARRAY_SIZE" value="(MAX_NUM_CASCADES * BLOCK_SIZE)"/>
+	<macro name="TILE_DIM" value="128"/>
+
+	<parameter type="rw_structured_buffer" elem_type="float2" name="interval_buff"/>
+	<parameter type="rw_structured_buffer" elem_type="uint2" name="interval_buff_uint"/>
+	<parameter type="rw_structured_buffer" elem_type="float3" name="scale_buff"/>
+	<parameter type="rw_structured_buffer" elem_type="float3" name="bias_buff"/>
+	<parameter type="structured_buffer" elem_type="float2" name="interval_buff_read"/>
+	<parameter type="rw_structured_buffer" elem_type="uint3" name="cascade_min_buff_uint"/>
+	<parameter type="rw_structured_buffer" elem_type="uint3" name="cascade_max_buff_uint"/>
+	<parameter type="structured_buffer" elem_type="float3" name="cascade_min_buff_read"/>
+	<parameter type="structured_buffer" elem_type="float3" name="cascade_max_buff_read"/>
+	<parameter type="texture2D" name="depth_tex"/>
+
+	<parameter type="uint" name="num_cascades"/>
+	<parameter type="int2" name="depth_width_height"/>
+	<parameter type="float2" name="near_far"/>
+	<parameter type="float3" name="upper_left"/>
+	<parameter type="float2" name="xy_dir"/>
+	<parameter type="float4x4" name="view_to_light_view_proj"/>
+
+	<parameter type="float3" name="light_space_border"/>
+	<parameter type="float3" name="max_cascade_scale"/>
+	<parameter type="float" name="dilation_factor" value="0.01"/>
+
+	<shader type="compute_shader" version="5">
+		<![CDATA[
+[numthreads(MAX_NUM_CASCADES, 1, 1)]
+void ClearZBoundsCS(uint GI : SV_GroupIndex)
+{
+	interval_buff_uint[GI].x = 0x7F7FFFFF;		// Float max
+	interval_buff_uint[GI].y = 0;
+}
+
+groupshared float2 min_max_z_sh[BLOCK_SIZE];
+
+[numthreads(BLOCK_X, BLOCK_Y, 1)]
+void ReduceZBoundsFromDepthCS(uint3 gid : SV_GroupID,
+								uint3 gtid : SV_GroupThreadID,
+								uint GI : SV_GroupIndex)
+{
+	float2 min_max_z = near_far.yx;
+	
+	uint2 tile_start = gid.xy * TILE_DIM + gtid.xy;
+	for (uint tile_y = 0; tile_y < TILE_DIM; tile_y += BLOCK_Y)
+	{
+		for (uint tile_x = 0; tile_x < TILE_DIM; tile_x += BLOCK_X)
+		{
+			float depth = depth_tex.Load(uint3(tile_start + uint2(tile_x, tile_y), 0)).x;
+			if ((depth >= near_far.x) && (depth < near_far.y))
+			{
+				min_max_z = float2(min(min_max_z.x, depth), max(min_max_z.y, depth));
+			}
+		}
+	}
+
+	min_max_z_sh[GI] = min_max_z;
+	GroupMemoryBarrierWithGroupSync();
+
+	for (uint offset = BLOCK_SIZE >> 1; offset > 32; offset >>= 1)
+	{
+		if (GI < offset)
+		{
+			min_max_z_sh[GI].x = min(min_max_z_sh[GI].x, min_max_z_sh[GI + offset].x);
+			min_max_z_sh[GI].y = max(min_max_z_sh[GI].y, min_max_z_sh[GI + offset].y);
+		}
+		GroupMemoryBarrierWithGroupSync();
+	}
+	for (offset = 32; offset > 0; offset >>= 1)
+	{
+		if (GI < offset)
+		{
+			min_max_z_sh[GI].x = min(min_max_z_sh[GI].x, min_max_z_sh[GI + offset].x);
+			min_max_z_sh[GI].y = max(min_max_z_sh[GI].y, min_max_z_sh[GI + offset].y);
+		}
+	}
+
+	if (0 == GI)
+	{
+		InterlockedMin(interval_buff_uint[0].x, asuint(min_max_z_sh[0].x));
+		InterlockedMax(interval_buff_uint[num_cascades - 1].y, asuint(min_max_z_sh[0].y));
+	}
+}
+
+float LogCascadeFromRange(uint cascade, float2 min_max_z)
+{
+	float z = min_max_z.y;
+	if (cascade < num_cascades)
+	{
+		float ratio = min_max_z.y / min_max_z.x;
+		float power = cascade * (1.0f / num_cascades);
+		z = min_max_z.x * pow(ratio, power);
+	}
+	return z;
+}
+
+[numthreads(MAX_NUM_CASCADES, 1, 1)]
+void ComputeLogCascadesFromZBoundsCS(uint GI : SV_GroupIndex)
+{
+	float2 min_max_z = float2(interval_buff[0].x, interval_buff[num_cascades - 1].y);
+	interval_buff[GI] = (uint2(0, num_cascades - 1) == GI) ? near_far
+		: float2(LogCascadeFromRange(GI, min_max_z), LogCascadeFromRange(GI + 1, min_max_z));
+}
+
+[numthreads(MAX_NUM_CASCADES, 1, 1)]
+void ClearCascadeBoundsCS(uint GI : SV_GroupIndex)
+{
+	cascade_min_buff_uint[GI] = 0x7F7FFFFF;
+	cascade_max_buff_uint[GI] = 0;
+}
+
+groupshared float3 bounds_min_sh[REDUCE_ARRAY_SIZE];
+groupshared float3 bounds_max_sh[REDUCE_ARRAY_SIZE];
+
+float3 Texcoord2View(float2 tex)
+{
+	return upper_left + float3(xy_dir * tex, 0);
+}
+
+[numthreads(BLOCK_X, BLOCK_Y, 1)]
+void ReduceBoundsFromDepthCS(uint3 gid : SV_GroupID,
+							uint3 gtid : SV_GroupThreadID,
+							uint GI : SV_GroupIndex)
+{
+	float3 mins_reduce[MAX_NUM_CASCADES];
+	float3 maxs_reduce[MAX_NUM_CASCADES];
+	for (uint cascade = 0; cascade < MAX_NUM_CASCADES; ++ cascade)
+	{
+		mins_reduce[cascade] = asfloat(0x7F7FFFFF);
+		maxs_reduce[cascade] = asfloat(0);
+	}
+
+	float2 min_max_z = float2(interval_buff_read[0].x, interval_buff_read[num_cascades - 1].y);
+	{
+		uint2 tile_start = gid.xy * TILE_DIM + gtid.xy;
+		for (uint tile_y = 0; tile_y < TILE_DIM; tile_y += BLOCK_Y)
+		{
+			for (uint tile_x = 0; tile_x < TILE_DIM; tile_x += BLOCK_X)
+			{
+				uint2 coords = tile_start + uint2(tile_x, tile_y);
+				float depth = depth_tex.Load(uint3(coords, 0)).x;
+				if ((depth >= min_max_z.x) && (depth < min_max_z.y))
+				{
+					uint cascade = 0;
+					for (uint i = 0; i < num_cascades - 1; ++ i)
+					{
+						if (depth >= interval_buff_read[i].y)
+						{
+							++ cascade;
+						}
+					}
+
+					float2 tc = (coords + 0.5f) / depth_width_height;
+					tc.y = KLAYGE_FLIPPING < 0 ? tc.y : 1 - tc.y;
+					float3 view_dir = Texcoord2View(tc);
+					float3 pos_es = view_dir * (depth / view_dir.z);
+					float4 light_tc = mul(float4(pos_es, 1), view_to_light_view_proj);
+					light_tc /= light_tc.w;
+					light_tc.y *= KLAYGE_FLIPPING;
+					light_tc.xy = light_tc.xy * 0.5f + 0.5f;
+
+					mins_reduce[cascade] = min(mins_reduce[cascade], light_tc.xyz);
+					maxs_reduce[cascade] = max(maxs_reduce[cascade], light_tc.xyz);
+				}
+			}
+		}
+	}
+
+	for (cascade = 0; cascade < MAX_NUM_CASCADES; ++ cascade)
+	{
+		uint index = GI * MAX_NUM_CASCADES + cascade;
+		bounds_min_sh[index] = mins_reduce[cascade];
+		bounds_max_sh[index] = maxs_reduce[cascade];
+	}
+	GroupMemoryBarrierWithGroupSync();
+
+	for (uint offset = REDUCE_ARRAY_SIZE >> 1; offset >= MAX_NUM_CASCADES; offset >>= 1)
+	{
+		for (uint i = GI; i < offset; i += BLOCK_SIZE)
+		{
+			bounds_min_sh[i] = min(bounds_min_sh[i], bounds_min_sh[i + offset]);
+			bounds_max_sh[i] = max(bounds_max_sh[i], bounds_max_sh[i + offset]);
+		}
+		GroupMemoryBarrierWithGroupSync();
+	}
+
+	if (GI < num_cascades)
+	{
+		InterlockedMin(cascade_min_buff_uint[GI].x, asuint(bounds_min_sh[GI].x));
+		InterlockedMin(cascade_min_buff_uint[GI].y, asuint(bounds_min_sh[GI].y));
+		InterlockedMin(cascade_min_buff_uint[GI].z, asuint(bounds_min_sh[GI].z));
+		InterlockedMax(cascade_max_buff_uint[GI].x, asuint(bounds_max_sh[GI].x));
+		InterlockedMax(cascade_max_buff_uint[GI].y, asuint(bounds_max_sh[GI].y));
+		InterlockedMax(cascade_max_buff_uint[GI].z, asuint(bounds_max_sh[GI].z));
+	}
+}
+
+[numthreads(MAX_NUM_CASCADES, 1, 1)]
+void ComputeCustomCascadesCS(uint GI : SV_GroupIndex)
+{
+	float3 min_tc = cascade_min_buff_read[GI];
+	float3 max_tc = cascade_max_buff_read[GI];
+	
+	min_tc -= light_space_border;
+	max_tc += light_space_border;
+
+	float3 scale = 1 / (max_tc - min_tc);
+	float3 bias = -min_tc * scale;
+
+	float one_minus_two_factor = 1 - 2 * dilation_factor;
+	scale *= one_minus_two_factor;
+	bias = dilation_factor + one_minus_two_factor * bias;
+
+	float3 center = 0.5f;
+	float3 clamped_scale = min(scale, max_cascade_scale.xyz);
+	bias = (clamped_scale / scale) * (bias - center) + center;
+	scale = clamped_scale;
+
+	if (scale.x < 0)
+	{
+		scale = asfloat(0x7F7FFFFF);
+		bias = scale;
+	}
+
+	scale_buff[GI] = scale;
+	bias_buff[GI] = bias;
+}
+		]]>
+	</shader>
+
+	<technique name="ClearZBounds">
+		<pass name="p0">
+			<state name="compute_shader" value="ClearZBoundsCS()"/>
+		</pass>
+	</technique>
+
+	<technique name="ReduceZBoundsFromDepth">
+		<pass name="p0">
+			<state name="compute_shader" value="ReduceZBoundsFromDepthCS()"/>
+		</pass>
+	</technique>
+
+	<technique name="ComputeLogCascadesFromZBounds">
+		<pass name="p0">
+			<state name="compute_shader" value="ComputeLogCascadesFromZBoundsCS()"/>
+		</pass>
+	</technique>
+
+	<technique name="ClearCascadeBounds">
+		<pass name="p0">
+			<state name="compute_shader" value="ClearCascadeBoundsCS()"/>
+		</pass>
+	</technique>
+
+	<technique name="ReduceBoundsFromDepth">
+		<pass name="p0">
+			<state name="compute_shader" value="ReduceBoundsFromDepthCS()"/>
+		</pass>
+	</technique>
+
+	<technique name="ComputeCustomCascades">
+		<pass name="p0">
+			<state name="compute_shader" value="ComputeCustomCascadesCS()"/>
+		</pass>
+	</technique>
+</effect>

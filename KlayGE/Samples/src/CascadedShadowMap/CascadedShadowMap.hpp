@@ -22,8 +22,9 @@ private:
 	void OnResize(KlayGE::uint32_t width, KlayGE::uint32_t height);
 
 	void InputHandler(KlayGE::InputEngine const & sender, KlayGE::InputAction const & action);
-	void PSSMFactorChangedHandler(KlayGE::UISlider const & sender);
+	void CSMTypeChangedHandler(KlayGE::UIComboBox const & sender);
 	void CascadesChangedHandler(KlayGE::UIComboBox const & sender);
+	void PSSMFactorChangedHandler(KlayGE::UISlider const & sender);
 	void CtrlCameraHandler(KlayGE::UICheckBox const & sender);
 
 	KlayGE::FontPtr font_;
@@ -45,9 +46,10 @@ private:
 
 	KlayGE::UIDialogPtr dialog_;
 
+	int id_csm_type_combo_;
+	int id_cascades_combo_;
 	int id_pssm_factor_static_;
 	int id_pssm_factor_slider_;
-	int id_cascades_combo_;
 	int id_ctrl_camera_;
 
 	KlayGE::SunLightSourcePtr sun_light_;

@@ -64,7 +64,7 @@ namespace KlayGE
 			int32_t cas_index = drl->CurrCascadeIndex();
 			if (cas_index >= 0)
 			{
-				proj *= drl->GetCascadedShadowLayer()->GetCascadeInfo(cas_index).crop_mat;
+				proj *= drl->GetCascadedShadowLayer()->CascadeCropMatrix(cas_index);
 			}
 
 			float4x4 const mv = model_mat_ * view;

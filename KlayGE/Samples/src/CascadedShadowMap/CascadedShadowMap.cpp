@@ -106,16 +106,20 @@ void CascadedShadowMapApp::InitObjects()
 	UIManager::Instance().Load(ResLoader::Instance().Open("CascadedShadowMap.uiml"));
 	dialog_ = UIManager::Instance().GetDialogs()[0];
 
+	id_csm_type_combo_ = dialog_->IDFromName("TypeCombo");
+	id_cascades_combo_ = dialog_->IDFromName("CascadesCombo");
 	id_pssm_factor_static_ = dialog_->IDFromName("PSSMFactorStatic");
 	id_pssm_factor_slider_ = dialog_->IDFromName("PSSMFactorSlider");
-	id_cascades_combo_ = dialog_->IDFromName("CascadesCombo");
 	id_ctrl_camera_ = dialog_->IDFromName("CtrlCamera");
 
-	dialog_->Control<UISlider>(id_pssm_factor_slider_)->OnValueChangedEvent().connect(KlayGE::bind(&CascadedShadowMapApp::PSSMFactorChangedHandler, this, KlayGE::placeholders::_1));
-	this->PSSMFactorChangedHandler(*dialog_->Control<UISlider>(id_pssm_factor_slider_));
+	dialog_->Control<UIComboBox>(id_csm_type_combo_)->OnSelectionChangedEvent().connect(KlayGE::bind(&CascadedShadowMapApp::CSMTypeChangedHandler, this, KlayGE::placeholders::_1));
+	this->CSMTypeChangedHandler(*dialog_->Control<UIComboBox>(id_csm_type_combo_));
 
 	dialog_->Control<UIComboBox>(id_cascades_combo_)->OnSelectionChangedEvent().connect(KlayGE::bind(&CascadedShadowMapApp::CascadesChangedHandler, this, KlayGE::placeholders::_1));
 	this->CascadesChangedHandler(*dialog_->Control<UIComboBox>(id_cascades_combo_));
+
+	dialog_->Control<UISlider>(id_pssm_factor_slider_)->OnValueChangedEvent().connect(KlayGE::bind(&CascadedShadowMapApp::PSSMFactorChangedHandler, this, KlayGE::placeholders::_1));
+	this->PSSMFactorChangedHandler(*dialog_->Control<UISlider>(id_pssm_factor_slider_));
 
 	dialog_->Control<UICheckBox>(id_ctrl_camera_)->OnChangedEvent().connect(KlayGE::bind(&CascadedShadowMapApp::CtrlCameraHandler, this, KlayGE::placeholders::_1));
 	this->CtrlCameraHandler(*dialog_->Control<UICheckBox>(id_ctrl_camera_));
@@ -153,6 +157,14 @@ void CascadedShadowMapApp::PSSMFactorChangedHandler(UISlider const & sender)
 	dialog_->Control<UIStatic>(id_pssm_factor_static_)->SetText(stream.str());
 
 	deferred_rendering_->SetViewportCascades(0, num_cascades_, pssm_factor_);
+}
+
+void CascadedShadowMapApp::CSMTypeChangedHandler(UIComboBox const & sender)
+{
+	CascadedShadowLayerType type = static_cast<CascadedShadowLayerType>(sender.GetSelectedIndex() + 1);
+	deferred_rendering_->SetCascadedShadowType(type);
+	dialog_->Control<UIStatic>(id_pssm_factor_static_)->SetEnabled(CSLT_PSSM == type);
+	dialog_->Control<UISlider>(id_pssm_factor_slider_)->SetEnabled(CSLT_PSSM == type);
 }
 
 void CascadedShadowMapApp::CascadesChangedHandler(UIComboBox const & sender)

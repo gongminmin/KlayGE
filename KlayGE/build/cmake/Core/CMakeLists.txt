@@ -106,6 +106,7 @@ SET(RENDERING_EFFECT_FILES
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/BilateralBlur.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/Blur.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/Bone.fxml
+	${KLAYGE_PROJECT_DIR}/media/RenderFX/CascadedShadow.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/ColorGrading.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/Copy.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/Copy2LightBuffer.fxml

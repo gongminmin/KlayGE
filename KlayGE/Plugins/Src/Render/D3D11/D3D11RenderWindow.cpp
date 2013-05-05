@@ -318,7 +318,7 @@ namespace KlayGE
 		gi_factory->CreateSwapChain(d3d_device.get(), &sc_desc_, &sc);
 #else
 		IDXGISwapChain1* sc = nullptr;
-		gi_factory_2->CreateSwapChainForCoreWindow(d3d_device_.get(),
+		gi_factory_2->CreateSwapChainForCoreWindow(d3d_device.get(),
 			reinterpret_cast<IUnknown*>(wnd_.Get()), &sc_desc_, nullptr, &sc);
 #endif
 		swap_chain_ = MakeCOMPtr(sc);

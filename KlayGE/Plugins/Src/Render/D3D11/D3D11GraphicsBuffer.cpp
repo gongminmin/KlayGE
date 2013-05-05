@@ -174,7 +174,7 @@ namespace KlayGE
 			}
 			else
 			{
-				D3D11Mapping::MappingFormat(fmt_as_shader_res_);
+				uav_desc.Format = D3D11Mapping::MappingFormat(fmt_as_shader_res_);
 			}
 			uav_desc.ViewDimension = D3D11_UAV_DIMENSION_BUFFER;
 			uav_desc.Buffer.FirstElement = 0;

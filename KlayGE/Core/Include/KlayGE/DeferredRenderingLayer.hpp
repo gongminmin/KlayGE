@@ -79,7 +79,6 @@ namespace KlayGE
 
 		static uint32_t const MAX_NUM_CASCADES = 4;
 		uint32_t num_cascades;
-		float pssm_factor;
 		array<TexturePtr, MAX_NUM_CASCADES> blur_cascaded_sm_texs;
 
 		array<FrameBufferPtr, Num_GBuffers> curr_merged_shading_buffers;
@@ -228,6 +227,7 @@ namespace KlayGE
 			light_scale_ = dist * 0.01f;
 		}
 
+		void SetCascadedShadowType(CascadedShadowLayerType type);
 		CascadedShadowLayerPtr const & GetCascadedShadowLayer() const
 		{
 			return cascaded_shadow_layer_;
@@ -236,7 +236,7 @@ namespace KlayGE
 		{
 			return curr_cascade_index_;
 		}
-		void SetViewportCascades(uint32_t vp, uint32_t num_cascades, float factor);
+		void SetViewportCascades(uint32_t vp, uint32_t num_cascades, float pssm_lambda);
 
 	private:
 		void SetupViewportGI(uint32_t vp);
