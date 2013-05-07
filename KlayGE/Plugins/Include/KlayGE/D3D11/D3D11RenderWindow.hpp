@@ -73,6 +73,23 @@ namespace KlayGE
 		{
 			return depth_stencil_;
 		}
+		ID3D11RenderTargetViewPtr const & D3DBackBufferRTV() const
+		{
+			return render_target_view_;
+		}
+		ID3D11DepthStencilViewPtr const & D3DDepthStencilBufferDSV() const
+		{
+			return depth_stencil_view_;
+		}
+		ID3D11RenderTargetViewPtr const & D3DBackBufferRightEyeRTV() const
+		{
+			return render_target_view_right_eye_;
+		}
+		
+		ID3D11DepthStencilViewPtr const & D3DDepthStencilBufferRightEyeDSV() const
+		{
+			return depth_stencil_view_right_eye_;
+		}
 
 		// Method for dealing with resize / move & 3d library
 		void WindowMovedOrResized();
@@ -143,10 +160,8 @@ namespace KlayGE
 		ID3D11Texture2DPtr			depth_stencil_;
 		ID3D11RenderTargetViewPtr	render_target_view_;
 		ID3D11DepthStencilViewPtr	depth_stencil_view_;
-#if (_WIN32_WINNT >= 0x0602 /*_WIN32_WINNT_WIN8*/)
 		ID3D11RenderTargetViewPtr	render_target_view_right_eye_;
 		ID3D11DepthStencilViewPtr	depth_stencil_view_right_eye_;
-#endif
 
 		DXGI_FORMAT					back_buffer_format_;
 		DXGI_FORMAT					depth_stencil_format_;

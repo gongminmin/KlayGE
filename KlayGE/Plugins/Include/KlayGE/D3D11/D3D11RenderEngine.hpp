@@ -218,6 +218,15 @@ namespace KlayGE
 
 		std::string vs_profile_, ps_profile_, gs_profile_, cs_profile_, hs_profile_, ds_profile_;
 
+		enum StereoMethod
+		{
+			SM_None,
+			SM_DXGI,
+			SM_NV3DVision,
+			SM_AMDQuadBuffer
+		};
+
+		StereoMethod stereo_method_;
 		FrameBufferPtr stereo_lr_3d_vision_fb_;
 		TexturePtr stereo_lr_3d_vision_tex_;
 

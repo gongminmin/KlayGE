@@ -305,34 +305,54 @@ namespace KlayGE
 
 		if (STM_LCDShutter == settings.stereo_method)
 		{
-			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+			stereo_method_ = SM_None;
 
-			uint32_t const w = win->Width();
-			uint32_t const h = win->Height();
-			stereo_lr_3d_vision_tex_ = rf.MakeTexture2D(w * 2, h + 1, 1, 1,
-				settings.color_fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
+#if (_WIN32_WINNT >= 0x0602 /*_WIN32_WINNT_WIN8*/)
+			IDXGIFactory2* factory;
+			gi_factory_->QueryInterface(IID_IDXGIFactory2, reinterpret_cast<void**>(&factory));
+			if (factory != nullptr)
+			{
+				if (factory->IsWindowedStereoEnabled())
+				{
+					stereo_method_ = SM_DXGI;
+				}
+				factory->Release();
+			}
+#endif
 
-			stereo_lr_3d_vision_fb_ = rf.MakeFrameBuffer();
-			stereo_lr_3d_vision_fb_->Attach(FrameBuffer::ATT_Color0,
-				rf.Make2DRenderView(*stereo_lr_3d_vision_tex_, 0, 1, 0));
+			if (SM_None == stereo_method_)
+			{
+				stereo_method_ = SM_NV3DVision;
 
-			NVSTEREOIMAGEHEADER sih;
-			sih.dwSignature = NVSTEREO_IMAGE_SIGNATURE;
-			sih.dwBPP = NumFormatBits(settings.color_fmt);
-			sih.dwFlags = SIH_SWAP_EYES;
-			sih.dwWidth = w * 2; 
-			sih.dwHeight = h;
+				RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-			ElementInitData init_data;
-			init_data.data = &sih;
-			init_data.row_pitch = sizeof(sih);
-			init_data.slice_pitch = init_data.row_pitch;
-			TexturePtr sih_tex = rf.MakeTexture2D(sizeof(sih) / NumFormatBytes(settings.color_fmt),
-				1, 1, 1, settings.color_fmt, 1, 0, EAH_GPU_Read, &init_data);
+				uint32_t const w = win->Width();
+				uint32_t const h = win->Height();
+				stereo_lr_3d_vision_tex_ = rf.MakeTexture2D(w * 2, h + 1, 1, 1,
+					settings.color_fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
 
-			sih_tex->CopyToSubTexture2D(*stereo_lr_3d_vision_tex_,
-				0, 0, 0, h, sih_tex->Width(0), 1,
-				0, 0, 0, 0, sih_tex->Width(0), 1);
+				stereo_lr_3d_vision_fb_ = rf.MakeFrameBuffer();
+				stereo_lr_3d_vision_fb_->Attach(FrameBuffer::ATT_Color0,
+					rf.Make2DRenderView(*stereo_lr_3d_vision_tex_, 0, 1, 0));
+
+				NVSTEREOIMAGEHEADER sih;
+				sih.dwSignature = NVSTEREO_IMAGE_SIGNATURE;
+				sih.dwBPP = NumFormatBits(settings.color_fmt);
+				sih.dwFlags = SIH_SWAP_EYES;
+				sih.dwWidth = w * 2; 
+				sih.dwHeight = h;
+
+				ElementInitData init_data;
+				init_data.data = &sih;
+				init_data.row_pitch = sizeof(sih);
+				init_data.slice_pitch = init_data.row_pitch;
+				TexturePtr sih_tex = rf.MakeTexture2D(sizeof(sih) / NumFormatBytes(settings.color_fmt),
+					1, 1, 1, settings.color_fmt, 1, 0, EAH_GPU_Read, &init_data);
+
+				sih_tex->CopyToSubTexture2D(*stereo_lr_3d_vision_tex_,
+					0, 0, 0, h, sih_tex->Width(0), 1,
+					0, 0, 0, 0, sih_tex->Width(0), 1);
+			}
 		}
 	}
 
@@ -1122,33 +1142,66 @@ namespace KlayGE
 
 	void D3D11RenderEngine::StereoscopicForLCDShutter(int32_t eye)
 	{
-		this->BindFrameBuffer(stereo_lr_3d_vision_fb_);
+		uint32_t const width = mono_tex_->Width(0);
+		uint32_t const height = mono_tex_->Height(0);
+		D3D11RenderWindowPtr win = checked_pointer_cast<D3D11RenderWindow>(screen_frame_buffer_);
 
-		D3D11_VIEWPORT vp;
-		vp.TopLeftY = 0;
-		vp.Width = static_cast<float>(mono_tex_->Width(0));
-		vp.Height = static_cast<float>(mono_tex_->Height(0));
-		vp.MinDepth = 0;
-		vp.MaxDepth = 1;
-		vp.TopLeftX = (0 == eye) ? 0 : vp.TopLeftX = vp.Width;
-
-		d3d_imm_ctx_->RSSetViewports(1, &vp);
-		stereoscopic_pp_->SetParam(2, eye);
-		stereoscopic_pp_->Render();
-		
-		if (0 == eye)
+		switch (stereo_method_)
 		{
-			ID3D11Texture2DPtr back = checked_cast<D3D11RenderWindow*>(this->ScreenFrameBuffer().get())->D3DBackBuffer();
-			ID3D11Texture2DPtr stereo = checked_cast<D3D11Texture2D*>(stereo_lr_3d_vision_tex_.get())->D3DTexture();
+		case SM_DXGI:
+			{
+				ID3D11RenderTargetView* rtv = (0 == eye) ? win->D3DBackBufferRTV().get() : win->D3DBackBufferRightEyeRTV().get();
+				d3d_imm_ctx_->OMSetRenderTargets(1, &rtv, nullptr);
 
-			D3D11_BOX box;
-			box.left = 0;
-			box.right = mono_tex_->Width(0);
-			box.top = 0;
-			box.bottom = mono_tex_->Height(0);
-			box.front = 0;
-			box.back = 1;
-			d3d_imm_ctx_->CopySubresourceRegion(back.get(), 0, 0, 0, 0, stereo.get(), 0, &box);
+				D3D11_VIEWPORT vp;
+				vp.TopLeftX = 0;
+				vp.TopLeftY = 0;
+				vp.Width = static_cast<float>(width);
+				vp.Height = static_cast<float>(height);
+				vp.MinDepth = 0;
+				vp.MaxDepth = 1;
+
+				d3d_imm_ctx_->RSSetViewports(1, &vp);
+				stereoscopic_pp_->SetParam(2, eye);
+				stereoscopic_pp_->Render();
+			}
+			break;
+
+		case SM_NV3DVision:
+			{
+				this->BindFrameBuffer(stereo_lr_3d_vision_fb_);
+
+				D3D11_VIEWPORT vp;
+				vp.TopLeftY = 0;
+				vp.Width = static_cast<float>(width);
+				vp.Height = static_cast<float>(height);
+				vp.MinDepth = 0;
+				vp.MaxDepth = 1;
+				vp.TopLeftX = (0 == eye) ? 0 : vp.Width;
+
+				d3d_imm_ctx_->RSSetViewports(1, &vp);
+				stereoscopic_pp_->SetParam(2, eye);
+				stereoscopic_pp_->Render();
+		
+				if (0 == eye)
+				{
+					ID3D11Texture2DPtr back = win->D3DBackBuffer();
+					ID3D11Texture2DPtr stereo = checked_cast<D3D11Texture2D*>(stereo_lr_3d_vision_tex_.get())->D3DTexture();
+
+					D3D11_BOX box;
+					box.left = 0;
+					box.right = width;
+					box.top = 0;
+					box.bottom = height;
+					box.front = 0;
+					box.back = 1;
+					d3d_imm_ctx_->CopySubresourceRegion(back.get(), 0, 0, 0, 0, stereo.get(), 0, &box);
+				}
+			}
+			break;
+
+		default:
+			break;
 		}
 	}
 

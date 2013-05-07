@@ -690,20 +690,17 @@ namespace KlayGE
 		{
 			swap_chain_->SetFullscreenState(false, nullptr);
 		}
-#endif
 
 #if (_WIN32_WINNT >= 0x0602 /*_WIN32_WINNT_WIN8*/)
-#ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
 		if (has_dxgi_1_2_ && !!gi_factory_2_)
 		{
 			gi_factory_2_->UnregisterStereoStatus(stereo_cookie_);
 		}
 #endif
+#endif
 
 		render_target_view_right_eye_.reset();
 		depth_stencil_view_right_eye_.reset();
-#endif
-
 		render_target_view_.reset();
 		depth_stencil_view_.reset();
 		back_buffer_.reset();
