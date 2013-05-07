@@ -31,7 +31,6 @@
 
 namespace KlayGE
 {
-	typedef shared_ptr<IDXGIAdapter>				IDXGIAdapterPtr;
 	typedef shared_ptr<IDXGIFactory1>				IDXGIFactory1Ptr;
 	typedef shared_ptr<IDXGIAdapter1>				IDXGIAdapter1Ptr;
 #if (_WIN32_WINNT >= 0x0602 /*_WIN32_WINNT_WIN8*/)
@@ -42,6 +41,7 @@ namespace KlayGE
 	typedef shared_ptr<ID3D11Device>				ID3D11DevicePtr;
 	typedef shared_ptr<ID3D11DeviceContext>			ID3D11DeviceContextPtr;
 #if (_WIN32_WINNT >= 0x0602 /*_WIN32_WINNT_WIN8*/)
+	typedef shared_ptr<IDXGISwapChain1>				IDXGISwapChain1Ptr;
 	typedef shared_ptr<ID3D11Device1>				ID3D11Device1Ptr;
 	typedef shared_ptr<ID3D11DeviceContext1>		ID3D11DeviceContext1Ptr;
 #endif

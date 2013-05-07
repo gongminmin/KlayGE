@@ -33,6 +33,10 @@
 
 namespace KlayGE
 {
+#if defined KLAYGE_PLATFORM_WINDOWS_METRO
+	ref class MetroD3D11RenderWindow;
+#endif
+
 	struct RenderSettings;
 
 	class D3D11RenderWindow : public D3D11FrameBuffer
@@ -93,6 +97,21 @@ namespace KlayGE
 		HWND	hWnd_;				// Win32 Window handle
 #else
 		Platform::Agile<Windows::UI::Core::CoreWindow> wnd_;
+
+		ref class MetroD3D11RenderWindow
+		{
+			friend class D3D11RenderWindow;
+
+		public:
+			void OnStereoEnabledChanged(Platform::Object^ sender);
+
+		private:
+			void BindD3D11RenderWindow(D3D11RenderWindow* win);
+
+			D3D11RenderWindow* win_;
+		};
+
+		MetroD3D11RenderWindow^ metro_d3d_render_win_;
 #endif
 		bool	ready_;				// Is ready i.e. available for update
 		bool	isFullScreen_;
@@ -100,12 +119,19 @@ namespace KlayGE
 
 		D3D11AdapterPtr			adapter_;
 
+		IDXGIFactory1Ptr gi_factory_;
+#if (_WIN32_WINNT >= 0x0602 /*_WIN32_WINNT_WIN8*/)
+		IDXGIFactory2Ptr gi_factory_2_;
 		bool has_dxgi_1_2_;
+		bool stereo_support_;
+#endif
+
 #ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
 		DXGI_SWAP_CHAIN_DESC sc_desc_;
 #if (_WIN32_WINNT >= 0x0602 /*_WIN32_WINNT_WIN8*/)
 		DXGI_SWAP_CHAIN_DESC1 sc_desc1_;
 		DXGI_SWAP_CHAIN_FULLSCREEN_DESC sc_fs_desc_;
+		DWORD stereo_cookie_;
 #endif
 #else
 		DXGI_SWAP_CHAIN_DESC1 sc_desc1_;
@@ -117,6 +143,10 @@ namespace KlayGE
 		ID3D11Texture2DPtr			depth_stencil_;
 		ID3D11RenderTargetViewPtr	render_target_view_;
 		ID3D11DepthStencilViewPtr	depth_stencil_view_;
+#if (_WIN32_WINNT >= 0x0602 /*_WIN32_WINNT_WIN8*/)
+		ID3D11RenderTargetViewPtr	render_target_view_right_eye_;
+		ID3D11DepthStencilViewPtr	depth_stencil_view_right_eye_;
+#endif
 
 		DXGI_FORMAT					back_buffer_format_;
 		DXGI_FORMAT					depth_stencil_format_;
