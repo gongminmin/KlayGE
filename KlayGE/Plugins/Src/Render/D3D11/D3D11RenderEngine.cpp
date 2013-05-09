@@ -51,6 +51,7 @@
 #endif
 
 #include <KlayGE/D3D11/D3D11RenderEngine.hpp>
+#include "NV3DVision.hpp"
 
 #ifdef KLAYGE_PLATFORM_WINDOWS_METRO
 using namespace Windows::UI::Core;
@@ -90,22 +91,6 @@ namespace
 		boost::mem_fn(&ID3D11DeviceContext::DSSetConstantBuffers)
 	};
 }
-
-// Stereo Blit defines
-#define NVSTEREO_IMAGE_SIGNATURE 0x4433564E		//NV3D
-
-struct NVSTEREOIMAGEHEADER
-{
-	unsigned int dwSignature;
-	unsigned int dwWidth;
-	unsigned int dwHeight;
-	unsigned int dwBPP;
-	unsigned int dwFlags;
-};
-
-// Flags in the dwFlags fiels of the _Nv_Stereo_Image_Header structure above
-#define     SIH_SWAP_EYES               0x00000001
-#define     SIH_SCALE_TO_FIT            0x00000002
 
 namespace KlayGE
 {
@@ -165,7 +150,8 @@ namespace KlayGE
 		cur_frame_buffer_.reset();
 		screen_frame_buffer_.reset();
 		mono_tex_.reset();
-		stereo_lr_3d_vision_tex_.reset();
+		stereo_nv_3d_vision_fb_.reset();
+		stereo_nv_3d_vision_tex_.reset();
 
 		rasterizer_state_cache_.reset();
 		depth_stencil_state_cache_.reset();
@@ -322,36 +308,46 @@ namespace KlayGE
 
 			if (SM_None == stereo_method_)
 			{
-				stereo_method_ = SM_NV3DVision;
+				DXGI_ADAPTER_DESC1 adapter_desc;
+				win->Adapter().DXGIAdapter()->GetDesc1(&adapter_desc);
 
-				RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+				if (std::wstring(adapter_desc.Description).find(L"NVIDIA", 0) != std::wstring::npos)
+				{
+					stereo_method_ = SM_NV3DVision;
 
-				uint32_t const w = win->Width();
-				uint32_t const h = win->Height();
-				stereo_lr_3d_vision_tex_ = rf.MakeTexture2D(w * 2, h + 1, 1, 1,
-					settings.color_fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
+					RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-				stereo_lr_3d_vision_fb_ = rf.MakeFrameBuffer();
-				stereo_lr_3d_vision_fb_->Attach(FrameBuffer::ATT_Color0,
-					rf.Make2DRenderView(*stereo_lr_3d_vision_tex_, 0, 1, 0));
+					uint32_t const w = win->Width();
+					uint32_t const h = win->Height();
+					stereo_nv_3d_vision_tex_ = rf.MakeTexture2D(w * 2, h + 1, 1, 1,
+						settings.color_fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
 
-				NVSTEREOIMAGEHEADER sih;
-				sih.dwSignature = NVSTEREO_IMAGE_SIGNATURE;
-				sih.dwBPP = NumFormatBits(settings.color_fmt);
-				sih.dwFlags = SIH_SWAP_EYES;
-				sih.dwWidth = w * 2; 
-				sih.dwHeight = h;
+					stereo_nv_3d_vision_fb_ = rf.MakeFrameBuffer();
+					stereo_nv_3d_vision_fb_->Attach(FrameBuffer::ATT_Color0,
+						rf.Make2DRenderView(*stereo_nv_3d_vision_tex_, 0, 1, 0));
 
-				ElementInitData init_data;
-				init_data.data = &sih;
-				init_data.row_pitch = sizeof(sih);
-				init_data.slice_pitch = init_data.row_pitch;
-				TexturePtr sih_tex = rf.MakeTexture2D(sizeof(sih) / NumFormatBytes(settings.color_fmt),
-					1, 1, 1, settings.color_fmt, 1, 0, EAH_GPU_Read, &init_data);
+					NVSTEREOIMAGEHEADER sih;
+					sih.dwSignature = NVSTEREO_IMAGE_SIGNATURE;
+					sih.dwBPP = NumFormatBits(settings.color_fmt);
+					sih.dwFlags = SIH_SWAP_EYES;
+					sih.dwWidth = w * 2; 
+					sih.dwHeight = h;
 
-				sih_tex->CopyToSubTexture2D(*stereo_lr_3d_vision_tex_,
-					0, 0, 0, h, sih_tex->Width(0), 1,
-					0, 0, 0, 0, sih_tex->Width(0), 1);
+					ElementInitData init_data;
+					init_data.data = &sih;
+					init_data.row_pitch = sizeof(sih);
+					init_data.slice_pitch = init_data.row_pitch;
+					TexturePtr sih_tex = rf.MakeTexture2D(sizeof(sih) / NumFormatBytes(settings.color_fmt),
+						1, 1, 1, settings.color_fmt, 1, 0, EAH_GPU_Read, &init_data);
+
+					sih_tex->CopyToSubTexture2D(*stereo_nv_3d_vision_tex_,
+						0, 0, 0, h, sih_tex->Width(0), 1,
+						0, 0, 0, 0, sih_tex->Width(0), 1);
+				}
+				else if (std::wstring(adapter_desc.Description).find(L"AMD", 0) != std::wstring::npos)
+				{
+					stereo_method_ = SM_AMDQuadBuffer;
+				}
 			}
 		}
 	}
@@ -1169,7 +1165,7 @@ namespace KlayGE
 
 		case SM_NV3DVision:
 			{
-				this->BindFrameBuffer(stereo_lr_3d_vision_fb_);
+				this->BindFrameBuffer(stereo_nv_3d_vision_fb_);
 
 				D3D11_VIEWPORT vp;
 				vp.TopLeftY = 0;
@@ -1186,7 +1182,7 @@ namespace KlayGE
 				if (0 == eye)
 				{
 					ID3D11Texture2DPtr back = win->D3DBackBuffer();
-					ID3D11Texture2DPtr stereo = checked_cast<D3D11Texture2D*>(stereo_lr_3d_vision_tex_.get())->D3DTexture();
+					ID3D11Texture2DPtr stereo = checked_cast<D3D11Texture2D*>(stereo_nv_3d_vision_tex_.get())->D3DTexture();
 
 					D3D11_BOX box;
 					box.left = 0;
@@ -1197,6 +1193,25 @@ namespace KlayGE
 					box.back = 1;
 					d3d_imm_ctx_->CopySubresourceRegion(back.get(), 0, 0, 0, 0, stereo.get(), 0, &box);
 				}
+			}
+			break;
+
+		case SM_AMDQuadBuffer:
+			{
+				ID3D11RenderTargetView* rtv = win->D3DBackBufferRTV().get();
+				d3d_imm_ctx_->OMSetRenderTargets(1, &rtv, nullptr);
+
+				D3D11_VIEWPORT vp;
+				vp.TopLeftX = 0;
+				vp.TopLeftY = (0 == eye) ? 0 : static_cast<float>(win->StereoRightEyeHeight());
+				vp.Width = static_cast<float>(width);
+				vp.Height = static_cast<float>(height);
+				vp.MinDepth = 0;
+				vp.MaxDepth = 1;
+
+				d3d_imm_ctx_->RSSetViewports(1, &vp);
+				stereoscopic_pp_->SetParam(2, eye);
+				stereoscopic_pp_->Render();
 			}
 			break;
 

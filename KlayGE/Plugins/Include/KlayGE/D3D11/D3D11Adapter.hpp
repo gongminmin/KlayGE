@@ -41,7 +41,7 @@ namespace KlayGE
 			return adapter_no_;
 		}
 
-		IDXGIAdapter1Ptr const & Adapter() const
+		IDXGIAdapter1Ptr const & DXGIAdapter() const
 		{
 			return adapter_;
 		}

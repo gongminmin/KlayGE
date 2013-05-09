@@ -31,6 +31,8 @@
 #pragma warning(pop)
 #endif
 
+#include "AMDQuadBuffer.hpp"
+
 namespace KlayGE
 {
 #if defined KLAYGE_PLATFORM_WINDOWS_METRO
@@ -84,6 +86,10 @@ namespace KlayGE
 		ID3D11RenderTargetViewPtr const & D3DBackBufferRightEyeRTV() const
 		{
 			return render_target_view_right_eye_;
+		}
+		uint32_t StereoRightEyeHeight() const
+		{
+			return stereo_amd_right_eye_height_;
 		}
 		
 		ID3D11DepthStencilViewPtr const & D3DDepthStencilBufferRightEyeDSV() const
@@ -140,7 +146,7 @@ namespace KlayGE
 #if (_WIN32_WINNT >= 0x0602 /*_WIN32_WINNT_WIN8*/)
 		IDXGIFactory2Ptr gi_factory_2_;
 		bool has_dxgi_1_2_;
-		bool stereo_support_;
+		bool dxgi_stereo_support_;
 #endif
 
 #ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
@@ -155,6 +161,9 @@ namespace KlayGE
 #endif
 		IDXGISwapChainPtr		swap_chain_;
 		bool					main_wnd_;
+
+		IAmdDxExtQuadBufferStereoPtr stereo_amd_qb_ext_;
+		uint32_t stereo_amd_right_eye_height_;
 
 		ID3D11Texture2DPtr			back_buffer_;
 		ID3D11Texture2DPtr			depth_stencil_;

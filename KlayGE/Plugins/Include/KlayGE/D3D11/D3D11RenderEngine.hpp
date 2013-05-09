@@ -227,8 +227,8 @@ namespace KlayGE
 		};
 
 		StereoMethod stereo_method_;
-		FrameBufferPtr stereo_lr_3d_vision_fb_;
-		TexturePtr stereo_lr_3d_vision_tex_;
+		FrameBufferPtr stereo_nv_3d_vision_fb_;
+		TexturePtr stereo_nv_3d_vision_tex_;
 
 		std::set<ElementFormat> vertex_format_;
 		std::set<ElementFormat> texture_format_;
