@@ -29,7 +29,7 @@
 	</parameter>
 
 	<shader>
-		<![CDATA[    
+		<![CDATA[
 float4 GBuffer2DepthDerivatePS(float2 tc : TEXCOORD0) : SV_Target
 {
 	tc = tc + delta_offset.zw;

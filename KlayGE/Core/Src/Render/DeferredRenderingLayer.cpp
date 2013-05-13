@@ -1234,6 +1234,16 @@ namespace KlayGE
 	void DeferredRenderingLayer::BuildPassScanList(bool has_opaque_objs, bool has_transparency_back_objs, bool has_transparency_front_objs)
 	{
 		pass_scaned_.clear();
+		
+		for (uint32_t i = 0; i < lights_.size(); ++ i)
+		{
+			LightSourcePtr const & light = lights_[i];
+			if (light->Enabled())
+			{
+				this->AppendShadowPassScanCode(i);
+			}
+		}
+
 		for (uint32_t vpi = 0; vpi < viewports_.size(); ++ vpi)
 		{
 			PerViewport& pvp = viewports_[vpi];
@@ -1251,22 +1261,7 @@ namespace KlayGE
 					{
 						this->AppendGBufferPassScanCode(vpi, i);
 					}
-				}
-			}
-		}
-		for (uint32_t i = 0; i < lights_.size(); ++ i)
-		{
-			LightSourcePtr const & light = lights_[i];
-			if (light->Enabled())
-			{
-				this->AppendShadowPassScanCode(i);
-			}
-		}
-		for (uint32_t vpi = 0; vpi < viewports_.size(); ++ vpi)
-		{
-			PerViewport& pvp = viewports_[vpi];
-			if (pvp.attrib & VPAM_Enabled)
-			{
+				}			
 				if (cascaded_shadow_index_ >= 0)
 				{
 					this->AppendCascadedShadowPassScanCode(pvp, cascaded_shadow_index_);
@@ -1374,6 +1369,9 @@ namespace KlayGE
 					pass_scaned_.push_back(this->ComposePassScanCode(0, shadow_pt, light_index, j));
 				}
 			}
+			break;
+
+		case LT_Sun:
 			break;
 
 		default:

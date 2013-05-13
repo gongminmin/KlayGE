@@ -126,6 +126,13 @@ void CascadedShadowMapApp::InitObjects()
 
 	sky_box_ = MakeSharedPtr<SceneObjectSkyBox>();
 	sky_box_->AddToSceneManager();
+
+	RenderDeviceCaps const & caps = Context::Instance().RenderFactoryInstance().RenderEngineInstance().DeviceCaps();
+	if (caps.max_shader_model < 5)
+	{
+		dialog_->Control<UIComboBox>(id_csm_type_combo_)->SetSelectedByIndex(0);
+		dialog_->Control<UIComboBox>(id_csm_type_combo_)->SetEnabled(false);
+	}
 }
 
 void CascadedShadowMapApp::OnResize(uint32_t width, uint32_t height)
