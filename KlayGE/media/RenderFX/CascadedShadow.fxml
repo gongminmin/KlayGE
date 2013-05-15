@@ -20,7 +20,7 @@
 	<parameter type="texture2D" name="depth_tex"/>
 
 	<parameter type="uint" name="num_cascades"/>
-	<parameter type="int2" name="depth_width_height"/>
+	<parameter type="float2" name="inv_depth_width_height"/>
 	<parameter type="float2" name="near_far"/>
 	<parameter type="float3" name="upper_left"/>
 	<parameter type="float2" name="xy_dir"/>
@@ -157,7 +157,7 @@ void ReduceBoundsFromDepthCS(uint3 gid : SV_GroupID,
 						}
 					}
 
-					float2 tc = (coords + 0.5f) / depth_width_height;
+					float2 tc = (coords + 0.5f) * inv_depth_width_height;
 					tc.y = KLAYGE_FLIPPING < 0 ? tc.y : 1 - tc.y;
 					float3 view_dir = Texcoord2View(tc);
 					float3 pos_es = view_dir * (depth / view_dir.z);

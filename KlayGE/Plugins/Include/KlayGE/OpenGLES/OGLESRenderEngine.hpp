@@ -58,7 +58,7 @@ namespace KlayGE
 		bool FullScreen() const;
 		void FullScreen(bool fs);
 
-		void AdjustPerspectiveMatrix(float4x4& pers_mat);
+		void AdjustProjectionMatrix(float4x4& proj_mat);
 
 		void ActiveTexture(GLenum tex_unit);
 		

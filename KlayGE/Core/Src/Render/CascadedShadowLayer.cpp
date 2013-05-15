@@ -217,7 +217,7 @@ namespace KlayGE
 		cascade_max_buff_read_param_ = effect->ParameterByName("cascade_max_buff_read");
 		depth_tex_param_ = effect->ParameterByName("depth_tex");
 		num_cascades_param_ = effect->ParameterByName("num_cascades");
-		depth_width_height_param_ = effect->ParameterByName("depth_width_height");
+		inv_depth_width_height_param_ = effect->ParameterByName("inv_depth_width_height");
 		near_far_param_ = effect->ParameterByName("near_far");
 		upper_left_param_ = effect->ParameterByName("upper_left");
 		xy_dir_param_ = effect->ParameterByName("xy_dir");
@@ -260,7 +260,7 @@ namespace KlayGE
 		*bias_buff_param_ = bias_buff_;
 		*depth_tex_param_ = depth_tex_;
 		*num_cascades_param_ = static_cast<uint32_t>(intervals_.size());
-		*depth_width_height_param_ = int2(depth_tex_->Width(0), depth_tex_->Height(0));
+		*inv_depth_width_height_param_ = float2(1.0f / depth_tex_->Width(0), 1.0f / depth_tex_->Height(0));
 		*near_far_param_ = float2(camera.NearPlane(), camera.FarPlane());
 		float4x4 const & inv_proj = camera.InverseProjMatrix();
 		float3 upper_left = MathLib::transform_coord(float3(-1, +1, 1), inv_proj);

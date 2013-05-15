@@ -156,7 +156,7 @@ float4 VSM_Directional(float3 pos_es, float len)
 float4 VSM_Sun(float3 pos_es, float len)
 {
 	float2 light_proj_pos = mul(float4(pos_es, 1), light_view_proj).xy;
-	light_proj_pos.y *= KLAYGE_FLIPPING;
+	light_proj_pos.y *= -1;
 	light_proj_pos = light_proj_pos * 0.5f + 0.5f;
 	float4 tc_ddx_ddy = float4(ddx(light_proj_pos), ddy(light_proj_pos));
 	
@@ -168,6 +168,7 @@ float4 VSM_Sun(float3 pos_es, float len)
 			if ((pos_es.z >= cascade_intervals[i].x) && (pos_es.z < cascade_intervals[i].y))
 			{
 				float2 shadow_tc = light_proj_pos * cascade_scale_bias[i].xy + cascade_scale_bias[i].zw;
+				shadow_tc.y = KLAYGE_FLIPPING < 0 ? shadow_tc.y : 1 - shadow_tc.y;
 
 				float4 shadow_tc_ddx_ddy = tc_ddx_ddy * cascade_scale_bias[i].xyxy;
 

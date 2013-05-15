@@ -133,7 +133,7 @@ namespace KlayGE
 		RenderEffectParameterPtr cascade_max_buff_read_param_;
 		RenderEffectParameterPtr depth_tex_param_;
 		RenderEffectParameterPtr num_cascades_param_;
-		RenderEffectParameterPtr depth_width_height_param_;
+		RenderEffectParameterPtr inv_depth_width_height_param_;
 		RenderEffectParameterPtr near_far_param_;
 		RenderEffectParameterPtr upper_left_param_;
 		RenderEffectParameterPtr xy_dir_param_;

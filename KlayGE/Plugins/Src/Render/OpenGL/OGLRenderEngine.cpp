@@ -1268,9 +1268,9 @@ namespace KlayGE
 		checked_pointer_cast<OGLRenderWindow>(screen_frame_buffer_)->FullScreen(fs);
 	}
 
-	void OGLRenderEngine::AdjustPerspectiveMatrix(float4x4& pers_mat)
+	void OGLRenderEngine::AdjustProjectionMatrix(float4x4& proj_mat)
 	{
-		pers_mat *= MathLib::scaling(1.0f, 1.0f, 2.0f) * MathLib::translation(0.0f, 0.0f, -1.0f);
+		proj_mat *= MathLib::scaling(1.0f, 1.0f, 2.0f) * MathLib::translation(0.0f, 0.0f, -1.0f);
 	}
 
 	bool OGLRenderEngine::VertexFormatSupport(ElementFormat elem_fmt)

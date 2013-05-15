@@ -35,7 +35,7 @@ namespace KlayGE
 	// ¹¹Ôìº¯Êý
 	//////////////////////////////////////////////////////////////////////////////////
 	Camera::Camera()
-		: view_proj_mat_dirty_(true), frustum_dirty_(true),
+		: view_proj_mat_dirty_(true), view_proj_mat_wo_adjust_dirty_(true), frustum_dirty_(true),
 			mode_(0), cur_jitter_index_(0)
 	{
 		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
@@ -62,6 +62,7 @@ namespace KlayGE
 		view_mat_ = MathLib::look_at_lh(eye_pos, look_at, up_vec);
 		inv_view_mat_ = MathLib::inverse(view_mat_);
 		view_proj_mat_dirty_ = true;
+		view_proj_mat_wo_adjust_dirty_ = true;
 		frustum_dirty_ = true;
 	}
 
@@ -75,10 +76,13 @@ namespace KlayGE
 		far_plane_	= far_plane;
 
 		proj_mat_ = MathLib::perspective_fov_lh(fov, aspect, near_plane, far_plane);
+		proj_mat_wo_adjust_ = proj_mat_;
 		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-		re.AdjustPerspectiveMatrix(proj_mat_);
+		re.AdjustProjectionMatrix(proj_mat_);
 		inv_proj_mat_ = MathLib::inverse(proj_mat_);
+		inv_proj_mat_wo_adjust_ = MathLib::inverse(proj_mat_wo_adjust_);
 		view_proj_mat_dirty_ = true;
+		view_proj_mat_wo_adjust_dirty_ = true;
 		frustum_dirty_ = true;
 	}
 
@@ -90,10 +94,13 @@ namespace KlayGE
 		far_plane_	= far_plane;
 
 		proj_mat_ = MathLib::ortho_lh(w, h, near_plane, far_plane);
+		proj_mat_wo_adjust_ = proj_mat_;
 		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-		re.AdjustPerspectiveMatrix(proj_mat_);
+		re.AdjustProjectionMatrix(proj_mat_);
 		inv_proj_mat_ = MathLib::inverse(proj_mat_);
+		inv_proj_mat_wo_adjust_ = MathLib::inverse(proj_mat_wo_adjust_);
 		view_proj_mat_dirty_ = true;
+		view_proj_mat_wo_adjust_dirty_ = true;
 		frustum_dirty_ = true;
 	}
 
@@ -133,9 +140,12 @@ namespace KlayGE
 			float dy = -pixel_dy[cur_jitter_index_] * height / win_height;
 			proj_mat_ = MathLib::perspective_off_center_lh(left + dx, right + dx, bottom + dy, top + dy,
 								near_plane_, far_plane_);
-			re.AdjustPerspectiveMatrix(proj_mat_);
+			proj_mat_wo_adjust_ = proj_mat_;
+			re.AdjustProjectionMatrix(proj_mat_);
 			inv_proj_mat_ = MathLib::inverse(proj_mat_);
+			inv_proj_mat_wo_adjust_ = MathLib::inverse(proj_mat_wo_adjust_);
 			view_proj_mat_dirty_ = true;
+			view_proj_mat_wo_adjust_dirty_ = true;
 			frustum_dirty_ = true;
 		}
 	}
@@ -160,6 +170,11 @@ namespace KlayGE
 		return proj_mat_;
 	}
 
+	float4x4 const & Camera::ProjMatrixWOAdjust() const
+	{
+		return proj_mat_wo_adjust_;
+	}
+
 	float4x4 const & Camera::ViewProjMatrix() const
 	{
 		if (view_proj_mat_dirty_)
@@ -169,6 +184,17 @@ namespace KlayGE
 			view_proj_mat_dirty_ = false;
 		}
 		return view_proj_mat_;
+	}
+
+	float4x4 const & Camera::ViewProjMatrixWOAdjust() const
+	{
+		if (view_proj_mat_wo_adjust_dirty_)
+		{
+			view_proj_mat_wo_adjust_ = view_mat_ * proj_mat_wo_adjust_;
+			inv_view_proj_mat_wo_adjust_ = inv_proj_mat_wo_adjust_ * inv_view_mat_;
+			view_proj_mat_wo_adjust_dirty_ = false;
+		}
+		return view_proj_mat_wo_adjust_;
 	}
 	
 	float4x4 const & Camera::InverseViewMatrix() const
@@ -180,6 +206,11 @@ namespace KlayGE
 	{
 		return inv_proj_mat_;
 	}
+
+	float4x4 const & Camera::InverseProjMatrixWOAdjust() const
+	{
+		return inv_proj_mat_wo_adjust_;
+	}
 	
 	float4x4 const & Camera::InverseViewProjMatrix() const
 	{
@@ -190,6 +221,17 @@ namespace KlayGE
 			view_proj_mat_dirty_ = false;
 		}
 		return inv_view_proj_mat_;
+	}
+
+	float4x4 const & Camera::InverseViewProjMatrixWOAdjust() const
+	{
+		if (view_proj_mat_wo_adjust_dirty_)
+		{
+			view_proj_mat_wo_adjust_ = view_mat_ * proj_mat_wo_adjust_;
+			inv_view_proj_mat_wo_adjust_ = inv_proj_mat_wo_adjust_ * inv_view_mat_;
+			view_proj_mat_wo_adjust_dirty_ = false;
+		}
+		return inv_view_proj_mat_wo_adjust_;
 	}
 
 	float4x4 const & Camera::PrevViewMatrix() const
@@ -206,7 +248,7 @@ namespace KlayGE
 	{
 		if (frustum_dirty_)
 		{
-			frustum_.ClipMatrix(this->ViewProjMatrix(), this->InverseViewProjMatrix());
+			frustum_.ClipMatrix(this->ViewProjMatrixWOAdjust(), this->InverseViewProjMatrixWOAdjust());
 			frustum_dirty_ = false;
 		}
 		return frustum_;

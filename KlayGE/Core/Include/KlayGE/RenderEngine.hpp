@@ -147,7 +147,7 @@ namespace KlayGE
 		// Render a frame when no pending message
 		virtual void Refresh();
 
-		virtual void AdjustPerspectiveMatrix(float4x4& /*pers_mat*/)
+		virtual void AdjustProjectionMatrix(float4x4& /*proj_mat*/)
 		{
 		}
 
