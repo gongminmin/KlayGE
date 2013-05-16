@@ -64,8 +64,7 @@ namespace KlayGE
 			int32_t cas_index = drl->CurrCascadeIndex();
 			if (cas_index >= 0)
 			{
-				proj = camera.ProjMatrixWOAdjust() * drl->GetCascadedShadowLayer()->CascadeCropMatrix(cas_index);
-				re.AdjustProjectionMatrix(proj);
+				proj *= drl->GetCascadedShadowLayer()->CascadeCropMatrix(cas_index);
 			}
 
 			float4x4 const mv = model_mat_ * view;
