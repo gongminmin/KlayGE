@@ -407,7 +407,11 @@ namespace KlayGE
 #endif
 
 #ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
-		if ((STM_LCDShutter == settings.stereo_method) && !dxgi_stereo_support_)
+		if ((STM_LCDShutter == settings.stereo_method)
+#if (_WIN32_WINNT >= 0x0602 /*_WIN32_WINNT_WIN8*/)
+			&& !dxgi_stereo_support_
+#endif
+			)
 		{
 			DXGI_ADAPTER_DESC1 adapter_desc;
 			adapter_->DXGIAdapter()->GetDesc1(&adapter_desc);
