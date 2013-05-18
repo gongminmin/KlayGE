@@ -317,7 +317,7 @@ void DeferredRenderingApp::OnResize(uint32_t width, uint32_t height)
 
 	debug_pp_->InputPin(0, deferred_rendering_->OpaqueGBufferRT0Tex(0));
 	debug_pp_->InputPin(1, deferred_rendering_->OpaqueDepthTex(0));
-	debug_pp_->InputPin(2, deferred_rendering_->OpaqueLightingTex(0));
+	debug_pp_->InputPin(2, deferred_rendering_->LightingTex(0));
 	debug_pp_->InputPin(3, deferred_rendering_->SmallSSVOTex(0));
 
 	UIManager::Instance().SettleCtrls(width, height);
@@ -477,14 +477,14 @@ uint32_t DeferredRenderingApp::DoUpdate(uint32_t pass)
 			}
 		}
 	}
-	else if (1 == pass)
+	else if (14 == pass)
 	{
 		num_objs_rendered_ = sceneMgr.NumObjectsRendered();
 		num_renderable_rendered_ = sceneMgr.NumRenderablesRendered();
 		num_primitives_rendered_ = sceneMgr.NumPrimitivesRendered();
 		num_vertices_rendered_ = sceneMgr.NumVerticesRendered();
 	}
-	else if (2 == pass)
+	else if (15 == pass)
 	{
 		if ((1 == buffer_type_) || (2 == buffer_type_) || (3 == buffer_type_))
 		{

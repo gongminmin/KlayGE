@@ -192,8 +192,8 @@ namespace
 					*(technique_->Effect().ParameterByName("proj")) = camera.ProjMatrix();
 					*(technique_->Effect().ParameterByName("inv_proj")) = camera.InverseProjMatrix();
 					float q = camera.FarPlane() / (camera.FarPlane() - camera.NearPlane());
-					float3 near_q(camera.NearPlane() * q, q, camera.FarPlane());
-					*(technique_->Effect().ParameterByName("near_q")) = near_q;
+					float3 near_q_far(camera.NearPlane() * q, q, camera.FarPlane());
+					*(technique_->Effect().ParameterByName("near_q_far")) = near_q_far;
 					*(technique_->Effect().ParameterByName("ray_length")) = camera.FarPlane() - camera.NearPlane();
 					*(technique_->Effect().ParameterByName("min_samples")) = static_cast<int32_t>(20);
 					*(technique_->Effect().ParameterByName("max_samples")) = static_cast<int32_t>(30);

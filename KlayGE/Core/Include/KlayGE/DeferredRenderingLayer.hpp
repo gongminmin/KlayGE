@@ -69,7 +69,7 @@ namespace KlayGE
 		array<TexturePtr, Num_GBuffers> g_buffer_depth_texs;
 
 		array<FrameBufferPtr, Num_GBuffers> lighting_buffers;
-		array<TexturePtr, Num_GBuffers> lighting_texs;
+		TexturePtr lighting_tex;
 
 		FrameBufferPtr shadowing_buffer;
 		TexturePtr shadowing_tex;
@@ -131,17 +131,9 @@ namespace KlayGE
 			return g_buffer_effect_;
 		}
 
-		TexturePtr const & OpaqueLightingTex(uint32_t vp) const
+		TexturePtr const & LightingTex(uint32_t vp) const
 		{
-			return viewports_[vp].lighting_texs[Opaque_GBuffer];
-		}
-		TexturePtr const & TransparencyBackLightingTex(uint32_t vp) const
-		{
-			return viewports_[vp].lighting_texs[TransparencyBack_GBuffer];
-		}
-		TexturePtr const & TransparencyFrontLightingTex(uint32_t vp) const
-		{
-			return viewports_[vp].lighting_texs[TransparencyFront_GBuffer];
+			return viewports_[vp].lighting_tex;
 		}
 		TexturePtr const & OpaqueShadingTex(uint32_t vp) const
 		{
@@ -248,11 +240,12 @@ namespace KlayGE
 		void BuildLightList();
 		void BuildVisibleSceneObjList(bool& has_opaque_objs, bool& has_transparency_back_objs, bool& has_transparency_front_objs);
 		void BuildPassScanList(bool has_opaque_objs, bool has_transparency_back_objs, bool has_transparency_front_objs);
+		void CheckLightVisible(uint32_t vp_index, uint32_t light_index);
 		void AppendGBufferPassScanCode(uint32_t vp_index, uint32_t g_buffer_index);
 		void AppendShadowPassScanCode(uint32_t light_index);
 		void AppendCascadedShadowPassScanCode(PerViewport const & pvp, uint32_t light_index);
-		void AppendLightingPassScanCode(uint32_t vp_index, uint32_t light_index);
-		void AppendShadingPassScanCode(uint32_t vp_index);
+		void AppendLightingPassScanCode(uint32_t vp_index, uint32_t g_buffer_index, uint32_t light_index);
+		void AppendShadingPassScanCode(uint32_t vp_index, uint32_t g_buffer_index);
 		void PreparePVP(PerViewport& pvp);
 		void GenerateDepthBuffer(PerViewport const & pvp, uint32_t g_buffer_index);
 		void GenerateGBuffer(PerViewport const & pvp, uint32_t g_buffer_index);
@@ -265,9 +258,10 @@ namespace KlayGE
 		void UpdateLighting(PerViewport const & pvp, uint32_t g_buffer_index, LightType type);
 		void UpdateIndirectAndSSVO(PerViewport const & pvp);
 		void UpdateShading(PerViewport const & pvp, uint32_t g_buffer_index);
+		void MergeShadingAndDepth(PerViewport const & pvp);
 		void AddSSR(PerViewport const & pvp);
 		void AddAtmospheric(PerViewport const & pvp);
-		void MergeShadingAndDepth(PerViewport const & pvp);
+		void AddTAA(PerViewport const & pvp);
 
 	private:
 		bool mrt_g_buffer_support_;
