@@ -151,6 +151,7 @@ SET(RENDERING_EFFECT_FILES
 )
 
 SET(RENDERING_POSTPROCESSOR_FILES
+	${KLAYGE_PROJECT_DIR}/media/PostProcessors/CascadedShadow.ppml
 	${KLAYGE_PROJECT_DIR}/media/PostProcessors/ColorGrading.ppml
 	${KLAYGE_PROJECT_DIR}/media/PostProcessors/Copy.ppml
 	${KLAYGE_PROJECT_DIR}/media/PostProcessors/Copy2LightBuffer.ppml

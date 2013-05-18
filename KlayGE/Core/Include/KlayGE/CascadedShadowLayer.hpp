@@ -71,14 +71,15 @@ namespace KlayGE
 		std::vector<float3> const & CascadeScales() const;
 		std::vector<float3> const & CascadeBiases() const;
 		float4x4 const & CascadeCropMatrix(uint32_t index) const;
-		float4x4 const & CascadeInverseCropMatrix(uint32_t index) const;
+
+	protected:
+		void UpdateCropMats();
 
 	protected:
 		std::vector<float2> intervals_;
 		std::vector<float3> scales_;
 		std::vector<float3> biases_;
 		std::vector<float4x4> crop_mats_;
-		std::vector<float4x4> inv_crop_mats_;
 	};
 
 	class KLAYGE_CORE_API PSSMCascadedShadowLayer : public CascadedShadowLayer
@@ -116,6 +117,10 @@ namespace KlayGE
 			float3 const & light_space_border) KLAYGE_OVERRIDE;
 
 	private:
+		TexturePtr depth_tex_;
+		bool cs_support_;
+
+		// For CS implement
 		RenderTechniquePtr clear_z_bounds_tech_;
 		RenderTechniquePtr reduce_z_bounds_from_depth_tech_;
 		RenderTechniquePtr compute_log_cascades_from_z_bounds_tech_;
@@ -151,7 +156,15 @@ namespace KlayGE
 		GraphicsBufferPtr scale_cpu_buff_;
 		GraphicsBufferPtr bias_cpu_buff_;
 
-		TexturePtr depth_tex_;
+		// For PS implement
+		TexturePtr depth_deriative_tex_;
+		TexturePtr depth_deriative_small_tex_;
+		PostProcessPtr reduce_z_bounds_from_depth_pp_;
+		PostProcessPtr reduce_z_bounds_from_depth_mip_map_pp_;
+		PostProcessPtr compute_log_cascades_from_z_bounds_pp_;
+
+		TexturePtr interval_tex_;
+		TexturePtr interval_cpu_tex_;
 	};
 }
 

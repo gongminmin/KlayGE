@@ -1,6 +1,8 @@
 <?xml version='1.0'?>
 
 <effect>
+	<include name="PostProcess.fxml"/>
+
 	<macro name="MAX_NUM_CASCADES" value="4"/>
 	<macro name="BLOCK_X" value="16"/>
 	<macro name="BLOCK_Y" value="8"/>
@@ -19,7 +21,7 @@
 	<parameter type="structured_buffer" elem_type="float3" name="cascade_max_buff_read"/>
 	<parameter type="texture2D" name="depth_tex"/>
 
-	<parameter type="uint" name="num_cascades"/>
+	<parameter type="int" name="num_cascades"/>
 	<parameter type="float2" name="inv_depth_width_height"/>
 	<parameter type="float2" name="near_far"/>
 	<parameter type="float3" name="upper_left"/>
@@ -29,6 +31,27 @@
 	<parameter type="float3" name="light_space_border"/>
 	<parameter type="float3" name="max_cascade_scale"/>
 	<parameter type="float" name="dilation_factor" value="0.01"/>
+
+	<shader>
+		<![CDATA[
+float LogCascadeFromRange(uint cascade, float2 min_max_z)
+{
+	float z = min_max_z.y;
+	if (cascade < uint(num_cascades))
+	{
+		float ratio = min_max_z.y / min_max_z.x;
+		float power = cascade * (1.0f / num_cascades);
+		z = min_max_z.x * pow(ratio, power);
+	}
+	return z;
+}
+
+float3 Texcoord2View(float2 tex)
+{
+	return upper_left + float3(xy_dir * tex, 0);
+}
+		]]>
+	</shader>
 
 	<shader type="compute_shader" version="5">
 		<![CDATA[
@@ -89,18 +112,6 @@ void ReduceZBoundsFromDepthCS(uint3 gid : SV_GroupID,
 	}
 }
 
-float LogCascadeFromRange(uint cascade, float2 min_max_z)
-{
-	float z = min_max_z.y;
-	if (cascade < num_cascades)
-	{
-		float ratio = min_max_z.y / min_max_z.x;
-		float power = cascade * (1.0f / num_cascades);
-		z = min_max_z.x * pow(ratio, power);
-	}
-	return z;
-}
-
 [numthreads(MAX_NUM_CASCADES, 1, 1)]
 void ComputeLogCascadesFromZBoundsCS(uint GI : SV_GroupIndex)
 {
@@ -118,11 +129,6 @@ void ClearCascadeBoundsCS(uint GI : SV_GroupIndex)
 
 groupshared float3 bounds_min_sh[REDUCE_ARRAY_SIZE];
 groupshared float3 bounds_max_sh[REDUCE_ARRAY_SIZE];
-
-float3 Texcoord2View(float2 tex)
-{
-	return upper_left + float3(xy_dir * tex, 0);
-}
 
 [numthreads(BLOCK_X, BLOCK_Y, 1)]
 void ReduceBoundsFromDepthCS(uint3 gid : SV_GroupID,
@@ -149,7 +155,7 @@ void ReduceBoundsFromDepthCS(uint3 gid : SV_GroupID,
 				if ((depth >= min_max_z.x) && (depth < min_max_z.y))
 				{
 					uint cascade = 0;
-					for (uint i = 0; i < num_cascades - 1; ++ i)
+					for (uint i = 0; i < uint(num_cascades) - 1; ++ i)
 					{
 						if (depth >= interval_buff_read[i].y)
 						{
@@ -191,7 +197,7 @@ void ReduceBoundsFromDepthCS(uint3 gid : SV_GroupID,
 		GroupMemoryBarrierWithGroupSync();
 	}
 
-	if (GI < num_cascades)
+	if (GI < uint(num_cascades))
 	{
 		InterlockedMin(cascade_min_buff_uint[GI].x, asuint(bounds_min_sh[GI].x));
 		InterlockedMin(cascade_min_buff_uint[GI].y, asuint(bounds_min_sh[GI].y));
@@ -268,6 +274,99 @@ void ComputeCustomCascadesCS(uint GI : SV_GroupIndex)
 	<technique name="ComputeCustomCascades">
 		<pass name="p0">
 			<state name="compute_shader" value="ComputeCustomCascadesCS()"/>
+		</pass>
+	</technique>
+
+
+	<parameter type="sampler" name="point_sampler">
+		<state name="filtering" value="min_mag_mip_point"/>
+		<state name="address_u" value="clamp"/>
+		<state name="address_v" value="clamp"/>
+	</parameter>
+
+	<parameter type="float4" name="delta_offset"/>
+	<parameter type="float" name="prev_level"/>
+	<parameter type="float" name="last_level"/>
+	<parameter type="texture2D" name="depth_deriv_tex"/>
+
+	<parameter type="float2" name="kernel" array_size="4">
+		<value>
+			<![CDATA[
+				0, 0,  1, 0,
+				0, 1,  1, 1
+				]]>
+		</value>
+	</parameter>
+
+	<shader>
+		<![CDATA[
+float4 ReduceZBoundsFromDepthPS(float2 tc : TEXCOORD0) : SV_Target
+{
+	float2 min_max_z = near_far.yx;
+
+	tc = tc + delta_offset.zw;
+	for (int i = 0; i < 4; ++ i)
+	{
+		float2 ntc = tc + kernel[i] * delta_offset.xy;
+		float depth = depth_tex.SampleLevel(point_sampler, ntc, 0).x;
+		if ((depth >= near_far.x) && (depth < near_far.y))
+		{
+			min_max_z = float2(min(min_max_z.x, depth), max(min_max_z.y, depth));
+		}
+	}
+	return float4(min_max_z, 0, 0);
+}
+
+float4 ReduceZBoundsFromDepthMipMapPS(float2 tc : TEXCOORD0) : SV_Target
+{
+	tc = tc + delta_offset.zw;
+	float2 min_max_z = depth_deriv_tex.SampleLevel(point_sampler, tc, prev_level).xy;
+	for (int i = 1; i < 4; ++ i)
+	{
+		float2 ntc = tc + kernel[i] * delta_offset.xy;
+		float2 depth_deriv = depth_deriv_tex.SampleLevel(point_sampler, ntc, prev_level).xy;
+		min_max_z = float2(min(min_max_z.x, depth_deriv.x), max(min_max_z.y, depth_deriv.y));
+	}
+	return float4(min_max_z, 0, 0);
+}
+
+float4 ComputeLogCascadesFromZBoundsPS(float2 tc : TEXCOORD0) : SV_Target
+{
+	float2 min_max_z = depth_deriv_tex.SampleLevel(point_sampler, 0.5f, last_level).xy;
+	
+	int addr = int(tc.x * MAX_NUM_CASCADES);
+	return float4((int2(0, num_cascades - 1) == addr) ? near_far
+		: float2(LogCascadeFromRange(addr, min_max_z), LogCascadeFromRange(addr + 1, min_max_z)), 0, 0);
+}
+		]]>
+	</shader>
+
+	<technique name="ReduceZBoundsFromDepth2">
+		<pass name="p0">
+			<state name="depth_enable" value="false"/>
+			<state name="depth_write_mask" value="false"/>
+
+			<state name="vertex_shader" value="PostProcessVS()"/>
+			<state name="pixel_shader" value="ReduceZBoundsFromDepthPS()"/>
+		</pass>
+	</technique>
+	<technique name="ReduceZBoundsFromDepthMipMap2">
+		<pass name="p0">
+			<state name="depth_enable" value="false"/>
+			<state name="depth_write_mask" value="false"/>
+
+			<state name="vertex_shader" value="PostProcessVS()"/>
+			<state name="pixel_shader" value="ReduceZBoundsFromDepthMipMapPS()"/>
+		</pass>
+	</technique>
+
+	<technique name="ComputeLogCascadesFromZBounds2">
+		<pass name="p0">
+			<state name="depth_enable" value="false"/>
+			<state name="depth_write_mask" value="false"/>
+
+			<state name="vertex_shader" value="PostProcessVS()"/>
+			<state name="pixel_shader" value="ComputeLogCascadesFromZBoundsPS()"/>
 		</pass>
 	</technique>
 </effect>
