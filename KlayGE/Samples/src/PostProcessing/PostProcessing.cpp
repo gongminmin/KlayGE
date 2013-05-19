@@ -200,7 +200,7 @@ void PostProcessingApp::OnResize(uint32_t width, uint32_t height)
 
 	ascii_arts_->InputPin(0, color_tex_);
 
-	cartoon_->InputPin(0, deferred_rendering_->OpaqueGBufferRT0Tex(0));
+	cartoon_->InputPin(0, deferred_rendering_->GBufferRT0Tex(0));
 	cartoon_->InputPin(1, deferred_rendering_->OpaqueDepthTex(0));
 	cartoon_->InputPin(2, color_tex_);
 

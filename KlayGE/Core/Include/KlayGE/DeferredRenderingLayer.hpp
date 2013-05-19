@@ -63,8 +63,8 @@ namespace KlayGE
 
 		array<FrameBufferPtr, Num_GBuffers> g_buffers;
 		array<FrameBufferPtr, Num_GBuffers> g_buffers_rt1;
-		array<TexturePtr, Num_GBuffers> g_buffer_rt0_texs;
-		array<TexturePtr, Num_GBuffers> g_buffer_rt1_texs;
+		TexturePtr g_buffer_rt0_tex;
+		TexturePtr g_buffer_rt1_tex;
 		array<TexturePtr, Num_GBuffers> g_buffer_ds_texs;
 		array<TexturePtr, Num_GBuffers> g_buffer_depth_texs;
 
@@ -75,7 +75,7 @@ namespace KlayGE
 		TexturePtr shadowing_tex;
 
 		array<FrameBufferPtr, Num_GBuffers> shading_buffers;
-		array<TexturePtr, Num_GBuffers> shading_texs;
+		TexturePtr shading_tex;
 
 		static uint32_t const MAX_NUM_CASCADES = 4;
 		uint32_t num_cascades;
@@ -135,17 +135,9 @@ namespace KlayGE
 		{
 			return viewports_[vp].lighting_tex;
 		}
-		TexturePtr const & OpaqueShadingTex(uint32_t vp) const
+		TexturePtr const & ShadingTex(uint32_t vp) const
 		{
-			return viewports_[vp].shading_texs[Opaque_GBuffer];
-		}
-		TexturePtr const & TransparencyBackShadingTex(uint32_t vp) const
-		{
-			return viewports_[vp].shading_texs[TransparencyBack_GBuffer];
-		}
-		TexturePtr const & TransparencyFrontShadingTex(uint32_t vp) const
-		{
-			return viewports_[vp].shading_texs[TransparencyFront_GBuffer];
+			return viewports_[vp].shading_tex;
 		}
 		TexturePtr const & CurrFrameShadingTex(uint32_t vp) const
 		{
@@ -169,37 +161,21 @@ namespace KlayGE
 			return viewports_[vp].small_ssvo_tex;
 		}
 
-		TexturePtr const & OpaqueGBufferRT0Tex(uint32_t vp) const
+		TexturePtr const & GBufferRT0Tex(uint32_t vp) const
 		{
-			return viewports_[vp].g_buffer_rt0_texs[Opaque_GBuffer];
+			return viewports_[vp].g_buffer_rt0_tex;
 		}
-		TexturePtr const & OpaqueGBufferRT1Tex(uint32_t vp) const
+		TexturePtr const & GBufferRT1Tex(uint32_t vp) const
 		{
-			return viewports_[vp].g_buffer_rt1_texs[Opaque_GBuffer];
+			return viewports_[vp].g_buffer_rt1_tex;
 		}
 		TexturePtr const & OpaqueDepthTex(uint32_t vp) const
 		{
 			return viewports_[vp].g_buffer_depth_texs[Opaque_GBuffer];
 		}
-		TexturePtr const & TransparencyBackGBufferRT0Tex(uint32_t vp) const
-		{
-			return viewports_[vp].g_buffer_rt0_texs[TransparencyBack_GBuffer];
-		}
-		TexturePtr const & TransparencyBackGBufferRT1Tex(uint32_t vp) const
-		{
-			return viewports_[vp].g_buffer_rt1_texs[TransparencyBack_GBuffer];
-		}
 		TexturePtr const & TransparencyBackDepthTex(uint32_t vp) const
 		{
 			return viewports_[vp].g_buffer_depth_texs[TransparencyBack_GBuffer];
-		}
-		TexturePtr const & TransparencyFrontGBufferRT0Tex(uint32_t vp) const
-		{
-			return viewports_[vp].g_buffer_rt0_texs[TransparencyFront_GBuffer];
-		}
-		TexturePtr const & TransparencyFrontGBufferRT1Tex(uint32_t vp) const
-		{
-			return viewports_[vp].g_buffer_rt1_texs[TransparencyFront_GBuffer];
 		}
 		TexturePtr const & TransparencyFrontDepthTex(uint32_t vp) const
 		{
@@ -258,7 +234,7 @@ namespace KlayGE
 		void UpdateLighting(PerViewport const & pvp, uint32_t g_buffer_index, LightType type);
 		void UpdateIndirectAndSSVO(PerViewport const & pvp);
 		void UpdateShading(PerViewport const & pvp, uint32_t g_buffer_index);
-		void MergeShadingAndDepth(PerViewport const & pvp);
+		void MergeShadingAndDepth(PerViewport const & pvp, uint32_t g_buffer_index);
 		void AddSSR(PerViewport const & pvp);
 		void AddAtmospheric(PerViewport const & pvp);
 		void AddTAA(PerViewport const & pvp);

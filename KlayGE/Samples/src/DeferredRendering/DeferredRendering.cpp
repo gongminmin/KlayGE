@@ -315,7 +315,7 @@ void DeferredRenderingApp::OnResize(uint32_t width, uint32_t height)
 	RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 	deferred_rendering_->SetupViewport(0, re.CurFrameBuffer(), 0);
 
-	debug_pp_->InputPin(0, deferred_rendering_->OpaqueGBufferRT0Tex(0));
+	debug_pp_->InputPin(0, deferred_rendering_->GBufferRT0Tex(0));
 	debug_pp_->InputPin(1, deferred_rendering_->OpaqueDepthTex(0));
 	debug_pp_->InputPin(2, deferred_rendering_->LightingTex(0));
 	debug_pp_->InputPin(3, deferred_rendering_->SmallSSVOTex(0));

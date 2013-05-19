@@ -184,8 +184,8 @@ namespace
 				*emit_clr_param_ = float4(0, 0, 0, 0);
 				*opacity_clr_param_ = 1.0f;
 				*opacity_map_enabled_param_ = static_cast<int32_t>(0);
-				*(technique_->Effect().ParameterByName("opaque_shading_tex")) = Context::Instance().DeferredRenderingLayerInstance()->OpaqueShadingTex(0);
-				*(technique_->Effect().ParameterByName("g_buffer_tex")) = Context::Instance().DeferredRenderingLayerInstance()->TransparencyFrontGBufferRT0Tex(0);
+				*(technique_->Effect().ParameterByName("opaque_shading_tex")) = Context::Instance().DeferredRenderingLayerInstance()->CurrFrameShadingTex(0);
+				*(technique_->Effect().ParameterByName("g_buffer_tex")) = Context::Instance().DeferredRenderingLayerInstance()->GBufferRT0Tex(0);
 				{
 					App3DFramework const & app = Context::Instance().AppInstance();
 					Camera const & camera = app.ActiveCamera();
@@ -200,7 +200,7 @@ namespace
 					*(technique_->Effect().ParameterByName("inv_view")) = camera.InverseViewMatrix();
 				}
 				*(technique_->Effect().ParameterByName("front_side_depth_tex")) = Context::Instance().DeferredRenderingLayerInstance()->OpaqueDepthTex(0);
-				*(technique_->Effect().ParameterByName("front_side_tex")) = Context::Instance().DeferredRenderingLayerInstance()->OpaqueShadingTex(0);
+				*(technique_->Effect().ParameterByName("front_side_tex")) = Context::Instance().DeferredRenderingLayerInstance()->CurrFrameShadingTex(0);
 				break;
 				
 			default:

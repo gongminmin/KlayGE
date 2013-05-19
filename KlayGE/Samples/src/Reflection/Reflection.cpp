@@ -287,7 +287,7 @@ void ScreenSpaceReflectionApp::OnResize(KlayGE::uint32_t width, KlayGE::uint32_t
 	deferred_rendering_->SetupViewport(1, re.CurFrameBuffer(), VPAM_NoSSVO | VPAM_NoGI);
 	
 	back_refl_tex_ = rf.MakeTexture2D(width / 2, width / 2, 1, 1, 
-		deferred_rendering_->OpaqueShadingTex(1)->Format(), 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+		deferred_rendering_->ShadingTex(1)->Format(), 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
 	back_refl_ds_tex_ = rf.MakeTexture2D(width / 2, width / 2, 1, 1, 
 		EF_D16, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
 	back_refl_fb_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*back_refl_tex_, 0, 1, 0));
