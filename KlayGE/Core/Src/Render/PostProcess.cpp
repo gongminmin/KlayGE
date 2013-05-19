@@ -242,7 +242,7 @@ namespace KlayGE
 
 	PostProcessPtr PostProcess::Clone()
 	{
-		RenderEffectPtr effect = technique_->Effect().Clone();
+		RenderEffectPtr effect = technique_->Effect().PrototypeEffect()->Clone();
 		RenderTechniquePtr tech = effect->TechniqueByName(technique_->Name());
 
 		std::vector<std::string> param_names(params_.size());
