@@ -49,7 +49,7 @@ namespace KlayGE
 	struct PerViewport
 	{
 		PerViewport()
-			: attrib(0), ssvo_enabled(true), ssgi_enable(false)
+			: attrib(0), ssvo_enabled(true)
 		{
 		}
 
@@ -100,7 +100,6 @@ namespace KlayGE
 		float4x4 proj_to_prev;
 
 		IndirectLightingLayerPtr il_layer;
-		bool ssgi_enable;
 
 		std::vector<bool> light_visibles;
 	};
@@ -199,7 +198,7 @@ namespace KlayGE
 		void SetViewportCascades(uint32_t vp, uint32_t num_cascades, float pssm_lambda);
 
 	private:
-		void SetupViewportGI(uint32_t vp);
+		void SetupViewportGI(uint32_t vp, bool ssgi_enable);
 		void AccumulateToLightingTex(PerViewport const & pvp);
 
 		uint32_t ComposePassScanCode(uint32_t vp_index, PassType pass_type, int32_t org_no, int32_t index_in_pass);

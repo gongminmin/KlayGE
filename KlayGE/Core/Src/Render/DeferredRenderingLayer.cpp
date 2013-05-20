@@ -555,8 +555,7 @@ namespace KlayGE
 
 	void DeferredRenderingLayer::SSGIEnabled(uint32_t vp, bool ssgi)
 	{
-		viewports_[vp].ssgi_enable = ssgi;
-		this->SetupViewportGI(vp);
+		this->SetupViewportGI(vp, ssgi);
 	}
 
 	void DeferredRenderingLayer::SSVOEnabled(uint32_t vp, bool ssvo)
@@ -686,7 +685,7 @@ namespace KlayGE
 			}
 		}
 
-		this->SetupViewportGI(index);
+		this->SetupViewportGI(index, false);
 
 		ElementFormat fmt;
 		if (caps.rendertarget_format_support(EF_GR32F, 1, 0))
@@ -1974,10 +1973,10 @@ namespace KlayGE
 		re.Render(*technique_merge_depths_[g_buffer_index != 0], *rl_quad_);
 	}
 
-	void DeferredRenderingLayer::SetupViewportGI(uint32_t vp)
+	void DeferredRenderingLayer::SetupViewportGI(uint32_t vp, bool ssgi_enable)
 	{
 		PerViewport& pvp = viewports_[vp];
-		if (pvp.ssgi_enable)
+		if (ssgi_enable)
 		{
 			pvp.il_layer = MakeSharedPtr<SSGILayer>();
 		}
