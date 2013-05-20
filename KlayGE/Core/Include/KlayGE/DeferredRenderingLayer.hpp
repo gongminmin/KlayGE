@@ -66,7 +66,7 @@ namespace KlayGE
 		TexturePtr g_buffer_rt0_tex;
 		TexturePtr g_buffer_rt1_tex;
 		array<TexturePtr, Num_GBuffers> g_buffer_ds_texs;
-		array<TexturePtr, Num_GBuffers> g_buffer_depth_texs;
+		TexturePtr g_buffer_depth_tex;
 
 		array<FrameBufferPtr, Num_GBuffers> lighting_buffers;
 		TexturePtr lighting_tex;
@@ -169,17 +169,9 @@ namespace KlayGE
 		{
 			return viewports_[vp].g_buffer_rt1_tex;
 		}
-		TexturePtr const & OpaqueDepthTex(uint32_t vp) const
+		TexturePtr const & DepthTex(uint32_t vp) const
 		{
-			return viewports_[vp].g_buffer_depth_texs[Opaque_GBuffer];
-		}
-		TexturePtr const & TransparencyBackDepthTex(uint32_t vp) const
-		{
-			return viewports_[vp].g_buffer_depth_texs[TransparencyBack_GBuffer];
-		}
-		TexturePtr const & TransparencyFrontDepthTex(uint32_t vp) const
-		{
-			return viewports_[vp].g_buffer_depth_texs[TransparencyFront_GBuffer];
+			return viewports_[vp].g_buffer_depth_tex;
 		}
 
 		uint32_t ActiveViewport() const
@@ -230,7 +222,7 @@ namespace KlayGE
 		void PrepareLightCamera(PerViewport const & pvp, LightSourcePtr const & light,
 			int32_t index_in_pass, PassType pass_type);
 		void PostGenerateShadowMap(PerViewport const & pvp, int32_t org_no, int32_t index_in_pass);
-		void UpdateShadowing(PerViewport const & pvp, uint32_t g_buffer_index, int32_t org_no);
+		void UpdateShadowing(PerViewport const & pvp, int32_t org_no);
 		void UpdateLighting(PerViewport const & pvp, uint32_t g_buffer_index, LightType type);
 		void UpdateIndirectAndSSVO(PerViewport const & pvp);
 		void UpdateShading(PerViewport const & pvp, uint32_t g_buffer_index);

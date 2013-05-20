@@ -173,7 +173,7 @@ namespace
 				*height_map_enabled_param_ = static_cast<int32_t>(0);
 				*specular_level_param_ = float4(5, 0, 0, 0);
 				*shininess_param_ = 0.5f;
-				*opaque_depth_tex_param_ = Context::Instance().DeferredRenderingLayerInstance()->OpaqueDepthTex(0);
+				*opaque_depth_tex_param_ = Context::Instance().DeferredRenderingLayerInstance()->CurrFrameDepthTex(0);
 				break;
 
 			case PT_OpaqueSpecialShading:
@@ -199,7 +199,7 @@ namespace
 					*(technique_->Effect().ParameterByName("max_samples")) = static_cast<int32_t>(30);
 					*(technique_->Effect().ParameterByName("inv_view")) = camera.InverseViewMatrix();
 				}
-				*(technique_->Effect().ParameterByName("front_side_depth_tex")) = Context::Instance().DeferredRenderingLayerInstance()->OpaqueDepthTex(0);
+				*(technique_->Effect().ParameterByName("front_side_depth_tex")) = Context::Instance().DeferredRenderingLayerInstance()->CurrFrameDepthTex(0);
 				*(technique_->Effect().ParameterByName("front_side_tex")) = Context::Instance().DeferredRenderingLayerInstance()->CurrFrameShadingTex(0);
 				break;
 				

@@ -86,7 +86,7 @@ namespace KlayGE
 			case PT_TransparencyFrontDepth:
 				*diffuse_tex_param_ = diffuse_tex_;
 				*diffuse_clr_param_ = float4(mtl_ ? mtl_->diffuse.x() : 0, mtl_ ? mtl_->diffuse.y() : 0, mtl_ ? mtl_->diffuse.z() : 0, static_cast<float>(!!diffuse_tex_));
-				*opaque_depth_tex_param_ = drl->OpaqueDepthTex(drl->ActiveViewport());
+				*opaque_depth_tex_param_ = drl->CurrFrameDepthTex(drl->ActiveViewport());
 				break;
 
 			case PT_OpaqueGBufferRT0:
@@ -109,7 +109,7 @@ namespace KlayGE
 				*specular_level_param_ = float4(MathLib::clamp(mtl_ ? mtl_->specular_level : 0, 0.0f, 1.0f), 0, 0, static_cast<float>(!!specular_tex_));
 				*shininess_param_ = MathLib::clamp(mtl_ ? mtl_->shininess / 256.0f : 0, 1e-6f, 0.999f);
 				*opacity_clr_param_ = mtl_ ? mtl_->opacity : 1.0f;
-				*opaque_depth_tex_param_ = drl->OpaqueDepthTex(drl->ActiveViewport());
+				*opaque_depth_tex_param_ = drl->CurrFrameDepthTex(drl->ActiveViewport());
 				break;
 
 			case PT_GenShadowMap:
