@@ -12,6 +12,7 @@ except:
 ################################################
 
 compiler		= "auto"		# could be "vc11", "vc10", "vc9", "mingw", "gcc", "auto".
+toolset			= "auto"		# could be "v110", "v110_xp", "v100", "v90", "auto".
 arch			= ("x86", )		# could be "x86", "x64", "arm_app", "x86_app"
 config			= ("Debug", "RelWithDebInfo") # could be "Debug", "Release", "MinSizeRel", "RelWithDebInfo"
 	""")
@@ -26,6 +27,23 @@ def get_compiler_info(compiler, archs, cfg):
 	platform = sys.platform
 	if 0 == platform.find("linux"):
 		platform = "linux"
+
+	try:
+		cfg_build.compiler
+	except:
+		cfg_build.compiler = "auto"
+	try:
+		cfg_build.toolset
+	except:
+		cfg_build.toolset = "auto"
+	try:
+		cfg_build.arch
+	except:
+		cfg_build.arch = ("x86", )
+	try:
+		cfg_build.config
+	except:
+		cfg_build.config = ("Debug", "RelWithDebInfo")
 
 	if "" == compiler:
 		if ("" == cfg_build.compiler) or ("auto" == cfg_build.compiler):
@@ -45,6 +63,17 @@ def get_compiler_info(compiler, archs, cfg):
 				sys.exit(1)
 		else:
 			compiler = cfg_build.compiler
+
+	if ("" == cfg_build.toolset) or ("auto" == cfg_build.toolset):
+		if "win32" == platform:
+			if "VS110COMNTOOLS" in env:
+				toolset = "v110"
+			elif "VS100COMNTOOLS" in env:
+				toolset = "v100"
+			elif "VS90COMNTOOLS" in env:
+				toolset = "v90"
+	else:
+		toolset = cfg_build.toolset
 			
 	if "" == archs:
 		archs = cfg_build.arch
@@ -96,7 +125,7 @@ def get_compiler_info(compiler, archs, cfg):
 	else:
 		return ()
 		
-	return (compiler_name, compiler_version, arch_list, cfg, platform)
+	return (compiler_name, compiler_version, arch_list, cfg, platform, toolset)
 
 class batch_command:
 	def __init__(self):
