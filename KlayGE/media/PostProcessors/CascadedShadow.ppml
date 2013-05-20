@@ -1,0 +1,46 @@
+<?xml version='1.0'?>
+
+<post_processors>
+	<post_processor name="reduce_z_bounds_from_depth">
+		<params>
+			<param name="delta_offset"/>
+			<param name="near_far"/>
+		</params>
+		<input>
+			<pin name="depth_tex"/>
+		</input>
+		<output>
+			<pin name="output"/>
+		</output>
+		<shader effect="CascadedShadow.fxml" tech="ReduceZBoundsFromDepth2"/>
+	</post_processor>
+
+	<post_processor name="reduce_z_bounds_from_depth_mip_map">
+		<params>
+			<param name="delta_offset"/>
+			<param name="prev_level"/>
+		</params>
+		<input>
+			<pin name="depth_deriv_tex"/>
+		</input>
+		<output>
+			<pin name="output"/>
+		</output>
+		<shader effect="CascadedShadow.fxml" tech="ReduceZBoundsFromDepthMipMap2"/>
+	</post_processor>
+
+	<post_processor name="compute_log_cascades_from_z_bounds">
+		<params>
+			<param name="last_level"/>
+			<param name="num_cascades"/>
+			<param name="near_far"/>
+		</params>
+		<input>
+			<pin name="depth_deriv_tex"/>
+		</input>
+		<output>
+			<pin name="output"/>
+		</output>
+		<shader effect="CascadedShadow.fxml" tech="ComputeLogCascadesFromZBounds2"/>
+	</post_processor>
+</post_processors>
