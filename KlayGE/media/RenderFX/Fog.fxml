@@ -36,6 +36,7 @@ float FogFactorExp2(float fog_coord, float density)
 	<parameter type="float3" name="fog_color"/>
 	<parameter type="float4x4" name="inv_proj"/>
 	<parameter type="float" name="density"/>
+	<parameter type="float" name="far_plane"/>
 
 	<parameter type="texture2D" name="depth_tex"/>
 	<parameter type="sampler" name="point_sampler">
@@ -57,9 +58,15 @@ void FogVS(float4 pos : POSITION,
 
 float4 FogPS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Target
 {
-	float3 pos_es = view_dir * (depth_tex.Sample(point_sampler, tc).r / view_dir.z);
-	float fog_factor = FogFactorLinear(length(pos_es), density);
-	return float4(fog_color, fog_factor);
+	float4 ret = 0;
+	float depth = depth_tex.Sample(point_sampler, tc).r;
+	if (depth < far_plane * 0.997f)
+	{
+		float dist = length(view_dir * (depth / view_dir.z));
+		float fog_factor = FogFactorLinear(dist, density);
+		ret = float4(fog_color, fog_factor);
+	}
+	return ret;
 }
 		]]>
 	</shader>
@@ -70,15 +77,6 @@ float4 FogPS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Target
 			<state name="depth_write_mask" value="false"/>
 
 			<state name="cull_mode" value="none"/>
-
-			<state name="front_stencil_enable" value="true"/>
-			<state name="front_stencil_func" value="not_equal"/>
-			<state name="front_stencil_ref" value="128"/>
-			<state name="front_stencil_pass" value="keep"/>
-			<state name="back_stencil_enable" value="true"/>
-			<state name="back_stencil_func" value="not_equal"/>
-			<state name="back_stencil_ref" value="128"/>
-			<state name="back_stencil_pass" value="keep"/>
 
 			<state name="blend_enable" value="true"/>
 			<state name="blend_op" value="add"/>

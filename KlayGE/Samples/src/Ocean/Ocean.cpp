@@ -790,6 +790,7 @@ void OceanApp::InitObjects()
 	fog_pp_ = SyncLoadPostProcess("Fog.ppml", "fog");
 	fog_pp_->SetParam(1, float3(fog_color.r(), fog_color.g(), fog_color.b()));
 	fog_pp_->SetParam(2, 1.0f / 1200);
+	fog_pp_->SetParam(3, this->ActiveCamera().FarPlane());
 	deferred_rendering_->AtmosphericPostProcess(fog_pp_);
 
 	light_shaft_pp_ = MakeSharedPtr<LightShaftPostProcess>();

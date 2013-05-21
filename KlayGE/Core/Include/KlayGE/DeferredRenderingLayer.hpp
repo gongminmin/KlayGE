@@ -65,7 +65,7 @@ namespace KlayGE
 		array<FrameBufferPtr, Num_GBuffers> g_buffers_rt1;
 		TexturePtr g_buffer_rt0_tex;
 		TexturePtr g_buffer_rt1_tex;
-		array<TexturePtr, Num_GBuffers> g_buffer_ds_texs;
+		array<TexturePtr, 2> g_buffer_ds_texs;
 		TexturePtr g_buffer_depth_tex;
 
 		array<FrameBufferPtr, Num_GBuffers> lighting_buffers;
@@ -77,9 +77,8 @@ namespace KlayGE
 		array<FrameBufferPtr, Num_GBuffers> shading_buffers;
 		TexturePtr shading_tex;
 
-		static uint32_t const MAX_NUM_CASCADES = 4;
 		uint32_t num_cascades;
-		array<TexturePtr, MAX_NUM_CASCADES> blur_cascaded_sm_texs;
+		array<TexturePtr, CascadedShadowLayer::MAX_NUM_CASCADES> blur_cascaded_sm_texs;
 
 		array<FrameBufferPtr, Num_GBuffers> curr_merged_shading_buffers;
 		TexturePtr curr_merged_shading_tex;
@@ -320,7 +319,7 @@ namespace KlayGE
 		RenderEffectParameterPtr num_cascades_param_;
 		RenderEffectParameterPtr view_z_to_light_view_param_;
 		RenderEffectParameterPtr cascaded_shadow_map_tex_array_param_;
-		array<RenderEffectParameterPtr, PerViewport::MAX_NUM_CASCADES> cascaded_shadow_map_texs_param_;
+		array<RenderEffectParameterPtr, CascadedShadowLayer::MAX_NUM_CASCADES> cascaded_shadow_map_texs_param_;
 
 		std::vector<SceneObject*> visible_scene_objs_;
 		bool has_reflective_objs_;

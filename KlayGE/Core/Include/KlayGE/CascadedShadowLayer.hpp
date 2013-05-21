@@ -55,6 +55,9 @@ namespace KlayGE
 	class KLAYGE_CORE_API CascadedShadowLayer
 	{
 	public:
+		static uint32_t const MAX_NUM_CASCADES = 4UL;
+
+	public:
 		virtual ~CascadedShadowLayer()
 		{
 		}

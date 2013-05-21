@@ -641,7 +641,7 @@ namespace KlayGE
 				ds_fmt = EF_D16;
 			}
 
-			for (size_t i = 0; i < pvp.g_buffers.size(); ++ i)
+			for (size_t i = 0; i < pvp.g_buffer_ds_texs.size(); ++ i)
 			{
 				pvp.g_buffer_ds_texs[i] = rf.MakeTexture2D(width, height, 1, 1, ds_fmt, 1, 0,  EAH_GPU_Read | EAH_GPU_Write, nullptr);
 				ds_views[i] = rf.Make2DDepthStencilRenderView(*pvp.g_buffer_ds_texs[i], 0, 0, 0);
@@ -649,10 +649,14 @@ namespace KlayGE
 		}
 		else
 		{
-			for (size_t i = 0; i < pvp.g_buffers.size(); ++ i)
+			for (size_t i = 0; i < pvp.g_buffer_ds_texs.size(); ++ i)
 			{
 				ds_views[i] = rf.Make2DDepthStencilRenderView(width, height, EF_D16, 1, 0);
 			}
+		}
+		for (size_t i = pvp.g_buffer_ds_texs.size(); i < pvp.g_buffers.size(); ++ i)
+		{
+			ds_views[i] = ds_views[i & 1UL];
 		}
 
 		pvp.g_buffer_rt0_tex = rf.MakeTexture2D(width, height, MAX_IL_MIPMAP_LEVELS + 1, 1, fmt8, 1, 0,
@@ -709,7 +713,7 @@ namespace KlayGE
 		if (tex_array_support_)
 		{
 			pvp.blur_cascaded_sm_texs[0] = rf.MakeTexture2D(SM_SIZE * 2, SM_SIZE * 2, 3,
-				PerViewport::MAX_NUM_CASCADES, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write | EAH_Generate_Mips, nullptr);
+				CascadedShadowLayer::MAX_NUM_CASCADES, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write | EAH_Generate_Mips, nullptr);
 		}
 		else
 		{
@@ -1544,7 +1548,7 @@ namespace KlayGE
 
 		if (depth_texture_support_)
 		{
-			depth_to_linear_pp_->InputPin(0, pvp.g_buffer_ds_texs[g_buffer_index]);
+			depth_to_linear_pp_->InputPin(0, pvp.g_buffer_ds_texs[g_buffer_index & 1UL]);
 			depth_to_linear_pp_->OutputPin(0, pvp.g_buffer_depth_tex);
 			depth_to_linear_pp_->Apply();
 		}

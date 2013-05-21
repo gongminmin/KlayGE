@@ -6,6 +6,7 @@
 			<param name="inv_proj"/>
 			<param name="fog_color"/>
 			<param name="density"/>
+			<param name="far_plane"/>
 		</params>
 		<input>
 			<pin name="depth_tex"/>
