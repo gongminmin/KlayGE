@@ -59,35 +59,35 @@ namespace KlayGE
 
 		array<bool, Num_GBuffers> g_buffer_enables;
 
-		array<FrameBufferPtr, Num_GBuffers> pre_depth_buffers;
+		FrameBufferPtr pre_depth_buffer;
 
-		array<FrameBufferPtr, Num_GBuffers> g_buffers;
-		array<FrameBufferPtr, Num_GBuffers> g_buffers_rt1;
+		FrameBufferPtr g_buffer;
+		FrameBufferPtr g_buffer_rt1;
 		TexturePtr g_buffer_rt0_tex;
 		TexturePtr g_buffer_rt1_tex;
-		array<TexturePtr, 2> g_buffer_ds_texs;
+		TexturePtr g_buffer_ds_tex;
 		TexturePtr g_buffer_depth_tex;
 
-		array<FrameBufferPtr, Num_GBuffers> lighting_buffers;
+		FrameBufferPtr lighting_buffer;
 		TexturePtr lighting_tex;
 
 		FrameBufferPtr shadowing_buffer;
 		TexturePtr shadowing_tex;
 
-		array<FrameBufferPtr, Num_GBuffers> shading_buffers;
+		FrameBufferPtr shading_buffer;
 		TexturePtr shading_tex;
 
 		uint32_t num_cascades;
 		array<TexturePtr, CascadedShadowLayer::MAX_NUM_CASCADES> blur_cascaded_sm_texs;
 
-		array<FrameBufferPtr, Num_GBuffers> curr_merged_shading_buffers;
+		FrameBufferPtr curr_merged_shading_buffer;
 		TexturePtr curr_merged_shading_tex;
-		array<FrameBufferPtr, Num_GBuffers> curr_merged_depth_buffers;
+		FrameBufferPtr curr_merged_depth_buffer;
 		TexturePtr curr_merged_depth_tex;
 
-		array<FrameBufferPtr, Num_GBuffers> prev_merged_shading_buffers;
+		FrameBufferPtr prev_merged_shading_buffer;
 		TexturePtr prev_merged_shading_tex;
-		array<FrameBufferPtr, Num_GBuffers> prev_merged_depth_buffers;
+		FrameBufferPtr prev_merged_depth_buffer;
 		TexturePtr prev_merged_depth_tex;
 
 		TexturePtr small_ssvo_tex;
@@ -215,13 +215,13 @@ namespace KlayGE
 		void PreparePVP(PerViewport& pvp);
 		void GenerateDepthBuffer(PerViewport const & pvp, uint32_t g_buffer_index);
 		void GenerateGBuffer(PerViewport const & pvp, uint32_t g_buffer_index);
-		void PostGenerateGBuffer(PerViewport const & pvp, uint32_t g_buffer_index);
+		void PostGenerateGBuffer(PerViewport const & pvp);
 		void RenderDecals(PerViewport const & pvp, PassType pass_type);
 		void PrepareLightCamera(PerViewport const & pvp, LightSourcePtr const & light,
 			int32_t index_in_pass, PassType pass_type);
 		void PostGenerateShadowMap(PerViewport const & pvp, int32_t org_no, int32_t index_in_pass);
 		void UpdateShadowing(PerViewport const & pvp, int32_t org_no);
-		void UpdateLighting(PerViewport const & pvp, uint32_t g_buffer_index, LightType type);
+		void UpdateLighting(PerViewport const & pvp, LightType type);
 		void UpdateIndirectAndSSVO(PerViewport const & pvp);
 		void UpdateShading(PerViewport const & pvp, uint32_t g_buffer_index);
 		void MergeShadingAndDepth(PerViewport const & pvp, uint32_t g_buffer_index);
