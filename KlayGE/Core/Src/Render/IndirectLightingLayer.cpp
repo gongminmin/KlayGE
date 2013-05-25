@@ -426,9 +426,11 @@ namespace KlayGE
 		{
 			uint32_t const width = indirect_lighting_tex_->Width(i);
 			uint32_t const height = indirect_lighting_tex_->Height(i);
+			uint32_t const lower_width = indirect_lighting_tex_->Width(i + 1);
+			uint32_t const lower_height = indirect_lighting_tex_->Height(i + 1);
 
-			upsampling_pp_->SetParam(0, float4(1.0f / indirect_lighting_tex_->Width(i + 1) , 1.0f / indirect_lighting_tex_->Height(i + 1),
-				1.0f / width, 1.0f / height));
+			upsampling_pp_->SetParam(0, float4(static_cast<float>(lower_width), static_cast<float>(lower_height),
+				1.0f / lower_width, 1.0f / lower_height));
 			upsampling_pp_->SetParam(1, int2(i + 1, i));
 			
 			upsampling_pp_->InputPin(0, indirect_lighting_tex_);
