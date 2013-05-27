@@ -2622,108 +2622,11 @@ namespace
 
 namespace KlayGE
 {
-	class EffectLoadingDesc : public ResLoadingDesc
-	{
-	private:
-		struct EffectDesc
-		{
-			std::string res_name;
-			std::vector<std::pair<std::string, std::string> > macros;
-
-			RenderEffectPtr effect;
-		};
-
-	public:
-		EffectLoadingDesc(std::string const & name, std::pair<std::string, std::string>* macros)
-		{
-			effect_desc_.res_name = name;
-			if (macros)
-			{
-				size_t m = 0;
-				while (!macros[m].first.empty())
-				{
-					effect_desc_.macros.push_back(macros[m]);
-					++ m;
-				}
-				effect_desc_.macros.push_back(macros[m]);
-			}
-		}
-
-		uint64_t Type() const
-		{
-			static uint64_t const type = static_cast<uint64_t>(boost::hash_value("EffectLoadingDesc"));
-			return type;
-		}
-
-		bool StateLess() const
-		{
-			return false;
-		}
-
-		void SubThreadStage()
-		{
-		}
-
-		shared_ptr<void> MainThreadStage()
-		{
-			RenderEffectPtr prototype = MakeSharedPtr<RenderEffect>();
-			prototype->Load(effect_desc_.res_name, effect_desc_.macros.empty() ? nullptr : &effect_desc_.macros[0]);
-			effect_desc_.effect = prototype->Clone();
-			effect_desc_.effect->PrototypeEffect(prototype);
-			return static_pointer_cast<void>(effect_desc_.effect);
-		}
-
-		bool HasSubThreadStage() const
-		{
-			return false;
-		}
-
-		bool Match(ResLoadingDesc const & rhs) const
-		{
-			if (this->Type() == rhs.Type())
-			{
-				EffectLoadingDesc const & eld = static_cast<EffectLoadingDesc const &>(rhs);
-				return (effect_desc_.res_name == eld.effect_desc_.res_name)
-					&& (effect_desc_.macros == eld.effect_desc_.macros);
-			}
-			return false;
-		}
-
-		void CopyDataFrom(ResLoadingDesc const & rhs)
-		{
-			BOOST_ASSERT(this->Type() == rhs.Type());
-
-			EffectLoadingDesc const & eld = static_cast<EffectLoadingDesc const &>(rhs);
-			effect_desc_.res_name = eld.effect_desc_.res_name;
-			effect_desc_.macros = eld.effect_desc_.macros;
-		}
-
-		shared_ptr<void> CloneResourceFrom(shared_ptr<void> const & resource)
-		{
-			RenderEffectPtr prototype = static_pointer_cast<RenderEffect>(resource)->PrototypeEffect();
-			effect_desc_.effect = prototype->Clone();
-			effect_desc_.effect->PrototypeEffect(prototype);
-			return static_pointer_cast<void>(effect_desc_.effect);
-		}
-
-	private:
-		EffectDesc effect_desc_;
-	};
-
-
 	void RenderEffectAnnotation::Load(XMLNodePtr const & node)
 	{
 		type_ = type_define::instance().type_code(node->Attrib("type")->ValueString());
 		name_ = node->Attrib("name")->ValueString();
 		var_ = read_var(node, type_, 0);
-	}
-
-	void RenderEffectAnnotation::StreamIn(ResIdentifierPtr const & res)
-	{
-		res->read(&type_, sizeof(type_));
-		LittleEndianToNative<sizeof(type_)>(&type_);
-		name_ = ReadShortString(res);
-		var_ = stream_in_var(res, type_, 0);
 	}
 
 	void RenderEffectAnnotation::StreamOut(std::ostream& os)
@@ -2794,314 +2697,154 @@ namespace KlayGE
 			predefined_macros_hash_ = 0;
 		}
 
-		std::vector<std::vector<std::vector<uint8_t> > > native_shader_blocks;
-		if (!this->StreamIn(kfx_source, predefined_macros, native_shader_blocks))
-		{
-			shader_descs_.reset();
-			cbuffers_.reset();
-			macros_.reset();
-			params_.clear();
-			shaders_.reset();
-			techniques_.clear();
+		std::vector<std::vector<uint8_t> > native_shader_blocks;
+		shader_descs_.reset();
+		cbuffers_.reset();
+		macros_.reset();
+		params_.clear();
+		shaders_.reset();
+		techniques_.clear();
 
-			if (source)
-			{
-				shader_descs_ = MakeSharedPtr<KLAYGE_DECLTYPE(*shader_descs_)>(1);
-
-				XMLDocument doc;
-				XMLNodePtr root = doc.Parse(source);
-
-				cbuffers_ = MakeSharedPtr<KLAYGE_DECLTYPE(*cbuffers_)>();
-
-				XMLAttributePtr attr;
-
-				std::vector<XMLDocumentPtr> include_docs;
-				for (XMLNodePtr node = root->FirstNode("include"); node;)
-				{
-					attr = node->Attrib("name");
-					include_docs.push_back(MakeSharedPtr<XMLDocument>());
-					XMLNodePtr include_root = include_docs.back()->Parse(ResLoader::Instance().Open(attr->ValueString()));
-
-					for (XMLNodePtr child_node = include_root->FirstNode(); child_node; child_node = child_node->NextSibling())
-					{
-						if (XNT_Element == child_node->Type())
-						{
-							root->InsertNode(node, doc.CloneNode(child_node));
-						}
-					}
-
-					XMLNodePtr node_next = node->NextSibling("include");
-					root->RemoveNode(node);
-					node = node_next;
-				}
-
-				{
-					XMLNodePtr macro_node = root->FirstNode("macro");
-					if (macro_node || predefined_macros)
-					{
-						macros_ = MakeSharedPtr<KLAYGE_DECLTYPE(*macros_)>();
-					}
-					if (predefined_macros)
-					{
-						size_t m = 0;
-						while (!predefined_macros[m].first.empty())
-						{
-							macros_->push_back(std::make_pair(std::make_pair(predefined_macros[m].first, predefined_macros[m].second), false));
-							++ m;
-						}
-					}
-					for (; macro_node; macro_node = macro_node->NextSibling("macro"))
-					{
-						macros_->push_back(std::make_pair(std::make_pair(macro_node->Attrib("name")->ValueString(), macro_node->Attrib("value")->ValueString()), true));
-					}
-				}
-
-				std::vector<XMLNodePtr> parameter_nodes;
-				for (XMLNodePtr node = root->FirstNode(); node; node = node->NextSibling())
-				{
-					if ("parameter" == node->Name())
-					{
-						parameter_nodes.push_back(node);
-					}
-					else if ("cbuffer" == node->Name())
-					{
-						for (XMLNodePtr sub_node = node->FirstNode("parameter"); sub_node; sub_node = sub_node->NextSibling("parameter"))
-						{
-							parameter_nodes.push_back(sub_node);
-						}
-					}
-				}
-
-				for (uint32_t param_index = 0; param_index < parameter_nodes.size(); ++ param_index)
-				{
-					XMLNodePtr const & node = parameter_nodes[param_index];
-
-					uint32_t type = type_define::instance().type_code(node->Attrib("type")->ValueString());
-					if ((type != REDT_sampler)
-						&& (type != REDT_texture1D) && (type != REDT_texture2D) && (type != REDT_texture3D) && (type != REDT_textureCUBE)
-						&& (type != REDT_texture1DArray) && (type != REDT_texture2DArray) && (type != REDT_texture3DArray) && (type != REDT_textureCUBEArray))
-					{
-						XMLNodePtr parent_node = node->Parent();
-						std::string cbuff_name = parent_node->AttribString("name", "global_cb");
-
-						bool found = false;
-						for (size_t i = 0; i < cbuffers_->size(); ++ i)
-						{
-							if ((*cbuffers_)[i].first == cbuff_name)
-							{
-								(*cbuffers_)[i].second.push_back(param_index);
-								found = true;
-								break;
-							}
-						}
-						if (!found)
-						{
-							cbuffers_->push_back(std::make_pair(cbuff_name, std::vector<uint32_t>(1, param_index)));
-						}
-					}
-
-					RenderEffectParameterPtr param = MakeSharedPtr<RenderEffectParameter>(*this);
-					params_.push_back(param);
-
-					param->Load(node);
-				}
-
-				{
-					XMLNodePtr shader_node = root->FirstNode("shader");
-					if (shader_node)
-					{
-						shaders_ = MakeSharedPtr<KLAYGE_DECLTYPE(*shaders_)>();
-						for (; shader_node; shader_node = shader_node->NextSibling("shader"))
-						{
-							shaders_->push_back(RenderShaderFunc());
-							shaders_->back().Load(shader_node);
-						}
-					}
-				}
-
-				uint32_t index = 0;
-				for (XMLNodePtr node = root->FirstNode("technique"); node; node = node->NextSibling("technique"), ++ index)
-				{
-					RenderTechniquePtr technique = MakeSharedPtr<RenderTechnique>(*this);
-					techniques_.push_back(technique);
-
-					technique->Load(node, index);
-				}
-			}
-
-			native_shader_blocks.resize(shader_descs_->size());
-			for (size_t i = 1; i < shader_descs_->size(); ++ i)
-			{
-				uint32_t tech_pass_type = (*shader_descs_)[i].tech_pass_type;
-				ShaderObjectPtr const & so = techniques_[tech_pass_type >> 16]->Pass((tech_pass_type >> 8) & 0xFF)->GetShaderObject();
-
-				native_shader_blocks[i].push_back(std::vector<uint8_t>());
-				so->ExtractNativeShader(static_cast<ShaderObject::ShaderType>(tech_pass_type & 0xFF), *this, native_shader_blocks[i].back());
-
-				if (native_shader_blocks[i].back().empty())
-				{
-					native_shader_blocks[i].pop_back();
-				}
-			}
-
-			std::ofstream ofs(kfx_name.c_str(), std::ios_base::binary | std::ios_base::out);
-			this->StreamOut(ofs, native_shader_blocks);
-		}
-	}
-
-	bool RenderEffect::StreamIn(ResIdentifierPtr const & source, std::pair<std::string, std::string>* predefined_macros,
-			std::vector<std::vector<std::vector<uint8_t> > >& native_shader_blocks)
-	{
-		bool ret = false;
 		if (source)
 		{
-			uint32_t fourcc;
-			source->read(&fourcc, sizeof(fourcc));
-			LittleEndianToNative<sizeof(fourcc)>(&fourcc);
-			if (MakeFourCC<'K', 'F', 'X', ' '>::value == fourcc)
+			shader_descs_ = MakeSharedPtr<KLAYGE_DECLTYPE(*shader_descs_)>(1);
+
+			XMLDocument doc;
+			XMLNodePtr root = doc.Parse(source);
+
+			cbuffers_ = MakeSharedPtr<KLAYGE_DECLTYPE(*cbuffers_)>();
+
+			XMLAttributePtr attr;
+
+			std::vector<XMLDocumentPtr> include_docs;
+			for (XMLNodePtr node = root->FirstNode("include"); node;)
 			{
-				uint32_t ver;
-				source->read(&ver, sizeof(ver));
-				LittleEndianToNative<sizeof(ver)>(&ver);
-				if (KFX_VERSION == ver)
+				attr = node->Attrib("name");
+				include_docs.push_back(MakeSharedPtr<XMLDocument>());
+				XMLNodePtr include_root = include_docs.back()->Parse(ResLoader::Instance().Open(attr->ValueString()));
+
+				for (XMLNodePtr child_node = include_root->FirstNode(); child_node; child_node = child_node->NextSibling())
 				{
-					uint64_t timestamp;
-					source->read(&timestamp, sizeof(timestamp));
-					LittleEndianToNative<sizeof(timestamp)>(&timestamp);
-					if (timestamp_ <= timestamp)
+					if (XNT_Element == child_node->Type())
 					{
-						shader_descs_ = MakeSharedPtr<KLAYGE_DECLTYPE(*shader_descs_)>(1);
+						root->InsertNode(node, doc.CloneNode(child_node));
+					}
+				}
 
-						cbuffers_ = MakeSharedPtr<KLAYGE_DECLTYPE(*cbuffers_)>();
+				XMLNodePtr node_next = node->NextSibling("include");
+				root->RemoveNode(node);
+				node = node_next;
+			}
 
-						{
-							uint16_t num_macros;
-							source->read(&num_macros, sizeof(num_macros));
-							LittleEndianToNative<sizeof(num_macros)>(&num_macros);
+			{
+				XMLNodePtr macro_node = root->FirstNode("macro");
+				if (macro_node || predefined_macros)
+				{
+					macros_ = MakeSharedPtr<KLAYGE_DECLTYPE(*macros_)>();
+				}
+				if (predefined_macros)
+				{
+					size_t m = 0;
+					while (!predefined_macros[m].first.empty())
+					{
+						macros_->push_back(std::make_pair(std::make_pair(predefined_macros[m].first, predefined_macros[m].second), false));
+						++ m;
+					}
+				}
+				for (; macro_node; macro_node = macro_node->NextSibling("macro"))
+				{
+					macros_->push_back(std::make_pair(std::make_pair(macro_node->Attrib("name")->ValueString(), macro_node->Attrib("value")->ValueString()), true));
+				}
+			}
 
-							if ((num_macros > 0) || predefined_macros)
-							{
-								macros_ = MakeSharedPtr<KLAYGE_DECLTYPE(*macros_)>();
-							}
-							if (predefined_macros)
-							{
-								size_t m = 0;
-								while (!predefined_macros[m].first.empty())
-								{
-									macros_->push_back(std::make_pair(std::make_pair(predefined_macros[m].first, predefined_macros[m].second), false));
-									++ m;
-								}
-							}
-							for (uint32_t i = 0; i < num_macros; ++ i)
-							{
-								std::string name = ReadShortString(source);
-								std::string value = ReadShortString(source);
-								macros_->push_back(std::make_pair(std::make_pair(name, value), true));
-							}
-						}
-
-						{
-							uint16_t num_cbufs;
-							source->read(&num_cbufs, sizeof(num_cbufs));
-							LittleEndianToNative<sizeof(num_cbufs)>(&num_cbufs);
-							cbuffers_->resize(num_cbufs);
-							for (uint32_t i = 0; i < num_cbufs; ++ i)
-							{
-								(*cbuffers_)[i].first = ReadShortString(source);
-
-								uint16_t len;
-								source->read(&len, sizeof(len));
-								LittleEndianToNative<sizeof(len)>(&len);
-								(*cbuffers_)[i].second.resize(len);
-								source->read(&(*cbuffers_)[i].second[0], len * sizeof((*cbuffers_)[i].second[0]));
-								for (uint32_t j = 0; j < len; ++ j)
-								{
-									LittleEndianToNative<sizeof((*cbuffers_)[i].second[j])>(&(*cbuffers_)[i].second[j]);
-								}
-							}
-						}
-
-						{
-							uint16_t num_params;
-							source->read(&num_params, sizeof(num_params));
-							LittleEndianToNative<sizeof(num_params)>(&num_params);
-							params_.resize(num_params);
-							for (uint32_t i = 0; i < num_params; ++ i)
-							{
-								RenderEffectParameterPtr param = MakeSharedPtr<RenderEffectParameter>(*this);
-								params_[i] = param;
-
-								param->StreamIn(source);
-							}
-						}
-
-						{
-							uint16_t num_shaders;
-							source->read(&num_shaders, sizeof(num_shaders));
-							LittleEndianToNative<sizeof(num_shaders)>(&num_shaders);
-							if (num_shaders > 0)
-							{
-								shaders_ = MakeSharedPtr<KLAYGE_DECLTYPE(*shaders_)>(num_shaders);
-								for (uint32_t i = 0; i < num_shaders; ++ i)
-								{
-									(*shaders_)[i].StreamIn(source);
-								}
-							}
-						}
-
-						{
-							uint16_t num_shader_descs;
-							source->read(&num_shader_descs, sizeof(num_shader_descs));
-							LittleEndianToNative<sizeof(num_shader_descs)>(&num_shader_descs);
-							shader_descs_->resize(num_shader_descs + 1);
-							for (uint32_t i = 0; i < num_shader_descs; ++ i)
-							{
-								(*shader_descs_)[i + 1].profile = ReadShortString(source);
-								(*shader_descs_)[i + 1].func_name = ReadShortString(source);
-
-								source->read(&(*shader_descs_)[i + 1].tech_pass_type, sizeof((*shader_descs_)[i + 1].tech_pass_type));
-								LittleEndianToNative<sizeof((*shader_descs_)[i + 1].tech_pass_type)>(&(*shader_descs_)[i + 1].tech_pass_type);
-
-								uint8_t len;
-								source->read(&len, sizeof(len));
-								if (len > 0)
-								{
-									(*shader_descs_)[i + 1].so_decl.resize(len);
-									source->read(&(*shader_descs_)[i + 1].so_decl[0], len * sizeof((*shader_descs_)[i + 1].so_decl[0]));
-									for (uint32_t j = 0; j < len; ++ j)
-									{
-										LittleEndianToNative<sizeof((*shader_descs_)[i + 1].so_decl[j].usage)>(&(*shader_descs_)[i + 1].so_decl[j].usage);
-									}
-								}
-							}
-
-							native_shader_blocks.resize(shader_descs_->size());
-						}
-
-						ret = true;
-						{
-							uint16_t num_techs;
-							source->read(&num_techs, sizeof(num_techs));
-							LittleEndianToNative<sizeof(num_techs)>(&num_techs);
-							techniques_.resize(num_techs);
-							for (uint32_t i = 0; i < num_techs; ++ i)
-							{
-								RenderTechniquePtr technique = MakeSharedPtr<RenderTechnique>(*this);
-								techniques_[i] = technique;
-
-								ret &= technique->StreamIn(source, i, native_shader_blocks);
-							}
-						}
+			std::vector<XMLNodePtr> parameter_nodes;
+			for (XMLNodePtr node = root->FirstNode(); node; node = node->NextSibling())
+			{
+				if ("parameter" == node->Name())
+				{
+					parameter_nodes.push_back(node);
+				}
+				else if ("cbuffer" == node->Name())
+				{
+					for (XMLNodePtr sub_node = node->FirstNode("parameter"); sub_node; sub_node = sub_node->NextSibling("parameter"))
+					{
+						parameter_nodes.push_back(sub_node);
 					}
 				}
 			}
+
+			for (uint32_t param_index = 0; param_index < parameter_nodes.size(); ++ param_index)
+			{
+				XMLNodePtr const & node = parameter_nodes[param_index];
+
+				uint32_t type = type_define::instance().type_code(node->Attrib("type")->ValueString());
+				if ((type != REDT_sampler)
+					&& (type != REDT_texture1D) && (type != REDT_texture2D) && (type != REDT_texture3D) && (type != REDT_textureCUBE)
+					&& (type != REDT_texture1DArray) && (type != REDT_texture2DArray) && (type != REDT_texture3DArray) && (type != REDT_textureCUBEArray))
+				{
+					XMLNodePtr parent_node = node->Parent();
+					std::string cbuff_name = parent_node->AttribString("name", "global_cb");
+
+					bool found = false;
+					for (size_t i = 0; i < cbuffers_->size(); ++ i)
+					{
+						if ((*cbuffers_)[i].first == cbuff_name)
+						{
+							(*cbuffers_)[i].second.push_back(param_index);
+							found = true;
+							break;
+						}
+					}
+					if (!found)
+					{
+						cbuffers_->push_back(std::make_pair(cbuff_name, std::vector<uint32_t>(1, param_index)));
+					}
+				}
+
+				RenderEffectParameterPtr param = MakeSharedPtr<RenderEffectParameter>(*this);
+				params_.push_back(param);
+
+				param->Load(node);
+			}
+
+			{
+				XMLNodePtr shader_node = root->FirstNode("shader");
+				if (shader_node)
+				{
+					shaders_ = MakeSharedPtr<KLAYGE_DECLTYPE(*shaders_)>();
+					for (; shader_node; shader_node = shader_node->NextSibling("shader"))
+					{
+						shaders_->push_back(RenderShaderFunc());
+						shaders_->back().Load(shader_node);
+					}
+				}
+			}
+
+			uint32_t index = 0;
+			for (XMLNodePtr node = root->FirstNode("technique"); node; node = node->NextSibling("technique"), ++ index)
+			{
+				RenderTechniquePtr technique = MakeSharedPtr<RenderTechnique>(*this);
+				techniques_.push_back(technique);
+
+				technique->Load(node, index);
+			}
 		}
 
-		return ret;
+		native_shader_blocks.resize(shader_descs_->size());
+		for (size_t i = 1; i < shader_descs_->size(); ++ i)
+		{
+			uint32_t tech_pass_type = (*shader_descs_)[i].tech_pass_type;
+			ShaderObjectPtr const & so = techniques_[tech_pass_type >> 16]->Pass((tech_pass_type >> 8) & 0xFF)->GetShaderObject();
+
+			so->ExtractNativeShader(static_cast<ShaderObject::ShaderType>(tech_pass_type & 0xFF), *this, native_shader_blocks[i]);
+		}
+
+		std::ofstream ofs(kfx_name.c_str(), std::ios_base::binary | std::ios_base::out);
+		this->StreamOut(ofs, native_shader_blocks);
 	}
 
 	void RenderEffect::StreamOut(std::ostream& os,
-		std::vector<std::vector<std::vector<uint8_t> > > const & native_shader_blocks)
+		std::vector<std::vector<uint8_t> > const & native_shader_blocks)
 	{
 		uint32_t fourcc = MakeFourCC<'K', 'F', 'X', ' '>::value;
 		NativeToLittleEndian<sizeof(fourcc)>(&fourcc);
@@ -3425,57 +3168,8 @@ namespace KlayGE
 		}
 	}
 
-	bool RenderTechnique::StreamIn(ResIdentifierPtr const & res, uint32_t tech_index,
-			std::vector<std::vector<std::vector<uint8_t> > >& native_shader_blocks)
-	{
-		name_ = MakeSharedPtr<KLAYGE_DECLTYPE(*name_)>(ReadShortString(res));
-
-		uint8_t num_anno;
-		res->read(&num_anno, sizeof(num_anno));
-		if (num_anno > 0)
-		{
-			annotations_ = MakeSharedPtr<KLAYGE_DECLTYPE(*annotations_)>();
-			annotations_->resize(num_anno);
-			for (uint32_t i = 0; i < num_anno; ++ i)
-			{
-				RenderEffectAnnotationPtr annotation = MakeSharedPtr<RenderEffectAnnotation>();
-				(*annotations_)[i] = annotation;
-				
-				annotation->StreamIn(res);
-			}
-		}
-
-		is_validate_ = true;
-
-		has_discard_ = false;
-		has_tessellation_ = false;
-		
-		res->read(&transparent_, sizeof(transparent_));
-		res->read(&weight_, sizeof(weight_));
-		LittleEndianToNative<sizeof(weight_)>(&weight_);
-
-		bool ret = true;
-		uint8_t num_passes;
-		res->read(&num_passes, sizeof(num_passes));
-		passes_.resize(num_passes);
-		for (uint32_t pass_index = 0; pass_index < num_passes; ++ pass_index)
-		{
-			RenderPassPtr pass = MakeSharedPtr<RenderPass>(effect_);
-			passes_[pass_index] = pass;
-
-			ret &= pass->StreamIn(res, tech_index, pass_index, native_shader_blocks);
-
-			is_validate_ &= pass->Validate();
-
-			has_discard_ |= pass->GetShaderObject()->HasDiscard();
-			has_tessellation_ |= pass->GetShaderObject()->HasTessellation();
-		}
-
-		return ret;
-	}
-
 	void RenderTechnique::StreamOut(std::ostream& os, uint32_t tech_index,
-			std::vector<std::vector<std::vector<uint8_t> > > const & native_shader_blocks)
+			std::vector<std::vector<uint8_t> > const & native_shader_blocks)
 	{
 		WriteShortString(os, *name_);
 
@@ -3959,167 +3653,8 @@ namespace KlayGE
 		is_validate_ = shader_obj_->Validate();
 	}
 
-	bool RenderPass::StreamIn(ResIdentifierPtr const & res, uint32_t tech_index, uint32_t pass_index,
-			std::vector<std::vector<std::vector<uint8_t> > >& native_shader_blocks)
-	{
-		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-
-		name_ = MakeSharedPtr<KLAYGE_DECLTYPE(*name_)>(ReadShortString(res));
-
-		uint8_t num_anno;
-		res->read(&num_anno, sizeof(num_anno));
-		if (num_anno > 0)
-		{
-			annotations_ = MakeSharedPtr<KLAYGE_DECLTYPE(*annotations_)>();
-			annotations_->resize(num_anno);
-			for (uint32_t i = 0; i < num_anno; ++ i)
-			{
-				RenderEffectAnnotationPtr annotation = MakeSharedPtr<RenderEffectAnnotation>();
-				(*annotations_)[i] = annotation;
-				
-				annotation->StreamIn(res);
-			}
-		}
-
-		RasterizerStateDesc rs_desc;
-		DepthStencilStateDesc dss_desc;
-		BlendStateDesc bs_desc;
-
-		res->read(&rs_desc, sizeof(rs_desc));
-		LittleEndianToNative<sizeof(rs_desc.polygon_mode)>(&rs_desc.polygon_mode);
-		LittleEndianToNative<sizeof(rs_desc.shade_mode)>(&rs_desc.shade_mode);
-		LittleEndianToNative<sizeof(rs_desc.cull_mode)>(&rs_desc.cull_mode);
-		LittleEndianToNative<sizeof(rs_desc.polygon_offset_factor)>(&rs_desc.polygon_offset_factor);
-		LittleEndianToNative<sizeof(rs_desc.polygon_offset_units)>(&rs_desc.polygon_offset_units);
-		
-		res->read(&dss_desc, sizeof(dss_desc));
-		LittleEndianToNative<sizeof(dss_desc.depth_func)>(&dss_desc.depth_func);
-		LittleEndianToNative<sizeof(dss_desc.front_stencil_func)>(&dss_desc.front_stencil_func);
-		LittleEndianToNative<sizeof(dss_desc.front_stencil_read_mask)>(&dss_desc.front_stencil_read_mask);
-		LittleEndianToNative<sizeof(dss_desc.front_stencil_write_mask)>(&dss_desc.front_stencil_write_mask);
-		LittleEndianToNative<sizeof(dss_desc.front_stencil_fail)>(&dss_desc.front_stencil_fail);
-		LittleEndianToNative<sizeof(dss_desc.front_stencil_depth_fail)>(&dss_desc.front_stencil_depth_fail);
-		LittleEndianToNative<sizeof(dss_desc.front_stencil_pass)>(&dss_desc.front_stencil_pass);
-		LittleEndianToNative<sizeof(dss_desc.back_stencil_func)>(&dss_desc.back_stencil_func);
-		LittleEndianToNative<sizeof(dss_desc.back_stencil_read_mask)>(&dss_desc.back_stencil_read_mask);
-		LittleEndianToNative<sizeof(dss_desc.back_stencil_write_mask)>(&dss_desc.back_stencil_write_mask);
-		LittleEndianToNative<sizeof(dss_desc.back_stencil_fail)>(&dss_desc.back_stencil_fail);
-		LittleEndianToNative<sizeof(dss_desc.back_stencil_depth_fail)>(&dss_desc.back_stencil_depth_fail);
-		LittleEndianToNative<sizeof(dss_desc.back_stencil_pass)>(&dss_desc.back_stencil_pass);
-
-		res->read(&bs_desc, sizeof(bs_desc));
-		for (size_t i = 0; i < bs_desc.blend_op.size(); ++ i)
-		{
-			LittleEndianToNative<sizeof(bs_desc.blend_op[i])>(&bs_desc.blend_op[i]);
-			LittleEndianToNative<sizeof(bs_desc.src_blend[i])>(&bs_desc.src_blend[i]);
-			LittleEndianToNative<sizeof(bs_desc.dest_blend[i])>(&bs_desc.dest_blend[i]);
-			LittleEndianToNative<sizeof(bs_desc.blend_op_alpha[i])>(&bs_desc.blend_op_alpha[i]);
-			LittleEndianToNative<sizeof(bs_desc.src_blend_alpha[i])>(&bs_desc.src_blend_alpha[i]);
-			LittleEndianToNative<sizeof(bs_desc.dest_blend_alpha[i])>(&bs_desc.dest_blend_alpha[i]);
-		}
-		
-		rasterizer_state_obj_ = rf.MakeRasterizerStateObject(rs_desc);
-		depth_stencil_state_obj_ = rf.MakeDepthStencilStateObject(dss_desc);
-		blend_state_obj_ = rf.MakeBlendStateObject(bs_desc);
-
-		res->read(&front_stencil_ref_, sizeof(front_stencil_ref_));
-		LittleEndianToNative<sizeof(front_stencil_ref_)>(&front_stencil_ref_);
-		res->read(&back_stencil_ref_, sizeof(back_stencil_ref_));
-		LittleEndianToNative<sizeof(back_stencil_ref_)>(&back_stencil_ref_);
-		res->read(&blend_factor_, sizeof(blend_factor_));
-		for (int i = 0; i < 4; ++ i)
-		{
-			LittleEndianToNative<sizeof(blend_factor_[i])>(&blend_factor_[i]);
-		}
-		res->read(&sample_mask_, sizeof(sample_mask_));
-		LittleEndianToNative<sizeof(sample_mask_)>(&sample_mask_);
-
-		shader_desc_ids_ = MakeSharedPtr<KLAYGE_DECLTYPE(*shader_desc_ids_)>();
-		shader_desc_ids_->resize(ShaderObject::ST_NumShaderTypes, 0);
-		res->read(&(*shader_desc_ids_)[0], shader_desc_ids_->size() * sizeof((*shader_desc_ids_)[0]));
-		for (int i = 0; i < ShaderObject::ST_NumShaderTypes; ++ i)
-		{
-			LittleEndianToNative<sizeof((*shader_desc_ids_)[i])>(&(*shader_desc_ids_)[i]);
-		}
-
-		
-		shader_obj_ = rf.MakeShaderObject();
-
-		bool native_accepted = true;
-
-		for (int type = 0; type < ShaderObject::ST_NumShaderTypes; ++ type)
-		{
-			ShaderObjectPtr shared_so;
-			shader_desc const & sd = effect_.GetShaderDesc((*shader_desc_ids_)[type]);
-			if (!sd.func_name.empty())
-			{
-				ShaderObject::ShaderType st = static_cast<ShaderObject::ShaderType>(type);
-
-				bool this_native_accepted;
-				if (sd.tech_pass_type != (tech_index << 16) + (pass_index << 8) + type)
-				{
-					shader_obj_->AttachShader(st,
-						effect_, effect_.TechniqueByIndex(sd.tech_pass_type >> 16)->Pass((sd.tech_pass_type >> 8) & 0xFF)->GetShaderObject());
-					this_native_accepted = true;
-				}
-				else
-				{
-					std::vector<std::vector<uint8_t> >& this_native_shader_block = native_shader_blocks[(*shader_desc_ids_)[type]];
-
-					uint8_t num;
-					res->read(&num, sizeof(num));
-					this_native_shader_block.resize(num);
-
-					for (uint32_t i = 0; i < num; ++ i)
-					{
-						uint32_t len;
-						res->read(&len, sizeof(len));
-						LittleEndianToNative<sizeof(len)>(&len);
-						this_native_shader_block[i].resize(len);
-						if (len > 0)
-						{
-							res->read(&this_native_shader_block[i][0], len * sizeof(this_native_shader_block[i][0]));
-						}
-					}
-
-					this_native_accepted = false;
-					for (uint32_t i = 0; i < num; ++ i)
-					{
-						if (shader_obj_->AttachNativeShader(st, effect_, *shader_desc_ids_, this_native_shader_block[i]))
-						{
-							this_native_accepted = true;
-							break;
-						}
-					}
-
-					if (!this_native_accepted)
-					{
-						shader_obj_->AttachShader(st, effect_, *shader_desc_ids_);
-
-						this_native_shader_block.push_back(std::vector<uint8_t>());
-						shader_obj_->ExtractNativeShader(st, effect_, this_native_shader_block.back());
-
-						if (this_native_shader_block.back().empty())
-						{
-							this_native_shader_block.pop_back();
-							this_native_accepted = true;
-						}
-					}
-				}
-
-				native_accepted &= this_native_accepted;
-			}
-		}
-
-		shader_obj_->LinkShaders(effect_);
-
-		is_validate_ = shader_obj_->Validate();
-
-		return native_accepted;
-	}
-
 	void RenderPass::StreamOut(std::ostream& os, uint32_t tech_index, uint32_t pass_index,
-			std::vector<std::vector<std::vector<uint8_t> > > const & native_shader_blocks)
+			std::vector<std::vector<uint8_t> > const & native_shader_blocks)
 	{
 		WriteShortString(os, *name_);
 
@@ -4214,21 +3749,18 @@ namespace KlayGE
 			{
 				if (sd.tech_pass_type == (tech_index << 16) + (pass_index << 8) + type)
 				{
-					uint8_t num = static_cast<uint8_t>(native_shader_blocks[(*shader_desc_ids_)[type]].size());
+					uint8_t num = 1;
 					os.write(reinterpret_cast<char const *>(&num), sizeof(num));
 
-					for (uint32_t i = 0; i < num; ++ i)
+					uint32_t len = static_cast<uint32_t>(native_shader_blocks[(*shader_desc_ids_)[type]].size());
 					{
-						uint32_t len = static_cast<uint32_t>(native_shader_blocks[(*shader_desc_ids_)[type]][i].size());
-						{
-							uint32_t tmp = len;
-							os.write(reinterpret_cast<char const *>(&tmp), sizeof(tmp));
-						}
-						if (len > 0)
-						{
-							os.write(reinterpret_cast<char const *>(&native_shader_blocks[(*shader_desc_ids_)[type]][i][0]),
-								len * sizeof(native_shader_blocks[(*shader_desc_ids_)[type]][i][0]));
-						}
+						uint32_t tmp = len;
+						os.write(reinterpret_cast<char const *>(&tmp), sizeof(tmp));
+					}
+					if (len > 0)
+					{
+						os.write(reinterpret_cast<char const *>(&native_shader_blocks[(*shader_desc_ids_)[type]][0]),
+							len * sizeof(native_shader_blocks[(*shader_desc_ids_)[type]][0]));
 					}
 				}
 			}
@@ -4325,73 +3857,6 @@ namespace KlayGE
 
 					annotation->Load(anno_node);
 				}
-			}
-		}
-
-		if (annotations_ && ((REDT_texture1D == type_) || (REDT_texture2D == type_) || (REDT_texture3D == type_) || (REDT_textureCUBE == type_)
-			|| (REDT_texture1DArray == type_) || (REDT_texture2DArray == type_) || (REDT_texture3DArray == type_) || (REDT_textureCUBEArray == type_)))
-		{
-			for (size_t i = 0; i < annotations_->size(); ++ i)
-			{
-				if (REDT_string == (*annotations_)[i]->Type())
-				{
-					if ("SasResourceAddress" == (*annotations_)[i]->Name())
-					{
-						std::string val;
-						(*annotations_)[i]->Value(val);
-
-						*var_ = SyncLoadTexture(val, EAH_GPU_Read | EAH_Immutable);
-					}
-				}
-			}
-		}
-	}
-
-	void RenderEffectParameter::StreamIn(ResIdentifierPtr const & res)
-	{
-		res->read(&type_, sizeof(type_));
-		LittleEndianToNative<sizeof(type_)>(&type_);
-		name_ = MakeSharedPtr<KLAYGE_DECLTYPE(*name_)>(ReadShortString(res));
-
-		std::string sem = ReadShortString(res);
-		if (!sem.empty())
-		{
-			semantic_ = MakeSharedPtr<KLAYGE_DECLTYPE(*semantic_)>(sem);
-		}
-
-		uint32_t as;
-		std::string as_str = ReadShortString(res);
-		if (!as_str.empty())
-		{
-			array_size_ = MakeSharedPtr<std::string>(as_str);
-
-			try
-			{
-				as = boost::lexical_cast<uint32_t>(as_str);
-			}
-			catch (...)
-			{
-				as = 1;  // dummy array size
-			}
-		}
-		else
-		{
-			as = 0;
-		}
-		var_ = stream_in_var(res, type_, as);
-
-		uint8_t num_anno;
-		res->read(&num_anno, sizeof(num_anno));
-		if (num_anno > 0)
-		{
-			annotations_ = MakeSharedPtr<KLAYGE_DECLTYPE(*annotations_)>();
-			annotations_->resize(num_anno);
-			for (uint32_t i = 0; i < num_anno; ++ i)
-			{
-				RenderEffectAnnotationPtr annotation = MakeSharedPtr<RenderEffectAnnotation>();
-				(*annotations_)[i] = annotation;
-				
-				annotation->StreamIn(res);
 			}
 		}
 
@@ -4537,20 +4002,6 @@ namespace KlayGE
 				str_ += shader_text_node->ValueString();
 			}
 		}
-	}
-
-	void RenderShaderFunc::StreamIn(ResIdentifierPtr const & res)
-	{
-		res->read(&type_, sizeof(type_));
-		LittleEndianToNative<sizeof(type_)>(&type_);
-		res->read(&version_, sizeof(version_));
-		LittleEndianToNative<sizeof(version_)>(&version_);
-
-		uint32_t len;
-		res->read(&len, sizeof(len));
-		LittleEndianToNative<sizeof(len)>(&len);
-		str_.resize(len);
-		res->read(&str_[0], len * sizeof(str_[0]));
 	}
 
 	void RenderShaderFunc::StreamOut(std::ostream& os)

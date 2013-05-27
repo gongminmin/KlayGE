@@ -310,7 +310,6 @@ namespace KlayGE
 	public:
 		void Load(XMLNodePtr const & node);
 
-		void StreamIn(ResIdentifierPtr const & res);
 		void StreamOut(std::ostream& os);
 
 		uint32_t Type() const
@@ -340,7 +339,6 @@ namespace KlayGE
 	public:
 		void Load(XMLNodePtr const & node);
 
-		void StreamIn(ResIdentifierPtr const & res);
 		void StreamOut(std::ostream& os);
 
 		ShaderObject::ShaderType Type() const
@@ -373,9 +371,7 @@ namespace KlayGE
 
 		void Load(std::string const & name, std::pair<std::string, std::string>* macros);
 
-		bool StreamIn(ResIdentifierPtr const & source, std::pair<std::string, std::string>* predefined_macros,
-			std::vector<std::vector<std::vector<uint8_t> > >& native_shader_blocks);
-		void StreamOut(std::ostream& os, std::vector<std::vector<std::vector<uint8_t> > > const & native_shader_blocks);
+		void StreamOut(std::ostream& os, std::vector<std::vector<uint8_t> > const & native_shader_blocks);
 
 		RenderEffectPtr Clone();
 
@@ -482,10 +478,8 @@ namespace KlayGE
 
 		void Load(XMLNodePtr const & node, uint32_t tech_index);
 
-		bool StreamIn(ResIdentifierPtr const & res, uint32_t tech_index,
-			std::vector<std::vector<std::vector<uint8_t> > >& native_shader_blocks);
 		void StreamOut(std::ostream& os, uint32_t tech_index,
-			std::vector<std::vector<std::vector<uint8_t> > > const & native_shader_blocks);
+			std::vector<std::vector<uint8_t> > const & native_shader_blocks);
 
 		RenderTechniquePtr Clone(RenderEffect& effect);
 
@@ -570,10 +564,8 @@ namespace KlayGE
 
 		void Load(XMLNodePtr const & node, uint32_t tech_index, uint32_t pass_index, RenderPassPtr const & inherit_pass);
 
-		bool StreamIn(ResIdentifierPtr const & res, uint32_t tech_index, uint32_t pass_index,
-			std::vector<std::vector<std::vector<uint8_t> > >& native_shader_blocks);
 		void StreamOut(std::ostream& os, uint32_t tech_index, uint32_t pass_index,
-			std::vector<std::vector<std::vector<uint8_t> > > const & native_shader_blocks);
+			std::vector<std::vector<uint8_t> > const & native_shader_blocks);
 
 		RenderPassPtr Clone(RenderEffect& effect);
 
@@ -643,7 +635,6 @@ namespace KlayGE
 
 		void Load(XMLNodePtr const & node);
 
-		void StreamIn(ResIdentifierPtr const & res);
 		void StreamOut(std::ostream& os);
 
 		RenderEffectParameterPtr Clone(RenderEffect& effect);

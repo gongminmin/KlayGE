@@ -127,7 +127,5 @@ int main(int argc, char* argv[])
 	RenderEffectPtr effect = MakeSharedPtr<RenderEffect>();
 	effect->Load(fxml_name, macros.empty() ? nullptr : &macros[0]);
 
-	Context::Destroy();
-
 	return 0;
 }
