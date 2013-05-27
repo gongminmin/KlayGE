@@ -1,5 +1,7 @@
 #!/bin/bash
 
+../../autogen.py
+
 $ANDROID_NDK/ndk-build -j 3
 
 if [ ! -d ../../lib/android_armeabi ]; then
