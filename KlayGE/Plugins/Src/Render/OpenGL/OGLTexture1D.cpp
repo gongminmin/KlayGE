@@ -150,7 +150,7 @@ namespace KlayGE
 							}
 
 							glCompressedTexSubImage2D(target_type_, level, 0, array_index, w, 1,
-								glformat, gltype, (nullptr == init_data) ? nullptr : init_data[array_index * num_mip_maps_ + level].data);
+								glformat, image_size, (nullptr == init_data) ? nullptr : init_data[array_index * num_mip_maps_ + level].data);
 						}
 						else
 						{
