@@ -1,0 +1,8 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GLES_IMG_texture_compression_pvrtc2" reg_no="140">
+	<tokens>
+		<token name="GL_COMPRESSED_RGBA_PVRTC_2BPPV2_IMG" value="0x9137"/>
+		<token name="GL_COMPRESSED_RGBA_PVRTC_4BPPV2_IMG" value="0x9138"/>
+	</tokens>
+</gl_extension>

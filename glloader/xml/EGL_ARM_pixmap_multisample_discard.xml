@@ -1,0 +1,7 @@
+<?xml version='1.0'?>
+
+<gl_extension name="EGL_ARM_pixmap_multisample_discard" reg_no="54">
+	<tokens>
+		<token name="EGL_DISCARD_SAMPLES_ARM" value="0x3286"/>
+	</tokens>
+</gl_extension>

@@ -1,0 +1,8 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GLES_NV_texture_border_clamp" reg_no="149">
+	<tokens>
+		<token name="GL_TEXTURE_BORDER_COLOR_NV" value="0x1004"/>
+		<token name="GL_CLAMP_TO_BORDER_NV" value="0x812D"/>
+	</tokens>
+</gl_extension>

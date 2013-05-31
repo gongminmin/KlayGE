@@ -1,0 +1,16 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GLES_NV_sRGB_formats" reg_no="148">
+	<tokens>
+		<token name="GL_SLUMINANCE_NV" value="0x8C46"/>
+		<token name="GL_SLUMINANCE_ALPHA_NV" value="0x8C44"/>
+		<token name="GL_SRGB8_NV" value="0x8C41"/>
+		<token name="GL_SLUMINANCE8_NV" value="0x8C47"/>
+		<token name="GL_SLUMINANCE8_ALPHA8_NV" value="0x8C45"/>
+		<token name="GL_COMPRESSED_SRGB_S3TC_DXT1_NV" value="0x8C4C"/>
+		<token name="GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT1_NV" value="0x8C4D"/>
+		<token name="GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT3_NV" value="0x8C4E"/>
+		<token name="GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT5_NV" value="0x8C4F"/>
+		<token name="GL_ETC1_SRGB8_NV" value="0x88EE"/>
+	</tokens>
+</gl_extension>

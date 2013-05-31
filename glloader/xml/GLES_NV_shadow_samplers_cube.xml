@@ -1,0 +1,7 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GLES_NV_shadow_samplers_cube" reg_no="147">
+	<tokens>
+		<token name="GL_SAMPLER_CUBE_SHADOW_NV" value="0x8DC5"/>
+	</tokens>
+</gl_extension>

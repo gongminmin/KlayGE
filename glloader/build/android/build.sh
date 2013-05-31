@@ -1,6 +1,6 @@
 #!/bin/bash
 
-../../autogen.py
+../../autogen.py -q
 
 $ANDROID_NDK/ndk-build -j 3
 

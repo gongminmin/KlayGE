@@ -1,0 +1,14 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GLES_ANGLE_depth_texture" reg_no="138">
+	<tokens>
+		<token name="GL_DEPTH_COMPONENT" value="0x1902"/>
+		<token name="GL_DEPTH_STENCIL_OES" value="0x84F9"/>
+		<token name="GL_UNSIGNED_SHORT" value="0x1403"/>
+		<token name="GL_UNSIGNED_INT" value="0x1405"/>
+		<token name="GL_UNSIGNED_INT_24_8_OES" value="0x84FA"/>
+		<token name="GL_DEPTH_COMPONENT16" value="0x81A5"/>
+		<token name="GL_DEPTH_COMPONENT32_OES" value="0x81A7"/>
+		<token name="GL_DEPTH24_STENCIL8_OES" value="0x88F0"/>
+	</tokens>
+</gl_extension>

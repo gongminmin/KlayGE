@@ -1,0 +1,21 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GLES_NV_framebuffer_multisample" reg_no="143">
+	<tokens>
+		<token name="GL_RENDERBUFFER_SAMPLES_NV" value="0x8CAB"/>
+		<token name="GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE_NV" value="0x8D56"/>
+		<token name="GL_MAX_SAMPLES_NV" value="0x8D57"/>
+	</tokens>
+
+	<functions>
+		<function name="glRenderbufferStorageMultisampleNV" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLsizei" name="samples"/>
+				<param type="GLenum" name="internalformat"/>
+				<param type="GLsizei" name="width"/>
+				<param type="GLsizei" name="height"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

@@ -1,0 +1,23 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GLES_NV_draw_instanced" reg_no="141">
+	<functions>
+		<function name="glDrawArraysInstancedNV" return="void">
+			<params>
+				<param type="GLenum" name="mode"/>
+				<param type="GLint" name="first"/>
+				<param type="GLsizei" name="count"/>
+				<param type="GLsizei" name="primcount"/>
+			</params>
+		</function>
+		<function name="glDrawElementsInstancedNV" return="void">
+			<params>
+				<param type="GLenum" name="mode"/>
+				<param type="GLsizei" name="count"/>
+				<param type="GLenum" name="type"/>
+				<param type="const GLvoid*" name="indices"/>
+				<param type="GLsizei" name="primcount"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

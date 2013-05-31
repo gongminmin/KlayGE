@@ -96,15 +96,16 @@ class Function:
 		return ret
 
 class Extension:
-	def __init__(self, dom):
+	def __init__(self, dom, quite_mode):
 		self.name = dom.documentElement.getAttribute("name")
 		if dom.documentElement.hasAttribute("predefined"):
 			self.predefined = dom.documentElement.getAttribute("predefined")
 		else:
 			self.predefined = None
 
-		if dom.documentElement.getAttributeNode("reg_no") == None:
-			print("\tWarning: %s is not in the OpenGL Extension Registry." % dom.documentElement.getAttribute("name"))
+		if not quite_mode:
+			if dom.documentElement.getAttributeNode("reg_no") == None:
+				print("\tWarning: %s is not in the OpenGL Extension Registry." % dom.documentElement.getAttribute("name"))
 
 		self.typedefs = []
 		typedefsTag = dom.documentElement.getElementsByTagName("typedefs")
@@ -160,7 +161,7 @@ class Extension:
 					one_of.append(ext.getAttribute("name"))
 				self.additionals.append(one_of)
 
-def create_header(prefix, extensions, base_dir):
+def create_header(prefix, extensions, base_dir, quite_mode):
 	header_str = StringIO()
 
 	header_str.write("/*\n%s*/\n\n" % GPLNotice);
@@ -264,14 +265,16 @@ def create_header(prefix, extensions, base_dir):
 		cur_header_str = ""
 	new_header_str = header_str.getvalue()
 	if new_header_str != cur_header_str:
-		print("glloader_%s.h is updated" % prefix.lower())
+		if not quite_mode:
+			print("glloader_%s.h is updated" % prefix.lower())
 		header_file = open("%s/include/glloader/glloader_%s.h" % (base_dir, prefix.lower()), "w")
 		header_file.write(new_header_str)
 		header_file.close()
 	else:
-		print("No change detected. Skip glloader_%s.h" % prefix.lower())
+		if not quite_mode:
+			print("No change detected. Skip glloader_%s.h" % prefix.lower())
 
-def create_source(prefix, extensions, base_dir):
+def create_source(prefix, extensions, base_dir, quite_mode):
 	source_str = StringIO()
 
 	source_str.write("/*\n%s*/\n\n" % GPLNotice);
@@ -509,15 +512,17 @@ def create_source(prefix, extensions, base_dir):
 		cur_source_str = ""
 	new_source_str = source_str.getvalue()
 	if new_source_str != cur_source_str:
-		print("glloader_%s.c is updated" % prefix.lower())
+		if not quite_mode:
+			print("glloader_%s.c is updated" % prefix.lower())
 		source_file = open("%s/src/glloader_%s.c" % (base_dir, prefix.lower()), "w")
 		source_file.write(new_source_str)
 		source_file.close()
 	else:
-		print("No change detected. Skip glloader_%s.c" % prefix.lower())
+		if not quite_mode:
+			print("No change detected. Skip glloader_%s.c" % prefix.lower())
 
 
-def auto_gen_glloader_files(base_dir):
+def auto_gen_glloader_files(base_dir, quite_mode):
 	import os
 	exts = os.listdir(base_dir + "/xml")
 
@@ -526,26 +531,38 @@ def auto_gen_glloader_files(base_dir):
 	from xml.dom.minidom import parse
 	for ext in exts:
 		if ext[-4:] == ".xml":
-			print("Processing " + ext)
+			if not quite_mode:
+				print("Processing " + ext)
 			prefix = ext[0 : ext.find("_")]
 			if prefix not in extension_set:
 				extension_set[prefix] = []
-			extension_set[prefix].append(Extension(parse(base_dir + "/xml/" + ext)))
+			extension_set[prefix].append(Extension(parse(base_dir + "/xml/" + ext), quite_mode))
 
-	print("")
+	if not quite_mode:
+		print("")
 
-	print("Creating Header Files...")
+	if not quite_mode:
+		print("Creating Header Files...")
 	for extensions in extension_set.items():
-		create_header(extensions[0], extensions[1], base_dir)
-	print("")
+		create_header(extensions[0], extensions[1], base_dir, quite_mode)
+	if not quite_mode:
+		print("")
 
-	print("Creating Source Files...")
+	if not quite_mode:
+		print("Creating Source Files...")
 	for extensions in extension_set.items():
-		create_source(extensions[0], extensions[1], base_dir)
-	print("")
+		create_source(extensions[0], extensions[1], base_dir, quite_mode)
+	if not quite_mode:
+		print("")
 
 
 if __name__ == "__main__":
 	import os
 	import sys
-	auto_gen_glloader_files(os.path.dirname(sys.argv[0]))
+	
+	quite_mode = False
+	if (len(sys.argv) >= 2):
+		if ("-q" == sys.argv[1]):
+			quite_mode = True
+
+	auto_gen_glloader_files(os.path.dirname(sys.argv[0]), quite_mode)
