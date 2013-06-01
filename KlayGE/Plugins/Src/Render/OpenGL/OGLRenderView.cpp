@@ -665,10 +665,7 @@ namespace KlayGE
 				if (status != GL_FRAMEBUFFER_COMPLETE_EXT)
 				{
 					glGenTextures(1, &tex_2d_);
-					if (glloader_GL_ARB_pixel_buffer_object())
-					{
-						re.BindBuffer(GL_PIXEL_UNPACK_BUFFER_ARB, 0);
-					}
+					re.BindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
 					glTextureImage2DEXT(tex_2d_, GL_TEXTURE_RECTANGLE_ARB,
                                0, GL_RGBA32F_ARB,
                                width_, height_, 0,
@@ -715,10 +712,7 @@ namespace KlayGE
 				{
 					glGenTextures(1, &tex_2d_);
 					glBindTexture(GL_TEXTURE_RECTANGLE_ARB, tex_2d_);
-					if (glloader_GL_ARB_pixel_buffer_object())
-					{
-						re.BindBuffer(GL_PIXEL_UNPACK_BUFFER_ARB, 0);
-					}
+					re.BindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
 					glTexImage2D(GL_TEXTURE_RECTANGLE_ARB, 0, GL_RGBA32F_ARB, width_, height_,
 						0, GL_RGBA, GL_FLOAT, nullptr);
 					glTexParameteri(GL_TEXTURE_RECTANGLE_ARB, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -928,11 +922,8 @@ namespace KlayGE
 
 		glGenTextures(1, &tex_);
 		glBindTexture(GL_TEXTURE_RECTANGLE_ARB, tex_);
-		if (glloader_GL_ARB_pixel_buffer_object())
-		{
-			OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-			re.BindBuffer(GL_PIXEL_UNPACK_BUFFER_ARB, 0);
-		}
+		OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+		re.BindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
 		glTexImage2D(GL_TEXTURE_RECTANGLE_ARB, 0, GL_RGBA32F_ARB, width_, height_,
 			0, GL_RGBA, GL_FLOAT, nullptr);
 		glTexParameteri(GL_TEXTURE_RECTANGLE_ARB, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -1039,18 +1030,8 @@ namespace KlayGE
 
 		OGLGraphicsBuffer* ogl_gb = checked_cast<OGLGraphicsBuffer*>(&gbuffer_);
 		OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-		if (glloader_GL_ARB_pixel_buffer_object())
-		{
-			re.BindBuffer(GL_PIXEL_PACK_BUFFER_ARB, ogl_gb->GLvbo());
-			glReadPixels(0, 0, width_, height_, glformat, gltype, nullptr);
-		}
-		else
-		{
-			std::vector<uint8_t> buf_data(width_ * height_ * NumFormatBytes(pf_));
-			glReadPixels(0, 0, width_, height_, glformat, gltype, &buf_data[0]);
-			re.BindBuffer(ogl_gb->GLType(), ogl_gb->GLvbo());
-			glBufferData(ogl_gb->GLType(), ogl_gb->Size(), &buf_data[0], GL_STREAM_DRAW);
-		}
+		re.BindBuffer(GL_PIXEL_PACK_BUFFER, ogl_gb->GLvbo());
+		glReadPixels(0, 0, width_, height_, glformat, gltype, nullptr);
 	}
 
 

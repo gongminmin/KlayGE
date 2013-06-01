@@ -1343,6 +1343,7 @@ namespace KlayGE
 		predefined_ps_out_varyings_add_num += "\n";
 
 		std::stringstream ss;
+		ss << "#version 120" << std::endl << std::endl;
 		switch (type)
 		{
 		case ST_VertexShader:

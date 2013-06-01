@@ -1635,21 +1635,18 @@ namespace KlayGE
 			}
 			texture_format_.insert(EF_D32F);
 		}
-		if (glloader_GL_EXT_texture_sRGB())
+		texture_format_.insert(EF_ARGB8_SRGB);
+		texture_format_.insert(EF_ABGR8_SRGB);
+		if (glloader_GL_EXT_texture_compression_s3tc())
 		{
-			texture_format_.insert(EF_ARGB8_SRGB);
-			texture_format_.insert(EF_ABGR8_SRGB);
-			if (glloader_GL_EXT_texture_compression_s3tc())
-			{
-				texture_format_.insert(EF_BC1_SRGB);
-				texture_format_.insert(EF_BC2_SRGB);
-				texture_format_.insert(EF_BC3_SRGB);
-			}
-			if (glloader_GL_EXT_texture_compression_latc())
-			{
-				texture_format_.insert(EF_BC4_SRGB);
-				texture_format_.insert(EF_BC5_SRGB);
-			}
+			texture_format_.insert(EF_BC1_SRGB);
+			texture_format_.insert(EF_BC2_SRGB);
+			texture_format_.insert(EF_BC3_SRGB);
+		}
+		if (glloader_GL_EXT_texture_compression_latc())
+		{
+			texture_format_.insert(EF_BC4_SRGB);
+			texture_format_.insert(EF_BC5_SRGB);
 		}
 
 		GLint max_samples;
@@ -1715,7 +1712,7 @@ namespace KlayGE
 			rendertarget_format_.insert(EF_D24S8);
 		}
 		rendertarget_format_.insert(EF_D32F);
-		if (glloader_GL_EXT_texture_sRGB() && glloader_GL_EXT_framebuffer_sRGB())
+		if (glloader_GL_EXT_framebuffer_sRGB())
 		{
 			rendertarget_format_.insert(EF_ARGB8_SRGB);
 			rendertarget_format_.insert(EF_ABGR8_SRGB);

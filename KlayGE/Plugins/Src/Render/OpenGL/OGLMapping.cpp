@@ -1079,94 +1079,45 @@ namespace KlayGE
 			break;
 
 		case EF_ARGB8_SRGB:
-			if (glloader_GL_EXT_texture_sRGB())
-			{
-				internalFormat = GL_SRGB8_ALPHA8_EXT;
-				glformat = GL_BGRA;
-				gltype = GL_UNSIGNED_INT_8_8_8_8_REV;
-			}
-			else
-			{
-				THR(errc::function_not_supported);
-			}
+			internalFormat = GL_SRGB8_ALPHA8_EXT;
+			glformat = GL_BGRA;
+			gltype = GL_UNSIGNED_INT_8_8_8_8_REV;
 			break;
 
 		case EF_ABGR8_SRGB:
-			if (glloader_GL_EXT_texture_sRGB())
-			{
-				internalFormat = GL_SRGB8_ALPHA8_EXT;
-				glformat = GL_RGBA;
-				gltype = GL_UNSIGNED_BYTE;
-			}
-			else
-			{
-				THR(errc::function_not_supported);
-			}
+			internalFormat = GL_SRGB8_ALPHA8_EXT;
+			glformat = GL_RGBA;
+			gltype = GL_UNSIGNED_BYTE;
 			break;
 
 		case EF_BC1_SRGB:
-			if (glloader_GL_EXT_texture_sRGB())
-			{
-				internalFormat = GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT1_EXT;
-				glformat = GL_BGRA;
-				gltype = GL_UNSIGNED_BYTE;
-			}
-			else
-			{
-				THR(errc::function_not_supported);
-			}
+			internalFormat = GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT1_EXT;
+			glformat = GL_BGRA;
+			gltype = GL_UNSIGNED_BYTE;
 			break;
 
 		case EF_BC2_SRGB:
-			if (glloader_GL_EXT_texture_sRGB())
-			{
-				internalFormat = GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT3_EXT;
-				glformat = GL_BGRA;
-				gltype = GL_UNSIGNED_BYTE;
-			}
-			else
-			{
-				THR(errc::function_not_supported);
-			}
+			internalFormat = GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT3_EXT;
+			glformat = GL_BGRA;
+			gltype = GL_UNSIGNED_BYTE;
 			break;
 
 		case EF_BC3_SRGB:
-			if (glloader_GL_EXT_texture_sRGB())
-			{
-				internalFormat = GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT5_EXT;
-				glformat = GL_BGRA;
-				gltype = GL_UNSIGNED_BYTE;
-			}
-			else
-			{
-				THR(errc::function_not_supported);
-			}
+			internalFormat = GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT5_EXT;
+			glformat = GL_BGRA;
+			gltype = GL_UNSIGNED_BYTE;
 			break;
 
 		case EF_BC4_SRGB:
-			if (glloader_GL_EXT_texture_sRGB())
-			{
-				internalFormat = GL_COMPRESSED_SLUMINANCE_EXT;
-				glformat = GL_LUMINANCE;
-				gltype = GL_UNSIGNED_BYTE;
-			}
-			else
-			{
-				THR(errc::function_not_supported);
-			}
+			internalFormat = GL_COMPRESSED_SLUMINANCE_EXT;
+			glformat = GL_LUMINANCE;
+			gltype = GL_UNSIGNED_BYTE;
 			break;
 
 		case EF_BC5_SRGB:
-			if (glloader_GL_EXT_texture_sRGB())
-			{
-				internalFormat = GL_COMPRESSED_SLUMINANCE_ALPHA_EXT;
-				glformat = GL_LUMINANCE_ALPHA;
-				gltype = GL_UNSIGNED_BYTE;
-			}
-			else
-			{
-				THR(errc::function_not_supported);
-			}
+			internalFormat = GL_COMPRESSED_SLUMINANCE_ALPHA_EXT;
+			glformat = GL_LUMINANCE_ALPHA;
+			gltype = GL_UNSIGNED_BYTE;
 			break;
 
 		default:

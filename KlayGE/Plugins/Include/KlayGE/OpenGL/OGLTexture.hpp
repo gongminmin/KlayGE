@@ -103,7 +103,6 @@ namespace KlayGE
 		GLuint texture_;
 		GLenum target_type_;
 		std::vector<GLuint> pbos_;
-		std::vector<std::vector<uint8_t> > tex_data_;
 		TextureMapAccess last_tma_;
 
 		std::map<GLenum, GLint> tex_param_i_;
