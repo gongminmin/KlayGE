@@ -1879,10 +1879,6 @@ namespace KlayGE
 		{
 			args.push_back("-DKLAYGE_BC5_AS_AG");
 		}
-		else
-		{
-			args.push_back("-DKLAYGE_BC5_AS_GA");
-		}
 		if (!re.DeviceCaps().texture_format_support(EF_BC4)
 			|| !re.DeviceCaps().texture_format_support(EF_BC4_SRGB))
 		{

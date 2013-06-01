@@ -1002,9 +1002,9 @@ namespace KlayGE
 			break;
 
 		case EF_BC4:
-			if (glloader_GL_EXT_texture_compression_latc())
+			if (glloader_GL_VERSION_3_0() || glloader_GL_ARB_texture_compression_rgtc())
 			{
-				internalFormat = GL_COMPRESSED_LUMINANCE_LATC1_EXT;
+				internalFormat = GL_COMPRESSED_RED_RGTC1;
 				glformat = GL_COMPRESSED_LUMINANCE;
 				gltype = GL_UNSIGNED_BYTE;
 			}
@@ -1015,9 +1015,9 @@ namespace KlayGE
 			break;
 
 		case EF_BC5:
-			if (glloader_GL_EXT_texture_compression_latc())
+			if (glloader_GL_VERSION_3_0() || glloader_GL_ARB_texture_compression_rgtc())
 			{
-				internalFormat = GL_COMPRESSED_LUMINANCE_ALPHA_LATC2_EXT;
+				internalFormat = GL_COMPRESSED_RG_RGTC2;
 				glformat = GL_COMPRESSED_LUMINANCE_ALPHA;
 				gltype = GL_UNSIGNED_BYTE;
 			}
@@ -1028,9 +1028,9 @@ namespace KlayGE
 			break;
 
 		case EF_SIGNED_BC4:
-			if (glloader_GL_EXT_texture_compression_latc())
+			if (glloader_GL_VERSION_3_0() || glloader_GL_ARB_texture_compression_rgtc())
 			{
-				internalFormat = GL_COMPRESSED_SIGNED_LUMINANCE_LATC1_EXT;
+				internalFormat = GL_COMPRESSED_SIGNED_RED_RGTC1;
 				glformat = GL_COMPRESSED_LUMINANCE;
 				gltype = GL_UNSIGNED_BYTE;
 			}
@@ -1041,9 +1041,9 @@ namespace KlayGE
 			break;
 
 		case EF_SIGNED_BC5:
-			if (glloader_GL_EXT_texture_compression_latc())
+			if (glloader_GL_VERSION_3_0() || glloader_GL_ARB_texture_compression_rgtc())
 			{
-				internalFormat = GL_COMPRESSED_SIGNED_LUMINANCE_ALPHA_LATC2_EXT;
+				internalFormat = GL_COMPRESSED_SIGNED_RG_RGTC2;
 				glformat = GL_COMPRESSED_LUMINANCE_ALPHA;
 				gltype = GL_UNSIGNED_BYTE;
 			}
@@ -1079,13 +1079,13 @@ namespace KlayGE
 			break;
 
 		case EF_ARGB8_SRGB:
-			internalFormat = GL_SRGB8_ALPHA8_EXT;
+			internalFormat = GL_SRGB8_ALPHA8;
 			glformat = GL_BGRA;
 			gltype = GL_UNSIGNED_INT_8_8_8_8_REV;
 			break;
 
 		case EF_ABGR8_SRGB:
-			internalFormat = GL_SRGB8_ALPHA8_EXT;
+			internalFormat = GL_SRGB8_ALPHA8;
 			glformat = GL_RGBA;
 			gltype = GL_UNSIGNED_BYTE;
 			break;
@@ -1109,13 +1109,13 @@ namespace KlayGE
 			break;
 
 		case EF_BC4_SRGB:
-			internalFormat = GL_COMPRESSED_SLUMINANCE_EXT;
+			internalFormat = GL_COMPRESSED_SLUMINANCE;
 			glformat = GL_LUMINANCE;
 			gltype = GL_UNSIGNED_BYTE;
 			break;
 
 		case EF_BC5_SRGB:
-			internalFormat = GL_COMPRESSED_SLUMINANCE_ALPHA_EXT;
+			internalFormat = GL_COMPRESSED_SLUMINANCE_ALPHA;
 			glformat = GL_LUMINANCE_ALPHA;
 			gltype = GL_UNSIGNED_BYTE;
 			break;

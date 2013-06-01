@@ -1614,7 +1614,7 @@ namespace KlayGE
 			texture_format_.insert(EF_BC2);
 			texture_format_.insert(EF_BC3);
 		}
-		if (glloader_GL_EXT_texture_compression_latc())
+		if (glloader_GL_VERSION_3_0() || glloader_GL_ARB_texture_compression_rgtc())
 		{
 			texture_format_.insert(EF_BC4);
 			texture_format_.insert(EF_BC5);
@@ -1643,7 +1643,7 @@ namespace KlayGE
 			texture_format_.insert(EF_BC2_SRGB);
 			texture_format_.insert(EF_BC3_SRGB);
 		}
-		if (glloader_GL_EXT_texture_compression_latc())
+		if (glloader_GL_VERSION_3_0() || glloader_GL_ARB_texture_compression_rgtc())
 		{
 			texture_format_.insert(EF_BC4_SRGB);
 			texture_format_.insert(EF_BC5_SRGB);
