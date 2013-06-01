@@ -16,7 +16,10 @@
 				<param type="GLenum" name="internalformat"/>
 				<param type="GLsizei" name="width"/>
 				<param type="GLsizei" name="height"/>
-			</params>
+			</params>			
+			<mappings>
+				<mapping from="GLES_IMG_multisampled_render_to_texture" name="glRenderbufferStorageMultisampleIMG"/>
+			</mappings>
 		</function>
 		<function name="glFramebufferTexture2DMultisampleEXT" return="void">
 			<params>
@@ -27,6 +30,9 @@
 				<param type="GLint" name="level"/>
 				<param type="GLsizei" name="samples"/>
 			</params>
+			<mappings>
+				<mapping from="GLES_IMG_multisampled_render_to_texture" name="glFramebufferTexture2DMultisampleIMG"/>
+			</mappings>
 		</function>
 	</functions>
 </gl_extension>

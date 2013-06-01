@@ -112,7 +112,19 @@ namespace glloader
 			if (ogl_dll != NULL)
 			{
 				gl_dlls_.push_back(ogl_dll);
-				gl_dlls_.push_back(::LoadLibraryA("libGLESv2.dll"));
+				ogl_dll = ::LoadLibraryA("libGLESv3.dll");
+				if (ogl_dll != NULL)
+				{
+					gl_dlls_.push_back(ogl_dll);
+				}
+				else
+				{
+					ogl_dll = ::LoadLibraryA("libGLESv2.dll");
+					if (ogl_dll != NULL)
+					{
+						gl_dlls_.push_back(ogl_dll);
+					}
+				}
 			}
 			else
 			{
@@ -147,16 +159,19 @@ namespace glloader
 			if (ogl_dll != NULL)
 			{
 				gl_dlls_.push_back(ogl_dll);
-			}
-			ogl_dll = ::dlopen("libGLESv2.so", RTLD_LAZY);
-			if (ogl_dll != NULL)
-			{
-				gl_dlls_.push_back(ogl_dll);
-			}
-			ogl_dll = ::dlopen("libGLESv1_CM.so", RTLD_LAZY);
-			if (ogl_dll != NULL)
-			{
-				gl_dlls_.push_back(ogl_dll);
+				ogl_dll = ::dlopen("libGLESv3.so", RTLD_LAZY);
+				if (ogl_dll != NULL)
+				{
+					gl_dlls_.push_back(ogl_dll);
+				}
+				else
+				{
+					ogl_dll = ::dlopen("libGLESv2.so", RTLD_LAZY);
+					if (ogl_dll != NULL)
+					{
+						gl_dlls_.push_back(ogl_dll);
+					}
+				}
 			}
 #else
 			ogl_dll = ::dlopen("libGL.so", RTLD_LAZY);
@@ -289,7 +304,6 @@ namespace glloader
 			if (major > 0)
 			{
 				std::vector<std::string> gl_exts;
-#ifndef GLLOADER_GLES
 				if (major >= 3)
 				{
 					LOAD_FUNC1(glGetStringi);
@@ -302,7 +316,6 @@ namespace glloader
 					}
 				}
 				else
-#endif
 				{
 					GLubyte const * str = glGetString(GL_EXTENSIONS);
 					if (str != NULL)

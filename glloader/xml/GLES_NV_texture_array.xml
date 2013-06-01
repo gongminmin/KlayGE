@@ -81,7 +81,7 @@
 				<param type="GLsizei" name="imageSize"/>
 				<param type="const GLvoid*" name="data"/>
 			</params>
-		</function>		
+		</function>
 		<function name="glFramebufferTextureLayerNV" return="void">
 			<params>
 				<param type="GLenum" name="target"/>
