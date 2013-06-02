@@ -27,6 +27,7 @@
 
 #include <glloader/glloader.h>
 
+#include <KlayGE/OpenGL/OGLRenderEngine.hpp>
 #include <KlayGE/OpenGL/OGLMapping.hpp>
 #include <KlayGE/OpenGL/OGLGraphicsBuffer.hpp>
 #include <KlayGE/OpenGL/OGLShaderObject.hpp>
@@ -38,7 +39,15 @@ namespace KlayGE
 	{
 		if (glloader_GL_VERSION_3_0() || glloader_GL_ARB_vertex_array_object())
 		{
-			use_vao_ = true;
+			OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+			if (!re.HackForIntel())
+			{
+				use_vao_ = true;
+			}
+			else
+			{
+				use_vao_ = false;
+			}
 		}
 		else
 		{
