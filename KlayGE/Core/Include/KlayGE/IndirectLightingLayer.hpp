@@ -135,10 +135,6 @@ namespace KlayGE
 
 		RenderLayoutPtr rl_vpl_;
 
-		// USE_NEW_LIGHT_SAMPLING
-	private:
-		void ExtractVPLsNew(CameraPtr const & rsm_camera, LightSourcePtr const & light);
-
 	private:
 		TexturePtr rsm_depth_derivative_tex_;
 		PostProcessPtr rsm_to_depth_derivate_pp_;

@@ -18,7 +18,6 @@
 	</parameter>
 
 	<parameter type="float4x4" name="ls_to_es"/>
-	<parameter type="float" name="mip_level"/>
 	<parameter type="float4" name="vpl_params"/>
 	<parameter type="float4" name="light_color"/>
 	<parameter type="float4" name="light_cos_out_inner"/>
@@ -92,16 +91,6 @@ float4 RSM2VPLsSpot(float2 tc, float2 rsm_tc, float level, float factor)
 
 float4 RSM2VPLsSpotPS(float2 tc : TEXCOORD0) : SV_Target
 {
-	float vpl_id = tc.x * vpl_params.x;
-	float j = floor(vpl_id / vpl_params.y);
-	float i = vpl_id - j * vpl_params.y;
-	float2 rsm_tc = float2(i, j) * vpl_params.z + vpl_params.w;
-
-	return RSM2VPLsSpot(tc, rsm_tc, mip_level, 1);
-}
-
-float4 RSM2VPLsSpotPSNew(float2 tc : TEXCOORD0) : SV_Target
-{
 	float vpl_id = floor((1.0 - tc.x) * vpl_params.x);
 	float accum = 1;
 	float accum_sqrt = 1;
@@ -149,16 +138,6 @@ float4 RSM2VPLsSpotPSNew(float2 tc : TEXCOORD0) : SV_Target
 
 			<state name="vertex_shader" value="PostProcessVS()"/>
 			<state name="pixel_shader" value="RSM2VPLsSpotPS()"/>
-		</pass>
-	</technique>
-
-	<technique name="RSM2VPLsSpotNew">
-		<pass name="p0">
-			<state name="depth_enable" value="false"/>
-			<state name="depth_write_mask" value="false"/>
-
-			<state name="vertex_shader" value="PostProcessVS()"/>
-			<state name="pixel_shader" value="RSM2VPLsSpotPSNew()"/>
 		</pass>
 	</technique>
 </effect>

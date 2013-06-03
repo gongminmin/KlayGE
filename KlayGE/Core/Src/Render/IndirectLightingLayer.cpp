@@ -43,22 +43,15 @@
 
 #include <KlayGE/IndirectLightingLayer.hpp>
 
-#define USE_NEW_LIGHT_SAMPLING
-
 namespace KlayGE
 {
 	int const VPL_COUNT_SQRT = 16;
 
-#ifdef USE_NEW_LIGHT_SAMPLING
 	int const MIN_RSM_MIPMAP_SIZE = 8; // minimum mipmap size is 8x8
 	int const MAX_RSM_MIPMAP_LEVELS = 7; // (log(512)-log(4))/log(2) + 1
 	int const BEGIN_RSM_SAMPLING_LIGHT_LEVEL = 5;
 	int const SAMPLE_LEVEL_CNT = MAX_RSM_MIPMAP_LEVELS - BEGIN_RSM_SAMPLING_LIGHT_LEVEL;
 	int const VPL_COUNT = 64 * ((1UL << (SAMPLE_LEVEL_CNT * 2)) - 1) / (4 - 1);
-#else
-	int const MAX_RSM_MIPMAP_LEVELS = 6;
-	int const VPL_COUNT = VPL_COUNT_SQRT * VPL_COUNT_SQRT;
-#endif
 
 	MultiResSILLayer::MultiResSILLayer()
 	{
@@ -197,11 +190,7 @@ namespace KlayGE
 
 	void MultiResSILLayer::RSM(TexturePtr const & rt0_tex, TexturePtr const & rt1_tex, TexturePtr const & depth_tex)
 	{
-#ifdef USE_NEW_LIGHT_SAMPLING
-		std::string RSM2VPLsSpotName = "RSM2VPLsSpotNew";
-#else
 		std::string RSM2VPLsSpotName = "RSM2VPLsSpot";
-#endif
 
 		rsm_texs_[0] = rt0_tex;
 		rsm_texs_[1] = rt1_tex;
@@ -211,9 +200,9 @@ namespace KlayGE
 		rsm_to_vpls_pps_[LT_Spot]->InputPin(0, rsm_texs_[0]);
 		rsm_to_vpls_pps_[LT_Spot]->InputPin(1, rsm_texs_[1]);
 		rsm_to_vpls_pps_[LT_Spot]->InputPin(2, rsm_depth_tex_);
+		rsm_to_vpls_pps_[LT_Spot]->InputPin(3, rsm_depth_derivative_tex_);
 		rsm_to_vpls_pps_[LT_Spot]->OutputPin(0, vpl_tex_);
 
-#ifdef USE_NEW_LIGHT_SAMPLING
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 		RenderDeviceCaps const & caps = rf.RenderEngineInstance().DeviceCaps();
 
@@ -246,7 +235,6 @@ namespace KlayGE
 		float delta_y = 1.0f / rsm_depth_derivative_tex_->Height(0);
 		float4 rsm_delta_offset(delta_x, delta_y, delta_x / 2, delta_y / 2);
 		rsm_to_depth_derivate_pp_->SetParam(0, rsm_delta_offset);
-#endif
 	}
 
 	void MultiResSILLayer::UpdateGBuffer(CameraPtr const & vp_camera)
@@ -260,11 +248,7 @@ namespace KlayGE
 
 	void MultiResSILLayer::UpdateRSM(CameraPtr const & rsm_camera, LightSourcePtr const & light)
 	{
-#ifdef USE_NEW_LIGHT_SAMPLING
-		this->ExtractVPLsNew(rsm_camera, light);
-#else
 		this->ExtractVPLs(rsm_camera, light);
-#endif
 		this->VPLsLighting(light);
 	}
 
@@ -355,31 +339,34 @@ namespace KlayGE
 
 	void MultiResSILLayer::ExtractVPLs(CameraPtr const & rsm_camera, LightSourcePtr const & light)
 	{
-		float const VPL_DELTA = 1.0f / VPL_COUNT_SQRT;
-		float const VPL_OFFSET = 0.5f * VPL_DELTA;
-
 		rsm_texs_[0]->BuildMipSubLevels();
 		rsm_texs_[1]->BuildMipSubLevels();
+		
+		rsm_to_depth_derivate_pp_->Apply();
+		
 		float4x4 ls_to_es = rsm_camera->InverseViewMatrix() * g_buffer_camera_->ViewMatrix();
-		float mip_level = (MathLib::log(static_cast<float>(rsm_texs_[0]->Width(0))) - MathLib::log(static_cast<float>(VPL_COUNT_SQRT))) / MathLib::log(2);
-		float4 vpl_params = float4(static_cast<float>(VPL_COUNT), static_cast<float>(VPL_COUNT_SQRT), VPL_DELTA, VPL_OFFSET);
-
 		float4x4 const & inv_proj = rsm_camera->InverseProjMatrix();
-
 		LightType type = light->Type();
+
+		float4 vpl_params(static_cast<float>(VPL_COUNT), 2.0f, 
+			              static_cast<float>(MIN_RSM_MIPMAP_SIZE), static_cast<float>(MIN_RSM_MIPMAP_SIZE * MIN_RSM_MIPMAP_SIZE));
+
 		rsm_to_vpls_pps_[type]->SetParam(0, ls_to_es);
-		rsm_to_vpls_pps_[type]->SetParam(1, mip_level);
-		rsm_to_vpls_pps_[type]->SetParam(2, vpl_params);
-		rsm_to_vpls_pps_[type]->SetParam(3, light->Color());
-		rsm_to_vpls_pps_[type]->SetParam(4, light->CosOuterInner());
-		rsm_to_vpls_pps_[type]->SetParam(5, light->Falloff());
-		rsm_to_vpls_pps_[type]->SetParam(6, g_buffer_camera_->InverseViewMatrix());
+		rsm_to_vpls_pps_[type]->SetParam(1, vpl_params);
+		rsm_to_vpls_pps_[type]->SetParam(2, light->Color());
+		rsm_to_vpls_pps_[type]->SetParam(3, light->CosOuterInner());
+		rsm_to_vpls_pps_[type]->SetParam(4, light->Falloff());
+		rsm_to_vpls_pps_[type]->SetParam(5, g_buffer_camera_->InverseViewMatrix());
 		float3 upper_left = MathLib::transform_coord(float3(-1, +1, 1), inv_proj);
 		float3 upper_right = MathLib::transform_coord(float3(+1, +1, 1), inv_proj);
 		float3 lower_left = MathLib::transform_coord(float3(-1, -1, 1), inv_proj);
-		rsm_to_vpls_pps_[type]->SetParam(7, upper_left);
-		rsm_to_vpls_pps_[type]->SetParam(8, upper_right - upper_left);
-		rsm_to_vpls_pps_[type]->SetParam(9, lower_left - upper_left);
+		rsm_to_vpls_pps_[type]->SetParam(6, upper_left);
+		rsm_to_vpls_pps_[type]->SetParam(7, upper_right - upper_left);
+		rsm_to_vpls_pps_[type]->SetParam(8, lower_left - upper_left);
+		rsm_to_vpls_pps_[type]->SetParam(9, int2(1, 0));
+		rsm_to_vpls_pps_[type]->SetParam(10, 0.12f * rsm_camera->FarPlane());
+		rsm_to_vpls_pps_[type]->SetParam(11, static_cast<float>(rsm_texs_[0]->NumMipMaps() - 1));
+
 		rsm_to_vpls_pps_[type]->Apply();
 	}
 
@@ -441,44 +428,6 @@ namespace KlayGE
 				0, i, 0, 0, width, height);
 		}
 	}
-
-#ifdef USE_NEW_LIGHT_SAMPLING
-	void MultiResSILLayer::ExtractVPLsNew(CameraPtr const & rsm_camera, LightSourcePtr const & light)
-	{
-		rsm_texs_[0]->BuildMipSubLevels();
-		rsm_texs_[1]->BuildMipSubLevels();
-		
-		rsm_to_depth_derivate_pp_->Apply();
-		
-		float4x4 ls_to_es = rsm_camera->InverseViewMatrix() * g_buffer_camera_->ViewMatrix();
-		float4x4 const & inv_proj = rsm_camera->InverseProjMatrix();
-		LightType type = light->Type();
-
-		float4 vpl_params(static_cast<float>(VPL_COUNT), 2.0f, 
-			              static_cast<float>(MIN_RSM_MIPMAP_SIZE), static_cast<float>(MIN_RSM_MIPMAP_SIZE * MIN_RSM_MIPMAP_SIZE));
-
-		rsm_to_vpls_pps_[type]->SetParam(0, ls_to_es);
-		//rsm_to_vpls_pps_[type]->SetParam(1, static_cast<float>(1));
-		rsm_to_vpls_pps_[type]->SetParam(2, vpl_params);
-		rsm_to_vpls_pps_[type]->SetParam(3, light->Color());
-		rsm_to_vpls_pps_[type]->SetParam(4, light->CosOuterInner());
-		rsm_to_vpls_pps_[type]->SetParam(5, light->Falloff());
-		rsm_to_vpls_pps_[type]->SetParam(6, g_buffer_camera_->InverseViewMatrix());
-		float3 upper_left = MathLib::transform_coord(float3(-1, +1, 1), inv_proj);
-		float3 upper_right = MathLib::transform_coord(float3(+1, +1, 1), inv_proj);
-		float3 lower_left = MathLib::transform_coord(float3(-1, -1, 1), inv_proj);
-		rsm_to_vpls_pps_[type]->SetParam(7, upper_left);
-		rsm_to_vpls_pps_[type]->SetParam(8, upper_right - upper_left);
-		rsm_to_vpls_pps_[type]->SetParam(9, lower_left - upper_left);
-		rsm_to_vpls_pps_[type]->SetParam(10, int2(1, 0));
-		rsm_to_vpls_pps_[type]->SetParam(11, 0.12f * rsm_camera->FarPlane());
-		rsm_to_vpls_pps_[type]->SetParam(12, static_cast<float>(rsm_texs_[0]->NumMipMaps() - 1));
-
-		rsm_to_vpls_pps_[type]->InputPin(3, rsm_depth_derivative_tex_);
-
-		rsm_to_vpls_pps_[type]->Apply();
-	}
-#endif
 
 
 	SSGILayer::SSGILayer()
