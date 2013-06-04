@@ -40,34 +40,38 @@
 		<![CDATA[
 void BackFaceDepthVS(float2 tex0 : TEXCOORD0,
 				float4 pos : POSITION,
-				float4 tangent_quat	: TANGENT,	// in object space
-				
+				out float oDepth : TEXCOORD0,
 				out float4 oPos : SV_Position)
 {
 	pos = float4(pos.xyz * pos_extent + pos_center, 1);
 	oPos = mul(pos, worldviewproj);
+	oDepth = oPos.w;
 }
 
-float4 BackFaceDepthPS() : SV_Target
+float4 BackFaceDepthPS(float depth : TEXCOORD0) : SV_Target
 {
-	return 0;	
+	return depth;	
 }
 		]]>
 	</shader>
 
-	<technique name="BackFaceDepthTech">
+	<technique name="BackFaceDepthTechWODepthTexture">
 		<pass name="p0">
 			<state name="cull_mode" value="front"/>
 			<state name="depth_func" value="greater"/>
-
-			<state name="color_write_mask" value="0"/>
 
 			<state name="vertex_shader" value="BackFaceDepthVS()"/>
 			<state name="pixel_shader" value="BackFaceDepthPS()"/>
 		</pass>
 	</technique>
+	<technique name="BackFaceDepthTech" inherit="BackFaceDepthTechWODepthTexture">
+		<pass name="p0">
+			<state name="color_write_mask" value="0"/>
+		</pass>
+	</technique>
 
 	<parameter type="texture2D" name="back_face_depth_tex"/>
+	<parameter type="int" name="non_linear_depth"/>
 	<parameter type="float2" name="near_q"/>
 
 	<parameter type="sampler" name="point_sampler">
@@ -140,7 +144,11 @@ float4 SubSurfacePS(float2 uv : TEXCOORD0,
 	float2 tex_coord = oPosSS.xy / oPosSS.w;
 	tex_coord.y *= KLAYGE_FLIPPING;
 	tex_coord = tex_coord * 0.5f + 0.5f;
-	float back_face_depth = non_linear_depth_to_linear(back_face_depth_tex.Sample(point_sampler, tex_coord).r, near_q.x, near_q.y);
+	float back_face_depth = back_face_depth_tex.Sample(point_sampler, tex_coord).r;
+	if (non_linear_depth)
+	{
+		back_face_depth = non_linear_depth_to_linear(back_face_depth, near_q.x, near_q.y);
+	}
 	float thickness = clamp(back_face_depth - oPosSS.w, 0, 100.0f);
 
 	float indirect_light = material_thickness * (max(0, dot(-N, L)) + max(0, dot(-V, L)));
