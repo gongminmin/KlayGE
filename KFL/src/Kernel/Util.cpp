@@ -30,11 +30,11 @@
 
 #include <KFL/KFL.hpp>
 #include <KFL/ResIdentifier.hpp>
-#include <KFL/Thread.hpp>
 
 #ifdef KLAYGE_PLATFORM_WINDOWS
 	#include <windows.h>
 #else
+	#include <KFL/Thread.hpp>
 	#include <cerrno>
 	#include <cstdlib>
 	#include <cwchar>
@@ -149,7 +149,36 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void Sleep(uint32_t ms)
 	{
+#if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
+		::Sleep(ms);
+#elif defined KLAYGE_PLATFORM_WINDOWS_METRO
+		static HANDLE singleton_event = nullptr;
+
+		HANDLE sleep_event = singleton_event;
+
+		// Demand create the event.
+		if (!sleep_event)
+		{
+			sleep_event = ::CreateEventEx(nullptr, nullptr, CREATE_EVENT_MANUAL_RESET, EVENT_ALL_ACCESS);
+			if (!sleep_event)
+			{
+				return;
+			}
+
+			HANDLE previous_event = ::InterlockedCompareExchangePointerRelease(&singleton_event, sleep_event, nullptr);            
+			if (previous_event)
+			{
+				// Back out if multiple threads try to demand create at the same time.
+				::CloseHandle(sleep_event);
+				sleep_event = previous_event;
+			}
+		}
+
+		// Emulate sleep by waiting with timeout on an event that is never signalled.
+		::WaitForSingleObjectEx(sleep_event, ms, false);
+#else
 		this_thread::sleep_for(chrono::milliseconds(ms));
+#endif
 	}
 
 	// EndianµÄÇÐ»»
