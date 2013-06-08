@@ -120,6 +120,8 @@ namespace KlayGE
 	typedef shared_ptr<SkinnedMesh> SkinnedMeshPtr;
 	class RenderableLightSourceProxy;
 	typedef shared_ptr<RenderableLightSourceProxy> RenderableLightSourceProxyPtr;
+	class RenderableCameraProxy;
+	typedef shared_ptr<RenderableCameraProxy> RenderableCameraProxyPtr;
 	class LightSource;
 	typedef shared_ptr<LightSource> LightSourcePtr;
 	class AmbientLightSource;

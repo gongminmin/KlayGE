@@ -1963,4 +1963,15 @@ namespace KlayGE
 	{
 		light_ = light;
 	}
+
+
+	RenderableCameraProxy::RenderableCameraProxy(RenderModelPtr const & model, std::wstring const & name)
+			: StaticMesh(model, name)
+	{
+	}
+
+	void RenderableCameraProxy::AttachCamera(CameraPtr const & camera)
+	{
+		camera_ = camera;
+	}
 }
