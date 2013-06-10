@@ -1968,6 +1968,31 @@ namespace KlayGE
 	RenderableCameraProxy::RenderableCameraProxy(RenderModelPtr const & model, std::wstring const & name)
 			: StaticMesh(model, name)
 	{
+		RenderEffectPtr effect = SyncLoadRenderEffect("CameraProxy.fxml");
+
+		if (deferred_effect_)
+		{
+			this->BindDeferredEffect(effect);
+			depth_tech_ = effect->TechniqueByName("DepthCameraProxyTech");
+			gbuffer_rt0_tech_ = effect->TechniqueByName("GBufferCameraProxyRT0Tech");
+			gbuffer_rt1_tech_ = effect->TechniqueByName("GBufferCameraProxyRT1Tech");
+			gbuffer_mrt_tech_ = effect->TechniqueByName("GBufferCameraProxyMRTTech");
+		}
+
+		this->Technique(effect->TechniqueByName("CameraProxy"));
+	}
+
+	void RenderableCameraProxy::Technique(RenderTechniquePtr const & tech)
+	{
+		technique_ = tech;
+		if (tech)
+		{
+			mvp_param_ = technique_->Effect().ParameterByName("mvp");
+			pos_center_param_ = technique_->Effect().ParameterByName("pos_center");
+			pos_extent_param_ = technique_->Effect().ParameterByName("pos_extent");
+			tc_center_param_ = technique_->Effect().ParameterByName("tc_center");
+			tc_extent_param_ = technique_->Effect().ParameterByName("tc_extent");
+		}
 	}
 
 	void RenderableCameraProxy::AttachCamera(CameraPtr const & camera)

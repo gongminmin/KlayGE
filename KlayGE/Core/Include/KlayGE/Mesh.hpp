@@ -487,6 +487,7 @@ namespace KlayGE
 	{
 	public:
 		RenderableCameraProxy(RenderModelPtr const & model, std::wstring const & name);
+		virtual void Technique(RenderTechniquePtr const & tech);
 
 		virtual void AttachCamera(CameraPtr const & camera);
 
