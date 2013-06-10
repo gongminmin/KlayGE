@@ -47,6 +47,8 @@ namespace KlayGE
 		std::string file_name_;
 		Interface* max_interface_;
 		std::vector<INode*> export_nodes_;
+
+		bool in_chs_;
 	};
 
 	class meshml_class_desc : public ClassDesc

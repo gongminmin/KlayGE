@@ -132,11 +132,31 @@ namespace KlayGE
 			this->enum_node(this->max_interface_->GetRootNode());
 		}
 
+		DWORD dlg_id;
+		WORD lang_id = MaxSDK::Util::GetLanguageID();
+		if ((LANG_CHINESE == PRIMARYLANGID(lang_id)) && (SUBLANG_CHINESE_SIMPLIFIED == SUBLANGID(lang_id)))
+		{
+			dlg_id = IDD_MESHML_EXPORT_CHS;
+			in_chs_ = true;
+		}
+		else
+		{
+			dlg_id = IDD_MESHML_EXPORT_EN;
+			in_chs_ = false;
+		}
+
 		HWND max_wnd = max_interface->GetMAXHWnd();
-		if (::DialogBoxParam(dll_instance, MAKEINTRESOURCE(IDD_MESHML_EXPORT), max_wnd,
+		if (::DialogBoxParam(dll_instance, MAKEINTRESOURCE(dlg_id), max_wnd,
 			export_wnd_proc, reinterpret_cast<LPARAM>(this)))
 		{
-			::MessageBox(max_wnd, TEXT("Export Successful!"), TEXT("MeshML Export"), MB_OK);
+			if (in_chs_)
+			{
+				::MessageBox(max_wnd, TEXT("导出成功!"), TEXT("MeshML导出插件"), MB_OK);
+			}
+			else
+			{
+				::MessageBox(max_wnd, TEXT("Export Successful!"), TEXT("MeshML Export"), MB_OK);
+			}
 		}
 
 		return 1;
@@ -165,9 +185,12 @@ namespace KlayGE
 
 			::SetWindowLongPtr(wnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(instance));
 
-			::SendMessage(::GetDlgItem(wnd, IDC_TANGENT_COMBO), CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(TEXT("Tangent quaternion")));
-			::SendMessage(::GetDlgItem(wnd, IDC_TANGENT_COMBO), CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(TEXT("Normal")));
-			::SendMessage(::GetDlgItem(wnd, IDC_TANGENT_COMBO), CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(TEXT("None")));
+			::SendMessage(::GetDlgItem(wnd, IDC_TANGENT_COMBO), CB_ADDSTRING, 0, 
+				instance->in_chs_ ? reinterpret_cast<LPARAM>(TEXT("正切四元数")) : reinterpret_cast<LPARAM>(TEXT("Tangent quaternion")));
+			::SendMessage(::GetDlgItem(wnd, IDC_TANGENT_COMBO), CB_ADDSTRING, 0,
+				instance->in_chs_ ? reinterpret_cast<LPARAM>(TEXT("法线")) : reinterpret_cast<LPARAM>(TEXT("Normal")));
+			::SendMessage(::GetDlgItem(wnd, IDC_TANGENT_COMBO), CB_ADDSTRING, 0,
+				instance->in_chs_ ? reinterpret_cast<LPARAM>(TEXT("无")) : reinterpret_cast<LPARAM>(TEXT("None")));
 			::SendMessage(::GetDlgItem(wnd, IDC_TANGENT_COMBO), CB_SETCURSEL, 0, 0);
 			::SendMessage(::GetDlgItem(wnd, IDC_TEXCOORD_CHECK), BM_SETCHECK, BST_CHECKED, NULL);
 			::SendMessage(::GetDlgItem(wnd, IDC_COMBINE_MESHES_CHECK), BM_SETCHECK, BST_UNCHECKED, NULL);

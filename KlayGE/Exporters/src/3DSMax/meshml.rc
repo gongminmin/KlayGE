@@ -24,9 +24,9 @@ LANGUAGE LANG_CHINESE, SUBLANG_CHINESE_SIMPLIFIED
 // Dialog
 //
 
-IDD_MESHML_EXPORT DIALOGEX 0, 0, 366, 193
+IDD_MESHML_EXPORT_CHS DIALOGEX 0, 0, 366, 193
 STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | DS_CENTER | WS_POPUP | WS_CAPTION | WS_SYSMENU
-CAPTION "MeshML Export"
+CAPTION "MeshML导出插件"
 FONT 8, "MS Shell Dlg", 400, 0, 0x0
 BEGIN
     EDITTEXT        IDC_JOINT_PER_VER,25,33,40,14,ES_AUTOHSCROLL | ES_NUMBER
@@ -35,9 +35,9 @@ BEGIN
     PUSHBUTTON      "取消(&C)",IDCANCEL,289,38,50,14
     LTEXT           "每顶点最多的骨骼数量：",IDC_STATIC,25,20,89,8
     LTEXT           "导出的顶点属性：",IDC_STATIC,25,62,65,8
-    CONTROL         "合并材质相同的mesh",IDC_COMBINE_MESHES_CHECK,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,135,35,89,10
+    CONTROL         "合并材质相同的物体",IDC_COMBINE_MESHES_CHECK,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,135,35,145,10
     COMBOBOX        IDC_TANGENT_COMBO,26,81,78,30,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
-    CONTROL         "Texture coordinate",IDC_TEXCOORD_CHECK,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,27,102,77,10
+    CONTROL         "纹理坐标",IDC_TEXCOORD_CHECK,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,27,102,77,10
 END
 
 
@@ -49,7 +49,7 @@ END
 #ifdef APSTUDIO_INVOKED
 GUIDELINES DESIGNINFO
 BEGIN
-    IDD_MESHML_EXPORT, DIALOG
+    IDD_MESHML_EXPORT_CHS, DIALOG
     BEGIN
         LEFTMARGIN, 7
         RIGHTMARGIN, 359
@@ -82,12 +82,12 @@ BEGIN
     BEGIN
         BLOCK "080404b0"
         BEGIN
-            VALUE "FileDescription", "MeshML 3DSMax导出插件"
+            VALUE "FileDescription", "MeshML 3DSMax exporter"
             VALUE "FileVersion", "1, 0, 0, 1"
             VALUE "InternalName", "MeshML"
-            VALUE "LegalCopyright", "版权所有 (C) 龚敏敏，2005"
+            VALUE "LegalCopyright", "Copyright (C) Minmin Gong, 2005-2013"
             VALUE "OriginalFilename", "MeshML.dll"
-            VALUE "ProductName", "MeshML 3DSMax导出插件"
+            VALUE "ProductName", "MeshML 3DSMax exporter"
             VALUE "ProductVersion", "1, 0, 0, 1"
         END
     END
@@ -107,6 +107,28 @@ END
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
 LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
 #pragma code_page(1252)
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+IDD_MESHML_EXPORT_EN DIALOGEX 0, 0, 366, 193
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | DS_CENTER | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "MeshML Export"
+FONT 8, "MS Shell Dlg", 400, 0, 0x0
+BEGIN
+    EDITTEXT        IDC_JOINT_PER_VER,25,33,40,14,ES_AUTOHSCROLL | ES_NUMBER
+    CONTROL         "",IDC_SPIN_JOINT_PER_VER,"msctls_updown32",UDS_SETBUDDYINT | UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_ARROWKEYS,63,33,11,14
+    DEFPUSHBUTTON   "&OK",IDOK,289,20,50,14
+    PUSHBUTTON      "&Cancel",IDCANCEL,289,38,50,14
+    LTEXT           "Maximum bones per vertex: ",IDC_STATIC,25,20,89,8
+    LTEXT           "Exported vertex attributes:",IDC_STATIC,25,62,65,8
+    CONTROL         "Combine meshes with the same material",IDC_COMBINE_MESHES_CHECK,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,135,35,145,10
+    COMBOBOX        IDC_TANGENT_COMBO,26,81,78,30,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+    CONTROL         "Texture coordinate",IDC_TEXCOORD_CHECK,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,27,102,77,10
+END
+
 
 #ifdef APSTUDIO_INVOKED
 /////////////////////////////////////////////////////////////////////////////
