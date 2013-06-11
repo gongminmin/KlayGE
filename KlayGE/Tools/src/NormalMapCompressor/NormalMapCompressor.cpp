@@ -55,18 +55,21 @@ namespace
 			{
 				uint8_t uncom_x[16];
 				uint8_t uncom_y[16];
-				for (int y = 0; y < 4; ++ y)
+				for (uint32_t dy = 0; dy < 4; ++ dy)
 				{
-					for (int x = 0; x < 4; ++ x)
+					uint32_t y = MathLib::clamp(y_base + dy, 0U, height - 1);
+					for (uint32_t dx = 0; dx < 4; ++ dx)
 					{
+						uint32_t x = MathLib::clamp(x_base + dx, 0U, width - 1);
+
 						float3 n;
-						n.x() = in_data[(y_base + y) * width + (x_base + x)].r() * 2 - 1;
-						n.y() = in_data[(y_base + y) * width + (x_base + x)].g() * 2 - 1;
-						n.z() = in_data[(y_base + y) * width + (x_base + x)].b() * 2 - 1;
+						n.x() = in_data[y * width + x].r() * 2 - 1;
+						n.y() = in_data[y * width + x].g() * 2 - 1;
+						n.z() = in_data[y * width + x].b() * 2 - 1;
 						n = MathLib::normalize(n);
 
-						uncom_x[y * 4 + x] = static_cast<uint8_t>(MathLib::clamp(static_cast<int>((n.x() * 0.5f + 0.5f) * 255.0f + 0.5f), 0, 255));
-						uncom_y[y * 4 + x] = static_cast<uint8_t>(MathLib::clamp(static_cast<int>((n.y() * 0.5f + 0.5f) * 255.0f + 0.5f), 0, 255));
+						uncom_x[dy * 4 + dx] = static_cast<uint8_t>(MathLib::clamp(static_cast<int>((n.x() * 0.5f + 0.5f) * 255.0f + 0.5f), 0, 255));
+						uncom_y[dy * 4 + dx] = static_cast<uint8_t>(MathLib::clamp(static_cast<int>((n.y() * 0.5f + 0.5f) * 255.0f + 0.5f), 0, 255));
 					}
 				}
 

@@ -177,25 +177,17 @@ namespace KlayGE
 		std::string sm_name;
 		std::string adsf_name;
 
-		XMLDocument cfg_doc;
-		XMLNodePtr rf_node;
-		XMLNodePtr af_node;
-		XMLNodePtr if_node;
-		XMLNodePtr sf_node;
-		XMLNodePtr scf_node;
-		XMLNodePtr sm_node;
-		XMLNodePtr adsf_node;
-
 		ResIdentifierPtr file = ResLoader::Instance().Open(cfg_file);
 		if (file)
 		{
+			XMLDocument cfg_doc;
 			XMLNodePtr cfg_root = cfg_doc.Parse(file);
 
 			XMLNodePtr context_node = cfg_root->FirstNode("context");
 			XMLNodePtr graphics_node = cfg_root->FirstNode("graphics");
 
 #ifdef KLAYGE_PLATFORM_WINDOWS
-			rf_node = context_node->FirstNode("render_factory");
+			XMLNodePtr rf_node = context_node->FirstNode("render_factory");
 			if (rf_node)
 			{
 				rf_name = rf_node->Attrib("name")->ValueString();
@@ -203,7 +195,7 @@ namespace KlayGE
 #endif
 
 #ifdef KLAYGE_PLATFORM_WINDOWS
-			af_node = context_node->FirstNode("audio_factory");
+			XMLNodePtr af_node = context_node->FirstNode("audio_factory");
 			if (af_node)
 			{
 				af_name = af_node->Attrib("name")->ValueString();
@@ -211,7 +203,7 @@ namespace KlayGE
 #endif
 
 #ifdef KLAYGE_PLATFORM_WINDOWS
-			if_node = context_node->FirstNode("input_factory");
+			XMLNodePtr if_node = context_node->FirstNode("input_factory");
 			if (if_node)
 			{
 				if_name = if_node->Attrib("name")->ValueString();
@@ -219,7 +211,7 @@ namespace KlayGE
 #endif
 
 #ifdef KLAYGE_PLATFORM_WINDOWS
-			sf_node = context_node->FirstNode("show_factory");
+			XMLNodePtr sf_node = context_node->FirstNode("show_factory");
 			if (sf_node)
 			{
 				sf_name = sf_node->Attrib("name")->ValueString();
@@ -227,20 +219,20 @@ namespace KlayGE
 #endif
 
 #ifdef KLAYGE_PLATFORM_WINDOWS
-			scf_node = context_node->FirstNode("script_factory");
+			XMLNodePtr scf_node = context_node->FirstNode("script_factory");
 			if (scf_node)
 			{
 				scf_name = scf_node->Attrib("name")->ValueString();
 			}
 #endif
 
-			sm_node = context_node->FirstNode("scene_manager");
+			XMLNodePtr sm_node = context_node->FirstNode("scene_manager");
 			if (sm_node)
 			{
 				sm_name = sm_node->Attrib("name")->ValueString();
 			}
 
-			adsf_node = context_node->FirstNode("audio_data_source_factory");
+			XMLNodePtr adsf_node = context_node->FirstNode("audio_data_source_factory");
 			if (adsf_node)
 			{
 				adsf_name = adsf_node->Attrib("name")->ValueString();
