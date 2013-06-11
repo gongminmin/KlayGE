@@ -484,11 +484,11 @@ namespace KlayGE
 				tl = ASyncLoadTexture(iter->second, EAH_GPU_Read | EAH_Immutable);
 			}
 
-			if (("Diffuse Color" == iter->first) || ("Diffuse Color Map" == iter->first))
+			if (("Color" == iter->first) || ("Diffuse Color" == iter->first) || ("Diffuse Color Map" == iter->first))
 			{
 				diffuse_tl_ = tl;
 			}
-			else if (("Specular Level" == iter->first) || ("Reflection Glossiness Map" == iter->first))
+			else if (("Specular Level" == iter->first) || ("Glossiness" == iter->first) || ("Reflection Glossiness Map" == iter->first))
 			{
 				specular_tl_ = tl;
 			}
@@ -957,7 +957,11 @@ namespace KlayGE
 #if (defined KLAYGE_PLATFORM_WINDOWS_DESKTOP) || (defined KLAYGE_PLATFORM_LINUX)
 		if (jit)
 		{
-			if (system(("MeshMLJIT \"" + meshml_name + "\" N10 " + "\"" + path_name + jit_ext_name + "\" -q").c_str()) != 0)
+			std::string meshmljit_name = "MeshMLJIT";
+#ifdef KLAYGE_DEBUG
+			meshmljit_name += "_d";
+#endif
+			if (system((meshmljit_name + " \"" + meshml_name + "\" N10 " + "\"" + path_name + jit_ext_name + "\" -q").c_str()) != 0)
 			{
 				LogError("MeshMLJIT failed. Forgot to build Tools?");
 			}
