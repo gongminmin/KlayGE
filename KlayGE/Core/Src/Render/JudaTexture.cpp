@@ -1412,12 +1412,10 @@ namespace KlayGE
 				tile_info.y = min_tileiter->second.y;
 				tile_info.z = min_tileiter->second.z;
 
-				for (KLAYGE_AUTO(tileiter, tim.begin()); tileiter != tim.end(); ++ tileiter)
+				for (KLAYGE_AUTO(tileiter, tim.begin()); tileiter != tim.end();)
 				{
 					if (tileiter->second.tick == min_tick)
 					{
-						tim.erase(tileiter);
-
 						uint32_t const id = tileiter->second.z * num_cache_tiles_a_layer + tileiter->second.y * num_cache_tiles_a_row + tileiter->second.x;
 						KLAYGE_AUTO(freeiter, tile_free_list_.begin());
 						while ((freeiter != tile_free_list_.end()) && (freeiter->second <= id))
@@ -1425,9 +1423,15 @@ namespace KlayGE
 							++ freeiter;
 						}
 						tile_free_list_.insert(freeiter, std::make_pair(id, id + 1));
+
+						tileiter = tim.erase(tileiter);
+					}
+					else
+					{
+						 ++ tileiter;
 					}
 				}
-				for (KLAYGE_AUTO(freeiter, tile_free_list_.begin()); freeiter != tile_free_list_.end();)
+				for (KLAYGE_AUTO(freeiter, tile_free_list_.begin()); freeiter != tile_free_list_.end() - 1;)
 				{
 					KLAYGE_AUTO(nextiter, freeiter);
 					++ nextiter;
@@ -1435,7 +1439,8 @@ namespace KlayGE
 					if (freeiter->second == nextiter->first)
 					{
 						freeiter->second = nextiter->second;
-						tile_free_list_.erase(nextiter);
+						freeiter = tile_free_list_.erase(nextiter);
+						-- freeiter;
 					}
 					else
 					{
