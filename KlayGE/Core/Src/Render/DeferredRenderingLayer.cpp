@@ -33,29 +33,16 @@
 
 #include <KlayGE/DeferredRenderingLayer.hpp>
 
-#define USE_NEW_LIGHT_SAMPLING
-
 namespace KlayGE
 {
 	int const SM_SIZE = 512;
 	
-	int const VPL_COUNT_SQRT = 16;
-	
-	float const VPL_DELTA = 1.0f / VPL_COUNT_SQRT;
-	float const VPL_OFFSET = 0.5f * VPL_DELTA;
-
 	int const MAX_IL_MIPMAP_LEVELS = 3;
 
-#ifdef USE_NEW_LIGHT_SAMPLING
-	int const MIN_RSM_MIPMAP_SIZE = 8; // minimum mipmap size is 8x8
 	int const MAX_RSM_MIPMAP_LEVELS = 7; // (log(512)-log(4))/log(2) + 1
 	int const BEGIN_RSM_SAMPLING_LIGHT_LEVEL = 5;
 	int const SAMPLE_LEVEL_CNT = MAX_RSM_MIPMAP_LEVELS - BEGIN_RSM_SAMPLING_LIGHT_LEVEL;
 	int const VPL_COUNT = 64 * ((1UL << (SAMPLE_LEVEL_CNT * 2)) - 1) / (4 - 1);
-#else
-	int const MAX_RSM_MIPMAP_LEVELS = 6;
-	int const VPL_COUNT = VPL_COUNT_SQRT * VPL_COUNT_SQRT;
-#endif
 
 	template <typename T>
 	void CreateConeMesh(std::vector<T>& vb, std::vector<uint16_t>& ib, uint16_t vertex_base, float radius, float height, uint16_t n)
@@ -1102,25 +1089,14 @@ namespace KlayGE
 		SceneManager& scene_mgr = Context::Instance().SceneManagerInstance();
 
 		lights_.clear();
-		sm_light_indices_.clear();	
+		sm_light_indices_.clear();
+
+		lights_.push_back(MakeSharedPtr<AmbientLightSource>());
+		sm_light_indices_.push_back(-1);
 
 		uint32_t const num_lights = scene_mgr.NumLights();
 		bool with_ambient = false;
-		for (uint32_t i = 0; i < num_lights; ++ i)
-		{
-			if (LT_Ambient == scene_mgr.GetLight(i)->Type())
-			{
-				with_ambient = true;
-				break;
-			}
-		}
-		if (!with_ambient)
-		{
-			LightSourcePtr ambient_light = MakeSharedPtr<AmbientLightSource>();
-			ambient_light->Color(float3(0.1f, 0.1f, 0.1f));
-			lights_.push_back(ambient_light);
-			sm_light_indices_.push_back(-1);
-		}
+		float3 ambient_clr(0, 0, 0);
 
 		cascaded_shadow_index_ = -1;
 		uint32_t num_sm_2d_lights = 0;
@@ -1130,48 +1106,62 @@ namespace KlayGE
 			LightSourcePtr const & light = scene_mgr.GetLight(i);
 			if (light->Enabled())
 			{
-				lights_.push_back(light);
-
-				if (0 == (light->Attrib() & LSA_NoShadow))
+				if (LT_Ambient == light->Type())
 				{
-					switch (light->Type())
-					{
-					case LT_Sun:
-						sm_light_indices_.push_back(-1);
-						cascaded_shadow_index_ = static_cast<int32_t>(i);
-						if (!with_ambient)
-						{
-							++ cascaded_shadow_index_;
-						}
-						break;
-
-					case LT_Spot:
-						if (num_sm_2d_lights < MAX_NUM_SHADOWED_SPOT_LIGHTS)
-						{
-							sm_light_indices_.push_back(num_sm_2d_lights);
-							++ num_sm_2d_lights;
-						}
-						break;
-
-					case LT_Point:
-						if (num_sm_cube_lights < MAX_NUM_SHADOWED_POINT_LIGHTS)
-						{
-							sm_light_indices_.push_back(num_sm_cube_lights);
-							++ num_sm_cube_lights;
-						}
-						break;
-
-					default:
-						sm_light_indices_.push_back(-1);
-						break;
-					}
+					float4 const & clr = light->Color();
+					ambient_clr += float3(clr.x(), clr.y(), clr.z());
+					with_ambient = true;
 				}
 				else
 				{
-					sm_light_indices_.push_back(-1);
+					lights_.push_back(light);
+
+					if (0 == (light->Attrib() & LSA_NoShadow))
+					{
+						switch (light->Type())
+						{
+						case LT_Sun:
+							sm_light_indices_.push_back(-1);
+							cascaded_shadow_index_ = static_cast<int32_t>(i);
+							if (!with_ambient)
+							{
+								++ cascaded_shadow_index_;
+							}
+							break;
+
+						case LT_Spot:
+							if (num_sm_2d_lights < MAX_NUM_SHADOWED_SPOT_LIGHTS)
+							{
+								sm_light_indices_.push_back(num_sm_2d_lights);
+								++ num_sm_2d_lights;
+							}
+							break;
+
+						case LT_Point:
+							if (num_sm_cube_lights < MAX_NUM_SHADOWED_POINT_LIGHTS)
+							{
+								sm_light_indices_.push_back(num_sm_cube_lights);
+								++ num_sm_cube_lights;
+							}
+							break;
+
+						default:
+							sm_light_indices_.push_back(-1);
+							break;
+						}
+					}
+					else
+					{
+						sm_light_indices_.push_back(-1);
+					}
 				}
 			}
 		}
+		if (!with_ambient)
+		{
+			ambient_clr = float3(0.1f, 0.1f, 0.1f);
+		}
+		lights_[0]->Color(ambient_clr);
 
 		indirect_lighting_enabled_ = false;
 		if (rsm_buffer_ && (illum_ != 1))
