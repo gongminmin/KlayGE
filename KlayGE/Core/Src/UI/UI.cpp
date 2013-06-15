@@ -1114,8 +1114,8 @@ namespace KlayGE
 						if (dialog->GetVisible() && dialog->ContainsPoint(param->abs_coord))
 						{
 							mouse_on_ui_ = true;
-							dialog->MouseOverHandler(param->buttons_state, dialog->ToLocal(param->abs_coord));
 						}
+						dialog->MouseOverHandler(param->buttons_state, dialog->ToLocal(param->abs_coord));
 					}
 				}
 				break;
@@ -1138,8 +1138,8 @@ namespace KlayGE
 						if (dialog->GetVisible() && dialog->ContainsPoint(param->abs_coord))
 						{
 							mouse_on_ui_ = true;
-							dialog->MouseWheelHandler(param->buttons_state, dialog->ToLocal(param->abs_coord), param->wheel_delta);
 						}
+						dialog->MouseWheelHandler(param->buttons_state, dialog->ToLocal(param->abs_coord), param->wheel_delta);
 					}
 				}
 				break;
@@ -1162,14 +1162,14 @@ namespace KlayGE
 						if (dialog->GetVisible() && dialog->ContainsPoint(param->abs_coord))
 						{
 							mouse_on_ui_ = true;
-							if (param->buttons_down & MB_Left)
-							{
-								dialog->MouseDownHandler(param->buttons_down, dialog->ToLocal(param->abs_coord));
-							}
-							else if (param->buttons_up & MB_Left)
-							{
-								dialog->MouseUpHandler(param->buttons_up, dialog->ToLocal(param->abs_coord));
-							}
+						}
+						if (param->buttons_down & MB_Left)
+						{
+							dialog->MouseDownHandler(param->buttons_down, dialog->ToLocal(param->abs_coord));
+						}
+						else if (param->buttons_up & MB_Left)
+						{
+							dialog->MouseUpHandler(param->buttons_up, dialog->ToLocal(param->abs_coord));
 						}
 					}
 				}
@@ -1185,9 +1185,9 @@ namespace KlayGE
 						if (dialog->GetVisible() && dialog->ContainsPoint(param->center))
 						{
 							mouse_on_ui_ = true;
-							dialog->MouseDownHandler(MB_Left, dialog->ToLocal(param->center));
-							dialog->MouseUpHandler(MB_Left, dialog->ToLocal(param->center));
 						}
+						dialog->MouseDownHandler(MB_Left, dialog->ToLocal(param->center));
+						dialog->MouseUpHandler(MB_Left, dialog->ToLocal(param->center));
 					}
 				}
 				break;
