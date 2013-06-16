@@ -17,8 +17,8 @@
 		<![CDATA[
 float4 MotionBlurPS(float2 tex_coord0 : TEXCOORD0) : SV_Target
 {
-	float2 motion_vec = (motion_vec_tex.Sample(point_sampler, tex_coord0).rg - 0.5f) / 10;
-	const int NUM_SAMPLES = 12;
+	float2 motion_vec = (motion_vec_tex.Sample(point_sampler, tex_coord0).rg - 0.5f) / 30;
+	const int NUM_SAMPLES = 8;
 	float3 clr = color_tex.Sample(point_sampler, tex_coord0).xyz;
 	float depth = depth_tex.Sample(point_sampler, tex_coord0).x;
 	float sum_weight = 1;
@@ -27,7 +27,7 @@ float4 MotionBlurPS(float2 tex_coord0 : TEXCOORD0) : SV_Target
 		float2 tc = tex_coord0 + motion_vec * i / NUM_SAMPLES;
 		float3 other_clr = color_tex.Sample(point_sampler, tc).xyz;
 		float other_depth = depth_tex.Sample(point_sampler, tc).x;
-		if (depth >= other_depth)
+		if (abs(depth - other_depth) < 0.1f)
 		{
 			clr += other_clr;
 			++ sum_weight;
