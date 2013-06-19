@@ -122,17 +122,19 @@ float4 AdaptedLumPS(float4 tex0 : TEXCOORD0,
 	
 	<shader type="compute_shader" version="5">
 		<![CDATA[
-groupshared float shared_l[256];
+groupshared float shared_l[128];
 
-[numthreads(16, 16, 1)]
+[numthreads(16, 8, 1)]
 void SumLum4x4LogCS(uint3 tid : SV_DispatchThreadID, uint GI : SV_GroupIndex, uint3 group_id : SV_GroupID)
 {
-	float2 faddr = (tid.xy * 2 + 0.5f) / dst_tex_dim;
+	float2 faddr0 = (tid.xy * 2 + 0.5f) / dst_tex_dim;
+	float2 faddr1 = faddr0 + float2(0, 16) / dst_tex_dim;
 
 	const float3 RGB_TO_LUM = float3(0.2126f, 0.7152f, 0.0722f);
 	
-	shared_l[GI] = log(dot(src_tex.SampleLevel(src_sampler, faddr, 0).rgb, RGB_TO_LUM) + 0.001f);
-	for (uint step = 128; step > 16; step >>= 1)
+	shared_l[GI] = log(dot(src_tex.SampleLevel(src_sampler, faddr0, 0).rgb, RGB_TO_LUM) + 0.001f)
+		+ log(dot(src_tex.SampleLevel(src_sampler, faddr1, 0).rgb, RGB_TO_LUM) + 0.001f);
+	for (uint step = 64; step > 16; step >>= 1)
 	{
 		GroupMemoryBarrierWithGroupSync();
 		if (GI < step)
@@ -140,21 +142,12 @@ void SumLum4x4LogCS(uint3 tid : SV_DispatchThreadID, uint GI : SV_GroupIndex, ui
 			shared_l[GI] += shared_l[GI + step];
 		}
 	}
-	if (GI < 16)
+	for (step = 16; step > 1; step >>= 1)
 	{
-		shared_l[GI] += shared_l[GI + 16];
-	}
-	if (GI < 8)
-	{
-		shared_l[GI] += shared_l[GI + 8];
-	}
-	if (GI < 4)
-	{
-		shared_l[GI] += shared_l[GI + 4];
-	}
-	if (GI < 2)
-	{
-		shared_l[GI] += shared_l[GI + 2];
+		if (GI < step)
+		{
+			shared_l[GI] += shared_l[GI + step];
+		}
 	}
 	if (GI < 1)
 	{

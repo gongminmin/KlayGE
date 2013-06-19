@@ -36,6 +36,7 @@
 #include <KFL/Thread.hpp>
 
 #include <fstream>
+#include <sstream>
 
 #ifdef KLAYGE_PLATFORM_ANDROID
 #include <KlayGE/OpenGLES/OGLESRenderFactory.hpp>
@@ -646,7 +647,11 @@ namespace KlayGE
 				break;
 			}
 			stereo_node->AppendAttrib(cfg_doc.AllocAttribString("method", method_str));
-			stereo_node->AppendAttrib(cfg_doc.AllocAttribFloat("separation", cfg_.graphics_cfg.stereo_separation));
+
+			std::ostringstream oss;
+			oss.precision(2);
+			oss << std::fixed << cfg_.graphics_cfg.stereo_separation;
+			stereo_node->AppendAttrib(cfg_doc.AllocAttribString("separation", oss.str()));
 
 			graphics_node->AppendNode(stereo_node);
 		}
