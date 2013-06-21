@@ -93,18 +93,18 @@ namespace KlayGE
 
 	bool SceneObject::Visible() const
 	{
-		return (0 == (attrib_ & SOA_Unvisible));
+		return (0 == (attrib_ & SOA_Invisible));
 	}
 
 	void SceneObject::Visible(bool vis)
 	{
 		if (vis)
 		{
-			attrib_ &= ~SOA_Unvisible;
+			attrib_ &= ~SOA_Invisible;
 		}
 		else
 		{
-			attrib_ |= SOA_Unvisible;
+			attrib_ |= SOA_Invisible;
 		}
 	}
 

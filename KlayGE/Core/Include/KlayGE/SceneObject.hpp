@@ -38,7 +38,7 @@ namespace KlayGE
 			SOA_Cullable = 1UL << 0,
 			SOA_Overlay = 1UL << 1,
 			SOA_Moveable = 1UL << 2,
-			SOA_Unvisible = 1UL << 3,
+			SOA_Invisible = 1UL << 3,
 			SOA_NotCastShadow = 1UL << 4
 		};
 
