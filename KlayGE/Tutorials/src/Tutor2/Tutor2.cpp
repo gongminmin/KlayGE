@@ -87,6 +87,7 @@ void TutorFramework::InitObjects()
 		KlayGE::CreateModelFactory<KlayGE::RenderModel>(), KlayGE::CreateMeshFactory<RenderPolygon>());
 
 	renderableFile_ = KlayGE::MakeSharedPtr<KlayGE::SceneObjectHelper>(loadedModel, KlayGE::SceneObject::SOA_Cullable);
+	renderableFile_->ModelMatrix(KlayGE::MathLib::translation(0.0f, 0.5f, 0.0f));
 	renderableFile_->AddToSceneManager();
 
 	std::vector<KlayGE::float3> vertices;
@@ -199,6 +200,6 @@ void RenderPolygon::OnRenderBegin()
 {
 	KlayGE::App3DFramework const & app = KlayGE::Context::Instance().AppInstance();
 
-	KlayGE::float4x4 view_proj = app.ActiveCamera().ViewProjMatrix();
+	KlayGE::float4x4 view_proj = model_mat_ * app.ActiveCamera().ViewProjMatrix();
 	*(technique_->Effect().ParameterByName("mvp")) = view_proj;
 }
