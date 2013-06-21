@@ -1097,7 +1097,7 @@ namespace KlayGE
 		sm_light_indices_.push_back(-1);
 
 		uint32_t const num_lights = scene_mgr.NumLights();
-		bool with_ambient = false;
+		uint32_t num_ambient_lights = 0;
 		float3 ambient_clr(0, 0, 0);
 
 		cascaded_shadow_index_ = -1;
@@ -1112,7 +1112,7 @@ namespace KlayGE
 				{
 					float4 const & clr = light->Color();
 					ambient_clr += float3(clr.x(), clr.y(), clr.z());
-					with_ambient = true;
+					++ num_ambient_lights;
 				}
 				else
 				{
@@ -1124,11 +1124,7 @@ namespace KlayGE
 						{
 						case LT_Sun:
 							sm_light_indices_.push_back(-1);
-							cascaded_shadow_index_ = static_cast<int32_t>(i);
-							if (!with_ambient)
-							{
-								++ cascaded_shadow_index_;
-							}
+							cascaded_shadow_index_ = static_cast<int32_t>(i + 1 - num_ambient_lights);
 							break;
 
 						case LT_Spot:
@@ -1159,7 +1155,7 @@ namespace KlayGE
 				}
 			}
 		}
-		if (!with_ambient)
+		if (0 == num_ambient_lights)
 		{
 			ambient_clr = float3(0.1f, 0.1f, 0.1f);
 		}
@@ -1263,7 +1259,7 @@ namespace KlayGE
 					{
 						if (cascaded_shadow_index_ >= 0)
 						{
-							this->AppendCascadedShadowPassScanCode(pvp, cascaded_shadow_index_);
+							this->AppendCascadedShadowPassScanCode(vpi, cascaded_shadow_index_);
 						}
 					}
 
@@ -1425,13 +1421,14 @@ namespace KlayGE
 		}
 	}
 
-	void DeferredRenderingLayer::AppendCascadedShadowPassScanCode(PerViewport const & pvp, uint32_t light_index)
+	void DeferredRenderingLayer::AppendCascadedShadowPassScanCode(uint32_t vp_index, uint32_t light_index)
 	{
 		BOOST_ASSERT(LT_Sun == lights_[light_index]->Type());
 
+		PerViewport& pvp = viewports_[vp_index];
 		for (uint32_t i = 0; i < pvp.num_cascades + 1; ++ i)
 		{
-			pass_scaned_.push_back(this->ComposePassScanCode(0, PT_GenCascadedShadowMap, light_index, i));
+			pass_scaned_.push_back(this->ComposePassScanCode(vp_index, PT_GenCascadedShadowMap, light_index, i));
 		}
 	}
 
