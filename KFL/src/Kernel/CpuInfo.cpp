@@ -48,12 +48,12 @@ namespace
 
 
 #ifndef KLAYGE_CPU_ARM
-	void get_cpuid(int op, uint32_t* peax, uint32_t* pebx, uint32_t* pecx, uint32_t* pedx)
+	void get_cpuid(uint32_t* peax, uint32_t* pebx, uint32_t* pecx, uint32_t* pedx)
 	{	
 #ifdef KLAYGE_COMPILER_MSVC
-	#if KLAYGE_COMPILER_VERSION >= 80 
+	#if KLAYGE_COMPILER_VERSION >= 90 
 		int CPUInfo[4];
-		__cpuid(CPUInfo, op);
+		__cpuidex(CPUInfo, *peax, *pecx);
 		*peax = CPUInfo[0];
 		*pebx = CPUInfo[1];
 		*pecx = CPUInfo[2];
@@ -61,19 +61,22 @@ namespace
 	#else
 		__asm
 		{
-			mov		eax, op
+			mov		eax, [peax]
+			mov		ecx, [pecx]
 			cpuid
 			mov		[peax], eax
 			mov		[pebx], ebx
-			mov		[pedx], ecx
-			mov		[pecx], edx
+			mov		[pecx], ecx
+			mov		[pedx], edx
 		}
 	#endif
 #elif defined KLAYGE_COMPILER_GCC
 	#ifdef KLAYGE_CPU_X64
 		__asm__
 		(
-			"cpuid": "=a" (*peax), "=b" (*pebx), "=c" (*pecx), "=d" (*pedx) : "a" (op)
+			"cpuid"
+			: "=a" (*peax), "=b" (*pebx), "=c" (*pecx), "=d" (*pedx)
+			: "a" (*peax), "c" (*pecx)
 		);
 	#else
 		__asm__
@@ -83,7 +86,7 @@ namespace
 			"movl   %%ebx, %%edi	\n\t"
 			"popl   %%ebx			\n\t"
 			: "=a" (*peax), "=D" (*pebx), "=c" (*pecx), "=d" (*pedx)
-			: "a" (op)
+			: "a" (*peax), "c" (*pecx)
 		);
 	#endif
 #else
@@ -298,7 +301,8 @@ namespace
 
 		void Call(uint32_t fn)
 		{
-			get_cpuid(fn, &eax_, &ebx_, &ecx_, &edx_);
+			eax_ = fn;
+			get_cpuid(&eax_, &ebx_, &ecx_, &edx_);
 		}
 
 	private:
