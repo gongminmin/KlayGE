@@ -157,14 +157,6 @@ namespace KlayGE
 		{
 			settings.hdr = false;
 		}
-
-		if (this->HackForIntel())
-		{
-			settings.hdr = false;
-			settings.ppaa = false;
-			settings.gamma = false;
-			settings.color_grading = false;
-		}
 	}
 
 	void OGLRenderEngine::InitRenderStates()

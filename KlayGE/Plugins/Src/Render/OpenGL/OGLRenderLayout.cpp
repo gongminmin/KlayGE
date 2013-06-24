@@ -39,15 +39,7 @@ namespace KlayGE
 	{
 		if (glloader_GL_VERSION_3_0() || glloader_GL_ARB_vertex_array_object())
 		{
-			OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-			if (!re.HackForIntel())
-			{
-				use_vao_ = true;
-			}
-			else
-			{
-				use_vao_ = false;
-			}
+			use_vao_ = true;
 		}
 		else
 		{
@@ -122,7 +114,8 @@ namespace KlayGE
 			}
 		}
 
-		if (this->UseIndices())
+		OGLRenderEngine& ogl_re = *checked_cast<OGLRenderEngine*>(&re);
+		if (!ogl_re.HackForIntel() && this->UseIndices())
 		{
 			OGLGraphicsBuffer& stream(*checked_pointer_cast<OGLGraphicsBuffer>(this->GetIndexStream()));
 			stream.Active(use_vao_);
@@ -167,6 +160,13 @@ namespace KlayGE
 			{
 				vao = iter->second;
 				glBindVertexArray(vao);
+			}
+
+			OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+			if (re.HackForIntel() && this->UseIndices())
+			{
+				OGLGraphicsBuffer& stream(*checked_pointer_cast<OGLGraphicsBuffer>(this->GetIndexStream()));
+				stream.Active(use_vao_);
 			}
 		}
 		else

@@ -214,7 +214,7 @@ namespace KlayGE
 
 		OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 			
-		if (!re.HackForATI() && !re.HackForIntel() && ((format_ == target.Format()) && !IsCompressedFormat(format_) && glloader_GL_NV_copy_image()
+		if (!re.HackForATI() && ((format_ == target.Format()) && !IsCompressedFormat(format_) && glloader_GL_NV_copy_image()
 			&& (src_width == dst_width) && (src_height == dst_height) && (1 == sample_count_)))
 		{
 			OGLTexture& ogl_target = *checked_cast<OGLTexture*>(&target);
@@ -226,7 +226,7 @@ namespace KlayGE
 		}
 		else
 		{
-			if (((sample_count_ > 1) || (!re.HackForATI() && !re.HackForIntel())) && !IsCompressedFormat(format_) && (glloader_GL_ARB_texture_rg() || (4 == NumComponents(format_))) && glloader_GL_EXT_framebuffer_blit())
+			if (((sample_count_ > 1) || !re.HackForATI()) && !IsCompressedFormat(format_) && (glloader_GL_ARB_texture_rg() || (4 == NumComponents(format_))) && glloader_GL_EXT_framebuffer_blit())
 			{
 				GLuint fbo_src, fbo_dst;
 				re.GetFBOForBlit(fbo_src, fbo_dst);
@@ -352,7 +352,7 @@ namespace KlayGE
 
 		OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 
-		if (!re.HackForATI() && !re.HackForIntel() && ((format_ == target.Format()) && !IsCompressedFormat(format_) && glloader_GL_NV_copy_image()
+		if (!re.HackForATI() && ((format_ == target.Format()) && !IsCompressedFormat(format_) && glloader_GL_NV_copy_image()
 			&& (src_width == dst_width) && (src_height == dst_height) && (1 == sample_count_)))
 		{
 			OGLTexture& ogl_target = *checked_cast<OGLTexture*>(&target);
@@ -364,7 +364,7 @@ namespace KlayGE
 		}
 		else
 		{
-			if (((sample_count_ > 1) || (!re.HackForATI() && !re.HackForIntel())) && !IsCompressedFormat(format_) && (glloader_GL_ARB_texture_rg() || (4 == NumComponents(format_))) && glloader_GL_EXT_framebuffer_blit())
+			if (((sample_count_ > 1) || !re.HackForATI()) && !IsCompressedFormat(format_) && (glloader_GL_ARB_texture_rg() || (4 == NumComponents(format_))) && glloader_GL_EXT_framebuffer_blit())
 			{
 				GLuint fbo_src, fbo_dst;
 				re.GetFBOForBlit(fbo_src, fbo_dst);
