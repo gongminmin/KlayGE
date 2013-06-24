@@ -2661,7 +2661,7 @@ namespace KlayGE
 
 		glAttachShader(glsl_program_, object);
 
-		if (ST_GeometryShader == type)
+		if ((ST_GeometryShader == type) && (glloader_GL_VERSION_3_2() || glloader_GL_EXT_geometry_shader4()))
 		{
 			glProgramParameteriEXT(glsl_program_, GL_GEOMETRY_INPUT_TYPE_EXT, gs_input_type_);
 			glProgramParameteriEXT(glsl_program_, GL_GEOMETRY_OUTPUT_TYPE_EXT, gs_output_type_);
