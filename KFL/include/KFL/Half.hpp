@@ -32,7 +32,6 @@
 #define _KFL_HALF_HPP
 
 #include <boost/operators.hpp>
-#include <boost/cstdint.hpp>
 #include <limits>
 
 #pragma once
