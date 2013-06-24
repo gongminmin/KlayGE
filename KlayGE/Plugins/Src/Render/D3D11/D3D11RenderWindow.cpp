@@ -35,6 +35,8 @@
 #include <KlayGE/D3D11/D3D11RenderView.hpp>
 #include <KlayGE/D3D11/D3D11RenderWindow.hpp>
 
+#include "AMDQuadBuffer.hpp"
+
 namespace KlayGE
 {
 	D3D11RenderWindow::D3D11RenderWindow(IDXGIFactory1Ptr const & gi_factory, D3D11AdapterPtr const & adapter,

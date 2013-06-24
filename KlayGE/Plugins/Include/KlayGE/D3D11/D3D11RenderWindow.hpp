@@ -31,7 +31,8 @@
 #pragma warning(pop)
 #endif
 
-#include "AMDQuadBuffer.hpp"
+class IAmdDxExtQuadBufferStereo;
+typedef KlayGE::shared_ptr<IAmdDxExtQuadBufferStereo> IAmdDxExtQuadBufferStereoPtr;
 
 namespace KlayGE
 {
