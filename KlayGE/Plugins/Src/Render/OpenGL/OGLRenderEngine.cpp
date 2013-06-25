@@ -1618,15 +1618,12 @@ namespace KlayGE
 			texture_format_.insert(EF_BC6);
 			texture_format_.insert(EF_BC7);
 		}
-		if (!this->HackForIntel())
+		texture_format_.insert(EF_D16);
+		if (glloader_GL_EXT_packed_depth_stencil())
 		{
-			texture_format_.insert(EF_D16);
-			if (glloader_GL_EXT_packed_depth_stencil())
-			{
-				texture_format_.insert(EF_D24S8);
-			}
-			texture_format_.insert(EF_D32F);
+			texture_format_.insert(EF_D24S8);
 		}
+		texture_format_.insert(EF_D32F);
 		texture_format_.insert(EF_ARGB8_SRGB);
 		texture_format_.insert(EF_ABGR8_SRGB);
 		if (glloader_GL_EXT_texture_compression_s3tc())
@@ -1704,7 +1701,7 @@ namespace KlayGE
 			rendertarget_format_.insert(EF_D24S8);
 		}
 		rendertarget_format_.insert(EF_D32F);
-		if (glloader_GL_EXT_framebuffer_sRGB())
+		if (glloader_GL_VERSION_3_0() || glloader_GL_ARB_framebuffer_sRGB() && glloader_GL_EXT_framebuffer_sRGB())
 		{
 			rendertarget_format_.insert(EF_ARGB8_SRGB);
 			rendertarget_format_.insert(EF_ABGR8_SRGB);

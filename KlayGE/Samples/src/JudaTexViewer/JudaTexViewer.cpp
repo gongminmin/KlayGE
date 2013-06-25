@@ -268,6 +268,7 @@ int SampleMain()
 	ContextCfg cfg = Context::Instance().Config();
 	cfg.graphics_cfg.hdr = false;
 	cfg.graphics_cfg.gamma = false;
+	cfg.graphics_cfg.ppaa = false;
 	cfg.graphics_cfg.color_grading = false;
 	Context::Instance().Config(cfg);
 
