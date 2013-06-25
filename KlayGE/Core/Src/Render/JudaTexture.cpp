@@ -1169,7 +1169,7 @@ namespace KlayGE
 				++ s;
 			}
 
-			uint32_t array_size = std::min((pages + s * s - 1) / (s * s), static_cast<uint32_t>(caps.max_pixel_texture_units - 1));
+			uint32_t array_size = std::min(std::min((pages + s * s - 1) / (s * s), static_cast<uint32_t>(caps.max_pixel_texture_units - 1)), 7U);
 			if (caps.max_texture_array_length > array_size)
 			{
 				tex_cache_ = rf.MakeTexture2D(tile_with_border_size * s, tile_with_border_size * s, mipmap, array_size, format, 1, 0, EAH_GPU_Read, nullptr);
