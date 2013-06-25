@@ -845,7 +845,7 @@ namespace KlayGE
 		uint32_t const num_passes = tech.NumPasses();
 		size_t const inst_format_size = rl.InstanceStreamFormat().size();
 
-		if (glloader_GL_VERSION_3_3() && rl.InstanceStream())
+		if ((glloader_GL_VERSION_3_3() || glloader_GL_ARB_instanced_arrays()) && rl.InstanceStream())
 		{
 			OGLGraphicsBuffer& stream(*checked_pointer_cast<OGLGraphicsBuffer>(rl.InstanceStream()));
 
@@ -871,7 +871,14 @@ namespace KlayGE
 					glVertexAttribPointer(attr, num_components, type, normalized, instance_size, offset);
 					glEnableVertexAttribArray(attr);
 
-					glVertexAttribDivisor(attr, 1);
+					if (glloader_GL_VERSION_3_3())
+					{
+						glVertexAttribDivisor(attr, 1);
+					}
+					else
+					{
+						glVertexAttribDivisorARB(attr, 1);
+					}
 				}
 
 				elem_offset += vs_elem.element_size();
@@ -976,7 +983,14 @@ namespace KlayGE
 				if (attr != -1)
 				{
 					glDisableVertexAttribArray(attr);
-					glVertexAttribDivisor(attr, 0);
+					if (glloader_GL_VERSION_3_3())
+					{
+						glVertexAttribDivisor(attr, 0);
+					}
+					else
+					{
+						glVertexAttribDivisorARB(attr, 0);
+					}
 				}
 			}
 		}
