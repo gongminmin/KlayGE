@@ -19,112 +19,137 @@ config			= ("Debug", "RelWithDebInfo") # could be "Debug", "Release", "MinSizeRe
 	cfg_build_f.close()
 	import cfg_build
 
-def get_compiler_info(compiler, archs, cfg):
-	import sys
+class compiler_info:
+	def __init__(self, compiler, archs, cfg):
+		import sys
 
-	env = os.environ
-	
-	platform = sys.platform
-	if 0 == platform.find("linux"):
-		platform = "linux"
-
-	try:
-		cfg_build.compiler
-	except:
-		cfg_build.compiler = "auto"
-	try:
-		cfg_build.toolset
-	except:
-		cfg_build.toolset = "auto"
-	try:
-		cfg_build.arch
-	except:
-		cfg_build.arch = ("x86", )
-	try:
-		cfg_build.config
-	except:
-		cfg_build.config = ("Debug", "RelWithDebInfo")
-
-	if "" == compiler:
-		if ("" == cfg_build.compiler) or ("auto" == cfg_build.compiler):
-			if "win32" == platform:
-				if "VS110COMNTOOLS" in env:
-					compiler = "vc11"
-				elif "VS100COMNTOOLS" in env:
-					compiler = "vc10"
-				elif "VS90COMNTOOLS" in env:
-					compiler = "vc9"
-				elif os.path.exists("C:\MinGW\bin\gcc.exe"):
-					compiler = "mingw"
-			elif "linux" == platform:
-				compiler = "gcc"
-			else:
-				print("Unsupported platform\n")
-				sys.exit(1)
-		else:
-			compiler = cfg_build.compiler
-
-	toolset = cfg_build.toolset
-	if ("" == cfg_build.toolset) or ("auto" == cfg_build.toolset):
-		if "win32" == platform:
-			if "vc11" == compiler:
-				toolset = "v110"
-			elif "vc10" == compiler:
-				toolset = "v100"
-			elif "vc9" == compiler:
-				toolset = "v90"
-			
-	if "" == archs:
-		archs = cfg_build.arch
-		if "" == archs:
-			archs = ("x86", )
-			
-	if "" == cfg:
-		cfg = cfg_build.config
-		if "" == cfg:
-			cfg = ("Debug", "RelWithDebInfo")
-
-	arch_list = []
-	if "vc11" == compiler:
-		compiler_name = "vc"
-		compiler_version = 11
-		for arch in archs:
-			if ("x86" == arch) or ("x86_app" == arch):
-				arch_list.append((arch, "Visual Studio 11"))
-			elif "arm_app" == arch:
-				arch_list.append((arch, "Visual Studio 11 ARM"))
-			elif "x64" == arch:
-				arch_list.append((arch, "Visual Studio 11 Win64"))
-	elif "vc10" == compiler:
-		compiler_name = "vc"
-		compiler_version = 10
-		for arch in archs:
-			if "x86" == arch:
-				arch_list.append((arch, "Visual Studio 10"))
-			elif "x64" == arch:
-				arch_list.append((arch, "Visual Studio 10 Win64"))
-	elif "vc9" == compiler:
-		compiler_name = "vc"
-		compiler_version = 9
-		for arch in archs:
-			if "x86" == arch:
-				arch_list.append((arch, "Visual Studio 9 2008"))
-			elif "x64" == arch:
-				arch_list.append((arch, "Visual Studio 9 2008 Win64"))
-	elif "mingw" == compiler:
-		compiler_name = "mgw"
-		compiler_version = 0
-		for arch in archs:
-			arch_list.append((arch, "MinGW Makefiles"))
-	elif "gcc" == compiler:
-		compiler_name = "gcc"
-		compiler_version = 0
-		for arch in archs:
-			arch_list.append((arch, "Unix Makefiles"))
-	else:
-		return ()
+		env = os.environ
 		
-	return (compiler_name, compiler_version, arch_list, cfg, platform, toolset)
+		platform = sys.platform
+		if 0 == platform.find("linux"):
+			platform = "linux"
+
+		try:
+			cfg_build.compiler
+		except:
+			cfg_build.compiler = "auto"
+		try:
+			cfg_build.toolset
+		except:
+			cfg_build.toolset = "auto"
+		try:
+			cfg_build.arch
+		except:
+			cfg_build.arch = ("x86", )
+		try:
+			cfg_build.config
+		except:
+			cfg_build.config = ("Debug", "RelWithDebInfo")
+
+		if "" == compiler:
+			if ("" == cfg_build.compiler) or ("auto" == cfg_build.compiler):
+				if "win32" == platform:
+					if "VS110COMNTOOLS" in env:
+						compiler = "vc11"
+					elif "VS100COMNTOOLS" in env:
+						compiler = "vc10"
+					elif "VS90COMNTOOLS" in env:
+						compiler = "vc9"
+					elif os.path.exists("C:\MinGW\bin\gcc.exe"):
+						compiler = "mingw"
+				elif "linux" == platform:
+					compiler = "gcc"
+				else:
+					print("Unsupported platform\n")
+					sys.exit(1)
+			else:
+				compiler = cfg_build.compiler
+
+		toolset = cfg_build.toolset
+		if ("" == cfg_build.toolset) or ("auto" == cfg_build.toolset):
+			if "win32" == platform:
+				if "vc11" == compiler:
+					toolset = "v110"
+				elif "vc10" == compiler:
+					toolset = "v100"
+				elif "vc9" == compiler:
+					toolset = "v90"
+				
+		if "" == archs:
+			archs = cfg_build.arch
+			if "" == archs:
+				archs = ("x86", )
+				
+		if "" == cfg:
+			cfg = cfg_build.config
+			if "" == cfg:
+				cfg = ("Debug", "RelWithDebInfo")
+
+		arch_list = []
+		if "vc11" == compiler:
+			compiler_name = "vc"
+			compiler_version = 11
+			for arch in archs:
+				if ("x86" == arch) or ("x86_app" == arch):
+					arch_list.append((arch, "Visual Studio 11"))
+				elif "arm_app" == arch:
+					arch_list.append((arch, "Visual Studio 11 ARM"))
+				elif "x64" == arch:
+					arch_list.append((arch, "Visual Studio 11 Win64"))
+		elif "vc10" == compiler:
+			compiler_name = "vc"
+			compiler_version = 10
+			for arch in archs:
+				if "x86" == arch:
+					arch_list.append((arch, "Visual Studio 10"))
+				elif "x64" == arch:
+					arch_list.append((arch, "Visual Studio 10 Win64"))
+		elif "vc9" == compiler:
+			compiler_name = "vc"
+			compiler_version = 9
+			for arch in archs:
+				if "x86" == arch:
+					arch_list.append((arch, "Visual Studio 9 2008"))
+				elif "x64" == arch:
+					arch_list.append((arch, "Visual Studio 9 2008 Win64"))
+		elif "mingw" == compiler:
+			compiler_name = "mgw"
+			compiler_version = 0
+			for arch in archs:
+				arch_list.append((arch, "MinGW Makefiles"))
+		elif "gcc" == compiler:
+			compiler_name = "gcc"
+			compiler_version = 0
+			for arch in archs:
+				arch_list.append((arch, "Unix Makefiles"))
+		else:
+			compiler_name = ""
+			compiler_version = 0
+
+		if "vc" == compiler_name:
+			if compiler_version >= 10:
+				self.use_msbuild = True
+				self.proj_ext_name = "vcxproj"
+			else:
+				self.use_msbuild = False
+				self.proj_ext_name = "vcproj"
+		else:
+			self.use_msbuild = False
+			self.proj_ext_name = ""
+
+		self.name = compiler_name
+		self.version = compiler_version
+		self.arch_list = arch_list
+		self.cfg = cfg
+		self.platform = platform
+		self.toolset = toolset
+		
+	def msvc_add_build_command(self, batch_cmd, sln_name, proj_name, config):
+		if self.use_msbuild:
+			batch_cmd.add_command('@SET VisualStudioVersion=%d.0' % self.version)
+			batch_cmd.add_command('MSBuild %s.%s /m /v:m /p:Configuration=%s' % (proj_name, self.proj_ext_name, config))
+		else:
+			batch_cmd.add_command('devenv %s.sln /Build %s /project %s' % (sln_name, config, proj_name))
 
 class batch_command:
 	def __init__(self):

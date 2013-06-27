@@ -25,48 +25,48 @@ if __name__ == "__main__":
 	else:
 		cfg = ""
 
-	compiler_info = get_compiler_info(compiler, arch, cfg)
+	ci = compiler_info(compiler, arch, cfg)
 
-	if 0 == len(compiler_info):
+	if 0 == len(ci.name):
 		print("Wrong configuration\n")
 		sys.exit(1)
 
 	print("Building external libs...")
-	for arch in compiler_info[2]:
-		build_external_libs(compiler_info[0], compiler_info[1], arch[0], arch[1], compiler_info[3], compiler_info[4])
+	for arch in ci.arch_list:
+		build_external_libs(ci, arch[0], arch[1])
 
 	print("Building KFL...")
-	for arch in compiler_info[2]:
-		build_KFL(compiler_info[0], compiler_info[1], arch[0], arch[1], compiler_info[3], compiler_info[5])
+	for arch in ci.arch_list:
+		build_KFL(ci, arch[0], arch[1])
 
 	print("Building glloader...")
-	for arch in compiler_info[2]:
+	for arch in ci.arch_list:
 		if (arch[0] != "x86_app") and (arch[0] != "arm_app"):
-			build_glloader(compiler_info[0], compiler_info[1], arch[0], arch[1], compiler_info[3], compiler_info[5])
+			build_glloader(ci, arch[0], arch[1])
 
 	print("Building kfont...")
-	for arch in compiler_info[2]:
-		build_kfont(compiler_info[0], compiler_info[1], arch[0], arch[1], compiler_info[3], compiler_info[5])
+	for arch in ci.arch_list:
+		build_kfont(ci, arch[0], arch[1])
 
 	print("Building MeshMLLib...")
-	for arch in compiler_info[2]:
-		build_MeshMLLib(compiler_info[0], compiler_info[1], arch[0], arch[1], compiler_info[3], compiler_info[5])
+	for arch in ci.arch_list:
+		build_MeshMLLib(ci, arch[0], arch[1])
 
 	print("Building KlayGE...")
-	for arch in compiler_info[2]:
-		build_KlayGE(compiler_info[0], compiler_info[1], arch[0], arch[1], compiler_info[3], compiler_info[5])
+	for arch in ci.arch_list:
+		build_KlayGE(ci, arch[0], arch[1])
 
 	print("Building KlayGE Samples...")
-	for arch in compiler_info[2]:
+	for arch in ci.arch_list:
 		if (arch[0] != "x86_app") and (arch[0] != "arm_app"):
-			build_Samples(compiler_info[0], compiler_info[1], arch[0], arch[1], compiler_info[3], compiler_info[5])
+			build_Samples(ci, arch[0], arch[1])
 
 	print("Building KlayGE Tools...")
-	for arch in compiler_info[2]:
+	for arch in ci.arch_list:
 		if (arch[0] != "x86_app") and (arch[0] != "arm_app"):
-			build_Tools(compiler_info[0], compiler_info[1], arch[0], arch[1], compiler_info[3], compiler_info[5])
+			build_Tools(ci, arch[0], arch[1])
 
 	print("Building KlayGE Tutorials...")
-	for arch in compiler_info[2]:
+	for arch in ci.arch_list:
 		if (arch[0] != "x86_app") and (arch[0] != "arm_app"):
-			build_Tutorials(compiler_info[0], compiler_info[1], arch[0], arch[1], compiler_info[3], compiler_info[5])
+			build_Tutorials(ci, arch[0], arch[1])

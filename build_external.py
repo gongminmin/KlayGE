@@ -10,17 +10,17 @@ def copy_to_dst(src_name, dst_dir):
 	import shutil
 	shutil.copy(src_name, dst_dir)
 
-def build_Boost(compiler_name, compiler_version, compiler_arch, config_list, platform):
+def build_Boost(compiler_info, compiler_arch):
 	os.chdir("External/boost")
-	if "win32" == platform:
+	if "win32" == compiler_info.platform:
 		if not os.path.exists("bjam.exe"):
 			os.system("bootstrap.bat")
-	elif "linux" == platform:
+	elif "linux" == compiler_info.platform:
 		if not os.path.exists("./bjam"):
 			os.system("bootstrap.sh")
 
-	if "vc" == compiler_name:
-		boost_toolset = "ms%s-%d.0" % (compiler_name, compiler_version)
+	if "vc" == compiler_info.name:
+		boost_toolset = "ms%s-%d.0" % (compiler_info.name, compiler_info.version)
 	else:
 		boost_toolset = "gcc"
 		
@@ -29,10 +29,10 @@ def build_Boost(compiler_name, compiler_version, compiler_arch, config_list, pla
 		address_model = 64
 	
 	options = ""
-	if "vc" == compiler_name:
-		if compiler_version >= 10:
+	if "vc" == compiler_info.name:
+		if compiler_info.version >= 10:
 			options += " --without-regex"
-		if compiler_version >= 11:
+		if compiler_info.version >= 11:
 			options += " --without-atomic --without-chrono --without-date_time --without-filesystem --without-system --without-thread"
 	else:
 		options += " --without-atomic --without-date_time --without-regex"
@@ -43,35 +43,35 @@ def build_Boost(compiler_name, compiler_version, compiler_arch, config_list, pla
 		options += " architecture=x86 --without-filesystem --without-program_options define=\"WINAPI_FAMILY=WINAPI_FAMILY_APP\" define=BOOST_NO_ANSI_APIS cxxflags=\"/ZW /EHsc\""
 	elif ("arm_app" == compiler_arch):
 		options += " architecture=arm --without-filesystem --without-program_options define=\"WINAPI_FAMILY=WINAPI_FAMILY_APP\" define=BOOST_NO_ANSI_APIS cxxflags=\"/ZW /EHsc\""
-	if "vc" == compiler_name:
+	if "vc" == compiler_info.name:
 		options += " cxxflags=-wd4819 cxxflags=-wd4910 define=_CRT_SECURE_NO_DEPRECATE define=_SCL_SECURE_NO_DEPRECATE"
 
 	config = ""
-	if "Debug" in config_list:
+	if "Debug" in compiler_info.cfg:
 		config += " debug"
-	if ("Release" in config_list) or ("RelWithDebInfo" in config_list) or ("MinSizeRel" in config_list):
+	if ("Release" in compiler_info.cfg) or ("RelWithDebInfo" in compiler_info.cfg) or ("MinSizeRel" in compiler_info.cfg):
 		config += " release"
 		
-	if "vc" == compiler_name:
-		compiler_version_str = "%d" % compiler_version
+	if "vc" == compiler_info.name:
+		compiler_version_str = "%d" % compiler_info.version
 	else:
 		compiler_version_str = ""
 
 	build_cmd = batch_command()
-	build_cmd.add_command('bjam.exe --toolset=%s --stagedir=./lib_%s%s_%s --builddir=./ address-model=%d %s link=shared runtime-link=shared threading=multi stage %s' % (boost_toolset, compiler_name, compiler_version_str, compiler_arch, address_model, options, config))
+	build_cmd.add_command('bjam.exe --toolset=%s --stagedir=./lib_%s%s_%s --builddir=./ address-model=%d %s link=shared runtime-link=shared threading=multi stage %s' % (boost_toolset, compiler_info.name, compiler_version_str, compiler_arch, address_model, options, config))
 	build_cmd.execute()
 
 	os.chdir("../../")
 
-def build_Python(compiler_name, compiler_version, compiler_arch, config_list, platform):
-	if "win32" == platform:
-		if "vc" == compiler_name:
-			if compiler_version >= 11:
+def build_Python(compiler_info, compiler_arch):
+	if "win32" == compiler_info.platform:
+		if "vc" == compiler_info.name:
+			if compiler_info.version >= 11:
 				os.chdir("External/Python/vc-11_0")
 			else:
 				os.chdir("External/Python/PCbuild")
-			if compiler_version >= 10:
-				sln_suffix = "%d" % compiler_version
+			if compiler_info.version >= 10:
+				sln_suffix = "%d" % compiler_info.version
 			else:
 				sln_suffix = ""
 
@@ -83,13 +83,13 @@ def build_Python(compiler_name, compiler_version, compiler_arch, config_list, pl
 				arch = "Win32"
 				subdir = ""
 			configs = []
-			if "Debug" in config_list:
+			if "Debug" in compiler_info.cfg:
 				configs.append("Debug")
-			if ("Release" in config_list) or ("RelWithDebInfo" in config_list) or ("MinSizeRel" in config_list):
+			if ("Release" in compiler_info.cfg) or ("RelWithDebInfo" in compiler_info.cfg) or ("MinSizeRel" in compiler_info.cfg):
 				configs.append("Release")
 
 			build_cmd = batch_command()
-			build_cmd.add_command('CALL "%%VS%d0COMNTOOLS%%..\\..\\VC\\vcvarsall.bat" %s' % (compiler_version, compiler_arch))
+			build_cmd.add_command('CALL "%%VS%d0COMNTOOLS%%..\\..\\VC\\vcvarsall.bat" %s' % (compiler_info.version, compiler_arch))
 			for cfg in configs:
 				build_cmd.add_command('devenv pcbuild%s.sln /Build "%s|%s"' % (sln_suffix, cfg, arch))
 				build_cmd.add_command('move /Y %s*.pyd ..\\DLLs\\%s' % (subdir, subdir))
@@ -102,7 +102,7 @@ def build_Python(compiler_name, compiler_version, compiler_arch, config_list, pl
 				build_cmd.add_command('move /Y %spython%s.exe ..\\%s' % (subdir, suffix, subdir))
 			build_cmd.execute()
 			os.chdir("../../../")
-		elif "mgw" == compiler_name:
+		elif "mgw" == compiler_info.name:
 			print("Currently Python can't be build by MinGW directly. Please build it by MSVC first\n");
 			os.chdir("External/Python/DLLs")
 			os.system("dlltool -D python32.dll -d python32.def -l libpython32.a")
@@ -110,29 +110,29 @@ def build_Python(compiler_name, compiler_version, compiler_arch, config_list, pl
 			os.system("dlltool -D python32_d.dll -d python32_d.def -l libpython32_d.a")
 			os.system("move /Y libpython32_d.a ..\libs\"")
 			os.chdir("../../../")
-	elif "linux" == platform:
+	elif "linux" == compiler_info.platform:
 		os.chdir("External/Python")
 		os.system("./configure")
 		os.system("make")
 		os.chdir("../../")
 
-def build_libogg(compiler_name, compiler_version, compiler_arch, config_list, platform, ide_name, ide_version):
-	if "win32" == platform:
-		if "vc" == compiler_name:
+def build_libogg(compiler_info, compiler_arch, ide_name, ide_version):
+	if "win32" == compiler_info.platform:
+		if "vc" == compiler_info.name:
 			if "x64" == compiler_arch:
 				arch = "x64"
 				compiler_arch = "x86_amd64"
 			else:
 				arch = "Win32"
 			configs = []
-			if "Debug" in config_list:
+			if "Debug" in compiler_info.cfg:
 				configs.append("Debug")
-			if ("Release" in config_list) or ("RelWithDebInfo" in config_list) or ("MinSizeRel" in config_list):
+			if ("Release" in compiler_info.cfg) or ("RelWithDebInfo" in compiler_info.cfg) or ("MinSizeRel" in compiler_info.cfg):
 				configs.append("Release")
 				
 			os.chdir("External/libogg/win32/%s%d" % (ide_name, ide_version))
 			build_cmd = batch_command()
-			build_cmd.add_command('CALL "%%VS%d0COMNTOOLS%%..\\..\\VC\\vcvarsall.bat" %s' % (compiler_version, compiler_arch))
+			build_cmd.add_command('CALL "%%VS%d0COMNTOOLS%%..\\..\\VC\\vcvarsall.bat" %s' % (compiler_info.version, compiler_arch))
 			for cfg in configs:
 				build_cmd.add_command('devenv libogg_static.sln /Build "%s|%s"' % (cfg, arch))
 				if "Debug" == cfg:
@@ -142,7 +142,7 @@ def build_libogg(compiler_name, compiler_version, compiler_arch, config_list, pl
 				build_cmd.add_command('move /Y %s\\%s\\libogg_static.lib ..\\..\\lib\\%s\\libogg_static%s.lib' % (arch, cfg, arch, suffix))
 			build_cmd.execute()
 			os.chdir("../../../../")
-		elif "mgw" == compiler_name:
+		elif "mgw" == compiler_info.name:
 			os.chdir("External/libogg")
 			build_cmd = batch_command()
 			build_cmd.add_command("@set PATH=%PATH%;C:\\MinGW\\msys\\1.0\\bin")
@@ -152,7 +152,7 @@ def build_libogg(compiler_name, compiler_version, compiler_arch, config_list, pl
 			build_cmd.add_command("mingw32-make.exe clean")
 			build_cmd.execute()
 			os.chdir("../../")
-	elif "linux" == platform:
+	elif "linux" == compiler_info.platform:
 		os.chdir("External/libogg")
 		os.system("./configure --disable-shared")
 		os.system("make")
@@ -160,23 +160,23 @@ def build_libogg(compiler_name, compiler_version, compiler_arch, config_list, pl
 		os.system("make clean")
 		os.chdir("../../")
 
-def build_libvorbis(compiler_name, compiler_version, compiler_arch, config_list, platform, ide_name, ide_version):
-	if "win32" == platform:
-		if "vc" == compiler_name:
+def build_libvorbis(compiler_info, compiler_arch, ide_name, ide_version):
+	if "win32" == compiler_info.platform:
+		if "vc" == compiler_info.name:
 			if "x64" == compiler_arch:
 				arch = "x64"
 				compiler_arch = "x86_amd64"
 			else:
 				arch = "Win32"
 			configs = []
-			if "Debug" in config_list:
+			if "Debug" in compiler_info.cfg:
 				configs.append("Debug")
-			if ("Release" in config_list) or ("RelWithDebInfo" in config_list) or ("MinSizeRel" in config_list):
+			if ("Release" in compiler_info.cfg) or ("RelWithDebInfo" in compiler_info.cfg) or ("MinSizeRel" in compiler_info.cfg):
 				configs.append("Release")
 
 			os.chdir("External/libvorbis/win32/%s%d" % (ide_name, ide_version))
 			build_cmd = batch_command()
-			build_cmd.add_command('CALL "%%VS%d0COMNTOOLS%%..\\..\\VC\\vcvarsall.bat" %s' % (compiler_version, compiler_arch))
+			build_cmd.add_command('CALL "%%VS%d0COMNTOOLS%%..\\..\\VC\\vcvarsall.bat" %s' % (compiler_info.version, compiler_arch))
 			for cfg in configs:
 				build_cmd.add_command('devenv vorbis_static.sln /Build "%s|%s"' % (cfg, arch))
 				if "Debug" == cfg:
@@ -187,7 +187,7 @@ def build_libvorbis(compiler_name, compiler_version, compiler_arch, config_list,
 				build_cmd.add_command('move /Y %s\\%s\\libvorbisfile_static.lib ..\\..\\libs\\%s\\libvorbisfile_static%s.lib' % (arch, cfg, arch, suffix))
 			build_cmd.execute()
 			os.chdir("../../../../")
-		elif "mgw" == compiler_name:
+		elif "mgw" == compiler_info.name:
 			os.chdir("External/libvorbis")
 			build_cmd = batch_command()
 			build_cmd.add_command("@set PATH=%PATH%;C:\\MinGW\\msys\\1.0\\bin")
@@ -198,7 +198,7 @@ def build_libvorbis(compiler_name, compiler_version, compiler_arch, config_list,
 			build_cmd.add_command("mingw32-make.exe clean")
 			build_cmd.execute()
 			os.chdir("../../")
-	elif "linux" == platform:
+	elif "linux" == compiler_info.platform:
 		os.chdir("External/libvorbis")
 		os.system("./configure --disable-shared --with-ogg=\"%s\"" % (os.path.realpath(os.path.abspath(".") + "/../libogg")))
 		os.system("make")
@@ -207,41 +207,41 @@ def build_libvorbis(compiler_name, compiler_version, compiler_arch, config_list,
 		os.system("make clean")
 		os.chdir("../../")
 
-def build_freetype(compiler_name, compiler_version, compiler_arch, config_list, platform, ide_version):
-	if "win32" == platform:
-		if "vc" == compiler_name:
+def build_freetype(compiler_info, compiler_arch, ide_version):
+	if "win32" == compiler_info.platform:
+		if "vc" == compiler_info.name:
 			if "x64" == compiler_arch:
 				arch = "x64"
 				compiler_arch = "x86_amd64"
 			else:
 				arch = "Win32"
 			configs = []
-			if "Debug" in config_list:
+			if "Debug" in compiler_info.cfg:
 				configs.append("Debug")
-			if ("Release" in config_list) or ("RelWithDebInfo" in config_list) or ("MinSizeRel" in config_list):
+			if ("Release" in compiler_info.cfg) or ("RelWithDebInfo" in compiler_info.cfg) or ("MinSizeRel" in compiler_info.cfg):
 				configs.append("Release")
 
 			os.chdir("External/freetype/builds/win32/vc%s" % ide_version)
 			build_cmd = batch_command()
-			build_cmd.add_command('CALL "%%VS%d0COMNTOOLS%%..\\..\\VC\\vcvarsall.bat" %s' % (compiler_version, compiler_arch))
+			build_cmd.add_command('CALL "%%VS%d0COMNTOOLS%%..\\..\\VC\\vcvarsall.bat" %s' % (compiler_info.version, compiler_arch))
 			for cfg in configs:
 				build_cmd.add_command('devenv freetype.sln /Build "%s|%s"' % (cfg, arch))
 			build_cmd.execute()
 			os.chdir("../../../../../")
-		elif "mgw" == compiler_name:
+		elif "mgw" == compiler_info.name:
 			os.chdir("External/freetype")
 			os.system("mingw32-make.exe")
 			os.system("mingw32-make.exe")
 			copy_to_dst("objs\\freetype.a", "objs\\libfreetype.a")
 			os.chdir("../../")
-	elif "linux" == platform:
+	elif "linux" == compiler_info.platform:
 		os.chdir("External/freetype")
 		os.system("./configure")
 		os.system("make")
 		os.chdir("../../")
 
-def build_7z(compiler_name, compiler_version, compiler_arch, config_list, platform):
-	if "win32" == platform:
+def build_7z(compiler_info, compiler_arch):
+	if "win32" == compiler_info.platform:
 		if "x64" == compiler_arch:
 			arch = "x64"
 			compiler_arch = "x86_amd64"
@@ -258,46 +258,46 @@ def build_7z(compiler_name, compiler_version, compiler_arch, config_list, platfo
 			arch = "Win32"
 			folder_suffix = ""
 		configs = []
-		if "Debug" in config_list:
+		if "Debug" in compiler_info.cfg:
 			configs.append("Debug")
-		if ("Release" in config_list) or ("RelWithDebInfo" in config_list) or ("MinSizeRel" in config_list):
+		if ("Release" in compiler_info.cfg) or ("RelWithDebInfo" in compiler_info.cfg) or ("MinSizeRel" in compiler_info.cfg):
 			configs.append("Release")
 
-		os.chdir("External/7z/build/%s-%d_0%s" % (compiler_name, compiler_version, folder_suffix))
+		os.chdir("External/7z/build/%s-%d_0%s" % (compiler_info.name, compiler_info.version, folder_suffix))
 		build_cmd = batch_command()
-		build_cmd.add_command('CALL "%%VS%d0COMNTOOLS%%..\\..\\VC\\vcvarsall.bat" %s' % (compiler_version, compiler_arch))
+		build_cmd.add_command('CALL "%%VS%d0COMNTOOLS%%..\\..\\VC\\vcvarsall.bat" %s' % (compiler_info.version, compiler_arch))
 		for cfg in configs:
 			build_cmd.add_command('devenv Format7zExtract.sln /Build "%s|%s"' % (cfg, arch))
 			build_cmd.add_command('devenv LzmaLib.sln /Build "%s|%s"' % (cfg, arch))
 		build_cmd.execute()
 		os.chdir("../../../../")
 			
-def build_external_libs(compiler_name, compiler_version, compiler_arch, generator_name, config_list, platform):
+def build_external_libs(compiler_info, compiler_arch, generator_name):
 	import glob
 
-	if "win32" == platform:
+	if "win32" == compiler_info.platform:
 		dst_dir = "KlayGE/bin/win_%s/" % compiler_arch
 		bat_suffix = "bat"
 		dll_suffix = "dll"
-	elif "linux" == platform:
+	elif "linux" == compiler_info.platform:
 		dst_dir = "KlayGE/bin/linux_%s/" % compiler_arch
 		bat_suffix = "sh"
 		dll_suffix = "so"
 		
-	if "vc" == compiler_name:
+	if "vc" == compiler_info.name:
 		ide_name = "VS"
-		if 11 == compiler_version:
+		if 11 == compiler_info.version:
 			ide_version = 2012
-		elif 10 == compiler_version:
+		elif 10 == compiler_info.version:
 			ide_version = 2010
-		elif 9 == compiler_version:
+		elif 9 == compiler_info.version:
 			ide_version = 2008
-		elif 8 == compiler_version:
+		elif 8 == compiler_info.version:
 			ide_version = 2005
-	elif "mgw" == compiler_name:
+	elif "mgw" == compiler_info.name:
 		ide_name = "mingw"
 		ide_version = 0
-	elif "gcc" == compiler_name:
+	elif "gcc" == compiler_info.name:
 		ide_name = "gcc"
 		ide_version = 0
 	else:
@@ -306,18 +306,18 @@ def build_external_libs(compiler_name, compiler_version, compiler_arch, generato
 
 
 	print("\nBuilding boost...\n")
-	build_Boost(compiler_name, compiler_version, compiler_arch, config_list, platform)
+	build_Boost(compiler_info, compiler_arch)
 
-	if "vc" == compiler_name:
-		compiler_version_str = "%d" % compiler_version
+	if "vc" == compiler_info.name:
+		compiler_version_str = "%d" % compiler_info.version
 	else:
 		compiler_version_str = ""
-	for fname in glob.iglob("External/boost/lib_%s%s_%s/lib/*.%s" % (compiler_name, compiler_version_str, compiler_arch, dll_suffix)):
+	for fname in glob.iglob("External/boost/lib_%s%s_%s/lib/*.%s" % (compiler_info.name, compiler_version_str, compiler_arch, dll_suffix)):
 		copy_to_dst(fname, dst_dir)
 
 	if (compiler_arch != "x86_app") and (compiler_arch != "arm_app"):
 		print("\nBuilding Python...\n")
-		build_Python(compiler_name, compiler_version, compiler_arch, config_list, platform)
+		build_Python(compiler_info, compiler_arch)
 
 		if "x64" == compiler_arch:
 			subdir = "amd64/"
@@ -337,19 +337,19 @@ def build_external_libs(compiler_name, compiler_version, compiler_arch, generato
 
 	if (compiler_arch != "x86_app") and (compiler_arch != "arm_app"):
 		print("\nBuilding libogg...\n")
-		build_libogg(compiler_name, compiler_version, compiler_arch, config_list, platform, ide_name, ide_version)
+		build_libogg(compiler_info, compiler_arch, ide_name, ide_version)
 
 	if (compiler_arch != "x86_app") and (compiler_arch != "arm_app"):
 		print("\nBuilding libvorbis...\n")
-		build_libvorbis(compiler_name, compiler_version, compiler_arch, config_list, platform, ide_name, ide_version)
+		build_libvorbis(compiler_info, compiler_arch, ide_name, ide_version)
 
 	if (compiler_arch != "x86_app") and (compiler_arch != "arm_app"):
 		print("\nBuilding freetype...\n")
-		build_freetype(compiler_name, compiler_version, compiler_arch, config_list, platform, ide_version)
+		build_freetype(compiler_info, compiler_arch, ide_version)
 
-	if ("vc" == compiler_name):
+	if ("vc" == compiler_info.name):
 		print("\nBuilding 7z...\n")
-		build_7z(compiler_name, compiler_version, compiler_arch, config_list, platform)
+		build_7z(compiler_info, compiler_arch)
 
 		if "x64" == compiler_arch:
 			subdir = "x64/"
@@ -363,17 +363,17 @@ def build_external_libs(compiler_name, compiler_version, compiler_arch, generato
 		else:
 			subdir = ""
 			folder_suffix = ""
-		copy_to_dst("External/7z/build/%s-%d_0%s/%sRelease/7zxa.%s" % (compiler_name, compiler_version, folder_suffix, subdir, dll_suffix), dst_dir)
-		copy_to_dst("External/7z/build/%s-%d_0%s/%sRelease/LZMA.%s" % (compiler_name, compiler_version, folder_suffix, subdir, dll_suffix), dst_dir)
+		copy_to_dst("External/7z/build/%s-%d_0%s/%sRelease/7zxa.%s" % (compiler_info.name, compiler_info.version, folder_suffix, subdir, dll_suffix), dst_dir)
+		copy_to_dst("External/7z/build/%s-%d_0%s/%sRelease/LZMA.%s" % (compiler_info.name, compiler_info.version, folder_suffix, subdir, dll_suffix), dst_dir)
 
 	if (compiler_arch != "x86_app") and (compiler_arch != "arm_app"):
-		if "win32" == platform:
+		if "win32" == compiler_info.platform:
 			print("\nSeting up DXSDK...\n")
 
 			copy_to_dst("External/DXSDK/Redist/%s/d3dcompiler_46.%s" % (compiler_arch, dll_suffix), dst_dir)
 
 	if (compiler_arch != "x86_app") and (compiler_arch != "arm_app"):
-		if "win32" == platform:
+		if "win32" == compiler_info.platform:
 			print("\nSeting up OpenAL SDK...\n")
 
 			copy_to_dst("External/OpenALSDK/redist/%s/OpenAL32.%s" % (compiler_arch, dll_suffix), dst_dir)
@@ -401,11 +401,11 @@ if __name__ == "__main__":
 	else:
 		cfg = ""
 
-	compiler_info = get_compiler_info(compiler, arch, cfg)
+	ci = compiler_info(compiler, arch, cfg)
 
-	if 0 == len(compiler_info):
+	if 0 == len(ci.name):
 		print("Wrong configuration\n")
 		sys.exit(1)
 
-	for arch in compiler_info[2]:
-		build_external_libs(compiler_info[0], compiler_info[1], arch[0], arch[1], compiler_info[3], compiler_info[4])
+	for arch in ci.arch_list:
+		build_external_libs(ci, arch[0], arch[1])
