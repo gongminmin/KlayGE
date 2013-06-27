@@ -1343,6 +1343,7 @@ namespace KlayGE
 		predefined_ps_out_varyings_add_num += "\n";
 
 		std::stringstream ss;
+		ss << "#version 120" << std::endl << std::endl;
 		switch (type)
 		{
 		case ST_VertexShader:
@@ -1877,10 +1878,6 @@ namespace KlayGE
 			|| !re.DeviceCaps().texture_format_support(EF_BC5_SRGB))
 		{
 			args.push_back("-DKLAYGE_BC5_AS_AG");
-		}
-		else
-		{
-			args.push_back("-DKLAYGE_BC5_AS_GA");
 		}
 		if (!re.DeviceCaps().texture_format_support(EF_BC4)
 			|| !re.DeviceCaps().texture_format_support(EF_BC4_SRGB))
@@ -2664,7 +2661,7 @@ namespace KlayGE
 
 		glAttachShader(glsl_program_, object);
 
-		if (ST_GeometryShader == type)
+		if ((ST_GeometryShader == type) && (glloader_GL_VERSION_3_2() || glloader_GL_EXT_geometry_shader4()))
 		{
 			glProgramParameteriEXT(glsl_program_, GL_GEOMETRY_INPUT_TYPE_EXT, gs_input_type_);
 			glProgramParameteriEXT(glsl_program_, GL_GEOMETRY_OUTPUT_TYPE_EXT, gs_output_type_);

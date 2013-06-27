@@ -142,6 +142,7 @@ namespace KlayGE
 
 		void HDREnabled(bool hdr);
 		void PPAAEnabled(int aa);
+		void GammaEnabled(bool gamma);
 		void ColorGradingEnabled(bool cg);
 
 		// Render a frame when no pending message

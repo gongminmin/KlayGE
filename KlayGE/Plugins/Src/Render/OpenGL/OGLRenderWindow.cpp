@@ -291,7 +291,7 @@ namespace KlayGE
 		}
 #endif
 
-		if (!glloader_GL_VERSION_2_0() || !glloader_GL_EXT_framebuffer_object())
+		if (!glloader_GL_VERSION_2_1() || !glloader_GL_EXT_framebuffer_object())
 		{
 			THR(errc::function_not_supported);
 		}

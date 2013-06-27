@@ -389,7 +389,7 @@ namespace
 
 				*(technique_->Effect().ParameterByName("src_tex")) = spread_tex_;
 
-				re.BindFrameBuffer(FrameBufferPtr());
+				re.BindFrameBuffer(frame_buffer_);
 				re.Render(*technique_, *normalization_rl_);
 			}
 			else
@@ -602,9 +602,20 @@ namespace
 				merge_bokeh_pp_->SetParam(5, static_cast<float>(in_width + max_radius_ * 4));
 				merge_bokeh_pp_->InputPin(0, bokeh_tex_);
 			}
+			else
+			{
+				merge_bokeh_pp_->InputPin(index, tex);
+			}
 		}
 
 		using PostProcess::InputPin;
+
+		void OutputPin(uint32_t index, TexturePtr const & tex, int level, int array_index, int face)
+		{
+			merge_bokeh_pp_->OutputPin(index, tex, level, array_index, face);
+		}
+
+		using PostProcess::OutputPin;
 
 		void Apply()
 		{
@@ -620,7 +631,6 @@ namespace
 
 			merge_bokeh_pp_->SetParam(3, float2(-focus_plane_ / focus_range_, 1.0f / focus_range_));
 			merge_bokeh_pp_->SetParam(4, focus_plane_);
-			merge_bokeh_pp_->InputPin(1, this->InputPin(1));
 			merge_bokeh_pp_->Apply();
 		}
 
@@ -894,24 +904,25 @@ void MotionBlurDoFApp::OnResize(uint32_t width, uint32_t height)
 	motion_vec_fb_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*motion_vec_tex_, 0, 1, 0));
 	motion_vec_fb_->Attach(FrameBuffer::ATT_DepthStencil, ds_view);
 
-	mbed_tex_ = rf.MakeTexture2D(width, height, 1, 1, color_fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
+	dof_tex_ = rf.MakeTexture2D(width, height, 1, 1, color_fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
 
-	motion_blur_->InputPin(0, color_tex_);
-	motion_blur_->InputPin(1, depth_tex_);
-	motion_blur_->InputPin(2, motion_vec_tex_);
-	motion_blur_->OutputPin(0, mbed_tex_);
-	motion_blur_copy_pp_->InputPin(0, color_tex_);
-	motion_blur_copy_pp_->OutputPin(0, mbed_tex_);
-
-	depth_of_field_->InputPin(0, mbed_tex_);
+	depth_of_field_->InputPin(0, color_tex_);
 	depth_of_field_->InputPin(1, depth_tex_);
-	depth_of_field_copy_pp_->InputPin(0, mbed_tex_);
+	depth_of_field_->OutputPin(0, dof_tex_);
+	depth_of_field_copy_pp_->InputPin(0, color_tex_);
+	depth_of_field_copy_pp_->OutputPin(0, dof_tex_);
 
 	if (bokeh_filter_)
 	{
-		bokeh_filter_->InputPin(0, mbed_tex_);
+		bokeh_filter_->InputPin(0, color_tex_);
 		bokeh_filter_->InputPin(1, depth_tex_);
+		bokeh_filter_->OutputPin(0, dof_tex_);
 	}
+
+	motion_blur_->InputPin(0, dof_tex_);
+	motion_blur_->InputPin(1, depth_tex_);
+	motion_blur_->InputPin(2, motion_vec_tex_);
+	motion_blur_copy_pp_->InputPin(0, dof_tex_);
 
 	UIManager::Instance().SettleCtrls(width, height);
 }
@@ -1161,14 +1172,6 @@ uint32_t MotionBlurDoFApp::DoUpdate(uint32_t pass)
 		color_tex_->BuildMipSubLevels();
 		depth_tex_->BuildMipSubLevels();
 
-		if (mb_on_)
-		{
-			motion_blur_->Apply();
-		}
-		else
-		{
-			motion_blur_copy_pp_->Apply();
-		}
 		if (dof_on_)
 		{
 			depth_of_field_->Apply();
@@ -1180,6 +1183,14 @@ uint32_t MotionBlurDoFApp::DoUpdate(uint32_t pass)
 		else
 		{
 			depth_of_field_copy_pp_->Apply();
+		}
+		if (mb_on_)
+		{
+			motion_blur_->Apply();
+		}
+		else
+		{
+			motion_blur_copy_pp_->Apply();
 		}
 
 		renderEngine.BindFrameBuffer(FrameBufferPtr());

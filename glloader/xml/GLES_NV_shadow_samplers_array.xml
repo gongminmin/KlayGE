@@ -1,0 +1,7 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GLES_NV_shadow_samplers_array" reg_no="146">
+	<tokens>
+		<token name="GL_SAMPLER_2D_ARRAY_SHADOW_NV" value="0x8DC4"/>
+	</tokens>
+</gl_extension>

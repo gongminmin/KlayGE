@@ -184,7 +184,6 @@ namespace
 int SampleMain()
 {
 	ContextCfg cfg = Context::Instance().Config();
-	cfg.graphics_cfg.hdr = false;
 	cfg.deferred_rendering = true;
 	Context::Instance().Config(cfg);
 

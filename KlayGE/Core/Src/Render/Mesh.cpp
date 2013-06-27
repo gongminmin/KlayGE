@@ -389,6 +389,16 @@ namespace KlayGE
 		}
 	}
 
+	void RenderModel::ModelMatrix(float4x4 const & mat)
+	{
+		Renderable::ModelMatrix(mat);
+		typedef KLAYGE_DECLTYPE(meshes_) MeshesType;
+		KLAYGE_FOREACH(MeshesType::const_reference mesh, meshes_)
+		{
+			mesh->ModelMatrix(mat);
+		}
+	}
+
 	void RenderModel::Pass(PassType type)
 	{
 		Renderable::Pass(type);
@@ -484,11 +494,11 @@ namespace KlayGE
 				tl = ASyncLoadTexture(iter->second, EAH_GPU_Read | EAH_Immutable);
 			}
 
-			if (("Diffuse Color" == iter->first) || ("Diffuse Color Map" == iter->first))
+			if (("Color" == iter->first) || ("Diffuse Color" == iter->first) || ("Diffuse Color Map" == iter->first))
 			{
 				diffuse_tl_ = tl;
 			}
-			else if (("Specular Level" == iter->first) || ("Reflection Glossiness Map" == iter->first))
+			else if (("Specular Level" == iter->first) || ("Glossiness" == iter->first) || ("Reflection Glossiness Map" == iter->first))
 			{
 				specular_tl_ = tl;
 			}
@@ -957,7 +967,11 @@ namespace KlayGE
 #if (defined KLAYGE_PLATFORM_WINDOWS_DESKTOP) || (defined KLAYGE_PLATFORM_LINUX)
 		if (jit)
 		{
-			if (system(("MeshMLJIT \"" + meshml_name + "\" N10 " + "\"" + path_name + jit_ext_name + "\" -q").c_str()) != 0)
+			std::string meshmljit_name = "MeshMLJIT";
+#ifdef KLAYGE_DEBUG
+			meshmljit_name += "_d";
+#endif
+			if (system((meshmljit_name + " \"" + meshml_name + "\" N10 " + "\"" + path_name + jit_ext_name + "\" -q").c_str()) != 0)
 			{
 				LogError("MeshMLJIT failed. Forgot to build Tools?");
 			}
@@ -1962,5 +1976,41 @@ namespace KlayGE
 	void RenderableLightSourceProxy::AttachLightSrc(LightSourcePtr const & light)
 	{
 		light_ = light;
+	}
+
+
+	RenderableCameraProxy::RenderableCameraProxy(RenderModelPtr const & model, std::wstring const & name)
+			: StaticMesh(model, name)
+	{
+		RenderEffectPtr effect = SyncLoadRenderEffect("CameraProxy.fxml");
+
+		if (deferred_effect_)
+		{
+			this->BindDeferredEffect(effect);
+			depth_tech_ = effect->TechniqueByName("DepthCameraProxyTech");
+			gbuffer_rt0_tech_ = effect->TechniqueByName("GBufferCameraProxyRT0Tech");
+			gbuffer_rt1_tech_ = effect->TechniqueByName("GBufferCameraProxyRT1Tech");
+			gbuffer_mrt_tech_ = effect->TechniqueByName("GBufferCameraProxyMRTTech");
+		}
+
+		this->Technique(effect->TechniqueByName("CameraProxy"));
+	}
+
+	void RenderableCameraProxy::Technique(RenderTechniquePtr const & tech)
+	{
+		technique_ = tech;
+		if (tech)
+		{
+			mvp_param_ = technique_->Effect().ParameterByName("mvp");
+			pos_center_param_ = technique_->Effect().ParameterByName("pos_center");
+			pos_extent_param_ = technique_->Effect().ParameterByName("pos_extent");
+			tc_center_param_ = technique_->Effect().ParameterByName("tc_center");
+			tc_extent_param_ = technique_->Effect().ParameterByName("tc_extent");
+		}
+	}
+
+	void RenderableCameraProxy::AttachCamera(CameraPtr const & camera)
+	{
+		camera_ = camera;
 	}
 }

@@ -50,7 +50,7 @@ private:
 	KlayGE::TexturePtr ds_tex_;
 	KlayGE::TexturePtr depth_tex_;
 	KlayGE::TexturePtr motion_vec_tex_;
-	KlayGE::TexturePtr mbed_tex_;
+	KlayGE::TexturePtr dof_tex_;
 
 	KlayGE::PostProcessPtr depth_of_field_;
 	KlayGE::PostProcessPtr bokeh_filter_;

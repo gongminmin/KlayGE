@@ -183,8 +183,8 @@ def build_libvorbis(compiler_name, compiler_version, compiler_arch, config_list,
 					suffix = "_d"
 				else:
 					suffix = ""
-				build_cmd.add_command('move /Y %s\\%s\\libvorbis_static%s.lib ..\\..\\libs\\%s\\libvorbis_static%s.lib' % (arch, cfg, suffix, arch, suffix))
-				build_cmd.add_command('move /Y %s\\%s\\libvorbisfile_static%s.lib ..\\..\\libs\\%s\\libvorbisfile_static%s.lib' % (arch, cfg, suffix, arch, suffix))
+				build_cmd.add_command('move /Y %s\\%s\\libvorbis_static.lib ..\\..\\libs\\%s\\libvorbis_static%s.lib' % (arch, cfg, arch, suffix))
+				build_cmd.add_command('move /Y %s\\%s\\libvorbisfile_static.lib ..\\..\\libs\\%s\\libvorbisfile_static%s.lib' % (arch, cfg, arch, suffix))
 			build_cmd.execute()
 			os.chdir("../../../../")
 		elif "mgw" == compiler_name:

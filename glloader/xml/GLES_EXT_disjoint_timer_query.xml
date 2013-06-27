@@ -1,0 +1,85 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GLES_EXT_disjoint_timer_query" reg_no="150">
+	<tokens>
+		<token name="GL_QUERY_COUNTER_BITS_EXT" value="0x8864"/>
+		<token name="GL_CURRENT_QUERY_EXT" value="0x8865"/>
+		<token name="GL_QUERY_RESULT_EXT" value="0x8866"/>
+		<token name="GL_QUERY_RESULT_AVAILABLE_EXT" value="0x8867"/>
+		<token name="GL_TIME_ELAPSED_EXT" value="0x88BF"/>
+		<token name="GL_TIMESTAMP_EXT" value="0x8E28"/>
+		<token name="GL_GPU_DISJOINT_EXT" value="0x8FBB"/>
+	</tokens>
+
+	<functions>
+		<function name="glGenQueriesEXT" return="void">
+			<params>
+				<param type="GLsizei" name="n"/>
+				<param type="GLuint*" name="ids"/>
+			</params>
+		</function>
+		<function name="glDeleteQueriesEXT" return="void">
+			<params>
+				<param type="GLsizei" name="n"/>
+				<param type="const GLuint*" name="ids"/>
+			</params>
+		</function>
+		<function name="glIsQueryEXT" return="GLboolean">
+			<params>
+				<param type="GLuint" name="id"/>
+			</params>
+		</function>
+		<function name="glBeginQueryEXT" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLuint" name="id"/>
+			</params>
+		</function>
+		<function name="glEndQueryEXT" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+			</params>
+		</function>
+		<function name="glQueryCounterEXT" return="void">
+			<params>
+				<param type="GLuint" name="id"/>
+				<param type="GLenum" name="target"/>
+			</params>
+		</function>
+		<function name="glGetQueryivEXT" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLint*" name="params"/>
+			</params>
+		</function>
+		<function name="glGetQueryObjectivEXT" return="void">
+			<params>
+				<param type="GLuint" name="id"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLint*" name="params"/>
+			</params>
+		</function>
+		<function name="glGetQueryObjectuivEXT" return="void">
+			<params>
+				<param type="GLuint" name="id"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLuint*" name="params"/>
+			</params>
+		</function>
+		<function name="glGetQueryObjecti64vEXT" return="void">
+			<params>
+				<param type="GLuint" name="id"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLint64*" name="params"/>
+			</params>
+		</function>
+		<function name="glGetQueryObjectui64vEXT" return="void">
+			<params>
+				<param type="GLuint" name="id"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLuint64*" name="params"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

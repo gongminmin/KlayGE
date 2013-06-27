@@ -265,6 +265,13 @@ namespace
 
 int SampleMain()
 {
+	ContextCfg cfg = Context::Instance().Config();
+	cfg.graphics_cfg.hdr = false;
+	cfg.graphics_cfg.gamma = false;
+	cfg.graphics_cfg.ppaa = false;
+	cfg.graphics_cfg.color_grading = false;
+	Context::Instance().Config(cfg);
+
 	JudaTexViewer app;
 	app.Create();
 	app.Run();
@@ -365,7 +372,7 @@ void JudaTexViewer::InputHandler(InputEngine const & /*sender*/, InputAction con
 			float2 p = float2(-param->abs_coord) / scale_ + position_;
 			float2 new_position = (position_ - p * (1 - f)) / f;
 			float new_scale = scale_ * f;
-			if (tile_size_ * new_scale > 64)
+			if (tile_size_ * new_scale > 32)
 			{
 				position_ = new_position;
 				scale_ = new_scale;
@@ -464,17 +471,20 @@ void JudaTexViewer::DoUpdateOverlay()
 	font_->RenderText(0, 0, Color(1, 1, 0, 1), L"Juda Texture Viewer", 16);
 	font_->RenderText(0, 18, Color(1, 1, 0, 1), stream.str(), 16);
 
-	for (uint32_t y = sy_; y < ey_; ++ y)
+	if (tile_size_ * scale_ > 64)
 	{
-		for (uint32_t x = sx_; x < ex_; ++ x)
+		for (uint32_t y = sy_; y < ey_; ++ y)
 		{
-			stream.str(L"");
-			stream << x << ',' << y;
-			std::wstring str = stream.str();
-			Size_T<uint32_t> s = font_->CalcSize(str, 16);
-			float fx = (position_.x() + (x + 0.5f) * tile_size_) * scale_;
-			float fy = (position_.y() + (y + 0.5f) * tile_size_) * scale_;
-			font_->RenderText(fx - s.cx() / 2.0f, fy - s.cy() / 2.0f, 0.7f, 1.0f, 1.0f, Color(1, 0, 1, 0.5f), str, 16);
+			for (uint32_t x = sx_; x < ex_; ++ x)
+			{
+				stream.str(L"");
+				stream << x << ',' << y;
+				std::wstring str = stream.str();
+				Size_T<uint32_t> s = font_->CalcSize(str, 16);
+				float fx = (position_.x() + (x + 0.5f) * tile_size_) * scale_;
+				float fy = (position_.y() + (y + 0.5f) * tile_size_) * scale_;
+				font_->RenderText(fx - s.cx() / 2.0f, fy - s.cy() / 2.0f, 0.7f, 1.0f, 1.0f, Color(1, 0, 1, 0.5f), str, 16);
+			}
 		}
 	}
 }
@@ -531,5 +541,5 @@ uint32_t JudaTexViewer::DoUpdate(uint32_t /*pass*/)
 		clear_clr.b() = 0.325f;
 	}
 	re.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, clear_clr, 1.0f, 0);
-	return App3DFramework::URV_Need_Flush | App3DFramework::URV_Skip_Postprocess | App3DFramework::URV_Finished;
+	return App3DFramework::URV_Need_Flush | App3DFramework::URV_Finished;
 }

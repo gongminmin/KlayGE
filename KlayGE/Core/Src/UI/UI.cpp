@@ -1114,8 +1114,8 @@ namespace KlayGE
 						if (dialog->GetVisible() && dialog->ContainsPoint(param->abs_coord))
 						{
 							mouse_on_ui_ = true;
-							dialog->MouseOverHandler(param->buttons_state, dialog->ToLocal(param->abs_coord));
 						}
+						dialog->MouseOverHandler(param->buttons_state, dialog->ToLocal(param->abs_coord));
 					}
 				}
 				break;
@@ -1138,8 +1138,8 @@ namespace KlayGE
 						if (dialog->GetVisible() && dialog->ContainsPoint(param->abs_coord))
 						{
 							mouse_on_ui_ = true;
-							dialog->MouseWheelHandler(param->buttons_state, dialog->ToLocal(param->abs_coord), param->wheel_delta);
 						}
+						dialog->MouseWheelHandler(param->buttons_state, dialog->ToLocal(param->abs_coord), param->wheel_delta);
 					}
 				}
 				break;
@@ -1162,14 +1162,14 @@ namespace KlayGE
 						if (dialog->GetVisible() && dialog->ContainsPoint(param->abs_coord))
 						{
 							mouse_on_ui_ = true;
-							if (param->buttons_down & MB_Left)
-							{
-								dialog->MouseDownHandler(param->buttons_down, dialog->ToLocal(param->abs_coord));
-							}
-							else if (param->buttons_up & MB_Left)
-							{
-								dialog->MouseUpHandler(param->buttons_up, dialog->ToLocal(param->abs_coord));
-							}
+						}
+						if (param->buttons_down & MB_Left)
+						{
+							dialog->MouseDownHandler(param->buttons_down, dialog->ToLocal(param->abs_coord));
+						}
+						else if (param->buttons_up & MB_Left)
+						{
+							dialog->MouseUpHandler(param->buttons_up, dialog->ToLocal(param->abs_coord));
 						}
 					}
 				}
@@ -1185,9 +1185,9 @@ namespace KlayGE
 						if (dialog->GetVisible() && dialog->ContainsPoint(param->center))
 						{
 							mouse_on_ui_ = true;
-							dialog->MouseDownHandler(MB_Left, dialog->ToLocal(param->center));
-							dialog->MouseUpHandler(MB_Left, dialog->ToLocal(param->center));
 						}
+						dialog->MouseDownHandler(MB_Left, dialog->ToLocal(param->center));
+						dialog->MouseUpHandler(MB_Left, dialog->ToLocal(param->center));
 					}
 				}
 				break;
@@ -1264,9 +1264,9 @@ namespace KlayGE
 	UIControlPtr const & UIDialog::GetControl(int ID) const
 	{
 		// Try to find the control with the given ID
-		for (size_t i = 0; i < controls_.size(); ++ i)
+		typedef KLAYGE_DECLTYPE(controls_) ControlsType;
+		KLAYGE_FOREACH(ControlsType::const_reference control, controls_)
 		{
-			UIControlPtr const & control = controls_[i];
 			if (control->GetID() == ID)
 			{
 				return control;
@@ -1281,9 +1281,9 @@ namespace KlayGE
 	UIControlPtr const & UIDialog::GetControl(int ID, uint32_t type) const
 	{
 		// Try to find the control with the given ID
-		for (size_t i = 0; i < controls_.size(); ++ i)
+		typedef KLAYGE_DECLTYPE(controls_) ControlsType;
+		KLAYGE_FOREACH(ControlsType::const_reference control, controls_)
 		{
-			UIControlPtr const & control = controls_[i];
 			if ((control->GetID() == ID) && (control->GetType() == type))
 			{
 				return control;
@@ -1299,10 +1299,9 @@ namespace KlayGE
 	{
 		// Search through all child controls for the first one which
 		// contains the mouse point
-		for (size_t i = 0; i < controls_.size(); ++ i)
+		typedef KLAYGE_DECLTYPE(controls_) ControlsType;
+		KLAYGE_FOREACH(ControlsType::const_reference control, controls_)
 		{
-			UIControlPtr const & control = controls_[i];
-
 			if (!control)
 			{
 				continue;
@@ -1504,6 +1503,26 @@ namespace KlayGE
 		bottom_right_clr_ = colorBottomRight;
 	}
 
+	bool UIDialog::ContainsPoint(int2 const & pt) const
+	{
+		bool inside = bounding_box_.PtInRect(pt);
+		if (!inside)
+		{
+			int2 const local_pt = this->ToLocal(pt);
+
+			typedef KLAYGE_DECLTYPE(controls_) ControlsType;
+			KLAYGE_FOREACH(ControlsType::const_reference control, controls_)
+			{
+				if (control->ContainsPoint(local_pt))
+				{
+					inside = true;
+					break;
+				}
+			}
+		}
+		return inside;
+	}
+
 	int2 UIDialog::ToLocal(int2 const & pt) const
 	{
 		int2 ret = pt - this->GetLocation();
@@ -1567,14 +1586,12 @@ namespace KlayGE
 	void UIDialog::ClearRadioButtonGroup(uint32_t nButtonGroup)
 	{
 		// Find all radio buttons with the given group number
-		for (size_t i = 0; i < controls_.size(); ++ i)
+		typedef KLAYGE_DECLTYPE(controls_) ControlsType;
+		KLAYGE_FOREACH(ControlsType::const_reference control, controls_)
 		{
-			UIControlPtr pControl = controls_[i];
-
-			if (UICT_RadioButton == pControl->GetType())
+			if (UICT_RadioButton == control->GetType())
 			{
-				UIRadioButton* pRadioButton = checked_cast<UIRadioButton*>(pControl.get());
-
+				UIRadioButton* pRadioButton = checked_cast<UIRadioButton*>(control.get());
 				if (pRadioButton->GetButtonGroup() == nButtonGroup)
 				{
 					pRadioButton->SetChecked(false, false);
@@ -1587,7 +1604,7 @@ namespace KlayGE
 	{
 		for (size_t i = 0; i < controls_.size(); ++ i)
 		{
-			UIControlPtr control = controls_[i];
+			UIControlPtr const & control = controls_[i];
 			if (control->GetID() == ID)
 			{
 				this->ClearFocus();
@@ -1632,9 +1649,10 @@ namespace KlayGE
 		}
 		control_mouse_over_.reset();
 
-		for (size_t i = 0; i < controls_.size(); ++ i)
+		typedef KLAYGE_DECLTYPE(controls_) ControlsType;
+		KLAYGE_FOREACH(ControlsType::const_reference control, controls_)
 		{
-			controls_[i]->Refresh();
+			control->Refresh();
 		}
 
 		if (keyboard_input_)
@@ -1668,9 +1686,9 @@ namespace KlayGE
 	void UIDialog::FocusDefaultControl()
 	{
 		// Check for default control in this dialog
-		for (size_t i = 0; i < controls_.size(); ++ i)
+		typedef KLAYGE_DECLTYPE(controls_) ControlsType;
+		KLAYGE_FOREACH(ControlsType::const_reference control, controls_)
 		{
-			UIControlPtr control = controls_[i];
 			if (control->GetIsDefault())
 			{
 				// Remove focus from the current control

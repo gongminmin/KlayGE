@@ -223,7 +223,8 @@ namespace KlayGE
 
 			float3 new_eye_pos = camera_->EyePos() + MathLib::transform_quat(movement, inv_rot_);
 
-			camera_->ViewParams(new_eye_pos, new_eye_pos + camera_->ForwardVec(), camera_->UpVec());
+			camera_->ViewParams(new_eye_pos, new_eye_pos + camera_->ForwardVec() * camera_->LookAtDist(),
+				camera_->UpVec());
 		}
 	}
 
@@ -252,7 +253,7 @@ namespace KlayGE
 			float3 view_vec = MathLib::transform_quat(float3(0, 0, 1), inv_rot_);
 			float3 up_vec = MathLib::transform_quat(float3(0, 1, 0), inv_rot_);
 
-			camera_->ViewParams(camera_->EyePos(), camera_->EyePos() + view_vec, up_vec);
+			camera_->ViewParams(camera_->EyePos(), camera_->EyePos() + view_vec * camera_->LookAtDist(), up_vec);
 		}
 	}
 
@@ -348,10 +349,11 @@ namespace KlayGE
 		{
 			dir = target_ - pos;
 		}
-		dir = MathLib::normalize(dir);
+		float dist = MathLib::length(dir);
+		dir /= dist;
 		float3 up = MathLib::cross(dir, right_);
 
-		camera_->ViewParams(pos, pos + dir, up);
+		camera_->ViewParams(pos, pos + dir * dist, up);
 	}
 
 	void TrackballCameraController::Zoom(float offset_x, float offset_y)
@@ -368,7 +370,7 @@ namespace KlayGE
 			reverse_target_ = false;
 		}
 
-		camera_->ViewParams(pos, pos + camera_->ForwardVec(), camera_->UpVec());
+		camera_->ViewParams(pos, pos + camera_->ForwardVec() * camera_->LookAtDist(), camera_->UpVec());
 	}
 
 

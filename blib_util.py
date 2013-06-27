@@ -64,6 +64,7 @@ def get_compiler_info(compiler, archs, cfg):
 		else:
 			compiler = cfg_build.compiler
 
+	toolset = cfg_build.toolset
 	if ("" == cfg_build.toolset) or ("auto" == cfg_build.toolset):
 		if "win32" == platform:
 			if "vc11" == compiler:
@@ -72,8 +73,6 @@ def get_compiler_info(compiler, archs, cfg):
 				toolset = "v100"
 			elif "vc9" == compiler:
 				toolset = "v90"
-	else:
-		toolset = cfg_build.toolset
 			
 	if "" == archs:
 		archs = cfg_build.arch

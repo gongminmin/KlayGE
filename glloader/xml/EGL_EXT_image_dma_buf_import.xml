@@ -1,0 +1,28 @@
+<?xml version='1.0'?>
+
+<gl_extension name="EGL_EXT_image_dma_buf_import" reg_no="53">
+	<tokens>
+		<token name="EGL_LINUX_DMA_BUF_EXT" value="0x3270"/>
+		<token name="EGL_LINUX_DRM_FOURCC_EXT" value="0x3271"/>
+		<token name="EGL_DMA_BUF_PLANE0_FD_EXT" value="0x3272"/>
+		<token name="EGL_DMA_BUF_PLANE0_OFFSET_EXT" value="0x3273"/>
+		<token name="EGL_DMA_BUF_PLANE0_PITCH_EXT" value="0x3274"/>
+		<token name="EGL_DMA_BUF_PLANE1_FD_EXT" value="0x3275"/>
+		<token name="EGL_DMA_BUF_PLANE1_OFFSET_EXT" value="0x3276"/>
+		<token name="EGL_DMA_BUF_PLANE1_PITCH_EXT" value="0x3277"/>
+		<token name="EGL_DMA_BUF_PLANE2_FD_EXT" value="0x3278"/>
+		<token name="EGL_DMA_BUF_PLANE2_OFFSET_EXT" value="0x3279"/>
+		<token name="EGL_DMA_BUF_PLANE2_PITCH_EXT" value="0x327A"/>
+		<token name="EGL_YUV_COLOR_SPACE_HINT_EXT" value="0x327B"/>
+		<token name="EGL_SAMPLE_RANGE_HINT_EXT" value="0x327C"/>
+		<token name="EGL_YUV_CHROMA_HORIZONTAL_SITING_HINT_EXT" value="0x327D"/>
+		<token name="EGL_YUV_CHROMA_VERTICAL_SITING_HINT_EXT" value="0x327E"/>
+		<token name="EGL_ITU_REC601_EXT" value="0x327F"/>
+		<token name="EGL_ITU_REC709_EXT" value="0x3280"/>
+		<token name="EGL_ITU_REC2020_EXT" value="0x3281"/>
+		<token name="EGL_YUV_FULL_RANGE_EXT" value="0x3282"/>
+		<token name="EGL_YUV_NARROW_RANGE_EXT" value="0x3283"/>
+		<token name="EGL_YUV_CHROMA_SITING_0_EXT" value="0x3284"/>
+		<token name="EGL_YUV_CHROMA_SITING_0_5_EXT" value="0x3285"/>
+	</tokens>
+</gl_extension>

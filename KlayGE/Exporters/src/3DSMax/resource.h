@@ -2,7 +2,8 @@
 // Microsoft Visual C++ generated include file.
 // Used by meshml.rc
 //
-#define IDD_MESHML_EXPORT               1002
+#define IDD_MESHML_EXPORT_CHS           1002
+#define IDD_MESHML_EXPORT_EN            1003
 #define IDC_JOINT_PER_VER               1007
 #define IDC_SPIN_JOINT_PER_VER          1008
 #define IDC_COMBINE_MESHES_CHECK        1024

@@ -221,6 +221,8 @@ namespace KlayGE
 
 		void AddToRenderQueue();
 
+		virtual void ModelMatrix(float4x4 const & mat) KLAYGE_OVERRIDE;
+
 		virtual void Pass(PassType type);
 
 		virtual bool SpecialShading() const;
@@ -475,13 +477,24 @@ namespace KlayGE
 	private:
 		LightSourcePtr light_;
 
-		RenderEffectParameterPtr mvp_param_;
 		RenderEffectParameterPtr model_param_;
 		RenderEffectParameterPtr light_color_param_;
 		RenderEffectParameterPtr light_falloff_param_;
 		RenderEffectParameterPtr light_is_projective_param_;
 		RenderEffectParameterPtr projective_map_2d_tex_param_;
 		RenderEffectParameterPtr projective_map_cube_tex_param_;
+	};
+
+	class KLAYGE_CORE_API RenderableCameraProxy : public StaticMesh
+	{
+	public:
+		RenderableCameraProxy(RenderModelPtr const & model, std::wstring const & name);
+		virtual void Technique(RenderTechniquePtr const & tech);
+
+		virtual void AttachCamera(CameraPtr const & camera);
+
+	private:
+		CameraPtr camera_;
 	};
 }
 

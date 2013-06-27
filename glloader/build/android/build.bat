@@ -1,4 +1,4 @@
-..\..\autogen.py
+..\..\autogen.py -q
 
 call %ANDROID_NDK%\ndk-build -j 3
 

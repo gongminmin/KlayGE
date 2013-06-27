@@ -56,6 +56,10 @@ namespace KlayGE
 			{ return *reinterpret_cast<float3 const *>(&inv_view_mat_.Row(1)); }
 		float3 const & ForwardVec() const
 			{ return *reinterpret_cast<float3 const *>(&inv_view_mat_.Row(2)); }
+		float LookAtDist() const
+		{
+			return look_at_dist_;
+		}
 
 		float FOV() const
 			{ return fov_; }

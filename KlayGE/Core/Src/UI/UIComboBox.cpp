@@ -194,11 +194,8 @@ namespace KlayGE
 		case KS_Enter:
 			if (opened_)
 			{
-				if (selected_ != focused_)
-				{
-					selected_ = focused_;
-					this->OnSelectionChangedEvent()(*this);
-				}
+				selected_ = focused_;
+				this->OnSelectionChangedEvent()(*this);
 				opened_ = false;
 
 				this->UpdateRects();

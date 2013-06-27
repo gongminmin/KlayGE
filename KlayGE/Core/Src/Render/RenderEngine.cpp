@@ -591,6 +591,15 @@ namespace KlayGE
 		}
 	}
 
+	void RenderEngine::GammaEnabled(bool gamma)
+	{
+		if (ldr_pp_)
+		{
+			gamma_enabled_ = gamma;
+			ldr_pp_->SetParam(0, int3(ppaa_enabled_, gamma_enabled_, color_grading_enabled_));
+		}
+	}
+
 	void RenderEngine::ColorGradingEnabled(bool cg)
 	{
 		if (ldr_pp_)

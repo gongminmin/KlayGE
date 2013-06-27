@@ -1,0 +1,25 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GL_AMD_interleaved_elements" reg_no="431">
+	<tokens>
+		<token name="GL_VERTEX_ELEMENT_SWIZZLE_AMD" value="0x91A4"/>
+		<token name="GL_VERTEX_ID_SWIZZLE_AMD" value="0x91A5"/>
+		<token name="GL_RED" value="0x1903"/>
+		<token name="GL_GREEN" value="0x1904"/>
+		<token name="GL_BLUE" value="0x1905"/>
+		<token name="GL_ALPHA" value="0x1906"/>
+		<token name="GL_RG8UI" value="0x8238"/>
+		<token name="GL_RG16UI" value="0x823A"/>
+		<token name="GL_RGBA8UI" value="0x8D7C"/>
+	</tokens>
+
+	<functions>
+		<function name="glVertexAttribParameteriAMD" return="void">
+			<params>
+				<param type="GLint" name="index"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLint" name="param"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

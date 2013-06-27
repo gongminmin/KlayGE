@@ -20,11 +20,7 @@ float2 get_xy_channel(float4 v)
 #ifdef KLAYGE_BC5_AS_GA
 	return v.ga;
 #else
-#ifdef KLAYGE_BC5_AS_GR
-	return v.gr;
-#else
 	return v.rg;
-#endif
 #endif
 #endif
 }

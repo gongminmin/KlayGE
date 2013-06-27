@@ -137,21 +137,14 @@ namespace
 		InputActionDefine(Exit, KS_Escape),
 	};
 
-	struct CreateDetailedModelFactory
-	{
-		RenderModelPtr operator()(std::wstring const & name)
-		{
-			return MakeSharedPtr<DetailedSkinnedModel>(name);
-		}
-	};
-
 	class ModelObject : public SceneObjectHelper
 	{
 	public:
 		explicit ModelObject(std::string const & name)
 			: SceneObjectHelper(0)
 		{
-			renderable_ = SyncLoadModel(name, EAH_GPU_Read | EAH_Immutable, CreateDetailedModelFactory(), CreateMeshFactory<DetailedSkinnedMesh>());
+			renderable_ = SyncLoadModel(name, EAH_GPU_Read | EAH_Immutable,
+				CreateModelFactory<DetailedSkinnedModel>(), CreateMeshFactory<DetailedSkinnedMesh>());
 			checked_pointer_cast<DetailedSkinnedModel>(renderable_)->SetTime(0);
 		}
 
@@ -281,15 +274,11 @@ bool ModelViewerApp::ConfirmDevice() const
 void ModelViewerApp::InitObjects()
 {
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-	RenderEngine& re = rf.RenderEngineInstance();
 
 	font_ = SyncLoadFont("gkai00mp.kfont");
 
 	deferred_rendering_ = Context::Instance().DeferredRenderingLayerInstance();
 	deferred_rendering_->SSVOEnabled(0, false);
-	re.HDREnabled(true);
-	re.PPAAEnabled(1);
-	re.ColorGradingEnabled(true);
 
 	point_light_ = MakeSharedPtr<PointLightSource>();
 	point_light_->Attrib(LSA_NoShadow);

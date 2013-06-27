@@ -9,15 +9,6 @@
 	<parameter type="texture2D" name="juda_tex_cache_4"/>
 	<parameter type="texture2D" name="juda_tex_cache_5"/>
 	<parameter type="texture2D" name="juda_tex_cache_6"/>
-	<parameter type="texture2D" name="juda_tex_cache_7"/>
-	<parameter type="texture2D" name="juda_tex_cache_8"/>
-	<parameter type="texture2D" name="juda_tex_cache_9"/>
-	<parameter type="texture2D" name="juda_tex_cache_10"/>
-	<parameter type="texture2D" name="juda_tex_cache_11"/>
-	<parameter type="texture2D" name="juda_tex_cache_12"/>
-	<parameter type="texture2D" name="juda_tex_cache_13"/>
-	<parameter type="texture2D" name="juda_tex_cache_14"/>
-	<parameter type="texture2D" name="juda_tex_cache_15"/>
 
 	<parameter type="texture2D" name="juda_tex_indirect"/>
 
@@ -129,46 +120,6 @@ float4 judatex2d_internal(int2 tile_xy, float2 in_tile_coord)
 	case 6:
 		ret = juda_tex_cache_6.Sample(jdt_aniso_sampler, tc);
 		break;
-
-#if KLAYGE_MAX_TEX_UNITS > 8
-	case 7:
-		ret = juda_tex_cache_7.Sample(jdt_aniso_sampler, tc);
-		break;
-
-	case 8:
-		ret = juda_tex_cache_8.Sample(jdt_aniso_sampler, tc);
-		break;
-
-	case 9:
-		ret = juda_tex_cache_9.Sample(jdt_aniso_sampler, tc);
-		break;
-
-	case 10:
-		ret = juda_tex_cache_10.Sample(jdt_aniso_sampler, tc);
-		break;
-
-	case 11:
-		ret = juda_tex_cache_11.Sample(jdt_aniso_sampler, tc);
-		break;
-
-	case 12:
-		ret = juda_tex_cache_12.Sample(jdt_aniso_sampler, tc);
-		break;
-
-	case 13:
-		ret = juda_tex_cache_13.Sample(jdt_aniso_sampler, tc);
-		break;
-
-	case 14:
-		ret = juda_tex_cache_14.Sample(jdt_aniso_sampler, tc);
-		break;
-		
-#if KLAYGE_MAX_TEX_UNITS > 16
-	default:
-		ret = juda_tex_cache_15.Sample(jdt_aniso_sampler, tc);
-		break;
-#endif
-#endif
 #endif
 	}
 	return ret;
@@ -214,46 +165,6 @@ float4 judatex2d_bias_internal(int2 tile_xy, float2 in_tile_coord, float bias)
 	case 6:
 		ret = juda_tex_cache_6.SampleBias(jdt_aniso_sampler, tc, bias);
 		break;
-
-#if KLAYGE_MAX_TEX_UNITS > 8
-	case 7:
-		ret = juda_tex_cache_7.SampleBias(jdt_aniso_sampler, tc, bias);
-		break;
-
-	case 8:
-		ret = juda_tex_cache_8.SampleBias(jdt_aniso_sampler, tc, bias);
-		break;
-
-	case 9:
-		ret = juda_tex_cache_9.SampleBias(jdt_aniso_sampler, tc, bias);
-		break;
-
-	case 10:
-		ret = juda_tex_cache_10.SampleBias(jdt_aniso_sampler, tc, bias);
-		break;
-
-	case 11:
-		ret = juda_tex_cache_11.SampleBias(jdt_aniso_sampler, tc, bias);
-		break;
-
-	case 12:
-		ret = juda_tex_cache_12.SampleBias(jdt_aniso_sampler, tc, bias);
-		break;
-
-	case 13:
-		ret = juda_tex_cache_13.SampleBias(jdt_aniso_sampler, tc, bias);
-		break;
-
-	case 14:
-		ret = juda_tex_cache_14.SampleBias(jdt_aniso_sampler, tc, bias);
-		break;
-
-#if KLAYGE_MAX_TEX_UNITS > 16
-	default:
-		ret = juda_tex_cache_15.SampleBias(jdt_aniso_sampler, tc, bias);
-		break;
-#endif
-#endif
 #endif
 	}
 	return ret;
@@ -299,46 +210,6 @@ float4 judatex2d_level_internal(int2 tile_xy, float2 in_tile_coord, float lod)
 	case 6:
 		ret = juda_tex_cache_6.SampleLevel(jdt_aniso_sampler, tc, lod);
 		break;
-
-#if KLAYGE_MAX_TEX_UNITS > 8
-	case 7:
-		ret = juda_tex_cache_7.SampleLevel(jdt_aniso_sampler, tc, lod);
-		break;
-
-	case 8:
-		ret = juda_tex_cache_8.SampleLevel(jdt_aniso_sampler, tc, lod);
-		break;
-
-	case 9:
-		ret = juda_tex_cache_9.SampleLevel(jdt_aniso_sampler, tc, lod);
-		break;
-
-	case 10:
-		ret = juda_tex_cache_10.SampleLevel(jdt_aniso_sampler, tc, lod);
-		break;
-
-	case 11:
-		ret = juda_tex_cache_11.SampleLevel(jdt_aniso_sampler, tc, lod);
-		break;
-
-	case 12:
-		ret = juda_tex_cache_12.SampleLevel(jdt_aniso_sampler, tc, lod);
-		break;
-
-	case 13:
-		ret = juda_tex_cache_13.SampleLevel(jdt_aniso_sampler, tc, lod);
-		break;
-
-	case 14:
-		ret = juda_tex_cache_14.SampleLevel(jdt_aniso_sampler, tc, lod);
-		break;
-
-#if KLAYGE_MAX_TEX_UNITS > 16
-	default:
-		ret = juda_tex_cache_15.SampleLevel(jdt_aniso_sampler, tc, lod);
-		break;
-#endif
-#endif
 #endif
 	}
 	return ret;
@@ -384,46 +255,6 @@ float4 judatex2d_grad_internal(int2 tile_xy, float2 in_tile_coord, float2 tc_ddx
 	case 6:
 		ret = juda_tex_cache_6.SampleGrad(jdt_aniso_sampler, tc, tc_ddx, tc_ddy);
 		break;
-
-#if KLAYGE_MAX_TEX_UNITS > 8
-	case 7:
-		ret = juda_tex_cache_7.SampleGrad(jdt_aniso_sampler, tc, tc_ddx, tc_ddy);
-		break;
-
-	case 8:
-		ret = juda_tex_cache_8.SampleGrad(jdt_aniso_sampler, tc, tc_ddx, tc_ddy);
-		break;
-
-	case 9:
-		ret = juda_tex_cache_9.SampleGrad(jdt_aniso_sampler, tc, tc_ddx, tc_ddy);
-		break;
-
-	case 10:
-		ret = juda_tex_cache_10.SampleGrad(jdt_aniso_sampler, tc, tc_ddx, tc_ddy);
-		break;
-
-	case 11:
-		ret = juda_tex_cache_11.SampleGrad(jdt_aniso_sampler, tc, tc_ddx, tc_ddy);
-		break;
-
-	case 12:
-		ret = juda_tex_cache_12.SampleGrad(jdt_aniso_sampler, tc, tc_ddx, tc_ddy);
-		break;
-
-	case 13:
-		ret = juda_tex_cache_13.SampleGrad(jdt_aniso_sampler, tc, tc_ddx, tc_ddy);
-		break;
-
-	case 14:
-		ret = juda_tex_cache_14.SampleGrad(jdt_aniso_sampler, tc, tc_ddx, tc_ddy);
-		break;
-
-#if KLAYGE_MAX_TEX_UNITS > 16
-	default:
-		ret = juda_tex_cache_15.SampleGrad(jdt_aniso_sampler, tc, tc_ddx, tc_ddy);
-		break;
-#endif
-#endif
 #endif
 	}
 	return ret;

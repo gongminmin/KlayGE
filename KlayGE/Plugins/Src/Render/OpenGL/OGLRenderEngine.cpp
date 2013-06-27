@@ -157,14 +157,6 @@ namespace KlayGE
 		{
 			settings.hdr = false;
 		}
-
-		if (this->HackForIntel())
-		{
-			settings.hdr = false;
-			settings.ppaa = false;
-			settings.gamma = false;
-			settings.color_grading = false;
-		}
 	}
 
 	void OGLRenderEngine::InitRenderStates()
@@ -853,7 +845,7 @@ namespace KlayGE
 		uint32_t const num_passes = tech.NumPasses();
 		size_t const inst_format_size = rl.InstanceStreamFormat().size();
 
-		if (glloader_GL_VERSION_3_3() && rl.InstanceStream())
+		if ((glloader_GL_VERSION_3_3() || glloader_GL_ARB_instanced_arrays()) && rl.InstanceStream())
 		{
 			OGLGraphicsBuffer& stream(*checked_pointer_cast<OGLGraphicsBuffer>(rl.InstanceStream()));
 
@@ -879,7 +871,14 @@ namespace KlayGE
 					glVertexAttribPointer(attr, num_components, type, normalized, instance_size, offset);
 					glEnableVertexAttribArray(attr);
 
-					glVertexAttribDivisor(attr, 1);
+					if (glloader_GL_VERSION_3_3())
+					{
+						glVertexAttribDivisor(attr, 1);
+					}
+					else
+					{
+						glVertexAttribDivisorARB(attr, 1);
+					}
 				}
 
 				elem_offset += vs_elem.element_size();
@@ -984,7 +983,14 @@ namespace KlayGE
 				if (attr != -1)
 				{
 					glDisableVertexAttribArray(attr);
-					glVertexAttribDivisor(attr, 0);
+					if (glloader_GL_VERSION_3_3())
+					{
+						glVertexAttribDivisor(attr, 0);
+					}
+					else
+					{
+						glVertexAttribDivisorARB(attr, 0);
+					}
 				}
 			}
 		}
@@ -1614,7 +1620,7 @@ namespace KlayGE
 			texture_format_.insert(EF_BC2);
 			texture_format_.insert(EF_BC3);
 		}
-		if (glloader_GL_EXT_texture_compression_latc())
+		if (glloader_GL_VERSION_3_0() || glloader_GL_ARB_texture_compression_rgtc())
 		{
 			texture_format_.insert(EF_BC4);
 			texture_format_.insert(EF_BC5);
@@ -1626,30 +1632,24 @@ namespace KlayGE
 			texture_format_.insert(EF_BC6);
 			texture_format_.insert(EF_BC7);
 		}
-		if (!this->HackForIntel())
+		texture_format_.insert(EF_D16);
+		if (glloader_GL_EXT_packed_depth_stencil())
 		{
-			texture_format_.insert(EF_D16);
-			if (glloader_GL_EXT_packed_depth_stencil())
-			{
-				texture_format_.insert(EF_D24S8);
-			}
-			texture_format_.insert(EF_D32F);
+			texture_format_.insert(EF_D24S8);
 		}
-		if (glloader_GL_EXT_texture_sRGB())
+		texture_format_.insert(EF_D32F);
+		texture_format_.insert(EF_ARGB8_SRGB);
+		texture_format_.insert(EF_ABGR8_SRGB);
+		if (glloader_GL_EXT_texture_compression_s3tc())
 		{
-			texture_format_.insert(EF_ARGB8_SRGB);
-			texture_format_.insert(EF_ABGR8_SRGB);
-			if (glloader_GL_EXT_texture_compression_s3tc())
-			{
-				texture_format_.insert(EF_BC1_SRGB);
-				texture_format_.insert(EF_BC2_SRGB);
-				texture_format_.insert(EF_BC3_SRGB);
-			}
-			if (glloader_GL_EXT_texture_compression_latc())
-			{
-				texture_format_.insert(EF_BC4_SRGB);
-				texture_format_.insert(EF_BC5_SRGB);
-			}
+			texture_format_.insert(EF_BC1_SRGB);
+			texture_format_.insert(EF_BC2_SRGB);
+			texture_format_.insert(EF_BC3_SRGB);
+		}
+		if (glloader_GL_VERSION_3_0() || glloader_GL_ARB_texture_compression_rgtc())
+		{
+			texture_format_.insert(EF_BC4_SRGB);
+			texture_format_.insert(EF_BC5_SRGB);
 		}
 
 		GLint max_samples;
@@ -1715,7 +1715,7 @@ namespace KlayGE
 			rendertarget_format_.insert(EF_D24S8);
 		}
 		rendertarget_format_.insert(EF_D32F);
-		if (glloader_GL_EXT_texture_sRGB() && glloader_GL_EXT_framebuffer_sRGB())
+		if (glloader_GL_VERSION_3_0() || glloader_GL_ARB_framebuffer_sRGB() && glloader_GL_EXT_framebuffer_sRGB())
 		{
 			rendertarget_format_.insert(EF_ARGB8_SRGB);
 			rendertarget_format_.insert(EF_ABGR8_SRGB);

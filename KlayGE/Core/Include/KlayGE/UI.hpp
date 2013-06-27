@@ -613,10 +613,7 @@ namespace KlayGE
 			return keyboard_input_;
 		}
 
-		bool ContainsPoint(int2 const & pt) const
-		{
-			return bounding_box_.PtInRect(pt);
-		}
+		bool ContainsPoint(int2 const & pt) const;
 		int2 ToLocal(int2 const & pt) const;
 
 		// Device state notification

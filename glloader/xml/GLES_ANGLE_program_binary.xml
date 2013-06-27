@@ -1,0 +1,7 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GLES_ANGLE_program_binary" reg_no="139">
+	<tokens>
+		<token name="GL_PROGRAM_BINARY_ANGLE" value="0x93A6"/>
+	</tokens>
+</gl_extension>

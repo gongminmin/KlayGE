@@ -200,9 +200,9 @@ namespace KlayGE
 			return instances_[index].lock();
 		}
 
-		// For deferred only
-
 		virtual void ModelMatrix(float4x4 const & mat);
+
+		// For deferred only
 
 		virtual void Pass(PassType type);
 

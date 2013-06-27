@@ -1,6 +1,6 @@
 <?xml version='1.0'?>
 
-<gl_extension name="GLES_IMG_multisampled_render_to_texture" reg_no="74">
+<gl_extension name="GLES_IMG_multisampled_render_to_texture" reg_no="74" prefer="GLES_EXT_multisampled_render_to_texture">
 	<tokens>
 		<token name="GL_RENDERBUFFER_SAMPLES_IMG" value="0x9133"/>
 		<token name="GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE_IMG" value="0x9134"/>

@@ -33,7 +33,9 @@
 
 #pragma once
 
-enum AmdDxExtPrimitiveTopology;
+enum AmdDxExtPrimitiveTopology
+{
+};
 
 class IAmdDxExtInterface
 {
@@ -46,7 +48,7 @@ protected:
 	IAmdDxExtInterface()
 	{
 	}
-	virtual ~IAmdDxExtInterface() = 0
+	virtual ~IAmdDxExtInterface()
 	{
 	}
 };
@@ -72,12 +74,12 @@ protected:
 	IAmdDxExt()
 	{
 	}
-	virtual ~IAmdDxExt() = 0
+	virtual ~IAmdDxExt()
 	{
 	}
 };
 
-const unsigned int AmdDxExtQuadBufferStereoID = 2;
+unsigned int const AmdDxExtQuadBufferStereoID = 2;
 
 class IAmdDxExtQuadBufferStereo : public IAmdDxExtInterface
 {

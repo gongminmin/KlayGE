@@ -28,6 +28,17 @@ void DetailedMesh::BuildMeshInfo()
 {
 	StaticMesh::BuildMeshInfo();
 
+	RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+	RenderDeviceCaps const & caps = re.DeviceCaps();
+	if (caps.texture_format_support(EF_D24S8) || caps.texture_format_support(EF_D16))
+	{
+		depth_texture_support_ = true;
+	}
+	else
+	{
+		depth_texture_support_ = false;
+	}
+
 	*(technique_->Effect().ParameterByName("diffuse_tex")) = diffuse_tex_;
 	*(technique_->Effect().ParameterByName("bump_tex")) = normal_tex_;
 	*(technique_->Effect().ParameterByName("specular_tex")) = specular_tex_;
@@ -55,6 +66,8 @@ void DetailedMesh::BuildMeshInfo()
 	AABBox const & tc_bb = this->TexcoordBound();
 	*(technique_->Effect().ParameterByName("tc_center")) = float2(tc_bb.Center().x(), tc_bb.Center().y());
 	*(technique_->Effect().ParameterByName("tc_extent")) = float2(tc_bb.HalfSize().x(), tc_bb.HalfSize().y());
+
+	*(technique_->Effect().ParameterByName("non_linear_depth")) = static_cast<int32_t>(depth_texture_support_);
 }
 
 void DetailedMesh::OnRenderBegin()
@@ -87,7 +100,14 @@ void DetailedMesh::BackFaceDepthPass(bool dfdp)
 {
 	if (dfdp)
 	{
-		technique_ = technique_->Effect().TechniqueByName("BackFaceDepthTech");
+		if (depth_texture_support_)
+		{
+			technique_ = technique_->Effect().TechniqueByName("BackFaceDepthTech");
+		}
+		else
+		{
+			technique_ = technique_->Effect().TechniqueByName("BackFaceDepthTechWODepthTexture");
+		}
 	}
 	else
 	{

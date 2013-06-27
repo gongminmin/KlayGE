@@ -317,7 +317,8 @@ INT_PTR CALLBACK Graphics_Tab_DlgProc(HWND hDlg, UINT uMsg, WPARAM /*wParam*/, L
 			HWND hStereoSepEdit = GetDlgItem(hDlg, IDC_STEREO_SEP_EDIT);
 
 			std::ostringstream oss;
-			oss << cfg.graphics_cfg.stereo_separation;
+			oss.precision(2);
+			oss << std::fixed << cfg.graphics_cfg.stereo_separation;
 			std::basic_string<TCHAR> str;
 			Convert(str, oss.str());
 
@@ -460,6 +461,9 @@ INT_PTR CreateTabDialogs(HWND hWnd, HINSTANCE hInstance)
 
 	ShowWindow(hTab, SW_SHOWNORMAL);
 
+	HFONT hFont = (HFONT)GetStockObject(DEFAULT_GUI_FONT);   
+	::SendMessage(hTab, WM_SETFONT, reinterpret_cast<WPARAM>(hFont), 1);
+
 	TCITEM tci;
 	tci.mask       = TCIF_TEXT;
 	tci.iImage     = -1;
@@ -515,6 +519,10 @@ INT_PTR CreateButtons(HWND hWnd, HINSTANCE hInstance)
 				nullptr,
 				hInstance,
 				nullptr);
+
+	HFONT hFont = (HFONT)GetStockObject(DEFAULT_GUI_FONT);   
+	::SendMessage(hOKButton, WM_SETFONT, reinterpret_cast<WPARAM>(hFont), 1);
+	::SendMessage(hCancelButton, WM_SETFONT, reinterpret_cast<WPARAM>(hFont), 1);
 
 	return FALSE;
 }
@@ -775,8 +783,8 @@ bool UIConfiguration(HINSTANCE hInstance)
 	return save_cfg;
 }
 
-#ifdef _In_
-int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE /*hPrevInstance*/, _In_ LPSTR /*lpszCmdLine*/, _In_ int /*nCmdShow*/)
+#if defined(KLAYGE_COMPILER_MSVC) && (KLAYGE_COMPILER_VERSION >= 100)
+int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_ HINSTANCE /*hPrevInstance*/, _In_ LPSTR /*lpszCmdLine*/, _In_ int /*nCmdShow*/)
 #else
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE /*hPrevInstance*/, LPSTR /*lpszCmdLine*/, int /*nCmdShow*/)
 #endif

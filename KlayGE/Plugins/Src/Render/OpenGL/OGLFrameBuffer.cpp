@@ -79,7 +79,7 @@ namespace KlayGE
 
 		if (fbo_ != 0)
 		{
-			re.EnableFramebufferSRGB(true);
+			re.EnableFramebufferSRGB(IsSRGB(clr_views_[0]->Format()));
 
 			std::vector<GLenum> targets(clr_views_.size());
 			for (size_t i = 0; i < clr_views_.size(); ++ i)

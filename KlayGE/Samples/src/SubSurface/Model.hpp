@@ -51,6 +51,9 @@ public:
 	void MtlThickness(float thickness);
 
 	void BuildMeshInfo();
+
+private:
+	bool depth_texture_support_;
 };
 
 #endif		// _MODEL_HPP

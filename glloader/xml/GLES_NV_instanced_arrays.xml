@@ -1,0 +1,16 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GLES_NV_instanced_arrays" reg_no="145">
+	<tokens>
+		<token name="GL_VERTEX_ATTRIB_ARRAY_DIVISOR_NV" value="0x88FE"/>
+	</tokens>
+
+	<functions>
+		<function name="glVertexAttribDivisorNV" return="void">
+			<params>
+				<param type="GLuint" name="index"/>
+				<param type="GLuint" name="divisor"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

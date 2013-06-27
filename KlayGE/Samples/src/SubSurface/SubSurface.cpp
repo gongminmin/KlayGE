@@ -161,6 +161,17 @@ void SubSurfaceApp::InitObjects()
 
 	dialog_params_->Control<UISlider>(id_mtl_thickness_slider_)->OnValueChangedEvent().connect(KlayGE::bind(&SubSurfaceApp::MtlThicknessChangedHandler, this, KlayGE::placeholders::_1));
 	this->MtlThicknessChangedHandler(*dialog_params_->Control<UISlider>(id_mtl_thickness_slider_));
+
+	RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+	RenderDeviceCaps const & caps = re.DeviceCaps();
+	if (caps.texture_format_support(EF_D24S8) || caps.texture_format_support(EF_D16))
+	{
+		depth_texture_support_ = true;
+	}
+	else
+	{
+		depth_texture_support_ = false;
+	}
 }
 
 void SubSurfaceApp::OnResize(uint32_t width, uint32_t height)
@@ -172,17 +183,43 @@ void SubSurfaceApp::OnResize(uint32_t width, uint32_t height)
 	RenderDeviceCaps const & caps = re.DeviceCaps();
 
 	ElementFormat fmt;
-	if (caps.rendertarget_format_support(EF_ABGR8, 1, 0))
+	if (depth_texture_support_)
 	{
-		fmt = EF_ABGR8;
+		if (caps.rendertarget_format_support(EF_ABGR8, 1, 0))
+		{
+			fmt = EF_ABGR8;
+		}
+		else
+		{
+			BOOST_ASSERT(caps.rendertarget_format_support(EF_ARGB8, 1, 0));
+
+			fmt = EF_ARGB8;
+		}
+		// Just dummy
+		back_face_depth_tex_ = rf.MakeTexture2D(width, height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
 	}
 	else
 	{
-		BOOST_ASSERT(caps.rendertarget_format_support(EF_ARGB8, 1, 0));
+		if (caps.rendertarget_format_support(EF_R16F, 1, 0))
+		{
+			fmt = EF_R16F;
+		}
+		else
+		{
+			if (caps.rendertarget_format_support(EF_R32F, 1, 0))
+			{
+				fmt = EF_R32F;
+			}
+			else
+			{
+				BOOST_ASSERT(caps.rendertarget_format_support(EF_ABGR16F, 1, 0));
 
-		fmt = EF_ARGB8;
+				fmt = EF_ABGR16F;
+			}
+		}
+		back_face_depth_tex_ = rf.MakeTexture2D(width, height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
 	}
-	TexturePtr dummy_color_tex = rf.MakeTexture2D(width, height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
+
 	if (caps.rendertarget_format_support(EF_D24S8, 1, 0))
 	{
 		fmt = EF_D24S8;
@@ -193,14 +230,21 @@ void SubSurfaceApp::OnResize(uint32_t width, uint32_t height)
 
 		fmt = EF_D16;
 	}
-	back_face_depth_tex_ = rf.MakeTexture2D(width, height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
+	back_face_ds_tex_ = rf.MakeTexture2D(width, height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
 	back_face_depth_fb_ = rf.MakeFrameBuffer();
-	back_face_depth_fb_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*dummy_color_tex, 0, 1, 0));
-	back_face_depth_fb_->Attach(FrameBuffer::ATT_DepthStencil, rf.Make2DDepthStencilRenderView(*back_face_depth_tex_, 0, 1, 0));
+	back_face_depth_fb_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*back_face_depth_tex_, 0, 1, 0));
+	back_face_depth_fb_->Attach(FrameBuffer::ATT_DepthStencil, rf.Make2DDepthStencilRenderView(*back_face_ds_tex_, 0, 1, 0));
 	FrameBufferPtr screen_buffer = rf.RenderEngineInstance().CurFrameBuffer();
 	back_face_depth_fb_->GetViewport()->camera = screen_buffer->GetViewport()->camera;
 
-	checked_pointer_cast<ModelObject>(model_)->BackFaceDepthTex(back_face_depth_tex_);
+	if (depth_texture_support_)
+	{
+		checked_pointer_cast<ModelObject>(model_)->BackFaceDepthTex(back_face_ds_tex_);
+	}
+	else
+	{
+		checked_pointer_cast<ModelObject>(model_)->BackFaceDepthTex(back_face_depth_tex_);
+	}
 
 	UIManager::Instance().SettleCtrls(width, height);
 }

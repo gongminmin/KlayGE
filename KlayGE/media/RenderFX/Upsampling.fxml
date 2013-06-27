@@ -43,12 +43,8 @@ float4 UpsamplingInterpolatePS(float2 tc : TEXCOORD0) : SV_Target
 		wxy.xy = coords - t0;
 		wxy.zw = 1 - wxy.xy;
 
-		float weight[4];
-		weight[0] = wxy.z * wxy.w;
-		weight[1] = wxy.x * wxy.w;
-		weight[2] = wxy.z * wxy.y;
-		weight[3] = wxy.x * wxy.y;
-	
+		float4 weight = wxy.zxzx * wxy.wwyy;
+
 		float4 total_color = 0;
 		for (int i = 0; i < 4; ++ i)
 		{

@@ -100,8 +100,7 @@ namespace KlayGE
 
 	void SceneObjectLightSourceProxy::Update(float /*app_time*/, float /*elapsed_time*/)
 	{
-		model_ = model_scaling_ * MathLib::to_matrix(light_->Rotation()) * MathLib::translation(light_->Position())
-			* model_translation_;
+		model_ = model_scaling_ * MathLib::to_matrix(light_->Rotation()) * MathLib::translation(light_->Position());
 		if (LT_Spot == light_->Type())
 		{
 			float radius = light_->CosOuterInner().w();
@@ -126,21 +125,11 @@ namespace KlayGE
 	{
 		model_scaling_ = MathLib::scaling(s);
 	}
-	
-	void SceneObjectLightSourceProxy::Translation(float x, float y, float z)
-	{
-		model_translation_ = MathLib::translation(x, y, z);
-	}
-
-	void SceneObjectLightSourceProxy::Translation(float3 const & t)
-	{
-		model_translation_ = MathLib::translation(t);
-	}
 
 	void SceneObjectLightSourceProxy::Init(LightSourcePtr const & light, RenderModelPtr const & light_model)
 	{
 		renderable_ = light_model;
-		model_scaling_ = model_translation_ = float4x4::Identity();
+		model_scaling_ = float4x4::Identity();
 
 		for (uint32_t i = 0; i < light_model->NumMeshes(); ++ i)
 		{
@@ -185,44 +174,62 @@ namespace KlayGE
 		: SceneObjectHelper(SOA_Cullable | SOA_Moveable | SOA_NotCastShadow),
 			camera_(camera)
 	{
-		eye_pos_ = camera_->EyePos();
-		look_at_ = camera->LookAt();
-		up_vec_ = camera->UpVec();;
+		this->Init(camera, CreateMeshFactory<RenderableLightSourceProxy>());
+	}
+
+	SceneObjectCameraProxy::SceneObjectCameraProxy(CameraPtr const & camera, RenderModelPtr const & camera_model)
+		: SceneObjectHelper(SOA_Cullable | SOA_Moveable | SOA_NotCastShadow),
+			camera_(camera)
+	{
+		this->Init(camera, camera_model);
+	}
+
+	SceneObjectCameraProxy::SceneObjectCameraProxy(CameraPtr const & camera,
+			function<StaticMeshPtr(RenderModelPtr const &, std::wstring const &)> CreateMeshFactoryFunc)
+		: SceneObjectHelper(SOA_Cullable | SOA_Moveable | SOA_NotCastShadow),
+			camera_(camera)
+	{
+		this->Init(camera, CreateMeshFactoryFunc);
 	}
 
 	void SceneObjectCameraProxy::Update(float /*app_time*/, float /*elapsed_time*/)
 	{
-		camera_->ViewParams(eye_pos_, look_at_, up_vec_);
-		model_ = camera_->InverseViewMatrix();
+		model_ = model_scaling_ * camera_->InverseViewMatrix();
+
+		RenderModelPtr camera_model = checked_pointer_cast<RenderModel>(renderable_);
+		for (uint32_t i = 0; i < camera_model->NumMeshes(); ++ i)
+		{
+			RenderableCameraProxyPtr camera_mesh = checked_pointer_cast<RenderableCameraProxy>(camera_model->Mesh(i));
+			camera_mesh->ModelMatrix(model_);
+		}
 	}
 
-	void SceneObjectCameraProxy::EyePos(float x, float y, float z)
+	void SceneObjectCameraProxy::Scaling(float x, float y, float z)
 	{
-		eye_pos_ = float3(x, y, z);
+		model_scaling_ = MathLib::scaling(x, y, z);
 	}
 
-	void SceneObjectCameraProxy::EyePos(float3 const & t)
+	void SceneObjectCameraProxy::Scaling(float3 const & s)
 	{
-		eye_pos_ = t;
+		model_scaling_ = MathLib::scaling(s);
 	}
 
-	void SceneObjectCameraProxy::LookAt(float x, float y, float z)
+	void SceneObjectCameraProxy::Init(CameraPtr const & camera, RenderModelPtr const & camera_model)
 	{
-		look_at_ = float3(x, y, z);
+		renderable_ = camera_model;
+		model_scaling_ = float4x4::Identity();
+
+		for (uint32_t i = 0; i < camera_model->NumMeshes(); ++ i)
+		{
+			checked_pointer_cast<RenderableCameraProxy>(camera_model->Mesh(i))->AttachCamera(camera);
+		}
 	}
 
-	void SceneObjectCameraProxy::LookAt(float3 const & t)
+	void SceneObjectCameraProxy::Init(CameraPtr const & camera,
+			function<StaticMeshPtr(RenderModelPtr const &, std::wstring const &)> CreateMeshFactoryFunc)
 	{
-		look_at_ = t;
-	}
-
-	void SceneObjectCameraProxy::UpVec(float x, float y, float z)
-	{
-		up_vec_ = float3(x, y, z);
-	}
-
-	void SceneObjectCameraProxy::UpVec(float3 const & t)
-	{
-		up_vec_ = t;
+		RenderModelPtr camera_model = SyncLoadModel("camera_proxy.meshml", EAH_GPU_Read | EAH_Immutable,
+			CreateModelFactory<RenderModel>(), CreateMeshFactoryFunc);
+		this->Init(camera, camera_model);
 	}
 }

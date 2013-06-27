@@ -33,15 +33,12 @@
 namespace KlayGE
 {
 	Renderable::Renderable()
-		: effect_attrs_(0)
+		: model_mat_(float4x4::Identity()), effect_attrs_(0)
 	{
 		DeferredRenderingLayerPtr const & drl = Context::Instance().DeferredRenderingLayerInstance();
 		if (drl)
 		{
 			this->BindDeferredEffect(drl->GBufferEffect());
-
-			model_mat_ = float4x4::Identity();
-
 			opacity_map_enabled_ = false;
 		}
 	}

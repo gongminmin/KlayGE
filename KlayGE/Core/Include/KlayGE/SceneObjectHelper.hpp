@@ -63,8 +63,6 @@ namespace KlayGE
 
 		void Scaling(float x, float y, float z);
 		void Scaling(float3 const & s);
-		void Translation(float x, float y, float z);
-		void Translation(float3 const & t);
 
 	private:
 		void Init(LightSourcePtr const & light, RenderModelPtr const & light_model);
@@ -73,7 +71,6 @@ namespace KlayGE
 
 	protected:
 		float4x4 model_scaling_;
-		float4x4 model_translation_;
 
 		LightSourcePtr light_;
 	};
@@ -82,20 +79,22 @@ namespace KlayGE
 	{
 	public:
 		explicit SceneObjectCameraProxy(CameraPtr const & camera);
+		SceneObjectCameraProxy(CameraPtr const & camera, RenderModelPtr const & camera_model);
+		SceneObjectCameraProxy(CameraPtr const & camera,
+			function<StaticMeshPtr(RenderModelPtr const &, std::wstring const &)> CreateMeshFactoryFunc);
 
 		void Update(float app_time, float elapsed_time);
 
-		void EyePos(float x, float y, float z);
-		void EyePos(float3 const & t);
-		void LookAt(float x, float y, float z);
-		void LookAt(float3 const & t);
-		void UpVec(float x, float y, float z);
-		void UpVec(float3 const & t);
+		void Scaling(float x, float y, float z);
+		void Scaling(float3 const & s);
+
+	private:
+		void Init(CameraPtr const & camera, RenderModelPtr const & camera_model);
+		void Init(CameraPtr const & camera,
+			function<StaticMeshPtr(RenderModelPtr const &, std::wstring const &)> CreateMeshFactoryFunc);
 
 	protected:
-		float3 eye_pos_;
-		float3 look_at_;
-		float3 up_vec_;
+		float4x4 model_scaling_;
 
 		CameraPtr camera_;
 	};

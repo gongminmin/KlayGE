@@ -1361,8 +1361,8 @@ namespace KlayGE
 			{
 				// singularity at north pole
 				yaw = 2 * atan2(quat.z(), quat.w());
-				roll = PI / 2;
-				pitch = 0;
+				pitch = PI / 2;
+				roll = 0;
 			}
 			else
 			{
@@ -1370,8 +1370,8 @@ namespace KlayGE
 				{
 					// singularity at south pole
 					yaw = -2 * atan2(quat.z(), quat.w());
-					roll = -PI / 2;
-					pitch = 0;
+					pitch = -PI / 2;
+					roll = 0;
 				}
 				else
 				{

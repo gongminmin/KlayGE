@@ -1,0 +1,135 @@
+<?xml version='1.0'?>
+
+<effect>
+	<include name="DeferredRenderingUtil.fxml"/>
+	<include name="util.fxml"/>
+	<include name="Quaternion.fxml"/>
+	<include name="GBuffer.fxml"/>
+
+	<shader>
+		<![CDATA[
+void CameraProxyVS(float4 pos : POSITION,
+						float4 tangent_quat : TANGENT,
+			out float4 oPos : SV_Position)
+{
+	pos = float4(pos.xyz * pos_extent + pos_center, 1);
+	oPos = mul(pos, mvp);
+}
+
+float4 CameraProxyPS() : SV_Target
+{
+	return 1;
+}
+		]]>
+	</shader>
+
+	<technique name="CameraProxy">
+		<pass name="p0">
+			<state name="depth_enable" value="true"/>
+
+			<state name="polygon_mode" value="line"/>
+
+			<state name="vertex_shader" value="CameraProxyVS()"/>
+			<state name="pixel_shader" value="CameraProxyPS()"/>
+		</pass>
+	</technique>
+
+	<shader>
+		<![CDATA[
+float4 DepthCameraProxyPS() : SV_Target
+{
+	return 0;
+}
+
+float4 GBufferCameraProxyRT0PS() : SV_Target
+{
+	return 0;
+}
+
+float4 GBufferCameraProxyRT1PS() : SV_Target
+{
+	return 1;
+}
+
+void GBufferCameraProxyMRTPS(out float4 mrt_0 : SV_Target0, out float4 mrt_1 : SV_Target1)
+{
+	mrt_0 = 0;
+	mrt_1 = 1;
+}
+		]]>
+	</shader>
+
+	<technique name="DepthCameraProxyTech">
+		<pass name="p0">
+			<state name="polygon_mode" value="line"/>
+
+			<state name="front_stencil_enable" value="true"/>
+			<state name="front_stencil_func" value="always_pass"/>
+			<state name="front_stencil_ref" value="128"/>
+			<state name="front_stencil_pass" value="replace"/>
+			<state name="back_stencil_enable" value="true"/>
+			<state name="back_stencil_func" value="always_pass"/>
+			<state name="back_stencil_ref" value="128"/>
+			<state name="back_stencil_pass" value="replace"/>
+
+			<state name="vertex_shader" value="CameraProxyVS()"/>
+			<state name="pixel_shader" value="DepthCameraProxyPS()"/>
+		</pass>
+	</technique>
+
+	<technique name="GBufferCameraProxyRT0Tech">
+		<pass name="p0">
+			<state name="polygon_mode" value="line"/>
+
+			<state name="color_write_mask" value="0"/>
+
+			<state name="front_stencil_enable" value="true"/>
+			<state name="front_stencil_func" value="always_pass"/>
+			<state name="front_stencil_ref" value="128"/>
+			<state name="front_stencil_pass" value="replace"/>
+			<state name="back_stencil_enable" value="true"/>
+			<state name="back_stencil_func" value="always_pass"/>
+			<state name="back_stencil_ref" value="128"/>
+			<state name="back_stencil_pass" value="replace"/>
+
+			<state name="vertex_shader" value="CameraProxyVS()"/>
+			<state name="pixel_shader" value="GBufferCameraProxyRT0PS()"/>
+		</pass>
+	</technique>
+
+	<technique name="GBufferCameraProxyRT1Tech">
+		<pass name="p0">
+			<state name="polygon_mode" value="line"/>
+
+			<state name="front_stencil_enable" value="true"/>
+			<state name="front_stencil_func" value="always_pass"/>
+			<state name="front_stencil_ref" value="128"/>
+			<state name="front_stencil_pass" value="replace"/>
+			<state name="back_stencil_enable" value="true"/>
+			<state name="back_stencil_func" value="always_pass"/>
+			<state name="back_stencil_ref" value="128"/>
+			<state name="back_stencil_pass" value="replace"/>
+
+			<state name="vertex_shader" value="CameraProxyVS()"/>
+			<state name="pixel_shader" value="GBufferCameraProxyRT1PS()"/>
+		</pass>
+	</technique>
+
+	<technique name="GBufferCameraProxyMRTTech">
+		<pass name="p0">
+			<state name="polygon_mode" value="line"/>
+
+			<state name="front_stencil_enable" value="true"/>
+			<state name="front_stencil_func" value="always_pass"/>
+			<state name="front_stencil_ref" value="128"/>
+			<state name="front_stencil_pass" value="replace"/>
+			<state name="back_stencil_enable" value="true"/>
+			<state name="back_stencil_func" value="always_pass"/>
+			<state name="back_stencil_ref" value="128"/>
+			<state name="back_stencil_pass" value="replace"/>
+
+			<state name="vertex_shader" value="CameraProxyVS()"/>
+			<state name="pixel_shader" value="GBufferCameraProxyMRTPS()"/>
+		</pass>
+	</technique>
+</effect>
