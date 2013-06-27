@@ -91,7 +91,7 @@ def build_Python(compiler_info, compiler_arch):
 			build_cmd = batch_command()
 			build_cmd.add_command('CALL "%%VS%d0COMNTOOLS%%..\\..\\VC\\vcvarsall.bat" %s' % (compiler_info.version, compiler_arch))
 			for cfg in configs:
-				build_cmd.add_command('devenv pcbuild%s.sln /Build "%s|%s"' % (sln_suffix, cfg, arch))
+				compiler_info.msvc_add_build_command(build_cmd, "pcbuild%s" % sln_suffix, "", cfg, arch)
 				build_cmd.add_command('move /Y %s*.pyd ..\\DLLs\\%s' % (subdir, subdir))
 				build_cmd.add_command('move /Y %s*.dll ..\\DLLs\\%s' % (subdir, subdir))
 				build_cmd.add_command('move /Y %s*.lib ..\\libs\\%s' % (subdir, subdir))
@@ -134,7 +134,7 @@ def build_libogg(compiler_info, compiler_arch, ide_name, ide_version):
 			build_cmd = batch_command()
 			build_cmd.add_command('CALL "%%VS%d0COMNTOOLS%%..\\..\\VC\\vcvarsall.bat" %s' % (compiler_info.version, compiler_arch))
 			for cfg in configs:
-				build_cmd.add_command('devenv libogg_static.sln /Build "%s|%s"' % (cfg, arch))
+				compiler_info.msvc_add_build_command(build_cmd, "libogg_static", "", cfg, arch)
 				if "Debug" == cfg:
 					suffix = "_d"
 				else:
@@ -178,7 +178,7 @@ def build_libvorbis(compiler_info, compiler_arch, ide_name, ide_version):
 			build_cmd = batch_command()
 			build_cmd.add_command('CALL "%%VS%d0COMNTOOLS%%..\\..\\VC\\vcvarsall.bat" %s' % (compiler_info.version, compiler_arch))
 			for cfg in configs:
-				build_cmd.add_command('devenv vorbis_static.sln /Build "%s|%s"' % (cfg, arch))
+				compiler_info.msvc_add_build_command(build_cmd, "vorbis_static", "", cfg, arch)
 				if "Debug" == cfg:
 					suffix = "_d"
 				else:
@@ -225,7 +225,7 @@ def build_freetype(compiler_info, compiler_arch, ide_version):
 			build_cmd = batch_command()
 			build_cmd.add_command('CALL "%%VS%d0COMNTOOLS%%..\\..\\VC\\vcvarsall.bat" %s' % (compiler_info.version, compiler_arch))
 			for cfg in configs:
-				build_cmd.add_command('devenv freetype.sln /Build "%s|%s"' % (cfg, arch))
+				compiler_info.msvc_add_build_command(build_cmd, "freetype", "", cfg, arch)
 			build_cmd.execute()
 			os.chdir("../../../../../")
 		elif "mgw" == compiler_info.name:
@@ -267,8 +267,8 @@ def build_7z(compiler_info, compiler_arch):
 		build_cmd = batch_command()
 		build_cmd.add_command('CALL "%%VS%d0COMNTOOLS%%..\\..\\VC\\vcvarsall.bat" %s' % (compiler_info.version, compiler_arch))
 		for cfg in configs:
-			build_cmd.add_command('devenv Format7zExtract.sln /Build "%s|%s"' % (cfg, arch))
-			build_cmd.add_command('devenv LzmaLib.sln /Build "%s|%s"' % (cfg, arch))
+			compiler_info.msvc_add_build_command(build_cmd, "Format7zExtract", "", cfg, arch)
+			compiler_info.msvc_add_build_command(build_cmd, "LzmaLib", "", cfg, arch)
 		build_cmd.execute()
 		os.chdir("../../../../")
 			

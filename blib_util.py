@@ -144,12 +144,25 @@ class compiler_info:
 		self.platform = platform
 		self.toolset = toolset
 		
-	def msvc_add_build_command(self, batch_cmd, sln_name, proj_name, config):
+	def msvc_add_build_command(self, batch_cmd, sln_name, proj_name, config, arch = ""):
 		if self.use_msbuild:
 			batch_cmd.add_command('@SET VisualStudioVersion=%d.0' % self.version)
-			batch_cmd.add_command('MSBuild %s.%s /m /v:m /p:Configuration=%s' % (proj_name, self.proj_ext_name, config))
+			if len(proj_name) != 0:
+				file_name = "%s.%s" % (proj_name, self.proj_ext_name)
+			else:
+				file_name = "%s.sln" % sln_name
+			config_str = "Configuration=%s" % config
+			if len(arch) != 0:
+				config_str = "%s,Platform=%s" % (config_str, arch)
+			batch_cmd.add_command('MSBuild %s /m /v:m /p:%s' % (file_name, config_str))
 		else:
-			batch_cmd.add_command('devenv %s.sln /Build %s /project %s' % (sln_name, config, proj_name))
+			config_str = config
+			if len(arch) != 0:
+				config_str = "%s|%s" % (config_str, arch)
+			proj_str = ""
+			if len(proj_name) != 0:
+				proj_str = "/project %s" % proj_name
+			batch_cmd.add_command('devenv %s.sln /Build %s %s' % (sln_name, config_str, proj_str))
 
 class batch_command:
 	def __init__(self):
