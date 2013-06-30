@@ -10,10 +10,10 @@ def copy_to_dst(src_name, dst_dir):
 	import shutil
 	shutil.copy(src_name, dst_dir)
 
-def deploy_KlayGE(target_dir, compiler_name, compiler_version, compiler_arch, platform):
+def deploy_KlayGE(target_dir, compiler_info, compiler_arch):
 	import glob
 
-	if "win32" == platform:
+	if "win32" == compiler_info.platform:
 		bin_dst_dir = "%s/bin/win_%s/" % (target_dir, compiler_arch)
 		bat_suffix = "bat"
 		dll_suffix = "dll"
@@ -66,25 +66,25 @@ def deploy_KlayGE(target_dir, compiler_name, compiler_version, compiler_arch, pl
 		copy_to_dst(fname, bin_dst_dir);
 		
 	print("Deploying glloader...\n")
-	for fname in glob.iglob("KlayGE/bin/win_%s/glloader_%s_%s.%s" % (compiler_arch, compiler_name, compiler_arch, dll_suffix)):
+	for fname in glob.iglob("KlayGE/bin/win_%s/glloader_%s_%s.%s" % (compiler_arch, compiler_info.name, compiler_arch, dll_suffix)):
 		copy_to_dst(fname, bin_dst_dir);
 
 	print("Deploying kfont...\n")
-	for fname in glob.iglob("KlayGE/bin/win_%s/kfont_%s_%s.%s" % (compiler_arch, compiler_name, compiler_arch, dll_suffix)):
+	for fname in glob.iglob("KlayGE/bin/win_%s/kfont_%s_%s.%s" % (compiler_arch, compiler_info.name, compiler_arch, dll_suffix)):
 		copy_to_dst(fname, bin_dst_dir);
 
 	print("Deploying KlayGE...\n")
-	for fname in glob.iglob("KlayGE/bin/win_%s/KlayGE_Core_%s*.%s" % (compiler_arch, compiler_name, dll_suffix)):
+	for fname in glob.iglob("KlayGE/bin/win_%s/KlayGE_Core_%s*.%s" % (compiler_arch, compiler_info.name, dll_suffix)):
 		copy_to_dst(fname, bin_dst_dir);
-	for fname in glob.iglob("KlayGE/bin/win_%s/Audio/KlayGE_Audio*_%s*.%s" % (compiler_arch, compiler_name, dll_suffix)):
+	for fname in glob.iglob("KlayGE/bin/win_%s/Audio/KlayGE_Audio*_%s*.%s" % (compiler_arch, compiler_info.name, dll_suffix)):
 		copy_to_dst(fname, "%sAudio/" % bin_dst_dir);
-	for fname in glob.iglob("KlayGE/bin/win_%s/Input/KlayGE_Input*_%s*.%s" % (compiler_arch, compiler_name, dll_suffix)):
+	for fname in glob.iglob("KlayGE/bin/win_%s/Input/KlayGE_Input*_%s*.%s" % (compiler_arch, compiler_info.name, dll_suffix)):
 		copy_to_dst(fname, "%sInput/" % bin_dst_dir);
-	for fname in glob.iglob("KlayGE/bin/win_%s/Render/KlayGE_Render*_%s*.%s" % (compiler_arch, compiler_name, dll_suffix)):
+	for fname in glob.iglob("KlayGE/bin/win_%s/Render/KlayGE_Render*_%s*.%s" % (compiler_arch, compiler_info.name, dll_suffix)):
 		copy_to_dst(fname, "%sRender/" % bin_dst_dir);
-	for fname in glob.iglob("KlayGE/bin/win_%s/Scene/KlayGE_Scene*_%s*.%s" % (compiler_arch, compiler_name, dll_suffix)):
+	for fname in glob.iglob("KlayGE/bin/win_%s/Scene/KlayGE_Scene*_%s*.%s" % (compiler_arch, compiler_info.name, dll_suffix)):
 		copy_to_dst(fname, "%sScene/" % bin_dst_dir);
-	for fname in glob.iglob("KlayGE/bin/win_%s/Show/KlayGE_Show*_%s*.%s" % (compiler_arch, compiler_name, dll_suffix)):
+	for fname in glob.iglob("KlayGE/bin/win_%s/Show/KlayGE_Show*_%s*.%s" % (compiler_arch, compiler_info.name, dll_suffix)):
 		copy_to_dst(fname, "%sShow/" % bin_dst_dir);
 	for fname in glob.iglob("KlayGE/bin/win_%s/MeshMLJIT*" % compiler_arch):
 		copy_to_dst(fname, bin_dst_dir);
@@ -153,11 +153,11 @@ if __name__ == "__main__":
 	else:
 		cfg = ""
 
-	compiler_info = get_compiler_info(compiler, arch, cfg)
+	ci = compiler_info(compiler, arch, cfg)
 	
-	if 0 == len(compiler_info):
+	if 0 == len(ci.name):
 		print("No target folder specified\n")
 		sys.exit(1)
 
-	for arch in compiler_info[2]:
-		deploy_KlayGE(target_dir, compiler_info[0], compiler_info[1], arch[0], compiler_info[4])
+	for arch in ci.arch_list:
+		deploy_KlayGE(target_dir, ci, arch[0])

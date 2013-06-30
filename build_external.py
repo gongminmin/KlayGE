@@ -240,47 +240,61 @@ def build_freetype(compiler_info, compiler_arch, ide_version):
 		os.system("make")
 		os.chdir("../../")
 
-def build_7z(compiler_info, compiler_arch):
-	if "win32" == compiler_info.platform:
-		if "x64" == compiler_arch:
-			arch = "x64"
-			compiler_arch = "x86_amd64"
-			folder_suffix = ""
-		elif "arm_app" == compiler_arch:
-			arch = "ARM"
-			compiler_arch = "x86_arm"
-			folder_suffix = "_app"
-		elif "x86_app" == compiler_arch:
-			arch = "Win32"
-			compiler_arch = "x86"
-			folder_suffix = "_app"
-		else:
-			arch = "Win32"
-			folder_suffix = ""
-		configs = []
-		if "Debug" in compiler_info.cfg:
-			configs.append("Debug")
-		if ("Release" in compiler_info.cfg) or ("RelWithDebInfo" in compiler_info.cfg) or ("MinSizeRel" in compiler_info.cfg):
-			configs.append("Release")
+def build_7z(compiler_info, compiler_arch, generator_name):
+	curdir = os.path.abspath(os.curdir)
 
-		os.chdir("External/7z/build/%s-%d_0%s" % (compiler_info.name, compiler_info.version, folder_suffix))
-		build_cmd = batch_command()
+	if "vc" == compiler_info.name:
+		build_dir = "External/7z/build/%s-%d_0-%s" % (compiler_info.name, compiler_info.version, compiler_arch)
+	else:
+		build_dir = "External/7z/build/%s-%s" % (compiler_info.name, compiler_arch)
+	if not os.path.exists(build_dir):
+		os.makedirs(build_dir)
+
+	os.chdir(build_dir)
+	
+	toolset_name = ""
+	if "vc" == compiler_info.name:
+		toolset_name = "-T %s" % compiler_info.toolset
+
+	additional_options = ""
+	if (compiler_arch.find("_app") > 0):
+		additional_options += "-D KLAYGE_WITH_WINRT:BOOL=\"TRUE\""
+
+	cmake_cmd = batch_command()
+	cmake_cmd.add_command('cmake -G "%s" %s %s %s' % (generator_name, toolset_name, additional_options, "../cmake"))
+	cmake_cmd.execute()
+
+	if ("x86_app" == compiler_arch):
+		compiler_arch = "x86"
+	elif ("arm_app" == compiler_arch):
+		compiler_arch = "x86_arm"
+	elif ("x64" == compiler_arch):
+		compiler_arch = "x86_amd64"
+
+	build_cmd = batch_command()
+	if "vc" == compiler_info.name:
 		build_cmd.add_command('CALL "%%VS%d0COMNTOOLS%%..\\..\\VC\\vcvarsall.bat" %s' % (compiler_info.version, compiler_arch))
-		for cfg in configs:
-			compiler_info.msvc_add_build_command(build_cmd, "Format7zExtract", "", cfg, arch)
-			compiler_info.msvc_add_build_command(build_cmd, "LzmaLib", "", cfg, arch)
-		build_cmd.execute()
-		os.chdir("../../../../")
+		for config in compiler_info.cfg:
+			compiler_info.msvc_add_build_command(build_cmd, "7z", "ALL_BUILD", config)
+	elif "mgw" == compiler_info.name:
+		build_cmd.add_command('mingw32-make.exe')
+	else:
+		build_cmd.add_command('make')
+	build_cmd.execute()
+
+	os.chdir(curdir)
 			
 def build_external_libs(compiler_info, compiler_arch, generator_name):
 	import glob
 
 	if "win32" == compiler_info.platform:
-		dst_dir = "KlayGE/bin/win_%s/" % compiler_arch
+		platform_dir = "win_%s" % compiler_arch
+		dst_dir = "KlayGE/bin/%s/" % platform_dir
 		bat_suffix = "bat"
 		dll_suffix = "dll"
 	elif "linux" == compiler_info.platform:
-		dst_dir = "KlayGE/bin/linux_%s/" % compiler_arch
+		platform_dir = "linux_%s" % compiler_arch
+		dst_dir = "KlayGE/bin/%s/" % platform_dir
 		bat_suffix = "sh"
 		dll_suffix = "so"
 		
@@ -349,22 +363,12 @@ def build_external_libs(compiler_info, compiler_arch, generator_name):
 
 	if ("vc" == compiler_info.name):
 		print("\nBuilding 7z...\n")
-		build_7z(compiler_info, compiler_arch)
+		build_7z(compiler_info, compiler_arch, generator_name)
 
-		if "x64" == compiler_arch:
-			subdir = "x64/"
-			folder_suffix = ""
-		elif "arm_app" == compiler_arch:
-			subdir = "ARM/"
-			folder_suffix = "_app"
-		elif "x86_app" == compiler_arch:
-			subdir = ""
-			folder_suffix = "_app"
-		else:
-			subdir = ""
-			folder_suffix = ""
-		copy_to_dst("External/7z/build/%s-%d_0%s/%sRelease/7zxa.%s" % (compiler_info.name, compiler_info.version, folder_suffix, subdir, dll_suffix), dst_dir)
-		copy_to_dst("External/7z/build/%s-%d_0%s/%sRelease/LZMA.%s" % (compiler_info.name, compiler_info.version, folder_suffix, subdir, dll_suffix), dst_dir)
+		for fname in glob.iglob("External/7z/lib/%s/7zxa*.%s" % (platform_dir, dll_suffix)):
+			copy_to_dst(fname, dst_dir)
+		for fname in glob.iglob("External/7z/lib/%s/LZMA*.%s" % (platform_dir, dll_suffix)):
+			copy_to_dst(fname, dst_dir)
 
 	if (compiler_arch != "x86_app") and (compiler_arch != "arm_app"):
 		if "win32" == compiler_info.platform:
