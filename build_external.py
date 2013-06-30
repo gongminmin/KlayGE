@@ -116,49 +116,49 @@ def build_Python(compiler_info, compiler_arch):
 		os.system("make")
 		os.chdir("../../")
 
-def build_libogg(compiler_info, compiler_arch, ide_name, ide_version):
-	if "win32" == compiler_info.platform:
-		if "vc" == compiler_info.name:
-			if "x64" == compiler_arch:
-				arch = "x64"
-				compiler_arch = "x86_amd64"
-			else:
-				arch = "Win32"
-			configs = []
-			if "Debug" in compiler_info.cfg:
-				configs.append("Debug")
-			if ("Release" in compiler_info.cfg) or ("RelWithDebInfo" in compiler_info.cfg) or ("MinSizeRel" in compiler_info.cfg):
-				configs.append("Release")
-				
-			os.chdir("External/libogg/win32/%s%d" % (ide_name, ide_version))
-			build_cmd = batch_command()
-			build_cmd.add_command('CALL "%%VS%d0COMNTOOLS%%..\\..\\VC\\vcvarsall.bat" %s' % (compiler_info.version, compiler_arch))
-			for cfg in configs:
-				compiler_info.msvc_add_build_command(build_cmd, "libogg_static", "", cfg, arch)
-				if "Debug" == cfg:
-					suffix = "_d"
-				else:
-					suffix = ""
-				build_cmd.add_command('move /Y %s\\%s\\libogg_static.lib ..\\..\\lib\\%s\\libogg_static%s.lib' % (arch, cfg, arch, suffix))
-			build_cmd.execute()
-			os.chdir("../../../../")
-		elif "mgw" == compiler_info.name:
-			os.chdir("External/libogg")
-			build_cmd = batch_command()
-			build_cmd.add_command("@set PATH=%PATH%;C:\\MinGW\\msys\\1.0\\bin")
-			build_cmd.add_command("sh ./configure --disable-shared")
-			build_cmd.add_command("mingw32-make.exe")
-			build_cmd.add_command("copy /Y src\\.libs\\libogg.a lib\\libogg.a")
-			build_cmd.add_command("mingw32-make.exe clean")
-			build_cmd.execute()
-			os.chdir("../../")
-	elif "linux" == compiler_info.platform:
-		os.chdir("External/libogg")
-		os.system("./configure --disable-shared")
-		os.system("make")
-		copy_to_dst("src/.libs/libogg.a", "lib/libogg.a")
-		os.system("make clean")
-		os.chdir("../../")
+def build_libogg(compiler_info, compiler_arch, generator_name):
+	curdir = os.path.abspath(os.curdir)
+
+	if "vc" == compiler_info.name:
+		build_dir = "External/libogg/build/%s-%d_0-%s" % (compiler_info.name, compiler_info.version, compiler_arch)
+	else:
+		build_dir = "External/libogg/build/%s-%s" % (compiler_info.name, compiler_arch)
+	if not os.path.exists(build_dir):
+		os.makedirs(build_dir)
+
+	os.chdir(build_dir)
+	
+	toolset_name = ""
+	if "vc" == compiler_info.name:
+		toolset_name = "-T %s" % compiler_info.toolset
+
+	additional_options = ""
+	if (compiler_arch.find("_app") > 0):
+		additional_options += "-D KLAYGE_WITH_WINRT:BOOL=\"TRUE\""
+
+	cmake_cmd = batch_command()
+	cmake_cmd.add_command('cmake -G "%s" %s %s %s' % (generator_name, toolset_name, additional_options, "../cmake"))
+	cmake_cmd.execute()
+
+	if ("x86_app" == compiler_arch):
+		compiler_arch = "x86"
+	elif ("arm_app" == compiler_arch):
+		compiler_arch = "x86_arm"
+	elif ("x64" == compiler_arch):
+		compiler_arch = "x86_amd64"
+
+	build_cmd = batch_command()
+	if "vc" == compiler_info.name:
+		build_cmd.add_command('CALL "%%VS%d0COMNTOOLS%%..\\..\\VC\\vcvarsall.bat" %s' % (compiler_info.version, compiler_arch))
+		for config in compiler_info.cfg:
+			compiler_info.msvc_add_build_command(build_cmd, "libogg", "ALL_BUILD", config)
+	elif "mgw" == compiler_info.name:
+		build_cmd.add_command('mingw32-make.exe')
+	else:
+		build_cmd.add_command('make')
+	build_cmd.execute()
+
+	os.chdir(curdir)
 
 def build_libvorbis(compiler_info, compiler_arch, ide_name, ide_version):
 	if "win32" == compiler_info.platform:
@@ -351,7 +351,7 @@ def build_external_libs(compiler_info, compiler_arch, generator_name):
 
 	if (compiler_arch != "x86_app") and (compiler_arch != "arm_app"):
 		print("\nBuilding libogg...\n")
-		build_libogg(compiler_info, compiler_arch, ide_name, ide_version)
+		build_libogg(compiler_info, compiler_arch, generator_name)
 
 	if (compiler_arch != "x86_app") and (compiler_arch != "arm_app"):
 		print("\nBuilding libvorbis...\n")
