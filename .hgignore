@@ -111,9 +111,13 @@ External/Python/vc-11_0/obj/
 External/Python/vc-11_0/amd64/
 External/Python/vc-11_0/*-temp-*/
 External/Python/vc-11_0/*-pgi/
+External/freetype/builds/mgw-*/
+External/freetype/builds/gcc-*/
+External/freetype/builds/vc-*/
 External/freetype/config.mk
 External/freetype/objs/debug
 External/freetype/objs/release
+External/freetype/objs/win_*
 External/freetype/objs/win32
 External/freetype/objs/x64
 External/freetype/objs/*.o
@@ -139,6 +143,7 @@ External/libogg/stamp-h1
 External/libogg/conftest.make
 External/libogg/confdefs.h
 External/libvorbis/libs/*/*.lib
+External/libvorbis/libs/*/*.pdb
 External/libvorbis/libs/*.a
 External/libvorbis/win32/*/*/Win32
 External/libvorbis/win32/*/*/x64
@@ -153,8 +158,3 @@ External/libvorbis/libtool
 External/libvorbis/vorbis*.pc
 External/libvorbis/stamp-h1
 External/libvorbis/doc/Doxyfile
-External/7z/build/vc-*/Release
-External/7z/build/vc-*/Debug
-External/7z/build/vc-*/x64
-External/7z/build/vc-*/ipch/
-External/7z/build/android/*/obj/

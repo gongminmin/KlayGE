@@ -204,38 +204,45 @@ def build_libvorbis(compiler_info, compiler_arch, generator_name):
 
 	os.chdir(curdir)
 
-def build_freetype(compiler_info, compiler_arch, ide_version):
-	if "win32" == compiler_info.platform:
-		if "vc" == compiler_info.name:
-			if "x64" == compiler_arch:
-				arch = "x64"
-				compiler_arch = "x86_amd64"
-			else:
-				arch = "Win32"
-			configs = []
-			if "Debug" in compiler_info.cfg:
-				configs.append("Debug")
-			if ("Release" in compiler_info.cfg) or ("RelWithDebInfo" in compiler_info.cfg) or ("MinSizeRel" in compiler_info.cfg):
-				configs.append("Release")
+def build_freetype(compiler_info, compiler_arch, generator_name):
+	curdir = os.path.abspath(os.curdir)
 
-			os.chdir("External/freetype/builds/win32/vc%s" % ide_version)
-			build_cmd = batch_command()
-			build_cmd.add_command('CALL "%%VS%d0COMNTOOLS%%..\\..\\VC\\vcvarsall.bat" %s' % (compiler_info.version, compiler_arch))
-			for cfg in configs:
-				compiler_info.msvc_add_build_command(build_cmd, "freetype", "", cfg, arch)
-			build_cmd.execute()
-			os.chdir("../../../../../")
-		elif "mgw" == compiler_info.name:
-			os.chdir("External/freetype")
-			os.system("mingw32-make.exe")
-			os.system("mingw32-make.exe")
-			copy_to_dst("objs\\freetype.a", "objs\\libfreetype.a")
-			os.chdir("../../")
-	elif "linux" == compiler_info.platform:
-		os.chdir("External/freetype")
-		os.system("./configure")
-		os.system("make")
-		os.chdir("../../")
+	if "vc" == compiler_info.name:
+		build_dir = "External/freetype/builds/%s-%d_0-%s" % (compiler_info.name, compiler_info.version, compiler_arch)
+	else:
+		build_dir = "External/freetype/builds/%s-%s" % (compiler_info.name, compiler_arch)
+	if not os.path.exists(build_dir):
+		os.makedirs(build_dir)
+
+	os.chdir(build_dir)
+	
+	toolset_name = ""
+	if "vc" == compiler_info.name:
+		toolset_name = "-T %s" % compiler_info.toolset
+
+	cmake_cmd = batch_command()
+	cmake_cmd.add_command('cmake -G "%s" %s %s' % (generator_name, toolset_name, "../cmake"))
+	cmake_cmd.execute()
+
+	if ("x86_app" == compiler_arch):
+		compiler_arch = "x86"
+	elif ("arm_app" == compiler_arch):
+		compiler_arch = "x86_arm"
+	elif ("x64" == compiler_arch):
+		compiler_arch = "x86_amd64"
+
+	build_cmd = batch_command()
+	if "vc" == compiler_info.name:
+		build_cmd.add_command('CALL "%%VS%d0COMNTOOLS%%..\\..\\VC\\vcvarsall.bat" %s' % (compiler_info.version, compiler_arch))
+		for config in compiler_info.cfg:
+			compiler_info.msvc_add_build_command(build_cmd, "freetype", "ALL_BUILD", config)
+	elif "mgw" == compiler_info.name:
+		build_cmd.add_command('mingw32-make.exe')
+	else:
+		build_cmd.add_command('make')
+	build_cmd.execute()
+
+	os.chdir(curdir)
 
 def build_7z(compiler_info, compiler_arch, generator_name):
 	curdir = os.path.abspath(os.curdir)
@@ -356,7 +363,7 @@ def build_external_libs(compiler_info, compiler_arch, generator_name):
 
 	if (compiler_arch != "x86_app") and (compiler_arch != "arm_app"):
 		print("\nBuilding freetype...\n")
-		build_freetype(compiler_info, compiler_arch, ide_version)
+		build_freetype(compiler_info, compiler_arch, generator_name)
 
 	if ("vc" == compiler_info.name):
 		print("\nBuilding 7z...\n")
