@@ -610,6 +610,25 @@ namespace KlayGE
 			return Vector_T<T, 3>(temp.x(), temp.y(), temp.z()) / temp.w();
 		}
 
+		template float ortho_area(float3 const & view_dir, AABBox const & aabbox);
+
+		// From http://www.codersnotes.com/notes/projected-area-of-an-aabb, mentioned by Ming Tu
+		template <typename T>
+		T ortho_area(Vector_T<T, 3> const & view_dir, AABBox_T<T> const & aabbox)
+		{
+			Vector_T<T, 3> size = aabbox.Max() - aabbox.Min();
+			return dot(Vector_T<T, 3>(abs(view_dir.x()), abs(view_dir.y()), abs(view_dir.z())),
+				Vector_T<T, 3>(size.y() * size.z(), size.z() * size.x(), size.x() * size.y()));
+		}
+
+		template float perspective_area(float3 const & view_pos, float3 const & view_dir, AABBox const & aabbox);
+
+		template <typename T>
+		T perspective_area(Vector_T<T, 3> const & view_pos, Vector_T<T, 3> const & view_dir, AABBox_T<T> const & aabbox)
+		{
+			return ortho_area(view_dir, aabbox) / length_sq(view_pos - aabbox.Center());
+		}
+
 
 		// 4D Vector
 		///////////////////////////////////////////////////////////////////////////////

@@ -396,6 +396,12 @@ namespace KlayGE
 			Matrix4_T<T> const & world, Matrix4_T<T> const & view, Matrix4_T<T> const & proj,
 			int const viewport[4], T const & nearPlane, T const & farPlane);
 
+		template <typename T>
+		T ortho_area(Vector_T<T, 3> const & view_dir, AABBox_T<T> const & aabbox);
+
+		template <typename T>
+		T perspective_area(Vector_T<T, 3> const & view_pos, Vector_T<T, 3> const & view_dir, AABBox_T<T> const & aabbox);
+
 
 		// 4D œÚ¡ø
 		///////////////////////////////////////////////////////////////////////////////
