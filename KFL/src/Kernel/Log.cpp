@@ -37,16 +37,26 @@
 #include <android/log.h>
 #else
 #include <iostream>
+#include <fstream>
 #endif
 
 #include <KFL/Log.hpp>
+
+#ifdef KLAYGE_DEBUG
+#ifndef KLAYGE_PLATFORM_ANDROID
+namespace
+{
+	std::ofstream log_file("KlayGE.log");
+}
+#endif
+#endif
 
 namespace KlayGE
 {
 	void LogInfo(char const * fmt, ...)
 	{
 		va_list args;
-		va_start(args, fmt); 
+		va_start(args, fmt);
 
 #ifdef KLAYGE_PLATFORM_ANDROID
 		__android_log_vprint(ANDROID_LOG_INFO, "KlayGE", fmt, args);
@@ -55,6 +65,9 @@ namespace KlayGE
 		vsprintf(buffer, fmt, args);
 
 		std::clog << "(INFO) KlayGE: " << buffer << std::endl;
+#ifdef KLAYGE_DEBUG
+		log_file << "(INFO) KlayGE: " << buffer << std::endl;
+#endif
 #endif
 
 		va_end(args);
@@ -63,7 +76,7 @@ namespace KlayGE
 	void LogWarn(char const * fmt, ...)
 	{
 		va_list args;
-		va_start(args, fmt); 
+		va_start(args, fmt);
 
 #ifdef KLAYGE_PLATFORM_ANDROID
 		__android_log_vprint(ANDROID_LOG_WARN, "KlayGE", fmt, args);
@@ -72,6 +85,9 @@ namespace KlayGE
 		vsprintf(buffer, fmt, args);
 
 		std::clog << "(WARN) KlayGE: " << buffer << std::endl;
+#ifdef KLAYGE_DEBUG
+		log_file << "(WARN) KlayGE: " << buffer << std::endl;
+#endif
 #endif
 
 		va_end(args);
@@ -80,7 +96,7 @@ namespace KlayGE
 	void LogError(char const * fmt, ...)
 	{
 		va_list args;
-		va_start(args, fmt); 
+		va_start(args, fmt);
 
 #ifdef KLAYGE_PLATFORM_ANDROID
 		__android_log_vprint(ANDROID_LOG_ERROR, "KlayGE", fmt, args);
@@ -89,6 +105,9 @@ namespace KlayGE
 		vsprintf(buffer, fmt, args);
 
 		std::clog << "(ERROR) KlayGE: " << buffer << std::endl;
+#ifdef KLAYGE_DEBUG
+		log_file << "(ERROR) KlayGE: " << buffer << std::endl;
+#endif
 #endif
 
 		va_end(args);
