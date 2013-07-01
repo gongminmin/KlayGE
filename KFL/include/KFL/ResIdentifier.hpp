@@ -91,9 +91,9 @@ namespace KlayGE
 			istream_->clear();
 		}
 
-		operator void*() const
+		operator bool() const
 		{
-			return istream_->operator void*();
+			return !istream_->fail();
 		}
 
 		bool operator!() const

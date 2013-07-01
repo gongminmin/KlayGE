@@ -43,7 +43,11 @@
 		using std::system_error;
 		using std::make_error_code;
 #ifdef KLAYGE_COMPILER_MSVC
+#if KLAYGE_COMPILER_VERSION >= 120
+		using std::errc;
+#else
 		namespace errc = std::errc;
+#endif
 #else
 		using std::errc;
 #endif

@@ -24,7 +24,7 @@ def build_KlayGE(compiler_info, compiler_arch, generator_name):
 	additional_options = ""
 	if (compiler_arch.find("_app") > 0):
 		additional_options += "-D KLAYGE_WITH_WINRT:BOOL=\"TRUE\""
-	if "v110_xp" == compiler_info.toolset:
+	if compiler_info.toolset in ("v110_xp", "v120_xp"):
 		additional_options += "-D KLAYGE_WITH_XP_TOOLSET:BOOL=\"TRUE\""
 
 	cmake_cmd = batch_command()

@@ -49,7 +49,9 @@ class compiler_info:
 		if "" == compiler:
 			if ("" == cfg_build.compiler) or ("auto" == cfg_build.compiler):
 				if "win32" == platform:
-					if "VS110COMNTOOLS" in env:
+					if "VS120COMNTOOLS" in env:
+						compiler = "vc12"
+					elif "VS110COMNTOOLS" in env:
 						compiler = "vc11"
 					elif "VS100COMNTOOLS" in env:
 						compiler = "vc10"
@@ -68,7 +70,9 @@ class compiler_info:
 		toolset = cfg_build.toolset
 		if ("" == cfg_build.toolset) or ("auto" == cfg_build.toolset):
 			if "win32" == platform:
-				if "vc11" == compiler:
+				if "vc12" == compiler:
+					toolset = "v120"
+				elif "vc11" == compiler:
 					toolset = "v110"
 				elif "vc10" == compiler:
 					toolset = "v100"
@@ -86,7 +90,17 @@ class compiler_info:
 				cfg = ("Debug", "RelWithDebInfo")
 
 		arch_list = []
-		if "vc11" == compiler:
+		if "vc12" == compiler:
+			compiler_name = "vc"
+			compiler_version = 12
+			for arch in archs:
+				if ("x86" == arch) or ("x86_app" == arch):
+					arch_list.append((arch, "Visual Studio 12"))
+				elif "arm_app" == arch:
+					arch_list.append((arch, "Visual Studio 12 ARM"))
+				elif "x64" == arch:
+					arch_list.append((arch, "Visual Studio 12 Win64"))
+		elif "vc11" == compiler:
 			compiler_name = "vc"
 			compiler_version = 11
 			for arch in archs:

@@ -301,26 +301,6 @@ def build_external_libs(compiler_info, compiler_arch, generator_name):
 		dst_dir = "KlayGE/bin/%s/" % platform_dir
 		bat_suffix = "sh"
 		dll_suffix = "so"
-		
-	if "vc" == compiler_info.name:
-		ide_name = "VS"
-		if 11 == compiler_info.version:
-			ide_version = 2012
-		elif 10 == compiler_info.version:
-			ide_version = 2010
-		elif 9 == compiler_info.version:
-			ide_version = 2008
-		elif 8 == compiler_info.version:
-			ide_version = 2005
-	elif "mgw" == compiler_info.name:
-		ide_name = "mingw"
-		ide_version = 0
-	elif "gcc" == compiler_info.name:
-		ide_name = "gcc"
-		ide_version = 0
-	else:
-		print("Wrong configuration\n")
-		sys.exit(1)
 
 
 	print("\nBuilding boost...\n")
