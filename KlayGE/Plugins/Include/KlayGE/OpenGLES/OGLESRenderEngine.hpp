@@ -62,7 +62,7 @@ namespace KlayGE
 
 		void ActiveTexture(GLenum tex_unit);
 		
-		void BindBuffer(GLenum target, GLuint buffer);
+		void BindBuffer(GLenum target, GLuint buffer, bool force = false);
 		void DeleteBuffers(GLsizei n, GLuint const * buffers);
 
 		void ClearColor(GLfloat r, GLfloat g, GLfloat b, GLfloat a);
@@ -91,7 +91,7 @@ namespace KlayGE
 		bool TextureFormatSupport(ElementFormat elem_fmt);
 		bool RenderTargetFormatSupport(ElementFormat elem_fmt, uint32_t sample_count, uint32_t sample_quality);
 
-		void CheckConfig(RenderSettings& settings) KLAYGE_OVERRIDE;
+		virtual void CheckConfig(RenderSettings& settings) KLAYGE_OVERRIDE;
 
 	private:
 		array<GLfloat, 4> clear_clr_;
@@ -103,6 +103,12 @@ namespace KlayGE
 
 		GLuint cur_fbo_;
 
+		RenderLayoutPtr so_rl_;
+		GLenum so_primitive_mode_;
+		std::vector<std::string> so_vars_;
+		std::vector<char const *> so_vars_ptrs_;
+		std::vector<GLuint> so_buffs_;
+
 		GLenum active_tex_unit_;
 		std::map<GLenum, GLuint> binded_buffer_;
 
@@ -111,7 +117,7 @@ namespace KlayGE
 		std::set<ElementFormat> rendertarget_format_;
 	};
 
-	typedef shared_ptr<OGLESRenderEngine> OGLES2RenderEnginePtr;
+	typedef shared_ptr<OGLESRenderEngine> OGLESRenderEnginePtr;
 }
 
 #endif			// _OGLESRENDERENGINE_HPP

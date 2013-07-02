@@ -30,16 +30,36 @@ namespace KlayGE
 {
 	OGLESRenderLayout::OGLESRenderLayout()
 	{
+		if (glloader_GLES_VERSION_3_0())
+		{
+			use_vao_ = true;
+		}
+		else
+		{
+			use_vao_ = false;
+		}
 	}
 
 	OGLESRenderLayout::~OGLESRenderLayout()
 	{
+		if (use_vao_)
+		{
+			typedef KLAYGE_DECLTYPE(vaos_) VAOsType;
+			KLAYGE_FOREACH(VAOsType::reference vao, vaos_)
+			{
+				glDeleteVertexArrays(1, &vao.second);
+			}
+		}
 	}
 
-	void OGLESRenderLayout::Active(ShaderObjectPtr const & so) const
+	void OGLESRenderLayout::BindVertexStreams(ShaderObjectPtr const & so) const
 	{
-		OGLES2ShaderObjectPtr const & ogl_so = checked_pointer_cast<OGLESShaderObject>(so);
+		OGLESShaderObjectPtr const & ogl_so = checked_pointer_cast<OGLESShaderObject>(so);
 
+		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+		uint32_t max_vertex_streams = re.DeviceCaps().max_vertex_streams;
+
+		std::vector<char> used_streams(max_vertex_streams, 0);
 		for (uint32_t i = 0; i < this->NumVertexStreams(); ++ i)
 		{
 			OGLESGraphicsBuffer& stream(*checked_pointer_cast<OGLESGraphicsBuffer>(this->GetVertexStream(i)));
@@ -60,19 +80,35 @@ namespace KlayGE
 					OGLESMapping::MappingVertexFormat(type, normalized, vs_elem.format);
 					normalized = (((VEU_Diffuse == vs_elem.usage) || (VEU_Specular == vs_elem.usage)) && !IsFloatFormat(vs_elem.format)) ? GL_TRUE : normalized;
 
-					glEnableVertexAttribArray(attr);
-					stream.Active();
+					stream.Active(use_vao_);
 					glVertexAttribPointer(attr, num_components, type, normalized, size, offset);
+					glEnableVertexAttribArray(attr);
+
+					used_streams[attr] = 1;
 				}
 
 				elem_offset += vs_elem.element_size();
 			}
 		}
+
+		for (GLuint i = 0; i < max_vertex_streams; ++ i)
+		{
+			if (!used_streams[i])
+			{
+				glDisableVertexAttribArray(i);
+			}
+		}
+
+		if (this->UseIndices())
+		{
+			OGLESGraphicsBuffer& stream(*checked_pointer_cast<OGLESGraphicsBuffer>(this->GetIndexStream()));
+			stream.Active(use_vao_);
+		}
 	}
 
-	void OGLESRenderLayout::Deactive(ShaderObjectPtr const & so) const
+	void OGLESRenderLayout::UnbindVertexStreams(ShaderObjectPtr const & so) const
 	{
-		OGLES2ShaderObjectPtr const & ogl_so = checked_pointer_cast<OGLESShaderObject>(so);
+		OGLESShaderObjectPtr const & ogl_so = checked_pointer_cast<OGLESShaderObject>(so);
 
 		for (uint32_t i = 0; i < this->NumVertexStreams(); ++ i)
 		{
@@ -87,6 +123,41 @@ namespace KlayGE
 					glDisableVertexAttribArray(attr);
 				}
 			}
+		}
+	}
+
+	void OGLESRenderLayout::Active(ShaderObjectPtr const & so) const
+	{
+		if (use_vao_)
+		{
+			GLuint vao;
+			typedef KLAYGE_DECLTYPE(vaos_) VAOsType;
+			VAOsType::iterator iter = vaos_.find(so);
+			if (iter == vaos_.end())
+			{
+				glGenVertexArrays(1, &vao);
+				vaos_.insert(std::make_pair(so, vao));
+
+				glBindVertexArray(vao);
+				this->BindVertexStreams(so);
+			}
+			else
+			{
+				vao = iter->second;
+				glBindVertexArray(vao);
+			}
+		}
+		else
+		{
+			this->BindVertexStreams(so);
+		}
+	}
+
+	void OGLESRenderLayout::Deactive(ShaderObjectPtr const & so) const
+	{
+		if (!use_vao_)
+		{
+			this->UnbindVertexStreams(so);
 		}
 	}
 }

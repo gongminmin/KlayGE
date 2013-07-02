@@ -1559,7 +1559,7 @@ namespace KlayGE
 
 	void OGLESShaderObject::AttachShader(ShaderType type, RenderEffect const & /*effect*/, ShaderObjectPtr const & shared_so)
 	{
-		OGLES2ShaderObjectPtr so = checked_pointer_cast<OGLESShaderObject>(shared_so);
+		OGLESShaderObjectPtr so = checked_pointer_cast<OGLESShaderObject>(shared_so);
 
 		is_shader_validate_[type] = so->is_shader_validate_[type];
 
@@ -1676,7 +1676,7 @@ namespace KlayGE
 
 	ShaderObjectPtr OGLESShaderObject::Clone(RenderEffect const & effect)
 	{
-		OGLES2ShaderObjectPtr ret = MakeSharedPtr<OGLESShaderObject>();
+		OGLESShaderObjectPtr ret = MakeSharedPtr<OGLESShaderObject>();
 
 		ret->has_discard_ = has_discard_;
 		ret->has_tessellation_ = has_tessellation_;

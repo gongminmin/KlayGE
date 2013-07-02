@@ -138,6 +138,10 @@ namespace KlayGE
 		checked_pointer_cast<OGLESBlendStateObject>(cur_bs_obj_)->ForceDefaultState();
 
 		glEnable(GL_POLYGON_OFFSET_FILL);
+		if (glloader_GLES_VERSION_3_0())
+		{
+			glEnable(GL_PRIMITIVE_RESTART_FIXED_INDEX);
+		}
 
 		active_tex_unit_ = GL_TEXTURE0;
 		glActiveTexture(active_tex_unit_);
@@ -154,10 +158,10 @@ namespace KlayGE
 		}
 	}
 
-	void OGLESRenderEngine::BindBuffer(GLenum target, GLuint buffer)
+	void OGLESRenderEngine::BindBuffer(GLenum target, GLuint buffer, bool force)
 	{
 		KLAYGE_AUTO(iter, binded_buffer_.find(target));
-		if ((iter == binded_buffer_.end()) || (iter->second != buffer))
+		if (force || (iter == binded_buffer_.end()) || (iter->second != buffer))
 		{
 			glBindBuffer(target, buffer);
 			binded_buffer_[target] = buffer;
@@ -254,8 +258,88 @@ namespace KlayGE
 
 	// 设置当前Stream output目标
 	/////////////////////////////////////////////////////////////////////////////////
-	void OGLESRenderEngine::DoBindSOBuffers(RenderLayoutPtr const & /*rl*/)
+	void OGLESRenderEngine::DoBindSOBuffers(RenderLayoutPtr const & rl)
 	{
+		so_rl_ = rl;
+
+		if (so_rl_)
+		{
+			switch (rl->TopologyType())
+			{
+			case RenderLayout::TT_PointList:
+				so_primitive_mode_ = GL_POINTS;
+				break;
+
+			case RenderLayout::TT_LineList:
+				so_primitive_mode_ = GL_LINES;
+				break;
+
+			case RenderLayout::TT_TriangleList:
+				so_primitive_mode_ = GL_TRIANGLES;
+				break;
+
+			default:
+				BOOST_ASSERT(false);
+				so_primitive_mode_ = GL_POINTS;
+				break;
+			}
+
+			so_vars_.resize(0);
+			for (uint32_t i = 0; i < so_rl_->NumVertexStreams(); ++ i)
+			{
+				so_buffs_.push_back(checked_pointer_cast<OGLESGraphicsBuffer>(so_rl_->GetVertexStream(i))->GLvbo());
+
+				vertex_element const & ve = so_rl_->VertexStreamFormat(i)[0];
+				switch (ve.usage)
+				{
+				case VEU_Position:
+					so_vars_.push_back("gl_Position");
+					break;
+
+				case VEU_Normal:
+					so_vars_.push_back("gl_Normal");
+					break;
+
+				case VEU_Diffuse:
+					so_vars_.push_back("gl_FrontColor");
+					break;
+
+				case VEU_Specular:
+					so_vars_.push_back("gl_FrontSecondaryColor");
+					break;
+
+				case VEU_BlendWeight:
+					so_vars_.push_back("_BLENDWEIGHT");
+					break;
+					
+				case VEU_BlendIndex:
+					so_vars_.push_back("_BLENDINDEX");
+					break;
+
+				case VEU_TextureCoord:
+					{
+						std::stringstream ss;
+						ss << "glTexCoord[" << ve.usage_index << "]";
+						so_vars_.push_back(ss.str());
+					}
+					break;
+
+				case VEU_Tangent:
+					so_vars_.push_back("_TANGENT");
+					break;
+					
+				case VEU_Binormal:
+					so_vars_.push_back("_BINORMAL");
+					break;
+				}
+			}
+
+			so_vars_ptrs_.resize(so_vars_.size());
+			for (size_t i = 0; i < so_rl_->NumVertexStreams(); ++ i)
+			{
+				so_vars_ptrs_[i] = so_vars_[i].c_str();
+			}
+		}
 	}
 
 	// 开始一帧
@@ -277,7 +361,7 @@ namespace KlayGE
 		uint32_t const num_instance = rl.NumInstances();
 		BOOST_ASSERT(num_instance != 0);
 
-		OGLES2ShaderObjectPtr cur_shader = checked_pointer_cast<OGLESShaderObject>(tech.Pass(0)->GetShaderObject());
+		OGLESShaderObjectPtr cur_shader = checked_pointer_cast<OGLESShaderObject>(tech.Pass(0)->GetShaderObject());
 		checked_cast<OGLESRenderLayout const *>(&rl)->Active(cur_shader);
 
 		size_t const vertexCount = rl.UseIndices() ? rl.NumIndices() : rl.NumVertices();
@@ -292,9 +376,6 @@ namespace KlayGE
 		uint8_t* index_offset = nullptr;
 		if (rl.UseIndices())
 		{
-			OGLESGraphicsBuffer& stream(*checked_pointer_cast<OGLESGraphicsBuffer>(rl.GetIndexStream()));
-			stream.Active();
-
 			if (EF_R16UI == rl.IndexStreamFormat())
 			{
 				index_type = GL_UNSIGNED_SHORT;
@@ -310,79 +391,41 @@ namespace KlayGE
 		uint32_t const num_passes = tech.NumPasses();
 		size_t const inst_format_size = rl.InstanceStreamFormat().size();
 
-		for (uint32_t instance = rl.StartInstanceLocation(); instance < rl.StartInstanceLocation() + num_instance; ++ instance)
+		if (glloader_GLES_VERSION_3_0() && rl.InstanceStream())
 		{
-			if (rl.InstanceStream())
+			OGLESGraphicsBuffer& stream(*checked_pointer_cast<OGLESGraphicsBuffer>(rl.InstanceStream()));
+
+			uint32_t const instance_size = rl.InstanceSize();
+			BOOST_ASSERT(num_instance * instance_size <= stream.Size());
+
+			uint8_t* elem_offset = nullptr;
+			for (size_t i = 0; i < inst_format_size; ++ i)
 			{
-				GraphicsBuffer& stream = *rl.InstanceStream();
+				vertex_element const & vs_elem = rl.InstanceStreamFormat()[i];
 
-				uint32_t const instance_size = rl.InstanceSize();
-				BOOST_ASSERT(num_instance * instance_size <= stream.Size());
-				GraphicsBuffer::Mapper mapper(stream, BA_Read_Only);
-				uint8_t const * buffer = mapper.Pointer<uint8_t>();
-
-				uint32_t elem_offset = 0;
-				for (size_t i = 0; i < inst_format_size; ++ i)
+				GLint attr = cur_shader->GetAttribLocation(vs_elem.usage, vs_elem.usage_index);
+				if (attr != -1)
 				{
-					BOOST_ASSERT(elem_offset < instance_size);
+					GLint const num_components = static_cast<GLint>(NumComponents(vs_elem.format));
+					GLenum type;
+					GLboolean normalized;
+					OGLESMapping::MappingVertexFormat(type, normalized, vs_elem.format);
+					normalized = (((VEU_Diffuse == vs_elem.usage) || (VEU_Specular == vs_elem.usage)) && !IsFloatFormat(vs_elem.format)) ? GL_TRUE : normalized;
+					GLvoid* offset = static_cast<GLvoid*>(elem_offset + rl.StartInstanceLocation() * instance_size);
 
-					vertex_element const & vs_elem = rl.InstanceStreamFormat()[i];
+					stream.Active(false);
+					glVertexAttribPointer(attr, num_components, type, normalized, instance_size, offset);
+					glEnableVertexAttribArray(attr);
 
-					GLint attr = cur_shader->GetAttribLocation(vs_elem.usage, vs_elem.usage_index);
-					if (attr != -1)
-					{
-						void const * addr = &buffer[instance * instance_size + elem_offset];
-						GLfloat const * float_addr = static_cast<GLfloat const *>(addr);
-						GLint const num_components = static_cast<GLint>(NumComponents(vs_elem.format));
-						GLenum type;
-						GLboolean normalized;
-						OGLESMapping::MappingVertexFormat(type, normalized, vs_elem.format);
-						normalized = (((VEU_Diffuse == vs_elem.usage) || (VEU_Specular == vs_elem.usage)) && !IsFloatFormat(vs_elem.format)) ? GL_TRUE : normalized;
-
-						switch (num_components)
-						{
-						case 1:
-							BOOST_ASSERT(IsFloatFormat(vs_elem.format));
-							glVertexAttrib1fv(attr, float_addr);
-							break;
-
-						case 2:
-							BOOST_ASSERT(IsFloatFormat(vs_elem.format));
-							glVertexAttrib2fv(attr, float_addr);
-							break;
-
-						case 3:
-							BOOST_ASSERT(IsFloatFormat(vs_elem.format));
-							glVertexAttrib3fv(attr, float_addr);
-							break;
-
-						case 4:
-							if (IsFloatFormat(vs_elem.format))
-							{
-								glVertexAttrib4fv(attr, float_addr);
-							}
-							else
-							{
-								GLubyte const * byte_addr = static_cast<GLubyte const *>(addr);
-								if (normalized)
-								{
-									glVertexAttrib4f(attr, byte_addr[0] / 255.0f, byte_addr[1] / 255.0f, byte_addr[2] / 255.0f, byte_addr[3] / 255.0f);
-								}
-								else
-								{
-									glVertexAttrib4f(attr, byte_addr[0], byte_addr[1], byte_addr[2], byte_addr[3]);
-								}
-							}
-							break;
-
-						default:
-							BOOST_ASSERT(false);
-							break;
-						}
-					}
-
-					elem_offset += vs_elem.element_size();
+					glVertexAttribDivisor(attr, 1);
 				}
+
+				elem_offset += vs_elem.element_size();
+			}
+
+			if (so_rl_)
+			{
+				glBeginTransformFeedback(so_primitive_mode_);
 			}
 
 			if (rl.UseIndices())
@@ -392,8 +435,19 @@ namespace KlayGE
 					RenderPassPtr const & pass = tech.Pass(i);
 
 					pass->Bind();
-					glDrawElements(mode, static_cast<GLsizei>(rl.NumIndices()),
-						index_type, index_offset);
+
+					if (so_rl_)
+					{
+						OGLESShaderObjectPtr shader = checked_pointer_cast<OGLESShaderObject>(pass->GetShaderObject());
+						glTransformFeedbackVaryings(shader->GLSLProgram(), static_cast<GLsizei>(so_vars_ptrs_.size()), &so_vars_ptrs_[0], GL_SEPARATE_ATTRIBS);
+						for (uint32_t j = 0; j < so_buffs_.size(); ++ j)
+						{
+							glBindBufferBase(GL_TRANSFORM_FEEDBACK_BUFFER, j, so_buffs_[j]);
+						}
+					}
+
+					glDrawElementsInstanced(mode, static_cast<GLsizei>(rl.NumIndices()),
+						index_type, index_offset, num_instance);
 					pass->Unbind();
 				}
 			}
@@ -404,13 +458,173 @@ namespace KlayGE
 					RenderPassPtr const & pass = tech.Pass(i);
 
 					pass->Bind();
-					glDrawArrays(mode, rl.StartVertexLocation(), static_cast<GLsizei>(rl.NumVertices()));
+
+					if (so_rl_)
+					{
+						OGLESShaderObjectPtr shader = checked_pointer_cast<OGLESShaderObject>(pass->GetShaderObject());
+						glTransformFeedbackVaryings(shader->GLSLProgram(), static_cast<GLsizei>(so_vars_ptrs_.size()), &so_vars_ptrs_[0], GL_SEPARATE_ATTRIBS);							for (uint32_t j = 0; j < so_buffs_.size(); ++ j)
+						{
+							glBindBufferBase(GL_TRANSFORM_FEEDBACK_BUFFER, j, so_buffs_[j]);
+						}
+					}
+
+					glDrawArraysInstanced(mode, rl.StartVertexLocation(), static_cast<GLsizei>(rl.NumVertices()), num_instance);
 					pass->Unbind();
+				}
+			}
+
+			if (so_rl_)
+			{
+				glEndTransformFeedback();
+			}
+
+			for (size_t i = 0; i < inst_format_size; ++ i)
+			{
+				vertex_element const & vs_elem = rl.InstanceStreamFormat()[i];
+				GLint attr = cur_shader->GetAttribLocation(vs_elem.usage, vs_elem.usage_index);
+				if (attr != -1)
+				{
+					glDisableVertexAttribArray(attr);
+					glVertexAttribDivisor(attr, 0);
+				}
+			}
+		}
+		else
+		{
+			for (uint32_t instance = rl.StartInstanceLocation(); instance < rl.StartInstanceLocation() + num_instance; ++ instance)
+			{
+				if (rl.InstanceStream())
+				{
+					GraphicsBuffer& stream = *rl.InstanceStream();
+
+					uint32_t const instance_size = rl.InstanceSize();
+					BOOST_ASSERT(num_instance * instance_size <= stream.Size());
+					GraphicsBuffer::Mapper mapper(stream, BA_Read_Only);
+					uint8_t const * buffer = mapper.Pointer<uint8_t>();
+
+					uint32_t elem_offset = 0;
+					for (size_t i = 0; i < inst_format_size; ++ i)
+					{
+						BOOST_ASSERT(elem_offset < instance_size);
+
+						vertex_element const & vs_elem = rl.InstanceStreamFormat()[i];
+
+						GLint attr = cur_shader->GetAttribLocation(vs_elem.usage, vs_elem.usage_index);
+						if (attr != -1)
+						{
+							void const * addr = &buffer[instance * instance_size + elem_offset];
+							GLfloat const * float_addr = static_cast<GLfloat const *>(addr);
+							GLint const num_components = static_cast<GLint>(NumComponents(vs_elem.format));
+							GLenum type;
+							GLboolean normalized;
+							OGLESMapping::MappingVertexFormat(type, normalized, vs_elem.format);
+							normalized = (((VEU_Diffuse == vs_elem.usage) || (VEU_Specular == vs_elem.usage)) && !IsFloatFormat(vs_elem.format)) ? GL_TRUE : normalized;
+
+							switch (num_components)
+							{
+							case 1:
+								BOOST_ASSERT(IsFloatFormat(vs_elem.format));
+								glVertexAttrib1fv(attr, float_addr);
+								break;
+
+							case 2:
+								BOOST_ASSERT(IsFloatFormat(vs_elem.format));
+								glVertexAttrib2fv(attr, float_addr);
+								break;
+
+							case 3:
+								BOOST_ASSERT(IsFloatFormat(vs_elem.format));
+								glVertexAttrib3fv(attr, float_addr);
+								break;
+
+							case 4:
+								if (IsFloatFormat(vs_elem.format))
+								{
+									glVertexAttrib4fv(attr, float_addr);
+								}
+								else
+								{
+									GLubyte const * byte_addr = static_cast<GLubyte const *>(addr);
+									if (normalized)
+									{
+										glVertexAttrib4f(attr, byte_addr[0] / 255.0f, byte_addr[1] / 255.0f, byte_addr[2] / 255.0f, byte_addr[3] / 255.0f);
+									}
+									else
+									{
+										glVertexAttrib4f(attr, byte_addr[0], byte_addr[1], byte_addr[2], byte_addr[3]);
+									}
+								}
+								break;
+
+							default:
+								BOOST_ASSERT(false);
+								break;
+							}
+						}
+
+						elem_offset += vs_elem.element_size();
+					}
+				}
+
+				if (so_rl_)
+				{
+					glBeginTransformFeedback(so_primitive_mode_);
+				}
+
+				if (rl.UseIndices())
+				{
+					for (uint32_t i = 0; i < num_passes; ++ i)
+					{
+						RenderPassPtr const & pass = tech.Pass(i);
+
+						pass->Bind();
+
+						if (so_rl_)
+						{
+							OGLESShaderObjectPtr shader = checked_pointer_cast<OGLESShaderObject>(pass->GetShaderObject());
+							glTransformFeedbackVaryings(shader->GLSLProgram(), static_cast<GLsizei>(so_vars_ptrs_.size()), &so_vars_ptrs_[0], GL_SEPARATE_ATTRIBS);
+							for (uint32_t j = 0; j < so_buffs_.size(); ++ j)
+							{
+								glBindBufferBase(GL_TRANSFORM_FEEDBACK_BUFFER, j, so_buffs_[j]);
+							}
+						}
+
+						glDrawElements(mode, static_cast<GLsizei>(rl.NumIndices()),
+							index_type, index_offset);
+						pass->Unbind();
+					}
+				}
+				else
+				{
+					for (uint32_t i = 0; i < num_passes; ++ i)
+					{
+						RenderPassPtr const & pass = tech.Pass(i);
+
+						pass->Bind();
+
+						if (so_rl_)
+						{
+							OGLESShaderObjectPtr shader = checked_pointer_cast<OGLESShaderObject>(pass->GetShaderObject());
+							glTransformFeedbackVaryings(shader->GLSLProgram(), static_cast<GLsizei>(so_vars_ptrs_.size()), &so_vars_ptrs_[0], GL_SEPARATE_ATTRIBS);
+							for (uint32_t j = 0; j < so_buffs_.size(); ++ j)
+							{
+								glBindBufferBase(GL_TRANSFORM_FEEDBACK_BUFFER, j, so_buffs_[j]);
+							}
+						}
+
+						glDrawArrays(mode, rl.StartVertexLocation(), static_cast<GLsizei>(rl.NumVertices()));
+						pass->Unbind();
+					}
+				}
+
+				if (so_rl_)
+				{
+					glEndTransformFeedback();
 				}
 			}
 		}
 
-		checked_cast<OGLESRenderLayout const *>(&rl)->Deactive(tech.Pass(0)->GetShaderObject());
+		checked_cast<OGLESRenderLayout const *>(&rl)->Deactive(cur_shader);
 	}
 
 	void OGLESRenderEngine::DoDispatch(RenderTechnique const & /*tech*/, uint32_t /*tgx*/, uint32_t /*tgy*/, uint32_t /*tgz*/)
@@ -563,7 +777,12 @@ namespace KlayGE
 
 		glGetIntegerv(GL_MAX_TEXTURE_SIZE, &temp);
 		caps_.max_texture_height = caps_.max_texture_width = temp;
-		if (glloader_GLES_OES_texture_3D())
+		if (glloader_GLES_VERSION_3_0())
+		{
+			glGetIntegerv(GL_MAX_3D_TEXTURE_SIZE, &temp);
+			caps_.max_texture_depth = temp;
+		}
+		else if (glloader_GLES_OES_texture_3D())
 		{
 			glGetIntegerv(GL_MAX_3D_TEXTURE_SIZE_OES, &temp);
 			caps_.max_texture_depth = temp;
@@ -593,7 +812,15 @@ namespace KlayGE
 			caps_.max_texture_anisotropy = 1;
 		}
 
-		caps_.max_simultaneous_rts = 1;
+		if (glloader_GLES_VERSION_3_0())
+		{
+			glGetIntegerv(GL_MAX_DRAW_BUFFERS, &temp);
+			caps_.max_simultaneous_rts = static_cast<uint8_t>(temp);
+		}
+		else
+		{
+			caps_.max_simultaneous_rts = 1;
+		}
 		caps_.max_simultaneous_uavs = 0;
 
 		glGetIntegerv(GL_MAX_VERTEX_ATTRIBS, &temp);
@@ -609,7 +836,7 @@ namespace KlayGE
 		caps_.multithread_rendering_support = false;
 		caps_.multithread_res_creating_support = false;
 		caps_.mrt_independent_bit_depths_support = false;
-		if (glloader_GLES_OES_standard_derivatives())
+		if (glloader_GLES_VERSION_3_0() || glloader_GLES_OES_standard_derivatives())
 		{
 			glGetIntegerv(GL_FRAGMENT_SHADER_DERIVATIVE_HINT_OES, &temp);
 			caps_.standard_derivatives_support = (temp != 0);

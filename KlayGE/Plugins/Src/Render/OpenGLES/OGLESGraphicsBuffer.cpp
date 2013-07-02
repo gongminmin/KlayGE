@@ -121,10 +121,10 @@ namespace KlayGE
 		}
 	}
 
-	void OGLESGraphicsBuffer::Active()
+	void OGLESGraphicsBuffer::Active(bool force)
 	{
 		OGLESRenderEngine& re = *checked_cast<OGLESRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-		re.BindBuffer(target_, vb_);
+		re.BindBuffer(target_, vb_, force);
 	}
 
 	void OGLESGraphicsBuffer::CopyToBuffer(GraphicsBuffer& rhs)

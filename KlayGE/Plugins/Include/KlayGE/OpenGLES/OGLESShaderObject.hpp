@@ -84,7 +84,7 @@ namespace KlayGE
 		std::map<std::pair<VertexElementUsage, uint8_t>, GLint> attrib_locs_;
 	};
 
-	typedef shared_ptr<OGLESShaderObject> OGLES2ShaderObjectPtr;
+	typedef shared_ptr<OGLESShaderObject> OGLESShaderObjectPtr;
 }
 
 #endif			// _OGLESSHADEROBJECT_HPP

@@ -15,6 +15,8 @@
 
 #pragma once
 
+#include <map>
+
 #include <KlayGE/RenderLayout.hpp>
 
 namespace KlayGE
@@ -27,6 +29,15 @@ namespace KlayGE
 
 		void Active(ShaderObjectPtr const & so) const;
 		void Deactive(ShaderObjectPtr const & so) const;
+
+	private:
+		void BindVertexStreams(ShaderObjectPtr const & so) const;
+		void UnbindVertexStreams(ShaderObjectPtr const & so) const;
+
+	private:
+		mutable std::map<ShaderObjectPtr, GLuint> vaos_;
+
+		bool use_vao_;
 	};
 }
 
