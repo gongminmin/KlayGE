@@ -165,8 +165,13 @@ namespace KlayGE
 
 		surf_ = eglCreateWindowSurface(display_, cfg_, wnd, nullptr);
 
-		EGLint ctx_attr[] = { EGL_CONTEXT_CLIENT_VERSION, 2, EGL_NONE };
+		EGLint ctx_attr[] = { EGL_CONTEXT_CLIENT_VERSION, 3, EGL_NONE };
 		context_ = eglCreateContext(display_, cfg_, EGL_NO_CONTEXT, ctx_attr);
+		if (nullptr == context_)
+		{
+			ctx_attr[1] = 2;
+			context_ = eglCreateContext(display_, cfg_, EGL_NO_CONTEXT, ctx_attr);
+		}
    
 		eglMakeCurrent(display_, surf_, surf_, context_);
 

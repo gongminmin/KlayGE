@@ -33,7 +33,7 @@ namespace KlayGE
 							uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint, ElementInitData const * init_data)
 					: OGLESTexture(TT_3D, array_size, sample_count, sample_quality, access_hint)
 	{
-		if (!glloader_GLES_OES_texture_3D())
+		if (!glloader_GLES_VERSION_3_0() && !glloader_GLES_OES_texture_3D())
 		{
 			THR(errc::function_not_supported);
 		}
@@ -76,8 +76,13 @@ namespace KlayGE
 		glGenTextures(1, &texture_);
 		glBindTexture(target_type_, texture_);
 		glTexParameteri(target_type_, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-		glTexParameteri(target_type_, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-		if (glloader_GLES_APPLE_texture_max_level())
+		glTexParameteri(target_type_, GL_TEXTURE_MIN_FILTER, GL_NEAREST);		
+		if (glloader_GLES_VERSION_3_0())
+		{
+			glTexParameteri(target_type_, GL_TEXTURE_BASE_LEVEL, 0);
+			glTexParameteri(target_type_, GL_TEXTURE_MAX_LEVEL, num_mip_maps_ - 1);
+		}
+		else if (glloader_GLES_APPLE_texture_max_level())
 		{
 			glTexParameteri(target_type_, GL_TEXTURE_MAX_LEVEL_APPLE, num_mip_maps_ - 1);
 		}
@@ -116,8 +121,16 @@ namespace KlayGE
 					tex_data_[level].resize(image_size);
 					std::memcpy(&tex_data_[level][0], init_data[level].data, image_size);
 				}
-				glCompressedTexImage3DOES(target_type_, level, glinternalFormat,
-					width, height, depth, 0, image_size, &tex_data_[level][0]);
+				if (glloader_GLES_VERSION_3_0())
+				{
+					glCompressedTexImage3D(target_type_, level, glinternalFormat,
+						width, height, depth, 0, image_size, &tex_data_[level][0]);
+				}
+				else
+				{
+					glCompressedTexImage3DOES(target_type_, level, glinternalFormat,
+						width, height, depth, 0, image_size, &tex_data_[level][0]);
+				}
 			}
 			else
 			{
@@ -132,7 +145,14 @@ namespace KlayGE
 					tex_data_[level].resize(image_size);
 					std::memcpy(&tex_data_[level][0], init_data[level].data, image_size);
 				}
-				glTexImage3DOES(target_type_, level, glinternalFormat, width, height, depth, 0, glformat, gltype, &tex_data_[level][0]);
+				if (glloader_GLES_VERSION_3_0())
+				{
+					glTexImage3D(target_type_, level, glinternalFormat, width, height, depth, 0, glformat, gltype, &tex_data_[level][0]);
+				}
+				else
+				{
+					glTexImage3DOES(target_type_, level, glinternalFormat, width, height, depth, 0, glformat, gltype, &tex_data_[level][0]);
+				}
 			}
 
 			width = std::max(1U, width / 2);
@@ -190,16 +210,32 @@ namespace KlayGE
 					GLsizei const image_size = ((this->Width(level) + 3) / 4) * ((this->Height(level) + 3) / 4) * this->Depth(level) * block_size;
 
 					std::memcpy(&gles_target.tex_data_[level][0], &tex_data_[level][0], image_size);
-					glCompressedTexSubImage3DOES(target_type_, level, 0, 0, 0,
-						this->Width(level), this->Height(level), this->Depth(level), gl_format, image_size, &tex_data_[level][0]);
+					if (glloader_GLES_VERSION_3_0())
+					{
+						glCompressedTexSubImage3D(target_type_, level, 0, 0, 0,
+							this->Width(level), this->Height(level), this->Depth(level), gl_format, image_size, &tex_data_[level][0]);
+					}
+					else
+					{
+						glCompressedTexSubImage3DOES(target_type_, level, 0, 0, 0,
+							this->Width(level), this->Height(level), this->Depth(level), gl_format, image_size, &tex_data_[level][0]);
+					}
 				}
 				else
 				{
 					GLsizei const image_size = target.Width(level) * target.Height(level) * target.Depth(level) * texel_size;
 
 					std::memcpy(&gles_target.tex_data_[level][0], &tex_data_[level][0], image_size);
-					glTexSubImage3DOES(target_type_, level, 0, 0, 0, this->Width(level), this->Height(level), this->Depth(level),
+					if (glloader_GLES_VERSION_3_0())
+					{
+						glTexSubImage3D(target_type_, level, 0, 0, 0, this->Width(level), this->Height(level), this->Depth(level),
 							gl_format, gl_type, &tex_data_[level][0]);
+					}
+					else
+					{
+						glTexSubImage3DOES(target_type_, level, 0, 0, 0, this->Width(level), this->Height(level), this->Depth(level),
+							gl_format, gl_type, &tex_data_[level][0]);
+					}
 				}
 			}
 		}
@@ -345,14 +381,31 @@ namespace KlayGE
 
 					GLsizei const image_size = ((widths_[level] + 3) / 4) * ((heights_[level] + 3) / 4) * depthes_[level] * block_size;
 
-					glCompressedTexSubImage3DOES(target_type_, level, 0, 0, 0,
+					if (glloader_GLES_VERSION_3_0())
+					{
+						glCompressedTexSubImage3D(target_type_, level, 0, 0, 0,
 							widths_[level], heights_[level], depthes_[level], gl_format, image_size, &tex_data_[level][0]);
+					}
+					else
+					{
+						glCompressedTexSubImage3DOES(target_type_, level, 0, 0, 0,
+							widths_[level], heights_[level], depthes_[level], gl_format, image_size, &tex_data_[level][0]);
+					}
 				}
 				else
 				{
-					glTexSubImage3DOES(target_type_, level,
+					if (glloader_GLES_VERSION_3_0())
+					{
+						glTexSubImage3D(target_type_, level,
 							0, 0, 0, widths_[level], heights_[level], depthes_[level],
 							gl_format, gl_type, &tex_data_[level][0]);
+					}
+					else
+					{
+						glTexSubImage3DOES(target_type_, level,
+							0, 0, 0, widths_[level], heights_[level], depthes_[level],
+							gl_format, gl_type, &tex_data_[level][0]);
+					}
 				}
 			}
 			break;

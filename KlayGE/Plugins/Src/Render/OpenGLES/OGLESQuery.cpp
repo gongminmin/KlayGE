@@ -28,7 +28,11 @@ namespace KlayGE
 {
 	OGLESConditionalRender::OGLESConditionalRender()
 	{
-		if (glloader_GLES_EXT_occlusion_query_boolean())
+		if (glloader_GLES_VERSION_3_0())
+		{
+			glGenQueries(1, &query_);
+		}
+		else if (glloader_GLES_EXT_occlusion_query_boolean())
 		{
 			glGenQueriesEXT(1, &query_);
 		}
@@ -36,7 +40,11 @@ namespace KlayGE
 
 	OGLESConditionalRender::~OGLESConditionalRender()
 	{
-		if (glloader_GLES_EXT_occlusion_query_boolean())
+		if (glloader_GLES_VERSION_3_0())
+		{
+			glDeleteQueries(1, &query_);
+		}
+		else if (glloader_GLES_EXT_occlusion_query_boolean())
 		{
 			glDeleteQueriesEXT(1, &query_);
 		}
@@ -44,7 +52,11 @@ namespace KlayGE
 
 	void OGLESConditionalRender::Begin()
 	{
-		if (glloader_GLES_EXT_occlusion_query_boolean())
+		if (glloader_GLES_VERSION_3_0())
+		{
+			glBeginQuery(GL_ANY_SAMPLES_PASSED, query_);
+		}
+		else if (glloader_GLES_EXT_occlusion_query_boolean())
 		{
 			glBeginQueryEXT(GL_ANY_SAMPLES_PASSED_EXT, query_);
 		}
@@ -52,7 +64,11 @@ namespace KlayGE
 
 	void OGLESConditionalRender::End()
 	{
-		if (glloader_GLES_EXT_occlusion_query_boolean())
+		if (glloader_GLES_VERSION_3_0())
+		{
+			glEndQueryEXT(GL_ANY_SAMPLES_PASSED);
+		}
+		else if (glloader_GLES_EXT_occlusion_query_boolean())
 		{
 			glEndQueryEXT(GL_ANY_SAMPLES_PASSED_EXT);
 		}
@@ -68,8 +84,15 @@ namespace KlayGE
 
 	bool OGLESConditionalRender::AnySamplesPassed()
 	{
-		GLuint ret;
-		glGetQueryObjectuivEXT(query_, GL_QUERY_RESULT_EXT, &ret);
+		GLuint ret = 0;
+		if (glloader_GLES_VERSION_3_0())
+		{
+			glGetQueryObjectuiv(query_, GL_QUERY_RESULT, &ret);
+		}
+		else if (glloader_GLES_EXT_occlusion_query_boolean())
+		{
+			glGetQueryObjectuivEXT(query_, GL_QUERY_RESULT_EXT, &ret);
+		}
 		return (ret != 0);
 	}
 }

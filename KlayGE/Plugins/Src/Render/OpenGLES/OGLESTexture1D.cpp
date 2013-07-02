@@ -67,8 +67,13 @@ namespace KlayGE
 		glGenTextures(1, &texture_);
 		glBindTexture(target_type_, texture_);
 		glTexParameteri(target_type_, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-		glTexParameteri(target_type_, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-		if (glloader_GLES_APPLE_texture_max_level())
+		glTexParameteri(target_type_, GL_TEXTURE_MIN_FILTER, GL_NEAREST);		
+		if (glloader_GLES_VERSION_3_0())
+		{
+			glTexParameteri(target_type_, GL_TEXTURE_BASE_LEVEL, 0);
+			glTexParameteri(target_type_, GL_TEXTURE_MAX_LEVEL, num_mip_maps_ - 1);
+		}
+		else if (glloader_GLES_APPLE_texture_max_level())
 		{
 			glTexParameteri(target_type_, GL_TEXTURE_MAX_LEVEL_APPLE, num_mip_maps_ - 1);
 		}

@@ -98,21 +98,51 @@ namespace KlayGE
 			}
 		}
 
-		if (flags & GL_COLOR_BUFFER_BIT)
+		if (glloader_GLES_VERSION_3_0())
 		{
-			re.ClearColor(clr.r(), clr.g(), clr.b(), clr.a());
+			if (flags & GL_COLOR_BUFFER_BIT)
+			{
+				glClearBufferfv(GL_COLOR, index_, &clr[0]);
+			}
+
+			if ((flags & GL_DEPTH_BUFFER_BIT) && (flags & GL_STENCIL_BUFFER_BIT))
+			{
+				glClearBufferfi(GL_DEPTH_STENCIL, 0, depth, stencil);
+			}
+			else
+			{
+				if (flags & GL_DEPTH_BUFFER_BIT)
+				{
+					glClearBufferfv(GL_DEPTH, 0, &depth);
+				}
+				else
+				{
+					if (flags & GL_STENCIL_BUFFER_BIT)
+					{
+						GLint s = stencil;
+						glClearBufferiv(GL_STENCIL, 0, &s);
+					}
+				}
+			}
 		}
-		if (flags & GL_DEPTH_BUFFER_BIT)
+		else
 		{
-			re.ClearDepth(depth);
-		}
-		if (flags & GL_STENCIL_BUFFER_BIT)
-		{
-			re.ClearStencil(stencil);
-		}
-		if (flags != 0)
-		{
-			glClear(flags);
+			if (flags & GL_COLOR_BUFFER_BIT)
+			{
+				re.ClearColor(clr.r(), clr.g(), clr.b(), clr.a());
+			}
+			if (flags & GL_DEPTH_BUFFER_BIT)
+			{
+				re.ClearDepth(depth);
+			}
+			if (flags & GL_STENCIL_BUFFER_BIT)
+			{
+				re.ClearStencil(stencil);
+			}
+			if (flags != 0)
+			{
+				glClear(flags);
+			}
 		}
 
 		if (flags & GL_COLOR_BUFFER_BIT)

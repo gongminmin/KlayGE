@@ -72,10 +72,24 @@ namespace KlayGE
 		OGLESRenderEngine& re = *checked_cast<OGLESRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		re.BindFramebuffer(fbo_);
 
-		GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
-		if (status != GL_FRAMEBUFFER_COMPLETE)
+		BOOST_ASSERT(GL_FRAMEBUFFER_COMPLETE == glCheckFramebufferStatus(GL_FRAMEBUFFER));
+
+		if (glloader_GLES_VERSION_3_0())
 		{
-			THR(errc::function_not_supported);
+			if (fbo_ != 0)
+			{
+				std::vector<GLenum> targets(clr_views_.size());
+				for (size_t i = 0; i < clr_views_.size(); ++ i)
+				{
+					targets[i] = static_cast<GLenum>(GL_COLOR_ATTACHMENT0 + i);
+				}
+				glDrawBuffers(static_cast<GLsizei>(targets.size()), &targets[0]);
+			}
+			else
+			{
+				GLenum targets[] = { GL_BACK };
+				glDrawBuffers(1, &targets[0]);
+			}
 		}
 	}
 
@@ -115,24 +129,67 @@ namespace KlayGE
 			}
 		}
 
-		GLbitfield ogl_flags = 0;
-		if (flags & CBM_Color)
+		if (glloader_GLES_VERSION_3_0())
 		{
-			ogl_flags |= GL_COLOR_BUFFER_BIT;
-			re.ClearColor(clr.r(), clr.g(), clr.b(), clr.a());
-		}
-		if (flags & CBM_Depth)
-		{
-			ogl_flags |= GL_DEPTH_BUFFER_BIT;
-			re.ClearDepth(depth);
-		}
-		if (flags & CBM_Stencil)
-		{
-			ogl_flags |= GL_STENCIL_BUFFER_BIT;
-			re.ClearStencil(stencil);
-		}
+			if (flags & CBM_Color)
+			{
+				if (fbo_ != 0)
+				{
+					for (size_t i = 0; i < clr_views_.size(); ++ i)
+					{
+						if (clr_views_[i])
+						{
+							glClearBufferfv(GL_COLOR, static_cast<GLint>(i), &clr[0]);
+						}
+					}
+				}
+				else
+				{
+					glClearBufferfv(GL_COLOR, 0, &clr[0]);
+				}
+			}
 
-		glClear(ogl_flags);
+			if ((flags & CBM_Depth) && (flags & CBM_Stencil))
+			{
+				glClearBufferfi(GL_DEPTH_STENCIL, 0, depth, stencil);
+			}
+			else
+			{
+				if (flags & CBM_Depth)
+				{
+					glClearBufferfv(GL_DEPTH, 0, &depth);
+				}
+				else
+				{
+					if (flags & CBM_Stencil)
+					{
+						GLint s = stencil;
+						glClearBufferiv(GL_STENCIL, 0, &s);
+					}
+				}
+			}
+		}
+		else
+		{
+			GLbitfield ogl_flags = 0;
+			if (flags & CBM_Color)
+			{
+				ogl_flags |= GL_COLOR_BUFFER_BIT;
+				re.ClearColor(clr.r(), clr.g(), clr.b(), clr.a());
+			}
+			if (flags & CBM_Depth)
+			{
+				ogl_flags |= GL_DEPTH_BUFFER_BIT;
+				re.ClearDepth(depth);
+			}
+			if (flags & CBM_Stencil)
+			{
+				ogl_flags |= GL_STENCIL_BUFFER_BIT;
+				re.ClearStencil(stencil);
+			}
+
+			glClear(ogl_flags);
+		}
 
 		if (flags & CBM_Color)
 		{
