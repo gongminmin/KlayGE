@@ -258,7 +258,9 @@ namespace KlayGE
 	}
 
 
-	TrackballCameraController::TrackballCameraController(bool use_input_engine)
+	TrackballCameraController::TrackballCameraController(bool use_input_engine, uint32_t rotate_button,
+		uint32_t zoom_button, uint32_t move_button)
+			: move_button_(move_button), rotate_button_(rotate_button), zoom_button_(zoom_button)
 	{
 		if (use_input_engine)
 		{
@@ -290,15 +292,15 @@ namespace KlayGE
 
 			if (!UIManager::Instance().MouseOnUI())
 			{
-				if (param->buttons_state & MB_Left)
+				if (param->buttons_state & rotate_button_)
 				{
 					this->Rotate(xd, yd);
 				}
-				else if (param->buttons_state & MB_Right)
+				else if (param->buttons_state & zoom_button_)
 				{
 					this->Zoom(xd, yd);
 				}
-				else if (param->buttons_state & MB_Middle)
+				else if (param->buttons_state & move_button_)
 				{
 					this->Move(xd, yd);
 				}

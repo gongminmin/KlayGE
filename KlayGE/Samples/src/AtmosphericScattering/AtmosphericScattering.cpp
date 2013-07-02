@@ -43,6 +43,11 @@ namespace
 		{
 		}
 
+		void LightDir(float3 const & dir)
+		{
+			*(technique_->Effect().ParameterByName("light_dir")) = dir;
+		}
+
 		void Density(float density)
 		{
 			*(technique_->Effect().ParameterByName("density")) = density;
@@ -90,6 +95,11 @@ namespace
 		void AtmosphereTop(float top)
 		{
 			*(technique_->Effect().ParameterByName("atmosphere_top")) = top;
+		}
+
+		void LightDir(float3 const & dir)
+		{
+			*(technique_->Effect().ParameterByName("light_dir")) = dir;
 		}
 
 		void Density(float density)
@@ -142,7 +152,9 @@ int SampleMain()
 }
 
 AtmosphericScatteringApp::AtmosphericScatteringApp()
-	: App3DFramework("Atmospheric Scattering")
+	: App3DFramework("Atmospheric Scattering"),
+		obj_controller_(true, MB_Left, MB_Middle, 0),
+		light_controller_(true, MB_Right, 0, 0)
 {
 	ResLoader::Instance().AddPath("../../Samples/media/AtmosphericScattering");
 }
@@ -164,8 +176,12 @@ void AtmosphericScatteringApp::InitObjects()
 	this->LookAt(float3(0, 0, -4.0f), float3(0, 0, 0), float3(0, 1, 0));
 	this->Proj(0.01f, 500.0f);
 
-	tb_controller_.AttachCamera(this->ActiveCamera());
-	tb_controller_.Scalers(0.003f, 0.003f);
+	obj_controller_.AttachCamera(this->ActiveCamera());
+	obj_controller_.Scalers(0.003f, 0.003f);
+
+	light_ctrl_camera_.ViewParams(float3(0, 0, 0), float3(1, 0, 0), float3(0, -1, 0));
+	light_controller_.AttachCamera(light_ctrl_camera_);
+	light_controller_.Scalers(0.003f, 0.003f);
 
 	RenderModelPtr model_planet = SyncLoadModel("geosphere.7z//geosphere.meshml", EAH_GPU_Read | EAH_Immutable,
 		CreateModelFactory<RenderModel>(), CreateMeshFactory<PlanetMesh>());
@@ -204,7 +220,7 @@ void AtmosphericScatteringApp::InitObjects()
 
 	sun_light_src_ = MakeSharedPtr<SceneObjectLightSourceProxy>(sun_light_);
 	checked_pointer_cast<SceneObjectLightSourceProxy>(sun_light_src_)->Scaling(0.1f, 0.1f, 0.1f);
-	sun_light_src_->AddToSceneManager();
+	//sun_light_src_->AddToSceneManager();
 
 	InputEngine& inputEngine(Context::Instance().InputFactoryInstance().InputEngineInstance());
 	InputActionMap actionMap;
@@ -383,6 +399,10 @@ void AtmosphericScatteringApp::DoUpdateOverlay()
 uint32_t AtmosphericScatteringApp::DoUpdate(KlayGE::uint32_t /*pass*/)
 {
 	RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+
+	sun_light_->Direction(-light_ctrl_camera_.ForwardVec());
+	checked_pointer_cast<PlanetMesh>(planet_->GetRenderable())->LightDir(sun_light_->Direction());
+	checked_pointer_cast<AtmosphereMesh>(atmosphere_->GetRenderable())->LightDir(sun_light_->Direction());
 
 	re.BindFrameBuffer(FrameBufferPtr());
 	Color clear_clr(0.0f, 0.0f, 0.0f, 1);

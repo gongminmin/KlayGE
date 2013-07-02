@@ -95,7 +95,9 @@ namespace KlayGE
 	class KLAYGE_CORE_API TrackballCameraController : public CameraController
 	{
 	public:
-		explicit TrackballCameraController(bool use_input_engine = true);
+		explicit TrackballCameraController(bool use_input_engine = true,
+			uint32_t rotate_button = MB_Left, uint32_t zoom_button = MB_Right,
+			uint32_t move_button = MB_Middle);
 
 		virtual void AttachCamera(Camera& camera);
 
@@ -107,6 +109,9 @@ namespace KlayGE
 		bool reverse_target_;
 		float3 target_;
 		float3 right_;
+		uint32_t move_button_;
+		uint32_t rotate_button_;
+		uint32_t zoom_button_;
 
 		enum
 		{

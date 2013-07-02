@@ -34,7 +34,9 @@ private:
 	KlayGE::SceneObjectPtr planet_;
 	KlayGE::SceneObjectPtr atmosphere_;
 
-	KlayGE::TrackballCameraController tb_controller_;
+	KlayGE::TrackballCameraController obj_controller_;
+	KlayGE::TrackballCameraController light_controller_;
+	KlayGE::Camera light_ctrl_camera_;
 
 	KlayGE::SceneObjectPtr sun_light_src_;
 	KlayGE::DirectionalLightSourcePtr sun_light_;
