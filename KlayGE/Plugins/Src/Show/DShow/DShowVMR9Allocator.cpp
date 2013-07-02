@@ -83,8 +83,8 @@ namespace KlayGE
 
 		IDirect3DDevice9* d3d_device;
 		TIF(d3d_->CreateDevice(D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL,
-								wnd_, vp_mode | D3DCREATE_MULTITHREADED,
-								&d3dpp_, &d3d_device));
+			wnd_, vp_mode | D3DCREATE_FPU_PRESERVE | D3DCREATE_MULTITHREADED,
+			&d3dpp_, &d3d_device));
 		d3d_device_ = MakeCOMPtr(d3d_device);
 	}
 
