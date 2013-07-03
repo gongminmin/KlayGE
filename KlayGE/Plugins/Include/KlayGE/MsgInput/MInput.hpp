@@ -234,6 +234,12 @@ namespace KlayGE
 		NTSTATUS HidP_GetUsageValue(HIDP_REPORT_TYPE ReportType, USAGE UsagePage,
 			USHORT LinkCollection, USAGE Usage, PULONG UsageValue, PHIDP_PREPARSED_DATA PreparsedData,
 			PCHAR Report, ULONG ReportLength) const;
+
+#if (_WIN32_WINNT >= 0x0601 /*_WIN32_WINNT_WIN7*/)
+		BOOL RegisterTouchWindow(HWND hWnd, ULONG ulFlags) const;
+		BOOL GetTouchInputInfo(HTOUCHINPUT hTouchInput, UINT cInputs, PTOUCHINPUT pInputs, int cbSize) const;
+		BOOL CloseTouchInputHandle(HTOUCHINPUT hTouchInput) const;
+#endif
 #endif
 #endif
 
@@ -264,6 +270,15 @@ namespace KlayGE
 		HidP_GetValueCapsFunc DynamicHidP_GetValueCaps_;
 		HidP_GetUsagesFunc DynamicHidP_GetUsages_;
 		HidP_GetUsageValueFunc DynamicHidP_GetUsageValue_;
+
+#if (_WIN32_WINNT >= 0x0601 /*_WIN32_WINNT_WIN7*/)
+		typedef BOOL (WINAPI *RegisterTouchWindowFunc)(HWND hWnd, ULONG ulFlags);
+		typedef BOOL (WINAPI *GetTouchInputInfoFunc)(HTOUCHINPUT hTouchInput, UINT cInputs, PTOUCHINPUT pInputs, int cbSize);
+		typedef BOOL (WINAPI *CloseTouchInputHandleFunc)(HTOUCHINPUT hTouchInput);
+		RegisterTouchWindowFunc DynamicRegisterTouchWindow_;
+		GetTouchInputInfoFunc DynamicGetTouchInputInfo_;
+		CloseTouchInputHandleFunc DynamicCloseTouchInputHandle_;
+#endif
 #endif
 #endif
 
