@@ -56,6 +56,15 @@ namespace KlayGE
 			DynamicHidP_GetUsages_ = reinterpret_cast<HidP_GetUsagesFunc>(::GetProcAddress(mod_hid_, "HidP_GetUsages"));
 			DynamicHidP_GetUsageValue_ = reinterpret_cast<HidP_GetUsageValueFunc>(::GetProcAddress(mod_hid_, "HidP_GetUsageValue"));
 		}
+
+#if (_WIN32_WINNT >= 0x0601 /*_WIN32_WINNT_WIN7*/)
+		HMODULE mod_user = ::GetModuleHandle(TEXT("user32"));
+		BOOST_ASSERT(mod_user != nullptr);
+
+		DynamicRegisterTouchWindow_ = reinterpret_cast<RegisterTouchWindowFunc>(::GetProcAddress(mod_user, "RegisterTouchWindow"));
+		DynamicGetTouchInputInfo_ = reinterpret_cast<GetTouchInputInfoFunc>(::GetProcAddress(mod_user, "GetTouchInputInfo"));
+		DynamicCloseTouchInputHandle_ = reinterpret_cast<CloseTouchInputHandleFunc>(::GetProcAddress(mod_user, "CloseTouchInputHandle"));
+#endif
 #endif
 	}
 
@@ -172,7 +181,7 @@ namespace KlayGE
 #elif (_WIN32_WINNT >= 0x0601 /*_WIN32_WINNT_WIN7*/)
 		if (::GetSystemMetrics(SM_DIGITIZER) & NID_READY)
 		{
-			if (::RegisterTouchWindow(hwnd, TWF_WANTPALM))
+			if (this->RegisterTouchWindow(hwnd, TWF_WANTPALM))
 			{
 				on_touch_ = main_wnd->OnTouch().connect(KlayGE::bind(&MsgInputEngine::OnTouch, this,
 					KlayGE::placeholders::_1, KlayGE::placeholders::_2, KlayGE::placeholders::_3));
@@ -334,5 +343,22 @@ namespace KlayGE
 		return DynamicHidP_GetUsageValue_(ReportType, UsagePage, LinkCollection, Usage, UsageValue, PreparsedData,
 			Report, ReportLength);
 	}
+
+#if (_WIN32_WINNT >= 0x0601 /*_WIN32_WINNT_WIN7*/)
+	BOOL MsgInputEngine::RegisterTouchWindow(HWND hWnd, ULONG ulFlags) const
+	{
+		return DynamicRegisterTouchWindow_(hWnd, ulFlags);
+	}
+
+	BOOL MsgInputEngine::GetTouchInputInfo(HTOUCHINPUT hTouchInput, UINT cInputs, PTOUCHINPUT pInputs, int cbSize) const
+	{
+		return DynamicGetTouchInputInfo_(hTouchInput, cInputs, pInputs, cbSize);
+	}
+
+	BOOL MsgInputEngine::CloseTouchInputHandle(HTOUCHINPUT hTouchInput) const
+	{
+		return DynamicCloseTouchInputHandle_(hTouchInput);
+	}
+#endif
 #endif
 }

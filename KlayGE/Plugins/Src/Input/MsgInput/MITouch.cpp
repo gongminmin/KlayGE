@@ -54,7 +54,9 @@ namespace KlayGE
 	{
 		std::vector<TOUCHINPUT> inputs(num_inputs);
 
-		if (::GetTouchInputInfo(hti, num_inputs, &inputs[0], sizeof(inputs[0])))
+		MsgInputEngine const & mie = *checked_cast<MsgInputEngine const *>(&Context::Instance().InputFactoryInstance().InputEngineInstance());
+
+		if (mie.GetTouchInputInfo(hti, num_inputs, &inputs[0], sizeof(inputs[0])))
 		{
 			typedef KLAYGE_DECLTYPE(inputs) InputsType;
 			KLAYGE_FOREACH(InputsType::const_reference ti, inputs)
@@ -65,7 +67,7 @@ namespace KlayGE
 				touch_down_state_[ti.dwID] = (ti.dwFlags & (TOUCHEVENTF_MOVE | TOUCHEVENTF_DOWN)) ? true : false;
 			}
 
-			::CloseTouchInputHandle(hti);
+			mie.CloseTouchInputHandle(hti);
 		}
 	}
 #endif
