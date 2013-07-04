@@ -459,7 +459,7 @@ namespace KlayGE
 
 		taa_pp_ = SyncLoadPostProcess("TAA.ppml", "taa");
 
-		if (mrt_g_buffer_support_)
+		if (depth_texture_support_ && mrt_g_buffer_support_)
 		{
 			rsm_buffer_ = rf.MakeFrameBuffer();
 

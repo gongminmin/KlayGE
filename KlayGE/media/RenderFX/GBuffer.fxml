@@ -919,7 +919,7 @@ float4 GenCascadedShadowMapAlphaTestPS(float2 tc : TEXCOORD0, float depth : TEXC
 			<state name="pixel_shader" value="GenShadowMapWODepthTexturePS()"/>
 		</pass>
 	</technique>
-	<technique name="GenShadowMapWODepthTextureAlphaTestTech" inherit="GenShadowMapTech">
+	<technique name="GenShadowMapWODepthTextureAlphaTestTech" inherit="GenShadowMapWODepthTextureTech">
 		<pass name="p0">
 			<state name="pixel_shader" value="GenShadowMapWODepthTextureAlphaTestPS()"/>
 		</pass>
