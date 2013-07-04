@@ -278,7 +278,7 @@ namespace KlayGE
 		}
 
 		uint32_t const channels = NumComponents(texture_1d.Format());
-		if ((1 == channels) || (2 == channels))
+		if (((1 == channels) || (2 == channels)) && (!(glloader_GLES_VERSION_3_0() || glloader_GLES_EXT_texture_rg())))
 		{
 			THR(errc::function_not_supported);
 		}
@@ -350,7 +350,7 @@ namespace KlayGE
 		}
 
 		uint32_t const channels = NumComponents(texture_2d.Format());
-		if ((1 == channels) || (2 == channels))
+		if (((1 == channels) || (2 == channels)) && (!(glloader_GLES_VERSION_3_0() || glloader_GLES_EXT_texture_rg())))
 		{
 			THR(errc::function_not_supported);
 		}
@@ -421,7 +421,7 @@ namespace KlayGE
 		BOOST_ASSERT(0 == array_index);
 
 		uint32_t const channels = NumComponents(texture_3d.Format());
-		if ((1 == channels) || (2 == channels))
+		if (((1 == channels) || (2 == channels)) && (!(glloader_GLES_VERSION_3_0() || glloader_GLES_EXT_texture_rg())))
 		{
 			THR(errc::function_not_supported);
 		}
@@ -546,8 +546,16 @@ namespace KlayGE
 		BOOST_ASSERT(att != FrameBuffer::ATT_DepthStencil);
 		UNREF_PARAM(att);
 
-		glBindTexture(GL_TEXTURE_3D_OES, tex_);
-		glCopyTexSubImage3DOES(GL_TEXTURE_3D_OES, level_, 0, 0, slice_, 0, 0, width_, height_);
+		if (glloader_GLES_VERSION_3_0())
+		{
+			glBindTexture(GL_TEXTURE_3D, tex_);
+			glCopyTexSubImage3D(GL_TEXTURE_3D, level_, 0, 0, slice_, 0, 0, width_, height_);
+		}
+		else
+		{
+			glBindTexture(GL_TEXTURE_3D_OES, tex_);
+			glCopyTexSubImage3DOES(GL_TEXTURE_3D_OES, level_, 0, 0, slice_, 0, 0, width_, height_);
+		}
 	}
 
 
@@ -561,7 +569,7 @@ namespace KlayGE
 		BOOST_ASSERT(0 == array_index);
 
 		uint32_t const channels = NumComponents(texture_cube.Format());
-		if ((1 == channels) || (2 == channels))
+		if (((1 == channels) || (2 == channels)) && (!(glloader_GLES_VERSION_3_0() || glloader_GLES_EXT_texture_rg())))
 		{
 			THR(errc::function_not_supported);
 		}

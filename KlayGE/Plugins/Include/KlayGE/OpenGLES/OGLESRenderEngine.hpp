@@ -76,6 +76,11 @@ namespace KlayGE
 		}
 		void DeleteFramebuffers(GLsizei n, GLuint const * framebuffers);
 
+		bool HackForPVR() const
+		{
+			return hack_for_pvr_;
+		}
+
 	private:
 		void DoCreateRenderWindow(std::string const & name, RenderSettings const & settings);
 		void DoBindFrameBuffer(FrameBufferPtr const & fb);
@@ -115,6 +120,8 @@ namespace KlayGE
 		std::set<ElementFormat> vertex_format_;
 		std::set<ElementFormat> texture_format_;
 		std::set<ElementFormat> rendertarget_format_;
+
+		bool hack_for_pvr_;
 	};
 
 	typedef shared_ptr<OGLESRenderEngine> OGLESRenderEnginePtr;

@@ -270,7 +270,13 @@ namespace KlayGE
 			break;
 
 		case EF_GR8:
-			if (glloader_GLES_EXT_texture_rg())
+			if (glloader_GLES_VERSION_3_0())
+			{
+				internalFormat = GL_RG;
+				glformat = GL_RG;
+				gltype = GL_UNSIGNED_BYTE;
+			}
+			else if (glloader_GLES_EXT_texture_rg())
 			{
 				internalFormat = GL_RG_EXT;
 				glformat = GL_RG_EXT;
@@ -314,7 +320,13 @@ namespace KlayGE
 			break;
 
 		case EF_A2BGR10:
-			if (glloader_GLES_EXT_texture_type_2_10_10_10_REV())
+			if (glloader_GLES_VERSION_3_0())
+			{
+				internalFormat = GL_RGBA;
+				glformat = GL_RGBA;
+				gltype = GL_UNSIGNED_INT_2_10_10_10_REV;
+			}
+			else if (glloader_GLES_EXT_texture_type_2_10_10_10_REV())
 			{
 				internalFormat = GL_RGBA;
 				glformat = GL_RGBA;
@@ -327,7 +339,13 @@ namespace KlayGE
 			break;
 
 		case EF_R16F:
-			if (glloader_GLES_OES_texture_half_float())
+			if (glloader_GLES_VERSION_3_0())
+			{
+				internalFormat = GL_RED;
+				glformat = GL_RED;
+				gltype = GL_HALF_FLOAT;
+			}
+			else if (glloader_GLES_OES_texture_half_float())
 			{
 				internalFormat = GL_LUMINANCE;
 				glformat = GL_LUMINANCE;
@@ -340,7 +358,13 @@ namespace KlayGE
 			break;
 
 		case EF_GR16F:
-			if (glloader_GLES_OES_texture_half_float())
+			if (glloader_GLES_VERSION_3_0())
+			{
+				internalFormat = GL_RG;
+				glformat = GL_RG;
+				gltype = GL_HALF_FLOAT;
+			}
+			else if (glloader_GLES_OES_texture_half_float())
 			{
 				internalFormat = GL_LUMINANCE_ALPHA;
 				glformat = GL_LUMINANCE_ALPHA;
@@ -353,7 +377,13 @@ namespace KlayGE
 			break;
 
 		case EF_BGR16F:
-			if (glloader_GLES_OES_texture_half_float())
+			if (glloader_GLES_VERSION_3_0())
+			{
+				internalFormat = GL_RGB;
+				glformat = GL_RGB;
+				gltype = GL_HALF_FLOAT;
+			}
+			else if (glloader_GLES_OES_texture_half_float())
 			{
 				internalFormat = GL_RGB;
 				glformat = GL_RGB;
@@ -366,7 +396,13 @@ namespace KlayGE
 			break;
 
 		case EF_ABGR16F:
-			if (glloader_GLES_OES_texture_half_float())
+			if (glloader_GLES_VERSION_3_0())
+			{
+				internalFormat = GL_RGBA;
+				glformat = GL_RGBA;
+				gltype = GL_HALF_FLOAT;
+			}
+			else if (glloader_GLES_OES_texture_half_float())
 			{
 				internalFormat = GL_RGBA;
 				glformat = GL_RGBA;
@@ -528,7 +564,13 @@ namespace KlayGE
 			break;
 
 		case EF_D24S8:
-			if (glloader_GLES_OES_packed_depth_stencil())
+			if (glloader_GLES_VERSION_3_0())
+			{
+				internalFormat = GL_DEPTH_STENCIL;
+				glformat = GL_DEPTH_STENCIL;
+				gltype = GL_UNSIGNED_INT_24_8;
+			}
+			else if (glloader_GLES_OES_packed_depth_stencil())
 			{
 				internalFormat = GL_DEPTH_STENCIL_OES;
 				glformat = GL_DEPTH_STENCIL_OES;

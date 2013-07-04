@@ -42,11 +42,18 @@ namespace KlayGE
 			break;
 
 		case TT_3D:
-			if (!glloader_GLES_OES_texture_3D())
+			if (!glloader_GLES_VERSION_3_0() && !glloader_GLES_OES_texture_3D())
 			{
 				THR(errc::function_not_supported);
 			}
-			target_type_ = GL_TEXTURE_3D_OES;
+			if (glloader_GLES_VERSION_3_0())
+			{
+				target_type_ = GL_TEXTURE_3D;
+			}
+			else
+			{
+				target_type_ = GL_TEXTURE_3D_OES;
+			}
 			break;
 
 		case TT_Cube:

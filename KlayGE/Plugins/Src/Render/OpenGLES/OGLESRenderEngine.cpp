@@ -758,6 +758,16 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void OGLESRenderEngine::FillRenderDeviceCaps()
 	{
+		std::string vendor(reinterpret_cast<char const *>(glGetString(GL_VENDOR)));
+		if (vendor.find("Imagination", 0) != std::string::npos)
+		{
+			hack_for_pvr_ = true;
+		}
+		else
+		{
+			hack_for_pvr_ = false;
+		}
+
 		GLint temp;
 
 		if (glloader_GLES_VERSION_2_0())
@@ -777,19 +787,21 @@ namespace KlayGE
 
 		glGetIntegerv(GL_MAX_TEXTURE_SIZE, &temp);
 		caps_.max_texture_height = caps_.max_texture_width = temp;
-		if (glloader_GLES_VERSION_3_0())
+		if (hack_for_pvr_)
 		{
-			glGetIntegerv(GL_MAX_3D_TEXTURE_SIZE, &temp);
-			caps_.max_texture_depth = temp;
-		}
-		else if (glloader_GLES_OES_texture_3D())
-		{
-			glGetIntegerv(GL_MAX_3D_TEXTURE_SIZE_OES, &temp);
-			caps_.max_texture_depth = temp;
+			caps_.max_texture_depth = 1;
 		}
 		else
 		{
-			caps_.max_texture_depth = 1;
+			if (glloader_GLES_VERSION_3_0() || glloader_GLES_OES_texture_3D())
+			{
+				glGetIntegerv(GL_MAX_3D_TEXTURE_SIZE_OES, &temp);
+				caps_.max_texture_depth = temp;
+			}
+			else
+			{
+				caps_.max_texture_depth = 1;
+			}
 		}
 
 		glGetIntegerv(GL_MAX_CUBE_MAP_TEXTURE_SIZE, &temp);
@@ -836,14 +848,21 @@ namespace KlayGE
 		caps_.multithread_rendering_support = false;
 		caps_.multithread_res_creating_support = false;
 		caps_.mrt_independent_bit_depths_support = false;
-		if (glloader_GLES_VERSION_3_0() || glloader_GLES_OES_standard_derivatives())
+		if (hack_for_pvr_)
 		{
-			glGetIntegerv(GL_FRAGMENT_SHADER_DERIVATIVE_HINT_OES, &temp);
-			caps_.standard_derivatives_support = (temp != 0);
+			caps_.standard_derivatives_support = false;
 		}
 		else
 		{
-			caps_.standard_derivatives_support = false;
+			if (glloader_GLES_VERSION_3_0() || glloader_GLES_OES_standard_derivatives())
+			{
+				glGetIntegerv(GL_FRAGMENT_SHADER_DERIVATIVE_HINT_OES, &temp);
+				caps_.standard_derivatives_support = (temp != 0);
+			}
+			else
+			{
+				caps_.standard_derivatives_support = false;
+			}
 		}
 		caps_.logic_op_support = false;
 
@@ -916,7 +935,7 @@ namespace KlayGE
 		texture_format_.insert(EF_ARGB4);
 		texture_format_.insert(EF_R8);
 		texture_format_.insert(EF_SIGNED_R8);
-		if (glloader_GLES_EXT_texture_rg())
+		if (glloader_GLES_VERSION_3_0() || glloader_GLES_EXT_texture_rg())
 		{
 			texture_format_.insert(EF_GR8);
 		}
@@ -925,11 +944,11 @@ namespace KlayGE
 		{
 			texture_format_.insert(EF_ARGB8);
 		}
-		if (glloader_GLES_EXT_texture_type_2_10_10_10_REV())
+		if (glloader_GLES_VERSION_3_0() || glloader_GLES_EXT_texture_type_2_10_10_10_REV())
 		{
 			texture_format_.insert(EF_A2BGR10);
 		}
-		if (glloader_GLES_OES_texture_half_float())
+		if (glloader_GLES_VERSION_3_0() || glloader_GLES_OES_texture_half_float())
 		{
 			texture_format_.insert(EF_R16F);
 			texture_format_.insert(EF_GR16F);
@@ -959,11 +978,11 @@ namespace KlayGE
 			texture_format_.insert(EF_SIGNED_BC4);
 			texture_format_.insert(EF_SIGNED_BC5);
 		}
-		if (glloader_GLES_OES_depth_texture())
+		if (glloader_GLES_VERSION_3_0() || glloader_GLES_OES_depth_texture())
 		{
 			texture_format_.insert(EF_D16);
 		}
-		if (glloader_GLES_OES_packed_depth_stencil())
+		if (glloader_GLES_VERSION_3_0() || glloader_GLES_OES_packed_depth_stencil())
 		{
 			texture_format_.insert(EF_D24S8);
 		}
@@ -974,11 +993,16 @@ namespace KlayGE
 		}
 		rendertarget_format_.insert(EF_ABGR8);
 		rendertarget_format_.insert(EF_SIGNED_ABGR8);
-		if (glloader_GLES_EXT_texture_type_2_10_10_10_REV())
+		if (glloader_GLES_VERSION_3_0() || glloader_GLES_EXT_texture_type_2_10_10_10_REV())
 		{
 			rendertarget_format_.insert(EF_A2BGR10);
 		}
-		if (glloader_GLES_OES_texture_half_float())
+		if (glloader_GLES_VERSION_3_0() || glloader_GLES_EXT_texture_rg())
+		{
+			rendertarget_format_.insert(EF_R16F);
+			rendertarget_format_.insert(EF_GR16F);
+		}
+		if (glloader_GLES_VERSION_3_0() || glloader_GLES_OES_texture_half_float())
 		{
 			rendertarget_format_.insert(EF_ABGR16F);
 		}
@@ -987,7 +1011,7 @@ namespace KlayGE
 			rendertarget_format_.insert(EF_ABGR32F);
 		}
 		rendertarget_format_.insert(EF_D16);
-		if (glloader_GLES_OES_packed_depth_stencil())
+		if (glloader_GLES_VERSION_3_0() || glloader_GLES_OES_packed_depth_stencil())
 		{
 			rendertarget_format_.insert(EF_D24S8);
 		}

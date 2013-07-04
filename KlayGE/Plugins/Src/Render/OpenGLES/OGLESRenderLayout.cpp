@@ -21,6 +21,7 @@
 
 #include <glloader/glloader.h>
 
+#include <KlayGE/OpenGLES/OGLESRenderEngine.hpp>
 #include <KlayGE/OpenGLES/OGLESMapping.hpp>
 #include <KlayGE/OpenGLES/OGLESGraphicsBuffer.hpp>
 #include <KlayGE/OpenGLES/OGLESShaderObject.hpp>
@@ -99,7 +100,8 @@ namespace KlayGE
 			}
 		}
 
-		if (this->UseIndices())
+		OGLESRenderEngine& ogl_re = *checked_cast<OGLESRenderEngine*>(&re);
+		if (!ogl_re.HackForPVR() && this->UseIndices())
 		{
 			OGLESGraphicsBuffer& stream(*checked_pointer_cast<OGLESGraphicsBuffer>(this->GetIndexStream()));
 			stream.Active(use_vao_);
@@ -145,6 +147,13 @@ namespace KlayGE
 			{
 				vao = iter->second;
 				glBindVertexArray(vao);
+			}
+
+			OGLESRenderEngine& re = *checked_cast<OGLESRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+			if (re.HackForPVR() && this->UseIndices())
+			{
+				OGLESGraphicsBuffer& stream(*checked_pointer_cast<OGLESGraphicsBuffer>(this->GetIndexStream()));
+				stream.Active(use_vao_);
 			}
 		}
 		else

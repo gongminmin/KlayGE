@@ -154,6 +154,34 @@ namespace
 	{\n																	\
 		return texCUBEbias(s, float4(location, lod));\n					\
 	}\n																	\
+	\n																	\
+	\n																	\
+	float4 tex2DGrad(sampler2D s, float2 location, float2 dpdx, float2 dpdy)\n		\
+	{\n																	\
+	#if KLAYGE_DERIVATIVES\n											\
+		return tex2D(s, location, dpdx, dpdy);\n						\
+	#else\n																\
+		return tex2D(s, location);\n									\
+	#endif\n															\
+	}\n																	\
+	\n																	\
+	float4 tex3DGrad(sampler3D s, float3 location, float3 dpdx, float3 dpdy)\n		\
+	{\n																	\
+	#if KLAYGE_DERIVATIVES\n											\
+		return tex3D(s, location, dpdx, dpdy);\n						\
+	#else\n																\
+		return tex3D(s, location);\n									\
+	#endif\n															\
+	}\n																	\
+	\n																	\
+	float4 texCUBEGrad(samplerCUBE s, float3 location, float3 dpdx, float3 dpdy)\n	\
+	{\n																	\
+	#if KLAYGE_DERIVATIVES\n											\
+		return texCUBE(s, location, dpdx, dpdy);\n						\
+	#else\n																\
+		return texCUBE(s, location);\n									\
+	#endif\n															\
+	}\n																	\
 	";
 
 	char const * predefined_attribs = "\n		\
@@ -968,7 +996,7 @@ namespace KlayGE
 									param, effect.ParameterByName(sample_tokens[4]), 1UL << type));
 							}
 
-							if ((!sample_helper) && (("SampleLevel" == sample_tokens[2]) || ("SampleBias" == sample_tokens[2])))
+							if ((!sample_helper) && (("SampleLevel" == sample_tokens[2]) || ("SampleBias" == sample_tokens[2])) || ("SampleGrad" == sample_tokens[2]))
 							{
 								sample_helper = true;
 							}
@@ -1011,12 +1039,13 @@ namespace KlayGE
 								{
 									shader_ss << "Level";
 								}
-								else
+								else if ("SampleBias" == sample_tokens[2])
 								{
-									if ("SampleBias" == sample_tokens[2])
-									{
-										shader_ss << "Bias";
-									}
+									shader_ss << "Bias";
+								}
+								else if ("SampleGrad" == sample_tokens[2])
+								{
+									shader_ss << "Grad";
 								}
 
 								break;

@@ -35,7 +35,7 @@ float3 ColorGrading(float3 rgb)
 	
 	const float DIM = 16;
 	
-#if !KLAYGE_OPENGLES
+#if KLAYGE_MAX_TEX_DEPTH > 1
 	return color_grading_tex.Sample(linear_clamp_sampler, (rgb * (DIM - 1) + 0.5f) / DIM).xyz;
 #else
 	rgb.xy = (rgb.xy * (DIM - 1) + 0.5f) / DIM;
