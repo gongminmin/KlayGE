@@ -14,6 +14,9 @@
 #include <vector>
 #include <cstring>
 
+#include <boost/algorithm/string/split.hpp>
+#include <boost/algorithm/string/trim.hpp>
+
 using namespace std;
 using namespace KlayGE;
 
@@ -36,6 +39,44 @@ namespace
 		std::vector<AABBox> bb;
 	};
 
+	template <int N>
+	void ExtractFVector(std::string const & value_str, float* v)
+	{
+		std::vector<std::string> strs;
+		boost::algorithm::split(strs, value_str, boost::is_any_of(" "));
+		for (size_t i = 0; i < N; ++ i)
+		{
+			if (i < strs.size())
+			{
+				boost::algorithm::trim(strs[i]);
+				v[i] = static_cast<float>(atof(strs[i].c_str()));
+			}
+			else
+			{
+				v[i] = 0;
+			}
+		}
+	}
+
+	template <int N>
+	void ExtractUIVector(std::string const & value_str, uint32_t* v)
+	{
+		std::vector<std::string> strs;
+		boost::algorithm::split(strs, value_str, boost::is_any_of(" "));
+		for (size_t i = 0; i < N; ++ i)
+		{
+			if (i < strs.size())
+			{
+				boost::algorithm::trim(strs[i]);
+				v[i] = static_cast<uint32_t>(atoi(strs[i].c_str()));
+			}
+			else
+			{
+				v[i] = 0;
+			}
+		}
+	}
+
 	void CompileMaterialsChunk(XMLNodePtr const & materials_chunk, std::vector<RenderMaterial>& mtls)
 	{
 		uint32_t mtl_index = 0;
@@ -46,8 +87,7 @@ namespace
 			XMLAttributePtr attr = mtl_node->Attrib("ambient");
 			if (attr)
 			{
-				std::istringstream attr_ss(attr->ValueString());
-				attr_ss >> mtl.ambient.x() >> mtl.ambient.y() >> mtl.ambient.z();
+				ExtractFVector<3>(attr->ValueString(), &mtl.ambient[0]);
 			}
 			else
 			{
@@ -58,8 +98,7 @@ namespace
 			attr = mtl_node->Attrib("diffuse");
 			if (attr)
 			{
-				std::istringstream attr_ss(attr->ValueString());
-				attr_ss >> mtl.diffuse.x() >> mtl.diffuse.y() >> mtl.diffuse.z();
+				ExtractFVector<3>(attr->ValueString(), &mtl.diffuse[0]);
 			}
 			else
 			{
@@ -70,8 +109,7 @@ namespace
 			attr = mtl_node->Attrib("specular");
 			if (attr)
 			{
-				std::istringstream attr_ss(attr->ValueString());
-				attr_ss >> mtl.specular.x() >> mtl.specular.y() >> mtl.specular.z();
+				ExtractFVector<3>(attr->ValueString(), &mtl.specular[0]);
 			}
 			else
 			{
@@ -82,8 +120,7 @@ namespace
 			attr = mtl_node->Attrib("emit");
 			if (attr)
 			{
-				std::istringstream attr_ss(attr->ValueString());
-				attr_ss >> mtl.emit.x() >> mtl.emit.y() >> mtl.emit.z();
+				ExtractFVector<3>(attr->ValueString(), &mtl.emit[0]);
 			}
 			else
 			{
@@ -145,8 +182,7 @@ namespace
 				XMLAttributePtr attr = pos_bb_node->Attrib("min");
 				if (attr)
 				{
-					std::istringstream attr_ss(attr->ValueString());
-					attr_ss >> pos_min_bb.x() >> pos_min_bb.y() >> pos_min_bb.z();
+					ExtractFVector<3>(attr->ValueString(), &pos_min_bb[0]);
 				}
 				else
 				{
@@ -160,8 +196,7 @@ namespace
 				XMLAttributePtr attr = pos_bb_node->Attrib("max");
 				if (attr)
 				{
-					std::istringstream attr_ss(attr->ValueString());
-					attr_ss >> pos_max_bb.x() >> pos_max_bb.y() >> pos_max_bb.z();
+					ExtractFVector<3>(attr->ValueString(), &pos_max_bb[0]);
 				}
 				else
 				{
@@ -189,8 +224,7 @@ namespace
 				XMLAttributePtr attr = tc_bb_node->Attrib("min");
 				if (attr)
 				{
-					std::istringstream attr_ss(attr->ValueString());
-					attr_ss >> tc_min_bb.x() >> tc_min_bb.y();
+					ExtractFVector<2>(attr->ValueString(), &tc_min_bb[0]);
 				}
 				else
 				{
@@ -203,8 +237,7 @@ namespace
 				XMLAttributePtr attr = tc_bb_node->Attrib("max");
 				if (attr)
 				{
-					std::istringstream attr_ss(attr->ValueString());
-					attr_ss >> tc_max_bb.x() >> tc_max_bb.y();
+					ExtractFVector<2>(attr->ValueString(), &tc_max_bb[0]);
 				}
 				else
 				{
@@ -256,8 +289,7 @@ namespace
 				}
 				else
 				{
-					std::istringstream attr_ss(vertex_node->Attrib("v")->ValueString());
-					attr_ss >> pos.x() >> pos.y() >> pos.z();
+					ExtractFVector<3>(vertex_node->Attrib("v")->ValueString(), &pos[0]);
 				}
 				mesh_positions.push_back(pos);
 			}
@@ -271,8 +303,7 @@ namespace
 				XMLAttributePtr attr = diffuse_node->Attrib("v");
 				if (attr)
 				{
-					std::istringstream attr_ss(attr->ValueString());
-					attr_ss >> diffuse.x() >> diffuse.y() >> diffuse.z() >> diffuse.w();
+					ExtractFVector<4>(attr->ValueString(), &diffuse[0]);
 				}
 				else
 				{
@@ -293,8 +324,7 @@ namespace
 				XMLAttributePtr attr = specular_node->Attrib("v");
 				if (attr)
 				{
-					std::istringstream attr_ss(attr->ValueString());
-					attr_ss >> specular.x() >> specular.y() >> specular.z();
+					ExtractFVector<3>(attr->ValueString(), &specular[0]);
 				}
 				else
 				{
@@ -321,8 +351,7 @@ namespace
 					}
 					else
 					{
-						std::istringstream attr_ss(tex_coord_node->Attrib("v")->ValueString());
-						attr_ss >> tex_coord.x() >> tex_coord.y();
+						ExtractFVector<2>(tex_coord_node->Attrib("v")->ValueString(), &tex_coord[0]);
 					}
 					mesh_tex_coords.push_back(tex_coord);
 				}
@@ -344,13 +373,24 @@ namespace
 				}
 				if (attr)
 				{
-					std::istringstream attr_ss_index(attr->ValueString());
-					std::istringstream attr_ss_weight(weight_node->Attrib("weight")->ValueString());
-					while (attr_ss_index && attr_ss_weight && (num_blend < 4))
+					XMLAttributePtr weight_attr = weight_node->Attrib("weight");
+
+					std::vector<std::string> index_strs;
+					std::vector<std::string> weight_strs;
+					boost::algorithm::split(index_strs, attr->ValueString(), boost::is_any_of(" "));
+					boost::algorithm::split(weight_strs, weight_attr->ValueString(), boost::is_any_of(" "));
+					
+					for (num_blend = 0; num_blend < 4; ++ num_blend)
 					{
-						attr_ss_index >> bone_index32[num_blend];
-						attr_ss_weight >> bone_weight32[num_blend];
-						++ num_blend;
+						if ((num_blend < index_strs.size()) && (num_blend < weight_strs.size()))
+						{
+							bone_index32[num_blend] = static_cast<uint32_t>(atoi(index_strs[num_blend].c_str()));
+							bone_weight32[num_blend] = static_cast<float>(atof(weight_strs[num_blend].c_str()));
+						}
+						else
+						{
+							break;
+						}
 					}
 				}
 				else
@@ -388,8 +428,7 @@ namespace
 				XMLAttributePtr attr = normal_node->Attrib("v");
 				if (attr)
 				{
-					std::istringstream attr_ss(attr->ValueString());
-					attr_ss >> normal.x() >> normal.y() >> normal.z();
+					ExtractFVector<3>(attr->ValueString(), &normal[0]);
 				}
 				else
 				{
@@ -409,8 +448,7 @@ namespace
 				XMLAttributePtr attr = tangent_node->Attrib("v");
 				if (attr)
 				{
-					std::istringstream attr_ss(attr->ValueString());
-					attr_ss >> tangent.x() >> tangent.y() >> tangent.z() >> tangent.w();
+					ExtractFVector<4>(attr->ValueString(), &tangent[0]);
 				}
 				else
 				{
@@ -439,8 +477,7 @@ namespace
 				XMLAttributePtr attr = binormal_node->Attrib("v");
 				if (attr)
 				{
-					std::istringstream attr_ss(attr->ValueString());
-					attr_ss >> binormal.x() >> binormal.y() >> binormal.z();
+					ExtractFVector<3>(attr->ValueString(), &binormal[0]);
 				}
 				else
 				{
@@ -457,11 +494,10 @@ namespace
 				has_tangent_quat = true;
 
 				Quaternion tangent_quat;
-				XMLAttributePtr attr = tangent_quat_node->Attrib("v");
+				XMLAttributePtr const & attr = tangent_quat_node->Attrib("v");
 				if (attr)
 				{
-					std::istringstream attr_ss(tangent_quat_node->Attrib("v")->ValueString());
-					attr_ss >> tangent_quat.x() >> tangent_quat.y() >> tangent_quat.z() >> tangent_quat.w();
+					ExtractFVector<4>(attr->ValueString(), &tangent_quat[0]);
 				}
 				else
 				{
@@ -731,24 +767,23 @@ namespace
 		is_index_16 = true;
 		for (XMLNodePtr tri_node = triangles_chunk->FirstNode("triangle"); tri_node; tri_node = tri_node->NextSibling("triangle"))
 		{
-			uint32_t a, b, c;
+			uint32_t ind[3];
 			XMLAttributePtr attr = tri_node->Attrib("index");
 			if (attr)
 			{
-				std::istringstream attr_ss(attr->ValueString());
-				attr_ss >> a >> b >> c;
+				ExtractUIVector<3>(attr->ValueString(), &ind[0]);
 			}
 			else
 			{
-				a = tri_node->Attrib("a")->ValueUInt();
-				b = tri_node->Attrib("b")->ValueUInt();
-				c = tri_node->Attrib("c")->ValueUInt();
+				ind[0] = tri_node->Attrib("a")->ValueUInt();
+				ind[1] = tri_node->Attrib("b")->ValueUInt();
+				ind[2] = tri_node->Attrib("c")->ValueUInt();
 			}
-			mesh_triangle_indices.push_back(a);
-			mesh_triangle_indices.push_back(b);
-			mesh_triangle_indices.push_back(c);
+			mesh_triangle_indices.push_back(ind[0]);
+			mesh_triangle_indices.push_back(ind[1]);
+			mesh_triangle_indices.push_back(ind[2]);
 
-			if ((a > 0xFFFF) || (b > 0xFFFF) || (c > 0xFFFF))
+			if ((ind[0] > 0xFFFF) || (ind[1] > 0xFFFF) || (ind[2] > 0xFFFF))
 			{
 				is_index_16 = false;
 			}
@@ -1119,9 +1154,7 @@ namespace
 				XMLAttributePtr attr = bind_real_node->Attrib("v");
 				if (attr)
 				{
-					std::istringstream attr_ss(attr->ValueString());
-					attr_ss >> joint.bind_real.x() >> joint.bind_real.y()
-						>> joint.bind_real.z() >> joint.bind_real.w();
+					ExtractFVector<4>(attr->ValueString(), &joint.bind_real[0]);
 				}
 				else
 				{
@@ -1139,9 +1172,7 @@ namespace
 				attr = bind_dual_node->Attrib("v");
 				if (attr)
 				{
-					std::istringstream attr_ss(attr->ValueString());
-					attr_ss >> joint.bind_dual.x() >> joint.bind_dual.y()
-						>> joint.bind_dual.z() >> joint.bind_dual.w();
+					ExtractFVector<4>(attr->ValueString(), &joint.bind_dual[0]);
 				}
 				else
 				{
@@ -1222,8 +1253,7 @@ namespace
 					XMLAttributePtr attr = bind_real_node->Attrib("v");
 					if (attr)
 					{
-						std::istringstream attr_ss(attr->ValueString());
-						attr_ss >> bind_real.x() >> bind_real.y() >> bind_real.z() >> bind_real.w();
+						ExtractFVector<4>(attr->ValueString(), &bind_real[0]);
 					}
 					else
 					{
@@ -1241,8 +1271,7 @@ namespace
 					attr = bind_dual_node->Attrib("v");
 					if (attr)
 					{
-						std::istringstream attr_ss(attr->ValueString());
-						attr_ss >> bind_dual.x() >> bind_dual.y() >> bind_dual.z() >> bind_dual.w();
+						ExtractFVector<4>(attr->ValueString(), &bind_dual[0]);
 					}
 					else
 					{
@@ -1300,8 +1329,7 @@ namespace
 					XMLAttributePtr attr = key_node->Attrib("min");
 					if (attr)
 					{
-						std::istringstream attr_ss(attr->ValueString());
-						attr_ss >> bb_min.x() >> bb_min.y() >> bb_min.z();
+						ExtractFVector<3>(attr->ValueString(), &bb_min[0]);
 					}
 					else
 					{
@@ -1313,8 +1341,7 @@ namespace
 					attr = key_node->Attrib("max");
 					if (attr)
 					{
-						std::istringstream attr_ss(attr->ValueString());
-						attr_ss >> bb_max[0] >> bb_max[1] >> bb_max[2];
+						ExtractFVector<3>(attr->ValueString(), &bb_max[0]);
 					}
 					else
 					{
@@ -1619,7 +1646,7 @@ namespace
 
 	void MeshMLJIT(std::string const & meshml_name, std::string const & output_name, bool normal_in_8_bit)
 	{
-		KlayGE::shared_ptr<std::stringstream> ss = MakeSharedPtr<std::stringstream>();
+		std::ostringstream ss;
 
 		ResIdentifierPtr file = ResLoader::Instance().Open(meshml_name);
 		XMLDocument doc;
@@ -1636,7 +1663,7 @@ namespace
 		{
 			uint32_t num_mtls = static_cast<uint32_t>(mtls.size());
 			NativeToLittleEndian<sizeof(num_mtls)>(&num_mtls);
-			ss->write(reinterpret_cast<char*>(&num_mtls), sizeof(num_mtls));
+			ss.write(reinterpret_cast<char*>(&num_mtls), sizeof(num_mtls));
 		}
 
 		XMLNodePtr meshes_chunk = root->FirstNode("meshes_chunk");
@@ -1663,7 +1690,7 @@ namespace
 		{
 			uint32_t num_meshes = static_cast<uint32_t>(pos_bbs.size());
 			NativeToLittleEndian<sizeof(num_meshes)>(&num_meshes);
-			ss->write(reinterpret_cast<char*>(&num_meshes), sizeof(num_meshes));
+			ss.write(reinterpret_cast<char*>(&num_meshes), sizeof(num_meshes));
 		}
 
 		XMLNodePtr bones_chunk = root->FirstNode("bones_chunk");
@@ -1675,7 +1702,7 @@ namespace
 		{
 			uint32_t num_joints = static_cast<uint32_t>(joints.size());
 			NativeToLittleEndian<sizeof(num_joints)>(&num_joints);
-			ss->write(reinterpret_cast<char*>(&num_joints), sizeof(num_joints));
+			ss.write(reinterpret_cast<char*>(&num_joints), sizeof(num_joints));
 		}
 
 		XMLNodePtr key_frames_chunk = root->FirstNode("key_frames_chunk");
@@ -1693,7 +1720,7 @@ namespace
 		{
 			uint32_t num_kfs = static_cast<uint32_t>(kfs.size());
 			NativeToLittleEndian<sizeof(num_kfs)>(&num_kfs);
-			ss->write(reinterpret_cast<char*>(&num_kfs), sizeof(num_kfs));
+			ss.write(reinterpret_cast<char*>(&num_kfs), sizeof(num_kfs));
 		}
 
 		XMLNodePtr actions_chunk = root->FirstNode("actions_chunk");
@@ -1705,31 +1732,31 @@ namespace
 		{
 			uint32_t num_actions = key_frames_chunk ? std::max(static_cast<uint32_t>(actions.size()), 1U) : 0;
 			NativeToLittleEndian<sizeof(num_actions)>(&num_actions);
-			ss->write(reinterpret_cast<char*>(&num_actions), sizeof(num_actions));
+			ss.write(reinterpret_cast<char*>(&num_actions), sizeof(num_actions));
 		}
 
 		if (materials_chunk)
 		{
-			WriteMaterialsChunk(mtls, *ss);
+			WriteMaterialsChunk(mtls, ss);
 		}
 
 		if (meshes_chunk)
 		{
 			WriteMeshesChunk(mesh_names, mtl_ids, pos_bbs, tc_bbs,
 				mesh_num_vertices, mesh_base_vertices, mesh_num_indices, mesh_start_indices,
-				merged_ves, merged_vertices, merged_indices, is_index_16_bit, *ss);
+				merged_ves, merged_vertices, merged_indices, is_index_16_bit, ss);
 		}
 
 		if (bones_chunk)
 		{
-			WriteBonesChunk(joints, *ss);
+			WriteBonesChunk(joints, ss);
 		}
 
 		if (key_frames_chunk)
 		{
-			WriteKeyFramesChunk(num_frames, frame_rate, kfs, *ss);
-			WriteBBKeyFramesChunk(bb_kfs, *ss);
-			WriteActionsChunk(actions, *ss);
+			WriteKeyFramesChunk(num_frames, frame_rate, kfs, ss);
+			WriteBBKeyFramesChunk(bb_kfs, ss);
+			WriteActionsChunk(actions, ss);
 		}
 
 		std::ofstream ofs(output_name.c_str(), std::ios_base::binary);
@@ -1742,7 +1769,7 @@ namespace
 		NativeToLittleEndian<sizeof(ver)>(&ver);
 		ofs.write(reinterpret_cast<char*>(&ver), sizeof(ver));
 
-		uint64_t original_len = ss->str().size();
+		uint64_t original_len = ss.str().size();
 		NativeToLittleEndian<sizeof(original_len)>(&original_len);
 		ofs.write(reinterpret_cast<char*>(&original_len), sizeof(original_len));
 
@@ -1751,7 +1778,7 @@ namespace
 		ofs.write(reinterpret_cast<char*>(&len), sizeof(len));
 
 		LZMACodec lzma;
-		len = lzma.Encode(ofs, ss->str().c_str(), ss->str().size());
+		len = lzma.Encode(ofs, ss.str().c_str(), ss.str().size());
 
 		ofs.seekp(p, std::ios_base::beg);
 		NativeToLittleEndian<sizeof(len)>(&len);
