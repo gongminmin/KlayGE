@@ -53,7 +53,7 @@ def build_Boost(compiler_info, compiler_arch):
 		config += " release"
 		
 	if "vc" == compiler_info.name:
-		compiler_version_str = "%d" % compiler_info.version
+		compiler_version_str = str(compiler_info.version)
 	else:
 		compiler_version_str = ""
 
@@ -70,8 +70,10 @@ def build_Python(compiler_info, compiler_arch):
 				os.chdir("External/Python/vc-11_0")
 			else:
 				os.chdir("External/Python/PCbuild")
-			if compiler_info.version >= 10:
-				sln_suffix = "%d" % compiler_info.version
+			if compiler_info.version >= 11:
+				sln_suffix = "11"
+			elif compiler_info.version >= 10:
+				sln_suffix = str(compiler_info.version)
 			else:
 				sln_suffix = ""
 
@@ -307,7 +309,7 @@ def build_external_libs(compiler_info, compiler_arch, generator_name):
 	build_Boost(compiler_info, compiler_arch)
 
 	if "vc" == compiler_info.name:
-		compiler_version_str = "%d" % compiler_info.version
+		compiler_version_str = str(compiler_info.version)
 	else:
 		compiler_version_str = ""
 	for fname in glob.iglob("External/boost/lib_%s%s_%s/lib/*.%s" % (compiler_info.name, compiler_version_str, compiler_arch, dll_suffix)):

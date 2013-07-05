@@ -11,8 +11,8 @@ except:
 # !!!! DO NOT DELETE ANY FIELD OF THIS FILE !!!!
 ################################################
 
-compiler		= "auto"		# could be "vc11", "vc10", "vc9", "mingw", "gcc", "auto".
-toolset			= "auto"		# could be "v110", "v110_xp", "v100", "v90", "auto".
+compiler		= "auto"		# could be "vc12", vc11", "vc10", "vc9", "mingw", "gcc", "auto".
+toolset			= "auto"		# could be "v120", "v120_xp", "v110", "v110_xp", "v100", "v90", "auto".
 arch			= ("x86", )		# could be "x86", "x64", "arm_app", "x86_app"
 config			= ("Debug", "RelWithDebInfo") # could be "Debug", "Release", "MinSizeRel", "RelWithDebInfo"
 	""")
