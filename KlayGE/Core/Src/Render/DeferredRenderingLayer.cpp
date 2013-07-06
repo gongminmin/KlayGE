@@ -783,6 +783,7 @@ namespace KlayGE
 	{
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 		RenderEngine& re = rf.RenderEngineInstance();
+		SceneManager& scene_mgr = Context::Instance().SceneManagerInstance();
 		
 		if (0 == pass)
 		{
@@ -1081,6 +1082,7 @@ namespace KlayGE
 			break;
 		}
 
+		scene_mgr.SmallObjectThreshold((PC_ShadowMap == pass_cat) ? 0.001f : 0.0f);
 		return urv;
 	}
 

@@ -164,7 +164,22 @@ namespace KlayGE
 			KLAYGE_FOREACH(SceneObjAABBPtrType const & soaabb, scene_objs_)
 			{
 				SceneObjectPtr const & obj = soaabb->so;
-				soaabb->visible = (!(obj->Attrib() & SceneObject::SOA_Overlay) && obj->Visible());
+				
+				AABBox aabb_ws;
+				if (obj->Attrib() & SceneObject::SOA_Moveable)
+				{
+					AABBox const & aabb = obj->PosBound();
+					float4x4 const & mat = obj->ModelMatrix();
+
+					aabb_ws = MathLib::transform_aabb(aabb, mat);
+				}
+				else
+				{
+					aabb_ws = *soaabb->aabb_ws;
+				}
+
+				soaabb->visible = (!(obj->Attrib() & SceneObject::SOA_Overlay) && obj->Visible())
+					&& (MathLib::perspective_area(camera.EyePos(), camera.ForwardVec(), aabb_ws) > small_obj_threshold_);
 			}
 		}
 		else
@@ -293,18 +308,28 @@ namespace KlayGE
 	{
 		BOOST_ASSERT(index < octree_.size());
 
+		App3DFramework& app = Context::Instance().AppInstance();
+		Camera& camera = app.ActiveCamera();
+
 		octree_node_t& node = octree_[index];
-		BoundOverlap const vis = frustum_->Intersect(node.bb);
-		node.visible = vis;
-		if (BO_Partial == vis)
+		if (MathLib::perspective_area(camera.EyePos(), camera.ForwardVec(), node.bb) > small_obj_threshold_)
 		{
-			if (node.first_child_index != -1)
+			BoundOverlap const vis = frustum_->Intersect(node.bb);
+			node.visible = vis;
+			if (BO_Partial == vis)
 			{
-				for (int i = 0; i < 8; ++ i)
+				if (node.first_child_index != -1)
 				{
-					this->NodeVisible(node.first_child_index + i);
+					for (int i = 0; i < 8; ++ i)
+					{
+						this->NodeVisible(node.first_child_index + i);
+					}
 				}
 			}
+		}
+		else
+		{
+			node.visible = BO_No;
 		}
 
 #ifdef KLAYGE_DRAW_NODES
@@ -319,6 +344,9 @@ namespace KlayGE
 	{
 		BOOST_ASSERT(index < octree_.size());
 
+		App3DFramework& app = Context::Instance().AppInstance();
+		Camera& camera = app.ActiveCamera();
+
 		octree_node_t const & node = octree_[index];
 		if ((node.visible != BO_No) || force)
 		{
@@ -326,8 +354,16 @@ namespace KlayGE
 			{
 				if (!soaabb->visible && soaabb->so->Visible())
 				{
-					BoundOverlap const bo = frustum_->Intersect(*soaabb->aabb_ws);
-					soaabb->visible = (bo != BO_No);
+					if (MathLib::perspective_area(camera.EyePos(), camera.ForwardVec(),
+						*soaabb->aabb_ws) > small_obj_threshold_)
+					{
+						BoundOverlap const bo = frustum_->Intersect(*soaabb->aabb_ws);
+						soaabb->visible = (bo != BO_No);
+					}
+					else
+					{
+						soaabb->visible = false;
+					}
 				}
 			}
 

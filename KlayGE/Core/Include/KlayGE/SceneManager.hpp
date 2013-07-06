@@ -63,6 +63,7 @@ namespace KlayGE
 
 		static SceneManagerPtr NullObject();
 
+		void SmallObjectThreshold(float area);
 		virtual void ClipScene();
 
 		void AddCamera(CameraPtr const & camera);
@@ -117,6 +118,8 @@ namespace KlayGE
 		SceneObjAABBsType scene_objs_;
 
 		unordered_map<size_t, shared_ptr<std::vector<char> > > visible_marks_map_;
+
+		float small_obj_threshold_;
 
 	private:
 		void FlushScene();
