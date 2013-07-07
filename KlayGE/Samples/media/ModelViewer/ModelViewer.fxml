@@ -425,16 +425,27 @@ float4 VisualizeTextureRT1PS(float2 tex0 : TEXCOORD0) : SV_Target
 	}
 	else if (1 == texture_slot)
 	{
-		if (specular_level.w > 0.5f)
+		if (specular_clr.w > 0.5f)
 		{
-			ret = float4(specular_tex.Sample(linear_sampler, tex0).xxx, 1);
+			ret = float4(specular_tex.Sample(linear_sampler, tex0).rgb, 1);
 		}
 		else
 		{
-			ret = float4(specular_level.xxx, 1);
+			ret = float4(specular_clr.rgb, 1);
 		}
 	}
 	else if (2 == texture_slot)
+	{
+		if (shininess_clr.y > 0.5f)
+		{
+			ret = float4(shininess_tex.Sample(linear_sampler, tex0).rrr, 1);
+		}
+		else
+		{
+			ret = float4(shininess_clr.rrr, 1);
+		}
+	}
+	else if (3 == texture_slot)
 	{
 		if (normal_map_enabled)
 		{
@@ -445,7 +456,7 @@ float4 VisualizeTextureRT1PS(float2 tex0 : TEXCOORD0) : SV_Target
 			ret = float4(0, 0, 1, 1);
 		}
 	}
-	else if (3 == texture_slot)
+	else if (4 == texture_slot)
 	{
 		if (emit_clr.w > 0.5f)
 		{
@@ -456,7 +467,7 @@ float4 VisualizeTextureRT1PS(float2 tex0 : TEXCOORD0) : SV_Target
 			ret = float4(emit_clr.rgb, 1);
 		}
 	}
-	else //if (4 == texture_slot)
+	else //if (5 == texture_slot)
 	{
 		if (opacity_map_enabled)
 		{
@@ -488,16 +499,27 @@ void VisualizeTextureMRTPS(float2 tex0 : TEXCOORD0,
 	}
 	else if (1 == texture_slot)
 	{
-		if (specular_level.w > 0.5f)
+		if (specular_clr.w > 0.5f)
 		{
-			mrt_1 = float4(specular_tex.Sample(linear_sampler, tex0).xxx, 1);
+			mrt_1 = float4(specular_tex.Sample(linear_sampler, tex0).rgb, 1);
 		}
 		else
 		{
-			mrt_1 = float4(specular_level.xxx, 1);
+			mrt_1 = float4(specular_clr.rgb, 1);
 		}
 	}
 	else if (2 == texture_slot)
+	{
+		if (shininess_clr.y > 0.5f)
+		{
+			mrt_1 = float4(shininess_tex.Sample(linear_sampler, tex0).rrr, 1);
+		}
+		else
+		{
+			mrt_1 = float4(shininess_clr.rrr, 1);
+		}
+	}
+	else if (3 == texture_slot)
 	{
 		if (normal_map_enabled)
 		{
@@ -508,7 +530,7 @@ void VisualizeTextureMRTPS(float2 tex0 : TEXCOORD0,
 			mrt_1 = float4(0, 0, 1, 1);
 		}
 	}
-	else if (3 == texture_slot)
+	else if (4 == texture_slot)
 	{
 		if (emit_clr.w > 0.5f)
 		{
@@ -519,7 +541,7 @@ void VisualizeTextureMRTPS(float2 tex0 : TEXCOORD0,
 			mrt_1 = float4(emit_clr.rgb, 1);
 		}
 	}
-	else //if (4 == texture_slot)
+	else //if (5 == texture_slot)
 	{
 		if (opacity_map_enabled)
 		{

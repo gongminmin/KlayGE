@@ -661,9 +661,10 @@ void ModelViewerApp::MeshChangedHandler(KlayGE::UIComboBox const & sender)
 
 	dialog_model_->Control<UIComboBox>(id_visualize_)->AddItem(L"Texture Diffuse", 0);
 	dialog_model_->Control<UIComboBox>(id_visualize_)->AddItem(L"Texture Specular", 1);
-	dialog_model_->Control<UIComboBox>(id_visualize_)->AddItem(L"Texture Bump", 2);
-	dialog_model_->Control<UIComboBox>(id_visualize_)->AddItem(L"Texture Emit", 3);
-	dialog_model_->Control<UIComboBox>(id_visualize_)->AddItem(L"Texture Opacity", 4);
+	dialog_model_->Control<UIComboBox>(id_visualize_)->AddItem(L"Texture Shininess", 2);
+	dialog_model_->Control<UIComboBox>(id_visualize_)->AddItem(L"Texture Bump", 3);
+	dialog_model_->Control<UIComboBox>(id_visualize_)->AddItem(L"Texture Emit", 4);
+	dialog_model_->Control<UIComboBox>(id_visualize_)->AddItem(L"Texture Opacity", 5);
 }
 
 void ModelViewerApp::VisualizeChangedHandler(KlayGE::UIComboBox const & sender)
