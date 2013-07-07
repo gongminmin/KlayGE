@@ -81,6 +81,7 @@ namespace KlayGE
 
 		virtual void Create();
 		virtual void Destroy();
+		void Refresh();
 
 		std::string const & Name() const
 		{

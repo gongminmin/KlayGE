@@ -261,6 +261,11 @@ namespace KlayGE
 		Context::Destroy();
 	}
 
+	void App3DFramework::Refresh()
+	{
+		Context::Instance().RenderFactoryInstance().RenderEngineInstance().Refresh();
+	}
+
 	WindowPtr App3DFramework::MakeWindow(std::string const & name, RenderSettings const & settings)
 	{
 		return MakeSharedPtr<Window>(name, settings);

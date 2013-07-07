@@ -156,6 +156,7 @@ private:
 #endif
 
 #ifdef KLAYGE_CXX11_LIBRARY_ATOMIC_SUPPORT
+#ifndef _M_CEE
 	#include <atomic>
 	namespace KlayGE
 	{
@@ -170,6 +171,7 @@ private:
 		using std::memory_order_acq_rel;
 		using std::memory_order_seq_cst;
 	}
+#endif
 #else
 	#include <boost/atomic.hpp>
 	namespace KlayGE
