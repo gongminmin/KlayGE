@@ -679,6 +679,7 @@ namespace KlayGE
 		UIElement cap_element_;  // Element for the caption
 
 		float depth_base_;
+		float opacity_;
 
 		std::map<std::string, int> id_name_;
 		std::map<int, ControlLocation> id_location_;

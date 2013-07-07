@@ -129,6 +129,7 @@ namespace KlayGE
 				technique_ = effect->TechniqueByName("UITecNoTex");
 			}
 
+			ui_tex_ep_ = technique_->Effect().ParameterByName("ui_tex");
 			half_width_height_ep_ = technique_->Effect().ParameterByName("half_width_height");
 		}
 
@@ -187,7 +188,7 @@ namespace KlayGE
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-			*(technique_->Effect().ParameterByName("ui_tex")) = texture_;
+			*ui_tex_ep_ = texture_;
 
 			RenderEngine& re = rf.RenderEngineInstance();
 			float const half_width = re.CurFrameBuffer()->Width() / 2.0f;
@@ -209,6 +210,7 @@ namespace KlayGE
 		bool restart_;
 		bool dirty_;
 
+		RenderEffectParameterPtr ui_tex_ep_;
 		RenderEffectParameterPtr half_width_height_ep_;
 
 		TexturePtr texture_;
@@ -1115,7 +1117,7 @@ namespace KlayGE
 						{
 							mouse_on_ui_ = true;
 						}
-						dialog->MouseOverHandler(param->buttons_state, dialog->ToLocal(param->abs_coord));
+						dialog->MouseOverHandler(param->buttons_state, param->abs_coord);
 					}
 				}
 				break;
@@ -1139,7 +1141,7 @@ namespace KlayGE
 						{
 							mouse_on_ui_ = true;
 						}
-						dialog->MouseWheelHandler(param->buttons_state, dialog->ToLocal(param->abs_coord), param->wheel_delta);
+						dialog->MouseWheelHandler(param->buttons_state, param->abs_coord, param->wheel_delta);
 					}
 				}
 				break;
@@ -1165,11 +1167,11 @@ namespace KlayGE
 						}
 						if (param->buttons_down & MB_Left)
 						{
-							dialog->MouseDownHandler(param->buttons_down, dialog->ToLocal(param->abs_coord));
+							dialog->MouseDownHandler(param->buttons_down, param->abs_coord);
 						}
 						else if (param->buttons_up & MB_Left)
 						{
-							dialog->MouseUpHandler(param->buttons_up, dialog->ToLocal(param->abs_coord));
+							dialog->MouseUpHandler(param->buttons_up, param->abs_coord);
 						}
 					}
 				}
@@ -1186,8 +1188,8 @@ namespace KlayGE
 						{
 							mouse_on_ui_ = true;
 						}
-						dialog->MouseDownHandler(MB_Left, dialog->ToLocal(param->center));
-						dialog->MouseUpHandler(MB_Left, dialog->ToLocal(param->center));
+						dialog->MouseDownHandler(MB_Left, param->center);
+						dialog->MouseUpHandler(MB_Left, param->center);
 					}
 				}
 				break;
@@ -1227,7 +1229,8 @@ namespace KlayGE
 					bounding_box_(0, 0, 0, 0),
 					caption_height_(18),
 					top_left_clr_(0, 0, 0, 0), top_right_clr_(0, 0, 0, 0),
-					bottom_left_clr_(0, 0, 0, 0), bottom_right_clr_(0, 0, 0, 0)
+					bottom_left_clr_(0, 0, 0, 0), bottom_right_clr_(0, 0, 0, 0),
+					opacity_(0.5f)
 	{
 		TexturePtr ct;
 		if (!control_tex)
@@ -1361,6 +1364,10 @@ namespace KlayGE
 			clrs[1] = top_right_clr_;
 			clrs[2] = bottom_right_clr_;
 			clrs[3] = bottom_left_clr_;
+			clrs[0].a() *= opacity_;
+			clrs[1].a() *= opacity_;
+			clrs[2].a() *= opacity_;
+			clrs[3].a() *= opacity_;
 
 			Rect_T<int32_t> rc(0, 0, this->GetWidth(), this->GetHeight());
 			Rect_T<int32_t> rcScreen = rc + this->GetLocation();
@@ -1394,7 +1401,8 @@ namespace KlayGE
 			w = std::min(w, static_cast<int32_t>(size.cx() * 1.2f));
 			rc.right() = w;
 
-			Color const & clr = cap_element_.TextureColor().Current;
+			Color clr = cap_element_.TextureColor().Current;
+			clr.a() *= opacity_;
 			UIManager::VertexFormat vertices[] =
 			{
 				UIManager::VertexFormat(float3(0, static_cast<float>(-caption_height_), 0), clr, float2(0, 0)),
@@ -1712,7 +1720,12 @@ namespace KlayGE
 		}
 
 		float3 pos(static_cast<float>(rcScreen.left()), static_cast<float>(rcScreen.top()), depth_base_ + depth);
-		std::vector<Color> clrs(4, clr);
+		array<Color, 4> clrs;
+		clrs.fill(clr);
+		for (size_t i = 0; i < clrs.size(); ++ i)
+		{
+			clrs[i].a() *= opacity_;
+		}
 		UIManager::Instance().DrawRect(pos, static_cast<float>(rcScreen.Width()), static_cast<float>(rc.Height()),
 			&clrs[0], Rect_T<int32_t>(0, 0, 0, 0), TexturePtr());
 	}
@@ -1747,7 +1760,12 @@ namespace KlayGE
 		}
 
 		float3 pos(static_cast<float>(rcScreen.left()), static_cast<float>(rcScreen.top()), depth_base_ + depth_bias);
-		std::vector<Color> clrs(4, element.TextureColor().Current);
+		array<Color, 4> clrs;
+		clrs.fill(element.TextureColor().Current);
+		for (size_t i = 0; i < clrs.size(); ++ i)
+		{
+			clrs[i].a() *= opacity_;
+		}
 		UIManager::Instance().DrawRect(pos, static_cast<float>(rcScreen.Width()),
 			static_cast<float>(rcScreen.Height()), &clrs[0], rcTexture, tex);
 	}
@@ -1767,7 +1785,7 @@ namespace KlayGE
 			}
 
 			UIManager::Instance().DrawString(strText, uie.FontIndex(), r, depth_base_ + depth_bias - 0.01f,
-				Color(0, 0, 0, uie.FontColor().Current.a()), uie.TextAlign());
+				Color(0, 0, 0, uie.FontColor().Current.a() * opacity_), uie.TextAlign());
 		}
 
 		Rect_T<int32_t> r = rc;
@@ -1777,8 +1795,10 @@ namespace KlayGE
 			r += int2(0, this->GetCaptionHeight());
 		}
 
+		Color clr = uie.FontColor().Current;
+		clr.a() *= opacity_;
 		UIManager::Instance().DrawString(strText, uie.FontIndex(), r, depth_base_ + depth_bias - 0.01f,
-			uie.FontColor().Current, uie.TextAlign());
+			clr, uie.TextAlign());
 	}
 
 	Size_T<uint32_t> UIDialog::CalcSize(std::wstring const & strText, UIElement const & uie, Rect_T<int32_t> const & rc, bool bShadow)
@@ -1981,6 +2001,15 @@ namespace KlayGE
 				}
 			}
 		}
+
+		if (control_focus_.lock() || control_mouse_over_.lock())
+		{
+			opacity_ = 1.0f;
+		}
+		else
+		{
+			opacity_ = 0.5f;
+		}
 	}
 
 	void UIDialog::KeyUpHandler(uint32_t key)
@@ -1989,25 +2018,36 @@ namespace KlayGE
 		{
 			control_focus_.lock()->KeyUpHandler(*this, key);
 		}
+
+		if (control_focus_.lock() || control_mouse_over_.lock())
+		{
+			opacity_ = 1.0f;
+		}
+		else
+		{
+			opacity_ = 0.5f;
+		}
 	}
 
 	void UIDialog::MouseDownHandler(uint32_t buttons, int2 const & pt)
 	{
+		int2 const local_pt = this->ToLocal(pt);
+
 		UIControlPtr control;
 		if (control_focus_.lock() && control_focus_.lock()->GetEnabled()
-			&& control_focus_.lock()->ContainsPoint(pt))
+			&& control_focus_.lock()->ContainsPoint(local_pt))
 		{
 			control = control_focus_.lock();
 		}
 		else
 		{
 			// Figure out which control the mouse is over now
-			control = this->GetControlAtPoint(pt);
+			control = this->GetControlAtPoint(local_pt);
 		}
 
 		if (control)
 		{
-			control->MouseDownHandler(*this, buttons, pt);
+			control->MouseDownHandler(*this, buttons, local_pt);
 		}
 		else
 		{
@@ -2016,26 +2056,37 @@ namespace KlayGE
 				control_focus_.lock()->OnFocusOut();
 				control_focus_.reset();
 			}
+		}
+
+		if (this->ContainsPoint(pt) || control_focus_.lock() || control_mouse_over_.lock())
+		{
+			opacity_ = 1.0f;
+		}
+		else
+		{
+			opacity_ = 0.5f;
 		}
 	}
 
 	void UIDialog::MouseUpHandler(uint32_t buttons, int2 const & pt)
 	{
+		int2 const local_pt = this->ToLocal(pt);
+
 		UIControlPtr control;
 		if (control_focus_.lock() && control_focus_.lock()->GetEnabled()
-			&& control_focus_.lock()->ContainsPoint(pt))
+			&& control_focus_.lock()->ContainsPoint(local_pt))
 		{
 			control = control_focus_.lock();
 		}
 		else
 		{
 			// Figure out which control the mouse is over now
-			control = this->GetControlAtPoint(pt);
+			control = this->GetControlAtPoint(local_pt);
 		}
 
 		if (control)
 		{
-			control->MouseUpHandler(*this, buttons, pt);
+			control->MouseUpHandler(*this, buttons, local_pt);
 		}
 		else
 		{
@@ -2044,26 +2095,37 @@ namespace KlayGE
 				control_focus_.lock()->OnFocusOut();
 				control_focus_.reset();
 			}
+		}
+
+		if (this->ContainsPoint(pt) || control_focus_.lock() || control_mouse_over_.lock())
+		{
+			opacity_ = 1.0f;
+		}
+		else
+		{
+			opacity_ = 0.5f;
 		}
 	}
 
 	void UIDialog::MouseWheelHandler(uint32_t buttons, int2 const & pt, int32_t z_delta)
 	{
+		int2 const local_pt = this->ToLocal(pt);
+
 		UIControlPtr control;
 		if (control_focus_.lock() && control_focus_.lock()->GetEnabled()
-			&& control_focus_.lock()->ContainsPoint(pt))
+			&& control_focus_.lock()->ContainsPoint(local_pt))
 		{
 			control = control_focus_.lock();
 		}
 		else
 		{
 			// Figure out which control the mouse is over now
-			control = this->GetControlAtPoint(pt);
+			control = this->GetControlAtPoint(local_pt);
 		}
 
 		if (control)
 		{
-			control->MouseWheelHandler(*this, buttons, pt, z_delta);
+			control->MouseWheelHandler(*this, buttons, local_pt, z_delta);
 		}
 		else
 		{
@@ -2073,20 +2135,31 @@ namespace KlayGE
 				control_focus_.reset();
 			}
 		}
+
+		if (this->ContainsPoint(pt) || control_focus_.lock() || control_mouse_over_.lock())
+		{
+			opacity_ = 1.0f;
+		}
+		else
+		{
+			opacity_ = 0.5f;
+		}
 	}
 
 	void UIDialog::MouseOverHandler(uint32_t buttons, int2 const & pt)
 	{
+		int2 const local_pt = this->ToLocal(pt);
+
 		UIControlPtr control;
 		if (control_focus_.lock() && control_focus_.lock()->GetEnabled()
-			&& ((buttons & MB_Left) || control_focus_.lock()->ContainsPoint(pt)))
+			&& ((buttons & MB_Left) || control_focus_.lock()->ContainsPoint(local_pt)))
 		{
 			control = control_focus_.lock();
 		}
 		else
 		{
 			// Figure out which control the mouse is over now
-			control = this->GetControlAtPoint(pt);
+			control = this->GetControlAtPoint(local_pt);
 
 			if (control_mouse_over_.lock() != control)
 			{
@@ -2107,7 +2180,16 @@ namespace KlayGE
 
 		if (control)
 		{
-			control->MouseOverHandler(*this, buttons, pt);
+			control->MouseOverHandler(*this, buttons, local_pt);
+		}
+
+		if (this->ContainsPoint(pt) || control_focus_.lock() || control_mouse_over_.lock())
+		{
+			opacity_ = 1.0f;
+		}
+		else
+		{
+			opacity_ = 0.5f;
 		}
 	}
 }
