@@ -42,13 +42,12 @@ void DetailedMesh::BuildMeshInfo()
 	*(technique_->Effect().ParameterByName("diffuse_tex")) = diffuse_tex_;
 	*(technique_->Effect().ParameterByName("bump_tex")) = normal_tex_;
 	*(technique_->Effect().ParameterByName("specular_tex")) = specular_tex_;
+	*(technique_->Effect().ParameterByName("specular_tex")) = shininess_tex_;
 
 	*(technique_->Effect().ParameterByName("ambient_clr")) = float4(mtl_->ambient.x(), mtl_->ambient.y(), mtl_->ambient.z(), 1);
-	*(technique_->Effect().ParameterByName("diffuse_clr")) = float4(mtl_->diffuse.x(), mtl_->diffuse.y(), mtl_->diffuse.z(), bool(diffuse_tex_));
-	*(technique_->Effect().ParameterByName("specular_clr")) = float4(mtl_->specular.x(), mtl_->specular.y(), mtl_->specular.z(), bool(specular_tex_));
-
-	*(technique_->Effect().ParameterByName("specular_level")) = mtl_->specular_level;
-	*(technique_->Effect().ParameterByName("shininess")) = mtl_->shininess;
+	*(technique_->Effect().ParameterByName("diffuse_clr")) = float4(mtl_->diffuse.x(), mtl_->diffuse.y(), mtl_->diffuse.z(), !!diffuse_tex_);
+	*(technique_->Effect().ParameterByName("specular_clr")) = float4(mtl_->specular.x(), mtl_->specular.y(), mtl_->specular.z(), !!specular_tex_);
+	*(technique_->Effect().ParameterByName("shininess_clr")) = float2(mtl_->shininess, !!shininess_tex_);
 
 	float3 extinction_coefficient(0.2f, 0.8f, 0.12f);
 	if (Context::Instance().Config().graphics_cfg.gamma)

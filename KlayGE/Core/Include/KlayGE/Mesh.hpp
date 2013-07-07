@@ -142,6 +142,7 @@ namespace KlayGE
 
 		function<TexturePtr()> diffuse_tl_;
 		function<TexturePtr()> specular_tl_;
+		function<TexturePtr()> shininess_tl_;
 		function<TexturePtr()> normal_tl_;
 		function<TexturePtr()> height_tl_;
 		function<TexturePtr()> emit_tl_;

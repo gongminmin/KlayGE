@@ -103,8 +103,9 @@ namespace KlayGE
 				*height_map_enabled_param_ = static_cast<int32_t>(!!height_tex_);
 				*height_tex_param_ = height_tex_;
 				*specular_tex_param_ = specular_tex_;
-				*specular_level_param_ = float4(MathLib::clamp(mtl_ ? mtl_->specular_level : 0, 0.0f, 1.0f), 0, 0, static_cast<float>(!!specular_tex_));
-				*shininess_param_ = MathLib::clamp(mtl_ ? mtl_->shininess / 256.0f : 0, 1e-6f, 0.999f);
+				*specular_clr_param_ = float4(mtl_ ? mtl_->specular.x() : 0, mtl_ ? mtl_->specular.y() : 0, mtl_ ? mtl_->specular.z() : 0, static_cast<float>(!!specular_tex_));
+				*shininess_clr_param_ = float2(MathLib::clamp(mtl_ ? mtl_->shininess / 256.0f : 0, 1e-6f, 0.999f), static_cast<float>(!!shininess_tex_));
+				*shininess_tex_param_ = shininess_tex_;
 				*opacity_clr_param_ = mtl_ ? mtl_->opacity : 1.0f;
 				*opaque_depth_tex_param_ = drl->CurrFrameDepthTex(drl->ActiveViewport());
 				break;
@@ -118,11 +119,12 @@ namespace KlayGE
 			case PT_OpaqueShading:
 			case PT_TransparencyBackShading:
 			case PT_TransparencyFrontShading:
-				*shininess_param_ = std::max(1e-6f, mtl_ ? mtl_->shininess : 0);
+				*shininess_clr_param_ = float2(MathLib::clamp(mtl_ ? mtl_->shininess / 256.0f : 0, 1e-6f, 0.999f), static_cast<float>(!!shininess_tex_));
+				*shininess_tex_param_ = shininess_tex_;
 				*diffuse_tex_param_ = diffuse_tex_;
 				*diffuse_clr_param_ = float4(mtl_ ? mtl_->diffuse.x() : 0, mtl_ ? mtl_->diffuse.y() : 0, mtl_ ? mtl_->diffuse.z() : 0, static_cast<float>(!!diffuse_tex_));
 				*specular_tex_param_ = specular_tex_;
-				*specular_level_param_ = float4(MathLib::clamp(mtl_ ? mtl_->specular_level : 0, 0.0f, 1.0f), 0, 0, static_cast<float>(!!specular_tex_));
+				*specular_clr_param_ = float4(mtl_ ? mtl_->specular.x() : 0, mtl_ ? mtl_->specular.y() : 0, mtl_ ? mtl_->specular.z() : 0, static_cast<float>(!!specular_tex_));
 				*emit_tex_param_ = emit_tex_;
 				*emit_clr_param_ = float4(mtl_ ? mtl_->emit.x() : 0, mtl_ ? mtl_->emit.y() : 0, mtl_ ? mtl_->emit.z() : 0, static_cast<float>(!!emit_tex_));
 				*opacity_clr_param_ = mtl_ ? mtl_->opacity : 1.0f;
@@ -292,7 +294,8 @@ namespace KlayGE
 		pos_extent_param_ = deferred_effect_->ParameterByName("pos_extent");
 		tc_center_param_ = deferred_effect_->ParameterByName("tc_center");
 		tc_extent_param_ = deferred_effect_->ParameterByName("tc_extent");
-		shininess_param_ = deferred_effect_->ParameterByName("shininess");
+		shininess_clr_param_ = deferred_effect_->ParameterByName("shininess_clr");
+		shininess_tex_param_ = deferred_effect_->ParameterByName("shininess_tex");
 		normal_map_enabled_param_ = deferred_effect_->ParameterByName("normal_map_enabled");
 		normal_tex_param_ = deferred_effect_->ParameterByName("normal_tex");
 		height_map_enabled_param_ = deferred_effect_->ParameterByName("height_map_enabled");
@@ -300,9 +303,9 @@ namespace KlayGE
 		diffuse_tex_param_ = deferred_effect_->ParameterByName("diffuse_tex");
 		diffuse_clr_param_ = deferred_effect_->ParameterByName("diffuse_clr");
 		specular_tex_param_ = deferred_effect_->ParameterByName("specular_tex");
+		specular_clr_param_ = deferred_effect_->ParameterByName("specular_clr");
 		emit_tex_param_ = deferred_effect_->ParameterByName("emit_tex");
 		emit_clr_param_ = deferred_effect_->ParameterByName("emit_clr");
-		specular_level_param_ = deferred_effect_->ParameterByName("specular_level");
 		opacity_clr_param_ = deferred_effect_->ParameterByName("opacity_clr");
 		opacity_map_enabled_param_ = deferred_effect_->ParameterByName("opacity_map_enabled");
 		opaque_depth_tex_param_ = deferred_effect_->ParameterByName("opaque_depth_tex");

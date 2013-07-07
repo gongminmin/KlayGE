@@ -48,7 +48,7 @@ namespace
 
 			mtl_->diffuse = float3(0.2f, 0.2f, 0.2f);
 			mtl_->shininess = 128;
-			mtl_->specular_level = 0.6f;
+			mtl_->specular = float3(0.6f, 0.6f, 0.6f);
 		}
 
 		void OnRenderBegin()
@@ -165,7 +165,7 @@ namespace
 				mtl_->diffuse.z() = MathLib::srgb_to_linear(mtl_->diffuse.z());
 			}
 			mtl_->shininess = 64;
-			mtl_->specular_level = 0.8f;
+			mtl_->specular = float3(0.8f, 0.8f, 0.8f);
 		}
 	};
 

@@ -23,7 +23,7 @@ using namespace KlayGE;
 namespace
 {
 	std::string const JIT_EXT_NAME = ".model_bin";
-	uint32_t const MODEL_BIN_VERSION = 8;
+	uint32_t const MODEL_BIN_VERSION = 9;
 
 	struct KeyFrames
 	{
@@ -129,7 +129,11 @@ namespace
 				mtl.emit.z() = mtl_node->Attrib("emit_b")->ValueFloat();
 			}
 			mtl.opacity = mtl_node->Attrib("opacity")->ValueFloat();
-			mtl.specular_level = mtl_node->Attrib("specular_level")->ValueFloat();
+			attr = mtl_node->Attrib("specular_level");
+			if (attr)
+			{
+				mtl.specular *= attr->ValueFloat();
+			}
 			mtl.shininess = mtl_node->Attrib("shininess")->ValueFloat();
 
 			XMLNodePtr tex_node = mtl_node->FirstNode("texture");
@@ -1414,28 +1418,39 @@ namespace
 		{
 			RenderMaterial mtl = mtls[i];
 
-			NativeToLittleEndian<sizeof(mtl.ambient[0])>(&mtl.ambient[0]);
-			NativeToLittleEndian<sizeof(mtl.ambient[1])>(&mtl.ambient[1]);
-			NativeToLittleEndian<sizeof(mtl.ambient[2])>(&mtl.ambient[2]);
-			NativeToLittleEndian<sizeof(mtl.diffuse[0])>(&mtl.diffuse[0]);
-			NativeToLittleEndian<sizeof(mtl.diffuse[1])>(&mtl.diffuse[1]);
-			NativeToLittleEndian<sizeof(mtl.diffuse[2])>(&mtl.diffuse[2]);
-			NativeToLittleEndian<sizeof(mtl.specular[0])>(&mtl.specular[0]);
-			NativeToLittleEndian<sizeof(mtl.specular[1])>(&mtl.specular[1]);
-			NativeToLittleEndian<sizeof(mtl.specular[2])>(&mtl.specular[2]);
-			NativeToLittleEndian<sizeof(mtl.emit[0])>(&mtl.emit[0]);
-			NativeToLittleEndian<sizeof(mtl.emit[1])>(&mtl.emit[1]);
-			NativeToLittleEndian<sizeof(mtl.emit[2])>(&mtl.emit[2]);
-			NativeToLittleEndian<sizeof(mtl.opacity)>(&mtl.opacity);
-			NativeToLittleEndian<sizeof(mtl.specular_level)>(&mtl.specular_level);
-			NativeToLittleEndian<sizeof(mtl.shininess)>(&mtl.shininess);
+			uint8_t rgb[3];
 
-			os.write(reinterpret_cast<char*>(&mtl.ambient), sizeof(mtl.ambient));
-			os.write(reinterpret_cast<char*>(&mtl.diffuse), sizeof(mtl.diffuse));
-			os.write(reinterpret_cast<char*>(&mtl.specular), sizeof(mtl.specular));
-			os.write(reinterpret_cast<char*>(&mtl.emit), sizeof(mtl.emit));
+			for (uint32_t i = 0; i < 3; ++ i)
+			{
+				rgb[i] = static_cast<uint8_t>(MathLib::clamp(static_cast<int>(mtl.ambient[i] * 255.0f + 0.5f), 0, 255));
+			}
+			os.write(reinterpret_cast<char*>(rgb), sizeof(rgb));
+
+			for (uint32_t i = 0; i < 3; ++ i)
+			{
+				rgb[i] = static_cast<uint8_t>(MathLib::clamp(static_cast<int>(mtl.diffuse[i] * 255.0f + 0.5f), 0, 255));
+			}
+			os.write(reinterpret_cast<char*>(rgb), sizeof(rgb));
+
+			float specular_level = std::max(std::max(mtl.specular.x(), mtl.specular.y()), mtl.specular.z());
+			for (uint32_t i = 0; i < 3; ++ i)
+			{
+				rgb[i] = static_cast<uint8_t>(MathLib::clamp(static_cast<int>(mtl.specular[i] / specular_level * 255.0f + 0.5f), 0, 255));
+			}
+			os.write(reinterpret_cast<char*>(rgb), sizeof(rgb));
+			NativeToLittleEndian<sizeof(specular_level)>(&specular_level);
+			os.write(reinterpret_cast<char*>(&specular_level), sizeof(specular_level));
+
+			for (uint32_t i = 0; i < 3; ++ i)
+			{
+				rgb[i] = static_cast<uint8_t>(MathLib::clamp(static_cast<int>(mtl.emit[i] * 255.0f + 0.5f), 0, 255));
+			}
+			os.write(reinterpret_cast<char*>(rgb), sizeof(rgb));
+			
 			os.write(reinterpret_cast<char*>(&mtl.opacity), sizeof(mtl.opacity));
-			os.write(reinterpret_cast<char*>(&mtl.specular_level), sizeof(mtl.specular_level));
+			NativeToLittleEndian<sizeof(mtl.opacity)>(&mtl.opacity);
+
+			NativeToLittleEndian<sizeof(mtl.shininess)>(&mtl.shininess);
 			os.write(reinterpret_cast<char*>(&mtl.shininess), sizeof(mtl.shininess));
 
 			uint32_t num_texs = static_cast<uint32_t>(mtl.texture_slots.size());

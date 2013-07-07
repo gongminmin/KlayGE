@@ -65,8 +65,8 @@ namespace
 				*diffuse_clr_param_ = float4(0, 0, 0, 1);
 				*normal_map_enabled_param_ = static_cast<int32_t>(0);
 				*height_map_enabled_param_ = static_cast<int32_t>(0);
-				*specular_level_param_ = float4(0, 0, 0, 0);
-				*shininess_param_ = 0.001f;
+				*specular_clr_param_ = float4(0, 0, 0, 0);
+				*shininess_clr_param_ = float2(0.001f, 0);
 				break;
 				
 			default:
@@ -171,8 +171,8 @@ namespace
 				*diffuse_clr_param_ = float4(0.07f, 0.15f, 0.2f, 0);
 				*normal_map_enabled_param_ = static_cast<int32_t>(0);
 				*height_map_enabled_param_ = static_cast<int32_t>(0);
-				*specular_level_param_ = float4(5, 0, 0, 0);
-				*shininess_param_ = 0.5f;
+				*specular_clr_param_ = float4(5, 5, 5, 0);
+				*shininess_clr_param_ = float2(0.5f, 0);
 				*opaque_depth_tex_param_ = Context::Instance().DeferredRenderingLayerInstance()->CurrFrameDepthTex(0);
 				break;
 

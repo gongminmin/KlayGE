@@ -70,7 +70,7 @@ float4 TerrainGBufferRT0PS(float3 texcoord : TEXCOORD0, float4 normal_fog : TEXC
 	float3 fitting_tc = FittingCoord(normal);
 	normal *= fitting_tc.z * normals_fitting_tex.Sample(bilinear_sampler, fitting_tc.xy).r;
 	
-	return StoreGBufferRT0(normal, shininess);
+	return StoreGBufferRT0(normal, shininess_clr.x);
 }
 
 float4 TerrainGBufferRT1PS(float3 texcoord : TEXCOORD0, float4 normal_fog : TEXCOORD1) : SV_Target
@@ -93,7 +93,7 @@ void TerrainGBufferMRTPS(float3 texcoord : TEXCOORD0, float4 normal_fog : TEXCOO
 		grass_tex_base.Sample(aniso_sampler, texcoord.xy).rgb, saturate(texcoord.z));
 	float specular = 0;
 	
-	StoreGBufferMRT(normal, specular, shininess, diffuse,
+	StoreGBufferMRT(normal, specular, shininess_clr.x, diffuse,
 		mrt_0, mrt_1);
 }
 		]]>

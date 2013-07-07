@@ -46,7 +46,7 @@ namespace
 {
 	using namespace KlayGE;
 
-	uint32_t const MODEL_BIN_VERSION = 8;
+	uint32_t const MODEL_BIN_VERSION = 9;
 
 	class RenderModelLoadingDesc : public ResLoadingDesc
 	{
@@ -498,9 +498,13 @@ namespace KlayGE
 			{
 				diffuse_tl_ = tl;
 			}
-			else if (("Specular Level" == iter->first) || ("Glossiness" == iter->first) || ("Reflection Glossiness Map" == iter->first))
+			else if (("Specular Level" == iter->first) || ("Specular Color" == iter->first))
 			{
 				specular_tl_ = tl;
+			}
+			else if (("Glossiness" == iter->first) || ("Reflection Glossiness Map" == iter->first))
+			{
+				shininess_tl_ = tl;
 			}
 			else if (("Bump" == iter->first) || ("Bump Map" == iter->first))
 			{
@@ -570,6 +574,10 @@ namespace KlayGE
 		if (specular_tl_ && !specular_tex_)
 		{
 			specular_tex_ = specular_tl_();
+		}
+		if (shininess_tl_ && !shininess_tex_)
+		{
+			shininess_tex_ = shininess_tl_();
 		}
 		if (normal_tl_ && !normal_tex_)
 		{
@@ -1063,36 +1071,39 @@ namespace KlayGE
 			RenderMaterialPtr mtl = MakeSharedPtr<RenderMaterial>();
 			mtls[mtl_index] = mtl;
 
-			decoded->read(&mtl->ambient.x(), sizeof(float));
-			decoded->read(&mtl->ambient.y(), sizeof(float));
-			decoded->read(&mtl->ambient.z(), sizeof(float));
-			decoded->read(&mtl->diffuse.x(), sizeof(float));
-			decoded->read(&mtl->diffuse.y(), sizeof(float));
-			decoded->read(&mtl->diffuse.z(), sizeof(float));
-			decoded->read(&mtl->specular.x(), sizeof(float));
-			decoded->read(&mtl->specular.y(), sizeof(float));
-			decoded->read(&mtl->specular.z(), sizeof(float));
-			decoded->read(&mtl->emit.x(), sizeof(float));
-			decoded->read(&mtl->emit.y(), sizeof(float));
-			decoded->read(&mtl->emit.z(), sizeof(float));
-			decoded->read(&mtl->opacity, sizeof(float));
-			decoded->read(&mtl->specular_level, sizeof(float));
-			decoded->read(&mtl->shininess, sizeof(float));
+			uint8_t rgb[3];
+			float specular_level;
+			decoded->read(&rgb[0], sizeof(uint8_t));
+			decoded->read(&rgb[1], sizeof(uint8_t));
+			decoded->read(&rgb[2], sizeof(uint8_t));
+			mtl->ambient.x() = rgb[0] / 255.0f;
+			mtl->ambient.y() = rgb[1] / 255.0f;
+			mtl->ambient.z() = rgb[2] / 255.0f;
+			decoded->read(&rgb[0], sizeof(uint8_t));
+			decoded->read(&rgb[1], sizeof(uint8_t));
+			decoded->read(&rgb[2], sizeof(uint8_t));
+			mtl->diffuse.x() = rgb[0] / 255.0f;
+			mtl->diffuse.y() = rgb[1] / 255.0f;
+			mtl->diffuse.z() = rgb[2] / 255.0f;
+			decoded->read(&rgb[0], sizeof(uint8_t));
+			decoded->read(&rgb[1], sizeof(uint8_t));
+			decoded->read(&rgb[2], sizeof(uint8_t));
+			decoded->read(&specular_level, sizeof(float));
+			LittleEndianToNative<sizeof(specular_level)>(&specular_level);
+			mtl->specular.x() = rgb[0] / 255.0f * specular_level;
+			mtl->specular.y() = rgb[1] / 255.0f * specular_level;
+			mtl->specular.z() = rgb[2] / 255.0f * specular_level;
+			decoded->read(&rgb[0], sizeof(uint8_t));
+			decoded->read(&rgb[1], sizeof(uint8_t));
+			decoded->read(&rgb[2], sizeof(uint8_t));
+			mtl->emit.x() = rgb[0] / 255.0f;
+			mtl->emit.y() = rgb[1] / 255.0f;
+			mtl->emit.z() = rgb[2] / 255.0f;
 
-			LittleEndianToNative<sizeof(mtl->ambient[0])>(&mtl->ambient[0]);
-			LittleEndianToNative<sizeof(mtl->ambient[1])>(&mtl->ambient[1]);
-			LittleEndianToNative<sizeof(mtl->ambient[2])>(&mtl->ambient[2]);
-			LittleEndianToNative<sizeof(mtl->diffuse[0])>(&mtl->diffuse[0]);
-			LittleEndianToNative<sizeof(mtl->diffuse[1])>(&mtl->diffuse[1]);
-			LittleEndianToNative<sizeof(mtl->diffuse[2])>(&mtl->diffuse[2]);
-			LittleEndianToNative<sizeof(mtl->specular[0])>(&mtl->specular[0]);
-			LittleEndianToNative<sizeof(mtl->specular[1])>(&mtl->specular[1]);
-			LittleEndianToNative<sizeof(mtl->specular[2])>(&mtl->specular[2]);
-			LittleEndianToNative<sizeof(mtl->emit[0])>(&mtl->emit[0]);
-			LittleEndianToNative<sizeof(mtl->emit[1])>(&mtl->emit[1]);
-			LittleEndianToNative<sizeof(mtl->emit[2])>(&mtl->emit[2]);
+			decoded->read(&mtl->opacity, sizeof(float));
 			LittleEndianToNative<sizeof(mtl->opacity)>(&mtl->opacity);
-			LittleEndianToNative<sizeof(mtl->specular_level)>(&mtl->specular_level);
+
+			decoded->read(&mtl->shininess, sizeof(float));
 			LittleEndianToNative<sizeof(mtl->shininess)>(&mtl->shininess);
 
 			if (Context::Instance().Config().graphics_cfg.gamma)
@@ -1457,7 +1468,7 @@ namespace KlayGE
 			}
 
 			obj.SetMaterial(mtl_id, ambient, diffuse, mtls[i]->specular, mtls[i]->emit,
-				mtls[i]->opacity, mtls[i]->specular_level, mtls[i]->shininess);
+				mtls[i]->opacity, mtls[i]->shininess);
 
 			for (size_t ts = 0; ts < mtls[i]->texture_slots.size(); ++ ts)
 			{

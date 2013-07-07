@@ -55,8 +55,8 @@ namespace KlayGE
 	{
 		bool same = (ambient == rhs.ambient) && (diffuse == rhs.diffuse)
 			&& (specular == rhs.specular) && (emit == rhs.emit)
-			&& (opacity == rhs.opacity) && (specular_level == rhs.specular_level)
-			&& (shininess == rhs.shininess) && (texture_slots.size() == rhs.texture_slots.size());
+			&& (opacity == rhs.opacity) && (shininess == rhs.shininess)
+			&& (texture_slots.size() == rhs.texture_slots.size());
 		if (same)
 		{
 			for (size_t i = 0; i < texture_slots.size(); ++ i)
@@ -156,7 +156,7 @@ namespace KlayGE
 	}
 
 	void MeshMLObj::SetMaterial(int mtl_id, float3 const & ambient, float3 const & diffuse,
-			float3 const & specular, float3 const & emit, float opacity, float specular_level, float shininess)
+			float3 const & specular, float3 const & emit, float opacity, float shininess)
 	{
 		BOOST_ASSERT(static_cast<int>(materials_.size()) > mtl_id);
 
@@ -166,7 +166,6 @@ namespace KlayGE
 		mtl.specular = specular;
 		mtl.emit = emit;
 		mtl.opacity = opacity;
-		mtl.specular_level = specular_level;
 		mtl.shininess = shininess;
 	}
 
@@ -518,7 +517,6 @@ namespace KlayGE
 				<< " " << mtl.emit[1]
 				<< " " << mtl.emit[2]
 				<< "\" opacity=\"" << mtl.opacity
-				<< "\" specular_level=\"" << mtl.specular_level
 				<< "\" shininess=\"" << mtl.shininess << "\"";
 
 			if (!mtl.texture_slots.empty())

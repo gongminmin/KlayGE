@@ -153,7 +153,7 @@ float4 OceanGBufferAlphaBlendRT0PS(float3 texcoord_depth : TEXCOORD0, float2 noi
 	
 	float3 normal = normalize(mul(float3(gradient.x, 1, gradient.y), (float3x3)model_view));
 
-	return StoreGBufferRT0(normal, shininess);
+	return StoreGBufferRT0(normal, shininess_clr.x);
 }
 
 float4 OceanGBufferAlphaBlendRT1PS(float3 texcoord_depth : TEXCOORD0, float2 noise_grad : TEXCOORD1,
@@ -204,7 +204,7 @@ void OceanGBufferAlphaBlendMRTPS(float3 texcoord_depth : TEXCOORD0, float2 noise
 	float3 diffuse = waterbody_color;
 	float specular = waterbody_specular_color.x;
 	
-	StoreGBufferMRT(normal, specular, shininess, diffuse,
+	StoreGBufferMRT(normal, specular, shininess_clr.x, diffuse,
 		mrt_0, mrt_1);
 }
 

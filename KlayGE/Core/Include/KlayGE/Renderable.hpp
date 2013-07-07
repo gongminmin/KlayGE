@@ -135,7 +135,6 @@ namespace KlayGE
 		float3 specular;
 		float3 emit;
 		float opacity;
-		float specular_level;
 		float shininess;
 
 		TextureSlotsType texture_slots;
@@ -289,8 +288,10 @@ namespace KlayGE
 		RenderEffectParameterPtr pos_extent_param_;
 		RenderEffectParameterPtr tc_center_param_;
 		RenderEffectParameterPtr tc_extent_param_;
-		RenderEffectParameterPtr shininess_param_;
+		RenderEffectParameterPtr shininess_tex_param_;
+		RenderEffectParameterPtr shininess_clr_param_;
 		RenderEffectParameterPtr specular_tex_param_;
+		RenderEffectParameterPtr specular_clr_param_;
 		RenderEffectParameterPtr normal_map_enabled_param_;
 		RenderEffectParameterPtr normal_tex_param_;
 		RenderEffectParameterPtr height_map_enabled_param_;
@@ -299,13 +300,13 @@ namespace KlayGE
 		RenderEffectParameterPtr diffuse_clr_param_;
 		RenderEffectParameterPtr emit_tex_param_;
 		RenderEffectParameterPtr emit_clr_param_;
-		RenderEffectParameterPtr specular_level_param_;
 		RenderEffectParameterPtr opacity_clr_param_;
 		RenderEffectParameterPtr opacity_map_enabled_param_;
 		RenderEffectParameterPtr opaque_depth_tex_param_;
 
 		TexturePtr diffuse_tex_;
 		TexturePtr specular_tex_;
+		TexturePtr shininess_tex_;
 		TexturePtr normal_tex_;
 		TexturePtr height_tex_;
 		TexturePtr emit_tex_;

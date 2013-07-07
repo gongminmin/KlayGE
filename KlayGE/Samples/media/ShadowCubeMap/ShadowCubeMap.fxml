@@ -492,13 +492,12 @@ void GenCubeOneInstanceGSShadowMapGS(triangle float4 in_pos[3] : POSITION, trian
 	<parameter type="float4" name="ambient_clr"/>
 	<parameter type="float4" name="diffuse_clr"/>
 	<parameter type="float4" name="specular_clr"/>
+	<parameter type="float2" name="shininess_clr"/>
 	<parameter type="float4" name="emit_clr"/>
-
-	<parameter type="float" name="specular_level"/>
-	<parameter type="float" name="shininess"/>
 
 	<parameter type="texture2D" name="diffuse_tex"/>
 	<parameter type="texture2D" name="specular_tex"/>
+	<parameter type="texture2D" name="shininess_tex"/>
 	<parameter type="texture2D" name="emit_tex"/>
 
 	<parameter type="textureCUBE" name="light_projective_tex"/>
@@ -550,6 +549,7 @@ float4 RenderScenePS(float2 Texcoord : TEXCOORD0, float3 LightWorldPos : TEXCOOR
 					float3 LightWorldNormal : TEXCOORD2, float3 LightViewPos : TEXCOORD3) : SV_Target 
 {
 	float3 c_diff, c_spec, emit;
+	float shininess;
 	float opacity;
 	if (diffuse_clr.a > 0.5f)
 	{
@@ -565,7 +565,15 @@ float4 RenderScenePS(float2 Texcoord : TEXCOORD0, float3 LightWorldPos : TEXCOOR
 	}
 	else
 	{
-		c_spec = specular_level;
+		c_spec = specular_clr.rgb;
+	}
+	if (shininess_clr.y > 0.5f)
+	{
+		shininess = shininess_tex.Sample(linear_wrap_sampler, Texcoord).r;
+	}
+	else
+	{
+		shininess = shininess_clr.r;
 	}
 	if (emit_clr.a > 0.5f)
 	{

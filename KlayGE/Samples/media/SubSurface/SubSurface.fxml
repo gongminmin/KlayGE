@@ -28,13 +28,12 @@
 	<parameter type="float4" name="ambient_clr"/>
 	<parameter type="float4" name="diffuse_clr"/>
 	<parameter type="float4" name="specular_clr"/>
-
-	<parameter type="float" name="specular_level"/>
-	<parameter type="float" name="shininess"/>
+	<parameter type="float2" name="shininess_clr"/>
 	
 	<parameter type="texture2D" name="diffuse_tex"/>
 	<parameter type="texture2D" name="bump_tex"/>
 	<parameter type="texture2D" name="specular_tex"/>
+	<parameter type="texture2D" name="shininess_tex"/>
 
 	<shader>
 		<![CDATA[
@@ -124,6 +123,7 @@ float4 SubSurfacePS(float2 uv : TEXCOORD0,
 	N = normalize(N + 0.11f * bump_tex.Sample(linear_sampler, uv).rgb);
 	
 	float3 diffuse, specular;
+	float shininess;
 	if (diffuse_clr.a > 0.5f)
 	{
 		diffuse = diffuse_tex.Sample(linear_sampler, uv).rgb;
@@ -138,7 +138,15 @@ float4 SubSurfacePS(float2 uv : TEXCOORD0,
 	}
 	else
 	{
-		specular = specular_level;
+		specular = specular_clr.rgb;
+	}	
+	if (shininess_clr.y > 0.5f)
+	{
+		shininess = shininess_tex.Sample(linear_sampler, uv).r;
+	}
+	else
+	{
+		shininess = shininess_clr.r;
 	}
 
 	float2 tex_coord = oPosSS.xy / oPosSS.w;

@@ -95,7 +95,7 @@ namespace KlayGE
 
 		int AllocMaterial();
 		void SetMaterial(int mtl_id, float3 const & ambient, float3 const & diffuse,
-			float3 const & specular, float3 const & emit, float opacity, float specular_level, float shininess);
+			float3 const & specular, float3 const & emit, float opacity, float shininess);
 		int AllocTextureSlot(int mtl_id);
 		void SetTextureSlot(int mtl_id, int slot_id, std::string const & type, std::string const & name);
 
@@ -140,7 +140,6 @@ namespace KlayGE
 			float3 specular;
 			float3 emit;
 			float opacity;
-			float specular_level;
 			float shininess;
 			std::vector<TextureSlot> texture_slots;
 

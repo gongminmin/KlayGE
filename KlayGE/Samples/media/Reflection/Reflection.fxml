@@ -100,14 +100,14 @@ float4 ReflectSpecialShadingPS(
 	float3 reflect_vec_front = reflect(pos_es_front, normal_es_front);
 	float3 reflect_vec_back = reflect(pos_es_back, normal_es_back);
 	
-	float specular;
-	if (specular_level.w > 0.5f)
+	float3 specular;
+	if (specular_clr.w > 0.5f)
 	{
-		specular = dot(specular_tex.Sample(aniso_sampler, texcoord).rgb, float3(0.2126f, 0.7152f, 0.0722f));
+		specular = specular_tex.Sample(aniso_sampler, texcoord).rgb;
 	}
 	else
 	{
-		specular = specular_level.x;
+		specular = specular_clr.rgb;
 	}
 
 	float3 reflect_vec_ws = mul(reflect_vec_front, (float3x3)inv_view);

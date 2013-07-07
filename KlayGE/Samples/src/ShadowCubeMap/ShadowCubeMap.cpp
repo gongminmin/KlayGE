@@ -281,15 +281,14 @@ namespace
 
 			*(effect_->ParameterByName("diffuse_tex")) = diffuse_tl_;
 			*(effect_->ParameterByName("specular_tex")) = specular_tl_;
+			*(effect_->ParameterByName("shininess_tex")) = shininess_tl_;
 			*(effect_->ParameterByName("emit_tex")) = emit_tl_;
 
 			*(effect_->ParameterByName("ambient_clr")) = float4(mtl_->ambient.x(), mtl_->ambient.y(), mtl_->ambient.z(), 1);
-			*(effect_->ParameterByName("diffuse_clr")) = float4(mtl_->diffuse.x(), mtl_->diffuse.y(), mtl_->diffuse.z(), bool(diffuse_tl_));
-			*(effect_->ParameterByName("specular_clr")) = float4(mtl_->specular.x(), mtl_->specular.y(), mtl_->specular.z(), bool(specular_tl_));
-			*(effect_->ParameterByName("emit_clr")) = float4(mtl_->emit.x(), mtl_->emit.y(), mtl_->emit.z(), bool(emit_tl_));
-
-			*(effect_->ParameterByName("specular_level")) = mtl_->specular_level;
-			*(effect_->ParameterByName("shininess")) = std::max(1e-6f, mtl_->shininess);
+			*(effect_->ParameterByName("diffuse_clr")) = float4(mtl_->diffuse.x(), mtl_->diffuse.y(), mtl_->diffuse.z(), !!diffuse_tl_);
+			*(effect_->ParameterByName("specular_clr")) = float4(mtl_->specular.x(), mtl_->specular.y(), mtl_->specular.z(), !!specular_tl_);
+			*(effect_->ParameterByName("shininess_clr")) = float2(MathLib::clamp(mtl_->shininess, 1e-6f, 0.999f), !!shininess_tl_);
+			*(effect_->ParameterByName("emit_clr")) = float4(mtl_->emit.x(), mtl_->emit.y(), mtl_->emit.z(), !!emit_tl_);
 
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 			RenderDeviceCaps const & caps = rf.RenderEngineInstance().DeviceCaps();
