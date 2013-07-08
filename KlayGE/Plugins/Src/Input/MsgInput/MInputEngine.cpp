@@ -133,21 +133,20 @@ namespace KlayGE
 					if (0 == ::GetRawInputDeviceInfo(raw_input_devices[i].hDevice, RIDI_DEVICEINFO, nullptr, &size))
 					{
 						std::vector<uint8_t> buf(size);
-						if (::GetRawInputDeviceInfo(raw_input_devices[i].hDevice, RIDI_DEVICEINFO, &buf[0], &size) >= 0)
+						::GetRawInputDeviceInfo(raw_input_devices[i].hDevice, RIDI_DEVICEINFO, &buf[0], &size);
+
+						RID_DEVICE_INFO* info = reinterpret_cast<RID_DEVICE_INFO*>(&buf[0]);
+						if ((HID_USAGE_PAGE_GENERIC == info->hid.usUsagePage)
+							&& ((HID_USAGE_GENERIC_GAMEPAD == info->hid.usUsage)
+								|| (HID_USAGE_GENERIC_JOYSTICK == info->hid.usUsage)))
 						{
-							RID_DEVICE_INFO* info = reinterpret_cast<RID_DEVICE_INFO*>(&buf[0]);
-							if ((HID_USAGE_PAGE_GENERIC == info->hid.usUsagePage)
-								&& ((HID_USAGE_GENERIC_GAMEPAD == info->hid.usUsage)
-									|| (HID_USAGE_GENERIC_JOYSTICK == info->hid.usUsage)))
-							{
-								device = MakeSharedPtr<MsgInputJoystick>(raw_input_devices[i].hDevice);
-								rid.usUsage = HID_USAGE_GENERIC_GAMEPAD;
-								rid.dwFlags = RIDEV_INPUTSINK;
-								rids.push_back(rid);
-								rid.usUsage = HID_USAGE_GENERIC_JOYSTICK;
-								rid.dwFlags = RIDEV_INPUTSINK;
-								rids.push_back(rid);
-							}
+							device = MakeSharedPtr<MsgInputJoystick>(raw_input_devices[i].hDevice);
+							rid.usUsage = HID_USAGE_GENERIC_GAMEPAD;
+							rid.dwFlags = RIDEV_INPUTSINK;
+							rids.push_back(rid);
+							rid.usUsage = HID_USAGE_GENERIC_JOYSTICK;
+							rid.dwFlags = RIDEV_INPUTSINK;
+							rids.push_back(rid);
 						}
 					}
 				}
@@ -209,39 +208,38 @@ namespace KlayGE
 		if (0 == ::GetRawInputData(ri, RID_INPUT, nullptr, &size, sizeof(RAWINPUTHEADER)))
 		{
 			std::vector<uint8_t> data(size);
-			if (::GetRawInputData(ri, RID_INPUT, &data[0], &size, sizeof(RAWINPUTHEADER)) >= 0)
+			::GetRawInputData(ri, RID_INPUT, &data[0], &size, sizeof(RAWINPUTHEADER));
+
+			RAWINPUT* raw = reinterpret_cast<RAWINPUT*>(&data[0]);
+
+			typedef KLAYGE_DECLTYPE(devices_) DevicesType;
+			KLAYGE_FOREACH(DevicesType::reference device, devices_)
 			{
-				RAWINPUT* raw = reinterpret_cast<RAWINPUT*>(&data[0]);
-
-				typedef KLAYGE_DECLTYPE(devices_) DevicesType;
-				KLAYGE_FOREACH(DevicesType::reference device, devices_)
+				switch (raw->header.dwType)
 				{
-					switch (raw->header.dwType)
+				case RIM_TYPEKEYBOARD:
+					if (IDT_Keyboard == device->Type())
 					{
-					case RIM_TYPEKEYBOARD:
-						if (IDT_Keyboard == device->Type())
-						{
-							checked_pointer_cast<MsgInputKeyboard>(device)->OnRawInput(*raw);
-						}
-						break;
-
-					case RIM_TYPEMOUSE:
-						if (IDT_Mouse == device->Type())
-						{
-							checked_pointer_cast<MsgInputMouse>(device)->OnRawInput(*raw);
-						}
-						break;
-
-					case RIM_TYPEHID:
-						if (IDT_Joystick == device->Type())
-						{
-							checked_pointer_cast<MsgInputJoystick>(device)->OnRawInput(*raw);
-						}
-						break;
-
-					default:
-						break;
+						checked_pointer_cast<MsgInputKeyboard>(device)->OnRawInput(*raw);
 					}
+					break;
+
+				case RIM_TYPEMOUSE:
+					if (IDT_Mouse == device->Type())
+					{
+						checked_pointer_cast<MsgInputMouse>(device)->OnRawInput(*raw);
+					}
+					break;
+
+				case RIM_TYPEHID:
+					if (IDT_Joystick == device->Type())
+					{
+						checked_pointer_cast<MsgInputJoystick>(device)->OnRawInput(*raw);
+					}
+					break;
+
+				default:
+					break;
 				}
 			}
 		}

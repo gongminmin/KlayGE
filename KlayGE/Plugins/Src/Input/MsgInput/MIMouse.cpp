@@ -48,12 +48,11 @@ namespace KlayGE
 		if (0 == ::GetRawInputDeviceInfo(device, RIDI_DEVICEINFO, nullptr, &size))
 		{
 			std::vector<uint8_t> buf(size);
-			if (::GetRawInputDeviceInfo(device, RIDI_DEVICEINFO, &buf[0], &size) >= 0)
-			{
-				RID_DEVICE_INFO* info = reinterpret_cast<RID_DEVICE_INFO*>(&buf[0]);
-				num_buttons_ = std::min(static_cast<uint32_t>(buttons_[0].size()),
-					static_cast<uint32_t>(info->mouse.dwNumberOfButtons));
-			}
+			::GetRawInputDeviceInfo(device, RIDI_DEVICEINFO, &buf[0], &size);
+
+			RID_DEVICE_INFO* info = reinterpret_cast<RID_DEVICE_INFO*>(&buf[0]);
+			num_buttons_ = std::min(static_cast<uint32_t>(buttons_[0].size()),
+				static_cast<uint32_t>(info->mouse.dwNumberOfButtons));
 		}
 	}
 

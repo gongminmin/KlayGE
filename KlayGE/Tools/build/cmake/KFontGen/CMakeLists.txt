@@ -7,34 +7,24 @@ SET(EXTRA_INCLUDE_DIRS
 	${KLAYGE_PROJECT_DIR}/../kfont/include
 )
 
-IF(MSVC)
-	SET(EXTRA_LINKED_DIRS
-		${KLAYGE_PROJECT_DIR}/../External/freetype/objs/${KLAYGE_PLATFORM_NAME}
-		${KLAYGE_PROJECT_DIR}/../kfont/lib/${KLAYGE_PLATFORM_NAME}
-	)
+SET(EXTRA_LINKED_DIRS
+	${KLAYGE_PROJECT_DIR}/../External/freetype/objs/${KLAYGE_PLATFORM_NAME}
+	${KLAYGE_PROJECT_DIR}/../kfont/lib/${KLAYGE_PLATFORM_NAME}
+)
 
+IF(MSVC)
 	SET(EXTRA_LINKED_LIBRARIES
 		debug freetype2411_D optimized freetype2411
 		debug kfont_${KLAYGE_COMPILER_NAME}_${KLAYGE_ARCH_NAME}${CMAKE_DEBUG_POSTFIX} optimized kfont_${KLAYGE_COMPILER_NAME}_${KLAYGE_ARCH_NAME}
 	)
 ELSEIF(MINGW)
-	SET(EXTRA_LINKED_DIRS
-		${KLAYGE_PROJECT_DIR}/../External/freetype/objs
-		${KLAYGE_PROJECT_DIR}/../kfont/lib/${KLAYGE_PLATFORM_NAME}
-	)
-
 	SET(EXTRA_LINKED_LIBRARIES ${EXTRA_LINKED_LIBRARIES}
-		freetype
+		freetype2411
 		debug kfont_${KLAYGE_COMPILER_NAME}_${KLAYGE_ARCH_NAME}${CMAKE_DEBUG_POSTFIX} optimized kfont_${KLAYGE_COMPILER_NAME}_${KLAYGE_ARCH_NAME}
 		debug boost_program_options-mgw47-mt-d-1_53 optimized boost_program_options-mgw47-mt-1_53)
 ELSE()
-	SET(EXTRA_LINKED_DIRS
-		${KLAYGE_PROJECT_DIR}/../External/freetype/objs
-		${KLAYGE_PROJECT_DIR}/../kfont/lib/${KLAYGE_PLATFORM_NAME}
-	)
-
 	SET(EXTRA_LINKED_LIBRARIES ${EXTRA_LINKED_LIBRARIES}
-		freetype
+		freetype2411
 		debug kfont_${KLAYGE_COMPILER_NAME}_${KLAYGE_ARCH_NAME}${CMAKE_DEBUG_POSTFIX} optimized kfont_${KLAYGE_COMPILER_NAME}_${KLAYGE_ARCH_NAME}
 		boost_program_options)
 ENDIF()

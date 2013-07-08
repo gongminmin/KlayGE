@@ -126,9 +126,7 @@ External/freetype/objs/*.a
 External/freetype/objs/*.def
 External/freetype/objs/*.h
 External/libogg/lib/*/*.lib
-External/libogg/lib/*.a
-External/libogg/win32/*/Win32
-External/libogg/win32/*/x64
+External/libogg/lib/*/*.a
 External/libogg/*/.deps/
 External/libogg/config.h
 External/libogg/config.log
@@ -144,9 +142,7 @@ External/libogg/conftest.make
 External/libogg/confdefs.h
 External/libvorbis/libs/*/*.lib
 External/libvorbis/libs/*/*.pdb
-External/libvorbis/libs/*.a
-External/libvorbis/win32/*/*/Win32
-External/libvorbis/win32/*/*/x64
+External/libvorbis/libs/*/*.a
 External/libvorbis/*/.deps/
 External/libvorbis/config.h
 External/libvorbis/config.log

@@ -49,21 +49,20 @@ namespace KlayGE
 		if (0 == ::GetRawInputDeviceInfo(device, RIDI_PREPARSEDDATA, nullptr, &size))
 		{
 			std::vector<uint8_t> buf(size);
-			if (::GetRawInputDeviceInfo(device, RIDI_PREPARSEDDATA, &buf[0], &size) >= 0)
+			::GetRawInputDeviceInfo(device, RIDI_PREPARSEDDATA, &buf[0], &size);
+
+			PHIDP_PREPARSED_DATA preparsed_data = reinterpret_cast<PHIDP_PREPARSED_DATA>(&buf[0]);
+
+			HIDP_CAPS caps;
+			if (HIDP_STATUS_SUCCESS == mie.HidP_GetCaps(preparsed_data, &caps))
 			{
-				PHIDP_PREPARSED_DATA preparsed_data = reinterpret_cast<PHIDP_PREPARSED_DATA>(&buf[0]);
+				std::vector<HIDP_BUTTON_CAPS> button_caps(caps.NumberInputButtonCaps);
 
-				HIDP_CAPS caps;
-				if (HIDP_STATUS_SUCCESS == mie.HidP_GetCaps(preparsed_data, &caps))
+				uint16_t caps_length = caps.NumberInputButtonCaps;
+				if (HIDP_STATUS_SUCCESS == mie.HidP_GetButtonCaps(HidP_Input, &button_caps[0], &caps_length, preparsed_data))
 				{
-					std::vector<HIDP_BUTTON_CAPS> button_caps(caps.NumberInputButtonCaps);
-
-					uint16_t caps_length = caps.NumberInputButtonCaps;
-					if (HIDP_STATUS_SUCCESS == mie.HidP_GetButtonCaps(HidP_Input, &button_caps[0], &caps_length, preparsed_data))
-					{
-						num_buttons_ = std::min<uint32_t>(static_cast<uint32_t>(buttons_[0].size()),
-							button_caps[0].Range.UsageMax - button_caps[0].Range.UsageMin + 1);
-					}
+					num_buttons_ = std::min<uint32_t>(static_cast<uint32_t>(buttons_[0].size()),
+						button_caps[0].Range.UsageMax - button_caps[0].Range.UsageMin + 1);
 				}
 			}
 		}
@@ -85,98 +84,97 @@ namespace KlayGE
 			if (0 == ::GetRawInputDeviceInfo(ri.header.hDevice, RIDI_PREPARSEDDATA, nullptr, &size))
 			{
 				std::vector<uint8_t> buf(size);
-				if (::GetRawInputDeviceInfo(ri.header.hDevice, RIDI_PREPARSEDDATA, &buf[0], &size) >= 0)
+				::GetRawInputDeviceInfo(ri.header.hDevice, RIDI_PREPARSEDDATA, &buf[0], &size);
+
+				PHIDP_PREPARSED_DATA preparsed_data = reinterpret_cast<PHIDP_PREPARSED_DATA>(&buf[0]);
+
+				HIDP_CAPS caps;
+				if (HIDP_STATUS_SUCCESS == mie.HidP_GetCaps(preparsed_data, &caps))
 				{
-					PHIDP_PREPARSED_DATA preparsed_data = reinterpret_cast<PHIDP_PREPARSED_DATA>(&buf[0]);
+					std::vector<HIDP_BUTTON_CAPS> button_caps(caps.NumberInputButtonCaps);
 
-					HIDP_CAPS caps;
-					if (HIDP_STATUS_SUCCESS == mie.HidP_GetCaps(preparsed_data, &caps))
+					uint16_t caps_length = caps.NumberInputButtonCaps;
+					if (HIDP_STATUS_SUCCESS == mie.HidP_GetButtonCaps(HidP_Input, &button_caps[0], &caps_length, preparsed_data))
 					{
-						std::vector<HIDP_BUTTON_CAPS> button_caps(caps.NumberInputButtonCaps);
-
-						uint16_t caps_length = caps.NumberInputButtonCaps;
-						if (HIDP_STATUS_SUCCESS == mie.HidP_GetButtonCaps(HidP_Input, &button_caps[0], &caps_length, preparsed_data))
+						std::vector<HIDP_VALUE_CAPS> value_caps(caps.NumberInputValueCaps);
+						caps_length = caps.NumberInputValueCaps;
+						if (HIDP_STATUS_SUCCESS == mie.HidP_GetValueCaps(HidP_Input, &value_caps[0], &caps_length, preparsed_data))
 						{
-							std::vector<HIDP_VALUE_CAPS> value_caps(caps.NumberInputValueCaps);
-							caps_length = caps.NumberInputValueCaps;
-							if (HIDP_STATUS_SUCCESS == mie.HidP_GetValueCaps(HidP_Input, &value_caps[0], &caps_length, preparsed_data))
+							USAGE usage[32];
+							ULONG usage_length = num_buttons_;
+							if (HIDP_STATUS_SUCCESS == mie.HidP_GetUsages(HidP_Input, button_caps[0].UsagePage,
+								0, usage, &usage_length, preparsed_data,
+								reinterpret_cast<CHAR*>(const_cast<BYTE*>(ri.data.hid.bRawData)), ri.data.hid.dwSizeHid))
 							{
-								USAGE usage[32];
-								ULONG usage_length = num_buttons_;
-								if (HIDP_STATUS_SUCCESS == mie.HidP_GetUsages(HidP_Input, button_caps[0].UsagePage,
-									0, usage, &usage_length, preparsed_data,
-									reinterpret_cast<CHAR*>(const_cast<BYTE*>(ri.data.hid.bRawData)), ri.data.hid.dwSizeHid))
+								buttons_state_.fill(false);
+								for (uint32_t i = 0; i < usage_length; ++ i)
 								{
-									buttons_state_.fill(false);
-									for (uint32_t i = 0; i < usage_length; ++ i)
+									buttons_state_[usage[i] - button_caps[0].Range.UsageMin] = true;
+								}
+
+								for (uint32_t i = 0; i < caps.NumberInputValueCaps; ++ i)
+								{
+									long center;
+									long shift;
+									switch (value_caps[i].BitField)
 									{
-										buttons_state_[usage[i] - button_caps[0].Range.UsageMin] = true;
+									case 1:
+										center = 0x80;
+										shift = 0;
+										break;
+
+									case 2:
+										center = 0x8000;
+										shift = 8;
+										break;
+
+									default:
+										center = 0;
+										shift = 0;
+										break;
 									}
 
-									for (uint32_t i = 0; i < caps.NumberInputValueCaps; ++ i)
+									ULONG value;
+									if (HIDP_STATUS_SUCCESS == mie.HidP_GetUsageValue(HidP_Input, value_caps[i].UsagePage,
+										0, value_caps[i].Range.UsageMin, &value, preparsed_data,
+										reinterpret_cast<CHAR*>(const_cast<BYTE*>(ri.data.hid.bRawData)), ri.data.hid.dwSizeHid))
 									{
-										long center;
-										long shift;
-										switch (value_caps[i].BitField)
+										switch (value_caps[i].Range.UsageMin)
 										{
-										case 1:
-											center = 0x80;
-											shift = 0;
+										case HID_USAGE_GENERIC_X:
+											pos_state_.x() = (static_cast<long>(value) - center) >> shift;
 											break;
 
-										case 2:
-											center = 0x8000;
-											shift = 8;
+										case HID_USAGE_GENERIC_Y:
+											pos_state_.y() = (static_cast<long>(value) - center) >> shift;
+											break;
+
+										case HID_USAGE_GENERIC_Z:
+											pos_state_.z() = (static_cast<long>(value) - center) >> shift;
+											break;
+
+										case HID_USAGE_GENERIC_RX:
+											rot_state_.x() = (static_cast<long>(value) - center) >> shift;
+											break;
+
+										case HID_USAGE_GENERIC_RY:
+											rot_state_.y() = (static_cast<long>(value) - center) >> shift;
+											break;
+
+										case HID_USAGE_GENERIC_RZ:
+											rot_state_.z() = (static_cast<long>(value) - center) >> shift;
+											break;
+
+										case HID_USAGE_GENERIC_SLIDER:
+											slider_state_.x() = (static_cast<long>(value) - center) >> shift;
+											break;
+
+										case HID_USAGE_GENERIC_DIAL:
+											slider_state_.y() = (static_cast<long>(value) - center) >> shift;
 											break;
 
 										default:
-											center = 0;
-											shift = 0;
 											break;
-										}
-
-										ULONG value;
-										if (HIDP_STATUS_SUCCESS == mie.HidP_GetUsageValue(HidP_Input, value_caps[i].UsagePage,
-											0, value_caps[i].Range.UsageMin, &value, preparsed_data,
-											reinterpret_cast<CHAR*>(const_cast<BYTE*>(ri.data.hid.bRawData)), ri.data.hid.dwSizeHid))
-										{
-											switch (value_caps[i].Range.UsageMin)
-											{
-											case HID_USAGE_GENERIC_X:
-												pos_state_.x() = (static_cast<long>(value) - center) >> shift;
-												break;
-
-											case HID_USAGE_GENERIC_Y:
-												pos_state_.y() = (static_cast<long>(value) - center) >> shift;
-												break;
-
-											case HID_USAGE_GENERIC_Z:
-												pos_state_.z() = (static_cast<long>(value) - center) >> shift;
-												break;
-
-											case HID_USAGE_GENERIC_RX:
-												rot_state_.x() = (static_cast<long>(value) - center) >> shift;
-												break;
-
-											case HID_USAGE_GENERIC_RY:
-												rot_state_.y() = (static_cast<long>(value) - center) >> shift;
-												break;
-
-											case HID_USAGE_GENERIC_RZ:
-												rot_state_.z() = (static_cast<long>(value) - center) >> shift;
-												break;
-
-											case HID_USAGE_GENERIC_SLIDER:
-												slider_state_.x() = (static_cast<long>(value) - center) >> shift;
-												break;
-
-											case HID_USAGE_GENERIC_DIAL:
-												slider_state_.y() = (static_cast<long>(value) - center) >> shift;
-												break;
-
-											default:
-												break;
-											}
 										}
 									}
 								}

@@ -1715,7 +1715,7 @@ namespace KlayGE
 			rendertarget_format_.insert(EF_D24S8);
 		}
 		rendertarget_format_.insert(EF_D32F);
-		if (glloader_GL_VERSION_3_0() || glloader_GL_ARB_framebuffer_sRGB() && glloader_GL_EXT_framebuffer_sRGB())
+		if (glloader_GL_VERSION_3_0() || glloader_GL_ARB_framebuffer_sRGB() || glloader_GL_EXT_framebuffer_sRGB())
 		{
 			rendertarget_format_.insert(EF_ARGB8_SRGB);
 			rendertarget_format_.insert(EF_ABGR8_SRGB);
