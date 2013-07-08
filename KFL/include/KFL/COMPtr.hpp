@@ -33,15 +33,6 @@
 
 #pragma once
 
-#ifdef KLAYGE_PLATFORM_WIN32
-	#ifndef KLAYGE_CPU_ARM
-		#ifndef BOOST_MEM_FN_ENABLE_STDCALL
-			#define BOOST_MEM_FN_ENABLE_STDCALL
-		#endif
-	#endif
-#endif
-#include <boost/mem_fn.hpp>
-
 namespace KlayGE
 {
 	// 得到COM对象的智能指针
@@ -49,7 +40,7 @@ namespace KlayGE
 	inline shared_ptr<T>
 	MakeCOMPtr(T* p)
 	{
-		return p ? shared_ptr<T>(p, boost::mem_fn(&T::Release)) : shared_ptr<T>();
+		return p ? shared_ptr<T>(p, mem_fn(&T::Release)) : shared_ptr<T>();
 	}
 }
 

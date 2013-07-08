@@ -63,32 +63,32 @@ namespace
 
 	function<void(ID3D11DeviceContext*, UINT, UINT, ID3D11ShaderResourceView * const *)> ShaderSetShaderResources[ShaderObject::ST_NumShaderTypes] =
 	{
-		boost::mem_fn(&ID3D11DeviceContext::VSSetShaderResources),
-		boost::mem_fn(&ID3D11DeviceContext::PSSetShaderResources),
-		boost::mem_fn(&ID3D11DeviceContext::GSSetShaderResources),
-		boost::mem_fn(&ID3D11DeviceContext::CSSetShaderResources),
-		boost::mem_fn(&ID3D11DeviceContext::HSSetShaderResources),
-		boost::mem_fn(&ID3D11DeviceContext::DSSetShaderResources)
+		mem_fn(&ID3D11DeviceContext::VSSetShaderResources),
+		mem_fn(&ID3D11DeviceContext::PSSetShaderResources),
+		mem_fn(&ID3D11DeviceContext::GSSetShaderResources),
+		mem_fn(&ID3D11DeviceContext::CSSetShaderResources),
+		mem_fn(&ID3D11DeviceContext::HSSetShaderResources),
+		mem_fn(&ID3D11DeviceContext::DSSetShaderResources)
 	};
 	
 	function<void(ID3D11DeviceContext*, UINT, UINT, ID3D11SamplerState * const *)> ShaderSetSamplers[ShaderObject::ST_NumShaderTypes] =
 	{
-		boost::mem_fn(&ID3D11DeviceContext::VSSetSamplers),
-		boost::mem_fn(&ID3D11DeviceContext::PSSetSamplers),
-		boost::mem_fn(&ID3D11DeviceContext::GSSetSamplers),
-		boost::mem_fn(&ID3D11DeviceContext::CSSetSamplers),
-		boost::mem_fn(&ID3D11DeviceContext::HSSetSamplers),
-		boost::mem_fn(&ID3D11DeviceContext::DSSetSamplers)
+		mem_fn(&ID3D11DeviceContext::VSSetSamplers),
+		mem_fn(&ID3D11DeviceContext::PSSetSamplers),
+		mem_fn(&ID3D11DeviceContext::GSSetSamplers),
+		mem_fn(&ID3D11DeviceContext::CSSetSamplers),
+		mem_fn(&ID3D11DeviceContext::HSSetSamplers),
+		mem_fn(&ID3D11DeviceContext::DSSetSamplers)
 	};
 
 	function<void(ID3D11DeviceContext*, UINT, UINT, ID3D11Buffer * const *)> ShaderSetConstantBuffers[ShaderObject::ST_NumShaderTypes] =
 	{
-		boost::mem_fn(&ID3D11DeviceContext::VSSetConstantBuffers),
-		boost::mem_fn(&ID3D11DeviceContext::PSSetConstantBuffers),
-		boost::mem_fn(&ID3D11DeviceContext::GSSetConstantBuffers),
-		boost::mem_fn(&ID3D11DeviceContext::CSSetConstantBuffers),
-		boost::mem_fn(&ID3D11DeviceContext::HSSetConstantBuffers),
-		boost::mem_fn(&ID3D11DeviceContext::DSSetConstantBuffers)
+		mem_fn(&ID3D11DeviceContext::VSSetConstantBuffers),
+		mem_fn(&ID3D11DeviceContext::PSSetConstantBuffers),
+		mem_fn(&ID3D11DeviceContext::GSSetConstantBuffers),
+		mem_fn(&ID3D11DeviceContext::CSSetConstantBuffers),
+		mem_fn(&ID3D11DeviceContext::HSSetConstantBuffers),
+		mem_fn(&ID3D11DeviceContext::DSSetConstantBuffers)
 	};
 }
 

@@ -127,7 +127,7 @@ private:
 	}
 #endif
 
-#ifdef KLAYGE_CXX11_LIBRARY_ALGORITHM
+#ifdef KLAYGE_CXX11_LIBRARY_ALGORITHM_SUPPORT
 	#include <algorithm>
 	namespace KlayGE
 	{
@@ -274,7 +274,6 @@ private:
 	namespace KlayGE
 	{
 		using std::bind;
-		using std::mem_fn;
 		using std::function;
 		namespace placeholders
 		{
@@ -297,12 +296,29 @@ private:
 		using std::ref;
 		using std::cref;
 	}
+
+#ifdef KLAYGE_CXX11_LIBRARY_MEM_FN_SUPPORT
+	namespace KlayGE
+	{
+		using std::mem_fn;
+	}
 #else
-	#ifdef KLAYGE_PLATFORM_WIN32
-		#ifndef KLAYGE_CPU_ARM
-			#ifndef BOOST_MEM_FN_ENABLE_STDCALL
-				#define BOOST_MEM_FN_ENABLE_STDCALL
-			#endif
+	#if defined(KLAYGE_PLATFORM_WIN32) && defined(KLAYGE_CPU_X86)
+		#ifndef BOOST_MEM_FN_ENABLE_STDCALL
+			#define BOOST_MEM_FN_ENABLE_STDCALL
+		#endif
+	#endif
+	
+	#include <boost/mem_fn.hpp>
+	namespace KlayGE
+	{
+		using boost::mem_fn;
+	}
+#endif
+#else
+	#if defined(KLAYGE_PLATFORM_WIN32) && defined(KLAYGE_CPU_X86)
+		#ifndef BOOST_MEM_FN_ENABLE_STDCALL
+			#define BOOST_MEM_FN_ENABLE_STDCALL
 		#endif
 	#endif
 	#include <boost/mem_fn.hpp>
