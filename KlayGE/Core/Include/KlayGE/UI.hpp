@@ -593,6 +593,14 @@ namespace KlayGE
 		{
 			return bounding_box_.Height();
 		}
+		void AlwaysInOpacity(bool opacity)
+		{
+			always_in_opacity_ = opacity;
+		}
+		bool AlwaysInOpacity() const
+		{
+			return always_in_opacity_;
+		}
 
 		UIControlPtr const & GetNextControl(UIControlPtr const & control) const;
 		UIControlPtr const & GetPrevControl(UIControlPtr const & control) const;
@@ -658,6 +666,7 @@ namespace KlayGE
 
 		bool visible_;
 		bool show_caption_;
+		bool always_in_opacity_;
 		bool minimized_;
 		bool drag_;
 		std::string id_;

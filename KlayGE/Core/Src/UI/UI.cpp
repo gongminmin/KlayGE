@@ -479,6 +479,7 @@ namespace KlayGE
 					dlg->SetCaptionText(wcaption);
 
 					dlg->EnableCaption(ReadBool(node, "show_caption", true));
+					dlg->AlwaysInOpacity(ReadBool(node, "opacity", false));
 
 					Color bg_clr(0.4f, 0.6f, 0.8f, 1);
 					attr = node->Attrib("bg_color_r");
@@ -1364,10 +1365,13 @@ namespace KlayGE
 			clrs[1] = top_right_clr_;
 			clrs[2] = bottom_right_clr_;
 			clrs[3] = bottom_left_clr_;
-			clrs[0].a() *= opacity_;
-			clrs[1].a() *= opacity_;
-			clrs[2].a() *= opacity_;
-			clrs[3].a() *= opacity_;
+			if (!always_in_opacity_)
+			{
+				clrs[0].a() *= opacity_;
+				clrs[1].a() *= opacity_;
+				clrs[2].a() *= opacity_;
+				clrs[3].a() *= opacity_;
+			}
 
 			Rect_T<int32_t> rc(0, 0, this->GetWidth(), this->GetHeight());
 			Rect_T<int32_t> rcScreen = rc + this->GetLocation();
@@ -1402,7 +1406,10 @@ namespace KlayGE
 			rc.right() = w;
 
 			Color clr = cap_element_.TextureColor().Current;
-			clr.a() *= opacity_;
+			if (!always_in_opacity_)
+			{
+				clr.a() *= opacity_;
+			}
 			UIManager::VertexFormat vertices[] =
 			{
 				UIManager::VertexFormat(float3(0, static_cast<float>(-caption_height_), 0), clr, float2(0, 0)),
@@ -1722,9 +1729,12 @@ namespace KlayGE
 		float3 pos(static_cast<float>(rcScreen.left()), static_cast<float>(rcScreen.top()), depth_base_ + depth);
 		array<Color, 4> clrs;
 		clrs.fill(clr);
-		for (size_t i = 0; i < clrs.size(); ++ i)
+		if (!always_in_opacity_)
 		{
-			clrs[i].a() *= opacity_;
+			for (size_t i = 0; i < clrs.size(); ++ i)
+			{
+				clrs[i].a() *= opacity_;
+			}
 		}
 		UIManager::Instance().DrawRect(pos, static_cast<float>(rcScreen.Width()), static_cast<float>(rc.Height()),
 			&clrs[0], Rect_T<int32_t>(0, 0, 0, 0), TexturePtr());
@@ -1762,9 +1772,12 @@ namespace KlayGE
 		float3 pos(static_cast<float>(rcScreen.left()), static_cast<float>(rcScreen.top()), depth_base_ + depth_bias);
 		array<Color, 4> clrs;
 		clrs.fill(element.TextureColor().Current);
-		for (size_t i = 0; i < clrs.size(); ++ i)
+		if (!always_in_opacity_)
 		{
-			clrs[i].a() *= opacity_;
+			for (size_t i = 0; i < clrs.size(); ++ i)
+			{
+				clrs[i].a() *= opacity_;
+			}
 		}
 		UIManager::Instance().DrawRect(pos, static_cast<float>(rcScreen.Width()),
 			static_cast<float>(rcScreen.Height()), &clrs[0], rcTexture, tex);
@@ -1784,8 +1797,13 @@ namespace KlayGE
 				r += int2(0, this->GetCaptionHeight());
 			}
 
+			float alpha = uie.FontColor().Current.a();
+			if (!always_in_opacity_)
+			{
+				alpha *= opacity_;
+			}
 			UIManager::Instance().DrawString(strText, uie.FontIndex(), r, depth_base_ + depth_bias - 0.01f,
-				Color(0, 0, 0, uie.FontColor().Current.a() * opacity_), uie.TextAlign());
+				Color(0, 0, 0, alpha), uie.TextAlign());
 		}
 
 		Rect_T<int32_t> r = rc;
@@ -1796,7 +1814,10 @@ namespace KlayGE
 		}
 
 		Color clr = uie.FontColor().Current;
-		clr.a() *= opacity_;
+		if (!always_in_opacity_)
+		{
+			clr.a() *= opacity_;
+		}
 		UIManager::Instance().DrawString(strText, uie.FontIndex(), r, depth_base_ + depth_bias - 0.01f,
 			clr, uie.TextAlign());
 	}

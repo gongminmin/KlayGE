@@ -11,7 +11,7 @@
 		<control type="check_box" id="enable_reflection" caption="Enable Reflection" x="20" y="140" width="170" height="24" checked="1" is_default="0" />
 	</dialog>
 
-	<dialog id="Logo" caption="Logo" x="-128" y="-128" align_x="right" align_y="bottom" width="128" height="128" show_caption="false" bg_color_a="0">
+	<dialog id="Logo" caption="Logo" x="-128" y="-128" align_x="right" align_y="bottom" width="128" height="128" show_caption="false" opacity="true" bg_color_a="0">
 		<control type="tex_button" id="LogoButton" texture="powered_by_klayge.dds" x="0" y="0" width="128" height="128" is_default="0"/>
 	</dialog>
 </ui>
