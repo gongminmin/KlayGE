@@ -52,6 +52,8 @@
 #include <KlayGE/HDRPostProcess.hpp>
 #include <KlayGE/SceneManager.hpp>
 
+#include <sstream>
+
 #include <KlayGE/RenderEngine.hpp>
 
 namespace KlayGE
