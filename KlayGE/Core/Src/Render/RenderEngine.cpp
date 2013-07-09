@@ -184,9 +184,14 @@ namespace KlayGE
 		color_grading_enabled_ = settings.color_grading;
 		if (settings.ppaa || settings.color_grading || settings.gamma)
 		{
-			ldr_pp_ = SyncLoadPostProcess("PostToneMapping.ppml", "PostToneMapping");
-			ldr_pp_->SetParam(0, int3(ppaa_enabled_, gamma_enabled_, color_grading_enabled_));
-			skip_ldr_pp_ = SyncLoadPostProcess("Copy.ppml", "copy");
+			for (size_t i = 0; i < 12; ++ i)
+			{
+				std::ostringstream iss;
+				iss << "PostToneMapping" << i;
+				ldr_pps_[i] = SyncLoadPostProcess("PostToneMapping.ppml", iss.str());
+			}
+
+			ldr_pp_ = ldr_pps_[ppaa_enabled_ * 4 + gamma_enabled_ * 2 + color_grading_enabled_];
 		}
 
 		for (int i = 0; i < 4; ++ i)
@@ -547,7 +552,7 @@ namespace KlayGE
 		{
 			if (skip)
 			{
-				skip_ldr_pp_->Apply();
+				ldr_pps_[0]->Apply();
 			}
 			else
 			{
@@ -556,9 +561,9 @@ namespace KlayGE
 		}
 		else
 		{
-			if (skip_ldr_pp_)
+			if (ldr_pps_[0])
 			{
-				skip_ldr_pp_->Apply();
+				ldr_pps_[0]->Apply();
 			}
 		}
 
@@ -587,7 +592,7 @@ namespace KlayGE
 		if (ldr_pp_)
 		{
 			ppaa_enabled_ = aa;
-			ldr_pp_->SetParam(0, int3(ppaa_enabled_, gamma_enabled_, color_grading_enabled_));
+			ldr_pp_ = ldr_pps_[ppaa_enabled_ * 4 + gamma_enabled_ * 2 + color_grading_enabled_];
 		}
 	}
 
@@ -596,7 +601,7 @@ namespace KlayGE
 		if (ldr_pp_)
 		{
 			gamma_enabled_ = gamma;
-			ldr_pp_->SetParam(0, int3(ppaa_enabled_, gamma_enabled_, color_grading_enabled_));
+			ldr_pp_ = ldr_pps_[ppaa_enabled_ * 4 + gamma_enabled_ * 2 + color_grading_enabled_];
 		}
 	}
 
@@ -605,7 +610,7 @@ namespace KlayGE
 		if (ldr_pp_)
 		{
 			color_grading_enabled_ = cg;
-			ldr_pp_->SetParam(0, int3(ppaa_enabled_, gamma_enabled_, color_grading_enabled_));
+			ldr_pp_ = ldr_pps_[ppaa_enabled_ * 4 + gamma_enabled_ * 2 + color_grading_enabled_];
 		}
 	}
 
@@ -705,8 +710,10 @@ namespace KlayGE
 			{
 				if (ldr_pp_)
 				{
-					ldr_pp_->OutputPin(0, mono_tex_);
-					skip_ldr_pp_->OutputPin(0, mono_tex_);
+					for (size_t i = 0; i < 12; ++ i)
+					{
+						ldr_pps_[i]->OutputPin(0, mono_tex_);
+					}
 				}
 				if (hdr_pp_)
 				{
@@ -722,8 +729,10 @@ namespace KlayGE
 		{
 			if (ldr_pp_)
 			{
-				ldr_pp_->OutputPin(0, TexturePtr());
-				skip_ldr_pp_->OutputPin(0, TexturePtr());
+				for (size_t i = 0; i < 12; ++ i)
+				{
+					ldr_pps_[i]->OutputPin(0, TexturePtr());
+				}
 			}
 			if (hdr_pp_)
 			{
@@ -740,8 +749,10 @@ namespace KlayGE
 				skip_hdr_pp_->OutputPin(0, ldr_tex_);
 			}
 
-			ldr_pp_->InputPin(0, ldr_tex_);
-			skip_ldr_pp_->InputPin(0, ldr_tex_);
+			for (size_t i = 0; i < 12; ++ i)
+			{
+				ldr_pps_[i]->InputPin(0, ldr_tex_);
+			}
 		}
 
 		if (hdr_pp_)

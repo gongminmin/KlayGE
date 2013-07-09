@@ -1,16 +1,112 @@
 <?xml version='1.0'?>
 
 <post_processors>
-	<post_processor name="PostToneMapping">
-		<params>
-			<param name="psaa_gamma_grading"/>
-		</params>
+	<post_processor name="PostToneMapping0">
 		<input>
 			<pin name="color_tex"/>
 		</input>
 		<output>
 			<pin name="output"/>
 		</output>
-		<shader effect="PostToneMapping.fxml" tech="PostToneMapping"/>
+		<shader effect="PostToneMapping.fxml" tech="PostToneMapping0"/>
+	</post_processor>
+	<post_processor name="PostToneMapping1">
+		<input>
+			<pin name="color_tex"/>
+		</input>
+		<output>
+			<pin name="output"/>
+		</output>
+		<shader effect="PostToneMapping.fxml" tech="PostToneMapping1"/>
+	</post_processor>
+	<post_processor name="PostToneMapping2">
+		<input>
+			<pin name="color_tex"/>
+		</input>
+		<output>
+			<pin name="output"/>
+		</output>
+		<shader effect="PostToneMapping.fxml" tech="PostToneMapping2"/>
+	</post_processor>
+	<post_processor name="PostToneMapping3">
+		<input>
+			<pin name="color_tex"/>
+		</input>
+		<output>
+			<pin name="output"/>
+		</output>
+		<shader effect="PostToneMapping.fxml" tech="PostToneMapping3"/>
+	</post_processor>
+	<post_processor name="PostToneMapping4">
+		<input>
+			<pin name="color_tex"/>
+		</input>
+		<output>
+			<pin name="output"/>
+		</output>
+		<shader effect="PostToneMapping.fxml" tech="PostToneMapping4"/>
+	</post_processor>
+	<post_processor name="PostToneMapping5">
+		<input>
+			<pin name="color_tex"/>
+		</input>
+		<output>
+			<pin name="output"/>
+		</output>
+		<shader effect="PostToneMapping.fxml" tech="PostToneMapping5"/>
+	</post_processor>
+	<post_processor name="PostToneMapping6">
+		<input>
+			<pin name="color_tex"/>
+		</input>
+		<output>
+			<pin name="output"/>
+		</output>
+		<shader effect="PostToneMapping.fxml" tech="PostToneMapping6"/>
+	</post_processor>
+	<post_processor name="PostToneMapping7">
+		<input>
+			<pin name="color_tex"/>
+		</input>
+		<output>
+			<pin name="output"/>
+		</output>
+		<shader effect="PostToneMapping.fxml" tech="PostToneMapping7"/>
+	</post_processor>
+	<post_processor name="PostToneMapping8">
+		<input>
+			<pin name="color_tex"/>
+		</input>
+		<output>
+			<pin name="output"/>
+		</output>
+		<shader effect="PostToneMapping.fxml" tech="PostToneMapping8"/>
+	</post_processor>
+	<post_processor name="PostToneMapping9">
+		<input>
+			<pin name="color_tex"/>
+		</input>
+		<output>
+			<pin name="output"/>
+		</output>
+		<shader effect="PostToneMapping.fxml" tech="PostToneMapping9"/>
+	</post_processor>
+	<post_processor name="PostToneMapping10">
+		<input>
+			<pin name="color_tex"/>
+		</input>
+		<output>
+			<pin name="output"/>
+		</output>
+		<shader effect="PostToneMapping.fxml" tech="PostToneMapping10"/>
+	</post_processor>
+	<post_processor name="PostToneMapping11">
+		<input>
+			<pin name="color_tex"/>
+		</input>
+		<output>
+			<pin name="output"/>
+		</output>
+		<shader effect="PostToneMapping.fxml" tech="PostToneMapping11"/>
 	</post_processor>
 </post_processors>

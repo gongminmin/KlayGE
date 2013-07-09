@@ -251,12 +251,13 @@ namespace KlayGE
 		PostProcessPtr skip_hdr_pp_;
 		bool hdr_enabled_;
 		PostProcessPtr ldr_pp_;
-		PostProcessPtr skip_ldr_pp_;
 		int ppaa_enabled_;
 		bool gamma_enabled_;
 		bool color_grading_enabled_;
 		PostProcessPtr stereoscopic_pp_;
 		int fb_stage_;
+
+		PostProcessPtr ldr_pps_[12];
 	};
 }
 
