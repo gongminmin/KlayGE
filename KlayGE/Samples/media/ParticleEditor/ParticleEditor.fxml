@@ -7,24 +7,12 @@
 	<parameter type="float" name="point_radius"/>
 	<parameter type="float" name="init_life"/>
 
-	<parameter type="float2" name="size_over_life" array_size="8"/>
-	<parameter type="int" name="num_size_over_life"/>
-
-	<parameter type="float2" name="weight_over_life" array_size="8"/>
-	<parameter type="int" name="num_weight_over_life"/>
-
-	<parameter type="float2" name="transparency_over_life" array_size="8"/>
-	<parameter type="int" name="num_transparency_over_life"/>
-
 	<cbuffer name="per_frame">
 		<parameter type="float4x4" name="View"/>
 		<parameter type="float4x4" name="Proj"/>
 
 		<parameter type="float3" name="depth_near_far_invfar"/>
 	</cbuffer>
-
-	<parameter type="float4" name="particle_color_from"/>
-	<parameter type="float4" name="particle_color_to"/>
 
 	<parameter type="texture2D" name="particle_alpha_from_tex"/>
 	<parameter type="texture2D" name="particle_alpha_to_tex"/>
@@ -42,45 +30,6 @@
 
 	<shader>
 		<![CDATA[
-float GetSizeOverLife(float p)
-{
-	float ret = 0;
-	p /= init_life;
-	for (int i = 0; (i < 7) && (i < num_size_over_life - 1); ++ i)
-	{
-		if (size_over_life[i + 1].x >= p)
-		{
-			float s = (p - size_over_life[i].x) / (size_over_life[i + 1].x - size_over_life[i].x);
-			ret = 1 - (size_over_life[i].y + (size_over_life[i + 1].y - size_over_life[i].y) * s);
-			break;
-		}
-	}
-	return ret;
-}
-
-float GetTransparencyOverLife(float p)
-{
-	float ret = 0;
-	p /= init_life;
-#if KLAYGE_D3D11
-	[loop]
-#endif
-	for (int i = 0; (i < 7) && (i < num_transparency_over_life - 1); ++ i)
-	{
-		if (transparency_over_life[i + 1].x >= p)
-		{
-			float s = (p - transparency_over_life[i].x) / (transparency_over_life[i + 1].x - transparency_over_life[i].x);
-			ret = 1 - (transparency_over_life[i].y + (transparency_over_life[i + 1].y - transparency_over_life[i].y) * s);
-			break;
-		}
-	}
-	return ret;
-}
-		]]>
-	</shader>
-
-	<shader>
-		<![CDATA[
 struct PS_IN
 {
 	float4 pos : SV_Position;
@@ -93,10 +42,12 @@ struct PS_IN
 
 void ParticleVS(float4 pos : TEXCOORD0,
 					float spin : TEXCOORD1,
+					float size : TEXCOORD2,
+					float4 color : TEXCOORD3,
 					float2 tex : POSITION,
 					out PS_IN vs_out)
 {
-	float radius = point_radius * GetSizeOverLife(init_life - pos.w) * 2;
+	float radius = point_radius * size * 2;
 
 	float life_factor = (init_life - pos.w) / init_life;
 
@@ -107,8 +58,7 @@ void ParticleVS(float4 pos : TEXCOORD0,
 	float sz = sin(spin);
 	view_pos.xy += float2(offset.x * cz - offset.y * sz, offset.x * sz + offset.y * cz);
 	vs_out.pos = mul(view_pos, Proj);
-	vs_out.clr.rgb = lerp(particle_color_from, particle_color_to, life_factor).rgb;
-	vs_out.clr.a = GetTransparencyOverLife(init_life - pos.w);
+	vs_out.clr = color;
 	vs_out.PosSS = vs_out.pos;
 	vs_out.view_dir.xyz = view_pos.xyz;
 	vs_out.view_dir.w = radius;
@@ -155,22 +105,28 @@ float4 ParticlePS(PS_IN ps_in) : SV_Target
 		<![CDATA[
 void ParticleVS2(float4 pos : POSITION,
 					float spin : TEXCOORD0,
+					float size : TEXCOORD1,
+					float4 color : TEXCOORD2,
 					out float4 oCenterView_Life : SV_Position,
 					out float oRadius : TEXCOORD0,
-					out float oSpin : TEXCOORD1)
+					out float oSpin : TEXCOORD1,
+					out float4 oColor : TEXCOORD2)
 {
 	oCenterView_Life = float4(mul(float4(pos.xyz, 1), View).xyz, pos.w);
-	oRadius = point_radius * GetSizeOverLife(init_life - pos.w) * 2;
+	oRadius = point_radius * size * 2;
 	oSpin = spin;
+	oColor = color;
 }
 
 #if KLAYGE_OPENGL
-POINT TRIANGLE_OUT void ParticleGS(AttribArray<float4> in_CenterView_Life : SV_Position, AttribArray<float> in_radius : TEXCOORD0, AttribArray<float> in_spin : TEXCOORD1)
+POINT TRIANGLE_OUT void ParticleGS(AttribArray<float4> in_CenterView_Life : SV_Position, AttribArray<float> in_radius : TEXCOORD0,
+	AttribArray<float> in_spin : TEXCOORD1, , AttribArray<float4> in_color : TEXCOORD2)
 {
 #else
 [maxvertexcount(4)]
-void ParticleGS(point float4 in_CenterView_Life[1] : SV_Position, point float in_radius[1] : TEXCOORD0, point float in_spin[1] : TEXCOORD1,
-					inout TriangleStream<PS_IN> out_stream)
+void ParticleGS(point float4 in_CenterView_Life[1] : SV_Position, point float in_radius[1] : TEXCOORD0,
+	point float in_spin[1] : TEXCOORD1, point float4 in_color[1] : TEXCOORD2,
+	inout TriangleStream<PS_IN> out_stream)
 {
 #endif
 
@@ -184,8 +140,7 @@ void ParticleGS(point float4 in_CenterView_Life[1] : SV_Position, point float in
 	gs_out.CenterView = float4(CenterView_Life.xyz, 1);
 	float cz = cos(spin);
 	float sz = sin(spin);
-	gs_out.clr.rgb = lerp(particle_color_from, particle_color_to, life_factor).rgb;
-	gs_out.clr.a = GetTransparencyOverLife(init_life - CenterView_Life.w);
+	gs_out.clr = in_color[0];
 	gs_out.view_dir.w = radius;
 
 	for (int i = 0; i < 4; ++ i)

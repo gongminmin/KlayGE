@@ -42,6 +42,21 @@ namespace
 {
 	bool use_gs = false;
 
+#ifdef KLAYGE_HAS_STRUCT_PACK
+#pragma pack(push, 1)
+#endif
+	struct ParticleInstance
+	{
+		float3 pos;
+		float life;
+		float spin;
+		float size;
+		uint32_t color;
+	};
+#ifdef KLAYGE_HAS_STRUCT_PACK
+#pragma pack(pop)
+#endif
+
 	class TerrainRenderable : public RenderableHelper
 	{
 	public:
@@ -131,7 +146,9 @@ namespace
 
 				GraphicsBufferPtr pos_vb = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Read | EAH_CPU_Write, nullptr);
 				rl_->BindVertexStream(pos_vb, KlayGE::make_tuple(vertex_element(VEU_Position, 0, EF_ABGR32F),
-					vertex_element(VEU_TextureCoord, 0, EF_R32F)));
+					vertex_element(VEU_TextureCoord, 0, EF_R32F),
+					vertex_element(VEU_TextureCoord, 1, EF_R32F),
+					vertex_element(VEU_TextureCoord, 2, EF_ABGR8)));
 
 				technique_ = SyncLoadRenderEffect("ParticleEditor.fxml")->TechniqueByName("ParticleWithGS");
 			}
@@ -149,7 +166,9 @@ namespace
 				GraphicsBufferPtr pos_vb = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Read | EAH_CPU_Write, nullptr);
 				rl_->BindVertexStream(pos_vb,
 					KlayGE::make_tuple(vertex_element(VEU_TextureCoord, 0, EF_ABGR32F),
-						vertex_element(VEU_TextureCoord, 1, EF_R32F)),
+						vertex_element(VEU_TextureCoord, 1, EF_R32F),
+						vertex_element(VEU_TextureCoord, 2, EF_R32F),
+						vertex_element(VEU_TextureCoord, 3, EF_ABGR8)),
 					RenderLayout::ST_Instance);
 
 				init_data.row_pitch = sizeof(indices);
@@ -179,63 +198,9 @@ namespace
 			*(technique_->Effect().ParameterByName("particle_alpha_to_tex")) = tex;
 		}
 
-		void ParticleColorFrom(float4 const & clr)
-		{
-			float4 f4_clr;
-			if (Context::Instance().Config().graphics_cfg.gamma)
-			{
-				f4_clr.x() = MathLib::srgb_to_linear(clr.x());
-				f4_clr.y() = MathLib::srgb_to_linear(clr.y());
-				f4_clr.z() = MathLib::srgb_to_linear(clr.z());
-				f4_clr.w() = clr.w();
-			}
-			else
-			{
-				f4_clr = clr;
-			}
-
-			*(technique_->Effect().ParameterByName("particle_color_from")) = f4_clr;
-		}
-
-		void ParticleColorTo(float4 const & clr)
-		{
-			float4 f4_clr;
-			if (Context::Instance().Config().graphics_cfg.gamma)
-			{
-				f4_clr.x() = MathLib::srgb_to_linear(clr.x());
-				f4_clr.y() = MathLib::srgb_to_linear(clr.y());
-				f4_clr.z() = MathLib::srgb_to_linear(clr.z());
-				f4_clr.w() = clr.w();
-			}
-			else
-			{
-				f4_clr = clr;
-			}
-
-			*(technique_->Effect().ParameterByName("particle_color_to")) = f4_clr;
-		}
-
-		void SetInitLife(float life)
+		void InitLife(float life)
 		{
 			*(technique_->Effect().ParameterByName("init_life")) = life;
-		}
-
-		void SetSizeOverLife(std::vector<float2> const & size_over_life)
-		{
-			*(technique_->Effect().ParameterByName("size_over_life")) = size_over_life;
-			*(technique_->Effect().ParameterByName("num_size_over_life")) = static_cast<int32_t>(size_over_life.size());
-		}
-
-		void SetWeightOverLife(std::vector<float2> const & weight_over_life)
-		{
-			*(technique_->Effect().ParameterByName("weight_over_life")) = weight_over_life;
-			*(technique_->Effect().ParameterByName("num_weight_over_life")) = static_cast<int32_t>(weight_over_life.size());
-		}
-
-		void SetTransparencyOverLife(std::vector<float2> const & transparency_over_life)
-		{
-			*(technique_->Effect().ParameterByName("transparency_over_life")) = transparency_over_life;
-			*(technique_->Effect().ParameterByName("num_transparency_over_life")) = static_cast<int32_t>(transparency_over_life.size());
 		}
 
 		void OnRenderBegin()
@@ -271,187 +236,11 @@ namespace
 			checked_pointer_cast<RenderParticles>(renderable_)->ParticleAlphaTo(tex);
 		}
 
-		void ParticleColorFrom(float4 const & clr)
+		void InitLife(float life)
 		{
-			checked_pointer_cast<RenderParticles>(renderable_)->ParticleColorFrom(clr);
-		}
-
-		void ParticleColorTo(float4 const & clr)
-		{
-			checked_pointer_cast<RenderParticles>(renderable_)->ParticleColorTo(clr);
-		}
-
-		void SetInitLife(float life)
-		{
-			checked_pointer_cast<RenderParticles>(renderable_)->SetInitLife(life);
-		}
-
-		void SetSizeOverLife(std::vector<float2> const & size_over_life)
-		{
-			checked_pointer_cast<RenderParticles>(renderable_)->SetSizeOverLife(size_over_life);
-		}
-
-		void SetWeightOverLife(std::vector<float2> const & weight_over_life)
-		{
-			checked_pointer_cast<RenderParticles>(renderable_)->SetWeightOverLife(weight_over_life);
-		}
-
-		void SetTransparencyOverLife(std::vector<float2> const & transparency_over_life)
-		{
-			checked_pointer_cast<RenderParticles>(renderable_)->SetTransparencyOverLife(transparency_over_life);
+			checked_pointer_cast<RenderParticles>(renderable_)->InitLife(life);
 		}
 	};
-
-
-	template <typename ParticleType>
-	class GenParticle
-	{
-	public:
-		GenParticle()
-			: random_dis_(-10000, +10000),
-				angle_(PI / 3), life_(3)
-		{
-		}
-
-		void SetMaxPositionDeviation(float3 const & dev)
-		{
-			max_position_deviation_ = dev;
-		}
-		float3 const & GetMaxPositionDeviation() const
-		{
-			return max_position_deviation_;
-		}
-
-		void SetAngle(float angle)
-		{
-			angle_ = angle;
-		}
-		float GetAngle() const
-		{
-			return angle_;
-		}
-
-		void SetLife(float life)
-		{
-			life_ = life;
-		}
-		float GetLife() const
-		{
-			return life_;
-		}
-
-		void InitMinVelocity(float min_vel)
-		{
-			min_velocity_ = min_vel;
-		}
-		void InitMaxVelocity(float max_vel)
-		{
-			max_velocity_ = max_vel;
-		}
-
-		void operator()(ParticleType& par, float4x4 const & mat)
-		{
-			float x = this->RandomGen() * max_position_deviation_.x();
-			float y = this->RandomGen()* max_position_deviation_.y();
-			float z = this->RandomGen()* max_position_deviation_.z();
-			par.pos = MathLib::transform_coord(float3(x, y, z), mat);
-			float theta = this->RandomGen() * PI;
-			float phi = abs(this->RandomGen()) * angle_ / 2;
-			float velocity = (this->RandomGen() * 0.5f + 0.5f) * (max_velocity_ - min_velocity_) + min_velocity_;
-			float vx = cos(theta) * sin(phi);
-			float vz = sin(theta) * sin(phi);
-			float vy = cos(phi);
-			par.vel = MathLib::transform_normal(float3(vx, vy, vz) * velocity, mat);
-			par.life = life_;
-			par.spin = this->RandomGen() * PI / 2;
-		}
-
-	private:
-		float RandomGen()
-		{
-			return MathLib::clamp(random_dis_(gen_) * 0.0001f, -1.0f, +1.0f);
-		}
-
-	private:
-		ranlux24_base gen_;
-		uniform_int_distribution<> random_dis_;
-
-		float3 max_position_deviation_;
-		float angle_;
-
-		float min_velocity_;
-		float max_velocity_;
-
-		float life_;
-	};
-
-	GenParticle<Particle> gen_particle;
-
-
-	template <typename ParticleType>
-	class UpdateParticle
-	{
-	public:
-		UpdateParticle()
-			: gravity_(0.1f),
-				force_(0, 0, 0),
-				media_density_(0.0f)
-		{
-		}
-
-		void SetInitLife(float life)
-		{
-			init_life_ = life;
-		}
-
-		void SetForce(float3 force)
-		{
-			force_ = force;
-		}
-
-		void MediaDensity(float density)
-		{
-			media_density_ = density;
-		}
-
-		void SizeOverLifeCtrl(UIPolylineEditBox* size_over_life)
-		{
-			size_over_life_ = size_over_life;
-		}
-
-		void WeightOverLifeCtrl(UIPolylineEditBox* weight_over_life)
-		{
-			weight_over_life_ = weight_over_life;
-		}
-
-		void operator()(ParticleType& par, float elapse_time)
-		{
-			float buoyancy = media_density_ * size_over_life_->GetValue((init_life_ - par.life) / init_life_);
-			float cur_weight = weight_over_life_->GetValue((init_life_ - par.life) / init_life_);
-			float3 accel = (force_ + float3(0, buoyancy, 0)) / cur_weight - float3(0, gravity_, 0);
-			par.vel += accel * elapse_time;
-			par.pos += par.vel * elapse_time;
-			par.life -= elapse_time;
-			par.spin += 0.001f;
-
-			if (par.pos.y() <= 0)
-			{
-				par.pos.y() = 0.01f;
-				par.vel = MathLib::reflect(par.vel, float3(0, 1, 0)) * 0.8f;
-			}
-		}
-
-	private:
-		float init_life_;
-		float gravity_;
-		float3 force_;
-		float media_density_;
-
-		UIPolylineEditBox* size_over_life_;
-		UIPolylineEditBox* weight_over_life_;
-	};
-
-	UpdateParticle<Particle> update_particle;
 
 
 	enum
@@ -521,10 +310,10 @@ void ParticleEditorApp::InitObjects()
 	terrain_ = MakeSharedPtr<TerrainObject>();
 	terrain_->AddToSceneManager();
 
-	update_particle.MediaDensity(0.5f);
+	particle_updater_.MediaDensity(0.5f);
 
-	ps_ = MakeSharedPtr<ParticleSystem<Particle> >(NUM_PARTICLE, KlayGE::bind(&GenParticle<Particle>::operator(), &gen_particle, KlayGE::placeholders::_1, KlayGE::placeholders::_2),
-		KlayGE::bind(&UpdateParticle<Particle>::operator(), &update_particle, KlayGE::placeholders::_1, KlayGE::placeholders::_2));
+	ps_ = MakeSharedPtr<ParticleSystem>(NUM_PARTICLE, KlayGE::bind(&ConeParticleEmitter::operator(), &particle_emitter_, KlayGE::placeholders::_1, KlayGE::placeholders::_2),
+		KlayGE::bind(&ParticleUpdater::operator(), &particle_updater_, KlayGE::placeholders::_1, KlayGE::placeholders::_2));
 
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 	RenderEngine& re = rf.RenderEngineInstance();
@@ -584,9 +373,6 @@ void ParticleEditorApp::InitObjects()
 	dialog_->Control<UIComboBox>(id_curve_type_)->OnSelectionChangedEvent().connect(KlayGE::bind(&ParticleEditorApp::CurveTypeChangedHandler, this, KlayGE::placeholders::_1));
 
 	this->LoadParticleSystem(ResLoader::Instance().Locate("Fire.psml"));
-
-	update_particle.SizeOverLifeCtrl(dialog_->Control<UIPolylineEditBox>(id_size_over_life_).get());
-	update_particle.WeightOverLifeCtrl(dialog_->Control<UIPolylineEditBox>(id_weight_over_life_).get());
 }
 
 void ParticleEditorApp::OnResize(uint32_t width, uint32_t height)
@@ -676,7 +462,7 @@ void ParticleEditorApp::SaveAsHandler(KlayGE::UIButton const & /*sender*/)
 void ParticleEditorApp::AngleChangedHandler(KlayGE::UISlider const & sender)
 {
 	float angle = static_cast<float>(sender.GetValue());
-	gen_particle.SetAngle(angle * DEG2RAD);
+	particle_emitter_.EmitAngle(angle * DEG2RAD);
 
 	std::wostringstream stream;
 	stream << angle;
@@ -686,9 +472,9 @@ void ParticleEditorApp::AngleChangedHandler(KlayGE::UISlider const & sender)
 void ParticleEditorApp::LifeChangedHandler(KlayGE::UISlider const & sender)
 {
 	init_life_ = static_cast<float>(sender.GetValue());
-	gen_particle.SetLife(init_life_);
-	update_particle.SetInitLife(init_life_);
-	checked_pointer_cast<ParticlesObject>(particles_)->SetInitLife(init_life_);
+	particle_emitter_.InitLife(init_life_);
+	particle_updater_.InitLife(init_life_);
+	checked_pointer_cast<ParticlesObject>(particles_)->InitLife(init_life_);
 
 	std::wostringstream stream;
 	stream << init_life_;
@@ -698,7 +484,7 @@ void ParticleEditorApp::LifeChangedHandler(KlayGE::UISlider const & sender)
 void ParticleEditorApp::DensityChangedHandler(KlayGE::UISlider const & sender)
 {
 	float density = sender.GetValue() / 100.0f;
-	update_particle.MediaDensity(density);
+	particle_updater_.MediaDensity(density);
 
 	std::wostringstream stream;
 	stream << density;
@@ -708,7 +494,7 @@ void ParticleEditorApp::DensityChangedHandler(KlayGE::UISlider const & sender)
 void ParticleEditorApp::MinVelocityChangedHandler(KlayGE::UISlider const & sender)
 {
 	float velocity = sender.GetValue() / 100.0f;
-	gen_particle.InitMinVelocity(velocity);
+	particle_emitter_.InitMinVelocity(velocity);
 
 	std::wostringstream stream;
 	stream << velocity;
@@ -718,7 +504,7 @@ void ParticleEditorApp::MinVelocityChangedHandler(KlayGE::UISlider const & sende
 void ParticleEditorApp::MaxVelocityChangedHandler(KlayGE::UISlider const & sender)
 {
 	float velocity = sender.GetValue() / 100.0f;
-	gen_particle.InitMaxVelocity(velocity);
+	particle_emitter_.InitMaxVelocity(velocity);
 
 	std::wostringstream stream;
 	stream << velocity;
@@ -804,11 +590,17 @@ void ParticleEditorApp::ChangeParticleColorFromHandler(KlayGE::UITexButton const
 		RGB(0xFF, 0xFF, 0xFF), RGB(0xFF, 0xFF, 0xFF), RGB(0xFF, 0xFF, 0xFF), RGB(0xFF, 0xFF, 0xFF),
 		RGB(0xFF, 0xFF, 0xFF), RGB(0xFF, 0xFF, 0xFF), RGB(0xFF, 0xFF, 0xFF), RGB(0xFF, 0xFF, 0xFF) };
 
+	Color clr_srgb;
+	clr_srgb.r() = MathLib::linear_to_srgb(particle_color_from_.r());
+	clr_srgb.g() = MathLib::linear_to_srgb(particle_color_from_.g());
+	clr_srgb.b() = MathLib::linear_to_srgb(particle_color_from_.b());
+	clr_srgb.a() = particle_color_from_.a();
+
 	ZeroMemory(&occ, sizeof(occ));
 	occ.lStructSize = sizeof(occ);
 	occ.hwndOwner = hwnd;
 	occ.hInstance = nullptr;
-	occ.rgbResult = particle_color_from_.ABGR();
+	occ.rgbResult = clr_srgb.ABGR();
 	occ.lpCustColors = cust_clrs;
 	occ.Flags = CC_ANYCOLOR | CC_FULLOPEN | CC_RGBINIT;
 	occ.lCustData = 0;
@@ -817,9 +609,13 @@ void ParticleEditorApp::ChangeParticleColorFromHandler(KlayGE::UITexButton const
 
 	if (ChooseColorA(&occ))
 	{
-		particle_color_from_ = Color(occ.rgbResult);
-		std::swap(particle_color_from_.r(), particle_color_from_.b());
+		clr_srgb = Color(occ.rgbResult);
+		particle_color_from_.r() = MathLib::srgb_to_linear(clr_srgb.b());
+		particle_color_from_.g() = MathLib::srgb_to_linear(clr_srgb.g());
+		particle_color_from_.b() = MathLib::srgb_to_linear(clr_srgb.r());
+		particle_color_from_.a() = 1;
 		this->LoadParticleColor(id_particle_color_from_button_, particle_color_from_);
+		particle_updater_.ColorFromTo(particle_color_from_, particle_color_to_);
 	}
 #endif
 }
@@ -835,6 +631,12 @@ void ParticleEditorApp::ChangeParticleColorToHandler(KlayGE::UITexButton const &
 		RGB(0xFF, 0xFF, 0xFF), RGB(0xFF, 0xFF, 0xFF), RGB(0xFF, 0xFF, 0xFF), RGB(0xFF, 0xFF, 0xFF),
 		RGB(0xFF, 0xFF, 0xFF), RGB(0xFF, 0xFF, 0xFF), RGB(0xFF, 0xFF, 0xFF), RGB(0xFF, 0xFF, 0xFF) };
 
+	Color clr_srgb;
+	clr_srgb.r() = MathLib::linear_to_srgb(particle_color_to_.r());
+	clr_srgb.g() = MathLib::linear_to_srgb(particle_color_to_.g());
+	clr_srgb.b() = MathLib::linear_to_srgb(particle_color_to_.b());
+	clr_srgb.a() = particle_color_to_.a();
+
 	ZeroMemory(&occ, sizeof(occ));
 	occ.lStructSize = sizeof(occ);
 	occ.hwndOwner = hwnd;
@@ -848,9 +650,13 @@ void ParticleEditorApp::ChangeParticleColorToHandler(KlayGE::UITexButton const &
 
 	if (ChooseColorA(&occ))
 	{
-		particle_color_to_ = Color(occ.rgbResult);
-		std::swap(particle_color_to_.r(), particle_color_to_.b());
+		clr_srgb = Color(occ.rgbResult);
+		particle_color_to_.r() = MathLib::srgb_to_linear(clr_srgb.b());
+		particle_color_to_.g() = MathLib::srgb_to_linear(clr_srgb.g());
+		particle_color_to_.b() = MathLib::srgb_to_linear(clr_srgb.r());
+		particle_color_to_.a() = 1;
 		this->LoadParticleColor(id_particle_color_to_button_, particle_color_to_);
+		particle_updater_.ColorFromTo(particle_color_from_, particle_color_to_);
 	}
 #endif
 }
@@ -930,28 +736,16 @@ void ParticleEditorApp::LoadParticleAlpha(int id, std::string const & name)
 void ParticleEditorApp::LoadParticleColor(int id, KlayGE::Color const & clr)
 {
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+	RenderDeviceCaps const & caps = rf.RenderEngineInstance().DeviceCaps();
 
-	float4 f4_clr = float4(clr.r(), clr.g(), clr.b(), 1);
-	ElementFormat fmt = rf.RenderEngineInstance().DeviceCaps().texture_format_support(EF_ABGR8) ? EF_ABGR8 : EF_ARGB8;
-
-	if (id_particle_color_from_button_ == id)
-	{
-		checked_pointer_cast<ParticlesObject>(particles_)->ParticleColorFrom(f4_clr);
-	}
-	else
-	{
-		BOOST_ASSERT(id_particle_color_to_button_ == id);
-		checked_pointer_cast<ParticlesObject>(particles_)->ParticleColorTo(f4_clr);
-	}
-
-	TexturePtr tex_for_button;
+	ElementFormat fmt = caps.texture_format_support(EF_ABGR8) ? EF_ABGR8 : EF_ARGB8;
 
 	uint32_t data;
-	data = 0xFF000000 | (rf.RenderEngineInstance().DeviceCaps().texture_format_support(EF_ABGR8) ? clr.ABGR() : clr.ARGB());
+	data = 0xFF000000 | ((EF_ABGR8 == fmt) ? clr.ABGR() : clr.ARGB());
 	ElementInitData init_data;
 	init_data.data = &data;
 	init_data.row_pitch = 4;
-	tex_for_button = rf.MakeTexture2D(1, 1, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_Immutable, &init_data);
+	TexturePtr tex_for_button = rf.MakeTexture2D(1, 1, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_Immutable, &init_data);
 
 	dialog_->Control<UITexButton>(id)->SetTexture(tex_for_button);
 }
@@ -990,33 +784,37 @@ void ParticleEditorApp::LoadParticleSystem(std::string const & name)
 				particle_color_from_.r() = from_node->Attrib("r")->ValueFloat();
 				particle_color_from_.g() = from_node->Attrib("g")->ValueFloat();
 				particle_color_from_.b() = from_node->Attrib("b")->ValueFloat();
+				particle_color_from_.a() = 1;
 				this->LoadParticleColor(id_particle_color_from_button_, particle_color_from_);
 
 				XMLNodePtr to_node = color_node->FirstNode("to");
 				particle_color_to_.r() = to_node->Attrib("r")->ValueFloat();
 				particle_color_to_.g() = to_node->Attrib("g")->ValueFloat();
 				particle_color_to_.b() = to_node->Attrib("b")->ValueFloat();
+				particle_color_to_.a() = 1;
 				this->LoadParticleColor(id_particle_color_to_button_, particle_color_to_);
+
+				particle_updater_.ColorFromTo(particle_color_from_, particle_color_to_);
 			}
 		}
 	}
 
 	{
-		XMLNodePtr emittor_node = root->FirstNode("emittor");
+		XMLNodePtr emitter_node = root->FirstNode("emitter");
 
-		XMLAttributePtr attr = emittor_node->Attrib("angle");
+		XMLAttributePtr attr = emitter_node->Attrib("angle");
 		dialog_->Control<UISlider>(id_angle_slider_)->SetValue(attr->ValueInt());
 		this->AngleChangedHandler(*dialog_->Control<UISlider>(id_angle_slider_));
 
-		attr = emittor_node->Attrib("life");
+		attr = emitter_node->Attrib("life");
 		dialog_->Control<UISlider>(id_life_slider_)->SetValue(attr->ValueInt());
 		this->LifeChangedHandler(*dialog_->Control<UISlider>(id_life_slider_));
 
-		attr = emittor_node->Attrib("min_velocity");
+		attr = emitter_node->Attrib("min_velocity");
 		dialog_->Control<UISlider>(id_min_velocity_slider_)->SetValue(static_cast<int>(attr->ValueFloat() * 100.0f + 0.5f));
 		this->MinVelocityChangedHandler(*dialog_->Control<UISlider>(id_min_velocity_slider_));
 
-		attr = emittor_node->Attrib("max_velocity");
+		attr = emitter_node->Attrib("max_velocity");
 		dialog_->Control<UISlider>(id_max_velocity_slider_)->SetValue(static_cast<int>(attr->ValueFloat() * 100.0f + 0.5f));
 		this->MaxVelocityChangedHandler(*dialog_->Control<UISlider>(id_max_velocity_slider_));
 	}
@@ -1039,7 +837,7 @@ void ParticleEditorApp::LoadParticleSystem(std::string const & name)
 		{
 			max_pos_dev.z() = attr->ValueFloat();
 		}
-		gen_particle.SetMaxPositionDeviation(max_pos_dev);
+		particle_emitter_.MaxPositionDeviation(max_pos_dev);
 	}
 
 	for (XMLNodePtr node = root->FirstNode("curve"); node; node = node->NextSibling("curve"))
@@ -1114,18 +912,18 @@ void ParticleEditorApp::SaveParticleSystem(std::string const & name)
 	}
 
 	{
-		XMLNodePtr emittor_node = doc.AllocNode(XNT_Element, "emittor");
+		XMLNodePtr emitter_node = doc.AllocNode(XNT_Element, "emitter");
 
-		emittor_node->AppendAttrib(doc.AllocAttribInt("angle", dialog_->Control<UISlider>(id_angle_slider_)->GetValue()));
-		emittor_node->AppendAttrib(doc.AllocAttribInt("life", dialog_->Control<UISlider>(id_life_slider_)->GetValue()));
-		emittor_node->AppendAttrib(doc.AllocAttribFloat("min_velocity", dialog_->Control<UISlider>(id_min_velocity_slider_)->GetValue() / 100.0f));
-		emittor_node->AppendAttrib(doc.AllocAttribFloat("max_velocity", dialog_->Control<UISlider>(id_max_velocity_slider_)->GetValue() / 100.0f));
-		root->AppendNode(emittor_node);
+		emitter_node->AppendAttrib(doc.AllocAttribInt("angle", dialog_->Control<UISlider>(id_angle_slider_)->GetValue()));
+		emitter_node->AppendAttrib(doc.AllocAttribInt("life", dialog_->Control<UISlider>(id_life_slider_)->GetValue()));
+		emitter_node->AppendAttrib(doc.AllocAttribFloat("min_velocity", dialog_->Control<UISlider>(id_min_velocity_slider_)->GetValue() / 100.0f));
+		emitter_node->AppendAttrib(doc.AllocAttribFloat("max_velocity", dialog_->Control<UISlider>(id_max_velocity_slider_)->GetValue() / 100.0f));
+		root->AppendNode(emitter_node);
 	}
 
 	{
 		XMLNodePtr max_position_deviation_node = doc.AllocNode(XNT_Element, "max_position_deviation");
-		float3 const & max_pos_dev = gen_particle.GetMaxPositionDeviation();
+		float3 const & max_pos_dev = particle_emitter_.MaxPositionDeviation();
 		max_position_deviation_node->AppendAttrib(doc.AllocAttribFloat("x", max_pos_dev.x()));
 		max_position_deviation_node->AppendAttrib(doc.AllocAttribFloat("y", max_pos_dev.y()));
 		max_position_deviation_node->AppendAttrib(doc.AllocAttribFloat("z", max_pos_dev.z()));
@@ -1219,9 +1017,9 @@ uint32_t ParticleEditorApp::DoUpdate(uint32_t pass)
 			}
 			re.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, clear_clr, 1.0f, 0);
 
-			checked_pointer_cast<ParticlesObject>(particles_)->SetSizeOverLife(dialog_->Control<UIPolylineEditBox>(id_size_over_life_)->GetCtrlPoints());
-			checked_pointer_cast<ParticlesObject>(particles_)->SetWeightOverLife(dialog_->Control<UIPolylineEditBox>(id_weight_over_life_)->GetCtrlPoints());
-			checked_pointer_cast<ParticlesObject>(particles_)->SetTransparencyOverLife(dialog_->Control<UIPolylineEditBox>(id_transparency_over_life_)->GetCtrlPoints());
+			particle_updater_.SizeOverLife(dialog_->Control<UIPolylineEditBox>(id_size_over_life_)->GetCtrlPoints());
+			particle_updater_.WeightOverLife(dialog_->Control<UIPolylineEditBox>(id_weight_over_life_)->GetCtrlPoints());
+			particle_updater_.TransparencyOverLife(dialog_->Control<UIPolylineEditBox>(id_transparency_over_life_)->GetCtrlPoints());
 
 			terrain_->Visible(true);
 			particles_->Visible(false);
@@ -1273,18 +1071,18 @@ uint32_t ParticleEditorApp::DoUpdate(uint32_t pass)
 				}
 			}
 
-			instance_gb->Resize(sizeof(float) * 5 * num_pars);
+			instance_gb->Resize(sizeof(ParticleInstance) * num_pars);
 			{
 				GraphicsBuffer::Mapper mapper(*instance_gb, BA_Write_Only);
-				float* instance_data = mapper.Pointer<float>();
-				for (uint32_t i = 0; i < num_pars; ++ i, instance_data += 5)
+				ParticleInstance* instance_data = mapper.Pointer<ParticleInstance>();
+				for (uint32_t i = 0; i < num_pars; ++ i, ++ instance_data)
 				{
 					Particle const & par = ps_->GetParticle(active_particles[i].first);
-					instance_data[0] = par.pos.x();
-					instance_data[1] = par.pos.y();
-					instance_data[2] = par.pos.z();
-					instance_data[3] = par.life;
-					instance_data[4] = par.spin;
+					instance_data->pos = par.pos;
+					instance_data->life = par.life;
+					instance_data->spin = par.spin;
+					instance_data->size = par.size;
+					instance_data->color = par.color.ABGR();
 				}
 			}
 

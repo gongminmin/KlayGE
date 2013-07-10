@@ -185,8 +185,10 @@ namespace KlayGE
 	typedef shared_ptr<TAAPostProcess> TAAPostProcessPtr;
 	class SSVOPostProcess;
 	typedef shared_ptr<SSVOPostProcess> SSVOPostProcessPtr;
-	template <typename ParticleType>
+	struct Particle;
+	typedef shared_ptr<Particle> ParticlePtr;
 	class ParticleSystem;
+	typedef shared_ptr<ParticleSystem> ParticleSystemPtr;
 	class InfTerrainRenderable;
 	typedef shared_ptr<InfTerrainRenderable> InfTerrainRenderablePtr;
 	class InfTerrainSceneObject;

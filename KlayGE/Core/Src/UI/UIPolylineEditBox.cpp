@@ -110,8 +110,8 @@ namespace KlayGE
 
 	int UIPolylineEditBox::AddCtrlPoint(float pos, float value)
 	{
-		pos = std::max(std::min(pos, 1.0f), 0.0f);
-		value = std::max(std::min(value, 1.0f), 0.0f);
+		pos = MathLib::clamp(pos, 0.0f, 1.0f);
+		value = MathLib::clamp(pos, 0.0f, 1.0f);
 
 		int index;
 		if (ctrl_points_.size() >= 1)
@@ -139,7 +139,7 @@ namespace KlayGE
 
 	int UIPolylineEditBox::AddCtrlPoint(float pos)
 	{
-		pos = std::max(std::min(pos, 1.0f), 0.0f);
+		pos = MathLib::clamp(pos, 0.0f, 1.0f);
 		float value = this->GetValue(pos);
 
 		return this->AddCtrlPoint(pos, value);
@@ -188,7 +188,7 @@ namespace KlayGE
 	float2 UIPolylineEditBox::PtFromCoord(int x, int y) const
 	{
 		return float2(static_cast<float>(x - bounding_box_.left()) / bounding_box_.Width(),
-			static_cast<float>(y - bounding_box_.top()) / bounding_box_.Height());
+			static_cast<float>(bounding_box_.bottom() - 1 - y) / bounding_box_.Height());
 	}
 
 	float UIPolylineEditBox::GetValue(float pos) const
@@ -320,14 +320,14 @@ namespace KlayGE
 						if (0 == this->ActivePoint())
 						{
 							p.x() = 0;
-							p.y() = std::min(std::max(p.y(), 0.0f), 1.0f);
+							p.y() = MathLib::clamp(p.y(), 0.0f, 1.0f);
 						}
 						else
 						{
 							if (static_cast<int>(this->NumCtrlPoints() - 1) == this->ActivePoint())
 							{
 								p.x() = 1;
-								p.y() = std::min(std::max(p.y(), 0.0f), 1.0f);
+								p.y() = MathLib::clamp(p.y(), 0.0f, 1.0f);
 							}
 						}
 						if (this->ActivePoint() < static_cast<int>(this->NumCtrlPoints() - 1))
@@ -382,7 +382,8 @@ namespace KlayGE
 				{
 					offset = -1;
 				}
-				dlg->DrawRect(Rect_T<int32_t>(x + offset, bounding_box_.top(), x + 1, bounding_box_.bottom()), 0, elements_[COORDLINE_INDEX]->TextureColor().Current);
+				dlg->DrawRect(Rect_T<int32_t>(x + offset, bounding_box_.top(), x + 1, bounding_box_.bottom()),
+					0, elements_[COORDLINE_INDEX]->TextureColor().Current);
 			}
 			for (size_t i = 0; i < 11; ++ i)
 			{
@@ -392,7 +393,8 @@ namespace KlayGE
 				{
 					offset = -1;
 				}
-				dlg->DrawRect(Rect_T<int32_t>(bounding_box_.left(), y + offset, bounding_box_.right(), y + 1), 0, elements_[COORDLINE_INDEX]->TextureColor().Current);
+				dlg->DrawRect(Rect_T<int32_t>(bounding_box_.left(), y + offset, bounding_box_.right(), y + 1),
+					0, elements_[COORDLINE_INDEX]->TextureColor().Current);
 			}
 
 			{
@@ -400,15 +402,15 @@ namespace KlayGE
 				for (size_t i = 0; i < ctrl_points_.size() - 1; ++ i)
 				{
 					float2 dir = ctrl_points_[i + 1] - ctrl_points_[i + 0];
-					dir = MathLib::normalize(float2(dir.y(), -dir.x())) / 2.0f;
-					float x0 = bounding_box_.left() + ctrl_points_[i + 1].x() * bounding_box_.Width() - dir.x();
-					float x1 = bounding_box_.left() + ctrl_points_[i + 0].x() * bounding_box_.Width() - dir.x();
-					float x2 = bounding_box_.left() + ctrl_points_[i + 0].x() * bounding_box_.Width() + dir.x();
-					float x3 = bounding_box_.left() + ctrl_points_[i + 1].x() * bounding_box_.Width() + dir.x();
-					float y0 = bounding_box_.top() + ctrl_points_[i + 1].y() * bounding_box_.Height() - dir.y();
-					float y1 = bounding_box_.top() + ctrl_points_[i + 0].y() * bounding_box_.Height() - dir.y();
-					float y2 = bounding_box_.top() + ctrl_points_[i + 0].y() * bounding_box_.Height() + dir.y();
-					float y3 = bounding_box_.top() + ctrl_points_[i + 1].y() * bounding_box_.Height() + dir.y();
+					dir = MathLib::normalize(float2(dir.y(), dir.x())) / 2.0f;
+					float x0 = bounding_box_.left() + ctrl_points_[i + 1].x() * bounding_box_.Width() + dir.x();
+					float x1 = bounding_box_.left() + ctrl_points_[i + 0].x() * bounding_box_.Width() + dir.x();
+					float x2 = bounding_box_.left() + ctrl_points_[i + 0].x() * bounding_box_.Width() - dir.x();
+					float x3 = bounding_box_.left() + ctrl_points_[i + 1].x() * bounding_box_.Width() - dir.x();
+					float y0 = bounding_box_.bottom() - 1 - ctrl_points_[i + 1].y() * bounding_box_.Height() + dir.y();
+					float y1 = bounding_box_.bottom() - 1 - ctrl_points_[i + 0].y() * bounding_box_.Height() + dir.y();
+					float y2 = bounding_box_.bottom() - 1 - ctrl_points_[i + 0].y() * bounding_box_.Height() - dir.y();
+					float y3 = bounding_box_.bottom() - 1 - ctrl_points_[i + 1].y() * bounding_box_.Height() - dir.y();
 					UIManager::VertexFormat vd[] = 
 					{
 						UIManager::VertexFormat(float3(x0, y0, 0), clr, float2(0, 0)),
@@ -429,8 +431,8 @@ namespace KlayGE
 
 					int32_t x0 = bounding_box_.left() + static_cast<int32_t>(ctrl_points_[i].x() * bounding_box_.Width()) - offset;
 					int32_t x1 = bounding_box_.left() + static_cast<int32_t>(ctrl_points_[i].x() * bounding_box_.Width()) + offset;
-					int32_t y0 = bounding_box_.top() + static_cast<int32_t>(ctrl_points_[i].y() * bounding_box_.Height()) - offset;
-					int32_t y1 = bounding_box_.top() + static_cast<int32_t>(ctrl_points_[i].y() * bounding_box_.Height()) + offset;
+					int32_t y0 = bounding_box_.bottom() - 1 - static_cast<int32_t>(ctrl_points_[i].y() * bounding_box_.Height()) - offset;
+					int32_t y1 = bounding_box_.bottom() - 1 - static_cast<int32_t>(ctrl_points_[i].y() * bounding_box_.Height()) + offset;
 					dlg->DrawRect(Rect_T<int32_t>(x0, y0, x1, y1), 0, (i == this->ActivePoint()) ? clr_active : clr_normal);
 				}
 			}

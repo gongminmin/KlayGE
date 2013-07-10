@@ -38,6 +38,7 @@ SET(RENDERING_SOURCE_FILES
 	${KLAYGE_PROJECT_DIR}/Core/Src/Render/Light.cpp
 	${KLAYGE_PROJECT_DIR}/Core/Src/Render/LightShaft.cpp
 	${KLAYGE_PROJECT_DIR}/Core/Src/Render/Mesh.cpp
+	${KLAYGE_PROJECT_DIR}/Core/Src/Render/ParticleSystem.cpp
 	${KLAYGE_PROJECT_DIR}/Core/Src/Render/PostProcess.cpp
 	${KLAYGE_PROJECT_DIR}/Core/Src/Render/Query.cpp
 	${KLAYGE_PROJECT_DIR}/Core/Src/Render/Renderable.cpp

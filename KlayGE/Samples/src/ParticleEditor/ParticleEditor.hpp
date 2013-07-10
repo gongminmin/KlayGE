@@ -1,5 +1,5 @@
-#ifndef _PARTICLESYSTEMAPP_HPP
-#define _PARTICLESYSTEMAPP_HPP
+#ifndef _PARTICLEEDITOR_HPP
+#define _PARTICLEEDITOR_HPP
 
 #include <KlayGE/PreDeclare.hpp>
 #include <KlayGE/App3D.hpp>
@@ -8,15 +8,6 @@
 #include <KlayGE/ParticleSystem.hpp>
 #include <KlayGE/PostProcess.hpp>
 #include <KlayGE/UI.hpp>
-
-struct Particle
-{
-	KlayGE::float3 pos;
-	KlayGE::float3 vel;
-	float life;
-	float spin;
-	float birth_time;
-};
 
 class ParticleEditorApp : public KlayGE::App3DFramework
 {
@@ -59,7 +50,9 @@ private:
 
 	KlayGE::FirstPersonCameraController fpsController_;
 
-	KlayGE::shared_ptr<KlayGE::ParticleSystem<Particle> > ps_;
+	KlayGE::ConeParticleEmitter particle_emitter_;
+	KlayGE::ParticleUpdater particle_updater_;
+	KlayGE::ParticleSystemPtr ps_;
 	float init_life_;
 
 	std::string particle_alpha_from_tex_;
@@ -96,4 +89,4 @@ private:
 	int id_transparency_over_life_;
 };
 
-#endif		// _PARTICLESYSTEMAPP_HPP
+#endif		// _PARTICLEEDITOR_HPP

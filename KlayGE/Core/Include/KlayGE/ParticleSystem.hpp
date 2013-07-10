@@ -1,14 +1,32 @@
-// ParticleSystem.hpp
-// KlayGE 粒子系统类 头文件
-// Ver 3.4.0
-// 版权所有(C) 龚敏敏, 2006
-// Homepage: http://www.klayge.org
-//
-// 3.4.0
-// 初次建立 (2006.7.12)
-//
-// 修改记录
-//////////////////////////////////////////////////////////////////////////////////
+/**
+ * @file ParticleSystem.hpp
+ * @author Minmin Gong
+ *
+ * @section DESCRIPTION
+ *
+ * This source file is part of KlayGE
+ * For the latest info, see http://www.klayge.org
+ *
+ * @section LICENSE
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published
+ * by the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ * You may alternatively use this source under the terms of
+ * the KlayGE Proprietary License (KPL). You can obtained such a license
+ * from http://www.klayge.org/licensing/.
+ */
 
 #ifndef _PARTICLESYSTEM_HPP
 #define _PARTICLESYSTEM_HPP
@@ -22,96 +40,42 @@
 
 namespace KlayGE
 {
-	template <typename ParticleType>
-	class ParticleSystem
+	struct Particle
+	{
+		float3 pos;
+		float3 vel;
+		float life;
+		float spin;
+		float birth_time;
+		float size;
+		Color color;
+	};
+
+	class KLAYGE_CORE_API ParticleSystem
 	{
 	public:
 		ParticleSystem(uint32_t max_num_particles,
-						function<void(ParticleType& par, float4x4 const & mat)> const & gen_func,
-						function<void(ParticleType& par, float elapse_time)> const & update_func)
-			: gen_func_(gen_func), update_func_(update_func),
-				particles_(max_num_particles),
-				inv_emit_freq_(0), accumulate_time_(0),
-				model_mat_(float4x4::Identity())
-		{
-		}
+			function<void(Particle& par, float4x4 const & mat)> const & emitter_func,
+			function<void(Particle& par, float elapse_time)> const & update_func);
 
-		void ModelMatrix(float4x4 const & model)
-		{
-			model_mat_ = model;
-		}
+		void ModelMatrix(float4x4 const & model);
+		float4x4 const & ModelMatrix() const;
 
-		float4x4 const & ModelMatrix() const
-		{
-			return model_mat_;
-		}
+		void Frequency(float freq);
+		float Frequency() const;
 
-		void Frequency(float freq)
-		{
-			inv_emit_freq_ = 1.0f / freq;
+		void Update(float app_time, float elapsed_time);
 
-			float time = 0;
-			typedef typename KLAYGE_DECLTYPE(particles_) ParticlesType;
-			KLAYGE_FOREACH(typename ParticlesType::reference particle, particles_)
-			{
-				particle.life = -1;
-				particle.birth_time = time;
-				time += inv_emit_freq_;
-			}
-		}
+		uint32_t NumParticles() const;
 
-		float Frequency() const
-		{
-			return 1.0f / inv_emit_freq_;
-		}
-
-		void Update(float /*app_time*/, float elapsed_time)
-		{
-			accumulate_time_ += elapsed_time;
-			if (accumulate_time_ >= particles_.size() * inv_emit_freq_)
-			{
-				accumulate_time_ = 0;
-			}
-
-			typedef typename KLAYGE_DECLTYPE(particles_) ParticlesType;
-			KLAYGE_FOREACH(typename ParticlesType::reference particle, particles_)
-			{
-				if (particle.life > 0)
-				{
-					update_func_(particle, elapsed_time);
-				}
-				else
-				{
-					float const t = accumulate_time_ - particle.birth_time;
-					if ((t >= 0) && (t < elapsed_time))
-					{
-						gen_func_(particle, model_mat_);
-					}
-				}
-			}
-		}
-
-		uint32_t NumParticles() const
-		{
-			return static_cast<uint32_t>(particles_.size());
-		}
-
-		ParticleType const & GetParticle(uint32_t i) const
-		{
-			BOOST_ASSERT(i < particles_.size());
-			return particles_[i];
-		}
-		ParticleType& GetParticle(uint32_t i)
-		{
-			BOOST_ASSERT(i < particles_.size());
-			return particles_[i];
-		}
+		Particle const & GetParticle(uint32_t i) const;
+		Particle& GetParticle(uint32_t i);
 
 	protected:
-		function<void(ParticleType& par, float4x4 const & mat)> gen_func_;
-		function<void(ParticleType& par, float elapse_time)> update_func_;
+		function<void(Particle& par, float4x4 const & mat)> emitter_func_;
+		function<void(Particle& par, float elapse_time)> update_func_;
 
-		std::vector<ParticleType> particles_;
+		std::vector<Particle> particles_;
 
 		float inv_emit_freq_;
 		float accumulate_time_;
@@ -119,15 +83,77 @@ namespace KlayGE
 		float4x4 model_mat_;
 	};
 
-	template <typename ParticleType>
-	class UpdateParticleFunc
+	class KLAYGE_CORE_API ConeParticleEmitter
 	{
 	public:
-		void operator()(ParticleType& par, float elapse_time)
-		{
-			par.pos += par.vel * elapse_time;
-			par.life -= elapse_time;
-		}
+		ConeParticleEmitter();
+
+		void MaxPositionDeviation(float3 const & dev);
+		float3 const & MaxPositionDeviation() const;
+
+		void EmitAngle(float angle);
+		float EmitAngle() const;
+
+		void InitLife(float life);
+		float InitLife() const;
+		void InitSize(float size);
+		float InitSize() const;
+		void InitColor(Color const & clr);
+		Color const & InitColor() const;
+
+		void InitMinVelocity(float min_vel);
+		void InitMaxVelocity(float max_vel);
+
+		void operator()(Particle& par, float4x4 const & mat);
+
+	private:
+		float RandomGen();
+
+	private:
+		ranlux24_base gen_;
+		uniform_int_distribution<> random_dis_;
+
+		float3 max_position_deviation_;
+		float emit_angle_;
+
+		float min_velocity_;
+		float max_velocity_;
+
+		float init_life_;
+		float init_size_;
+		Color init_color_;
+	};
+
+	class KLAYGE_CORE_API ParticleUpdater
+	{
+	public:
+		ParticleUpdater();
+
+		void InitLife(float life);
+
+		void Force(float3 force);
+
+		void MediaDensity(float density);
+
+		void SizeOverLife(std::vector<float2> const & size_over_life);
+		void WeightOverLife(std::vector<float2> const & weight_over_life);
+		void TransparencyOverLife(std::vector<float2> const & transparency_over_life);
+		
+		void ColorFromTo(Color const & from, Color const & to);
+
+		void operator()(Particle& par, float elapse_time);
+
+	private:
+		float init_life_;
+		float gravity_;
+		float3 force_;
+		float media_density_;
+
+		std::vector<float2> size_over_life_;
+		std::vector<float2> weight_over_life_;
+		std::vector<float2> transparency_over_life_;
+
+		Color clr_from_, clr_to_;
 	};
 }
 
