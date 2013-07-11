@@ -34,24 +34,34 @@
 
 namespace KlayGE
 {
-	ParticleSystem::ParticleSystem(uint32_t max_num_particles,
-					function<void(Particle& par, float4x4 const & mat)> const & emitter_func,
-					function<void(Particle& par, float elapse_time)> const & update_func)
-		: emitter_func_(emitter_func), update_func_(update_func),
-			particles_(max_num_particles),
-			inv_emit_freq_(0), accumulate_time_(0),
-			model_mat_(float4x4::Identity())
+	ParticleSystem::ParticleSystem(uint32_t max_num_particles)
+		: particles_(max_num_particles),
+			inv_emit_freq_(0), accumulate_time_(0)
 	{
 	}
 
-	void ParticleSystem::ModelMatrix(float4x4 const & model)
+	void ParticleSystem::Emitter(std::string const & name)
 	{
-		model_mat_ = model;
+		if ("Cone" == name)
+		{
+			this->Emitter(MakeSharedPtr<ConeParticleEmitter>());
+		}
+		else
+		{
+			BOOST_ASSERT(false);
+		}
 	}
 
-	float4x4 const & ParticleSystem::ModelMatrix() const
+	void ParticleSystem::Updater(std::string const & name)
 	{
-		return model_mat_;
+		if ("Polyline" == name)
+		{
+			this->Updater(MakeSharedPtr<PolylineParticleUpdater>());
+		}
+		else
+		{
+			BOOST_ASSERT(false);
+		}
 	}
 
 	void ParticleSystem::Frequency(float freq)
@@ -86,14 +96,14 @@ namespace KlayGE
 		{
 			if (particle.life > 0)
 			{
-				update_func_(particle, elapsed_time);
+				updater_->Update(particle, elapsed_time);
 			}
 			else
 			{
 				float const t = accumulate_time_ - particle.birth_time;
 				if ((t >= 0) && (t < elapsed_time))
 				{
-					emitter_func_(particle, model_mat_);
+					emitter_->Emit(particle);
 				}
 			}
 		}
@@ -118,19 +128,9 @@ namespace KlayGE
 
 
 	ConeParticleEmitter::ConeParticleEmitter()
-		: random_dis_(-10000, +10000),
-			emit_angle_(PI / 3), init_life_(3)
+		: random_dis_(0, +10000),
+			emit_angle_(PI / 3)
 	{
-	}
-
-	void ConeParticleEmitter::MaxPositionDeviation(float3 const & dev)
-	{
-		max_position_deviation_ = dev;
-	}
-
-	float3 const & ConeParticleEmitter::MaxPositionDeviation() const
-	{
-		return max_position_deviation_;
 	}
 
 	void ConeParticleEmitter::EmitAngle(float angle)
@@ -143,114 +143,71 @@ namespace KlayGE
 		return emit_angle_;
 	}
 
-	void ConeParticleEmitter::InitLife(float life)
+	void ConeParticleEmitter::Emit(Particle& par)
 	{
-		init_life_ = life;
-	}
-
-	float ConeParticleEmitter::InitLife() const
-	{
-		return init_life_;
-	}
-
-	void ConeParticleEmitter::InitSize(float size)
-	{
-		init_size_ = size;
-	}
-
-	float ConeParticleEmitter::InitSize() const
-	{
-		return init_size_;
-	}
-
-	void ConeParticleEmitter::InitColor(Color const & clr)
-	{
-		init_color_ = clr;
-	}
-
-	Color const & ConeParticleEmitter::InitColor() const
-	{
-		return init_color_;
-	}
-
-	void ConeParticleEmitter::InitMinVelocity(float min_vel)
-	{
-		min_velocity_ = min_vel;
-	}
-
-	void ConeParticleEmitter::InitMaxVelocity(float max_vel)
-	{
-		max_velocity_ = max_vel;
-	}
-
-	void ConeParticleEmitter::operator()(Particle& par, float4x4 const & mat)
-	{
-		float x = this->RandomGen() * max_position_deviation_.x();
-		float y = this->RandomGen()* max_position_deviation_.y();
-		float z = this->RandomGen()* max_position_deviation_.z();
-		par.pos = MathLib::transform_coord(float3(x, y, z), mat);
-		float theta = this->RandomGen() * PI;
-		float phi = abs(this->RandomGen()) * emit_angle_ / 2;
-		float velocity = (this->RandomGen() * 0.5f + 0.5f) * (max_velocity_ - min_velocity_) + min_velocity_;
+		par.pos = MathLib::transform_coord(MathLib::lerp(min_pos_, max_pos_, this->RandomGen()), model_mat_);
+		float theta = (this->RandomGen() * 2 - 1) * PI;
+		float phi = this->RandomGen() * emit_angle_ / 2;
+		float velocity = MathLib::lerp(min_vel_, max_vel_, this->RandomGen());
 		float vx = cos(theta) * sin(phi);
 		float vz = sin(theta) * sin(phi);
 		float vy = cos(phi);
-		par.vel = MathLib::transform_normal(float3(vx, vy, vz) * velocity, mat);
-		par.life = init_life_;
-		par.spin = this->RandomGen() * PI / 2;
-		par.size = init_size_;
-		par.color = init_color_;
+		par.vel = MathLib::transform_normal(float3(vx, vy, vz) * velocity, model_mat_);
+		par.life = MathLib::lerp(min_life_, max_life_, this->RandomGen());
+		par.spin = MathLib::lerp(min_spin_, max_spin_, this->RandomGen());
+		par.size = MathLib::lerp(min_size_, max_size_, this->RandomGen());
+		par.color = MathLib::lerp(min_clr_, max_clr_, this->RandomGen());
 	}
 
 	float ConeParticleEmitter::RandomGen()
 	{
-		return MathLib::clamp(random_dis_(gen_) * 0.0001f, -1.0f, +1.0f);
+		return MathLib::clamp(random_dis_(gen_) * 0.0001f, 0.0f, 1.0f);
 	}
 
-	ParticleUpdater::ParticleUpdater()
+	PolylineParticleUpdater::PolylineParticleUpdater()
 		: gravity_(0.1f),
 			force_(0, 0, 0),
 			media_density_(0.0f)
 	{
 	}
 
-	void ParticleUpdater::InitLife(float life)
+	void PolylineParticleUpdater::InitLife(float life)
 	{
 		init_life_ = life;
 	}
 
-	void ParticleUpdater::Force(float3 force)
+	void PolylineParticleUpdater::Force(float3 force)
 	{
 		force_ = force;
 	}
 
-	void ParticleUpdater::MediaDensity(float density)
+	void PolylineParticleUpdater::MediaDensity(float density)
 	{
 		media_density_ = density;
 	}
 
-	void ParticleUpdater::SizeOverLife(std::vector<float2> const & size_over_life)
+	void PolylineParticleUpdater::SizeOverLife(std::vector<float2> const & size_over_life)
 	{
 		size_over_life_ = size_over_life;
 	}
 
-	void ParticleUpdater::WeightOverLife(std::vector<float2> const & weight_over_life)
+	void PolylineParticleUpdater::WeightOverLife(std::vector<float2> const & weight_over_life)
 	{
 		weight_over_life_ = weight_over_life;
 	}
 
-	void ParticleUpdater::TransparencyOverLife(std::vector<float2> const & transparency_over_life)
+	void PolylineParticleUpdater::TransparencyOverLife(std::vector<float2> const & transparency_over_life)
 	{
 		transparency_over_life_ = transparency_over_life;
 	}
 
-	void ParticleUpdater::ColorFromTo(Color const & from, Color const & to)
+	void PolylineParticleUpdater::ColorFromTo(Color const & from, Color const & to)
 	{
 		clr_from_ = from;
 		clr_to_ = to;
 	}
 
-	void ParticleUpdater::operator()(Particle& par, float elapse_time)
+	void PolylineParticleUpdater::Update(Particle& par, float elapse_time)
 	{
 		float pos = (init_life_ - par.life) / init_life_;
 

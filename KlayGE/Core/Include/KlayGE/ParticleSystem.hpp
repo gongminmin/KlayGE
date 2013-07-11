@@ -46,20 +46,190 @@ namespace KlayGE
 		float3 vel;
 		float life;
 		float spin;
-		float birth_time;
 		float size;
 		Color color;
+		float birth_time;
+	};
+
+	class KLAYGE_CORE_API ParticleEmitter
+	{
+	public:
+		ParticleEmitter()
+			: model_mat_(float4x4::Identity())
+		{
+		}
+		virtual ~ParticleEmitter()
+		{
+		}
+
+		void ModelMatrix(float4x4 const & model)
+		{
+			model_mat_ = model;
+		}
+		float4x4 const & ModelMatrix() const
+		{
+			return model_mat_;
+		}
+
+		void MinPosition(float3 const & pos)
+		{
+			min_pos_ = pos;
+		}
+		void MaxPosition(float3 const & pos)
+		{
+			max_pos_ = pos;
+		}
+		float3 const & MinPosition() const
+		{
+			return min_pos_;
+		}
+		float3 const & MaxPosition() const
+		{
+			return max_pos_;
+		}
+
+		void MinVelocity(float vel)
+		{
+			min_vel_ = vel;
+		}
+		void MaxVelocity(float vel)
+		{
+			max_vel_ = vel;
+		}
+		float MinVelocity() const
+		{
+			return min_vel_;
+		}
+		float MaxVelocity() const
+		{
+			return max_vel_;
+		}
+
+		void MinLife(float life)
+		{
+			min_life_ = life;
+		}
+		void MaxLife(float life)
+		{
+			max_life_ = life;
+		}
+		float MinLife() const
+		{
+			return min_life_;
+		}
+		float MaxLife() const
+		{
+			return max_life_;
+		}
+
+		void MinSpin(float spin)
+		{
+			min_spin_ = spin;
+		}
+		void MaxSpin(float spin)
+		{
+			max_spin_ = spin;
+		}
+		float MinSpin() const
+		{
+			return min_spin_;
+		}
+		float MaxSpin() const
+		{
+			return max_spin_;
+		}
+
+		void MinSize(float size)
+		{
+			min_size_ = size;
+		}
+		void MaxSize(float size)
+		{
+			max_size_ = size;
+		}
+		float MinSize() const
+		{
+			return min_size_;
+		}
+		float MaxSize() const
+		{
+			return max_size_;
+		}
+
+		void MinColor(Color const & clr)
+		{
+			min_clr_ = clr;
+		}
+		void MaxColor(Color const & clr)
+		{
+			max_clr_ = clr;
+		}
+		Color const & MinColor() const
+		{
+			return min_clr_;
+		}
+		Color const & MaxColor() const
+		{
+			return max_clr_;
+		}
+
+		virtual void Emit(Particle& par) = 0;
+
+	protected:
+		float4x4 model_mat_;
+
+		float3 min_pos_;
+		float3 max_pos_;
+		float min_vel_;
+		float max_vel_;
+		float min_life_;
+		float max_life_;
+		float min_spin_;
+		float max_spin_;
+		float min_size_;
+		float max_size_;
+		Color min_clr_;
+		Color max_clr_;
+	};
+
+	class KLAYGE_CORE_API ParticleUpdater
+	{
+	public:
+		virtual ~ParticleUpdater()
+		{
+		}
+
+		virtual void InitLife(float life) = 0;
+		virtual void Force(float3 force) = 0;
+		virtual void MediaDensity(float density) = 0;
+
+		virtual void Update(Particle& par, float elapse_time) = 0;
 	};
 
 	class KLAYGE_CORE_API ParticleSystem
 	{
 	public:
-		ParticleSystem(uint32_t max_num_particles,
-			function<void(Particle& par, float4x4 const & mat)> const & emitter_func,
-			function<void(Particle& par, float elapse_time)> const & update_func);
+		explicit ParticleSystem(uint32_t max_num_particles);
 
-		void ModelMatrix(float4x4 const & model);
-		float4x4 const & ModelMatrix() const;
+		void Emitter(std::string const & name);
+		void Emitter(ParticleEmitterPtr const & emitter)
+		{
+			emitter_ = emitter;
+		}
+		ParticleEmitterPtr Emitter() const
+		{
+			return emitter_;
+		}
+
+		void Updater(std::string const & name);
+		void Updater(ParticleUpdaterPtr const & updater)
+		{
+			updater_ = updater;
+		}
+		ParticleUpdaterPtr Updater() const
+		{
+			return updater_;
+		}
 
 		void Frequency(float freq);
 		float Frequency() const;
@@ -72,39 +242,24 @@ namespace KlayGE
 		Particle& GetParticle(uint32_t i);
 
 	protected:
-		function<void(Particle& par, float4x4 const & mat)> emitter_func_;
-		function<void(Particle& par, float elapse_time)> update_func_;
+		ParticleEmitterPtr emitter_;
+		ParticleUpdaterPtr updater_;
 
 		std::vector<Particle> particles_;
 
 		float inv_emit_freq_;
 		float accumulate_time_;
-
-		float4x4 model_mat_;
 	};
 
-	class KLAYGE_CORE_API ConeParticleEmitter
+	class KLAYGE_CORE_API ConeParticleEmitter : public ParticleEmitter
 	{
 	public:
 		ConeParticleEmitter();
 
-		void MaxPositionDeviation(float3 const & dev);
-		float3 const & MaxPositionDeviation() const;
-
 		void EmitAngle(float angle);
 		float EmitAngle() const;
 
-		void InitLife(float life);
-		float InitLife() const;
-		void InitSize(float size);
-		float InitSize() const;
-		void InitColor(Color const & clr);
-		Color const & InitColor() const;
-
-		void InitMinVelocity(float min_vel);
-		void InitMaxVelocity(float max_vel);
-
-		void operator()(Particle& par, float4x4 const & mat);
+		virtual void Emit(Particle& par) KLAYGE_OVERRIDE;
 
 	private:
 		float RandomGen();
@@ -113,27 +268,17 @@ namespace KlayGE
 		ranlux24_base gen_;
 		uniform_int_distribution<> random_dis_;
 
-		float3 max_position_deviation_;
 		float emit_angle_;
-
-		float min_velocity_;
-		float max_velocity_;
-
-		float init_life_;
-		float init_size_;
-		Color init_color_;
 	};
 
-	class KLAYGE_CORE_API ParticleUpdater
+	class KLAYGE_CORE_API PolylineParticleUpdater : public ParticleUpdater
 	{
 	public:
-		ParticleUpdater();
+		PolylineParticleUpdater();
 
-		void InitLife(float life);
-
-		void Force(float3 force);
-
-		void MediaDensity(float density);
+		virtual void InitLife(float life) KLAYGE_OVERRIDE;
+		virtual void Force(float3 force) KLAYGE_OVERRIDE;
+		virtual void MediaDensity(float density) KLAYGE_OVERRIDE;
 
 		void SizeOverLife(std::vector<float2> const & size_over_life);
 		void WeightOverLife(std::vector<float2> const & weight_over_life);
@@ -141,7 +286,7 @@ namespace KlayGE
 		
 		void ColorFromTo(Color const & from, Color const & to);
 
-		void operator()(Particle& par, float elapse_time);
+		virtual void Update(Particle& par, float elapse_time) KLAYGE_OVERRIDE;
 
 	private:
 		float init_life_;

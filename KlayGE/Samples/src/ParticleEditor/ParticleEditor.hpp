@@ -50,8 +50,8 @@ private:
 
 	KlayGE::FirstPersonCameraController fpsController_;
 
-	KlayGE::ConeParticleEmitter particle_emitter_;
-	KlayGE::ParticleUpdater particle_updater_;
+	KlayGE::ParticleEmitterPtr particle_emitter_;
+	KlayGE::ParticleUpdaterPtr particle_updater_;
 	KlayGE::ParticleSystemPtr ps_;
 	float init_life_;
 

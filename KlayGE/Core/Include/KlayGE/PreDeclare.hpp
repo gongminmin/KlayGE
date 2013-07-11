@@ -187,6 +187,10 @@ namespace KlayGE
 	typedef shared_ptr<SSVOPostProcess> SSVOPostProcessPtr;
 	struct Particle;
 	typedef shared_ptr<Particle> ParticlePtr;
+	class ParticleEmitter;
+	typedef shared_ptr<ParticleEmitter> ParticleEmitterPtr;
+	class ParticleUpdater;
+	typedef shared_ptr<ParticleUpdater> ParticleUpdaterPtr;
 	class ParticleSystem;
 	typedef shared_ptr<ParticleSystem> ParticleSystemPtr;
 	class InfTerrainRenderable;

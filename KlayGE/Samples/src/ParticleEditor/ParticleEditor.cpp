@@ -310,10 +310,14 @@ void ParticleEditorApp::InitObjects()
 	terrain_ = MakeSharedPtr<TerrainObject>();
 	terrain_->AddToSceneManager();
 
-	particle_updater_.MediaDensity(0.5f);
-
-	ps_ = MakeSharedPtr<ParticleSystem>(NUM_PARTICLE, KlayGE::bind(&ConeParticleEmitter::operator(), &particle_emitter_, KlayGE::placeholders::_1, KlayGE::placeholders::_2),
-		KlayGE::bind(&ParticleUpdater::operator(), &particle_updater_, KlayGE::placeholders::_1, KlayGE::placeholders::_2));
+	particle_emitter_ = MakeSharedPtr<ConeParticleEmitter>();
+	particle_emitter_->MinSpin(-PI / 2);
+	particle_emitter_->MaxSpin(+PI / 2);
+	particle_updater_ = MakeSharedPtr<PolylineParticleUpdater>();
+	particle_updater_->MediaDensity(0.5f);
+	ps_ = MakeSharedPtr<ParticleSystem>(NUM_PARTICLE);
+	ps_->Emitter(particle_emitter_);
+	ps_->Updater(particle_updater_);
 
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 	RenderEngine& re = rf.RenderEngineInstance();
@@ -462,7 +466,7 @@ void ParticleEditorApp::SaveAsHandler(KlayGE::UIButton const & /*sender*/)
 void ParticleEditorApp::AngleChangedHandler(KlayGE::UISlider const & sender)
 {
 	float angle = static_cast<float>(sender.GetValue());
-	particle_emitter_.EmitAngle(angle * DEG2RAD);
+	checked_pointer_cast<ConeParticleEmitter>(particle_emitter_)->EmitAngle(angle * DEG2RAD);
 
 	std::wostringstream stream;
 	stream << angle;
@@ -472,8 +476,9 @@ void ParticleEditorApp::AngleChangedHandler(KlayGE::UISlider const & sender)
 void ParticleEditorApp::LifeChangedHandler(KlayGE::UISlider const & sender)
 {
 	init_life_ = static_cast<float>(sender.GetValue());
-	particle_emitter_.InitLife(init_life_);
-	particle_updater_.InitLife(init_life_);
+	particle_emitter_->MinLife(init_life_);
+	particle_emitter_->MaxLife(init_life_);
+	particle_updater_->InitLife(init_life_);
 	checked_pointer_cast<ParticlesObject>(particles_)->InitLife(init_life_);
 
 	std::wostringstream stream;
@@ -484,7 +489,7 @@ void ParticleEditorApp::LifeChangedHandler(KlayGE::UISlider const & sender)
 void ParticleEditorApp::DensityChangedHandler(KlayGE::UISlider const & sender)
 {
 	float density = sender.GetValue() / 100.0f;
-	particle_updater_.MediaDensity(density);
+	particle_updater_->MediaDensity(density);
 
 	std::wostringstream stream;
 	stream << density;
@@ -494,7 +499,7 @@ void ParticleEditorApp::DensityChangedHandler(KlayGE::UISlider const & sender)
 void ParticleEditorApp::MinVelocityChangedHandler(KlayGE::UISlider const & sender)
 {
 	float velocity = sender.GetValue() / 100.0f;
-	particle_emitter_.InitMinVelocity(velocity);
+	particle_emitter_->MinVelocity(velocity);
 
 	std::wostringstream stream;
 	stream << velocity;
@@ -504,7 +509,7 @@ void ParticleEditorApp::MinVelocityChangedHandler(KlayGE::UISlider const & sende
 void ParticleEditorApp::MaxVelocityChangedHandler(KlayGE::UISlider const & sender)
 {
 	float velocity = sender.GetValue() / 100.0f;
-	particle_emitter_.InitMaxVelocity(velocity);
+	particle_emitter_->MaxVelocity(velocity);
 
 	std::wostringstream stream;
 	stream << velocity;
@@ -615,7 +620,7 @@ void ParticleEditorApp::ChangeParticleColorFromHandler(KlayGE::UITexButton const
 		particle_color_from_.b() = MathLib::srgb_to_linear(clr_srgb.r());
 		particle_color_from_.a() = 1;
 		this->LoadParticleColor(id_particle_color_from_button_, particle_color_from_);
-		particle_updater_.ColorFromTo(particle_color_from_, particle_color_to_);
+		checked_pointer_cast<PolylineParticleUpdater>(particle_updater_)->ColorFromTo(particle_color_from_, particle_color_to_);
 	}
 #endif
 }
@@ -656,7 +661,7 @@ void ParticleEditorApp::ChangeParticleColorToHandler(KlayGE::UITexButton const &
 		particle_color_to_.b() = MathLib::srgb_to_linear(clr_srgb.r());
 		particle_color_to_.a() = 1;
 		this->LoadParticleColor(id_particle_color_to_button_, particle_color_to_);
-		particle_updater_.ColorFromTo(particle_color_from_, particle_color_to_);
+		checked_pointer_cast<PolylineParticleUpdater>(particle_updater_)->ColorFromTo(particle_color_from_, particle_color_to_);
 	}
 #endif
 }
@@ -794,7 +799,7 @@ void ParticleEditorApp::LoadParticleSystem(std::string const & name)
 				particle_color_to_.a() = 1;
 				this->LoadParticleColor(id_particle_color_to_button_, particle_color_to_);
 
-				particle_updater_.ColorFromTo(particle_color_from_, particle_color_to_);
+				checked_pointer_cast<PolylineParticleUpdater>(particle_updater_)->ColorFromTo(particle_color_from_, particle_color_to_);
 			}
 		}
 	}
@@ -837,7 +842,8 @@ void ParticleEditorApp::LoadParticleSystem(std::string const & name)
 		{
 			max_pos_dev.z() = attr->ValueFloat();
 		}
-		particle_emitter_.MaxPositionDeviation(max_pos_dev);
+		particle_emitter_->MinPosition(float3(0, 0, 0));
+		particle_emitter_->MaxPosition(max_pos_dev);
 	}
 
 	for (XMLNodePtr node = root->FirstNode("curve"); node; node = node->NextSibling("curve"))
@@ -923,7 +929,7 @@ void ParticleEditorApp::SaveParticleSystem(std::string const & name)
 
 	{
 		XMLNodePtr max_position_deviation_node = doc.AllocNode(XNT_Element, "max_position_deviation");
-		float3 const & max_pos_dev = particle_emitter_.MaxPositionDeviation();
+		float3 const & max_pos_dev = particle_emitter_->MaxPosition();
 		max_position_deviation_node->AppendAttrib(doc.AllocAttribFloat("x", max_pos_dev.x()));
 		max_position_deviation_node->AppendAttrib(doc.AllocAttribFloat("y", max_pos_dev.y()));
 		max_position_deviation_node->AppendAttrib(doc.AllocAttribFloat("z", max_pos_dev.z()));
@@ -1017,9 +1023,9 @@ uint32_t ParticleEditorApp::DoUpdate(uint32_t pass)
 			}
 			re.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, clear_clr, 1.0f, 0);
 
-			particle_updater_.SizeOverLife(dialog_->Control<UIPolylineEditBox>(id_size_over_life_)->GetCtrlPoints());
-			particle_updater_.WeightOverLife(dialog_->Control<UIPolylineEditBox>(id_weight_over_life_)->GetCtrlPoints());
-			particle_updater_.TransparencyOverLife(dialog_->Control<UIPolylineEditBox>(id_transparency_over_life_)->GetCtrlPoints());
+			checked_pointer_cast<PolylineParticleUpdater>(particle_updater_)->SizeOverLife(dialog_->Control<UIPolylineEditBox>(id_size_over_life_)->GetCtrlPoints());
+			checked_pointer_cast<PolylineParticleUpdater>(particle_updater_)->WeightOverLife(dialog_->Control<UIPolylineEditBox>(id_weight_over_life_)->GetCtrlPoints());
+			checked_pointer_cast<PolylineParticleUpdater>(particle_updater_)->TransparencyOverLife(dialog_->Control<UIPolylineEditBox>(id_transparency_over_life_)->GetCtrlPoints());
 
 			terrain_->Visible(true);
 			particles_->Visible(false);
@@ -1033,7 +1039,7 @@ uint32_t ParticleEditorApp::DoUpdate(uint32_t pass)
 		copy_pp_->Apply();
 
 		float4x4 mat = MathLib::translation(0.0f, 0.1f, 0.0f);
-		ps_->ModelMatrix(mat);
+		particle_emitter_->ModelMatrix(mat);
 
 		ps_->Update(this->AppTime(), this->FrameTime());
 
