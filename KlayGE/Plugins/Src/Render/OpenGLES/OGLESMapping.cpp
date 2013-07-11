@@ -264,9 +264,18 @@ namespace KlayGE
 			break;
 
 		case EF_R8:
-			internalFormat = GL_LUMINANCE;
-			glformat = GL_LUMINANCE;
-			gltype = GL_UNSIGNED_BYTE;
+			if (glloader_GLES_VERSION_3_0())
+			{
+				internalFormat = GL_RED;
+				glformat = GL_RED;
+				gltype = GL_UNSIGNED_BYTE;
+			}
+			else
+			{
+				internalFormat = GL_LUMINANCE;
+				glformat = GL_LUMINANCE;
+				gltype = GL_UNSIGNED_BYTE;
+			}
 			break;
 
 		case EF_GR8:

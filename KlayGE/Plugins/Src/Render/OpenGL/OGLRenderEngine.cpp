@@ -153,7 +153,8 @@ namespace KlayGE
 
 	void OGLRenderEngine::CheckConfig(RenderSettings& settings)
 	{
-		if (!glloader_GL_VERSION_3_0() && !glloader_GL_ARB_texture_float())
+		if ((!caps_.texture_format_support(EF_R16F) && !caps_.texture_format_support(EF_ABGR16F))
+			|| (!caps_.texture_format_support(EF_R32F) || !caps_.texture_format_support(EF_ABGR32F)))
 		{
 			settings.hdr = false;
 		}

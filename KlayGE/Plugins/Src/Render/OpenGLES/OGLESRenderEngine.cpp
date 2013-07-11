@@ -114,7 +114,8 @@ namespace KlayGE
 
 	void OGLESRenderEngine::CheckConfig(RenderSettings& settings)
 	{
-		if (!glloader_GLES_OES_texture_half_float() && !glloader_GLES_OES_texture_float())
+		if ((!caps_.texture_format_support(EF_R16F) && !caps_.texture_format_support(EF_ABGR16F))
+			|| (!caps_.texture_format_support(EF_R32F) || !caps_.texture_format_support(EF_ABGR32F)))
 		{
 			settings.hdr = false;
 		}
@@ -948,7 +949,7 @@ namespace KlayGE
 		{
 			texture_format_.insert(EF_A2BGR10);
 		}
-		if (glloader_GLES_VERSION_3_0() || glloader_GLES_OES_texture_half_float())
+		if ((glloader_GLES_VERSION_3_0() || glloader_GLES_OES_texture_half_float()) && !hack_for_pvr_)
 		{
 			texture_format_.insert(EF_R16F);
 			texture_format_.insert(EF_GR16F);
@@ -971,7 +972,7 @@ namespace KlayGE
 			texture_format_.insert(EF_BC2);
 			texture_format_.insert(EF_BC3);
 		}
-		if (glloader_GLES_EXT_texture_compression_latc())
+		if (glloader_GLES_EXT_texture_compression_latc() && !hack_for_pvr_)
 		{
 			texture_format_.insert(EF_BC4);
 			texture_format_.insert(EF_BC5);
@@ -997,12 +998,12 @@ namespace KlayGE
 		{
 			rendertarget_format_.insert(EF_A2BGR10);
 		}
-		if (glloader_GLES_VERSION_3_0() || glloader_GLES_EXT_texture_rg())
+		if ((glloader_GLES_VERSION_3_0() || glloader_GLES_EXT_texture_rg()) && !hack_for_pvr_)
 		{
 			rendertarget_format_.insert(EF_R16F);
 			rendertarget_format_.insert(EF_GR16F);
 		}
-		if (glloader_GLES_VERSION_3_0() || glloader_GLES_OES_texture_half_float())
+		if ((glloader_GLES_VERSION_3_0() || glloader_GLES_OES_texture_half_float()) && !hack_for_pvr_)
 		{
 			rendertarget_format_.insert(EF_ABGR16F);
 		}
