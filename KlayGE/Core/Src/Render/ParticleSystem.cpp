@@ -104,6 +104,7 @@ namespace KlayGE
 				if ((t >= 0) && (t < elapsed_time))
 				{
 					emitter_->Emit(particle);
+					updater_->Update(particle, 0);
 				}
 			}
 		}
@@ -128,7 +129,7 @@ namespace KlayGE
 
 
 	ConeParticleEmitter::ConeParticleEmitter()
-		: random_dis_(0, +10000),
+		: random_dis_(0, 10000),
 			emit_angle_(PI / 3)
 	{
 	}
@@ -165,7 +166,7 @@ namespace KlayGE
 	}
 
 	PolylineParticleUpdater::PolylineParticleUpdater()
-		: gravity_(0.1f),
+		: gravity_(0.5f),
 			force_(0, 0, 0),
 			media_density_(0.0f)
 	{
