@@ -1,4 +1,4 @@
-<particle_system frequency="100">
+<particle_system frequency="500">
 	<particle>
 		<alpha>
 			<from tex="fire.dds"/>

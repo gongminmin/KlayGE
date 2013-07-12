@@ -310,13 +310,13 @@ void ParticleEditorApp::InitObjects()
 	terrain_ = MakeSharedPtr<TerrainObject>();
 	terrain_->AddToSceneManager();
 
-	particle_emitter_ = MakeSharedPtr<ConeParticleEmitter>();
+	ps_ = MakeSharedPtr<ParticleSystem>(NUM_PARTICLE);
+	particle_emitter_ = MakeSharedPtr<ConeParticleEmitter>(ps_);
 	particle_emitter_->MinSpin(-PI / 2);
 	particle_emitter_->MaxSpin(+PI / 2);
-	particle_updater_ = MakeSharedPtr<PolylineParticleUpdater>();
+	particle_updater_ = MakeSharedPtr<PolylineParticleUpdater>(ps_);
 	particle_updater_->MediaDensity(0.5f);
-	ps_ = MakeSharedPtr<ParticleSystem>(NUM_PARTICLE);
-	ps_->Emitter(particle_emitter_);
+	ps_->AddEmitter(particle_emitter_);
 	ps_->Updater(particle_updater_);
 
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
@@ -466,7 +466,7 @@ void ParticleEditorApp::SaveAsHandler(KlayGE::UIButton const & /*sender*/)
 void ParticleEditorApp::AngleChangedHandler(KlayGE::UISlider const & sender)
 {
 	float angle = static_cast<float>(sender.GetValue());
-	checked_pointer_cast<ConeParticleEmitter>(particle_emitter_)->EmitAngle(angle * DEG2RAD);
+	particle_emitter_->EmitAngle(angle * DEG2RAD);
 
 	std::wostringstream stream;
 	stream << angle;
@@ -478,7 +478,6 @@ void ParticleEditorApp::LifeChangedHandler(KlayGE::UISlider const & sender)
 	init_life_ = static_cast<float>(sender.GetValue());
 	particle_emitter_->MinLife(init_life_);
 	particle_emitter_->MaxLife(init_life_);
-	particle_updater_->InitLife(init_life_);
 	checked_pointer_cast<ParticlesObject>(particles_)->InitLife(init_life_);
 
 	std::wostringstream stream;
@@ -766,7 +765,7 @@ void ParticleEditorApp::LoadParticleSystem(std::string const & name)
 	KlayGE::XMLDocument doc;
 	XMLNodePtr root = doc.Parse(ifs);
 
-	ps_->Frequency(root->Attrib("frequency")->ValueFloat());
+	particle_emitter_->Frequency(root->Attrib("frequency")->ValueFloat());
 
 	{
 		XMLNodePtr particle_node = root->FirstNode("particle");
@@ -880,7 +879,7 @@ void ParticleEditorApp::SaveParticleSystem(std::string const & name)
 	XMLNodePtr root = doc.AllocNode(XNT_Element, "particle_system");
 	doc.RootNode(root);
 
-	root->AppendAttrib(doc.AllocAttribFloat("frequency", ps_->Frequency()));
+	root->AppendAttrib(doc.AllocAttribFloat("frequency", particle_emitter_->Frequency()));
 
 	{
 		XMLNodePtr particle_node = doc.AllocNode(XNT_Element, "particle");

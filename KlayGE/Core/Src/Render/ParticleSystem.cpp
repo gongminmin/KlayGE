@@ -34,62 +34,65 @@
 
 namespace KlayGE
 {
+	uint32_t ParticleEmitter::Update(float elapsed_time)
+	{
+		return static_cast<uint32_t>(elapsed_time * emit_freq_ + 0.5f);
+	}
+
+
 	ParticleSystem::ParticleSystem(uint32_t max_num_particles)
-		: particles_(max_num_particles),
-			inv_emit_freq_(0), accumulate_time_(0)
+		: particles_(max_num_particles)
 	{
 	}
 
-	void ParticleSystem::Emitter(std::string const & name)
+	ParticleEmitterPtr ParticleSystem::MakeEmitter(std::string const & name)
 	{
+		ParticleEmitterPtr ret;
 		if ("Cone" == name)
 		{
-			this->Emitter(MakeSharedPtr<ConeParticleEmitter>());
+			ret = MakeSharedPtr<ConeParticleEmitter>(this->shared_from_this());
 		}
 		else
 		{
 			BOOST_ASSERT(false);
 		}
+
+		return ret;
 	}
 
-	void ParticleSystem::Updater(std::string const & name)
+	ParticleUpdaterPtr ParticleSystem::MakeUpdater(std::string const & name)
 	{
+		ParticleUpdaterPtr ret;
 		if ("Polyline" == name)
 		{
-			this->Updater(MakeSharedPtr<PolylineParticleUpdater>());
+			ret = MakeSharedPtr<PolylineParticleUpdater>(this->shared_from_this());
 		}
 		else
 		{
 			BOOST_ASSERT(false);
 		}
+
+		return ret;
 	}
 
-	void ParticleSystem::Frequency(float freq)
+	void ParticleSystem::AddEmitter(ParticleEmitterPtr const & emitter)
 	{
-		inv_emit_freq_ = 1.0f / freq;
+		emitters_.push_back(emitter);
+	}
 
-		float time = 0;
-		typedef KLAYGE_DECLTYPE(particles_) ParticlesType;
-		KLAYGE_FOREACH(ParticlesType::reference particle, particles_)
+	void ParticleSystem::DelEmitter(ParticleEmitterPtr const & emitter)
+	{
+		KLAYGE_AUTO(iter, std::find(emitters_.begin(), emitters_.end(), emitter));
+		if (iter != emitters_.end())
 		{
-			particle.life = -1;
-			particle.birth_time = time;
-			time += inv_emit_freq_;
+			emitters_.erase(iter);
 		}
-	}
-
-	float ParticleSystem::Frequency() const
-	{
-		return 1.0f / inv_emit_freq_;
 	}
 
 	void ParticleSystem::Update(float /*app_time*/, float elapsed_time)
 	{
-		accumulate_time_ += elapsed_time;
-		if (accumulate_time_ >= particles_.size() * inv_emit_freq_)
-		{
-			accumulate_time_ = 0;
-		}
+		KLAYGE_AUTO(emitter_iter, emitters_.begin());
+		uint32_t new_particle = (*emitter_iter)->Update(elapsed_time);
 
 		typedef KLAYGE_DECLTYPE(particles_) ParticlesType;
 		KLAYGE_FOREACH(ParticlesType::reference particle, particles_)
@@ -100,11 +103,22 @@ namespace KlayGE
 			}
 			else
 			{
-				float const t = accumulate_time_ - particle.birth_time;
-				if ((t >= 0) && (t < elapsed_time))
+				if (new_particle > 0)
 				{
-					emitter_->Emit(particle);
+					(*emitter_iter)->Emit(particle);
 					updater_->Update(particle, 0);
+					-- new_particle;
+				}
+				else
+				{
+					if (emitter_iter != emitters_.end())
+					{
+						++ emitter_iter;
+						if (emitter_iter != emitters_.end())
+						{
+							new_particle = (*emitter_iter)->Update(elapsed_time);
+						}
+					}
 				}
 			}
 		}
@@ -128,20 +142,10 @@ namespace KlayGE
 	}
 
 
-	ConeParticleEmitter::ConeParticleEmitter()
-		: random_dis_(0, 10000),
-			emit_angle_(PI / 3)
+	ConeParticleEmitter::ConeParticleEmitter(ParticleSystemPtr const & ps)
+		: ParticleEmitter(ps),
+			random_dis_(0, 10000)
 	{
-	}
-
-	void ConeParticleEmitter::EmitAngle(float angle)
-	{
-		emit_angle_ = angle;
-	}
-
-	float ConeParticleEmitter::EmitAngle() const
-	{
-		return emit_angle_;
 	}
 
 	void ConeParticleEmitter::Emit(Particle& par)
@@ -158,6 +162,7 @@ namespace KlayGE
 		par.spin = MathLib::lerp(min_spin_, max_spin_, this->RandomGen());
 		par.size = MathLib::lerp(min_size_, max_size_, this->RandomGen());
 		par.color = MathLib::lerp(min_clr_, max_clr_, this->RandomGen());
+		par.init_life = par.life;
 	}
 
 	float ConeParticleEmitter::RandomGen()
@@ -165,16 +170,10 @@ namespace KlayGE
 		return MathLib::clamp(random_dis_(gen_) * 0.0001f, 0.0f, 1.0f);
 	}
 
-	PolylineParticleUpdater::PolylineParticleUpdater()
-		: gravity_(0.5f),
-			force_(0, 0, 0),
-			media_density_(0.0f)
+	PolylineParticleUpdater::PolylineParticleUpdater(ParticleSystemPtr const & ps)
+		: ParticleUpdater(ps),
+			gravity_(0.5f), force_(0, 0, 0), media_density_(0.0f)
 	{
-	}
-
-	void PolylineParticleUpdater::InitLife(float life)
-	{
-		init_life_ = life;
 	}
 
 	void PolylineParticleUpdater::Force(float3 force)
@@ -210,7 +209,7 @@ namespace KlayGE
 
 	void PolylineParticleUpdater::Update(Particle& par, float elapse_time)
 	{
-		float pos = (init_life_ - par.life) / init_life_;
+		float pos = (par.init_life - par.life) / par.init_life;
 
 		float cur_size = size_over_life_.back().y();
 		for (std::vector<float2>::const_iterator iter = size_over_life_.begin(); iter != size_over_life_.end() - 1; ++ iter)

@@ -48,14 +48,15 @@ namespace KlayGE
 		float spin;
 		float size;
 		Color color;
-		float birth_time;
+
+		float init_life;
 	};
 
 	class KLAYGE_CORE_API ParticleEmitter
 	{
 	public:
-		ParticleEmitter()
-			: model_mat_(float4x4::Identity())
+		explicit ParticleEmitter(ParticleSystemPtr const & ps)
+			: ps_(ps), model_mat_(float4x4::Identity())
 		{
 		}
 		virtual ~ParticleEmitter()
@@ -69,6 +70,24 @@ namespace KlayGE
 		float4x4 const & ModelMatrix() const
 		{
 			return model_mat_;
+		}
+
+		void Frequency(float freq)
+		{
+			emit_freq_ = freq;
+		}
+		float Frequency() const
+		{
+			return emit_freq_;
+		}
+
+		void EmitAngle(float angle)
+		{
+			emit_angle_ = angle;
+		}
+		float EmitAngle() const
+		{
+			return emit_angle_;
 		}
 
 		void MinPosition(float3 const & pos)
@@ -173,10 +192,16 @@ namespace KlayGE
 			return max_clr_;
 		}
 
+		uint32_t Update(float elapsed_time);
 		virtual void Emit(Particle& par) = 0;
 
 	protected:
+		weak_ptr<ParticleSystem> ps_;
+
+		float emit_freq_;
+		
 		float4x4 model_mat_;
+		float emit_angle_;
 
 		float3 min_pos_;
 		float3 max_pos_;
@@ -195,33 +220,39 @@ namespace KlayGE
 	class KLAYGE_CORE_API ParticleUpdater
 	{
 	public:
+		explicit ParticleUpdater(ParticleSystemPtr const & ps)
+			: ps_(ps)
+		{
+		}
 		virtual ~ParticleUpdater()
 		{
 		}
 
-		virtual void InitLife(float life) = 0;
 		virtual void Force(float3 force) = 0;
 		virtual void MediaDensity(float density) = 0;
 
 		virtual void Update(Particle& par, float elapse_time) = 0;
+
+	private:
+		weak_ptr<ParticleSystem> ps_;
 	};
 
-	class KLAYGE_CORE_API ParticleSystem
+	class KLAYGE_CORE_API ParticleSystem : public enable_shared_from_this<ParticleSystem>
 	{
 	public:
 		explicit ParticleSystem(uint32_t max_num_particles);
 
-		void Emitter(std::string const & name);
-		void Emitter(ParticleEmitterPtr const & emitter)
+		ParticleEmitterPtr MakeEmitter(std::string const & name);
+		ParticleUpdaterPtr MakeUpdater(std::string const & name);
+
+		void AddEmitter(ParticleEmitterPtr const & emitter);
+		void DelEmitter(ParticleEmitterPtr const & emitter);
+		ParticleEmitterPtr Emitter(uint32_t index) const
 		{
-			emitter_ = emitter;
-		}
-		ParticleEmitterPtr Emitter() const
-		{
-			return emitter_;
+			BOOST_ASSERT(index < emitters_.size());
+			return emitters_[index];
 		}
 
-		void Updater(std::string const & name);
 		void Updater(ParticleUpdaterPtr const & updater)
 		{
 			updater_ = updater;
@@ -231,9 +262,6 @@ namespace KlayGE
 			return updater_;
 		}
 
-		void Frequency(float freq);
-		float Frequency() const;
-
 		void Update(float app_time, float elapsed_time);
 
 		uint32_t NumParticles() const;
@@ -242,22 +270,16 @@ namespace KlayGE
 		Particle& GetParticle(uint32_t i);
 
 	protected:
-		ParticleEmitterPtr emitter_;
+		std::vector<ParticleEmitterPtr> emitters_;
 		ParticleUpdaterPtr updater_;
 
 		std::vector<Particle> particles_;
-
-		float inv_emit_freq_;
-		float accumulate_time_;
 	};
 
 	class KLAYGE_CORE_API ConeParticleEmitter : public ParticleEmitter
 	{
 	public:
-		ConeParticleEmitter();
-
-		void EmitAngle(float angle);
-		float EmitAngle() const;
+		explicit ConeParticleEmitter(ParticleSystemPtr const & ps);
 
 		virtual void Emit(Particle& par) KLAYGE_OVERRIDE;
 
@@ -267,16 +289,13 @@ namespace KlayGE
 	private:
 		ranlux24_base gen_;
 		uniform_int_distribution<> random_dis_;
-
-		float emit_angle_;
 	};
 
 	class KLAYGE_CORE_API PolylineParticleUpdater : public ParticleUpdater
 	{
 	public:
-		PolylineParticleUpdater();
+		explicit PolylineParticleUpdater(ParticleSystemPtr const & ps);
 
-		virtual void InitLife(float life) KLAYGE_OVERRIDE;
 		virtual void Force(float3 force) KLAYGE_OVERRIDE;
 		virtual void MediaDensity(float density) KLAYGE_OVERRIDE;
 
@@ -289,7 +308,6 @@ namespace KlayGE
 		virtual void Update(Particle& par, float elapse_time) KLAYGE_OVERRIDE;
 
 	private:
-		float init_life_;
 		float gravity_;
 		float3 force_;
 		float media_density_;
