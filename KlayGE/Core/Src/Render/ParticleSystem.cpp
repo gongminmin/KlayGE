@@ -41,7 +41,8 @@ namespace KlayGE
 
 
 	ParticleSystem::ParticleSystem(uint32_t max_num_particles)
-		: particles_(max_num_particles)
+		: particles_(max_num_particles),
+			gravity_(0.5f), force_(0, 0, 0), media_density_(0.0f)
 	{
 	}
 
@@ -89,6 +90,30 @@ namespace KlayGE
 		}
 	}
 
+	void ParticleSystem::ClearEmitter()
+	{
+		emitters_.clear();
+	}
+
+	void ParticleSystem::AddUpdater(ParticleUpdaterPtr const & updater)
+	{
+		updaters_.push_back(updater);
+	}
+
+	void ParticleSystem::DelUpdater(ParticleUpdaterPtr const & updater)
+	{
+		KLAYGE_AUTO(iter, std::find(updaters_.begin(), updaters_.end(), updater));
+		if (iter != updaters_.end())
+		{
+			updaters_.erase(iter);
+		}
+	}
+
+	void ParticleSystem::ClearUpdater()
+	{
+		updaters_.clear();
+	}
+
 	void ParticleSystem::Update(float /*app_time*/, float elapsed_time)
 	{
 		KLAYGE_AUTO(emitter_iter, emitters_.begin());
@@ -97,16 +122,23 @@ namespace KlayGE
 		typedef KLAYGE_DECLTYPE(particles_) ParticlesType;
 		KLAYGE_FOREACH(ParticlesType::reference particle, particles_)
 		{
+			typedef KLAYGE_DECLTYPE(updaters_) UpdatersType;
 			if (particle.life > 0)
 			{
-				updater_->Update(particle, elapsed_time);
+				KLAYGE_FOREACH(UpdatersType::reference updater, updaters_)
+				{
+					updater->Update(particle, elapsed_time);
+				}
 			}
 			else
 			{
 				if (new_particle > 0)
 				{
 					(*emitter_iter)->Emit(particle);
-					updater_->Update(particle, 0);
+					KLAYGE_FOREACH(UpdatersType::reference updater, updaters_)
+					{
+						updater->Update(particle, 0);
+					}
 					-- new_particle;
 				}
 				else
@@ -122,23 +154,6 @@ namespace KlayGE
 				}
 			}
 		}
-	}
-
-	uint32_t ParticleSystem::NumParticles() const
-	{
-		return static_cast<uint32_t>(particles_.size());
-	}
-
-	Particle const & ParticleSystem::GetParticle(uint32_t i) const
-	{
-		BOOST_ASSERT(i < particles_.size());
-		return particles_[i];
-	}
-
-	Particle& ParticleSystem::GetParticle(uint32_t i)
-	{
-		BOOST_ASSERT(i < particles_.size());
-		return particles_[i];
 	}
 
 
@@ -171,19 +186,8 @@ namespace KlayGE
 	}
 
 	PolylineParticleUpdater::PolylineParticleUpdater(ParticleSystemPtr const & ps)
-		: ParticleUpdater(ps),
-			gravity_(0.5f), force_(0, 0, 0), media_density_(0.0f)
+		: ParticleUpdater(ps)
 	{
-	}
-
-	void PolylineParticleUpdater::Force(float3 force)
-	{
-		force_ = force;
-	}
-
-	void PolylineParticleUpdater::MediaDensity(float density)
-	{
-		media_density_ = density;
 	}
 
 	void PolylineParticleUpdater::SizeOverLife(std::vector<float2> const & size_over_life)
@@ -244,8 +248,10 @@ namespace KlayGE
 			}
 		}
 
-		float buoyancy = cur_size * media_density_;
-		float3 accel = (force_ + float3(0, buoyancy, 0)) / cur_weight - float3(0, gravity_, 0);
+		ParticleSystemPtr ps = ps_.lock();
+
+		float buoyancy = cur_size * ps->MediaDensity();
+		float3 accel = (ps->Force() + float3(0, buoyancy, 0)) / cur_weight - float3(0, ps->Gravity(), 0);
 		par.vel += accel * elapse_time;
 		par.pos += par.vel * elapse_time;
 		par.life -= elapse_time;

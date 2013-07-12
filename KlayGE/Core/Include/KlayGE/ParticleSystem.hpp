@@ -228,12 +228,9 @@ namespace KlayGE
 		{
 		}
 
-		virtual void Force(float3 force) = 0;
-		virtual void MediaDensity(float density) = 0;
-
 		virtual void Update(Particle& par, float elapse_time) = 0;
 
-	private:
+	protected:
 		weak_ptr<ParticleSystem> ps_;
 	};
 
@@ -242,38 +239,86 @@ namespace KlayGE
 	public:
 		explicit ParticleSystem(uint32_t max_num_particles);
 
+		void Gravity(float gravity)
+		{
+			gravity_ = gravity;
+		}
+		float Gravity() const
+		{
+			return gravity_;
+		}
+		void Force(float3 const & force)
+		{
+			force_ = force;
+		}
+		float3 const & Force() const
+		{
+			return force_;
+		}
+		void MediaDensity(float density)
+		{
+			media_density_ = density;
+		}
+		float MediaDensity() const
+		{
+			return media_density_;
+		}
+
 		ParticleEmitterPtr MakeEmitter(std::string const & name);
 		ParticleUpdaterPtr MakeUpdater(std::string const & name);
 
 		void AddEmitter(ParticleEmitterPtr const & emitter);
 		void DelEmitter(ParticleEmitterPtr const & emitter);
+		void ClearEmitter();
+		uint32_t NumEmitters() const
+		{
+			return static_cast<uint32_t>(emitters_.size());
+		}
 		ParticleEmitterPtr Emitter(uint32_t index) const
 		{
 			BOOST_ASSERT(index < emitters_.size());
 			return emitters_[index];
 		}
 
-		void Updater(ParticleUpdaterPtr const & updater)
+		void AddUpdater(ParticleUpdaterPtr const & updater);
+		void DelUpdater(ParticleUpdaterPtr const & updater);
+		void ClearUpdater();
+		uint32_t NumUpdaters() const
 		{
-			updater_ = updater;
+			return static_cast<uint32_t>(updaters_.size());
 		}
-		ParticleUpdaterPtr Updater() const
+		ParticleUpdaterPtr Updater(uint32_t index) const
 		{
-			return updater_;
+			BOOST_ASSERT(index < updaters_.size());
+			return updaters_[index];
 		}
 
 		void Update(float app_time, float elapsed_time);
 
-		uint32_t NumParticles() const;
-
-		Particle const & GetParticle(uint32_t i) const;
-		Particle& GetParticle(uint32_t i);
+		uint32_t NumParticles() const
+		{
+			return static_cast<uint32_t>(particles_.size());
+		}
+		Particle const & GetParticle(uint32_t i) const
+		{
+			BOOST_ASSERT(i < particles_.size());
+			return particles_[i];
+		}
+		Particle& GetParticle(uint32_t i)
+		{
+			BOOST_ASSERT(i < particles_.size());
+			return particles_[i];
+		}
 
 	protected:
 		std::vector<ParticleEmitterPtr> emitters_;
-		ParticleUpdaterPtr updater_;
+		std::vector<ParticleUpdaterPtr> updaters_;
 
 		std::vector<Particle> particles_;
+
+		float gravity_;
+		float3 force_;
+		float media_density_;
 	};
 
 	class KLAYGE_CORE_API ConeParticleEmitter : public ParticleEmitter
@@ -296,9 +341,6 @@ namespace KlayGE
 	public:
 		explicit PolylineParticleUpdater(ParticleSystemPtr const & ps);
 
-		virtual void Force(float3 force) KLAYGE_OVERRIDE;
-		virtual void MediaDensity(float density) KLAYGE_OVERRIDE;
-
 		void SizeOverLife(std::vector<float2> const & size_over_life);
 		void WeightOverLife(std::vector<float2> const & weight_over_life);
 		void TransparencyOverLife(std::vector<float2> const & transparency_over_life);
@@ -308,10 +350,6 @@ namespace KlayGE
 		virtual void Update(Particle& par, float elapse_time) KLAYGE_OVERRIDE;
 
 	private:
-		float gravity_;
-		float3 force_;
-		float media_density_;
-
 		std::vector<float2> size_over_life_;
 		std::vector<float2> weight_over_life_;
 		std::vector<float2> transparency_over_life_;

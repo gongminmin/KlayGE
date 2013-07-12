@@ -315,9 +315,9 @@ void ParticleEditorApp::InitObjects()
 	particle_emitter_->MinSpin(-PI / 2);
 	particle_emitter_->MaxSpin(+PI / 2);
 	particle_updater_ = MakeSharedPtr<PolylineParticleUpdater>(ps_);
-	particle_updater_->MediaDensity(0.5f);
+	ps_->MediaDensity(0.5f);
 	ps_->AddEmitter(particle_emitter_);
-	ps_->Updater(particle_updater_);
+	ps_->AddUpdater(particle_updater_);
 
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 	RenderEngine& re = rf.RenderEngineInstance();
@@ -488,7 +488,7 @@ void ParticleEditorApp::LifeChangedHandler(KlayGE::UISlider const & sender)
 void ParticleEditorApp::DensityChangedHandler(KlayGE::UISlider const & sender)
 {
 	float density = sender.GetValue() / 100.0f;
-	particle_updater_->MediaDensity(density);
+	ps_->MediaDensity(density);
 
 	std::wostringstream stream;
 	stream << density;
