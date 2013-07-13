@@ -14,6 +14,8 @@
 		<parameter type="float3" name="depth_near_far_invfar"/>
 	</cbuffer>
 
+	<parameter type="float3" name="particle_color_from"/>
+	<parameter type="float3" name="particle_color_to"/>
 	<parameter type="texture2D" name="particle_alpha_from_tex"/>
 	<parameter type="texture2D" name="particle_alpha_to_tex"/>
 	<parameter type="sampler" name="particle_sampler">
@@ -41,28 +43,24 @@ struct PS_IN
 };
 
 void ParticleVS(float4 pos : TEXCOORD0,
-					float spin : TEXCOORD1,
-					float size : TEXCOORD2,
-					float4 color : TEXCOORD3,
+					float4 spin_size_lf_alpha : TEXCOORD1,
 					float2 tex : POSITION,
 					out PS_IN vs_out)
 {
-	float radius = point_radius * size * 2;
-
-	float life_factor = (init_life - pos.w) / init_life;
+	float radius = point_radius * spin_size_lf_alpha.y * 2;
 
 	vs_out.CenterView = mul(float4(pos.xyz, 1), View);
 	float4 view_pos = vs_out.CenterView;
 	float2 offset = tex * radius;
-	float cz = cos(spin);
-	float sz = sin(spin);
+	float cz = cos(spin_size_lf_alpha.x);
+	float sz = sin(spin_size_lf_alpha.x);
 	view_pos.xy += float2(offset.x * cz - offset.y * sz, offset.x * sz + offset.y * cz);
 	vs_out.pos = mul(view_pos, Proj);
-	vs_out.clr = color;
+	vs_out.clr = float4(lerp(particle_color_from, particle_color_to, spin_size_lf_alpha.z), spin_size_lf_alpha.w);
 	vs_out.PosSS = vs_out.pos;
 	vs_out.view_dir.xyz = view_pos.xyz;
 	vs_out.view_dir.w = radius;
-	vs_out.tex = float3(float2(tex.x, -tex.y) / 2 + 0.5f, life_factor);
+	vs_out.tex = float3(float2(tex.x, -tex.y) / 2 + 0.5f, spin_size_lf_alpha.z);
 }
 
 float4 ParticlePS(PS_IN ps_in) : SV_Target
@@ -104,39 +102,36 @@ float4 ParticlePS(PS_IN ps_in) : SV_Target
 	<shader version="4">
 		<![CDATA[
 void ParticleVS2(float4 pos : POSITION,
-					float spin : TEXCOORD0,
-					float size : TEXCOORD1,
-					float4 color : TEXCOORD2,
+					float4 spin_size_lf_alpha : TEXCOORD0,
 					out float4 oCenterView_Life : SV_Position,
-					out float oRadius : TEXCOORD0,
-					out float oSpin : TEXCOORD1,
-					out float4 oColor : TEXCOORD2)
+					out float3 oSpinRadiusLF : TEXCOORD0,
+					out float4 oColor : TEXCOORD1)
 {
 	oCenterView_Life = float4(mul(float4(pos.xyz, 1), View).xyz, pos.w);
-	oRadius = point_radius * size * 2;
-	oSpin = spin;
-	oColor = color;
+	oSpinRadiusLF.x = spin_size_lf_alpha.x;
+	oSpinRadiusLF.y = point_radius * spin_size_lf_alpha.y * 2;
+	oSpinRadiusLF.z = spin_size_lf_alpha.z;
+	oColor = float4(lerp(particle_color_from, particle_color_to, spin_size_lf_alpha.z), spin_size_lf_alpha.w);
 }
 
 #if KLAYGE_OPENGL
-POINT TRIANGLE_OUT void ParticleGS(AttribArray<float4> in_CenterView_Life : SV_Position, AttribArray<float> in_radius : TEXCOORD0,
-	AttribArray<float> in_spin : TEXCOORD1, , AttribArray<float4> in_color : TEXCOORD2)
+POINT TRIANGLE_OUT void ParticleGS(AttribArray<float4> in_CenterView_Life : SV_Position, AttribArray<float3> in_spin_radius_lf : TEXCOORD0,
+	AttribArray<float4> in_color : TEXCOORD1)
 {
 #else
 [maxvertexcount(4)]
-void ParticleGS(point float4 in_CenterView_Life[1] : SV_Position, point float in_radius[1] : TEXCOORD0,
-	point float in_spin[1] : TEXCOORD1, point float4 in_color[1] : TEXCOORD2,
-	inout TriangleStream<PS_IN> out_stream)
+void ParticleGS(point float4 in_CenterView_Life[1] : SV_Position, point float3 in_spin_radius_lf[1] : TEXCOORD0,
+	point float4 in_color[1] : TEXCOORD1, inout TriangleStream<PS_IN> out_stream)
 {
 #endif
 
 	float4 CenterView_Life = in_CenterView_Life[0];
-	float radius = in_radius[0];
-	float spin = in_spin[0];
+	float spin = in_spin_radius_lf[0].x;
+	float radius = in_spin_radius_lf[0].y;
 	
 	PS_IN gs_out;
 	
-	float life_factor = (init_life - CenterView_Life.w) / init_life;
+	float life_factor = in_spin_radius_lf[0].z;
 	gs_out.CenterView = float4(CenterView_Life.xyz, 1);
 	float cz = cos(spin);
 	float sz = sin(spin);

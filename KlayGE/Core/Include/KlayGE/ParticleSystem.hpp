@@ -47,7 +47,7 @@ namespace KlayGE
 		float life;
 		float spin;
 		float size;
-		Color color;
+		float alpha;
 
 		float init_life;
 	};
@@ -62,6 +62,8 @@ namespace KlayGE
 		virtual ~ParticleEmitter()
 		{
 		}
+
+		virtual std::string const & Type() const = 0;
 
 		void ModelMatrix(float4x4 const & model)
 		{
@@ -175,23 +177,6 @@ namespace KlayGE
 			return max_size_;
 		}
 
-		void MinColor(Color const & clr)
-		{
-			min_clr_ = clr;
-		}
-		void MaxColor(Color const & clr)
-		{
-			max_clr_ = clr;
-		}
-		Color const & MinColor() const
-		{
-			return min_clr_;
-		}
-		Color const & MaxColor() const
-		{
-			return max_clr_;
-		}
-
 		uint32_t Update(float elapsed_time);
 		virtual void Emit(Particle& par) = 0;
 
@@ -213,8 +198,6 @@ namespace KlayGE
 		float max_spin_;
 		float min_size_;
 		float max_size_;
-		Color min_clr_;
-		Color max_clr_;
 	};
 
 	class KLAYGE_CORE_API ParticleUpdater
@@ -227,6 +210,8 @@ namespace KlayGE
 		virtual ~ParticleUpdater()
 		{
 		}
+
+		virtual std::string const & Type() const = 0;
 
 		virtual void Update(Particle& par, float elapse_time) = 0;
 
@@ -264,8 +249,8 @@ namespace KlayGE
 			return media_density_;
 		}
 
-		ParticleEmitterPtr MakeEmitter(std::string const & name);
-		ParticleUpdaterPtr MakeUpdater(std::string const & name);
+		ParticleEmitterPtr MakeEmitter(std::string const & type);
+		ParticleUpdaterPtr MakeUpdater(std::string const & type);
 
 		void AddEmitter(ParticleEmitterPtr const & emitter);
 		void DelEmitter(ParticleEmitterPtr const & emitter);
@@ -321,10 +306,12 @@ namespace KlayGE
 		float media_density_;
 	};
 
-	class KLAYGE_CORE_API ConeParticleEmitter : public ParticleEmitter
+	class KLAYGE_CORE_API PointParticleEmitter : public ParticleEmitter
 	{
 	public:
-		explicit ConeParticleEmitter(ParticleSystemPtr const & ps);
+		explicit PointParticleEmitter(ParticleSystemPtr const & ps);
+
+		virtual std::string const & Type() const KLAYGE_OVERRIDE;
 
 		virtual void Emit(Particle& par) KLAYGE_OVERRIDE;
 
@@ -341,20 +328,39 @@ namespace KlayGE
 	public:
 		explicit PolylineParticleUpdater(ParticleSystemPtr const & ps);
 
-		void SizeOverLife(std::vector<float2> const & size_over_life);
-		void WeightOverLife(std::vector<float2> const & weight_over_life);
-		void TransparencyOverLife(std::vector<float2> const & transparency_over_life);
-		
-		void ColorFromTo(Color const & from, Color const & to);
+		virtual std::string const & Type() const KLAYGE_OVERRIDE;
+
+		void SizeOverLife(std::vector<float2> const & size_over_life)
+		{
+			size_over_life_ = size_over_life;
+		}
+		std::vector<float2> const & SizeOverLife() const
+		{
+			return size_over_life_;
+		}
+		void MassOverLife(std::vector<float2> const & mass_over_life)
+		{
+			mass_over_life_ = mass_over_life;
+		}
+		std::vector<float2> const & MassOverLife() const
+		{
+			return mass_over_life_;
+		}
+		void TransparencyOverLife(std::vector<float2> const & transparency_over_life)
+		{
+			transparency_over_life_ = transparency_over_life;
+		}
+		std::vector<float2> const & TransparencyOverLife() const
+		{
+			return transparency_over_life_;
+		}
 
 		virtual void Update(Particle& par, float elapse_time) KLAYGE_OVERRIDE;
 
 	private:
 		std::vector<float2> size_over_life_;
-		std::vector<float2> weight_over_life_;
+		std::vector<float2> mass_over_life_;
 		std::vector<float2> transparency_over_life_;
-
-		Color clr_from_, clr_to_;
 	};
 }
 

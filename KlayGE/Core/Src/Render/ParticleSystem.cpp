@@ -49,9 +49,9 @@ namespace KlayGE
 	ParticleEmitterPtr ParticleSystem::MakeEmitter(std::string const & name)
 	{
 		ParticleEmitterPtr ret;
-		if ("Cone" == name)
+		if ("point" == name)
 		{
-			ret = MakeSharedPtr<ConeParticleEmitter>(this->shared_from_this());
+			ret = MakeSharedPtr<PointParticleEmitter>(this->shared_from_this());
 		}
 		else
 		{
@@ -64,7 +64,7 @@ namespace KlayGE
 	ParticleUpdaterPtr ParticleSystem::MakeUpdater(std::string const & name)
 	{
 		ParticleUpdaterPtr ret;
-		if ("Polyline" == name)
+		if ("polyline" == name)
 		{
 			ret = MakeSharedPtr<PolylineParticleUpdater>(this->shared_from_this());
 		}
@@ -157,15 +157,24 @@ namespace KlayGE
 	}
 
 
-	ConeParticleEmitter::ConeParticleEmitter(ParticleSystemPtr const & ps)
+	PointParticleEmitter::PointParticleEmitter(ParticleSystemPtr const & ps)
 		: ParticleEmitter(ps),
 			random_dis_(0, 10000)
 	{
 	}
 
-	void ConeParticleEmitter::Emit(Particle& par)
+	std::string const & PointParticleEmitter::Type() const
 	{
-		par.pos = MathLib::transform_coord(MathLib::lerp(min_pos_, max_pos_, this->RandomGen()), model_mat_);
+		static std::string const type("point");
+		return type;
+	}
+
+	void PointParticleEmitter::Emit(Particle& par)
+	{
+		par.pos.x() = MathLib::lerp(min_pos_.x(), max_pos_.x(), this->RandomGen());
+		par.pos.y() = MathLib::lerp(min_pos_.y(), max_pos_.y(), this->RandomGen());
+		par.pos.z() = MathLib::lerp(min_pos_.z(), max_pos_.z(), this->RandomGen());
+		par.pos = MathLib::transform_coord(par.pos, model_mat_);
 		float theta = (this->RandomGen() * 2 - 1) * PI;
 		float phi = this->RandomGen() * emit_angle_ / 2;
 		float velocity = MathLib::lerp(min_vel_, max_vel_, this->RandomGen());
@@ -176,39 +185,24 @@ namespace KlayGE
 		par.life = MathLib::lerp(min_life_, max_life_, this->RandomGen());
 		par.spin = MathLib::lerp(min_spin_, max_spin_, this->RandomGen());
 		par.size = MathLib::lerp(min_size_, max_size_, this->RandomGen());
-		par.color = MathLib::lerp(min_clr_, max_clr_, this->RandomGen());
 		par.init_life = par.life;
 	}
 
-	float ConeParticleEmitter::RandomGen()
+	float PointParticleEmitter::RandomGen()
 	{
 		return MathLib::clamp(random_dis_(gen_) * 0.0001f, 0.0f, 1.0f);
 	}
+
 
 	PolylineParticleUpdater::PolylineParticleUpdater(ParticleSystemPtr const & ps)
 		: ParticleUpdater(ps)
 	{
 	}
 
-	void PolylineParticleUpdater::SizeOverLife(std::vector<float2> const & size_over_life)
+	std::string const & PolylineParticleUpdater::Type() const
 	{
-		size_over_life_ = size_over_life;
-	}
-
-	void PolylineParticleUpdater::WeightOverLife(std::vector<float2> const & weight_over_life)
-	{
-		weight_over_life_ = weight_over_life;
-	}
-
-	void PolylineParticleUpdater::TransparencyOverLife(std::vector<float2> const & transparency_over_life)
-	{
-		transparency_over_life_ = transparency_over_life;
-	}
-
-	void PolylineParticleUpdater::ColorFromTo(Color const & from, Color const & to)
-	{
-		clr_from_ = from;
-		clr_to_ = to;
+		static std::string const type("polyline");
+		return type;
 	}
 
 	void PolylineParticleUpdater::Update(Particle& par, float elapse_time)
@@ -226,13 +220,13 @@ namespace KlayGE
 			}
 		}
 
-		float cur_weight = weight_over_life_.back().y();
-		for (std::vector<float2>::const_iterator iter = weight_over_life_.begin(); iter != weight_over_life_.end() - 1; ++ iter)
+		float cur_mass = mass_over_life_.back().y();
+		for (std::vector<float2>::const_iterator iter = mass_over_life_.begin(); iter != mass_over_life_.end() - 1; ++ iter)
 		{
 			if ((iter + 1)->x() >= pos)
 			{
 				float const s = (pos - iter->x()) / ((iter + 1)->x() - iter->x());
-				cur_weight = MathLib::lerp(iter->y(), (iter + 1)->y(), s);
+				cur_mass = MathLib::lerp(iter->y(), (iter + 1)->y(), s);
 				break;
 			}
 		}
@@ -250,15 +244,13 @@ namespace KlayGE
 
 		ParticleSystemPtr ps = ps_.lock();
 
-		float buoyancy = cur_size * ps->MediaDensity();
-		float3 accel = (ps->Force() + float3(0, buoyancy, 0)) / cur_weight - float3(0, ps->Gravity(), 0);
+		float buoyancy = 4.0f / 3 * PI * MathLib::cube(cur_size) * ps->MediaDensity() * ps->Gravity();
+		float3 accel = (ps->Force() + float3(0, buoyancy, 0)) / cur_mass - float3(0, ps->Gravity(), 0);
 		par.vel += accel * elapse_time;
 		par.pos += par.vel * elapse_time;
 		par.life -= elapse_time;
 		par.spin += 0.001f;
 		par.size = cur_size;
-		*reinterpret_cast<float4*>(&par.color) = MathLib::lerp(*reinterpret_cast<float4*>(&clr_from_),
-			*reinterpret_cast<float4*>(&clr_to_), pos);
-		par.color.a() = cur_alpha;
+		par.alpha = cur_alpha;
 	}
 }
