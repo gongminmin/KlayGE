@@ -51,7 +51,6 @@ private:
 
 	KlayGE::FontPtr font_;
 
-	KlayGE::SceneObjectPtr particles_;
 	KlayGE::SceneObjectPtr terrain_;
 
 	KlayGE::FirstPersonCameraController fpsController_;
@@ -59,11 +58,6 @@ private:
 	KlayGE::ParticleEmitterPtr particle_emitter_;
 	KlayGE::ParticleUpdaterPtr particle_updater_;
 	KlayGE::ParticleSystemPtr ps_;
-
-	std::string particle_alpha_from_tex_;
-	std::string particle_alpha_to_tex_;
-	KlayGE::Color particle_color_from_;
-	KlayGE::Color particle_color_to_;
 
 	KlayGE::TexturePtr scene_tex_;
 	KlayGE::FrameBufferPtr scene_buffer_;

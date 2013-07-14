@@ -130,6 +130,7 @@ SET(RENDERING_EFFECT_FILES
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/LightShaft.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/LightSourceProxy.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/Noise.fxml
+	${KLAYGE_PROJECT_DIR}/media/RenderFX/Particle.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/PointSprite.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/PostProcess.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/PostToneMapping.fxml

@@ -35,6 +35,7 @@
 
 #include <KlayGE/PreDeclare.hpp>
 #include <KFL/Math.hpp>
+#include <KlayGE/SceneObjectHelper.hpp>
 
 #include <vector>
 
@@ -55,8 +56,9 @@ namespace KlayGE
 	class KLAYGE_CORE_API ParticleEmitter
 	{
 	public:
-		explicit ParticleEmitter(ParticleSystemPtr const & ps)
-			: ps_(ps), model_mat_(float4x4::Identity())
+		explicit ParticleEmitter(SceneObjectPtr const & ps)
+			: ps_(checked_pointer_cast<ParticleSystem>(ps)),
+				model_mat_(float4x4::Identity())
 		{
 		}
 		virtual ~ParticleEmitter()
@@ -203,8 +205,8 @@ namespace KlayGE
 	class KLAYGE_CORE_API ParticleUpdater
 	{
 	public:
-		explicit ParticleUpdater(ParticleSystemPtr const & ps)
-			: ps_(ps)
+		explicit ParticleUpdater(SceneObjectPtr const & ps)
+			: ps_(checked_pointer_cast<ParticleSystem>(ps))
 		{
 		}
 		virtual ~ParticleUpdater()
@@ -219,7 +221,7 @@ namespace KlayGE
 		weak_ptr<ParticleSystem> ps_;
 	};
 
-	class KLAYGE_CORE_API ParticleSystem : public enable_shared_from_this<ParticleSystem>
+	class KLAYGE_CORE_API ParticleSystem : public SceneObjectHelper
 	{
 	public:
 		explicit ParticleSystem(uint32_t max_num_particles);
@@ -278,11 +280,15 @@ namespace KlayGE
 			return updaters_[index];
 		}
 
-		void Update(float app_time, float elapsed_time);
+		virtual void Update(float app_time, float elapsed_time) KLAYGE_OVERRIDE;
 
 		uint32_t NumParticles() const
 		{
 			return static_cast<uint32_t>(particles_.size());
+		}
+		uint32_t NumActiveParticles() const
+		{
+			return num_active_particles_;
 		}
 		Particle const & GetParticle(uint32_t i) const
 		{
@@ -295,21 +301,52 @@ namespace KlayGE
 			return particles_[i];
 		}
 
+		void ParticleAlphaFromTex(std::string const & tex_name);
+		std::string const & ParticleAlphaFromTex() const
+		{
+			return particle_alpha_from_tex_name_;
+		}
+		void ParticleAlphaToTex(std::string const & tex_name);
+		std::string const & ParticleAlphaToTex() const
+		{
+			return particle_alpha_to_tex_name_;
+		}
+		void ParticleColorFrom(Color const & clr);
+		Color const & ParticleColorFrom() const
+		{
+			return particle_color_from_;
+		}
+		void ParticleColorTo(Color const & clr);
+		Color const & ParticleColorTo() const
+		{
+			return particle_color_to_;
+		}
+
+		void SceneDepthTexture(TexturePtr const & depth_tex);
+
 	protected:
 		std::vector<ParticleEmitterPtr> emitters_;
 		std::vector<ParticleUpdaterPtr> updaters_;
 
 		std::vector<Particle> particles_;
+		uint32_t num_active_particles_;
 
 		float gravity_;
 		float3 force_;
 		float media_density_;
+
+		std::string particle_alpha_from_tex_name_;
+		std::string particle_alpha_to_tex_name_;
+		Color particle_color_from_;
+		Color particle_color_to_;
+
+		bool gs_support_;
 	};
 
 	class KLAYGE_CORE_API PointParticleEmitter : public ParticleEmitter
 	{
 	public:
-		explicit PointParticleEmitter(ParticleSystemPtr const & ps);
+		explicit PointParticleEmitter(SceneObjectPtr const & ps);
 
 		virtual std::string const & Type() const KLAYGE_OVERRIDE;
 
@@ -326,7 +363,7 @@ namespace KlayGE
 	class KLAYGE_CORE_API PolylineParticleUpdater : public ParticleUpdater
 	{
 	public:
-		explicit PolylineParticleUpdater(ParticleSystemPtr const & ps);
+		explicit PolylineParticleUpdater(SceneObjectPtr const & ps);
 
 		virtual std::string const & Type() const KLAYGE_OVERRIDE;
 
