@@ -36,12 +36,344 @@
 #include <KlayGE/RenderableHelper.hpp>
 #include <KlayGE/App3D.hpp>
 #include <KlayGE/Camera.hpp>
+#include <KlayGE/ResLoader.hpp>
+#include <KFL/XMLDom.hpp>
+
+#include <fstream>
+#include <sstream>
+
+#include <boost/functional/hash.hpp>
+#include <boost/algorithm/string/split.hpp>
+#include <boost/algorithm/string/trim.hpp>
 
 #include <KlayGE/ParticleSystem.hpp>
 
 namespace
 {
 	using namespace KlayGE;
+
+	uint32_t const NUM_PARTICLES = 4096;
+
+	class ParticleSystemLoadingDesc : public ResLoadingDesc
+	{
+	private:
+		struct ParticleSystemDesc
+		{
+			std::string res_name;
+
+			struct ParticleSystemData
+			{
+				std::wstring name;
+
+				std::string particle_alpha_from_tex;
+				std::string particle_alpha_to_tex;
+				Color particle_color_from;
+				Color particle_color_to;
+
+				std::string emitter_type;
+				float frequency;
+				float angle;
+				float3 min_pos;
+				float3 max_pos;
+				float min_vel;
+				float max_vel;
+				float min_life;
+				float max_life;
+
+				std::string updater_type;
+				std::vector<KlayGE::float2> size_over_life_ctrl_pts;
+				std::vector<KlayGE::float2> mass_over_life_ctrl_pts;
+				std::vector<KlayGE::float2> opacity_over_life_ctrl_pts;
+			};
+			shared_ptr<ParticleSystemData> ps_data;
+
+			ParticleSystemPtr ps;
+		};
+
+	public:
+		ParticleSystemLoadingDesc(std::string const & res_name)
+		{
+			ps_desc_.res_name = res_name;
+			ps_desc_.ps_data = MakeSharedPtr<ParticleSystemDesc::ParticleSystemData>();
+		}
+
+		uint64_t Type() const
+		{
+			static uint64_t const type = static_cast<uint64_t>(boost::hash_value("ParticleSystemLoadingDesc"));
+			return type;
+		}
+
+		bool StateLess() const
+		{
+			return false;
+		}
+
+		void SubThreadStage()
+		{
+			ResIdentifierPtr psmm_input = ResLoader::Instance().Open(ps_desc_.res_name);
+
+			XMLDocument doc;
+			XMLNodePtr root = doc.Parse(psmm_input);
+
+			{
+				XMLNodePtr particle_node = root->FirstNode("particle");
+				{
+					XMLNodePtr alpha_node = particle_node->FirstNode("alpha");
+					ps_desc_.ps_data->particle_alpha_from_tex = alpha_node->Attrib("from")->ValueString();
+					ps_desc_.ps_data->particle_alpha_to_tex = alpha_node->Attrib("to")->ValueString();
+				}
+				{
+					XMLNodePtr color_node = particle_node->FirstNode("color");
+					{
+						Color from;
+						XMLAttributePtr attr = color_node->Attrib("from");
+						if (attr)
+						{
+							std::vector<std::string> strs;
+							boost::algorithm::split(strs, attr->ValueString(), boost::is_any_of(" "));
+							for (size_t i = 0; i < 3; ++ i)
+							{
+								if (i < strs.size())
+								{
+									boost::algorithm::trim(strs[i]);
+									from[i] = static_cast<float>(atof(strs[i].c_str()));
+								}
+								else
+								{
+									from[i] = 0;
+								}
+							}
+						}
+						from.a() = 1;
+						ps_desc_.ps_data->particle_color_from = from;
+
+						Color to;
+						attr = color_node->Attrib("to");
+						if (attr)
+						{
+							std::vector<std::string> strs;
+							boost::algorithm::split(strs, attr->ValueString(), boost::is_any_of(" "));
+							for (size_t i = 0; i < 3; ++ i)
+							{
+								if (i < strs.size())
+								{
+									boost::algorithm::trim(strs[i]);
+									to[i] = static_cast<float>(atof(strs[i].c_str()));
+								}
+								else
+								{
+									to[i] = 0;
+								}
+							}
+						}
+						to.a() = 1;
+						ps_desc_.ps_data->particle_color_to = to;
+					}
+				}
+			}
+
+			{
+				XMLNodePtr emitter_node = root->FirstNode("emitter");
+
+				XMLAttributePtr type_attr = emitter_node->Attrib("type");
+				if (type_attr)
+				{
+					ps_desc_.ps_data->emitter_type = type_attr->ValueString();
+				}
+				else
+				{
+					ps_desc_.ps_data->emitter_type = "point";
+				}
+
+				XMLNodePtr freq_node = emitter_node->FirstNode("frequency");
+				if (freq_node)
+				{
+					XMLAttributePtr attr = freq_node->Attrib("value");
+					ps_desc_.ps_data->frequency = attr->ValueFloat();
+				}
+
+				XMLNodePtr angle_node = emitter_node->FirstNode("angle");
+				if (angle_node)
+				{
+					XMLAttributePtr attr = angle_node->Attrib("value");
+					ps_desc_.ps_data->angle = attr->ValueInt() * DEG2RAD;
+				}
+
+				XMLNodePtr pos_node = emitter_node->FirstNode("pos");
+				if (pos_node)
+				{
+					float3 min_pos(0, 0, 0);
+					XMLAttributePtr attr = pos_node->Attrib("min");
+					if (attr)
+					{
+						std::vector<std::string> strs;
+						boost::algorithm::split(strs, attr->ValueString(), boost::is_any_of(" "));
+						for (size_t i = 0; i < 3; ++ i)
+						{
+							if (i < strs.size())
+							{
+								boost::algorithm::trim(strs[i]);
+								min_pos[i] = static_cast<float>(atof(strs[i].c_str()));
+							}
+							else
+							{
+								min_pos[i] = 0;
+							}
+						}
+					}
+					ps_desc_.ps_data->min_pos = min_pos;
+			
+					float3 max_pos(0, 0, 0);
+					attr = pos_node->Attrib("max");
+					if (attr)
+					{
+						std::vector<std::string> strs;
+						boost::algorithm::split(strs, attr->ValueString(), boost::is_any_of(" "));
+						for (size_t i = 0; i < 3; ++ i)
+						{
+							if (i < strs.size())
+							{
+								boost::algorithm::trim(strs[i]);
+								max_pos[i] = static_cast<float>(atof(strs[i].c_str()));
+							}
+							else
+							{
+								max_pos[i] = 0;
+							}
+						}
+					}			
+					ps_desc_.ps_data->max_pos = max_pos;
+				}
+
+				XMLNodePtr vel_node = emitter_node->FirstNode("vel");
+				if (vel_node)
+				{
+					XMLAttributePtr attr = vel_node->Attrib("min");
+					ps_desc_.ps_data->min_vel = attr->ValueFloat();
+
+					attr = vel_node->Attrib("max");
+					ps_desc_.ps_data->max_vel = attr->ValueFloat();
+				}
+
+				XMLNodePtr life_node = emitter_node->FirstNode("life");
+				if (life_node)
+				{
+					XMLAttributePtr attr = life_node->Attrib("min");
+					ps_desc_.ps_data->min_life = attr->ValueFloat();
+
+					attr = life_node->Attrib("max");
+					ps_desc_.ps_data->max_life = attr->ValueFloat();
+				}
+			}
+
+			{
+				XMLNodePtr updater_node = root->FirstNode("updater");
+
+				XMLAttributePtr type_attr = updater_node->Attrib("type");
+				if (type_attr)
+				{
+					ps_desc_.ps_data->updater_type = type_attr->ValueString();
+				}
+				else
+				{
+					ps_desc_.ps_data->updater_type = "polyline";
+				}
+
+				if ("polyline" == ps_desc_.ps_data->updater_type)
+				{
+					for (XMLNodePtr node = updater_node->FirstNode("curve"); node; node = node->NextSibling("curve"))
+					{
+						std::vector<float2> xys;
+						for (XMLNodePtr ctrl_point_node = node->FirstNode("ctrl_point"); ctrl_point_node; ctrl_point_node = ctrl_point_node->NextSibling("ctrl_point"))
+						{
+							XMLAttributePtr attr_x = ctrl_point_node->Attrib("x");
+							XMLAttributePtr attr_y = ctrl_point_node->Attrib("y");
+
+							xys.push_back(float2(attr_x->ValueFloat(), attr_y->ValueFloat()));
+						}
+
+						XMLAttributePtr attr = node->Attrib("name");
+						if ("size_over_life" == attr->ValueString())
+						{
+							ps_desc_.ps_data->size_over_life_ctrl_pts = xys;
+						}
+						else if ("mass_over_life" == attr->ValueString())
+						{
+							ps_desc_.ps_data->mass_over_life_ctrl_pts = xys;
+						}
+						else if ("opacity_over_life" == attr->ValueString())
+						{
+							ps_desc_.ps_data->opacity_over_life_ctrl_pts = xys;
+						}
+					}
+				}
+			}
+		}
+
+		shared_ptr<void> MainThreadStage()
+		{
+			ParticleSystemPtr ps = MakeSharedPtr<ParticleSystem>(NUM_PARTICLES);
+
+			ps->ParticleAlphaFromTex(ps_desc_.ps_data->particle_alpha_from_tex);
+			ps->ParticleAlphaToTex(ps_desc_.ps_data->particle_alpha_to_tex);
+			ps->ParticleColorFrom(ps_desc_.ps_data->particle_color_from);
+			ps->ParticleColorTo(ps_desc_.ps_data->particle_color_to);
+
+			ParticleEmitterPtr emitter = ps->MakeEmitter(ps_desc_.ps_data->emitter_type);
+			ps->AddEmitter(emitter);
+
+			emitter->Frequency(ps_desc_.ps_data->frequency);
+			emitter->EmitAngle(ps_desc_.ps_data->angle);
+			emitter->MinPosition(ps_desc_.ps_data->min_pos);
+			emitter->MaxPosition(ps_desc_.ps_data->max_pos);
+			emitter->MinVelocity(ps_desc_.ps_data->min_vel);
+			emitter->MaxVelocity(ps_desc_.ps_data->max_vel);
+			emitter->MinLife(ps_desc_.ps_data->min_life);
+			emitter->MaxLife(ps_desc_.ps_data->max_life);
+
+			ParticleUpdaterPtr updater = ps->MakeUpdater(ps_desc_.ps_data->updater_type);
+			ps->AddUpdater(updater);
+			checked_pointer_cast<PolylineParticleUpdater>(updater)->SizeOverLife(ps_desc_.ps_data->size_over_life_ctrl_pts);
+			checked_pointer_cast<PolylineParticleUpdater>(updater)->MassOverLife(ps_desc_.ps_data->mass_over_life_ctrl_pts);
+			checked_pointer_cast<PolylineParticleUpdater>(updater)->OpacityOverLife(ps_desc_.ps_data->opacity_over_life_ctrl_pts);
+
+			ps_desc_.ps = ps;
+			return static_pointer_cast<void>(ps);
+		}
+
+		bool HasSubThreadStage() const
+		{
+			return true;
+		}
+
+		bool Match(ResLoadingDesc const & rhs) const
+		{
+			if (this->Type() == rhs.Type())
+			{
+				ParticleSystemLoadingDesc const & psld = static_cast<ParticleSystemLoadingDesc const &>(rhs);
+				return (ps_desc_.res_name == psld.ps_desc_.res_name);
+			}
+			return false;
+		}
+
+		void CopyDataFrom(ResLoadingDesc const & rhs)
+		{
+			BOOST_ASSERT(this->Type() == rhs.Type());
+
+			ParticleSystemLoadingDesc const & psld = static_cast<ParticleSystemLoadingDesc const &>(rhs);
+			ps_desc_.res_name = psld.ps_desc_.res_name;
+			ps_desc_.ps_data = psld.ps_desc_.ps_data;
+		}
+
+		shared_ptr<void> CloneResourceFrom(shared_ptr<void> const & resource)
+		{
+			ParticleSystemPtr rhs_pp = static_pointer_cast<ParticleSystem>(resource);
+			return static_pointer_cast<void>(rhs_pp->Clone());
+		}
+
+	private:
+		ParticleSystemDesc ps_desc_;
+	};
 	
 #ifdef KLAYGE_HAS_STRUCT_PACK
 #pragma pack(push, 1)
@@ -184,21 +516,72 @@ namespace KlayGE
 		return static_cast<uint32_t>(elapsed_time * emit_freq_ + 0.5f);
 	}
 
+	void ParticleEmitter::DoClone(ParticleEmitterPtr const & rhs)
+	{
+		rhs->ps_ = ps_;
+
+		rhs->emit_freq_ = emit_freq_;
+
+		rhs->model_mat_ = model_mat_;
+		rhs->emit_angle_ = emit_angle_;
+
+		rhs->min_pos_ = min_pos_;
+		rhs->max_pos_ = max_pos_;
+		rhs->min_vel_ = min_vel_;
+		rhs->max_vel_ = max_vel_;
+		rhs->min_life_ = min_life_;
+		rhs->max_life_ = max_life_;
+		rhs->min_spin_ = min_spin_;
+		rhs->max_spin_ = max_spin_;
+		rhs->min_size_ = min_size_;
+		rhs->max_size_ = max_size_;
+	}
+
+
+	void ParticleUpdater::DoClone(ParticleUpdaterPtr const & rhs)
+	{
+		rhs->ps_ = ps_;
+	}
+
 
 	ParticleSystem::ParticleSystem(uint32_t max_num_particles)
 		: SceneObjectHelper(SOA_Moveable),
 			particles_(max_num_particles), num_active_particles_(0),
 			gravity_(0.5f), force_(0, 0, 0), media_density_(0.0f)
 	{
-		typedef KLAYGE_DECLTYPE(particles_) ParticlesType;
-		KLAYGE_FOREACH(ParticlesType::reference particle, particles_)
-		{
-			particle.life = 0;
-		}
+		this->ClearParticles();
 
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 		gs_support_ = rf.RenderEngineInstance().DeviceCaps().gs_support;
 		renderable_ = MakeSharedPtr<RenderParticles>(gs_support_);
+	}
+
+	ParticleSystemPtr ParticleSystem::Clone()
+	{
+		ParticleSystemPtr ret = MakeSharedPtr<ParticleSystem>(NUM_PARTICLES);
+
+		ret->emitters_.resize(emitters_.size());
+		for (size_t i = 0; i < emitters_.size(); ++ i)
+		{
+			ret->emitters_[i] = emitters_[i]->Clone();
+		}
+
+		ret->updaters_.resize(updaters_.size());
+		for (size_t i = 0; i < updaters_.size(); ++ i)
+		{
+			ret->updaters_[i] = updaters_[i]->Clone();
+		}
+
+		ret->gravity_ = gravity_;
+		ret->force_ = force_;
+		ret->media_density_ = media_density_;
+
+		ret->particle_alpha_from_tex_name_ = particle_alpha_from_tex_name_;
+		ret->particle_alpha_to_tex_name_ = particle_alpha_to_tex_name_;
+		ret->particle_color_from_ = particle_color_from_;
+		ret->particle_color_to_ = particle_color_to_;
+
+		return ret;
 	}
 
 	ParticleEmitterPtr ParticleSystem::MakeEmitter(std::string const & name)
@@ -245,7 +628,7 @@ namespace KlayGE
 		}
 	}
 
-	void ParticleSystem::ClearEmitter()
+	void ParticleSystem::ClearEmitters()
 	{
 		emitters_.clear();
 	}
@@ -264,9 +647,18 @@ namespace KlayGE
 		}
 	}
 
-	void ParticleSystem::ClearUpdater()
+	void ParticleSystem::ClearUpdaters()
 	{
 		updaters_.clear();
+	}
+
+	void ParticleSystem::ClearParticles()
+	{
+		typedef KLAYGE_DECLTYPE(particles_) ParticlesType;
+		KLAYGE_FOREACH(ParticlesType::reference particle, particles_)
+		{
+			particle.life = 0;
+		}
 	}
 
 	void ParticleSystem::Update(float /*app_time*/, float elapsed_time)
@@ -403,6 +795,167 @@ namespace KlayGE
 	}
 
 
+	ParticleSystemPtr SyncLoadParticleSystem(std::string const & psml_name)
+	{
+		return ResLoader::Instance().SyncQueryT<ParticleSystem>(MakeSharedPtr<ParticleSystemLoadingDesc>(psml_name));
+	}
+
+	function<ParticleSystemPtr()> ASyncLoadParticleSystem(std::string const & psml_name)
+	{
+		return ResLoader::Instance().ASyncQueryT<ParticleSystem>(MakeSharedPtr<ParticleSystemLoadingDesc>(psml_name));
+	}
+
+	void SaveParticleSystem(ParticleSystemPtr const & ps, std::string const & psml_name)
+	{
+		KlayGE::XMLDocument doc;
+
+		XMLNodePtr root = doc.AllocNode(XNT_Element, "particle_system");
+		doc.RootNode(root);
+
+		{
+			XMLNodePtr particle_node = doc.AllocNode(XNT_Element, "particle");
+			{
+				XMLNodePtr alpha_node = doc.AllocNode(XNT_Element, "alpha");
+				alpha_node->AppendAttrib(doc.AllocAttribString("from", ps->ParticleAlphaFromTex()));
+				alpha_node->AppendAttrib(doc.AllocAttribString("to", ps->ParticleAlphaToTex()));
+				particle_node->AppendNode(alpha_node);
+			}
+			{
+				XMLNodePtr color_node = doc.AllocNode(XNT_Element, "color");
+				{
+					Color const & from = ps->ParticleColorFrom();
+					{
+						std::ostringstream ss;
+						ss << from.r() << ' ' << from.g() << ' ' << from.b();
+						color_node->AppendAttrib(doc.AllocAttribString("from", ss.str()));
+					}
+					Color const & to = ps->ParticleColorTo();
+					{
+						std::ostringstream ss;
+						ss << to.r() << ' ' << to.g() << ' ' << to.b();
+						color_node->AppendAttrib(doc.AllocAttribString("to", ss.str()));
+					}
+				}
+				particle_node->AppendNode(color_node);
+			}
+			root->AppendNode(particle_node);
+		}
+
+		for (uint32_t i = 0; i < ps->NumEmitters(); ++ i)
+		{
+			ParticleEmitterPtr const & particle_emitter = ps->Emitter(i);
+
+			XMLNodePtr emitter_node = doc.AllocNode(XNT_Element, "emitter");
+			emitter_node->AppendAttrib(doc.AllocAttribString("type", particle_emitter->Type()));
+
+			{
+				XMLNodePtr freq_node = doc.AllocNode(XNT_Element, "frequency");
+				freq_node->AppendAttrib(doc.AllocAttribFloat("value", particle_emitter->Frequency()));
+				emitter_node->AppendNode(freq_node);
+			}
+			{
+				XMLNodePtr angle_node = doc.AllocNode(XNT_Element, "angle");
+				angle_node->AppendAttrib(doc.AllocAttribInt("value", static_cast<int>(particle_emitter->EmitAngle() * RAD2DEG + 0.5f)));
+				emitter_node->AppendNode(angle_node);
+			}
+			{
+				XMLNodePtr pos_node = doc.AllocNode(XNT_Element, "pos");
+				{
+					std::ostringstream ss;
+					ss << particle_emitter->MinPosition().x() << ' '
+						<< particle_emitter->MinPosition().y() << ' '
+						<< particle_emitter->MinPosition().z();
+					pos_node->AppendAttrib(doc.AllocAttribString("min", ss.str()));
+				}
+				{
+					std::ostringstream ss;
+					ss << particle_emitter->MaxPosition().x() << ' '
+						<< particle_emitter->MaxPosition().y() << ' '
+						<< particle_emitter->MaxPosition().z();
+					pos_node->AppendAttrib(doc.AllocAttribString("max", ss.str()));
+				}
+				emitter_node->AppendNode(pos_node);
+			}		
+			{
+				XMLNodePtr vel_node = doc.AllocNode(XNT_Element, "vel");
+				vel_node->AppendAttrib(doc.AllocAttribFloat("min", particle_emitter->MinVelocity()));
+				vel_node->AppendAttrib(doc.AllocAttribFloat("max", particle_emitter->MaxVelocity()));
+				emitter_node->AppendNode(vel_node);
+			}
+			{
+				XMLNodePtr life_node = doc.AllocNode(XNT_Element, "life");
+				life_node->AppendAttrib(doc.AllocAttribFloat("min", particle_emitter->MinLife()));
+				life_node->AppendAttrib(doc.AllocAttribFloat("max", particle_emitter->MaxLife()));
+				emitter_node->AppendNode(life_node);
+			}
+			root->AppendNode(emitter_node);
+		}
+
+		for (uint32_t i = 0; i < ps->NumUpdaters(); ++ i)
+		{
+			ParticleUpdaterPtr const & particle_updater = ps->Updater(i);
+
+			XMLNodePtr updater_node = doc.AllocNode(XNT_Element, "updater");
+			updater_node->AppendAttrib(doc.AllocAttribString("type", particle_updater->Type()));
+
+			if ("polyline" == particle_updater->Type())
+			{
+				shared_ptr<PolylineParticleUpdater> polyline_updater = checked_pointer_cast<PolylineParticleUpdater>(particle_updater);
+
+				XMLNodePtr size_over_life_node = doc.AllocNode(XNT_Element, "curve");
+				size_over_life_node->AppendAttrib(doc.AllocAttribString("name", "size_over_life"));
+				std::vector<float2> const & size_over_life = polyline_updater->SizeOverLife();
+				for (size_t i = 0; i < size_over_life.size(); ++ i)
+				{
+					float2 const & pt = size_over_life[i];
+
+					XMLNodePtr ctrl_point_node = doc.AllocNode(XNT_Element, "ctrl_point");
+					ctrl_point_node->AppendAttrib(doc.AllocAttribFloat("x", pt.x()));
+					ctrl_point_node->AppendAttrib(doc.AllocAttribFloat("y", pt.y()));
+
+					size_over_life_node->AppendNode(ctrl_point_node);
+				}
+				updater_node->AppendNode(size_over_life_node);
+
+				XMLNodePtr mass_over_life_node = doc.AllocNode(XNT_Element, "curve");
+				mass_over_life_node->AppendAttrib(doc.AllocAttribString("name", "mass_over_life"));
+				std::vector<float2> const & mass_over_life = polyline_updater->MassOverLife();
+				for (size_t i = 0; i < mass_over_life.size(); ++ i)
+				{
+					float2 const & pt = mass_over_life[i];
+
+					XMLNodePtr ctrl_point_node = doc.AllocNode(XNT_Element, "ctrl_point");
+					ctrl_point_node->AppendAttrib(doc.AllocAttribFloat("x", pt.x()));
+					ctrl_point_node->AppendAttrib(doc.AllocAttribFloat("y", pt.y()));
+
+					mass_over_life_node->AppendNode(ctrl_point_node);
+				}
+				updater_node->AppendNode(mass_over_life_node);
+
+				XMLNodePtr opacity_over_life_node = doc.AllocNode(XNT_Element, "curve");
+				opacity_over_life_node->AppendAttrib(doc.AllocAttribString("name", "opacity_over_life"));
+				std::vector<float2> const & opacity_over_life = polyline_updater->OpacityOverLife();
+				for (size_t i = 0; i < opacity_over_life.size(); ++ i)
+				{
+					float2 const & pt = opacity_over_life[i];
+
+					XMLNodePtr ctrl_point_node = doc.AllocNode(XNT_Element, "ctrl_point");
+					ctrl_point_node->AppendAttrib(doc.AllocAttribFloat("x", pt.x()));
+					ctrl_point_node->AppendAttrib(doc.AllocAttribFloat("y", pt.y()));
+
+					opacity_over_life_node->AppendNode(ctrl_point_node);
+				}
+				updater_node->AppendNode(opacity_over_life_node);
+			}
+
+			root->AppendNode(updater_node);
+		}
+
+		std::ofstream ofs(psml_name.c_str());
+		doc.Print(ofs);
+	}
+
+
 	PointParticleEmitter::PointParticleEmitter(SceneObjectPtr const & ps)
 		: ParticleEmitter(ps),
 			random_dis_(0, 10000)
@@ -413,6 +966,13 @@ namespace KlayGE
 	{
 		static std::string const type("point");
 		return type;
+	}
+
+	ParticleEmitterPtr PointParticleEmitter::Clone()
+	{
+		shared_ptr<PointParticleEmitter> ret = MakeSharedPtr<PointParticleEmitter>(ps_.lock());
+		this->DoClone(ret);
+		return ret;
 	}
 
 	void PointParticleEmitter::Emit(Particle& par)
@@ -451,12 +1011,26 @@ namespace KlayGE
 		return type;
 	}
 
+	ParticleUpdaterPtr PolylineParticleUpdater::Clone()
+	{
+		shared_ptr<PolylineParticleUpdater> ret = MakeSharedPtr<PolylineParticleUpdater>(ps_.lock());
+		this->DoClone(ret);
+		ret->size_over_life_ = size_over_life_;
+		ret->mass_over_life_ = mass_over_life_;
+		ret->opacity_over_life_ = opacity_over_life_;
+		return ret;
+	}
+
 	void PolylineParticleUpdater::Update(Particle& par, float elapse_time)
 	{
+		BOOST_ASSERT(!size_over_life_.empty());
+		BOOST_ASSERT(!mass_over_life_.empty());
+		BOOST_ASSERT(!opacity_over_life_.empty());
+
 		float pos = (par.init_life - par.life) / par.init_life;
 
 		float cur_size = size_over_life_.back().y();
-		for (std::vector<float2>::const_iterator iter = size_over_life_.begin(); iter != size_over_life_.end() - 1; ++ iter)
+		for (KLAYGE_AUTO(iter, size_over_life_.begin()); iter != size_over_life_.end() - 1; ++ iter)
 		{
 			if ((iter + 1)->x() >= pos)
 			{
@@ -467,7 +1041,7 @@ namespace KlayGE
 		}
 
 		float cur_mass = mass_over_life_.back().y();
-		for (std::vector<float2>::const_iterator iter = mass_over_life_.begin(); iter != mass_over_life_.end() - 1; ++ iter)
+		for (KLAYGE_AUTO(iter, mass_over_life_.begin()); iter != mass_over_life_.end() - 1; ++ iter)
 		{
 			if ((iter + 1)->x() >= pos)
 			{
@@ -477,8 +1051,8 @@ namespace KlayGE
 			}
 		}
 
-		float cur_alpha = transparency_over_life_.back().y();
-		for (std::vector<float2>::const_iterator iter = transparency_over_life_.begin(); iter != transparency_over_life_.end() - 1; ++ iter)
+		float cur_alpha = opacity_over_life_.back().y();
+		for (KLAYGE_AUTO(iter, opacity_over_life_.begin()); iter != opacity_over_life_.end() - 1; ++ iter)
 		{
 			if ((iter + 1)->x() >= pos)
 			{
@@ -489,7 +1063,6 @@ namespace KlayGE
 		}
 
 		ParticleSystemPtr ps = ps_.lock();
-
 		float buoyancy = 4.0f / 3 * PI * MathLib::cube(cur_size) * ps->MediaDensity() * ps->Gravity();
 		float3 accel = (ps->Force() + float3(0, buoyancy, 0)) / cur_mass - float3(0, ps->Gravity(), 0);
 		par.vel += accel * elapse_time;

@@ -24,7 +24,7 @@
 			<ctrl_point x="0" y="0.5"/>
 			<ctrl_point x="1" y="0.5"/>
 		</curve>
-		<curve name="transparency_over_life">
+		<curve name="opacity_over_life">
 			<ctrl_point x="0" y="0.5"/>
 			<ctrl_point x="1" y="0"/>
 		</curve>

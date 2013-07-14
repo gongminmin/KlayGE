@@ -43,12 +43,12 @@
 		<control type="combo_box" id="CurveTypeCombo" x="20" y="460" width="200" height="24" hotkey="0" is_default="0">
 			<item name="Size over life"/>
 			<item name="Mass over life"/>
-			<item name="Transparency over life"/>
+			<item name="Opacity over life"/>
 		</control>
 
 		<control type="polyline_edit_box" id="SizeOverLifePolyline" x="20" y="490" width="200" height="120" is_default="0" visible="1" line_r="0" line_g="1" line_b="0" line_a="1"/>
 		<control type="polyline_edit_box" id="MassOverLifePolyline" x="20" y="490" width="200" height="120" is_default="0" visible="0" line_r="0" line_g="1" line_b="0" line_a="1"/>
-		<control type="polyline_edit_box" id="TransparencyOverLifePolyline" x="20" y="490" width="200" height="120" is_default="0" visible="0" line_r="0" line_g="1" line_b="0" line_a="1"/>
+		<control type="polyline_edit_box" id="OpacityOverLifePolyline" x="20" y="490" width="200" height="120" is_default="0" visible="0" line_r="0" line_g="1" line_b="0" line_a="1"/>
 
 		<control type="check_box" id="FPSCamera" caption="FPS camera" x="20" y="650" width="120" height="24" checked="0" hotkey="0" is_default="0"/>
 	</dialog>

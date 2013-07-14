@@ -167,11 +167,6 @@ void ParticleEditorApp::InitObjects()
 	terrain_ = MakeSharedPtr<TerrainObject>();
 	terrain_->AddToSceneManager();
 
-	ps_ = MakeSharedPtr<ParticleSystem>(NUM_PARTICLE);
-	ps_->Gravity(0.5f);
-	ps_->MediaDensity(0.5f);
-	ps_->AddToSceneManager();
-
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 	RenderEngine& re = rf.RenderEngineInstance();
 
@@ -216,7 +211,7 @@ void ParticleEditorApp::InitObjects()
 	id_curve_type_ = dialog_->IDFromName("CurveTypeCombo");
 	id_size_over_life_ = dialog_->IDFromName("SizeOverLifePolyline");
 	id_mass_over_life_ = dialog_->IDFromName("MassOverLifePolyline");
-	id_transparency_over_life_ = dialog_->IDFromName("TransparencyOverLifePolyline");
+	id_opacity_over_life_ = dialog_->IDFromName("OpacityOverLifePolyline");
 
 	this->LoadParticleSystem(ResLoader::Instance().Locate("Fire.psml"));
 
@@ -267,8 +262,6 @@ void ParticleEditorApp::OnResize(uint32_t width, uint32_t height)
 	scene_tex_ = rf.MakeTexture2D(width, height, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
 	scene_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*scene_tex_, 0, 1, 0));
 	scene_buffer_->Attach(FrameBuffer::ATT_DepthStencil, ds_view);
-
-	ps_->SceneDepthTexture(scene_tex_);
 
 	copy_pp_->InputPin(0, scene_tex_);
 
@@ -612,7 +605,7 @@ void ParticleEditorApp::CurveTypeChangedHandler(KlayGE::UIComboBox const & sende
 	uint32_t ct = sender.GetSelectedIndex();
 	dialog_->GetControl(id_size_over_life_)->SetVisible(false);
 	dialog_->GetControl(id_mass_over_life_)->SetVisible(false);
-	dialog_->GetControl(id_transparency_over_life_)->SetVisible(false);
+	dialog_->GetControl(id_opacity_over_life_)->SetVisible(false);
 	switch (ct)
 	{
 	case 0:
@@ -624,7 +617,7 @@ void ParticleEditorApp::CurveTypeChangedHandler(KlayGE::UIComboBox const & sende
 		break;
 
 	default:
-		dialog_->GetControl(id_transparency_over_life_)->SetVisible(true);
+		dialog_->GetControl(id_opacity_over_life_)->SetVisible(true);
 		break;
 	}
 }
@@ -691,224 +684,23 @@ void ParticleEditorApp::LoadParticleSystem(std::string const & name)
 {
 	dialog_->Control<UIPolylineEditBox>(id_size_over_life_)->ClearCtrlPoints();
 	dialog_->Control<UIPolylineEditBox>(id_mass_over_life_)->ClearCtrlPoints();
-	dialog_->Control<UIPolylineEditBox>(id_transparency_over_life_)->ClearCtrlPoints();
+	dialog_->Control<UIPolylineEditBox>(id_opacity_over_life_)->ClearCtrlPoints();
 
-	ps_->ClearEmitter();
-	ps_->ClearUpdater();
-
-	ResIdentifierPtr ifs = ResLoader::Instance().Open(name.c_str());
-
-	KlayGE::XMLDocument doc;
-	XMLNodePtr root = doc.Parse(ifs);
-
+	if (ps_)
 	{
-		XMLNodePtr particle_node = root->FirstNode("particle");
-		{
-			XMLNodePtr alpha_node = particle_node->FirstNode("alpha");
-			ps_->ParticleAlphaFromTex(alpha_node->Attrib("from")->ValueString());
-			ps_->ParticleAlphaToTex(alpha_node->Attrib("to")->ValueString());
-		}
-		{
-			XMLNodePtr color_node = particle_node->FirstNode("color");
-			{
-				Color from;
-				XMLAttributePtr attr = color_node->Attrib("from");
-				if (attr)
-				{
-					std::vector<std::string> strs;
-					boost::algorithm::split(strs, attr->ValueString(), boost::is_any_of(" "));
-					for (size_t i = 0; i < 3; ++ i)
-					{
-						if (i < strs.size())
-						{
-							boost::algorithm::trim(strs[i]);
-							from[i] = static_cast<float>(atof(strs[i].c_str()));
-						}
-						else
-						{
-							from[i] = 0;
-						}
-					}
-				}
-				from.a() = 1;
-				ps_->ParticleColorFrom(from);
-
-				Color to;
-				attr = color_node->Attrib("to");
-				if (attr)
-				{
-					std::vector<std::string> strs;
-					boost::algorithm::split(strs, attr->ValueString(), boost::is_any_of(" "));
-					for (size_t i = 0; i < 3; ++ i)
-					{
-						if (i < strs.size())
-						{
-							boost::algorithm::trim(strs[i]);
-							to[i] = static_cast<float>(atof(strs[i].c_str()));
-						}
-						else
-						{
-							to[i] = 0;
-						}
-					}
-				}
-				to.a() = 1;
-				ps_->ParticleColorTo(to);
-			}
-		}
+		ps_->DelFromSceneManager();
 	}
+	ps_ = SyncLoadParticleSystem(name);
+	ps_->Gravity(0.5f);
+	ps_->MediaDensity(0.5f);
+	ps_->AddToSceneManager();
 
-	{
-		XMLNodePtr emitter_node = root->FirstNode("emitter");
+	particle_emitter_ = ps_->Emitter(0);
+	particle_updater_ = ps_->Updater(0);
 
-		std::string emitter_type;
-		XMLAttributePtr type_attr = emitter_node->Attrib("type");
-		if (type_attr)
-		{
-			emitter_type = type_attr->ValueString();
-		}
-		else
-		{
-			emitter_type = "point";
-		}
-
-		particle_emitter_ = ps_->MakeEmitter(emitter_type);
-		particle_emitter_->MinSpin(-PI / 2);
-		particle_emitter_->MaxSpin(+PI / 2);
-		particle_emitter_->ModelMatrix(MathLib::translation(0.0f, 0.1f, 0.0f));
-		ps_->AddEmitter(particle_emitter_);
-
-		XMLNodePtr freq_node = emitter_node->FirstNode("frequency");
-		if (freq_node)
-		{
-			XMLAttributePtr attr = freq_node->Attrib("value");
-			particle_emitter_->Frequency(attr->ValueFloat());
-		}
-
-		XMLNodePtr angle_node = emitter_node->FirstNode("angle");
-		if (angle_node)
-		{
-			XMLAttributePtr attr = angle_node->Attrib("value");
-			particle_emitter_->EmitAngle(attr->ValueInt() * DEG2RAD);
-		}
-
-		XMLNodePtr pos_node = emitter_node->FirstNode("pos");
-		if (pos_node)
-		{
-			float3 min_pos(0, 0, 0);
-			XMLAttributePtr attr = pos_node->Attrib("min");
-			if (attr)
-			{
-				std::vector<std::string> strs;
-				boost::algorithm::split(strs, attr->ValueString(), boost::is_any_of(" "));
-				for (size_t i = 0; i < 3; ++ i)
-				{
-					if (i < strs.size())
-					{
-						boost::algorithm::trim(strs[i]);
-						min_pos[i] = static_cast<float>(atof(strs[i].c_str()));
-					}
-					else
-					{
-						min_pos[i] = 0;
-					}
-				}
-			}
-			particle_emitter_->MinPosition(min_pos);
-			
-			float3 max_pos(0, 0, 0);
-			attr = pos_node->Attrib("max");
-			if (attr)
-			{
-				std::vector<std::string> strs;
-				boost::algorithm::split(strs, attr->ValueString(), boost::is_any_of(" "));
-				for (size_t i = 0; i < 3; ++ i)
-				{
-					if (i < strs.size())
-					{
-						boost::algorithm::trim(strs[i]);
-						max_pos[i] = static_cast<float>(atof(strs[i].c_str()));
-					}
-					else
-					{
-						max_pos[i] = 0;
-					}
-				}
-			}			
-			particle_emitter_->MaxPosition(max_pos);
-		}
-
-		XMLNodePtr vel_node = emitter_node->FirstNode("vel");
-		if (vel_node)
-		{
-			XMLAttributePtr attr = vel_node->Attrib("min");
-			particle_emitter_->MinVelocity(attr->ValueFloat());
-
-			attr = vel_node->Attrib("max");
-			particle_emitter_->MaxVelocity(attr->ValueFloat());
-		}
-
-		XMLNodePtr life_node = emitter_node->FirstNode("life");
-		if (life_node)
-		{
-			XMLAttributePtr attr = life_node->Attrib("min");
-			particle_emitter_->MinLife(attr->ValueFloat());
-
-			attr = life_node->Attrib("max");
-			particle_emitter_->MaxLife(attr->ValueFloat());
-		}
-	}
-
-	std::vector<KlayGE::float2> size_over_life_ctrl_pts;
-	std::vector<KlayGE::float2> mass_over_life_ctrl_pts;
-	std::vector<KlayGE::float2> transparency_over_life_ctrl_pts;
-	{
-		XMLNodePtr updater_node = root->FirstNode("updater");
-
-		std::string updater_type;
-		XMLAttributePtr type_attr = updater_node->Attrib("type");
-		if (type_attr)
-		{
-			updater_type = type_attr->ValueString();
-		}
-		else
-		{
-			updater_type = "polyline";
-		}
-
-		particle_updater_ = ps_->MakeUpdater(updater_type);
-		ps_->AddUpdater(particle_updater_);
-
-		for (XMLNodePtr node = updater_node->FirstNode("curve"); node; node = node->NextSibling("curve"))
-		{
-			std::vector<float2> xys;
-			for (XMLNodePtr ctrl_point_node = node->FirstNode("ctrl_point"); ctrl_point_node; ctrl_point_node = ctrl_point_node->NextSibling("ctrl_point"))
-			{
-				XMLAttributePtr attr_x = ctrl_point_node->Attrib("x");
-				XMLAttributePtr attr_y = ctrl_point_node->Attrib("y");
-
-				xys.push_back(float2(attr_x->ValueFloat(), attr_y->ValueFloat()));
-			}
-
-			XMLAttributePtr attr = node->Attrib("name");
-			if ("size_over_life" == attr->ValueString())
-			{
-				size_over_life_ctrl_pts = xys;
-			}
-			else if ("mass_over_life" == attr->ValueString())
-			{
-				mass_over_life_ctrl_pts = xys;
-			}
-			else if ("transparency_over_life" == attr->ValueString())
-			{
-				transparency_over_life_ctrl_pts = xys;
-			}
-		}
-	}
-
-	checked_pointer_cast<PolylineParticleUpdater>(particle_updater_)->SizeOverLife(size_over_life_ctrl_pts);
-	checked_pointer_cast<PolylineParticleUpdater>(particle_updater_)->MassOverLife(mass_over_life_ctrl_pts);
-	checked_pointer_cast<PolylineParticleUpdater>(particle_updater_)->TransparencyOverLife(transparency_over_life_ctrl_pts);
+	particle_emitter_->MinSpin(-PI / 2);
+	particle_emitter_->MaxSpin(+PI / 2);
+	particle_emitter_->ModelMatrix(MathLib::translation(0.0f, 0.1f, 0.0f));
 
 	this->LoadParticleAlpha(id_particle_alpha_from_button_, ResLoader::Instance().Locate(ps_->ParticleAlphaFromTex()));
 	this->LoadParticleAlpha(id_particle_alpha_to_button_, ResLoader::Instance().Locate(ps_->ParticleAlphaToTex()));
@@ -943,141 +735,14 @@ void ParticleEditorApp::LoadParticleSystem(std::string const & name)
 	dialog_->Control<UISlider>(id_max_life_slider_)->SetValue(static_cast<int>(particle_emitter_->MaxLife()));
 	this->MaxLifeChangedHandler(*dialog_->Control<UISlider>(id_max_life_slider_));
 
-	dialog_->Control<UIPolylineEditBox>(id_size_over_life_)->SetCtrlPoints(size_over_life_ctrl_pts);
-	dialog_->Control<UIPolylineEditBox>(id_mass_over_life_)->SetCtrlPoints(mass_over_life_ctrl_pts);
-	dialog_->Control<UIPolylineEditBox>(id_transparency_over_life_)->SetCtrlPoints(transparency_over_life_ctrl_pts);
+	dialog_->Control<UIPolylineEditBox>(id_size_over_life_)->SetCtrlPoints(checked_pointer_cast<PolylineParticleUpdater>(particle_updater_)->SizeOverLife());
+	dialog_->Control<UIPolylineEditBox>(id_mass_over_life_)->SetCtrlPoints(checked_pointer_cast<PolylineParticleUpdater>(particle_updater_)->MassOverLife());
+	dialog_->Control<UIPolylineEditBox>(id_opacity_over_life_)->SetCtrlPoints(checked_pointer_cast<PolylineParticleUpdater>(particle_updater_)->OpacityOverLife());
 }
 
 void ParticleEditorApp::SaveParticleSystem(std::string const & name)
 {
-	KlayGE::XMLDocument doc;
-
-	XMLNodePtr root = doc.AllocNode(XNT_Element, "particle_system");
-	doc.RootNode(root);
-
-	{
-		XMLNodePtr particle_node = doc.AllocNode(XNT_Element, "particle");
-		{
-			XMLNodePtr alpha_node = doc.AllocNode(XNT_Element, "alpha");
-			alpha_node->AppendAttrib(doc.AllocAttribString("from", ps_->ParticleAlphaFromTex()));
-			alpha_node->AppendAttrib(doc.AllocAttribString("to", ps_->ParticleAlphaToTex()));
-			particle_node->AppendNode(alpha_node);
-		}
-		{
-			XMLNodePtr color_node = doc.AllocNode(XNT_Element, "color");
-			{
-				Color const & from = ps_->ParticleColorFrom();
-				{
-					std::ostringstream ss;
-					ss << from.r() << ' ' << from.g() << ' ' << from.b();
-					color_node->AppendAttrib(doc.AllocAttribString("from", ss.str()));
-				}
-				Color const & to = ps_->ParticleColorTo();
-				{
-					std::ostringstream ss;
-					ss << to.r() << ' ' << to.g() << ' ' << to.b();
-					color_node->AppendAttrib(doc.AllocAttribString("to", ss.str()));
-				}
-			}
-			particle_node->AppendNode(color_node);
-		}
-		root->AppendNode(particle_node);
-	}
-
-	{
-		XMLNodePtr emitter_node = doc.AllocNode(XNT_Element, "emitter");
-		emitter_node->AppendAttrib(doc.AllocAttribString("type", particle_emitter_->Type()));
-
-		{
-			XMLNodePtr freq_node = doc.AllocNode(XNT_Element, "frequency");
-			freq_node->AppendAttrib(doc.AllocAttribFloat("value", particle_emitter_->Frequency()));
-			emitter_node->AppendNode(freq_node);
-		}
-		{
-			XMLNodePtr angle_node = doc.AllocNode(XNT_Element, "angle");
-			angle_node->AppendAttrib(doc.AllocAttribInt("value", static_cast<int>(particle_emitter_->EmitAngle() * RAD2DEG + 0.5f)));
-			emitter_node->AppendNode(angle_node);
-		}
-		{
-			XMLNodePtr pos_node = doc.AllocNode(XNT_Element, "pos");
-			{
-				std::ostringstream ss;
-				ss << particle_emitter_->MinPosition().x() << ' ' << particle_emitter_->MinPosition().y() << ' ' << particle_emitter_->MinPosition().z();
-				pos_node->AppendAttrib(doc.AllocAttribString("min", ss.str()));
-			}
-			{
-				std::ostringstream ss;
-				ss << particle_emitter_->MaxPosition().x() << ' ' << particle_emitter_->MaxPosition().y() << ' ' << particle_emitter_->MaxPosition().z();
-				pos_node->AppendAttrib(doc.AllocAttribString("max", ss.str()));
-			}
-			emitter_node->AppendNode(pos_node);
-		}		
-		{
-			XMLNodePtr vel_node = doc.AllocNode(XNT_Element, "vel");
-			vel_node->AppendAttrib(doc.AllocAttribFloat("min", particle_emitter_->MinVelocity()));
-			vel_node->AppendAttrib(doc.AllocAttribFloat("max", particle_emitter_->MaxVelocity()));
-			emitter_node->AppendNode(vel_node);
-		}
-		{
-			XMLNodePtr life_node = doc.AllocNode(XNT_Element, "life");
-			life_node->AppendAttrib(doc.AllocAttribFloat("min", particle_emitter_->MinLife()));
-			life_node->AppendAttrib(doc.AllocAttribFloat("max", particle_emitter_->MaxLife()));
-			emitter_node->AppendNode(life_node);
-		}
-		root->AppendNode(emitter_node);
-	}
-
-	{
-		XMLNodePtr updater_node = doc.AllocNode(XNT_Element, "updater");
-		updater_node->AppendAttrib(doc.AllocAttribString("type", particle_updater_->Type()));
-
-		XMLNodePtr size_over_life_node = doc.AllocNode(XNT_Element, "curve");
-		size_over_life_node->AppendAttrib(doc.AllocAttribString("name", "size_over_life"));
-		for (size_t i = 0; i < dialog_->Control<UIPolylineEditBox>(id_size_over_life_)->NumCtrlPoints(); ++ i)
-		{
-			float2 const & pt = dialog_->Control<UIPolylineEditBox>(id_size_over_life_)->GetCtrlPoint(i);
-
-			XMLNodePtr ctrl_point_node = doc.AllocNode(XNT_Element, "ctrl_point");
-			ctrl_point_node->AppendAttrib(doc.AllocAttribFloat("x", pt.x()));
-			ctrl_point_node->AppendAttrib(doc.AllocAttribFloat("y", pt.y()));
-
-			size_over_life_node->AppendNode(ctrl_point_node);
-		}
-		updater_node->AppendNode(size_over_life_node);
-
-		XMLNodePtr mass_over_life_node = doc.AllocNode(XNT_Element, "curve");
-		mass_over_life_node->AppendAttrib(doc.AllocAttribString("name", "mass_over_life"));
-		for (size_t i = 0; i < dialog_->Control<UIPolylineEditBox>(id_mass_over_life_)->NumCtrlPoints(); ++ i)
-		{
-			float2 const & pt = dialog_->Control<UIPolylineEditBox>(id_mass_over_life_)->GetCtrlPoint(i);
-
-			XMLNodePtr ctrl_point_node = doc.AllocNode(XNT_Element, "ctrl_point");
-			ctrl_point_node->AppendAttrib(doc.AllocAttribFloat("x", pt.x()));
-			ctrl_point_node->AppendAttrib(doc.AllocAttribFloat("y", pt.y()));
-
-			mass_over_life_node->AppendNode(ctrl_point_node);
-		}
-		updater_node->AppendNode(mass_over_life_node);
-
-		XMLNodePtr transparency_over_life_node = doc.AllocNode(XNT_Element, "curve");
-		transparency_over_life_node->AppendAttrib(doc.AllocAttribString("name", "transparency_over_life"));
-		for (size_t i = 0; i < dialog_->Control<UIPolylineEditBox>(id_transparency_over_life_)->NumCtrlPoints(); ++ i)
-		{
-			float2 const & pt = dialog_->Control<UIPolylineEditBox>(id_transparency_over_life_)->GetCtrlPoint(i);
-
-			XMLNodePtr ctrl_point_node = doc.AllocNode(XNT_Element, "ctrl_point");
-			ctrl_point_node->AppendAttrib(doc.AllocAttribFloat("x", pt.x()));
-			ctrl_point_node->AppendAttrib(doc.AllocAttribFloat("y", pt.y()));
-
-			transparency_over_life_node->AppendNode(ctrl_point_node);
-		}
-		updater_node->AppendNode(transparency_over_life_node);
-
-		root->AppendNode(updater_node);
-	}
-
-	std::ofstream ofs(name.c_str());
-	doc.Print(ofs);
+	KlayGE::SaveParticleSystem(ps_, name);
 }
 
 void ParticleEditorApp::DoUpdateOverlay()
@@ -1112,9 +777,10 @@ uint32_t ParticleEditorApp::DoUpdate(uint32_t pass)
 			}
 			re.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, clear_clr, 1.0f, 0);
 
+			ps_->SceneDepthTexture(scene_tex_);
 			checked_pointer_cast<PolylineParticleUpdater>(particle_updater_)->SizeOverLife(dialog_->Control<UIPolylineEditBox>(id_size_over_life_)->GetCtrlPoints());
 			checked_pointer_cast<PolylineParticleUpdater>(particle_updater_)->MassOverLife(dialog_->Control<UIPolylineEditBox>(id_mass_over_life_)->GetCtrlPoints());
-			checked_pointer_cast<PolylineParticleUpdater>(particle_updater_)->TransparencyOverLife(dialog_->Control<UIPolylineEditBox>(id_transparency_over_life_)->GetCtrlPoints());
+			checked_pointer_cast<PolylineParticleUpdater>(particle_updater_)->OpacityOverLife(dialog_->Control<UIPolylineEditBox>(id_opacity_over_life_)->GetCtrlPoints());
 
 			terrain_->Visible(true);
 			ps_->Visible(false);

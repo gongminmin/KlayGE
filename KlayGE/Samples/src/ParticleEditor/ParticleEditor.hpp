@@ -97,7 +97,7 @@ private:
 	int id_curve_type_;
 	int id_size_over_life_;
 	int id_mass_over_life_;
-	int id_transparency_over_life_;
+	int id_opacity_over_life_;
 };
 
 #endif		// _PARTICLEEDITOR_HPP
