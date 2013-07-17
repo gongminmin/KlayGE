@@ -1238,4 +1238,17 @@
 			</params>
 		</function>
 	</functions>
+	<additionals>
+		<ext name="GLES_NV_pixel_buffer_object"/>
+		<ext name="GLES_EXT_texture_rg"/>
+		<ext name="GLES_EXT_texture_lod_bias"/>
+		<ext name="GLES_EXT_sRGB"/>
+		<ext name="GLES_OES_vertex_type_10_10_10_2"/>
+		<ext name="GLES_OES_vertex_half_float"/>
+		<ext name="GLES_OES_depth_texture"/>
+		<ext name="GLES_EXT_shadow_samplers"/>
+		<ext name="GLES_OES_packed_depth_stencil"/>
+		<ext name="GLES_OES_texture_float"/>
+		<ext name="GLES_EXT_color_buffer_float"/>
+	</additionals>
 </gl_extension>
