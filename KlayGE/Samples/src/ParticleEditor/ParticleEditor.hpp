@@ -59,8 +59,13 @@ private:
 	KlayGE::ParticleUpdaterPtr particle_updater_;
 	KlayGE::ParticleSystemPtr ps_;
 
+	bool depth_texture_support_;
 	KlayGE::TexturePtr scene_tex_;
+	KlayGE::TexturePtr scene_depth_tex_;
+	KlayGE::TexturePtr scene_ds_tex_;
 	KlayGE::FrameBufferPtr scene_buffer_;
+	KlayGE::FrameBufferPtr scene_depth_buffer_;
+	KlayGE::PostProcessPtr depth_to_linear_pp_;
 
 	KlayGE::PostProcessPtr copy_pp_;
 

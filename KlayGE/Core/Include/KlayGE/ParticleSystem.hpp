@@ -56,11 +56,7 @@ namespace KlayGE
 	class KLAYGE_CORE_API ParticleEmitter
 	{
 	public:
-		explicit ParticleEmitter(SceneObjectPtr const & ps)
-			: ps_(checked_pointer_cast<ParticleSystem>(ps)),
-				model_mat_(float4x4::Identity())
-		{
-		}
+		explicit ParticleEmitter(SceneObjectPtr const & ps);
 		virtual ~ParticleEmitter()
 		{
 		}
@@ -209,10 +205,7 @@ namespace KlayGE
 	class KLAYGE_CORE_API ParticleUpdater
 	{
 	public:
-		explicit ParticleUpdater(SceneObjectPtr const & ps)
-			: ps_(checked_pointer_cast<ParticleSystem>(ps))
-		{
-		}
+		explicit ParticleUpdater(SceneObjectPtr const & ps);
 		virtual ~ParticleUpdater()
 		{
 		}

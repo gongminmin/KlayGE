@@ -22,6 +22,19 @@
 
 	<shader>
 		<![CDATA[
+void TerrainDepthVS(float4 Position : POSITION,
+					out float oDepth : TEXCOORD0,
+					out float4 oPos : SV_Position)
+{
+	oPos = mul(mul(Position, view), proj);
+	oDepth = oPos.w;
+}
+
+float4 TerrainDepthPS(float depth : TEXCOORD0) : SV_Target 
+{
+	return depth;
+}
+
 void TerrainVS(float4 Position : POSITION,
 					out float4 oTex0 : TEXCOORD0,
 					out float3 oPosOS : TEXCOORD1,
@@ -49,6 +62,13 @@ float4 TerrainPS(float4 tex0 : TEXCOORD0,
 }
 		]]>
 	</shader>
+
+	<technique name="TerrainDepth">
+		<pass name="p0">
+			<state name="vertex_shader" value="TerrainDepthVS()"/>
+			<state name="pixel_shader" value="TerrainDepthPS()"/>
+		</pass>
+	</technique>
 
 	<technique name="Terrain">
 		<pass name="p0">

@@ -51,8 +51,12 @@ namespace
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-			technique_ = SyncLoadRenderEffect("ParticleEditor.fxml")->TechniqueByName("Terrain");
-			*(technique_->Effect().ParameterByName("grass_tex")) = ASyncLoadTexture("grass.dds", EAH_GPU_Read | EAH_Immutable);
+			RenderEffectPtr effect = SyncLoadRenderEffect("ParticleEditor.fxml");
+			depth_tech_ = effect->TechniqueByName("TerrainDepth");
+			color_tech_ = effect->TechniqueByName("Terrain");
+			technique_ = color_tech_;
+
+			*(effect->ParameterByName("grass_tex")) = ASyncLoadTexture("grass.dds", EAH_GPU_Read | EAH_Immutable);
 
 			rl_ = rf.MakeRenderLayout();
 			rl_->TopologyType(RenderLayout::TT_TriangleStrip);
@@ -91,6 +95,24 @@ namespace
 			Camera const & camera = Context::Instance().AppInstance().ActiveCamera();
 			*(technique_->Effect().ParameterByName("depth_near_far_invfar")) = float3(camera.NearPlane(), camera.FarPlane(), 1.0f / camera.FarPlane());
 		}
+
+		virtual void Pass(PassType type) KLAYGE_OVERRIDE
+		{
+			switch (type)
+			{
+			case PT_OpaqueDepth:
+				technique_ = depth_tech_;
+				break;
+
+			default:
+				technique_ = color_tech_;
+				break;
+			}
+		}
+
+	private:
+		RenderTechniquePtr depth_tech_;
+		RenderTechniquePtr color_tech_;
 	};
 
 	class TerrainObject : public SceneObjectHelper
@@ -169,10 +191,28 @@ void ParticleEditorApp::InitObjects()
 
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 	RenderEngine& re = rf.RenderEngineInstance();
+	RenderDeviceCaps const & caps = re.DeviceCaps();
+	if (caps.texture_format_support(EF_D24S8) || caps.texture_format_support(EF_D16))
+	{
+		depth_texture_support_ = true;
+	}
+	else
+	{
+		depth_texture_support_ = false;
+	}
 
 	scene_buffer_ = rf.MakeFrameBuffer();
 	FrameBufferPtr screen_buffer = re.CurFrameBuffer();
 	scene_buffer_->GetViewport()->camera = screen_buffer->GetViewport()->camera;
+	if (!depth_texture_support_)
+	{
+		scene_depth_buffer_ = rf.MakeFrameBuffer();
+		scene_depth_buffer_->GetViewport()->camera = screen_buffer->GetViewport()->camera;
+	}
+	else
+	{
+		depth_to_linear_pp_ = SyncLoadPostProcess("DepthToSM.ppml", "DepthToSM");
+	}
 
 	copy_pp_ = SyncLoadPostProcess("Copy.ppml", "copy");
 
@@ -256,10 +296,70 @@ void ParticleEditorApp::OnResize(uint32_t width, uint32_t height)
 	App3DFramework::OnResize(width, height);
 
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+	RenderEngine& re = rf.RenderEngineInstance();
+	RenderDeviceCaps const & caps = re.DeviceCaps();
 
-	RenderViewPtr ds_view = rf.Make2DDepthStencilRenderView(width, height, EF_D16, 1, 0);
+	ElementFormat fmt;
+	if (caps.rendertarget_format_support(EF_B10G11R11F, 1, 0))
+	{
+		fmt = EF_B10G11R11F;
+	}
+	else if (caps.rendertarget_format_support(EF_ABGR8, 1, 0))
+	{
+		fmt = EF_ABGR8;
+	}
+	else
+	{
+		BOOST_ASSERT(caps.rendertarget_format_support(EF_ARGB8, 1, 0));
+		fmt = EF_ARGB8;
+	}
+	scene_tex_ = rf.MakeTexture2D(width, height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
 
-	scene_tex_ = rf.MakeTexture2D(width, height, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
+	if (caps.rendertarget_format_support(EF_R16F, 1, 0))
+	{
+		fmt = EF_R16F;
+	}
+	else if (caps.rendertarget_format_support(EF_R32F, 1, 0))
+	{
+		fmt = EF_R32F;
+	}
+	else
+	{
+		BOOST_ASSERT(caps.rendertarget_format_support(EF_ABGR16F, 1, 0));
+
+		fmt = EF_ABGR16F;
+	}
+	scene_depth_tex_ = rf.MakeTexture2D(width, height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
+
+	ElementFormat ds_fmt;
+	if (caps.rendertarget_format_support(EF_D24S8, 1, 0))
+	{
+		ds_fmt = EF_D24S8;
+	}
+	else
+	{
+		BOOST_ASSERT(caps.rendertarget_format_support(EF_D16, 1, 0));
+
+		ds_fmt = EF_D16;
+	}
+
+	RenderViewPtr ds_view;
+	if (depth_texture_support_)
+	{
+		scene_ds_tex_ = rf.MakeTexture2D(width, height, 1, 1, ds_fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
+		ds_view = rf.Make2DDepthStencilRenderView(*scene_ds_tex_, 0, 1, 0);
+
+		depth_to_linear_pp_->InputPin(0, scene_ds_tex_);
+		depth_to_linear_pp_->OutputPin(0, scene_depth_tex_);
+	}
+	else
+	{
+		ds_view = rf.Make2DDepthStencilRenderView(width, height, EF_D16, 1, 0);
+
+		scene_depth_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*scene_depth_tex_, 0, 1, 0));
+		scene_depth_buffer_->Attach(FrameBuffer::ATT_DepthStencil, ds_view);
+	}
+
 	scene_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*scene_tex_, 0, 1, 0));
 	scene_buffer_->Attach(FrameBuffer::ATT_DepthStencil, ds_view);
 
@@ -267,7 +367,7 @@ void ParticleEditorApp::OnResize(uint32_t width, uint32_t height)
 
 	if (ps_)
 	{
-		ps_->SceneDepthTexture(scene_tex_);
+		ps_->SceneDepthTexture(scene_depth_tex_);
 	}
 
 	UIManager::Instance().SettleCtrls(width, height);
@@ -700,9 +800,9 @@ void ParticleEditorApp::LoadParticleSystem(std::string const & name)
 	ps_->MediaDensity(0.5f);
 	ps_->AddToSceneManager();
 
-	if (scene_tex_)
+	if (scene_depth_tex_)
 	{
-		ps_->SceneDepthTexture(scene_tex_);
+		ps_->SceneDepthTexture(scene_depth_tex_);
 	}
 
 	particle_emitter_ = ps_->Emitter(0);
@@ -772,39 +872,98 @@ uint32_t ParticleEditorApp::DoUpdate(uint32_t pass)
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 	RenderEngine& re = rf.RenderEngineInstance();
 
-	switch (pass)
+	if (depth_texture_support_)
 	{
-	case 0:
+		switch (pass)
 		{
-			re.BindFrameBuffer(scene_buffer_);
-			
-			Color clear_clr(0.2f, 0.4f, 0.6f, 1);
-			if (Context::Instance().Config().graphics_cfg.gamma)
+		case 0:
 			{
-				clear_clr.r() = 0.029f;
-				clear_clr.g() = 0.133f;
-				clear_clr.b() = 0.325f;
+				re.BindFrameBuffer(scene_buffer_);
+
+				float q = this->ActiveCamera().FarPlane() / (this->ActiveCamera().FarPlane() - this->ActiveCamera().NearPlane());
+				float2 near_q(this->ActiveCamera().NearPlane() * q, q);
+				depth_to_linear_pp_->SetParam(0, near_q);
+			
+				Color clear_clr(0.2f, 0.4f, 0.6f, 1);
+				if (Context::Instance().Config().graphics_cfg.gamma)
+				{
+					clear_clr.r() = 0.029f;
+					clear_clr.g() = 0.133f;
+					clear_clr.b() = 0.325f;
+				}
+				re.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, clear_clr, 1.0f, 0);
+
+				checked_pointer_cast<PolylineParticleUpdater>(particle_updater_)->SizeOverLife(dialog_->Control<UIPolylineEditBox>(id_size_over_life_)->GetCtrlPoints());
+				checked_pointer_cast<PolylineParticleUpdater>(particle_updater_)->MassOverLife(dialog_->Control<UIPolylineEditBox>(id_mass_over_life_)->GetCtrlPoints());
+				checked_pointer_cast<PolylineParticleUpdater>(particle_updater_)->OpacityOverLife(dialog_->Control<UIPolylineEditBox>(id_opacity_over_life_)->GetCtrlPoints());
+
+				terrain_->Visible(true);
+				ps_->Visible(false);
 			}
-			re.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, clear_clr, 1.0f, 0);
+			return App3DFramework::URV_Need_Flush;
 
-			checked_pointer_cast<PolylineParticleUpdater>(particle_updater_)->SizeOverLife(dialog_->Control<UIPolylineEditBox>(id_size_over_life_)->GetCtrlPoints());
-			checked_pointer_cast<PolylineParticleUpdater>(particle_updater_)->MassOverLife(dialog_->Control<UIPolylineEditBox>(id_mass_over_life_)->GetCtrlPoints());
-			checked_pointer_cast<PolylineParticleUpdater>(particle_updater_)->OpacityOverLife(dialog_->Control<UIPolylineEditBox>(id_opacity_over_life_)->GetCtrlPoints());
+		default:
+			depth_to_linear_pp_->Apply();
 
-			terrain_->Visible(true);
-			ps_->Visible(false);
+			re.BindFrameBuffer(FrameBufferPtr());
+			re.CurFrameBuffer()->Clear(FrameBuffer::CBM_Depth, Color(0, 0, 0, 0), 1, 0);
+
+			copy_pp_->Apply();
+
+			terrain_->Visible(false);
+			ps_->Visible(true);
+
+			return App3DFramework::URV_Need_Flush | App3DFramework::URV_Finished;
 		}
-		return App3DFramework::URV_Need_Flush;
+	}
+	else
+	{
+		switch (pass)
+		{
+		case 0:
+			{
+				re.BindFrameBuffer(scene_depth_buffer_);
+				re.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(100.0f, 100.0f, 100.0f, 1), 1.0f, 0);
 
-	default:
-		re.BindFrameBuffer(FrameBufferPtr());
-		re.CurFrameBuffer()->Clear(FrameBuffer::CBM_Depth, Color(0, 0, 0, 0), 1, 0);
+				checked_pointer_cast<PolylineParticleUpdater>(particle_updater_)->SizeOverLife(dialog_->Control<UIPolylineEditBox>(id_size_over_life_)->GetCtrlPoints());
+				checked_pointer_cast<PolylineParticleUpdater>(particle_updater_)->MassOverLife(dialog_->Control<UIPolylineEditBox>(id_mass_over_life_)->GetCtrlPoints());
+				checked_pointer_cast<PolylineParticleUpdater>(particle_updater_)->OpacityOverLife(dialog_->Control<UIPolylineEditBox>(id_opacity_over_life_)->GetCtrlPoints());
 
-		copy_pp_->Apply();
+				terrain_->Pass(PT_OpaqueDepth);
+				terrain_->Visible(true);
+				ps_->Visible(false);
+			}
+			return App3DFramework::URV_Need_Flush;
 
-		terrain_->Visible(false);
-		ps_->Visible(true);
+		case 1:
+			{
+				re.BindFrameBuffer(scene_buffer_);
+			
+				Color clear_clr(0.2f, 0.4f, 0.6f, 1);
+				if (Context::Instance().Config().graphics_cfg.gamma)
+				{
+					clear_clr.r() = 0.029f;
+					clear_clr.g() = 0.133f;
+					clear_clr.b() = 0.325f;
+				}
+				re.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, clear_clr, 1.0f, 0);
 
-		return App3DFramework::URV_Need_Flush | App3DFramework::URV_Finished;
+				terrain_->Pass(PT_OpaqueShading);
+				terrain_->Visible(true);
+				ps_->Visible(false);
+			}
+			return App3DFramework::URV_Need_Flush;
+
+		default:
+			re.BindFrameBuffer(FrameBufferPtr());
+			re.CurFrameBuffer()->Clear(FrameBuffer::CBM_Depth, Color(0, 0, 0, 0), 1, 0);
+
+			copy_pp_->Apply();
+
+			terrain_->Visible(false);
+			ps_->Visible(true);
+
+			return App3DFramework::URV_Need_Flush | App3DFramework::URV_Finished;
+		}
 	}
 }

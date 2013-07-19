@@ -492,9 +492,6 @@ namespace
 			float scale_y = sqrt(model_mat_(1, 0) * model_mat_(1, 0) + model_mat_(1, 1) * model_mat_(1, 1) + model_mat_(1, 2) * model_mat_(1, 2));
 			*(technique_->Effect().ParameterByName("point_radius")) = 0.08f * std::max(scale_x, scale_y);
 
-			*(technique_->Effect().ParameterByName("depth_near_far_invfar")) = float3(camera.NearPlane(),
-				camera.FarPlane(), 1.0f / camera.FarPlane());
-
 			DeferredRenderingLayerPtr const & drl = Context::Instance().DeferredRenderingLayerInstance();
 			if (drl)
 			{
@@ -522,6 +519,13 @@ namespace
 
 namespace KlayGE
 {
+	ParticleEmitter::ParticleEmitter(SceneObjectPtr const & ps)
+			: ps_(checked_pointer_cast<ParticleSystem>(ps)),
+				model_mat_(float4x4::Identity()),
+				min_spin_(-PI / 2), max_spin_(+PI / 2)
+	{
+	}
+
 	uint32_t ParticleEmitter::Update(float elapsed_time)
 	{
 		return static_cast<uint32_t>(elapsed_time * emit_freq_ + 0.5f);
@@ -548,6 +552,11 @@ namespace KlayGE
 		rhs->max_size_ = max_size_;
 	}
 
+
+	ParticleUpdater::ParticleUpdater(SceneObjectPtr const & ps)
+		: ps_(checked_pointer_cast<ParticleSystem>(ps))
+	{
+	}
 
 	void ParticleUpdater::DoClone(ParticleUpdaterPtr const & rhs)
 	{

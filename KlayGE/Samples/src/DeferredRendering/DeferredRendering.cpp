@@ -17,6 +17,7 @@
 #include <KlayGE/PostProcess.hpp>
 #include <KlayGE/Camera.hpp>
 #include <KlayGE/DeferredRenderingLayer.hpp>
+#include <KlayGE/ParticleSystem.hpp>
 
 #include <sstream>
 
@@ -306,6 +307,12 @@ void DeferredRenderingApp::InitObjects()
 
 	sky_box_ = MakeSharedPtr<SceneObjectSkyBox>();
 	sky_box_->AddToSceneManager();
+
+	ps_ = SyncLoadParticleSystem("Fire.psml");
+	ps_->Gravity(0.5f);
+	ps_->MediaDensity(0.5f);
+	ps_->AddToSceneManager();
+	ps_->ModelMatrix(MathLib::scaling(10.0f, 10.0f, 10.0f));
 }
 
 void DeferredRenderingApp::OnResize(uint32_t width, uint32_t height)

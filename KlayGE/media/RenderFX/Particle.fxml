@@ -6,8 +6,6 @@
 	<cbuffer name="per_frame">
 		<parameter type="float4x4" name="model_view"/>
 		<parameter type="float4x4" name="proj"/>
-
-		<parameter type="float3" name="depth_near_far_invfar"/>
 	</cbuffer>
 
 	<parameter type="float3" name="particle_color_from"/>
@@ -78,7 +76,7 @@ float4 ParticlePS(PS_IN ps_in) : SV_Target
 		tex_coord.y *= KLAYGE_FLIPPING;
 		tex_coord = tex_coord / 2 + 0.5f;
 		
-		float depth = depth_tex.Sample(point_sampler, tex_coord).a * depth_near_far_invfar.y;
+		float depth = depth_tex.Sample(point_sampler, tex_coord).x;
 
 		clr.a *= lerp(particle_alpha_from_tex.Sample(bilinear_sampler, ps_in.tex.xy).r,
 						particle_alpha_to_tex.Sample(bilinear_sampler, ps_in.tex.xy).r,
@@ -175,7 +173,7 @@ void ParticleGS(point float4 in_CenterView_Life[1] : SV_Position, point float3 i
 
 	<technique name="Particle">
 		<pass name="p0">
-			<state name="depth_enable" value="false"/>
+			<state name="depth_enable" value="true"/>
 			<state name="depth_write_mask" value="false"/>
 
 			<state name="blend_enable" value="true"/>
