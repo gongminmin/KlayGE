@@ -4,7 +4,7 @@
 	<parameter type="float" name="point_radius"/>
 
 	<cbuffer name="per_frame">
-		<parameter type="float4x4" name="view"/>
+		<parameter type="float4x4" name="model_view"/>
 		<parameter type="float4x4" name="proj"/>
 
 		<parameter type="float3" name="depth_near_far_invfar"/>
@@ -45,7 +45,7 @@ void ParticleVS(float4 pos : TEXCOORD0,
 {
 	float radius = point_radius * spin_size_lf_alpha.y * 2;
 
-	vs_out.CenterView = mul(float4(pos.xyz, 1), view);
+	vs_out.CenterView = mul(float4(pos.xyz, 1), model_view);
 	float4 view_pos = vs_out.CenterView;
 	float2 offset = tex * radius;
 	float cz = cos(spin_size_lf_alpha.x);
@@ -103,7 +103,7 @@ void ParticleVS2(float4 pos : POSITION,
 					out float3 oSpinRadiusLF : TEXCOORD0,
 					out float4 oColor : TEXCOORD1)
 {
-	oCenterView_Life = float4(mul(float4(pos.xyz, 1), view).xyz, pos.w);
+	oCenterView_Life = float4(mul(float4(pos.xyz, 1), model_view).xyz, pos.w);
 	oSpinRadiusLF.x = spin_size_lf_alpha.x;
 	oSpinRadiusLF.y = point_radius * spin_size_lf_alpha.y * 2;
 	oSpinRadiusLF.z = spin_size_lf_alpha.z;

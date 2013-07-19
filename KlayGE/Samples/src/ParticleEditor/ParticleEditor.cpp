@@ -265,6 +265,11 @@ void ParticleEditorApp::OnResize(uint32_t width, uint32_t height)
 
 	copy_pp_->InputPin(0, scene_tex_);
 
+	if (ps_)
+	{
+		ps_->SceneDepthTexture(scene_tex_);
+	}
+
 	UIManager::Instance().SettleCtrls(width, height);
 }
 
@@ -695,6 +700,11 @@ void ParticleEditorApp::LoadParticleSystem(std::string const & name)
 	ps_->MediaDensity(0.5f);
 	ps_->AddToSceneManager();
 
+	if (scene_tex_)
+	{
+		ps_->SceneDepthTexture(scene_tex_);
+	}
+
 	particle_emitter_ = ps_->Emitter(0);
 	particle_updater_ = ps_->Updater(0);
 
@@ -777,7 +787,6 @@ uint32_t ParticleEditorApp::DoUpdate(uint32_t pass)
 			}
 			re.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, clear_clr, 1.0f, 0);
 
-			ps_->SceneDepthTexture(scene_tex_);
 			checked_pointer_cast<PolylineParticleUpdater>(particle_updater_)->SizeOverLife(dialog_->Control<UIPolylineEditBox>(id_size_over_life_)->GetCtrlPoints());
 			checked_pointer_cast<PolylineParticleUpdater>(particle_updater_)->MassOverLife(dialog_->Control<UIPolylineEditBox>(id_mass_over_life_)->GetCtrlPoints());
 			checked_pointer_cast<PolylineParticleUpdater>(particle_updater_)->OpacityOverLife(dialog_->Control<UIPolylineEditBox>(id_opacity_over_life_)->GetCtrlPoints());
@@ -794,7 +803,7 @@ uint32_t ParticleEditorApp::DoUpdate(uint32_t pass)
 		copy_pp_->Apply();
 
 		terrain_->Visible(false);
-		ps_->Visible(ps_->NumActiveParticles() > 0);
+		ps_->Visible(true);
 
 		return App3DFramework::URV_Need_Flush | App3DFramework::URV_Finished;
 	}

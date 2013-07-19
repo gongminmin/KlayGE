@@ -38,6 +38,7 @@
 #include <KlayGE/Camera.hpp>
 #include <KlayGE/ResLoader.hpp>
 #include <KFL/XMLDom.hpp>
+#include <KlayGE/DeferredRenderingLayer.hpp>
 
 #include <fstream>
 #include <sstream>
@@ -449,7 +450,7 @@ namespace
 				technique_ = SyncLoadRenderEffect("Particle.fxml")->TechniqueByName("Particle");
 			}
 
-			*(technique_->Effect().ParameterByName("point_radius")) = 0.08f;
+			effect_attrs_ |= EA_SimpleForward;
 		}
 
 		void SceneDepthTexture(TexturePtr const & tex)
@@ -484,11 +485,21 @@ namespace
 			float4x4 const & view = camera.ViewMatrix();
 			float4x4 const & proj = camera.ProjMatrix();
 
-			*(technique_->Effect().ParameterByName("view")) = view;
+			*(technique_->Effect().ParameterByName("model_view")) = model_mat_ * view;
 			*(technique_->Effect().ParameterByName("proj")) = proj;
+
+			float scale_x = sqrt(model_mat_(0, 0) * model_mat_(0, 0) + model_mat_(0, 1) * model_mat_(0, 1) + model_mat_(0, 2) * model_mat_(0, 2));
+			float scale_y = sqrt(model_mat_(1, 0) * model_mat_(1, 0) + model_mat_(1, 1) * model_mat_(1, 1) + model_mat_(1, 2) * model_mat_(1, 2));
+			*(technique_->Effect().ParameterByName("point_radius")) = 0.08f * std::max(scale_x, scale_y);
 
 			*(technique_->Effect().ParameterByName("depth_near_far_invfar")) = float3(camera.NearPlane(),
 				camera.FarPlane(), 1.0f / camera.FarPlane());
+
+			DeferredRenderingLayerPtr const & drl = Context::Instance().DeferredRenderingLayerInstance();
+			if (drl)
+			{
+				*(technique_->Effect().ParameterByName("depth_tex")) = drl->CurrFrameDepthTex(drl->ActiveViewport());
+			}
 		}
 
 		void PosBound(AABBox const & pos_aabb)
@@ -554,6 +565,14 @@ namespace KlayGE
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 		gs_support_ = rf.RenderEngineInstance().DeviceCaps().gs_support;
 		renderable_ = MakeSharedPtr<RenderParticles>(gs_support_);
+	}
+
+	void ParticleSystem::Pass(PassType type)
+	{
+		if (PT_SimpleForward == type)
+		{
+			this->Visible(true);
+		}
 	}
 
 	ParticleSystemPtr ParticleSystem::Clone()
