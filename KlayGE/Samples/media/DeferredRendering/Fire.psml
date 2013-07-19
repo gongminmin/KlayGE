@@ -1,0 +1,33 @@
+<?xml version="1.0"?>
+
+<particle_system>
+	<particle>
+		<alpha from="fire.dds" to="fire.dds"/>
+		<color from="1 0.17 0.05" to="1 0.17 0.05"/>
+	</particle>
+	<emitter type="point">
+		<frequency value="500"/>
+		<angle value="47"/>
+		<pos min="-0.01 -0 -0.01" max="0.01 0.0 0.01"/>
+		<vel min="0.2" max="0.31"/>
+		<life min="1" max="2"/>
+	</emitter>
+	<updater type="polyline">
+		<curve name="size_over_life">
+			<ctrl_point x="0" y="0.558333337"/>
+			<ctrl_point x="0.150000006" y="0.75833334"/>
+			<ctrl_point x="0.289999992" y="0.849999994"/>
+			<ctrl_point x="0.779999971" y="0.199999988"/>
+			<ctrl_point x="1" y="0"/>
+		</curve>
+		<curve name="mass_over_life">
+			<ctrl_point x="0" y="0.5"/>
+			<ctrl_point x="1" y="0.5"/>
+		</curve>
+		<curve name="opacity_over_life">
+			<ctrl_point x="0" y="0.5"/>
+			<ctrl_point x="1" y="0"/>
+		</curve>
+	</updater>
+</particle_system>
+
