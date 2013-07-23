@@ -80,6 +80,10 @@ namespace KlayGE
 		{
 			return hack_for_pvr_;
 		}
+		bool HackForMali() const
+		{
+			return hack_for_mali_;
+		}
 
 	private:
 		void DoCreateRenderWindow(std::string const & name, RenderSettings const & settings);
@@ -122,6 +126,7 @@ namespace KlayGE
 		std::set<ElementFormat> rendertarget_format_;
 
 		bool hack_for_pvr_;
+		bool hack_for_mali_;
 	};
 
 	typedef shared_ptr<OGLESRenderEngine> OGLESRenderEnginePtr;

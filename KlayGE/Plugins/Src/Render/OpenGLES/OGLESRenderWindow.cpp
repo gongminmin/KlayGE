@@ -117,7 +117,7 @@ namespace KlayGE
 
 		std::vector<EGLint> visual_attr;
 		visual_attr.push_back(EGL_RENDERABLE_TYPE);
-		visual_attr.push_back(EGL_OPENGL_ES2_BIT);
+		visual_attr.push_back(EGL_OPENGL_ES3_BIT_KHR);
 		visual_attr.push_back(EGL_RED_SIZE);
 		visual_attr.push_back(r_size);
 		visual_attr.push_back(EGL_GREEN_SIZE);
@@ -148,7 +148,11 @@ namespace KlayGE
 		eglInitialize(display_, &major_ver, &minor_ver);
 		eglGetConfigs(display_, nullptr, 0, &num_cfgs);
 
-		eglChooseConfig(display_, &visual_attr[0], &cfg_, 1, &num_cfgs);
+		if (!eglChooseConfig(display_, &visual_attr[0], &cfg_, 1, &num_cfgs))
+		{
+			visual_attr[1] = EGL_OPENGL_ES2_BIT;
+			eglChooseConfig(display_, &visual_attr[0], &cfg_, 1, &num_cfgs);
+		}
 
 		NativeWindowType wnd;
 #if defined KLAYGE_PLATFORM_WINDOWS

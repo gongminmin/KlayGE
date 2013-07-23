@@ -768,6 +768,14 @@ namespace KlayGE
 		{
 			hack_for_pvr_ = false;
 		}
+		if (vendor.find("ARM", 0) != std::string::npos)
+		{
+			hack_for_mali_ = true;
+		}
+		else
+		{
+			hack_for_mali_ = false;
+		}
 
 		GLint temp;
 
@@ -788,7 +796,7 @@ namespace KlayGE
 
 		glGetIntegerv(GL_MAX_TEXTURE_SIZE, &temp);
 		caps_.max_texture_height = caps_.max_texture_width = temp;
-		if (hack_for_pvr_)
+		if (hack_for_pvr_ || hack_for_mali_)
 		{
 			caps_.max_texture_depth = 1;
 		}
@@ -979,11 +987,11 @@ namespace KlayGE
 			texture_format_.insert(EF_SIGNED_BC4);
 			texture_format_.insert(EF_SIGNED_BC5);
 		}
-		if (glloader_GLES_VERSION_3_0() || glloader_GLES_OES_depth_texture())
+		if ((glloader_GLES_VERSION_3_0() || glloader_GLES_OES_depth_texture()) && !hack_for_mali_)
 		{
 			texture_format_.insert(EF_D16);
 		}
-		if (glloader_GLES_VERSION_3_0() || glloader_GLES_OES_packed_depth_stencil())
+		if ((glloader_GLES_VERSION_3_0() || glloader_GLES_OES_packed_depth_stencil()) && !hack_for_mali_)
 		{
 			texture_format_.insert(EF_D24S8);
 		}

@@ -14,5 +14,6 @@
 		<token name="EGL_CONTEXT_OPENGL_ROBUST_ACCESS_BIT_KHR" value="0x00000004"/>
 		<token name="EGL_CONTEXT_OPENGL_CORE_PROFILE_BIT_KHR" value="0x00000001"/>
 		<token name="EGL_CONTEXT_OPENGL_COMPATIBILITY_PROFILE_BIT_KHR" value="0x00000002"/>
+		<token name="EGL_OPENGL_ES3_BIT_KHR" value="0x00000040"/>
 	</tokens>
 </gl_extension>
