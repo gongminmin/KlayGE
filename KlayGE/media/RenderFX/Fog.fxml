@@ -13,7 +13,7 @@ float FogFactorLinear(float fog_coord, float start, float end)
 
 float FogFactorLinear(float fog_coord, float density)
 {
-	float fog = density * fog_coord;
+	float fog = 1 - density * fog_coord;
 	return saturate(fog);
 }
 
@@ -58,7 +58,7 @@ void FogVS(float4 pos : POSITION,
 
 float4 FogPS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Target
 {
-	float4 ret = 0;
+	float4 ret = float4(0, 0, 0, 1);
 	float depth = depth_tex.Sample(point_sampler, tc).r;
 	if (depth < far_plane * 0.997f)
 	{
@@ -80,8 +80,8 @@ float4 FogPS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Target
 
 			<state name="blend_enable" value="true"/>
 			<state name="blend_op" value="add"/>
-			<state name="src_blend" value="src_alpha"/>
-			<state name="dest_blend" value="inv_src_alpha"/>
+			<state name="src_blend" value="inv_src_alpha"/>
+			<state name="dest_blend" value="src_alpha"/>
 			<state name="blend_op_alpha" value="add"/>
 			<state name="src_blend_alpha" value="zero"/>
 			<state name="dest_blend_alpha" value="dst_alpha"/>
