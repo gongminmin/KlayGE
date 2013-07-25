@@ -68,7 +68,8 @@ namespace KlayGE
 	// 构造函数
 	/////////////////////////////////////////////////////////////////////////////////
 	OGLESRenderEngine::OGLESRenderEngine()
-		: clear_depth_(1), clear_stencil_(0),
+		: fbo_blit_src_(0), fbo_blit_dst_(0),
+			clear_depth_(1), clear_stencil_(0), cur_program_(0),
 			vp_x_(0), vp_y_(0), vp_width_(0), vp_height_(0),
 			cur_fbo_(0)
 	{
@@ -79,6 +80,14 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	OGLESRenderEngine::~OGLESRenderEngine()
 	{
+		if (fbo_blit_src_ != 0)
+		{
+			glDeleteFramebuffers(1, &fbo_blit_src_);
+		}
+		if (fbo_blit_dst_ != 0)
+		{
+			glDeleteFramebuffers(1, &fbo_blit_dst_);
+		}
 	}
 
 	// 返回渲染系统的名字
@@ -110,6 +119,9 @@ namespace KlayGE
 		}
 
 		this->BindFrameBuffer(win);
+
+		glGenFramebuffers(1, &fbo_blit_src_);
+		glGenFramebuffers(1, &fbo_blit_dst_);
 	}
 
 	void OGLESRenderEngine::CheckConfig(RenderSettings& settings)
@@ -215,6 +227,382 @@ namespace KlayGE
 		{
 			glClearStencil(stencil);
 			clear_stencil_ = stencil;
+		}
+	}
+
+	void OGLESRenderEngine::UseProgram(GLuint program)
+	{
+		if (program != cur_program_)
+		{
+			glUseProgram(program);
+			cur_program_ = program;
+		}
+	}
+
+	void OGLESRenderEngine::Uniform1i(GLint location, GLint value)
+	{
+		bool dirty = false;
+		KLAYGE_AUTO(iter_p, uniformi_cache_.find(cur_program_));
+		if (iter_p == uniformi_cache_.end())
+		{
+			dirty = true;
+			iter_p = uniformi_cache_.insert(std::make_pair(cur_program_, std::map<GLint, int4>())).first;
+		}
+		KLAYGE_AUTO(iter_v, iter_p->second.find(location));
+		if (iter_v == iter_p->second.end())
+		{
+			dirty = true;
+			iter_p->second.insert(std::make_pair(location, int4(value, 0, 0, 0)));
+		}
+		else
+		{
+			if (iter_v->second.x() != value)
+			{
+				dirty = true;
+				iter_v->second.x() = value;
+			}
+		}
+
+		if (dirty)
+		{
+			glUniform1i(location, value);
+		}
+	}
+		
+	void OGLESRenderEngine::Uniform1ui(GLint location, GLuint value)
+	{
+		this->Uniform1i(location, value);
+	}
+
+	void OGLESRenderEngine::Uniform1f(GLint location, float value)
+	{
+		bool dirty = false;
+		KLAYGE_AUTO(iter_p, uniformf_cache_.find(cur_program_));
+		if (iter_p == uniformf_cache_.end())
+		{
+			dirty = true;
+			iter_p = uniformf_cache_.insert(std::make_pair(cur_program_, std::map<GLint, float4>())).first;
+		}
+		KLAYGE_AUTO(iter_v, iter_p->second.find(location));
+		if (iter_v == iter_p->second.end())
+		{
+			dirty = true;
+			iter_p->second.insert(std::make_pair(location, float4(value, 0, 0, 0)));
+		}
+		else
+		{
+			if (iter_v->second.x() != value)
+			{
+				dirty = true;
+				iter_v->second.x() = value;
+			}
+		}
+
+		if (dirty)
+		{
+			glUniform1f(location, value);
+		}
+	}
+
+	void OGLESRenderEngine::Uniform1iv(GLint location, GLsizei count, GLint const * value)
+	{
+		bool dirty = false;
+		KLAYGE_AUTO(iter_p, uniformi_cache_.find(cur_program_));
+		if (iter_p == uniformi_cache_.end())
+		{
+			dirty = true;
+			iter_p = uniformi_cache_.insert(std::make_pair(cur_program_, std::map<GLint, int4>())).first;
+		}
+		for (GLsizei i = 0; i < count; ++ i)
+		{
+			KLAYGE_AUTO(iter_v, iter_p->second.find(location + i));
+			if (iter_v == iter_p->second.end())
+			{
+				dirty = true;
+				iter_p->second.insert(std::make_pair(location, int4(value[i], 0, 0, 0)));
+			}
+			else
+			{
+				if (iter_v->second.x() != value[i])
+				{
+					dirty = true;
+					iter_v->second.x() = value[i];
+				}
+			}			
+		}
+
+		if (dirty)
+		{
+			glUniform1iv(location, count, value);
+		}
+	}
+
+	void OGLESRenderEngine::Uniform1uiv(GLint location, GLsizei count, GLuint const * value)
+	{
+		this->Uniform1iv(location, count, reinterpret_cast<GLint const *>(value));
+	}
+
+	void OGLESRenderEngine::Uniform1fv(GLint location, GLsizei count, GLfloat const * value)
+	{
+		bool dirty = false;
+		KLAYGE_AUTO(iter_p, uniformf_cache_.find(cur_program_));
+		if (iter_p == uniformf_cache_.end())
+		{
+			dirty = true;
+			iter_p = uniformf_cache_.insert(std::make_pair(cur_program_, std::map<GLint, float4>())).first;
+		}
+		for (GLsizei i = 0; i < count; ++ i)
+		{
+			KLAYGE_AUTO(iter_v, iter_p->second.find(location + i));
+			if (iter_v == iter_p->second.end())
+			{
+				dirty = true;
+				iter_p->second.insert(std::make_pair(location, float4(value[i], 0, 0, 0)));
+			}
+			else
+			{
+				if (iter_v->second.x() != value[i])
+				{
+					dirty = true;
+					iter_v->second.x() = value[i];
+				}
+			}			
+		}
+
+		if (dirty)
+		{
+			glUniform1fv(location, count, value);
+		}
+	}
+
+	void OGLESRenderEngine::Uniform2iv(GLint location, GLsizei count, GLint const * value)
+	{
+		bool dirty = false;
+		KLAYGE_AUTO(iter_p, uniformi_cache_.find(cur_program_));
+		if (iter_p == uniformi_cache_.end())
+		{
+			dirty = true;
+			iter_p = uniformi_cache_.insert(std::make_pair(cur_program_, std::map<GLint, int4>())).first;
+		}
+		for (GLsizei i = 0; i < count; ++ i)
+		{
+			KLAYGE_AUTO(iter_v, iter_p->second.find(location + i));
+			if (iter_v == iter_p->second.end())
+			{
+				dirty = true;
+				iter_p->second.insert(std::make_pair(location, int4(value[i * 2 + 0], value[i * 2 + 1], 0, 0)));
+			}
+			else
+			{
+				if ((iter_v->second.x() != value[i * 2 + 0]) || (iter_v->second.y() != value[i * 2 + 1]))
+				{
+					dirty = true;
+					iter_v->second.x() = value[i * 2 + 0];
+					iter_v->second.y() = value[i * 2 + 1];
+				}
+			}			
+		}
+
+		if (dirty)
+		{
+			glUniform2iv(location, count, value);
+		}
+	}
+
+	void OGLESRenderEngine::Uniform2uiv(GLint location, GLsizei count, GLuint const * value)
+	{
+		this->Uniform2iv(location, count, reinterpret_cast<GLint const *>(value));
+	}
+
+	void OGLESRenderEngine::Uniform2fv(GLint location, GLsizei count, GLfloat const * value)
+	{
+		bool dirty = false;
+		KLAYGE_AUTO(iter_p, uniformf_cache_.find(cur_program_));
+		if (iter_p == uniformf_cache_.end())
+		{
+			dirty = true;
+			iter_p = uniformf_cache_.insert(std::make_pair(cur_program_, std::map<GLint, float4>())).first;
+		}
+		for (GLsizei i = 0; i < count; ++ i)
+		{
+			KLAYGE_AUTO(iter_v, iter_p->second.find(location + i));
+			if (iter_v == iter_p->second.end())
+			{
+				dirty = true;
+				iter_p->second.insert(std::make_pair(location, float4(value[i * 2 + 0], value[i * 2 + 1], 0, 0)));
+			}
+			else
+			{
+				if ((iter_v->second.x() != value[i * 2 + 0]) || (iter_v->second.y() != value[i * 2 + 1]))
+				{
+					dirty = true;
+					iter_v->second.x() = value[i * 2 + 0];
+					iter_v->second.y() = value[i * 2 + 1];
+				}
+			}			
+		}
+
+		if (dirty)
+		{
+			glUniform2fv(location, count, value);
+		}
+	}
+
+	void OGLESRenderEngine::Uniform3iv(GLint location, GLsizei count, GLint const * value)
+	{
+		bool dirty = false;
+		KLAYGE_AUTO(iter_p, uniformi_cache_.find(cur_program_));
+		if (iter_p == uniformi_cache_.end())
+		{
+			dirty = true;
+			iter_p = uniformi_cache_.insert(std::make_pair(cur_program_, std::map<GLint, int4>())).first;
+		}
+		for (GLsizei i = 0; i < count; ++ i)
+		{
+			KLAYGE_AUTO(iter_v, iter_p->second.find(location + i));
+			if (iter_v == iter_p->second.end())
+			{
+				dirty = true;
+				iter_p->second.insert(std::make_pair(location, int4(value[i * 3 + 0], value[i * 3 + 1], value[i * 3 + 2], 0)));
+			}
+			else
+			{
+				if ((iter_v->second.x() != value[i * 3 + 0]) || (iter_v->second.y() != value[i * 3 + 1])
+					|| (iter_v->second.z() != value[i * 3 + 2]))
+				{
+					dirty = true;
+					iter_v->second.x() = value[i * 3 + 0];
+					iter_v->second.y() = value[i * 3 + 1];
+					iter_v->second.z() = value[i * 3 + 2];
+				}
+			}			
+		}
+
+		if (dirty)
+		{
+			glUniform3iv(location, count, value);
+		}
+	}
+
+	void OGLESRenderEngine::Uniform3uiv(GLint location, GLsizei count, GLuint const * value)
+	{
+		this->Uniform3iv(location, count, reinterpret_cast<GLint const *>(value));
+	}
+
+	void OGLESRenderEngine::Uniform3fv(GLint location, GLsizei count, GLfloat const * value)
+	{
+		bool dirty = false;
+		KLAYGE_AUTO(iter_p, uniformf_cache_.find(cur_program_));
+		if (iter_p == uniformf_cache_.end())
+		{
+			dirty = true;
+			iter_p = uniformf_cache_.insert(std::make_pair(cur_program_, std::map<GLint, float4>())).first;
+		}
+		for (GLsizei i = 0; i < count; ++ i)
+		{
+			KLAYGE_AUTO(iter_v, iter_p->second.find(location + i));
+			if (iter_v == iter_p->second.end())
+			{
+				dirty = true;
+				iter_p->second.insert(std::make_pair(location, float4(value[i * 3 + 0], value[i * 3 + 1], value[i * 3 + 2], 0)));
+			}
+			else
+			{
+				if ((iter_v->second.x() != value[i * 3 + 0]) || (iter_v->second.y() != value[i * 3 + 1])
+					|| (iter_v->second.z() != value[i * 3 + 2]))
+				{
+					dirty = true;
+					iter_v->second.x() = value[i * 3 + 0];
+					iter_v->second.y() = value[i * 3 + 1];
+					iter_v->second.z() = value[i * 3 + 2];
+				}
+			}			
+		}
+
+		if (dirty)
+		{
+			glUniform3fv(location, count, value);
+		}
+	}
+
+	void OGLESRenderEngine::Uniform4iv(GLint location, GLsizei count, GLint const * value)
+	{
+		bool dirty = false;
+		KLAYGE_AUTO(iter_p, uniformi_cache_.find(cur_program_));
+		if (iter_p == uniformi_cache_.end())
+		{
+			dirty = true;
+			iter_p = uniformi_cache_.insert(std::make_pair(cur_program_, std::map<GLint, int4>())).first;
+		}
+		for (GLsizei i = 0; i < count; ++ i)
+		{
+			KLAYGE_AUTO(iter_v, iter_p->second.find(location + i));
+			if (iter_v == iter_p->second.end())
+			{
+				dirty = true;
+				iter_p->second.insert(std::make_pair(location,
+					int4(value[i * 4 + 0], value[i * 4 + 1], value[i * 4 + 2], value[i * 4 + 3])));
+			}
+			else
+			{
+				if ((iter_v->second.x() != value[i * 4 + 0]) || (iter_v->second.y() != value[i * 4 + 1])
+					|| (iter_v->second.z() != value[i * 4 + 2]) || (iter_v->second.z() != value[i * 4 + 3]))
+				{
+					dirty = true;
+					iter_v->second.x() = value[i * 4 + 0];
+					iter_v->second.y() = value[i * 4 + 1];
+					iter_v->second.z() = value[i * 4 + 2];
+					iter_v->second.w() = value[i * 4 + 3];
+				}
+			}			
+		}
+
+		if (dirty)
+		{
+			glUniform4iv(location, count, value);
+		}
+	}
+
+	void OGLESRenderEngine::Uniform4uiv(GLint location, GLsizei count, GLuint const * value)
+	{
+		this->Uniform4iv(location, count, reinterpret_cast<GLint const *>(value));
+	}
+
+	void OGLESRenderEngine::Uniform4fv(GLint location, GLsizei count, GLfloat const * value)
+	{
+		bool dirty = false;
+		KLAYGE_AUTO(iter_p, uniformf_cache_.find(cur_program_));
+		if (iter_p == uniformf_cache_.end())
+		{
+			dirty = true;
+			iter_p = uniformf_cache_.insert(std::make_pair(cur_program_, std::map<GLint, float4>())).first;
+		}
+		for (GLsizei i = 0; i < count; ++ i)
+		{
+			KLAYGE_AUTO(iter_v, iter_p->second.find(location + i));
+			if (iter_v == iter_p->second.end())
+			{
+				dirty = true;
+				iter_p->second.insert(std::make_pair(location,
+					float4(value[i * 4 + 0], value[i * 4 + 1], value[i * 4 + 2], value[i * 4 + 3])));
+			}
+			else
+			{
+				if ((iter_v->second.x() != value[i * 4 + 0]) || (iter_v->second.y() != value[i * 4 + 1])
+					|| (iter_v->second.z() != value[i * 4 + 2]) || (iter_v->second.z() != value[i * 4 + 3]))
+				{
+					dirty = true;
+					iter_v->second.x() = value[i * 4 + 0];
+					iter_v->second.y() = value[i * 4 + 1];
+					iter_v->second.z() = value[i * 4 + 2];
+					iter_v->second.w() = value[i * 4 + 3];
+				}
+			}			
+		}
+
+		if (dirty)
+		{
+			glUniform4fv(location, count, value);
 		}
 	}
 
@@ -791,7 +1179,14 @@ namespace KlayGE
 
 		if (glloader_GLES_VERSION_2_0())
 		{
-			caps_.max_shader_model = 2;
+			if (caps_.max_vertex_texture_units != 0)
+			{
+				caps_.max_shader_model = 3;
+			}
+			else
+			{
+				caps_.max_shader_model = 2;
+			}
 		}
 
 		glGetIntegerv(GL_MAX_TEXTURE_SIZE, &temp);
@@ -853,7 +1248,14 @@ namespace KlayGE
 		caps_.instance_id_support = false;
 		caps_.stream_output_support = false;
 		caps_.alpha_to_coverage_support = true;
-		caps_.primitive_restart_support = false;
+		if (glloader_GLES_VERSION_3_0())
+		{
+			caps_.primitive_restart_support = true;
+		}
+		else
+		{
+			caps_.primitive_restart_support = false;
+		}
 		caps_.multithread_rendering_support = false;
 		caps_.multithread_res_creating_support = false;
 		caps_.mrt_independent_bit_depths_support = false;
@@ -886,6 +1288,10 @@ namespace KlayGE
 		vertex_format_.insert(EF_R8);
 		vertex_format_.insert(EF_GR8);
 		vertex_format_.insert(EF_BGR8);
+		if (glloader_GLES_EXT_texture_format_BGRA8888())
+		{
+			vertex_format_.insert(EF_ARGB8);
+		}
 		vertex_format_.insert(EF_ABGR8);
 		vertex_format_.insert(EF_R8UI);
 		vertex_format_.insert(EF_GR8UI);
@@ -927,18 +1333,14 @@ namespace KlayGE
 		vertex_format_.insert(EF_GR32I);
 		vertex_format_.insert(EF_BGR32I);
 		vertex_format_.insert(EF_ABGR32I);
-		vertex_format_.insert(EF_R16F);
-		vertex_format_.insert(EF_GR16F);
-		vertex_format_.insert(EF_BGR16F);
-		vertex_format_.insert(EF_ABGR16F);
 		vertex_format_.insert(EF_R32F);
 		vertex_format_.insert(EF_GR32F);
 		vertex_format_.insert(EF_BGR32F);
 		vertex_format_.insert(EF_ABGR32F);
-		if (glloader_GLES_EXT_texture_format_BGRA8888())
-		{
-			vertex_format_.insert(EF_ARGB8);
-		}
+		vertex_format_.insert(EF_R16F);
+		vertex_format_.insert(EF_GR16F);
+		vertex_format_.insert(EF_BGR16F);
+		vertex_format_.insert(EF_ABGR16F);
 
 		texture_format_.insert(EF_A8);
 		texture_format_.insert(EF_ARGB4);
@@ -957,12 +1359,41 @@ namespace KlayGE
 		{
 			texture_format_.insert(EF_A2BGR10);
 		}
+		if (glloader_GLES_VERSION_3_0())
+		{
+			texture_format_.insert(EF_R8UI);
+			texture_format_.insert(EF_R8I);
+			texture_format_.insert(EF_GR8UI);
+			texture_format_.insert(EF_GR8I);
+			texture_format_.insert(EF_BGR8UI);
+			texture_format_.insert(EF_BGR8I);
+			texture_format_.insert(EF_R16UI);
+			texture_format_.insert(EF_R16I);
+			texture_format_.insert(EF_GR16UI);
+			texture_format_.insert(EF_GR16I);
+			texture_format_.insert(EF_BGR16UI);
+			texture_format_.insert(EF_BGR16I);
+			texture_format_.insert(EF_ABGR16UI);
+			texture_format_.insert(EF_ABGR16I);
+			texture_format_.insert(EF_R32UI);
+			texture_format_.insert(EF_R32I);
+			texture_format_.insert(EF_GR32UI);
+			texture_format_.insert(EF_GR32I);
+			texture_format_.insert(EF_BGR32UI);
+			texture_format_.insert(EF_BGR32I);
+			texture_format_.insert(EF_ABGR32UI);
+			texture_format_.insert(EF_ABGR32I);
+		}
 		if ((glloader_GLES_VERSION_3_0() || glloader_GLES_OES_texture_half_float()) && !hack_for_pvr_)
 		{
 			texture_format_.insert(EF_R16F);
 			texture_format_.insert(EF_GR16F);
 			texture_format_.insert(EF_BGR16F);
 			texture_format_.insert(EF_ABGR16F);
+		}
+		if (glloader_GLES_VERSION_3_0())
+		{
+			texture_format_.insert(EF_B10G11R11F);
 		}
 		if (glloader_GLES_OES_texture_float())
 		{
@@ -995,21 +1426,60 @@ namespace KlayGE
 		{
 			texture_format_.insert(EF_D24S8);
 		}
+		if (glloader_GLES_VERSION_3_0() && !hack_for_mali_)
+		{
+			texture_format_.insert(EF_D32F);
+		}
 
 		if (glloader_GLES_EXT_texture_format_BGRA8888())
 		{
 			rendertarget_format_.insert(EF_ARGB8);
 		}
+
+		if (glloader_GLES_VERSION_3_0)
+		{
+			GLint max_samples;
+			glGetIntegerv(GL_MAX_SAMPLES, &max_samples);
+			max_samples_ = static_cast<uint32_t>(max_samples);
+		}
+		else if (glloader_GLES_EXT_multisampled_render_to_texture())
+		{
+			GLint max_samples;
+			glGetIntegerv(GL_MAX_SAMPLES_EXT, &max_samples);
+			max_samples_ = static_cast<uint32_t>(max_samples);
+		}
+		else
+		{
+			max_samples_ = 1;
+		}
+
 		rendertarget_format_.insert(EF_ABGR8);
 		rendertarget_format_.insert(EF_SIGNED_ABGR8);
 		if (glloader_GLES_VERSION_3_0() || glloader_GLES_EXT_texture_type_2_10_10_10_REV())
 		{
 			rendertarget_format_.insert(EF_A2BGR10);
 		}
+		if (glloader_GLES_VERSION_3_0())
+		{
+			rendertarget_format_.insert(EF_R16UI);
+			rendertarget_format_.insert(EF_R16I);
+			rendertarget_format_.insert(EF_GR16UI);
+			rendertarget_format_.insert(EF_GR16I);
+			rendertarget_format_.insert(EF_ABGR16UI);
+			rendertarget_format_.insert(EF_ABGR16I);
+			rendertarget_format_.insert(EF_R32UI);
+			rendertarget_format_.insert(EF_R32I);
+			rendertarget_format_.insert(EF_GR32UI);
+			rendertarget_format_.insert(EF_GR32I);
+			rendertarget_format_.insert(EF_ABGR32UI);
+			rendertarget_format_.insert(EF_ABGR32I);
+		}
 		if ((glloader_GLES_VERSION_3_0() || glloader_GLES_EXT_texture_rg()) && !hack_for_pvr_)
 		{
 			rendertarget_format_.insert(EF_R16F);
 			rendertarget_format_.insert(EF_GR16F);
+			rendertarget_format_.insert(EF_R32F);
+			rendertarget_format_.insert(EF_GR32F);
 		}
 		if ((glloader_GLES_VERSION_3_0() || glloader_GLES_OES_texture_half_float()) && !hack_for_pvr_)
 		{
@@ -1023,6 +1493,10 @@ namespace KlayGE
 		if (glloader_GLES_VERSION_3_0() || glloader_GLES_OES_packed_depth_stencil())
 		{
 			rendertarget_format_.insert(EF_D24S8);
+		}
+		if (glloader_GLES_VERSION_3_0())
+		{
+			rendertarget_format_.insert(EF_D32F);
 		}
 
 		caps_.vertex_format_support = bind<bool>(&OGLESRenderEngine::VertexFormatSupport, this,

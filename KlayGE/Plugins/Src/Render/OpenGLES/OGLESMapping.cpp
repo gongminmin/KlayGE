@@ -169,7 +169,11 @@ namespace KlayGE
 			return GL_FUNC_REVERSE_SUBTRACT;
 
 		case BOP_Min:
-			if (glloader_GLES_EXT_blend_minmax())
+			if (glloader_GLES_VERSION_3_0())
+			{
+				return GL_MIN;
+			}
+			else if (glloader_GLES_EXT_blend_minmax())
 			{
 				return GL_MIN_EXT;
 			}
@@ -179,7 +183,11 @@ namespace KlayGE
 			}
 
 		case BOP_Max:
-			if (glloader_GLES_EXT_blend_minmax())
+			if (glloader_GLES_VERSION_3_0())
+			{
+				return GL_MAX;
+			}
+			else if (glloader_GLES_EXT_blend_minmax())
 			{
 				return GL_MAX_EXT;
 			}
@@ -270,11 +278,38 @@ namespace KlayGE
 				glformat = GL_RED;
 				gltype = GL_UNSIGNED_BYTE;
 			}
+			else if (glloader_GLES_EXT_texture_rg())
+			{
+				internalFormat = GL_RED_EXT;
+				glformat = GL_RED_EXT;
+				gltype = GL_UNSIGNED_BYTE;
+			}
 			else
 			{
 				internalFormat = GL_LUMINANCE;
 				glformat = GL_LUMINANCE;
 				gltype = GL_UNSIGNED_BYTE;
+			}
+			break;
+
+		case EF_SIGNED_R8:
+			if (glloader_GLES_VERSION_3_0())
+			{
+				internalFormat = GL_RED;
+				glformat = GL_RED;
+				gltype = GL_BYTE;
+			}
+			else if (glloader_GLES_EXT_texture_rg())
+			{
+				internalFormat = GL_RED_EXT;
+				glformat = GL_RED_EXT;
+				gltype = GL_BYTE;
+			}
+			else
+			{
+				internalFormat = GL_LUMINANCE;
+				glformat = GL_LUMINANCE;
+				gltype = GL_BYTE;
 			}
 			break;
 
@@ -297,10 +332,23 @@ namespace KlayGE
 			}
 			break;
 
-		case EF_SIGNED_R8:
-			internalFormat = GL_LUMINANCE;
-			glformat = GL_LUMINANCE;
-			gltype = GL_BYTE;
+		case EF_SIGNED_GR8:
+			if (glloader_GLES_VERSION_3_0())
+			{
+				internalFormat = GL_RG;
+				glformat = GL_RG;
+				gltype = GL_BYTE;
+			}
+			else if (glloader_GLES_EXT_texture_rg())
+			{
+				internalFormat = GL_RG_EXT;
+				glformat = GL_RG_EXT;
+				gltype = GL_BYTE;
+			}
+			else
+			{
+				THR(errc::function_not_supported);
+			}
 			break;
 
 		case EF_BGR8:
@@ -347,6 +395,292 @@ namespace KlayGE
 			}
 			break;
 
+		case EF_SIGNED_A2BGR10:
+			if (glloader_GLES_VERSION_3_0())
+			{
+				internalFormat = GL_RGBA;
+				glformat = GL_RGBA;
+				gltype = GL_INT_2_10_10_10_REV;
+			}
+			else
+			{
+				THR(errc::function_not_supported);
+			}
+			break;
+
+		case EF_R8I:
+			if (glloader_GLES_VERSION_3_0())
+			{
+				internalFormat = GL_R8I;
+				glformat = GL_RED_INTEGER;
+				gltype = GL_BYTE;
+			}
+			else
+			{
+				THR(errc::function_not_supported);
+			}
+			break;
+
+		case EF_GR8UI:
+			if (glloader_GLES_VERSION_3_0())
+			{
+				internalFormat = GL_RG8UI;
+				glformat = GL_RG_INTEGER;
+				gltype = GL_UNSIGNED_BYTE;
+			}
+			else
+			{
+				THR(errc::function_not_supported);
+			}
+			break;
+
+		case EF_GR8I:
+			if (glloader_GLES_VERSION_3_0())
+			{
+				internalFormat = GL_RG8I;
+				glformat = GL_RG_INTEGER;
+				gltype = GL_BYTE;
+			}
+			else
+			{
+				THR(errc::function_not_supported);
+			}
+			break;
+
+		case EF_BGR8UI:
+			if (glloader_GLES_VERSION_3_0())
+			{
+				internalFormat = GL_RGB8UI;
+				glformat = GL_RGB_INTEGER;
+				gltype = GL_UNSIGNED_BYTE;
+			}
+			else
+			{
+				THR(errc::function_not_supported);
+			}
+			break;
+
+		case EF_BGR8I:
+			if (glloader_GLES_VERSION_3_0())
+			{
+				internalFormat = GL_RGB8I;
+				glformat = GL_RGB_INTEGER;
+				gltype = GL_BYTE;
+			}
+			else
+			{
+				THR(errc::function_not_supported);
+			}
+			break;
+
+		case EF_R16UI:
+			if (glloader_GLES_VERSION_3_0())
+			{
+				internalFormat = GL_R16UI;
+				glformat = GL_RED_INTEGER;
+				gltype = GL_UNSIGNED_SHORT;
+			}
+			else
+			{
+				THR(errc::function_not_supported);
+			}
+			break;
+
+		case EF_R16I:
+			if (glloader_GLES_VERSION_3_0())
+			{
+				internalFormat = GL_R16I;
+				glformat = GL_RED_INTEGER;
+				gltype = GL_SHORT;
+			}
+			else
+			{
+				THR(errc::function_not_supported);
+			}
+			break;
+
+		case EF_GR16UI:
+			if (glloader_GLES_VERSION_3_0())
+			{
+				internalFormat = GL_RG16UI;
+				glformat = GL_RG_INTEGER;
+				gltype = GL_UNSIGNED_SHORT;
+			}
+			else
+			{
+				THR(errc::function_not_supported);
+			}
+			break;
+
+		case EF_GR16I:
+			if (glloader_GLES_VERSION_3_0())
+			{
+				internalFormat = GL_RG16I;
+				glformat = GL_RG_INTEGER;
+				gltype = GL_SHORT;
+			}
+			else
+			{
+				THR(errc::function_not_supported);
+			}
+			break;
+
+		case EF_BGR16UI:
+			if (glloader_GLES_VERSION_3_0())
+			{
+				internalFormat = GL_RGB16UI;
+				glformat = GL_RGB_INTEGER;
+				gltype = GL_UNSIGNED_SHORT;
+			}
+			else
+			{
+				THR(errc::function_not_supported);
+			}
+			break;
+
+		case EF_BGR16I:
+			if (glloader_GLES_VERSION_3_0())
+			{
+				internalFormat = GL_RGB16I;
+				glformat = GL_RGB_INTEGER;
+				gltype = GL_SHORT;
+			}
+			else
+			{
+				THR(errc::function_not_supported);
+			}
+			break;
+
+		case EF_ABGR16UI:
+			if (glloader_GLES_VERSION_3_0())
+			{
+				internalFormat = GL_RGBA16UI;
+				glformat = GL_RGBA_INTEGER;
+				gltype = GL_UNSIGNED_SHORT;
+			}
+			else
+			{
+				THR(errc::function_not_supported);
+			}
+			break;
+
+		case EF_ABGR16I:
+			if (glloader_GLES_VERSION_3_0())
+			{
+				internalFormat = GL_RGBA16I;
+				glformat = GL_RGBA_INTEGER;
+				gltype = GL_SHORT;
+			}
+			else
+			{
+				THR(errc::function_not_supported);
+			}
+			break;
+
+		case EF_R32UI:
+			if (glloader_GLES_VERSION_3_0())
+			{
+				internalFormat = GL_R32UI;
+				glformat = GL_RED_INTEGER;
+				gltype = GL_UNSIGNED_INT;
+			}
+			else
+			{
+				THR(errc::function_not_supported);
+			}
+			break;
+
+		case EF_R32I:
+			if (glloader_GLES_VERSION_3_0())
+			{
+				internalFormat = GL_R32I;
+				glformat = GL_RED_INTEGER;
+				gltype = GL_INT;
+			}
+			else
+			{
+				THR(errc::function_not_supported);
+			}
+			break;
+
+		case EF_GR32UI:
+			if (glloader_GLES_VERSION_3_0())
+			{
+				internalFormat = GL_RG32UI;
+				glformat = GL_RG_INTEGER;
+				gltype = GL_UNSIGNED_INT;
+			}
+			else
+			{
+				THR(errc::function_not_supported);
+			}
+			break;
+
+		case EF_GR32I:
+			if (glloader_GLES_VERSION_3_0())
+			{
+				internalFormat = GL_RG32I;
+				glformat = GL_RG_INTEGER;
+				gltype = GL_INT;
+			}
+			else
+			{
+				THR(errc::function_not_supported);
+			}
+			break;
+
+		case EF_BGR32UI:
+			if (glloader_GLES_VERSION_3_0())
+			{
+				internalFormat = GL_RGB32UI;
+				glformat = GL_RGB_INTEGER;
+				gltype = GL_UNSIGNED_INT;
+			}
+			else
+			{
+				THR(errc::function_not_supported);
+			}
+			break;
+
+		case EF_BGR32I:
+			if (glloader_GLES_VERSION_3_0())
+			{
+				internalFormat = GL_RGB32I;
+				glformat = GL_RGB_INTEGER;
+				gltype = GL_INT;
+			}
+			else
+			{
+				THR(errc::function_not_supported);
+			}
+			break;
+
+		case EF_ABGR32UI:
+			if (glloader_GLES_VERSION_3_0())
+			{
+				internalFormat = GL_RGBA32UI;
+				glformat = GL_RGBA_INTEGER;
+				gltype = GL_UNSIGNED_INT;
+			}
+			else
+			{
+				THR(errc::function_not_supported);
+			}
+			break;
+
+		case EF_ABGR32I:
+			if (glloader_GLES_VERSION_3_0())
+			{
+				internalFormat = GL_RGBA32I;
+				glformat = GL_RGBA_INTEGER;
+				gltype = GL_INT;
+			}
+			else
+			{
+				THR(errc::function_not_supported);
+			}
+			break;
+
 		case EF_R16F:
 			if (glloader_GLES_VERSION_3_0())
 			{
@@ -378,6 +712,19 @@ namespace KlayGE
 				internalFormat = GL_LUMINANCE_ALPHA;
 				glformat = GL_LUMINANCE_ALPHA;
 				gltype = GL_HALF_FLOAT_OES;
+			}
+			else
+			{
+				THR(errc::function_not_supported);
+			}
+			break;
+
+		case EF_B10G11R11F:
+			if (glloader_GLES_VERSION_3_0())
+			{
+				internalFormat = GL_R11F_G11F_B10F;
+				glformat = GL_RGB;
+				gltype = GL_UNSIGNED_INT_10F_11F_11F_REV;
 			}
 			else
 			{
@@ -424,7 +771,13 @@ namespace KlayGE
 			break;
 
 		case EF_R32F:
-			if (glloader_GLES_OES_texture_float())
+			if (glloader_GLES_VERSION_3_0())
+			{
+				internalFormat = GL_RED;
+				glformat = GL_RED;
+				gltype = GL_FLOAT;
+			}
+			else if (glloader_GLES_OES_texture_float())
 			{
 				internalFormat = GL_LUMINANCE;
 				glformat = GL_LUMINANCE;
@@ -437,7 +790,13 @@ namespace KlayGE
 			break;
 
 		case EF_GR32F:
-			if (glloader_GLES_OES_texture_float())
+			if (glloader_GLES_VERSION_3_0())
+			{
+				internalFormat = GL_RG;
+				glformat = GL_RG;
+				gltype = GL_FLOAT;
+			}
+			else if (glloader_GLES_OES_texture_float())
 			{
 				internalFormat = GL_LUMINANCE_ALPHA;
 				glformat = GL_LUMINANCE_ALPHA;
@@ -450,7 +809,13 @@ namespace KlayGE
 			break;
 
 		case EF_BGR32F:
-			if (glloader_GLES_OES_texture_float())
+			if (glloader_GLES_VERSION_3_0())
+			{
+				internalFormat = GL_RGB;
+				glformat = GL_RGB;
+				gltype = GL_FLOAT;
+			}
+			else if (glloader_GLES_OES_texture_float())
 			{
 				internalFormat = GL_RGB;
 				glformat = GL_RGB;
@@ -463,7 +828,13 @@ namespace KlayGE
 			break;
 
 		case EF_ABGR32F:
-			if (glloader_GLES_OES_texture_float())
+			if (glloader_GLES_VERSION_3_0())
+			{
+				internalFormat = GL_RGBA;
+				glformat = GL_RGBA;
+				gltype = GL_FLOAT;
+			}
+			else if (glloader_GLES_OES_texture_float())
 			{
 				internalFormat = GL_RGBA;
 				glformat = GL_RGBA;
@@ -589,6 +960,12 @@ namespace KlayGE
 			{
 				THR(errc::function_not_supported);
 			}
+			break;
+
+		case EF_D32F:
+			internalFormat = GL_DEPTH_COMPONENT32F;
+			glformat = GL_DEPTH_COMPONENT;
+			gltype = GL_FLOAT;
 			break;
 
 		default:

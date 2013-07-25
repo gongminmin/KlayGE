@@ -180,73 +180,11 @@ namespace KlayGE
 	{
 		BOOST_ASSERT(type_ == target.Type());
 
-		if ((format_ == target.Format()) && (widths_[0] == target.Width(0)) && (heights_[0] == target.Height(0)) && (depthes_[0] == target.Depth(0)))
+		for (uint32_t level = 0; level < num_mip_maps_; ++ level)
 		{
-			uint32_t texel_size = NumFormatBytes(format_);
-
-			GLint gl_internalFormat;
-			GLenum gl_format;
-			GLenum gl_type;
-			OGLESMapping::MappingFormat(gl_internalFormat, gl_format, gl_type, format_);
-
-			OGLESTexture3D& gles_target = *checked_cast<OGLESTexture3D*>(&target);
-			for (uint32_t level = 0; level < num_mip_maps_; ++ level)
-			{
-				glBindTexture(target_type_, gles_target.GLTexture());
-
-				if (IsCompressedFormat(format_))
-				{
-					int block_size;
-					if ((EF_BC1 == format_) || (EF_SIGNED_BC1 == format_) || (EF_BC1_SRGB == format_)
-						|| (EF_BC4 == format_) || (EF_SIGNED_BC4 == format_) || (EF_BC4_SRGB == format_))
-					{
-						block_size = 8;
-					}
-					else
-					{
-						block_size = 16;
-					}
-
-					GLsizei const image_size = ((this->Width(level) + 3) / 4) * ((this->Height(level) + 3) / 4) * this->Depth(level) * block_size;
-
-					std::memcpy(&gles_target.tex_data_[level][0], &tex_data_[level][0], image_size);
-					if (glloader_GLES_VERSION_3_0())
-					{
-						glCompressedTexSubImage3D(target_type_, level, 0, 0, 0,
-							this->Width(level), this->Height(level), this->Depth(level), gl_format, image_size, &tex_data_[level][0]);
-					}
-					else
-					{
-						glCompressedTexSubImage3DOES(target_type_, level, 0, 0, 0,
-							this->Width(level), this->Height(level), this->Depth(level), gl_format, image_size, &tex_data_[level][0]);
-					}
-				}
-				else
-				{
-					GLsizei const image_size = target.Width(level) * target.Height(level) * target.Depth(level) * texel_size;
-
-					std::memcpy(&gles_target.tex_data_[level][0], &tex_data_[level][0], image_size);
-					if (glloader_GLES_VERSION_3_0())
-					{
-						glTexSubImage3D(target_type_, level, 0, 0, 0, this->Width(level), this->Height(level), this->Depth(level),
-							gl_format, gl_type, &tex_data_[level][0]);
-					}
-					else
-					{
-						glTexSubImage3DOES(target_type_, level, 0, 0, 0, this->Width(level), this->Height(level), this->Depth(level),
-							gl_format, gl_type, &tex_data_[level][0]);
-					}
-				}
-			}
-		}
-		else
-		{
-			for (uint32_t level = 0; level < num_mip_maps_; ++ level)
-			{
-				this->CopyToSubTexture3D(target,
-					0, level, 0, 0, 0, target.Width(level), target.Height(level), target.Depth(level),
-					0, level, 0, 0, 0, this->Width(level), this->Height(level), this->Depth(level));
-			}
+			this->CopyToSubTexture3D(target,
+				0, level, 0, 0, 0, target.Width(level), target.Height(level), target.Depth(level),
+				0, level, 0, 0, 0, this->Width(level), this->Height(level), this->Depth(level));
 		}
 	}
 
