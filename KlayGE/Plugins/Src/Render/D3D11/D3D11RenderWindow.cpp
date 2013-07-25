@@ -557,7 +557,7 @@ namespace KlayGE
 
 			sc_desc1_.Width = width_;
 			sc_desc1_.Height = height_;
-			sc_desc1_.Stereo = dxgi_stereo_support_;
+			sc_desc1_.Stereo = (STM_LCDShutter == Context::Instance().Config().graphics_cfg.stereo_method) && dxgi_stereo_support_;
 		}
 		else
 #endif
@@ -570,7 +570,7 @@ namespace KlayGE
 
 		sc_desc1_.Width = width_;
 		sc_desc1_.Height = height_;
-		sc_desc1_.Stereo = dxgi_stereo_support_;
+		sc_desc1_.Stereo = (STM_LCDShutter == Context::Instance().Config().graphics_cfg.stereo_method) && dxgi_stereo_support_;
 #endif
 
 		if (!!swap_chain_)
@@ -813,8 +813,10 @@ namespace KlayGE
 		TIF(d3d_device->CreateRenderTargetView(back_buffer_.get(), &rtv_desc, &render_target_view));
 		render_target_view_ = MakeCOMPtr(render_target_view);
 
+		bool stereo = (STM_LCDShutter == Context::Instance().Config().graphics_cfg.stereo_method) && dxgi_stereo_support_;
+
 #if (_WIN32_WINNT >= 0x0602 /*_WIN32_WINNT_WIN8*/)
-		if (has_dxgi_1_2_ && dxgi_stereo_support_)
+		if (stereo)
 		{
 			if (bb_desc.SampleDesc.Count > 1)
 			{
@@ -839,7 +841,7 @@ namespace KlayGE
 		ds_desc.Width = this->Width();
 		ds_desc.Height = this->Height();
 		ds_desc.MipLevels = 1;
-		ds_desc.ArraySize = 1;
+		ds_desc.ArraySize = stereo ? 2 : 1;
 		ds_desc.Format = depth_stencil_format_;
 		ds_desc.SampleDesc.Count = bb_desc.SampleDesc.Count;
 		ds_desc.SampleDesc.Quality = bb_desc.SampleDesc.Quality;
@@ -890,7 +892,7 @@ namespace KlayGE
 		depth_stencil_view_ = MakeCOMPtr(depth_stencil_view);
 
 #if (_WIN32_WINNT >= 0x0602 /*_WIN32_WINNT_WIN8*/)
-		if (has_dxgi_1_2_ && dxgi_stereo_support_)
+		if (stereo)
 		{
 			if (bb_desc.SampleDesc.Count > 1)
 			{
