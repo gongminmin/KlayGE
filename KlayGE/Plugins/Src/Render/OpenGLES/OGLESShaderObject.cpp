@@ -224,7 +224,8 @@ namespace
 			bool v;
 			param_->Value(v);
 
-			glUniform1i(location_, v);
+			OGLESRenderEngine& re = *checked_cast<OGLESRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+			re.Uniform1i(location_, v);
 		}
 
 	private:
@@ -246,7 +247,8 @@ namespace
 			uint32_t v;
 			param_->Value(v);
 
-			glUniform1i(location_, v);
+			OGLESRenderEngine& re = *checked_cast<OGLESRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+			re.Uniform1ui(location_, v);
 		}
 
 	private:
@@ -268,7 +270,8 @@ namespace
 			int32_t v;
 			param_->Value(v);
 
-			glUniform1i(location_, v);
+			OGLESRenderEngine& re = *checked_cast<OGLESRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+			re.Uniform1i(location_, v);
 		}
 
 	private:
@@ -290,7 +293,8 @@ namespace
 			float v;
 			param_->Value(v);
 
-			glUniform1f(location_, v);
+			OGLESRenderEngine& re = *checked_cast<OGLESRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+			re.Uniform1f(location_, v);
 		}
 
 	private:
@@ -312,7 +316,8 @@ namespace
 			uint2 v;
 			param_->Value(v);
 
-			glUniform2iv(location_, 1, reinterpret_cast<GLint*>(&v.x()));
+			OGLESRenderEngine& re = *checked_cast<OGLESRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+			re.Uniform2uiv(location_, 1, reinterpret_cast<GLuint*>(&v.x()));
 		}
 
 	private:
@@ -334,7 +339,8 @@ namespace
 			uint3 v;
 			param_->Value(v);
 
-			glUniform3iv(location_, 1, reinterpret_cast<GLint*>(&v.x()));
+			OGLESRenderEngine& re = *checked_cast<OGLESRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+			re.Uniform3uiv(location_, 1, reinterpret_cast<GLuint*>(&v.x()));
 		}
 
 	private:
@@ -356,7 +362,8 @@ namespace
 			uint4 v;
 			param_->Value(v);
 
-			glUniform4iv(location_, 1, reinterpret_cast<GLint*>(&v.x()));
+			OGLESRenderEngine& re = *checked_cast<OGLESRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+			re.Uniform4uiv(location_, 1, reinterpret_cast<GLuint*>(&v.x()));
 		}
 
 	private:
@@ -378,7 +385,8 @@ namespace
 			int2 v;
 			param_->Value(v);
 
-			glUniform2iv(location_, 1, reinterpret_cast<GLint*>(&v.x()));
+			OGLESRenderEngine& re = *checked_cast<OGLESRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+			re.Uniform2iv(location_, 1, reinterpret_cast<GLint*>(&v.x()));
 		}
 
 	private:
@@ -400,7 +408,8 @@ namespace
 			int3 v;
 			param_->Value(v);
 
-			glUniform3iv(location_, 1, reinterpret_cast<GLint*>(&v.x()));
+			OGLESRenderEngine& re = *checked_cast<OGLESRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+			re.Uniform3iv(location_, 1, reinterpret_cast<GLint*>(&v.x()));
 		}
 
 	private:
@@ -422,7 +431,8 @@ namespace
 			int4 v;
 			param_->Value(v);
 
-			glUniform4iv(location_, 1, reinterpret_cast<GLint*>(&v.x()));
+			OGLESRenderEngine& re = *checked_cast<OGLESRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+			re.Uniform4iv(location_, 1, reinterpret_cast<GLint*>(&v.x()));
 		}
 
 	private:
@@ -444,7 +454,8 @@ namespace
 			float2 v;
 			param_->Value(v);
 
-			glUniform2fv(location_, 1, &v.x());
+			OGLESRenderEngine& re = *checked_cast<OGLESRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+			re.Uniform2fv(location_, 1, &v.x());
 		}
 
 	private:
@@ -466,7 +477,8 @@ namespace
 			float3 v;
 			param_->Value(v);
 
-			glUniform3fv(location_, 1, &v.x());
+			OGLESRenderEngine& re = *checked_cast<OGLESRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+			re.Uniform3fv(location_, 1, &v.x());
 		}
 
 	private:
@@ -488,7 +500,8 @@ namespace
 			float4 v;
 			param_->Value(v);
 
-			glUniform4fv(location_, 1, &v.x());
+			OGLESRenderEngine& re = *checked_cast<OGLESRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+			re.Uniform4fv(location_, 1, &v.x());
 		}
 
 	private:
@@ -510,7 +523,8 @@ namespace
 			float4x4 v;
 			param_->Value(v);
 
-			glUniform4fv(location_, 4, &v[0]);
+			OGLESRenderEngine& re = *checked_cast<OGLESRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+			re.Uniform4fv(location_, 4, &v[0]);
 		}
 
 	private:
@@ -535,7 +549,8 @@ namespace
 			if (!v.empty())
 			{
 				std::vector<int> tmp(v.begin(), v.end());
-				glUniform1iv(location_, static_cast<int>(tmp.size()), &tmp[0]);
+				OGLESRenderEngine& re = *checked_cast<OGLESRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+				re.Uniform1iv(location_, static_cast<int>(tmp.size()), &tmp[0]);
 			}
 		}
 
@@ -560,7 +575,8 @@ namespace
 
 			if (!v.empty())
 			{
-				glUniform1iv(location_, static_cast<int>(v.size()), reinterpret_cast<GLint*>(&v[0]));
+				OGLESRenderEngine& re = *checked_cast<OGLESRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+				re.Uniform1uiv(location_, static_cast<int>(v.size()), reinterpret_cast<GLuint*>(&v[0]));
 			}
 		}
 
@@ -585,7 +601,8 @@ namespace
 
 			if (!v.empty())
 			{
-				glUniform1iv(location_, static_cast<int>(v.size()), reinterpret_cast<GLint*>(&v[0]));
+				OGLESRenderEngine& re = *checked_cast<OGLESRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+				re.Uniform1iv(location_, static_cast<int>(v.size()), reinterpret_cast<GLint*>(&v[0]));
 			}
 		}
 
@@ -610,7 +627,8 @@ namespace
 
 			if (!v.empty())
 			{
-				glUniform1fv(location_, static_cast<int>(v.size()), &v[0]);
+				OGLESRenderEngine& re = *checked_cast<OGLESRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+				re.Uniform1fv(location_, static_cast<int>(v.size()), &v[0]);
 			}
 		}
 
@@ -635,7 +653,8 @@ namespace
 
 			if (!v.empty())
 			{
-				glUniform2iv(location_, static_cast<long>(v.size()), reinterpret_cast<GLint*>(&v[0][0]));
+				OGLESRenderEngine& re = *checked_cast<OGLESRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+				re.Uniform2uiv(location_, static_cast<long>(v.size()), reinterpret_cast<GLuint*>(&v[0][0]));
 			}
 		}
 
@@ -660,7 +679,8 @@ namespace
 
 			if (!v.empty())
 			{
-				glUniform3iv(location_, static_cast<long>(v.size()), reinterpret_cast<GLint*>(&v[0][0]));
+				OGLESRenderEngine& re = *checked_cast<OGLESRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+				re.Uniform3uiv(location_, static_cast<long>(v.size()), reinterpret_cast<GLuint*>(&v[0][0]));
 			}
 		}
 
@@ -685,7 +705,8 @@ namespace
 
 			if (!v.empty())
 			{
-				glUniform4iv(location_, static_cast<long>(v.size()), reinterpret_cast<GLint*>(&v[0][0]));
+				OGLESRenderEngine& re = *checked_cast<OGLESRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+				re.Uniform4uiv(location_, static_cast<long>(v.size()), reinterpret_cast<GLuint*>(&v[0][0]));
 			}
 		}
 
@@ -710,7 +731,8 @@ namespace
 
 			if (!v.empty())
 			{
-				glUniform2iv(location_, static_cast<long>(v.size()), reinterpret_cast<GLint*>(&v[0][0]));
+				OGLESRenderEngine& re = *checked_cast<OGLESRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+				re.Uniform2iv(location_, static_cast<long>(v.size()), reinterpret_cast<GLint*>(&v[0][0]));
 			}
 		}
 
@@ -735,7 +757,8 @@ namespace
 
 			if (!v.empty())
 			{
-				glUniform3iv(location_, static_cast<long>(v.size()), reinterpret_cast<GLint*>(&v[0][0]));
+				OGLESRenderEngine& re = *checked_cast<OGLESRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+				re.Uniform3iv(location_, static_cast<long>(v.size()), reinterpret_cast<GLint*>(&v[0][0]));
 			}
 		}
 
@@ -760,7 +783,8 @@ namespace
 
 			if (!v.empty())
 			{
-				glUniform4iv(location_, static_cast<long>(v.size()), reinterpret_cast<GLint*>(&v[0][0]));
+				OGLESRenderEngine& re = *checked_cast<OGLESRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+				re.Uniform4iv(location_, static_cast<long>(v.size()), reinterpret_cast<GLint*>(&v[0][0]));
 			}
 		}
 
@@ -785,7 +809,8 @@ namespace
 
 			if (!v.empty())
 			{
-				glUniform2fv(location_, static_cast<long>(v.size()), &v[0][0]);
+				OGLESRenderEngine& re = *checked_cast<OGLESRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+				re.Uniform2fv(location_, static_cast<long>(v.size()), &v[0][0]);
 			}
 		}
 
@@ -810,7 +835,8 @@ namespace
 
 			if (!v.empty())
 			{
-				glUniform3fv(location_, static_cast<long>(v.size()), &v[0][0]);
+				OGLESRenderEngine& re = *checked_cast<OGLESRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+				re.Uniform3fv(location_, static_cast<long>(v.size()), &v[0][0]);
 			}
 		}
 
@@ -835,7 +861,8 @@ namespace
 
 			if (!v.empty())
 			{
-				glUniform4fv(location_, static_cast<long>(v.size()), &v[0][0]);
+				OGLESRenderEngine& re = *checked_cast<OGLESRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+				re.Uniform4fv(location_, static_cast<long>(v.size()), &v[0][0]);
 			}
 		}
 
@@ -860,7 +887,8 @@ namespace
 
 			if (!v.empty())
 			{
-				glUniform4fv(location_, static_cast<long>(v.size()) * 4, &v[0][0]);
+				OGLESRenderEngine& re = *checked_cast<OGLESRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+				re.Uniform4fv(location_, static_cast<long>(v.size()) * 4, &v[0][0]);
 			}
 		}
 
@@ -894,14 +922,14 @@ namespace
 				GLuint const gl_tex = checked_pointer_cast<OGLESTexture>((*samplers_)[stage_].first)->GLTexture();
 				glBindTexture(tex_type, gl_tex);
 
-				glUniform1i(location_, stage_);
+				re.Uniform1i(location_, stage_);
 			}
 			else
 			{
 				re.ActiveTexture(GL_TEXTURE0 + stage_);
 				glBindTexture(GL_TEXTURE_2D, 0);
 
-				glUniform1i(location_, stage_);
+				re.Uniform1i(location_, stage_);
 			}
 		}
 
@@ -922,6 +950,8 @@ namespace KlayGE
 		has_tessellation_ = false;
 		is_shader_validate_.fill(true);
 
+		glsl_program_ = glCreateProgram();
+
 		glsl_srcs_ = MakeSharedPtr<array<shared_ptr<std::string>, ST_NumShaderTypes> >();
 
 		pnames_ = MakeSharedPtr<array<shared_ptr<std::vector<std::string> >, ST_NumShaderTypes> >();
@@ -930,8 +960,6 @@ namespace KlayGE
 		vs_usages_ = MakeSharedPtr<std::vector<VertexElementUsage> >();
 		vs_usage_indices_ = MakeSharedPtr<std::vector<uint8_t> >();
 		glsl_vs_attrib_names_ = MakeSharedPtr<std::vector<std::string> >();
-
-		glsl_program_ = glCreateProgram();
 	}
 
 	OGLESShaderObject::~OGLESShaderObject()
@@ -2279,7 +2307,8 @@ namespace KlayGE
 
 	void OGLESShaderObject::Bind()
 	{
-		glUseProgram(glsl_program_);
+		OGLESRenderEngine& re = *checked_cast<OGLESRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+		re.UseProgram(glsl_program_);
 
 		typedef KLAYGE_DECLTYPE(param_binds_) ParamBindsType;
 		KLAYGE_FOREACH(ParamBindsType::reference pb, param_binds_)

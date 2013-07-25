@@ -1084,7 +1084,7 @@ namespace KlayGE
 									param, effect.ParameterByName(sample_tokens[4]), 1UL << type));
 							}
 
-							if ((!sample_helper) && (("SampleLevel" == sample_tokens[2]) || ("SampleBias" == sample_tokens[2])))
+							if (!sample_helper && (("SampleLevel" == sample_tokens[2]) || ("SampleBias" == sample_tokens[2])))
 							{
 								sample_helper = true;
 							}

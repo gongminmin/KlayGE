@@ -90,7 +90,7 @@ namespace KlayGE
 
 	QueryPtr OGLESRenderFactory::MakeConditionalRender()
 	{
-		if (glloader_GLES_EXT_occlusion_query_boolean())
+		if (glloader_GLES_VERSION_3_0() || glloader_GLES_EXT_occlusion_query_boolean())
 		{
 			return MakeSharedPtr<OGLESConditionalRender>();
 		}
