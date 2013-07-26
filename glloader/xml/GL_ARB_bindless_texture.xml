@@ -1,0 +1,108 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GL_ARB_bindless_texture" reg_no="152">
+	<tokens>
+		<token name="GL_UNSIGNED_INT64_ARB" value="0x140F"/>
+	</tokens>
+	
+	<functions>
+		<function name="glGetTextureHandleARB" return="GLuint64">
+			<params>
+				<param type="GLuint" name="texture"/>
+			</params>
+		</function>
+		<function name="glGetTextureSamplerHandleARB" return="GLuint64">
+			<params>
+				<param type="GLuint" name="texture"/>
+				<param type="GLuint" name="sampler"/>
+			</params>
+		</function>
+		<function name="glMakeTextureHandleResidentARB" return="void">
+			<params>
+				<param type="GLuint64" name="handle"/>
+			</params>
+		</function>
+		<function name="glMakeTextureHandleNonResidentARB" return="void">
+			<params>
+				<param type="GLuint64" name="handle"/>
+			</params>
+		</function>
+		<function name="glGetImageHandleARB" return="GLuint64">
+			<params>
+				<param type="GLuint" name="texture"/>
+				<param type="GLint" name="level"/>
+				<param type="GLboolean" name="layered"/>
+				<param type="GLint" name="layer"/>
+				<param type="GLenum" name="format"/>
+			</params>
+		</function>
+		<function name="glMakeImageHandleResidentARB" return="void">
+			<params>
+				<param type="GLuint64" name="handle"/>
+				<param type="GLenum" name="access"/>
+			</params>
+		</function>
+		<function name="glMakeImageHandleNonResidentARB" return="void">
+			<params>
+				<param type="GLuint64" name="handle"/>
+			</params>
+		</function>
+		<function name="glUniformHandleui64ARB" return="void">
+			<params>
+				<param type="GLint" name="location"/>
+				<param type="GLuint64" name="value"/>
+			</params>
+		</function>
+		<function name="glUniformHandleui64vARB" return="void">
+			<params>
+				<param type="GLint" name="location"/>
+				<param type="GLsizei" name="count"/>
+				<param type="const GLuint64*" name="value"/>
+			</params>
+		</function>
+		<function name="glProgramUniformHandleui64ARB" return="void">
+			<params>
+				<param type="GLuint" name="program"/>
+				<param type="GLint" name="location"/>
+				<param type="GLuint64" name="value"/>
+			</params>
+		</function>
+		<function name="glProgramUniformHandleui64vARB" return="void">
+			<params>
+				<param type="GLuint" name="program"/>
+				<param type="GLint" name="location"/>
+				<param type="GLsizei" name="count"/>
+				<param type="const GLuint64*" name="values"/>
+			</params>
+		</function>
+		<function name="glIsTextureHandleResidentARB" return="GLboolean">
+			<params>
+				<param type="GLuint64" name="handle"/>
+			</params>
+		</function>
+		<function name="glIsImageHandleResidentARB" return="GLboolean">
+			<params>
+				<param type="GLuint64" name="handle"/>
+			</params>
+		</function>
+		<function name="glVertexAttribL1ui64ARB" return="void">
+			<params>
+				<param type="GLuint" name="index"/>
+				<param type="GLuint64" name="x"/>
+			</params>
+		</function>
+		<function name="glVertexAttribL1ui64vARB" return="void">
+			<params>
+				<param type="GLuint" name="index"/>
+				<param type="const GLuint64*" name="v"/>
+			</params>
+		</function>
+		<function name="glGetVertexAttribLui64vARB" return="void">
+			<params>
+				<param type="GLuint" name="index"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLuint64*" name="params"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

@@ -1,0 +1,30 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GL_ARB_indirect_parameters" reg_no="154">
+	<tokens>
+		<token name="GL_PARAMETER_BUFFER_ARB" value="0x80EE"/>
+		<token name="GL_PARAMETER_BUFFER_BINDING_ARB" value="0x80EF"/>
+	</tokens>
+
+	<functions>
+		<function name="glMultiDrawArraysIndirectCountARB" return="void">
+			<params>
+				<param type="GLenum" name="mode"/>
+				<param type="const void*" name="indirect"/>
+				<param type="GLintptr" name="drawcount"/>
+				<param type="GLsizei" name="maxdrawcount"/>
+				<param type="GLsizei" name="stride"/>
+			</params>
+		</function>
+		<function name="glMultiDrawElementsIndirectCountARB" return="void">
+			<params>
+				<param type="GLenum" name="mode"/>
+				<param type="GLenum" name="type"/>
+				<param type="const void*" name="indirect"/>
+				<param type="GLintptr" name="drawcount"/>
+				<param type="GLsizei" name="maxdrawcount"/>
+				<param type="GLsizei" name="stride"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

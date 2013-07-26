@@ -1,0 +1,18 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GL_VERSION_4_4">
+	<tokens>
+		<token name="GL_MAX_VERTEX_ATTRIB_STRIDE" value="0x82E5"/>
+	</tokens>
+
+	<additionals>
+		<ext name="GL_ARB_buffer_storage"/>
+		<ext name="GL_ARB_clear_texture"/>
+		<ext name="GL_ARB_multi_bind"/>
+		<ext name="GL_ARB_enhanced_layouts"/>
+		<ext name="GL_ARB_query_buffer_object"/>
+		<ext name="GL_ARB_texture_mirror_clamp_to_edge"/>
+		<ext name="GL_ARB_texture_stencil8"/>
+		<ext name="GL_ARB_vertex_type_10f_11f_11f_rev"/>
+	</additionals>
+</gl_extension>

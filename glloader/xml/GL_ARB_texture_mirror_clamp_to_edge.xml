@@ -1,0 +1,7 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GL_ARB_texture_mirror_clamp_to_edge" reg_no="149">
+	<tokens>
+		<token name="GL_MIRROR_CLAMP_TO_EDGE" value="0x8743"/>
+	</tokens>
+</gl_extension>

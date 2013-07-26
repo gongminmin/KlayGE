@@ -1,0 +1,47 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GL_ARB_sparse_texture" reg_no="158">
+	<tokens>
+		<token name="GL_TEXTURE_SPARSE_ARB" value="0x91A6"/>
+		<token name="GL_VIRTUAL_PAGE_SIZE_INDEX_ARB" value="0x91A7"/>
+		<token name="GL_NUM_SPARSE_LEVELS_ARB" value="0x91AA"/>
+		<token name="GL_NUM_VIRTUAL_PAGE_SIZES_ARB" value="0x91A8"/>
+		<token name="GL_VIRTUAL_PAGE_SIZE_X_ARB" value="0x9195"/>
+		<token name="GL_VIRTUAL_PAGE_SIZE_Y_ARB" value="0x9196"/>
+		<token name="GL_VIRTUAL_PAGE_SIZE_Z_ARB" value="0x9197"/>
+		<token name="GL_MAX_SPARSE_TEXTURE_SIZE_ARB" value="0x9198"/>
+		<token name="GL_MAX_SPARSE_3D_TEXTURE_SIZE_ARB" value="0x9199"/>
+		<token name="GL_MAX_SPARSE_ARRAY_TEXTURE_LAYERS_ARB" value="0x919A"/>
+		<token name="GL_SPARSE_TEXTURE_FULL_ARRAY_CUBE_MIPMAPS_ARB" value="0x91A9"/>
+	</tokens>
+
+	<functions>
+		<function name="glTexPageCommitmentARB" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLint" name="level"/>
+				<param type="GLint" name="xoffset"/>
+				<param type="GLint" name="yoffset"/>
+				<param type="GLint" name="zoffset"/>
+				<param type="GLsizei" name="width"/>
+				<param type="GLsizei" name="height"/>
+				<param type="GLsizei" name="depth"/>
+				<param type="GLboolean" name="commit"/>
+			</params>
+		</function>
+		<function name="glTexturePageCommitmentEXT" return="void">
+			<params>
+				<param type="GLuint" name="texture"/>
+				<param type="GLenum" name="target"/>
+				<param type="GLint" name="level"/>
+				<param type="GLint" name="xoffset"/>
+				<param type="GLint" name="yoffset"/>
+				<param type="GLint" name="zoffset"/>
+				<param type="GLsizei" name="width"/>
+				<param type="GLsizei" name="height"/>
+				<param type="GLsizei" name="depth"/>
+				<param type="GLboolean" name="commit"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

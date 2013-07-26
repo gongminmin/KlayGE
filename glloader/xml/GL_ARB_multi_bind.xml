@@ -1,0 +1,54 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GL_ARB_multi_bind" reg_no="147">
+	<functions>
+		<function name="glBindBuffersBase" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLuint" name="first"/>
+				<param type="GLsizei" name="count"/>
+				<param type="GLuint const *" name="buffers"/>
+			</params>
+		</function>
+		<function name="glBindBuffersRange" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLuint" name="first"/>
+				<param type="GLsizei" name="count"/>
+				<param type="GLuint const *" name="buffers"/>
+				<param type="GLintptr const *" name="offsets"/>
+				<param type="GLsizeiptr const *" name="sizes"/>
+			</params>
+		</function>
+		<function name="glBindTextures" return="void">
+			<params>
+				<param type="GLuint" name="first"/>
+				<param type="GLsizei" name="count"/>
+				<param type="GLuint const *" name="textures"/>
+			</params>
+		</function>
+		<function name="glBindSamplers" return="void">
+			<params>
+				<param type="GLuint" name="first"/>
+				<param type="GLsizei" name="count"/>
+				<param type="GLuint const *" name="samplers"/>
+			</params>
+		</function>
+		<function name="glBindImageTextures" return="void">
+			<params>
+				<param type="GLuint" name="first"/>
+				<param type="GLsizei" name="count"/>
+				<param type="GLuint const *" name="textures"/>
+			</params>
+		</function>
+		<function name="glBindVertexBuffers" return="void">
+			<params>
+				<param type="GLuint" name="first"/>
+				<param type="GLsizei" name="count"/>
+				<param type="GLuint const *" name="buffers"/>
+				<param type="GLintptr const *" name="offsets"/>
+				<param type="GLsizei const *" name="strides"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

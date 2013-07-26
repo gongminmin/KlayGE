@@ -1,0 +1,8 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GL_ARB_texture_stencil8" reg_no="150">
+	<tokens>
+		<token name="GL_STENCIL_INDEX" value="0x1901"/>
+		<token name="GL_STENCIL_INDEX8" value="0x8D48"/>
+	</tokens>
+</gl_extension>

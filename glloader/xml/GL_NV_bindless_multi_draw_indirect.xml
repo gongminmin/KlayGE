@@ -1,0 +1,25 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GL_NV_bindless_multi_draw_indirect" reg_no="432">
+	<functions>
+		<function name="glMultiDrawArraysIndirectBindlessNV" return="void">
+			<params>
+				<param type="GLenum" name="mode"/>
+				<param type="const void*" name="indirect"/>
+				<param type="GLsizei" name="drawCount"/>
+				<param type="GLsizei" name="stride"/>
+				<param type="GLint" name="vertexBufferCount"/>
+			</params>
+		</function>
+		<function name="glMultiDrawElementsIndirectBindlessNV" return="void">
+			<params>
+				<param type="GLenum" name="mode"/>
+				<param type="GLenum" name="type"/>
+				<param type="const void*" name="indirect"/>
+				<param type="GLsizei" name="drawCount"/>
+				<param type="GLsizei" name="stride"/>
+				<param type="GLint" name="vertexBufferCount"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

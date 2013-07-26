@@ -1,0 +1,34 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GL_ARB_clear_texture" reg_no="145">
+	<tokens>
+		<token name="GL_CLEAR_TEXTURE" value="0x9365"/>
+	</tokens>
+
+	<functions>
+		<function name="glClearTexImage" return="void">
+			<params>
+				<param type="GLuint" name="texture"/>
+				<param type="GLint" name="level"/>
+				<param type="GLenum" name="format"/>
+				<param type="GLenum" name="type"/>
+				<param type="void const *" name="data"/>
+			</params>
+		</function>
+		<function name="glClearTexSubImage" return="void">
+			<params>
+				<param type="GLuint" name="texture"/>
+				<param type="GLint" name="level"/>
+				<param type="GLint" name="xoffset"/>
+				<param type="GLint" name="yoffset"/>
+				<param type="GLint" name="zoffset"/>
+				<param type="GLsizei" name="width"/>
+				<param type="GLsizei" name="height"/>
+				<param type="GLsizei" name="depth"/>
+				<param type="GLenum" name="format"/>
+				<param type="GLenum" name="type"/>
+				<param type="void const *" name="data"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

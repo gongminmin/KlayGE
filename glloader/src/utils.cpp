@@ -402,6 +402,10 @@ namespace glloader
 				{
 					features_.push_back("GL_VERSION_4_3");
 				}
+				if (ver_code >= 44)
+				{
+					features_.push_back("GL_VERSION_4_4");
+				}
 #else
 				if (ver_code >= 10)
 				{

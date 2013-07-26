@@ -1,0 +1,7 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GL_ARB_vertex_type_10f_11f_11f_rev" reg_no="151">
+	<tokens>
+		<token name="GL_UNSIGNED_INT_10F_11F_11F_REV" value="0x8C3B"/>
+	</tokens>
+</gl_extension>

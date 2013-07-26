@@ -1,0 +1,9 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GL_ARB_enhanced_layouts" reg_no="146">
+	<tokens>
+		<token name="GL_LOCATION_COMPONENT" value="0x934A"/>
+		<token name="GL_TRANSFORM_FEEDBACK_BUFFER_INDEX" value="0x934B"/>
+		<token name="GL_TRANSFORM_FEEDBACK_BUFFER_STRIDE" value="0x934C"/>
+	</tokens>
+</gl_extension>

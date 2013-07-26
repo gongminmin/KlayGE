@@ -1,0 +1,11 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GL_ARB_seamless_cubemap_per_texture" reg_no="155">
+	<tokens>
+		<token name="GL_TEXTURE_CUBE_MAP_SEAMLESS" value="0x884F"/>
+	</tokens>
+
+	<additionals>
+		<ext name="GL_AMD_seamless_cubemap_per_texture"/>
+	</additionals>
+</gl_extension>

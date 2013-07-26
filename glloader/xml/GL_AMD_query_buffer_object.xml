@@ -1,6 +1,6 @@
 <?xml version='1.0'?>
 
-<gl_extension name="GL_AMD_query_buffer_object" reg_no="420">
+<gl_extension name="GL_AMD_query_buffer_object" reg_no="420" prefer="GL_ARB_query_buffer_object">
 	<tokens>
 		<token name="GL_QUERY_BUFFER_AMD" value="0x9192"/>
 		<token name="GL_QUERY_BUFFER_BINDING_AMD" value="0x9193"/>

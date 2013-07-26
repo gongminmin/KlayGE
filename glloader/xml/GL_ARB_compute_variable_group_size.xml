@@ -1,0 +1,23 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GL_ARB_compute_variable_group_size" reg_no="153">
+	<tokens>
+		<token name="GL_MAX_COMPUTE_VARIABLE_GROUP_INVOCATIONS_ARB" value="0x9344"/>
+		<token name="GL_MAX_COMPUTE_FIXED_GROUP_INVOCATIONS_ARB" value="0x90EB"/>
+		<token name="GL_MAX_COMPUTE_VARIABLE_GROUP_SIZE_ARB" value="0x9345"/>
+		<token name="GL_MAX_COMPUTE_FIXED_GROUP_SIZE_ARB" value="0x91BF"/>
+	</tokens>
+	
+	<functions>
+		<function name="glDispatchComputeGroupSizeARB" return="void">
+			<params>
+				<param type="GLuint" name="num_groups_x"/>
+				<param type="GLuint" name="num_groups_y"/>
+				<param type="GLuint" name="num_groups_z"/>
+				<param type="GLuint" name="group_size_x"/>
+				<param type="GLuint" name="group_size_y"/>
+				<param type="GLuint" name="group_size_z"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>
