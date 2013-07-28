@@ -1657,6 +1657,11 @@ namespace KlayGE
 		glGetIntegerv(GL_MAX_SAMPLES_EXT, &max_samples);
 		max_samples_ = static_cast<uint32_t>(max_samples);
 
+		if (glloader_GL_VERSION_3_0() || glloader_GL_ARB_texture_rg())
+		{
+			rendertarget_format_.insert(EF_R8);
+			rendertarget_format_.insert(EF_GR8);
+		}
 		rendertarget_format_.insert(EF_ARGB8);
 		rendertarget_format_.insert(EF_ABGR8);
 		if (glloader_GL_NV_texture_shader())

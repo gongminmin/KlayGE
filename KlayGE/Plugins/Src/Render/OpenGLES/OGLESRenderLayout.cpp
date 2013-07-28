@@ -101,7 +101,7 @@ namespace KlayGE
 		}
 
 		OGLESRenderEngine& ogl_re = *checked_cast<OGLESRenderEngine*>(&re);
-		if (!ogl_re.HackForPVR() && this->UseIndices())
+		if (!(ogl_re.HackForPVR() || ogl_re.HackForMali()) && this->UseIndices())
 		{
 			OGLESGraphicsBuffer& stream(*checked_pointer_cast<OGLESGraphicsBuffer>(this->GetIndexStream()));
 			stream.Active(use_vao_);
@@ -150,7 +150,7 @@ namespace KlayGE
 			}
 
 			OGLESRenderEngine& re = *checked_cast<OGLESRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-			if (re.HackForPVR() && this->UseIndices())
+			if ((re.HackForPVR() || re.HackForMali()) && this->UseIndices())
 			{
 				OGLESGraphicsBuffer& stream(*checked_pointer_cast<OGLESGraphicsBuffer>(this->GetIndexStream()));
 				stream.Active(use_vao_);

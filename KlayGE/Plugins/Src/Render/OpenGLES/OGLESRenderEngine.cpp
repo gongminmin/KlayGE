@@ -1259,7 +1259,7 @@ namespace KlayGE
 		caps_.multithread_rendering_support = false;
 		caps_.multithread_res_creating_support = false;
 		caps_.mrt_independent_bit_depths_support = false;
-		if (hack_for_pvr_)
+		if (hack_for_pvr_ || hack_for_mali_)
 		{
 			caps_.standard_derivatives_support = false;
 		}
@@ -1411,24 +1411,28 @@ namespace KlayGE
 			texture_format_.insert(EF_BC2);
 			texture_format_.insert(EF_BC3);
 		}
-		if (glloader_GLES_EXT_texture_compression_latc() && !hack_for_pvr_)
+		if (glloader_GLES_EXT_texture_compression_latc() && !(hack_for_pvr_ || hack_for_mali_))
 		{
 			texture_format_.insert(EF_BC4);
 			texture_format_.insert(EF_BC5);
 			texture_format_.insert(EF_SIGNED_BC4);
 			texture_format_.insert(EF_SIGNED_BC5);
 		}
-		if ((glloader_GLES_VERSION_3_0() || glloader_GLES_OES_depth_texture()) && !hack_for_mali_)
+		if ((glloader_GLES_VERSION_3_0() || glloader_GLES_OES_depth_texture()))
 		{
 			texture_format_.insert(EF_D16);
 		}
-		if ((glloader_GLES_VERSION_3_0() || glloader_GLES_OES_packed_depth_stencil()) && !hack_for_mali_)
+		if ((glloader_GLES_VERSION_3_0() || glloader_GLES_OES_packed_depth_stencil()))
 		{
 			texture_format_.insert(EF_D24S8);
 		}
-		if (glloader_GLES_VERSION_3_0() && !hack_for_mali_)
+		if (glloader_GLES_VERSION_3_0())
 		{
 			texture_format_.insert(EF_D32F);
+		}
+		if (glloader_GLES_VERSION_3_0())
+		{
+			texture_format_.insert(EF_ABGR8_SRGB);
 		}
 
 		if (glloader_GLES_EXT_texture_format_BGRA8888())
@@ -1453,6 +1457,11 @@ namespace KlayGE
 			max_samples_ = 1;
 		}
 
+		if (glloader_GLES_VERSION_3_0() || glloader_GLES_EXT_texture_rg())
+		{
+			rendertarget_format_.insert(EF_R8);
+			rendertarget_format_.insert(EF_GR8);
+		}
 		rendertarget_format_.insert(EF_ABGR8);
 		rendertarget_format_.insert(EF_SIGNED_ABGR8);
 		if (glloader_GLES_VERSION_3_0() || glloader_GLES_EXT_texture_type_2_10_10_10_REV())
@@ -1474,18 +1483,18 @@ namespace KlayGE
 			rendertarget_format_.insert(EF_ABGR32UI);
 			rendertarget_format_.insert(EF_ABGR32I);
 		}
-		if ((glloader_GLES_VERSION_3_0() || glloader_GLES_EXT_texture_rg()) && !hack_for_pvr_)
+		if ((glloader_GLES_VERSION_3_0() || glloader_GLES_EXT_texture_rg()) && !(hack_for_pvr_ || hack_for_mali_))
 		{
 			rendertarget_format_.insert(EF_R16F);
 			rendertarget_format_.insert(EF_GR16F);
 			rendertarget_format_.insert(EF_R32F);
 			rendertarget_format_.insert(EF_GR32F);
 		}
-		if ((glloader_GLES_VERSION_3_0() || glloader_GLES_OES_texture_half_float()) && !hack_for_pvr_)
+		if ((glloader_GLES_VERSION_3_0() || glloader_GLES_OES_texture_half_float()) && !(hack_for_pvr_ || hack_for_mali_))
 		{
 			rendertarget_format_.insert(EF_ABGR16F);
 		}
-		if (glloader_GLES_OES_texture_float())
+		if (glloader_GLES_OES_texture_float() && !(hack_for_pvr_ || hack_for_mali_))
 		{
 			rendertarget_format_.insert(EF_ABGR32F);
 		}
@@ -1497,6 +1506,10 @@ namespace KlayGE
 		if (glloader_GLES_VERSION_3_0())
 		{
 			rendertarget_format_.insert(EF_D32F);
+		}
+		if (glloader_GLES_VERSION_3_0())
+		{
+			rendertarget_format_.insert(EF_ABGR8_SRGB);
 		}
 
 		caps_.vertex_format_support = bind<bool>(&OGLESRenderEngine::VertexFormatSupport, this,

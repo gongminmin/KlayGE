@@ -274,7 +274,7 @@ namespace KlayGE
 		case EF_R8:
 			if (glloader_GLES_VERSION_3_0())
 			{
-				internalFormat = GL_RED;
+				internalFormat = GL_R8;
 				glformat = GL_RED;
 				gltype = GL_UNSIGNED_BYTE;
 			}
@@ -295,7 +295,7 @@ namespace KlayGE
 		case EF_SIGNED_R8:
 			if (glloader_GLES_VERSION_3_0())
 			{
-				internalFormat = GL_RED;
+				internalFormat = GL_R8_SNORM;
 				glformat = GL_RED;
 				gltype = GL_BYTE;
 			}
@@ -316,7 +316,7 @@ namespace KlayGE
 		case EF_GR8:
 			if (glloader_GLES_VERSION_3_0())
 			{
-				internalFormat = GL_RG;
+				internalFormat = GL_RG8;
 				glformat = GL_RG;
 				gltype = GL_UNSIGNED_BYTE;
 			}
@@ -335,7 +335,7 @@ namespace KlayGE
 		case EF_SIGNED_GR8:
 			if (glloader_GLES_VERSION_3_0())
 			{
-				internalFormat = GL_RG;
+				internalFormat = GL_RG8_SNORM;
 				glformat = GL_RG;
 				gltype = GL_BYTE;
 			}
@@ -352,7 +352,7 @@ namespace KlayGE
 			break;
 
 		case EF_BGR8:
-			internalFormat = GL_RGB;
+			internalFormat = GL_RGB8;
 			glformat = GL_RGB;
 			gltype = GL_UNSIGNED_BYTE;
 			break;
@@ -379,7 +379,7 @@ namespace KlayGE
 		case EF_A2BGR10:
 			if (glloader_GLES_VERSION_3_0())
 			{
-				internalFormat = GL_RGBA;
+				internalFormat = GL_RGB10_A2;
 				glformat = GL_RGBA;
 				gltype = GL_UNSIGNED_INT_2_10_10_10_REV;
 			}
@@ -388,19 +388,6 @@ namespace KlayGE
 				internalFormat = GL_RGBA;
 				glformat = GL_RGBA;
 				gltype = GL_UNSIGNED_INT_2_10_10_10_REV_EXT;
-			}
-			else
-			{
-				THR(errc::function_not_supported);
-			}
-			break;
-
-		case EF_SIGNED_A2BGR10:
-			if (glloader_GLES_VERSION_3_0())
-			{
-				internalFormat = GL_RGBA;
-				glformat = GL_RGBA;
-				gltype = GL_INT_2_10_10_10_REV;
 			}
 			else
 			{
@@ -684,7 +671,7 @@ namespace KlayGE
 		case EF_R16F:
 			if (glloader_GLES_VERSION_3_0())
 			{
-				internalFormat = GL_RED;
+				internalFormat = GL_R16F;
 				glformat = GL_RED;
 				gltype = GL_HALF_FLOAT;
 			}
@@ -703,7 +690,7 @@ namespace KlayGE
 		case EF_GR16F:
 			if (glloader_GLES_VERSION_3_0())
 			{
-				internalFormat = GL_RG;
+				internalFormat = GL_RG16F;
 				glformat = GL_RG;
 				gltype = GL_HALF_FLOAT;
 			}
@@ -735,7 +722,7 @@ namespace KlayGE
 		case EF_BGR16F:
 			if (glloader_GLES_VERSION_3_0())
 			{
-				internalFormat = GL_RGB;
+				internalFormat = GL_RGB16F;
 				glformat = GL_RGB;
 				gltype = GL_HALF_FLOAT;
 			}
@@ -754,7 +741,7 @@ namespace KlayGE
 		case EF_ABGR16F:
 			if (glloader_GLES_VERSION_3_0())
 			{
-				internalFormat = GL_RGBA;
+				internalFormat = GL_RGBA16F;
 				glformat = GL_RGBA;
 				gltype = GL_HALF_FLOAT;
 			}
@@ -773,7 +760,7 @@ namespace KlayGE
 		case EF_R32F:
 			if (glloader_GLES_VERSION_3_0())
 			{
-				internalFormat = GL_RED;
+				internalFormat = GL_R32F;
 				glformat = GL_RED;
 				gltype = GL_FLOAT;
 			}
@@ -792,7 +779,7 @@ namespace KlayGE
 		case EF_GR32F:
 			if (glloader_GLES_VERSION_3_0())
 			{
-				internalFormat = GL_RG;
+				internalFormat = GL_RG32F;
 				glformat = GL_RG;
 				gltype = GL_FLOAT;
 			}
@@ -811,7 +798,7 @@ namespace KlayGE
 		case EF_BGR32F:
 			if (glloader_GLES_VERSION_3_0())
 			{
-				internalFormat = GL_RGB;
+				internalFormat = GL_RGB32F;
 				glformat = GL_RGB;
 				gltype = GL_FLOAT;
 			}
@@ -830,7 +817,7 @@ namespace KlayGE
 		case EF_ABGR32F:
 			if (glloader_GLES_VERSION_3_0())
 			{
-				internalFormat = GL_RGBA;
+				internalFormat = GL_RGBA32F;
 				glformat = GL_RGBA;
 				gltype = GL_FLOAT;
 			}
@@ -938,7 +925,14 @@ namespace KlayGE
 			break;
 
 		case EF_D16:
-			internalFormat = GL_DEPTH_COMPONENT;
+			if (glloader_GLES_VERSION_3_0())
+			{
+				internalFormat = GL_DEPTH_COMPONENT16;
+			}
+			else
+			{
+				internalFormat = GL_DEPTH_COMPONENT;
+			}
 			glformat = GL_DEPTH_COMPONENT;
 			gltype = GL_UNSIGNED_SHORT;
 			break;
@@ -946,7 +940,7 @@ namespace KlayGE
 		case EF_D24S8:
 			if (glloader_GLES_VERSION_3_0())
 			{
-				internalFormat = GL_DEPTH_STENCIL;
+				internalFormat = GL_DEPTH24_STENCIL8;
 				glformat = GL_DEPTH_STENCIL;
 				gltype = GL_UNSIGNED_INT_24_8;
 			}
@@ -963,9 +957,29 @@ namespace KlayGE
 			break;
 
 		case EF_D32F:
-			internalFormat = GL_DEPTH_COMPONENT32F;
-			glformat = GL_DEPTH_COMPONENT;
-			gltype = GL_FLOAT;
+			if (glloader_GLES_VERSION_3_0())
+			{
+				internalFormat = GL_DEPTH_COMPONENT32F;
+				glformat = GL_DEPTH_COMPONENT;
+				gltype = GL_FLOAT;
+			}
+			else
+			{
+				THR(errc::function_not_supported);
+			}
+			break;
+
+		case EF_ABGR8_SRGB:
+			if (glloader_GLES_VERSION_3_0())
+			{
+				internalFormat = GL_SRGB8_ALPHA8;
+				glformat = GL_RGBA;
+				gltype = GL_UNSIGNED_BYTE;
+			}
+			else
+			{
+				THR(errc::function_not_supported);
+			}
 			break;
 
 		default:
