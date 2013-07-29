@@ -813,9 +813,9 @@ namespace KlayGE
 		TIF(d3d_device->CreateRenderTargetView(back_buffer_.get(), &rtv_desc, &render_target_view));
 		render_target_view_ = MakeCOMPtr(render_target_view);
 
+#if (_WIN32_WINNT >= 0x0602 /*_WIN32_WINNT_WIN8*/)
 		bool stereo = (STM_LCDShutter == Context::Instance().Config().graphics_cfg.stereo_method) && dxgi_stereo_support_;
 
-#if (_WIN32_WINNT >= 0x0602 /*_WIN32_WINNT_WIN8*/)
 		if (stereo)
 		{
 			if (bb_desc.SampleDesc.Count > 1)
@@ -834,6 +834,8 @@ namespace KlayGE
 			TIF(d3d_device->CreateRenderTargetView(back_buffer_.get(), &rtv_desc, &render_target_view));
 			render_target_view_right_eye_ = MakeCOMPtr(render_target_view);
 		}
+#else
+		bool stereo = false;
 #endif
 
 		// Create depth stencil texture
