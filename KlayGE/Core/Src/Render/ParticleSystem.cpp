@@ -749,7 +749,7 @@ namespace KlayGE
 			}
 		}
 
-		num_active_particles_ = active_particles.size();
+		num_active_particles_ = static_cast<uint32_t>(active_particles.size());
 
 		if (!active_particles.empty())
 		{

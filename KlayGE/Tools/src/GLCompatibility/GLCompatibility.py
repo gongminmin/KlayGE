@@ -15,8 +15,8 @@ def support_one(feature_names):
 			return True
 	return False
 
-ogl_ver_db = ['1.1', '1.2', '1.3', '1.4', '1.5', '2.0', '2.1', '3.0', '3.1', '3.2', '3.3', '4.0', '4.1', '4.2', '4.3']
-glsl_ver_db = ['0.0', '1.1', '1.2', '1.3', '1.4', '1.5', '3.3', '4.0', '4.1', '4.2', '4.3']
+ogl_ver_db = ['1.1', '1.2', '1.3', '1.4', '1.5', '2.0', '2.1', '3.0', '3.1', '3.2', '3.3', '4.0', '4.1', '4.2', '4.3', '4.4']
+glsl_ver_db = ['0.0', '1.1', '1.2', '1.3', '1.4', '1.5', '3.3', '4.0', '4.1', '4.2', '4.3', '4.4']
 
 features_db = {
 	'1.1' : {
@@ -223,6 +223,17 @@ features_db = {
 			'Immutable storage objects for multisampled textures' : lambda : is_supported('GL_ARB_texture_storage_multisample'),
 			'Provide different ways to interpret texture data without duplicating the texture' : lambda : is_supported('GL_ARB_texture_view'),
 			'Separate vertex attribute state from the data stores of each array' : lambda : is_supported('GL_ARB_vertex_attrib_binding'),
+		},
+
+	'4.4' : {
+			'Buffer storage' : lambda : is_supported('GL_ARB_buffer_storage'),
+			'Cldar a texture' : lambda : is_supported('GL_ARB_clear_texture'),
+			'Enhanced layouts' : lambda : is_supported('GL_ARB_enhanced_layouts'),
+			'Multi-bind' : lambda : is_supported('GL_ARB_multi_bind'),
+			'Query buffer object' : lambda : is_supported('GL_ARB_query_buffer_object'),
+			'Texture mirror clamp to edge' : lambda : is_supported('GL_ARB_texture_mirror_clamp_to_edge'),
+			'Stencil8 format texture' : lambda : is_supported('GL_ARB_texture_stencil8'),
+			'B10G11R11F format for vertex' : lambda : is_supported('GL_ARB_vertex_type_10f_11f_11f_rev'),
 		}
 }
 
@@ -348,6 +359,8 @@ class information:
 			is_supported.exts.append('GLSL_4_2')
 		if glsl_ver_index >= 10:
 			is_supported.exts.append('GLSL_4_3')
+		if glsl_ver_index >= 11:
+			is_supported.exts.append('GLSL_4_4')
 
 		for i in range(0, len(ogl_ver_db)):
 			supported = []
