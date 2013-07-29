@@ -8,6 +8,7 @@ syntax: glob
 *.model_bin
 *.aps
 *.pyc
+KlayGE.log
 __pycache__
 cfg_build.py
 */build/android/*/bin

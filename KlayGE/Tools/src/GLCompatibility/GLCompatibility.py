@@ -230,8 +230,8 @@ features_db = {
 			'Cldar a texture' : lambda : is_supported('GL_ARB_clear_texture'),
 			'Enhanced layouts' : lambda : is_supported('GL_ARB_enhanced_layouts'),
 			'Multi-bind' : lambda : is_supported('GL_ARB_multi_bind'),
-			'Query buffer object' : lambda : is_supported('GL_ARB_query_buffer_object'),
-			'Texture mirror clamp to edge' : lambda : is_supported('GL_ARB_texture_mirror_clamp_to_edge'),
+			'Query buffer object' : lambda : support_one(['GL_ARB_query_buffer_object', 'GL_AMD_query_buffer_object']),
+			'Texture mirror clamp to edge' : lambda : support_one(['GL_ARB_texture_mirror_clamp_to_edge', 'GL_EXT_texture_mirror_clamp', 'GL_ATI_texture_mirror_once']),
 			'Stencil8 format texture' : lambda : is_supported('GL_ARB_texture_stencil8'),
 			'B10G11R11F format for vertex' : lambda : is_supported('GL_ARB_vertex_type_10f_11f_11f_rev'),
 		}
