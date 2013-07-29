@@ -16,7 +16,7 @@ def support_one(feature_names):
 	return False
 
 ogl_ver_db = ['2.0', '3.0']
-glsl_ver_db = ['1.1', '3.0']
+glsl_ver_db = ['1.0', '1.1', '3.0']
 
 features_db = {
 	'2.0' : {
