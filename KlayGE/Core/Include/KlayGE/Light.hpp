@@ -106,7 +106,8 @@ namespace KlayGE
 		AmbientLightSource();
 		virtual ~AmbientLightSource();
 
-		void Attrib(int32_t attrib);
+		using LightSource::Attrib;
+		virtual void Attrib(int32_t attrib) KLAYGE_OVERRIDE;
 	};
 
 	class KLAYGE_CORE_API PointLightSource : public LightSource
@@ -115,16 +116,19 @@ namespace KlayGE
 		PointLightSource();
 		virtual ~PointLightSource();
 
-		void Position(float3 const & pos);
-		void Direction(float3 const & dir);
-		void Rotation(Quaternion const & quat);
+		using LightSource::Position;
+		virtual void Position(float3 const & pos) KLAYGE_OVERRIDE;
+		using LightSource::Direction;
+		virtual void Direction(float3 const & dir) KLAYGE_OVERRIDE;
+		using LightSource::Rotation;
+		virtual void Rotation(Quaternion const & quat) KLAYGE_OVERRIDE;
 		void ModelMatrix(float4x4 const & model);
 
-		TexturePtr const & ProjectiveTexture() const;
-		void ProjectiveTexture(TexturePtr const & tex);
+		virtual TexturePtr const & ProjectiveTexture() const KLAYGE_OVERRIDE;
+		virtual void ProjectiveTexture(TexturePtr const & tex) KLAYGE_OVERRIDE;
 
-		ConditionalRenderPtr const & ConditionalRenderQuery(uint32_t index) const;
-		CameraPtr const & SMCamera(uint32_t index) const;
+		virtual ConditionalRenderPtr const & ConditionalRenderQuery(uint32_t index) const KLAYGE_OVERRIDE;
+		virtual CameraPtr const & SMCamera(uint32_t index) const KLAYGE_OVERRIDE;
 
 	protected:
 		void UpdateCameras();
@@ -142,24 +146,27 @@ namespace KlayGE
 		SpotLightSource();
 		virtual ~SpotLightSource();
 
-		void Position(float3 const & pos);
-		void Direction(float3 const & dir);
-		void Rotation(Quaternion const & quat);
-		void ModelMatrix(float4x4 const & model);
+		using LightSource::Position;
+		virtual void Position(float3 const & pos) KLAYGE_OVERRIDE;
+		using LightSource::Direction;
+		virtual void Direction(float3 const & dir) KLAYGE_OVERRIDE;
+		using LightSource::Rotation;
+		virtual void Rotation(Quaternion const & quat) KLAYGE_OVERRIDE;
+		virtual void ModelMatrix(float4x4 const & model) KLAYGE_OVERRIDE;
 
-		float CosInnerAngle() const;
-		void InnerAngle(float angle);
+		virtual float CosInnerAngle() const KLAYGE_OVERRIDE;
+		virtual void InnerAngle(float angle) KLAYGE_OVERRIDE;
 
-		float CosOuterAngle() const;
-		void OuterAngle(float angle);
+		virtual float CosOuterAngle() const KLAYGE_OVERRIDE;
+		virtual void OuterAngle(float angle) KLAYGE_OVERRIDE;
 
-		float4 const & CosOuterInner() const;
+		virtual float4 const & CosOuterInner() const KLAYGE_OVERRIDE;
 
-		TexturePtr const & ProjectiveTexture() const;
-		void ProjectiveTexture(TexturePtr const & tex);
+		virtual TexturePtr const & ProjectiveTexture() const KLAYGE_OVERRIDE;
+		virtual void ProjectiveTexture(TexturePtr const & tex) KLAYGE_OVERRIDE;
 
-		ConditionalRenderPtr const & ConditionalRenderQuery(uint32_t index) const;
-		CameraPtr const & SMCamera(uint32_t index) const;
+		virtual ConditionalRenderPtr const & ConditionalRenderQuery(uint32_t index) const KLAYGE_OVERRIDE;
+		virtual CameraPtr const & SMCamera(uint32_t index) const KLAYGE_OVERRIDE;
 
 	protected:
 		void UpdateCamera();
@@ -179,7 +186,8 @@ namespace KlayGE
 		DirectionalLightSource();
 		virtual ~DirectionalLightSource();
 
-		void Attrib(int32_t attrib);
+		using LightSource::Attrib;
+		virtual void Attrib(int32_t attrib) KLAYGE_OVERRIDE;
 	};
 
 	class KLAYGE_CORE_API SunLightSource : public LightSource
@@ -188,6 +196,7 @@ namespace KlayGE
 		SunLightSource();
 		virtual ~SunLightSource();
 
+		using LightSource::Attrib;
 		virtual void Attrib(int32_t attrib) KLAYGE_OVERRIDE;
 
 		virtual CameraPtr const & SMCamera(uint32_t index) const KLAYGE_OVERRIDE;

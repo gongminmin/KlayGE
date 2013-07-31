@@ -32,43 +32,33 @@ namespace
 	class SpotLightSourceUpdate
 	{
 	public:
-		SpotLightSourceUpdate(float cone_radius, float cone_height, float org_angle, float rot_speed, float3 const & pos)
-			: rot_speed_(rot_speed), pos_(pos)
+		SpotLightSourceUpdate()
+			: random_dis_(0, 1000)
 		{
-			model_org_ = MathLib::scaling(cone_radius, cone_radius, cone_height) * MathLib::rotation_x(org_angle);
 		}
 
-		void operator()(LightSource& light, float app_time, float /*elapsed_time*/)
+		void operator()(LightSource& light, float /*app_time*/, float /*elapsed_time*/)
 		{
-			light.ModelMatrix(model_org_ * MathLib::rotation_y(app_time * 1000 * rot_speed_)
-				* MathLib::translation(pos_));
+			light.Direction(float3(MathLib::clamp(random_dis_(gen_) * 0.0001f, 0.0f, 0.1f),
+				1, MathLib::clamp(random_dis_(gen_) * 0.0001f, 0.0f, 0.1f)));
 		}
 
 	private:
-		float4x4 model_org_;
-		float rot_speed_;
-		float3 pos_;
+		ranlux24_base gen_;
+		uniform_int_distribution<> random_dis_;
 	};
 
 	class GISpotLightSourceUpdate
 	{
 	public:
-		GISpotLightSourceUpdate(float cone_radius, float cone_height, float org_angle, float rot_speed, float3 const & pos)
-			: rot_speed_(rot_speed), pos_(pos)
+		GISpotLightSourceUpdate()
 		{
-			model_org_ = MathLib::scaling(cone_radius, cone_radius, cone_height) * MathLib::rotation_x(org_angle);
 		}
 
 		void operator()(LightSource& light, float app_time, float /*elapsed_time*/)
 		{
-			light.ModelMatrix(model_org_ * MathLib::rotation_y(sin(app_time * 1000 * rot_speed_) * PI / 6)
-				* MathLib::translation(pos_));
+			light.Direction(float3(sin(app_time) * 0.3f, -1, 0.1f));
 		}
-
-	private:
-		float4x4 model_org_;
-		float rot_speed_;
-		float3 pos_;
 	};
 
 	class PointLightSourceUpdate
@@ -213,50 +203,45 @@ void DeferredRenderingApp::InitObjects()
 
 	deferred_rendering_ = Context::Instance().DeferredRenderingLayerInstance();
 	
-	point_light_ = MakeSharedPtr<PointLightSource>();
-	point_light_->Attrib(0);
-	point_light_->Color(float3(0.8f, 0.96f, 1.0f));
-	point_light_->Position(float3(0, 0, 0));
-	point_light_->Falloff(float3(1, 0.5f, 0));
-	point_light_->BindUpdateFunc(PointLightSourceUpdate(1 / 1000.0f, float3(2, 10, 0)));
-	point_light_->AddToSceneManager();
-
 	spot_light_[0] = MakeSharedPtr<SpotLightSource>();
 	spot_light_[0]->Attrib(0);
-	spot_light_[0]->Color(float3(2, 0, 0));
+	spot_light_[0]->Color(float3(1.0f, 0.17f, 0.05f) * 10.0f);
 	spot_light_[0]->Falloff(float3(1, 0.5f, 0));
-	spot_light_[0]->OuterAngle(PI / 6);
-	spot_light_[0]->InnerAngle(PI / 8);
-	spot_light_[0]->BindUpdateFunc(SpotLightSourceUpdate(sqrt(3.0f) / 3, 1.0f, PI, 1 / 1400.0f, float3(0.0f, 4.0f, 0.0f)));
+	spot_light_[0]->Position(float3(+14.6f, 3.7f, -4.3f));
+	spot_light_[0]->Direction(float3(0, 1, 0));
+	spot_light_[0]->OuterAngle(PI / 2.5f);
+	spot_light_[0]->InnerAngle(PI / 4);
+	spot_light_[0]->BindUpdateFunc(SpotLightSourceUpdate());
 	spot_light_[0]->AddToSceneManager();
 
 	spot_light_[1] = MakeSharedPtr<SpotLightSource>();
 	spot_light_[1]->Attrib(0);
-	spot_light_[1]->Color(float3(0, 2, 0));
+	spot_light_[1]->Color(float3(1.0f, 0.17f, 0.05f) * 10.0f);
 	spot_light_[1]->Falloff(float3(1, 0.5f, 0));
-	spot_light_[1]->OuterAngle(PI / 4);
-	spot_light_[1]->InnerAngle(PI / 6);
-	spot_light_[1]->BindUpdateFunc(SpotLightSourceUpdate(1.0f, 1.0f, 0.0f, -1 / 700.0f, float3(0.0f, 3.4f, 0.0f)));
+	spot_light_[1]->Position(float3(-18.6f, 3.7f, +6.5f));
+	spot_light_[1]->Direction(float3(0, 1, 0));
+	spot_light_[1]->OuterAngle(PI / 2.5f);
+	spot_light_[1]->InnerAngle(PI / 4);
+	spot_light_[1]->BindUpdateFunc(SpotLightSourceUpdate());
 	spot_light_[1]->AddToSceneManager();
 
 	spot_light_[2] = MakeSharedPtr<SpotLightSource>();
 	spot_light_[2]->Attrib(LSA_IndirectLighting);
-	spot_light_[2]->Color(float3(6.0f, 5.88f, 4.38f));
+	spot_light_[2]->Color(float3(6.0f, 5.88f, 4.38f) * 2.0f);
+	spot_light_[2]->Position(float3(0.0f, 43.2f, -5.9f));
+	spot_light_[2]->Direction(float3(0.0f, -1, 0.1f));
 	spot_light_[2]->Falloff(float3(1, 0.1f, 0));
-	spot_light_[2]->OuterAngle(PI / 6);
-	spot_light_[2]->InnerAngle(PI / 8);
-	spot_light_[2]->BindUpdateFunc(GISpotLightSourceUpdate(sqrt(3.0f) / 3, 1.0f, PI * 0.13f, 1 / 2800.0f, float3(0.0f, 16.0f, -4.8f)));
+	spot_light_[2]->OuterAngle(PI / 4);
+	spot_light_[2]->InnerAngle(PI / 6);
+	spot_light_[2]->BindUpdateFunc(GISpotLightSourceUpdate());
 	spot_light_[2]->AddToSceneManager();
 
-	point_light_src_ = MakeSharedPtr<SceneObjectLightSourceProxy>(point_light_);
-	checked_pointer_cast<SceneObjectLightSourceProxy>(point_light_src_)->Scaling(0.1f, 0.1f, 0.1f);
 	spot_light_src_[0] = MakeSharedPtr<SceneObjectLightSourceProxy>(spot_light_[0]);
 	checked_pointer_cast<SceneObjectLightSourceProxy>(spot_light_src_[0])->Scaling(0.1f, 0.1f, 0.1f);
 	spot_light_src_[1] = MakeSharedPtr<SceneObjectLightSourceProxy>(spot_light_[1]);
 	checked_pointer_cast<SceneObjectLightSourceProxy>(spot_light_src_[1])->Scaling(0.1f, 0.1f, 0.1f);
 	spot_light_src_[2] = MakeSharedPtr<SceneObjectLightSourceProxy>(spot_light_[2]);
 	checked_pointer_cast<SceneObjectLightSourceProxy>(spot_light_src_[2])->Scaling(0.1f, 0.1f, 0.1f);
-	point_light_src_->AddToSceneManager();
 	spot_light_src_[0]->AddToSceneManager();
 	spot_light_src_[1]->AddToSceneManager();
 	spot_light_src_[2]->AddToSceneManager();
@@ -312,7 +297,16 @@ void DeferredRenderingApp::InitObjects()
 	ps_->Gravity(0.5f);
 	ps_->MediaDensity(0.5f);
 	ps_->AddToSceneManager();
-	ps_->ModelMatrix(MathLib::scaling(10.0f, 10.0f, 10.0f));
+
+	float const SCALE = 3;
+	ps_->ModelMatrix(MathLib::scaling(SCALE, SCALE, SCALE));
+
+	ParticleEmitterPtr emitter0 = ps_->Emitter(0);
+	emitter0->ModelMatrix(MathLib::translation(spot_light_[0]->Position() / SCALE));
+
+	ParticleEmitterPtr emitter1 = emitter0->Clone();
+	emitter1->ModelMatrix(MathLib::translation(spot_light_[1]->Position() / SCALE));
+	ps_->AddEmitter(emitter1);
 }
 
 void DeferredRenderingApp::OnResize(uint32_t width, uint32_t height)

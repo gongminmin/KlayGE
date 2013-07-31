@@ -33,7 +33,6 @@ private:
 	KlayGE::FontPtr font_;
 	KlayGE::RenderModelPtr scene_model_;
 	std::vector<KlayGE::SceneObjectPtr> scene_objs_;
-	KlayGE::SceneObjectPtr point_light_src_;
 	KlayGE::SceneObjectPtr spot_light_src_[3];
 
 	KlayGE::SceneObjectPtr sky_box_;
@@ -66,7 +65,6 @@ private:
 	int id_aa_;
 	int id_ctrl_camera_;
 
-	KlayGE::PointLightSourcePtr point_light_;
 	KlayGE::SpotLightSourcePtr spot_light_[3];
 
 	size_t num_objs_rendered_;

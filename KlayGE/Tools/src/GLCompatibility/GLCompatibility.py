@@ -227,7 +227,7 @@ features_db = {
 
 	'4.4' : {
 			'Buffer storage' : lambda : is_supported('GL_ARB_buffer_storage'),
-			'Cldar a texture' : lambda : is_supported('GL_ARB_clear_texture'),
+			'Clear a texture' : lambda : is_supported('GL_ARB_clear_texture'),
 			'Enhanced layouts' : lambda : is_supported('GL_ARB_enhanced_layouts'),
 			'Multi-bind' : lambda : is_supported('GL_ARB_multi_bind'),
 			'Query buffer object' : lambda : support_one(['GL_ARB_query_buffer_object', 'GL_AMD_query_buffer_object']),

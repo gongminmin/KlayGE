@@ -168,9 +168,6 @@ namespace KlayGE
 
 	void LensFlareSceneObject::Pass(PassType type)
 	{
-		if (PT_SimpleForward == type)
-		{
-			this->Visible(this->LFVisible());
-		}
+		this->Visible((PT_SimpleForward == type) && this->LFVisible());
 	}
 }

@@ -1544,7 +1544,7 @@ namespace KlayGE
 			vertex_format_.insert(EF_BGR16F);
 			vertex_format_.insert(EF_ABGR16F);
 		}
-		if (glloader_GL_VERSION_3_0() || glloader_GL_EXT_packed_float())
+		if (glloader_GL_VERSION_4_4() || glloader_GL_ARB_vertex_type_10f_11f_11f_rev())
 		{
 			vertex_format_.insert(EF_B10G11R11F);
 		}

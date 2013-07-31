@@ -578,10 +578,7 @@ namespace KlayGE
 
 	void ParticleSystem::Pass(PassType type)
 	{
-		if (PT_SimpleForward == type)
-		{
-			this->Visible(true);
-		}
+		this->Visible(PT_SimpleForward == type);
 	}
 
 	ParticleSystemPtr ParticleSystem::Clone()
