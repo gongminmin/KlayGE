@@ -273,6 +273,14 @@ namespace KlayGE
 
 			default_frame_buffers_[0] = default_frame_buffers_[1]
 				= default_frame_buffers_[2] = mono_frame_buffer_;
+
+			overlay_frame_buffer_ = rf.MakeFrameBuffer();
+			overlay_frame_buffer_->GetViewport()->camera = cur_frame_buffer_->GetViewport()->camera;
+
+			overlay_tex_ = rf.MakeTexture2D(width, height, 1, 1,
+				fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
+			overlay_frame_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*overlay_tex_, 0, 1, 0));
+			overlay_frame_buffer_->Attach(FrameBuffer::ATT_DepthStencil, ds_view);
 		}
 		
 		if (ldr_pp_)
@@ -412,6 +420,11 @@ namespace KlayGE
 	FrameBufferPtr const & RenderEngine::ScreenFrameBuffer() const
 	{
 		return screen_frame_buffer_;
+	}
+
+	FrameBufferPtr const & RenderEngine::OverlayFrameBuffer() const
+	{
+		return overlay_frame_buffer_;
 	}
 
 	void RenderEngine::BindSOBuffers(RenderLayoutPtr const & rl)
@@ -569,13 +582,6 @@ namespace KlayGE
 			}
 		}
 
-		fb_stage_ = 3;
-
-		if (stereo_method_ != STM_None)
-		{
-			this->Stereoscopic();
-		}
-
 		this->DefaultFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->ClearDepth(1.0f);
 
 		fb_stage_ = 0;
@@ -628,24 +634,29 @@ namespace KlayGE
 
 	void RenderEngine::Stereoscopic()
 	{
-		BOOST_ASSERT(stereo_method_ != STM_None);
-
-		this->BindFrameBuffer(screen_frame_buffer_);
-		if (stereoscopic_pp_)
+		if (stereo_method_ != STM_None)
 		{
-			stereoscopic_pp_->SetParam(0, stereo_separation_);
-			stereoscopic_pp_->SetParam(1, screen_frame_buffer_->GetViewport()->camera->NearPlane());
-		}
-		if (stereo_method_ != STM_LCDShutter)
-		{
-			stereoscopic_pp_->Render();
-		}
-		else
-		{
-			this->StereoscopicForLCDShutter(1);
-			this->StereoscopicForLCDShutter(0);
+			fb_stage_ = 3;
 
 			this->BindFrameBuffer(screen_frame_buffer_);
+			if (stereoscopic_pp_)
+			{
+				stereoscopic_pp_->SetParam(0, stereo_separation_);
+				stereoscopic_pp_->SetParam(1, screen_frame_buffer_->GetViewport()->camera->NearPlane());
+			}
+			if (stereo_method_ != STM_LCDShutter)
+			{
+				stereoscopic_pp_->Render();
+			}
+			else
+			{
+				this->StereoscopicForLCDShutter(1);
+				this->StereoscopicForLCDShutter(0);
+
+				this->BindFrameBuffer(screen_frame_buffer_);
+			}
+
+			fb_stage_ = 0;
 		}
 	}
 
@@ -725,6 +736,7 @@ namespace KlayGE
 
 				stereoscopic_pp_->InputPin(0, mono_tex_);
 				stereoscopic_pp_->InputPin(1, ds_tex_);
+				stereoscopic_pp_->InputPin(2, overlay_tex_);
 			}
 		}
 		else

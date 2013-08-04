@@ -16,6 +16,7 @@
 	<parameter type="float4" name="width_height"/>
 	<parameter type="texture2D" name="color_tex"/>
 	<parameter type="texture2D" name="depth_tex"/>
+	<parameter type="texture2D" name="overlay_tex"/>
 	
 	<shader>
 		<![CDATA[
@@ -44,7 +45,10 @@ float4 RedCyanPS(float2 tex : TEXCOORD0) : SV_Target
 {
 	float4 lr_coord = CalcStereoCoord(tex);
 	float4 left = color_tex.Sample(point_sampler, lr_coord.xy);
-	float4 right = color_tex.Sample(point_sampler, lr_coord.zw);	
+	float4 right = color_tex.Sample(point_sampler, lr_coord.zw);
+	float4 overlay = overlay_tex.Sample(point_sampler, tex);
+	left = lerp(left, overlay, overlay.a);
+	right = lerp(right, overlay, overlay.a);
 	return float4(dot(left.gb, float2(0.7f, 0.3f)), right.gb, 1);
 }
 
@@ -53,6 +57,9 @@ float4 YellowBluePS(float2 tex : TEXCOORD0) : SV_Target
 	float4 lr_coord = CalcStereoCoord(tex);
 	float4 left = color_tex.Sample(point_sampler, lr_coord.xy);
 	float4 right = color_tex.Sample(point_sampler, lr_coord.zw);
+	float4 overlay = overlay_tex.Sample(point_sampler, tex);
+	left = lerp(left, overlay, overlay.a);
+	right = lerp(right, overlay, overlay.a);
 	return float4(left.rg, right.b, 1);
 }
 
@@ -61,6 +68,9 @@ float4 GreenRedPS(float2 tex : TEXCOORD0) : SV_Target
 	float4 lr_coord = CalcStereoCoord(tex);
 	float4 left = color_tex.Sample(point_sampler, lr_coord.xy);
 	float4 right = color_tex.Sample(point_sampler, lr_coord.zw);
+	float4 overlay = overlay_tex.Sample(point_sampler, tex);
+	left = lerp(left, overlay, overlay.a);
+	right = lerp(right, overlay, overlay.a);
 	return float4(right.r, left.gb, 1);
 }
 
@@ -70,7 +80,9 @@ float4 HorInterlacingPS(float2 tex : TEXCOORD0) : SV_Target
 	float4 lr_coord = CalcStereoCoord(tex);	
 	uint u = tex.x * width_height.x;
 	float2 coord = (u % 2) ? lr_coord.xy : lr_coord.zw;
-	return color_tex.Sample(point_sampler, coord);
+	float4 scene = color_tex.Sample(point_sampler, coord);
+	float4 overlay = overlay_tex.Sample(point_sampler, tex);
+	return lerp(scene, overlay, overlay.a);
 }
 
 float4 VerInterlacingPS(float2 tex : TEXCOORD0) : SV_Target
@@ -78,28 +90,38 @@ float4 VerInterlacingPS(float2 tex : TEXCOORD0) : SV_Target
 	float4 lr_coord = CalcStereoCoord(tex);	
 	uint v = tex.y * width_height.y;
 	float2 coord = (v % 2) ? lr_coord.xy : lr_coord.zw;
-	return color_tex.Sample(point_sampler, coord);
+	float4 scene = color_tex.Sample(point_sampler, coord);
+	float4 overlay = overlay_tex.Sample(point_sampler, tex);
+	return lerp(scene, overlay, overlay.a);
 }
 
 float4 HorizontalPS(float2 tex : TEXCOORD0) : SV_Target
 {
-	float2 coord = (tex.x < 0.5f) ? CalcStereoCoord(float2(tex.x * 2, tex.y)).xy
-		: CalcStereoCoord(float2((tex.x - 0.5f) * 2, tex.y)).zw;
-	return color_tex.Sample(point_sampler, coord);
+	float2 overlay_coord = (tex.x < 0.5f) ? float2(tex.x * 2, tex.y) : float2((tex.x - 0.5f) * 2, tex.y);
+	float4 lr_coord = CalcStereoCoord(overlay_coord);
+	float2 coord = (tex.x < 0.5f) ? lr_coord.xy : lr_coord.zw;
+	float4 scene = color_tex.Sample(point_sampler, coord);
+	float4 overlay = overlay_tex.Sample(point_sampler, overlay_coord);
+	return lerp(scene, overlay, overlay.a);
 }
 
 float4 VerticalPS(float2 tex : TEXCOORD0) : SV_Target
 {
-	float2 coord = (tex.y < 0.5f) ? CalcStereoCoord(float2(tex.x, tex.y * 2)).xy
-		: CalcStereoCoord(float2(tex.x, (tex.y - 0.5f) * 2)).zw;
-	return color_tex.Sample(point_sampler, coord);
+	float2 overlay_coord = (tex.y < 0.5f) ? float2(tex.x, tex.y * 2) : float2(tex.x, (tex.y - 0.5f) * 2);
+	float4 lr_coord = CalcStereoCoord(overlay_coord);
+	float2 coord = (tex.y < 0.5f) ? lr_coord.xy : lr_coord.zw;
+	float4 scene = color_tex.Sample(point_sampler, coord);
+	float4 overlay = overlay_tex.Sample(point_sampler, overlay_coord);
+	return lerp(scene, overlay, overlay.a);
 }
 
 float4 LCDShutterOneEyePS(float2 tex : TEXCOORD0) : SV_Target
 {
 	float4 lr_coord = CalcStereoCoord(tex);
 	float2 coord = (0 == eye) ? lr_coord.xy : lr_coord.zw;
-	return color_tex.Sample(point_sampler, coord);
+	float4 scene = color_tex.Sample(point_sampler, coord);
+	float4 overlay = overlay_tex.Sample(point_sampler, tex);
+	return lerp(scene, overlay, overlay.a);
 }
 		]]>
 	</shader>

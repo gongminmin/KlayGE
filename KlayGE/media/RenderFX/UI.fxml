@@ -44,10 +44,14 @@ float4 UINoTexPS(float2 texCoord : TEXCOORD0, float4 clr : COLOR) : SV_Target0
 
 	<technique name="UITec">
 		<pass name="p0">
+			<state name="depth_enable" value="false"/>
+			<state name="depth_write_mask" value="0"/>
+
 			<state name="blend_enable" value="true"/>
 			<state name="src_blend" value="src_alpha"/>
 			<state name="dest_blend" value="inv_src_alpha"/>
-			<state name="depth_func" value="less_equal"/>
+			<state name="src_blend_alpha" value="src_alpha"/>
+			<state name="dest_blend_alpha" value="inv_src_alpha"/>
 			
 			<state name="vertex_shader" value="UIVS()"/>
 			<state name="pixel_shader" value="UIPS()"/>
@@ -56,10 +60,14 @@ float4 UINoTexPS(float2 texCoord : TEXCOORD0, float4 clr : COLOR) : SV_Target0
 
 	<technique name="UITecNoTex">
 		<pass name="p0">
+			<state name="depth_enable" value="false"/>
+			<state name="depth_write_mask" value="0"/>
+
 			<state name="blend_enable" value="true"/>
 			<state name="src_blend" value="src_alpha"/>
 			<state name="dest_blend" value="inv_src_alpha"/>
-			<state name="depth_func" value="less_equal"/>
+			<state name="src_blend_alpha" value="src_alpha"/>
+			<state name="dest_blend_alpha" value="inv_src_alpha"/>
 
 			<state name="vertex_shader" value="UIVS()"/>
 			<state name="pixel_shader" value="UINoTexPS()"/>

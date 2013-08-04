@@ -9,6 +9,7 @@
 		<input>
 			<pin name="color_tex"/>
 			<pin name="depth_tex"/>
+			<pin name="overlay_tex"/>
 		</input>
 		<output>
 			<pin name="output"/>
@@ -23,6 +24,7 @@
 		<input>
 			<pin name="color_tex"/>
 			<pin name="depth_tex"/>
+			<pin name="overlay_tex"/>
 		</input>
 		<output>
 			<pin name="output"/>
@@ -37,6 +39,7 @@
 		<input>
 			<pin name="color_tex"/>
 			<pin name="depth_tex"/>
+			<pin name="overlay_tex"/>
 		</input>
 		<output>
 			<pin name="output"/>
@@ -51,6 +54,7 @@
 		<input>
 			<pin name="color_tex"/>
 			<pin name="depth_tex"/>
+			<pin name="overlay_tex"/>
 		</input>
 		<output>
 			<pin name="output"/>
@@ -65,6 +69,7 @@
 		<input>
 			<pin name="color_tex"/>
 			<pin name="depth_tex"/>
+			<pin name="overlay_tex"/>
 		</input>
 		<output>
 			<pin name="output"/>
@@ -79,6 +84,7 @@
 		<input>
 			<pin name="color_tex"/>
 			<pin name="depth_tex"/>
+			<pin name="overlay_tex"/>
 		</input>
 		<output>
 			<pin name="output"/>
@@ -93,6 +99,7 @@
 		<input>
 			<pin name="color_tex"/>
 			<pin name="depth_tex"/>
+			<pin name="overlay_tex"/>
 		</input>
 		<output>
 			<pin name="output"/>
@@ -109,6 +116,7 @@
 		<input>
 			<pin name="color_tex"/>
 			<pin name="depth_tex"/>
+			<pin name="overlay_tex"/>
 		</input>
 		<output>
 			<pin name="output"/>

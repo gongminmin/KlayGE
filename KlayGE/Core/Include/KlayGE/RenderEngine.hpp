@@ -122,6 +122,7 @@ namespace KlayGE
 		FrameBufferPtr const & CurFrameBuffer() const;
 		FrameBufferPtr const & DefaultFrameBuffer() const;
 		FrameBufferPtr const & ScreenFrameBuffer() const;
+		FrameBufferPtr const & OverlayFrameBuffer() const;
 
 		void BindSOBuffers(RenderLayoutPtr const & rl);
 
@@ -226,6 +227,9 @@ namespace KlayGE
 		FrameBufferPtr mono_frame_buffer_;
 		TexturePtr mono_tex_;
 		FrameBufferPtr default_frame_buffers_[4];
+
+		FrameBufferPtr overlay_frame_buffer_;
+		TexturePtr overlay_tex_;
 
 		RenderLayoutPtr so_buffers_;
 
