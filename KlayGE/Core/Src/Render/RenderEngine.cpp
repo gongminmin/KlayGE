@@ -174,6 +174,11 @@ namespace KlayGE
 
 		screen_frame_buffer_ = cur_frame_buffer_;
 
+		uint32_t const screen_width = screen_frame_buffer_->Width();
+		uint32_t const screen_height = screen_frame_buffer_->Height();
+		uint32_t const render_width = settings.width;
+		uint32_t const render_height = settings.height;
+
 		hdr_enabled_ = settings.hdr;
 		if (settings.hdr)
 		{
@@ -196,6 +201,11 @@ namespace KlayGE
 			ldr_pp_ = ldr_pps_[ppaa_enabled_ * 4 + gamma_enabled_ * 2 + color_grading_enabled_];
 		}
 
+		if ((render_width != screen_width) || (render_height != screen_height))
+		{
+			resize_pp_ = SyncLoadPostProcess("Copy.ppml", "bilinear_copy");
+		}
+
 		for (int i = 0; i < 4; ++ i)
 		{
 			default_frame_buffers_[i] = screen_frame_buffer_;
@@ -203,11 +213,8 @@ namespace KlayGE
 
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-		uint32_t const width = screen_frame_buffer_->Width();
-		uint32_t const height = screen_frame_buffer_->Height();
-
 		RenderViewPtr ds_view;
-		if (hdr_pp_ || ldr_pp_ || (settings.stereo_method != STM_None))
+		if (hdr_pp_ || ldr_pp_ || resize_pp_ || (settings.stereo_method != STM_None))
 		{
 			if (caps.texture_format_support(EF_D24S8) || caps.texture_format_support(EF_D16))
 			{
@@ -222,7 +229,7 @@ namespace KlayGE
 
 					fmt = EF_D16;
 				}
-				ds_tex_ = rf.MakeTexture2D(width, height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
+				ds_tex_ = rf.MakeTexture2D(render_width, render_height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
 				ds_view = rf.Make2DDepthStencilRenderView(*ds_tex_, 0, 1, 0);
 			}
 			else
@@ -238,7 +245,7 @@ namespace KlayGE
 
 					fmt = EF_D16;
 				}
-				ds_view = rf.Make2DDepthStencilRenderView(width, height, fmt, 1, 0);
+				ds_view = rf.Make2DDepthStencilRenderView(render_width, render_height, fmt, 1, 0);
 			}
 		}
 
@@ -266,10 +273,9 @@ namespace KlayGE
 				}
 			}
 
-			mono_tex_ = rf.MakeTexture2D(width, height, 1, 1,
+			mono_tex_ = rf.MakeTexture2D(screen_width, screen_height, 1, 1,
 				fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
 			mono_frame_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*mono_tex_, 0, 1, 0));
-			mono_frame_buffer_->Attach(FrameBuffer::ATT_DepthStencil, ds_view);
 
 			default_frame_buffers_[0] = default_frame_buffers_[1]
 				= default_frame_buffers_[2] = mono_frame_buffer_;
@@ -277,10 +283,36 @@ namespace KlayGE
 			overlay_frame_buffer_ = rf.MakeFrameBuffer();
 			overlay_frame_buffer_->GetViewport()->camera = cur_frame_buffer_->GetViewport()->camera;
 
-			overlay_tex_ = rf.MakeTexture2D(width, height, 1, 1,
+			overlay_tex_ = rf.MakeTexture2D(screen_width, screen_height, 1, 1,
 				fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
 			overlay_frame_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*overlay_tex_, 0, 1, 0));
-			overlay_frame_buffer_->Attach(FrameBuffer::ATT_DepthStencil, ds_view);
+		}
+		else
+		{
+			if (resize_pp_)
+			{
+				resize_frame_buffer_ = rf.MakeFrameBuffer();
+				resize_frame_buffer_->GetViewport()->camera = cur_frame_buffer_->GetViewport()->camera;
+
+				ElementFormat fmt;
+				if (caps.rendertarget_format_support(EF_ABGR8, 1, 0))
+				{
+					fmt = EF_ABGR8;
+				}
+				else
+				{
+					BOOST_ASSERT(caps.rendertarget_format_support(EF_ARGB8, 1, 0));
+
+					fmt = EF_ARGB8;
+				}
+
+				resize_tex_ = rf.MakeTexture2D(render_width, render_height, 1, 1,
+					fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
+				resize_frame_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*resize_tex_, 0, 1, 0));
+
+				default_frame_buffers_[0] = default_frame_buffers_[1]
+					= default_frame_buffers_[2] = resize_frame_buffer_;
+			}
 		}
 		
 		if (ldr_pp_)
@@ -305,7 +337,7 @@ namespace KlayGE
 				fmt = fmt_srgb;
 			}
 
-			ldr_tex_ = rf.MakeTexture2D(width, height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
+			ldr_tex_ = rf.MakeTexture2D(render_width, render_height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
 			ldr_frame_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*ldr_tex_, 0, 1, 0));
 			ldr_frame_buffer_->Attach(FrameBuffer::ATT_DepthStencil, ds_view);
 
@@ -328,7 +360,7 @@ namespace KlayGE
 
 				fmt = EF_ABGR16F;
 			}
-			hdr_tex_ = rf.MakeTexture2D(width, height, 4, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write | EAH_Generate_Mips, nullptr);
+			hdr_tex_ = rf.MakeTexture2D(render_width, render_height, 4, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write | EAH_Generate_Mips, nullptr);
 			hdr_frame_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*hdr_tex_, 0, 1, 0));
 			hdr_frame_buffer_->Attach(FrameBuffer::ATT_DepthStencil, ds_view);
 
@@ -515,7 +547,15 @@ namespace KlayGE
 			ElementFormat fmt = mono_tex_->Format();
 			mono_tex_ = rf.MakeTexture2D(width, height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
 			mono_frame_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*mono_tex_, 0, 1, 0));
-			mono_frame_buffer_->Attach(FrameBuffer::ATT_DepthStencil, ds_view);
+		}
+		else
+		{
+			if (resize_pp_)
+			{
+				ElementFormat fmt = resize_tex_->Format();
+				resize_tex_ = rf.MakeTexture2D(width, height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
+				resize_frame_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*resize_tex_, 0, 1, 0));
+			}
 		}
 		if (ldr_pp_)
 		{
@@ -580,6 +620,13 @@ namespace KlayGE
 			{
 				ldr_pps_[0]->Apply();
 			}
+		}
+
+		fb_stage_ = 3;
+
+		if ((STM_None == stereo_method_) && resize_pp_)
+		{
+			resize_pp_->Apply();
 		}
 
 		this->DefaultFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->ClearDepth(1.0f);
@@ -741,6 +788,10 @@ namespace KlayGE
 		}
 		else
 		{
+			if (resize_pp_)
+			{
+				resize_pp_->OutputPin(0, TexturePtr());
+			}
 			if (ldr_pp_)
 			{
 				for (size_t i = 0; i < 12; ++ i)
@@ -753,6 +804,19 @@ namespace KlayGE
 				hdr_pp_->OutputPin(0, TexturePtr());
 				skip_hdr_pp_->OutputPin(0, TexturePtr());
 			}
+		}
+
+		if (resize_pp_)
+		{
+			if (ldr_pp_)
+			{
+				for (size_t i = 0; i < 12; ++ i)
+				{
+					ldr_pps_[i]->InputPin(0, resize_tex_);
+				}
+			}
+
+			resize_pp_->InputPin(0, resize_tex_);
 		}
 
 		if (ldr_pp_)
