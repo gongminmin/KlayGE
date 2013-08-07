@@ -11,13 +11,16 @@ def copy_to_dst(src_name, dst_dir):
 	shutil.copy(src_name, dst_dir)
 
 def build_Boost(compiler_info, compiler_arch):
+	bjam_name = ""
 	os.chdir("External/boost")
 	if "win32" == compiler_info.platform:
-		if not os.path.exists("bjam.exe"):
+		bjam_name = "bjam.exe"
+		if not os.path.exists(bjam_name):
 			os.system("bootstrap.bat")
 	elif "linux" == compiler_info.platform:
-		if not os.path.exists("./bjam"):
-			os.system("bootstrap.sh")
+		bjam_name = "./bjam"
+		if not os.path.exists(bjam_name):
+			os.system("./bootstrap.sh")
 
 	if "vc" == compiler_info.name:
 		boost_toolset = "ms%s-%d.0" % (compiler_info.name, compiler_info.version)
@@ -47,10 +50,10 @@ def build_Boost(compiler_info, compiler_arch):
 		options += " cxxflags=-wd4819 cxxflags=-wd4910 define=_CRT_SECURE_NO_DEPRECATE define=_SCL_SECURE_NO_DEPRECATE"
 
 	config = ""
-	if "Debug" in compiler_info.cfg:
-		config += " debug"
+	if ("Debug" in compiler_info.cfg):
+		config += " variant=debug"
 	if ("Release" in compiler_info.cfg) or ("RelWithDebInfo" in compiler_info.cfg) or ("MinSizeRel" in compiler_info.cfg):
-		config += " release"
+		config += " variant=release"
 		
 	if "vc" == compiler_info.name:
 		compiler_version_str = str(compiler_info.version)
@@ -58,7 +61,7 @@ def build_Boost(compiler_info, compiler_arch):
 		compiler_version_str = ""
 
 	build_cmd = batch_command()
-	build_cmd.add_command('bjam.exe --toolset=%s --stagedir=./lib_%s%s_%s --builddir=./ address-model=%d %s link=shared runtime-link=shared threading=multi stage %s' % (boost_toolset, compiler_info.name, compiler_version_str, compiler_arch, address_model, options, config))
+	build_cmd.add_command('%s --toolset=%s --stagedir=./lib_%s%s_%s --builddir=./ --layout=versioned address-model=%d %s %s link=shared runtime-link=shared threading=multi stage' % (bjam_name, boost_toolset, compiler_info.name, compiler_version_str, compiler_arch, address_model, config, options))
 	build_cmd.execute()
 
 	os.chdir("../../")
