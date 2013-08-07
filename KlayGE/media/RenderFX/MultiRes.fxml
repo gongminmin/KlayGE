@@ -1,0 +1,253 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<effect>
+	<include name="DeferredRenderingUtil.fxml"/>
+	<include name="PostProcess.fxml"/>
+
+	<parameter type="sampler" name="point_sampler">
+		<state name="filtering" value="min_mag_mip_point"/>
+		<state name="address_u" value="clamp"/>
+		<state name="address_v" value="clamp"/>
+	</parameter>
+
+	<parameter type="float4" name="delta_offset"/>
+	<parameter type="float" name="prev_level"/>
+
+	<parameter type="texture2D" name="g_buffer_tex"/>
+	<parameter type="texture2D" name="depth_tex"/>
+	<parameter type="texture2D" name="depth_deriv_tex"/>
+	<parameter type="texture2D" name="normal_cone_tex"/>
+
+	<parameter type="float2" name="kernel9" array_size="9">
+		<value>
+			<![CDATA[
+				0,  0,  -1,  0,  -1,  1,
+				0,  1,   1,  1,   1,  0,
+				1, -1,   0, -1,  -1, -1
+				]]>
+		</value>
+	</parameter>
+
+	<shader>
+		<![CDATA[
+float4 GBuffer2DepthDerivatePS(float2 tc : TEXCOORD0) : SV_Target
+{
+	tc = tc + delta_offset.zw;
+	float max_depth = depth_tex.SampleLevel(point_sampler, tc, 0).r;
+	float min_depth = max_depth;
+	for (int i = 1; i < 9; ++ i)
+	{
+		float2 ntc = tc + kernel9[i] * delta_offset.xy;
+		float depth = depth_tex.SampleLevel(point_sampler, ntc, 0).r;
+		max_depth = max(max_depth, depth);
+		min_depth = min(min_depth, depth);
+	}
+	return max_depth - min_depth;
+}
+
+float4 DepthDerivateMipMapPS(float2 tc : TEXCOORD0) : SV_Target
+{
+	tc = tc + delta_offset.zw;
+	float max_depth_deriv = depth_deriv_tex.SampleLevel(point_sampler, tc, prev_level).r;
+	for (int i = 1; i < 9; ++ i)
+	{
+		float2 ntc = tc + kernel9[i] * delta_offset.xy;
+		float depth_deriv = depth_deriv_tex.SampleLevel(point_sampler, ntc, prev_level).r;
+		max_depth_deriv = max(max_depth_deriv, depth_deriv);
+	}
+	return max_depth_deriv;
+}
+
+float4 GBuffer2NormalConePS(float2 tc : TEXCOORD0) : SV_Target
+{
+	tc = tc + delta_offset.zw;
+	float2 max_nxy = GetNormal(g_buffer_tex.SampleLevel(point_sampler, tc, 0)).xy;
+	float2 min_nxy = max_nxy;
+	for (int i = 1; i < 9; ++ i)
+	{
+		float2 ntc = tc + kernel9[i] * delta_offset.xy;
+		float2 nxy = GetNormal(g_buffer_tex.SampleLevel(point_sampler, ntc, 0)).xy;
+		max_nxy = max(max_nxy, nxy);
+		min_nxy = min(min_nxy, nxy);
+	}
+	return float4(max_nxy, min_nxy) * 0.5f + 0.5f;
+}
+
+float4 NormalConeMipMapPS(float2 tc : TEXCOORD0) : SV_Target
+{
+	tc = tc + delta_offset.zw;  
+	float4 max_min_nxy = normal_cone_tex.SampleLevel(point_sampler, tc, prev_level);
+	for (int i = 1; i < 9; ++ i)
+	{
+		float2 ntc = tc + kernel9[i] * delta_offset.xy;
+		float4 nxy = normal_cone_tex.SampleLevel(point_sampler, ntc, prev_level);
+		max_min_nxy.xy = max(max_min_nxy.xy, nxy.xy);
+		max_min_nxy.zw = min(max_min_nxy.zw, nxy.zw);
+	}
+	return max_min_nxy;
+}
+		]]>
+	</shader>
+
+	<technique name="GBuffer2DepthDerivate">
+		<pass name="p0">
+			<state name="depth_enable" value="false"/>
+			<state name="depth_write_mask" value="false"/>
+
+			<state name="vertex_shader" value="PostProcessVS()"/>
+			<state name="pixel_shader" value="GBuffer2DepthDerivatePS()"/>
+		</pass>
+	</technique>
+
+	<technique name="DepthDerivateMipMap">
+		<pass name="p0">
+			<state name="depth_enable" value="false"/>
+			<state name="depth_write_mask" value="false"/>
+
+			<state name="vertex_shader" value="PostProcessVS()"/>
+			<state name="pixel_shader" value="DepthDerivateMipMapPS()"/>
+		</pass>
+	</technique>
+
+	<technique name="GBuffer2NormalCone">
+		<pass name="p0">
+			<state name="depth_enable" value="false"/>
+			<state name="depth_write_mask" value="false"/>
+
+			<state name="vertex_shader" value="PostProcessVS()"/>
+			<state name="pixel_shader" value="GBuffer2NormalConePS()"/>
+		</pass>
+	</technique>
+
+	<technique name="NormalConeMipMap">
+		<pass name="p0">
+			<state name="depth_enable" value="false"/>
+			<state name="depth_write_mask" value="false"/>
+
+			<state name="vertex_shader" value="PostProcessVS()"/>
+			<state name="pixel_shader" value="NormalConeMipMapPS()"/>
+		</pass>
+	</technique>
+	
+
+	<parameter type="float2" name="depth_normal_threshold"/>
+	<parameter type="int2" name="is_not_first_last_level"/>
+
+	<shader>
+		<![CDATA[
+float4 SetSubsplatStencilPS(float2 tc: TEXCOORD0) : SV_Target
+{
+	if (is_not_first_last_level.x)
+	{
+		float depth_deriv = depth_deriv_tex.SampleLevel(point_sampler, tc, cur_lower_level.x).r;  
+		float4 normal_cone = normal_cone_tex.SampleLevel(point_sampler, tc, cur_lower_level.x);
+		normal_cone.xy -= normal_cone.zw;
+		float normal_deriv = max(normal_cone.x, normal_cone.y);
+		if (any(float2(depth_deriv, normal_deriv) > depth_normal_threshold))
+		{
+			discard;
+		}
+	}
+
+	if (is_not_first_last_level.y)
+	{
+		float depth_deriv = depth_deriv_tex.SampleLevel(point_sampler, tc, cur_lower_level.y).r;
+		float4 normal_cone = normal_cone_tex.SampleLevel(point_sampler, tc, cur_lower_level.y);
+		normal_cone.xy -= normal_cone.zw;
+		float normal_deriv = max(normal_cone.x, normal_cone.y);
+		if (all(float2(depth_deriv, normal_deriv) <= depth_normal_threshold))
+		{
+			discard;
+		}
+	}
+
+	return 1;
+}
+		]]>
+	</shader>
+
+	<technique name="SetSubsplatStencil">
+		<pass name="p0">
+			<state name="color_write_mask" value="0"/>
+			<state name="depth_enable" value="false"/>
+			<state name="depth_write_mask" value="false"/>
+
+			<state name="cull_mode" value="front"/>
+
+			<state name="front_stencil_enable" value="true"/>
+			<state name="front_stencil_func" value="always_pass"/>
+			<state name="front_stencil_ref" value="0"/>
+			<state name="front_stencil_pass" value="replace"/>
+			<state name="back_stencil_enable" value="true"/>
+			<state name="back_stencil_func" value="always_pass"/>
+			<state name="back_stencil_ref" value="0"/>
+			<state name="back_stencil_pass" value="replace"/>
+
+			<state name="vertex_shader" value="PostProcessVS()"/>
+			<state name="pixel_shader" value="SetSubsplatStencilPS()"/>
+		</pass>
+	</technique>
+
+
+	<parameter type="float2" name="kernel4" array_size="4">
+		<value>
+			<![CDATA[
+				0,  0,  1, 0,  0, 1,  1, 1
+			]]>
+		</value>
+	</parameter>
+
+	<parameter type="texture2D" name="src_tex"/>
+	<parameter type="float4" name="delta"/>
+	<parameter type="int2" name="cur_lower_level"/>
+
+	<shader>
+		<![CDATA[
+float4 UpsamplingPS(float2 tc : TEXCOORD0) : SV_Target
+{
+	float3 color0 = src_tex.SampleLevel(point_sampler, tc, cur_lower_level.y).xyz;
+	float3 color1 = src_tex.SampleLevel(point_sampler, tc, cur_lower_level.x).xyz;
+  
+	return float4(color0 + color1, 1);
+}
+
+float4 UpsamplingInterpolatePS(float2 tc : TEXCOORD0) : SV_Target
+{
+	float4 finer = src_tex.SampleLevel(point_sampler, tc, cur_lower_level.y);
+	float4 coarse = src_tex.SampleLevel(point_sampler, tc, cur_lower_level.x);
+	if (coarse.a > 0)
+	{	
+		float2 coords = tc * delta.xy;
+		float2 t0 = floor(coords - 0.5f) + 0.5f;	
+		float4 wxy;
+		wxy.xy = coords - t0;
+		wxy.zw = 1 - wxy.xy;
+
+		float4 weight = wxy.zxzx * wxy.wwyy;
+
+		float4 total_color = 0;
+		for (int i = 0; i < 4; ++ i)
+		{
+			float2 ntc = (t0 + kernel4[i]) * delta.zw;
+			float4 color = src_tex.SampleLevel(point_sampler, ntc, cur_lower_level.x);
+ 			total_color += float4(color.rgb, 1) * weight[i] * color.a;
+		}
+
+		finer += float4(total_color.rgb / max(total_color.a, 0.001f), 1);
+	}
+	
+	return finer;
+}
+		]]>
+	</shader>
+
+	<technique name="Upsampling">
+		<pass name="p0">
+			<state name="depth_enable" value="false"/>
+			<state name="depth_write_mask" value="false"/>
+
+			<state name="vertex_shader" value="PostProcessVS()"/>
+			<state name="pixel_shader" value="UpsamplingInterpolatePS()"/>
+		</pass>
+	</technique>
+</effect>

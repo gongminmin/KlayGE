@@ -12,7 +12,7 @@
 		<output>
 			<pin name="output"/>
 		</output>
-		<shader effect="CustomMipMap.fxml" tech="GBuffer2DepthDerivate"/>
+		<shader effect="MultiRes.fxml" tech="GBuffer2DepthDerivate"/>
 	</post_processor>
 
 	<post_processor name="DepthDerivateMipMap">
@@ -26,7 +26,7 @@
 		<output>
 			<pin name="output"/>
 		</output>
-		<shader effect="CustomMipMap.fxml" tech="DepthDerivateMipMap"/>
+		<shader effect="MultiRes.fxml" tech="DepthDerivateMipMap"/>
 	</post_processor>
 
 	<post_processor name="GBuffer2NormalCone">
@@ -39,7 +39,7 @@
 		<output>
 			<pin name="output"/>
 		</output>
-		<shader effect="CustomMipMap.fxml" tech="GBuffer2NormalCone"/>
+		<shader effect="MultiRes.fxml" tech="GBuffer2NormalCone"/>
 	</post_processor>
 
 	<post_processor name="NormalConeMipMap">
@@ -53,6 +53,20 @@
 		<output>
 			<pin name="output"/>
 		</output>
-		<shader effect="CustomMipMap.fxml" tech="NormalConeMipMap"/>
+		<shader effect="MultiRes.fxml" tech="NormalConeMipMap"/>
+	</post_processor>
+
+	<post_processor name="Upsampling">
+		<params>
+			<param name="delta"/>
+			<param name="cur_lower_level"/>
+		</params>
+		<input>
+			<pin name="src_tex"/>
+		</input>
+		<output>
+			<pin name="output"/>
+		</output>
+		<shader effect="MultiRes.fxml" tech="Upsampling"/>
 	</post_processor>
 </post_processors>

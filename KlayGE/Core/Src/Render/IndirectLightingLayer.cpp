@@ -81,12 +81,12 @@ namespace KlayGE
 
 		vpl_tex_ = rf.MakeTexture2D(VPL_COUNT, 4, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);	
 
-		gbuffer_to_depth_derivate_pp_ = SyncLoadPostProcess("CustomMipMap.ppml", "GBuffer2DepthDerivate");
-		depth_derivate_mipmap_pp_ =  SyncLoadPostProcess("CustomMipMap.ppml", "DepthDerivateMipMap");
-		gbuffer_to_normal_cone_pp_ =  SyncLoadPostProcess("CustomMipMap.ppml", "GBuffer2NormalCone");
-		normal_cone_mipmap_pp_ =  SyncLoadPostProcess("CustomMipMap.ppml", "NormalConeMipMap");
+		gbuffer_to_depth_derivate_pp_ = SyncLoadPostProcess("MultiRes.ppml", "GBuffer2DepthDerivate");
+		depth_derivate_mipmap_pp_ =  SyncLoadPostProcess("MultiRes.ppml", "DepthDerivateMipMap");
+		gbuffer_to_normal_cone_pp_ =  SyncLoadPostProcess("MultiRes.ppml", "GBuffer2NormalCone");
+		normal_cone_mipmap_pp_ =  SyncLoadPostProcess("MultiRes.ppml", "NormalConeMipMap");
 
-		RenderEffectPtr subsplat_stencil_effect = SyncLoadRenderEffect("SetSubsplatStencil.fxml");
+		RenderEffectPtr subsplat_stencil_effect = SyncLoadRenderEffect("MultiRes.fxml");
 		subsplat_stencil_tech_ = subsplat_stencil_effect->TechniqueByName("SetSubsplatStencil");
 
 		subsplat_cur_lower_level_param_ = subsplat_stencil_effect->ParameterByName("cur_lower_level");
@@ -111,7 +111,7 @@ namespace KlayGE
 		*(vpls_lighting_effect->ParameterByName("vpls_tex")) = vpl_tex_;
 		*(vpls_lighting_effect->ParameterByName("vpl_params")) = float2(1.0f / VPL_COUNT, 0.5f / VPL_COUNT);
 
-		upsampling_pp_ = SyncLoadPostProcess("Upsampling.ppml", "Upsampling");
+		upsampling_pp_ = SyncLoadPostProcess("MultiRes.ppml", "Upsampling");
 
 		rl_vpl_ = SyncLoadModel("indirect_light_proxy.meshml", EAH_GPU_Read | EAH_Immutable, CreateModelFactory<RenderModel>(), CreateMeshFactory<StaticMesh>())->Mesh(0)->GetRenderLayout();
 		if (caps.instance_id_support)
@@ -228,7 +228,7 @@ namespace KlayGE
 
 		rsm_depth_derivative_tex_ = rf.MakeTexture2D(MIN_RSM_MIPMAP_SIZE, MIN_RSM_MIPMAP_SIZE, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
 
-		rsm_to_depth_derivate_pp_ = SyncLoadPostProcess("CustomMipMap.ppml", "GBuffer2DepthDerivate");
+		rsm_to_depth_derivate_pp_ = SyncLoadPostProcess("MultiRes.ppml", "GBuffer2DepthDerivate");
 		rsm_to_depth_derivate_pp_->InputPin(1, rsm_depth_tex_);
 		rsm_to_depth_derivate_pp_->OutputPin(0, rsm_depth_derivative_tex_);
 		float delta_x = 1.0f / rsm_depth_derivative_tex_->Width(0);
@@ -330,7 +330,7 @@ namespace KlayGE
 			re.BindFrameBuffer(vpls_lighting_fbs_[i]);
 			vpls_lighting_fbs_[i]->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth | FrameBuffer::CBM_Stencil, Color(0, 0, 0, 0), 0.0f, 128);
 
-			*subsplat_cur_lower_level_param_ = float2(static_cast<float>(i), static_cast<float>(i + 1));
+			*subsplat_cur_lower_level_param_ = int2(static_cast<int>(i), static_cast<int>(i + 1));
 			*subsplat_is_not_first_last_level_param_ = int2(i > 0, i < vpls_lighting_fbs_.size() - 1);
 
 			re.Render(*subsplat_stencil_tech_, *rl_quad_);

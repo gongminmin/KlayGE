@@ -112,7 +112,6 @@ SET(RENDERING_EFFECT_FILES
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/ColorGrading.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/Copy.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/Copy2LightBuffer.fxml
-	${KLAYGE_PROJECT_DIR}/media/RenderFX/CustomMipMap.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/DeferredRendering.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/DeferredRenderingUtil.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/DepthToSM.fxml
@@ -129,6 +128,7 @@ SET(RENDERING_EFFECT_FILES
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/Lighting.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/LightShaft.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/LightSourceProxy.fxml
+	${KLAYGE_PROJECT_DIR}/media/RenderFX/MultiRes.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/Noise.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/Particle.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/PointSprite.fxml
@@ -137,7 +137,6 @@ SET(RENDERING_EFFECT_FILES
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/Quaternion.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/RenderableHelper.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/RSM2VPLs.fxml
-	${KLAYGE_PROJECT_DIR}/media/RenderFX/SetSubsplatStencil.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/SkyBox.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/Sort.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/SSGI.fxml
@@ -148,7 +147,6 @@ SET(RENDERING_EFFECT_FILES
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/SAT.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/TAA.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/ToneMapping.fxml
-	${KLAYGE_PROJECT_DIR}/media/RenderFX/Upsampling.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/util.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/VPLsLighting.fxml
 )
@@ -158,7 +156,6 @@ SET(RENDERING_POSTPROCESSOR_FILES
 	${KLAYGE_PROJECT_DIR}/media/PostProcessors/ColorGrading.ppml
 	${KLAYGE_PROJECT_DIR}/media/PostProcessors/Copy.ppml
 	${KLAYGE_PROJECT_DIR}/media/PostProcessors/Copy2LightBuffer.ppml
-	${KLAYGE_PROJECT_DIR}/media/PostProcessors/CustomMipMap.ppml
 	${KLAYGE_PROJECT_DIR}/media/PostProcessors/DepthToSM.ppml
 	${KLAYGE_PROJECT_DIR}/media/PostProcessors/FFT.ppml
 	${KLAYGE_PROJECT_DIR}/media/PostProcessors/Fog.ppml
@@ -166,13 +163,13 @@ SET(RENDERING_POSTPROCESSOR_FILES
 	${KLAYGE_PROJECT_DIR}/media/PostProcessors/GammaCorrection.ppml
 	${KLAYGE_PROJECT_DIR}/media/PostProcessors/LensEffects.ppml
 	${KLAYGE_PROJECT_DIR}/media/PostProcessors/LightShaft.ppml
+	${KLAYGE_PROJECT_DIR}/media/PostProcessors/MultiRes.ppml
 	${KLAYGE_PROJECT_DIR}/media/PostProcessors/PostToneMapping.ppml
 	${KLAYGE_PROJECT_DIR}/media/PostProcessors/RSM2VPLs.ppml
 	${KLAYGE_PROJECT_DIR}/media/PostProcessors/SAT.ppml
 	${KLAYGE_PROJECT_DIR}/media/PostProcessors/Sort.ppml
 	${KLAYGE_PROJECT_DIR}/media/PostProcessors/Stereoscopic.ppml
 	${KLAYGE_PROJECT_DIR}/media/PostProcessors/TAA.ppml
-	${KLAYGE_PROJECT_DIR}/media/PostProcessors/Upsampling.ppml
 )
 
 SOURCE_GROUP("Rendering System\\Source Files" FILES ${RENDERING_SOURCE_FILES})

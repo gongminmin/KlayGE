@@ -231,8 +231,8 @@ void DeferredRenderingApp::InitObjects()
 	spot_light_[2]->Position(float3(0.0f, 43.2f, -5.9f));
 	spot_light_[2]->Direction(float3(0.0f, -1, 0.1f));
 	spot_light_[2]->Falloff(float3(1, 0.1f, 0));
-	spot_light_[2]->OuterAngle(PI / 4);
-	spot_light_[2]->InnerAngle(PI / 6);
+	spot_light_[2]->OuterAngle(PI / 8);
+	spot_light_[2]->InnerAngle(PI / 12);
 	spot_light_[2]->BindUpdateFunc(GISpotLightSourceUpdate());
 	spot_light_[2]->AddToSceneManager();
 
