@@ -2,6 +2,7 @@
 
 <effect>
 	<include name="PostProcess.fxml"/>
+	<include name="util.fxml"/>
 	
 	<macro name="RGB_TO_LUM" value="float3(0.2126f, 0.7152f, 0.0722f)"/>
 
@@ -60,7 +61,12 @@ float3 ToneMapping(float3 color, float3 blur, float adapted_lum)
 
 float4 ToneMapping20PS(float2 iTex : TEXCOORD0) : SV_Target
 {
-	float lum = max(0.001f, lum_tex.Sample(point_sampler, 0.5f.xx).r);
+#if PACK_TO_RGBA
+	float adapted_lum = DecodeFloatRGBA(lum_tex.SampleLevel(point_sampler, 0.5f.xx, 0)) * 16;
+#else
+	float adapted_lum = lum_tex.SampleLevel(point_sampler, 0.5f.xx, 0).r;
+#endif
+	float lum = max(0.001f, adapted_lum);
 	// For FXAA
 	float3 ldr_rgb = saturate(ToneMapping(src_tex.Sample(linear_sampler, iTex).rgb, bloom_tex.Sample(linear_sampler, iTex).rgb, lum));
 	return float4(ldr_rgb, dot(ldr_rgb, RGB_TO_LUM));
@@ -97,6 +103,10 @@ float4 ToneMapping30PS(float3 iTex : TEXCOORD0) : SV_Target
 			<state name="vertex_shader" value="PostProcessVS()"/>
 			<state name="pixel_shader" value="ToneMapping20PS()"/>
 		</pass>
+	</technique>
+
+	<technique name="ToneMapping20Pack" inherit="ToneMapping20">
+		<macro name="PACK_TO_RGBA" value="1"/>
 	</technique>
 
 	<technique name="ToneMapping30">

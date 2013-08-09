@@ -75,6 +75,7 @@ namespace KlayGE
 	private:
 		TexturePtr adapted_textures_[2];
 		bool last_index_;
+		bool pack_to_rgba_;
 
 		RenderEffectParameterPtr last_lum_tex_ep_;
 		RenderEffectParameterPtr frame_delta_ep_;

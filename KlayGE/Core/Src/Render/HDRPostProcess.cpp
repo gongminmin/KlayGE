@@ -118,10 +118,11 @@ namespace KlayGE
 					std::vector<std::string>(),
 					std::vector<std::string>(1, "src_tex"),
 					std::vector<std::string>(1, "output"),
-					SyncLoadRenderEffect("SumLum.fxml")->TechniqueByName("AdaptedLum")),
+					RenderTechniquePtr()),
 				last_index_(false)
 	{
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+		RenderDeviceCaps const & caps = rf.RenderEngineInstance().DeviceCaps();
 
 		std::vector<int> data_v(4, 0);
 		ElementInitData init_data;
@@ -129,27 +130,34 @@ namespace KlayGE
 		init_data.slice_pitch = 0;
 		init_data.data = &data_v[0];
 		ElementFormat fmt;
-		if (rf.RenderEngineInstance().DeviceCaps().rendertarget_format_support(EF_R32F, 1, 0))
+		if (caps.rendertarget_format_support(EF_R32F, 1, 0))
 		{
 			fmt = EF_R32F;
+			pack_to_rgba_ = false;
 		}
-		else if (rf.RenderEngineInstance().DeviceCaps().rendertarget_format_support(EF_ABGR32F, 1, 0))
+		else if (caps.rendertarget_format_support(EF_ABGR8, 1, 0))
 		{
-			init_data.row_pitch = 4 * sizeof(int);
-			fmt = EF_ABGR32F;
-		}
-		else if (rf.RenderEngineInstance().DeviceCaps().rendertarget_format_support(EF_R16F, 1, 0))
-		{
-			init_data.row_pitch = sizeof(short);
-			fmt = EF_R16F;
+			fmt = EF_ABGR8;
+			pack_to_rgba_ = true;
 		}
 		else
 		{
-			BOOST_ASSERT(rf.RenderEngineInstance().DeviceCaps().rendertarget_format_support(EF_ABGR16F, 1, 0));
+			BOOST_ASSERT(caps.rendertarget_format_support(EF_ARGB8, 1, 0));
 
-			init_data.row_pitch = 4 * sizeof(short);
-			fmt = EF_ABGR16F;
+			fmt = EF_ARGB8;
+			pack_to_rgba_ = true;
 		}
+
+		RenderEffectPtr effect = SyncLoadRenderEffect("SumLum.fxml");
+		if (pack_to_rgba_)
+		{
+			this->Technique(effect->TechniqueByName("AdaptedLumPack"));
+		}
+		else
+		{
+			this->Technique(effect->TechniqueByName("AdaptedLum"));
+		}
+
 		adapted_textures_[0] = rf.MakeTexture2D(1, 1, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, &init_data);
 		adapted_textures_[1] = rf.MakeTexture2D(1, 1, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, &init_data);
 		this->OutputPin(0, adapted_textures_[last_index_]);
@@ -207,6 +215,9 @@ namespace KlayGE
 	ToneMappingPostProcess::ToneMappingPostProcess()
 		: PostProcess(L"ToneMapping")
 	{
+		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+		RenderDeviceCaps const & caps = rf.RenderEngineInstance().DeviceCaps();
+
 		input_pins_.push_back(std::make_pair("src_tex", TexturePtr()));
 		input_pins_.push_back(std::make_pair("lum_tex", TexturePtr()));
 		input_pins_.push_back(std::make_pair("bloom_tex", TexturePtr()));
@@ -214,10 +225,21 @@ namespace KlayGE
 		output_pins_.push_back(std::make_pair("out_tex", TexturePtr()));
 		
 		RenderEffectPtr effect = SyncLoadRenderEffect("ToneMapping.fxml");
-		RenderTechniquePtr tech = effect->TechniqueByName("ToneMapping30");
-		if (!tech->Validate())
+		RenderTechniquePtr tech;
+		if (caps.max_shader_model >= 3)
 		{
-			tech = effect->TechniqueByName("ToneMapping20");
+			tech = effect->TechniqueByName("ToneMapping30");
+		}
+		else
+		{
+			if (caps.rendertarget_format_support(EF_R32F, 1, 0))
+			{
+				tech = effect->TechniqueByName("ToneMapping20");
+			}
+			else
+			{
+				tech = effect->TechniqueByName("ToneMapping20Pack");
+			}
 		}
 
 		this->Technique(tech);

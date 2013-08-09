@@ -2,6 +2,7 @@
 
 <effect>
 	<include name="PostProcess.fxml"/>
+	<include name="util.fxml"/>
 
 	<parameter type="texture2D" name="src_tex"/>
 	<parameter type="sampler" name="src_sampler">
@@ -78,10 +79,19 @@ float4 SumLum4x4IterativePS(float4 iTex0 : TEXCOORD0,
 float4 AdaptedLumPS(float4 tex0 : TEXCOORD0,
 				float4 tex1 : TEXCOORD1) : SV_Target
 {
+#if PACK_TO_RGBA
+	float adapted_lum = DecodeFloatRGBA(last_lum_tex.Sample(last_lum_sampler, float2(0.5f, 0.5f))) * 16;
+#else
 	float adapted_lum = last_lum_tex.Sample(last_lum_sampler, float2(0.5f, 0.5f)).r;
+#endif
 	float current_lum = exp(src_tex.Sample(src_sampler, float2(0.5f, 0.5f)).r);
 
-	return CalcAdaptedLum(adapted_lum, current_lum);
+	float ret = CalcAdaptedLum(adapted_lum, current_lum);
+#if PACK_TO_RGBA
+	return EncodeFloatRGBA(clamp(ret / 16, 0, 0.999f));
+#else
+	return ret;
+#endif
 }
 		]]>
 	</shader>
@@ -114,6 +124,10 @@ float4 AdaptedLumPS(float4 tex0 : TEXCOORD0,
 			<state name="vertex_shader" value="SumLumVS()"/>
 			<state name="pixel_shader" value="AdaptedLumPS()"/>
 		</pass>
+	</technique>
+
+	<technique name="AdaptedLumPack" inherit="AdaptedLum">
+		<macro name="PACK_TO_RGBA" value="1"/>
 	</technique>
 
 
