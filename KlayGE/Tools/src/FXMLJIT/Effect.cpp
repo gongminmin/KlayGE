@@ -67,7 +67,7 @@ namespace
 {
 	using namespace KlayGE;
 
-	uint32_t const KFX_VERSION = 0x0103;
+	uint32_t const KFX_VERSION = 0x0104;
 
 	mutex singleton_mutex;
 
@@ -925,7 +925,7 @@ namespace
 
 		case REDT_shader:
 			{
-				shader_desc desc;
+				ShaderDesc desc;
 				desc.profile = get_profile(node);
 				desc.func_name = get_func_name(node);
 
@@ -1674,7 +1674,7 @@ namespace
 
 		case REDT_shader:
 			{
-				shader_desc desc;
+				ShaderDesc desc;
 				desc.profile = ReadShortString(res);
 				desc.func_name = ReadShortString(res);
 
@@ -2221,7 +2221,7 @@ namespace
 
 		case REDT_shader:
 			{
-				shader_desc tmp;
+				ShaderDesc tmp;
 				var->Value(tmp);
 				WriteShortString(os, tmp.profile);
 				WriteShortString(os, tmp.func_name);
@@ -2939,15 +2939,19 @@ namespace KlayGE
 				WriteShortString(os, (*shader_descs_)[i + 1].profile);
 				WriteShortString(os, (*shader_descs_)[i + 1].func_name);
 
-				uint32_t tmp = (*shader_descs_)[i + 1].tech_pass_type;
-				NativeToLittleEndian<sizeof(tmp)>(&tmp);
-				os.write(reinterpret_cast<char const *>(&tmp), sizeof(tmp));
+				uint64_t tmp64 = (*shader_descs_)[i + 1].macros_hash;
+				NativeToLittleEndian<sizeof(tmp64)>(&tmp64);
+				os.write(reinterpret_cast<char const *>(&tmp64), sizeof(tmp64));
+
+				uint32_t tmp32 = (*shader_descs_)[i + 1].tech_pass_type;
+				NativeToLittleEndian<sizeof(tmp32)>(&tmp32);
+				os.write(reinterpret_cast<char const *>(&tmp32), sizeof(tmp32));
 
 				uint8_t len = static_cast<uint8_t>((*shader_descs_)[i + 1].so_decl.size());
 				os.write(reinterpret_cast<char const *>(&len), sizeof(len));
 				for (uint32_t j = 0; j < len; ++ j)
 				{
-					shader_desc::stream_output_decl so_decl = (*shader_descs_)[i + 1].so_decl[j];
+					ShaderDesc::StreamOutputDecl so_decl = (*shader_descs_)[i + 1].so_decl[j];
 					NativeToLittleEndian<sizeof(so_decl.usage)>(&so_decl.usage);
 					os.write(reinterpret_cast<char const *>(&so_decl), sizeof(so_decl));
 				}
@@ -3034,7 +3038,7 @@ namespace KlayGE
 		return null_tech;
 	}
 
-	uint32_t RenderEffect::AddShaderDesc(shader_desc const & sd)
+	uint32_t RenderEffect::AddShaderDesc(ShaderDesc const & sd)
 	{
 		for (uint32_t i = 0; i < shader_descs_->size(); ++ i)
 		{
@@ -3049,13 +3053,13 @@ namespace KlayGE
 		return id;
 	}
 
-	shader_desc& RenderEffect::GetShaderDesc(uint32_t id)
+	ShaderDesc& RenderEffect::GetShaderDesc(uint32_t id)
 	{
 		BOOST_ASSERT(id < shader_descs_->size());
 		return (*shader_descs_)[id];
 	}
 
-	shader_desc const & RenderEffect::GetShaderDesc(uint32_t id) const
+	ShaderDesc const & RenderEffect::GetShaderDesc(uint32_t id) const
 	{
 		BOOST_ASSERT(id < shader_descs_->size());
 		return (*shader_descs_)[id];
@@ -3101,6 +3105,29 @@ namespace KlayGE
 			}
 		}
 
+		{
+			XMLNodePtr macro_node = node->FirstNode("macro");
+			if (macro_node)
+			{
+				if (!macros_)
+				{
+					macros_ = MakeSharedPtr<KLAYGE_DECLTYPE(*macros_)>();
+				}				
+				if (parent_tech && parent_tech->macros_)
+				{
+					*macros_ = *parent_tech->macros_;
+				}
+				for (; macro_node; macro_node = macro_node->NextSibling("macro"))
+				{
+					macros_->push_back(std::make_pair(macro_node->Attrib("name")->ValueString(), macro_node->Attrib("value")->ValueString()));
+				}
+			}
+			else if (parent_tech)
+			{
+				macros_ = parent_tech->macros_;
+			}
+		}
+
 		if (!node->FirstNode("pass") && parent_tech)
 		{
 			is_validate_ = parent_tech->is_validate_;
@@ -3109,7 +3136,23 @@ namespace KlayGE
 			transparent_ = parent_tech->transparent_;
 			weight_ = parent_tech->weight_;
 
-			passes_ = parent_tech->passes_;
+			if (macros_ == parent_tech->macros_)
+			{
+				passes_ = parent_tech->passes_;
+			}
+			else
+			{
+				for (uint32_t index = 0; index < parent_tech->passes_.size(); ++ index)
+				{
+					RenderPassPtr pass = MakeSharedPtr<RenderPass>(effect_);
+					passes_.push_back(pass);
+
+					RenderPassPtr inherit_pass = parent_tech->passes_[index];
+
+					pass->Load(tech_index, index, inherit_pass);
+					is_validate_ &= pass->Validate();
+				}
+			}
 		}
 		else
 		{
@@ -3191,6 +3234,22 @@ namespace KlayGE
 			annotation->StreamOut(os);
 		}
 
+		uint8_t num_macro;
+		if (macros_)
+		{
+			num_macro = static_cast<uint8_t>(macros_->size());
+		}
+		else
+		{
+			num_macro = 0;
+		}
+		os.write(reinterpret_cast<char const *>(&num_macro), sizeof(num_macro));
+		for (uint32_t i = 0; i < num_macro; ++ i)
+		{
+			WriteShortString(os, (*macros_)[i].first);
+			WriteShortString(os, (*macros_)[i].second);
+		}
+
 		os.write(reinterpret_cast<char const *>(&transparent_), sizeof(transparent_));
 		float w = weight_;
 		NativeToLittleEndian<sizeof(w)>(&w);
@@ -3211,6 +3270,7 @@ namespace KlayGE
 		ret->name_ = name_;
 
 		ret->annotations_ = annotations_;
+		ret->macros_ = macros_;
 		ret->weight_ = weight_;
 		ret->transparent_ = transparent_;
 		ret->is_validate_ = is_validate_;
@@ -3251,6 +3311,49 @@ namespace KlayGE
 					annotation->Load(anno_node);
 				}
 			}
+		}
+
+		{
+			XMLNodePtr macro_node = node->FirstNode("macro");
+			if (macro_node)
+			{
+				if (!macros_)
+				{
+					macros_ = MakeSharedPtr<KLAYGE_DECLTYPE(*macros_)>();
+				}
+				if (inherit_pass && inherit_pass->macros_)
+				{
+					*macros_ = *inherit_pass->macros_;
+				}
+				for (; macro_node; macro_node = macro_node->NextSibling("macro"))
+				{
+					macros_->push_back(std::make_pair(macro_node->Attrib("name")->ValueString(), macro_node->Attrib("value")->ValueString()));
+				}
+			}
+			else if (inherit_pass)
+			{
+				macros_ = inherit_pass->macros_;
+			}
+		}
+
+		uint64_t macros_hash;
+		{
+			RenderTechniquePtr const & tech = effect_.TechniqueByIndex(tech_index);
+
+			size_t hash_val = 0;
+			for (uint32_t i = 0; i < tech->NumMacros(); ++ i)
+			{
+				std::pair<std::string, std::string> const & name_value = tech->MacroByIndex(i);
+				boost::hash_range(hash_val, name_value.first.begin(), name_value.first.end());
+				boost::hash_range(hash_val, name_value.second.begin(), name_value.second.end());
+			}
+			for (uint32_t i = 0; i < this->NumMacros(); ++ i)
+			{
+				std::pair<std::string, std::string> const & name_value = this->MacroByIndex(i);
+				boost::hash_range(hash_val, name_value.first.begin(), name_value.first.end());
+				boost::hash_range(hash_val, name_value.second.begin(), name_value.second.end());
+			}
+			macros_hash = static_cast<uint64_t>(hash_val);
 		}
 
 		RasterizerStateDesc rs_desc;
@@ -3535,9 +3638,10 @@ namespace KlayGE
 					type = ShaderObject::ST_DomainShader;
 				}
 
-				shader_desc sd;
+				ShaderDesc sd;
 				sd.profile = get_profile(state_node);
 				sd.func_name = get_func_name(state_node);
+				sd.macros_hash = macros_hash;
 
 				if ((ShaderObject::ST_VertexShader == type) || (ShaderObject::ST_GeometryShader == type))
 				{
@@ -3546,7 +3650,7 @@ namespace KlayGE
 					{
 						for (XMLNodePtr slot_node = so_node->FirstNode("slot"); slot_node; slot_node = slot_node->NextSibling("slot"))
 						{
-							shader_desc::stream_output_decl decl;
+							ShaderDesc::StreamOutputDecl decl;
 
 							std::string usage_str = slot_node->Attrib("usage")->ValueString();
 							XMLAttributePtr attr = slot_node->Attrib("usage_index");
@@ -3631,20 +3735,86 @@ namespace KlayGE
 
 		for (int type = 0; type < ShaderObject::ST_NumShaderTypes; ++ type)
 		{
-			shader_desc& sd = effect_.GetShaderDesc((*shader_desc_ids_)[type]);
+			ShaderDesc& sd = effect_.GetShaderDesc((*shader_desc_ids_)[type]);
 			if (!sd.func_name.empty())
 			{
 				if (sd.tech_pass_type != 0xFFFFFFFF)
 				{
+					RenderTechniquePtr const & tech = effect_.TechniqueByIndex(sd.tech_pass_type >> 16);
+					RenderPassPtr const & pass = tech->Pass((sd.tech_pass_type >> 8) & 0xFF);
 					shader_obj_->AttachShader(static_cast<ShaderObject::ShaderType>(type),
-						effect_, effect_.TechniqueByIndex(sd.tech_pass_type >> 16)->Pass((sd.tech_pass_type >> 8) & 0xFF)->GetShaderObject());
+						effect_, *tech, *pass, pass->GetShaderObject());
 				}
 				else
 				{
+					RenderTechniquePtr const & tech = effect_.TechniqueByIndex(tech_index);
 					shader_obj_->AttachShader(static_cast<ShaderObject::ShaderType>(type),
-						effect_, *shader_desc_ids_);
+						effect_, *tech, *this, *shader_desc_ids_);
 					sd.tech_pass_type = (tech_index << 16) + (pass_index << 8) + type;
 				}
+			}
+		}
+
+		shader_obj_->LinkShaders(effect_);
+
+		is_validate_ = shader_obj_->Validate();
+	}
+
+	void RenderPass::Load(uint32_t tech_index, uint32_t pass_index, RenderPassPtr const & inherit_pass)
+	{
+		BOOST_ASSERT(inherit_pass);
+
+		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+
+		name_ = inherit_pass->name_;
+		annotations_ = inherit_pass->annotations_;
+		macros_ = inherit_pass->macros_;
+
+		uint64_t macros_hash;
+		{
+			RenderTechniquePtr const & tech = effect_.TechniqueByIndex(tech_index);
+
+			size_t hash_val = 0;
+			for (uint32_t i = 0; i < tech->NumMacros(); ++ i)
+			{
+				std::pair<std::string, std::string> const & name_value = tech->MacroByIndex(i);
+				boost::hash_range(hash_val, name_value.first.begin(), name_value.first.end());
+				boost::hash_range(hash_val, name_value.second.begin(), name_value.second.end());
+			}
+			for (uint32_t i = 0; i < this->NumMacros(); ++ i)
+			{
+				std::pair<std::string, std::string> const & name_value = this->MacroByIndex(i);
+				boost::hash_range(hash_val, name_value.first.begin(), name_value.first.end());
+				boost::hash_range(hash_val, name_value.second.begin(), name_value.second.end());
+			}
+			macros_hash = static_cast<uint64_t>(hash_val);
+		}
+
+		shader_obj_ = rf.MakeShaderObject();
+
+		shader_desc_ids_ = MakeSharedPtr<KLAYGE_DECLTYPE(*shader_desc_ids_)>();
+		shader_desc_ids_->resize(ShaderObject::ST_NumShaderTypes, 0);
+
+		rasterizer_state_obj_ = inherit_pass->rasterizer_state_obj_;
+		depth_stencil_state_obj_ = inherit_pass->depth_stencil_state_obj_;
+		blend_state_obj_ = inherit_pass->blend_state_obj_;
+		front_stencil_ref_ = inherit_pass->front_stencil_ref_;
+		back_stencil_ref_ = inherit_pass->back_stencil_ref_;
+		blend_factor_ = inherit_pass->blend_factor_;
+		sample_mask_ = inherit_pass->sample_mask_;
+
+		for (int type = 0; type < ShaderObject::ST_NumShaderTypes; ++ type)
+		{
+			ShaderDesc sd = effect_.GetShaderDesc((*inherit_pass->shader_desc_ids_)[type]);
+			if (!sd.func_name.empty())
+			{
+				sd.macros_hash = macros_hash;
+				sd.tech_pass_type = (tech_index << 16) + (pass_index << 8) + type;
+				(*shader_desc_ids_)[type] = effect_.AddShaderDesc(sd);
+				
+				RenderTechniquePtr const & tech = effect_.TechniqueByIndex(tech_index);
+				shader_obj_->AttachShader(static_cast<ShaderObject::ShaderType>(type),
+					effect_, *tech, *this, *shader_desc_ids_);
 			}
 		}
 
@@ -3674,6 +3844,22 @@ namespace KlayGE
 			(*annotations_)[i] = annotation;
 				
 			annotation->StreamOut(os);
+		}
+
+		uint8_t num_macro;
+		if (macros_)
+		{
+			num_macro = static_cast<uint8_t>(macros_->size());
+		}
+		else
+		{
+			num_macro = 0;
+		}
+		os.write(reinterpret_cast<char const *>(&num_macro), sizeof(num_macro));
+		for (uint32_t i = 0; i < num_macro; ++ i)
+		{
+			WriteShortString(os, (*macros_)[i].first);
+			WriteShortString(os, (*macros_)[i].second);
 		}
 
 		RasterizerStateDesc rs_desc = rasterizer_state_obj_->GetDesc();
@@ -3744,7 +3930,7 @@ namespace KlayGE
 		for (int type = 0; type < ShaderObject::ST_NumShaderTypes; ++ type)
 		{
 			ShaderObjectPtr shared_so;
-			shader_desc const & sd = effect_.GetShaderDesc((*shader_desc_ids_)[type]);
+			ShaderDesc const & sd = effect_.GetShaderDesc((*shader_desc_ids_)[type]);
 			if (!sd.func_name.empty())
 			{
 				if (sd.tech_pass_type == (tech_index << 16) + (pass_index << 8) + type)
@@ -3773,6 +3959,7 @@ namespace KlayGE
 
 		ret->name_ = name_;
 		ret->annotations_ = annotations_;
+		ret->macros_ = macros_;
 		ret->shader_desc_ids_ = shader_desc_ids_;
 
 		ret->rasterizer_state_obj_ = rasterizer_state_obj_;
@@ -4149,7 +4336,7 @@ namespace KlayGE
 		return *this;
 	}
 
-	RenderVariable& RenderVariable::operator=(shader_desc const & /*value*/)
+	RenderVariable& RenderVariable::operator=(ShaderDesc const & /*value*/)
 	{
 		BOOST_ASSERT(false);
 		return *this;
@@ -4334,7 +4521,7 @@ namespace KlayGE
 		BOOST_ASSERT(false);
 	}
 
-	void RenderVariable::Value(shader_desc& /*value*/) const
+	void RenderVariable::Value(ShaderDesc& /*value*/) const
 	{
 		BOOST_ASSERT(false);
 	}

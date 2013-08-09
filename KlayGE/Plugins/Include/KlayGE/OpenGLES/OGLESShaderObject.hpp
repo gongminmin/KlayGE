@@ -27,14 +27,17 @@ namespace KlayGE
 		OGLESShaderObject();
 		~OGLESShaderObject();
 
-		std::string GenShaderText(ShaderType type, RenderEffect const & effect);
+		std::string GenShaderText(ShaderType type, RenderEffect const & effect,
+			RenderTechnique const & tech, RenderPass const & pass);
 
 		bool AttachNativeShader(ShaderType type, RenderEffect const & effect, std::vector<uint32_t> const & shader_desc_ids,
 			std::vector<uint8_t> const & native_shader_block);
 		void ExtractNativeShader(ShaderType type, RenderEffect const & effect, std::vector<uint8_t>& native_shader_block);
 
-		void AttachShader(ShaderType type, RenderEffect const & effect, std::vector<uint32_t> const & shader_desc_ids);
-		void AttachShader(ShaderType type, RenderEffect const & effect, ShaderObjectPtr const & shared_so);
+		void AttachShader(ShaderType type, RenderEffect const & effect,
+			RenderTechnique const & tech, RenderPass const & pass, std::vector<uint32_t> const & shader_desc_ids);
+		void AttachShader(ShaderType type, RenderEffect const & effect,
+			RenderTechnique const & tech, RenderPass const & pass, ShaderObjectPtr const & shared_so);
 		void LinkShaders(RenderEffect const & effect);
 		ShaderObjectPtr Clone(RenderEffect const & effect);
 

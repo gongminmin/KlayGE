@@ -35,12 +35,14 @@ namespace KlayGE
 			native_shader_block.clear();
 		}
 
-		void AttachShader(ShaderType /*type*/, RenderEffect const & /*effect*/, std::vector<uint32_t> const & /*shader_desc_ids*/)
+		void AttachShader(ShaderType /*type*/, RenderEffect const & /*effect*/,
+			RenderTechnique const & /*tech*/, RenderPass const & /*pass*/, std::vector<uint32_t> const & /*shader_desc_ids*/)
 		{
 			is_validate_ = true;
 		}
 
-		void AttachShader(ShaderType /*type*/, RenderEffect const & /*effect*/, ShaderObjectPtr const & /*shared_so*/)
+		void AttachShader(ShaderType /*type*/, RenderEffect const & /*effect*/,
+			RenderTechnique const & /*tech*/, RenderPass const & /*pass*/, ShaderObjectPtr const & /*shared_so*/)
 		{
 			is_validate_ = true;
 		}

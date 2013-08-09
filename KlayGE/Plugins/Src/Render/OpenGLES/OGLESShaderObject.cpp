@@ -967,7 +967,8 @@ namespace KlayGE
 		glDeleteProgram(glsl_program_);
 	}
 
-	std::string OGLESShaderObject::GenShaderText(ShaderType type, RenderEffect const & effect)
+	std::string OGLESShaderObject::GenShaderText(ShaderType type, RenderEffect const & effect,
+			RenderTechnique const & tech, RenderPass const & pass)
 	{
 		std::stringstream shader_ss;
 
@@ -1153,6 +1154,20 @@ namespace KlayGE
 		for (uint32_t i = 0; i < effect.NumMacros(); ++ i)
 		{
 			std::pair<std::string, std::string> const & name_value = effect.MacroByIndex(i);
+			ss << "#define " << name_value.first << " " << name_value.second << std::endl;
+		}
+		ss << std::endl;
+
+		for (uint32_t i = 0; i < tech.NumMacros(); ++ i)
+		{
+			std::pair<std::string, std::string> const & name_value = tech.MacroByIndex(i);
+			ss << "#define " << name_value.first << " " << name_value.second << std::endl;
+		}
+		ss << std::endl;
+
+		for (uint32_t i = 0; i < pass.NumMacros(); ++ i)
+		{
+			std::pair<std::string, std::string> const & name_value = pass.MacroByIndex(i);
 			ss << "#define " << name_value.first << " " << name_value.second << std::endl;
 		}
 		ss << std::endl;
@@ -1584,11 +1599,12 @@ namespace KlayGE
 		}
 	}
 
-	void OGLESShaderObject::AttachShader(ShaderType type, RenderEffect const & effect, std::vector<uint32_t> const & shader_desc_ids)
+	void OGLESShaderObject::AttachShader(ShaderType type, RenderEffect const & effect,
+			RenderTechnique const & tech, RenderPass const & pass, std::vector<uint32_t> const & shader_desc_ids)
 	{
-		shader_desc const & sd = effect.GetShaderDesc(shader_desc_ids[type]);
-	
-		std::string shader_text = this->GenShaderText(type, effect);
+		ShaderDesc const & sd = effect.GetShaderDesc(shader_desc_ids[type]);
+
+		std::string shader_text = this->GenShaderText(type, effect, tech, pass);
 
 		is_shader_validate_[type] = true;
 
@@ -1614,7 +1630,8 @@ namespace KlayGE
 		}
 	}
 
-	void OGLESShaderObject::AttachShader(ShaderType type, RenderEffect const & /*effect*/, ShaderObjectPtr const & shared_so)
+	void OGLESShaderObject::AttachShader(ShaderType type, RenderEffect const & /*effect*/,
+			RenderTechnique const & /*tech*/, RenderPass const & /*pass*/, ShaderObjectPtr const & shared_so)
 	{
 		OGLESShaderObjectPtr so = checked_pointer_cast<OGLESShaderObject>(shared_so);
 

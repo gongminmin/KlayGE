@@ -1025,7 +1025,8 @@ namespace KlayGE
 		glDeleteProgram(glsl_program_);
 	}
 
-	std::string OGLShaderObject::GenShaderText(ShaderType type, RenderEffect const & effect)
+	std::string OGLShaderObject::GenShaderText(ShaderType type, RenderEffect const & effect,
+		RenderTechnique const & tech, RenderPass const & pass)
 	{
 		std::stringstream shader_ss;
 
@@ -1227,6 +1228,20 @@ namespace KlayGE
 		for (uint32_t i = 0; i < effect.NumMacros(); ++ i)
 		{
 			std::pair<std::string, std::string> const & name_value = effect.MacroByIndex(i);
+			ss << "#define " << name_value.first << " " << name_value.second << std::endl;
+		}
+		ss << std::endl;
+
+		for (uint32_t i = 0; i < tech.NumMacros(); ++ i)
+		{
+			std::pair<std::string, std::string> const & name_value = tech.MacroByIndex(i);
+			ss << "#define " << name_value.first << " " << name_value.second << std::endl;
+		}
+		ss << std::endl;
+
+		for (uint32_t i = 0; i < pass.NumMacros(); ++ i)
+		{
+			std::pair<std::string, std::string> const & name_value = pass.MacroByIndex(i);
 			ss << "#define " << name_value.first << " " << name_value.second << std::endl;
 		}
 		ss << std::endl;
@@ -1819,9 +1834,10 @@ namespace KlayGE
 		}
 	}
 
-	void OGLShaderObject::AttachShader(ShaderType type, RenderEffect const & effect, std::vector<uint32_t> const & shader_desc_ids)
+	void OGLShaderObject::AttachShader(ShaderType type, RenderEffect const & effect,
+			RenderTechnique const & tech, RenderPass const & pass, std::vector<uint32_t> const & shader_desc_ids)
 	{
-		shader_desc const & sd = effect.GetShaderDesc(shader_desc_ids[type]);
+		ShaderDesc const & sd = effect.GetShaderDesc(shader_desc_ids[type]);
 
 		OGLRenderFactory& rf = *checked_cast<OGLRenderFactory*>(&Context::Instance().RenderFactoryInstance());
 		RenderEngine& re = rf.RenderEngineInstance();
@@ -1863,7 +1879,7 @@ namespace KlayGE
 			standard_derivatives_str = ss.str();
 		}
 
-		std::string shader_text = this->GenShaderText(type, effect);
+		std::string shader_text = this->GenShaderText(type, effect, tech, pass);
 
 		std::vector<char const *> args;
 		args.push_back("-DKLAYGE_OPENGL=1");
@@ -2138,7 +2154,8 @@ namespace KlayGE
 		}
 	}
 
-	void OGLShaderObject::AttachShader(ShaderType type, RenderEffect const & /*effect*/, ShaderObjectPtr const & shared_so)
+	void OGLShaderObject::AttachShader(ShaderType type, RenderEffect const & /*effect*/,
+			RenderTechnique const & /*tech*/, RenderPass const & /*pass*/, ShaderObjectPtr const & shared_so)
 	{
 		OGLShaderObjectPtr so = checked_pointer_cast<OGLShaderObject>(shared_so);
 

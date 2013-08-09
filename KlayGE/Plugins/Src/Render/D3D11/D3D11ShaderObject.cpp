@@ -470,13 +470,28 @@ namespace KlayGE
 		is_shader_validate_.fill(true);
 	}
 
-	std::string D3D11ShaderObject::GenShaderText(RenderEffect const & effect, ShaderType cur_type) const
+	std::string D3D11ShaderObject::GenShaderText(ShaderType type, RenderEffect const & effect,
+		RenderTechnique const & tech, RenderPass const & pass) const
 	{
 		std::stringstream ss;
 
 		for (uint32_t i = 0; i < effect.NumMacros(); ++ i)
 		{
 			std::pair<std::string, std::string> const & name_value = effect.MacroByIndex(i);
+			ss << "#define " << name_value.first << " " << name_value.second << std::endl;
+		}
+		ss << std::endl;
+
+		for (uint32_t i = 0; i < tech.NumMacros(); ++ i)
+		{
+			std::pair<std::string, std::string> const & name_value = tech.MacroByIndex(i);
+			ss << "#define " << name_value.first << " " << name_value.second << std::endl;
+		}
+		ss << std::endl;
+
+		for (uint32_t i = 0; i < pass.NumMacros(); ++ i)
+		{
+			std::pair<std::string, std::string> const & name_value = pass.MacroByIndex(i);
 			ss << "#define " << name_value.first << " " << name_value.second << std::endl;
 		}
 		ss << std::endl;
@@ -723,7 +738,7 @@ namespace KlayGE
 		{
 			RenderShaderFunc const & effect_shader = effect.ShaderByIndex(i);
 			ShaderType shader_type = effect_shader.Type();
-			if ((ST_NumShaderTypes == shader_type) || (cur_type == shader_type))
+			if ((ST_NumShaderTypes == shader_type) || (type == shader_type))
 			{
 				if (caps.max_shader_model >= effect_shader.Version())
 				{
@@ -737,7 +752,7 @@ namespace KlayGE
 
 	std::string D3D11ShaderObject::GetShaderProfile(ShaderType type, RenderEffect const & effect, uint32_t shader_desc_id)
 	{
-		shader_desc const & sd = effect.GetShaderDesc(shader_desc_id);
+		ShaderDesc const & sd = effect.GetShaderDesc(shader_desc_id);
 		D3D11RenderEngine const & render_eng = *checked_cast<D3D11RenderEngine const *>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		RenderDeviceCaps const & caps = render_eng.DeviceCaps();
 		std::string shader_profile = sd.profile;
@@ -1082,7 +1097,8 @@ namespace KlayGE
 		}
 	}
 
-	shared_ptr<std::vector<uint8_t> > D3D11ShaderObject::CompiteToBytecode(ShaderType type, RenderEffect const & effect, std::vector<uint32_t> const & shader_desc_ids)
+	shared_ptr<std::vector<uint8_t> > D3D11ShaderObject::CompiteToBytecode(ShaderType type, RenderEffect const & effect,
+			RenderTechnique const & tech, RenderPass const & pass, std::vector<uint32_t> const & shader_desc_ids)
 	{
 #ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
 		D3D11RenderEngine const & render_eng = *checked_cast<D3D11RenderEngine const *>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
@@ -1126,9 +1142,9 @@ namespace KlayGE
 			standard_derivatives_str = ss.str();
 		}
 
-		shader_desc const & sd = effect.GetShaderDesc(shader_desc_ids[type]);
+		ShaderDesc const & sd = effect.GetShaderDesc(shader_desc_ids[type]);
 
-		std::string shader_text = this->GenShaderText(effect, static_cast<ShaderType>(type));
+		std::string shader_text = this->GenShaderText(static_cast<ShaderType>(type), effect, tech, pass);
 
 		is_shader_validate_[type] = true;
 
@@ -1508,7 +1524,7 @@ namespace KlayGE
 			ID3D11DevicePtr const & d3d_device = render_eng.D3DDevice();
 			RenderDeviceCaps const & caps = render_eng.DeviceCaps();
 
-			shader_desc const & sd = effect.GetShaderDesc(shader_desc_ids[type]);
+			ShaderDesc const & sd = effect.GetShaderDesc(shader_desc_ids[type]);
 
 			int shader_ver = ("auto" == sd.profile) ? 0 : sd.profile[3] - '0';
 			if (shader_ver > caps.max_shader_model)
@@ -1809,13 +1825,15 @@ namespace KlayGE
 		}
 	}
 
-	void D3D11ShaderObject::AttachShader(ShaderType type, RenderEffect const & effect, std::vector<uint32_t> const & shader_desc_ids)
+	void D3D11ShaderObject::AttachShader(ShaderType type, RenderEffect const & effect,
+			RenderTechnique const & tech, RenderPass const & pass, std::vector<uint32_t> const & shader_desc_ids)
 	{
-		shared_ptr<std::vector<uint8_t> > code_blob = this->CompiteToBytecode(type, effect, shader_desc_ids);
+		shared_ptr<std::vector<uint8_t> > code_blob = this->CompiteToBytecode(type, effect, tech, pass, shader_desc_ids);
 		this->AttachShaderBytecode(type, effect, shader_desc_ids, code_blob);
 	}
 
-	void D3D11ShaderObject::AttachShader(ShaderType type, RenderEffect const & /*effect*/, ShaderObjectPtr const & shared_so)
+	void D3D11ShaderObject::AttachShader(ShaderType type, RenderEffect const & /*effect*/,
+			RenderTechnique const & /*tech*/, RenderPass const & /*pass*/, ShaderObjectPtr const & shared_so)
 	{
 		D3D11RenderEngine const & render_eng = *checked_cast<D3D11RenderEngine const *>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		ID3D11DevicePtr const & d3d_device = render_eng.D3DDevice();

@@ -615,7 +615,7 @@ namespace KlayGE
 		}
 	}
 
-	D3D11_SO_DECLARATION_ENTRY D3D11Mapping::Mapping(shader_desc::stream_output_decl const & decl, uint8_t slot)
+	D3D11_SO_DECLARATION_ENTRY D3D11Mapping::Mapping(ShaderDesc::StreamOutputDecl const & decl, uint8_t slot)
 	{
 		D3D11_SO_DECLARATION_ENTRY ret;
 

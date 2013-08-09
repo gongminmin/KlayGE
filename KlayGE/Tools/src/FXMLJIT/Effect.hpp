@@ -143,7 +143,7 @@ namespace KlayGE
 		virtual RenderVariable& operator=(SamplerStateObjectPtr const & value);
 		virtual RenderVariable& operator=(GraphicsBufferPtr const & value);
 		virtual RenderVariable& operator=(std::string const & value);
-		virtual RenderVariable& operator=(shader_desc const & value);
+		virtual RenderVariable& operator=(ShaderDesc const & value);
 		virtual RenderVariable& operator=(std::vector<bool> const & value);
 		virtual RenderVariable& operator=(std::vector<uint32_t> const & value);
 		virtual RenderVariable& operator=(std::vector<int32_t> const & value);
@@ -178,7 +178,7 @@ namespace KlayGE
 		virtual void Value(SamplerStateObjectPtr& val) const;
 		virtual void Value(GraphicsBufferPtr& value) const;
 		virtual void Value(std::string& val) const;
-		virtual void Value(shader_desc& val) const;
+		virtual void Value(ShaderDesc& val) const;
 		virtual void Value(std::vector<bool>& val) const;
 		virtual void Value(std::vector<uint32_t>& val) const;
 		virtual void Value(std::vector<int32_t>& val) const;
@@ -291,7 +291,7 @@ namespace KlayGE
 	typedef RenderVariableConcrete<float4x4> RenderVariableFloat4x4;
 	typedef RenderVariableConcrete<SamplerStateObjectPtr> RenderVariableSampler;
 	typedef RenderVariableConcrete<std::string> RenderVariableString;
-	typedef RenderVariableConcrete<shader_desc> RenderVariableShader;
+	typedef RenderVariableConcrete<ShaderDesc> RenderVariableShader;
 	typedef RenderVariableConcrete<std::vector<bool> > RenderVariableBoolArray;
 	typedef RenderVariableConcrete<std::vector<uint32_t> > RenderVariableUIntArray;
 	typedef RenderVariableConcrete<std::vector<int32_t> > RenderVariableIntArray;
@@ -435,9 +435,9 @@ namespace KlayGE
 			return (*shaders_)[n];
 		}
 
-		uint32_t AddShaderDesc(shader_desc const & sd);
-		shader_desc& GetShaderDesc(uint32_t id);
-		shader_desc const & GetShaderDesc(uint32_t id) const;
+		uint32_t AddShaderDesc(ShaderDesc const & sd);
+		ShaderDesc& GetShaderDesc(uint32_t id);
+		ShaderDesc const & GetShaderDesc(uint32_t id) const;
 
 		uint32_t NumMacros() const
 		{
@@ -465,7 +465,7 @@ namespace KlayGE
 
 		RenderEffectPtr prototype_effect_;
 
-		shared_ptr<std::vector<shader_desc> > shader_descs_;
+		shared_ptr<std::vector<ShaderDesc> > shader_descs_;
 	};
 
 	class RenderTechnique : boost::noncopyable
@@ -501,6 +501,16 @@ namespace KlayGE
 		{
 			BOOST_ASSERT(n < this->NumAnnotations());
 			return (*annotations_)[n];
+		}
+
+		uint32_t NumMacros() const
+		{
+			return macros_ ? static_cast<uint32_t>(macros_->size()) : 0;
+		}
+		std::pair<std::string, std::string> const & MacroByIndex(uint32_t n) const
+		{
+			BOOST_ASSERT(n < this->NumMacros());
+			return (*macros_)[n];
 		}
 
 		uint32_t NumPasses() const
@@ -543,6 +553,7 @@ namespace KlayGE
 
 		std::vector<RenderPassPtr> passes_;
 		shared_ptr<std::vector<RenderEffectAnnotationPtr> > annotations_;
+		shared_ptr<std::vector<std::pair<std::string, std::string> > > macros_;
 
 		float weight_;
 		bool transparent_;
@@ -563,6 +574,7 @@ namespace KlayGE
 		}
 
 		void Load(XMLNodePtr const & node, uint32_t tech_index, uint32_t pass_index, RenderPassPtr const & inherit_pass);
+		void Load(uint32_t tech_index, uint32_t pass_index, RenderPassPtr const & inherit_pass);
 
 		void StreamOut(std::ostream& os, uint32_t tech_index, uint32_t pass_index,
 			std::vector<std::vector<uint8_t> > const & native_shader_blocks);
@@ -609,11 +621,22 @@ namespace KlayGE
 			return (*annotations_)[n];
 		}
 
+		uint32_t NumMacros() const
+		{
+			return macros_ ? static_cast<uint32_t>(macros_->size()) : 0;
+		}
+		std::pair<std::string, std::string> const & MacroByIndex(uint32_t n) const
+		{
+			BOOST_ASSERT(n < this->NumMacros());
+			return (*macros_)[n];
+		}
+
 	private:
 		RenderEffect& effect_;
 
 		shared_ptr<std::string> name_;
 		shared_ptr<std::vector<RenderEffectAnnotationPtr> > annotations_;
+		shared_ptr<std::vector<std::pair<std::string, std::string> > > macros_;
 		shared_ptr<std::vector<uint32_t> > shader_desc_ids_;
 
 		RasterizerStateObjectPtr rasterizer_state_obj_;

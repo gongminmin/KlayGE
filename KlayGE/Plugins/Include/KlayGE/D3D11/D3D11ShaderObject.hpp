@@ -92,14 +92,17 @@ namespace KlayGE
 	public:
 		D3D11ShaderObject();
 
-		std::string GenShaderText(RenderEffect const & effect, ShaderType cur_type) const;
+		std::string GenShaderText(ShaderType type, RenderEffect const & effect,
+			RenderTechnique const & tech, RenderPass const & pass) const;
 
 		bool AttachNativeShader(ShaderType type, RenderEffect const & effect, std::vector<uint32_t> const & shader_desc_ids,
 			std::vector<uint8_t> const & native_shader_block);
 		void ExtractNativeShader(ShaderType type, RenderEffect const & effect, std::vector<uint8_t>& native_shader_block);
 
-		void AttachShader(ShaderType type, RenderEffect const & effect, std::vector<uint32_t> const & shader_desc_ids);
-		void AttachShader(ShaderType type, RenderEffect const & effect, ShaderObjectPtr const & shared_so);
+		void AttachShader(ShaderType type, RenderEffect const & effect,
+			RenderTechnique const & tech, RenderPass const & pass, std::vector<uint32_t> const & shader_desc_ids);
+		void AttachShader(ShaderType type, RenderEffect const & effect,
+			RenderTechnique const & tech, RenderPass const & pass, ShaderObjectPtr const & shared_so);
 		void LinkShaders(RenderEffect const & effect);
 		ShaderObjectPtr Clone(RenderEffect const & effect);
 
@@ -128,7 +131,8 @@ namespace KlayGE
 		parameter_bind_t GetBindFunc(D3D11ShaderParameterHandle const & p_handle, RenderEffectParameterPtr const & param);
 
 		std::string GetShaderProfile(ShaderType type, RenderEffect const & effect, uint32_t shader_desc_id);
-		shared_ptr<std::vector<uint8_t> > CompiteToBytecode(ShaderType type, RenderEffect const & effect, std::vector<uint32_t> const & shader_desc_ids);
+		shared_ptr<std::vector<uint8_t> > CompiteToBytecode(ShaderType type, RenderEffect const & effect,
+			RenderTechnique const & tech, RenderPass const & pass, std::vector<uint32_t> const & shader_desc_ids);
 		void AttachShaderBytecode(ShaderType type, RenderEffect const & effect,
 			std::vector<uint32_t> const & shader_desc_ids, shared_ptr<std::vector<uint8_t> > const & code_blob);
 

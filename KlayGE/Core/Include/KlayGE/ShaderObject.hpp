@@ -26,34 +26,35 @@
 
 namespace KlayGE
 {
-	struct shader_desc
+	struct ShaderDesc
 	{
-		shader_desc()
-			: tech_pass_type(0xFFFFFFFF)
+		ShaderDesc()
+			: macros_hash(0), tech_pass_type(0xFFFFFFFF)
 		{
 		}
 
 		std::string profile;
 		std::string func_name;
+		uint64_t macros_hash;
 
 		uint32_t tech_pass_type;
 
 #ifdef KLAYGE_HAS_STRUCT_PACK
 		#pragma pack(push, 1)
 #endif
-		struct stream_output_decl
+		struct StreamOutputDecl
 		{
 			VertexElementUsage usage;
 			uint8_t usage_index;
 			uint8_t start_component;
 			uint8_t component_count;
 
-			friend bool operator==(stream_output_decl const & lhs, stream_output_decl const & rhs)
+			friend bool operator==(StreamOutputDecl const & lhs, StreamOutputDecl const & rhs)
 			{
 				return (lhs.usage == rhs.usage) && (lhs.usage_index == rhs.usage_index)
 					&& (lhs.start_component == rhs.start_component) && (lhs.component_count == rhs.component_count);
 			}
-			friend bool operator!=(stream_output_decl const & lhs, stream_output_decl const & rhs)
+			friend bool operator!=(StreamOutputDecl const & lhs, StreamOutputDecl const & rhs)
 			{
 				return !(lhs == rhs);
 			}
@@ -61,13 +62,14 @@ namespace KlayGE
 #ifdef KLAYGE_HAS_STRUCT_PACK
 		#pragma pack(pop)
 #endif
-		std::vector<stream_output_decl> so_decl;
+		std::vector<StreamOutputDecl> so_decl;
 
-		friend bool operator==(shader_desc const & lhs, shader_desc const & rhs)
+		friend bool operator==(ShaderDesc const & lhs, ShaderDesc const & rhs)
 		{
-			return (lhs.profile == rhs.profile) && (lhs.func_name == rhs.func_name) && (lhs.so_decl == rhs.so_decl);
+			return (lhs.profile == rhs.profile) && (lhs.func_name == rhs.func_name)
+				&& (lhs.macros_hash == rhs.macros_hash) && (lhs.so_decl == rhs.so_decl);
 		}
-		friend bool operator!=(shader_desc const & lhs, shader_desc const & rhs)
+		friend bool operator!=(ShaderDesc const & lhs, ShaderDesc const & rhs)
 		{
 			return !(lhs == rhs);
 		}
@@ -100,8 +102,10 @@ namespace KlayGE
 			std::vector<uint8_t> const & native_shader_block) = 0;
 		virtual void ExtractNativeShader(ShaderType type, RenderEffect const & effect, std::vector<uint8_t>& native_shader_block) = 0;
 
-		virtual void AttachShader(ShaderType type, RenderEffect const & effect, std::vector<uint32_t> const & shader_desc_ids) = 0;
-		virtual void AttachShader(ShaderType type, RenderEffect const & effect, ShaderObjectPtr const & shared_so) = 0;
+		virtual void AttachShader(ShaderType type, RenderEffect const & effect,
+			RenderTechnique const & tech, RenderPass const & pass, std::vector<uint32_t> const & shader_desc_ids) = 0;
+		virtual void AttachShader(ShaderType type, RenderEffect const & effect,
+			RenderTechnique const & tech, RenderPass const & pass, ShaderObjectPtr const & shared_so) = 0;
 		virtual void LinkShaders(RenderEffect const & effect) = 0;
 		virtual ShaderObjectPtr Clone(RenderEffect const & effect) = 0;
 
