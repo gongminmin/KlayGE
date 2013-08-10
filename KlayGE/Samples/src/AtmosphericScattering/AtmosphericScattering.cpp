@@ -235,7 +235,7 @@ void AtmosphericScatteringApp::OnResize(KlayGE::uint32_t width, KlayGE::uint32_t
 {
 	App3DFramework::OnResize(width, height);
 
-	UIManager::Instance().SettleCtrls(width, height);
+	UIManager::Instance().SettleCtrls();
 }
 
 void AtmosphericScatteringApp::LoadBeta(Color const & clr)

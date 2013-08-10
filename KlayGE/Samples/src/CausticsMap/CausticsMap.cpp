@@ -931,7 +931,7 @@ void CausticsMapApp::OnResize(uint32_t width, uint32_t height)
 {
 	App3DFramework::OnResize(width, height);
 
-	UIManager::Instance().SettleCtrls(width, height);
+	UIManager::Instance().SettleCtrls();
 
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 	RenderEngine& re = rf.RenderEngineInstance();

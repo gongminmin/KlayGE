@@ -1213,12 +1213,12 @@ namespace KlayGE
 		return elem_texture_rcs_[ctrl].size();
 	}
 
-	void UIManager::SettleCtrls(uint32_t width, uint32_t height)
+	void UIManager::SettleCtrls()
 	{
 		typedef KLAYGE_DECLTYPE(dialogs_) DialogsType;
 		KLAYGE_FOREACH(DialogsType::reference dialog, dialogs_)
 		{
-			dialog->SettleCtrls(width, height);
+			dialog->SettleCtrls();
 		}
 	}
 
@@ -1912,8 +1912,12 @@ namespace KlayGE
 		return id_location_[id];
 	}
 
-	void UIDialog::SettleCtrls(uint32_t width, uint32_t height)
+	void UIDialog::SettleCtrls()
 	{
+		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+		uint32_t width = re.ScreenFrameBuffer()->Width();
+		uint32_t height = re.ScreenFrameBuffer()->Height();
+
 		typedef KLAYGE_DECLTYPE(id_location_) IDLocationType;
 		KLAYGE_FOREACH(IDLocationType::reference id_loc, id_location_)
 		{

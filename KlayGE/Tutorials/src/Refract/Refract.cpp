@@ -333,7 +333,7 @@ void Refract::OnResize(uint32_t width, uint32_t height)
 		backface_depth_buffer_->Attach(FrameBuffer::ATT_DepthStencil, backface_ds_view);
 	}
 
-	UIManager::Instance().SettleCtrls(width, height);
+	UIManager::Instance().SettleCtrls();
 }
 
 void Refract::InputHandler(InputEngine const & /*sender*/, InputAction const & action)

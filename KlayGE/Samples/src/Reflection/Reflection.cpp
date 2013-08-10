@@ -278,7 +278,7 @@ void ScreenSpaceReflectionApp::OnResize(KlayGE::uint32_t width, KlayGE::uint32_t
 {
 	App3DFramework::OnResize(width, height);
 
-	UIManager::Instance().SettleCtrls(width, height);
+	UIManager::Instance().SettleCtrls();
 
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 	RenderEngine& re = rf.RenderEngineInstance();

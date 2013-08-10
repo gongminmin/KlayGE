@@ -1505,6 +1505,8 @@ namespace KlayGE
 #else
 		UNREF_PARAM(type);
 		UNREF_PARAM(effect);
+		UNREF_PARAM(tech);
+		UNREF_PARAM(pass);
 		UNREF_PARAM(shader_desc_ids);
 
 		return shared_ptr<std::vector<uint8_t> >();

@@ -563,7 +563,7 @@ void OrderIndependentTransparencyApp::OnResize(uint32_t width, uint32_t height)
 		checked_pointer_cast<PolygonObject>(polygon_)->BackgroundTex(opaque_bg_tex_);
 	}
 
-	UIManager::Instance().SettleCtrls(width, height);
+	UIManager::Instance().SettleCtrls();
 }
 
 void OrderIndependentTransparencyApp::InputHandler(InputEngine const & /*sender*/, InputAction const & action)

@@ -292,7 +292,9 @@ void InputCaps::InitObjects()
 
 void InputCaps::OnResize(uint32_t width, uint32_t height)
 {
-	UIManager::Instance().SettleCtrls(width, height);
+	App3DFramework::OnResize(width, height);
+
+	UIManager::Instance().SettleCtrls();
 }
 
 void InputCaps::InputHandler(InputEngine const & /*sender*/, InputAction const & action)

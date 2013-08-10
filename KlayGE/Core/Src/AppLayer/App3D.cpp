@@ -227,16 +227,11 @@ namespace KlayGE
 
 	void App3DFramework::MetroCreate()
 	{
-		ContextCfg cfg = Context::Instance().Config();
-		cfg.graphics_cfg.left = main_wnd_->Left();
-		cfg.graphics_cfg.top = main_wnd_->Top();
-		cfg.graphics_cfg.width = main_wnd_->Width();
-		cfg.graphics_cfg.height = main_wnd_->Height();
 #else
 	void App3DFramework::Create()
 	{
-		ContextCfg cfg = Context::Instance().Config();
 #endif
+		ContextCfg cfg = Context::Instance().Config();
 		Context::Instance().RenderFactoryInstance().RenderEngineInstance().CreateRenderWindow(name_,
 			cfg.graphics_cfg);
 		Context::Instance().Config(cfg);

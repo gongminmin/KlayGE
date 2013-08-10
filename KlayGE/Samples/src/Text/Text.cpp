@@ -120,7 +120,7 @@ void TextApp::OnResize(uint32_t width, uint32_t height)
 {
 	App3DFramework::OnResize(width, height);
 
-	UIManager::Instance().SettleCtrls(width, height);
+	UIManager::Instance().SettleCtrls();
 }
 
 void TextApp::InputHandler(InputEngine const & /*sender*/, InputAction const & action)

@@ -195,6 +195,9 @@
     <Image Include="..\..\media\Common\Assets\StoreLogo.png">
       <Filter>Resource Files</Filter>
     </Image>
+    <Image Include="..\..\media\DeferredRendering\fire.dds">
+      <Filter>Resource Files</Filter>
+    </Image>
   </ItemGroup>
   <ItemGroup>
     <AppxManifest Include="..\..\media\DeferredRendering\Package.appxmanifest" />
@@ -255,9 +258,6 @@
     <None Include="..\..\..\media\RenderFX\Copy2LightBuffer.kfx">
       <Filter>Resource Files</Filter>
     </None>
-    <None Include="..\..\..\media\RenderFX\CustomMipMap.kfx">
-      <Filter>Resource Files</Filter>
-    </None>
     <None Include="..\..\..\media\RenderFX\DeferredRendering.kfx">
       <Filter>Resource Files</Filter>
     </None>
@@ -271,9 +271,6 @@
       <Filter>Resource Files</Filter>
     </None>
     <None Include="..\..\..\media\RenderFX\RSM2VPLs.kfx">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="..\..\..\media\RenderFX\SetSubsplatStencil.kfx">
       <Filter>Resource Files</Filter>
     </None>
     <None Include="..\..\..\media\RenderFX\SkyBox.kfx">
@@ -291,16 +288,10 @@
     <None Include="..\..\..\media\RenderFX\TAA.kfx">
       <Filter>Resource Files</Filter>
     </None>
-    <None Include="..\..\..\media\RenderFX\Upsampling.kfx">
-      <Filter>Resource Files</Filter>
-    </None>
     <None Include="..\..\..\media\RenderFX\VPLsLighting.kfx">
       <Filter>Resource Files</Filter>
     </None>
     <None Include="..\..\..\media\PostProcessors\Copy2LightBuffer.ppml">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="..\..\..\media\PostProcessors\CustomMipMap.ppml">
       <Filter>Resource Files</Filter>
     </None>
     <None Include="..\..\..\media\PostProcessors\DepthToSM.ppml">
@@ -313,9 +304,6 @@
       <Filter>Resource Files</Filter>
     </None>
     <None Include="..\..\..\media\PostProcessors\TAA.ppml">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="..\..\..\media\PostProcessors\Upsampling.ppml">
       <Filter>Resource Files</Filter>
     </None>
     <None Include="..\..\..\media\Models\indirect_light_proxy.meshml.model_bin">
@@ -373,6 +361,18 @@
       <Filter>Resource Files</Filter>
     </None>
     <None Include="..\..\..\media\RenderFX\CascadedShadow.kfx">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\..\..\media\RenderFX\MultiRes.kfx">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\..\..\media\PostProcessors\MultiRes.ppml">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\..\media\DeferredRendering\Fire.psml">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\..\..\media\RenderFX\Particle.kfx">
       <Filter>Resource Files</Filter>
     </None>
   </ItemGroup>

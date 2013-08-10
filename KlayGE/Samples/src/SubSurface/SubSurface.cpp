@@ -246,7 +246,7 @@ void SubSurfaceApp::OnResize(uint32_t width, uint32_t height)
 		checked_pointer_cast<ModelObject>(model_)->BackFaceDepthTex(back_face_depth_tex_);
 	}
 
-	UIManager::Instance().SettleCtrls(width, height);
+	UIManager::Instance().SettleCtrls();
 }
 
 void SubSurfaceApp::InputHandler(InputEngine const & /*sender*/, InputAction const & action)

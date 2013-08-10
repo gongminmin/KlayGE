@@ -924,7 +924,7 @@ void MotionBlurDoFApp::OnResize(uint32_t width, uint32_t height)
 	motion_blur_->InputPin(2, motion_vec_tex_);
 	motion_blur_copy_pp_->InputPin(0, dof_tex_);
 
-	UIManager::Instance().SettleCtrls(width, height);
+	UIManager::Instance().SettleCtrls();
 }
 
 void MotionBlurDoFApp::InputHandler(InputEngine const & /*sender*/, InputAction const & action)

@@ -953,7 +953,7 @@ void OceanApp::OnResize(uint32_t width, uint32_t height)
 	light_shaft_pp_->InputPin(0, deferred_rendering_->CurrFrameShadingTex(0));
 	light_shaft_pp_->InputPin(1, deferred_rendering_->CurrFrameDepthTex(0));
 
-	UIManager::Instance().SettleCtrls(width, height);
+	UIManager::Instance().SettleCtrls();
 }
 
 void OceanApp::InputHandler(InputEngine const & /*sender*/, InputAction const & action)

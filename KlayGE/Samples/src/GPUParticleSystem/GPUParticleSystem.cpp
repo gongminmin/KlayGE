@@ -817,7 +817,7 @@ void GPUParticleSystemApp::OnResize(uint32_t width, uint32_t height)
 
 	blend_pp_->InputPin(0, scene_tex_);
 
-	UIManager::Instance().SettleCtrls(width, height);
+	UIManager::Instance().SettleCtrls();
 }
 
 void GPUParticleSystemApp::InputHandler(InputEngine const & /*sender*/, InputAction const & action)

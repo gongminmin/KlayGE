@@ -424,7 +424,7 @@ namespace KlayGE
 		Rect_T<int32_t> const & ElementTextureRect(uint32_t ctrl, uint32_t elem_index);
 		size_t NumElementTextureRect(uint32_t ctrl) const;
 
-		void SettleCtrls(uint32_t width, uint32_t height);
+		void SettleCtrls();
 
 		bool MouseOnUI() const
 		{
@@ -493,7 +493,7 @@ namespace KlayGE
 		void CtrlLocation(int id, ControlLocation const & loc);
 		ControlLocation const & CtrlLocation(int id);
 
-		void SettleCtrls(uint32_t width, uint32_t height);
+		void SettleCtrls();
 
 		void AddControl(UIControlPtr const & control);
 		void InitControl(UIControl& control);

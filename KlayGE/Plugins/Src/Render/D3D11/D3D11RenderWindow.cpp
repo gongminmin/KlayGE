@@ -52,8 +52,6 @@ namespace KlayGE
 	{
 		// Store info
 		name_				= name;
-		width_				= settings.width;
-		height_				= settings.height;
 		isFullScreen_		= settings.full_screen;
 		sync_interval_		= settings.sync_interval;
 
@@ -85,11 +83,15 @@ namespace KlayGE
 		{
 			left_ = 0;
 			top_ = 0;
+			width_ = settings.width;
+			height_ = settings.height;
 		}
 		else
 		{
 			top_ = settings.top;
 			left_ = settings.left;
+			width_ = main_wnd->Width();
+			height_ = main_wnd->Height();
 		}
 
 		back_buffer_format_ = D3D11Mapping::MappingFormat(format);

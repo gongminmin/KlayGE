@@ -321,7 +321,7 @@ void DeferredRenderingApp::OnResize(uint32_t width, uint32_t height)
 	debug_pp_->InputPin(2, deferred_rendering_->LightingTex(0));
 	debug_pp_->InputPin(3, deferred_rendering_->SmallSSVOTex(0));
 
-	UIManager::Instance().SettleCtrls(width, height);
+	UIManager::Instance().SettleCtrls();
 }
 
 void DeferredRenderingApp::InputHandler(InputEngine const & /*sender*/, InputAction const & action)

@@ -212,7 +212,7 @@ void PostProcessingApp::OnResize(uint32_t width, uint32_t height)
 
 	old_fashion_->InputPin(0, color_tex_);
 
-	UIManager::Instance().SettleCtrls(width, height);
+	UIManager::Instance().SettleCtrls();
 }
 
 void PostProcessingApp::InputHandler(InputEngine const & /*sender*/, InputAction const & action)

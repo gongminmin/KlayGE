@@ -370,7 +370,7 @@ void ParticleEditorApp::OnResize(uint32_t width, uint32_t height)
 		ps_->SceneDepthTexture(scene_depth_tex_);
 	}
 
-	UIManager::Instance().SettleCtrls(width, height);
+	UIManager::Instance().SettleCtrls();
 }
 
 void ParticleEditorApp::InputHandler(InputEngine const & /*sender*/, InputAction const & action)

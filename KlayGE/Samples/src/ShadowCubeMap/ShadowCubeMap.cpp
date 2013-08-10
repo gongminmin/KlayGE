@@ -672,7 +672,7 @@ void ShadowCubeMap::OnResize(uint32_t width, uint32_t height)
 {
 	App3DFramework::OnResize(width, height);
 
-	UIManager::Instance().SettleCtrls(width, height);
+	UIManager::Instance().SettleCtrls();
 }
 
 void ShadowCubeMap::InputHandler(InputEngine const & /*sender*/, InputAction const & action)

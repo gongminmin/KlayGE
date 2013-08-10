@@ -335,7 +335,7 @@ void JudaTexViewer::OnResize(uint32_t width, uint32_t height)
 {
 	App3DFramework::OnResize(width, height);
 
-	UIManager::Instance().SettleCtrls(width, height);
+	UIManager::Instance().SettleCtrls();
 }
 
 void JudaTexViewer::InputHandler(InputEngine const & /*sender*/, InputAction const & action)
