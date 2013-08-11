@@ -260,7 +260,7 @@ namespace KlayGE
 		int ppaa_enabled_;
 		bool gamma_enabled_;
 		bool color_grading_enabled_;
-		PostProcessPtr resize_pp_;
+		PostProcessPtr resize_pps_[2];
 		PostProcessPtr stereoscopic_pp_;
 		int fb_stage_;
 

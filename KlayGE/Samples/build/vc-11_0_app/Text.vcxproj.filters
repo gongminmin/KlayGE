@@ -129,6 +129,12 @@
     <None Include="..\..\..\media\RenderFX\PostToneMapping.kfx">
       <Filter>Resource Files</Filter>
     </None>
+    <None Include="..\..\..\media\RenderFX\Resizer.kfx">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\..\..\media\PostProcessors\Resizer.ppml">
+      <Filter>Resource Files</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Text Include="..\..\media\Text\text.txt">

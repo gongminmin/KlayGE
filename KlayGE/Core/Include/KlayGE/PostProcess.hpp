@@ -400,6 +400,19 @@ namespace KlayGE
 
 		using PostProcessChain::InputPin;
 	};
+
+
+	class KLAYGE_CORE_API BicubicFilteringPostProcess : public PostProcessChain
+	{
+	public:
+		BicubicFilteringPostProcess();
+
+		virtual void InputPin(uint32_t index, TexturePtr const & tex) KLAYGE_OVERRIDE;
+		using PostProcess::InputPin;
+
+		virtual void SetParam(uint32_t index, float2 const & value) KLAYGE_OVERRIDE;
+		using PostProcess::SetParam;
+	};
 }
 
 #endif		// _POSTPROCESS_HPP

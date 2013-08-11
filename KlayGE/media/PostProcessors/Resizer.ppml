@@ -1,0 +1,41 @@
+<?xml version='1.0'?>
+
+<post_processors>
+	<post_processor name="bilinear">
+		<params>
+			<param name="pos_scale"/>
+		</params>
+		<input>
+			<pin name="src_tex"/>
+		</input>
+		<output>
+			<pin name="output"/>
+		</output>
+		<shader effect="Resizer.fxml" tech="Bilinear"/>
+	</post_processor>
+	
+	<post_processor name="bicubic_x">
+		<params>
+			<param name="pos_scale"/>
+		</params>
+		<input>
+			<pin name="src_tex"/>
+		</input>
+		<output>
+			<pin name="output"/>
+		</output>
+		<shader effect="Resizer.fxml" tech="BicubicX"/>
+	</post_processor>
+	<post_processor name="bicubic_y">
+		<params>
+			<param name="pos_scale"/>
+		</params>
+		<input>
+			<pin name="src_tex"/>
+		</input>
+		<output>
+			<pin name="output"/>
+		</output>
+		<shader effect="Resizer.fxml" tech="BicubicY"/>
+	</post_processor>
+</post_processors>

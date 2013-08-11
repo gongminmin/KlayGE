@@ -1,0 +1,97 @@
+<?xml version='1.0'?>
+
+<effect>
+	<include name="PostProcess.fxml"/>
+
+	<parameter type="sampler" name="point_sampler">
+		<state name="filtering" value="min_mag_mip_point"/>
+		<state name="address_u" value="clamp"/>
+		<state name="address_v" value="clamp"/>
+	</parameter>
+	<parameter type="sampler" name="bilinear_sampler">
+		<state name="filtering" value="min_mag_linear_mip_point"/>
+		<state name="address_u" value="clamp"/>
+		<state name="address_v" value="clamp"/>
+	</parameter>
+
+	<parameter type="texture2D" name="src_tex"/>
+
+	<parameter type="float2" name="pos_scale"/>
+	<parameter type="float4" name="width_height"/>
+
+	<shader>
+		<![CDATA[
+void ScalingVS(float4 pos : POSITION,
+		out float2 oTex : TEXCOORD0,
+		out float4 oPos : SV_Position)
+{
+	oTex = TexCoordFromPos(pos);
+	oPos = float4(pos.xy * pos_scale, 1, 1);
+}
+
+float4 BilinearPS(float2 tc0 : TEXCOORD0) : SV_Target
+{
+	return src_tex.Sample(bilinear_sampler, tc0);
+}
+
+float4 CubicInterpolate(float4x4 p, float x)
+{
+	return p[1] + 0.5f * x * (p[2] - p[0] + x * (2 * p[0] - 5 * p[1] + 4 * p[2] - p[3] + x * (3 * (p[1] - p[2]) + p[3] - p[0])));
+}
+
+float4 BicubicXPS(float2 tc0 : TEXCOORD0) : SV_Target
+{
+	float2 xy = tc0 * width_height.xy;
+	int2 offset = (frac(xy) < 0.5f) ? -1 : 0;
+	float4x4 texels;
+	texels[0] = src_tex.Sample(point_sampler, float2(tc0.x + (-1 + offset.x) * width_height.z, tc0.y));
+	texels[1] = src_tex.Sample(point_sampler, float2(tc0.x + (+0 + offset.x) * width_height.z, tc0.y));
+	texels[2] = src_tex.Sample(point_sampler, float2(tc0.x + (+1 + offset.x) * width_height.z, tc0.y));
+	texels[3] = src_tex.Sample(point_sampler, float2(tc0.x + (+2 + offset.x) * width_height.z, tc0.y));
+	return CubicInterpolate(texels, frac(xy.x) - 0.5f - offset.x);
+}
+
+float4 BicubicYPS(float2 tc0 : TEXCOORD0) : SV_Target
+{
+	float2 xy = tc0 * width_height.xy;
+	int2 offset = (frac(xy) < 0.5f) ? -1 : 0;
+	float4x4 texels;
+	texels[0] = src_tex.Sample(point_sampler, float2(tc0.x, tc0.y + (-1 + offset.y) * width_height.w));
+	texels[1] = src_tex.Sample(point_sampler, float2(tc0.x, tc0.y + (+0 + offset.y) * width_height.w));
+	texels[2] = src_tex.Sample(point_sampler, float2(tc0.x, tc0.y + (+1 + offset.y) * width_height.w));
+	texels[3] = src_tex.Sample(point_sampler, float2(tc0.x, tc0.y + (+2 + offset.y) * width_height.w));
+	return CubicInterpolate(texels, frac(xy.y) - 0.5f - offset.y);
+}
+		]]>
+	</shader>
+
+	<technique name="Bilinear">
+		<pass name="p0">
+			<state name="depth_enable" value="false"/>
+			<state name="depth_write_mask" value="false"/>
+
+			<state name="vertex_shader" value="ScalingVS()"/>
+			<state name="pixel_shader" value="BilinearPS()"/>
+		</pass>
+	</technique>
+
+	<technique name="BicubicX">
+		<pass name="p0">
+			<state name="depth_enable" value="false"/>
+			<state name="depth_write_mask" value="false"/>
+
+			<state name="vertex_shader" value="ScalingVS()"/>
+			<state name="pixel_shader" value="BicubicXPS()"/>
+		</pass>
+	</technique>
+
+	<technique name="BicubicY">
+		<pass name="p0">
+			<state name="depth_enable" value="false"/>
+			<state name="depth_write_mask" value="false"/>
+
+			<state name="vertex_shader" value="ScalingVS()"/>
+			<state name="pixel_shader" value="BicubicYPS()"/>
+		</pass>
+	</technique>
+</effect>

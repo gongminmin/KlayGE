@@ -136,6 +136,7 @@ SET(RENDERING_EFFECT_FILES
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/PostToneMapping.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/Quaternion.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/RenderableHelper.fxml
+	${KLAYGE_PROJECT_DIR}/media/RenderFX/Resizer.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/RSM2VPLs.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/SkyBox.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/Sort.fxml
@@ -165,6 +166,7 @@ SET(RENDERING_POSTPROCESSOR_FILES
 	${KLAYGE_PROJECT_DIR}/media/PostProcessors/LightShaft.ppml
 	${KLAYGE_PROJECT_DIR}/media/PostProcessors/MultiRes.ppml
 	${KLAYGE_PROJECT_DIR}/media/PostProcessors/PostToneMapping.ppml
+	${KLAYGE_PROJECT_DIR}/media/PostProcessors/Resizer.ppml
 	${KLAYGE_PROJECT_DIR}/media/PostProcessors/RSM2VPLs.ppml
 	${KLAYGE_PROJECT_DIR}/media/PostProcessors/SAT.ppml
 	${KLAYGE_PROJECT_DIR}/media/PostProcessors/Sort.ppml

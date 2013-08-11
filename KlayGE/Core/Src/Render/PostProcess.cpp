@@ -1437,4 +1437,56 @@ namespace KlayGE
 		*blur_factor_ep_ = f;
 		*sharpness_factor_ep_ = f;
 	}
+
+
+	BicubicFilteringPostProcess::BicubicFilteringPostProcess()
+		: PostProcessChain(L"BicubicFiltering")
+	{
+		this->Append(SyncLoadPostProcess("Resizer.ppml", "bicubic_x"));
+		this->Append(SyncLoadPostProcess("Resizer.ppml", "bicubic_y"));
+	}
+
+	void BicubicFilteringPostProcess::InputPin(uint32_t index, TexturePtr const & tex)
+	{
+		pp_chain_[0]->InputPin(index, tex);
+
+		if (0 == index)
+		{
+			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+			RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+			FrameBufferPtr const & fb = re.CurFrameBuffer();
+
+			uint32_t const tex_width = tex->Width(0);
+			uint32_t const tex_height = tex->Height(0);
+
+			float const scale_x = static_cast<float>(fb->Width()) / tex_width;
+			float const scale_y = static_cast<float>(fb->Height()) / tex_height;
+
+			uint32_t x_width;
+			if (scale_x < scale_y)
+			{
+				x_width = fb->Width();
+			}
+			else
+			{
+				x_width = static_cast<uint32_t>(scale_y * tex_width + 0.5f);
+			}
+			uint32_t x_height = tex->Height(0);
+
+			TexturePtr blur_x = rf.MakeTexture2D(x_width, x_height, 1, 1, tex->Format(),
+					1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
+			pp_chain_[0]->OutputPin(0, blur_x);
+			pp_chain_[1]->InputPin(0, blur_x);
+		}
+		else
+		{
+			pp_chain_[1]->InputPin(index, tex);
+		}
+	}
+
+	void BicubicFilteringPostProcess::SetParam(uint32_t index, float2 const & value)
+	{
+		pp_chain_[0]->SetParam(index, float2(1, 1));
+		pp_chain_[1]->SetParam(index, value);
+	}
 }

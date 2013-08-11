@@ -203,7 +203,8 @@ namespace KlayGE
 
 		if ((render_width != screen_width) || (render_height != screen_height))
 		{
-			resize_pp_ = SyncLoadPostProcess("Copy.ppml", "bilinear_copy");
+			resize_pps_[0] = SyncLoadPostProcess("Resizer.ppml", "bilinear");
+			resize_pps_[1] = MakeSharedPtr<BicubicFilteringPostProcess>();
 		}
 
 		for (int i = 0; i < 4; ++ i)
@@ -214,7 +215,7 @@ namespace KlayGE
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
 		RenderViewPtr ds_view;
-		if (hdr_pp_ || ldr_pp_ || resize_pp_ || (settings.stereo_method != STM_None))
+		if (hdr_pp_ || ldr_pp_ || resize_pps_[0] || (settings.stereo_method != STM_None))
 		{
 			if (caps.texture_format_support(EF_D24S8) || caps.texture_format_support(EF_D16))
 			{
@@ -289,7 +290,7 @@ namespace KlayGE
 		}
 		else
 		{
-			if (resize_pp_)
+			if (resize_pps_[0])
 			{
 				resize_frame_buffer_ = rf.MakeFrameBuffer();
 				resize_frame_buffer_->GetViewport()->camera = cur_frame_buffer_->GetViewport()->camera;
@@ -550,7 +551,7 @@ namespace KlayGE
 		}
 		else
 		{
-			if (resize_pp_)
+			if (resize_pps_[0])
 			{
 				ElementFormat fmt = resize_tex_->Format();
 				resize_tex_ = rf.MakeTexture2D(width, height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
@@ -624,9 +625,29 @@ namespace KlayGE
 
 		fb_stage_ = 3;
 
-		if ((STM_None == stereo_method_) && resize_pp_)
+		if ((STM_None == stereo_method_) && resize_pps_[0])
 		{
-			resize_pp_->Apply();
+			uint32_t const screen_width = screen_frame_buffer_->Width();
+			uint32_t const screen_height = screen_frame_buffer_->Height();
+			uint32_t const render_width = resize_frame_buffer_->Width();
+			uint32_t const render_height = resize_frame_buffer_->Height();
+
+			float const scale_x = static_cast<float>(screen_width) / render_width;
+			float const scale_y = static_cast<float>(screen_height) / render_height;
+
+			if (!MathLib::equal(scale_x, scale_y))
+			{
+				this->DefaultFrameBuffer()->Attached(FrameBuffer::ATT_Color0)->ClearColor(Color(0, 0, 0, 0));
+			}
+
+			if ((scale_x > 2) || (scale_y > 2))
+			{
+				resize_pps_[1]->Apply();
+			}
+			else
+			{
+				resize_pps_[0]->Apply();
+			}
 		}
 
 		this->DefaultFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->ClearDepth(1.0f);
@@ -788,9 +809,12 @@ namespace KlayGE
 		}
 		else
 		{
-			if (resize_pp_)
+			if (resize_pps_[0])
 			{
-				resize_pp_->OutputPin(0, TexturePtr());
+				for (size_t i = 0; i < 2; ++ i)
+				{
+					resize_pps_[i]->OutputPin(0, TexturePtr());
+				}
 			}
 			if (ldr_pp_)
 			{
@@ -806,7 +830,7 @@ namespace KlayGE
 			}
 		}
 
-		if (resize_pp_)
+		if (resize_pps_[0])
 		{
 			if (ldr_pp_)
 			{
@@ -816,7 +840,31 @@ namespace KlayGE
 				}
 			}
 
-			resize_pp_->InputPin(0, resize_tex_);
+			uint32_t const screen_width = screen_frame_buffer_->Width();
+			uint32_t const screen_height = screen_frame_buffer_->Height();
+			uint32_t const render_width = resize_frame_buffer_->Width();
+			uint32_t const render_height = resize_frame_buffer_->Height();
+
+			float const scale_x = static_cast<float>(screen_width) / render_width;
+			float const scale_y = static_cast<float>(screen_height) / render_height;
+
+			float2 pos_scale;
+			if (scale_x < scale_y)
+			{
+				pos_scale.x() = 1;
+				pos_scale.y() = (scale_x * render_height) / screen_height;
+			}
+			else
+			{
+				pos_scale.x() = (scale_y * render_width) / screen_width;
+				pos_scale.y() = 1;
+			}
+
+			for (size_t i = 0; i < 2; ++ i)
+			{
+				resize_pps_[i]->SetParam(0, pos_scale);
+				resize_pps_[i]->InputPin(0, resize_tex_);
+			}
 		}
 
 		if (ldr_pp_)

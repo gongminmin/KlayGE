@@ -195,9 +195,6 @@
     <Image Include="..\..\media\Common\Assets\StoreLogo.png">
       <Filter>Resource Files</Filter>
     </Image>
-    <Image Include="..\..\media\DeferredRendering\fire.dds">
-      <Filter>Resource Files</Filter>
-    </Image>
   </ItemGroup>
   <ItemGroup>
     <AppxManifest Include="..\..\media\DeferredRendering\Package.appxmanifest" />
@@ -373,6 +370,13 @@
       <Filter>Resource Files</Filter>
     </None>
     <None Include="..\..\..\media\RenderFX\Particle.kfx">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\..\media\DeferredRendering\fire.dds" />
+    <None Include="..\..\..\media\PostProcessors\Resizer.ppml">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\..\..\media\RenderFX\Resizer.kfx">
       <Filter>Resource Files</Filter>
     </None>
   </ItemGroup>
