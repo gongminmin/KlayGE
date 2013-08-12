@@ -38,17 +38,11 @@ IF(MSVC)
 		debug libogg_static_d optimized libogg_static
 		debug libvorbis_static_d optimized libvorbis_static
 		debug libvorbisfile_static_d optimized libvorbisfile_static)
-ELSEIF(MINGW)
-	SET(EXTRA_LINKED_LIBRARIES
-		debug KlayGE_Core_${KLAYGE_COMPILER_NAME}_d optimized KlayGE_Core_${KLAYGE_COMPILER_NAME}
-		debug KFL_${KLAYGE_COMPILER_NAME}_${KLAYGE_ARCH_NAME}_d optimized KFL_${KLAYGE_COMPILER_NAME}_${KLAYGE_ARCH_NAME}
-		debug boost_system-mgw47-mt-d-1_53 optimized boost_system-mgw47-mt-1_53
-		vorbisfile_static vorbis_static ogg_static)
 ELSE()
 	SET(EXTRA_LINKED_LIBRARIES
 		debug KlayGE_Core_${KLAYGE_COMPILER_NAME}_d optimized KlayGE_Core_${KLAYGE_COMPILER_NAME}
 		debug KFL_${KLAYGE_COMPILER_NAME}_${KLAYGE_ARCH_NAME}_d optimized KFL_${KLAYGE_COMPILER_NAME}_${KLAYGE_ARCH_NAME}
-		boost_system
+		debug boost_system-${KLAYGE_COMPILER_NAME}${GCC_VER}-mt-d-${BOOST_VER} optimized boost_system-${KLAYGE_COMPILER_NAME}${GCC_VER}-mt-${BOOST_VER}
 		vorbisfile_static vorbis_static ogg_static)
 ENDIF()
 

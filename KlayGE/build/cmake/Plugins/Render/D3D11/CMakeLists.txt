@@ -93,12 +93,7 @@ ELSE()
 	SET(EXTRA_LINKED_LIBRARIES
 		debug KlayGE_Core_${KLAYGE_COMPILER_NAME}_d optimized KlayGE_Core_${KLAYGE_COMPILER_NAME}
 		debug KFL_${KLAYGE_COMPILER_NAME}_${KLAYGE_ARCH_NAME}_d optimized KFL_${KLAYGE_COMPILER_NAME}_${KLAYGE_ARCH_NAME}
-		debug boost_system-mgw47-mt-d-1_53 optimized boost_system-mgw47-mt-1_53)
-ELSE()
-	SET(EXTRA_LINKED_LIBRARIES
-		debug KlayGE_Core_${KLAYGE_COMPILER_NAME}_d optimized KlayGE_Core_${KLAYGE_COMPILER_NAME}
-		debug KFL_${KLAYGE_COMPILER_NAME}_${KLAYGE_ARCH_NAME}_d optimized KFL_${KLAYGE_COMPILER_NAME}_${KLAYGE_ARCH_NAME}
-		boost_system)
+		debug boost_system-${KLAYGE_COMPILER_NAME}${GCC_VER}-mt-d-${BOOST_VER} optimized boost_system-${KLAYGE_COMPILER_NAME}${GCC_VER}-mt-${BOOST_VER})
 ENDIF()
 
 SET_TARGET_PROPERTIES(${LIB_NAME} PROPERTIES

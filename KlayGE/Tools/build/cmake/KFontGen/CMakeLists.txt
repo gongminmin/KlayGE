@@ -17,16 +17,11 @@ IF(MSVC)
 		debug freetype2411_D optimized freetype2411
 		debug kfont_${KLAYGE_COMPILER_NAME}_${KLAYGE_ARCH_NAME}${CMAKE_DEBUG_POSTFIX} optimized kfont_${KLAYGE_COMPILER_NAME}_${KLAYGE_ARCH_NAME}
 	)
-ELSEIF(MINGW)
-	SET(EXTRA_LINKED_LIBRARIES ${EXTRA_LINKED_LIBRARIES}
-		freetype2411
-		debug kfont_${KLAYGE_COMPILER_NAME}_${KLAYGE_ARCH_NAME}${CMAKE_DEBUG_POSTFIX} optimized kfont_${KLAYGE_COMPILER_NAME}_${KLAYGE_ARCH_NAME}
-		debug boost_program_options-mgw47-mt-d-1_53 optimized boost_program_options-mgw47-mt-1_53)
 ELSE()
 	SET(EXTRA_LINKED_LIBRARIES ${EXTRA_LINKED_LIBRARIES}
 		freetype2411
 		debug kfont_${KLAYGE_COMPILER_NAME}_${KLAYGE_ARCH_NAME}${CMAKE_DEBUG_POSTFIX} optimized kfont_${KLAYGE_COMPILER_NAME}_${KLAYGE_ARCH_NAME}
-		boost_program_options)
+		debug boost_program_options-${KLAYGE_COMPILER_NAME}${GCC_VER}-mt-d-${BOOST_VER} optimized boost_program_options-${KLAYGE_COMPILER_NAME}${GCC_VER}-mt-${BOOST_VER})
 ENDIF()
 
 SETUP_TOOL(KFontGen)

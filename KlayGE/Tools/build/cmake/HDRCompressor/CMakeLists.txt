@@ -4,12 +4,9 @@ SET(SOURCE_FILES
 
 IF(MSVC)
 	SET(EXTRA_LINKED_LIBRARIES "")
-ELSEIF(MINGW)
-	SET(EXTRA_LINKED_LIBRARIES 
-		debug boost_filesystem-mgw47-mt-d-1_53 optimized boost_filesystem-mgw47-mt-1_53)
 ELSE()
-	SET(EXTRA_LINKED_LIBRARIES
-		boost_filesystem)
+	SET(EXTRA_LINKED_LIBRARIES 
+		debug boost_filesystem-${KLAYGE_COMPILER_NAME}${GCC_VER}-mt-d-${BOOST_VER} optimized boost_filesystem-${KLAYGE_COMPILER_NAME}${GCC_VER}-mt-${BOOST_VER})
 ENDIF()
 			
 SETUP_TOOL(HDRCompressor)
