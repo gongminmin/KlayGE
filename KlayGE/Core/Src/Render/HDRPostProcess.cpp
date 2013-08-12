@@ -86,6 +86,12 @@ namespace KlayGE
 	SumLumLogPostProcess::SumLumLogPostProcess()
 			: SumLumPostProcess(SyncLoadRenderEffect("SumLum.fxml")->TechniqueByName("SumLumLog"))
 	{
+		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+		RenderDeviceCaps const & caps = rf.RenderEngineInstance().DeviceCaps();
+		if (!caps.rendertarget_format_support(EF_R16F, 1, 0))
+		{
+			this->Technique(technique_->Effect().TechniqueByName("SumLumLogPack"));
+		}
 	}
 
 
@@ -110,6 +116,12 @@ namespace KlayGE
 	SumLumIterativePostProcess::SumLumIterativePostProcess()
 			: SumLumPostProcess(SyncLoadRenderEffect("SumLum.fxml")->TechniqueByName("SumLumIterative"))
 	{
+		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+		RenderDeviceCaps const & caps = rf.RenderEngineInstance().DeviceCaps();
+		if (!caps.rendertarget_format_support(EF_R16F, 1, 0))
+		{
+			this->Technique(technique_->Effect().TechniqueByName("SumLumIterativePack"));
+		}
 	}
 
 
@@ -261,19 +273,25 @@ namespace KlayGE
 	void ImageStatPostProcess::InputPin(uint32_t index, TexturePtr const & tex)
 	{
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+		RenderDeviceCaps const & caps = rf.RenderEngineInstance().DeviceCaps();
 
 		std::vector<TexturePtr> lum_texs(sum_lums_.size() + 1);
 		ElementFormat fmt;
-		if (rf.RenderEngineInstance().DeviceCaps().rendertarget_format_support(EF_R16F, 1, 0))
+		if (caps.rendertarget_format_support(EF_R16F, 1, 0))
 		{
 			fmt = EF_R16F;
 		}
+		else if (caps.rendertarget_format_support(EF_ABGR8, 1, 0))
+		{
+			fmt = EF_ABGR8;
+		}
 		else
 		{
-			BOOST_ASSERT(rf.RenderEngineInstance().DeviceCaps().rendertarget_format_support(EF_ABGR16F, 1, 0));
-			fmt = EF_ABGR16F;
+			BOOST_ASSERT(caps.rendertarget_format_support(EF_ARGB8, 1, 0));
+
+			fmt = EF_ARGB8;
 		}
-			
+
 		int len = 1;
 		for (size_t i = 0; i < sum_lums_.size() + 1; ++ i)
 		{

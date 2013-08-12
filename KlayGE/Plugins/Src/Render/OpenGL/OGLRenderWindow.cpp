@@ -208,7 +208,7 @@ namespace KlayGE
 
 			int attribs[] = { WGL_CONTEXT_MAJOR_VERSION_ARB, versions[0][0], WGL_CONTEXT_MINOR_VERSION_ARB, versions[0][1],
 				WGL_CONTEXT_FLAGS_ARB, flags, WGL_CONTEXT_PROFILE_MASK_ARB, WGL_CONTEXT_COMPATIBILITY_PROFILE_BIT_ARB, 0 };
-			for (int i = 0; i < MODERN_VERSIONS; ++ i)
+			for (uint32_t i = 0; i < MODERN_VERSIONS; ++ i)
 			{
 				attribs[1] = versions[i][0];
 				attribs[3] = versions[i][1];
@@ -273,7 +273,7 @@ namespace KlayGE
 			};
 
 			int attribs[] = { GLX_CONTEXT_MAJOR_VERSION_ARB, versions[0][0], GLX_CONTEXT_MINOR_VERSION_ARB, versions[0][1], 0 };
-			for (int i = 0; i < MODERN_VERSIONS; ++ i)
+			for (uint32_t i = 0; i < MODERN_VERSIONS; ++ i)
 			{
 				attribs[1] = versions[i][0];
 				attribs[3] = versions[i][1];
