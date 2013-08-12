@@ -32,8 +32,9 @@ namespace
 	class SpotLightSourceUpdate
 	{
 	public:
-		SpotLightSourceUpdate()
-			: random_dis_(0, 1000)
+		explicit SpotLightSourceUpdate(float3 const & clr)
+			: random_dis_(0, 1000),
+				color_(clr)
 		{
 		}
 
@@ -41,11 +42,13 @@ namespace
 		{
 			light.Direction(float3(MathLib::clamp(random_dis_(gen_) * 0.0001f, 0.0f, 0.1f),
 				1, MathLib::clamp(random_dis_(gen_) * 0.0001f, 0.0f, 0.1f)));
+			light.Color(color_ * (0.85f + random_dis_(gen_) * 0.0003f));
 		}
 
 	private:
 		ranlux24_base gen_;
 		uniform_int_distribution<> random_dis_;
+		float3 color_;
 	};
 
 	class GISpotLightSourceUpdate
@@ -211,7 +214,7 @@ void DeferredRenderingApp::InitObjects()
 	spot_light_[0]->Direction(float3(0, 1, 0));
 	spot_light_[0]->OuterAngle(PI / 2.5f);
 	spot_light_[0]->InnerAngle(PI / 4);
-	spot_light_[0]->BindUpdateFunc(SpotLightSourceUpdate());
+	spot_light_[0]->BindUpdateFunc(SpotLightSourceUpdate(spot_light_[0]->Color()));
 	spot_light_[0]->AddToSceneManager();
 
 	spot_light_[1] = MakeSharedPtr<SpotLightSource>();
@@ -222,7 +225,7 @@ void DeferredRenderingApp::InitObjects()
 	spot_light_[1]->Direction(float3(0, 1, 0));
 	spot_light_[1]->OuterAngle(PI / 2.5f);
 	spot_light_[1]->InnerAngle(PI / 4);
-	spot_light_[1]->BindUpdateFunc(SpotLightSourceUpdate());
+	spot_light_[1]->BindUpdateFunc(SpotLightSourceUpdate(spot_light_[1]->Color()));
 	spot_light_[1]->AddToSceneManager();
 
 	spot_light_[2] = MakeSharedPtr<SpotLightSource>();
@@ -241,9 +244,6 @@ void DeferredRenderingApp::InitObjects()
 	spot_light_src_[1] = MakeSharedPtr<SceneObjectLightSourceProxy>(spot_light_[1]);
 	checked_pointer_cast<SceneObjectLightSourceProxy>(spot_light_src_[1])->Scaling(0.1f, 0.1f, 0.1f);
 	spot_light_src_[2] = MakeSharedPtr<SceneObjectLightSourceProxy>(spot_light_[2]);
-	checked_pointer_cast<SceneObjectLightSourceProxy>(spot_light_src_[2])->Scaling(0.1f, 0.1f, 0.1f);
-	spot_light_src_[0]->AddToSceneManager();
-	spot_light_src_[1]->AddToSceneManager();
 	spot_light_src_[2]->AddToSceneManager();
 
 	fpcController_.Scalers(0.05f, 0.5f);

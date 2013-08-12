@@ -287,6 +287,7 @@ namespace KlayGE
 			overlay_tex_ = rf.MakeTexture2D(screen_width, screen_height, 1, 1,
 				fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
 			overlay_frame_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*overlay_tex_, 0, 1, 0));
+			overlay_frame_buffer_->Attach(FrameBuffer::ATT_DepthStencil, ds_view);
 		}
 		else
 		{
