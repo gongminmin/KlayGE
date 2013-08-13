@@ -202,9 +202,35 @@ namespace
 	float MSESubresource(uint32_t width, uint32_t height, ElementFormat in_format, 
 		ElementInitData const & in_data, ElementFormat new_format, ElementInitData const & new_data)
 	{
+		uint32_t out_width = (width + 3) & ~3;
+		uint32_t out_height = (height + 3) & ~3;
+
 		ElementInitData restored_data;
 		std::vector<uint8_t> restored_data_block;
-		DecompressNormalMapSubresource(width, height, in_format, restored_data, restored_data_block, new_format, new_data);
+		DecompressNormalMapSubresource(out_width, out_height, in_format, restored_data, restored_data_block, new_format, new_data);
+
+		if ((out_width != width) || (out_height != height))
+		{
+			ElementInitData resized_restored_data;
+			std::vector<uint8_t> resized_restored_data_block;
+
+			uint32_t const elem_size = NumFormatBytes(in_format);
+			resized_restored_data.row_pitch = width * elem_size;
+			resized_restored_data.slice_pitch = width * height * elem_size;
+			resized_restored_data_block.resize(resized_restored_data.slice_pitch);
+			resized_restored_data.data = &resized_restored_data_block[0];
+
+			ResizeTexture(&resized_restored_data_block[0],
+				width * elem_size, width * out_height * elem_size,
+				in_format, width, height, 1,
+				restored_data.data, restored_data.row_pitch, restored_data.slice_pitch,
+				in_format, out_width, out_height, 1,
+				true);
+
+			restored_data = resized_restored_data;
+			restored_data_block = resized_restored_data_block;
+			restored_data.data = &restored_data_block[0];
+		}
 
 		uint8_t const * restored_normals = static_cast<uint8_t const *>(restored_data.data);
 		uint8_t const * normals = static_cast<uint8_t const *>(in_data.data);
@@ -236,48 +262,74 @@ namespace
 		std::vector<uint8_t> in_data_block;
 		LoadTexture(in_file, in_type, in_width, in_height, in_depth, in_num_mipmaps, in_array_size, in_format, in_data, in_data_block);
 
-		uint32_t const elem_size = NumFormatBytes(in_format);
+		uint32_t out_width = (in_width + 3) & ~3;
+		uint32_t out_height = (in_height + 3) & ~3;
 
 		std::vector<std::vector<Color> > in_color(in_data.size());
-		for (size_t sub_res = 0; sub_res < in_color.size(); ++ sub_res)
+		for (size_t sub_res = 0; sub_res < in_array_size; ++ sub_res)
 		{
-			uint32_t the_width = in_data[sub_res].row_pitch / elem_size;
-			uint32_t the_height = in_data[sub_res].slice_pitch / in_data[sub_res].row_pitch;
-			in_color[sub_res].resize(the_width * the_height);
+			uint32_t src_width = in_width;
+			uint32_t src_height = in_height;
 
-			uint8_t const * src = static_cast<uint8_t const *>(in_data[sub_res].data);
-			Color* dst = &in_color[sub_res][0];
-			for (uint32_t y = 0; y < the_height; ++ y)
+			uint32_t dst_width = out_width;
+			uint32_t dst_height = out_height;
+
+			for (uint32_t mip = 0; mip < in_num_mipmaps; ++ mip)
 			{
-				ConvertToABGR32F(in_format, src, the_width, dst);
-				src += in_data[sub_res].row_pitch;
-				dst += the_width;
+				in_color[sub_res].resize(dst_width * dst_height);
+
+				ResizeTexture(&in_color[sub_res * in_num_mipmaps + mip][0],
+					dst_width * sizeof(Color), dst_width * dst_height * sizeof(Color),
+					EF_ABGR32F, dst_width, dst_height, 1,
+					in_data[sub_res * in_num_mipmaps + mip].data,
+					in_data[sub_res * in_num_mipmaps + mip].row_pitch,
+					in_data[sub_res * in_num_mipmaps + mip].slice_pitch,
+					in_format, src_width, src_height, 1,
+					true);
+
+				src_width = std::max(src_width / 2, 1U);
+				src_height = std::max(src_height / 2, 1U);
+
+				dst_width = std::max(dst_width / 2, 1U);
+				dst_height = std::max(dst_height / 2, 1U);
 			}
 		}
 
 		std::vector<ElementInitData> new_data(in_data.size());
 		std::vector<std::vector<uint8_t> > new_data_block(in_data.size());
 
-		for (size_t sub_res = 0; sub_res < in_data.size(); ++ sub_res)
+		for (size_t sub_res = 0; sub_res < in_array_size; ++ sub_res)
 		{
-			uint32_t the_width = in_data[sub_res].row_pitch / 4;
-			uint32_t the_height = in_data[sub_res].slice_pitch / in_data[sub_res].row_pitch;
+			uint32_t the_width = out_width;
+			uint32_t the_height = out_height;
 
-			CompressNormalMapSubresource(the_width, the_height, in_color[sub_res], new_format, new_data[sub_res], new_data_block[sub_res]);
+			for (uint32_t mip = 0; mip < in_num_mipmaps; ++ mip)
+			{
+				CompressNormalMapSubresource(the_width, the_height, in_color[sub_res * in_num_mipmaps + mip], new_format,
+					new_data[sub_res * in_num_mipmaps + mip], new_data_block[sub_res * in_num_mipmaps + mip]);
+
+				the_width = std::max(the_width / 2, 1U);
+				the_height = std::max(the_height / 2, 1U);
+			}
 		}
 
-		SaveTexture(out_file, in_type, in_width, in_height, in_depth, in_num_mipmaps, in_array_size, new_format, new_data);
+		SaveTexture(out_file, in_type, out_width, out_height, in_depth, in_num_mipmaps, in_array_size, new_format, new_data);
 
 		float mse = 0;
 		int n = 0;
+		for (size_t sub_res = 0; sub_res < in_array_size; ++ sub_res)
 		{
-			for (size_t sub_res = 0; sub_res < in_data.size(); ++ sub_res)
-			{
-				uint32_t the_width = in_data[sub_res].row_pitch / 4;
-				uint32_t the_height = in_data[sub_res].slice_pitch / in_data[sub_res].row_pitch;
+			uint32_t the_width = in_width;
+			uint32_t the_height = in_width;
 
-				mse += MSESubresource(the_width, the_height, in_format, in_data[sub_res], new_format, new_data[sub_res]);
+			for (uint32_t mip = 0; mip < in_num_mipmaps; ++ mip)
+			{
+				mse += MSESubresource(the_width, the_height, in_format, in_data[sub_res * in_num_mipmaps + mip],
+					new_format, new_data[sub_res * in_num_mipmaps + mip]);
 				n += the_width * the_height;
+
+				the_width = std::max(the_width / 2, 1U);
+				the_height = std::max(the_height / 2, 1U);
 			}
 		}
 
