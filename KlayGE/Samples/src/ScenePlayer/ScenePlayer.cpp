@@ -656,9 +656,9 @@ void ScenePlayerApp::LoadScene(std::string const & name)
 						{
 							obj_attr |= SceneObject::SOA_Moveable;
 						}
-						else if ("unvisible" == this_token)
+						else if ("invisible" == this_token)
 						{
-							obj_attr |= SceneObject::SOA_Unvisible;
+							obj_attr |= SceneObject::SOA_Invisible;
 						}
 					}
 				}
