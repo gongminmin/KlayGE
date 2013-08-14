@@ -5,92 +5,26 @@
 	<include name="util.fxml"/>
 	<include name="FXAA.fxml"/>
 	<include name="ColorGrading.fxml"/>
-
-	<parameter type="int3" name="psaa_gamma_grading"/>
 	
 	<shader>
 		<![CDATA[
-float4 PostToneMapping0PS(float2 tc0 : TEXCOORD0) : SV_Target
+float4 PostToneMappingPS(float2 tc0 : TEXCOORD0) : SV_Target
 {
-	float3 rgb = color_tex.Sample(linear_wrap_sampler, tc0).xyz;
-	return float4(rgb, 1);
-}
-
-float4 PostToneMapping1PS(float2 tc0 : TEXCOORD0) : SV_Target
-{
-	float3 rgb = color_tex.Sample(linear_wrap_sampler, tc0).xyz;
-	rgb = ColorGrading(rgb);
-	return float4(rgb, 1);
-}
-
-float4 PostToneMapping2PS(float2 tc0 : TEXCOORD0) : SV_Target
-{
-	float3 rgb = color_tex.Sample(linear_wrap_sampler, tc0).xyz;
-	rgb = SRGBCorrection(rgb);
-	return float4(rgb, 1);
-}
-
-float4 PostToneMapping3PS(float2 tc0 : TEXCOORD0) : SV_Target
-{
-	float3 rgb = color_tex.Sample(linear_wrap_sampler, tc0).xyz;
-	rgb = SRGBCorrection(rgb);
-	rgb = ColorGrading(rgb);
-	return float4(rgb, 1);
-}
-
-float4 PostToneMapping4PS(float2 tc0 : TEXCOORD0) : SV_Target
-{
-	float3 rgb = FxaaPixelShader(tc0);
-	return float4(rgb, 1);
-}
-
-float4 PostToneMapping5PS(float2 tc0 : TEXCOORD0) : SV_Target
-{
-	float3 rgb = FxaaPixelShader(tc0);
-	rgb = ColorGrading(rgb);
-	return float4(rgb, 1);
-}
-
-float4 PostToneMapping6PS(float2 tc0 : TEXCOORD0) : SV_Target
-{
-	float3 rgb = FxaaPixelShader(tc0);
-	rgb = SRGBCorrection(rgb);
-	return float4(rgb, 1);
-}
-
-float4 PostToneMapping7PS(float2 tc0 : TEXCOORD0) : SV_Target
-{
-	float3 rgb = FxaaPixelShader(tc0);
-	rgb = SRGBCorrection(rgb);
-	rgb = ColorGrading(rgb);
-	return float4(rgb, 1);
-}
-
-float4 PostToneMapping8PS(float2 tc0 : TEXCOORD0) : SV_Target
-{
+#if PTM_FXAA
+#if PTM_FXAA_EDGE
 	float3 rgb = DebugFxaaPixelShader(tc0);
-	return float4(rgb, 1);
-}
-
-float4 PostToneMapping9PS(float2 tc0 : TEXCOORD0) : SV_Target
-{
-	float3 rgb = DebugFxaaPixelShader(tc0);
-	rgb = ColorGrading(rgb);
-	return float4(rgb, 1);
-}
-
-float4 PostToneMapping10PS(float2 tc0 : TEXCOORD0) : SV_Target
-{
-	float3 rgb = DebugFxaaPixelShader(tc0);
+#else
+	float3 rgb = FxaaPixelShader(tc0);
+#endif
+#else
+	float3 rgb = color_tex.Sample(linear_wrap_sampler, tc0).xyz;
+#endif
+#if PTM_SRGB
 	rgb = SRGBCorrection(rgb);
-	return float4(rgb, 1);
-}
-
-float4 PostToneMapping11PS(float2 tc0 : TEXCOORD0) : SV_Target
-{
-	float3 rgb = DebugFxaaPixelShader(tc0);
-	rgb = SRGBCorrection(rgb);
+#endif
+#if PTM_COLOR_GRADING
 	rgb = ColorGrading(rgb);
+#endif
 	return float4(rgb, 1);
 }
 		]]>
@@ -102,106 +36,53 @@ float4 PostToneMapping11PS(float2 tc0 : TEXCOORD0) : SV_Target
 			<state name="depth_write_mask" value="false"/>
 
 			<state name="vertex_shader" value="PostProcessVS()"/>
-			<state name="pixel_shader" value="PostToneMapping0PS()"/>
+			<state name="pixel_shader" value="PostToneMappingPS()"/>
 		</pass>
 	</technique>
-	<technique name="PostToneMapping1">
-		<pass name="p0">
-			<state name="depth_enable" value="false"/>
-			<state name="depth_write_mask" value="false"/>
-
-			<state name="vertex_shader" value="PostProcessVS()"/>
-			<state name="pixel_shader" value="PostToneMapping1PS()"/>
-		</pass>
+	<technique name="PostToneMapping1" inherit="PostToneMapping0">
+		<macro name="PTM_COLOR_GRADING" value="1"/>
 	</technique>
-	<technique name="PostToneMapping2">
-		<pass name="p0">
-			<state name="depth_enable" value="false"/>
-			<state name="depth_write_mask" value="false"/>
-
-			<state name="vertex_shader" value="PostProcessVS()"/>
-			<state name="pixel_shader" value="PostToneMapping2PS()"/>
-		</pass>
+	<technique name="PostToneMapping2" inherit="PostToneMapping0">
+		<macro name="PTM_SRGB" value="1"/>
 	</technique>
-	<technique name="PostToneMapping3">
-		<pass name="p0">
-			<state name="depth_enable" value="false"/>
-			<state name="depth_write_mask" value="false"/>
-
-			<state name="vertex_shader" value="PostProcessVS()"/>
-			<state name="pixel_shader" value="PostToneMapping3PS()"/>
-		</pass>
+	<technique name="PostToneMapping3" inherit="PostToneMapping0">
+		<macro name="PTM_SRGB" value="1"/>
+		<macro name="PTM_COLOR_GRADING" value="1"/>
 	</technique>
-	<technique name="PostToneMapping4">
-		<pass name="p0">
-			<state name="depth_enable" value="false"/>
-			<state name="depth_write_mask" value="false"/>
-
-			<state name="vertex_shader" value="PostProcessVS()"/>
-			<state name="pixel_shader" value="PostToneMapping4PS()"/>
-		</pass>
+	<technique name="PostToneMapping4" inherit="PostToneMapping0">
+		<macro name="PTM_FXAA" value="1"/>
 	</technique>
-	<technique name="PostToneMapping5">
-		<pass name="p0">
-			<state name="depth_enable" value="false"/>
-			<state name="depth_write_mask" value="false"/>
-
-			<state name="vertex_shader" value="PostProcessVS()"/>
-			<state name="pixel_shader" value="PostToneMapping5PS()"/>
-		</pass>
+	<technique name="PostToneMapping5" inherit="PostToneMapping0">
+		<macro name="PTM_FXAA" value="1"/>
+		<macro name="PTM_COLOR_GRADING" value="1"/>
 	</technique>
-	<technique name="PostToneMapping6">
-		<pass name="p0">
-			<state name="depth_enable" value="false"/>
-			<state name="depth_write_mask" value="false"/>
-
-			<state name="vertex_shader" value="PostProcessVS()"/>
-			<state name="pixel_shader" value="PostToneMapping6PS()"/>
-		</pass>
+	<technique name="PostToneMapping6" inherit="PostToneMapping0">
+		<macro name="PTM_FXAA" value="1"/>
+		<macro name="PTM_SRGB" value="1"/>
 	</technique>
-	<technique name="PostToneMapping7">
-		<pass name="p0">
-			<state name="depth_enable" value="false"/>
-			<state name="depth_write_mask" value="false"/>
-
-			<state name="vertex_shader" value="PostProcessVS()"/>
-			<state name="pixel_shader" value="PostToneMapping7PS()"/>
-		</pass>
+	<technique name="PostToneMapping7" inherit="PostToneMapping0">
+		<macro name="PTM_FXAA" value="1"/>
+		<macro name="PTM_SRGB" value="1"/>
+		<macro name="PTM_COLOR_GRADING" value="1"/>
 	</technique>
-	<technique name="PostToneMapping8">
-		<pass name="p0">
-			<state name="depth_enable" value="false"/>
-			<state name="depth_write_mask" value="false"/>
-
-			<state name="vertex_shader" value="PostProcessVS()"/>
-			<state name="pixel_shader" value="PostToneMapping8PS()"/>
-		</pass>
+	<technique name="PostToneMapping8" inherit="PostToneMapping0">
+		<macro name="PTM_FXAA" value="1"/>
+		<macro name="PTM_FXAA_EDGE" value="1"/>
 	</technique>
-	<technique name="PostToneMapping9">
-		<pass name="p0">
-			<state name="depth_enable" value="false"/>
-			<state name="depth_write_mask" value="false"/>
-
-			<state name="vertex_shader" value="PostProcessVS()"/>
-			<state name="pixel_shader" value="PostToneMapping9PS()"/>
-		</pass>
+	<technique name="PostToneMapping9" inherit="PostToneMapping0">
+		<macro name="PTM_FXAA" value="1"/>
+		<macro name="PTM_FXAA_EDGE" value="1"/>
+		<macro name="PTM_COLOR_GRADING" value="1"/>
 	</technique>
-	<technique name="PostToneMapping10">
-		<pass name="p0">
-			<state name="depth_enable" value="false"/>
-			<state name="depth_write_mask" value="false"/>
-
-			<state name="vertex_shader" value="PostProcessVS()"/>
-			<state name="pixel_shader" value="PostToneMapping10PS()"/>
-		</pass>
+	<technique name="PostToneMapping10" inherit="PostToneMapping0">
+		<macro name="PTM_FXAA" value="1"/>
+		<macro name="PTM_FXAA_EDGE" value="1"/>
+		<macro name="PTM_SRGB" value="1"/>
 	</technique>
-	<technique name="PostToneMapping11">
-		<pass name="p0">
-			<state name="depth_enable" value="false"/>
-			<state name="depth_write_mask" value="false"/>
-
-			<state name="vertex_shader" value="PostProcessVS()"/>
-			<state name="pixel_shader" value="PostToneMapping11PS()"/>
-		</pass>
+	<technique name="PostToneMapping11" inherit="PostToneMapping0">
+		<macro name="PTM_FXAA" value="1"/>
+		<macro name="PTM_FXAA_EDGE" value="1"/>
+		<macro name="PTM_SRGB" value="1"/>
+		<macro name="PTM_COLOR_GRADING" value="1"/>
 	</technique>
 </effect>
