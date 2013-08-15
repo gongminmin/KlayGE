@@ -276,7 +276,7 @@ namespace
 
 			for (uint32_t mip = 0; mip < in_num_mipmaps; ++ mip)
 			{
-				in_color[sub_res].resize(dst_width * dst_height);
+				in_color[sub_res * in_num_mipmaps + mip].resize(dst_width * dst_height);
 
 				ResizeTexture(&in_color[sub_res * in_num_mipmaps + mip][0],
 					dst_width * sizeof(Color), dst_width * dst_height * sizeof(Color),
@@ -320,7 +320,7 @@ namespace
 		for (size_t sub_res = 0; sub_res < in_array_size; ++ sub_res)
 		{
 			uint32_t the_width = in_width;
-			uint32_t the_height = in_width;
+			uint32_t the_height = in_height;
 
 			for (uint32_t mip = 0; mip < in_num_mipmaps; ++ mip)
 			{
