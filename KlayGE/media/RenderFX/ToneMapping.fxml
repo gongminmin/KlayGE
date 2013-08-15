@@ -52,7 +52,11 @@ float3 ToneMapping(float3 color, float3 blur, float adapted_lum)
 	// martin's modified blue shift
 	color = lerp(lum * BLUE_SHIFT, color, saturate(16.0f * lum));
 
+#if NO_FP_TEXTURE
+	float adapted_lum_dest = 1;
+#else
 	float adapted_lum_dest = 3 / (max(0.1f, 1 + 10 * EyeAdaption(adapted_lum)));
+#endif
 
 	// Filmic Tonemapping from Unchart 2
 	const float White = 11.2f;
@@ -61,10 +65,14 @@ float3 ToneMapping(float3 color, float3 blur, float adapted_lum)
 
 float4 ToneMapping20PS(float2 iTex : TEXCOORD0) : SV_Target
 {
+#if NO_FP_TEXTURE
+	float adapted_lum = 1;
+#else
 #if PACK_TO_RGBA
 	float adapted_lum = DecodeFloatRGBA(lum_tex.SampleLevel(point_sampler, 0.5f.xx, 0)) * 16;
 #else
 	float adapted_lum = lum_tex.SampleLevel(point_sampler, 0.5f.xx, 0).r;
+#endif
 #endif
 	float lum = max(0.001f, adapted_lum);
 	// For FXAA
@@ -83,7 +91,16 @@ void ToneMapping30VS(float4 pos : POSITION,
 	oPos = pos;
 
 	oTex.xy = TexCoordFromPos(pos);
-	oTex.z = max(0.001f, lum_tex.SampleLevel(point_sampler, 0.5f.xx, 0).r);
+#if NO_FP_TEXTURE
+	float adapted_lum = 1;
+#else
+#if PACK_TO_RGBA
+	float adapted_lum = DecodeFloatRGBA(lum_tex.SampleLevel(point_sampler, 0.5f.xx, 0)) * 16;
+#else
+	float adapted_lum = lum_tex.SampleLevel(point_sampler, 0.5f.xx, 0).r;
+#endif
+#endif
+	oTex.z = max(0.001f, adapted_lum);
 }
 
 float4 ToneMapping30PS(float3 iTex : TEXCOORD0) : SV_Target
@@ -109,6 +126,10 @@ float4 ToneMapping30PS(float3 iTex : TEXCOORD0) : SV_Target
 		<macro name="PACK_TO_RGBA" value="1"/>
 	</technique>
 
+	<technique name="ToneMapping20NoFP" inherit="ToneMapping20">
+		<macro name="NO_FP_TEXTURE" value="1"/>
+	</technique>
+
 	<technique name="ToneMapping30">
 		<pass name="p0">
 			<state name="depth_enable" value="false"/>
@@ -117,5 +138,13 @@ float4 ToneMapping30PS(float3 iTex : TEXCOORD0) : SV_Target
 			<state name="vertex_shader" value="ToneMapping30VS()"/>
 			<state name="pixel_shader" value="ToneMapping30PS()"/>
 		</pass>
+	</technique>
+
+	<technique name="ToneMapping30Pack" inherit="ToneMapping30">
+		<macro name="PACK_TO_RGBA" value="1"/>
+	</technique>
+
+	<technique name="ToneMapping30NoFP" inherit="ToneMapping20">
+		<macro name="NO_FP_TEXTURE" value="1"/>
 	</technique>
 </effect>

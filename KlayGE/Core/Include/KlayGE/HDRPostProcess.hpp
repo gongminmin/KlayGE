@@ -205,6 +205,7 @@ namespace KlayGE
 		PostProcessPtr tone_mapping_;
 
 		bool cs_support_;
+		bool fp_texture_support_;
 	};
 }
 

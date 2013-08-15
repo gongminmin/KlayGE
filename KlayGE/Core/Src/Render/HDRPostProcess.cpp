@@ -230,6 +230,13 @@ namespace KlayGE
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 		RenderDeviceCaps const & caps = rf.RenderEngineInstance().DeviceCaps();
 
+		bool fp_texture_support = false;
+		if ((caps.texture_format_support(EF_B10G11R11F) && caps.rendertarget_format_support(EF_B10G11R11F, 1, 0))
+			|| (caps.texture_format_support(EF_ABGR16F) && caps.rendertarget_format_support(EF_ABGR16F, 1, 0)))
+		{
+			fp_texture_support = true;
+		}
+
 		input_pins_.push_back(std::make_pair("src_tex", TexturePtr()));
 		input_pins_.push_back(std::make_pair("lum_tex", TexturePtr()));
 		input_pins_.push_back(std::make_pair("bloom_tex", TexturePtr()));
@@ -240,17 +247,38 @@ namespace KlayGE
 		RenderTechniquePtr tech;
 		if (caps.max_shader_model >= 3)
 		{
-			tech = effect->TechniqueByName("ToneMapping30");
-		}
-		else
-		{
-			if (caps.rendertarget_format_support(EF_R32F, 1, 0))
+			if (fp_texture_support)
 			{
-				tech = effect->TechniqueByName("ToneMapping20");
+				if (caps.rendertarget_format_support(EF_R32F, 1, 0))
+				{
+					tech = effect->TechniqueByName("ToneMapping30");
+				}
+				else
+				{
+					tech = effect->TechniqueByName("ToneMapping30Pack");
+				}
 			}
 			else
 			{
-				tech = effect->TechniqueByName("ToneMapping20Pack");
+				tech = effect->TechniqueByName("ToneMapping30NoFP");
+			}
+		}
+		else
+		{
+			if (fp_texture_support)
+			{
+				if (caps.rendertarget_format_support(EF_R32F, 1, 0))
+				{
+					tech = effect->TechniqueByName("ToneMapping20");
+				}
+				else
+				{
+					tech = effect->TechniqueByName("ToneMapping20Pack");
+				}
+			}
+			else
+			{
+				tech = effect->TechniqueByName("ToneMapping20NoFP");
 			}
 		}
 
@@ -644,16 +672,26 @@ namespace KlayGE
 		RenderDeviceCaps const & caps = Context::Instance().RenderFactoryInstance().RenderEngineInstance().DeviceCaps();
 		cs_support_ = caps.cs_support && (caps.max_shader_model >= 5);
 
-		if (cs_support_)
+		fp_texture_support_ = false;
+		if ((caps.texture_format_support(EF_B10G11R11F) && caps.rendertarget_format_support(EF_B10G11R11F, 1, 0))
+			|| (caps.texture_format_support(EF_ABGR16F) && caps.rendertarget_format_support(EF_ABGR16F, 1, 0)))
 		{
-			image_stat_ = MakeSharedPtr<ImageStatPostProcessCS>();
-		}
-		else
-		{
-			image_stat_ = MakeSharedPtr<ImageStatPostProcess>();
+			fp_texture_support_ = true;
 		}
 
-		if (fft_lens_effects)
+		if (fp_texture_support_)
+		{
+			if (cs_support_)
+			{
+				image_stat_ = MakeSharedPtr<ImageStatPostProcessCS>();
+			}
+			else
+			{
+				image_stat_ = MakeSharedPtr<ImageStatPostProcess>();
+			}
+		}
+
+		if (fft_lens_effects && fp_texture_support_)
 		{
 			lens_effects_ = MakeSharedPtr<FFTLensEffectsPostProcess>();
 		}
@@ -667,12 +705,15 @@ namespace KlayGE
 
 	void HDRPostProcess::InputPin(uint32_t index, TexturePtr const & tex)
 	{
-		image_stat_->InputPin(index, tex);
+		if (fp_texture_support_)
+		{
+			image_stat_->InputPin(index, tex);
+		}
 
 		lens_effects_->InputPin(0, tex);
 
 		tone_mapping_->InputPin(0, tex);
-		if (cs_support_)
+		if (fp_texture_support_ && cs_support_)
 		{
 			tone_mapping_->InputPin(1, image_stat_->OutputPin(0));
 		}
@@ -696,11 +737,14 @@ namespace KlayGE
 
 	void HDRPostProcess::Apply()
 	{
-		image_stat_->Apply();
-
-		if (!cs_support_)
+		if (fp_texture_support_)
 		{
-			tone_mapping_->InputPin(1, image_stat_->OutputPin(0));
+			image_stat_->Apply();
+
+			if (!cs_support_)
+			{
+				tone_mapping_->InputPin(1, image_stat_->OutputPin(0));
+			}
 		}
 
 		lens_effects_->Apply();
