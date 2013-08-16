@@ -161,34 +161,31 @@ namespace KlayGE
 			if (!(obj->Attrib() & SceneObject::SOA_Overlay) && obj->Visible())
 			{
 				AABBox aabb_ws;
-				if (obj->Attrib() & SceneObject::SOA_Moveable)
-				{
-					AABBox const & aabb = obj->PosBound();
-					float4x4 const & mat = obj->ModelMatrix();
+				if (obj->Attrib() & SceneObject::SOA_Cullable)
+ 				{
+					if (obj->Attrib() & SceneObject::SOA_Moveable)
+					{
+						AABBox const & aabb = obj->PosBound();
+						float4x4 const & mat = obj->ModelMatrix();
 
-					aabb_ws = MathLib::transform_aabb(aabb, mat);
-				}
-				else
-				{
-					aabb_ws = *soaabb->aabb_ws;
-				}
+						aabb_ws = MathLib::transform_aabb(aabb, mat);
+					}
+					else
+					{
+						aabb_ws = *soaabb->aabb_ws;
+					}
 
-				if (camera.OmniDirectionalMode())
-				{
 					visible = (MathLib::perspective_area(camera.EyePos(), camera.ForwardVec(),
 						aabb_ws) > small_obj_threshold_);
 				}
 				else
 				{
-					if (obj->Attrib() & SceneObject::SOA_Cullable)
-					{
-						visible = (MathLib::perspective_area(camera.EyePos(), camera.ForwardVec(),
-							aabb_ws) > small_obj_threshold_) ? this->AABBVisible(aabb_ws) : false;
-					}
-					else
-					{
-						visible = true;
-					}
+					visible = true;
+				}
+
+				if (!camera.OmniDirectionalMode() && (obj->Attrib() & SceneObject::SOA_Cullable))
+				{
+					visible &= this->AABBVisible(aabb_ws);
 				}
 			}
 			else

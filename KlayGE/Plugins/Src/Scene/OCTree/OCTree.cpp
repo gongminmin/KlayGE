@@ -164,22 +164,25 @@ namespace KlayGE
 			KLAYGE_FOREACH(SceneObjAABBPtrType const & soaabb, scene_objs_)
 			{
 				SceneObjectPtr const & obj = soaabb->so;
+				soaabb->visible = (!(obj->Attrib() & SceneObject::SOA_Overlay) && obj->Visible());
 				
-				AABBox aabb_ws;
-				if (obj->Attrib() & SceneObject::SOA_Moveable)
-				{
-					AABBox const & aabb = obj->PosBound();
-					float4x4 const & mat = obj->ModelMatrix();
+				if (obj->Attrib() & SceneObject::SOA_Cullable)
+ 				{
+					AABBox aabb_ws;
+					if (obj->Attrib() & SceneObject::SOA_Moveable)
+					{
+						AABBox const & aabb = obj->PosBound();
+						float4x4 const & mat = obj->ModelMatrix();
 
-					aabb_ws = MathLib::transform_aabb(aabb, mat);
-				}
-				else
-				{
-					aabb_ws = *soaabb->aabb_ws;
-				}
+						aabb_ws = MathLib::transform_aabb(aabb, mat);
+					}
+					else
+					{
+						aabb_ws = *soaabb->aabb_ws;
+					}
 
-				soaabb->visible = (!(obj->Attrib() & SceneObject::SOA_Overlay) && obj->Visible())
-					&& (MathLib::perspective_area(camera.EyePos(), camera.ForwardVec(), aabb_ws) > small_obj_threshold_);
+					soaabb->visible &= (MathLib::perspective_area(camera.EyePos(), camera.ForwardVec(), aabb_ws) > small_obj_threshold_);
+				}
 			}
 		}
 		else
