@@ -341,14 +341,9 @@ namespace
 			*(effect_->ParameterByName("tc_extent")) = float2(tc_bb.HalfSize().x(), tc_bb.HalfSize().y());
 		}
 
-		void MinVariance(float min_variance)
+		void ScaleFactor(float scale_factor)
 		{
-			*(effect_->ParameterByName("min_variance")) = min_variance;
-		}
-
-		void BleedingReduce(float bleeding_reduce)
-		{
-			*(effect_->ParameterByName("bleeding_reduce")) = bleeding_reduce;
+			*(effect_->ParameterByName("scale_factor")) = scale_factor;
 		}
 
 		void GenShadowMapPass(bool gen_sm, SM_TYPE sm_type, int pass_index)
@@ -542,7 +537,7 @@ bool ShadowCubeMap::ConfirmDevice() const
 		return false;
 	}
 	if (!(caps.rendertarget_format_support(EF_D16, 1, 0)
-		&& (caps.rendertarget_format_support(EF_GR16F, 1, 0) || caps.rendertarget_format_support(EF_ABGR16F, 1, 0))))
+		&& (caps.rendertarget_format_support(EF_R32F, 1, 0) || caps.rendertarget_format_support(EF_ABGR32F, 1, 0))))
 	{
 		return false;
 	}
@@ -578,15 +573,15 @@ void ShadowCubeMap::InitObjects()
 		fmt = EF_D16;
 	}
 	RenderViewPtr depth_view = rf.Make2DDepthStencilRenderView(SHADOW_MAP_SIZE, SHADOW_MAP_SIZE, fmt, 1, 0);
-	if (caps.rendertarget_format_support(EF_GR16F, 1, 0))
+	if (caps.rendertarget_format_support(EF_R32F, 1, 0))
 	{
-		fmt = EF_GR16F;
+		fmt = EF_R32F;
 	}
 	else
 	{
-		BOOST_ASSERT(caps.rendertarget_format_support(EF_ABGR16F, 1, 0));
+		BOOST_ASSERT(caps.rendertarget_format_support(EF_ABGR32F, 1, 0));
 
-		fmt = EF_ABGR16F;
+		fmt = EF_ABGR32F;
 	}
 	shadow_tex_ = rf.MakeTexture2D(SHADOW_MAP_SIZE, SHADOW_MAP_SIZE, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
 	shadow_cube_buffer_ = rf.MakeFrameBuffer();
@@ -650,21 +645,16 @@ void ShadowCubeMap::InitObjects()
 	UIManager::Instance().Load(ResLoader::Instance().Open("ShadowCubemap.uiml"));
 	dialog_ = UIManager::Instance().GetDialogs()[0];
 
-	id_min_variance_static_ = dialog_->IDFromName("MinVarianceStatic");
-	id_min_variance_slider_ = dialog_->IDFromName("MinVarianceSlider");
-	id_bleeding_reduce_static_ = dialog_->IDFromName("BleedingReduceStatic");
-	id_bleeding_reduce_slider_ = dialog_->IDFromName("BleedingReduceSlider");
+	id_scale_factor_static_ = dialog_->IDFromName("ScaleFactorStatic");
+	id_scale_factor_slider_ = dialog_->IDFromName("ScaleFactorSlider");
 	id_sm_type_static_ = dialog_->IDFromName("SMStatic");
 	id_sm_type_combo_ = dialog_->IDFromName("SMCombo");
 	id_ctrl_camera_ = dialog_->IDFromName("CtrlCamera");
 
-	dialog_->Control<UISlider>(id_min_variance_slider_)->OnValueChangedEvent().connect(KlayGE::bind(&ShadowCubeMap::MinVarianceChangedHandler, this, KlayGE::placeholders::_1));
-	dialog_->Control<UISlider>(id_bleeding_reduce_slider_)->OnValueChangedEvent().connect(KlayGE::bind(&ShadowCubeMap::BleedingReduceChangedHandler, this, KlayGE::placeholders::_1));
+	dialog_->Control<UISlider>(id_scale_factor_slider_)->OnValueChangedEvent().connect(KlayGE::bind(&ShadowCubeMap::ScaleFactorChangedHandler, this, KlayGE::placeholders::_1));
 	dialog_->Control<UIComboBox>(id_sm_type_combo_)->OnSelectionChangedEvent().connect(KlayGE::bind(&ShadowCubeMap::SMTypeChangedHandler, this, KlayGE::placeholders::_1));
 	dialog_->Control<UICheckBox>(id_ctrl_camera_)->OnChangedEvent().connect(KlayGE::bind(&ShadowCubeMap::CtrlCameraHandler, this, KlayGE::placeholders::_1));
 
-	this->MinVarianceChangedHandler(*dialog_->Control<UISlider>(id_min_variance_slider_));
-	this->BleedingReduceChangedHandler(*dialog_->Control<UISlider>(id_bleeding_reduce_slider_));
 	this->SMTypeChangedHandler(*dialog_->Control<UIComboBox>(id_sm_type_combo_));
 }
 
@@ -685,21 +675,12 @@ void ShadowCubeMap::InputHandler(InputEngine const & /*sender*/, InputAction con
 	}
 }
 
-void ShadowCubeMap::MinVarianceChangedHandler(KlayGE::UISlider const & sender)
+void ShadowCubeMap::ScaleFactorChangedHandler(KlayGE::UISlider const & sender)
 {
-	float min_var = sender.GetValue() / 2000.0f + 0.001f;
+	float scale_factor = static_cast<float>(sender.GetValue());
 	for (size_t i = 0; i < scene_objs_.size(); ++ i)
 	{
-		checked_pointer_cast<OccluderMesh>(scene_objs_[i]->GetRenderable())->MinVariance(min_var);
-	}
-}
-
-void ShadowCubeMap::BleedingReduceChangedHandler(KlayGE::UISlider const & sender)
-{
-	float bleeding = sender.GetValue() / 500.0f + 0.45f;
-	for (size_t i = 0; i < scene_objs_.size(); ++ i)
-	{
-		checked_pointer_cast<OccluderMesh>(scene_objs_[i]->GetRenderable())->BleedingReduce(bleeding);
+		checked_pointer_cast<OccluderMesh>(scene_objs_[i]->GetRenderable())->ScaleFactor(scale_factor);
 	}
 }
 
@@ -789,6 +770,8 @@ uint32_t ShadowCubeMap::DoUpdate(uint32_t pass)
 				checked_pointer_cast<OccluderMesh>(scene_objs_.back()->GetRenderable())->CubeSMTexture(shadow_cube_tex_);
 				checked_pointer_cast<OccluderMesh>(scene_objs_.back()->GetRenderable())->DPSMTexture(shadow_dual_tex_);
 				scene_objs_.push_back(so);
+
+				this->ScaleFactorChangedHandler(*dialog_->Control<UISlider>(id_scale_factor_slider_));
 
 				loading_percentage_ = 100;
 			}

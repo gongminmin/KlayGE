@@ -15,6 +15,8 @@
 
 	<parameter type="float3" name="light_falloff"/>
 
+	<parameter type="float" name="scale_factor"/>
+
 	<shader>
 		<![CDATA[
 float calc_dist(float4 position)
@@ -37,12 +39,7 @@ void GenCubeShadowMapVS(float4 Position : POSITION,
 
 float4 GenCubeShadowMapPS(float dist : TEXCOORD0) : SV_Target
 {
-#if KLAYGE_DERIVATIVES
-	float2 dxdy = float2(ddx(dist), ddy(dist));
-#else
-	float2 dxdy = 0;
-#endif
-	return float4(dist, dist * dist + 0.25f * dot(dxdy, dxdy), 0, 1);
+	return exp(scale_factor * dist);
 }
 		]]>
 	</shader>
@@ -103,12 +100,7 @@ float4 GenDPShadowMapPS(float2 dist : TEXCOORD0) : SV_Target
 {
 	clip(dist.y);
 
-#if KLAYGE_DERIVATIVES
-	float2 dxdy = float2(ddx(dist.x), ddy(dist.x));
-#else
-	float2 dxdy = 0;
-#endif
-	return float4(dist.x, dist.x * dist.x + 0.25f * dot(dxdy, dxdy), 0, 1);
+	return exp(scale_factor * dist.x);
 }
 		]]>
 	</shader>
@@ -590,7 +582,7 @@ float4 RenderScenePS(float2 Texcoord : TEXCOORD0, float3 LightWorldPos : TEXCOOR
 	float3 lighting = calc_brdf(c_diff, c_spec, shininess, light_vec, halfway, normal);
 
 	float3 ori_color = light_projective_tex.Sample(linear_clamp_sampler, LightWorldPos).rgb;
-	float2 moments;
+	float occluder;
 	float dist;
 	if (dpsm)
 	{
@@ -605,26 +597,19 @@ float4 RenderScenePS(float2 Texcoord : TEXCOORD0, float3 LightWorldPos : TEXCOOR
 			tex.x += 0.5f;
 		}
 
-		moments = shadow_dual_tex.Sample(linear_clamp_sampler, tex).xy;
+		occluder = shadow_dual_tex.Sample(linear_clamp_sampler, tex).x;
 	}
 	else
 	{
 		dist = length(LightWorldPos);
 
 		float3 shadow_dir = float3(LightWorldPos.x, -KLAYGE_FLIPPING * LightWorldPos.y, LightWorldPos.z);
-		moments = shadow_cube_tex.Sample(linear_clamp_sampler, shadow_dir).xy;
+		occluder = shadow_cube_tex.Sample(linear_clamp_sampler, shadow_dir).x;
 	}
-
-	float p = (dist <= moments.x);
-	// Variance shadow mapping
-	float variance = moments.y - moments.x * moments.x;
-	variance = max(variance, min_variance);
-	float m_d = moments.x - dist;
-	float p_max = variance / (variance + m_d * m_d);
-	p_max = linstep(bleeding_reduce, 1, p_max);
-
+	
 	float atten = attenuation_term(0, LightWorldPos, light_falloff);
-	atten *= max(p, p_max);
+	// Exponential shadow mapping
+	atten *= min(1, occluder * exp(-scale_factor * dist));
 
 	float3 clr = ambient_clr.rgb * c_diff + emit + lighting * ori_color * atten;	
 	return float4(clr, 1.0f);

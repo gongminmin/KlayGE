@@ -30,8 +30,7 @@ private:
 	KlayGE::uint32_t DoUpdate(KlayGE::uint32_t pass);
 
 	void InputHandler(KlayGE::InputEngine const & sender, KlayGE::InputAction const & action);
-	void MinVarianceChangedHandler(KlayGE::UISlider const & sender);
-	void BleedingReduceChangedHandler(KlayGE::UISlider const & sender);
+	void ScaleFactorChangedHandler(KlayGE::UISlider const & sender);
 	void SMTypeChangedHandler(KlayGE::UIComboBox const & sender);
 	void CtrlCameraHandler(KlayGE::UICheckBox const & sender);
 
@@ -69,10 +68,8 @@ private:
 	SM_TYPE sm_type_;
 
 	KlayGE::UIDialogPtr dialog_;
-	int id_min_variance_static_;
-	int id_min_variance_slider_;
-	int id_bleeding_reduce_static_;
-	int id_bleeding_reduce_slider_;
+	int id_scale_factor_static_;
+	int id_scale_factor_slider_;
 	int id_sm_type_static_;
 	int id_sm_type_combo_;
 	int id_ctrl_camera_;
