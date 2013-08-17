@@ -621,12 +621,109 @@ namespace KlayGE
 				Vector_T<T, 3>(size.y() * size.z(), size.z() * size.x(), size.x() * size.y()));
 		}
 
-		template float perspective_area(float3 const & view_pos, float3 const & view_dir, AABBox const & aabbox);
+		template float perspective_area(float3 const & view_pos, float4x4 const & view_proj, AABBox const & aabbox);
 
 		template <typename T>
-		T perspective_area(Vector_T<T, 3> const & view_pos, Vector_T<T, 3> const & view_dir, AABBox_T<T> const & aabbox)
+		T perspective_area(Vector_T<T, 3> const & view_pos, Matrix4_T<T> const & view_proj, AABBox_T<T> const & aabbox)
 		{
-			return ortho_area(view_dir, aabbox) / length_sq(view_pos - aabbox.Center());
+			static uint32_t const HULL_VERTEX[64][7] = 
+			{
+				{ 0, 0, 0, 0, 0, 0, 0 },
+				{ 0, 4, 7, 3, 0, 0, 4 },
+				{ 1, 2, 6, 5, 0, 0, 4 },
+				{ 0, 0, 0, 0, 0, 0, 0 },
+				{ 0, 1, 5, 4, 0, 0, 4 },
+				{ 0, 1, 5, 4, 7, 3, 6 },
+				{ 0, 1, 2, 6, 5, 4, 6 },
+				{ 0, 0, 0, 0, 0, 0, 0 },
+				{ 2, 3, 7, 6, 0, 0, 4 },
+				{ 4, 7, 6, 2, 3, 0, 6 },
+				{ 2, 3, 7, 6, 5, 1, 6 },
+				{ 0, 0, 0, 0, 0, 0, 0 },
+				{ 0, 0, 0, 0, 0, 0, 0 },
+				{ 0, 0, 0, 0, 0, 0, 0 },
+				{ 0, 0, 0, 0, 0, 0, 0 },
+				{ 0, 0, 0, 0, 0, 0, 0 },
+				{ 0, 3, 2, 1, 0, 0, 4 },
+				{ 0, 4, 7, 3, 2, 1, 6 },
+				{ 0, 3, 2, 6, 5, 1, 6 },
+				{ 0, 0, 0, 0, 0, 0, 0 },
+				{ 0, 3, 2, 1, 5, 4, 6 },
+				{ 2, 1, 5, 4, 7, 3, 6 },
+				{ 0, 3, 2, 6, 5, 4, 6 },
+				{ 0, 0, 0, 0, 0, 0, 0 },
+				{ 0, 3, 7, 6, 2, 1, 6 },
+				{ 0, 4, 7, 6, 2, 1, 6 },
+				{ 0, 3, 7, 6, 5, 1, 6 },
+				{ 0, 0, 0, 0, 0, 0, 0 },
+				{ 0, 0, 0, 0, 0, 0, 0 },
+				{ 0, 0, 0, 0, 0, 0, 0 },
+				{ 0, 0, 0, 0, 0, 0, 0 },
+				{ 0, 0, 0, 0, 0, 0, 0 },
+				{ 4, 5, 6, 7, 0, 0, 4 },
+				{ 4, 5, 6, 7, 3, 0, 6 },
+				{ 1, 2, 6, 7, 4, 5, 6 },
+				{ 0, 0, 0, 0, 0, 0, 0 },
+				{ 0, 1, 5, 6, 7, 4, 6 },
+				{ 0, 1, 5, 6, 7, 3, 6 },
+				{ 0, 1, 2, 6, 7, 4, 6 },
+				{ 0, 0, 0, 0, 0, 0, 0 },
+				{ 2, 3, 7, 4, 5, 6, 6 },
+				{ 0, 4, 5, 6, 2, 3, 6 },
+				{ 1, 2, 3, 7, 4, 5, 6 },
+				{ 0, 0, 0, 0, 0, 0, 0 },
+				{ 0, 0, 0, 0, 0, 0, 0 },
+				{ 0, 0, 0, 0, 0, 0, 0 },
+				{ 0, 0, 0, 0, 0, 0, 0 },
+				{ 0, 0, 0, 0, 0, 0, 0 },
+				{ 0, 0, 0, 0, 0, 0, 0 },
+				{ 0, 0, 0, 0, 0, 0, 0 },
+				{ 0, 0, 0, 0, 0, 0, 0 },
+				{ 0, 0, 0, 0, 0, 0, 0 },
+				{ 0, 0, 0, 0, 0, 0, 0 },
+				{ 0, 0, 0, 0, 0, 0, 0 },
+				{ 0, 0, 0, 0, 0, 0, 0 },
+				{ 0, 0, 0, 0, 0, 0, 0 },
+				{ 0, 0, 0, 0, 0, 0, 0 },
+				{ 0, 0, 0, 0, 0, 0, 0 },
+				{ 0, 0, 0, 0, 0, 0, 0 },
+				{ 0, 0, 0, 0, 0, 0, 0 },
+				{ 0, 0, 0, 0, 0, 0, 0 },
+				{ 0, 0, 0, 0, 0, 0, 0 },
+				{ 0, 0, 0, 0, 0, 0, 0 },
+				{ 0, 0, 0, 0, 0, 0, 0 }
+			};
+
+			uint32_t const pos = ((view_pos.x() < aabbox.Min().x()))
+				| ((view_pos.x() > aabbox.Max().x()) << 1)
+				| ((view_pos.y() < aabbox.Min().y()) << 2)
+				| ((view_pos.y() > aabbox.Max().y()) << 3)
+				| ((view_pos.z() < aabbox.Min().z()) << 4)
+				| ((view_pos.z() > aabbox.Max().z()) << 5);
+			if (0 == pos)
+			{
+				return 1;
+			}
+			uint32_t const num = HULL_VERTEX[pos][6];
+			if (0 == num)
+			{
+				return 0;
+			}
+
+			Vector_T<T, 3> dst[8];
+			for (uint32_t i = 0; i < num; ++ i)
+			{
+				dst[i] = MathLib::transform_coord(aabbox.Corner(HULL_VERTEX[pos][i]), view_proj);
+				dst[i] = dst[i] * T(0.5) + Vector_T<T, 3>(0.5, 0.5, 0.0);
+			}
+
+			T sum = 0;
+			for (uint32_t i = 0; i < num; ++ i)
+			{
+				int next = (i + 1) % num;
+				sum += abs((dst[i].x() - dst[next].x()) * (dst[i].y() + dst[next].y()));
+			}
+			return sum / 2;
 		}
 
 

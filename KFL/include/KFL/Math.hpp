@@ -400,7 +400,7 @@ namespace KlayGE
 		T ortho_area(Vector_T<T, 3> const & view_dir, AABBox_T<T> const & aabbox);
 
 		template <typename T>
-		T perspective_area(Vector_T<T, 3> const & view_pos, Vector_T<T, 3> const & view_dir, AABBox_T<T> const & aabbox);
+		T perspective_area(Vector_T<T, 3> const & view_pos, Matrix4_T<T> const & view_proj, AABBox_T<T> const & aabbox);
 
 
 		// 4D œÚ¡ø

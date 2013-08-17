@@ -51,6 +51,7 @@
 #include <KlayGE/Input.hpp>
 #include <KlayGE/InputFactory.hpp>
 #include <KlayGE/FrameBuffer.hpp>
+#include <KlayGE/DeferredRenderingLayer.hpp>
 
 #include <map>
 #include <algorithm>
@@ -152,6 +153,18 @@ namespace KlayGE
 		App3DFramework& app = Context::Instance().AppInstance();
 		Camera& camera = app.ActiveCamera();
 
+		float4x4 view_proj = camera.ViewProjMatrix();;
+		DeferredRenderingLayerPtr const & drl = Context::Instance().DeferredRenderingLayerInstance();
+		if (drl)
+		{
+			float4x4 proj = camera.ProjMatrix();
+			int32_t cas_index = drl->CurrCascadeIndex();
+			if (cas_index >= 0)
+			{
+				view_proj *= drl->GetCascadedShadowLayer()->CascadeCropMatrix(cas_index);
+			}
+		}
+
 		for (size_t i = 0; i < scene_objs_.size(); ++ i)
 		{
 			bool visible;
@@ -175,7 +188,7 @@ namespace KlayGE
 						aabb_ws = *soaabb->aabb_ws;
 					}
 
-					visible = (MathLib::perspective_area(camera.EyePos(), camera.ForwardVec(),
+					visible = (MathLib::perspective_area(camera.EyePos(), view_proj,
 						aabb_ws) > small_obj_threshold_);
 				}
 				else

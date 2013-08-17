@@ -32,6 +32,7 @@
 #include <KlayGE/RenderableHelper.hpp>
 #include <KlayGE/Camera.hpp>
 #include <KlayGE/App3D.hpp>
+#include <KlayGE/DeferredRenderingLayer.hpp>
 
 #include <algorithm>
 #include <functional>
@@ -159,6 +160,18 @@ namespace KlayGE
 		App3DFramework& app = Context::Instance().AppInstance();
 		Camera& camera = app.ActiveCamera();
 
+		float4x4 view_proj = camera.ViewProjMatrix();;
+		DeferredRenderingLayerPtr const & drl = Context::Instance().DeferredRenderingLayerInstance();
+		if (drl)
+		{
+			float4x4 proj = camera.ProjMatrix();
+			int32_t cas_index = drl->CurrCascadeIndex();
+			if (cas_index >= 0)
+			{
+				view_proj *= drl->GetCascadedShadowLayer()->CascadeCropMatrix(cas_index);
+			}
+		}
+
 		if (camera.OmniDirectionalMode())
 		{
 			KLAYGE_FOREACH(SceneObjAABBPtrType const & soaabb, scene_objs_)
@@ -181,7 +194,8 @@ namespace KlayGE
 						aabb_ws = *soaabb->aabb_ws;
 					}
 
-					soaabb->visible &= (MathLib::perspective_area(camera.EyePos(), camera.ForwardVec(), aabb_ws) > small_obj_threshold_);
+					soaabb->visible &= (MathLib::perspective_area(camera.EyePos(), view_proj,
+						aabb_ws) > small_obj_threshold_);
 				}
 			}
 		}
@@ -314,8 +328,20 @@ namespace KlayGE
 		App3DFramework& app = Context::Instance().AppInstance();
 		Camera& camera = app.ActiveCamera();
 
+		float4x4 view_proj = camera.ViewProjMatrix();;
+		DeferredRenderingLayerPtr const & drl = Context::Instance().DeferredRenderingLayerInstance();
+		if (drl)
+		{
+			float4x4 proj = camera.ProjMatrix();
+			int32_t cas_index = drl->CurrCascadeIndex();
+			if (cas_index >= 0)
+			{
+				view_proj *= drl->GetCascadedShadowLayer()->CascadeCropMatrix(cas_index);
+			}
+		}
+
 		octree_node_t& node = octree_[index];
-		if (MathLib::perspective_area(camera.EyePos(), camera.ForwardVec(), node.bb) > small_obj_threshold_)
+		if (MathLib::perspective_area(camera.EyePos(), view_proj, node.bb) > small_obj_threshold_)
 		{
 			BoundOverlap const vis = frustum_->Intersect(node.bb);
 			node.visible = vis;
@@ -350,6 +376,18 @@ namespace KlayGE
 		App3DFramework& app = Context::Instance().AppInstance();
 		Camera& camera = app.ActiveCamera();
 
+		float4x4 view_proj = camera.ViewProjMatrix();;
+		DeferredRenderingLayerPtr const & drl = Context::Instance().DeferredRenderingLayerInstance();
+		if (drl)
+		{
+			float4x4 proj = camera.ProjMatrix();
+			int32_t cas_index = drl->CurrCascadeIndex();
+			if (cas_index >= 0)
+			{
+				view_proj *= drl->GetCascadedShadowLayer()->CascadeCropMatrix(cas_index);
+			}
+		}
+
 		octree_node_t const & node = octree_[index];
 		if ((node.visible != BO_No) || force)
 		{
@@ -357,7 +395,7 @@ namespace KlayGE
 			{
 				if (!soaabb->visible && soaabb->so->Visible())
 				{
-					if (MathLib::perspective_area(camera.EyePos(), camera.ForwardVec(),
+					if (MathLib::perspective_area(camera.EyePos(), view_proj,
 						*soaabb->aabb_ws) > small_obj_threshold_)
 					{
 						BoundOverlap const bo = frustum_->Intersect(*soaabb->aabb_ws);
