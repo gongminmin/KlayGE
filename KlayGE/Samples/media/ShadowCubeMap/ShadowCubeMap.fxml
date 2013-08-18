@@ -477,8 +477,6 @@ void GenCubeOneInstanceGSShadowMapGS(triangle float4 in_pos[3] : POSITION, trian
 	</technique>
 	
 	
-	<parameter type="float" name="min_variance"/>
-	<parameter type="float" name="bleeding_reduce"/>
 	<parameter type="float3" name="light_pos"/>
 
 	<parameter type="float4" name="ambient_clr"/>
@@ -530,11 +528,6 @@ void RenderSceneVS(float4 Position : POSITION,
 	oLightWorldPos = mul(Position, obj_model_to_light_model).xyz;
 	oLightWorldNormal = mul(transform_quat(float3(0, 0, 1), tangent_quat), (float3x3)obj_model_to_light_model);
 	oLightViewPos = mul(Position, obj_model_to_light_view).xyz;
-}
-
-float linstep(float min, float max, float v)
-{
-	return clamp((v - min) / (max - min), 0, 1);
 }
 
 float4 RenderScenePS(float2 Texcoord : TEXCOORD0, float3 LightWorldPos : TEXCOORD1,

@@ -149,8 +149,7 @@ float4 PosNormTexPS(float3 normal : TEXCOORD0) : SV_Target
 		<state name="address_w" value="clamp"/>
 	</parameter>
 
-	<parameter type="float" name="min_variance"/>
-	<parameter type="float" name="bleeding_reduce"/>
+	<parameter type="float" name="scale_factor"/>
 	<parameter type="textureCUBE" name="shadow_cube_tex"/>
 	<parameter type="texture2D" name="caustics_tex"/>
 	<parameter type="sampler" name="linear_clamp_sampler">
@@ -261,15 +260,8 @@ float4 DistanceMappingPS(float4 L	: TEXCOORD0,
 	float3 shadow_dir = normalize(LightWorldPos);
 	shadow_dir += deltaUV;
 	shadow_dir.y *= -KLAYGE_FLIPPING;
-	float2 moments = shadow_cube_tex.SampleLevel(linear_clamp_sampler, shadow_dir, 0).xy;
-	float p = (dist <= moments.x);
-	float variance = moments.y - moments.x * moments.x;
-	variance = max(variance, 500);
-	float m_d = moments.x - dist;
-	float p_max = variance / (variance + m_d * m_d);
-	p_max = linstep(0.55, 1, p_max);
-	float atten = max(p, p_max);
-
+	float occluder = shadow_cube_tex.SampleLevel(linear_clamp_sampler, shadow_dir, 0).x;
+	float atten = saturate(occluder * exp(-scale_factor * dist));
 
 	float4 caustics = 1;
 	float2 lookup_uv = CalcLookupUV(LightProjPos);

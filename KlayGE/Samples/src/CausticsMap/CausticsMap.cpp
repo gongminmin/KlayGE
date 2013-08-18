@@ -156,6 +156,7 @@ namespace
 				float4x4 inv_light_model = MathLib::inverse(light_model);
 
 				*(technique_->Effect().ParameterByName("obj_model_to_light_model")) = model * inv_light_model;
+				*(technique_->Effect().ParameterByName("scale_factor")) = 0.04f;
 			}
 			else
 			{
@@ -172,6 +173,7 @@ namespace
 				*(technique_->Effect().ParameterByName("caustics_tex")) = caustics_map_;
 				*(technique_->Effect().ParameterByName("obj_model_to_light_model")) = model * inv_light_model;
 				*(technique_->Effect().ParameterByName("obj_model_to_light_view")) = model * first_light_view;
+				*(technique_->Effect().ParameterByName("scale_factor")) = 0.04f;
 			}
 		}
 
@@ -874,15 +876,15 @@ void CausticsMapApp::InitCubeSM()
 	RenderViewPtr depth_view = rf.Make2DDepthStencilRenderView(SHADOW_MAP_SIZE, SHADOW_MAP_SIZE, ds_fmt, 1, 0);
 	shadow_cube_buffer_ = rf.MakeFrameBuffer();
 	ElementFormat fmt;
-	if (caps.rendertarget_format_support(EF_GR16F, 1, 0))
+	if (caps.rendertarget_format_support(EF_R32F, 1, 0))
 	{
-		fmt = EF_GR16F;
+		fmt = EF_R32F;
 	}
 	else
 	{
-		BOOST_ASSERT(caps.rendertarget_format_support(EF_ABGR16F, 1, 0));
+		BOOST_ASSERT(caps.rendertarget_format_support(EF_ABGR32F, 1, 0));
 
-		fmt = EF_ABGR16F;
+		fmt = EF_ABGR32F;
 	}
 	shadow_tex_ = rf.MakeTexture2D(SHADOW_MAP_SIZE, SHADOW_MAP_SIZE, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
 	shadow_cube_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*shadow_tex_, 0, 1, 0));
