@@ -311,7 +311,5 @@ int main(int argc, char* argv[])
 
 	PackJTML(argv[1]);
 
-	Context::Destroy();
-
 	return 0;
 }
