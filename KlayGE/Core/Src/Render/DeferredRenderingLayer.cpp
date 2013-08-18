@@ -857,7 +857,7 @@ namespace KlayGE
 					BOOST_ASSERT(PRT_RT1 == pass_rt);
 
 					re.BindFrameBuffer(pvp.g_buffer_rt1);
-					re.CurFrameBuffer()->Attached(FrameBuffer::ATT_Color0)->ClearColor(Color(0, 0, 0, 0));
+					pvp.g_buffer_rt1->Attached(FrameBuffer::ATT_Color0)->Discard();
 				}
 				urv = App3DFramework::URV_Need_Flush | (App3DFramework::URV_Opaque_Only << pass_tb);
 			}
@@ -932,7 +932,8 @@ namespace KlayGE
 					{
 					case PRT_ShadowMap:
 						re.BindFrameBuffer(sm_buffer_);
-						re.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->ClearDepth(1.0f);
+						sm_buffer_->Attached(FrameBuffer::ATT_Color0)->Discard();
+						sm_buffer_->Attached(FrameBuffer::ATT_DepthStencil)->ClearDepth(1.0f);
 						break;
 
 					case PRT_ShadowMapWODepth:
@@ -959,7 +960,9 @@ namespace KlayGE
 
 						rsm_buffer_->GetViewport()->camera = sm_buffer_->GetViewport()->camera;
 						re.BindFrameBuffer(rsm_buffer_);
-						re.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth | FrameBuffer::CBM_Stencil, Color(0, 0, 0, 0), 1.0f, 0);
+						rsm_buffer_->Attached(FrameBuffer::ATT_Color0)->Discard();
+						rsm_buffer_->Attached(FrameBuffer::ATT_Color1)->Discard();
+						rsm_buffer_->Attached(FrameBuffer::ATT_DepthStencil)->ClearDepthStencil(1.0f, 0);
 						urv |= App3DFramework::URV_Opaque_Only;
 						break;
 					}
@@ -1487,7 +1490,8 @@ namespace KlayGE
 
 		float depth = (TransparencyBack_GBuffer == g_buffer_index) ? 0.0f : 1.0f;
 		int32_t stencil = (Opaque_GBuffer == g_buffer_index) ? 0 : 128;
-		re.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth | FrameBuffer::CBM_Stencil, Color(0, 0, 0, 0), depth, stencil);
+		pvp.g_buffer->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth | FrameBuffer::CBM_Stencil,
+			Color(0, 0, 0, 0), depth, stencil);
 	}
 
 	void DeferredRenderingLayer::GenerateGBuffer(PerViewport const & pvp, uint32_t g_buffer_index)
@@ -1514,7 +1518,8 @@ namespace KlayGE
 
 		float depth = (TransparencyBack_GBuffer == g_buffer_index) ? 0.0f : 1.0f;
 		int32_t stencil = (Opaque_GBuffer == g_buffer_index) ? 0 : 128;
-		re.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth | FrameBuffer::CBM_Stencil, Color(0, 0, 0, 0), depth, stencil);
+		pvp.g_buffer->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth | FrameBuffer::CBM_Stencil,
+			Color(0, 0, 0, 0), depth, stencil);
 	}
 
 	void DeferredRenderingLayer::PostGenerateGBuffer(PerViewport const & pvp)
@@ -1811,7 +1816,7 @@ namespace KlayGE
 		}
 
 		re.BindFrameBuffer(pvp.shadowing_buffer);
-		re.CurFrameBuffer()->Attached(FrameBuffer::ATT_Color0)->ClearColor(Color(1, 1, 1, 1));
+		pvp.shadowing_buffer->Attached(FrameBuffer::ATT_Color0)->ClearColor(Color(1, 1, 1, 1));
 
 		*g_buffer_tex_param_ = pvp.g_buffer_rt0_tex;
 		*depth_tex_param_ = pvp.g_buffer_depth_tex;
@@ -1889,7 +1894,7 @@ namespace KlayGE
 		}
 		else
 		{
-			re.CurFrameBuffer()->Attached(FrameBuffer::ATT_Color0)->ClearColor(Color(0, 0, 0, 0));
+			re.CurFrameBuffer()->Attached(FrameBuffer::ATT_Color0)->Discard();
 		}
 		re.Render(*technique_shading_, *rl_quad_);
 	}
@@ -1922,6 +1927,7 @@ namespace KlayGE
 		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 
 		re.BindFrameBuffer(pvp.frame_buffer);
+		pvp.frame_buffer->Discard(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth | FrameBuffer::CBM_Stencil);
 		{
 			*depth_tex_param_ = pvp.curr_merged_depth_tex;
 

@@ -222,4 +222,67 @@ namespace KlayGE
 
 		re.BindFramebuffer(old_fbo);
 	}
+
+	void OGLESFrameBuffer::Discard(uint32_t flags)
+	{
+		if (glloader_GLES_EXT_discard_framebuffer())
+		{
+			std::vector<GLenum> attachments;
+			if (fbo_ != 0)
+			{
+				if (flags & CBM_Color)
+				{
+					for (size_t i = 0; i < clr_views_.size(); ++ i)
+					{
+						if (clr_views_[i])
+						{
+							attachments.push_back(GL_COLOR_ATTACHMENT0 + i);
+						}
+					}
+				}
+				if (flags & CBM_Depth)
+				{
+					if (rs_view_)
+					{
+						attachments.push_back(GL_DEPTH_ATTACHMENT);
+					}
+				}
+				if (flags & CBM_Stencil)
+				{
+					if (rs_view_)
+					{
+						attachments.push_back(GL_STENCIL_ATTACHMENT);
+					}
+				}
+			}
+			else
+			{
+				if (flags & CBM_Color)
+				{
+					attachments.push_back(GL_COLOR_EXT);
+				}
+				if (flags & CBM_Depth)
+				{
+					attachments.push_back(GL_DEPTH_EXT);
+				}
+				if (flags & CBM_Stencil)
+				{
+					attachments.push_back(GL_STENCIL_EXT);
+				}
+			}
+
+			OGLESRenderEngine& re = *checked_cast<OGLESRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+
+			GLuint old_fbo = re.BindFramebuffer();
+			re.BindFramebuffer(fbo_);
+
+			glDiscardFramebufferEXT(GL_FRAMEBUFFER, attachments.size(), &attachments[0]);
+
+			re.BindFramebuffer(old_fbo);
+		}
+		else
+		{
+			this->Clear(flags, Color(0, 0, 0, 0), 1, 0);
+		}
+	}
 }

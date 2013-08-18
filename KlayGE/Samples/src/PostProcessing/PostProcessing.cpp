@@ -345,6 +345,7 @@ uint32_t PostProcessingApp::DoUpdate(uint32_t pass)
 	{
 		color_tex_->BuildMipSubLevels();
 		re.BindFrameBuffer(FrameBufferPtr());
+		re.CurFrameBuffer()->Attached(FrameBuffer::ATT_Color0)->Discard();
 		re.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->ClearDepth(1.0f);
 		active_pp_->Apply();
 

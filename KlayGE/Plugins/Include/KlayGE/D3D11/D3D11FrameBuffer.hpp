@@ -36,6 +36,7 @@ namespace KlayGE
 		virtual void OnUnbind();
 
 		void Clear(uint32_t flags, Color const & clr, float depth, int32_t stencil);
+		virtual void Discard(uint32_t flags) KLAYGE_OVERRIDE;
 
 	private:
 		D3D11_VIEWPORT d3d_viewport_;

@@ -42,6 +42,8 @@ namespace KlayGE
 
 	protected:
 		void DoClear(uint32_t flags, Color const & clr, float depth, int32_t stencil);
+		void DoDiscardColor();
+		void DoDiscardDepthStencil();
 
 	protected:
 		GLuint tex_;
@@ -62,6 +64,8 @@ namespace KlayGE
 		void ClearStencil(int32_t stencil);
 		void ClearDepthStencil(float depth, int32_t stencil);
 
+		virtual void Discard() KLAYGE_OVERRIDE;
+
 		void OnAttached(FrameBuffer& fb, uint32_t att);
 		void OnDetached(FrameBuffer& fb, uint32_t att);
 	};
@@ -76,6 +80,8 @@ namespace KlayGE
 
 		void ClearColor(Color const & clr);
 
+		virtual void Discard() KLAYGE_OVERRIDE;
+
 		void OnAttached(FrameBuffer& fb, uint32_t att);
 		void OnDetached(FrameBuffer& fb, uint32_t att);
 	};
@@ -89,6 +95,8 @@ namespace KlayGE
 		OGLTexture1DRenderView(Texture& texture_1d, int array_index, int level);
 
 		void ClearColor(Color const & clr);
+
+		virtual void Discard() KLAYGE_OVERRIDE;
 
 		void OnAttached(FrameBuffer& fb, uint32_t att);
 		void OnDetached(FrameBuffer& fb, uint32_t att);
@@ -109,6 +117,8 @@ namespace KlayGE
 
 		void ClearColor(Color const & clr);
 
+		virtual void Discard() KLAYGE_OVERRIDE;
+
 		void OnAttached(FrameBuffer& fb, uint32_t att);
 		void OnDetached(FrameBuffer& fb, uint32_t att);
 
@@ -128,6 +138,8 @@ namespace KlayGE
 		~OGLTexture3DRenderView();
 
 		void ClearColor(Color const & clr);
+
+		virtual void Discard() KLAYGE_OVERRIDE;
 
 		void OnAttached(FrameBuffer& fb, uint32_t att);
 		void OnDetached(FrameBuffer& fb, uint32_t att);
@@ -155,6 +167,8 @@ namespace KlayGE
 
 		void ClearColor(Color const & clr);
 
+		virtual void Discard() KLAYGE_OVERRIDE;
+
 		void OnAttached(FrameBuffer& fb, uint32_t att);
 		void OnDetached(FrameBuffer& fb, uint32_t att);
 
@@ -175,6 +189,8 @@ namespace KlayGE
 		~OGLGraphicsBufferRenderView();
 
 		void ClearColor(Color const & clr);
+
+		virtual void Discard() KLAYGE_OVERRIDE;
 
 		void OnAttached(FrameBuffer& fb, uint32_t att);
 		void OnDetached(FrameBuffer& fb, uint32_t att);
@@ -200,6 +216,8 @@ namespace KlayGE
 
 		void ClearColor(Color const & clr);
 
+		virtual void Discard() KLAYGE_OVERRIDE;
+
 		void OnAttached(FrameBuffer& fb, uint32_t att);
 		void OnDetached(FrameBuffer& fb, uint32_t att);
 
@@ -219,6 +237,8 @@ namespace KlayGE
 		OGLTextureCubeDepthStencilRenderView(Texture& texture_cube, int array_index, Texture::CubeFaces face, int level);
 
 		void ClearColor(Color const & clr);
+
+		virtual void Discard() KLAYGE_OVERRIDE;
 
 		void OnAttached(FrameBuffer& fb, uint32_t att);
 		void OnDetached(FrameBuffer& fb, uint32_t att);

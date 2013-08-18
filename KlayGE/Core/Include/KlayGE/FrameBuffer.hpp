@@ -93,6 +93,7 @@ namespace KlayGE
 		UnorderedAccessViewPtr AttachedUAV(uint32_t att) const;
 
 		virtual void Clear(uint32_t flags, Color const & clr, float depth, int32_t stencil) = 0;
+		virtual void Discard(uint32_t flags) = 0;
 
 		virtual void OnBind();
 		virtual void OnUnbind();

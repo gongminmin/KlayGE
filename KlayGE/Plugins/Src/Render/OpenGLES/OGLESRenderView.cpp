@@ -176,6 +176,65 @@ namespace KlayGE
 
 		re.BindFramebuffer(old_fbo);
 	}
+	
+	void OGLESRenderView::DoDiscardColor()
+	{
+		if (glloader_GLES_EXT_discard_framebuffer())
+		{
+			GLenum attachment;
+			if (fbo_ != 0)
+			{
+				attachment = GL_COLOR_ATTACHMENT0 + index_;
+			}
+			else
+			{
+				attachment = GL_COLOR_EXT;
+			}
+
+			OGLESRenderEngine& re = *checked_cast<OGLESRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+
+			GLuint old_fbo = re.BindFramebuffer();
+			re.BindFramebuffer(fbo_);
+			glDiscardFramebufferEXT(GL_FRAMEBUFFER, 1, &attachment);
+
+			re.BindFramebuffer(old_fbo);
+		}
+		else
+		{
+			this->ClearColor(Color(0, 0, 0, 0));
+		}
+	}
+
+	void OGLESRenderView::DoDiscardDepthStencil()
+	{
+		if (glloader_GLES_EXT_discard_framebuffer())
+		{
+			GLenum attachments[2];
+			if (fbo_ != 0)
+			{
+				attachments[0] = GL_DEPTH_ATTACHMENT;
+				attachments[1] = GL_STENCIL_ATTACHMENT;
+			}
+			else
+			{
+				attachments[0] = GL_DEPTH_EXT;
+				attachments[1] = GL_STENCIL_EXT;
+			}
+
+			OGLESRenderEngine& re = *checked_cast<OGLESRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+
+			GLuint old_fbo = re.BindFramebuffer();
+			re.BindFramebuffer(fbo_);
+
+			glDiscardFramebufferEXT(GL_FRAMEBUFFER, 2, attachments);
+
+			re.BindFramebuffer(old_fbo);
+		}
+		else
+		{
+			this->ClearDepthStencil(1, 0);
+		}
+	}
 
 
 	OGLESScreenColorRenderView::OGLESScreenColorRenderView(uint32_t width, uint32_t height, ElementFormat pf)
@@ -203,6 +262,11 @@ namespace KlayGE
 	void OGLESScreenColorRenderView::ClearDepthStencil(float /*depth*/, int32_t /*stencil*/)
 	{
 		BOOST_ASSERT(false);
+	}
+
+	void OGLESScreenColorRenderView::Discard()
+	{
+		this->DoDiscardColor();
 	}
 
 	void OGLESScreenColorRenderView::OnAttached(FrameBuffer& fb, uint32_t att)
@@ -241,6 +305,11 @@ namespace KlayGE
 	void OGLESScreenDepthStencilRenderView::ClearColor(Color const & /*clr*/)
 	{
 		BOOST_ASSERT(false);
+	}
+
+	void OGLESScreenDepthStencilRenderView::Discard()
+	{
+		this->DoDiscardDepthStencil();
 	}
 
 	void OGLESScreenDepthStencilRenderView::OnAttached(FrameBuffer& fb, uint32_t /*att*/)
@@ -303,6 +372,11 @@ namespace KlayGE
 			std::vector<Color> mem_clr(width_, clr);
 			glTexSubImage2D(texture_1d_.GLType(), level_, 0, 0, width_, 1, GL_RGBA, GL_FLOAT, &mem_clr[0]);
 		}
+	}
+
+	void OGLESTexture1DRenderView::Discard()
+	{
+		this->DoDiscardColor();
 	}
 
 	void OGLESTexture1DRenderView::OnAttached(FrameBuffer& fb, uint32_t att)
@@ -377,6 +451,11 @@ namespace KlayGE
 		}
 	}
 
+	void OGLESTexture2DRenderView::Discard()
+	{
+		this->DoDiscardColor();
+	}
+
 	void OGLESTexture2DRenderView::OnAttached(FrameBuffer& fb, uint32_t att)
 	{
 		BOOST_ASSERT(att != FrameBuffer::ATT_DepthStencil);
@@ -446,6 +525,11 @@ namespace KlayGE
 		BOOST_ASSERT(fbo_ != 0);
 
 		this->DoClear(GL_COLOR_BUFFER_BIT, clr, 0, 0);
+	}
+
+	void OGLESTexture3DRenderView::Discard()
+	{
+		this->DoDiscardColor();
 	}
 
 	void OGLESTexture3DRenderView::OnAttached(FrameBuffer& fb, uint32_t att)
@@ -597,6 +681,11 @@ namespace KlayGE
 		}
 	}
 
+	void OGLESTextureCubeRenderView::Discard()
+	{
+		this->DoDiscardColor();
+	}
+
 	void OGLESTextureCubeRenderView::OnAttached(FrameBuffer& fb, uint32_t att)
 	{
 		BOOST_ASSERT(att != FrameBuffer::ATT_DepthStencil);
@@ -696,6 +785,11 @@ namespace KlayGE
 	void OGLESDepthStencilRenderView::ClearColor(Color const & /*clr*/)
 	{
 		BOOST_ASSERT(false);
+	}
+
+	void OGLESDepthStencilRenderView::Discard()
+	{
+		this->DoDiscardDepthStencil();
 	}
 
 	void OGLESDepthStencilRenderView::OnAttached(FrameBuffer& fb, uint32_t att)
@@ -813,6 +907,11 @@ namespace KlayGE
 	void OGLESTextureCubeDepthStencilRenderView::ClearColor(Color const & /*clr*/)
 	{
 		BOOST_ASSERT(false);
+	}
+
+	void OGLESTextureCubeDepthStencilRenderView::Discard()
+	{
+		this->DoDiscardDepthStencil();
 	}
 
 	void OGLESTextureCubeDepthStencilRenderView::OnAttached(FrameBuffer& fb, uint32_t att)

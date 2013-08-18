@@ -118,6 +118,27 @@ namespace KlayGE
 		BOOST_ASSERT(false);
 	}
 
+	void D3D11RenderTargetRenderView::Discard()
+	{
+#if (_WIN32_WINNT >= 0x0602 /*_WIN32_WINNT_WIN8*/)
+		ID3D11DeviceContext1* d3d_imm_ctx_1;
+		d3d_imm_ctx_->QueryInterface(IID_ID3D11DeviceContext1, reinterpret_cast<void**>(&d3d_imm_ctx_1));
+		if (d3d_imm_ctx_1 != nullptr)
+		{
+			d3d_imm_ctx_1->DiscardView(rt_view_.get());
+			d3d_imm_ctx_1->Release();
+		}
+		else
+		{
+			float clr[] = { 0, 0, 0, 0 };
+			d3d_imm_ctx_->ClearRenderTargetView(rt_view_.get(), clr);
+		}
+#else
+		float clr[] = { 0, 0, 0, 0 };
+		d3d_imm_ctx_->ClearRenderTargetView(rt_view_.get(), clr);
+#endif
+	}
+
 	void D3D11RenderTargetRenderView::OnAttached(FrameBuffer& /*fb*/, uint32_t /*att*/)
 	{
 	}
@@ -228,6 +249,25 @@ namespace KlayGE
 	void D3D11DepthStencilRenderView::ClearDepthStencil(float depth, int32_t stencil)
 	{
 		d3d_imm_ctx_->ClearDepthStencilView(ds_view_.get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, depth, static_cast<uint8_t>(stencil));
+	}
+
+	void D3D11DepthStencilRenderView::Discard()
+	{
+#if (_WIN32_WINNT >= 0x0602 /*_WIN32_WINNT_WIN8*/)
+		ID3D11DeviceContext1* d3d_imm_ctx_1;
+		d3d_imm_ctx_->QueryInterface(IID_ID3D11DeviceContext1, reinterpret_cast<void**>(&d3d_imm_ctx_1));
+		if (d3d_imm_ctx_1 != nullptr)
+		{
+			d3d_imm_ctx_1->DiscardView(ds_view_.get());
+			d3d_imm_ctx_1->Release();
+		}
+		else
+		{
+			d3d_imm_ctx_->ClearDepthStencilView(ds_view_.get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1, 0);
+		}
+#else
+		d3d_imm_ctx_->ClearDepthStencilView(ds_view_.get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1, 0);
+#endif
 	}
 
 	void D3D11DepthStencilRenderView::OnAttached(FrameBuffer& /*fb*/, uint32_t att)

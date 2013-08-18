@@ -183,46 +183,60 @@ namespace KlayGE
 
 	void D3D11FrameBuffer::Clear(uint32_t flags, Color const & clr, float depth, int32_t stencil)
 	{
-		D3D11RenderEngine const & re = *checked_cast<D3D11RenderEngine const *>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-		ID3D11DeviceContextPtr const & d3d_imm_ctx = re.D3DDeviceImmContext();
-
 		if (flags & CBM_Color)
 		{
 			for (uint32_t i = 0; i < clr_views_.size(); ++ i)
 			{
-				ID3D11RenderTargetViewPtr rt_view = this->D3DRTView(i);
-				if (rt_view)
+				if (clr_views_[i])
 				{
-					d3d_imm_ctx->ClearRenderTargetView(rt_view.get(), &clr.r());
+					clr_views_[i]->ClearColor(clr);
 				}
 			}
 		}
 		if ((flags & CBM_Depth) && (flags & CBM_Stencil))
 		{
-			ID3D11DepthStencilViewPtr const & ds_view = this->D3DDSView();
-			if (ds_view)
+			if (rs_view_)
 			{
-				d3d_imm_ctx->ClearDepthStencilView(ds_view.get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, depth, static_cast<uint8_t>(stencil));
+				rs_view_->ClearDepthStencil(depth, stencil);
 			}
 		}
 		else
 		{
 			if (flags & CBM_Depth)
 			{
-				ID3D11DepthStencilViewPtr const & ds_view = this->D3DDSView();
-				if (ds_view)
+				if (rs_view_)
 				{
-					d3d_imm_ctx->ClearDepthStencilView(ds_view.get(), D3D11_CLEAR_DEPTH, depth, 0);
+					rs_view_->ClearDepth(depth);
 				}
 			}
 
 			if (flags & CBM_Stencil)
 			{
-				ID3D11DepthStencilViewPtr const & ds_view = this->D3DDSView();
-				if (ds_view)
+				if (rs_view_)
 				{
-					d3d_imm_ctx->ClearDepthStencilView(ds_view.get(), D3D11_CLEAR_STENCIL, 1, static_cast<uint8_t>(stencil));
+					rs_view_->ClearStencil(stencil);
 				}
+			}
+		}
+	}
+
+	void D3D11FrameBuffer::Discard(uint32_t flags)
+	{
+		if (flags & CBM_Color)
+		{
+			for (uint32_t i = 0; i < clr_views_.size(); ++ i)
+			{
+				if (clr_views_[i])
+				{
+					clr_views_[i]->Discard();
+				}
+			}
+		}
+		if ((flags & CBM_Depth) || (flags & CBM_Stencil))
+		{
+			if (rs_view_)
+			{
+				rs_view_->Discard();
 			}
 		}
 	}

@@ -55,6 +55,8 @@ namespace KlayGE
 		virtual void ClearStencil(int32_t stencil) = 0;
 		virtual void ClearDepthStencil(float depth, int32_t stencil) = 0;
 
+		virtual void Discard() = 0;
+
 		virtual void OnAttached(FrameBuffer& fb, uint32_t att) = 0;
 		virtual void OnDetached(FrameBuffer& fb, uint32_t att) = 0;
 

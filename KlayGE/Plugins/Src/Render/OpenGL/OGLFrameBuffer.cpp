@@ -255,4 +255,9 @@ namespace KlayGE
 
 		re.BindFramebuffer(old_fbo);
 	}
+
+	void OGLFrameBuffer::Discard(uint32_t flags)
+	{
+		this->Clear(flags, Color(0, 0, 0, 0), 1, 0);
+	}
 }
