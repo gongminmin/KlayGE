@@ -13,6 +13,7 @@
 	<parameter type="float3" name="extinction_coefficient"/>
 	<parameter type="float" name="material_thickness"/>
 	<parameter type="float" name="sigma_t"/>
+	<parameter type="float2" name="far_plane"/>
 	
 	<parameter type="float3" name="pos_center"/>
 	<parameter type="float3" name="pos_extent"/>
@@ -49,7 +50,11 @@ void BackFaceDepthVS(float2 tex0 : TEXCOORD0,
 
 float4 BackFaceDepthPS(float depth : TEXCOORD0) : SV_Target
 {
-	return depth;	
+#if PACK_TO_RGBA
+	return EncodeFloatRGBA(clamp(depth * far_plane.y, 0, 0.999f));
+#else
+	return depth;
+#endif
 }
 		]]>
 	</shader>
@@ -68,9 +73,11 @@ float4 BackFaceDepthPS(float depth : TEXCOORD0) : SV_Target
 			<state name="color_write_mask" value="0"/>
 		</pass>
 	</technique>
+	<technique name="BackFaceDepthTechWODepthTexturePack" inherit="BackFaceDepthTechWODepthTexture">
+		<macro name="PACK_TO_RGBA" value="1"/>
+	</technique>
 
 	<parameter type="texture2D" name="back_face_depth_tex"/>
-	<parameter type="int" name="non_linear_depth"/>
 	<parameter type="float2" name="near_q"/>
 
 	<parameter type="sampler" name="point_sampler">
@@ -152,11 +159,14 @@ float4 SubSurfacePS(float2 uv : TEXCOORD0,
 	float2 tex_coord = oPosSS.xy / oPosSS.w;
 	tex_coord.y *= KLAYGE_FLIPPING;
 	tex_coord = tex_coord * 0.5f + 0.5f;
+#if PACK_TO_RGBA
+	float back_face_depth = DecodeFloatRGBA(back_face_depth_tex.Sample(point_sampler, tex_coord)) * far_plane.x;
+#else
 	float back_face_depth = back_face_depth_tex.Sample(point_sampler, tex_coord).r;
-	if (non_linear_depth)
-	{
-		back_face_depth = non_linear_depth_to_linear(back_face_depth, near_q.x, near_q.y);
-	}
+#endif
+#if !NO_DEPTH_TEXTURE
+	back_face_depth = non_linear_depth_to_linear(back_face_depth, near_q.x, near_q.y);
+#endif
 	float thickness = clamp(back_face_depth - oPosSS.w, 0, 100.0f);
 
 	float indirect_light = material_thickness * (max(0, dot(-N, L)) + max(0, dot(-V, L)));
@@ -179,5 +189,12 @@ float4 SubSurfacePS(float2 uv : TEXCOORD0,
 			<state name="vertex_shader" value="SubSurfaceVS()"/>
 			<state name="pixel_shader" value="SubSurfacePS()"/>
 		</pass>
+	</technique>
+	<technique name="SubSurfaceTechWODepthTexture" inherit="SubSurfaceTech">
+		<macro name="NO_DEPTH_TEXTURE" value="1"/>
+	</technique>
+	<technique name="SubSurfaceTechWODepthTexturePack" inherit="SubSurfaceTech">
+		<macro name="NO_DEPTH_TEXTURE" value="1"/>
+		<macro name="PACK_TO_RGBA" value="1"/>
 	</technique>
 </effect>

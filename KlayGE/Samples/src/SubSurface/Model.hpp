@@ -20,7 +20,7 @@ public:
 	void LightFalloff(KlayGE::float3 const & light_falloff);
 
 	void BackFaceDepthPass(bool dfdp);
-	void BackFaceDepthTex(KlayGE::TexturePtr const & tex);
+	void BackFaceDepthTex(KlayGE::TexturePtr const & tex, bool pack_to_rgba);
 	void SigmaT(float sigma_t);
 	void MtlThickness(float thickness);
 
@@ -46,7 +46,7 @@ public:
 	void LightFalloff(KlayGE::float3 const & light_falloff);
 
 	void BackFaceDepthPass(bool dfdp);
-	void BackFaceDepthTex(KlayGE::TexturePtr const & tex);
+	void BackFaceDepthTex(KlayGE::TexturePtr const & tex, bool pack_to_rgba);
 	void SigmaT(float sigma_t);
 	void MtlThickness(float thickness);
 
@@ -54,6 +54,7 @@ public:
 
 private:
 	bool depth_texture_support_;
+	bool pack_to_rgba_;
 };
 
 #endif		// _MODEL_HPP

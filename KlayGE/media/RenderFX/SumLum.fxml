@@ -54,18 +54,13 @@ float4 SumLum4x4LogPS(float4 iTex0 : TEXCOORD0,
 	float s = 0;
 	for (int i = 0; i < 2; ++ i)
 	{
-#if PACK_TO_RGBA
-		s += dot(src_tex.Sample(src_sampler, tex[i].xy).rgb, RGB_TO_LUM);
-		s += dot(src_tex.Sample(src_sampler, tex[i].zw).rgb, RGB_TO_LUM);
-#else
 		s += log(dot(src_tex.Sample(src_sampler, tex[i].xy).rgb, RGB_TO_LUM) + 0.001f);
 		s += log(dot(src_tex.Sample(src_sampler, tex[i].zw).rgb, RGB_TO_LUM) + 0.001f);
-#endif
 	}
 
 	float ret = s / 4;
 #if PACK_TO_RGBA
-	return EncodeFloatRGBA(clamp(ret / 16, 0, 0.999f));
+	return EncodeFloatRGBA(clamp(ret / 16 + 0.5f, 0, 0.999f));
 #else
 	return ret;
 #endif
@@ -80,8 +75,8 @@ float4 SumLum4x4IterativePS(float4 iTex0 : TEXCOORD0,
 	for (int i = 0; i < 2; ++ i)
 	{
 #if PACK_TO_RGBA
-		s += DecodeFloatRGBA(src_tex.Sample(src_sampler, tex[i].xy)) * 16;
-		s += DecodeFloatRGBA(src_tex.Sample(src_sampler, tex[i].zw)) * 16;
+		s += DecodeFloatRGBA(src_tex.Sample(src_sampler, tex[i].xy)) * 16 - 8;
+		s += DecodeFloatRGBA(src_tex.Sample(src_sampler, tex[i].zw)) * 16 - 8;
 #else
 		s += src_tex.Sample(src_sampler, tex[i].xy).r;
 		s += src_tex.Sample(src_sampler, tex[i].zw).r;
@@ -90,7 +85,7 @@ float4 SumLum4x4IterativePS(float4 iTex0 : TEXCOORD0,
 
 	float ret = s / 4;
 #if PACK_TO_RGBA
-	return EncodeFloatRGBA(clamp(ret / 16, 0, 0.999f));
+	return EncodeFloatRGBA(clamp(ret / 16 + 0.5f, 0, 0.999f));
 #else
 	return ret;
 #endif
@@ -106,7 +101,7 @@ float4 AdaptedLumPS(float4 tex0 : TEXCOORD0,
 #endif
 
 #if PACK_IN_TO_RGBA
-	float current_lum = DecodeFloatRGBA(src_tex.Sample(src_sampler, 0.5f.xx)) * 16;
+	float current_lum = exp(DecodeFloatRGBA(src_tex.Sample(src_sampler, 0.5f.xx)) * 16 - 8);
 #else
 	float current_lum = exp(src_tex.Sample(src_sampler, 0.5f.xx).r);
 #endif

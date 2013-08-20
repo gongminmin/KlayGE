@@ -64,9 +64,9 @@ namespace
 			checked_pointer_cast<DetailedModel>(renderable_)->BackFaceDepthPass(dfdp);
 		}
 
-		void BackFaceDepthTex(TexturePtr const & tex)
+		void BackFaceDepthTex(TexturePtr const & tex, bool pack_to_rgba)
 		{
-			checked_pointer_cast<DetailedModel>(renderable_)->BackFaceDepthTex(tex);
+			checked_pointer_cast<DetailedModel>(renderable_)->BackFaceDepthTex(tex, pack_to_rgba);
 		}
 
 		void SigmaT(float sigma_t)
@@ -182,69 +182,71 @@ void SubSurfaceApp::OnResize(uint32_t width, uint32_t height)
 	RenderEngine& re = rf.RenderEngineInstance();
 	RenderDeviceCaps const & caps = re.DeviceCaps();
 
+	KlayGE::TexturePtr back_face_depth_tex;
+	KlayGE::TexturePtr back_face_ds_tex;
+	KlayGE::RenderViewPtr back_face_ds_view;
 	ElementFormat fmt;
 	if (depth_texture_support_)
 	{
-		if (caps.rendertarget_format_support(EF_ABGR8, 1, 0))
+		if (caps.texture_format_support(EF_ABGR8) && caps.rendertarget_format_support(EF_ABGR8, 1, 0))
 		{
 			fmt = EF_ABGR8;
 		}
 		else
 		{
-			BOOST_ASSERT(caps.rendertarget_format_support(EF_ARGB8, 1, 0));
+			BOOST_ASSERT(caps.texture_format_support(EF_ARGB8) && caps.rendertarget_format_support(EF_ARGB8, 1, 0));
 
 			fmt = EF_ARGB8;
 		}
 		// Just dummy
-		back_face_depth_tex_ = rf.MakeTexture2D(width, height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
-	}
-	else
-	{
-		if (caps.rendertarget_format_support(EF_R16F, 1, 0))
+		back_face_depth_tex = rf.MakeTexture2D(width, height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
+
+		if (caps.rendertarget_format_support(EF_D24S8, 1, 0))
 		{
-			fmt = EF_R16F;
+			fmt = EF_D24S8;
 		}
 		else
 		{
-			if (caps.rendertarget_format_support(EF_R32F, 1, 0))
-			{
-				fmt = EF_R32F;
-			}
-			else
-			{
-				BOOST_ASSERT(caps.rendertarget_format_support(EF_ABGR16F, 1, 0));
+			BOOST_ASSERT(caps.rendertarget_format_support(EF_D16, 1, 0));
 
-				fmt = EF_ABGR16F;
-			}
+			fmt = EF_D16;
 		}
-		back_face_depth_tex_ = rf.MakeTexture2D(width, height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
-	}
+		back_face_ds_tex = rf.MakeTexture2D(width, height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
+		back_face_ds_view = rf.Make2DDepthStencilRenderView(*back_face_ds_tex, 0, 1, 0);
 
-	if (caps.rendertarget_format_support(EF_D24S8, 1, 0))
-	{
-		fmt = EF_D24S8;
+		checked_pointer_cast<ModelObject>(model_)->BackFaceDepthTex(back_face_ds_tex, false);
 	}
 	else
 	{
-		BOOST_ASSERT(caps.rendertarget_format_support(EF_D16, 1, 0));
+		bool pack_to_rgba;
+		if (caps.texture_format_support(EF_R16F) && caps.rendertarget_format_support(EF_R16F, 1, 0))
+		{
+			fmt = EF_R16F;
+			pack_to_rgba = false;
+		}
+		else if (caps.texture_format_support(EF_ABGR8) && caps.rendertarget_format_support(EF_ABGR8, 1, 0))
+		{
+			fmt = EF_ABGR8;
+			pack_to_rgba = true;
+		}
+		else
+		{
+			BOOST_ASSERT(caps.texture_format_support(EF_ARGB8) && caps.rendertarget_format_support(EF_ARGB8, 1, 0));
 
-		fmt = EF_D16;
+			fmt = EF_ARGB8;
+			pack_to_rgba = true;
+		}
+		back_face_depth_tex = rf.MakeTexture2D(width, height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
+		back_face_ds_view = rf.Make2DDepthStencilRenderView(width, height, EF_D16, 1, 0);
+
+		checked_pointer_cast<ModelObject>(model_)->BackFaceDepthTex(back_face_depth_tex, pack_to_rgba);
 	}
-	back_face_ds_tex_ = rf.MakeTexture2D(width, height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
+
 	back_face_depth_fb_ = rf.MakeFrameBuffer();
-	back_face_depth_fb_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*back_face_depth_tex_, 0, 1, 0));
-	back_face_depth_fb_->Attach(FrameBuffer::ATT_DepthStencil, rf.Make2DDepthStencilRenderView(*back_face_ds_tex_, 0, 1, 0));
+	back_face_depth_fb_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*back_face_depth_tex, 0, 1, 0));
+	back_face_depth_fb_->Attach(FrameBuffer::ATT_DepthStencil, back_face_ds_view);
 	FrameBufferPtr screen_buffer = rf.RenderEngineInstance().CurFrameBuffer();
 	back_face_depth_fb_->GetViewport()->camera = screen_buffer->GetViewport()->camera;
-
-	if (depth_texture_support_)
-	{
-		checked_pointer_cast<ModelObject>(model_)->BackFaceDepthTex(back_face_ds_tex_);
-	}
-	else
-	{
-		checked_pointer_cast<ModelObject>(model_)->BackFaceDepthTex(back_face_depth_tex_);
-	}
 
 	UIManager::Instance().SettleCtrls();
 }

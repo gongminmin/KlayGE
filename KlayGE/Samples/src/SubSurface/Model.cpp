@@ -65,8 +65,6 @@ void DetailedMesh::BuildMeshInfo()
 	AABBox const & tc_bb = this->TexcoordBound();
 	*(technique_->Effect().ParameterByName("tc_center")) = float2(tc_bb.Center().x(), tc_bb.Center().y());
 	*(technique_->Effect().ParameterByName("tc_extent")) = float2(tc_bb.HalfSize().x(), tc_bb.HalfSize().y());
-
-	*(technique_->Effect().ParameterByName("non_linear_depth")) = static_cast<int32_t>(depth_texture_support_);
 }
 
 void DetailedMesh::OnRenderBegin()
@@ -105,23 +103,53 @@ void DetailedMesh::BackFaceDepthPass(bool dfdp)
 		}
 		else
 		{
-			technique_ = technique_->Effect().TechniqueByName("BackFaceDepthTechWODepthTexture");
+			if (pack_to_rgba_)
+			{
+				technique_ = technique_->Effect().TechniqueByName("BackFaceDepthTechWODepthTexturePack");
+			}
+			else
+			{
+				technique_ = technique_->Effect().TechniqueByName("BackFaceDepthTechWODepthTexture");
+			}
 		}
 	}
 	else
 	{
-		technique_ = technique_->Effect().TechniqueByName("SubSurfaceTech");
+		if (depth_texture_support_)
+		{
+			technique_ = technique_->Effect().TechniqueByName("SubSurfaceTech");
+		}
+		else
+		{
+			if (pack_to_rgba_)
+			{
+				technique_ = technique_->Effect().TechniqueByName("SubSurfaceTechWODepthTexturePack");
+			}
+			else
+			{
+				technique_ = technique_->Effect().TechniqueByName("SubSurfaceTechWODepthTexture");
+			}
+		}
 	}
 }
 
-void DetailedMesh::BackFaceDepthTex(KlayGE::TexturePtr const & tex)
+void DetailedMesh::BackFaceDepthTex(KlayGE::TexturePtr const & tex, bool pack_to_rgba)
 {
 	*(technique_->Effect().ParameterByName("back_face_depth_tex")) = tex;
 
+	pack_to_rgba_ = pack_to_rgba;
+
 	App3DFramework const & app = Context::Instance().AppInstance();
 	Camera const & camera = app.ActiveCamera();
-	float q = camera.FarPlane() / (camera.FarPlane() - camera.NearPlane());
-	*(technique_->Effect().ParameterByName("near_q")) = float2(camera.NearPlane() * q, q);
+	if (depth_texture_support_)
+	{
+		float q = camera.FarPlane() / (camera.FarPlane() - camera.NearPlane());
+		*(technique_->Effect().ParameterByName("near_q")) = float2(camera.NearPlane() * q, q);
+	}
+	if (pack_to_rgba_)
+	{
+		*(technique_->Effect().ParameterByName("far_plane")) = float2(camera.FarPlane(), 1.0f / camera.FarPlane());
+	}
 }
 
 void DetailedMesh::SigmaT(float sigma_t)
@@ -197,11 +225,11 @@ void DetailedModel::BackFaceDepthPass(bool dfdp)
 	}
 }
 
-void DetailedModel::BackFaceDepthTex(KlayGE::TexturePtr const & tex)
+void DetailedModel::BackFaceDepthTex(KlayGE::TexturePtr const & tex, bool pack_to_rgba)
 {
 	for (StaticMeshesPtrType::iterator iter = meshes_.begin(); iter != meshes_.end(); ++ iter)
 	{
-		checked_pointer_cast<DetailedMesh>(*iter)->BackFaceDepthTex(tex);
+		checked_pointer_cast<DetailedMesh>(*iter)->BackFaceDepthTex(tex, pack_to_rgba);
 	}
 }
 

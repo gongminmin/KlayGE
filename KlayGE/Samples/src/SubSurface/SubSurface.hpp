@@ -31,8 +31,6 @@ private:
 	KlayGE::TrackballCameraController tbController_;
 
 	bool depth_texture_support_;
-	KlayGE::TexturePtr back_face_depth_tex_;
-	KlayGE::TexturePtr back_face_ds_tex_;
 	KlayGE::FrameBufferPtr back_face_depth_fb_;
 
 	KlayGE::SceneObjectPtr light_proxy_;
