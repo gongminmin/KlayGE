@@ -236,7 +236,7 @@ namespace KlayGE
 					{
 						if (clr_views_[i])
 						{
-							attachments.push_back(GL_COLOR_ATTACHMENT0 + i);
+							attachments.push_back(static_cast<GLenum>(GL_COLOR_ATTACHMENT0 + i));
 						}
 					}
 				}
@@ -276,7 +276,7 @@ namespace KlayGE
 			GLuint old_fbo = re.BindFramebuffer();
 			re.BindFramebuffer(fbo_);
 
-			glDiscardFramebufferEXT(GL_FRAMEBUFFER, attachments.size(), &attachments[0]);
+			glDiscardFramebufferEXT(GL_FRAMEBUFFER, static_cast<GLsizei>(attachments.size()), &attachments[0]);
 
 			re.BindFramebuffer(old_fbo);
 		}
