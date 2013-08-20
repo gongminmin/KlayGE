@@ -88,7 +88,7 @@ namespace KlayGE
 	{
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 		RenderDeviceCaps const & caps = rf.RenderEngineInstance().DeviceCaps();
-		if (!caps.rendertarget_format_support(EF_R16F, 1, 0))
+		if (!(caps.texture_format_support(EF_R16F) && caps.rendertarget_format_support(EF_R16F, 1, 0)))
 		{
 			this->Technique(technique_->Effect().TechniqueByName("SumLumLogPack"));
 		}
@@ -118,7 +118,7 @@ namespace KlayGE
 	{
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 		RenderDeviceCaps const & caps = rf.RenderEngineInstance().DeviceCaps();
-		if (!caps.rendertarget_format_support(EF_R16F, 1, 0))
+		if (!(caps.texture_format_support(EF_R16F) && caps.rendertarget_format_support(EF_R16F, 1, 0)))
 		{
 			this->Technique(technique_->Effect().TechniqueByName("SumLumIterativePack"));
 		}
@@ -141,29 +141,44 @@ namespace KlayGE
 		init_data.row_pitch = sizeof(int);
 		init_data.slice_pitch = 0;
 		init_data.data = &data_v[0];
+		bool pack_out_to_rgba;
 		ElementFormat fmt;
-		if (caps.rendertarget_format_support(EF_R32F, 1, 0))
+		if (caps.texture_format_support(EF_R32F) && caps.rendertarget_format_support(EF_R32F, 1, 0))
 		{
 			fmt = EF_R32F;
-			pack_to_rgba_ = false;
+			pack_out_to_rgba = false;
 		}
-		else if (caps.rendertarget_format_support(EF_ABGR8, 1, 0))
+		else if (caps.texture_format_support(EF_ABGR8) && caps.rendertarget_format_support(EF_ABGR8, 1, 0))
 		{
 			fmt = EF_ABGR8;
-			pack_to_rgba_ = true;
+			pack_out_to_rgba = true;
 		}
 		else
 		{
-			BOOST_ASSERT(caps.rendertarget_format_support(EF_ARGB8, 1, 0));
+			BOOST_ASSERT(caps.texture_format_support(EF_ARGB8) && caps.rendertarget_format_support(EF_ARGB8, 1, 0));
 
 			fmt = EF_ARGB8;
-			pack_to_rgba_ = true;
+			pack_out_to_rgba = true;
+		}
+
+		bool pack_in_to_rgba = true;
+		if (caps.texture_format_support(EF_R16F) && caps.rendertarget_format_support(EF_R16F, 1, 0))
+		{
+			pack_in_to_rgba = false;
 		}
 
 		RenderEffectPtr effect = SyncLoadRenderEffect("SumLum.fxml");
-		if (pack_to_rgba_)
+		if (pack_in_to_rgba && pack_out_to_rgba)
 		{
-			this->Technique(effect->TechniqueByName("AdaptedLumPack"));
+			this->Technique(effect->TechniqueByName("AdaptedLumInOutPack"));
+		}
+		else if (pack_in_to_rgba)
+		{
+			this->Technique(effect->TechniqueByName("AdaptedLumInPack"));
+		}
+		else if (pack_out_to_rgba)
+		{
+			this->Technique(effect->TechniqueByName("AdaptedLumOutPack"));
 		}
 		else
 		{
@@ -249,7 +264,7 @@ namespace KlayGE
 		{
 			if (fp_texture_support)
 			{
-				if (caps.rendertarget_format_support(EF_R32F, 1, 0))
+				if (caps.texture_format_support(EF_R32F) && caps.rendertarget_format_support(EF_R32F, 1, 0))
 				{
 					tech = effect->TechniqueByName("ToneMapping30");
 				}
@@ -267,7 +282,7 @@ namespace KlayGE
 		{
 			if (fp_texture_support)
 			{
-				if (caps.rendertarget_format_support(EF_R32F, 1, 0))
+				if (caps.texture_format_support(EF_R32F) && caps.rendertarget_format_support(EF_R32F, 1, 0))
 				{
 					tech = effect->TechniqueByName("ToneMapping20");
 				}
@@ -305,17 +320,17 @@ namespace KlayGE
 
 		std::vector<TexturePtr> lum_texs(sum_lums_.size() + 1);
 		ElementFormat fmt;
-		if (caps.rendertarget_format_support(EF_R16F, 1, 0))
+		if (caps.texture_format_support(EF_R16F) && caps.rendertarget_format_support(EF_R16F, 1, 0))
 		{
 			fmt = EF_R16F;
 		}
-		else if (caps.rendertarget_format_support(EF_ABGR8, 1, 0))
+		else if (caps.texture_format_support(EF_ABGR8) && caps.rendertarget_format_support(EF_ABGR8, 1, 0))
 		{
 			fmt = EF_ABGR8;
 		}
 		else
 		{
-			BOOST_ASSERT(caps.rendertarget_format_support(EF_ARGB8, 1, 0));
+			BOOST_ASSERT(caps.texture_format_support(EF_ARGB8) && caps.rendertarget_format_support(EF_ARGB8, 1, 0));
 
 			fmt = EF_ARGB8;
 		}

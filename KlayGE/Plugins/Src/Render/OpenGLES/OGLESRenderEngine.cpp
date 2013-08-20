@@ -126,17 +126,13 @@ namespace KlayGE
 
 	void OGLESRenderEngine::CheckConfig(RenderSettings& settings)
 	{
-		if ((!caps_.texture_format_support(EF_R16F) && !caps_.texture_format_support(EF_ABGR16F))
-			|| (!caps_.texture_format_support(EF_R32F) || !caps_.texture_format_support(EF_ABGR32F)))
-		{
-			settings.hdr = false;
-		}
-
 #if defined KLAYGE_PLATFORM_ANDROID
 		settings.hdr = false;
 		settings.ppaa = false;
 		settings.gamma = false;
 		settings.color_grading = false;
+#else
+		UNREF_PARAM(settings);
 #endif
 	}
 
@@ -1483,19 +1479,16 @@ namespace KlayGE
 			rendertarget_format_.insert(EF_ABGR32UI);
 			rendertarget_format_.insert(EF_ABGR32I);
 		}
-		if ((glloader_GLES_VERSION_3_0() || glloader_GLES_EXT_texture_rg()) && !(hack_for_pvr_ || hack_for_mali_))
+		if (glloader_GLES_EXT_color_buffer_half_float() || glloader_GLES_EXT_color_buffer_float())
 		{
 			rendertarget_format_.insert(EF_R16F);
 			rendertarget_format_.insert(EF_GR16F);
-			rendertarget_format_.insert(EF_R32F);
-			rendertarget_format_.insert(EF_GR32F);
-		}
-		if ((glloader_GLES_VERSION_3_0() || glloader_GLES_OES_texture_half_float()) && !(hack_for_pvr_ || hack_for_mali_))
-		{
 			rendertarget_format_.insert(EF_ABGR16F);
 		}
-		if (glloader_GLES_OES_texture_float() && !(hack_for_pvr_ || hack_for_mali_))
+		if (glloader_GLES_EXT_color_buffer_float())
 		{
+			rendertarget_format_.insert(EF_R32F);
+			rendertarget_format_.insert(EF_GR32F);
 			rendertarget_format_.insert(EF_ABGR32F);
 		}
 		rendertarget_format_.insert(EF_D16);

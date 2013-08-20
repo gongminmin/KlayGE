@@ -69,9 +69,9 @@ float4 ToneMapping20PS(float2 iTex : TEXCOORD0) : SV_Target
 	float adapted_lum = 1;
 #else
 #if PACK_TO_RGBA
-	float adapted_lum = DecodeFloatRGBA(lum_tex.SampleLevel(point_sampler, 0.5f.xx, 0)) * 16;
+	float adapted_lum = DecodeFloatRGBA(lum_tex.Sample(point_sampler, 0.5f.xx)) * 16;
 #else
-	float adapted_lum = lum_tex.SampleLevel(point_sampler, 0.5f.xx, 0).r;
+	float adapted_lum = lum_tex.Sample(point_sampler, 0.5f.xx).r;
 #endif
 #endif
 	float lum = max(0.001f, adapted_lum);
