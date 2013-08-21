@@ -602,9 +602,9 @@ float4 RenderScenePS(float2 Texcoord : TEXCOORD0, float3 LightWorldPos : TEXCOOR
 	
 	float atten = attenuation_term(0, LightWorldPos, light_falloff);
 	// Exponential shadow mapping
-	atten *= min(1, occluder * exp(-scale_factor * dist));
+	atten *= min(1, occluder * exp(scale_factor * dist));
 
-	float3 clr = ambient_clr.rgb * c_diff + emit + lighting * ori_color * atten;	
+	float3 clr = ambient_clr.rgb * 0.2f * c_diff + emit + lighting * ori_color * atten;	
 	return float4(clr, 1.0f);
 }
 		]]>

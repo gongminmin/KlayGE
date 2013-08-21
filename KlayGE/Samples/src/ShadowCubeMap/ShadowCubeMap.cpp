@@ -153,6 +153,8 @@ namespace
 			light_proj_ = app.ActiveCamera().ProjMatrix();
 
 			light_falloff_ = light_src->Falloff();
+
+			light_inv_range_ = 1.0f / (app.ActiveCamera().FarPlane() - app.ActiveCamera().NearPlane());
 		}
 
 		void CubeSMTexture(TexturePtr const & cube_tex)
@@ -181,6 +183,8 @@ namespace
 
 			if (gen_sm_pass_)
 			{
+				*(effect->ParameterByName("scale_factor")) = scale_factor_ * light_inv_range_;
+
 				switch (sm_type_)
 				{
 				case SMT_DP:
@@ -214,6 +218,8 @@ namespace
 			}
 			else
 			{
+				*(effect->ParameterByName("scale_factor")) = -scale_factor_ * light_inv_range_;
+
 				*(effect->ParameterByName("mvp")) = model * camera.ViewProjMatrix();
 				*(effect->ParameterByName("light_pos")) = light_pos_;
 
@@ -250,6 +256,9 @@ namespace
 		float4x4 light_views_[6];
 		float4x4 light_proj_;
 		float3 light_falloff_;
+
+		float scale_factor_;
+		float light_inv_range_;
 
 		TexturePtr lamp_tex_;
 	};
@@ -343,7 +352,7 @@ namespace
 
 		void ScaleFactor(float scale_factor)
 		{
-			*(effect_->ParameterByName("scale_factor")) = scale_factor;
+			scale_factor_ = scale_factor;
 		}
 
 		void GenShadowMapPass(bool gen_sm, SM_TYPE sm_type, int pass_index)
@@ -655,6 +664,7 @@ void ShadowCubeMap::InitObjects()
 	dialog_->Control<UIComboBox>(id_sm_type_combo_)->OnSelectionChangedEvent().connect(KlayGE::bind(&ShadowCubeMap::SMTypeChangedHandler, this, KlayGE::placeholders::_1));
 	dialog_->Control<UICheckBox>(id_ctrl_camera_)->OnChangedEvent().connect(KlayGE::bind(&ShadowCubeMap::CtrlCameraHandler, this, KlayGE::placeholders::_1));
 
+	this->ScaleFactorChangedHandler(*dialog_->Control<UISlider>(id_scale_factor_slider_));
 	this->SMTypeChangedHandler(*dialog_->Control<UIComboBox>(id_sm_type_combo_));
 }
 
@@ -682,6 +692,10 @@ void ShadowCubeMap::ScaleFactorChangedHandler(KlayGE::UISlider const & sender)
 	{
 		checked_pointer_cast<OccluderMesh>(scene_objs_[i]->GetRenderable())->ScaleFactor(scale_factor);
 	}
+
+	std::wostringstream stream;
+	stream << L"Scale Factor: " << scale_factor;
+	dialog_->Control<UIStatic>(id_scale_factor_static_)->SetText(stream.str());
 }
 
 void ShadowCubeMap::SMTypeChangedHandler(KlayGE::UIComboBox const & sender)

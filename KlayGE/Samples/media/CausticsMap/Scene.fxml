@@ -261,7 +261,7 @@ float4 DistanceMappingPS(float4 L	: TEXCOORD0,
 	shadow_dir += deltaUV;
 	shadow_dir.y *= -KLAYGE_FLIPPING;
 	float occluder = shadow_cube_tex.SampleLevel(linear_clamp_sampler, shadow_dir, 0).x;
-	float atten = saturate(occluder * exp(-scale_factor * dist));
+	float atten = saturate(occluder * exp(scale_factor * dist));
 
 	float4 caustics = 1;
 	float2 lookup_uv = CalcLookupUV(LightProjPos);

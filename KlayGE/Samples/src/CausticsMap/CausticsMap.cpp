@@ -147,19 +147,25 @@ namespace
 			*(technique_->Effect().ParameterByName("pos_center")) = pos_aabb_.Center();
 			*(technique_->Effect().ParameterByName("pos_extent")) = pos_aabb_.HalfSize();
 
+			float const scale_factor = 4.0f;
+
 			if ((Depth_WODT_Pass == pass_) || (Position_Pass == pass_))
 			{
 			}
 			else if (Gen_Shadow_Pass == pass_)
 			{
+				float light_inv_range = 1.0f / (light_->SMCamera(0)->FarPlane() - light_->SMCamera(0)->NearPlane());
+
 				float4x4 light_model = MathLib::to_matrix(light_->Rotation()) * MathLib::translation(light_->Position());
 				float4x4 inv_light_model = MathLib::inverse(light_model);
 
 				*(technique_->Effect().ParameterByName("obj_model_to_light_model")) = model * inv_light_model;
-				*(technique_->Effect().ParameterByName("scale_factor")) = 0.04f;
+				*(technique_->Effect().ParameterByName("scale_factor")) = scale_factor * light_inv_range;
 			}
 			else
 			{
+				float light_inv_range = 1.0f / (light_->SMCamera(0)->FarPlane() - light_->SMCamera(0)->NearPlane());
+
 				float4x4 light_model = MathLib::to_matrix(light_->Rotation()) * MathLib::translation(light_->Position());
 				float4x4 inv_light_model = MathLib::inverse(light_model);
 				float4x4 first_light_view = light_->SMCamera(0)->ViewMatrix();
@@ -173,7 +179,7 @@ namespace
 				*(technique_->Effect().ParameterByName("caustics_tex")) = caustics_map_;
 				*(technique_->Effect().ParameterByName("obj_model_to_light_model")) = model * inv_light_model;
 				*(technique_->Effect().ParameterByName("obj_model_to_light_view")) = model * first_light_view;
-				*(technique_->Effect().ParameterByName("scale_factor")) = 0.04f;
+				*(technique_->Effect().ParameterByName("scale_factor")) = -scale_factor * light_inv_range;
 			}
 		}
 
