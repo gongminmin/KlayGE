@@ -44,7 +44,7 @@ void DetailedMesh::BuildMeshInfo()
 	*(technique_->Effect().ParameterByName("specular_tex")) = specular_tex_;
 	*(technique_->Effect().ParameterByName("specular_tex")) = shininess_tex_;
 
-	*(technique_->Effect().ParameterByName("ambient_clr")) = float4(mtl_->ambient.x(), mtl_->ambient.y(), mtl_->ambient.z(), 1);
+	*(technique_->Effect().ParameterByName("ambient_clr")) = float4(mtl_->ambient.x() * 0.2f, mtl_->ambient.y() * 0.2f, mtl_->ambient.z() * 0.2f, 1);
 	*(technique_->Effect().ParameterByName("diffuse_clr")) = float4(mtl_->diffuse.x(), mtl_->diffuse.y(), mtl_->diffuse.z(), !!diffuse_tex_);
 	*(technique_->Effect().ParameterByName("specular_clr")) = float4(mtl_->specular.x(), mtl_->specular.y(), mtl_->specular.z(), !!specular_tex_);
 	*(technique_->Effect().ParameterByName("shininess_clr")) = float2(mtl_->shininess, !!shininess_tex_);
@@ -154,12 +154,12 @@ void DetailedMesh::BackFaceDepthTex(KlayGE::TexturePtr const & tex, bool pack_to
 
 void DetailedMesh::SigmaT(float sigma_t)
 {
-	*(technique_->Effect().ParameterByName("sigma_t")) = sigma_t;
+	*(technique_->Effect().ParameterByName("sigma_t")) = -sigma_t;
 }
 
 void DetailedMesh::MtlThickness(float thickness)
 {
-	*(technique_->Effect().ParameterByName("material_thickness")) = thickness;
+	*(technique_->Effect().ParameterByName("material_thickness")) = -thickness;
 }
 
 DetailedModel::DetailedModel(std::wstring const & name)

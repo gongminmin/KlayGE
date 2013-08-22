@@ -1284,9 +1284,13 @@ namespace KlayGE
 				D3D_SHADER_MACRO macro_end = { nullptr, nullptr };
 				macros.push_back(macro_end);
 			}
+			uint32_t flags = 0;
+#if !defined(KLAYGE_DEBUG)
+			flags |= D3DCOMPILE_OPTIMIZATION_LEVEL3;
+#endif
 			render_eng.D3DCompile(shader_text.c_str(), static_cast<UINT>(shader_text.size()), nullptr, &macros[0],
 				nullptr, sd.func_name.c_str(), shader_profile.c_str(),
-				0, 0, &code, &err_msg);
+				flags, 0, &code, &err_msg);
 			if (err_msg != nullptr)
 			{
 				LogError("Error when compiling %s:", sd.func_name.c_str());

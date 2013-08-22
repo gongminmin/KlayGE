@@ -27,7 +27,7 @@ float spot_lighting(float3 light_pos, float3 light_dir, float2 cos_cone, float3 
 float3 fresnel_term_schlick(float3 light_vec, float3 halfway_vec, float3 c_spec)
 {
 	float e_n = saturate(dot(light_vec, halfway_vec));
-	return c_spec + (1 - c_spec) * pow(1 - e_n, 5);
+	return c_spec + (1 - c_spec) * exp2(-(5.55473f * e_n + 6.98316f) * e_n);
 }
 
 float specular_normalize_factor(float roughness)
@@ -70,8 +70,10 @@ float3 calc_brdf(float3 c_diff, float3 c_spec, float roughness, float3 l, float3
 
 float attenuation_term(float3 light_pos, float3 pos, float3 atten)
 {
-	float d = distance(light_pos, pos);
-	return 1 / (atten.x + d * atten.y + d * d * atten.z);
+	float3 v = light_pos - pos;
+	float d2 = dot(v, v);
+	float d = sqrt(d2);
+	return 1 / (atten.x + d * atten.y + d2 * atten.z);
 }
     ]]>
 	</shader>

@@ -263,12 +263,11 @@ float4 DistanceMappingPS(float4 L	: TEXCOORD0,
 	float occluder = shadow_cube_tex.SampleLevel(linear_clamp_sampler, shadow_dir, 0).x;
 	float atten = saturate(occluder * exp(scale_factor * dist));
 
-	float4 caustics = 1;
 	float2 lookup_uv = CalcLookupUV(LightProjPos);
 	float2 delta = texUV.xy - texCoord0.xy;
 	lookup_uv += float2(delta.x, -KLAYGE_FLIPPING * delta.y);
-	caustics = float4(caustics_tex.Sample(linear_border_sampler, lookup_uv).xyz + 1, 1);
-	
+	float4 caustics = float4(caustics_tex.Sample(linear_border_sampler, lookup_uv).xyz, 1);
+
 #if KLAYGE_DERIVATIVES
 	float3 diffuse = diffuse_tex.SampleGrad(linear_sampler, texUV.xy, dx, dy).rgb;
 	float3 bump_normal = decompress_normal(normal_tex.SampleGrad(linear_sampler, texUV.xy, dx, dy));
@@ -276,7 +275,7 @@ float4 DistanceMappingPS(float4 L	: TEXCOORD0,
 	float3 diffuse = diffuse_tex.Sample(linear_sampler, texUV.xy).rgb;
 	float3 bump_normal = decompress_normal(normal_tex.Sample(linear_sampler, texUV.xy));
 #endif
-	return DistanceMappingShading(L.xyz, V.xyz, H.xyz, diffuse, bump_normal) * atten * caustics;
+	return DistanceMappingShading(L.xyz, V.xyz, H.xyz, diffuse, bump_normal) * atten + caustics;
 }
 
 float4 DistanceMappingPS_20(float4 L	: TEXCOORD0,
@@ -317,16 +316,14 @@ float4 DistanceMappingPS_20(float4 L	: TEXCOORD0,
 	p_max = linstep(0.55f, 1, p_max);
 	float atten = max(p, p_max);
 
-
-	float4 caustics = 1;
 	float2 lookup_uv = CalcLookupUV(LightProjPos);
 	float2 delta = texUV.xy - texCoord0.xy;
 	lookup_uv += float2(delta.x, -KLAYGE_FLIPPING * delta.y);
-	caustics = float4(caustics_tex.Sample(linear_border_sampler, lookup_uv).xyz + 1, 1);
+	float4 caustics = float4(caustics_tex.Sample(linear_border_sampler, lookup_uv).xyz, 1);
 
 	float3 diffuse = diffuse_tex.Sample(linear_sampler, texUV.xy).rgb;
 	float3 bump_normal = decompress_normal(normal_tex.Sample(linear_sampler, texUV.xy));
-	return DistanceMappingShading(L.xyz, V.xyz, H.xyz, diffuse, bump_normal) * atten * caustics;
+	return DistanceMappingShading(L.xyz, V.xyz, H.xyz, diffuse, bump_normal) * atten + caustics;
 }
 		]]>
 	</shader>

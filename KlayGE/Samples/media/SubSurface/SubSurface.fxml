@@ -169,13 +169,11 @@ float4 SubSurfacePS(float2 uv : TEXCOORD0,
 #endif
 	float thickness = clamp(back_face_depth - oPosSS.w, 0, 100.0f);
 
-	float indirect_light = material_thickness * (max(0, dot(-N, L)) + max(0, dot(-V, L)));
-	indirect_light *= attenuation;
-	indirect_light *= exp(-thickness * sigma_t);
+	float indirect_light = material_thickness * (min(0, dot(N, L)) + min(0, dot(V, L)));
+	indirect_light *= exp(thickness * sigma_t);
 
-	float3 clr = ambient_clr.rgb * 0.2f * diffuse * attenuation;
-	clr += indirect_light * extinction_coefficient;
-	clr.rgb += calc_brdf(diffuse, specular, shininess, L, H, N);
+	float3 clr = (ambient_clr.rgb * diffuse + calc_brdf(diffuse, specular, shininess, L, H, N)
+		+ indirect_light * extinction_coefficient) * attenuation;
 
 	return float4(clr.rgb * light_color, 1);
 }

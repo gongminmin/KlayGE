@@ -147,7 +147,7 @@ namespace
 			*(technique_->Effect().ParameterByName("pos_center")) = pos_aabb_.Center();
 			*(technique_->Effect().ParameterByName("pos_extent")) = pos_aabb_.HalfSize();
 
-			float const scale_factor = 4.0f;
+			float const scale_factor = 8.0f;
 
 			if ((Depth_WODT_Pass == pass_) || (Position_Pass == pass_))
 			{
@@ -900,7 +900,7 @@ void CausticsMapApp::InitCubeSM()
 
 	for (int i = 0; i < 6; ++ i)
 	{
-		sm_filter_pps_[i] = MakeSharedPtr<BlurPostProcess<SeparableGaussianFilterPostProcess> >(3, 1.0f);
+		sm_filter_pps_[i] = MakeSharedPtr<BlurPostProcess<SeparableGaussianFilterPostProcess> >(8, 1.0f);
 
 		sm_filter_pps_[i]->InputPin(0, shadow_tex_);
 		sm_filter_pps_[i]->OutputPin(0, shadow_cube_tex_, 0, 0, i);
