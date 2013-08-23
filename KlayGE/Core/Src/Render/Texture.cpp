@@ -1548,14 +1548,7 @@ namespace KlayGE
 						&& (0x0000FF00 == desc.pixel_format.g_bit_mask)
 						&& (0x000000FF == desc.pixel_format.b_bit_mask))
 					{
-						if ((desc.pixel_format.flags & DDSPF_ALPHAPIXELS) != 0)
-						{
-							format = EF_ARGB8;
-						}
-						else
-						{
-							BOOST_ASSERT(false);
-						}
+						format = EF_ARGB8;
 					}
 					else
 					{
