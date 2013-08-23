@@ -493,7 +493,6 @@ void GenCubeOneInstanceGSShadowMapGS(triangle float4 in_pos[3] : POSITION, trian
 	<parameter type="textureCUBE" name="light_projective_tex"/>
 	<parameter type="textureCUBE" name="shadow_cube_tex"/>
 	<parameter type="texture2D" name="shadow_dual_tex"/>
-	<parameter type="int" name="dpsm"/>
 
 	<parameter type="sampler" name="linear_wrap_sampler">
 		<state name="filtering" value="min_mag_linear_mip_point"/>
@@ -577,28 +576,25 @@ float4 RenderScenePS(float2 Texcoord : TEXCOORD0, float3 LightWorldPos : TEXCOOR
 	float3 ori_color = light_projective_tex.Sample(linear_clamp_sampler, LightWorldPos).rgb;
 	float occluder;
 	float dist;
-	if (dpsm)
+#if USE_DPSM
+	dist = length(LightViewPos);
+
+	float2 tex = float2(LightViewPos.x * sign(LightViewPos.z), LightViewPos.y) / (dist + abs(LightViewPos.z));
+	tex.y *= KLAYGE_FLIPPING;
+	tex = (tex + 1) / 2;
+	tex.x *= 0.5f;
+	if (LightViewPos.z < 0.0f)
 	{
-		dist = length(LightViewPos);
-
-		float2 tex = float2(LightViewPos.x * sign(LightViewPos.z), LightViewPos.y) / (dist + abs(LightViewPos.z));
-		tex.y *= KLAYGE_FLIPPING;
-		tex = (tex + 1) / 2;
-		tex.x *= 0.5f;
-		if (LightViewPos.z < 0.0f)
-		{
-			tex.x += 0.5f;
-		}
-
-		occluder = shadow_dual_tex.Sample(linear_clamp_sampler, tex).x;
+		tex.x += 0.5f;
 	}
-	else
-	{
-		dist = length(LightWorldPos);
 
-		float3 shadow_dir = float3(LightWorldPos.x, -KLAYGE_FLIPPING * LightWorldPos.y, LightWorldPos.z);
-		occluder = shadow_cube_tex.Sample(linear_clamp_sampler, shadow_dir).x;
-	}
+	occluder = shadow_dual_tex.Sample(linear_clamp_sampler, tex).x;
+#else
+	dist = length(LightWorldPos);
+
+	float3 shadow_dir = float3(LightWorldPos.x, -KLAYGE_FLIPPING * LightWorldPos.y, LightWorldPos.z);
+	occluder = shadow_cube_tex.Sample(linear_clamp_sampler, shadow_dir).x;
+#endif
 	
 	float atten = attenuation_term(0, LightWorldPos, light_falloff);
 	// Exponential shadow mapping
@@ -617,5 +613,8 @@ float4 RenderScenePS(float2 Texcoord : TEXCOORD0, float3 LightWorldPos : TEXCOOR
 			<state name="vertex_shader" value="RenderSceneVS()"/>
 			<state name="pixel_shader" value="RenderScenePS()"/>
 		</pass>
+	</technique>
+	<technique name="RenderSceneDPSM" inherit="RenderScene">
+		<macro name="USE_DPSM" value="1"/>
 	</technique>
 </effect>

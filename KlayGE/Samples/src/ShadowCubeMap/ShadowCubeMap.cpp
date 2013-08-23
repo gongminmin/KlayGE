@@ -229,15 +229,9 @@ namespace
 
 				*(effect->ParameterByName("light_falloff")) = light_falloff_;
 
-				*(effect->ParameterByName("dpsm")) = static_cast<int32_t>((SMT_DP == sm_type_) ? 1 : 0);
 				if (SMT_DP == sm_type_)
 				{
-					*(effect->ParameterByName("dpsm")) = static_cast<int32_t>(1);
 					*(effect->ParameterByName("obj_model_to_light_view")) = model * light_views_[0];
-				}
-				else
-				{
-					*(effect->ParameterByName("dpsm")) = static_cast<int32_t>(0);
 				}
 			}
 		}
@@ -414,7 +408,14 @@ namespace
 			}
 			else
 			{
-				technique_ = effect_->TechniqueByName("RenderScene");
+				if (SMT_DP == sm_type_)
+				{
+					technique_ = effect_->TechniqueByName("RenderSceneDPSM");
+				}
+				else
+				{
+					technique_ = effect_->TechniqueByName("RenderScene");
+				}
 				smooth_mesh_ = false;
 				mesh_rl_->NumInstances(1);
 			}

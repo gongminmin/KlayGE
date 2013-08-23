@@ -358,10 +358,6 @@ namespace KlayGE
 		{
 			settings.ppaa = false;
 		}
-		if (d3d_feature_level_ <= D3D_FEATURE_LEVEL_9_1)
-		{
-			settings.hdr = false;
-		}
 	}
 
 	void D3D11RenderEngine::D3DDevice(ID3D11DevicePtr const & device, ID3D11DeviceContextPtr const & imm_ctx, D3D_FEATURE_LEVEL feature_level)

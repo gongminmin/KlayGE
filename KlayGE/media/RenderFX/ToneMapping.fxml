@@ -53,14 +53,14 @@ float3 ToneMapping(float3 color, float3 blur, float adapted_lum)
 	color = lerp(lum * BLUE_SHIFT, color, saturate(16.0f * lum));
 
 #if NO_FP_TEXTURE
-	float adapted_lum_dest = 1;
+	return color;
 #else
 	float adapted_lum_dest = 3 / (max(0.1f, 1 + 10 * EyeAdaption(adapted_lum)));
-#endif
 
 	// Filmic Tonemapping from Unchart 2
 	const float White = 11.2f;
 	return F(1.6f * adapted_lum_dest * color) / F(White);
+#endif
 }
 
 float4 ToneMapping20PS(float2 iTex : TEXCOORD0) : SV_Target
