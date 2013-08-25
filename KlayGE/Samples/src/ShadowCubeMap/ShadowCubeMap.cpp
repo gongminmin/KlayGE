@@ -154,7 +154,7 @@ namespace
 
 			light_falloff_ = light_src->Falloff();
 
-			light_inv_range_ = 1.0f / (app.ActiveCamera().FarPlane() - app.ActiveCamera().NearPlane());
+			light_inv_range_ = 1.0f / (light_src->SMCamera(0)->FarPlane() - light_src->SMCamera(0)->NearPlane());
 		}
 
 		void CubeSMTexture(TexturePtr const & cube_tex)
@@ -180,11 +180,10 @@ namespace
 
 			*(effect->ParameterByName("model")) = model;
 			*(effect->ParameterByName("obj_model_to_light_model")) = model * inv_light_model_;
+			*(effect->ParameterByName("esm_scale_factor")) = esm_scale_factor_ * light_inv_range_;
 
 			if (gen_sm_pass_)
 			{
-				*(effect->ParameterByName("scale_factor")) = scale_factor_ * light_inv_range_;
-
 				switch (sm_type_)
 				{
 				case SMT_DP:
@@ -218,8 +217,6 @@ namespace
 			}
 			else
 			{
-				*(effect->ParameterByName("scale_factor")) = -scale_factor_ * light_inv_range_;
-
 				*(effect->ParameterByName("mvp")) = model * camera.ViewProjMatrix();
 				*(effect->ParameterByName("light_pos")) = light_pos_;
 
@@ -251,7 +248,7 @@ namespace
 		float4x4 light_proj_;
 		float3 light_falloff_;
 
-		float scale_factor_;
+		float esm_scale_factor_;
 		float light_inv_range_;
 
 		TexturePtr lamp_tex_;
@@ -344,9 +341,9 @@ namespace
 			*(effect_->ParameterByName("tc_extent")) = float2(tc_bb.HalfSize().x(), tc_bb.HalfSize().y());
 		}
 
-		void ScaleFactor(float scale_factor)
+		void ScaleFactor(float esm_scale_factor)
 		{
-			scale_factor_ = scale_factor;
+			esm_scale_factor_ = esm_scale_factor;
 		}
 
 		void GenShadowMapPass(bool gen_sm, SM_TYPE sm_type, int pass_index)
@@ -547,7 +544,7 @@ bool ShadowCubeMap::ConfirmDevice() const
 		return false;
 	}
 	if (!(caps.rendertarget_format_support(EF_D16, 1, 0)
-		&& (caps.rendertarget_format_support(EF_R32F, 1, 0) || caps.rendertarget_format_support(EF_ABGR32F, 1, 0))))
+		&& (caps.rendertarget_format_support(EF_R16F, 1, 0) || caps.rendertarget_format_support(EF_ABGR16F, 1, 0))))
 	{
 		return false;
 	}
@@ -569,7 +566,7 @@ void ShadowCubeMap::InitObjects()
 	font_ = SyncLoadFont("gkai00mp.kfont");
 
 	this->LookAt(float3(0.0f, 10.0f, -25.0f), float3(0, 10.0f, 0));
-	this->Proj(0.01f, 500);
+	this->Proj(0.1f, 200);
 
 	ElementFormat fmt;
 	if (caps.rendertarget_format_support(EF_D24S8, 1, 0))
@@ -583,15 +580,15 @@ void ShadowCubeMap::InitObjects()
 		fmt = EF_D16;
 	}
 	RenderViewPtr depth_view = rf.Make2DDepthStencilRenderView(SHADOW_MAP_SIZE, SHADOW_MAP_SIZE, fmt, 1, 0);
-	if (caps.rendertarget_format_support(EF_R32F, 1, 0))
+	if (caps.texture_format_support(EF_R16F) && caps.rendertarget_format_support(EF_R16F, 1, 0))
 	{
-		fmt = EF_R32F;
+		fmt = EF_R16F;
 	}
 	else
 	{
-		BOOST_ASSERT(caps.rendertarget_format_support(EF_ABGR32F, 1, 0));
+		BOOST_ASSERT(caps.texture_format_support(EF_ABGR16F) && caps.rendertarget_format_support(EF_ABGR16F, 1, 0));
 
-		fmt = EF_ABGR32F;
+		fmt = EF_ABGR16F;
 	}
 	shadow_tex_ = rf.MakeTexture2D(SHADOW_MAP_SIZE, SHADOW_MAP_SIZE, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
 	shadow_cube_buffer_ = rf.MakeFrameBuffer();
@@ -636,8 +633,8 @@ void ShadowCubeMap::InitObjects()
 
 	for (int i = 0; i < 6; ++ i)
 	{
-		sm_filter_pps_[i] = MakeSharedPtr<BlurPostProcess<SeparableGaussianFilterPostProcess> >(3, 1.0f);
-	
+		sm_filter_pps_[i] = MakeSharedPtr<LogGaussianBlurPostProcess>(3, true);
+
 		sm_filter_pps_[i]->InputPin(0, shadow_tex_);
 		sm_filter_pps_[i]->OutputPin(0, shadow_cube_tex_, 0, 0, i);
 	}
@@ -688,14 +685,14 @@ void ShadowCubeMap::InputHandler(InputEngine const & /*sender*/, InputAction con
 
 void ShadowCubeMap::ScaleFactorChangedHandler(KlayGE::UISlider const & sender)
 {
-	float scale_factor = static_cast<float>(sender.GetValue());
+	esm_scale_factor_ = static_cast<float>(sender.GetValue());
 	for (size_t i = 0; i < scene_objs_.size(); ++ i)
 	{
-		checked_pointer_cast<OccluderMesh>(scene_objs_[i]->GetRenderable())->ScaleFactor(scale_factor);
+		checked_pointer_cast<OccluderMesh>(scene_objs_[i]->GetRenderable())->ScaleFactor(esm_scale_factor_);
 	}
 
 	std::wostringstream stream;
-	stream << L"Scale Factor: " << scale_factor;
+	stream << L"Scale Factor: " << esm_scale_factor_;
 	dialog_->Control<UIStatic>(id_scale_factor_static_)->SetText(stream.str());
 }
 
@@ -763,6 +760,7 @@ uint32_t ShadowCubeMap::DoUpdate(uint32_t pass)
 					checked_pointer_cast<OccluderMesh>(so->GetRenderable())->LampTexture(lamp_tex_);
 					checked_pointer_cast<OccluderMesh>(so->GetRenderable())->CubeSMTexture(shadow_cube_tex_);
 					checked_pointer_cast<OccluderMesh>(so->GetRenderable())->DPSMTexture(shadow_dual_tex_);
+					checked_pointer_cast<OccluderMesh>(so->GetRenderable())->ScaleFactor(esm_scale_factor_);
 					scene_objs_.push_back(so);
 				}
 
@@ -784,9 +782,8 @@ uint32_t ShadowCubeMap::DoUpdate(uint32_t pass)
 				checked_pointer_cast<OccluderMesh>(scene_objs_.back()->GetRenderable())->LampTexture(lamp_tex_);
 				checked_pointer_cast<OccluderMesh>(scene_objs_.back()->GetRenderable())->CubeSMTexture(shadow_cube_tex_);
 				checked_pointer_cast<OccluderMesh>(scene_objs_.back()->GetRenderable())->DPSMTexture(shadow_dual_tex_);
+				checked_pointer_cast<OccluderMesh>(so->GetRenderable())->ScaleFactor(esm_scale_factor_);
 				scene_objs_.push_back(so);
-
-				this->ScaleFactorChangedHandler(*dialog_->Control<UISlider>(id_scale_factor_slider_));
 
 				loading_percentage_ = 100;
 			}
@@ -846,6 +843,7 @@ uint32_t ShadowCubeMap::DoUpdate(uint32_t pass)
 	case SMT_Cube:
 		if (pass > 0)
 		{
+			checked_pointer_cast<LogGaussianBlurPostProcess>(sm_filter_pps_[pass - 1])->ESMScaleFactor(esm_scale_factor_, light_->SMCamera(pass - 1));
 			sm_filter_pps_[pass - 1]->Apply();
 		}
 
@@ -919,6 +917,7 @@ uint32_t ShadowCubeMap::DoUpdate(uint32_t pass)
 					{
 						shadow_cube_one_tex_->CopyToSubTexture2D(*shadow_tex_, 0, 0, 0, 0, shadow_tex_->Width(0), shadow_tex_->Height(0), 
 							p, 0, 0, 0, shadow_cube_one_tex_->Width(0), shadow_cube_one_tex_->Height(0));
+						checked_pointer_cast<LogGaussianBlurPostProcess>(sm_filter_pps_[p])->ESMScaleFactor(esm_scale_factor_, light_->SMCamera(p));
 						sm_filter_pps_[p]->Apply();
 					}
 

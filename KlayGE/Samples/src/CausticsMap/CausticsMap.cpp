@@ -147,25 +147,25 @@ namespace
 			*(technique_->Effect().ParameterByName("pos_center")) = pos_aabb_.Center();
 			*(technique_->Effect().ParameterByName("pos_extent")) = pos_aabb_.HalfSize();
 
-			float const scale_factor = 8.0f;
+			if (light_)
+			{
+				float const scale_factor = 8.0f;
+				float light_inv_range = 1.0f / (light_->SMCamera(0)->FarPlane() - light_->SMCamera(0)->NearPlane());
+				*(technique_->Effect().ParameterByName("esm_scale_factor")) = scale_factor * light_inv_range;
+			}
 
 			if ((Depth_WODT_Pass == pass_) || (Position_Pass == pass_))
 			{
 			}
 			else if (Gen_Shadow_Pass == pass_)
 			{
-				float light_inv_range = 1.0f / (light_->SMCamera(0)->FarPlane() - light_->SMCamera(0)->NearPlane());
-
 				float4x4 light_model = MathLib::to_matrix(light_->Rotation()) * MathLib::translation(light_->Position());
 				float4x4 inv_light_model = MathLib::inverse(light_model);
 
 				*(technique_->Effect().ParameterByName("obj_model_to_light_model")) = model * inv_light_model;
-				*(technique_->Effect().ParameterByName("scale_factor")) = scale_factor * light_inv_range;
 			}
 			else
 			{
-				float light_inv_range = 1.0f / (light_->SMCamera(0)->FarPlane() - light_->SMCamera(0)->NearPlane());
-
 				float4x4 light_model = MathLib::to_matrix(light_->Rotation()) * MathLib::translation(light_->Position());
 				float4x4 inv_light_model = MathLib::inverse(light_model);
 				float4x4 first_light_view = light_->SMCamera(0)->ViewMatrix();
@@ -179,7 +179,6 @@ namespace
 				*(technique_->Effect().ParameterByName("caustics_tex")) = caustics_map_;
 				*(technique_->Effect().ParameterByName("obj_model_to_light_model")) = model * inv_light_model;
 				*(technique_->Effect().ParameterByName("obj_model_to_light_view")) = model * first_light_view;
-				*(technique_->Effect().ParameterByName("scale_factor")) = -scale_factor * light_inv_range;
 			}
 		}
 
@@ -882,15 +881,15 @@ void CausticsMapApp::InitCubeSM()
 	RenderViewPtr depth_view = rf.Make2DDepthStencilRenderView(SHADOW_MAP_SIZE, SHADOW_MAP_SIZE, ds_fmt, 1, 0);
 	shadow_cube_buffer_ = rf.MakeFrameBuffer();
 	ElementFormat fmt;
-	if (caps.rendertarget_format_support(EF_R32F, 1, 0))
+	if (caps.texture_format_support(EF_R16F) && caps.rendertarget_format_support(EF_R16F, 1, 0))
 	{
-		fmt = EF_R32F;
+		fmt = EF_R16F;
 	}
 	else
 	{
-		BOOST_ASSERT(caps.rendertarget_format_support(EF_ABGR32F, 1, 0));
+		BOOST_ASSERT(caps.texture_format_support(EF_ABGR16F) && caps.rendertarget_format_support(EF_ABGR16F, 1, 0));
 
-		fmt = EF_ABGR32F;
+		fmt = EF_ABGR16F;
 	}
 	shadow_tex_ = rf.MakeTexture2D(SHADOW_MAP_SIZE, SHADOW_MAP_SIZE, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
 	shadow_cube_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*shadow_tex_, 0, 1, 0));
@@ -900,7 +899,7 @@ void CausticsMapApp::InitCubeSM()
 
 	for (int i = 0; i < 6; ++ i)
 	{
-		sm_filter_pps_[i] = MakeSharedPtr<BlurPostProcess<SeparableGaussianFilterPostProcess> >(8, 1.0f);
+		sm_filter_pps_[i] = MakeSharedPtr<LogGaussianBlurPostProcess>(3, true);
 
 		sm_filter_pps_[i]->InputPin(0, shadow_tex_);
 		sm_filter_pps_[i]->OutputPin(0, shadow_cube_tex_, 0, 0, i);
@@ -1248,6 +1247,7 @@ uint32_t CausticsMapApp::DoUpdate(uint32_t pass)
 	
 		if (pass > sm_start_pass)
 		{
+			checked_pointer_cast<LogGaussianBlurPostProcess>(sm_filter_pps_[pass - sm_start_pass - 1])->ESMScaleFactor(8.0f, light_->SMCamera(0));
 			sm_filter_pps_[pass - sm_start_pass - 1]->Apply();
 		}
 

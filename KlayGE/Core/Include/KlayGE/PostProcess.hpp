@@ -363,6 +363,29 @@ namespace KlayGE
 		RenderEffectParameterPtr sharpness_factor_ep_;
 	};
 
+	class KLAYGE_CORE_API SeparableLogGaussianFilterPostProcess : public PostProcess
+	{
+	public:
+		SeparableLogGaussianFilterPostProcess(int kernel_radius, bool linear_depth, bool x_dir);
+		virtual ~SeparableLogGaussianFilterPostProcess();
+
+		void InputPin(uint32_t index, TexturePtr const & tex);
+		using PostProcess::InputPin;
+
+		void KernelRadius(int radius);
+
+	protected:
+		float GaussianDistribution(float x, float y, float rho);
+		void CalSampleOffsets(uint32_t tex_size, float deviation);
+
+	protected:
+		int kernel_radius_;
+		bool x_dir_;
+
+		RenderEffectParameterPtr color_weight_ep_;
+		RenderEffectParameterPtr tex_coord_offset_ep_;
+	};
+
 	template <typename T>
 	class BlurPostProcess : public PostProcessChain
 	{
@@ -412,6 +435,17 @@ namespace KlayGE
 
 		virtual void SetParam(uint32_t index, float2 const & value) KLAYGE_OVERRIDE;
 		using PostProcess::SetParam;
+	};
+
+	class KLAYGE_CORE_API LogGaussianBlurPostProcess : public PostProcessChain
+	{
+	public:
+		LogGaussianBlurPostProcess(int kernel_radius, bool linear_depth);
+
+		void ESMScaleFactor(float factor, CameraPtr const & camera);
+
+		virtual void InputPin(uint32_t index, TexturePtr const & tex) KLAYGE_OVERRIDE;
+		using PostProcess::InputPin;
 	};
 }
 

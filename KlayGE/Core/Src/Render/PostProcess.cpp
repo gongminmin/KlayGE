@@ -31,6 +31,7 @@
 #include <KlayGE/RenderLayout.hpp>
 #include <KFL/XMLDom.hpp>
 #include <KlayGE/ResLoader.hpp>
+#include <KlayGE/Camera.hpp>
 
 #include <cstring>
 #include <boost/functional/hash.hpp>
@@ -1437,6 +1438,86 @@ namespace KlayGE
 		*blur_factor_ep_ = f;
 		*sharpness_factor_ep_ = f;
 	}
+	
+	
+	SeparableLogGaussianFilterPostProcess::SeparableLogGaussianFilterPostProcess(int kernel_radius, bool linear_depth, bool x_dir)
+			: PostProcess(L"SeparableLogGaussian"),
+				kernel_radius_(kernel_radius), x_dir_(x_dir)
+	{
+		BOOST_ASSERT((kernel_radius > 0) && (kernel_radius <= 7));
+
+		params_.push_back(std::make_pair("esm_scale_factor", RenderEffectParameterPtr()));
+		params_.push_back(std::make_pair("near_q", RenderEffectParameterPtr()));
+		input_pins_.push_back(std::make_pair("src_tex", TexturePtr()));
+		output_pins_.push_back(std::make_pair("output", TexturePtr()));
+		this->Technique(SyncLoadRenderEffect("Blur.fxml")->TechniqueByName(x_dir ? (linear_depth ? "LogBlurX" : "LogBlurXNLD") : "LogBlurY"));
+
+		color_weight_ep_ = technique_->Effect().ParameterByName("color_weight");
+		tex_coord_offset_ep_ = technique_->Effect().ParameterByName("tex_coord_offset");
+	}
+
+	SeparableLogGaussianFilterPostProcess::~SeparableLogGaussianFilterPostProcess()
+	{
+	}
+
+	void SeparableLogGaussianFilterPostProcess::InputPin(uint32_t index, TexturePtr const & tex)
+	{
+		PostProcess::InputPin(index, tex);
+		if (0 == index)
+		{
+			this->CalSampleOffsets(x_dir_ ? tex->Width(0) : tex->Height(0), 3.0f);
+		}
+	}
+
+	void SeparableLogGaussianFilterPostProcess::KernelRadius(int radius)
+	{
+		kernel_radius_ = radius;
+		TexturePtr const & tex = this->InputPin(0);
+		if (!!tex)
+		{
+			this->CalSampleOffsets(x_dir_ ? tex->Width(0) : tex->Height(0), 3.0f);
+		}
+	}
+
+	float SeparableLogGaussianFilterPostProcess::GaussianDistribution(float x, float y, float rho)
+	{
+		float g = 1.0f / sqrt(2.0f * PI * rho * rho);
+		g *= exp(-(x * x + y * y) / (2 * rho * rho));
+		return g;
+	}
+
+	void SeparableLogGaussianFilterPostProcess::CalSampleOffsets(uint32_t tex_size, float deviation)
+	{
+		std::vector<float> color_weight(8, 0);
+		std::vector<float> tex_coord_offset(8, 0);
+
+		float const tu = 1.0f / tex_size;
+
+		float sum_weight = 0;
+		for (int i = 0; i < kernel_radius_; ++ i)
+		{
+			float weight = this->GaussianDistribution(static_cast<float>(i - kernel_radius_), 0, kernel_radius_ / deviation);
+			color_weight[7 - kernel_radius_ + i] = weight;
+		}
+		{
+			float weight = this->GaussianDistribution(0.0f, 0, kernel_radius_ / deviation);
+			color_weight[7] = weight;
+			sum_weight += weight;
+		}
+		for (int i = 0; i < kernel_radius_ + 1; ++ i)
+		{
+			color_weight[i] /= sum_weight;
+		}
+
+		// Fill the offsets
+		for (int i = 0; i < kernel_radius_ + 1; ++ i)
+		{
+			tex_coord_offset[7 - kernel_radius_ + i] = (i - kernel_radius_) * tu;
+		}
+
+		*color_weight_ep_ = color_weight;
+		*tex_coord_offset_ep_ = tex_coord_offset;
+	}
 
 
 	BicubicFilteringPostProcess::BicubicFilteringPostProcess()
@@ -1488,5 +1569,42 @@ namespace KlayGE
 	{
 		pp_chain_[0]->SetParam(index, float2(1, 1));
 		pp_chain_[1]->SetParam(index, value);
+	}
+
+
+	LogGaussianBlurPostProcess::LogGaussianBlurPostProcess(int kernel_radius, bool linear_depth)
+		: PostProcessChain(L"LogGaussianBlur")
+	{
+		this->Append(MakeSharedPtr<SeparableLogGaussianFilterPostProcess>(kernel_radius, linear_depth, true));
+		this->Append(MakeSharedPtr<SeparableLogGaussianFilterPostProcess>(kernel_radius, linear_depth, false));
+	}
+
+	void LogGaussianBlurPostProcess::ESMScaleFactor(float factor, CameraPtr const & camera)
+	{
+		float np = camera->NearPlane();
+		float fp = camera->FarPlane();
+		this->SetParam(0, factor / (fp - np));
+
+		float q = fp / (fp - np);
+		float2 near_q(np * q, q);
+		this->SetParam(1, near_q);
+	}
+
+	void LogGaussianBlurPostProcess::InputPin(uint32_t index, TexturePtr const & tex)
+	{
+		pp_chain_[0]->InputPin(index, tex);
+
+		if (0 == index)
+		{
+			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+			TexturePtr blur_x = rf.MakeTexture2D(tex->Width(0), tex->Height(0), 1, 1, tex->Format(),
+					1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
+			pp_chain_[0]->OutputPin(0, blur_x);
+			pp_chain_[1]->InputPin(0, blur_x);
+		}
+		else
+		{
+			pp_chain_[1]->InputPin(index, tex);
+		}
 	}
 }

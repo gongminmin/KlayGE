@@ -15,7 +15,7 @@
 
 	<parameter type="float3" name="light_falloff"/>
 
-	<parameter type="float" name="scale_factor"/>
+	<parameter type="float" name="esm_scale_factor"/>
 
 	<shader>
 		<![CDATA[
@@ -39,7 +39,7 @@ void GenCubeShadowMapVS(float4 Position : POSITION,
 
 float4 GenCubeShadowMapPS(float dist : TEXCOORD0) : SV_Target
 {
-	return exp(scale_factor * dist);
+	return dist;
 }
 		]]>
 	</shader>
@@ -100,7 +100,7 @@ float4 GenDPShadowMapPS(float2 dist : TEXCOORD0) : SV_Target
 {
 	clip(dist.y);
 
-	return exp(scale_factor * dist.x);
+	return esm_scale_factor * dist.x;
 }
 		]]>
 	</shader>
@@ -598,8 +598,8 @@ float4 RenderScenePS(float2 Texcoord : TEXCOORD0, float3 LightWorldPos : TEXCOOR
 	
 	float atten = attenuation_term(0, LightWorldPos, light_falloff);
 	// Exponential shadow mapping
-	atten *= min(1, occluder * exp(scale_factor * dist));
-
+	atten *= saturate(exp(occluder - esm_scale_factor * dist));
+	
 	float3 clr = ambient_clr.rgb * 0.2f * c_diff + emit + lighting * ori_color * atten;	
 	return float4(clr, 1.0f);
 }
