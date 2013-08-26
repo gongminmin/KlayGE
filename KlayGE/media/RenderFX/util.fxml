@@ -85,7 +85,7 @@ float3 srgb_to_linear(float3 srgb)
 // Encoding a [0, 1) float into a rgba8. From http://aras-p.info/blog/2009/07/30/encoding-floats-to-rgba-the-final/
 float4 EncodeFloatRGBA(float v)
 {
-	float4 enc = float4(1.0f, 255.0f, 65025.0f, 160581375.0f) * v;
+	float4 enc = float4(1.0f, 255.0f, 65025.0f, 16581375.0f) * v;
 	enc = frac(enc);
 	enc -= enc.yzww * float4(1 / 255.0f, 1 / 255.0f, 1 / 255.0f, 0);
 	return enc;
@@ -93,7 +93,7 @@ float4 EncodeFloatRGBA(float v)
 
 float DecodeFloatRGBA(float4 rgba)
 {
-	return dot(rgba, float4(1, 1 / 255.0f, 1 / 65025.0f, 1 / 160581375.0f));
+	return dot(rgba, float4(1, 1 / 255.0f, 1 / 65025.0f, 1 / 16581375.0f));
 }
 		]]>
 	</shader>

@@ -1471,6 +1471,8 @@ namespace KlayGE
 
 	void SeparableLogGaussianFilterPostProcess::KernelRadius(int radius)
 	{
+		BOOST_ASSERT((radius > 0) && (radius <= 7));
+
 		kernel_radius_ = radius;
 		TexturePtr const & tex = this->InputPin(0);
 		if (!!tex)
