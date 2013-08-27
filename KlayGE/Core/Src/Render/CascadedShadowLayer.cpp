@@ -179,6 +179,7 @@ namespace KlayGE
 
 
 	SDSMCascadedShadowLayer::SDSMCascadedShadowLayer()
+		: frame_index_(0)
 	{
 		int const MAX_NUM_CASCADES = 4;
 
@@ -194,19 +195,22 @@ namespace KlayGE
 			cascade_min_buff_ = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Read | EAH_GPU_Write | EAH_GPU_Unordered | EAH_GPU_Structured, nullptr, EF_BGR32F);
 			cascade_max_buff_ = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Read | EAH_GPU_Write | EAH_GPU_Unordered | EAH_GPU_Structured, nullptr, EF_BGR32F);
 
-			interval_cpu_buff_ = rf.MakeVertexBuffer(BU_Dynamic, EAH_CPU_Read, nullptr);
-			scale_cpu_buff_ = rf.MakeVertexBuffer(BU_Dynamic, EAH_CPU_Read, nullptr);
-			bias_cpu_buff_ = rf.MakeVertexBuffer(BU_Dynamic, EAH_CPU_Read, nullptr);
-
 			interval_buff_->Resize(MAX_NUM_CASCADES * sizeof(float2));
 			scale_buff_->Resize(MAX_NUM_CASCADES * sizeof(float3));
 			bias_buff_->Resize(MAX_NUM_CASCADES * sizeof(float3));
 			cascade_min_buff_->Resize(MAX_NUM_CASCADES * sizeof(float3));
 			cascade_max_buff_->Resize(MAX_NUM_CASCADES * sizeof(float3));
 
-			interval_cpu_buff_->Resize(interval_buff_->Size());
-			scale_cpu_buff_->Resize(scale_buff_->Size());
-			bias_cpu_buff_->Resize(bias_buff_->Size());
+			for (uint32_t i = 0; i < 2; ++ i)
+			{
+				interval_cpu_buffs_[i] = rf.MakeVertexBuffer(BU_Dynamic, EAH_CPU_Read, nullptr);
+				scale_cpu_buffs_[i] = rf.MakeVertexBuffer(BU_Dynamic, EAH_CPU_Read, nullptr);
+				bias_cpu_buffs_[i] = rf.MakeVertexBuffer(BU_Dynamic, EAH_CPU_Read, nullptr);
+
+				interval_cpu_buffs_[i]->Resize(interval_buff_->Size());
+				scale_cpu_buffs_[i]->Resize(scale_buff_->Size());
+				bias_cpu_buffs_[i]->Resize(bias_buff_->Size());
+			}
 
 			RenderEffectPtr effect = SyncLoadRenderEffect("CascadedShadow.fxml");
 
@@ -243,7 +247,10 @@ namespace KlayGE
 			compute_log_cascades_from_z_bounds_pp_ = SyncLoadPostProcess("CascadedShadow.ppml", "compute_log_cascades_from_z_bounds");
 
 			interval_tex_ = rf.MakeTexture2D(MAX_NUM_CASCADES, 1, 1, 1, EF_GR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
-			interval_cpu_tex_ = rf.MakeTexture2D(MAX_NUM_CASCADES, 1, 1, 1, EF_GR16F, 1, 0, EAH_CPU_Read, nullptr);
+			for (uint32_t i = 0; i < 2; ++ i)
+			{
+				interval_cpu_texs_[i] = rf.MakeTexture2D(MAX_NUM_CASCADES, 1, 1, 1, EF_GR16F, 1, 0, EAH_CPU_Read, nullptr);
+			}
 		}
 	}
 
@@ -280,6 +287,8 @@ namespace KlayGE
 		RenderEngine& re = rf.RenderEngineInstance();
 
 		uint32_t const num_cascades = static_cast<uint32_t>(intervals_.size());
+		uint32_t const copy_index = frame_index_ & 1;
+		uint32_t const read_back_index = (0 == frame_index_) ? copy_index : !copy_index;
 
 		if (cs_support_)
 		{
@@ -325,13 +334,13 @@ namespace KlayGE
 			re.Dispatch(*reduce_bounds_from_depth_tech_, dispatch_x, dispatch_y, 1);
 			re.Dispatch(*compute_custom_cascades_tech_, 1, 1, 1);
 
-			interval_buff_->CopyToBuffer(*interval_cpu_buff_);
-			scale_buff_->CopyToBuffer(*scale_cpu_buff_);
-			bias_buff_->CopyToBuffer(*bias_cpu_buff_);
+			interval_buff_->CopyToBuffer(*interval_cpu_buffs_[copy_index]);
+			scale_buff_->CopyToBuffer(*scale_cpu_buffs_[copy_index]);
+			bias_buff_->CopyToBuffer(*bias_cpu_buffs_[copy_index]);
 
-			GraphicsBuffer::Mapper interval_mapper(*interval_cpu_buff_, BA_Read_Only);
-			GraphicsBuffer::Mapper scale_mapper(*scale_cpu_buff_, BA_Read_Only);
-			GraphicsBuffer::Mapper bias_mapper(*bias_cpu_buff_, BA_Read_Only);
+			GraphicsBuffer::Mapper interval_mapper(*interval_cpu_buffs_[read_back_index], BA_Read_Only);
+			GraphicsBuffer::Mapper scale_mapper(*scale_cpu_buffs_[read_back_index], BA_Read_Only);
+			GraphicsBuffer::Mapper bias_mapper(*bias_cpu_buffs_[read_back_index], BA_Read_Only);
 			float2* interval_ptr = interval_mapper.Pointer<float2>();
 			float3* scale_ptr = scale_mapper.Pointer<float3>();
 			float3* bias_ptr = bias_mapper.Pointer<float3>();
@@ -378,10 +387,11 @@ namespace KlayGE
 			compute_log_cascades_from_z_bounds_pp_->SetParam(2, near_far);
 			compute_log_cascades_from_z_bounds_pp_->Apply();
 
-			interval_tex_->CopyToSubTexture2D(*interval_cpu_tex_, 0, 0, 0, 0, num_cascades, 1,
+			interval_tex_->CopyToSubTexture2D(*interval_cpu_texs_[copy_index], 0, 0, 0, 0, num_cascades, 1,
 				0, 0, 0, 0, num_cascades, 1);
 
-			Texture::Mapper interval_mapper(*interval_cpu_tex_, 0, 0, TMA_Read_Only, 0, 0, num_cascades, 1);
+			Texture::Mapper interval_mapper(*interval_cpu_texs_[read_back_index], 0, 0,
+				TMA_Read_Only, 0, 0, num_cascades, 1);
 			Vector_T<half, 2>* interval_ptr = interval_mapper.Pointer<Vector_T<half, 2> >();
 
 			for (size_t i = 0; i < intervals_.size(); ++ i)
@@ -413,5 +423,7 @@ namespace KlayGE
 		}
 
 		this->UpdateCropMats();
+
+		++ frame_index_;
 	}
 }

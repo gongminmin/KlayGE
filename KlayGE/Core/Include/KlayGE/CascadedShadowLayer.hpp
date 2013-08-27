@@ -155,9 +155,10 @@ namespace KlayGE
 		GraphicsBufferPtr cascade_min_buff_;
 		GraphicsBufferPtr cascade_max_buff_;
 
-		GraphicsBufferPtr interval_cpu_buff_;
-		GraphicsBufferPtr scale_cpu_buff_;
-		GraphicsBufferPtr bias_cpu_buff_;
+		GraphicsBufferPtr interval_cpu_buffs_[2];
+		GraphicsBufferPtr scale_cpu_buffs_[2];
+		GraphicsBufferPtr bias_cpu_buffs_[2];
+		uint32_t frame_index_;
 
 		// For PS implement
 		TexturePtr depth_deriative_tex_;
@@ -167,7 +168,7 @@ namespace KlayGE
 		PostProcessPtr compute_log_cascades_from_z_bounds_pp_;
 
 		TexturePtr interval_tex_;
-		TexturePtr interval_cpu_tex_;
+		TexturePtr interval_cpu_texs_[2];
 	};
 }
 
