@@ -32,17 +32,12 @@ float4 DepthToSMPS(float2 tc : TEXCOORD0) : SV_Target
 	return non_linear_depth_to_linear(src_tex.Sample(point_sampler, tc).r, near_q.x, near_q.y);
 }
 
-float4 DepthToVSMPS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Target
+float4 DepthToESMPS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Target
 {
 	float dist = non_linear_depth_to_linear(src_tex.Sample(point_sampler, tc).r, near_q.x, near_q.y);
 	dist *= length(view_dir) / view_dir.z;
 
-#if KLAYGE_DERIVATIVES
-	float2 dxdy = float2(ddx(dist), ddy(dist));
-#else
-	float2 dxdy = 0;
-#endif
-	return float4(dist, dist * dist + 0.2f * dot(dxdy, dxdy), 0, 1);
+	return dist;
 }
 		]]>
 	</shader>
@@ -57,13 +52,13 @@ float4 DepthToVSMPS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Tar
 		</pass>
 	</technique>
 
-	<technique name="DepthToVSM">
+	<technique name="DepthToESM">
 		<pass name="p0">
 			<state name="depth_enable" value="false"/>
 			<state name="depth_write_mask" value="false"/>
 
 			<state name="vertex_shader" value="DepthToSMVS()"/>
-			<state name="pixel_shader" value="DepthToVSMPS()"/>
+			<state name="pixel_shader" value="DepthToESMPS()"/>
 		</pass>
 	</technique>
 </effect>

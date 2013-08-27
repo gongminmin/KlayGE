@@ -886,28 +886,14 @@ void GenShadowMapWODepthTextureVS(float4 pos : POSITION,
 
 float4 GenShadowMapWODepthTexturePS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Target
 {
-	float dist = length(view_dir);
-	
-#if KLAYGE_DERIVATIVES
-	float2 dxdy = float2(ddx(dist), ddy(dist));
-#else
-	float2 dxdy = 0;
-#endif
-	return float4(dist, dist * dist + 0.2f * dot(dxdy, dxdy), 0, 1);
+	return length(view_dir);
 }
 
 float4 GenShadowMapWODepthTextureAlphaTestPS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Target
 {
 	clip(diffuse_tex.Sample(bilinear_sampler, tc).a - ALPHA_TEST_THRESHOLD);
 	
-	float dist = length(view_dir);
-	
-#if KLAYGE_DERIVATIVES
-	float2 dxdy = float2(ddx(dist), ddy(dist));
-#else
-	float2 dxdy = 0;
-#endif
-	return float4(dist, dist * dist + 0.2f * dot(dxdy, dxdy), 0, 1);
+	return length(view_dir);
 }
 
 void GenCascadedShadowMapVS(float4 pos : POSITION,
@@ -927,24 +913,14 @@ void GenCascadedShadowMapVS(float4 pos : POSITION,
 
 float4 GenCascadedShadowMapPS(float2 tc : TEXCOORD0, float depth : TEXCOORD1) : SV_Target
 {
-#if KLAYGE_DERIVATIVES
-	float2 dxdy = float2(ddx(depth), ddy(depth));
-#else
-	float2 dxdy = 0;
-#endif
-	return float4(depth, depth * depth + 0.2f * dot(dxdy, dxdy), 0, 1);
+	return depth;
 }
 
 float4 GenCascadedShadowMapAlphaTestPS(float2 tc : TEXCOORD0, float depth : TEXCOORD1) : SV_Target
 {
 	clip(diffuse_tex.Sample(bilinear_sampler, tc).a - ALPHA_TEST_THRESHOLD);
 
-#if KLAYGE_DERIVATIVES
-	float2 dxdy = float2(ddx(depth), ddy(depth));
-#else
-	float2 dxdy = 0;
-#endif
-	return float4(depth, depth * depth + 0.2f * dot(dxdy, dxdy), 0, 1);
+	return depth;
 }
 		]]>
 	</shader>

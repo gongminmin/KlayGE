@@ -289,7 +289,7 @@ namespace KlayGE
 		array<TexturePtr, MAX_NUM_SHADOWED_POINT_LIGHTS> blur_sm_cube_texs_;
 
 		PostProcessPtr sm_filter_pp_;
-		PostProcessPtr depth_to_vsm_pp_;
+		PostProcessPtr depth_to_esm_pp_;
 		PostProcessPtr depth_to_linear_pp_;
 
 		RenderEffectParameterPtr g_buffer_tex_param_;
@@ -313,6 +313,7 @@ namespace KlayGE
 		RenderEffectParameterPtr shadow_map_cube_tex_param_;
 		RenderEffectParameterPtr inv_width_height_param_;
 		RenderEffectParameterPtr shadowing_tex_param_;
+		RenderEffectParameterPtr esm_scale_factor_param_;
 		RenderEffectParameterPtr near_q_param_;
 		RenderEffectParameterPtr cascade_intervals_param_;
 		RenderEffectParameterPtr cascade_scale_bias_param_;

@@ -44,6 +44,8 @@ namespace KlayGE
 	int const SAMPLE_LEVEL_CNT = MAX_RSM_MIPMAP_LEVELS - BEGIN_RSM_SAMPLING_LIGHT_LEVEL;
 	int const VPL_COUNT = 64 * ((1UL << (SAMPLE_LEVEL_CNT * 2)) - 1) / (4 - 1);
 
+	float const ESM_SCALE_FACTOR = 300.0f;
+
 	template <typename T>
 	void CreateConeMesh(std::vector<T>& vb, std::vector<uint16_t>& ib, uint16_t vertex_base, float radius, float height, uint16_t n)
 	{
@@ -403,23 +405,15 @@ namespace KlayGE
 
 		sm_buffer_ = rf.MakeFrameBuffer();
 		ElementFormat fmt;
-		if (caps.rendertarget_format_support(EF_GR32F, 1, 0))
+		if (caps.rendertarget_format_support(EF_R32F, 1, 0))
 		{
-			fmt = EF_GR32F;
-		}
-		else if (caps.rendertarget_format_support(EF_ABGR32F, 1, 0))
-		{
-			fmt = EF_ABGR32F;
-		}
-		else if (caps.rendertarget_format_support(EF_GR16F, 1, 0))
-		{
-			fmt = EF_GR16F;
+			fmt = EF_R32F;
 		}
 		else
 		{
-			BOOST_ASSERT(caps.rendertarget_format_support(EF_ABGR16F, 1, 0));
+			BOOST_ASSERT(caps.rendertarget_format_support(EF_ABGR32F, 1, 0));
 
-			fmt = EF_ABGR16F;
+			fmt = EF_ABGR32F;
 		}
 		sm_tex_ = rf.MakeTexture2D(SM_SIZE, SM_SIZE, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
 		sm_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*sm_tex_, 0, 1, 0));
@@ -486,12 +480,12 @@ namespace KlayGE
 		}
 
 
-		sm_filter_pp_ = MakeSharedPtr<BlurPostProcess<SeparableGaussianFilterPostProcess> >(8, 1.0f);
+		sm_filter_pp_ = MakeSharedPtr<LogGaussianBlurPostProcess>(4, true);
 		if (depth_texture_support_)
 		{
-			depth_to_vsm_pp_ = SyncLoadPostProcess("DepthToSM.ppml", "DepthToVSM");
-			depth_to_vsm_pp_->InputPin(0, sm_depth_tex_);
-			depth_to_vsm_pp_->OutputPin(0, sm_tex_);
+			depth_to_esm_pp_ = SyncLoadPostProcess("DepthToSM.ppml", "DepthToESM");
+			depth_to_esm_pp_->InputPin(0, sm_depth_tex_);
+			depth_to_esm_pp_->OutputPin(0, sm_tex_);
 
 			depth_to_linear_pp_ = SyncLoadPostProcess("DepthToSM.ppml", "DepthToSM");
 		}
@@ -517,6 +511,7 @@ namespace KlayGE
 		shadow_map_cube_tex_param_ = dr_effect_->ParameterByName("shadow_map_cube_tex");
 		inv_width_height_param_ = dr_effect_->ParameterByName("inv_width_height");
 		shadowing_tex_param_ = dr_effect_->ParameterByName("shadowing_tex");
+		esm_scale_factor_param_ = dr_effect_->ParameterByName("esm_scale_factor");
 		near_q_param_ = dr_effect_->ParameterByName("near_q");
 		cascade_intervals_param_ = dr_effect_->ParameterByName("cascade_intervals");
 		cascade_scale_bias_param_ = dr_effect_->ParameterByName("cascade_scale_bias");
@@ -664,23 +659,15 @@ namespace KlayGE
 		this->SetupViewportGI(index, false);
 
 		ElementFormat fmt;
-		if (caps.rendertarget_format_support(EF_GR32F, 1, 0))
+		if (caps.rendertarget_format_support(EF_R32F, 1, 0))
 		{
-			fmt = EF_GR32F;
-		}
-		else if (caps.rendertarget_format_support(EF_ABGR32F, 1, 0))
-		{
-			fmt = EF_ABGR32F;
-		}
-		else if (caps.rendertarget_format_support(EF_GR16F, 1, 0))
-		{
-			fmt = EF_GR16F;
+			fmt = EF_R32F;
 		}
 		else
 		{
-			BOOST_ASSERT(caps.rendertarget_format_support(EF_ABGR16F, 1, 0));
+			BOOST_ASSERT(caps.rendertarget_format_support(EF_ABGR32F, 1, 0));
 
-			fmt = EF_ABGR16F;
+			fmt = EF_ABGR32F;
 		}
 		if (tex_array_support_)
 		{
@@ -951,7 +938,7 @@ namespace KlayGE
 							}
 							float const far_plane = light_camera->FarPlane();
 							re.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth,
-								Color(far_plane, far_plane * far_plane, 0, 0), 1.0f, 0);
+								Color(far_plane, 0, 0, 0), 1.0f, 0);
 						}
  						break;
 
@@ -973,7 +960,7 @@ namespace KlayGE
 		case PC_IndirectLighting:
 			if (depth_texture_support_)
 			{
-				depth_to_vsm_pp_->Apply();
+				depth_to_esm_pp_->Apply();
 			}
 			pvp.il_layer->UpdateRSM(rsm_buffer_->GetViewport()->camera, lights_[org_no]);
 			urv = App3DFramework::URV_Flushed;
@@ -1605,10 +1592,10 @@ namespace KlayGE
 					float q = sm_camera->FarPlane() / (sm_camera->FarPlane() - sm_camera->NearPlane());
 
 					float2 near_q(sm_camera->NearPlane() * q, q);
-					depth_to_vsm_pp_->SetParam(0, near_q);
+					depth_to_esm_pp_->SetParam(0, near_q);
 
 					float4x4 inv_sm_proj = sm_camera->InverseProjMatrix();
-					depth_to_vsm_pp_->SetParam(1, inv_sm_proj);
+					depth_to_esm_pp_->SetParam(1, inv_sm_proj);
 				}
 
 				float3 const & p = light->Position();
@@ -1692,27 +1679,26 @@ namespace KlayGE
 		{
 			if (type != LT_Sun)
 			{
-				depth_to_vsm_pp_->Apply();
+				depth_to_esm_pp_->Apply();
 			}
 		}
 
-		PostProcessChainPtr pp_chain = checked_pointer_cast<PostProcessChain>(sm_filter_pp_);
-		SeparableGaussianFilterPostProcessPtr pp_x_dir = checked_pointer_cast<SeparableGaussianFilterPostProcess>(pp_chain->GetPostProcess(0));
-		SeparableGaussianFilterPostProcessPtr pp_y_dir = checked_pointer_cast<SeparableGaussianFilterPostProcess>(pp_chain->GetPostProcess(1));
+		int2 kernel_size;
 		if (LT_Sun == type)
 		{
 			float3 const & scale = cascaded_shadow_layer_->CascadeScales()[index_in_pass - 1];
 			float2 blur_kernel_size = blur_size_light_space_ * float2(scale.x(), scale.y()) * static_cast<float>(cascaded_sm_tex_->Width(0));
-			int2 kernel_size(MathLib::clamp(static_cast<int32_t>(blur_kernel_size.x() + 0.5f), 1, 8),
-				MathLib::clamp(static_cast<int32_t>(blur_kernel_size.y() + 0.5f), 1, 8));
-			pp_x_dir->KernelRadius(kernel_size.x());
-			pp_y_dir->KernelRadius(kernel_size.y());
+			kernel_size.x() = MathLib::clamp(static_cast<int32_t>(blur_kernel_size.x() + 0.5f), 1, 4);
+			kernel_size.y() = MathLib::clamp(static_cast<int32_t>(blur_kernel_size.y() + 0.5f), 1, 4);
 		}
 		else
 		{
-			pp_x_dir->KernelRadius(8);
-			pp_y_dir->KernelRadius(8);
+			kernel_size.x() = 4;
+			kernel_size.y() = 4;
 		}
+		PostProcessChainPtr pp_chain = checked_pointer_cast<PostProcessChain>(sm_filter_pp_);
+		checked_pointer_cast<SeparableLogGaussianFilterPostProcess>(pp_chain->GetPostProcess(0))->KernelRadius(kernel_size.x());
+		checked_pointer_cast<SeparableLogGaussianFilterPostProcess>(pp_chain->GetPostProcess(1))->KernelRadius(kernel_size.y());
 
 		if (LT_Sun == type)
 		{
@@ -1738,6 +1724,8 @@ namespace KlayGE
 				sm_filter_pp_->OutputPin(0, blur_sm_2d_texs_[sm_light_indices_[org_no]]);
 			}
 		}
+		checked_pointer_cast<LogGaussianBlurPostProcess>(sm_filter_pp_)->ESMScaleFactor(ESM_SCALE_FACTOR,
+			sm_buffer_->GetViewport()->camera);
 		sm_filter_pp_->Apply();
 
 		if (LT_Sun == type)
@@ -1761,6 +1749,7 @@ namespace KlayGE
 		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 		
 		LightSourcePtr const & light = lights_[org_no];
+		CameraPtr sm_camera;
 		LightType type = light->Type();
 
 		int32_t light_index = sm_light_indices_[org_no];
@@ -1769,16 +1758,18 @@ namespace KlayGE
 			switch (type)
 			{
 			case LT_Spot:
+				sm_camera = light->SMCamera(0);
 				*shadow_map_2d_tex_param_ = blur_sm_2d_texs_[light_index];
 				break;
 
 			case LT_Point:
+				sm_camera = light->SMCamera(0);
 				*shadow_map_cube_tex_param_ = blur_sm_cube_texs_[light_index];
 				break;
 
 			case LT_Sun:
 				{
-					CameraPtr const & sm_camera = lights_[cascaded_shadow_index_]->SMCamera(0);
+					sm_camera = lights_[cascaded_shadow_index_]->SMCamera(0);
 
 					*light_view_proj_param_ = pvp.inv_view * sm_camera->ViewProjMatrix();
 
@@ -1823,6 +1814,10 @@ namespace KlayGE
 		*inv_width_height_param_ = float2(1.0f / pvp.frame_buffer->GetViewport()->width,
 			1.0f / pvp.frame_buffer->GetViewport()->height);
 		*shadowing_tex_param_ = pvp.shadowing_tex;
+		if (sm_camera)
+		{
+			*esm_scale_factor_param_ = ESM_SCALE_FACTOR / (sm_camera->FarPlane() - sm_camera->NearPlane());
+		}
 
 		if (0 == (light->Attrib() & LSA_NoShadow))
 		{

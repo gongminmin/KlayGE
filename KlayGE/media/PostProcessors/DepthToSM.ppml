@@ -14,7 +14,7 @@
 		<shader effect="DepthToSM.fxml" tech="DepthToSM"/>
 	</post_processor>
 
-	<post_processor name="DepthToVSM">
+	<post_processor name="DepthToESM">
 		<params>
 			<param name="near_q"/>
 			<param name="inv_proj"/>
@@ -25,6 +25,6 @@
 		<output>
 			<pin name="output"/>
 		</output>
-		<shader effect="DepthToSM.fxml" tech="DepthToVSM"/>
+		<shader effect="DepthToSM.fxml" tech="DepthToESM"/>
 	</post_processor>
 </post_processors>
