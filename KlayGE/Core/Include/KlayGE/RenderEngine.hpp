@@ -263,6 +263,7 @@ namespace KlayGE
 		PostProcessPtr resize_pps_[2];
 		PostProcessPtr stereoscopic_pp_;
 		int fb_stage_;
+		bool pp_chain_dirty_;
 
 		PostProcessPtr ldr_pps_[12];
 	};

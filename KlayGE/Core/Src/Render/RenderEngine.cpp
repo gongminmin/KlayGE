@@ -595,13 +595,19 @@ namespace KlayGE
 			hdr_frame_buffer_->Attach(FrameBuffer::ATT_DepthStencil, ds_view);
 		}
 
-		this->AssemblePostProcessChain();
+		pp_chain_dirty_ = true;
 
 		this->DoResize(width, height);
 	}
 
 	void RenderEngine::PostProcess(bool skip)
 	{
+		if (pp_chain_dirty_)
+		{
+			this->AssemblePostProcessChain();
+			pp_chain_dirty_ = false;
+		}
+
 		fb_stage_ = 1;
 
 		if (hdr_enabled_)
@@ -681,6 +687,7 @@ namespace KlayGE
 	{
 		if (hdr_pp_)
 		{
+			pp_chain_dirty_ = true;
 			hdr_enabled_ = hdr;
 		}
 	}
@@ -689,6 +696,7 @@ namespace KlayGE
 	{
 		if (ldr_pp_)
 		{
+			pp_chain_dirty_ = true;
 			ppaa_enabled_ = aa;
 			ldr_pp_ = ldr_pps_[ppaa_enabled_ * 4 + gamma_enabled_ * 2 + color_grading_enabled_];
 		}
@@ -698,6 +706,7 @@ namespace KlayGE
 	{
 		if (ldr_pp_)
 		{
+			pp_chain_dirty_ = true;
 			gamma_enabled_ = gamma;
 			ldr_pp_ = ldr_pps_[ppaa_enabled_ * 4 + gamma_enabled_ * 2 + color_grading_enabled_];
 		}
@@ -707,6 +716,7 @@ namespace KlayGE
 	{
 		if (ldr_pp_)
 		{
+			pp_chain_dirty_ = true;
 			color_grading_enabled_ = cg;
 			ldr_pp_ = ldr_pps_[ppaa_enabled_ * 4 + gamma_enabled_ * 2 + color_grading_enabled_];
 		}
@@ -802,7 +812,7 @@ namespace KlayGE
 			stereoscopic_pp_ = SyncLoadPostProcess("Stereoscopic.ppml", pp_name);
 		}
 
-		this->AssemblePostProcessChain();
+		pp_chain_dirty_ = true;
 	}
 
 	void RenderEngine::AssemblePostProcessChain()
