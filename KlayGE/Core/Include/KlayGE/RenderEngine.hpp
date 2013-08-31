@@ -99,12 +99,12 @@ namespace KlayGE
 
 		virtual bool RequiresFlipping() const = 0;
 
-		virtual void BeginFrame() = 0;
-		virtual void BeginPass() = 0;
+		virtual void BeginFrame();
+		virtual void BeginPass();
 		void Render(RenderTechnique const & tech, RenderLayout const & rl);
 		void Dispatch(RenderTechnique const & tech, uint32_t tgx, uint32_t tgy, uint32_t tgz);
-		virtual void EndPass() = 0;
-		virtual void EndFrame() = 0;
+		virtual void EndPass();
+		virtual void EndFrame();
 
 		// Just for debug or profile propose
 		virtual void ForceFlush() = 0;

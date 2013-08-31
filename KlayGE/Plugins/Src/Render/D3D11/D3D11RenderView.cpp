@@ -58,7 +58,7 @@ namespace KlayGE
 		width_ = texture_3d.Width(level);
 		height_ = texture_3d.Height(level);
 		pf_ = texture_3d.Format();
-    }
+	}
 
 	D3D11RenderTargetRenderView::D3D11RenderTargetRenderView(Texture& texture_cube, int array_index, Texture::CubeFaces face, int level)
 		: rt_src_(&texture_cube), rt_first_subres_((array_index * 6 + face) * texture_cube.NumMipMaps() + level), rt_num_subres_(1)
@@ -166,7 +166,7 @@ namespace KlayGE
 		width_ = texture_3d.Width(level);
 		height_ = texture_3d.Height(level);
 		pf_ = texture_3d.Format();
-    }
+	}
 
 	D3D11DepthStencilRenderView::D3D11DepthStencilRenderView(Texture& texture_cube, int array_index, Texture::CubeFaces face, int level)
 		: rt_src_(&texture_cube), rt_first_subres_((array_index * 6 + face) * texture_cube.NumMipMaps() + level), rt_num_subres_(1)
@@ -311,7 +311,7 @@ namespace KlayGE
 		width_ = texture_3d.Width(level);
 		height_ = texture_3d.Height(level);
 		pf_ = texture_3d.Format();
-    }
+	}
 
 	D3D11UnorderedAccessView::D3D11UnorderedAccessView(Texture& texture_cube, int array_index, Texture::CubeFaces face, int level)
 		: ua_src_(&texture_cube), ua_first_subres_((array_index * 6 + face) * texture_cube.NumMipMaps() + level), ua_num_subres_(1)

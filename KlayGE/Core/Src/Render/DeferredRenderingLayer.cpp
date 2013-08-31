@@ -940,7 +940,7 @@ namespace KlayGE
 							re.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth,
 								Color(far_plane, 0, 0, 0), 1.0f, 0);
 						}
- 						break;
+						break;
 
 					default:
 						BOOST_ASSERT(PRT_ReflectiveShadowMap == pass_rt);

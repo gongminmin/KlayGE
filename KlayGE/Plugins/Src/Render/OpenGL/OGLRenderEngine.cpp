@@ -779,18 +779,6 @@ namespace KlayGE
 		}
 	}
 
-	// 开始一帧
-	/////////////////////////////////////////////////////////////////////////////////
-	void OGLRenderEngine::BeginFrame()
-	{
-	}
-
-	// 开始一个Pass
-	/////////////////////////////////////////////////////////////////////////////////
-	void OGLRenderEngine::BeginPass()
-	{
-	}
-	
 	// 渲染
 	/////////////////////////////////////////////////////////////////////////////////
 	void OGLRenderEngine::DoRender(RenderTechnique const & tech, RenderLayout const & rl)
@@ -1171,18 +1159,6 @@ namespace KlayGE
 	void OGLRenderEngine::DoDispatch(RenderTechnique const & /*tech*/, uint32_t /*tgx*/, uint32_t /*tgy*/, uint32_t /*tgz*/)
 	{
 		BOOST_ASSERT(false);
-	}
-
-	// 结束一帧
-	/////////////////////////////////////////////////////////////////////////////////
-	void OGLRenderEngine::EndFrame()
-	{
-	}
-
-	// 结束一个Pass
-	/////////////////////////////////////////////////////////////////////////////////
-	void OGLRenderEngine::EndPass()
-	{
 	}
 
 	void OGLRenderEngine::ForceFlush()

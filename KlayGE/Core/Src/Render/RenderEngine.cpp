@@ -72,31 +72,12 @@ namespace KlayGE
 			return false;
 		}
 
-		void BeginFrame()
-		{
-		}
-		void EndFrame()
-		{
-		}
-
-		void BeginPass()
-		{
-		}
-		void EndPass()
-		{
-		}
-
 		void ForceFlush()
 		{
 		}
 
 		void ScissorRect(uint32_t /*x*/, uint32_t /*y*/, uint32_t /*width*/, uint32_t /*height*/)
 		{
-		}
-
-		float4 TexelToPixelOffset() const
-		{
-			return float4(0, 0, 0, 0);
 		}
 
 		bool FullScreen() const
@@ -161,6 +142,23 @@ namespace KlayGE
 	{
 		static RenderEnginePtr obj = MakeSharedPtr<NullRenderEngine>();
 		return obj;
+	}
+
+	void RenderEngine::BeginFrame()
+	{
+	}
+
+	void RenderEngine::BeginPass()
+	{
+	}
+
+	void RenderEngine::EndFrame()
+	{
+		this->BindFrameBuffer(default_frame_buffers_[0]);
+	}
+
+	void RenderEngine::EndPass()
+	{
 	}
 
 	// ½¨Á¢äÖÈ¾´°¿Ú

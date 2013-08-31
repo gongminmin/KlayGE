@@ -175,7 +175,7 @@ namespace KlayGE
 			{
 				AABBox aabb_ws;
 				if (obj->Attrib() & SceneObject::SOA_Cullable)
- 				{
+				{
 					if (obj->Attrib() & SceneObject::SOA_Moveable)
 					{
 						AABBox const & aabb = obj->PosBound();
@@ -693,7 +693,6 @@ namespace KlayGE
 	void SceneManager::FlushScene()
 	{
 		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-		FrameBufferPtr fb = re.CurFrameBuffer();
 
 		visible_marks_map_.clear();
 
@@ -728,7 +727,5 @@ namespace KlayGE
 		this->Flush(App3DFramework::URV_Overlay);
 
 		re.Stereoscopic();
-
-		re.BindFrameBuffer(fb);
 	}
 }

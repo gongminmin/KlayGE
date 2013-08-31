@@ -61,11 +61,6 @@ namespace KlayGE
 		D3D_FEATURE_LEVEL DeviceFeatureLevel() const;
 		void D3DDevice(ID3D11DevicePtr const & device, ID3D11DeviceContextPtr const & imm_ctx, D3D_FEATURE_LEVEL feature_level);
 
-		void BeginFrame();
-		void EndFrame();
-		void BeginPass();
-		void EndPass();
-
 		void ForceFlush();
 
 		void ScissorRect(uint32_t x, uint32_t y, uint32_t width, uint32_t height);
