@@ -14,12 +14,12 @@ SET(EXTRA_LINKED_DIRS
 
 IF(MSVC)
 	SET(EXTRA_LINKED_LIBRARIES
-		debug freetype2411_D optimized freetype2411
+		debug freetype250_D optimized freetype250
 		debug kfont_${KLAYGE_COMPILER_NAME}_${KLAYGE_ARCH_NAME}${CMAKE_DEBUG_POSTFIX} optimized kfont_${KLAYGE_COMPILER_NAME}_${KLAYGE_ARCH_NAME}
 	)
 ELSE()
 	SET(EXTRA_LINKED_LIBRARIES ${EXTRA_LINKED_LIBRARIES}
-		freetype2411
+		freetype250
 		debug kfont_${KLAYGE_COMPILER_NAME}_${KLAYGE_ARCH_NAME}${CMAKE_DEBUG_POSTFIX} optimized kfont_${KLAYGE_COMPILER_NAME}_${KLAYGE_ARCH_NAME}
 		debug boost_program_options-${KLAYGE_COMPILER_NAME}${GCC_VER}-mt-d-${BOOST_VER} optimized boost_program_options-${KLAYGE_COMPILER_NAME}${GCC_VER}-mt-${BOOST_VER})
 ENDIF()
