@@ -687,7 +687,7 @@ void ScenePlayerApp::LoadScene(std::string const & name)
 			scene_obj->ModelMatrix(obj_mat);
 			if (!update_script.empty())
 			{
-				scene_obj->BindUpdateFunc(SceneObjectUpdate(update_script));
+				scene_obj->BindSubThreadUpdateFunc(SceneObjectUpdate(update_script));
 			}
 			scene_objs_.push_back(scene_obj);
 			scene_obj->AddToSceneManager();

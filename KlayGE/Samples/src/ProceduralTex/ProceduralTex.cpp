@@ -144,7 +144,7 @@ namespace
 			}
 		}
 
-		void Update(float app_time, float /*elapsed_time*/)
+		virtual void SubThreadUpdate(float app_time, float /*elapsed_time*/) KLAYGE_OVERRIDE
 		{
 			RenderModelPtr model = checked_pointer_cast<RenderModel>(renderable_);
 			for (uint32_t i = 0; i < model->NumMeshes(); ++ i)

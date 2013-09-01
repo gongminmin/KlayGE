@@ -777,7 +777,7 @@ uint32_t ShadowCubeMap::DoUpdate(uint32_t pass)
 			else
 			{
 				SceneObjectPtr so = MakeSharedPtr<SceneObjectHelper>(teapot_model_->Mesh(0), SceneObject::SOA_Cullable | SceneObject::SOA_Moveable);
-				so->BindUpdateFunc(OccluderObjectUpdate());
+				so->BindSubThreadUpdateFunc(OccluderObjectUpdate());
 				so->AddToSceneManager();
 				checked_pointer_cast<OccluderMesh>(scene_objs_.back()->GetRenderable())->LampTexture(lamp_tex_);
 				checked_pointer_cast<OccluderMesh>(scene_objs_.back()->GetRenderable())->CubeSMTexture(shadow_cube_tex_);

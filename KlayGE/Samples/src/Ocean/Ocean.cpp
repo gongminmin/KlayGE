@@ -410,7 +410,7 @@ namespace
 			return ocean_plane_;
 		}
 
-		void Update(float app_time, float elapsed_time)
+		virtual void SubThreadUpdate(float app_time, float elapsed_time) KLAYGE_OVERRIDE
 		{
 			if (dirty_)
 			{
@@ -419,7 +419,7 @@ namespace
 				dirty_ = false;
 			}
 
-			InfTerrainSceneObject::Update(app_time, elapsed_time);
+			InfTerrainSceneObject::SubThreadUpdate(app_time, elapsed_time);
 
 			float t = app_time * ocean_param_.time_scale / ocean_param_.time_peroid;
 			float frame = (t - floor(t)) * ocean_param_.num_frames;

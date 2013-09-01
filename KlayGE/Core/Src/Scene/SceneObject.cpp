@@ -63,16 +63,29 @@ namespace KlayGE
 		return model_;
 	}
 
-	void SceneObject::BindUpdateFunc(function<void(SceneObject&, float, float)> const & update_func)
+	void SceneObject::BindSubThreadUpdateFunc(function<void(SceneObject&, float, float)> const & update_func)
 	{
-		update_func_ = update_func;
+		sub_thread_update_func_ = update_func;
 	}
 
-	void SceneObject::Update(float app_time, float elapsed_time)
+	void SceneObject::BindMainThreadUpdateFunc(function<void(SceneObject&, float, float)> const & update_func)
 	{
-		if (update_func_)
+		main_thread_update_func_ = update_func;
+	}
+
+	void SceneObject::SubThreadUpdate(float app_time, float elapsed_time)
+	{
+		if (sub_thread_update_func_)
 		{
-			update_func_(*this, app_time, elapsed_time);
+			sub_thread_update_func_(*this, app_time, elapsed_time);
+		}
+	}
+
+	void SceneObject::MainThreadUpdate(float app_time, float elapsed_time)
+	{
+		if (main_thread_update_func_)
+		{
+			main_thread_update_func_(*this, app_time, elapsed_time);
 		}
 	}
 

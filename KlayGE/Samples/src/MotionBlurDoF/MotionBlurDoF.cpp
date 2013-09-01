@@ -227,7 +227,7 @@ namespace
 			renderable_ = ra;
 		}
 
-		void Update(float /*app_time*/, float elapsed_time)
+		virtual void SubThreadUpdate(float /*app_time*/, float elapsed_time) KLAYGE_OVERRIDE
 		{
 			last_mats_.push_back(model_);
 
@@ -1094,7 +1094,8 @@ uint32_t MotionBlurDoFApp::DoUpdate(uint32_t pass)
 					so->AddToSceneManager();
 					scene_objs_.push_back(so);
 
-					so->Update(0, 0);
+					so->SubThreadUpdate(0, 0);
+					so->MainThreadUpdate(0, 0);
 				}
 
 				++ loading_percentage_;

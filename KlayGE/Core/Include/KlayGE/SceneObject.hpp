@@ -56,9 +56,11 @@ namespace KlayGE
 		virtual void AddToSceneManager();
 		virtual void DelFromSceneManager();
 
-		void BindUpdateFunc(function<void(SceneObject&, float, float)> const & update_func);
+		void BindSubThreadUpdateFunc(function<void(SceneObject&, float, float)> const & update_func);
+		void BindMainThreadUpdateFunc(function<void(SceneObject&, float, float)> const & update_func);
 
-		virtual void Update(float app_time, float elapsed_time);
+		virtual void SubThreadUpdate(float app_time, float elapsed_time);
+		virtual void MainThreadUpdate(float app_time, float elapsed_time);
 
 		uint32_t Attrib() const;
 		bool Visible() const;
@@ -95,7 +97,8 @@ namespace KlayGE
 
 		float4x4 model_;
 
-		function<void(SceneObject&, float, float)> update_func_;
+		function<void(SceneObject&, float, float)> sub_thread_update_func_;
+		function<void(SceneObject&, float, float)> main_thread_update_func_;
 	};
 }
 

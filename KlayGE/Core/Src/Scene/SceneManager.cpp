@@ -93,26 +93,6 @@ namespace
 
 namespace KlayGE
 {
-	class NullSceneManager : public SceneManager
-	{
-	public:
-		NullSceneManager()
-		{
-		}
-
-		void OnAddSceneObject(SceneObjectPtr const & /*obj*/)
-		{
-		}
-
-		void OnDelSceneObject(SceneObjAABBsType::iterator /*iter*/)
-		{
-		}
-
-	private:
-		NullSceneManager(NullSceneManager const & rhs);
-		NullSceneManager& operator=(NullSceneManager const & rhs);
-	};
-
 	// 构造函数
 	/////////////////////////////////////////////////////////////////////////////////
 	SceneManager::SceneManager()
@@ -121,24 +101,22 @@ namespace KlayGE
 			numObjectsRendered_(0),
 			numRenderablesRendered_(0),
 			numPrimitivesRendered_(0),
-			numVerticesRendered_(0)
+			numVerticesRendered_(0),
+			quit_(false)
 	{
+		update_thread_ = MakeSharedPtr<joiner<void> >(Context::Instance().ThreadPool()(
+			bind(&SceneManager::UpdateThreadFunc, this)));
 	}
 
 	// 析构函数
 	/////////////////////////////////////////////////////////////////////////////////
 	SceneManager::~SceneManager()
 	{
+		quit_ = true;
+		(*update_thread_)();
+
 		this->ClearLight();
 		this->ClearObject();
-	}
-
-	// 返回空对象
-	/////////////////////////////////////////////////////////////////////////////////
-	SceneManagerPtr SceneManager::NullObject()
-	{
-		static SceneManagerPtr obj = MakeSharedPtr<NullSceneManager>();
-		return obj;
 	}
 
 	void SceneManager::SmallObjectThreshold(float area)
@@ -266,6 +244,8 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void SceneManager::AddSceneObject(SceneObjectPtr const & obj)
 	{
+		unique_lock<mutex> lock(update_mutex_);
+
 		AABBoxPtr aabb_ws;
 		uint32_t const attr = obj->Attrib();
 		if ((attr & SceneObject::SOA_Cullable)
@@ -298,8 +278,9 @@ namespace KlayGE
 
 	SceneManager::SceneObjAABBsType::iterator SceneManager::DelSceneObject(SceneManager::SceneObjAABBsType::iterator iter)
 	{
-		this->OnDelSceneObject(iter);
+		unique_lock<mutex> lock(update_mutex_);
 
+		this->OnDelSceneObject(iter);
 		return scene_objs_.erase(iter);
 	}
 
@@ -441,6 +422,7 @@ namespace KlayGE
 
 	void SceneManager::ClearObject()
 	{
+		unique_lock<mutex> lock(update_mutex_);
 		scene_objs_.resize(0);
 	}
 
@@ -478,7 +460,7 @@ namespace KlayGE
 		{
 			if (!(scene_obj->so->Attrib() & SceneObject::SOA_Overlay))
 			{
-				scene_obj->so->Update(app_time, frame_time);
+				scene_obj->so->MainThreadUpdate(app_time, frame_time);
 			}
 		}
 
@@ -566,7 +548,8 @@ namespace KlayGE
 			{
 				if (scene_obj->so->Attrib() & SceneObject::SOA_Overlay)
 				{
-					scene_obj->so->Update(app_time, frame_time);
+					scene_obj->so->SubThreadUpdate(app_time, frame_time);
+					scene_obj->so->MainThreadUpdate(app_time, frame_time);
 					scene_obj->visible = scene_obj->so->Visible();
 				}
 			}
@@ -727,5 +710,36 @@ namespace KlayGE
 		this->Flush(App3DFramework::URV_Overlay);
 
 		re.Stereoscopic();
+	}
+
+	void SceneManager::UpdateThreadFunc()
+	{
+		while (!quit_)
+		{
+			float const frame_time = 1.0f / 60;
+			Timer timer;
+
+			{
+				unique_lock<mutex> lock(update_mutex_);
+
+				App3DFramework& app = Context::Instance().AppInstance();
+				float const app_time = app.AppTime();
+
+				typedef KLAYGE_DECLTYPE(scene_objs_) SceneObjsType;
+				KLAYGE_FOREACH(SceneObjsType::const_reference scene_obj, scene_objs_)
+				{
+					if (!(scene_obj->so->Attrib() & SceneObject::SOA_Overlay))
+					{
+						scene_obj->so->SubThreadUpdate(app_time, frame_time);
+					}
+				}
+			}
+
+			float update_time = static_cast<float>(timer.elapsed());
+			if (update_time < frame_time)
+			{
+				Sleep(static_cast<uint32_t>((frame_time - update_time) * 1000));
+			}
+		}
 	}
 }

@@ -727,7 +727,7 @@ namespace KlayGE
 		{
 		}
 
-		void Update(float /*app_time*/, float /*elapsed_time*/)
+		void MainThreadUpdate(float /*app_time*/, float /*elapsed_time*/)
 		{
 			checked_pointer_cast<FontRenderable>(renderable_)->UpdateBuffers();
 		}

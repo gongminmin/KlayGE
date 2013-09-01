@@ -100,11 +100,9 @@ namespace KlayGE
 
 	Context::~Context()
 	{
-		ResLoader::Destroy();
-
-		app_ = nullptr;
-
 		scene_mgr_.reset();
+
+		ResLoader::Destroy();
 
 		render_factory_.reset();
 		audio_factory_.reset();
@@ -113,6 +111,8 @@ namespace KlayGE
 		script_factory_.reset();
 		audio_data_src_factory_.reset();
 		deferred_rendering_layer_.reset();
+
+		app_ = nullptr;
 
 		gtp_instance_.reset();
 	}
@@ -798,7 +798,7 @@ namespace KlayGE
 
 	void Context::LoadSceneManager(std::string const & sm_name)
 	{
-		scene_mgr_ = SceneManager::NullObject();
+		scene_mgr_.reset();
 
 #ifndef KLAYGE_PLATFORM_ANDROID
 		sm_loader_.Free();

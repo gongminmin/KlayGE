@@ -98,7 +98,7 @@ namespace KlayGE
 		this->Init(light, CreateMeshFactoryFunc);
 	}
 
-	void SceneObjectLightSourceProxy::Update(float /*app_time*/, float /*elapsed_time*/)
+	void SceneObjectLightSourceProxy::SubThreadUpdate(float /*app_time*/, float /*elapsed_time*/)
 	{
 		model_ = model_scaling_ * MathLib::to_matrix(light_->Rotation()) * MathLib::translation(light_->Position());
 		if (LT_Spot == light_->Type())
@@ -192,7 +192,7 @@ namespace KlayGE
 		this->Init(camera, CreateMeshFactoryFunc);
 	}
 
-	void SceneObjectCameraProxy::Update(float /*app_time*/, float /*elapsed_time*/)
+	void SceneObjectCameraProxy::SubThreadUpdate(float /*app_time*/, float /*elapsed_time*/)
 	{
 		model_ = model_scaling_ * camera_->InverseViewMatrix();
 

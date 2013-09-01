@@ -421,7 +421,7 @@ namespace KlayGE
 
 		this->ActiveCamera().ProjParams(PI / 4, static_cast<float>(fb.Width()) / fb.Height(),
 			nearPlane, farPlane);
- 	}
+	}
 
 	// ÍË³ö³ÌÐò
 	/////////////////////////////////////////////////////////////////////////////////

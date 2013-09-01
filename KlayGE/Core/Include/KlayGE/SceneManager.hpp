@@ -30,6 +30,7 @@
 
 #include <KlayGE/Renderable.hpp>
 #include <KFL/Frustum.hpp>
+#include <KFL/Thread.hpp>
 
 #include <vector>
 
@@ -60,8 +61,6 @@ namespace KlayGE
 	public:
 		SceneManager();
 		virtual ~SceneManager();
-
-		static SceneManagerPtr NullObject();
 
 		void SmallObjectThreshold(float area);
 		virtual void ClipScene();
@@ -111,6 +110,8 @@ namespace KlayGE
 		virtual void OnAddSceneObject(SceneObjectPtr const & obj) = 0;
 		virtual void OnDelSceneObject(SceneObjAABBsType::iterator iter) = 0;
 
+		void UpdateThreadFunc();
+
 	protected:
 		std::vector<CameraPtr> cameras_;
 		Frustum const * frustum_;
@@ -133,6 +134,10 @@ namespace KlayGE
 		size_t numRenderablesRendered_;
 		size_t numPrimitivesRendered_;
 		size_t numVerticesRendered_;
+
+		mutex update_mutex_;
+		shared_ptr<joiner<void> > update_thread_;
+		bool quit_;
 	};
 }
 

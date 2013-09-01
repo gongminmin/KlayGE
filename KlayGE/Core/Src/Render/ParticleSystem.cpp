@@ -566,7 +566,7 @@ namespace KlayGE
 
 	ParticleSystem::ParticleSystem(uint32_t max_num_particles)
 		: SceneObjectHelper(SOA_Moveable),
-			particles_(max_num_particles), num_active_particles_(0),
+			particles_(max_num_particles),
 			gravity_(0.5f), force_(0, 0, 0), media_density_(0.0f)
 	{
 		this->ClearParticles();
@@ -686,7 +686,7 @@ namespace KlayGE
 		}
 	}
 
-	void ParticleSystem::Update(float /*app_time*/, float elapsed_time)
+	void ParticleSystem::SubThreadUpdate(float /*app_time*/, float elapsed_time)
 	{
 		KLAYGE_AUTO(emitter_iter, emitters_.begin());
 		uint32_t new_particle = (*emitter_iter)->Update(elapsed_time);
@@ -746,13 +746,26 @@ namespace KlayGE
 			}
 		}
 
-		num_active_particles_ = static_cast<uint32_t>(active_particles.size());
-
 		if (!active_particles.empty())
 		{
 			std::sort(active_particles.begin(), active_particles.end(), ParticleCmp());
 
 			checked_pointer_cast<RenderParticles>(renderable_)->PosBound(AABBox(min_bb, max_bb));
+		}
+
+		unique_lock<mutex> lock(update_mutex_);
+		active_particles_ = active_particles;
+	}
+
+	void ParticleSystem::MainThreadUpdate(float app_time, float elapsed_time)
+	{
+		UNREF_PARAM(app_time);
+		UNREF_PARAM(elapsed_time);
+
+		unique_lock<mutex> lock(update_mutex_);
+		if (!active_particles_.empty())
+		{
+			uint32_t const num_active_particles = static_cast<uint32_t>(active_particles_.size());
 
 			RenderLayoutPtr const & rl = renderable_->GetRenderLayout();
 			GraphicsBufferPtr instance_gb;
@@ -766,17 +779,17 @@ namespace KlayGE
 
 				for (uint32_t i = 0; i < rl->NumVertexStreams(); ++ i)
 				{
-					rl->VertexStreamFrequencyDivider(i, RenderLayout::ST_Geometry, num_active_particles_);
+					rl->VertexStreamFrequencyDivider(i, RenderLayout::ST_Geometry, num_active_particles);
 				}
 			}
 
-			instance_gb->Resize(sizeof(ParticleInstance) * num_active_particles_);
+			instance_gb->Resize(sizeof(ParticleInstance) * num_active_particles);
 			{
 				GraphicsBuffer::Mapper mapper(*instance_gb, BA_Write_Only);
 				ParticleInstance* instance_data = mapper.Pointer<ParticleInstance>();
-				for (uint32_t i = 0; i < num_active_particles_; ++ i, ++ instance_data)
+				for (uint32_t i = 0; i < num_active_particles; ++ i, ++ instance_data)
 				{
-					Particle const & par = particles_[active_particles[i].first];
+					Particle const & par = particles_[active_particles_[i].first];
 					instance_data->pos = par.pos;
 					instance_data->life = par.life;
 					instance_data->spin = par.spin;

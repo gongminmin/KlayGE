@@ -35,6 +35,7 @@
 
 #include <KlayGE/PreDeclare.hpp>
 #include <KFL/Math.hpp>
+#include <KFL/Thread.hpp>
 #include <KlayGE/SceneObjectHelper.hpp>
 
 #include <vector>
@@ -285,7 +286,8 @@ namespace KlayGE
 			return updaters_[index];
 		}
 
-		virtual void Update(float app_time, float elapsed_time) KLAYGE_OVERRIDE;
+		virtual void SubThreadUpdate(float app_time, float elapsed_time) KLAYGE_OVERRIDE;
+		virtual void MainThreadUpdate(float app_time, float elapsed_time) KLAYGE_OVERRIDE;
 
 		uint32_t NumParticles() const
 		{
@@ -293,7 +295,7 @@ namespace KlayGE
 		}
 		uint32_t NumActiveParticles() const
 		{
-			return num_active_particles_;
+			return static_cast<uint32_t>(active_particles_.size());
 		}
 		Particle const & GetParticle(uint32_t i) const
 		{
@@ -335,7 +337,7 @@ namespace KlayGE
 		std::vector<ParticleUpdaterPtr> updaters_;
 
 		std::vector<Particle> particles_;
-		uint32_t num_active_particles_;
+		std::vector<std::pair<uint32_t, float> > active_particles_;
 
 		float gravity_;
 		float3 force_;
@@ -347,6 +349,8 @@ namespace KlayGE
 		Color particle_color_to_;
 
 		bool gs_support_;
+
+		mutex update_mutex_;
 	};
 
 	KLAYGE_CORE_API ParticleSystemPtr SyncLoadParticleSystem(std::string const & psml_name);
