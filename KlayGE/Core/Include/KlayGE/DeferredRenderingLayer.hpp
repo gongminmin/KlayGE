@@ -67,6 +67,7 @@ namespace KlayGE
 		TexturePtr g_buffer_rt1_tex;
 		TexturePtr g_buffer_ds_tex;
 		TexturePtr g_buffer_depth_tex;
+		TexturePtr g_buffer_rt0_backup_tex;
 
 		FrameBufferPtr lighting_buffer;
 		TexturePtr lighting_tex;
@@ -170,6 +171,10 @@ namespace KlayGE
 		TexturePtr const & DepthTex(uint32_t vp) const
 		{
 			return viewports_[vp].g_buffer_depth_tex;
+		}
+		TexturePtr const & GBufferRT0BackupTex(uint32_t vp) const
+		{
+			return viewports_[vp].g_buffer_rt0_backup_tex;
 		}
 
 		uint32_t ActiveViewport() const

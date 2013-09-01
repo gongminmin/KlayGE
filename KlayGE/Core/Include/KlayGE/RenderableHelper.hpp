@@ -206,6 +206,7 @@ namespace KlayGE
 
 	private:
 		RenderEffectParameterPtr inv_mv_ep_;
+		RenderEffectParameterPtr g_buffer_rt0_tex_param_;
 		float3 diffuse_clr_;
 		float specular_level_;
 		float shininess_;

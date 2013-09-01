@@ -37,6 +37,8 @@
 #include <KlayGE/App3D.hpp>
 #include <KlayGE/RenderLayout.hpp>
 #include <KlayGE/Camera.hpp>
+#include <KlayGE/Renderable.hpp>
+#include <KlayGE/DeferredRenderingLayer.hpp>
 
 #include <cstring>
 
@@ -699,6 +701,7 @@ namespace KlayGE
 		effect_attrs_ |= EA_AlphaTest;
 
 		inv_mv_ep_ = technique_->Effect().ParameterByName("inv_mv");
+		g_buffer_rt0_tex_param_ = deferred_effect_->ParameterByName("g_buffer_rt0_tex");
 
 		normal_tex_ = normal_tex;
 		diffuse_tex_ = diffuse_tex;
@@ -712,6 +715,7 @@ namespace KlayGE
 	{
 		RenderableHelper::OnRenderBegin();
 
+		DeferredRenderingLayerPtr const & drl = Context::Instance().DeferredRenderingLayerInstance();
 		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 		Camera const & camera = *re.CurFrameBuffer()->GetViewport()->camera;
 
@@ -733,6 +737,8 @@ namespace KlayGE
 			*shininess_clr_param_ = float2(MathLib::clamp(shininess_ / 256.0f, 1e-6f, 0.999f), static_cast<float>(!!shininess_tex_));
 			*shininess_tex_param_ = shininess_tex_;
 			*inv_mv_ep_ = view_to_decal;
+			*opaque_depth_tex_param_ = drl->DepthTex(drl->ActiveViewport());
+			*g_buffer_rt0_tex_param_ = drl->GBufferRT0BackupTex(drl->ActiveViewport());
 			break;
 
 		default:

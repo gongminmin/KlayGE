@@ -634,6 +634,8 @@ namespace KlayGE
 			EAH_GPU_Read | EAH_GPU_Write, nullptr);
 		pvp.g_buffer_depth_tex = rf.MakeTexture2D(width, height, MAX_IL_MIPMAP_LEVELS + 1, 1, depth_fmt, 1, 0,
 				EAH_GPU_Read | EAH_GPU_Write | EAH_Generate_Mips, nullptr);
+		pvp.g_buffer_rt0_backup_tex = rf.MakeTexture2D(width, height, 1, 1, fmt8, 1, 0,
+			EAH_GPU_Read, nullptr);
 		RenderViewPtr g_buffer_rt0_view = rf.Make2DRenderView(*pvp.g_buffer_rt0_tex, 0, 1, 0);
 		RenderViewPtr g_buffer_rt1_view = rf.Make2DRenderView(*pvp.g_buffer_rt1_tex, 0, 1, 0);
 		RenderViewPtr g_buffer_depth_view = rf.Make2DRenderView(*pvp.g_buffer_depth_tex, 0, 1, 0);
@@ -889,7 +891,7 @@ namespace KlayGE
 				{
 					if (!decals_.empty())
 					{
-						this->RenderDecals(pvp, PT_OpaqueGBufferRT1);
+						this->RenderDecals(pvp, (PRT_MRT == pass_rt) ? PT_OpaqueGBufferMRT : PT_OpaqueGBufferRT1);
 					}
 				}
 				urv = App3DFramework::URV_Flushed;
@@ -1526,6 +1528,11 @@ namespace KlayGE
 	void DeferredRenderingLayer::RenderDecals(PerViewport const & pvp, PassType pass_type)
 	{
 		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+
+		uint32_t const width = pvp.g_buffer_rt0_tex->Width(0);
+		uint32_t const height = pvp.g_buffer_rt0_tex->Height(0);
+		pvp.g_buffer_rt0_tex->CopyToSubTexture2D(*pvp.g_buffer_rt0_backup_tex, 0, 0,
+			0, 0, width, height, 0, 0, 0, 0, width, height);
 
 		re.BindFrameBuffer((PT_OpaqueGBufferRT1 == pass_type) ? pvp.g_buffer_rt1
 			: pvp.g_buffer);

@@ -70,6 +70,7 @@
 	</parameter>
 
 	<parameter type="texture2D" name="opaque_depth_tex"/>
+	<parameter type="texture2D" name="g_buffer_rt0_tex"/>
 
 	<parameter type="sampler" name="bilinear_border_sampler">
 		<state name="filtering" value="min_mag_linear_mip_point"/>
@@ -417,7 +418,7 @@ float4 DecalGBufferAlphaTestRT0PS(float4 texcoord_2xy : TEXCOORD0, float4 ts_to_
 	float3 pos_es = view_dir * (opaque_depth_tex.Sample(point_sampler, screen_tc).r / view_dir.z);
 	
 	float3 decal_normal = normalize(float3(texcoord_2xy.zw, ts_to_view0_2z.w));
-	float3 pixel_normal = normalize(cross(ddx(pos_es), ddy(pos_es)));
+	float3 pixel_normal = GetNormal(g_buffer_rt0_tex.Sample(bilinear_sampler, screen_tc));
 	clip(dot(decal_normal, pixel_normal) - NORMAL_THRESHOLD);
 	
 	float4 decal_pos = mul(float4(pos_es, 1), inv_mv);
@@ -459,7 +460,7 @@ float4 DecalGBufferAlphaTestRT1PS(float4 texcoord_2xy : TEXCOORD0, float4 ts_to_
 	float3 pos_es = view_dir * (opaque_depth_tex.Sample(point_sampler, screen_tc).r / view_dir.z);
 
 	float3 decal_normal = normalize(float3(texcoord_2xy.zw, ts_to_view0_2z.w));
-	float3 pixel_normal = normalize(cross(ddx(pos_es), ddy(pos_es)));
+	float3 pixel_normal = GetNormal(g_buffer_rt0_tex.Sample(bilinear_sampler, screen_tc));
 	clip(dot(decal_normal, pixel_normal) - NORMAL_THRESHOLD);
 	
 	float4 decal_pos = mul(float4(pos_es, 1), inv_mv);
@@ -512,7 +513,7 @@ void DecalGBufferAlphaTestMRTPS(float4 texcoord_2xy : TEXCOORD0, float4 ts_to_vi
 	float3 pos_es = view_dir * (opaque_depth_tex.Sample(point_sampler, screen_tc).r / view_dir.z);
 	
 	float3 decal_normal = normalize(float3(texcoord_2xy.zw, ts_to_view0_2z.w));
-	float3 pixel_normal = normalize(cross(ddx(pos_es), ddy(pos_es)));
+	float3 pixel_normal = GetNormal(g_buffer_rt0_tex.Sample(bilinear_sampler, screen_tc));
 	clip(dot(decal_normal, pixel_normal) - NORMAL_THRESHOLD);
 	
 	float4 decal_pos = mul(float4(pos_es, 1), inv_mv);
