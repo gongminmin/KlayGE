@@ -104,8 +104,6 @@ namespace KlayGE
 			numVerticesRendered_(0),
 			quit_(false)
 	{
-		update_thread_ = MakeSharedPtr<joiner<void> >(Context::Instance().ThreadPool()(
-			bind(&SceneManager::UpdateThreadFunc, this)));
 	}
 
 	// Îö¹¹º¯Êý
@@ -116,6 +114,7 @@ namespace KlayGE
 		(*update_thread_)();
 
 		this->ClearLight();
+		this->ClearCamera();
 		this->ClearObject();
 	}
 
@@ -430,6 +429,12 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void SceneManager::Update()
 	{
+		if (!update_thread_ && !quit_)
+		{
+			update_thread_ = MakeSharedPtr<joiner<void> >(Context::Instance().ThreadPool()(
+				bind(&SceneManager::UpdateThreadFunc, this)));
+		}
+
 		InputEngine& ie = Context::Instance().InputFactoryInstance().InputEngineInstance();
 		ie.Update();
 
@@ -548,7 +553,6 @@ namespace KlayGE
 			{
 				if (scene_obj->so->Attrib() & SceneObject::SOA_Overlay)
 				{
-					scene_obj->so->SubThreadUpdate(app_time, frame_time);
 					scene_obj->so->MainThreadUpdate(app_time, frame_time);
 					scene_obj->visible = scene_obj->so->Visible();
 				}
@@ -714,31 +718,28 @@ namespace KlayGE
 
 	void SceneManager::UpdateThreadFunc()
 	{
+		Timer timer;
+		float app_time = 0;
 		while (!quit_)
 		{
-			float const frame_time = 1.0f / 60;
-			Timer timer;
+			float const frame_time = static_cast<float>(timer.elapsed());
+			timer.restart();
+			app_time += frame_time;
 
 			{
 				unique_lock<mutex> lock(update_mutex_);
 
-				App3DFramework& app = Context::Instance().AppInstance();
-				float const app_time = app.AppTime();
-
 				typedef KLAYGE_DECLTYPE(scene_objs_) SceneObjsType;
 				KLAYGE_FOREACH(SceneObjsType::const_reference scene_obj, scene_objs_)
 				{
-					if (!(scene_obj->so->Attrib() & SceneObject::SOA_Overlay))
-					{
-						scene_obj->so->SubThreadUpdate(app_time, frame_time);
-					}
+					scene_obj->so->SubThreadUpdate(app_time, frame_time);
 				}
 			}
 
-			float update_time = static_cast<float>(timer.elapsed());
-			if (update_time < frame_time)
+			float const update_budget = 1.0f / 60;
+			if (frame_time < update_budget)
 			{
-				Sleep(static_cast<uint32_t>((frame_time - update_time) * 1000));
+				Sleep(static_cast<uint32_t>((update_budget - frame_time) * 1000));
 			}
 		}
 	}
