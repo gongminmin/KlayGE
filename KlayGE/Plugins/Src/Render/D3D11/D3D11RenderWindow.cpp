@@ -46,7 +46,6 @@ namespace KlayGE
 #else
 						: metro_d3d_render_win_(ref new MetroD3D11RenderWindow),
 #endif
-							ready_(false),
 							adapter_(adapter),
 							gi_factory_(gi_factory)
 	{
@@ -64,11 +63,7 @@ namespace KlayGE
 		wnd_ = main_wnd->GetWindow();
 		metro_d3d_render_win_->BindD3D11RenderWindow(this);
 #endif
-		on_active_connect_ = main_wnd->OnActive().connect(bind(&D3D11RenderWindow::OnActive, this,
-			placeholders::_1, placeholders::_2));
 		on_paint_connect_ = main_wnd->OnPaint().connect(bind(&D3D11RenderWindow::OnPaint, this,
-			placeholders::_1));
-		on_enter_size_move_connect_ = main_wnd->OnEnterSizeMove().connect(bind(&D3D11RenderWindow::OnEnterSizeMove, this,
 			placeholders::_1));
 		on_exit_size_move_connect_ = main_wnd->OnExitSizeMove().connect(bind(&D3D11RenderWindow::OnExitSizeMove, this,
 			placeholders::_1));
@@ -480,32 +475,17 @@ namespace KlayGE
 		Verify(!!swap_chain_);
 
 		this->UpdateSurfacesPtrs();
-
-		active_ = true;
-		ready_ = true;
 	}
 
 	D3D11RenderWindow::~D3D11RenderWindow()
 	{
-		on_active_connect_.disconnect();
 		on_paint_connect_.disconnect();
-		on_enter_size_move_connect_.disconnect();
 		on_exit_size_move_connect_.disconnect();
 		on_size_connect_.disconnect();
 		on_set_cursor_connect_.disconnect();
 		on_close_connect_.disconnect();
 
 		this->Destroy();
-	}
-
-	bool D3D11RenderWindow::Ready() const
-	{
-		return ready_;
-	}
-
-	void D3D11RenderWindow::Ready(bool ready)
-	{
-		ready_ = ready;
 	}
 
 	std::wstring const & D3D11RenderWindow::Description() const
@@ -938,45 +918,28 @@ namespace KlayGE
 		}
 	}
 
-	void D3D11RenderWindow::OnActive(Window const & /*win*/, bool active)
-	{
-		active_ = active;
-	}
-
-	void D3D11RenderWindow::OnPaint(Window const & /*win*/)
+	void D3D11RenderWindow::OnPaint(Window const & win)
 	{
 		// If we get WM_PAINT messges, it usually means our window was
 		// comvered up, so we need to refresh it by re-showing the contents
 		// of the current frame.
-		if (this->Active() && this->Ready())
+		if (win.Active() && win.Ready())
 		{
 			Context::Instance().SceneManagerInstance().Update();
 			this->SwapBuffers();
 		}
 	}
 
-	void D3D11RenderWindow::OnEnterSizeMove(Window const & /*win*/)
-	{
-		// Previent rendering while moving / sizing
-		this->Ready(false);
-	}
-
 	void D3D11RenderWindow::OnExitSizeMove(Window const & /*win*/)
 	{
 		this->WindowMovedOrResized();
-		this->Ready(true);
 	}
 
-	void D3D11RenderWindow::OnSize(Window const & /*win*/, bool active)
+	void D3D11RenderWindow::OnSize(Window const & win, bool active)
 	{
-		if (!active)
+		if (active)
 		{
-			active_ = false;
-		}
-		else
-		{
-			active_ = true;
-			if (this->Ready())
+			if (win.Ready())
 			{
 				this->WindowMovedOrResized();
 			}

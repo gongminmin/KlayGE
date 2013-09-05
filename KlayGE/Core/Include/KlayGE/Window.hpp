@@ -118,6 +118,14 @@ namespace KlayGE
 			return height_;
 		}
 
+		bool Active() const
+		{
+			return active_;
+		}
+		bool Ready() const
+		{
+			return ready_;
+		}
 		bool Closed() const
 		{
 			return closed_;
@@ -276,6 +284,8 @@ namespace KlayGE
 		uint32_t width_;
 		uint32_t height_;
 
+		bool active_;
+		bool ready_;
 		bool closed_;
 
 #if defined KLAYGE_PLATFORM_WINDOWS

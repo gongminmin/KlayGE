@@ -81,9 +81,6 @@ namespace KlayGE
 		ViewportPtr& GetViewport();
 		void SetViewport(ViewportPtr const & viewport);
 
-		bool Active() const;
-		void Active(bool state);
-
 		void Attach(uint32_t att, RenderViewPtr const & view);
 		void Detach(uint32_t att);
 		RenderViewPtr Attached(uint32_t att) const;
@@ -112,8 +109,6 @@ namespace KlayGE
 		uint32_t	top_;
 		uint32_t	width_;
 		uint32_t	height_;
-
-		bool	active_;	// Is active i.e. visible
 
 		ViewportPtr viewport_;
 

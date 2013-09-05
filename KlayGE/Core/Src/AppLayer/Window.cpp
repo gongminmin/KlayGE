@@ -62,7 +62,7 @@ namespace KlayGE
 	}
 
 	Window::Window(std::string const & name, RenderSettings const & settings)
-		: closed_(false)
+		: active_(false), ready_(false), closed_(false)
 	{
 		HINSTANCE hInst = ::GetModuleHandle(nullptr);
 
@@ -231,14 +231,8 @@ namespace KlayGE
 		switch (uMsg)
 		{
 		case WM_ACTIVATE:
-			if (WA_INACTIVE == LOWORD(wParam))
-			{
-				this->OnActive()(*this, false);
-			}
-			else
-			{
-				this->OnActive()(*this, true);
-			}
+			active_ = (WA_INACTIVE != LOWORD(wParam));
+			this->OnActive()(*this, active_);
 			break;
 
 		case WM_ERASEBKGND:
@@ -250,11 +244,13 @@ namespace KlayGE
 
 		case WM_ENTERSIZEMOVE:
 			// Previent rendering while moving / sizing
+			ready_ = false;
 			this->OnEnterSizeMove()(*this);
 			break;
 
 		case WM_EXITSIZEMOVE:
 			this->OnExitSizeMove()(*this);
+			ready_ = true;
 			break;
 
 		case WM_SIZE:
@@ -262,10 +258,12 @@ namespace KlayGE
 			// active flag to match
 			if ((SIZE_MAXHIDE == wParam) || (SIZE_MINIMIZED == wParam))
 			{
+				active_ = false;
 				this->OnSize()(*this, false);
 			}
 			else
 			{
+				active_ = true;
 				this->OnSize()(*this, true);
 			}
 			break;
@@ -277,7 +275,7 @@ namespace KlayGE
 			break;
 
 		case WM_SETCURSOR:
-		    this->OnSetCursor()(*this);
+			this->OnSetCursor()(*this);
 			break;
 
 		case WM_CHAR:
@@ -857,7 +855,7 @@ namespace KlayGE
 		case APP_CMD_INIT_WINDOW:
 			win->a_window_ = app->window;
 			break;
-        
+		
 		case APP_CMD_TERM_WINDOW:
 			win->OnClose()(*win);
 			win->closed_ = true;
@@ -865,7 +863,7 @@ namespace KlayGE
 
 		case APP_CMD_GAINED_FOCUS:
 			win->OnActive()(*win, true);
-            break;
+			break;
 
 		case APP_CMD_LOST_FOCUS:
 			win->OnActive()(*win, false);

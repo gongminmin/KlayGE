@@ -33,8 +33,7 @@
 namespace KlayGE
 {
 	OGLESRenderWindow::OGLESRenderWindow(std::string const & name, RenderSettings const & settings)
-						: OGLESFrameBuffer(false),
-							ready_(false), closed_(false)
+						: OGLESFrameBuffer(false)
 	{
 		// Store info
 		name_				= name;
@@ -44,11 +43,7 @@ namespace KlayGE
 		color_bits_			= NumFormatBits(settings.color_fmt);
 
 		WindowPtr const & main_wnd = Context::Instance().AppInstance().MainWnd();		
-		on_active_connect_ = main_wnd->OnActive().connect(bind(&OGLESRenderWindow::OnActive, this,
-			placeholders::_1, placeholders::_2));
 		on_paint_connect_ = main_wnd->OnPaint().connect(bind(&OGLESRenderWindow::OnPaint, this,
-			placeholders::_1));
-		on_enter_size_move_connect_ = main_wnd->OnEnterSizeMove().connect(bind(&OGLESRenderWindow::OnEnterSizeMove, this,
 			placeholders::_1));
 		on_exit_size_move_connect_ = main_wnd->OnExitSizeMove().connect(bind(&OGLESRenderWindow::OnExitSizeMove, this,
 			placeholders::_1));
@@ -205,36 +200,16 @@ namespace KlayGE
 			oss << L" (" << settings.sample_count << L"x AA)";
 		}
 		description_ = oss.str();
-
-		active_ = true;
-		ready_ = true;
 	}
 
 	OGLESRenderWindow::~OGLESRenderWindow()
 	{
-		on_active_connect_.disconnect();
 		on_paint_connect_.disconnect();
-		on_enter_size_move_connect_.disconnect();
 		on_exit_size_move_connect_.disconnect();
 		on_size_connect_.disconnect();
 		on_close_connect_.disconnect();
 
 		this->Destroy();
-	}
-
-	bool OGLESRenderWindow::Closed() const
-	{
-		return closed_;
-	}
-
-	bool OGLESRenderWindow::Ready() const
-	{
-		return ready_;
-	}
-
-	void OGLESRenderWindow::Ready(bool ready)
-	{
-		ready_ = ready;
 	}
 
 	std::wstring const & OGLESRenderWindow::Description() const
@@ -397,45 +372,28 @@ namespace KlayGE
 		eglSwapBuffers(display_, surf_);
 	}
 
-	void OGLESRenderWindow::OnActive(Window const & /*win*/, bool active)
-	{
-		active_ = active;
-	}
-
-	void OGLESRenderWindow::OnPaint(Window const & /*win*/)
+	void OGLESRenderWindow::OnPaint(Window const & win)
 	{
 		// If we get WM_PAINT messges, it usually means our window was
 		// comvered up, so we need to refresh it by re-showing the contents
 		// of the current frame.
-		if (this->Active() && this->Ready())
+		if (win.Active() && win.Ready())
 		{
 			Context::Instance().SceneManagerInstance().Update();
 			this->SwapBuffers();
 		}
 	}
 
-	void OGLESRenderWindow::OnEnterSizeMove(Window const & /*win*/)
-	{
-		// Previent rendering while moving / sizing
-		this->Ready(false);
-	}
-
 	void OGLESRenderWindow::OnExitSizeMove(Window const & win)
 	{
 		this->WindowMovedOrResized(win);
-		this->Ready(true);
 	}
 
 	void OGLESRenderWindow::OnSize(Window const & win, bool active)
 	{
-		if (!active)
+		if (active)
 		{
-			active_ = false;
-		}
-		else
-		{
-			active_ = true;
-			if (this->Ready())
+			if (win.Ready())
 			{
 				this->WindowMovedOrResized(win);
 			}
@@ -445,6 +403,5 @@ namespace KlayGE
 	void OGLESRenderWindow::OnClose(Window const & /*win*/)
 	{
 		this->Destroy();
-		closed_ = true;
 	}
 }

@@ -285,7 +285,6 @@ namespace KlayGE
 #endif
 	{
 		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-		FrameBufferPtr fb = re.ScreenFrameBuffer();
 
 #if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
 		bool gotMsg;
@@ -297,7 +296,7 @@ namespace KlayGE
 		{
 			// 如果窗口是激活的，用 PeekMessage()以便我们可以用空闲时间渲染场景
 			// 不然, 用 GetMessage() 减少 CPU 占用率
-			if (fb->Active())
+			if (main_wnd_->Active())
 			{
 				gotMsg = (::PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE) != 0);
 			}
@@ -319,7 +318,7 @@ namespace KlayGE
 #elif defined KLAYGE_PLATFORM_WINDOWS_METRO
 		while (!main_wnd_->Closed())
 		{
-			if (fb->Active())
+			if (main_wnd_->Active())
 			{
 				CoreWindow::GetForCurrentThread()->Dispatcher->ProcessEvents(CoreProcessEventsOption::ProcessAllIfPresent);
 				re.Refresh();
@@ -354,7 +353,7 @@ namespace KlayGE
 
 			do
 			{
-				ident = ALooper_pollAll(fb->Active() ? 0 : -1, nullptr, &events, reinterpret_cast<void**>(&source));
+				ident = ALooper_pollAll(main_wnd_->Active() ? 0 : -1, nullptr, &events, reinterpret_cast<void**>(&source));
 
 				// Process this event.
 				if (source != nullptr)

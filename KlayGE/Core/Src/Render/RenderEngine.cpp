@@ -51,6 +51,8 @@
 #include <KlayGE/PostProcess.hpp>
 #include <KlayGE/HDRPostProcess.hpp>
 #include <KlayGE/SceneManager.hpp>
+#include <KlayGE/App3D.hpp>
+#include <KlayGE/Window.hpp>
 
 #include <sstream>
 
@@ -723,7 +725,7 @@ namespace KlayGE
 	void RenderEngine::Refresh()
 	{
 		FrameBuffer& fb = *this->ScreenFrameBuffer();
-		if (fb.Active())
+		if (Context::Instance().AppInstance().MainWnd()->Active())
 		{
 			Context::Instance().SceneManagerInstance().Update();
 			fb.SwapBuffers();

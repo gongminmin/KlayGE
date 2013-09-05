@@ -51,9 +51,6 @@ namespace KlayGE
 
 		void Destroy();
 
-		bool Ready() const;
-		void Ready(bool ready);
-
 		void SwapBuffers();
 
 		std::wstring const & Description() const;
@@ -102,9 +99,7 @@ namespace KlayGE
 		void WindowMovedOrResized();
 
 	private:
-		void OnActive(Window const & win, bool active);
 		void OnPaint(Window const & win);
-		void OnEnterSizeMove(Window const & win);
 		void OnExitSizeMove(Window const & win);
 		void OnSize(Window const & win, bool active);
 		void OnSetCursor(Window const & win);
@@ -137,7 +132,6 @@ namespace KlayGE
 
 		MetroD3D11RenderWindow^ metro_d3d_render_win_;
 #endif
-		bool	ready_;				// Is ready i.e. available for update
 		bool	isFullScreen_;
 		uint32_t sync_interval_;
 
@@ -178,9 +172,7 @@ namespace KlayGE
 
 		std::wstring			description_;
 
-		boost::signals2::connection on_active_connect_;
 		boost::signals2::connection on_paint_connect_;
-		boost::signals2::connection on_enter_size_move_connect_;
 		boost::signals2::connection on_exit_size_move_connect_;
 		boost::signals2::connection on_size_connect_;
 		boost::signals2::connection on_set_cursor_connect_;

@@ -40,7 +40,7 @@ namespace KlayGE
 
 	FrameBuffer::FrameBuffer()
 					: left_(0), top_(0), width_(0), height_(0),
-						active_(false), viewport_(MakeSharedPtr<Viewport>())
+						viewport_(MakeSharedPtr<Viewport>())
 	{
 	}
 
@@ -99,20 +99,6 @@ namespace KlayGE
 	void FrameBuffer::SetViewport(ViewportPtr const & viewport)
 	{
 		viewport_ = viewport;
-	}
-
-	// 获取该渲染目标是否处于活动状态
-	/////////////////////////////////////////////////////////////////////////////////
-	bool FrameBuffer::Active() const
-	{
-		return active_;
-	}
-
-	// 设置该渲染目标是否处于活动状态
-	/////////////////////////////////////////////////////////////////////////////////
-	void FrameBuffer::Active(bool state)
-	{
-		active_ = state;
 	}
 
 	void FrameBuffer::Attach(uint32_t att, RenderViewPtr const & view)
@@ -176,7 +162,6 @@ namespace KlayGE
 
 		view->OnAttached(*this, att);
 
-		active_ = true;
 		views_dirty_ = true;
 	}
 
@@ -255,7 +240,6 @@ namespace KlayGE
 
 		view->OnAttached(*this, att);
 
-		active_ = true;
 		views_dirty_ = true;
 	}
 

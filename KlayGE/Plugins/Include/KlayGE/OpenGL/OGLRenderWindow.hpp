@@ -42,11 +42,6 @@ namespace KlayGE
 
 		void Destroy();
 
-		bool Closed() const;
-
-		bool Ready() const;
-		void Ready(bool ready);
-
 		void SwapBuffers();
 
 		std::wstring const & Description() const;
@@ -61,9 +56,7 @@ namespace KlayGE
 		void WindowMovedOrResized();
 
 	private:
-		void OnActive(Window const & win, bool active);
 		void OnPaint(Window const & win);
-		void OnEnterSizeMove(Window const & win);
 		void OnExitSizeMove(Window const & win);
 		void OnSize(Window const & win, bool active);
 		void OnClose(Window const & win);
@@ -82,17 +75,13 @@ namespace KlayGE
 		::GLXFBConfig* fbc_;
 #endif
 
-		bool	ready_;				// Is ready i.e. available for update
-		bool	closed_;
 		bool	isFullScreen_;
 
 		uint32_t color_bits_;
 
 		std::wstring			description_;
 
-		boost::signals2::connection on_active_connect_;
 		boost::signals2::connection on_paint_connect_;
-		boost::signals2::connection on_enter_size_move_connect_;
 		boost::signals2::connection on_exit_size_move_connect_;
 		boost::signals2::connection on_size_connect_;
 		boost::signals2::connection on_close_connect_;
