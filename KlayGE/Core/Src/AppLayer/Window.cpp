@@ -144,7 +144,7 @@ namespace KlayGE
 	}
 
 	Window::Window(std::string const & name, RenderSettings const & settings, void* native_wnd)
-		: closed_(false)
+		: active_(false), ready_(false), closed_(false)
 	{
 		// Register the window class
 #ifdef KLAYGE_COMPILER_GCC
@@ -338,7 +338,7 @@ namespace KlayGE
 	}
 #else
 	Window::Window(std::string const & name, RenderSettings const & /*settings*/)
-		: closed_(false),
+		: active_(false), ready_(false), closed_(false),
 			msgs_(ref new MetroMsgs)
 	{
 		msgs_->BindWindow(this);
@@ -347,7 +347,7 @@ namespace KlayGE
 	}
 
 	Window::Window(std::string const & name, RenderSettings const & /*settings*/, void* /*native_wnd*/)
-		: closed_(false),
+		: active_(false), ready_(false), closed_(false),
 			msgs_(ref new MetroMsgs)
 	{
 		msgs_->BindWindow(this);
@@ -395,11 +395,14 @@ namespace KlayGE
 
 	void Window::MetroMsgs::OnWindowSizeChanged(CoreWindow^ /*sender*/, WindowSizeChangedEventArgs^ /*args*/)
 	{
+		win_->active_ = true;
+		win_->ready_ = true;
 		win_->OnSize()(*win_, true);
 	}
 
 	void Window::MetroMsgs::OnVisibilityChanged(CoreWindow^ /*sender*/, VisibilityChangedEventArgs^ args)
 	{
+		win_->active_ = args->Visible;
 		win_->OnActive()(*win_, args->Visible);
 	}
 
@@ -444,7 +447,7 @@ namespace KlayGE
 #endif
 #elif defined KLAYGE_PLATFORM_LINUX
 	Window::Window(std::string const & name, RenderSettings const & settings)
-		: closed_(false)
+		: active_(false), ready_(false), closed_(false)
 	{
 		x_display_ = XOpenDisplay(nullptr);
 
@@ -570,7 +573,7 @@ namespace KlayGE
 	}
 
 	Window::Window(std::string const & name, RenderSettings const & settings, void* native_wnd)
-		: closed_(false)
+		: active_(false), ready_(false), closed_(false)
 	{
 		x_display_ = XOpenDisplay(nullptr);
 
@@ -706,10 +709,13 @@ namespace KlayGE
 		switch (event.type)
 		{
 		case FocusIn:
+			active_ = true;
+			ready_ = true;
 			this->OnActive()(*this, true);
 			break;
 
 		case FocusOut:
+			active_ = false;
 			this->OnActive()(*this, false);
 			break;
 
@@ -722,10 +728,13 @@ namespace KlayGE
 				XResizeRequestEvent const & resize_ev = reinterpret_cast<XResizeRequestEvent const &>(event);
 				if ((0 == resize_ev.width) || (0 == resize_ev.height))
 				{
+					active_ = false;
 					this->OnSize()(*this, false);
 				}
 				else
 				{
+					active_ = true;
+					ready_ = true;
 					this->OnSize()(*this, true);
 				}
 			}
@@ -759,7 +768,7 @@ namespace KlayGE
 	}
 #elif defined KLAYGE_PLATFORM_ANDROID
 	Window::Window(std::string const & /*name*/, RenderSettings const & settings)
-		: closed_(false)
+		: active_(false), ready_(false), closed_(false)
 	{
 		a_window_ = nullptr;
 
@@ -800,7 +809,7 @@ namespace KlayGE
 	}
 
 	Window::Window(std::string const & /*name*/, RenderSettings const & settings, void* native_wnd)
-		: closed_(false)
+		: active_(false), ready_(false), closed_(false)
 	{
 		a_window_ = static_cast<ANativeWindow*>(native_wnd);
 
@@ -862,10 +871,13 @@ namespace KlayGE
 			break;
 
 		case APP_CMD_GAINED_FOCUS:
+			win->active_ = true;
+			win->ready_ = true;
 			win->OnActive()(*win, true);
 			break;
 
 		case APP_CMD_LOST_FOCUS:
+			win->active_ = false;
 			win->OnActive()(*win, false);
 			break;
 
@@ -875,6 +887,8 @@ namespace KlayGE
 			win->top_ = app->contentRect.top;
 			win->width_ = app->contentRect.right;
 			win->height_ = app->contentRect.bottom;
+			win->active_ = true;
+			win->ready_ = true;
 			win->OnSize()(*win, true);
 			break;
 		}

@@ -41,10 +41,6 @@
 
 namespace KlayGE
 {
-#if defined KLAYGE_PLATFORM_WINDOWS_METRO
-	ref class MetroFramework;
-#endif
-
 	// 一个用于创建3D应用程序框架的基类。建立一个3D应用程序需要继承这个类，
 	//			然后重载以下函数:
 	//
@@ -55,9 +51,6 @@ namespace KlayGE
 	class KLAYGE_CORE_API App3DFramework
 	{
 		friend class SceneManager;
-#if defined KLAYGE_PLATFORM_WINDOWS_METRO
-		friend MetroFramework;
-#endif
 
 	public:
 		enum UpdateRetVal
@@ -152,7 +145,7 @@ namespace KlayGE
 		WindowPtr main_wnd_;
 
 #if defined KLAYGE_PLATFORM_WINDOWS_METRO
-	private:
+	public:
 		void MetroCreate();
 		void MetroRun();
 #endif
