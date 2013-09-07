@@ -329,6 +329,8 @@ namespace KlayGE
 
 		case WM_CLOSE:
 			this->OnClose()(*this);
+			active_ = false;
+			ready_ = false;
 			closed_ = true;
 			::PostQuitMessage(0);
 			return 0;
@@ -409,6 +411,8 @@ namespace KlayGE
 	void Window::MetroMsgs::OnWindowClosed(CoreWindow^ /*sender*/, CoreWindowEventArgs^ /*args*/)
 	{
 		win_->OnClose()(*win_);
+		win_->active_ = false;
+		win_->ready_ = false;
 		win_->closed_ = true;
 	}
 
@@ -758,6 +762,8 @@ namespace KlayGE
 			if (wm_delete_window_ == static_cast<Atom>(event.xclient.data.l[0]))
 			{
 				this->OnClose()(*this);
+				active_ = false;
+				ready_ = false;
 				closed_ = true;
 				XDestroyWindow(x_display_, x_window_);
 				XCloseDisplay(x_display_);
@@ -867,6 +873,8 @@ namespace KlayGE
 		
 		case APP_CMD_TERM_WINDOW:
 			win->OnClose()(*win);
+			win->active_ = false;
+			win->ready_ = false;
 			win->closed_ = true;
 			break;
 

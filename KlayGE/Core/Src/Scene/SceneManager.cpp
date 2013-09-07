@@ -40,6 +40,7 @@
 #include <KlayGE/Context.hpp>
 #include <KFL/Math.hpp>
 #include <KlayGE/App3D.hpp>
+#include <KlayGE/Window.hpp>
 #include <KlayGE/Viewport.hpp>
 #include <KlayGE/Camera.hpp>
 #include <KlayGE/RenderEngine.hpp>
@@ -726,6 +727,8 @@ namespace KlayGE
 			timer.restart();
 			app_time += frame_time;
 
+			WindowPtr const & win = Context::Instance().AppInstance().MainWnd();
+			if (win && win->Active())
 			{
 				unique_lock<mutex> lock(update_mutex_);
 
