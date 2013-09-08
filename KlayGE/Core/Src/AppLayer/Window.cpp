@@ -340,20 +340,14 @@ namespace KlayGE
 	}
 #else
 	Window::Window(std::string const & name, RenderSettings const & /*settings*/)
-		: active_(false), ready_(false), closed_(false),
-			msgs_(ref new MetroMsgs)
+		: active_(false), ready_(false), closed_(false)
 	{
-		msgs_->BindWindow(this);
-
 		Convert(wname_, name);
 	}
 
 	Window::Window(std::string const & name, RenderSettings const & /*settings*/, void* /*native_wnd*/)
-		: active_(false), ready_(false), closed_(false),
-			msgs_(ref new MetroMsgs)
+		: active_(false), ready_(false), closed_(false)
 	{
-		msgs_->BindWindow(this);
-
 		Convert(wname_, name);
 	}
 
@@ -361,7 +355,7 @@ namespace KlayGE
 	{
 	}
 
-	void Window::SetWindow(CoreWindow^ window)
+	void Window::SetWindow(Platform::Agile<Windows::UI::Core::CoreWindow> const & window)
 	{
 		wnd_ = window;
 
@@ -369,84 +363,6 @@ namespace KlayGE
 		top_ = 0;
 		width_ = static_cast<uint32_t>(wnd_->Bounds.Width);
 		height_ = static_cast<uint32_t>(wnd_->Bounds.Height);
-
-		window->SizeChanged += 
-			ref new TypedEventHandler<CoreWindow^, WindowSizeChangedEventArgs^>(msgs_, &MetroMsgs::OnWindowSizeChanged);
-
-		window->VisibilityChanged +=
-			ref new TypedEventHandler<CoreWindow^, VisibilityChangedEventArgs^>(msgs_, &MetroMsgs::OnVisibilityChanged);
-
-		window->Closed += 
-			ref new TypedEventHandler<CoreWindow^, CoreWindowEventArgs^>(msgs_, &MetroMsgs::OnWindowClosed);
-
-		window->PointerCursor = ref new CoreCursor(CoreCursorType::Arrow, 0);
-
-		window->PointerPressed +=
-			ref new TypedEventHandler<CoreWindow^, PointerEventArgs^>(msgs_, &MetroMsgs::OnPointerPressed);
-		window->PointerReleased +=
-			ref new TypedEventHandler<CoreWindow^, PointerEventArgs^>(msgs_, &MetroMsgs::OnPointerReleased);
-		window->PointerMoved +=
-			ref new TypedEventHandler<CoreWindow^, PointerEventArgs^>(msgs_, &MetroMsgs::OnPointerMoved);
-		window->PointerWheelChanged +=
-			ref new TypedEventHandler<CoreWindow^, PointerEventArgs^>(msgs_, &MetroMsgs::OnPointerWheelChanged);
-	}
-
-	Window::MetroMsgs::MetroMsgs()
-	{
-	}
-
-	void Window::MetroMsgs::OnWindowSizeChanged(CoreWindow^ /*sender*/, WindowSizeChangedEventArgs^ /*args*/)
-	{
-		win_->active_ = true;
-		win_->ready_ = true;
-		win_->OnSize()(*win_, true);
-	}
-
-	void Window::MetroMsgs::OnVisibilityChanged(CoreWindow^ /*sender*/, VisibilityChangedEventArgs^ args)
-	{
-		win_->active_ = args->Visible;
-		win_->OnActive()(*win_, args->Visible);
-	}
-
-	void Window::MetroMsgs::OnWindowClosed(CoreWindow^ /*sender*/, CoreWindowEventArgs^ /*args*/)
-	{
-		win_->OnClose()(*win_);
-		win_->active_ = false;
-		win_->ready_ = false;
-		win_->closed_ = true;
-	}
-
-	void Window::MetroMsgs::OnPointerPressed(CoreWindow^ /*sender*/, PointerEventArgs^ args)
-	{
-		win_->OnPointerDown()(*win_,
-			int2(static_cast<int>(args->CurrentPoint->Position.X), static_cast<int>(args->CurrentPoint->Position.Y)),
-			args->CurrentPoint->PointerId);
-	}
-
-	void Window::MetroMsgs::OnPointerReleased(CoreWindow^ /*sender*/, PointerEventArgs^ args)
-	{
-		win_->OnPointerUp()(*win_,
-			int2(static_cast<int>(args->CurrentPoint->Position.X), static_cast<int>(args->CurrentPoint->Position.Y)),
-			args->CurrentPoint->PointerId);
-	}
-
-	void Window::MetroMsgs::OnPointerMoved(CoreWindow^ /*sender*/, PointerEventArgs^ args)
-	{
-		win_->OnPointerUpdate()(*win_,
-			int2(static_cast<int>(args->CurrentPoint->Position.X), static_cast<int>(args->CurrentPoint->Position.Y)),
-			args->CurrentPoint->PointerId, args->CurrentPoint->IsInContact);
-	}
-
-	void Window::MetroMsgs::OnPointerWheelChanged(CoreWindow^ /*sender*/, PointerEventArgs^ args)
-	{
-		win_->OnPointerWheel()(*win_,
-			int2(static_cast<int>(args->CurrentPoint->Position.X), static_cast<int>(args->CurrentPoint->Position.Y)),
-			args->CurrentPoint->PointerId, args->CurrentPoint->Properties->MouseWheelDelta);
-	}
-
-	void Window::MetroMsgs::BindWindow(Window* win)
-	{
-		win_ = win;
 	}
 #endif
 #elif defined KLAYGE_PLATFORM_LINUX

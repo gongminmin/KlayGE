@@ -61,6 +61,7 @@ namespace KlayGE
 {
 #if defined KLAYGE_PLATFORM_WINDOWS_METRO
 	ref class MetroFrameworkSource;
+	ref class MetroMsgs;
 
 	ref class MetroFramework sealed : public Windows::ApplicationModel::Core::IFrameworkView
 	{
@@ -85,6 +86,7 @@ namespace KlayGE
 
 	private:
 		App3DFramework* app_;
+		MetroMsgs^ msgs_;
 	};
 
 	ref class MetroFrameworkSource sealed : Windows::ApplicationModel::Core::IFrameworkViewSource
@@ -101,7 +103,31 @@ namespace KlayGE
 		App3DFramework* app_;
 	};
 
+	ref class MetroMsgs sealed
+	{
+		friend MetroFramework;
+
+	public:
+		MetroMsgs();
+
+	private:
+		void OnWindowSizeChanged(Windows::UI::Core::CoreWindow^ sender, Windows::UI::Core::WindowSizeChangedEventArgs^ args);
+		void OnLogicalDpiChanged(Platform::Object^ sender);
+		void OnWindowClosed(Windows::UI::Core::CoreWindow^ sender, Windows::UI::Core::CoreWindowEventArgs^ args);
+		void OnVisibilityChanged(Windows::UI::Core::CoreWindow^ sender, Windows::UI::Core::VisibilityChangedEventArgs^ args);
+		void OnPointerPressed(Windows::UI::Core::CoreWindow^ sender, Windows::UI::Core::PointerEventArgs^ args);
+		void OnPointerReleased(Windows::UI::Core::CoreWindow^ sender, Windows::UI::Core::PointerEventArgs^ args);
+		void OnPointerMoved(Windows::UI::Core::CoreWindow^ sender, Windows::UI::Core::PointerEventArgs^ args);
+		void OnPointerWheelChanged(Windows::UI::Core::CoreWindow^ sender, Windows::UI::Core::PointerEventArgs^ args);
+
+		void BindWindow(Window* win);
+
+	private:
+		Window* win_;
+	};
+
 	MetroFramework::MetroFramework()
+		: msgs_(ref new MetroMsgs)
 	{
 	}
 
@@ -119,7 +145,31 @@ namespace KlayGE
 
 	void MetroFramework::SetWindow(CoreWindow^ window)
 	{
-		app_->MainWnd()->SetWindow(CoreWindow::GetForCurrentThread());
+		msgs_->BindWindow(app_->MainWnd().get());
+		
+		window = CoreWindow::GetForCurrentThread();
+
+		window->SizeChanged += 
+			ref new TypedEventHandler<CoreWindow^, WindowSizeChangedEventArgs^>(msgs_, &MetroMsgs::OnWindowSizeChanged);
+
+		window->VisibilityChanged +=
+			ref new TypedEventHandler<CoreWindow^, VisibilityChangedEventArgs^>(msgs_, &MetroMsgs::OnVisibilityChanged);
+
+		window->Closed += 
+			ref new TypedEventHandler<CoreWindow^, CoreWindowEventArgs^>(msgs_, &MetroMsgs::OnWindowClosed);
+
+		window->PointerCursor = ref new CoreCursor(CoreCursorType::Arrow, 0);
+
+		window->PointerPressed +=
+			ref new TypedEventHandler<CoreWindow^, PointerEventArgs^>(msgs_, &MetroMsgs::OnPointerPressed);
+		window->PointerReleased +=
+			ref new TypedEventHandler<CoreWindow^, PointerEventArgs^>(msgs_, &MetroMsgs::OnPointerReleased);
+		window->PointerMoved +=
+			ref new TypedEventHandler<CoreWindow^, PointerEventArgs^>(msgs_, &MetroMsgs::OnPointerMoved);
+		window->PointerWheelChanged +=
+			ref new TypedEventHandler<CoreWindow^, PointerEventArgs^>(msgs_, &MetroMsgs::OnPointerWheelChanged);
+
+		app_->MainWnd()->SetWindow(Platform::Agile<Windows::UI::Core::CoreWindow>(window));
 		app_->MetroCreate();
 	}
 
@@ -172,6 +222,64 @@ namespace KlayGE
 	void MetroFrameworkSource::BindAppFramework(App3DFramework* app)
 	{
 		app_ = app;
+	}
+
+	MetroMsgs::MetroMsgs()
+	{
+	}
+
+	void MetroMsgs::OnWindowSizeChanged(CoreWindow^ /*sender*/, WindowSizeChangedEventArgs^ /*args*/)
+	{
+		win_->Active(true);
+		win_->Ready(true);
+		win_->OnSize()(*win_, true);
+	}
+
+	void MetroMsgs::OnVisibilityChanged(CoreWindow^ /*sender*/, VisibilityChangedEventArgs^ args)
+	{
+		win_->Active(args->Visible);
+		win_->OnActive()(*win_, args->Visible);
+	}
+
+	void MetroMsgs::OnWindowClosed(CoreWindow^ /*sender*/, CoreWindowEventArgs^ /*args*/)
+	{
+		win_->OnClose()(*win_);
+		win_->Active(false);
+		win_->Ready(false);
+		win_->Closed(true);
+	}
+
+	void MetroMsgs::OnPointerPressed(CoreWindow^ /*sender*/, PointerEventArgs^ args)
+	{
+		win_->OnPointerDown()(*win_,
+			int2(static_cast<int>(args->CurrentPoint->Position.X), static_cast<int>(args->CurrentPoint->Position.Y)),
+			args->CurrentPoint->PointerId);
+	}
+
+	void MetroMsgs::OnPointerReleased(CoreWindow^ /*sender*/, PointerEventArgs^ args)
+	{
+		win_->OnPointerUp()(*win_,
+			int2(static_cast<int>(args->CurrentPoint->Position.X), static_cast<int>(args->CurrentPoint->Position.Y)),
+			args->CurrentPoint->PointerId);
+	}
+
+	void MetroMsgs::OnPointerMoved(CoreWindow^ /*sender*/, PointerEventArgs^ args)
+	{
+		win_->OnPointerUpdate()(*win_,
+			int2(static_cast<int>(args->CurrentPoint->Position.X), static_cast<int>(args->CurrentPoint->Position.Y)),
+			args->CurrentPoint->PointerId, args->CurrentPoint->IsInContact);
+	}
+
+	void MetroMsgs::OnPointerWheelChanged(CoreWindow^ /*sender*/, PointerEventArgs^ args)
+	{
+		win_->OnPointerWheel()(*win_,
+			int2(static_cast<int>(args->CurrentPoint->Position.X), static_cast<int>(args->CurrentPoint->Position.Y)),
+			args->CurrentPoint->PointerId, args->CurrentPoint->Properties->MouseWheelDelta);
+	}
+
+	void MetroMsgs::BindWindow(Window* win)
+	{
+		win_ = win;
 	}
 #endif
 

@@ -71,11 +71,11 @@ namespace KlayGE
 			return wnd_;
 		}
 #else
-		void SetWindow(Windows::UI::Core::CoreWindow^ window);
+		void SetWindow(Platform::Agile<Windows::UI::Core::CoreWindow> const & window);
 
-		Windows::UI::Core::CoreWindow^ GetWindow() const
+		Platform::Agile<Windows::UI::Core::CoreWindow> GetWindow() const
 		{
-			return wnd_.Get();
+			return wnd_;
 		}
 #endif
 #elif defined KLAYGE_PLATFORM_LINUX
@@ -122,13 +122,25 @@ namespace KlayGE
 		{
 			return active_;
 		}
+		void Active(bool active)
+		{
+			active_ = active;
+		}
 		bool Ready() const
 		{
 			return ready_;
 		}
+		void Ready(bool ready)
+		{
+			ready_ = ready;
+		}
 		bool Closed() const
 		{
 			return closed_;
+		}
+		void Closed(bool closed)
+		{
+			closed_ = closed;
 		}
 
 	public:
@@ -245,29 +257,6 @@ namespace KlayGE
 			WPARAM wParam, LPARAM lParam);
 
 		LRESULT MsgProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
-#else
-		ref class MetroMsgs sealed
-		{
-			friend class Window;
-
-		public:
-			MetroMsgs();
-
-		private:
-			void OnWindowSizeChanged(Windows::UI::Core::CoreWindow^ sender, Windows::UI::Core::WindowSizeChangedEventArgs^ args);
-			void OnLogicalDpiChanged(Platform::Object^ sender);
-			void OnWindowClosed(Windows::UI::Core::CoreWindow^ sender, Windows::UI::Core::CoreWindowEventArgs^ args);
-			void OnVisibilityChanged(Windows::UI::Core::CoreWindow^ sender, Windows::UI::Core::VisibilityChangedEventArgs^ args);
-			void OnPointerPressed(Windows::UI::Core::CoreWindow^ sender, Windows::UI::Core::PointerEventArgs^ args);
-			void OnPointerReleased(Windows::UI::Core::CoreWindow^ sender, Windows::UI::Core::PointerEventArgs^ args);
-			void OnPointerMoved(Windows::UI::Core::CoreWindow^ sender, Windows::UI::Core::PointerEventArgs^ args);
-			void OnPointerWheelChanged(Windows::UI::Core::CoreWindow^ sender, Windows::UI::Core::PointerEventArgs^ args);
-
-			void BindWindow(Window* win);
-
-		private:
-			Window* win_;
-		};
 #endif
 #elif defined KLAYGE_PLATFORM_LINUX
 	public:
@@ -300,7 +289,6 @@ namespace KlayGE
 		WNDPROC default_wnd_proc_;
 #else
 		Platform::Agile<Windows::UI::Core::CoreWindow> wnd_;
-		MetroMsgs^ msgs_;
 #endif
 #elif defined KLAYGE_PLATFORM_LINUX
 		::Display* x_display_;
