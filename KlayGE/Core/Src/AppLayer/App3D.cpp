@@ -120,10 +120,10 @@ namespace KlayGE
 		void OnPointerMoved(Windows::UI::Core::CoreWindow^ sender, Windows::UI::Core::PointerEventArgs^ args);
 		void OnPointerWheelChanged(Windows::UI::Core::CoreWindow^ sender, Windows::UI::Core::PointerEventArgs^ args);
 
-		void BindWindow(Window* win);
+		void BindWindow(WindowPtr const & win);
 
 	private:
-		Window* win_;
+		WindowPtr win_;
 	};
 
 	MetroFramework::MetroFramework()
@@ -145,9 +145,7 @@ namespace KlayGE
 
 	void MetroFramework::SetWindow(CoreWindow^ window)
 	{
-		msgs_->BindWindow(app_->MainWnd().get());
-		
-		window = CoreWindow::GetForCurrentThread();
+		msgs_->BindWindow(app_->MainWnd());
 
 		window->SizeChanged += 
 			ref new TypedEventHandler<CoreWindow^, WindowSizeChangedEventArgs^>(msgs_, &MetroMsgs::OnWindowSizeChanged);
@@ -277,7 +275,7 @@ namespace KlayGE
 			args->CurrentPoint->PointerId, args->CurrentPoint->Properties->MouseWheelDelta);
 	}
 
-	void MetroMsgs::BindWindow(Window* win)
+	void MetroMsgs::BindWindow(WindowPtr const & win)
 	{
 		win_ = win;
 	}

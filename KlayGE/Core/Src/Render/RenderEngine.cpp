@@ -201,10 +201,30 @@ namespace KlayGE
 			ldr_pp_ = ldr_pps_[ppaa_enabled_ * 4 + gamma_enabled_ * 2 + color_grading_enabled_];
 		}
 
-		if ((render_width != screen_width) || (render_height != screen_height))
+		bool need_resize = ((render_width != screen_width) || (render_height != screen_height));
 		{
 			resize_pps_[0] = SyncLoadPostProcess("Resizer.ppml", "bilinear");
 			resize_pps_[1] = MakeSharedPtr<BicubicFilteringPostProcess>();
+
+			float const scale_x = static_cast<float>(screen_width) / render_width;
+			float const scale_y = static_cast<float>(screen_height) / render_height;
+
+			float2 pos_scale;
+			if (scale_x < scale_y)
+			{
+				pos_scale.x() = 1;
+				pos_scale.y() = (scale_x * render_height) / screen_height;
+			}
+			else
+			{
+				pos_scale.x() = (scale_y * render_width) / screen_width;
+				pos_scale.y() = 1;
+			}
+
+			for (size_t i = 0; i < 2; ++ i)
+			{
+				resize_pps_[i]->SetParam(0, pos_scale);
+			}
 		}
 
 		for (int i = 0; i < 4; ++ i)
@@ -215,7 +235,7 @@ namespace KlayGE
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
 		RenderViewPtr ds_view;
-		if (hdr_pp_ || ldr_pp_ || resize_pps_[0] || (settings.stereo_method != STM_None))
+		if (hdr_pp_ || ldr_pp_ || (settings.stereo_method != STM_None))
 		{
 			if (caps.texture_format_support(EF_D24S8) || caps.texture_format_support(EF_D16))
 			{
@@ -287,11 +307,21 @@ namespace KlayGE
 			overlay_tex_ = rf.MakeTexture2D(screen_width, screen_height, 1, 1,
 				fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
 			overlay_frame_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*overlay_tex_, 0, 1, 0));
-			overlay_frame_buffer_->Attach(FrameBuffer::ATT_DepthStencil, ds_view);
+
+			RenderViewPtr screen_size_ds_view;
+			if (need_resize)
+			{
+				screen_size_ds_view = rf.Make2DDepthStencilRenderView(screen_width, screen_height, ds_view->Format(), 1, 0);
+			}
+			else
+			{
+				screen_size_ds_view = ds_view;
+			}
+			overlay_frame_buffer_->Attach(FrameBuffer::ATT_DepthStencil, screen_size_ds_view);
 		}
 		else
 		{
-			if (resize_pps_[0])
+			if (need_resize)
 			{
 				resize_frame_buffer_ = rf.MakeFrameBuffer();
 				resize_frame_buffer_->GetViewport()->camera = cur_frame_buffer_->GetViewport()->camera;
@@ -449,7 +479,6 @@ namespace KlayGE
 			}
 
 			cur_frame_buffer_ = new_fb;
-
 			cur_frame_buffer_->OnBind();
 
 			this->DoBindFrameBuffer(cur_frame_buffer_);
@@ -535,69 +564,105 @@ namespace KlayGE
 
 	void RenderEngine::Resize(uint32_t width, uint32_t height)
 	{
-		RenderSettings const & settings = Context::Instance().Config().graphics_cfg;
-		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-		RenderDeviceCaps const & caps = rf.RenderEngineInstance().DeviceCaps();
-
-		RenderViewPtr ds_view;
-		if (hdr_pp_ || ldr_pp_ || (stereo_method_ != STM_None))
+		uint32_t const old_screen_width = default_frame_buffers_[3]->Width();
+		uint32_t const old_screen_height = default_frame_buffers_[3]->Height();
+		uint32_t const old_render_width = default_frame_buffers_[0]->Width();
+		uint32_t const old_render_height = default_frame_buffers_[0]->Height();
+		uint32_t const new_screen_width = width;
+		uint32_t const new_screen_height = height;
+		uint32_t const new_render_width = new_screen_width * old_render_width / old_screen_width;
+		uint32_t const new_render_height = new_screen_height * old_render_height / old_screen_height;
+		if ((old_screen_width != new_screen_width) || (old_screen_height != new_screen_height))
 		{
-			if (caps.texture_format_support(EF_D24S8) || caps.texture_format_support(EF_D16))
+			RenderSettings const & settings = Context::Instance().Config().graphics_cfg;
+			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+			RenderDeviceCaps const & caps = rf.RenderEngineInstance().DeviceCaps();
+
+			RenderViewPtr ds_view;
+			if (hdr_pp_ || ldr_pp_ || (stereo_method_ != STM_None))
 			{
-				ElementFormat fmt = ds_tex_->Format();
-				ds_tex_ = rf.MakeTexture2D(width, height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
-				ds_view = rf.Make2DDepthStencilRenderView(*ds_tex_, 0, 1, 0);
-			}
-			else
-			{
-				ElementFormat fmt;
-				if (caps.rendertarget_format_support(settings.depth_stencil_fmt, 1, 0))
+				if (caps.texture_format_support(EF_D24S8) || caps.texture_format_support(EF_D16))
 				{
-					fmt = settings.depth_stencil_fmt;
+					ElementFormat fmt = ds_tex_->Format();
+					ds_tex_ = rf.MakeTexture2D(new_render_width, new_render_height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
+					ds_view = rf.Make2DDepthStencilRenderView(*ds_tex_, 0, 1, 0);
 				}
 				else
 				{
-					BOOST_ASSERT(caps.rendertarget_format_support(EF_D16, 1, 0));
+					ElementFormat fmt;
+					if (caps.rendertarget_format_support(settings.depth_stencil_fmt, 1, 0))
+					{
+						fmt = settings.depth_stencil_fmt;
+					}
+					else
+					{
+						BOOST_ASSERT(caps.rendertarget_format_support(EF_D16, 1, 0));
 
-					fmt = EF_D16;
+						fmt = EF_D16;
+					}
+					ds_view = rf.Make2DDepthStencilRenderView(new_render_width, new_render_height, fmt, 1, 0);
 				}
-				ds_view = rf.Make2DDepthStencilRenderView(width, height, fmt, 1, 0);
 			}
-		}
 
-		if (stereo_method_ != STM_None)
-		{
-			ElementFormat fmt = mono_tex_->Format();
-			mono_tex_ = rf.MakeTexture2D(width, height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
-			mono_frame_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*mono_tex_, 0, 1, 0));
+			if (stereo_method_ != STM_None)
+			{
+				ElementFormat fmt = mono_tex_->Format();
+				mono_tex_ = rf.MakeTexture2D(new_render_width, new_render_height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
+				mono_frame_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*mono_tex_, 0, 1, 0));
+			}
+			else
+			{
+				bool need_resize = ((new_render_width != new_screen_width) || (new_render_height != new_screen_height));
+				if (need_resize)
+				{
+					ElementFormat fmt = resize_tex_->Format();
+					resize_tex_ = rf.MakeTexture2D(new_render_width, new_render_height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
+					resize_frame_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*resize_tex_, 0, 1, 0));
+
+					float const scale_x = static_cast<float>(new_screen_width) / new_render_width;
+					float const scale_y = static_cast<float>(new_screen_height) / new_render_height;
+
+					float2 pos_scale;
+					if (scale_x < scale_y)
+					{
+						pos_scale.x() = 1;
+						pos_scale.y() = (scale_x * new_render_height) / new_screen_height;
+					}
+					else
+					{
+						pos_scale.x() = (scale_y * new_render_width) / new_screen_width;
+						pos_scale.y() = 1;
+					}
+
+					for (size_t i = 0; i < 2; ++ i)
+					{
+						resize_pps_[i]->SetParam(0, pos_scale);
+					}
+				}
+			}
+			if (ldr_pp_)
+			{
+				ElementFormat fmt = ldr_tex_->Format();
+				ldr_tex_ = rf.MakeTexture2D(new_render_width, new_render_height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
+				ldr_frame_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*ldr_tex_, 0, 1, 0));
+				ldr_frame_buffer_->Attach(FrameBuffer::ATT_DepthStencil, ds_view);
+			}
+			if (hdr_pp_)
+			{
+				ElementFormat fmt = hdr_tex_->Format();
+				hdr_tex_ = rf.MakeTexture2D(new_render_width, new_render_height, 4, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write | EAH_Generate_Mips, nullptr);
+				hdr_frame_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*hdr_tex_, 0, 1, 0));
+				hdr_frame_buffer_->Attach(FrameBuffer::ATT_DepthStencil, ds_view);
+			}
+
+			pp_chain_dirty_ = true;
+
+			this->DoResize(new_render_width, new_render_height);
 		}
 		else
 		{
-			if (resize_pps_[0])
-			{
-				ElementFormat fmt = resize_tex_->Format();
-				resize_tex_ = rf.MakeTexture2D(width, height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
-				resize_frame_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*resize_tex_, 0, 1, 0));
-			}
+			this->DoResize(old_render_width, old_render_height);
 		}
-		if (ldr_pp_)
-		{
-			ElementFormat fmt = ldr_tex_->Format();
-			ldr_tex_ = rf.MakeTexture2D(width, height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
-			ldr_frame_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*ldr_tex_, 0, 1, 0));
-			ldr_frame_buffer_->Attach(FrameBuffer::ATT_DepthStencil, ds_view);
-		}
-		if (hdr_pp_)
-		{
-			ElementFormat fmt = hdr_tex_->Format();
-			hdr_tex_ = rf.MakeTexture2D(width, height, 4, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write | EAH_Generate_Mips, nullptr);
-			hdr_frame_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*hdr_tex_, 0, 1, 0));
-			hdr_frame_buffer_->Attach(FrameBuffer::ATT_DepthStencil, ds_view);
-		}
-
-		pp_chain_dirty_ = true;
-
-		this->DoResize(width, height);
 	}
 
 	void RenderEngine::PostProcess(bool skip)
@@ -653,13 +718,13 @@ namespace KlayGE
 
 		fb_stage_ = 3;
 
-		if ((STM_None == stereo_method_) && resize_pps_[0])
+		uint32_t const screen_width = default_frame_buffers_[3]->Width();
+		uint32_t const screen_height = default_frame_buffers_[3]->Height();
+		uint32_t const render_width = default_frame_buffers_[0]->Width();
+		uint32_t const render_height = default_frame_buffers_[0]->Height();
+		bool need_resize = ((render_width != screen_width) || (render_height != screen_height));
+		if ((STM_None == stereo_method_) && need_resize)
 		{
-			uint32_t const screen_width = screen_frame_buffer_->Width();
-			uint32_t const screen_height = screen_frame_buffer_->Height();
-			uint32_t const render_width = resize_frame_buffer_->Width();
-			uint32_t const render_height = resize_frame_buffer_->Height();
-
 			float const scale_x = static_cast<float>(screen_width) / render_width;
 			float const scale_y = static_cast<float>(screen_height) / render_height;
 
@@ -817,6 +882,19 @@ namespace KlayGE
 
 	void RenderEngine::AssemblePostProcessChain()
 	{
+		if (ldr_pp_)
+		{
+			for (size_t i = 0; i < 12; ++ i)
+			{
+				ldr_pps_[i]->OutputPin(0, TexturePtr());
+			}
+		}				
+		if (hdr_pp_)
+		{
+			hdr_pp_->OutputPin(0, TexturePtr());
+			skip_hdr_pp_->OutputPin(0, TexturePtr());
+		}
+
 		if (stereo_method_ != STM_None)
 		{
 			if (stereoscopic_pp_)
@@ -841,61 +919,30 @@ namespace KlayGE
 		}
 		else
 		{
-			if (resize_pps_[0])
+			uint32_t const screen_width = default_frame_buffers_[3]->Width();
+			uint32_t const screen_height = default_frame_buffers_[3]->Height();
+			uint32_t const render_width = default_frame_buffers_[0]->Width();
+			uint32_t const render_height = default_frame_buffers_[0]->Height();
+			bool need_resize = ((render_width != screen_width) || (render_height != screen_height));
+			if (need_resize)
 			{
+				if (ldr_pp_)
+				{
+					for (size_t i = 0; i < 12; ++ i)
+					{
+						ldr_pps_[i]->OutputPin(0, resize_tex_);
+					}
+				}
+				if (hdr_pp_)
+				{
+					hdr_pp_->OutputPin(0, resize_tex_);
+					skip_hdr_pp_->OutputPin(0, resize_tex_);
+				}
+
 				for (size_t i = 0; i < 2; ++ i)
 				{
-					resize_pps_[i]->OutputPin(0, TexturePtr());
+					resize_pps_[i]->InputPin(0, resize_tex_);
 				}
-			}
-			if (ldr_pp_)
-			{
-				for (size_t i = 0; i < 12; ++ i)
-				{
-					ldr_pps_[i]->OutputPin(0, TexturePtr());
-				}
-			}
-			if (hdr_pp_)
-			{
-				hdr_pp_->OutputPin(0, TexturePtr());
-				skip_hdr_pp_->OutputPin(0, TexturePtr());
-			}
-		}
-
-		if (resize_pps_[0])
-		{
-			if (ldr_pp_)
-			{
-				for (size_t i = 0; i < 12; ++ i)
-				{
-					ldr_pps_[i]->InputPin(0, resize_tex_);
-				}
-			}
-
-			uint32_t const screen_width = screen_frame_buffer_->Width();
-			uint32_t const screen_height = screen_frame_buffer_->Height();
-			uint32_t const render_width = resize_frame_buffer_->Width();
-			uint32_t const render_height = resize_frame_buffer_->Height();
-
-			float const scale_x = static_cast<float>(screen_width) / render_width;
-			float const scale_y = static_cast<float>(screen_height) / render_height;
-
-			float2 pos_scale;
-			if (scale_x < scale_y)
-			{
-				pos_scale.x() = 1;
-				pos_scale.y() = (scale_x * render_height) / screen_height;
-			}
-			else
-			{
-				pos_scale.x() = (scale_y * render_width) / screen_width;
-				pos_scale.y() = 1;
-			}
-
-			for (size_t i = 0; i < 2; ++ i)
-			{
-				resize_pps_[i]->SetParam(0, pos_scale);
-				resize_pps_[i]->InputPin(0, resize_tex_);
 			}
 		}
 
