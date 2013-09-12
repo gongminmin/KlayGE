@@ -99,6 +99,7 @@ namespace KlayGE
 	SceneManager::SceneManager()
 		: frustum_(nullptr),
 			small_obj_threshold_(0),
+			update_elapse_(1.0f / 60),
 			numObjectsRendered_(0),
 			numRenderablesRendered_(0),
 			numPrimitivesRendered_(0),
@@ -122,6 +123,11 @@ namespace KlayGE
 	void SceneManager::SmallObjectThreshold(float area)
 	{
 		small_obj_threshold_ = area;
+	}
+
+	void SceneManager::SceneUpdateElapse(float elapse)
+	{
+		update_elapse_ = elapse;
 	}
 
 	// ³¡¾°²Ã¼õ
@@ -739,10 +745,9 @@ namespace KlayGE
 				}
 			}
 
-			float const update_budget = 1.0f / 60;
-			if (frame_time < update_budget)
+			if (frame_time < update_elapse_)
 			{
-				Sleep(static_cast<uint32_t>((update_budget - frame_time) * 1000));
+				Sleep(static_cast<uint32_t>((update_elapse_ - frame_time) * 1000));
 			}
 		}
 	}
