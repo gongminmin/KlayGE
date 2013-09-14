@@ -16,12 +16,13 @@ cp ../../../../media/RenderFX/Font.kfx assets
 cp ../../../../media/RenderFX/LensEffects.kfx assets
 cp ../../../../media/RenderFX/LightSourceProxy.kfx assets
 cp ../../../../media/RenderFX/PostToneMapping.kfx assets
-cp ../../../../media/RenderFX/SumLum.kfx assets
+cp ../../../../media/RenderFX/Resizer.kfx assets
 cp ../../../../media/RenderFX/ToneMapping.kfx assets
 cp ../../../../media/RenderFX/UI.kfx assets
 cp ../../../../media/PostProcessors/Copy.ppml assets
 cp ../../../../media/PostProcessors/LensEffects.ppml assets
 cp ../../../../media/PostProcessors/PostToneMapping.ppml assets
+cp ../../../../media/PostProcessors/Resizer.ppml assets
 cp ../../../../media/Textures/2D/normals_fitting.dds assets
 cp ../../../../media/Textures/2D/powered_by_klayge.dds assets
 cp ../../../../media/Textures/2D/ui.dds assets

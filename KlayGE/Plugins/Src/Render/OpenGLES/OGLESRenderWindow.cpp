@@ -143,7 +143,9 @@ namespace KlayGE
 		eglInitialize(display_, &major_ver, &minor_ver);
 		eglGetConfigs(display_, nullptr, 0, &num_cfgs);
 
+#ifndef KLAYGE_PLATFORM_ANDROID
 		if (!eglChooseConfig(display_, &visual_attr[0], &cfg_, 1, &num_cfgs))
+#endif
 		{
 			visual_attr[1] = EGL_OPENGL_ES2_BIT;
 			eglChooseConfig(display_, &visual_attr[0], &cfg_, 1, &num_cfgs);
@@ -165,8 +167,10 @@ namespace KlayGE
 		surf_ = eglCreateWindowSurface(display_, cfg_, wnd, nullptr);
 
 		EGLint ctx_attr[] = { EGL_CONTEXT_CLIENT_VERSION, 3, EGL_NONE };
+#ifndef KLAYGE_PLATFORM_ANDROID
 		context_ = eglCreateContext(display_, cfg_, EGL_NO_CONTEXT, ctx_attr);
 		if (nullptr == context_)
+#endif
 		{
 			ctx_attr[1] = 2;
 			context_ = eglCreateContext(display_, cfg_, EGL_NO_CONTEXT, ctx_attr);

@@ -12,12 +12,13 @@ copy ..\..\..\..\media\RenderFX\Font.kfx assets
 copy ..\..\..\..\media\RenderFX\LensEffects.kfx assets
 copy ..\..\..\..\media\RenderFX\LightSourceProxy.kfx assets
 copy ..\..\..\..\media\RenderFX\PostToneMapping.kfx assets
-copy ..\..\..\..\media\RenderFX\SumLum.kfx assets
+copy ..\..\..\..\media\RenderFX\Resizer.kfx assets
 copy ..\..\..\..\media\RenderFX\ToneMapping.kfx assets
 copy ..\..\..\..\media\RenderFX\UI.kfx assets
 copy ..\..\..\..\media\PostProcessors\Copy.ppml assets
 copy ..\..\..\..\media\PostProcessors\LensEffects.ppml assets
 copy ..\..\..\..\media\PostProcessors\PostToneMapping.ppml assets
+copy ..\..\..\..\media\PostProcessors\Resizer.ppml assets
 copy ..\..\..\..\media\Textures\2D\normals_fitting.dds assets
 copy ..\..\..\..\media\Textures\2D\powered_by_klayge.dds assets
 copy ..\..\..\..\media\Textures\2D\ui.dds assets

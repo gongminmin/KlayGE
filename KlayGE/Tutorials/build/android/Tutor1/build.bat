@@ -10,11 +10,12 @@ copy ..\..\..\..\media\RenderFX\Copy.kfx assets
 copy ..\..\..\..\media\RenderFX\Font.kfx assets
 copy ..\..\..\..\media\RenderFX\LensEffects.kfx assets
 copy ..\..\..\..\media\RenderFX\PostToneMapping.kfx assets
-copy ..\..\..\..\media\RenderFX\SumLum.kfx assets
+copy ..\..\..\..\media\RenderFX\Resizer.kfx assets
 copy ..\..\..\..\media\RenderFX\ToneMapping.kfx assets
 copy ..\..\..\..\media\PostProcessors\Copy.ppml assets
 copy ..\..\..\..\media\PostProcessors\LensEffects.ppml assets
 copy ..\..\..\..\media\PostProcessors\PostToneMapping.ppml assets
+copy ..\..\..\..\media\PostProcessors\Resizer.ppml assets
 copy ..\..\..\..\media\Textures\3D\color_grading.dds assets
 
 call ant debug
