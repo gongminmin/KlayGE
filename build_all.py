@@ -33,40 +33,40 @@ if __name__ == "__main__":
 
 	print("Building external libs...")
 	for arch in ci.arch_list:
-		build_external_libs(ci, arch[0], arch[1])
+		build_external_libs(ci, arch)
 
 	print("Building KFL...")
 	for arch in ci.arch_list:
-		build_KFL(ci, arch[0], arch[1])
+		build_KFL(ci, arch)
 
 	print("Building glloader...")
 	for arch in ci.arch_list:
-		if (arch[0] != "x86_app") and (arch[0] != "arm_app"):
-			build_glloader(ci, arch[0], arch[1])
+		if not arch[3]:
+			build_glloader(ci, arch)
 
 	print("Building kfont...")
 	for arch in ci.arch_list:
-		build_kfont(ci, arch[0], arch[1])
+		build_kfont(ci, arch)
 
 	print("Building MeshMLLib...")
 	for arch in ci.arch_list:
-		build_MeshMLLib(ci, arch[0], arch[1])
+		build_MeshMLLib(ci, arch)
 
 	print("Building KlayGE...")
 	for arch in ci.arch_list:
-		build_KlayGE(ci, arch[0], arch[1])
+		build_KlayGE(ci, arch)
 
 	print("Building KlayGE Samples...")
 	for arch in ci.arch_list:
-		if (arch[0] != "x86_app") and (arch[0] != "arm_app"):
-			build_Samples(ci, arch[0], arch[1])
+		if not arch[3]:
+			build_Samples(ci, arch)
 
 	print("Building KlayGE Tools...")
 	for arch in ci.arch_list:
-		if (arch[0] != "x86_app") and (arch[0] != "arm_app"):
-			build_Tools(ci, arch[0], arch[1])
+		if not arch[3]:
+			build_Tools(ci, arch)
 
 	print("Building KlayGE Tutorials...")
 	for arch in ci.arch_list:
-		if (arch[0] != "x86_app") and (arch[0] != "arm_app"):
-			build_Tutorials(ci, arch[0], arch[1])
+		if not arch[3]:
+			build_Tutorials(ci, arch)

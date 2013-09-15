@@ -94,48 +94,62 @@ class compiler_info:
 			compiler_name = "vc"
 			compiler_version = 12
 			for arch in archs:
+				is_metro = False
+				if (arch.find("_app") > 0):
+					toolset = "v120"
+					is_metro = True
+				is_xp_toolset = False
+				if (toolset.find("_xp") > 0):
+					is_xp_toolset = True
 				if ("x86" == arch) or ("x86_app" == arch):
-					arch_list.append((arch, "Visual Studio 12"))
+					arch_list.append((arch, "Visual Studio 12", toolset, is_metro, is_xp_toolset))
 				elif "arm_app" == arch:
-					arch_list.append((arch, "Visual Studio 12 ARM"))
+					arch_list.append((arch, "Visual Studio 12 ARM", toolset, is_metro, is_xp_toolset))
 				elif "x64" == arch:
-					arch_list.append((arch, "Visual Studio 12 Win64"))
+					arch_list.append((arch, "Visual Studio 12 Win64", toolset, is_metro, is_xp_toolset))
 		elif "vc11" == compiler:
 			compiler_name = "vc"
 			compiler_version = 11
 			for arch in archs:
+				is_metro = False
+				if (arch.find("_app") > 0):
+					toolset = "v110"
+					is_metro = True
+				is_xp_toolset = False
+				if (toolset.find("_xp") > 0):
+					is_xp_toolset = True
 				if ("x86" == arch) or ("x86_app" == arch):
-					arch_list.append((arch, "Visual Studio 11"))
+					arch_list.append((arch, "Visual Studio 11", toolset, is_metro, is_xp_toolset))
 				elif "arm_app" == arch:
-					arch_list.append((arch, "Visual Studio 11 ARM"))
+					arch_list.append((arch, "Visual Studio 11 ARM", toolset, is_metro, is_xp_toolset))
 				elif "x64" == arch:
-					arch_list.append((arch, "Visual Studio 11 Win64"))
+					arch_list.append((arch, "Visual Studio 11 Win64", toolset, is_metro, is_xp_toolset))
 		elif "vc10" == compiler:
 			compiler_name = "vc"
 			compiler_version = 10
 			for arch in archs:
 				if "x86" == arch:
-					arch_list.append((arch, "Visual Studio 10"))
+					arch_list.append((arch, "Visual Studio 10", toolset, False, False))
 				elif "x64" == arch:
-					arch_list.append((arch, "Visual Studio 10 Win64"))
+					arch_list.append((arch, "Visual Studio 10 Win64", toolset, False, False))
 		elif "vc9" == compiler:
 			compiler_name = "vc"
 			compiler_version = 9
 			for arch in archs:
 				if "x86" == arch:
-					arch_list.append((arch, "Visual Studio 9 2008"))
+					arch_list.append((arch, "Visual Studio 9 2008", toolset, False, False))
 				elif "x64" == arch:
-					arch_list.append((arch, "Visual Studio 9 2008 Win64"))
+					arch_list.append((arch, "Visual Studio 9 2008 Win64", toolset, False, False))
 		elif "mingw" == compiler:
 			compiler_name = "mgw"
 			compiler_version = 0
 			for arch in archs:
-				arch_list.append((arch, "MinGW Makefiles"))
+				arch_list.append((arch, "MinGW Makefiles", toolset, False, False))
 		elif "gcc" == compiler:
 			compiler_name = "gcc"
 			compiler_version = 0
 			for arch in archs:
-				arch_list.append((arch, "Unix Makefiles"))
+				arch_list.append((arch, "Unix Makefiles", toolset, False, False))
 		else:
 			compiler_name = ""
 			compiler_version = 0
@@ -156,7 +170,6 @@ class compiler_info:
 		self.arch_list = arch_list
 		self.cfg = cfg
 		self.platform = platform
-		self.toolset = toolset
 		
 	def msvc_add_build_command(self, batch_cmd, sln_name, proj_name, config, arch = ""):
 		if self.use_msbuild:
