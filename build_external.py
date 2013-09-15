@@ -313,15 +313,16 @@ def build_external_libs(compiler_info, compiler_arch):
 		dll_suffix = "so"
 
 
-	print("\nBuilding boost...\n")
-	build_Boost(compiler_info, compiler_arch)
+	if not compiler_arch[3]:
+		print("\nBuilding boost...\n")
+		build_Boost(compiler_info, compiler_arch)
 
-	if "vc" == compiler_info.name:
-		compiler_version_str = str(compiler_info.version)
-	else:
-		compiler_version_str = ""
-	for fname in glob.iglob("External/boost/lib_%s%s_%s/lib/*.%s" % (compiler_info.name, compiler_version_str, compiler_arch[0], dll_suffix)):
-		copy_to_dst(fname, dst_dir)
+		if "vc" == compiler_info.name:
+			compiler_version_str = str(compiler_info.version)
+		else:
+			compiler_version_str = ""
+		for fname in glob.iglob("External/boost/lib_%s%s_%s/lib/*.%s" % (compiler_info.name, compiler_version_str, compiler_arch[0], dll_suffix)):
+			copy_to_dst(fname, dst_dir)
 
 	if not compiler_arch[3]:
 		print("\nBuilding Python...\n")
