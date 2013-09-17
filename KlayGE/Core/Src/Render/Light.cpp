@@ -36,7 +36,7 @@ namespace KlayGE
 	{
 	}
 
-	LightType LightSource::Type() const
+	LightSource::LightType LightSource::Type() const
 	{
 		return type_;
 	}

@@ -229,7 +229,7 @@ void DeferredRenderingApp::InitObjects()
 	spot_light_[1]->AddToSceneManager();
 
 	spot_light_[2] = MakeSharedPtr<SpotLightSource>();
-	spot_light_[2]->Attrib(LSA_IndirectLighting);
+	spot_light_[2]->Attrib(LightSource::LSA_IndirectLighting);
 	spot_light_[2]->Color(float3(6.0f, 5.88f, 4.38f) * 2.0f);
 	spot_light_[2]->Position(float3(0.0f, 43.2f, -5.9f));
 	spot_light_[2]->Direction(float3(0.0f, -1, 0.1f));
@@ -432,6 +432,10 @@ void DeferredRenderingApp::DoUpdateOverlay()
 		<< num_primitives_rendered_ << " Primitives "
 		<< num_vertices_rendered_ << " Vertices";
 	font_->RenderText(0, 54, Color(1, 1, 1, 1), stream.str(), 16);
+
+	stream.str(L"");
+	stream << ps_->NumActiveParticles() << " Particles";
+	font_->RenderText(0, 72, Color(1, 1, 1, 1), stream.str(), 16);
 }
 
 uint32_t DeferredRenderingApp::DoUpdate(uint32_t pass)

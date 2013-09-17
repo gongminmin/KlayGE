@@ -95,7 +95,7 @@ namespace KlayGE
 		array<TexturePtr, 2> rsm_texs_;
 		TexturePtr rsm_depth_tex_;
 
-		array<PostProcessPtr, LT_NumLightTypes> rsm_to_vpls_pps_;
+		array<PostProcessPtr, LightSource::LT_NumLightTypes> rsm_to_vpls_pps_;
 		TexturePtr vpl_tex_;
 
 		TexturePtr depth_deriative_tex_;

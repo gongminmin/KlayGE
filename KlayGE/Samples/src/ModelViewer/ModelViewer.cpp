@@ -281,7 +281,7 @@ void ModelViewerApp::InitObjects()
 	deferred_rendering_->SSVOEnabled(0, false);
 
 	point_light_ = MakeSharedPtr<PointLightSource>();
-	point_light_->Attrib(LSA_NoShadow);
+	point_light_->Attrib(LightSource::LSA_NoShadow);
 	point_light_->Color(float3(1.0f, 1.0f, 1.0f));
 	point_light_->Position(float3(0, 2.0f, 0));
 	point_light_->Falloff(float3(1, 0, 0));

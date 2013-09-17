@@ -846,7 +846,7 @@ void OceanApp::InitObjects()
 	deferred_rendering_->SSVOEnabled(0, false);
 
 	sun_light_ = MakeSharedPtr<DirectionalLightSource>();
-	sun_light_->Attrib(LSA_NoShadow);
+	sun_light_->Attrib(LightSource::LSA_NoShadow);
 	sun_light_->Direction(float3(-0.267835f, 0.0517653f, 0.960315f));
 	sun_light_->Color(float3(1, 0.7f, 0.5f));
 	sun_light_->AddToSceneManager();

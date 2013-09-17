@@ -196,12 +196,12 @@ namespace KlayGE
 		rsm_texs_[1] = rt1_tex;
 		rsm_depth_tex_ = depth_tex;
 
-		rsm_to_vpls_pps_[LT_Spot] = SyncLoadPostProcess("RSM2VPLs.ppml", RSM2VPLsSpotName);
-		rsm_to_vpls_pps_[LT_Spot]->InputPin(0, rsm_texs_[0]);
-		rsm_to_vpls_pps_[LT_Spot]->InputPin(1, rsm_texs_[1]);
-		rsm_to_vpls_pps_[LT_Spot]->InputPin(2, rsm_depth_tex_);
-		rsm_to_vpls_pps_[LT_Spot]->InputPin(3, rsm_depth_derivative_tex_);
-		rsm_to_vpls_pps_[LT_Spot]->OutputPin(0, vpl_tex_);
+		rsm_to_vpls_pps_[LightSource::LT_Spot] = SyncLoadPostProcess("RSM2VPLs.ppml", RSM2VPLsSpotName);
+		rsm_to_vpls_pps_[LightSource::LT_Spot]->InputPin(0, rsm_texs_[0]);
+		rsm_to_vpls_pps_[LightSource::LT_Spot]->InputPin(1, rsm_texs_[1]);
+		rsm_to_vpls_pps_[LightSource::LT_Spot]->InputPin(2, rsm_depth_tex_);
+		rsm_to_vpls_pps_[LightSource::LT_Spot]->InputPin(3, rsm_depth_derivative_tex_);
+		rsm_to_vpls_pps_[LightSource::LT_Spot]->OutputPin(0, vpl_tex_);
 
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 		RenderDeviceCaps const & caps = rf.RenderEngineInstance().DeviceCaps();
@@ -346,7 +346,7 @@ namespace KlayGE
 		
 		float4x4 ls_to_es = rsm_camera->InverseViewMatrix() * g_buffer_camera_->ViewMatrix();
 		float4x4 const & inv_proj = rsm_camera->InverseProjMatrix();
-		LightType type = light->Type();
+		LightSource::LightType type = light->Type();
 
 		float4 vpl_params(static_cast<float>(VPL_COUNT), 2.0f, 
 			              static_cast<float>(MIN_RSM_MIPMAP_SIZE), static_cast<float>(MIN_RSM_MIPMAP_SIZE * MIN_RSM_MIPMAP_SIZE));

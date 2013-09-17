@@ -1946,9 +1946,10 @@ namespace KlayGE
 		}
 		if (light_is_projective_param_)
 		{
-			*light_is_projective_param_ = int2(light_->ProjectiveTexture() ? 1 : 0, LT_Point == light_->Type());
+			*light_is_projective_param_ = int2(light_->ProjectiveTexture() ? 1 : 0,
+				LightSource::LT_Point == light_->Type());
 		}
-		if (LT_Point == light_->Type())
+		if (LightSource::LT_Point == light_->Type())
 		{
 			if (projective_map_cube_tex_param_)
 			{

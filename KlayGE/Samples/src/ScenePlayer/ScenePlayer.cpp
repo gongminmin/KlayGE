@@ -397,19 +397,19 @@ void ScenePlayerApp::LoadScene(std::string const & name)
 						this_token = *beg;
 						if ("noshadow" == this_token)
 						{
-							light_attr |= LSA_NoShadow;
+							light_attr |= LightSource::LSA_NoShadow;
 						}
 						else if ("nodiffuse" == this_token)
 						{
-							light_attr |= LSA_NoDiffuse;
+							light_attr |= LightSource::LSA_NoDiffuse;
 						}
 						else if ("nospecular" == this_token)
 						{
-							light_attr |= LSA_NoSpecular;
+							light_attr |= LightSource::LSA_NoSpecular;
 						}
 						else if ("indirect" == this_token)
 						{
-							light_attr |= LSA_IndirectLighting;
+							light_attr |= LightSource::LSA_IndirectLighting;
 						}
 					}
 				}

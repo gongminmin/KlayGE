@@ -99,7 +99,7 @@ void GlobalIlluminationApp::InitObjects()
 	deferred_rendering_ = Context::Instance().DeferredRenderingLayerInstance();
 
 	spot_light_ = MakeSharedPtr<SpotLightSource>();
-	spot_light_->Attrib(LSA_IndirectLighting);
+	spot_light_->Attrib(LightSource::LSA_IndirectLighting);
 	spot_light_->Position(float3(0, 12, -4.8f));
 	spot_light_->Direction(float3(0, 0, 1));
 	spot_light_->Color(float3(6.0f, 5.88f, 4.38f));

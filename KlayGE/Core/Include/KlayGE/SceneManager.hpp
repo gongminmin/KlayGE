@@ -107,6 +107,8 @@ namespace KlayGE
 	protected:
 		void Flush(uint32_t urt);
 
+		std::vector<CameraPtr>::iterator DelCamera(std::vector<CameraPtr>::iterator iter);
+		std::vector<LightSourcePtr>::iterator DelLight(std::vector<LightSourcePtr>::iterator iter);
 		SceneObjAABBsType::iterator DelSceneObject(SceneObjAABBsType::iterator iter);
 		virtual void OnAddSceneObject(SceneObjectPtr const & obj) = 0;
 		virtual void OnDelSceneObject(SceneObjAABBsType::iterator iter) = 0;

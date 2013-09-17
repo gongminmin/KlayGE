@@ -101,7 +101,7 @@ namespace KlayGE
 	void SceneObjectLightSourceProxy::SubThreadUpdate(float /*app_time*/, float /*elapsed_time*/)
 	{
 		model_ = model_scaling_ * MathLib::to_matrix(light_->Rotation()) * MathLib::translation(light_->Position());
-		if (LT_Spot == light_->Type())
+		if (LightSource::LT_Spot == light_->Type())
 		{
 			float radius = light_->CosOuterInner().w();
 			model_ = MathLib::scaling(radius, radius, 1.0f) * model_;
@@ -143,20 +143,20 @@ namespace KlayGE
 		std::string mesh_name;
 		switch (light->Type())
 		{
-		case LT_Ambient:
+		case LightSource::LT_Ambient:
 			mesh_name = "ambient_light_proxy.meshml";
 			break;
 
-		case LT_Point:
+		case LightSource::LT_Point:
 			mesh_name = "point_light_proxy.meshml";
 			break;
 
-		case LT_Directional:
-		case LT_Sun:
+		case LightSource::LT_Directional:
+		case LightSource::LT_Sun:
 			mesh_name = "directional_light_proxy.meshml";
 			break;
 
-		case LT_Spot:
+		case LightSource::LT_Spot:
 			mesh_name = "spot_light_proxy.meshml";
 			break;
 

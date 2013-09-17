@@ -297,6 +297,10 @@ namespace KlayGE
 		{
 			return static_cast<uint32_t>(active_particles_.size());
 		}
+		uint32_t GetActiveParticleIndex(uint32_t i) const
+		{
+			return active_particles_[i].first;
+		}
 		Particle const & GetParticle(uint32_t i) const
 		{
 			BOOST_ASSERT(i < particles_.size());

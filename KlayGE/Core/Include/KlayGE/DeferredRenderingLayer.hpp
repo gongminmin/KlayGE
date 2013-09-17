@@ -226,7 +226,7 @@ namespace KlayGE
 			int32_t index_in_pass, PassType pass_type);
 		void PostGenerateShadowMap(PerViewport const & pvp, int32_t org_no, int32_t index_in_pass);
 		void UpdateShadowing(PerViewport const & pvp, int32_t org_no);
-		void UpdateLighting(PerViewport const & pvp, LightType type);
+		void UpdateLighting(PerViewport const & pvp, LightSource::LightType type);
 		void UpdateIndirectAndSSVO(PerViewport const & pvp);
 		void UpdateShading(PerViewport const & pvp, uint32_t g_buffer_index);
 		void MergeShadingAndDepth(PerViewport const & pvp, uint32_t g_buffer_index);
@@ -259,7 +259,7 @@ namespace KlayGE
 		RenderLayoutPtr rl_pyramid_;
 		RenderLayoutPtr rl_box_;
 		RenderLayoutPtr rl_quad_;
-		array<RenderLayoutPtr, LT_NumLightTypes> light_volume_rl_;
+		array<RenderLayoutPtr, LightSource::LT_NumLightTypes> light_volume_rl_;
 		OBBox cone_obb_;
 		OBBox pyramid_obb_;
 		OBBox box_obb_;
@@ -269,8 +269,8 @@ namespace KlayGE
 
 		std::vector<uint32_t> pass_scaned_;
 
-		array<RenderTechniquePtr, LT_NumLightTypes> technique_shadows_;
-		array<RenderTechniquePtr, LT_NumLightTypes> technique_lights_;
+		array<RenderTechniquePtr, LightSource::LT_NumLightTypes> technique_shadows_;
+		array<RenderTechniquePtr, LightSource::LT_NumLightTypes> technique_lights_;
 		RenderTechniquePtr technique_light_depth_only_;
 		RenderTechniquePtr technique_light_stencil_;
 		RenderTechniquePtr technique_clear_stencil_;

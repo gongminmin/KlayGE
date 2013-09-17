@@ -372,25 +372,25 @@ namespace KlayGE
 				make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F)));
 		}
 
-		light_volume_rl_[LT_Ambient] = rl_quad_;
-		light_volume_rl_[LT_Directional] = rl_quad_;
-		light_volume_rl_[LT_Point] = rl_box_;
-		light_volume_rl_[LT_Spot] = rl_cone_;
-		light_volume_rl_[LT_Sun] = rl_quad_;
+		light_volume_rl_[LightSource::LT_Ambient] = rl_quad_;
+		light_volume_rl_[LightSource::LT_Directional] = rl_quad_;
+		light_volume_rl_[LightSource::LT_Point] = rl_box_;
+		light_volume_rl_[LightSource::LT_Spot] = rl_cone_;
+		light_volume_rl_[LightSource::LT_Sun] = rl_quad_;
 
 		g_buffer_effect_ = SyncLoadRenderEffect("GBuffer.fxml");
 		dr_effect_ = SyncLoadRenderEffect("DeferredRendering.fxml");
 
-		technique_shadows_[LT_Ambient] = dr_effect_->TechniqueByName("DeferredShadowingAmbient");
-		technique_shadows_[LT_Directional] = dr_effect_->TechniqueByName("DeferredShadowingDirectional");
-		technique_shadows_[LT_Point] = dr_effect_->TechniqueByName("DeferredShadowingPoint");
-		technique_shadows_[LT_Spot] = dr_effect_->TechniqueByName("DeferredShadowingSpot");
-		technique_shadows_[LT_Sun] = dr_effect_->TechniqueByName("DeferredShadowingSun");
-		technique_lights_[LT_Ambient] = dr_effect_->TechniqueByName("DeferredRenderingAmbient");
-		technique_lights_[LT_Directional] = dr_effect_->TechniqueByName("DeferredRenderingDirectional");
-		technique_lights_[LT_Point] = dr_effect_->TechniqueByName("DeferredRenderingPoint");
-		technique_lights_[LT_Spot] = dr_effect_->TechniqueByName("DeferredRenderingSpot");
-		technique_lights_[LT_Sun] = dr_effect_->TechniqueByName("DeferredRenderingSun");
+		technique_shadows_[LightSource::LT_Ambient] = dr_effect_->TechniqueByName("DeferredShadowingAmbient");
+		technique_shadows_[LightSource::LT_Directional] = dr_effect_->TechniqueByName("DeferredShadowingDirectional");
+		technique_shadows_[LightSource::LT_Point] = dr_effect_->TechniqueByName("DeferredShadowingPoint");
+		technique_shadows_[LightSource::LT_Spot] = dr_effect_->TechniqueByName("DeferredShadowingSpot");
+		technique_shadows_[LightSource::LT_Sun] = dr_effect_->TechniqueByName("DeferredShadowingSun");
+		technique_lights_[LightSource::LT_Ambient] = dr_effect_->TechniqueByName("DeferredRenderingAmbient");
+		technique_lights_[LightSource::LT_Directional] = dr_effect_->TechniqueByName("DeferredRenderingDirectional");
+		technique_lights_[LightSource::LT_Point] = dr_effect_->TechniqueByName("DeferredRenderingPoint");
+		technique_lights_[LightSource::LT_Spot] = dr_effect_->TechniqueByName("DeferredRenderingSpot");
+		technique_lights_[LightSource::LT_Sun] = dr_effect_->TechniqueByName("DeferredRenderingSun");
 		technique_light_depth_only_ = dr_effect_->TechniqueByName("DeferredRenderingLightDepthOnly");
 		technique_light_stencil_ = dr_effect_->TechniqueByName("DeferredRenderingLightStencil");
 		technique_clear_stencil_ = dr_effect_->TechniqueByName("ClearStencil");
@@ -908,9 +908,9 @@ namespace KlayGE
 					this->PostGenerateShadowMap(pvp, org_no, index_in_pass);
 				}
 
-				if (((LT_Point == light->Type()) && (6 == index_in_pass))
-					|| ((LT_Spot == light->Type()) && (1 == index_in_pass))
-					|| ((LT_Sun == light->Type()) && (static_cast<int32_t>(pvp.num_cascades) == index_in_pass)))
+				if (((LightSource::LT_Point == light->Type()) && (6 == index_in_pass))
+					|| ((LightSource::LT_Spot == light->Type()) && (1 == index_in_pass))
+					|| ((LightSource::LT_Sun == light->Type()) && (static_cast<int32_t>(pvp.num_cascades) == index_in_pass)))
 				{
 					urv = App3DFramework::URV_Flushed;
 				}
@@ -971,12 +971,12 @@ namespace KlayGE
 		case PC_Lighting:
 			{
 				LightSourcePtr const & light = lights_[org_no];
-				LightType type = light->Type();
+				LightSource::LightType type = light->Type();
 				int32_t attr = light->Attrib();
 
 				this->PrepareLightCamera(pvp, light, index_in_pass, pass_type);
 
-				if (LT_Point == type)
+				if (LightSource::LT_Point == type)
 				{
 					*projective_map_cube_tex_param_ = light->ProjectiveTexture();
 				}
@@ -985,8 +985,9 @@ namespace KlayGE
 					*projective_map_2d_tex_param_ = light->ProjectiveTexture();
 				}
 
-				*light_attrib_param_ = float4(attr & LSA_NoDiffuse ? 0.0f : 1.0f, attr & LSA_NoSpecular ? 0.0f : 1.0f,
-					attr & LSA_NoShadow ? -1.0f : 1.0f, light->ProjectiveTexture() ? 1.0f : -1.0f);
+				*light_attrib_param_ = float4(attr & LightSource::LSA_NoDiffuse ? 0.0f : 1.0f,
+					attr & LightSource::LSA_NoSpecular ? 0.0f : 1.0f,
+					attr & LightSource::LSA_NoShadow ? -1.0f : 1.0f, light->ProjectiveTexture() ? 1.0f : -1.0f);
 				*light_color_param_ = light->Color();
 				*light_falloff_param_ = light->Falloff();
 
@@ -1100,7 +1101,7 @@ namespace KlayGE
 			LightSourcePtr const & light = scene_mgr.GetLight(i);
 			if (light->Enabled())
 			{
-				if (LT_Ambient == light->Type())
+				if (LightSource::LT_Ambient == light->Type())
 				{
 					float4 const & clr = light->Color();
 					ambient_clr += float3(clr.x(), clr.y(), clr.z());
@@ -1110,16 +1111,16 @@ namespace KlayGE
 				{
 					lights_.push_back(light);
 
-					if (0 == (light->Attrib() & LSA_NoShadow))
+					if (0 == (light->Attrib() & LightSource::LSA_NoShadow))
 					{
 						switch (light->Type())
 						{
-						case LT_Sun:
+						case LightSource::LT_Sun:
 							sm_light_indices_.push_back(-1);
 							cascaded_shadow_index_ = static_cast<int32_t>(i + 1 - num_ambient_lights);
 							break;
 
-						case LT_Spot:
+						case LightSource::LT_Spot:
 							if (num_sm_2d_lights < MAX_NUM_SHADOWED_SPOT_LIGHTS)
 							{
 								sm_light_indices_.push_back(num_sm_2d_lights);
@@ -1127,7 +1128,7 @@ namespace KlayGE
 							}
 							break;
 
-						case LT_Point:
+						case LightSource::LT_Point:
 							if (num_sm_cube_lights < MAX_NUM_SHADOWED_POINT_LIGHTS)
 							{
 								sm_light_indices_.push_back(num_sm_cube_lights);
@@ -1158,7 +1159,7 @@ namespace KlayGE
 		{
 			for (size_t i = 0; i < lights_.size(); ++ i)
 			{
-				if (lights_[i]->Attrib() & LSA_IndirectLighting)
+				if (lights_[i]->Attrib() & LightSource::LSA_IndirectLighting)
 				{
 					indirect_lighting_enabled_ = true;
 					break;
@@ -1284,7 +1285,7 @@ namespace KlayGE
 
 		switch (light->Type())
 		{
-		case LT_Spot:
+		case LightSource::LT_Spot:
 			{
 				float4x4 const & inv_light_view = light->SMCamera(0)->InverseViewMatrix();
 				float const scale = light->CosOuterInner().w();
@@ -1294,7 +1295,7 @@ namespace KlayGE
 			}
 			break;
 
-		case LT_Point:
+		case LightSource::LT_Point:
 			{
 				float3 const & p = light->Position();
 				float4x4 light_model = MathLib::scaling(light_scale_, light_scale_, light_scale_)
@@ -1352,14 +1353,14 @@ namespace KlayGE
 		}
 
 		LightSourcePtr const & light = lights_[light_index];
-		LightType type = light->Type();
+		LightSource::LightType type = light->Type();
 		int32_t attr = light->Attrib();
 		switch (type)
 		{
-		case LT_Spot:
+		case LightSource::LT_Spot:
 			{
 				int sm_seq;
-				if (attr & LSA_IndirectLighting)
+				if (attr & LightSource::LSA_IndirectLighting)
 				{
 					if (rsm_buffer_ && (illum_ != 1))
 					{
@@ -1373,7 +1374,7 @@ namespace KlayGE
 				}
 				else
 				{
-					if (0 == (attr & LSA_NoShadow))
+					if (0 == (attr & LightSource::LSA_NoShadow))
 					{
 						sm_seq = 1;
 					}
@@ -1391,8 +1392,8 @@ namespace KlayGE
 			}
 			break;
 
-		case LT_Point:
-			if (0 == (attr & LSA_NoShadow))
+		case LightSource::LT_Point:
+			if (0 == (attr & LightSource::LSA_NoShadow))
 			{
 				for (int j = 0; j < 7; ++ j)
 				{
@@ -1401,11 +1402,11 @@ namespace KlayGE
 			}
 			break;
 
-		case LT_Sun:
+		case LightSource::LT_Sun:
 			break;
 
 		default:
-			if (0 == (attr & LSA_NoShadow))
+			if (0 == (attr & LightSource::LSA_NoShadow))
 			{							
 				pass_scaned_.push_back(this->ComposePassScanCode(0, shadow_pt, light_index, 0));
 			}
@@ -1415,7 +1416,7 @@ namespace KlayGE
 
 	void DeferredRenderingLayer::AppendCascadedShadowPassScanCode(uint32_t vp_index, uint32_t light_index)
 	{
-		BOOST_ASSERT(LT_Sun == lights_[light_index]->Type());
+		BOOST_ASSERT(LightSource::LT_Sun == lights_[light_index]->Type());
 
 		PerViewport& pvp = viewports_[vp_index];
 		for (uint32_t i = 0; i < pvp.num_cascades + 1; ++ i)
@@ -1430,7 +1431,8 @@ namespace KlayGE
 		LightSourcePtr const & light = lights_[light_index];
 		PassTargetBuffer const pass_tb = static_cast<PassTargetBuffer>(g_buffer_index);
 
-		if ((LT_Spot == light->Type()) && (PTB_Opaque == pass_tb) && (light->Attrib() & LSA_IndirectLighting))
+		if ((LightSource::LT_Spot == light->Type()) && (PTB_Opaque == pass_tb)
+			&& (light->Attrib() & LightSource::LSA_IndirectLighting))
 		{
 			if (rsm_buffer_ && (illum_ != 1))
 			{
@@ -1547,23 +1549,23 @@ namespace KlayGE
 	void DeferredRenderingLayer::PrepareLightCamera(PerViewport const & pvp,
 		LightSourcePtr const & light, int32_t index_in_pass, PassType pass_type)
 	{
-		LightType const type = light->Type();
+		LightSource::LightType const type = light->Type();
 		PassCategory const pass_cat = GetPassCategory(pass_type);
 
 		switch (type)
 		{
-		case LT_Point:
-		case LT_Spot:
-		case LT_Sun:
+		case LightSource::LT_Point:
+		case LightSource::LT_Spot:
+		case LightSource::LT_Sun:
 			{
 				CameraPtr sm_camera;
 				float3 dir_es(0, 0, 0);
-				if (LT_Spot == type)
+				if (LightSource::LT_Spot == type)
 				{
 					dir_es = MathLib::transform_normal(light->Direction(), pvp.view);
 					sm_camera = light->SMCamera(0);
 				}
-				else if (LT_Sun == type)
+				else if (LightSource::LT_Sun == type)
 				{
 					dir_es = MathLib::transform_normal(-light->Direction(), pvp.view);
 					sm_camera = light->SMCamera(0);
@@ -1579,7 +1581,7 @@ namespace KlayGE
 
 				sm_buffer_->GetViewport()->camera = sm_camera;
 
-				if ((LT_Sun == type) && (pass_cat != PC_Lighting))
+				if ((LightSource::LT_Sun == type) && (pass_cat != PC_Lighting))
 				{
 					curr_cascade_index_ = index_in_pass;
 				}
@@ -1611,7 +1613,7 @@ namespace KlayGE
 
 				switch (type)
 				{
-				case LT_Spot:
+				case LightSource::LT_Spot:
 					{
 						light_pos_es_actived.w() = light->CosOuterInner().x();
 						light_dir_es_actived.w() = light->CosOuterInner().y();
@@ -1623,7 +1625,7 @@ namespace KlayGE
 					}
 					break;
 
-				case LT_Point:
+				case LightSource::LT_Point:
 					if (PC_Lighting == pass_cat)
 					{
 						float4x4 light_model = MathLib::scaling(light_scale_, light_scale_, light_scale_)
@@ -1639,7 +1641,7 @@ namespace KlayGE
 					}
 					break;
 
-				case LT_Sun:
+				case LightSource::LT_Sun:
 					*light_volume_mv_param_ = pvp.inv_proj;
 					*light_volume_mvp_param_ = float4x4::Identity();
 					break;
@@ -1654,7 +1656,7 @@ namespace KlayGE
 			}
 			break;
 
-		case LT_Directional:
+		case LightSource::LT_Directional:
 			{
 				float3 dir_es = MathLib::transform_normal(light->Direction(), pvp.view);
 				*light_dir_es_param_ = float4(dir_es.x(), dir_es.y(), dir_es.z(), 0);
@@ -1663,7 +1665,7 @@ namespace KlayGE
 			*light_volume_mvp_param_ = float4x4::Identity();
 			break;
 
-		case LT_Ambient:
+		case LightSource::LT_Ambient:
 			{
 				float3 dir_es = MathLib::transform_normal(float3(0, 1, 0), pvp.view);
 				*light_dir_es_param_ = float4(dir_es.x(), dir_es.y(), dir_es.z(), 0);
@@ -1680,18 +1682,18 @@ namespace KlayGE
 
 	void DeferredRenderingLayer::PostGenerateShadowMap(PerViewport const & pvp, int32_t org_no, int32_t index_in_pass)
 	{
-		LightType type = lights_[org_no]->Type();
+		LightSource::LightType type = lights_[org_no]->Type();
 
 		if (depth_texture_support_)
 		{
-			if (type != LT_Sun)
+			if (type != LightSource::LT_Sun)
 			{
 				depth_to_esm_pp_->Apply();
 			}
 		}
 
 		int2 kernel_size;
-		if (LT_Sun == type)
+		if (LightSource::LT_Sun == type)
 		{
 			float3 const & scale = cascaded_shadow_layer_->CascadeScales()[index_in_pass - 1];
 			float2 blur_kernel_size = blur_size_light_space_ * float2(scale.x(), scale.y()) * static_cast<float>(cascaded_sm_tex_->Width(0));
@@ -1707,7 +1709,7 @@ namespace KlayGE
 		checked_pointer_cast<SeparableLogGaussianFilterPostProcess>(pp_chain->GetPostProcess(0))->KernelRadius(kernel_size.x());
 		checked_pointer_cast<SeparableLogGaussianFilterPostProcess>(pp_chain->GetPostProcess(1))->KernelRadius(kernel_size.y());
 
-		if (LT_Sun == type)
+		if (LightSource::LT_Sun == type)
 		{
 			sm_filter_pp_->InputPin(0, cascaded_sm_tex_);
 			if (tex_array_support_)
@@ -1722,7 +1724,7 @@ namespace KlayGE
 		else
 		{
 			sm_filter_pp_->InputPin(0, sm_tex_);
-			if (LT_Point == type)
+			if (LightSource::LT_Point == type)
 			{
 				sm_filter_pp_->OutputPin(0, blur_sm_cube_texs_[sm_light_indices_[org_no]], 0, 0, index_in_pass - 1);
 			}
@@ -1735,7 +1737,7 @@ namespace KlayGE
 			sm_buffer_->GetViewport()->camera);
 		sm_filter_pp_->Apply();
 
-		if (LT_Sun == type)
+		if (LightSource::LT_Sun == type)
 		{
 			if (tex_array_support_)
 			{
@@ -1757,24 +1759,25 @@ namespace KlayGE
 		
 		LightSourcePtr const & light = lights_[org_no];
 		CameraPtr sm_camera;
-		LightType type = light->Type();
+		LightSource::LightType type = light->Type();
 
 		int32_t light_index = sm_light_indices_[org_no];
-		if (((light_index >= 0) && (0 == (light->Attrib() & LSA_NoShadow))) || (LT_Sun == type))
+		if (((light_index >= 0) && (0 == (light->Attrib() & LightSource::LSA_NoShadow)))
+			|| (LightSource::LT_Sun == type))
 		{
 			switch (type)
 			{
-			case LT_Spot:
+			case LightSource::LT_Spot:
 				sm_camera = light->SMCamera(0);
 				*shadow_map_2d_tex_param_ = blur_sm_2d_texs_[light_index];
 				break;
 
-			case LT_Point:
+			case LightSource::LT_Point:
 				sm_camera = light->SMCamera(0);
 				*shadow_map_cube_tex_param_ = blur_sm_cube_texs_[light_index];
 				break;
 
-			case LT_Sun:
+			case LightSource::LT_Sun:
 				{
 					sm_camera = lights_[cascaded_shadow_index_]->SMCamera(0);
 
@@ -1826,13 +1829,13 @@ namespace KlayGE
 			*esm_scale_factor_param_ = ESM_SCALE_FACTOR / (sm_camera->FarPlane() - sm_camera->NearPlane());
 		}
 
-		if (0 == (light->Attrib() & LSA_NoShadow))
+		if (0 == (light->Attrib() & LightSource::LSA_NoShadow))
 		{
 			re.Render(*technique_shadows_[type], *light_volume_rl_[type]);
 		}
 	}
 
-	void DeferredRenderingLayer::UpdateLighting(PerViewport const & pvp, LightType type)
+	void DeferredRenderingLayer::UpdateLighting(PerViewport const & pvp, LightSource::LightType type)
 	{
 		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 
@@ -1842,7 +1845,7 @@ namespace KlayGE
 
 		RenderLayoutPtr const & rl = light_volume_rl_[type];
 
-		if ((LT_Point == type) || (LT_Spot == type))
+		if ((LightSource::LT_Point == type) || (LightSource::LT_Spot == type))
 		{
 			re.Render(*technique_light_stencil_, *rl);
 		}

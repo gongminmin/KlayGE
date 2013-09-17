@@ -205,6 +205,12 @@ namespace KlayGE
 		cameras_.erase(iter);
 	}
 
+	std::vector<CameraPtr>::iterator SceneManager::DelCamera(std::vector<CameraPtr>::iterator iter)
+	{
+		unique_lock<mutex> lock(update_mutex_);
+		return cameras_.erase(iter);
+	}
+
 	uint32_t SceneManager::NumCameras() const
 	{
 		return static_cast<uint32_t>(cameras_.size());
@@ -229,6 +235,12 @@ namespace KlayGE
 	{
 		KLAYGE_AUTO(iter, std::find(lights_.begin(), lights_.end(), light));
 		lights_.erase(iter);
+	}
+
+	std::vector<LightSourcePtr>::iterator SceneManager::DelLight(std::vector<LightSourcePtr>::iterator iter)
+	{
+		unique_lock<mutex> lock(update_mutex_);
+		return lights_.erase(iter);
 	}
 
 	uint32_t SceneManager::NumLights() const
@@ -483,6 +495,17 @@ namespace KlayGE
 			if ((*iter)->so->Attrib() & SceneObject::SOA_Overlay)
 			{
 				iter = this->DelSceneObject(iter);
+			}
+			else
+			{
+				++ iter;
+			}
+		}
+		for (KLAYGE_AUTO(iter, lights_.begin()); iter != lights_.end();)
+		{
+			if ((*iter)->Attrib() & LightSource::LSA_Temporary)
+			{
+				iter = this->DelLight(iter);
 			}
 			else
 			{

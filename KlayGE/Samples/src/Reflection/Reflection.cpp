@@ -233,7 +233,7 @@ void ScreenSpaceReflectionApp::InitObjects()
 	this->ActiveCamera().AddToSceneManager();
 
 	point_light_ = MakeSharedPtr<PointLightSource>();
-	point_light_->Attrib(LSA_NoShadow);
+	point_light_->Attrib(LightSource::LSA_NoShadow);
 	point_light_->Color(float3(1, 1, 1));
 	point_light_->Position(float3(0, 3, -2));
 	point_light_->Falloff(float3(1, 0, 0.3f));

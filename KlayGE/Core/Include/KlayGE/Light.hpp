@@ -24,27 +24,30 @@
 
 namespace KlayGE
 {
-	enum LightType
-	{
-		LT_Ambient = 0,
-		LT_Point,
-		LT_Directional,
-		LT_Spot,
-		LT_Sun,
-
-		LT_NumLightTypes
-	};
-
-	enum LightSrcAttrib
-	{
-		LSA_NoShadow = 1UL << 0,
-		LSA_NoDiffuse = 1UL << 1,
-		LSA_NoSpecular = 1UL << 2,
-		LSA_IndirectLighting = 1UL << 3
-	};
-
 	class KLAYGE_CORE_API LightSource : public enable_shared_from_this<LightSource>
 	{
+	public:
+		enum LightType
+		{
+			LT_Ambient = 0,
+			LT_Point,
+			LT_Directional,
+			LT_Spot,
+			LT_Sun,
+
+			LT_NumLightTypes
+		};
+
+		enum LightSrcAttrib
+		{
+			LSA_NoShadow = 1UL << 0,
+			LSA_NoDiffuse = 1UL << 1,
+			LSA_NoSpecular = 1UL << 2,
+			LSA_IndirectLighting = 1UL << 3,
+			LSA_Temporary = 1UL << 4
+		};
+
+
 	public:
 		explicit LightSource(LightType type);
 		virtual ~LightSource();

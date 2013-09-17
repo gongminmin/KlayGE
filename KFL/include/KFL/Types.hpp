@@ -441,6 +441,12 @@ private:
 	}
 #endif
 
+#ifdef KLAYGE_COMPILER_MSVC
+	#define RESTRICT __restrict
+#else
+	#define RESTRICT
+#endif
+
 namespace KlayGE
 {
 #ifdef KLAYGE_COMPILER_MSVC
