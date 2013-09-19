@@ -45,10 +45,9 @@ namespace KlayGE
 		d3d_desc.AntialiasedLineEnable = false;
 
 #if (_WIN32_WINNT >= 0x0602 /*_WIN32_WINNT_WIN8*/)
-		ID3D11Device1* d3d_device_1;
-		d3d_device->QueryInterface(IID_ID3D11Device1, reinterpret_cast<void**>(&d3d_device_1));
-		if (d3d_device_1 != nullptr)
+		if (re.IsD3D11_1())
 		{
+			ID3D11Device1Ptr const & d3d_device_1 = static_pointer_cast<ID3D11Device1>(d3d_device);
 			D3D11_RASTERIZER_DESC1 d3d_desc1;
 			d3d_desc1.FillMode = d3d_desc.FillMode;
 			d3d_desc1.CullMode = d3d_desc.CullMode;
@@ -65,7 +64,6 @@ namespace KlayGE
 			ID3D11RasterizerState1* rasterizer_state;
 			TIF(d3d_device_1->CreateRasterizerState1(&d3d_desc1, &rasterizer_state));
 			rasterizer_state_ = MakeCOMPtr(rasterizer_state);
-			d3d_device_1->Release();
 		}
 		else
 		{
@@ -136,13 +134,13 @@ namespace KlayGE
 			d3d_desc.RenderTarget[i].RenderTargetWriteMask = static_cast<UINT8>(D3D11Mapping::MappingColorMask(desc.color_write_mask[i]));
 		}
 
-		ID3D11DevicePtr const & d3d_device = checked_cast<D3D11RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance())->D3DDevice();
+		D3D11RenderEngine& re = *checked_cast<D3D11RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+		ID3D11DevicePtr const & d3d_device = re.D3DDevice();
 
 #if (_WIN32_WINNT >= 0x0602 /*_WIN32_WINNT_WIN8*/)
-		ID3D11Device1* d3d_device_1;
-		d3d_device->QueryInterface(IID_ID3D11Device1, reinterpret_cast<void**>(&d3d_device_1));
-		if (d3d_device_1 != nullptr)
+		if (re.IsD3D11_1())
 		{
+			ID3D11Device1Ptr const & d3d_device_1 = static_pointer_cast<ID3D11Device1>(d3d_device);
 			D3D11_BLEND_DESC1 d3d_desc1;
 			d3d_desc1.AlphaToCoverageEnable = d3d_desc.AlphaToCoverageEnable;
 			d3d_desc1.IndependentBlendEnable = d3d_desc.IndependentBlendEnable;
@@ -163,7 +161,6 @@ namespace KlayGE
 			ID3D11BlendState1* blend_state;
 			TIF(d3d_device_1->CreateBlendState1(&d3d_desc1, &blend_state));
 			blend_state_ = MakeCOMPtr(blend_state);
-			d3d_device_1->Release();
 		}
 		else
 		{

@@ -388,7 +388,7 @@ void DeferredRenderingApp::SSVOHandler(UICheckBox const & sender)
 		}
 		else
 		{
-			re.HDREnabled(true);
+			re.HDREnabled(hdr_enabled_);
 		}
 	}
 }

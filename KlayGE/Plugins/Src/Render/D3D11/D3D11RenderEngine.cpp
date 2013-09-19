@@ -206,6 +206,11 @@ namespace KlayGE
 		return d3d_imm_ctx_;
 	}
 
+	bool D3D11RenderEngine::IsD3D11_1() const
+	{
+		return is_d3d_11_1_;
+	}
+
 	D3D_FEATURE_LEVEL D3D11RenderEngine::DeviceFeatureLevel() const
 	{
 		return d3d_feature_level_;
@@ -362,8 +367,36 @@ namespace KlayGE
 
 	void D3D11RenderEngine::D3DDevice(ID3D11DevicePtr const & device, ID3D11DeviceContextPtr const & imm_ctx, D3D_FEATURE_LEVEL feature_level)
 	{
+		is_d3d_11_1_ = false;
+
+#if (_WIN32_WINNT >= 0x0602 /*_WIN32_WINNT_WIN8*/)
+		ID3D11Device1* d3d_device_1;
+		device->QueryInterface(IID_ID3D11Device1, reinterpret_cast<void**>(&d3d_device_1));
+		if (d3d_device_1)
+		{
+			ID3D11DeviceContext1* d3d_imm_ctx_1;
+			imm_ctx->QueryInterface(IID_ID3D11DeviceContext1, reinterpret_cast<void**>(&d3d_imm_ctx_1));
+			if (d3d_imm_ctx_1)
+			{
+				d3d_device_ = MakeCOMPtr(d3d_device_1);
+				d3d_imm_ctx_ = MakeCOMPtr(d3d_imm_ctx_1);
+				is_d3d_11_1_ = true;
+			}
+			else
+			{
+				d3d_device_1->Release();
+			}
+		}
+		
+		if (!is_d3d_11_1_)
+		{
+			d3d_device_ = device;
+			d3d_imm_ctx_ = imm_ctx;
+		}		
+#else
 		d3d_device_ = device;
 		d3d_imm_ctx_ = imm_ctx;
+#endif
 		d3d_feature_level_ = feature_level;
 		Verify(!!d3d_device_);
 
