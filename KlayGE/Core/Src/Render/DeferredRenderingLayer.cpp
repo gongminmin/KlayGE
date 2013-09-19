@@ -286,6 +286,7 @@ namespace KlayGE
 			pvp.lighting_buffer = rf.MakeFrameBuffer();
 			pvp.shading_buffer = rf.MakeFrameBuffer();
 			pvp.shadowing_buffer = rf.MakeFrameBuffer();
+			pvp.projective_shadowing_buffer = rf.MakeFrameBuffer();
 			pvp.curr_merged_shading_buffer = rf.MakeFrameBuffer();
 			pvp.curr_merged_depth_buffer = rf.MakeFrameBuffer();
 			pvp.prev_merged_shading_buffer = rf.MakeFrameBuffer();
@@ -381,11 +382,21 @@ namespace KlayGE
 		g_buffer_effect_ = SyncLoadRenderEffect("GBuffer.fxml");
 		dr_effect_ = SyncLoadRenderEffect("DeferredRendering.fxml");
 
-		technique_shadows_[LightSource::LT_Ambient] = dr_effect_->TechniqueByName("DeferredShadowingAmbient");
-		technique_shadows_[LightSource::LT_Directional] = dr_effect_->TechniqueByName("DeferredShadowingDirectional");
-		technique_shadows_[LightSource::LT_Point] = dr_effect_->TechniqueByName("DeferredShadowingPoint");
-		technique_shadows_[LightSource::LT_Spot] = dr_effect_->TechniqueByName("DeferredShadowingSpot");
-		technique_shadows_[LightSource::LT_Sun] = dr_effect_->TechniqueByName("DeferredShadowingSun");
+		technique_shadows_[LightSource::LT_Point][0] = dr_effect_->TechniqueByName("DeferredShadowingPointR");
+		technique_shadows_[LightSource::LT_Point][1] = dr_effect_->TechniqueByName("DeferredShadowingPointG");
+		technique_shadows_[LightSource::LT_Point][2] = dr_effect_->TechniqueByName("DeferredShadowingPointB");
+		technique_shadows_[LightSource::LT_Point][3] = dr_effect_->TechniqueByName("DeferredShadowingPointA");
+		technique_shadows_[LightSource::LT_Point][4] = dr_effect_->TechniqueByName("DeferredShadowingPoint");
+		technique_shadows_[LightSource::LT_Spot][0] = dr_effect_->TechniqueByName("DeferredShadowingSpotR");
+		technique_shadows_[LightSource::LT_Spot][1] = dr_effect_->TechniqueByName("DeferredShadowingSpotG");
+		technique_shadows_[LightSource::LT_Spot][2] = dr_effect_->TechniqueByName("DeferredShadowingSpotB");
+		technique_shadows_[LightSource::LT_Spot][3] = dr_effect_->TechniqueByName("DeferredShadowingSpotA");
+		technique_shadows_[LightSource::LT_Spot][4] = dr_effect_->TechniqueByName("DeferredShadowingSpot");
+		technique_shadows_[LightSource::LT_Sun][0] = dr_effect_->TechniqueByName("DeferredShadowingSunR");
+		technique_shadows_[LightSource::LT_Sun][1] = dr_effect_->TechniqueByName("DeferredShadowingSunG");
+		technique_shadows_[LightSource::LT_Sun][2] = dr_effect_->TechniqueByName("DeferredShadowingSunB");
+		technique_shadows_[LightSource::LT_Sun][3] = dr_effect_->TechniqueByName("DeferredShadowingSunA");
+		technique_shadows_[LightSource::LT_Sun][4] = dr_effect_->TechniqueByName("DeferredShadowingSun");
 		technique_lights_[LightSource::LT_Ambient] = dr_effect_->TechniqueByName("DeferredRenderingAmbient");
 		technique_lights_[LightSource::LT_Directional] = dr_effect_->TechniqueByName("DeferredRenderingDirectional");
 		technique_lights_[LightSource::LT_Point] = dr_effect_->TechniqueByName("DeferredRenderingPoint");
@@ -435,11 +446,11 @@ namespace KlayGE
 		cascaded_sm_buffer_->Attach(FrameBuffer::ATT_DepthStencil,
 			rf.Make2DDepthStencilRenderView(SM_SIZE * 2, SM_SIZE * 2, ds_fmt, 1, 0));
 
-		for (uint32_t i = 0; i < MAX_NUM_SHADOWED_SPOT_LIGHTS; ++ i)
+		for (uint32_t i = 0; i < blur_sm_2d_texs_.size(); ++ i)
 		{
 			blur_sm_2d_texs_[i] = rf.MakeTexture2D(SM_SIZE, SM_SIZE, 1, 1, sm_tex_->Format(), 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
 		}
-		for (uint32_t i = 0; i < MAX_NUM_SHADOWED_POINT_LIGHTS; ++ i)
+		for (uint32_t i = 0; i < blur_sm_cube_texs_.size(); ++ i)
 		{
 			blur_sm_cube_texs_[i] = rf.MakeTextureCube(SM_SIZE, 1, 1, sm_tex_->Format(), 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
 		}
@@ -511,6 +522,8 @@ namespace KlayGE
 		shadow_map_cube_tex_param_ = dr_effect_->ParameterByName("shadow_map_cube_tex");
 		inv_width_height_param_ = dr_effect_->ParameterByName("inv_width_height");
 		shadowing_tex_param_ = dr_effect_->ParameterByName("shadowing_tex");
+		projective_shadowing_tex_param_ = dr_effect_->ParameterByName("projective_shadowing_tex");
+		shadowing_channel_param_ = dr_effect_->ParameterByName("shadowing_channel");
 		esm_scale_factor_param_ = dr_effect_->ParameterByName("esm_scale_factor");
 		near_q_param_ = dr_effect_->ParameterByName("near_q");
 		cascade_intervals_param_ = dr_effect_->ParameterByName("cascade_intervals");
@@ -685,6 +698,19 @@ namespace KlayGE
 			}
 		}
 
+		if (caps.rendertarget_format_support(EF_ABGR8, 1, 0))
+		{
+			fmt = EF_ABGR8;
+		}
+		else
+		{
+			BOOST_ASSERT(caps.rendertarget_format_support(EF_ARGB8, 1, 0));
+
+			fmt = EF_ARGB8;
+		}
+		pvp.shadowing_tex = rf.MakeTexture2D(width / 2, height / 2, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
+		pvp.shadowing_buffer->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*pvp.shadowing_tex, 0, 1, 0));
+		
 		if (caps.rendertarget_format_support(EF_B10G11R11F, 1, 0))
 		{
 			fmt = EF_B10G11R11F;
@@ -702,8 +728,8 @@ namespace KlayGE
 				fmt = EF_ARGB8;
 			}
 		}
-		pvp.shadowing_tex = rf.MakeTexture2D(width / 2, height / 2, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
-		pvp.shadowing_buffer->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*pvp.shadowing_tex, 0, 1, 0));
+		pvp.projective_shadowing_tex = rf.MakeTexture2D(width / 2, height / 2, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
+		pvp.projective_shadowing_buffer->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*pvp.projective_shadowing_tex, 0, 1, 0));
 
 		pvp.lighting_tex = rf.MakeTexture2D(width, height, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
 		pvp.lighting_buffer->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*pvp.lighting_tex, 0, 1, 0));
@@ -801,7 +827,8 @@ namespace KlayGE
 
 		PerViewport& pvp = viewports_[vp_index];
 
-		if ((pass_cat != PC_Lighting) && (pass_cat != PC_IndirectLighting) && (pass_cat != PC_Shading))
+		if ((pass_cat != PC_Shadowing) && (pass_cat != PC_Lighting)
+			&& (pass_cat != PC_IndirectLighting) && (pass_cat != PC_Shading))
 		{
 			typedef KLAYGE_DECLTYPE(visible_scene_objs_) VisibleSceneObjsType;
 			KLAYGE_FOREACH(VisibleSceneObjsType::reference deo, visible_scene_objs_)
@@ -827,6 +854,7 @@ namespace KlayGE
 				{
 					CameraPtr const & camera = pvp.frame_buffer->GetViewport()->camera;
 					pvp.shadowing_buffer->GetViewport()->camera = camera;
+					pvp.projective_shadowing_buffer->GetViewport()->camera = camera;
 
 					if (depth_texture_support_)
 					{
@@ -968,7 +996,7 @@ namespace KlayGE
 			urv = App3DFramework::URV_Flushed;
 			break;
 
-		case PC_Lighting:
+		case PC_Shadowing:
 			{
 				LightSourcePtr const & light = lights_[org_no];
 				LightSource::LightType type = light->Type();
@@ -988,11 +1016,28 @@ namespace KlayGE
 				*light_attrib_param_ = float4(attr & LightSource::LSA_NoDiffuse ? 0.0f : 1.0f,
 					attr & LightSource::LSA_NoSpecular ? 0.0f : 1.0f,
 					attr & LightSource::LSA_NoShadow ? -1.0f : 1.0f, light->ProjectiveTexture() ? 1.0f : -1.0f);
+
+				this->UpdateShadowing(pvp, org_no);
+
+				urv = App3DFramework::URV_Flushed;
+			}
+			break;
+
+		case PC_Lighting:
+			{
+				LightSourcePtr const & light = lights_[org_no];
+				LightSource::LightType type = light->Type();
+				int32_t attr = light->Attrib();
+
+				this->PrepareLightCamera(pvp, light, index_in_pass, pass_type);
+
+				*light_attrib_param_ = float4(attr & LightSource::LSA_NoDiffuse ? 0.0f : 1.0f,
+					attr & LightSource::LSA_NoSpecular ? 0.0f : 1.0f,
+					attr & LightSource::LSA_NoShadow ? -1.0f : 1.0f, light->ProjectiveTexture() ? 1.0f : -1.0f);
 				*light_color_param_ = light->Color();
 				*light_falloff_param_ = light->Falloff();
 
-				this->UpdateShadowing(pvp, org_no);
-				this->UpdateLighting(pvp, type);	
+				this->UpdateLighting(pvp, type, org_no);	
 
 				urv = App3DFramework::URV_Flushed;
 			}
@@ -1093,6 +1138,7 @@ namespace KlayGE
 		uint32_t num_ambient_lights = 0;
 		float3 ambient_clr(0, 0, 0);
 
+		projective_light_index_ = -1;
 		cascaded_shadow_index_ = -1;
 		uint32_t num_sm_2d_lights = 0;
 		uint32_t num_sm_cube_lights = 0;
@@ -1121,7 +1167,15 @@ namespace KlayGE
 							break;
 
 						case LightSource::LT_Spot:
-							if (num_sm_2d_lights < MAX_NUM_SHADOWED_SPOT_LIGHTS)
+							if (projective_light_index_ < 0)
+							{
+								if (light->ProjectiveTexture())
+								{
+									projective_light_index_ = static_cast<int32_t>(i + 1 - num_ambient_lights);
+									sm_light_indices_.push_back(MAX_NUM_SHADOWED_SPOT_LIGHTS);
+								}
+							}
+							if (!light->ProjectiveTexture() && (num_sm_2d_lights < MAX_NUM_SHADOWED_SPOT_LIGHTS))
 							{
 								sm_light_indices_.push_back(num_sm_2d_lights);
 								++ num_sm_2d_lights;
@@ -1129,7 +1183,15 @@ namespace KlayGE
 							break;
 
 						case LightSource::LT_Point:
-							if (num_sm_cube_lights < MAX_NUM_SHADOWED_POINT_LIGHTS)
+							if (projective_light_index_ < 0)
+							{
+								if (light->ProjectiveTexture())
+								{
+									projective_light_index_ = static_cast<int32_t>(i + 1 - num_ambient_lights);
+									sm_light_indices_.push_back(MAX_NUM_SHADOWED_POINT_LIGHTS);
+								}
+							}
+							if (!light->ProjectiveTexture() && (num_sm_cube_lights < MAX_NUM_SHADOWED_POINT_LIGHTS))
 							{
 								sm_light_indices_.push_back(num_sm_cube_lights);
 								++ num_sm_cube_lights;
@@ -1258,6 +1320,15 @@ namespace KlayGE
 
 					if (pvp.g_buffer_enables[i])
 					{
+						for (uint32_t li = 0; li < lights_.size(); ++ li)
+						{
+							LightSourcePtr const & light = lights_[li];
+							if (light->Enabled())
+							{
+								this->AppendShadowingPassScanCode(vpi, i, li);
+							}
+						}
+
 						for (uint32_t li = 0; li < lights_.size(); ++ li)
 						{
 							LightSourcePtr const & light = lights_[li];
@@ -1440,6 +1511,22 @@ namespace KlayGE
 		}
 	}
 
+	void DeferredRenderingLayer::AppendShadowingPassScanCode(uint32_t vp_index, uint32_t g_buffer_index, uint32_t light_index)
+	{
+		PerViewport& pvp = viewports_[vp_index];
+		LightSourcePtr const & light = lights_[light_index];
+		PassTargetBuffer const pass_tb = static_cast<PassTargetBuffer>(g_buffer_index);
+
+		if (pvp.light_visibles[light_index])
+		{
+			if (0 == (light->Attrib() & LightSource::LSA_NoShadow))
+			{
+				pass_scaned_.push_back(this->ComposePassScanCode(vp_index,
+					ComposePassType(PRT_None, pass_tb, PC_Shadowing), light_index, 0));
+			}
+		}
+	}
+	
 	void DeferredRenderingLayer::AppendLightingPassScanCode(uint32_t vp_index, uint32_t g_buffer_index, uint32_t light_index)
 	{
 		PerViewport& pvp = viewports_[vp_index];
@@ -1596,7 +1683,7 @@ namespace KlayGE
 
 				sm_buffer_->GetViewport()->camera = sm_camera;
 
-				if ((LightSource::LT_Sun == type) && (pass_cat != PC_Lighting))
+				if ((LightSource::LT_Sun == type) && (pass_cat != PC_Shadowing) && (pass_cat != PC_Lighting))
 				{
 					curr_cascade_index_ = index_in_pass;
 				}
@@ -1655,7 +1742,7 @@ namespace KlayGE
 					break;
 
 				case LightSource::LT_Point:
-					if (PC_Lighting == pass_cat)
+					if ((PC_Shadowing == pass_cat) || (PC_Lighting == pass_cat))
 					{
 						float4x4 light_model = MathLib::scaling(light_scale, light_scale, light_scale)
 							* MathLib::to_matrix(light->Rotation()) * MathLib::translation(p);
@@ -1845,28 +1932,66 @@ namespace KlayGE
 			}
 		}
 
-		re.BindFrameBuffer(pvp.shadowing_buffer);
-		pvp.shadowing_buffer->Attached(FrameBuffer::ATT_Color0)->ClearColor(Color(1, 1, 1, 1));
+		if (org_no == projective_light_index_)
+		{
+			re.BindFrameBuffer(pvp.projective_shadowing_buffer);
+			pvp.projective_shadowing_buffer->Attached(FrameBuffer::ATT_Color0)->ClearColor(Color(1, 1, 1, 1));
+		}
+		else
+		{
+			re.BindFrameBuffer(pvp.shadowing_buffer);
+			if (light_index <= 0)
+			{
+				pvp.shadowing_buffer->Attached(FrameBuffer::ATT_Color0)->ClearColor(Color(1, 1, 1, 1));
+			}
+		}
 
 		*g_buffer_tex_param_ = pvp.g_buffer_rt0_tex;
 		*depth_tex_param_ = pvp.g_buffer_depth_tex;
 		*inv_width_height_param_ = float2(1.0f / pvp.frame_buffer->GetViewport()->width,
 			1.0f / pvp.frame_buffer->GetViewport()->height);
-		*shadowing_tex_param_ = pvp.shadowing_tex;
 		if (sm_camera)
 		{
 			*esm_scale_factor_param_ = ESM_SCALE_FACTOR / (sm_camera->FarPlane() - sm_camera->NearPlane());
 		}
 
-		if (0 == (light->Attrib() & LightSource::LSA_NoShadow))
+		BOOST_ASSERT(0 == (light->Attrib() & LightSource::LSA_NoShadow));
+
+		RenderTechniquePtr tech;
+		if (org_no == projective_light_index_)
 		{
-			re.Render(*technique_shadows_[type], *light_volume_rl_[type]);
+			tech = technique_shadows_[type][4];
 		}
+		else
+		{
+			tech = technique_shadows_[type][light_index];
+		}
+		re.Render(*tech, *light_volume_rl_[type]);
 	}
 
-	void DeferredRenderingLayer::UpdateLighting(PerViewport const & pvp, LightSource::LightType type)
+	void DeferredRenderingLayer::UpdateLighting(PerViewport const & pvp, LightSource::LightType type, int32_t org_no)
 	{
 		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+
+		LightSourcePtr const & light = lights_[org_no];
+		if (0 == (light->Attrib() & LightSource::LSA_NoShadow))
+		{
+			int32_t light_index = sm_light_indices_[org_no];
+			if (org_no == projective_light_index_)
+			{
+				*projective_shadowing_tex_param_ = pvp.projective_shadowing_tex;
+				*shadowing_channel_param_ = static_cast<int32_t>(4);
+			}
+			else
+			{
+				*shadowing_tex_param_ = pvp.shadowing_tex;
+				*shadowing_channel_param_ = light_index;
+			}
+		}
+		else
+		{
+			*shadowing_channel_param_ = static_cast<int32_t>(-1);
+		}
 
 		re.BindFrameBuffer(pvp.lighting_buffer);
 		// Clear stencil to 0 with write mask

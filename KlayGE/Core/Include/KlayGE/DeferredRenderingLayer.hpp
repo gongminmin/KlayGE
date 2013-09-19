@@ -75,6 +75,9 @@ namespace KlayGE
 		FrameBufferPtr shadowing_buffer;
 		TexturePtr shadowing_tex;
 
+		FrameBufferPtr projective_shadowing_buffer;
+		TexturePtr projective_shadowing_tex;
+
 		FrameBufferPtr shading_buffer;
 		TexturePtr shading_tex;
 
@@ -215,6 +218,7 @@ namespace KlayGE
 		void AppendGBufferPassScanCode(uint32_t vp_index, uint32_t g_buffer_index);
 		void AppendShadowPassScanCode(uint32_t light_index);
 		void AppendCascadedShadowPassScanCode(uint32_t vp_index, uint32_t light_index);
+		void AppendShadowingPassScanCode(uint32_t vp_index, uint32_t g_buffer_index, uint32_t light_index);
 		void AppendLightingPassScanCode(uint32_t vp_index, uint32_t g_buffer_index, uint32_t light_index);
 		void AppendShadingPassScanCode(uint32_t vp_index, uint32_t g_buffer_index);
 		void PreparePVP(PerViewport& pvp);
@@ -226,7 +230,7 @@ namespace KlayGE
 			int32_t index_in_pass, PassType pass_type);
 		void PostGenerateShadowMap(PerViewport const & pvp, int32_t org_no, int32_t index_in_pass);
 		void UpdateShadowing(PerViewport const & pvp, int32_t org_no);
-		void UpdateLighting(PerViewport const & pvp, LightSource::LightType type);
+		void UpdateLighting(PerViewport const & pvp, LightSource::LightType type, int32_t org_no);
 		void UpdateIndirectAndSSVO(PerViewport const & pvp);
 		void UpdateShading(PerViewport const & pvp, uint32_t g_buffer_index);
 		void MergeShadingAndDepth(PerViewport const & pvp, uint32_t g_buffer_index);
@@ -269,7 +273,7 @@ namespace KlayGE
 
 		std::vector<uint32_t> pass_scaned_;
 
-		array<RenderTechniquePtr, LightSource::LT_NumLightTypes> technique_shadows_;
+		array<array<RenderTechniquePtr, 5>, LightSource::LT_NumLightTypes> technique_shadows_;
 		array<RenderTechniquePtr, LightSource::LT_NumLightTypes> technique_lights_;
 		RenderTechniquePtr technique_light_depth_only_;
 		RenderTechniquePtr technique_light_stencil_;
@@ -284,14 +288,15 @@ namespace KlayGE
 		static uint32_t const MAX_NUM_SHADOWED_SPOT_LIGHTS = 4;
 		static uint32_t const MAX_NUM_SHADOWED_POINT_LIGHTS = 1;
 
+		int32_t projective_light_index_;
 		std::vector<int32_t> sm_light_indices_;
 		FrameBufferPtr sm_buffer_;
 		TexturePtr sm_tex_;
 		TexturePtr sm_depth_tex_;
 		FrameBufferPtr cascaded_sm_buffer_;
 		TexturePtr cascaded_sm_tex_;
-		array<TexturePtr, MAX_NUM_SHADOWED_SPOT_LIGHTS> blur_sm_2d_texs_;
-		array<TexturePtr, MAX_NUM_SHADOWED_POINT_LIGHTS> blur_sm_cube_texs_;
+		array<TexturePtr, MAX_NUM_SHADOWED_SPOT_LIGHTS + 1> blur_sm_2d_texs_;
+		array<TexturePtr, MAX_NUM_SHADOWED_POINT_LIGHTS + 1> blur_sm_cube_texs_;
 
 		PostProcessPtr sm_filter_pp_;
 		PostProcessPtr depth_to_esm_pp_;
@@ -318,6 +323,8 @@ namespace KlayGE
 		RenderEffectParameterPtr shadow_map_cube_tex_param_;
 		RenderEffectParameterPtr inv_width_height_param_;
 		RenderEffectParameterPtr shadowing_tex_param_;
+		RenderEffectParameterPtr projective_shadowing_tex_param_;
+		RenderEffectParameterPtr shadowing_channel_param_;
 		RenderEffectParameterPtr esm_scale_factor_param_;
 		RenderEffectParameterPtr near_q_param_;
 		RenderEffectParameterPtr cascade_intervals_param_;

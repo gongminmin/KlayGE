@@ -36,6 +36,7 @@ namespace KlayGE
 		PC_Depth = 0,
 		PC_GBuffer,
 		PC_ShadowMap,
+		PC_Shadowing,
 		PC_Lighting,
 		PC_IndirectLighting,
 		PC_Shading,
@@ -94,6 +95,8 @@ namespace KlayGE
 		PT_GenCascadedShadowMap = MakePassType<PRT_CascadedShadowMap, PTB_None, PC_ShadowMap>::value,
 		PT_GenReflectiveShadowMap = MakePassType<PRT_ReflectiveShadowMap, PTB_None, PC_ShadowMap>::value,
 		
+		PT_Shadowing = MakePassType<PRT_None, PTB_None, PC_Shadowing>::value,
+
 		PT_Lighting = MakePassType<PRT_None, PTB_None, PC_Lighting>::value,
 		
 		PT_IndirectLighting = MakePassType<PRT_None, PTB_None, PC_IndirectLighting>::value,

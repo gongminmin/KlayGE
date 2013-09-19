@@ -42,6 +42,8 @@
 	<parameter type="textureCUBE" name="projective_map_cube_tex"/>
 
 	<parameter type="texture2D" name="shadowing_tex"/>
+	<parameter type="texture2D" name="projective_shadowing_tex"/>
+	<parameter type="int" name="shadowing_channel"/>
 
 	<parameter type="sampler" name="linear_sampler">
 		<state name="filtering" value="min_mag_linear_mip_point"/>
@@ -212,11 +214,25 @@ float4 NearestDepthUpsamplingShadow(float2 tc)
 	float3 ndus = NearestDepthUpsampling(tc0, float4(z00, z10, z01, z11), z_full, l1_inv_width_height, threshold);
 	if (ndus.z > 0)
 	{
-		return shadowing_tex.Sample(linear_sampler, tc);
+		if (shadowing_channel < 4)
+		{
+			return shadowing_tex.Sample(linear_sampler, tc)[shadowing_channel];
+		}
+		else
+		{
+			return projective_shadowing_tex.Sample(linear_sampler, tc);
+		}
 	}
 	else
 	{
-		return shadowing_tex.Sample(point_sampler, ndus.xy);
+		if (shadowing_channel < 4)
+		{
+			return shadowing_tex.Sample(point_sampler, ndus.xy)[shadowing_channel];
+		}
+		else
+		{
+			return projective_shadowing_tex.Sample(point_sampler, ndus.xy);
+		}
 	}
 }
 
@@ -276,7 +292,11 @@ float4 DeferredRenderingPointPS(
 	if (n_dot_l > 0)
 	{
 		float spec = roughness_term(normalize(dir - view_dir), normal, GetShininess(ndc)).x;
-		float3 shadow = NearestDepthUpsamplingShadow(tc).xyz;
+		float3 shadow = 1;
+		if (shadowing_channel >= 0)
+		{
+			shadow = NearestDepthUpsamplingShadow(tc).xyz;
+		}
 		float atten = attenuation_term(light_pos_es.xyz, pos_es.xyz, light_falloff);
 		final_clr = CalcColor(n_dot_l, spec, atten, shadow);
 	}
@@ -311,7 +331,11 @@ float4 DeferredRenderingSpotPS(
 		if (n_dot_l > 0)
 		{
 			float spec = roughness_term(normalize(dir - view_dir), normal, GetShininess(ndc)).x;
-			float3 shadow = NearestDepthUpsamplingShadow(tc).xyz;
+			float3 shadow = 1;
+			if (shadowing_channel >= 0)
+			{
+				shadow = NearestDepthUpsamplingShadow(tc).xyz;
+			}
 			float atten = spot * attenuation_term(light_pos_es.xyz, pos_es.xyz, light_falloff);
 			final_clr = CalcColor(n_dot_l, spec, atten, shadow);
 		}
@@ -343,7 +367,11 @@ float4 DeferredRenderingSunPS(
 	if (n_dot_l > 0)
 	{
 		float spec = roughness_term(normalize(dir - view_dir), normal, GetShininess(ndc)).x;
-		float shadow = NearestDepthUpsamplingShadow(tc).x;
+		float shadow = 1;
+		if (shadowing_channel >= 0)
+		{
+			shadow = NearestDepthUpsamplingShadow(tc).x;
+		}
 		final_clr = CalcColor(n_dot_l, spec, 1, shadow);
 	}
 
@@ -451,16 +479,6 @@ float4 DeferredShadowingSunPS(
 	float3 pos_es = view_dir * (depth_tex.Sample(point_sampler, tc).r / view_dir.z);
 	float len = dot(float4(pos_es, 1), view_z_to_light_view);
 	return ESM_Sun(pos_es, len);
-}
-
-float4 DeferredShadowingDirectionalPS() : SV_Target
-{
-	return 1;
-}
-
-float4 DeferredShadowingAmbientPS() : SV_Target
-{
-	return 1;
 }
 		]]>
 	</shader>
@@ -588,10 +606,50 @@ float4 DeferredShadowingAmbientPS() : SV_Target
 			<state name="pixel_shader" value="DeferredShadowingPointPS()"/>
 		</pass>
 	</technique>
+	<technique name="DeferredShadowingPointR" inherit="DeferredShadowingPoint">
+		<pass name="p0">
+			<state name="color_write_mask" value="1"/>
+		</pass>
+	</technique>
+	<technique name="DeferredShadowingPointG" inherit="DeferredShadowingPoint">
+		<pass name="p0">
+			<state name="color_write_mask" value="2"/>
+		</pass>
+	</technique>
+	<technique name="DeferredShadowingPointB" inherit="DeferredShadowingPoint">
+		<pass name="p0">
+			<state name="color_write_mask" value="4"/>
+		</pass>
+	</technique>
+	<technique name="DeferredShadowingPointA" inherit="DeferredShadowingPoint">
+		<pass name="p0">
+			<state name="color_write_mask" value="8"/>
+		</pass>
+	</technique>
 
 	<technique name="DeferredShadowingSpot" inherit="DeferredShadowingPoint">
 		<pass name="p0">
 			<state name="pixel_shader" value="DeferredShadowingSpotPS()"/>
+		</pass>
+	</technique>
+	<technique name="DeferredShadowingSpotR" inherit="DeferredShadowingSpot">
+		<pass name="p0">
+			<state name="color_write_mask" value="1"/>
+		</pass>
+	</technique>
+	<technique name="DeferredShadowingSpotG" inherit="DeferredShadowingSpot">
+		<pass name="p0">
+			<state name="color_write_mask" value="2"/>
+		</pass>
+	</technique>
+	<technique name="DeferredShadowingSpotB" inherit="DeferredShadowingSpot">
+		<pass name="p0">
+			<state name="color_write_mask" value="4"/>
+		</pass>
+	</technique>
+	<technique name="DeferredShadowingSpotA" inherit="DeferredShadowingSpot">
+		<pass name="p0">
+			<state name="color_write_mask" value="8"/>
 		</pass>
 	</technique>
 
@@ -600,16 +658,24 @@ float4 DeferredShadowingAmbientPS() : SV_Target
 			<state name="pixel_shader" value="DeferredShadowingSunPS()"/>
 		</pass>
 	</technique>
-
-	<technique name="DeferredShadowingDirectional" inherit="DeferredShadowingPoint">
+	<technique name="DeferredShadowingSunR" inherit="DeferredShadowingSun">
 		<pass name="p0">
-			<state name="pixel_shader" value="DeferredShadowingDirectionalPS()"/>
+			<state name="color_write_mask" value="1"/>
 		</pass>
 	</technique>
-
-	<technique name="DeferredShadowingAmbient" inherit="DeferredShadowingPoint">
+	<technique name="DeferredShadowingSunG" inherit="DeferredShadowingSunR">
 		<pass name="p0">
-			<state name="pixel_shader" value="DeferredShadowingAmbientPS()"/>
+			<state name="color_write_mask" value="2"/>
+		</pass>
+	</technique>
+	<technique name="DeferredShadowingSunB" inherit="DeferredShadowingSunR">
+		<pass name="p0">
+			<state name="color_write_mask" value="4"/>
+		</pass>
+	</technique>
+	<technique name="DeferredShadowingSunA" inherit="DeferredShadowingSunR">
+		<pass name="p0">
+			<state name="color_write_mask" value="8"/>
 		</pass>
 	</technique>
 
