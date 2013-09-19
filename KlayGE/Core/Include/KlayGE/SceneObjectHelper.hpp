@@ -59,7 +59,7 @@ namespace KlayGE
 		SceneObjectLightSourceProxy(LightSourcePtr const & light,
 			function<StaticMeshPtr(RenderModelPtr const &, std::wstring const &)> CreateMeshFactoryFunc);
 
-		virtual void SubThreadUpdate(float app_time, float elapsed_time) KLAYGE_OVERRIDE;
+		virtual void MainThreadUpdate(float app_time, float elapsed_time) KLAYGE_OVERRIDE;
 
 		void Scaling(float x, float y, float z);
 		void Scaling(float3 const & s);

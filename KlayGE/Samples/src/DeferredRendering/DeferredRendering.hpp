@@ -66,6 +66,7 @@ private:
 	int id_ctrl_camera_;
 
 	KlayGE::SpotLightSourcePtr spot_light_[3];
+	std::vector<KlayGE::LightSourcePtr> particle_lights_;
 
 	size_t num_objs_rendered_;
 	size_t num_renderable_rendered_;

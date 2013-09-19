@@ -79,49 +79,15 @@ float4 LightSourceProxyPS(float3 pos_os : TEXCOORD0, float3 normal : TEXCOORD1) 
 void LightSourceProxySpecialShadingVS(float4 pos : POSITION,
 			float2 texcoord : TEXCOORD0,
 			float4 tangent_quat : TANGENT,
-			out float2 oTexCoord : TEXCOORD0,
-#ifdef NOPERSPECTIVE_SUPPORT
-			out noperspective float2 oTc : TEXCOORD1,
-#else
-			out float3 oTc : TEXCOORD1,
-#endif
-			out float3 oViewDir : TEXCOORD2,
-			out float3 oNormal : TEXCOORD3,
-			out float3 oPosOS : TEXCOORD4,
+			out float3 oPosOS : TEXCOORD0,
 			out float4 oPos : SV_Position)
 {
 	pos = float4(pos.xyz * pos_extent + pos_center, 1);
-	texcoord = texcoord * tc_extent + tc_center;
-	
 	oPos = mul(pos, mvp);
-	oTexCoord = texcoord;
-	
-	oViewDir = -mul(pos, model_view).xyz;
-	
-	tangent_quat = tangent_quat * 2 - 1;
-	oNormal = mul(transform_quat(float3(0, 0, 1), tangent_quat), (float3x3)model_view);
-	
 	oPosOS = pos.xyz;
-
-	oTc.xy = oPos.xy / oPos.w;
-	oTc.y *= KLAYGE_FLIPPING;
-	oTc.xy = oTc.xy * 0.5f + 0.5f;
-
-#ifndef NOPERSPECTIVE_SUPPORT
-	oTc.z = oPos.w;
-	oTc.xy *= oTc.z;
-#endif
 }
 
-float4 LightSourceProxySpecialShadingPS(float2 texcoord : TEXCOORD0,
-#ifdef NOPERSPECTIVE_SUPPORT
-	noperspective float2 tc : TEXCOORD1,
-#else
-	float3 tc_w : TEXCOORD1,
-#endif
-	float3 view_dir : TEXCOORD2, float3 normal : TEXCOORD3,
-	float3 pos_os : TEXCOORD4
-	) : SV_Target
+float4 LightSourceProxySpecialShadingPS(float3 pos_os : TEXCOORD0) : SV_Target
 {
 	float4 clr = light_color;
 	if (light_is_projective.x)

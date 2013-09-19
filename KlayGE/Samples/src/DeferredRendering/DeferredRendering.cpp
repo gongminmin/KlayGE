@@ -246,6 +246,19 @@ void DeferredRenderingApp::InitObjects()
 	spot_light_src_[2] = MakeSharedPtr<SceneObjectLightSourceProxy>(spot_light_[2]);
 	spot_light_src_[2]->AddToSceneManager();
 
+	particle_lights_.resize(128);
+	for (size_t i = 0; i < particle_lights_.size(); ++ i)
+	{
+		particle_lights_[i] = MakeSharedPtr<PointLightSource>();
+		particle_lights_[i]->Attrib(LightSource::LSA_NoShadow);
+		particle_lights_[i]->Falloff(float3(1, 0, 1));
+		particle_lights_[i]->AddToSceneManager();
+
+		SceneObjectPtr particle_light_src = MakeSharedPtr<SceneObjectLightSourceProxy>(particle_lights_[i]);
+		checked_pointer_cast<SceneObjectLightSourceProxy>(particle_light_src)->Scaling(0.1f, 0.1f, 0.1f);
+		particle_light_src->AddToSceneManager();
+	}
+
 	fpcController_.Scalers(0.05f, 0.5f);
 
 	InputEngine& inputEngine(Context::Instance().InputFactoryInstance().InputEngineInstance());
@@ -480,6 +493,17 @@ uint32_t DeferredRenderingApp::DoUpdate(uint32_t pass)
 
 				++ loading_percentage_;
 			}
+		}
+		
+		for (uint32_t i = 0; i < particle_lights_.size(); ++ i)
+		{
+			float3 clr = MathLib::normalize(float3(sin(this->AppTime() + i * 0.1f),
+				sin(this->AppTime() + 0.5f + i * 0.2f),
+				sin(this->AppTime() + 1.0f + i * 0.3f))) * 0.5f + 0.5f;
+			particle_lights_[i]->Color(clr);
+			float factor = 50.0f / particle_lights_.size() + (this->AppTime() * 0.1f);
+			particle_lights_[i]->Position(float3(5 * sin(factor * i),
+				5.0f + 10.0f / particle_lights_.size() * i, 5 * cos(factor * i)));
 		}
 	}
 	else if (14 == pass)

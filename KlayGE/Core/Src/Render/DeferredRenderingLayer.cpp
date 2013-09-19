@@ -1283,13 +1283,28 @@ namespace KlayGE
 		PerViewport& pvp = viewports_[vp_index];
 		LightSourcePtr const & light = lights_[light_index];
 
+		const float4 RGB_TO_LUM(0.2126f, 0.7152f, 0.0722f, 0);
+		float lum = MathLib::dot(light->Color(), RGB_TO_LUM);
+		float3 const & falloff = light->Falloff();
+		float d;
+		if (abs(falloff.z()) < 1e-6f)
+		{
+			d = abs(falloff.y()) < 1e-6f ? 1 : -(falloff.x() - lum * 255) / falloff.y();
+		}
+		else
+		{
+			float delta = falloff.y() * falloff.y() - 4 * falloff.z() * (falloff.x() - lum * 255);
+			d = delta < 0 ? 1 : (-falloff.y() + sqrt(delta)) / (2 * falloff.z());
+		}
+		float light_scale = d * 0.01f * light_scale_;
+
 		switch (light->Type())
 		{
 		case LightSource::LT_Spot:
 			{
 				float4x4 const & inv_light_view = light->SMCamera(0)->InverseViewMatrix();
 				float const scale = light->CosOuterInner().w();
-				float4x4 mat = MathLib::scaling(scale * light_scale_, scale * light_scale_, light_scale_);
+				float4x4 mat = MathLib::scaling(scale * light_scale, scale * light_scale, light_scale);
 				float4x4 light_model = mat * inv_light_view;
 				pvp.light_visibles[light_index] = scene_mgr.OBBVisible(MathLib::transform_obb(cone_obb_, light_model));
 			}
@@ -1298,7 +1313,7 @@ namespace KlayGE
 		case LightSource::LT_Point:
 			{
 				float3 const & p = light->Position();
-				float4x4 light_model = MathLib::scaling(light_scale_, light_scale_, light_scale_)
+				float4x4 light_model = MathLib::scaling(light_scale, light_scale, light_scale)
 					* MathLib::translation(p);
 				pvp.light_visibles[light_index] = scene_mgr.OBBVisible(MathLib::transform_obb(box_obb_, light_model));
 			}
@@ -1611,6 +1626,20 @@ namespace KlayGE
 				float3 loc_es = MathLib::transform_coord(p, pvp.view);
 				float4 light_pos_es_actived = float4(loc_es.x(), loc_es.y(), loc_es.z(), 1);
 
+				const float4 RGB_TO_LUM(0.2126f, 0.7152f, 0.0722f, 0);
+				float lum = MathLib::dot(light->Color(), RGB_TO_LUM);
+				float3 const & falloff = light->Falloff();
+				float d;
+				if (abs(falloff.z()) < 1e-6f)
+				{
+					d = abs(falloff.y()) < 1e-6f ? 1 : -(falloff.x() - lum * 255) / falloff.y();
+				}
+				else
+				{
+					float delta = falloff.y() * falloff.y() - 4 * falloff.z() * (falloff.x() - lum * 255);
+					d = delta < 0 ? 1 : (-falloff.y() + sqrt(delta)) / (2 * falloff.z());
+				}
+				float light_scale = d * 0.01f * light_scale_;
 				switch (type)
 				{
 				case LightSource::LT_Spot:
@@ -1619,7 +1648,7 @@ namespace KlayGE
 						light_dir_es_actived.w() = light->CosOuterInner().y();
 
 						float const scale = light->CosOuterInner().w();
-						float4x4 light_model = MathLib::scaling(scale * light_scale_, scale * light_scale_, light_scale_);
+						float4x4 light_model = MathLib::scaling(scale * light_scale, scale * light_scale, light_scale);
 						*light_volume_mv_param_ = light_model * light_to_view;
 						*light_volume_mvp_param_ = light_model * light_to_proj;
 					}
@@ -1628,7 +1657,7 @@ namespace KlayGE
 				case LightSource::LT_Point:
 					if (PC_Lighting == pass_cat)
 					{
-						float4x4 light_model = MathLib::scaling(light_scale_, light_scale_, light_scale_)
+						float4x4 light_model = MathLib::scaling(light_scale, light_scale, light_scale)
 							* MathLib::to_matrix(light->Rotation()) * MathLib::translation(p);
 						*light_volume_mv_param_ = light_model * pvp.view;
 						*light_volume_mvp_param_ = light_model * pvp.view * pvp.proj;

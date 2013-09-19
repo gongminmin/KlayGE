@@ -98,7 +98,7 @@ namespace KlayGE
 		this->Init(light, CreateMeshFactoryFunc);
 	}
 
-	void SceneObjectLightSourceProxy::SubThreadUpdate(float /*app_time*/, float /*elapsed_time*/)
+	void SceneObjectLightSourceProxy::MainThreadUpdate(float /*app_time*/, float /*elapsed_time*/)
 	{
 		model_ = model_scaling_ * MathLib::to_matrix(light_->Rotation()) * MathLib::translation(light_->Position());
 		if (LightSource::LT_Spot == light_->Type())
