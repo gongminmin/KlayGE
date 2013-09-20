@@ -867,6 +867,13 @@ namespace KlayGE
 
 					*depth_near_far_invfar_param_ = pvp.depth_near_far_invfar;
 
+					*g_buffer_tex_param_ = pvp.g_buffer_rt0_tex;
+					*depth_tex_param_ = pvp.g_buffer_depth_tex;
+					*inv_width_height_param_ = float2(1.0f / pvp.frame_buffer->GetViewport()->width,
+						1.0f / pvp.frame_buffer->GetViewport()->height);
+					*shadowing_tex_param_ = pvp.shadowing_tex;
+					*projective_shadowing_tex_param_ = pvp.projective_shadowing_tex;
+
 					this->GenerateGBuffer(pvp, pass_tb);
 				}
 				else
@@ -1965,10 +1972,6 @@ namespace KlayGE
 			}
 		}
 
-		*g_buffer_tex_param_ = pvp.g_buffer_rt0_tex;
-		*depth_tex_param_ = pvp.g_buffer_depth_tex;
-		*inv_width_height_param_ = float2(1.0f / pvp.frame_buffer->GetViewport()->width,
-			1.0f / pvp.frame_buffer->GetViewport()->height);
 		if (sm_camera)
 		{
 			*esm_scale_factor_param_ = ESM_SCALE_FACTOR / (sm_camera->FarPlane() - sm_camera->NearPlane());
@@ -1982,23 +1985,16 @@ namespace KlayGE
 		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 
 		LightSourcePtr const & light = lights_[org_no];
+		int32_t shadowing_channel;
 		if (0 == (light->Attrib() & LightSource::LSA_NoShadow))
 		{
-			int32_t shadowing_channel = sm_light_indices_[org_no].second;
-			if (org_no == projective_light_index_)
-			{
-				*projective_shadowing_tex_param_ = pvp.projective_shadowing_tex;
-			}
-			else
-			{
-				*shadowing_tex_param_ = pvp.shadowing_tex;
-			}
-			*shadowing_channel_param_ = shadowing_channel;
+			shadowing_channel = sm_light_indices_[org_no].second;
 		}
 		else
 		{
-			*shadowing_channel_param_ = static_cast<int32_t>(-1);
+			shadowing_channel = -1;
 		}
+		*shadowing_channel_param_ = shadowing_channel;
 
 		re.BindFrameBuffer(pvp.lighting_buffer);
 		// Clear stencil to 0 with write mask
