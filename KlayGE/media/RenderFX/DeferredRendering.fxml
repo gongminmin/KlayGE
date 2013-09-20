@@ -367,10 +367,10 @@ float4 DeferredRenderingSunPS(
 	if (n_dot_l > 0)
 	{
 		float spec = roughness_term(normalize(dir - view_dir), normal, GetShininess(ndc)).x;
-		float shadow = 1;
+		float3 shadow = 1;
 		if (shadowing_channel >= 0)
 		{
-			shadow = NearestDepthUpsamplingShadow(tc).x;
+			shadow = NearestDepthUpsamplingShadow(tc).xyz;
 		}
 		final_clr = CalcColor(n_dot_l, spec, 1, shadow);
 	}

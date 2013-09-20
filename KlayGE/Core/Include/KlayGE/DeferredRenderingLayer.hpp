@@ -285,11 +285,12 @@ namespace KlayGE
 		RenderTechniquePtr technique_copy_shading_depth_;
 		RenderTechniquePtr technique_copy_depth_;
 
+		static uint32_t const MAX_NUM_SHADOWED_LIGHTS = 4;
 		static uint32_t const MAX_NUM_SHADOWED_SPOT_LIGHTS = 4;
 		static uint32_t const MAX_NUM_SHADOWED_POINT_LIGHTS = 1;
 
 		int32_t projective_light_index_;
-		std::vector<int32_t> sm_light_indices_;
+		std::vector<std::pair<int32_t, uint32_t> > sm_light_indices_;
 		FrameBufferPtr sm_buffer_;
 		TexturePtr sm_tex_;
 		TexturePtr sm_depth_tex_;

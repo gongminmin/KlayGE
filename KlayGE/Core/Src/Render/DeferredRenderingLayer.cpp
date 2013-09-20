@@ -1132,7 +1132,7 @@ namespace KlayGE
 		sm_light_indices_.clear();
 
 		lights_.push_back(MakeSharedPtr<AmbientLightSource>());
-		sm_light_indices_.push_back(-1);
+		sm_light_indices_.push_back(std::make_pair(-1, 0));
 
 		uint32_t const num_lights = scene_mgr.NumLights();
 		uint32_t num_ambient_lights = 0;
@@ -1140,6 +1140,7 @@ namespace KlayGE
 
 		projective_light_index_ = -1;
 		cascaded_shadow_index_ = -1;
+		uint32_t num_sm_lights = 0;
 		uint32_t num_sm_2d_lights = 0;
 		uint32_t num_sm_cube_lights = 0;
 		for (uint32_t i = 0; i < num_lights; ++ i)
@@ -1162,7 +1163,8 @@ namespace KlayGE
 						switch (light->Type())
 						{
 						case LightSource::LT_Sun:
-							sm_light_indices_.push_back(-1);
+							sm_light_indices_.push_back(std::make_pair(0, num_sm_lights));
+							++ num_sm_lights;
 							cascaded_shadow_index_ = static_cast<int32_t>(i + 1 - num_ambient_lights);
 							break;
 
@@ -1172,13 +1174,20 @@ namespace KlayGE
 								if (light->ProjectiveTexture())
 								{
 									projective_light_index_ = static_cast<int32_t>(i + 1 - num_ambient_lights);
-									sm_light_indices_.push_back(MAX_NUM_SHADOWED_SPOT_LIGHTS);
+									sm_light_indices_.push_back(std::make_pair(0, 4));
 								}
 							}
-							if (!light->ProjectiveTexture() && (num_sm_2d_lights < MAX_NUM_SHADOWED_SPOT_LIGHTS))
+							if (!light->ProjectiveTexture()
+								&& (num_sm_2d_lights < MAX_NUM_SHADOWED_SPOT_LIGHTS)
+								&& (num_sm_lights < MAX_NUM_SHADOWED_LIGHTS))
 							{
-								sm_light_indices_.push_back(num_sm_2d_lights);
+								sm_light_indices_.push_back(std::make_pair(num_sm_2d_lights, num_sm_lights));
 								++ num_sm_2d_lights;
+								++ num_sm_lights;
+							}
+							else
+							{
+								sm_light_indices_.push_back(std::make_pair(-1, 0));
 							}
 							break;
 
@@ -1188,24 +1197,31 @@ namespace KlayGE
 								if (light->ProjectiveTexture())
 								{
 									projective_light_index_ = static_cast<int32_t>(i + 1 - num_ambient_lights);
-									sm_light_indices_.push_back(MAX_NUM_SHADOWED_POINT_LIGHTS);
+									sm_light_indices_.push_back(std::make_pair(0, 4));
 								}
 							}
-							if (!light->ProjectiveTexture() && (num_sm_cube_lights < MAX_NUM_SHADOWED_POINT_LIGHTS))
+							if (!light->ProjectiveTexture()
+								&& (num_sm_cube_lights < MAX_NUM_SHADOWED_POINT_LIGHTS)
+								&& (num_sm_lights < MAX_NUM_SHADOWED_LIGHTS))
 							{
-								sm_light_indices_.push_back(num_sm_cube_lights);
+								sm_light_indices_.push_back(std::make_pair(num_sm_cube_lights, num_sm_lights));
 								++ num_sm_cube_lights;
+								++ num_sm_lights;
+							}
+							else
+							{
+								sm_light_indices_.push_back(std::make_pair(-1, 0));
 							}
 							break;
 
 						default:
-							sm_light_indices_.push_back(-1);
+							sm_light_indices_.push_back(std::make_pair(-1, 0));
 							break;
 						}
 					}
 					else
 					{
-						sm_light_indices_.push_back(-1);
+						sm_light_indices_.push_back(std::make_pair(-1, 0));
 					}
 				}
 			}
@@ -1842,11 +1858,11 @@ namespace KlayGE
 			sm_filter_pp_->InputPin(0, sm_tex_);
 			if (LightSource::LT_Point == type)
 			{
-				sm_filter_pp_->OutputPin(0, blur_sm_cube_texs_[sm_light_indices_[org_no]], 0, 0, index_in_pass - 1);
+				sm_filter_pp_->OutputPin(0, blur_sm_cube_texs_[sm_light_indices_[org_no].first], 0, 0, index_in_pass - 1);
 			}
 			else 
 			{
-				sm_filter_pp_->OutputPin(0, blur_sm_2d_texs_[sm_light_indices_[org_no]]);
+				sm_filter_pp_->OutputPin(0, blur_sm_2d_texs_[sm_light_indices_[org_no].first]);
 			}
 		}
 		checked_pointer_cast<LogGaussianBlurPostProcess>(sm_filter_pp_)->ESMScaleFactor(ESM_SCALE_FACTOR,
@@ -1877,7 +1893,10 @@ namespace KlayGE
 		CameraPtr sm_camera;
 		LightSource::LightType type = light->Type();
 
-		int32_t light_index = sm_light_indices_[org_no];
+		BOOST_ASSERT(0 == (light->Attrib() & LightSource::LSA_NoShadow));
+
+		int32_t light_index = sm_light_indices_[org_no].first;
+		int32_t shadowing_channel = sm_light_indices_[org_no].second;
 		if (((light_index >= 0) && (0 == (light->Attrib() & LightSource::LSA_NoShadow)))
 			|| (LightSource::LT_Sun == type))
 		{
@@ -1940,7 +1959,7 @@ namespace KlayGE
 		else
 		{
 			re.BindFrameBuffer(pvp.shadowing_buffer);
-			if (light_index <= 0)
+			if (shadowing_channel <= 0)
 			{
 				pvp.shadowing_buffer->Attached(FrameBuffer::ATT_Color0)->ClearColor(Color(1, 1, 1, 1));
 			}
@@ -1955,18 +1974,7 @@ namespace KlayGE
 			*esm_scale_factor_param_ = ESM_SCALE_FACTOR / (sm_camera->FarPlane() - sm_camera->NearPlane());
 		}
 
-		BOOST_ASSERT(0 == (light->Attrib() & LightSource::LSA_NoShadow));
-
-		RenderTechniquePtr tech;
-		if (org_no == projective_light_index_)
-		{
-			tech = technique_shadows_[type][4];
-		}
-		else
-		{
-			tech = technique_shadows_[type][light_index];
-		}
-		re.Render(*tech, *light_volume_rl_[type]);
+		re.Render(*technique_shadows_[type][shadowing_channel], *light_volume_rl_[type]);
 	}
 
 	void DeferredRenderingLayer::UpdateLighting(PerViewport const & pvp, LightSource::LightType type, int32_t org_no)
@@ -1976,17 +1984,16 @@ namespace KlayGE
 		LightSourcePtr const & light = lights_[org_no];
 		if (0 == (light->Attrib() & LightSource::LSA_NoShadow))
 		{
-			int32_t light_index = sm_light_indices_[org_no];
+			int32_t shadowing_channel = sm_light_indices_[org_no].second;
 			if (org_no == projective_light_index_)
 			{
 				*projective_shadowing_tex_param_ = pvp.projective_shadowing_tex;
-				*shadowing_channel_param_ = static_cast<int32_t>(4);
 			}
 			else
 			{
 				*shadowing_tex_param_ = pvp.shadowing_tex;
-				*shadowing_channel_param_ = light_index;
 			}
+			*shadowing_channel_param_ = shadowing_channel;
 		}
 		else
 		{
