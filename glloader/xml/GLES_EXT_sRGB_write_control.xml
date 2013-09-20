@@ -1,0 +1,7 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GLES_EXT_sRGB_write_control" reg_no="153">
+	<tokens>
+		<token name="GL_FRAMEBUFFER_SRGB_EXT" value="0x8DB9"/>
+	</tokens>
+</gl_extension>

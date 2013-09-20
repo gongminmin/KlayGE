@@ -1,0 +1,4 @@
+<?xml version='1.0'?>
+
+<gl_extension name="EGL_KHR_get_all_proc_addresses" reg_no="61">
+</gl_extension>

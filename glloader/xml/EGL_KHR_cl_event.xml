@@ -1,0 +1,9 @@
+<?xml version='1.0'?>
+
+<gl_extension name="EGL_KHR_cl_event" reg_no="60">
+	<tokens>
+		<token name="EGL_CL_EVENT_HANDLE_KHR" value="0x309C"/>
+		<token name="EGL_SYNC_CL_EVENT_KHR" value="0x30FE"/>
+		<token name="EGL_SYNC_CL_EVENT_COMPLETE_KHR" value="0x30FF"/>
+	</tokens>
+</gl_extension>

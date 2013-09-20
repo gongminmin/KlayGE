@@ -1,10 +1,14 @@
 <?xml version='1.0'?>
 
-<gl_extension name="GLES_EXT_texture_compression_s3tc">
+<gl_extension name="GLES_EXT_texture_compression_s3tc" reg_no="154">
 	<tokens>
 		<token name="GL_COMPRESSED_RGB_S3TC_DXT1_EXT" value="0x83F0"/>
 		<token name="GL_COMPRESSED_RGBA_S3TC_DXT1_EXT" value="0x83F1"/>
 		<token name="GL_COMPRESSED_RGBA_S3TC_DXT3_EXT" value="0x83F2"/>
 		<token name="GL_COMPRESSED_RGBA_S3TC_DXT5_EXT" value="0x83F3"/>
 	</tokens>
+	
+	<additionals>
+		<ext name="GLES_NV_texture_compression_s3tc"/>
+	</additionals>
 </gl_extension>

@@ -1,6 +1,6 @@
 <?xml version='1.0'?>
 
-<gl_extension name="GLES_NV_texture_compression_s3tc" reg_no="128">
+<gl_extension name="GLES_NV_texture_compression_s3tc" reg_no="128" prefer="GLES_EXT_texture_compression_s3tc">
 	<tokens>
 		<token name="GL_COMPRESSED_RGB_S3TC_DXT1_EXT" value="0x83F0"/>
 		<token name="GL_COMPRESSED_RGBA_S3TC_DXT1_EXT" value="0x83F1"/>

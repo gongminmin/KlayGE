@@ -1,11 +1,17 @@
 <?xml version='1.0'?>
 
-<gl_extension name="GLES_ANGLE_instanced_arrays" reg_no="109">
+<gl_extension name="GLES_ANGLE_instanced_arrays" reg_no="109" prefer="GLES_EXT_instanced_arrays">
 	<tokens>
 		<token name="GL_VERTEX_ATTRIB_ARRAY_DIVISOR_ANGLE" value="0x88FE"/>
 	</tokens>
 
 	<functions>
+		<function name="glVertexAttribDivisorANGLE" return="void">
+			<params>
+				<param type="GLuint" name="index"/>
+				<param type="GLuint" name="divisor"/>
+			</params>
+		</function>
 		<function name="glDrawArraysInstancedANGLE" return="void">
 			<params>
 				<param type="GLenum" name="mode"/>
@@ -21,12 +27,6 @@
 				<param type="GLenum" name="type"/>
 				<param type="const void*" name="indices"/>
 				<param type="GLsizei" name="primcount"/>
-			</params>
-		</function>
-		<function name="glVertexAttribDivisorANGLE" return="void">
-			<params>
-				<param type="GLuint" name="index"/>
-				<param type="GLuint" name="divisor"/>
 			</params>
 		</function>
 	</functions>

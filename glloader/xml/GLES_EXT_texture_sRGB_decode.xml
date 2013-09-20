@@ -1,0 +1,9 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GLES_EXT_texture_sRGB_decode" reg_no="152">
+	<tokens>
+		<token name="GL_TEXTURE_SRGB_DECODE_EXT" value="0x8A48"/>
+		<token name="GL_DECODE_EXT" value="0x8A49"/>
+		<token name="GL_SKIP_DECODE_EXT" value="0x8A4A"/>
+	</tokens>
+</gl_extension>

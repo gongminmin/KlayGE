@@ -506,6 +506,7 @@
 				<param type="const GLenum*" name="bufs"/>
 			</params>
 			<mappings>
+				<mapping from="GLES_EXT_draw_buffers" name="glDrawBuffersEXT"/>
 				<mapping from="GLES_NV_draw_buffers" name="glDrawBuffersNV"/>
 			</mappings>
 		</function>
@@ -929,8 +930,9 @@
 				<param type="GLsizei" name="primcount"/>
 			</params>
 			<mappings>
+				<mapping from="GLES_EXT_instanced_arrays" name="glDrawArraysInstancedEXT"/>
 				<mapping from="GLES_NV_draw_instanced" name="glDrawArraysInstancedNV"/>
-				<mapping from="GLES_ANGLE_draw_instanced" name="glDrawArraysInstancedANGLE"/>
+				<mapping from="GLES_ANGLE_instanced_arrays" name="glDrawArraysInstancedANGLE"/>
 			</mappings>
 		</function>
 		<function name="glDrawElementsInstanced" return="void" link="static">
@@ -942,8 +944,9 @@
 				<param type="GLsizei" name="primcount"/>
 			</params>
 			<mappings>
+				<mapping from="GLES_EXT_instanced_arrays" name="glDrawElementsInstancedEXT"/>
 				<mapping from="GLES_NV_draw_instanced" name="glDrawElementsInstancedNV"/>
-				<mapping from="GLES_ANGLE_draw_instanced" name="glDrawElementsInstancedANGLE"/>
+				<mapping from="GLES_ANGLE_instanced_arrays" name="glDrawElementsInstancedANGLE"/>
 			</mappings>
 		</function>
 		<function name="glFenceSync" return="GLsync" link="static">
@@ -1097,6 +1100,7 @@
 				<param type="GLuint" name="divisor"/>
 			</params>
 			<mappings>
+				<mapping from="GLES_EXT_instanced_arrays" name="glVertexAttribDivisorEXT"/>
 				<mapping from="GLES_NV_instanced_arrays" name="glVertexAttribDivisorNV"/>
 				<mapping from="GLES_ANGLE_instanced_arrays" name="glVertexAttribDivisorANGLE"/>
 			</mappings>

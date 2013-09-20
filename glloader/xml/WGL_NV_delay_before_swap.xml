@@ -1,0 +1,12 @@
+<?xml version='1.0'?>
+
+<gl_extension name="WGL_NV_delay_before_swap" reg_no="436">
+	<functions>
+		<function name="wglDelayBeforeSwapNV" return="BOOL">
+			<params>
+				<param type="HDC" name="hDC"/>
+				<param type="GLfloat" name="seconds"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

@@ -1,0 +1,18 @@
+<?xml version='1.0'?>
+
+<gl_extension name="EGL_NV_stream_sync" reg_no="56">
+	<tokens>
+		<token name="EGL_SYNC_NEW_FRAME_NV" value="0x321F"/>
+	</tokens>
+
+	<functions>
+		<function name="eglCreateStreamSyncNV" return="EGLSyncKHR">
+			<params>
+				<param type="EGLDisplay" name="dpy"/>
+				<param type="EGLStreamKHR" name="stream"/>
+				<param type="EGLenum" name="type"/>
+				<param type="const EGLint*" name="attrib_list"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

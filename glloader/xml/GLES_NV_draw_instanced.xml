@@ -1,6 +1,6 @@
 <?xml version='1.0'?>
 
-<gl_extension name="GLES_NV_draw_instanced" reg_no="141">
+<gl_extension name="GLES_NV_draw_instanced" reg_no="141" prefer="GLES_EXT_draw_instanced">
 	<functions>
 		<function name="glDrawArraysInstancedNV" return="void">
 			<params>

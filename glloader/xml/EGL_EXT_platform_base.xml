@@ -1,0 +1,29 @@
+<?xml version='1.0'?>
+
+<gl_extension name="EGL_EXT_platform_base" reg_no="57">
+	<functions>
+		<function name="eglGetPlatformDisplayEXT" return="EGLDisplay">
+			<params>
+				<param type="EGLenum" name="platform"/>
+				<param type="void*" name="native_display"/>
+				<param type="const EGLint*" name="attrib_list"/>
+			</params>
+		</function>
+		<function name="eglCreatePlatformWindowSurfaceEXT" return="EGLSurface">
+			<params>
+				<param type="EGLDisplay" name="dpy"/>
+				<param type="EGLConfig" name="config"/>
+				<param type="void*" name="native_window"/>
+				<param type="const EGLint*" name="attrib_list"/>
+			</params>
+		</function>
+		<function name="eglCreatePlatformPixmapSurfaceEXT" return="EGLSurface">
+			<params>
+				<param type="EGLDisplay" name="dpy"/>
+				<param type="EGLConfig" name="config"/>
+				<param type="void*" name="native_pixmap"/>
+				<param type="const EGLint*" name="attrib_list"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

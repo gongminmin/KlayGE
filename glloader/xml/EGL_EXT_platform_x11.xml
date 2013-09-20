@@ -1,0 +1,8 @@
+<?xml version='1.0'?>
+
+<gl_extension name="EGL_EXT_platform_x11" reg_no="59">
+	<tokens>
+		<token name="EGL_PLATFORM_X11_EXT" value="0x31D5"/>
+		<token name="EGL_PLATFORM_X11_SCREEN_EXT" value="0x31D6"/>
+	</tokens>
+</gl_extension>

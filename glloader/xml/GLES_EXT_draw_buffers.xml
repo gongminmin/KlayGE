@@ -1,0 +1,36 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GLES_EXT_draw_buffers" reg_no="151">
+	<tokens>
+		<token name="GL_MAX_COLOR_ATTACHMENTS_EXT" value="0x8CDF"/>
+		<token name="GL_MAX_DRAW_BUFFERS_EXT" value="0x8824"/>
+		<token name="GL_DRAW_BUFFER0_EXT" value="0x8825"/>
+		<token name="GL_DRAW_BUFFER1_EXT" value="0x8826"/>
+		<token name="GL_DRAW_BUFFER2_EXT" value="0x8827"/>
+		<token name="GL_DRAW_BUFFER3_EXT" value="0x8828"/>
+		<token name="GL_DRAW_BUFFER4_EXT" value="0x8829"/>
+		<token name="GL_DRAW_BUFFER5_EXT" value="0x882A"/>
+		<token name="GL_DRAW_BUFFER6_EXT" value="0x882B"/>
+		<token name="GL_DRAW_BUFFER7_EXT" value="0x882C"/>
+		<token name="GL_DRAW_BUFFER8_EXT" value="0x882D"/>
+		<token name="GL_DRAW_BUFFER9_EXT" value="0x882E"/>
+		<token name="GL_DRAW_BUFFER10_EXT" value="0x882F"/>
+		<token name="GL_DRAW_BUFFER11_EXT" value="0x8830"/>
+		<token name="GL_DRAW_BUFFER12_EXT" value="0x8831"/>
+		<token name="GL_DRAW_BUFFER13_EXT" value="0x8832"/>
+		<token name="GL_DRAW_BUFFER14_EXT" value="0x8833"/>
+		<token name="GL_DRAW_BUFFER15_EXT" value="0x8834"/>
+	</tokens>
+
+	<functions>
+		<function name="glDrawBuffersEXT" return="void">
+			<params>
+				<param type="GLsizei" name="n"/>
+				<param type="const GLenum*" name="bufs"/>
+			</params>
+			<mappings>
+				<mapping from="GLES_NV_draw_buffers" name="glDrawBuffersNV"/>
+			</mappings>
+		</function>
+	</functions>
+</gl_extension>

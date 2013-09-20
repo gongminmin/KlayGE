@@ -1,0 +1,31 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GLES_EXT_draw_instanced" reg_no="157">
+	<functions>
+		<function name="glDrawArraysInstancedEXT" return="void">
+			<params>
+				<param type="GLenum" name="mode"/>
+				<param type="GLint" name="first"/>
+				<param type="GLsizei" name="count"/>
+				<param type="GLsizei" name="primcount"/>
+			</params>
+			<mappings>
+				<mapping from="GLES_NV_draw_instanced" name="glDrawArraysInstancedNV"/>
+				<mapping from="GLES_ANGLE_instanced_arrays" name="glDrawArraysInstancedANGLE"/>
+			</mappings>
+		</function>
+		<function name="glDrawElementsInstancedEXT" return="void">
+			<params>
+				<param type="GLenum" name="mode"/>
+				<param type="GLsizei" name="count"/>
+				<param type="GLenum" name="type"/>
+				<param type="const void*" name="indices"/>
+				<param type="GLsizei" name="primcount"/>
+			</params>
+			<mappings>
+				<mapping from="GLES_NV_draw_instanced" name="glDrawElementsInstancedNV"/>
+				<mapping from="GLES_ANGLE_instanced_arrays" name="glDrawElementsInstancedANGLE"/>
+			</mappings>
+		</function>
+	</functions>
+</gl_extension>
