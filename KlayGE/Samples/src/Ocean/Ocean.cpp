@@ -339,6 +339,9 @@ namespace
 						i, 0, 0, 0, ocean_param_.dmap_dim, ocean_param_.dmap_dim);
 				}
 				gradient_tex_array_->BuildMipSubLevels();
+
+				checked_pointer_cast<RenderOcean>(renderable_)->DisplacementMapArray(displacement_tex_array_);
+				checked_pointer_cast<RenderOcean>(renderable_)->GradientMapArray(gradient_tex_array_);
 			}
 			else
 			{
@@ -410,7 +413,7 @@ namespace
 			return ocean_plane_;
 		}
 
-		virtual void SubThreadUpdate(float app_time, float elapsed_time) KLAYGE_OVERRIDE
+		virtual void MainThreadUpdate(float app_time, float elapsed_time) KLAYGE_OVERRIDE
 		{
 			if (dirty_)
 			{
@@ -419,7 +422,7 @@ namespace
 				dirty_ = false;
 			}
 
-			InfTerrainSceneObject::SubThreadUpdate(app_time, elapsed_time);
+			InfTerrainSceneObject::MainThreadUpdate(app_time, elapsed_time);
 
 			float t = app_time * ocean_param_.time_scale / ocean_param_.time_peroid;
 			float frame = (t - floor(t)) * ocean_param_.num_frames;
@@ -431,8 +434,6 @@ namespace
 			if (use_tex_array_)
 			{
 				checked_pointer_cast<RenderOcean>(renderable_)->Frames(int2(frame0, frame1));
-				checked_pointer_cast<RenderOcean>(renderable_)->DisplacementMapArray(displacement_tex_array_);
-				checked_pointer_cast<RenderOcean>(renderable_)->GradientMapArray(gradient_tex_array_);
 			}
 			else
 			{

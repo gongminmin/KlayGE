@@ -219,6 +219,7 @@ namespace KlayGE
 		void AppendShadowPassScanCode(uint32_t light_index);
 		void AppendCascadedShadowPassScanCode(uint32_t vp_index, uint32_t light_index);
 		void AppendShadowingPassScanCode(uint32_t vp_index, uint32_t g_buffer_index, uint32_t light_index);
+		void AppendIndirectLightingPassScanCode(uint32_t vp_index, uint32_t light_index);
 		void AppendLightingPassScanCode(uint32_t vp_index, uint32_t g_buffer_index, uint32_t light_index);
 		void AppendShadingPassScanCode(uint32_t vp_index, uint32_t g_buffer_index);
 		void PreparePVP(PerViewport& pvp);

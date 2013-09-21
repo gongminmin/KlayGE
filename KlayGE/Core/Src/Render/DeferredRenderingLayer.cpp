@@ -1345,7 +1345,8 @@ namespace KlayGE
 						for (uint32_t li = 0; li < lights_.size(); ++ li)
 						{
 							LightSourcePtr const & light = lights_[li];
-							if (light->Enabled())
+							if (light->Enabled() && (0 == (light->Attrib() & LightSource::LSA_NoShadow))
+								&& pvp.light_visibles[li])
 							{
 								this->AppendShadowingPassScanCode(vpi, i, li);
 							}
@@ -1355,6 +1356,22 @@ namespace KlayGE
 						{
 							LightSourcePtr const & light = lights_[li];
 							if (light->Enabled())
+							{
+								PassTargetBuffer const pass_tb = static_cast<PassTargetBuffer>(i);
+								if ((LightSource::LT_Spot == light->Type()) && (PTB_Opaque == pass_tb)
+									&& (light->Attrib() & LightSource::LSA_IndirectLighting)
+									&& rsm_buffer_ && (illum_ != 1)
+									&& pvp.light_visibles[li])
+								{
+									this->AppendIndirectLightingPassScanCode(vpi, li);
+								}
+							}
+						}
+
+						for (uint32_t li = 0; li < lights_.size(); ++ li)
+						{
+							LightSourcePtr const & light = lights_[li];
+							if (light->Enabled() && pvp.light_visibles[li])
 							{
 								this->AppendLightingPassScanCode(vpi, i, li);
 							}
@@ -1542,40 +1559,21 @@ namespace KlayGE
 
 	void DeferredRenderingLayer::AppendShadowingPassScanCode(uint32_t vp_index, uint32_t g_buffer_index, uint32_t light_index)
 	{
-		PerViewport& pvp = viewports_[vp_index];
-		LightSourcePtr const & light = lights_[light_index];
 		PassTargetBuffer const pass_tb = static_cast<PassTargetBuffer>(g_buffer_index);
+		pass_scaned_.push_back(this->ComposePassScanCode(vp_index,
+			ComposePassType(PRT_None, pass_tb, PC_Shadowing), light_index, 0));
+	}
 
-		if (pvp.light_visibles[light_index])
-		{
-			if (0 == (light->Attrib() & LightSource::LSA_NoShadow))
-			{
-				pass_scaned_.push_back(this->ComposePassScanCode(vp_index,
-					ComposePassType(PRT_None, pass_tb, PC_Shadowing), light_index, 0));
-			}
-		}
+	void DeferredRenderingLayer::AppendIndirectLightingPassScanCode(uint32_t vp_index, uint32_t light_index)
+	{
+		pass_scaned_.push_back(this->ComposePassScanCode(vp_index, PT_IndirectLighting, light_index, 0));
 	}
 	
 	void DeferredRenderingLayer::AppendLightingPassScanCode(uint32_t vp_index, uint32_t g_buffer_index, uint32_t light_index)
 	{
-		PerViewport& pvp = viewports_[vp_index];
-		LightSourcePtr const & light = lights_[light_index];
 		PassTargetBuffer const pass_tb = static_cast<PassTargetBuffer>(g_buffer_index);
-
-		if ((LightSource::LT_Spot == light->Type()) && (PTB_Opaque == pass_tb)
-			&& (light->Attrib() & LightSource::LSA_IndirectLighting))
-		{
-			if (rsm_buffer_ && (illum_ != 1))
-			{
-				pass_scaned_.push_back(this->ComposePassScanCode(vp_index, PT_IndirectLighting, light_index, 0));
-			}
-		}
-
-		if (pvp.light_visibles[light_index])
-		{
-			pass_scaned_.push_back(this->ComposePassScanCode(vp_index,
-				ComposePassType(PRT_None, pass_tb, PC_Lighting), light_index, 0));
-		}
+		pass_scaned_.push_back(this->ComposePassScanCode(vp_index,
+			ComposePassType(PRT_None, pass_tb, PC_Lighting), light_index, 0));
 	}
 
 	void DeferredRenderingLayer::AppendShadingPassScanCode(uint32_t vp_index, uint32_t g_buffer_index)
