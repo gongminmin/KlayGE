@@ -8,7 +8,7 @@
 	<parameter type="int" name="skybox_compressed"/>
 	<parameter type="textureCUBE" name="skybox_tex"/>
 	<parameter type="textureCUBE" name="skybox_C_tex"/>
-	<parameter type="sampler" name="skybox_cubeMapSampler">
+	<parameter type="sampler" name="skybox_sampler">
 		<state name="filtering" value="min_mag_linear_mip_point"/>
 		<state name="address_u" value="clamp"/>
 		<state name="address_v" value="clamp"/>
@@ -55,12 +55,12 @@ float4 SkyBoxPS(float3 texCoord0 : TEXCOORD0) : SV_Target
 {
 	if (skybox_compressed)
 	{
-		return decode_hdr_yc(skybox_tex.Sample(skybox_cubeMapSampler, texCoord0).r,
-					skybox_C_tex.Sample(skybox_cubeMapSampler, texCoord0));
+		return decode_hdr_yc(skybox_tex.Sample(skybox_sampler, texCoord0).r,
+					skybox_C_tex.Sample(skybox_sampler, texCoord0));
 	}
 	else
 	{
-		return skybox_tex.Sample(skybox_cubeMapSampler, texCoord0);
+		return skybox_tex.Sample(skybox_sampler, texCoord0);
 	}
 }
 		]]>

@@ -497,9 +497,9 @@ uint32_t DeferredRenderingApp::DoUpdate(uint32_t pass)
 		
 		for (uint32_t i = 0; i < particle_lights_.size(); ++ i)
 		{
-			float3 clr = MathLib::normalize(float3(sin(this->AppTime() + i * 0.005f),
-				sin(this->AppTime() + 0.5f + i * 0.2f),
-				sin(this->AppTime() + 1.0f + i * 0.3f))) * 1.0f + 1.0f;
+			float3 clr = float3(sin(this->AppTime() * 0.3f + i * 10.0f),
+				sin(this->AppTime() * 0.2f + 0.5f + i * 20.0f),
+				sin(this->AppTime() * 0.1f + 1.0f + i * 30.0f)) + 1.0f;
 			particle_lights_[i]->Color(clr);
 			float factor = 50.0f / particle_lights_.size() + (this->AppTime() * 0.005f);
 			particle_lights_[i]->Position(float3(8 * sin(factor * i),

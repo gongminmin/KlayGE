@@ -404,7 +404,6 @@ namespace KlayGE
 		technique_lights_[LightSource::LT_Sun] = dr_effect_->TechniqueByName("DeferredRenderingSun");
 		technique_light_depth_only_ = dr_effect_->TechniqueByName("DeferredRenderingLightDepthOnly");
 		technique_light_stencil_ = dr_effect_->TechniqueByName("DeferredRenderingLightStencil");
-		technique_clear_stencil_ = dr_effect_->TechniqueByName("ClearStencil");
 		technique_no_lighting_ = dr_effect_->TechniqueByName("NoLightingTech");
 		technique_shading_ = dr_effect_->TechniqueByName("ShadingTech");
 		technique_merge_shadings_[0] = dr_effect_->TechniqueByName("MergeShadingTech");
@@ -1383,7 +1382,14 @@ namespace KlayGE
 		float d;
 		if (abs(falloff.z()) < 1e-6f)
 		{
-			d = abs(falloff.y()) < 1e-6f ? 1 : -(falloff.x() - lum * 255) / falloff.y();
+			if (abs(falloff.y()) < 1e-6f)
+			{
+				d = 100;
+			}
+			else
+			{
+				d = abs(falloff.y()) < 1e-6f ? 1 : -(falloff.x() - lum * 255) / falloff.y();
+			}
 		}
 		else
 		{
@@ -1742,7 +1748,14 @@ namespace KlayGE
 				float d;
 				if (abs(falloff.z()) < 1e-6f)
 				{
-					d = abs(falloff.y()) < 1e-6f ? 1 : -(falloff.x() - lum * 255) / falloff.y();
+					if (abs(falloff.y()) < 1e-6f)
+					{
+						d = 100;
+					}
+					else
+					{
+						d = abs(falloff.y()) < 1e-6f ? 1 : -(falloff.x() - lum * 255) / falloff.y();
+					}
 				}
 				else
 				{
@@ -1997,8 +2010,6 @@ namespace KlayGE
 		*shadowing_channel_param_ = shadowing_channel;
 
 		re.BindFrameBuffer(pvp.lighting_buffer);
-		// Clear stencil to 0 with write mask
-		re.Render(*technique_clear_stencil_, *rl_quad_);
 
 		RenderLayoutPtr const & rl = light_volume_rl_[type];
 

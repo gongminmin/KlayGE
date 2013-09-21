@@ -1393,7 +1393,7 @@ float EdgeFactor(float2 p0_ss, float2 p1_ss, float3 p0_ws, float3 p1_ws)
 HS_CONSTANT_DATA_OUTPUT SmoothConstantsHS(InputPatch<CONTROL_POINT, 3> ip)
 {	
 	HS_CONSTANT_DATA_OUTPUT output;
-    
+
 	if (adaptive_tess)
 	{
 		const float BACK_FACE_THRESHOLD = 0.4f;

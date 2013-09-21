@@ -277,7 +277,6 @@ namespace KlayGE
 		array<RenderTechniquePtr, LightSource::LT_NumLightTypes> technique_lights_;
 		RenderTechniquePtr technique_light_depth_only_;
 		RenderTechniquePtr technique_light_stencil_;
-		RenderTechniquePtr technique_clear_stencil_;
 		RenderTechniquePtr technique_no_lighting_;
 		RenderTechniquePtr technique_shading_;
 		array<RenderTechniquePtr, 2> technique_merge_shadings_;
