@@ -1030,23 +1030,26 @@ namespace KlayGE
 			break;
 
 		case PC_Lighting:
+			for (uint32_t li = 0; li < lights_.size(); ++ li)
 			{
-				LightSourcePtr const & light = lights_[org_no];
-				LightSource::LightType type = light->Type();
-				int32_t attr = light->Attrib();
+				LightSourcePtr const & light = lights_[li];
+				if (light->Enabled() && pvp.light_visibles[li])
+				{
+					LightSource::LightType type = light->Type();
+					int32_t attr = light->Attrib();
 
-				this->PrepareLightCamera(pvp, light, index_in_pass, pass_type);
+					this->PrepareLightCamera(pvp, light, index_in_pass, pass_type);
 
-				*light_attrib_param_ = float4(attr & LightSource::LSA_NoDiffuse ? 0.0f : 1.0f,
-					attr & LightSource::LSA_NoSpecular ? 0.0f : 1.0f,
-					attr & LightSource::LSA_NoShadow ? -1.0f : 1.0f, light->ProjectiveTexture() ? 1.0f : -1.0f);
-				*light_color_param_ = light->Color();
-				*light_falloff_param_ = light->Falloff();
+					*light_attrib_param_ = float4(attr & LightSource::LSA_NoDiffuse ? 0.0f : 1.0f,
+						attr & LightSource::LSA_NoSpecular ? 0.0f : 1.0f,
+						attr & LightSource::LSA_NoShadow ? -1.0f : 1.0f, light->ProjectiveTexture() ? 1.0f : -1.0f);
+					*light_color_param_ = light->Color();
+					*light_falloff_param_ = light->Falloff();
 
-				this->UpdateLighting(pvp, type, org_no);	
-
-				urv = App3DFramework::URV_Flushed;
+					this->UpdateLighting(pvp, type, li);
+				}
 			}
+			urv = App3DFramework::URV_Flushed;
 			break;
 
 		case PC_Shading:
@@ -1368,15 +1371,7 @@ namespace KlayGE
 							}
 						}
 
-						for (uint32_t li = 0; li < lights_.size(); ++ li)
-						{
-							LightSourcePtr const & light = lights_[li];
-							if (light->Enabled() && pvp.light_visibles[li])
-							{
-								this->AppendLightingPassScanCode(vpi, i, li);
-							}
-						}
-
+						this->AppendLightingPassScanCode(vpi, i);
 						this->AppendShadingPassScanCode(vpi, i);
 					}
 				}
@@ -1569,11 +1564,11 @@ namespace KlayGE
 		pass_scaned_.push_back(this->ComposePassScanCode(vp_index, PT_IndirectLighting, light_index, 0));
 	}
 	
-	void DeferredRenderingLayer::AppendLightingPassScanCode(uint32_t vp_index, uint32_t g_buffer_index, uint32_t light_index)
+	void DeferredRenderingLayer::AppendLightingPassScanCode(uint32_t vp_index, uint32_t g_buffer_index)
 	{
 		PassTargetBuffer const pass_tb = static_cast<PassTargetBuffer>(g_buffer_index);
 		pass_scaned_.push_back(this->ComposePassScanCode(vp_index,
-			ComposePassType(PRT_None, pass_tb, PC_Lighting), light_index, 0));
+			ComposePassType(PRT_None, pass_tb, PC_Lighting), 0, 0));
 	}
 
 	void DeferredRenderingLayer::AppendShadingPassScanCode(uint32_t vp_index, uint32_t g_buffer_index)
