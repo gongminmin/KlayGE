@@ -25,6 +25,8 @@
 #include <KlayGE/IndirectLightingLayer.hpp>
 #include <KlayGE/CascadedShadowLayer.hpp>
 
+#define LIGHT_INDEXED_DEFERRED
+
 namespace KlayGE
 {
 	enum
@@ -105,6 +107,11 @@ namespace KlayGE
 		IndirectLightingLayerPtr il_layer;
 
 		std::vector<bool> light_visibles;
+
+#ifdef LIGHT_INDEXED_DEFERRED
+		FrameBufferPtr light_index_buffer;
+		TexturePtr light_index_tex;
+#endif
 	};
 
 	class KLAYGE_CORE_API DeferredRenderingLayer
@@ -239,6 +246,12 @@ namespace KlayGE
 		void AddAtmospheric(PerViewport const & pvp);
 		void AddTAA(PerViewport const & pvp);
 
+#ifdef LIGHT_INDEXED_DEFERRED
+		void DrawLightIndex(PerViewport const & pvp, std::vector<int32_t> const & light_batch,
+			int32_t index_in_pass, PassType pass_type);
+		void UpdateLightIndexedLighting(PerViewport const & pvp, std::vector<int32_t> const & light_batch, bool blend);
+#endif
+
 	private:
 		bool mrt_g_buffer_support_;
 		bool depth_texture_support_;
@@ -284,7 +297,11 @@ namespace KlayGE
 		array<RenderTechniquePtr, 2> technique_merge_depths_;
 		RenderTechniquePtr technique_copy_shading_depth_;
 		RenderTechniquePtr technique_copy_depth_;
-
+#ifdef LIGHT_INDEXED_DEFERRED
+		array<RenderTechniquePtr, 2> technique_draw_light_index_;
+		RenderTechniquePtr technique_light_indexed_deferred_rendering_no_blend_;
+		RenderTechniquePtr technique_light_indexed_deferred_rendering_blend_;
+#endif
 		static uint32_t const MAX_NUM_SHADOWED_LIGHTS = 4;
 		static uint32_t const MAX_NUM_SHADOWED_SPOT_LIGHTS = 4;
 		static uint32_t const MAX_NUM_SHADOWED_POINT_LIGHTS = 1;
@@ -334,6 +351,18 @@ namespace KlayGE
 		RenderEffectParameterPtr view_z_to_light_view_param_;
 		RenderEffectParameterPtr cascaded_shadow_map_tex_array_param_;
 		array<RenderEffectParameterPtr, CascadedShadowLayer::MAX_NUM_CASCADES> cascaded_shadow_map_texs_param_;
+#ifdef LIGHT_INDEXED_DEFERRED
+		RenderEffectParameterPtr light_id_param_;
+		RenderEffectParameterPtr lights_color_param_;
+		RenderEffectParameterPtr lights_pos_es_param_;
+		RenderEffectParameterPtr lights_dir_es_param_;
+		RenderEffectParameterPtr lights_falloff_param_;
+		RenderEffectParameterPtr lights_attrib_param_;
+		RenderEffectParameterPtr lights_type_param_;
+		RenderEffectParameterPtr lights_shadowing_channel_param_;
+		RenderEffectParameterPtr num_lights_param_;
+		RenderEffectParameterPtr light_index_tex_param_;
+#endif
 
 		std::vector<SceneObject*> visible_scene_objs_;
 		bool has_reflective_objs_;

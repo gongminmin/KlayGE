@@ -90,7 +90,7 @@ float linstep(float min, float max, float v)
 #endif
 #endif
 
-float4 CalcColor(float n_dot_l, float spec, float atten, float3 shadow)
+float4 CalcColor(float n_dot_l, float spec, float atten, float3 shadow, float4 light_color, float4 light_attrib)
 {
 	float2 ds = n_dot_l * atten * float2(1, spec);
 	ds *= light_attrib.xy;
@@ -200,7 +200,7 @@ float4 ESM_Sun(float3 pos_es, float len)
 	return shadow;
 }
 
-float4 NearestDepthUpsamplingShadow(float2 tc)
+float4 NearestDepthUpsamplingShadow(float2 tc, int channel)
 {
 	float2 l1_inv_width_height = inv_width_height * 2;
 	float2 tc0 = tc - inv_width_height;
@@ -214,9 +214,9 @@ float4 NearestDepthUpsamplingShadow(float2 tc)
 	float3 ndus = NearestDepthUpsampling(tc0, float4(z00, z10, z01, z11), z_full, l1_inv_width_height, threshold);
 	if (ndus.z > 0)
 	{
-		if (shadowing_channel < 4)
+		if (channel < 4)
 		{
-			return shadowing_tex.Sample(linear_sampler, tc)[shadowing_channel];
+			return shadowing_tex.Sample(linear_sampler, tc)[channel];
 		}
 		else
 		{
@@ -225,9 +225,9 @@ float4 NearestDepthUpsamplingShadow(float2 tc)
 	}
 	else
 	{
-		if (shadowing_channel < 4)
+		if (channel < 4)
 		{
-			return shadowing_tex.Sample(point_sampler, ndus.xy)[shadowing_channel];
+			return shadowing_tex.Sample(point_sampler, ndus.xy)[channel];
 		}
 		else
 		{
@@ -295,10 +295,10 @@ float4 DeferredRenderingPointPS(
 		float3 shadow = 1;
 		if (shadowing_channel >= 0)
 		{
-			shadow = NearestDepthUpsamplingShadow(tc).xyz;
+			shadow = NearestDepthUpsamplingShadow(tc, shadowing_channel).xyz;
 		}
 		float atten = attenuation_term(light_pos_es.xyz, pos_es.xyz, light_falloff);
-		final_clr = CalcColor(n_dot_l, spec, atten, shadow);
+		final_clr = CalcColor(n_dot_l, spec, atten, shadow, light_color, light_attrib);
 	}
 
 	return final_clr;
@@ -334,10 +334,10 @@ float4 DeferredRenderingSpotPS(
 			float3 shadow = 1;
 			if (shadowing_channel >= 0)
 			{
-				shadow = NearestDepthUpsamplingShadow(tc).xyz;
+				shadow = NearestDepthUpsamplingShadow(tc, shadowing_channel).xyz;
 			}
 			float atten = spot * attenuation_term(light_pos_es.xyz, pos_es.xyz, light_falloff);
-			final_clr = CalcColor(n_dot_l, spec, atten, shadow);
+			final_clr = CalcColor(n_dot_l, spec, atten, shadow, light_color, light_attrib);
 		}
 	}
 
@@ -370,9 +370,9 @@ float4 DeferredRenderingSunPS(
 		float3 shadow = 1;
 		if (shadowing_channel >= 0)
 		{
-			shadow = NearestDepthUpsamplingShadow(tc).xyz;
+			shadow = NearestDepthUpsamplingShadow(tc, shadowing_channel).xyz;
 		}
-		final_clr = CalcColor(n_dot_l, spec, 1, shadow);
+		final_clr = CalcColor(n_dot_l, spec, 1, shadow, light_color, light_attrib);
 	}
 
 	return final_clr;
@@ -401,7 +401,7 @@ float4 DeferredRenderingDirectionalPS(
 	if (n_dot_l > 0)
 	{
 		float spec = roughness_term(normalize(dir - view_dir), normal, GetShininess(ndc)).x;
-		final_clr = CalcColor(n_dot_l, spec, 1, 1);
+		final_clr = CalcColor(n_dot_l, spec, 1, 1, light_color, light_attrib);
 	}
 
 	return final_clr;
@@ -422,7 +422,7 @@ float4 DeferredRenderingAmbientPS(
 	float4 ndc = g_buffer_tex.Sample(point_sampler, tc);
 	float3 normal = GetNormal(ndc);
 
-	return CalcColor(0.5f + 0.5f * dot(light_dir_es.xyz, normal), 0, 1, 1);
+	return CalcColor(0.5f + 0.5f * dot(light_dir_es.xyz, normal), 0, 1, 1, light_color, light_attrib);
 }
 
 float4 DeferredShadowingPointPS(
@@ -861,6 +861,206 @@ void CopyDepthPS(float2 tc : TEXCOORD0,
 
 			<state name="vertex_shader" value="ShadingVS()"/>
 			<state name="pixel_shader" value="CopyDepthPS()"/>
+		</pass>
+	</technique>
+
+
+	<parameter type="float4" name="light_id"/>
+	<cbuffer name="light_batch">
+		<parameter type="float4" name="lights_color" array_size="32"/>
+		<parameter type="float4" name="lights_pos_es" array_size="32"/>
+		<parameter type="float4" name="lights_dir_es" array_size="32"/>
+		<parameter type="float3" name="lights_falloff" array_size="32"/>
+		<parameter type="float4" name="lights_attrib" array_size="32"/>
+		<parameter type="int" name="lights_type" array_size="32"/>
+		<parameter type="int" name="lights_shadowing_channel" array_size="32"/>
+		<parameter type="int" name="num_lights"/>
+	</cbuffer>
+	<parameter type="texture2D" name="light_index_tex"/>
+	<macro name="LT_Ambient" value="0"/>
+	<macro name="LT_Point" value="1"/>
+	<macro name="LT_Directional" value="2"/>
+	<macro name="LT_Spot" value="3"/>
+	<macro name="LT_Sun" value="4"/>
+	
+	<shader>
+		<![CDATA[
+float4 DrawLightIndexPS() : SV_Target
+{
+	return light_id;
+}
+
+void LightIndexedDeferredRenderingVS(float4 pos : POSITION,
+			out float2 oTexCoord : TEXCOORD0,
+			out float3 oViewDir : TEXCOORD1,
+			out float4 oPos : SV_Position)
+{
+	oPos = pos;
+
+	oViewDir = mul(pos, light_volume_mv).xyz;
+	oTexCoord = pos.xy / 2;
+	oTexCoord.y *= KLAYGE_FLIPPING;
+	oTexCoord += 0.5f;
+}
+
+#if KLAYGE_D3D11
+#if KLAYGE_SHADER_MODEL >= 4
+#define INTEGER_SUPPORT 1
+#endif
+#endif
+ 
+float4 LightIndexedDeferredRenderingPS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Target
+{
+	float4 final_clr = 0;
+	int4 light_index = light_index_tex.Sample(point_sampler, tc) * 255;
+	if (any(light_index))
+	{
+		float4 ndc = g_buffer_tex.Sample(point_sampler, tc);
+		view_dir = normalize(view_dir);
+		float3 pos_es = view_dir * (depth_tex.Sample(point_sampler, tc).r / view_dir.z);
+		float3 normal = GetNormal(ndc);
+		float shininess = GetShininess(ndc);
+		int comp = 0;
+		int mask = 1;
+		for (int i = 0; (i < 32) && (i < num_lights); ++ i)
+		{
+#if INTEGER_SUPPORT
+			if (light_index[comp] & mask)
+#else
+			if ((light_index[comp] / mask) % 2)
+#endif
+			{
+				float n_dot_l;
+				float spec = 0;
+				float atten = 1;
+				float3 shadow = 1;
+				if (LT_Ambient == lights_type[i])
+				{
+					n_dot_l = 0.5f + 0.5f * dot(lights_dir_es[i].xyz, normal);
+				}
+				else
+				{
+					float3 dir = lights_dir_es[i].xyz;
+					if (lights_type[i] != LT_Directional)
+					{
+						if (lights_shadowing_channel[i] >= 0)
+						{
+							shadow = NearestDepthUpsamplingShadow(tc, lights_shadowing_channel[i]).xyz;
+						}
+					
+						if (lights_type[i] != LT_Sun)
+						{
+							atten = attenuation_term(lights_pos_es[i].xyz, pos_es.xyz, lights_falloff[i]);
+							dir = normalize(lights_pos_es[i].xyz - pos_es);
+
+							if (LT_Spot == lights_type[i])
+							{
+								float spot = spot_lighting(lights_pos_es[i].xyz, lights_dir_es[i].xyz,
+									float2(lights_pos_es[i].w, lights_dir_es[i].w), pos_es.xyz);
+								atten *= max(spot, 0.0f);
+							}
+						}
+					}
+				
+					n_dot_l = dot(normal, dir);
+					if (n_dot_l > 0)
+					{
+						spec = roughness_term(normalize(dir - view_dir), normal, shininess).x;
+					}
+				}
+			
+				final_clr += CalcColor(n_dot_l, spec, atten, shadow, lights_color[i], lights_attrib[i]);
+			}
+		
+			mask *= 2;
+			if (mask >= 256)
+			{
+				++ comp;
+				mask = 1;
+			}
+		}
+	}
+
+	return final_clr;
+}
+		]]>
+	</shader>
+		
+	<technique name="DrawLightIndexNonFullScreen">
+		<pass name="p0">
+			<state name="depth_enable" value="false"/>
+			<state name="depth_write_mask" value="false"/>
+
+			<state name="depth_clip_enable" value="false"/>
+			<state name="cull_mode" value="front"/>
+
+			<state name="front_stencil_enable" value="true"/>
+			<state name="front_stencil_func" value="less"/>
+			<state name="front_stencil_ref" value="0"/>
+			<state name="front_stencil_pass" value="replace"/>
+			<state name="front_stencil_read_mask" value="127"/>
+			<state name="front_stencil_write_mask" value="127"/>
+			<state name="back_stencil_enable" value="true"/>
+			<state name="back_stencil_func" value="less"/>
+			<state name="back_stencil_ref" value="0"/>
+			<state name="back_stencil_pass" value="replace"/>
+			<state name="back_stencil_read_mask" value="127"/>
+			<state name="back_stencil_write_mask" value="127"/>
+
+			<state name="blend_enable" value="true"/>
+			<state name="blend_op" value="add"/>
+			<state name="src_blend" value="one"/>
+			<state name="dest_blend" value="one"/>
+			<state name="blend_op_alpha" value="add"/>
+			<state name="src_blend_alpha" value="one"/>
+			<state name="dest_blend_alpha" value="one"/>
+
+			<state name="vertex_shader" value="DeferredRenderingDepthOnlyVS()"/>
+			<state name="pixel_shader" value="DrawLightIndexPS()"/>
+		</pass>
+	</technique>
+
+	<technique name="DrawLightIndexFullScreen" inherit="DrawLightIndexNonFullScreen">
+		<pass name="p0">
+			<state name="front_stencil_func" value="equal"/>
+			<state name="front_stencil_pass" value="keep"/>
+			<state name="front_stencil_write_mask" value="0"/>
+			<state name="back_stencil_func" value="equal"/>
+			<state name="back_stencil_pass" value="keep"/>
+			<state name="back_stencil_write_mask" value="0"/>
+		</pass>
+	</technique>
+
+	<technique name="LightIndexedDeferredRenderingNoBlend">
+		<pass name="p0">
+			<state name="depth_enable" value="false"/>
+			<state name="depth_write_mask" value="false"/>
+
+			<state name="cull_mode" value="front"/>
+
+			<state name="front_stencil_enable" value="true"/>
+			<state name="front_stencil_func" value="not_equal"/>
+			<state name="front_stencil_ref" value="128"/>
+			<state name="front_stencil_pass" value="keep"/>
+			<state name="back_stencil_enable" value="true"/>
+			<state name="back_stencil_func" value="not_equal"/>
+			<state name="back_stencil_ref" value="128"/>
+			<state name="back_stencil_pass" value="keep"/>
+
+			<state name="vertex_shader" value="LightIndexedDeferredRenderingVS()"/>
+			<state name="pixel_shader" value="LightIndexedDeferredRenderingPS()"/>
+		</pass>
+	</technique>
+
+	<technique name="LightIndexedDeferredRenderingBlend" inherit="LightIndexedDeferredRenderingNoBlend">
+		<pass name="p0">
+			<state name="blend_enable" value="true"/>
+			<state name="blend_op" value="add"/>
+			<state name="src_blend" value="one"/>
+			<state name="dest_blend" value="one"/>
+			<state name="blend_op_alpha" value="add"/>
+			<state name="src_blend_alpha" value="one"/>
+			<state name="dest_blend_alpha" value="one"/>
 		</pass>
 	</technique>
 </effect>

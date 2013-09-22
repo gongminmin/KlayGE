@@ -291,6 +291,9 @@ namespace KlayGE
 			pvp.curr_merged_depth_buffer = rf.MakeFrameBuffer();
 			pvp.prev_merged_shading_buffer = rf.MakeFrameBuffer();
 			pvp.prev_merged_depth_buffer = rf.MakeFrameBuffer();
+#ifdef LIGHT_INDEXED_DEFERRED
+			pvp.light_index_buffer = rf.MakeFrameBuffer();
+#endif
 		}
 
 		{
@@ -412,6 +415,12 @@ namespace KlayGE
 		technique_merge_depths_[1] = dr_effect_->TechniqueByName("MergeDepthAlphaBlendTech");
 		technique_copy_shading_depth_ = dr_effect_->TechniqueByName("CopyShadingDepthTech");
 		technique_copy_depth_ = dr_effect_->TechniqueByName("CopyDepthTech");
+#ifdef LIGHT_INDEXED_DEFERRED
+		technique_draw_light_index_[0] = dr_effect_->TechniqueByName("DrawLightIndexFullScreen");
+		technique_draw_light_index_[1] = dr_effect_->TechniqueByName("DrawLightIndexNonFullScreen");
+		technique_light_indexed_deferred_rendering_no_blend_ = dr_effect_->TechniqueByName("LightIndexedDeferredRenderingNoBlend");
+		technique_light_indexed_deferred_rendering_blend_ = dr_effect_->TechniqueByName("LightIndexedDeferredRenderingBlend");
+#endif
 
 		sm_buffer_ = rf.MakeFrameBuffer();
 		ElementFormat fmt;
@@ -540,6 +549,18 @@ namespace KlayGE
 			cascaded_shadow_map_texs_param_[2] = dr_effect_->ParameterByName("cascaded_shadow_map_2_tex");
 			cascaded_shadow_map_texs_param_[3] = dr_effect_->ParameterByName("cascaded_shadow_map_3_tex");
 		}
+#ifdef LIGHT_INDEXED_DEFERRED
+		light_id_param_ = dr_effect_->ParameterByName("light_id");
+		lights_color_param_ = dr_effect_->ParameterByName("lights_color");
+		lights_pos_es_param_ = dr_effect_->ParameterByName("lights_pos_es");
+		lights_dir_es_param_ = dr_effect_->ParameterByName("lights_dir_es");
+		lights_falloff_param_ = dr_effect_->ParameterByName("lights_falloff");
+		lights_attrib_param_ = dr_effect_->ParameterByName("lights_attrib");
+		lights_type_param_ = dr_effect_->ParameterByName("lights_type");
+		lights_shadowing_channel_param_ = dr_effect_->ParameterByName("lights_shadowing_channel");
+		num_lights_param_ = dr_effect_->ParameterByName("num_lights");
+		light_index_tex_param_ = dr_effect_->ParameterByName("light_index_tex");
+#endif
 
 		this->SetCascadedShadowType(CSLT_Auto);
 	}
@@ -778,6 +799,22 @@ namespace KlayGE
 			fmt = EF_ABGR16F;
 		}
 		pvp.small_ssvo_tex = rf.MakeTexture2D(width / 2, height / 2, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
+
+#ifdef LIGHT_INDEXED_DEFERRED
+		if (caps.rendertarget_format_support(EF_ABGR8, 1, 0))
+		{
+			fmt = EF_ABGR8;
+		}
+		else
+		{
+			BOOST_ASSERT(caps.rendertarget_format_support(EF_ARGB8, 1, 0));
+
+			fmt = EF_ARGB8;
+		}
+		pvp.light_index_tex = rf.MakeTexture2D(width, height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
+		pvp.light_index_buffer->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*pvp.light_index_tex, 0, 1, 0));
+		pvp.light_index_buffer->Attach(FrameBuffer::ATT_DepthStencil, ds_view);
+#endif
 	}
 
 	void DeferredRenderingLayer::EnableViewport(uint32_t index, bool enable)
@@ -1030,6 +1067,32 @@ namespace KlayGE
 			break;
 
 		case PC_Lighting:
+#ifdef LIGHT_INDEXED_DEFERRED
+			{
+				bool blend = false;
+				std::vector<int32_t> light_batch;
+				uint32_t li = 0;
+				while (li < lights_.size())
+				{
+					LightSourcePtr const & light = lights_[li];
+					if (light->Enabled() && pvp.light_visibles[li])
+					{
+						light_batch.push_back(li);
+					}
+
+					++ li;
+
+					if ((32 == light_batch.size()) || (li == lights_.size()))
+					{
+						this->DrawLightIndex(pvp, light_batch, index_in_pass, pass_type);
+						this->UpdateLightIndexedLighting(pvp, light_batch, blend);
+						blend = true;
+
+						light_batch.clear();
+					}
+				}
+			}
+#else
 			for (uint32_t li = 0; li < lights_.size(); ++ li)
 			{
 				LightSourcePtr const & light = lights_[li];
@@ -1049,6 +1112,7 @@ namespace KlayGE
 					this->UpdateLighting(pvp, type, li);
 				}
 			}
+#endif
 			urv = App3DFramework::URV_Flushed;
 			break;
 
@@ -2236,4 +2300,161 @@ namespace KlayGE
 		org_no = (code >> 6) & 0x0FFF;		// 12 bits, [17 - 6]
 		index_in_pass = (code >> 0) & 0x3F;		//  6 bits, [5 -  0]
 	}
+
+#ifdef LIGHT_INDEXED_DEFERRED
+	void DeferredRenderingLayer::DrawLightIndex(PerViewport const & pvp, std::vector<int32_t> const & light_batch,
+		int32_t index_in_pass, PassType pass_type)
+	{
+		BOOST_ASSERT(light_batch.size() <= 32);
+
+		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+
+		CameraPtr const & camera = pvp.frame_buffer->GetViewport()->camera;
+		pvp.light_index_buffer->GetViewport()->camera = camera;
+
+		re.BindFrameBuffer(pvp.light_index_buffer);
+		pvp.light_index_buffer->Attached(FrameBuffer::ATT_Color0)->ClearColor(Color(0, 0, 0, 0));
+
+		for (size_t i = 0; i < light_batch.size(); ++ i)
+		{
+			uint32_t light_id = 1UL << i;
+			float4 light_id_f4(((light_id & 0xFF) + 0.5f) / 255.0f,
+				(((light_id >> 8) & 0xFF) + 0.5f) / 255.0f, (((light_id >> 16) & 0xFF) + 0.5f) / 255.0f,
+				(((light_id >> 24) & 0xFF) + 0.5f) / 255.0f);
+			*light_id_param_ = light_id_f4;
+
+			LightSourcePtr const & light = lights_[light_batch[i]];
+			LightSource::LightType type = light->Type();
+
+			this->PrepareLightCamera(pvp, light, index_in_pass, pass_type);
+
+			RenderLayoutPtr const & rl = light_volume_rl_[type];
+
+			RenderTechniquePtr tech;
+			if ((LightSource::LT_Point == type) || (LightSource::LT_Spot == type))
+			{
+				re.Render(*technique_light_stencil_, *rl);
+				tech = technique_draw_light_index_[1];
+			}
+			else
+			{
+				tech = technique_draw_light_index_[0];
+			}
+
+			re.Render(*tech, *rl);
+		}
+	}
+
+	void DeferredRenderingLayer::UpdateLightIndexedLighting(PerViewport const & pvp, std::vector<int32_t> const & light_batch, bool blend)
+	{
+		BOOST_ASSERT(light_batch.size() <= 32);
+
+		std::vector<float4> lights_color(light_batch.size());
+		std::vector<float4> lights_pos_es(light_batch.size());
+		std::vector<float4> lights_dir_es(light_batch.size());
+		std::vector<float3> lights_falloff(light_batch.size());
+		std::vector<float4> lights_attrib(light_batch.size());
+		std::vector<int> lights_type(light_batch.size());
+		std::vector<int> lights_shadowing_channel(light_batch.size());
+		for (size_t i = 0; i < light_batch.size(); ++ i)
+		{
+			LightSourcePtr const & light = lights_[light_batch[i]];
+			LightSource::LightType type = light->Type();
+			int32_t attr = light->Attrib();
+
+			lights_color[i] = light->Color();
+
+			switch (type)
+			{
+			case LightSource::LT_Point:
+			case LightSource::LT_Spot:
+			case LightSource::LT_Sun:
+				{
+					float3 const & p = light->Position();
+					float3 loc_es = MathLib::transform_coord(p, pvp.view);
+					lights_pos_es[i] = float4(loc_es.x(), loc_es.y(), loc_es.z(), 1);
+
+					float3 dir_es(0, 0, 0);
+					if (LightSource::LT_Spot == type)
+					{
+						dir_es = MathLib::transform_normal(light->Direction(), pvp.view);
+					}
+					else if (LightSource::LT_Sun == type)
+					{
+						dir_es = MathLib::transform_normal(-light->Direction(), pvp.view);
+					}
+					lights_dir_es[i] = float4(dir_es.x(), dir_es.y(), dir_es.z(), 0);
+
+					if (LightSource::LT_Spot == type)
+					{
+						lights_pos_es[i].w() = light->CosOuterInner().x();
+						lights_dir_es[i].w() = light->CosOuterInner().y();
+					}
+				}
+				break;
+
+			case LightSource::LT_Directional:
+				{
+					lights_pos_es[i] = float4(0, 0, 0, 0);
+					float3 dir_es = MathLib::transform_normal(light->Direction(), pvp.view);
+					lights_dir_es[i] = float4(dir_es.x(), dir_es.y(), dir_es.z(), 0);
+				}
+				break;
+
+			case LightSource::LT_Ambient:
+			default:
+				{
+					lights_pos_es[i] = float4(0, 0, 0, 0);
+					float3 dir_es = MathLib::transform_normal(float3(0, 1, 0), pvp.view);
+					lights_dir_es[i] = float4(dir_es.x(), dir_es.y(), dir_es.z(), 0);
+				}
+				break;
+			}
+
+			lights_falloff[i] = light->Falloff();
+			lights_attrib[i] = float4(attr & LightSource::LSA_NoDiffuse ? 0.0f : 1.0f,
+				attr & LightSource::LSA_NoSpecular ? 0.0f : 1.0f,
+				attr & LightSource::LSA_NoShadow ? -1.0f : 1.0f, light->ProjectiveTexture() ? 1.0f : -1.0f);
+			lights_type[i] = type;
+
+			int32_t shadowing_channel;
+			if (0 == (light->Attrib() & LightSource::LSA_NoShadow))
+			{
+				shadowing_channel = sm_light_indices_[light_batch[i]].second;
+			}
+			else
+			{
+				shadowing_channel = -1;
+			}
+			lights_shadowing_channel[i] = shadowing_channel;
+		}
+		*num_lights_param_ = static_cast<int32_t>(light_batch.size());
+
+		*lights_color_param_ = lights_color;
+		*lights_pos_es_param_ = lights_pos_es;
+		*lights_dir_es_param_ = lights_dir_es;
+		*lights_falloff_param_ = lights_falloff;
+		*lights_attrib_param_ = lights_attrib;
+		*lights_type_param_ = lights_type;
+		*lights_shadowing_channel_param_ = lights_shadowing_channel;
+		*light_index_tex_param_ = pvp.light_index_tex;
+
+		*g_buffer_tex_param_ = pvp.g_buffer_rt0_tex;
+		*depth_tex_param_ = pvp.g_buffer_depth_tex;
+		*light_volume_mv_param_ = pvp.inv_proj;
+
+		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+		re.BindFrameBuffer(pvp.lighting_buffer);
+		RenderTechniquePtr tech;
+		if (blend)
+		{
+			tech = technique_light_indexed_deferred_rendering_blend_;
+		}
+		else
+		{
+			tech = technique_light_indexed_deferred_rendering_no_blend_;
+		}
+		re.Render(*tech, *rl_quad_);
+	}
+#endif
 }
