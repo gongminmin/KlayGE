@@ -208,7 +208,11 @@ namespace KlayGE
 
 	bool D3D11RenderEngine::IsD3D11_1() const
 	{
+#if (_WIN32_WINNT >= 0x0602 /*_WIN32_WINNT_WIN8*/)
 		return is_d3d_11_1_;
+#else
+		return false;
+#endif
 	}
 
 	D3D_FEATURE_LEVEL D3D11RenderEngine::DeviceFeatureLevel() const
@@ -367,9 +371,9 @@ namespace KlayGE
 
 	void D3D11RenderEngine::D3DDevice(ID3D11DevicePtr const & device, ID3D11DeviceContextPtr const & imm_ctx, D3D_FEATURE_LEVEL feature_level)
 	{
+#if (_WIN32_WINNT >= 0x0602 /*_WIN32_WINNT_WIN8*/)
 		is_d3d_11_1_ = false;
 
-#if (_WIN32_WINNT >= 0x0602 /*_WIN32_WINNT_WIN8*/)
 		ID3D11Device1* d3d_device_1;
 		device->QueryInterface(IID_ID3D11Device1, reinterpret_cast<void**>(&d3d_device_1));
 		if (d3d_device_1)
