@@ -416,8 +416,7 @@ namespace KlayGE
 		technique_copy_shading_depth_ = dr_effect_->TechniqueByName("CopyShadingDepthTech");
 		technique_copy_depth_ = dr_effect_->TechniqueByName("CopyDepthTech");
 #ifdef LIGHT_INDEXED_DEFERRED
-		technique_draw_light_index_[0] = dr_effect_->TechniqueByName("DrawLightIndexFullScreen");
-		technique_draw_light_index_[1] = dr_effect_->TechniqueByName("DrawLightIndexNonFullScreen");
+		technique_draw_light_index_ = dr_effect_->TechniqueByName("DrawLightIndex");
 		technique_light_indexed_deferred_rendering_no_blend_ = dr_effect_->TechniqueByName("LightIndexedDeferredRenderingNoBlend");
 		technique_light_indexed_deferred_rendering_blend_ = dr_effect_->TechniqueByName("LightIndexedDeferredRenderingBlend");
 #endif
@@ -556,7 +555,6 @@ namespace KlayGE
 		lights_dir_es_param_ = dr_effect_->ParameterByName("lights_dir_es");
 		lights_falloff_param_ = dr_effect_->ParameterByName("lights_falloff");
 		lights_attrib_param_ = dr_effect_->ParameterByName("lights_attrib");
-		lights_type_param_ = dr_effect_->ParameterByName("lights_type");
 		lights_shadowing_channel_param_ = dr_effect_->ParameterByName("lights_shadowing_channel");
 		num_lights_param_ = dr_effect_->ParameterByName("num_lights");
 		light_index_tex_param_ = dr_effect_->ParameterByName("light_index_tex");
@@ -1070,25 +1068,28 @@ namespace KlayGE
 #ifdef LIGHT_INDEXED_DEFERRED
 			{
 				bool blend = false;
-				std::vector<int32_t> light_batch;
+				array<std::vector<int32_t>, LightSource::LT_NumLightTypes> light_batch;
 				uint32_t li = 0;
+				uint32_t nl = 0;
 				while (li < lights_.size())
 				{
 					LightSourcePtr const & light = lights_[li];
 					if (light->Enabled() && pvp.light_visibles[li])
 					{
-						light_batch.push_back(li);
+						light_batch[light->Type()].push_back(li);
+						++ nl;
 					}
 
 					++ li;
 
-					if ((32 == light_batch.size()) || (li == lights_.size()))
+					if ((32 == nl) || (li == lights_.size()))
 					{
 						this->DrawLightIndex(pvp, light_batch, index_in_pass, pass_type);
 						this->UpdateLightIndexedLighting(pvp, light_batch, blend);
 						blend = true;
+						nl = 0;
 
-						light_batch.clear();
+						light_batch.fill(std::vector<int32_t>());
 					}
 				}
 			}
@@ -2302,11 +2303,10 @@ namespace KlayGE
 	}
 
 #ifdef LIGHT_INDEXED_DEFERRED
-	void DeferredRenderingLayer::DrawLightIndex(PerViewport const & pvp, std::vector<int32_t> const & light_batch,
+	void DeferredRenderingLayer::DrawLightIndex(PerViewport const & pvp,
+		array<std::vector<int32_t>, LightSource::LT_NumLightTypes> const & light_batch,
 		int32_t index_in_pass, PassType pass_type)
 	{
-		BOOST_ASSERT(light_batch.size() <= 32);
-
 		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 
 		CameraPtr const & camera = pvp.frame_buffer->GetViewport()->camera;
@@ -2315,127 +2315,125 @@ namespace KlayGE
 		re.BindFrameBuffer(pvp.light_index_buffer);
 		pvp.light_index_buffer->Attached(FrameBuffer::ATT_Color0)->ClearColor(Color(0, 0, 0, 0));
 
+		uint32_t light_id = 1;
 		for (size_t i = 0; i < light_batch.size(); ++ i)
 		{
-			uint32_t light_id = 1UL << i;
-			float4 light_id_f4(((light_id & 0xFF) + 0.5f) / 255.0f,
-				(((light_id >> 8) & 0xFF) + 0.5f) / 255.0f, (((light_id >> 16) & 0xFF) + 0.5f) / 255.0f,
-				(((light_id >> 24) & 0xFF) + 0.5f) / 255.0f);
-			*light_id_param_ = light_id_f4;
-
-			LightSourcePtr const & light = lights_[light_batch[i]];
-			LightSource::LightType type = light->Type();
-
-			this->PrepareLightCamera(pvp, light, index_in_pass, pass_type);
-
-			RenderLayoutPtr const & rl = light_volume_rl_[type];
-
-			RenderTechniquePtr tech;
-			if ((LightSource::LT_Point == type) || (LightSource::LT_Spot == type))
+			for (size_t j = 0; j < light_batch[i].size(); ++ j)
 			{
-				re.Render(*technique_light_stencil_, *rl);
-				tech = technique_draw_light_index_[1];
-			}
-			else
-			{
-				tech = technique_draw_light_index_[0];
-			}
+				LightSourcePtr const & light = lights_[light_batch[i][j]];
+				LightSource::LightType type = light->Type();
+				if ((LightSource::LT_Point == type) || (LightSource::LT_Spot == type))
+				{
+					float4 light_id_f4(((light_id & 0xFF) + 0.5f) / 255.0f,
+						(((light_id >> 8) & 0xFF) + 0.5f) / 255.0f, (((light_id >> 16) & 0xFF) + 0.5f) / 255.0f,
+						(((light_id >> 24) & 0xFF) + 0.5f) / 255.0f);
+					*light_id_param_ = light_id_f4;
 
-			re.Render(*tech, *rl);
+					this->PrepareLightCamera(pvp, light, index_in_pass, pass_type);
+
+					RenderLayoutPtr const & rl = light_volume_rl_[type];
+					re.Render(*technique_light_stencil_, *rl);
+					re.Render(*technique_draw_light_index_, *rl);
+				}
+
+				light_id <<= 1;
+			}
 		}
 	}
 
-	void DeferredRenderingLayer::UpdateLightIndexedLighting(PerViewport const & pvp, std::vector<int32_t> const & light_batch, bool blend)
+	void DeferredRenderingLayer::UpdateLightIndexedLighting(PerViewport const & pvp,
+		array<std::vector<int32_t>, LightSource::LT_NumLightTypes> const & light_batch, bool blend)
 	{
-		BOOST_ASSERT(light_batch.size() <= 32);
-
-		std::vector<float4> lights_color(light_batch.size());
-		std::vector<float4> lights_pos_es(light_batch.size());
-		std::vector<float4> lights_dir_es(light_batch.size());
-		std::vector<float3> lights_falloff(light_batch.size());
-		std::vector<float4> lights_attrib(light_batch.size());
-		std::vector<int> lights_type(light_batch.size());
-		std::vector<int> lights_shadowing_channel(light_batch.size());
+		std::vector<float4> lights_color;
+		std::vector<float4> lights_pos_es;
+		std::vector<float4> lights_dir_es;
+		std::vector<float3> lights_falloff;
+		std::vector<float4> lights_attrib;
+		std::vector<int32_t> lights_shadowing_channel;
+		std::vector<int32_t> num_lights;
 		for (size_t i = 0; i < light_batch.size(); ++ i)
 		{
-			LightSourcePtr const & light = lights_[light_batch[i]];
-			LightSource::LightType type = light->Type();
-			int32_t attr = light->Attrib();
-
-			lights_color[i] = light->Color();
-
-			switch (type)
+			for (size_t j = 0; j < light_batch[i].size(); ++ j)
 			{
-			case LightSource::LT_Point:
-			case LightSource::LT_Spot:
-			case LightSource::LT_Sun:
+				LightSourcePtr const & light = lights_[light_batch[i][j]];
+				LightSource::LightType type = light->Type();
+				int32_t attr = light->Attrib();
+
+				lights_color.push_back(light->Color());
+
+				switch (type)
 				{
-					float3 const & p = light->Position();
-					float3 loc_es = MathLib::transform_coord(p, pvp.view);
-					lights_pos_es[i] = float4(loc_es.x(), loc_es.y(), loc_es.z(), 1);
+				case LightSource::LT_Point:
+				case LightSource::LT_Spot:
+				case LightSource::LT_Sun:
+					{
+						float3 const & p = light->Position();
+						float3 loc_es = MathLib::transform_coord(p, pvp.view);
+						lights_pos_es.push_back(float4(loc_es.x(), loc_es.y(), loc_es.z(), 1));
 
-					float3 dir_es(0, 0, 0);
-					if (LightSource::LT_Spot == type)
-					{
-						dir_es = MathLib::transform_normal(light->Direction(), pvp.view);
-					}
-					else if (LightSource::LT_Sun == type)
-					{
-						dir_es = MathLib::transform_normal(-light->Direction(), pvp.view);
-					}
-					lights_dir_es[i] = float4(dir_es.x(), dir_es.y(), dir_es.z(), 0);
+						float3 dir_es(0, 0, 0);
+						if (LightSource::LT_Spot == type)
+						{
+							dir_es = MathLib::transform_normal(light->Direction(), pvp.view);
+						}
+						else if (LightSource::LT_Sun == type)
+						{
+							dir_es = MathLib::transform_normal(-light->Direction(), pvp.view);
+						}
+						lights_dir_es.push_back(float4(dir_es.x(), dir_es.y(), dir_es.z(), 0));
 
-					if (LightSource::LT_Spot == type)
-					{
-						lights_pos_es[i].w() = light->CosOuterInner().x();
-						lights_dir_es[i].w() = light->CosOuterInner().y();
+						if (LightSource::LT_Spot == type)
+						{
+							lights_pos_es.back().w() = light->CosOuterInner().x();
+							lights_dir_es.back().w() = light->CosOuterInner().y();
+						}
 					}
+					break;
+
+				case LightSource::LT_Directional:
+					{
+						lights_pos_es.push_back(float4(0, 0, 0, 0));
+						float3 dir_es = MathLib::transform_normal(light->Direction(), pvp.view);
+						lights_dir_es.push_back(float4(dir_es.x(), dir_es.y(), dir_es.z(), 0));
+					}
+					break;
+
+				case LightSource::LT_Ambient:
+				default:
+					{
+						lights_pos_es.push_back(float4(0, 0, 0, 0));
+						float3 dir_es = MathLib::transform_normal(float3(0, 1, 0), pvp.view);
+						lights_dir_es.push_back(float4(dir_es.x(), dir_es.y(), dir_es.z(), 0));
+					}
+					break;
 				}
-				break;
 
-			case LightSource::LT_Directional:
+				lights_falloff.push_back(light->Falloff());
+				lights_attrib.push_back(float4(attr & LightSource::LSA_NoDiffuse ? 0.0f : 1.0f,
+					attr & LightSource::LSA_NoSpecular ? 0.0f : 1.0f,
+					attr & LightSource::LSA_NoShadow ? -1.0f : 1.0f, light->ProjectiveTexture() ? 1.0f : -1.0f));
+
+				int32_t shadowing_channel;
+				if (0 == (light->Attrib() & LightSource::LSA_NoShadow))
 				{
-					lights_pos_es[i] = float4(0, 0, 0, 0);
-					float3 dir_es = MathLib::transform_normal(light->Direction(), pvp.view);
-					lights_dir_es[i] = float4(dir_es.x(), dir_es.y(), dir_es.z(), 0);
+					shadowing_channel = sm_light_indices_[light_batch[i][j]].second;
 				}
-				break;
-
-			case LightSource::LT_Ambient:
-			default:
+				else
 				{
-					lights_pos_es[i] = float4(0, 0, 0, 0);
-					float3 dir_es = MathLib::transform_normal(float3(0, 1, 0), pvp.view);
-					lights_dir_es[i] = float4(dir_es.x(), dir_es.y(), dir_es.z(), 0);
+					shadowing_channel = -1;
 				}
-				break;
+				lights_shadowing_channel.push_back(shadowing_channel);
 			}
 
-			lights_falloff[i] = light->Falloff();
-			lights_attrib[i] = float4(attr & LightSource::LSA_NoDiffuse ? 0.0f : 1.0f,
-				attr & LightSource::LSA_NoSpecular ? 0.0f : 1.0f,
-				attr & LightSource::LSA_NoShadow ? -1.0f : 1.0f, light->ProjectiveTexture() ? 1.0f : -1.0f);
-			lights_type[i] = type;
-
-			int32_t shadowing_channel;
-			if (0 == (light->Attrib() & LightSource::LSA_NoShadow))
-			{
-				shadowing_channel = sm_light_indices_[light_batch[i]].second;
-			}
-			else
-			{
-				shadowing_channel = -1;
-			}
-			lights_shadowing_channel[i] = shadowing_channel;
+			num_lights.push_back(light_batch[i].size());
 		}
-		*num_lights_param_ = static_cast<int32_t>(light_batch.size());
+		*num_lights_param_ = num_lights;
 
 		*lights_color_param_ = lights_color;
 		*lights_pos_es_param_ = lights_pos_es;
 		*lights_dir_es_param_ = lights_dir_es;
 		*lights_falloff_param_ = lights_falloff;
 		*lights_attrib_param_ = lights_attrib;
-		*lights_type_param_ = lights_type;
 		*lights_shadowing_channel_param_ = lights_shadowing_channel;
 		*light_index_tex_param_ = pvp.light_index_tex;
 

@@ -30,10 +30,10 @@ namespace KlayGE
 		enum LightType
 		{
 			LT_Ambient = 0,
-			LT_Point,
-			LT_Directional,
-			LT_Spot,
 			LT_Sun,
+			LT_Directional,
+			LT_Point,
+			LT_Spot,
 
 			LT_NumLightTypes
 		};

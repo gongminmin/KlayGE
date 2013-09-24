@@ -106,7 +106,7 @@ namespace KlayGE
 
 		IndirectLightingLayerPtr il_layer;
 
-		std::vector<bool> light_visibles;
+		std::vector<char> light_visibles;
 
 #ifdef LIGHT_INDEXED_DEFERRED
 		FrameBufferPtr light_index_buffer;
@@ -247,9 +247,11 @@ namespace KlayGE
 		void AddTAA(PerViewport const & pvp);
 
 #ifdef LIGHT_INDEXED_DEFERRED
-		void DrawLightIndex(PerViewport const & pvp, std::vector<int32_t> const & light_batch,
+		void DrawLightIndex(PerViewport const & pvp,
+			array<std::vector<int32_t>, LightSource::LT_NumLightTypes> const & light_batch,
 			int32_t index_in_pass, PassType pass_type);
-		void UpdateLightIndexedLighting(PerViewport const & pvp, std::vector<int32_t> const & light_batch, bool blend);
+		void UpdateLightIndexedLighting(PerViewport const & pvp,
+			array<std::vector<int32_t>, LightSource::LT_NumLightTypes> const & light_batch, bool blend);
 #endif
 
 	private:
@@ -298,7 +300,7 @@ namespace KlayGE
 		RenderTechniquePtr technique_copy_shading_depth_;
 		RenderTechniquePtr technique_copy_depth_;
 #ifdef LIGHT_INDEXED_DEFERRED
-		array<RenderTechniquePtr, 2> technique_draw_light_index_;
+		RenderTechniquePtr technique_draw_light_index_;
 		RenderTechniquePtr technique_light_indexed_deferred_rendering_no_blend_;
 		RenderTechniquePtr technique_light_indexed_deferred_rendering_blend_;
 #endif
@@ -358,7 +360,6 @@ namespace KlayGE
 		RenderEffectParameterPtr lights_dir_es_param_;
 		RenderEffectParameterPtr lights_falloff_param_;
 		RenderEffectParameterPtr lights_attrib_param_;
-		RenderEffectParameterPtr lights_type_param_;
 		RenderEffectParameterPtr lights_shadowing_channel_param_;
 		RenderEffectParameterPtr num_lights_param_;
 		RenderEffectParameterPtr light_index_tex_param_;
