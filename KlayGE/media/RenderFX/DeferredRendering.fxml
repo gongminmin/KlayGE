@@ -921,13 +921,13 @@ float4 LightIndexedDeferredRenderingPS(float2 tc : TEXCOORD0, float3 view_dir : 
 	int light_id = 0;
 	int comp = 0;
 	int mask = 1;
-		
+
 	if (num_lights[LT_Ambient] > 0)
 	{
 		float n_dot_l = 0.5f + 0.5f * dot(lights_dir_es[light_id].xyz, normal);
 		lighting += CalcColor(n_dot_l, 0, 1, 1, lights_color[light_id], lights_attrib[light_id]);
 		++ light_id;
-		
+
 		mask *= 2;
 		if (mask >= 256)
 		{
@@ -935,7 +935,7 @@ float4 LightIndexedDeferredRenderingPS(float2 tc : TEXCOORD0, float3 view_dir : 
 			mask = 1;
 		}
 	}
-		
+
 	if (num_lights[LT_Sun] > 0)
 	{
 		float3 shadow = 1;
@@ -951,9 +951,9 @@ float4 LightIndexedDeferredRenderingPS(float2 tc : TEXCOORD0, float3 view_dir : 
 			float spec = roughness_term(normalize(dir - view_dir), normal, shininess).x;
 			lighting += CalcColor(n_dot_l, spec, 1, shadow, lights_color[light_id], lights_attrib[light_id]);
 		}
-			
+
 		++ light_id;
-		
+
 		mask *= 2;
 		if (mask >= 256)
 		{
@@ -961,7 +961,7 @@ float4 LightIndexedDeferredRenderingPS(float2 tc : TEXCOORD0, float3 view_dir : 
 			mask = 1;
 		}
 	}
-	
+
 	{
 		for (int i = 0; i < num_lights[LT_Directional]; ++ i, ++ light_id)
 		{
@@ -972,7 +972,7 @@ float4 LightIndexedDeferredRenderingPS(float2 tc : TEXCOORD0, float3 view_dir : 
 				float spec = roughness_term(normalize(dir - view_dir), normal, shininess).x;
 				lighting += CalcColor(n_dot_l, spec, 1, 1, lights_color[light_id], lights_attrib[light_id]);
 			}
-			
+
 			mask *= 2;
 			if (mask >= 256)
 			{
@@ -981,7 +981,7 @@ float4 LightIndexedDeferredRenderingPS(float2 tc : TEXCOORD0, float3 view_dir : 
 			}
 		}
 	}
-	
+
 	if (any(light_index))
 	{
 		for (int i = 0; i < num_lights[LT_Point]; ++ i, ++ light_id)
@@ -1001,13 +1001,13 @@ float4 LightIndexedDeferredRenderingPS(float2 tc : TEXCOORD0, float3 view_dir : 
 					{
 						shadow = NearestDepthUpsamplingShadow(tc, lights_shadowing_channel[light_id]).xyz;
 					}
-				
+
 					float spec = roughness_term(normalize(dir - view_dir), normal, shininess).x;
 					float atten = attenuation_term(lights_pos_es[light_id].xyz, pos_es.xyz, lights_falloff[light_id]);
 					lighting += CalcColor(n_dot_l, spec, atten, shadow, lights_color[light_id], lights_attrib[light_id]);
 				}
 			}
-			
+
 			mask *= 2;
 			if (mask >= 256)
 			{
@@ -1037,14 +1037,14 @@ float4 LightIndexedDeferredRenderingPS(float2 tc : TEXCOORD0, float3 view_dir : 
 						{
 							shadow = NearestDepthUpsamplingShadow(tc, lights_shadowing_channel[light_id]).xyz;
 						}
-						
+
 						float spec = roughness_term(normalize(dir - view_dir), normal, shininess).x;
 						float atten = spot * attenuation_term(lights_pos_es[light_id].xyz, pos_es.xyz, lights_falloff[light_id]);
 						lighting += CalcColor(n_dot_l, spec, atten, shadow, lights_color[light_id], lights_attrib[light_id]);
 					}
 				}
 			}
-			
+
 			mask *= 2;
 			if (mask >= 256)
 			{

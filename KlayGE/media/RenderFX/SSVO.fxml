@@ -145,8 +145,8 @@ float4 SSVOPS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Target
 			<state name="src_blend" value="dst_color"/>
 			<state name="dest_blend" value="zero"/>
 			<state name="blend_op_alpha" value="add"/>
-			<state name="src_blend_alpha" value="dst_alpha"/>
-			<state name="dest_blend_alpha" value="zero"/>
+			<state name="src_blend_alpha" value="zero"/>
+			<state name="dest_blend_alpha" value="dst_alpha"/>
 		</pass>
 	</technique>
 </effect>

@@ -37,7 +37,6 @@ namespace KlayGE
 		PC_GBuffer,
 		PC_ShadowMap,
 		PC_Shadowing,
-		PC_Lighting,
 		PC_IndirectLighting,
 		PC_Shading,
 		PC_SpecialShading,
@@ -97,8 +96,6 @@ namespace KlayGE
 		
 		PT_Shadowing = MakePassType<PRT_None, PTB_None, PC_Shadowing>::value,
 
-		PT_Lighting = MakePassType<PRT_None, PTB_None, PC_Lighting>::value,
-		
 		PT_IndirectLighting = MakePassType<PRT_None, PTB_None, PC_IndirectLighting>::value,
 		
 		PT_OpaqueShading = MakePassType<PRT_None, PTB_Opaque, PC_Shading>::value,

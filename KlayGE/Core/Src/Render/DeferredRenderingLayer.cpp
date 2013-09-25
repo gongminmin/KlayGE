@@ -861,8 +861,7 @@ namespace KlayGE
 
 		PerViewport& pvp = viewports_[vp_index];
 
-		if ((pass_cat != PC_Shadowing) && (pass_cat != PC_Lighting)
-			&& (pass_cat != PC_IndirectLighting) && (pass_cat != PC_Shading))
+		if ((pass_cat != PC_Shadowing) && (pass_cat != PC_IndirectLighting) && (pass_cat != PC_Shading))
 		{
 			typedef KLAYGE_DECLTYPE(visible_scene_objs_) VisibleSceneObjsType;
 			KLAYGE_FOREACH(VisibleSceneObjsType::reference deo, visible_scene_objs_)
@@ -1064,59 +1063,6 @@ namespace KlayGE
 			}
 			break;
 
-		case PC_Lighting:
-#ifdef LIGHT_INDEXED_DEFERRED
-			{
-				bool blend = false;
-				array<std::vector<int32_t>, LightSource::LT_NumLightTypes> light_batch;
-				uint32_t li = 0;
-				uint32_t nl = 0;
-				while (li < lights_.size())
-				{
-					LightSourcePtr const & light = lights_[li];
-					if (light->Enabled() && pvp.light_visibles[li])
-					{
-						light_batch[light->Type()].push_back(li);
-						++ nl;
-					}
-
-					++ li;
-
-					if ((32 == nl) || (li == lights_.size()))
-					{
-						this->DrawLightIndex(pvp, light_batch, index_in_pass, pass_type);
-						this->UpdateLightIndexedLighting(pvp, light_batch, blend);
-						blend = true;
-						nl = 0;
-
-						light_batch.fill(std::vector<int32_t>());
-					}
-				}
-			}
-#else
-			for (uint32_t li = 0; li < lights_.size(); ++ li)
-			{
-				LightSourcePtr const & light = lights_[li];
-				if (light->Enabled() && pvp.light_visibles[li])
-				{
-					LightSource::LightType type = light->Type();
-					int32_t attr = light->Attrib();
-
-					this->PrepareLightCamera(pvp, light, index_in_pass, pass_type);
-
-					*light_attrib_param_ = float4(attr & LightSource::LSA_NoDiffuse ? 0.0f : 1.0f,
-						attr & LightSource::LSA_NoSpecular ? 0.0f : 1.0f,
-						attr & LightSource::LSA_NoShadow ? -1.0f : 1.0f, light->ProjectiveTexture() ? 1.0f : -1.0f);
-					*light_color_param_ = light->Color();
-					*light_falloff_param_ = light->Falloff();
-
-					this->UpdateLighting(pvp, type, li);
-				}
-			}
-#endif
-			urv = App3DFramework::URV_Flushed;
-			break;
-
 		case PC_Shading:
 		case PC_SpecialShading:
 		default:
@@ -1124,11 +1070,63 @@ namespace KlayGE
 			{
 				if (PC_Shading == pass_cat)
 				{
+#ifdef LIGHT_INDEXED_DEFERRED
+					bool blend = false;
+					array<std::vector<int32_t>, LightSource::LT_NumLightTypes> light_batch;
+					uint32_t li = 0;
+					uint32_t nl = 0;
+					while (li < lights_.size())
+					{
+						LightSourcePtr const & light = lights_[li];
+						if (light->Enabled() && pvp.light_visibles[li])
+						{
+							light_batch[light->Type()].push_back(li);
+							++ nl;
+						}
+
+						++ li;
+
+						if ((32 == nl) || (li == lights_.size()))
+						{
+							this->DrawLightIndex(pvp, light_batch, index_in_pass, pass_type);
+							this->UpdateLightIndexedLighting(pvp, light_batch, blend);
+							blend = true;
+							nl = 0;
+
+							light_batch.fill(std::vector<int32_t>());
+						}
+					}
+#else
+					for (uint32_t li = 0; li < lights_.size(); ++ li)
+					{
+						LightSourcePtr const & light = lights_[li];
+						if (light->Enabled() && pvp.light_visibles[li])
+						{
+							LightSource::LightType type = light->Type();
+							int32_t attr = light->Attrib();
+
+							this->PrepareLightCamera(pvp, light, index_in_pass, pass_type);
+
+							*light_attrib_param_ = float4(attr & LightSource::LSA_NoDiffuse ? 0.0f : 1.0f,
+								attr & LightSource::LSA_NoSpecular ? 0.0f : 1.0f,
+								attr & LightSource::LSA_NoShadow ? -1.0f : 1.0f, light->ProjectiveTexture() ? 1.0f : -1.0f);
+							*light_color_param_ = light->Color();
+							*light_falloff_param_ = light->Falloff();
+
+							this->UpdateLighting(pvp, type, li);
+						}
+					}
+#endif
+
 					if (PTB_Opaque == pass_tb)
 					{
-						this->UpdateIndirectAndSSVO(pvp);
+						this->MergeIndirectLighting(pvp);
 					}
 					this->UpdateShading(pvp, pass_tb);
+					if (PTB_Opaque == pass_tb)
+					{
+						this->MergeSSVO(pvp, pass_tb);
+					}
 					urv = App3DFramework::URV_Flushed;
 				}
 				else
@@ -1436,7 +1434,6 @@ namespace KlayGE
 							}
 						}
 
-						this->AppendLightingPassScanCode(vpi, i);
 						this->AppendShadingPassScanCode(vpi, i);
 					}
 				}
@@ -1628,13 +1625,6 @@ namespace KlayGE
 	{
 		pass_scaned_.push_back(this->ComposePassScanCode(vp_index, PT_IndirectLighting, light_index, 0));
 	}
-	
-	void DeferredRenderingLayer::AppendLightingPassScanCode(uint32_t vp_index, uint32_t g_buffer_index)
-	{
-		PassTargetBuffer const pass_tb = static_cast<PassTargetBuffer>(g_buffer_index);
-		pass_scaned_.push_back(this->ComposePassScanCode(vp_index,
-			ComposePassType(PRT_None, pass_tb, PC_Lighting), 0, 0));
-	}
 
 	void DeferredRenderingLayer::AppendShadingPassScanCode(uint32_t vp_index, uint32_t g_buffer_index)
 	{
@@ -1770,7 +1760,7 @@ namespace KlayGE
 
 				sm_buffer_->GetViewport()->camera = sm_camera;
 
-				if ((LightSource::LT_Sun == type) && (pass_cat != PC_Shadowing) && (pass_cat != PC_Lighting))
+				if ((LightSource::LT_Sun == type) && (pass_cat != PC_Shadowing) && (pass_cat != PC_Shading))
 				{
 					curr_cascade_index_ = index_in_pass;
 				}
@@ -1836,7 +1826,7 @@ namespace KlayGE
 					break;
 
 				case LightSource::LT_Point:
-					if ((PC_Shadowing == pass_cat) || (PC_Lighting == pass_cat))
+					if ((PC_Shadowing == pass_cat) || (PC_Shading == pass_cat))
 					{
 						float4x4 light_model = MathLib::scaling(light_scale, light_scale, light_scale)
 							* MathLib::to_matrix(light->Rotation()) * MathLib::translation(p);
@@ -2079,25 +2069,12 @@ namespace KlayGE
 		re.Render(*technique_lights_[type], *rl);
 	}
 
-	void DeferredRenderingLayer::UpdateIndirectAndSSVO(PerViewport const & pvp)
+	void DeferredRenderingLayer::MergeIndirectLighting(PerViewport const & pvp)
 	{
 		if ((indirect_lighting_enabled_ && !(pvp.attrib & VPAM_NoGI)) && (illum_ != 1))
 		{
 			pvp.il_layer->CalcIndirectLighting(pvp.prev_merged_shading_tex, pvp.proj_to_prev);
 			this->AccumulateToLightingTex(pvp);
-		}
-
-		if (pvp.ssvo_enabled && !(pvp.attrib & VPAM_NoSSVO))
-		{
-			ssvo_pp_->InputPin(0, pvp.g_buffer_rt0_tex);
-			ssvo_pp_->InputPin(1, pvp.g_buffer_depth_tex);
-			ssvo_pp_->OutputPin(0, pvp.small_ssvo_tex);
-			ssvo_pp_->Apply();
-
-			ssvo_blur_pp_->InputPin(0, pvp.small_ssvo_tex);
-			ssvo_blur_pp_->InputPin(1, pvp.g_buffer_depth_tex);
-			ssvo_blur_pp_->OutputPin(0, pvp.lighting_tex);
-			ssvo_blur_pp_->Apply();
 		}
 	}
 
@@ -2105,7 +2082,7 @@ namespace KlayGE
 	{
 		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 
-		if (0 == g_buffer_index)
+		if (Opaque_GBuffer == g_buffer_index)
 		{
 			re.BindFrameBuffer(pvp.curr_merged_shading_buffer);
 		}
@@ -2128,6 +2105,29 @@ namespace KlayGE
 			re.CurFrameBuffer()->Attached(FrameBuffer::ATT_Color0)->Discard();
 		}
 		re.Render(*technique_shading_, *rl_quad_);
+	}
+
+	void DeferredRenderingLayer::MergeSSVO(PerViewport const & pvp, uint32_t g_buffer_index)
+	{
+		if (pvp.ssvo_enabled && !(pvp.attrib & VPAM_NoSSVO))
+		{
+			ssvo_pp_->InputPin(0, pvp.g_buffer_rt0_tex);
+			ssvo_pp_->InputPin(1, pvp.g_buffer_depth_tex);
+			ssvo_pp_->OutputPin(0, pvp.small_ssvo_tex);
+			ssvo_pp_->Apply();
+
+			ssvo_blur_pp_->InputPin(0, pvp.small_ssvo_tex);
+			ssvo_blur_pp_->InputPin(1, pvp.g_buffer_depth_tex);
+			if (Opaque_GBuffer == g_buffer_index)
+			{
+				ssvo_blur_pp_->OutputPin(0, pvp.curr_merged_shading_tex);
+			}
+			else
+			{
+				ssvo_blur_pp_->OutputPin(0, pvp.shading_tex);
+			}
+			ssvo_blur_pp_->Apply();
+		}
 	}
 
 	void DeferredRenderingLayer::AddSSR(PerViewport const & pvp)

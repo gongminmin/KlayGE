@@ -227,7 +227,6 @@ namespace KlayGE
 		void AppendCascadedShadowPassScanCode(uint32_t vp_index, uint32_t light_index);
 		void AppendShadowingPassScanCode(uint32_t vp_index, uint32_t g_buffer_index, uint32_t light_index);
 		void AppendIndirectLightingPassScanCode(uint32_t vp_index, uint32_t light_index);
-		void AppendLightingPassScanCode(uint32_t vp_index, uint32_t g_buffer_index);
 		void AppendShadingPassScanCode(uint32_t vp_index, uint32_t g_buffer_index);
 		void PreparePVP(PerViewport& pvp);
 		void GenerateDepthBuffer(PerViewport const & pvp, uint32_t g_buffer_index);
@@ -239,8 +238,9 @@ namespace KlayGE
 		void PostGenerateShadowMap(PerViewport const & pvp, int32_t org_no, int32_t index_in_pass);
 		void UpdateShadowing(PerViewport const & pvp, int32_t org_no);
 		void UpdateLighting(PerViewport const & pvp, LightSource::LightType type, int32_t org_no);
-		void UpdateIndirectAndSSVO(PerViewport const & pvp);
+		void MergeIndirectLighting(PerViewport const & pvp);
 		void UpdateShading(PerViewport const & pvp, uint32_t g_buffer_index);
+		void MergeSSVO(PerViewport const & pvp, uint32_t g_buffer_index);
 		void MergeShadingAndDepth(PerViewport const & pvp, uint32_t g_buffer_index);
 		void AddSSR(PerViewport const & pvp);
 		void AddAtmospheric(PerViewport const & pvp);
