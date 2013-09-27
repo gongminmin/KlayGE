@@ -4,7 +4,7 @@ SET(CMAKE_RELEASE_POSTFIX "" CACHE STRING "add a postfix, usually empty on windo
 SET(CMAKE_RELWITHDEBINFO_POSTFIX "" CACHE STRING "add a postfix, usually empty on windows")
 SET(CMAKE_MINSIZEREL_POSTFIX "" CACHE STRING "add a postfix, usually empty on windows")
 
-SET(GCC_VER "47")
+SET(GCC_VER "48")
 SET(BOOST_VER "1_53")
 
 FUNCTION(ADD_POST_BUILD TARGET_NAME SUBFOLDER)

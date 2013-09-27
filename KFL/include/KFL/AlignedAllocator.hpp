@@ -145,7 +145,7 @@ namespace KlayGE
 
 		void destroy(pointer p)
 		{
-			destroy_t<pointer, has_trivial_destructor<value_type>::value>()(p);
+			destroy_t<pointer, is_trivially_destructible<value_type>::value>()(p);
 		}
 
 		size_type max_size() const throw()

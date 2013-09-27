@@ -144,7 +144,7 @@ namespace
 	};
 
 #ifdef KLAYGE_PLATFORM_WINDOWS
-#ifdef KLAYGE_COMPILER_GCC
+#if defined(KLAYGE_COMPILER_GCC) && !defined(__MINGW64__)
 	typedef enum _LOGICAL_PROCESSOR_RELATIONSHIP
 	{
 		RelationProcessorCore,

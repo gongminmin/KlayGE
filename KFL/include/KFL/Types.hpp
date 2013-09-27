@@ -366,7 +366,15 @@ private:
 	namespace KlayGE
 	{
 		using std::add_lvalue_reference;
-		using std::has_trivial_destructor;
+#if defined(KLAYGE_COMPILER_GCC) && (KLAYGE_COMPILER_VERSION >= 48)
+		using std::is_trivially_destructible;
+#else
+		template <typename T>
+		struct is_trivially_destructible
+		{
+			static const bool value = std::has_trivial_destructor<T>::value;
+		};
+#endif
 		using std::is_same;
 		using std::remove_reference;
 		using std::conditional;
@@ -377,7 +385,11 @@ private:
 	namespace KlayGE
 	{
 		using boost::add_lvalue_reference;
-		using boost::has_trivial_destructor;
+		template <typename T>
+		struct is_trivially_destructible
+		{
+			static const bool value = boost::has_trivial_destructor<T>::value;
+		};
 		using boost::is_same;
 		using boost::remove_reference;
 		template <bool B, typename T, typename F>

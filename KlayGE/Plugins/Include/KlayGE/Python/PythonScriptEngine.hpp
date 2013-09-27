@@ -33,6 +33,12 @@
 
 #pragma once
 
+#if defined(__MINGW32__)
+#ifndef __NO_MINGW_LFS
+#define __NO_MINGW_LFS
+#endif
+#endif
+
 #include <Python.h>
 #include <vector>
 #include <string>
