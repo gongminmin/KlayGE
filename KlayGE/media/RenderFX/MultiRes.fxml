@@ -230,7 +230,7 @@ float4 UpsamplingInterpolatePS(float2 tc : TEXCOORD0) : SV_Target
 		{
 			float2 ntc = (t0 + kernel4[i]) * delta.zw;
 			float4 color = src_tex.SampleLevel(point_sampler, ntc, cur_lower_level.x);
- 			total_color += float4(color.rgb, 1) * weight[i] * color.a;
+			total_color += float4(color.rgb, 1) * weight[i] * color.a;
 		}
 
 		finer += float4(total_color.rgb / max(total_color.a, 0.001f), 1);

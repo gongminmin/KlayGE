@@ -70,6 +70,7 @@ namespace KlayGE
 		TexturePtr g_buffer_ds_tex;
 		TexturePtr g_buffer_depth_tex;
 		TexturePtr g_buffer_rt0_backup_tex;
+		array<TexturePtr, 5> g_buffer_min_max_depth_texs;
 
 		FrameBufferPtr lighting_buffer;
 		TexturePtr lighting_tex;
@@ -248,10 +249,9 @@ namespace KlayGE
 
 #ifdef LIGHT_INDEXED_DEFERRED
 		void DrawLightIndex(PerViewport const & pvp,
-			array<std::vector<int32_t>, LightSource::LT_NumLightTypes> const & light_batch,
-			int32_t index_in_pass, PassType pass_type);
-		void UpdateLightIndexedLighting(PerViewport const & pvp,
-			array<std::vector<int32_t>, LightSource::LT_NumLightTypes> const & light_batch, bool blend);
+			array<std::vector<int32_t>, LightSource::LT_NumLightTypes> const & light_batch);
+		void UpdateLightIndexedLighting(PerViewport const & pvp, bool blend);
+		void CreateDepthMinMaxMap(PerViewport const & pvp);
 #endif
 
 	private:
@@ -354,15 +354,23 @@ namespace KlayGE
 		RenderEffectParameterPtr cascaded_shadow_map_tex_array_param_;
 		array<RenderEffectParameterPtr, CascadedShadowLayer::MAX_NUM_CASCADES> cascaded_shadow_map_texs_param_;
 #ifdef LIGHT_INDEXED_DEFERRED
-		RenderEffectParameterPtr light_id_param_;
+		RenderEffectParameterPtr min_max_depth_tex_param_;
 		RenderEffectParameterPtr lights_color_param_;
 		RenderEffectParameterPtr lights_pos_es_param_;
 		RenderEffectParameterPtr lights_dir_es_param_;
 		RenderEffectParameterPtr lights_falloff_param_;
 		RenderEffectParameterPtr lights_attrib_param_;
 		RenderEffectParameterPtr lights_shadowing_channel_param_;
+		RenderEffectParameterPtr lights_size_param_;
 		RenderEffectParameterPtr num_lights_param_;
 		RenderEffectParameterPtr light_index_tex_param_;
+		RenderEffectParameterPtr light_index_tex_width_height_param_;
+		RenderEffectParameterPtr tile_scale_param_;
+		RenderEffectParameterPtr camera_proj_param_;
+		RenderEffectParameterPtr tc_to_tile_scale_param_;
+
+		PostProcessPtr depth_to_min_max_pp_;
+		PostProcessPtr reduce_min_max_pp_;
 #endif
 
 		std::vector<SceneObject*> visible_scene_objs_;

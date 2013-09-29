@@ -27,4 +27,31 @@
 		</output>
 		<shader effect="DepthToSM.fxml" tech="DepthToESM"/>
 	</post_processor>
+
+	<post_processor name="DepthToMinMax">
+		<params>
+			<param name="offset"/>
+			<param name="tc_scale"/>
+		</params>
+		<input>
+			<pin name="src_tex"/>
+		</input>
+		<output>
+			<pin name="output"/>
+		</output>
+		<shader effect="DepthToSM.fxml" tech="DepthToMinMax"/>
+	</post_processor>
+	<post_processor name="ReduceMinMax">
+		<params>
+			<param name="offset"/>
+			<param name="tc_scale"/>
+		</params>
+		<input>
+			<pin name="src_tex"/>
+		</input>
+		<output>
+			<pin name="output"/>
+		</output>
+		<shader effect="DepthToSM.fxml" tech="ReduceMinMax"/>
+	</post_processor>
 </post_processors>

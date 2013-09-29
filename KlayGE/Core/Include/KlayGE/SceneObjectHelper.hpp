@@ -41,7 +41,7 @@ namespace KlayGE
 	class KLAYGE_CORE_API SceneObjectSkyBox : public SceneObjectHelper
 	{
 	public:
-		SceneObjectSkyBox(uint32_t attrib = 0);
+		explicit SceneObjectSkyBox(uint32_t attrib = 0);
 		virtual ~SceneObjectSkyBox()
 		{
 		}

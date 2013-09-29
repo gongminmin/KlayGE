@@ -61,4 +61,68 @@ float4 DepthToESMPS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Tar
 			<state name="pixel_shader" value="DepthToESMPS()"/>
 		</pass>
 	</technique>
+	
+	<parameter type="float2" name="offset"/>
+	<parameter type="float2" name="tc_scale"/>
+
+	<shader>
+		<![CDATA[
+float4 DepthToMinMaxPS(float2 tc : TEXCOORD0) : SV_Target
+{
+	float z00 = src_tex.SampleLevel(point_sampler, tc * tc_scale + float2(-offset.x, -offset.y), 0).x;
+	float z01 = src_tex.SampleLevel(point_sampler, tc * tc_scale + float2(+offset.x, -offset.y), 0).x;
+	float z10 = src_tex.SampleLevel(point_sampler, tc * tc_scale + float2(-offset.x, +offset.y), 0).x;
+	float z11 = src_tex.SampleLevel(point_sampler, tc * tc_scale + float2(+offset.x, +offset.y), 0).x;
+
+	float min_depth = z00;
+	float max_depth = z00;
+	min_depth = min(min_depth, z01);
+	max_depth = max(max_depth, z01);
+	min_depth = min(min_depth, z10);
+	max_depth = max(max_depth, z10);
+	min_depth = min(min_depth, z11);
+	max_depth = max(max_depth, z11);
+
+	return float4(min_depth, max_depth, 0, 0);
+}
+
+float4 ReduceMinMaxPS(float2 tc : TEXCOORD0) : SV_Target
+{
+	float2 z00 = src_tex.Sample(point_sampler, tc * tc_scale + float2(-offset.x, -offset.y)).xy;
+	float2 z01 = src_tex.Sample(point_sampler, tc * tc_scale + float2(+offset.x, -offset.y)).xy;
+	float2 z10 = src_tex.Sample(point_sampler, tc * tc_scale + float2(-offset.x, +offset.y)).xy;
+	float2 z11 = src_tex.Sample(point_sampler, tc * tc_scale + float2(+offset.x, +offset.y)).xy;
+
+	float min_depth = z00.x;
+	float max_depth = z00.y;
+	min_depth = min(min_depth, z01.x);
+	max_depth = max(max_depth, z01.y);
+	min_depth = min(min_depth, z10.x);
+	max_depth = max(max_depth, z10.y);
+	min_depth = min(min_depth, z11.x);
+	max_depth = max(max_depth, z11.y);
+
+	return float4(min_depth, max_depth, 0, 0);
+}
+		]]>
+	</shader>
+
+	<technique name="DepthToMinMax">
+		<pass name="p0">
+			<state name="depth_enable" value="false"/>
+			<state name="depth_write_mask" value="false"/>
+
+			<state name="vertex_shader" value="PostProcessVS()"/>
+			<state name="pixel_shader" value="DepthToMinMaxPS()"/>
+		</pass>
+	</technique>
+	<technique name="ReduceMinMax">
+		<pass name="p0">
+			<state name="depth_enable" value="false"/>
+			<state name="depth_write_mask" value="false"/>
+
+			<state name="vertex_shader" value="PostProcessVS()"/>
+			<state name="pixel_shader" value="ReduceMinMaxPS()"/>
+		</pass>
+	</technique>
 </effect>

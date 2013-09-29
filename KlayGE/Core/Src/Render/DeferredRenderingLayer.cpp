@@ -549,15 +549,23 @@ namespace KlayGE
 			cascaded_shadow_map_texs_param_[3] = dr_effect_->ParameterByName("cascaded_shadow_map_3_tex");
 		}
 #ifdef LIGHT_INDEXED_DEFERRED
-		light_id_param_ = dr_effect_->ParameterByName("light_id");
+		min_max_depth_tex_param_ = dr_effect_->ParameterByName("min_max_depth_tex");
 		lights_color_param_ = dr_effect_->ParameterByName("lights_color");
 		lights_pos_es_param_ = dr_effect_->ParameterByName("lights_pos_es");
 		lights_dir_es_param_ = dr_effect_->ParameterByName("lights_dir_es");
 		lights_falloff_param_ = dr_effect_->ParameterByName("lights_falloff");
 		lights_attrib_param_ = dr_effect_->ParameterByName("lights_attrib");
 		lights_shadowing_channel_param_ = dr_effect_->ParameterByName("lights_shadowing_channel");
+		lights_size_param_ = dr_effect_->ParameterByName("lights_size");
 		num_lights_param_ = dr_effect_->ParameterByName("num_lights");
 		light_index_tex_param_ = dr_effect_->ParameterByName("light_index_tex");
+		light_index_tex_width_height_param_ = dr_effect_->ParameterByName("light_index_tex_width_height");
+		tile_scale_param_ = dr_effect_->ParameterByName("tile_scale");
+		camera_proj_param_ = dr_effect_->ParameterByName("camera_proj");
+		tc_to_tile_scale_param_ = dr_effect_->ParameterByName("tc_to_tile_scale");
+
+		depth_to_min_max_pp_ = SyncLoadPostProcess("DepthToSM.ppml", "DepthToMinMax");
+		reduce_min_max_pp_ = SyncLoadPostProcess("DepthToSM.ppml", "ReduceMinMax");
 #endif
 
 		this->SetCascadedShadowType(CSLT_Auto);
@@ -667,6 +675,31 @@ namespace KlayGE
 				EAH_GPU_Read | EAH_GPU_Write | EAH_Generate_Mips, nullptr);
 		pvp.g_buffer_rt0_backup_tex = rf.MakeTexture2D(width, height, 1, 1, fmt8, 1, 0,
 			EAH_GPU_Read, nullptr);
+		{
+			ElementFormat min_max_depth_fmt;
+			if (EF_R16F == depth_fmt)
+			{
+				min_max_depth_fmt = EF_GR16F;
+			}
+			else if (EF_R32F == depth_fmt)
+			{
+				min_max_depth_fmt = EF_GR32F;
+			}
+			else
+			{
+				min_max_depth_fmt = depth_fmt;
+			}
+
+			uint32_t w = std::max(1U, (width + 1) / 2);
+			uint32_t h = std::max(1U, (height + 1) / 2);
+			for (size_t i = 0; i < pvp.g_buffer_min_max_depth_texs.size(); ++ i)
+			{
+				pvp.g_buffer_min_max_depth_texs[i] = rf.MakeTexture2D(w, h, 1, 1, min_max_depth_fmt, 1, 0,
+					EAH_GPU_Read | EAH_GPU_Write, nullptr);
+				w = std::max(1U, (w + 1) / 2);
+				h = std::max(1U, (h + 1) / 2);
+			}
+		}
 		RenderViewPtr g_buffer_rt0_view = rf.Make2DRenderView(*pvp.g_buffer_rt0_tex, 0, 1, 0);
 		RenderViewPtr g_buffer_rt1_view = rf.Make2DRenderView(*pvp.g_buffer_rt1_tex, 0, 1, 0);
 		RenderViewPtr g_buffer_depth_view = rf.Make2DRenderView(*pvp.g_buffer_depth_tex, 0, 1, 0);
@@ -809,9 +842,9 @@ namespace KlayGE
 
 			fmt = EF_ARGB8;
 		}
-		pvp.light_index_tex = rf.MakeTexture2D(width, height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
+		pvp.light_index_tex = rf.MakeTexture2D((width + 31) / 32, (height + 31) / 32,
+			1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
 		pvp.light_index_buffer->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*pvp.light_index_tex, 0, 1, 0));
-		pvp.light_index_buffer->Attach(FrameBuffer::ATT_DepthStencil, ds_view);
 #endif
 	}
 
@@ -1088,8 +1121,8 @@ namespace KlayGE
 
 						if ((32 == nl) || (li == lights_.size()))
 						{
-							this->DrawLightIndex(pvp, light_batch, index_in_pass, pass_type);
-							this->UpdateLightIndexedLighting(pvp, light_batch, blend);
+							this->DrawLightIndex(pvp, light_batch);
+							this->UpdateLightIndexedLighting(pvp, blend);
 							blend = true;
 							nl = 0;
 
@@ -1704,6 +1737,10 @@ namespace KlayGE
 		}
 
 		pvp.g_buffer_depth_tex->BuildMipSubLevels();
+
+#ifdef LIGHT_INDEXED_DEFERRED
+		this->CreateDepthMinMaxMap(pvp);
+#endif
 	}
 
 	void DeferredRenderingLayer::RenderDecals(PerViewport const & pvp, PassType pass_type)
@@ -2304,52 +2341,34 @@ namespace KlayGE
 
 #ifdef LIGHT_INDEXED_DEFERRED
 	void DeferredRenderingLayer::DrawLightIndex(PerViewport const & pvp,
-		array<std::vector<int32_t>, LightSource::LT_NumLightTypes> const & light_batch,
-		int32_t index_in_pass, PassType pass_type)
+		array<std::vector<int32_t>, LightSource::LT_NumLightTypes> const & light_batch)
 	{
 		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-
-		CameraPtr const & camera = pvp.frame_buffer->GetViewport()->camera;
-		pvp.light_index_buffer->GetViewport()->camera = camera;
 
 		re.BindFrameBuffer(pvp.light_index_buffer);
 		pvp.light_index_buffer->Attached(FrameBuffer::ATT_Color0)->ClearColor(Color(0, 0, 0, 0));
 
-		uint32_t light_id = 1;
-		for (size_t i = 0; i < light_batch.size(); ++ i)
-		{
-			for (size_t j = 0; j < light_batch[i].size(); ++ j)
-			{
-				LightSourcePtr const & light = lights_[light_batch[i][j]];
-				LightSource::LightType type = light->Type();
-				if ((LightSource::LT_Point == type) || (LightSource::LT_Spot == type))
-				{
-					float4 light_id_f4(((light_id & 0xFF) + 0.5f) / 255.0f,
-						(((light_id >> 8) & 0xFF) + 0.5f) / 255.0f, (((light_id >> 16) & 0xFF) + 0.5f) / 255.0f,
-						(((light_id >> 24) & 0xFF) + 0.5f) / 255.0f);
-					*light_id_param_ = light_id_f4;
+		*min_max_depth_tex_param_ = pvp.g_buffer_min_max_depth_texs[4];
 
-					this->PrepareLightCamera(pvp, light, index_in_pass, pass_type);
+		uint32_t w = pvp.light_index_tex->Width(0);
+		uint32_t h = pvp.light_index_tex->Height(0);
+		*light_index_tex_width_height_param_ = float4(static_cast<float>(w),
+			static_cast<float>(h), 1.0f / w, 1.0f / h);
 
-					RenderLayoutPtr const & rl = light_volume_rl_[type];
-					re.Render(*technique_light_stencil_, *rl);
-					re.Render(*technique_draw_light_index_, *rl);
-				}
+		uint32_t const TILE_SIZE = 32;
+		w = (pvp.g_buffer_depth_tex->Width(0) + TILE_SIZE - 1) & ~(TILE_SIZE - 1);
+		h = (pvp.g_buffer_depth_tex->Height(0) + TILE_SIZE - 1) & ~(TILE_SIZE - 1);
+		*tile_scale_param_ = float2(w / (2.0f * TILE_SIZE), h / (2.0f * TILE_SIZE));
 
-				light_id <<= 1;
-			}
-		}
-	}
+		*camera_proj_param_ = pvp.proj;
 
-	void DeferredRenderingLayer::UpdateLightIndexedLighting(PerViewport const & pvp,
-		array<std::vector<int32_t>, LightSource::LT_NumLightTypes> const & light_batch, bool blend)
-	{
 		std::vector<float4> lights_color;
 		std::vector<float4> lights_pos_es;
 		std::vector<float4> lights_dir_es;
 		std::vector<float3> lights_falloff;
 		std::vector<float4> lights_attrib;
 		std::vector<int32_t> lights_shadowing_channel;
+		std::vector<float> lights_size;
 		std::vector<int32_t> num_lights;
 		for (size_t i = 0; i < light_batch.size(); ++ i)
 		{
@@ -2423,6 +2442,34 @@ namespace KlayGE
 					shadowing_channel = -1;
 				}
 				lights_shadowing_channel.push_back(shadowing_channel);
+
+				float size = 0;
+				if ((LightSource::LT_Point == type) || (LightSource::LT_Spot == type))
+				{
+					const float4 RGB_TO_LUM(0.2126f, 0.7152f, 0.0722f, 0);
+					float lum = MathLib::dot(light->Color(), RGB_TO_LUM);
+					float3 const & falloff = light->Falloff();
+					float d;
+					if (abs(falloff.z()) < 1e-6f)
+					{
+						if (abs(falloff.y()) < 1e-6f)
+						{
+							d = 100;
+						}
+						else
+						{
+							d = abs(falloff.y()) < 1e-6f ? 1 : -(falloff.x() - lum * 255) / falloff.y();
+						}
+					}
+					else
+					{
+						float delta = falloff.y() * falloff.y() - 4 * falloff.z() * (falloff.x() - lum * 255);
+						d = delta < 0 ? 1 : (-falloff.y() + sqrt(delta)) / (2 * falloff.z());
+					}
+
+					size = d * light_scale_;
+				}
+				lights_size.push_back(size);
 			}
 
 			num_lights.push_back(light_batch[i].size());
@@ -2435,8 +2482,19 @@ namespace KlayGE
 		*lights_falloff_param_ = lights_falloff;
 		*lights_attrib_param_ = lights_attrib;
 		*lights_shadowing_channel_param_ = lights_shadowing_channel;
-		*light_index_tex_param_ = pvp.light_index_tex;
+		*lights_size_param_ = lights_size;
 
+		re.Render(*technique_draw_light_index_, *rl_quad_);
+	}
+
+	void DeferredRenderingLayer::UpdateLightIndexedLighting(PerViewport const & pvp, bool blend)
+	{
+		uint32_t w = pvp.g_buffer_depth_tex->Width(0);
+		uint32_t h = pvp.g_buffer_depth_tex->Height(0);
+		uint32_t const TILE_SIZE = 32;
+		*tc_to_tile_scale_param_ = float2(static_cast<float>(w) / ((w + TILE_SIZE - 1) & ~(TILE_SIZE - 1)),
+			static_cast<float>(h) / ((h + TILE_SIZE - 1) & ~(TILE_SIZE - 1)));
+		*light_index_tex_param_ = pvp.light_index_tex;
 		*g_buffer_tex_param_ = pvp.g_buffer_rt0_tex;
 		*depth_tex_param_ = pvp.g_buffer_depth_tex;
 		*light_volume_mv_param_ = pvp.inv_proj;
@@ -2453,6 +2511,30 @@ namespace KlayGE
 			tech = technique_light_indexed_deferred_rendering_no_blend_;
 		}
 		re.Render(*tech, *rl_quad_);
+	}
+
+	void DeferredRenderingLayer::CreateDepthMinMaxMap(PerViewport const & pvp)
+	{
+		uint32_t w = pvp.g_buffer_depth_tex->Width(0);
+		uint32_t h = pvp.g_buffer_depth_tex->Height(0);
+		depth_to_min_max_pp_->SetParam(0, float2(0.5f / w, 0.5f / h));
+		depth_to_min_max_pp_->SetParam(1, float2(static_cast<float>((w + 1) & ~1) / w,
+			static_cast<float>((h + 1) & ~1) / h));
+		depth_to_min_max_pp_->InputPin(0, pvp.g_buffer_depth_tex);
+		depth_to_min_max_pp_->OutputPin(0, pvp.g_buffer_min_max_depth_texs[0]);
+		depth_to_min_max_pp_->Apply();
+
+		for (uint32_t i = 1; i < pvp.g_buffer_min_max_depth_texs.size(); ++ i)
+		{
+			w = pvp.g_buffer_min_max_depth_texs[i - 1]->Width(0);
+			h = pvp.g_buffer_min_max_depth_texs[i - 1]->Height(0);
+			reduce_min_max_pp_->SetParam(0, float2(0.5f / w, 0.5f / h));
+			reduce_min_max_pp_->SetParam(1, float2(static_cast<float>((w + 1) & ~1) / w,
+				static_cast<float>((h + 1) & ~1) / h));
+			reduce_min_max_pp_->InputPin(0, pvp.g_buffer_min_max_depth_texs[i - 1]);
+			reduce_min_max_pp_->OutputPin(0, pvp.g_buffer_min_max_depth_texs[i]);
+			reduce_min_max_pp_->Apply();
+		}
 	}
 #endif
 }
