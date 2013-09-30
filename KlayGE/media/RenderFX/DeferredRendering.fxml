@@ -878,6 +878,8 @@ void CopyDepthPS(float2 tc : TEXCOORD0,
 		<parameter type="float4" name="lights_attrib" array_size="32"/>
 		<parameter type="int" name="lights_shadowing_channel" array_size="32"/>
 		<parameter type="float" name="lights_size" array_size="32"/>
+		<parameter type="float3" name="lights_aabb_min" array_size="32"/>
+		<parameter type="float3" name="lights_aabb_max" array_size="32"/>
 		<parameter type="int" name="num_lights" array_size="5"/>
 	</cbuffer>
 	<parameter type="texture2D" name="light_index_tex"/>
@@ -973,11 +975,15 @@ float4 DrawLightIndexPS(float2 tc : TEXCOORD0) : SV_Target
 	{
 		for (int i = 0; i < num_lights[LT_Spot]; ++ i, ++ light_id)
 		{
+			float3 min_pt = lights_aabb_min[light_id];
+			float3 max_pt = lights_aabb_max[light_id];
+
 			bool overlap = true;
 			for (int j = 0; j < 6; ++ j)
 			{
-				float d = dot(planes[j], float4(lights_pos_es[light_id].xyz, 1));
-				overlap = overlap && (d > -lights_size[light_id]);
+				float4 plane = planes[j];
+				float3 v0 = plane.xyz < 0 ? min_pt : max_pt;
+				overlap = overlap & (dot(plane, float4(v0, 1)) >= 0);
 			}
 
 			if (overlap)
