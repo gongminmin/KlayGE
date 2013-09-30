@@ -9,7 +9,6 @@
 
 	<parameter type="float4x4" name="model"/>
 	<parameter type="float4" name="light_color"/>
-	<parameter type="float3" name="light_falloff"/>
 	<parameter type="int2" name="light_is_projective"/>
 
 	<parameter type="texture2D" name="projective_map_2d_tex"/>
@@ -39,11 +38,6 @@ void LightSourceProxyVS(float4 pos : POSITION,
 
 float4 LightSourceProxyPS(float3 pos_os : TEXCOORD0, float3 normal : TEXCOORD1) : SV_Target
 {
-	float atten = 1;
-	if (dot(light_falloff, light_falloff) > 0)
-	{
-		atten = attenuation_term(0, pos_os, light_falloff);	
-	}
 	float4 clr = light_color;
 	if (light_is_projective.x)
 	{
@@ -60,7 +54,7 @@ float4 LightSourceProxyPS(float3 pos_os : TEXCOORD0, float3 normal : TEXCOORD1) 
 		}
 		clr *= proj_clr;
 	}
-	return atten * (saturate(dot(normalize(normal), float3(0, 1, 0))) + 0.2f) * clr;
+	return (saturate(dot(normalize(normal), float3(0, 1, 0))) + 0.2f) * clr;
 }
 		]]>
 	</shader>
@@ -71,62 +65,6 @@ float4 LightSourceProxyPS(float3 pos_os : TEXCOORD0, float3 normal : TEXCOORD1) 
 
 			<state name="vertex_shader" value="LightSourceProxyVS()"/>
 			<state name="pixel_shader" value="LightSourceProxyPS()"/>
-		</pass>
-	</technique>
-
-	<shader>
-		<![CDATA[
-void LightSourceProxySpecialShadingVS(float4 pos : POSITION,
-			float2 texcoord : TEXCOORD0,
-			float4 tangent_quat : TANGENT,
-			out float3 oPosOS : TEXCOORD0,
-			out float4 oPos : SV_Position)
-{
-	pos = float4(pos.xyz * pos_extent + pos_center, 1);
-	oPos = mul(pos, mvp);
-	oPosOS = pos.xyz;
-}
-
-float4 LightSourceProxySpecialShadingPS(float3 pos_os : TEXCOORD0) : SV_Target
-{
-	float4 clr = light_color;
-	if (light_is_projective.x)
-	{
-		float4 proj_clr;
-		if (light_is_projective.y)
-		{
-			proj_clr = projective_map_cube_tex.Sample(linear_sampler, pos_os);
-		}
-		else
-		{
-			float2 tc = pos_os.xy;
-			tc.y *= KLAYGE_FLIPPING;
-			proj_clr = projective_map_2d_tex.Sample(linear_sampler, tc * 0.5f + 0.5f);
-		}
-		clr *= proj_clr;
-	}
-	return clr;
-}
-		]]>
-	</shader>
-
-	<technique name="LightSourceProxySpecialShadingTech">
-		<pass name="p0">
-			<state name="cull_mode" value="back"/>
-			<state name="depth_enable" value="true"/>
-			<state name="depth_func" value="equal"/>
-			<state name="depth_write_mask" value="false"/>
-
-			<state name="blend_enable" value="true"/>
-			<state name="blend_op" value="add"/>
-			<state name="src_blend" value="one"/>
-			<state name="dest_blend" value="one"/>
-			<state name="blend_op_alpha" value="add"/>
-			<state name="src_blend_alpha" value="src_alpha"/>
-			<state name="dest_blend_alpha" value="zero"/>
-
-			<state name="vertex_shader" value="LightSourceProxySpecialShadingVS()"/>
-			<state name="pixel_shader" value="LightSourceProxySpecialShadingPS()"/>
 		</pass>
 	</technique>
 </effect>

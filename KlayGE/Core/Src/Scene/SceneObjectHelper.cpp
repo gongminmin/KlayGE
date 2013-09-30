@@ -126,6 +126,15 @@ namespace KlayGE
 		model_scaling_ = MathLib::scaling(s);
 	}
 
+	void SceneObjectLightSourceProxy::Pass(PassType type)
+	{
+		if (PT_SimpleForward == type)
+		{
+			SceneObjectHelper::Pass(type);
+		}
+		this->Visible(PT_SimpleForward == type);
+	}
+
 	void SceneObjectLightSourceProxy::Init(LightSourcePtr const & light, RenderModelPtr const & light_model)
 	{
 		renderable_ = light_model;
@@ -212,6 +221,15 @@ namespace KlayGE
 	void SceneObjectCameraProxy::Scaling(float3 const & s)
 	{
 		model_scaling_ = MathLib::scaling(s);
+	}
+
+	void SceneObjectCameraProxy::Pass(PassType type)
+	{
+		if (PT_SimpleForward == type)
+		{
+			SceneObjectHelper::Pass(type);
+		}
+		this->Visible(PT_SimpleForward == type);
 	}
 
 	void SceneObjectCameraProxy::Init(CameraPtr const & camera, RenderModelPtr const & camera_model)

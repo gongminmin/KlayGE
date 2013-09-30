@@ -180,7 +180,7 @@ namespace KlayGE
 				soaabb->visible = (!(obj->Attrib() & SceneObject::SOA_Overlay) && obj->Visible());
 				
 				if (obj->Attrib() & SceneObject::SOA_Cullable)
- 				{
+				{
 					AABBox aabb_ws;
 					if (obj->Attrib() & SceneObject::SOA_Moveable)
 					{

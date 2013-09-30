@@ -479,7 +479,6 @@ namespace KlayGE
 	void StaticMesh::BuildMeshInfo()
 	{
 		opacity_map_enabled_ = false;
-		effect_attrs_ = 0;
 
 		RenderModelPtr model = model_.lock();
 
@@ -1903,15 +1902,8 @@ namespace KlayGE
 	RenderableLightSourceProxy::RenderableLightSourceProxy(RenderModelPtr const & model, std::wstring const & name)
 			: StaticMesh(model, name)
 	{
-		RenderEffectPtr effect = SyncLoadRenderEffect("LightSourceProxy.fxml");
-
-		if (deferred_effect_)
-		{
-			this->BindDeferredEffect(effect);
-			special_shading_tech_ = effect->TechniqueByName("LightSourceProxySpecialShadingTech");
-		}
-
-		this->Technique(effect->TechniqueByName("LightSourceProxy"));
+		this->Technique(SyncLoadRenderEffect("LightSourceProxy.fxml")->TechniqueByName("LightSourceProxy"));
+		effect_attrs_ |= EA_SimpleForward;
 	}
 
 	void RenderableLightSourceProxy::Technique(RenderTechniquePtr const & tech)
@@ -1927,7 +1919,6 @@ namespace KlayGE
 			tc_extent_param_ = technique_->Effect().ParameterByName("tc_extent");
 
 			light_color_param_ = technique_->Effect().ParameterByName("light_color");
-			light_falloff_param_ = technique_->Effect().ParameterByName("light_falloff");
 			light_is_projective_param_ = technique_->Effect().ParameterByName("light_is_projective");
 			projective_map_2d_tex_param_ = technique_->Effect().ParameterByName("projective_map_2d_tex");
 			projective_map_cube_tex_param_ = technique_->Effect().ParameterByName("projective_map_cube_tex");
@@ -1939,10 +1930,6 @@ namespace KlayGE
 		if (light_color_param_)
 		{
 			*light_color_param_ = light_->Color();
-		}
-		if (light_falloff_param_)
-		{
-			*light_falloff_param_ = light_->Falloff();
 		}
 		if (light_is_projective_param_)
 		{
@@ -1994,18 +1981,8 @@ namespace KlayGE
 	RenderableCameraProxy::RenderableCameraProxy(RenderModelPtr const & model, std::wstring const & name)
 			: StaticMesh(model, name)
 	{
-		RenderEffectPtr effect = SyncLoadRenderEffect("CameraProxy.fxml");
-
-		if (deferred_effect_)
-		{
-			this->BindDeferredEffect(effect);
-			depth_tech_ = effect->TechniqueByName("DepthCameraProxyTech");
-			gbuffer_rt0_tech_ = effect->TechniqueByName("GBufferCameraProxyRT0Tech");
-			gbuffer_rt1_tech_ = effect->TechniqueByName("GBufferCameraProxyRT1Tech");
-			gbuffer_mrt_tech_ = effect->TechniqueByName("GBufferCameraProxyMRTTech");
-		}
-
-		this->Technique(effect->TechniqueByName("CameraProxy"));
+		this->Technique(SyncLoadRenderEffect("CameraProxy.fxml")->TechniqueByName("CameraProxy"));
+		effect_attrs_ |= EA_SimpleForward;
 	}
 
 	void RenderableCameraProxy::Technique(RenderTechniquePtr const & tech)

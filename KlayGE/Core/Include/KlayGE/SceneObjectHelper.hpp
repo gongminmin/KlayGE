@@ -64,6 +64,8 @@ namespace KlayGE
 		void Scaling(float x, float y, float z);
 		void Scaling(float3 const & s);
 
+		virtual void Pass(PassType type) KLAYGE_OVERRIDE;
+
 	private:
 		void Init(LightSourcePtr const & light, RenderModelPtr const & light_model);
 		void Init(LightSourcePtr const & light,
@@ -87,6 +89,8 @@ namespace KlayGE
 
 		void Scaling(float x, float y, float z);
 		void Scaling(float3 const & s);
+
+		virtual void Pass(PassType type) KLAYGE_OVERRIDE;
 
 	private:
 		void Init(CameraPtr const & camera, RenderModelPtr const & camera_model);
