@@ -28,7 +28,8 @@ namespace KlayGE
 		: type_(type), attrib_(0), enabled_(true),
 			color_(0, 0, 0, 0),
 			quat_(Quaternion::Identity()),
-			pos_(float3::Zero())
+			pos_(float3::Zero()),
+			range_(-1)
 	{
 	}
 
@@ -93,6 +94,11 @@ namespace KlayGE
 	{
 		color_ = float4(clr.x(), clr.y(), clr.z(),
 			MathLib::dot(clr, float3(0.2126f, 0.7152f, 0.0722f)));
+
+		if (range_ < 0)
+		{
+			this->Range(-1);
+		}
 	}
 
 	float3 const & LightSource::Position() const
@@ -139,6 +145,11 @@ namespace KlayGE
 	void LightSource::Falloff(float3 const & fall_off)
 	{
 		falloff_ = fall_off;
+
+		if (range_ < 0)
+		{
+			this->Range(-1);
+		}
 	}
 
 	float LightSource::CosInnerAngle() const
@@ -162,6 +173,41 @@ namespace KlayGE
 
 	void LightSource::OuterAngle(float /*angle*/)
 	{
+	}
+
+	float LightSource::Range() const
+	{
+		return range_ >= 0 ? range_ : -range_;
+	}
+	
+	void LightSource::Range(float range)
+	{
+		if (range <= 0)
+		{
+			const float4 RGB_TO_LUM(0.2126f, 0.7152f, 0.0722f, 0);
+			float lum = MathLib::dot(color_, RGB_TO_LUM);
+			if (abs(falloff_.z()) < 1e-6f)
+			{
+				if (abs(falloff_.y()) < 1e-6f)
+				{
+					range_ = 100;
+				}
+				else
+				{
+					range_ = abs(falloff_.y()) < 1e-6f ? 1 : -(falloff_.x() - lum * 255) / falloff_.y();
+				}
+			}
+			else
+			{
+				float delta = falloff_.y() * falloff_.y() - 4 * falloff_.z() * (falloff_.x() - lum * 255);
+				range_ = delta < 0 ? 1 : (-falloff_.y() + sqrt(delta)) / (2 * falloff_.z());
+			}
+			range_ = -std::min(range_, 100.0f);
+		}
+		else
+		{
+			range_ = range;
+		}
 	}
 
 	TexturePtr const & LightSource::ProjectiveTexture() const

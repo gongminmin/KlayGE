@@ -553,10 +553,9 @@ namespace KlayGE
 		lights_color_param_ = dr_effect_->ParameterByName("lights_color");
 		lights_pos_es_param_ = dr_effect_->ParameterByName("lights_pos_es");
 		lights_dir_es_param_ = dr_effect_->ParameterByName("lights_dir_es");
-		lights_falloff_param_ = dr_effect_->ParameterByName("lights_falloff");
+		lights_falloff_range_param_ = dr_effect_->ParameterByName("lights_falloff_range");
 		lights_attrib_param_ = dr_effect_->ParameterByName("lights_attrib");
 		lights_shadowing_channel_param_ = dr_effect_->ParameterByName("lights_shadowing_channel");
-		lights_size_param_ = dr_effect_->ParameterByName("lights_size");
 		lights_aabb_min_param_ = dr_effect_->ParameterByName("lights_aabb_min");
 		lights_aabb_max_param_ = dr_effect_->ParameterByName("lights_aabb_max");
 		num_lights_param_ = dr_effect_->ParameterByName("num_lights");
@@ -1485,28 +1484,7 @@ namespace KlayGE
 		PerViewport& pvp = viewports_[vp_index];
 		LightSourcePtr const & light = lights_[light_index];
 
-		const float4 RGB_TO_LUM(0.2126f, 0.7152f, 0.0722f, 0);
-		float lum = MathLib::dot(light->Color(), RGB_TO_LUM);
-		float3 const & falloff = light->Falloff();
-		float d;
-		if (abs(falloff.z()) < 1e-6f)
-		{
-			if (abs(falloff.y()) < 1e-6f)
-			{
-				d = 100;
-			}
-			else
-			{
-				d = abs(falloff.y()) < 1e-6f ? 1 : -(falloff.x() - lum * 255) / falloff.y();
-			}
-		}
-		else
-		{
-			float delta = falloff.y() * falloff.y() - 4 * falloff.z() * (falloff.x() - lum * 255);
-			d = delta < 0 ? 1 : (-falloff.y() + sqrt(delta)) / (2 * falloff.z());
-		}
-		float light_scale = std::min(d * 0.01f, 1.0f) * light_scale_;
-
+		float light_scale = std::min(light->Range() * 0.01f, 1.0f) * light_scale_;
 		switch (light->Type())
 		{
 		case LightSource::LT_Spot:
@@ -1829,27 +1807,7 @@ namespace KlayGE
 				float3 loc_es = MathLib::transform_coord(p, pvp.view);
 				float4 light_pos_es_actived = float4(loc_es.x(), loc_es.y(), loc_es.z(), 1);
 
-				const float4 RGB_TO_LUM(0.2126f, 0.7152f, 0.0722f, 0);
-				float lum = MathLib::dot(light->Color(), RGB_TO_LUM);
-				float3 const & falloff = light->Falloff();
-				float d;
-				if (abs(falloff.z()) < 1e-6f)
-				{
-					if (abs(falloff.y()) < 1e-6f)
-					{
-						d = 100;
-					}
-					else
-					{
-						d = abs(falloff.y()) < 1e-6f ? 1 : -(falloff.x() - lum * 255) / falloff.y();
-					}
-				}
-				else
-				{
-					float delta = falloff.y() * falloff.y() - 4 * falloff.z() * (falloff.x() - lum * 255);
-					d = delta < 0 ? 1 : (-falloff.y() + sqrt(delta)) / (2 * falloff.z());
-				}
-				float light_scale = std::min(d * 0.01f, 1.0f) * light_scale_;
+				float light_scale = std::min(light->Range() * 0.01f, 1.0f) * light_scale_;
 				switch (type)
 				{
 				case LightSource::LT_Spot:
@@ -2367,10 +2325,9 @@ namespace KlayGE
 		std::vector<float4> lights_color;
 		std::vector<float4> lights_pos_es;
 		std::vector<float4> lights_dir_es;
-		std::vector<float3> lights_falloff;
+		std::vector<float4> lights_falloff_range;
 		std::vector<float4> lights_attrib;
 		std::vector<int32_t> lights_shadowing_channel;
-		std::vector<float> lights_size;
 		std::vector<float3> lights_aabb_min;
 		std::vector<float3> lights_aabb_max;
 		std::vector<int32_t> num_lights;
@@ -2431,7 +2388,6 @@ namespace KlayGE
 					break;
 				}
 
-				lights_falloff.push_back(light->Falloff());
 				lights_attrib.push_back(float4(attr & LightSource::LSA_NoDiffuse ? 0.0f : 1.0f,
 					attr & LightSource::LSA_NoSpecular ? 0.0f : 1.0f,
 					attr & LightSource::LSA_NoShadow ? -1.0f : 1.0f, light->ProjectiveTexture() ? 1.0f : -1.0f));
@@ -2447,42 +2403,23 @@ namespace KlayGE
 				}
 				lights_shadowing_channel.push_back(shadowing_channel);
 
-				float size = 0;
+				float range = 0;
 				AABBox aabb(float3(0, 0, 0), float3(0, 0, 0));
 				if ((LightSource::LT_Point == type) || (LightSource::LT_Spot == type))
 				{
-					const float4 RGB_TO_LUM(0.2126f, 0.7152f, 0.0722f, 0);
-					float lum = MathLib::dot(light->Color(), RGB_TO_LUM);
-					float3 const & falloff = light->Falloff();
-					float d;
-					if (abs(falloff.z()) < 1e-6f)
-					{
-						if (abs(falloff.y()) < 1e-6f)
-						{
-							d = 100;
-						}
-						else
-						{
-							d = abs(falloff.y()) < 1e-6f ? 1 : -(falloff.x() - lum * 255) / falloff.y();
-						}
-					}
-					else
-					{
-						float delta = falloff.y() * falloff.y() - 4 * falloff.z() * (falloff.x() - lum * 255);
-						d = delta < 0 ? 1 : (-falloff.y() + sqrt(delta)) / (2 * falloff.z());
-					}
-					size = std::min(d, 100.0f) * light_scale_;
+					range = light->Range() * light_scale_;
 
 					if (LightSource::LT_Spot == type)
 					{
 						float4x4 light_to_view = light->SMCamera(0)->InverseViewMatrix() * pvp.view;
 						float const scale = light->CosOuterInner().w();
-						float4x4 light_model = MathLib::scaling(scale * size * 0.01f, scale * size * 0.01f, size * 0.01f);
+						float4x4 light_model = MathLib::scaling(range * 0.01f * float3(scale, scale, 1));
 						float4x4 light_mv = light_model * light_to_view;
 						aabb = MathLib::convert_to_aabbox(MathLib::transform_obb(cone_obb_, light_mv));
 					}
 				}
-				lights_size.push_back(size);
+				lights_falloff_range.push_back(float4(light->Falloff().x(), light->Falloff().y(),
+					light->Falloff().z(), range));
 				lights_aabb_min.push_back(aabb.Min());
 				lights_aabb_max.push_back(aabb.Max());
 			}
@@ -2494,10 +2431,9 @@ namespace KlayGE
 		*lights_color_param_ = lights_color;
 		*lights_pos_es_param_ = lights_pos_es;
 		*lights_dir_es_param_ = lights_dir_es;
-		*lights_falloff_param_ = lights_falloff;
+		*lights_falloff_range_param_ = lights_falloff_range;
 		*lights_attrib_param_ = lights_attrib;
 		*lights_shadowing_channel_param_ = lights_shadowing_channel;
-		*lights_size_param_ = lights_size;
 		*lights_aabb_min_param_ = lights_aabb_min;
 		*lights_aabb_max_param_ = lights_aabb_max;
 

@@ -84,6 +84,8 @@ namespace KlayGE
 		virtual float CosOuterAngle() const;
 		virtual void OuterAngle(float angle);
 		virtual float4 const & CosOuterInner() const;
+		virtual float Range() const;
+		virtual void Range(float range);
 
 		virtual TexturePtr const & ProjectiveTexture() const;
 		virtual void ProjectiveTexture(TexturePtr const & tex);
@@ -99,6 +101,7 @@ namespace KlayGE
 		Quaternion quat_;
 		float3 pos_;
 		float3 falloff_;
+		float range_;
 
 		function<void(LightSource&, float, float)> update_func_;
 	};

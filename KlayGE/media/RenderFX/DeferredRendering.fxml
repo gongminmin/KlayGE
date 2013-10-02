@@ -874,10 +874,9 @@ void CopyDepthPS(float2 tc : TEXCOORD0,
 		<parameter type="float4" name="lights_color" array_size="32"/>
 		<parameter type="float4" name="lights_pos_es" array_size="32"/>
 		<parameter type="float4" name="lights_dir_es" array_size="32"/>
-		<parameter type="float3" name="lights_falloff" array_size="32"/>
+		<parameter type="float4" name="lights_falloff_range" array_size="32"/>
 		<parameter type="float4" name="lights_attrib" array_size="32"/>
 		<parameter type="int" name="lights_shadowing_channel" array_size="32"/>
-		<parameter type="float" name="lights_size" array_size="32"/>
 		<parameter type="float3" name="lights_aabb_min" array_size="32"/>
 		<parameter type="float3" name="lights_aabb_max" array_size="32"/>
 		<parameter type="int" name="num_lights" array_size="5"/>
@@ -966,7 +965,7 @@ float4 DrawLightIndexPS(float2 tc : TEXCOORD0) : SV_Target
 			for (int j = 0; j < 6; ++ j)
 			{
 				float d = dot(planes[j], float4(lights_pos_es[light_id].xyz, 1));
-				overlap = overlap && (d > -lights_size[light_id]);
+				overlap = overlap && (d > -lights_falloff_range[light_id].w);
 			}
 
 			if (overlap)
@@ -1155,7 +1154,7 @@ float4 LightIndexedDeferredRenderingPS(float2 tc : TEXCOORD0, float3 view_dir : 
 			{
 				float3 dir = lights_pos_es[light_id].xyz - pos_es;
 				float dist = length(dir);
-				if (dist < lights_size[light_id])
+				if (dist < lights_falloff_range[light_id].w)
 				{
 					dir /= dist;
 					float n_dot_l = dot(normal, dir);
@@ -1168,7 +1167,7 @@ float4 LightIndexedDeferredRenderingPS(float2 tc : TEXCOORD0, float3 view_dir : 
 						}
 
 						float spec = roughness_term(normalize(dir - view_dir), normal, shininess).x;
-						float atten = attenuation_term(lights_pos_es[light_id].xyz, pos_es.xyz, lights_falloff[light_id]);
+						float atten = attenuation_term(lights_pos_es[light_id].xyz, pos_es.xyz, lights_falloff_range[light_id].xyz);
 						lighting += CalcColor(n_dot_l, spec, atten, shadow, lights_color[light_id], lights_attrib[light_id]);
 					}
 				}
@@ -1198,7 +1197,7 @@ float4 LightIndexedDeferredRenderingPS(float2 tc : TEXCOORD0, float3 view_dir : 
 				{
 					float3 dir = lights_pos_es[light_id].xyz - pos_es;
 					float dist = length(dir);
-					if (dist < lights_size[light_id])
+					if (dist < lights_falloff_range[light_id].w)
 					{
 						dir /= dist;
 						float n_dot_l = dot(normal, dir);
@@ -1211,7 +1210,7 @@ float4 LightIndexedDeferredRenderingPS(float2 tc : TEXCOORD0, float3 view_dir : 
 							}
 
 							float spec = roughness_term(normalize(dir - view_dir), normal, shininess).x;
-							float atten = spot * attenuation_term(lights_pos_es[light_id].xyz, pos_es.xyz, lights_falloff[light_id]);
+							float atten = spot * attenuation_term(lights_pos_es[light_id].xyz, pos_es.xyz, lights_falloff_range[light_id].xyz);
 							lighting += CalcColor(n_dot_l, spec, atten, shadow, lights_color[light_id], lights_attrib[light_id]);
 						}
 					}
