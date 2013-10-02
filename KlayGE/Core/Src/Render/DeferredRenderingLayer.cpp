@@ -557,6 +557,8 @@ namespace KlayGE
 		lights_attrib_param_ = dr_effect_->ParameterByName("lights_attrib");
 		lights_shadowing_channel_param_ = dr_effect_->ParameterByName("lights_shadowing_channel");
 		lights_size_param_ = dr_effect_->ParameterByName("lights_size");
+		lights_aabb_min_param_ = dr_effect_->ParameterByName("lights_aabb_min");
+		lights_aabb_max_param_ = dr_effect_->ParameterByName("lights_aabb_max");
 		num_lights_param_ = dr_effect_->ParameterByName("num_lights");
 		light_index_tex_param_ = dr_effect_->ParameterByName("light_index_tex");
 		light_index_tex_width_height_param_ = dr_effect_->ParameterByName("light_index_tex_width_height");
@@ -1503,7 +1505,7 @@ namespace KlayGE
 			float delta = falloff.y() * falloff.y() - 4 * falloff.z() * (falloff.x() - lum * 255);
 			d = delta < 0 ? 1 : (-falloff.y() + sqrt(delta)) / (2 * falloff.z());
 		}
-		float light_scale = d * 0.01f * light_scale_;
+		float light_scale = std::min(d * 0.01f, 1.0f) * light_scale_;
 
 		switch (light->Type())
 		{
@@ -1847,7 +1849,7 @@ namespace KlayGE
 					float delta = falloff.y() * falloff.y() - 4 * falloff.z() * (falloff.x() - lum * 255);
 					d = delta < 0 ? 1 : (-falloff.y() + sqrt(delta)) / (2 * falloff.z());
 				}
-				float light_scale = d * 0.01f * light_scale_;
+				float light_scale = std::min(d * 0.01f, 1.0f) * light_scale_;
 				switch (type)
 				{
 				case LightSource::LT_Spot:
@@ -2469,7 +2471,7 @@ namespace KlayGE
 						float delta = falloff.y() * falloff.y() - 4 * falloff.z() * (falloff.x() - lum * 255);
 						d = delta < 0 ? 1 : (-falloff.y() + sqrt(delta)) / (2 * falloff.z());
 					}
-					size = d * light_scale_;
+					size = std::min(d, 100.0f) * light_scale_;
 
 					if (LightSource::LT_Spot == type)
 					{
@@ -2477,7 +2479,7 @@ namespace KlayGE
 						float const scale = light->CosOuterInner().w();
 						float4x4 light_model = MathLib::scaling(scale * size * 0.01f, scale * size * 0.01f, size * 0.01f);
 						float4x4 light_mv = light_model * light_to_view;
-						aabb = MathLib::convert_to_aabbox(cone_obb_);
+						aabb = MathLib::convert_to_aabbox(MathLib::transform_obb(cone_obb_, light_mv));
 					}
 				}
 				lights_size.push_back(size);
@@ -2496,8 +2498,8 @@ namespace KlayGE
 		*lights_attrib_param_ = lights_attrib;
 		*lights_shadowing_channel_param_ = lights_shadowing_channel;
 		*lights_size_param_ = lights_size;
-		*(dr_effect_->ParameterByName("lights_aabb_min")) = lights_aabb_min;
-		*(dr_effect_->ParameterByName("lights_aabb_max")) = lights_aabb_max;
+		*lights_aabb_min_param_ = lights_aabb_min;
+		*lights_aabb_max_param_ = lights_aabb_max;
 
 		re.Render(*technique_draw_light_index_, *rl_quad_);
 	}

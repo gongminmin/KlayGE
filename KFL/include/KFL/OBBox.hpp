@@ -60,9 +60,7 @@ namespace KlayGE
 			Vector_T<T, 3> const & extent)
 			: center_(center), extent_(extent)
 		{
-			UNREF_PARAM(x_axis);
-			UNREF_PARAM(y_axis);
-			rotation_ = MathLib::unit_axis_to_unit_axis(Vector_T<T, 3>(0, 0, 1), MathLib::normalize(z_axis));
+			rotation_ = MathLib::to_quaternion(x_axis, y_axis, z_axis, 0);
 		}
 		OBBox_T(Vector_T<T, 3> const & center,
 			Quaternion_T<T> const & rotation,

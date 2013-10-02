@@ -1618,14 +1618,17 @@ namespace KlayGE
 			{
 				tangent_quat = -tangent_quat;
 			}
-			T const bias = T(1) / ((1UL << (bits - 1)) - 1);
-			if (tangent_quat.w() < bias)
+			if (bits > 0)
 			{
-				T const factor = sqrt(1 - bias * bias);
-				tangent_quat.x() *= factor;
-				tangent_quat.y() *= factor;
-				tangent_quat.z() *= factor;
-				tangent_quat.w() = bias;
+				T const bias = T(1) / ((1UL << (bits - 1)) - 1);
+				if (tangent_quat.w() < bias)
+				{
+					T const factor = sqrt(1 - bias * bias);
+					tangent_quat.x() *= factor;
+					tangent_quat.y() *= factor;
+					tangent_quat.z() *= factor;
+					tangent_quat.w() = bias;
+				}
 			}
 			if (k < 0)
 			{
@@ -2147,7 +2150,7 @@ namespace KlayGE
 			for (; iter != last; ++ iter)
 			{
 				diff = Vector_T<value_type, 3>(*iter) - center;
-				for (int j = 0; j < 3; ++j)
+				for (int j = 0; j < 3; ++ j)
 				{
 					float d = dot(diff, axis[j]);
 					if (d < pmin[j])

@@ -891,6 +891,12 @@ void CopyDepthPS(float2 tc : TEXCOORD0,
 	
 	<shader>
 		<![CDATA[
+#if KLAYGE_D3D11
+#if KLAYGE_SHADER_MODEL >= 4
+#define INTEGER_SUPPORT 1
+#endif
+#endif
+ 
 void DrawLightIndexVS(float4 pos : POSITION,
 			out float2 oTexCoord : TEXCOORD0,
 			out float4 oPos : SV_Position)
@@ -927,14 +933,20 @@ float4 DrawLightIndexPS(float2 tc : TEXCOORD0) : SV_Target
 	planes[4] = float4(0.0f, 0.0f, -1.0f, far_plane);
 	planes[5] = float4(0.0f, 0.0f, +1.0f, -near_plane);
 
+#if INTEGER_SUPPORT
+	uint light_id = 0;
+	uint accum = 0;
+#else
 	float all_light_id[4] = { 0, 0, 0, 0 };
 	int light_id = 0;
 	int comp = 0;
 	int mask = 1;
 	int accum = 0;
+#endif
 
 	{
 		light_id = num_lights[LT_Ambient] + num_lights[LT_Sun] + num_lights[LT_Directional];
+#if !INTEGER_SUPPORT
 		for (int i = 0; i < light_id; ++ i)
 		{
 			mask *= 2;
@@ -944,6 +956,7 @@ float4 DrawLightIndexPS(float2 tc : TEXCOORD0) : SV_Target
 				mask = 1;
 			}
 		}
+#endif
 	}
 	
 	{
@@ -958,9 +971,14 @@ float4 DrawLightIndexPS(float2 tc : TEXCOORD0) : SV_Target
 
 			if (overlap)
 			{
+#if INTEGER_SUPPORT
+				accum |= (1UL << light_id);
+#else
 				accum += mask;
+#endif
 			}
-			
+
+#if !INTEGER_SUPPORT
 			mask *= 2;
 			if (mask >= 256)
 			{
@@ -969,6 +987,7 @@ float4 DrawLightIndexPS(float2 tc : TEXCOORD0) : SV_Target
 				mask = 1;
 				accum = 0;
 			}
+#endif
 		}
 	}
 	
@@ -988,9 +1007,14 @@ float4 DrawLightIndexPS(float2 tc : TEXCOORD0) : SV_Target
 
 			if (overlap)
 			{
+#if INTEGER_SUPPORT
+				accum |= (1UL << light_id);
+#else
 				accum += mask;
+#endif
 			}
 			
+#if !INTEGER_SUPPORT
 			mask *= 2;
 			if (mask >= 256)
 			{
@@ -999,12 +1023,18 @@ float4 DrawLightIndexPS(float2 tc : TEXCOORD0) : SV_Target
 				mask = 1;
 				accum = 0;
 			}
+#endif
 		}
 	}
 
-	all_light_id[comp] = (accum + 0.5f) / 255.0f;
+#if INTEGER_SUPPORT
+	return float4((accum & 0xFF) / 255.0f, ((accum >> 8) & 0xFF) / 255.0f,
+		((accum >> 16) & 0xFF) / 255.0f, ((accum >> 24) & 0xFF) / 255.0f);
+#else
+	all_light_id[comp] = (accum + 0.5f) / 255.0f;	
 	
 	return float4(all_light_id);
+#endif
 }
 
 void LightIndexedDeferredRenderingVS(float4 pos : POSITION,
@@ -1020,25 +1050,28 @@ void LightIndexedDeferredRenderingVS(float4 pos : POSITION,
 	oTexCoord += 0.5f;
 }
 
-#if KLAYGE_D3D11
-#if KLAYGE_SHADER_MODEL >= 4
-#define INTEGER_SUPPORT 1
-#endif
-#endif
- 
 float4 LightIndexedDeferredRenderingPS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Target
 {
 	float4 lighting = 0;
+#if INTEGER_SUPPORT
+	uint4 light_index = light_index_tex.Sample(point_sampler, tc * tc_to_tile_scale) * 255;
+	uint light_index_all = light_index.x | (light_index.y << 8) | (light_index.z << 16) | (light_index.w << 24);
+#else
 	int4 light_index = light_index_tex.Sample(point_sampler, tc * tc_to_tile_scale) * 255;
+#endif
 
 	float4 ndc = g_buffer_tex.Sample(point_sampler, tc);
 	view_dir = normalize(view_dir);
 	float3 pos_es = view_dir * (depth_tex.Sample(point_sampler, tc).r / view_dir.z);
 	float3 normal = GetNormal(ndc);
 	float shininess = GetShininess(ndc);
+#if INTEGER_SUPPORT
+	uint light_id = 0;
+#else
 	int light_id = 0;
 	int comp = 0;
 	int mask = 1;
+#endif
 
 	if (num_lights[LT_Ambient] > 0)
 	{
@@ -1046,12 +1079,14 @@ float4 LightIndexedDeferredRenderingPS(float2 tc : TEXCOORD0, float3 view_dir : 
 		lighting += CalcColor(n_dot_l, 0, 1, 1, lights_color[light_id], lights_attrib[light_id]);
 		++ light_id;
 
+#if !INTEGER_SUPPORT
 		mask *= 2;
 		if (mask >= 256)
 		{
 			++ comp;
 			mask = 1;
 		}
+#endif
 	}
 
 	if (num_lights[LT_Sun] > 0)
@@ -1072,12 +1107,14 @@ float4 LightIndexedDeferredRenderingPS(float2 tc : TEXCOORD0, float3 view_dir : 
 
 		++ light_id;
 
+#if !INTEGER_SUPPORT
 		mask *= 2;
 		if (mask >= 256)
 		{
 			++ comp;
 			mask = 1;
 		}
+#endif
 	}
 
 	{
@@ -1091,21 +1128,27 @@ float4 LightIndexedDeferredRenderingPS(float2 tc : TEXCOORD0, float3 view_dir : 
 				lighting += CalcColor(n_dot_l, spec, 1, 1, lights_color[light_id], lights_attrib[light_id]);
 			}
 
+#if !INTEGER_SUPPORT
 			mask *= 2;
 			if (mask >= 256)
 			{
 				++ comp;
 				mask = 1;
 			}
+#endif
 		}
 	}
 
+#if INTEGER_SUPPORT
+	if (light_index_all != 0)
+#else
 	if (any(light_index))
+#endif
 	{
 		for (int i = 0; i < num_lights[LT_Point]; ++ i, ++ light_id)
 		{
 #if INTEGER_SUPPORT
-			if (light_index[comp] & mask)
+			if (light_index_all & (1UL << light_id))
 #else
 			if ((light_index[comp] / mask) % 2)
 #endif
@@ -1131,18 +1174,20 @@ float4 LightIndexedDeferredRenderingPS(float2 tc : TEXCOORD0, float3 view_dir : 
 				}
 			}
 
+#if !INTEGER_SUPPORT
 			mask *= 2;
 			if (mask >= 256)
 			{
 				++ comp;
 				mask = 1;
 			}
+#endif
 		}
 
 		for (i = 0; i < num_lights[LT_Spot]; ++ i, ++ light_id)
 		{
 #if INTEGER_SUPPORT
-			if (light_index[comp] & mask)
+			if (light_index_all & (1UL << light_id))
 #else
 			if ((light_index[comp] / mask) % 2)
 #endif
@@ -1173,12 +1218,14 @@ float4 LightIndexedDeferredRenderingPS(float2 tc : TEXCOORD0, float3 view_dir : 
 				}
 			}
 
+#if !INTEGER_SUPPORT
 			mask *= 2;
 			if (mask >= 256)
 			{
 				++ comp;
 				mask = 1;
 			}
+#endif
 		}
 	}
 

@@ -362,6 +362,8 @@ namespace KlayGE
 		RenderEffectParameterPtr lights_attrib_param_;
 		RenderEffectParameterPtr lights_shadowing_channel_param_;
 		RenderEffectParameterPtr lights_size_param_;
+		RenderEffectParameterPtr lights_aabb_min_param_;
+		RenderEffectParameterPtr lights_aabb_max_param_;
 		RenderEffectParameterPtr num_lights_param_;
 		RenderEffectParameterPtr light_index_tex_param_;
 		RenderEffectParameterPtr light_index_tex_width_height_param_;
