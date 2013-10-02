@@ -248,9 +248,9 @@ namespace KlayGE
 		void AddTAA(PerViewport const & pvp);
 
 #ifdef LIGHT_INDEXED_DEFERRED
-		void DrawLightIndex(PerViewport const & pvp,
-			array<std::vector<int32_t>, LightSource::LT_NumLightTypes> const & light_batch);
-		void UpdateLightIndexedLighting(PerViewport const & pvp, bool blend);
+		void DrawLightIndex(PerViewport const & pvp, std::vector<int32_t> const & light_batch);
+		void UpdateLightIndexedLightingDirectional(PerViewport const & pvp, std::vector<int32_t> const & light_batch);
+		void UpdateLightIndexedLightingPointSpot(PerViewport const & pvp, bool is_point);
 		void CreateDepthMinMaxMap(PerViewport const & pvp);
 #endif
 
@@ -300,9 +300,11 @@ namespace KlayGE
 		RenderTechniquePtr technique_copy_shading_depth_;
 		RenderTechniquePtr technique_copy_depth_;
 #ifdef LIGHT_INDEXED_DEFERRED
-		RenderTechniquePtr technique_draw_light_index_;
-		RenderTechniquePtr technique_light_indexed_deferred_rendering_no_blend_;
-		RenderTechniquePtr technique_light_indexed_deferred_rendering_blend_;
+		RenderTechniquePtr technique_draw_light_index_point_;
+		RenderTechniquePtr technique_draw_light_index_spot_;
+		RenderTechniquePtr technique_light_indexed_deferred_rendering_directional_;
+		RenderTechniquePtr technique_light_indexed_deferred_rendering_point_;
+		RenderTechniquePtr technique_light_indexed_deferred_rendering_spot_;
 #endif
 		static uint32_t const MAX_NUM_SHADOWED_LIGHTS = 4;
 		static uint32_t const MAX_NUM_SHADOWED_SPOT_LIGHTS = 4;
