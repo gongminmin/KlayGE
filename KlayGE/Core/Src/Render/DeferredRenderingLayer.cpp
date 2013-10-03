@@ -1107,111 +1107,84 @@ namespace KlayGE
 				if (PC_Shading == pass_cat)
 				{
 #ifdef LIGHT_INDEXED_DEFERRED
+					std::vector<uint32_t> directional_lights;
+					std::vector<uint32_t> point_lights;
+					std::vector<uint32_t> spot_lights;
 					for (uint32_t li = 0; li < lights_.size(); ++ li)
 					{
 						LightSourcePtr const & light = lights_[li];
 						if (light->Enabled() && pvp.light_visibles[li])
 						{
 							LightSource::LightType type = light->Type();
-							if ((LightSource::LT_Ambient == type)
-								|| (LightSource::LT_Sun == type))
+							switch (type)
 							{
-								int32_t attr = light->Attrib();
+							case LightSource::LT_Ambient:
+							case LightSource::LT_Sun:
+								{
+									int32_t attr = light->Attrib();
 
-								this->PrepareLightCamera(pvp, light, index_in_pass, pass_type);
+									this->PrepareLightCamera(pvp, light, index_in_pass, pass_type);
 
-								*light_attrib_param_ = float4(attr & LightSource::LSA_NoDiffuse ? 0.0f : 1.0f,
-									attr & LightSource::LSA_NoSpecular ? 0.0f : 1.0f,
-									attr & LightSource::LSA_NoShadow ? -1.0f : 1.0f, light->ProjectiveTexture() ? 1.0f : -1.0f);
-								*light_color_param_ = light->Color();
-								*light_falloff_param_ = light->Falloff();
+									*light_attrib_param_ = float4(attr & LightSource::LSA_NoDiffuse ? 0.0f : 1.0f,
+										attr & LightSource::LSA_NoSpecular ? 0.0f : 1.0f,
+										attr & LightSource::LSA_NoShadow ? -1.0f : 1.0f, light->ProjectiveTexture() ? 1.0f : -1.0f);
+									*light_color_param_ = light->Color();
+									*light_falloff_param_ = light->Falloff();
 
-								this->UpdateLighting(pvp, type, li);
+									this->UpdateLighting(pvp, type, li);
+								}
+								break;
+
+							case LightSource::LT_Directional:
+								directional_lights.push_back(li);
+								break;
+
+							case LightSource::LT_Point:
+								point_lights.push_back(li);
+								break;
+
+							case LightSource::LT_Spot:
+								spot_lights.push_back(li);
+								break;
+
+							default:
+								BOOST_ASSERT(false);
+								break;
 							}
 						}
 					}
 
 					{
-						std::vector<int32_t> light_batch;
 						uint32_t li = 0;
-						uint32_t nl = 0;
-						while (li < lights_.size())
+						while (li < directional_lights.size())
 						{
-							LightSourcePtr const & light = lights_[li];
-							if (light->Enabled() && pvp.light_visibles[li])
-							{
-								if (LightSource::LT_Directional == light->Type())
-								{
-									light_batch.push_back(li);
-									++ nl;
-								}
-							}
-
-							++ li;
-
-							if ((32 == nl) || (li == lights_.size()))
-							{
-								this->UpdateLightIndexedLightingDirectional(pvp, light_batch);
-								nl = 0;
-
-								light_batch.clear();
-							}
+							uint32_t nl = std::min(static_cast<size_t>(32), directional_lights.size() - li);
+							std::vector<uint32_t>::const_iterator iter_beg = directional_lights.begin() + li;
+							std::vector<uint32_t>::const_iterator iter_end = iter_beg + nl;
+							this->UpdateLightIndexedLightingDirectional(pvp, iter_beg, iter_end);
+							li += nl;
 						}
 					}
 					{
-						std::vector<int32_t> light_batch;
 						uint32_t li = 0;
-						uint32_t nl = 0;
-						while (li < lights_.size())
+						while (li < point_lights.size())
 						{
-							LightSourcePtr const & light = lights_[li];
-							if (light->Enabled() && pvp.light_visibles[li])
-							{
-								if (LightSource::LT_Point == light->Type())
-								{
-									light_batch.push_back(li);
-									++ nl;
-								}
-							}
-
-							++ li;
-
-							if ((32 == nl) || (li == lights_.size()))
-							{
-								this->DrawLightIndex(pvp, light_batch);
-								this->UpdateLightIndexedLightingPointSpot(pvp, true);
-								nl = 0;
-
-								light_batch.clear();
-							}
+							uint32_t nl = std::min(static_cast<size_t>(32), point_lights.size() - li);
+							std::vector<uint32_t>::iterator iter_beg = point_lights.begin() + li;
+							std::vector<uint32_t>::iterator iter_end = iter_beg + nl;
+							this->UpdateLightIndexedLightingPointSpot(pvp, iter_beg, iter_end, true);
+							li += nl;
 						}
 					}
 					{
-						std::vector<int32_t> light_batch;
 						uint32_t li = 0;
-						uint32_t nl = 0;
-						while (li < lights_.size())
+						while (li < spot_lights.size())
 						{
-							LightSourcePtr const & light = lights_[li];
-							if (light->Enabled() && pvp.light_visibles[li])
-							{
-								if (LightSource::LT_Spot == light->Type())
-								{
-									light_batch.push_back(li);
-									++ nl;
-								}
-							}
-
-							++ li;
-
-							if ((32 == nl) || (li == lights_.size()))
-							{
-								this->DrawLightIndex(pvp, light_batch);
-								this->UpdateLightIndexedLightingPointSpot(pvp, false);
-								nl = 0;
-
-								light_batch.clear();
-							}
+							uint32_t nl = std::min(static_cast<size_t>(32), spot_lights.size() - li);
+							std::vector<uint32_t>::iterator iter_beg = spot_lights.begin() + li;
+							std::vector<uint32_t>::iterator iter_end = iter_beg + nl;
+							this->UpdateLightIndexedLightingPointSpot(pvp, iter_beg, iter_end, false);
+							li += nl;
 						}
 					}
 #else
@@ -2384,7 +2357,45 @@ namespace KlayGE
 	}
 
 #ifdef LIGHT_INDEXED_DEFERRED
-	void DeferredRenderingLayer::DrawLightIndex(PerViewport const & pvp, std::vector<int32_t> const & light_batch)
+	void DeferredRenderingLayer::UpdateLightIndexedLightingDirectional(PerViewport const & pvp,
+		std::vector<uint32_t>::const_iterator iter_beg, std::vector<uint32_t>::const_iterator iter_end)
+	{
+		std::vector<float4> lights_color;
+		std::vector<float4> lights_dir_es;
+		std::vector<float4> lights_attrib;
+		for (std::vector<uint32_t>::const_iterator iter = iter_beg; iter != iter_end; ++ iter)
+		{
+			LightSourcePtr const & light = lights_[*iter];
+			BOOST_ASSERT(LightSource::LT_Directional == light->Type());
+			int32_t attr = light->Attrib();
+
+			lights_color.push_back(light->Color());
+
+			float3 dir_es = MathLib::transform_normal(light->Direction(), pvp.view);
+			lights_dir_es.push_back(float4(dir_es.x(), dir_es.y(), dir_es.z(), 0));
+
+			lights_attrib.push_back(float4(attr & LightSource::LSA_NoDiffuse ? 0.0f : 1.0f,
+				attr & LightSource::LSA_NoSpecular ? 0.0f : 1.0f,
+				attr & LightSource::LSA_NoShadow ? -1.0f : 1.0f, light->ProjectiveTexture() ? 1.0f : -1.0f));
+		}
+
+		*lights_color_param_ = lights_color;
+		*lights_dir_es_param_ = lights_dir_es;
+		*lights_attrib_param_ = lights_attrib;
+		*num_lights_param_ = static_cast<int32_t>(iter_end - iter_beg);
+
+		*light_index_tex_param_ = pvp.light_index_tex;
+		*g_buffer_tex_param_ = pvp.g_buffer_rt0_tex;
+		*depth_tex_param_ = pvp.g_buffer_depth_tex;
+		*light_volume_mv_param_ = pvp.inv_proj;
+
+		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+		re.BindFrameBuffer(pvp.lighting_buffer);
+		re.Render(*technique_light_indexed_deferred_rendering_directional_, *rl_quad_);
+	}
+
+	void DeferredRenderingLayer::UpdateLightIndexedLightingPointSpot(PerViewport const & pvp,
+		std::vector<uint32_t>::const_iterator iter_beg, std::vector<uint32_t>::const_iterator iter_end, bool is_point)
 	{
 		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 
@@ -2413,9 +2424,9 @@ namespace KlayGE
 		std::vector<int32_t> lights_shadowing_channel;
 		std::vector<float3> lights_aabb_min;
 		std::vector<float3> lights_aabb_max;
-		for (size_t i = 0; i < light_batch.size(); ++ i)
+		for (std::vector<uint32_t>::const_iterator iter = iter_beg; iter != iter_end; ++ iter)
 		{
-			LightSourcePtr const & light = lights_[light_batch[i]];
+			LightSourcePtr const & light = lights_[*iter];
 			LightSource::LightType type = light->Type();
 			int32_t attr = light->Attrib();
 
@@ -2447,7 +2458,7 @@ namespace KlayGE
 			int32_t shadowing_channel;
 			if (0 == (light->Attrib() & LightSource::LSA_NoShadow))
 			{
-				shadowing_channel = sm_light_indices_[light_batch[i]].second;
+				shadowing_channel = sm_light_indices_[*iter].second;
 			}
 			else
 			{
@@ -2479,62 +2490,21 @@ namespace KlayGE
 		*lights_shadowing_channel_param_ = lights_shadowing_channel;
 		*lights_aabb_min_param_ = lights_aabb_min;
 		*lights_aabb_max_param_ = lights_aabb_max;
-		*num_lights_param_ = static_cast<int32_t>(light_batch.size());
+		*num_lights_param_ = static_cast<int32_t>(iter_end - iter_beg);
 
 		RenderTechniquePtr tech;
-		if (LightSource::LT_Point == lights_[light_batch[0]]->Type())
+		if (is_point)
 		{
 			tech = technique_draw_light_index_point_;
 		}
 		else
 		{
-			BOOST_ASSERT(LightSource::LT_Spot == lights_[light_batch[0]]->Type()]);
 			tech = technique_draw_light_index_spot_;
 		}
 		re.Render(*tech, *rl_quad_);
-	}
 
-	void DeferredRenderingLayer::UpdateLightIndexedLightingDirectional(PerViewport const & pvp, std::vector<int32_t> const & light_batch)
-	{
-		std::vector<float4> lights_color;
-		std::vector<float4> lights_dir_es;
-		std::vector<float4> lights_attrib;
-		for (size_t i = 0; i < light_batch.size(); ++ i)
-		{
-			LightSourcePtr const & light = lights_[light_batch[i]];
-			BOOST_ASSERT(LightSource::LT_Directional == light->Type());
-			int32_t attr = light->Attrib();
-
-			lights_color.push_back(light->Color());
-
-			float3 dir_es = MathLib::transform_normal(light->Direction(), pvp.view);
-			lights_dir_es.push_back(float4(dir_es.x(), dir_es.y(), dir_es.z(), 0));
-
-			lights_attrib.push_back(float4(attr & LightSource::LSA_NoDiffuse ? 0.0f : 1.0f,
-				attr & LightSource::LSA_NoSpecular ? 0.0f : 1.0f,
-				attr & LightSource::LSA_NoShadow ? -1.0f : 1.0f, light->ProjectiveTexture() ? 1.0f : -1.0f));
-		}
-
-		*lights_color_param_ = lights_color;
-		*lights_dir_es_param_ = lights_dir_es;
-		*lights_attrib_param_ = lights_attrib;
-		*num_lights_param_ = static_cast<int32_t>(light_batch.size());
-
-		*light_index_tex_param_ = pvp.light_index_tex;
-		*g_buffer_tex_param_ = pvp.g_buffer_rt0_tex;
-		*depth_tex_param_ = pvp.g_buffer_depth_tex;
-		*light_volume_mv_param_ = pvp.inv_proj;
-
-		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-		re.BindFrameBuffer(pvp.lighting_buffer);
-		re.Render(*technique_light_indexed_deferred_rendering_directional_, *rl_quad_);
-	}
-
-	void DeferredRenderingLayer::UpdateLightIndexedLightingPointSpot(PerViewport const & pvp, bool is_point)
-	{
-		uint32_t w = pvp.g_buffer_depth_tex->Width(0);
-		uint32_t h = pvp.g_buffer_depth_tex->Height(0);
-		uint32_t const TILE_SIZE = 32;
+		w = pvp.g_buffer_depth_tex->Width(0);
+		h = pvp.g_buffer_depth_tex->Height(0);
 		*tc_to_tile_scale_param_ = float2(static_cast<float>(w) / ((w + TILE_SIZE - 1) & ~(TILE_SIZE - 1)),
 			static_cast<float>(h) / ((h + TILE_SIZE - 1) & ~(TILE_SIZE - 1)));
 		*light_index_tex_param_ = pvp.light_index_tex;
@@ -2542,9 +2512,7 @@ namespace KlayGE
 		*depth_tex_param_ = pvp.g_buffer_depth_tex;
 		*light_volume_mv_param_ = pvp.inv_proj;
 
-		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 		re.BindFrameBuffer(pvp.lighting_buffer);
-		RenderTechniquePtr tech;
 		if (is_point)
 		{
 			tech = technique_light_indexed_deferred_rendering_point_;

@@ -248,9 +248,11 @@ namespace KlayGE
 		void AddTAA(PerViewport const & pvp);
 
 #ifdef LIGHT_INDEXED_DEFERRED
-		void DrawLightIndex(PerViewport const & pvp, std::vector<int32_t> const & light_batch);
-		void UpdateLightIndexedLightingDirectional(PerViewport const & pvp, std::vector<int32_t> const & light_batch);
-		void UpdateLightIndexedLightingPointSpot(PerViewport const & pvp, bool is_point);
+		void UpdateLightIndexedLightingDirectional(PerViewport const & pvp,
+			std::vector<uint32_t>::const_iterator iter_beg, std::vector<uint32_t>::const_iterator iter_end);
+		void UpdateLightIndexedLightingPointSpot(PerViewport const & pvp,
+			std::vector<uint32_t>::const_iterator iter_beg, std::vector<uint32_t>::const_iterator iter_end,
+			bool is_point);
 		void CreateDepthMinMaxMap(PerViewport const & pvp);
 #endif
 

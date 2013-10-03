@@ -865,10 +865,12 @@ void CopyDepthPS(float2 tc : TEXCOORD0,
 	</technique>
 
 
-	<parameter type="float4x4" name="camera_proj"/>
-	<parameter type="float2" name="tile_scale"/>
-	<parameter type="float2" name="tc_to_tile_scale"/>
-	<parameter type="float4" name="light_index_tex_width_height"/>
+	<cbuffer name="tile_based">
+		<parameter type="float4x4" name="camera_proj"/>
+		<parameter type="float2" name="tile_scale"/>
+		<parameter type="float2" name="tc_to_tile_scale"/>
+		<parameter type="float4" name="light_index_tex_width_height"/>
+	</cbuffer>
 	<parameter type="texture2D" name="min_max_depth_tex"/>
 	<cbuffer name="light_batch">
 		<parameter type="float4" name="lights_color" array_size="32"/>
@@ -912,7 +914,7 @@ void CalcTileViewFrustum(float2 tc, float2 min_max, out float4 planes[6])
 	float near_plane = min_max.x;
 	float far_plane = min_max.y;
 
-	float2 tile_bias = tile_scale - int2(tc * light_index_tex_width_height.xy);
+	float2 tile_bias = tile_scale - floor(tc * light_index_tex_width_height.xy);
 	float q = far_plane / (far_plane - near_plane);
 
 	float4 column1 = float4(camera_proj[0][0] * tile_scale.x, 0, tile_bias.x, 0);
@@ -1085,19 +1087,13 @@ float4 LightIndexedDeferredRenderingDirectionalPS(float2 tc : TEXCOORD0, float3 
 float4 LightIndexedDeferredRenderingPointPS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Target
 {
 	float4 lighting = 0;
-#if INTEGER_SUPPORT
-	uint4 light_index = light_index_tex.Sample(point_sampler, tc * tc_to_tile_scale) * 255;
-	uint light_index_all = light_index.x | (light_index.y << 8) | (light_index.z << 16) | (light_index.w << 24);
-#else
 	int4 light_index = light_index_tex.Sample(point_sampler, tc * tc_to_tile_scale) * 255;
+	if (any(light_index))
+	{
+#if INTEGER_SUPPORT
+		uint light_index_all = light_index.x | (light_index.y << 8) | (light_index.z << 16) | (light_index.w << 24);
 #endif
 
-#if INTEGER_SUPPORT
-	if (light_index_all != 0)
-#else
-	if (any(light_index))
-#endif
-	{
 		float4 ndc = g_buffer_tex.Sample(point_sampler, tc);
 		view_dir = normalize(view_dir);
 		float3 pos_es = view_dir * (depth_tex.Sample(point_sampler, tc).r / view_dir.z);
@@ -1154,19 +1150,13 @@ float4 LightIndexedDeferredRenderingPointPS(float2 tc : TEXCOORD0, float3 view_d
 float4 LightIndexedDeferredRenderingSpotPS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Target
 {
 	float4 lighting = 0;
-#if INTEGER_SUPPORT
-	uint4 light_index = light_index_tex.Sample(point_sampler, tc * tc_to_tile_scale) * 255;
-	uint light_index_all = light_index.x | (light_index.y << 8) | (light_index.z << 16) | (light_index.w << 24);
-#else
 	int4 light_index = light_index_tex.Sample(point_sampler, tc * tc_to_tile_scale) * 255;
+	if (any(light_index))
+	{
+#if INTEGER_SUPPORT
+		uint light_index_all = light_index.x | (light_index.y << 8) | (light_index.z << 16) | (light_index.w << 24);
 #endif
 
-#if INTEGER_SUPPORT
-	if (light_index_all != 0)
-#else
-	if (any(light_index))
-#endif
-	{
 		float4 ndc = g_buffer_tex.Sample(point_sampler, tc);
 		view_dir = normalize(view_dir);
 		float3 pos_es = view_dir * (depth_tex.Sample(point_sampler, tc).r / view_dir.z);
