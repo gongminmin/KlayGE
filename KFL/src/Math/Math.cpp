@@ -1371,13 +1371,10 @@ namespace KlayGE
 				}
 				else
 				{
-					Vector_T<T, 3> axis = normalize(cross(from, to));
+					// From http://lolengine.net/blog/2013/09/18/beautiful-maths-quaternion-from-vectors
 
-					T const sin_theta = sqrt(1 - cos_theta * cos_theta);
-					T const sin_half_theta = sqrt((1 - cos_theta) / 2);
-					T const cos_half_theta = sin_theta / (2 * sin_half_theta);
-
-					return Quaternion_T<T>(axis * sin_half_theta, cos_half_theta);
+					Vector_T<T, 3> w = cross(from, to);
+					return normalize(Quaternion_T<T>(w.x(), w.y(), w.z(), 1 + cos_theta));
 				}
 			}
 		}

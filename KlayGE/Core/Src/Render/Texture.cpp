@@ -179,13 +179,13 @@ namespace
 	};
 
 	enum D3D10_RESOURCE_MISC_FLAG
-    {
+	{
 		D3D10_RESOURCE_MISC_GENERATE_MIPS = 0x1L,
 		D3D10_RESOURCE_MISC_SHARED = 0x2L,
 		D3D10_RESOURCE_MISC_TEXTURECUBE	= 0x4L,
 		D3D10_RESOURCE_MISC_SHARED_KEYEDMUTEX = 0x10L,
 		D3D10_RESOURCE_MISC_GDI_COMPATIBLE = 0x20L
-    };
+	};
 
 	struct DDS_HEADER_DXT10
 	{
@@ -2913,7 +2913,7 @@ namespace KlayGE
 			return name;
 		}
 
-        uint32_t Width(uint32_t /*level*/) const
+		uint32_t Width(uint32_t /*level*/) const
 		{
 			return 0;
 		}

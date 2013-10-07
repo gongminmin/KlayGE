@@ -607,13 +607,13 @@ namespace KlayGE
 						if (mantissa != 0)
 						{
 							exponent = 1;
-    
+	
 							do
 							{
 								-- exponent;
 								mantissa <<= 1;
 							} while (0 == (mantissa & 0x20));
-    
+	
 							mantissa &= 0x1F;
 						}
 						else
