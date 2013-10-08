@@ -878,7 +878,7 @@ void CopyDepthPS(float2 tc : TEXCOORD0,
 		<parameter type="float4" name="lights_dir_es" array_size="32"/>
 		<parameter type="float4" name="lights_falloff_range" array_size="32"/>
 		<parameter type="float4" name="lights_attrib" array_size="32"/>
-		<parameter type="int" name="lights_shadowing_channel" array_size="32"/>
+		<parameter type="int4" name="lights_shadowing_channel"/>
 		<parameter type="float3" name="lights_aabb_min" array_size="32"/>
 		<parameter type="float3" name="lights_aabb_max" array_size="32"/>
 		<parameter type="int" name="num_lights"/>
@@ -1104,8 +1104,18 @@ float4 LightIndexedDeferredRenderingPointPS(float2 tc : TEXCOORD0, float3 view_d
 		int mask = 1;
 #endif
 
-		for (int i = 0; i < num_lights; ++ i)
+#if KLAYGE_D3D11
+		[unroll]
+#endif
+#if WITH_SHADOW
+		for (int i = 0; (i < 4) && (i < num_lights); ++ i)
+#else
+		for (int i = 0; (i < 32) && (i < num_lights); ++ i)
+#endif
 		{
+#if KLAYGE_D3D11
+			[branch]
+#endif
 #if INTEGER_SUPPORT
 			if (light_index_all & (1UL << i))
 #else
@@ -1121,10 +1131,9 @@ float4 LightIndexedDeferredRenderingPointPS(float2 tc : TEXCOORD0, float3 view_d
 					if (n_dot_l > 0)
 					{
 						float3 shadow = 1;
-						if (lights_shadowing_channel[i] >= 0)
-						{
-							shadow = NearestDepthUpsamplingShadow(tc, lights_shadowing_channel[i]).xyz;
-						}
+#if WITH_SHADOW
+						shadow = NearestDepthUpsamplingShadow(tc, lights_shadowing_channel[i]).xyz;
+#endif
 
 						float spec = roughness_term(normalize(dir - view_dir), normal, shininess).x;
 						float atten = attenuation_term(lights_pos_es[i].xyz, pos_es.xyz, lights_falloff_range[i].xyz);
@@ -1167,8 +1176,18 @@ float4 LightIndexedDeferredRenderingSpotPS(float2 tc : TEXCOORD0, float3 view_di
 		int mask = 1;
 #endif
 
-		for (int i = 0; i < num_lights; ++ i)
+#if KLAYGE_D3D11
+		[unroll]
+#endif
+#if WITH_SHADOW
+		for (int i = 0; (i < 4) && (i < num_lights); ++ i)
+#else
+		for (int i = 0; (i < 32) && (i < num_lights); ++ i)
+#endif
 		{
+#if KLAYGE_D3D11
+			[branch]
+#endif
 #if INTEGER_SUPPORT
 			if (light_index_all & (1UL << i))
 #else
@@ -1188,10 +1207,9 @@ float4 LightIndexedDeferredRenderingSpotPS(float2 tc : TEXCOORD0, float3 view_di
 						if (n_dot_l > 0)
 						{
 							float3 shadow = 1;
-							if (lights_shadowing_channel[i] >= 0)
-							{
-								shadow = NearestDepthUpsamplingShadow(tc, lights_shadowing_channel[i]).xyz;
-							}
+#if WITH_SHADOW
+							shadow = NearestDepthUpsamplingShadow(tc, lights_shadowing_channel[i]).xyz;
+#endif
 
 							float spec = roughness_term(normalize(dir - view_dir), normal, shininess).x;
 							float atten = spot * attenuation_term(lights_pos_es[i].xyz, pos_es.xyz, lights_falloff_range[i].xyz);
@@ -1262,14 +1280,22 @@ float4 LightIndexedDeferredRenderingSpotPS(float2 tc : TEXCOORD0, float3 view_di
 			<state name="pixel_shader" value="LightIndexedDeferredRenderingDirectionalPS()"/>
 		</pass>
 	</technique>
-	<technique name="LightIndexedDeferredRenderingPoint" inherit="LightIndexedDeferredRenderingDirectional">
+	<technique name="LightIndexedDeferredRenderingPointShadow" inherit="LightIndexedDeferredRenderingDirectional">
+		<macro name="WITH_SHADOW" value="1"/>
 		<pass name="p0">
 			<state name="pixel_shader" value="LightIndexedDeferredRenderingPointPS()"/>
 		</pass>
 	</technique>
-	<technique name="LightIndexedDeferredRenderingSpot" inherit="LightIndexedDeferredRenderingDirectional">
+	<technique name="LightIndexedDeferredRenderingPointNoShadow" inherit="LightIndexedDeferredRenderingPointShadow">
+		<macro name="WITH_SHADOW" value="0"/>
+	</technique>
+	<technique name="LightIndexedDeferredRenderingSpotShadow" inherit="LightIndexedDeferredRenderingDirectional">
+		<macro name="WITH_SHADOW" value="1"/>
 		<pass name="p0">
 			<state name="pixel_shader" value="LightIndexedDeferredRenderingSpotPS()"/>
 		</pass>
+	</technique>
+	<technique name="LightIndexedDeferredRenderingSpotNoShadow" inherit="LightIndexedDeferredRenderingSpotShadow">
+		<macro name="WITH_SHADOW" value="0"/>
 	</technique>
 </effect>

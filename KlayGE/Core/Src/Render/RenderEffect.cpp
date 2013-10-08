@@ -3393,7 +3393,22 @@ namespace KlayGE
 				}
 				for (; macro_node; macro_node = macro_node->NextSibling("macro"))
 				{
-					macros_->push_back(std::make_pair(macro_node->Attrib("name")->ValueString(), macro_node->Attrib("value")->ValueString()));
+					std::string name = macro_node->Attrib("name")->ValueString();
+					std::string value = macro_node->Attrib("value")->ValueString();
+					bool found = false;
+					for (size_t i = 0; i < macros_->size(); ++ i)
+					{
+						if ((*macros_)[i].first == name)
+						{
+							(*macros_)[i].second = value;
+							found = true;
+							break;
+						}
+					}
+					if (!found)
+					{
+						macros_->push_back(std::make_pair(name, value));
+					}
 				}
 			}
 			else if (parent_tech)
@@ -3664,7 +3679,22 @@ namespace KlayGE
 				}
 				for (; macro_node; macro_node = macro_node->NextSibling("macro"))
 				{
-					macros_->push_back(std::make_pair(macro_node->Attrib("name")->ValueString(), macro_node->Attrib("value")->ValueString()));
+					std::string name = macro_node->Attrib("name")->ValueString();
+					std::string value = macro_node->Attrib("value")->ValueString();
+					bool found = false;
+					for (size_t i = 0; i < macros_->size(); ++ i)
+					{
+						if ((*macros_)[i].first == name)
+						{
+							(*macros_)[i].second = value;
+							found = true;
+							break;
+						}
+					}
+					if (!found)
+					{
+						macros_->push_back(std::make_pair(name, value));
+					}
 				}
 			}
 			else if (inherit_pass)

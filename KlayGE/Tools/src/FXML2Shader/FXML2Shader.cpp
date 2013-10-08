@@ -34,13 +34,16 @@ public:
 		RenderEffectPtr effect = SyncLoadRenderEffect(fxml_name);
 
 		ofstream ofs((fxml_name + ".shader").c_str(), std::ios_base::binary);
-		ofs << "#define CONSTANT_BUFFER" << "\r\n";
-		ofs << "#define KLAYGE_D3D11" << "\r\n";
+		ofs << "#define KLAYGE_CONSTANT_BUFFER 1" << "\r\n";
+		ofs << "#define KLAYGE_D3D11 1" << "\r\n";
 		ofs << "#define KLAYGE_SHADER_MODEL 5" << "\r\n";
 		ofs << "#define KLAYGE_MAX_TEX_ARRAY_LEN 512" << "\r\n";
 		ofs << "#define KLAYGE_MAX_TEX_DEPTH 512" << "\r\n";
+		ofs << "#define KLAYGE_MAX_TEX_UNITS 32" << "\r\n";
 		ofs << "#define KLAYGE_NO_TEX_LOD 0" << "\r\n";
-		ofs << "#define KLAYGE_FLIPPING -1" << "\r\n\r\n";
+		ofs << "#define KLAYGE_FLIPPING -1" << "\r\n";
+		ofs << "#define KLAYGE_DERIVATIVES 1" << "\r\n";
+		ofs << "\r\n";
 
 		for (uint32_t i = 0; i < effect->NumMacros(); ++ i)
 		{
@@ -306,8 +309,6 @@ int main(int argc, char* argv[])
 
 	EmptyApp app;
 	app.Create();
-
-	Context::Destroy();
 
 	return 0;
 }

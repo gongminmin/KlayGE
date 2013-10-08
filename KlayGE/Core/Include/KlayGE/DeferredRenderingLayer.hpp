@@ -252,7 +252,7 @@ namespace KlayGE
 			std::vector<uint32_t>::const_iterator iter_beg, std::vector<uint32_t>::const_iterator iter_end);
 		void UpdateLightIndexedLightingPointSpot(PerViewport const & pvp,
 			std::vector<uint32_t>::const_iterator iter_beg, std::vector<uint32_t>::const_iterator iter_end,
-			bool is_point);
+			bool is_point, bool with_shadow);
 		void CreateDepthMinMaxMap(PerViewport const & pvp);
 #endif
 
@@ -305,8 +305,10 @@ namespace KlayGE
 		RenderTechniquePtr technique_draw_light_index_point_;
 		RenderTechniquePtr technique_draw_light_index_spot_;
 		RenderTechniquePtr technique_light_indexed_deferred_rendering_directional_;
-		RenderTechniquePtr technique_light_indexed_deferred_rendering_point_;
-		RenderTechniquePtr technique_light_indexed_deferred_rendering_spot_;
+		RenderTechniquePtr technique_light_indexed_deferred_rendering_point_shadow_;
+		RenderTechniquePtr technique_light_indexed_deferred_rendering_point_no_shadow_;
+		RenderTechniquePtr technique_light_indexed_deferred_rendering_spot_shadow_;
+		RenderTechniquePtr technique_light_indexed_deferred_rendering_spot_no_shadow_;
 #endif
 		static uint32_t const MAX_NUM_SHADOWED_LIGHTS = 4;
 		static uint32_t const MAX_NUM_SHADOWED_SPOT_LIGHTS = 4;
