@@ -82,11 +82,19 @@ namespace KlayGE
 	template <typename T>
 	class Size_T;
 	typedef Size_T<float> Size;
+	typedef Size_T<int32_t> ISize;
+	typedef Size_T<uint32_t> UISize;
 	typedef shared_ptr<Size> SizePtr;
+	typedef shared_ptr<ISize> ISizePtr;
+	typedef shared_ptr<UISize> UISizePtr;
 	template <typename T>
 	class Rect_T;
 	typedef Rect_T<float> Rect;
+	typedef Rect_T<int32_t> IRect;
+	typedef Rect_T<uint32_t> UIRect;
 	typedef shared_ptr<Rect> RectPtr;
+	typedef shared_ptr<IRect> IRectPtr;
+	typedef shared_ptr<UIRect> UIRectPtr;
 	template <typename T>
 	class Bound_T;
 	typedef Bound_T<float> Bound;

@@ -257,7 +257,7 @@ namespace KlayGE
 	}
 
 
-	void UIElement::SetTexture(uint32_t tex_index, Rect_T<int32_t> const & tex_rect, Color const & default_texture_color)
+	void UIElement::SetTexture(uint32_t tex_index, IRect const & tex_rect, Color const & default_texture_color)
 	{
 		tex_index_ = tex_index;
 		tex_rect_ = tex_rect;
@@ -292,50 +292,50 @@ namespace KlayGE
 	{
 		effect_ = SyncLoadRenderEffect("UI.fxml");
 
-		elem_texture_rcs_[UICT_Button].push_back(Rect_T<int32_t>(0, 0, 136, 54));
-		elem_texture_rcs_[UICT_Button].push_back(Rect_T<int32_t>(136, 0, 252, 54));
+		elem_texture_rcs_[UICT_Button].push_back(IRect(0, 0, 136, 54));
+		elem_texture_rcs_[UICT_Button].push_back(IRect(136, 0, 252, 54));
 
-		elem_texture_rcs_[UICT_CheckBox].push_back(Rect_T<int32_t>(0, 54, 27, 81));
-		elem_texture_rcs_[UICT_CheckBox].push_back(Rect_T<int32_t>(27, 54, 54, 81));
+		elem_texture_rcs_[UICT_CheckBox].push_back(IRect(0, 54, 27, 81));
+		elem_texture_rcs_[UICT_CheckBox].push_back(IRect(27, 54, 54, 81));
 
-		elem_texture_rcs_[UICT_RadioButton].push_back(Rect_T<int32_t>(54, 54, 81, 81));
-		elem_texture_rcs_[UICT_RadioButton].push_back(Rect_T<int32_t>(81, 54, 108, 81));
+		elem_texture_rcs_[UICT_RadioButton].push_back(IRect(54, 54, 81, 81));
+		elem_texture_rcs_[UICT_RadioButton].push_back(IRect(81, 54, 108, 81));
 
-		elem_texture_rcs_[UICT_Slider].push_back(Rect_T<int32_t>(1, 187, 93, 228));
-		elem_texture_rcs_[UICT_Slider].push_back(Rect_T<int32_t>(151, 193, 192, 234));
+		elem_texture_rcs_[UICT_Slider].push_back(IRect(1, 187, 93, 228));
+		elem_texture_rcs_[UICT_Slider].push_back(IRect(151, 193, 192, 234));
 
-		elem_texture_rcs_[UICT_ScrollBar].push_back(Rect_T<int32_t>(196, 212, 218, 223));
-		elem_texture_rcs_[UICT_ScrollBar].push_back(Rect_T<int32_t>(196, 192, 218, 212));
-		elem_texture_rcs_[UICT_ScrollBar].push_back(Rect_T<int32_t>(196, 223, 218, 244));
-		elem_texture_rcs_[UICT_ScrollBar].push_back(Rect_T<int32_t>(220, 192, 238, 234));
+		elem_texture_rcs_[UICT_ScrollBar].push_back(IRect(196, 212, 218, 223));
+		elem_texture_rcs_[UICT_ScrollBar].push_back(IRect(196, 192, 218, 212));
+		elem_texture_rcs_[UICT_ScrollBar].push_back(IRect(196, 223, 218, 244));
+		elem_texture_rcs_[UICT_ScrollBar].push_back(IRect(220, 192, 238, 234));
 
-		elem_texture_rcs_[UICT_ListBox].push_back(Rect_T<int32_t>(13, 123, 241, 160));
-		elem_texture_rcs_[UICT_ListBox].push_back(Rect_T<int32_t>(16, 166, 240, 183));
+		elem_texture_rcs_[UICT_ListBox].push_back(IRect(13, 123, 241, 160));
+		elem_texture_rcs_[UICT_ListBox].push_back(IRect(16, 166, 240, 183));
 
-		elem_texture_rcs_[UICT_ComboBox].push_back(Rect_T<int32_t>(7, 81, 247, 123));
-		elem_texture_rcs_[UICT_ComboBox].push_back(Rect_T<int32_t>(98, 189, 151, 238));
-		elem_texture_rcs_[UICT_ComboBox].push_back(Rect_T<int32_t>(13, 123, 241, 160));
-		elem_texture_rcs_[UICT_ComboBox].push_back(Rect_T<int32_t>(12, 163, 239, 183));
+		elem_texture_rcs_[UICT_ComboBox].push_back(IRect(7, 81, 247, 123));
+		elem_texture_rcs_[UICT_ComboBox].push_back(IRect(98, 189, 151, 238));
+		elem_texture_rcs_[UICT_ComboBox].push_back(IRect(13, 123, 241, 160));
+		elem_texture_rcs_[UICT_ComboBox].push_back(IRect(12, 163, 239, 183));
 
-		elem_texture_rcs_[UICT_EditBox].push_back(Rect_T<int32_t>(14, 90, 241, 113));
-		elem_texture_rcs_[UICT_EditBox].push_back(Rect_T<int32_t>(8, 82, 14, 90));
-		elem_texture_rcs_[UICT_EditBox].push_back(Rect_T<int32_t>(14, 82, 241, 90));
-		elem_texture_rcs_[UICT_EditBox].push_back(Rect_T<int32_t>(241, 82, 246, 90));
-		elem_texture_rcs_[UICT_EditBox].push_back(Rect_T<int32_t>(8, 90, 14, 113));
-		elem_texture_rcs_[UICT_EditBox].push_back(Rect_T<int32_t>(241, 90, 246, 113));
-		elem_texture_rcs_[UICT_EditBox].push_back(Rect_T<int32_t>(8, 113, 14, 121));
-		elem_texture_rcs_[UICT_EditBox].push_back(Rect_T<int32_t>(14, 113, 241, 121));
-		elem_texture_rcs_[UICT_EditBox].push_back(Rect_T<int32_t>(241, 113, 246, 121));
+		elem_texture_rcs_[UICT_EditBox].push_back(IRect(14, 90, 241, 113));
+		elem_texture_rcs_[UICT_EditBox].push_back(IRect(8, 82, 14, 90));
+		elem_texture_rcs_[UICT_EditBox].push_back(IRect(14, 82, 241, 90));
+		elem_texture_rcs_[UICT_EditBox].push_back(IRect(241, 82, 246, 90));
+		elem_texture_rcs_[UICT_EditBox].push_back(IRect(8, 90, 14, 113));
+		elem_texture_rcs_[UICT_EditBox].push_back(IRect(241, 90, 246, 113));
+		elem_texture_rcs_[UICT_EditBox].push_back(IRect(8, 113, 14, 121));
+		elem_texture_rcs_[UICT_EditBox].push_back(IRect(14, 113, 241, 121));
+		elem_texture_rcs_[UICT_EditBox].push_back(IRect(241, 113, 246, 121));
 
-		elem_texture_rcs_[UICT_TexButton].push_back(Rect_T<int32_t>(136, 0, 141, 5));
-		elem_texture_rcs_[UICT_TexButton].push_back(Rect_T<int32_t>(141, 0, 247, 5));
-		elem_texture_rcs_[UICT_TexButton].push_back(Rect_T<int32_t>(247, 0, 252, 5));
-		elem_texture_rcs_[UICT_TexButton].push_back(Rect_T<int32_t>(136, 5, 141, 49));
-		elem_texture_rcs_[UICT_TexButton].push_back(Rect_T<int32_t>(141, 5, 247, 49));
-		elem_texture_rcs_[UICT_TexButton].push_back(Rect_T<int32_t>(247, 5, 252, 49));
-		elem_texture_rcs_[UICT_TexButton].push_back(Rect_T<int32_t>(136, 49, 141, 54));
-		elem_texture_rcs_[UICT_TexButton].push_back(Rect_T<int32_t>(141, 49, 247, 54));
-		elem_texture_rcs_[UICT_TexButton].push_back(Rect_T<int32_t>(247, 49, 252, 54));
+		elem_texture_rcs_[UICT_TexButton].push_back(IRect(136, 0, 141, 5));
+		elem_texture_rcs_[UICT_TexButton].push_back(IRect(141, 0, 247, 5));
+		elem_texture_rcs_[UICT_TexButton].push_back(IRect(247, 0, 252, 5));
+		elem_texture_rcs_[UICT_TexButton].push_back(IRect(136, 5, 141, 49));
+		elem_texture_rcs_[UICT_TexButton].push_back(IRect(141, 5, 247, 49));
+		elem_texture_rcs_[UICT_TexButton].push_back(IRect(247, 5, 252, 49));
+		elem_texture_rcs_[UICT_TexButton].push_back(IRect(136, 49, 141, 54));
+		elem_texture_rcs_[UICT_TexButton].push_back(IRect(141, 49, 247, 54));
+		elem_texture_rcs_[UICT_TexButton].push_back(IRect(247, 49, 252, 54));
 
 		using namespace boost::assign;
 
@@ -934,7 +934,7 @@ namespace KlayGE
 	}
 
 	void UIManager::DrawRect(float3 const & pos, float width, float height, Color const * clrs,
-				Rect_T<int32_t> const & rcTexture, TexturePtr const & texture)
+				IRect const & rcTexture, TexturePtr const & texture)
 	{
 		Rect texcoord;
 		if (texture)
@@ -1046,7 +1046,7 @@ namespace KlayGE
 	}
 
 	void UIManager::DrawString(std::wstring const & strText, uint32_t font_index,
-		Rect_T<int32_t> const & rc, float depth, Color const & clr, uint32_t align)
+		IRect const & rc, float depth, Color const & clr, uint32_t align)
 	{
 		strings_[font_index].push_back(string_cache());
 		string_cache& sc = strings_[font_index].back();
@@ -1058,7 +1058,7 @@ namespace KlayGE
 	}
 
 	Size_T<float> UIManager::CalcSize(std::wstring const & strText, uint32_t font_index,
-		Rect_T<int32_t> const & /*rc*/, uint32_t /*align*/)
+		IRect const & /*rc*/, uint32_t /*align*/)
 	{
 		typedef KLAYGE_DECLTYPE(font_cache_) FontCacheType;
 		FontCacheType::reference font = font_cache_[font_index];
@@ -1199,7 +1199,7 @@ namespace KlayGE
 		}
 	}
 
-	Rect_T<int32_t> const & UIManager::ElementTextureRect(uint32_t ctrl, uint32_t elem_index)
+	IRect const & UIManager::ElementTextureRect(uint32_t ctrl, uint32_t elem_index)
 	{
 		BOOST_ASSERT(ctrl < elem_texture_rcs_.size());
 		BOOST_ASSERT(elem_index < elem_texture_rcs_[ctrl].size());
@@ -1373,8 +1373,8 @@ namespace KlayGE
 				clrs[3].a() *= opacity_;
 			}
 
-			Rect_T<int32_t> rc(0, 0, this->GetWidth(), this->GetHeight());
-			Rect_T<int32_t> rcScreen = rc + this->GetLocation();
+			IRect rc(0, 0, this->GetWidth(), this->GetHeight());
+			IRect rcScreen = rc + this->GetLocation();
 			if (this->IsCaptionEnabled())
 			{
 				rcScreen += int2(0, this->GetCaptionHeight());
@@ -1382,7 +1382,7 @@ namespace KlayGE
 
 			float3 pos(static_cast<float>(rcScreen.left()), static_cast<float>(rcScreen.top()), depth_base_);
 			UIManager::Instance().DrawRect(pos, static_cast<float>(this->GetWidth()),
-				static_cast<float>(this->GetHeight()), &clrs[0], Rect_T<int32_t>(0, 0, 0, 0), TexturePtr());
+				static_cast<float>(this->GetHeight()), &clrs[0], IRect(0, 0, 0, 0), TexturePtr());
 		}
 
 		// Render the caption if it's enabled.
@@ -1398,9 +1398,9 @@ namespace KlayGE
 			// caption_height_, so adjust the rect higher
 			// here to negate the effect.
 			int32_t w = this->GetWidth();
-			Rect_T<int32_t> rc(0, -caption_height_, w, 0);
+			IRect rc(0, -caption_height_, w, 0);
 
-			Size_T<uint32_t> size = this->CalcSize(wstrOutput, cap_element_, rc, true);
+			UISize size = this->CalcSize(wstrOutput, cap_element_, rc, true);
 
 			w = std::min(w, static_cast<int32_t>(size.cx() * 1.2f));
 			rc.right() = w;
@@ -1432,7 +1432,7 @@ namespace KlayGE
 			{
 				for (size_t j = 0; j < i; ++ j)
 				{
-					Rect_T<int32_t> rc = controls_[i]->BoundingBoxRect() & controls_[j]->BoundingBoxRect();
+					IRect rc = controls_[i]->BoundingBoxRect() & controls_[j]->BoundingBoxRect();
 					if ((rc.Width() > 0) && (rc.Height() > 0))
 					{
 						size_t k = 0;
@@ -1718,9 +1718,9 @@ namespace KlayGE
 		}
 	}
 
-	void UIDialog::DrawRect(Rect_T<int32_t> const & rc, float depth, Color const & clr)
+	void UIDialog::DrawRect(IRect const & rc, float depth, Color const & clr)
 	{
-		Rect_T<int32_t> rcScreen = rc + this->GetLocation();
+		IRect rcScreen = rc + this->GetLocation();
 		if (this->IsCaptionEnabled())
 		{
 			rcScreen += int2(0, this->GetCaptionHeight());
@@ -1737,7 +1737,7 @@ namespace KlayGE
 			}
 		}
 		UIManager::Instance().DrawRect(pos, static_cast<float>(rcScreen.Width()), static_cast<float>(rc.Height()),
-			&clrs[0], Rect_T<int32_t>(0, 0, 0, 0), TexturePtr());
+			&clrs[0], IRect(0, 0, 0, 0), TexturePtr());
 	}
 
 	void UIDialog::DrawQuad(UIManager::VertexFormat const * vertices, float depth, TexturePtr const & texture)
@@ -1751,7 +1751,7 @@ namespace KlayGE
 		UIManager::Instance().DrawQuad(offset, vertices, texture);
 	}
 
-	void UIDialog::DrawSprite(UIElement const & element, Rect_T<int32_t> const & rcDest, float depth_bias)
+	void UIDialog::DrawSprite(UIElement const & element, IRect const & rcDest, float depth_bias)
 	{
 		// No need to draw fully transparent layers
 		if (0 == element.TextureColor().Current.a())
@@ -1759,8 +1759,8 @@ namespace KlayGE
 			return;
 		}
 
-		Rect_T<int32_t> rcTexture = element.TexRect();
-		Rect_T<int32_t> rcScreen = rcDest + this->GetLocation();
+		IRect rcTexture = element.TexRect();
+		IRect rcScreen = rcDest + this->GetLocation();
 		TexturePtr const & tex = UIManager::Instance().GetTexture(element.TextureIndex());
 
 		// If caption is enabled, offset the Y position by its height.
@@ -1783,14 +1783,14 @@ namespace KlayGE
 			static_cast<float>(rcScreen.Height()), &clrs[0], rcTexture, tex);
 	}
 
-	void UIDialog::DrawString(std::wstring const & strText, UIElement const & uie, Rect_T<int32_t> const & rc, bool bShadow, float depth_bias)
+	void UIDialog::DrawString(std::wstring const & strText, UIElement const & uie, IRect const & rc, bool bShadow, float depth_bias)
 	{
 		if (bShadow)
 		{
-			Rect_T<int32_t> rcShadow = rc;
+			IRect rcShadow = rc;
 			rcShadow += int2(1, 1);
 
-			Rect_T<int32_t> r = rcShadow;
+			IRect r = rcShadow;
 			r += this->GetLocation();
 			if (this->IsCaptionEnabled())
 			{
@@ -1806,7 +1806,7 @@ namespace KlayGE
 				Color(0, 0, 0, alpha), uie.TextAlign());
 		}
 
-		Rect_T<int32_t> r = rc;
+		IRect r = rc;
 		r += this->GetLocation();
 		if (this->IsCaptionEnabled())
 		{
@@ -1822,16 +1822,16 @@ namespace KlayGE
 			clr, uie.TextAlign());
 	}
 
-	Size_T<uint32_t> UIDialog::CalcSize(std::wstring const & strText, UIElement const & uie, Rect_T<int32_t> const & rc, bool bShadow)
+	UISize UIDialog::CalcSize(std::wstring const & strText, UIElement const & uie, IRect const & rc, bool bShadow)
 	{
-		Rect_T<int32_t> r = rc;
+		IRect r = rc;
 		r += this->GetLocation();
 		if (this->IsCaptionEnabled())
 		{
 			r += int2(0, this->GetCaptionHeight());
 		}
 
-		Size_T<uint32_t> size = UIManager::Instance().CalcSize(strText, uie.FontIndex(), r, uie.TextAlign());
+		UISize size = UIManager::Instance().CalcSize(strText, uie.FontIndex(), r, uie.TextAlign());
 		if (bShadow)
 		{
 			size.cx() += 1;
@@ -1847,7 +1847,7 @@ namespace KlayGE
 
 		// Element for the caption
 		cap_element_.SetFont(0);
-		cap_element_.SetTexture(static_cast<uint32_t>(tex_index_), Rect_T<int32_t>(17, 269, 241, 287));
+		cap_element_.SetTexture(static_cast<uint32_t>(tex_index_), IRect(17, 269, 241, 287));
 		cap_element_.TextureColor().States[UICS_Normal] = Color(0.4f, 0.6f, 0.4f, 1);
 		cap_element_.FontColor().States[UICS_Normal] = Color(1, 1, 1, 1);
 		cap_element_.SetFont(0, Color(1, 1, 1, 1), Font::FA_Hor_Left | Font::FA_Ver_Middle);

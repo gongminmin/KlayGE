@@ -145,7 +145,7 @@ namespace KlayGE
 	{
 		UIControl::UpdateRects();
 
-		show_rc_ = Rect_T<int32_t>(x_, y_, x_ + width_, y_ + height_);
+		show_rc_ = IRect(x_, y_, x_ + width_, y_ + height_);
 
 		text_rc_ = button_rc_ = show_rc_;
 		button_rc_.left() = button_rc_.right() - button_rc_.Height();
@@ -481,7 +481,7 @@ namespace KlayGE
 					continue;
 				}
 
-				pItem->rcActive = Rect_T<int32_t>(dropdown_text_rc_.left(), curY, dropdown_text_rc_.right(), curY + font_size);
+				pItem->rcActive = IRect(dropdown_text_rc_.left(), curY, dropdown_text_rc_.right(), curY + font_size);
 				curY += font_size;
 
 				//debug
@@ -494,7 +494,7 @@ namespace KlayGE
 				{
 					if (static_cast<int>(i) == focused_)
 					{
-						Rect_T<int32_t> rc(dropdown_rc_.left(), pItem->rcActive.top() - 2, dropdown_rc_.right(), pItem->rcActive.bottom() + 2);
+						IRect rc(dropdown_rc_.left(), pItem->rcActive.top() - 2, dropdown_rc_.right(), pItem->rcActive.bottom() + 2);
 						this->GetDialog()->DrawSprite(*pSelectionElement, rc, depth_bias);
 						this->GetDialog()->DrawString(pItem->strText, *pSelectionElement, pItem->rcActive, false, depth_bias);
 					}
@@ -547,7 +547,7 @@ namespace KlayGE
 		// Blend current color
 		pElement->TextureColor().SetState(iState);
 
-		Rect_T<int32_t> rcWindow = button_rc_;
+		IRect rcWindow = button_rc_;
 		this->GetDialog()->DrawSprite(*pElement, rcWindow, depth_bias);
 
 		if (opened_)
@@ -581,7 +581,7 @@ namespace KlayGE
 		// Create a new item and set the data
 		shared_ptr<UIComboBoxItem> pItem = MakeSharedPtr<UIComboBoxItem>();
 		pItem->strText = strText;
-		pItem->rcActive = Rect_T<int32_t>(0, 0, 0, 0);
+		pItem->rcActive = IRect(0, 0, 0, 0);
 		pItem->bVisible = false;
 
 		int ret = static_cast<int>(items_.size());
@@ -615,7 +615,7 @@ namespace KlayGE
 		shared_ptr<UIComboBoxItem> pItem = MakeSharedPtr<UIComboBoxItem>();
 		pItem->strText = strText;
 		pItem->data = data;
-		pItem->rcActive = Rect_T<int32_t>(0, 0, 0, 0);
+		pItem->rcActive = IRect(0, 0, 0, 0);
 		pItem->bVisible = false;
 
 		int ret = static_cast<int>(items_.size());

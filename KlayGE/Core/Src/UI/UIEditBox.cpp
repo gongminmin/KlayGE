@@ -74,7 +74,7 @@ namespace KlayGE
 		{
 			char_width_.resize(buffer_.size() + 1);
 
-			Size_T<uint32_t> size;
+			UISize size;
 
 			for (size_t i = 0; i < char_width_.size(); ++ i)
 			{
@@ -446,21 +446,21 @@ namespace KlayGE
 		// Update the text rectangle
 		text_rc_ = bounding_box_;
 		// First inflate by border_ to compute render rects
-		text_rc_ += Rect_T<int32_t>(border_, border_, -border_, -border_);
+		text_rc_ += IRect(border_, border_, -border_, -border_);
 
 		// Update the render rectangles
 		render_rc_[0] = text_rc_;
-		render_rc_[1] = Rect_T<int32_t>(bounding_box_.left(), bounding_box_.top(), text_rc_.left(), text_rc_.top());
-		render_rc_[2] = Rect_T<int32_t>(text_rc_.left(), bounding_box_.top(), text_rc_.right(), text_rc_.top());
-		render_rc_[3] = Rect_T<int32_t>(text_rc_.right(), bounding_box_.top(), bounding_box_.right(), text_rc_.top());
-		render_rc_[4] = Rect_T<int32_t>(bounding_box_.left(), text_rc_.top(), text_rc_.left(), text_rc_.bottom());
-		render_rc_[5] = Rect_T<int32_t>(text_rc_.right(), text_rc_.top(), bounding_box_.right(), text_rc_.bottom());
-		render_rc_[6] = Rect_T<int32_t>(bounding_box_.left(), text_rc_.bottom(), text_rc_.left(), bounding_box_.bottom());
-		render_rc_[7] = Rect_T<int32_t>(text_rc_.left(), text_rc_.bottom(), text_rc_.right(), bounding_box_.bottom());
-		render_rc_[8] = Rect_T<int32_t>(text_rc_.right(), text_rc_.bottom(), bounding_box_.right(), bounding_box_.bottom());
+		render_rc_[1] = IRect(bounding_box_.left(), bounding_box_.top(), text_rc_.left(), text_rc_.top());
+		render_rc_[2] = IRect(text_rc_.left(), bounding_box_.top(), text_rc_.right(), text_rc_.top());
+		render_rc_[3] = IRect(text_rc_.right(), bounding_box_.top(), bounding_box_.right(), text_rc_.top());
+		render_rc_[4] = IRect(bounding_box_.left(), text_rc_.top(), text_rc_.left(), text_rc_.bottom());
+		render_rc_[5] = IRect(text_rc_.right(), text_rc_.top(), bounding_box_.right(), text_rc_.bottom());
+		render_rc_[6] = IRect(bounding_box_.left(), text_rc_.bottom(), text_rc_.left(), bounding_box_.bottom());
+		render_rc_[7] = IRect(text_rc_.left(), text_rc_.bottom(), text_rc_.right(), bounding_box_.bottom());
+		render_rc_[8] = IRect(text_rc_.right(), text_rc_.bottom(), bounding_box_.right(), bounding_box_.bottom());
 
 		// Inflate further by spacing_
-		text_rc_ += Rect_T<int32_t>(spacing_, spacing_, -spacing_, -spacing_);
+		text_rc_ += IRect(spacing_, spacing_, -spacing_, -spacing_);
 
 		bounding_box_ = text_rc_;
 		for (int i = 0; i < 9; ++ i)
@@ -845,7 +845,7 @@ namespace KlayGE
 		//
 		// Render the selection rectangle
 		//
-		Rect_T<int32_t> rcSelection;  // Make this available for rendering selected text
+		IRect rcSelection;  // Make this available for rendering selected text
 		if (caret_pos_ != sel_start_)
 		{
 			int nSelLeftX = nCaretX, nSelRightX = nSelStartX;
@@ -855,7 +855,7 @@ namespace KlayGE
 				std::swap(nSelLeftX, nSelRightX);
 			}
 
-			rcSelection = Rect_T<int32_t>(nSelLeftX, text_rc_.top(), nSelRightX, text_rc_.bottom());
+			rcSelection = IRect(nSelLeftX, text_rc_.top(), nSelRightX, text_rc_.bottom());
 			rcSelection += int2(text_rc_.left() - nXFirst, 0);
 			rcSelection &= text_rc_;
 
@@ -894,7 +894,7 @@ namespace KlayGE
 		if (has_focus_ && caret_on_ && !hide_caret_)
 		{
 			// Start the rectangle with insert mode caret
-			Rect_T<int32_t> rcCaret(text_rc_.left() - nXFirst + nCaretX - 1, text_rc_.top(),
+			IRect rcCaret(text_rc_.left() - nXFirst + nCaretX - 1, text_rc_.top(),
 				text_rc_.left() - nXFirst + nCaretX + 1, text_rc_.bottom());
 
 			// If we are in overwrite mode, adjust the caret rectangle

@@ -31,11 +31,13 @@
 #ifndef _KFL_SIZE_HPP
 #define _KFL_SIZE_HPP
 
+#pragma once
+
+#include <KFL/PreDeclare.hpp>
+
 #include <boost/operators.hpp>
 
 #include <KFL/Vector.hpp>
-
-#pragma once
 
 namespace KlayGE
 {
@@ -63,48 +65,45 @@ namespace KlayGE
 
 	public:
 		Size_T()
-			{ }
-		explicit Size_T(T const * rhs)
-			: size_(rhs)
-			{ }
-		Size_T(const Size_T& rhs)
+		{
+		}
+		explicit Size_T(T const * rhs);
+		Size_T(Size_T const & rhs)
 			: size_(rhs.size_)
-			{ }
+		{
+		}
 		template <typename U>
 		Size_T(Size_T<U> const & rhs)
 			: size_(rhs.size_)
-			{ }
-		Size_T(T const & cx, T const & cy)
 		{
-			this->cx() = cx;
-			this->cy() = cy;
 		}
+		Size_T(T cx, T cy);
 
 		// 取向量
 		reference cx()
-			{ return size_[0]; }
+		{
+			return size_[0];
+		}
 		const_reference cx() const
-			{ return size_[0]; }
+		{
+			return size_[0];
+		}
 		reference cy()
-			{ return size_[1]; }
+		{
+			return size_[1];
+		}
 		const_reference cy() const
-			{ return size_[1]; }
+		{
+			return size_[1];
+		}
 
 		// 赋值操作符
 		template <typename U>
-		Size_T const & operator+=(Size_T<U> const & rhs)
-		{
-			size_ += rhs.size_;
-			return *this;
-		}
+		Size_T const & operator+=(Size_T<U> const & rhs);
 		template <typename U>
-		Size_T const & operator-=(Size_T<U> const & rhs)
-		{
-			size_ -= rhs.size_;
-			return *this;
-		}
+		Size_T const & operator-=(Size_T<U> const & rhs);
 
-		Size_T& operator=(const Size_T& rhs)
+		Size_T& operator=(Size_T const & rhs)
 		{
 			if (this != &rhs)
 			{
@@ -115,23 +114,15 @@ namespace KlayGE
 		template <typename U>
 		Size_T& operator=(Size_T<U> const & rhs)
 		{
-			if (this != &rhs)
-			{
-				size_ = rhs.size_;
-			}
+			size_ = rhs.size_;
 			return *this;
 		}
 
 		// 一元操作符
-		Size_T<T> const operator+() const
-			{ return *this; }
-		Size_T<T> const operator-() const
-			{ return Size_T<T>(-this->cx(), -this->cy()); }
+		Size_T<T> const operator+() const;
+		Size_T<T> const operator-() const;
 
-		bool operator==(Size_T<T> const & rhs)
-		{
-			return size_ == rhs.size_;
-		}
+		bool operator==(Size_T<T> const & rhs) const;
 
 	private:
 		Vector_T<T, elem_num> size_;

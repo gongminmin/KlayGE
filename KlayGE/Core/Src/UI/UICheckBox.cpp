@@ -133,7 +133,7 @@ namespace KlayGE
 
 	void UICheckBox::UpdateRects()
 	{
-		button_rc_ = text_rc_ = Rect_T<int32_t>(x_, y_, x_ + width_, y_ + height_);
+		button_rc_ = text_rc_ = IRect(x_, y_, x_ + width_, y_ + height_);
 		button_rc_.right() = button_rc_.left() + button_rc_.Height();
 		text_rc_.left() += static_cast<int32_t>(1.25f * button_rc_.Width());
 

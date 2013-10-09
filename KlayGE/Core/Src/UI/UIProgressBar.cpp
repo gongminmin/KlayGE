@@ -110,7 +110,7 @@ namespace KlayGE
 
 			dlg->DrawRect(bounding_box_, 0, elements_[BACKGROUND_INDEX]->TextureColor().Current);
 
-			Rect_T<int32_t> bar_bb = bounding_box_;
+			IRect bar_bb = bounding_box_;
 			bar_bb.right() = bounding_box_.left() + static_cast<int>((progress_ / 100.0f) * bounding_box_.Width() + 0.5f);
 			dlg->DrawRect(bar_bb, 0, elements_[BAR_INDEX]->TextureColor().Current);
 		}

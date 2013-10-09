@@ -171,7 +171,7 @@ namespace KlayGE
 		//TODO: remove magic numbers
 		UIElementPtr pElement = elements_[0];
 
-		Rect_T<int32_t> rcWindow = bounding_box_;
+		IRect rcWindow = bounding_box_;
 
 		// Blend current color
 		pElement->TextureColor().SetState(iState);

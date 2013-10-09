@@ -183,7 +183,7 @@ namespace KlayGE
 	{
 		UIControl::UpdateRects();
 
-		slider_rc_ = Rect_T<int32_t>(x_, y_, x_ + width_, y_ + height_);
+		slider_rc_ = IRect(x_, y_, x_ + width_, y_ + height_);
 
 		button_rc_ = slider_rc_;
 		button_rc_.right() = button_rc_.left() + button_rc_.Height();

@@ -85,7 +85,7 @@ namespace KlayGE
 	class KLAYGE_CORE_API UIElement
 	{
 	public:
-		void SetTexture(uint32_t tex_index, Rect_T<int32_t> const & tex_rect, Color const & default_texture_color = Color(1, 1, 1, 1));
+		void SetTexture(uint32_t tex_index, IRect const & tex_rect, Color const & default_texture_color = Color(1, 1, 1, 1));
 
 		void SetFont(uint32_t font_index);
 		void SetFont(uint32_t font_index, Color const & default_font_color);
@@ -108,7 +108,7 @@ namespace KlayGE
 			return text_align_;
 		}
 
-		Rect_T<int32_t> const & TexRect() const
+		IRect const & TexRect() const
 		{
 			return tex_rect_;
 		}
@@ -136,7 +136,7 @@ namespace KlayGE
 		uint32_t font_index_;
 		uint32_t text_align_;
 
-		Rect_T<int32_t> tex_rect_;
+		IRect tex_rect_;
 
 		UIStatesColor texture_color_;
 		UIStatesColor font_color_;
@@ -201,7 +201,7 @@ namespace KlayGE
 		{
 		}
 
-		Rect_T<int32_t> const & BoundingBoxRect() const
+		IRect const & BoundingBoxRect() const
 		{
 			return bounding_box_;
 		}
@@ -346,7 +346,7 @@ namespace KlayGE
 	protected:
 		virtual void UpdateRects()
 		{
-			bounding_box_ = Rect_T<int32_t>(x_, y_, x_ + width_, y_ + height_);
+			bounding_box_ = IRect(x_, y_, x_ + width_, y_ + height_);
 		}
 
 		int  id_;				// ID number
@@ -355,7 +355,7 @@ namespace KlayGE
 
 		bool enabled_;			// Enabled/disabled flag
 
-		Rect_T<int32_t> bounding_box_;		// Rectangle defining the active region of the control
+		IRect bounding_box_;		// Rectangle defining the active region of the control
 	};
 
 	class KLAYGE_CORE_API UIManager : public enable_shared_from_this<UIManager>
@@ -414,14 +414,14 @@ namespace KlayGE
 		void Render();
 
 		void DrawRect(float3 const & pos, float width, float height, Color const * clrs,
-			Rect_T<int32_t> const & rcTexture, TexturePtr const & texture);
+			IRect const & rcTexture, TexturePtr const & texture);
 		void DrawQuad(float3 const & offset, VertexFormat const * vertices, TexturePtr const & texture);
 		void DrawString(std::wstring const & strText, uint32_t font_index,
-			Rect_T<int32_t> const & rc, float depth, Color const & clr, uint32_t align);
+			IRect const & rc, float depth, Color const & clr, uint32_t align);
 		Size_T<float> CalcSize(std::wstring const & strText, uint32_t font_index,
-			Rect_T<int32_t> const & rc, uint32_t align);
+			IRect const & rc, uint32_t align);
 
-		Rect_T<int32_t> const & ElementTextureRect(uint32_t ctrl, uint32_t elem_index);
+		IRect const & ElementTextureRect(uint32_t ctrl, uint32_t elem_index);
 		size_t NumElementTextureRect(uint32_t ctrl) const;
 
 		void SettleCtrls();
@@ -445,7 +445,7 @@ namespace KlayGE
 		std::vector<TexturePtr> texture_cache_;   // Shared textures
 		std::vector<std::pair<FontPtr, float> > font_cache_;         // Shared fonts
 
-		array<std::vector<Rect_T<int32_t> >, UICT_Num_Control_Types> elem_texture_rcs_;
+		array<std::vector<IRect >, UICT_Num_Control_Types> elem_texture_rcs_;
 
 		std::map<TexturePtr, RenderablePtr> rects_;
 
@@ -635,11 +635,11 @@ namespace KlayGE
 
 		void FocusDefaultControl();
 
-		void DrawRect(Rect_T<int32_t> const & rc, float depth, Color const & clr);
+		void DrawRect(IRect const & rc, float depth, Color const & clr);
 		void DrawQuad(UIManager::VertexFormat const * vertices, float depth, TexturePtr const & texture);
-		void DrawSprite(UIElement const & element, Rect_T<int32_t> const & rcDest, float depth_bias = 0.0f);
-		void DrawString(std::wstring const & strText, UIElement const & uie, Rect_T<int32_t> const & rc, bool bShadow = false, float depth_bias = 0.0f);
-		Size_T<uint32_t> CalcSize(std::wstring const & strText, UIElement const & uie, Rect_T<int32_t> const & rc, bool bShadow = false);
+		void DrawSprite(UIElement const & element, IRect const & rcDest, float depth_bias = 0.0f);
+		void DrawString(std::wstring const & strText, UIElement const & uie, IRect const & rc, bool bShadow = false, float depth_bias = 0.0f);
+		UISize CalcSize(std::wstring const & strText, UIElement const & uie, IRect const & rc, bool bShadow = false);
 
 	private:
 		void KeyDownHandler(uint32_t key);
@@ -672,7 +672,7 @@ namespace KlayGE
 		std::string id_;
 		std::wstring caption_;
 
-		Rect_T<int32_t> bounding_box_;
+		IRect bounding_box_;
 		int caption_height_;
 
 		Color top_left_clr_;
@@ -900,8 +900,8 @@ namespace KlayGE
 		virtual void InitDefaultElements();
 
 		bool checked_;
-		Rect_T<int32_t> button_rc_;
-		Rect_T<int32_t> text_rc_;
+		IRect button_rc_;
+		IRect text_rc_;
 
 		bool pressed_;
 
@@ -981,8 +981,8 @@ namespace KlayGE
 		uint32_t button_group_;
 
 		bool checked_;
-		Rect_T<int32_t> button_rc_;
-		Rect_T<int32_t> text_rc_;
+		IRect button_rc_;
+		IRect text_rc_;
 
 		bool pressed_;
 
@@ -1068,8 +1068,8 @@ namespace KlayGE
 
 		bool pressed_;
 
-		Rect_T<int32_t> button_rc_;
-		Rect_T<int32_t> slider_rc_;
+		IRect button_rc_;
+		IRect slider_rc_;
 	};
 
 	class KLAYGE_CORE_API UIScrollBar : public UIControl
@@ -1142,10 +1142,10 @@ namespace KlayGE
 
 		bool show_thumb_;
 		bool drag_;
-		Rect_T<int32_t> up_button_rc_;
-		Rect_T<int32_t> down_button_rc_;
-		Rect_T<int32_t> track_rc_;
-		Rect_T<int32_t> thumb_rc_;
+		IRect up_button_rc_;
+		IRect down_button_rc_;
+		IRect track_rc_;
+		IRect thumb_rc_;
 		size_t position_;  // Position of the first displayed item
 		size_t page_size_;  // How many items are displayable in one page
 		size_t start_;     // First item
@@ -1163,7 +1163,7 @@ namespace KlayGE
 		std::wstring strText;
 		boost::any data;
 
-		Rect_T<int32_t>  rcActive;
+		IRect  rcActive;
 		bool  bSelected;
 	};
 
@@ -1266,8 +1266,8 @@ namespace KlayGE
 	protected:
 		virtual void InitDefaultElements();
 
-		Rect_T<int32_t> text_rc_;      // Text rendering bound
-		Rect_T<int32_t> selection_rc_; // Selection box bound
+		IRect text_rc_;      // Text rendering bound
+		IRect selection_rc_; // Selection box bound
 		UIScrollBar scroll_bar_;
 		int sb_width_;
 		int border_;
@@ -1286,7 +1286,7 @@ namespace KlayGE
 		std::wstring strText;
 		boost::any data;
 
-		Rect_T<int32_t>  rcActive;
+		IRect  rcActive;
 		bool  bVisible;
 	};
 
@@ -1398,11 +1398,11 @@ namespace KlayGE
 
 		bool    opened_;
 
-		Rect_T<int32_t> show_rc_;
-		Rect_T<int32_t> text_rc_;
-		Rect_T<int32_t> button_rc_;
-		Rect_T<int32_t> dropdown_rc_;
-		Rect_T<int32_t> dropdown_text_rc_;
+		IRect show_rc_;
+		IRect text_rc_;
+		IRect button_rc_;
+		IRect dropdown_rc_;
+		IRect dropdown_text_rc_;
 
 		std::vector<shared_ptr<UIComboBoxItem> > items_;
 
@@ -1566,8 +1566,8 @@ namespace KlayGE
 		UniBuffer buffer_;     // Buffer to hold text
 		int      border_;      // Border of the window
 		int      spacing_;     // Spacing between the text and the edge of border
-		Rect_T<int32_t>     text_rc_;       // Bounding rectangle for the text
-		Rect_T<int32_t>     render_rc_[9];  // Convenient rectangles for rendering elements
+		IRect     text_rc_;       // Bounding rectangle for the text
+		IRect     render_rc_[9];  // Convenient rectangles for rendering elements
 		double   blink_time_;      // Caret blink time in milliseconds
 		double   last_blink_time_;  // Last timestamp of caret blink
 		bool     caret_on_;     // Flag to indicate whether caret is currently visible

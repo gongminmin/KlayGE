@@ -98,11 +98,11 @@ namespace KlayGE
 	{
 		UIControl::UpdateRects();
 
-		selection_rc_ = Rect_T<int32_t>(x_, y_, x_ + width_, y_ + height_);
+		selection_rc_ = IRect(x_, y_, x_ + width_, y_ + height_);
 		selection_rc_.right() -= sb_width_;
-		selection_rc_ += Rect_T<int32_t>(border_, border_, -border_, -border_);
+		selection_rc_ += IRect(border_, border_, -border_, -border_);
 		text_rc_ = selection_rc_;
-		text_rc_ += Rect_T<int32_t>(margin_, 0, -margin_, 0);
+		text_rc_ += IRect(margin_, 0, -margin_, 0);
 
 		// Update the scrollbar's rects
 		scroll_bar_.SetLocation(x_ + width_ - sb_width_, y_);
@@ -125,7 +125,7 @@ namespace KlayGE
 	{
 		shared_ptr<UIListBoxItem> pNewItem = MakeSharedPtr<UIListBoxItem>();
 		pNewItem->strText = strText;
-		pNewItem->rcActive = Rect_T<int32_t>(0, 0, 0, 0);
+		pNewItem->rcActive = IRect(0, 0, 0, 0);
 		pNewItem->bSelected = false;
 
 		int ret = static_cast<int>(items_.size());
@@ -146,7 +146,7 @@ namespace KlayGE
 		shared_ptr<UIListBoxItem> pNewItem = MakeSharedPtr<UIListBoxItem>();
 		pNewItem->strText = strText;
 		pNewItem->data = data;
-		pNewItem->rcActive = Rect_T<int32_t>(0, 0, 0, 0);
+		pNewItem->rcActive = IRect(0, 0, 0, 0);
 		pNewItem->bSelected = false;
 
 		int ret = static_cast<int>(items_.size());
@@ -162,7 +162,7 @@ namespace KlayGE
 		shared_ptr<UIListBoxItem> pNewItem = MakeSharedPtr<UIListBoxItem>();
 		pNewItem->strText = strText;
 		pNewItem->data = data;
-		pNewItem->rcActive = Rect_T<int32_t>(0, 0, 0, 0);
+		pNewItem->rcActive = IRect(0, 0, 0, 0);
 		pNewItem->bSelected = false;
 
 		items_.insert(items_.begin() + nIndex, pNewItem);
@@ -631,14 +631,14 @@ namespace KlayGE
 		}
 
 		this->GetDialog()->DrawSprite(*pElement,
-			Rect_T<int32_t>(x_, y_, x_ + width_, y_ + height_));
+			IRect(x_, y_, x_ + width_, y_ + height_));
 
 		// Render the text
 		if (!items_.empty())
 		{
 			// Find out the height of a single line of text
-			Rect_T<int32_t> rc = text_rc_;
-			Rect_T<int32_t> rcSel = selection_rc_;
+			IRect rc = text_rc_;
+			IRect rcSel = selection_rc_;
 			rc.bottom() = static_cast<int32_t>(rc.top() + UIManager::Instance().GetFontSize(pElement->FontIndex()));
 
 			// Update the line height formation

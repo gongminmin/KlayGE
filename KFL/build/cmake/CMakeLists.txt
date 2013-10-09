@@ -76,7 +76,19 @@ SET(MATH_HEADER_FILES
 	${KFL_PROJECT_DIR}/include/KFL/Vector.hpp
 )
 SET(MATH_SOURCE_FILES
+	${KFL_PROJECT_DIR}/src/Math/AABBox.cpp
+	${KFL_PROJECT_DIR}/src/Math/Color.cpp
+	${KFL_PROJECT_DIR}/src/Math/Frustum.cpp
+	${KFL_PROJECT_DIR}/src/Math/Half.cpp
 	${KFL_PROJECT_DIR}/src/Math/Math.cpp
+	${KFL_PROJECT_DIR}/src/Math/Matrix.cpp
+	${KFL_PROJECT_DIR}/src/Math/Noise.cpp
+	${KFL_PROJECT_DIR}/src/Math/OBBox.cpp
+	${KFL_PROJECT_DIR}/src/Math/Plane.cpp
+	${KFL_PROJECT_DIR}/src/Math/Quaternion.cpp
+	${KFL_PROJECT_DIR}/src/Math/Rect.cpp
+	${KFL_PROJECT_DIR}/src/Math/Size.cpp
+	${KFL_PROJECT_DIR}/src/Math/Sphere.cpp
 )
 
 SOURCE_GROUP("Kernel\\Source Files" FILES ${KERNEL_SOURCE_FILES})

@@ -36,10 +36,10 @@ namespace KlayGE
 						start_(0), end_(1),
 						arrow_(CLEAR), arrow_ts_(0)
 	{
-		up_button_rc_ = Rect_T<int32_t>(0, 0, 0, 0);
-		down_button_rc_ = Rect_T<int32_t>(0, 0, 0, 0);
-		track_rc_ = Rect_T<int32_t>(0, 0, 0, 0);
-		thumb_rc_ = Rect_T<int32_t>(0, 0, 0, 0);
+		up_button_rc_ = IRect(0, 0, 0, 0);
+		down_button_rc_ = IRect(0, 0, 0, 0);
+		track_rc_ = IRect(0, 0, 0, 0);
+		thumb_rc_ = IRect(0, 0, 0, 0);
 
 		this->InitDefaultElements();
 	}
@@ -51,10 +51,10 @@ namespace KlayGE
 						start_(nTrackStart), end_(nTrackEnd),
 						arrow_(CLEAR), arrow_ts_(0)
 	{
-		up_button_rc_ = Rect_T<int32_t>(0, 0, 0, 0);
-		down_button_rc_ = Rect_T<int32_t>(0, 0, 0, 0);
-		track_rc_ = Rect_T<int32_t>(0, 0, 0, 0);
-		thumb_rc_ = Rect_T<int32_t>(0, 0, 0, 0);
+		up_button_rc_ = IRect(0, 0, 0, 0);
+		down_button_rc_ = IRect(0, 0, 0, 0);
+		track_rc_ = IRect(0, 0, 0, 0);
+		thumb_rc_ = IRect(0, 0, 0, 0);
 
 		this->InitDefaultElements();
 
@@ -71,10 +71,10 @@ namespace KlayGE
 						start_(0), end_(1),
 						arrow_(CLEAR), arrow_ts_(0)
 	{
-		up_button_rc_ = Rect_T<int32_t>(0, 0, 0, 0);
-		down_button_rc_ = Rect_T<int32_t>(0, 0, 0, 0);
-		track_rc_ = Rect_T<int32_t>(0, 0, 0, 0);
-		thumb_rc_ = Rect_T<int32_t>(0, 0, 0, 0);
+		up_button_rc_ = IRect(0, 0, 0, 0);
+		down_button_rc_ = IRect(0, 0, 0, 0);
+		track_rc_ = IRect(0, 0, 0, 0);
+		thumb_rc_ = IRect(0, 0, 0, 0);
 
 		this->InitDefaultElements();
 	}
@@ -125,11 +125,11 @@ namespace KlayGE
 
 		// Make the buttons square
 
-		up_button_rc_ = Rect_T<int32_t>(bounding_box_.left(), bounding_box_.top(),
+		up_button_rc_ = IRect(bounding_box_.left(), bounding_box_.top(),
 			bounding_box_.right(), bounding_box_.top() + bounding_box_.Width());
-		down_button_rc_ = Rect_T<int32_t>(bounding_box_.left(), bounding_box_.bottom() - bounding_box_.Width(),
+		down_button_rc_ = IRect(bounding_box_.left(), bounding_box_.bottom() - bounding_box_.Width(),
 			bounding_box_.right(), bounding_box_.bottom());
-		track_rc_ = Rect_T<int32_t>(up_button_rc_.left(), up_button_rc_.bottom(),
+		track_rc_ = IRect(up_button_rc_.left(), up_button_rc_.bottom(),
 			down_button_rc_.right(), down_button_rc_.top());
 		thumb_rc_.left() = up_button_rc_.left();
 		thumb_rc_.right() = up_button_rc_.right();

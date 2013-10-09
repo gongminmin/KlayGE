@@ -31,10 +31,10 @@
 #ifndef _KFL_HALF_HPP
 #define _KFL_HALF_HPP
 
+#pragma once
+
 #include <boost/operators.hpp>
 #include <limits>
-
-#pragma once
 
 #define HALF_MIN	5.96046448e-08f	// Smallest positive half
 
@@ -77,213 +77,50 @@ namespace KlayGE
 	class half : boost::addable<half,
 						boost::subtractable<half,
 						boost::multipliable<half,
-						boost::dividable<half> > > >
+						boost::dividable<half,
+						boost::equality_comparable<half> > > > >
 	{
 	public:
 		half()
 		{
 		}
 
-		explicit half(float f)
-		{
-			union FNI
-			{
-				float f;
-				int32_t i;
-			} fni;
-			fni.f = f;
-			int32_t i = fni.i;
+		explicit half(float f);
 
-			int32_t s = (i >> 16) & 0x00008000;
-			int32_t e = ((i >> 23) & 0x000000FF) - (127 - 15);
-			int32_t m = i & 0x007FFFFF;
-
-			if (e <= 0)
-			{
-				if (e < -10)
-				{
-					value_ = 0;
-				}
-				else
-				{
-					m = (m | 0x00800000) >> (1 - e);
-
-					if (m &  0x00001000)
-					{
-						m += 0x00002000;
-					}
-
-					value_ = static_cast<uint16_t>(s | (m >> 13));
-				}
-			}
-			else
-			{
-				if (0xFF - (127 - 15) == e)
-				{
-					e = 31;
-				}
-				else
-				{
-					if (m & 0x00001000)
-					{
-						m += 0x00002000;
-
-						if (m & 0x00800000)
-						{
-							m = 0;		// overflow in significand,
-							e += 1;		// adjust exponent
-						}
-					}
-				}
-
-				value_ = static_cast<uint16_t>(s | (e << 10) | (m >> 13));
-			}
-		}
-
-		operator float() const
-		{
-			int32_t ret;
-
-			int32_t s = ((value_ & 0x8000) >> 15) << 31;
-			int32_t e = (value_ & 0x7C00) >> 10;
-			int32_t m = value_ & 0x03FF;
-
-			if (0 == e)
-			{
-				if (m != 0)
-				{
-					// Denormalized number -- renormalize it
-
-					while (!(m & 0x00000400))
-					{
-						m <<= 1;
-						e -= 1;
-					}
-
-					e += 1;
-					m &= ~0x00000400;
-				}
-			}
-			else
-			{
-				if (31 == e)
-				{
-					if (m != 0)
-					{
-						// Nan -- preserve sign and significand bits
-						e = 0xFF - (127 - 15);
-					}
-				}
-			}
-
-			// Normalized number
-			e += 127 - 15;
-			m <<= 13;
-
-			ret = s | (e << 23) | m;
-
-			union INF
-			{
-				int32_t i;
-				float f;
-			} inf;
-			inf.i = ret;
-			return inf.f;
-		}
+		operator float() const;
 
 		// 特殊值
 
 		// returns +infinity
-		static half pos_inf()
-		{
-			half h;
-			h.value_ = 0x7C00;
-			return h;
-		}
+		static half pos_inf();
 
 		// returns -infinity
-		static half neg_inf()
-		{
-			half h;
-			h.value_ = 0xFC00;
-			return h;
-		}
+		static half neg_inf();
 
 		// returns a NAN with the bit pattern 0111111111111111
-		static half q_nan()
-		{
-			half h;
-			h.value_ = 0x7FFF;
-			return h;
-		}
+		static half q_nan();
 
 		// returns a NAN with the bit pattern 0111110111111111
-		static half s_nan()
-		{
-			half h;
-			h.value_ = 0x7DFF;
-			return h;
-		}
+		static half s_nan();
 
 
 		// 赋值操作符
-		half const & operator+=(half const & rhs)
-		{
-			*this = half(float(*this) + float(rhs));
-			return *this;
-		}
-		half const & operator-=(half const & rhs)
-		{
-			*this = half(float(*this) - float(rhs));
-			return *this;
-		}
-		half const & operator*=(half const & rhs)
-		{
-			*this = half(float(*this) * float(rhs));
-			return *this;
-		}
-		half const & operator/=(half const & rhs)
-		{
-			*this = half(float(*this) / float(rhs));
-			return *this;
-		}
+		half const & operator+=(half const & rhs);
+		half const & operator-=(half const & rhs);
+		half const & operator*=(half const & rhs);
+		half const & operator/=(half const & rhs);
 
-		half& operator=(half const & rhs)
-		{
-			if (this != &rhs)
-			{
-				value_ = rhs.value_;
-			}
-			return *this;
-		}
+		half& operator=(half const & rhs);
 
 		// 一元操作符
-		half const operator+() const
-		{
-			return *this;
-		}
-		half const operator-() const
-		{
-			half temp(*this);
-			temp.value_ = -temp.value_;
-			return temp;
-		}
+		half const operator+() const;
+		half const operator-() const;
 
-		friend bool
-		operator==(half const & lhs, half const & rhs)
-		{
-			return lhs.value_ == rhs.value_;
-		}
+		bool operator==(half const & rhs);
 
 	private:
 		uint16_t value_;
 	};
-
-	inline bool
-	operator!=(half const & lhs, half const & rhs)
-	{
-		return !(lhs == rhs);
-	}
 }
 
 namespace std

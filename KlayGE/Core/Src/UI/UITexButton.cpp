@@ -76,11 +76,11 @@ namespace KlayGE
 
 			if (tex)
 			{
-				Element.SetTexture(static_cast<uint32_t>(tex_index_), Rect_T<int32_t>(0, 0, tex->Width(0), tex->Height(0)));
+				Element.SetTexture(static_cast<uint32_t>(tex_index_), IRect(0, 0, tex->Width(0), tex->Height(0)));
 			}
 			else
 			{
-				Element.SetTexture(static_cast<uint32_t>(tex_index_), Rect_T<int32_t>(0, 0, 1, 1));
+				Element.SetTexture(static_cast<uint32_t>(tex_index_), IRect(0, 0, 1, 1));
 			}
 			Element.SetFont(0);
 			Element.TextureColor().States[UICS_MouseOver] = Color(1, 1, 1, 1);
@@ -182,7 +182,7 @@ namespace KlayGE
 
 		//TODO: remove magic numbers
 
-		Rect_T<int32_t> rcWindow = bounding_box_;
+		IRect rcWindow = bounding_box_;
 
 		for (int i = 0; i < 10; ++ i)
 		{
@@ -194,25 +194,25 @@ namespace KlayGE
 		}
 
 		// Fill layer
-		this->GetDialog()->DrawSprite(*elements_[0], Rect_T<int32_t>(bounding_box_.left(), bounding_box_.top(),
+		this->GetDialog()->DrawSprite(*elements_[0], IRect(bounding_box_.left(), bounding_box_.top(),
 			bounding_box_.left() + 5, bounding_box_.top() + 5));
-		this->GetDialog()->DrawSprite(*elements_[1], Rect_T<int32_t>(bounding_box_.left() + 5, bounding_box_.top(),
+		this->GetDialog()->DrawSprite(*elements_[1], IRect(bounding_box_.left() + 5, bounding_box_.top(),
 			bounding_box_.right() - 5, bounding_box_.top() + 5));
-		this->GetDialog()->DrawSprite(*elements_[2], Rect_T<int32_t>(bounding_box_.right() - 5, bounding_box_.top(),
+		this->GetDialog()->DrawSprite(*elements_[2], IRect(bounding_box_.right() - 5, bounding_box_.top(),
 			bounding_box_.right(), bounding_box_.top() + 5));
 
-		this->GetDialog()->DrawSprite(*elements_[3], Rect_T<int32_t>(bounding_box_.left(), bounding_box_.top() + 5,
+		this->GetDialog()->DrawSprite(*elements_[3], IRect(bounding_box_.left(), bounding_box_.top() + 5,
 			bounding_box_.left() + 5, bounding_box_.bottom() - 5));
-		this->GetDialog()->DrawSprite(*elements_[4], Rect_T<int32_t>(bounding_box_.left() + 5, bounding_box_.top() + 5,
+		this->GetDialog()->DrawSprite(*elements_[4], IRect(bounding_box_.left() + 5, bounding_box_.top() + 5,
 			bounding_box_.right() - 5, bounding_box_.bottom() - 5));
-		this->GetDialog()->DrawSprite(*elements_[5], Rect_T<int32_t>(bounding_box_.right() - 5, bounding_box_.top() + 5,
+		this->GetDialog()->DrawSprite(*elements_[5], IRect(bounding_box_.right() - 5, bounding_box_.top() + 5,
 			bounding_box_.right(), bounding_box_.bottom() - 5));
 
-		this->GetDialog()->DrawSprite(*elements_[6], Rect_T<int32_t>(bounding_box_.left(), bounding_box_.bottom() - 5,
+		this->GetDialog()->DrawSprite(*elements_[6], IRect(bounding_box_.left(), bounding_box_.bottom() - 5,
 			bounding_box_.left() + 5, bounding_box_.bottom()));
-		this->GetDialog()->DrawSprite(*elements_[7], Rect_T<int32_t>(bounding_box_.left() + 5, bounding_box_.bottom() - 5,
+		this->GetDialog()->DrawSprite(*elements_[7], IRect(bounding_box_.left() + 5, bounding_box_.bottom() - 5,
 			bounding_box_.right() - 5, bounding_box_.bottom()));
-		this->GetDialog()->DrawSprite(*elements_[8], Rect_T<int32_t>(bounding_box_.right() - 5, bounding_box_.bottom() - 5,
+		this->GetDialog()->DrawSprite(*elements_[8], IRect(bounding_box_.right() - 5, bounding_box_.bottom() - 5,
 			bounding_box_.right(), bounding_box_.bottom()));
 
 		// Main button
@@ -229,11 +229,11 @@ namespace KlayGE
 		tex_index_ = UIManager::Instance().AddTexture(tex);
 		if (tex)
 		{
-			elements_[9]->SetTexture(static_cast<uint32_t>(tex_index_), Rect_T<int32_t>(0, 0, tex->Width(0), tex->Height(0)));
+			elements_[9]->SetTexture(static_cast<uint32_t>(tex_index_), IRect(0, 0, tex->Width(0), tex->Height(0)));
 		}
 		else
 		{
-			elements_[9]->SetTexture(static_cast<uint32_t>(tex_index_), Rect_T<int32_t>(0, 0, 1, 1));
+			elements_[9]->SetTexture(static_cast<uint32_t>(tex_index_), IRect(0, 0, 1, 1));
 		}
 	}
 

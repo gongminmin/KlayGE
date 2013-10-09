@@ -31,11 +31,11 @@
 #ifndef _KFL_QUATERNION_HPP
 #define _KFL_QUATERNION_HPP
 
+#pragma once
+
 #include <boost/operators.hpp>
 
 #include <KFL/Vector.hpp>
-
-#pragma once
 
 namespace KlayGE
 {
@@ -47,159 +47,109 @@ namespace KlayGE
 						boost::multipliable2<Quaternion_T<T>, T,
 						boost::equality_comparable<Quaternion_T<T> > > > > > >
 	{
-		template <typename U>
-		friend class Quaternion_T;
-
 	public:
-		typedef T					value_type;
-
-		typedef value_type*			pointer;
-		typedef value_type const *	const_pointer;
-
-		typedef value_type&			reference;
-		typedef value_type const &	const_reference;
-
-		typedef value_type*			iterator;
-		typedef value_type const *	const_iterator;
-
 		enum { elem_num = 4 };
+
+		typedef T value_type;
+
+		typedef typename Vector_T<T, elem_num>::pointer pointer;
+		typedef typename Vector_T<T, elem_num>::const_pointer const_pointer;
+
+		typedef typename Vector_T<T, elem_num>::reference reference;
+		typedef typename Vector_T<T, elem_num>::const_reference const_reference;
+
+		typedef typename Vector_T<T, elem_num>::iterator iterator;
+		typedef typename Vector_T<T, elem_num>::const_iterator const_iterator;
 
 	public:
 		Quaternion_T()
-			{ }
-		explicit Quaternion_T(T const * rhs)
-			: quat_(rhs)
-			{ }
-		Quaternion_T(Vector_T<T, 3> const & vec, T const & s)
 		{
-			this->x() = vec.x();
-			this->y() = vec.y();
-			this->z() = vec.z();
-			this->w() = s;
 		}
-		Quaternion_T(Quaternion_T const & rhs)
-			: quat_(rhs.quat_)
-			{ }
-		template <typename U>
-		Quaternion_T(Quaternion_T<U> const & rhs)
-			: quat_(rhs.quat_)
-			{ }
-		Quaternion_T(T const & x, T const & y, T const & z, T const & w)
-		{
-			this->x() = x;
-			this->y() = y;
-			this->z() = z;
-			this->w() = w;
-		}
+		explicit Quaternion_T(T const * rhs);
+		Quaternion_T(Vector_T<T, 3> const & vec, T s);
+		Quaternion_T(Quaternion_T const & rhs);
+		Quaternion_T(T x, T y, T z, T w);
 
-		static Quaternion_T const & Identity()
-		{
-			static Quaternion_T const out(0, 0, 0, 1);
-			return out;
-		}
+		static Quaternion_T const & Identity();
 
 		// 取向量
 		iterator begin()
-			{ return quat_.begin(); }
+		{
+			return quat_.begin();
+		}
 		const_iterator begin() const
-			{ return quat_.begin(); }
+		{
+			return quat_.begin();
+		}
 		iterator end()
-			{ return quat_.end(); }
+		{
+			return quat_.end();
+		}
 		const_iterator end() const
-			{ return quat_.end(); }
+		{
+			return quat_.end();
+		}
 		reference operator[](size_t index)
-			{ return quat_[index]; }
+		{
+			return quat_[index];
+		}
 		const_reference operator[](size_t index) const
-			{ return quat_[index]; }
+		{
+			return quat_[index];
+		}
 
 		reference x()
-			{ return quat_[0]; }
+		{
+			return quat_[0];
+		}
 		const_reference x() const
-			{ return quat_[0]; }
+		{
+			return quat_[0];
+		}
 		reference y()
-			{ return quat_[1]; }
+		{
+			return quat_[1];
+		}
 		const_reference y() const
-			{ return quat_[1]; }
+		{
+			return quat_[1];
+		}
 		reference z()
-			{ return quat_[2]; }
+		{
+			return quat_[2];
+		}
 		const_reference z() const
-			{ return quat_[2]; }
+		{
+			return quat_[2];
+		}
 		reference w()
-			{ return quat_[3]; }
+		{
+			return quat_[3];
+		}
 		const_reference w() const
-			{ return quat_[3]; }
+		{
+			return quat_[3];
+		}
 
 		// 赋值操作符
-		template <typename U>
-		Quaternion_T const & operator+=(Quaternion_T<U> const & rhs)
-		{
-			quat_ += rhs.quat_;
-			return *this;
-		}
-		template <typename U>
-		Quaternion_T const & operator-=(Quaternion_T<U> const & rhs)
-		{
-			quat_ -= rhs.quat_;
-			return *this;
-		}
+		Quaternion_T const & operator+=(Quaternion_T const & rhs);
+		Quaternion_T const & operator-=(Quaternion_T const & rhs);
 
-		template <typename U>
-		Quaternion_T const & operator*=(Quaternion_T<U> const & rhs)
-		{
-			*this = MathLib::mul(*this, rhs);
-			return *this;
-		}
-		template <typename U>
-		Quaternion_T const & operator*=(U const & rhs)
-		{
-			quat_ *= rhs;
-			return *this;
-		}
-		template <typename U>
-		Quaternion_T const & operator/=(U const & rhs)
-		{
-			quat_ /= rhs;
-			return *this;
-		}
+		Quaternion_T const & operator*=(Quaternion_T const & rhs);
+		Quaternion_T const & operator*=(T rhs);
+		Quaternion_T const & operator/=(T rhs);
 
-		Quaternion_T& operator=(Quaternion_T const & rhs)
-		{
-			if (this != &rhs)
-			{
-				quat_ = rhs.quat_;
-			}
-			return *this;
-		}
-		template <typename U>
-		Quaternion_T& operator=(Quaternion_T<U> const & rhs)
-		{
-			if (this != &rhs)
-			{
-				quat_ = rhs.quat_;
-			}
-			return *this;
-		}
+		Quaternion_T& operator=(Quaternion_T const & rhs);
 
 		// 一元操作符
-		Quaternion_T const operator+() const
-			{ return *this; }
-		Quaternion_T const operator-() const
-			{ return Quaternion_T(-this->x(), -this->y(), -this->z(), -this->w()); }
+		Quaternion_T const operator+() const;
+		Quaternion_T const operator-() const;
 
 		// 取方向向量
-		Vector_T<T, 3> const v() const
-			{ return Vector_T<T, 3>(this->x(), this->y(), this->z()); }
-		void v(Vector_T<T, 3> const & rhs)
-		{
-			this->x() = rhs.x();
-			this->y() = rhs.y();
-			this->z() = rhs.z();
-		}
+		Vector_T<T, 3> const v() const;
+		void v(Vector_T<T, 3> const & rhs);
 
-		bool operator==(Quaternion_T<T> const & rhs)
-		{
-			return quat_ == rhs.quat_;
-		}
+		bool operator==(Quaternion_T<T> const & rhs) const;
 
 	private:
 		Vector_T<T, elem_num> quat_;

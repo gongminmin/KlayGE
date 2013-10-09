@@ -31,19 +31,11 @@
 #ifndef _KFL_VECTOR_HPP
 #define _KFL_VECTOR_HPP
 
-#ifdef KLAYGE_COMPILER_MSVC
-#pragma warning(push)
-#pragma warning(disable: 6385)
-#endif
-#include <boost/array.hpp>
-#ifdef KLAYGE_COMPILER_MSVC
-#pragma warning(pop)
-#endif
+#pragma once
+
 #include <boost/operators.hpp>
 
 #include <KFL/Detail/MathHelper.hpp>
-
-#pragma once
 
 namespace KlayGE
 {
@@ -55,12 +47,13 @@ namespace KlayGE
 						boost::dividable2<Vector_T<T, N>, T,
 						boost::multipliable2<Vector_T<T, N>, T,
 						boost::addable2<Vector_T<T, N>, T,
-						boost::subtractable2<Vector_T<T, N>, T> > > > > > > >
+						boost::subtractable2<Vector_T<T, N>, T,
+						boost::equality_comparable<Vector_T<T, N> > > > > > > > > >
 	{
 		template <typename U, int M>
 		friend class Vector_T;
 
-		typedef boost::array<T, N>	DetailType;
+		typedef array<T, N>	DetailType;
 
 	public:
 		typedef typename DetailType::value_type			value_type;
@@ -290,22 +283,14 @@ namespace KlayGE
 			detail::vector_helper<T, N>::DoSwap(&vec_[0], &rhs.vec_[0]);
 		}
 
-		friend bool
-		operator==(Vector_T const & lhs, Vector_T const & rhs)
+		bool operator==(Vector_T const & rhs) const
 		{
-			return detail::vector_helper<T, N>::DoEqual(&lhs[0], &rhs[0]);
+			return detail::vector_helper<T, N>::DoEqual(&vec_[0], &rhs[0]);
 		}
 
 	private:
 		DetailType vec_;
 	};
-
-	template <typename T, int N>
-	inline bool
-	operator!=(Vector_T<T, N> const & lhs, Vector_T<T, N> const & rhs)
-	{
-		return !(lhs == rhs);
-	}
 
 	template <typename T, int N>
 	inline void swap(Vector_T<T, N>& lhs, Vector_T<T, N>& rhs)

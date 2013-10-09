@@ -382,7 +382,7 @@ namespace KlayGE
 				{
 					offset = -1;
 				}
-				dlg->DrawRect(Rect_T<int32_t>(x + offset, bounding_box_.top(), x + 1, bounding_box_.bottom()),
+				dlg->DrawRect(IRect(x + offset, bounding_box_.top(), x + 1, bounding_box_.bottom()),
 					0, elements_[COORDLINE_INDEX]->TextureColor().Current);
 			}
 			for (size_t i = 0; i < 11; ++ i)
@@ -393,7 +393,7 @@ namespace KlayGE
 				{
 					offset = -1;
 				}
-				dlg->DrawRect(Rect_T<int32_t>(bounding_box_.left(), y + offset, bounding_box_.right(), y + 1),
+				dlg->DrawRect(IRect(bounding_box_.left(), y + offset, bounding_box_.right(), y + 1),
 					0, elements_[COORDLINE_INDEX]->TextureColor().Current);
 			}
 
@@ -433,7 +433,7 @@ namespace KlayGE
 					int32_t x1 = bounding_box_.left() + static_cast<int32_t>(ctrl_points_[i].x() * bounding_box_.Width()) + offset;
 					int32_t y0 = bounding_box_.bottom() - 1 - static_cast<int32_t>(ctrl_points_[i].y() * bounding_box_.Height()) - offset;
 					int32_t y1 = bounding_box_.bottom() - 1 - static_cast<int32_t>(ctrl_points_[i].y() * bounding_box_.Height()) + offset;
-					dlg->DrawRect(Rect_T<int32_t>(x0, y0, x1, y1), 0, (i == this->ActivePoint()) ? clr_active : clr_normal);
+					dlg->DrawRect(IRect(x0, y0, x1, y1), 0, (i == this->ActivePoint()) ? clr_active : clr_normal);
 				}
 			}
 		}

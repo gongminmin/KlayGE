@@ -375,10 +375,10 @@ namespace KlayGE
 						float height = ci.height * rel_size_y;
 
 						KLAYGE_AUTO(cmiter, cim.find(ch));
-						Rect_T<float> const & texRect(cmiter->second.rc);
+						Rect const & texRect(cmiter->second.rc);
 
-						Rect_T<float> pos_rc(x + left, y + top, x + left + width, y + top + height);
-						Rect_T<float> intersect_rc = pos_rc & rc;
+						Rect pos_rc(x + left, y + top, x + left + width, y + top + height);
+						Rect intersect_rc = pos_rc & rc;
 						if ((intersect_rc.Width() > 0) && (intersect_rc.Height() > 0))
 						{
 							verts.push_back(FontVert(float3(pos_rc.left(), pos_rc.top(), sz),
@@ -473,8 +473,8 @@ namespace KlayGE
 						float height = ci.height * rel_size_y;
 
 						KLAYGE_AUTO(cmiter, cim.find(ch));
-						Rect_T<float> const & texRect(cmiter->second.rc);
-						Rect_T<float> pos_rc(x + left, y + top, x + left + width, y + top + height);
+						Rect const & texRect(cmiter->second.rc);
+						Rect pos_rc(x + left, y + top, x + left + width, y + top + height);
 
 						verts.push_back(FontVert(float3(pos_rc.left(), pos_rc.top(), sz),
 												clr32,
@@ -668,7 +668,7 @@ namespace KlayGE
 	private:
 		struct CharInfo
 		{
-			Rect_T<float> rc;
+			Rect rc;
 			uint64_t tick;
 		};
 

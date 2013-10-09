@@ -31,12 +31,14 @@
 #ifndef _KFL_RECT_HPP
 #define _KFL_RECT_HPP
 
+#pragma once
+
+#include <KFL/PreDeclare.hpp>
+
 #include <boost/operators.hpp>
 
 #include <KFL/Vector.hpp>
 #include <KFL/Size.hpp>
-
-#pragma once
 
 namespace KlayGE
 {
@@ -68,89 +70,67 @@ namespace KlayGE
 
 	public:
 		Rect_T()
-			{ }
-		explicit Rect_T(T const * rhs)
-			: rect_(rhs)
-			{ }
+		{
+		}
+		explicit Rect_T(T const * rhs);
 		Rect_T(Rect_T const & rhs)
 			: rect_(rhs.rect_)
-			{ }
+		{
+		}
 		template <typename U>
 		Rect_T(Rect_T<U> const & rhs)
 			: rect_(rhs.rect_)
-			{ }
-		Rect_T(T const & left, T const & top, T const & right, T const & bottom)
 		{
-			this->left()	= left;
-			this->top()		= top;
-			this->right()	= right;
-			this->bottom()	= bottom;
 		}
+		Rect_T(T left, T top, T right, T bottom);
 
 		// 取向量
 		reference left()
-			{ return rect_[0]; }
+		{
+			return rect_[0];
+		}
 		const_reference left() const
-			{ return rect_[0]; }
+		{
+			return rect_[0];
+		}
 		reference top()
-			{ return rect_[1]; }
+		{
+			return rect_[1];
+		}
 		const_reference top() const
-			{ return rect_[1]; }
+		{
+			return rect_[1];
+		}
 		reference right()
-			{ return rect_[2]; }
+		{
+			return rect_[2];
+		}
 		const_reference right() const
-			{ return rect_[2]; }
+		{
+			return rect_[2];
+		}
 		reference bottom()
-			{ return rect_[3]; }
+		{
+			return rect_[3];
+		}
 		const_reference bottom() const
-			{ return rect_[3]; }
+		{
+			return rect_[3];
+		}
 
 		// 赋值操作符
 		template <typename U>
-		Rect_T const & operator+=(Vector_T<U, 2> const & rhs)
-		{
-			this->left() += rhs.x();
-			this->right() += rhs.x();
-			this->top() += rhs.y();
-			this->bottom() += rhs.y();
-			return *this;
-		}
+		Rect_T const & operator+=(Vector_T<U, 2> const & rhs);
 		template <typename U>
-		Rect_T const & operator-=(Vector_T<U, 2> const & rhs)
-		{
-			*this += -rhs;
-			return *this;
-		}
+		Rect_T const & operator-=(Vector_T<U, 2> const & rhs);
 		template <typename U>
-		Rect_T const & operator+=(Rect_T<U> const & rhs)
-		{
-			rect_ += rhs.rect_;
-			return *this;
-		}
+		Rect_T const & operator+=(Rect_T<U> const & rhs);
 		template <typename U>
-		Rect_T const & operator-=(Rect_T<U> const & rhs)
-		{
-			rect_ -= rhs.rect_;
-			return *this;
-		}
+		Rect_T const & operator-=(Rect_T<U> const & rhs);
 		template <typename U>
-		Rect_T const & operator&=(Rect_T<U> const & rhs)
-		{
-			this->left()	= std::max(this->left(),	rhs.left());
-			this->top()		= std::max(this->top(),		rhs.top());
-			this->right()	= std::min(this->right(),	rhs.right());
-			this->bottom()	= std::min(this->bottom(),	rhs.bottom());
-			return *this;
-		}
+		Rect_T const & operator&=(Rect_T<U> const & rhs);
 		template <typename U>
-		Rect_T const & operator|=(Rect_T<U> const & rhs)
-		{
-			this->left()	= std::min(this->left(),	rhs.left());
-			this->top()		= std::min(this->top(),		rhs.top());
-			this->right()	= std::max(this->right(),	rhs.right());
-			this->bottom()	= std::max(this->bottom(),	rhs.bottom());
-			return *this;
-		}
+		Rect_T const & operator|=(Rect_T<U> const & rhs);
 
 		Rect_T& operator=(Rect_T const & rhs)
 		{
@@ -168,31 +148,18 @@ namespace KlayGE
 		}
 
 		// 一元操作符
-		Rect_T const operator+() const
-			{ return *this; }
-		Rect_T const operator-() const
-			{ return Rect_T<T>(-this->left(), -this->top(), -this->right(), -this->bottom()); }
+		Rect_T const operator+() const;
+		Rect_T const operator-() const;
 
 		// 属性
-		T Width() const
-			{ return this->right() - this->left(); }
-		T Height() const
-			{ return this->bottom() - this->top(); }
-		Size_T<T> const Size() const
-			{ return Size_T<T>(this->Width(), this->Height()); }
-		bool IsEmpty() const
-			{ return (this->left() == this->right()) && (this->top() == this->bottom()); }
+		T Width() const;
+		T Height() const;
+		Size_T<T> const Size() const;
+		bool IsEmpty() const;
 
-		bool operator==(Rect_T<T> const & rhs)
-		{
-			return rect_ == rhs.rect_;
-		}
+		bool operator==(Rect_T<T> const & rhs) const;
 
-		bool PtInRect(Vector_T<T, 2> const & pt) const
-		{
-			return MathLib::in_bound(pt.x(), this->left(), this->right())
-				&& MathLib::in_bound(pt.y(), this->top(), this->bottom());
-		}
+		bool PtInRect(Vector_T<T, 2> const & pt) const;
 
 	private:
 		Vector_T<T, elem_num> rect_;

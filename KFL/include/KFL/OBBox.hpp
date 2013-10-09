@@ -35,7 +35,6 @@
 
 #include <KFL/PreDeclare.hpp>
 
-#include <boost/assert.hpp>
 #include <boost/operators.hpp>
 
 #include <KFL/Bound.hpp>
@@ -51,86 +50,28 @@ namespace KlayGE
 				public Bound_T<T>
 	{
 	public:
-		OBBox_T()
-			: extent_(0, 0, 0)
-		{
-		}
+		OBBox_T();
 		OBBox_T(Vector_T<T, 3> const & center,
 			Vector_T<T, 3> const & x_axis, Vector_T<T, 3> const & y_axis, Vector_T<T, 3> const & z_axis,
-			Vector_T<T, 3> const & extent)
-			: center_(center), extent_(extent)
-		{
-			rotation_ = MathLib::to_quaternion(x_axis, y_axis, z_axis, 0);
-		}
+			Vector_T<T, 3> const & extent);
 		OBBox_T(Vector_T<T, 3> const & center,
 			Quaternion_T<T> const & rotation,
-			Vector_T<T, 3> const & extent)
-			: center_(center), rotation_(rotation), extent_(extent)
-		{
-		}
-		OBBox_T(OBBox_T<T> const & rhs)
-			: Bound_T<T>(rhs),
-				center_(rhs.center_), rotation_(rhs.rotation_), extent_(rhs.extent_)
-		{
-		}
+			Vector_T<T, 3> const & extent);
+		OBBox_T(OBBox_T<T> const & rhs);
 
-		OBBox_T<T>& operator+=(Vector_T<T, 3> const & rhs)
-		{
-			center_ += rhs;
-			return *this;
-		}
-		OBBox_T<T>& operator-=(Vector_T<T, 3> const & rhs)
-		{
-			center_ -= rhs;
-			return *this;
-		}
-		OBBox_T<T>& operator*=(T const & rhs)
-		{
-			extent_ *= rhs;
-			return *this;
-		}
-		OBBox_T<T>& operator/=(T const & rhs)
-		{
-			return this->operator*=(1.0f / rhs);
-		}
+		OBBox_T<T>& operator+=(Vector_T<T, 3> const & rhs);
+		OBBox_T<T>& operator-=(Vector_T<T, 3> const & rhs);
+		OBBox_T<T>& operator*=(T rhs);
+		OBBox_T<T>& operator/=(T rhs);
 
-		OBBox_T<T>& operator=(OBBox_T<T> const & rhs)
-		{
-			if (this != &rhs)
-			{
-				center_ = rhs.center_;
-				rotation_ = rhs.rotation_;
-				extent_ = rhs.extent_;
-			}
-			return *this;
-		}
+		OBBox_T<T>& operator=(OBBox_T<T> const & rhs);
 
-		OBBox_T<T> const operator+() const
-		{
-			return *this;
-		}
-		OBBox_T<T> const operator-() const
-		{
-			OBBox_T<T> ret;
-			ret.center_ = -center_;
-			ret.rotation_ = -rotation_;
-			ret.extent_ = extent_;
-			return ret;
-		}
+		OBBox_T<T> const operator+() const;
+		OBBox_T<T> const operator-() const;
 
-		bool IsEmpty() const
-		{
-			return MathLib::length_sq(extent_) < T(1e-6);
-		}
-
-		bool VecInBound(Vector_T<T, 3> const & v) const
-		{
-			return MathLib::intersect_point_obb(v, *this);
-		}
-		T MaxRadiusSq() const
-		{
-			return MathLib::length_sq(extent_);
-		}
+		virtual bool IsEmpty() const KLAYGE_OVERRIDE;
+		virtual bool VecInBound(Vector_T<T, 3> const & v) const KLAYGE_OVERRIDE;
+		virtual T MaxRadiusSq() const KLAYGE_OVERRIDE;
 
 		Vector_T<T, 3> const & Center() const
 		{
@@ -140,56 +81,20 @@ namespace KlayGE
 		{
 			return rotation_;
 		}
-		Vector_T<T, 3> Axis(uint32_t index) const
-		{
-			Vector_T<T, 3> v(0, 0, 0);
-			v[index] = 1;
-			return MathLib::transform_quat(v, rotation_);
-		}
+		Vector_T<T, 3> Axis(uint32_t index) const;
 		Vector_T<T, 3> const & HalfSize() const
 		{
 			return extent_;
 		}
 
-		bool Intersect(AABBox_T<T> const & aabb) const
-		{
-			return MathLib::intersect_aabb_obb(aabb, *this);
-		}
-		bool Intersect(OBBox_T<T> const & obb) const
-		{
-			return MathLib::intersect_obb_obb(*this, obb);
-		}
-		bool Intersect(Sphere_T<T> const & sphere) const
-		{
-			return MathLib::intersect_obb_sphere(*this, sphere);
-		}
-		bool Intersect(Frustum_T<T> const & frustum) const
-		{
-			return MathLib::intersect_obb_frustum(*this, frustum) != BO_No;
-		}
+		bool Intersect(AABBox_T<T> const & aabb) const;
+		bool Intersect(OBBox_T<T> const & obb) const;
+		bool Intersect(Sphere_T<T> const & sphere) const;
+		bool Intersect(Frustum_T<T> const & frustum) const;
 
-		Vector_T<T, 3> Corner(uint32_t index) const
-		{
-			BOOST_ASSERT(index < 8);
+		Vector_T<T, 3> Corner(uint32_t index) const;
 
-			float3 const & center = this->Center();
-			float3 const & extent = this->HalfSize();
-			float3 const extent_x = MathLib::abs(extent.x() * this->Axis(0));
-			float3 const extent_y = MathLib::abs(extent.y() * this->Axis(1));
-			float3 const extent_z = MathLib::abs(extent.z() * this->Axis(2));
-
-			return center + ((index & 1UL) ? +extent_x : -extent_x)
-				+ ((index & 2UL) ? +extent_y : -extent_y)
-				+ ((index & 4UL) ? +extent_z : -extent_z);
-		}
-
-		friend bool
-		operator==(OBBox_T<T> const & lhs, OBBox_T<T> const & rhs)
-		{
-			return (lhs.center_ == rhs.center_)
-				&& (lhs.rotation_ == rhs.rotation_)
-				&& (rhs.extent_ == rhs.extent_);
-		}
+		bool operator==(OBBox_T<T> const & rhs) const;
 
 	private:
 		Vector_T<T, 3> center_;
