@@ -73,8 +73,8 @@ float attenuation_term(float3 light_pos, float3 pos, float3 atten)
 	float3 v = light_pos - pos;
 	float d2 = dot(v, v);
 	float d = sqrt(d2);
-	return 1 / (atten.x + d * atten.y + d2 * atten.z);
+	return 1 / dot(atten, float3(1, d, d2));
 }
-    ]]>
+		]]>
 	</shader>
 </effect>

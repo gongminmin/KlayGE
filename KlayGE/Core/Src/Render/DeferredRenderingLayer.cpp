@@ -2437,7 +2437,7 @@ namespace KlayGE
 		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 
 		re.BindFrameBuffer(pvp.light_index_buffer);
-		pvp.light_index_buffer->Attached(FrameBuffer::ATT_Color0)->ClearColor(Color(0, 0, 0, 0));
+		pvp.light_index_buffer->Discard(FrameBuffer::ATT_Color0);
 
 		*min_max_depth_tex_param_ = pvp.g_buffer_min_max_depth_texs[4];
 

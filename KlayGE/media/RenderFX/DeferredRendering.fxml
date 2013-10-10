@@ -1104,14 +1104,17 @@ float4 LightIndexedDeferredRenderingPointPS(float2 tc : TEXCOORD0, float3 view_d
 		int mask = 1;
 #endif
 
+#if WITH_SHADOW
+		int nl = 4;
+#else
+		int nl = 32;
+#endif
+		nl = min(nl, num_lights);
+
 #if KLAYGE_D3D11
 		[unroll]
 #endif
-#if WITH_SHADOW
-		for (int i = 0; (i < 4) && (i < num_lights); ++ i)
-#else
-		for (int i = 0; (i < 32) && (i < num_lights); ++ i)
-#endif
+		for (int i = 0; i < nl; ++ i)
 		{
 #if KLAYGE_D3D11
 			[branch]
@@ -1176,14 +1179,17 @@ float4 LightIndexedDeferredRenderingSpotPS(float2 tc : TEXCOORD0, float3 view_di
 		int mask = 1;
 #endif
 
+#if WITH_SHADOW
+		int nl = 4;
+#else
+		int nl = 32;
+#endif
+		nl = min(nl, num_lights);
+		
 #if KLAYGE_D3D11
 		[unroll]
 #endif
-#if WITH_SHADOW
-		for (int i = 0; (i < 4) && (i < num_lights); ++ i)
-#else
-		for (int i = 0; (i < 32) && (i < num_lights); ++ i)
-#endif
+		for (int i = 0; i < nl; ++ i)
 		{
 #if KLAYGE_D3D11
 			[branch]
