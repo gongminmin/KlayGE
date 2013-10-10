@@ -21,8 +21,12 @@ def build_glloader(compiler_info, compiler_arch):
 	if "vc" == compiler_info.name:
 		toolset_name = "-T %s" % compiler_arch[2]
 
+	additional_options = ""
+	if compiler_info.name != "vc":
+		additional_options += "-D KLAYGE_ARCH_NAME:STRING=\"%s\"" % compiler_arch[0]
+
 	cmake_cmd = batch_command()
-	cmake_cmd.add_command('cmake -G "%s" %s -D GLLOADER_USE_GLES:BOOL="FALSE" -D PYTHON_EXE:STRING="%s" %s' % (compiler_arch[1], toolset_name, sys.executable, "../cmake"))
+	cmake_cmd.add_command('cmake -G "%s" %s -D GLLOADER_USE_GLES:BOOL="FALSE" -D PYTHON_EXE:STRING="%s" %s %s' % (compiler_arch[1], toolset_name, sys.executable, additional_options, "../cmake"))
 	cmake_cmd.execute()
 
 	build_cmd = batch_command()
@@ -49,7 +53,7 @@ def build_glloader(compiler_info, compiler_arch):
 	os.chdir(build_dir)
 
 	cmake_cmd = batch_command()
-	cmake_cmd.add_command('cmake -G "%s" %s -D GLLOADER_USE_GLES:BOOL="TRUE" -D PYTHON_EXE:STRING="%s" %s' % (compiler_arch[1], toolset_name, sys.executable, "../cmake"))
+	cmake_cmd.add_command('cmake -G "%s" %s -D GLLOADER_USE_GLES:BOOL="TRUE" -D PYTHON_EXE:STRING="%s" %s %s' % (compiler_arch[1], toolset_name, sys.executable, additional_options, "../cmake"))
 	cmake_cmd.execute()
 
 	build_cmd = batch_command()
