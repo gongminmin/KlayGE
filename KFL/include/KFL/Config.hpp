@@ -359,6 +359,12 @@
 	#define BOOST_SYSTEM_NO_DEPRECATED
 #endif
 
+#if defined(KLAYGE_COMPILER_GCC) && defined(KLAYGE_PLATFORM_WINDOWS) && defined(KLAYGE_CPU_X64)
+	#ifndef BOOST_USE_WINDOWS_H
+		#define BOOST_USE_WINDOWS_H
+	#endif
+#endif
+
 #if defined(KLAYGE_COMPILER_GCC) || (defined(KLAYGE_COMPILER_MSVC) && (KLAYGE_COMPILER_VERSION >= 110))
 	// Prevent Boost to link the Boost.DateTime
 	#ifndef BOOST_DATE_TIME_NO_LIB

@@ -113,7 +113,7 @@ namespace
 		{
 			ResIdentifierPtr psmm_input = ResLoader::Instance().Open(ps_desc_.res_name);
 
-			XMLDocument doc;
+			KlayGE::XMLDocument doc;
 			XMLNodePtr root = doc.Parse(psmm_input);
 
 			{

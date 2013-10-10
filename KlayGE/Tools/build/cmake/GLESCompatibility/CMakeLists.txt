@@ -13,10 +13,6 @@ ELSE()
 	)
 ENDIF()
 
-SET(EXTRA_LINKED_LIBRARIES
-    debug python32_d optimized python32
-)
-
 SETUP_TOOL(GLESCompatibility)
 
 INSTALL(FILES ${KLAYGE_PROJECT_DIR}/Tools/src/GLESCompatibility/GLESCompatibility.py

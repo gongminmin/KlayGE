@@ -48,6 +48,9 @@ def build_Boost(compiler_info, compiler_arch):
 		options += " architecture=arm --without-filesystem --without-program_options define=\"WINAPI_FAMILY=WINAPI_FAMILY_APP\" define=BOOST_NO_ANSI_APIS cxxflags=\"/ZW /EHsc\""
 	if "vc" == compiler_info.name:
 		options += " cxxflags=-wd4819 cxxflags=-wd4910 define=_CRT_SECURE_NO_DEPRECATE define=_SCL_SECURE_NO_DEPRECATE"
+	else:
+		if ("x64" == compiler_arch[0]):
+			options += " define=BOOST_USE_WINDOWS_H"
 
 	config = ""
 	if ("Debug" in compiler_info.cfg):
@@ -109,13 +112,21 @@ def build_Python(compiler_info, compiler_arch):
 			build_cmd.execute()
 			os.chdir("../../../")
 		elif "mgw" == compiler_info.name:
-			print("Currently Python can't be build by MinGW directly. Please build it by MSVC first\n");
-			os.chdir("External/Python/DLLs")
-			os.system("dlltool -D python32.dll -d python32.def -l libpython32.a")
-			os.system("move /Y libpython32.a ..\libs\"")
-			os.system("dlltool -D python32_d.dll -d python32_d.def -l libpython32_d.a")
-			os.system("move /Y libpython32_d.a ..\libs\"")
-			os.chdir("../../../")
+			print("Currently Python can't be build by MinGW directly. Please build it by MSVC first\n")
+			if ("x64" == compiler_arch[0]):
+				os.chdir("External/Python/DLLs/amd64")
+				os.system("dlltool -f--64 -m i386:x86-64 -D python32.dll -d python32.def -l libpython32.a")
+				os.system("dlltool -f--64 -m i386:x86-64 -D python32_d.dll -d python32_d.def -l libpython32_d.a")
+				os.system("move /Y libpython32.a ..\\..\\libs\\amd64")
+				os.system("move /Y libpython32_d.a ..\\..\\libs\\amd64")
+				os.chdir("../../../../")
+			else:
+				os.chdir("External/Python/DLLs")
+				os.system("dlltool -f--32 -m i386 -D python32.dll -d python32.def -l libpython32.a")
+				os.system("dlltool -f--32 -m i386 -D python32_d.dll -d python32_d.def -l libpython32_d.a")
+				os.system("move /Y libpython32.a ..\\libs")
+				os.system("move /Y libpython32_d.a ..\\libs")
+				os.chdir("../../../")
 	elif "linux" == compiler_info.platform:
 		os.chdir("External/Python")
 		os.system("./configure")
