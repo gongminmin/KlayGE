@@ -85,7 +85,7 @@ def build_Python(compiler_info, compiler_arch):
 	if "vc" == compiler_info.name:
 		toolset_name = "-T %s" % compiler_arch[2]
 
-	additional_options = ""
+	additional_options = "-D BUILTIN_COLLECTIONS:BOOL=\"ON\" -D BUILTIN_MSI:BOOL=\"OFF\" -D BUILTIN_ITERTOOLS:BOOL=\"ON\""
 	if compiler_arch[3]:
 		additional_options += "-D KLAYGE_WITH_WINRT:BOOL=\"TRUE\""
 	if compiler_info.name != "vc":
