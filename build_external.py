@@ -70,68 +70,71 @@ def build_Boost(compiler_info, compiler_arch):
 	os.chdir("../../")
 
 def build_Python(compiler_info, compiler_arch):
+	curdir = os.path.abspath(os.curdir)
+
+	if "vc" == compiler_info.name:
+		build_dir = "External/Python/%s-%d_0-%s" % (compiler_info.name, compiler_info.version, compiler_arch[0])
+	else:
+		build_dir = "External/Python/%s-%s" % (compiler_info.name, compiler_arch[0])
+	if not os.path.exists(build_dir):
+		os.makedirs(build_dir)
+
+	os.chdir(build_dir)
+	
+	toolset_name = ""
+	if "vc" == compiler_info.name:
+		toolset_name = "-T %s" % compiler_arch[2]
+
+	additional_options = ""
+	if compiler_arch[3]:
+		additional_options += "-D KLAYGE_WITH_WINRT:BOOL=\"TRUE\""
+	if compiler_info.name != "vc":
+		additional_options += "-D KLAYGE_ARCH_NAME:STRING=\"%s\"" % compiler_arch[0]
+
+	cmake_cmd = batch_command()
+	cmake_cmd.add_command('cmake -G "%s" %s %s %s' % (compiler_arch[1], toolset_name, additional_options, ".."))
+	cmake_cmd.execute()
+
+	arch_name = compiler_arch[0]
+	if ("x86_app" == arch_name):
+		arch_name = "x86"
+	elif ("arm_app" == arch_name):
+		arch_name = "x86_arm"
+	elif ("x64" == arch_name):
+		arch_name = "x86_amd64"
+
+	build_cmd = batch_command()
+	if "vc" == compiler_info.name:
+		build_cmd.add_command('CALL "%%VS%d0COMNTOOLS%%..\\..\\VC\\vcvarsall.bat" %s' % (compiler_info.version, arch_name))
+		for config in compiler_info.cfg:
+			compiler_info.msvc_add_build_command(build_cmd, "Python32", "ALL_BUILD", config)
+	elif "mgw" == compiler_info.name:
+		build_cmd.add_command('mingw32-make.exe')
+	else:
+		build_cmd.add_command('make')
+	build_cmd.execute()
+	
+	import glob
+
+	lib_prefix = ""
+	lib_suffix = ""
+	if "vc" == compiler_info.name:
+		lib_prefix = ""
+		lib_suffix = "lib"
+	else:
+		lib_prefix = "lib"
+		lib_suffix = "a"
+	platform_name = compiler_info.platform
 	if "win32" == compiler_info.platform:
-		if "vc" == compiler_info.name:
-			if compiler_info.version >= 11:
-				os.chdir("External/Python/vc-11_0")
-			else:
-				os.chdir("External/Python/PCbuild")
-			if compiler_info.version >= 11:
-				sln_suffix = "11"
-			elif compiler_info.version >= 10:
-				sln_suffix = str(compiler_info.version)
-			else:
-				sln_suffix = ""
+		platform_name = "win"
+	target_dir = "../libs/%s_%s" % (platform_name, compiler_arch[0])
+	if not os.path.exists(target_dir):
+		os.mkdir(target_dir)
+	for config in compiler_info.cfg:
+		for fname in glob.iglob("static-libs/%s/%spython32*.%s" % (config, lib_prefix, lib_suffix)):
+			copy_to_dst(fname, target_dir)
 
-			arch_name = compiler_arch[0]
-			if "x64" == arch_name:
-				arch = "x64"
-				subdir = "amd64\\"
-				arch_name = "x86_amd64"
-			else:
-				arch = "Win32"
-				subdir = ""
-			configs = []
-			if "Debug" in compiler_info.cfg:
-				configs.append("Debug")
-			if ("Release" in compiler_info.cfg) or ("RelWithDebInfo" in compiler_info.cfg) or ("MinSizeRel" in compiler_info.cfg):
-				configs.append("Release")
-
-			build_cmd = batch_command()
-			build_cmd.add_command('CALL "%%VS%d0COMNTOOLS%%..\\..\\VC\\vcvarsall.bat" %s' % (compiler_info.version, arch_name))
-			for cfg in configs:
-				compiler_info.msvc_add_build_command(build_cmd, "pcbuild%s" % sln_suffix, "", cfg, arch)
-				build_cmd.add_command('move /Y %s*.pyd ..\\DLLs\\%s' % (subdir, subdir))
-				build_cmd.add_command('move /Y %s*.dll ..\\DLLs\\%s' % (subdir, subdir))
-				build_cmd.add_command('move /Y %s*.lib ..\\libs\\%s' % (subdir, subdir))
-				if "Debug" == cfg:
-					suffix = "_d"
-				else:
-					suffix = ""
-				build_cmd.add_command('move /Y %spython%s.exe ..\\%s' % (subdir, suffix, subdir))
-			build_cmd.execute()
-			os.chdir("../../../")
-		elif "mgw" == compiler_info.name:
-			print("Currently Python can't be build by MinGW directly. Please build it by MSVC first\n")
-			if ("x64" == compiler_arch[0]):
-				os.chdir("External/Python/DLLs/amd64")
-				os.system("dlltool -f--64 -m i386:x86-64 -D python32.dll -d python32.def -l libpython32.a")
-				os.system("dlltool -f--64 -m i386:x86-64 -D python32_d.dll -d python32_d.def -l libpython32_d.a")
-				os.system("move /Y libpython32.a ..\\..\\libs\\amd64")
-				os.system("move /Y libpython32_d.a ..\\..\\libs\\amd64")
-				os.chdir("../../../../")
-			else:
-				os.chdir("External/Python/DLLs")
-				os.system("dlltool -f--32 -m i386 -D python32.dll -d python32.def -l libpython32.a")
-				os.system("dlltool -f--32 -m i386 -D python32_d.dll -d python32_d.def -l libpython32_d.a")
-				os.system("move /Y libpython32.a ..\\libs")
-				os.system("move /Y libpython32_d.a ..\\libs")
-				os.chdir("../../../")
-	elif "linux" == compiler_info.platform:
-		os.chdir("External/Python")
-		os.system("./configure")
-		os.system("make")
-		os.chdir("../../")
+	os.chdir(curdir)
 
 def build_libogg(compiler_info, compiler_arch):
 	curdir = os.path.abspath(os.curdir)
@@ -348,13 +351,6 @@ def build_external_libs(compiler_info, compiler_arch):
 	if not compiler_arch[3]:
 		print("\nBuilding Python...\n")
 		build_Python(compiler_info, compiler_arch)
-
-		if "x64" == compiler_arch[0]:
-			subdir = "amd64/"
-		else:
-			subdir = ""
-		for fname in glob.iglob("External/Python/Dlls/%spython32*.%s" % (subdir, dll_suffix)):
-			copy_to_dst(fname, dst_dir)
 
 		if not os.path.exists("%sLib" % dst_dir):
 			os.mkdir("%sLib" % dst_dir)
