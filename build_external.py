@@ -85,7 +85,7 @@ def build_Python(compiler_info, compiler_arch):
 	if "vc" == compiler_info.name:
 		toolset_name = "-T %s" % compiler_arch[2]
 
-	additional_options = "-D BUILTIN_COLLECTIONS:BOOL=\"ON\" -D BUILTIN_MSI:BOOL=\"OFF\" -D BUILTIN_ITERTOOLS:BOOL=\"ON\""
+	additional_options = ""
 	if compiler_arch[3]:
 		additional_options += "-D KLAYGE_WITH_WINRT:BOOL=\"TRUE\""
 	if compiler_info.name != "vc":
@@ -130,9 +130,8 @@ def build_Python(compiler_info, compiler_arch):
 	target_dir = "../libs/%s_%s" % (platform_name, compiler_arch[0])
 	if not os.path.exists(target_dir):
 		os.mkdir(target_dir)
-	for config in compiler_info.cfg:
-		for fname in glob.iglob("static-libs/%s/%spython32*.%s" % (config, lib_prefix, lib_suffix)):
-			copy_to_dst(fname, target_dir)
+	for fname in glob.iglob("static-libs/%spython*.%s" % (lib_prefix, lib_suffix)):
+		copy_to_dst(fname, target_dir)
 
 	os.chdir(curdir)
 

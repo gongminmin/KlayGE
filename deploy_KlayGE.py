@@ -43,10 +43,6 @@ def deploy_KlayGE(target_dir, compiler_info, compiler_arch):
 	for fname in glob.iglob("KlayGE/bin/win_%s/boost_*.%s" % (compiler_arch, dll_suffix)):
 		copy_to_dst(fname, bin_dst_dir);
 
-	print("Deploying Python...\n")
-	for fname in glob.iglob("KlayGE/bin/win_%s/python*.%s" % (compiler_arch, dll_suffix)):
-		copy_to_dst(fname, bin_dst_dir);
-
 	print("Deploying 7z...\n")
 	for fname in glob.iglob("KlayGE/bin/win_%s/7zxa*.%s" % (compiler_arch, dll_suffix)):
 		copy_to_dst(fname, bin_dst_dir);
