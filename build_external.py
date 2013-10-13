@@ -113,25 +113,6 @@ def build_Python(compiler_info, compiler_arch):
 	else:
 		build_cmd.add_command('make')
 	build_cmd.execute()
-	
-	import glob
-
-	lib_prefix = ""
-	lib_suffix = ""
-	if "vc" == compiler_info.name:
-		lib_prefix = ""
-		lib_suffix = "lib"
-	else:
-		lib_prefix = "lib"
-		lib_suffix = "a"
-	platform_name = compiler_info.platform
-	if "win32" == compiler_info.platform:
-		platform_name = "win"
-	target_dir = "../libs/%s_%s" % (platform_name, compiler_arch[0])
-	if not os.path.exists(target_dir):
-		os.mkdir(target_dir)
-	for fname in glob.iglob("static-libs/%spython*.%s" % (lib_prefix, lib_suffix)):
-		copy_to_dst(fname, target_dir)
 
 	os.chdir(curdir)
 

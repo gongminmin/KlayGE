@@ -53,7 +53,6 @@
 #include <windows.h>
 #elif defined KLAYGE_PLATFORM_LINUX
 #elif defined KLAYGE_PLATFORM_ANDROID
-#include <KlayGE/Context.hpp>
 #include <android/asset_manager.h>
 #endif
 
