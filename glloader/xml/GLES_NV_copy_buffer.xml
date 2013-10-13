@@ -1,0 +1,20 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GLES_NV_copy_buffer" reg_no="158">
+	<tokens>
+		<token name="GL_COPY_READ_BUFFER_NV" value="0x8F36"/>
+		<token name="GL_COPY_WRITE_BUFFER_NV" value="0x8F37"/>
+	</tokens>
+
+	<functions>
+		<function name="glCopyBufferSubDataNV" return="void">
+			<params>
+				<param type="GLenum" name="readtarget"/>
+				<param type="GLenum" name="writetarget"/>
+				<param type="GLintptr" name="readoffset"/>
+				<param type="GLintptr" name="writeoffset"/>
+				<param type="GLsizeiptr" name="size"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

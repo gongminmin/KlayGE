@@ -1,0 +1,63 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GLES_NV_non_square_matrices" reg_no="160">
+	<tokens>
+		<token name="GL_FLOAT_MAT2x3_NV" value="0x8B65"/>
+		<token name="GL_FLOAT_MAT2x4_NV" value="0x8B66"/>
+		<token name="GL_FLOAT_MAT3x2_NV" value="0x8B67"/>
+		<token name="GL_FLOAT_MAT3x4_NV" value="0x8B68"/>
+		<token name="GL_FLOAT_MAT4x2_NV" value="0x8B69"/>
+		<token name="GL_FLOAT_MAT4x3_NV" value="0x8B6A"/>
+	</tokens>
+
+	<functions>
+		<function name="glUniformMatrix2x3fvNV" return="void">
+			<params>
+				<param type="GLint" name="location"/>
+				<param type="GLsizei" name="count"/>
+				<param type="GLboolean" name="transpose"/>
+				<param type="const GLfloat*" name="value"/>
+			</params>
+		</function>
+		<function name="glUniformMatrix3x2fvNV" return="void">
+			<params>
+				<param type="GLint" name="location"/>
+				<param type="GLsizei" name="count"/>
+				<param type="GLboolean" name="transpose"/>
+				<param type="const GLfloat*" name="value"/>
+			</params>
+		</function>
+		<function name="glUniformMatrix2x4fvNV" return="void">
+			<params>
+				<param type="GLint" name="location"/>
+				<param type="GLsizei" name="count"/>
+				<param type="GLboolean" name="transpose"/>
+				<param type="const GLfloat*" name="value"/>
+			</params>
+		</function>
+		<function name="glUniformMatrix4x2fvNV" return="void">
+			<params>
+				<param type="GLint" name="location"/>
+				<param type="GLsizei" name="count"/>
+				<param type="GLboolean" name="transpose"/>
+				<param type="const GLfloat*" name="value"/>
+			</params>
+		</function>
+		<function name="glUniformMatrix3x4fvNV" return="void">
+			<params>
+				<param type="GLint" name="location"/>
+				<param type="GLsizei" name="count"/>
+				<param type="GLboolean" name="transpose"/>
+				<param type="const GLfloat*" name="value"/>
+			</params>
+		</function>
+		<function name="glUniformMatrix4x3fvNV" return="void">
+			<params>
+				<param type="GLint" name="location"/>
+				<param type="GLsizei" name="count"/>
+				<param type="GLboolean" name="transpose"/>
+				<param type="const GLfloat*" name="value"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

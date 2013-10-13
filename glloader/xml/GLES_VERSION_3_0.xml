@@ -517,6 +517,9 @@
 				<param type="GLboolean" name="transpose"/>
 				<param type="const GLfloat*" name="value"/>
 			</params>
+			<mappings>
+				<mapping from="GLES_NV_non_square_matrices" name="glUniformMatrix2x3fvNV"/>
+			</mappings>
 		</function>
 		<function name="glUniformMatrix3x2fv" return="void" link="static">
 			<params>
@@ -525,6 +528,9 @@
 				<param type="GLboolean" name="transpose"/>
 				<param type="const GLfloat*" name="value"/>
 			</params>
+			<mappings>
+				<mapping from="GLES_NV_non_square_matrices" name="glUniformMatrix3x2fvNV"/>
+			</mappings>
 		</function>
 		<function name="glUniformMatrix2x4fv" return="void" link="static">
 			<params>
@@ -533,6 +539,9 @@
 				<param type="GLboolean" name="transpose"/>
 				<param type="const GLfloat*" name="value"/>
 			</params>
+			<mappings>
+				<mapping from="GLES_NV_non_square_matrices" name="glUniformMatrix2x4fvNV"/>
+			</mappings>
 		</function>
 		<function name="glUniformMatrix4x2fv" return="void" link="static">
 			<params>
@@ -541,6 +550,9 @@
 				<param type="GLboolean" name="transpose"/>
 				<param type="const GLfloat*" name="value"/>
 			</params>
+			<mappings>
+				<mapping from="GLES_NV_non_square_matrices" name="glUniformMatrix4x2fvNV"/>
+			</mappings>
 		</function>
 		<function name="glUniformMatrix3x4fv" return="void" link="static">
 			<params>
@@ -549,6 +561,9 @@
 				<param type="GLboolean" name="transpose"/>
 				<param type="const GLfloat*" name="value"/>
 			</params>
+			<mappings>
+				<mapping from="GLES_NV_non_square_matrices" name="glUniformMatrix3x4fvNV"/>
+			</mappings>
 		</function>
 		<function name="glUniformMatrix4x3fv" return="void" link="static">
 			<params>
@@ -557,6 +572,9 @@
 				<param type="GLboolean" name="transpose"/>
 				<param type="const GLfloat*" name="value"/>
 			</params>
+			<mappings>
+				<mapping from="GLES_NV_non_square_matrices" name="glUniformMatrix4x3fvNV"/>
+			</mappings>
 		</function>
 		<function name="glBlitFramebuffer" return="void" link="static">
 			<params>
