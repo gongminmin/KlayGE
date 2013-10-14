@@ -23,11 +23,11 @@ def build_KlayGE(compiler_info, compiler_arch):
 
 	additional_options = ""
 	if compiler_arch[3]:
-		additional_options += "-D KLAYGE_WITH_WINRT:BOOL=\"TRUE\""
+		additional_options += "-D KLAYGE_WITH_WINRT:BOOL=\"TRUE\" "
 	if compiler_arch[4]:
-		additional_options += "-D KLAYGE_WITH_XP_TOOLSET:BOOL=\"TRUE\""
+		additional_options += "-D KLAYGE_WITH_XP_TOOLSET:BOOL=\"TRUE\" "
 	if compiler_info.name != "vc":
-		additional_options += "-D KLAYGE_ARCH_NAME:STRING=\"%s\"" % compiler_arch[0]
+		additional_options += "-D KLAYGE_ARCH_NAME:STRING=\"%s\" " % compiler_arch[0]
 
 	cmake_cmd = batch_command()
 	cmake_cmd.add_command('cmake -G "%s" %s %s %s' % (compiler_arch[1], toolset_name, additional_options, "../cmake"))
@@ -73,9 +73,9 @@ def build_Samples(compiler_info, compiler_arch):
 	
 	additional_options = ""
 	if compiler_arch[3]:
-		additional_options += "-D KLAYGE_WITH_WINRT:BOOL=\"TRUE\""
+		additional_options += "-D KLAYGE_WITH_WINRT:BOOL=\"TRUE\" "
 	if compiler_info.name != "vc":
-		additional_options += "-D KLAYGE_ARCH_NAME:STRING=\"%s\"" % compiler_arch[0]
+		additional_options += "-D KLAYGE_ARCH_NAME:STRING=\"%s\" " % compiler_arch[0]
 
 	cmake_cmd = batch_command()
 	cmake_cmd.add_command('cmake -G "%s" %s %s %s' % (compiler_arch[1], toolset_name, additional_options, "../cmake"))
@@ -121,7 +121,7 @@ def build_Tools(compiler_info, compiler_arch):
 
 	additional_options = ""
 	if compiler_info.name != "vc":
-		additional_options += "-D KLAYGE_ARCH_NAME:STRING=\"%s\"" % compiler_arch[0]
+		additional_options += "-D KLAYGE_ARCH_NAME:STRING=\"%s\" " % compiler_arch[0]
 
 	cmake_cmd = batch_command()
 	cmake_cmd.add_command('cmake -G "%s" %s %s %s' % (compiler_arch[1], toolset_name, additional_options, "../cmake"))
@@ -159,9 +159,9 @@ def build_Tutorials(compiler_info, compiler_arch):
 
 	additional_options = ""
 	if compiler_arch[3]:
-		additional_options += "-D KLAYGE_WITH_WINRT:BOOL=\"TRUE\""
+		additional_options += "-D KLAYGE_WITH_WINRT:BOOL=\"TRUE\" "
 	if compiler_info.name != "vc":
-		additional_options += "-D KLAYGE_ARCH_NAME:STRING=\"%s\"" % compiler_arch[0]
+		additional_options += "-D KLAYGE_ARCH_NAME:STRING=\"%s\" " % compiler_arch[0]
 
 	cmake_cmd = batch_command()
 	cmake_cmd.add_command('cmake -G "%s" %s %s %s' % (compiler_arch[1], toolset_name, additional_options, "../cmake"))

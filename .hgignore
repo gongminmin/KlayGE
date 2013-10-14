@@ -103,8 +103,7 @@ External/Python/PCbuild/*-pgi/
 External/Python/vc-*/
 External/Python/mgw-*/
 External/Python/gcc-*/
-External/Python/libs/*/*.lib
-External/Python/libs/*/*.a
+External/Python/libs/
 External/freetype/builds/mgw-*/
 External/freetype/builds/gcc-*/
 External/freetype/builds/vc-*/

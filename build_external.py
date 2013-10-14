@@ -85,11 +85,11 @@ def build_Python(compiler_info, compiler_arch):
 	if "vc" == compiler_info.name:
 		toolset_name = "-T %s" % compiler_arch[2]
 
-	additional_options = "-D BUILTIN_CODECS_CN:BOOL=\"ON\" -D BUILTIN_CODECS_HK:BOOL=\"ON\" -D BUILTIN_CODECS_ISO2022:BOOL=\"ON\" -D BUILTIN_CODECS_CN:BOOL=\"ON\" -D BUILTIN_CODECS_JP:BOOL=\"ON\" -D BUILTIN_CODECS_KR:BOOL=\"ON\" -D BUILTIN_CODECS_TW:BOOL=\"ON\" -D BUILTIN_COLLECTIONS:BOOL=\"ON\" -D BUILTIN_FUNCTOOLS:BOOL=\"ON\" -D BUILTIN_IO:BOOL=\"ON\" -D BUILTIN_ITERTOOLS:BOOL=\"ON\" -D BUILTIN_LOCALE:BOOL=\"ON\" -D BUILTIN_MATH:BOOL=\"ON\" -D BUILTIN_MSI:BOOL=\"OFF\" -D BUILTIN_MULTIBYTECODEC:BOOL=\"ON\" -D BUILTIN_OPERATOR:BOOL=\"ON\" -D BUILTIN_UNICODEDATA:BOOL=\"ON\""
+	additional_options = "-D BUILTIN_CODECS_CN:BOOL=\"ON\" -D BUILTIN_CODECS_HK:BOOL=\"ON\" -D BUILTIN_CODECS_ISO2022:BOOL=\"ON\" -D BUILTIN_CODECS_CN:BOOL=\"ON\" -D BUILTIN_CODECS_JP:BOOL=\"ON\" -D BUILTIN_CODECS_KR:BOOL=\"ON\" -D BUILTIN_CODECS_TW:BOOL=\"ON\" -D BUILTIN_COLLECTIONS:BOOL=\"ON\" -D BUILTIN_FUNCTOOLS:BOOL=\"ON\" -D BUILTIN_IO:BOOL=\"ON\" -D BUILTIN_ITERTOOLS:BOOL=\"ON\" -D BUILTIN_LOCALE:BOOL=\"ON\" -D BUILTIN_MATH:BOOL=\"ON\" -D BUILTIN_MSI:BOOL=\"OFF\" -D BUILTIN_MULTIBYTECODEC:BOOL=\"ON\" -D BUILTIN_OPERATOR:BOOL=\"ON\" -D BUILTIN_UNICODEDATA:BOOL=\"ON\" "
 	if compiler_arch[3]:
-		additional_options += "-D KLAYGE_WITH_WINRT:BOOL=\"TRUE\""
+		additional_options += "-D KLAYGE_WITH_WINRT:BOOL=\"TRUE\" "
 	if compiler_info.name != "vc":
-		additional_options += "-D KLAYGE_ARCH_NAME:STRING=\"%s\"" % compiler_arch[0]
+		additional_options += "-D KLAYGE_ARCH_NAME:STRING=\"%s\" " % compiler_arch[0]
 
 	cmake_cmd = batch_command()
 	cmake_cmd.add_command('cmake -G "%s" %s %s %s' % (compiler_arch[1], toolset_name, additional_options, ".."))
@@ -134,9 +134,9 @@ def build_libogg(compiler_info, compiler_arch):
 
 	additional_options = ""
 	if compiler_arch[3]:
-		additional_options += "-D KLAYGE_WITH_WINRT:BOOL=\"TRUE\""
+		additional_options += "-D KLAYGE_WITH_WINRT:BOOL=\"TRUE\" "
 	if compiler_info.name != "vc":
-		additional_options += "-D KLAYGE_ARCH_NAME:STRING=\"%s\"" % compiler_arch[0]
+		additional_options += "-D KLAYGE_ARCH_NAME:STRING=\"%s\" " % compiler_arch[0]
 
 	cmake_cmd = batch_command()
 	cmake_cmd.add_command('cmake -G "%s" %s %s %s' % (compiler_arch[1], toolset_name, additional_options, "../cmake"))
@@ -181,9 +181,9 @@ def build_libvorbis(compiler_info, compiler_arch):
 
 	additional_options = ""
 	if compiler_arch[3]:
-		additional_options += "-D KLAYGE_WITH_WINRT:BOOL=\"TRUE\""
+		additional_options += "-D KLAYGE_WITH_WINRT:BOOL=\"TRUE\" "
 	if compiler_info.name != "vc":
-		additional_options += "-D KLAYGE_ARCH_NAME:STRING=\"%s\"" % compiler_arch[0]
+		additional_options += "-D KLAYGE_ARCH_NAME:STRING=\"%s\" " % compiler_arch[0]
 
 	cmake_cmd = batch_command()
 	cmake_cmd.add_command('cmake -G "%s" %s %s %s' % (compiler_arch[1], toolset_name, additional_options, "../cmake"))
@@ -228,7 +228,7 @@ def build_freetype(compiler_info, compiler_arch):
 
 	additional_options = ""
 	if compiler_info.name != "vc":
-		additional_options += "-D KLAYGE_ARCH_NAME:STRING=\"%s\"" % compiler_arch[0]
+		additional_options += "-D KLAYGE_ARCH_NAME:STRING=\"%s\" " % compiler_arch[0]
 
 	cmake_cmd = batch_command()
 	cmake_cmd.add_command('cmake -G "%s" %s %s %s' % (compiler_arch[1], toolset_name, additional_options, "../cmake"))
@@ -273,9 +273,9 @@ def build_7z(compiler_info, compiler_arch):
 
 	additional_options = ""
 	if compiler_arch[3]:
-		additional_options += "-D KLAYGE_WITH_WINRT:BOOL=\"TRUE\""
+		additional_options += "-D KLAYGE_WITH_WINRT:BOOL=\"TRUE\" "
 	if compiler_info.name != "vc":
-		additional_options += "-D KLAYGE_ARCH_NAME:STRING=\"%s\"" % compiler_arch[0]
+		additional_options += "-D KLAYGE_ARCH_NAME:STRING=\"%s\" " % compiler_arch[0]
 
 	cmake_cmd = batch_command()
 	cmake_cmd.add_command('cmake -G "%s" %s %s %s' % (compiler_arch[1], toolset_name, additional_options, "../cmake"))

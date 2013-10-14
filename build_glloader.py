@@ -23,7 +23,7 @@ def build_glloader(compiler_info, compiler_arch):
 
 	additional_options = ""
 	if compiler_info.name != "vc":
-		additional_options += "-D KLAYGE_ARCH_NAME:STRING=\"%s\"" % compiler_arch[0]
+		additional_options += "-D KLAYGE_ARCH_NAME:STRING=\"%s\" " % compiler_arch[0]
 
 	cmake_cmd = batch_command()
 	cmake_cmd.add_command('cmake -G "%s" %s -D GLLOADER_USE_GLES:BOOL="FALSE" -D PYTHON_EXE:STRING="%s" %s %s' % (compiler_arch[1], toolset_name, sys.executable, additional_options, "../cmake"))
