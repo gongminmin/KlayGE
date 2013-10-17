@@ -70,7 +70,9 @@ namespace KlayGE
 		TexturePtr g_buffer_ds_tex;
 		TexturePtr g_buffer_depth_tex;
 		TexturePtr g_buffer_rt0_backup_tex;
-		array<TexturePtr, 5> g_buffer_min_max_depth_texs;
+#ifdef LIGHT_INDEXED_DEFERRED
+		std::vector<TexturePtr> g_buffer_min_max_depth_texs;
+#endif
 
 		FrameBufferPtr lighting_buffer;
 		TexturePtr lighting_tex;
@@ -214,7 +216,7 @@ namespace KlayGE
 
 	private:
 		void SetupViewportGI(uint32_t vp, bool ssgi_enable);
-		void AccumulateToLightingTex(PerViewport const & pvp);
+		void AccumulateToLightingTex(PerViewport const & pvp, uint32_t g_buffer_index);
 
 		uint32_t ComposePassScanCode(uint32_t vp_index, PassType pass_type, int32_t org_no, int32_t index_in_pass);
 		void DecomposePassScanCode(uint32_t& vp_index, PassType& pass_type, int32_t& org_no, int32_t& index_in_pass, uint32_t code);
@@ -239,7 +241,7 @@ namespace KlayGE
 		void PostGenerateShadowMap(PerViewport const & pvp, int32_t org_no, int32_t index_in_pass);
 		void UpdateShadowing(PerViewport const & pvp, int32_t org_no);
 		void UpdateLighting(PerViewport const & pvp, LightSource::LightType type, int32_t org_no);
-		void MergeIndirectLighting(PerViewport const & pvp);
+		void MergeIndirectLighting(PerViewport const & pvp, uint32_t g_buffer_index);
 		void UpdateShading(PerViewport const & pvp, uint32_t g_buffer_index);
 		void MergeSSVO(PerViewport const & pvp, uint32_t g_buffer_index);
 		void MergeShadingAndDepth(PerViewport const & pvp, uint32_t g_buffer_index);
@@ -248,11 +250,13 @@ namespace KlayGE
 		void AddTAA(PerViewport const & pvp);
 
 #ifdef LIGHT_INDEXED_DEFERRED
-		void UpdateLightIndexedLightingDirectional(PerViewport const & pvp,
+		void UpdateLightIndexedLightingAmbientSun(PerViewport const & pvp, LightSource::LightType type,
+			int32_t org_no, PassCategory pass_cat, int32_t index_in_pass, uint32_t g_buffer_index);
+		void UpdateLightIndexedLightingDirectional(PerViewport const & pvp, uint32_t g_buffer_index,
 			std::vector<uint32_t>::const_iterator iter_beg, std::vector<uint32_t>::const_iterator iter_end);
 		void UpdateLightIndexedLightingPointSpot(PerViewport const & pvp,
 			std::vector<uint32_t>::const_iterator iter_beg, std::vector<uint32_t>::const_iterator iter_end,
-			bool is_point, bool with_shadow);
+			uint32_t g_buffer_index, bool is_point, bool with_shadow);
 		void CreateDepthMinMaxMap(PerViewport const & pvp);
 #endif
 
@@ -304,6 +308,8 @@ namespace KlayGE
 #ifdef LIGHT_INDEXED_DEFERRED
 		RenderTechniquePtr technique_draw_light_index_point_;
 		RenderTechniquePtr technique_draw_light_index_spot_;
+		RenderTechniquePtr technique_light_indexed_deferred_rendering_ambient_;
+		RenderTechniquePtr technique_light_indexed_deferred_rendering_sun_;
 		RenderTechniquePtr technique_light_indexed_deferred_rendering_directional_;
 		RenderTechniquePtr technique_light_indexed_deferred_rendering_point_shadow_;
 		RenderTechniquePtr technique_light_indexed_deferred_rendering_point_no_shadow_;

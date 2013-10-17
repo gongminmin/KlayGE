@@ -11,6 +11,7 @@
 		<input>
 			<pin name="indirect_lighting_tex"/>
 			<pin name="g_buffer_tex"/>
+			<pin name="g_buffer_1_tex"/>
 			<pin name="depth_tex"/>
 		</input>
 		<output>
@@ -29,6 +30,7 @@
 		<input>
 			<pin name="indirect_lighting_tex"/>
 			<pin name="g_buffer_tex"/>
+			<pin name="g_buffer_1_tex"/>
 			<pin name="depth_tex"/>
 		</input>
 		<output>

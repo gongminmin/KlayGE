@@ -712,9 +712,7 @@ float4 ShadingPS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Target
 	
 	float4 lighting = lighting_tex.Sample(point_sampler, tc);
 	float4 diffuse = g_buffer_1_tex.Sample(point_sampler, tc);
-	float3 diff_lighting = lighting.rgb;
-	float3 spec_lighting = lighting.a / (dot(lighting.rgb, float3(0.2126f, 0.7152f, 0.0722f)) + 1e-6f) * lighting.rgb;
-	return float4(max(diff_lighting * diffuse.rgb + specular_normalize_factor(shininess) * spec_lighting * fresnel_term_schlick(normalize(view_dir), normal, diffuse.a), 0), 1);
+	return float4(Shading(lighting, shininess, diffuse.xyz, diffuse.w, view_dir, normal), 1);
 }
 
 float4 MergeShadingPS(float2 tc : TEXCOORD0) : SV_Target
@@ -1060,6 +1058,48 @@ void LightIndexedDeferredRenderingVS(float4 pos : POSITION,
 	oTexCoord += 0.5f;
 }
 
+float4 LightIndexedDeferredRenderingAmbientPS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Target
+{
+	float4 ndc = g_buffer_tex.Sample(point_sampler, tc);
+	view_dir = normalize(view_dir);
+	float3 normal = GetNormal(ndc);
+	float shininess = GetShininess(ndc);
+
+	float4 lighting = CalcColor(0.5f + 0.5f * dot(light_dir_es.xyz, normal), 0, 1, 1, light_color, light_attrib);
+	
+	float4 diffuse = g_buffer_1_tex.Sample(point_sampler, tc);
+	return float4(Shading(lighting, shininess, diffuse.xyz, diffuse.w, -view_dir, normal), 1);
+}
+
+float4 LightIndexedDeferredRenderingSunPS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Target
+{
+	float4 shading = 0;
+
+	float4 ndc = g_buffer_tex.Sample(point_sampler, tc);
+	float3 normal = GetNormal(ndc);
+
+	float3 dir = light_dir_es.xyz;
+	float n_dot_l = dot(normal, dir);
+	if (n_dot_l > 0)
+	{
+		view_dir = normalize(view_dir);
+
+		float spec = roughness_term(normalize(dir - view_dir), normal, GetShininess(ndc)).x;
+		float3 shadow = 1;
+		if (shadowing_channel >= 0)
+		{
+			shadow = NearestDepthUpsamplingShadow(tc, shadowing_channel).xyz;
+		}
+		float4 lighting = CalcColor(n_dot_l, spec, 1, shadow, light_color, light_attrib);
+
+		float shininess = GetShininess(ndc);
+		float4 diffuse = g_buffer_1_tex.Sample(point_sampler, tc);
+		shading = float4(Shading(lighting, shininess, diffuse.xyz, diffuse.w, -view_dir, normal), 1);
+	}
+	
+	return shading;
+}
+
 float4 LightIndexedDeferredRenderingDirectionalPS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Target
 {
 	float4 lighting = 0;
@@ -1081,12 +1121,13 @@ float4 LightIndexedDeferredRenderingDirectionalPS(float2 tc : TEXCOORD0, float3 
 		}
 	}
 
-	return lighting;
+	float4 diffuse = g_buffer_1_tex.Sample(point_sampler, tc);
+	return float4(Shading(lighting, shininess, diffuse.xyz, diffuse.w, -view_dir, normal), 1);
 }
 
 float4 LightIndexedDeferredRenderingPointPS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Target
 {
-	float4 lighting = 0;
+	float4 shading = 0;
 	int4 light_index = light_index_tex.Sample(point_sampler, tc * tc_to_tile_scale) * 255;
 	if (any(light_index))
 	{
@@ -1094,6 +1135,7 @@ float4 LightIndexedDeferredRenderingPointPS(float2 tc : TEXCOORD0, float3 view_d
 		uint light_index_all = light_index.x | (light_index.y << 8) | (light_index.z << 16) | (light_index.w << 24);
 #endif
 
+		float4 lighting = 0;
 		float4 ndc = g_buffer_tex.Sample(point_sampler, tc);
 		view_dir = normalize(view_dir);
 		float3 pos_es = view_dir * (depth_tex.Sample(point_sampler, tc).r / view_dir.z);
@@ -1154,14 +1196,17 @@ float4 LightIndexedDeferredRenderingPointPS(float2 tc : TEXCOORD0, float3 view_d
 			}
 #endif
 		}
+
+		float4 diffuse = g_buffer_1_tex.Sample(point_sampler, tc);
+		shading = float4(Shading(lighting, shininess, diffuse.xyz, diffuse.w, -view_dir, normal), 1);
 	}
 
-	return lighting;
+	return shading;
 }
 
 float4 LightIndexedDeferredRenderingSpotPS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Target
 {
-	float4 lighting = 0;
+	float4 shading = 0;
 	int4 light_index = light_index_tex.Sample(point_sampler, tc * tc_to_tile_scale) * 255;
 	if (any(light_index))
 	{
@@ -1169,6 +1214,7 @@ float4 LightIndexedDeferredRenderingSpotPS(float2 tc : TEXCOORD0, float3 view_di
 		uint light_index_all = light_index.x | (light_index.y << 8) | (light_index.z << 16) | (light_index.w << 24);
 #endif
 
+		float4 lighting = 0;
 		float4 ndc = g_buffer_tex.Sample(point_sampler, tc);
 		view_dir = normalize(view_dir);
 		float3 pos_es = view_dir * (depth_tex.Sample(point_sampler, tc).r / view_dir.z);
@@ -1234,9 +1280,12 @@ float4 LightIndexedDeferredRenderingSpotPS(float2 tc : TEXCOORD0, float3 view_di
 			}
 #endif
 		}
+
+		float4 diffuse = g_buffer_1_tex.Sample(point_sampler, tc);
+		shading = float4(Shading(lighting, shininess, diffuse.xyz, diffuse.w, -view_dir, normal), 1);
 	}
 
-	return lighting;
+	return shading;
 }
 		]]>
 	</shader>
@@ -1258,7 +1307,7 @@ float4 LightIndexedDeferredRenderingSpotPS(float2 tc : TEXCOORD0, float3 view_di
 		</pass>
 	</technique>
 
-	<technique name="LightIndexedDeferredRenderingDirectional">
+	<technique name="LightIndexedDeferredRenderingAmbient">
 		<pass name="p0">
 			<state name="depth_enable" value="false"/>
 			<state name="depth_write_mask" value="false"/>
@@ -1274,6 +1323,12 @@ float4 LightIndexedDeferredRenderingSpotPS(float2 tc : TEXCOORD0, float3 view_di
 			<state name="back_stencil_ref" value="128"/>
 			<state name="back_stencil_pass" value="keep"/>
 
+			<state name="vertex_shader" value="LightIndexedDeferredRenderingVS()"/>			
+			<state name="pixel_shader" value="LightIndexedDeferredRenderingAmbientPS()"/>
+		</pass>
+	</technique>
+	<technique name="LightIndexedDeferredRenderingSun" inherit="LightIndexedDeferredRenderingAmbient">
+		<pass name="p0">
 			<state name="blend_enable" value="true"/>
 			<state name="blend_op" value="add"/>
 			<state name="src_blend" value="one"/>
@@ -1282,7 +1337,11 @@ float4 LightIndexedDeferredRenderingSpotPS(float2 tc : TEXCOORD0, float3 view_di
 			<state name="src_blend_alpha" value="one"/>
 			<state name="dest_blend_alpha" value="one"/>
 
-			<state name="vertex_shader" value="LightIndexedDeferredRenderingVS()"/>
+			<state name="pixel_shader" value="LightIndexedDeferredRenderingSunPS()"/>
+		</pass>
+	</technique>
+	<technique name="LightIndexedDeferredRenderingDirectional" inherit="LightIndexedDeferredRenderingSun">
+		<pass name="p0">
 			<state name="pixel_shader" value="LightIndexedDeferredRenderingDirectionalPS()"/>
 		</pass>
 	</technique>

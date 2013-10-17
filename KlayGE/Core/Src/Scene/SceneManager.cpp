@@ -756,21 +756,24 @@ namespace KlayGE
 			timer.restart();
 			app_time += frame_time;
 
-			WindowPtr const & win = Context::Instance().AppInstance().MainWnd();
-			if (win && win->Active())
+			if (Context::Instance().AppValid())
 			{
-				unique_lock<mutex> lock(update_mutex_);
-
-				typedef KLAYGE_DECLTYPE(scene_objs_) SceneObjsType;
-				KLAYGE_FOREACH(SceneObjsType::const_reference scene_obj, scene_objs_)
+				WindowPtr const & win = Context::Instance().AppInstance().MainWnd();
+				if (win && win->Active())
 				{
-					scene_obj->so->SubThreadUpdate(app_time, frame_time);
-				}
-			}
+					unique_lock<mutex> lock(update_mutex_);
 
-			if (frame_time < update_elapse_)
-			{
-				Sleep(static_cast<uint32_t>((update_elapse_ - frame_time) * 1000));
+					typedef KLAYGE_DECLTYPE(scene_objs_) SceneObjsType;
+					KLAYGE_FOREACH(SceneObjsType::const_reference scene_obj, scene_objs_)
+					{
+						scene_obj->so->SubThreadUpdate(app_time, frame_time);
+					}
+				}
+
+				if (frame_time < update_elapse_)
+				{
+					Sleep(static_cast<uint32_t>((update_elapse_ - frame_time) * 1000));
+				}
 			}
 		}
 	}

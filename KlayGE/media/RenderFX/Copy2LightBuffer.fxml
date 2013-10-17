@@ -3,6 +3,7 @@
 <effect>
 	<include name="PostProcess.fxml"/>
 	<include name="DeferredRenderingUtil.fxml"/>
+	<include name="Lighting.fxml"/>
 
 	<parameter type="sampler" name="point_sampler">
 		<state name="filtering" value="min_mag_mip_point"/>
@@ -21,6 +22,7 @@
 	<parameter type="float4x4" name="inv_proj"/>
 	<parameter type="texture2D" name="indirect_lighting_tex"/>
 	<parameter type="texture2D" name="g_buffer_tex"/>
+	<parameter type="texture2D" name="g_buffer_1_tex"/>
 	<parameter type="texture2D" name="depth_tex"/>
 
 	<shader>
@@ -59,12 +61,16 @@ void CopyToLightBufferVS(float4 pos : POSITION,
 float4 CopyToLightBufferPS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Target
 {
 	view_dir = normalize(view_dir);
-	float3 normal = GetNormal(g_buffer_tex.Sample(point_sampler, tc));
+	float4 ndc = g_buffer_tex.Sample(point_sampler, tc);
+	float shininess = GetShininess(ndc);
+	float3 normal = GetNormal(ndc);
 	
 	float detail_factor = dot(view_dir, normal) * 0.5f + 0.5f;
 
-	float3 color = NearestDepthUpsamplingIL(tc).xyz;
-	return float4(color * scaling_factor * detail_factor, 0);
+	float4 lighting = float4(NearestDepthUpsamplingIL(tc).xyz * scaling_factor * detail_factor, 0);
+	
+	float4 diffuse = g_buffer_1_tex.Sample(point_sampler, tc);
+	return float4(Shading(lighting, shininess, diffuse.xyz, diffuse.w, view_dir, normal), 1);
 }
 		]]>
 	</shader>
