@@ -57,7 +57,7 @@ namespace KlayGE
 		InfTerrainSceneObject();
 		virtual ~InfTerrainSceneObject();
 
-		virtual void SubThreadUpdate(float app_time, float elapsed_time) KLAYGE_OVERRIDE;
+		virtual void MainThreadUpdate(float app_time, float elapsed_time) KLAYGE_OVERRIDE;
 
 	protected:
 		float base_level_;

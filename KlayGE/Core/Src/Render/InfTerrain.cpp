@@ -159,7 +159,7 @@ namespace KlayGE
 	{
 	}
 
-	void InfTerrainSceneObject::SubThreadUpdate(float /*app_time*/, float /*elapsed_time*/)
+	void InfTerrainSceneObject::MainThreadUpdate(float /*app_time*/, float /*elapsed_time*/)
 	{
 		App3DFramework const & app = Context::Instance().AppInstance();
 		Camera const & camera = app.ActiveCamera();
