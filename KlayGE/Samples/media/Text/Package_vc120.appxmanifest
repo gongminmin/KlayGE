@@ -1,0 +1,28 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Package xmlns="http://schemas.microsoft.com/appx/2010/manifest" xmlns:m2="http://schemas.microsoft.com/appx/2013/manifest">
+  <Identity Name="0cf69a0d-fa24-4075-8971-82c545f4af61" Publisher="CN=KlayGE" Version="1.1.0.0" />
+  <Properties>
+    <DisplayName>Text</DisplayName>
+    <PublisherDisplayName>KlayGE</PublisherDisplayName>
+    <Logo>StoreLogo.png</Logo>
+  </Properties>
+  <Prerequisites>
+    <OSMinVersion>6.3</OSMinVersion>
+    <OSMaxVersionTested>6.3</OSMaxVersionTested>
+  </Prerequisites>
+  <Resources>
+    <Resource Language="x-generate" />
+  </Resources>
+  <Applications>
+    <Application Id="App" Executable="$targetnametoken$.exe" EntryPoint="Text.App">
+      <m2:VisualElements DisplayName="Text" Description="KlayGE Sample: Text" BackgroundColor="#336699" ForegroundText="light" Square150x150Logo="Logo.png" Square30x30Logo="SmallLogo.png">
+        <m2:DefaultTile ShortName="Text">
+          <m2:ShowNameOnTiles>
+            <m2:ShowOn Tile="square150x150Logo" />
+          </m2:ShowNameOnTiles>
+        </m2:DefaultTile>
+        <m2:SplashScreen Image="SplashScreen.png" />
+      </m2:VisualElements>
+    </Application>
+  </Applications>
+</Package>

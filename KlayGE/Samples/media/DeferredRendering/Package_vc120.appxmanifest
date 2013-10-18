@@ -1,0 +1,28 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Package xmlns="http://schemas.microsoft.com/appx/2010/manifest" xmlns:m2="http://schemas.microsoft.com/appx/2013/manifest">
+  <Identity Name="f7ce04f3-92fc-4e92-8b55-acb9f159eb13" Publisher="CN=KlayGE" Version="1.1.0.0" />
+  <Properties>
+    <DisplayName>Deferred Rendering</DisplayName>
+    <PublisherDisplayName>KlayGE</PublisherDisplayName>
+    <Logo>StoreLogo.png</Logo>
+  </Properties>
+  <Prerequisites>
+    <OSMinVersion>6.3</OSMinVersion>
+    <OSMaxVersionTested>6.3</OSMaxVersionTested>
+  </Prerequisites>
+  <Resources>
+    <Resource Language="x-generate" />
+  </Resources>
+  <Applications>
+    <Application Id="App" Executable="$targetnametoken$.exe" EntryPoint="DeferredRendering.App">
+      <m2:VisualElements DisplayName="DeferredRendering" Description="KlayGE Sample: Deferred Rendering" BackgroundColor="#336699" ForegroundText="light" Square150x150Logo="Logo.png" Square30x30Logo="SmallLogo.png">
+        <m2:DefaultTile ShortName="DeferredRendering">
+          <m2:ShowNameOnTiles>
+            <m2:ShowOn Tile="square150x150Logo" />
+          </m2:ShowNameOnTiles>
+        </m2:DefaultTile>
+        <m2:SplashScreen Image="SplashScreen.png" />
+      </m2:VisualElements>
+    </Application>
+  </Applications>
+</Package>

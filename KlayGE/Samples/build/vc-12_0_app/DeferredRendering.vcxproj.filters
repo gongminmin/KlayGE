@@ -197,7 +197,7 @@
     </Image>
   </ItemGroup>
   <ItemGroup>
-    <AppxManifest Include="..\..\media\DeferredRendering\Package_vc110.appxmanifest" />
+    <AppxManifest Include="..\..\media\DeferredRendering\Package_vc120.appxmanifest" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\DeferredRendering\DeferredRendering.cpp">
