@@ -122,7 +122,12 @@ namespace KlayGE
 			friend class D3D11RenderWindow;
 
 		public:
+#if (_WIN32_WINNT >= 0x0603 /*_WIN32_WINNT_WINBLUE*/)
+			void D3D11RenderWindow::MetroD3D11RenderWindow::OnStereoEnabledChanged(
+				Windows::Graphics::Display::DisplayInformation^ /*sender*/, Platform::Object^ /*args*/);
+#else
 			void OnStereoEnabledChanged(Platform::Object^ sender);
+#endif
 
 		private:
 			void BindD3D11RenderWindow(D3D11RenderWindow* win);

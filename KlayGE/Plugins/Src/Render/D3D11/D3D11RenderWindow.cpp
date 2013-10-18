@@ -388,8 +388,14 @@ namespace KlayGE
 		bool stereo = (STM_LCDShutter == settings.stereo_method) && dxgi_stereo_support_;
 
 		using namespace Windows::Graphics::Display;
+		using namespace Windows::Foundation;
+#if (_WIN32_WINNT >= 0x0603 /*_WIN32_WINNT_WINBLUE*/)
+		DisplayInformation::GetForCurrentView()->StereoEnabledChanged +=
+			ref new TypedEventHandler<DisplayInformation^, Platform::Object^>(metro_d3d_render_win_, &MetroD3D11RenderWindow::OnStereoEnabledChanged);
+#else
 		DisplayProperties::StereoEnabledChanged +=
 			ref new DisplayPropertiesEventHandler(metro_d3d_render_win_, &MetroD3D11RenderWindow::OnStereoEnabledChanged);
+#endif
 
 		std::memset(&sc_desc1_, 0, sizeof(sc_desc1_));
 		sc_desc1_.BufferCount = 2;
@@ -956,7 +962,12 @@ namespace KlayGE
 	}
 
 #if defined KLAYGE_PLATFORM_WINDOWS_METRO
+#if (_WIN32_WINNT >= 0x0603 /*_WIN32_WINNT_WINBLUE*/)
+	void D3D11RenderWindow::MetroD3D11RenderWindow::OnStereoEnabledChanged(
+		Windows::Graphics::Display::DisplayInformation^ /*sender*/, Platform::Object^ /*args*/)
+#else
 	void D3D11RenderWindow::MetroD3D11RenderWindow::OnStereoEnabledChanged(Platform::Object^ /*sender*/)
+#endif
 	{
 		if ((win_->gi_factory_2_->IsWindowedStereoEnabled() ? true : false) != win_->dxgi_stereo_support_)
 		{

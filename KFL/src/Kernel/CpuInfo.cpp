@@ -33,6 +33,9 @@
 
 #ifdef KLAYGE_PLATFORM_WINDOWS
 #include <windows.h>
+#if (_WIN32_WINNT >= 0x0603 /*_WIN32_WINNT_WINBLUE*/)
+#include <VersionHelpers.h>
+#endif
 #ifdef KLAYGE_COMPILER_MSVC
 #include <intrin.h>
 #endif
@@ -425,6 +428,9 @@ namespace KlayGE
 #if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
 		GetLogicalProcessorInformationPtr glpi = nullptr;
 		{
+#if (_WIN32_WINNT >= 0x0603 /*_WIN32_WINNT_WINBLUE*/)
+			if (IsWindowsVistaOrGreater())
+#else
 			OSVERSIONINFO os_ver_info;
 			memset(&os_ver_info, 0, sizeof(os_ver_info));
 			os_ver_info.dwOSVersionInfoSize = sizeof(os_ver_info);
@@ -434,6 +440,7 @@ namespace KlayGE
 			// on Windows Server 2003 and XP64. Therefore, only
 			// GetLogicalProcessorInformation on Windows Vista and up are supported for now.
 			if (os_ver_info.dwMajorVersion >= 6)
+#endif
 			{
 				HMODULE hMod = ::GetModuleHandle(TEXT("kernel32"));
 				if (hMod)
