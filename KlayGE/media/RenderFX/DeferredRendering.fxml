@@ -1146,13 +1146,22 @@ float4 LightIndexedDeferredRenderingPointPS(float2 tc : TEXCOORD0, float3 view_d
 		int mask = 1;
 #endif
 
+#if INTEGER_SUPPORT
+		uint nl = countbits(light_index_all);
+#else
 #if WITH_SHADOW
 		int nl = 4;
 #else
 		int nl = 32;
 #endif
 		nl = min(nl, num_lights);
+#endif
 
+#if INTEGER_SUPPORT
+		for (uint il = 0; il < nl; ++ il)
+		{
+			uint i = firstbitlow(light_index_all);
+#else
 #if KLAYGE_D3D11
 		[unroll]
 #endif
@@ -1161,9 +1170,6 @@ float4 LightIndexedDeferredRenderingPointPS(float2 tc : TEXCOORD0, float3 view_d
 #if KLAYGE_D3D11
 			[branch]
 #endif
-#if INTEGER_SUPPORT
-			if (light_index_all & (1UL << i))
-#else
 			if ((light_index[comp] / mask) % 2)
 #endif
 			{
@@ -1187,7 +1193,9 @@ float4 LightIndexedDeferredRenderingPointPS(float2 tc : TEXCOORD0, float3 view_d
 				}
 			}
 
-#if !INTEGER_SUPPORT
+#if INTEGER_SUPPORT
+			light_index_all = light_index_all & (light_index_all - 1);
+#else
 			mask *= 2;
 			if (mask >= 256)
 			{
@@ -1225,13 +1233,22 @@ float4 LightIndexedDeferredRenderingSpotPS(float2 tc : TEXCOORD0, float3 view_di
 		int mask = 1;
 #endif
 
+#if INTEGER_SUPPORT
+		uint nl = countbits(light_index_all);
+#else
 #if WITH_SHADOW
 		int nl = 4;
 #else
 		int nl = 32;
 #endif
 		nl = min(nl, num_lights);
-		
+#endif
+
+#if INTEGER_SUPPORT
+		for (uint il = 0; il < nl; ++ il)
+		{
+			uint i = firstbitlow(light_index_all);
+#else
 #if KLAYGE_D3D11
 		[unroll]
 #endif
@@ -1240,9 +1257,6 @@ float4 LightIndexedDeferredRenderingSpotPS(float2 tc : TEXCOORD0, float3 view_di
 #if KLAYGE_D3D11
 			[branch]
 #endif
-#if INTEGER_SUPPORT
-			if (light_index_all & (1UL << i))
-#else
 			if ((light_index[comp] / mask) % 2)
 #endif
 			{
@@ -1271,7 +1285,9 @@ float4 LightIndexedDeferredRenderingSpotPS(float2 tc : TEXCOORD0, float3 view_di
 				}
 			}
 
-#if !INTEGER_SUPPORT
+#if INTEGER_SUPPORT
+			light_index_all = light_index_all & (light_index_all - 1);
+#else
 			mask *= 2;
 			if (mask >= 256)
 			{
