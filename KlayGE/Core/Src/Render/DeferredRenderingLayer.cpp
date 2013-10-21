@@ -1113,6 +1113,15 @@ namespace KlayGE
 		case PC_Shading:
 			{
 #ifdef LIGHT_INDEXED_DEFERRED
+				if (PTB_Opaque == pass_tb)
+				{
+					*g_buffer_1_tex_param_ = pvp.g_buffer_rt1_tex;
+					*light_volume_mv_param_ = pvp.inv_proj;
+
+					re.BindFrameBuffer(pvp.curr_merged_shading_buffer);
+					re.Render(*technique_no_lighting_, *rl_quad_);
+				}
+
 				std::vector<uint32_t> directional_lights;
 				std::vector<uint32_t> point_lights_shadow;
 				std::vector<uint32_t> point_lights_no_shadow;
@@ -2170,14 +2179,6 @@ namespace KlayGE
 	{
 		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 
-		if (Opaque_GBuffer == g_buffer_index)
-		{
-			re.BindFrameBuffer(pvp.curr_merged_shading_buffer);
-		}
-		else
-		{
-			re.BindFrameBuffer(pvp.shading_buffer);
-		}
 		*g_buffer_tex_param_ = pvp.g_buffer_rt0_tex;
 		*g_buffer_1_tex_param_ = pvp.g_buffer_rt1_tex;
 		*depth_tex_param_ = pvp.g_buffer_depth_tex;
@@ -2186,10 +2187,12 @@ namespace KlayGE
 
 		if (Opaque_GBuffer == g_buffer_index)
 		{
+			re.BindFrameBuffer(pvp.curr_merged_shading_buffer);
 			re.Render(*technique_no_lighting_, *rl_quad_);
 		}
 		else
 		{
+			re.BindFrameBuffer(pvp.shading_buffer);
 			re.CurFrameBuffer()->Attached(FrameBuffer::ATT_Color0)->Discard();
 		}
 		re.Render(*technique_shading_, *rl_quad_);
