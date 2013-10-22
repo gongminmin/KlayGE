@@ -978,7 +978,12 @@ namespace KlayGE
 #ifdef KLAYGE_DEBUG
 			meshmljit_name += "_d";
 #endif
-			if (system((meshmljit_name + " \"" + meshml_name + "\" N10 " + "\"" + path_name + jit_ext_name + "\" -q").c_str()) != 0)
+#ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
+			meshmljit_name += ".exe";
+#endif
+			meshmljit_name = ResLoader::Instance().Locate(meshmljit_name);
+			if (meshmljit_name.empty() ||
+				system((meshmljit_name + " \"" + meshml_name + "\" N10 " + "\"" + path_name + jit_ext_name + "\" -q").c_str()) != 0)
 			{
 				LogError("MeshMLJIT failed. Forgot to build Tools?");
 			}
