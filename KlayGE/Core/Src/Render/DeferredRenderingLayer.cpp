@@ -1375,16 +1375,12 @@ namespace KlayGE
 							break;
 
 						case LightSource::LT_Spot:
-							if (projective_light_index_ < 0)
+							if ((projective_light_index_ < 0) && light->ProjectiveTexture())
 							{
-								if (light->ProjectiveTexture())
-								{
-									projective_light_index_ = static_cast<int32_t>(i + 1 - num_ambient_lights);
-									sm_light_indices_.push_back(std::make_pair(0, 4));
-								}
+								projective_light_index_ = static_cast<int32_t>(i + 1 - num_ambient_lights);
+								sm_light_indices_.push_back(std::make_pair(0, 4));
 							}
-							if (!light->ProjectiveTexture()
-								&& (num_sm_2d_lights < MAX_NUM_SHADOWED_SPOT_LIGHTS)
+							else if ((num_sm_2d_lights < MAX_NUM_SHADOWED_SPOT_LIGHTS)
 								&& (num_sm_lights < MAX_NUM_SHADOWED_LIGHTS))
 							{
 								sm_light_indices_.push_back(std::make_pair(num_sm_2d_lights, num_sm_lights));
@@ -1398,16 +1394,12 @@ namespace KlayGE
 							break;
 
 						case LightSource::LT_Point:
-							if (projective_light_index_ < 0)
+							if ((projective_light_index_ < 0) && light->ProjectiveTexture())
 							{
-								if (light->ProjectiveTexture())
-								{
-									projective_light_index_ = static_cast<int32_t>(i + 1 - num_ambient_lights);
-									sm_light_indices_.push_back(std::make_pair(0, 4));
-								}
+								projective_light_index_ = static_cast<int32_t>(i + 1 - num_ambient_lights);
+								sm_light_indices_.push_back(std::make_pair(0, 4));
 							}
-							if (!light->ProjectiveTexture()
-								&& (num_sm_cube_lights < MAX_NUM_SHADOWED_POINT_LIGHTS)
+							else if ((num_sm_cube_lights < MAX_NUM_SHADOWED_POINT_LIGHTS)
 								&& (num_sm_lights < MAX_NUM_SHADOWED_LIGHTS))
 							{
 								sm_light_indices_.push_back(std::make_pair(num_sm_cube_lights, num_sm_lights));
