@@ -46,6 +46,8 @@ private:
 
 	KlayGE::UIDialogPtr dialog_;
 	int id_open_;
+
+	std::string last_file_path_;
 };
 
 #endif		// _JUDATEXVIEWER_HPP

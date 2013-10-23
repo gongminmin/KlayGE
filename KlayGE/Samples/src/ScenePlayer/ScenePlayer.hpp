@@ -64,6 +64,8 @@ private:
 	int id_aa_;
 	int id_cg_;
 	int id_ctrl_camera_;
+
+	std::string last_file_path_;
 };
 
 #endif		// _SCENEPLAYER_HPP

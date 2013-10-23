@@ -103,6 +103,8 @@ private:
 	int id_size_over_life_;
 	int id_mass_over_life_;
 	int id_opacity_over_life_;
+
+	std::string last_file_path_;
 };
 
 #endif		// _PARTICLEEDITOR_HPP

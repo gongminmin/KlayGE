@@ -665,7 +665,12 @@ namespace KlayGE
 		
 	void FFTLensEffectsPostProcess::Apply()
 	{
-		bright_pass_pp_->Apply();
+		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+
+		FrameBufferPtr fb = bright_pass_pp_->OutputFrameBuffer();
+		re.BindFrameBuffer(fb);
+		fb->Attached(FrameBuffer::ATT_Color0)->ClearColor(Color(0, 0, 0, 0));
+		bright_pass_pp_->Render();
 
 		fft_->Execute(freq_real_tex_, freq_imag_tex_, resized_tex_, empty_tex_);
 

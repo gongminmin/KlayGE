@@ -446,15 +446,24 @@ void JudaTexViewer::OpenHandler(KlayGE::UIButton const & /*sender*/)
 	ofn.lpstrFileTitle = nullptr;
 	ofn.nMaxFileTitle = 0;
 	ofn.lpstrInitialDir = nullptr;
-	ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
+	ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST | OFN_NOCHANGEDIR;
 
 	if (GetOpenFileNameA(&ofn))
 	{
 		HCURSOR cur = GetCursor();
 		SetCursor(LoadCursor(nullptr, IDC_WAIT));
+
+		if (last_file_path_.empty())
+		{
+			ResLoader::Instance().DelPath(last_file_path_);
+		}
+
+		std::string file_name = fn;
+		last_file_path_ = file_name.substr(0, file_name.find_last_of('\\'));
+		ResLoader::Instance().AddPath(last_file_path_);
 		
 		this->OpenJudaTex(fn);
-		
+
 		SetCursor(cur);
 	}
 #endif

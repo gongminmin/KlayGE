@@ -69,6 +69,8 @@ private:
 	int id_textures_;
 	int id_visualize_;
 	int id_line_mode_;
+
+	std::string last_file_path_;
 };
 
 #endif		// _MODELVIEWER_HPP
