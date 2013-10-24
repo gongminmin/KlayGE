@@ -1590,13 +1590,7 @@ namespace
 				uint32_t frame_id = kfs[i].frame_id[j];
 				Quaternion bind_real = kfs[i].bind_real[j];
 				Quaternion bind_dual = kfs[i].bind_dual[j];
-				float bind_scale = MathLib::length(bind_real);
-				bind_real /= bind_scale;
-				if (bind_real.w() < 0)
-				{
-					bind_real = -bind_real;
-					bind_scale = -bind_scale;
-				}
+				float bind_scale = kfs[i].bind_scale[j];
 
 				NativeToLittleEndian<sizeof(frame_id)>(&frame_id);
 				os.write(reinterpret_cast<char*>(&frame_id), sizeof(frame_id));
