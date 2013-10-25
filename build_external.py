@@ -10,6 +10,52 @@ def copy_to_dst(src_name, dst_dir):
 	import shutil
 	shutil.copy(src_name, dst_dir)
 
+def build_external_project(name, compiler_info, compiler_arch, additional_options = ""):
+	curdir = os.path.abspath(os.curdir)
+
+	if "vc" == compiler_info.name:
+		build_dir = "External/%s/build/%s-%d_0-%s" % (name, compiler_info.name, compiler_info.version, compiler_arch[0])
+	else:
+		build_dir = "External/%s/build/%s-%s" % (name, compiler_info.name, compiler_arch[0])
+	if not os.path.exists(build_dir):
+		os.makedirs(build_dir)
+
+	os.chdir(build_dir)
+	
+	toolset_name = ""
+	if "vc" == compiler_info.name:
+		toolset_name = "-T %s" % compiler_arch[2]
+
+	if compiler_arch[3]:
+		additional_options += "-D KLAYGE_WITH_WINRT:BOOL=\"TRUE\" "
+	if compiler_info.name != "vc":
+		additional_options += "-D KLAYGE_ARCH_NAME:STRING=\"%s\" " % compiler_arch[0]
+
+	cmake_cmd = batch_command()
+	cmake_cmd.add_command('cmake -G "%s" %s %s %s' % (compiler_arch[1], toolset_name, additional_options, "../cmake"))
+	cmake_cmd.execute()
+
+	arch_name = compiler_arch[0]
+	if ("x86_app" == arch_name):
+		arch_name = "x86"
+	elif ("arm_app" == arch_name):
+		arch_name = "x86_arm"
+	elif ("x64" == arch_name):
+		arch_name = "x86_amd64"
+
+	build_cmd = batch_command()
+	if "vc" == compiler_info.name:
+		build_cmd.add_command('CALL "%%VS%d0COMNTOOLS%%..\\..\\VC\\vcvarsall.bat" %s' % (compiler_info.version, arch_name))
+		for config in compiler_info.cfg:
+			compiler_info.msvc_add_build_command(build_cmd, name, "ALL_BUILD", config)
+	elif "mgw" == compiler_info.name:
+		build_cmd.add_command('mingw32-make.exe')
+	else:
+		build_cmd.add_command('make')
+	build_cmd.execute()
+
+	os.chdir(curdir)
+
 def build_Boost(compiler_info, compiler_arch):
 	bjam_name = ""
 	os.chdir("External/boost")
@@ -70,237 +116,20 @@ def build_Boost(compiler_info, compiler_arch):
 	os.chdir("../../")
 
 def build_Python(compiler_info, compiler_arch):
-	curdir = os.path.abspath(os.curdir)
-
-	if "vc" == compiler_info.name:
-		build_dir = "External/Python/%s-%d_0-%s" % (compiler_info.name, compiler_info.version, compiler_arch[0])
-	else:
-		build_dir = "External/Python/%s-%s" % (compiler_info.name, compiler_arch[0])
-	if not os.path.exists(build_dir):
-		os.makedirs(build_dir)
-
-	os.chdir(build_dir)
-	
-	toolset_name = ""
-	if "vc" == compiler_info.name:
-		toolset_name = "-T %s" % compiler_arch[2]
-
 	additional_options = "-D BUILTIN_CODECS_CN:BOOL=\"ON\" -D BUILTIN_CODECS_HK:BOOL=\"ON\" -D BUILTIN_CODECS_ISO2022:BOOL=\"ON\" -D BUILTIN_CODECS_CN:BOOL=\"ON\" -D BUILTIN_CODECS_JP:BOOL=\"ON\" -D BUILTIN_CODECS_KR:BOOL=\"ON\" -D BUILTIN_CODECS_TW:BOOL=\"ON\" -D BUILTIN_COLLECTIONS:BOOL=\"ON\" -D BUILTIN_FUNCTOOLS:BOOL=\"ON\" -D BUILTIN_IO:BOOL=\"ON\" -D BUILTIN_ITERTOOLS:BOOL=\"ON\" -D BUILTIN_LOCALE:BOOL=\"ON\" -D BUILTIN_MATH:BOOL=\"ON\" -D BUILTIN_MSI:BOOL=\"OFF\" -D BUILTIN_MULTIBYTECODEC:BOOL=\"ON\" -D BUILTIN_OPERATOR:BOOL=\"ON\" -D BUILTIN_UNICODEDATA:BOOL=\"ON\" "
-	if compiler_arch[3]:
-		additional_options += "-D KLAYGE_WITH_WINRT:BOOL=\"TRUE\" "
-	if compiler_info.name != "vc":
-		additional_options += "-D KLAYGE_ARCH_NAME:STRING=\"%s\" " % compiler_arch[0]
-
-	cmake_cmd = batch_command()
-	cmake_cmd.add_command('cmake -G "%s" %s %s %s' % (compiler_arch[1], toolset_name, additional_options, ".."))
-	cmake_cmd.execute()
-
-	arch_name = compiler_arch[0]
-	if ("x86_app" == arch_name):
-		arch_name = "x86"
-	elif ("arm_app" == arch_name):
-		arch_name = "x86_arm"
-	elif ("x64" == arch_name):
-		arch_name = "x86_amd64"
-
-	build_cmd = batch_command()
-	if "vc" == compiler_info.name:
-		build_cmd.add_command('CALL "%%VS%d0COMNTOOLS%%..\\..\\VC\\vcvarsall.bat" %s' % (compiler_info.version, arch_name))
-		for config in compiler_info.cfg:
-			compiler_info.msvc_add_build_command(build_cmd, "Python32", "ALL_BUILD", config)
-	elif "mgw" == compiler_info.name:
-		build_cmd.add_command('mingw32-make.exe')
-	else:
-		build_cmd.add_command('make')
-	build_cmd.execute()
-
-	os.chdir(curdir)
+	build_external_project("Python", compiler_info, compiler_arch, additional_options)
 
 def build_libogg(compiler_info, compiler_arch):
-	curdir = os.path.abspath(os.curdir)
-
-	if "vc" == compiler_info.name:
-		build_dir = "External/libogg/build/%s-%d_0-%s" % (compiler_info.name, compiler_info.version, compiler_arch[0])
-	else:
-		build_dir = "External/libogg/build/%s-%s" % (compiler_info.name, compiler_arch[0])
-	if not os.path.exists(build_dir):
-		os.makedirs(build_dir)
-
-	os.chdir(build_dir)
-	
-	toolset_name = ""
-	if "vc" == compiler_info.name:
-		toolset_name = "-T %s" % compiler_arch[2]
-
-	additional_options = ""
-	if compiler_arch[3]:
-		additional_options += "-D KLAYGE_WITH_WINRT:BOOL=\"TRUE\" "
-	if compiler_info.name != "vc":
-		additional_options += "-D KLAYGE_ARCH_NAME:STRING=\"%s\" " % compiler_arch[0]
-
-	cmake_cmd = batch_command()
-	cmake_cmd.add_command('cmake -G "%s" %s %s %s' % (compiler_arch[1], toolset_name, additional_options, "../cmake"))
-	cmake_cmd.execute()
-
-	arch_name = compiler_arch[0]
-	if ("x86_app" == arch_name):
-		arch_name = "x86"
-	elif ("arm_app" == arch_name):
-		arch_name = "x86_arm"
-	elif ("x64" == arch_name):
-		arch_name = "x86_amd64"
-
-	build_cmd = batch_command()
-	if "vc" == compiler_info.name:
-		build_cmd.add_command('CALL "%%VS%d0COMNTOOLS%%..\\..\\VC\\vcvarsall.bat" %s' % (compiler_info.version, arch_name))
-		for config in compiler_info.cfg:
-			compiler_info.msvc_add_build_command(build_cmd, "libogg", "ALL_BUILD", config)
-	elif "mgw" == compiler_info.name:
-		build_cmd.add_command('mingw32-make.exe')
-	else:
-		build_cmd.add_command('make')
-	build_cmd.execute()
-
-	os.chdir(curdir)
+	build_external_project("libogg", compiler_info, compiler_arch)
 
 def build_libvorbis(compiler_info, compiler_arch):
-	curdir = os.path.abspath(os.curdir)
-
-	if "vc" == compiler_info.name:
-		build_dir = "External/libvorbis/build/%s-%d_0-%s" % (compiler_info.name, compiler_info.version, compiler_arch[0])
-	else:
-		build_dir = "External/libvorbis/build/%s-%s" % (compiler_info.name, compiler_arch[0])
-	if not os.path.exists(build_dir):
-		os.makedirs(build_dir)
-
-	os.chdir(build_dir)
-	
-	toolset_name = ""
-	if "vc" == compiler_info.name:
-		toolset_name = "-T %s" % compiler_arch[2]
-
-	additional_options = ""
-	if compiler_arch[3]:
-		additional_options += "-D KLAYGE_WITH_WINRT:BOOL=\"TRUE\" "
-	if compiler_info.name != "vc":
-		additional_options += "-D KLAYGE_ARCH_NAME:STRING=\"%s\" " % compiler_arch[0]
-
-	cmake_cmd = batch_command()
-	cmake_cmd.add_command('cmake -G "%s" %s %s %s' % (compiler_arch[1], toolset_name, additional_options, "../cmake"))
-	cmake_cmd.execute()
-
-	arch_name = compiler_arch[0]
-	if ("x86_app" == arch_name):
-		arch_name = "x86"
-	elif ("arm_app" == arch_name):
-		arch_name = "x86_arm"
-	elif ("x64" == arch_name):
-		arch_name = "x86_amd64"
-
-	build_cmd = batch_command()
-	if "vc" == compiler_info.name:
-		build_cmd.add_command('CALL "%%VS%d0COMNTOOLS%%..\\..\\VC\\vcvarsall.bat" %s' % (compiler_info.version, arch_name))
-		for config in compiler_info.cfg:
-			compiler_info.msvc_add_build_command(build_cmd, "vorbis", "ALL_BUILD", config)
-	elif "mgw" == compiler_info.name:
-		build_cmd.add_command('mingw32-make.exe')
-	else:
-		build_cmd.add_command('make')
-	build_cmd.execute()
-
-	os.chdir(curdir)
+	build_external_project("libvorbis", compiler_info, compiler_arch)
 
 def build_freetype(compiler_info, compiler_arch):
-	curdir = os.path.abspath(os.curdir)
-
-	if "vc" == compiler_info.name:
-		build_dir = "External/freetype/builds/%s-%d_0-%s" % (compiler_info.name, compiler_info.version, compiler_arch[0])
-	else:
-		build_dir = "External/freetype/builds/%s-%s" % (compiler_info.name, compiler_arch[0])
-	if not os.path.exists(build_dir):
-		os.makedirs(build_dir)
-
-	os.chdir(build_dir)
-	
-	toolset_name = ""
-	if "vc" == compiler_info.name:
-		toolset_name = "-T %s" % compiler_arch[2]
-
-	additional_options = ""
-	if compiler_info.name != "vc":
-		additional_options += "-D KLAYGE_ARCH_NAME:STRING=\"%s\" " % compiler_arch[0]
-
-	cmake_cmd = batch_command()
-	cmake_cmd.add_command('cmake -G "%s" %s %s %s' % (compiler_arch[1], toolset_name, additional_options, "../cmake"))
-	cmake_cmd.execute()
-
-	arch_name = compiler_arch[0]
-	if ("x86_app" == arch_name):
-		arch_name = "x86"
-	elif ("arm_app" == arch_name):
-		arch_name = "x86_arm"
-	elif ("x64" == arch_name):
-		arch_name = "x86_amd64"
-
-	build_cmd = batch_command()
-	if "vc" == compiler_info.name:
-		build_cmd.add_command('CALL "%%VS%d0COMNTOOLS%%..\\..\\VC\\vcvarsall.bat" %s' % (compiler_info.version, arch_name))
-		for config in compiler_info.cfg:
-			compiler_info.msvc_add_build_command(build_cmd, "freetype", "ALL_BUILD", config)
-	elif "mgw" == compiler_info.name:
-		build_cmd.add_command('mingw32-make.exe')
-	else:
-		build_cmd.add_command('make')
-	build_cmd.execute()
-
-	os.chdir(curdir)
+	build_external_project("freetype", compiler_info, compiler_arch)
 
 def build_7z(compiler_info, compiler_arch):
-	curdir = os.path.abspath(os.curdir)
-
-	if "vc" == compiler_info.name:
-		build_dir = "External/7z/build/%s-%d_0-%s" % (compiler_info.name, compiler_info.version, compiler_arch[0])
-	else:
-		build_dir = "External/7z/build/%s-%s" % (compiler_info.name, compiler_arch[0])
-	if not os.path.exists(build_dir):
-		os.makedirs(build_dir)
-
-	os.chdir(build_dir)
-	
-	toolset_name = ""
-	if "vc" == compiler_info.name:
-		toolset_name = "-T %s" % compiler_arch[2]
-
-	additional_options = ""
-	if compiler_arch[3]:
-		additional_options += "-D KLAYGE_WITH_WINRT:BOOL=\"TRUE\" "
-	if compiler_info.name != "vc":
-		additional_options += "-D KLAYGE_ARCH_NAME:STRING=\"%s\" " % compiler_arch[0]
-
-	cmake_cmd = batch_command()
-	cmake_cmd.add_command('cmake -G "%s" %s %s %s' % (compiler_arch[1], toolset_name, additional_options, "../cmake"))
-	cmake_cmd.execute()
-
-	arch_name = compiler_arch[0]
-	if ("x86_app" == arch_name):
-		arch_name = "x86"
-	elif ("arm_app" == arch_name):
-		arch_name = "x86_arm"
-	elif ("x64" == arch_name):
-		arch_name = "x86_amd64"
-
-	build_cmd = batch_command()
-	if "vc" == compiler_info.name:
-		build_cmd.add_command('CALL "%%VS%d0COMNTOOLS%%..\\..\\VC\\vcvarsall.bat" %s' % (compiler_info.version, arch_name))
-		for config in compiler_info.cfg:
-			compiler_info.msvc_add_build_command(build_cmd, "7z", "ALL_BUILD", config)
-	elif "mgw" == compiler_info.name:
-		build_cmd.add_command('mingw32-make.exe')
-	else:
-		build_cmd.add_command('make')
-	build_cmd.execute()
-
-	os.chdir(curdir)
+	build_external_project("7z", compiler_info, compiler_arch)
 			
 def build_external_libs(compiler_info, compiler_arch):
 	import glob

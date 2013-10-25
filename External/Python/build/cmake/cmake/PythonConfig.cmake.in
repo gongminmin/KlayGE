@@ -1,0 +1,45 @@
+#  PYTHON_USE_STATIC_LIB    - Set to ON to force the use of the static
+#                             library.  Default is OFF.
+
+@PACKAGE_INIT@
+
+set(PYTHON_BUILD_SHARED "@BUILD_SHARED@")
+set(PYTHON_BUILD_STATIC "@BUILD_STATIC@")
+
+set_and_check(PYTHON_CONFIG_DIR "@PACKAGE_CONFIG_DIR_CONFIG@")
+set_and_check(PYTHON_INCLUDE_DIR "@PACKAGE_INCLUDE_DIR_CONFIG@")
+set_and_check(PYTHON_TARGETS "@PACKAGE_CONFIG_DIR_CONFIG@/PythonTargets.cmake")
+
+@PYTHON_CONFIG_CODE@
+
+if(NOT PYTHON_TARGETS_IMPORTED)
+  set(PYTHON_TARGETS_IMPORTED 1)
+  include(${PYTHON_TARGETS})
+endif()
+
+if(TARGET libpython-shared)
+  set(PYTHON_LIBRARY_SHARED libpython-shared)
+endif()
+if(TARGET libpython-static)
+  set(PYTHON_LIBRARY_STATIC libpython-static)
+endif()
+
+if(NOT Python_USE_STATIC_LIB)
+  if(PYTHON_LIBRARY_SHARED)
+    set(PYTHON_LIBRARIES ${PYTHON_LIBRARY_SHARED})
+  elseif(PYTHON_LIBRARY_STATIC)
+    set(PYTHON_LIBRARIES ${PYTHON_LIBRARY_STATIC})
+  endif()
+else()
+  if(PYTHON_LIBRARY_STATIC)
+    set(PYTHON_LIBRARIES ${PYTHON_LIBRARY_STATIC})
+  else()
+    set(PYTHON_LIBRARIES ${PYTHON_LIBRARY_SHARED})
+  endif()
+endif()
+
+if(NOT Python_FIND_QUIETLY)
+  message(STATUS "PYTHON_LIBRARIES set to ${PYTHON_LIBRARIES}")
+endif()
+
+set(PYTHON_INCLUDE_DIRS ${PYTHON_INCLUDE_DIR})

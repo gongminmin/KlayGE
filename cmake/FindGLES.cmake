@@ -11,7 +11,9 @@ IF(NOT KLAYGE_GLES_SDK_PATH)
 			PATHS
 				"$ENV{ProgramFiles}/NVIDIA Corporation/win_x86_es2emu"
 				"$ENV{ProgramFiles(x86)}/NVIDIA Corporation/win_x86_es2emu"
-				"$ENV{SystemDrive}/Imagination/PowerVR/GraphicsSDK/SDK_3.1/Builds"
+				"$ENV{SystemDrive}/Imagination/PowerVR/GraphicsSDK/SDK_*/Builds"
+				"$ENV{ProgramFiles}/ARM/Mali Developer Tools/Mali OpenGL ES Emulator*"
+				"$ENV{ProgramFiles(x86)}/ARM/Mali Developer Tools/Mali OpenGL ES Emulator*"
 			)
 	ENDIF()
 	IF(UNIX)
@@ -28,4 +30,6 @@ ENDIF()
 IF(KLAYGE_GLES_SDK_PATH)
 	SET(KLAYGE_GLES_FOUND TRUE)
 	MESSAGE(STATUS "Found GLES SDK: ${KLAYGE_GLES_SDK_PATH}")
+ELSE()
+	MESSAGE(STATUS "Could NOT find GLES SDK.")
 ENDIF()
