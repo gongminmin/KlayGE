@@ -1913,7 +1913,7 @@ namespace KlayGE
 
 	void RenderableLightSourceProxy::Technique(RenderTechniquePtr const & tech)
 	{
-		technique_ = tech;
+		technique_ = simple_forward_tech_ = tech;
 		if (tech)
 		{
 			mvp_param_ = technique_->Effect().ParameterByName("mvp");
@@ -1992,7 +1992,7 @@ namespace KlayGE
 
 	void RenderableCameraProxy::Technique(RenderTechniquePtr const & tech)
 	{
-		technique_ = tech;
+		technique_ = simple_forward_tech_ = tech;
 		if (tech)
 		{
 			mvp_param_ = technique_->Effect().ParameterByName("mvp");

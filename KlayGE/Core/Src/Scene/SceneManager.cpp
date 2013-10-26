@@ -309,37 +309,30 @@ namespace KlayGE
 		bool add;
 		if (urt_ != 0)
 		{
-			if (urt_ & App3DFramework::URV_Opaque_Only)
+			if (urt_ & App3DFramework::URV_Simple_Forward_Only)
+			{
+				add = obj->SimpleForward();
+			}
+			else if (urt_ & App3DFramework::URV_Opaque_Only)
 			{
 				add = !(obj->TransparencyBackFace() || obj->TransparencyFrontFace()) && !obj->SimpleForward();
 			}
+			else if (urt_ & App3DFramework::URV_Transparency_Back_Only)
+			{
+				add = obj->TransparencyBackFace() && !obj->SimpleForward();
+			}
+			else if (urt_ & App3DFramework::URV_Transparency_Front_Only)
+			{
+				add = obj->TransparencyFrontFace() && !obj->SimpleForward();
+			}
 			else
 			{
-				if (urt_ & App3DFramework::URV_Transparency_Back_Only)
-				{
-					add = obj->TransparencyBackFace() && !obj->SimpleForward();
-				}
-				else
-				{
-					if (urt_ & App3DFramework::URV_Transparency_Front_Only)
-					{
-						add = obj->TransparencyFrontFace() && !obj->SimpleForward();
-					}
-					else
-					{
-						add = true;
-					}
-				}
+				add = !obj->SimpleForward();
 			}
 
 			if (urt_ & App3DFramework::URV_Special_Shading_Only)
 			{
 				add &= obj->SpecialShading() && !obj->SimpleForward();
-			}
-
-			if (urt_ & App3DFramework::URV_Simple_Forward_Only)
-			{
-				add &= obj->SimpleForward();
 			}
 		}
 		else

@@ -273,6 +273,7 @@ namespace KlayGE
 		RenderTechniquePtr special_shading_tech_;
 		RenderTechniquePtr special_shading_alpha_blend_back_tech_;
 		RenderTechniquePtr special_shading_alpha_blend_front_tech_;
+		RenderTechniquePtr simple_forward_tech_;
 
 		float4x4 model_mat_;
 

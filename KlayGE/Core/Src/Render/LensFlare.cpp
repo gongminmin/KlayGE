@@ -66,7 +66,8 @@ namespace KlayGE
 		GraphicsBufferPtr ib = rf.MakeIndexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, &init_data);
 		rl_->BindIndexStream(ib, EF_R32UI);
 
-		technique_ = SyncLoadRenderEffect("LensFlare.fxml")->TechniqueByName("LensFlare");
+		simple_forward_tech_ = SyncLoadRenderEffect("LensFlare.fxml")->TechniqueByName("LensFlare");
+		technique_ = simple_forward_tech_;
 
 		effect_attrs_ |= EA_SimpleForward;
 	}
@@ -168,6 +169,7 @@ namespace KlayGE
 
 	void LensFlareSceneObject::Pass(PassType type)
 	{
-		this->Visible((PT_SimpleForward == type) && this->LFVisible());
+		SceneObjectHelper::Pass(type);
+		this->Visible(this->LFVisible());
 	}
 }

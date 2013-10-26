@@ -409,7 +409,7 @@ namespace
 				rl_->BindVertexStream(pos_vb, KlayGE::make_tuple(vertex_element(VEU_Position, 0, EF_ABGR32F),
 					vertex_element(VEU_TextureCoord, 0, EF_ABGR32F)));
 
-				technique_ = SyncLoadRenderEffect("Particle.fxml")->TechniqueByName("ParticleWithGS");
+				simple_forward_tech_ = SyncLoadRenderEffect("Particle.fxml")->TechniqueByName("ParticleWithGS");
 			}
 			else
 			{
@@ -447,8 +447,9 @@ namespace
 				GraphicsBufferPtr ib = rf.MakeIndexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, &init_data);
 				rl_->BindIndexStream(ib, EF_R16UI);
 
-				technique_ = SyncLoadRenderEffect("Particle.fxml")->TechniqueByName("Particle");
+				simple_forward_tech_ = SyncLoadRenderEffect("Particle.fxml")->TechniqueByName("Particle");
 			}
+			technique_ = simple_forward_tech_;
 
 			effect_attrs_ |= EA_SimpleForward;
 		}
@@ -574,11 +575,6 @@ namespace KlayGE
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 		gs_support_ = rf.RenderEngineInstance().DeviceCaps().gs_support;
 		renderable_ = MakeSharedPtr<RenderParticles>(gs_support_);
-	}
-
-	void ParticleSystem::Pass(PassType type)
-	{
-		this->Visible(PT_SimpleForward == type);
 	}
 
 	ParticleSystemPtr ParticleSystem::Clone()

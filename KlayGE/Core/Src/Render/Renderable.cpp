@@ -429,7 +429,7 @@ namespace KlayGE
 			return special_shading_alpha_blend_front_tech_;
 
 		case PT_SimpleForward:
-			return technique_;
+			return simple_forward_tech_;
 
 		default:
 			BOOST_ASSERT(false);

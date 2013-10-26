@@ -1308,7 +1308,10 @@ namespace KlayGE
 					typedef KLAYGE_DECLTYPE(visible_scene_objs_) VisibleSceneObjsType;
 					KLAYGE_FOREACH(VisibleSceneObjsType::reference deo, visible_scene_objs_)
 					{
-						deo->Pass(PT_SimpleForward);
+						if (deo->SimpleForward())
+						{
+							deo->Pass(PT_SimpleForward);
+						}
 					}
 
 					urv = App3DFramework::URV_Need_Flush | App3DFramework::URV_Simple_Forward_Only;

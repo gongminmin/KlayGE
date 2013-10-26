@@ -228,8 +228,6 @@ namespace KlayGE
 	public:
 		explicit ParticleSystem(uint32_t max_num_particles);
 
-		virtual void Pass(PassType type) KLAYGE_OVERRIDE;
-
 		virtual ParticleSystemPtr Clone();
 
 		void Gravity(float gravity)
