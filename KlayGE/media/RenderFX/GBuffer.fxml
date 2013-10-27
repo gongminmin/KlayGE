@@ -852,7 +852,7 @@ void GenShadowMapVS(float4 pos : POSITION,
 	oTc = texcoord;
 }
 
-float4 GenShadowMapPS(float2 tc : TEXCOORD0) : SV_Target
+float4 GenShadowMapPS() : SV_Target
 {
 	return 0;
 }
