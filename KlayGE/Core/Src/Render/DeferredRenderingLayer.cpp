@@ -1981,6 +1981,7 @@ namespace KlayGE
 		{
 			if (type != LightSource::LT_Sun)
 			{
+				sm_buffer_->Attached(FrameBuffer::ATT_Color0)->Discard();
 				depth_to_esm_pp_->Apply();
 			}
 		}
