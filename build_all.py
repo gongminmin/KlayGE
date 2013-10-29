@@ -70,3 +70,8 @@ if __name__ == "__main__":
 	for arch in ci.arch_list:
 		if not arch[3]:
 			build_Tutorials(ci, arch)
+
+	print("Building Exporters...")
+	for arch in ci.arch_list:
+		if not arch[3]:
+			build_Exporters(ci, arch)
