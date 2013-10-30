@@ -41,6 +41,8 @@ private:
 	uint32_t loading_percentage_;
 
 	KlayGE::FirstPersonCameraController fpcController_;
+	KlayGE::TrackballCameraController light_controller_;
+	KlayGE::Camera light_ctrl_camera_;
 
 	KlayGE::DeferredRenderingLayerPtr deferred_rendering_;
 

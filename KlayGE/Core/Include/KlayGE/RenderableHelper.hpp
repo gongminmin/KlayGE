@@ -61,7 +61,6 @@ namespace KlayGE
 		RenderLayoutPtr rl_;
 
 		RenderEffectParameterPtr color_ep_;
-		RenderEffectParameterPtr mvp_ep_;
 	};
 
 	class KLAYGE_CORE_API RenderablePoint : public RenderableHelper

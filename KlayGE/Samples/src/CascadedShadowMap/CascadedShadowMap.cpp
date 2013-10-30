@@ -54,6 +54,7 @@ int SampleMain()
 
 CascadedShadowMapApp::CascadedShadowMapApp()
 			: App3DFramework("CascadedShadowMap"),
+				light_controller_(true, MB_Right, 0, 0),
 				num_objs_rendered_(0), num_renderable_rendered_(0),
 				num_primitives_rendered_(0), num_vertices_rendered_(0),
 				pssm_factor_(0.8f)
@@ -75,6 +76,10 @@ void CascadedShadowMapApp::InitObjects()
 {
 	this->LookAt(float3(-25.72f, 29.65f, 24.57f), float3(-24.93f, 29.09f, 24.32f));
 	this->Proj(0.05f, 300.0f);
+
+	light_ctrl_camera_.ViewParams(float3(-50, 50, -50), float3(0, 0, 0), float3(0, 1, 0));
+	light_controller_.AttachCamera(light_ctrl_camera_);
+	light_controller_.Scalers(0.003f, 0.003f);
 
 	loading_percentage_ = 0;
 	c_cube_tl_ = ASyncLoadTexture("Lake_CraterLake03_c.dds", EAH_GPU_Read | EAH_Immutable);
@@ -269,6 +274,10 @@ uint32_t CascadedShadowMapApp::DoUpdate(uint32_t pass)
 
 				++ loading_percentage_;
 			}
+		}
+		else
+		{
+			sun_light_->Direction(light_ctrl_camera_.ForwardVec());
 		}
 	}
 	else if (1 == pass)

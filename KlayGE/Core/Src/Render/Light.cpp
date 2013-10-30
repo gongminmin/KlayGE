@@ -474,7 +474,7 @@ namespace KlayGE
 
 		// Enable shadow and disable GI
 		attrib_ &= ~LSA_NoShadow;
-		attrib_ &= LSA_IndirectLighting;
+		attrib_ &= ~LSA_IndirectLighting;
 	}
 
 	CameraPtr const & SunLightSource::SMCamera(uint32_t /*index*/) const

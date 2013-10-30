@@ -848,7 +848,7 @@ void OceanApp::InitObjects()
 
 	sun_light_ = MakeSharedPtr<DirectionalLightSource>();
 	sun_light_->Attrib(LightSource::LSA_NoShadow);
-	sun_light_->Direction(float3(-0.267835f, 0.0517653f, 0.960315f));
+	sun_light_->Direction(float3(0.267835f, -0.0517653f, -0.960315f));
 	sun_light_->Color(float3(1, 0.7f, 0.5f));
 	sun_light_->AddToSceneManager();
 	
@@ -881,7 +881,7 @@ void OceanApp::InitObjects()
 	deferred_rendering_->AtmosphericPostProcess(fog_pp_);
 
 	light_shaft_pp_ = MakeSharedPtr<LightShaftPostProcess>();
-	light_shaft_pp_->SetParam(0, sun_light_->Direction() * 10000.0f);
+	light_shaft_pp_->SetParam(0, -sun_light_->Direction() * 10000.0f);
 	light_shaft_pp_->SetParam(1, sun_light_->Color());
 
 	fpcController_.Scalers(0.05f, 1.0f);

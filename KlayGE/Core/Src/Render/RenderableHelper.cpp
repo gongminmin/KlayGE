@@ -106,7 +106,7 @@ namespace KlayGE
 	void RenderablePoint::OnRenderBegin()
 	{
 		Camera const & camera = Context::Instance().AppInstance().ActiveCamera();
-		*mvp_ep_ = model_mat_ * camera.ViewProjMatrix();
+		*mvp_param_ = model_mat_ * camera.ViewProjMatrix();
 	}
 
 	void RenderablePoint::Init(bool is_overlay)
@@ -128,7 +128,7 @@ namespace KlayGE
 		}
 		v0_ep_ = effect->ParameterByName("v0");
 		color_ep_ = effect->ParameterByName("color");
-		mvp_ep_ = effect->ParameterByName("mvp");
+		mvp_param_ = effect->ParameterByName("mvp");
 
 		rl_ = rf.MakeRenderLayout();
 		rl_->TopologyType(RenderLayout::TT_PointList);
@@ -184,7 +184,7 @@ namespace KlayGE
 	void RenderableLine::OnRenderBegin()
 	{
 		Camera const & camera = Context::Instance().AppInstance().ActiveCamera();
-		*mvp_ep_ = model_mat_ * camera.ViewProjMatrix();
+		*mvp_param_ = model_mat_ * camera.ViewProjMatrix();
 	}
 
 	void RenderableLine::Init(bool is_overlay)
@@ -207,7 +207,7 @@ namespace KlayGE
 		v0_ep_ = effect->ParameterByName("v0");
 		v1_ep_ = effect->ParameterByName("v1");
 		color_ep_ = effect->ParameterByName("color");
-		mvp_ep_ = effect->ParameterByName("mvp");
+		mvp_param_ = effect->ParameterByName("mvp");
 
 		float vertices[] =
 		{
@@ -268,7 +268,7 @@ namespace KlayGE
 	void RenderableTriangle::OnRenderBegin()
 	{
 		Camera const & camera = Context::Instance().AppInstance().ActiveCamera();
-		*mvp_ep_ = model_mat_ * camera.ViewProjMatrix();
+		*mvp_param_ = model_mat_ * camera.ViewProjMatrix();
 	}
 
 	void RenderableTriangle::Init(bool is_overlay)
@@ -292,7 +292,7 @@ namespace KlayGE
 		v1_ep_ = effect->ParameterByName("v1");
 		v2_ep_ = effect->ParameterByName("v2");
 		color_ep_ = effect->ParameterByName("color");
-		mvp_ep_ = effect->ParameterByName("mvp");
+		mvp_param_ = effect->ParameterByName("mvp");
 
 		float vertices[] =
 		{
@@ -354,7 +354,7 @@ namespace KlayGE
 	void RenderableTriBox::OnRenderBegin()
 	{
 		Camera const & camera = Context::Instance().AppInstance().ActiveCamera();
-		*mvp_ep_ = model_mat_ * camera.ViewProjMatrix();
+		*mvp_param_ = model_mat_ * camera.ViewProjMatrix();
 	}
 
 	void RenderableTriBox::Init(bool is_overlay)
@@ -383,7 +383,7 @@ namespace KlayGE
 		v6_ep_ = effect->ParameterByName("v6");
 		v7_ep_ = effect->ParameterByName("v7");
 		color_ep_ = effect->ParameterByName("color");
-		mvp_ep_ = effect->ParameterByName("mvp");
+		mvp_param_ = effect->ParameterByName("mvp");
 
 		float vertices[] =
 		{
@@ -462,7 +462,7 @@ namespace KlayGE
 	void RenderableLineBox::OnRenderBegin()
 	{
 		Camera const & camera = Context::Instance().AppInstance().ActiveCamera();
-		*mvp_ep_ = model_mat_ * camera.ViewProjMatrix();
+		*mvp_param_ = model_mat_ * camera.ViewProjMatrix();
 	}
 
 	void RenderableLineBox::Init(bool is_overlay)
@@ -491,7 +491,7 @@ namespace KlayGE
 		v6_ep_ = effect->ParameterByName("v6");
 		v7_ep_ = effect->ParameterByName("v7");
 		color_ep_ = effect->ParameterByName("color");
-		mvp_ep_ = effect->ParameterByName("mvp");
+		mvp_param_ = effect->ParameterByName("mvp");
 
 		float vertices[] =
 		{

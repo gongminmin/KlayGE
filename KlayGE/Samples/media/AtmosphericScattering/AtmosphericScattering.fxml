@@ -23,7 +23,7 @@
 	<parameter type="float" name="planet_radius" value="1"/>
 	<parameter type="float" name="atmosphere_top" value="1.011"/>
 	<parameter type="float" name="density" value="0.00119"/>
-	<parameter type="float3" name="light_dir" x="-1" y="0" z="0"/>
+	<parameter type="float3" name="light_dir"/>
 	<parameter type="float3" name="beta" x="38.05" y="82.36" z="214.65"/>
 	<parameter type="float3" name="absorb" x="0.75" y="0.85" z="1"/>
 

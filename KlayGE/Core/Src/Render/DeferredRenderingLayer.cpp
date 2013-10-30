@@ -1951,7 +1951,7 @@ namespace KlayGE
 
 		case LightSource::LT_Directional:
 			{
-				float3 dir_es = MathLib::transform_normal(light->Direction(), pvp.view);
+				float3 dir_es = MathLib::transform_normal(-light->Direction(), pvp.view);
 				*light_dir_es_param_ = float4(dir_es.x(), dir_es.y(), dir_es.z(), 0);
 			}
 			*light_volume_mv_param_ = pvp.inv_proj;
@@ -2488,7 +2488,7 @@ namespace KlayGE
 
 			lights_color.push_back(light->Color());
 
-			float3 dir_es = MathLib::transform_normal(light->Direction(), pvp.view);
+			float3 dir_es = MathLib::transform_normal(-light->Direction(), pvp.view);
 			lights_dir_es.push_back(float4(dir_es.x(), dir_es.y(), dir_es.z(), 0));
 
 			lights_attrib.push_back(float4(attr & LightSource::LSA_NoDiffuse ? 0.0f : 1.0f,

@@ -215,7 +215,6 @@ void AtmosphericScatteringApp::InitObjects()
 	sun_light_ = MakeSharedPtr<DirectionalLightSource>();
 	sun_light_->Attrib(0);
 	sun_light_->Color(float3(1, 1, 1));
-	sun_light_->Direction(float3(-1, 0, 0));
 	sun_light_->AddToSceneManager();
 
 	sun_light_src_ = MakeSharedPtr<SceneObjectLightSourceProxy>(sun_light_);
@@ -400,9 +399,9 @@ uint32_t AtmosphericScatteringApp::DoUpdate(KlayGE::uint32_t /*pass*/)
 {
 	RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 
-	sun_light_->Direction(-light_ctrl_camera_.ForwardVec());
-	checked_pointer_cast<PlanetMesh>(planet_->GetRenderable())->LightDir(sun_light_->Direction());
-	checked_pointer_cast<AtmosphereMesh>(atmosphere_->GetRenderable())->LightDir(sun_light_->Direction());
+	sun_light_->Direction(light_ctrl_camera_.ForwardVec());
+	checked_pointer_cast<PlanetMesh>(planet_->GetRenderable())->LightDir(-sun_light_->Direction());
+	checked_pointer_cast<AtmosphereMesh>(atmosphere_->GetRenderable())->LightDir(-sun_light_->Direction());
 
 	re.BindFrameBuffer(FrameBufferPtr());
 	Color clear_clr(0.0f, 0.0f, 0.0f, 1);
