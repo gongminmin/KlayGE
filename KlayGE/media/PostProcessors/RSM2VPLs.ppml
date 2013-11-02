@@ -17,8 +17,8 @@
 			<param name="smaller_level"/>
 		</params>
 		<input>
-			<pin name="albedo_tex"/>
 			<pin name="normal_es_tex"/>
+			<pin name="albedo_tex"/>
 			<pin name="depth_tex" />
 			<pin name="depth_derivate_tex"/>
 		</input>
