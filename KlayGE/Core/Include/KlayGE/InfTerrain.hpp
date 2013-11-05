@@ -63,6 +63,211 @@ namespace KlayGE
 		float base_level_;
 		float strength_;
 	};
+
+
+	class KLAYGE_CORE_API HQTerrainRenderable : public RenderableHelper
+	{
+		friend class HQTerrainSceneObject;
+
+	private:
+#pragma pack(push, 1)
+		struct Adjacency
+		{
+			float neighbor_minus_x;
+			float neighbor_minus_y;
+			float neighbor_plus_x;
+			float neighbor_plus_y;
+		};
+
+		struct InstanceData
+		{
+			float x, y;
+			Adjacency adjacency;
+		};
+#pragma pack(pop)
+
+		//----------------------------------------------------------------------------------
+		// Defines and draws one ring of tiles in a concentric, nested set of rings. Each ring
+		// is a different LOD and uses a different tile/patch size. These are actually square
+		// rings. (Is there a term for that?) But they could conceivably change to circular.
+		// The inner-most LOD is a square, represented by a degenerate ring.
+		//
+
+		// Int dimensions specified to the ctor are in numbers of tiles. It's symmetrical in
+		// each direction. (Don't read much into the exact numbers of #s in this diagram.)
+		//
+		//    <-   outer_width  ->
+		//    ####################
+		//    ####################
+		//    ###              ###
+		//    ###<-hole_width->###
+		//    ###              ###
+		//    ###    (0, 0)    ###
+		//    ###              ###
+		//    ###              ###
+		//    ###              ###
+		//    ####################
+		//    ####################
+		//
+		class TileRing
+		{
+		public:
+			// hole_width & outer_width are num of tiles
+			// tile_size is a world-space length
+			TileRing(int hole_width, int outer_width, float tile_size,
+				GraphicsBufferPtr const & tile_non_tess_ib,
+				GraphicsBufferPtr const & tile_tess_ib);
+
+			int OuterWidth() const
+			{
+				return outer_width_;
+			}
+			int NumTiles() const
+			{
+				return num_tiles_;
+			}
+			float TileSize() const
+			{
+				return tile_size_;
+			}
+
+			RenderLayoutPtr const & GetNonTessRL() const
+			{
+				return tile_non_tess_rl_;
+			}
+			RenderLayoutPtr const & GetTessRL() const
+			{
+				return tile_tess_rl_;
+			}
+
+		private:
+			void CreateInstanceDataVB();
+			bool InRing(int x, int y) const;
+			void AssignNeighbourSizes(int x, int y, Adjacency& adj) const;
+
+			GraphicsBufferPtr vb_;
+
+			RenderLayoutPtr tile_non_tess_rl_;
+			RenderLayoutPtr tile_tess_rl_;
+			GraphicsBufferPtr tile_non_tess_ib_;
+			GraphicsBufferPtr tile_tess_ib_;
+
+			int const hole_width_, outer_width_, ring_width_;
+			int const num_tiles_;
+			float const tile_size_;
+			std::vector<InstanceData> vb_data_;
+
+			TileRing(TileRing const & rhs);
+			TileRing& operator=(TileRing const & rhs);
+		};
+
+	public:
+		explicit HQTerrainRenderable(RenderEffectPtr const & effect);
+		virtual ~HQTerrainRenderable()
+		{
+		}
+
+		virtual void Render() KLAYGE_OVERRIDE;
+
+		void Tessellation(bool tess);
+		void ShowPatches(bool sp);
+		void ShowTiles(bool st);
+		void Wireframe(bool wf);
+		void DetailNoiseScale(float scale);
+		void TessellatedTriSize(int size);
+
+		void TextureLayer(uint32_t layer, TexturePtr const & tex);
+		void TextureScale(uint32_t layer, float2 const & scale);
+
+		float GetHeight(float x, float z);
+
+	protected:
+		virtual void BindDeferredEffect(RenderEffectPtr const & deferred_effect) KLAYGE_OVERRIDE;
+		void CreateNonTessIB();
+		void CreateTessIB();
+		float3 CalcUVOffset(Camera const & camera) const;
+		void SetMatrices(Camera const & camera);
+		void RenderTerrain();
+		void UpdateTechnique();
+
+		virtual void FlushTerrainData() = 0;
+
+	protected:
+		float WORLD_SCALE;
+		float VERTICAL_SCALE;
+		int WORLD_UV_REPEATS;
+
+		int ridge_octaves_;
+		int fBm_octaves_;
+		int tex_twist_octaves_;
+		float detail_noise_scale_;
+		bool hw_tessellation_;
+		int tessellated_tri_size_;
+		bool wireframe_;
+		bool show_patches_;
+		bool show_tiles_;
+
+		float snap_grid_size_;
+		float snapped_x_, snapped_z_;
+		std::vector<KlayGE::shared_ptr<TileRing> > tile_rings_;
+
+		float3 texture_world_offset_;
+
+		RenderTechniquePtr terrain_gbuffer_rt0_techs_[4];
+		RenderTechniquePtr terrain_gbuffer_rt1_techs_[4];
+		RenderTechniquePtr terrain_gbuffer_mrt_techs_[4];
+		RenderEffectParameterPtr height_map_param_;
+		RenderEffectParameterPtr gradient_map_param_;
+		RenderEffectParameterPtr mask_map_param_;
+		RenderEffectParameterPtr eye_pos_param_;
+		RenderEffectParameterPtr view_dir_param_;
+		RenderEffectParameterPtr proj_param_;
+		RenderEffectParameterPtr texture_world_offset_param_;
+		RenderEffectParameterPtr tri_size_param_;
+		RenderEffectParameterPtr tile_size_param_;
+		RenderEffectParameterPtr debug_show_patches_param_;
+		RenderEffectParameterPtr debug_show_tiles_param_;
+		RenderEffectParameterPtr detail_noise_param_;
+		RenderEffectParameterPtr detail_uv_param_;
+		RenderEffectParameterPtr sample_spacing_param_;
+		RenderEffectParameterPtr frame_size_param_;
+		KlayGE::array<RenderEffectParameterPtr, 4> terrain_tex_layer_params_;
+		KlayGE::array<RenderEffectParameterPtr, 4> terrain_tex_layer_scale_params_;
+
+		GraphicsBufferPtr tile_non_tess_ib_;
+		GraphicsBufferPtr tile_tess_ib_;
+		TexturePtr height_map_tex_;
+		TexturePtr gradient_map_tex_;
+		TexturePtr mask_map_tex_;
+		TexturePtr height_map_cpu_tex_;
+		TexturePtr gradient_map_cpu_tex_;
+		TexturePtr mask_map_cpu_tex_;
+	};
+
+	class KLAYGE_CORE_API HQTerrainSceneObject : public SceneObjectHelper
+	{
+	public:
+		explicit HQTerrainSceneObject(RenderablePtr const & renderable);
+		virtual ~HQTerrainSceneObject();
+
+		virtual void MainThreadUpdate(float app_time, float elapsed_time) KLAYGE_OVERRIDE;
+
+		void Tessellation(bool tess);
+		void ShowPatches(bool sp);
+		void ShowTiles(bool st);
+		void Wireframe(bool wf);
+		void DetailNoiseScale(float scale);
+		void TessellatedTriSize(int size);
+
+		void TextureLayer(uint32_t layer, TexturePtr const & tex);
+		void TextureScale(uint32_t layer, float2 const & scale);
+
+		float GetHeight(float x, float z);
+
+	private:
+		bool reset_terrain_;
+		float3 last_eye_pos_;
+	};
 }
 
 #endif		// _INFTERRAIN_HPP

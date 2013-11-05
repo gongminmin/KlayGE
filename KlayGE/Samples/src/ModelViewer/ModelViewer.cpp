@@ -41,7 +41,7 @@ namespace
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
 			this->BindDeferredEffect(SyncLoadRenderEffect("MVUtil.fxml"));
-			mvp_ep_ = deferred_effect_->ParameterByName("mvp");
+			mvp_param_ = deferred_effect_->ParameterByName("mvp");
 			depth_tech_ = deferred_effect_->TechniqueByName("AxisDepthTech");
 			gbuffer_rt0_tech_ = deferred_effect_->TechniqueByName("AxisRT0Tech");
 			gbuffer_rt1_tech_ = deferred_effect_->TechniqueByName("AxisRT1Tech");
@@ -75,7 +75,7 @@ namespace
 		void OnRenderBegin()
 		{
 			Camera& camera = Context::Instance().AppInstance().ActiveCamera();
-			*mvp_ep_ = model_mat_ * camera.ViewProjMatrix();
+			*mvp_param_ = model_mat_ * camera.ViewProjMatrix();
 		}
 	};
 
@@ -88,7 +88,7 @@ namespace
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
 			this->BindDeferredEffect(SyncLoadRenderEffect("MVUtil.fxml"));
-			mvp_ep_ = deferred_effect_->ParameterByName("mvp");
+			mvp_param_ = deferred_effect_->ParameterByName("mvp");
 			depth_tech_ = deferred_effect_->TechniqueByName("GridDepthTech");
 			gbuffer_rt0_tech_ = deferred_effect_->TechniqueByName("GridRT0Tech");
 			gbuffer_rt1_tech_ = deferred_effect_->TechniqueByName("GridRT1Tech");
@@ -122,7 +122,7 @@ namespace
 		void OnRenderBegin()
 		{
 			Camera& camera = Context::Instance().AppInstance().ActiveCamera();
-			*mvp_ep_ = model_mat_ * camera.ViewProjMatrix();
+			*mvp_param_ = model_mat_ * camera.ViewProjMatrix();
 		}
 	};
 

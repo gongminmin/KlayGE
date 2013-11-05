@@ -197,6 +197,10 @@ namespace KlayGE
 	typedef shared_ptr<InfTerrainRenderable> InfTerrainRenderablePtr;
 	class InfTerrainSceneObject;
 	typedef shared_ptr<InfTerrainSceneObject> InfTerrainSceneObjectPtr;
+	class HQTerrainRenderable;
+	typedef shared_ptr<HQTerrainRenderable> HQTerrainRenderablePtr;
+	class HQTerrainSceneObject;
+	typedef shared_ptr<HQTerrainSceneObject> HQTerrainSceneObjectPtr;
 	class LensFlareRenderable;
 	typedef shared_ptr<LensFlareRenderable> LensFlareRenderablePtr;
 	class LensFlareSceneObject;

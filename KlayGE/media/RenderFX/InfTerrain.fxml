@@ -1,6 +1,11 @@
 <?xml version='1.0'?>
 
 <effect>
+	<include name="DeferredRenderingUtil.fxml"/>
+	<include name="util.fxml"/>
+	<include name="Quaternion.fxml"/>
+	<include name="GBuffer.fxml"/>
+	
 	<parameter type="float" name="stretch"/>
 	<parameter type="float" name="base_level"/>
 
@@ -20,4 +25,552 @@ float4 GetInfTerrainPosOS(float2 pos, float strength)
 }
 		]]>
 	</shader>
+
+	<macro name="CONTROL_VTX_PER_TILE_EDGE" value="9"/>
+	<macro name="PATCHES_PER_TILE_EDGE" value="8"/>
+	<macro name="RECIP_CONTROL_VTX_PER_TILE_EDGE" value="1.0f / 9"/>
+	<macro name="WORLD_SCALE" value="800"/>
+	<macro name="VERTICAL_SCALE" value="2.5f"/>
+	<macro name="WORLD_UV_REPEATS" value="8"/>
+	<macro name="WORLD_UV_REPEATS_RECIP" value="1.0f / WORLD_UV_REPEATS"/>
+	<macro name="MAX_TESS_LEVEL" value="16"/>
+
+	<cbuffer name="per_frame">
+		<parameter type="float3" name="texture_world_offset"/>
+		<parameter type="float" name="coarse_sample_spacing"/>
+		<parameter type="float3" name="view_dir"/>
+		<parameter type="float4x4" name="proj"/>
+	</cbuffer>
+
+	<parameter type="texture2D" name="coarse_height_map"/>
+	<parameter type="texture2D" name="coarse_gradient_map"/>
+	<parameter type="texture2D" name="coarse_mask_map"/>
+	<parameter type="texture2D" name="detail_noise_tex">
+		<annotation type="string" name="SasResourceAddress" value="fBm5_tex.dds"/>
+	</parameter>
+	<parameter type="texture2D" name="detail_noise_grad_tex">
+		<annotation type="string" name="SasResourceAddress" value="fBm5_grad_tex.dds"/>
+	</parameter>
+	<parameter type="float" name="detail_noise_scale" value="0.2"/>
+	<parameter type="float2" name="detail_uv_scale" value="1"/>
+
+	<parameter type="bool" name="show_patches" value="false"/>
+	<parameter type="bool" name="show_tiles" value="false"/>
+	<parameter type="float2" name="frame_size"/>
+	<parameter type="int" name="tri_size" value="10"/>
+	<parameter type="float" name="tile_size" value="1"/>
+
+	<parameter type="sampler" name="aniso_wrap_sampler">
+		<state name="filtering" value="anisotropic"/>
+		<state name="address_u" value="wrap"/>
+		<state name="address_v" value="wrap"/>
+		<state name="max_anisotropy" value="4"/>
+	</parameter>
+	<parameter type="sampler" name="linear_wrap_sampler">
+		<state name="filtering" value="min_mag_mip_linear"/>
+		<state name="address_u" value="wrap"/>
+		<state name="address_v" value="wrap"/>
+	</parameter>
+	<parameter type="sampler" name="linear_clamp_sampler">
+		<state name="filtering" value="min_mag_mip_linear"/>
+		<state name="address_u" value="clamp"/>
+		<state name="address_v" value="clamp"/>
+	</parameter>
+
+	<shader>
+		<![CDATA[
+void ReconstructPosition(float2 position, uint vertex_id,
+							out float3 pos, out int2 int_uv)
+{
+	float iv = floor(vertex_id * RECIP_CONTROL_VTX_PER_TILE_EDGE);
+	float iu = vertex_id - iv * CONTROL_VTX_PER_TILE_EDGE;
+	float2 uv = float2(iu, iv) / (CONTROL_VTX_PER_TILE_EDGE - 1);
+
+	float size = tile_size;
+	if (show_tiles)
+	{
+		size *= 0.98f;
+	}
+
+	pos.xz = uv * size + position.xy;
+	pos.y = 0;
+	int_uv = int2(iu, iv);
+}
+
+float2 DetailNoiseSampleCoords(float2 uv)
+{
+	return (WORLD_UV_REPEATS * uv + texture_world_offset.xz) * detail_uv_scale.x;
+}
+
+float ScaleDetailNoise(float coarse, float detail)
+{
+	return detail_noise_scale * (detail * 2 - 1) * saturate(coarse);
+}
+
+float2 ScaleDetailGrad(float2 grad)
+{
+	return detail_noise_scale * (grad * 2 - 1);
+}
+
+float SampleLevelDetailNoise(float2 uv, float coarse)
+{
+	return ScaleDetailNoise(coarse, detail_noise_tex.SampleLevel(linear_wrap_sampler, DetailNoiseSampleCoords(uv), 0).x);
+}
+
+float2 SampleDetailGradOctaves(float2 uv)
+{
+	return ScaleDetailGrad(detail_noise_grad_tex.Sample(aniso_wrap_sampler, DetailNoiseSampleCoords(uv)).ra) * detail_noise_scale;
+}
+
+float2 WorldXZToHeightUV(float2 world_xz)
+{
+	return world_xz / (WORLD_UV_REPEATS * 2) + 0.5f;
+}
+
+float2 HeightUVToWorldXZ(float2 uv)
+{
+	return (WORLD_UV_REPEATS * 2) * (uv - 0.5f);
+}
+
+float SampleHeightForVS(float2 world_xz, int2 offset)
+{
+	float2 uv = WorldXZToHeightUV(world_xz);
+	float coarse = coarse_height_map.SampleLevel(linear_clamp_sampler, uv, 0, offset).x;
+	return VERTICAL_SCALE * (coarse + SampleLevelDetailNoise(uv, coarse) * 0.5f);
+}
+
+void GBufferNoTessTerrainVS(float2 position  : TEXCOORD0,
+		float4 neighbor_minus_plus_xy : TEXCOORD1,
+		uint vertex_id    : SV_VertexID,
+		out float3 oWorldPos        : TEXCOORD0,
+		out float oDebugPatch       : TEXCOORD1,
+		out float4 oPosition        : SV_Position)
+{
+	float3 displaced_pos;
+	int2 int_uv;
+	ReconstructPosition(position, vertex_id, displaced_pos, int_uv);
+
+	float z1, z2, z3;
+
+	float3 displaced_pos2, displaced_pos3;
+	int2 int_uv2, int_uv3;
+	if ((neighbor_minus_plus_xy.y > 1) && ((1 == vertex_id) || (3 == vertex_id) || (5 == vertex_id) || (7 == vertex_id)))
+	{
+		ReconstructPosition(position, vertex_id - 1, displaced_pos2, int_uv2);
+		ReconstructPosition(position, vertex_id + 1, displaced_pos3, int_uv3);
+
+		z1 = (SampleHeightForVS(displaced_pos2.xz, int2(1, 1)) + SampleHeightForVS(displaced_pos3.xz, int2(1, 1))) * 0.5f;
+		z2 = (SampleHeightForVS(displaced_pos2.xz, int2(2, 1)) + SampleHeightForVS(displaced_pos3.xz, int2(2, 1))) * 0.5f;
+		z3 = (SampleHeightForVS(displaced_pos2.xz, int2(1, 2)) + SampleHeightForVS(displaced_pos3.xz, int2(1, 2))) * 0.5f;
+	}
+	else if ((neighbor_minus_plus_xy.w > 1) && ((73 == vertex_id) || (75 == vertex_id) || (77 == vertex_id) || (79 == vertex_id)))
+	{
+		ReconstructPosition(position, vertex_id - 1, displaced_pos2, int_uv2);
+		ReconstructPosition(position, vertex_id + 1, displaced_pos3, int_uv3);
+
+		z1 = (SampleHeightForVS(displaced_pos2.xz, int2(1, 1)) + SampleHeightForVS(displaced_pos3.xz, int2(1, 1))) * 0.5f;
+		z2 = (SampleHeightForVS(displaced_pos2.xz, int2(2, 1)) + SampleHeightForVS(displaced_pos3.xz, int2(2, 1))) * 0.5f;
+		z3 = (SampleHeightForVS(displaced_pos2.xz, int2(1, 2)) + SampleHeightForVS(displaced_pos3.xz, int2(1, 2))) * 0.5f;
+	}
+	else if ((neighbor_minus_plus_xy.x > 1) && ((9 == vertex_id) || (27 == vertex_id) || (45 == vertex_id) || (63 == vertex_id)))
+	{
+		ReconstructPosition(position, vertex_id - CONTROL_VTX_PER_TILE_EDGE, displaced_pos2, int_uv2);
+		ReconstructPosition(position, vertex_id + CONTROL_VTX_PER_TILE_EDGE, displaced_pos3, int_uv3);
+
+		z1 = (SampleHeightForVS(displaced_pos2.xz, int2(1, 1)) + SampleHeightForVS(displaced_pos3.xz, int2(1, 1))) * 0.5f;
+		z2 = (SampleHeightForVS(displaced_pos2.xz, int2(2, 1)) + SampleHeightForVS(displaced_pos3.xz, int2(2, 1))) * 0.5f;
+		z3 = (SampleHeightForVS(displaced_pos2.xz, int2(1, 2)) + SampleHeightForVS(displaced_pos3.xz, int2(1, 2))) * 0.5f;
+	}
+	else if ((neighbor_minus_plus_xy.z > 1) && ((17 == vertex_id) || (35 == vertex_id) || (53 == vertex_id) || (71 == vertex_id)))
+	{
+		ReconstructPosition(position, vertex_id - CONTROL_VTX_PER_TILE_EDGE, displaced_pos2, int_uv2);
+		ReconstructPosition(position, vertex_id + CONTROL_VTX_PER_TILE_EDGE, displaced_pos3, int_uv3);
+
+		z1 = (SampleHeightForVS(displaced_pos2.xz, int2(1, 1)) + SampleHeightForVS(displaced_pos3.xz, int2(1, 1))) * 0.5f;
+		z2 = (SampleHeightForVS(displaced_pos2.xz, int2(2, 1)) + SampleHeightForVS(displaced_pos3.xz, int2(2, 1))) * 0.5f;
+		z3 = (SampleHeightForVS(displaced_pos2.xz, int2(1, 2)) + SampleHeightForVS(displaced_pos3.xz, int2(1, 2))) * 0.5f;
+	}
+	else
+	{
+		z1 = SampleHeightForVS(displaced_pos.xz, int2(1, 1));
+		z2 = SampleHeightForVS(displaced_pos.xz, int2(2, 1));
+		z3 = SampleHeightForVS(displaced_pos.xz, int2(1, 2));
+	}
+	
+	float3 normal = float3(z2 - z1, 1.0f / CONTROL_VTX_PER_TILE_EDGE, z3 - z1);
+
+	displaced_pos.y += z1;
+
+	oPosition = mul(float4(displaced_pos, 1), mvp);
+	oWorldPos = displaced_pos;
+	oDebugPatch = 1;
+
+	if (show_patches)
+	{
+		oDebugPatch = (0.5f * (((uint)int_uv.x + (uint)int_uv.y) % 2) + 0.5f);
+	}
+}
+		]]>
+	</shader>
+
+	<shader version="5">
+		<![CDATA[
+struct VS_CONTROL_POINT_OUTPUT
+{
+	float3 position         : POSITION;
+	float2 world_xz         : TEXCOORD0;
+	
+	float4 neighbor_minus_plus_xy	: TEXCOORD1;
+};
+
+VS_CONTROL_POINT_OUTPUT GBufferTessTerrainVS(float2 position  : TEXCOORD0,
+							float4 neighbor_minus_plus_xy : TEXCOORD1,
+							uint vertex_id    : SV_VertexID)
+{
+	VS_CONTROL_POINT_OUTPUT output;
+	int2 int_uv;
+	ReconstructPosition(position, vertex_id, output.position, int_uv);
+
+	float z = SampleHeightForVS(output.position.xz, 0);
+	output.position.y += z;
+	output.world_xz = output.position.xz;
+	output.neighbor_minus_plus_xy = neighbor_minus_plus_xy;
+
+	return output;
+}
+
+struct HS_CONSTANT_DATA_OUTPUT
+{
+	float edges[4]        : SV_TessFactor;
+	float inside[2]       : SV_InsideTessFactor;
+	float2 world_xz[4]    : TEXCOORD0;
+};
+
+struct HS_OUTPUT
+{
+	float2 world_xz : POSITION;
+};
+
+float ClipToScreenSpaceTessellation(float4 clip0, float4 clip1)
+{
+	clip0 /= clip0.w;
+	clip1 /= clip1.w;
+
+	clip0.xy *= frame_size;
+	clip1.xy *= frame_size;
+
+	float d = distance(clip0, clip1);
+	return clamp(d / tri_size, 0, MAX_TESS_LEVEL);
+}
+
+float SphereToScreenSpaceTessellation(float3 p0, float3 p1, float diameter)
+{
+	float3 center = (p0 + p1) * 0.5f;
+	float4 view0 = mul(float4(center, 1), model_view);
+	float4 view1 = view0;
+	view1.x += WORLD_SCALE * diameter;
+	
+	float4 clip0 = mul(view0, proj);
+	float4 clip1 = mul(view1, proj);
+	return ClipToScreenSpaceTessellation(clip0, clip1);
+}
+
+bool InFrustum(float3 pt, float3 eye_pos, float3 view_dir, float margin)
+{
+	float3 eye_to_pt = pt - eye_pos;
+	float3 patch_to_camera_direction_vector = view_dir * dot(eye_to_pt, view_dir) - eye_to_pt;
+	float3 patch_center_realigned = pt + normalize(patch_to_camera_direction_vector) * min(margin, length(patch_to_camera_direction_vector));
+	float4 patch_screenspace_center = mul(float4(patch_center_realigned, 1), mvp);
+	
+	patch_screenspace_center.xy /= patch_screenspace_center.w;
+
+	return (((patch_screenspace_center.x > -1) && (patch_screenspace_center.x < 1)
+		&& (patch_screenspace_center.y > -1) && (patch_screenspace_center.y < 1)
+		&& (patch_screenspace_center.w > 0)) || (length(pt - eye_pos) < margin));
+}
+
+float SmallerNeighbourAdjacencyClamp(float tess)
+{
+	float log_tess = ceil(log2(tess));
+	float t = pow(2, log_tess);
+	return max(4, t);
+}
+
+float LargerNeighbourAdjacencyClamp(float tess)
+{
+	float log_tess = ceil(log2(tess));
+	float t = pow(2, log_tess);
+	return clamp(t, 2, MAX_TESS_LEVEL / 2);
+}
+
+void MakeVertexHeightsAgree(inout float3 p0, inout float3 p1)
+{
+	p0.y = SampleHeightForVS(p0.xz, 0);
+	p1.y = SampleHeightForVS(p0.xz, 0);
+}
+
+float SmallerNeighbourAdjacencyFix(float3 p0, float3 p1, float diameter)
+{
+	MakeVertexHeightsAgree(p0, p1);
+	return SmallerNeighbourAdjacencyClamp(SphereToScreenSpaceTessellation(p0, p1, diameter));
+}
+
+float LargerNeighbourAdjacencyFix(float3 p0, float3 p1, uint patch_idx, float diameter)
+{
+	// Larger neighbour
+	// +-------------------+
+	// +---------+
+	// p0   Us   p1 ---->  +		Move p1
+	// |    0    |    1    |		patch_idx % 2 
+	//
+	//           +---------+
+	// +  <----  p0   Us   p1		Move p0
+	// |    0    |    1    |		patch_idx % 2 
+	//
+	if (patch_idx % 2)
+	{
+		p0 += (p0 - p1);
+	}
+	else
+	{
+		p1 += (p1 - p0);
+	}
+
+	MakeVertexHeightsAgree(p0, p1);
+
+	float t = 0.5f * SphereToScreenSpaceTessellation(p0, p1, 2 * diameter);
+	return LargerNeighbourAdjacencyClamp(t);
+}	
+
+// This constant hull shader is executed once per patch.
+HS_CONSTANT_DATA_OUTPUT TerrainScreenspaceLODConstantsHS(InputPatch<VS_CONTROL_POINT_OUTPUT, 4> ip, uint patch_id : SV_PrimitiveID)
+{
+	HS_CONSTANT_DATA_OUTPUT output;
+
+	float3 center = (ip[0].position + ip[1].position + ip[2].position + ip[3].position) * 0.25f;
+	float side_len = max(abs(ip[1].position.x - ip[0].position.x), abs(ip[1].position.x - ip[2].position.x));		// assume square & uniform
+	float diag_len = sqrt(side_len * side_len * 2);
+
+	if (!InFrustum(center, eye_pos / WORLD_SCALE, view_dir, diag_len))
+	{
+		output.inside[0] = output.inside[1] = -1;
+		output.edges[0] = output.edges[1] = output.edges[2] = output.edges[3] = -1;
+		output.world_xz[0] = output.world_xz[1] = output.world_xz[2] = output.world_xz[3] = 0;
+	}
+	else
+	{
+		output.edges[0] = SphereToScreenSpaceTessellation(ip[0].position, ip[1].position, side_len);
+		output.edges[3] = SphereToScreenSpaceTessellation(ip[1].position, ip[2].position, side_len);
+		output.edges[2] = SphereToScreenSpaceTessellation(ip[2].position, ip[3].position, side_len);
+		output.edges[1] = SphereToScreenSpaceTessellation(ip[3].position, ip[0].position, side_len);
+
+		uint2 patch_xy;
+		patch_xy.y = patch_id / PATCHES_PER_TILE_EDGE;
+		patch_xy.x = patch_id - patch_xy.y * PATCHES_PER_TILE_EDGE;
+
+		if ((ip[0].neighbor_minus_plus_xy.x < 0.55f) && (0 == patch_xy.x))
+		{
+			output.edges[0] = SmallerNeighbourAdjacencyFix(ip[0].position, ip[1].position, side_len);
+		}
+		if ((ip[0].neighbor_minus_plus_xy.y < 0.55f) && (0 == patch_xy.y))
+		{
+			output.edges[1] = SmallerNeighbourAdjacencyFix(ip[3].position, ip[0].position, side_len);
+		}
+		if ((ip[0].neighbor_minus_plus_xy.z < 0.55f) && (PATCHES_PER_TILE_EDGE - 1 == patch_xy.x))
+		{
+			output.edges[2] = SmallerNeighbourAdjacencyFix(ip[2].position, ip[3].position, side_len);
+		}
+		if ((ip[0].neighbor_minus_plus_xy.w < 0.55f) && (PATCHES_PER_TILE_EDGE - 1 == patch_xy.y))
+		{
+			output.edges[3] = SmallerNeighbourAdjacencyFix(ip[1].position, ip[2].position, side_len);
+		}
+
+		if ((ip[0].neighbor_minus_plus_xy.x > 1) && (0 == patch_xy.x))
+		{
+			output.edges[0] = LargerNeighbourAdjacencyFix(ip[0].position, ip[1].position, patch_xy.y, side_len);
+		}
+		if ((ip[0].neighbor_minus_plus_xy.y > 1 )&& (0 == patch_xy.y))
+		{
+			output.edges[1] = LargerNeighbourAdjacencyFix(ip[0].position, ip[3].position, patch_xy.x, side_len);
+		}
+		if ((ip[0].neighbor_minus_plus_xy.z > 1) && (PATCHES_PER_TILE_EDGE - 1 == patch_xy.x))
+		{
+			output.edges[2] = LargerNeighbourAdjacencyFix(ip[3].position, ip[2].position, patch_xy.y, side_len);
+		}
+		if ((ip[0].neighbor_minus_plus_xy.w > 1) && (PATCHES_PER_TILE_EDGE - 1 == patch_xy.y))
+		{
+			output.edges[3] = LargerNeighbourAdjacencyFix(ip[1].position, ip[2].position, patch_xy.x, side_len);
+		}
+
+		output.inside[1] = (output.edges[0] + output.edges[2]) * 0.5f;
+		output.inside[0] = (output.edges[1] + output.edges[3]) * 0.5f;
+
+		output.world_xz[0] = ip[0].world_xz;
+		output.world_xz[1] = ip[1].world_xz;
+		output.world_xz[2] = ip[2].world_xz;
+		output.world_xz[3] = ip[3].world_xz;
+	}
+
+	return output;
+}
+
+[domain("quad")]
+[partitioning("fractional_even")]
+[outputtopology("triangle_ccw")]
+[outputcontrolpoints(4)]
+[patchconstantfunc("TerrainScreenspaceLODConstantsHS")]
+HS_OUTPUT GBufferTessTerrainHS(InputPatch<VS_CONTROL_POINT_OUTPUT, 4> p, uint i : SV_OutputControlPointID)
+{
+	HS_OUTPUT output;
+	output.world_xz = p[i].position.xz;
+	return output;
+}
+
+[domain("quad")]
+void GBufferTessTerrainDS(HS_CONSTANT_DATA_OUTPUT input, 
+					float2 uv : SV_DomainLocation,
+					OutputPatch<HS_OUTPUT, 4> terrain_quad,
+					uint patch_id : SV_PrimitiveID,
+					out float3 oWorldPos        : TEXCOORD0,
+					out float oDebugPatch       : TEXCOORD1,
+					out float4 oPosition        : SV_Position)
+{
+	float3 world_pos;
+	world_pos.xz = lerp(lerp(terrain_quad[0].world_xz, terrain_quad[3].world_xz, uv.x),
+		lerp(terrain_quad[1].world_xz, terrain_quad[2].world_xz, uv.x), uv.y);
+
+	world_pos.y = SampleHeightForVS(world_pos.xz, 0);
+
+	oPosition = mul(float4(world_pos, 1), mvp);
+	oWorldPos = world_pos;
+	oDebugPatch = 1;
+
+	if (show_patches)
+	{
+		uint patch_y = patch_id / PATCHES_PER_TILE_EDGE;
+		uint patch_x = patch_id - patch_y * PATCHES_PER_TILE_EDGE;
+		oDebugPatch = ((patch_x + patch_y) % 2) * 0.5f + 0.5f;
+	}
+}
+		]]>
+	</shader>
+
+	<parameter type="texture2D" name="terrain_tex_layer_0"/>
+	<parameter type="texture2D" name="terrain_tex_layer_1"/>
+	<parameter type="texture2D" name="terrain_tex_layer_2"/>
+	<parameter type="texture2D" name="terrain_tex_layer_3"/>
+
+	<parameter type="float2" name="terrain_tex_layer_scale_0"/>
+	<parameter type="float2" name="terrain_tex_layer_scale_1"/>
+	<parameter type="float2" name="terrain_tex_layer_scale_2"/>
+	<parameter type="float2" name="terrain_tex_layer_scale_3"/>
+
+	<shader>
+		<![CDATA[
+float3 SampleDetailNormal(float2 world_xz)
+{
+	float2 uv = WorldXZToHeightUV(world_xz);
+	float coarse = coarse_height_map.Sample(linear_clamp_sampler, uv).r;
+
+	float scale = saturate(coarse) * WORLD_SCALE * VERTICAL_SCALE;
+
+	float2 grad = SampleDetailGradOctaves(uv);
+	return normalize(float3(scale * grad.x, coarse_sample_spacing * WORLD_UV_REPEATS_RECIP * detail_uv_scale.y, scale * grad.y));
+}
+
+float4 DepthTerrainPS(float3 world_pos : TEXCOORD0, float debug_patch : TEXCOORD1) : SV_Target
+{
+	float3 pos_es = mul(float4(world_pos, 1), model_view).xyz;
+	return pos_es.z;
+}
+
+float3 CalcTerrainNormal(float3 world_pos)
+{
+	float2 height_uv = WorldXZToHeightUV(world_pos.xz);
+
+	float ARBITRARY_FUDGE = 2;
+	float2 grad = coarse_gradient_map.Sample(linear_wrap_sampler, height_uv).xy;
+	float scale = ARBITRARY_FUDGE * WORLD_SCALE * VERTICAL_SCALE;
+	float3 coarse_normal = normalize(float3(scale * grad.x, coarse_sample_spacing, scale * grad.y));
+	float3 detail_normal = SampleDetailNormal(world_pos.xz);
+	return normalize(float3(coarse_normal.xz + detail_normal.xz, coarse_normal.y).xzy);
+}
+
+float3 CalcTerrainColor(float3 world_pos, float debug_patch, float4 mask)
+{
+	float2 tex_uv = world_pos.xz + 2 * texture_world_offset.xz;	
+	float3 color = terrain_tex_layer_0.Sample(linear_wrap_sampler, tex_uv * terrain_tex_layer_scale_0).xyz * mask.r
+		+ terrain_tex_layer_1.Sample(linear_wrap_sampler, tex_uv * terrain_tex_layer_scale_1).xyz * mask.g
+		+ terrain_tex_layer_2.Sample(linear_wrap_sampler, tex_uv * terrain_tex_layer_scale_2).xyz * mask.b
+		+ terrain_tex_layer_3.Sample(linear_wrap_sampler, tex_uv * terrain_tex_layer_scale_3).xyz * mask.a;
+		
+	if (show_patches)
+	{
+		color *= debug_patch;
+	}
+	
+	return color;
+}
+
+float4 GenNoTessTerrainShadowMapWODepthTexturePS(float3 world_pos : TEXCOORD0) : SV_Target
+{
+	float3 pos_es = mul(float4(world_pos, 1), model_view).xyz;
+	return length(pos_es);
+}
+
+float4 GenNoTessTerrainCascadedShadowMapPS(float3 world_pos : TEXCOORD0) : SV_Target
+{
+	float3 pos_es = mul(float4(world_pos, 1), model_view).xyz;
+	return pos_es.z;
+}
+		]]>
+	</shader>
+
+	<technique name="DepthTessTerrainTech">
+		<pass name="p0">
+			<state name="cull_mode" value="back"/>
+
+			<state name="vertex_shader" value="GBufferTessTerrainVS()"/>
+			<state name="hull_shader" value="GBufferTessTerrainHS()"/>
+			<state name="domain_shader" value="GBufferTessTerrainDS()"/>
+			<state name="pixel_shader" value="DepthTerrainPS()"/>
+		</pass>
+	</technique>
+	<technique name="DepthNoTessTerrainTech">
+		<pass name="p0">
+			<state name="cull_mode" value="back"/>
+
+			<state name="vertex_shader" value="GBufferNoTessTerrainVS()"/>
+			<state name="pixel_shader" value="DepthTerrainPS()"/>
+		</pass>
+	</technique>
+
+	<technique name="GenNoTessTerrainShadowMapTech">
+		<pass name="p0">
+			<state name="cull_mode" value="none"/>
+			<state name="color_write_mask" value="0"/>
+
+			<state name="vertex_shader" value="GBufferNoTessTerrainVS()"/>
+			<state name="pixel_shader" value="GenShadowMapPS()"/>
+		</pass>
+	</technique>
+
+	<technique name="GenNoTessTerrainShadowMapWODepthTextureTech">
+		<pass name="p0">
+			<state name="cull_mode" value="none"/>
+
+			<state name="vertex_shader" value="GBufferNoTessTerrainVS()"/>
+			<state name="pixel_shader" value="GenNoTessTerrainShadowMapWODepthTexturePS()"/>
+		</pass>
+	</technique>
+
+	<technique name="GenNoTessTerrainCascadedShadowMapTech">
+		<pass name="p0">
+			<state name="cull_mode" value="none"/>
+			<state name="depth_clip_enable" value="false"/>
+
+			<state name="vertex_shader" value="GBufferNoTessTerrainVS()"/>
+			<state name="pixel_shader" value="GenNoTessTerrainCascadedShadowMapPS()"/>
+		</pass>
+	</technique>
 </effect>

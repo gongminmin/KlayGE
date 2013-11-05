@@ -17,6 +17,9 @@
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/RenderEffect.hpp>
 #include <KlayGE/Camera.hpp>
+#include <KlayGE/PostProcess.hpp>
+#include <KlayGE/FrameBuffer.hpp>
+#include <KFL/Half.hpp>
 
 #include <KlayGE/InfTerrain.hpp>
 
@@ -217,5 +220,572 @@ namespace KlayGE
 		checked_pointer_cast<InfTerrainRenderable>(renderable_)->OffsetY(sy);
 
 		this->Visible(intersect);
+	}
+
+
+	int const COARSE_HEIGHT_MAP_SIZE = 1024;
+	uint32_t const VTX_PER_TILE_EDGE = 9;				// overlap => -2
+	uint32_t const TRI_STRIP_INDEX_COUNT = (VTX_PER_TILE_EDGE - 1) * (2 * VTX_PER_TILE_EDGE + 2);
+	uint32_t const QUAD_LIST_INDEX_COUNT = (VTX_PER_TILE_EDGE - 1) * (VTX_PER_TILE_EDGE - 1) * 4;
+	uint32_t const MAX_RINGS = 10;
+
+	HQTerrainRenderable::TileRing::TileRing(int hole_width, int outer_width, float tile_size,
+		GraphicsBufferPtr const & tile_non_tess_ib,
+		GraphicsBufferPtr const & tile_tess_ib)
+		: tile_non_tess_ib_(tile_non_tess_ib), tile_tess_ib_(tile_tess_ib),
+		hole_width_(hole_width), outer_width_(outer_width),
+		ring_width_((outer_width - hole_width) / 2),
+		num_tiles_(outer_width * outer_width - hole_width * hole_width),
+		tile_size_(tile_size)
+	{
+		BOOST_ASSERT(0 == ((outer_width - hole_width) % 2));
+
+		this->CreateInstanceDataVB();
+	}
+
+	bool HQTerrainRenderable::TileRing::InRing(int x, int y) const
+	{
+		BOOST_ASSERT((x >= 0) && (x < outer_width_));
+		BOOST_ASSERT((y >= 0) && (y < outer_width_));
+
+		return (x < ring_width_) || (y < ring_width_) || (x >= outer_width_ - ring_width_)
+			|| (y >= outer_width_ - ring_width_);
+	}
+
+	void HQTerrainRenderable::TileRing::AssignNeighbourSizes(int x, int y, Adjacency& adj) const
+	{
+		adj.neighbor_minus_x = 1;
+		adj.neighbor_minus_y = 1;
+		adj.neighbor_plus_x = 1;
+		adj.neighbor_plus_y = 1;
+
+		// TBD: these aren't necessarily 2x different. Depends on the relative tiles sizes supplied to ring ctors.
+		float const inner_neighbour_size = 0.5f;
+		float const outer_neighbour_size = 2.0f;
+
+		// Inner edges abut tiles that are smaller. (But not on the inner-most.)
+		if (hole_width_ > 0)
+		{
+			if ((y >= ring_width_) && (y < outer_width_ - ring_width_))
+			{
+				if (x == ring_width_ - 1)
+				{
+					adj.neighbor_plus_x = inner_neighbour_size;
+				}
+				if (x == outer_width_ - ring_width_)
+				{
+					adj.neighbor_minus_x = inner_neighbour_size;
+				}
+			}
+			if ((x >= ring_width_) && (x < outer_width_ - ring_width_))
+			{
+				if (y == ring_width_ - 1)
+				{
+					adj.neighbor_plus_y = inner_neighbour_size;
+				}
+				if (y == outer_width_ - ring_width_)
+				{
+					adj.neighbor_minus_y = inner_neighbour_size;
+				}
+			}
+		}
+
+		// Outer edges abut tiles that are larger. We could skip this on the outer-most ring. But it will
+		// make almost zero visual or perf difference.
+		if (0 == x)
+		{
+			adj.neighbor_minus_x = outer_neighbour_size;
+		}
+		if (0 == y)
+		{
+			adj.neighbor_minus_y = outer_neighbour_size;
+		}
+		if (x == outer_width_ - 1)
+		{
+			adj.neighbor_plus_x = outer_neighbour_size;
+		}
+		if (y == outer_width_ - 1)
+		{
+			adj.neighbor_plus_y = outer_neighbour_size;
+		}
+	}
+
+	void HQTerrainRenderable::TileRing::CreateInstanceDataVB()
+	{
+		int index = 0;
+		vb_data_.resize(num_tiles_);
+
+		float const half_width = 0.5f * outer_width_;
+		for (int y = 0; y < outer_width_; ++ y)
+		{
+			for (int x = 0; x < outer_width_; ++ x)
+			{
+				if (this->InRing(x, y))
+				{
+					vb_data_[index].x = tile_size_ * (x - half_width);
+					vb_data_[index].y = tile_size_ * (y - half_width);
+					this->AssignNeighbourSizes(x, y, vb_data_[index].adjacency);
+					++ index;
+				}
+			}
+		}
+		BOOST_ASSERT(index == num_tiles_);
+
+		ElementInitData init_data;
+		init_data.data = &vb_data_[0];
+		init_data.row_pitch = num_tiles_ * sizeof(InstanceData);
+		init_data.slice_pitch = init_data.row_pitch;
+
+		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+		vb_ = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, &init_data);
+
+		tile_non_tess_rl_ = rf.MakeRenderLayout();
+		tile_non_tess_rl_->TopologyType(RenderLayout::TT_TriangleStrip);
+		tile_non_tess_rl_->BindIndexStream(tile_non_tess_ib_, EF_R32UI);
+		tile_non_tess_rl_->NumIndices(TRI_STRIP_INDEX_COUNT);
+		tile_non_tess_rl_->BindVertexStream(vb_, make_tuple(vertex_element(VEU_TextureCoord, 0, EF_GR32F),
+			vertex_element(VEU_TextureCoord, 1, EF_ABGR32F)),
+			RenderLayout::ST_Instance);
+		tile_non_tess_rl_->NumInstances(num_tiles_);
+
+		tile_tess_rl_ = rf.MakeRenderLayout();
+		tile_tess_rl_->TopologyType(RenderLayout::TT_4_Ctrl_Pt_PatchList);
+		tile_tess_rl_->BindIndexStream(tile_tess_ib_, EF_R32UI);
+		tile_tess_rl_->NumIndices(QUAD_LIST_INDEX_COUNT);
+		tile_tess_rl_->BindVertexStream(vb_, make_tuple(vertex_element(VEU_TextureCoord, 0, EF_GR32F),
+			vertex_element(VEU_TextureCoord, 1, EF_ABGR32F)),
+			RenderLayout::ST_Instance);
+		tile_tess_rl_->NumInstances(num_tiles_);
+	}
+
+
+	HQTerrainRenderable::HQTerrainRenderable(RenderEffectPtr const & effect)
+		: RenderableHelper(L"HQTerrain"),
+		WORLD_SCALE(800), VERTICAL_SCALE(2.5f), WORLD_UV_REPEATS(8),
+		ridge_octaves_(3), fBm_octaves_(3), tex_twist_octaves_(1), detail_noise_scale_(0.02f),
+		tessellated_tri_size_(6)
+	{
+		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+		RenderEngine& re = rf.RenderEngineInstance();
+
+		hw_tessellation_ = re.DeviceCaps().ds_support;
+
+		this->CreateNonTessIB();
+		this->CreateTessIB();
+
+		int widths[] = { 0, 16, 16, 16, 16 };
+		int rings = sizeof(widths) / sizeof(widths[0]) - 1;
+		BOOST_ASSERT(rings <= MAX_RINGS);
+
+		tile_rings_.resize(rings);
+		float tile_width = 0.125f;
+		for (int i = 0; i < rings; ++ i)
+		{
+			tile_rings_[i] = MakeSharedPtr<TileRing>(widths[i] / 2, widths[i + 1], tile_width, tile_non_tess_ib_, tile_tess_ib_);
+			tile_width *= 2.0f;
+		}
+
+		uint32_t const PATCHES_PER_TILE_EDGE = VTX_PER_TILE_EDGE - 1;
+		snap_grid_size_ = WORLD_SCALE * tile_rings_.back()->TileSize() / PATCHES_PER_TILE_EDGE;
+
+		this->BindDeferredEffect(effect);
+	}
+
+	void HQTerrainRenderable::Tessellation(bool tess)
+	{
+		hw_tessellation_ = tess;
+		this->UpdateTechnique();
+	}
+
+	void HQTerrainRenderable::ShowPatches(bool sp)
+	{
+		show_patches_ = sp;
+	}
+
+	void HQTerrainRenderable::ShowTiles(bool st)
+	{
+		show_tiles_ = st;
+	}
+
+	void HQTerrainRenderable::Wireframe(bool wf)
+	{
+		wireframe_ = wf;
+		this->UpdateTechnique();
+	}
+
+	void HQTerrainRenderable::DetailNoiseScale(float scale)
+	{
+		detail_noise_scale_ = scale;
+	}
+
+	void HQTerrainRenderable::TessellatedTriSize(int size)
+	{
+		tessellated_tri_size_ = size;
+	}
+
+	void HQTerrainRenderable::Render()
+	{
+		this->OnRenderBegin();
+		this->RenderTerrain();
+		this->OnRenderEnd();
+	}
+
+	void HQTerrainRenderable::UpdateTechnique()
+	{
+		uint32_t tech_index;
+		if (hw_tessellation_)
+		{
+			tech_index = 0;
+		}
+		else
+		{
+			tech_index = 2;
+		}
+
+		if (wireframe_)
+		{
+			tech_index += 1;
+		}
+
+		gbuffer_rt0_tech_ = terrain_gbuffer_rt0_techs_[tech_index];
+		gbuffer_rt1_tech_ = terrain_gbuffer_rt1_techs_[tech_index];
+		gbuffer_mrt_tech_ = terrain_gbuffer_mrt_techs_[tech_index];
+		technique_ = gbuffer_mrt_tech_;
+	}
+
+	void HQTerrainRenderable::CreateNonTessIB()
+	{
+		int index = 0;
+		uint32_t indices[TRI_STRIP_INDEX_COUNT];
+
+		for (int y = 0; y < VTX_PER_TILE_EDGE - 1; ++ y)
+		{
+			int const row_start = y * VTX_PER_TILE_EDGE;
+
+			for (int x = 0; x < VTX_PER_TILE_EDGE; ++ x)
+			{
+				indices[index] = row_start + x;
+				++ index;
+				indices[index] = row_start + x + VTX_PER_TILE_EDGE;
+				++ index;
+			}
+
+			indices[index] = indices[index - 1];
+			++ index;
+			indices[index] = row_start + VTX_PER_TILE_EDGE;
+			++ index;
+		}
+		BOOST_ASSERT(TRI_STRIP_INDEX_COUNT == index);
+
+		ElementInitData init_data;
+		init_data.data = &indices[0];
+		init_data.row_pitch = TRI_STRIP_INDEX_COUNT * sizeof(uint32_t);
+		init_data.slice_pitch = init_data.row_pitch;
+
+		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+		tile_non_tess_ib_ = rf.MakeIndexBuffer(BU_Static, EAH_GPU_Read, &init_data);
+	}
+
+	void HQTerrainRenderable::CreateTessIB()
+	{
+		int index = 0;
+		uint32_t indices[QUAD_LIST_INDEX_COUNT];
+
+		for (int y = 0; y < VTX_PER_TILE_EDGE - 1; ++ y)
+		{
+			int const row_start = y * VTX_PER_TILE_EDGE;
+
+			for (int x = 0; x < VTX_PER_TILE_EDGE - 1; ++ x)
+			{
+				indices[index] = row_start + x;
+				++ index;
+				indices[index] = row_start + x + VTX_PER_TILE_EDGE;
+				++ index;
+				indices[index] = row_start + x + VTX_PER_TILE_EDGE + 1;
+				++ index;
+				indices[index] = row_start + x + 1;
+				++ index;
+			}
+		}
+		BOOST_ASSERT(QUAD_LIST_INDEX_COUNT == index);
+
+		ElementInitData init_data;
+		init_data.data = &indices[0];
+		init_data.row_pitch = QUAD_LIST_INDEX_COUNT * sizeof(uint32_t);
+		init_data.slice_pitch = init_data.row_pitch;
+
+		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+		tile_tess_ib_ = rf.MakeIndexBuffer(BU_Static, EAH_GPU_Read, &init_data);
+	}
+
+	void HQTerrainRenderable::TextureLayer(uint32_t layer, TexturePtr const & tex)
+	{
+		BOOST_ASSERT(layer < terrain_tex_layer_params_.size());
+		*terrain_tex_layer_params_[layer] = tex;
+	}
+
+	void HQTerrainRenderable::TextureScale(uint32_t layer, float2 const & scale)
+	{
+		BOOST_ASSERT(layer < terrain_tex_layer_scale_params_.size());
+		*terrain_tex_layer_scale_params_[layer] = scale;
+	}
+
+	void HQTerrainRenderable::BindDeferredEffect(RenderEffectPtr const & deferred_effect)
+	{
+		RenderableHelper::BindDeferredEffect(deferred_effect);
+
+		terrain_gbuffer_rt0_techs_[0] = deferred_effect->TechniqueByName("GBufferTessTerrainFillRT0Tech");
+		terrain_gbuffer_rt0_techs_[1] = deferred_effect->TechniqueByName("GBufferTessTerrainLineRT0Tech");
+		terrain_gbuffer_rt0_techs_[2] = deferred_effect->TechniqueByName("GBufferNoTessTerrainFillRT0Tech");
+		terrain_gbuffer_rt0_techs_[3] = deferred_effect->TechniqueByName("GBufferNoTessTerrainLineRT0Tech");
+		terrain_gbuffer_rt1_techs_[0] = deferred_effect->TechniqueByName("GBufferTessTerrainFillRT1Tech");
+		terrain_gbuffer_rt1_techs_[1] = deferred_effect->TechniqueByName("GBufferTessTerrainLineRT1Tech");
+		terrain_gbuffer_rt1_techs_[2] = deferred_effect->TechniqueByName("GBufferNoTessTerrainFillRT1Tech");
+		terrain_gbuffer_rt1_techs_[3] = deferred_effect->TechniqueByName("GBufferNoTessTerrainLineRT1Tech");
+		terrain_gbuffer_mrt_techs_[0] = deferred_effect->TechniqueByName("GBufferTessTerrainFillMRTTech");
+		terrain_gbuffer_mrt_techs_[1] = deferred_effect->TechniqueByName("GBufferTessTerrainLineMRTTech");
+		terrain_gbuffer_mrt_techs_[2] = deferred_effect->TechniqueByName("GBufferNoTessTerrainFillMRTTech");
+		terrain_gbuffer_mrt_techs_[3] = deferred_effect->TechniqueByName("GBufferNoTessTerrainLineMRTTech");
+		depth_tech_ = deferred_effect->TechniqueByName("DepthTessTerrainTech");
+		gen_sm_tech_ = deferred_effect->TechniqueByName("GenNoTessTerrainShadowMapTech");
+		gen_sm_wo_dt_tech_ = deferred_effect->TechniqueByName("GenNoTessTerrainShadowMapWODepthTextureTech");
+		gen_cascaded_sm_tech_ = deferred_effect->TechniqueByName("GenNoTessTerrainCascadedShadowMapTech");
+		gen_rsm_tech_ = deferred_effect->TechniqueByName("GenNoTessTerrainReflectiveShadowMapTech");
+
+		height_map_param_ = deferred_effect->ParameterByName("coarse_height_map");
+		gradient_map_param_ = deferred_effect->ParameterByName("coarse_gradient_map");
+		mask_map_param_ = deferred_effect->ParameterByName("coarse_mask_map");
+
+		eye_pos_param_ = deferred_effect->ParameterByName("eye_pos");
+		view_dir_param_ = deferred_effect->ParameterByName("view_dir");
+		proj_param_ = deferred_effect->ParameterByName("proj");
+		texture_world_offset_param_ = deferred_effect->ParameterByName("texture_world_offset");
+		tri_size_param_ = deferred_effect->ParameterByName("tri_size");
+		tile_size_param_ = deferred_effect->ParameterByName("tile_size");
+		debug_show_patches_param_ = deferred_effect->ParameterByName("show_patches");
+		debug_show_tiles_param_ = deferred_effect->ParameterByName("show_tiles");
+		detail_noise_param_ = deferred_effect->ParameterByName("detail_noise_scale");
+		detail_uv_param_ = deferred_effect->ParameterByName("detail_uv_scale");
+		sample_spacing_param_ = deferred_effect->ParameterByName("coarse_sample_spacing");
+		frame_size_param_ = deferred_effect->ParameterByName("frame_size");
+
+		terrain_tex_layer_params_[0] = deferred_effect->ParameterByName("terrain_tex_layer_0");
+		terrain_tex_layer_params_[1] = deferred_effect->ParameterByName("terrain_tex_layer_1");
+		terrain_tex_layer_params_[2] = deferred_effect->ParameterByName("terrain_tex_layer_2");
+		terrain_tex_layer_params_[3] = deferred_effect->ParameterByName("terrain_tex_layer_3");
+
+		terrain_tex_layer_scale_params_[0] = deferred_effect->ParameterByName("terrain_tex_layer_scale_0");
+		terrain_tex_layer_scale_params_[1] = deferred_effect->ParameterByName("terrain_tex_layer_scale_1");
+		terrain_tex_layer_scale_params_[2] = deferred_effect->ParameterByName("terrain_tex_layer_scale_2");
+		terrain_tex_layer_scale_params_[3] = deferred_effect->ParameterByName("terrain_tex_layer_scale_3");
+
+		this->UpdateTechnique();
+	}
+
+	float3 HQTerrainRenderable::CalcUVOffset(Camera const & camera) const
+	{
+		float3 eye = camera.EyePos();
+		eye.y() = 0;
+		if (snap_grid_size_ > 0)
+		{
+			eye.x() = floor(eye.x() / snap_grid_size_) * snap_grid_size_;
+			eye.z() = floor(eye.z() / snap_grid_size_) * snap_grid_size_;
+		}
+		eye /= WORLD_SCALE;
+		return eye;
+	}
+
+	void HQTerrainRenderable::SetMatrices(Camera const & camera)
+	{
+		float4x4 const & proj = camera.ProjMatrix();
+
+		texture_world_offset_ = this->CalcUVOffset(camera);
+
+		float3 const & eye = camera.EyePos();
+		snapped_x_ = texture_world_offset_.x() * WORLD_SCALE;
+		snapped_z_ = texture_world_offset_.z() * WORLD_SCALE;
+		float const dx = eye.x() - snapped_x_;
+		float const dz = eye.z() - snapped_z_;
+		snapped_x_ = eye.x() - 2 * dx;				// TODO: Figure out why the 2x works
+		snapped_z_ = eye.z() - 2 * dz;
+		float4x4 trans = MathLib::translation(snapped_x_, 0.0f, snapped_z_);
+		float4x4 scale = MathLib::scaling(WORLD_SCALE, WORLD_SCALE, WORLD_SCALE);
+		model_mat_ = scale * trans;
+
+		*proj_param_ = proj;
+
+		*tri_size_param_ = 2 * tessellated_tri_size_;
+
+		*debug_show_patches_param_ = show_patches_;
+		*debug_show_tiles_param_ = show_tiles_;
+
+		*detail_noise_param_ = detail_noise_scale_;
+		*sample_spacing_param_ = WORLD_SCALE * tile_rings_.back()->OuterWidth() / COARSE_HEIGHT_MAP_SIZE;
+
+		float const detail_uv_scale = pow(2.0f, std::max(ridge_octaves_, tex_twist_octaves_) + fBm_octaves_ - 4.0f);
+		*detail_uv_param_ = float2(detail_uv_scale, 1.0f / detail_uv_scale);
+
+		*texture_world_offset_param_ = texture_world_offset_;
+
+		float3 culling_eye = camera.EyePos();
+		culling_eye.x() -= snapped_x_;
+		culling_eye.z() -= snapped_z_;
+		*eye_pos_param_ = culling_eye;
+		*view_dir_param_ = camera.ForwardVec();
+	}
+
+	void HQTerrainRenderable::RenderTerrain()
+	{
+		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+		RenderEngine& re = rf.RenderEngineInstance();
+
+		*height_map_param_ = height_map_tex_;
+		*gradient_map_param_ = gradient_map_tex_;
+		*mask_map_param_ = mask_map_tex_;
+		*frame_size_param_ = float2(static_cast<float>(re.CurFrameBuffer()->Width()),
+			static_cast<float>(re.CurFrameBuffer()->Height()));
+
+		bool need_tess = false;
+		if (hw_tessellation_)
+		{
+			switch (type_)
+			{
+			case PT_OpaqueDepth:
+			case PT_OpaqueGBufferRT0:
+			case PT_OpaqueGBufferRT1:
+			case PT_OpaqueGBufferMRT:
+			case PT_OpaqueShading:
+			case PT_OpaqueSpecialShading:
+				need_tess = true;
+				break;
+
+			default:
+				break;
+			}
+		}
+
+		for (size_t i = 0; i < tile_rings_.size(); ++ i)
+		{
+			KlayGE::shared_ptr<TileRing> const & ring = tile_rings_[i];
+
+			if (need_tess)
+			{
+				rl_ = ring->GetTessRL();
+			}
+			else
+			{
+				rl_ = ring->GetNonTessRL();
+			}
+
+			*tile_size_param_ = ring->TileSize();
+			re.Render(*technique_, *rl_);
+		}
+	}
+
+	float HQTerrainRenderable::GetHeight(float x, float z)
+	{
+		uint32_t width = height_map_cpu_tex_->Width(0);
+		uint32_t height = height_map_cpu_tex_->Height(0);
+
+		float2 uv((x - snapped_x_) / WORLD_SCALE / (WORLD_UV_REPEATS * 2) + 0.5f,
+			(z - snapped_z_) / WORLD_SCALE / (WORLD_UV_REPEATS * 2) + 0.5f);
+		uv.x() = MathLib::clamp(uv.x(), 0.0f, 1.0f);
+		uv.y() = MathLib::clamp(uv.y(), 0.0f, 1.0f);
+
+		float fu = uv.x() * width;
+		float fv = uv.y() * height;
+		uint32_t iu0 = MathLib::clamp(static_cast<uint32_t>(fu), 0U, width - 1);
+		uint32_t iv0 = MathLib::clamp(static_cast<uint32_t>(fv), 0U, width - 1);
+		uint32_t iu1 = MathLib::clamp(iu0 + 1, 0U, width - 1);
+		uint32_t iv1 = MathLib::clamp(iv0 + 1, 0U, width - 1);
+		float wu = fu - iu0;
+		float wv = fv - iv0;
+		Texture::Mapper mapper(*height_map_cpu_tex_, 0, 0, TMA_Read_Only, 0, 0, width, height);
+		half const * src = mapper.Pointer<half>();
+		float t0 = static_cast<float>(src[iv0 * mapper.RowPitch() / sizeof(half)+ iu0]);
+		float t1 = static_cast<float>(src[iv0 * mapper.RowPitch() / sizeof(half)+ iu1]);
+		float t2 = static_cast<float>(src[iv1 * mapper.RowPitch() / sizeof(half)+ iu0]);
+		float t3 = static_cast<float>(src[iv1 * mapper.RowPitch() / sizeof(half)+ iu1]);
+		return MathLib::lerp(MathLib::lerp(t0, t1, wu), MathLib::lerp(t2, t3, wu), wv) * WORLD_SCALE * VERTICAL_SCALE;
+	}
+
+
+	HQTerrainSceneObject::HQTerrainSceneObject(RenderablePtr const & renderable)
+		: SceneObjectHelper(SOA_Moveable),
+		reset_terrain_(true)
+	{
+		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+		last_eye_pos_ = re.CurFrameBuffer()->GetViewport()->camera->EyePos();
+
+		renderable_ = renderable;
+		BOOST_ASSERT(!!dynamic_pointer_cast<HQTerrainRenderable>(renderable));
+	}
+
+	HQTerrainSceneObject::~HQTerrainSceneObject()
+	{
+	}
+
+	void HQTerrainSceneObject::MainThreadUpdate(float app_time, float elapsed_time)
+	{
+		UNREF_PARAM(app_time);
+		UNREF_PARAM(elapsed_time);
+
+		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+		CameraPtr const & camera = re.ScreenFrameBuffer()->GetViewport()->camera;
+
+		checked_pointer_cast<HQTerrainRenderable>(renderable_)->SetMatrices(*camera);
+
+		reset_terrain_ = reset_terrain_ || (last_eye_pos_ != camera->EyePos());
+		if (reset_terrain_)
+		{
+			checked_pointer_cast<HQTerrainRenderable>(renderable_)->FlushTerrainData();
+			reset_terrain_ = false;
+			last_eye_pos_ = camera->EyePos();
+		}
+	}
+
+	void HQTerrainSceneObject::Tessellation(bool tess)
+	{
+		checked_pointer_cast<HQTerrainRenderable>(renderable_)->Tessellation(tess);
+	}
+
+	void HQTerrainSceneObject::ShowPatches(bool sp)
+	{
+		checked_pointer_cast<HQTerrainRenderable>(renderable_)->ShowPatches(sp);
+	}
+
+	void HQTerrainSceneObject::ShowTiles(bool st)
+	{
+		checked_pointer_cast<HQTerrainRenderable>(renderable_)->ShowTiles(st);
+	}
+
+	void HQTerrainSceneObject::Wireframe(bool wf)
+	{
+		checked_pointer_cast<HQTerrainRenderable>(renderable_)->Wireframe(wf);
+	}
+
+	void HQTerrainSceneObject::DetailNoiseScale(float scale)
+	{
+		checked_pointer_cast<HQTerrainRenderable>(renderable_)->DetailNoiseScale(scale);
+	}
+
+	void HQTerrainSceneObject::TessellatedTriSize(int size)
+	{
+		checked_pointer_cast<HQTerrainRenderable>(renderable_)->TessellatedTriSize(size);
+	}
+
+	void HQTerrainSceneObject::TextureLayer(uint32_t layer, TexturePtr const & tex)
+	{
+		checked_pointer_cast<HQTerrainRenderable>(renderable_)->TextureLayer(layer, tex);
+	}
+
+	void HQTerrainSceneObject::TextureScale(uint32_t layer, float2 const & scale)
+	{
+		checked_pointer_cast<HQTerrainRenderable>(renderable_)->TextureScale(layer, scale);
+	}
+
+	float HQTerrainSceneObject::GetHeight(float x, float z)
+	{
+		return checked_pointer_cast<HQTerrainRenderable>(renderable_)->GetHeight(x, z);
 	}
 }
