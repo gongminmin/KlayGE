@@ -63,7 +63,7 @@ float4 FogPS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Target
 	if (depth < far_plane * 0.997f)
 	{
 		float dist = length(view_dir * (depth / view_dir.z));
-		float fog_factor = FogFactorLinear(dist, density);
+		float fog_factor = FogFactorExp(dist, density);
 		ret = float4(fog_color, fog_factor);
 	}
 	return ret;

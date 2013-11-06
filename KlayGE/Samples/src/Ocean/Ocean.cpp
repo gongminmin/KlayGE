@@ -25,6 +25,7 @@
 #include <sstream>
 
 #include "SampleCommon.hpp"
+#include "ProceduralTerrain.hpp"
 #include "OceanSimulator.hpp"
 #include "Ocean.hpp"
 
@@ -33,60 +34,6 @@ using namespace KlayGE;
 
 namespace
 {
-	class RenderTerrain : public InfTerrainRenderable
-	{
-	public:
-		RenderTerrain(float base_level, float strength)
-			: InfTerrainRenderable(L"Terrain")
-		{
-			this->BindDeferredEffect(SyncLoadRenderEffect("Terrain.fxml"));
-			gbuffer_rt0_tech_ = deferred_effect_->TechniqueByName("TerrainGBufferRT0");
-			gbuffer_rt1_tech_ = deferred_effect_->TechniqueByName("TerrainGBufferRT1");
-			gbuffer_mrt_tech_ = deferred_effect_->TechniqueByName("TerrainGBufferMRT");
-			technique_ = gbuffer_mrt_tech_;
-
-			this->SetStretch(strength);
-			this->SetBaseLevel(base_level);
-
-			diffuse_tex_ = SyncLoadTexture("RealSand40BoH.dds", EAH_GPU_Read | EAH_Immutable);
-
-			model_mat_ = float4x4::Identity();
-		}
-
-		void OnRenderBegin()
-		{
-			InfTerrainRenderable::OnRenderBegin();
-					
-			switch (type_)
-			{
-			case PT_OpaqueGBufferRT0:
-			case PT_OpaqueGBufferRT1:
-			case PT_OpaqueGBufferMRT:
-				*diffuse_clr_param_ = float4(0, 0, 0, 1);
-				*normal_map_enabled_param_ = static_cast<int32_t>(0);
-				*height_map_enabled_param_ = static_cast<int32_t>(0);
-				*specular_clr_param_ = float4(0, 0, 0, 0);
-				*shininess_clr_param_ = float2(0.001f, 0);
-				break;
-				
-			default:
-				break;
-			}
-		}
-	};
-
-	class TerrainObject : public InfTerrainSceneObject
-	{
-	public:
-		TerrainObject()
-		{
-			base_level_ = 0;
-			strength_ = 50;
-
-			renderable_ = MakeSharedPtr<RenderTerrain>(base_level_, strength_);
-		}
-	};
-
 	class RenderOcean : public InfTerrainRenderable
 	{
 	public:
@@ -834,8 +781,8 @@ bool OceanApp::ConfirmDevice() const
 
 void OceanApp::InitObjects()
 {
-	this->LookAt(float3(0, 14, 0), float3(0, 13.8f, 1));
-	this->Proj(0.1f, 3000);
+	this->LookAt(float3(-3455.78f, 23.4f, 8133.55f), float3(-3456.18f, 23.4f, 8134.49f));
+	this->Proj(0.1f, 5000);
 
 	loading_percentage_ = 0;
 	c_cube_tl_ = ASyncLoadTexture("DH001cross_c.dds", EAH_GPU_Read | EAH_Immutable);
@@ -860,7 +807,16 @@ void OceanApp::InitObjects()
 		fog_color.b() = MathLib::srgb_to_linear(fog_color.b());
 	}
 
-	terrain_ = MakeSharedPtr<TerrainObject>();
+	HQTerrainSceneObjectPtr terrain = MakeSharedPtr<HQTerrainSceneObject>(MakeSharedPtr<ProceduralTerrain>());
+	terrain->TextureLayer(0, SyncLoadTexture("RealSand40BoH.dds", EAH_GPU_Read | EAH_Immutable));
+	terrain->TextureLayer(1, SyncLoadTexture("snow_DM.dds", EAH_GPU_Read | EAH_Immutable));
+	terrain->TextureLayer(2, SyncLoadTexture("GrassGreenTexture0002.dds", EAH_GPU_Read | EAH_Immutable));
+	terrain->TextureLayer(3, SyncLoadTexture("Dirt.dds", EAH_GPU_Read | EAH_Immutable));
+	terrain->TextureScale(0, float2(7, 7));
+	terrain->TextureScale(1, float2(1, 1));
+	terrain->TextureScale(2, float2(3, 3));
+	terrain->TextureScale(3, float2(1, 1));
+	terrain_ = terrain;
 	terrain_->AddToSceneManager();
 
 	ocean_ = MakeSharedPtr<OceanObject>();
@@ -876,7 +832,7 @@ void OceanApp::InitObjects()
 
 	fog_pp_ = SyncLoadPostProcess("Fog.ppml", "fog");
 	fog_pp_->SetParam(1, float3(fog_color.r(), fog_color.g(), fog_color.b()));
-	fog_pp_->SetParam(2, 1.0f / 1200);
+	fog_pp_->SetParam(2, 1.0f / 5000);
 	fog_pp_->SetParam(3, this->ActiveCamera().FarPlane());
 	deferred_rendering_->AtmosphericPostProcess(fog_pp_);
 
@@ -1087,6 +1043,7 @@ void OceanApp::DoUpdateOverlay()
 		<< sceneMgr.NumPrimitivesRendered() << " Primitives "
 		<< sceneMgr.NumVerticesRendered() << " Vertices";
 	font_->RenderText(0, 36, Color(1, 1, 1, 1), stream.str(), 16);
+
 }
 
 uint32_t OceanApp::DoUpdate(uint32_t pass)
