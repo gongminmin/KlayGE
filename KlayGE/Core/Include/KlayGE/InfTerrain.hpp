@@ -221,7 +221,7 @@ namespace KlayGE
 		RenderEffectParameterPtr mask_map_param_;
 		RenderEffectParameterPtr eye_pos_param_;
 		RenderEffectParameterPtr view_dir_param_;
-		RenderEffectParameterPtr proj_param_;
+		RenderEffectParameterPtr proj_mat_param_;
 		RenderEffectParameterPtr texture_world_offset_param_;
 		RenderEffectParameterPtr tri_size_param_;
 		RenderEffectParameterPtr tile_size_param_;

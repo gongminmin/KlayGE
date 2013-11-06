@@ -558,7 +558,7 @@ namespace KlayGE
 
 		eye_pos_param_ = deferred_effect->ParameterByName("eye_pos");
 		view_dir_param_ = deferred_effect->ParameterByName("view_dir");
-		proj_param_ = deferred_effect->ParameterByName("proj");
+		proj_mat_param_ = deferred_effect->ParameterByName("proj_mat");
 		texture_world_offset_param_ = deferred_effect->ParameterByName("texture_world_offset");
 		tri_size_param_ = deferred_effect->ParameterByName("tri_size");
 		tile_size_param_ = deferred_effect->ParameterByName("tile_size");
@@ -612,7 +612,7 @@ namespace KlayGE
 		float4x4 scale = MathLib::scaling(WORLD_SCALE, WORLD_SCALE, WORLD_SCALE);
 		model_mat_ = scale * trans;
 
-		*proj_param_ = proj;
+		*proj_mat_param_ = proj;
 
 		*tri_size_param_ = 2 * tessellated_tri_size_;
 

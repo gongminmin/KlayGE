@@ -40,17 +40,6 @@
 	<parameter type="texture2D" name="g_buffer_tex"/>
 	<parameter type="texture2D" name="opaque_shading_tex"/>
 
-	<parameter type="sampler" name="linear_wrap_sampler">
-		<state name="filtering" value="min_mag_mip_linear"/>
-		<state name="address_u" value="wrap"/>
-		<state name="address_v" value="wrap"/>
-		<state name="address_w" value="wrap"/>
-	</parameter>
-	<parameter type="sampler" name="linear_clamp_sampler">
-		<state name="filtering" value="min_mag_mip_linear"/>
-		<state name="address_u" value="clamp"/>
-		<state name="address_v" value="clamp"/>
-	</parameter>
 	<parameter type="sampler" name="point_clamp_sampler">
 		<state name="filtering" value="min_mag_mip_point"/>
 		<state name="address_u" value="clamp"/>

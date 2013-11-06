@@ -4606,7 +4606,14 @@ namespace KlayGE
 						std::string val;
 						(*annotations_)[i]->Value(val);
 
-						*var_ = SyncLoadTexture(val, EAH_GPU_Read | EAH_Immutable);
+						if (!ResLoader::Instance().Locate(val).empty())
+						{
+							*var_ = SyncLoadTexture(val, EAH_GPU_Read | EAH_Immutable);
+						}
+						else
+						{
+							LogError("%s NOT found", val.c_str());
+						}
 					}
 				}
 			}
@@ -4673,7 +4680,14 @@ namespace KlayGE
 						std::string val;
 						(*annotations_)[i]->Value(val);
 
-						*var_ = SyncLoadTexture(val, EAH_GPU_Read | EAH_Immutable);
+						if (!ResLoader::Instance().Locate(val).empty())
+						{
+							*var_ = SyncLoadTexture(val, EAH_GPU_Read | EAH_Immutable);
+						}
+						else
+						{
+							LogError("%s NOT found", val.c_str());
+						}
 					}
 				}
 			}

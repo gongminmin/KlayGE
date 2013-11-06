@@ -39,7 +39,7 @@ float4 GetInfTerrainPosOS(float2 pos, float strength)
 		<parameter type="float3" name="texture_world_offset"/>
 		<parameter type="float" name="coarse_sample_spacing"/>
 		<parameter type="float3" name="view_dir"/>
-		<parameter type="float4x4" name="proj"/>
+		<parameter type="float4x4" name="proj_mat"/>
 	</cbuffer>
 
 	<parameter type="texture2D" name="coarse_height_map"/>
@@ -270,8 +270,8 @@ float SphereToScreenSpaceTessellation(float3 p0, float3 p1, float diameter)
 	float4 view1 = view0;
 	view1.x += WORLD_SCALE * diameter;
 	
-	float4 clip0 = mul(view0, proj);
-	float4 clip1 = mul(view1, proj);
+	float4 clip0 = mul(view0, proj_mat);
+	float4 clip1 = mul(view1, proj_mat);
 	return ClipToScreenSpaceTessellation(clip0, clip1);
 }
 
