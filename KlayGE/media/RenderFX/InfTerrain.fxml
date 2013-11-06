@@ -119,7 +119,7 @@ float SampleLevelDetailNoise(float2 uv, float coarse)
 
 float2 SampleDetailGradOctaves(float2 uv)
 {
-	return ScaleDetailGrad(detail_noise_grad_tex.Sample(aniso_wrap_sampler, DetailNoiseSampleCoords(uv)).ra) * detail_noise_scale;
+	return ScaleDetailGrad(get_xy_channel(detail_noise_grad_tex.Sample(aniso_wrap_sampler, DetailNoiseSampleCoords(uv)))) * detail_noise_scale;
 }
 
 float2 WorldXZToHeightUV(float2 world_xz)
