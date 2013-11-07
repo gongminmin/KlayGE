@@ -51,8 +51,8 @@ float HybridTerrain(float2 x, int3 octaves)
 float4 HeightPS(float2 texcoord : TEXCOORD0) : SV_Target
 {
 	texcoord.y = KLAYGE_FLIPPING < 0 ? 1 - texcoord.y : texcoord.y;
-	float2 uv = texcoord * WORLD_UV_REPEATS + float2(texture_world_offset.x, -texture_world_offset.z);
-	return HybridTerrain(uv, fractal_octaves) - 0.3f;
+	float2 uv = texcoord * world_uv_repeats.x + float2(texture_world_offset.x, -texture_world_offset.z);
+	return HybridTerrain(uv, fractal_octaves) - 0.5f;
 }
 
 float4 GradientPS(float2 texcoord : TEXCOORD0) : SV_Target
@@ -83,11 +83,11 @@ float4 ProceduralMask(float2 texcoord, float height, float3 normal)
 
 float4 MaskPS(float2 texcoord : TEXCOORD0) : SV_Target
 {
-	float height = VERTICAL_SCALE * height_tex.Sample(linear_clamp_sampler, texcoord).x;
+	float height = vertical_scale.x * height_tex.Sample(linear_clamp_sampler, texcoord).x;
 
 	float ARBITRARY_FUDGE = 2;
 	float2 grad = gradient_tex.Sample(linear_clamp_sampler, texcoord).xy;
-	float scale = ARBITRARY_FUDGE * WORLD_SCALE * VERTICAL_SCALE;
+	float scale = ARBITRARY_FUDGE * vertical_scale.y;
 	float3 normal = normalize(float3(scale * grad.x, coarse_sample_spacing, scale * grad.y));
 
 	float2 tex_uv = HeightUVToWorldXZ(texcoord) + 2 * texture_world_offset.xz;

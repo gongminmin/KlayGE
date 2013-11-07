@@ -193,9 +193,9 @@ namespace KlayGE
 		virtual void FlushTerrainData() = 0;
 
 	protected:
-		float WORLD_SCALE;
-		float VERTICAL_SCALE;
-		int WORLD_UV_REPEATS;
+		float world_scale_;
+		float vertical_scale_;
+		int world_uv_repeats_;
 
 		int ridge_octaves_;
 		int fBm_octaves_;

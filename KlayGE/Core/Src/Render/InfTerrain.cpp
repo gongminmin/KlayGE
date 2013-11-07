@@ -224,9 +224,10 @@ namespace KlayGE
 
 
 	int const COARSE_HEIGHT_MAP_SIZE = 1024;
-	uint32_t const VTX_PER_TILE_EDGE = 9;				// overlap => -2
-	uint32_t const TRI_STRIP_INDEX_COUNT = (VTX_PER_TILE_EDGE - 1) * (2 * VTX_PER_TILE_EDGE + 2);
-	uint32_t const QUAD_LIST_INDEX_COUNT = (VTX_PER_TILE_EDGE - 1) * (VTX_PER_TILE_EDGE - 1) * 4;
+	uint32_t const VERTEX_PER_TILE_EDGE = 9;				// overlap => -2
+	uint32_t const PATCHES_PER_TILE_EDGE = VERTEX_PER_TILE_EDGE - 1;
+	uint32_t const NON_TESS_INDEX_COUNT = (VERTEX_PER_TILE_EDGE - 1) * (2 * VERTEX_PER_TILE_EDGE + 2);
+	uint32_t const TESS_INDEX_COUNT = (VERTEX_PER_TILE_EDGE - 1) * (VERTEX_PER_TILE_EDGE - 1) * 4;
 	uint32_t const MAX_RINGS = 10;
 
 	HQTerrainRenderable::TileRing::TileRing(int hole_width, int outer_width, float tile_size,
@@ -342,7 +343,7 @@ namespace KlayGE
 		tile_non_tess_rl_ = rf.MakeRenderLayout();
 		tile_non_tess_rl_->TopologyType(RenderLayout::TT_TriangleStrip);
 		tile_non_tess_rl_->BindIndexStream(tile_non_tess_ib_, EF_R32UI);
-		tile_non_tess_rl_->NumIndices(TRI_STRIP_INDEX_COUNT);
+		tile_non_tess_rl_->NumIndices(NON_TESS_INDEX_COUNT);
 		tile_non_tess_rl_->BindVertexStream(vb_, make_tuple(vertex_element(VEU_TextureCoord, 0, EF_GR32F),
 			vertex_element(VEU_TextureCoord, 1, EF_ABGR32F)),
 			RenderLayout::ST_Instance);
@@ -351,7 +352,7 @@ namespace KlayGE
 		tile_tess_rl_ = rf.MakeRenderLayout();
 		tile_tess_rl_->TopologyType(RenderLayout::TT_4_Ctrl_Pt_PatchList);
 		tile_tess_rl_->BindIndexStream(tile_tess_ib_, EF_R32UI);
-		tile_tess_rl_->NumIndices(QUAD_LIST_INDEX_COUNT);
+		tile_tess_rl_->NumIndices(TESS_INDEX_COUNT);
 		tile_tess_rl_->BindVertexStream(vb_, make_tuple(vertex_element(VEU_TextureCoord, 0, EF_GR32F),
 			vertex_element(VEU_TextureCoord, 1, EF_ABGR32F)),
 			RenderLayout::ST_Instance);
@@ -361,7 +362,7 @@ namespace KlayGE
 
 	HQTerrainRenderable::HQTerrainRenderable(RenderEffectPtr const & effect)
 		: RenderableHelper(L"HQTerrain"),
-		WORLD_SCALE(800), VERTICAL_SCALE(2.5f), WORLD_UV_REPEATS(8),
+		world_scale_(800), vertical_scale_(2.5f), world_uv_repeats_(8),
 		ridge_octaves_(3), fBm_octaves_(3), tex_twist_octaves_(1), detail_noise_scale_(0.02f),
 		tessellated_tri_size_(6)
 	{
@@ -385,8 +386,7 @@ namespace KlayGE
 			tile_width *= 2.0f;
 		}
 
-		uint32_t const PATCHES_PER_TILE_EDGE = VTX_PER_TILE_EDGE - 1;
-		snap_grid_size_ = WORLD_SCALE * tile_rings_.back()->TileSize() / PATCHES_PER_TILE_EDGE;
+		snap_grid_size_ = world_scale_ * tile_rings_.back()->TileSize() / PATCHES_PER_TILE_EDGE;
 
 		this->BindDeferredEffect(effect);
 	}
@@ -456,30 +456,30 @@ namespace KlayGE
 	void HQTerrainRenderable::CreateNonTessIB()
 	{
 		int index = 0;
-		uint32_t indices[TRI_STRIP_INDEX_COUNT];
+		uint32_t indices[NON_TESS_INDEX_COUNT];
 
-		for (int y = 0; y < VTX_PER_TILE_EDGE - 1; ++ y)
+		for (int y = 0; y < VERTEX_PER_TILE_EDGE - 1; ++ y)
 		{
-			int const row_start = y * VTX_PER_TILE_EDGE;
+			int const row_start = y * VERTEX_PER_TILE_EDGE;
 
-			for (int x = 0; x < VTX_PER_TILE_EDGE; ++ x)
+			for (int x = 0; x < VERTEX_PER_TILE_EDGE; ++ x)
 			{
 				indices[index] = row_start + x;
 				++ index;
-				indices[index] = row_start + x + VTX_PER_TILE_EDGE;
+				indices[index] = row_start + x + VERTEX_PER_TILE_EDGE;
 				++ index;
 			}
 
 			indices[index] = indices[index - 1];
 			++ index;
-			indices[index] = row_start + VTX_PER_TILE_EDGE;
+			indices[index] = row_start + VERTEX_PER_TILE_EDGE;
 			++ index;
 		}
-		BOOST_ASSERT(TRI_STRIP_INDEX_COUNT == index);
+		BOOST_ASSERT(NON_TESS_INDEX_COUNT == index);
 
 		ElementInitData init_data;
 		init_data.data = &indices[0];
-		init_data.row_pitch = TRI_STRIP_INDEX_COUNT * sizeof(uint32_t);
+		init_data.row_pitch = NON_TESS_INDEX_COUNT * sizeof(uint32_t);
 		init_data.slice_pitch = init_data.row_pitch;
 
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
@@ -489,29 +489,29 @@ namespace KlayGE
 	void HQTerrainRenderable::CreateTessIB()
 	{
 		int index = 0;
-		uint32_t indices[QUAD_LIST_INDEX_COUNT];
+		uint32_t indices[TESS_INDEX_COUNT];
 
-		for (int y = 0; y < VTX_PER_TILE_EDGE - 1; ++ y)
+		for (int y = 0; y < VERTEX_PER_TILE_EDGE - 1; ++ y)
 		{
-			int const row_start = y * VTX_PER_TILE_EDGE;
+			int const row_start = y * VERTEX_PER_TILE_EDGE;
 
-			for (int x = 0; x < VTX_PER_TILE_EDGE - 1; ++ x)
+			for (int x = 0; x < VERTEX_PER_TILE_EDGE - 1; ++ x)
 			{
 				indices[index] = row_start + x;
 				++ index;
-				indices[index] = row_start + x + VTX_PER_TILE_EDGE;
+				indices[index] = row_start + x + VERTEX_PER_TILE_EDGE;
 				++ index;
-				indices[index] = row_start + x + VTX_PER_TILE_EDGE + 1;
+				indices[index] = row_start + x + VERTEX_PER_TILE_EDGE + 1;
 				++ index;
 				indices[index] = row_start + x + 1;
 				++ index;
 			}
 		}
-		BOOST_ASSERT(QUAD_LIST_INDEX_COUNT == index);
+		BOOST_ASSERT(TESS_INDEX_COUNT == index);
 
 		ElementInitData init_data;
 		init_data.data = &indices[0];
-		init_data.row_pitch = QUAD_LIST_INDEX_COUNT * sizeof(uint32_t);
+		init_data.row_pitch = TESS_INDEX_COUNT * sizeof(uint32_t);
 		init_data.slice_pitch = init_data.row_pitch;
 
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
@@ -552,6 +552,14 @@ namespace KlayGE
 		gen_cascaded_sm_tech_ = deferred_effect->TechniqueByName("GenNoTessTerrainCascadedShadowMapTech");
 		gen_rsm_tech_ = deferred_effect->TechniqueByName("GenNoTessTerrainReflectiveShadowMapTech");
 
+		*deferred_effect->ParameterByName("vertex_per_tile_edge") = static_cast<int32_t>(VERTEX_PER_TILE_EDGE);
+		*deferred_effect->ParameterByName("patches_per_tile_edge") = int2(PATCHES_PER_TILE_EDGE, PATCHES_PER_TILE_EDGE - 1);
+		*deferred_effect->ParameterByName("inv_patches_per_tile_edge") = 1.0f / PATCHES_PER_TILE_EDGE;
+		*deferred_effect->ParameterByName("inv_vertex_per_tile_edge") = 1.0f / VERTEX_PER_TILE_EDGE;
+		*deferred_effect->ParameterByName("world_scale") = world_scale_;
+		*deferred_effect->ParameterByName("vertical_scale") = float2(vertical_scale_, world_scale_ * vertical_scale_);
+		*deferred_effect->ParameterByName("world_uv_repeats") = float2(static_cast<float>(world_uv_repeats_), 1.0f / world_uv_repeats_);
+
 		height_map_param_ = deferred_effect->ParameterByName("coarse_height_map");
 		gradient_map_param_ = deferred_effect->ParameterByName("coarse_gradient_map");
 		mask_map_param_ = deferred_effect->ParameterByName("coarse_mask_map");
@@ -591,7 +599,7 @@ namespace KlayGE
 			eye.x() = floor(eye.x() / snap_grid_size_) * snap_grid_size_;
 			eye.z() = floor(eye.z() / snap_grid_size_) * snap_grid_size_;
 		}
-		eye /= WORLD_SCALE;
+		eye /= world_scale_;
 		return eye;
 	}
 
@@ -602,14 +610,14 @@ namespace KlayGE
 		texture_world_offset_ = this->CalcUVOffset(camera);
 
 		float3 const & eye = camera.EyePos();
-		snapped_x_ = texture_world_offset_.x() * WORLD_SCALE;
-		snapped_z_ = texture_world_offset_.z() * WORLD_SCALE;
+		snapped_x_ = texture_world_offset_.x() * world_scale_;
+		snapped_z_ = texture_world_offset_.z() * world_scale_;
 		float const dx = eye.x() - snapped_x_;
 		float const dz = eye.z() - snapped_z_;
 		snapped_x_ = eye.x() - 2 * dx;				// TODO: Figure out why the 2x works
 		snapped_z_ = eye.z() - 2 * dz;
 		float4x4 trans = MathLib::translation(snapped_x_, 0.0f, snapped_z_);
-		float4x4 scale = MathLib::scaling(WORLD_SCALE, WORLD_SCALE, WORLD_SCALE);
+		float4x4 scale = MathLib::scaling(world_scale_, world_scale_, world_scale_);
 		model_mat_ = scale * trans;
 
 		*proj_mat_param_ = proj;
@@ -620,7 +628,7 @@ namespace KlayGE
 		*debug_show_tiles_param_ = show_tiles_;
 
 		*detail_noise_param_ = detail_noise_scale_;
-		*sample_spacing_param_ = WORLD_SCALE * tile_rings_.back()->OuterWidth() / COARSE_HEIGHT_MAP_SIZE;
+		*sample_spacing_param_ = world_scale_ * tile_rings_.back()->OuterWidth() / COARSE_HEIGHT_MAP_SIZE;
 
 		float const detail_uv_scale = pow(2.0f, std::max(ridge_octaves_, tex_twist_octaves_) + fBm_octaves_ - 4.0f);
 		*detail_uv_param_ = float2(detail_uv_scale, 1.0f / detail_uv_scale);
@@ -687,8 +695,8 @@ namespace KlayGE
 		uint32_t width = height_map_cpu_tex_->Width(0);
 		uint32_t height = height_map_cpu_tex_->Height(0);
 
-		float2 uv((x - snapped_x_) / WORLD_SCALE / (WORLD_UV_REPEATS * 2) + 0.5f,
-			(z - snapped_z_) / WORLD_SCALE / (WORLD_UV_REPEATS * 2) + 0.5f);
+		float2 uv((x - snapped_x_) / world_scale_ / (world_uv_repeats_ * 2) + 0.5f,
+			(z - snapped_z_) / world_scale_ / (world_uv_repeats_ * 2) + 0.5f);
 		uv.x() = MathLib::clamp(uv.x(), 0.0f, 1.0f);
 		uv.y() = MathLib::clamp(uv.y(), 0.0f, 1.0f);
 
@@ -706,7 +714,7 @@ namespace KlayGE
 		float t1 = static_cast<float>(src[iv0 * mapper.RowPitch() / sizeof(half)+ iu1]);
 		float t2 = static_cast<float>(src[iv1 * mapper.RowPitch() / sizeof(half)+ iu0]);
 		float t3 = static_cast<float>(src[iv1 * mapper.RowPitch() / sizeof(half)+ iu1]);
-		return MathLib::lerp(MathLib::lerp(t0, t1, wu), MathLib::lerp(t2, t3, wu), wv) * WORLD_SCALE * VERTICAL_SCALE;
+		return MathLib::lerp(MathLib::lerp(t0, t1, wu), MathLib::lerp(t2, t3, wu), wv) * world_scale_ * vertical_scale_;
 	}
 
 

@@ -5,6 +5,7 @@
 		<params>
 			<param name="fractal_octaves"/>
 			<param name="texture_world_offset"/>
+			<param name="world_uv_repeats"/>
 		</params>
 		<output>
 			<pin name="output"/>
@@ -26,6 +27,8 @@
 		<params>
 			<param name="texture_world_offset"/>
 			<param name="coarse_sample_spacing"/>
+			<param name="world_uv_repeats"/>
+			<param name="vertical_scale"/>
 		</params>
 		<input>
 			<pin name="height_tex"/>

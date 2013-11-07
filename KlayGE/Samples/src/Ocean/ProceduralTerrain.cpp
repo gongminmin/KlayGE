@@ -8,10 +8,7 @@
 
 namespace KlayGE
 {
-	int const COARSE_HEIGHT_MAP_SIZE = 1024;
-	uint32_t const VTX_PER_TILE_EDGE = 9;				// overlap => -2
-	uint32_t const TRI_STRIP_INDEX_COUNT = (VTX_PER_TILE_EDGE - 1) * (2 * VTX_PER_TILE_EDGE + 2);
-	uint32_t const QUAD_LIST_INDEX_COUNT = (VTX_PER_TILE_EDGE - 1) * (VTX_PER_TILE_EDGE - 1) * 4;
+	uint32_t const COARSE_HEIGHT_MAP_SIZE = 1024;
 	uint32_t const MAX_RINGS = 10;
 
 	ProceduralTerrain::ProceduralTerrain()
@@ -68,15 +65,18 @@ namespace KlayGE
 		int3 octaves(ridge_octaves_, fBm_octaves_, tex_twist_octaves_);
 		height_pp_->SetParam(0, octaves);
 		height_pp_->SetParam(1, texture_world_offset_);
+		height_pp_->SetParam(2, float2(static_cast<float>(world_uv_repeats_), 1.0f / world_uv_repeats_));
 
 		mask_pp_->SetParam(0, texture_world_offset_);
-		mask_pp_->SetParam(1, WORLD_SCALE * tile_rings_.back()->OuterWidth() / COARSE_HEIGHT_MAP_SIZE);
+		mask_pp_->SetParam(1, world_scale_ * tile_rings_.back()->OuterWidth() / COARSE_HEIGHT_MAP_SIZE);
+		mask_pp_->SetParam(2, float2(static_cast<float>(world_uv_repeats_), 1.0f / world_uv_repeats_));
+		mask_pp_->SetParam(3, float2(vertical_scale_, 1.0f / vertical_scale_));
 
 		FrameBufferPtr fb = re.CurFrameBuffer();
 
 		height_pp_->Apply();
 		gradient_pp_->Apply();
-		mask_pp_->Apply();
+		//mask_pp_->Apply();
 
 		re.BindFrameBuffer(fb);
 
