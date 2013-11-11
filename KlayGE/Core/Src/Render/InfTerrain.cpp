@@ -234,10 +234,10 @@ namespace KlayGE
 		GraphicsBufferPtr const & tile_non_tess_ib,
 		GraphicsBufferPtr const & tile_tess_ib)
 		: tile_non_tess_ib_(tile_non_tess_ib), tile_tess_ib_(tile_tess_ib),
-		hole_width_(hole_width), outer_width_(outer_width),
-		ring_width_((outer_width - hole_width) / 2),
-		num_tiles_(outer_width * outer_width - hole_width * hole_width),
-		tile_size_(tile_size)
+			hole_width_(hole_width), outer_width_(outer_width),
+			ring_width_((outer_width - hole_width) / 2),
+			num_tiles_(outer_width * outer_width - hole_width * hole_width),
+			tile_size_(tile_size)
 	{
 		BOOST_ASSERT(0 == ((outer_width - hole_width) % 2));
 
@@ -362,9 +362,9 @@ namespace KlayGE
 
 	HQTerrainRenderable::HQTerrainRenderable(RenderEffectPtr const & effect)
 		: RenderableHelper(L"HQTerrain"),
-		world_scale_(800), vertical_scale_(2.5f), world_uv_repeats_(8),
-		ridge_octaves_(3), fBm_octaves_(3), tex_twist_octaves_(1), detail_noise_scale_(0.02f),
-		tessellated_tri_size_(6)
+			world_scale_(800), vertical_scale_(2.5f), world_uv_repeats_(8),
+			ridge_octaves_(3), fBm_octaves_(3), tex_twist_octaves_(1), detail_noise_scale_(0.02f),
+			tessellated_tri_size_(6), wireframe_(false), show_patches_(false), show_tiles_(false)
 	{
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 		RenderEngine& re = rf.RenderEngineInstance();
@@ -720,7 +720,7 @@ namespace KlayGE
 
 	HQTerrainSceneObject::HQTerrainSceneObject(RenderablePtr const & renderable)
 		: SceneObjectHelper(SOA_Moveable),
-		reset_terrain_(true)
+			reset_terrain_(true)
 	{
 		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 		last_eye_pos_ = re.CurFrameBuffer()->GetViewport()->camera->EyePos();
