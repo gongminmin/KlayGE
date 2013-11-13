@@ -57,15 +57,15 @@ def build_external_project(name, compiler_info, compiler_arch, additional_option
 	os.chdir(curdir)
 
 def build_Boost(compiler_info, compiler_arch):
-	bjam_name = ""
+	b2_name = ""
 	os.chdir("External/boost")
 	if "win32" == compiler_info.platform:
-		bjam_name = "bjam.exe"
-		if not os.path.exists(bjam_name):
+		b2_name = "b2.exe"
+		if not os.path.exists(b2_name):
 			os.system("bootstrap.bat")
 	elif "linux" == compiler_info.platform:
-		bjam_name = "./bjam"
-		if not os.path.exists(bjam_name):
+		b2_name = "./b2"
+		if not os.path.exists(b2_name):
 			os.system("./bootstrap.sh")
 
 	if "vc" == compiler_info.name:
@@ -110,7 +110,7 @@ def build_Boost(compiler_info, compiler_arch):
 		compiler_version_str = ""
 
 	build_cmd = batch_command()
-	build_cmd.add_command('%s --toolset=%s --stagedir=./lib_%s%s_%s --builddir=./ --layout=versioned address-model=%d %s %s link=shared runtime-link=shared threading=multi stage' % (bjam_name, boost_toolset, compiler_info.name, compiler_version_str, compiler_arch[0], address_model, config, options))
+	build_cmd.add_command('%s --toolset=%s --stagedir=./lib_%s%s_%s --builddir=./ --layout=versioned address-model=%d %s %s link=shared runtime-link=shared threading=multi stage' % (b2_name, boost_toolset, compiler_info.name, compiler_version_str, compiler_arch[0], address_model, config, options))
 	build_cmd.execute()
 
 	os.chdir("../../")
