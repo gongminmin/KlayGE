@@ -1194,6 +1194,9 @@ namespace KlayGE
 					}
 				}
 				break;
+
+			default:
+				break;
 			}
 			break;
 		}

@@ -375,12 +375,12 @@ namespace KlayGE
 		this->CreateTessIB();
 
 		int widths[] = { 0, 16, 16, 16, 16 };
-		int rings = sizeof(widths) / sizeof(widths[0]) - 1;
+		uint32_t const rings = sizeof(widths) / sizeof(widths[0]) - 1;
 		BOOST_ASSERT(rings <= MAX_RINGS);
 
 		tile_rings_.resize(rings);
 		float tile_width = 0.125f;
-		for (int i = 0; i < rings; ++ i)
+		for (uint32_t i = 0; i < rings; ++ i)
 		{
 			tile_rings_[i] = MakeSharedPtr<TileRing>(widths[i] / 2, widths[i + 1], tile_width, tile_non_tess_ib_, tile_tess_ib_);
 			tile_width *= 2.0f;
@@ -455,14 +455,14 @@ namespace KlayGE
 
 	void HQTerrainRenderable::CreateNonTessIB()
 	{
-		int index = 0;
+		uint32_t index = 0;
 		uint32_t indices[NON_TESS_INDEX_COUNT];
 
-		for (int y = 0; y < VERTEX_PER_TILE_EDGE - 1; ++ y)
+		for (uint32_t y = 0; y < VERTEX_PER_TILE_EDGE - 1; ++ y)
 		{
-			int const row_start = y * VERTEX_PER_TILE_EDGE;
+			uint32_t const row_start = y * VERTEX_PER_TILE_EDGE;
 
-			for (int x = 0; x < VERTEX_PER_TILE_EDGE; ++ x)
+			for (uint32_t x = 0; x < VERTEX_PER_TILE_EDGE; ++ x)
 			{
 				indices[index] = row_start + x;
 				++ index;
@@ -488,14 +488,14 @@ namespace KlayGE
 
 	void HQTerrainRenderable::CreateTessIB()
 	{
-		int index = 0;
+		uint32_t index = 0;
 		uint32_t indices[TESS_INDEX_COUNT];
 
-		for (int y = 0; y < VERTEX_PER_TILE_EDGE - 1; ++ y)
+		for (uint32_t y = 0; y < VERTEX_PER_TILE_EDGE - 1; ++ y)
 		{
-			int const row_start = y * VERTEX_PER_TILE_EDGE;
+			uint32_t const row_start = y * VERTEX_PER_TILE_EDGE;
 
-			for (int x = 0; x < VERTEX_PER_TILE_EDGE - 1; ++ x)
+			for (uint32_t x = 0; x < VERTEX_PER_TILE_EDGE - 1; ++ x)
 			{
 				indices[index] = row_start + x;
 				++ index;
