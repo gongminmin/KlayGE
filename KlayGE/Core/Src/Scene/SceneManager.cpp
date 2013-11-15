@@ -307,7 +307,11 @@ namespace KlayGE
 	void SceneManager::AddRenderable(RenderablePtr const & obj)
 	{
 		bool add;
-		if (urt_ != 0)
+		if (obj->SelectMode() || (0 == urt_))
+		{
+			add = true;
+		}
+		else
 		{
 			if (urt_ & App3DFramework::URV_Simple_Forward_Only)
 			{
@@ -334,10 +338,6 @@ namespace KlayGE
 			{
 				add &= obj->SpecialShading() && !obj->SimpleForward();
 			}
-		}
-		else
-		{
-			add = true;
 		}
 
 		if (add)

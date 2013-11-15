@@ -33,8 +33,11 @@
 namespace KlayGE
 {
 	Renderable::Renderable()
-		: model_mat_(float4x4::Identity()), effect_attrs_(0)
+		: select_mode_on_(false),
+			model_mat_(float4x4::Identity()), effect_attrs_(0)
 	{
+		this->BindSelectModeEffect();
+
 		DeferredRenderingLayerPtr const & drl = Context::Instance().DeferredRenderingLayerInstance();
 		if (drl)
 		{
@@ -49,30 +52,37 @@ namespace KlayGE
 
 	void Renderable::OnRenderBegin()
 	{
-		if (deferred_effect_)
-		{
-			RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-			DeferredRenderingLayerPtr const & drl = Context::Instance().DeferredRenderingLayerInstance();
-			Camera const & camera = *re.CurFrameBuffer()->GetViewport()->camera;
+		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+		Camera const & camera = *re.CurFrameBuffer()->GetViewport()->camera;
+		float4x4 const & view = camera.ViewMatrix();
+		float4x4 const & proj = camera.ProjMatrix();
+		float4x4 mv = model_mat_ * view;
+		float4x4 mvp = mv * proj;
+		AABBox const & pos_bb = this->PosBound();
+		AABBox const & tc_bb = this->TexcoordBound();
 
-			float4x4 const & view = camera.ViewMatrix();
-			float4x4 proj = camera.ProjMatrix();
+		if (select_mode_on_)
+		{
+			*select_mode_mvp_param_ = mvp;
+			*select_mode_pos_center_param_ = pos_bb.Center();
+			*select_mode_pos_extent_param_ = pos_bb.HalfSize();
+			*select_mode_object_id_param_ = select_mode_object_id_;
+		}
+		else if (deferred_effect_)
+		{
+			DeferredRenderingLayerPtr const & drl = Context::Instance().DeferredRenderingLayerInstance();
 
 			int32_t cas_index = drl->CurrCascadeIndex();
 			if (cas_index >= 0)
 			{
-				proj *= drl->GetCascadedShadowLayer()->CascadeCropMatrix(cas_index);
+				mvp *= drl->GetCascadedShadowLayer()->CascadeCropMatrix(cas_index);
 			}
 
-			float4x4 const mv = model_mat_ * view;
-			*mvp_param_ = mv * proj;
+			*mvp_param_ = mvp;
 			*model_view_param_ = mv;
 
-			AABBox const & pos_bb = this->PosBound();
 			*pos_center_param_ = pos_bb.Center();
 			*pos_extent_param_ = pos_bb.HalfSize();
-
-			AABBox const & tc_bb = this->TexcoordBound();
 			*tc_center_param_ = float2(tc_bb.Center().x(), tc_bb.Center().y());
 			*tc_extent_param_ = float2(tc_bb.HalfSize().x(), tc_bb.HalfSize().y());
 
@@ -250,10 +260,37 @@ namespace KlayGE
 		model_mat_ = mat;
 	}
 
+	void Renderable::ObjectID(uint32_t id)
+	{
+		select_mode_object_id_ = float4(((id & 0xFF) + 0.5f) / 255.0f,
+			(((id >> 8) & 0xFF) + 0.5f) / 255.0f, (((id >> 16) & 0xFF) + 0.5f) / 255.0f, 0.0f);
+	}
+
+	void Renderable::SelectMode(bool select_mode)
+	{
+		select_mode_on_ = select_mode;
+		if (select_mode_on_)
+		{
+			technique_ = select_mode_tech_;
+		}
+	}
+
 	void Renderable::Pass(PassType type)
 	{
 		type_ = type;
 		technique_ = this->PassTech(type);
+	}
+
+	void Renderable::BindSelectModeEffect()
+	{
+		select_mode_effect_ = SyncLoadRenderEffect("SelectMode.fxml");
+
+		select_mode_tech_ = select_mode_effect_->TechniqueByName("SelectModeTech");
+
+		select_mode_mvp_param_ = select_mode_effect_->ParameterByName("mvp");
+		select_mode_pos_center_param_ = select_mode_effect_->ParameterByName("pos_center");
+		select_mode_pos_extent_param_ = select_mode_effect_->ParameterByName("pos_extent");
+		select_mode_object_id_param_ = select_mode_effect_->ParameterByName("object_id");
 	}
 
 	void Renderable::BindDeferredEffect(RenderEffectPtr const & deferred_effect)

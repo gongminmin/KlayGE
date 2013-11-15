@@ -201,6 +201,15 @@ namespace KlayGE
 
 		virtual void ModelMatrix(float4x4 const & mat);
 
+		// For select mode
+
+		virtual void ObjectID(uint32_t id);
+		virtual void SelectMode(bool select_mode);
+		bool SelectMode() const
+		{
+			return select_mode_on_;
+		}
+
 		// For deferred only
 
 		virtual void Pass(PassType type);
@@ -233,6 +242,9 @@ namespace KlayGE
 	protected:
 		virtual void UpdateInstanceStream();
 
+		// For select mode
+		virtual void BindSelectModeEffect();
+
 		// For deferred only
 		virtual void BindDeferredEffect(RenderEffectPtr const & deferred_effect);
 		virtual RenderTechniquePtr const & PassTech(PassType type) const;
@@ -241,6 +253,20 @@ namespace KlayGE
 		std::vector<weak_ptr<SceneObject> > instances_;
 
 		RenderTechniquePtr technique_;
+
+		// For select mode
+
+		RenderEffectPtr select_mode_effect_;
+
+		RenderTechniquePtr select_mode_tech_;
+
+		RenderEffectParameterPtr select_mode_mvp_param_;
+		RenderEffectParameterPtr select_mode_pos_center_param_;
+		RenderEffectParameterPtr select_mode_pos_extent_param_;
+		RenderEffectParameterPtr select_mode_object_id_param_;
+
+		float4 select_mode_object_id_;
+		bool select_mode_on_;
 
 		// For deferred only
 

@@ -69,6 +69,14 @@ namespace KlayGE
 		vertex_elements_type const & InstanceFormat() const;
 		virtual void const * InstanceData() const;
 
+		// For select mode
+		virtual void ObjectID(uint32_t id);
+		virtual void SelectMode(bool select_mode);
+		bool SelectMode() const
+		{
+			return renderable_->SelectMode();
+		}
+
 		// For deferred only
 		virtual void Pass(PassType type);
 

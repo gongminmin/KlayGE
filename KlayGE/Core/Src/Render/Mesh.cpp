@@ -1959,6 +1959,8 @@ namespace KlayGE
 
 	void RenderableLightSourceProxy::OnRenderBegin()
 	{
+		StaticMesh::OnRenderBegin();
+
 		Camera const & camera = Context::Instance().AppInstance().ActiveCamera();
 
 		float4x4 const & view = camera.ViewMatrix();

@@ -174,7 +174,7 @@ namespace KlayGE
 		: SceneObjectHelper(SOA_Cullable | SOA_Moveable | SOA_NotCastShadow),
 			camera_(camera)
 	{
-		this->Init(camera, CreateMeshFactory<RenderableLightSourceProxy>());
+		this->Init(camera, CreateMeshFactory<RenderableCameraProxy>());
 	}
 
 	SceneObjectCameraProxy::SceneObjectCameraProxy(CameraPtr const & camera, RenderModelPtr const & camera_model)

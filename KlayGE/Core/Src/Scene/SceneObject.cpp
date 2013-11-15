@@ -131,6 +131,16 @@ namespace KlayGE
 		return nullptr;
 	}
 
+	void SceneObject::SelectMode(bool select_mode)
+	{
+		renderable_->SelectMode(select_mode);
+	}
+
+	void SceneObject::ObjectID(uint32_t id)
+	{
+		renderable_->ObjectID(id);
+	}
+
 	void SceneObject::Pass(PassType type)
 	{
 		renderable_->Pass(type);
