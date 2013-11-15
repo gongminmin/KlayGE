@@ -7,6 +7,7 @@ IF(COMMAND cmake_policy)
 ENDIF(COMMAND cmake_policy)
 
 FIND_PATH(KLAYGE_PROJECT_DIR klayge_logo.ico PATHS ../../../)
+SET(KLAYGE_ROOT_DIR "${KLAYGE_PROJECT_DIR}/..")
 
 INCLUDE(${KLAYGE_PROJECT_DIR}/../cmake/Common.cmake)
 INCLUDE(${KLAYGE_PROJECT_DIR}/../cmake/Platform.cmake)
