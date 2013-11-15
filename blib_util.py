@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 #-*- coding: ascii -*-
 
-import os
+import os, sys
 try:
 	import cfg_build
 except:
@@ -13,15 +13,17 @@ except:
 
 compiler		= "auto"		# could be "vc12", vc11", "vc10", "vc9", "mingw", "gcc", "auto".
 toolset			= "auto"		# could be "v120", "v120_xp", "v110", "v110_xp", "v100", "v90", "auto".
-arch			= ("x86", )		# could be "x86", "x64", "arm_app", "x86_app"
+arch			= ("x86", )		# could be "x86", "x64", "arm_app", "x86_app", "x64_app"
 config			= ("Debug", "RelWithDebInfo") # could be "Debug", "Release", "MinSizeRel", "RelWithDebInfo"
 	""")
 	cfg_build_f.close()
 	import cfg_build
-
+	
 class compiler_info:
 	def __init__(self, compiler, archs, cfg):
-		import sys
+		import platform
+		machine = platform.machine()
+		native_x64 = ("AMD64" == machine) or ("x86_64" == machine)
 
 		env = os.environ
 		
@@ -89,9 +91,18 @@ class compiler_info:
 				cfg = ("Debug", "RelWithDebInfo")
 
 		arch_list = []
+		prefer_compiler = { "x86" : "", "x64" : "", "arm" : "" }
 		if "vc12" == compiler:
 			compiler_name = "vc"
 			compiler_version = 12
+			if native_x64:
+				prefer_compiler["x86"] = "amd64_x86"
+				prefer_compiler["x64"] = "amd64"
+				prefer_compiler["arm"] = "amd64_arm"
+			else:
+				prefer_compiler["x86"] = "x86"
+				prefer_compiler["x64"] = "x86_amd64"
+				prefer_compiler["arm"] = "x86_arm"
 			for arch in archs:
 				is_metro = False
 				if (arch.find("_app") > 0):
@@ -104,11 +115,17 @@ class compiler_info:
 					arch_list.append((arch, "Visual Studio 12", toolset, is_metro, is_xp_toolset))
 				elif "arm_app" == arch:
 					arch_list.append((arch, "Visual Studio 12 ARM", toolset, is_metro, is_xp_toolset))
-				elif "x64" == arch:
+				elif ("x64" == arch) or ("x64_app" == arch):
 					arch_list.append((arch, "Visual Studio 12 Win64", toolset, is_metro, is_xp_toolset))
 		elif "vc11" == compiler:
 			compiler_name = "vc"
 			compiler_version = 11
+			prefer_compiler["x86"] = "x86"
+			prefer_compiler["arm"] = "x86_arm"
+			if native_x64:
+				prefer_compiler["x64"] = "amd64"
+			else:
+				prefer_compiler["x64"] = "x86_amd64"
 			for arch in archs:
 				is_metro = False
 				if (arch.find("_app") > 0):
@@ -121,11 +138,16 @@ class compiler_info:
 					arch_list.append((arch, "Visual Studio 11", toolset, is_metro, is_xp_toolset))
 				elif "arm_app" == arch:
 					arch_list.append((arch, "Visual Studio 11 ARM", toolset, is_metro, is_xp_toolset))
-				elif "x64" == arch:
+				elif ("x64" == arch) or ("x64_app" == arch):
 					arch_list.append((arch, "Visual Studio 11 Win64", toolset, is_metro, is_xp_toolset))
 		elif "vc10" == compiler:
 			compiler_name = "vc"
 			compiler_version = 10
+			prefer_compiler["x86"] = "x86"
+			if native_x64:
+				prefer_compiler["x64"] = "amd64"
+			else:
+				prefer_compiler["x64"] = "x86_amd64"
 			for arch in archs:
 				if "x86" == arch:
 					arch_list.append((arch, "Visual Studio 10", toolset, False, False))
@@ -134,6 +156,8 @@ class compiler_info:
 		elif "vc9" == compiler:
 			compiler_name = "vc"
 			compiler_version = 9
+			prefer_compiler["x86"] = "x86"
+			prefer_compiler["x64"] = "x86_amd64"
 			for arch in archs:
 				if "x86" == arch:
 					arch_list.append((arch, "Visual Studio 9 2008", toolset, False, False))
@@ -169,7 +193,8 @@ class compiler_info:
 		self.arch_list = arch_list
 		self.cfg = cfg
 		self.platform = platform
-		
+		self.prefer_compiler = prefer_compiler
+
 	def msvc_add_build_command(self, batch_cmd, sln_name, proj_name, config, arch = ""):
 		if self.use_msbuild:
 			batch_cmd.add_command('@SET VisualStudioVersion=%d.0' % self.version)
@@ -217,3 +242,64 @@ def log_info(message):
 
 def log_warning(message):
 	print("[W] %s" % message)
+
+def build_a_project(name, build_path, compiler_info, compiler_arch, need_install = False, additional_options = ""):
+	curdir = os.path.abspath(os.curdir)
+
+	if "vc" == compiler_info.name:
+		build_dir = "%s/build/%s-%d_0-%s" % (build_path, compiler_info.name, compiler_info.version, compiler_arch[0])
+	else:
+		build_dir = "%s/build/%s-%s" % (build_path, compiler_info.name, compiler_arch[0])
+	if not os.path.exists(build_dir):
+		os.makedirs(build_dir)
+
+	os.chdir(build_dir)
+	
+	toolset_name = ""
+	if "vc" == compiler_info.name:
+		toolset_name = "-T %s" % compiler_arch[2]
+
+	if compiler_arch[3]:
+		additional_options += "-D KLAYGE_WITH_WINRT:BOOL=\"TRUE\" "
+	if compiler_arch[4]:
+		additional_options += "-D KLAYGE_WITH_XP_TOOLSET:BOOL=\"TRUE\" "
+	if compiler_info.name != "vc":
+		additional_options += "-D KLAYGE_ARCH_NAME:STRING=\"%s\" " % compiler_arch[0]
+
+	cmake_cmd = batch_command()
+	cmake_cmd.add_command('cmake -G "%s" %s %s %s' % (compiler_arch[1], toolset_name, additional_options, "../cmake"))
+	if cmake_cmd.execute() != 0:
+		log_error("Config %s failed." % name)
+
+	build_cmd = batch_command()
+	if "vc" == compiler_info.name:
+		if ("x86" == compiler_arch[0]) or ("x86_app" == compiler_arch[0]):
+			vc_option = compiler_info.prefer_compiler["x86"]
+		elif ("x64" == compiler_arch[0]) or ("x64_app" == compiler_arch[0]):
+			vc_option = compiler_info.prefer_compiler["x64"]
+		elif ("arm_app" == compiler_arch[0]):
+			vc_option = compiler_info.prefer_compiler["arm"]
+
+		build_cmd.add_command('@CALL "%%VS%d0COMNTOOLS%%..\\..\\VC\\vcvarsall.bat" %s' % (compiler_info.version, vc_option))
+		for config in compiler_info.cfg:
+			compiler_info.msvc_add_build_command(build_cmd, name, "ALL_BUILD", config)
+			if need_install:
+				compiler_info.msvc_add_build_command(build_cmd, name, "INSTALL", config)
+	else:
+		install_str = ""
+		if need_install:
+			install_str = "install"
+		if "mgw" == compiler_info.name:
+			build_cmd.add_command("@mingw32-make.exe %s" % install_str)
+		else:
+			build_cmd.add_command("@make %s" % install_str)
+		build_cmd.add_command('@if ERRORLEVEL 1 exit /B 1')
+	if build_cmd.execute() != 0:
+		log_error("Build %s failed." % name)
+
+	os.chdir(curdir)
+
+def copy_to_dst(src_name, dst_dir):
+	print("Copy %s to %s" % (src_name, dst_dir))
+	import shutil
+	shutil.copy2(src_name, dst_dir)

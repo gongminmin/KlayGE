@@ -5,11 +5,6 @@ from __future__ import print_function
 import os, sys
 from blib_util import *
 
-def copy_to_dst(src_name, dst_dir):
-	print("Copy %s to %s" % (src_name, dst_dir))
-	import shutil
-	shutil.copy(src_name, dst_dir)
-
 def deploy_KlayGE(target_dir, compiler_info, compiler_arch):
 	import glob
 

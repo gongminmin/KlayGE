@@ -6,44 +6,8 @@ import os, sys
 from blib_util import *
 
 def build_glloader(compiler_info, compiler_arch):
-	curdir = os.path.abspath(os.curdir)
-
-	if "vc" == compiler_info.name:
-		build_dir = "glloader/build/%s-%d_0-%s" % (compiler_info.name, compiler_info.version, compiler_arch[0])
-	else:
-		build_dir = "glloader/build/%s-%s" % (compiler_info.name, compiler_arch[0])
-	if not os.path.exists(build_dir):
-		os.makedirs(build_dir)
-
-	os.chdir(build_dir)
-
-	toolset_name = ""
-	if "vc" == compiler_info.name:
-		toolset_name = "-T %s" % compiler_arch[2]
-
-	additional_options = ""
-	if compiler_info.name != "vc":
-		additional_options += "-D KLAYGE_ARCH_NAME:STRING=\"%s\" " % compiler_arch[0]
-
-	cmake_cmd = batch_command()
-	cmake_cmd.add_command('cmake -G "%s" %s -D PYTHON_EXE:STRING="%s" %s %s' % (compiler_arch[1], toolset_name, sys.executable, additional_options, "../cmake"))
-	if cmake_cmd.execute() != 0:
-		log_error("Config glloader failed.")
-
-	build_cmd = batch_command()
-	if "vc" == compiler_info.name:
-		build_cmd.add_command('CALL "%%VS%d0COMNTOOLS%%..\\..\\VC\\vcvarsall.bat" %s' % (compiler_info.version, compiler_arch[0]))
-		for config in compiler_info.cfg:
-			compiler_info.msvc_add_build_command(build_cmd, "glloader", "ALL_BUILD", config)
-			compiler_info.msvc_add_build_command(build_cmd, "glloader", "INSTALL", config)
-	elif "mgw" == compiler_info.name:
-		build_cmd.add_command('mingw32-make.exe install')
-	else:
-		build_cmd.add_command('make install')
-	if build_cmd.execute() != 0:
-		log_error("Build glloader failed.")
-
-	os.chdir(curdir)
+	additional_options = '-D PYTHON_EXE:STRING="%s"' % sys.executable
+	build_a_project("glloader", "glloader", compiler_info, compiler_arch, True, additional_options)
 
 if __name__ == "__main__":
 	if len(sys.argv) > 1:
