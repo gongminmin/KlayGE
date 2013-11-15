@@ -28,8 +28,7 @@ if __name__ == "__main__":
 	ci = compiler_info(compiler, arch, cfg)
 
 	if 0 == len(ci.name):
-		print("Wrong configuration\n")
-		sys.exit(1)
+		log_error("Wrong configuration\n")
 
 	print("Building external libs...")
 	for arch in ci.arch_list:

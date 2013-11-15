@@ -36,7 +36,8 @@ def build_KlayGE_project(name, compiler_info, compiler_arch):
 
 	cmake_cmd = batch_command()
 	cmake_cmd.add_command('cmake -G "%s" %s %s %s' % (compiler_arch[1], toolset_name, additional_options, "../cmake"))
-	cmake_cmd.execute()
+	if cmake_cmd.execute() != 0:
+		log_error("Config %s failed." % name)
 
 	arch_name = compiler_arch[0]
 	if ("x86_app" == arch_name):
@@ -56,7 +57,8 @@ def build_KlayGE_project(name, compiler_info, compiler_arch):
 		build_cmd.add_command('mingw32-make.exe install')
 	else:
 		build_cmd.add_command('make install')
-	build_cmd.execute()
+	if build_cmd.execute() != 0:
+		log_error("Build %s failed." % name)
 
 	os.chdir(curdir)
 
@@ -92,8 +94,7 @@ if __name__ == "__main__":
 	ci = compiler_info(compiler, arch, cfg)
 
 	if 0 == len(ci.name):
-		print("Wrong configuration\n")
-		sys.exit(1)
+		log_error("Wrong configuration\n")
 
 	print("Building KlayGE...")
 	for arch in ci.arch_list:

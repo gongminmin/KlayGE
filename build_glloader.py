@@ -27,7 +27,8 @@ def build_glloader(compiler_info, compiler_arch):
 
 	cmake_cmd = batch_command()
 	cmake_cmd.add_command('cmake -G "%s" %s -D PYTHON_EXE:STRING="%s" %s %s' % (compiler_arch[1], toolset_name, sys.executable, additional_options, "../cmake"))
-	cmake_cmd.execute()
+	if cmake_cmd.execute() != 0:
+		log_error("Config glloader failed.")
 
 	build_cmd = batch_command()
 	if "vc" == compiler_info.name:
@@ -39,7 +40,8 @@ def build_glloader(compiler_info, compiler_arch):
 		build_cmd.add_command('mingw32-make.exe install')
 	else:
 		build_cmd.add_command('make install')
-	build_cmd.execute()
+	if build_cmd.execute() != 0:
+		log_error("Build glloader failed.")
 
 	os.chdir(curdir)
 
@@ -60,8 +62,7 @@ if __name__ == "__main__":
 	ci = compiler_info(compiler, arch, cfg)
 
 	if 0 == len(ci.name):
-		print("Wrong configuration\n")
-		sys.exit(1)
+		log_error("Wrong configuration\n")
 
 	print("Building glloader...")
 	for arch in ci.arch_list:

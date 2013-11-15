@@ -62,8 +62,7 @@ class compiler_info:
 				elif "linux" == platform:
 					compiler = "gcc"
 				else:
-					print("Unsupported platform\n")
-					sys.exit(1)
+					log_error("Unsupported platform\n")
 			else:
 				compiler = cfg_build.compiler
 
@@ -181,7 +180,7 @@ class compiler_info:
 			config_str = "Configuration=%s" % config
 			if len(arch) != 0:
 				config_str = "%s,Platform=%s" % (config_str, arch)
-			batch_cmd.add_command('MSBuild %s /m /v:m /p:%s' % (file_name, config_str))
+			batch_cmd.add_command('@MSBuild %s /m /v:m /p:%s' % (file_name, config_str))
 		else:
 			config_str = config
 			if len(arch) != 0:
@@ -189,7 +188,8 @@ class compiler_info:
 			proj_str = ""
 			if len(proj_name) != 0:
 				proj_str = "/project %s" % proj_name
-			batch_cmd.add_command('devenv %s.sln /Build %s %s' % (sln_name, config_str, proj_str))
+			batch_cmd.add_command('@devenv %s.sln /Build %s %s' % (sln_name, config_str, proj_str))
+		batch_cmd.add_command('@if ERRORLEVEL 1 exit /B 1')
 
 class batch_command:
 	def __init__(self):
@@ -203,5 +203,17 @@ class batch_command:
 		batch_f = open(batch_file, "w")
 		batch_f.writelines([cmd_line + "\n" for cmd_line in self.commands_])
 		batch_f.close()
-		os.system(batch_file)
+		ret_code = os.system(batch_file)
 		os.remove(batch_file)
+		return ret_code
+
+def log_error(message):
+	print("[E] %s" % message)
+	os.system("pause")
+	sys.exit(1)
+
+def log_info(message):
+	print("[I] %s" % message)
+
+def log_warning(message):
+	print("[W] %s" % message)
