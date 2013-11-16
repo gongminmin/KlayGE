@@ -8,7 +8,7 @@ from blib_util import *
 def build_Boost(compiler_info, compiler_arch):
 	b2_name = ""
 	os.chdir("External/boost")
-	if "win32" == compiler_info.platform:
+	if "win" == compiler_info.platform:
 		b2_name = "b2.exe"
 		if not os.path.exists(b2_name):
 			os.system("bootstrap.bat")
@@ -53,13 +53,8 @@ def build_Boost(compiler_info, compiler_arch):
 	if ("Release" in compiler_info.cfg) or ("RelWithDebInfo" in compiler_info.cfg) or ("MinSizeRel" in compiler_info.cfg):
 		config += " variant=release"
 		
-	if "vc" == compiler_info.name:
-		compiler_version_str = str(compiler_info.version)
-	else:
-		compiler_version_str = ""
-
 	build_cmd = batch_command()
-	build_cmd.add_command('%s --toolset=%s --stagedir=./lib_%s%s_%s --builddir=./ --layout=versioned address-model=%d %s %s link=shared runtime-link=shared threading=multi stage' % (b2_name, boost_toolset, compiler_info.name, compiler_version_str, compiler_arch[0], address_model, config, options))
+	build_cmd.add_command('%s --toolset=%s --stagedir=./lib/%s_%s --builddir=./ --layout=versioned address-model=%d %s %s link=shared runtime-link=shared threading=multi stage' % (b2_name, boost_toolset, compiler_info.platform, compiler_arch[0], address_model, config, options))
 	if build_cmd.execute() != 0:
 		log_error("Build boost failed.")
 
@@ -84,14 +79,12 @@ def build_7z(compiler_info, compiler_arch):
 def build_external_libs(compiler_info, compiler_arch):
 	import glob
 
-	if "win32" == compiler_info.platform:
-		platform_dir = "win_%s" % compiler_arch[0]
-		dst_dir = "KlayGE/bin/%s/" % platform_dir
+	platform_dir = "%s_%s" % (compiler_info.platform, compiler_arch[0])
+	dst_dir = "KlayGE/bin/%s/" % platform_dir
+	if "win" == compiler_info.platform:
 		bat_suffix = "bat"
 		dll_suffix = "dll"
 	elif "linux" == compiler_info.platform:
-		platform_dir = "linux_%s" % compiler_arch[0]
-		dst_dir = "KlayGE/bin/%s/" % platform_dir
 		bat_suffix = "sh"
 		dll_suffix = "so"
 
@@ -100,11 +93,7 @@ def build_external_libs(compiler_info, compiler_arch):
 		print("\nBuilding boost...\n")
 		build_Boost(compiler_info, compiler_arch)
 
-		if "vc" == compiler_info.name:
-			compiler_version_str = str(compiler_info.version)
-		else:
-			compiler_version_str = ""
-		for fname in glob.iglob("External/boost/lib_%s%s_%s/lib/*.%s" % (compiler_info.name, compiler_version_str, compiler_arch[0], dll_suffix)):
+		for fname in glob.iglob("External/boost/lib/%s_%s/lib/*.%s" % (compiler_info.platform, compiler_arch[0], dll_suffix)):
 			copy_to_dst(fname, dst_dir)
 
 	if not compiler_arch[3]:
@@ -142,13 +131,13 @@ def build_external_libs(compiler_info, compiler_arch):
 			copy_to_dst(fname, dst_dir)
 
 	if not compiler_arch[3]:
-		if "win32" == compiler_info.platform:
+		if "win" == compiler_info.platform:
 			print("\nSeting up DXSDK...\n")
 
 			copy_to_dst("External/DXSDK/Redist/%s/d3dcompiler_46.%s" % (compiler_arch[0], dll_suffix), dst_dir)
 
 	if not compiler_arch[3]:
-		if "win32" == compiler_info.platform:
+		if "win" == compiler_info.platform:
 			print("\nSeting up OpenAL SDK...\n")
 
 			copy_to_dst("External/OpenALSDK/redist/%s/OpenAL32.%s" % (compiler_arch[0], dll_suffix), dst_dir)

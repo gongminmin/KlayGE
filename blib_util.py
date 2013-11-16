@@ -21,14 +21,12 @@ config			= ("Debug", "RelWithDebInfo") # could be "Debug", "Release", "MinSizeRe
 	
 class compiler_info:
 	def __init__(self, compiler, archs, cfg):
-		import platform
-		machine = platform.machine()
-		native_x64 = ("AMD64" == machine) or ("x86_64" == machine)
-
 		env = os.environ
 		
 		platform = sys.platform
-		if 0 == platform.find("linux"):
+		if 0 == platform.find("win"):
+			platform = "win"
+		elif 0 == platform.find("linux"):
 			platform = "linux"
 
 		try:
@@ -50,7 +48,7 @@ class compiler_info:
 
 		if "" == compiler:
 			if ("" == cfg_build.compiler) or ("auto" == cfg_build.compiler):
-				if "win32" == platform:
+				if "win" == platform:
 					if "VS120COMNTOOLS" in env:
 						compiler = "vc12"
 					elif "VS110COMNTOOLS" in env:
@@ -70,7 +68,7 @@ class compiler_info:
 
 		toolset = cfg_build.toolset
 		if ("" == cfg_build.toolset) or ("auto" == cfg_build.toolset):
-			if "win32" == platform:
+			if "win" == platform:
 				if "vc12" == compiler:
 					toolset = "v120"
 				elif "vc11" == compiler:
@@ -91,18 +89,9 @@ class compiler_info:
 				cfg = ("Debug", "RelWithDebInfo")
 
 		arch_list = []
-		prefer_compiler = { "x86" : "", "x64" : "", "arm" : "" }
 		if "vc12" == compiler:
 			compiler_name = "vc"
 			compiler_version = 12
-			if native_x64:
-				prefer_compiler["x86"] = "amd64_x86"
-				prefer_compiler["x64"] = "amd64"
-				prefer_compiler["arm"] = "amd64_arm"
-			else:
-				prefer_compiler["x86"] = "x86"
-				prefer_compiler["x64"] = "x86_amd64"
-				prefer_compiler["arm"] = "x86_arm"
 			for arch in archs:
 				is_metro = False
 				if (arch.find("_app") > 0):
@@ -120,12 +109,6 @@ class compiler_info:
 		elif "vc11" == compiler:
 			compiler_name = "vc"
 			compiler_version = 11
-			prefer_compiler["x86"] = "x86"
-			prefer_compiler["arm"] = "x86_arm"
-			if native_x64:
-				prefer_compiler["x64"] = "amd64"
-			else:
-				prefer_compiler["x64"] = "x86_amd64"
 			for arch in archs:
 				is_metro = False
 				if (arch.find("_app") > 0):
@@ -143,11 +126,6 @@ class compiler_info:
 		elif "vc10" == compiler:
 			compiler_name = "vc"
 			compiler_version = 10
-			prefer_compiler["x86"] = "x86"
-			if native_x64:
-				prefer_compiler["x64"] = "amd64"
-			else:
-				prefer_compiler["x64"] = "x86_amd64"
 			for arch in archs:
 				if "x86" == arch:
 					arch_list.append((arch, "Visual Studio 10", toolset, False, False))
@@ -156,8 +134,6 @@ class compiler_info:
 		elif "vc9" == compiler:
 			compiler_name = "vc"
 			compiler_version = 9
-			prefer_compiler["x86"] = "x86"
-			prefer_compiler["x64"] = "x86_amd64"
 			for arch in archs:
 				if "x86" == arch:
 					arch_list.append((arch, "Visual Studio 9 2008", toolset, False, False))
@@ -193,7 +169,6 @@ class compiler_info:
 		self.arch_list = arch_list
 		self.cfg = cfg
 		self.platform = platform
-		self.prefer_compiler = prefer_compiler
 
 	def msvc_add_build_command(self, batch_cmd, sln_name, proj_name, config, arch = ""):
 		if self.use_msbuild:
@@ -205,7 +180,7 @@ class compiler_info:
 			config_str = "Configuration=%s" % config
 			if len(arch) != 0:
 				config_str = "%s,Platform=%s" % (config_str, arch)
-			batch_cmd.add_command('@MSBuild %s /m /v:m /p:%s' % (file_name, config_str))
+			batch_cmd.add_command('@MSBuild %s /nologo /m /v:m /p:%s' % (file_name, config_str))
 		else:
 			config_str = config
 			if len(arch) != 0:
@@ -274,11 +249,11 @@ def build_a_project(name, build_path, compiler_info, compiler_arch, need_install
 	build_cmd = batch_command()
 	if "vc" == compiler_info.name:
 		if ("x86" == compiler_arch[0]) or ("x86_app" == compiler_arch[0]):
-			vc_option = compiler_info.prefer_compiler["x86"]
+			vc_option = "x86"
 		elif ("x64" == compiler_arch[0]) or ("x64_app" == compiler_arch[0]):
-			vc_option = compiler_info.prefer_compiler["x64"]
+			vc_option = "x86_amd64"
 		elif ("arm_app" == compiler_arch[0]):
-			vc_option = compiler_info.prefer_compiler["arm"]
+			vc_option = "x86_arm"
 
 		build_cmd.add_command('@CALL "%%VS%d0COMNTOOLS%%..\\..\\VC\\vcvarsall.bat" %s' % (compiler_info.version, vc_option))
 		for config in compiler_info.cfg:

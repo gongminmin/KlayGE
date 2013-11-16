@@ -8,12 +8,11 @@ from blib_util import *
 def deploy_KlayGE(target_dir, compiler_info, compiler_arch):
 	import glob
 
-	if "win32" == compiler_info.platform:
-		bin_dst_dir = "%s/bin/win_%s/" % (target_dir, compiler_arch)
+	bin_dst_dir = "%s/bin/%s_%s/" % (target_dir, compiler_info.platform, compiler_arch)
+	if "win" == compiler_info.platform:
 		bat_suffix = "bat"
 		dll_suffix = "dll"
 	elif "linux" == platform:
-		bin_dst_dir = "%s/bin/linux_%s/" % (target_dir, compiler_arch)
 		bat_suffix = "sh"
 		dll_suffix = "so"
 		
