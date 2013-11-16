@@ -76,11 +76,9 @@ def build_freetype(compiler_info, compiler_arch):
 def build_7z(compiler_info, compiler_arch):
 	build_a_project("7z", "External/7z", compiler_info, compiler_arch)
 
-def build_external_libs(compiler_info, compiler_arch):
+def build_external_libs(compiler_info):
 	import glob
 
-	platform_dir = "%s_%s" % (compiler_info.platform, compiler_arch[0])
-	dst_dir = "KlayGE/bin/%s/" % platform_dir
 	if "win" == compiler_info.platform:
 		bat_suffix = "bat"
 		dll_suffix = "dll"
@@ -88,87 +86,74 @@ def build_external_libs(compiler_info, compiler_arch):
 		bat_suffix = "sh"
 		dll_suffix = "so"
 
+	for arch in compiler_info.arch_list:
+		platform_dir = "%s_%s" % (compiler_info.platform, arch[0])
+		dst_dir = "KlayGE/bin/%s/" % platform_dir
 
-	if not compiler_arch[3]:
-		print("\nBuilding boost...\n")
-		build_Boost(compiler_info, compiler_arch)
+		if not arch[3]:
+			print("\nBuilding boost...\n")
+			build_Boost(compiler_info, arch)
 
-		for fname in glob.iglob("External/boost/lib/%s_%s/lib/*.%s" % (compiler_info.platform, compiler_arch[0], dll_suffix)):
-			copy_to_dst(fname, dst_dir)
+			for fname in glob.iglob("External/boost/lib/%s_%s/lib/*.%s" % (compiler_info.platform, arch[0], dll_suffix)):
+				copy_to_dst(fname, dst_dir)
 
-	if not compiler_arch[3]:
-		print("\nBuilding Python...\n")
-		build_Python(compiler_info, compiler_arch)
+		if not arch[3]:
+			print("\nBuilding Python...\n")
+			build_Python(compiler_info, arch)
 
-		if not os.path.exists("%sLib" % dst_dir):
-			os.mkdir("%sLib" % dst_dir)
-		for fname in glob.iglob("External/Python/Lib/*.py"):
-			copy_to_dst(fname, "%sLib/" % dst_dir)
-		if not os.path.exists("%sLib/encodings" % dst_dir):
-			os.mkdir("%sLib/encodings" % dst_dir)
-		for fname in glob.iglob("External/Python/Lib/encodings/*.py"):
-			copy_to_dst(fname, "%sLib/encodings/" % dst_dir)
+			if not os.path.exists("%sLib" % dst_dir):
+				os.mkdir("%sLib" % dst_dir)
+			for fname in glob.iglob("External/Python/Lib/*.py"):
+				copy_to_dst(fname, "%sLib/" % dst_dir)
+			if not os.path.exists("%sLib/encodings" % dst_dir):
+				os.mkdir("%sLib/encodings" % dst_dir)
+			for fname in glob.iglob("External/Python/Lib/encodings/*.py"):
+				copy_to_dst(fname, "%sLib/encodings/" % dst_dir)
 
-	if not compiler_arch[3]:
-		print("\nBuilding libogg...\n")
-		build_libogg(compiler_info, compiler_arch)
+		if not arch[3]:
+			print("\nBuilding libogg...\n")
+			build_libogg(compiler_info, arch)
 
-	if not compiler_arch[3]:
-		print("\nBuilding libvorbis...\n")
-		build_libvorbis(compiler_info, compiler_arch)
+		if not arch[3]:
+			print("\nBuilding libvorbis...\n")
+			build_libvorbis(compiler_info, arch)
 
-	if not compiler_arch[3]:
-		print("\nBuilding freetype...\n")
-		build_freetype(compiler_info, compiler_arch)
+		if not arch[3]:
+			print("\nBuilding freetype...\n")
+			build_freetype(compiler_info, arch)
 
-	if ("vc" == compiler_info.name):
-		print("\nBuilding 7z...\n")
-		build_7z(compiler_info, compiler_arch)
+		if ("vc" == compiler_info.name):
+			print("\nBuilding 7z...\n")
+			build_7z(compiler_info, arch)
 
-		for fname in glob.iglob("External/7z/lib/%s/7zxa*.%s" % (platform_dir, dll_suffix)):
-			copy_to_dst(fname, dst_dir)
-		for fname in glob.iglob("External/7z/lib/%s/LZMA*.%s" % (platform_dir, dll_suffix)):
-			copy_to_dst(fname, dst_dir)
+			for fname in glob.iglob("External/7z/lib/%s/7zxa*.%s" % (platform_dir, dll_suffix)):
+				copy_to_dst(fname, dst_dir)
+			for fname in glob.iglob("External/7z/lib/%s/LZMA*.%s" % (platform_dir, dll_suffix)):
+				copy_to_dst(fname, dst_dir)
 
-	if not compiler_arch[3]:
-		if "win" == compiler_info.platform:
-			print("\nSeting up DXSDK...\n")
+		if not arch[3]:
+			if "win" == compiler_info.platform:
+				print("\nSeting up DXSDK...\n")
 
-			copy_to_dst("External/DXSDK/Redist/%s/d3dcompiler_46.%s" % (compiler_arch[0], dll_suffix), dst_dir)
+				copy_to_dst("External/DXSDK/Redist/%s/d3dcompiler_46.%s" % (arch[0], dll_suffix), dst_dir)
 
-	if not compiler_arch[3]:
-		if "win" == compiler_info.platform:
-			print("\nSeting up OpenAL SDK...\n")
+		if not arch[3]:
+			if "win" == compiler_info.platform:
+				print("\nSeting up OpenAL SDK...\n")
 
-			copy_to_dst("External/OpenALSDK/redist/%s/OpenAL32.%s" % (compiler_arch[0], dll_suffix), dst_dir)
+				copy_to_dst("External/OpenALSDK/redist/%s/OpenAL32.%s" % (arch[0], dll_suffix), dst_dir)
 
-	if not compiler_arch[3]:
-		print("\nSeting up Cg...\n")
+		if not arch[3]:
+			print("\nSeting up Cg...\n")
 
-		if "x64" == compiler_arch[0]:
-			subdir = ".x64"
-		else:
-			subdir = ""
-		copy_to_dst("External/Cg/bin%s/cg.%s" % (subdir, dll_suffix), dst_dir)
+			if "x64" == arch[0]:
+				subdir = ".x64"
+			else:
+				subdir = ""
+			copy_to_dst("External/Cg/bin%s/cg.%s" % (subdir, dll_suffix), dst_dir)
 
 if __name__ == "__main__":
-	if len(sys.argv) > 1:
-		compiler = sys.argv[1]
-	else:
-		compiler = ""
-	if len(sys.argv) > 2:
-		arch = (sys.argv[2], )
-	else:
-		arch = ""
-	if len(sys.argv) > 3:
-		cfg = sys.argv[3]
-	else:
-		cfg = ""
+	cfg = cfg_from_argv(sys.argv)
+	ci = compiler_info(cfg.compiler, cfg.archs, cfg.cfg)
 
-	ci = compiler_info(compiler, arch, cfg)
-
-	if 0 == len(ci.name):
-		log_error("Wrong configuration\n")
-
-	for arch in ci.arch_list:
-		build_external_libs(ci, arch)
+	build_external_libs(ci)

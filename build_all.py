@@ -2,7 +2,7 @@
 #-*- coding: ascii -*-
 
 from __future__ import print_function
-import os, sys
+import sys
 from build_external import build_external_libs
 from blib_util import *
 from build_KFL import *
@@ -12,65 +12,35 @@ from build_MeshMLLib import *
 from build_KlayGE import *
 
 if __name__ == "__main__":
-	if len(sys.argv) > 1:
-		compiler = sys.argv[1]
-	else:
-		compiler = ""
-	if len(sys.argv) > 2:
-		arch = (sys.argv[2], )
-	else:
-		arch = ""
-	if len(sys.argv) > 3:
-		cfg = sys.argv[3]
-	else:
-		cfg = ""
-
-	ci = compiler_info(compiler, arch, cfg)
-
-	if 0 == len(ci.name):
-		log_error("Wrong configuration\n")
+	cfg = cfg_from_argv(sys.argv)
+	ci = compiler_info(cfg.compiler, cfg.archs, cfg.cfg)
 
 	print("Building external libs...")
-	for arch in ci.arch_list:
-		build_external_libs(ci, arch)
+	build_external_libs(ci)
 
 	print("Building KFL...")
-	for arch in ci.arch_list:
-		build_KFL(ci, arch)
+	build_KFL(ci)
 
 	print("Building glloader...")
-	for arch in ci.arch_list:
-		if not arch[3]:
-			build_glloader(ci, arch)
+	build_glloader(ci)
 
 	print("Building kfont...")
-	for arch in ci.arch_list:
-		build_kfont(ci, arch)
+	build_kfont(ci)
 
 	print("Building MeshMLLib...")
-	for arch in ci.arch_list:
-		build_MeshMLLib(ci, arch)
+	build_MeshMLLib(ci)
 
 	print("Building KlayGE...")
-	for arch in ci.arch_list:
-		build_KlayGE(ci, arch)
+	build_KlayGE(ci)
 
 	print("Building KlayGE Samples...")
-	for arch in ci.arch_list:
-		if not arch[3]:
-			build_Samples(ci, arch)
+	build_Samples(ci)
 
 	print("Building KlayGE Tools...")
-	for arch in ci.arch_list:
-		if not arch[3]:
-			build_Tools(ci, arch)
+	build_Tools(ci)
 
 	print("Building KlayGE Tutorials...")
-	for arch in ci.arch_list:
-		if not arch[3]:
-			build_Tutorials(ci, arch)
+	build_Tutorials(ci)
 
-	print("Building Exporters...")
-	for arch in ci.arch_list:
-		if not arch[3]:
-			build_Exporters(ci, arch)
+	print("Building KlayGE Exporters...")
+	build_Exporters(ci)

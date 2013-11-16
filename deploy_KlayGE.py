@@ -125,29 +125,14 @@ def deploy_KlayGE(target_dir, compiler_info, compiler_arch):
 	for fname in glob.iglob("KlayGE/media/Textures/Juda/*.jdt"):
 		copy_to_dst(fname, "%s/media/Textures/Juda/" % target_dir);
 
-if __name__ == "__main__":	
+if __name__ == "__main__":
 	if len(sys.argv) > 1:
 		target_dir = sys.argv[1]
 	else:
 		target_dir = ""
-	if len(sys.argv) > 2:
-		compiler = sys.argv[2]
-	else:
-		compiler = ""
-	if len(sys.argv) > 3:
-		arch = (sys.argv[3], )
-	else:
-		arch = ""
-	if len(sys.argv) > 4:
-		cfg = sys.argv[4]
-	else:
-		cfg = ""
 
-	ci = compiler_info(compiler, arch, cfg)
-	
-	if 0 == len(ci.name):
-		print("No target folder specified\n")
-		sys.exit(1)
+	cfg = cfg_from_argv(sys.argv, 1)
+	ci = compiler_info(cfg.compiler, cfg.archs, cfg.cfg)
 
 	for arch in ci.arch_list:
 		deploy_KlayGE(target_dir, ci, arch[0])

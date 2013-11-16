@@ -18,7 +18,22 @@ config			= ("Debug", "RelWithDebInfo") # could be "Debug", "Release", "MinSizeRe
 	""")
 	cfg_build_f.close()
 	import cfg_build
-	
+
+class cfg_from_argv:
+	def __init__(self, argv, base = 0):
+		if len(argv) > base + 1:
+			self.compiler = argv[base + 1]
+		else:
+			self.compiler = ""
+		if len(argv) > base + 2:
+			self.archs = (argv[base + 2], )
+		else:
+			self.archs = ""
+		if len(argv) > base + 3:
+			self.cfg = argv[base + 3]
+		else:
+			self.cfg = ""
+
 class compiler_info:
 	def __init__(self, compiler, archs, cfg):
 		env = os.environ
@@ -152,6 +167,7 @@ class compiler_info:
 		else:
 			compiler_name = ""
 			compiler_version = 0
+			log_error("Wrong configuration\n")
 
 		if "vc" == compiler_name:
 			if compiler_version >= 10:
