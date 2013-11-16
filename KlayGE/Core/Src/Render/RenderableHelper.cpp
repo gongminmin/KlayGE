@@ -77,16 +77,16 @@ namespace KlayGE
 	}
 
 
-	RenderablePoint::RenderablePoint(bool is_overlay)
+	RenderablePoint::RenderablePoint()
 		: RenderableHelper(L"Point")
 	{
-		this->Init(is_overlay);
+		this->Init();
 	}
 
-	RenderablePoint::RenderablePoint(float3 const & v, Color const & clr, bool is_overlay)
+	RenderablePoint::RenderablePoint(float3 const & v, Color const & clr)
 		: RenderableHelper(L"Point")
 	{
-		this->Init(is_overlay);
+		this->Init();
 
 		this->SetPoint(v);
 		this->SetColor(clr);
@@ -109,23 +109,12 @@ namespace KlayGE
 		*mvp_param_ = model_mat_ * camera.ViewProjMatrix();
 	}
 
-	void RenderablePoint::Init(bool is_overlay)
+	void RenderablePoint::Init()
 	{
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
 		RenderEffectPtr effect = SyncLoadRenderEffect("RenderableHelper.fxml");
-		if (deferred_effect_ && !is_overlay)
-		{
-			this->BindDeferredEffect(effect);
-			depth_tech_ = effect->TechniqueByName("PointDepthTech");
-			gbuffer_rt0_tech_ = effect->TechniqueByName("PointRT0Tech");
-			gbuffer_rt1_tech_ = effect->TechniqueByName("PointRT1Tech");
-			gbuffer_mrt_tech_ = effect->TechniqueByName("PointMRTTech");
-		}
-		else
-		{
-			technique_ = effect->TechniqueByName("PointTec");
-		}
+		technique_ = simple_forward_tech_ = effect->TechniqueByName("PointTec");
 		v0_ep_ = effect->ParameterByName("v0");
 		color_ep_ = effect->ParameterByName("color");
 		mvp_param_ = effect->ParameterByName("mvp");
@@ -146,19 +135,21 @@ namespace KlayGE
 
 		*(effect->ParameterByName("pos_center")) = float3(0, 0, 0);
 		*(effect->ParameterByName("pos_extent")) = float3(1, 1, 1);
+
+		effect_attrs_ |= EA_SimpleForward;
 	}
 
 
-	RenderableLine::RenderableLine(bool is_overlay)
+	RenderableLine::RenderableLine()
 		: RenderableHelper(L"Line")
 	{
-		this->Init(is_overlay);
+		this->Init();
 	}
 	
-	RenderableLine::RenderableLine(float3 const & v0, float3 const & v1, Color const & clr, bool is_overlay)
+	RenderableLine::RenderableLine(float3 const & v0, float3 const & v1, Color const & clr)
 		: RenderableHelper(L"Line")
 	{
-		this->Init(is_overlay);
+		this->Init();
 
 		this->SetLine(v0, v1);
 		this->SetColor(clr);
@@ -187,23 +178,12 @@ namespace KlayGE
 		*mvp_param_ = model_mat_ * camera.ViewProjMatrix();
 	}
 
-	void RenderableLine::Init(bool is_overlay)
+	void RenderableLine::Init()
 	{
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
 		RenderEffectPtr effect = SyncLoadRenderEffect("RenderableHelper.fxml");
-		if (deferred_effect_ && !is_overlay)
-		{
-			this->BindDeferredEffect(effect);
-			depth_tech_ = effect->TechniqueByName("LineDepthTech");
-			gbuffer_rt0_tech_ = effect->TechniqueByName("LineRT0Tech");
-			gbuffer_rt1_tech_ = effect->TechniqueByName("LineRT1Tech");
-			gbuffer_mrt_tech_ = effect->TechniqueByName("LineMRTTech");
-		}
-		else
-		{
-			technique_ = effect->TechniqueByName("LineTec");
-		}
+		technique_ = simple_forward_tech_ = effect->TechniqueByName("LineTec");
 		v0_ep_ = effect->ParameterByName("v0");
 		v1_ep_ = effect->ParameterByName("v1");
 		color_ep_ = effect->ParameterByName("color");
@@ -229,19 +209,21 @@ namespace KlayGE
 
 		*(effect->ParameterByName("pos_center")) = float3(0, 0, 0);
 		*(effect->ParameterByName("pos_extent")) = float3(1, 1, 1);
+
+		effect_attrs_ |= EA_SimpleForward;
 	}
 
 
-	RenderableTriangle::RenderableTriangle(bool is_overlay)
+	RenderableTriangle::RenderableTriangle()
 		: RenderableHelper(L"Triangle")
 	{
-		this->Init(is_overlay);
+		this->Init();
 	}
 
-	RenderableTriangle::RenderableTriangle(float3 const & v0, float3 const & v1, float3 const & v2, Color const & clr, bool is_overlay)
+	RenderableTriangle::RenderableTriangle(float3 const & v0, float3 const & v1, float3 const & v2, Color const & clr)
 		: RenderableHelper(L"Triangle")
 	{
-		this->Init(is_overlay);
+		this->Init();
 
 		this->SetTriangle(v0, v1, v2);
 		this->SetColor(clr);
@@ -271,23 +253,12 @@ namespace KlayGE
 		*mvp_param_ = model_mat_ * camera.ViewProjMatrix();
 	}
 
-	void RenderableTriangle::Init(bool is_overlay)
+	void RenderableTriangle::Init()
 	{
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
 		RenderEffectPtr effect = SyncLoadRenderEffect("RenderableHelper.fxml");
-		if (deferred_effect_ && !is_overlay)
-		{
-			this->BindDeferredEffect(effect);
-			depth_tech_ = effect->TechniqueByName("LineDepthTech");
-			gbuffer_rt0_tech_ = effect->TechniqueByName("LineRT0Tech");
-			gbuffer_rt1_tech_ = effect->TechniqueByName("LineRT1Tech");
-			gbuffer_mrt_tech_ = effect->TechniqueByName("LineMRTTech");
-		}
-		else
-		{
-			technique_ = effect->TechniqueByName("LineTec");
-		}
+		technique_ = simple_forward_tech_ = effect->TechniqueByName("LineTec");
 		v0_ep_ = effect->ParameterByName("v0");
 		v1_ep_ = effect->ParameterByName("v1");
 		v2_ep_ = effect->ParameterByName("v2");
@@ -314,19 +285,21 @@ namespace KlayGE
 
 		*(effect->ParameterByName("pos_center")) = float3(0, 0, 0);
 		*(effect->ParameterByName("pos_extent")) = float3(1, 1, 1);
+
+		effect_attrs_ |= EA_SimpleForward;
 	}
 
 
-	RenderableTriBox::RenderableTriBox(bool is_overlay)
+	RenderableTriBox::RenderableTriBox()
 		: RenderableHelper(L"TriBox")
 	{
-		this->Init(is_overlay);
+		this->Init();
 	}
 
-	RenderableTriBox::RenderableTriBox(OBBox const & obb, Color const & clr, bool is_overlay)
+	RenderableTriBox::RenderableTriBox(OBBox const & obb, Color const & clr)
 		: RenderableHelper(L"TriBox")
 	{
-		this->Init(is_overlay);
+		this->Init();
 
 		this->SetBox(obb);
 		this->SetColor(clr);
@@ -357,23 +330,12 @@ namespace KlayGE
 		*mvp_param_ = model_mat_ * camera.ViewProjMatrix();
 	}
 
-	void RenderableTriBox::Init(bool is_overlay)
+	void RenderableTriBox::Init()
 	{		
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
 		RenderEffectPtr effect = SyncLoadRenderEffect("RenderableHelper.fxml");
-		if (deferred_effect_ && !is_overlay)
-		{
-			this->BindDeferredEffect(effect);
-			depth_tech_ = effect->TechniqueByName("LineDepthTech");
-			gbuffer_rt0_tech_ = effect->TechniqueByName("LineRT0Tech");
-			gbuffer_rt1_tech_ = effect->TechniqueByName("LineRT1Tech");
-			gbuffer_mrt_tech_ = effect->TechniqueByName("LineMRTTech");
-		}
-		else
-		{
-			technique_ = effect->TechniqueByName("LineTec");
-		}
+		technique_ = simple_forward_tech_ = effect->TechniqueByName("LineTec");
 		v0_ep_ = effect->ParameterByName("v0");
 		v1_ep_ = effect->ParameterByName("v1");
 		v2_ep_ = effect->ParameterByName("v2");
@@ -422,19 +384,21 @@ namespace KlayGE
 
 		*(effect->ParameterByName("pos_center")) = float3(0, 0, 0);
 		*(effect->ParameterByName("pos_extent")) = float3(1, 1, 1);
+
+		effect_attrs_ |= EA_SimpleForward;
 	}
 
 
-	RenderableLineBox::RenderableLineBox(bool is_overlay)
+	RenderableLineBox::RenderableLineBox()
 		: RenderableHelper(L"LineBox")
 	{
-		this->Init(is_overlay);
+		this->Init();
 	}
 	
-	RenderableLineBox::RenderableLineBox(OBBox const & obb, Color const & clr, bool is_overlay)
+	RenderableLineBox::RenderableLineBox(OBBox const & obb, Color const & clr)
 		: RenderableHelper(L"LineBox")
 	{
-		this->Init(is_overlay);
+		this->Init();
 
 		this->SetBox(obb);
 		this->SetColor(clr);
@@ -465,23 +429,12 @@ namespace KlayGE
 		*mvp_param_ = model_mat_ * camera.ViewProjMatrix();
 	}
 
-	void RenderableLineBox::Init(bool is_overlay)
+	void RenderableLineBox::Init()
 	{
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
 		RenderEffectPtr effect = SyncLoadRenderEffect("RenderableHelper.fxml");
-		if (deferred_effect_ && !is_overlay)
-		{
-			this->BindDeferredEffect(effect);
-			depth_tech_ = effect->TechniqueByName("LineDepthTech");
-			gbuffer_rt0_tech_ = effect->TechniqueByName("LineRT0Tech");
-			gbuffer_rt1_tech_ = effect->TechniqueByName("LineRT1Tech");
-			gbuffer_mrt_tech_ = effect->TechniqueByName("LineMRTTech");
-		}
-		else
-		{
-			technique_ = effect->TechniqueByName("LineTec");
-		}
+		technique_ = simple_forward_tech_ = effect->TechniqueByName("LineTec");
 		v0_ep_ = effect->ParameterByName("v0");
 		v1_ep_ = effect->ParameterByName("v1");
 		v2_ep_ = effect->ParameterByName("v2");
@@ -527,6 +480,8 @@ namespace KlayGE
 
 		*(effect->ParameterByName("pos_center")) = float3(0, 0, 0);
 		*(effect->ParameterByName("pos_extent")) = float3(1, 1, 1);
+
+		effect_attrs_ |= EA_SimpleForward;
 	}
 
 

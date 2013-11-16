@@ -40,12 +40,9 @@ namespace
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-			this->BindDeferredEffect(SyncLoadRenderEffect("MVUtil.fxml"));
-			mvp_param_ = deferred_effect_->ParameterByName("mvp");
-			depth_tech_ = deferred_effect_->TechniqueByName("AxisDepthTech");
-			gbuffer_rt0_tech_ = deferred_effect_->TechniqueByName("AxisRT0Tech");
-			gbuffer_rt1_tech_ = deferred_effect_->TechniqueByName("AxisRT1Tech");
-			gbuffer_mrt_tech_ = deferred_effect_->TechniqueByName("AxisMRTTech");
+			RenderEffectPtr effect = SyncLoadRenderEffect("MVUtil.fxml");
+			simple_forward_tech_ = effect->TechniqueByName("AxisTech");
+			mvp_param_ = effect->ParameterByName("mvp");
 
 			float4 xyzs[] =
 			{
@@ -70,11 +67,13 @@ namespace
 
 			pos_aabb_ = MathLib::compute_aabbox(&xyzs[0], &xyzs[sizeof(xyzs) / sizeof(xyzs[0])]);
 			tc_aabb_ = AABBox(float3(0, 0, 0), float3(0, 0, 0));
+
+			effect_attrs_ |= EA_SimpleForward;
 		}
 
 		void OnRenderBegin()
 		{
-			Camera& camera = Context::Instance().AppInstance().ActiveCamera();
+			Camera const & camera = Context::Instance().AppInstance().ActiveCamera();
 			*mvp_param_ = model_mat_ * camera.ViewProjMatrix();
 		}
 	};
@@ -87,12 +86,9 @@ namespace
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-			this->BindDeferredEffect(SyncLoadRenderEffect("MVUtil.fxml"));
-			mvp_param_ = deferred_effect_->ParameterByName("mvp");
-			depth_tech_ = deferred_effect_->TechniqueByName("GridDepthTech");
-			gbuffer_rt0_tech_ = deferred_effect_->TechniqueByName("GridRT0Tech");
-			gbuffer_rt1_tech_ = deferred_effect_->TechniqueByName("GridRT1Tech");
-			gbuffer_mrt_tech_ = deferred_effect_->TechniqueByName("GridMRTTech");
+			RenderEffectPtr effect = SyncLoadRenderEffect("MVUtil.fxml");
+			simple_forward_tech_ = effect->TechniqueByName("GridTech");
+			mvp_param_ = effect->ParameterByName("mvp");
 
 			float3 xyzs[(21 + 21) * 2];
 			for (int i = 0; i < 21; ++ i)
@@ -117,11 +113,13 @@ namespace
 
 			pos_aabb_ = MathLib::compute_aabbox(&xyzs[0], &xyzs[sizeof(xyzs) / sizeof(xyzs[0])]);
 			tc_aabb_ = AABBox(float3(0, 0, 0), float3(0, 0, 0));
+
+			effect_attrs_ |= EA_SimpleForward;
 		}
 
 		void OnRenderBegin()
 		{
-			Camera& camera = Context::Instance().AppInstance().ActiveCamera();
+			Camera const & camera = Context::Instance().AppInstance().ActiveCamera();
 			*mvp_param_ = model_mat_ * camera.ViewProjMatrix();
 		}
 	};
