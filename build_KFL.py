@@ -14,4 +14,4 @@ if __name__ == "__main__":
 	ci = compiler_info(cfg.compiler, cfg.archs, cfg.cfg)
 
 	print("Building KFL...")
-	build_KFL(ci, arch)
+	build_KFL(ci)

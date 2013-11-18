@@ -1,5 +1,7 @@
 #!/bin/bash
 
+android update project -p . -s -t android-17
+
 $ANDROID_NDK/ndk-build -j 3
 
 if [ ! -d assets ]; then
@@ -16,6 +18,7 @@ cp ../../../../media/RenderFX/LensEffects.kfx assets
 cp ../../../../media/RenderFX/PostToneMapping.kfx assets
 cp ../../../../media/RenderFX/Resizer.kfx assets
 cp ../../../../media/RenderFX/RenderableHelper.kfx assets
+cp ../../../../media/RenderFX/SelectMode.kfx assets
 cp ../../../../media/RenderFX/ToneMapping.kfx assets
 cp ../../../../media/PostProcessors/Copy.ppml assets
 cp ../../../../media/PostProcessors/LensEffects.ppml assets

@@ -1,3 +1,5 @@
+call android update project -p . -s -t android-17
+
 call %ANDROID_NDK%\ndk-build -j 3
 
 if NOT EXIST assets mkdir assets
@@ -13,6 +15,7 @@ copy ..\..\..\..\media\RenderFX\LensEffects.kfx assets
 copy ..\..\..\..\media\RenderFX\PostToneMapping.kfx assets
 copy ..\..\..\..\media\RenderFX\RenderableHelper.kfx assets
 copy ..\..\..\..\media\RenderFX\Resizer.kfx assets
+copy ..\..\..\..\media\RenderFX\SelectMode.kfx assets
 copy ..\..\..\..\media\RenderFX\ToneMapping.kfx assets
 copy ..\..\..\..\media\RenderFX\UI.kfx assets
 copy ..\..\..\..\media\PostProcessors\Copy.ppml assets

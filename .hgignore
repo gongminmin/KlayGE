@@ -17,6 +17,11 @@ cfg_build.py
 */build/android/*/*/*/obj
 */build/android/*/assets
 */build/android/obj/
+*/build/android/*/build.xml
+*/build/android/*/local.properties
+*/build/android/*/proguard.cfg
+*/build/android/*/proguard-project.txt
+*/build/android/*/project.properties
 */build/codelite/*.mk
 */build/codelite/*.tags
 */build/codelite/*.session
