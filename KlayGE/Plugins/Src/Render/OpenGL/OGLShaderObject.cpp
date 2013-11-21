@@ -2072,7 +2072,7 @@ namespace KlayGE
 					cg_param = cgGetNextParameter(cg_param);
 				}
 
-				if (0 == type)
+				if (ST_VertexShader == type)
 				{
 					cg_param = cgGetFirstParameter(cg_shader, CG_PROGRAM);
 					while (cg_param)
@@ -2288,7 +2288,7 @@ namespace KlayGE
 					}
 				}
 
-				if (0 == type)
+				if (ST_VertexShader == type)
 				{
 					for (size_t pi = 0; pi < glsl_vs_attrib_names_->size(); ++ pi)
 					{

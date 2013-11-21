@@ -1643,14 +1643,13 @@ namespace KlayGE
 
 			(*pnames_)[type] = (*so->pnames_)[type];
 			(*glsl_res_names_)[type] = (*so->glsl_res_names_)[type];
-			if (0 == type)
+			if (ST_VertexShader == type)
 			{
 				*vs_usages_ = *so->vs_usages_;
 				*vs_usage_indices_ = *so->vs_usage_indices_;
 				*glsl_vs_attrib_names_ = *so->glsl_vs_attrib_names_;
 			}
-
-			if (ST_PixelShader == type)
+			else if (ST_PixelShader == type)
 			{
 				has_discard_ = so->has_discard_;
 			}
@@ -1736,7 +1735,7 @@ namespace KlayGE
 					}
 				}
 				
-				if (0 == type)
+				if (ST_VertexShader == type)
 				{
 					for (size_t pi = 0; pi < glsl_vs_attrib_names_->size(); ++ pi)
 					{
@@ -2168,7 +2167,7 @@ namespace KlayGE
 				cg_param = cgGetNextParameter(cg_param);
 			}
 
-			if (0 == type)
+			if (ST_VertexShader == type)
 			{
 				cg_param = cgGetFirstParameter(cg_shader, CG_PROGRAM);
 				while (cg_param)

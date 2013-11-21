@@ -216,6 +216,9 @@ void TextApp::DoUpdateOverlay()
 {
 	RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 
+	float2 fxy = position_ * scale_;
+	font_->RenderText(fxy.x(), fxy.y(), 0.5f, 1, 1, Color(1, 1, 1, 1), text_, 32 * scale_);
+
 	std::wostringstream stream;
 	stream.precision(2);
 	stream << std::fixed << this->FPS() << " FPS";
@@ -223,9 +226,6 @@ void TextApp::DoUpdateOverlay()
 	font_->RenderText(0, 0, Color(1, 1, 0, 1), L"Text", 16);
 	font_->RenderText(0, 18, Color(1, 1, 0, 1), renderEngine.ScreenFrameBuffer()->Description(), 16);
 	font_->RenderText(0, 36, Color(1, 1, 0, 1), stream.str(), 16);
-
-	float2 fxy = position_ * scale_;
-	font_->RenderText(fxy.x(), fxy.y(), 0.5f, 1, 1, Color(1, 1, 1, 1), text_, 32 * scale_);
 
 	UIManager::Instance().Render();
 }

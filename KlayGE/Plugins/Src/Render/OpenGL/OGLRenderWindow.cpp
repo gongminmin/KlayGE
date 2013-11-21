@@ -35,6 +35,8 @@
 #include <map>
 #include <sstream>
 #include <boost/assert.hpp>
+#include <boost/algorithm/string/split.hpp>
+#include <boost/algorithm/string/trim.hpp>
 
 #include <glloader/glloader.h>
 
@@ -181,32 +183,60 @@ namespace KlayGE
 			}
 		}
 
-		if (!glloader_GL_VERSION_4_0() && !glloader_GL_VERSION_3_0() && glloader_WGL_ARB_create_context())
+		std::vector<std::pair<std::string, std::pair<int, int> > > available_versions;
+		available_versions.push_back(std::make_pair("4.4", std::make_pair(4, 4)));
+		available_versions.push_back(std::make_pair("4.3", std::make_pair(4, 3)));
+		available_versions.push_back(std::make_pair("4.2", std::make_pair(4, 2)));
+		available_versions.push_back(std::make_pair("4.1", std::make_pair(4, 1)));
+		available_versions.push_back(std::make_pair("4.0", std::make_pair(4, 0)));
+		available_versions.push_back(std::make_pair("3.3", std::make_pair(3, 3)));
+		available_versions.push_back(std::make_pair("3.2", std::make_pair(3, 2)));
+		available_versions.push_back(std::make_pair("3.1", std::make_pair(3, 1)));
+		available_versions.push_back(std::make_pair("3.0", std::make_pair(3, 0)));
+
+		std::vector<std::string> strs;
+		boost::algorithm::split(strs, settings.options, boost::is_any_of(","));
+		for (size_t index = 0; index < strs.size(); ++ index)
+		{
+			std::string& opt = strs[index];
+			boost::algorithm::trim(opt);
+			std::string::size_type loc = opt.find(':');
+			std::string opt_name = opt.substr(0, loc);
+			std::string opt_val = opt.substr(loc + 1);
+
+			if ("version" == opt_name)
+			{
+				size_t feature_index = 0;
+				for (size_t i = 0; i < available_versions.size(); ++ i)
+				{
+					if (available_versions[i].first == opt_val)
+					{
+						feature_index = i;
+						break;
+					}
+				}
+
+				if (feature_index > 0)
+				{
+					available_versions.erase(available_versions.begin(),
+						available_versions.begin() + feature_index);
+				}
+			}
+		}
+
+		if (glloader_WGL_ARB_create_context())
 		{
 			int flags = 0;//WGL_CONTEXT_FORWARD_COMPATIBLE_BIT_ARB;
 #ifdef KLAYGE_DEBUG
 			flags |= WGL_CONTEXT_DEBUG_BIT_ARB;
 #endif
-			uint32_t const MODERN_VERSIONS = 9;
-			int versions[MODERN_VERSIONS][2] =
-			{
-				{ 4, 4 },
-				{ 4, 3 },
-				{ 4, 2 },
-				{ 4, 1 },
-				{ 4, 0 },
-				{ 3, 3 },
-				{ 3, 2 },
-				{ 3, 1 },
-				{ 3, 0 }
-			};
 
-			int attribs[] = { WGL_CONTEXT_MAJOR_VERSION_ARB, versions[0][0], WGL_CONTEXT_MINOR_VERSION_ARB, versions[0][1],
+			int attribs[] = { WGL_CONTEXT_MAJOR_VERSION_ARB, 0, WGL_CONTEXT_MINOR_VERSION_ARB, 0,
 				WGL_CONTEXT_FLAGS_ARB, flags, WGL_CONTEXT_PROFILE_MASK_ARB, WGL_CONTEXT_COMPATIBILITY_PROFILE_BIT_ARB, 0 };
-			for (uint32_t i = 0; i < MODERN_VERSIONS; ++ i)
+			for (size_t i = 0; i < available_versions.size(); ++ i)
 			{
-				attribs[1] = versions[i][0];
-				attribs[3] = versions[i][1];
+				attribs[1] = available_versions[i].second.first;
+				attribs[3] = available_versions[i].second.second;
 				HGLRC hRC_new = wglCreateContextAttribsARB(hDC_, nullptr, attribs);
 				if (hRC_new != nullptr)
 				{
@@ -251,27 +281,13 @@ namespace KlayGE
 
 		uint32_t sample_count = settings.sample_count;
 
-		if (!glloader_GL_VERSION_4_0() && !glloader_GL_VERSION_3_0() && glloader_GLX_ARB_create_context())
+		if (glloader_GLX_ARB_create_context())
 		{
-			uint32_t const MODERN_VERSIONS = 9;
-			int versions[MODERN_VERSIONS][2] =
+			int attribs[] = { GLX_CONTEXT_MAJOR_VERSION_ARB, 0, GLX_CONTEXT_MINOR_VERSION_ARB, 0, 0 };
+			for (size_t i = 0; i < available_versions.size(); ++ i)
 			{
-				{ 4, 4 },
-				{ 4, 3 },
-				{ 4, 2 },
-				{ 4, 1 },
-				{ 4, 0 },
-				{ 3, 3 },
-				{ 3, 2 },
-				{ 3, 1 },
-				{ 3, 0 }
-			};
-
-			int attribs[] = { GLX_CONTEXT_MAJOR_VERSION_ARB, versions[0][0], GLX_CONTEXT_MINOR_VERSION_ARB, versions[0][1], 0 };
-			for (uint32_t i = 0; i < MODERN_VERSIONS; ++ i)
-			{
-				attribs[1] = versions[i][0];
-				attribs[3] = versions[i][1];
+				attribs[1] = available_versions[i].second.first;
+				attribs[3] = available_versions[i].second.second;
 				GLXContext x_context_new = glXCreateContextAttribsARB(x_display_, fbc_[0], nullptr, GL_TRUE, attribs);
 				if (x_context_new != nullptr)
 				{

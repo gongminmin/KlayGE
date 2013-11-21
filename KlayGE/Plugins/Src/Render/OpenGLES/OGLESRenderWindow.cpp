@@ -25,6 +25,8 @@
 #include <map>
 #include <sstream>
 #include <boost/assert.hpp>
+#include <boost/algorithm/string/split.hpp>
+#include <boost/algorithm/string/trim.hpp>
 
 #include <glloader/glloader.h>
 
@@ -110,9 +112,45 @@ namespace KlayGE
 			break;
 		}
 
+		std::vector<std::pair<std::string, std::pair<EGLint, int> > > available_versions;
+#if !defined(KLAYGE_PLATFORM_ANDROID) || (__ANDROID_API__ >= 18)
+		available_versions.push_back(std::make_pair("3.0", std::make_pair(EGL_OPENGL_ES3_BIT_KHR, 3)));
+#endif
+		available_versions.push_back(std::make_pair("2.0", std::make_pair(EGL_OPENGL_ES2_BIT, 2)));
+
+		std::vector<std::string> strs;
+		boost::algorithm::split(strs, settings.options, boost::is_any_of(","));
+		for (size_t index = 0; index < strs.size(); ++ index)
+		{
+			std::string& opt = strs[index];
+			boost::algorithm::trim(opt);
+			std::string::size_type loc = opt.find(':');
+			std::string opt_name = opt.substr(0, loc);
+			std::string opt_val = opt.substr(loc + 1);
+
+			if ("version" == opt_name)
+			{
+				size_t feature_index = 0;
+				for (size_t i = 0; i < available_versions.size(); ++ i)
+				{
+					if (available_versions[i].first == opt_val)
+					{
+						feature_index = i;
+						break;
+					}
+				}
+
+				if (feature_index > 0)
+				{
+					available_versions.erase(available_versions.begin(),
+						available_versions.begin() + feature_index);
+				}
+			}
+		}
+
 		std::vector<EGLint> visual_attr;
 		visual_attr.push_back(EGL_RENDERABLE_TYPE);
-		visual_attr.push_back(EGL_OPENGL_ES3_BIT_KHR);
+		visual_attr.push_back(available_versions[0].second.first);
 		visual_attr.push_back(EGL_RED_SIZE);
 		visual_attr.push_back(r_size);
 		visual_attr.push_back(EGL_GREEN_SIZE);
@@ -143,13 +181,17 @@ namespace KlayGE
 		eglInitialize(display_, &major_ver, &minor_ver);
 		eglGetConfigs(display_, nullptr, 0, &num_cfgs);
 
-#if !defined(KLAYGE_PLATFORM_ANDROID) || (__ANDROID_API__ >= 18)
-		if (!eglChooseConfig(display_, &visual_attr[0], &cfg_, 1, &num_cfgs))
-#endif
+		EGLint client_version = -1;
+		for (size_t i = 0; i < available_versions.size(); ++ i)
 		{
-			visual_attr[1] = EGL_OPENGL_ES2_BIT;
-			eglChooseConfig(display_, &visual_attr[0], &cfg_, 1, &num_cfgs);
+			visual_attr[1] = available_versions[i].second.first;
+			if (eglChooseConfig(display_, &visual_attr[0], &cfg_, 1, &num_cfgs))
+			{
+				client_version = available_versions[i].second.second;
+				break;
+			}
 		}
+		BOOST_ASSERT(client_version != -1);
 
 		NativeWindowType wnd;
 #if defined KLAYGE_PLATFORM_WINDOWS
@@ -166,15 +208,8 @@ namespace KlayGE
 
 		surf_ = eglCreateWindowSurface(display_, cfg_, wnd, nullptr);
 
-		EGLint ctx_attr[] = { EGL_CONTEXT_CLIENT_VERSION, 3, EGL_NONE };
-#if !defined(KLAYGE_PLATFORM_ANDROID) || (__ANDROID_API__ >= 18)
+		EGLint ctx_attr[] = { EGL_CONTEXT_CLIENT_VERSION, client_version, EGL_NONE };
 		context_ = eglCreateContext(display_, cfg_, EGL_NO_CONTEXT, ctx_attr);
-		if (nullptr == context_)
-#endif
-		{
-			ctx_attr[1] = 2;
-			context_ = eglCreateContext(display_, cfg_, EGL_NO_CONTEXT, ctx_attr);
-		}
    
 		eglMakeCurrent(display_, surf_, surf_, context_);
 
