@@ -237,32 +237,17 @@ def log_warning(message):
 def build_a_project(name, build_path, compiler_info, compiler_arch, need_install = False, additional_options = ""):
 	curdir = os.path.abspath(os.curdir)
 
-	if "vc" == compiler_info.name:
-		build_dir = "%s/build/%s-%d_0-%s" % (build_path, compiler_info.name, compiler_info.version, compiler_arch[0])
-	else:
-		build_dir = "%s/build/%s-%s" % (build_path, compiler_info.name, compiler_arch[0])
-	if not os.path.exists(build_dir):
-		os.makedirs(build_dir)
-
-	os.chdir(build_dir)
-	
 	toolset_name = ""
 	if "vc" == compiler_info.name:
 		toolset_name = "-T %s" % compiler_arch[2]
 
 	if compiler_arch[3]:
-		additional_options += "-D KLAYGE_WITH_WINRT:BOOL=\"TRUE\" "
+		additional_options += " -D KLAYGE_WITH_WINRT:BOOL=\"TRUE\""
 	if compiler_arch[4]:
-		additional_options += "-D KLAYGE_WITH_XP_TOOLSET:BOOL=\"TRUE\" "
+		additional_options += " -D KLAYGE_WITH_XP_TOOLSET:BOOL=\"TRUE\""
 	if compiler_info.name != "vc":
-		additional_options += "-D KLAYGE_ARCH_NAME:STRING=\"%s\" " % compiler_arch[0]
+		additional_options += " -D KLAYGE_ARCH_NAME:STRING=\"%s\"" % compiler_arch[0]
 
-	cmake_cmd = batch_command()
-	cmake_cmd.add_command('cmake -G "%s" %s %s %s' % (compiler_arch[1], toolset_name, additional_options, "../cmake"))
-	if cmake_cmd.execute() != 0:
-		log_error("Config %s failed." % name)
-
-	build_cmd = batch_command()
 	if "vc" == compiler_info.name:
 		if ("x86" == compiler_arch[0]) or ("x86_app" == compiler_arch[0]):
 			vc_option = "x86"
@@ -271,24 +256,55 @@ def build_a_project(name, build_path, compiler_info, compiler_arch, need_install
 		elif ("arm_app" == compiler_arch[0]):
 			vc_option = "x86_arm"
 
+		build_dir = "%s/build/%s-%d_0-%s" % (build_path, compiler_info.name, compiler_info.version, compiler_arch[0])
+		if not os.path.exists(build_dir):
+			os.makedirs(build_dir)
+
+		os.chdir(build_dir)
+
+		cmake_cmd = batch_command()
+		cmake_cmd.add_command('cmake -G "%s" %s %s %s' % (compiler_arch[1], toolset_name, additional_options, "../cmake"))
+		if cmake_cmd.execute() != 0:
+			log_error("Config %s failed." % name)
+
+		build_cmd = batch_command()
 		build_cmd.add_command('@CALL "%%VS%d0COMNTOOLS%%..\\..\\VC\\vcvarsall.bat" %s' % (compiler_info.version, vc_option))
 		for config in compiler_info.cfg:
 			compiler_info.msvc_add_build_command(build_cmd, name, "ALL_BUILD", config)
 			if need_install:
 				compiler_info.msvc_add_build_command(build_cmd, name, "INSTALL", config)
-	else:
-		install_str = ""
-		if need_install:
-			install_str = "install"
-		if "mgw" == compiler_info.name:
-			build_cmd.add_command("@mingw32-make.exe %s" % install_str)
-		else:
-			build_cmd.add_command("@make %s" % install_str)
-		build_cmd.add_command('@if ERRORLEVEL 1 exit /B 1')
-	if build_cmd.execute() != 0:
-		log_error("Build %s failed." % name)
+		if build_cmd.execute() != 0:
+			log_error("Build %s failed." % name)
 
-	os.chdir(curdir)
+		os.chdir(curdir)
+	else:
+		for config in compiler_info.cfg:
+			build_dir = "%s/build/%s-%s-%s" % (build_path, compiler_info.name, compiler_arch[0], config)
+			if not os.path.exists(build_dir):
+				os.makedirs(build_dir)
+
+			os.chdir(build_dir)
+			
+			additional_options += " -D CMAKE_BUILD_TYPE:STRING=\"%s\"" % config
+			
+			cmake_cmd = batch_command()
+			cmake_cmd.add_command('cmake -G "%s" %s %s %s' % (compiler_arch[1], toolset_name, additional_options, "../cmake"))
+			if cmake_cmd.execute() != 0:
+				log_error("Config %s failed." % name)		
+
+			install_str = ""
+			if need_install:
+				install_str = "install"
+			build_cmd = batch_command()
+			if "mgw" == compiler_info.name:
+				build_cmd.add_command("@mingw32-make.exe %s" % install_str)
+			else:
+				build_cmd.add_command("@make %s" % install_str)
+			build_cmd.add_command('@if ERRORLEVEL 1 exit /B 1')
+			if build_cmd.execute() != 0:
+				log_error("Build %s failed." % name)
+
+			os.chdir(curdir)
 
 def copy_to_dst(src_name, dst_dir):
 	print("Copy %s to %s" % (src_name, dst_dir))
