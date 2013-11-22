@@ -78,17 +78,13 @@ namespace KlayGE
 		virtual void CalcIndirectLighting(TexturePtr const & prev_shading_tex, float4x4 const & proj_to_prev);
 
 	private:
-		void CreateDepthDerivativeMipMap();
-		void CreateNormalConeMipMap();
-		void SetSubsplatStencil();
 		void ExtractVPLs(CameraPtr const & rsm_camera, LightSourcePtr const & light);
 		void VPLsLighting(LightSourcePtr const & light);
-		void UpsampleMultiresLighting();
 
 	private:
-		RenderLayoutPtr rl_quad_;
+		MultiResLayerPtr multi_res_layer_;
 
-		array<TexturePtr, 2> g_buffer_texs_;
+		TexturePtr g_buffer_rt0_tex_;
 		TexturePtr g_buffer_depth_tex_;
 		CameraPtr g_buffer_camera_;
 
@@ -98,30 +94,8 @@ namespace KlayGE
 		array<PostProcessPtr, LightSource::LT_NumLightTypes> rsm_to_vpls_pps_;
 		TexturePtr vpl_tex_;
 
-		TexturePtr depth_deriative_tex_;
-		TexturePtr depth_deriative_small_tex_;
-		TexturePtr normal_cone_tex_;
-		TexturePtr normal_cone_small_tex_;
-
-		TexturePtr indirect_lighting_pingpong_tex_;
-		std::vector<FrameBufferPtr> vpls_lighting_fbs_;
-				
-		RenderTechniquePtr subsplat_stencil_tech_;
 		RenderTechniquePtr vpls_lighting_instance_id_tech_;
 		RenderTechniquePtr vpls_lighting_no_instance_id_tech_;
-
-		PostProcessPtr gbuffer_to_depth_derivate_pp_;
-		PostProcessPtr depth_derivate_mipmap_pp_;
-		PostProcessPtr gbuffer_to_normal_cone_pp_;
-		PostProcessPtr normal_cone_mipmap_pp_;
-
-		PostProcessPtr upsampling_pp_;
-
-		RenderEffectParameterPtr subsplat_cur_lower_level_param_;
-		RenderEffectParameterPtr subsplat_is_not_first_last_level_param_;
-		RenderEffectParameterPtr subsplat_depth_deriv_tex_param_;
-		RenderEffectParameterPtr subsplat_normal_cone_tex_param_;
-		RenderEffectParameterPtr subsplat_depth_normal_threshold_param_;
 
 		RenderEffectParameterPtr vpl_view_param_;
 		RenderEffectParameterPtr vpl_proj_param_;
@@ -135,7 +109,6 @@ namespace KlayGE
 
 		RenderLayoutPtr rl_vpl_;
 
-	private:
 		TexturePtr rsm_depth_derivative_tex_;
 		PostProcessPtr rsm_to_depth_derivate_pp_;
 	};
