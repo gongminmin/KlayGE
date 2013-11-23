@@ -108,36 +108,36 @@ class compiler_info:
 			compiler_name = "vc"
 			compiler_version = 12
 			for arch in archs:
-				is_metro = False
+				is_winrt = False
 				if (arch.find("_app") > 0):
 					toolset = "v120"
-					is_metro = True
+					is_winrt = True
 				is_xp_toolset = False
 				if (toolset.find("_xp") > 0):
 					is_xp_toolset = True
 				if ("x86" == arch) or ("x86_app" == arch):
-					arch_list.append((arch, "Visual Studio 12", toolset, is_metro, is_xp_toolset))
+					arch_list.append((arch, "Visual Studio 12", toolset, is_winrt, is_xp_toolset))
 				elif "arm_app" == arch:
-					arch_list.append((arch, "Visual Studio 12 ARM", toolset, is_metro, is_xp_toolset))
+					arch_list.append((arch, "Visual Studio 12 ARM", toolset, is_winrt, is_xp_toolset))
 				elif ("x64" == arch) or ("x64_app" == arch):
-					arch_list.append((arch, "Visual Studio 12 Win64", toolset, is_metro, is_xp_toolset))
+					arch_list.append((arch, "Visual Studio 12 Win64", toolset, is_winrt, is_xp_toolset))
 		elif "vc11" == compiler:
 			compiler_name = "vc"
 			compiler_version = 11
 			for arch in archs:
-				is_metro = False
+				is_winrt = False
 				if (arch.find("_app") > 0):
 					toolset = "v110"
-					is_metro = True
+					is_winrt = True
 				is_xp_toolset = False
 				if (toolset.find("_xp") > 0):
 					is_xp_toolset = True
 				if ("x86" == arch) or ("x86_app" == arch):
-					arch_list.append((arch, "Visual Studio 11", toolset, is_metro, is_xp_toolset))
+					arch_list.append((arch, "Visual Studio 11", toolset, is_winrt, is_xp_toolset))
 				elif "arm_app" == arch:
-					arch_list.append((arch, "Visual Studio 11 ARM", toolset, is_metro, is_xp_toolset))
+					arch_list.append((arch, "Visual Studio 11 ARM", toolset, is_winrt, is_xp_toolset))
 				elif ("x64" == arch) or ("x64_app" == arch):
-					arch_list.append((arch, "Visual Studio 11 Win64", toolset, is_metro, is_xp_toolset))
+					arch_list.append((arch, "Visual Studio 11 Win64", toolset, is_winrt, is_xp_toolset))
 		elif "vc10" == compiler:
 			compiler_name = "vc"
 			compiler_version = 10
