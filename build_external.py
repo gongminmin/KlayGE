@@ -122,14 +122,11 @@ def build_external_libs(compiler_info):
 			print("\nBuilding freetype...\n")
 			build_freetype(compiler_info, arch)
 
-		if ("vc" == compiler_info.name):
-			print("\nBuilding 7z...\n")
-			build_7z(compiler_info, arch)
+		print("\nBuilding 7z...\n")
+		build_7z(compiler_info, arch)
 
-			for fname in glob.iglob("External/7z/lib/%s/7zxa*.%s" % (platform_dir, dll_suffix)):
-				copy_to_dst(fname, dst_dir)
-			for fname in glob.iglob("External/7z/lib/%s/LZMA*.%s" % (platform_dir, dll_suffix)):
-				copy_to_dst(fname, dst_dir)
+		for fname in glob.iglob("External/7z/lib/%s/*.%s" % (platform_dir, dll_suffix)):
+			copy_to_dst(fname, dst_dir)
 
 		if not arch[3]:
 			if "win" == compiler_info.platform:

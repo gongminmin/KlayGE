@@ -40,6 +40,24 @@
 
 #include <KlayGE/LZMACodec.hpp>
 
+#ifdef KLAYGE_COMPILER_GCC
+	#define DLL_PREFIX "lib"
+#else
+	#define DLL_PREFIX ""
+#endif
+#ifdef KLAYGE_DEBUG
+	#define DBG_SUFFIX "_d"
+#else
+	#define DBG_SUFFIX ""
+#endif
+#ifdef KLAYGE_PLATFORM_WINDOWS
+	#define DLL_EXT_NAME "dll"
+#else
+	#define DLL_EXT_NAME "so"
+#endif
+
+#define DLL_SUFFIX DBG_SUFFIX "." DLL_EXT_NAME
+
 namespace
 {
 	using namespace KlayGE;
@@ -99,11 +117,8 @@ namespace
 		LZMALoader()
 		{
 #ifndef KLAYGE_PLATFORM_ANDROID
-#ifdef KLAYGE_PLATFORM_WINDOWS
-			dll_loader_.Load("LZMA.dll");
-#elif defined KLAYGE_PLATFORM_LINUX
-			dll_loader_.Load("LZMA.so");
-#endif
+			dll_loader_.Load(DLL_PREFIX "LZMA" DLL_SUFFIX);
+
 			lzmaCompressFunc_ = (LzmaCompressFunc)dll_loader_.GetProcAddress("LzmaCompress");
 			lzmaUncompressFunc_ = (LzmaUncompressFunc)dll_loader_.GetProcAddress("LzmaUncompress");
 

@@ -60,6 +60,24 @@
 #endif
 #endif
 
+#ifdef KLAYGE_COMPILER_GCC
+	#define DLL_PREFIX "lib"
+#else
+	#define DLL_PREFIX ""
+#endif
+#ifdef KLAYGE_DEBUG
+	#define DBG_SUFFIX "_d"
+#else
+	#define DBG_SUFFIX ""
+#endif
+#ifdef KLAYGE_PLATFORM_WINDOWS
+	#define DLL_EXT_NAME "dll"
+#else
+	#define DLL_EXT_NAME "so"
+#endif
+
+#define DLL_SUFFIX DBG_SUFFIX "." DLL_EXT_NAME
+
 namespace
 {
 	using namespace KlayGE;
@@ -127,11 +145,8 @@ namespace
 	private:
 		SevenZipLoader()
 		{
-#ifdef KLAYGE_PLATFORM_WINDOWS
-			dll_loader_.Load("7zxa.dll");
-#elif defined KLAYGE_PLATFORM_LINUX || defined KLAYGE_PLATFORM_ANDROID
-			dll_loader_.Load("7zxa.so");
-#endif
+			dll_loader_.Load(DLL_PREFIX "7zxa" DLL_SUFFIX);
+
 			createObjectFunc_ = (CreateObjectFunc)dll_loader_.GetProcAddress("CreateObject");
 
 			BOOST_ASSERT(createObjectFunc_);
