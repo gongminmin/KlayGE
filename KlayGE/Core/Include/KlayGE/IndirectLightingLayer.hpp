@@ -126,7 +126,9 @@ namespace KlayGE
 		virtual void CalcIndirectLighting(TexturePtr const & prev_shading_tex, float4x4 const & proj_to_prev);
 
 	private:
-		array<TexturePtr, 2> g_buffer_texs_;
+		MultiResLayerPtr multi_res_layer_;
+
+		TexturePtr g_buffer_rt0_tex_;
 		TexturePtr g_buffer_depth_tex_;
 		CameraPtr g_buffer_camera_;
 

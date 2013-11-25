@@ -247,6 +247,8 @@ namespace KlayGE
 
 	SSGILayer::SSGILayer()
 	{
+		multi_res_layer_ = MakeSharedPtr<MultiResLayer>();
+
 		ssgi_pp_ = MakeSharedPtr<SSGIPostProcess>();
 		ssgi_blur_pp_ = MakeSharedPtr<BlurPostProcess<SeparableBilateralFilterPostProcess> >(4, 1.0f,
 			SyncLoadRenderEffect("SSGI.fxml")->TechniqueByName("SSGIBlurX"),
@@ -255,31 +257,19 @@ namespace KlayGE
 
 	void SSGILayer::GBuffer(TexturePtr const & rt0_tex, TexturePtr const & rt1_tex, TexturePtr const & depth_tex)
 	{
-		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-		RenderEngine& re = rf.RenderEngineInstance();
-		RenderDeviceCaps const & caps = re.DeviceCaps();
+		UNREF_PARAM(rt1_tex);
 
-		g_buffer_texs_[0] = rt0_tex;
-		g_buffer_texs_[1] = rt1_tex;
+		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+
+		g_buffer_rt0_tex_ = rt0_tex;
 		g_buffer_depth_tex_ = depth_tex;
 
 		uint32_t const width = rt0_tex->Width(0);
 		uint32_t const height = rt0_tex->Height(0);
-
-		ElementFormat fmt;
-		if (caps.rendertarget_format_support(EF_B10G11R11F, 1, 0))
-		{
-			fmt = EF_B10G11R11F;
-		}
-		else
-		{
-			BOOST_ASSERT(caps.rendertarget_format_support(EF_ABGR16F, 1, 0));
-
-			fmt = EF_ABGR16F;
-		}
-		small_ssgi_tex_ = rf.MakeTexture2D(width / 4, height / 4, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
-
+		small_ssgi_tex_ = rf.MakeTexture2D(width / 4, height / 4, MAX_IL_MIPMAP_LEVELS - 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
 		indirect_lighting_tex_ = rf.MakeTexture2D(width / 2, height / 2, 1, 1, EF_ABGR16F, 1, 0,  EAH_GPU_Read | EAH_GPU_Write, nullptr);
+
+		multi_res_layer_->BindBuffers(rt0_tex, rt1_tex, depth_tex, small_ssgi_tex_);
 	}
 
 	void SSGILayer::RSM(TexturePtr const & rt0_tex, TexturePtr const & rt1_tex, TexturePtr const & depth_tex)
@@ -291,7 +281,7 @@ namespace KlayGE
 
 	void SSGILayer::UpdateGBuffer(CameraPtr const & vp_camera)
 	{
-		UNREF_PARAM(vp_camera);
+		multi_res_layer_->UpdateGBuffer(vp_camera);
 	}
 
 	void SSGILayer::UpdateRSM(CameraPtr const & rsm_camera, LightSourcePtr const & light)
@@ -304,11 +294,19 @@ namespace KlayGE
 	{
 		UNREF_PARAM(proj_to_prev);
 
-		ssgi_pp_->InputPin(0, g_buffer_texs_[0]);
+		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+
+		ssgi_pp_->InputPin(0, g_buffer_rt0_tex_);
 		ssgi_pp_->InputPin(1, g_buffer_depth_tex_);
 		ssgi_pp_->InputPin(2, prev_shading_tex);
-		ssgi_pp_->OutputPin(0, small_ssgi_tex_);
-		ssgi_pp_->Apply();
+		ssgi_pp_->OutputPin(0, TexturePtr());
+		for (uint32_t i = 0; i < small_ssgi_tex_->NumMipMaps(); ++ i)
+		{
+			re.BindFrameBuffer(multi_res_layer_->MultiResFB(i));
+			ssgi_pp_->Render();
+		}
+
+		multi_res_layer_->UpsampleMultiRes();
 
 		ssgi_blur_pp_->InputPin(0, small_ssgi_tex_);
 		ssgi_blur_pp_->InputPin(1, g_buffer_depth_tex_);

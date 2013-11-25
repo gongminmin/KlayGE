@@ -58,6 +58,9 @@ float3 CalcAlchemyObscurance(float2 tc, float3 pos_es, float3 x_dir, float3 y_di
 
 	x_dir *= radius;
 	y_dir *= radius;
+	
+	float2 grad_x = ddx(tc);
+	float2 grad_y = ddy(tc);
 
 	float sqr_radius = radius * radius;
 	float3 indirect = 0;
@@ -73,10 +76,10 @@ float3 CalcAlchemyObscurance(float2 tc, float3 pos_es, float3 x_dir, float3 y_di
 			float4 sample_point_ss = mul(float4(sample_point, 1), proj);
 
 			float2 tc_sample = TexCoordFromPos(sample_point_ss / sample_point_ss.w);
-			float depth_sample = depth_tex.SampleLevel(point_sampler, tc_sample, 2).r;
+			float depth_sample = depth_tex.SampleGrad(point_sampler, tc_sample, grad_x, grad_y).r;
 			float3 pos_es_sample = sample_point * (depth_sample / sample_point.z);
 			float3 dir_es_sample = pos_es_sample - pos_es;
-			float3 normal_sample = GetNormal(g_buffer_tex.SampleLevel(point_sampler, tc_sample, 2));
+			float3 normal_sample = GetNormal(g_buffer_tex.SampleGrad(point_sampler, tc_sample, grad_x, grad_y));
 			
 			if (dot(normal_sample, normal) < 1e-3f)
 			{
@@ -123,7 +126,7 @@ float4 SSGIPS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Target
 	float3 x_dir = cross(y_dir, normal);
 
 	float3 indirect = CalcAlchemyObscurance(tc, pos_es, x_dir, y_dir, normal, radius, depth);
-	return float4(indirect, 0);
+	return float4(indirect, 1);
 }
 		]]>
 	</shader>
@@ -132,6 +135,17 @@ float4 SSGIPS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Target
 		<pass name="p0">
 			<state name="depth_enable" value="false"/>
 			<state name="depth_write_mask" value="false"/>
+
+			<state name="front_stencil_enable" value="true"/>
+			<state name="front_stencil_func" value="equal"/>
+			<state name="front_stencil_ref" value="0"/>
+			<state name="front_stencil_pass" value="keep"/>
+			<state name="front_stencil_write_mask" value="0"/>
+			<state name="back_stencil_enable" value="true"/>
+			<state name="back_stencil_func" value="equal"/>
+			<state name="back_stencil_ref" value="0"/>
+			<state name="back_stencil_pass" value="keep"/>
+			<state name="back_stencil_write_mask" value="0"/>
 
 			<state name="vertex_shader" value="SSGIVS()"/>
 			<state name="pixel_shader" value="SSGIPS()"/>
