@@ -1,12 +1,6 @@
 SET(SOURCE_FILES
 	${KLAYGE_PROJECT_DIR}/Samples/src/Text/Text.cpp
 )
-IF(KLAYGE_WITH_WINRT)
-	SET(SOURCE_FILES
-		${SOURCE_FILES}
-		${KLAYGE_PROJECT_DIR}/Samples/media/Text/Package_${KLAYGE_COMPILER_NAME}${KLAYGE_COMPILER_VERSION}0.appxmanifest
-	)
-ENDIF()
 
 SET(HEADER_FILES
 	${KLAYGE_PROJECT_DIR}/Samples/src/Text/Text.hpp
@@ -18,14 +12,10 @@ SET(UI_FILES
 
 IF(KLAYGE_WITH_WINRT)
 	SET(CONTENT_FILES
+		${KLAYGE_PROJECT_DIR}/bin/KlayGE.cfg
 		${KLAYGE_PROJECT_DIR}/media/Textures/2D/powered_by_klayge.dds
 		${KLAYGE_PROJECT_DIR}/media/Textures/2D/ui.dds
 		${KLAYGE_PROJECT_DIR}/media/Textures/3D/color_grading.dds
-		${KLAYGE_PROJECT_DIR}/Samples/media/Common/Assets/Logo.png
-		${KLAYGE_PROJECT_DIR}/Samples/media/Common/Assets/SmallLogo.png
-		${KLAYGE_PROJECT_DIR}/Samples/media/Common/Assets/SplashScreen.png
-		${KLAYGE_PROJECT_DIR}/Samples/media/Common/Assets/StoreLogo.png
-		${KLAYGE_PROJECT_DIR}/bin/KlayGE.cfg
 		${KLAYGE_PROJECT_DIR}/media/Fonts/gkai00mp.kfont
 		${KLAYGE_PROJECT_DIR}/media/PostProcessors/Copy.ppml
 		${KLAYGE_PROJECT_DIR}/media/PostProcessors/LensEffects.ppml
@@ -41,7 +31,12 @@ IF(KLAYGE_WITH_WINRT)
 		${KLAYGE_PROJECT_DIR}/media/RenderFX/SumLum.kfx
 		${KLAYGE_PROJECT_DIR}/media/RenderFX/ToneMapping.kfx
 		${KLAYGE_PROJECT_DIR}/media/RenderFX/UI.kfx
+		${KLAYGE_PROJECT_DIR}/Samples/media/Common/Assets/Logo.png
+		${KLAYGE_PROJECT_DIR}/Samples/media/Common/Assets/SmallLogo.png
+		${KLAYGE_PROJECT_DIR}/Samples/media/Common/Assets/SplashScreen.png
+		${KLAYGE_PROJECT_DIR}/Samples/media/Common/Assets/StoreLogo.png
 		${KLAYGE_PROJECT_DIR}/Samples/media/Text/text.txt
+		${KLAYGE_PROJECT_DIR}/Samples/media/Text/Package_${KLAYGE_COMPILER_NAME}${KLAYGE_COMPILER_VERSION}0.appxmanifest
 	)
 	SET(DEBUG_CONTENT_FILES
 		${KLAYGE_PROJECT_DIR}/bin/${KLAYGE_PLATFORM_NAME}/7zxa${CMAKE_DEBUG_POSTFIX}.dll
