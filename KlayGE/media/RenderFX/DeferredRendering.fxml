@@ -981,8 +981,9 @@ float4 DrawLightIndexPointPS(float2 tc : TEXCOORD0) : SV_Target
 		((accum >> 16) & 0xFF) / 255.0f, ((accum >> 24) & 0xFF) / 255.0f);
 #else
 	all_light_id[comp] = (accum + 0.5f) / 255.0f;	
-	
-	return float4(all_light_id);
+
+	// TODO: Cg doesn't support float[4]->float4
+	return float4(all_light_id[0], all_light_id[1], all_light_id[2], all_light_id[3]);
 #endif
 }
 
@@ -1040,8 +1041,9 @@ float4 DrawLightIndexSpotPS(float2 tc : TEXCOORD0) : SV_Target
 		((accum >> 16) & 0xFF) / 255.0f, ((accum >> 24) & 0xFF) / 255.0f);
 #else
 	all_light_id[comp] = (accum + 0.5f) / 255.0f;	
-	
-	return float4(all_light_id);
+
+	// TODO: Cg doesn't support float[4]->float4
+	return float4(all_light_id[0], all_light_id[1], all_light_id[2], all_light_id[3]);
 #endif
 }
 
@@ -1154,7 +1156,11 @@ float4 LightIndexedDeferredRenderingPointPS(float2 tc : TEXCOORD0, float3 view_d
 #else
 		int nl = 32;
 #endif
-		nl = min(nl, num_lights);
+		// TODO: Cg doesn't support min(int, int)
+		if (num_lights < nl)
+		{
+			nl = num_lights;
+		}
 #endif
 
 #if INTEGER_SUPPORT
@@ -1241,7 +1247,11 @@ float4 LightIndexedDeferredRenderingSpotPS(float2 tc : TEXCOORD0, float3 view_di
 #else
 		int nl = 32;
 #endif
-		nl = min(nl, num_lights);
+		// TODO: Cg doesn't support min(int, int)
+		if (num_lights < nl)
+		{
+			nl = num_lights;
+		}
 #endif
 
 #if INTEGER_SUPPORT
