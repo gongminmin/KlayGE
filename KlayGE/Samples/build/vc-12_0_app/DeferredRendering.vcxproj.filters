@@ -372,12 +372,15 @@
     <None Include="..\..\..\media\RenderFX\Particle.kfx">
       <Filter>Resource Files</Filter>
     </None>
-    <None Include="..\..\media\DeferredRendering\fire.dds" />
+    <None Include="..\..\media\DeferredRendering\fire.dds">
+      <Filter>Resource Files</Filter>
+    </None>
     <None Include="..\..\..\media\PostProcessors\Resizer.ppml">
       <Filter>Resource Files</Filter>
     </None>
     <None Include="..\..\..\media\RenderFX\Resizer.kfx">
       <Filter>Resource Files</Filter>
     </None>
+    <None Include="..\..\media\Common\KlayGE_TemporaryKey.pfx" />
   </ItemGroup>
 </Project>

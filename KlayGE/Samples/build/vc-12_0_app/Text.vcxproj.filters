@@ -135,6 +135,7 @@
     <None Include="..\..\..\media\PostProcessors\Resizer.ppml">
       <Filter>Resource Files</Filter>
     </None>
+    <None Include="..\..\media\Common\KlayGE_TemporaryKey.pfx" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="..\..\media\Text\text.txt">
