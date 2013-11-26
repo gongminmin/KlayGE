@@ -23,6 +23,8 @@
 		<parameter type="float4x4" name="inv_proj"/>
 	</cbuffer>
 
+	<parameter type="float" name="min_threshold" value="6.10352e-5"/>
+
 	<parameter type="sampler" name="bilinear_sampler">
 		<state name="filtering" value="min_mag_linear_mip_point"/>
 		<state name="address_u" value="clamp"/>
@@ -126,6 +128,7 @@ float4 SSGIPS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Target
 	float3 x_dir = cross(y_dir, normal);
 
 	float3 indirect = CalcAlchemyObscurance(tc, pos_es, x_dir, y_dir, normal, radius, depth);
+	indirect.r += min_threshold;
 	return float4(indirect, 1);
 }
 		]]>

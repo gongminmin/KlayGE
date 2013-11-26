@@ -14,6 +14,8 @@
 	<parameter type="texture2D" name="vpls_tex"/>
 	<parameter type="texture2D" name="gbuffer_tex"/>
 	<parameter type="texture2D" name="depth_tex"/>
+	
+	<parameter type="float" name="min_threshold" value="6.10352e-5"/>
 
 	<parameter type="float2" name="vpl_params"/>
 
@@ -149,6 +151,7 @@ float4 VPLsLightingPS(
 		color_i = cos_iv * atten * vpl_color;
 	}
 
+	color_i.r += min_threshold;
 	return float4(color_i, 1);
 }
 		]]>

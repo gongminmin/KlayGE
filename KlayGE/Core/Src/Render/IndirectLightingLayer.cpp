@@ -93,6 +93,8 @@ namespace KlayGE
 	void MultiResSILLayer::GBuffer(TexturePtr const & rt0_tex, TexturePtr const & rt1_tex, TexturePtr const & depth_tex)
 	{
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+		RenderEngine& re = rf.RenderEngineInstance();
+		RenderDeviceCaps const & caps = re.DeviceCaps();
 
 		g_buffer_rt0_tex_ = rt0_tex;
 		g_buffer_depth_tex_ = depth_tex;
@@ -100,7 +102,19 @@ namespace KlayGE
 		uint32_t const width = rt0_tex->Width(0);
 		uint32_t const height = rt0_tex->Height(0);
 
-		indirect_lighting_tex_ = rf.MakeTexture2D(width / 2, height / 2, MAX_IL_MIPMAP_LEVELS, 1, EF_ABGR16F, 1, 0,  EAH_GPU_Read | EAH_GPU_Write, nullptr);
+		ElementFormat fmt;
+		if (caps.rendertarget_format_support(EF_B10G11R11F, 1, 0))
+		{
+			fmt = EF_B10G11R11F;
+		}
+		else
+		{
+			BOOST_ASSERT(caps.rendertarget_format_support(EF_ABGR16F, 1, 0));
+
+			fmt = EF_ABGR16F;
+		}
+
+		indirect_lighting_tex_ = rf.MakeTexture2D(width / 2, height / 2, MAX_IL_MIPMAP_LEVELS, 1, fmt, 1, 0,  EAH_GPU_Read | EAH_GPU_Write, nullptr);
 
 		multi_res_layer_->BindBuffers(rt0_tex, rt1_tex, depth_tex, indirect_lighting_tex_);
 	}
@@ -260,14 +274,28 @@ namespace KlayGE
 		UNREF_PARAM(rt1_tex);
 
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+		RenderEngine& re = rf.RenderEngineInstance();
+		RenderDeviceCaps const & caps = re.DeviceCaps();
 
 		g_buffer_rt0_tex_ = rt0_tex;
 		g_buffer_depth_tex_ = depth_tex;
 
 		uint32_t const width = rt0_tex->Width(0);
 		uint32_t const height = rt0_tex->Height(0);
-		small_ssgi_tex_ = rf.MakeTexture2D(width / 4, height / 4, MAX_IL_MIPMAP_LEVELS - 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
-		indirect_lighting_tex_ = rf.MakeTexture2D(width / 2, height / 2, 1, 1, EF_ABGR16F, 1, 0,  EAH_GPU_Read | EAH_GPU_Write, nullptr);
+
+		ElementFormat fmt;
+		if (caps.rendertarget_format_support(EF_B10G11R11F, 1, 0))
+		{
+			fmt = EF_B10G11R11F;
+		}
+		else
+		{
+			BOOST_ASSERT(caps.rendertarget_format_support(EF_ABGR16F, 1, 0));
+
+			fmt = EF_ABGR16F;
+		}
+		small_ssgi_tex_ = rf.MakeTexture2D(width / 4, height / 4, MAX_IL_MIPMAP_LEVELS - 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
+		indirect_lighting_tex_ = rf.MakeTexture2D(width / 2, height / 2, 1, 1, fmt, 1, 0,  EAH_GPU_Read | EAH_GPU_Write, nullptr);
 
 		multi_res_layer_->BindBuffers(rt0_tex, rt1_tex, depth_tex, small_ssgi_tex_);
 	}

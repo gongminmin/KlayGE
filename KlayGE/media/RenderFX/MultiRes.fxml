@@ -196,6 +196,7 @@ float4 SetSubsplatStencilPS(float2 tc: TEXCOORD0) : SV_Target
 			]]>
 		</value>
 	</parameter>
+	<parameter type="float" name="min_threshold" value="6.10352e-5"/>
 
 	<parameter type="texture2D" name="src_tex"/>
 	<parameter type="float4" name="delta"/>
@@ -214,7 +215,25 @@ float4 UpsamplingPS(float2 tc : TEXCOORD0) : SV_Target
 float4 UpsamplingInterpolatePS(float2 tc : TEXCOORD0) : SV_Target
 {
 	float4 finer = src_tex.SampleLevel(point_sampler, tc, cur_lower_level.y);
+	if (finer.r > min_threshold)
+	{
+		finer.a = 1;
+		finer.r -= min_threshold;
+	}
+	else
+	{
+		finer.a = 0;
+	}
 	float4 coarse = src_tex.SampleLevel(point_sampler, tc, cur_lower_level.x);
+	if (coarse.r > min_threshold)
+	{
+		coarse.a = 1;
+		coarse.r -= min_threshold;
+	}
+	else
+	{
+		coarse.a = 0;
+	}
 	if (coarse.a > 0)
 	{	
 		float2 coords = tc * delta.xy;
@@ -230,12 +249,25 @@ float4 UpsamplingInterpolatePS(float2 tc : TEXCOORD0) : SV_Target
 		{
 			float2 ntc = (t0 + kernel4[i]) * delta.zw;
 			float4 color = src_tex.SampleLevel(point_sampler, ntc, cur_lower_level.x);
+			if (color.r > min_threshold)
+			{
+				color.a = 1;
+				color.r -= min_threshold;
+			}
+			else
+			{
+				color.a = 0;
+			}
 			total_color += float4(color.rgb, 1) * weight[i] * color.a;
 		}
 
 		finer += float4(total_color.rgb / max(total_color.a, 0.001f), 1);
 	}
-	
+
+	if (finer.a > 0)
+	{
+		finer.r += min_threshold;
+	}
 	return finer;
 }
 		]]>

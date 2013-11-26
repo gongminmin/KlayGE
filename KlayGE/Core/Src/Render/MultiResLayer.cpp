@@ -142,7 +142,7 @@ namespace KlayGE
 		}
 		multi_res_tex_ = multi_res_tex;
 		multi_res_pingpong_tex_ = rf.MakeTexture2D(multi_res_tex->Width(0), multi_res_tex->Height(0),
-			multi_res_tex->NumMipMaps() - 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Write, nullptr);
+			multi_res_tex->NumMipMaps() - 1, 1, multi_res_tex_->Format(), 1, 0, EAH_GPU_Write, nullptr);
 		multi_res_fbs_.resize(multi_res_tex->NumMipMaps());
 		for (uint32_t i = 0; i < multi_res_tex->NumMipMaps(); ++ i)
 		{
