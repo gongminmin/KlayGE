@@ -54,8 +54,6 @@ namespace KlayGE
 	int const SAMPLE_LEVEL_CNT = MAX_RSM_MIPMAP_LEVELS - BEGIN_RSM_SAMPLING_LIGHT_LEVEL;
 	int const VPL_COUNT = 64 * ((1UL << (SAMPLE_LEVEL_CNT * 2)) - 1) / (4 - 1);
 
-	uint32_t const MAX_IL_MIPMAP_LEVELS = 3;
-
 	MultiResSILLayer::MultiResSILLayer()
 	{
 		multi_res_layer_ = MakeSharedPtr<MultiResLayer>();
@@ -114,7 +112,8 @@ namespace KlayGE
 			fmt = EF_ABGR16F;
 		}
 
-		indirect_lighting_tex_ = rf.MakeTexture2D(width / 2, height / 2, MAX_IL_MIPMAP_LEVELS, 1, fmt, 1, 0,  EAH_GPU_Read | EAH_GPU_Write, nullptr);
+		indirect_lighting_tex_ = rf.MakeTexture2D(width / 2, height / 2, std::max(1U, g_buffer_rt0_tex_->NumMipMaps() - 1),
+			1, fmt, 1, 0,  EAH_GPU_Read | EAH_GPU_Write, nullptr);
 
 		multi_res_layer_->BindBuffers(rt0_tex, rt1_tex, depth_tex, indirect_lighting_tex_);
 	}
@@ -185,7 +184,10 @@ namespace KlayGE
 		UNREF_PARAM(prev_shading_tex);
 		UNREF_PARAM(proj_to_prev);
 
-		multi_res_layer_->UpsampleMultiRes();
+		if (g_buffer_rt0_tex_->NumMipMaps() > 1)
+		{
+			multi_res_layer_->UpsampleMultiRes();
+		}
 	}
 
 	void MultiResSILLayer::ExtractVPLs(CameraPtr const & rsm_camera, LightSourcePtr const & light)
@@ -239,7 +241,7 @@ namespace KlayGE
 		*vpl_gbuffer_tex_param_ = g_buffer_rt0_tex_;
 		*vpl_depth_tex_param_ = g_buffer_depth_tex_;
 		
-		for (uint32_t i = 0; i < MAX_IL_MIPMAP_LEVELS; ++ i)
+		for (uint32_t i = 0; i < indirect_lighting_tex_->NumMipMaps(); ++ i)
 		{
 			re.BindFrameBuffer(multi_res_layer_->MultiResFB(i));
 
@@ -273,6 +275,8 @@ namespace KlayGE
 	{
 		UNREF_PARAM(rt1_tex);
 
+		BOOST_ASSERT(rt0_tex->NumMipMaps() >= 3);
+
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 		RenderEngine& re = rf.RenderEngineInstance();
 		RenderDeviceCaps const & caps = re.DeviceCaps();
@@ -294,7 +298,7 @@ namespace KlayGE
 
 			fmt = EF_ABGR16F;
 		}
-		small_ssgi_tex_ = rf.MakeTexture2D(width / 4, height / 4, MAX_IL_MIPMAP_LEVELS - 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
+		small_ssgi_tex_ = rf.MakeTexture2D(width / 4, height / 4, g_buffer_rt0_tex_->NumMipMaps() - 2, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
 		indirect_lighting_tex_ = rf.MakeTexture2D(width / 2, height / 2, 1, 1, fmt, 1, 0,  EAH_GPU_Read | EAH_GPU_Write, nullptr);
 
 		multi_res_layer_->BindBuffers(rt0_tex, rt1_tex, depth_tex, small_ssgi_tex_);

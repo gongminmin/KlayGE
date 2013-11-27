@@ -129,20 +129,24 @@ namespace KlayGE
 			}
 		}
 
-		depth_deriative_tex_ = rf.MakeTexture2D(multi_res_tex->Width(0), multi_res_tex->Height(0),
-			multi_res_tex->NumMipMaps(), 1, depth_fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
-		normal_cone_tex_ = rf.MakeTexture2D(multi_res_tex->Width(0), multi_res_tex->Height(0),
-			multi_res_tex->NumMipMaps(), 1, fmt8, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
+		multi_res_tex_ = multi_res_tex;
 		if (multi_res_tex->NumMipMaps() > 1)
 		{
-			depth_deriative_small_tex_ = rf.MakeTexture2D(multi_res_tex->Width(1), multi_res_tex->Height(1),
-				multi_res_tex->NumMipMaps() - 1, 1, EF_R16F, 1, 0, EAH_GPU_Write, nullptr);
-			normal_cone_small_tex_ = rf.MakeTexture2D(multi_res_tex->Width(1), multi_res_tex->Height(1),
-				multi_res_tex->NumMipMaps() - 1, 1, fmt8, 1, 0, EAH_GPU_Write, nullptr);
+			depth_deriative_tex_ = rf.MakeTexture2D(multi_res_tex->Width(0), multi_res_tex->Height(0),
+				multi_res_tex->NumMipMaps(), 1, depth_fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
+			normal_cone_tex_ = rf.MakeTexture2D(multi_res_tex->Width(0), multi_res_tex->Height(0),
+				multi_res_tex->NumMipMaps(), 1, fmt8, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
+			if (multi_res_tex->NumMipMaps() > 2)
+			{
+				depth_deriative_small_tex_ = rf.MakeTexture2D(multi_res_tex->Width(1), multi_res_tex->Height(1),
+					multi_res_tex->NumMipMaps() - 1, 1, EF_R16F, 1, 0, EAH_GPU_Write, nullptr);
+				normal_cone_small_tex_ = rf.MakeTexture2D(multi_res_tex->Width(1), multi_res_tex->Height(1),
+					multi_res_tex->NumMipMaps() - 1, 1, fmt8, 1, 0, EAH_GPU_Write, nullptr);
+			}
+	
+			multi_res_pingpong_tex_ = rf.MakeTexture2D(multi_res_tex->Width(0), multi_res_tex->Height(0),
+				multi_res_tex->NumMipMaps() - 1, 1, multi_res_tex_->Format(), 1, 0, EAH_GPU_Write, nullptr);
 		}
-		multi_res_tex_ = multi_res_tex;
-		multi_res_pingpong_tex_ = rf.MakeTexture2D(multi_res_tex->Width(0), multi_res_tex->Height(0),
-			multi_res_tex->NumMipMaps() - 1, 1, multi_res_tex_->Format(), 1, 0, EAH_GPU_Write, nullptr);
 		multi_res_fbs_.resize(multi_res_tex->NumMipMaps());
 		for (uint32_t i = 0; i < multi_res_tex->NumMipMaps(); ++ i)
 		{
@@ -158,9 +162,18 @@ namespace KlayGE
 
 	void MultiResLayer::UpdateGBuffer(CameraPtr const & vp_camera)
 	{
-		this->CreateDepthDerivativeMipMap();
-		this->CreateNormalConeMipMap();
-		this->SetSubsplatStencil(vp_camera);
+		if (multi_res_tex_->NumMipMaps() > 1)
+		{
+			this->CreateDepthDerivativeMipMap();
+			this->CreateNormalConeMipMap();
+			this->SetSubsplatStencil(vp_camera);
+		}
+		else
+		{
+			RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+			re.BindFrameBuffer(multi_res_fbs_[0]);
+			multi_res_fbs_[0]->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth | FrameBuffer::CBM_Stencil, Color(0, 0, 0, 0), 0.0f, 0);
+		}
 	}
 
 	void MultiResLayer::CreateDepthDerivativeMipMap()
