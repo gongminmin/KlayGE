@@ -100,7 +100,7 @@ namespace KlayGE
 		void CommitTiles(std::vector<std::vector<uint8_t> > const & data, std::vector<uint32_t> const & tile_ids, std::vector<uint32_t> const & tile_attrs);
 		void DecodeTiles(std::vector<std::vector<uint8_t> >& data, std::vector<uint32_t> const & tile_ids, uint32_t mipmaps);
 
-		void CacheProperty(uint32_t pages, ElementFormat format, uint32_t border_size);
+		void CacheProperty(uint32_t pages, ElementFormat format, uint32_t border_size, uint32_t cache_tile_size = 0);
 
 		TexturePtr const & CacheTex() const;
 		std::vector<TexturePtr> const & CacheTexArray() const;
@@ -213,6 +213,7 @@ namespace KlayGE
 		TexturePtr tex_indirect_;
 		TexturePtr tex_a_tile_indirect_;
 		uint32_t cache_tile_border_size_;
+		uint32_t cache_tile_size_;
 
 		struct TileInfo
 		{

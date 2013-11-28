@@ -416,12 +416,25 @@ namespace KlayGE
 		}
 		std::sort(shuffs.begin(), shuffs.end());
 
-		uint32_t const full_tile_bytes = tile_size_ * tile_size_ * texel_size_;
+		uint32_t const full_tile_bytes = cache_tile_size_ * cache_tile_size_ * texel_size_;
 
 		for (size_t i = 0; i < shuffs.size(); ++ i)
 		{
-			uint32_t const shuff = shuffs[i].first;
+			uint32_t shuff = shuffs[i].first;
 			uint32_t const index = shuffs[i].second;
+
+			uint32_t scale = tile_size_ / cache_tile_size_;
+			if (scale != 1)
+			{
+				uint32_t level = this->ShuffLevel(shuff);
+				while (scale > 1)
+				{
+					scale /= 2;
+					-- level;
+				}
+
+				shuff = this->ShuffLevel(shuff, level);
+			}
 
 			uint32_t s = full_tile_bytes;
 			for (size_t j = 0; j < mipmaps; ++ j)
@@ -438,7 +451,7 @@ namespace KlayGE
 	{
 		++ decode_tick_;
 
-		uint32_t const full_tile_bytes = tile_size_ * tile_size_ * texel_size_;
+		uint32_t const full_tile_bytes = cache_tile_size_ * cache_tile_size_ * texel_size_;
 		uint32_t target_level = this->ShuffLevel(shuff);
 
 		quadtree_node_ptr node = root_;
@@ -454,15 +467,15 @@ namespace KlayGE
 				step = lower_levels_;
 			}
 
-			std::vector<uint32_t> branches(target_level + 1);
-			for (uint32_t i = 0; i <= target_level; ++ i)
+			std::vector<uint32_t> branches(tree_levels_);
+			for (uint32_t i = 0; i <= tree_levels_ - 1; ++ i)
 			{
 				branches[i] = this->GetLevelBranch(shuff, i);
 			}
 
 			uint32_t start_sub_tile_x = 0;
 			uint32_t start_sub_tile_y = 0;
-			for (uint32_t i = 1; i <= target_level; ++ i)
+			for (uint32_t i = 1; i <= tree_levels_ - 1; ++ i)
 			{
 				uint32_t branch = branches[i];
 				uint32_t by = (branch >> 1) & 1UL;
@@ -482,9 +495,9 @@ namespace KlayGE
 					step = lower_levels_;
 				}
 				uint32_t const ll_e = ll + step;
-				uint32_t const shift = target_level + 1 - ll_e;
+				uint32_t const shift = tree_levels_ - ll_e;
 
-				for (uint32_t i = ll_b; i < std::min(target_level + 1, ll_e); ++ i)
+				for (uint32_t i = ll_b, i_end = std::min(target_level + 1, ll_e); i < i_end; ++ i)
 				{
 					uint32_t const used_w = tile_size_ >> (ll_e - i);
 					uint32_t const used_h = used_w;
@@ -510,8 +523,8 @@ namespace KlayGE
 						this->Upsample(&temp[0], &tile_data[0], used_w, used_h, used_w * texel_size_);
 					}
 
-					start_sub_tile_x &= ~(1UL << (target_level - i));
-					start_sub_tile_y &= ~(1UL << (target_level - i));
+					start_sub_tile_x &= ~(1UL << (tree_levels_ - 1 - i));
+					start_sub_tile_y &= ~(1UL << (tree_levels_ - 1 - i));
 
 					if (node)
 					{
@@ -565,15 +578,15 @@ namespace KlayGE
 				step = lower_levels_;
 			}
 
-			std::vector<uint32_t> branches(target_level + 1);
-			for (uint32_t i = 0; i <= target_level; ++ i)
+			std::vector<uint32_t> branches(tree_levels_);
+			for (uint32_t i = 0; i <= tree_levels_ - 1; ++ i)
 			{
 				branches[i] = this->GetLevelBranch(shuff, i);
 			}
 
 			uint32_t start_sub_tile_x = 0;
 			uint32_t start_sub_tile_y = 0;
-			for (uint32_t i = 1; i <= target_level; ++ i)
+			for (uint32_t i = 1; i <= tree_levels_ - 1; ++ i)
 			{
 				uint32_t branch = branches[i];
 				uint32_t by = (branch >> 1) & 1UL;
@@ -591,10 +604,10 @@ namespace KlayGE
 				}
 				uint32_t const ll_e = ll + step;
 
-				for (uint32_t i = ll_b; i < std::min(target_level + 1, ll_e); ++ i)
+				for (uint32_t i = ll_b, i_end = std::min(target_level + 1, ll_e); i < i_end; ++ i)
 				{
-					start_sub_tile_x &= ~(1UL << (target_level - i));
-					start_sub_tile_y &= ~(1UL << (target_level - i));
+					start_sub_tile_x &= ~(1UL << (tree_levels_ - 1 - i));
+					start_sub_tile_y &= ~(1UL << (tree_levels_ - 1 - i));
 
 					if (node)
 					{
@@ -1145,17 +1158,24 @@ namespace KlayGE
 		ofs->write(reinterpret_cast<char const *>(&block_start_pos[0]), block_start_pos.size() * sizeof(block_start_pos[0]));
 	}
 
-	void JudaTexture::CacheProperty(uint32_t pages, ElementFormat format, uint32_t border_size)
+	void JudaTexture::CacheProperty(uint32_t pages, ElementFormat format, uint32_t border_size, uint32_t cache_tile_size)
 	{
 		if (!tex_cache_ && tex_cache_array_.empty())
 		{
 			pages = std::min<uint32_t>(pages, 1024U);
+			uint32_t sqrt_pages = static_cast<uint32_t>(sqrt(static_cast<float>(pages)) + 0.5f);
 
 			cache_tile_border_size_ = border_size;
+			cache_tile_size_ = (0 == cache_tile_size) ? tile_size_ : cache_tile_size;
+
+			uint32_t const scale = tile_size_ / cache_tile_size_;
+			BOOST_ASSERT(scale * cache_tile_size_ == tile_size_);
+			BOOST_ASSERT(0 == (scale & (scale - 1)));
+			UNREF_PARAM(scale);
 
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-			uint32_t tile_with_border_size = tile_size_ + cache_tile_border_size_ * 2;
+			uint32_t tile_with_border_size = cache_tile_size_ + cache_tile_border_size_ * 2;
 			uint32_t mipmap = 0;
 			while (cache_tile_border_size_ > (1UL << mipmap))
 			{
@@ -1173,14 +1193,7 @@ namespace KlayGE
 
 			RenderDeviceCaps const & caps = rf.RenderEngineInstance().DeviceCaps();
 
-			uint32_t s = 0;
-			while ((tile_with_border_size * (s + 1) < caps.max_texture_width)
-				&& (tile_with_border_size * (s + 1) < caps.max_texture_height)
-				&& (s < 8))
-			{
-				++ s;
-			}
-
+			uint32_t s = std::min(sqrt_pages, std::min(caps.max_texture_width, caps.max_texture_height) / tile_with_border_size);
 			uint32_t array_size = std::min(std::min((pages + s * s - 1) / (s * s), static_cast<uint32_t>(caps.max_pixel_texture_units - 1)), 7U);
 			if (caps.max_texture_array_length > array_size)
 			{
@@ -1240,8 +1253,9 @@ namespace KlayGE
 		*(effect.ParameterByName("juda_tex_indirect")) = tex_indirect_;
 		*(effect.ParameterByName("inv_juda_tex_indirect_size")) = float2(1.0f / tex_indirect_->Width(0), 1.0f / tex_indirect_->Height(0));
 
-		*(effect.ParameterByName("tile_size")) = float3(static_cast<float>(tile_size_),
-				static_cast<float>(tile_size_ + cache_tile_border_size_ * 2), static_cast<float>(cache_tile_border_size_));
+		*(effect.ParameterByName("tile_size")) = float3(static_cast<float>(cache_tile_size_),
+				static_cast<float>(cache_tile_size_ + cache_tile_border_size_ * 2),
+				static_cast<float>(cache_tile_border_size_));
 	}
 
 	void JudaTexture::UpdateCache(std::vector<uint32_t> const & tile_ids)
@@ -1253,7 +1267,7 @@ namespace KlayGE
 		uint32_t const tex_width = tex_cache_ ? tex_cache_->Width(0) : tex_cache_array_[0]->Width(0);
 		uint32_t const tex_height = tex_cache_ ? tex_cache_->Height(0) : tex_cache_array_[0]->Height(0);
 		uint32_t const tex_layer = tex_cache_ ? tex_cache_->ArraySize() : static_cast<uint32_t>(tex_cache_array_.size());
-		uint32_t const tile_with_border_size = tile_size_ + cache_tile_border_size_ * 2;
+		uint32_t const tile_with_border_size = cache_tile_size_ + cache_tile_border_size_ * 2;
 
 		uint32_t const num_cache_tiles_a_row = tex_width / tile_with_border_size;
 		uint32_t const num_cache_tiles_a_layer = num_cache_tiles_a_row * tex_height / tile_with_border_size;
@@ -1480,7 +1494,7 @@ namespace KlayGE
 			}
 			BOOST_ASSERT(index_with_neighbors[0] != 0xFFFFFFFF);
 
-			uint32_t mip_tile_size = tile_size_;
+			uint32_t mip_tile_size = cache_tile_size_;
 			uint32_t mip_tile_with_border_size = tile_with_border_size;
 			uint32_t mip_border_size = cache_tile_border_size_;
 			for (uint32_t l = 0; l < mipmaps; ++ l)
