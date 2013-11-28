@@ -223,7 +223,7 @@ namespace KlayGE
 
 	void JudaTexture::CompactNode(uint32_t shuff)
 	{
-		if ((shuff >> LEVEL_SHIFT) == tree_levels_ - 1)
+		if (this->ShuffLevel(shuff) == tree_levels_ - 1)
 		{
 			return;
 		}
@@ -439,7 +439,7 @@ namespace KlayGE
 		++ decode_tick_;
 
 		uint32_t const full_tile_bytes = tile_size_ * tile_size_ * texel_size_;
-		uint32_t target_level = shuff >> LEVEL_SHIFT;
+		uint32_t target_level = this->ShuffLevel(shuff);
 
 		quadtree_node_ptr node = root_;
 		if (0 == target_level)
@@ -448,7 +448,7 @@ namespace KlayGE
 		}
 		else
 		{
-			int step = target_level % lower_levels_;
+			int step = (tree_levels_ - 1) % lower_levels_;
 			if (0 == step)
 			{
 				step = lower_levels_;
@@ -484,7 +484,7 @@ namespace KlayGE
 				uint32_t const ll_e = ll + step;
 				uint32_t const shift = target_level + 1 - ll_e;
 
-				for (uint32_t i = ll_b; i < ll_e; ++ i)
+				for (uint32_t i = ll_b; i < std::min(target_level + 1, ll_e); ++ i)
 				{
 					uint32_t const used_w = tile_size_ >> (ll_e - i);
 					uint32_t const used_h = used_w;
@@ -549,7 +549,7 @@ namespace KlayGE
 
 	uint32_t JudaTexture::DecodeAAttr(uint32_t shuff)
 	{
-		uint32_t target_level = shuff >> LEVEL_SHIFT;
+		uint32_t target_level = this->ShuffLevel(shuff);
 
 		uint32_t ret_attr = 0xFFFFFFFF;
 		quadtree_node_ptr node = root_;
@@ -559,7 +559,7 @@ namespace KlayGE
 		}
 		else
 		{
-			int step = target_level % lower_levels_;
+			int step = (tree_levels_ - 1) % lower_levels_;
 			if (0 == step)
 			{
 				step = lower_levels_;
@@ -591,7 +591,7 @@ namespace KlayGE
 				}
 				uint32_t const ll_e = ll + step;
 
-				for (uint32_t i = ll_b; i < ll_e; ++ i)
+				for (uint32_t i = ll_b; i < std::min(target_level + 1, ll_e); ++ i)
 				{
 					start_sub_tile_x &= ~(1UL << (target_level - i));
 					start_sub_tile_y &= ~(1UL << (target_level - i));
@@ -695,7 +695,7 @@ namespace KlayGE
 
 	JudaTexture::quadtree_node_ptr const & JudaTexture::GetNode(uint32_t shuff)
 	{
-		uint32_t target_level = shuff >> LEVEL_SHIFT;
+		uint32_t target_level = this->ShuffLevel(shuff);
 		quadtree_node_ptr* node = &root_;
 		for (uint32_t level = 1; level <= target_level; ++ level)
 		{
@@ -715,7 +715,7 @@ namespace KlayGE
 
 	JudaTexture::quadtree_node_ptr const & JudaTexture::AddNode(uint32_t shuff)
 	{
-		uint32_t target_level = shuff >> LEVEL_SHIFT;
+		uint32_t target_level = this->ShuffLevel(shuff);
 		quadtree_node_ptr* node = &root_;
 		for (uint32_t level = 1; level <= target_level; ++ level)
 		{
@@ -731,7 +731,19 @@ namespace KlayGE
 		return *node;
 	}
 
-	uint32_t JudaTexture::Pos2Shuff(uint32_t level, uint32_t x, uint32_t y)
+	uint32_t JudaTexture::ShuffLevel(uint32_t shuff) const
+	{
+		return shuff >> LEVEL_SHIFT;
+	}
+
+	uint32_t JudaTexture::ShuffLevel(uint32_t shuff, uint32_t level) const
+	{
+		shuff &= ~(0xFU << LEVEL_SHIFT);
+		shuff |= (level << LEVEL_SHIFT);
+		return shuff;
+	}
+
+	uint32_t JudaTexture::Pos2Shuff(uint32_t level, uint32_t x, uint32_t y) const
 	{
 		uint32_t shuff = level << LEVEL_SHIFT;
 		for (int l = level; l >= 0; -- l)
@@ -742,7 +754,7 @@ namespace KlayGE
 		return shuff;
 	}
 
-	void JudaTexture::Shuff2Pos(uint32_t& x, uint32_t& y, uint32_t level, uint32_t shuff)
+	void JudaTexture::Shuff2Pos(uint32_t& x, uint32_t& y, uint32_t level, uint32_t shuff) const
 	{
 		x = 0;
 		y = 0;
@@ -753,24 +765,24 @@ namespace KlayGE
 		}
 	}
 
-	uint32_t JudaTexture::GetLevelBranch(uint32_t shuff, uint32_t level)
+	uint32_t JudaTexture::GetLevelBranch(uint32_t shuff, uint32_t level) const
 	{
 		return (shuff >> (2 * (MAX_TREE_LEVEL - level))) & 3UL;
 	}
 
-	uint32_t JudaTexture::SetLevelBranch(uint32_t shuff, uint32_t level, uint32_t bits)
+	uint32_t JudaTexture::SetLevelBranch(uint32_t shuff, uint32_t level, uint32_t bits) const
 	{
 		return (shuff & ~(3UL << (2 * (MAX_TREE_LEVEL - level)))) | (bits << (2 * (MAX_TREE_LEVEL - level)));
 	}
 
-	uint32_t JudaTexture::GetParentShuff(uint32_t shuff)
+	uint32_t JudaTexture::GetParentShuff(uint32_t shuff) const
 	{
-		return (0 == shuff) ? 0 : (shuff - ((1UL << LEVEL_SHIFT) | (shuff & (3UL << (2 * (MAX_TREE_LEVEL - (shuff >> LEVEL_SHIFT)))))));
+		return (0 == shuff) ? 0 : (shuff - ((1UL << LEVEL_SHIFT) | (shuff & (3UL << (2 * (MAX_TREE_LEVEL - this->ShuffLevel(shuff)))))));
 	}
 
-	uint32_t JudaTexture::GetChildShuff(uint32_t shuff, uint32_t branch)
+	uint32_t JudaTexture::GetChildShuff(uint32_t shuff, uint32_t branch) const
 	{
-		uint32_t level = shuff >> LEVEL_SHIFT;
+		uint32_t level = this->ShuffLevel(shuff);
 		return (shuff + (1UL << LEVEL_SHIFT)) | (branch << (2 * (MAX_TREE_LEVEL - level - 1)));
 	}
 
@@ -1250,8 +1262,8 @@ namespace KlayGE
 		unordered_map<uint32_t, uint32_t> neighbor_id_map;
 		std::vector<uint32_t> all_neighbor_ids;
 		std::vector<uint32_t> neighbor_ids;
-		std::vector<uint32_t> tile_attrs(tile_ids.size());
-		std::vector<bool> in_same_image(tile_ids.size() * 9, false);
+		std::vector<uint32_t> tile_attrs;
+		std::vector<bool> in_same_image;
 		KLAYGE_DECLTYPE(tile_info_map_)& tim = tile_info_map_;
 		for (size_t i = 0; i < tile_ids.size(); ++ i)
 		{
@@ -1261,7 +1273,6 @@ namespace KlayGE
 				// Exists in cache
 
 				tmiter->second.tick = tile_tick_;
-				tile_attrs[i] = tmiter->second.attr;
 			}
 			else
 			{
@@ -1269,12 +1280,15 @@ namespace KlayGE
 				this->DecodeTileID(level, tile_x, tile_y, tile_ids[i]);
 
 				array<uint32_t, 9> new_tile_id_with_neighbors;
-				std::fill(new_tile_id_with_neighbors.begin(), new_tile_id_with_neighbors.end(), 0xFFFFFFFF);
+				new_tile_id_with_neighbors.fill(0xFFFFFFFF);
                 new_tile_id_with_neighbors[0] = tile_ids[i];
-				in_same_image[i * 9 + 0] = true;
+
+				array<bool, 9> new_in_same_image;
+				new_in_same_image.fill(false);
+				new_in_same_image[0] = true;
 
 				uint32_t attr = this->DecodeAAttr(this->Pos2Shuff(level, tile_x, tile_y));
-				tile_attrs[i] = attr;
+				tile_attrs.push_back(attr);
 				if (attr != 0xFFFFFFFF)
 				{
 					array<int32_t, 9> new_tile_id_x;
@@ -1327,7 +1341,7 @@ namespace KlayGE
 							{
 								if (attr == this->DecodeAAttr(this->Pos2Shuff(level, new_tile_id_x[j], new_tile_id_y[j])))
 								{
-									in_same_image[i * 9 + j] = true;
+									new_in_same_image[j] = true;
 								}
 							}
 						}
@@ -1349,6 +1363,7 @@ namespace KlayGE
 						}
 					}
 					all_neighbor_ids.push_back(new_tile_id_with_neighbors[j]);
+					in_same_image.push_back(new_in_same_image[j]);
 				}
 			}
 		}

@@ -120,12 +120,14 @@ namespace KlayGE
 		quadtree_node_ptr const & AddNode(uint32_t shuff);
 		void CompactNode(uint32_t shuff);
 
-		uint32_t Pos2Shuff(uint32_t level, uint32_t x, uint32_t y);
-		void Shuff2Pos(uint32_t& x, uint32_t& y, uint32_t level, uint32_t shuff);
-		uint32_t GetLevelBranch(uint32_t shuff, uint32_t level);
-		uint32_t SetLevelBranch(uint32_t shuff, uint32_t level, uint32_t bits);
-		uint32_t GetParentShuff(uint32_t shuff);
-		uint32_t GetChildShuff(uint32_t shuff, uint32_t branch);
+		uint32_t ShuffLevel(uint32_t shuff) const;
+		uint32_t ShuffLevel(uint32_t shuff, uint32_t level) const;
+		uint32_t Pos2Shuff(uint32_t level, uint32_t x, uint32_t y) const;
+		void Shuff2Pos(uint32_t& x, uint32_t& y, uint32_t level, uint32_t shuff) const;
+		uint32_t GetLevelBranch(uint32_t shuff, uint32_t level) const;
+		uint32_t SetLevelBranch(uint32_t shuff, uint32_t level, uint32_t bits) const;
+		uint32_t GetParentShuff(uint32_t shuff) const;
+		uint32_t GetChildShuff(uint32_t shuff, uint32_t branch) const;
 
 		void Upsample(uint8_t* output, uint8_t const * input, uint32_t in_width, uint32_t in_height, uint32_t in_pitch,
 			uint32_t rx, uint32_t ry, uint32_t rw, uint32_t rh);
