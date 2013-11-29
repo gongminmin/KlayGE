@@ -1,0 +1,23 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GL_AMD_occlusion_query_event" reg_no="442">
+	<tokens>
+		<token name="GL_OCCLUSION_QUERY_EVENT_MASK_AMD" value="0x874F"/>
+		<token name="GL_QUERY_DEPTH_PASS_EVENT_BIT_AMD" value="0x00000001"/>
+		<token name="GL_QUERY_DEPTH_FAIL_EVENT_BIT_AMD" value="0x00000002"/>
+		<token name="GL_QUERY_STENCIL_FAIL_EVENT_BIT_AMD" value="0x00000004"/>
+		<token name="GL_QUERY_DEPTH_BOUNDS_FAIL_EVENT_BIT_AMD" value="0x00000008"/>
+		<token name="GL_QUERY_ALL_EVENT_BITS_AMD" value="0xFFFFFFFF"/>
+	</tokens>
+
+	<functions>
+		<function name="glQueryObjectParameteruiAMD" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLuint" name="id"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLuint" name="param"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

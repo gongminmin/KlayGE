@@ -1,0 +1,7 @@
+<?xml version='1.0'?>
+
+<gl_extension name="EGL_EXT_platform_wayland" reg_no="63">
+	<tokens>
+		<token name="EGL_PLATFORM_WAYLAND_EXT" value="0x31D8"/>
+	</tokens>
+</gl_extension>

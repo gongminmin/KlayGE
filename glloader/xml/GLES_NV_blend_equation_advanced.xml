@@ -1,0 +1,62 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GLES_NV_blend_equation_advanced" reg_no="163">
+	<tokens>
+		<token name="GL_BLEND_ADVANCED_COHERENT_NV" value="0x9285"/>
+		<token name="GL_BLEND_PREMULTIPLIED_SRC_NV" value="0x9280"/>
+		<token name="GL_BLEND_OVERLAP_NV" value="0x9281"/>
+		<token name="GL_UNCORRELATED_NV" value="0x9282"/>
+		<token name="GL_DISJOINT_NV" value="0x9283"/>
+		<token name="GL_CONJOINT_NV" value="0x9284"/>
+		<token name="GL_SRC_NV" value="0x9286"/>
+		<token name="GL_DST_NV" value="0x9287"/>
+		<token name="GL_SRC_OVER_NV" value="0x9288"/>
+		<token name="GL_DST_OVER_NV" value="0x9289"/>
+		<token name="GL_SRC_IN_NV" value="0x928A"/>
+		<token name="GL_DST_IN_NV" value="0x928B"/>
+		<token name="GL_SRC_OUT_NV" value="0x928C"/>
+		<token name="GL_DST_OUT_NV" value="0x928D"/>
+		<token name="GL_SRC_ATOP_NV" value="0x928E"/>
+		<token name="GL_DST_ATOP_NV" value="0x928F"/>
+		<token name="GL_MULTIPLY_NV" value="0x9294"/>
+		<token name="GL_SCREEN_NV" value="0x9295"/>
+		<token name="GL_OVERLAY_NV" value="0x9296"/>
+		<token name="GL_DARKEN_NV" value="0x9297"/>
+		<token name="GL_LIGHTEN_NV" value="0x9298"/>
+		<token name="GL_COLORDODGE_NV" value="0x9299"/>
+		<token name="GL_COLORBURN_NV" value="0x929A"/>
+		<token name="GL_HARDLIGHT_NV" value="0x929B"/>
+		<token name="GL_SOFTLIGHT_NV" value="0x929C"/>
+		<token name="GL_DIFFERENCE_NV" value="0x929E"/>
+		<token name="GL_EXCLUSION_NV" value="0x92A0"/>
+		<token name="GL_INVERT_RGB_NV" value="0x92A3"/>
+		<token name="GL_LINEARDODGE_NV" value="0x92A4"/>
+		<token name="GL_LINEARBURN_NV" value="0x92A5"/>
+		<token name="GL_VIVIDLIGHT_NV" value="0x92A6"/>
+		<token name="GL_LINEARLIGHT_NV" value="0x92A7"/>
+		<token name="GL_PINLIGHT_NV" value="0x92A8"/>
+		<token name="GL_HARDMIX_NV" value="0x92A9"/>
+		<token name="GL_HSL_HUE_NV" value="0x92AD"/>
+		<token name="GL_HSL_SATURATION_NV" value="0x92AE"/>
+		<token name="GL_HSL_COLOR_NV" value="0x92AF"/>
+		<token name="GL_HSL_LUMINOSITY_NV" value="0x92B0"/>
+		<token name="GL_PLUS_NV" value="0x9291"/>
+		<token name="GL_PLUS_CLAMPED_NV" value="0x92B1"/>
+		<token name="GL_PLUS_CLAMPED_ALPHA_NV" value="0x92B2"/>
+		<token name="GL_PLUS_DARKER_NV" value="0x9292"/>
+		<token name="GL_MINUS_NV" value="0x929F"/>
+		<token name="GL_MINUS_CLAMPED_NV" value="0x92B3"/>
+		<token name="GL_CONTRAST_NV" value="0x92A1"/>
+		<token name="GL_INVERT_OVG_NV" value="0x92B4"/>
+	</tokens>
+
+	<functions>
+		<function name="glBlendParameteriNV" return="void">
+			<params>
+				<param type="GLenum" name="pname"/>
+				<param type="GLint" name="value"/>
+			</params>
+		</function>
+		<function name="glBlendBarrierNV" return="void"/>
+	</functions>
+</gl_extension>

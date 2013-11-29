@@ -1,0 +1,7 @@
+<?xml version='1.0'?>
+
+<gl_extension name="EGL_MESA_platform_gbm" reg_no="62">
+	<tokens>
+		<token name="EGL_PLATFORM_GBM_MESA" value="0x31D7"/>
+	</tokens>
+</gl_extension>
