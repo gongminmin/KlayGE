@@ -1,8 +1,8 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Package xmlns="http://schemas.microsoft.com/appx/2010/manifest" xmlns:m2="http://schemas.microsoft.com/appx/2013/manifest">
-  <Identity Name="0cf69a0d-fa24-4075-8971-82c545f4af61" Publisher="CN=KlayGE" Version="1.1.0.0" />
+  <Identity Name="@PACKAGE_GUID@" Publisher="CN=KlayGE" Version="1.1.0.0" />
   <Properties>
-    <DisplayName>Text</DisplayName>
+    <DisplayName>@DISPLAY_NAME@</DisplayName>
     <PublisherDisplayName>KlayGE</PublisherDisplayName>
     <Logo>StoreLogo.png</Logo>
   </Properties>
@@ -14,9 +14,9 @@
     <Resource Language="x-generate" />
   </Resources>
   <Applications>
-    <Application Id="App" Executable="$targetnametoken$.exe" EntryPoint="Text.App">
-      <m2:VisualElements DisplayName="Text" Description="KlayGE Sample: Text" BackgroundColor="#336699" ForegroundText="light" Square150x150Logo="Logo.png" Square30x30Logo="SmallLogo.png">
-        <m2:DefaultTile ShortName="Text">
+    <Application Id="App" Executable="$targetnametoken$.exe" EntryPoint="@SHORT_NAME@.App">
+      <m2:VisualElements DisplayName="@SHORT_NAME@" Description="KlayGE Sample: @DISPLAY_NAME@" BackgroundColor="#336699" ForegroundText="light" Square150x150Logo="Logo.png" Square30x30Logo="SmallLogo.png">
+        <m2:DefaultTile ShortName="@SHORT_NAME@">
           <m2:ShowNameOnTiles>
             <m2:ShowOn Tile="square150x150Logo" />
           </m2:ShowNameOnTiles>

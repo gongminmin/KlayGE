@@ -15,6 +15,10 @@ SET(UI_FILES
 )
 
 IF(KLAYGE_WITH_WINRT)
+	SET(PACKAGE_GUID "f7ce04f3-92fc-4e92-8b55-acb9f159eb13")
+	SET(DISPLAY_NAME "Deferred Rendering")
+	SET(SHORT_NAME "DeferredRendering")
+
 	SET(CONTENT_FILES
 		${KLAYGE_PROJECT_DIR}/bin/KlayGE.cfg
 		${KLAYGE_PROJECT_DIR}/media/Fonts/gkai00mp.kfont
@@ -119,7 +123,6 @@ IF(KLAYGE_WITH_WINRT)
 		${KLAYGE_PROJECT_DIR}/Samples/media/DeferredRendering/DeferredRenderingDebug.kfx
 		${KLAYGE_PROJECT_DIR}/Samples/media/DeferredRendering/fire.dds
 		${KLAYGE_PROJECT_DIR}/Samples/media/DeferredRendering/Fire.psml
-		${KLAYGE_PROJECT_DIR}/Samples/media/DeferredRendering/Package_${KLAYGE_COMPILER_NAME}${KLAYGE_COMPILER_VERSION}0.appxmanifest
 	)
 	SET(DEBUG_CONTENT_FILES
 		${KLAYGE_PROJECT_DIR}/bin/${KLAYGE_PLATFORM_NAME}/7zxa${CMAKE_DEBUG_POSTFIX}.dll
@@ -138,10 +141,6 @@ IF(KLAYGE_WITH_WINRT)
 		${KLAYGE_PROJECT_DIR}/bin/${KLAYGE_PLATFORM_NAME}/Render/KlayGE_RenderEngine_D3D11_${KLAYGE_COMPILER_NAME}.dll
 		${KLAYGE_PROJECT_DIR}/bin/${KLAYGE_PLATFORM_NAME}/Scene/KlayGE_Scene_OCTree_${KLAYGE_COMPILER_NAME}.dll
 		${KLAYGE_PROJECT_DIR}/bin/${KLAYGE_PLATFORM_NAME}/Input/KlayGE_InputEngine_MsgInput_${KLAYGE_COMPILER_NAME}.dll
-	)
-	
-	SET(RESOURCE_FILES
-		${CONTENT_FILES} ${DEBUG_CONTENT_FILES} ${RELEASE_CONTENT_FILES}
 	)
 ELSE()
 	SET(RESOURCE_FILES
