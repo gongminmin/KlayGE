@@ -246,19 +246,6 @@ void DeferredRenderingApp::InitObjects()
 	spot_light_src_[2] = MakeSharedPtr<SceneObjectLightSourceProxy>(spot_light_[2]);
 	spot_light_src_[2]->AddToSceneManager();
 
-	particle_lights_.resize(128);
-	for (size_t i = 0; i < particle_lights_.size(); ++ i)
-	{
-		particle_lights_[i] = MakeSharedPtr<PointLightSource>();
-		particle_lights_[i]->Attrib(LightSource::LSA_NoShadow);
-		particle_lights_[i]->Falloff(float3(1, 0, 1));
-		particle_lights_[i]->AddToSceneManager();
-
-		SceneObjectPtr particle_light_src = MakeSharedPtr<SceneObjectLightSourceProxy>(particle_lights_[i]);
-		checked_pointer_cast<SceneObjectLightSourceProxy>(particle_light_src)->Scaling(0.1f, 0.1f, 0.1f);
-		particle_light_src->AddToSceneManager();
-	}
-
 	fpcController_.Scalers(0.05f, 0.5f);
 
 	InputEngine& inputEngine(Context::Instance().InputFactoryInstance().InputEngineInstance());
@@ -281,6 +268,8 @@ void DeferredRenderingApp::InitObjects()
 	id_ssvo_ = dialog_->IDFromName("SSVO");
 	id_hdr_ = dialog_->IDFromName("HDR");
 	id_aa_ = dialog_->IDFromName("AA");
+	id_num_lights_static_ = dialog_->IDFromName("NumLightsStatic");
+	id_num_lights_slider_ = dialog_->IDFromName("NumLightsSlider");
 	id_ctrl_camera_ = dialog_->IDFromName("CtrlCamera");
 
 	dialog_->Control<UIComboBox>(id_buffer_combo_)->OnSelectionChangedEvent().connect(KlayGE::bind(&DeferredRenderingApp::BufferChangedHandler, this, KlayGE::placeholders::_1));
@@ -299,6 +288,8 @@ void DeferredRenderingApp::InitObjects()
 	this->HDRHandler(*dialog_->Control<UICheckBox>(id_hdr_));
 	dialog_->Control<UICheckBox>(id_aa_)->OnChangedEvent().connect(KlayGE::bind(&DeferredRenderingApp::AntiAliasHandler, this, KlayGE::placeholders::_1));
 	this->AntiAliasHandler(*dialog_->Control<UICheckBox>(id_aa_));
+	dialog_->Control<UISlider>(id_num_lights_slider_)->OnValueChangedEvent().connect(KlayGE::bind(&DeferredRenderingApp::NumLightsChangedHandler, this, KlayGE::placeholders::_1));
+	this->NumLightsChangedHandler(*dialog_->Control<UISlider>(id_num_lights_slider_));
 
 	dialog_->Control<UICheckBox>(id_ctrl_camera_)->OnChangedEvent().connect(KlayGE::bind(&DeferredRenderingApp::CtrlCameraHandler, this, KlayGE::placeholders::_1));
 	this->CtrlCameraHandler(*dialog_->Control<UICheckBox>(id_ctrl_camera_));
@@ -411,6 +402,37 @@ void DeferredRenderingApp::AntiAliasHandler(UICheckBox const & sender)
 		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 		re.PPAAEnabled(anti_alias_enabled_);
 	}
+}
+
+void DeferredRenderingApp::NumLightsChangedHandler(KlayGE::UISlider const & sender)
+{
+	int num_lights = sender.GetValue();
+
+	for (size_t i = num_lights; i < particle_lights_.size(); ++ i)
+	{
+		particle_lights_[i]->DelFromSceneManager();
+		particle_light_srcs_[i]->DelFromSceneManager();
+	}
+
+	size_t old_size = particle_lights_.size();
+
+	particle_lights_.resize(num_lights);
+	particle_light_srcs_.resize(num_lights);
+	for (size_t i = old_size; i < particle_lights_.size(); ++ i)
+	{
+		particle_lights_[i] = MakeSharedPtr<PointLightSource>();
+		particle_lights_[i]->Attrib(LightSource::LSA_NoShadow);
+		particle_lights_[i]->Falloff(float3(1, 0, 1));
+		particle_lights_[i]->AddToSceneManager();
+
+		particle_light_srcs_[i] = MakeSharedPtr<SceneObjectLightSourceProxy>(particle_lights_[i]);
+		checked_pointer_cast<SceneObjectLightSourceProxy>(particle_light_srcs_[i])->Scaling(0.1f, 0.1f, 0.1f);
+		particle_light_srcs_[i]->AddToSceneManager();
+	}
+
+	std::wostringstream stream;
+	stream << L"# lights: " << num_lights;
+	dialog_->Control<UIStatic>(id_num_lights_static_)->SetText(stream.str());
 }
 
 void DeferredRenderingApp::CtrlCameraHandler(UICheckBox const & sender)

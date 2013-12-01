@@ -28,6 +28,7 @@ private:
 	void SSVOHandler(KlayGE::UICheckBox const & sender);
 	void HDRHandler(KlayGE::UICheckBox const & sender);
 	void AntiAliasHandler(KlayGE::UICheckBox const & sender);
+	void NumLightsChangedHandler(KlayGE::UISlider const & sender);
 	void CtrlCameraHandler(KlayGE::UICheckBox const & sender);
 
 	KlayGE::FontPtr font_;
@@ -63,10 +64,13 @@ private:
 	int id_ssvo_;
 	int id_hdr_;
 	int id_aa_;
+	int id_num_lights_static_;
+	int id_num_lights_slider_;
 	int id_ctrl_camera_;
 
 	KlayGE::SpotLightSourcePtr spot_light_[3];
 	std::vector<KlayGE::LightSourcePtr> particle_lights_;
+	std::vector<KlayGE::SceneObjectPtr> particle_light_srcs_;
 
 	size_t num_objs_rendered_;
 	size_t num_renderable_rendered_;
