@@ -15,7 +15,7 @@ compiler		= "auto"		# could be "vc12", vc11", "vc10", "vc9", "mingw", "gcc", "au
 toolset			= "auto"		# could be "v120", "v120_xp", "v110", "v110_xp", "v100", "v90", "auto".
 arch			= ("x86", )		# could be "x86", "x64", "arm_app", "x86_app", "x64_app"
 config			= ("Debug", "RelWithDebInfo") # could be "Debug", "Release", "MinSizeRel", "RelWithDebInfo"
-	""")
+""")
 	cfg_build_f.close()
 	import cfg_build
 
