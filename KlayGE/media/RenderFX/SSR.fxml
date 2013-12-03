@@ -40,7 +40,7 @@
 
 	<shader>
 		<![CDATA[
-float4 CalcSSR(float2 tc, float3 normal, float3 pos_es, float3 indicent_es, bool front_side, bool strictness)
+float4 CalcSSR(float2 tc, float3 normal, float3 pos_es, float3 incident_es, bool front_side, bool strictness)
 {
 	normal = normalize(normal); // eye space normal 
 	float3 view_dir = normalize(pos_es); // eye space view direction
@@ -49,7 +49,7 @@ float4 CalcSSR(float2 tc, float3 normal, float3 pos_es, float3 indicent_es, bool
 	float non_linear_depth = linear_depth_to_non_linear(linear_depth, near_q_far.x, near_q_far.y);
 	float3 tex_pos = float3(tc, non_linear_depth); // let z component be projected nonlinear depth, so we can do linear interpolation in screen space
 
-	float3 reflect_vec = normalize(reflect(indicent_es, normal)); // eye space reflect vector
+	float3 reflect_vec = normalize(reflect(incident_es, normal)); // eye space reflect vector
 	float4 proj_ray_end = mul(float4(pos_es + reflect_vec * ray_length, 1), proj);
 	proj_ray_end.xyz /= proj_ray_end.w;
 	float3 tex_reflect_pos = float3(TexCoordFromPos(proj_ray_end), proj_ray_end.z);
