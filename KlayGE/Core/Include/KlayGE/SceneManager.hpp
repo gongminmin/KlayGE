@@ -142,6 +142,8 @@ namespace KlayGE
 		mutex update_mutex_;
 		shared_ptr<joiner<void> > update_thread_;
 		bool quit_;
+
+		bool deferred_mode_;
 	};
 }
 

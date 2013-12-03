@@ -104,7 +104,7 @@ namespace KlayGE
 			numRenderablesRendered_(0),
 			numPrimitivesRendered_(0),
 			numVerticesRendered_(0),
-			quit_(false)
+			quit_(false), deferred_mode_(false)
 	{
 	}
 
@@ -313,30 +313,40 @@ namespace KlayGE
 		}
 		else
 		{
-			if (urt_ & App3DFramework::URV_Simple_Forward_Only)
+			if (deferred_mode_)
 			{
-				add = obj->SimpleForward();
-			}
-			else if (urt_ & App3DFramework::URV_Opaque_Only)
-			{
-				add = !(obj->TransparencyBackFace() || obj->TransparencyFrontFace()) && !obj->SimpleForward();
-			}
-			else if (urt_ & App3DFramework::URV_Transparency_Back_Only)
-			{
-				add = obj->TransparencyBackFace() && !obj->SimpleForward();
-			}
-			else if (urt_ & App3DFramework::URV_Transparency_Front_Only)
-			{
-				add = obj->TransparencyFrontFace() && !obj->SimpleForward();
+				if (obj->SimpleForward())
+				{
+					add = (urt_ & App3DFramework::URV_Simple_Forward_Only) ? true : false;
+				}
+				else
+				{
+					if (urt_ & App3DFramework::URV_Opaque_Only)
+					{
+						add = !(obj->TransparencyBackFace() || obj->TransparencyFrontFace());
+					}
+					else if (urt_ & App3DFramework::URV_Transparency_Back_Only)
+					{
+						add = obj->TransparencyBackFace();
+					}
+					else if (urt_ & App3DFramework::URV_Transparency_Front_Only)
+					{
+						add = obj->TransparencyFrontFace();
+					}
+					else
+					{
+						add = true;
+					}
+
+					if (urt_ & App3DFramework::URV_Special_Shading_Only)
+					{
+						add &= obj->SpecialShading();
+					}
+				}
 			}
 			else
 			{
-				add = !obj->SimpleForward();
-			}
-
-			if (urt_ & App3DFramework::URV_Special_Shading_Only)
-			{
-				add &= obj->SpecialShading() && !obj->SimpleForward();
+				add = true;
 			}
 		}
 
@@ -453,6 +463,8 @@ namespace KlayGE
 
 		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 		re.BeginFrame();
+
+		deferred_mode_ = !!Context::Instance().DeferredRenderingLayerInstance();
 
 		App3DFramework& app = Context::Instance().AppInstance();
 		float const app_time = app.AppTime();
