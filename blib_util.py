@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 #-*- coding: ascii -*-
 
-import os, sys
+import os, sys, multiprocessing
 try:
 	import cfg_build
 except:
@@ -278,6 +278,12 @@ def build_a_project(name, build_path, compiler_info, compiler_arch, need_install
 
 		os.chdir(curdir)
 	else:
+		if "mgw" == compiler_info.name:
+			make_name = "mingw32-make.exe"
+		else:
+			make_name = "make"
+		make_name += " -j%d" % multiprocessing.cpu_count()
+
 		for config in compiler_info.cfg:
 			build_dir = "%s/build/%s-%s-%s" % (build_path, compiler_info.name, compiler_arch[0], config)
 			if not os.path.exists(build_dir):
@@ -296,10 +302,7 @@ def build_a_project(name, build_path, compiler_info, compiler_arch, need_install
 			if need_install:
 				install_str = "install"
 			build_cmd = batch_command()
-			if "mgw" == compiler_info.name:
-				build_cmd.add_command("@mingw32-make.exe %s" % install_str)
-			else:
-				build_cmd.add_command("@make %s" % install_str)
+			build_cmd.add_command("@%s %s" % (make_name, install_str))
 			build_cmd.add_command('@if ERRORLEVEL 1 exit /B 1')
 			if build_cmd.execute() != 0:
 				log_error("Build %s failed." % name)
