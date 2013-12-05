@@ -78,15 +78,9 @@ IF(MSVC)
 					${CMAKE_CURRENT_BINARY_DIR}/${TARGETNAME}.vcxproj.user
 					@ONLY
 				)
-			ELSEIF(MSVC_VERSION GREATER 1400)
+			ELSE()
 				CONFIGURE_FILE(
 					${KLAYGE_ROOT_DIR}/cmake/VisualStudio2008UserFile.vcproj.user.in
-					${CMAKE_CURRENT_BINARY_DIR}/${TARGETNAME}.vcproj.${SYSTEM_NAME}.${USER_NAME}.user
-					@ONLY
-				)
-			ELSEIF(MSVC_VERSION GREATER 1300)
-				CONFIGURE_FILE(
-					${KLAYGE_ROOT_DIR}/cmake/VisualStudio2005UserFile.vcproj.user.in
 					${CMAKE_CURRENT_BINARY_DIR}/${TARGETNAME}.vcproj.${SYSTEM_NAME}.${USER_NAME}.user
 					@ONLY
 				)
