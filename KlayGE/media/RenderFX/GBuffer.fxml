@@ -101,7 +101,7 @@ void DepthVS(float4 pos : POSITION,
 	oScreenTc.xy = oPos.xy / oPos.w * 0.5f;
 	oScreenTc.y *= KLAYGE_FLIPPING;
 	oScreenTc.xy += 0.5f;
-	
+
 #ifndef NOPERSPECTIVE_SUPPORT
 	oScreenTc.z = oPos.w;
 	oScreenTc.xy *= oScreenTc.z;
@@ -165,7 +165,7 @@ void GBufferVS(float4 pos : POSITION,
 	oTsToView1_Depth.xyz = ts_to_view[1];
 	oTexCoord_2xy.zw = ts_to_view[2].xy;
 	oTsToView0_2z.w = ts_to_view[2].z;
-	
+
 	oTsToView1_Depth.w = oPos.w;
 	
 	oScreenTc.xy = oPos.xy / oPos.w * 0.5f;

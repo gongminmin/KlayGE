@@ -91,7 +91,13 @@ namespace KlayGE
 		ABF_Dst_Color,
 		ABF_Inv_Src_Color,
 		ABF_Inv_Dst_Color,
-		ABF_Src_Alpha_Sat
+		ABF_Src_Alpha_Sat,
+		ABF_Blend_Factor,
+		ABF_Inv_Blend_Factor,
+		ABF_Src1_Alpha,
+		ABF_Inv_Src1_Alpha,
+		ABF_Src1_Color,
+		ABF_Inv_Src1_Color
 	};
 
 	enum CompareFunction

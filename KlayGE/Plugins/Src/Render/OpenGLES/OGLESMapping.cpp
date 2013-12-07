@@ -113,6 +113,12 @@ namespace KlayGE
 		case ABF_Src_Alpha_Sat:
 			return GL_SRC_ALPHA_SATURATE;
 
+		case ABF_Blend_Factor:
+			return GL_CONSTANT_COLOR;
+
+		case ABF_Inv_Blend_Factor:
+			return GL_ONE_MINUS_CONSTANT_COLOR;
+
 		default:
 			BOOST_ASSERT(false);
 			return GL_ZERO;

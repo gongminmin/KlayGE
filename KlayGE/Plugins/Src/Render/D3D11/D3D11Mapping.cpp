@@ -186,6 +186,24 @@ namespace KlayGE
 		case ABF_Src_Alpha_Sat:
 			return D3D11_BLEND_SRC_ALPHA_SAT;
 
+		case ABF_Blend_Factor:
+			return D3D11_BLEND_BLEND_FACTOR;
+
+		case ABF_Inv_Blend_Factor:
+			return D3D11_BLEND_INV_BLEND_FACTOR;
+
+		case ABF_Src1_Alpha:
+			return D3D11_BLEND_SRC1_ALPHA;
+
+		case ABF_Inv_Src1_Alpha:
+			return D3D11_BLEND_INV_SRC1_ALPHA;
+
+		case ABF_Src1_Color:
+			return D3D11_BLEND_SRC1_COLOR;
+
+		case ABF_Inv_Src1_Color:
+			return D3D11_BLEND_INV_SRC1_COLOR;
+
 		default:
 			BOOST_ASSERT(false);
 			return D3D11_BLEND_ZERO;

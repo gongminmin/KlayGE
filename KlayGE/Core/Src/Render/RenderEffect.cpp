@@ -403,6 +403,12 @@ namespace
 			abfs_.push_back("inv_src_color");
 			abfs_.push_back("inv_dst_color");
 			abfs_.push_back("src_alpha_sat");
+			abfs_.push_back("blend_factor");
+			abfs_.push_back("inv_blend_factor");
+			abfs_.push_back("src1_alpha");
+			abfs_.push_back("inv_src1_alpha");
+			abfs_.push_back("src1_color");
+			abfs_.push_back("inv_src1_color");
 		}
 
 	private:

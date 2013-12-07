@@ -362,7 +362,7 @@ HS_CONSTANT_DATA_OUTPUT TessellationConstantsHS(InputPatch<VS_CONTROL_POINT_OUTP
 	float4 tess_factors = float4(5, 5, 1, 9);
 	
 	HS_CONSTANT_DATA_OUTPUT output;
-    
+
 	// Calculate the tessellation factor per edge, based on distance from camera
 	float dist;
 	float3 mid_point;

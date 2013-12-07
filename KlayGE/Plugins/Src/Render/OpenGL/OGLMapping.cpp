@@ -119,6 +119,56 @@ namespace KlayGE
 		case ABF_Src_Alpha_Sat:
 			return GL_SRC_ALPHA_SATURATE;
 
+		case ABF_Blend_Factor:
+			return GL_CONSTANT_COLOR;
+
+		case ABF_Inv_Blend_Factor:
+			return GL_ONE_MINUS_CONSTANT_COLOR;
+
+		case ABF_Src1_Alpha:
+			if (glloader_GL_VERSION_3_3() || glloader_GL_ARB_blend_func_extended())
+			{
+				return GL_SRC1_ALPHA;
+			}
+			else
+			{
+				BOOST_ASSERT(false);
+				return GL_ZERO;
+			}
+
+		case ABF_Inv_Src1_Alpha:
+			if (glloader_GL_VERSION_3_3() || glloader_GL_ARB_blend_func_extended())
+			{
+				return GL_ONE_MINUS_SRC1_ALPHA;
+			}
+			else
+			{
+				BOOST_ASSERT(false);
+				return GL_ZERO;
+			}
+
+		case ABF_Src1_Color:
+			if (glloader_GL_VERSION_3_3() || glloader_GL_ARB_blend_func_extended())
+			{
+				return GL_SRC1_COLOR;
+			}
+			else
+			{
+				BOOST_ASSERT(false);
+				return GL_ZERO;
+			}
+
+		case ABF_Inv_Src1_Color:
+			if (glloader_GL_VERSION_3_3() || glloader_GL_ARB_blend_func_extended())
+			{
+				return GL_ONE_MINUS_SRC1_COLOR;
+			}
+			else
+			{
+				BOOST_ASSERT(false);
+				return GL_ZERO;
+			}
+
 		default:
 			BOOST_ASSERT(false);
 			return GL_ZERO;

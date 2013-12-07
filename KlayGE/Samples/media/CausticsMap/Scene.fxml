@@ -17,14 +17,14 @@ void DepthTexWODTVS(float4 pos : POSITION,
 	out float4 oPos : SV_Position)
 {
 	pos = float4(pos.xyz * pos_extent + pos_center, 1);
-	
-    oPos = mul(pos, mvp);
+
+	oPos = mul(pos, mvp);
 	oDepth = oPos.w;
 }  
 
 float4 DepthTexWODTPS(float depth : TEXCOORD0) : SV_Target
 {
-    return depth;
+	return depth;
 }
 
 void PosTexVS(float4 pos : POSITION,
@@ -32,12 +32,12 @@ void PosTexVS(float4 pos : POSITION,
 {
 	pos = float4(pos.xyz * pos_extent + pos_center, 1);
 
-    oPos = mul(pos, mvp);
-}  
+	oPos = mul(pos, mvp);
+}
 
 float4 PosTexPS() : SV_Target
 {
-    return 0;
+	return 0;
 }
 		]]>
 	</shader>
@@ -75,10 +75,10 @@ void PosNormTexVS(float4 pos : POSITION,
 	oPos = mul(pos, mvp);
 	oNormal = mul(transform_quat(float3(0, 0, 1), tangent_quat * 2 - 1), (float3x3)model);
 }
-    
+
 float4 PosNormTexPS(float3 normal : TEXCOORD0) : SV_Target
 {
-    return float4(normalize(normal) * 0.5f + 0.5f, 1);
+	return float4(normalize(normal) * 0.5f + 0.5f, 1);
 }
 		]]>
 	</shader>
@@ -228,8 +228,8 @@ float4 DistanceMappingShading(float3 L, float3 V, float3 H, float3 diffuse, floa
 float4 DistanceMappingPS(float4 L	: TEXCOORD0,
 			float4 V	: TEXCOORD1,
 			float3 H	: TEXCOORD2,
-            float3 LightWorldPos : TEXCOORD3,
-            float4 LightProjPos : TEXCOORD4) : SV_Target
+			float3 LightWorldPos : TEXCOORD3,
+			float4 LightProjPos : TEXCOORD4) : SV_Target
 {
 	float3 texCoord0 = float3(L.w, V.w, 1);
 
@@ -281,8 +281,8 @@ float4 DistanceMappingPS(float4 L	: TEXCOORD0,
 float4 DistanceMappingPS_20(float4 L	: TEXCOORD0,
 						float4 V		: TEXCOORD1,
 						float3 H		: TEXCOORD2,
-            float3 LightWorldPos : TEXCOORD3,
-            float4 LightProjPos : TEXCOORD4) : SV_Target
+						float3 LightWorldPos : TEXCOORD3,
+						float4 LightProjPos : TEXCOORD4) : SV_Target
 {
 	float3 texCoord0 = float3(L.w, V.w, 1);
 
@@ -357,37 +357,37 @@ float4 DistanceMappingPS_20(float4 L	: TEXCOORD0,
 	<shader>
 		<![CDATA[
 void RefractEffectVS(float4 position : POSITION, float4 tangent_quat : TANGENT,
-    out float3 wPosition : TEXCOORD0,
-    out float3 wNormal : TEXCOORD1,
-    out float3 wViewVec : TEXCOORD2,
-    out float4 hPos : SV_Position)
+		out float3 wPosition : TEXCOORD0,
+		out float3 wNormal : TEXCOORD1,
+		out float3 wViewVec : TEXCOORD2,
+		out float4 hPos : SV_Position)
 {
 	position = float4(position.xyz * pos_extent + pos_center, 1);
 	
-    hPos = mul(float4(position.xyz, 1), mvp);
-    wPosition = mul(float4(position.xyz, 1), model).xyz;
-    wNormal = mul(transform_quat(float3(0, 0, 1), tangent_quat * 2 - 1), (float3x3)model);
-    wViewVec = normalize(wPosition - eye_pos);
+	hPos = mul(float4(position.xyz, 1), mvp);
+	wPosition = mul(float4(position.xyz, 1), model).xyz;
+	wNormal = mul(transform_quat(float3(0, 0, 1), tangent_quat * 2 - 1), (float3x3)model);
+	wViewVec = normalize(wPosition - eye_pos);
 }
 
 float4 RefractEffectPS(float3 wPosition : TEXCOORD0, float3 wNormal : TEXCOORD1, float3 wViewVec : TEXCOORD2) : SV_Target
 {
-    wViewVec = normalize(wViewVec);
-    wNormal = normalize(wNormal);
+	wViewVec = normalize(wViewVec);
+	wNormal = normalize(wNormal);
 
-    float3 refract_vec = refract(wViewVec, wNormal, refract_idx.y);
-    float3 reflect_vec = reflect(wViewVec, wNormal);
-    float fresnel_term = fresnel_term_schlick(-wViewVec, wNormal, 0.0977f).x;
+	float3 refract_vec = refract(wViewVec, wNormal, refract_idx.y);
+	float3 reflect_vec = reflect(wViewVec, wNormal);
+	float fresnel_term = fresnel_term_schlick(-wViewVec, wNormal, 0.0977f).x;
 
-    float3 reflected_clr = env_cube.Sample(trilinear_sampler, float3(reflect_vec.x, -KLAYGE_FLIPPING * reflect_vec.y, reflect_vec.z)).xyz;
+	float3 reflected_clr = env_cube.Sample(trilinear_sampler, float3(reflect_vec.x, -KLAYGE_FLIPPING * reflect_vec.y, reflect_vec.z)).xyz;
 
-    float dist = 10.0f;
-    float3 intersection_pt = wPosition + dist * refract_vec;
+	float dist = 10.0f;
+	float3 intersection_pt = wPosition + dist * refract_vec;
 
 	float4 lookup_proj = mul(float4(intersection_pt, 1), vp);
 	float3 refracted_clr = background_texture.Sample(trilinear_sampler, CalcLookupUV(lookup_proj)).xyz;
 
-    return float4(lerp(refracted_clr, reflected_clr, fresnel_term), 1);
+	return float4(lerp(refracted_clr, reflected_clr, fresnel_term), 1);
 }
 		]]>
 	</shader>
