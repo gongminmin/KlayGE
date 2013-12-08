@@ -41,6 +41,7 @@ void SSSBlurPP::InputPin(uint32_t index, TexturePtr const & tex)
 		temp_y_tex_ = rf.MakeTexture2D(tex->Width(0), tex->Height(0), 1, 1, tex->Format(), 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
 
 		temp_fb_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*temp_x_tex_, 0, 1, 0));
+		temp_fb_->Attach(FrameBuffer::ATT_DepthStencil, frame_buffer_->Attached(FrameBuffer::ATT_DepthStencil));
 		frame_buffer_->Attach(FrameBuffer::ATT_Color1, rf.Make2DRenderView(*temp_y_tex_, 0, 1, 0));
 	}
 }
@@ -53,7 +54,8 @@ void SSSBlurPP::Apply()
 	for (uint32_t i = 0; i < 6; ++ i)
 	{
 		re.BindFrameBuffer(temp_fb_);
-		temp_fb_->Discard(FrameBuffer::CBM_Color);
+		re.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color,
+			Color(0.0f, 0.0f, 0.0f, 0), 1.0f, 0);
 		technique_ = blur_x_tech_;
 		*(technique_->Effect().ParameterByName("color_tex")) = (0 == i) ? this->InputPin(0) : temp_y_tex_;
 		(*technique_->Effect().ParameterByName("step")) = float2(i * sss_strength / frame_buffer_->Width(), 0);

@@ -115,8 +115,11 @@ void SSSSSApp::InitObjects()
 
 	scene_camera_ = re.DefaultFrameBuffer()->GetViewport()->camera;
 
-	color_fbo_ = rf.MakeFrameBuffer();
-	color_fbo_->GetViewport()->camera = scene_camera_;
+	color_fb_ = rf.MakeFrameBuffer();
+	color_fb_->GetViewport()->camera = scene_camera_;
+
+	sss_fb_ = rf.MakeFrameBuffer();
+	sss_fb_->GetViewport()->camera = scene_camera_;
 
 	sss_blur_pp_ = MakeSharedPtr<SSSBlurPP>();
 	translucency_pp_ = SyncLoadPostProcess("Translucency.ppml", "Translucency");
@@ -159,7 +162,7 @@ void SSSSSApp::InitObjects()
 	dialog_params_->Control<UISlider>(id_sss_correction_slider_)->OnValueChangedEvent().connect(KlayGE::bind(&SSSSSApp::SSSCorrectionChangedHandler, this, KlayGE::placeholders::_1));
 	this->SSSCorrectionChangedHandler(*dialog_params_->Control<UISlider>(id_sss_correction_slider_));
 	dialog_params_->Control<UICheckBox>(id_translucency_)->OnChangedEvent().connect(KlayGE::bind(&SSSSSApp::TranslucencyHandler, this, KlayGE::placeholders::_1));
-	this->SSSHandler(*dialog_params_->Control<UICheckBox>(id_translucency_));
+	this->TranslucencyHandler(*dialog_params_->Control<UICheckBox>(id_translucency_));
 	dialog_params_->Control<UISlider>(id_translucency_strength_slider_)->OnValueChangedEvent().connect(KlayGE::bind(&SSSSSApp::TranslucencyStrengthChangedHandler, this, KlayGE::placeholders::_1));
 	this->TranslucencyStrengthChangedHandler(*dialog_params_->Control<UISlider>(id_translucency_strength_slider_));
 }
@@ -189,21 +192,29 @@ void SSSSSApp::OnResize(uint32_t width, uint32_t height)
 	ds_tex_ = rf.MakeTexture2D(width, height, 1, 1, ds_fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
 	depth_tex_ = rf.MakeTexture2D(width, height, 1, 1, EF_R32F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
 
-	sss_blurred_tex_ = rf.MakeTexture2D(width, height, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
+	sss_tex_ = rf.MakeTexture2D(width, height, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
 
-	color_fbo_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*normal_tex_, 0, 1, 0));
-	color_fbo_->Attach(FrameBuffer::ATT_Color1, rf.Make2DRenderView(*albedo_tex_, 0, 1, 0));
-	color_fbo_->Attach(FrameBuffer::ATT_Color2, rf.Make2DRenderView(*shading_tex_, 0, 1, 0));
-	color_fbo_->Attach(FrameBuffer::ATT_DepthStencil, rf.Make2DDepthStencilRenderView(*ds_tex_, 0, 1, 0));
+	RenderViewPtr ds_view = rf.Make2DDepthStencilRenderView(*ds_tex_, 0, 1, 0);
 
+	color_fb_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*normal_tex_, 0, 1, 0));
+	color_fb_->Attach(FrameBuffer::ATT_Color1, rf.Make2DRenderView(*albedo_tex_, 0, 1, 0));
+	color_fb_->Attach(FrameBuffer::ATT_Color2, rf.Make2DRenderView(*shading_tex_, 0, 1, 0));
+	color_fb_->Attach(FrameBuffer::ATT_DepthStencil, ds_view);
+
+	sss_fb_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*sss_tex_, 0, 1, 0));
+	sss_fb_->Attach(FrameBuffer::ATT_DepthStencil, ds_view);
+
+	sss_blur_pp_->OutputFrameBuffer()->Attach(FrameBuffer::ATT_DepthStencil, ds_view);
 	sss_blur_pp_->InputPin(0, shading_tex_);
 	sss_blur_pp_->InputPin(1, depth_tex_);
-	sss_blur_pp_->OutputPin(0, sss_blurred_tex_);
+	sss_blur_pp_->OutputPin(0, sss_tex_);
 
 	translucency_pp_->InputPin(0, normal_tex_);
 	translucency_pp_->InputPin(1, albedo_tex_);
 	translucency_pp_->InputPin(2, depth_tex_);
 	translucency_pp_->InputPin(3, depth_in_ls_tex_);
+	translucency_pp_->OutputPin(0, sss_tex_);
+	translucency_pp_->OutputFrameBuffer()->Attach(FrameBuffer::ATT_DepthStencil, ds_view);
 	translucency_pp_->SetParam(3, float3(light_->Color()));
 	translucency_pp_->SetParam(4, 50.0f);
 
@@ -287,7 +298,7 @@ uint32_t SSSSSApp::DoUpdate(uint32_t pass)
 		light_->Direction(light_camera_->ForwardVec());
 
 		re.BindFrameBuffer(depth_ls_fb_);
-		re.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth,
+		re.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth | FrameBuffer::CBM_Stencil,
 			Color(0.0f, 0.0f, 0.0f, 0.0f), 1.0f, 0);
 		return App3DFramework::URV_Need_Flush;
 	
@@ -305,15 +316,15 @@ uint32_t SSSSSApp::DoUpdate(uint32_t pass)
 			depth_to_linear_pp_->Apply();
 		}
 
-		re.BindFrameBuffer(color_fbo_);
+		re.BindFrameBuffer(color_fb_);
 		checked_pointer_cast<MySceneObjectHelper>(subsurfaceObject_)->LightPosition(light_->Position());
 		checked_pointer_cast<MySceneObjectHelper>(subsurfaceObject_)->LightColor(light_->Color());
 		checked_pointer_cast<MySceneObjectHelper>(subsurfaceObject_)->EyePosition(scene_camera_->EyePos());
-		re.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth,
+		re.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth | FrameBuffer::CBM_Stencil,
 			Color(0.0f, 0.0f, 0.0f, 0), 1.0f, 0);
 		return App3DFramework::URV_Need_Flush;
 
-	default:
+	case 2:
 		light_proxy_->Visible(true);
 		subsurfaceObject_->Visible(false);
 
@@ -326,19 +337,16 @@ uint32_t SSSSSApp::DoUpdate(uint32_t pass)
 			depth_to_linear_pp_->Apply();
 		}
 
+		re.BindFrameBuffer(sss_fb_);
+
+		copy_pp_->InputPin(0, shading_tex_);
+		copy_pp_->OutputPin(0, sss_tex_);
+		copy_pp_->Apply();
+
 		if (sss_on_)
 		{
 			sss_blur_pp_->Apply();
-			copy_pp_->InputPin(0, sss_blurred_tex_);
 		}
-		else
-		{
-			copy_pp_->InputPin(0, shading_tex_);
-		}
-		copy_pp_->Apply();
-
-		re.BindFrameBuffer(FrameBufferPtr());
-		re.CurFrameBuffer()->Clear(FrameBuffer::CBM_Depth, Color(0.0f, 0.0f, 0.0f, 0), 1.0f, 0);
 
 		if (translucency_on_)
 		{
@@ -348,6 +356,12 @@ uint32_t SSSSSApp::DoUpdate(uint32_t pass)
 			translucency_pp_->Apply();
 		}
 
-		return App3DFramework::URV_Need_Flush | App3DFramework::URV_Finished;
+		return App3DFramework::URV_Need_Flush;
+
+	default:
+		copy_pp_->InputPin(0, sss_tex_);
+		copy_pp_->OutputPin(0, TexturePtr());
+		copy_pp_->Apply();
+		return App3DFramework::URV_Flushed | App3DFramework::URV_Finished;
 	}
 }
