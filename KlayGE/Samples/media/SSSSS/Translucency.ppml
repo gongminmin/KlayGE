@@ -1,0 +1,24 @@
+<?xml version='1.0'?>
+
+<post_processors>
+	<post_processor name="Translucency">
+		<params>
+			<param name="light_view_proj"/>
+			<param name="inv_proj"/>
+			<param name="light_pos_es"/>
+			<param name="light_color"/>
+			<param name="strength"/>
+		</params>
+		<input>
+			<pin name="normal_tex"/>
+			<pin name="albedo_tex"/>
+			<pin name="reflectance_tex"/>
+			<pin name="depth_tex"/>
+			<pin name="shadow_tex"/>
+		</input>
+		<output>
+			<pin name="output"/>
+		</output>
+		<shader effect="SSS.fxml" tech="Translucency"/>
+	</post_processor>
+</post_processors>

@@ -1,0 +1,198 @@
+<?xml version='1.0'?>
+
+<effect>
+	<include name="util.fxml"/>
+	<include name="Quaternion.fxml"/>
+	<include name="PostProcess.fxml"/>
+
+	<parameter type="float2" name="step"/>
+	<parameter type="texture2D" name="depth_tex"/>
+	<parameter type="texture2D" name="color_tex"/>
+	<parameter type="float" name="scale_factor"/>
+
+	<parameter type="sampler" name="point_sampler">
+		<state name="filtering" value="min_mag_mip_point"/>
+		<state name="address_u" value="clamp"/>
+		<state name="address_v" value="clamp"/>
+	</parameter>
+	<parameter type="sampler" name="linear_sampler">
+		<state name="filtering" value="min_mag_linear_mip_point"/>
+		<state name="address_u" value="clamp"/>
+		<state name="address_v" value="clamp"/>
+	</parameter>
+
+	<shader>
+		<![CDATA[
+float4 GuassBlur(float2 texcoord)
+{
+	// Gaussian weights for the six samples around the current pixel:
+	//   -3 -2 -1 +1 +2 +3
+	float w[6] = { 0.006f,   0.061f,   0.242f,  0.242f,  0.061f, 0.006f };
+	float o[6] = {  -1.0f, -0.6667f, -0.3333f, 0.3333f, 0.6667f,   1.0f };
+
+	// Fetch color and linear depth for current pixel:
+	float4 colorM = color_tex.Sample(point_sampler, texcoord);
+	float depthM = depth_tex.Sample(point_sampler,  texcoord).r;
+
+	// Accumulate center sample, multiplying it with its gaussian weight:
+	float4 colorBlurred = colorM;
+	colorBlurred.rgb *= 0.382f;
+	
+	// Calculate the step that we will use to fetch the surrounding pixels,
+	// where "step" is:
+	//     step = sssStrength * gaussianWidth * pixelSize * dir
+	// The closer the pixel, the stronger the effect needs to be, hence
+	// the factor 1.0 / depthM.
+	float2 finalStep = colorM.a * step / depthM;
+	for (int i = 0; i < 6; ++ i)
+	{
+		// Fetch color and depth for current sample:
+		float2 offset = texcoord + o[i] * finalStep;
+		float3 color = color_tex.SampleLevel(point_sampler, offset, 0).rgb;
+		float depth = depth_tex.SampleLevel(point_sampler, offset, 0).r;
+
+		// If the difference in depth is huge, we lerp color back to "colorM":
+		float s = min(0.0125f * scale_factor * abs(depthM - depth), 1);
+		color = lerp(color, colorM.rgb, s);
+
+		// Accumulate:
+		colorBlurred.rgb += w[i] * color;
+	}
+
+	// The result will be alpha blended with current buffer by using specific
+	// RGB weights. For more details, I refer you to the GPU Pro chapter :)
+	return colorBlurred;
+}
+
+float4 BlurXPS(float2 texcoord : TEXCOORD0) : SV_Target
+{
+	return GuassBlur(texcoord);
+}
+
+void BlurYPS(float2 texcoord : TEXCOORD0,
+			out float4 oRT0 : SV_Target0,
+			out float4 oRT1 : SV_Target1)
+{
+	oRT0 = oRT1 = GuassBlur(texcoord);
+}
+		]]>
+	</shader>
+	
+	<technique name="BlurX">
+		<pass name="p1">
+			<state name="vertex_shader" value="PostProcessVS()"/>
+			<state name="pixel_shader" value="BlurXPS()"/>
+		</pass>
+	</technique>
+	
+	<technique name="BlurY0">
+		<pass name="p1">
+			<state name="independent_blend_enable" value="true"/>
+			<state name="blend_enable" index="0" value="true"/>
+			<state name="blend_enable" index="1" value="false"/>
+			<state name="blend_op" value="add"/>
+			<state name="src_blend" value="blend_factor"/>
+			<state name="dest_blend" value="inv_blend_factor"/>
+			<state name="blend_op_alpha" value="add"/>
+			<state name="src_blend_alpha" value="one"/>
+			<state name="dest_blend_alpha" value="one"/>
+			<state name="blend_factor" r="0.233" g="0.455" b="0.649" a="1"/>
+
+			<state name="vertex_shader" value="PostProcessVS()"/>
+			<state name="pixel_shader" value="BlurYPS()"/>
+		</pass>
+	</technique>
+	<technique name="BlurY1" inherit="BlurY0">
+		<pass name="p1">
+			<state name="blend_factor" r="0.1" g="0.336" b="0.344" a="1"/>
+		</pass>
+	</technique>
+	<technique name="BlurY2" inherit="BlurY0">
+		<pass name="p1">
+			<state name="blend_factor" r="0.118" g="0.198" b="0" a="1"/>
+		</pass>
+	</technique>
+	<technique name="BlurY3" inherit="BlurY0">
+		<pass name="p1">
+			<state name="blend_factor" r="0.113" g="0.007" b="0.007" a="1"/>
+		</pass>
+	</technique>
+	<technique name="BlurY4" inherit="BlurY0">
+		<pass name="p1">
+			<state name="blend_factor" r="0.358" g="0.004" b="0" a="1"/>
+		</pass>
+	</technique>
+	<technique name="BlurY5" inherit="BlurY0">
+		<pass name="p1">
+			<state name="blend_factor" r="0.078" g="0" b="0" a="1"/>
+		</pass>
+	</technique>
+
+
+	<parameter type="float3" name= "light_color"/>
+	<parameter type="float3" name= "light_falloff"/>
+	<parameter type="float4x4"  name="inv_proj"/>
+	<parameter type="float3"  name="light_pos_es"/>
+	<parameter type="float4x4"  name="light_view_proj"/>
+	<parameter type="float" name="strength"/>
+
+	<parameter type="texture2D" name="shadow_tex"/>
+	<parameter type="texture2D" name="shading_tex"/>
+	<parameter type="texture2D" name="reflectance_tex"/>
+	<parameter type="texture2D" name="albedo_tex"/>
+	<parameter type="texture2D" name="normal_tex"/>
+	
+	<shader>
+		<![CDATA[
+float3 T(float s)
+{
+	return float3(0.233f, 0.455f, 0.649f) * exp(-s * s / 0.0064f)
+		+ float3(0.1f, 0.336f, 0.344f) * exp(-s * s / 0.0484f)
+		+ float3(0.118f, 0.198f, 0.0f) * exp(-s * s / 0.187f)
+		+ float3(0.113f, 0.007f, 0.007f) * exp(-s * s / 0.567f)
+		+ float3(0.358f, 0.004f, 0.0f) * exp(-s * s / 1.99f)
+		+ float3(0.078f, 0.0f, 0.0f) * exp(-s * s / 7.41f);
+}
+
+void TranslucencyVS(float4 pos : POSITION,
+					out float2 oTex : TEXCOORD0,
+					out float3 oViewDir : TEXCOORD1,
+					out float4 oPos : SV_Position)
+{
+	oTex = TexCoordFromPos(pos);
+	oPos = pos;
+	
+	oViewDir = mul(oPos, inv_proj).xyz;
+}
+
+float4 TranslucencyPS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Target0
+{
+	float3 pos_es = view_dir * (depth_tex.Sample(point_sampler, tc).r / view_dir.z);
+	
+	float4 light_vp_pos = mul(float4(pos_es, 1), light_view_proj);
+
+	float3 normal = normal_tex.Sample(point_sampler, tc).rgb;
+
+	float2 coord_ls = light_vp_pos.xy / light_vp_pos.w * 0.5f;
+	coord_ls.y *= KLAYGE_FLIPPING;
+	coord_ls += 0.5f;
+	float s = abs(light_vp_pos.w - shadow_tex.Sample(linear_sampler, coord_ls).x);
+	
+	float3 L = normalize(pos_es - light_pos_es);
+	float irradiance = max(0.3f + dot(normal, L), 0);
+	float3 transmittance = T(s * strength) * light_color * irradiance * albedo_tex.Sample(point_sampler, tc).rgb;
+	float3 reflectance = reflectance_tex.Sample(point_sampler, tc).rgb;
+	return float4(transmittance + reflectance, 1);
+}
+		]]>
+	</shader>
+
+	<technique name="Translucency">
+		<pass name="p0">
+			<state name="depth_write_mask" value="false"/>
+
+			<state name="vertex_shader" value="TranslucencyVS()"/>
+			<state name="pixel_shader" value="TranslucencyPS()"/>
+		</pass>
+	</technique>
+</effect>
