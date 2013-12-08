@@ -160,7 +160,10 @@ namespace KlayGE
 			break;
 		}
 
-		view->OnAttached(*this, att);
+		if (view)
+		{
+			view->OnAttached(*this, att);
+		}
 
 		views_dirty_ = true;
 	}
@@ -237,8 +240,10 @@ namespace KlayGE
 		}
 
 		ua_views_[att] = view;
-
-		view->OnAttached(*this, att);
+		if (view)
+		{
+			view->OnAttached(*this, att);
+		}
 
 		views_dirty_ = true;
 	}
