@@ -80,6 +80,9 @@ void BlurYPS(float2 texcoord : TEXCOORD0,
 	
 	<technique name="BlurX">
 		<pass name="p1">
+			<state name="depth_enable" value="false"/>
+			<state name="depth_write_mask" value="false"/>
+			
 			<state name="vertex_shader" value="PostProcessVS()"/>
 			<state name="pixel_shader" value="BlurXPS()"/>
 		</pass>
@@ -87,6 +90,9 @@ void BlurYPS(float2 texcoord : TEXCOORD0,
 	
 	<technique name="BlurY0">
 		<pass name="p1">
+			<state name="depth_enable" value="false"/>
+			<state name="depth_write_mask" value="false"/>
+			
 			<state name="independent_blend_enable" value="true"/>
 			<state name="blend_enable" index="0" value="true"/>
 			<state name="blend_enable" index="1" value="false"/>
@@ -138,7 +144,6 @@ void BlurYPS(float2 texcoord : TEXCOORD0,
 
 	<parameter type="texture2D" name="shadow_tex"/>
 	<parameter type="texture2D" name="shading_tex"/>
-	<parameter type="texture2D" name="reflectance_tex"/>
 	<parameter type="texture2D" name="albedo_tex"/>
 	<parameter type="texture2D" name="normal_tex"/>
 	
@@ -179,15 +184,23 @@ float4 TranslucencyPS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_T
 	float3 L = normalize(pos_es - light_pos_es);
 	float irradiance = max(0.3f + dot(normal, L), 0);
 	float3 transmittance = T(s * strength) * light_color * irradiance * albedo_tex.Sample(point_sampler, tc).rgb;
-	float3 reflectance = reflectance_tex.Sample(point_sampler, tc).rgb;
-	return float4(transmittance + reflectance, 1);
+	return float4(transmittance, 1);
 }
 		]]>
 	</shader>
 
 	<technique name="Translucency">
 		<pass name="p0">
+			<state name="depth_enable" value="false"/>
 			<state name="depth_write_mask" value="false"/>
+			
+			<state name="blend_enable" value="true"/>
+			<state name="blend_op" value="add"/>
+			<state name="src_blend" value="one"/>
+			<state name="dest_blend" value="one"/>
+			<state name="blend_op_alpha" value="add"/>
+			<state name="src_blend_alpha" value="one"/>
+			<state name="dest_blend_alpha" value="one"/>
 
 			<state name="vertex_shader" value="TranslucencyVS()"/>
 			<state name="pixel_shader" value="TranslucencyPS()"/>

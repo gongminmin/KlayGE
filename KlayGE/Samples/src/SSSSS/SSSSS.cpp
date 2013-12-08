@@ -202,9 +202,8 @@ void SSSSSApp::OnResize(uint32_t width, uint32_t height)
 
 	translucency_pp_->InputPin(0, normal_tex_);
 	translucency_pp_->InputPin(1, albedo_tex_);
-	translucency_pp_->InputPin(2, sss_blurred_tex_);
-	translucency_pp_->InputPin(3, depth_tex_);
-	translucency_pp_->InputPin(4, depth_in_ls_tex_);
+	translucency_pp_->InputPin(2, depth_tex_);
+	translucency_pp_->InputPin(3, depth_in_ls_tex_);
 	translucency_pp_->SetParam(3, float3(light_->Color()));
 	translucency_pp_->SetParam(4, 50.0f);
 
@@ -330,14 +329,13 @@ uint32_t SSSSSApp::DoUpdate(uint32_t pass)
 		if (sss_on_)
 		{
 			sss_blur_pp_->Apply();
-			translucency_pp_->InputPin(2, sss_blurred_tex_);
 			copy_pp_->InputPin(0, sss_blurred_tex_);
 		}
 		else
 		{
-			translucency_pp_->InputPin(2, shading_tex_);
 			copy_pp_->InputPin(0, shading_tex_);
 		}
+		copy_pp_->Apply();
 
 		re.BindFrameBuffer(FrameBufferPtr());
 		re.CurFrameBuffer()->Clear(FrameBuffer::CBM_Depth, Color(0.0f, 0.0f, 0.0f, 0), 1.0f, 0);
@@ -348,10 +346,6 @@ uint32_t SSSSSApp::DoUpdate(uint32_t pass)
 			translucency_pp_->SetParam(1, scene_camera_->InverseProjMatrix());
 			translucency_pp_->SetParam(2, MathLib::transform_coord(light_->Position(), scene_camera_->ViewMatrix()));
 			translucency_pp_->Apply();
-		}
-		else
-		{
-			copy_pp_->Apply();
 		}
 
 		return App3DFramework::URV_Need_Flush | App3DFramework::URV_Finished;

@@ -12,7 +12,6 @@
 		<input>
 			<pin name="normal_tex"/>
 			<pin name="albedo_tex"/>
-			<pin name="reflectance_tex"/>
 			<pin name="depth_tex"/>
 			<pin name="shadow_tex"/>
 		</input>
