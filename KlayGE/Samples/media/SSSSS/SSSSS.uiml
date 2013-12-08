@@ -1,0 +1,19 @@
+<?xml version='1.0' encoding='utf-8' standalone='no'?>
+
+<ui>
+	<dialog id="Parameters" caption="Parameters" x="-220" y="150" align_x="right" width="220" height="340">
+		<control type="check_box" id="SSS" caption="SSS" x="20" y="30" width="350" height="24" checked="1" hotkey="0" is_default="0"/>
+		<control type="static" id="SSSStrengthStatic" caption="SSS strength: 0" x="25" y="70" width="160" height="24" is_default="0"/>
+		<control type="slider" id="SSSStrengthSlider" x="25" y="90" width="180" height="24" min="0" max="30" value="10" is_default="0"/>
+		<control type="static" id="SSSCorrectionStatic" caption="SSS correction: 0" x="25" y="120" width="160" height="24" is_default="0"/>
+		<control type="slider" id="SSSCorrectionSlider" x="25" y="140" width="180" height="24" min="0" max="30" value="10" is_default="0"/>
+
+		<control type="check_box" id="Translucency" caption="Translucency" x="20" y="190" width="350" height="24" checked="1" hotkey="0" is_default="0"/>
+		<control type="static" id="TranslucencyStrengthStatic" caption="Translucency strength: 0" x="25" y="230" width="160" height="24" is_default="0"/>
+		<control type="slider" id="TranslucencyStrengthSlider" x="25" y="250" width="180" height="24" min="0" max="100" value="50" is_default="0"/>
+	</dialog>
+
+	<dialog id="Logo" caption="Logo" x="-128" y="0" align_x="right" align_y="top" width="128" height="128" show_caption="false" opacity="true" bg_color_a="0">
+		<control type="tex_button" id="LogoButton" texture="powered_by_klayge.dds" x="0" y="0" width="128" height="128" is_default="0"/>
+	</dialog>
+</ui>

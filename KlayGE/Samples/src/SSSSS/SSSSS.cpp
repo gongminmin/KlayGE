@@ -36,16 +36,29 @@ uint32_t const SHADOW_MAP_SIZE = 512;
 
 using namespace KlayGE;
 
+namespace
+{
+	enum
+	{
+		Exit,
+	};
+
+	InputActionDefine actions[] =
+	{
+		InputActionDefine(Exit, KS_Escape),
+	};
+}
+
 int SampleMain()
 {
-	MyAppFramework app;
+	SSSSSApp app;
 	app.Create();
 	app.Run();
 
 	return 0;
 }
 
-MyAppFramework::MyAppFramework()
+SSSSSApp::SSSSSApp()
 	: App3DFramework("SSSSS"),
 		obj_controller_(true, MB_Left, MB_Middle, 0),
 		light_controller_(true, MB_Right, 0, 0)
@@ -53,7 +66,7 @@ MyAppFramework::MyAppFramework()
 	ResLoader::Instance().AddPath("../../Samples/media/SSSSS");
 }
 
-void MyAppFramework::InitObjects()
+void SSSSSApp::InitObjects()
 {
 	font_ = SyncLoadFont("gkai00mp.kfont");
 	  
@@ -118,9 +131,40 @@ void MyAppFramework::InitObjects()
 	light_camera_->ProjParams(light_->SMCamera(0)->FOV(), light_->SMCamera(0)->Aspect(), light_->SMCamera(0)->NearPlane(), light_->SMCamera(0)->FarPlane());
 
 	depth_to_linear_pp_ = SyncLoadPostProcess("DepthToSM.ppml", "DepthToSM");
+	copy_pp_ = SyncLoadPostProcess("Copy.ppml", "copy");
+
+	InputEngine& inputEngine(Context::Instance().InputFactoryInstance().InputEngineInstance());
+	InputActionMap actionMap;
+	actionMap.AddActions(actions, actions + sizeof(actions) / sizeof(actions[0]));
+
+	action_handler_t input_handler = MakeSharedPtr<input_signal>();
+	input_handler->connect(KlayGE::bind(&SSSSSApp::InputHandler, this, KlayGE::placeholders::_1, KlayGE::placeholders::_2));
+	inputEngine.ActionMap(actionMap, input_handler);
+
+	UIManager::Instance().Load(ResLoader::Instance().Open("SSSSS.uiml"));
+	dialog_params_ = UIManager::Instance().GetDialog("Parameters");
+	id_sss_ = dialog_params_->IDFromName("SSS");
+	id_sss_strength_static_ = dialog_params_->IDFromName("SSSStrengthStatic");
+	id_sss_strength_slider_ = dialog_params_->IDFromName("SSSStrengthSlider");
+	id_sss_correction_static_ = dialog_params_->IDFromName("SSSCorrectionStatic");
+	id_sss_correction_slider_ = dialog_params_->IDFromName("SSSCorrectionSlider");
+	id_translucency_ = dialog_params_->IDFromName("Translucency");
+	id_translucency_strength_static_ = dialog_params_->IDFromName("TranslucencyStrengthStatic");
+	id_translucency_strength_slider_ = dialog_params_->IDFromName("TranslucencyStrengthSlider");
+
+	dialog_params_->Control<UICheckBox>(id_sss_)->OnChangedEvent().connect(KlayGE::bind(&SSSSSApp::SSSHandler, this, KlayGE::placeholders::_1));
+	this->SSSHandler(*dialog_params_->Control<UICheckBox>(id_sss_));
+	dialog_params_->Control<UISlider>(id_sss_strength_slider_)->OnValueChangedEvent().connect(KlayGE::bind(&SSSSSApp::SSSStrengthChangedHandler, this, KlayGE::placeholders::_1));
+	this->SSSStrengthChangedHandler(*dialog_params_->Control<UISlider>(id_sss_strength_slider_));
+	dialog_params_->Control<UISlider>(id_sss_correction_slider_)->OnValueChangedEvent().connect(KlayGE::bind(&SSSSSApp::SSSCorrectionChangedHandler, this, KlayGE::placeholders::_1));
+	this->SSSCorrectionChangedHandler(*dialog_params_->Control<UISlider>(id_sss_correction_slider_));
+	dialog_params_->Control<UICheckBox>(id_translucency_)->OnChangedEvent().connect(KlayGE::bind(&SSSSSApp::TranslucencyHandler, this, KlayGE::placeholders::_1));
+	this->SSSHandler(*dialog_params_->Control<UICheckBox>(id_translucency_));
+	dialog_params_->Control<UISlider>(id_translucency_strength_slider_)->OnValueChangedEvent().connect(KlayGE::bind(&SSSSSApp::TranslucencyStrengthChangedHandler, this, KlayGE::placeholders::_1));
+	this->TranslucencyStrengthChangedHandler(*dialog_params_->Control<UISlider>(id_translucency_strength_slider_));
 }
 
-void MyAppFramework::OnResize(uint32_t width, uint32_t height)
+void SSSSSApp::OnResize(uint32_t width, uint32_t height)
 {
 	App3DFramework::OnResize(width, height);
 
@@ -167,8 +211,60 @@ void MyAppFramework::OnResize(uint32_t width, uint32_t height)
 	UIManager::Instance().SettleCtrls();
 }
 
-void MyAppFramework::DoUpdateOverlay()
+void SSSSSApp::InputHandler(InputEngine const & /*sender*/, InputAction const & action)
 {
+	switch (action.first)
+	{
+	case Exit:
+		this->Quit();
+		break;
+	}
+}
+
+void SSSSSApp::SSSHandler(KlayGE::UICheckBox const & sender)
+{
+	sss_on_ = sender.GetChecked();
+}
+
+void SSSSSApp::SSSStrengthChangedHandler(KlayGE::UISlider const & sender)
+{
+	float strength = sender.GetValue() * 0.1f;
+	sss_blur_pp_->SetParam(0, strength);
+
+	std::wostringstream stream;
+	stream << L"SSS strength: " << strength;
+	dialog_params_->Control<UIStatic>(id_sss_strength_static_)->SetText(stream.str());
+}
+
+void SSSSSApp::SSSCorrectionChangedHandler(KlayGE::UISlider const & sender)
+{
+	float correction = sender.GetValue() * 0.1f;
+	sss_blur_pp_->SetParam(1, correction);
+
+	std::wostringstream stream;
+	stream << L"SSS Correction: " << correction;
+	dialog_params_->Control<UIStatic>(id_sss_correction_static_)->SetText(stream.str());
+}
+
+void SSSSSApp::TranslucencyHandler(KlayGE::UICheckBox const & sender)
+{
+	translucency_on_ = sender.GetChecked();
+}
+
+void SSSSSApp::TranslucencyStrengthChangedHandler(KlayGE::UISlider const & sender)
+{
+	float strength = static_cast<float>(sender.GetValue());
+	translucency_pp_->SetParam(4, strength);
+
+	std::wostringstream stream;
+	stream << L"Translucency strength: " << strength;
+	dialog_params_->Control<UIStatic>(id_translucency_strength_static_)->SetText(stream.str());
+}
+
+void SSSSSApp::DoUpdateOverlay()
+{
+	UIManager::Instance().Render();
+
 	std::wostringstream stream;
 	stream.precision(2);
 	stream << std::fixed << this->FPS() << " FPS";
@@ -177,7 +273,7 @@ void MyAppFramework::DoUpdateOverlay()
 	font_->RenderText(0, 18, Color(1, 1, 0, 1), stream.str(), 16);
 }
 
-uint32_t MyAppFramework::DoUpdate(uint32_t pass)
+uint32_t SSSSSApp::DoUpdate(uint32_t pass)
 {
 	RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
  
@@ -231,16 +327,32 @@ uint32_t MyAppFramework::DoUpdate(uint32_t pass)
 			depth_to_linear_pp_->Apply();
 		}
 
-		sss_blur_pp_->SetParam(0, 1.0f);
-		sss_blur_pp_->Apply();
+		if (sss_on_)
+		{
+			sss_blur_pp_->Apply();
+			translucency_pp_->InputPin(2, sss_blurred_tex_);
+			copy_pp_->InputPin(0, sss_blurred_tex_);
+		}
+		else
+		{
+			translucency_pp_->InputPin(2, shading_tex_);
+			copy_pp_->InputPin(0, shading_tex_);
+		}
 
 		re.BindFrameBuffer(FrameBufferPtr());
 		re.CurFrameBuffer()->Clear(FrameBuffer::CBM_Depth, Color(0.0f, 0.0f, 0.0f, 0), 1.0f, 0);
 
-		translucency_pp_->SetParam(0, scene_camera_->InverseViewMatrix() * light_->SMCamera(0)->ViewProjMatrix());
-		translucency_pp_->SetParam(1, scene_camera_->InverseProjMatrix());
-		translucency_pp_->SetParam(2, MathLib::transform_coord(light_->Position(), scene_camera_->ViewMatrix()));
-		translucency_pp_->Apply();
+		if (translucency_on_)
+		{
+			translucency_pp_->SetParam(0, scene_camera_->InverseViewMatrix() * light_->SMCamera(0)->ViewProjMatrix());
+			translucency_pp_->SetParam(1, scene_camera_->InverseProjMatrix());
+			translucency_pp_->SetParam(2, MathLib::transform_coord(light_->Position(), scene_camera_->ViewMatrix()));
+			translucency_pp_->Apply();
+		}
+		else
+		{
+			copy_pp_->Apply();
+		}
 
 		return App3DFramework::URV_Need_Flush | App3DFramework::URV_Finished;
 	}

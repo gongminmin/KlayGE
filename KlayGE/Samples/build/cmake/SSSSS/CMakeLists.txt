@@ -19,6 +19,10 @@ SET(POST_PROCESSORS
 	${KLAYGE_PROJECT_DIR}/Samples/media/SSSSS/Translucency.ppml
 )
 
+SET(UI_FILES
+	${KLAYGE_PROJECT_DIR}/Samples/media/SSSSS/SSSSS.uiml
+)
+
 SET(RESOURCE_FILES
 	${KLAYGE_PROJECT_DIR}/Samples/media/Common/KlayGESample.rc
 	${KLAYGE_PROJECT_DIR}/klayge_logo.ico

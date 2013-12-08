@@ -18,16 +18,23 @@
 #include <vector>
 #include <sstream>
 
-class MyAppFramework : public KlayGE::App3DFramework
+class SSSSSApp : public KlayGE::App3DFramework
 {
 public:
-	MyAppFramework();
+	SSSSSApp();
 
 private:
 	virtual void InitObjects() KLAYGE_OVERRIDE;
 	virtual void OnResize(uint32_t width, uint32_t height) KLAYGE_OVERRIDE;
 	virtual void DoUpdateOverlay();
 	virtual KlayGE::uint32_t DoUpdate(KlayGE::uint32_t pass);
+
+	void InputHandler(KlayGE::InputEngine const & sender, KlayGE::InputAction const & action);
+	void SSSHandler(KlayGE::UICheckBox const & sender);
+	void SSSStrengthChangedHandler(KlayGE::UISlider const & sender);
+	void SSSCorrectionChangedHandler(KlayGE::UISlider const & sender);
+	void TranslucencyHandler(KlayGE::UICheckBox const & sender);
+	void TranslucencyStrengthChangedHandler(KlayGE::UISlider const & sender);
 
 	KlayGE::FontPtr font_;
 	KlayGE::TrackballCameraController obj_controller_;
@@ -51,4 +58,18 @@ private:
 	KlayGE::CameraPtr light_camera_;
 
 	KlayGE::PostProcessPtr depth_to_linear_pp_;
+	KlayGE::PostProcessPtr copy_pp_;
+
+	bool sss_on_;
+	bool translucency_on_;
+
+	KlayGE::UIDialogPtr dialog_params_;
+	int id_sss_;
+	int id_sss_strength_static_;
+	int id_sss_strength_slider_;
+	int id_sss_correction_static_;
+	int id_sss_correction_slider_;
+	int id_translucency_;
+	int id_translucency_strength_static_;
+	int id_translucency_strength_slider_;
 };

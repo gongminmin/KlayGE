@@ -13,7 +13,8 @@ SSSBlurPP::SSSBlurPP()
 
 	output_pins_.push_back(std::make_pair("output", TexturePtr()));
 
-	params_.push_back(std::make_pair("scale_factor", RenderEffectParameterPtr()));
+	params_.push_back(std::make_pair("strength", RenderEffectParameterPtr())); 
+	params_.push_back(std::make_pair("correction", RenderEffectParameterPtr()));
 
 	RenderEffectPtr effect = SyncLoadRenderEffect("SSS.fxml");
 	blur_x_tech_ = effect->TechniqueByName("BlurX");
@@ -47,7 +48,8 @@ void SSSBlurPP::InputPin(uint32_t index, TexturePtr const & tex)
 void SSSBlurPP::Apply()
 {
 	RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-	float sss_strength = 1.0f;
+	float sss_strength;
+	params_[0].second->Value(sss_strength);
 	for (uint32_t i = 0; i < 6; ++ i)
 	{
 		re.BindFrameBuffer(temp_fb_);

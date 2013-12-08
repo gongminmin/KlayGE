@@ -8,7 +8,7 @@
 	<parameter type="float2" name="step"/>
 	<parameter type="texture2D" name="depth_tex"/>
 	<parameter type="texture2D" name="color_tex"/>
-	<parameter type="float" name="scale_factor"/>
+	<parameter type="float" name="correction"/>
 
 	<parameter type="sampler" name="point_sampler">
 		<state name="filtering" value="min_mag_mip_point"/>
@@ -52,7 +52,7 @@ float4 GuassBlur(float2 texcoord)
 		float depth = depth_tex.SampleLevel(point_sampler, offset, 0).r;
 
 		// If the difference in depth is huge, we lerp color back to "colorM":
-		float s = min(0.0125f * scale_factor * abs(depthM - depth), 1);
+		float s = min(0.0125f * correction * abs(depthM - depth), 1);
 		color = lerp(color, colorM.rgb, s);
 
 		// Accumulate:
@@ -168,9 +168,7 @@ void TranslucencyVS(float4 pos : POSITION,
 float4 TranslucencyPS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Target0
 {
 	float3 pos_es = view_dir * (depth_tex.Sample(point_sampler, tc).r / view_dir.z);
-	
 	float4 light_vp_pos = mul(float4(pos_es, 1), light_view_proj);
-
 	float3 normal = normal_tex.Sample(point_sampler, tc).rgb;
 
 	float2 coord_ls = light_vp_pos.xy / light_vp_pos.w * 0.5f;
