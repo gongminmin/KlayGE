@@ -20,4 +20,6 @@ private:
 	KlayGE::TexturePtr temp_y_tex_;
 	KlayGE::RenderTechniquePtr blur_x_tech_;
 	KlayGE::RenderTechniquePtr blur_y_techs_[6];
+	KlayGE::RenderEffectParameterPtr color_tex_param_;
+	KlayGE::RenderEffectParameterPtr step_param_;
 };

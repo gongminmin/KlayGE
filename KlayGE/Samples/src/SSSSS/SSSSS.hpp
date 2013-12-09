@@ -39,16 +39,14 @@ private:
 	KlayGE::FontPtr font_;
 	KlayGE::TrackballCameraController obj_controller_;
 	KlayGE::TrackballCameraController light_controller_;
-	KlayGE::SceneObjectHelperPtr subsurfaceObject_;
+	KlayGE::SceneObjectHelperPtr subsurface_obj_;
 
 	KlayGE::FrameBufferPtr depth_ls_fb_;
 	KlayGE::FrameBufferPtr color_fb_;
 	KlayGE::FrameBufferPtr sss_fb_;
-	KlayGE::TexturePtr depth_in_ls_tex_, depth_in_ls_ds_tex_;
+	KlayGE::TexturePtr shadow_tex_, shadow_ds_tex_;
 	KlayGE::TexturePtr shading_tex_, normal_tex_, albedo_tex_;
 	KlayGE::TexturePtr depth_tex_, ds_tex_;
-
-	KlayGE::TexturePtr sss_tex_;
 
 	KlayGE::LightSourcePtr light_;
 	KlayGE::SceneObjectLightSourceProxyPtr light_proxy_;

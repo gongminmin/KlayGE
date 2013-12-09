@@ -28,6 +28,9 @@ SSSBlurPP::SSSBlurPP()
 
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 	temp_fb_ = rf.MakeFrameBuffer();
+
+	color_tex_param_ = technique_->Effect().ParameterByName("color_tex");
+	step_param_ = technique_->Effect().ParameterByName("step");
 }
 
 void SSSBlurPP::InputPin(uint32_t index, TexturePtr const & tex)
@@ -54,17 +57,16 @@ void SSSBlurPP::Apply()
 	for (uint32_t i = 0; i < 6; ++ i)
 	{
 		re.BindFrameBuffer(temp_fb_);
-		re.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color,
-			Color(0.0f, 0.0f, 0.0f, 0), 1.0f, 0);
+		re.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color, Color(0.0f, 0.0f, 0.0f, 0), 1.0f, 0);
 		technique_ = blur_x_tech_;
-		*(technique_->Effect().ParameterByName("color_tex")) = (0 == i) ? this->InputPin(0) : temp_y_tex_;
-		(*technique_->Effect().ParameterByName("step")) = float2(i * sss_strength / frame_buffer_->Width(), 0);
+		*color_tex_param_ = (0 == i) ? this->InputPin(0) : temp_y_tex_;
+		*step_param_ = float2(i * sss_strength / frame_buffer_->Width(), 0);
 		this->Render();
 
 		re.BindFrameBuffer(frame_buffer_);
 		technique_ = blur_y_techs_[i];
-		*(technique_->Effect().ParameterByName("color_tex")) = temp_x_tex_;
-		(*technique_->Effect().ParameterByName("step")) = float2(0, i * sss_strength / frame_buffer_->Height());
+		*color_tex_param_ = temp_x_tex_;
+		*step_param_ = float2(0, i * sss_strength / frame_buffer_->Height());
 		this->Render();
 	}
 }

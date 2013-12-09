@@ -14,7 +14,6 @@
 #include <KlayGE/ResLoader.hpp>
 #include <KlayGE/RenderSettings.hpp>
 #include <KlayGE/Mesh.hpp>
-#include <KlayGE/Mesh.hpp>
 #include <KlayGE/Texture.hpp>
 #include <KlayGE/SceneObjectHelper.hpp>
 #include <KlayGE/PostProcess.hpp>
@@ -87,8 +86,8 @@ void SSSSSApp::InitObjects()
 	checked_pointer_cast<SceneObjectLightSourceProxy>(light_proxy_)->Scaling(0.1f, 0.1f, 0.1f);
 	light_proxy_->AddToSceneManager();
 
-	subsurfaceObject_ = MakeSharedPtr<MySceneObjectHelper>("Infinite-Level_02.meshml");
-	subsurfaceObject_->AddToSceneManager();
+	subsurface_obj_ = MakeSharedPtr<MySceneObjectHelper>("Infinite-Level_02.meshml");
+	subsurface_obj_->AddToSceneManager();
 
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 	RenderEngine& re = rf.RenderEngineInstance();
@@ -105,12 +104,12 @@ void SSSSSApp::InitObjects()
 		ds_fmt = EF_D16;
 	}
 
-	depth_in_ls_tex_ = rf.MakeTexture2D(SHADOW_MAP_SIZE, SHADOW_MAP_SIZE, 1, 1, EF_R32F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
-	depth_in_ls_ds_tex_ = rf.MakeTexture2D(SHADOW_MAP_SIZE, SHADOW_MAP_SIZE, 1, 1, ds_fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
+	shadow_tex_ = rf.MakeTexture2D(SHADOW_MAP_SIZE, SHADOW_MAP_SIZE, 1, 1, EF_R32F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
+	shadow_ds_tex_ = rf.MakeTexture2D(SHADOW_MAP_SIZE, SHADOW_MAP_SIZE, 1, 1, ds_fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
 
 	depth_ls_fb_ = rf.MakeFrameBuffer();
-	depth_ls_fb_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*depth_in_ls_tex_, 0, 1, 0));
-	depth_ls_fb_->Attach(FrameBuffer::ATT_DepthStencil, rf.Make2DDepthStencilRenderView(*depth_in_ls_ds_tex_, 0, 1, 0));
+	depth_ls_fb_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*shadow_tex_, 0, 1, 0));
+	depth_ls_fb_->Attach(FrameBuffer::ATT_DepthStencil, rf.Make2DDepthStencilRenderView(*shadow_ds_tex_, 0, 1, 0));
 	depth_ls_fb_->GetViewport()->camera = light_->SMCamera(0);
 
 	scene_camera_ = re.DefaultFrameBuffer()->GetViewport()->camera;
@@ -192,8 +191,6 @@ void SSSSSApp::OnResize(uint32_t width, uint32_t height)
 	ds_tex_ = rf.MakeTexture2D(width, height, 1, 1, ds_fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
 	depth_tex_ = rf.MakeTexture2D(width, height, 1, 1, EF_R32F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
 
-	sss_tex_ = rf.MakeTexture2D(width, height, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
-
 	RenderViewPtr ds_view = rf.Make2DDepthStencilRenderView(*ds_tex_, 0, 1, 0);
 
 	color_fb_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*normal_tex_, 0, 1, 0));
@@ -201,22 +198,24 @@ void SSSSSApp::OnResize(uint32_t width, uint32_t height)
 	color_fb_->Attach(FrameBuffer::ATT_Color2, rf.Make2DRenderView(*shading_tex_, 0, 1, 0));
 	color_fb_->Attach(FrameBuffer::ATT_DepthStencil, ds_view);
 
-	sss_fb_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*sss_tex_, 0, 1, 0));
+	sss_fb_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*shading_tex_, 0, 1, 0));
 	sss_fb_->Attach(FrameBuffer::ATT_DepthStencil, ds_view);
 
 	sss_blur_pp_->OutputFrameBuffer()->Attach(FrameBuffer::ATT_DepthStencil, ds_view);
 	sss_blur_pp_->InputPin(0, shading_tex_);
 	sss_blur_pp_->InputPin(1, depth_tex_);
-	sss_blur_pp_->OutputPin(0, sss_tex_);
+	sss_blur_pp_->OutputPin(0, shading_tex_);
 
 	translucency_pp_->InputPin(0, normal_tex_);
 	translucency_pp_->InputPin(1, albedo_tex_);
 	translucency_pp_->InputPin(2, depth_tex_);
-	translucency_pp_->InputPin(3, depth_in_ls_tex_);
-	translucency_pp_->OutputPin(0, sss_tex_);
+	translucency_pp_->InputPin(3, shadow_tex_);
+	translucency_pp_->OutputPin(0, shading_tex_);
 	translucency_pp_->OutputFrameBuffer()->Attach(FrameBuffer::ATT_DepthStencil, ds_view);
 	translucency_pp_->SetParam(3, float3(light_->Color()));
 	translucency_pp_->SetParam(4, 50.0f);
+
+	copy_pp_->InputPin(0, shading_tex_);
 
 	UIManager::Instance().SettleCtrls();
 }
@@ -291,8 +290,8 @@ uint32_t SSSSSApp::DoUpdate(uint32_t pass)
 	{
 	case 0:
 		light_proxy_->Visible(false);
-		subsurfaceObject_->Visible(true);
-		checked_pointer_cast<SubsurfaceMesh>(subsurfaceObject_->GetRenderable())->Pass(PT_GenShadowMap);
+		subsurface_obj_->Visible(true);
+		checked_pointer_cast<SubsurfaceMesh>(subsurface_obj_->GetRenderable())->Pass(PT_GenShadowMap);
 
 		light_->Position(-light_camera_->ForwardVec() * 2.0f);
 		light_->Direction(light_camera_->ForwardVec());
@@ -304,29 +303,29 @@ uint32_t SSSSSApp::DoUpdate(uint32_t pass)
 	
 	case 1:
 		light_proxy_->Visible(false);
-		subsurfaceObject_->Visible(true);
-		checked_pointer_cast<SubsurfaceMesh>(subsurfaceObject_->GetRenderable())->Pass(PT_OpaqueShading);
+		subsurface_obj_->Visible(true);
+		checked_pointer_cast<SubsurfaceMesh>(subsurface_obj_->GetRenderable())->Pass(PT_OpaqueShading);
 
 		{
 			float q = light_->SMCamera(0)->FarPlane() / (light_->SMCamera(0)->FarPlane() - light_->SMCamera(0)->NearPlane());
 			float2 near_q(light_->SMCamera(0)->NearPlane() * q, q);
 			depth_to_linear_pp_->SetParam(0, near_q);
-			depth_to_linear_pp_->InputPin(0, depth_in_ls_ds_tex_);
-			depth_to_linear_pp_->OutputPin(0, depth_in_ls_tex_);
+			depth_to_linear_pp_->InputPin(0, shadow_ds_tex_);
+			depth_to_linear_pp_->OutputPin(0, shadow_tex_);
 			depth_to_linear_pp_->Apply();
 		}
 
 		re.BindFrameBuffer(color_fb_);
-		checked_pointer_cast<MySceneObjectHelper>(subsurfaceObject_)->LightPosition(light_->Position());
-		checked_pointer_cast<MySceneObjectHelper>(subsurfaceObject_)->LightColor(light_->Color());
-		checked_pointer_cast<MySceneObjectHelper>(subsurfaceObject_)->EyePosition(scene_camera_->EyePos());
+		checked_pointer_cast<MySceneObjectHelper>(subsurface_obj_)->LightPosition(light_->Position());
+		checked_pointer_cast<MySceneObjectHelper>(subsurface_obj_)->LightColor(light_->Color());
+		checked_pointer_cast<MySceneObjectHelper>(subsurface_obj_)->EyePosition(scene_camera_->EyePos());
 		re.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth | FrameBuffer::CBM_Stencil,
 			Color(0.0f, 0.0f, 0.0f, 0), 1.0f, 0);
 		return App3DFramework::URV_Need_Flush;
 
 	case 2:
 		light_proxy_->Visible(true);
-		subsurfaceObject_->Visible(false);
+		subsurface_obj_->Visible(false);
 
 		{
 			float q = scene_camera_->FarPlane() / (scene_camera_->FarPlane() - scene_camera_->NearPlane());
@@ -338,10 +337,6 @@ uint32_t SSSSSApp::DoUpdate(uint32_t pass)
 		}
 
 		re.BindFrameBuffer(sss_fb_);
-
-		copy_pp_->InputPin(0, shading_tex_);
-		copy_pp_->OutputPin(0, sss_tex_);
-		copy_pp_->Apply();
 
 		if (sss_on_)
 		{
@@ -359,8 +354,6 @@ uint32_t SSSSSApp::DoUpdate(uint32_t pass)
 		return App3DFramework::URV_Need_Flush;
 
 	default:
-		copy_pp_->InputPin(0, sss_tex_);
-		copy_pp_->OutputPin(0, TexturePtr());
 		copy_pp_->Apply();
 		return App3DFramework::URV_Flushed | App3DFramework::URV_Finished;
 	}
