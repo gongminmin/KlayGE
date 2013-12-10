@@ -961,7 +961,7 @@ void ScenePlayerApp::InputHandler(InputEngine const & /*sender*/, InputAction co
 
 void ScenePlayerApp::OpenHandler(UIButton const & /*sender*/)
 {
-#if defined KLAYGE_PLATFORM_WINDOWS
+#if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
 	OPENFILENAMEA ofn;
 	char fn[260];
 	HWND hwnd = this->MainWnd()->HWnd();

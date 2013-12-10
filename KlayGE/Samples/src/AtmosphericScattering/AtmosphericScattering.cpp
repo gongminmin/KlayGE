@@ -321,7 +321,7 @@ void AtmosphericScatteringApp::DensityHandler(KlayGE::UISlider const & sender)
 
 void AtmosphericScatteringApp::ChangeBetaHandler(KlayGE::UITexButton const & /*sender*/)
 {
-#if defined KLAYGE_PLATFORM_WINDOWS
+#if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
 	CHOOSECOLORA occ;
 	HWND hwnd = this->MainWnd()->HWnd();
 
@@ -354,7 +354,7 @@ void AtmosphericScatteringApp::ChangeBetaHandler(KlayGE::UITexButton const & /*s
 
 void AtmosphericScatteringApp::ChangeAbsorbHandler(KlayGE::UITexButton const & /*sender*/)
 {
-#if defined KLAYGE_PLATFORM_WINDOWS
+#if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
 	CHOOSECOLORA occ;
 	HWND hwnd = this->MainWnd()->HWnd();
 

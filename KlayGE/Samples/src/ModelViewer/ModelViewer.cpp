@@ -446,7 +446,7 @@ void ModelViewerApp::InputHandler(InputEngine const & /*sender*/, InputAction co
 
 void ModelViewerApp::OpenHandler(KlayGE::UIButton const & /*sender*/)
 {
-#if defined KLAYGE_PLATFORM_WINDOWS
+#if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
 	OPENFILENAMEA ofn;
 	char fn[260];
 	HWND hwnd = this->MainWnd()->HWnd();
@@ -487,7 +487,7 @@ void ModelViewerApp::OpenHandler(KlayGE::UIButton const & /*sender*/)
 
 void ModelViewerApp::SaveAsHandler(KlayGE::UIButton const & /*sender*/)
 {
-#if defined KLAYGE_PLATFORM_WINDOWS
+#if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
 	OPENFILENAMEA ofn;
 	char fn[260];
 	HWND hwnd = this->MainWnd()->HWnd();

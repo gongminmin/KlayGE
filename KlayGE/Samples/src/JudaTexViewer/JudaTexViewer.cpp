@@ -430,7 +430,7 @@ void JudaTexViewer::OpenJudaTex(std::string const & name)
 
 void JudaTexViewer::OpenHandler(KlayGE::UIButton const & /*sender*/)
 {
-#if defined KLAYGE_PLATFORM_WINDOWS
+#if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
 	OPENFILENAMEA ofn;
 	char fn[260];
 	HWND hwnd = this->MainWnd()->HWnd();

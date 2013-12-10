@@ -242,7 +242,7 @@ def build_a_project(name, build_path, compiler_info, compiler_arch, need_install
 		toolset_name = "-T %s" % compiler_arch[2]
 
 	if compiler_arch[3]:
-		additional_options += " -D KLAYGE_WITH_WINRT:BOOL=\"TRUE\""
+		additional_options += " -D KLAYGE_BUILD_PLATFORM_WINRT:BOOL=\"TRUE\""
 	if compiler_arch[4]:
 		additional_options += " -D KLAYGE_WITH_XP_TOOLSET:BOOL=\"TRUE\""
 	if compiler_info.name != "vc":
