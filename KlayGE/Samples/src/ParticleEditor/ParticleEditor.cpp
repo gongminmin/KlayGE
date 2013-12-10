@@ -914,7 +914,7 @@ uint32_t ParticleEditorApp::DoUpdate(uint32_t pass)
 				terrain_->Visible(true);
 				ps_->Visible(false);
 			}
-			return App3DFramework::URV_Need_Flush;
+			return App3DFramework::URV_NeedFlush;
 
 		default:
 			depth_to_linear_pp_->Apply();
@@ -927,7 +927,7 @@ uint32_t ParticleEditorApp::DoUpdate(uint32_t pass)
 			terrain_->Visible(false);
 			ps_->Visible(true);
 
-			return App3DFramework::URV_Need_Flush | App3DFramework::URV_Finished;
+			return App3DFramework::URV_NeedFlush | App3DFramework::URV_Finished;
 		}
 	}
 	else
@@ -947,7 +947,7 @@ uint32_t ParticleEditorApp::DoUpdate(uint32_t pass)
 				terrain_->Visible(true);
 				ps_->Visible(false);
 			}
-			return App3DFramework::URV_Need_Flush;
+			return App3DFramework::URV_NeedFlush;
 
 		case 1:
 			{
@@ -966,7 +966,7 @@ uint32_t ParticleEditorApp::DoUpdate(uint32_t pass)
 				terrain_->Visible(true);
 				ps_->Visible(false);
 			}
-			return App3DFramework::URV_Need_Flush;
+			return App3DFramework::URV_NeedFlush;
 
 		default:
 			re.BindFrameBuffer(FrameBufferPtr());
@@ -977,7 +977,7 @@ uint32_t ParticleEditorApp::DoUpdate(uint32_t pass)
 			terrain_->Visible(false);
 			ps_->Visible(true);
 
-			return App3DFramework::URV_Need_Flush | App3DFramework::URV_Finished;
+			return App3DFramework::URV_NeedFlush | App3DFramework::URV_Finished;
 		}
 	}
 }

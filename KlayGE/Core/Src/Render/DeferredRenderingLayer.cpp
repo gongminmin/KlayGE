@@ -925,7 +925,7 @@ namespace KlayGE
 			// Pre depth for no depth texture support platforms
 			this->PreparePVP(pvp);
 			this->GenerateDepthBuffer(pvp, pass_tb);
-			urv = App3DFramework::URV_Need_Flush | (App3DFramework::URV_Opaque_Only << pass_tb);
+			urv = App3DFramework::URV_NeedFlush | (App3DFramework::URV_OpaqueOnly << pass_tb);
 			break;
 
 		case PC_GBuffer:
@@ -964,7 +964,7 @@ namespace KlayGE
 					re.BindFrameBuffer(pvp.g_buffer_rt1);
 					pvp.g_buffer_rt1->Attached(FrameBuffer::ATT_Color0)->Discard();
 				}
-				urv = App3DFramework::URV_Need_Flush | (App3DFramework::URV_Opaque_Only << pass_tb);
+				urv = App3DFramework::URV_NeedFlush | (App3DFramework::URV_OpaqueOnly << pass_tb);
 			}
 			else
 			{
@@ -1010,7 +1010,7 @@ namespace KlayGE
 						this->RenderDecals(pvp, (PRT_MRT == pass_rt) ? PT_OpaqueGBufferMRT : PT_OpaqueGBufferRT1);
 					}
 				}
-				urv = App3DFramework::URV_Flushed;
+				urv = 0;
 			}
 			break;
 
@@ -1028,11 +1028,11 @@ namespace KlayGE
 					|| ((LightSource::LT_Spot == light->Type()) && (1 == index_in_pass))
 					|| ((LightSource::LT_Sun == light->Type()) && (static_cast<int32_t>(pvp.num_cascades) == index_in_pass)))
 				{
-					urv = App3DFramework::URV_Flushed;
+					urv = 0;
 				}
 				else
 				{
-					urv = App3DFramework::URV_Need_Flush;
+					urv = App3DFramework::URV_NeedFlush;
 					switch (pass_rt)
 					{
 					case PRT_ShadowMap:
@@ -1068,7 +1068,7 @@ namespace KlayGE
 						rsm_buffer_->Attached(FrameBuffer::ATT_Color0)->Discard();
 						rsm_buffer_->Attached(FrameBuffer::ATT_Color1)->Discard();
 						rsm_buffer_->Attached(FrameBuffer::ATT_DepthStencil)->ClearDepthStencil(1.0f, 0);
-						urv |= App3DFramework::URV_Opaque_Only;
+						urv |= App3DFramework::URV_OpaqueOnly;
 						break;
 					}
 				}
@@ -1081,7 +1081,7 @@ namespace KlayGE
 				depth_to_esm_pp_->Apply();
 			}
 			pvp.il_layer->UpdateRSM(rsm_buffer_->GetViewport()->camera, lights_[org_no]);
-			urv = App3DFramework::URV_Flushed;
+			urv = 0;
 			break;
 
 		case PC_Shadowing:
@@ -1107,7 +1107,7 @@ namespace KlayGE
 
 				this->UpdateShadowing(pvp, org_no);
 
-				urv = App3DFramework::URV_Flushed;
+				urv = 0;
 			}
 			break;
 
@@ -1261,7 +1261,7 @@ namespace KlayGE
 					this->MergeIndirectLighting(pvp, pass_tb);
 					this->MergeSSVO(pvp, pass_tb);
 				}
-				urv = App3DFramework::URV_Flushed;
+				urv = 0;
 			}
 			break;
 
@@ -1277,13 +1277,13 @@ namespace KlayGE
 				{
 					re.BindFrameBuffer(pvp.shading_buffer);
 				}
-				urv = App3DFramework::URV_Need_Flush | App3DFramework::URV_Special_Shading_Only
-					| (App3DFramework::URV_Opaque_Only << pass_tb);
+				urv = App3DFramework::URV_NeedFlush | App3DFramework::URV_SpecialShadingOnly
+					| (App3DFramework::URV_OpaqueOnly << pass_tb);
 			}
 			else if (1 == index_in_pass)
 			{
 				this->MergeShadingAndDepth(pvp, pass_tb);
-				urv = App3DFramework::URV_Flushed;
+				urv = 0;
 			}
 			else
 			{
@@ -1315,11 +1315,11 @@ namespace KlayGE
 						}
 					}
 
-					urv = App3DFramework::URV_Need_Flush | App3DFramework::URV_Simple_Forward_Only;
+					urv = App3DFramework::URV_NeedFlush | App3DFramework::URV_SimpleForwardOnly;
 				}
 				else
 				{
-					urv = App3DFramework::URV_Flushed;
+					urv = 0;
 				}
 
 				if (pass_scaned_.size() - 1 == pass)

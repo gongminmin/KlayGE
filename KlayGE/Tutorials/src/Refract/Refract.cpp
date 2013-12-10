@@ -373,7 +373,7 @@ uint32_t Refract::DoUpdate(uint32_t pass)
 
 			checked_pointer_cast<RefractorObject>(refractor_)->Pass(PT_TransparencyBackGBufferRT0);
 			sky_box_->Visible(false);
-			return App3DFramework::URV_Need_Flush;
+			return App3DFramework::URV_NeedFlush;
 		}
 		else
 		{
@@ -383,7 +383,7 @@ uint32_t Refract::DoUpdate(uint32_t pass)
 
 			checked_pointer_cast<RefractorObject>(refractor_)->Pass(PT_TransparencyBackDepth);
 			sky_box_->Visible(false);
-			return App3DFramework::URV_Need_Flush;
+			return App3DFramework::URV_NeedFlush;
 		}
 
 	case 1:
@@ -404,7 +404,7 @@ uint32_t Refract::DoUpdate(uint32_t pass)
 			checked_pointer_cast<RefractorObject>(refractor_)->BackFaceDepthTexture(backface_depth_tex_);
 
 			sky_box_->Visible(true);
-			return App3DFramework::URV_Need_Flush | App3DFramework::URV_Finished;
+			return App3DFramework::URV_NeedFlush | App3DFramework::URV_Finished;
 		}
 		else
 		{
@@ -413,7 +413,7 @@ uint32_t Refract::DoUpdate(uint32_t pass)
 
 			checked_pointer_cast<RefractorObject>(refractor_)->Pass(PT_TransparencyBackGBufferRT0);
 			sky_box_->Visible(false);
-			return App3DFramework::URV_Need_Flush;
+			return App3DFramework::URV_NeedFlush;
 		}
 
 	default:
@@ -428,6 +428,6 @@ uint32_t Refract::DoUpdate(uint32_t pass)
 		checked_pointer_cast<RefractorObject>(refractor_)->BackFaceDepthTexture(backface_depth_tex_);
 
 		sky_box_->Visible(true);
-		return App3DFramework::URV_Need_Flush | App3DFramework::URV_Finished;
+		return App3DFramework::URV_NeedFlush | App3DFramework::URV_Finished;
 	}
 }

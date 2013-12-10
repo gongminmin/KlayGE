@@ -299,7 +299,7 @@ uint32_t SSSSSApp::DoUpdate(uint32_t pass)
 		re.BindFrameBuffer(depth_ls_fb_);
 		re.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth | FrameBuffer::CBM_Stencil,
 			Color(0.0f, 0.0f, 0.0f, 0.0f), 1.0f, 0);
-		return App3DFramework::URV_Need_Flush;
+		return App3DFramework::URV_NeedFlush;
 	
 	case 1:
 		light_proxy_->Visible(false);
@@ -321,7 +321,7 @@ uint32_t SSSSSApp::DoUpdate(uint32_t pass)
 		checked_pointer_cast<MySceneObjectHelper>(subsurface_obj_)->EyePosition(scene_camera_->EyePos());
 		re.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth | FrameBuffer::CBM_Stencil,
 			Color(0.0f, 0.0f, 0.0f, 0), 1.0f, 0);
-		return App3DFramework::URV_Need_Flush;
+		return App3DFramework::URV_NeedFlush;
 
 	case 2:
 		light_proxy_->Visible(true);
@@ -351,10 +351,10 @@ uint32_t SSSSSApp::DoUpdate(uint32_t pass)
 			translucency_pp_->Apply();
 		}
 
-		return App3DFramework::URV_Need_Flush;
+		return App3DFramework::URV_NeedFlush;
 
 	default:
 		copy_pp_->Apply();
-		return App3DFramework::URV_Flushed | App3DFramework::URV_Finished;
+		return App3DFramework::URV_Finished;
 	}
 }

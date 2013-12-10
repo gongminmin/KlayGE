@@ -175,7 +175,7 @@ uint32_t TutorFramework::DoUpdate(uint32_t /*pass*/)
 	re.CurFrameBuffer()->Clear(KlayGE::FrameBuffer::CBM_Color | KlayGE::FrameBuffer::CBM_Depth,
 		clear_clr, 1.0f, 0);
 
-	return KlayGE::App3DFramework::URV_Need_Flush | KlayGE::App3DFramework::URV_Finished;
+	return KlayGE::App3DFramework::URV_NeedFlush | KlayGE::App3DFramework::URV_Finished;
 }
 
 

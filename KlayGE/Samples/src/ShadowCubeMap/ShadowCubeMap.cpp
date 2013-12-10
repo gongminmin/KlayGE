@@ -813,7 +813,7 @@ uint32_t ShadowCubeMap::DoUpdate(uint32_t pass)
 					checked_pointer_cast<OccluderMesh>(scene_objs_[i]->GetRenderable())->LightSrc(light_);
 				}
 			}
-			return App3DFramework::URV_Need_Flush;
+			return App3DFramework::URV_NeedFlush;
 
 		default:
 			{
@@ -836,7 +836,7 @@ uint32_t ShadowCubeMap::DoUpdate(uint32_t pass)
 					checked_pointer_cast<OccluderMesh>(scene_objs_[i]->GetRenderable())->GenShadowMapPass(false, sm_type_, pass);
 				}
 			}
-			return App3DFramework::URV_Need_Flush | App3DFramework::URV_Finished;
+			return App3DFramework::URV_NeedFlush | App3DFramework::URV_Finished;
 		}
 		break;
 	
@@ -867,7 +867,7 @@ uint32_t ShadowCubeMap::DoUpdate(uint32_t pass)
 					checked_pointer_cast<OccluderMesh>(scene_objs_[i]->GetRenderable())->LightSrc(light_);
 				}
 			}
-			return App3DFramework::URV_Need_Flush;
+			return App3DFramework::URV_NeedFlush;
 
 		default:
 			{
@@ -887,7 +887,7 @@ uint32_t ShadowCubeMap::DoUpdate(uint32_t pass)
 					checked_pointer_cast<OccluderMesh>(scene_objs_[i]->GetRenderable())->GenShadowMapPass(false, sm_type_, pass);
 				}
 			}
-			return App3DFramework::URV_Need_Flush | App3DFramework::URV_Finished;
+			return App3DFramework::URV_NeedFlush | App3DFramework::URV_Finished;
 		}
 		break;
 
@@ -909,7 +909,7 @@ uint32_t ShadowCubeMap::DoUpdate(uint32_t pass)
 						checked_pointer_cast<OccluderMesh>(scene_objs_[i]->GetRenderable())->LightSrc(light_);
 					}
 				}
-				return App3DFramework::URV_Need_Flush;
+				return App3DFramework::URV_NeedFlush;
 
 			default:
 				{
@@ -937,7 +937,7 @@ uint32_t ShadowCubeMap::DoUpdate(uint32_t pass)
 						checked_pointer_cast<OccluderMesh>(scene_objs_[i]->GetRenderable())->GenShadowMapPass(false, sm_type_, pass);
 					}
 				}
-				return App3DFramework::URV_Need_Flush | App3DFramework::URV_Finished;
+				return App3DFramework::URV_NeedFlush | App3DFramework::URV_Finished;
 			}
 		}
 		else

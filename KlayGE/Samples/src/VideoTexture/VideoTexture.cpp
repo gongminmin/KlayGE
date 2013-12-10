@@ -241,5 +241,5 @@ uint32_t VideoTextureApp::DoUpdate(uint32_t /*pass*/)
 	checked_pointer_cast<TeapotObject>(ground_)->LightColor(light_->Color());
 	checked_pointer_cast<TeapotObject>(ground_)->LightFalloff(light_->Falloff());
 
-	return App3DFramework::URV_Need_Flush | App3DFramework::URV_Finished;
+	return App3DFramework::URV_NeedFlush | App3DFramework::URV_Finished;
 }

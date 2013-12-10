@@ -542,7 +542,7 @@ uint32_t DeferredRenderingApp::DoUpdate(uint32_t pass)
 			renderEngine.BindFrameBuffer(FrameBufferPtr());
 			renderEngine.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->ClearDepth(1.0f);
 			debug_pp_->Apply();
-			return App3DFramework::URV_Skip_Postprocess | App3DFramework::URV_Finished;
+			return App3DFramework::URV_SkipPostProcess | App3DFramework::URV_Finished;
 		}
 	}
 
@@ -554,7 +554,7 @@ uint32_t DeferredRenderingApp::DoUpdate(uint32_t pass)
 			renderEngine.BindFrameBuffer(FrameBufferPtr());
 			renderEngine.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->ClearDepth(1.0f);
 			debug_pp_->Apply();
-			return App3DFramework::URV_Skip_Postprocess | App3DFramework::URV_Finished;
+			return App3DFramework::URV_SkipPostProcess | App3DFramework::URV_Finished;
 		}
 	}
 

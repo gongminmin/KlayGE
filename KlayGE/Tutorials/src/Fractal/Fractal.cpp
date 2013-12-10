@@ -193,5 +193,5 @@ uint32_t Fractal::DoUpdate(uint32_t /*pass*/)
 	renderEngine.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(0, 0, 0, 1), 1.0f, 0);
 	renderFractal_->AddToRenderQueue();
 
-	return App3DFramework::URV_Need_Flush | App3DFramework::URV_Finished;
+	return App3DFramework::URV_NeedFlush | App3DFramework::URV_Finished;
 }

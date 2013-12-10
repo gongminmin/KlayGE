@@ -53,18 +53,17 @@ namespace KlayGE
 		friend class SceneManager;
 
 	public:
-		enum UpdateRetVal
+		enum UpdateRetValue
 		{
-			URV_Need_Flush = 1UL << 0,
-			URV_Flushed = 1UL << 1,
-			URV_Finished = 1UL << 2,
-			URV_Overlay = 1UL << 3,
-			URV_Skip_Postprocess = 1UL << 4,
-			URV_Opaque_Only = 1UL << 5,
-			URV_Transparency_Back_Only = 1UL << 6,
-			URV_Transparency_Front_Only = 1UL << 7,
-			URV_Special_Shading_Only = 1UL << 8,
-			URV_Simple_Forward_Only = 1UL << 9
+			URV_NeedFlush = 1UL << 0,
+			URV_Finished = 1UL << 1,
+			URV_Overlay = 1UL << 2,
+			URV_SkipPostProcess = 1UL << 3,
+			URV_OpaqueOnly = 1UL << 4,
+			URV_TransparencyBackOnly = 1UL << 5,
+			URV_TransparencyFrontOnly = 1UL << 6,
+			URV_SpecialShadingOnly = 1UL << 7,
+			URV_SimpleForwardOnly = 1UL << 8
 		};
 
 	public:

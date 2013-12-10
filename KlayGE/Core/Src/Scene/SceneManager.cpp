@@ -307,47 +307,38 @@ namespace KlayGE
 	void SceneManager::AddRenderable(RenderablePtr const & obj)
 	{
 		bool add;
-		if (obj->SelectMode() || (0 == urt_))
+		if (obj->SelectMode())
 		{
 			add = true;
 		}
 		else
 		{
-			if (deferred_mode_)
+			if (urt_ & App3DFramework::URV_OpaqueOnly)
 			{
-				if (obj->SimpleForward())
-				{
-					add = (urt_ & App3DFramework::URV_Simple_Forward_Only) ? true : false;
-				}
-				else
-				{
-					if (urt_ & App3DFramework::URV_Opaque_Only)
-					{
-						add = !(obj->TransparencyBackFace() || obj->TransparencyFrontFace());
-					}
-					else if (urt_ & App3DFramework::URV_Transparency_Back_Only)
-					{
-						add = obj->TransparencyBackFace();
-					}
-					else if (urt_ & App3DFramework::URV_Transparency_Front_Only)
-					{
-						add = obj->TransparencyFrontFace();
-					}
-					else
-					{
-						add = true;
-					}
-
-					if (urt_ & App3DFramework::URV_Special_Shading_Only)
-					{
-						add &= obj->SpecialShading();
-					}
-				}
+				add = !(obj->TransparencyBackFace() || obj->TransparencyFrontFace());
+			}
+			else if (urt_ & App3DFramework::URV_TransparencyBackOnly)
+			{
+				add = obj->TransparencyBackFace();
+			}
+			else if (urt_ & App3DFramework::URV_TransparencyFrontOnly)
+			{
+				add = obj->TransparencyFrontFace();
 			}
 			else
 			{
 				add = true;
 			}
+
+			if (deferred_mode_ && (urt_ & App3DFramework::URV_SpecialShadingOnly))
+			{
+				add &= obj->SpecialShading();
+			}
+
+			add &= (deferred_mode_ && !obj->SimpleForward() && !(urt_ & App3DFramework::URV_SimpleForwardOnly))
+				|| !deferred_mode_;
+
+			add |= (deferred_mode_ && obj->SimpleForward() && (urt_ & App3DFramework::URV_SimpleForwardOnly));
 		}
 
 		if (add)
@@ -544,7 +535,7 @@ namespace KlayGE
 		{
 			scene_obj->visible = false;
 		}
-		if (urt & App3DFramework::URV_Need_Flush)
+		if (urt & App3DFramework::URV_NeedFlush)
 		{
 			frustum_ = &camera.ViewFrustum();
 
@@ -727,7 +718,7 @@ namespace KlayGE
 
 			urt = app.Update(pass);
 
-			if (urt & (App3DFramework::URV_Need_Flush | App3DFramework::URV_Finished))
+			if (urt & App3DFramework::URV_NeedFlush)
 			{
 				this->Flush(urt);
 			}
@@ -740,7 +731,7 @@ namespace KlayGE
 			}
 		}
 
-		re.PostProcess((urt & App3DFramework::URV_Skip_Postprocess) != 0);
+		re.PostProcess((urt & App3DFramework::URV_SkipPostProcess) != 0);
 
 		if (re.Stereo() != STM_None)
 		{

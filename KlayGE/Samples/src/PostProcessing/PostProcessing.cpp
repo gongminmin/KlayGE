@@ -349,7 +349,7 @@ uint32_t PostProcessingApp::DoUpdate(uint32_t pass)
 		re.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->ClearDepth(1.0f);
 		active_pp_->Apply();
 
-		return App3DFramework::URV_Skip_Postprocess | App3DFramework::URV_Finished;
+		return App3DFramework::URV_SkipPostProcess | App3DFramework::URV_Finished;
 	}
 	else
 	{

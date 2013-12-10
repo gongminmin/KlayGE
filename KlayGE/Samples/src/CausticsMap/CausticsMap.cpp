@@ -1102,7 +1102,7 @@ uint32_t CausticsMapApp::DoUpdate(uint32_t pass)
 			depth_to_linear_pp_->SetParam(0, near_q);
 		}
 
-		return App3DFramework::URV_Need_Flush;
+		return App3DFramework::URV_NeedFlush;
 	}
 	else if (1 == pass)
 	{
@@ -1129,7 +1129,7 @@ uint32_t CausticsMapApp::DoUpdate(uint32_t pass)
 			re.CurFrameBuffer()->GetViewport()->camera = light_->SMCamera(0);
 		}
 
-		return App3DFramework::URV_Need_Flush;
+		return App3DFramework::URV_NeedFlush;
 	}
 	else if (2 == pass)
 	{
@@ -1147,10 +1147,10 @@ uint32_t CausticsMapApp::DoUpdate(uint32_t pass)
 				re.BindFrameBuffer(refract_obj_fb_b_);
 				re.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(0.0f, 0.0f, 0.0f, 0.0f), 1.0f, 0);
 				re.CurFrameBuffer()->GetViewport()->camera = light_->SMCamera(0);
-				return App3DFramework::URV_Need_Flush;
+				return App3DFramework::URV_NeedFlush;
 			}
 
-			return App3DFramework::URV_Flushed;
+			return 0;
 		}
 		else
 		{
@@ -1163,7 +1163,7 @@ uint32_t CausticsMapApp::DoUpdate(uint32_t pass)
 			re.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color, Color(0.0f, 0.0f, 0.0f, 0.0f), 1.0f, 0);
 			re.CurFrameBuffer()->GetViewport()->camera = light_->SMCamera(0);
 
-			return App3DFramework::URV_Need_Flush;
+			return App3DFramework::URV_NeedFlush;
 		}
 	}
 	else if (3 == pass)
@@ -1200,11 +1200,11 @@ uint32_t CausticsMapApp::DoUpdate(uint32_t pass)
 				re.BindFrameBuffer(refract_obj_fb_d_b_);
 				re.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(light_->SMCamera(0)->FarPlane(), 0.0f, 0.0f, 0.0f), 1.0f, 0);
 				re.CurFrameBuffer()->GetViewport()->camera = light_->SMCamera(0);
-				return App3DFramework::URV_Need_Flush;
+				return App3DFramework::URV_NeedFlush;
 			}
 		}
 
-		return App3DFramework::URV_Flushed;
+		return 0;
 	}
 	else if (!depth_texture_ && (4 == pass))
 	{
@@ -1216,10 +1216,10 @@ uint32_t CausticsMapApp::DoUpdate(uint32_t pass)
 			re.BindFrameBuffer(refract_obj_fb_b_);
 			re.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color, Color(0.0f, 0.0f, 0.0f, 0.0f), 1.0f, 0);
 			re.CurFrameBuffer()->GetViewport()->camera = light_->SMCamera(0);
-			return App3DFramework::URV_Need_Flush;
+			return App3DFramework::URV_NeedFlush;
 		}
 
-		return App3DFramework::URV_Flushed;
+		return 0;
 	}
 	else if (!depth_texture_ && (5 == pass))
 	{
@@ -1239,7 +1239,7 @@ uint32_t CausticsMapApp::DoUpdate(uint32_t pass)
 		caustics_grid_->Render();
 		caustics_map_pps_->Apply();
 
-		return App3DFramework::URV_Flushed;
+		return 0;
 	}
 	else if (pass - sm_start_pass < 6)
 	{
@@ -1263,7 +1263,7 @@ uint32_t CausticsMapApp::DoUpdate(uint32_t pass)
 		re.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->ClearDepth(1.0f);
 		shadow_cube_buffer_->GetViewport()->camera = dummy_light_->SMCamera(pass - sm_start_pass);
 
-		return App3DFramework::URV_Need_Flush;
+		return App3DFramework::URV_NeedFlush;
 	}
 	else if (pass - env_start_pass < 6)
 	{
@@ -1288,7 +1288,7 @@ uint32_t CausticsMapApp::DoUpdate(uint32_t pass)
 		re.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->ClearDepth(1.0f);
 		env_cube_buffer_->GetViewport()->camera = dummy_light_env_->SMCamera(pass - env_start_pass);
 		
-		return App3DFramework::URV_Need_Flush;
+		return App3DFramework::URV_NeedFlush;
 	}
 	else if (6 == pass - env_start_pass)
 	{
@@ -1307,7 +1307,7 @@ uint32_t CausticsMapApp::DoUpdate(uint32_t pass)
 		re.BindFrameBuffer(scene_fb_);
 		re.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->ClearDepth(1.0f);
 
-		return App3DFramework::URV_Need_Flush;
+		return App3DFramework::URV_NeedFlush;
 	}
 	else
 	{
@@ -1327,6 +1327,6 @@ uint32_t CausticsMapApp::DoUpdate(uint32_t pass)
 
 		copy_pp_->Apply();
 
-		return App3DFramework::URV_Need_Flush | App3DFramework::URV_Finished;
+		return App3DFramework::URV_NeedFlush | App3DFramework::URV_Finished;
 	}
 }

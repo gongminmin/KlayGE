@@ -244,6 +244,9 @@ namespace
 
 			switch (mode_)
 			{
+			case OM_No:
+				break;
+
 			case OM_DepthPeeling:
 				{
 					float q = camera.FarPlane() / (camera.FarPlane() - camera.NearPlane());
@@ -660,21 +663,21 @@ uint32_t OrderIndependentTransparencyApp::DoUpdate(uint32_t pass)
 				re.BindFrameBuffer(FrameBufferPtr());
 			}
 			re.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->ClearDepthStencil(1, 0);
-			return App3DFramework::URV_Opaque_Only | App3DFramework::URV_Need_Flush;
+			return App3DFramework::URV_OpaqueOnly | App3DFramework::URV_NeedFlush;
 
 		case 1:
 			checked_pointer_cast<PolygonObject>(polygon_)->FirstPass(true);
 			
 			re.BindFrameBuffer(linked_list_fb_);
 			start_offset_uav_->Clear(uint4(0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF));
-			return App3DFramework::URV_Transparency_Front_Only | App3DFramework::URV_Need_Flush;
+			return App3DFramework::URV_TransparencyFrontOnly | App3DFramework::URV_NeedFlush;
 
 		default:
 			checked_pointer_cast<PolygonObject>(polygon_)->FirstPass(false);
 
 			re.BindFrameBuffer(FrameBufferPtr());
 			checked_pointer_cast<PolygonObject>(polygon_)->RenderQuad();
-			return App3DFramework::URV_Flushed | App3DFramework::URV_Finished;
+			return App3DFramework::URV_Finished;
 		}
 	}
 	else if (OM_DepthPeeling == oit_mode_)
@@ -684,7 +687,7 @@ uint32_t OrderIndependentTransparencyApp::DoUpdate(uint32_t pass)
 		case 0:
 			re.BindFrameBuffer(FrameBufferPtr());
 			re.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->ClearDepthStencil(1, 0);
-			return App3DFramework::URV_Opaque_Only | App3DFramework::URV_Need_Flush;
+			return App3DFramework::URV_OpaqueOnly | App3DFramework::URV_NeedFlush;
 
 		case 1:
 			num_layers_ = 1;
@@ -692,7 +695,7 @@ uint32_t OrderIndependentTransparencyApp::DoUpdate(uint32_t pass)
 			checked_pointer_cast<PolygonObject>(polygon_)->FirstPass(true);
 			re.BindFrameBuffer(peeling_fbs_[0]);
 			re.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(0, 0, 0, 0), 1, 0);
-			return App3DFramework::URV_Transparency_Front_Only | App3DFramework::URV_Need_Flush;
+			return App3DFramework::URV_TransparencyFrontOnly | App3DFramework::URV_NeedFlush;
 
 		default:
 			checked_pointer_cast<PolygonObject>(polygon_)->FirstPass(false);
@@ -761,7 +764,7 @@ uint32_t OrderIndependentTransparencyApp::DoUpdate(uint32_t pass)
 				}
 				else
 				{
-					return App3DFramework::URV_Transparency_Front_Only | App3DFramework::URV_Need_Flush;
+					return App3DFramework::URV_TransparencyFrontOnly | App3DFramework::URV_NeedFlush;
 				}
 			}
 		}
@@ -772,6 +775,6 @@ uint32_t OrderIndependentTransparencyApp::DoUpdate(uint32_t pass)
 
 		re.BindFrameBuffer(FrameBufferPtr());
 		re.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->ClearDepthStencil(1, 0);
-		return App3DFramework::URV_Need_Flush | App3DFramework::URV_Finished;
+		return App3DFramework::URV_NeedFlush | App3DFramework::URV_Finished;
 	}
 }

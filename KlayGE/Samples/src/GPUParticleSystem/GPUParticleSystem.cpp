@@ -868,7 +868,7 @@ uint32_t GPUParticleSystemApp::DoUpdate(uint32_t pass)
 			terrain_->Visible(true);
 			particles_->Visible(false);
 		}
-		return App3DFramework::URV_Need_Flush;
+		return App3DFramework::URV_NeedFlush;
 
 	case 1:
 		{
@@ -892,7 +892,7 @@ uint32_t GPUParticleSystemApp::DoUpdate(uint32_t pass)
 			re.BindFrameBuffer(fog_buffer_);
 			re.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(0, 0, 0, 0), 1.0f, 0);
 
-			return App3DFramework::URV_Need_Flush;
+			return App3DFramework::URV_NeedFlush;
 		}
 
 	default:
@@ -907,7 +907,7 @@ uint32_t GPUParticleSystemApp::DoUpdate(uint32_t pass)
 
 			blend_pp_->Apply();
 
-			return App3DFramework::URV_Need_Flush | App3DFramework::URV_Finished;
+			return App3DFramework::URV_NeedFlush | App3DFramework::URV_Finished;
 		}
 	}
 }

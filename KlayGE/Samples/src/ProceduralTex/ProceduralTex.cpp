@@ -343,7 +343,7 @@ uint32_t ProceduralTexApp::DoUpdate(uint32_t /*pass*/)
 		}
 
 		renderEngine.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(0.0f, 0.0f, 0.0f, 1), 1.0f, 0);
-		return App3DFramework::URV_Skip_Postprocess | App3DFramework::URV_Flushed | App3DFramework::URV_Finished;
+		return App3DFramework::URV_SkipPostProcess | App3DFramework::URV_Finished;
 	}
 	else
 	{
@@ -365,6 +365,6 @@ uint32_t ProceduralTexApp::DoUpdate(uint32_t /*pass*/)
 		checked_pointer_cast<PolygonObject>(polygon_)->LightColor(light_->Color());
 		checked_pointer_cast<PolygonObject>(polygon_)->LightFalloff(light_->Falloff());
 
-		return App3DFramework::URV_Need_Flush | App3DFramework::URV_Finished;
+		return App3DFramework::URV_NeedFlush | App3DFramework::URV_Finished;
 	}
 }

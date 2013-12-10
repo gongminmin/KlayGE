@@ -1148,7 +1148,7 @@ uint32_t MotionBlurDoFApp::DoUpdate(uint32_t pass)
 		{
 			checked_pointer_cast<Teapot>(scene_objs_[i])->MotionVecPass(false);
 		}
-		return App3DFramework::URV_Need_Flush;
+		return App3DFramework::URV_NeedFlush;
 
 	case 1:
 		if (depth_texture_support_)
@@ -1162,7 +1162,7 @@ uint32_t MotionBlurDoFApp::DoUpdate(uint32_t pass)
 		{
 			checked_pointer_cast<Teapot>(scene_objs_[i])->MotionVecPass(true);
 		}
-		return App3DFramework::URV_Need_Flush;
+		return App3DFramework::URV_NeedFlush;
 
 	default:
 		num_objs_rendered_ = sceneMgr.NumObjectsRendered();

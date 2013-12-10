@@ -550,5 +550,5 @@ uint32_t JudaTexViewer::DoUpdate(uint32_t /*pass*/)
 		clear_clr.b() = 0.325f;
 	}
 	re.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, clear_clr, 1.0f, 0);
-	return App3DFramework::URV_Need_Flush | App3DFramework::URV_Finished;
+	return App3DFramework::URV_NeedFlush | App3DFramework::URV_Finished;
 }

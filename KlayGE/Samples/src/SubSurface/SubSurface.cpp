@@ -306,7 +306,7 @@ uint32_t SubSurfaceApp::DoUpdate(KlayGE::uint32_t pass)
 		renderEngine.BindFrameBuffer(back_face_depth_fb_);
 		renderEngine.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(0, 0, 0, 0), 0.0f, 0);
 		checked_pointer_cast<ModelObject>(model_)->BackFaceDepthPass(true);
-		return App3DFramework::URV_Need_Flush;
+		return App3DFramework::URV_NeedFlush;
 
 	default:
 		renderEngine.BindFrameBuffer(FrameBufferPtr());
@@ -325,6 +325,6 @@ uint32_t SubSurfaceApp::DoUpdate(KlayGE::uint32_t pass)
 		checked_pointer_cast<ModelObject>(model_)->EyePos(this->ActiveCamera().EyePos());
 		checked_pointer_cast<ModelObject>(model_)->BackFaceDepthPass(false);
 
-		return App3DFramework::URV_Need_Flush | App3DFramework::URV_Finished;
+		return App3DFramework::URV_NeedFlush | App3DFramework::URV_Finished;
 	}
 }
