@@ -97,7 +97,7 @@ void SubSurfaceVS(float2 tex0 : TEXCOORD0,
 				out float3 oV	: TEXCOORD2,
 				out float3 oH	: TEXCOORD3,
 				out float3 oN	: TEXCOORD4,
-				out float4 oPosSS : TEXCOORD5,
+				out float3 oTcW : TEXCOORD5,
 				out float4 oPos : SV_Position)
 {
 	pos = float4(pos.xyz * pos_extent + pos_center, 1);
@@ -112,7 +112,12 @@ void SubSurfaceVS(float2 tex0 : TEXCOORD0,
 	oN = transform_quat(float3(0, 0, 1), tangent_quat);
 
 	oPos = mul(pos, worldviewproj);
-	oPosSS = oPos;
+	
+	oTcW.xy = oPos.xy / oPos.w;
+	oTcW.y *= KLAYGE_FLIPPING;
+	oTcW.xy = oTcW.xy * 0.5f + 0.5f;	
+	oTcW.z = oPos.w;
+	oTcW.xy *= oTcW.z;
 }
 
 float4 SubSurfacePS(float2 uv : TEXCOORD0,
@@ -120,7 +125,7 @@ float4 SubSurfacePS(float2 uv : TEXCOORD0,
 				float3 V	: TEXCOORD2,
 				float3 H	: TEXCOORD3,
 				float3 N	: TEXCOORD4,
-				float4 oPosSS : TEXCOORD5) : SV_Target
+				float3 tc_w : TEXCOORD5) : SV_Target
 {
 	float attenuation = attenuation_term(0, -L.xyz, light_falloff);
 
@@ -156,9 +161,7 @@ float4 SubSurfacePS(float2 uv : TEXCOORD0,
 		shininess = shininess_clr.r;
 	}
 
-	float2 tex_coord = oPosSS.xy / oPosSS.w;
-	tex_coord.y *= KLAYGE_FLIPPING;
-	tex_coord = tex_coord * 0.5f + 0.5f;
+	float2 tex_coord = tc_w.xy / tc_w.z;
 #if PACK_TO_RGBA
 	float back_face_depth = DecodeFloatRGBA(back_face_depth_tex.Sample(point_sampler, tex_coord)) * far_plane.x;
 #else
@@ -167,7 +170,7 @@ float4 SubSurfacePS(float2 uv : TEXCOORD0,
 #if !NO_DEPTH_TEXTURE
 	back_face_depth = non_linear_depth_to_linear(back_face_depth, near_q.x, near_q.y);
 #endif
-	float thickness = clamp(back_face_depth - oPosSS.w, 0, 100.0f);
+	float thickness = clamp(back_face_depth - tc_w.z, 0, 100.0f);
 
 	float indirect_light = material_thickness * (min(0, dot(N, L)) + min(0, dot(V, L)));
 	indirect_light *= exp(thickness * sigma_t);
