@@ -231,9 +231,10 @@ namespace KlayGE
 	uint32_t const MAX_RINGS = 10;
 
 	HQTerrainRenderable::TileRing::TileRing(int hole_width, int outer_width, float tile_size,
-		GraphicsBufferPtr const & tile_non_tess_ib,
+		GraphicsBufferPtr const & tile_non_tess_ib, GraphicsBufferPtr const & tile_non_tess_vid_vb,
 		GraphicsBufferPtr const & tile_tess_ib)
-		: tile_non_tess_ib_(tile_non_tess_ib), tile_tess_ib_(tile_tess_ib),
+		: tile_non_tess_ib_(tile_non_tess_ib), tile_non_tess_vid_vb_(tile_non_tess_vid_vb),
+			tile_tess_ib_(tile_tess_ib),
 			hole_width_(hole_width), outer_width_(outer_width),
 			ring_width_((outer_width - hole_width) / 2),
 			num_tiles_(outer_width * outer_width - hole_width * hole_width),
@@ -314,7 +315,7 @@ namespace KlayGE
 	void HQTerrainRenderable::TileRing::CreateInstanceDataVB()
 	{
 		int index = 0;
-		vb_data_.resize(num_tiles_);
+		std::vector<InstanceData> vb_data(num_tiles_);
 
 		float const half_width = 0.5f * outer_width_;
 		for (int y = 0; y < outer_width_; ++ y)
@@ -323,9 +324,9 @@ namespace KlayGE
 			{
 				if (this->InRing(x, y))
 				{
-					vb_data_[index].x = tile_size_ * (x - half_width);
-					vb_data_[index].y = tile_size_ * (y - half_width);
-					this->AssignNeighbourSizes(x, y, vb_data_[index].adjacency);
+					vb_data[index].x = tile_size_ * (x - half_width);
+					vb_data[index].y = tile_size_ * (y - half_width);
+					this->AssignNeighbourSizes(x, y, vb_data[index].adjacency);
 					++ index;
 				}
 			}
@@ -333,7 +334,7 @@ namespace KlayGE
 		BOOST_ASSERT(index == num_tiles_);
 
 		ElementInitData init_data;
-		init_data.data = &vb_data_[0];
+		init_data.data = &vb_data[0];
 		init_data.row_pitch = num_tiles_ * sizeof(InstanceData);
 		init_data.slice_pitch = init_data.row_pitch;
 
@@ -347,6 +348,8 @@ namespace KlayGE
 		tile_non_tess_rl_->BindVertexStream(vb_, make_tuple(vertex_element(VEU_TextureCoord, 0, EF_GR32F),
 			vertex_element(VEU_TextureCoord, 1, EF_ABGR32F)),
 			RenderLayout::ST_Instance);
+		tile_non_tess_rl_->BindVertexStream(tile_non_tess_vid_vb_,
+			make_tuple(vertex_element(VEU_TextureCoord, 2, EF_R32F)));
 		tile_non_tess_rl_->NumInstances(num_tiles_);
 
 		tile_tess_rl_ = rf.MakeRenderLayout();
@@ -372,6 +375,7 @@ namespace KlayGE
 		hw_tessellation_ = re.DeviceCaps().ds_support;
 
 		this->CreateNonTessIB();
+		this->CreateNonTessVIDVB();
 		this->CreateTessIB();
 
 		int widths[] = { 0, 16, 16, 16, 16 };
@@ -382,7 +386,8 @@ namespace KlayGE
 		float tile_width = 0.125f;
 		for (uint32_t i = 0; i < rings; ++ i)
 		{
-			tile_rings_[i] = MakeSharedPtr<TileRing>(widths[i] / 2, widths[i + 1], tile_width, tile_non_tess_ib_, tile_tess_ib_);
+			tile_rings_[i] = MakeSharedPtr<TileRing>(widths[i] / 2, widths[i + 1], tile_width,
+				tile_non_tess_ib_, tile_non_tess_vid_vb_, tile_tess_ib_);
 			tile_width *= 2.0f;
 		}
 
@@ -479,11 +484,34 @@ namespace KlayGE
 
 		ElementInitData init_data;
 		init_data.data = &indices[0];
-		init_data.row_pitch = NON_TESS_INDEX_COUNT * sizeof(uint32_t);
+		init_data.row_pitch = sizeof(indices);
 		init_data.slice_pitch = init_data.row_pitch;
 
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-		tile_non_tess_ib_ = rf.MakeIndexBuffer(BU_Static, EAH_GPU_Read, &init_data);
+		tile_non_tess_ib_ = rf.MakeIndexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, &init_data);
+	}
+
+	void HQTerrainRenderable::CreateNonTessVIDVB()
+	{
+		float vid[VERTEX_PER_TILE_EDGE * VERTEX_PER_TILE_EDGE];
+
+		for (uint32_t y = 0; y < VERTEX_PER_TILE_EDGE; ++ y)
+		{
+			uint32_t const row_start = y * VERTEX_PER_TILE_EDGE;
+
+			for (uint32_t x = 0; x < VERTEX_PER_TILE_EDGE; ++ x)
+			{
+				vid[row_start + x] = row_start + x + 0.5f;
+			}
+		}
+
+		ElementInitData init_data;
+		init_data.data = &vid[0];
+		init_data.row_pitch = sizeof(vid);
+		init_data.slice_pitch = init_data.row_pitch;
+
+		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+		tile_non_tess_vid_vb_ = rf.MakeIndexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, &init_data);
 	}
 
 	void HQTerrainRenderable::CreateTessIB()
@@ -515,7 +543,7 @@ namespace KlayGE
 		init_data.slice_pitch = init_data.row_pitch;
 
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-		tile_tess_ib_ = rf.MakeIndexBuffer(BU_Static, EAH_GPU_Read, &init_data);
+		tile_tess_ib_ = rf.MakeIndexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, &init_data);
 	}
 
 	void HQTerrainRenderable::TextureLayer(uint32_t layer, TexturePtr const & tex)

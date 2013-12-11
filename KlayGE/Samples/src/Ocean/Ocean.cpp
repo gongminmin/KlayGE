@@ -311,12 +311,12 @@ namespace
 
 					gradient_tex_[i] = rf.MakeTexture2D(ocean_param_.dmap_dim, ocean_param_.dmap_dim,
 						0, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write | EAH_Generate_Mips, nullptr);
+					displacement_tex_[i] = rf.MakeTexture2D(ocean_param_.dmap_dim, ocean_param_.dmap_dim,
+						1, 1, EF_ABGR8, 1, 0, EAH_GPU_Read | EAH_GPU_Write,
+						use_load_tex ? &disp_init_data[i * disp_num_mipmaps] : nullptr);
 
 					if (use_load_tex)
 					{
-						displacement_tex_[i] = rf.MakeTexture2D(ocean_param_.dmap_dim, ocean_param_.dmap_dim,
-							1, 1, EF_ABGR8, 1, 0, EAH_GPU_Read | EAH_GPU_Write, &disp_init_data[i * disp_num_mipmaps]);
-
 						TexturePtr gta;
 						if (EF_GR8 == fmt)
 						{

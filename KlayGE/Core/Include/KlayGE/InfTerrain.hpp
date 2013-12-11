@@ -116,6 +116,7 @@ namespace KlayGE
 			// tile_size is a world-space length
 			TileRing(int hole_width, int outer_width, float tile_size,
 				GraphicsBufferPtr const & tile_non_tess_ib,
+				GraphicsBufferPtr const & tile_non_tess_vid_vb,
 				GraphicsBufferPtr const & tile_tess_ib);
 
 			int OuterWidth() const
@@ -150,12 +151,12 @@ namespace KlayGE
 			RenderLayoutPtr tile_non_tess_rl_;
 			RenderLayoutPtr tile_tess_rl_;
 			GraphicsBufferPtr tile_non_tess_ib_;
+			GraphicsBufferPtr tile_non_tess_vid_vb_;
 			GraphicsBufferPtr tile_tess_ib_;
 
 			int const hole_width_, outer_width_, ring_width_;
 			int const num_tiles_;
 			float const tile_size_;
-			std::vector<InstanceData> vb_data_;
 
 			TileRing(TileRing const & rhs);
 			TileRing& operator=(TileRing const & rhs);
@@ -184,6 +185,7 @@ namespace KlayGE
 	protected:
 		virtual void BindDeferredEffect(RenderEffectPtr const & deferred_effect) KLAYGE_OVERRIDE;
 		void CreateNonTessIB();
+		void CreateNonTessVIDVB();
 		void CreateTessIB();
 		float3 CalcUVOffset(Camera const & camera) const;
 		void SetMatrices(Camera const & camera);
@@ -235,6 +237,7 @@ namespace KlayGE
 		KlayGE::array<RenderEffectParameterPtr, 4> terrain_tex_layer_scale_params_;
 
 		GraphicsBufferPtr tile_non_tess_ib_;
+		GraphicsBufferPtr tile_non_tess_vid_vb_;
 		GraphicsBufferPtr tile_tess_ib_;
 		TexturePtr height_map_tex_;
 		TexturePtr gradient_map_tex_;

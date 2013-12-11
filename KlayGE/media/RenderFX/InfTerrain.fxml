@@ -143,13 +143,15 @@ float SampleHeightForVS(float2 world_xz, float2 offset)
 	return vertical_scale.x * (coarse + SampleLevelDetailNoise(uv, coarse) * 0.5f);
 }
 
-void GBufferNoTessTerrainVS(float2 position  : TEXCOORD0,
+void GBufferNoTessTerrainVS(float2 position : TEXCOORD0,
 		float4 neighbor_minus_plus_xy : TEXCOORD1,
-		uint vertex_id    : SV_VertexID,
+		float f_vertex_id : TEXCOORD2,
 		out float3 oWorldPos        : TEXCOORD0,
 		out float oDebugPatch       : TEXCOORD1,
 		out float4 oPosition        : SV_Position)
 {
+	int vertex_id = f_vertex_id;
+	
 	float3 displaced_pos;
 	int2 int_uv;
 	ReconstructPosition(position, vertex_id, displaced_pos, int_uv);
