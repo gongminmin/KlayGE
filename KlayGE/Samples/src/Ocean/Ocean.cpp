@@ -21,6 +21,7 @@
 #include <KlayGE/DeferredRenderingLayer.hpp>
 #include <KlayGE/LightShaft.hpp>
 #include <KlayGE/SkyBox.hpp>
+#include <KFL/Half.hpp>
 
 #include <sstream>
 
@@ -503,8 +504,8 @@ namespace
 			ocean_simulator_->Parameters(ocean_param_);
 
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-			TexturePtr disp_32f = rf.MakeTexture2D(ocean_param_.dmap_dim, ocean_param_.dmap_dim,
-					1, 1, EF_ABGR32F, 1, 0, EAH_CPU_Read | EAH_CPU_Write, nullptr);
+			TexturePtr disp_cpu_tex = rf.MakeTexture2D(ocean_param_.dmap_dim, ocean_param_.dmap_dim,
+					1, 1, EF_ABGR16F, 1, 0, EAH_CPU_Read | EAH_CPU_Write, nullptr);
 
 			std::vector<float4> min_disps(ocean_param_.num_frames, float4(+1e10f, +1e10f, +1e10f, +1e10f));
 			std::vector<float4> disp_ranges(ocean_param_.num_frames);
@@ -516,19 +517,22 @@ namespace
 				TexturePtr const & sim_disp_tex = ocean_simulator_->DisplacementTex();
 				TexturePtr const & sim_grad_tex = ocean_simulator_->GradientTex();
 
-				sim_disp_tex->CopyToSubTexture2D(*disp_32f,
+				sim_disp_tex->CopyToSubTexture2D(*disp_cpu_tex,
 					0, 0, 0, 0, sim_disp_tex->Width(0), sim_disp_tex->Height(0),
 					0, 0, 0, 0, sim_disp_tex->Width(0), sim_disp_tex->Height(0));
 
 				{
 					float4 max_disp = float4(-1e10f, -1e10f, -1e10f, -1e10f);
-					Texture::Mapper mapper(*disp_32f, 0, 0, TMA_Read_Only, 0, 0, ocean_param_.dmap_dim, ocean_param_.dmap_dim);
-					float4* p = mapper.Pointer<float4>();
+					Texture::Mapper mapper(*disp_cpu_tex, 0, 0, TMA_Read_Only, 0, 0, ocean_param_.dmap_dim, ocean_param_.dmap_dim);
+					half* p = mapper.Pointer<half>();
 					for (int y = 0; y < ocean_param_.dmap_dim; ++ y)
 					{
 						for (int x = 0; x < ocean_param_.dmap_dim; ++ x)
 						{
-							float4 const & disp = p[y * mapper.RowPitch() / sizeof(float4) + x];
+							float4 disp = float4(float(p[y * mapper.RowPitch() / sizeof(half) + x * 4 + 0]),
+								float(p[y * mapper.RowPitch() / sizeof(half) + x * 4 + 1]),
+								float(p[y * mapper.RowPitch() / sizeof(half) + x * 4 + 2]),
+								float(p[y * mapper.RowPitch() / sizeof(half) + x * 4 + 3]));
 							min_disps[i] = MathLib::minimize(min_disps[i], disp);
 							max_disp = MathLib::maximize(max_disp, disp);
 						}
@@ -540,7 +544,10 @@ namespace
 					{
 						for (int x = 0; x < ocean_param_.dmap_dim; ++ x)
 						{
-							float4 const & disp = p[y * mapper.RowPitch() / sizeof(float4) + x];
+							float4 disp = float4(float(p[y * mapper.RowPitch() / sizeof(half) + x * 4 + 0]),
+								float(p[y * mapper.RowPitch() / sizeof(half) + x * 4 + 1]),
+								float(p[y * mapper.RowPitch() / sizeof(half) + x * 4 + 2]),
+								float(p[y * mapper.RowPitch() / sizeof(half) + x * 4 + 3]));
 							float4 normalized_disp = (disp - min_disps[i]) / disp_ranges[i];
 							abgr8_disp[y * ocean_param_.dmap_dim + x] = Color(&normalized_disp.x()).ABGR();
 						}
