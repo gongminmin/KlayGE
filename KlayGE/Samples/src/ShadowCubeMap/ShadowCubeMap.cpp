@@ -108,6 +108,12 @@ namespace
 		}
 	}
 
+	void DeinitInstancedTessBuffs()
+	{
+		tess_pattern_vbs.clear();
+		tess_pattern_ibs.clear();
+	}
+
 
 	uint32_t const SHADOW_MAP_SIZE = 512;
 
@@ -295,19 +301,48 @@ namespace
 			if (TM_Instanced == caps.tess_method)
 			{
 				{
+					float3 const pos_center = pos_aabb_.Center();
+					float3 const pos_extent = pos_aabb_.HalfSize();
+
 					GraphicsBufferPtr vb_sysmem = rf.MakeVertexBuffer(BU_Static, EAH_CPU_Read, nullptr);
 					vb_sysmem->Resize(rl_->GetVertexStream(0)->Size());
 					rl_->GetVertexStream(0)->CopyToBuffer(*vb_sysmem);
-				
+
 					GraphicsBuffer::Mapper mapper(*vb_sysmem, BA_Read_Only);
-					float3* src = mapper.Pointer<float3>() + this->StartVertexLocation();
-
 					std::vector<float4> dst(this->NumVertices());
-					for (size_t i = 0; i < dst.size(); ++ i)
+					switch (rl_->VertexStreamFormat(0)[0].format)
 					{
-						dst[i] = float4(src[i].x(), src[i].y(), src[i].z(), 1);
-					}
+					case EF_BGR32F:
+						{
+							float3 const * src = mapper.Pointer<float3>() + this->StartVertexLocation();
+							for (size_t i = 0; i < dst.size(); ++ i)
+							{
+								dst[i] = float4(src[i].x(), src[i].y(), src[i].z(), 1);
+							}
+						}
+						break;
 
+					case EF_ABGR32F:
+						{
+							float4 const * src = mapper.Pointer<float4>() + this->StartVertexLocation();
+							memcpy(&dst[0], src, this->NumVertices() * sizeof(float4));
+						}
+						break;
+
+					case EF_SIGNED_ABGR16:
+						{
+							int16_t const * src = mapper.Pointer<int16_t>() + this->StartVertexLocation() * 4;
+							for (size_t i = 0; i < dst.size(); ++ i)
+							{
+								dst[i].x() = (((src[i * 4 + 0] + 32768) / 65536.0f) * 2 - 1) * pos_extent.x() + pos_center.x();
+								dst[i].y() = (((src[i * 4 + 1] + 32768) / 65536.0f) * 2 - 1) * pos_extent.y() + pos_center.y();
+								dst[i].z() = (((src[i * 4 + 2] + 32768) / 65536.0f) * 2 - 1) * pos_extent.z() + pos_center.z();
+								dst[i].w() = 1;
+							}
+						}
+						break;
+					}
+				
 					ElementInitData init_data;
 					init_data.data = &dst[0];
 					init_data.row_pitch = this->NumVertices() * sizeof(float4);
@@ -525,6 +560,8 @@ int SampleMain()
 	ShadowCubeMap app;
 	app.Create();
 	app.Run();
+
+	DeinitInstancedTessBuffs();
 
 	return 0;
 }

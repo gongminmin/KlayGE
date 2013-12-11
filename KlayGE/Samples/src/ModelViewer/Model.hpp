@@ -5,6 +5,9 @@
 #include <string>
 #include <KlayGE/Mesh.hpp>
 
+void InitInstancedTessBuffs();
+void DeinitInstancedTessBuffs();
+
 class DetailedSkinnedMesh;
 
 class DetailedSkinnedModel : public KlayGE::SkinnedModel

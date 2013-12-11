@@ -247,6 +247,8 @@ int SampleMain()
 	app.Create();
 	app.Run();
 
+	DeinitInstancedTessBuffs();
+
 	return 0;
 }
 
