@@ -34,7 +34,7 @@ float HybridTerrain(float2 x, int3 octaves)
 
 	float h = ridge(0.3f + 0.5f * fBm(x_twisted, octaves.x), 1);
 	
-	float uv_scale  = pow(2, octaves.x);
+	float uv_scale  = pow(2.0f, octaves.x);
 	float amp_scale = pow(0.5f, octaves.x);
 	float f = fBm(x * uv_scale, octaves.y) * amp_scale;
 	
