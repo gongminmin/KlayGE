@@ -343,7 +343,7 @@ namespace KlayGE
 
 		tile_non_tess_rl_ = rf.MakeRenderLayout();
 		tile_non_tess_rl_->TopologyType(RenderLayout::TT_TriangleStrip);
-		tile_non_tess_rl_->BindIndexStream(tile_non_tess_ib_, EF_R32UI);
+		tile_non_tess_rl_->BindIndexStream(tile_non_tess_ib_, EF_R16UI);
 		tile_non_tess_rl_->NumIndices(NON_TESS_INDEX_COUNT);
 		tile_non_tess_rl_->BindVertexStream(vb_, make_tuple(vertex_element(VEU_TextureCoord, 0, EF_GR32F),
 			vertex_element(VEU_TextureCoord, 1, EF_ABGR32F)),
@@ -354,7 +354,7 @@ namespace KlayGE
 
 		tile_tess_rl_ = rf.MakeRenderLayout();
 		tile_tess_rl_->TopologyType(RenderLayout::TT_4_Ctrl_Pt_PatchList);
-		tile_tess_rl_->BindIndexStream(tile_tess_ib_, EF_R32UI);
+		tile_tess_rl_->BindIndexStream(tile_tess_ib_, EF_R16UI);
 		tile_tess_rl_->NumIndices(TESS_INDEX_COUNT);
 		tile_tess_rl_->BindVertexStream(vb_, make_tuple(vertex_element(VEU_TextureCoord, 0, EF_GR32F),
 			vertex_element(VEU_TextureCoord, 1, EF_ABGR32F)),
@@ -463,14 +463,14 @@ namespace KlayGE
 
 	void HQTerrainRenderable::CreateNonTessIB()
 	{
-		uint32_t index = 0;
-		uint32_t indices[NON_TESS_INDEX_COUNT];
+		uint16_t index = 0;
+		uint16_t indices[NON_TESS_INDEX_COUNT];
 
-		for (uint32_t y = 0; y < VERTEX_PER_TILE_EDGE - 1; ++ y)
+		for (uint16_t y = 0; y < VERTEX_PER_TILE_EDGE - 1; ++ y)
 		{
-			uint32_t const row_start = y * VERTEX_PER_TILE_EDGE;
+			uint16_t const row_start = y * VERTEX_PER_TILE_EDGE;
 
-			for (uint32_t x = 0; x < VERTEX_PER_TILE_EDGE; ++ x)
+			for (uint16_t x = 0; x < VERTEX_PER_TILE_EDGE; ++ x)
 			{
 				indices[index] = row_start + x;
 				++ index;
@@ -519,14 +519,14 @@ namespace KlayGE
 
 	void HQTerrainRenderable::CreateTessIB()
 	{
-		uint32_t index = 0;
-		uint32_t indices[TESS_INDEX_COUNT];
+		uint16_t index = 0;
+		uint16_t indices[TESS_INDEX_COUNT];
 
-		for (uint32_t y = 0; y < VERTEX_PER_TILE_EDGE - 1; ++ y)
+		for (uint16_t y = 0; y < VERTEX_PER_TILE_EDGE - 1; ++ y)
 		{
-			uint32_t const row_start = y * VERTEX_PER_TILE_EDGE;
+			uint16_t const row_start = y * VERTEX_PER_TILE_EDGE;
 
-			for (uint32_t x = 0; x < VERTEX_PER_TILE_EDGE - 1; ++ x)
+			for (uint16_t x = 0; x < VERTEX_PER_TILE_EDGE - 1; ++ x)
 			{
 				indices[index] = row_start + x;
 				++ index;
@@ -542,7 +542,7 @@ namespace KlayGE
 
 		ElementInitData init_data;
 		init_data.data = &indices[0];
-		init_data.row_pitch = TESS_INDEX_COUNT * sizeof(uint32_t);
+		init_data.row_pitch = sizeof(indices);
 		init_data.slice_pitch = init_data.row_pitch;
 
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
