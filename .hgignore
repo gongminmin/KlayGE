@@ -61,6 +61,9 @@ KlayGE/Exporters/3DSMax/MeshML/build/*/ipch/
 KlayGE/Exporters/Maya/build/*/Debug/
 KlayGE/Exporters/Maya/build/*/Release/
 KlayGE/Exporters/Maya/build/*/ipch/
+KlayGE/Samples/media/Ocean/OceanDisplacement.dds
+KlayGE/Samples/media/Ocean/OceanDisplacementParam.dds
+KlayGE/Samples/media/Ocean/OceanGradient.dds
 External/boost/bin.v2/
 External/boost/lib_*/
 External/boost/b2

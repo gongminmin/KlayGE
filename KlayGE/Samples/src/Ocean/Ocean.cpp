@@ -208,9 +208,9 @@ namespace
 			ElementFormat disp_format;
 			std::vector<ElementInitData> disp_init_data;
 			std::vector<uint8_t> disp_data_block;
-			if (!ResLoader::Instance().Locate("OceanWave.7z//OceanDisplacement.dds").empty())
+			if (!ResLoader::Instance().Locate("OceanDisplacement.dds").empty())
 			{
-				LoadTexture("OceanWave.7z//OceanDisplacement.dds", disp_type, disp_width, disp_height, disp_depth, disp_num_mipmaps, disp_array_size,
+				LoadTexture("OceanDisplacement.dds", disp_type, disp_width, disp_height, disp_depth, disp_num_mipmaps, disp_array_size,
 					disp_format, disp_init_data, disp_data_block);
 			}
 
@@ -221,9 +221,9 @@ namespace
 			ElementFormat grad_format;
 			std::vector<ElementInitData> grad_init_data;
 			std::vector<uint8_t> grad_data_block;
-			if (!ResLoader::Instance().Locate("OceanWave.7z//OceanGradient.dds").empty())
+			if (!ResLoader::Instance().Locate("OceanGradient.dds").empty())
 			{
-				LoadTexture("OceanWave.7z//OceanGradient.dds", grad_type, grad_width, grad_height, grad_depth, grad_num_mipmaps, grad_array_size,
+				LoadTexture("OceanGradient.dds", grad_type, grad_width, grad_height, grad_depth, grad_num_mipmaps, grad_array_size,
 					grad_format, grad_init_data, grad_data_block);
 			}
 			
@@ -234,9 +234,9 @@ namespace
 			ElementFormat disp_param_format;
 			std::vector<ElementInitData> disp_param_init_data;
 			std::vector<uint8_t> disp_param_data_block;
-			if (!ResLoader::Instance().Locate("OceanWave.7z//OceanDisplacementParam.dds").empty())
+			if (!ResLoader::Instance().Locate("OceanDisplacementParam.dds").empty())
 			{
-				LoadTexture("OceanWave.7z//OceanDisplacementParam.dds", disp_param_type, disp_param_width, disp_param_height, disp_param_depth, disp_param_num_mipmaps, disp_param_array_size,
+				LoadTexture("OceanDisplacementParam.dds", disp_param_type, disp_param_width, disp_param_height, disp_param_depth, disp_param_num_mipmaps, disp_param_array_size,
 					disp_param_format, disp_param_init_data, disp_param_data_block);
 			}
 
@@ -592,6 +592,8 @@ namespace
 				displacement_params_[i + ocean_param_.num_frames * 0] = float3(min_disps[i]);
 				displacement_params_[i + ocean_param_.num_frames * 1] = float3(disp_ranges[i]);
 			}
+
+			this->SaveWaveTextures();
 		}
 
 		void SaveWaveTextures()
@@ -607,15 +609,17 @@ namespace
 				disp_params[i + ocean_param_.num_frames * 1] = float4(disp_range.x(), disp_range.y(), disp_range.z(), 1);
 			}
 
+			std::string const PREFIX = "../../Samples/media/Ocean/";
+
 			std::vector<ElementInitData> param_init_data(1);
 			param_init_data[0].data = &disp_params[0];
 			param_init_data[0].row_pitch = ocean_param_.num_frames * sizeof(float4);
 			param_init_data[0].slice_pitch = param_init_data[0].row_pitch * 2;
-			SaveTexture("OceanDisplacementParam.dds", Texture::TT_2D, ocean_param_.num_frames, 2, 1, 1, 1, EF_ABGR32F, param_init_data);
+			SaveTexture(PREFIX + "OceanDisplacementParam.dds", Texture::TT_2D, ocean_param_.num_frames, 2, 1, 1, 1, EF_ABGR32F, param_init_data);
 
 			if (use_tex_array_)
 			{
-				SaveTexture(displacement_tex_array_, "OceanDisplacement.dds");
+				SaveTexture(displacement_tex_array_, PREFIX + "OceanDisplacement.dds");
 
 				TexturePtr gta = rf.MakeTexture2D(ocean_param_.dmap_dim, ocean_param_.dmap_dim,
 					1, ocean_param_.num_frames, EF_GR8, 1, 0, EAH_CPU_Read | EAH_CPU_Write, nullptr);
@@ -625,7 +629,7 @@ namespace
 						i, 0, 0, 0, ocean_param_.dmap_dim, ocean_param_.dmap_dim,
 						i, 0, 0, 0, ocean_param_.dmap_dim, ocean_param_.dmap_dim);
 				}
-				SaveTexture(gta, "OceanGradient.dds");
+				SaveTexture(gta, PREFIX + "OceanGradient.dds");
 			}
 			else
 			{
@@ -654,7 +658,7 @@ namespace
 						}
 					}
 
-					SaveTexture("OceanDisplacement.dds", Texture::TT_2D,
+					SaveTexture(PREFIX + "OceanDisplacement.dds", Texture::TT_2D,
 						ocean_param_.dmap_dim, ocean_param_.dmap_dim, 1, 1, ocean_param_.num_frames,
 						displacement_tex_[0]->Format(), disp_init_data);
 				}
@@ -686,7 +690,7 @@ namespace
 						}
 					}
 
-					SaveTexture("OceanGradient.dds", Texture::TT_2D,
+					SaveTexture(PREFIX + "OceanGradient.dds", Texture::TT_2D,
 						ocean_param_.dmap_dim, ocean_param_.dmap_dim, 1, 1, ocean_param_.num_frames,
 						gradient_tex_[0]->Format(), grad_init_data);
 				}

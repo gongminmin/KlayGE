@@ -398,7 +398,10 @@ namespace KlayGE
 
 	void HQTerrainRenderable::Tessellation(bool tess)
 	{
-		hw_tessellation_ = tess;
+		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+		RenderEngine& re = rf.RenderEngineInstance();
+
+		hw_tessellation_ = re.DeviceCaps().ds_support & tess;
 		this->UpdateTechnique();
 	}
 
