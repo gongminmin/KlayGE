@@ -81,6 +81,7 @@ namespace KlayGE
 					OGLESMapping::MappingVertexFormat(type, normalized, vs_elem.format);
 					normalized = (((VEU_Diffuse == vs_elem.usage) || (VEU_Specular == vs_elem.usage)) && !IsFloatFormat(vs_elem.format)) ? GL_TRUE : normalized;
 
+					BOOST_ASSERT(GL_ARRAY_BUFFER == stream.GLType());
 					stream.Active(use_vao_);
 					glVertexAttribPointer(attr, num_components, type, normalized, size, offset);
 					glEnableVertexAttribArray(attr);
@@ -104,6 +105,7 @@ namespace KlayGE
 		if (!(ogl_re.HackForPVR() || ogl_re.HackForMali()) && this->UseIndices())
 		{
 			OGLESGraphicsBuffer& stream(*checked_pointer_cast<OGLESGraphicsBuffer>(this->GetIndexStream()));
+			BOOST_ASSERT(GL_ELEMENT_ARRAY_BUFFER == stream.GLType());
 			stream.Active(use_vao_);
 		}
 	}
@@ -153,6 +155,7 @@ namespace KlayGE
 			if ((re.HackForPVR() || re.HackForMali()) && this->UseIndices())
 			{
 				OGLESGraphicsBuffer& stream(*checked_pointer_cast<OGLESGraphicsBuffer>(this->GetIndexStream()));
+				BOOST_ASSERT(GL_ELEMENT_ARRAY_BUFFER == stream.GLType());
 				stream.Active(use_vao_);
 			}
 		}

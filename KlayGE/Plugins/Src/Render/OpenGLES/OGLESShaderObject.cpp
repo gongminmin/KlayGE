@@ -201,8 +201,8 @@ namespace
 
 	char const * predefined_varyings = "\n	\
 	varying vec4 v_gl_FrontColor;\n			\
-    varying vec4 v_gl_TexCoord[8];\n		\
-    varying float v_gl_FogFragCoord;\n		\
+	varying vec4 v_gl_TexCoord[8];\n		\
+	varying float v_gl_FogFragCoord;\n		\
 	";
 
 	template <typename SrcType>
@@ -2114,21 +2114,40 @@ namespace KlayGE
 #ifdef KLAYGE_DEBUG
 			if (CG_COMPILER_ERROR == error)
 			{
-				std::istringstream iss(shader_text);
-				std::string s;
-				int line = 1;
-				while (iss)
-				{
-					std::getline(iss, s);
-					LogError("%d %s", line, s.c_str());
-					++ line;
-				}
 				LogError("Error when compiling %s:", func_name.c_str());
-				LogError(cgGetErrorString(error));
-
 				char const* listing = cgGetLastListing(CGContextIniter::Instance().Context());
 				if (listing)
 				{
+					std::string err_str = listing;
+					std::string::size_type pos = err_str.find(") : error ");
+					if (pos == std::string::npos)
+					{
+						pos = err_str.find(") : warning ");
+					}
+					if (pos != std::string::npos)
+					{
+						std::string part_err_str = err_str.substr(0, pos);
+						pos = part_err_str.rfind("(");
+						part_err_str = part_err_str.substr(pos + 1);
+						int err_line = boost::lexical_cast<int>(part_err_str);
+
+						std::istringstream iss(shader_text);
+						std::string s;
+						int line = 1;
+						LogError("...");
+						while (iss)
+						{
+							std::getline(iss, s);
+							if ((line - err_line > -3) && (line - err_line < 3))
+							{
+								LogError("%d %s", line, s.c_str());
+							}
+							++ line;
+						}
+						LogError("...");
+					}
+
+					LogError(cgGetErrorString(error));
 					LogError(listing);
 				}
 			}

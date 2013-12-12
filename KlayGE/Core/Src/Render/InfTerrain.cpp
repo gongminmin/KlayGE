@@ -514,7 +514,7 @@ namespace KlayGE
 		init_data.slice_pitch = init_data.row_pitch;
 
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-		tile_non_tess_vid_vb_ = rf.MakeIndexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, &init_data);
+		tile_non_tess_vid_vb_ = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, &init_data);
 	}
 
 	void HQTerrainRenderable::CreateTessIB()

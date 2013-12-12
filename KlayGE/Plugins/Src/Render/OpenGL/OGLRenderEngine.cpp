@@ -856,6 +856,7 @@ namespace KlayGE
 					normalized = (((VEU_Diffuse == vs_elem.usage) || (VEU_Specular == vs_elem.usage)) && !IsFloatFormat(vs_elem.format)) ? GL_TRUE : normalized;
 					GLvoid* offset = static_cast<GLvoid*>(elem_offset + rl.StartInstanceLocation() * instance_size);
 
+					BOOST_ASSERT(GL_ARRAY_BUFFER == stream.GLType());
 					stream.Active(false);
 					glVertexAttribPointer(attr, num_components, type, normalized, instance_size, offset);
 					glEnableVertexAttribArray(attr);
