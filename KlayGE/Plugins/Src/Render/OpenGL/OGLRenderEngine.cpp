@@ -96,7 +96,7 @@ namespace KlayGE
 		: fbo_blit_src_(0), fbo_blit_dst_(0),
 			clear_depth_(1), clear_stencil_(0), cur_program_(0),
 			vp_x_(0), vp_y_(0), vp_width_(0), vp_height_(0),
-			cur_fbo_(0), restart_index_(0)
+			cur_fbo_(0), restart_index_(0xFFFF)
 	{
 		clear_clr_.fill(0);
 	}
@@ -176,6 +176,7 @@ namespace KlayGE
 		if (glloader_GL_VERSION_3_1())
 		{
 			glEnable(GL_PRIMITIVE_RESTART);
+			glPrimitiveRestartIndex(restart_index_);
 		}
 
 		active_tex_unit_ = GL_TEXTURE0;
