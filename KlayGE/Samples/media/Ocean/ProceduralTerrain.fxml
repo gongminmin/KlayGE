@@ -57,7 +57,6 @@ float4 HeightPS(float2 texcoord : TEXCOORD0) : SV_Target
 
 float4 GradientPS(float2 texcoord : TEXCOORD0) : SV_Target
 {
-	texcoord.y = KLAYGE_FLIPPING < 0 ? texcoord.y : 1 - texcoord.y;
 	float x0 = height_tex.Sample(point_clamp_sampler, texcoord + float2(+inv_width_height.x, 0)).x;
 	float x1 = height_tex.Sample(point_clamp_sampler, texcoord + float2(-inv_width_height.x, 0)).x;
 	float y0 = height_tex.Sample(point_clamp_sampler, texcoord + float2(0, +inv_width_height.y)).x;
