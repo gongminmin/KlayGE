@@ -1010,6 +1010,7 @@ namespace KlayGE
 
 		glsl_program_ = glCreateProgram();
 
+		shader_func_names_ = MakeSharedPtr<array<std::string, ST_NumShaderTypes> >();
 		glsl_srcs_ = MakeSharedPtr<array<shared_ptr<std::string>, ST_NumShaderTypes> >();
 
 		pnames_ = MakeSharedPtr<array<shared_ptr<std::vector<std::string> >, ST_NumShaderTypes> >();
@@ -1551,7 +1552,7 @@ namespace KlayGE
 		return ss.str();
 	}
 
-	bool OGLShaderObject::AttachNativeShader(ShaderType type, RenderEffect const & effect, std::vector<uint32_t> const & /*shader_desc_ids*/,
+	bool OGLShaderObject::AttachNativeShader(ShaderType type, RenderEffect const & effect, std::vector<uint32_t> const & shader_desc_ids,
 			std::vector<uint8_t> const & native_shader_block)
 	{
 		bool ret = false;
@@ -1587,6 +1588,7 @@ namespace KlayGE
 							std::memcpy(&len32, nsbp, sizeof(len32));
 							nsbp += sizeof(len32);
 							LittleEndianToNative<sizeof(len32)>(&len32);
+							(*shader_func_names_)[type] = effect.GetShaderDesc(shader_desc_ids[type]).func_name;
 							(*glsl_srcs_)[type] = MakeSharedPtr<std::string>(len32, '\0');
 							std::memcpy(&(*(*glsl_srcs_)[type])[0], nsbp, len32);
 							nsbp += len32;
@@ -1839,6 +1841,8 @@ namespace KlayGE
 	{
 		ShaderDesc const & sd = effect.GetShaderDesc(shader_desc_ids[type]);
 
+		(*shader_func_names_)[type] = sd.func_name;
+
 		OGLRenderFactory& rf = *checked_cast<OGLRenderFactory*>(&Context::Instance().RenderFactoryInstance());
 		RenderEngine& re = rf.RenderEngineInstance();
 		RenderDeviceCaps const & caps = re.DeviceCaps();
@@ -1958,7 +1962,6 @@ namespace KlayGE
 			CGerror error = cgGetError();
 			if (error != CG_NO_ERROR)
 			{
-#ifdef KLAYGE_DEBUG
 				if (CG_COMPILER_ERROR == error)
 				{
 					LogError("Error when compiling %s:", sd.func_name.c_str());
@@ -1996,9 +1999,9 @@ namespace KlayGE
 
 						LogError(cgGetErrorString(error));
 						LogError(listing);
+						LogError("\n");
 					}
 				}
-#endif
 
 				is_shader_validate_[type] = false;
 			}
@@ -2179,6 +2182,7 @@ namespace KlayGE
 		OGLShaderObjectPtr so = checked_pointer_cast<OGLShaderObject>(shared_so);
 
 		is_shader_validate_[type] = so->is_shader_validate_[type];
+		(*shader_func_names_)[type] = (*so->shader_func_names_)[type];
 
 		if (is_shader_validate_[type])
 		{
@@ -2327,6 +2331,7 @@ namespace KlayGE
 		ret->has_tessellation_ = has_tessellation_;
 		ret->glsl_bin_formats_ = glsl_bin_formats_;
 		ret->glsl_bin_program_ = glsl_bin_program_;
+		ret->shader_func_names_ = shader_func_names_;
 		ret->glsl_srcs_ = glsl_srcs_;
 		ret->pnames_ = pnames_;
 		ret->glsl_res_names_ = glsl_res_names_;
@@ -2670,7 +2675,6 @@ namespace KlayGE
 		{
 			is_shader_validate_[type] = false;
 		}
-		//printf("%s\n", glsl);
 
 		glShaderSource(object, 1, &glsl, nullptr);
 
@@ -2678,10 +2682,9 @@ namespace KlayGE
 
 		GLint compiled = false;
 		glGetShaderiv(object, GL_COMPILE_STATUS, &compiled);
-#ifdef KLAYGE_DEBUG
 		if (!compiled)
 		{
-			printf("%s\n", glsl);
+			LogError("Error when compiling GLSL %s:", (*shader_func_names_)[type].c_str());
 
 			GLint len = 0;
 			glGetShaderiv(object, GL_INFO_LOG_LENGTH, &len);
@@ -2689,10 +2692,45 @@ namespace KlayGE
 			{
 				std::vector<char> info(len + 1, 0);
 				glGetShaderInfoLog(object, len, &len, &info[0]);
-				LogError(&info[0]);
+
+				std::istringstream err_iss(&info[0]);
+				std::string err_str;
+				while (err_iss)
+				{
+					std::getline(err_iss, err_str);
+					if (!err_str.empty())
+					{
+						std::string::size_type pos = err_str.find(": 0:");
+						if (pos != std::string::npos)
+						{
+							pos += 4;
+							std::string::size_type pos2 = err_str.find(':', pos + 1);
+							std::string part_err_str = err_str.substr(pos, pos2 - pos);
+							int err_line = boost::lexical_cast<int>(part_err_str);
+
+							std::istringstream iss(glsl);
+							std::string s;
+							int line = 1;
+							LogError("...");
+							while (iss)
+							{
+								std::getline(iss, s);
+								if ((line - err_line > -3) && (line - err_line < 3))
+								{
+									LogError("%d %s", line, s.c_str());
+								}
+								++ line;
+							}
+							LogError("...");
+						}
+
+						LogError(err_str.c_str());
+						LogError("\n");
+					}
+				}
 			}
 		}
-#endif
+
 		is_shader_validate_[type] &= compiled ? true : false;
 
 		glAttachShader(glsl_program_, object);
