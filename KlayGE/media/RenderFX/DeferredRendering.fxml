@@ -1186,7 +1186,7 @@ float4 CalcLightIndexedDeferredRenderingSpotLighting(int index, float3 pos_es, f
 float4 LightIndexedDeferredRenderingPointPS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Target
 {
 	float4 shading = 0;
-	int4 light_index = light_index_tex.Sample(point_sampler, tc * tc_to_tile_scale) * 255;
+	int4 light_index = light_index_tex.Sample(point_sampler, tc * tc_to_tile_scale) * 255 + 0.5f;
 	if (any(light_index))
 	{
 		float4 lighting = 0;
@@ -1254,7 +1254,7 @@ float4 LightIndexedDeferredRenderingPointPS(float2 tc : TEXCOORD0, float3 view_d
 float4 LightIndexedDeferredRenderingSpotPS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Target
 {
 	float4 shading = 0;
-	int4 light_index = light_index_tex.Sample(point_sampler, tc * tc_to_tile_scale) * 255;
+	int4 light_index = light_index_tex.Sample(point_sampler, tc * tc_to_tile_scale) * 255 + 0.5f;
 	if (any(light_index))
 	{
 		float4 lighting = 0;
