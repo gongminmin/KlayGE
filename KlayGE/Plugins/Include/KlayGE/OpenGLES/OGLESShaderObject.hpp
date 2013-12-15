@@ -63,7 +63,7 @@ namespace KlayGE
 		};
 		typedef std::vector<parameter_bind_t> parameter_binds_t;
 
-		std::string ConvertToELSL(std::string const & glsl, ShaderType type);
+		std::string ConvertToESSL(std::string const & glsl, ShaderType type);
 		parameter_bind_t GetBindFunc(GLint location, RenderEffectParameterPtr const & param);
 		void CompileToNative(std::string const & shader_text, int type, std::string const & func_name);
 		void AttachGLSL(uint32_t type);
@@ -71,6 +71,7 @@ namespace KlayGE
 
 	private:
 		GLuint glsl_program_;
+		shared_ptr<array<std::string, ST_NumShaderTypes> > shader_func_names_;
 		shared_ptr<array<shared_ptr<std::string>, ST_NumShaderTypes> > glsl_srcs_;
 		shared_ptr<array<shared_ptr<std::vector<std::string> >, ST_NumShaderTypes> > pnames_;
 		shared_ptr<array<shared_ptr<std::vector<std::string> >, ST_NumShaderTypes> > glsl_res_names_;

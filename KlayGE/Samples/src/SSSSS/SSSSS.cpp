@@ -65,6 +65,21 @@ SSSSSApp::SSSSSApp()
 	ResLoader::Instance().AddPath("../../Samples/media/SSSSS");
 }
 
+bool SSSSSApp::ConfirmDevice() const
+{
+	RenderDeviceCaps const & caps = Context::Instance().RenderFactoryInstance().RenderEngineInstance().DeviceCaps();
+	if (caps.max_shader_model < 2)
+	{
+		return false;
+	}
+	if (!caps.rendertarget_format_support(EF_ABGR16F, 1, 0))
+	{
+		return false;
+	}
+
+	return true;
+}
+
 void SSSSSApp::InitObjects()
 {
 	font_ = SyncLoadFont("gkai00mp.kfont");

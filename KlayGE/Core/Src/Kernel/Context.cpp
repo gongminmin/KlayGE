@@ -439,21 +439,20 @@ namespace KlayGE
 
 #if defined(KLAYGE_PLATFORM_WINDOWS_DESKTOP)
 #if (_WIN32_WINNT >= 0x0603 /*_WIN32_WINNT_WINBLUE*/)
-		if (IsWindowsVistaOrGreater())
+		if (!IsWindowsVistaOrGreater())
 #else
 		OSVERSIONINFO os_ver_info;
 		memset(&os_ver_info, 0, sizeof(os_ver_info));
 		os_ver_info.dwOSVersionInfoSize = sizeof(os_ver_info);
 		::GetVersionEx(&os_ver_info);
 
-		if (os_ver_info.dwMajorVersion >= 6)
+		if (os_ver_info.dwMajorVersion < 6)
 #endif
 		{
-			rf_name = "D3D11";
-		}
-		else if ("D3D11" == rf_name)
-		{
-			rf_name = "OpenGL";
+			if ("D3D11" == rf_name)
+			{
+				rf_name = "OpenGL";
+			}
 		}
 		
 #elif defined(KLAYGE_PLATFORM_WINDOWS_METRO)

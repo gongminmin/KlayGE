@@ -66,7 +66,7 @@ namespace KlayGE
 	{
 		if (glloader_GLES_VERSION_3_0())
 		{
-			glEndQueryEXT(GL_ANY_SAMPLES_PASSED);
+			glEndQuery(GL_ANY_SAMPLES_PASSED);
 		}
 		else if (glloader_GLES_EXT_occlusion_query_boolean())
 		{

@@ -33,6 +33,14 @@
 #include <boost/assert.hpp>
 #ifdef KLAYGE_COMPILER_MSVC
 #pragma warning(push)
+#pragma warning(disable: 4702)
+#endif
+#include <boost/lexical_cast.hpp>
+#ifdef KLAYGE_COMPILER_MSVC
+#pragma warning(pop)
+#endif
+#ifdef KLAYGE_COMPILER_MSVC
+#pragma warning(push)
 #pragma warning(disable: 6011 6334)
 #endif
 #include <boost/functional/hash.hpp>
@@ -1306,11 +1314,9 @@ namespace KlayGE
 					std::string part_err_str = err_str.substr(0, pos);
 					pos = part_err_str.rfind("(");
 					part_err_str = part_err_str.substr(pos + 1);
-					int err_line;
-					std::istringstream iss(part_err_str);
-					iss >> err_line;
+					int err_line = boost::lexical_cast<int>(part_err_str);
 
-					iss.str(shader_text);
+					std::istringstream iss(shader_text);
 					std::string s;
 					int line = 1;
 					LogError("...");

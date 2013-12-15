@@ -1341,6 +1341,37 @@ namespace KlayGE
 
 	std::string OGLShaderObject::ConvertToGLSL(std::string const & glsl, ShaderType type, uint32_t gs_input_vertices, bool has_gs)
 	{
+		std::stringstream ss;
+		
+		{
+			bool has_directive = false;
+			std::stringstream iss(glsl);
+			std::string s;
+			while (iss)
+			{
+				std::getline(iss, s);
+
+				if (0 == s.find("#version"))
+				{
+					has_directive = true;
+					ss << "#version 120" << std::endl;
+				}
+				else if (0 == s.find("#extension"))
+				{
+					has_directive = true;
+					ss << s << std::endl;
+				}
+				else if (!s.empty() && (s.find("//") != 0) && (s.find("/*") != 0))
+				{
+					break;
+				}
+			}
+			if (has_directive)
+			{
+				ss << std::endl;
+			}
+		}
+
 		char predefined_gs_in_varyings_add_num[1024];
 		sprintf(predefined_gs_in_varyings_add_num, predefined_gs_in_varyings,
 			gs_input_vertices, gs_input_vertices, gs_input_vertices, gs_input_vertices,
@@ -1358,8 +1389,6 @@ namespace KlayGE
 		}
 		predefined_ps_out_varyings_add_num += "\n";
 
-		std::stringstream ss;
-		ss << "#version 120" << std::endl << std::endl;
 		switch (type)
 		{
 		case ST_VertexShader:
@@ -1394,25 +1423,39 @@ namespace KlayGE
 
 		boost::char_separator<char> sep("", " \t\n.,():;+-*/%&!|^[]{}'\"?");
 		boost::tokenizer<boost::char_separator<char> > tok(glsl, sep);
-		std::string this_token;
 		for (KLAYGE_AUTO(beg, tok.begin()); beg != tok.end(); ++ beg)
 		{
-			this_token = *beg;
+			std::string const & this_token = *beg;
 
-			switch (type)
+			if ("#version" == this_token)
 			{
-			case ST_VertexShader:
-			case ST_GeometryShader:
-				if (("gl_Color" == this_token) || ("gl_Normal" == this_token)
-					|| ("gl_Vertex" == this_token) || ("gl_FogCoord" == this_token)
-					|| (0 == this_token.find("gl_MultiTexCoord")))
+				++ beg; // Skip space
+				++ beg; // Skip version
+				++ beg; // Skip \n
+			}
+			else if ("#extension" == this_token)
+			{
+				++ beg; // Skip space
+				++ beg; // Skip extension name
+				++ beg; // Skip space
+				++ beg; // Skip ":"
+				++ beg; // Skip "true"
+				++ beg; // Skip \n
+			}
+			else
+			{
+				switch (type)
+				{
+				case ST_VertexShader:
+				case ST_GeometryShader:
+					if (("gl_Color" == this_token) || ("gl_Normal" == this_token)
+						|| ("gl_Vertex" == this_token) || ("gl_FogCoord" == this_token)
+						|| (0 == this_token.find("gl_MultiTexCoord")))
 
-				{
-					ss << "a_" << this_token;
-				}
-				else
-				{
-					if (("gl_FogFragCoord" == this_token)
+					{
+						ss << "a_" << this_token;
+					}
+					else if (("gl_FogFragCoord" == this_token)
 						|| ("gl_FrontColor" == this_token)
 						|| ("gl_BackColor" == this_token)
 						|| ("gl_FrontSecondaryColor" == this_token)
@@ -1424,128 +1467,107 @@ namespace KlayGE
 							ss << "In";
 						}
 					}
-					else
+					else if (("gl_FogFragCoordIn" == this_token)
+						|| ("gl_FrontColorIn" == this_token)
+						|| ("gl_BackColorIn" == this_token)
+						|| ("gl_FrontSecondaryColorIn" == this_token)
+						|| ("gl_BackSecondaryColorIn" == this_token))
 					{
-						if (("gl_FogFragCoordIn" == this_token)
-							|| ("gl_FrontColorIn" == this_token)
-							|| ("gl_BackColorIn" == this_token)
-							|| ("gl_FrontSecondaryColorIn" == this_token)
-							|| ("gl_BackSecondaryColorIn" == this_token))
+						ss << "v_" << this_token;
+					}
+					else if ("gl_TexCoord" == this_token)
+					{
+						if ((ST_VertexShader == type) && has_gs)
+						{
+							std::string tmp_token[3];
+							for (int t = 0; t < 3; ++ t)
+							{
+								++ beg;
+								tmp_token[t] = *beg;
+							}
+
+							ss << "v_" << this_token << "In" << tmp_token[1];
+						}
+						else
 						{
 							ss << "v_" << this_token;
 						}
-						else
-						{
-							if ("gl_TexCoord" == this_token)
-							{
-								if ((ST_VertexShader == type) && has_gs)
-								{
-									std::string tmp_token[3];
-									for (int t = 0; t < 3; ++ t)
-									{
-										++ beg;
-										tmp_token[t] = *beg;
-									}
-
-									ss << "v_" << this_token << "In" << tmp_token[1];
-								}
-								else
-								{
-									ss << "v_" << this_token;
-								}
-							}
-							else
-							{
-								if ("gl_TexCoordIn" == this_token)
-								{
-									std::string tmp_token[6];
-									for (int t = 0; t < 6; ++ t)
-									{
-										++ beg;
-										tmp_token[t] = *beg;
-									}
-
-									ss << "v_" << this_token << tmp_token[4]
-										 << tmp_token[0] << tmp_token[1] << tmp_token[2];
-								}
-								else
-								{
-									ss << this_token;
-								}
-							}
-						}
 					}
-				}
-				break;
-
-			case ST_PixelShader:
-				if (("gl_TexCoord" == this_token) || ("gl_FogFragCoord" == this_token))
-				{
-					ss << "v_" << this_token;
-				}
-				else
-				{
-					if ("gl_Color" == this_token)
+					else if ("gl_TexCoordIn" == this_token)
 					{
-						ss << "v_gl_FrontColor";
+						std::string tmp_token[6];
+						for (int t = 0; t < 6; ++ t)
+						{
+							++ beg;
+							tmp_token[t] = *beg;
+						}
+
+						ss << "v_" << this_token << tmp_token[4]
+							<< tmp_token[0] << tmp_token[1] << tmp_token[2];
 					}
 					else
 					{
-						if ("gl_SecondaryColor" == this_token)
+						ss << this_token;
+					}
+					break;
+
+				case ST_PixelShader:
+					if (("gl_TexCoord" == this_token) || ("gl_FogFragCoord" == this_token))
+					{
+						ss << "v_" << this_token;
+					}
+					else if ("gl_Color" == this_token)
+					{
+						ss << "v_gl_FrontColor";
+					}
+					else if ("gl_SecondaryColor" == this_token)
+					{
+						ss << "v_gl_FrontSecondaryColor";
+					}
+					else if ("gl_FragColor" == this_token)
+					{
+						if (glloader_GL_VERSION_4_2())
 						{
-							ss << "v_gl_FrontSecondaryColor";
+							ss << "v_gl_FragData_0";
 						}
 						else
 						{
-							if ("gl_FragColor" == this_token)
-							{
-								if (glloader_GL_VERSION_4_2())
-								{
-									ss << "v_gl_FragData_0";
-								}
-								else
-								{
-									ss << this_token;
-								}
-							}
-							else
-							{
-								if ("gl_FragData" == this_token)
-								{
-									if (glloader_GL_VERSION_4_2())
-									{
-										std::string tmp_token[3];
-										for (int t = 0; t < 3; ++ t)
-										{
-											++ beg;
-											tmp_token[t] = *beg;
-										}
-
-										ss << "v_gl_FragData_" << tmp_token[1];
-									}
-									else
-									{
-										ss << this_token;
-									}
-								}
-								else
-								{
-									if ("discard" == this_token)
-									{
-										has_discard_ = true;
-									}
-
-									ss << this_token;
-								}
-							}
+							ss << this_token;
 						}
 					}
-				}
-				break;
+					else if ("gl_FragData" == this_token)
+					{
+						if (glloader_GL_VERSION_4_2())
+						{
+							std::string tmp_token[3];
+							for (int t = 0; t < 3; ++ t)
+							{
+								++ beg;
+								tmp_token[t] = *beg;
+							}
 
-			default:
-				BOOST_ASSERT(false);
-				break;
+							ss << "v_gl_FragData_" << tmp_token[1];
+						}
+						else
+						{
+							ss << this_token;
+						}
+					}
+					else
+					{
+						if ("discard" == this_token)
+						{
+							has_discard_ = true;
+						}
+
+						ss << this_token;
+					}
+					break;
+
+				default:
+					BOOST_ASSERT(false);
+					break;
+				}
 			}
 		}
 
@@ -2682,43 +2704,63 @@ namespace KlayGE
 			glGetShaderiv(object, GL_INFO_LOG_LENGTH, &len);
 			if (len > 0)
 			{
+				OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+
 				std::vector<char> info(len + 1, 0);
 				glGetShaderInfoLog(object, len, &len, &info[0]);
 
-				std::istringstream err_iss(&info[0]);
-				std::string err_str;
-				while (err_iss)
+				if (re.HackForIntel())
 				{
-					std::getline(err_iss, err_str);
-					if (!err_str.empty())
+					std::istringstream err_iss(&info[0]);
+					std::string err_str;
+					while (err_iss)
 					{
-						std::string::size_type pos = err_str.find(": 0:");
-						if (pos != std::string::npos)
+						std::getline(err_iss, err_str);
+						if (!err_str.empty())
 						{
-							pos += 4;
-							std::string::size_type pos2 = err_str.find(':', pos + 1);
-							std::string part_err_str = err_str.substr(pos, pos2 - pos);
-							int err_line = boost::lexical_cast<int>(part_err_str);
-
-							std::istringstream iss(glsl);
-							std::string s;
-							int line = 1;
-							LogError("...");
-							while (iss)
+							std::string::size_type pos = err_str.find(": 0:");
+							if (pos != std::string::npos)
 							{
-								std::getline(iss, s);
-								if ((line - err_line > -3) && (line - err_line < 3))
-								{
-									LogError("%d %s", line, s.c_str());
-								}
-								++ line;
-							}
-							LogError("...");
-						}
+								pos += 4;
+								std::string::size_type pos2 = err_str.find(':', pos + 1);
+								std::string part_err_str = err_str.substr(pos, pos2 - pos);
+								int err_line = boost::lexical_cast<int>(part_err_str);
 
-						LogError(err_str.c_str());
-						LogError("\n");
+								std::istringstream iss(glsl);
+								std::string s;
+								int line = 1;
+								LogError("...");
+								while (iss)
+								{
+									std::getline(iss, s);
+									if ((line - err_line > -3) && (line - err_line < 3))
+									{
+										LogError("%d %s", line, s.c_str());
+									}
+									++ line;
+								}
+								LogError("...");
+							}
+
+							LogError(err_str.c_str());
+							LogError("\n");
+						}
 					}
+				}
+				else
+				{
+					std::istringstream iss(glsl);
+					std::string s;
+					int line = 1;
+					while (iss)
+					{
+						std::getline(iss, s);
+						LogError("%d %s", line, s.c_str());
+						++ line;
+					}
+
+					LogError(&info[0]);
+					LogError("\n");
 				}
 			}
 		}
