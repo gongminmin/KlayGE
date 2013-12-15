@@ -342,19 +342,41 @@ namespace KlayGE
 				glDisable(GL_SAMPLE_ALPHA_TO_COVERAGE);
 			}
 		}
-		if (glloader_GL_EXT_draw_buffers2())
+		if (desc_.independent_blend_enable && (glloader_GL_VERSION_3_0() || glloader_GL_EXT_draw_buffers2()))
 		{
-			for (int i = 0; i < 8; ++ i)
+			if (glloader_GL_VERSION_3_0())
 			{
-				if (cur_desc.blend_enable[i] != desc_.blend_enable[i])
+				for (int i = 0; i < 8; ++ i)
 				{
-					if (desc_.blend_enable[i])
+					if (cur_desc.blend_enable[i] != desc_.blend_enable[i])
 					{
-						glEnableIndexedEXT(GL_BLEND, i);
+						if (desc_.blend_enable[i])
+						{
+							glEnablei(GL_BLEND, i);
+						}
+						else
+						{
+							glDisablei(GL_BLEND, i);
+						}
 					}
-					else
+				}
+			}
+			else
+			{
+				BOOST_ASSERT(glloader_GL_EXT_draw_buffers2());
+
+				for (int i = 0; i < 8; ++ i)
+				{
+					if (cur_desc.blend_enable[i] != desc_.blend_enable[i])
 					{
-						glDisableIndexedEXT(GL_BLEND, i);
+						if (desc_.blend_enable[i])
+						{
+							glEnableIndexedEXT(GL_BLEND, i);
+						}
+						else
+						{
+							glDisableIndexedEXT(GL_BLEND, i);
+						}
 					}
 				}
 			}
@@ -386,28 +408,85 @@ namespace KlayGE
 			}
 		}
 
-		if (cur_desc.blend_op[0] != desc_.blend_op[0])
-		{
-			glBlendEquationSeparate(ogl_blend_op_, ogl_blend_op_alpha_);
-		}
-		if ((cur_desc.src_blend[0] != desc_.src_blend[0])
-			|| (cur_desc.dest_blend[0] != desc_.dest_blend[0])
-			|| (cur_desc.src_blend_alpha[0] != desc_.src_blend_alpha[0])
-			|| (cur_desc.dest_blend_alpha[0] != desc_.dest_blend_alpha[0]))
-		{
-			glBlendFuncSeparate(ogl_src_blend_, ogl_dest_blend_,
-					ogl_src_blend_alpha_, ogl_dest_blend_alpha_);
-		}
-		if (glloader_GL_EXT_draw_buffers2())
+		if (glloader_GL_VERSION_4_0())
 		{
 			for (int i = 0; i < 8; ++ i)
 			{
-				if (cur_desc.color_write_mask[i] != desc_.color_write_mask[i])
+				if (cur_desc.blend_op[i] != desc_.blend_op[i])
 				{
-					glColorMaskIndexedEXT(i, (desc_.color_write_mask[i] & CMASK_Red) != 0,
+					glBlendEquationSeparatei(i, ogl_blend_op_, ogl_blend_op_alpha_);
+				}
+				if ((cur_desc.src_blend[i] != desc_.src_blend[i])
+					|| (cur_desc.dest_blend[i] != desc_.dest_blend[i])
+					|| (cur_desc.src_blend_alpha[i] != desc_.src_blend_alpha[i])
+					|| (cur_desc.dest_blend_alpha[i] != desc_.dest_blend_alpha[i]))
+				{
+					glBlendFuncSeparatei(i, ogl_src_blend_, ogl_dest_blend_,
+						ogl_src_blend_alpha_, ogl_dest_blend_alpha_);
+				}
+			}
+		}
+		else if (glloader_GL_ARB_draw_buffers_blend())
+		{
+			for (int i = 0; i < 8; ++ i)
+			{
+				if (cur_desc.blend_op[i] != desc_.blend_op[i])
+				{
+					glBlendEquationSeparateiARB(i, ogl_blend_op_, ogl_blend_op_alpha_);
+				}
+				if ((cur_desc.src_blend[i] != desc_.src_blend[i])
+					|| (cur_desc.dest_blend[i] != desc_.dest_blend[i])
+					|| (cur_desc.src_blend_alpha[i] != desc_.src_blend_alpha[i])
+					|| (cur_desc.dest_blend_alpha[i] != desc_.dest_blend_alpha[i]))
+				{
+					glBlendFuncSeparateiARB(i, ogl_src_blend_, ogl_dest_blend_,
+						ogl_src_blend_alpha_, ogl_dest_blend_alpha_);
+				}
+			}
+		}
+		else
+		{
+			if (cur_desc.blend_op[0] != desc_.blend_op[0])
+			{
+				glBlendEquationSeparate(ogl_blend_op_, ogl_blend_op_alpha_);
+			}
+			if ((cur_desc.src_blend[0] != desc_.src_blend[0])
+				|| (cur_desc.dest_blend[0] != desc_.dest_blend[0])
+				|| (cur_desc.src_blend_alpha[0] != desc_.src_blend_alpha[0])
+				|| (cur_desc.dest_blend_alpha[0] != desc_.dest_blend_alpha[0]))
+			{
+				glBlendFuncSeparate(ogl_src_blend_, ogl_dest_blend_,
+					ogl_src_blend_alpha_, ogl_dest_blend_alpha_);
+			}
+		}
+		if (desc_.independent_blend_enable && (glloader_GL_VERSION_3_0() || glloader_GL_EXT_draw_buffers2()))
+		{
+			if (glloader_GL_VERSION_3_0())
+			{
+				for (int i = 0; i < 8; ++ i)
+				{
+					if (cur_desc.color_write_mask[i] != desc_.color_write_mask[i])
+					{
+						glColorMaski(i, (desc_.color_write_mask[i] & CMASK_Red) != 0,
 							(desc_.color_write_mask[i] & CMASK_Green) != 0,
 							(desc_.color_write_mask[i] & CMASK_Blue) != 0,
 							(desc_.color_write_mask[i] & CMASK_Alpha) != 0);
+					}
+				}
+			}
+			else
+			{
+				BOOST_ASSERT(glloader_GL_EXT_draw_buffers2());
+
+				for (int i = 0; i < 8; ++ i)
+				{
+					if (cur_desc.color_write_mask[i] != desc_.color_write_mask[i])
+					{
+						glColorMaskIndexedEXT(i, (desc_.color_write_mask[i] & CMASK_Red) != 0,
+							(desc_.color_write_mask[i] & CMASK_Green) != 0,
+							(desc_.color_write_mask[i] & CMASK_Blue) != 0,
+							(desc_.color_write_mask[i] & CMASK_Alpha) != 0);
+					}
 				}
 			}
 		}
@@ -445,30 +524,13 @@ namespace KlayGE
 		{
 			glDisable(GL_SAMPLE_ALPHA_TO_COVERAGE);
 		}
-		if (glloader_GL_EXT_draw_buffers2())
+		if (desc.blend_enable[0])
 		{
-			for (int i = 0; i < 8; ++ i)
-			{
-				if (desc.blend_enable[i])
-				{
-					glEnableIndexedEXT(GL_BLEND, i);
-				}
-				else
-				{
-					glDisableIndexedEXT(GL_BLEND, i);
-				}
-			}
+			glEnable(GL_BLEND);
 		}
 		else
 		{
-			if (desc.blend_enable[0])
-			{
-				glEnable(GL_BLEND);
-			}
-			else
-			{
-				glDisable(GL_BLEND);
-			}
+			glDisable(GL_BLEND);
 		}
 		if (desc.logic_op_enable[0])
 		{
@@ -481,23 +543,10 @@ namespace KlayGE
 		glBlendEquationSeparate(OGLMapping::Mapping(desc.blend_op[0]), OGLMapping::Mapping(desc.blend_op_alpha[0]));
 		glBlendFuncSeparate(OGLMapping::Mapping(desc.src_blend[0]), OGLMapping::Mapping(desc.dest_blend[0]),
 				OGLMapping::Mapping(desc.src_blend_alpha[0]), OGLMapping::Mapping(desc.dest_blend_alpha[0]));
-		if (glloader_GL_EXT_draw_buffers2())
-		{
-			for (int i = 0; i < 8; ++ i)
-			{
-				glColorMaskIndexedEXT(i, (desc_.color_write_mask[i] & CMASK_Red) != 0,
-						(desc_.color_write_mask[i] & CMASK_Green) != 0,
-						(desc_.color_write_mask[i] & CMASK_Blue) != 0,
-						(desc_.color_write_mask[i] & CMASK_Alpha) != 0);
-			}
-		}
-		else
-		{
-			glColorMask((desc.color_write_mask[0] & CMASK_Red) != 0,
-					(desc.color_write_mask[0] & CMASK_Green) != 0,
-					(desc.color_write_mask[0] & CMASK_Blue) != 0,
-					(desc.color_write_mask[0] & CMASK_Alpha) != 0);
-		}
+		glColorMask((desc.color_write_mask[0] & CMASK_Red) != 0,
+				(desc.color_write_mask[0] & CMASK_Green) != 0,
+				(desc.color_write_mask[0] & CMASK_Blue) != 0,
+				(desc.color_write_mask[0] & CMASK_Alpha) != 0);
 		glLogicOp(OGLMapping::Mapping(desc.logic_op[0]));
 
 		glBlendColor(1, 1, 1, 1);

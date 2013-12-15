@@ -185,7 +185,7 @@ namespace KlayGE
 		binded_buffer_.clear();
 
 		fb_srgb_cache_ = false;
-		if (glloader_GL_ARB_framebuffer_sRGB())
+		if (glloader_GL_VERSION_3_0() || glloader_GL_ARB_framebuffer_sRGB() || glloader_GL_EXT_framebuffer_sRGB())
 		{
 			glDisable(GL_FRAMEBUFFER_SRGB);
 		}
@@ -639,7 +639,7 @@ namespace KlayGE
 	{
 		if (fb_srgb_cache_ != srgb)
 		{
-			if (glloader_GL_ARB_framebuffer_sRGB())
+			if (glloader_GL_VERSION_3_0() || glloader_GL_ARB_framebuffer_sRGB() || glloader_GL_EXT_framebuffer_sRGB())
 			{
 				if (srgb)
 				{
@@ -1350,9 +1350,9 @@ namespace KlayGE
 		glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &temp);
 		caps_.max_pixel_texture_units = static_cast<uint8_t>(temp);
 
-		if (glloader_GL_ARB_geometry_shader4() || glloader_GL_EXT_geometry_shader4())
+		if (glloader_GL_VERSION_3_2() || glloader_GL_ARB_geometry_shader4() || glloader_GL_EXT_geometry_shader4())
 		{
-			glGetIntegerv(GL_MAX_GEOMETRY_TEXTURE_IMAGE_UNITS_ARB, &temp);
+			glGetIntegerv(GL_MAX_GEOMETRY_TEXTURE_IMAGE_UNITS, &temp);
 			caps_.max_geometry_texture_units = static_cast<uint8_t>(temp);
 		}
 		else
@@ -1411,8 +1411,7 @@ namespace KlayGE
 		}
 		caps_.logic_op_support = true;
 
-		if (glloader_GL_ARB_geometry_shader4() || glloader_GL_EXT_geometry_shader4()
-			|| glloader_GL_NV_geometry_shader4())
+		if (glloader_GL_VERSION_3_2() || glloader_GL_ARB_geometry_shader4() || glloader_GL_EXT_geometry_shader4())
 		{
 			caps_.gs_support = true;
 		}
@@ -1539,7 +1538,7 @@ namespace KlayGE
 			texture_format_.insert(EF_SIGNED_GR16);
 		}
 		texture_format_.insert(EF_BGR8);
-		if (glloader_GL_NV_texture_shader())
+		if (glloader_GL_VERSION_3_1() || glloader_GL_EXT_texture_snorm())
 		{
 			texture_format_.insert(EF_SIGNED_BGR8);
 			texture_format_.insert(EF_SIGNED_ABGR8);
@@ -1612,7 +1611,7 @@ namespace KlayGE
 			texture_format_.insert(EF_BC7);
 		}
 		texture_format_.insert(EF_D16);
-		if (glloader_GL_EXT_packed_depth_stencil())
+		if (glloader_GL_VERSION_3_0() || glloader_GL_EXT_packed_depth_stencil())
 		{
 			texture_format_.insert(EF_D24S8);
 		}
@@ -1642,7 +1641,7 @@ namespace KlayGE
 		}
 		rendertarget_format_.insert(EF_ARGB8);
 		rendertarget_format_.insert(EF_ABGR8);
-		if (glloader_GL_NV_texture_shader())
+		if (glloader_GL_VERSION_3_1() || glloader_GL_EXT_texture_snorm())
 		{
 			rendertarget_format_.insert(EF_SIGNED_ABGR8);
 		}
@@ -1694,7 +1693,7 @@ namespace KlayGE
 			rendertarget_format_.insert(EF_ABGR32F);
 		}
 		rendertarget_format_.insert(EF_D16);
-		if (glloader_GL_EXT_packed_depth_stencil())
+		if (glloader_GL_VERSION_3_0() || glloader_GL_EXT_packed_depth_stencil())
 		{
 			rendertarget_format_.insert(EF_D24S8);
 		}

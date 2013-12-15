@@ -467,9 +467,9 @@ namespace KlayGE
 			break;
 
 		case EF_SIGNED_BGR8:
-			if (glloader_GL_NV_texture_shader())
+			if (glloader_GL_VERSION_3_1() || glloader_GL_EXT_texture_snorm())
 			{
-				internalFormat = GL_SIGNED_RGB8_NV;
+				internalFormat = GL_RGB8_SNORM;
 				glformat = GL_RGB;
 				gltype = GL_BYTE;
 			}
@@ -492,9 +492,9 @@ namespace KlayGE
 			break;
 
 		case EF_SIGNED_ABGR8:
-			if (glloader_GL_NV_texture_shader())
+			if (glloader_GL_VERSION_3_1() || glloader_GL_EXT_texture_snorm())
 			{
-				internalFormat = GL_SIGNED_RGBA8_NV;
+				internalFormat = GL_RGBA8_SNORM;
 				glformat = GL_RGBA;
 				gltype = GL_BYTE;
 			}
@@ -1110,7 +1110,13 @@ namespace KlayGE
 			break;
 
 		case EF_D24S8:
-			if (glloader_GL_EXT_packed_depth_stencil())
+			if (glloader_GL_VERSION_3_0())
+			{
+				internalFormat = GL_DEPTH24_STENCIL8;
+				glformat = GL_DEPTH_STENCIL;
+				gltype = GL_UNSIGNED_INT_24_8;
+			}
+			else if (glloader_GL_EXT_packed_depth_stencil())
 			{
 				internalFormat = GL_DEPTH24_STENCIL8_EXT;
 				glformat = GL_DEPTH_STENCIL_EXT;

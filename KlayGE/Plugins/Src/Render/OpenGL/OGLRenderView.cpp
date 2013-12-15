@@ -77,7 +77,17 @@ namespace KlayGE
 
 		if (flags & GL_COLOR_BUFFER_BIT)
 		{
-			if (glloader_GL_EXT_draw_buffers2())
+			if (glloader_GL_VERSION_3_0())
+			{
+				for (int i = 0; i < 8; ++ i)
+				{
+					if (blend_desc.color_write_mask[i] != CMASK_All)
+					{
+						glColorMaski(i, true, true, true, true);
+					}
+				}
+			}
+			else if (glloader_GL_EXT_draw_buffers2())
 			{
 				for (int i = 0; i < 8; ++ i)
 				{
@@ -163,7 +173,20 @@ namespace KlayGE
 
 		if (flags & GL_COLOR_BUFFER_BIT)
 		{
-			if (glloader_GL_EXT_draw_buffers2())
+			if (glloader_GL_VERSION_3_0())
+			{
+				for (int i = 0; i < 8; ++ i)
+				{
+					if (blend_desc.color_write_mask[i] != CMASK_All)
+					{
+						glColorMaski(i, (blend_desc.color_write_mask[i] & CMASK_Red) != 0,
+							(blend_desc.color_write_mask[i] & CMASK_Green) != 0,
+							(blend_desc.color_write_mask[i] & CMASK_Blue) != 0,
+							(blend_desc.color_write_mask[i] & CMASK_Alpha) != 0);
+					}
+				}
+			}
+			else if (glloader_GL_EXT_draw_buffers2())
 			{
 				for (int i = 0; i < 8; ++ i)
 				{
@@ -702,9 +725,9 @@ namespace KlayGE
 					glGenTextures(1, &tex_2d_);
 					re.BindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
 					glTextureImage2DEXT(tex_2d_, GL_TEXTURE_RECTANGLE_ARB,
-                               0, GL_RGBA32F_ARB,
-                               width_, height_, 0,
-                               GL_RGBA, GL_FLOAT, nullptr);
+							   0, GL_RGBA32F_ARB,
+							   width_, height_, 0,
+							   GL_RGBA, GL_FLOAT, nullptr);
 					glTextureParameteriEXT(tex_2d_, GL_TEXTURE_RECTANGLE_ARB, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 					glTextureParameteriEXT(tex_2d_, GL_TEXTURE_RECTANGLE_ARB, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 					glTextureParameteriEXT(tex_2d_, GL_TEXTURE_RECTANGLE_ARB, GL_TEXTURE_MAG_FILTER, GL_NEAREST);

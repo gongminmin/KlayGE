@@ -1891,7 +1891,7 @@ namespace KlayGE
 		args.push_back(max_tex_array_str.c_str());
 		args.push_back(max_tex_depth_str.c_str());
 		args.push_back(max_tex_units_str.c_str());
-		args.push_back(nullptr);
+		args.push_back("-DKLAYGE_NO_TEX_LOD=0");
 		args.push_back(flipping_str.c_str());
 		args.push_back(standard_derivatives_str.c_str());
 		if (!re.DeviceCaps().texture_format_support(EF_BC5)
@@ -1947,14 +1947,6 @@ namespace KlayGE
 				profile = CG_PROFILE_UNKNOWN;
 				break;
 			}
-
-			std::string no_tex_lod_str;
-			{
-				std::stringstream ss;
-				ss << "-DKLAYGE_NO_TEX_LOD=" << ((ST_VertexShader == type) ? 0 : ((glloader_GL_VERSION_2_1() || glloader_GL_ARB_shader_texture_lod()) ? 0 : 1));
-				no_tex_lod_str = ss.str();
-			}
-			args[5] = no_tex_lod_str.c_str();
 
 			CGprogram cg_shader = cgCreateProgram(CGContextIniter::Instance().Context(),
 					CG_SOURCE, shader_text.c_str(), profile, sd.func_name.c_str(), &args[0]);
