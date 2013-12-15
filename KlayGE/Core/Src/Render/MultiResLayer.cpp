@@ -136,13 +136,11 @@ namespace KlayGE
 				multi_res_tex->NumMipMaps(), 1, depth_fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
 			normal_cone_tex_ = rf.MakeTexture2D(multi_res_tex->Width(0), multi_res_tex->Height(0),
 				multi_res_tex->NumMipMaps(), 1, fmt8, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
-			if (multi_res_tex->NumMipMaps() > 2)
-			{
-				depth_deriative_small_tex_ = rf.MakeTexture2D(multi_res_tex->Width(1), multi_res_tex->Height(1),
-					multi_res_tex->NumMipMaps() - 1, 1, EF_R16F, 1, 0, EAH_GPU_Write, nullptr);
-				normal_cone_small_tex_ = rf.MakeTexture2D(multi_res_tex->Width(1), multi_res_tex->Height(1),
-					multi_res_tex->NumMipMaps() - 1, 1, fmt8, 1, 0, EAH_GPU_Write, nullptr);
-			}
+
+			depth_deriative_small_tex_ = rf.MakeTexture2D(multi_res_tex->Width(1), multi_res_tex->Height(1),
+				multi_res_tex->NumMipMaps() - 1, 1, EF_R16F, 1, 0, EAH_GPU_Write, nullptr);
+			normal_cone_small_tex_ = rf.MakeTexture2D(multi_res_tex->Width(1), multi_res_tex->Height(1),
+				multi_res_tex->NumMipMaps() - 1, 1, fmt8, 1, 0, EAH_GPU_Write, nullptr);
 	
 			multi_res_pingpong_tex_ = rf.MakeTexture2D(multi_res_tex->Width(0), multi_res_tex->Height(0),
 				multi_res_tex->NumMipMaps() - 1, 1, multi_res_tex_->Format(), 1, 0, EAH_GPU_Write, nullptr);
