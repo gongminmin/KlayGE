@@ -1121,6 +1121,14 @@ namespace KlayGE
 	void OGLESRenderEngine::FillRenderDeviceCaps()
 	{
 		std::string vendor(reinterpret_cast<char const *>(glGetString(GL_VENDOR)));
+		if (vendor.find("NVIDIA", 0) != std::string::npos)
+		{
+			hack_for_tegra_ = true;
+		}
+		else
+		{
+			hack_for_tegra_ = false;
+		}
 		if (vendor.find("Imagination", 0) != std::string::npos)
 		{
 			hack_for_pvr_ = true;
@@ -1413,7 +1421,7 @@ namespace KlayGE
 			rendertarget_format_.insert(EF_ARGB8);
 		}
 
-		if (glloader_GLES_VERSION_3_0)
+		if (glloader_GLES_VERSION_3_0())
 		{
 			GLint max_samples;
 			glGetIntegerv(GL_MAX_SAMPLES, &max_samples);
@@ -1460,12 +1468,18 @@ namespace KlayGE
 		{
 			rendertarget_format_.insert(EF_R16F);
 			rendertarget_format_.insert(EF_GR16F);
+		}
+		if (glloader_GLES_EXT_color_buffer_half_float() || glloader_GLES_EXT_color_buffer_float() || hack_for_tegra_)
+		{
 			rendertarget_format_.insert(EF_ABGR16F);
 		}
 		if (glloader_GLES_EXT_color_buffer_float())
 		{
 			rendertarget_format_.insert(EF_R32F);
 			rendertarget_format_.insert(EF_GR32F);
+		}
+		if (glloader_GLES_EXT_color_buffer_float() || hack_for_tegra_)
+		{
 			rendertarget_format_.insert(EF_ABGR32F);
 		}
 		rendertarget_format_.insert(EF_D16);
