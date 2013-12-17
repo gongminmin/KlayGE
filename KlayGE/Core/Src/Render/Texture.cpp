@@ -991,6 +991,7 @@ namespace
 						char* p = static_cast<char*>(const_cast<void*>(tex_desc_.tex_data->init_data[i].data)) + j;
 
 						BC4ToBC1G(tmp, *reinterpret_cast<BC4_layout const *>(p));
+						std::memcpy(p, &tmp, sizeof(BC1_layout));
 					}
 				}
 
