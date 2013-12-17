@@ -9,9 +9,11 @@ IF(NOT KLAYGE_GLES_INCLUDE_DIR)
 	IF(WIN32)
 		FIND_PATH(KLAYGE_GLES_INCLUDE_DIR KHR/khrplatform.h
 			PATHS
+				"$ENV{NV_WINGL_X86_PLAT}/include"
 				"$ENV{ProgramFiles}/NVIDIA Corporation/win_x86_es2emu/include"
 				"$ENV{ProgramFiles(x86)}/NVIDIA Corporation/win_x86_es2emu/include"
 				"$ENV{SystemDrive}/Imagination/PowerVR/GraphicsSDK/SDK_*/Builds/include"
+				"$ENV{KHRONOS_HEADERS}"
 				"$ENV{ProgramFiles}/ARM/Mali Developer Tools/Mali OpenGL ES Emulator*/include"
 				"$ENV{ProgramFiles(x86)}/ARM/Mali Developer Tools/Mali OpenGL ES Emulator*/include"
 			)
