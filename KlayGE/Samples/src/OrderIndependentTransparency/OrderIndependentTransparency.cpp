@@ -176,11 +176,12 @@ namespace
 			}
 		}
 
-		void LastDepth(TexturePtr const & depth_tex)
+		void LastDepth(TexturePtr const & depth_tex, int channel)
 		{
 			if (dp_nth_tech_)
 			{
 				*(dp_nth_tech_->Effect().ParameterByName("last_depth_tex")) = depth_tex;
+				*(dp_nth_tech_->Effect().ParameterByName("channel")) = channel;
 			}
 		}
 
@@ -339,12 +340,12 @@ namespace
 			}
 		}
 
-		void LastDepth(TexturePtr const & depth_tex)
+		void LastDepth(TexturePtr const & depth_tex, int channel)
 		{
 			RenderModelPtr model = checked_pointer_cast<RenderModel>(renderable_);
 			for (uint32_t i = 0; i < model->NumMeshes(); ++ i)
 			{
-				checked_pointer_cast<RenderPolygon>(model->Mesh(i))->LastDepth(depth_tex);
+				checked_pointer_cast<RenderPolygon>(model->Mesh(i))->LastDepth(depth_tex, channel);
 			}
 		}
 
@@ -502,6 +503,16 @@ void OrderIndependentTransparencyApp::OnResize(uint32_t width, uint32_t height)
 	App3DFramework::OnResize(width, height);
 
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+	RenderDeviceCaps const & caps = rf.RenderEngineInstance().DeviceCaps();
+
+	if (caps.texture_format_support(EF_D24S8) || caps.texture_format_support(EF_D16))
+	{
+		depth_texture_support_ = true;
+	}
+	else
+	{
+		depth_texture_support_ = false;
+	}
 
 	ElementFormat depth_format;
 	if (rf.RenderEngineInstance().DeviceCaps().rendertarget_format_support(EF_D24S8, 1, 0))
@@ -512,10 +523,20 @@ void OrderIndependentTransparencyApp::OnResize(uint32_t width, uint32_t height)
 	{
 		depth_format = EF_D16;
 	}
-	for (size_t i = 0; i < depth_texs_.size(); ++ i)
+	if (depth_texture_support_)
 	{
-		depth_texs_[i] = rf.MakeTexture2D(width, height, 1, 1, depth_format, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
-		depth_views_[i] = rf.Make2DDepthStencilRenderView(*depth_texs_[i], 0, 1, 0);
+		for (size_t i = 0; i < depth_texs_.size(); ++ i)
+		{
+			depth_texs_[i] = rf.MakeTexture2D(width, height, 1, 1, depth_format, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
+			depth_views_[i] = rf.Make2DDepthStencilRenderView(*depth_texs_[i], 0, 1, 0);
+		}
+	}
+	else
+	{
+		for (size_t i = 0; i < depth_texs_.size(); ++ i)
+		{
+			depth_views_[i] = rf.Make2DDepthStencilRenderView(width, height, depth_format, 1, 0);
+		}
 	}
 
 	ElementFormat peel_format;
@@ -539,7 +560,6 @@ void OrderIndependentTransparencyApp::OnResize(uint32_t width, uint32_t height)
 		peeling_fbs_[i]->Attach(FrameBuffer::ATT_DepthStencil, depth_views_[i % 2]);
 	}
 
-	RenderDeviceCaps const & caps = rf.RenderEngineInstance().DeviceCaps();
 	if (caps.max_shader_model >= 5)
 	{
 		ElementFormat opaque_bg_format;
@@ -735,7 +755,14 @@ uint32_t OrderIndependentTransparencyApp::DoUpdate(uint32_t pass)
 				{
 					if (!finished)
 					{
-						checked_pointer_cast<PolygonObject>(polygon_)->LastDepth(depth_texs_[(layer - 1) % 2]);
+						if (depth_texture_support_)
+						{
+							checked_pointer_cast<PolygonObject>(polygon_)->LastDepth(depth_texs_[(layer - 1) % 2], 0);
+						}
+						else
+						{
+							checked_pointer_cast<PolygonObject>(polygon_)->LastDepth(peeled_texs_[layer - 1], 3);
+						}
 
 						re.BindFrameBuffer(peeling_fbs_[layer]);
 						peeling_fbs_[layer]->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(0, 0, 0, 0), 1, 0);

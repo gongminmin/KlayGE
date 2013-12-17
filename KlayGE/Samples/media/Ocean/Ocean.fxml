@@ -111,6 +111,11 @@ void OceanGBufferVS(float2 pos : POSITION,
 #endif
 }
 
+float4 OceanDepthAlphaBlendPS(float3 texcoord_depth : TEXCOORD0) : SV_Target
+{
+	return texcoord_depth.z;
+}
+
 float4 OceanGBufferAlphaBlendRT0PS(float3 texcoord_depth : TEXCOORD0, float2 noise_grad : TEXCOORD1,
 #ifdef NOPERSPECTIVE_SUPPORT
 					noperspective float2 screen_tc : TEXCOORD2
@@ -305,6 +310,13 @@ float4 OceanSpecialShadingAlphaBlendPS(float3 eye_dir : TEXCOORD0, float4 tex_co
 		]]>
 	</shader>
 
+	<technique name="OceanDepthAlphaBlendFront" inherit="DepthAlphaBlendFrontTech">
+		<pass name="p0">
+			<state name="vertex_shader" value="OceanGBufferVS()"/>
+			<state name="pixel_shader" value="OceanDepthAlphaBlendPS()"/>
+		</pass>
+	</technique>
+	
 	<technique name="OceanGBufferAlphaBlendFrontRT0" inherit="GBufferAlphaBlendFrontRT0Tech">
 		<pass name="p0">
 			<state name="vertex_shader" value="OceanGBufferVS()"/>

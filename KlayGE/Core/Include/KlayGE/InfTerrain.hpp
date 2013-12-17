@@ -215,6 +215,7 @@ namespace KlayGE
 
 		float3 texture_world_offset_;
 
+		RenderTechniquePtr terrain_depth_techs_[2];
 		RenderTechniquePtr terrain_gbuffer_rt0_techs_[4];
 		RenderTechniquePtr terrain_gbuffer_rt1_techs_[4];
 		RenderTechniquePtr terrain_gbuffer_mrt_techs_[4];

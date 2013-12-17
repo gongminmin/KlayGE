@@ -344,8 +344,20 @@ namespace
 				uint32_t const width = tex->Width(0) + max_radius_ * 4 + 1;
 				uint32_t const height = tex->Height(0) + max_radius_ * 4 + 1;
 
+				RenderDeviceCaps const & caps = Context::Instance().RenderFactoryInstance().RenderEngineInstance().DeviceCaps();
+				ElementFormat fmt;
+				if (caps.texture_format_support(EF_ABGR32F))
+				{
+					fmt = EF_ABGR32F;
+				}
+				else
+				{
+					BOOST_ASSERT(caps.texture_format_support(EF_ABGR16F));
+					fmt = EF_ABGR16F;
+				}
+
 				RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-				spread_tex_ = rf.MakeTexture2D(width, height, 1, 1, EF_ABGR32F, 1, 0, EAH_GPU_Read | EAH_GPU_Write | (cs_support_ ? EAH_GPU_Unordered : 0), nullptr);
+				spread_tex_ = rf.MakeTexture2D(width, height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write | (cs_support_ ? EAH_GPU_Unordered : 0), nullptr);
 				spread_fb_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*spread_tex_, 0, 0, 0));
 
 				spreading_pp_->SetParam(0, float4(static_cast<float>(width),

@@ -17,6 +17,7 @@
 	</parameter>
 
 	<parameter type="texture2D" name="last_depth_tex"/>
+	<parameter type="int" name="channel"/>
 
 	<shader>
 		<![CDATA[
@@ -35,9 +36,10 @@ void DepthPeelingVS(float4 pos				: POSITION,
 }
 
 float4 DepthPeeling1stPS(float4 L : TEXCOORD0,
-					float4 H : TEXCOORD1) : SV_Target
+					float4 H : TEXCOORD1,
+					float4 pos_ss : TEXCOORD2) : SV_Target
 {
-	return Shading(L, H);
+	return float4(Shading(L, H).xyz, pos_ss.z / pos_ss.w);
 }
 
 float4 DepthPeelingNthPS(float4 L : TEXCOORD0,
@@ -48,10 +50,10 @@ float4 DepthPeelingNthPS(float4 L : TEXCOORD0,
 	tex_coord.y *= KLAYGE_FLIPPING;
 	tex_coord = tex_coord / 2 + 0.5f;
 
-	float last_depth = non_linear_depth_to_linear(last_depth_tex.Sample(point_sampler, tex_coord).r, near_q.x, near_q.y);
+	float last_depth = non_linear_depth_to_linear(last_depth_tex.Sample(point_sampler, tex_coord)[channel], near_q.x, near_q.y);
 	clip(pos_ss.w - (last_depth + 1e-3f));
 
-	return Shading(L, H);
+	return float4(Shading(L, H).xyz, pos_ss.z / pos_ss.w);
 }
 		]]>
 	</shader>

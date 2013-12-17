@@ -193,6 +193,8 @@ void GBufferProceduralTerrainMRTPS(float3 world_pos : TEXCOORD0, float debug_pat
 	</technique>
 	<technique name="GBufferTessTerrainFillRT1Tech" inherit="DepthTessTerrainTech">
 		<pass name="p0">
+			<state name="depth_func" value="equal"/>
+			
 			<state name="pixel_shader" value="GBufferProceduralTerrainRT1PS()"/>
 		</pass>
 	</technique>
@@ -203,10 +205,12 @@ void GBufferProceduralTerrainMRTPS(float3 world_pos : TEXCOORD0, float debug_pat
 	</technique>
 	<technique name="GBufferNoTessTerrainFillRT1Tech" inherit="DepthNoTessTerrainTech">
 		<pass name="p0">
+			<state name="depth_func" value="equal"/>
+			
 			<state name="pixel_shader" value="GBufferProceduralTerrainRT1PS()"/>
 		</pass>
 	</technique>
-	<technique name="GBufferNoTessTerrainLineRT1Tech" inherit="GBufferNoTessTerrainFillRT0Tech">
+	<technique name="GBufferNoTessTerrainLineRT1Tech" inherit="GBufferNoTessTerrainFillRT1Tech">
 		<pass name="p0">
 			<state name="polygon_mode" value="line"/>
 		</pass>

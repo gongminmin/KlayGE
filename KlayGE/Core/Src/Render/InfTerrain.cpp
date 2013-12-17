@@ -455,6 +455,7 @@ namespace KlayGE
 			tech_index += 1;
 		}
 
+		depth_tech_ = terrain_depth_techs_[tech_index / 2];
 		gbuffer_rt0_tech_ = terrain_gbuffer_rt0_techs_[tech_index];
 		gbuffer_rt1_tech_ = terrain_gbuffer_rt1_techs_[tech_index];
 		gbuffer_mrt_tech_ = terrain_gbuffer_mrt_techs_[tech_index];
@@ -565,6 +566,8 @@ namespace KlayGE
 	{
 		RenderableHelper::BindDeferredEffect(deferred_effect);
 
+		terrain_depth_techs_[0] = deferred_effect->TechniqueByName("DepthTessTerrainTech");
+		terrain_depth_techs_[1] = deferred_effect->TechniqueByName("DepthNoTessTerrainTech");
 		terrain_gbuffer_rt0_techs_[0] = deferred_effect->TechniqueByName("GBufferTessTerrainFillRT0Tech");
 		terrain_gbuffer_rt0_techs_[1] = deferred_effect->TechniqueByName("GBufferTessTerrainLineRT0Tech");
 		terrain_gbuffer_rt0_techs_[2] = deferred_effect->TechniqueByName("GBufferNoTessTerrainFillRT0Tech");
@@ -577,7 +580,6 @@ namespace KlayGE
 		terrain_gbuffer_mrt_techs_[1] = deferred_effect->TechniqueByName("GBufferTessTerrainLineMRTTech");
 		terrain_gbuffer_mrt_techs_[2] = deferred_effect->TechniqueByName("GBufferNoTessTerrainFillMRTTech");
 		terrain_gbuffer_mrt_techs_[3] = deferred_effect->TechniqueByName("GBufferNoTessTerrainLineMRTTech");
-		depth_tech_ = deferred_effect->TechniqueByName("DepthTessTerrainTech");
 		gen_sm_tech_ = deferred_effect->TechniqueByName("GenNoTessTerrainShadowMapTech");
 		gen_sm_wo_dt_tech_ = deferred_effect->TechniqueByName("GenNoTessTerrainShadowMapWODepthTextureTech");
 		gen_cascaded_sm_tech_ = deferred_effect->TechniqueByName("GenNoTessTerrainCascadedShadowMapTech");

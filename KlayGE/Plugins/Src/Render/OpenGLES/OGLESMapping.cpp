@@ -686,7 +686,7 @@ namespace KlayGE
 				glformat = GL_RED;
 				gltype = GL_HALF_FLOAT;
 			}
-			else if (glloader_GLES_OES_texture_half_float())
+			else if (glloader_GLES_OES_texture_half_float() || ogl_re.HackForTegra())
 			{
 				internalFormat = GL_LUMINANCE;
 				glformat = GL_LUMINANCE;
@@ -705,7 +705,7 @@ namespace KlayGE
 				glformat = GL_RG;
 				gltype = GL_HALF_FLOAT;
 			}
-			else if (glloader_GLES_OES_texture_half_float())
+			else if (glloader_GLES_OES_texture_half_float() || ogl_re.HackForTegra())
 			{
 				internalFormat = GL_LUMINANCE_ALPHA;
 				glformat = GL_LUMINANCE_ALPHA;
@@ -737,7 +737,7 @@ namespace KlayGE
 				glformat = GL_RGB;
 				gltype = GL_HALF_FLOAT;
 			}
-			else if (glloader_GLES_OES_texture_half_float())
+			else if (glloader_GLES_OES_texture_half_float() || ogl_re.HackForTegra())
 			{
 				internalFormat = GL_RGB;
 				glformat = GL_RGB;

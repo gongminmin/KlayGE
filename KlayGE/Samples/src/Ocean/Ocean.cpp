@@ -42,6 +42,7 @@ namespace
 			: InfTerrainRenderable(L"Ocean")
 		{
 			this->BindDeferredEffect(SyncLoadRenderEffect("Ocean.fxml"));
+			depth_alpha_blend_front_tech_ = deferred_effect_->TechniqueByName("OceanDepthAlphaBlendFront");
 			gbuffer_alpha_blend_front_rt0_tech_ = deferred_effect_->TechniqueByName("OceanGBufferAlphaBlendFrontRT0");
 			gbuffer_alpha_blend_front_rt1_tech_ = deferred_effect_->TechniqueByName("OceanGBufferAlphaBlendFrontRT1");
 			gbuffer_alpha_blend_front_mrt_tech_ = deferred_effect_->TechniqueByName("OceanGBufferAlphaBlendFrontMRT");
@@ -1054,7 +1055,6 @@ void OceanApp::DoUpdateOverlay()
 		<< sceneMgr.NumPrimitivesRendered() << " Primitives "
 		<< sceneMgr.NumVerticesRendered() << " Vertices";
 	font_->RenderText(0, 36, Color(1, 1, 1, 1), stream.str(), 16);
-
 }
 
 uint32_t OceanApp::DoUpdate(uint32_t pass)
