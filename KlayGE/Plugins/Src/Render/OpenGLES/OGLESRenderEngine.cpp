@@ -1477,13 +1477,10 @@ namespace KlayGE
 		{
 			rendertarget_format_.insert(EF_R32F);
 			rendertarget_format_.insert(EF_GR32F);
-		}
-		if (glloader_GLES_EXT_color_buffer_float() || hack_for_tegra_)
-		{
 			rendertarget_format_.insert(EF_ABGR32F);
 		}
 		rendertarget_format_.insert(EF_D16);
-		if (glloader_GLES_VERSION_3_0() || glloader_GLES_OES_packed_depth_stencil())
+		if (glloader_GLES_VERSION_3_0() || glloader_GLES_OES_packed_depth_stencil() || hack_for_tegra_)
 		{
 			rendertarget_format_.insert(EF_D24S8);
 		}

@@ -438,11 +438,15 @@ namespace KlayGE
 		{
 			fmt = EF_R32F;
 		}
+		else if (caps.rendertarget_format_support(EF_R16F, 1, 0))
+		{
+			fmt = EF_R16F;
+		}
 		else
 		{
-			BOOST_ASSERT(caps.rendertarget_format_support(EF_ABGR32F, 1, 0));
+			BOOST_ASSERT(caps.rendertarget_format_support(EF_ABGR16F, 1, 0));
 
-			fmt = EF_ABGR32F;
+			fmt = EF_ABGR16F;
 		}
 		sm_tex_ = rf.MakeTexture2D(SM_SIZE, SM_SIZE, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
 		sm_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*sm_tex_, 0, 1, 0));
@@ -744,11 +748,15 @@ namespace KlayGE
 		{
 			fmt = EF_R32F;
 		}
+		else if (caps.rendertarget_format_support(EF_R16F, 1, 0))
+		{
+			fmt = EF_R16F;
+		}
 		else
 		{
-			BOOST_ASSERT(caps.rendertarget_format_support(EF_ABGR32F, 1, 0));
+			BOOST_ASSERT(caps.rendertarget_format_support(EF_ABGR16F, 1, 0));
 
-			fmt = EF_ABGR32F;
+			fmt = EF_ABGR16F;
 		}
 		if (tex_array_support_)
 		{

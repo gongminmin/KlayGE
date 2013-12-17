@@ -725,6 +725,7 @@ float4 MergeDepthPS(float2 tc : TEXCOORD0) : SV_Target
 	return depth_tex.Sample(point_sampler, tc).x;
 }
 
+#if KLAYGE_D3D11 || KLAYGE_OPENGL
 void CopyShadingDepthPS(float2 tc : TEXCOORD0,
 		out float4 oClr : SV_Target0, out float oDepth : SV_Depth)
 {
@@ -737,6 +738,19 @@ void CopyDepthPS(float2 tc : TEXCOORD0,
 {
 	oDepth = linear_depth_to_non_linear(depth_tex.Sample(point_sampler, tc).x, near_q.x, near_q.y);
 }
+#else
+void CopyShadingDepthPS(float2 tc : TEXCOORD0,
+		out float4 oClr : SV_Target0)
+{
+	oClr = shading_tex.Sample(point_sampler, tc);
+}
+
+void CopyDepthPS(float2 tc : TEXCOORD0,
+		out float4 oClr : SV_Target0)
+{
+	oClr = 0;
+}
+#endif
 		]]>
 	</shader>
 
