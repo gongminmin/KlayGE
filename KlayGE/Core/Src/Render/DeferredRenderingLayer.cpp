@@ -680,7 +680,7 @@ namespace KlayGE
 		}
 		else
 		{
-			ds_view = rf.Make2DDepthStencilRenderView(width, height, EF_D16, 1, 0);
+			ds_view = rf.Make2DDepthStencilRenderView(width, height, EF_D24S8, 1, 0);
 		}
 
 		pvp.g_buffer_rt0_tex = rf.MakeTexture2D(width, height, MAX_IL_MIPMAP_LEVELS + 1, 1, fmt8, 1, 0,

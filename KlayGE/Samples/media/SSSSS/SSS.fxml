@@ -75,6 +75,11 @@ void BlurYPS(float2 texcoord : TEXCOORD0,
 {
 	oRT0 = oRT1 = GuassBlur(texcoord);
 }
+
+float4 CopyPS(float2 texcoord : TEXCOORD0) : SV_Target
+{
+	return color_tex.Sample(point_sampler, texcoord);
+}
 		]]>
 	</shader>
 	
@@ -141,6 +146,71 @@ void BlurYPS(float2 texcoord : TEXCOORD0,
 		</pass>
 	</technique>
 	<technique name="BlurY5" inherit="BlurY0">
+		<pass name="p1">
+			<state name="blend_factor" r="0.078" g="0" b="0" a="1"/>
+		</pass>
+	</technique>
+
+	<technique name="BlurYWOMRT">
+		<pass name="p1">
+			<state name="depth_enable" value="false"/>
+			<state name="depth_write_mask" value="false"/>
+
+			<state name="front_stencil_enable" value="true"/>
+			<state name="front_stencil_func" value="equal"/>
+			<state name="front_stencil_ref" value="32"/>
+			<state name="front_stencil_read_mask" value="32"/>
+			<state name="front_stencil_write_mask" value="0"/>
+
+			<state name="vertex_shader" value="PostProcessVS()"/>
+			<state name="pixel_shader" value="BlurXPS()"/>
+		</pass>
+	</technique>
+	<technique name="Accum0">
+		<pass name="p1">
+			<state name="depth_enable" value="false"/>
+			<state name="depth_write_mask" value="false"/>
+
+			<state name="front_stencil_enable" value="true"/>
+			<state name="front_stencil_func" value="equal"/>
+			<state name="front_stencil_ref" value="32"/>
+			<state name="front_stencil_read_mask" value="32"/>
+			<state name="front_stencil_write_mask" value="0"/>
+
+			<state name="blend_enable" value="true"/>
+			<state name="blend_op" value="add"/>
+			<state name="src_blend" value="blend_factor"/>
+			<state name="dest_blend" value="inv_blend_factor"/>
+			<state name="blend_op_alpha" value="add"/>
+			<state name="src_blend_alpha" value="one"/>
+			<state name="dest_blend_alpha" value="one"/>
+			<state name="blend_factor" r="0.233" g="0.455" b="0.649" a="1"/>
+
+			<state name="vertex_shader" value="PostProcessVS()"/>
+			<state name="pixel_shader" value="CopyPS()"/>
+		</pass>
+	</technique>
+	<technique name="Accum1" inherit="Accum0">
+		<pass name="p1">
+			<state name="blend_factor" r="0.1" g="0.336" b="0.344" a="1"/>
+		</pass>
+	</technique>
+	<technique name="Accum2" inherit="Accum0">
+		<pass name="p1">
+			<state name="blend_factor" r="0.118" g="0.198" b="0" a="1"/>
+		</pass>
+	</technique>
+	<technique name="Accum3" inherit="Accum0">
+		<pass name="p1">
+			<state name="blend_factor" r="0.113" g="0.007" b="0.007" a="1"/>
+		</pass>
+	</technique>
+	<technique name="Accum4" inherit="Accum0">
+		<pass name="p1">
+			<state name="blend_factor" r="0.358" g="0.004" b="0" a="1"/>
+		</pass>
+	</technique>
+	<technique name="Accum5" inherit="Accum0">
 		<pass name="p1">
 			<state name="blend_factor" r="0.078" g="0" b="0" a="1"/>
 		</pass>

@@ -330,7 +330,7 @@ uint32_t PostProcessingApp::DoUpdate(uint32_t pass)
 				if (scene_model)
 				{
 					scene_obj_ = MakeSharedPtr<SceneObjectHelper>(scene_model->Mesh(0), SceneObject::SOA_Cullable | SceneObject::SOA_Moveable);
-					scene_obj_->BindSubThreadUpdateFunc(ObjectUpdate());
+					scene_obj_->BindMainThreadUpdateFunc(ObjectUpdate());
 					scene_obj_->AddToSceneManager();
 					loading_percentage_ = 100;
 				}
