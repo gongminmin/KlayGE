@@ -8,6 +8,7 @@
 
 	<cbuffer name="per_frame">
 		<parameter type="float2" name="near_q"/>
+		<parameter type="float2" name="far_plane"/>
 	</cbuffer>
 
 	<parameter type="sampler" name="point_sampler">
@@ -17,7 +18,6 @@
 	</parameter>
 
 	<parameter type="texture2D" name="last_depth_tex"/>
-	<parameter type="int" name="channel"/>
 
 	<shader>
 		<![CDATA[
@@ -26,34 +26,58 @@ void DepthPeelingVS(float4 pos				: POSITION,
 					float4 tangent_quat		: TANGENT,
 					out float4 oL			: TEXCOORD0,
 					out float4 oH			: TEXCOORD1,
-					out float4 oPosSS		: TEXCOORD2,
+					out float3 oTc			: TEXCOORD2,
 					out float4 oPos			: SV_Position)
 {
 	Transform(pos, texcoord, tangent_quat,
 		oL, oH, oPos);
 
-	oPosSS = oPos;
+	oTc.xy = oPos.xy / oPos.w * 0.5f;
+	oTc.y *= KLAYGE_FLIPPING;
+	oTc.xy += 0.5f;
+	oTc.z = oPos.w;
+	oTc.xy *= oTc.z;
 }
 
 float4 DepthPeeling1stPS(float4 L : TEXCOORD0,
-					float4 H : TEXCOORD1,
-					float4 pos_ss : TEXCOORD2) : SV_Target
+					float4 H : TEXCOORD1) : SV_Target
 {
-	return float4(Shading(L, H).xyz, pos_ss.z / pos_ss.w);
+	return Shading(L, H);
 }
 
 float4 DepthPeelingNthPS(float4 L : TEXCOORD0,
 					float4 H : TEXCOORD1,
-					float4 pos_ss : TEXCOORD2) : SV_Target
+					float3 tc_w : TEXCOORD2) : SV_Target
 {
-	float2 tex_coord = pos_ss.xy / pos_ss.w;
-	tex_coord.y *= KLAYGE_FLIPPING;
-	tex_coord = tex_coord / 2 + 0.5f;
+	float2 tex_coord = tc_w.xy / tc_w.z;
 
-	float last_depth = non_linear_depth_to_linear(last_depth_tex.Sample(point_sampler, tex_coord)[channel], near_q.x, near_q.y);
-	clip(pos_ss.w - (last_depth + 1e-3f));
+#if NO_DEPTH_TEXTURE
+	float last_depth = DecodeFloatRGBA(last_depth_tex.Sample(point_sampler, tex_coord)) * far_plane.x;
+#else
+	float last_depth = non_linear_depth_to_linear(last_depth_tex.Sample(point_sampler, tex_coord).x, near_q.x, near_q.y);
+#endif
+	clip(tc_w.z - (last_depth + 1e-3f));
 
-	return float4(Shading(L, H).xyz, pos_ss.z / pos_ss.w);
+	return Shading(L, H);
+}
+
+float4 DepthPeeling1stDepthPS(float4 L : TEXCOORD0,
+					float4 H : TEXCOORD1,
+					float3 tc_w : TEXCOORD2) : SV_Target
+{
+	return EncodeFloatRGBA(clamp(tc_w.z * far_plane.y, 0, 0.999f));
+}
+
+float4 DepthPeelingNthDepthPS(float4 L : TEXCOORD0,
+					float4 H : TEXCOORD1,
+					float3 tc_w : TEXCOORD2) : SV_Target
+{
+	float2 tex_coord = tc_w.xy / tc_w.z;
+
+	float last_depth = DecodeFloatRGBA(last_depth_tex.Sample(point_sampler, tex_coord)) * far_plane.x;
+	clip(tc_w.z - (last_depth + 1e-3f));
+
+	return EncodeFloatRGBA(clamp(tc_w.z * far_plane.y, 0, 0.999f));
 }
 		]]>
 	</shader>
@@ -70,6 +94,25 @@ float4 DepthPeelingNthPS(float4 L : TEXCOORD0,
 	<technique name="DepthPeelingNth" inherit="DepthPeeling1st">
 		<pass name="p0">
 			<state name="pixel_shader" value="DepthPeelingNthPS()"/>
+		</pass>
+	</technique>
+
+	<technique name="DepthPeelingNthWODepthTexture" inherit="DepthPeelingNth">
+		<macro name="NO_DEPTH_TEXTURE" value="1"/>
+	</technique>
+
+	<technique name="DepthPeeling1stDepth">
+		<pass name="p0">
+			<state name="cull_mode" value="none"/>
+
+			<state name="vertex_shader" value="DepthPeelingVS()"/>
+			<state name="pixel_shader" value="DepthPeeling1stDepthPS()"/>
+		</pass>
+	</technique>
+
+	<technique name="DepthPeelingNthDepth" inherit="DepthPeeling1stDepth">
+		<pass name="p0">
+			<state name="pixel_shader" value="DepthPeelingNthDepthPS()"/>
 		</pass>
 	</technique>
 </effect>
