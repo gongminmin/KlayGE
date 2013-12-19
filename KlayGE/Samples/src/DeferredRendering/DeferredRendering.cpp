@@ -124,6 +124,7 @@ namespace
 				technique_ = technique_->Effect().TechniqueByName("ShowSSVO");
 				break;
 
+#if DEFAULT_DEFERRED == TRIDITIONAL_DEFERRED
 			case 6:
 				technique_ = technique_->Effect().TechniqueByName("ShowDiffuseLighting");
 				break;
@@ -131,6 +132,7 @@ namespace
 			case 7:
 				technique_ = technique_->Effect().TechniqueByName("ShowSpecularLighting");
 				break;
+#endif
 
 			default:
 				break;
@@ -272,6 +274,11 @@ void DeferredRenderingApp::InitObjects()
 	id_num_lights_slider_ = dialog_->IDFromName("NumLightsSlider");
 	id_ctrl_camera_ = dialog_->IDFromName("CtrlCamera");
 
+#if DEFAULT_DEFERRED != TRIDITIONAL_DEFERRED
+	dialog_->Control<UIComboBox>(id_buffer_combo_)->RemoveItem(7);
+	dialog_->Control<UIComboBox>(id_buffer_combo_)->RemoveItem(6);
+#endif
+
 	dialog_->Control<UIComboBox>(id_buffer_combo_)->OnSelectionChangedEvent().connect(KlayGE::bind(&DeferredRenderingApp::BufferChangedHandler, this, KlayGE::placeholders::_1));
 	this->BufferChangedHandler(*dialog_->Control<UIComboBox>(id_buffer_combo_));
 
@@ -322,7 +329,9 @@ void DeferredRenderingApp::OnResize(uint32_t width, uint32_t height)
 
 	debug_pp_->InputPin(0, deferred_rendering_->GBufferRT0Tex(0));
 	debug_pp_->InputPin(1, deferred_rendering_->DepthTex(0));
+#if DEFAULT_DEFERRED == TRIDITIONAL_DEFERRED
 	debug_pp_->InputPin(2, deferred_rendering_->LightingTex(0));
+#endif
 	debug_pp_->InputPin(3, deferred_rendering_->SmallSSVOTex(0));
 
 	UIManager::Instance().SettleCtrls();

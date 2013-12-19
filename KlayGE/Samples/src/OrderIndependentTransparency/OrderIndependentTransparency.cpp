@@ -555,6 +555,12 @@ void OrderIndependentTransparencyApp::InitObjects()
 	id_layer_combo_ = dialog_layer_->IDFromName("LayerCombo");
 	id_layer_tex_ = dialog_layer_->IDFromName("LayerTexButton");
 
+	if (caps.max_shader_model < 5)
+	{
+		dialog_oit_->Control<UIComboBox>(id_oit_mode_)->RemoveItem(3);
+		dialog_oit_->Control<UIComboBox>(id_oit_mode_)->RemoveItem(2);
+	}
+
 	dialog_oit_->Control<UIComboBox>(id_oit_mode_)->OnSelectionChangedEvent().connect(KlayGE::bind(&OrderIndependentTransparencyApp::OITModeHandler, this, KlayGE::placeholders::_1));
 	this->OITModeHandler(*dialog_oit_->Control<UIComboBox>(id_oit_mode_));
 	dialog_oit_->Control<UISlider>(id_alpha_slider_)->OnValueChangedEvent().connect(KlayGE::bind(&OrderIndependentTransparencyApp::AlphaHandler, this, KlayGE::placeholders::_1));
