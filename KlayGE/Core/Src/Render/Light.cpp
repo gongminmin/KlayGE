@@ -95,10 +95,7 @@ namespace KlayGE
 		color_ = float4(clr.x(), clr.y(), clr.z(),
 			MathLib::dot(clr, float3(0.2126f, 0.7152f, 0.0722f)));
 
-		if (range_ < 0)
-		{
-			this->Range(-1);
-		}
+		this->Range(-1);
 	}
 
 	float3 const & LightSource::Position() const
@@ -146,10 +143,7 @@ namespace KlayGE
 	{
 		falloff_ = fall_off;
 
-		if (range_ < 0)
-		{
-			this->Range(-1);
-		}
+		this->Range(-1);
 	}
 
 	float LightSource::CosInnerAngle() const

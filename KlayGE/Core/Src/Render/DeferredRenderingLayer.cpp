@@ -25,7 +25,6 @@
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/App3D.hpp>
 #include <KlayGE/PostProcess.hpp>
-#include <KlayGE/Query.hpp>
 #include <KlayGE/Camera.hpp>
 #include <KlayGE/Mesh.hpp>
 #include <KlayGE/SSVOPostProcess.hpp>
