@@ -294,9 +294,9 @@ namespace KlayGE
 		RenderLayoutPtr rl_box_;
 		RenderLayoutPtr rl_quad_;
 		array<RenderLayoutPtr, LightSource::LT_NumLightTypes> light_volume_rl_;
-		OBBox cone_obb_;
-		OBBox pyramid_obb_;
-		OBBox box_obb_;
+		AABBox cone_aabb_;
+		AABBox pyramid_aabb_;
+		AABBox box_aabb_;
 
 		std::vector<LightSourcePtr> lights_;
 		std::vector<RenderablePtr> decals_;

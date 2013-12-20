@@ -309,7 +309,7 @@ namespace KlayGE
 			std::vector<float3> pos;
 			std::vector<uint16_t> index;
 			CreateConeMesh(pos, index, 0, 100.0f, 100.0f, 12);
-			cone_obb_ = MathLib::compute_obbox(pos.begin(), pos.end());
+			cone_aabb_ = MathLib::compute_aabbox(pos.begin(), pos.end());
 
 			ElementInitData init_data;
 			init_data.row_pitch = static_cast<uint32_t>(pos.size() * sizeof(pos[0]));
@@ -329,7 +329,7 @@ namespace KlayGE
 			std::vector<float3> pos;
 			std::vector<uint16_t> index;
 			CreatePyramidMesh(pos, index, 0, 100.0f, 100.0f);
-			pyramid_obb_ = MathLib::compute_obbox(pos.begin(), pos.end());
+			pyramid_aabb_ = MathLib::compute_aabbox(pos.begin(), pos.end());
 
 			ElementInitData init_data;
 			init_data.row_pitch = static_cast<uint32_t>(pos.size() * sizeof(pos[0]));
@@ -349,7 +349,7 @@ namespace KlayGE
 			std::vector<float3> pos;
 			std::vector<uint16_t> index;
 			CreateBoxMesh(pos, index, 0, 100.0f);
-			box_obb_ = MathLib::compute_obbox(pos.begin(), pos.end());
+			box_aabb_ = MathLib::compute_aabbox(pos.begin(), pos.end());
 
 			ElementInitData init_data;
 			init_data.row_pitch = static_cast<uint32_t>(pos.size() * sizeof(pos[0]));
@@ -1604,7 +1604,7 @@ namespace KlayGE
 				float const scale = light->CosOuterInner().w();
 				float4x4 mat = MathLib::scaling(scale * light_scale, scale * light_scale, light_scale);
 				float4x4 light_model = mat * inv_light_view;
-				pvp.light_visibles[light_index] = scene_mgr.OBBVisible(MathLib::transform_obb(cone_obb_, light_model));
+				pvp.light_visibles[light_index] = scene_mgr.AABBVisible(MathLib::transform_aabb(cone_aabb_, light_model));
 			}
 			break;
 
@@ -1613,7 +1613,7 @@ namespace KlayGE
 				float3 const & p = light->Position();
 				float4x4 light_model = MathLib::scaling(light_scale, light_scale, light_scale)
 					* MathLib::translation(p);
-				pvp.light_visibles[light_index] = scene_mgr.OBBVisible(MathLib::transform_obb(box_obb_, light_model));
+				pvp.light_visibles[light_index] = scene_mgr.AABBVisible(MathLib::transform_aabb(box_aabb_, light_model));
 			}
 			break;
 
@@ -2614,7 +2614,7 @@ namespace KlayGE
 				float const scale = light->CosOuterInner().w();
 				float4x4 light_model = MathLib::scaling(range * 0.01f * float3(scale, scale, 1));
 				float4x4 light_mv = light_model * light_to_view;
-				aabb = MathLib::convert_to_aabbox(MathLib::transform_obb(cone_obb_, light_mv));
+				aabb = MathLib::transform_aabb(cone_aabb_, light_mv);
 			}
 			lights_falloff_range.push_back(float4(light->Falloff().x(), light->Falloff().y(),
 				light->Falloff().z(), range));

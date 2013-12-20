@@ -937,12 +937,13 @@ void CalcTileViewFrustum(float2 tc, float2 min_max, out float4 planes[6])
 	planes[1] = column4 + column1;
 	planes[2] = column4 - column2;
 	planes[3] = column4 + column2;
-	for (int i = 0; i < 4; ++ i)
+	planes[4] = column4 - column3;
+	// TODO: Should be column3 only
+	planes[5] = column4 + column3;
+	for (int i = 0; i < 6; ++ i)
 	{
 		planes[i] /= length(planes[i].xyz);
 	}
-	planes[4] = float4(0.0f, 0.0f, -1.0f, far_plane);
-	planes[5] = float4(0.0f, 0.0f, +1.0f, -near_plane);
 }
 
 float4 DrawLightIndexPointPS(float2 tc : TEXCOORD0) : SV_Target

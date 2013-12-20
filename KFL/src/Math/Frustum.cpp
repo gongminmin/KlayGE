@@ -66,7 +66,8 @@ namespace KlayGE
 		planes_[2] = column4 - column2;	// top
 		planes_[3] = column4 + column2;	// bottom
 		planes_[4] = column4 - column3;	// far
-		planes_[5] = column3;			// near
+		// TODO: Should be column3 only
+		planes_[5] = column4 + column3;	// near
 
 		// Loop through each side of the frustum and normalize it.
 		KLAYGE_FOREACH(typename planes_t::reference plane, planes_)
