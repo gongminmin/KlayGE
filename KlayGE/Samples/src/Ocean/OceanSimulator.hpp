@@ -57,8 +57,8 @@ namespace KlayGE
 		TexturePtr gradient_tex_;
 		FrameBufferPtr gradient_fb_;
 
-		GraphicsBufferPtr h0_buffer_;
-		GraphicsBufferPtr omega_buffer_;
+		TexturePtr h0_tex_;
+		TexturePtr omega_tex_;
 
 		TexturePtr out_real_tex_;
 		TexturePtr out_imag_tex_;

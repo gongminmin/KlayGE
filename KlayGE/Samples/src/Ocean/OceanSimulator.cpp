@@ -99,16 +99,16 @@ namespace KlayGE
 		srand(0);
 		
 		float interval = 2 * PI / param_.time_peroid;
-		for (int i = 0; i <= param_.dmap_dim; i++)
+		for (int i = 0; i <= param_.dmap_dim; ++ i)
 		{
 			// K is wave-vector, range [-|DX/W, |DX/W], [-|DY/H, |DY/H]
 			K.y() = (-param_.dmap_dim / 2.0f + i) * (2 * PI / param_.patch_length);
 
-			for (int j = 0; j <= param_.dmap_dim; j++)
+			for (int j = 0; j <= param_.dmap_dim; ++ j)
 			{
 				K.x() = (-param_.dmap_dim / 2.0f + j) * (2 * PI / param_.patch_length);
 
-				float phil = ((K.x() == 0) && (K.y() == 0)) ? 0 : sqrt(Phillips(K, param_.wind_speed, param_.wave_amplitude, param_.wind_dependency)) * HALF_SQRT_2;
+				float phil = ((0 == K.x()) && (0 == K.y())) ? 0 : sqrt(Phillips(K, param_.wind_speed, param_.wave_amplitude, param_.wind_dependency)) * HALF_SQRT_2;
 				out_h0[i * (param_.dmap_dim + 4) + j] = phil * float2(Gauss(), Gauss());
 
 				// The angular frequency is following the dispersion relation:
@@ -175,15 +175,15 @@ namespace KlayGE
 
 		ElementInitData init_data;
 
-		std::vector<char> zero_data(3 * params.dmap_dim * params.dmap_dim * sizeof(float) * 2, 0);
-
-		init_data.row_pitch = static_cast<uint32_t>(h0_data.size() * sizeof(h0_data[0]));
 		init_data.data = &h0_data[0];
-		h0_buffer_ = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Read | EAH_Immutable, &init_data, EF_GR32F);
+		init_data.row_pitch = (params.dmap_dim + 4) * sizeof(float2);
+		init_data.slice_pitch = init_data.row_pitch * (params.dmap_dim + 1);
+		h0_tex_ = rf.MakeTexture2D(params.dmap_dim + 4, params.dmap_dim + 1, 1, 1, EF_GR32F, 1, 0, EAH_GPU_Read | EAH_Immutable, &init_data);
 
-		init_data.row_pitch = static_cast<uint32_t>(omega_data.size() * sizeof(omega_data[0]));
 		init_data.data = &omega_data[0];
-		omega_buffer_ = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Read | EAH_Immutable, &init_data, EF_R32F);
+		init_data.row_pitch = (params.dmap_dim + 4) * sizeof(float);
+		init_data.slice_pitch = init_data.row_pitch * (params.dmap_dim + 1);
+		omega_tex_ = rf.MakeTexture2D(params.dmap_dim + 4, params.dmap_dim + 1, 1, 1, EF_R32F, 1, 0, EAH_GPU_Read | EAH_Immutable, &init_data);
 
 		displacement_tex_ = rf.MakeTexture2D(params.dmap_dim, params.dmap_dim, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
 		gradient_tex_ = rf.MakeTexture2D(params.dmap_dim, params.dmap_dim, 1, 1, EF_ABGR8, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
@@ -200,20 +200,18 @@ namespace KlayGE
 
 		uint32_t actual_dim = param_.dmap_dim;
 		uint32_t input_width = actual_dim + 4;
+		uint32_t input_height = actual_dim + 1;
 		uint32_t output_width = actual_dim;
 		uint32_t output_height = actual_dim;
 		uint32_t dtx_offset = actual_dim * actual_dim;
-		uint32_t dty_offset = actual_dim * actual_dim * 2;
 
 		RenderEffect& effect = update_spectrum_tech_->Effect();
-		*(effect.ParameterByName("actual_dim")) = actual_dim;
-		*(effect.ParameterByName("in_width")) = input_width;
-		*(effect.ParameterByName("out_width")) = output_width;
-		*(effect.ParameterByName("out_height")) = output_height;
-		*(effect.ParameterByName("dx_addr_offset")) = dtx_offset;
-		*(effect.ParameterByName("dy_addr_offset")) = dty_offset;
-		*(effect.ParameterByName("input_h0")) = h0_buffer_;
-		*(effect.ParameterByName("input_omega")) = omega_buffer_;
+		*(effect.ParameterByName("actual_dim")) = float4(static_cast<float>(actual_dim), actual_dim * 0.5f,
+			1.0f / actual_dim, static_cast<float>(dtx_offset));
+		*(effect.ParameterByName("inout_scale")) = float4(static_cast<float>(output_width) / input_width,
+			static_cast<float>(output_height) / input_height, 1.0f / input_width, 1.0f / input_height);
+		*(effect.ParameterByName("h0_tex")) = h0_tex_;
+		*(effect.ParameterByName("omega_tex")) = omega_tex_;
 		*(effect.ParameterByName("choppy_scale")) = param_.choppy_scale;
 		*(effect.ParameterByName("grid_len")) = param_.dmap_dim / param_.patch_length;
 		*(effect.ParameterByName("displacement_tex")) = displacement_tex_;

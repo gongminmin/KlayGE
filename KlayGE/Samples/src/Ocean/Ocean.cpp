@@ -39,7 +39,7 @@ namespace
 	{
 	public:
 		RenderOcean(float base_level, float strength)
-			: InfTerrainRenderable(L"Ocean")
+			: InfTerrainRenderable(L"Ocean", 384)
 		{
 			this->BindDeferredEffect(SyncLoadRenderEffect("Ocean.fxml"));
 			depth_alpha_blend_front_tech_ = deferred_effect_->TechniqueByName("OceanDepthAlphaBlendFront");
