@@ -38,8 +38,8 @@
 #if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
 namespace KlayGE
 {
-	MsgInputMouse::MsgInputMouse(HANDLE device)
-		: device_(device),
+	MsgInputMouse::MsgInputMouse(HWND hwnd, HANDLE device)
+		: hwnd_(hwnd), device_(device),
 			offset_state_(0, 0, 0)
 	{
 		buttons_state_.fill(false);
@@ -64,7 +64,8 @@ namespace KlayGE
 
 	void MsgInputMouse::OnRawInput(RAWINPUT const & ri)
 	{
-		if ((RIM_TYPEMOUSE == ri.header.dwType) && (ri.header.hDevice == device_))
+		if ((RIM_TYPEMOUSE == ri.header.dwType) && (ri.header.hDevice == device_)
+			&& (hwnd_ == ::GetForegroundWindow()))
 		{
 			for (int i = 0; i < 5; ++ i)
 			{
