@@ -88,14 +88,10 @@ namespace KlayGE
 		tex_fb_ = rf.MakeFrameBuffer();
 	}
 
-	// Initialize the vector field.
-	// wlen_x: width of wave tile, in meters
-	// wlen_y: length of wave tile, in meters
 	void OceanSimulator::InitHeightMap(std::vector<float2>& out_h0, std::vector<float>& out_omega)
 	{
 		float2 K;
 
-		// initialize random generator.
 		srand(0);
 		
 		float interval = 2 * PI / param_.time_peroid;
@@ -109,7 +105,7 @@ namespace KlayGE
 				K.x() = (-param_.dmap_dim / 2.0f + j) * (2 * PI / param_.patch_length);
 
 				float phil = ((0 == K.x()) && (0 == K.y())) ? 0 : sqrt(Phillips(K, param_.wind_speed, param_.wave_amplitude, param_.wind_dependency)) * HALF_SQRT_2;
-				out_h0[i * (param_.dmap_dim + 4) + j] = phil * float2(Gauss(), Gauss());
+				out_h0[i * (param_.dmap_dim + 1) + j] = phil * float2(Gauss(), Gauss());
 
 				// The angular frequency is following the dispersion relation:
 				//            out_omega^2 = g*k
@@ -119,7 +115,7 @@ namespace KlayGE
 				// Gerstner wave shows that a point on a simple sinusoid wave is doing a uniform circular
 				// motion with the center at (x0, y0, z0), radius at A, and the circular plane is parallel
 				// to vector K.
-				out_omega[i * (param_.dmap_dim + 4) + j] = static_cast<int>(sqrt(GRAV_ACCEL * MathLib::length(K)) / interval) * interval;
+				out_omega[i * (param_.dmap_dim + 1) + j] = static_cast<int>(sqrt(GRAV_ACCEL * MathLib::length(K)) / interval) * interval;
 			}
 		}
 	}
@@ -168,7 +164,7 @@ namespace KlayGE
 
 		param_ = params;
 
-		int height_map_size = (params.dmap_dim + 4) * (params.dmap_dim + 1);
+		int height_map_size = (params.dmap_dim + 1) * (params.dmap_dim + 1);
 		std::vector<float2> h0_data(height_map_size);
 		std::vector<float> omega_data(height_map_size);
 		this->InitHeightMap(h0_data, omega_data);
@@ -176,14 +172,14 @@ namespace KlayGE
 		ElementInitData init_data;
 
 		init_data.data = &h0_data[0];
-		init_data.row_pitch = (params.dmap_dim + 4) * sizeof(float2);
+		init_data.row_pitch = (params.dmap_dim + 1) * sizeof(float2);
 		init_data.slice_pitch = init_data.row_pitch * (params.dmap_dim + 1);
-		h0_tex_ = rf.MakeTexture2D(params.dmap_dim + 4, params.dmap_dim + 1, 1, 1, EF_GR32F, 1, 0, EAH_GPU_Read | EAH_Immutable, &init_data);
+		h0_tex_ = rf.MakeTexture2D(params.dmap_dim + 1, params.dmap_dim + 1, 1, 1, EF_GR32F, 1, 0, EAH_GPU_Read | EAH_Immutable, &init_data);
 
 		init_data.data = &omega_data[0];
-		init_data.row_pitch = (params.dmap_dim + 4) * sizeof(float);
+		init_data.row_pitch = (params.dmap_dim + 1) * sizeof(float);
 		init_data.slice_pitch = init_data.row_pitch * (params.dmap_dim + 1);
-		omega_tex_ = rf.MakeTexture2D(params.dmap_dim + 4, params.dmap_dim + 1, 1, 1, EF_R32F, 1, 0, EAH_GPU_Read | EAH_Immutable, &init_data);
+		omega_tex_ = rf.MakeTexture2D(params.dmap_dim + 1, params.dmap_dim + 1, 1, 1, EF_R32F, 1, 0, EAH_GPU_Read | EAH_Immutable, &init_data);
 
 		displacement_tex_ = rf.MakeTexture2D(params.dmap_dim, params.dmap_dim, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
 		gradient_tex_ = rf.MakeTexture2D(params.dmap_dim, params.dmap_dim, 1, 1, EF_ABGR8, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
@@ -199,17 +195,14 @@ namespace KlayGE
 		tex_fb_->Attach(FrameBuffer::ATT_Color1, rf.Make2DRenderView(*out_imag_tex_, 0, 1, 0));
 
 		uint32_t actual_dim = param_.dmap_dim;
-		uint32_t input_width = actual_dim + 4;
-		uint32_t input_height = actual_dim + 1;
-		uint32_t output_width = actual_dim;
-		uint32_t output_height = actual_dim;
+		uint32_t input_dim = actual_dim + 1;
+		uint32_t output_dim = actual_dim;
 		uint32_t dtx_offset = actual_dim * actual_dim;
 
 		RenderEffect& effect = update_spectrum_tech_->Effect();
 		*(effect.ParameterByName("actual_dim")) = float4(static_cast<float>(actual_dim), actual_dim * 0.5f,
 			1.0f / actual_dim, static_cast<float>(dtx_offset));
-		*(effect.ParameterByName("inout_scale")) = float4(static_cast<float>(output_width) / input_width,
-			static_cast<float>(output_height) / input_height, 1.0f / input_width, 1.0f / input_height);
+		*(effect.ParameterByName("inout_scale")) = static_cast<float>(output_dim) / input_dim;
 		*(effect.ParameterByName("h0_tex")) = h0_tex_;
 		*(effect.ParameterByName("omega_tex")) = omega_tex_;
 		*(effect.ParameterByName("choppy_scale")) = param_.choppy_scale;

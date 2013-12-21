@@ -4,7 +4,7 @@
 	<include name="PostProcess.fxml"/>
 
 	<parameter type="float4" name="actual_dim"/>
-	<parameter type="float4" name="inout_scale"/>
+	<parameter type="float" name="inout_scale"/>
 
 	<cbuffer name="per_frame">
 		<parameter type="float" name="time"/>
@@ -27,11 +27,13 @@ void UpdateSpectrumPS(float2 tc : TEXCOORD0,
 			out float4 oReal : SV_Target0,
 			out float4 oImag : SV_Target1)
 {
+	float2 tc_out = tc * inout_scale;
+	
 	// H(0) -> H(t)
-	float2 h0_k  = h0_tex.Sample(point_sampler, tc * inout_scale.xy).xy;
-	float2 h0_mk = h0_tex.Sample(point_sampler, (1 - tc) * inout_scale.xy + inout_scale.zw).xy;
+	float2 h0_k  = h0_tex.Sample(point_sampler, tc_out).xy;
+	float2 h0_mk = h0_tex.Sample(point_sampler, 1 - tc_out).xy;
 	float sin_v, cos_v;
-	sincos(omega_tex.Sample(point_sampler, tc * inout_scale.xy).x * time, sin_v, cos_v);
+	sincos(omega_tex.Sample(point_sampler, tc_out).x * time, sin_v, cos_v);
 
 	float2 h0_k_add_mk = h0_k + h0_mk;
 	float2 h0_k_sub_mk = h0_k - h0_mk;
