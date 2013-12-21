@@ -152,6 +152,7 @@ void SSSSSApp::InitObjects()
 
 	sss_blur_pp_ = MakeSharedPtr<SSSBlurPP>();
 	translucency_pp_ = SyncLoadPostProcess("Translucency.ppml", "Translucency");
+	translucency_pp_->SetParam(3, float3(light_->Color()));
 
 	obj_controller_.AttachCamera(*scene_camera_);
 	obj_controller_.Scalers(0.01f, 0.005f);
@@ -257,8 +258,6 @@ void SSSSSApp::OnResize(uint32_t width, uint32_t height)
 	translucency_pp_->InputPin(3, shadow_tex_);
 	translucency_pp_->OutputPin(0, shading_tex_);
 	translucency_pp_->OutputFrameBuffer()->Attach(FrameBuffer::ATT_DepthStencil, ds_view);
-	translucency_pp_->SetParam(3, float3(light_->Color()));
-	translucency_pp_->SetParam(4, 50.0f);
 
 	copy_pp_->InputPin(0, shading_tex_);
 
