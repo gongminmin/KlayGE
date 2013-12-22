@@ -37,15 +37,6 @@
 #undef Bool		// for boost::foreach
 #endif
 
-#ifdef KLAYGE_COMPILER_MSVC
-#pragma warning(push)
-#pragma warning(disable: 4512)
-#endif
-#include <boost/assign.hpp>
-#ifdef KLAYGE_COMPILER_MSVC
-#pragma warning(pop)
-#endif
-
 #include <cstring>
 #include <fstream>
 
@@ -337,19 +328,19 @@ namespace KlayGE
 		elem_texture_rcs_[UICT_TexButton].push_back(IRect(141, 49, 247, 54));
 		elem_texture_rcs_[UICT_TexButton].push_back(IRect(247, 49, 252, 54));
 
-		using namespace boost::assign;
-
-		std::vector<InputActionDefine> actions;
-		actions += InputActionDefine(Key, KS_AnyKey),
-					InputActionDefine(Move, MS_X),
-					InputActionDefine(Move, MS_Y),
-					InputActionDefine(Wheel, MS_Z),
-					InputActionDefine(Click, MS_Button0),
-					InputActionDefine(Click, TS_Tap);
+		InputActionDefine actions[] =
+		{
+			InputActionDefine(Key, KS_AnyKey),
+			InputActionDefine(Move, MS_X),
+			InputActionDefine(Move, MS_Y),
+			InputActionDefine(Wheel, MS_Z),
+			InputActionDefine(Click, MS_Button0),
+			InputActionDefine(Click, TS_Tap)
+		};
 
 		InputEngine& inputEngine(Context::Instance().InputFactoryInstance().InputEngineInstance());
 		InputActionMap actionMap;
-		actionMap.AddActions(actions.begin(), actions.end());
+		actionMap.AddActions(&actions[0], &actions[sizeof(actions) / sizeof(actions[0])]);
 
 		action_handler_t input_handler = MakeSharedPtr<input_signal>();
 		input_handler->connect(KlayGE::bind(&UIManager::InputHandler, this, KlayGE::placeholders::_1, KlayGE::placeholders::_2));
