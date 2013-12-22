@@ -925,6 +925,11 @@ void CalcTileViewFrustum(float2 tc, float2 min_max, out float4 planes[6])
 {
 	float near_plane = min_max.x;
 	float far_plane = min_max.y;
+	
+	if (far_plane - near_plane < 1e-3f)
+	{
+		far_plane += 1e-3f;
+	}
 
 	float2 tile_bias = tile_scale - floor(tc * light_index_tex_width_height.xy);
 	float q = far_plane / (far_plane - near_plane);
