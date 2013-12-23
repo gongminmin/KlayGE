@@ -64,12 +64,12 @@ float4 GuassBlur(float2 texcoord)
 	return colorBlurred;
 }
 
-float4 BlurXPS(float2 texcoord : TEXCOORD0) : SV_Target
+float4 BlurRT0PS(float2 texcoord : TEXCOORD0) : SV_Target
 {
 	return GuassBlur(texcoord);
 }
 
-void BlurYPS(float2 texcoord : TEXCOORD0,
+void BlurMRTPS(float2 texcoord : TEXCOORD0,
 			out float4 oRT0 : SV_Target0,
 			out float4 oRT1 : SV_Target1)
 {
@@ -82,6 +82,22 @@ float4 CopyPS(float2 texcoord : TEXCOORD0) : SV_Target
 }
 		]]>
 	</shader>
+
+	<technique name="Copy">
+		<pass name="p1">
+			<state name="depth_enable" value="false"/>
+			<state name="depth_write_mask" value="false"/>
+
+			<state name="front_stencil_enable" value="true"/>
+			<state name="front_stencil_func" value="equal"/>
+			<state name="front_stencil_ref" value="32"/>
+			<state name="front_stencil_read_mask" value="32"/>
+			<state name="front_stencil_write_mask" value="0"/>
+
+			<state name="vertex_shader" value="PostProcessVS()"/>
+			<state name="pixel_shader" value="CopyPS()"/>
+		</pass>
+	</technique>
 	
 	<technique name="BlurX">
 		<pass name="p1">
@@ -95,11 +111,11 @@ float4 CopyPS(float2 texcoord : TEXCOORD0) : SV_Target
 			<state name="front_stencil_write_mask" value="0"/>
 			
 			<state name="vertex_shader" value="PostProcessVS()"/>
-			<state name="pixel_shader" value="BlurXPS()"/>
+			<state name="pixel_shader" value="BlurRT0PS()"/>
 		</pass>
 	</technique>
 	
-	<technique name="BlurY0">
+	<technique name="BlurY1">
 		<pass name="p1">
 			<state name="depth_enable" value="false"/>
 			<state name="depth_write_mask" value="false"/>
@@ -119,54 +135,24 @@ float4 CopyPS(float2 texcoord : TEXCOORD0) : SV_Target
 			<state name="blend_op_alpha" value="add"/>
 			<state name="src_blend_alpha" value="one"/>
 			<state name="dest_blend_alpha" value="one"/>
-			<state name="blend_factor" r="0.233" g="0.455" b="0.649" a="1"/>
+			<state name="blend_factor" r="0.3251" g="0.45" b="0.3583" a="1"/>
 
 			<state name="vertex_shader" value="PostProcessVS()"/>
-			<state name="pixel_shader" value="BlurYPS()"/>
+			<state name="pixel_shader" value="BlurMRTPS()"/>
 		</pass>
 	</technique>
-	<technique name="BlurY1" inherit="BlurY0">
+	<technique name="BlurY2" inherit="BlurY1">
 		<pass name="p1">
-			<state name="blend_factor" r="0.1" g="0.336" b="0.344" a="1"/>
+			<state name="blend_factor" r="0.34" g="0.1864" b="0" a="1"/>
 		</pass>
 	</technique>
-	<technique name="BlurY2" inherit="BlurY0">
+	<technique name="BlurY3" inherit="BlurY1">
 		<pass name="p1">
-			<state name="blend_factor" r="0.118" g="0.198" b="0" a="1"/>
-		</pass>
-	</technique>
-	<technique name="BlurY3" inherit="BlurY0">
-		<pass name="p1">
-			<state name="blend_factor" r="0.113" g="0.007" b="0.007" a="1"/>
-		</pass>
-	</technique>
-	<technique name="BlurY4" inherit="BlurY0">
-		<pass name="p1">
-			<state name="blend_factor" r="0.358" g="0.004" b="0" a="1"/>
-		</pass>
-	</technique>
-	<technique name="BlurY5" inherit="BlurY0">
-		<pass name="p1">
-			<state name="blend_factor" r="0.078" g="0" b="0" a="1"/>
+			<state name="blend_factor" r="0.46" g="0" b="0.0402" a="1"/>
 		</pass>
 	</technique>
 
-	<technique name="BlurYWOMRT">
-		<pass name="p1">
-			<state name="depth_enable" value="false"/>
-			<state name="depth_write_mask" value="false"/>
-
-			<state name="front_stencil_enable" value="true"/>
-			<state name="front_stencil_func" value="equal"/>
-			<state name="front_stencil_ref" value="32"/>
-			<state name="front_stencil_read_mask" value="32"/>
-			<state name="front_stencil_write_mask" value="0"/>
-
-			<state name="vertex_shader" value="PostProcessVS()"/>
-			<state name="pixel_shader" value="BlurXPS()"/>
-		</pass>
-	</technique>
-	<technique name="Accum0">
+	<technique name="Accum1">
 		<pass name="p1">
 			<state name="depth_enable" value="false"/>
 			<state name="depth_write_mask" value="false"/>
@@ -184,35 +170,20 @@ float4 CopyPS(float2 texcoord : TEXCOORD0) : SV_Target
 			<state name="blend_op_alpha" value="add"/>
 			<state name="src_blend_alpha" value="one"/>
 			<state name="dest_blend_alpha" value="one"/>
-			<state name="blend_factor" r="0.233" g="0.455" b="0.649" a="1"/>
+			<state name="blend_factor" r="0.3251" g="0.45" b="0.3583" a="1"/>
 
 			<state name="vertex_shader" value="PostProcessVS()"/>
 			<state name="pixel_shader" value="CopyPS()"/>
 		</pass>
 	</technique>
-	<technique name="Accum1" inherit="Accum0">
+	<technique name="Accum2" inherit="Accum1">
 		<pass name="p1">
-			<state name="blend_factor" r="0.1" g="0.336" b="0.344" a="1"/>
+			<state name="blend_factor" r="0.34" g="0.1864" b="0" a="1"/>
 		</pass>
 	</technique>
-	<technique name="Accum2" inherit="Accum0">
+	<technique name="Accum3" inherit="Accum1">
 		<pass name="p1">
-			<state name="blend_factor" r="0.118" g="0.198" b="0" a="1"/>
-		</pass>
-	</technique>
-	<technique name="Accum3" inherit="Accum0">
-		<pass name="p1">
-			<state name="blend_factor" r="0.113" g="0.007" b="0.007" a="1"/>
-		</pass>
-	</technique>
-	<technique name="Accum4" inherit="Accum0">
-		<pass name="p1">
-			<state name="blend_factor" r="0.358" g="0.004" b="0" a="1"/>
-		</pass>
-	</technique>
-	<technique name="Accum5" inherit="Accum0">
-		<pass name="p1">
-			<state name="blend_factor" r="0.078" g="0" b="0" a="1"/>
+			<state name="blend_factor" r="0.46" g="0" b="0.0402" a="1"/>
 		</pass>
 	</technique>
 
