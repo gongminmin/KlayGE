@@ -76,6 +76,8 @@ External/boost/tools/build/bjam.log
 External/boost/tools/build/v2/engine/bin.ntx86/
 External/boost/tools/build/v2/engine/bootstrap/
 External/boost/tools/build/v2/engine/bin.cygwinx86/
+External/Cg/bin/
+External/DXSDK/Redist/
 External/Python/*.exe
 External/Python/amd64/*.exe
 External/Python/Android/libs
@@ -121,3 +123,4 @@ External/libvorbis/libtool
 External/libvorbis/vorbis*.pc
 External/libvorbis/stamp-h1
 External/libvorbis/doc/Doxyfile
+External/OpenALSDK/redist/

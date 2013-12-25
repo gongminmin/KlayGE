@@ -76,6 +76,15 @@ def build_freetype(compiler_info, compiler_arch):
 def build_7z(compiler_info, compiler_arch):
 	build_a_project("7z", "External/7z", compiler_info, compiler_arch)
 
+def setup_DXSDK(compiler_info, compiler_arch):
+	build_a_project("DXSDK", "External/DXSDK", compiler_info, compiler_arch)
+
+def setup_OpenALSDK(compiler_info, compiler_arch):
+	build_a_project("OpenALSDK", "External/OpenALSDK", compiler_info, compiler_arch)
+
+def setup_Cg(compiler_info, compiler_arch):
+	build_a_project("Cg", "External/Cg", compiler_info, compiler_arch)
+
 def build_external_libs(compiler_info):
 	import glob
 
@@ -131,23 +140,16 @@ def build_external_libs(compiler_info):
 		if not arch[3]:
 			if "win" == compiler_info.platform:
 				print("\nSeting up DXSDK...\n")
-
-				copy_to_dst("External/DXSDK/Redist/%s/d3dcompiler_46.%s" % (arch[0], dll_suffix), dst_dir)
+				setup_DXSDK(compiler_info, arch)
 
 		if not arch[3]:
 			if "win" == compiler_info.platform:
 				print("\nSeting up OpenAL SDK...\n")
-
-				copy_to_dst("External/OpenALSDK/redist/%s/OpenAL32.%s" % (arch[0], dll_suffix), dst_dir)
+				setup_OpenALSDK(compiler_info, arch)
 
 		if not arch[3]:
 			print("\nSeting up Cg...\n")
-
-			if "x64" == arch[0]:
-				subdir = ".x64"
-			else:
-				subdir = ""
-			copy_to_dst("External/Cg/bin%s/cg.%s" % (subdir, dll_suffix), dst_dir)
+			setup_Cg(compiler_info, arch)
 
 if __name__ == "__main__":
 	cfg = cfg_from_argv(sys.argv)
