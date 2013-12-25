@@ -13,7 +13,7 @@ INCLUDE(${DXSDK_DIR}/../../cmake/Platform.cmake)
 INCLUDE(${DXSDK_DIR}/../../cmake/Compiler.cmake)
 
 SET(KLAYGE_BIN_DIR "${DXSDK_DIR}/../../KlayGE/bin/${KLAYGE_PLATFORM_NAME}")
-SET(D3DCOMPILER_NAME "d3dcompiler_46.dll")
+SET(D3DCOMPILER_NAME "d3dcompiler_47.dll")
 SET(SRC_PATH "${DXSDK_DIR}/Redist/${KLAYGE_ARCH_NAME}/${D3DCOMPILER_NAME}")
 SET(DST_PATH "${KLAYGE_BIN_DIR}/${D3DCOMPILER_NAME}")
 

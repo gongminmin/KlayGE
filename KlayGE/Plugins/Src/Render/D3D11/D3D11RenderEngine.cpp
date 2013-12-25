@@ -111,10 +111,10 @@ namespace KlayGE
 		{
 			::MessageBoxW(nullptr, L"Can't load d3d11.dll", L"Error", MB_OK);
 		}
-		mod_d3dcompiler_ = ::LoadLibraryW(L"d3dcompiler_46.dll");
+		mod_d3dcompiler_ = ::LoadLibraryW(L"d3dcompiler_47.dll");
 		if (nullptr == mod_d3dcompiler_)
 		{
-			::MessageBoxW(nullptr, L"Can't load d3dcompiler_46.dll", L"Error", MB_OK);
+			::MessageBoxW(nullptr, L"Can't load d3dcompiler_47.dll", L"Error", MB_OK);
 		}
 
 		if (mod_dxgi_ != nullptr)

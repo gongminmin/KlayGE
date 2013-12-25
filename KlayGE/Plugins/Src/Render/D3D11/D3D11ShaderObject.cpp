@@ -51,10 +51,10 @@
 #include <KlayGE/D3D11/D3D11Texture.hpp>
 #include <KlayGE/D3D11/D3D11ShaderObject.hpp>
 
-DEFINE_GUID(IID_ID3D11ShaderReflection_46,
+DEFINE_GUID(IID_ID3D11ShaderReflection_47,
 	0x8d536ca1, 0x0cca, 0x4956, 0xa8, 0x37, 0x78, 0x69, 0x63, 0x75, 0x55, 0x84);
 
-struct D3D11_SIGNATURE_PARAMETER_DESC_46
+struct D3D11_SIGNATURE_PARAMETER_DESC_47
 {
 	LPCSTR						SemanticName;
 	UINT						SemanticIndex;
@@ -66,6 +66,10 @@ struct D3D11_SIGNATURE_PARAMETER_DESC_46
 	UINT						Stream;
 	UINT						MinPrecision;
 };
+
+#if D3D_COMPILER_VERSION < 44
+#define D3DCOMPILER_STRIP_PRIVATE_DATA 8
+#endif
 
 namespace
 {
@@ -1340,7 +1344,8 @@ namespace KlayGE
 			if (code)
 			{
 				ID3D11ShaderReflection* reflection;
-				render_eng.D3DReflect(code->GetBufferPointer(), code->GetBufferSize(), IID_ID3D11ShaderReflection_46, reinterpret_cast<void**>(&reflection));
+				render_eng.D3DReflect(code->GetBufferPointer(), code->GetBufferSize(),
+					IID_ID3D11ShaderReflection_47, reinterpret_cast<void**>(&reflection));
 				if (reflection != nullptr)
 				{
 					D3D11_SHADER_DESC desc;
@@ -1456,7 +1461,7 @@ namespace KlayGE
 					if (ST_VertexShader == type)
 					{
 						vs_signature_ = 0;
-						D3D11_SIGNATURE_PARAMETER_DESC_46 signature;
+						D3D11_SIGNATURE_PARAMETER_DESC_47 signature;
 						for (uint32_t i = 0; i < desc.InputParameters; ++ i)
 						{
 							reflection->GetInputParameterDesc(i, reinterpret_cast<D3D11_SIGNATURE_PARAMETER_DESC*>(&signature));
@@ -1486,7 +1491,8 @@ namespace KlayGE
 
 				ID3DBlob* strip_code = nullptr;
 				render_eng.D3DStripShader(code->GetBufferPointer(), code->GetBufferSize(),
-					D3DCOMPILER_STRIP_REFLECTION_DATA | D3DCOMPILER_STRIP_DEBUG_INFO | D3DCOMPILER_STRIP_TEST_BLOBS,
+					D3DCOMPILER_STRIP_REFLECTION_DATA | D3DCOMPILER_STRIP_DEBUG_INFO
+					| D3DCOMPILER_STRIP_TEST_BLOBS | D3DCOMPILER_STRIP_PRIVATE_DATA,
 					&strip_code);
 				if (strip_code)
 				{
