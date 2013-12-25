@@ -10,16 +10,13 @@ SET(UI_FILES
 	${KLAYGE_PROJECT_DIR}/Samples/media/Text/Text.uiml
 )
 
-IF(KLAYGE_WITH_WINRT)
+IF(KLAYGE_BUILD_PLATFORM_WINRT)
 	SET(PACKAGE_GUID "0cf69a0d-fa24-4075-8971-82c545f4af61")
 	SET(DISPLAY_NAME "Text")
 	SET(SHORT_NAME "Text")
 
 	SET(CONTENT_FILES
 		${KLAYGE_PROJECT_DIR}/bin/KlayGE.cfg
-		${KLAYGE_PROJECT_DIR}/media/Textures/2D/powered_by_klayge.dds
-		${KLAYGE_PROJECT_DIR}/media/Textures/2D/ui.dds
-		${KLAYGE_PROJECT_DIR}/media/Textures/3D/color_grading.dds
 		${KLAYGE_PROJECT_DIR}/media/Fonts/gkai00mp.kfont
 		${KLAYGE_PROJECT_DIR}/media/PostProcessors/Copy.ppml
 		${KLAYGE_PROJECT_DIR}/media/PostProcessors/LensEffects.ppml
@@ -35,6 +32,9 @@ IF(KLAYGE_WITH_WINRT)
 		${KLAYGE_PROJECT_DIR}/media/RenderFX/SumLum.kfx
 		${KLAYGE_PROJECT_DIR}/media/RenderFX/ToneMapping.kfx
 		${KLAYGE_PROJECT_DIR}/media/RenderFX/UI.kfx
+		${KLAYGE_PROJECT_DIR}/media/Textures/2D/powered_by_klayge.dds
+		${KLAYGE_PROJECT_DIR}/media/Textures/2D/ui.dds
+		${KLAYGE_PROJECT_DIR}/media/Textures/3D/color_grading.dds
 		${KLAYGE_PROJECT_DIR}/Samples/media/Common/Assets/Logo.png
 		${KLAYGE_PROJECT_DIR}/Samples/media/Common/Assets/SmallLogo.png
 		${KLAYGE_PROJECT_DIR}/Samples/media/Common/Assets/SplashScreen.png

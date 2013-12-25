@@ -40,9 +40,12 @@ private:
 
 	KlayGE::FirstPersonCameraController fpcController_;
 
+	bool depth_texture_support_;
+
 	// Depth Peeling
 	std::vector<KlayGE::FrameBufferPtr> peeling_fbs_;
 	std::vector<KlayGE::TexturePtr> peeled_texs_;
+	KlayGE::array<KlayGE::FrameBufferPtr, 2> depth_fbs_;
 	KlayGE::array<KlayGE::TexturePtr, 2> depth_texs_;
 	KlayGE::array<KlayGE::RenderViewPtr, 2> depth_views_;
 	KlayGE::array<KlayGE::ConditionalRenderPtr, 2> oc_queries_;

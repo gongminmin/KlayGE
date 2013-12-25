@@ -715,7 +715,14 @@ namespace KlayGE
 
 		if (fft_lens_effects && fp_texture_support_)
 		{
-			lens_effects_ = MakeSharedPtr<FFTLensEffectsPostProcess>();
+			if (caps.rendertarget_format_support(EF_ABGR32F, 1, 0))
+			{
+				lens_effects_ = MakeSharedPtr<FFTLensEffectsPostProcess>();
+			}
+			else
+			{
+				lens_effects_ = MakeSharedPtr<LensEffectsPostProcess>();
+			}
 		}
 		else
 		{

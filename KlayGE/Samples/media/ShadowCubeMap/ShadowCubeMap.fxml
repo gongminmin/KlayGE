@@ -21,8 +21,8 @@
 		<![CDATA[
 float calc_dist(float4 position)
 {
-    float4 LightWorldPos = mul(position, obj_model_to_light_model);
-    LightWorldPos /= LightWorldPos.w;
+	float4 LightWorldPos = mul(position, obj_model_to_light_model);
+	LightWorldPos /= LightWorldPos.w;
 	return length(LightWorldPos.xyz);
 }
 
@@ -33,8 +33,8 @@ void GenCubeShadowMapVS(float4 Position : POSITION,
 {
 	Position = float4(Position.xyz * pos_extent + pos_center, 1);
 	
-    oPos = mul(Position, mvp);
-    oDist = calc_dist(Position);
+	oPos = mul(Position, mvp);
+	oDist = calc_dist(Position);
 }
 
 float4 GenCubeShadowMapPS(float dist : TEXCOORD0) : SV_Target

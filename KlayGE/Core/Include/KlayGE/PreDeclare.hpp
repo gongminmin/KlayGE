@@ -188,7 +188,7 @@ namespace KlayGE
 	class SumLumLogPostProcess;
 	typedef shared_ptr<SumLumLogPostProcess> SumLumLogPostProcessPtr;
 	class SumLumLogPostProcessCS;
-	typedef shared_ptr<SumLumLogPostProcess> SumLumLogPostProcessCSPtr;
+	typedef shared_ptr<SumLumLogPostProcessCS> SumLumLogPostProcessCSPtr;
 	class SumLumIterativePostProcess;
 	typedef shared_ptr<SumLumIterativePostProcess> SumLumIterativePostProcessPtr;
 	class AdaptedLumPostProcess;

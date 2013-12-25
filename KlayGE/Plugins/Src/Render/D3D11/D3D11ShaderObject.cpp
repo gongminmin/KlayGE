@@ -1307,10 +1307,9 @@ namespace KlayGE
 					pos = part_err_str.rfind("(");
 					part_err_str = part_err_str.substr(pos + 1);
 					int err_line;
-					std::istringstream iss(part_err_str);
-					iss >> err_line;
+					std::istringstream(part_err_str) >> err_line;
 
-					iss.str(shader_text);
+					std::istringstream iss(shader_text);
 					std::string s;
 					int line = 1;
 					LogError("...");

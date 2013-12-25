@@ -1,58 +1,39 @@
 <?xml version='1.0'?>
 
 <effect>
-	<macro name="PI" value="3.1415926536"/>
-	<macro name="BLOCK_SIZE_X" value="16"/>
-	<macro name="BLOCK_SIZE_Y" value="16"/>
-	
-	<parameter type="uint" name="actual_dim"/>
-	<parameter type="uint" name="in_width"/>
-	<parameter type="uint" name="out_width"/>
-	<parameter type="uint" name="out_height"/>
-	<parameter type="uint" name="dx_addr_offset"/>
-	<parameter type="uint" name="dy_addr_offset"/>
+	<include name="PostProcess.fxml"/>
+
+	<parameter type="float4" name="actual_dim"/>
+	<parameter type="float" name="inout_scale"/>
 
 	<cbuffer name="per_frame">
 		<parameter type="float" name="time"/>
 	</cbuffer>
 
-	<parameter type="buffer" elem_type="float2" name="input_h0"/>
-	<parameter type="buffer" elem_type="float" name="input_omega"/>
+	<parameter type="texture2D" name="h0_tex"/>
+	<parameter type="texture2D" name="omega_tex"/>
+	<parameter type="sampler" name="point_sampler">
+		<state name="filtering" value="min_mag_mip_point"/>
+		<state name="address_u" value="wrap"/>
+		<state name="address_v" value="wrap"/>
+	</parameter>
 
 	<shader>
 		<![CDATA[
-void QuadVS(float2 vPos : POSITION,
-		out float2 TexCoord : TEXCOORD0,
-		out float4 Position : SV_Position)
-{
-	Position = float4(vPos, 0, 1);
-	TexCoord.x = 0.5f + vPos.x * 0.5f;
-	TexCoord.y = 0.5f - vPos.y * 0.5f;
-}
-
 // Pre-FFT data preparation:
 
-// Notice: In CS5.0, we can output up to 8 RWBuffers but in CS4.x only one output buffer is allowed,
-// that way we have to allocate one big buffer and manage the offsets manually. The restriction is
-// not caused by NVIDIA GPUs and does not present on NVIDIA GPUs when using other computing APIs like
-// CUDA and OpenCL.
-
 // H(0) -> H(t)
-void UpdateSpectrumPS(float2 TexCoord : TEXCOORD0,
+void UpdateSpectrumPS(float2 tc : TEXCOORD0,
 			out float4 oReal : SV_Target0,
 			out float4 oImag : SV_Target1)
 {
-	int index_x = (int)(TexCoord.x * out_width);
-	int index_y = (int)(TexCoord.y * out_height);
-	int in_index = index_y * in_width + index_x;
-	int in_mindex = (actual_dim - index_y) * in_width + (actual_dim - index_x);
-	int out_index = index_y * out_width + index_x;
-
+	float2 tc_out = tc * inout_scale;
+	
 	// H(0) -> H(t)
-	float2 h0_k  = input_h0.Load(in_index);
-	float2 h0_mk = input_h0.Load(in_mindex);
+	float2 h0_k  = h0_tex.Sample(point_sampler, tc_out).xy;
+	float2 h0_mk = h0_tex.Sample(point_sampler, 1 - tc_out).xy;
 	float sin_v, cos_v;
-	sincos(input_omega.Load(in_index) * time, sin_v, cos_v);
+	sincos(omega_tex.Sample(point_sampler, tc_out).x * time, sin_v, cos_v);
 
 	float2 h0_k_add_mk = h0_k + h0_mk;
 	float2 h0_k_sub_mk = h0_k - h0_mk;
@@ -62,14 +43,14 @@ void UpdateSpectrumPS(float2 TexCoord : TEXCOORD0,
 	ht.y = h0_k_sub_mk.x * sin_v + h0_k_sub_mk.y * cos_v;
 
 	// H(t) -> Dx(t), Dy(t)
-	float2 kxy = int2(index_x, index_y) - actual_dim * 0.5f;
+	// actual_dim.y is actual_dim.x * 0.5f
+	float2 kxy = floor(tc * actual_dim.x) - actual_dim.y;
 	float sqr_k = dot(kxy, kxy);
 	float rsqr_k = 0;
-	if (sqr_k > 1e-12f)
+	if (sqr_k > 1e-6f)
 	{
 		rsqr_k = 1 / sqrt(sqr_k);
 	}
-	//float rsqr_k = 1 / sqrt(dot(kxy, kxy));
 	kxy *= rsqr_k;
 	float4 dt_xy = float2(ht.y, -ht.x).xyxy * float4(kxy.xx, kxy.yy);
 
@@ -83,7 +64,7 @@ void UpdateSpectrumPS(float2 TexCoord : TEXCOORD0,
 		<pass name="p0">
 			<state name="cull_mode" value="none"/>
 			
-			<state name="vertex_shader" value="QuadVS()"/>
+			<state name="vertex_shader" value="PostProcessVS()"/>
 			<state name="pixel_shader" value="UpdateSpectrumPS()"/>
 		</pass>
 	</technique>
@@ -106,16 +87,15 @@ void UpdateSpectrumPS(float2 TexCoord : TEXCOORD0,
 	<shader>
 		<![CDATA[
 // Post-FFT data wrap up: Dx, Dy, Dz -> Displacement
-float4 UpdateDisplacementPS(float2 TexCoord : TEXCOORD0) : SV_Target
+float4 UpdateDisplacementPS(float2 tc : TEXCOORD0) : SV_Target
 {
-	uint index_x = (uint)(TexCoord.x * out_width);
-	uint index_y = (uint)(TexCoord.y * out_height);
-	uint addr = index_y * out_width + index_x;
+	int2 index_xy = (int2)(tc * actual_dim.x);
 
 	// cos(pi * (m1 + m2))
-	int sign_correction = ((index_x + index_y) & 1) ? -1 : 1;
+	int sign_correction = ((index_xy.x + index_xy.y) & 1) ? -1 : 1;
 
-	float3 dxyz = dxyz_tex.Sample(linear_sampler, 1 - TexCoord).yzx * dx_addr_offset;
+	// actual_dim.w is dx_addr_offset
+	float3 dxyz = dxyz_tex.Sample(linear_sampler, 1 - tc).yzx * actual_dim.w;
 	dxyz.xy *= choppy_scale;
 	dxyz *= sign_correction;
 
@@ -126,7 +106,8 @@ float4 UpdateDisplacementPS(float2 TexCoord : TEXCOORD0) : SV_Target
 float4 GenGradientFoldingPS(float2 tc : TEXCOORD0) : SV_Target
 {
 	// Sample neighbour texels
-	float2 one_texel = float2(1.0f / out_width, 1.0f / out_height);
+	// actual_dim.z is 1.0f / actual_dim.x
+	float2 one_texel = actual_dim.z;
 
 	float2 tc_left  = float2(tc.x - one_texel.x, tc.y);
 	float2 tc_right = float2(tc.x + one_texel.x, tc.y);
@@ -157,14 +138,14 @@ float4 GenGradientFoldingPS(float2 tc : TEXCOORD0) : SV_Target
 	
 	<technique name="UpdateDisplacement">
 		<pass name="p0">
-			<state name="vertex_shader" value="QuadVS()"/>
+			<state name="vertex_shader" value="PostProcessVS()"/>
 			<state name="pixel_shader" value="UpdateDisplacementPS()"/>
 		</pass>
 	</technique>
 
 	<technique name="GenGradientFolding">
 		<pass name="p0">
-			<state name="vertex_shader" value="QuadVS()"/>
+			<state name="vertex_shader" value="PostProcessVS()"/>
 			<state name="pixel_shader" value="GenGradientFoldingPS()"/>
 		</pass>
 	</technique>

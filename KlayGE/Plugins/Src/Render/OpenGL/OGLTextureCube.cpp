@@ -200,11 +200,11 @@ namespace KlayGE
 	{
 		BOOST_ASSERT(type_ == target.Type());
 
-		if ((format_ == target.Format()) && !IsCompressedFormat(format_) && glloader_GL_NV_copy_image()
+		if ((format_ == target.Format()) && !IsCompressedFormat(format_) && (glloader_GL_VERSION_4_3() || glloader_GL_ARB_copy_image())
 			&& (src_width == dst_width) && (src_height == dst_height) && (1 == sample_count_))
 		{
 			OGLTexture& ogl_target = *checked_cast<OGLTexture*>(&target);
-			glCopyImageSubDataNV(
+			glCopyImageSubData(
 				texture_, target_type_, src_level,
 				src_x_offset, src_y_offset, src_array_index * 6 + src_face - CF_Positive_X,
 				ogl_target.GLTexture(), ogl_target.GLType(), dst_level,

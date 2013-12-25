@@ -94,6 +94,10 @@ namespace KlayGE
 		}
 		void DeleteFramebuffers(GLsizei n, GLuint const * framebuffers);
 
+		bool HackForTegra() const
+		{
+			return hack_for_tegra_;
+		}
 		bool HackForPVR() const
 		{
 			return hack_for_pvr_;
@@ -152,6 +156,7 @@ namespace KlayGE
 		std::map<GLuint, std::map<GLint, int4> > uniformi_cache_;
 		std::map<GLuint, std::map<GLint, float4> > uniformf_cache_;
 
+		bool hack_for_tegra_;
 		bool hack_for_pvr_;
 		bool hack_for_mali_;
 	};

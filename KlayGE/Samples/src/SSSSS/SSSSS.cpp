@@ -65,6 +65,21 @@ SSSSSApp::SSSSSApp()
 	ResLoader::Instance().AddPath("../../Samples/media/SSSSS");
 }
 
+bool SSSSSApp::ConfirmDevice() const
+{
+	RenderDeviceCaps const & caps = Context::Instance().RenderFactoryInstance().RenderEngineInstance().DeviceCaps();
+	if (caps.max_shader_model < 2)
+	{
+		return false;
+	}
+	if (!caps.rendertarget_format_support(EF_ABGR16F, 1, 0))
+	{
+		return false;
+	}
+
+	return true;
+}
+
 void SSSSSApp::InitObjects()
 {
 	font_ = SyncLoadFont("gkai00mp.kfont");
@@ -92,6 +107,22 @@ void SSSSSApp::InitObjects()
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 	RenderEngine& re = rf.RenderEngineInstance();
 	RenderDeviceCaps const & caps = re.DeviceCaps();
+
+	ElementFormat sm_fmt;
+	if (caps.rendertarget_format_support(EF_R32F, 1, 0))
+	{
+		sm_fmt = EF_R32F;
+	}
+	else if (caps.rendertarget_format_support(EF_R16F, 1, 0))
+	{
+		sm_fmt = EF_R16F;
+	}
+	else
+	{
+		BOOST_ASSERT(caps.rendertarget_format_support(EF_ABGR16F, 1, 0));
+		sm_fmt = EF_ABGR16F;
+	}
+
 	ElementFormat ds_fmt;
 	if (caps.rendertarget_format_support(EF_D24S8, 1, 0))
 	{
@@ -100,11 +131,10 @@ void SSSSSApp::InitObjects()
 	else
 	{
 		BOOST_ASSERT(caps.rendertarget_format_support(EF_D16, 1, 0));
-
 		ds_fmt = EF_D16;
 	}
 
-	shadow_tex_ = rf.MakeTexture2D(SHADOW_MAP_SIZE, SHADOW_MAP_SIZE, 1, 1, EF_R32F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
+	shadow_tex_ = rf.MakeTexture2D(SHADOW_MAP_SIZE, SHADOW_MAP_SIZE, 1, 1, sm_fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
 	shadow_ds_tex_ = rf.MakeTexture2D(SHADOW_MAP_SIZE, SHADOW_MAP_SIZE, 1, 1, ds_fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
 
 	depth_ls_fb_ = rf.MakeFrameBuffer();
@@ -122,6 +152,7 @@ void SSSSSApp::InitObjects()
 
 	sss_blur_pp_ = MakeSharedPtr<SSSBlurPP>();
 	translucency_pp_ = SyncLoadPostProcess("Translucency.ppml", "Translucency");
+	translucency_pp_->SetParam(3, float3(light_->Color()));
 
 	obj_controller_.AttachCamera(*scene_camera_);
 	obj_controller_.Scalers(0.01f, 0.005f);
@@ -173,6 +204,22 @@ void SSSSSApp::OnResize(uint32_t width, uint32_t height)
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 	RenderEngine& re = rf.RenderEngineInstance();
 	RenderDeviceCaps const & caps = re.DeviceCaps();
+
+	ElementFormat depth_fmt;
+	if (caps.rendertarget_format_support(EF_R32F, 1, 0))
+	{
+		depth_fmt = EF_R32F;
+	}
+	else if (caps.rendertarget_format_support(EF_R16F, 1, 0))
+	{
+		depth_fmt = EF_R16F;
+	}
+	else
+	{
+		BOOST_ASSERT(caps.rendertarget_format_support(EF_ABGR16F, 1, 0));
+		depth_fmt = EF_ABGR16F;
+	}
+
 	ElementFormat ds_fmt;
 	if (caps.rendertarget_format_support(EF_D24S8, 1, 0))
 	{
@@ -181,7 +228,6 @@ void SSSSSApp::OnResize(uint32_t width, uint32_t height)
 	else
 	{
 		BOOST_ASSERT(caps.rendertarget_format_support(EF_D16, 1, 0));
-
 		ds_fmt = EF_D16;
 	}
 
@@ -189,7 +235,7 @@ void SSSSSApp::OnResize(uint32_t width, uint32_t height)
 	normal_tex_ = rf.MakeTexture2D(width, height, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
 	albedo_tex_ = rf.MakeTexture2D(width, height, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
 	ds_tex_ = rf.MakeTexture2D(width, height, 1, 1, ds_fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
-	depth_tex_ = rf.MakeTexture2D(width, height, 1, 1, EF_R32F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
+	depth_tex_ = rf.MakeTexture2D(width, height, 1, 1, depth_fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
 
 	RenderViewPtr ds_view = rf.Make2DDepthStencilRenderView(*ds_tex_, 0, 1, 0);
 
@@ -212,8 +258,6 @@ void SSSSSApp::OnResize(uint32_t width, uint32_t height)
 	translucency_pp_->InputPin(3, shadow_tex_);
 	translucency_pp_->OutputPin(0, shading_tex_);
 	translucency_pp_->OutputFrameBuffer()->Attach(FrameBuffer::ATT_DepthStencil, ds_view);
-	translucency_pp_->SetParam(3, float3(light_->Color()));
-	translucency_pp_->SetParam(4, 50.0f);
 
 	copy_pp_->InputPin(0, shading_tex_);
 

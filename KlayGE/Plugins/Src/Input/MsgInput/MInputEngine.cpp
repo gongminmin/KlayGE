@@ -114,14 +114,14 @@ namespace KlayGE
 			switch (raw_input_devices[i].dwType)
 			{
 			case RIM_TYPEKEYBOARD:
-				device = MakeSharedPtr<MsgInputKeyboard>(raw_input_devices[i].hDevice);
+				device = MakeSharedPtr<MsgInputKeyboard>(hwnd, raw_input_devices[i].hDevice);
 				rid.usUsage = HID_USAGE_GENERIC_KEYBOARD;
-				rid.dwFlags = RIDEV_INPUTSINK;
+				rid.dwFlags = 0;
 				rids.push_back(rid);
 				break;
 
 			case RIM_TYPEMOUSE:
-				device = MakeSharedPtr<MsgInputMouse>(raw_input_devices[i].hDevice);
+				device = MakeSharedPtr<MsgInputMouse>(hwnd, raw_input_devices[i].hDevice);
 				rid.usUsage = HID_USAGE_GENERIC_MOUSE;
 				rid.dwFlags = 0;
 				rids.push_back(rid);

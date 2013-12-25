@@ -185,9 +185,12 @@ namespace KlayGE
 		RenderLayoutPtr const & layout = this->GetRenderLayout();
 		if (inst_stream)
 		{
-			this->OnRenderBegin();
-			re.Render(*tech, *layout);
-			this->OnRenderEnd();
+			if (layout->NumInstances() > 0)
+			{
+				this->OnRenderBegin();
+				re.Render(*tech, *layout);
+				this->OnRenderEnd();
+			}
 		}
 		else
 		{

@@ -231,9 +231,10 @@ namespace KlayGE
 	uint32_t const MAX_RINGS = 10;
 
 	HQTerrainRenderable::TileRing::TileRing(int hole_width, int outer_width, float tile_size,
-		GraphicsBufferPtr const & tile_non_tess_ib,
+		GraphicsBufferPtr const & tile_non_tess_ib, GraphicsBufferPtr const & tile_non_tess_vid_vb,
 		GraphicsBufferPtr const & tile_tess_ib)
-		: tile_non_tess_ib_(tile_non_tess_ib), tile_tess_ib_(tile_tess_ib),
+		: tile_non_tess_ib_(tile_non_tess_ib), tile_non_tess_vid_vb_(tile_non_tess_vid_vb),
+			tile_tess_ib_(tile_tess_ib),
 			hole_width_(hole_width), outer_width_(outer_width),
 			ring_width_((outer_width - hole_width) / 2),
 			num_tiles_(outer_width * outer_width - hole_width * hole_width),
@@ -314,7 +315,7 @@ namespace KlayGE
 	void HQTerrainRenderable::TileRing::CreateInstanceDataVB()
 	{
 		int index = 0;
-		vb_data_.resize(num_tiles_);
+		std::vector<InstanceData> vb_data(num_tiles_);
 
 		float const half_width = 0.5f * outer_width_;
 		for (int y = 0; y < outer_width_; ++ y)
@@ -323,9 +324,9 @@ namespace KlayGE
 			{
 				if (this->InRing(x, y))
 				{
-					vb_data_[index].x = tile_size_ * (x - half_width);
-					vb_data_[index].y = tile_size_ * (y - half_width);
-					this->AssignNeighbourSizes(x, y, vb_data_[index].adjacency);
+					vb_data[index].x = tile_size_ * (x - half_width);
+					vb_data[index].y = tile_size_ * (y - half_width);
+					this->AssignNeighbourSizes(x, y, vb_data[index].adjacency);
 					++ index;
 				}
 			}
@@ -333,7 +334,7 @@ namespace KlayGE
 		BOOST_ASSERT(index == num_tiles_);
 
 		ElementInitData init_data;
-		init_data.data = &vb_data_[0];
+		init_data.data = &vb_data[0];
 		init_data.row_pitch = num_tiles_ * sizeof(InstanceData);
 		init_data.slice_pitch = init_data.row_pitch;
 
@@ -342,16 +343,18 @@ namespace KlayGE
 
 		tile_non_tess_rl_ = rf.MakeRenderLayout();
 		tile_non_tess_rl_->TopologyType(RenderLayout::TT_TriangleStrip);
-		tile_non_tess_rl_->BindIndexStream(tile_non_tess_ib_, EF_R32UI);
+		tile_non_tess_rl_->BindIndexStream(tile_non_tess_ib_, EF_R16UI);
 		tile_non_tess_rl_->NumIndices(NON_TESS_INDEX_COUNT);
 		tile_non_tess_rl_->BindVertexStream(vb_, make_tuple(vertex_element(VEU_TextureCoord, 0, EF_GR32F),
 			vertex_element(VEU_TextureCoord, 1, EF_ABGR32F)),
 			RenderLayout::ST_Instance);
+		tile_non_tess_rl_->BindVertexStream(tile_non_tess_vid_vb_,
+			make_tuple(vertex_element(VEU_TextureCoord, 2, EF_R32F)));
 		tile_non_tess_rl_->NumInstances(num_tiles_);
 
 		tile_tess_rl_ = rf.MakeRenderLayout();
 		tile_tess_rl_->TopologyType(RenderLayout::TT_4_Ctrl_Pt_PatchList);
-		tile_tess_rl_->BindIndexStream(tile_tess_ib_, EF_R32UI);
+		tile_tess_rl_->BindIndexStream(tile_tess_ib_, EF_R16UI);
 		tile_tess_rl_->NumIndices(TESS_INDEX_COUNT);
 		tile_tess_rl_->BindVertexStream(vb_, make_tuple(vertex_element(VEU_TextureCoord, 0, EF_GR32F),
 			vertex_element(VEU_TextureCoord, 1, EF_ABGR32F)),
@@ -372,6 +375,7 @@ namespace KlayGE
 		hw_tessellation_ = re.DeviceCaps().ds_support;
 
 		this->CreateNonTessIB();
+		this->CreateNonTessVIDVB();
 		this->CreateTessIB();
 
 		int widths[] = { 0, 16, 16, 16, 16 };
@@ -382,7 +386,8 @@ namespace KlayGE
 		float tile_width = 0.125f;
 		for (uint32_t i = 0; i < rings; ++ i)
 		{
-			tile_rings_[i] = MakeSharedPtr<TileRing>(widths[i] / 2, widths[i + 1], tile_width, tile_non_tess_ib_, tile_tess_ib_);
+			tile_rings_[i] = MakeSharedPtr<TileRing>(widths[i] / 2, widths[i + 1], tile_width,
+				tile_non_tess_ib_, tile_non_tess_vid_vb_, tile_tess_ib_);
 			tile_width *= 2.0f;
 		}
 
@@ -393,7 +398,10 @@ namespace KlayGE
 
 	void HQTerrainRenderable::Tessellation(bool tess)
 	{
-		hw_tessellation_ = tess;
+		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+		RenderEngine& re = rf.RenderEngineInstance();
+
+		hw_tessellation_ = re.DeviceCaps().ds_support & tess;
 		this->UpdateTechnique();
 	}
 
@@ -447,6 +455,7 @@ namespace KlayGE
 			tech_index += 1;
 		}
 
+		depth_tech_ = terrain_depth_techs_[tech_index / 2];
 		gbuffer_rt0_tech_ = terrain_gbuffer_rt0_techs_[tech_index];
 		gbuffer_rt1_tech_ = terrain_gbuffer_rt1_techs_[tech_index];
 		gbuffer_mrt_tech_ = terrain_gbuffer_mrt_techs_[tech_index];
@@ -455,14 +464,14 @@ namespace KlayGE
 
 	void HQTerrainRenderable::CreateNonTessIB()
 	{
-		uint32_t index = 0;
-		uint32_t indices[NON_TESS_INDEX_COUNT];
+		uint16_t index = 0;
+		uint16_t indices[NON_TESS_INDEX_COUNT];
 
-		for (uint32_t y = 0; y < VERTEX_PER_TILE_EDGE - 1; ++ y)
+		for (uint16_t y = 0; y < VERTEX_PER_TILE_EDGE - 1; ++ y)
 		{
-			uint32_t const row_start = y * VERTEX_PER_TILE_EDGE;
+			uint16_t const row_start = y * VERTEX_PER_TILE_EDGE;
 
-			for (uint32_t x = 0; x < VERTEX_PER_TILE_EDGE; ++ x)
+			for (uint16_t x = 0; x < VERTEX_PER_TILE_EDGE; ++ x)
 			{
 				indices[index] = row_start + x;
 				++ index;
@@ -479,23 +488,46 @@ namespace KlayGE
 
 		ElementInitData init_data;
 		init_data.data = &indices[0];
-		init_data.row_pitch = NON_TESS_INDEX_COUNT * sizeof(uint32_t);
+		init_data.row_pitch = sizeof(indices);
 		init_data.slice_pitch = init_data.row_pitch;
 
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-		tile_non_tess_ib_ = rf.MakeIndexBuffer(BU_Static, EAH_GPU_Read, &init_data);
+		tile_non_tess_ib_ = rf.MakeIndexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, &init_data);
+	}
+
+	void HQTerrainRenderable::CreateNonTessVIDVB()
+	{
+		float vid[VERTEX_PER_TILE_EDGE * VERTEX_PER_TILE_EDGE];
+
+		for (uint32_t y = 0; y < VERTEX_PER_TILE_EDGE; ++ y)
+		{
+			uint32_t const row_start = y * VERTEX_PER_TILE_EDGE;
+
+			for (uint32_t x = 0; x < VERTEX_PER_TILE_EDGE; ++ x)
+			{
+				vid[row_start + x] = row_start + x + 0.5f;
+			}
+		}
+
+		ElementInitData init_data;
+		init_data.data = &vid[0];
+		init_data.row_pitch = sizeof(vid);
+		init_data.slice_pitch = init_data.row_pitch;
+
+		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+		tile_non_tess_vid_vb_ = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, &init_data);
 	}
 
 	void HQTerrainRenderable::CreateTessIB()
 	{
-		uint32_t index = 0;
-		uint32_t indices[TESS_INDEX_COUNT];
+		uint16_t index = 0;
+		uint16_t indices[TESS_INDEX_COUNT];
 
-		for (uint32_t y = 0; y < VERTEX_PER_TILE_EDGE - 1; ++ y)
+		for (uint16_t y = 0; y < VERTEX_PER_TILE_EDGE - 1; ++ y)
 		{
-			uint32_t const row_start = y * VERTEX_PER_TILE_EDGE;
+			uint16_t const row_start = y * VERTEX_PER_TILE_EDGE;
 
-			for (uint32_t x = 0; x < VERTEX_PER_TILE_EDGE - 1; ++ x)
+			for (uint16_t x = 0; x < VERTEX_PER_TILE_EDGE - 1; ++ x)
 			{
 				indices[index] = row_start + x;
 				++ index;
@@ -511,11 +543,11 @@ namespace KlayGE
 
 		ElementInitData init_data;
 		init_data.data = &indices[0];
-		init_data.row_pitch = TESS_INDEX_COUNT * sizeof(uint32_t);
+		init_data.row_pitch = sizeof(indices);
 		init_data.slice_pitch = init_data.row_pitch;
 
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-		tile_tess_ib_ = rf.MakeIndexBuffer(BU_Static, EAH_GPU_Read, &init_data);
+		tile_tess_ib_ = rf.MakeIndexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, &init_data);
 	}
 
 	void HQTerrainRenderable::TextureLayer(uint32_t layer, TexturePtr const & tex)
@@ -534,6 +566,8 @@ namespace KlayGE
 	{
 		RenderableHelper::BindDeferredEffect(deferred_effect);
 
+		terrain_depth_techs_[0] = deferred_effect->TechniqueByName("DepthTessTerrainTech");
+		terrain_depth_techs_[1] = deferred_effect->TechniqueByName("DepthNoTessTerrainTech");
 		terrain_gbuffer_rt0_techs_[0] = deferred_effect->TechniqueByName("GBufferTessTerrainFillRT0Tech");
 		terrain_gbuffer_rt0_techs_[1] = deferred_effect->TechniqueByName("GBufferTessTerrainLineRT0Tech");
 		terrain_gbuffer_rt0_techs_[2] = deferred_effect->TechniqueByName("GBufferNoTessTerrainFillRT0Tech");
@@ -546,7 +580,6 @@ namespace KlayGE
 		terrain_gbuffer_mrt_techs_[1] = deferred_effect->TechniqueByName("GBufferTessTerrainLineMRTTech");
 		terrain_gbuffer_mrt_techs_[2] = deferred_effect->TechniqueByName("GBufferNoTessTerrainFillMRTTech");
 		terrain_gbuffer_mrt_techs_[3] = deferred_effect->TechniqueByName("GBufferNoTessTerrainLineMRTTech");
-		depth_tech_ = deferred_effect->TechniqueByName("DepthTessTerrainTech");
 		gen_sm_tech_ = deferred_effect->TechniqueByName("GenNoTessTerrainShadowMapTech");
 		gen_sm_wo_dt_tech_ = deferred_effect->TechniqueByName("GenNoTessTerrainShadowMapWODepthTextureTech");
 		gen_cascaded_sm_tech_ = deferred_effect->TechniqueByName("GenNoTessTerrainCascadedShadowMapTech");

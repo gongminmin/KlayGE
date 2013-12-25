@@ -16,6 +16,7 @@
 #include <KFL/Vector.hpp>
 #include <KFL/Matrix.hpp>
 #include <KFL/Color.hpp>
+#include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/RenderLayout.hpp>
 
@@ -23,6 +24,7 @@
 
 #include <glloader/glloader.h>
 
+#include <KlayGE/OpenGLES/OGLESRenderEngine.hpp>
 #include <KlayGE/OpenGLES/OGLESTexture.hpp>
 #include <KlayGE/OpenGLES/OGLESMapping.hpp>
 
@@ -269,6 +271,9 @@ namespace KlayGE
 
 	void OGLESMapping::MappingFormat(GLint& internalFormat, GLenum& glformat, GLenum& gltype, ElementFormat ef)
 	{
+		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+		OGLESRenderEngine& ogl_re = *checked_cast<OGLESRenderEngine*>(&re);
+
 		switch (ef)
 		{
 		case EF_A8:
@@ -681,7 +686,7 @@ namespace KlayGE
 				glformat = GL_RED;
 				gltype = GL_HALF_FLOAT;
 			}
-			else if (glloader_GLES_OES_texture_half_float())
+			else if (glloader_GLES_OES_texture_half_float() || ogl_re.HackForTegra())
 			{
 				internalFormat = GL_LUMINANCE;
 				glformat = GL_LUMINANCE;
@@ -700,7 +705,7 @@ namespace KlayGE
 				glformat = GL_RG;
 				gltype = GL_HALF_FLOAT;
 			}
-			else if (glloader_GLES_OES_texture_half_float())
+			else if (glloader_GLES_OES_texture_half_float() || ogl_re.HackForTegra())
 			{
 				internalFormat = GL_LUMINANCE_ALPHA;
 				glformat = GL_LUMINANCE_ALPHA;
@@ -732,7 +737,7 @@ namespace KlayGE
 				glformat = GL_RGB;
 				gltype = GL_HALF_FLOAT;
 			}
-			else if (glloader_GLES_OES_texture_half_float())
+			else if (glloader_GLES_OES_texture_half_float() || ogl_re.HackForTegra())
 			{
 				internalFormat = GL_RGB;
 				glformat = GL_RGB;
@@ -751,7 +756,7 @@ namespace KlayGE
 				glformat = GL_RGBA;
 				gltype = GL_HALF_FLOAT;
 			}
-			else if (glloader_GLES_OES_texture_half_float())
+			else if (glloader_GLES_OES_texture_half_float() || ogl_re.HackForTegra())
 			{
 				internalFormat = GL_RGBA;
 				glformat = GL_RGBA;
@@ -950,7 +955,7 @@ namespace KlayGE
 				glformat = GL_DEPTH_STENCIL;
 				gltype = GL_UNSIGNED_INT_24_8;
 			}
-			else if (glloader_GLES_OES_packed_depth_stencil())
+			else if (glloader_GLES_OES_packed_depth_stencil() || ogl_re.HackForTegra())
 			{
 				internalFormat = GL_DEPTH_STENCIL_OES;
 				glformat = GL_DEPTH_STENCIL_OES;

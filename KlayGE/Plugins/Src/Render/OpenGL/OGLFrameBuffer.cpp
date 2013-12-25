@@ -109,7 +109,17 @@ namespace KlayGE
 
 		if (flags & CBM_Color)
 		{
-			if (glloader_GL_EXT_draw_buffers2())
+			if (glloader_GL_VERSION_3_0())
+			{
+				for (int i = 0; i < 8; ++ i)
+				{
+					if (blend_desc.color_write_mask[i] != CMASK_All)
+					{
+						glColorMaski(i, true, true, true, true);
+					}
+				}
+			}
+			else if (glloader_GL_EXT_draw_buffers2())
 			{
 				for (int i = 0; i < 8; ++ i)
 				{
@@ -210,7 +220,20 @@ namespace KlayGE
 
 		if (flags & CBM_Color)
 		{
-			if (glloader_GL_EXT_draw_buffers2())
+			if (glloader_GL_VERSION_3_0())
+			{
+				for (int i = 0; i < 8; ++ i)
+				{
+					if (blend_desc.color_write_mask[i] != CMASK_All)
+					{
+						glColorMaski(i, (blend_desc.color_write_mask[i] & CMASK_Red) != 0,
+							(blend_desc.color_write_mask[i] & CMASK_Green) != 0,
+							(blend_desc.color_write_mask[i] & CMASK_Blue) != 0,
+							(blend_desc.color_write_mask[i] & CMASK_Alpha) != 0);
+					}
+				}
+			}
+			else if (glloader_GL_EXT_draw_buffers2())
 			{
 				for (int i = 0; i < 8; ++ i)
 				{

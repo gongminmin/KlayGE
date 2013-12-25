@@ -112,15 +112,12 @@ class compiler_info:
 				if (arch.find("_app") > 0):
 					toolset = "v120"
 					is_winrt = True
-				is_xp_toolset = False
-				if (toolset.find("_xp") > 0):
-					is_xp_toolset = True
 				if ("x86" == arch) or ("x86_app" == arch):
-					arch_list.append((arch, "Visual Studio 12", toolset, is_winrt, is_xp_toolset))
+					arch_list.append((arch, "Visual Studio 12", toolset, is_winrt))
 				elif "arm_app" == arch:
-					arch_list.append((arch, "Visual Studio 12 ARM", toolset, is_winrt, is_xp_toolset))
+					arch_list.append((arch, "Visual Studio 12 ARM", toolset, is_winrt))
 				elif ("x64" == arch) or ("x64_app" == arch):
-					arch_list.append((arch, "Visual Studio 12 Win64", toolset, is_winrt, is_xp_toolset))
+					arch_list.append((arch, "Visual Studio 12 Win64", toolset, is_winrt))
 		elif "vc11" == compiler:
 			compiler_name = "vc"
 			compiler_version = 11
@@ -129,41 +126,38 @@ class compiler_info:
 				if (arch.find("_app") > 0):
 					toolset = "v110"
 					is_winrt = True
-				is_xp_toolset = False
-				if (toolset.find("_xp") > 0):
-					is_xp_toolset = True
 				if ("x86" == arch) or ("x86_app" == arch):
-					arch_list.append((arch, "Visual Studio 11", toolset, is_winrt, is_xp_toolset))
+					arch_list.append((arch, "Visual Studio 11", toolset, is_winrt))
 				elif "arm_app" == arch:
-					arch_list.append((arch, "Visual Studio 11 ARM", toolset, is_winrt, is_xp_toolset))
+					arch_list.append((arch, "Visual Studio 11 ARM", toolset, is_winrt))
 				elif ("x64" == arch) or ("x64_app" == arch):
-					arch_list.append((arch, "Visual Studio 11 Win64", toolset, is_winrt, is_xp_toolset))
+					arch_list.append((arch, "Visual Studio 11 Win64", toolset, is_winrt))
 		elif "vc10" == compiler:
 			compiler_name = "vc"
 			compiler_version = 10
 			for arch in archs:
 				if "x86" == arch:
-					arch_list.append((arch, "Visual Studio 10", toolset, False, False))
+					arch_list.append((arch, "Visual Studio 10", toolset, False))
 				elif "x64" == arch:
-					arch_list.append((arch, "Visual Studio 10 Win64", toolset, False, False))
+					arch_list.append((arch, "Visual Studio 10 Win64", toolset, False))
 		elif "vc9" == compiler:
 			compiler_name = "vc"
 			compiler_version = 9
 			for arch in archs:
 				if "x86" == arch:
-					arch_list.append((arch, "Visual Studio 9 2008", toolset, False, False))
+					arch_list.append((arch, "Visual Studio 9 2008", toolset, False))
 				elif "x64" == arch:
-					arch_list.append((arch, "Visual Studio 9 2008 Win64", toolset, False, False))
+					arch_list.append((arch, "Visual Studio 9 2008 Win64", toolset, False))
 		elif "mingw" == compiler:
 			compiler_name = "mgw"
 			compiler_version = 0
 			for arch in archs:
-				arch_list.append((arch, "MinGW Makefiles", toolset, False, False))
+				arch_list.append((arch, "MinGW Makefiles", toolset, False))
 		elif "gcc" == compiler:
 			compiler_name = "gcc"
 			compiler_version = 0
 			for arch in archs:
-				arch_list.append((arch, "Unix Makefiles", toolset, False, False))
+				arch_list.append((arch, "Unix Makefiles", toolset, False))
 		else:
 			compiler_name = ""
 			compiler_version = 0
@@ -242,9 +236,7 @@ def build_a_project(name, build_path, compiler_info, compiler_arch, need_install
 		toolset_name = "-T %s" % compiler_arch[2]
 
 	if compiler_arch[3]:
-		additional_options += " -D KLAYGE_WITH_WINRT:BOOL=\"TRUE\""
-	if compiler_arch[4]:
-		additional_options += " -D KLAYGE_WITH_XP_TOOLSET:BOOL=\"TRUE\""
+		additional_options += " -D KLAYGE_BUILD_PLATFORM_WINRT:BOOL=\"TRUE\""
 	if compiler_info.name != "vc":
 		additional_options += " -D KLAYGE_ARCH_NAME:STRING=\"%s\"" % compiler_arch[0]
 

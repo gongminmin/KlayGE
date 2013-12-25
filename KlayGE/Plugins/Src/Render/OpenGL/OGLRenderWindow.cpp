@@ -315,7 +315,13 @@ namespace KlayGE
 			THR(errc::function_not_supported);
 		}
 
-		if (glloader_GL_ARB_color_buffer_float())
+		if (glloader_GL_VERSION_3_0())
+		{
+			glClampColor(GL_CLAMP_VERTEX_COLOR, GL_FALSE);
+			glClampColor(GL_CLAMP_FRAGMENT_COLOR, GL_FALSE);
+			glClampColor(GL_CLAMP_READ_COLOR, GL_FALSE);
+		}
+		else if (glloader_GL_ARB_color_buffer_float())
 		{
 			glClampColorARB(GL_CLAMP_VERTEX_COLOR_ARB, GL_FALSE);
 			glClampColorARB(GL_CLAMP_FRAGMENT_COLOR_ARB, GL_FALSE);

@@ -38,8 +38,6 @@
 #ifdef KLAYGE_COMPILER_MSVC
 #pragma warning(pop)
 #endif
-#include <boost/assign.hpp>
-#include <boost/assign/std/vector.hpp>
 #ifdef KLAYGE_COMPILER_MSVC
 #pragma warning(push)
 #pragma warning(disable: 4127 6328)
@@ -201,8 +199,8 @@ namespace
 
 	char const * predefined_varyings = "\n	\
 	varying vec4 v_gl_FrontColor;\n			\
-    varying vec4 v_gl_TexCoord[8];\n		\
-    varying float v_gl_FogFragCoord;\n		\
+	varying vec4 v_gl_TexCoord[8];\n		\
+	varying float v_gl_FogFragCoord;\n		\
 	";
 
 	template <typename SrcType>
@@ -952,6 +950,7 @@ namespace KlayGE
 
 		glsl_program_ = glCreateProgram();
 
+		shader_func_names_ = MakeSharedPtr<array<std::string, ST_NumShaderTypes> >();
 		glsl_srcs_ = MakeSharedPtr<array<shared_ptr<std::string>, ST_NumShaderTypes> >();
 
 		pnames_ = MakeSharedPtr<array<shared_ptr<std::vector<std::string> >, ST_NumShaderTypes> >();
@@ -1248,9 +1247,34 @@ namespace KlayGE
 		return ss.str();
 	}
 
-	std::string OGLESShaderObject::ConvertToELSL(std::string const & glsl, ShaderType type)
+	std::string OGLESShaderObject::ConvertToESSL(std::string const & glsl, ShaderType type)
 	{
 		std::stringstream ss;
+
+		{
+			bool has_directive = false;
+			std::stringstream iss(glsl);
+			std::string s;
+			while (iss)
+			{
+				std::getline(iss, s);
+
+				if ((0 == s.find("#version")) || (0 == s.find("#extension")))
+				{
+					has_directive = true;
+					ss << s << std::endl;
+				}
+				else if (!s.empty() && (s.find("//") != 0) && (s.find("/*") != 0))
+				{
+					break;
+				}
+			}
+			if (has_directive)
+			{
+				ss << std::endl;
+			}
+		}
+
 		switch (type)
 		{
 		case ST_VertexShader:
@@ -1269,49 +1293,57 @@ namespace KlayGE
 
 		boost::char_separator<char> sep("", " \t\n.,():;+-*/%&!|^[]{}'\"?");
 		boost::tokenizer<boost::char_separator<char> > tok(glsl, sep);
-		std::string this_token;
 		for (KLAYGE_AUTO(beg, tok.begin()); beg != tok.end(); ++ beg)
 		{
-			this_token = *beg;
+			std::string const & this_token = *beg;
 
-			switch (type)
+			if ("#version" == this_token)
 			{
-			case ST_VertexShader:
-				if (("gl_Color" == this_token) || ("gl_Normal" == this_token)
-					|| ("gl_Vertex" == this_token) || ("gl_FogCoord" == this_token)
-					|| (0 == this_token.find("gl_MultiTexCoord")))
+				++ beg; // Skip space
+				++ beg; // Skip version
+				++ beg; // Skip \n
+			}
+			else if ("#extension" == this_token)
+			{
+				++ beg; // Skip space
+				++ beg; // Skip extension name
+				++ beg; // Skip space
+				++ beg; // Skip ":"
+				++ beg; // Skip "true"
+				++ beg; // Skip \n
+			}
+			else
+			{
+				switch (type)
+				{
+				case ST_VertexShader:
+					if (("gl_Color" == this_token) || ("gl_Normal" == this_token)
+						|| ("gl_Vertex" == this_token) || ("gl_FogCoord" == this_token)
+						|| (0 == this_token.find("gl_MultiTexCoord")))
 
-				{
-					ss << "a_" << this_token;
-				}
-				else
-				{
+					{
+						ss << "a_" << this_token;
+					}
+					else if (("gl_TexCoord" == this_token) || ("gl_FogFragCoord" == this_token))
+					{
+						ss << "v_" << this_token;
+					}
+					else if (("gl_FrontColor" == this_token) || ("gl_BackColor" == this_token))
+					{
+						ss << "v_gl_FrontColor";
+					}
+					else
+					{
+						ss << this_token;
+					}
+					break;
+
+				case ST_PixelShader:
 					if (("gl_TexCoord" == this_token) || ("gl_FogFragCoord" == this_token))
 					{
 						ss << "v_" << this_token;
 					}
-					else
-					{
-						if (("gl_FrontColor" == this_token) || ("gl_BackColor" == this_token))
-						{
-							ss << "v_gl_FrontColor";
-						}
-						else
-						{
-							ss << this_token;
-						}
-					}
-				}
-				break;
-
-			case ST_PixelShader:
-				if (("gl_TexCoord" == this_token) || ("gl_FogFragCoord" == this_token))
-				{
-					ss << "v_" << this_token;
-				}
-				else
-				{
-					if ("gl_Color" == this_token)
+					else if ("gl_Color" == this_token)
 					{
 						ss << "v_gl_FrontColor";
 					}
@@ -1324,19 +1356,19 @@ namespace KlayGE
 
 						ss << this_token;
 					}
-				}
-				break;
+					break;
 
-			default:
-				BOOST_ASSERT(false);
-				break;
+				default:
+					BOOST_ASSERT(false);
+					break;
+				}
 			}
 		}
 
 		return ss.str();
 	}
 
-	bool OGLESShaderObject::AttachNativeShader(ShaderType type, RenderEffect const & effect, std::vector<uint32_t> const & /*shader_desc_ids*/,
+	bool OGLESShaderObject::AttachNativeShader(ShaderType type, RenderEffect const & effect, std::vector<uint32_t> const & shader_desc_ids,
 			std::vector<uint8_t> const & native_shader_block)
 	{
 		bool ret = false;
@@ -1372,6 +1404,7 @@ namespace KlayGE
 							std::memcpy(&len32, nsbp, sizeof(len32));
 							nsbp += sizeof(len32);
 							LittleEndianToNative<sizeof(len32)>(&len32);
+							(*shader_func_names_)[type] = effect.GetShaderDesc(shader_desc_ids[type]).func_name;
 							(*glsl_srcs_)[type] = MakeSharedPtr<std::string>(len32, '\0');
 							std::memcpy(&(*(*glsl_srcs_)[type])[0], nsbp, len32);
 							nsbp += len32;
@@ -1604,6 +1637,8 @@ namespace KlayGE
 	{
 		ShaderDesc const & sd = effect.GetShaderDesc(shader_desc_ids[type]);
 
+		(*shader_func_names_)[type] = sd.func_name;
+
 		std::string shader_text = this->GenShaderText(type, effect, tech, pass);
 
 		is_shader_validate_[type] = true;
@@ -1636,6 +1671,7 @@ namespace KlayGE
 		OGLESShaderObjectPtr so = checked_pointer_cast<OGLESShaderObject>(shared_so);
 
 		is_shader_validate_[type] = so->is_shader_validate_[type];
+		(*shader_func_names_)[type] = (*so->shader_func_names_)[type];
 
 		if (is_shader_validate_[type])
 		{
@@ -1753,6 +1789,7 @@ namespace KlayGE
 
 		ret->has_discard_ = has_discard_;
 		ret->has_tessellation_ = has_tessellation_;
+		ret->shader_func_names_ = shader_func_names_;
 		ret->glsl_srcs_ = glsl_srcs_;
 		ret->pnames_ = pnames_;
 		ret->glsl_res_names_ = glsl_res_names_;
@@ -2114,21 +2151,40 @@ namespace KlayGE
 #ifdef KLAYGE_DEBUG
 			if (CG_COMPILER_ERROR == error)
 			{
-				std::istringstream iss(shader_text);
-				std::string s;
-				int line = 1;
-				while (iss)
-				{
-					std::getline(iss, s);
-					LogError("%d %s", line, s.c_str());
-					++ line;
-				}
 				LogError("Error when compiling %s:", func_name.c_str());
-				LogError(cgGetErrorString(error));
-
 				char const* listing = cgGetLastListing(CGContextIniter::Instance().Context());
 				if (listing)
 				{
+					std::string err_str = listing;
+					std::string::size_type pos = err_str.find(") : error ");
+					if (pos == std::string::npos)
+					{
+						pos = err_str.find(") : warning ");
+					}
+					if (pos != std::string::npos)
+					{
+						std::string part_err_str = err_str.substr(0, pos);
+						pos = part_err_str.rfind("(");
+						part_err_str = part_err_str.substr(pos + 1);
+						int err_line = boost::lexical_cast<int>(part_err_str);
+
+						std::istringstream iss(shader_text);
+						std::string s;
+						int line = 1;
+						LogError("...");
+						while (iss)
+						{
+							std::getline(iss, s);
+							if ((line - err_line > -3) && (line - err_line < 3))
+							{
+								LogError("%d %s", line, s.c_str());
+							}
+							++ line;
+						}
+						LogError("...");
+					}
+
+					LogError(cgGetErrorString(error));
 					LogError(listing);
 				}
 			}
@@ -2138,7 +2194,7 @@ namespace KlayGE
 		}
 		else
 		{
-			(*glsl_srcs_)[type] = MakeSharedPtr<std::string>(this->ConvertToELSL(cgGetProgramString(cg_shader, CG_COMPILED_PROGRAM),
+			(*glsl_srcs_)[type] = MakeSharedPtr<std::string>(this->ConvertToESSL(cgGetProgramString(cg_shader, CG_COMPILED_PROGRAM),
 				static_cast<ShaderType>(type)));
 			(*pnames_)[type] = MakeSharedPtr<std::vector<std::string> >();
 			(*glsl_res_names_)[type] = MakeSharedPtr<std::vector<std::string> >();
@@ -2268,7 +2324,6 @@ namespace KlayGE
 		{
 			is_shader_validate_[type] = false;
 		}
-		//printf("%s\n", glsl);
 
 		glShaderSource(object, 1, &glsl, nullptr);
 
@@ -2276,21 +2331,74 @@ namespace KlayGE
 
 		GLint compiled = false;
 		glGetShaderiv(object, GL_COMPILE_STATUS, &compiled);
-#ifdef KLAYGE_DEBUG
 		if (!compiled)
 		{
-			printf("%s\n", glsl);
+			LogError("Error when compiling ESSL %s:", (*shader_func_names_)[type].c_str());
 
 			GLint len = 0;
 			glGetShaderiv(object, GL_INFO_LOG_LENGTH, &len);
 			if (len > 0)
 			{
+				OGLESRenderEngine& re = *checked_cast<OGLESRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+
 				std::vector<char> info(len + 1, 0);
 				glGetShaderInfoLog(object, len, &len, &info[0]);
-				LogError(&info[0]);
+
+				if (re.HackForMali())
+				{
+					std::istringstream err_iss(&info[0]);
+					std::string err_str;
+					while (err_iss)
+					{
+						std::getline(err_iss, err_str);
+						if (!err_str.empty())
+						{
+							std::string::size_type pos = err_str.find("1:");
+							if (pos != std::string::npos)
+							{
+								pos += 2;
+								std::string::size_type pos2 = err_str.find(':', pos);
+								std::string part_err_str = err_str.substr(pos, pos2 - pos);
+								int err_line = boost::lexical_cast<int>(part_err_str);
+
+								std::istringstream iss(glsl);
+								std::string s;
+								int line = 1;
+								LogError("...");
+								while (iss)
+								{
+									std::getline(iss, s);
+									if ((line - err_line > -3) && (line - err_line < 3))
+									{
+										LogError("%d %s", line, s.c_str());
+									}
+									++ line;
+								}
+								LogError("...");
+							}
+
+							LogError(err_str.c_str());
+							LogError("\n");
+						}
+					}
+				}
+				else
+				{
+					std::istringstream iss(glsl);
+					std::string s;
+					int line = 1;
+					while (iss)
+					{
+						std::getline(iss, s);
+						LogError("%d %s", line, s.c_str());
+						++ line;
+					}
+
+					LogError(&info[0]);
+					LogError("\n");
+				}
 			}
 		}
-#endif
 		is_shader_validate_[type] &= compiled ? true : false;
 
 		glAttachShader(glsl_program_, object);

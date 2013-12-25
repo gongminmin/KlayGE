@@ -759,26 +759,27 @@ namespace KlayGE
 		UNREF_PARAM(elapsed_time);
 
 		unique_lock<mutex> lock(update_mutex_);
+
+		uint32_t const num_active_particles = static_cast<uint32_t>(active_particles_.size());
+
+		RenderLayoutPtr const & rl = renderable_->GetRenderLayout();
+		GraphicsBufferPtr instance_gb;
+		if (gs_support_)
+		{
+			instance_gb = rl->GetVertexStream(0);
+		}
+		else
+		{
+			instance_gb = rl->InstanceStream();
+
+			for (uint32_t i = 0; i < rl->NumVertexStreams(); ++ i)
+			{
+				rl->VertexStreamFrequencyDivider(i, RenderLayout::ST_Geometry, num_active_particles);
+			}
+		}
+
 		if (!active_particles_.empty())
 		{
-			uint32_t const num_active_particles = static_cast<uint32_t>(active_particles_.size());
-
-			RenderLayoutPtr const & rl = renderable_->GetRenderLayout();
-			GraphicsBufferPtr instance_gb;
-			if (gs_support_)
-			{
-				instance_gb = rl->GetVertexStream(0);
-			}
-			else
-			{
-				instance_gb = rl->InstanceStream();
-
-				for (uint32_t i = 0; i < rl->NumVertexStreams(); ++ i)
-				{
-					rl->VertexStreamFrequencyDivider(i, RenderLayout::ST_Geometry, num_active_particles);
-				}
-			}
-
 			instance_gb->Resize(sizeof(ParticleInstance) * num_active_particles);
 			{
 				GraphicsBuffer::Mapper mapper(*instance_gb, BA_Write_Only);

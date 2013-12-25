@@ -300,8 +300,8 @@ namespace
 
 namespace KlayGE
 {
-	MsgInputKeyboard::MsgInputKeyboard(HANDLE device)
-		: device_(device)
+	MsgInputKeyboard::MsgInputKeyboard(HWND hwnd, HANDLE device)
+		: hwnd_(hwnd), device_(device)
 	{
 		keys_state_.fill(false);
 	}
@@ -314,7 +314,8 @@ namespace KlayGE
 
 	void MsgInputKeyboard::OnRawInput(RAWINPUT const & ri)
 	{
-		if ((RIM_TYPEKEYBOARD == ri.header.dwType) && (ri.header.hDevice == device_))
+		if ((RIM_TYPEKEYBOARD == ri.header.dwType) && (ri.header.hDevice == device_)
+			&& (hwnd_ == ::GetForegroundWindow()))
 		{
 			int32_t ks = VK_MAPPING[ri.data.keyboard.VKey];
 			if (ks >= 0)

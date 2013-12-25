@@ -35,15 +35,6 @@
 #include <KlayGE/App3D.hpp>
 
 #include <sstream>
-#ifdef KLAYGE_COMPILER_MSVC
-#pragma warning(push)
-#pragma warning(disable: 4512)
-#endif
-#include <boost/assign.hpp>
-#ifdef KLAYGE_COMPILER_MSVC
-#pragma warning(pop)
-#endif
-#include <boost/assign/std/vector.hpp>
 
 #include <KlayGE/CameraController.hpp>
 
@@ -81,25 +72,25 @@ namespace KlayGE
 	{
 		if (use_input_engine)
 		{
-			using namespace boost::assign;
-
-			std::vector<InputActionDefine> actions;
-			actions += InputActionDefine(TurnLeftRight, MS_X),
-						InputActionDefine(TurnUpDown, MS_Y),
-						InputActionDefine(RollLeft, KS_Q),
-						InputActionDefine(RollRight, KS_E),
-						InputActionDefine(Forward, KS_W),
-						InputActionDefine(Backward, KS_S),
-						InputActionDefine(MoveLeft, KS_A),
-						InputActionDefine(MoveRight, KS_D),
-						InputActionDefine(Forward, KS_UpArrow),
-						InputActionDefine(Backward, KS_DownArrow),
-						InputActionDefine(MoveLeft, KS_LeftArrow),
-						InputActionDefine(MoveRight, KS_RightArrow);
+			InputActionDefine actions[] =
+			{
+				InputActionDefine(TurnLeftRight, MS_X),
+				InputActionDefine(TurnUpDown, MS_Y),
+				InputActionDefine(RollLeft, KS_Q),
+				InputActionDefine(RollRight, KS_E),
+				InputActionDefine(Forward, KS_W),
+				InputActionDefine(Backward, KS_S),
+				InputActionDefine(MoveLeft, KS_A),
+				InputActionDefine(MoveRight, KS_D),
+				InputActionDefine(Forward, KS_UpArrow),
+				InputActionDefine(Backward, KS_DownArrow),
+				InputActionDefine(MoveLeft, KS_LeftArrow),
+				InputActionDefine(MoveRight, KS_RightArrow)
+			};
 
 			InputEngine& inputEngine(Context::Instance().InputFactoryInstance().InputEngineInstance());
 			InputActionMap actionMap;
-			actionMap.AddActions(actions.begin(), actions.end());
+			actionMap.AddActions(&actions[0], &actions[sizeof(actions) / sizeof(actions[0])]);
 
 			action_handler_t input_handler = MakeSharedPtr<input_signal>();
 			input_handler->connect(KlayGE::bind(&FirstPersonCameraController::InputHandler, this,
@@ -264,15 +255,15 @@ namespace KlayGE
 	{
 		if (use_input_engine)
 		{
-			using namespace boost::assign;
-
-			std::vector<InputActionDefine> actions;
-			actions += InputActionDefine(Turn, MS_X),
-						InputActionDefine(Turn, MS_Y);
+			InputActionDefine actions[] =
+			{
+				InputActionDefine(Turn, MS_X),
+				InputActionDefine(Turn, MS_Y)
+			};
 
 			InputEngine& inputEngine(Context::Instance().InputFactoryInstance().InputEngineInstance());
 			InputActionMap actionMap;
-			actionMap.AddActions(actions.begin(), actions.end());
+			actionMap.AddActions(&actions[0], &actions[sizeof(actions) / sizeof(actions[0])]);
 
 			action_handler_t input_handler = MakeSharedPtr<input_signal>();
 			input_handler->connect(KlayGE::bind(&TrackballCameraController::InputHandler, this,

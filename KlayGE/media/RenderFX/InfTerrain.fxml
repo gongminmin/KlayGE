@@ -27,6 +27,7 @@ float4 GetInfTerrainPosOS(float2 pos, float strength)
 	</shader>
 
 	<macro name="MAX_TESS_LEVEL" value="16"/>
+	<macro name="COARSE_HEIGHT_MAP_SIZE" value="1024"/>
 
 	<cbuffer name="global_params">
 		<parameter type="float2" name="vertical_scale"/>
@@ -135,20 +136,22 @@ float2 HeightUVToWorldXZ(float2 uv)
 	return (world_uv_repeats.x * 2) * (uv - 0.5f);
 }
 
-float SampleHeightForVS(float2 world_xz, int2 offset)
+float SampleHeightForVS(float2 world_xz, float2 offset)
 {
-	float2 uv = WorldXZToHeightUV(world_xz);
-	float coarse = coarse_height_map.SampleLevel(linear_clamp_sampler, uv, 0, offset).x;
+	float2 uv = WorldXZToHeightUV(world_xz) + offset;
+	float coarse = coarse_height_map.SampleLevel(linear_clamp_sampler, uv, 0).x;
 	return vertical_scale.x * (coarse + SampleLevelDetailNoise(uv, coarse) * 0.5f);
 }
 
-void GBufferNoTessTerrainVS(float2 position  : TEXCOORD0,
+void GBufferNoTessTerrainVS(float2 position : TEXCOORD0,
 		float4 neighbor_minus_plus_xy : TEXCOORD1,
-		uint vertex_id    : SV_VertexID,
+		float f_vertex_id : TEXCOORD2,
 		out float3 oWorldPos        : TEXCOORD0,
 		out float oDebugPatch       : TEXCOORD1,
 		out float4 oPosition        : SV_Position)
 {
+	int vertex_id = f_vertex_id;
+	
 	float3 displaced_pos;
 	int2 int_uv;
 	ReconstructPosition(position, vertex_id, displaced_pos, int_uv);
@@ -162,42 +165,42 @@ void GBufferNoTessTerrainVS(float2 position  : TEXCOORD0,
 		ReconstructPosition(position, vertex_id - 1, displaced_pos2, int_uv2);
 		ReconstructPosition(position, vertex_id + 1, displaced_pos3, int_uv3);
 
-		z1 = (SampleHeightForVS(displaced_pos2.xz, int2(1, 1)) + SampleHeightForVS(displaced_pos3.xz, int2(1, 1))) * 0.5f;
-		z2 = (SampleHeightForVS(displaced_pos2.xz, int2(2, 1)) + SampleHeightForVS(displaced_pos3.xz, int2(2, 1))) * 0.5f;
-		z3 = (SampleHeightForVS(displaced_pos2.xz, int2(1, 2)) + SampleHeightForVS(displaced_pos3.xz, int2(1, 2))) * 0.5f;
+		z1 = (SampleHeightForVS(displaced_pos2.xz, float2(1, 1) / COARSE_HEIGHT_MAP_SIZE) + SampleHeightForVS(displaced_pos3.xz, float2(1, 1) / COARSE_HEIGHT_MAP_SIZE)) * 0.5f;
+		z2 = (SampleHeightForVS(displaced_pos2.xz, float2(2, 1) / COARSE_HEIGHT_MAP_SIZE) + SampleHeightForVS(displaced_pos3.xz, float2(2, 1) / COARSE_HEIGHT_MAP_SIZE)) * 0.5f;
+		z3 = (SampleHeightForVS(displaced_pos2.xz, float2(1, 2) / COARSE_HEIGHT_MAP_SIZE) + SampleHeightForVS(displaced_pos3.xz, float2(1, 2) / COARSE_HEIGHT_MAP_SIZE)) * 0.5f;
 	}
 	else if ((neighbor_minus_plus_xy.w > 1) && ((73 == vertex_id) || (75 == vertex_id) || (77 == vertex_id) || (79 == vertex_id)))
 	{
 		ReconstructPosition(position, vertex_id - 1, displaced_pos2, int_uv2);
 		ReconstructPosition(position, vertex_id + 1, displaced_pos3, int_uv3);
 
-		z1 = (SampleHeightForVS(displaced_pos2.xz, int2(1, 1)) + SampleHeightForVS(displaced_pos3.xz, int2(1, 1))) * 0.5f;
-		z2 = (SampleHeightForVS(displaced_pos2.xz, int2(2, 1)) + SampleHeightForVS(displaced_pos3.xz, int2(2, 1))) * 0.5f;
-		z3 = (SampleHeightForVS(displaced_pos2.xz, int2(1, 2)) + SampleHeightForVS(displaced_pos3.xz, int2(1, 2))) * 0.5f;
+		z1 = (SampleHeightForVS(displaced_pos2.xz, float2(1, 1) / COARSE_HEIGHT_MAP_SIZE) + SampleHeightForVS(displaced_pos3.xz, float2(1, 1) / COARSE_HEIGHT_MAP_SIZE)) * 0.5f;
+		z2 = (SampleHeightForVS(displaced_pos2.xz, float2(2, 1) / COARSE_HEIGHT_MAP_SIZE) + SampleHeightForVS(displaced_pos3.xz, float2(2, 1) / COARSE_HEIGHT_MAP_SIZE)) * 0.5f;
+		z3 = (SampleHeightForVS(displaced_pos2.xz, float2(1, 2) / COARSE_HEIGHT_MAP_SIZE) + SampleHeightForVS(displaced_pos3.xz, float2(1, 2) / COARSE_HEIGHT_MAP_SIZE)) * 0.5f;
 	}
 	else if ((neighbor_minus_plus_xy.x > 1) && ((9 == vertex_id) || (27 == vertex_id) || (45 == vertex_id) || (63 == vertex_id)))
 	{
 		ReconstructPosition(position, vertex_id - vertex_per_tile_edge, displaced_pos2, int_uv2);
 		ReconstructPosition(position, vertex_id + vertex_per_tile_edge, displaced_pos3, int_uv3);
 
-		z1 = (SampleHeightForVS(displaced_pos2.xz, int2(1, 1)) + SampleHeightForVS(displaced_pos3.xz, int2(1, 1))) * 0.5f;
-		z2 = (SampleHeightForVS(displaced_pos2.xz, int2(2, 1)) + SampleHeightForVS(displaced_pos3.xz, int2(2, 1))) * 0.5f;
-		z3 = (SampleHeightForVS(displaced_pos2.xz, int2(1, 2)) + SampleHeightForVS(displaced_pos3.xz, int2(1, 2))) * 0.5f;
+		z1 = (SampleHeightForVS(displaced_pos2.xz, float2(1, 1) / COARSE_HEIGHT_MAP_SIZE) + SampleHeightForVS(displaced_pos3.xz, float2(1, 1) / COARSE_HEIGHT_MAP_SIZE)) * 0.5f;
+		z2 = (SampleHeightForVS(displaced_pos2.xz, float2(2, 1) / COARSE_HEIGHT_MAP_SIZE) + SampleHeightForVS(displaced_pos3.xz, float2(2, 1) / COARSE_HEIGHT_MAP_SIZE)) * 0.5f;
+		z3 = (SampleHeightForVS(displaced_pos2.xz, float2(1, 2) / COARSE_HEIGHT_MAP_SIZE) + SampleHeightForVS(displaced_pos3.xz, float2(1, 2) / COARSE_HEIGHT_MAP_SIZE)) * 0.5f;
 	}
 	else if ((neighbor_minus_plus_xy.z > 1) && ((17 == vertex_id) || (35 == vertex_id) || (53 == vertex_id) || (71 == vertex_id)))
 	{
 		ReconstructPosition(position, vertex_id - vertex_per_tile_edge, displaced_pos2, int_uv2);
 		ReconstructPosition(position, vertex_id + vertex_per_tile_edge, displaced_pos3, int_uv3);
 
-		z1 = (SampleHeightForVS(displaced_pos2.xz, int2(1, 1)) + SampleHeightForVS(displaced_pos3.xz, int2(1, 1))) * 0.5f;
-		z2 = (SampleHeightForVS(displaced_pos2.xz, int2(2, 1)) + SampleHeightForVS(displaced_pos3.xz, int2(2, 1))) * 0.5f;
-		z3 = (SampleHeightForVS(displaced_pos2.xz, int2(1, 2)) + SampleHeightForVS(displaced_pos3.xz, int2(1, 2))) * 0.5f;
+		z1 = (SampleHeightForVS(displaced_pos2.xz, float2(1, 1) / COARSE_HEIGHT_MAP_SIZE) + SampleHeightForVS(displaced_pos3.xz, float2(1, 1) / COARSE_HEIGHT_MAP_SIZE)) * 0.5f;
+		z2 = (SampleHeightForVS(displaced_pos2.xz, float2(2, 1) / COARSE_HEIGHT_MAP_SIZE) + SampleHeightForVS(displaced_pos3.xz, float2(2, 1) / COARSE_HEIGHT_MAP_SIZE)) * 0.5f;
+		z3 = (SampleHeightForVS(displaced_pos2.xz, float2(1, 2) / COARSE_HEIGHT_MAP_SIZE) + SampleHeightForVS(displaced_pos3.xz, float2(1, 2) / COARSE_HEIGHT_MAP_SIZE)) * 0.5f;
 	}
 	else
 	{
-		z1 = SampleHeightForVS(displaced_pos.xz, int2(1, 1));
-		z2 = SampleHeightForVS(displaced_pos.xz, int2(2, 1));
-		z3 = SampleHeightForVS(displaced_pos.xz, int2(1, 2));
+		z1 = SampleHeightForVS(displaced_pos.xz, float2(1, 1) / COARSE_HEIGHT_MAP_SIZE);
+		z2 = SampleHeightForVS(displaced_pos.xz, float2(2, 1) / COARSE_HEIGHT_MAP_SIZE);
+		z3 = SampleHeightForVS(displaced_pos.xz, float2(1, 2) / COARSE_HEIGHT_MAP_SIZE);
 	}
 	
 	float3 normal = float3(z2 - z1, inv_vertex_per_tile_edge, z3 - z1);
@@ -210,7 +213,8 @@ void GBufferNoTessTerrainVS(float2 position  : TEXCOORD0,
 
 	if (show_patches)
 	{
-		oDebugPatch = (0.5f * (((uint)int_uv.x + (uint)int_uv.y) % 2) + 0.5f);
+		int sum = int_uv.x + int_uv.y;
+		oDebugPatch = (0.5f * (sum / 2 * 2 != sum) + 0.5f);
 	}
 }
 		]]>

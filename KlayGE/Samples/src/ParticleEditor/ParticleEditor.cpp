@@ -385,7 +385,7 @@ void ParticleEditorApp::InputHandler(InputEngine const & /*sender*/, InputAction
 
 void ParticleEditorApp::OpenHandler(KlayGE::UIButton const & /*sender*/)
 {
-#if defined KLAYGE_PLATFORM_WINDOWS
+#if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
 	OPENFILENAMEA ofn;
 	char fn[260];
 	HWND hwnd = this->MainWnd()->HWnd();
@@ -426,7 +426,7 @@ void ParticleEditorApp::OpenHandler(KlayGE::UIButton const & /*sender*/)
 
 void ParticleEditorApp::SaveAsHandler(KlayGE::UIButton const & /*sender*/)
 {
-#if defined KLAYGE_PLATFORM_WINDOWS
+#if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
 	OPENFILENAMEA ofn;
 	char fn[260];
 	HWND hwnd = this->MainWnd()->HWnd();
@@ -585,7 +585,7 @@ void ParticleEditorApp::FPSCameraHandler(KlayGE::UICheckBox const & sender)
 
 void ParticleEditorApp::ChangeParticleAlphaFromHandler(KlayGE::UITexButton const & /*sender*/)
 {
-#if defined KLAYGE_PLATFORM_WINDOWS
+#if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
 	OPENFILENAMEA ofn;
 	char fn[260];
 	HWND hwnd = this->MainWnd()->HWnd();
@@ -613,7 +613,7 @@ void ParticleEditorApp::ChangeParticleAlphaFromHandler(KlayGE::UITexButton const
 
 void ParticleEditorApp::ChangeParticleAlphaToHandler(KlayGE::UITexButton const & /*sender*/)
 {
-#if defined KLAYGE_PLATFORM_WINDOWS
+#if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
 	OPENFILENAMEA ofn;
 	char fn[260];
 	HWND hwnd = this->MainWnd()->HWnd();
@@ -641,7 +641,7 @@ void ParticleEditorApp::ChangeParticleAlphaToHandler(KlayGE::UITexButton const &
 
 void ParticleEditorApp::ChangeParticleColorFromHandler(KlayGE::UITexButton const & /*sender*/)
 {
-#if defined KLAYGE_PLATFORM_WINDOWS
+#if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
 	CHOOSECOLORA occ;
 	HWND hwnd = this->MainWnd()->HWnd();
 
@@ -681,7 +681,7 @@ void ParticleEditorApp::ChangeParticleColorFromHandler(KlayGE::UITexButton const
 
 void ParticleEditorApp::ChangeParticleColorToHandler(KlayGE::UITexButton const & /*sender*/)
 {
-#if defined KLAYGE_PLATFORM_WINDOWS
+#if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
 	CHOOSECOLORA occ;
 	HWND hwnd = this->MainWnd()->HWnd();
 

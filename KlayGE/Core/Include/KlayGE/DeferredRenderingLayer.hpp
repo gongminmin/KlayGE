@@ -25,7 +25,9 @@
 #include <KlayGE/IndirectLightingLayer.hpp>
 #include <KlayGE/CascadedShadowLayer.hpp>
 
-#define LIGHT_INDEXED_DEFERRED
+#define TRIDITIONAL_DEFERRED 0
+#define LIGHT_INDEXED_DEFERRED 1
+#define DEFAULT_DEFERRED LIGHT_INDEXED_DEFERRED
 
 namespace KlayGE
 {
@@ -61,7 +63,7 @@ namespace KlayGE
 
 		array<bool, Num_GBuffers> g_buffer_enables;
 
-		FrameBufferPtr pre_depth_buffer;
+		FrameBufferPtr pre_depth_fb;
 
 		FrameBufferPtr g_buffer;
 		FrameBufferPtr g_buffer_rt1;
@@ -70,33 +72,35 @@ namespace KlayGE
 		TexturePtr g_buffer_ds_tex;
 		TexturePtr g_buffer_depth_tex;
 		TexturePtr g_buffer_rt0_backup_tex;
-#ifdef LIGHT_INDEXED_DEFERRED
+#if DEFAULT_DEFERRED == LIGHT_INDEXED_DEFERRED
 		std::vector<TexturePtr> g_buffer_min_max_depth_texs;
 #endif
 
-		FrameBufferPtr lighting_buffer;
+#if DEFAULT_DEFERRED == TRIDITIONAL_DEFERRED
+		FrameBufferPtr lighting_fb;
 		TexturePtr lighting_tex;
+#endif
 
-		FrameBufferPtr shadowing_buffer;
+		FrameBufferPtr shadowing_fb;
 		TexturePtr shadowing_tex;
 
-		FrameBufferPtr projective_shadowing_buffer;
+		FrameBufferPtr projective_shadowing_fb;
 		TexturePtr projective_shadowing_tex;
 
-		FrameBufferPtr shading_buffer;
+		FrameBufferPtr shading_fb;
 		TexturePtr shading_tex;
 
 		uint32_t num_cascades;
-		array<TexturePtr, CascadedShadowLayer::MAX_NUM_CASCADES> blur_cascaded_sm_texs;
+		array<TexturePtr, CascadedShadowLayer::MAX_NUM_CASCADES> filtered_csm_texs;
 
-		FrameBufferPtr curr_merged_shading_buffer;
+		FrameBufferPtr curr_merged_shading_fb;
 		TexturePtr curr_merged_shading_tex;
-		FrameBufferPtr curr_merged_depth_buffer;
+		FrameBufferPtr curr_merged_depth_fb;
 		TexturePtr curr_merged_depth_tex;
 
-		FrameBufferPtr prev_merged_shading_buffer;
+		FrameBufferPtr prev_merged_shading_fb;
 		TexturePtr prev_merged_shading_tex;
-		FrameBufferPtr prev_merged_depth_buffer;
+		FrameBufferPtr prev_merged_depth_fb;
 		TexturePtr prev_merged_depth_tex;
 
 		TexturePtr small_ssvo_tex;
@@ -111,8 +115,8 @@ namespace KlayGE
 
 		std::vector<char> light_visibles;
 
-#ifdef LIGHT_INDEXED_DEFERRED
-		FrameBufferPtr light_index_buffer;
+#if DEFAULT_DEFERRED == LIGHT_INDEXED_DEFERRED
+		FrameBufferPtr light_index_fb;
 		TexturePtr light_index_tex;
 #endif
 	};
@@ -143,10 +147,12 @@ namespace KlayGE
 			return g_buffer_effect_;
 		}
 
+#if DEFAULT_DEFERRED == TRIDITIONAL_DEFERRED
 		TexturePtr const & LightingTex(uint32_t vp) const
 		{
 			return viewports_[vp].lighting_tex;
 		}
+#endif
 		TexturePtr const & ShadingTex(uint32_t vp) const
 		{
 			return viewports_[vp].shading_tex;
@@ -240,16 +246,18 @@ namespace KlayGE
 			int32_t index_in_pass, PassType pass_type);
 		void PostGenerateShadowMap(PerViewport const & pvp, int32_t org_no, int32_t index_in_pass);
 		void UpdateShadowing(PerViewport const & pvp, int32_t org_no);
+#if DEFAULT_DEFERRED == TRIDITIONAL_DEFERRED
 		void UpdateLighting(PerViewport const & pvp, LightSource::LightType type, int32_t org_no);
-		void MergeIndirectLighting(PerViewport const & pvp, uint32_t g_buffer_index);
 		void UpdateShading(PerViewport const & pvp, uint32_t g_buffer_index);
+#endif
+		void MergeIndirectLighting(PerViewport const & pvp, uint32_t g_buffer_index);
 		void MergeSSVO(PerViewport const & pvp, uint32_t g_buffer_index);
 		void MergeShadingAndDepth(PerViewport const & pvp, uint32_t g_buffer_index);
 		void AddSSR(PerViewport const & pvp);
 		void AddAtmospheric(PerViewport const & pvp);
 		void AddTAA(PerViewport const & pvp);
 
-#ifdef LIGHT_INDEXED_DEFERRED
+#if DEFAULT_DEFERRED == LIGHT_INDEXED_DEFERRED
 		void UpdateLightIndexedLightingAmbientSun(PerViewport const & pvp, LightSource::LightType type,
 			int32_t org_no, PassCategory pass_cat, int32_t index_in_pass, uint32_t g_buffer_index);
 		void UpdateLightIndexedLightingDirectional(PerViewport const & pvp, uint32_t g_buffer_index,
@@ -286,9 +294,9 @@ namespace KlayGE
 		RenderLayoutPtr rl_box_;
 		RenderLayoutPtr rl_quad_;
 		array<RenderLayoutPtr, LightSource::LT_NumLightTypes> light_volume_rl_;
-		OBBox cone_obb_;
-		OBBox pyramid_obb_;
-		OBBox box_obb_;
+		AABBox cone_aabb_;
+		AABBox pyramid_aabb_;
+		AABBox box_aabb_;
 
 		std::vector<LightSourcePtr> lights_;
 		std::vector<RenderablePtr> decals_;
@@ -296,16 +304,18 @@ namespace KlayGE
 		std::vector<uint32_t> pass_scaned_;
 
 		array<array<RenderTechniquePtr, 5>, LightSource::LT_NumLightTypes> technique_shadows_;
+#if DEFAULT_DEFERRED == TRIDITIONAL_DEFERRED
 		array<RenderTechniquePtr, LightSource::LT_NumLightTypes> technique_lights_;
 		RenderTechniquePtr technique_light_depth_only_;
 		RenderTechniquePtr technique_light_stencil_;
+#endif
 		RenderTechniquePtr technique_no_lighting_;
 		RenderTechniquePtr technique_shading_;
 		array<RenderTechniquePtr, 2> technique_merge_shadings_;
 		array<RenderTechniquePtr, 2> technique_merge_depths_;
 		RenderTechniquePtr technique_copy_shading_depth_;
 		RenderTechniquePtr technique_copy_depth_;
-#ifdef LIGHT_INDEXED_DEFERRED
+#if DEFAULT_DEFERRED == LIGHT_INDEXED_DEFERRED
 		RenderTechniquePtr technique_draw_light_index_point_;
 		RenderTechniquePtr technique_draw_light_index_spot_;
 		RenderTechniquePtr technique_light_indexed_deferred_rendering_ambient_;
@@ -322,13 +332,13 @@ namespace KlayGE
 
 		int32_t projective_light_index_;
 		std::vector<std::pair<int32_t, uint32_t> > sm_light_indices_;
-		FrameBufferPtr sm_buffer_;
+		FrameBufferPtr sm_fb_;
 		TexturePtr sm_tex_;
 		TexturePtr sm_depth_tex_;
-		FrameBufferPtr cascaded_sm_buffer_;
-		TexturePtr cascaded_sm_tex_;
-		array<TexturePtr, MAX_NUM_SHADOWED_SPOT_LIGHTS + 1> blur_sm_2d_texs_;
-		array<TexturePtr, MAX_NUM_SHADOWED_POINT_LIGHTS + 1> blur_sm_cube_texs_;
+		FrameBufferPtr csm_fb_;
+		TexturePtr csm_tex_;
+		array<TexturePtr, MAX_NUM_SHADOWED_SPOT_LIGHTS + 1> filtered_sm_2d_texs_;
+		array<TexturePtr, MAX_NUM_SHADOWED_POINT_LIGHTS + 1> filtered_sm_cube_texs_;
 
 		PostProcessPtr sm_filter_pp_;
 		PostProcessPtr depth_to_esm_pp_;
@@ -337,7 +347,9 @@ namespace KlayGE
 		RenderEffectParameterPtr g_buffer_tex_param_;
 		RenderEffectParameterPtr g_buffer_1_tex_param_;
 		RenderEffectParameterPtr depth_tex_param_;
+#if DEFAULT_DEFERRED == TRIDITIONAL_DEFERRED
 		RenderEffectParameterPtr lighting_tex_param_;
+#endif
 		RenderEffectParameterPtr shading_tex_param_;
 		RenderEffectParameterPtr depth_near_far_invfar_param_;
 		RenderEffectParameterPtr light_attrib_param_;
@@ -351,8 +363,8 @@ namespace KlayGE
 		RenderEffectParameterPtr light_dir_es_param_;
 		RenderEffectParameterPtr projective_map_2d_tex_param_;
 		RenderEffectParameterPtr projective_map_cube_tex_param_;
-		RenderEffectParameterPtr shadow_map_2d_tex_param_;
-		RenderEffectParameterPtr shadow_map_cube_tex_param_;
+		RenderEffectParameterPtr filtered_sm_2d_tex_param_;
+		RenderEffectParameterPtr filtered_sm_cube_tex_param_;
 		RenderEffectParameterPtr inv_width_height_param_;
 		RenderEffectParameterPtr shadowing_tex_param_;
 		RenderEffectParameterPtr projective_shadowing_tex_param_;
@@ -363,9 +375,8 @@ namespace KlayGE
 		RenderEffectParameterPtr cascade_scale_bias_param_;
 		RenderEffectParameterPtr num_cascades_param_;
 		RenderEffectParameterPtr view_z_to_light_view_param_;
-		RenderEffectParameterPtr cascaded_shadow_map_tex_array_param_;
-		array<RenderEffectParameterPtr, CascadedShadowLayer::MAX_NUM_CASCADES> cascaded_shadow_map_texs_param_;
-#ifdef LIGHT_INDEXED_DEFERRED
+		array<RenderEffectParameterPtr, CascadedShadowLayer::MAX_NUM_CASCADES> filtered_csm_texs_param_;
+#if DEFAULT_DEFERRED == LIGHT_INDEXED_DEFERRED
 		RenderEffectParameterPtr min_max_depth_tex_param_;
 		RenderEffectParameterPtr lights_color_param_;
 		RenderEffectParameterPtr lights_pos_es_param_;
@@ -392,7 +403,7 @@ namespace KlayGE
 
 		PostProcessPtr atmospheric_pp_;
 
-		FrameBufferPtr rsm_buffer_;
+		FrameBufferPtr rsm_fb_;
 		array<TexturePtr, 2> rsm_texs_;
 
 		bool indirect_lighting_enabled_;

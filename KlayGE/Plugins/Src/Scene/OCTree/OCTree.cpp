@@ -519,18 +519,16 @@ namespace KlayGE
 		BOOST_ASSERT(index < octree_.size());
 
 		octree_node_t const & node = octree_[index];
-		if (MathLib::intersect_aabb_aabb(node.bb, aabb))
+		if ((node.visible != BO_No) && MathLib::intersect_aabb_aabb(node.bb, aabb))
 		{
-			BoundOverlap const vis = node.visible;
-			switch (vis)
+			if (BO_Yes == node.visible)
 			{
-			case BO_Yes:
 				return true;
+			}
+			else
+			{
+				BOOST_ASSERT(BO_Partial == node.visible);
 
-			case BO_No:
-				return false;
-
-			case BO_Partial:
 				if (node.first_child_index != -1)
 				{
 					float3 const center = node.bb.Center();
@@ -560,11 +558,6 @@ namespace KlayGE
 				{
 					return true;
 				}
-				break;
-
-			default:
-				BOOST_ASSERT(false);
-				return false;
 			}
 		}
 		else
@@ -578,18 +571,16 @@ namespace KlayGE
 		BOOST_ASSERT(index < octree_.size());
 
 		octree_node_t const & node = octree_[index];
-		if (MathLib::intersect_aabb_obb(node.bb, obb))
+		if ((node.visible != BO_No) && MathLib::intersect_aabb_obb(node.bb, obb))
 		{
-			BoundOverlap const vis = node.visible;
-			switch (vis)
+			if (BO_Yes == node.visible)
 			{
-			case BO_Yes:
 				return true;
+			}
+			else
+			{
+				BOOST_ASSERT(BO_Partial == node.visible);
 
-			case BO_No:
-				return false;
-
-			case BO_Partial:
 				if (node.first_child_index != -1)
 				{
 					for (int i = 0; i < 8; ++ i)
@@ -606,11 +597,6 @@ namespace KlayGE
 				{
 					return true;
 				}
-				break;
-
-			default:
-				BOOST_ASSERT(false);
-				return false;
 			}
 		}
 		else
@@ -624,18 +610,16 @@ namespace KlayGE
 		BOOST_ASSERT(index < octree_.size());
 
 		octree_node_t const & node = octree_[index];
-		if (MathLib::intersect_aabb_sphere(node.bb, sphere))
+		if ((node.visible != BO_No) && MathLib::intersect_aabb_sphere(node.bb, sphere))
 		{
-			BoundOverlap const vis = node.visible;
-			switch (vis)
+			if (BO_Yes == node.visible)
 			{
-			case BO_Yes:
 				return true;
+			}
+			else
+			{
+				BOOST_ASSERT(BO_Partial == node.visible);
 
-			case BO_No:
-				return false;
-
-			case BO_Partial:
 				if (node.first_child_index != -1)
 				{
 					for (int i = 0; i < 8; ++ i)
@@ -652,11 +636,6 @@ namespace KlayGE
 				{
 					return true;
 				}
-				break;
-
-			default:
-				BOOST_ASSERT(false);
-				return false;
 			}
 		}
 		else
@@ -670,18 +649,16 @@ namespace KlayGE
 		BOOST_ASSERT(index < octree_.size());
 
 		octree_node_t const & node = octree_[index];
-		if (MathLib::intersect_aabb_frustum(node.bb, frustum))
+		if ((node.visible != BO_No) && MathLib::intersect_aabb_frustum(node.bb, frustum))
 		{
-			BoundOverlap const vis = node.visible;
-			switch (vis)
+			if (BO_Yes == node.visible)
 			{
-			case BO_Yes:
 				return true;
+			}
+			else
+			{
+				BOOST_ASSERT(BO_Partial == node.visible);
 
-			case BO_No:
-				return false;
-
-			case BO_Partial:
 				if (node.first_child_index != -1)
 				{
 					for (int i = 0; i < 8; ++ i)
@@ -698,11 +675,6 @@ namespace KlayGE
 				{
 					return true;
 				}
-				break;
-
-			default:
-				BOOST_ASSERT(false);
-				return false;
 			}
 		}
 		else

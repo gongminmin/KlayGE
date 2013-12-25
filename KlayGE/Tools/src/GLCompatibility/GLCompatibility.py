@@ -130,8 +130,8 @@ features_db = {
 			'Primitive restart' : lambda : is_supported('GL_NV_primitive_restart'),
 			'Texture buffer objects' : lambda : is_supported('GL_ARB_texture_buffer_object'),
 			'Rectangular textures' : lambda : support_one(['GL_ARB_texture_rectangle', 'GL_EXT_texture_rectangle', 'GL_NV_texture_rectangle']),
-			'Uniform buffer objects' : lambda : support_one(['GL_ARB_uniform_buffer_object', 'GL_EXT_bindable_uniform']),
-			'Texture buffer objects' : lambda : is_supported('GL_ARB_texture_buffer_object'),
+			'Uniform buffer objects' : lambda : support_one(['GL_ARB_uniform_buffer_object', 'GL_EXT_bindable_uniform'])
+			'Signed normalized texture component formats' : lambda : support_one(['GL_EXT_texture_snorm', 'GL_NV_texture_shader']),
 		},
 		
 	'3.2' : {

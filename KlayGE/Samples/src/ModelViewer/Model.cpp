@@ -90,6 +90,12 @@ void InitInstancedTessBuffs()
 	}
 }
 
+void DeinitInstancedTessBuffs()
+{
+	tess_pattern_vbs.clear();
+	tess_pattern_ibs.clear();
+}
+
 
 DetailedSkinnedMesh::DetailedSkinnedMesh(RenderModelPtr const & model, std::wstring const & name)
 	: SkinnedMesh(model, name),

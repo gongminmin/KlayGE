@@ -40,13 +40,29 @@ namespace
 			: StaticMesh(model, name)
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+			RenderDeviceCaps const & caps = rf.RenderEngineInstance().DeviceCaps();
+
+			bool depth_texture_support;
+			if (caps.texture_format_support(EF_D24S8) || caps.texture_format_support(EF_D16))
+			{
+				depth_texture_support = true;
+			}
+			else
+			{
+				depth_texture_support = false;
+			}
 
 			no_oit_tech_ = SyncLoadRenderEffect("NoOIT.fxml")->TechniqueByName("NoOIT");
 
 			dp_1st_tech_ = SyncLoadRenderEffect("DepthPeeling.fxml")->TechniqueByName("DepthPeeling1st");
 			dp_nth_tech_ = dp_1st_tech_->Effect().TechniqueByName("DepthPeelingNth");
+			if (!depth_texture_support)
+			{
+				dp_nth_tech_ = dp_1st_tech_->Effect().TechniqueByName("DepthPeelingNthWODepthTexture");
+				dp_1st_depth_tech_ = dp_1st_tech_->Effect().TechniqueByName("DepthPeeling1stDepth");
+				dp_nth_depth_tech_ = dp_1st_tech_->Effect().TechniqueByName("DepthPeelingNthDepth");
+			}
 
-			RenderDeviceCaps const & caps = rf.RenderEngineInstance().DeviceCaps();
 			if (caps.max_shader_model >= 5)
 			{
 				gen_ppll_tech_ = SyncLoadRenderEffect("FragmentList.fxml")->TechniqueByName("GenPerPixelLinkedLists");
@@ -127,6 +143,7 @@ namespace
 
 		void FirstPass(bool fp)
 		{
+			first_pass_ = fp;
 			if (fp)
 			{
 				switch (mode_)
@@ -172,6 +189,34 @@ namespace
 				default:
 					BOOST_ASSERT(false);
 					break;
+				}
+			}
+		}
+
+		void DepthPass(bool dp)
+		{
+			BOOST_ASSERT(OM_DepthPeeling == mode_);
+
+			if (dp)
+			{
+				if (first_pass_)
+				{
+					technique_ = dp_1st_depth_tech_;
+				}
+				else
+				{
+					technique_ = dp_nth_depth_tech_;
+				}
+			}
+			else
+			{
+				if (first_pass_)
+				{
+					technique_ = dp_1st_tech_;
+				}
+				else
+				{
+					technique_ = dp_nth_tech_;
 				}
 			}
 		}
@@ -251,6 +296,7 @@ namespace
 				{
 					float q = camera.FarPlane() / (camera.FarPlane() - camera.NearPlane());
 					*(technique_->Effect().ParameterByName("near_q")) = float2(camera.NearPlane() * q, q);
+					*(technique_->Effect().ParameterByName("far_plane")) = float2(camera.FarPlane(), 1.0f / camera.FarPlane());
 					break;
 				}
 			
@@ -280,11 +326,14 @@ namespace
 
 	private:
 		OITMode mode_;
+		bool first_pass_;
 		
 		RenderTechniquePtr no_oit_tech_;
 
 		RenderTechniquePtr dp_1st_tech_;
 		RenderTechniquePtr dp_nth_tech_;
+		RenderTechniquePtr dp_1st_depth_tech_;
+		RenderTechniquePtr dp_nth_depth_tech_;
 
 		RenderTechniquePtr gen_ppll_tech_;
 		RenderLayoutPtr rl_quad_;
@@ -336,6 +385,15 @@ namespace
 			for (uint32_t i = 0; i < model->NumMeshes(); ++ i)
 			{
 				checked_pointer_cast<RenderPolygon>(model->Mesh(i))->FirstPass(fp);
+			}
+		}
+
+		void DepthPass(bool dp)
+		{
+			RenderModelPtr model = checked_pointer_cast<RenderModel>(renderable_);
+			for (uint32_t i = 0; i < model->NumMeshes(); ++ i)
+			{
+				checked_pointer_cast<RenderPolygon>(model->Mesh(i))->DepthPass(dp);
 			}
 		}
 
@@ -433,6 +491,15 @@ void OrderIndependentTransparencyApp::InitObjects()
 	checked_pointer_cast<SceneObjectSkyBox>(sky_box_)->CompressedCubeMap(y_cube_map, c_cube_map);
 	sky_box_->AddToSceneManager();
 
+	if (caps.texture_format_support(EF_D24S8) || caps.texture_format_support(EF_D16))
+	{
+		depth_texture_support_ = true;
+	}
+	else
+	{
+		depth_texture_support_ = false;
+	}
+
 	peeling_fbs_.resize(17);
 	for (size_t i = 0; i < peeling_fbs_.size(); ++ i)
 	{
@@ -440,6 +507,15 @@ void OrderIndependentTransparencyApp::InitObjects()
 		peeling_fbs_[i]->GetViewport()->camera = re.CurFrameBuffer()->GetViewport()->camera;
 	}
 	peeled_texs_.resize(peeling_fbs_.size());
+
+	if (!depth_texture_support_)
+	{
+		for (size_t i = 0; i < depth_fbs_.size(); ++ i)
+		{
+			depth_fbs_[i] = rf.MakeFrameBuffer();
+			depth_fbs_[i]->GetViewport()->camera = re.CurFrameBuffer()->GetViewport()->camera;
+		}
+	}
 
 	for (size_t i = 0; i < oc_queries_.size(); ++ i)
 	{
@@ -479,6 +555,12 @@ void OrderIndependentTransparencyApp::InitObjects()
 	id_layer_combo_ = dialog_layer_->IDFromName("LayerCombo");
 	id_layer_tex_ = dialog_layer_->IDFromName("LayerTexButton");
 
+	if (caps.max_shader_model < 5)
+	{
+		dialog_oit_->Control<UIComboBox>(id_oit_mode_)->RemoveItem(3);
+		dialog_oit_->Control<UIComboBox>(id_oit_mode_)->RemoveItem(2);
+	}
+
 	dialog_oit_->Control<UIComboBox>(id_oit_mode_)->OnSelectionChangedEvent().connect(KlayGE::bind(&OrderIndependentTransparencyApp::OITModeHandler, this, KlayGE::placeholders::_1));
 	this->OITModeHandler(*dialog_oit_->Control<UIComboBox>(id_oit_mode_));
 	dialog_oit_->Control<UISlider>(id_alpha_slider_)->OnValueChangedEvent().connect(KlayGE::bind(&OrderIndependentTransparencyApp::AlphaHandler, this, KlayGE::placeholders::_1));
@@ -502,33 +584,57 @@ void OrderIndependentTransparencyApp::OnResize(uint32_t width, uint32_t height)
 	App3DFramework::OnResize(width, height);
 
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+	RenderDeviceCaps const & caps = rf.RenderEngineInstance().DeviceCaps();
 
-	ElementFormat depth_format;
-	if (rf.RenderEngineInstance().DeviceCaps().rendertarget_format_support(EF_D24S8, 1, 0))
+	ElementFormat ds_format;
+	if (caps.rendertarget_format_support(EF_D24S8, 1, 0))
 	{
-		depth_format = EF_D24S8;
+		ds_format = EF_D24S8;
 	}
 	else
 	{
-		depth_format = EF_D16;
+		BOOST_ASSERT(caps.rendertarget_format_support(EF_D16, 1, 0));
+		ds_format = EF_D16;
 	}
-	for (size_t i = 0; i < depth_texs_.size(); ++ i)
+	if (depth_texture_support_)
 	{
-		depth_texs_[i] = rf.MakeTexture2D(width, height, 1, 1, depth_format, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
-		depth_views_[i] = rf.Make2DDepthStencilRenderView(*depth_texs_[i], 0, 1, 0);
+		for (size_t i = 0; i < depth_texs_.size(); ++ i)
+		{
+			depth_texs_[i] = rf.MakeTexture2D(width, height, 1, 1, ds_format, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
+			depth_views_[i] = rf.Make2DDepthStencilRenderView(*depth_texs_[i], 0, 1, 0);
+		}
+	}
+	else
+	{
+		ElementFormat depth_format;
+		if (caps.rendertarget_format_support(EF_ABGR8, 1, 0))
+		{
+			depth_format = EF_ABGR8;
+		}
+		else
+		{
+			BOOST_ASSERT(caps.rendertarget_format_support(EF_ARGB8, 1, 0));
+			depth_format = EF_ARGB8;
+		}
+		for (size_t i = 0; i < depth_texs_.size(); ++ i)
+		{
+			depth_texs_[i] = rf.MakeTexture2D(width, height, 1, 1, depth_format, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
+			depth_views_[i] = rf.Make2DDepthStencilRenderView(width, height, ds_format, 1, 0);
+		}
 	}
 
 	ElementFormat peel_format;
-	if (rf.RenderEngineInstance().DeviceCaps().rendertarget_format_support(EF_ABGR16F, 1, 0))
+	if (caps.rendertarget_format_support(EF_ABGR16F, 1, 0))
 	{
 		peel_format = EF_ABGR16F;
 	}
-	else if (rf.RenderEngineInstance().DeviceCaps().rendertarget_format_support(EF_ABGR8, 1, 0))
+	else if (caps.rendertarget_format_support(EF_ABGR8, 1, 0))
 	{
 		peel_format = EF_ABGR8;
 	}
 	else
 	{
+		BOOST_ASSERT(caps.rendertarget_format_support(EF_ARGB8, 1, 0));
 		peel_format = EF_ARGB8;
 	}
 	for (size_t i = 0; i < peeling_fbs_.size(); ++ i)
@@ -538,8 +644,15 @@ void OrderIndependentTransparencyApp::OnResize(uint32_t width, uint32_t height)
 		peeling_fbs_[i]->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*peeled_texs_[i], 0, 1, 0));
 		peeling_fbs_[i]->Attach(FrameBuffer::ATT_DepthStencil, depth_views_[i % 2]);
 	}
+	if (!depth_texture_support_)
+	{
+		for (size_t i = 0; i < depth_fbs_.size(); ++ i)
+		{
+			depth_fbs_[i]->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*depth_texs_[i], 0, 1, 0));
+			depth_fbs_[i]->Attach(FrameBuffer::ATT_DepthStencil, depth_views_[i]);
+		}
+	}
 
-	RenderDeviceCaps const & caps = rf.RenderEngineInstance().DeviceCaps();
 	if (caps.max_shader_model >= 5)
 	{
 		ElementFormat opaque_bg_format;
@@ -553,7 +666,7 @@ void OrderIndependentTransparencyApp::OnResize(uint32_t width, uint32_t height)
 		}
 		opaque_bg_tex_ = rf.MakeTexture2D(width, height, 1, 1, opaque_bg_format, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
 		opaque_bg_fb_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*opaque_bg_tex_, 0, 1, 0));
-		opaque_bg_fb_->Attach(FrameBuffer::ATT_DepthStencil, rf.Make2DDepthStencilRenderView(width, height, depth_format, 1, 0));
+		opaque_bg_fb_->Attach(FrameBuffer::ATT_DepthStencil, rf.Make2DDepthStencilRenderView(width, height, ds_format, 1, 0));
 		frag_link_buf_->Resize(width * height * 4 * sizeof(float4));
 		start_offset_buf_->Resize(width * height * sizeof(uint32_t));
 		frag_link_uav_ = rf.MakeGraphicsBufferUnorderedAccessView(*frag_link_buf_, EF_ABGR32F);
@@ -682,89 +795,205 @@ uint32_t OrderIndependentTransparencyApp::DoUpdate(uint32_t pass)
 	}
 	else if (OM_DepthPeeling == oit_mode_)
 	{
-		switch (pass)
+		if (0 == pass)
 		{
-		case 0:
 			re.BindFrameBuffer(FrameBufferPtr());
 			re.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->ClearDepthStencil(1, 0);
 			return App3DFramework::URV_OpaqueOnly | App3DFramework::URV_NeedFlush;
-
-		case 1:
-			num_layers_ = 1;
-
-			checked_pointer_cast<PolygonObject>(polygon_)->FirstPass(true);
-			re.BindFrameBuffer(peeling_fbs_[0]);
-			re.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(0, 0, 0, 0), 1, 0);
-			return App3DFramework::URV_TransparencyFrontOnly | App3DFramework::URV_NeedFlush;
-
-		default:
-			checked_pointer_cast<PolygonObject>(polygon_)->FirstPass(false);
-
+		}
+		else
+		{
+			if (depth_texture_support_)
 			{
-				bool finished = false;
-
-				size_t layer_batch = (pass - 2) / oc_queries_.size() * oc_queries_.size() + 1;
-				size_t oc_index = (pass - 2) % oc_queries_.size();
-				size_t layer = layer_batch + oc_index;
-				if (oc_index > 0)
+				if (1 == pass)
 				{
-					if (oc_queries_[oc_index - 1])
+					num_layers_ = 1;
+
+					checked_pointer_cast<PolygonObject>(polygon_)->FirstPass(true);
+					re.BindFrameBuffer(peeling_fbs_[0]);
+					re.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(0, 0, 0, 0), 1, 0);
+					return App3DFramework::URV_TransparencyFrontOnly | App3DFramework::URV_NeedFlush;
+				}
+				else
+				{
+					checked_pointer_cast<PolygonObject>(polygon_)->FirstPass(false);
+
+					bool finished = false;
+
+					size_t layer_batch = (pass - 2) / oc_queries_.size() * oc_queries_.size() + 1;
+					size_t oc_index = (pass - 2) % oc_queries_.size();
+					size_t layer = layer_batch + oc_index;
+					if (oc_index > 0)
 					{
-						oc_queries_[oc_index - 1]->End();
+						if (oc_queries_[oc_index - 1])
+						{
+							oc_queries_[oc_index - 1]->End();
+						}
+					}
+					if ((0 == oc_index) && (layer_batch > 1))
+					{
+						if (oc_queries_.back())
+						{
+							oc_queries_.back()->End();
+						}
+						for (size_t j = 0; j < oc_queries_.size(); ++ j)
+						{
+							if (oc_queries_[j] && !oc_queries_[j]->AnySamplesPassed())
+							{
+								finished = true;
+							}
+							else
+							{
+								++ num_layers_;
+							}
+						}
+					}
+					if (layer_batch < peeled_texs_.size())
+					{
+						if (!finished)
+						{
+							checked_pointer_cast<PolygonObject>(polygon_)->LastDepth(depth_texs_[(layer - 1) % 2]);
+
+							re.BindFrameBuffer(peeling_fbs_[layer]);
+							peeling_fbs_[layer]->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(0, 0, 0, 0), 1, 0);
+
+							if (oc_queries_[oc_index])
+							{
+								oc_queries_[oc_index]->Begin();
+							}
+						}
+					}
+					else
+					{
+						finished = true;
+					}
+
+					if (finished)
+					{
+						re.BindFrameBuffer(FrameBufferPtr());
+						for (size_t i = 0; i < num_layers_; ++ i)
+						{
+							blend_pp_->InputPin(0, peeled_texs_[num_layers_ - 1 - i]);
+							blend_pp_->Apply();
+						}
+
+						return App3DFramework::URV_Finished;
+					}
+					else
+					{
+						return App3DFramework::URV_TransparencyFrontOnly | App3DFramework::URV_NeedFlush;
 					}
 				}
-				if ((oc_index == 0) && (layer_batch > 1))
+			}
+			else
+			{
+				bool depth_pass = (pass & 1);
+				if ((1 == pass) || (2 == pass))
 				{
-					if (oc_queries_.back())
+					num_layers_ = 1;
+
+					checked_pointer_cast<PolygonObject>(polygon_)->FirstPass(true);
+					checked_pointer_cast<PolygonObject>(polygon_)->DepthPass(depth_pass);
+					if (depth_pass)
 					{
-						oc_queries_.back()->End();
+						re.BindFrameBuffer(depth_fbs_[0]);
+						re.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(1, 1, 1, 1), 1, 0);
 					}
-					for (size_t j = 0; j < oc_queries_.size(); ++ j)
+					else
 					{
-						if (oc_queries_[j] && !oc_queries_[j]->AnySamplesPassed())
+						re.BindFrameBuffer(peeling_fbs_[0]);
+						re.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(0, 0, 0, 0), 1, 0);
+					}
+					return App3DFramework::URV_TransparencyFrontOnly | App3DFramework::URV_NeedFlush;
+				}
+				else
+				{
+					checked_pointer_cast<PolygonObject>(polygon_)->FirstPass(false);
+					checked_pointer_cast<PolygonObject>(polygon_)->DepthPass(depth_pass);
+
+					bool finished = false;
+
+					size_t layer_batch = ((pass - 3) / 2) / oc_queries_.size() * oc_queries_.size() + 1;
+					size_t oc_index = ((pass - 3) / 2) % oc_queries_.size();
+					size_t layer = layer_batch + oc_index;
+
+					if (!depth_pass)
+					{
+						if (oc_index > 0)
+						{
+							if (oc_queries_[oc_index - 1])
+							{
+								oc_queries_[oc_index - 1]->End();
+							}
+						}
+						if ((0 == oc_index) && (layer_batch > 1))
+						{
+							if (oc_queries_.back())
+							{
+								oc_queries_.back()->End();
+							}
+							for (size_t j = 0; j < oc_queries_.size(); ++ j)
+							{
+								if (oc_queries_[j] && !oc_queries_[j]->AnySamplesPassed())
+								{
+									finished = true;
+								}
+								else
+								{
+									++ num_layers_;
+								}
+							}
+						}
+					}
+					if (layer_batch < peeled_texs_.size())
+					{
+						if (!finished)
+						{
+							checked_pointer_cast<PolygonObject>(polygon_)->LastDepth(depth_texs_[(layer - 1) % 2]);
+
+							if (depth_pass)
+							{
+								re.BindFrameBuffer(depth_fbs_[layer % 2]);
+								re.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(1, 1, 1, 1), 1, 0);
+							}
+							else
+							{
+								re.BindFrameBuffer(peeling_fbs_[layer]);
+								re.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(0, 0, 0, 0), 1, 0);
+							}
+
+							if (!depth_pass)
+							{
+								if (oc_queries_[oc_index])
+								{
+									oc_queries_[oc_index]->Begin();
+								}
+							}
+						}
+					}
+					else
+					{
+						if (!depth_pass)
 						{
 							finished = true;
 						}
-						else
-						{
-							++ num_layers_;
-						}
 					}
-				}
-				if (layer_batch < peeled_texs_.size())
-				{
-					if (!finished)
+
+					if (finished)
 					{
-						checked_pointer_cast<PolygonObject>(polygon_)->LastDepth(depth_texs_[(layer - 1) % 2]);
-
-						re.BindFrameBuffer(peeling_fbs_[layer]);
-						peeling_fbs_[layer]->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(0, 0, 0, 0), 1, 0);
-
-						if (oc_queries_[oc_index])
+						re.BindFrameBuffer(FrameBufferPtr());
+						for (size_t i = 0; i < num_layers_; ++ i)
 						{
-							oc_queries_[oc_index]->Begin();
+							blend_pp_->InputPin(0, peeled_texs_[num_layers_ - 1 - i]);
+							blend_pp_->Apply();
 						}
-					}
-				}
-				else
-				{
-					finished = true;
-				}
 
-				if (finished)
-				{
-					re.BindFrameBuffer(FrameBufferPtr());
-					for (size_t i = 0; i < num_layers_; ++ i)
+						return App3DFramework::URV_Finished;
+					}
+					else
 					{
-						blend_pp_->InputPin(0, peeled_texs_[num_layers_ - 1 - i]);
-						blend_pp_->Apply();
+						return App3DFramework::URV_TransparencyFrontOnly | App3DFramework::URV_NeedFlush;
 					}
-
-					return App3DFramework::URV_Finished;
-				}
-				else
-				{
-					return App3DFramework::URV_TransparencyFrontOnly | App3DFramework::URV_NeedFlush;
 				}
 			}
 		}

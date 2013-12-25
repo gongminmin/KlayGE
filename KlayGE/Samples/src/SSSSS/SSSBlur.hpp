@@ -15,11 +15,16 @@ public:
 	virtual void Apply() KLAYGE_OVERRIDE;
 
 private:
-	KlayGE::FrameBufferPtr temp_fb_;
-	KlayGE::TexturePtr temp_x_tex_;
-	KlayGE::TexturePtr temp_y_tex_;
+	bool mrt_support_;
+
+	KlayGE::FrameBufferPtr blur_x_fb_;
+	KlayGE::FrameBufferPtr blur_y_fb_;
+	KlayGE::TexturePtr blur_x_tex_;
+	KlayGE::TexturePtr blur_y_tex_;
+	KlayGE::RenderTechniquePtr copy_tech_;
 	KlayGE::RenderTechniquePtr blur_x_tech_;
-	KlayGE::RenderTechniquePtr blur_y_techs_[6];
+	KlayGE::RenderTechniquePtr blur_y_techs_[3];
+	KlayGE::RenderTechniquePtr accum_techs_[3];
 	KlayGE::RenderEffectParameterPtr color_tex_param_;
 	KlayGE::RenderEffectParameterPtr step_param_;
 };

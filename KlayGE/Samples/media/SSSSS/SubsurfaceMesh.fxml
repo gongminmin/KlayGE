@@ -49,7 +49,7 @@ void ShadingVS(float4 pos : POSITION,
 					out float4 oTsToView0_2z : TEXCOORD1,
 					out float4 oTsToView1_Depth : TEXCOORD2,
 					out float3 oLightVec : TEXCOORD3,
-					out float4 oViewVec : TEXCOORD4,
+					out float3 oViewVec : TEXCOORD4,
 					out float4 oPos : SV_Position)
 {
 	pos = float4(pos.xyz * pos_extent + pos_center, 1);
@@ -71,17 +71,15 @@ void ShadingVS(float4 pos : POSITION,
 
 	oTsToView1_Depth.w = oPos.w;
 	
-	oLightVec = normalize(light_pos - pos.xyz);
+	oLightVec = light_pos - pos.xyz;
 	oViewVec.xyz = eye_pos - pos.xyz;
-	oViewVec.w = length(oViewVec.xyz);
-	oViewVec.xyz /= oViewVec.w;
 }
 
 void ShadingPS(float4 texcoord_2xy : TEXCOORD0,
 					float4 ts_to_view0_2z : TEXCOORD1,
 					float3 ts_to_view1 : TEXCOORD2,
 					float3 light_vec : TEXCOORD3,
-					float4 view_vec : TEXCOORD4,
+					float3 view_vec : TEXCOORD4,
 					out float4 oNormal : SV_Target0,
 					out float4 oAlbedo : SV_Target1,
 					out float4 oShading : SV_Target2)
@@ -94,15 +92,15 @@ void ShadingPS(float4 texcoord_2xy : TEXCOORD0,
 	normal = normalize(mul(decompress_normal(normal_tex.Sample(linear_sampler, texcoord_2xy.xy)), ts_to_obj));
 
 	float3 L = normalize(light_vec);
-	float3 V = normalize(view_vec.xyz);
+	float3 V = normalize(view_vec);
 	float3 H = normalize(V + L);
 	
-	oNormal = float4(mul(normal, (float3x3)model_view), 1);
-	
+	oNormal = float4(mul(normal, (float3x3)model_view), 1);	
 	oAlbedo = diffuse_tex.Sample(linear_sampler, texcoord_2xy.xy);
-
+	
+	float3 ambient = 0.1f * (0.5f * normal.y + 0.5f) * oAlbedo.xyz;
 	// Diffuse and specular are suppose to be separated. But combine them are faster and also good quality.
-	oShading =  float4(light_color * calc_brdf(oAlbedo.xyz, 0.028f, 32, L, H, normal), 1);
+	oShading = float4(ambient + light_color * calc_brdf(oAlbedo.xyz, 0.028f, 32, L, H, normal), 1);
 }
 		]]>
 	</shader>

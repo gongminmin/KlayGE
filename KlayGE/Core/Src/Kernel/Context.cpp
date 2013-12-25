@@ -38,6 +38,13 @@
 #include <fstream>
 #include <sstream>
 
+#ifdef KLAYGE_PLATFORM_WINDOWS
+#include <windows.h>
+#if (_WIN32_WINNT >= 0x0603 /*_WIN32_WINNT_WINBLUE*/)
+#include <VersionHelpers.h>
+#endif
+#endif
+
 #ifdef KLAYGE_PLATFORM_ANDROID
 #include <KlayGE/OpenGLES/OGLESRenderFactory.hpp>
 #include <KlayGE/OCTree/OCTreeFactory.hpp>
@@ -154,27 +161,11 @@ namespace KlayGE
 		float stereo_separation = 0;
 		std::string graphics_options;
 
-#ifdef KLAYGE_PLATFORM_WINDOWS
 		std::string rf_name = "D3D11";
-#else
-		std::string rf_name = "OpenGL";
-#endif
 		std::string af_name = "OpenAL";
-#ifdef KLAYGE_PLATFORM_WINDOWS
 		std::string if_name = "DInput";
-#else
-		std::string if_name;
-#endif
-#ifdef KLAYGE_PLATFORM_WINDOWS
 		std::string sf_name = "DShow";
-#else
-		std::string sf_name;
-#endif
-#ifdef KLAYGE_PLATFORM_WINDOWS
 		std::string scf_name = "Python";
-#else
-		std::string scf_name;
-#endif
 		std::string sm_name;
 		std::string adsf_name;
 
@@ -187,45 +178,35 @@ namespace KlayGE
 			XMLNodePtr context_node = cfg_root->FirstNode("context");
 			XMLNodePtr graphics_node = cfg_root->FirstNode("graphics");
 
-#ifdef KLAYGE_PLATFORM_WINDOWS
 			XMLNodePtr rf_node = context_node->FirstNode("render_factory");
 			if (rf_node)
 			{
 				rf_name = rf_node->Attrib("name")->ValueString();
 			}
-#endif
 
-#ifdef KLAYGE_PLATFORM_WINDOWS
 			XMLNodePtr af_node = context_node->FirstNode("audio_factory");
 			if (af_node)
 			{
 				af_name = af_node->Attrib("name")->ValueString();
 			}
-#endif
 
-#ifdef KLAYGE_PLATFORM_WINDOWS
 			XMLNodePtr if_node = context_node->FirstNode("input_factory");
 			if (if_node)
 			{
 				if_name = if_node->Attrib("name")->ValueString();
 			}
-#endif
 
-#ifdef KLAYGE_PLATFORM_WINDOWS
 			XMLNodePtr sf_node = context_node->FirstNode("show_factory");
 			if (sf_node)
 			{
 				sf_name = sf_node->Attrib("name")->ValueString();
 			}
-#endif
 
-#ifdef KLAYGE_PLATFORM_WINDOWS
 			XMLNodePtr scf_node = context_node->FirstNode("script_factory");
 			if (scf_node)
 			{
 				scf_name = scf_node->Attrib("name")->ValueString();
 			}
-#endif
 
 			XMLNodePtr sm_node = context_node->FirstNode("scene_manager");
 			if (sm_node)
@@ -455,6 +436,40 @@ namespace KlayGE
 				}
 			}
 		}
+
+#if defined(KLAYGE_PLATFORM_WINDOWS_DESKTOP)
+#if (_WIN32_WINNT >= 0x0603 /*_WIN32_WINNT_WINBLUE*/)
+		if (!IsWindowsVistaOrGreater())
+#else
+		OSVERSIONINFO os_ver_info;
+		memset(&os_ver_info, 0, sizeof(os_ver_info));
+		os_ver_info.dwOSVersionInfoSize = sizeof(os_ver_info);
+		::GetVersionEx(&os_ver_info);
+
+		if (os_ver_info.dwMajorVersion < 6)
+#endif
+		{
+			if ("D3D11" == rf_name)
+			{
+				rf_name = "OpenGL";
+			}
+		}
+		
+#elif defined(KLAYGE_PLATFORM_WINDOWS_METRO)
+		rf_name = "D3D11";
+#elif defined(KLAYGE_PLATFORM_WINDOWS_LINUX)
+		if ("D3D11" == rf_name)
+		{
+			rf_name = "OpenGL";
+		}
+		if ("DSound" == af_name)
+		{
+			af_name = "OpenAL";
+		}
+#elif defined(KLAYGE_PLATFORM_WINDOWS_ANDROID)
+		rf_name = "OpenGLES";
+		af_name = "OpenAL";
+#endif
 
 		cfg_.render_factory_name = rf_name;
 		cfg_.audio_factory_name = af_name;

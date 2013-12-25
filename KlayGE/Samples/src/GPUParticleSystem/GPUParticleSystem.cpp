@@ -659,9 +659,16 @@ namespace
 			RenderDeviceCaps const & caps = re.DeviceCaps();
 			if (3 == caps.max_shader_model)
 			{
-				TexturePtr height_32f = rf.MakeTexture2D(height_map->Width(0), height_map->Height(0), 1, 1, EF_R32F, 1, 0, EAH_GPU_Read | EAH_Immutable, nullptr);
-				height_map->CopyToTexture(*height_32f);
-				*(technique_->Effect().ParameterByName("height_map_tex")) = height_32f;
+				if (caps.texture_format_support(EF_R32F))
+				{
+					TexturePtr height_32f = rf.MakeTexture2D(height_map->Width(0), height_map->Height(0), 1, 1, EF_R32F, 1, 0, EAH_GPU_Read | EAH_Immutable, nullptr);
+					height_map->CopyToTexture(*height_32f);
+					*(technique_->Effect().ParameterByName("height_map_tex")) = height_32f;
+				}
+				else
+				{
+					*(technique_->Effect().ParameterByName("height_map_tex")) = height_map;
+				}
 			}
 			else
 			{

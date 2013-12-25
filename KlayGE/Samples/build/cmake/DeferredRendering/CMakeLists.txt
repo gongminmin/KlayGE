@@ -14,7 +14,7 @@ SET(UI_FILES
 	${KLAYGE_PROJECT_DIR}/Samples/media/DeferredRendering/DeferredRendering.uiml
 )
 
-IF(KLAYGE_WITH_WINRT)
+IF(KLAYGE_BUILD_PLATFORM_WINRT)
 	SET(PACKAGE_GUID "f7ce04f3-92fc-4e92-8b55-acb9f159eb13")
 	SET(DISPLAY_NAME "Deferred Rendering")
 	SET(SHORT_NAME "DeferredRendering")
@@ -56,7 +56,6 @@ IF(KLAYGE_WITH_WINRT)
 		${KLAYGE_PROJECT_DIR}/media/RenderFX/SSVO.kfx
 		${KLAYGE_PROJECT_DIR}/media/RenderFX/SumLum.kfx
 		${KLAYGE_PROJECT_DIR}/media/RenderFX/TAA.kfx
-		${KLAYGE_PROJECT_DIR}/media/RenderFX/SumLum.kfx
 		${KLAYGE_PROJECT_DIR}/media/RenderFX/ToneMapping.kfx
 		${KLAYGE_PROJECT_DIR}/media/RenderFX/VPLsLighting.kfx
 		${KLAYGE_PROJECT_DIR}/media/RenderFX/UI.kfx

@@ -786,6 +786,7 @@ namespace KlayGE
 					normalized = (((VEU_Diffuse == vs_elem.usage) || (VEU_Specular == vs_elem.usage)) && !IsFloatFormat(vs_elem.format)) ? GL_TRUE : normalized;
 					GLvoid* offset = static_cast<GLvoid*>(elem_offset + rl.StartInstanceLocation() * instance_size);
 
+					BOOST_ASSERT(GL_ARRAY_BUFFER == stream.GLType());
 					stream.Active(false);
 					glVertexAttribPointer(attr, num_components, type, normalized, instance_size, offset);
 					glEnableVertexAttribArray(attr);
@@ -1120,6 +1121,14 @@ namespace KlayGE
 	void OGLESRenderEngine::FillRenderDeviceCaps()
 	{
 		std::string vendor(reinterpret_cast<char const *>(glGetString(GL_VENDOR)));
+		if (vendor.find("NVIDIA", 0) != std::string::npos)
+		{
+			hack_for_tegra_ = true;
+		}
+		else
+		{
+			hack_for_tegra_ = false;
+		}
 		if (vendor.find("Imagination", 0) != std::string::npos)
 		{
 			hack_for_pvr_ = true;
@@ -1412,7 +1421,7 @@ namespace KlayGE
 			rendertarget_format_.insert(EF_ARGB8);
 		}
 
-		if (glloader_GLES_VERSION_3_0)
+		if (glloader_GLES_VERSION_3_0())
 		{
 			GLint max_samples;
 			glGetIntegerv(GL_MAX_SAMPLES, &max_samples);
@@ -1459,6 +1468,9 @@ namespace KlayGE
 		{
 			rendertarget_format_.insert(EF_R16F);
 			rendertarget_format_.insert(EF_GR16F);
+		}
+		if (glloader_GLES_EXT_color_buffer_half_float() || glloader_GLES_EXT_color_buffer_float() || hack_for_tegra_)
+		{
 			rendertarget_format_.insert(EF_ABGR16F);
 		}
 		if (glloader_GLES_EXT_color_buffer_float())
@@ -1468,7 +1480,7 @@ namespace KlayGE
 			rendertarget_format_.insert(EF_ABGR32F);
 		}
 		rendertarget_format_.insert(EF_D16);
-		if (glloader_GLES_VERSION_3_0() || glloader_GLES_OES_packed_depth_stencil())
+		if (glloader_GLES_VERSION_3_0() || glloader_GLES_OES_packed_depth_stencil() || hack_for_tegra_)
 		{
 			rendertarget_format_.insert(EF_D24S8);
 		}

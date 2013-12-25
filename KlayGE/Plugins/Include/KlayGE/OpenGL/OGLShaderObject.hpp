@@ -78,6 +78,7 @@ namespace KlayGE
 		GLuint glsl_program_;
 		shared_ptr<std::vector<GLint> > glsl_bin_formats_;
 		shared_ptr<std::vector<uint8_t> > glsl_bin_program_;
+		shared_ptr<array<std::string, ST_NumShaderTypes> > shader_func_names_;
 		shared_ptr<array<shared_ptr<std::string>, ST_NumShaderTypes> > glsl_srcs_;
 		shared_ptr<array<shared_ptr<std::vector<std::string> >, ST_NumShaderTypes> > pnames_;
 		shared_ptr<array<shared_ptr<std::vector<std::string> >, ST_NumShaderTypes> > glsl_res_names_;

@@ -81,117 +81,117 @@ typedef USHORT USAGE, *PUSAGE;
 
 typedef enum _HIDP_REPORT_TYPE
 {
-    HidP_Input,
-    HidP_Output,
-    HidP_Feature
+	HidP_Input,
+	HidP_Output,
+	HidP_Feature
 } HIDP_REPORT_TYPE;
 
 typedef struct _HIDP_PREPARSED_DATA * PHIDP_PREPARSED_DATA;
 
 typedef struct _HIDP_CAPS
 {
-    USAGE    Usage;
-    USAGE    UsagePage;
-    USHORT   InputReportByteLength;
-    USHORT   OutputReportByteLength;
-    USHORT   FeatureReportByteLength;
-    USHORT   Reserved[17];
+	USAGE    Usage;
+	USAGE    UsagePage;
+	USHORT   InputReportByteLength;
+	USHORT   OutputReportByteLength;
+	USHORT   FeatureReportByteLength;
+	USHORT   Reserved[17];
 
-    USHORT   NumberLinkCollectionNodes;
+	USHORT   NumberLinkCollectionNodes;
 
-    USHORT   NumberInputButtonCaps;
-    USHORT   NumberInputValueCaps;
-    USHORT   NumberInputDataIndices;
+	USHORT   NumberInputButtonCaps;
+	USHORT   NumberInputValueCaps;
+	USHORT   NumberInputDataIndices;
 
-    USHORT   NumberOutputButtonCaps;
-    USHORT   NumberOutputValueCaps;
-    USHORT   NumberOutputDataIndices;
+	USHORT   NumberOutputButtonCaps;
+	USHORT   NumberOutputValueCaps;
+	USHORT   NumberOutputDataIndices;
 
-    USHORT   NumberFeatureButtonCaps;
-    USHORT   NumberFeatureValueCaps;
-    USHORT   NumberFeatureDataIndices;
+	USHORT   NumberFeatureButtonCaps;
+	USHORT   NumberFeatureValueCaps;
+	USHORT   NumberFeatureDataIndices;
 } HIDP_CAPS, *PHIDP_CAPS;
 
 typedef struct _HIDP_BUTTON_CAPS
 {
-    USAGE    UsagePage;
-    UCHAR    ReportID;
-    BOOLEAN  IsAlias;
+	USAGE    UsagePage;
+	UCHAR    ReportID;
+	BOOLEAN  IsAlias;
 
-    USHORT   BitField;
-    USHORT   LinkCollection;   // A unique internal index pointer
+	USHORT   BitField;
+	USHORT   LinkCollection;   // A unique internal index pointer
 
-    USAGE    LinkUsage;
-    USAGE    LinkUsagePage;
+	USAGE    LinkUsage;
+	USAGE    LinkUsagePage;
 
-    BOOLEAN  IsRange;
-    BOOLEAN  IsStringRange;
-    BOOLEAN  IsDesignatorRange;
-    BOOLEAN  IsAbsolute;
+	BOOLEAN  IsRange;
+	BOOLEAN  IsStringRange;
+	BOOLEAN  IsDesignatorRange;
+	BOOLEAN  IsAbsolute;
 
-    ULONG    Reserved[10];
-    union {
-        struct {
-            USAGE    UsageMin,         UsageMax;
-            USHORT   StringMin,        StringMax;
-            USHORT   DesignatorMin,    DesignatorMax;
-            USHORT   DataIndexMin,     DataIndexMax;
-        } Range;
-        struct  {
-            USAGE    Usage,            Reserved1;
-            USHORT   StringIndex,      Reserved2;
-            USHORT   DesignatorIndex,  Reserved3;
-            USHORT   DataIndex,        Reserved4;
-        } NotRange;
-    };
+	ULONG    Reserved[10];
+	union {
+		struct {
+			USAGE    UsageMin,         UsageMax;
+			USHORT   StringMin,        StringMax;
+			USHORT   DesignatorMin,    DesignatorMax;
+			USHORT   DataIndexMin,     DataIndexMax;
+		} Range;
+		struct  {
+			USAGE    Usage,            Reserved1;
+			USHORT   StringIndex,      Reserved2;
+			USHORT   DesignatorIndex,  Reserved3;
+			USHORT   DataIndex,        Reserved4;
+		} NotRange;
+	};
 
 } HIDP_BUTTON_CAPS, *PHIDP_BUTTON_CAPS;
 
 typedef struct _HIDP_VALUE_CAPS
 {
-    USAGE    UsagePage;
-    UCHAR    ReportID;
-    BOOLEAN  IsAlias;
+	USAGE    UsagePage;
+	UCHAR    ReportID;
+	BOOLEAN  IsAlias;
 
-    USHORT   BitField;
-    USHORT   LinkCollection;   // A unique internal index pointer
+	USHORT   BitField;
+	USHORT   LinkCollection;   // A unique internal index pointer
 
-    USAGE    LinkUsage;
-    USAGE    LinkUsagePage;
+	USAGE    LinkUsage;
+	USAGE    LinkUsagePage;
 
-    BOOLEAN  IsRange;
-    BOOLEAN  IsStringRange;
-    BOOLEAN  IsDesignatorRange;
-    BOOLEAN  IsAbsolute;
+	BOOLEAN  IsRange;
+	BOOLEAN  IsStringRange;
+	BOOLEAN  IsDesignatorRange;
+	BOOLEAN  IsAbsolute;
 
-    BOOLEAN  HasNull;        // Does this channel have a null report   union
-    UCHAR    Reserved;
-    USHORT   BitSize;        // How many bits are devoted to this value?
+	BOOLEAN  HasNull;        // Does this channel have a null report   union
+	UCHAR    Reserved;
+	USHORT   BitSize;        // How many bits are devoted to this value?
 
-    USHORT   ReportCount;    // See Note below.  Usually set to 1.
-    USHORT   Reserved2[5];
+	USHORT   ReportCount;    // See Note below.  Usually set to 1.
+	USHORT   Reserved2[5];
 
-    ULONG    UnitsExp;
-    ULONG    Units;
+	ULONG    UnitsExp;
+	ULONG    Units;
 
-    LONG     LogicalMin,       LogicalMax;
-    LONG     PhysicalMin,      PhysicalMax;
+	LONG     LogicalMin,       LogicalMax;
+	LONG     PhysicalMin,      PhysicalMax;
 
-    union {
-        struct {
-            USAGE    UsageMin,         UsageMax;
-            USHORT   StringMin,        StringMax;
-            USHORT   DesignatorMin,    DesignatorMax;
-            USHORT   DataIndexMin,     DataIndexMax;
-        } Range;
+	union {
+		struct {
+			USAGE    UsageMin,         UsageMax;
+			USHORT   StringMin,        StringMax;
+			USHORT   DesignatorMin,    DesignatorMax;
+			USHORT   DataIndexMin,     DataIndexMax;
+		} Range;
 
-        struct {
-            USAGE    Usage,            Reserved1;
-            USHORT   StringIndex,      Reserved2;
-            USHORT   DesignatorIndex,  Reserved3;
-            USHORT   DataIndex,        Reserved4;
-        } NotRange;
-    };
+		struct {
+			USAGE    Usage,            Reserved1;
+			USHORT   StringIndex,      Reserved2;
+			USHORT   DesignatorIndex,  Reserved3;
+			USHORT   DataIndex,        Reserved4;
+		} NotRange;
+	};
 } HIDP_VALUE_CAPS, *PHIDP_VALUE_CAPS;
 
 #ifndef FACILITY_HID_ERROR_CODE
@@ -199,7 +199,7 @@ typedef struct _HIDP_VALUE_CAPS
 #endif
 
 #define HIDP_ERROR_CODES(SEV, CODE) \
-        ((NTSTATUS) (((SEV) << 28) | (FACILITY_HID_ERROR_CODE << 16) | (CODE)))
+		((NTSTATUS) (((SEV) << 28) | (FACILITY_HID_ERROR_CODE << 16) | (CODE)))
 
 #define HIDP_STATUS_SUCCESS                  (HIDP_ERROR_CODES(0x0,0))
 #endif
@@ -302,7 +302,7 @@ namespace KlayGE
 	class MsgInputKeyboard : public InputKeyboard
 	{
 	public:
-		explicit MsgInputKeyboard(HANDLE device);
+		MsgInputKeyboard(HWND hwnd, HANDLE device);
 
 		virtual std::wstring const & Name() const KLAYGE_OVERRIDE;
 		void OnRawInput(RAWINPUT const & ri);
@@ -311,6 +311,7 @@ namespace KlayGE
 		virtual void UpdateInputs() KLAYGE_OVERRIDE;
 
 	private:
+		HWND hwnd_;
 		HANDLE device_;
 		array<bool, 256> keys_state_;
 	};
@@ -318,7 +319,7 @@ namespace KlayGE
 	class MsgInputMouse : public InputMouse
 	{
 	public:
-		explicit MsgInputMouse(HANDLE device);
+		MsgInputMouse(HWND hwnd, HANDLE device);
 
 		virtual std::wstring const & Name() const KLAYGE_OVERRIDE;
 		void OnRawInput(RAWINPUT const & ri);
@@ -327,6 +328,7 @@ namespace KlayGE
 		virtual void UpdateInputs() KLAYGE_OVERRIDE;
 
 	private:
+		HWND hwnd_;
 		HANDLE device_;
 		int3 offset_state_;
 		array<bool, 8> buttons_state_;
