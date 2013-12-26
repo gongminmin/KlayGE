@@ -44,7 +44,7 @@ def deploy_KlayGE(target_dir, compiler_info, compiler_arch):
 		copy_to_dst(fname, bin_dst_dir);
 	
 	print("Deploying DXSDK...\n")
-	for fname in glob.iglob("KlayGE/bin/win_%s/d3dcompiler_46.%s" % (compiler_arch, dll_suffix)):
+	for fname in glob.iglob("KlayGE/bin/win_%s/d3dcompiler_47.%s" % (compiler_arch, dll_suffix)):
 		copy_to_dst(fname, bin_dst_dir);
 	
 	print("Deploying OpenAL...\n")
@@ -56,11 +56,11 @@ def deploy_KlayGE(target_dir, compiler_info, compiler_arch):
 		copy_to_dst(fname, bin_dst_dir);
 		
 	print("Deploying glloader...\n")
-	for fname in glob.iglob("KlayGE/bin/win_%s/glloader_%s_%s.%s" % (compiler_arch, compiler_info.name, compiler_arch, dll_suffix)):
+	for fname in glob.iglob("KlayGE/bin/win_%s/glloader_%s_%s*.%s" % (compiler_arch, compiler_info.name, compiler_arch, dll_suffix)):
 		copy_to_dst(fname, bin_dst_dir);
 
 	print("Deploying kfont...\n")
-	for fname in glob.iglob("KlayGE/bin/win_%s/kfont_%s_%s.%s" % (compiler_arch, compiler_info.name, compiler_arch, dll_suffix)):
+	for fname in glob.iglob("KlayGE/bin/win_%s/kfont_%s_%s*.%s" % (compiler_arch, compiler_info.name, compiler_arch, dll_suffix)):
 		copy_to_dst(fname, bin_dst_dir);
 
 	print("Deploying KlayGE...\n")
