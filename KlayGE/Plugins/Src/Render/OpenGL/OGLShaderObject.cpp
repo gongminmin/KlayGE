@@ -1477,6 +1477,8 @@ namespace KlayGE
 					{
 						if ((ST_VertexShader == type) && has_gs)
 						{
+							ss << "v_" << this_token << "In";
+
 							std::string tmp_token[3];
 							for (int t = 0; t < 3; ++ t)
 							{
@@ -1484,7 +1486,7 @@ namespace KlayGE
 								tmp_token[t] = *beg;
 							}
 
-							ss << "v_" << this_token << "In" << tmp_token[1];
+							ss << tmp_token[1];
 						}
 						else
 						{
@@ -1493,6 +1495,8 @@ namespace KlayGE
 					}
 					else if ("gl_TexCoordIn" == this_token)
 					{
+						ss << "v_" << this_token;
+
 						std::string tmp_token[6];
 						for (int t = 0; t < 6; ++ t)
 						{
@@ -1500,8 +1504,7 @@ namespace KlayGE
 							tmp_token[t] = *beg;
 						}
 
-						ss << "v_" << this_token << tmp_token[4]
-							<< tmp_token[0] << tmp_token[1] << tmp_token[2];
+						ss << tmp_token[4] << tmp_token[0] << tmp_token[1] << tmp_token[2];
 					}
 					else
 					{
