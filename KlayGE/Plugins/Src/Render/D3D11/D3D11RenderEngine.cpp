@@ -885,6 +885,7 @@ namespace KlayGE
 			caps_.max_simultaneous_uavs = 0;
 			caps_.alpha_to_coverage_support = false;
 			caps_.mrt_independent_bit_depths_support = false;
+			caps_.independent_blend_support = false;
 		}
 		else
 		{
@@ -897,6 +898,7 @@ namespace KlayGE
 			caps_.max_simultaneous_uavs = D3D11_PS_CS_UAV_REGISTER_COUNT;
 			caps_.alpha_to_coverage_support = true;
 			caps_.mrt_independent_bit_depths_support = true;
+			caps_.independent_blend_support = true;
 		}
 		if (d3d_feature_level_ <= D3D_FEATURE_LEVEL_9_2)
 		{
@@ -1143,6 +1145,12 @@ namespace KlayGE
 			placeholders::_1);
 		caps_.rendertarget_format_support = bind<bool>(&D3D11RenderEngine::RenderTargetFormatSupport, this,
 			placeholders::_1, placeholders::_2, placeholders::_3);
+
+		caps_.depth_texture_support = (caps_.texture_format_support(EF_D24S8) || caps_.texture_format_support(EF_D16));
+		caps_.fp_color_support = !((caps_.texture_format_support(EF_B10G11R11F) && caps_.rendertarget_format_support(EF_B10G11R11F, 1, 0))
+			|| (caps_.texture_format_support(EF_ABGR16F) && caps_.rendertarget_format_support(EF_ABGR16F, 1, 0)));
+		caps_.pack_to_rgba_required = !(caps_.texture_format_support(EF_R16F) && caps_.rendertarget_format_support(EF_R16F, 1, 0)
+			&& caps_.texture_format_support(EF_R32F) && caps_.rendertarget_format_support(EF_R32F, 1, 0));
 	}
 
 	void D3D11RenderEngine::StereoscopicForLCDShutter(int32_t eye)

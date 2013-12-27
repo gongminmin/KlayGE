@@ -42,21 +42,11 @@ namespace
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 			RenderDeviceCaps const & caps = rf.RenderEngineInstance().DeviceCaps();
 
-			bool depth_texture_support;
-			if (caps.texture_format_support(EF_D24S8) || caps.texture_format_support(EF_D16))
-			{
-				depth_texture_support = true;
-			}
-			else
-			{
-				depth_texture_support = false;
-			}
-
 			no_oit_tech_ = SyncLoadRenderEffect("NoOIT.fxml")->TechniqueByName("NoOIT");
 
 			dp_1st_tech_ = SyncLoadRenderEffect("DepthPeeling.fxml")->TechniqueByName("DepthPeeling1st");
 			dp_nth_tech_ = dp_1st_tech_->Effect().TechniqueByName("DepthPeelingNth");
-			if (!depth_texture_support)
+			if (!caps.depth_texture_support)
 			{
 				dp_nth_tech_ = dp_1st_tech_->Effect().TechniqueByName("DepthPeelingNthWODepthTexture");
 				dp_1st_depth_tech_ = dp_1st_tech_->Effect().TechniqueByName("DepthPeeling1stDepth");
@@ -491,14 +481,7 @@ void OrderIndependentTransparencyApp::InitObjects()
 	checked_pointer_cast<SceneObjectSkyBox>(sky_box_)->CompressedCubeMap(y_cube_map, c_cube_map);
 	sky_box_->AddToSceneManager();
 
-	if (caps.texture_format_support(EF_D24S8) || caps.texture_format_support(EF_D16))
-	{
-		depth_texture_support_ = true;
-	}
-	else
-	{
-		depth_texture_support_ = false;
-	}
+	depth_texture_support_ = caps.depth_texture_support;
 
 	peeling_fbs_.resize(17);
 	for (size_t i = 0; i < peeling_fbs_.size(); ++ i)

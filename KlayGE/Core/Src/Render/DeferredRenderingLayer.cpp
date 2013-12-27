@@ -257,22 +257,14 @@ namespace KlayGE
 		if (caps.texture_format_support(EF_D24S8))
 		{
 			ds_fmt = EF_D24S8;
-			depth_texture_support_ = true;
 		}
 		else
 		{
 			ds_fmt = EF_D16;
-			if (caps.texture_format_support(EF_D16))
-			{				
-				depth_texture_support_ = true;
-			}
-			else
-			{
-				depth_texture_support_ = false;
-			}
 		}
 
 		mrt_g_buffer_support_ = (caps.max_simultaneous_rts > 1);
+		depth_texture_support_ = caps.depth_texture_support;
 		tex_array_support_ = (caps.max_texture_array_length >= 4);
 
 		for (size_t vpi = 0; vpi < viewports_.size(); ++ vpi)

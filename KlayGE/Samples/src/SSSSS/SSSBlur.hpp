@@ -15,7 +15,7 @@ public:
 	virtual void Apply() KLAYGE_OVERRIDE;
 
 private:
-	bool mrt_support_;
+	bool mrt_blend_support_;
 
 	KlayGE::FrameBufferPtr blur_x_fb_;
 	KlayGE::FrameBufferPtr blur_y_fb_;

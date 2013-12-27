@@ -30,14 +30,7 @@ void DetailedMesh::BuildMeshInfo()
 
 	RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 	RenderDeviceCaps const & caps = re.DeviceCaps();
-	if (caps.texture_format_support(EF_D24S8) || caps.texture_format_support(EF_D16))
-	{
-		depth_texture_support_ = true;
-	}
-	else
-	{
-		depth_texture_support_ = false;
-	}
+	depth_texture_support_ = caps.depth_texture_support;
 
 	*(technique_->Effect().ParameterByName("diffuse_tex")) = diffuse_tl_;
 	*(technique_->Effect().ParameterByName("bump_tex")) = normal_tl_;

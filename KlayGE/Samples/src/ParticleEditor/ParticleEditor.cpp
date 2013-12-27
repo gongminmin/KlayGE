@@ -192,14 +192,7 @@ void ParticleEditorApp::InitObjects()
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 	RenderEngine& re = rf.RenderEngineInstance();
 	RenderDeviceCaps const & caps = re.DeviceCaps();
-	if (caps.texture_format_support(EF_D24S8) || caps.texture_format_support(EF_D16))
-	{
-		depth_texture_support_ = true;
-	}
-	else
-	{
-		depth_texture_support_ = false;
-	}
+	depth_texture_support_ = caps.depth_texture_support;
 
 	scene_buffer_ = rf.MakeFrameBuffer();
 	FrameBufferPtr screen_buffer = re.CurFrameBuffer();

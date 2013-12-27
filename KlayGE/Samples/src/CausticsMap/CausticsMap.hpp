@@ -77,7 +77,7 @@ private:
 	void ModelSelectionComboBox(KlayGE::UIComboBox const & sender);
 
 private:
-	bool depth_texture_;
+	bool depth_texture_support_;
 
 	KlayGE::FontPtr font_;
 	KlayGE::TrackballCameraController trackball_controller_;

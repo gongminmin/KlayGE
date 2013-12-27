@@ -597,23 +597,9 @@ bool CausticsMapApp::ConfirmDevice() const
 void CausticsMapApp::InitObjects()
 {
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-	use_gs = rf.RenderEngineInstance().DeviceCaps().gs_support;
-
-	if (rf.RenderEngineInstance().DeviceCaps().texture_format_support(EF_D24S8))
-	{
-		depth_texture_ = true;
-	}
-	else
-	{
-		if (rf.RenderEngineInstance().DeviceCaps().texture_format_support(EF_D16))
-		{
-			depth_texture_ = true;
-		}
-		else
-		{
-			depth_texture_ = false;
-		}
-	}
+	RenderDeviceCaps const & caps = rf.RenderEngineInstance().DeviceCaps();
+	use_gs = caps.gs_support;
+	depth_texture_support_ = caps.depth_texture_support;
 
 	//Font config
 	font_ = SyncLoadFont("gkai00mp.kfont");
@@ -686,7 +672,7 @@ void CausticsMapApp::InitObjects()
 	sky_box_->AddToSceneManager();
 
 	copy_pp_ = SyncLoadPostProcess("Copy.ppml", "copy");
-	if (depth_texture_)
+	if (depth_texture_support_)
 	{
 		depth_to_linear_pp_ = SyncLoadPostProcess("DepthToSM.ppml", "DepthToSM");
 	}
@@ -708,44 +694,45 @@ void CausticsMapApp::InitBuffer()
 {
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 	RenderEngine& re = rf.RenderEngineInstance();
+	RenderDeviceCaps const & caps = re.DeviceCaps();
 	
 	ElementFormat normal_fmt;
-	if (re.DeviceCaps().rendertarget_format_support(EF_A2BGR10, 1, 0))
+	if (caps.rendertarget_format_support(EF_A2BGR10, 1, 0))
 	{
 		normal_fmt = EF_A2BGR10;
 	}
 	else
 	{
-		if (re.DeviceCaps().rendertarget_format_support(EF_ABGR8, 1, 0))
+		if (caps.rendertarget_format_support(EF_ABGR8, 1, 0))
 		{
 			normal_fmt = EF_ABGR8;
 		}
 		else
 		{
-			BOOST_ASSERT(re.DeviceCaps().rendertarget_format_support(EF_ARGB8, 1, 0));
+			BOOST_ASSERT(caps.rendertarget_format_support(EF_ARGB8, 1, 0));
 
 			normal_fmt = EF_ARGB8;
 		}
 	}
 	ElementFormat depth_fmt;
-	if (re.DeviceCaps().rendertarget_format_support(EF_R16F, 1, 0))
+	if (caps.rendertarget_format_support(EF_R16F, 1, 0))
 	{
 		depth_fmt = EF_R16F;
 	}
 	else
 	{
-		BOOST_ASSERT(re.DeviceCaps().rendertarget_format_support(EF_ABGR16F, 1, 0));
+		BOOST_ASSERT(caps.rendertarget_format_support(EF_ABGR16F, 1, 0));
 
 		depth_fmt = EF_ABGR16F;
 	}
 	ElementFormat ds_fmt;
-	if (rf.RenderEngineInstance().DeviceCaps().rendertarget_format_support(EF_D24S8, 1, 0))
+	if (caps.rendertarget_format_support(EF_D24S8, 1, 0))
 	{
 		ds_fmt = EF_D24S8;
 	}
 	else
 	{
-		BOOST_ASSERT(rf.RenderEngineInstance().DeviceCaps().rendertarget_format_support(EF_D16, 1, 0));
+		BOOST_ASSERT(caps.rendertarget_format_support(EF_D16, 1, 0));
 
 		ds_fmt = EF_D16;
 	}
@@ -753,7 +740,7 @@ void CausticsMapApp::InitBuffer()
 	RenderViewPtr refract_obj_ds_view_f;
 	RenderViewPtr refract_obj_ds_view_b;
 	RenderViewPtr background_ds_view;
-	if (depth_texture_)
+	if (depth_texture_support_)
 	{
 		refract_obj_ds_tex_f_ = rf.MakeTexture2D(CAUSTICS_GRID_SIZE, CAUSTICS_GRID_SIZE, 1, 1, ds_fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
 		refract_obj_ds_tex_b_ = rf.MakeTexture2D(CAUSTICS_GRID_SIZE, CAUSTICS_GRID_SIZE, 1, 1, ds_fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
@@ -797,13 +784,13 @@ void CausticsMapApp::InitBuffer()
 	refract_obj_fb_b_->Attach(FrameBuffer::ATT_DepthStencil, refract_obj_ds_view_b);
 
 	ElementFormat fmt;
-	if (rf.RenderEngineInstance().DeviceCaps().rendertarget_format_support(EF_B10G11R11F, 1, 0))
+	if (caps.rendertarget_format_support(EF_B10G11R11F, 1, 0))
 	{
 		fmt = EF_B10G11R11F;
 	}
 	else
 	{
-		BOOST_ASSERT(rf.RenderEngineInstance().DeviceCaps().rendertarget_format_support(EF_ABGR16F, 1, 0));
+		BOOST_ASSERT(caps.rendertarget_format_support(EF_ABGR16F, 1, 0));
 
 		fmt = EF_ABGR16F;
 	}
@@ -1073,7 +1060,7 @@ uint32_t CausticsMapApp::DoUpdate(uint32_t pass)
 	uint32_t sm_start_pass = 4;
 	uint32_t env_start_pass = 10;
 
-	if (!depth_texture_)
+	if (!depth_texture_support_)
 	{
 		sm_start_pass += 2;
 		env_start_pass += 2;
@@ -1082,7 +1069,7 @@ uint32_t CausticsMapApp::DoUpdate(uint32_t pass)
 	//Pass 0 ~ 3 Caustics Map
 	if (0 == pass)
 	{
-		if (depth_texture_)
+		if (depth_texture_support_)
 		{
 			checked_pointer_cast<PlaneObject>(plane_object_)->Pass(Position_Pass);
 		}
@@ -1095,7 +1082,7 @@ uint32_t CausticsMapApp::DoUpdate(uint32_t pass)
 		re.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(0.0f, 0.0f, 0.0f, 0.0f), 1.0f, 0);
 		re.CurFrameBuffer()->GetViewport()->camera = light_->SMCamera(0);
 
-		if (depth_texture_)
+		if (depth_texture_support_)
 		{
 			float q = light_->SMCamera(0)->FarPlane() / (light_->SMCamera(0)->FarPlane() - light_->SMCamera(0)->NearPlane());
 			float2 near_q(light_->SMCamera(0)->NearPlane() * q, q);
@@ -1108,7 +1095,7 @@ uint32_t CausticsMapApp::DoUpdate(uint32_t pass)
 	{
 		plane_object_->Visible(false);
 		refract_obj_->Visible(true);
-		if (depth_texture_)
+		if (depth_texture_support_)
 		{
 			checked_pointer_cast<RefractModel>(refract_obj_->GetRenderable())->Pass(Position_Normal_Front_Pass);
 
@@ -1133,7 +1120,7 @@ uint32_t CausticsMapApp::DoUpdate(uint32_t pass)
 	}
 	else if (2 == pass)
 	{
-		if (depth_texture_)
+		if (depth_texture_support_)
 		{
 			depth_to_linear_pp_->InputPin(0, refract_obj_ds_tex_f_);
 			depth_to_linear_pp_->OutputPin(0, refract_obj_depth_tex_f_);
@@ -1168,7 +1155,7 @@ uint32_t CausticsMapApp::DoUpdate(uint32_t pass)
 	}
 	else if (3 == pass)
 	{
-		if (depth_texture_)
+		if (depth_texture_support_)
 		{
 			if (enable_dual_face_caustics_)
 			{
@@ -1206,7 +1193,7 @@ uint32_t CausticsMapApp::DoUpdate(uint32_t pass)
 
 		return 0;
 	}
-	else if (!depth_texture_ && (4 == pass))
+	else if (!depth_texture_support_ && (4 == pass))
 	{
 		if (enable_dual_face_caustics_)
 		{
@@ -1221,7 +1208,7 @@ uint32_t CausticsMapApp::DoUpdate(uint32_t pass)
 
 		return 0;
 	}
-	else if (!depth_texture_ && (5 == pass))
+	else if (!depth_texture_support_ && (5 == pass))
 	{
 		if (enable_dual_face_caustics_)
 		{

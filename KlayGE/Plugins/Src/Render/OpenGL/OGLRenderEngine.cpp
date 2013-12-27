@@ -1411,6 +1411,15 @@ namespace KlayGE
 		}
 		caps_.logic_op_support = true;
 
+		if (glloader_GL_VERSION_3_0() || glloader_GL_EXT_draw_buffers2())
+		{
+			caps_.independent_blend_support = true;
+		}
+		else
+		{
+			caps_.independent_blend_support = false;
+		}
+
 		if (glloader_GL_VERSION_3_2() || glloader_GL_ARB_geometry_shader4() || glloader_GL_EXT_geometry_shader4())
 		{
 			caps_.gs_support = true;
@@ -1710,6 +1719,12 @@ namespace KlayGE
 			placeholders::_1);
 		caps_.rendertarget_format_support = bind<bool>(&OGLRenderEngine::RenderTargetFormatSupport, this,
 			placeholders::_1, placeholders::_2, placeholders::_3);
+
+		caps_.depth_texture_support = (caps_.texture_format_support(EF_D24S8) || caps_.texture_format_support(EF_D16));
+		caps_.fp_color_support = !((caps_.texture_format_support(EF_B10G11R11F) && caps_.rendertarget_format_support(EF_B10G11R11F, 1, 0))
+			|| (caps_.texture_format_support(EF_ABGR16F) && caps_.rendertarget_format_support(EF_ABGR16F, 1, 0)));
+		caps_.pack_to_rgba_required = !(caps_.texture_format_support(EF_R16F) && caps_.rendertarget_format_support(EF_R16F, 1, 0)
+			&& caps_.texture_format_support(EF_R32F) && caps_.rendertarget_format_support(EF_R32F, 1, 0));
 	}
 
 	void OGLRenderEngine::StereoscopicForLCDShutter(int32_t eye)

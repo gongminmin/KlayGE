@@ -9,7 +9,7 @@ SSSBlurPP::SSSBlurPP()
 		: PostProcess(L"SSSBlurPP")
 {
 	RenderDeviceCaps const & caps = Context::Instance().RenderFactoryInstance().RenderEngineInstance().DeviceCaps();
-	mrt_support_ = (caps.max_simultaneous_rts > 1);
+	mrt_blend_support_ = (caps.max_simultaneous_rts > 1) && caps.independent_blend_support;
 
 	input_pins_.push_back(std::make_pair("color_tex", TexturePtr()));
 	input_pins_.push_back(std::make_pair("depth_tex", TexturePtr()));
@@ -22,7 +22,7 @@ SSSBlurPP::SSSBlurPP()
 	RenderEffectPtr effect = SyncLoadRenderEffect("SSS.fxml");
 	copy_tech_ = effect->TechniqueByName("Copy");
 	blur_x_tech_ = effect->TechniqueByName("BlurX");
-	if (mrt_support_)
+	if (mrt_blend_support_)
 	{
 		std::string blur_y_name = "BlurY1";
 		for (uint32_t i = 0; i < 3; ++ i)
@@ -66,7 +66,7 @@ void SSSBlurPP::InputPin(uint32_t index, TexturePtr const & tex)
 		blur_y_fb_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*blur_y_tex_, 0, 1, 0));
 		blur_y_fb_->Attach(FrameBuffer::ATT_DepthStencil, frame_buffer_->Attached(FrameBuffer::ATT_DepthStencil));
 
-		if (mrt_support_)
+		if (mrt_blend_support_)
 		{
 			frame_buffer_->Attach(FrameBuffer::ATT_Color1, rf.Make2DRenderView(*blur_y_tex_, 0, 1, 0));
 		}
@@ -96,7 +96,11 @@ void SSSBlurPP::Apply()
 
 		*color_tex_param_ = blur_x_tex_;
 		*step_param_ = float2(0, (i + 1) * sss_strength / frame_buffer_->Height());
-		if (!mrt_support_)
+		if (mrt_blend_support_)
+		{
+			technique_ = blur_y_techs_[i];
+		}
+		else
 		{
 			re.BindFrameBuffer(blur_y_fb_);
 			re.CurFrameBuffer()->Attached(FrameBuffer::ATT_Color0)->ClearColor(Color(0, 0, 0, 0));
@@ -105,10 +109,6 @@ void SSSBlurPP::Apply()
 
 			technique_ = accum_techs_[i];
 			*color_tex_param_ = blur_y_tex_;
-		}
-		else
-		{
-			technique_ = blur_y_techs_[i];
 		}
 
 		re.BindFrameBuffer(frame_buffer_);

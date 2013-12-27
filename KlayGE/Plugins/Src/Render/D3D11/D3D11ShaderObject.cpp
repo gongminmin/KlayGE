@@ -1284,14 +1284,12 @@ namespace KlayGE
 				D3D_SHADER_MACRO macro_bc4_as_bc1 = { "KLAYGE_BC4_AS_G", "1" };
 				macros.push_back(macro_bc4_as_bc1);
 			}
-			if (!((caps.texture_format_support(EF_B10G11R11F) && caps.rendertarget_format_support(EF_B10G11R11F, 1, 0))
-				|| (caps.texture_format_support(EF_ABGR16F) && caps.rendertarget_format_support(EF_ABGR16F, 1, 0))))
+			if (caps.fp_color_support)
 			{
-				D3D_SHADER_MACRO macro_no_fp_tex = { "KLAYGE_NO_FP_TEXTURE", "1" };
+				D3D_SHADER_MACRO macro_no_fp_tex = { "KLAYGE_NO_FP_COLOR", "1" };
 				macros.push_back(macro_no_fp_tex);
 			}
-			if (!(caps.texture_format_support(EF_R16F) && caps.rendertarget_format_support(EF_R16F, 1, 0)
-				&& caps.texture_format_support(EF_R32F) && caps.rendertarget_format_support(EF_R32F, 1, 0)))
+			if (caps.pack_to_rgba_required)
 			{
 				D3D_SHADER_MACRO macro_pack_to_rgba = { "KLAYGE_PACK_TO_RGBA", "1" };
 				macros.push_back(macro_pack_to_rgba);

@@ -225,14 +225,7 @@ void Refract::InitObjects()
 	input_handler->connect(KlayGE::bind(&Refract::InputHandler, this, KlayGE::placeholders::_1, KlayGE::placeholders::_2));
 	inputEngine.ActionMap(actionMap, input_handler);
 
-	if (rf.RenderEngineInstance().DeviceCaps().texture_format_support(EF_D16))
-	{
-		depth_texture_support_ = true;
-	}
-	else
-	{
-		depth_texture_support_ = false;
-	}
+	depth_texture_support_ = rf.RenderEngineInstance().DeviceCaps().depth_texture_support;
 
 	backface_buffer_ = rf.MakeFrameBuffer();
 	FrameBufferPtr const & screen_buffer = re.CurFrameBuffer();

@@ -164,14 +164,7 @@ void SubSurfaceApp::InitObjects()
 
 	RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 	RenderDeviceCaps const & caps = re.DeviceCaps();
-	if (caps.texture_format_support(EF_D24S8) || caps.texture_format_support(EF_D16))
-	{
-		depth_texture_support_ = true;
-	}
-	else
-	{
-		depth_texture_support_ = false;
-	}
+	depth_texture_support_ = caps.depth_texture_support;
 }
 
 void SubSurfaceApp::OnResize(uint32_t width, uint32_t height)

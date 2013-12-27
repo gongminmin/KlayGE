@@ -44,23 +44,27 @@ namespace KlayGE
 		uint8_t max_vertex_streams;
 		uint8_t max_texture_anisotropy;
 
-		bool is_tbdr;
+		bool is_tbdr : 1;
 
-		bool hw_instancing_support;
-		bool instance_id_support;
-		bool stream_output_support;
-		bool alpha_to_coverage_support;
-		bool primitive_restart_support;
-		bool multithread_rendering_support;
-		bool multithread_res_creating_support;
-		bool mrt_independent_bit_depths_support;
-		bool standard_derivatives_support;
-		bool logic_op_support;
+		bool hw_instancing_support : 1;
+		bool instance_id_support : 1;
+		bool stream_output_support : 1;
+		bool alpha_to_coverage_support : 1;
+		bool primitive_restart_support : 1;
+		bool multithread_rendering_support : 1;
+		bool multithread_res_creating_support : 1;
+		bool mrt_independent_bit_depths_support : 1;
+		bool standard_derivatives_support : 1;
+		bool logic_op_support : 1;
+		bool independent_blend_support : 1;
+		bool depth_texture_support : 1;
+		bool fp_color_support : 1;
+		bool pack_to_rgba_required : 1;
 
-		bool gs_support;
-		bool cs_support;
-		bool hs_support;
-		bool ds_support;
+		bool gs_support : 1;
+		bool cs_support : 1;
+		bool hs_support : 1;
+		bool ds_support : 1;
 
 		TessellationMethod tess_method;
 

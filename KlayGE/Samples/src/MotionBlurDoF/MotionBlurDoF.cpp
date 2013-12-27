@@ -836,15 +836,9 @@ void MotionBlurDoFApp::OnResize(uint32_t width, uint32_t height)
 
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 	RenderEngine& re = rf.RenderEngineInstance();
+	RenderDeviceCaps const & caps = re.DeviceCaps();
 
-	if (rf.RenderEngineInstance().DeviceCaps().texture_format_support(EF_D16))
-	{
-		depth_texture_support_ = true;
-	}
-	else
-	{
-		depth_texture_support_ = false;
-	}
+	depth_texture_support_ = caps.depth_texture_support;
 
 	RenderViewPtr ds_view;
 	if (depth_texture_support_)
@@ -858,13 +852,13 @@ void MotionBlurDoFApp::OnResize(uint32_t width, uint32_t height)
 	}
 
 	ElementFormat depth_fmt;
-	if (re.DeviceCaps().rendertarget_format_support(EF_R16F, 1, 0))
+	if (caps.rendertarget_format_support(EF_R16F, 1, 0))
 	{
 		depth_fmt = EF_R16F;
 	}
 	else
 	{
-		BOOST_ASSERT(re.DeviceCaps().rendertarget_format_support(EF_ABGR16F, 1, 0));
+		BOOST_ASSERT(caps.rendertarget_format_support(EF_ABGR16F, 1, 0));
 
 		depth_fmt = EF_ABGR16F;
 	}
@@ -878,13 +872,13 @@ void MotionBlurDoFApp::OnResize(uint32_t width, uint32_t height)
 	}
 
 	ElementFormat color_fmt;
-	if (re.DeviceCaps().rendertarget_format_support(EF_B10G11R11F, 1, 0))
+	if (caps.rendertarget_format_support(EF_B10G11R11F, 1, 0))
 	{
 		color_fmt = EF_B10G11R11F;
 	}
 	else
 	{
-		BOOST_ASSERT(re.DeviceCaps().rendertarget_format_support(EF_ABGR16F, 1, 0));
+		BOOST_ASSERT(caps.rendertarget_format_support(EF_ABGR16F, 1, 0));
 
 		color_fmt = EF_ABGR16F;
 	}
@@ -894,19 +888,19 @@ void MotionBlurDoFApp::OnResize(uint32_t width, uint32_t height)
 	clr_depth_fb_->Attach(FrameBuffer::ATT_DepthStencil, ds_view);
 
 	ElementFormat motion_fmt;
-	if (re.DeviceCaps().rendertarget_format_support(EF_GR8, 1, 0))
+	if (caps.rendertarget_format_support(EF_GR8, 1, 0))
 	{
 		motion_fmt = EF_GR8;
 	}
 	else
 	{
-		if (re.DeviceCaps().rendertarget_format_support(EF_ABGR8, 1, 0))
+		if (caps.rendertarget_format_support(EF_ABGR8, 1, 0))
 		{
 			motion_fmt = EF_ABGR8;
 		}
 		else
 		{
-			BOOST_ASSERT(re.DeviceCaps().rendertarget_format_support(EF_ARGB8, 1, 0));
+			BOOST_ASSERT(caps.rendertarget_format_support(EF_ARGB8, 1, 0));
 
 			motion_fmt = EF_ARGB8;
 		}

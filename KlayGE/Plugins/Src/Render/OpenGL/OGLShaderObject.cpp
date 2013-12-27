@@ -1927,13 +1927,11 @@ namespace KlayGE
 		{
 			args.push_back("-DKLAYGE_BC4_AS_G");
 		}
-		if (!((caps.texture_format_support(EF_B10G11R11F) && caps.rendertarget_format_support(EF_B10G11R11F, 1, 0))
-			|| (caps.texture_format_support(EF_ABGR16F) && caps.rendertarget_format_support(EF_ABGR16F, 1, 0))))
+		if (caps.fp_color_support)
 		{
-			args.push_back("-DKLAYGE_NO_FP_TEXTURE");
+			args.push_back("-DKLAYGE_NO_FP_COLOR");
 		}
-		if (!(caps.texture_format_support(EF_R16F) && caps.rendertarget_format_support(EF_R16F, 1, 0)
-			&& caps.texture_format_support(EF_R32F) && caps.rendertarget_format_support(EF_R32F, 1, 0)))
+		if (caps.pack_to_rgba_required)
 		{
 			args.push_back("-DKLAYGE_PACK_TO_RGBA");
 		}
