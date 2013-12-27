@@ -64,9 +64,9 @@ namespace
 			checked_pointer_cast<DetailedModel>(renderable_)->BackFaceDepthPass(dfdp);
 		}
 
-		void BackFaceDepthTex(TexturePtr const & tex, bool pack_to_rgba)
+		void BackFaceDepthTex(TexturePtr const & tex)
 		{
-			checked_pointer_cast<DetailedModel>(renderable_)->BackFaceDepthTex(tex, pack_to_rgba);
+			checked_pointer_cast<DetailedModel>(renderable_)->BackFaceDepthTex(tex);
 		}
 
 		void SigmaT(float sigma_t)
@@ -214,32 +214,29 @@ void SubSurfaceApp::OnResize(uint32_t width, uint32_t height)
 		back_face_ds_tex = rf.MakeTexture2D(width, height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
 		back_face_ds_view = rf.Make2DDepthStencilRenderView(*back_face_ds_tex, 0, 1, 0);
 
-		checked_pointer_cast<ModelObject>(model_)->BackFaceDepthTex(back_face_ds_tex, false);
+		checked_pointer_cast<ModelObject>(model_)->BackFaceDepthTex(back_face_ds_tex);
 	}
 	else
 	{
-		bool pack_to_rgba;
-		if (caps.texture_format_support(EF_R16F) && caps.rendertarget_format_support(EF_R16F, 1, 0))
+		if (caps.texture_format_support(EF_R16F) && caps.rendertarget_format_support(EF_R16F, 1, 0)
+			&& caps.texture_format_support(EF_R32F) && caps.rendertarget_format_support(EF_R32F, 1, 0))
 		{
 			fmt = EF_R16F;
-			pack_to_rgba = false;
 		}
 		else if (caps.texture_format_support(EF_ABGR8) && caps.rendertarget_format_support(EF_ABGR8, 1, 0))
 		{
 			fmt = EF_ABGR8;
-			pack_to_rgba = true;
 		}
 		else
 		{
 			BOOST_ASSERT(caps.texture_format_support(EF_ARGB8) && caps.rendertarget_format_support(EF_ARGB8, 1, 0));
 
 			fmt = EF_ARGB8;
-			pack_to_rgba = true;
 		}
 		back_face_depth_tex = rf.MakeTexture2D(width, height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
 		back_face_ds_view = rf.Make2DDepthStencilRenderView(width, height, EF_D16, 1, 0);
 
-		checked_pointer_cast<ModelObject>(model_)->BackFaceDepthTex(back_face_depth_tex, pack_to_rgba);
+		checked_pointer_cast<ModelObject>(model_)->BackFaceDepthTex(back_face_depth_tex);
 	}
 
 	back_face_depth_fb_ = rf.MakeFrameBuffer();

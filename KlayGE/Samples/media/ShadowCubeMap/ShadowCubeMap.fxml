@@ -3,10 +3,12 @@
 <effect>
 	<include name="Lighting.fxml"/>
 	<include name="Quaternion.fxml"/>
+	<include name="util.fxml"/>
 
 	<parameter type="float4x4" name="mvp"/>
 	<parameter type="float4x4" name="model"/>
 	<parameter type="float4x4" name="obj_model_to_light_model"/>
+	<parameter type="float2" name="far_plane"/>
 
 	<parameter type="float3" name="pos_center"/>
 	<parameter type="float3" name="pos_extent"/>
@@ -39,7 +41,11 @@ void GenCubeShadowMapVS(float4 Position : POSITION,
 
 float4 GenCubeShadowMapPS(float dist : TEXCOORD0) : SV_Target
 {
+#if KLAYGE_PACK_TO_RGBA
+	return EncodeFloatRGBA(clamp(dist * far_plane.y, 0, 0.999f));
+#else
 	return dist;
+#endif
 }
 		]]>
 	</shader>
@@ -100,7 +106,11 @@ float4 GenDPShadowMapPS(float2 dist : TEXCOORD0) : SV_Target
 {
 	clip(dist.y);
 
-	return esm_scale_factor * dist.x;
+#if KLAYGE_PACK_TO_RGBA
+	return EncodeFloatRGBA(clamp(dist.x * far_plane.y, 0, 0.999f));
+#else
+	return dist.x;
+#endif
 }
 		]]>
 	</shader>
@@ -588,12 +598,21 @@ float4 RenderScenePS(float2 Texcoord : TEXCOORD0, float3 LightWorldPos : TEXCOOR
 		tex.x += 0.5f;
 	}
 
+#if KLAYGE_PACK_TO_RGBA
+	occluder = DecodeFloatRGBA(shadow_dual_tex.Sample(linear_clamp_sampler, tex)) * far_plane.x;
+#else
 	occluder = shadow_dual_tex.Sample(linear_clamp_sampler, tex).x;
+#endif
+	occluder *= esm_scale_factor;
 #else
 	dist = length(LightWorldPos);
 
 	float3 shadow_dir = float3(LightWorldPos.x, -KLAYGE_FLIPPING * LightWorldPos.y, LightWorldPos.z);
+#if KLAYGE_PACK_TO_RGBA
+	occluder = DecodeFloatRGBA(shadow_cube_tex.Sample(linear_clamp_sampler, shadow_dir)) * far_plane.x * esm_scale_factor;
+#else
 	occluder = shadow_cube_tex.Sample(linear_clamp_sampler, shadow_dir).x;
+#endif
 #endif
 	
 	float atten = attenuation_term(0, LightWorldPos, light_falloff);

@@ -186,6 +186,7 @@ namespace
 
 			*(effect->ParameterByName("model")) = model;
 			*(effect->ParameterByName("obj_model_to_light_model")) = model * inv_light_model_;
+			*(effect->ParameterByName("far_plane")) = float2(camera.FarPlane(), 1.0f / camera.FarPlane());
 			*(effect->ParameterByName("esm_scale_factor")) = esm_scale_factor_ * light_inv_range_;
 
 			if (gen_sm_pass_)
@@ -580,11 +581,6 @@ bool ShadowCubeMap::ConfirmDevice() const
 	{
 		return false;
 	}
-	if (!(caps.rendertarget_format_support(EF_D16, 1, 0)
-		&& (caps.rendertarget_format_support(EF_R16F, 1, 0) || caps.rendertarget_format_support(EF_ABGR16F, 1, 0))))
-	{
-		return false;
-	}
 
 	return true;
 }
@@ -617,15 +613,22 @@ void ShadowCubeMap::InitObjects()
 		fmt = EF_D16;
 	}
 	RenderViewPtr depth_view = rf.Make2DDepthStencilRenderView(SHADOW_MAP_SIZE, SHADOW_MAP_SIZE, fmt, 1, 0);
-	if (caps.texture_format_support(EF_R16F) && caps.rendertarget_format_support(EF_R16F, 1, 0))
+	if (caps.texture_format_support(EF_R16F) && caps.rendertarget_format_support(EF_R16F, 1, 0)
+		&& caps.texture_format_support(EF_R32F) && caps.rendertarget_format_support(EF_R32F, 1, 0))
 	{
 		fmt = EF_R16F;
+		filter_shadow_ = true;
+	}
+	else if (caps.texture_format_support(EF_ABGR8) && caps.rendertarget_format_support(EF_ABGR8, 1, 0))
+	{
+		fmt = EF_ABGR8;
+		filter_shadow_ = false;
 	}
 	else
 	{
-		BOOST_ASSERT(caps.texture_format_support(EF_ABGR16F) && caps.rendertarget_format_support(EF_ABGR16F, 1, 0));
-
-		fmt = EF_ABGR16F;
+		BOOST_ASSERT(caps.texture_format_support(EF_ARGB8) && caps.rendertarget_format_support(EF_ARGB8, 1, 0));
+		fmt = EF_ARGB8;
+		filter_shadow_ = false;
 	}
 	shadow_tex_ = rf.MakeTexture2D(SHADOW_MAP_SIZE, SHADOW_MAP_SIZE, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
 	shadow_cube_buffer_ = rf.MakeFrameBuffer();
@@ -670,7 +673,14 @@ void ShadowCubeMap::InitObjects()
 
 	for (int i = 0; i < 6; ++ i)
 	{
-		sm_filter_pps_[i] = MakeSharedPtr<LogGaussianBlurPostProcess>(3, true);
+		if (filter_shadow_)
+		{
+			sm_filter_pps_[i] = MakeSharedPtr<LogGaussianBlurPostProcess>(3, true);
+		}
+		else
+		{
+			sm_filter_pps_[i] = SyncLoadPostProcess("Copy.ppml", "copy");
+		}
 
 		sm_filter_pps_[i]->InputPin(0, shadow_tex_);
 		sm_filter_pps_[i]->OutputPin(0, shadow_cube_tex_, 0, 0, i);
@@ -880,7 +890,10 @@ uint32_t ShadowCubeMap::DoUpdate(uint32_t pass)
 	case SMT_Cube:
 		if (pass > 0)
 		{
-			checked_pointer_cast<LogGaussianBlurPostProcess>(sm_filter_pps_[pass - 1])->ESMScaleFactor(esm_scale_factor_, light_->SMCamera(pass - 1));
+			if (filter_shadow_)
+			{
+				checked_pointer_cast<LogGaussianBlurPostProcess>(sm_filter_pps_[pass - 1])->ESMScaleFactor(esm_scale_factor_, light_->SMCamera(pass - 1));
+			}
 			sm_filter_pps_[pass - 1]->Apply();
 		}
 
@@ -954,7 +967,10 @@ uint32_t ShadowCubeMap::DoUpdate(uint32_t pass)
 					{
 						shadow_cube_one_tex_->CopyToSubTexture2D(*shadow_tex_, 0, 0, 0, 0, shadow_tex_->Width(0), shadow_tex_->Height(0), 
 							p, 0, 0, 0, shadow_cube_one_tex_->Width(0), shadow_cube_one_tex_->Height(0));
-						checked_pointer_cast<LogGaussianBlurPostProcess>(sm_filter_pps_[p])->ESMScaleFactor(esm_scale_factor_, light_->SMCamera(p));
+						if (filter_shadow_)
+						{
+							checked_pointer_cast<LogGaussianBlurPostProcess>(sm_filter_pps_[p])->ESMScaleFactor(esm_scale_factor_, light_->SMCamera(p));
+						}
 						sm_filter_pps_[p]->Apply();
 					}
 

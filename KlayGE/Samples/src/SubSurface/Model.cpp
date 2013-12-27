@@ -103,14 +103,7 @@ void DetailedMesh::BackFaceDepthPass(bool dfdp)
 		}
 		else
 		{
-			if (pack_to_rgba_)
-			{
-				technique_ = technique_->Effect().TechniqueByName("BackFaceDepthTechWODepthTexturePack");
-			}
-			else
-			{
-				technique_ = technique_->Effect().TechniqueByName("BackFaceDepthTechWODepthTexture");
-			}
+			technique_ = technique_->Effect().TechniqueByName("BackFaceDepthTechWODepthTexture");
 		}
 	}
 	else
@@ -121,23 +114,14 @@ void DetailedMesh::BackFaceDepthPass(bool dfdp)
 		}
 		else
 		{
-			if (pack_to_rgba_)
-			{
-				technique_ = technique_->Effect().TechniqueByName("SubSurfaceTechWODepthTexturePack");
-			}
-			else
-			{
-				technique_ = technique_->Effect().TechniqueByName("SubSurfaceTechWODepthTexture");
-			}
+			technique_ = technique_->Effect().TechniqueByName("SubSurfaceTechWODepthTexture");
 		}
 	}
 }
 
-void DetailedMesh::BackFaceDepthTex(KlayGE::TexturePtr const & tex, bool pack_to_rgba)
+void DetailedMesh::BackFaceDepthTex(KlayGE::TexturePtr const & tex)
 {
 	*(technique_->Effect().ParameterByName("back_face_depth_tex")) = tex;
-
-	pack_to_rgba_ = pack_to_rgba;
 
 	App3DFramework const & app = Context::Instance().AppInstance();
 	Camera const & camera = app.ActiveCamera();
@@ -146,10 +130,7 @@ void DetailedMesh::BackFaceDepthTex(KlayGE::TexturePtr const & tex, bool pack_to
 		float q = camera.FarPlane() / (camera.FarPlane() - camera.NearPlane());
 		*(technique_->Effect().ParameterByName("near_q")) = float2(camera.NearPlane() * q, q);
 	}
-	if (pack_to_rgba_)
-	{
-		*(technique_->Effect().ParameterByName("far_plane")) = float2(camera.FarPlane(), 1.0f / camera.FarPlane());
-	}
+	*(technique_->Effect().ParameterByName("far_plane")) = float2(camera.FarPlane(), 1.0f / camera.FarPlane());
 }
 
 void DetailedMesh::SigmaT(float sigma_t)
@@ -225,11 +206,11 @@ void DetailedModel::BackFaceDepthPass(bool dfdp)
 	}
 }
 
-void DetailedModel::BackFaceDepthTex(KlayGE::TexturePtr const & tex, bool pack_to_rgba)
+void DetailedModel::BackFaceDepthTex(KlayGE::TexturePtr const & tex)
 {
 	for (StaticMeshesPtrType::iterator iter = meshes_.begin(); iter != meshes_.end(); ++ iter)
 	{
-		checked_pointer_cast<DetailedMesh>(*iter)->BackFaceDepthTex(tex, pack_to_rgba);
+		checked_pointer_cast<DetailedMesh>(*iter)->BackFaceDepthTex(tex);
 	}
 }
 

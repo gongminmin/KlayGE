@@ -68,6 +68,7 @@ private:
 	SM_TYPE sm_type_;
 
 	float esm_scale_factor_;
+	bool filter_shadow_;
 
 	KlayGE::UIDialogPtr dialog_;
 	int id_scale_factor_static_;

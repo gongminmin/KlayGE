@@ -131,8 +131,7 @@ namespace KlayGE
 		init_data.slice_pitch = 0;
 		init_data.data = &data_v[0];
 		ElementFormat fmt;
-		if (caps.texture_format_support(EF_R16F) && caps.rendertarget_format_support(EF_R16F, 1, 0)
-			&& caps.texture_format_support(EF_R32F) && caps.rendertarget_format_support(EF_R32F, 1, 0))
+		if (caps.texture_format_support(EF_R32F) && caps.rendertarget_format_support(EF_R32F, 1, 0))
 		{
 			fmt = EF_R32F;
 		}
@@ -250,7 +249,8 @@ namespace KlayGE
 
 		std::vector<TexturePtr> lum_texs(sum_lums_.size() + 1);
 		ElementFormat fmt;
-		if (caps.texture_format_support(EF_R16F) && caps.rendertarget_format_support(EF_R16F, 1, 0))
+		if (caps.texture_format_support(EF_R16F) && caps.rendertarget_format_support(EF_R16F, 1, 0)
+			&& caps.texture_format_support(EF_R32F) && caps.rendertarget_format_support(EF_R32F, 1, 0))
 		{
 			fmt = EF_R16F;
 		}
