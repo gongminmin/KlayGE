@@ -59,7 +59,7 @@ float4 SumLum4x4LogPS(float4 iTex0 : TEXCOORD0,
 	}
 
 	float ret = s / 4;
-#if PACK_TO_RGBA
+#if KLAYGE_PACK_TO_RGBA
 	return EncodeFloatRGBA(clamp(ret / 16 + 0.5f, 0, 0.999f));
 #else
 	return ret;
@@ -74,7 +74,7 @@ float4 SumLum4x4IterativePS(float4 iTex0 : TEXCOORD0,
 	float s = 0;
 	for (int i = 0; i < 2; ++ i)
 	{
-#if PACK_TO_RGBA
+#if KLAYGE_PACK_TO_RGBA
 		s += DecodeFloatRGBA(src_tex.Sample(src_sampler, tex[i].xy)) * 16 - 8;
 		s += DecodeFloatRGBA(src_tex.Sample(src_sampler, tex[i].zw)) * 16 - 8;
 #else
@@ -84,7 +84,7 @@ float4 SumLum4x4IterativePS(float4 iTex0 : TEXCOORD0,
 	}
 
 	float ret = s / 4;
-#if PACK_TO_RGBA
+#if KLAYGE_PACK_TO_RGBA
 	return EncodeFloatRGBA(clamp(ret / 16 + 0.5f, 0, 0.999f));
 #else
 	return ret;
@@ -94,20 +94,20 @@ float4 SumLum4x4IterativePS(float4 iTex0 : TEXCOORD0,
 float4 AdaptedLumPS(float4 tex0 : TEXCOORD0,
 				float4 tex1 : TEXCOORD1) : SV_Target
 {
-#if PACK_OUT_TO_RGBA
+#if KLAYGE_PACK_TO_RGBA
 	float adapted_lum = DecodeFloatRGBA(last_lum_tex.Sample(last_lum_sampler, 0.5f.xx)) * 16;
 #else
 	float adapted_lum = last_lum_tex.Sample(last_lum_sampler, 0.5f.xx).r;
 #endif
 
-#if PACK_IN_TO_RGBA
+#if KLAYGE_PACK_TO_RGBA
 	float current_lum = exp(DecodeFloatRGBA(src_tex.Sample(src_sampler, 0.5f.xx)) * 16 - 8);
 #else
 	float current_lum = exp(src_tex.Sample(src_sampler, 0.5f.xx).r);
 #endif
 
 	float ret = CalcAdaptedLum(adapted_lum, current_lum);
-#if PACK_OUT_TO_RGBA
+#if KLAYGE_PACK_TO_RGBA
 	return EncodeFloatRGBA(clamp(ret / 16, 0, 0.999f));
 #else
 	return ret;
@@ -126,10 +126,6 @@ float4 AdaptedLumPS(float4 tex0 : TEXCOORD0,
 		</pass>
 	</technique>
 
-	<technique name="SumLumLogPack" inherit="SumLumLog">
-		<macro name="PACK_TO_RGBA" value="1"/>
-	</technique>
-
 	<technique name="SumLumIterative">
 		<pass name="p0">
 			<state name="depth_enable" value="false"/>
@@ -138,10 +134,6 @@ float4 AdaptedLumPS(float4 tex0 : TEXCOORD0,
 			<state name="vertex_shader" value="SumLumVS()"/>
 			<state name="pixel_shader" value="SumLum4x4IterativePS()"/>
 		</pass>
-	</technique>
-
-	<technique name="SumLumIterativePack" inherit="SumLumIterative">
-		<macro name="PACK_TO_RGBA" value="1"/>
 	</technique>
 	
 	<technique name="AdaptedLum">
@@ -152,17 +144,6 @@ float4 AdaptedLumPS(float4 tex0 : TEXCOORD0,
 			<state name="vertex_shader" value="SumLumVS()"/>
 			<state name="pixel_shader" value="AdaptedLumPS()"/>
 		</pass>
-	</technique>
-
-	<technique name="AdaptedLumInPack" inherit="AdaptedLum">
-		<macro name="PACK_IN_TO_RGBA" value="1"/>
-	</technique>
-	<technique name="AdaptedLumOutPack" inherit="AdaptedLum">
-		<macro name="PACK_OUT_TO_RGBA" value="1"/>
-	</technique>
-	<technique name="AdaptedLumInOutPack" inherit="AdaptedLum">
-		<macro name="PACK_IN_TO_RGBA" value="1"/>
-		<macro name="PACK_OUT_TO_RGBA" value="1"/>
 	</technique>
 
 

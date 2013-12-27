@@ -1917,15 +1917,25 @@ namespace KlayGE
 		args.push_back("-DKLAYGE_NO_TEX_LOD=0");
 		args.push_back(flipping_str.c_str());
 		args.push_back(standard_derivatives_str.c_str());
-		if (!re.DeviceCaps().texture_format_support(EF_BC5)
-			|| !re.DeviceCaps().texture_format_support(EF_BC5_SRGB))
+		if (!caps.texture_format_support(EF_BC5)
+			|| !caps.texture_format_support(EF_BC5_SRGB))
 		{
 			args.push_back("-DKLAYGE_BC5_AS_AG");
 		}
-		if (!re.DeviceCaps().texture_format_support(EF_BC4)
-			|| !re.DeviceCaps().texture_format_support(EF_BC4_SRGB))
+		if (!caps.texture_format_support(EF_BC4)
+			|| !caps.texture_format_support(EF_BC4_SRGB))
 		{
 			args.push_back("-DKLAYGE_BC4_AS_G");
+		}
+		if (!((caps.texture_format_support(EF_B10G11R11F) && caps.rendertarget_format_support(EF_B10G11R11F, 1, 0))
+			|| (caps.texture_format_support(EF_ABGR16F) && caps.rendertarget_format_support(EF_ABGR16F, 1, 0))))
+		{
+			args.push_back("-DKLAYGE_NO_FP_TEXTURE");
+		}
+		if (!(caps.texture_format_support(EF_R16F) && caps.rendertarget_format_support(EF_R16F, 1, 0)
+			&& caps.texture_format_support(EF_R32F) && caps.rendertarget_format_support(EF_R32F, 1, 0)))
+		{
+			args.push_back("-DKLAYGE_PACK_TO_RGBA");
 		}
 		args.push_back(nullptr);
 

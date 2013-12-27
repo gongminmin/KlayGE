@@ -1,5 +1,5 @@
 // OGLESShaderObject.cpp
-// KlayGE OpenGL ES2 shader对象类 实现文件
+// KlayGE OpenGL ES shader对象类 实现文件
 // Ver 3.11.0
 // 版权所有(C) 龚敏敏, 2010
 // Homepage: http://www.klayge.org
@@ -2110,8 +2110,8 @@ namespace KlayGE
 		args.push_back(no_tex_lod_str.c_str());
 		args.push_back(flipping_str.c_str());
 		args.push_back(standard_derivatives_str.c_str());
-		if (!re.DeviceCaps().texture_format_support(EF_BC5)
-			|| !re.DeviceCaps().texture_format_support(EF_BC5_SRGB))
+		if (!caps.texture_format_support(EF_BC5)
+			|| !caps.texture_format_support(EF_BC5_SRGB))
 		{
 			args.push_back("-DKLAYGE_BC5_AS_AG");
 		}
@@ -2119,10 +2119,20 @@ namespace KlayGE
 		{
 			args.push_back("-DKLAYGE_BC5_AS_GA");
 		}		
-		if (!re.DeviceCaps().texture_format_support(EF_BC4)
-			|| !re.DeviceCaps().texture_format_support(EF_BC4_SRGB))
+		if (!caps.texture_format_support(EF_BC4)
+			|| !caps.texture_format_support(EF_BC4_SRGB))
 		{
 			args.push_back("-DKLAYGE_BC4_AS_G");
+		}
+		if (!((caps.texture_format_support(EF_B10G11R11F) && caps.rendertarget_format_support(EF_B10G11R11F, 1, 0))
+			|| (caps.texture_format_support(EF_ABGR16F) && caps.rendertarget_format_support(EF_ABGR16F, 1, 0))))
+		{
+			args.push_back("-DKLAYGE_NO_FP_TEXTURE");
+		}
+		if (!(caps.texture_format_support(EF_R16F) && caps.rendertarget_format_support(EF_R16F, 1, 0)
+			&& caps.texture_format_support(EF_R32F) && caps.rendertarget_format_support(EF_R32F, 1, 0)))
+		{
+			args.push_back("-DKLAYGE_PACK_TO_RGBA");
 		}
 		args.push_back(nullptr);
 

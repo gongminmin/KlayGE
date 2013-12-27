@@ -86,12 +86,6 @@ namespace KlayGE
 	SumLumLogPostProcess::SumLumLogPostProcess()
 			: SumLumPostProcess(SyncLoadRenderEffect("SumLum.fxml")->TechniqueByName("SumLumLog"))
 	{
-		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-		RenderDeviceCaps const & caps = rf.RenderEngineInstance().DeviceCaps();
-		if (!(caps.texture_format_support(EF_R16F) && caps.rendertarget_format_support(EF_R16F, 1, 0)))
-		{
-			this->Technique(technique_->Effect().TechniqueByName("SumLumLogPack"));
-		}
 	}
 
 
@@ -117,12 +111,6 @@ namespace KlayGE
 	SumLumIterativePostProcess::SumLumIterativePostProcess()
 			: SumLumPostProcess(SyncLoadRenderEffect("SumLum.fxml")->TechniqueByName("SumLumIterative"))
 	{
-		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-		RenderDeviceCaps const & caps = rf.RenderEngineInstance().DeviceCaps();
-		if (!(caps.texture_format_support(EF_R16F) && caps.rendertarget_format_support(EF_R16F, 1, 0)))
-		{
-			this->Technique(technique_->Effect().TechniqueByName("SumLumIterativePack"));
-		}
 	}
 
 
@@ -142,49 +130,24 @@ namespace KlayGE
 		init_data.row_pitch = sizeof(int);
 		init_data.slice_pitch = 0;
 		init_data.data = &data_v[0];
-		bool pack_out_to_rgba;
 		ElementFormat fmt;
-		if (caps.texture_format_support(EF_R32F) && caps.rendertarget_format_support(EF_R32F, 1, 0))
+		if (caps.texture_format_support(EF_R16F) && caps.rendertarget_format_support(EF_R16F, 1, 0)
+			&& caps.texture_format_support(EF_R32F) && caps.rendertarget_format_support(EF_R32F, 1, 0))
 		{
 			fmt = EF_R32F;
-			pack_out_to_rgba = false;
 		}
 		else if (caps.texture_format_support(EF_ABGR8) && caps.rendertarget_format_support(EF_ABGR8, 1, 0))
 		{
 			fmt = EF_ABGR8;
-			pack_out_to_rgba = true;
 		}
 		else
 		{
 			BOOST_ASSERT(caps.texture_format_support(EF_ARGB8) && caps.rendertarget_format_support(EF_ARGB8, 1, 0));
 
 			fmt = EF_ARGB8;
-			pack_out_to_rgba = true;
 		}
 
-		bool pack_in_to_rgba = true;
-		if (caps.texture_format_support(EF_R16F) && caps.rendertarget_format_support(EF_R16F, 1, 0))
-		{
-			pack_in_to_rgba = false;
-		}
-
-		RenderEffectPtr effect = SyncLoadRenderEffect("SumLum.fxml");
-		if (pack_in_to_rgba && pack_out_to_rgba)
-		{
-			this->Technique(effect->TechniqueByName("AdaptedLumInOutPack"));
-		}
-		else if (pack_in_to_rgba)
-		{
-			this->Technique(effect->TechniqueByName("AdaptedLumInPack"));
-		}
-		else if (pack_out_to_rgba)
-		{
-			this->Technique(effect->TechniqueByName("AdaptedLumOutPack"));
-		}
-		else
-		{
-			this->Technique(effect->TechniqueByName("AdaptedLum"));
-		}
+		this->Technique(SyncLoadRenderEffect("SumLum.fxml")->TechniqueByName("AdaptedLum"));
 
 		adapted_textures_[0] = rf.MakeTexture2D(1, 1, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, &init_data);
 		adapted_textures_[1] = rf.MakeTexture2D(1, 1, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, &init_data);
@@ -247,13 +210,6 @@ namespace KlayGE
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 		RenderDeviceCaps const & caps = rf.RenderEngineInstance().DeviceCaps();
 
-		bool fp_texture_support = false;
-		if ((caps.texture_format_support(EF_B10G11R11F) && caps.rendertarget_format_support(EF_B10G11R11F, 1, 0))
-			|| (caps.texture_format_support(EF_ABGR16F) && caps.rendertarget_format_support(EF_ABGR16F, 1, 0)))
-		{
-			fp_texture_support = true;
-		}
-
 		input_pins_.push_back(std::make_pair("src_tex", TexturePtr()));
 		input_pins_.push_back(std::make_pair("lum_tex", TexturePtr()));
 		input_pins_.push_back(std::make_pair("bloom_tex", TexturePtr()));
@@ -264,39 +220,11 @@ namespace KlayGE
 		RenderTechniquePtr tech;
 		if (caps.max_shader_model >= 3)
 		{
-			if (fp_texture_support)
-			{
-				if (caps.texture_format_support(EF_R32F) && caps.rendertarget_format_support(EF_R32F, 1, 0))
-				{
-					tech = effect->TechniqueByName("ToneMapping30");
-				}
-				else
-				{
-					tech = effect->TechniqueByName("ToneMapping30Pack");
-				}
-			}
-			else
-			{
-				tech = effect->TechniqueByName("ToneMapping30NoFP");
-			}
+			tech = effect->TechniqueByName("ToneMapping30");
 		}
 		else
 		{
-			if (fp_texture_support)
-			{
-				if (caps.texture_format_support(EF_R32F) && caps.rendertarget_format_support(EF_R32F, 1, 0))
-				{
-					tech = effect->TechniqueByName("ToneMapping20");
-				}
-				else
-				{
-					tech = effect->TechniqueByName("ToneMapping20Pack");
-				}
-			}
-			else
-			{
-				tech = effect->TechniqueByName("ToneMapping20NoFP");
-			}
+			tech = effect->TechniqueByName("ToneMapping20");
 		}
 
 		this->Technique(tech);
