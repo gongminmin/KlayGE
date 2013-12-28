@@ -211,20 +211,21 @@ void SubSurfaceApp::OnResize(uint32_t width, uint32_t height)
 	}
 	else
 	{
-		if (caps.texture_format_support(EF_R16F) && caps.rendertarget_format_support(EF_R16F, 1, 0)
-			&& caps.texture_format_support(EF_R32F) && caps.rendertarget_format_support(EF_R32F, 1, 0))
+		if (caps.pack_to_rgba_required)
 		{
-			fmt = EF_R16F;
-		}
-		else if (caps.texture_format_support(EF_ABGR8) && caps.rendertarget_format_support(EF_ABGR8, 1, 0))
-		{
-			fmt = EF_ABGR8;
+			if (caps.texture_format_support(EF_ABGR8) && caps.rendertarget_format_support(EF_ABGR8, 1, 0))
+			{
+				fmt = EF_ABGR8;
+			}
+			else
+			{
+				BOOST_ASSERT(caps.texture_format_support(EF_ARGB8) && caps.rendertarget_format_support(EF_ARGB8, 1, 0));
+				fmt = EF_ARGB8;
+			}
 		}
 		else
 		{
-			BOOST_ASSERT(caps.texture_format_support(EF_ARGB8) && caps.rendertarget_format_support(EF_ARGB8, 1, 0));
-
-			fmt = EF_ARGB8;
+			fmt = EF_R16F;
 		}
 		back_face_depth_tex = rf.MakeTexture2D(width, height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
 		back_face_ds_view = rf.Make2DDepthStencilRenderView(width, height, EF_D16, 1, 0);

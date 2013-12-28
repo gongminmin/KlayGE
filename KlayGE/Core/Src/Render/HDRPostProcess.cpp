@@ -131,19 +131,21 @@ namespace KlayGE
 		init_data.slice_pitch = 0;
 		init_data.data = &data_v[0];
 		ElementFormat fmt;
-		if (caps.texture_format_support(EF_R32F) && caps.rendertarget_format_support(EF_R32F, 1, 0))
+		if (caps.pack_to_rgba_required)
 		{
-			fmt = EF_R32F;
-		}
-		else if (caps.texture_format_support(EF_ABGR8) && caps.rendertarget_format_support(EF_ABGR8, 1, 0))
-		{
-			fmt = EF_ABGR8;
+			if (caps.texture_format_support(EF_ABGR8) && caps.rendertarget_format_support(EF_ABGR8, 1, 0))
+			{
+				fmt = EF_ABGR8;
+			}
+			else
+			{
+				BOOST_ASSERT(caps.texture_format_support(EF_ARGB8) && caps.rendertarget_format_support(EF_ARGB8, 1, 0));
+				fmt = EF_ARGB8;
+			}
 		}
 		else
 		{
-			BOOST_ASSERT(caps.texture_format_support(EF_ARGB8) && caps.rendertarget_format_support(EF_ARGB8, 1, 0));
-
-			fmt = EF_ARGB8;
+			fmt = EF_R32F;
 		}
 
 		this->Technique(SyncLoadRenderEffect("SumLum.fxml")->TechniqueByName("AdaptedLum"));
@@ -249,20 +251,21 @@ namespace KlayGE
 
 		std::vector<TexturePtr> lum_texs(sum_lums_.size() + 1);
 		ElementFormat fmt;
-		if (caps.texture_format_support(EF_R16F) && caps.rendertarget_format_support(EF_R16F, 1, 0)
-			&& caps.texture_format_support(EF_R32F) && caps.rendertarget_format_support(EF_R32F, 1, 0))
+		if (caps.pack_to_rgba_required)
 		{
-			fmt = EF_R16F;
-		}
-		else if (caps.texture_format_support(EF_ABGR8) && caps.rendertarget_format_support(EF_ABGR8, 1, 0))
-		{
-			fmt = EF_ABGR8;
+			if (caps.texture_format_support(EF_ABGR8) && caps.rendertarget_format_support(EF_ABGR8, 1, 0))
+			{
+				fmt = EF_ABGR8;
+			}
+			else
+			{
+				BOOST_ASSERT(caps.texture_format_support(EF_ARGB8) && caps.rendertarget_format_support(EF_ARGB8, 1, 0));
+				fmt = EF_ARGB8;
+			}
 		}
 		else
 		{
-			BOOST_ASSERT(caps.texture_format_support(EF_ARGB8) && caps.rendertarget_format_support(EF_ARGB8, 1, 0));
-
-			fmt = EF_ARGB8;
+			fmt = EF_R16F;
 		}
 
 		int len = 1;
@@ -622,12 +625,7 @@ namespace KlayGE
 		RenderDeviceCaps const & caps = Context::Instance().RenderFactoryInstance().RenderEngineInstance().DeviceCaps();
 		cs_support_ = caps.cs_support && (caps.max_shader_model >= 5);
 
-		fp_texture_support_ = false;
-		if ((caps.texture_format_support(EF_B10G11R11F) && caps.rendertarget_format_support(EF_B10G11R11F, 1, 0))
-			|| (caps.texture_format_support(EF_ABGR16F) && caps.rendertarget_format_support(EF_ABGR16F, 1, 0)))
-		{
-			fp_texture_support_ = true;
-		}
+		fp_texture_support_ = caps.fp_color_support;
 
 		if (fp_texture_support_)
 		{

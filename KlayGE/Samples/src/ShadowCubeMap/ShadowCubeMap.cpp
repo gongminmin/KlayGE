@@ -613,22 +613,23 @@ void ShadowCubeMap::InitObjects()
 		fmt = EF_D16;
 	}
 	RenderViewPtr depth_view = rf.Make2DDepthStencilRenderView(SHADOW_MAP_SIZE, SHADOW_MAP_SIZE, fmt, 1, 0);
-	if (caps.texture_format_support(EF_R16F) && caps.rendertarget_format_support(EF_R16F, 1, 0)
-		&& caps.texture_format_support(EF_R32F) && caps.rendertarget_format_support(EF_R32F, 1, 0))
+	if (caps.pack_to_rgba_required)
 	{
-		fmt = EF_R16F;
-		filter_shadow_ = true;
-	}
-	else if (caps.texture_format_support(EF_ABGR8) && caps.rendertarget_format_support(EF_ABGR8, 1, 0))
-	{
-		fmt = EF_ABGR8;
 		filter_shadow_ = false;
+		if (caps.texture_format_support(EF_ABGR8) && caps.rendertarget_format_support(EF_ABGR8, 1, 0))
+		{
+			fmt = EF_ABGR8;
+		}
+		else
+		{
+			BOOST_ASSERT(caps.texture_format_support(EF_ARGB8) && caps.rendertarget_format_support(EF_ARGB8, 1, 0));
+			fmt = EF_ARGB8;
+		}
 	}
 	else
 	{
-		BOOST_ASSERT(caps.texture_format_support(EF_ARGB8) && caps.rendertarget_format_support(EF_ARGB8, 1, 0));
-		fmt = EF_ARGB8;
-		filter_shadow_ = false;
+		fmt = EF_R16F;
+		filter_shadow_ = true;
 	}
 	shadow_tex_ = rf.MakeTexture2D(SHADOW_MAP_SIZE, SHADOW_MAP_SIZE, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
 	shadow_cube_buffer_ = rf.MakeFrameBuffer();
