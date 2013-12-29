@@ -117,7 +117,7 @@ float4 DepthPS(float3 texcoord_depth : TEXCOORD0) : SV_Target
 float4 DepthAlphaTestPS(float3 texcoord_depth : TEXCOORD0) : SV_Target
 {
 	clip(diffuse_tex.Sample(bilinear_sampler, texcoord_depth.xy).a - ALPHA_TEST_THRESHOLD);
-	return texcoord_depth.z;
+	return WriteAFloat(texcoord_depth.z, far_plane.y);
 }
 
 float4 DepthAlphaBlendPS(float3 texcoord_depth : TEXCOORD0,
@@ -133,7 +133,7 @@ float4 DepthAlphaBlendPS(float3 texcoord_depth : TEXCOORD0,
 #endif
 
 	clip(ReadAFloat(opaque_depth_tex.Sample(point_sampler, screen_tc), far_plane.x) - texcoord_depth.z);	
-	return texcoord_depth.z;
+	return WriteAFloat(texcoord_depth.z, far_plane.y);
 }
 
 void GBufferVS(float4 pos : POSITION,
@@ -786,14 +786,13 @@ void GenShadowMapWODepthTextureVS(float4 pos : POSITION,
 
 float4 GenShadowMapWODepthTexturePS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Target
 {
-	return length(view_dir);
+	return WriteAFloat(length(view_dir), far_plane.y);
 }
 
 float4 GenShadowMapWODepthTextureAlphaTestPS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Target
 {
-	clip(diffuse_tex.Sample(bilinear_sampler, tc).a - ALPHA_TEST_THRESHOLD);
-	
-	return length(view_dir);
+	clip(diffuse_tex.Sample(bilinear_sampler, tc).a - ALPHA_TEST_THRESHOLD);	
+	return WriteAFloat(length(view_dir), far_plane.y);
 }
 
 void GenCascadedShadowMapVS(float4 pos : POSITION,
@@ -813,14 +812,13 @@ void GenCascadedShadowMapVS(float4 pos : POSITION,
 
 float4 GenCascadedShadowMapPS(float2 tc : TEXCOORD0, float depth : TEXCOORD1) : SV_Target
 {
-	return depth;
+	return WriteAFloat(depth, far_plane.y);
 }
 
 float4 GenCascadedShadowMapAlphaTestPS(float2 tc : TEXCOORD0, float depth : TEXCOORD1) : SV_Target
 {
 	clip(diffuse_tex.Sample(bilinear_sampler, tc).a - ALPHA_TEST_THRESHOLD);
-
-	return depth;
+	return WriteAFloat(depth, far_plane.y);
 }
 		]]>
 	</shader>

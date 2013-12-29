@@ -370,6 +370,7 @@ namespace KlayGE
 		RenderEffectParameterPtr projective_shadowing_tex_param_;
 		RenderEffectParameterPtr shadowing_channel_param_;
 		RenderEffectParameterPtr esm_scale_factor_param_;
+		RenderEffectParameterPtr sm_far_plane_param_;
 		RenderEffectParameterPtr near_q_param_;
 		RenderEffectParameterPtr cascade_intervals_param_;
 		RenderEffectParameterPtr cascade_scale_bias_param_;

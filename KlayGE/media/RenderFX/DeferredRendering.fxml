@@ -10,6 +10,7 @@
 	</cbuffer>
 
 	<parameter type="float" name="esm_scale_factor"/>
+	<parameter type="float" name="sm_far_plane"/>
 
 	<cbuffer name="light_sources">
 		<parameter type="float4x4" name="light_view_proj"/>
@@ -111,7 +112,7 @@ float4 ESM_Omnidirectional(float3 dir_ls, float len)
 	float shadow = 1;
 	if (light_attrib.z > 0)
 	{
-		float occluder = ReadAFloat(filtered_sm_cube_tex.Sample(linear_sampler, dir_ls), depth_near_far_invfar.y * esm_scale_factor);
+		float occluder = ReadAFloat(filtered_sm_cube_tex.Sample(linear_sampler, dir_ls), sm_far_plane * esm_scale_factor);
 		shadow = Calc_ESM(occluder, len);
 	}
 
@@ -134,7 +135,7 @@ float4 ESM_Directional(float3 pos_es, float len)
 	float shadow = 1;
 	if (light_attrib.z > 0)
 	{
-		float occluder = ReadAFloat(filtered_sm_2d_tex.Sample(linear_sampler, light_proj_pos.xy), depth_near_far_invfar.y * esm_scale_factor);
+		float occluder = ReadAFloat(filtered_sm_2d_tex.Sample(linear_sampler, light_proj_pos.xy), sm_far_plane * esm_scale_factor);
 		shadow = Calc_ESM(occluder, len);
 	}
 	
@@ -168,28 +169,28 @@ float4 ESM_Sun(float3 pos_es, float len)
 
 #if KLAYGE_MAX_TEX_ARRAY_LEN >= 4
 				float occluder = ReadAFloat(filtered_csm_tex_array.SampleGrad(aniso_sampler, float3(shadow_tc, i),
-					shadow_tc_ddx_ddy.xy, shadow_tc_ddx_ddy.zw), depth_near_far_invfar.y * esm_scale_factor);
+					shadow_tc_ddx_ddy.xy, shadow_tc_ddx_ddy.zw), sm_far_plane * esm_scale_factor);
 #else
 				float occluder;
 				if (0 == i)
 				{
 					occluder = ReadAFloat(filtered_csm_0_tex.SampleGrad(aniso_sampler, shadow_tc,
-						shadow_tc_ddx_ddy.xy, shadow_tc_ddx_ddy.zw), depth_near_far_invfar.y * esm_scale_factor);
+						shadow_tc_ddx_ddy.xy, shadow_tc_ddx_ddy.zw), sm_far_plane * esm_scale_factor);
 				}
 				else if (1 == i)
 				{
 					occluder = ReadAFloat(filtered_csm_1_tex.SampleGrad(aniso_sampler, shadow_tc,
-						shadow_tc_ddx_ddy.xy, shadow_tc_ddx_ddy.zw), depth_near_far_invfar.y * esm_scale_factor);
+						shadow_tc_ddx_ddy.xy, shadow_tc_ddx_ddy.zw), sm_far_plane * esm_scale_factor);
 				}
 				else if (2 == i)
 				{
 					occluder = ReadAFloat(filtered_csm_2_tex.SampleGrad(aniso_sampler, shadow_tc,
-						shadow_tc_ddx_ddy.xy, shadow_tc_ddx_ddy.zw), depth_near_far_invfar.y * esm_scale_factor);
+						shadow_tc_ddx_ddy.xy, shadow_tc_ddx_ddy.zw), sm_far_plane * esm_scale_factor);
 				}
 				else
 				{
 					occluder = ReadAFloat(filtered_csm_3_tex.SampleGrad(aniso_sampler, shadow_tc,
-						shadow_tc_ddx_ddy.xy, shadow_tc_ddx_ddy.zw), depth_near_far_invfar.y * esm_scale_factor);
+						shadow_tc_ddx_ddy.xy, shadow_tc_ddx_ddy.zw), sm_far_plane * esm_scale_factor);
 				}
 #endif
 				shadow += Calc_ESM(occluder, len);

@@ -561,6 +561,7 @@ namespace KlayGE
 		projective_shadowing_tex_param_ = dr_effect_->ParameterByName("projective_shadowing_tex");
 		shadowing_channel_param_ = dr_effect_->ParameterByName("shadowing_channel");
 		esm_scale_factor_param_ = dr_effect_->ParameterByName("esm_scale_factor");
+		sm_far_plane_param_ = dr_effect_->ParameterByName("sm_far_plane");
 		near_q_param_ = dr_effect_->ParameterByName("near_q");
 		cascade_intervals_param_ = dr_effect_->ParameterByName("cascade_intervals");
 		cascade_scale_bias_param_ = dr_effect_->ParameterByName("cascade_scale_bias");
@@ -801,13 +802,13 @@ namespace KlayGE
 		{
 			if (caps.pack_to_rgba_required)
 			{
-				pvp.filtered_csm_texs[0] = rf.MakeTexture2D(SM_SIZE * 2, SM_SIZE * 2, 3,
-					CascadedShadowLayer::MAX_NUM_CASCADES, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write | EAH_Generate_Mips, nullptr);
+				pvp.filtered_csm_texs[0] = rf.MakeTexture2D(SM_SIZE * 2, SM_SIZE * 2, 1,
+					CascadedShadowLayer::MAX_NUM_CASCADES, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
 			}
 			else
 			{
-				pvp.filtered_csm_texs[0] = rf.MakeTexture2D(SM_SIZE * 2, SM_SIZE * 2, 1,
-					CascadedShadowLayer::MAX_NUM_CASCADES, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
+				pvp.filtered_csm_texs[0] = rf.MakeTexture2D(SM_SIZE * 2, SM_SIZE * 2, 3,
+					CascadedShadowLayer::MAX_NUM_CASCADES, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write | EAH_Generate_Mips, nullptr);
 			}
 		}
 		else
@@ -816,16 +817,16 @@ namespace KlayGE
 			{
 				for (size_t i = 0; i < pvp.filtered_csm_texs.size(); ++ i)
 				{
-					pvp.filtered_csm_texs[i] = rf.MakeTexture2D(SM_SIZE * 2, SM_SIZE * 2, 3, 1, fmt, 1, 0,
-						EAH_GPU_Read | EAH_GPU_Write | EAH_Generate_Mips, nullptr);
+					pvp.filtered_csm_texs[i] = rf.MakeTexture2D(SM_SIZE * 2, SM_SIZE * 2, 1, 1, fmt, 1, 0,
+						EAH_GPU_Read | EAH_GPU_Write, nullptr);
 				}
 			}
 			else
 			{
 				for (size_t i = 0; i < pvp.filtered_csm_texs.size(); ++ i)
 				{
-					pvp.filtered_csm_texs[i] = rf.MakeTexture2D(SM_SIZE * 2, SM_SIZE * 2, 1, 1, fmt, 1, 0,
-						EAH_GPU_Read | EAH_GPU_Write, nullptr);
+					pvp.filtered_csm_texs[i] = rf.MakeTexture2D(SM_SIZE * 2, SM_SIZE * 2, 3, 1, fmt, 1, 0,
+						EAH_GPU_Read | EAH_GPU_Write | EAH_Generate_Mips, nullptr);
 				}
 			}
 		}
@@ -2221,6 +2222,7 @@ namespace KlayGE
 		if (sm_camera)
 		{
 			*esm_scale_factor_param_ = ESM_SCALE_FACTOR / (sm_camera->FarPlane() - sm_camera->NearPlane());
+			*sm_far_plane_param_ = sm_camera->FarPlane();
 		}
 
 		re.Render(*technique_shadows_[type][shadowing_channel], *light_volume_rl_[type]);
