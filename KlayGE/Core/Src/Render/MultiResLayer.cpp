@@ -82,6 +82,7 @@ namespace KlayGE
 		subsplat_depth_deriv_tex_param_ = subsplat_stencil_effect->ParameterByName("depth_deriv_tex");
 		subsplat_normal_cone_tex_param_ = subsplat_stencil_effect->ParameterByName("normal_cone_tex");
 		subsplat_depth_normal_threshold_param_ = subsplat_stencil_effect->ParameterByName("depth_normal_threshold");
+		subsplat_far_plane_param_ = subsplat_stencil_effect->ParameterByName("far_plane");
 
 		upsampling_pp_ = SyncLoadPostProcess("MultiRes.ppml", "Upsampling");
 	}
@@ -111,21 +112,28 @@ namespace KlayGE
 		}
 
 		ElementFormat depth_fmt;
-		if (caps.rendertarget_format_support(EF_R16F, 1, 0))
+		if (caps.pack_to_rgba_required)
 		{
-			depth_fmt = EF_R16F;
-		}
-		else
-		{
-			if (caps.rendertarget_format_support(EF_R32F, 1, 0))
+			if (caps.rendertarget_format_support(EF_ABGR8, 1, 0))
 			{
-				depth_fmt = EF_R32F;
+				depth_fmt = EF_ABGR8;
 			}
 			else
 			{
-				BOOST_ASSERT(caps.rendertarget_format_support(EF_ABGR16F, 1, 0));
-
-				depth_fmt = EF_ABGR16F;
+				BOOST_ASSERT(caps.rendertarget_format_support(EF_ARGB8, 1, 0));
+				depth_fmt = EF_ARGB8;
+			}
+		}
+		else
+		{
+			if (caps.rendertarget_format_support(EF_R16F, 1, 0))
+			{
+				depth_fmt = EF_R16F;
+			}
+			else
+			{
+				BOOST_ASSERT(caps.rendertarget_format_support(EF_R32F, 1, 0));
+				depth_fmt = EF_R32F;
 			}
 		}
 
@@ -162,7 +170,7 @@ namespace KlayGE
 	{
 		if (multi_res_tex_->NumMipMaps() > 1)
 		{
-			this->CreateDepthDerivativeMipMap();
+			this->CreateDepthDerivativeMipMap(vp_camera);
 			this->CreateNormalConeMipMap();
 			this->SetSubsplatStencil(vp_camera);
 		}
@@ -174,7 +182,7 @@ namespace KlayGE
 		}
 	}
 
-	void MultiResLayer::CreateDepthDerivativeMipMap()
+	void MultiResLayer::CreateDepthDerivativeMipMap(CameraPtr const & vp_camera)
 	{
 		gbuffer_to_depth_derivate_pp_->InputPin(0, g_buffer_rt0_tex_);
 		gbuffer_to_depth_derivate_pp_->InputPin(1, g_buffer_depth_tex_);
@@ -183,6 +191,7 @@ namespace KlayGE
 		float delta_y = 1.0f / g_buffer_rt0_tex_->Height(0);
 		float4 delta_offset(delta_x, delta_y, delta_x / 2, delta_y / 2);
 		gbuffer_to_depth_derivate_pp_->SetParam(0, delta_offset);
+		gbuffer_to_depth_derivate_pp_->SetParam(1, float2(vp_camera->FarPlane(), 1.0f / vp_camera->FarPlane()));
 		gbuffer_to_depth_derivate_pp_->Apply();
 
 		depth_derivate_mipmap_pp_->InputPin(0, depth_deriative_tex_);
@@ -196,6 +205,7 @@ namespace KlayGE
 			float4 delta_offset(delta_x, delta_y, delta_x / 2, delta_y / 2);			
 			depth_derivate_mipmap_pp_->SetParam(0, delta_offset);
 			depth_derivate_mipmap_pp_->SetParam(1, i - 1.0f);
+			depth_derivate_mipmap_pp_->SetParam(2, float2(vp_camera->FarPlane(), 1.0f / vp_camera->FarPlane()));
 			
 			depth_derivate_mipmap_pp_->OutputPin(0, depth_deriative_small_tex_, i - 1);
 			depth_derivate_mipmap_pp_->Apply();
@@ -240,6 +250,7 @@ namespace KlayGE
 		*subsplat_depth_deriv_tex_param_ = depth_deriative_tex_;
 		*subsplat_normal_cone_tex_param_ = normal_cone_tex_;
 		*subsplat_depth_normal_threshold_param_ = float2(0.001f * vp_camera->FarPlane(), 0.77f);
+		*subsplat_far_plane_param_ = float2(vp_camera->FarPlane(), 1.0f / vp_camera->FarPlane());
 
 		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 		for (size_t i = 0; i < multi_res_fbs_.size(); ++ i)

@@ -311,6 +311,7 @@ namespace KlayGE
 
 		RenderEffectParameterPtr mvp_param_;
 		RenderEffectParameterPtr model_view_param_;
+		RenderEffectParameterPtr far_plane_param_;
 		RenderEffectParameterPtr pos_center_param_;
 		RenderEffectParameterPtr pos_extent_param_;
 		RenderEffectParameterPtr tc_center_param_;

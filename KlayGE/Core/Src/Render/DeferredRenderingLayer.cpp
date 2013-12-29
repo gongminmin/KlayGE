@@ -429,19 +429,29 @@ namespace KlayGE
 
 		sm_fb_ = rf.MakeFrameBuffer();
 		ElementFormat fmt;
-		if (caps.rendertarget_format_support(EF_R32F, 1, 0))
+		if (caps.pack_to_rgba_required)
 		{
-			fmt = EF_R32F;
-		}
-		else if (caps.rendertarget_format_support(EF_R16F, 1, 0))
-		{
-			fmt = EF_R16F;
+			if (caps.rendertarget_format_support(EF_ABGR8, 1, 0))
+			{
+				fmt = EF_ABGR8;
+			}
+			else
+			{
+				BOOST_ASSERT(caps.rendertarget_format_support(EF_ARGB8, 1, 0));
+				fmt = EF_ARGB8;
+			}
 		}
 		else
 		{
-			BOOST_ASSERT(caps.rendertarget_format_support(EF_ABGR16F, 1, 0));
-
-			fmt = EF_ABGR16F;
+			if (caps.rendertarget_format_support(EF_R32F, 1, 0))
+			{
+				fmt = EF_R32F;
+			}
+			else
+			{
+				BOOST_ASSERT(caps.rendertarget_format_support(EF_R16F, 1, 0));
+				fmt = EF_R16F;
+			}
 		}
 		sm_tex_ = rf.MakeTexture2D(SM_SIZE, SM_SIZE, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
 		sm_fb_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*sm_tex_, 0, 1, 0));
@@ -508,7 +518,14 @@ namespace KlayGE
 		}
 
 
-		sm_filter_pp_ = MakeSharedPtr<LogGaussianBlurPostProcess>(4, true);
+		if (caps.pack_to_rgba_required)
+		{
+			sm_filter_pp_ = SyncLoadPostProcess("Copy.ppml", "copy");
+		}
+		else
+		{
+			sm_filter_pp_ = MakeSharedPtr<LogGaussianBlurPostProcess>(4, true);
+		}
 		if (depth_texture_support_)
 		{
 			depth_to_esm_pp_ = SyncLoadPostProcess("DepthToSM.ppml", "DepthToESM");
@@ -639,21 +656,28 @@ namespace KlayGE
 			fmt8 = EF_ARGB8;
 		}
 		ElementFormat depth_fmt;
-		if (caps.rendertarget_format_support(EF_R16F, 1, 0))
+		if (caps.pack_to_rgba_required)
 		{
-			depth_fmt = EF_R16F;
-		}
-		else
-		{
-			if (caps.rendertarget_format_support(EF_R32F, 1, 0))
+			if (caps.rendertarget_format_support(EF_ABGR8, 1, 0))
 			{
-				depth_fmt = EF_R32F;
+				depth_fmt = EF_ABGR8;
 			}
 			else
 			{
-				BOOST_ASSERT(caps.rendertarget_format_support(EF_ABGR16F, 1, 0));
-
-				depth_fmt = EF_ABGR16F;
+				BOOST_ASSERT(caps.rendertarget_format_support(EF_ARGB8, 1, 0));
+				depth_fmt = EF_ARGB8;
+			}
+		}
+		else
+		{
+			if (caps.rendertarget_format_support(EF_R16F, 1, 0))
+			{
+				depth_fmt = EF_R16F;
+			}
+			else
+			{
+				BOOST_ASSERT(caps.rendertarget_format_support(EF_R32F, 1, 0));
+				depth_fmt = EF_R32F;
 			}
 		}
 
@@ -668,11 +692,11 @@ namespace KlayGE
 			else
 			{
 				BOOST_ASSERT(caps.texture_format_support(EF_D16));
-				
+
 				ds_fmt = EF_D16;
 			}
 
-			pvp.g_buffer_ds_tex = rf.MakeTexture2D(width, height, 1, 1, ds_fmt, 1, 0,  EAH_GPU_Read | EAH_GPU_Write, nullptr);
+			pvp.g_buffer_ds_tex = rf.MakeTexture2D(width, height, 1, 1, ds_fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
 			ds_view = rf.Make2DDepthStencilRenderView(*pvp.g_buffer_ds_tex, 0, 0, 0);
 		}
 		else
@@ -684,8 +708,16 @@ namespace KlayGE
 			EAH_GPU_Read | EAH_GPU_Write | EAH_Generate_Mips, nullptr);
 		pvp.g_buffer_rt1_tex = rf.MakeTexture2D(width, height, 1, 1, fmt8, 1, 0,
 			EAH_GPU_Read | EAH_GPU_Write, nullptr);
-		pvp.g_buffer_depth_tex = rf.MakeTexture2D(width, height, MAX_IL_MIPMAP_LEVELS + 1, 1, depth_fmt, 1, 0,
+		if (caps.pack_to_rgba_required)
+		{
+			pvp.g_buffer_depth_tex = rf.MakeTexture2D(width, height, 1, 1, depth_fmt, 1, 0,
+				EAH_GPU_Read | EAH_GPU_Write, nullptr);
+		}
+		else
+		{
+			pvp.g_buffer_depth_tex = rf.MakeTexture2D(width, height, MAX_IL_MIPMAP_LEVELS + 1, 1, depth_fmt, 1, 0,
 				EAH_GPU_Read | EAH_GPU_Write | EAH_Generate_Mips, nullptr);
+		}
 		pvp.g_buffer_rt0_backup_tex = rf.MakeTexture2D(width, height, 1, 1, fmt8, 1, 0,
 			EAH_GPU_Read, nullptr);
 #if DEFAULT_DEFERRED == LIGHT_INDEXED_DEFERRED
@@ -741,31 +773,60 @@ namespace KlayGE
 		this->SetupViewportGI(index, false);
 
 		ElementFormat fmt;
-		if (caps.rendertarget_format_support(EF_R32F, 1, 0))
+		if (caps.pack_to_rgba_required)
 		{
-			fmt = EF_R32F;
-		}
-		else if (caps.rendertarget_format_support(EF_R16F, 1, 0))
-		{
-			fmt = EF_R16F;
+			if (caps.rendertarget_format_support(EF_ABGR8, 1, 0))
+			{
+				fmt = EF_ABGR8;
+			}
+			else
+			{
+				BOOST_ASSERT(caps.rendertarget_format_support(EF_ARGB8, 1, 0));
+				fmt = EF_ARGB8;
+			}
 		}
 		else
 		{
-			BOOST_ASSERT(caps.rendertarget_format_support(EF_ABGR16F, 1, 0));
-
-			fmt = EF_ABGR16F;
+			if (caps.rendertarget_format_support(EF_R32F, 1, 0))
+			{
+				fmt = EF_R32F;
+			}
+			else
+			{
+				BOOST_ASSERT(caps.rendertarget_format_support(EF_R16F, 1, 0));
+				fmt = EF_R16F;
+			}
 		}
 		if (tex_array_support_)
 		{
-			pvp.filtered_csm_texs[0] = rf.MakeTexture2D(SM_SIZE * 2, SM_SIZE * 2, 3,
-				CascadedShadowLayer::MAX_NUM_CASCADES, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write | EAH_Generate_Mips, nullptr);
+			if (caps.pack_to_rgba_required)
+			{
+				pvp.filtered_csm_texs[0] = rf.MakeTexture2D(SM_SIZE * 2, SM_SIZE * 2, 3,
+					CascadedShadowLayer::MAX_NUM_CASCADES, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write | EAH_Generate_Mips, nullptr);
+			}
+			else
+			{
+				pvp.filtered_csm_texs[0] = rf.MakeTexture2D(SM_SIZE * 2, SM_SIZE * 2, 1,
+					CascadedShadowLayer::MAX_NUM_CASCADES, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
+			}
 		}
 		else
 		{
-			for (size_t i = 0; i < pvp.filtered_csm_texs.size(); ++ i)
+			if (caps.pack_to_rgba_required)
 			{
-				pvp.filtered_csm_texs[i] = rf.MakeTexture2D(SM_SIZE * 2, SM_SIZE * 2, 3, 1, fmt, 1, 0,
-					EAH_GPU_Read | EAH_GPU_Write | EAH_Generate_Mips, nullptr);
+				for (size_t i = 0; i < pvp.filtered_csm_texs.size(); ++ i)
+				{
+					pvp.filtered_csm_texs[i] = rf.MakeTexture2D(SM_SIZE * 2, SM_SIZE * 2, 3, 1, fmt, 1, 0,
+						EAH_GPU_Read | EAH_GPU_Write | EAH_Generate_Mips, nullptr);
+				}
+			}
+			else
+			{
+				for (size_t i = 0; i < pvp.filtered_csm_texs.size(); ++ i)
+				{
+					pvp.filtered_csm_texs[i] = rf.MakeTexture2D(SM_SIZE * 2, SM_SIZE * 2, 1, 1, fmt, 1, 0,
+						EAH_GPU_Read | EAH_GPU_Write, nullptr);
+				}
 			}
 		}
 
@@ -776,7 +837,6 @@ namespace KlayGE
 		else
 		{
 			BOOST_ASSERT(caps.rendertarget_format_support(EF_ARGB8, 1, 0));
-
 			fmt = EF_ARGB8;
 		}
 		pvp.shadowing_tex = rf.MakeTexture2D(width / 2, height / 2, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
@@ -845,11 +905,14 @@ namespace KlayGE
 		{
 			fmt = EF_R16F;
 		}
+		else if (caps.rendertarget_format_support(EF_ABGR8, 1, 0))
+		{
+			fmt = EF_ABGR8;
+		}
 		else
 		{
-			BOOST_ASSERT(caps.rendertarget_format_support(EF_ABGR16F, 1, 0));
-
-			fmt = EF_ABGR16F;
+			BOOST_ASSERT(caps.rendertarget_format_support(EF_ARGB8, 1, 0));
+			fmt = EF_ARGB8;
 		}
 		pvp.small_ssvo_tex = rf.MakeTexture2D(width / 2, height / 2, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
 
@@ -949,8 +1012,8 @@ namespace KlayGE
 						this->PreparePVP(pvp);
 
 						float q = camera->FarPlane() / (camera->FarPlane() - camera->NearPlane());
-						float2 near_q(camera->NearPlane() * q, q);
-						depth_to_linear_pp_->SetParam(0, near_q);
+						float4 near_q_far(camera->NearPlane() * q, q, camera->FarPlane(), 1 / camera->FarPlane());
+						depth_to_linear_pp_->SetParam(0, near_q_far);
 					}
 
 					*depth_near_far_invfar_param_ = pvp.depth_near_far_invfar;
@@ -1812,6 +1875,9 @@ namespace KlayGE
 
 	void DeferredRenderingLayer::PostGenerateGBuffer(PerViewport const & pvp)
 	{
+		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+		RenderDeviceCaps const & caps = re.DeviceCaps();
+
 		pvp.g_buffer_rt0_tex->BuildMipSubLevels();
 
 		if (depth_texture_support_)
@@ -1821,7 +1887,10 @@ namespace KlayGE
 			depth_to_linear_pp_->Apply();
 		}
 
-		pvp.g_buffer_depth_tex->BuildMipSubLevels();
+		if (!caps.pack_to_rgba_required)
+		{
+			pvp.g_buffer_depth_tex->BuildMipSubLevels();
+		}
 
 #if DEFAULT_DEFERRED == LIGHT_INDEXED_DEFERRED
 		this->CreateDepthMinMaxMap(pvp);
@@ -1901,8 +1970,8 @@ namespace KlayGE
 				{
 					float q = sm_camera->FarPlane() / (sm_camera->FarPlane() - sm_camera->NearPlane());
 
-					float2 near_q(sm_camera->NearPlane() * q, q);
-					depth_to_esm_pp_->SetParam(0, near_q);
+					float4 near_q_far(sm_camera->NearPlane() * q, q, sm_camera->FarPlane(), 1 / sm_camera->FarPlane());
+					depth_to_esm_pp_->SetParam(0, near_q_far);
 
 					float4x4 inv_sm_proj = sm_camera->InverseProjMatrix();
 					depth_to_esm_pp_->SetParam(1, inv_sm_proj);
@@ -1984,6 +2053,10 @@ namespace KlayGE
 
 	void DeferredRenderingLayer::PostGenerateShadowMap(PerViewport const & pvp, int32_t org_no, int32_t index_in_pass)
 	{
+		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+		RenderEngine& re = rf.RenderEngineInstance();
+		RenderDeviceCaps const & caps = re.DeviceCaps();
+
 		LightSource::LightType type = lights_[org_no]->Type();
 
 		if (depth_texture_support_)
@@ -2008,9 +2081,12 @@ namespace KlayGE
 			kernel_size.x() = 4;
 			kernel_size.y() = 4;
 		}
-		PostProcessChainPtr pp_chain = checked_pointer_cast<PostProcessChain>(sm_filter_pp_);
-		checked_pointer_cast<SeparableLogGaussianFilterPostProcess>(pp_chain->GetPostProcess(0))->KernelRadius(kernel_size.x());
-		checked_pointer_cast<SeparableLogGaussianFilterPostProcess>(pp_chain->GetPostProcess(1))->KernelRadius(kernel_size.y());
+		if (!caps.pack_to_rgba_required)
+		{
+			PostProcessChainPtr pp_chain = checked_pointer_cast<PostProcessChain>(sm_filter_pp_);
+			checked_pointer_cast<SeparableLogGaussianFilterPostProcess>(pp_chain->GetPostProcess(0))->KernelRadius(kernel_size.x());
+			checked_pointer_cast<SeparableLogGaussianFilterPostProcess>(pp_chain->GetPostProcess(1))->KernelRadius(kernel_size.y());
+		}
 
 		if (LightSource::LT_Sun == type)
 		{
@@ -2036,22 +2112,28 @@ namespace KlayGE
 				sm_filter_pp_->OutputPin(0, filtered_sm_2d_texs_[sm_light_indices_[org_no].first]);
 			}
 		}
-		checked_pointer_cast<LogGaussianBlurPostProcess>(sm_filter_pp_)->ESMScaleFactor(ESM_SCALE_FACTOR,
-			sm_fb_->GetViewport()->camera);
+		if (!caps.pack_to_rgba_required)
+		{
+			checked_pointer_cast<LogGaussianBlurPostProcess>(sm_filter_pp_)->ESMScaleFactor(ESM_SCALE_FACTOR,
+				sm_fb_->GetViewport()->camera);
+		}
 		sm_filter_pp_->Apply();
 
-		if (LightSource::LT_Sun == type)
+		if (!caps.pack_to_rgba_required)
 		{
-			if (tex_array_support_)
+			if (LightSource::LT_Sun == type)
 			{
-				if (static_cast<int32_t>(pvp.num_cascades) == index_in_pass)
+				if (tex_array_support_)
 				{
-					pvp.filtered_csm_texs[0]->BuildMipSubLevels();
+					if (static_cast<int32_t>(pvp.num_cascades) == index_in_pass)
+					{
+						pvp.filtered_csm_texs[0]->BuildMipSubLevels();
+					}
 				}
-			}
-			else
-			{
-				pvp.filtered_csm_texs[index_in_pass - 1]->BuildMipSubLevels();
+				else
+				{
+					pvp.filtered_csm_texs[index_in_pass - 1]->BuildMipSubLevels();
+				}
 			}
 		}
 	}
@@ -2685,6 +2767,8 @@ namespace KlayGE
 		depth_to_min_max_pp_->SetParam(0, float2(0.5f / w, 0.5f / h));
 		depth_to_min_max_pp_->SetParam(1, float2(static_cast<float>((w + 1) & ~1) / w,
 			static_cast<float>((h + 1) & ~1) / h));
+		CameraPtr const & camera = pvp.frame_buffer->GetViewport()->camera;
+		depth_to_min_max_pp_->SetParam(2, float4(0, 0, camera->FarPlane(), 1 / camera->FarPlane()));
 		depth_to_min_max_pp_->InputPin(0, pvp.g_buffer_depth_tex);
 		depth_to_min_max_pp_->OutputPin(0, pvp.g_buffer_min_max_depth_texs[0]);
 		depth_to_min_max_pp_->Apply();
@@ -2696,6 +2780,7 @@ namespace KlayGE
 			reduce_min_max_pp_->SetParam(0, float2(0.5f / w, 0.5f / h));
 			reduce_min_max_pp_->SetParam(1, float2(static_cast<float>((w + 1) & ~1) / w,
 				static_cast<float>((h + 1) & ~1) / h));
+			reduce_min_max_pp_->SetParam(2, float4(0, 0, camera->FarPlane(), 1 / camera->FarPlane()));
 			reduce_min_max_pp_->InputPin(0, pvp.g_buffer_min_max_depth_texs[i - 1]);
 			reduce_min_max_pp_->OutputPin(0, pvp.g_buffer_min_max_depth_texs[i]);
 			reduce_min_max_pp_->Apply();

@@ -25,7 +25,7 @@ void GBufferSkyBoxVS(float4 pos : POSITION,
 
 float4 DepthSkyBoxPS() : SV_Target
 {
-	return depth_far;
+	return WriteAFloat(depth_far, 1.0f / depth_far);
 }
 
 float4 GBufferSkyBoxRT0PS() : SV_Target

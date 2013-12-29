@@ -3,6 +3,7 @@
 <effect>
 	<include name="DeferredRenderingUtil.fxml"/>
 	<include name="PostProcess.fxml"/>
+	<include name="util.fxml"/>
 
 	<parameter type="sampler" name="point_sampler">
 		<state name="filtering" value="min_mag_mip_point"/>
@@ -12,6 +13,7 @@
 
 	<parameter type="float4" name="delta_offset"/>
 	<parameter type="float" name="prev_level"/>
+	<parameter type="float2" name="far_plane"/>
 
 	<parameter type="texture2D" name="g_buffer_tex"/>
 	<parameter type="texture2D" name="depth_tex"/>
@@ -33,29 +35,29 @@
 float4 GBuffer2DepthDerivatePS(float2 tc : TEXCOORD0) : SV_Target
 {
 	tc = tc + delta_offset.zw;
-	float max_depth = depth_tex.SampleLevel(point_sampler, tc, 0).r;
+	float max_depth = ReadAFloat(depth_tex.SampleLevel(point_sampler, tc, 0), far_plane.x);
 	float min_depth = max_depth;
 	for (int i = 1; i < 9; ++ i)
 	{
 		float2 ntc = tc + kernel9[i] * delta_offset.xy;
-		float depth = depth_tex.SampleLevel(point_sampler, ntc, 0).r;
+		float depth = ReadAFloat(depth_tex.SampleLevel(point_sampler, ntc, 0), far_plane.x);
 		max_depth = max(max_depth, depth);
 		min_depth = min(min_depth, depth);
 	}
-	return max_depth - min_depth;
+	return WriteAFloat(max_depth - min_depth, far_plane.y);
 }
 
 float4 DepthDerivateMipMapPS(float2 tc : TEXCOORD0) : SV_Target
 {
 	tc = tc + delta_offset.zw;
-	float max_depth_deriv = depth_deriv_tex.SampleLevel(point_sampler, tc, prev_level).r;
+	float max_depth_deriv = ReadAFloat(depth_deriv_tex.SampleLevel(point_sampler, tc, prev_level), far_plane.x);
 	for (int i = 1; i < 9; ++ i)
 	{
 		float2 ntc = tc + kernel9[i] * delta_offset.xy;
-		float depth_deriv = depth_deriv_tex.SampleLevel(point_sampler, ntc, prev_level).r;
+		float depth_deriv = ReadAFloat(depth_deriv_tex.SampleLevel(point_sampler, ntc, prev_level), far_plane.x);
 		max_depth_deriv = max(max_depth_deriv, depth_deriv);
 	}
-	return max_depth_deriv;
+	return WriteAFloat(max_depth_deriv, far_plane.y);
 }
 
 float4 GBuffer2NormalConePS(float2 tc : TEXCOORD0) : SV_Target
@@ -139,7 +141,7 @@ float4 SetSubsplatStencilPS(float2 tc: TEXCOORD0) : SV_Target
 {
 	if (is_not_first_last_level.x)
 	{
-		float depth_deriv = depth_deriv_tex.SampleLevel(point_sampler, tc, cur_lower_level.x).r;  
+		float depth_deriv = ReadAFloat(depth_deriv_tex.SampleLevel(point_sampler, tc, cur_lower_level.x), far_plane.x);
 		float4 normal_cone = normal_cone_tex.SampleLevel(point_sampler, tc, cur_lower_level.x);
 		normal_cone.xy -= normal_cone.zw;
 		float normal_deriv = max(normal_cone.x, normal_cone.y);
@@ -151,7 +153,7 @@ float4 SetSubsplatStencilPS(float2 tc: TEXCOORD0) : SV_Target
 
 	if (is_not_first_last_level.y)
 	{
-		float depth_deriv = depth_deriv_tex.SampleLevel(point_sampler, tc, cur_lower_level.y).r;
+		float depth_deriv = ReadAFloat(depth_deriv_tex.SampleLevel(point_sampler, tc, cur_lower_level.y), far_plane.x);
 		float4 normal_cone = normal_cone_tex.SampleLevel(point_sampler, tc, cur_lower_level.y);
 		normal_cone.xy -= normal_cone.zw;
 		float normal_deriv = max(normal_cone.x, normal_cone.y);

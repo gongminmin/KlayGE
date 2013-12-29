@@ -18,9 +18,9 @@ namespace KlayGE
 
 		this->Technique(SyncLoadRenderEffect("SSVO.fxml")->TechniqueByName("SSVO"));
 
-		depth_near_far_invfar_param_ = technique_->Effect().ParameterByName("depth_near_far_invfar");
 		proj_param_ = technique_->Effect().ParameterByName("proj");
 		inv_proj_param_ = technique_->Effect().ParameterByName("inv_proj");
+		far_plane_param_ = technique_->Effect().ParameterByName("far_plane");
 	}
 
 	void SSVOPostProcess::OnRenderBegin()
@@ -30,5 +30,6 @@ namespace KlayGE
 		Camera const & camera = Context::Instance().AppInstance().ActiveCamera();
 		*proj_param_ = camera.ProjMatrix();
 		*inv_proj_param_ = camera.InverseProjMatrix();
+		*far_plane_param_ = float2(camera.FarPlane(), 1.0f / camera.FarPlane());
 	}
 }

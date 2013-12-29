@@ -68,11 +68,7 @@ float4 ToneMapping20PS(float2 iTex : TEXCOORD0) : SV_Target
 #if KLAYGE_NO_FP_COLOR
 	float adapted_lum = 1;
 #else
-#if KLAYGE_PACK_TO_RGBA
-	float adapted_lum = DecodeFloatRGBA(lum_tex.Sample(point_sampler, 0.5f.xx)) * 16;
-#else
-	float adapted_lum = lum_tex.Sample(point_sampler, 0.5f.xx).r;
-#endif
+	float adapted_lum = ReadAFloat(lum_tex.Sample(point_sampler, 0.5f.xx), 16);
 #endif
 	float lum = max(0.001f, adapted_lum);
 	// For FXAA
@@ -94,11 +90,7 @@ void ToneMapping30VS(float4 pos : POSITION,
 #if KLAYGE_NO_FP_COLOR
 	float adapted_lum = 1;
 #else
-#if KLAYGE_PACK_TO_RGBA
-	float adapted_lum = DecodeFloatRGBA(lum_tex.SampleLevel(point_sampler, 0.5f.xx, 0)) * 16;
-#else
-	float adapted_lum = lum_tex.SampleLevel(point_sampler, 0.5f.xx, 0).r;
-#endif
+	float adapted_lum = ReadAFloat(lum_tex.SampleLevel(point_sampler, 0.5f.xx, 0), 16);
 #endif
 	oTex.z = max(0.001f, adapted_lum);
 }

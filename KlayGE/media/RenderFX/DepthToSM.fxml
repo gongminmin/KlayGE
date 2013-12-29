@@ -10,7 +10,7 @@
 		<state name="address_v" value="clamp"/>
 	</parameter>
 
-	<parameter type="float2" name="near_q"/>
+	<parameter type="float4" name="near_q_far"/>
 	<parameter type="float4x4" name="inv_proj"/>
 
 	<parameter type="texture2D" name="src_tex"/>
@@ -29,15 +29,15 @@ void DepthToSMVS(float4 pos : POSITION,
 
 float4 DepthToSMPS(float2 tc : TEXCOORD0) : SV_Target
 {
-	return non_linear_depth_to_linear(src_tex.Sample(point_sampler, tc).r, near_q.x, near_q.y);
+	return WriteAFloat(non_linear_depth_to_linear(src_tex.Sample(point_sampler, tc).r, near_q_far.x, near_q_far.y), near_q_far.w);
 }
 
 float4 DepthToESMPS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Target
 {
-	float dist = non_linear_depth_to_linear(src_tex.Sample(point_sampler, tc).r, near_q.x, near_q.y);
+	float dist = non_linear_depth_to_linear(src_tex.Sample(point_sampler, tc).r, near_q_far.x, near_q_far.y);
 	dist *= length(view_dir) / view_dir.z;
 
-	return dist;
+	return WriteAFloat(dist, near_q_far.w);
 }
 		]]>
 	</shader>
@@ -69,10 +69,10 @@ float4 DepthToESMPS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Tar
 		<![CDATA[
 float4 DepthToMinMaxPS(float2 tc : TEXCOORD0) : SV_Target
 {
-	float z00 = src_tex.SampleLevel(point_sampler, tc * tc_scale + float2(-offset.x, -offset.y), 0).x;
-	float z01 = src_tex.SampleLevel(point_sampler, tc * tc_scale + float2(+offset.x, -offset.y), 0).x;
-	float z10 = src_tex.SampleLevel(point_sampler, tc * tc_scale + float2(-offset.x, +offset.y), 0).x;
-	float z11 = src_tex.SampleLevel(point_sampler, tc * tc_scale + float2(+offset.x, +offset.y), 0).x;
+	float z00 = ReadAFloat(src_tex.SampleLevel(point_sampler, tc * tc_scale + float2(-offset.x, -offset.y), 0), near_q_far.z);
+	float z01 = ReadAFloat(src_tex.SampleLevel(point_sampler, tc * tc_scale + float2(+offset.x, -offset.y), 0), near_q_far.z);
+	float z10 = ReadAFloat(src_tex.SampleLevel(point_sampler, tc * tc_scale + float2(-offset.x, +offset.y), 0), near_q_far.z);
+	float z11 = ReadAFloat(src_tex.SampleLevel(point_sampler, tc * tc_scale + float2(+offset.x, +offset.y), 0), near_q_far.z);
 
 	float min_depth = z00;
 	float max_depth = z00;
@@ -83,15 +83,15 @@ float4 DepthToMinMaxPS(float2 tc : TEXCOORD0) : SV_Target
 	min_depth = min(min_depth, z11);
 	max_depth = max(max_depth, z11);
 
-	return float4(min_depth, max_depth, 0, 0);
+	return WriteTwoHalf(float2(min_depth, max_depth), near_q_far.w);
 }
 
 float4 ReduceMinMaxPS(float2 tc : TEXCOORD0) : SV_Target
 {
-	float2 z00 = src_tex.Sample(point_sampler, tc * tc_scale + float2(-offset.x, -offset.y)).xy;
-	float2 z01 = src_tex.Sample(point_sampler, tc * tc_scale + float2(+offset.x, -offset.y)).xy;
-	float2 z10 = src_tex.Sample(point_sampler, tc * tc_scale + float2(-offset.x, +offset.y)).xy;
-	float2 z11 = src_tex.Sample(point_sampler, tc * tc_scale + float2(+offset.x, +offset.y)).xy;
+	float2 z00 = ReadTwoHalf(src_tex.Sample(point_sampler, tc * tc_scale + float2(-offset.x, -offset.y)), near_q_far.z);
+	float2 z01 = ReadTwoHalf(src_tex.Sample(point_sampler, tc * tc_scale + float2(+offset.x, -offset.y)), near_q_far.z);
+	float2 z10 = ReadTwoHalf(src_tex.Sample(point_sampler, tc * tc_scale + float2(-offset.x, +offset.y)), near_q_far.z);
+	float2 z11 = ReadTwoHalf(src_tex.Sample(point_sampler, tc * tc_scale + float2(+offset.x, +offset.y)), near_q_far.z);
 
 	float min_depth = z00.x;
 	float max_depth = z00.y;
@@ -102,7 +102,7 @@ float4 ReduceMinMaxPS(float2 tc : TEXCOORD0) : SV_Target
 	min_depth = min(min_depth, z11.x);
 	max_depth = max(max_depth, z11.y);
 
-	return float4(min_depth, max_depth, 0, 0);
+	return WriteTwoHalf(float2(min_depth, max_depth), near_q_far.w);
 }
 		]]>
 	</shader>

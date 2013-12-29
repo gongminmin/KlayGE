@@ -137,23 +137,29 @@ namespace KlayGE
 		RenderDeviceCaps const & caps = rf.RenderEngineInstance().DeviceCaps();
 
 		ElementFormat fmt;
-		if (caps.rendertarget_format_support(EF_GR32F, 1, 0))
+		if (caps.pack_to_rgba_required)
 		{
-			fmt = EF_GR32F;
-		}
-		else if (caps.rendertarget_format_support(EF_ABGR32F, 1, 0))
-		{
-			fmt = EF_ABGR32F;
-		}
-		else if (caps.rendertarget_format_support(EF_GR16F, 1, 0))
-		{
-			fmt = EF_GR16F;
+			if (caps.rendertarget_format_support(EF_ABGR8, 1, 0))
+			{
+				fmt = EF_ABGR8;
+			}
+			else
+			{
+				BOOST_ASSERT(caps.rendertarget_format_support(EF_ARGB8, 1, 0));
+				fmt = EF_ARGB8;
+			}
 		}
 		else
 		{
-			BOOST_ASSERT(caps.rendertarget_format_support(EF_ABGR16F, 1, 0));
-
-			fmt = EF_ABGR16F;
+			if (caps.rendertarget_format_support(EF_GR32F, 1, 0))
+			{
+				fmt = EF_GR32F;
+			}
+			else
+			{
+				BOOST_ASSERT(caps.rendertarget_format_support(EF_GR16F, 1, 0));
+				fmt = EF_GR16F;
+			}
 		}
 
 		rsm_depth_derivative_tex_ = rf.MakeTexture2D(MIN_RSM_MIPMAP_SIZE, MIN_RSM_MIPMAP_SIZE, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
@@ -175,6 +181,7 @@ namespace KlayGE
 
 	void MultiResSILLayer::UpdateRSM(CameraPtr const & rsm_camera, LightSourcePtr const & light)
 	{
+		rsm_to_depth_derivate_pp_->SetParam(1, float2(rsm_camera->FarPlane(), 1 / rsm_camera->FarPlane()));
 		this->ExtractVPLs(rsm_camera, light);
 		this->VPLsLighting(light);
 	}
@@ -219,6 +226,7 @@ namespace KlayGE
 		rsm_to_vpls_pps_[type]->SetParam(9, int2(1, 0));
 		rsm_to_vpls_pps_[type]->SetParam(10, 0.12f * rsm_camera->FarPlane());
 		rsm_to_vpls_pps_[type]->SetParam(11, static_cast<float>(rsm_texs_[0]->NumMipMaps() - 1));
+		rsm_to_vpls_pps_[type]->SetParam(12, float2(rsm_camera->FarPlane(), 1 / rsm_camera->FarPlane()));
 
 		rsm_to_vpls_pps_[type]->Apply();
 	}

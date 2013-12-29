@@ -4,6 +4,7 @@
 	<include name="DeferredRenderingUtil.fxml"/>
 	<include name="Lighting.fxml"/>
 	<include name="Quaternion.fxml"/>
+	<include name="util.fxml"/>
 
 	<parameter type="sampler" name="point_sampler">
 		<state name="filtering" value="min_mag_mip_point"/>
@@ -134,7 +135,7 @@ float4 VPLsLightingPS(
 	float2 tc = tc_w.xy / tc_w.z;
 #endif
 
-	float pixel_depth = depth_tex.Sample(point_sampler, tc).r;
+	float pixel_depth = ReadAFloat(depth_tex.Sample(point_sampler, tc), depth_near_far_invfar.y);
 	float3 color_i = 0;
 	clip(view_dir.z - pixel_depth);
 

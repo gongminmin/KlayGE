@@ -59,7 +59,7 @@ void FogVS(float4 pos : POSITION,
 float4 FogPS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Target
 {
 	float4 ret = float4(0, 0, 0, 1);
-	float depth = depth_tex.Sample(point_sampler, tc).r;
+	float depth = ReadAFloat(depth_tex.Sample(point_sampler, tc), far_plane);
 	if (depth < far_plane * 0.997f)
 	{
 		float dist = length(view_dir * (depth / view_dir.z));

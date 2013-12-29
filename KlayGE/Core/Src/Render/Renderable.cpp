@@ -80,6 +80,7 @@ namespace KlayGE
 
 			*mvp_param_ = mvp;
 			*model_view_param_ = mv;
+			*far_plane_param_ = float2(camera.FarPlane(), 1.0f / camera.FarPlane());
 
 			*pos_center_param_ = pos_bb.Center();
 			*pos_extent_param_ = pos_bb.HalfSize();
@@ -330,6 +331,7 @@ namespace KlayGE
 
 		mvp_param_ = deferred_effect_->ParameterByName("mvp");
 		model_view_param_ = deferred_effect_->ParameterByName("model_view");
+		far_plane_param_ = deferred_effect_->ParameterByName("far_plane");
 		pos_center_param_ = deferred_effect_->ParameterByName("pos_center");
 		pos_extent_param_ = deferred_effect_->ParameterByName("pos_extent");
 		tc_center_param_ = deferred_effect_->ParameterByName("tc_center");

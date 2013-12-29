@@ -12,6 +12,7 @@
 		<parameter type="float4x4" name="mvp"/>
 		<parameter type="float4x4" name="model_view"/>
 		<parameter type="float4x4" name="inv_mv"/>
+		<parameter type="float2" name="far_plane"/>
 	</cbuffer>
 
 	<cbuffer name="model">
@@ -110,7 +111,7 @@ void DepthVS(float4 pos : POSITION,
 
 float4 DepthPS(float3 texcoord_depth : TEXCOORD0) : SV_Target
 {
-	return texcoord_depth.z;
+	return WriteAFloat(texcoord_depth.z, far_plane.y);
 }
 
 float4 DepthAlphaTestPS(float3 texcoord_depth : TEXCOORD0) : SV_Target
@@ -131,7 +132,7 @@ float4 DepthAlphaBlendPS(float3 texcoord_depth : TEXCOORD0,
 	float2 screen_tc = screen_tc_w.xy / screen_tc_w.z;
 #endif
 
-	clip(opaque_depth_tex.Sample(point_sampler, screen_tc).r - texcoord_depth.z);	
+	clip(ReadAFloat(opaque_depth_tex.Sample(point_sampler, screen_tc), far_plane.x) - texcoord_depth.z);	
 	return texcoord_depth.z;
 }
 
@@ -297,7 +298,7 @@ float4 GBufferAlphaBlendRT0PS(float4 texcoord_2xy : TEXCOORD0, float4 ts_to_view
 	float2 screen_tc = screen_tc_w.xy / screen_tc_w.z;
 #endif
 
-	clip(opaque_depth_tex.Sample(point_sampler, screen_tc).r - ts_to_view1_depth.w);	
+	clip(ReadAFloat(opaque_depth_tex.Sample(point_sampler, screen_tc), far_plane.x) - ts_to_view1_depth.w);	
 	return ConstructGBufferRT0(texcoord_2xy, ts_to_view0_2z, ts_to_view1_depth.xyz);
 }
 
@@ -324,7 +325,7 @@ float4 GBufferAlphaBlendRT1PS(float4 texcoord_2xy : TEXCOORD0, float4 ts_to_view
 	float2 screen_tc = screen_tc_w.xy / screen_tc_w.z;
 #endif
 
-	clip(opaque_depth_tex.Sample(point_sampler, screen_tc).r - ts_to_view1_depth.w);	
+	clip(ReadAFloat(opaque_depth_tex.Sample(point_sampler, screen_tc), far_plane.x) - ts_to_view1_depth.w);	
 	return ConstructGBufferRT1(texcoord_2xy, ts_to_view0_2z, ts_to_view1_depth.xyz);
 }
 
@@ -353,7 +354,7 @@ void GBufferAlphaBlendMRTPS(float4 texcoord_2xy : TEXCOORD0, float4 ts_to_view0_
 	float2 screen_tc = screen_tc_w.xy / screen_tc_w.z;
 #endif
 
-	clip(opaque_depth_tex.Sample(point_sampler, screen_tc).r - ts_to_view1_depth.w);
+	clip(ReadAFloat(opaque_depth_tex.Sample(point_sampler, screen_tc), far_plane.x) - ts_to_view1_depth.w);
 	ConstructMRTGBuffer(texcoord_2xy, ts_to_view0_2z, ts_to_view1_depth.xyz, mrt_0, mrt_1);
 }
 
@@ -408,7 +409,7 @@ float4 DecalGBufferAlphaTestRT0PS(float4 texcoord_2xy : TEXCOORD0, float4 ts_to_
 	float2 screen_tc = screen_tc_w.xy / screen_tc_w.z;
 #endif
 
-	float3 pos_es = view_dir * (opaque_depth_tex.Sample(point_sampler, screen_tc).r / view_dir.z);
+	float3 pos_es = view_dir * (ReadAFloat(opaque_depth_tex.Sample(point_sampler, screen_tc), far_plane.x) / view_dir.z);
 	
 	float3 decal_normal = normalize(float3(texcoord_2xy.zw, ts_to_view0_2z.w));
 	float3 pixel_normal = GetNormal(g_buffer_rt0_tex.Sample(bilinear_sampler, screen_tc));
@@ -450,7 +451,7 @@ float4 DecalGBufferAlphaTestRT1PS(float4 texcoord_2xy : TEXCOORD0, float4 ts_to_
 	float2 screen_tc = screen_tc_w.xy / screen_tc_w.z;
 #endif
 
-	float3 pos_es = view_dir * (opaque_depth_tex.Sample(point_sampler, screen_tc).r / view_dir.z);
+	float3 pos_es = view_dir * (ReadAFloat(opaque_depth_tex.Sample(point_sampler, screen_tc), far_plane.x) / view_dir.z);
 
 	float3 decal_normal = normalize(float3(texcoord_2xy.zw, ts_to_view0_2z.w));
 	float3 pixel_normal = GetNormal(g_buffer_rt0_tex.Sample(bilinear_sampler, screen_tc));
@@ -503,7 +504,7 @@ void DecalGBufferAlphaTestMRTPS(float4 texcoord_2xy : TEXCOORD0, float4 ts_to_vi
 	float2 screen_tc = screen_tc_w.xy / screen_tc_w.z;
 #endif
 
-	float3 pos_es = view_dir * (opaque_depth_tex.Sample(point_sampler, screen_tc).r / view_dir.z);
+	float3 pos_es = view_dir * (ReadAFloat(opaque_depth_tex.Sample(point_sampler, screen_tc), far_plane.x) / view_dir.z);
 	
 	float3 decal_normal = normalize(float3(texcoord_2xy.zw, ts_to_view0_2z.w));
 	float3 pixel_normal = GetNormal(g_buffer_rt0_tex.Sample(bilinear_sampler, screen_tc));

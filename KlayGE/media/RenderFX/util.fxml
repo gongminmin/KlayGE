@@ -96,6 +96,56 @@ float DecodeFloatRGBA(float4 rgba)
 	return dot(rgba, float4(1, 1 / 255.0f, 1 / 65025.0f, 1 / 16581375.0f));
 }
 
+float2 EncodeHalfRG(float v)
+{
+	float2 enc = float2(1.0f, 255.0f) * v;
+	enc = frac(enc);
+	enc -= enc.y * float2(1 / 255.0f, 0);
+	return enc;
+}
+
+float DecodeHalfRG(float2 rg)
+{
+	return dot(rg, float2(1, 1 / 255.0f));
+}
+
+float4 WriteAFloat(float v, float scale = 1, float bias = 0)
+{
+#if KLAYGE_PACK_TO_RGBA
+	return EncodeFloatRGBA(clamp(v * scale + bias, 0, 0.999f));
+#else
+	return v;
+#endif
+}
+
+float4 WriteTwoHalf(float2 v, float scale = 1, float bias = 0)
+{
+#if KLAYGE_PACK_TO_RGBA
+	v = clamp(v * scale + bias, 0, 0.999f);
+	return float4(EncodeHalfRG(v.x), EncodeHalfRG(v.y));
+#else
+	return float4(v.xy, 0, 0);
+#endif
+}
+
+float ReadAFloat(float4 v, float scale = 1, float bias = 0)
+{
+#if KLAYGE_PACK_TO_RGBA
+	return (DecodeFloatRGBA(v) + bias) * scale;
+#else
+	return v.r;
+#endif
+}
+
+float2 ReadTwoHalf(float4 v, float scale = 1, float bias = 0)
+{
+#if KLAYGE_PACK_TO_RGBA
+	return (float2(DecodeHalfRG(v.xy), DecodeHalfRG(v.zw)) + bias) * scale;
+#else
+	return v.xy;
+#endif
+}
+
 
 #if KLAYGE_SHADER_MODEL < 5
 float mad(float mvalue, float avalue, float bvalue)

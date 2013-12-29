@@ -3,7 +3,7 @@
 <post_processors>
 	<post_processor name="DepthToSM">
 		<params>
-			<param name="near_q"/>
+			<param name="near_q_far"/>
 		</params>
 		<input>
 			<pin name="src_tex"/>
@@ -16,7 +16,7 @@
 
 	<post_processor name="DepthToESM">
 		<params>
-			<param name="near_q"/>
+			<param name="near_q_far"/>
 			<param name="inv_proj"/>
 		</params>
 		<input>
@@ -32,6 +32,7 @@
 		<params>
 			<param name="offset"/>
 			<param name="tc_scale"/>
+			<param name="near_q_far"/>
 		</params>
 		<input>
 			<pin name="src_tex"/>
@@ -45,6 +46,7 @@
 		<params>
 			<param name="offset"/>
 			<param name="tc_scale"/>
+			<param name="near_q_far"/>
 		</params>
 		<input>
 			<pin name="src_tex"/>

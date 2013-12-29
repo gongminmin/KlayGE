@@ -111,7 +111,7 @@ float4 ESM_Omnidirectional(float3 dir_ls, float len)
 	float shadow = 1;
 	if (light_attrib.z > 0)
 	{
-		float occluder = filtered_sm_cube_tex.Sample(linear_sampler, dir_ls).x;
+		float occluder = ReadAFloat(filtered_sm_cube_tex.Sample(linear_sampler, dir_ls), depth_near_far_invfar.y * esm_scale_factor);
 		shadow = Calc_ESM(occluder, len);
 	}
 
@@ -134,7 +134,7 @@ float4 ESM_Directional(float3 pos_es, float len)
 	float shadow = 1;
 	if (light_attrib.z > 0)
 	{
-		float occluder = filtered_sm_2d_tex.Sample(linear_sampler, light_proj_pos.xy).x;
+		float occluder = ReadAFloat(filtered_sm_2d_tex.Sample(linear_sampler, light_proj_pos.xy), depth_near_far_invfar.y * esm_scale_factor);
 		shadow = Calc_ESM(occluder, len);
 	}
 	
@@ -167,29 +167,29 @@ float4 ESM_Sun(float3 pos_es, float len)
 				float4 shadow_tc_ddx_ddy = tc_ddx_ddy * cascade_scale_bias[i].xyxy;
 
 #if KLAYGE_MAX_TEX_ARRAY_LEN >= 4
-				float occluder = filtered_csm_tex_array.SampleGrad(aniso_sampler, float3(shadow_tc, i),
-					shadow_tc_ddx_ddy.xy, shadow_tc_ddx_ddy.zw).x;
+				float occluder = ReadAFloat(filtered_csm_tex_array.SampleGrad(aniso_sampler, float3(shadow_tc, i),
+					shadow_tc_ddx_ddy.xy, shadow_tc_ddx_ddy.zw), depth_near_far_invfar.y * esm_scale_factor);
 #else
 				float occluder;
 				if (0 == i)
 				{
-					occluder = filtered_csm_0_tex.SampleGrad(aniso_sampler, shadow_tc,
-						shadow_tc_ddx_ddy.xy, shadow_tc_ddx_ddy.zw).x;
+					occluder = ReadAFloat(filtered_csm_0_tex.SampleGrad(aniso_sampler, shadow_tc,
+						shadow_tc_ddx_ddy.xy, shadow_tc_ddx_ddy.zw), depth_near_far_invfar.y * esm_scale_factor);
 				}
 				else if (1 == i)
 				{
-					occluder = filtered_csm_1_tex.SampleGrad(aniso_sampler, shadow_tc,
-						shadow_tc_ddx_ddy.xy, shadow_tc_ddx_ddy.zw).x;
+					occluder = ReadAFloat(filtered_csm_1_tex.SampleGrad(aniso_sampler, shadow_tc,
+						shadow_tc_ddx_ddy.xy, shadow_tc_ddx_ddy.zw), depth_near_far_invfar.y * esm_scale_factor);
 				}
 				else if (2 == i)
 				{
-					occluder = filtered_csm_2_tex.SampleGrad(aniso_sampler, shadow_tc,
-						shadow_tc_ddx_ddy.xy, shadow_tc_ddx_ddy.zw).x;
+					occluder = ReadAFloat(filtered_csm_2_tex.SampleGrad(aniso_sampler, shadow_tc,
+						shadow_tc_ddx_ddy.xy, shadow_tc_ddx_ddy.zw), depth_near_far_invfar.y * esm_scale_factor);
 				}
 				else
 				{
-					occluder = filtered_csm_3_tex.SampleGrad(aniso_sampler, shadow_tc,
-						shadow_tc_ddx_ddy.xy, shadow_tc_ddx_ddy.zw).x;
+					occluder = ReadAFloat(filtered_csm_3_tex.SampleGrad(aniso_sampler, shadow_tc,
+						shadow_tc_ddx_ddy.xy, shadow_tc_ddx_ddy.zw), depth_near_far_invfar.y * esm_scale_factor);
 				}
 #endif
 				shadow += Calc_ESM(occluder, len);
@@ -204,11 +204,11 @@ float4 NearestDepthUpsamplingShadow(float2 tc, int channel)
 {
 	float2 l1_inv_width_height = inv_width_height * 2;
 	float2 tc0 = tc - inv_width_height;
-	float z00 = depth_tex.SampleLevel(point_sampler, tc0, 1).r;
-	float z10 = depth_tex.SampleLevel(point_sampler, tc0 + float2(l1_inv_width_height.x, 0), 1).r;
-	float z01 = depth_tex.SampleLevel(point_sampler, tc0 + float2(0, l1_inv_width_height.y), 1).r;
-	float z11 = depth_tex.SampleLevel(point_sampler, tc0 + l1_inv_width_height, 1).r;
-	float z_full = depth_tex.SampleLevel(point_sampler, tc, 0).r;
+	float z00 = ReadAFloat(depth_tex.SampleLevel(point_sampler, tc0, 1), depth_near_far_invfar.y);
+	float z10 = ReadAFloat(depth_tex.SampleLevel(point_sampler, tc0 + float2(l1_inv_width_height.x, 0), 1), depth_near_far_invfar.y);
+	float z01 = ReadAFloat(depth_tex.SampleLevel(point_sampler, tc0 + float2(0, l1_inv_width_height.y), 1), depth_near_far_invfar.y);
+	float z11 = ReadAFloat(depth_tex.SampleLevel(point_sampler, tc0 + l1_inv_width_height, 1), depth_near_far_invfar.y);
+	float z_full = ReadAFloat(depth_tex.SampleLevel(point_sampler, tc, 0), depth_near_far_invfar.y);
 	float threshold = 0.25f;
 
 	float3 ndus = NearestDepthUpsampling(tc0, float4(z00, z10, z01, z11), z_full, l1_inv_width_height, threshold);
@@ -285,7 +285,7 @@ float4 DeferredRenderingPointPS(
 	float4 final_clr = 0;
 
 	view_dir = normalize(view_dir);
-	float3 pos_es = view_dir * (depth_tex.Sample(point_sampler, tc).r / view_dir.z);
+	float3 pos_es = view_dir * (ReadAFloat(depth_tex.Sample(point_sampler, tc), depth_near_far_invfar.y) / view_dir.z);
 	float3 dir = normalize(light_pos_es.xyz - pos_es);
 	float3 normal = GetNormal(ndc);
 	float n_dot_l = dot(normal, dir);
@@ -320,7 +320,7 @@ float4 DeferredRenderingSpotPS(
 	float4 final_clr = 0;
 	
 	view_dir = normalize(view_dir);
-	float3 pos_es = view_dir * (depth_tex.Sample(point_sampler, tc).r / view_dir.z);
+	float3 pos_es = view_dir * (ReadAFloat(depth_tex.Sample(point_sampler, tc), depth_near_far_invfar.y) / view_dir.z);
 	float spot = spot_lighting(light_pos_es.xyz, light_dir_es.xyz,
 				float2(light_pos_es.w, light_dir_es.w), pos_es.xyz);
 	if (spot > 0)
@@ -438,7 +438,7 @@ float4 DeferredShadowingPointPS(
 #endif
 
 	view_dir = normalize(view_dir);
-	float3 pos_es = view_dir * (depth_tex.Sample(point_sampler, tc).r / view_dir.z);
+	float3 pos_es = view_dir * (ReadAFloat(depth_tex.Sample(point_sampler, tc), depth_near_far_invfar.y) / view_dir.z);
 	float3 dir = light_pos_es.xyz - pos_es;
 	float len = length(dir);
 	float3 dir_ls = mul(-dir, (float3x3)view_to_light_model);
@@ -458,7 +458,7 @@ float4 DeferredShadowingSpotPS(
 #endif
 
 	view_dir = normalize(view_dir);
-	float3 pos_es = view_dir * (depth_tex.Sample(point_sampler, tc).r / view_dir.z);
+	float3 pos_es = view_dir * (ReadAFloat(depth_tex.Sample(point_sampler, tc), depth_near_far_invfar.y) / view_dir.z);
 	float len = length(light_pos_es.xyz - pos_es);
 	return ESM_Directional(pos_es, len);
 }
@@ -476,7 +476,7 @@ float4 DeferredShadowingSunPS(
 #endif
 
 	view_dir = normalize(view_dir);
-	float3 pos_es = view_dir * (depth_tex.Sample(point_sampler, tc).r / view_dir.z);
+	float3 pos_es = view_dir * (ReadAFloat(depth_tex.Sample(point_sampler, tc), depth_near_far_invfar.y) / view_dir.z);
 	float len = dot(float4(pos_es, 1), view_z_to_light_view);
 	return ESM_Sun(pos_es, len);
 }
@@ -722,7 +722,7 @@ float4 MergeShadingPS(float2 tc : TEXCOORD0) : SV_Target
 
 float4 MergeDepthPS(float2 tc : TEXCOORD0) : SV_Target
 {
-	return depth_tex.Sample(point_sampler, tc).x;
+	return ReadAFloat(depth_tex.Sample(point_sampler, tc), depth_near_far_invfar.y);
 }
 
 #if KLAYGE_D3D11 || KLAYGE_OPENGL
@@ -730,13 +730,13 @@ void CopyShadingDepthPS(float2 tc : TEXCOORD0,
 		out float4 oClr : SV_Target0, out float oDepth : SV_Depth)
 {
 	oClr = shading_tex.Sample(point_sampler, tc);
-	oDepth = linear_depth_to_non_linear(depth_tex.Sample(point_sampler, tc).x, near_q.x, near_q.y);
+	oDepth = linear_depth_to_non_linear(ReadAFloat(depth_tex.Sample(point_sampler, tc), depth_near_far_invfar.y), near_q.x, near_q.y);
 }
 
 void CopyDepthPS(float2 tc : TEXCOORD0,
 		out float oDepth : SV_Depth)
 {
-	oDepth = linear_depth_to_non_linear(depth_tex.Sample(point_sampler, tc).x, near_q.x, near_q.y);
+	oDepth = linear_depth_to_non_linear(ReadAFloat(depth_tex.Sample(point_sampler, tc), depth_near_far_invfar.y), near_q.x, near_q.y);
 }
 #else
 void CopyShadingDepthPS(float2 tc : TEXCOORD0,
@@ -953,7 +953,7 @@ void CalcTileViewFrustum(float2 tc, float2 min_max, out float4 planes[6])
 
 float4 DrawLightIndexPointPS(float2 tc : TEXCOORD0) : SV_Target
 {
-	float2 min_max = min_max_depth_tex.Sample(point_sampler, tc).xy;
+	float2 min_max = ReadTwoHalf(min_max_depth_tex.Sample(point_sampler, tc), depth_near_far_invfar.y);
 	float4 planes[6];
 	CalcTileViewFrustum(tc, min_max, planes);
 
@@ -1009,7 +1009,7 @@ float4 DrawLightIndexPointPS(float2 tc : TEXCOORD0) : SV_Target
 
 float4 DrawLightIndexSpotPS(float2 tc : TEXCOORD0) : SV_Target
 {
-	float2 min_max = min_max_depth_tex.Sample(point_sampler, tc).xy;
+	float2 min_max = ReadTwoHalf(min_max_depth_tex.Sample(point_sampler, tc), depth_near_far_invfar.y);
 	float4 planes[6];
 	CalcTileViewFrustum(tc, min_max, planes);
 
@@ -1128,7 +1128,7 @@ float4 LightIndexedDeferredRenderingDirectionalPS(float2 tc : TEXCOORD0, float3 
 
 	float4 ndc = g_buffer_tex.Sample(point_sampler, tc);
 	view_dir = normalize(view_dir);
-	float3 pos_es = view_dir * (depth_tex.Sample(point_sampler, tc).r / view_dir.z);
+	float3 pos_es = view_dir * (ReadAFloat(depth_tex.Sample(point_sampler, tc), depth_near_far_invfar.y) / view_dir.z);
 	float3 normal = GetNormal(ndc);
 	float shininess = GetShininess(ndc);
 
@@ -1212,7 +1212,7 @@ float4 LightIndexedDeferredRenderingPointPS(float2 tc : TEXCOORD0, float3 view_d
 		float4 lighting = 0;
 		float4 ndc = g_buffer_tex.Sample(point_sampler, tc);
 		view_dir = normalize(view_dir);
-		float3 pos_es = view_dir * (depth_tex.Sample(point_sampler, tc).r / view_dir.z);
+		float3 pos_es = view_dir * (ReadAFloat(depth_tex.Sample(point_sampler, tc), depth_near_far_invfar.y) / view_dir.z);
 		float3 normal = GetNormal(ndc);
 		float shininess = GetShininess(ndc);
 
@@ -1280,7 +1280,7 @@ float4 LightIndexedDeferredRenderingSpotPS(float2 tc : TEXCOORD0, float3 view_di
 		float4 lighting = 0;
 		float4 ndc = g_buffer_tex.Sample(point_sampler, tc);
 		view_dir = normalize(view_dir);
-		float3 pos_es = view_dir * (depth_tex.Sample(point_sampler, tc).r / view_dir.z);
+		float3 pos_es = view_dir * (ReadAFloat(depth_tex.Sample(point_sampler, tc), depth_near_far_invfar.y) / view_dir.z);
 		float3 normal = GetNormal(ndc);
 		float shininess = GetShininess(ndc);
 

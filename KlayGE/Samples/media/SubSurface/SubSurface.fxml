@@ -50,11 +50,7 @@ void BackFaceDepthVS(float2 tex0 : TEXCOORD0,
 
 float4 BackFaceDepthPS(float depth : TEXCOORD0) : SV_Target
 {
-#if KLAYGE_PACK_TO_RGBA
-	return EncodeFloatRGBA(clamp(depth * far_plane.y, 0, 0.999f));
-#else
-	return depth;
-#endif
+	return WriteAFloat(depth, far_plane.y);
 }
 		]]>
 	</shader>
@@ -159,11 +155,7 @@ float4 SubSurfacePS(float2 uv : TEXCOORD0,
 	}
 
 	float2 tex_coord = tc_w.xy / tc_w.z;
-#if KLAYGE_PACK_TO_RGBA
-	float back_face_depth = DecodeFloatRGBA(back_face_depth_tex.Sample(point_sampler, tex_coord)) * far_plane.x;
-#else
-	float back_face_depth = back_face_depth_tex.Sample(point_sampler, tex_coord).r;
-#endif
+	float back_face_depth = ReadAFloat(back_face_depth_tex.Sample(point_sampler, tex_coord), far_plane.x);
 #if !NO_DEPTH_TEXTURE
 	back_face_depth = non_linear_depth_to_linear(back_face_depth, near_q.x, near_q.y);
 #endif

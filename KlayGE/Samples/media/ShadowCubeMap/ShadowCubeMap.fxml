@@ -41,11 +41,7 @@ void GenCubeShadowMapVS(float4 Position : POSITION,
 
 float4 GenCubeShadowMapPS(float dist : TEXCOORD0) : SV_Target
 {
-#if KLAYGE_PACK_TO_RGBA
-	return EncodeFloatRGBA(clamp(dist * far_plane.y, 0, 0.999f));
-#else
-	return dist;
-#endif
+	return WriteAFloat(dist, far_plane.y);
 }
 		]]>
 	</shader>
@@ -105,12 +101,7 @@ void GenDPShadowMapVS(float4 Position : POSITION,
 float4 GenDPShadowMapPS(float2 dist : TEXCOORD0) : SV_Target
 {
 	clip(dist.y);
-
-#if KLAYGE_PACK_TO_RGBA
-	return EncodeFloatRGBA(clamp(dist.x * far_plane.y, 0, 0.999f));
-#else
-	return dist.x;
-#endif
+	return WriteAFloat(dist.x, far_plane.y);
 }
 		]]>
 	</shader>
@@ -598,21 +589,12 @@ float4 RenderScenePS(float2 Texcoord : TEXCOORD0, float3 LightWorldPos : TEXCOOR
 		tex.x += 0.5f;
 	}
 
-#if KLAYGE_PACK_TO_RGBA
-	occluder = DecodeFloatRGBA(shadow_dual_tex.Sample(linear_clamp_sampler, tex)) * far_plane.x;
-#else
-	occluder = shadow_dual_tex.Sample(linear_clamp_sampler, tex).x;
-#endif
-	occluder *= esm_scale_factor;
+	occluder = ReadAFloat(shadow_dual_tex.Sample(linear_clamp_sampler, tex), far_plane.x) * esm_scale_factor;
 #else
 	dist = length(LightWorldPos);
 
 	float3 shadow_dir = float3(LightWorldPos.x, -KLAYGE_FLIPPING * LightWorldPos.y, LightWorldPos.z);
-#if KLAYGE_PACK_TO_RGBA
-	occluder = DecodeFloatRGBA(shadow_cube_tex.Sample(linear_clamp_sampler, shadow_dir)) * far_plane.x * esm_scale_factor;
-#else
-	occluder = shadow_cube_tex.Sample(linear_clamp_sampler, shadow_dir).x;
-#endif
+	occluder = ReadAFloat(shadow_cube_tex.Sample(linear_clamp_sampler, shadow_dir), far_plane.x * esm_scale_factor);
 #endif
 	
 	float atten = attenuation_term(0, LightWorldPos, light_falloff);

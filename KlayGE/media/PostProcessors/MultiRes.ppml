@@ -4,6 +4,7 @@
 	<post_processor name="GBuffer2DepthDerivate">
 		<params>
 			<param name="delta_offset"/>
+			<param name="far_plane"/>
 		</params>
 		<input>
 			<pin name="g_buffer_tex"/>
@@ -19,6 +20,7 @@
 		<params>
 			<param name="delta_offset"/>
 			<param name="prev_level"/>
+			<param name="far_plane"/>
 		</params>
 		<input>
 			<pin name="depth_deriv_tex"/>
