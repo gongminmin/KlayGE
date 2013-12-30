@@ -2,6 +2,7 @@
 
 <effect>
 	<include name="PostProcess.fxml"/>
+	<include name="util.fxml"/>
 	
 	<shader>
 		<![CDATA[
