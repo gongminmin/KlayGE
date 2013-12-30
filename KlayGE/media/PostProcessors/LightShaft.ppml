@@ -6,7 +6,7 @@
 			<param name="blur_sample_num"/>
 			<param name="blur_origin"/>
 			<param name="cutoff_decay_weight"/>
-			<param name="valid_sample_length"/>
+			<param name="far_plane"/>
 		</params>
 		<input>
 			<pin name="color_tex"/>
@@ -22,7 +22,7 @@
 			<param name="blur_sample_num"/>
 			<param name="blur_origin"/>
 			<param name="cutoff_decay_weight"/>
-			<param name="valid_sample_length"/>
+			<param name="far_plane"/>
 		</params>
 		<input>
 			<pin name="color_depth_tex"/>

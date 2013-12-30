@@ -109,6 +109,7 @@ namespace KlayGE
 			{
 				radial_blur_pps_[i]->SetParam(1, light_uv_pos);
 				radial_blur_pps_[i]->SetParam(2, (1 - cutoff_decay_weight) / RADIAL_SAMPLE_NUM);
+				radial_blur_pps_[i]->SetParam(3, float2(camera.FarPlane(), 1 / camera.FarPlane()));
 				radial_blur_pps_[i]->Apply();
 			}
 

@@ -2,6 +2,7 @@
 
 <effect>
 	<include name="PostProcess.fxml"/>
+	<include name="util.fxml"/>
 
 	<parameter type="sampler" name="linear_sampler">
 		<state name="filtering" value="min_mag_linear_mip_point"/>
@@ -14,6 +15,8 @@
 		<parameter type="float2" name="blur_origin"/>
 		<parameter type="float" name="cutoff_decay_weight" value="0.015625"/>
 	</cbuffer>
+
+	<parameter type="float2" name="far_plane"/>
 
 	<parameter type="texture2D" name="color_tex"/>
 	<parameter type="texture2D" name="depth_tex"/>
@@ -30,7 +33,7 @@ float4 LightShaftRadialBlurCombinePS(float2 tc0 : TEXCOORD0) : SV_Target
 	for (int i = 0; i < blur_sample_num.x; ++ i)
 	{
 		sample_sum += float4(color_tex.Sample(linear_sampler, current_tc).xyz,
-			depth_tex.Sample(linear_sampler, current_tc).x) * sample_weight;
+			ReadAFloat(depth_tex.Sample(linear_sampler, current_tc), far_plane.x)) * sample_weight;
 		current_tc += sample_step;
 		sample_weight -= cutoff_decay_weight; // linear decay
 	}
