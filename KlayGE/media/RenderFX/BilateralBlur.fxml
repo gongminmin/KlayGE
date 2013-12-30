@@ -31,8 +31,14 @@ float4 CalcBlur1(float2 tc0, bool x_dir)
 
 	float center_d = src2_tex.Sample(linear_sampler, tc0).x;
 
+	int kr = 8;
+	// TODO: Cg doesn't support min(int, int)
+	if (kernel_radius < kr)
+	{
+		kr = kernel_radius;
+	}
 	float total_weight = 0;
-	for (int i = -kernel_radius; i <= kernel_radius; ++ i)
+	for (int i = -kr; i <= kr; ++ i)
 	{
 		float2 offset = float2(i * src_tex_size.y, 0);
 		float2 tc = tc0 + (x_dir ? offset.xy : offset.yx);
@@ -53,8 +59,14 @@ float4 CalcBlur2(float2 tc0, bool x_dir)
 
 	float center_d = src2_tex.Sample(linear_sampler, tc0).x;
 
+	int kr = 8;
+	// TODO: Cg doesn't support min(int, int)
+	if (kernel_radius < kr)
+	{
+		kr = kernel_radius;
+	}
 	float total_weight = 0;
-	for (int i = -kernel_radius; i <= kernel_radius; ++ i)
+	for (int i = -kr; i <= kr; ++ i)
 	{
 		float2 offset = float2(i * src_tex_size.y, 0);
 		float2 tc = tc0 + (x_dir ? offset.xy : offset.yx);
@@ -75,8 +87,14 @@ float4 CalcBlur3(float2 tc0, bool x_dir)
 
 	float center_d = src2_tex.Sample(linear_sampler, tc0).x;
 
+	int kr = 8;
+	// TODO: Cg doesn't support min(int, int)
+	if (kernel_radius < kr)
+	{
+		kr = kernel_radius;
+	}
 	float total_weight = 0;
-	for (int i = -kernel_radius; i <= kernel_radius; ++ i)
+	for (int i = -kr; i <= kr; ++ i)
 	{
 		float2 offset = float2(i * src_tex_size.y, 0);
 		float2 tc = tc0 + (x_dir ? offset.xy : offset.yx);
@@ -97,8 +115,14 @@ float4 CalcBlur4(float2 tc0, bool x_dir)
 
 	float center_d = src2_tex.Sample(linear_sampler, tc0).x;
 
+	int kr = 8;
+	// TODO: Cg doesn't support min(int, int)
+	if (kernel_radius < kr)
+	{
+		kr = kernel_radius;
+	}
 	float total_weight = 0;
-	for (int i = -kernel_radius; i <= kernel_radius; ++ i)
+	for (int i = -kr; i <= kr; ++ i)
 	{
 		float2 offset = float2(i * src_tex_size.y, 0);
 		float2 tc = tc0 + (x_dir ? offset.xy : offset.yx);

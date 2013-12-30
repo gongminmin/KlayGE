@@ -37,19 +37,16 @@ namespace KlayGE
 	{
 		if (0 == numMipMaps)
 		{
-			num_mip_maps_ = 1;
+			numMipMaps = 1;
 			uint32_t w = size;
 			while (w != 1)
 			{
-				++ num_mip_maps_;
+				++ numMipMaps;
 
 				w = std::max<uint32_t>(1U, w / 2);
 			}
 		}
-		else
-		{
-			num_mip_maps_ = numMipMaps;
-		}
+		num_mip_maps_ = numMipMaps;
 
 		D3D11RenderEngine const & re = *checked_cast<D3D11RenderEngine const *>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		if (re.DeviceFeatureLevel() <= D3D_FEATURE_LEVEL_9_3)
@@ -58,6 +55,24 @@ namespace KlayGE
 			{
 				// height or width is not a power of 2 and multiple mip levels are specified. This is not supported at feature levels below 10.0.
 				num_mip_maps_ = 1;
+			}
+
+			if ((num_mip_maps_ > 1) && IsCompressedFormat(format))
+			{
+				// height or width is not a multiply of 4 and multiple mip levels are specified. This is not supported at feature levels below 10.0.
+				num_mip_maps_ = 1;
+				uint32_t w = size;
+				while (w != 1)
+				{
+					w = std::max<uint32_t>(1U, w / 2);
+
+					if ((w & 0x3) != 0)
+					{
+						break;
+					}
+
+					++ num_mip_maps_;
+				}
 			}
 		}
 
@@ -83,9 +98,9 @@ namespace KlayGE
 			{
 				for (uint32_t i = 0; i < num_mip_maps_; ++ i)
 				{
-					subres_data[face * num_mip_maps_ + i].pSysMem = init_data[face * num_mip_maps_ + i].data;
-					subres_data[face * num_mip_maps_ + i].SysMemPitch = init_data[face * num_mip_maps_ + i].row_pitch;
-					subres_data[face * num_mip_maps_ + i].SysMemSlicePitch = init_data[face * num_mip_maps_ + i].slice_pitch;
+					subres_data[face * num_mip_maps_ + i].pSysMem = init_data[face * numMipMaps + i].data;
+					subres_data[face * num_mip_maps_ + i].SysMemPitch = init_data[face * numMipMaps + i].row_pitch;
+					subres_data[face * num_mip_maps_ + i].SysMemSlicePitch = init_data[face * numMipMaps + i].slice_pitch;
 				}
 			}
 		}

@@ -201,15 +201,15 @@ float4 ESM_Sun(float3 pos_es, float len)
 	return shadow;
 }
 
-float4 NearestDepthUpsamplingShadow(float2 tc, int channel)
+float4 NearestDepthUpsamplingShadow(float2 tc, float2 tc_ddx, float2 tc_ddy, int channel)
 {
 	float2 l1_inv_width_height = inv_width_height * 2;
 	float2 tc0 = tc - inv_width_height;
-	float z00 = ReadAFloat(depth_tex.SampleLevel(point_sampler, tc0, 1), depth_near_far_invfar.y);
-	float z10 = ReadAFloat(depth_tex.SampleLevel(point_sampler, tc0 + float2(l1_inv_width_height.x, 0), 1), depth_near_far_invfar.y);
-	float z01 = ReadAFloat(depth_tex.SampleLevel(point_sampler, tc0 + float2(0, l1_inv_width_height.y), 1), depth_near_far_invfar.y);
-	float z11 = ReadAFloat(depth_tex.SampleLevel(point_sampler, tc0 + l1_inv_width_height, 1), depth_near_far_invfar.y);
-	float z_full = ReadAFloat(depth_tex.SampleLevel(point_sampler, tc, 0), depth_near_far_invfar.y);
+	float z00 = ReadAFloat(depth_tex.SampleGrad(point_sampler, tc0, tc_ddx * 2, tc_ddy * 2), depth_near_far_invfar.y);
+	float z10 = ReadAFloat(depth_tex.SampleGrad(point_sampler, tc0 + float2(l1_inv_width_height.x, 0), tc_ddx * 2, tc_ddy * 2), depth_near_far_invfar.y);
+	float z01 = ReadAFloat(depth_tex.SampleGrad(point_sampler, tc0 + float2(0, l1_inv_width_height.y), tc_ddx * 2, tc_ddy * 2), depth_near_far_invfar.y);
+	float z11 = ReadAFloat(depth_tex.SampleGrad(point_sampler, tc0 + l1_inv_width_height, tc_ddx * 2, tc_ddy * 2), depth_near_far_invfar.y);
+	float z_full = ReadAFloat(depth_tex.SampleGrad(point_sampler, tc, tc_ddx, tc_ddy), depth_near_far_invfar.y);
 	float threshold = 0.25f;
 
 	float3 ndus = NearestDepthUpsampling(tc0, float4(z00, z10, z01, z11), z_full, l1_inv_width_height, threshold);
@@ -217,22 +217,22 @@ float4 NearestDepthUpsamplingShadow(float2 tc, int channel)
 	{
 		if (channel < 4)
 		{
-			return shadowing_tex.SampleLevel(linear_sampler, tc, 0)[channel];
+			return shadowing_tex.SampleGrad(linear_sampler, tc, tc_ddx, tc_ddy)[channel];
 		}
 		else
 		{
-			return projective_shadowing_tex.SampleLevel(linear_sampler, tc, 0);
+			return projective_shadowing_tex.SampleGrad(linear_sampler, tc, tc_ddx, tc_ddy);
 		}
 	}
 	else
 	{
 		if (channel < 4)
 		{
-			return shadowing_tex.SampleLevel(point_sampler, ndus.xy, 0)[channel];
+			return shadowing_tex.SampleGrad(point_sampler, ndus.xy, tc_ddx, tc_ddy)[channel];
 		}
 		else
 		{
-			return projective_shadowing_tex.SampleLevel(point_sampler, ndus.xy, 0);
+			return projective_shadowing_tex.SampleGrad(point_sampler, ndus.xy, tc_ddx, tc_ddy);
 		}
 	}
 }
@@ -282,6 +282,9 @@ float4 DeferredRenderingPointPS(
 	float2 tc = tc_w.xy / tc_w.z;
 #endif
 
+	float2 tc_ddx = ddx(tc);
+	float2 tc_ddy = ddy(tc);
+
 	float4 ndc = g_buffer_tex.Sample(point_sampler, tc);
 	float4 final_clr = 0;
 
@@ -296,7 +299,7 @@ float4 DeferredRenderingPointPS(
 		float3 shadow = 1;
 		if (shadowing_channel >= 0)
 		{
-			shadow = NearestDepthUpsamplingShadow(tc, shadowing_channel).xyz;
+			shadow = NearestDepthUpsamplingShadow(tc, tc_ddx, tc_ddy, shadowing_channel).xyz;
 		}
 		float atten = attenuation_term(light_pos_es.xyz, pos_es.xyz, light_falloff);
 		final_clr = CalcColor(n_dot_l, spec, atten, shadow, light_color, light_attrib);
@@ -317,6 +320,9 @@ float4 DeferredRenderingSpotPS(
 	float2 tc = tc_w.xy / tc_w.z;
 #endif
 
+	float2 tc_ddx = ddx(tc);
+	float2 tc_ddy = ddy(tc);
+
 	float4 ndc = g_buffer_tex.Sample(point_sampler, tc);
 	float4 final_clr = 0;
 	
@@ -335,7 +341,7 @@ float4 DeferredRenderingSpotPS(
 			float3 shadow = 1;
 			if (shadowing_channel >= 0)
 			{
-				shadow = NearestDepthUpsamplingShadow(tc, shadowing_channel).xyz;
+				shadow = NearestDepthUpsamplingShadow(tc, tc_ddx, tc_ddy, shadowing_channel).xyz;
 			}
 			float atten = spot * attenuation_term(light_pos_es.xyz, pos_es.xyz, light_falloff);
 			final_clr = CalcColor(n_dot_l, spec, atten, shadow, light_color, light_attrib);
@@ -356,6 +362,9 @@ float4 DeferredRenderingSunPS(
 #ifndef NOPERSPECTIVE_SUPPORT
 	float2 tc = tc_w.xy / tc_w.z;
 #endif
+
+	float2 tc_ddx = ddx(tc);
+	float2 tc_ddy = ddy(tc);
 	
 	float4 ndc = g_buffer_tex.Sample(point_sampler, tc);
 	float4 final_clr = 0;
@@ -371,7 +380,7 @@ float4 DeferredRenderingSunPS(
 		float3 shadow = 1;
 		if (shadowing_channel >= 0)
 		{
-			shadow = NearestDepthUpsamplingShadow(tc, shadowing_channel).xyz;
+			shadow = NearestDepthUpsamplingShadow(tc, tc_ddx, tc_ddy, shadowing_channel).xyz;
 		}
 		final_clr = CalcColor(n_dot_l, spec, 1, shadow, light_color, light_attrib);
 	}
@@ -735,8 +744,9 @@ void CopyShadingDepthPS(float2 tc : TEXCOORD0,
 }
 
 void CopyDepthPS(float2 tc : TEXCOORD0,
-		out float oDepth : SV_Depth)
+		out float4 oClr : SV_Target0, out float oDepth : SV_Depth)
 {
+	oClr = 0;
 	oDepth = linear_depth_to_non_linear(ReadAFloat(depth_tex.Sample(point_sampler, tc), depth_near_far_invfar.y), near_q.x, near_q.y);
 }
 #else
@@ -952,6 +962,34 @@ void CalcTileViewFrustum(float2 tc, float2 min_max, out float4 planes[6])
 	}
 }
 
+int OverlapTestPoint(float4 planes[6], int light_index)
+{
+	int overlap = 1;
+	for (int j = 0; j < 6; ++ j)
+	{
+		float d = dot(planes[j], float4(lights_pos_es[light_index].xyz, 1));
+		overlap *= (d > -lights_falloff_range[light_index].w);
+	}
+
+	return overlap;
+}
+
+int OverlapTestSpot(float4 planes[6], int light_index)
+{
+	float3 min_pt = lights_aabb_min[light_index];
+	float3 max_pt = lights_aabb_max[light_index];
+
+	int overlap = 1;
+	for (int j = 0; j < 6; ++ j)
+	{
+		float4 plane = planes[j];
+		float3 v0 = plane.xyz < 0 ? min_pt : max_pt;
+		overlap *= (dot(plane, float4(v0, 1)) >= 0);
+	}
+
+	return overlap;
+}
+
 float4 DrawLightIndexPointPS(float2 tc : TEXCOORD0) : SV_Target
 {
 	float2 min_max = ReadTwoHalf(min_max_depth_tex.Sample(point_sampler, tc), depth_near_far_invfar.y);
@@ -960,48 +998,46 @@ float4 DrawLightIndexPointPS(float2 tc : TEXCOORD0) : SV_Target
 
 #if INTEGER_SUPPORT
 	uint accum = 0;
-#else
-	float all_light_id[4] = { 0, 0, 0, 0 };
-	int comp = 0;
-	int mask = 1;
-	int accum = 0;
-#endif
-
-	for (int i = 0; i < num_lights; ++ i)
+	
+	for (int index = 0; index < num_lights; ++ index)
 	{
-		int overlap = 1;
-		for (int j = 0; j < 6; ++ j)
+		if (OverlapTestPoint(planes, index))
 		{
-			float d = dot(planes[j], float4(lights_pos_es[i].xyz, 1));
-			overlap = overlap * (d > -lights_falloff_range[i].w);
+			accum |= (1UL << index);
 		}
-
-		if (overlap)
-		{
-#if INTEGER_SUPPORT
-			accum |= (1UL << i);
-#else
-			accum += mask;
-#endif
-		}
-
-#if !INTEGER_SUPPORT
-		mask *= 2;
-		if (mask >= 256)
-		{
-			all_light_id[comp] = (accum + 0.5f) / 255.0f;
-			++ comp;
-			mask = 1;
-			accum = 0;
-		}
-#endif
 	}
 
-#if INTEGER_SUPPORT
-	return float4((accum & 0xFF) / 255.0f, ((accum >> 8) & 0xFF) / 255.0f,
-		((accum >> 16) & 0xFF) / 255.0f, ((accum >> 24) & 0xFF) / 255.0f);
+	return float4(uint4(accum & 0xFF, accum >> 8,
+		accum >> 16, accum >> 24) & 0xFF) / 255.0f;
 #else
-	all_light_id[comp] = (accum + 0.5f) / 255.0f;	
+	float all_light_id[4] = { 0, 0, 0, 0 };
+
+	int nl = 32;
+	// TODO: Cg doesn't support min(int, int)
+	if (num_lights < nl)
+	{
+		nl = num_lights;
+	}
+
+	int end_comp = (nl + 7) / 8;
+	int index = 0;
+	for (int comp = 0; comp < end_comp; ++ comp)
+	{
+		int mask = 1;
+		int accum = 0;
+		while (mask < 256)
+		{
+			if (OverlapTestPoint(planes, index))
+			{
+				accum += mask;
+			}
+			
+			mask *= 2;
+			++ index;
+		}
+
+		all_light_id[comp] = (accum + 0.5f) / 255.0f;
+	}
 
 	// TODO: Cg doesn't support float[4]->float4
 	return float4(all_light_id[0], all_light_id[1], all_light_id[2], all_light_id[3]);
@@ -1016,52 +1052,46 @@ float4 DrawLightIndexSpotPS(float2 tc : TEXCOORD0) : SV_Target
 
 #if INTEGER_SUPPORT
 	uint accum = 0;
-#else
-	float all_light_id[4] = { 0, 0, 0, 0 };
-	int comp = 0;
-	int mask = 1;
-	int accum = 0;
-#endif
-
-	for (int i = 0; i < num_lights; ++ i)
+	
+	for (int index = 0; index < num_lights; ++ index)
 	{
-		float3 min_pt = lights_aabb_min[i];
-		float3 max_pt = lights_aabb_max[i];
-
-		int overlap = 1;
-		for (int j = 0; j < 6; ++ j)
+		if (OverlapTestSpot(planes, index))
 		{
-			float4 plane = planes[j];
-			float3 v0 = plane.xyz < 0 ? min_pt : max_pt;
-			overlap = overlap * (dot(plane, float4(v0, 1)) >= 0);
+			accum |= (1UL << index);
 		}
-
-		if (overlap)
-		{
-#if INTEGER_SUPPORT
-			accum |= (1UL << i);
-#else
-			accum += mask;
-#endif
-		}
-			
-#if !INTEGER_SUPPORT
-		mask *= 2;
-		if (mask >= 256)
-		{
-			all_light_id[comp] = (accum + 0.5f) / 255.0f;
-			++ comp;
-			mask = 1;
-			accum = 0;
-		}
-#endif
 	}
 
-#if INTEGER_SUPPORT
-	return float4((accum & 0xFF) / 255.0f, ((accum >> 8) & 0xFF) / 255.0f,
-		((accum >> 16) & 0xFF) / 255.0f, ((accum >> 24) & 0xFF) / 255.0f);
+	return float4(uint4(accum & 0xFF, accum >> 8,
+		accum >> 16, accum >> 24) & 0xFF) / 255.0f;
 #else
-	all_light_id[comp] = (accum + 0.5f) / 255.0f;	
+	float all_light_id[4] = { 0, 0, 0, 0 };
+
+	int nl = 32;
+	// TODO: Cg doesn't support min(int, int)
+	if (num_lights < nl)
+	{
+		nl = num_lights;
+	}
+
+	int end_comp = (nl + 7) / 8;
+	int index = 0;
+	for (int comp = 0; comp < end_comp; ++ comp)
+	{
+		int mask = 1;
+		int accum = 0;
+		while (mask < 256)
+		{
+			if (OverlapTestSpot(planes, index))
+			{
+				accum += mask;
+			}
+			
+			mask *= 2;
+			++ index;
+		}
+		
+		all_light_id[comp] = (accum + 0.5f) / 255.0f;
+	}
 
 	// TODO: Cg doesn't support float[4]->float4
 	return float4(all_light_id[0], all_light_id[1], all_light_id[2], all_light_id[3]);
@@ -1096,6 +1126,9 @@ float4 LightIndexedDeferredRenderingAmbientPS(float2 tc : TEXCOORD0, float3 view
 
 float4 LightIndexedDeferredRenderingSunPS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Target
 {
+	float2 tc_ddx = ddx(tc);
+	float2 tc_ddy = ddy(tc);
+	
 	float4 shading = 0;
 
 	float4 ndc = g_buffer_tex.Sample(point_sampler, tc);
@@ -1111,7 +1144,7 @@ float4 LightIndexedDeferredRenderingSunPS(float2 tc : TEXCOORD0, float3 view_dir
 		float3 shadow = 1;
 		if (shadowing_channel >= 0)
 		{
-			shadow = NearestDepthUpsamplingShadow(tc, shadowing_channel).xyz;
+			shadow = NearestDepthUpsamplingShadow(tc, tc_ddx, tc_ddy, shadowing_channel).xyz;
 		}
 		float4 lighting = CalcColor(n_dot_l, spec, 1, shadow, light_color, light_attrib);
 
@@ -1149,7 +1182,7 @@ float4 LightIndexedDeferredRenderingDirectionalPS(float2 tc : TEXCOORD0, float3 
 }
 
 float4 CalcLightIndexedDeferredRenderingPointLighting(int index, float3 pos_es, float3 normal, float3 view_dir,
-		float shininess, float2 tc)
+		float shininess, float2 tc, float2 tc_ddx, float2 tc_ddy)
 {
 	float4 lighting = 0;
 	float3 dir = lights_pos_es[index].xyz - pos_es;
@@ -1162,7 +1195,7 @@ float4 CalcLightIndexedDeferredRenderingPointLighting(int index, float3 pos_es, 
 		{
 			float3 shadow = 1;
 #if WITH_SHADOW
-			shadow = NearestDepthUpsamplingShadow(tc, lights_shadowing_channel[index]).xyz;
+			shadow = NearestDepthUpsamplingShadow(tc, tc_ddx, tc_ddy, lights_shadowing_channel[index]).xyz;
 #endif
 
 			float spec = roughness_term(normalize(dir - view_dir), normal, shininess).x;
@@ -1174,7 +1207,7 @@ float4 CalcLightIndexedDeferredRenderingPointLighting(int index, float3 pos_es, 
 }
 
 float4 CalcLightIndexedDeferredRenderingSpotLighting(int index, float3 pos_es, float3 normal, float3 view_dir,
-		float shininess, float2 tc)
+		float shininess, float2 tc, float2 tc_ddx, float2 tc_ddy)
 {
 	float4 lighting = 0;
 	float spot = spot_lighting(lights_pos_es[index].xyz, lights_dir_es[index].xyz,
@@ -1191,7 +1224,7 @@ float4 CalcLightIndexedDeferredRenderingSpotLighting(int index, float3 pos_es, f
 			{
 				float3 shadow = 1;
 #if WITH_SHADOW
-				shadow = NearestDepthUpsamplingShadow(tc, lights_shadowing_channel[index]).xyz;
+				shadow = NearestDepthUpsamplingShadow(tc, tc_ddx, tc_ddy, lights_shadowing_channel[index]).xyz;
 #endif
 
 				float spec = roughness_term(normalize(dir - view_dir), normal, shininess).x;
@@ -1206,6 +1239,9 @@ float4 CalcLightIndexedDeferredRenderingSpotLighting(int index, float3 pos_es, f
 				
 float4 LightIndexedDeferredRenderingPointPS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Target
 {
+	float2 tc_ddx = ddx(tc);
+	float2 tc_ddy = ddy(tc);
+	
 	float4 shading = 0;
 	int4 light_index = light_index_tex.Sample(point_sampler, tc * tc_to_tile_scale) * 255 + 0.5f;
 	if (any(light_index))
@@ -1223,7 +1259,7 @@ float4 LightIndexedDeferredRenderingPointPS(float2 tc : TEXCOORD0, float3 view_d
 		for (uint il = 0; il < nl; ++ il)
 		{
 			uint index = firstbitlow(light_index_all);
-			lighting += CalcLightIndexedDeferredRenderingPointLighting(index, pos_es, normal, view_dir, shininess, tc);
+			lighting += CalcLightIndexedDeferredRenderingPointLighting(index, pos_es, normal, view_dir, shininess, tc, tc_ddx, tc_ddy);
 			light_index_all = light_index_all & (light_index_all - 1);
 		}
 #else
@@ -1255,7 +1291,7 @@ float4 LightIndexedDeferredRenderingPointPS(float2 tc : TEXCOORD0, float3 view_d
 #endif
 				if (mask <= light_comp)
 				{
-					lighting += CalcLightIndexedDeferredRenderingPointLighting(index, pos_es, normal, view_dir, shininess, tc);
+					lighting += CalcLightIndexedDeferredRenderingPointLighting(index, pos_es, normal, view_dir, shininess, tc, tc_ddx, tc_ddy);
 					light_comp -= mask;
 				}
 
@@ -1274,6 +1310,9 @@ float4 LightIndexedDeferredRenderingPointPS(float2 tc : TEXCOORD0, float3 view_d
 
 float4 LightIndexedDeferredRenderingSpotPS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Target
 {
+	float2 tc_ddx = ddx(tc);
+	float2 tc_ddy = ddy(tc);
+	
 	float4 shading = 0;
 	int4 light_index = light_index_tex.Sample(point_sampler, tc * tc_to_tile_scale) * 255 + 0.5f;
 	if (any(light_index))
@@ -1291,7 +1330,7 @@ float4 LightIndexedDeferredRenderingSpotPS(float2 tc : TEXCOORD0, float3 view_di
 		for (uint il = 0; il < nl; ++ il)
 		{
 			uint index = firstbitlow(light_index_all);
-			lighting += CalcLightIndexedDeferredRenderingSpotLighting(index, pos_es, normal, view_dir, shininess, tc);
+			lighting += CalcLightIndexedDeferredRenderingSpotLighting(index, pos_es, normal, view_dir, shininess, tc, tc_ddx, tc_ddy);
 			light_index_all = light_index_all & (light_index_all - 1);
 		}
 #else
@@ -1323,7 +1362,7 @@ float4 LightIndexedDeferredRenderingSpotPS(float2 tc : TEXCOORD0, float3 view_di
 #endif
 				if (mask <= light_comp)
 				{
-					lighting += CalcLightIndexedDeferredRenderingSpotLighting(index, pos_es, normal, view_dir, shininess, tc);
+					lighting += CalcLightIndexedDeferredRenderingSpotLighting(index, pos_es, normal, view_dir, shininess, tc, tc_ddx, tc_ddy);
 					light_comp -= mask;
 				}
 

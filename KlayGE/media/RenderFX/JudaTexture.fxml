@@ -75,7 +75,7 @@ void decode_tile_id(out int2 tile_xy, float4 tile_id)
 
 float3 calc_cache_addr(int2 tile_xy, float2 in_tile_coord)
 {
-	float3 cache_addr = juda_tex_indirect.SampleLevel(jdt_point_sampler, float2(tile_xy) * inv_juda_tex_indirect_size, 0).rgb * 255;
+	float3 cache_addr = juda_tex_indirect.SampleGrad(jdt_point_sampler, float2(tile_xy) * inv_juda_tex_indirect_size, 1, 1).rgb * 255;
 	cache_addr.xy = cache_addr.xy * tile_size.y + tile_size.z;
 	float2 tc = float2((cache_addr.xy + in_tile_coord * tile_size.x) * inv_juda_tex_cache_size);
 	return float3(tc, cache_addr.z);
@@ -90,38 +90,36 @@ float4 judatex2d_internal(int2 tile_xy, float2 in_tile_coord)
 	float2 tc = cache_addr.xy;
 	int index = cache_addr.z;
 	float4 ret = 0;
-	switch (index)
+	if (0 == index)
 	{
-	case 0:
 		ret = juda_tex_cache_0.Sample(jdt_aniso_sampler, tc);
-		break;
-
-	case 1:
-		ret = juda_tex_cache_1.Sample(jdt_aniso_sampler, tc);
-		break;
-
-	case 2:
-		ret = juda_tex_cache_2.Sample(jdt_aniso_sampler, tc);
-		break;
-
-#if KLAYGE_MAX_TEX_UNITS > 4
-	case 3:
-		ret = juda_tex_cache_3.Sample(jdt_aniso_sampler, tc);
-		break;
-
-	case 4:
-		ret = juda_tex_cache_4.Sample(jdt_aniso_sampler, tc);
-		break;
-
-	case 5:
-		ret = juda_tex_cache_5.Sample(jdt_aniso_sampler, tc);
-		break;
-
-	case 6:
-		ret = juda_tex_cache_6.Sample(jdt_aniso_sampler, tc);
-		break;
-#endif
 	}
+	else if (1 == index)
+	{
+		ret = juda_tex_cache_1.Sample(jdt_aniso_sampler, tc);
+	}
+	else if (2 == index)
+	{
+		ret = juda_tex_cache_2.Sample(jdt_aniso_sampler, tc);
+	}
+#if KLAYGE_MAX_TEX_UNITS > 4
+	else if (3 == index)
+	{
+		ret = juda_tex_cache_3.Sample(jdt_aniso_sampler, tc);
+	}
+	else if (4 == index)
+	{
+		ret = juda_tex_cache_4.Sample(jdt_aniso_sampler, tc);
+	}
+	else if (5 == index)
+	{
+		ret = juda_tex_cache_5.Sample(jdt_aniso_sampler, tc);
+	}
+	else //if (6 == index)
+	{
+		ret = juda_tex_cache_6.Sample(jdt_aniso_sampler, tc);
+	}
+#endif
 	return ret;
 #endif
 }
@@ -135,38 +133,36 @@ float4 judatex2d_bias_internal(int2 tile_xy, float2 in_tile_coord, float bias)
 	float2 tc = cache_addr.xy;
 	int index = cache_addr.z;
 	float4 ret = 0;
-	switch (index)
+	if (0 == index)
 	{
-	case 0:
 		ret = juda_tex_cache_0.SampleBias(jdt_aniso_sampler, tc, bias);
-		break;
-
-	case 1:
-		ret = juda_tex_cache_1.SampleBias(jdt_aniso_sampler, tc, bias);
-		break;
-
-	case 2:
-		ret = juda_tex_cache_2.SampleBias(jdt_aniso_sampler, tc, bias);
-		break;
-
-#if KLAYGE_MAX_TEX_UNITS > 4
-	case 3:
-		ret = juda_tex_cache_3.SampleBias(jdt_aniso_sampler, tc, bias);
-		break;
-
-	case 4:
-		ret = juda_tex_cache_4.SampleBias(jdt_aniso_sampler, tc, bias);
-		break;
-
-	case 5:
-		ret = juda_tex_cache_5.SampleBias(jdt_aniso_sampler, tc, bias);
-		break;
-
-	case 6:
-		ret = juda_tex_cache_6.SampleBias(jdt_aniso_sampler, tc, bias);
-		break;
-#endif
 	}
+	else if (1 == index)
+	{
+		ret = juda_tex_cache_1.SampleBias(jdt_aniso_sampler, tc, bias);
+	}
+	else if (2 == index)
+	{
+		ret = juda_tex_cache_2.SampleBias(jdt_aniso_sampler, tc, bias);
+	}
+#if KLAYGE_MAX_TEX_UNITS > 4
+	else if (3 == index)
+	{
+		ret = juda_tex_cache_3.SampleBias(jdt_aniso_sampler, tc, bias);
+	}
+	else if (4 == index)
+	{
+		ret = juda_tex_cache_4.SampleBias(jdt_aniso_sampler, tc, bias);
+	}
+	else if (5 == index)
+	{
+		ret = juda_tex_cache_5.SampleBias(jdt_aniso_sampler, tc, bias);
+	}
+	else //if (6 == index)
+	{
+		ret = juda_tex_cache_6.SampleBias(jdt_aniso_sampler, tc, bias);
+	}
+#endif
 	return ret;
 #endif
 }
@@ -180,38 +176,36 @@ float4 judatex2d_level_internal(int2 tile_xy, float2 in_tile_coord, float lod)
 	float2 tc = cache_addr.xy;
 	int index = cache_addr.z;
 	float4 ret = 0;
-	switch (index)
+	if (0 == index)
 	{
-	case 0:
 		ret = juda_tex_cache_0.SampleLevel(jdt_aniso_sampler, tc, lod);
-		break;
-
-	case 1:
-		ret = juda_tex_cache_1.SampleLevel(jdt_aniso_sampler, tc, lod);
-		break;
-
-	case 2:
-		ret = juda_tex_cache_2.SampleLevel(jdt_aniso_sampler, tc, lod);
-		break;
-
-#if KLAYGE_MAX_TEX_UNITS > 4
-	case 3:
-		ret = juda_tex_cache_3.SampleLevel(jdt_aniso_sampler, tc, lod);
-		break;
-
-	case 4:
-		ret = juda_tex_cache_4.SampleLevel(jdt_aniso_sampler, tc, lod);
-		break;
-
-	case 5:
-		ret = juda_tex_cache_5.SampleLevel(jdt_aniso_sampler, tc, lod);
-		break;
-
-	case 6:
-		ret = juda_tex_cache_6.SampleLevel(jdt_aniso_sampler, tc, lod);
-		break;
-#endif
 	}
+	else if (1 == index)
+	{
+		ret = juda_tex_cache_1.SampleLevel(jdt_aniso_sampler, tc, lod);
+	}
+	else if (2 == index)
+	{
+		ret = juda_tex_cache_2.SampleLevel(jdt_aniso_sampler, tc, lod);
+	}
+#if KLAYGE_MAX_TEX_UNITS > 4
+	else if (3 == index)
+	{
+		ret = juda_tex_cache_3.SampleLevel(jdt_aniso_sampler, tc, lod);
+	}
+	else if (4 == index)
+	{
+		ret = juda_tex_cache_4.SampleLevel(jdt_aniso_sampler, tc, lod);
+	}
+	else if (5 == index)
+	{
+		ret = juda_tex_cache_5.SampleLevel(jdt_aniso_sampler, tc, lod);
+	}
+	else //if (6 == index)
+	{
+		ret = juda_tex_cache_6.SampleLevel(jdt_aniso_sampler, tc, lod);
+	}
+#endif
 	return ret;
 #endif
 }
@@ -225,38 +219,36 @@ float4 judatex2d_grad_internal(int2 tile_xy, float2 in_tile_coord, float2 tc_ddx
 	float2 tc = cache_addr.xy;
 	int index = cache_addr.z;
 	float4 ret = 0;
-	switch (index)
+	if (0 == index)
 	{
-	case 0:
 		ret = juda_tex_cache_0.SampleGrad(jdt_aniso_sampler, tc, tc_ddx, tc_ddy);
-		break;
-
-	case 1:
-		ret = juda_tex_cache_1.SampleGrad(jdt_aniso_sampler, tc, tc_ddx, tc_ddy);
-		break;
-
-	case 2:
-		ret = juda_tex_cache_2.SampleGrad(jdt_aniso_sampler, tc, tc_ddx, tc_ddy);
-		break;
-
-#if KLAYGE_MAX_TEX_UNITS > 4
-	case 3:
-		ret = juda_tex_cache_3.SampleGrad(jdt_aniso_sampler, tc, tc_ddx, tc_ddy);
-		break;
-
-	case 4:
-		ret = juda_tex_cache_4.SampleGrad(jdt_aniso_sampler, tc, tc_ddx, tc_ddy);
-		break;
-
-	case 5:
-		ret = juda_tex_cache_5.SampleGrad(jdt_aniso_sampler, tc, tc_ddx, tc_ddy);
-		break;
-
-	case 6:
-		ret = juda_tex_cache_6.SampleGrad(jdt_aniso_sampler, tc, tc_ddx, tc_ddy);
-		break;
-#endif
 	}
+	else if (1 == index)
+	{
+		ret = juda_tex_cache_1.SampleGrad(jdt_aniso_sampler, tc, tc_ddx, tc_ddy);
+	}
+	else if (2 == index)
+	{
+		ret = juda_tex_cache_2.SampleGrad(jdt_aniso_sampler, tc, tc_ddx, tc_ddy);
+	}
+#if KLAYGE_MAX_TEX_UNITS > 4
+	else if (3 == index)
+	{
+		ret = juda_tex_cache_3.SampleGrad(jdt_aniso_sampler, tc, tc_ddx, tc_ddy);
+	}
+	else if (4 == index)
+	{
+		ret = juda_tex_cache_4.SampleGrad(jdt_aniso_sampler, tc, tc_ddx, tc_ddy);
+	}
+	else if (5 == index)
+	{
+		ret = juda_tex_cache_5.SampleGrad(jdt_aniso_sampler, tc, tc_ddx, tc_ddy);
+	}
+	else //if (6 == index)
+	{
+		ret = juda_tex_cache_6.SampleGrad(jdt_aniso_sampler, tc, tc_ddx, tc_ddy);
+	}
+#endif
 	return ret;
 #endif
 }

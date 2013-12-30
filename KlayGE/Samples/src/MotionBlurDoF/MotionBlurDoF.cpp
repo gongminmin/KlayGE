@@ -1134,8 +1134,8 @@ uint32_t MotionBlurDoFApp::DoUpdate(uint32_t pass)
 			if (depth_texture_support_)
 			{
 				float q = camera.FarPlane() / (camera.FarPlane() - camera.NearPlane());
-				float2 near_q(camera.NearPlane() * q, q);
-				depth_to_linear_pp_->SetParam(0, near_q);
+				float4 near_q_far(camera.NearPlane() * q, q, camera.FarPlane(), 1 / camera.FarPlane());
+				depth_to_linear_pp_->SetParam(0, near_q_far);
 			}
 		}
 

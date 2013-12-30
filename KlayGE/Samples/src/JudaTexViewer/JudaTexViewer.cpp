@@ -62,6 +62,11 @@ namespace
 				float2(1, 1)
 			};
 
+			uint16_t indices[] = 
+			{
+				0, 1, 2, 3
+			};
+
 			rl_ = rf.MakeRenderLayout();
 			rl_->TopologyType(RenderLayout::TT_TriangleStrip);
 
@@ -71,6 +76,12 @@ namespace
 			init_data.data = texs;
 			GraphicsBufferPtr tex_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, &init_data);
 			rl_->BindVertexStream(tex_vb, KlayGE::make_tuple(vertex_element(VEU_Position, 0, EF_GR32F)));
+
+			init_data.row_pitch = sizeof(indices);
+			init_data.slice_pitch = 0;
+			init_data.data = indices;
+			GraphicsBufferPtr ib = rf.MakeIndexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, &init_data);
+			rl_->BindIndexStream(ib, EF_R16UI);
 		}
 
 		void SetPosBuffer(GraphicsBufferPtr const & pos_vb)
