@@ -723,7 +723,7 @@ float4 MergeShadingPS(float2 tc : TEXCOORD0) : SV_Target
 
 float4 MergeDepthPS(float2 tc : TEXCOORD0) : SV_Target
 {
-	return ReadAFloat(depth_tex.Sample(point_sampler, tc), depth_near_far_invfar.y);
+	return depth_tex.Sample(point_sampler, tc);
 }
 
 #if KLAYGE_D3D11 || KLAYGE_OPENGL

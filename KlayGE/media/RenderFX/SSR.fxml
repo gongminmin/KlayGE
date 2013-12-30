@@ -103,11 +103,11 @@ float4 CalcSSR(float2 tc, float3 normal, float3 pos_es, float3 incident_es, bool
 		float cur_sample_depth;
 		if (front_side)
 		{
-			cur_sample_depth = front_side_depth_tex.SampleLevel(ssr_linear_sampler, cur_tex_pos.xy, 0).r;
+			cur_sample_depth = ReadAFloat(front_side_depth_tex.SampleLevel(ssr_linear_sampler, cur_tex_pos.xy, 0), near_q_far.z);
 		}
 		else
 		{
-			cur_sample_depth = back_side_depth_tex.SampleLevel(ssr_linear_sampler, cur_tex_pos.xy, 0).r;
+			cur_sample_depth = ReadAFloat(back_side_depth_tex.SampleLevel(ssr_linear_sampler, cur_tex_pos.xy, 0), near_q_far.z);
 		}
 		float cur_ray_march_depth = non_linear_depth_to_linear(cur_tex_pos.z, near_q_far.x, near_q_far.y);
 	
@@ -143,11 +143,11 @@ float4 CalcSSR(float2 tc, float3 normal, float3 pos_es, float3 incident_es, bool
 	float sample_z;
 	if (front_side)
 	{
-		sample_z = front_side_depth_tex.SampleLevel(ssr_linear_sampler, sample_tex_pos.xy, 0).r;
+		sample_z = ReadAFloat(front_side_depth_tex.SampleLevel(ssr_linear_sampler, sample_tex_pos.xy, 0), near_q_far.z);
 	}
 	else
 	{
-		sample_z = back_side_depth_tex.SampleLevel(ssr_linear_sampler, sample_tex_pos.xy, 0).r;
+		sample_z = ReadAFloat(back_side_depth_tex.SampleLevel(ssr_linear_sampler, sample_tex_pos.xy, 0), near_q_far.z);
 	}
 
 	float4 ret;
@@ -189,7 +189,7 @@ void ScreenSpaceReflectionPostProcessVS(float4 pos : POSITION,
 
 float4 ScreenSpaceReflectionPostProcessPS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Target
 {
-	float3 pos_es = view_dir * (foreground_depth_tex.Sample(ssr_point_sampler, tc).x / view_dir.z);
+	float3 pos_es = view_dir * (ReadAFloat(foreground_depth_tex.Sample(ssr_point_sampler, tc), near_q_far.z) / view_dir.z);
 	float3 normal = GetNormal(g_buffer_0_tex.Sample(ssr_linear_sampler, tc));
 	float4 clr = CalcSSR(tc, normal, pos_es, pos_es, 1, 0);
 	float fresnel = fresnel_term_schlick(-view_dir, normal, g_buffer_1_tex.Sample(ssr_linear_sampler, tc).w).x;
