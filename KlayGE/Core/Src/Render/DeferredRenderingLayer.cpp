@@ -842,8 +842,8 @@ namespace KlayGE
 		}
 		pvp.shadowing_tex = rf.MakeTexture2D(width / 2, height / 2, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
 		pvp.shadowing_fb->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*pvp.shadowing_tex, 0, 1, 0));
-		
-		if (caps.rendertarget_format_support(EF_B10G11R11F, 1, 0))
+
+		if (caps.fp_color_support && caps.rendertarget_format_support(EF_B10G11R11F, 1, 0))
 		{
 			fmt = EF_B10G11R11F;
 		}
@@ -856,30 +856,74 @@ namespace KlayGE
 			else
 			{
 				BOOST_ASSERT(caps.rendertarget_format_support(EF_ARGB8, 1, 0));
-
 				fmt = EF_ARGB8;
+			}
+
+			ElementFormat fmt_srgb = MakeSRGB(fmt);
+			if (caps.texture_format_support(fmt_srgb) && caps.rendertarget_format_support(fmt_srgb, 1, 0))
+			{
+				fmt = fmt_srgb;
 			}
 		}
 		pvp.projective_shadowing_tex = rf.MakeTexture2D(width / 2, height / 2, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
 		pvp.projective_shadowing_fb->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*pvp.projective_shadowing_tex, 0, 1, 0));
 
+		ElementFormat shading_fmt;
+		if (caps.fp_color_support)
+		{
+			BOOST_ASSERT(caps.rendertarget_format_support(EF_ABGR16F, 1, 0));
+			shading_fmt = EF_ABGR16F;
+		}
+		else
+		{
+			if (caps.rendertarget_format_support(EF_ABGR8, 1, 0))
+			{
+				shading_fmt = EF_ABGR8;
+			}
+			else
+			{
+				BOOST_ASSERT(caps.rendertarget_format_support(EF_ARGB8, 1, 0));
+				shading_fmt = EF_ARGB8;
+			}
+
+			ElementFormat fmt_srgb = MakeSRGB(fmt);
+			if (caps.texture_format_support(fmt_srgb) && caps.rendertarget_format_support(fmt_srgb, 1, 0))
+			{
+				fmt = fmt_srgb;
+			}
+		}
+
 #if DEFAULT_DEFERRED == TRIDITIONAL_DEFERRED
-		pvp.lighting_tex = rf.MakeTexture2D(width, height, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
+		pvp.lighting_tex = rf.MakeTexture2D(width, height, 1, 1, shading_fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
 		pvp.lighting_fb->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*pvp.lighting_tex, 0, 1, 0));
 		pvp.lighting_fb->Attach(FrameBuffer::ATT_DepthStencil, ds_view);
 #endif
 
-		if (caps.rendertarget_format_support(EF_B10G11R11F, 1, 0))
+		if (caps.fp_color_support)
 		{
-			fmt = EF_B10G11R11F;
+			if (caps.rendertarget_format_support(EF_B10G11R11F, 1, 0))
+			{
+				fmt = EF_B10G11R11F;
+			}
+			else
+			{
+				BOOST_ASSERT(caps.rendertarget_format_support(EF_ABGR16F, 1, 0));
+				fmt = EF_ABGR16F;
+			}
 		}
 		else
 		{
-			BOOST_ASSERT(caps.rendertarget_format_support(EF_ABGR16F, 1, 0));
-
-			fmt = EF_ABGR16F;
+			if (caps.rendertarget_format_support(EF_ABGR8, 1, 0))
+			{
+				fmt = EF_ABGR8;
+			}
+			else
+			{
+				BOOST_ASSERT(caps.rendertarget_format_support(EF_ARGB8, 1, 0));
+				fmt = EF_ARGB8;
+			}
 		}
-		pvp.shading_tex = rf.MakeTexture2D(width, height, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
+		pvp.shading_tex = rf.MakeTexture2D(width, height, 1, 1, shading_fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
 		pvp.curr_merged_shading_tex = rf.MakeTexture2D(width, height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
 		pvp.curr_merged_depth_tex = rf.MakeTexture2D(width, height, 1, 1, depth_fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
 		pvp.prev_merged_shading_tex = rf.MakeTexture2D(width, height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);

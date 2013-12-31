@@ -151,14 +151,14 @@ namespace KlayGE
 		}
 		else
 		{
-			if (caps.rendertarget_format_support(EF_GR32F, 1, 0))
+			if (caps.rendertarget_format_support(EF_R32F, 1, 0))
 			{
-				fmt = EF_GR32F;
+				fmt = EF_R32F;
 			}
 			else
 			{
-				BOOST_ASSERT(caps.rendertarget_format_support(EF_GR16F, 1, 0));
-				fmt = EF_GR16F;
+				BOOST_ASSERT(caps.rendertarget_format_support(EF_R16F, 1, 0));
+				fmt = EF_R16F;
 			}
 		}
 

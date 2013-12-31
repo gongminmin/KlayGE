@@ -381,32 +381,31 @@ namespace KlayGE
 			hdr_frame_buffer_ = rf.MakeFrameBuffer();
 			hdr_frame_buffer_->GetViewport()->camera = cur_frame_buffer_->GetViewport()->camera;
 
-			bool non_fp_tex;
 			ElementFormat fmt;
-			if (caps.texture_format_support(EF_B10G11R11F) && caps.rendertarget_format_support(EF_B10G11R11F, 1, 0))
+			if (caps.fp_color_support)
 			{
-				fmt = EF_B10G11R11F;
-				non_fp_tex = false;
-			}
-			else if (caps.texture_format_support(EF_ABGR16F) && caps.rendertarget_format_support(EF_ABGR16F, 1, 0))
-			{
-				fmt = EF_ABGR16F;
-				non_fp_tex = false;
-			}
-			else if (caps.texture_format_support(EF_ABGR8) && caps.rendertarget_format_support(EF_ABGR8, 1, 0))
-			{
-				fmt = EF_ABGR8;
-				non_fp_tex = true;
+				if (caps.texture_format_support(EF_B10G11R11F) && caps.rendertarget_format_support(EF_B10G11R11F, 1, 0))
+				{
+					fmt = EF_B10G11R11F;
+				}
+				else
+				{
+					BOOST_ASSERT(caps.texture_format_support(EF_ABGR16F) && caps.rendertarget_format_support(EF_ABGR16F, 1, 0));
+					fmt = EF_ABGR16F;
+				}
 			}
 			else
 			{
-				BOOST_ASSERT(caps.texture_format_support(EF_ARGB8) && caps.rendertarget_format_support(EF_ARGB8, 1, 0));
+				if (caps.texture_format_support(EF_ABGR8) && caps.rendertarget_format_support(EF_ABGR8, 1, 0))
+				{
+					fmt = EF_ABGR8;
+				}
+				else
+				{
+					BOOST_ASSERT(caps.texture_format_support(EF_ARGB8) && caps.rendertarget_format_support(EF_ARGB8, 1, 0));
+					fmt = EF_ARGB8;
+				}
 
-				fmt = EF_ARGB8;
-				non_fp_tex = true;
-			}
-			if (non_fp_tex)
-			{
 				ElementFormat fmt_srgb = MakeSRGB(fmt);
 				if (caps.rendertarget_format_support(fmt_srgb, 1, 0))
 				{
