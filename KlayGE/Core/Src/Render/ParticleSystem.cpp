@@ -488,6 +488,7 @@ namespace
 
 			*(technique_->Effect().ParameterByName("model_view")) = model_mat_ * view;
 			*(technique_->Effect().ParameterByName("proj")) = proj;
+			*(technique_->Effect().ParameterByName("far_plane")) = camera.FarPlane();
 
 			float scale_x = sqrt(model_mat_(0, 0) * model_mat_(0, 0) + model_mat_(0, 1) * model_mat_(0, 1) + model_mat_(0, 2) * model_mat_(0, 2));
 			float scale_y = sqrt(model_mat_(1, 0) * model_mat_(1, 0) + model_mat_(1, 1) * model_mat_(1, 1) + model_mat_(1, 2) * model_mat_(1, 2));

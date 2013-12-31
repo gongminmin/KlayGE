@@ -1,11 +1,14 @@
 <?xml version='1.0'?>
 
 <effect>
+	<include name="util.fxml"/>
+			 
 	<parameter type="float" name="point_radius"/>
 
 	<cbuffer name="per_frame">
 		<parameter type="float4x4" name="model_view"/>
 		<parameter type="float4x4" name="proj"/>
+		<parameter type="float" name="far_plane"/>
 	</cbuffer>
 
 	<parameter type="float3" name="particle_color_from"/>
@@ -76,7 +79,7 @@ float4 ParticlePS(PS_IN ps_in) : SV_Target
 		tex_coord.y *= KLAYGE_FLIPPING;
 		tex_coord = tex_coord / 2 + 0.5f;
 		
-		float depth = depth_tex.Sample(point_sampler, tex_coord).x;
+		float depth = ReadAFloat(depth_tex.Sample(point_sampler, tex_coord), far_plane);
 
 		clr.a *= lerp(particle_alpha_from_tex.Sample(bilinear_sampler, ps_in.tex.xy).r,
 						particle_alpha_to_tex.Sample(bilinear_sampler, ps_in.tex.xy).r,

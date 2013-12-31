@@ -1,6 +1,8 @@
 <?xml version='1.0'?>
 
 <effect>
+	<include name="util.fxml"/>
+
 	<cbuffer name="per_frame">
 		<parameter type="float4x4" name="view"/>
 		<parameter type="float4x4" name="proj"/>
@@ -32,7 +34,7 @@ void TerrainDepthVS(float4 Position : POSITION,
 
 float4 TerrainDepthPS(float depth : TEXCOORD0) : SV_Target 
 {
-	return depth;
+	return WriteAFloat(depth, depth_near_far_invfar.z);
 }
 
 void TerrainVS(float4 Position : POSITION,
@@ -55,10 +57,9 @@ float4 TerrainPS(float4 tex0 : TEXCOORD0,
 					float3 normal : TEXCOORD2,
 					float2 depth : TEXCOORD3) : SV_Target 
 {
-	float4 logo = logo_tex.Sample(grass_sampler, tex0.zw);
-	float4 clr = float4(grass_tex.Sample(grass_sampler, tex0.xy).rgb * dot(normalize(LightPos - pos_os), normal),
-				depth.x / depth.y * depth_near_far_invfar.z);
-	return float4(lerp(clr.rgb, logo.rgb, 0.3f), 1);
+	float3 logo = logo_tex.Sample(grass_sampler, tex0.zw).xyz;
+	float3 clr = float3(grass_tex.Sample(grass_sampler, tex0.xy).xyz * dot(normalize(LightPos - pos_os), normal));
+	return float4(lerp(clr, logo, 0.3f), 1);
 }
 		]]>
 	</shader>

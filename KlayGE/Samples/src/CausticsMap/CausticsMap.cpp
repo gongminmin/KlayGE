@@ -1085,8 +1085,8 @@ uint32_t CausticsMapApp::DoUpdate(uint32_t pass)
 		if (depth_texture_support_)
 		{
 			float q = light_->SMCamera(0)->FarPlane() / (light_->SMCamera(0)->FarPlane() - light_->SMCamera(0)->NearPlane());
-			float2 near_q(light_->SMCamera(0)->NearPlane() * q, q);
-			depth_to_linear_pp_->SetParam(0, near_q);
+			float4 near_q_far(light_->SMCamera(0)->NearPlane() * q, q, light_->SMCamera(0)->FarPlane(), 1 / light_->SMCamera(0)->FarPlane());
+			depth_to_linear_pp_->SetParam(0, near_q_far);
 		}
 
 		return App3DFramework::URV_NeedFlush;

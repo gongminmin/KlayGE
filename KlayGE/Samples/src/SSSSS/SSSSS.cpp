@@ -352,8 +352,8 @@ uint32_t SSSSSApp::DoUpdate(uint32_t pass)
 
 		{
 			float q = light_->SMCamera(0)->FarPlane() / (light_->SMCamera(0)->FarPlane() - light_->SMCamera(0)->NearPlane());
-			float2 near_q(light_->SMCamera(0)->NearPlane() * q, q);
-			depth_to_linear_pp_->SetParam(0, near_q);
+			float4 near_q_far(light_->SMCamera(0)->NearPlane() * q, q, light_->SMCamera(0)->FarPlane(), 1 / light_->SMCamera(0)->FarPlane());
+			depth_to_linear_pp_->SetParam(0, near_q_far);
 			depth_to_linear_pp_->InputPin(0, shadow_ds_tex_);
 			depth_to_linear_pp_->OutputPin(0, shadow_tex_);
 			depth_to_linear_pp_->Apply();
@@ -373,8 +373,8 @@ uint32_t SSSSSApp::DoUpdate(uint32_t pass)
 
 		{
 			float q = scene_camera_->FarPlane() / (scene_camera_->FarPlane() - scene_camera_->NearPlane());
-			float2 near_q(scene_camera_->NearPlane() * q, q);
-			depth_to_linear_pp_->SetParam(0, near_q);
+			float4 near_q_far(scene_camera_->NearPlane() * q, q, scene_camera_->FarPlane(), 1 / scene_camera_->FarPlane());
+			depth_to_linear_pp_->SetParam(0, near_q_far);
 			depth_to_linear_pp_->InputPin(0, ds_tex_);
 			depth_to_linear_pp_->OutputPin(0, depth_tex_);
 			depth_to_linear_pp_->Apply();

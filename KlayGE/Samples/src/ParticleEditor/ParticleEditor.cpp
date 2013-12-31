@@ -161,10 +161,6 @@ bool ParticleEditorApp::ConfirmDevice() const
 	{
 		return false;
 	}
-	if (!caps.rendertarget_format_support(EF_ABGR16F, 1, 0))
-	{
-		return false;
-	}
 
 	return true;
 }
@@ -293,7 +289,7 @@ void ParticleEditorApp::OnResize(uint32_t width, uint32_t height)
 	RenderDeviceCaps const & caps = re.DeviceCaps();
 
 	ElementFormat fmt;
-	if (caps.rendertarget_format_support(EF_B10G11R11F, 1, 0))
+	if (caps.fp_color_support && caps.rendertarget_format_support(EF_B10G11R11F, 1, 0))
 	{
 		fmt = EF_B10G11R11F;
 	}
@@ -308,19 +304,29 @@ void ParticleEditorApp::OnResize(uint32_t width, uint32_t height)
 	}
 	scene_tex_ = rf.MakeTexture2D(width, height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
 
-	if (caps.rendertarget_format_support(EF_R16F, 1, 0))
+	if (caps.pack_to_rgba_required)
 	{
-		fmt = EF_R16F;
-	}
-	else if (caps.rendertarget_format_support(EF_R32F, 1, 0))
-	{
-		fmt = EF_R32F;
+		if (caps.rendertarget_format_support(EF_ABGR8, 1, 0))
+		{
+			fmt = EF_ABGR8;
+		}
+		else if (caps.rendertarget_format_support(EF_ARGB8, 1, 0))
+		{
+			BOOST_ASSERT(caps.rendertarget_format_support(EF_ARGB8, 1, 0));
+			fmt = EF_ARGB8;
+		}
 	}
 	else
 	{
-		BOOST_ASSERT(caps.rendertarget_format_support(EF_ABGR16F, 1, 0));
-
-		fmt = EF_ABGR16F;
+		if (caps.rendertarget_format_support(EF_R16F, 1, 0))
+		{
+			fmt = EF_R16F;
+		}
+		else if (caps.rendertarget_format_support(EF_R32F, 1, 0))
+		{
+			BOOST_ASSERT(caps.rendertarget_format_support(EF_R32F, 1, 0));
+			fmt = EF_R32F;
+		}
 	}
 	scene_depth_tex_ = rf.MakeTexture2D(width, height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
 
@@ -887,9 +893,10 @@ uint32_t ParticleEditorApp::DoUpdate(uint32_t pass)
 			{
 				re.BindFrameBuffer(scene_buffer_);
 
-				float q = this->ActiveCamera().FarPlane() / (this->ActiveCamera().FarPlane() - this->ActiveCamera().NearPlane());
-				float2 near_q(this->ActiveCamera().NearPlane() * q, q);
-				depth_to_linear_pp_->SetParam(0, near_q);
+				Camera const & camera = this->ActiveCamera();
+				float q = camera.FarPlane() / (camera.FarPlane() - camera.NearPlane());
+				float4 near_q_far(this->ActiveCamera().NearPlane() * q, q, camera.FarPlane(), 1 / camera.FarPlane());
+				depth_to_linear_pp_->SetParam(0, near_q_far);
 			
 				Color clear_clr(0.2f, 0.4f, 0.6f, 1);
 				if (Context::Instance().Config().graphics_cfg.gamma)
