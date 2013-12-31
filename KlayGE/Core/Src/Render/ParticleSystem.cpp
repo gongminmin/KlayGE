@@ -1059,14 +1059,25 @@ namespace KlayGE
 
 	void PolylineParticleUpdater::Update(Particle& par, float elapse_time)
 	{
-		BOOST_ASSERT(!size_over_life_.empty());
-		BOOST_ASSERT(!mass_over_life_.empty());
-		BOOST_ASSERT(!opacity_over_life_.empty());
+		std::vector<float2> local_size_over_life;
+		std::vector<float2> local_mass_over_life;
+		std::vector<float2> local_opacity_over_life;
+
+		{
+			unique_lock<mutex> lock(update_mutex_);
+			local_size_over_life = size_over_life_;
+			local_mass_over_life = mass_over_life_;
+			local_opacity_over_life = opacity_over_life_;
+		}
+
+		BOOST_ASSERT(!local_size_over_life.empty());
+		BOOST_ASSERT(!local_mass_over_life.empty());
+		BOOST_ASSERT(!local_opacity_over_life.empty());
 
 		float pos = (par.init_life - par.life) / par.init_life;
 
-		float cur_size = size_over_life_.back().y();
-		for (KLAYGE_AUTO(iter, size_over_life_.begin()); iter != size_over_life_.end() - 1; ++ iter)
+		float cur_size = local_size_over_life.back().y();
+		for (KLAYGE_AUTO(iter, local_size_over_life.begin()); iter != local_size_over_life.end() - 1; ++ iter)
 		{
 			if ((iter + 1)->x() >= pos)
 			{
@@ -1076,8 +1087,8 @@ namespace KlayGE
 			}
 		}
 
-		float cur_mass = mass_over_life_.back().y();
-		for (KLAYGE_AUTO(iter, mass_over_life_.begin()); iter != mass_over_life_.end() - 1; ++ iter)
+		float cur_mass = local_mass_over_life.back().y();
+		for (KLAYGE_AUTO(iter, local_mass_over_life.begin()); iter != local_mass_over_life.end() - 1; ++ iter)
 		{
 			if ((iter + 1)->x() >= pos)
 			{
@@ -1087,8 +1098,8 @@ namespace KlayGE
 			}
 		}
 
-		float cur_alpha = opacity_over_life_.back().y();
-		for (KLAYGE_AUTO(iter, opacity_over_life_.begin()); iter != opacity_over_life_.end() - 1; ++ iter)
+		float cur_alpha = local_opacity_over_life.back().y();
+		for (KLAYGE_AUTO(iter, local_opacity_over_life.begin()); iter != local_opacity_over_life.end() - 1; ++ iter)
 		{
 			if ((iter + 1)->x() >= pos)
 			{

@@ -2124,7 +2124,7 @@ namespace KlayGE
 		{
 			args.push_back("-DKLAYGE_BC4_AS_G");
 		}
-		if (caps.fp_color_support)
+		if (!caps.fp_color_support)
 		{
 			args.push_back("-DKLAYGE_NO_FP_COLOR");
 		}

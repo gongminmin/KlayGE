@@ -1284,7 +1284,7 @@ namespace KlayGE
 				D3D_SHADER_MACRO macro_bc4_as_bc1 = { "KLAYGE_BC4_AS_G", "1" };
 				macros.push_back(macro_bc4_as_bc1);
 			}
-			if (caps.fp_color_support)
+			if (!caps.fp_color_support)
 			{
 				D3D_SHADER_MACRO macro_no_fp_tex = { "KLAYGE_NO_FP_COLOR", "1" };
 				macros.push_back(macro_no_fp_tex);

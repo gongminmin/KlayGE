@@ -389,6 +389,7 @@ namespace KlayGE
 
 		void SizeOverLife(std::vector<float2> const & size_over_life)
 		{
+			unique_lock<mutex> lock(update_mutex_);
 			size_over_life_ = size_over_life;
 		}
 		std::vector<float2> const & SizeOverLife() const
@@ -397,6 +398,7 @@ namespace KlayGE
 		}
 		void MassOverLife(std::vector<float2> const & mass_over_life)
 		{
+			unique_lock<mutex> lock(update_mutex_);
 			mass_over_life_ = mass_over_life;
 		}
 		std::vector<float2> const & MassOverLife() const
@@ -405,6 +407,7 @@ namespace KlayGE
 		}
 		void OpacityOverLife(std::vector<float2> const & opacity_over_life)
 		{
+			unique_lock<mutex> lock(update_mutex_);
 			opacity_over_life_ = opacity_over_life;
 		}
 		std::vector<float2> const & OpacityOverLife() const
@@ -415,6 +418,7 @@ namespace KlayGE
 		virtual void Update(Particle& par, float elapse_time) KLAYGE_OVERRIDE;
 
 	private:
+		mutex update_mutex_;
 		std::vector<float2> size_over_life_;
 		std::vector<float2> mass_over_life_;
 		std::vector<float2> opacity_over_life_;
