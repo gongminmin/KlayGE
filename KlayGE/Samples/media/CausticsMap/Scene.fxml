@@ -9,6 +9,7 @@
 	<parameter type="float4x4" name="mvp"/>
 	<parameter type="float3" name="pos_center"/>
 	<parameter type="float3" name="pos_extent"/>
+	<parameter type="float2" name="far_plane"/>
 
 	<shader>
 		<![CDATA[
@@ -24,7 +25,7 @@ void DepthTexWODTVS(float4 pos : POSITION,
 
 float4 DepthTexWODTPS(float depth : TEXCOORD0) : SV_Target
 {
-	return depth;
+	return WriteAFloat(depth, far_plane.y);
 }
 
 void PosTexVS(float4 pos : POSITION,
@@ -212,11 +213,6 @@ void DistanceMappingVS(float4 pos		: POSITION,
 	oLightProjPos = mul(mul(pos, model), light_vp);
 }
 
-float linstep(float min, float max, float v)
-{
-	return clamp((v - min) / (max - min), 0, 1);
-}
-
 float4 DistanceMappingShading(float3 L, float3 V, float3 H, float3 diffuse, float3 normal)
 {
 	float atten = attenuation_term(0, -L.xyz, light_falloff);
@@ -260,7 +256,7 @@ float4 DistanceMappingPS(float4 L	: TEXCOORD0,
 	float3 shadow_dir = normalize(LightWorldPos);
 	shadow_dir += deltaUV;
 	shadow_dir.y *= -KLAYGE_FLIPPING;
-	float occluder = shadow_cube_tex.SampleLevel(linear_clamp_sampler, shadow_dir, 0).x;
+	float occluder = ReadAFloat(shadow_cube_tex.SampleLevel(linear_clamp_sampler, shadow_dir, 0), far_plane.x * esm_scale_factor);
 	float atten = saturate(exp(occluder - esm_scale_factor * dist));
 
 	float2 lookup_uv = CalcLookupUV(LightProjPos);
@@ -301,20 +297,14 @@ float4 DistanceMappingPS_20(float4 L	: TEXCOORD0,
 		discard;
 	}
   
-	float3 deltaUV = normalize(float3(texUV.xy, 0.5)) - normalize(float3(texCoord0.xy, 0.5));
+	float3 deltaUV = normalize(float3(texUV.xy, 0.5f)) - normalize(float3(texCoord0.xy, 0.5f));
 
 	float dist = length(LightWorldPos);
 	float3 shadow_dir = normalize(LightWorldPos);
 	shadow_dir += deltaUV;
 	shadow_dir.y *= -KLAYGE_FLIPPING;
-	float2 moments = shadow_cube_tex.SampleLevel(linear_clamp_sampler, shadow_dir, 0).xy;
-	float p = (dist <= moments.x);
-	float variance = moments.y - moments.x * moments.x;
-	variance = max(variance, 500);
-	float m_d = moments.x - dist;
-	float p_max = variance / (variance + m_d * m_d);
-	p_max = linstep(0.55f, 1, p_max);
-	float atten = max(p, p_max);
+	float occluder = ReadAFloat(shadow_cube_tex.SampleLevel(linear_clamp_sampler, shadow_dir, 0), far_plane.x * esm_scale_factor);
+	float atten = saturate(exp(occluder - esm_scale_factor * dist));
 
 	float2 lookup_uv = CalcLookupUV(LightProjPos);
 	float2 delta = texUV.xy - texCoord0.xy;

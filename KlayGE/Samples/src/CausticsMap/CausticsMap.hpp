@@ -136,6 +136,8 @@ private:
 	float refract_idx_;
 	float light_density_;
 	float point_size_;
+
+	bool filter_shadow_;
 };
 
 #endif		// _CAUSTICSMAP_HPP

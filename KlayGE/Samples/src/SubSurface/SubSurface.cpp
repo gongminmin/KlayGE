@@ -162,9 +162,14 @@ void SubSurfaceApp::InitObjects()
 	dialog_params_->Control<UISlider>(id_mtl_thickness_slider_)->OnValueChangedEvent().connect(KlayGE::bind(&SubSurfaceApp::MtlThicknessChangedHandler, this, KlayGE::placeholders::_1));
 	this->MtlThicknessChangedHandler(*dialog_params_->Control<UISlider>(id_mtl_thickness_slider_));
 
-	RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+	RenderEngine& re = rf.RenderEngineInstance();
 	RenderDeviceCaps const & caps = re.DeviceCaps();
 	depth_texture_support_ = caps.depth_texture_support;
+
+	back_face_depth_fb_ = rf.MakeFrameBuffer();
+	FrameBufferPtr screen_buffer = rf.RenderEngineInstance().CurFrameBuffer();
+	back_face_depth_fb_->GetViewport()->camera = screen_buffer->GetViewport()->camera;
 }
 
 void SubSurfaceApp::OnResize(uint32_t width, uint32_t height)
@@ -233,11 +238,8 @@ void SubSurfaceApp::OnResize(uint32_t width, uint32_t height)
 		checked_pointer_cast<ModelObject>(model_)->BackFaceDepthTex(back_face_depth_tex);
 	}
 
-	back_face_depth_fb_ = rf.MakeFrameBuffer();
 	back_face_depth_fb_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*back_face_depth_tex, 0, 1, 0));
 	back_face_depth_fb_->Attach(FrameBuffer::ATT_DepthStencil, back_face_ds_view);
-	FrameBufferPtr screen_buffer = rf.RenderEngineInstance().CurFrameBuffer();
-	back_face_depth_fb_->GetViewport()->camera = screen_buffer->GetViewport()->camera;
 
 	UIManager::Instance().SettleCtrls();
 }

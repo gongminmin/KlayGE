@@ -120,6 +120,8 @@ namespace
 
 			*(technique_->Effect().ParameterByName("inv_view")) = camera.InverseViewMatrix();
 			*(technique_->Effect().ParameterByName("inv_vp")) = camera.InverseViewProjMatrix();
+
+			*(technique_->Effect().ParameterByName("far_plane")) = float2(camera.FarPlane(), 1 / camera.FarPlane());
 		}
 
 	private:
@@ -186,10 +188,6 @@ bool Refract::ConfirmDevice() const
 	{
 		return false;
 	}
-	if (!caps.rendertarget_format_support(EF_ABGR16F, 1, 0))
-	{
-		return false;
-	}
 
 	return true;
 }
@@ -245,18 +243,19 @@ void Refract::OnResize(uint32_t width, uint32_t height)
 
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 	ContextCfg const & cfg = Context::Instance().Config();
+	RenderDeviceCaps const & caps = rf.RenderEngineInstance().DeviceCaps();
 
 	RenderViewPtr backface_ds_view;
 	if (depth_texture_support_)
 	{
 		ElementFormat ds_fmt;
-		if (rf.RenderEngineInstance().DeviceCaps().texture_format_support(cfg.graphics_cfg.depth_stencil_fmt))
+		if (caps.texture_format_support(cfg.graphics_cfg.depth_stencil_fmt))
 		{
 			ds_fmt = cfg.graphics_cfg.depth_stencil_fmt;
 		}
 		else
 		{
-			BOOST_ASSERT(rf.RenderEngineInstance().DeviceCaps().texture_format_support(EF_D16));
+			BOOST_ASSERT(caps.texture_format_support(EF_D16));
 
 			ds_fmt = EF_D16;
 		}
@@ -269,45 +268,45 @@ void Refract::OnResize(uint32_t width, uint32_t height)
 	}
 
 	ElementFormat depth_fmt;
-	if (rf.RenderEngineInstance().DeviceCaps().texture_format_support(EF_R16F)
-		&& rf.RenderEngineInstance().DeviceCaps().rendertarget_format_support(EF_R16F, 1, 0))
+	if (caps.pack_to_rgba_required)
 	{
-		depth_fmt = EF_R16F;
-	}
-	else
-	{
-		if (rf.RenderEngineInstance().DeviceCaps().texture_format_support(EF_GR16F)
-			&& rf.RenderEngineInstance().DeviceCaps().rendertarget_format_support(EF_GR16F, 1, 0))
+		if (caps.rendertarget_format_support(EF_ABGR8, 1, 0))
 		{
-			depth_fmt = EF_GR16F;
+			depth_fmt = EF_ABGR8;
 		}
 		else
 		{
-			BOOST_ASSERT(rf.RenderEngineInstance().DeviceCaps().texture_format_support(EF_ABGR16F)
-				&& rf.RenderEngineInstance().DeviceCaps().rendertarget_format_support(EF_ABGR16F, 1, 0));
-
-			depth_fmt = EF_ABGR16F;
+			BOOST_ASSERT(caps.rendertarget_format_support(EF_ARGB8, 1, 0));
+			depth_fmt = EF_ARGB8;
+		}
+	}
+	else
+	{
+		if (caps.rendertarget_format_support(EF_R16F, 1, 0))
+		{
+			depth_fmt = EF_R16F;
+		}
+		else 
+		{
+			BOOST_ASSERT(caps.rendertarget_format_support(EF_R32F, 1, 0));
+			depth_fmt = EF_R32F;
 		}
 	}
 	backface_depth_tex_ = rf.MakeTexture2D(width, height, 1, 1, depth_fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
 
 	ElementFormat normal_fmt;
-	if (rf.RenderEngineInstance().DeviceCaps().texture_format_support(EF_GR8))
+	if (caps.rendertarget_format_support(EF_GR8, 1, 0))
 	{
 		normal_fmt = EF_GR8;
 	}
+	else if (caps.rendertarget_format_support(EF_ABGR8, 1, 0))
+	{
+		normal_fmt = EF_ABGR8;
+	}
 	else
 	{
-		if (rf.RenderEngineInstance().DeviceCaps().texture_format_support(EF_ABGR8))
-		{
-			normal_fmt = EF_ABGR8;
-		}
-		else
-		{
-			BOOST_ASSERT(rf.RenderEngineInstance().DeviceCaps().texture_format_support(EF_ARGB8));
-
-			normal_fmt = EF_ARGB8;
-		}
+		BOOST_ASSERT(caps.rendertarget_format_support(EF_ARGB8, 1, 0));
+		normal_fmt = EF_ARGB8;
 	}
 	backface_tex_ = rf.MakeTexture2D(width, height, 1, 1, normal_fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
 
@@ -384,8 +383,8 @@ uint32_t Refract::DoUpdate(uint32_t pass)
 		{
 			Camera& camera = this->ActiveCamera();
 			float q = camera.FarPlane() / (camera.FarPlane() - camera.NearPlane());
-			float2 near_q(camera.NearPlane() * q, q);
-			depth_to_linear_pp_->SetParam(0, near_q);
+			float4 near_q_far(camera.NearPlane() * q, q, camera.FarPlane(), 1 / camera.FarPlane());
+			depth_to_linear_pp_->SetParam(0, near_q_far);
 			depth_to_linear_pp_->Apply();
 		
 			// Pass 1: Render front face

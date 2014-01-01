@@ -6,6 +6,7 @@
 	<include name="PostProcess.fxml"/>
 
 	<parameter type="float2" name="step"/>
+	<parameter type="float" name="far_plane"/>
 	<parameter type="texture2D" name="depth_tex"/>
 	<parameter type="texture2D" name="color_tex"/>
 	<parameter type="float" name="correction"/>
@@ -32,7 +33,7 @@ float4 GuassBlur(float2 texcoord)
 
 	// Fetch color and linear depth for current pixel:
 	float4 colorM = color_tex.Sample(point_sampler, texcoord);
-	float depthM = depth_tex.Sample(point_sampler,  texcoord).r;
+	float depthM = ReadAFloat(depth_tex.Sample(point_sampler, texcoord), far_plane);
 
 	// Accumulate center sample, multiplying it with its gaussian weight:
 	float4 colorBlurred = colorM;
@@ -48,8 +49,8 @@ float4 GuassBlur(float2 texcoord)
 	{
 		// Fetch color and depth for current sample:
 		float2 offset = texcoord + o[i] * finalStep;
-		float3 color = color_tex.SampleLevel(point_sampler, offset, 0).rgb;
-		float depth = depth_tex.SampleLevel(point_sampler, offset, 0).r;
+		float3 color = color_tex.Sample(point_sampler, offset).rgb;
+		float depth = ReadAFloat(depth_tex.Sample(point_sampler, offset), far_plane);
 
 		// If the difference in depth is huge, we lerp color back to "colorM":
 		float s = min(0.0125f * correction * abs(depthM - depth), 1);
@@ -194,6 +195,7 @@ float4 CopyPS(float2 texcoord : TEXCOORD0) : SV_Target
 	<parameter type="float3"  name="light_pos_es"/>
 	<parameter type="float4x4"  name="light_view_proj"/>
 	<parameter type="float" name="strength"/>
+	<parameter type="float" name="sm_far_plane"/>
 
 	<parameter type="texture2D" name="shadow_tex"/>
 	<parameter type="texture2D" name="shading_tex"/>
@@ -225,14 +227,14 @@ void TranslucencyVS(float4 pos : POSITION,
 
 float4 TranslucencyPS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Target0
 {
-	float3 pos_es = view_dir * (depth_tex.Sample(point_sampler, tc).r / view_dir.z);
+	float3 pos_es = view_dir * (ReadAFloat(depth_tex.Sample(point_sampler, tc), far_plane) / view_dir.z);
 	float4 light_vp_pos = mul(float4(pos_es, 1), light_view_proj);
 	float3 normal = normal_tex.Sample(point_sampler, tc).rgb;
 
 	float2 coord_ls = light_vp_pos.xy / light_vp_pos.w * 0.5f;
 	coord_ls.y *= KLAYGE_FLIPPING;
 	coord_ls += 0.5f;
-	float s = abs(light_vp_pos.w - shadow_tex.Sample(linear_sampler, coord_ls).x);
+	float s = abs(light_vp_pos.w - ReadAFloat(shadow_tex.Sample(linear_sampler, coord_ls), sm_far_plane));
 	
 	float3 L = normalize(pos_es - light_pos_es);
 	float irradiance = max(0.3f + dot(normal, L), 0);

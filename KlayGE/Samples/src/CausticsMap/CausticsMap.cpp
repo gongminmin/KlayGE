@@ -143,6 +143,7 @@ namespace
 
 			*(technique_->Effect().ParameterByName("mvp")) = model * camera.ViewProjMatrix();
 			*(technique_->Effect().ParameterByName("model")) = model;
+			*(technique_->Effect().ParameterByName("far_plane")) = float2(camera.FarPlane(), 1.0f / camera.FarPlane());
 
 			*(technique_->Effect().ParameterByName("pos_center")) = pos_aabb_.Center();
 			*(technique_->Effect().ParameterByName("pos_extent")) = pos_aabb_.HalfSize();
@@ -284,6 +285,7 @@ namespace
 					float4x4 inv_light_model = MathLib::inverse(light_model);
 
 					*(technique_->Effect().ParameterByName("obj_model_to_light_model")) = model_mat_ * inv_light_model;
+					*(technique_->Effect().ParameterByName("far_plane")) = float2(camera.FarPlane(), 1.0f / camera.FarPlane());
 				}
 				break;
 
@@ -551,6 +553,7 @@ namespace
 				*(technique_->Effect().ParameterByName("ttow_z")) = float4(ttow_center.x(), ttow_center.y(), ttow_center.z(), MathLib::length(ttow_center));
 				*(technique_->Effect().ParameterByName("ttow_x")) = ttow_right - ttow_left;
 				*(technique_->Effect().ParameterByName("ttow_y")) = ttow_lower - ttow_upper;
+				*(technique_->Effect().ParameterByName("far_plane")) = float2(camera.FarPlane(), 1 / camera.FarPlane());
 
 				if (Dual_Caustics_Pass == pass_)
 				{
@@ -715,15 +718,29 @@ void CausticsMapApp::InitBuffer()
 		}
 	}
 	ElementFormat depth_fmt;
-	if (caps.rendertarget_format_support(EF_R16F, 1, 0))
+	if (caps.pack_to_rgba_required)
 	{
-		depth_fmt = EF_R16F;
+		if (caps.rendertarget_format_support(EF_ABGR8, 1, 0))
+		{
+			depth_fmt = EF_ABGR8;
+		}
+		else
+		{
+			BOOST_ASSERT(caps.rendertarget_format_support(EF_ARGB8, 1, 0));
+			depth_fmt = EF_ARGB8;
+		}
 	}
 	else
 	{
-		BOOST_ASSERT(caps.rendertarget_format_support(EF_ABGR16F, 1, 0));
-
-		depth_fmt = EF_ABGR16F;
+		if (caps.rendertarget_format_support(EF_R16F, 1, 0))
+		{
+			depth_fmt = EF_R16F;
+		}
+		else
+		{
+			BOOST_ASSERT(caps.rendertarget_format_support(EF_R32F, 1, 0));
+			depth_fmt = EF_R32F;
+		}
 	}
 	ElementFormat ds_fmt;
 	if (caps.rendertarget_format_support(EF_D24S8, 1, 0))
@@ -784,15 +801,29 @@ void CausticsMapApp::InitBuffer()
 	refract_obj_fb_b_->Attach(FrameBuffer::ATT_DepthStencil, refract_obj_ds_view_b);
 
 	ElementFormat fmt;
-	if (caps.rendertarget_format_support(EF_B10G11R11F, 1, 0))
+	if (caps.fp_color_support)
 	{
-		fmt = EF_B10G11R11F;
+		if (caps.rendertarget_format_support(EF_B10G11R11F, 1, 0))
+		{
+			fmt = EF_B10G11R11F;
+		}
+		else
+		{
+			BOOST_ASSERT(caps.rendertarget_format_support(EF_ABGR16F, 1, 0));
+			fmt = EF_ABGR16F;
+		}
 	}
 	else
 	{
-		BOOST_ASSERT(caps.rendertarget_format_support(EF_ABGR16F, 1, 0));
-
-		fmt = EF_ABGR16F;
+		if (caps.rendertarget_format_support(EF_ABGR8, 1, 0))
+		{
+			fmt = EF_ABGR8;
+		}
+		else
+		{
+			BOOST_ASSERT(caps.rendertarget_format_support(EF_ARGB8, 1, 0));
+			fmt = EF_ARGB8;
+		}
 	}
 	caustics_texture_ = rf.MakeTexture2D(CAUSTICS_GRID_SIZE, CAUSTICS_GRID_SIZE, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
 	caustics_texture_filtered_ = rf.MakeTexture2D(CAUSTICS_GRID_SIZE, CAUSTICS_GRID_SIZE, 1, 1, caustics_texture_->Format(), 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
@@ -823,15 +854,29 @@ void CausticsMapApp::InitEnvCube()
 	RenderViewPtr depth_view = rf.Make2DDepthStencilRenderView(ENV_CUBE_MAP_SIZE, ENV_CUBE_MAP_SIZE, ds_fmt, 1, 0);
 	env_cube_buffer_ = rf.MakeFrameBuffer();
 	ElementFormat fmt;
-	if (caps.rendertarget_format_support(EF_B10G11R11F, 1, 0))
+	if (caps.fp_color_support)
 	{
-		fmt = EF_B10G11R11F;
+		if (caps.rendertarget_format_support(EF_B10G11R11F, 1, 0))
+		{
+			fmt = EF_B10G11R11F;
+		}
+		else
+		{
+			BOOST_ASSERT(caps.rendertarget_format_support(EF_ABGR16F, 1, 0));
+			fmt = EF_ABGR16F;
+		}
 	}
 	else
 	{
-		BOOST_ASSERT(caps.rendertarget_format_support(EF_ABGR16F, 1, 0));
-
-		fmt = EF_ABGR16F;
+		if (caps.rendertarget_format_support(EF_ABGR8, 1, 0))
+		{
+			fmt = EF_ABGR8;
+		}
+		else
+		{
+			BOOST_ASSERT(caps.rendertarget_format_support(EF_ARGB8, 1, 0));
+			fmt = EF_ARGB8;
+		}
 	}
 	env_tex_ = rf.MakeTexture2D(ENV_CUBE_MAP_SIZE, ENV_CUBE_MAP_SIZE, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
 	env_cube_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*env_tex_, 0, 1, 0));
@@ -868,15 +913,31 @@ void CausticsMapApp::InitCubeSM()
 	RenderViewPtr depth_view = rf.Make2DDepthStencilRenderView(SHADOW_MAP_SIZE, SHADOW_MAP_SIZE, ds_fmt, 1, 0);
 	shadow_cube_buffer_ = rf.MakeFrameBuffer();
 	ElementFormat fmt;
-	if (caps.texture_format_support(EF_R16F) && caps.rendertarget_format_support(EF_R16F, 1, 0))
+	if (caps.pack_to_rgba_required)
 	{
-		fmt = EF_R16F;
+		filter_shadow_ = false;
+		if (caps.rendertarget_format_support(EF_ABGR8, 1, 0))
+		{
+			fmt = EF_ABGR8;
+		}
+		else
+		{
+			BOOST_ASSERT(caps.rendertarget_format_support(EF_ARGB8, 1, 0));
+			fmt = EF_ARGB8;
+		}
 	}
 	else
 	{
-		BOOST_ASSERT(caps.texture_format_support(EF_ABGR16F) && caps.rendertarget_format_support(EF_ABGR16F, 1, 0));
-
-		fmt = EF_ABGR16F;
+		filter_shadow_ = true;
+		if (caps.rendertarget_format_support(EF_R16F, 1, 0))
+		{
+			fmt = EF_R16F;
+		}
+		else
+		{
+			BOOST_ASSERT(caps.rendertarget_format_support(EF_R32F, 1, 0));
+			fmt = EF_R32F;
+		}
 	}
 	shadow_tex_ = rf.MakeTexture2D(SHADOW_MAP_SIZE, SHADOW_MAP_SIZE, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
 	shadow_cube_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*shadow_tex_, 0, 1, 0));
@@ -886,7 +947,14 @@ void CausticsMapApp::InitCubeSM()
 
 	for (int i = 0; i < 6; ++ i)
 	{
-		sm_filter_pps_[i] = MakeSharedPtr<LogGaussianBlurPostProcess>(3, true);
+		if (filter_shadow_)
+		{
+			sm_filter_pps_[i] = MakeSharedPtr<LogGaussianBlurPostProcess>(3, true);
+		}
+		else
+		{
+			sm_filter_pps_[i] = SyncLoadPostProcess("Copy.ppml", "copy");
+		}
 
 		sm_filter_pps_[i]->InputPin(0, shadow_tex_);
 		sm_filter_pps_[i]->OutputPin(0, shadow_cube_tex_, 0, 0, i);
@@ -1234,7 +1302,10 @@ uint32_t CausticsMapApp::DoUpdate(uint32_t pass)
 	
 		if (pass > sm_start_pass)
 		{
-			checked_pointer_cast<LogGaussianBlurPostProcess>(sm_filter_pps_[pass - sm_start_pass - 1])->ESMScaleFactor(8.0f, light_->SMCamera(0));
+			if (filter_shadow_)
+			{
+				checked_pointer_cast<LogGaussianBlurPostProcess>(sm_filter_pps_[pass - sm_start_pass - 1])->ESMScaleFactor(8.0f, light_->SMCamera(0));
+			}
 			sm_filter_pps_[pass - sm_start_pass - 1]->Apply();
 		}
 

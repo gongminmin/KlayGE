@@ -8,6 +8,8 @@
 			<param name="light_pos_es"/>
 			<param name="light_color"/>
 			<param name="strength"/>
+			<param name="far_plane"/>
+			<param name="sm_far_plane"/>
 		</params>
 		<input>
 			<pin name="normal_tex"/>

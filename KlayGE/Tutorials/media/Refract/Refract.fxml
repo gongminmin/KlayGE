@@ -5,6 +5,13 @@
 	<include name="util.fxml"/>
 	<include name="Quaternion.fxml"/>
 
+	<cbuffer name="per_object">
+		<parameter type="float3" name="pos_center"/>
+		<parameter type="float3" name="pos_extent"/>
+		<parameter type="float2" name="tc_center"/>
+		<parameter type="float2" name="tc_extent"/>
+	</cbuffer>
+
 	<cbuffer name="per_frame">
 		<parameter type="float4x4" name="model"/>
 		<parameter type="float4x4" name="mvp"/>
@@ -13,10 +20,7 @@
 		<parameter type="float4x4" name="inv_view"/>
 		<parameter type="float4x4" name="inv_vp"/>
 		<parameter type="float3" name="eye_pos"/>
-		<parameter type="float3" name="pos_center"/>
-		<parameter type="float3" name="pos_extent"/>
-		<parameter type="float2" name="tc_center"/>
-		<parameter type="float2" name="tc_extent"/>
+		<parameter type="float2" name="far_plane"/>
 	</cbuffer>
 	<parameter type="float3" name="eta_ratio"/>
 
@@ -54,7 +58,7 @@ float3x3 my_refract3(float3 i, float3 n, float3 eta)
 	ret[0] = (cost2.x < 0) ? 0 : (eta.x * i - tmp.x * n);
 	ret[1] = (cost2.y < 0) ? 0 : (eta.y * i - tmp.y * n);
 	ret[2] = (cost2.z < 0) ? 0 : (eta.z * i - tmp.z * n);
-    return ret;
+	return ret;
 }
 
 void RefractVS(float4 pos			: POSITION,
@@ -95,7 +99,7 @@ float4 RefractPS(float3 normal			: TEXCOORD0,
 	float2 tex = pos_ss.xy / pos_ss.w;
 	tex.y *= KLAYGE_FLIPPING;
 	tex = tex / 2 + 0.5f;
-	float backface_depth = BackFaceDepth_tex.Sample(BackFace_Sampler, tex).x;
+	float backface_depth = ReadAFloat(BackFaceDepth_tex.Sample(BackFace_Sampler, tex), far_plane.x);
 	
 	pos_ss += dir_ss * (backface_depth - incident.w);
 	
@@ -176,7 +180,7 @@ void RefractBackFaceDepthVS(float4 pos : POSITION,
 
 float4 RefractBackFaceDepthPS(float depth : TEXCOORD0) : SV_Target
 {
-	return depth;
+	return WriteAFloat(depth, far_plane.y);
 }
 		]]>
 	</shader>

@@ -131,7 +131,7 @@ float4 WriteTwoHalf(float2 v, float scale = 1, float bias = 0)
 float ReadAFloat(float4 v, float scale = 1, float bias = 0)
 {
 #if KLAYGE_PACK_TO_RGBA
-	return (DecodeFloatRGBA(v) + bias) * scale;
+	return DecodeFloatRGBA(v) * scale + bias;
 #else
 	return v.r;
 #endif
@@ -140,7 +140,7 @@ float ReadAFloat(float4 v, float scale = 1, float bias = 0)
 float2 ReadTwoHalf(float4 v, float scale = 1, float bias = 0)
 {
 #if KLAYGE_PACK_TO_RGBA
-	return (float2(DecodeHalfRG(v.xy), DecodeHalfRG(v.zw)) + bias) * scale;
+	return float2(DecodeHalfRG(v.xy), DecodeHalfRG(v.zw)) * scale + bias;
 #else
 	return v.xy;
 #endif

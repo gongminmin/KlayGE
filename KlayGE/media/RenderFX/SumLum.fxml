@@ -69,8 +69,8 @@ float4 SumLum4x4IterativePS(float4 iTex0 : TEXCOORD0,
 	float s = 0;
 	for (int i = 0; i < 2; ++ i)
 	{
-		s += ReadAFloat(src_tex.Sample(src_sampler, tex[i].xy), 16, -0.5f);
-		s += ReadAFloat(src_tex.Sample(src_sampler, tex[i].zw), 16, -0.5f);
+		s += ReadAFloat(src_tex.Sample(src_sampler, tex[i].xy), 16, -8);
+		s += ReadAFloat(src_tex.Sample(src_sampler, tex[i].zw), 16, -8);
 	}
 
 	return WriteAFloat(s / 4, 1.0f / 16, 0.5f);
@@ -80,7 +80,7 @@ float4 AdaptedLumPS(float4 tex0 : TEXCOORD0,
 				float4 tex1 : TEXCOORD1) : SV_Target
 {
 	float adapted_lum = ReadAFloat(last_lum_tex.Sample(last_lum_sampler, 0.5f.xx), 16);
-	float current_lum = exp(ReadAFloat(src_tex.Sample(src_sampler, 0.5f.xx), 16, -0.5f));
+	float current_lum = exp(ReadAFloat(src_tex.Sample(src_sampler, 0.5f.xx), 16, -8));
 
 	return WriteAFloat(CalcAdaptedLum(adapted_lum, current_lum), 1.0f / 16);
 }

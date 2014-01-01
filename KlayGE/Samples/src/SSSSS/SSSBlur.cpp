@@ -1,5 +1,6 @@
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/RenderEffect.hpp>
+#include <KlayGE/Camera.hpp>
 
 #include "SSSBlur.hpp"
 
@@ -49,6 +50,7 @@ SSSBlurPP::SSSBlurPP()
 
 	color_tex_param_ = technique_->Effect().ParameterByName("color_tex");
 	step_param_ = technique_->Effect().ParameterByName("step");
+	far_plane_param_ = technique_->Effect().ParameterByName("far_plane");
 }
 
 void SSSBlurPP::InputPin(uint32_t index, TexturePtr const & tex)
@@ -78,6 +80,9 @@ void SSSBlurPP::Apply()
 	RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 	float sss_strength;
 	params_[0].second->Value(sss_strength);
+
+	Camera const & camera = *re.DefaultFrameBuffer()->GetViewport()->camera;
+	*far_plane_param_ = camera.FarPlane();
 
 	{
 		re.BindFrameBuffer(blur_y_fb_);

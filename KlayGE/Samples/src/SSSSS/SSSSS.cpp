@@ -72,10 +72,6 @@ bool SSSSSApp::ConfirmDevice() const
 	{
 		return false;
 	}
-	if (!caps.rendertarget_format_support(EF_ABGR16F, 1, 0))
-	{
-		return false;
-	}
 
 	return true;
 }
@@ -109,18 +105,29 @@ void SSSSSApp::InitObjects()
 	RenderDeviceCaps const & caps = re.DeviceCaps();
 
 	ElementFormat sm_fmt;
-	if (caps.rendertarget_format_support(EF_R32F, 1, 0))
+	if (caps.pack_to_rgba_required)
 	{
-		sm_fmt = EF_R32F;
-	}
-	else if (caps.rendertarget_format_support(EF_R16F, 1, 0))
-	{
-		sm_fmt = EF_R16F;
+		if (caps.rendertarget_format_support(EF_ABGR8, 1, 0))
+		{
+			sm_fmt = EF_ABGR8;
+		}
+		else
+		{
+			BOOST_ASSERT(caps.rendertarget_format_support(EF_ARGB8, 1, 0));
+			sm_fmt = EF_ARGB8;
+		}
 	}
 	else
 	{
-		BOOST_ASSERT(caps.rendertarget_format_support(EF_ABGR16F, 1, 0));
-		sm_fmt = EF_ABGR16F;
+		if (caps.rendertarget_format_support(EF_R32F, 1, 0))
+		{
+			sm_fmt = EF_R32F;
+		}
+		else
+		{
+			BOOST_ASSERT(caps.rendertarget_format_support(EF_R16F, 1, 0));
+			sm_fmt = EF_R16F;
+		}
 	}
 
 	ElementFormat ds_fmt;
@@ -206,18 +213,29 @@ void SSSSSApp::OnResize(uint32_t width, uint32_t height)
 	RenderDeviceCaps const & caps = re.DeviceCaps();
 
 	ElementFormat depth_fmt;
-	if (caps.rendertarget_format_support(EF_R32F, 1, 0))
+	if (caps.pack_to_rgba_required)
 	{
-		depth_fmt = EF_R32F;
-	}
-	else if (caps.rendertarget_format_support(EF_R16F, 1, 0))
-	{
-		depth_fmt = EF_R16F;
+		if (caps.rendertarget_format_support(EF_ABGR8, 1, 0))
+		{
+			depth_fmt = EF_ABGR8;
+		}
+		else
+		{
+			BOOST_ASSERT(caps.rendertarget_format_support(EF_ARGB8, 1, 0));
+			depth_fmt = EF_ARGB8;
+		}
 	}
 	else
 	{
-		BOOST_ASSERT(caps.rendertarget_format_support(EF_ABGR16F, 1, 0));
-		depth_fmt = EF_ABGR16F;
+		if (caps.rendertarget_format_support(EF_R32F, 1, 0))
+		{
+			depth_fmt = EF_R32F;
+		}
+		else
+		{
+			BOOST_ASSERT(caps.rendertarget_format_support(EF_R16F, 1, 0));
+			depth_fmt = EF_R16F;
+		}
 	}
 
 	ElementFormat ds_fmt;
@@ -231,9 +249,27 @@ void SSSSSApp::OnResize(uint32_t width, uint32_t height)
 		ds_fmt = EF_D16;
 	}
 
-	shading_tex_ = rf.MakeTexture2D(width, height, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
-	normal_tex_ = rf.MakeTexture2D(width, height, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
-	albedo_tex_ = rf.MakeTexture2D(width, height, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
+	ElementFormat shading_fmt;
+	if (caps.fp_color_support && caps.rendertarget_format_support(EF_ABGR16F, 1, 0))
+	{
+		shading_fmt = EF_ABGR16F;
+	}
+	else
+	{
+		if (caps.rendertarget_format_support(EF_ABGR8, 1, 0))
+		{
+			shading_fmt = EF_ABGR8;
+		}
+		else
+		{
+			BOOST_ASSERT(caps.rendertarget_format_support(EF_ARGB8, 1, 0));
+			shading_fmt = EF_ARGB8;
+		}
+	}
+
+	shading_tex_ = rf.MakeTexture2D(width, height, 1, 1, shading_fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
+	normal_tex_ = rf.MakeTexture2D(width, height, 1, 1, shading_fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
+	albedo_tex_ = rf.MakeTexture2D(width, height, 1, 1, shading_fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
 	ds_tex_ = rf.MakeTexture2D(width, height, 1, 1, ds_fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
 	depth_tex_ = rf.MakeTexture2D(width, height, 1, 1, depth_fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
 
@@ -392,6 +428,8 @@ uint32_t SSSSSApp::DoUpdate(uint32_t pass)
 			translucency_pp_->SetParam(0, scene_camera_->InverseViewMatrix() * light_->SMCamera(0)->ViewProjMatrix());
 			translucency_pp_->SetParam(1, scene_camera_->InverseProjMatrix());
 			translucency_pp_->SetParam(2, MathLib::transform_coord(light_->Position(), scene_camera_->ViewMatrix()));
+			translucency_pp_->SetParam(5, scene_camera_->FarPlane());
+			translucency_pp_->SetParam(6, light_->SMCamera(0)->FarPlane());
 			translucency_pp_->Apply();
 		}
 

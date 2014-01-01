@@ -504,18 +504,7 @@ namespace
 
 				RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 				RenderDeviceCaps const & caps = rf.RenderEngineInstance().DeviceCaps();
-				ElementFormat fmt;
-				if (caps.rendertarget_format_support(EF_B10G11R11F, 1, 0))
-				{
-					fmt = EF_B10G11R11F;
-				}
-				else
-				{
-					BOOST_ASSERT(caps.rendertarget_format_support(EF_ABGR16F, 1, 0));
-
-					fmt = EF_ABGR16F;
-				}
-				bokeh_tex_ = rf.MakeTexture2D(out_width, out_height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
+				bokeh_tex_ = rf.MakeTexture2D(out_width, out_height, 1, 1, tex->Format(), 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
 				bokeh_fb_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*bokeh_tex_, 0, 0, 0));
 
 				if (gs_support_)
@@ -741,10 +730,6 @@ bool MotionBlurDoFApp::ConfirmDevice() const
 	{
 		return false;
 	}
-	if (!caps.rendertarget_format_support(EF_ABGR16F, 1, 0))
-	{
-		return false;
-	}
 
 	return true;
 }
@@ -766,6 +751,7 @@ void MotionBlurDoFApp::InitObjects()
 	this->Proj(0.1f, 100);
 
 	RenderEngine& re = rf.RenderEngineInstance();
+	RenderDeviceCaps const & caps = re.DeviceCaps();
 	clr_depth_fb_ = rf.MakeFrameBuffer();
 	motion_vec_fb_ = rf.MakeFrameBuffer();
 	clr_depth_fb_->GetViewport()->camera = re.CurFrameBuffer()->GetViewport()->camera;
@@ -781,10 +767,13 @@ void MotionBlurDoFApp::InitObjects()
 	input_handler->connect(KlayGE::bind(&MotionBlurDoFApp::InputHandler, this, KlayGE::placeholders::_1, KlayGE::placeholders::_2));
 	inputEngine.ActionMap(actionMap, input_handler);
 
-	depth_of_field_ = MakeSharedPtr<DepthOfField>();
-	if (re.DeviceCaps().max_shader_model >= 3)
+	if (caps.fp_color_support)
 	{
-		bokeh_filter_ = MakeSharedPtr<BokehFilter>();
+		depth_of_field_ = MakeSharedPtr<DepthOfField>();
+		if (caps.max_shader_model >= 3)
+		{
+			bokeh_filter_ = MakeSharedPtr<BokehFilter>();
+		}
 	}
 	depth_of_field_copy_pp_ = SyncLoadPostProcess("Copy.ppml", "copy");
 	
@@ -808,22 +797,33 @@ void MotionBlurDoFApp::InitObjects()
 	id_use_instancing_ = app_dialog_->IDFromName("UseInstancing");
 	id_ctrl_camera_ = app_dialog_->IDFromName("CtrlCamera");
 
-	dof_dialog_->Control<UICheckBox>(id_dof_on_)->OnChangedEvent().connect(KlayGE::bind(&MotionBlurDoFApp::DoFOnHandler, this, KlayGE::placeholders::_1));
-	dof_dialog_->Control<UICheckBox>(id_bokeh_on_)->OnChangedEvent().connect(KlayGE::bind(&MotionBlurDoFApp::BokehOnHandler, this, KlayGE::placeholders::_1));
-	dof_dialog_->Control<UISlider>(id_focus_plane_slider_)->OnValueChangedEvent().connect(KlayGE::bind(&MotionBlurDoFApp::FocusPlaneChangedHandler, this, KlayGE::placeholders::_1));
-	dof_dialog_->Control<UISlider>(id_focus_range_slider_)->OnValueChangedEvent().connect(KlayGE::bind(&MotionBlurDoFApp::FocusRangeChangedHandler, this, KlayGE::placeholders::_1));
-	dof_dialog_->Control<UICheckBox>(id_blur_factor_)->OnChangedEvent().connect(KlayGE::bind(&MotionBlurDoFApp::BlurFactorHandler, this, KlayGE::placeholders::_1));
+	if (depth_of_field_)
+	{
+		dof_dialog_->Control<UICheckBox>(id_dof_on_)->OnChangedEvent().connect(KlayGE::bind(&MotionBlurDoFApp::DoFOnHandler, this, KlayGE::placeholders::_1));
+		this->DoFOnHandler(*dof_dialog_->Control<UICheckBox>(id_dof_on_));
+		dof_dialog_->Control<UICheckBox>(id_bokeh_on_)->OnChangedEvent().connect(KlayGE::bind(&MotionBlurDoFApp::BokehOnHandler, this, KlayGE::placeholders::_1));
+		this->BokehOnHandler(*dof_dialog_->Control<UICheckBox>(id_bokeh_on_));
+		dof_dialog_->Control<UISlider>(id_focus_plane_slider_)->OnValueChangedEvent().connect(KlayGE::bind(&MotionBlurDoFApp::FocusPlaneChangedHandler, this, KlayGE::placeholders::_1));
+		this->FocusPlaneChangedHandler(*dof_dialog_->Control<UISlider>(id_focus_plane_slider_));
+		dof_dialog_->Control<UISlider>(id_focus_range_slider_)->OnValueChangedEvent().connect(KlayGE::bind(&MotionBlurDoFApp::FocusRangeChangedHandler, this, KlayGE::placeholders::_1));
+		this->FocusRangeChangedHandler(*dof_dialog_->Control<UISlider>(id_focus_range_slider_));
+		dof_dialog_->Control<UICheckBox>(id_blur_factor_)->OnChangedEvent().connect(KlayGE::bind(&MotionBlurDoFApp::BlurFactorHandler, this, KlayGE::placeholders::_1));
+		this->BlurFactorHandler(*dof_dialog_->Control<UICheckBox>(id_blur_factor_));
+	}
+	else
+	{
+		dof_dialog_->Control<UICheckBox>(id_dof_on_)->SetEnabled(false);
+		dof_dialog_->Control<UICheckBox>(id_bokeh_on_)->SetEnabled(false);
+		dof_dialog_->Control<UISlider>(id_focus_plane_slider_)->SetEnabled(false);
+		dof_dialog_->Control<UISlider>(id_focus_range_slider_)->SetEnabled(false);
+		dof_dialog_->Control<UICheckBox>(id_blur_factor_)->SetEnabled(false);
+		dof_on_ = false;
+	}
 
 	mb_dialog_->Control<UICheckBox>(id_mb_on_)->OnChangedEvent().connect(KlayGE::bind(&MotionBlurDoFApp::MBOnHandler, this, KlayGE::placeholders::_1));
 	mb_dialog_->Control<UICheckBox>(id_motion_vec_)->OnChangedEvent().connect(KlayGE::bind(&MotionBlurDoFApp::MotionVecHandler, this, KlayGE::placeholders::_1));
 
 	app_dialog_->Control<UICheckBox>(id_ctrl_camera_)->OnChangedEvent().connect(KlayGE::bind(&MotionBlurDoFApp::CtrlCameraHandler, this, KlayGE::placeholders::_1));
-
-	this->DoFOnHandler(*dof_dialog_->Control<UICheckBox>(id_dof_on_));
-	this->BokehOnHandler(*dof_dialog_->Control<UICheckBox>(id_bokeh_on_));
-	this->FocusPlaneChangedHandler(*dof_dialog_->Control<UISlider>(id_focus_plane_slider_));
-	this->FocusRangeChangedHandler(*dof_dialog_->Control<UISlider>(id_focus_range_slider_));
-	this->BlurFactorHandler(*dof_dialog_->Control<UICheckBox>(id_blur_factor_));
 
 	app_dialog_->Control<UICheckBox>(id_use_instancing_)->OnChangedEvent().connect(KlayGE::bind(&MotionBlurDoFApp::UseInstancingHandler, this, KlayGE::placeholders::_1));
 
@@ -852,15 +852,29 @@ void MotionBlurDoFApp::OnResize(uint32_t width, uint32_t height)
 	}
 
 	ElementFormat depth_fmt;
-	if (caps.rendertarget_format_support(EF_R16F, 1, 0))
+	if (caps.pack_to_rgba_required)
 	{
-		depth_fmt = EF_R16F;
+		if (caps.rendertarget_format_support(EF_ABGR8, 1, 0))
+		{
+			depth_fmt = EF_ABGR8;
+		}
+		else
+		{
+			BOOST_ASSERT(caps.rendertarget_format_support(EF_ARGB8, 1, 0));
+			depth_fmt = EF_ARGB8;
+		}
 	}
 	else
 	{
-		BOOST_ASSERT(caps.rendertarget_format_support(EF_ABGR16F, 1, 0));
-
-		depth_fmt = EF_ABGR16F;
+		if (caps.rendertarget_format_support(EF_R16F, 1, 0))
+		{
+			depth_fmt = EF_R16F;
+		}
+		else
+		{
+			BOOST_ASSERT(caps.rendertarget_format_support(EF_R32F, 1, 0));
+			depth_fmt = EF_R32F;
+		}
 	}
 	depth_tex_ = rf.MakeTexture2D(width, height, 2, 1, depth_fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write | EAH_Generate_Mips, nullptr);
 
@@ -872,15 +886,29 @@ void MotionBlurDoFApp::OnResize(uint32_t width, uint32_t height)
 	}
 
 	ElementFormat color_fmt;
-	if (caps.rendertarget_format_support(EF_B10G11R11F, 1, 0))
+	if (caps.fp_color_support)
 	{
-		color_fmt = EF_B10G11R11F;
+		if (caps.rendertarget_format_support(EF_B10G11R11F, 1, 0))
+		{
+			color_fmt = EF_B10G11R11F;
+		}
+		else
+		{
+			BOOST_ASSERT(caps.rendertarget_format_support(EF_ABGR16F, 1, 0));
+			color_fmt = EF_ABGR16F;
+		}
 	}
 	else
 	{
-		BOOST_ASSERT(caps.rendertarget_format_support(EF_ABGR16F, 1, 0));
-
-		color_fmt = EF_ABGR16F;
+		if (caps.rendertarget_format_support(EF_ABGR8, 1, 0))
+		{
+			color_fmt = EF_ABGR8;
+		}
+		else
+		{
+			BOOST_ASSERT(caps.rendertarget_format_support(EF_ARGB8, 1, 0));
+			color_fmt = EF_ARGB8;
+		}
 	}
 
 	color_tex_ = rf.MakeTexture2D(width, height, 2, 1, color_fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write | EAH_Generate_Mips, nullptr);
@@ -912,9 +940,12 @@ void MotionBlurDoFApp::OnResize(uint32_t width, uint32_t height)
 
 	dof_tex_ = rf.MakeTexture2D(width, height, 1, 1, color_fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
 
-	depth_of_field_->InputPin(0, color_tex_);
-	depth_of_field_->InputPin(1, depth_tex_);
-	depth_of_field_->OutputPin(0, dof_tex_);
+	if (depth_of_field_)
+	{
+		depth_of_field_->InputPin(0, color_tex_);
+		depth_of_field_->InputPin(1, depth_tex_);
+		depth_of_field_->OutputPin(0, dof_tex_);
+	}
 	depth_of_field_copy_pp_->InputPin(0, color_tex_);
 	depth_of_field_copy_pp_->OutputPin(0, dof_tex_);
 

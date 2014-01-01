@@ -19,14 +19,29 @@ namespace KlayGE
 		RenderDeviceCaps const & caps = re.DeviceCaps();
 
 		ElementFormat height_fmt;
-		if (caps.rendertarget_format_support(EF_R16F, 1, 0) && caps.texture_format_support(EF_R16F))
+		if (caps.pack_to_rgba_required)
 		{
-			height_fmt = EF_R16F;
+			if (caps.rendertarget_format_support(EF_ABGR8, 1, 0))
+			{
+				height_fmt = EF_ABGR8;
+			}
+			else
+			{
+				BOOST_ASSERT(caps.rendertarget_format_support(EF_ARGB8, 1, 0));
+				height_fmt = EF_ARGB8;
+			}
 		}
 		else
 		{
-			BOOST_ASSERT(caps.rendertarget_format_support(EF_ABGR16F, 1, 0) && caps.texture_format_support(EF_ABGR16F));
-			height_fmt = EF_ABGR16F;
+			if (caps.rendertarget_format_support(EF_R16F, 1, 0))
+			{
+				height_fmt = EF_R16F;
+			}
+			else
+			{
+				BOOST_ASSERT(caps.rendertarget_format_support(EF_R32F, 1, 0));
+				height_fmt = EF_R32F;
+			}
 		}
 		height_map_tex_ = rf.MakeTexture2D(COARSE_HEIGHT_MAP_SIZE, COARSE_HEIGHT_MAP_SIZE, 1, 1, height_fmt,
 			1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
@@ -34,14 +49,17 @@ namespace KlayGE
 			1, 1, height_map_tex_->Format(), 1, 0, EAH_CPU_Read, nullptr);
 
 		ElementFormat gradient_fmt;
-		if (caps.rendertarget_format_support(EF_GR16F, 1, 0) && caps.texture_format_support(EF_GR16F))
+		if (EF_R16F == height_fmt)
 		{
 			gradient_fmt = EF_GR16F;
 		}
+		else if (EF_R32F == height_fmt)
+		{
+			gradient_fmt = EF_GR32F;
+		}
 		else
 		{
-			BOOST_ASSERT(caps.rendertarget_format_support(EF_ABGR16F, 1, 0) && caps.texture_format_support(EF_ABGR16F));
-			gradient_fmt = EF_ABGR16F;
+			gradient_fmt = height_fmt;
 		}
 		gradient_map_tex_ = rf.MakeTexture2D(COARSE_HEIGHT_MAP_SIZE, COARSE_HEIGHT_MAP_SIZE, 1, 1, gradient_fmt,
 			1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);

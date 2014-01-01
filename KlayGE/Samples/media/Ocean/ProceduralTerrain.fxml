@@ -52,16 +52,16 @@ float4 HeightPS(float2 texcoord : TEXCOORD0) : SV_Target
 {
 	texcoord.y = 1 - texcoord.y;
 	float2 uv = texcoord * world_uv_repeats.x + float2(texture_world_offset.x, -texture_world_offset.z);
-	return HybridTerrain(uv, fractal_octaves) - 0.5f;
+	return WriteAFloat(HybridTerrain(uv, fractal_octaves) - 0.5f, 1, 0.5f);
 }
 
 float4 GradientPS(float2 texcoord : TEXCOORD0) : SV_Target
 {
-	float x0 = height_tex.Sample(point_clamp_sampler, texcoord + float2(+inv_width_height.x, 0)).x;
-	float x1 = height_tex.Sample(point_clamp_sampler, texcoord + float2(-inv_width_height.x, 0)).x;
-	float y0 = height_tex.Sample(point_clamp_sampler, texcoord + float2(0, +inv_width_height.y)).x;
-	float y1 = height_tex.Sample(point_clamp_sampler, texcoord + float2(0, -inv_width_height.y)).x;
-	return float4(x1 - x0, y1 - y0, 0, 0);
+	float x0 = ReadAFloat(height_tex.Sample(point_clamp_sampler, texcoord + float2(+inv_width_height.x, 0)), 1, -0.5f);
+	float x1 = ReadAFloat(height_tex.Sample(point_clamp_sampler, texcoord + float2(-inv_width_height.x, 0)), 1, -0.5f);
+	float y0 = ReadAFloat(height_tex.Sample(point_clamp_sampler, texcoord + float2(0, +inv_width_height.y)), 1, -0.5f);
+	float y1 = ReadAFloat(height_tex.Sample(point_clamp_sampler, texcoord + float2(0, -inv_width_height.y)), 1, -0.5f);
+	return WriteTwoHalf(float2(x1 - x0, y1 - y0), 0.5f, 0.5f);
 }
 
 float4 ProceduralMask(float2 texcoord, float height, float3 normal)
@@ -82,10 +82,10 @@ float4 ProceduralMask(float2 texcoord, float height, float3 normal)
 
 float4 MaskPS(float2 texcoord : TEXCOORD0) : SV_Target
 {
-	float height = vertical_scale.x * height_tex.Sample(linear_clamp_sampler, texcoord).x;
+	float height = vertical_scale.x * ReadAFloat(height_tex.Sample(linear_clamp_sampler, texcoord), 1, -0.5f);
 
 	float ARBITRARY_FUDGE = 2;
-	float2 grad = gradient_tex.Sample(linear_clamp_sampler, texcoord).xy;
+	float2 grad = ReadTwoHalf(gradient_tex.Sample(linear_clamp_sampler, texcoord), 2, -1);
 	float scale = ARBITRARY_FUDGE * vertical_scale.y;
 	float3 normal = normalize(float3(scale * grad.x, coarse_sample_spacing, scale * grad.y));
 

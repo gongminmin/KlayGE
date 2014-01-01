@@ -155,8 +155,10 @@ float4 SubSurfacePS(float2 uv : TEXCOORD0,
 	}
 
 	float2 tex_coord = tc_w.xy / tc_w.z;
+#if NO_DEPTH_TEXTURE
 	float back_face_depth = ReadAFloat(back_face_depth_tex.Sample(point_sampler, tex_coord), far_plane.x);
-#if !NO_DEPTH_TEXTURE
+#else
+	float back_face_depth = back_face_depth_tex.Sample(point_sampler, tex_coord).x;
 	back_face_depth = non_linear_depth_to_linear(back_face_depth, near_q.x, near_q.y);
 #endif
 	float thickness = clamp(back_face_depth - tc_w.z, 0, 100.0f);
