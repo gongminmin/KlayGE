@@ -1241,10 +1241,6 @@ namespace KlayGE
 			ID3DBlob* err_msg;
 			std::vector<D3D_SHADER_MACRO> macros;
 			{
-				D3D_SHADER_MACRO macro_cb = { "KLAYGE_CONSTANT_BUFFER", "1" };
-				macros.push_back(macro_cb);
-			}
-			{
 				D3D_SHADER_MACRO macro_d3d11 = { "KLAYGE_D3D11", "1" };
 				macros.push_back(macro_d3d11);
 			}

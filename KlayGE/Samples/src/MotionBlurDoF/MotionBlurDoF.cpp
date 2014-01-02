@@ -767,7 +767,8 @@ void MotionBlurDoFApp::InitObjects()
 	input_handler->connect(KlayGE::bind(&MotionBlurDoFApp::InputHandler, this, KlayGE::placeholders::_1, KlayGE::placeholders::_2));
 	inputEngine.ActionMap(actionMap, input_handler);
 
-	if (caps.fp_color_support)
+	if (caps.fp_color_support && caps.texture_format_support(EF_ABGR32F)
+		&& caps.rendertarget_format_support(EF_ABGR32F, 1, 0))
 	{
 		depth_of_field_ = MakeSharedPtr<DepthOfField>();
 		if (caps.max_shader_model >= 3)
