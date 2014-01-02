@@ -518,14 +518,7 @@ namespace KlayGE
 		}
 
 
-		if (caps.pack_to_rgba_required)
-		{
-			sm_filter_pp_ = SyncLoadPostProcess("Copy.ppml", "copy");
-		}
-		else
-		{
-			sm_filter_pp_ = MakeSharedPtr<LogGaussianBlurPostProcess>(4, true);
-		}
+		sm_filter_pp_ = MakeSharedPtr<LogGaussianBlurPostProcess>(4, true);
 		if (depth_texture_support_)
 		{
 			depth_to_esm_pp_ = SyncLoadPostProcess("Depth.ppml", "DepthToESM");
@@ -2140,12 +2133,9 @@ namespace KlayGE
 			kernel_size.x() = 4;
 			kernel_size.y() = 4;
 		}
-		if (!caps.pack_to_rgba_required)
-		{
-			PostProcessChainPtr pp_chain = checked_pointer_cast<PostProcessChain>(sm_filter_pp_);
-			checked_pointer_cast<SeparableLogGaussianFilterPostProcess>(pp_chain->GetPostProcess(0))->KernelRadius(kernel_size.x());
-			checked_pointer_cast<SeparableLogGaussianFilterPostProcess>(pp_chain->GetPostProcess(1))->KernelRadius(kernel_size.y());
-		}
+		PostProcessChainPtr pp_chain = checked_pointer_cast<PostProcessChain>(sm_filter_pp_);
+		checked_pointer_cast<SeparableLogGaussianFilterPostProcess>(pp_chain->GetPostProcess(0))->KernelRadius(kernel_size.x());
+		checked_pointer_cast<SeparableLogGaussianFilterPostProcess>(pp_chain->GetPostProcess(1))->KernelRadius(kernel_size.y());
 
 		if (LightSource::LT_Sun == type)
 		{
@@ -2171,11 +2161,8 @@ namespace KlayGE
 				sm_filter_pp_->OutputPin(0, filtered_sm_2d_texs_[sm_light_indices_[org_no].first]);
 			}
 		}
-		if (!caps.pack_to_rgba_required)
-		{
-			checked_pointer_cast<LogGaussianBlurPostProcess>(sm_filter_pp_)->ESMScaleFactor(ESM_SCALE_FACTOR,
-				sm_fb_->GetViewport()->camera);
-		}
+		checked_pointer_cast<LogGaussianBlurPostProcess>(sm_filter_pp_)->ESMScaleFactor(ESM_SCALE_FACTOR,
+			sm_fb_->GetViewport()->camera);
 		sm_filter_pp_->Apply();
 
 		if (!caps.pack_to_rgba_required)

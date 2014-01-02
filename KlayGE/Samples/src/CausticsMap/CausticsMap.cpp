@@ -915,7 +915,6 @@ void CausticsMapApp::InitCubeSM()
 	ElementFormat fmt;
 	if (caps.pack_to_rgba_required)
 	{
-		filter_shadow_ = false;
 		if (caps.rendertarget_format_support(EF_ABGR8, 1, 0))
 		{
 			fmt = EF_ABGR8;
@@ -928,7 +927,6 @@ void CausticsMapApp::InitCubeSM()
 	}
 	else
 	{
-		filter_shadow_ = true;
 		if (caps.rendertarget_format_support(EF_R16F, 1, 0))
 		{
 			fmt = EF_R16F;
@@ -947,15 +945,7 @@ void CausticsMapApp::InitCubeSM()
 
 	for (int i = 0; i < 6; ++ i)
 	{
-		if (filter_shadow_)
-		{
-			sm_filter_pps_[i] = MakeSharedPtr<LogGaussianBlurPostProcess>(3, true);
-		}
-		else
-		{
-			sm_filter_pps_[i] = SyncLoadPostProcess("Copy.ppml", "copy");
-		}
-
+		sm_filter_pps_[i] = MakeSharedPtr<LogGaussianBlurPostProcess>(3, true);
 		sm_filter_pps_[i]->InputPin(0, shadow_tex_);
 		sm_filter_pps_[i]->OutputPin(0, shadow_cube_tex_, 0, 0, i);
 	}
@@ -1302,10 +1292,7 @@ uint32_t CausticsMapApp::DoUpdate(uint32_t pass)
 	
 		if (pass > sm_start_pass)
 		{
-			if (filter_shadow_)
-			{
-				checked_pointer_cast<LogGaussianBlurPostProcess>(sm_filter_pps_[pass - sm_start_pass - 1])->ESMScaleFactor(8.0f, light_->SMCamera(0));
-			}
+			checked_pointer_cast<LogGaussianBlurPostProcess>(sm_filter_pps_[pass - sm_start_pass - 1])->ESMScaleFactor(8.0f, light_->SMCamera(0));
 			sm_filter_pps_[pass - sm_start_pass - 1]->Apply();
 		}
 

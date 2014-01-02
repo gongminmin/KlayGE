@@ -1452,7 +1452,7 @@ namespace KlayGE
 		BOOST_ASSERT((kernel_radius > 0) && (kernel_radius <= 7));
 
 		params_.push_back(std::make_pair("esm_scale_factor", RenderEffectParameterPtr()));
-		params_.push_back(std::make_pair("near_q", RenderEffectParameterPtr()));
+		params_.push_back(std::make_pair("near_q_far", RenderEffectParameterPtr()));
 		input_pins_.push_back(std::make_pair("src_tex", TexturePtr()));
 		output_pins_.push_back(std::make_pair("output", TexturePtr()));
 		this->Technique(SyncLoadRenderEffect("Blur.fxml")->TechniqueByName(x_dir ? (linear_depth ? "LogBlurX" : "LogBlurXNLD") : "LogBlurY"));
@@ -1590,11 +1590,15 @@ namespace KlayGE
 	{
 		float np = camera->NearPlane();
 		float fp = camera->FarPlane();
-		this->SetParam(0, factor / (fp - np));
+
+		float esm_scale_factor = factor / (fp - np);
+		pp_chain_[0]->SetParam(0, esm_scale_factor);
+		pp_chain_[1]->SetParam(0, esm_scale_factor);
 
 		float q = fp / (fp - np);
-		float2 near_q(np * q, q);
-		this->SetParam(1, near_q);
+		float4 near_q_far(np * q, q, fp, 1 / fp);
+		pp_chain_[0]->SetParam(1, near_q_far);
+		pp_chain_[1]->SetParam(1, near_q_far);
 	}
 
 	void LogGaussianBlurPostProcess::InputPin(uint32_t index, TexturePtr const & tex)
