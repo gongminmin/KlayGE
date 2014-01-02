@@ -10,9 +10,14 @@
 		<state name="address_u" value="clamp"/>
 		<state name="address_v" value="clamp"/>
 	</parameter>
+	<parameter type="sampler" name="bias_neg_1_point_sampler">
+		<state name="mip_map_lod_bias" value="-1"/>
+		<state name="filtering" value="min_mag_mip_point"/>
+		<state name="address_u" value="clamp"/>
+		<state name="address_v" value="clamp"/>
+	</parameter>
 
 	<parameter type="float4" name="delta_offset"/>
-	<parameter type="float" name="prev_level"/>
 	<parameter type="float2" name="far_plane"/>
 
 	<parameter type="texture2D" name="g_buffer_tex"/>
@@ -50,11 +55,11 @@ float4 GBuffer2DepthDerivatePS(float2 tc : TEXCOORD0) : SV_Target
 float4 DepthDerivateMipMapPS(float2 tc : TEXCOORD0) : SV_Target
 {
 	tc = tc + delta_offset.zw;
-	float max_depth_deriv = ReadAFloat(depth_deriv_tex.SampleLevel(point_sampler, tc, prev_level), far_plane.x);
+	float max_depth_deriv = ReadAFloat(depth_deriv_tex.Sample(bias_neg_1_point_sampler, tc), far_plane.x);
 	for (int i = 1; i < 9; ++ i)
 	{
 		float2 ntc = tc + kernel9[i] * delta_offset.xy;
-		float depth_deriv = ReadAFloat(depth_deriv_tex.SampleLevel(point_sampler, ntc, prev_level), far_plane.x);
+		float depth_deriv = ReadAFloat(depth_deriv_tex.Sample(bias_neg_1_point_sampler, ntc), far_plane.x);
 		max_depth_deriv = max(max_depth_deriv, depth_deriv);
 	}
 	return WriteAFloat(max_depth_deriv, far_plane.y);
@@ -78,11 +83,11 @@ float4 GBuffer2NormalConePS(float2 tc : TEXCOORD0) : SV_Target
 float4 NormalConeMipMapPS(float2 tc : TEXCOORD0) : SV_Target
 {
 	tc = tc + delta_offset.zw;  
-	float4 max_min_nxy = normal_cone_tex.SampleLevel(point_sampler, tc, prev_level);
+	float4 max_min_nxy = normal_cone_tex.Sample(bias_neg_1_point_sampler, tc);
 	for (int i = 1; i < 9; ++ i)
 	{
 		float2 ntc = tc + kernel9[i] * delta_offset.xy;
-		float4 nxy = normal_cone_tex.SampleLevel(point_sampler, ntc, prev_level);
+		float4 nxy = normal_cone_tex.Sample(bias_neg_1_point_sampler, ntc);
 		max_min_nxy.xy = max(max_min_nxy.xy, nxy.xy);
 		max_min_nxy.zw = min(max_min_nxy.zw, nxy.zw);
 	}

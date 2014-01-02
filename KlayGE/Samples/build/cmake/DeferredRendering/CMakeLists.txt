@@ -27,7 +27,7 @@ IF(KLAYGE_BUILD_PLATFORM_WINRT)
 		${KLAYGE_PROJECT_DIR}/media/Models/spot_light_proxy.meshml.model_bin
 		${KLAYGE_PROJECT_DIR}/media/PostProcessors/Copy.ppml
 		${KLAYGE_PROJECT_DIR}/media/PostProcessors/Copy2LightBuffer.ppml
-		${KLAYGE_PROJECT_DIR}/media/PostProcessors/DepthToSM.ppml
+		${KLAYGE_PROJECT_DIR}/media/PostProcessors/Depth.ppml
 		${KLAYGE_PROJECT_DIR}/media/PostProcessors/LensEffects.ppml
 		${KLAYGE_PROJECT_DIR}/media/PostProcessors/MultiRes.ppml
 		${KLAYGE_PROJECT_DIR}/media/PostProcessors/PostToneMapping.ppml
@@ -39,7 +39,7 @@ IF(KLAYGE_BUILD_PLATFORM_WINRT)
 		${KLAYGE_PROJECT_DIR}/media/RenderFX/Copy.kfx
 		${KLAYGE_PROJECT_DIR}/media/RenderFX/Copy2LightBuffer.kfx
 		${KLAYGE_PROJECT_DIR}/media/RenderFX/DeferredRendering.kfx
-		${KLAYGE_PROJECT_DIR}/media/RenderFX/DepthToSM.kfx
+		${KLAYGE_PROJECT_DIR}/media/RenderFX/Depth.kfx
 		${KLAYGE_PROJECT_DIR}/media/RenderFX/GBuffer.kfx
 		${KLAYGE_PROJECT_DIR}/media/RenderFX/Font.kfx
 		${KLAYGE_PROJECT_DIR}/media/RenderFX/LensEffects.kfx

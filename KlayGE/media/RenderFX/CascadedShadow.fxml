@@ -283,9 +283,14 @@ void ComputeCustomCascadesCS(uint GI : SV_GroupIndex)
 		<state name="address_u" value="clamp"/>
 		<state name="address_v" value="clamp"/>
 	</parameter>
+	<parameter type="sampler" name="bias_neg_1_point_sampler">
+		<state name="mip_map_lod_bias" value="-1"/>
+		<state name="filtering" value="min_mag_mip_point"/>
+		<state name="address_u" value="clamp"/>
+		<state name="address_v" value="clamp"/>
+	</parameter>
 
 	<parameter type="float4" name="delta_offset"/>
-	<parameter type="float" name="prev_level"/>
 	<parameter type="float" name="last_level"/>
 	<parameter type="texture2D" name="depth_deriv_tex"/>
 
@@ -320,11 +325,11 @@ float4 ReduceZBoundsFromDepthPS(float2 tc : TEXCOORD0) : SV_Target
 float4 ReduceZBoundsFromDepthMipMapPS(float2 tc : TEXCOORD0) : SV_Target
 {
 	tc = tc + delta_offset.zw;
-	float2 min_max_z = depth_deriv_tex.SampleLevel(point_sampler, tc, prev_level).xy;
+	float2 min_max_z = depth_deriv_tex.Sample(bias_neg_1_point_sampler, tc).xy;
 	for (int i = 1; i < 4; ++ i)
 	{
 		float2 ntc = tc + kernel[i] * delta_offset.xy;
-		float2 depth_deriv = depth_deriv_tex.SampleLevel(point_sampler, ntc, prev_level).xy;
+		float2 depth_deriv = depth_deriv_tex.Sample(bias_neg_1_point_sampler, ntc).xy;
 		min_max_z = float2(min(min_max_z.x, depth_deriv.x), max(min_max_z.y, depth_deriv.y));
 	}
 	return float4(min_max_z, 0, 0);

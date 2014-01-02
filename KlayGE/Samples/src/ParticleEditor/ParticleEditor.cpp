@@ -200,7 +200,7 @@ void ParticleEditorApp::InitObjects()
 	}
 	else
 	{
-		depth_to_linear_pp_ = SyncLoadPostProcess("DepthToSM.ppml", "DepthToSM");
+		depth_to_linear_pp_ = SyncLoadPostProcess("Depth.ppml", "DepthToLinear");
 	}
 
 	copy_pp_ = SyncLoadPostProcess("Copy.ppml", "copy");

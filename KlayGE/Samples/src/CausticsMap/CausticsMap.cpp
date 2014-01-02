@@ -677,7 +677,7 @@ void CausticsMapApp::InitObjects()
 	copy_pp_ = SyncLoadPostProcess("Copy.ppml", "copy");
 	if (depth_texture_support_)
 	{
-		depth_to_linear_pp_ = SyncLoadPostProcess("DepthToSM.ppml", "DepthToSM");
+		depth_to_linear_pp_ = SyncLoadPostProcess("Depth.ppml", "DepthToLinear");
 	}
 
 	this->InitUI();

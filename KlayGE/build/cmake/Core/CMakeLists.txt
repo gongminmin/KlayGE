@@ -116,7 +116,7 @@ SET(RENDERING_EFFECT_FILES
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/Copy2LightBuffer.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/DeferredRendering.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/DeferredRenderingUtil.fxml
-	${KLAYGE_PROJECT_DIR}/media/RenderFX/DepthToSM.fxml
+	${KLAYGE_PROJECT_DIR}/media/RenderFX/Depth.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/FFT.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/Fog.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/Font.fxml
@@ -160,7 +160,7 @@ SET(RENDERING_POSTPROCESSOR_FILES
 	${KLAYGE_PROJECT_DIR}/media/PostProcessors/ColorGrading.ppml
 	${KLAYGE_PROJECT_DIR}/media/PostProcessors/Copy.ppml
 	${KLAYGE_PROJECT_DIR}/media/PostProcessors/Copy2LightBuffer.ppml
-	${KLAYGE_PROJECT_DIR}/media/PostProcessors/DepthToSM.ppml
+	${KLAYGE_PROJECT_DIR}/media/PostProcessors/Depth.ppml
 	${KLAYGE_PROJECT_DIR}/media/PostProcessors/FFT.ppml
 	${KLAYGE_PROJECT_DIR}/media/PostProcessors/Fog.ppml
 	${KLAYGE_PROJECT_DIR}/media/PostProcessors/FXAA.ppml

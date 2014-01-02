@@ -528,11 +528,12 @@ namespace KlayGE
 		}
 		if (depth_texture_support_)
 		{
-			depth_to_esm_pp_ = SyncLoadPostProcess("DepthToSM.ppml", "DepthToESM");
+			depth_to_esm_pp_ = SyncLoadPostProcess("Depth.ppml", "DepthToESM");
 			depth_to_esm_pp_->InputPin(0, sm_depth_tex_);
 			depth_to_esm_pp_->OutputPin(0, sm_tex_);
 
-			depth_to_linear_pp_ = SyncLoadPostProcess("DepthToSM.ppml", "DepthToSM");
+			depth_to_linear_pp_ = SyncLoadPostProcess("Depth.ppml", "DepthToLinear");
+			depth_mipmap_pp_ = SyncLoadPostProcess("Depth.ppml", "DepthMipmapBilinear");
 		}
 
 		g_buffer_tex_param_ = dr_effect_->ParameterByName("g_buffer_tex");
@@ -595,8 +596,8 @@ namespace KlayGE
 		camera_proj_param_ = dr_effect_->ParameterByName("camera_proj");
 		tc_to_tile_scale_param_ = dr_effect_->ParameterByName("tc_to_tile_scale");
 
-		depth_to_min_max_pp_ = SyncLoadPostProcess("DepthToSM.ppml", "DepthToMinMax");
-		reduce_min_max_pp_ = SyncLoadPostProcess("DepthToSM.ppml", "ReduceMinMax");
+		depth_to_min_max_pp_ = SyncLoadPostProcess("Depth.ppml", "DepthToMinMax");
+		reduce_min_max_pp_ = SyncLoadPostProcess("Depth.ppml", "ReduceMinMax");
 #endif
 
 		this->SetCascadedShadowType(CSLT_Auto);
@@ -709,15 +710,12 @@ namespace KlayGE
 			EAH_GPU_Read | EAH_GPU_Write | EAH_Generate_Mips, nullptr);
 		pvp.g_buffer_rt1_tex = rf.MakeTexture2D(width, height, 1, 1, fmt8, 1, 0,
 			EAH_GPU_Read | EAH_GPU_Write, nullptr);
+		pvp.g_buffer_depth_tex = rf.MakeTexture2D(width, height, MAX_IL_MIPMAP_LEVELS + 1, 1, depth_fmt, 1, 0,
+			EAH_GPU_Read | EAH_GPU_Write | EAH_Generate_Mips, nullptr);
 		if (caps.pack_to_rgba_required)
 		{
-			pvp.g_buffer_depth_tex = rf.MakeTexture2D(width, height, 1, 1, depth_fmt, 1, 0,
-				EAH_GPU_Read | EAH_GPU_Write, nullptr);
-		}
-		else
-		{
-			pvp.g_buffer_depth_tex = rf.MakeTexture2D(width, height, MAX_IL_MIPMAP_LEVELS + 1, 1, depth_fmt, 1, 0,
-				EAH_GPU_Read | EAH_GPU_Write | EAH_Generate_Mips, nullptr);
+			pvp.g_buffer_depth_pingpong_tex = rf.MakeTexture2D(width / 2, height / 2, MAX_IL_MIPMAP_LEVELS, 1,
+				depth_fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);			
 		}
 		pvp.g_buffer_rt0_backup_tex = rf.MakeTexture2D(width, height, 1, 1, fmt8, 1, 0,
 			EAH_GPU_Read, nullptr);
@@ -1932,7 +1930,23 @@ namespace KlayGE
 			depth_to_linear_pp_->Apply();
 		}
 
-		if (!caps.pack_to_rgba_required)
+		if (caps.pack_to_rgba_required)
+		{
+			depth_mipmap_pp_->InputPin(0, pvp.g_buffer_depth_tex);
+			for (uint32_t i = 1; i < pvp.g_buffer_depth_tex->NumMipMaps(); ++ i)
+			{
+				uint32_t width = pvp.g_buffer_depth_tex->Width(i - 1);
+				uint32_t height = pvp.g_buffer_depth_tex->Height(i - 1);
+				depth_mipmap_pp_->SetParam(0, float2(0.5f / width, 0.5f / height));
+
+				depth_mipmap_pp_->OutputPin(0, pvp.g_buffer_depth_pingpong_tex, i - 1);
+				depth_mipmap_pp_->Apply();
+
+				pvp.g_buffer_depth_pingpong_tex->CopyToSubTexture2D(*pvp.g_buffer_depth_tex, 0, i, 0, 0, width / 2, height / 2,
+					0, i - 1, 0, 0, width / 2, height / 2);
+			}
+		}
+		else
 		{
 			pvp.g_buffer_depth_tex->BuildMipSubLevels();
 		}
@@ -2813,8 +2827,6 @@ namespace KlayGE
 		depth_to_min_max_pp_->SetParam(0, float2(0.5f / w, 0.5f / h));
 		depth_to_min_max_pp_->SetParam(1, float2(static_cast<float>((w + 1) & ~1) / w,
 			static_cast<float>((h + 1) & ~1) / h));
-		CameraPtr const & camera = pvp.frame_buffer->GetViewport()->camera;
-		depth_to_min_max_pp_->SetParam(2, float4(0, 0, camera->FarPlane(), 1 / camera->FarPlane()));
 		depth_to_min_max_pp_->InputPin(0, pvp.g_buffer_depth_tex);
 		depth_to_min_max_pp_->OutputPin(0, pvp.g_buffer_min_max_depth_texs[0]);
 		depth_to_min_max_pp_->Apply();
@@ -2826,7 +2838,6 @@ namespace KlayGE
 			reduce_min_max_pp_->SetParam(0, float2(0.5f / w, 0.5f / h));
 			reduce_min_max_pp_->SetParam(1, float2(static_cast<float>((w + 1) & ~1) / w,
 				static_cast<float>((h + 1) & ~1) / h));
-			reduce_min_max_pp_->SetParam(2, float4(0, 0, camera->FarPlane(), 1 / camera->FarPlane()));
 			reduce_min_max_pp_->InputPin(0, pvp.g_buffer_min_max_depth_texs[i - 1]);
 			reduce_min_max_pp_->OutputPin(0, pvp.g_buffer_min_max_depth_texs[i]);
 			reduce_min_max_pp_->Apply();

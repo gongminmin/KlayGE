@@ -18,7 +18,6 @@
 	<post_processor name="reduce_z_bounds_from_depth_mip_map">
 		<params>
 			<param name="delta_offset"/>
-			<param name="prev_level"/>
 		</params>
 		<input>
 			<pin name="depth_deriv_tex"/>

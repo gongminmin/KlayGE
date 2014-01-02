@@ -19,7 +19,6 @@
 	<post_processor name="DepthDerivateMipMap">
 		<params>
 			<param name="delta_offset"/>
-			<param name="prev_level"/>
 			<param name="far_plane"/>
 		</params>
 		<input>
@@ -47,7 +46,6 @@
 	<post_processor name="NormalConeMipMap">
 		<params>
 			<param name="delta_offset"/>
-			<param name="prev_level"/>
 		</params>
 		<input>
 			<pin name="normal_cone_tex"/>

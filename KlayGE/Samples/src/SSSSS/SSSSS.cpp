@@ -170,7 +170,7 @@ void SSSSSApp::InitObjects()
 	light_camera_->ViewParams(light_->SMCamera(0)->EyePos(), light_->SMCamera(0)->LookAt(), light_->SMCamera(0)->UpVec());
 	light_camera_->ProjParams(light_->SMCamera(0)->FOV(), light_->SMCamera(0)->Aspect(), light_->SMCamera(0)->NearPlane(), light_->SMCamera(0)->FarPlane());
 
-	depth_to_linear_pp_ = SyncLoadPostProcess("DepthToSM.ppml", "DepthToSM");
+	depth_to_linear_pp_ = SyncLoadPostProcess("Depth.ppml", "DepthToLinear");
 	copy_pp_ = SyncLoadPostProcess("Copy.ppml", "copy");
 
 	InputEngine& inputEngine(Context::Instance().InputFactoryInstance().InputEngineInstance());

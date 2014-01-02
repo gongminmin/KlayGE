@@ -371,8 +371,7 @@ namespace KlayGE
 				float delta_y = 1.0f / height;
 				float4 delta_offset(delta_x, delta_y, -delta_x / 2, -delta_y / 2);			
 				reduce_z_bounds_from_depth_mip_map_pp_->SetParam(0, delta_offset);
-				reduce_z_bounds_from_depth_mip_map_pp_->SetParam(1, i - 1.0f);
-			
+
 				reduce_z_bounds_from_depth_mip_map_pp_->OutputPin(0, depth_deriative_small_tex_, i - 1);
 				reduce_z_bounds_from_depth_mip_map_pp_->Apply();
 

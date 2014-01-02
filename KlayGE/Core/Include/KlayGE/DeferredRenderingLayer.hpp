@@ -71,6 +71,7 @@ namespace KlayGE
 		TexturePtr g_buffer_rt1_tex;
 		TexturePtr g_buffer_ds_tex;
 		TexturePtr g_buffer_depth_tex;
+		TexturePtr g_buffer_depth_pingpong_tex;
 		TexturePtr g_buffer_rt0_backup_tex;
 #if DEFAULT_DEFERRED == LIGHT_INDEXED_DEFERRED
 		std::vector<TexturePtr> g_buffer_min_max_depth_texs;
@@ -343,6 +344,7 @@ namespace KlayGE
 		PostProcessPtr sm_filter_pp_;
 		PostProcessPtr depth_to_esm_pp_;
 		PostProcessPtr depth_to_linear_pp_;
+		PostProcessPtr depth_mipmap_pp_;
 
 		RenderEffectParameterPtr g_buffer_tex_param_;
 		RenderEffectParameterPtr g_buffer_1_tex_param_;
