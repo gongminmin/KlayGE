@@ -276,6 +276,9 @@ namespace KlayGE
 
 		RenderEffectPtr g_buffer_effect_;
 		RenderEffectPtr dr_effect_;
+#if DEFAULT_DEFERRED == LIGHT_INDEXED_DEFERRED
+		uint32_t light_batch_;
+#endif
 
 		array<PerViewport, 8> viewports_;
 		uint32_t active_viewport_;
@@ -391,9 +394,8 @@ namespace KlayGE
 		RenderEffectParameterPtr lights_aabb_max_param_;
 		RenderEffectParameterPtr num_lights_param_;
 		RenderEffectParameterPtr light_index_tex_param_;
-		RenderEffectParameterPtr light_index_tex_width_height_param_;
 		RenderEffectParameterPtr tile_scale_param_;
-		RenderEffectParameterPtr camera_proj_param_;
+		RenderEffectParameterPtr camera_proj_01_param_;
 		RenderEffectParameterPtr tc_to_tile_scale_param_;
 
 		PostProcessPtr depth_to_min_max_pp_;

@@ -1,0 +1,614 @@
+<?xml version='1.0'?>
+
+<effect>
+	<include name="DeferredRenderingUtil.fxml"/>
+	<include name="Lighting.fxml"/>
+	<include name="util.fxml"/>
+	<include name="DeferredRendering.fxml"/>
+
+	<cbuffer name="tile_based">
+		<parameter type="float4" name="tile_scale"/>
+		<parameter type="float2" name="camera_proj_01"/>
+		<parameter type="float2" name="tc_to_tile_scale"/>
+	</cbuffer>
+	<cbuffer name="light_batch">
+		<parameter type="float4" name="lights_color" array_size="LIGHT_BATCH"/>
+		<parameter type="float4" name="lights_pos_es" array_size="LIGHT_BATCH"/>
+		<parameter type="float4" name="lights_dir_es" array_size="LIGHT_BATCH"/>
+		<parameter type="float4" name="lights_falloff_range" array_size="LIGHT_BATCH"/>
+		<parameter type="float4" name="lights_attrib" array_size="LIGHT_BATCH"/>
+		<parameter type="float3" name="lights_aabb_min" array_size="LIGHT_BATCH"/>
+		<parameter type="float3" name="lights_aabb_max" array_size="LIGHT_BATCH"/>
+		<parameter type="int4" name="lights_shadowing_channel"/>
+		<parameter type="int" name="num_lights"/>
+	</cbuffer>
+	<parameter type="texture2D" name="min_max_depth_tex"/>
+	<parameter type="texture2D" name="light_index_tex"/>
+	<macro name="LT_Ambient" value="0"/>
+	<macro name="LT_Sun" value="1"/>
+	<macro name="LT_Directional" value="2"/>
+	<macro name="LT_Point" value="3"/>
+	<macro name="LT_Spot" value="4"/>
+	
+	<shader>
+		<![CDATA[
+#if KLAYGE_D3D11
+#if KLAYGE_SHADER_MODEL >= 4
+#define INTEGER_SUPPORT 1
+#endif
+#endif
+ 
+void DrawLightIndexVS(float4 pos : POSITION,
+			out float2 oTexCoord : TEXCOORD0,
+			out float4 oPos : SV_Position)
+{
+	oPos = pos;
+
+	oTexCoord = pos.xy / 2;
+	oTexCoord.y *= KLAYGE_FLIPPING;
+	oTexCoord += 0.5f;
+}
+
+void CalcTileViewFrustum(float2 tc, float2 min_max, out float4 planes[6])
+{
+	float near_plane = min_max.x;
+	float far_plane = min_max.y;
+	
+	if (far_plane - near_plane < 1e-3f)
+	{
+		far_plane += 1e-3f;
+	}
+
+	float2 tile_bias = tile_scale.xy - floor(tc * tile_scale.zw);
+	float q = far_plane / (far_plane - near_plane);
+
+	float4 column1 = float4(camera_proj_01.x, 0, tile_bias.x, 0);
+	float4 column2 = float4(0, -camera_proj_01.y, tile_bias.y, 0);
+	float4 column3 = float4(0, 0, q, -near_plane * q);
+	float4 column4 = float4(0, 0, 1, 0);
+	planes[0] = column4 - column1;
+	planes[1] = column4 + column1;
+	planes[2] = column4 - column2;
+	planes[3] = column4 + column2;
+	planes[4] = column4 - column3;
+	// TODO: Should be column3 only
+	planes[5] = column4 + column3;
+	for (int i = 0; i < 6; ++ i)
+	{
+		planes[i] /= length(planes[i].xyz);
+	}
+}
+
+int OverlapTestPoint(float4 planes[6], int light_index)
+{
+	int overlap = 1;
+	for (int j = 0; j < 6; ++ j)
+	{
+		float d = dot(planes[j], float4(lights_pos_es[light_index].xyz, 1));
+		overlap *= (d > -lights_falloff_range[light_index].w);
+	}
+
+	return overlap;
+}
+
+int OverlapTestSpot(float4 planes[6], int light_index)
+{
+	float3 min_pt = lights_aabb_min[light_index];
+	float3 max_pt = lights_aabb_max[light_index];
+
+	int overlap = 1;
+	for (int j = 0; j < 6; ++ j)
+	{
+		float4 plane = planes[j];
+		float3 v0 = plane.xyz < 0 ? min_pt : max_pt;
+		overlap *= (dot(plane, float4(v0, 1)) >= 0);
+	}
+
+	return overlap;
+}
+
+float4 DrawLightIndexPointPS(float2 tc : TEXCOORD0) : SV_Target
+{
+	float2 min_max = ReadTwoHalf(min_max_depth_tex.Sample(point_sampler, tc), depth_near_far_invfar.y);
+	float4 planes[6];
+	CalcTileViewFrustum(tc, min_max, planes);
+
+#if INTEGER_SUPPORT
+	uint accum = 0;
+	
+	for (int index = 0; index < num_lights; ++ index)
+	{
+		if (OverlapTestPoint(planes, index))
+		{
+			accum |= (1UL << index);
+		}
+	}
+
+	return float4(uint4(accum & 0xFF, accum >> 8,
+		accum >> 16, accum >> 24) & 0xFF) / 255.0f;
+#else
+	float all_light_id[4] = { 0, 0, 0, 0 };
+
+	int nl = LIGHT_BATCH;
+	// TODO: Cg doesn't support min(int, int)
+	if (num_lights < nl)
+	{
+		nl = num_lights;
+	}
+
+#if LIGHT_BATCH > 4
+	int end_comp = (nl + 7) / 8;
+	int index = 0;
+	for (int comp = 0; comp < end_comp; ++ comp)
+	{
+		int mask = 1;
+		int accum = 0;
+		while (mask < 256)
+		{
+			if (OverlapTestPoint(planes, index))
+			{
+				accum += mask;
+			}
+			
+			mask *= 2;
+			++ index;
+		}
+
+		all_light_id[comp] = (accum + 0.5f) / 255.0f;
+	}
+#else
+	for (int index = 0; index < nl; ++ index)
+	{
+		if (OverlapTestPoint(planes, index))
+		{
+			all_light_id[index] = 1;
+		}
+	}
+#endif
+
+	// TODO: Cg doesn't support float[4]->float4
+	return float4(all_light_id[0], all_light_id[1], all_light_id[2], all_light_id[3]);
+#endif
+}
+
+float4 DrawLightIndexSpotPS(float2 tc : TEXCOORD0) : SV_Target
+{
+	float2 min_max = ReadTwoHalf(min_max_depth_tex.Sample(point_sampler, tc), depth_near_far_invfar.y);
+	float4 planes[6];
+	CalcTileViewFrustum(tc, min_max, planes);
+
+#if INTEGER_SUPPORT
+	uint accum = 0;
+	
+	for (int index = 0; index < num_lights; ++ index)
+	{
+		if (OverlapTestSpot(planes, index))
+		{
+			accum |= (1UL << index);
+		}
+	}
+
+	return float4(uint4(accum & 0xFF, accum >> 8,
+		accum >> 16, accum >> 24) & 0xFF) / 255.0f;
+#else
+	float all_light_id[4] = { 0, 0, 0, 0 };
+
+	int nl = LIGHT_BATCH;
+	// TODO: Cg doesn't support min(int, int)
+	if (num_lights < nl)
+	{
+		nl = num_lights;
+	}
+
+#if LIGHT_BATCH > 4
+	int end_comp = (nl + 7) / 8;
+	int index = 0;
+	for (int comp = 0; comp < end_comp; ++ comp)
+	{
+		int mask = 1;
+		int accum = 0;
+		while (mask < 256)
+		{
+			if (OverlapTestSpot(planes, index))
+			{
+				accum += mask;
+			}
+			
+			mask *= 2;
+			++ index;
+		}
+		
+		all_light_id[comp] = (accum + 0.5f) / 255.0f;
+	}
+#else
+	for (int index = 0; index < nl; ++ index)
+	{
+		if (OverlapTestPoint(planes, index))
+		{
+			all_light_id[index] = 1;
+		}
+	}
+#endif
+
+	// TODO: Cg doesn't support float[4]->float4
+	return float4(all_light_id[0], all_light_id[1], all_light_id[2], all_light_id[3]);
+#endif
+}
+
+void LightIndexedDeferredRenderingVS(float4 pos : POSITION,
+			out float2 oTexCoord : TEXCOORD0,
+			out float3 oViewDir : TEXCOORD1,
+			out float4 oPos : SV_Position)
+{
+	oPos = pos;
+
+	oViewDir = mul(pos, light_volume_mv).xyz;
+	oTexCoord = pos.xy / 2;
+	oTexCoord.y *= KLAYGE_FLIPPING;
+	oTexCoord += 0.5f;
+}
+
+float4 LightIndexedDeferredRenderingAmbientPS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Target
+{
+	float4 ndc = g_buffer_tex.Sample(point_sampler, tc);
+	view_dir = normalize(view_dir);
+	float3 normal = GetNormal(ndc);
+	float shininess = GetShininess(ndc);
+
+	float4 lighting = CalcColor(0.5f + 0.5f * dot(light_dir_es.xyz, normal), 0, 1, 1, light_color, light_attrib);
+	
+	float4 diffuse = g_buffer_1_tex.Sample(point_sampler, tc);
+	return float4(Shading(lighting, shininess, diffuse.xyz, diffuse.w, -view_dir, normal), 1);
+}
+
+float4 LightIndexedDeferredRenderingSunPS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Target
+{
+	float2 tc_ddx = ddx(tc);
+	float2 tc_ddy = ddy(tc);
+	
+	float4 shading = 0;
+
+	float4 ndc = g_buffer_tex.Sample(point_sampler, tc);
+	float3 normal = GetNormal(ndc);
+
+	float3 dir = light_dir_es.xyz;
+	float n_dot_l = dot(normal, dir);
+	if (n_dot_l > 0)
+	{
+		view_dir = normalize(view_dir);
+
+		float spec = roughness_term(normalize(dir - view_dir), normal, GetShininess(ndc)).x;
+		float3 shadow = 1;
+		if (shadowing_channel >= 0)
+		{
+			shadow = NearestDepthUpsamplingShadow(tc, tc_ddx, tc_ddy, shadowing_channel).xyz;
+		}
+		float4 lighting = CalcColor(n_dot_l, spec, 1, shadow, light_color, light_attrib);
+
+		float shininess = GetShininess(ndc);
+		float4 diffuse = g_buffer_1_tex.Sample(point_sampler, tc);
+		shading = float4(Shading(lighting, shininess, diffuse.xyz, diffuse.w, -view_dir, normal), 1);
+	}
+	
+	return shading;
+}
+
+float4 LightIndexedDeferredRenderingDirectionalPS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Target
+{
+	float4 lighting = 0;
+
+	float4 ndc = g_buffer_tex.Sample(point_sampler, tc);
+	view_dir = normalize(view_dir);
+	float3 pos_es = view_dir * (ReadAFloat(depth_tex.Sample(point_sampler, tc), depth_near_far_invfar.y) / view_dir.z);
+	float3 normal = GetNormal(ndc);
+	float shininess = GetShininess(ndc);
+
+	for (int i = 0; i < num_lights; ++ i)
+	{
+		float3 dir = lights_dir_es[i].xyz;
+		float n_dot_l = dot(normal, dir);
+		if (n_dot_l > 0)
+		{
+			float spec = roughness_term(normalize(dir - view_dir), normal, shininess).x;
+			lighting += CalcColor(n_dot_l, spec, 1, 1, lights_color[i], lights_attrib[i]);
+		}
+	}
+
+	float4 diffuse = g_buffer_1_tex.Sample(point_sampler, tc);
+	return float4(Shading(lighting, shininess, diffuse.xyz, diffuse.w, -view_dir, normal), 1);
+}
+
+float4 CalcLightIndexedDeferredRenderingPointLighting(int index, float3 pos_es, float3 normal, float3 view_dir,
+		float shininess, float2 tc, float2 tc_ddx, float2 tc_ddy)
+{
+	float4 lighting = 0;
+	float3 dir = lights_pos_es[index].xyz - pos_es;
+	float dist = length(dir);
+	if (dist < lights_falloff_range[index].w)
+	{
+		dir /= dist;
+		float n_dot_l = dot(normal, dir);
+		if (n_dot_l > 0)
+		{
+			float3 shadow = 1;
+#if WITH_SHADOW
+			shadow = NearestDepthUpsamplingShadow(tc, tc_ddx, tc_ddy, lights_shadowing_channel[index]).xyz;
+#endif
+
+			float spec = roughness_term(normalize(dir - view_dir), normal, shininess).x;
+			float atten = attenuation_term(lights_pos_es[index].xyz, pos_es, lights_falloff_range[index].xyz);
+			lighting = CalcColor(n_dot_l, spec, atten, shadow, lights_color[index], lights_attrib[index]);
+		}
+	}
+	return lighting;
+}
+
+float4 CalcLightIndexedDeferredRenderingSpotLighting(int index, float3 pos_es, float3 normal, float3 view_dir,
+		float shininess, float2 tc, float2 tc_ddx, float2 tc_ddy)
+{
+	float4 lighting = 0;
+	float spot = spot_lighting(lights_pos_es[index].xyz, lights_dir_es[index].xyz,
+		float2(lights_pos_es[index].w, lights_dir_es[index].w), pos_es);
+	if (spot > 0)
+	{
+		float3 dir = lights_pos_es[index].xyz - pos_es;
+		float dist = length(dir);
+		if (dist < lights_falloff_range[index].w)
+		{
+			dir /= dist;
+			float n_dot_l = dot(normal, dir);
+			if (n_dot_l > 0)
+			{
+				float3 shadow = 1;
+#if WITH_SHADOW
+				shadow = NearestDepthUpsamplingShadow(tc, tc_ddx, tc_ddy, lights_shadowing_channel[index]).xyz;
+#endif
+
+				float spec = roughness_term(normalize(dir - view_dir), normal, shininess).x;
+				float atten = spot * attenuation_term(lights_pos_es[index].xyz, pos_es, lights_falloff_range[index].xyz);
+				lighting = CalcColor(n_dot_l, spec, atten, shadow, lights_color[index], lights_attrib[index]);
+			}
+		}
+	}
+	
+	return lighting;
+}
+				
+float4 LightIndexedDeferredRenderingPointPS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Target
+{
+	float2 tc_ddx = ddx(tc);
+	float2 tc_ddy = ddy(tc);
+	
+	float4 shading = 0;
+	int4 light_index = light_index_tex.Sample(point_sampler, tc * tc_to_tile_scale) * 255 + 0.5f;
+	if (any(light_index))
+	{
+		float4 lighting = 0;
+		float4 ndc = g_buffer_tex.Sample(point_sampler, tc);
+		view_dir = normalize(view_dir);
+		float3 pos_es = view_dir * (ReadAFloat(depth_tex.Sample(point_sampler, tc), depth_near_far_invfar.y) / view_dir.z);
+		float3 normal = GetNormal(ndc);
+		float shininess = GetShininess(ndc);
+
+#if INTEGER_SUPPORT
+		uint light_index_all = light_index.x | (light_index.y << 8) | (light_index.z << 16) | (light_index.w << 24);
+		uint nl = countbits(light_index_all);
+		for (uint il = 0; il < nl; ++ il)
+		{
+			uint index = firstbitlow(light_index_all);
+			lighting += CalcLightIndexedDeferredRenderingPointLighting(index, pos_es, normal, view_dir, shininess, tc, tc_ddx, tc_ddy);
+			light_index_all = light_index_all & (light_index_all - 1);
+		}
+#else
+#if WITH_SHADOW
+		int nl = 4;
+#else
+		int nl = LIGHT_BATCH;
+#endif
+		// TODO: Cg doesn't support min(int, int)
+		if (num_lights < nl)
+		{
+			nl = num_lights;
+		}
+
+#if LIGHT_BATCH > 4
+		int start_comp = (nl + 7) / 8;
+		int index = start_comp * 8 - 1;
+		for (int comp = start_comp - 1; comp >= 0; -- comp)
+		{
+			int mask = 128;
+			int light_comp = light_index[comp];
+
+#if KLAYGE_D3D11
+			[loop]
+#endif
+			while (mask > 0)
+			{
+#if KLAYGE_D3D11
+				[branch]
+#endif
+				if (mask <= light_comp)
+				{
+					lighting += CalcLightIndexedDeferredRenderingPointLighting(index, pos_es, normal, view_dir, shininess, tc, tc_ddx, tc_ddy);
+					light_comp -= mask;
+				}
+
+				mask /= 2;
+				-- index;
+			}
+		}
+#else
+		for (int index = 0; index < nl; ++ index)
+		{
+			if (light_index[index])
+			{
+				lighting += CalcLightIndexedDeferredRenderingPointLighting(index, pos_es, normal, view_dir, shininess, tc, tc_ddx, tc_ddy);
+			}
+		}
+#endif
+#endif
+
+		float4 diffuse = g_buffer_1_tex.Sample(point_sampler, tc);
+		shading = float4(Shading(lighting, shininess, diffuse.xyz, diffuse.w, -view_dir, normal), 1);
+	}
+
+	return shading;
+}
+
+float4 LightIndexedDeferredRenderingSpotPS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Target
+{
+	float2 tc_ddx = ddx(tc);
+	float2 tc_ddy = ddy(tc);
+	
+	float4 shading = 0;
+	int4 light_index = light_index_tex.Sample(point_sampler, tc * tc_to_tile_scale) * 255 + 0.5f;
+	if (any(light_index))
+	{
+		float4 lighting = 0;
+		float4 ndc = g_buffer_tex.Sample(point_sampler, tc);
+		view_dir = normalize(view_dir);
+		float3 pos_es = view_dir * (ReadAFloat(depth_tex.Sample(point_sampler, tc), depth_near_far_invfar.y) / view_dir.z);
+		float3 normal = GetNormal(ndc);
+		float shininess = GetShininess(ndc);
+
+#if INTEGER_SUPPORT
+		uint light_index_all = light_index.x | (light_index.y << 8) | (light_index.z << 16) | (light_index.w << 24);
+		uint nl = countbits(light_index_all);
+		for (uint il = 0; il < nl; ++ il)
+		{
+			uint index = firstbitlow(light_index_all);
+			lighting += CalcLightIndexedDeferredRenderingSpotLighting(index, pos_es, normal, view_dir, shininess, tc, tc_ddx, tc_ddy);
+			light_index_all = light_index_all & (light_index_all - 1);
+		}
+#else
+#if WITH_SHADOW
+		int nl = 4;
+#else
+		int nl = LIGHT_BATCH;
+#endif
+		// TODO: Cg doesn't support min(int, int)
+		if (num_lights < nl)
+		{
+			nl = num_lights;
+		}
+
+#if LIGHT_BATCH > 4
+		int start_comp = (nl + 7) / 8;
+		int index = start_comp * 8 - 1;
+		for (int comp = start_comp - 1; comp >= 0; -- comp)
+		{
+			int mask = 128;
+			int light_comp = light_index[comp];
+
+#if KLAYGE_D3D11
+			[loop]
+#endif
+			while (mask > 0)
+			{
+#if KLAYGE_D3D11
+				[branch]
+#endif
+				if (mask <= light_comp)
+				{
+					lighting += CalcLightIndexedDeferredRenderingSpotLighting(index, pos_es, normal, view_dir, shininess, tc, tc_ddx, tc_ddy);
+					light_comp -= mask;
+				}
+
+				mask /= 2;
+				-- index;
+			}
+		}
+#else
+		for (int index = 0; index < nl; ++ index)
+		{
+			if (light_index[index])
+			{
+				lighting += CalcLightIndexedDeferredRenderingSpotLighting(index, pos_es, normal, view_dir, shininess, tc, tc_ddx, tc_ddy);
+			}
+		}
+#endif
+#endif
+
+		float4 diffuse = g_buffer_1_tex.Sample(point_sampler, tc);
+		shading = float4(Shading(lighting, shininess, diffuse.xyz, diffuse.w, -view_dir, normal), 1);
+	}
+
+	return shading;
+}
+		]]>
+	</shader>
+		
+	<technique name="DrawLightIndexPoint">
+		<pass name="p0">
+			<state name="depth_enable" value="false"/>
+			<state name="depth_write_mask" value="false"/>
+
+			<state name="cull_mode" value="front"/>
+
+			<state name="vertex_shader" value="DrawLightIndexVS()"/>
+			<state name="pixel_shader" value="DrawLightIndexPointPS()"/>
+		</pass>
+	</technique>
+	<technique name="DrawLightIndexSpot" inherit="DrawLightIndexPoint">
+		<pass name="p0">
+			<state name="pixel_shader" value="DrawLightIndexSpotPS()"/>
+		</pass>
+	</technique>
+
+	<technique name="LightIndexedDeferredRenderingAmbient">
+		<pass name="p0">
+			<state name="depth_enable" value="false"/>
+			<state name="depth_write_mask" value="false"/>
+
+			<state name="cull_mode" value="front"/>
+
+			<state name="front_stencil_enable" value="true"/>
+			<state name="front_stencil_func" value="not_equal"/>
+			<state name="front_stencil_ref" value="128"/>
+			<state name="front_stencil_pass" value="keep"/>
+			<state name="back_stencil_enable" value="true"/>
+			<state name="back_stencil_func" value="not_equal"/>
+			<state name="back_stencil_ref" value="128"/>
+			<state name="back_stencil_pass" value="keep"/>
+
+			<state name="vertex_shader" value="LightIndexedDeferredRenderingVS()"/>			
+			<state name="pixel_shader" value="LightIndexedDeferredRenderingAmbientPS()"/>
+		</pass>
+	</technique>
+	<technique name="LightIndexedDeferredRenderingSun" inherit="LightIndexedDeferredRenderingAmbient">
+		<pass name="p0">
+			<state name="blend_enable" value="true"/>
+			<state name="blend_op" value="add"/>
+			<state name="src_blend" value="one"/>
+			<state name="dest_blend" value="one"/>
+			<state name="blend_op_alpha" value="add"/>
+			<state name="src_blend_alpha" value="one"/>
+			<state name="dest_blend_alpha" value="one"/>
+
+			<state name="pixel_shader" value="LightIndexedDeferredRenderingSunPS()"/>
+		</pass>
+	</technique>
+	<technique name="LightIndexedDeferredRenderingDirectional" inherit="LightIndexedDeferredRenderingSun">
+		<pass name="p0">
+			<state name="pixel_shader" value="LightIndexedDeferredRenderingDirectionalPS()"/>
+		</pass>
+	</technique>
+	<technique name="LightIndexedDeferredRenderingPointShadow" inherit="LightIndexedDeferredRenderingDirectional">
+		<macro name="WITH_SHADOW" value="1"/>
+		<pass name="p0">
+			<state name="pixel_shader" value="LightIndexedDeferredRenderingPointPS()"/>
+		</pass>
+	</technique>
+	<technique name="LightIndexedDeferredRenderingPointNoShadow" inherit="LightIndexedDeferredRenderingPointShadow">
+		<macro name="WITH_SHADOW" value="0"/>
+	</technique>
+	<technique name="LightIndexedDeferredRenderingSpotShadow" inherit="LightIndexedDeferredRenderingDirectional">
+		<macro name="WITH_SHADOW" value="1"/>
+		<pass name="p0">
+			<state name="pixel_shader" value="LightIndexedDeferredRenderingSpotPS()"/>
+		</pass>
+	</technique>
+	<technique name="LightIndexedDeferredRenderingSpotNoShadow" inherit="LightIndexedDeferredRenderingSpotShadow">
+		<macro name="WITH_SHADOW" value="0"/>
+	</technique>
+</effect>

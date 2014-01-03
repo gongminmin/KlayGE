@@ -30,6 +30,15 @@
 #include <KlayGE/SSVOPostProcess.hpp>
 #include <KlayGE/SSRPostProcess.hpp>
 
+#ifdef KLAYGE_COMPILER_MSVC
+#pragma warning(push)
+#pragma warning(disable: 4702)
+#endif
+#include <boost/lexical_cast.hpp>
+#ifdef KLAYGE_COMPILER_MSVC
+#pragma warning(pop)
+#endif
+
 #include <KlayGE/DeferredRenderingLayer.hpp>
 
 namespace KlayGE
@@ -381,7 +390,22 @@ namespace KlayGE
 		light_volume_rl_[LightSource::LT_Sun] = rl_quad_;
 
 		g_buffer_effect_ = SyncLoadRenderEffect("GBuffer.fxml");
+#if DEFAULT_DEFERRED == TRIDITIONAL_DEFERRED
 		dr_effect_ = SyncLoadRenderEffect("DeferredRendering.fxml");
+#elif DEFAULT_DEFERRED == LIGHT_INDEXED_DEFERRED
+		if (caps.max_shader_model >= 4)
+		{
+			light_batch_ = 32;
+		}
+		else
+		{
+			light_batch_ = 4;
+		}
+		std::vector<std::pair<std::string, std::string> > light_batch_macro;
+		light_batch_macro.push_back(std::make_pair("LIGHT_BATCH", boost::lexical_cast<std::string>(light_batch_)));
+		light_batch_macro.push_back(std::make_pair("", ""));
+		dr_effect_ = SyncLoadRenderEffect("LightIndexedDeferredRendering.fxml", &light_batch_macro[0]);
+#endif
 
 		technique_shadows_[LightSource::LT_Point][0] = dr_effect_->TechniqueByName("DeferredShadowingPointR");
 		technique_shadows_[LightSource::LT_Point][1] = dr_effect_->TechniqueByName("DeferredShadowingPointG");
@@ -584,9 +608,8 @@ namespace KlayGE
 		lights_aabb_max_param_ = dr_effect_->ParameterByName("lights_aabb_max");
 		num_lights_param_ = dr_effect_->ParameterByName("num_lights");
 		light_index_tex_param_ = dr_effect_->ParameterByName("light_index_tex");
-		light_index_tex_width_height_param_ = dr_effect_->ParameterByName("light_index_tex_width_height");
 		tile_scale_param_ = dr_effect_->ParameterByName("tile_scale");
-		camera_proj_param_ = dr_effect_->ParameterByName("camera_proj");
+		camera_proj_01_param_ = dr_effect_->ParameterByName("camera_proj_01");
 		tc_to_tile_scale_param_ = dr_effect_->ParameterByName("tc_to_tile_scale");
 
 		depth_to_min_max_pp_ = SyncLoadPostProcess("Depth.ppml", "DepthToMinMax");
@@ -1287,7 +1310,7 @@ namespace KlayGE
 					uint32_t li = 0;
 					while (li < directional_lights.size())
 					{
-						uint32_t nl = static_cast<uint32_t>(std::min(static_cast<size_t>(32), directional_lights.size() - li));
+						uint32_t nl = std::min(light_batch_, static_cast<uint32_t>(directional_lights.size() - li));
 						std::vector<uint32_t>::const_iterator iter_beg = directional_lights.begin() + li;
 						std::vector<uint32_t>::const_iterator iter_end = iter_beg + nl;
 						this->UpdateLightIndexedLightingDirectional(pvp, pass_tb, iter_beg, iter_end);
@@ -1298,7 +1321,7 @@ namespace KlayGE
 					uint32_t li = 0;
 					while (li < point_lights_no_shadow.size())
 					{
-						uint32_t nl = static_cast<uint32_t>(std::min(static_cast<size_t>(32), point_lights_no_shadow.size() - li));
+						uint32_t nl = std::min(light_batch_, static_cast<uint32_t>(point_lights_no_shadow.size() - li));
 						std::vector<uint32_t>::iterator iter_beg = point_lights_no_shadow.begin() + li;
 						std::vector<uint32_t>::iterator iter_end = iter_beg + nl;
 						this->UpdateLightIndexedLightingPointSpot(pvp, iter_beg, iter_end, pass_tb, true, false);
@@ -1309,7 +1332,7 @@ namespace KlayGE
 					uint32_t li = 0;
 					while (li < point_lights_shadow.size())
 					{
-						uint32_t nl = static_cast<uint32_t>(std::min(static_cast<size_t>(32), point_lights_shadow.size() - li));
+						uint32_t nl = std::min(light_batch_, static_cast<uint32_t>(point_lights_shadow.size() - li));
 						std::vector<uint32_t>::iterator iter_beg = point_lights_shadow.begin() + li;
 						std::vector<uint32_t>::iterator iter_end = iter_beg + nl;
 						this->UpdateLightIndexedLightingPointSpot(pvp, iter_beg, iter_end, pass_tb, true, true);
@@ -1320,7 +1343,7 @@ namespace KlayGE
 					uint32_t li = 0;
 					while (li < spot_lights_no_shadow.size())
 					{
-						uint32_t nl = static_cast<uint32_t>(std::min(static_cast<size_t>(32), spot_lights_no_shadow.size() - li));
+						uint32_t nl = std::min(light_batch_, static_cast<uint32_t>(spot_lights_no_shadow.size() - li));
 						std::vector<uint32_t>::iterator iter_beg = spot_lights_no_shadow.begin() + li;
 						std::vector<uint32_t>::iterator iter_end = iter_beg + nl;
 						this->UpdateLightIndexedLightingPointSpot(pvp, iter_beg, iter_end, pass_tb, false, false);
@@ -1331,7 +1354,7 @@ namespace KlayGE
 					uint32_t li = 0;
 					while (li < spot_lights_shadow.size())
 					{
-						uint32_t nl = static_cast<uint32_t>(std::min(static_cast<size_t>(32), spot_lights_shadow.size() - li));
+						uint32_t nl = std::min(light_batch_, static_cast<uint32_t>(spot_lights_shadow.size() - li));
 						std::vector<uint32_t>::iterator iter_beg = spot_lights_shadow.begin() + li;
 						std::vector<uint32_t>::iterator iter_end = iter_beg + nl;
 						this->UpdateLightIndexedLightingPointSpot(pvp, iter_beg, iter_end, pass_tb, false, true);
@@ -2670,16 +2693,14 @@ namespace KlayGE
 
 		*min_max_depth_tex_param_ = pvp.g_buffer_min_max_depth_texs.back();
 
-		uint32_t w = pvp.light_index_tex->Width(0);
-		uint32_t h = pvp.light_index_tex->Height(0);
-		*light_index_tex_width_height_param_ = float4(static_cast<float>(w),
-			static_cast<float>(h), 1.0f / w, 1.0f / h);
+		uint32_t w = (pvp.g_buffer_depth_tex->Width(0) + TILE_SIZE - 1) & ~(TILE_SIZE - 1);
+		uint32_t h = (pvp.g_buffer_depth_tex->Height(0) + TILE_SIZE - 1) & ~(TILE_SIZE - 1);
+		float2 tile_scale(w / (2.0f * TILE_SIZE), h / (2.0f * TILE_SIZE));
+		*tile_scale_param_ = float4(tile_scale.x(), tile_scale.y(),
+			static_cast<float>(pvp.light_index_tex->Width(0)),
+			static_cast<float>(pvp.light_index_tex->Height(0)));
 
-		w = (pvp.g_buffer_depth_tex->Width(0) + TILE_SIZE - 1) & ~(TILE_SIZE - 1);
-		h = (pvp.g_buffer_depth_tex->Height(0) + TILE_SIZE - 1) & ~(TILE_SIZE - 1);
-		*tile_scale_param_ = float2(w / (2.0f * TILE_SIZE), h / (2.0f * TILE_SIZE));
-
-		*camera_proj_param_ = pvp.proj;
+		*camera_proj_01_param_ = float2(pvp.proj(0, 0) * tile_scale.x(), pvp.proj(1, 1) * tile_scale.y());
 
 		std::vector<float4> lights_color;
 		std::vector<float4> lights_pos_es;

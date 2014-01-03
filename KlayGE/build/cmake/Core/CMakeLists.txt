@@ -127,6 +127,7 @@ SET(RENDERING_EFFECT_FILES
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/JudaTexture.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/LensEffects.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/LensFlare.fxml
+	${KLAYGE_PROJECT_DIR}/media/RenderFX/LightIndexedDeferredRendering.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/Lighting.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/LightShaft.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/LightSourceProxy.fxml
