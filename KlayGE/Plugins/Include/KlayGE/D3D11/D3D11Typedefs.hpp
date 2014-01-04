@@ -25,8 +25,10 @@
 	#ifdef KLAYGE_COMPILER_MSVC
 	#pragma warning(pop)
 	#endif
-#else
+#elif (_WIN32_WINNT < 0x0603 /*_WIN32_WINNT_WINBLUE*/)
 	#include <d3d11_1.h>
+#else
+	#include <d3d11_2.h>
 #endif
 
 namespace KlayGE
@@ -37,6 +39,9 @@ namespace KlayGE
 	typedef shared_ptr<IDXGIFactory2>				IDXGIFactory2Ptr;
 	typedef shared_ptr<IDXGIAdapter2>				IDXGIAdapter2Ptr;
 #endif
+#if (_WIN32_WINNT >= 0x0603 /*_WIN32_WINNT_WINBLUE*/)
+	typedef shared_ptr<IDXGIFactory3>				IDXGIFactory3Ptr;
+#endif
 	typedef shared_ptr<IDXGISwapChain>				IDXGISwapChainPtr;
 	typedef shared_ptr<ID3D11Device>				ID3D11DevicePtr;
 	typedef shared_ptr<ID3D11DeviceContext>			ID3D11DeviceContextPtr;
@@ -44,6 +49,11 @@ namespace KlayGE
 	typedef shared_ptr<IDXGISwapChain1>				IDXGISwapChain1Ptr;
 	typedef shared_ptr<ID3D11Device1>				ID3D11Device1Ptr;
 	typedef shared_ptr<ID3D11DeviceContext1>		ID3D11DeviceContext1Ptr;
+#endif
+#if (_WIN32_WINNT >= 0x0603 /*_WIN32_WINNT_WINBLUE*/)
+	typedef shared_ptr<IDXGISwapChain2>				IDXGISwapChain2Ptr;
+	typedef shared_ptr<ID3D11Device2>				ID3D11Device2Ptr;
+	typedef shared_ptr<ID3D11DeviceContext2>		ID3D11DeviceContext2Ptr;
 #endif
 	typedef shared_ptr<ID3D11Resource>				ID3D11ResourcePtr;
 	typedef shared_ptr<ID3D11Texture1D>				ID3D11Texture1DPtr;

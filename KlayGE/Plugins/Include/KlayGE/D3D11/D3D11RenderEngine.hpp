@@ -58,7 +58,8 @@ namespace KlayGE
 		IDXGIFactory1Ptr const & DXGIFactory() const;
 		ID3D11DevicePtr const & D3DDevice() const;
 		ID3D11DeviceContextPtr const & D3DDeviceImmContext() const;
-		bool IsD3D11_1() const;
+		bool HasD3D11_1Runtime() const;
+		bool HasD3D11_2Runtime() const;
 		D3D_FEATURE_LEVEL DeviceFeatureLevel() const;
 		void D3DDevice(ID3D11DevicePtr const & device, ID3D11DeviceContextPtr const & imm_ctx, D3D_FEATURE_LEVEL feature_level);
 
@@ -134,6 +135,8 @@ namespace KlayGE
 		void DoResize(uint32_t width, uint32_t height);
 
 		void FillRenderDeviceCaps();
+		void DetectD3D11_1Runtime(ID3D11DevicePtr const & device, ID3D11DeviceContextPtr const & imm_ctx);
+		void DetectD3D11_2Runtime(ID3D11DevicePtr const & device, ID3D11DeviceContextPtr const & imm_ctx);
 
 		virtual void StereoscopicForLCDShutter(int32_t eye) KLAYGE_OVERRIDE;
 
@@ -176,7 +179,10 @@ namespace KlayGE
 		ID3D11DevicePtr		d3d_device_;
 		ID3D11DeviceContextPtr d3d_imm_ctx_;
 #if (_WIN32_WINNT >= 0x0602 /*_WIN32_WINNT_WIN8*/)
-		bool is_d3d_11_1_;
+		bool has_d3d_11_1_runtime_;
+#endif
+#if (_WIN32_WINNT >= 0x0603 /*_WIN32_WINNT_WINBLUE*/)
+		bool has_d3d_11_2_runtime_;
 #endif
 		D3D_FEATURE_LEVEL d3d_feature_level_;
 

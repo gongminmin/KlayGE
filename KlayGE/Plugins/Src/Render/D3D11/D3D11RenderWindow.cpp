@@ -105,6 +105,18 @@ namespace KlayGE
 			}
 		}
 #endif
+#if (_WIN32_WINNT >= 0x0603 /*_WIN32_WINNT_WINBLUE*/)
+		has_dxgi_1_3_ = false;
+		{
+			IDXGIFactory3* factory;
+			gi_factory->QueryInterface(IID_IDXGIFactory3, reinterpret_cast<void**>(&factory));
+			if (factory != nullptr)
+			{
+				gi_factory_3_ = MakeCOMPtr(factory);
+				has_dxgi_1_3_ = true;
+			}
+		}
+#endif
 
 		viewport_->left		= 0;
 		viewport_->top		= 0;
@@ -418,10 +430,7 @@ namespace KlayGE
 #endif
 			)
 		{
-			DXGI_ADAPTER_DESC1 adapter_desc;
-			adapter_->DXGIAdapter()->GetDesc1(&adapter_desc);
-
-			if (std::wstring(adapter_desc.Description).find(L"AMD", 0) != std::wstring::npos)
+			if (adapter_->Description().find(L"AMD", 0) != std::wstring::npos)
 			{
 #ifdef KLAYGE_PLATFORM_WIN64
 				HMODULE dll = ::GetModuleHandle(TEXT("atidxx64.dll"));

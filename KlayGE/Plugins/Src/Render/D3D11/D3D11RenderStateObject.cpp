@@ -45,7 +45,7 @@ namespace KlayGE
 		d3d_desc.AntialiasedLineEnable = false;
 
 #if (_WIN32_WINNT >= 0x0602 /*_WIN32_WINNT_WIN8*/)
-		if (re.IsD3D11_1())
+		if (re.HasD3D11_1Runtime())
 		{
 			ID3D11Device1Ptr const & d3d_device_1 = static_pointer_cast<ID3D11Device1>(d3d_device);
 			D3D11_RASTERIZER_DESC1 d3d_desc1;
@@ -66,16 +66,12 @@ namespace KlayGE
 			rasterizer_state_ = MakeCOMPtr(rasterizer_state);
 		}
 		else
+#endif
 		{
 			ID3D11RasterizerState* rasterizer_state;
 			TIF(d3d_device->CreateRasterizerState(&d3d_desc, &rasterizer_state));
 			rasterizer_state_ = MakeCOMPtr(rasterizer_state);
 		}
-#else
-		ID3D11RasterizerState* rasterizer_state;
-		TIF(d3d_device->CreateRasterizerState(&d3d_desc, &rasterizer_state));
-		rasterizer_state_ = MakeCOMPtr(rasterizer_state);
-#endif
 	}
 
 	void D3D11RasterizerStateObject::Active()
@@ -138,7 +134,7 @@ namespace KlayGE
 		ID3D11DevicePtr const & d3d_device = re.D3DDevice();
 
 #if (_WIN32_WINNT >= 0x0602 /*_WIN32_WINNT_WIN8*/)
-		if (re.IsD3D11_1())
+		if (re.HasD3D11_1Runtime())
 		{
 			ID3D11Device1Ptr const & d3d_device_1 = static_pointer_cast<ID3D11Device1>(d3d_device);
 			D3D11_BLEND_DESC1 d3d_desc1;
@@ -163,16 +159,12 @@ namespace KlayGE
 			blend_state_ = MakeCOMPtr(blend_state);
 		}
 		else
+#endif
 		{
 			ID3D11BlendState* blend_state;
 			TIF(d3d_device->CreateBlendState(&d3d_desc, &blend_state));
 			blend_state_ = MakeCOMPtr(blend_state);
 		}
-#else
-		ID3D11BlendState* blend_state;
-		TIF(d3d_device->CreateBlendState(&d3d_desc, &blend_state));
-		blend_state_ = MakeCOMPtr(blend_state);
-#endif
 	}
 
 	void D3D11BlendStateObject::Active(Color const & blend_factor, uint32_t sample_mask)

@@ -148,6 +148,10 @@ namespace KlayGE
 		bool has_dxgi_1_2_;
 		bool dxgi_stereo_support_;
 #endif
+#if (_WIN32_WINNT >= 0x0603 /*_WIN32_WINNT_WINBLUE*/)
+		IDXGIFactory3Ptr gi_factory_3_;
+		bool has_dxgi_1_3_;
+#endif
 
 #ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
 		DXGI_SWAP_CHAIN_DESC sc_desc_;

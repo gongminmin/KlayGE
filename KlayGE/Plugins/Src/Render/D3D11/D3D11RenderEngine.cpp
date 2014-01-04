@@ -206,10 +206,19 @@ namespace KlayGE
 		return d3d_imm_ctx_;
 	}
 
-	bool D3D11RenderEngine::IsD3D11_1() const
+	bool D3D11RenderEngine::HasD3D11_1Runtime() const
 	{
 #if (_WIN32_WINNT >= 0x0602 /*_WIN32_WINNT_WIN8*/)
-		return is_d3d_11_1_;
+		return has_d3d_11_1_runtime_;
+#else
+		return false;
+#endif
+	}
+
+	bool D3D11RenderEngine::HasD3D11_2Runtime() const
+	{
+#if (_WIN32_WINNT >= 0x0603 /*_WIN32_WINNT_WINBLUE*/)
+		return has_d3d_11_2_runtime_;
 #else
 		return false;
 #endif
@@ -317,10 +326,7 @@ namespace KlayGE
 
 			if (SM_None == stereo_method_)
 			{
-				DXGI_ADAPTER_DESC1 adapter_desc;
-				win->Adapter().DXGIAdapter()->GetDesc1(&adapter_desc);
-
-				if (std::wstring(adapter_desc.Description).find(L"NVIDIA", 0) != std::wstring::npos)
+				if (win->Adapter().Description().find(L"NVIDIA", 0) != std::wstring::npos)
 				{
 					stereo_method_ = SM_NV3DVision;
 
@@ -353,7 +359,7 @@ namespace KlayGE
 						0, 0, 0, h, sih_tex->Width(0), 1,
 						0, 0, 0, 0, sih_tex->Width(0), 1);
 				}
-				else if (std::wstring(adapter_desc.Description).find(L"AMD", 0) != std::wstring::npos)
+				else if (win->Adapter().Description().find(L"AMD", 0) != std::wstring::npos)
 				{
 					stereo_method_ = SM_AMDQuadBuffer;
 				}
@@ -371,32 +377,15 @@ namespace KlayGE
 
 	void D3D11RenderEngine::D3DDevice(ID3D11DevicePtr const & device, ID3D11DeviceContextPtr const & imm_ctx, D3D_FEATURE_LEVEL feature_level)
 	{
-#if (_WIN32_WINNT >= 0x0602 /*_WIN32_WINNT_WIN8*/)
-		is_d3d_11_1_ = false;
+#if (_WIN32_WINNT >= 0x0603 /*_WIN32_WINNT_WINBLUE*/)
+		this->DetectD3D11_2Runtime(device, imm_ctx);
 
-		ID3D11Device1* d3d_device_1;
-		device->QueryInterface(IID_ID3D11Device1, reinterpret_cast<void**>(&d3d_device_1));
-		if (d3d_device_1)
+		if (!has_d3d_11_2_runtime_)
 		{
-			ID3D11DeviceContext1* d3d_imm_ctx_1;
-			imm_ctx->QueryInterface(IID_ID3D11DeviceContext1, reinterpret_cast<void**>(&d3d_imm_ctx_1));
-			if (d3d_imm_ctx_1)
-			{
-				d3d_device_ = MakeCOMPtr(d3d_device_1);
-				d3d_imm_ctx_ = MakeCOMPtr(d3d_imm_ctx_1);
-				is_d3d_11_1_ = true;
-			}
-			else
-			{
-				d3d_device_1->Release();
-			}
+			this->DetectD3D11_1Runtime(device, imm_ctx);
 		}
-		
-		if (!is_d3d_11_1_)
-		{
-			d3d_device_ = device;
-			d3d_imm_ctx_ = imm_ctx;
-		}		
+#elif (_WIN32_WINNT >= 0x0602 /*_WIN32_WINNT_WIN8*/)
+		this->DetectD3D11_1Runtime(device, imm_ctx);
 #else
 		d3d_device_ = device;
 		d3d_imm_ctx_ = imm_ctx;
@@ -909,23 +898,43 @@ namespace KlayGE
 			caps_.standard_derivatives_support = true;
 		}
 #if (_WIN32_WINNT >= 0x0602 /*_WIN32_WINNT_WIN8*/)
+		if (has_d3d_11_1_runtime_)
 		{
 			D3D11_FEATURE_DATA_ARCHITECTURE_INFO arch_feature;
 			d3d_device_->CheckFeatureSupport(D3D11_FEATURE_ARCHITECTURE_INFO, &arch_feature, sizeof(arch_feature));
 			caps_.is_tbdr = arch_feature.TileBasedDeferredRenderer ? true : false;
 		}
+		else
+#endif
+		{
+			caps_.is_tbdr = false;
+		}
+#if (_WIN32_WINNT >= 0x0602 /*_WIN32_WINNT_WIN8*/)
+		if (has_d3d_11_1_runtime_)
 		{
 			D3D11_FEATURE_DATA_D3D11_OPTIONS d3d11_feature;
 			d3d_device_->CheckFeatureSupport(D3D11_FEATURE_D3D11_OPTIONS, &d3d11_feature, sizeof(d3d11_feature));
 			caps_.logic_op_support = d3d11_feature.OutputMergerLogicOp ? true : false;
 		}
-#else
-		caps_.is_tbdr = false;
-		caps_.logic_op_support = false;
+		else
 #endif
+		{
+			caps_.logic_op_support = false;
+		}
 		caps_.max_vertex_streams = 16;
 		caps_.max_texture_anisotropy = (D3D_FEATURE_LEVEL_9_1 == d3d_feature_level_) ? 2 : 16;
-		caps_.hw_instancing_support = (d3d_feature_level_ >= D3D_FEATURE_LEVEL_9_3);
+#if (_WIN32_WINNT >= 0x0603 /*_WIN32_WINNT_WINBLUE*/)
+		if (has_d3d_11_2_runtime_)
+		{
+			D3D11_FEATURE_DATA_D3D9_SIMPLE_INSTANCING_SUPPORT d3d11_feature;
+			d3d_device_->CheckFeatureSupport(D3D11_FEATURE_D3D9_SIMPLE_INSTANCING_SUPPORT, &d3d11_feature, sizeof(d3d11_feature));
+			caps_.hw_instancing_support = d3d11_feature.SimpleInstancingSupported ? true : false;
+		}
+		else
+#endif
+		{
+			caps_.hw_instancing_support = (d3d_feature_level_ >= D3D_FEATURE_LEVEL_9_3);
+		}
 		caps_.instance_id_support = (d3d_feature_level_ >= D3D_FEATURE_LEVEL_10_0);
 		{
 			D3D11_FEATURE_DATA_THREADING mt_feature;
@@ -1151,6 +1160,60 @@ namespace KlayGE
 			|| (caps_.texture_format_support(EF_ABGR16F) && caps_.rendertarget_format_support(EF_ABGR16F, 1, 0)));
 		caps_.pack_to_rgba_required = !(caps_.texture_format_support(EF_R16F) && caps_.rendertarget_format_support(EF_R16F, 1, 0)
 			&& caps_.texture_format_support(EF_R32F) && caps_.rendertarget_format_support(EF_R32F, 1, 0));
+	}
+
+	void D3D11RenderEngine::DetectD3D11_1Runtime(ID3D11DevicePtr const & device, ID3D11DeviceContextPtr const & imm_ctx)
+	{
+		has_d3d_11_1_runtime_ = false;
+
+		ID3D11Device1* d3d_device_1;
+		device->QueryInterface(IID_ID3D11Device1, reinterpret_cast<void**>(&d3d_device_1));
+		if (d3d_device_1)
+		{
+			ID3D11DeviceContext1* d3d_imm_ctx_1;
+			imm_ctx->QueryInterface(IID_ID3D11DeviceContext1, reinterpret_cast<void**>(&d3d_imm_ctx_1));
+			if (d3d_imm_ctx_1)
+			{
+				d3d_device_ = MakeCOMPtr(d3d_device_1);
+				d3d_imm_ctx_ = MakeCOMPtr(d3d_imm_ctx_1);
+				has_d3d_11_1_runtime_ = true;
+			}
+			else
+			{
+				d3d_device_1->Release();
+			}
+		}
+
+		if (!has_d3d_11_1_runtime_)
+		{
+			d3d_device_ = device;
+			d3d_imm_ctx_ = imm_ctx;
+		}
+	}
+
+	void D3D11RenderEngine::DetectD3D11_2Runtime(ID3D11DevicePtr const & device, ID3D11DeviceContextPtr const & imm_ctx)
+	{
+		has_d3d_11_1_runtime_ = false;
+		has_d3d_11_2_runtime_ = false;
+
+		ID3D11Device2* d3d_device_2;
+		device->QueryInterface(IID_ID3D11Device2, reinterpret_cast<void**>(&d3d_device_2));
+		if (d3d_device_2)
+		{
+			ID3D11DeviceContext2* d3d_imm_ctx_2;
+			imm_ctx->QueryInterface(IID_ID3D11DeviceContext2, reinterpret_cast<void**>(&d3d_imm_ctx_2));
+			if (d3d_imm_ctx_2)
+			{
+				d3d_device_ = MakeCOMPtr(d3d_device_2);
+				d3d_imm_ctx_ = MakeCOMPtr(d3d_imm_ctx_2);
+				has_d3d_11_1_runtime_ = true;
+				has_d3d_11_2_runtime_ = true;
+			}
+			else
+			{
+				d3d_device_2->Release();
+			}
+		}
 	}
 
 	void D3D11RenderEngine::StereoscopicForLCDShutter(int32_t eye)

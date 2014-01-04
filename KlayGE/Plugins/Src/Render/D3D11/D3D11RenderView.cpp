@@ -122,20 +122,17 @@ namespace KlayGE
 	{
 #if (_WIN32_WINNT >= 0x0602 /*_WIN32_WINNT_WIN8*/)
 		D3D11RenderEngine& re = *checked_cast<D3D11RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-		if (re.IsD3D11_1())
+		if (re.HasD3D11_1Runtime())
 		{
 			ID3D11DeviceContext1Ptr const & d3d_imm_ctx_1 = static_pointer_cast<ID3D11DeviceContext1>(d3d_imm_ctx_);
 			d3d_imm_ctx_1->DiscardView(rt_view_.get());
 		}
 		else
+#endif
 		{
 			float clr[] = { 0, 0, 0, 0 };
 			d3d_imm_ctx_->ClearRenderTargetView(rt_view_.get(), clr);
 		}
-#else
-		float clr[] = { 0, 0, 0, 0 };
-		d3d_imm_ctx_->ClearRenderTargetView(rt_view_.get(), clr);
-#endif
 	}
 
 	void D3D11RenderTargetRenderView::OnAttached(FrameBuffer& /*fb*/, uint32_t /*att*/)
@@ -254,18 +251,16 @@ namespace KlayGE
 	{
 #if (_WIN32_WINNT >= 0x0602 /*_WIN32_WINNT_WIN8*/)
 		D3D11RenderEngine& re = *checked_cast<D3D11RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-		if (re.IsD3D11_1())
+		if (re.HasD3D11_1Runtime())
 		{
 			ID3D11DeviceContext1Ptr const & d3d_imm_ctx_1 = static_pointer_cast<ID3D11DeviceContext1>(d3d_imm_ctx_);
 			d3d_imm_ctx_1->DiscardView(ds_view_.get());
 		}
 		else
+#endif
 		{
 			d3d_imm_ctx_->ClearDepthStencilView(ds_view_.get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1, 0);
 		}
-#else
-		d3d_imm_ctx_->ClearDepthStencilView(ds_view_.get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1, 0);
-#endif
 	}
 
 	void D3D11DepthStencilRenderView::OnAttached(FrameBuffer& /*fb*/, uint32_t att)
