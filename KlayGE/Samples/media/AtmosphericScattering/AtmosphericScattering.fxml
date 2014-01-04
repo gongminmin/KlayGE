@@ -41,15 +41,16 @@ float Chapman(float X, float h, float cos_chi)
 	// corrected for transitive consistency 
 
 	float c = sqrt(X + h);
+	float c_exp_h = c * exp2(-h);
 	if (cos_chi >= 0)
 	{
-		return c / (c * cos_chi + 1) * exp2(-h);
+		return c_exp_h / (c * cos_chi + 1);
 	}
 	else
 	{
 		float x0 = sqrt(1 - cos_chi * cos_chi) * (X + h);
 		float c0 = sqrt(x0);
-		return 2 * c0 * exp2(X - x0) - c / (1 - c * cos_chi) * exp2(-h);
+		return 2 * c0 * exp2(X - x0) - c_exp_h / (1 - c * cos_chi);
 	}
 }
 
@@ -58,12 +59,9 @@ float3 Transmittance(float3 r, float3 view_dir)
 	// a quick function to get the transmittance
 	// looking from point p into infinity
 
-	float rsq = dot(r, r);
-	float inv_rl = 1 / sqrt(rsq);
-	float len = rsq * inv_rl;
-	float x = len * INV_H50;
+	float x = length(r) * INV_H50;
 	float h = x - X50;
-	float cos_chi = dot(r, view_dir) * inv_rl;
+	float cos_chi = dot(normalize(r), view_dir);
 
 	return exp2(-BETA50 * H50 * Chapman(X50, h, cos_chi));
 }
@@ -123,7 +121,11 @@ void AerialPerspective(float3 r0, float3 r1, bool infinite,
 	// initialization of
 	// the integration loop variables
 
+#if KLAYGE_SHADER_MODEL >= 3
 	const int NMAX = 8;
+#else
+	const int NMAX = 4;
+#endif
 	int N = NMAX;
 	float range = t1 - t0;
 	float dt = range / (N - 1);
@@ -184,7 +186,7 @@ void AerialPerspective(float3 r0, float3 r1, bool infinite,
 		// propagate the integration
 		// previous inscatter is attenuated by current transmittance, plus the new inscatter
 		// previous transmittance is attenuated by current transmittance
-		result_s = result_s * segment_t + (1 - segment_t) * segment_s;
+		result_s = lerp(segment_s, result_s, segment_t);
 		result_t = result_t * segment_t;
 
 		// keep these variables for the next iteration

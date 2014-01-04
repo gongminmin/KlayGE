@@ -100,7 +100,7 @@ void FFTYPS(float2 tc : TEXCOORD0,
 
 	<parameter type="structured_buffer" elem_type="float2" name="input_buf"/>
 
-	<shader>
+	<shader version="4">
 		<![CDATA[
 void QuadVS(float2 vPos : POSITION,
 		out float2 TexCoord : TEXCOORD0,

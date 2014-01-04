@@ -6,10 +6,11 @@
 	<include name="util.fxml"/>
 	<include name="DeferredRendering.fxml"/>
 
-	<cbuffer name="tile_based">
+	<cbuffer name="overlap_test">
 		<parameter type="float4" name="tile_scale"/>
 		<parameter type="float2" name="camera_proj_01"/>
-		<parameter type="float2" name="tc_to_tile_scale"/>
+		<parameter type="float3" name="lights_aabb_min" array_size="LIGHT_BATCH"/>
+		<parameter type="float3" name="lights_aabb_max" array_size="LIGHT_BATCH"/>
 	</cbuffer>
 	<cbuffer name="light_batch">
 		<parameter type="float4" name="lights_color" array_size="LIGHT_BATCH"/>
@@ -17,10 +18,9 @@
 		<parameter type="float4" name="lights_dir_es" array_size="LIGHT_BATCH"/>
 		<parameter type="float4" name="lights_falloff_range" array_size="LIGHT_BATCH"/>
 		<parameter type="float4" name="lights_attrib" array_size="LIGHT_BATCH"/>
-		<parameter type="float3" name="lights_aabb_min" array_size="LIGHT_BATCH"/>
-		<parameter type="float3" name="lights_aabb_max" array_size="LIGHT_BATCH"/>
 		<parameter type="int4" name="lights_shadowing_channel"/>
 		<parameter type="int" name="num_lights"/>
+		<parameter type="float2" name="tc_to_tile_scale"/>
 	</cbuffer>
 	<parameter type="texture2D" name="min_max_depth_tex"/>
 	<parameter type="texture2D" name="light_index_tex"/>

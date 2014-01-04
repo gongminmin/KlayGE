@@ -263,12 +263,13 @@ namespace KlayGE
 		RenderDeviceCaps const & caps = re.DeviceCaps();
 
 		ElementFormat ds_fmt;
-		if (caps.texture_format_support(EF_D24S8))
+		if (caps.rendertarget_format_support(EF_D24S8, 1, 0))
 		{
 			ds_fmt = EF_D24S8;
 		}
 		else
 		{
+			BOOST_ASSERT(caps.rendertarget_format_support(EF_D16, 1, 0));
 			ds_fmt = EF_D16;
 		}
 
@@ -550,8 +551,8 @@ namespace KlayGE
 			depth_to_esm_pp_->OutputPin(0, sm_tex_);
 
 			depth_to_linear_pp_ = SyncLoadPostProcess("Depth.ppml", "DepthToLinear");
-			depth_mipmap_pp_ = SyncLoadPostProcess("Depth.ppml", "DepthMipmapBilinear");
 		}
+		depth_mipmap_pp_ = SyncLoadPostProcess("Depth.ppml", "DepthMipmapBilinear");
 
 		g_buffer_tex_param_ = dr_effect_->ParameterByName("g_buffer_tex");
 		g_buffer_1_tex_param_ = dr_effect_->ParameterByName("g_buffer_1_tex");

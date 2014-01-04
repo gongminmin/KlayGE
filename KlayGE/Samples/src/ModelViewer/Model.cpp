@@ -343,7 +343,7 @@ DetailedSkinnedModel::DetailedSkinnedModel(std::wstring const & name)
 	num_joints_macro.push_back(std::make_pair("NUM_JOINTS", "128"));
 	num_joints_macro.push_back(std::make_pair("", ""));
 	effect_ = SyncLoadRenderEffect("ModelViewer.fxml", &num_joints_macro[0]);
-	if (!effect_->TechniqueByName("GBufferFillMRTTech")->Validate())
+	if (!effect_->TechniqueByName("GBufferFillSkinnedRT0Tech")->Validate())
 	{
 		num_joints_macro[0].second = "64";
 		effect_ = SyncLoadRenderEffect("ModelViewer.fxml", &num_joints_macro[0]);
