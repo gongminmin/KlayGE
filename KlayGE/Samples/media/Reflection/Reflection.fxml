@@ -116,6 +116,7 @@ float4 ReflectSpecialShadingPS(
 
 	float fresnel = fresnel_term_schlick(-normalize(pos_es_front), normal_es_front, specular).x;
 	float4 ssr;
+#if KLAYGE_SHADER_MODEL >= 3
 	if (reflect_vec_front.z > 0)
 	{
 		ssr = CalcSSR(tc_front, normal_es_front, pos_es_front, pos_es_front, 1, 1);
@@ -131,6 +132,9 @@ float4 ReflectSpecialShadingPS(
 			ssr = 0;
 		}
 	}
+#else
+	ssr = 0;
+#endif
 
 	ssr.xyz = lerp(sky, ssr.xyz, ssr.w);
 	ssr.w = fresnel;

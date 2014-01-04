@@ -1291,6 +1291,40 @@ namespace KlayGE
 				macros.push_back(macro_pack_to_rgba);
 			}
 			{
+				D3D_SHADER_MACRO macro_shader_type = { "", "1" };
+				switch (type)
+				{
+				case ST_VertexShader:
+					macro_shader_type.Name = "KLAYGE_VERTEX_SHADER";
+					break;
+
+				case ST_PixelShader:
+					macro_shader_type.Name = "KLAYGE_PIXEL_SHADER";
+					break;
+
+				case ST_GeometryShader:
+					macro_shader_type.Name = "KLAYGE_GEOMETRY_SHADER";
+					break;
+
+				case ST_ComputeShader:
+					macro_shader_type.Name = "KLAYGE_COMPUTE_SHADER";
+					break;
+
+				case ST_HullShader:
+					macro_shader_type.Name = "KLAYGE_HULL_SHADER";
+					break;
+
+				case ST_DomainShader:
+					macro_shader_type.Name = "KLAYGE_DOMAIN_SHADER";
+					break;
+
+				default:
+					BOOST_ASSERT(false);
+					break;
+				}
+				macros.push_back(macro_shader_type);
+			}
+			{
 				D3D_SHADER_MACRO macro_end = { nullptr, nullptr };
 				macros.push_back(macro_end);
 			}
@@ -1305,42 +1339,81 @@ namespace KlayGE
 			{
 				LogError("Error when compiling %s:", sd.func_name.c_str());
 
-				std::string err_str(static_cast<char*>(err_msg->GetBufferPointer()));
-				std::string::size_type pos = err_str.find("): error X");
-				if (pos == std::string::npos)
+				std::map<int, std::vector<std::string> > err_lines;
 				{
-					pos = err_str.find("): warning X");
-				}
-				if (pos != std::string::npos)
-				{
-					std::string part_err_str = err_str.substr(0, pos);
-					pos = part_err_str.rfind("(");
-					part_err_str = part_err_str.substr(pos + 1);
-					int err_line;
-					std::istringstream(part_err_str) >> err_line;
+					std::istringstream err_iss(static_cast<char*>(err_msg->GetBufferPointer()));
+					std::string err_str;
+					while (err_iss)
+					{
+						std::getline(err_iss, err_str);
 
-					std::istringstream iss(shader_text);
-					std::string s;
-					int line = 1;
-					LogError("...");
-					while (iss)
-					{
-						std::getline(iss, s);
-						if ((line - err_line > -3) && (line - err_line < 3))
+						int err_line = -1;
+						std::string::size_type pos = err_str.find("): error X");
+						if (pos == std::string::npos)
 						{
-							LogError("%d %s", line, s.c_str());
+							pos = err_str.find("): warning X");
 						}
-						++ line;
+						if (pos != std::string::npos)
+						{
+							std::string part_err_str = err_str.substr(0, pos);
+							pos = part_err_str.rfind("(");
+							part_err_str = part_err_str.substr(pos + 1);
+							std::istringstream(part_err_str) >> err_line;
+						}
+
+						std::vector<std::string>& msgs = err_lines[err_line];
+						bool found = false;
+						typedef KLAYGE_DECLTYPE(msgs) ErrMsgsType;
+						KLAYGE_FOREACH(ErrMsgsType::const_reference msg, msgs)
+						{
+							if (msg == err_str)
+							{
+								found = true;
+								break;
+							}
+						}
+
+						if (!found)
+						{
+							msgs.push_back(err_str);
+						}
 					}
-					LogError("...");
 				}
+
+				for (KLAYGE_AUTO(iter, err_lines.begin()); iter != err_lines.end(); ++ iter)
 				{
-					std::istringstream iss(err_str);
-					std::string s;
-					while (iss)
+					if (iter->first >= 0)
 					{
-						std::getline(iss, s);
-						LogError(s.c_str());
+						std::istringstream iss(shader_text);
+						std::string s;
+						int line = 1;
+
+						LogInfo("...");
+						while (iss && ((iter->first - line) >= 3))
+						{
+							std::getline(iss, s);
+							++ line;
+						}
+						while (iss && (abs(line - iter->first) < 3))
+						{
+							std::getline(iss, s);
+							
+							while (!s.empty() && (('\r' == s.back()) || ('\n' == s.back())))
+							{
+								s.pop_back();
+							}
+
+							LogInfo("%d %s", line, s.c_str());
+
+							++ line;
+						}
+						LogInfo("...");
+					}
+
+					typedef KLAYGE_DECLTYPE(iter->second) ErrMsgsType;
+					KLAYGE_FOREACH(ErrMsgsType::const_reference msg, iter->second)
+					{
+						LogError(msg.c_str());
 					}
 				}
 

@@ -21,7 +21,11 @@
 		<![CDATA[
 float perm2d(float2 xy)
 {
+#ifdef KLAYGE_PIXEL_SHADER
+	return grad3_perm_tex.Sample(noise_point_sampler, (xy + 0.5f) / 256).w * 255;
+#else
 	return grad3_perm_tex.SampleLevel(noise_point_sampler, (xy + 0.5f) / 256, 0).w * 255;
+#endif
 }
 
 float perm(float x)
@@ -31,17 +35,29 @@ float perm(float x)
 
 float3 grad3_perm(float2 xy)
 {
+#ifdef KLAYGE_PIXEL_SHADER
+	return grad3_perm_tex.Sample(noise_point_sampler, (xy + 0.5f) / 256).xyz * 2 - 1;
+#else
 	return grad3_perm_tex.SampleLevel(noise_point_sampler, (xy + 0.5f) / 256, 0).xyz * 2 - 1;
+#endif
 }
 
 float4 grad4_perm(float2 xy)
 {
+#ifdef KLAYGE_PIXEL_SHADER
+	return grad4_perm_tex.Sample(noise_point_sampler, (xy + 0.5f) / 256) * 2 - 1;
+#else
 	return grad4_perm_tex.SampleLevel(noise_point_sampler, (xy + 0.5f) / 256, 0) * 2 - 1;
+#endif
 }
 
 float4 simplex(float x)
 {
+#ifdef KLAYGE_PIXEL_SHADER
+	return simplex_tex.Sample(noise_point_sampler, float2((x + 0.5f) / 64, 0.5f)) * 255;
+#else
 	return simplex_tex.SampleLevel(noise_point_sampler, float2((x + 0.5f) / 64, 0.5f), 0) * 255;
+#endif
 }
 
 float simplex_noise(float2 p)
@@ -348,10 +364,10 @@ float turbulence(float4 p, int octaves, float lacunarity = 2.0f, float gain = 0.
 // See "Texturing & Modeling, A Procedural Approach", Chapter 12
 float ridge(float h, float offset)
 {
-    h = abs(h);
-    h = offset - h;
-    h = h * h;
-    return h;
+	h = abs(h);
+	h = offset - h;
+	h = h * h;
+	return h;
 }
 
 float ridgedmf(float2 p, int octaves, float lacunarity = 2.0f, float gain = 0.5f, float offset = 1.0f)

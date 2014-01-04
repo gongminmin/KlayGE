@@ -2132,6 +2132,36 @@ namespace KlayGE
 		{
 			args.push_back("-DKLAYGE_PACK_TO_RGBA");
 		}
+		switch (type)
+		{
+		case ST_VertexShader:
+			args.push_back("-DKLAYGE_VERTEX_SHADER");
+			break;
+
+		case ST_PixelShader:
+			args.push_back("-DKLAYGE_PIXEL_SHADER");
+			break;
+
+		case ST_GeometryShader:
+			args.push_back("-DKLAYGE_GEOMETRY_SHADER");
+			break;
+
+		case ST_ComputeShader:
+			args.push_back("-DKLAYGE_COMPUTE_SHADER");
+			break;
+
+		case ST_HullShader:
+			args.push_back("-DKLAYGE_HULL_SHADER");
+			break;
+
+		case ST_DomainShader:
+			args.push_back("-DKLAYGE_DOMAIN_SHADER");
+			break;
+
+		default:
+			BOOST_ASSERT(false);
+			break;
+		}
 		args.push_back(nullptr);
 
 		CGprofile profile;
