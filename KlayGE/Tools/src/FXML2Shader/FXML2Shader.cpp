@@ -18,6 +18,7 @@ using namespace std;
 namespace
 {
 	std::string fxml_name;
+	std::vector<std::pair<std::string, std::string> > macros;
 	std::string shader_text;
 }
 
@@ -31,10 +32,9 @@ public:
 
 	void InitObjects()
 	{
-		RenderEffectPtr effect = SyncLoadRenderEffect(fxml_name);
+		RenderEffectPtr effect = SyncLoadRenderEffect(fxml_name, macros.empty() ? nullptr : &macros[0]);
 
 		ofstream ofs((fxml_name + ".shader").c_str(), std::ios_base::binary);
-		ofs << "#define KLAYGE_CONSTANT_BUFFER 1" << "\r\n";
 		ofs << "#define KLAYGE_D3D11 1" << "\r\n";
 		ofs << "#define KLAYGE_SHADER_MODEL 5" << "\r\n";
 		ofs << "#define KLAYGE_MAX_TEX_ARRAY_LEN 512" << "\r\n";
@@ -296,11 +296,25 @@ int main(int argc, char* argv[])
 
 	if (argc < 2)
 	{
-		cout << "Usage: FXML2Shader xxx.fxml" << endl;
+		cout << "Usage: FXML2Shader xxx.fxml [macro=value] ..." << endl;
 		return 1;
 	}
 
 	fxml_name = argv[1];
+
+	for (int i = 2; i < argc; ++ i)
+	{
+		std::string macro = argv[i];
+		std::string::size_type pos = macro.find('=');
+		if (pos != std::string::npos)
+		{
+			macros.push_back(std::make_pair(macro.substr(0, pos), macro.substr(pos + 1)));
+		}
+	}
+	if (!macros.empty())
+	{
+		macros.push_back(std::make_pair("", ""));
+	}
 
 	Context::Instance().LoadCfg("KlayGE.cfg");
 	ContextCfg context_cfg = Context::Instance().Config();
