@@ -698,6 +698,15 @@ namespace KlayGE
 		case EF_A8:
 			return DXGI_FORMAT_A8_UNORM;
 
+		case EF_R5G6B5:
+			return DXGI_FORMAT_B5G6R5_UNORM;
+
+		case EF_A1RGB5:
+			return DXGI_FORMAT_B5G5R5A1_UNORM;
+
+		case EF_ARGB4:
+			return DXGI_FORMAT_B4G4R4A4_UNORM;
+
 		case EF_R8:
 			return DXGI_FORMAT_R8_UNORM;
 
@@ -721,6 +730,9 @@ namespace KlayGE
 
 		case EF_A2BGR10:
 			return DXGI_FORMAT_R10G10B10A2_UNORM;
+
+		case EF_SIGNED_A2BGR10:
+			return DXGI_FORMAT_R10G10B10_XR_BIAS_A2_UNORM;
 
 		case EF_R8UI:
 			return DXGI_FORMAT_R8_UINT;
@@ -900,6 +912,15 @@ namespace KlayGE
 		case DXGI_FORMAT_A8_UNORM:
 			return EF_A8;
 
+		case DXGI_FORMAT_B5G6R5_UNORM:
+			return EF_R5G6B5;
+
+		case DXGI_FORMAT_B5G5R5A1_UNORM:
+			return EF_A1RGB5;
+
+		case DXGI_FORMAT_B4G4R4A4_UNORM:
+			return EF_ARGB4;
+
 		case DXGI_FORMAT_R8_UNORM:
 			return EF_R8;
 
@@ -923,6 +944,9 @@ namespace KlayGE
 
 		case DXGI_FORMAT_R10G10B10A2_UNORM:
 			return EF_A2BGR10;
+
+		case DXGI_FORMAT_R10G10B10_XR_BIAS_A2_UNORM:
+			return EF_SIGNED_A2BGR10;
 
 		case DXGI_FORMAT_R8_UINT:
 			return EF_R8UI;

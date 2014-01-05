@@ -302,6 +302,22 @@ namespace
 		DXGI_FORMAT_BC7_TYPELESS                = 97,
 		DXGI_FORMAT_BC7_UNORM                   = 98,
 		DXGI_FORMAT_BC7_UNORM_SRGB              = 99,
+		DXGI_FORMAT_AYUV                        = 100,
+		DXGI_FORMAT_Y410                        = 101,
+		DXGI_FORMAT_Y416                        = 102,
+		DXGI_FORMAT_NV12                        = 103,
+		DXGI_FORMAT_P010                        = 104,
+		DXGI_FORMAT_P016                        = 105,
+		DXGI_FORMAT_420_OPAQUE                  = 106,
+		DXGI_FORMAT_YUY2                        = 107,
+		DXGI_FORMAT_Y210                        = 108,
+		DXGI_FORMAT_Y216                        = 109,
+		DXGI_FORMAT_NV11                        = 110,
+		DXGI_FORMAT_AI44                        = 111,
+		DXGI_FORMAT_IA44                        = 112,
+		DXGI_FORMAT_P8                          = 113,
+		DXGI_FORMAT_A8P8                        = 114,
+		DXGI_FORMAT_B4G4R4A4_UNORM              = 115,
 		DXGI_FORMAT_FORCE_UINT                  = 0xffffffff
 	};
 #endif
@@ -316,6 +332,15 @@ namespace
 		{
 		case DXGI_FORMAT_A8_UNORM:
 			return EF_A8;
+
+		case DXGI_FORMAT_B5G6R5_UNORM:
+			return EF_R5G6B5;
+
+		case DXGI_FORMAT_B5G5R5A1_UNORM:
+			return EF_A1RGB5;
+
+		case DXGI_FORMAT_B4G4R4A4_UNORM:
+			return EF_ARGB4;
 
 		case DXGI_FORMAT_R8_UNORM:
 			return EF_R8;
@@ -340,6 +365,9 @@ namespace
 
 		case DXGI_FORMAT_R10G10B10A2_UNORM:
 			return EF_A2BGR10;
+
+		case DXGI_FORMAT_R10G10B10_XR_BIAS_A2_UNORM:
+			return EF_SIGNED_A2BGR10;
 
 		case DXGI_FORMAT_R8_UINT:
 			return EF_R8UI;
@@ -515,6 +543,15 @@ namespace
 		case EF_A8:
 			return DXGI_FORMAT_A8_UNORM;
 
+		case EF_R5G6B5:
+			return DXGI_FORMAT_B5G6R5_UNORM;
+
+		case EF_A1RGB5:
+			return DXGI_FORMAT_B5G5R5A1_UNORM;
+
+		case EF_ARGB4:
+			return DXGI_FORMAT_B4G4R4A4_UNORM;
+
 		case EF_R8:
 			return DXGI_FORMAT_R8_UNORM;
 
@@ -539,6 +576,9 @@ namespace
 
 		case EF_A2BGR10:
 			return DXGI_FORMAT_R10G10B10A2_UNORM;
+
+		case EF_SIGNED_A2BGR10:
+			return DXGI_FORMAT_R10G10B10_XR_BIAS_A2_UNORM;
 
 		case EF_R8UI:
 			return DXGI_FORMAT_R8_UINT;

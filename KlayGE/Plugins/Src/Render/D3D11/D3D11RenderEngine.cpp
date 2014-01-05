@@ -995,6 +995,9 @@ namespace KlayGE
 		std::pair<ElementFormat, DXGI_FORMAT> fmts[] = 
 		{
 			std::make_pair(EF_A8, DXGI_FORMAT_A8_UNORM),
+			std::make_pair(EF_R5G6B5, DXGI_FORMAT_B5G6R5_UNORM),
+			std::make_pair(EF_A1RGB5, DXGI_FORMAT_B5G5R5A1_UNORM),
+			std::make_pair(EF_ARGB4, DXGI_FORMAT_B4G4R4A4_UNORM),
 			std::make_pair(EF_R8, DXGI_FORMAT_R8_UNORM),
 			std::make_pair(EF_SIGNED_R8, DXGI_FORMAT_R8_SNORM),
 			std::make_pair(EF_GR8, DXGI_FORMAT_R8G8_UNORM),
@@ -1003,6 +1006,7 @@ namespace KlayGE
 			std::make_pair(EF_ABGR8, DXGI_FORMAT_R8G8B8A8_UNORM),
 			std::make_pair(EF_SIGNED_ABGR8, DXGI_FORMAT_R8G8B8A8_SNORM),
 			std::make_pair(EF_A2BGR10, DXGI_FORMAT_R10G10B10A2_UNORM),
+			std::make_pair(EF_SIGNED_A2BGR10, DXGI_FORMAT_R10G10B10_XR_BIAS_A2_UNORM),
 			std::make_pair(EF_R8UI, DXGI_FORMAT_R8_UINT),
 			std::make_pair(EF_R8I, DXGI_FORMAT_R8_SINT),
 			std::make_pair(EF_GR8UI, DXGI_FORMAT_R8G8_UINT),

@@ -1,6 +1,6 @@
 <?xml version='1.0'?>
 
-<gl_extension name="GL_EXT_robustness" reg_no="107">
+<gl_extension name="GLES_EXT_robustness" reg_no="107">
 	<tokens>
 		<token name="GL_NO_ERROR" value="0x0000"/>
 		<token name="GL_GUILTY_CONTEXT_RESET_EXT" value="0x8253"/>

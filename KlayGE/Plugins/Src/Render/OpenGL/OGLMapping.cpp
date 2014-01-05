@@ -398,6 +398,18 @@ namespace KlayGE
 			gltype = GL_UNSIGNED_BYTE;
 			break;
 
+		case EF_R5G6B5:
+			internalFormat = GL_RGB565;
+			glformat = GL_BGRA;
+			gltype = GL_UNSIGNED_SHORT_5_6_5_REV;
+			break;
+
+		case EF_A1RGB5:
+			internalFormat = GL_RGB5_A1;
+			glformat = GL_BGRA;
+			gltype = GL_UNSIGNED_SHORT_1_5_5_5_REV;
+			break;
+
 		case EF_ARGB4:
 			internalFormat = GL_RGBA4;
 			glformat = GL_BGRA;
