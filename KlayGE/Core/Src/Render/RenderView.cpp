@@ -82,6 +82,10 @@ namespace KlayGE
 		{
 		}
 
+		virtual void Discard() KLAYGE_OVERRIDE
+		{
+		}
+
 		void OnAttached(FrameBuffer& /*fb*/, uint32_t /*att*/)
 		{
 		}

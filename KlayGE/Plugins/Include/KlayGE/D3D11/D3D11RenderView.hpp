@@ -81,10 +81,17 @@ namespace KlayGE
 		}
 
 	private:
+		void BindDiscardFunc();
+		void HWDiscard();
+		void FackDiscard();
+
+	private:
 		ID3D11RenderTargetViewPtr rt_view_;
 		void* rt_src_;
 		uint32_t rt_first_subres_;
 		uint32_t rt_num_subres_;
+
+		function<void()> discard_func_;
 	};
 	typedef shared_ptr<D3D11RenderTargetRenderView> D3D11RenderTargetRenderViewPtr;
 
@@ -126,10 +133,17 @@ namespace KlayGE
 		}
 
 	private:
+		void BindDiscardFunc();
+		void HWDiscard();
+		void FackDiscard();
+
+	private:
 		ID3D11DepthStencilViewPtr ds_view_;
 		void* rt_src_;
 		uint32_t rt_first_subres_;
 		uint32_t rt_num_subres_;
+
+		function<void()> discard_func_;
 	};
 	typedef shared_ptr<D3D11DepthStencilRenderView> D3D11DepthStencilRenderViewPtr;
 
@@ -146,6 +160,8 @@ namespace KlayGE
 
 		void Clear(float4 const & val);
 		void Clear(uint4 const & val);
+
+		virtual void Discard() KLAYGE_OVERRIDE;
 
 		void OnAttached(FrameBuffer& fb, uint32_t att);
 		void OnDetached(FrameBuffer& fb, uint32_t att);
@@ -169,6 +185,11 @@ namespace KlayGE
 		}
 
 	private:
+		void BindDiscardFunc();
+		void HWDiscard();
+		void FackDiscard();
+
+	private:
 		ID3D11DevicePtr d3d_device_;
 		ID3D11DeviceContextPtr d3d_imm_ctx_;
 
@@ -176,6 +197,8 @@ namespace KlayGE
 		void* ua_src_;
 		uint32_t ua_first_subres_;
 		uint32_t ua_num_subres_;
+
+		function<void()> discard_func_;
 	};
 	typedef shared_ptr<D3D11UnorderedAccessView> D3D11UnorderedAccessViewPtr;
 }

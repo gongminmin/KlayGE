@@ -48,6 +48,8 @@ namespace KlayGE
 		width_ = texture.Width(level);
 		height_ = texture.Height(level);
 		pf_ = texture.Format();
+
+		this->BindDiscardFunc();
 	}
 
 	D3D11RenderTargetRenderView::D3D11RenderTargetRenderView(Texture& texture_3d, int array_index, uint32_t first_slice, uint32_t num_slices, int level)
@@ -58,6 +60,8 @@ namespace KlayGE
 		width_ = texture_3d.Width(level);
 		height_ = texture_3d.Height(level);
 		pf_ = texture_3d.Format();
+
+		this->BindDiscardFunc();
 	}
 
 	D3D11RenderTargetRenderView::D3D11RenderTargetRenderView(Texture& texture_cube, int array_index, Texture::CubeFaces face, int level)
@@ -68,6 +72,8 @@ namespace KlayGE
 		width_ = texture_cube.Width(level);
 		height_ = texture_cube.Width(level);
 		pf_ = texture_cube.Format();
+
+		this->BindDiscardFunc();
 	}
 
 	D3D11RenderTargetRenderView::D3D11RenderTargetRenderView(GraphicsBuffer& gb, uint32_t width, uint32_t height, ElementFormat pf)
@@ -88,6 +94,8 @@ namespace KlayGE
 		width_ = width * height;
 		height_ = 1;
 		pf_ = pf;
+
+		this->BindDiscardFunc();
 	}
 
 	D3D11RenderTargetRenderView::D3D11RenderTargetRenderView(ID3D11RenderTargetViewPtr const & view, uint32_t width, uint32_t height, ElementFormat pf)
@@ -96,6 +104,8 @@ namespace KlayGE
 		width_ = width;
 		height_ = height;
 		pf_ = pf;
+
+		this->BindDiscardFunc();
 	}
 
 	void D3D11RenderTargetRenderView::ClearColor(Color const & clr)
@@ -120,19 +130,34 @@ namespace KlayGE
 
 	void D3D11RenderTargetRenderView::Discard()
 	{
+		discard_func_();
+	}
+
+	void D3D11RenderTargetRenderView::BindDiscardFunc()
+	{
 #if (_WIN32_WINNT >= 0x0602 /*_WIN32_WINNT_WIN8*/)
 		D3D11RenderEngine& re = *checked_cast<D3D11RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		if (re.HasD3D11_1Runtime())
 		{
-			ID3D11DeviceContext1Ptr const & d3d_imm_ctx_1 = static_pointer_cast<ID3D11DeviceContext1>(d3d_imm_ctx_);
-			d3d_imm_ctx_1->DiscardView(rt_view_.get());
+			discard_func_ = KlayGE::bind(&D3D11RenderTargetRenderView::HWDiscard, this);
 		}
 		else
 #endif
 		{
-			float clr[] = { 0, 0, 0, 0 };
-			d3d_imm_ctx_->ClearRenderTargetView(rt_view_.get(), clr);
+			discard_func_ = KlayGE::bind(&D3D11RenderTargetRenderView::FackDiscard, this);
 		}
+	}
+
+	void D3D11RenderTargetRenderView::HWDiscard()
+	{
+		ID3D11DeviceContext1Ptr const & d3d_imm_ctx_1 = static_pointer_cast<ID3D11DeviceContext1>(d3d_imm_ctx_);
+		d3d_imm_ctx_1->DiscardView(rt_view_.get());
+	}
+
+	void D3D11RenderTargetRenderView::FackDiscard()
+	{
+		float clr[] = { 0, 0, 0, 0 };
+		d3d_imm_ctx_->ClearRenderTargetView(rt_view_.get(), clr);
 	}
 
 	void D3D11RenderTargetRenderView::OnAttached(FrameBuffer& /*fb*/, uint32_t /*att*/)
@@ -152,6 +177,8 @@ namespace KlayGE
 		width_ = texture.Width(level);
 		height_ = texture.Height(level);
 		pf_ = texture.Format();
+
+		this->BindDiscardFunc();
 	}
 
 	D3D11DepthStencilRenderView::D3D11DepthStencilRenderView(Texture& texture_3d, int array_index, uint32_t first_slice, uint32_t num_slices, int level)
@@ -162,6 +189,8 @@ namespace KlayGE
 		width_ = texture_3d.Width(level);
 		height_ = texture_3d.Height(level);
 		pf_ = texture_3d.Format();
+
+		this->BindDiscardFunc();
 	}
 
 	D3D11DepthStencilRenderView::D3D11DepthStencilRenderView(Texture& texture_cube, int array_index, Texture::CubeFaces face, int level)
@@ -172,6 +201,8 @@ namespace KlayGE
 		width_ = texture_cube.Width(level);
 		height_ = texture_cube.Width(level);
 		pf_ = texture_cube.Format();
+
+		this->BindDiscardFunc();
 	}
 
 	D3D11DepthStencilRenderView::D3D11DepthStencilRenderView(ID3D11DepthStencilViewPtr const & view, uint32_t width, uint32_t height, ElementFormat pf)
@@ -180,6 +211,8 @@ namespace KlayGE
 		width_ = width;
 		height_ = height;
 		pf_ = pf;
+
+		this->BindDiscardFunc();
 	}
 
 	D3D11DepthStencilRenderView::D3D11DepthStencilRenderView(uint32_t width, uint32_t height,
@@ -225,6 +258,8 @@ namespace KlayGE
 		width_ = width;
 		height_ = height;
 		pf_ = pf;
+
+		this->BindDiscardFunc();
 	}
 
 	void D3D11DepthStencilRenderView::ClearColor(Color const & /*clr*/)
@@ -249,18 +284,33 @@ namespace KlayGE
 
 	void D3D11DepthStencilRenderView::Discard()
 	{
+		discard_func_();
+	}
+	
+	void D3D11DepthStencilRenderView::BindDiscardFunc()
+	{
 #if (_WIN32_WINNT >= 0x0602 /*_WIN32_WINNT_WIN8*/)
 		D3D11RenderEngine& re = *checked_cast<D3D11RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		if (re.HasD3D11_1Runtime())
 		{
-			ID3D11DeviceContext1Ptr const & d3d_imm_ctx_1 = static_pointer_cast<ID3D11DeviceContext1>(d3d_imm_ctx_);
-			d3d_imm_ctx_1->DiscardView(ds_view_.get());
+			discard_func_ = KlayGE::bind(&D3D11DepthStencilRenderView::HWDiscard, this);
 		}
 		else
 #endif
 		{
-			d3d_imm_ctx_->ClearDepthStencilView(ds_view_.get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1, 0);
+			discard_func_ = KlayGE::bind(&D3D11DepthStencilRenderView::FackDiscard, this);
 		}
+	}
+
+	void D3D11DepthStencilRenderView::HWDiscard()
+	{
+		ID3D11DeviceContext1Ptr const & d3d_imm_ctx_1 = static_pointer_cast<ID3D11DeviceContext1>(d3d_imm_ctx_);
+		d3d_imm_ctx_1->DiscardView(ds_view_.get());
+	}
+
+	void D3D11DepthStencilRenderView::FackDiscard()
+	{
+		d3d_imm_ctx_->ClearDepthStencilView(ds_view_.get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1, 0);
 	}
 
 	void D3D11DepthStencilRenderView::OnAttached(FrameBuffer& /*fb*/, uint32_t att)
@@ -290,6 +340,8 @@ namespace KlayGE
 		width_ = texture.Width(level);
 		height_ = texture.Height(level);
 		pf_ = texture.Format();
+
+		this->BindDiscardFunc();
 	}
 
 	D3D11UnorderedAccessView::D3D11UnorderedAccessView(Texture& texture_3d, int array_index, uint32_t first_slice, uint32_t num_slices, int level)
@@ -304,6 +356,8 @@ namespace KlayGE
 		width_ = texture_3d.Width(level);
 		height_ = texture_3d.Height(level);
 		pf_ = texture_3d.Format();
+
+		this->BindDiscardFunc();
 	}
 
 	D3D11UnorderedAccessView::D3D11UnorderedAccessView(Texture& texture_cube, int array_index, Texture::CubeFaces face, int level)
@@ -318,6 +372,8 @@ namespace KlayGE
 		width_ = texture_cube.Width(level);
 		height_ = texture_cube.Width(level);
 		pf_ = texture_cube.Format();
+
+		this->BindDiscardFunc();
 	}
 
 	D3D11UnorderedAccessView::D3D11UnorderedAccessView(GraphicsBuffer& gb, ElementFormat pf)
@@ -334,6 +390,8 @@ namespace KlayGE
 		width_ = gb.Size() / NumFormatBytes(pf);
 		height_ = 1;
 		pf_ = pf;
+
+		this->BindDiscardFunc();
 	}
 
 	D3D11UnorderedAccessView::D3D11UnorderedAccessView(ID3D11UnorderedAccessViewPtr const & view, uint32_t width, uint32_t height, ElementFormat pf)
@@ -346,6 +404,8 @@ namespace KlayGE
 		width_ = width;
 		height_ = height;
 		pf_ = pf;
+
+		this->BindDiscardFunc();
 	}
 	
 	D3D11UnorderedAccessView::~D3D11UnorderedAccessView()
@@ -360,6 +420,38 @@ namespace KlayGE
 	void D3D11UnorderedAccessView::Clear(uint4 const & val)
 	{
 		d3d_imm_ctx_->ClearUnorderedAccessViewUint(ua_view_.get(), &val.x());
+	}
+
+	void D3D11UnorderedAccessView::Discard()
+	{
+		discard_func_();
+	}
+
+	void D3D11UnorderedAccessView::BindDiscardFunc()
+	{
+#if (_WIN32_WINNT >= 0x0602 /*_WIN32_WINNT_WIN8*/)
+		D3D11RenderEngine& re = *checked_cast<D3D11RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+		if (re.HasD3D11_1Runtime())
+		{
+			discard_func_ = KlayGE::bind(&D3D11UnorderedAccessView::HWDiscard, this);
+		}
+		else
+#endif
+		{
+			discard_func_ = KlayGE::bind(&D3D11UnorderedAccessView::FackDiscard, this);
+		}
+	}
+
+	void D3D11UnorderedAccessView::HWDiscard()
+	{
+		ID3D11DeviceContext1Ptr const & d3d_imm_ctx_1 = static_pointer_cast<ID3D11DeviceContext1>(d3d_imm_ctx_);
+		d3d_imm_ctx_1->DiscardView(ua_view_.get());
+	}
+
+	void D3D11UnorderedAccessView::FackDiscard()
+	{
+		float clr[] = { 0, 0, 0, 0 };
+		d3d_imm_ctx_->ClearUnorderedAccessViewFloat(ua_view_.get(), clr);
 	}
 
 	void D3D11UnorderedAccessView::OnAttached(FrameBuffer& /*fb*/, uint32_t /*att*/)

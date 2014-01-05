@@ -98,6 +98,8 @@ namespace KlayGE
 		virtual void Clear(float4 const & val) = 0;
 		virtual void Clear(uint4 const & val) = 0;
 
+		virtual void Discard() = 0;
+
 		virtual void OnAttached(FrameBuffer& fb, uint32_t att) = 0;
 		virtual void OnDetached(FrameBuffer& fb, uint32_t att) = 0;
 
