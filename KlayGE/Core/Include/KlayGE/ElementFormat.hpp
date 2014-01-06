@@ -299,6 +299,10 @@ namespace KlayGE
 	// 8-bit element format, all bits alpha.
 	ElementFormat const EF_A8 = MakeElementFormat1<EC_A, 8, ECT_UNorm>::value;
 
+	// 16-bit element format, 5 bits for red, 6 bits for green and 5 bits for blue.
+	ElementFormat const EF_R5G6B5 = MakeElementFormat3<EC_R, EC_G, EC_B, 5, 6, 5, ECT_UNorm, ECT_UNorm, ECT_UNorm>::value;
+	// 16-bit element format, 1 bits for alpha, 5 bits for red, green and blue.
+	ElementFormat const EF_A1RGB5 = MakeElementFormat4<EC_A, EC_R, EC_G, EC_B, 1, 5, 5, 5, ECT_UNorm, ECT_UNorm, ECT_UNorm, ECT_UNorm>::value;
 	// 16-bit element format, 4 bits for alpha, red, green and blue.
 	ElementFormat const EF_ARGB4 = MakeElementFormat4<EC_A, EC_R, EC_G, EC_B, 4, 4, 4, 4, ECT_UNorm, ECT_UNorm, ECT_UNorm, ECT_UNorm>::value;
 

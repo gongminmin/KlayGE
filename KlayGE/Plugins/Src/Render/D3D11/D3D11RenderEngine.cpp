@@ -1168,6 +1168,7 @@ namespace KlayGE
 
 	void D3D11RenderEngine::DetectD3D11_1Runtime(ID3D11DevicePtr const & device, ID3D11DeviceContextPtr const & imm_ctx)
 	{
+#if (_WIN32_WINNT >= 0x0602 /*_WIN32_WINNT_WIN8*/)
 		has_d3d_11_1_runtime_ = false;
 
 		ID3D11Device1* d3d_device_1;
@@ -1193,10 +1194,15 @@ namespace KlayGE
 			d3d_device_ = device;
 			d3d_imm_ctx_ = imm_ctx;
 		}
+#else
+		UNREF_PARAM(device);
+		UNREF_PARAM(imm_ctx);
+#endif
 	}
 
 	void D3D11RenderEngine::DetectD3D11_2Runtime(ID3D11DevicePtr const & device, ID3D11DeviceContextPtr const & imm_ctx)
 	{
+#if (_WIN32_WINNT >= 0x0603 /*_WIN32_WINNT_WINBLUE*/)
 		has_d3d_11_1_runtime_ = false;
 		has_d3d_11_2_runtime_ = false;
 
@@ -1218,6 +1224,10 @@ namespace KlayGE
 				d3d_device_2->Release();
 			}
 		}
+#else
+		UNREF_PARAM(device);
+		UNREF_PARAM(imm_ctx);
+#endif
 	}
 
 	void D3D11RenderEngine::StereoscopicForLCDShutter(int32_t eye)

@@ -128,9 +128,11 @@ private:
 #endif
 
 #ifdef KLAYGE_CXX11_LIBRARY_ALGORITHM_SUPPORT
-	#ifdef KLAYGE_COMPILER_GCC
-		// Fix C++ linkage problem in GCC 4.8.2
-		#include <intrin.h>
+	#ifndef KLAYGE_PLATFORM_ANDROID
+		#ifdef KLAYGE_COMPILER_GCC
+			// Fix C++ linkage problem in GCC 4.8.2
+			#include <intrin.h>
+		#endif
 	#endif
 	#include <algorithm>
 	namespace KlayGE
