@@ -315,7 +315,7 @@ namespace KlayGE
 	void MsgInputKeyboard::OnRawInput(RAWINPUT const & ri)
 	{
 		if ((RIM_TYPEKEYBOARD == ri.header.dwType) && (ri.header.hDevice == device_)
-			&& (hwnd_ == ::GetForegroundWindow()))
+			&& (hwnd_ == ::GetFocus()))
 		{
 			int32_t ks = VK_MAPPING[ri.data.keyboard.VKey];
 			if (ks >= 0)
