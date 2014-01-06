@@ -17,6 +17,11 @@ IF(NOT KLAYGE_GLES_INCLUDE_DIR)
 				"$ENV{ProgramFiles}/ARM/Mali Developer Tools/Mali OpenGL ES Emulator*/include"
 				"$ENV{ProgramFiles(x86)}/ARM/Mali Developer Tools/Mali OpenGL ES Emulator*/include"
 			)
+	ELSEIF(ANDROID)
+		FIND_PATH(KLAYGE_GLES_INCLUDE_DIR KHR/khrplatform.h
+			PATHS
+				"$ENV{ANDROID_NDK}/platforms/${ANDROID_NATIVE_API_LEVEL}/arch-arm/usr/local/include"
+		)
 	ELSEIF(UNIX)
 		FIND_PATH(KLAYGE_GLES_INCLUDE_DIR KHR/khrplatform.h
 			PATHS

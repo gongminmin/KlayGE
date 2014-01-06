@@ -12,8 +12,8 @@ except:
 ################################################
 
 compiler		= "auto"		# could be "vc12", vc11", "vc10", "vc9", "mingw", "gcc", "auto".
-toolset			= "auto"		# could be "v120", "v120_xp", "v110", "v110_xp", "v100", "v90", "auto".
-arch			= ("x86", )		# could be "x86", "x64", "arm_app", "x86_app", "x64_app"
+toolset			= "auto"		# could be "v120", "v120_xp", "v110", "v110_xp", "v100", "v90", "android_ndk", "auto".
+arch			= ("x86", )		# could be "x86", "x64", "arm_app", "x86_app", "x64_app", "armeabi", "armeabi-v7a"
 config			= ("Debug", "RelWithDebInfo") # could be "Debug", "Release", "MinSizeRel", "RelWithDebInfo"
 """)
 	cfg_build_f.close()
@@ -156,8 +156,12 @@ class compiler_info:
 		elif "gcc" == compiler:
 			compiler_name = "gcc"
 			compiler_version = 0
-			for arch in archs:
-				arch_list.append((arch, "Unix Makefiles", toolset, False))
+			if ("android_ndk" == toolset) and ("win" == platform):
+				for arch in archs:
+					arch_list.append((arch, "MinGW Makefiles", toolset, False))
+			else:
+				for arch in archs:
+					arch_list.append((arch, "Unix Makefiles", toolset, False))
 		else:
 			compiler_name = ""
 			compiler_version = 0
@@ -236,9 +240,16 @@ def build_a_project(name, build_path, compiler_info, compiler_arch, need_install
 		toolset_name = "-T %s" % compiler_arch[2]
 
 	if compiler_arch[3]:
-		additional_options += " -D KLAYGE_BUILD_PLATFORM_WINRT:BOOL=\"TRUE\""
+		additional_options += " -DKLAYGE_BUILD_PLATFORM_WINRT:BOOL=\"TRUE\""
 	if compiler_info.name != "vc":
-		additional_options += " -D KLAYGE_ARCH_NAME:STRING=\"%s\"" % compiler_arch[0]
+		additional_options += " -DKLAYGE_ARCH_NAME:STRING=\"%s\"" % compiler_arch[0]
+	if "android_ndk" == compiler_arch[2]:
+		additional_options += " -DANDROID_NATIVE_API_LEVEL=android-9"
+		if "win" == compiler_info.platform:
+			additional_options += " -DCMAKE_TOOLCHAIN_FILE=\"%s\\cmake\\android.toolchain.cmake\"" % curdir
+			additional_options += " -DCMAKE_MAKE_PROGRAM=\"%ANDROID_NDK%\\prebuilt\\windows\\bin\\make.exe\""
+		else:
+			additional_options += " -DCMAKE_TOOLCHAIN_FILE=\"%s/cmake/android.toolchain.cmake\"" % curdir
 
 	if "vc" == compiler_info.name:
 		if ("x86" == compiler_arch[0]) or ("x86_app" == compiler_arch[0]):
@@ -274,6 +285,11 @@ def build_a_project(name, build_path, compiler_info, compiler_arch, need_install
 			make_name = "mingw32-make.exe"
 		else:
 			make_name = "make"
+		if "android_ndk" == compiler_arch[2]:
+			if "win" == compiler_info.platform:
+				make_name = "%ANDROID_NDK%\\prebuilt\\windows\\bin\\make.exe"
+			else:
+				make_name = "make"
 		make_name += " -j%d" % multiprocessing.cpu_count()
 
 		for config in compiler_info.cfg:
@@ -283,15 +299,17 @@ def build_a_project(name, build_path, compiler_info, compiler_arch, need_install
 
 			os.chdir(build_dir)
 			
-			additional_options += " -D CMAKE_BUILD_TYPE:STRING=\"%s\"" % config
+			config_options = "-DCMAKE_BUILD_TYPE:STRING=\"%s\"" % config
+			if "android_ndk" == compiler_arch[2]:
+				config_options += " -DANDROID_ABI=%s" % compiler_arch[0]
 			
 			cmake_cmd = batch_command()
-			cmake_cmd.add_command('cmake -G "%s" %s %s %s' % (compiler_arch[1], toolset_name, additional_options, "../cmake"))
+			cmake_cmd.add_command('cmake -G "%s" %s %s %s %s' % (compiler_arch[1], toolset_name, additional_options, config_options, "../cmake"))
 			if cmake_cmd.execute() != 0:
 				log_error("Config %s failed." % name)		
 
 			install_str = ""
-			if need_install:
+			if need_install and (compiler_arch[2] != "android_ndk"):
 				install_str = "install"
 			build_cmd = batch_command()
 			build_cmd.add_command("@%s %s" % (make_name, install_str))
