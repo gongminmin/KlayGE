@@ -38,11 +38,17 @@ class compiler_info:
 	def __init__(self, compiler, archs, cfg):
 		env = os.environ
 		
-		platform = sys.platform
-		if 0 == platform.find("win"):
-			platform = "win"
-		elif 0 == platform.find("linux"):
-			platform = "linux"
+		host_platform = sys.platform
+		if 0 == host_platform.find("win"):
+			host_platform = "win"
+		elif 0 == host_platform.find("linux"):
+			host_platform = "linux"
+		if "android_ndk" == cfg_build.toolset:
+			target_platform = "android"
+			prefer_static = True
+		else:
+			target_platform = host_platform
+			prefer_static = False
 
 		try:
 			cfg_build.compiler
@@ -63,7 +69,7 @@ class compiler_info:
 
 		if "" == compiler:
 			if ("" == cfg_build.compiler) or ("auto" == cfg_build.compiler):
-				if "win" == platform:
+				if "win" == host_platform:
 					if "VS120COMNTOOLS" in env:
 						compiler = "vc12"
 					elif "VS110COMNTOOLS" in env:
@@ -74,16 +80,16 @@ class compiler_info:
 						compiler = "vc9"
 					elif os.path.exists("C:\MinGW\bin\gcc.exe"):
 						compiler = "mingw"
-				elif "linux" == platform:
+				elif "linux" == host_platform:
 					compiler = "gcc"
 				else:
-					log_error("Unsupported platform\n")
+					log_error("Unsupported host platform\n")
 			else:
 				compiler = cfg_build.compiler
 
 		toolset = cfg_build.toolset
 		if ("" == cfg_build.toolset) or ("auto" == cfg_build.toolset):
-			if "win" == platform:
+			if "win" == host_platform:
 				if "vc12" == compiler:
 					toolset = "v120"
 				elif "vc11" == compiler:
@@ -156,7 +162,7 @@ class compiler_info:
 		elif "gcc" == compiler:
 			compiler_name = "gcc"
 			compiler_version = 0
-			if ("android_ndk" == toolset) and ("win" == platform):
+			if ("android_ndk" == toolset) and ("win" == host_platform):
 				for arch in archs:
 					arch_list.append((arch, "MinGW Makefiles", toolset, False))
 			else:
@@ -182,7 +188,9 @@ class compiler_info:
 		self.version = compiler_version
 		self.arch_list = arch_list
 		self.cfg = cfg
-		self.platform = platform
+		self.host_platform = host_platform
+		self.target_platform = target_platform
+		self.prefer_static = prefer_static
 
 	def msvc_add_build_command(self, batch_cmd, sln_name, proj_name, config, arch = ""):
 		if self.use_msbuild:
@@ -243,9 +251,9 @@ def build_a_project(name, build_path, compiler_info, compiler_arch, need_install
 		additional_options += " -DKLAYGE_BUILD_PLATFORM_WINRT:BOOL=\"TRUE\""
 	if compiler_info.name != "vc":
 		additional_options += " -DKLAYGE_ARCH_NAME:STRING=\"%s\"" % compiler_arch[0]
-	if "android_ndk" == compiler_arch[2]:
+	if "android" == compiler_info.target_platform:
 		additional_options += " -DANDROID_NATIVE_API_LEVEL=android-9"
-		if "win" == compiler_info.platform:
+		if "win" == compiler_info.host_platform:
 			additional_options += " -DCMAKE_TOOLCHAIN_FILE=\"%s\\cmake\\android.toolchain.cmake\"" % curdir
 			additional_options += " -DCMAKE_MAKE_PROGRAM=\"%ANDROID_NDK%\\prebuilt\\windows\\bin\\make.exe\""
 		else:
@@ -286,7 +294,7 @@ def build_a_project(name, build_path, compiler_info, compiler_arch, need_install
 		else:
 			make_name = "make"
 		if "android_ndk" == compiler_arch[2]:
-			if "win" == compiler_info.platform:
+			if "win" == compiler_info.host_platform:
 				make_name = "%ANDROID_NDK%\\prebuilt\\windows\\bin\\make.exe"
 			else:
 				make_name = "make"

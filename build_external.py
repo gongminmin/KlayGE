@@ -8,11 +8,11 @@ from blib_util import *
 def build_Boost(compiler_info, compiler_arch):
 	b2_name = ""
 	os.chdir("External/boost")
-	if "win" == compiler_info.platform:
+	if "win" == compiler_info.host_platform:
 		b2_name = "b2.exe"
 		if not os.path.exists(b2_name):
 			os.system("bootstrap.bat")
-	elif "linux" == compiler_info.platform:
+	elif "linux" == compiler_info.host_platform:
 		b2_name = "./b2"
 		if not os.path.exists(b2_name):
 			os.system("./bootstrap.sh")
@@ -54,7 +54,7 @@ def build_Boost(compiler_info, compiler_arch):
 		config += " variant=release"
 		
 	build_cmd = batch_command()
-	build_cmd.add_command('%s --toolset=%s --stagedir=./lib/%s_%s --builddir=./ --layout=versioned address-model=%d %s %s link=shared runtime-link=shared threading=multi stage' % (b2_name, boost_toolset, compiler_info.platform, compiler_arch[0], address_model, config, options))
+	build_cmd.add_command('%s --toolset=%s --stagedir=./lib/%s_%s --builddir=./ --layout=versioned address-model=%d %s %s link=shared runtime-link=shared threading=multi stage' % (b2_name, boost_toolset, compiler_info.target_platform, compiler_arch[0], address_model, config, options))
 	if build_cmd.execute() != 0:
 		log_error("Build boost failed.")
 
@@ -88,36 +88,40 @@ def setup_Cg(compiler_info, compiler_arch):
 def build_external_libs(compiler_info):
 	import glob
 
-	if "win" == compiler_info.platform:
+	if "win" == compiler_info.host_platform:
 		bat_suffix = "bat"
-		dll_suffix = "dll"
-	elif "linux" == compiler_info.platform:
+	elif "linux" == compiler_info.host_platform:
 		bat_suffix = "sh"
+	if "win" == compiler_info.target_platform:
+		dll_suffix = "dll"
+	elif "linux" == compiler_info.target_platform:
 		dll_suffix = "so"
 
 	for arch in compiler_info.arch_list:
-		platform_dir = "%s_%s" % (compiler_info.platform, arch[0])
+		platform_dir = "%s_%s" % (compiler_info.target_platform, arch[0])
 		dst_dir = "KlayGE/bin/%s/" % platform_dir
 
-		if not arch[3]:
+		if (not arch[3]) and (compiler_info.target_platform != "android"):
 			print("\nBuilding boost...\n")
 			build_Boost(compiler_info, arch)
 
-			for fname in glob.iglob("External/boost/lib/%s_%s/lib/*.%s" % (compiler_info.platform, arch[0], dll_suffix)):
-				copy_to_dst(fname, dst_dir)
+			if not compiler_info.prefer_static:
+				for fname in glob.iglob("External/boost/lib/%s_%s/lib/*.%s" % (compiler_info.target_platform, arch[0], dll_suffix)):
+					copy_to_dst(fname, dst_dir)
 
-		if not arch[3]:
+		if (not arch[3]) and (compiler_info.target_platform != "android"):
 			print("\nBuilding Python...\n")
 			build_Python(compiler_info, arch)
 
-			if not os.path.exists("%sLib" % dst_dir):
-				os.mkdir("%sLib" % dst_dir)
-			for fname in glob.iglob("External/Python/Lib/*.py"):
-				copy_to_dst(fname, "%sLib/" % dst_dir)
-			if not os.path.exists("%sLib/encodings" % dst_dir):
-				os.mkdir("%sLib/encodings" % dst_dir)
-			for fname in glob.iglob("External/Python/Lib/encodings/*.py"):
-				copy_to_dst(fname, "%sLib/encodings/" % dst_dir)
+			if not compiler_info.prefer_static:
+				if not os.path.exists("%sLib" % dst_dir):
+					os.mkdir("%sLib" % dst_dir)
+				for fname in glob.iglob("External/Python/Lib/*.py"):
+					copy_to_dst(fname, "%sLib/" % dst_dir)
+				if not os.path.exists("%sLib/encodings" % dst_dir):
+					os.mkdir("%sLib/encodings" % dst_dir)
+				for fname in glob.iglob("External/Python/Lib/encodings/*.py"):
+					copy_to_dst(fname, "%sLib/encodings/" % dst_dir)
 
 		if not arch[3]:
 			print("\nBuilding libogg...\n")
@@ -127,27 +131,28 @@ def build_external_libs(compiler_info):
 			print("\nBuilding libvorbis...\n")
 			build_libvorbis(compiler_info, arch)
 
-		if not arch[3]:
+		if (not arch[3]) and (compiler_info.target_platform != "android"):
 			print("\nBuilding freetype...\n")
 			build_freetype(compiler_info, arch)
 
 		print("\nBuilding 7z...\n")
 		build_7z(compiler_info, arch)
 
-		for fname in glob.iglob("External/7z/lib/%s/*.%s" % (platform_dir, dll_suffix)):
-			copy_to_dst(fname, dst_dir)
+		if not compiler_info.prefer_static:
+			for fname in glob.iglob("External/7z/lib/%s/*.%s" % (platform_dir, dll_suffix)):
+				copy_to_dst(fname, dst_dir)
 
-		if not arch[3]:
+		if (not arch[3]) and (compiler_info.target_platform != "android"):
 			if "win" == compiler_info.platform:
 				print("\nSeting up DXSDK...\n")
 				setup_DXSDK(compiler_info, arch)
 
-		if not arch[3]:
+		if (not arch[3]) and (compiler_info.target_platform != "android"):
 			if "win" == compiler_info.platform:
 				print("\nSeting up OpenAL SDK...\n")
 				setup_OpenALSDK(compiler_info, arch)
 
-		if not arch[3]:
+		if (not arch[3]) and (compiler_info.target_platform != "android"):
 			print("\nSeting up Cg...\n")
 			setup_Cg(compiler_info, arch)
 
