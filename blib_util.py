@@ -302,6 +302,10 @@ def build_a_project(name, build_path, compiler_info, compiler_arch, need_install
 			config_options = "-DCMAKE_BUILD_TYPE:STRING=\"%s\"" % config
 			if "android_ndk" == compiler_arch[2]:
 				config_options += " -DANDROID_ABI=%s" % compiler_arch[0]
+				if "x86" == compiler_arch[0]:
+					config_options += " -DANDROID_TOOLCHAIN_NAME=x86-linux-4.6"
+				else:
+					config_options += " -DANDROID_TOOLCHAIN_NAME=arm-linux-androideabi-4.6"
 			
 			cmake_cmd = batch_command()
 			cmake_cmd.add_command('cmake -G "%s" %s %s %s %s' % (compiler_arch[1], toolset_name, additional_options, config_options, "../cmake"))

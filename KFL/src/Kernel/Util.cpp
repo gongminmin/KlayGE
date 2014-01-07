@@ -105,10 +105,10 @@ namespace KlayGE
 		MultiByteToWideChar(CP_ACP, 0, src.c_str(), static_cast<int>(src.size()), &tmp[0], wcs_len);
 #elif defined KLAYGE_PLATFORM_ANDROID
 		// Hack for mbstowcs
-		std::vector<char> tmp;
+		std::vector<wchar_t> tmp;
 		for (std::string::const_iterator iter = src.begin(); iter != src.end(); ++ iter)
 		{
-			char ch = *iter;
+			unsigned char ch = *iter;
 			wchar_t wch;
 			if (ch < 0x80)
 			{
@@ -122,7 +122,7 @@ namespace KlayGE
 			}
 			tmp.push_back(wch);
 		}
-		tmp.push_back('\0');
+		tmp.push_back(L'\0');
 #else
 		std::setlocale(LC_CTYPE, "");
 
