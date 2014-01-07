@@ -143,12 +143,12 @@ def build_external_libs(compiler_info):
 				copy_to_dst(fname, dst_dir)
 
 		if (not arch[3]) and (compiler_info.target_platform != "android"):
-			if "win" == compiler_info.platform:
+			if "win" == compiler_info.target_platform:
 				print("\nSeting up DXSDK...\n")
 				setup_DXSDK(compiler_info, arch)
 
 		if (not arch[3]) and (compiler_info.target_platform != "android"):
-			if "win" == compiler_info.platform:
+			if "win" == compiler_info.target_platform:
 				print("\nSeting up OpenAL SDK...\n")
 				setup_OpenALSDK(compiler_info, arch)
 
