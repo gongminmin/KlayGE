@@ -206,11 +206,6 @@ namespace
 			checked_pointer_cast<DetailedSkinnedModel>(renderable_)->VisualizeTexture(slot);
 		}
 
-		void LineMode(bool line_mode)
-		{
-			checked_pointer_cast<DetailedSkinnedModel>(renderable_)->LineMode(line_mode);
-		}
-
 		void SmoothMesh(bool smooth)
 		{
 			checked_pointer_cast<DetailedSkinnedModel>(renderable_)->SmoothMesh(smooth);
@@ -712,7 +707,7 @@ void ModelViewerApp::VisualizeChangedHandler(KlayGE::UIComboBox const & sender)
 
 void ModelViewerApp::LineModeChangedHandler(KlayGE::UICheckBox const & sender)
 {
-	checked_pointer_cast<ModelObject>(model_)->LineMode(sender.GetChecked());
+	deferred_rendering_->ForceLineMode(sender.GetChecked());
 }
 
 void ModelViewerApp::DoUpdateOverlay()

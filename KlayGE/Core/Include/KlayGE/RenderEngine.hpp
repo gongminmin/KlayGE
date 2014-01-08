@@ -202,6 +202,13 @@ namespace KlayGE
 		{
 			return stereo_separation_;
 		}
+		
+		// For debug only
+		void ForceLineMode(bool line);
+		bool ForceLineMode() const
+		{
+			return force_line_mode_;
+		}
 
 	protected:
 		virtual void DoCreateRenderWindow(std::string const & name, RenderSettings const & settings) = 0;
@@ -241,6 +248,7 @@ namespace KlayGE
 		RenderDeviceCaps caps_;
 
 		RasterizerStateObjectPtr cur_rs_obj_;
+		RasterizerStateObjectPtr cur_line_rs_obj_;
 		DepthStencilStateObjectPtr cur_dss_obj_;
 		uint16_t cur_front_stencil_ref_;
 		uint16_t cur_back_stencil_ref_;
@@ -266,6 +274,8 @@ namespace KlayGE
 		bool pp_chain_dirty_;
 
 		PostProcessPtr ldr_pps_[12];
+
+		bool force_line_mode_;
 	};
 }
 

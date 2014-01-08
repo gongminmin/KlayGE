@@ -128,7 +128,7 @@ namespace KlayGE
 			cur_sample_mask_(0xFFFFFFFF),
 			motion_frames_(0),
 			stereo_method_(STM_None), stereo_separation_(0),
-			fb_stage_(0)
+			fb_stage_(0), force_line_mode_(false)
 	{
 	}
 
@@ -435,8 +435,19 @@ namespace KlayGE
 	{
 		if (cur_rs_obj_ != rs_obj)
 		{
-			rs_obj->Active();
 			cur_rs_obj_ = rs_obj;
+
+			if (force_line_mode_)
+			{
+				RasterizerStateDesc desc = cur_rs_obj_->GetDesc();
+				desc.polygon_mode = PM_Line;
+				cur_line_rs_obj_ = Context::Instance().RenderFactoryInstance().MakeRasterizerStateObject(desc);
+				cur_line_rs_obj_->Active();
+			}
+			else
+			{
+				cur_rs_obj_->Active();
+			}
 		}
 
 		if ((cur_dss_obj_ != dss_obj) || (cur_front_stencil_ref_ != front_stencil_ref) || (cur_back_stencil_ref_ != back_stencil_ref))
@@ -963,6 +974,29 @@ namespace KlayGE
 		{
 			hdr_pp_->InputPin(0, hdr_tex_);
 			skip_hdr_pp_->InputPin(0, hdr_tex_);
+		}
+	}
+
+	void RenderEngine::ForceLineMode(bool line)
+	{
+		if (force_line_mode_ != line)
+		{
+			force_line_mode_ = line;
+
+			if (cur_rs_obj_)
+			{
+				if (force_line_mode_)
+				{
+					RasterizerStateDesc desc = cur_rs_obj_->GetDesc();
+					desc.polygon_mode = PM_Line;
+					cur_line_rs_obj_ = Context::Instance().RenderFactoryInstance().MakeRasterizerStateObject(desc);
+					cur_line_rs_obj_->Active();
+				}
+				else
+				{
+					cur_rs_obj_->Active();
+				}
+			}
 		}
 	}
 }

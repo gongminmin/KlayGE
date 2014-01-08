@@ -1048,6 +1048,18 @@ namespace KlayGE
 			}
 		}
 
+		if (force_line_mode_)
+		{
+			if ((PC_Depth == pass_cat) || (PC_GBuffer == pass_cat))
+			{
+				re.ForceLineMode(force_line_mode_);
+			}
+			else
+			{
+				re.ForceLineMode(false);
+			}
+		}
+
 		uint32_t urv;
 		switch (pass_cat)
 		{

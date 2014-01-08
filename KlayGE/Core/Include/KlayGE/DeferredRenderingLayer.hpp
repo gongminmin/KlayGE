@@ -221,6 +221,16 @@ namespace KlayGE
 		}
 		void SetViewportCascades(uint32_t vp, uint32_t num_cascades, float pssm_lambda);
 
+		// For debug only
+		void ForceLineMode(bool line)
+		{
+			force_line_mode_ = line;
+		}
+		bool ForceLineMode() const
+		{
+			return force_line_mode_;
+		}
+
 	private:
 		void SetupViewportGI(uint32_t vp, bool ssgi_enable);
 		void AccumulateToLightingTex(PerViewport const & pvp, uint32_t g_buffer_index);
@@ -422,6 +432,8 @@ namespace KlayGE
 		CascadedShadowLayerPtr cascaded_shadow_layer_;
 		float2 blur_size_light_space_;
 		int32_t curr_cascade_index_;
+
+		bool force_line_mode_;
 	};
 }
 
