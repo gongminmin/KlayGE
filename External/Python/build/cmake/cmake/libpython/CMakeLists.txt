@@ -215,10 +215,16 @@ configure_file(
 
 function(add_libpython name type)
     add_library(${name} ${type} ${LIBPYTHON_SOURCES})
-    target_link_libraries(${name}
-        ${builtin_link_libraries}
-        ${HAVE_LIBDL}
-    )
+    if(BUILD_SHARED)
+        target_link_libraries(${name}
+            ${builtin_link_libraries}
+            ${HAVE_LIBDL}
+        )
+    else(BUILD_SHARED)
+        target_link_libraries(${name}
+            ${builtin_link_libraries}
+        )
+    endif(BUILD_SHARED)
     if(WITH_THREAD)
         target_link_libraries(${name} ${CMAKE_THREAD_LIBS_INIT})
     endif(WITH_THREAD)

@@ -109,7 +109,7 @@ def build_external_libs(compiler_info):
 				for fname in glob.iglob("External/boost/lib/%s_%s/lib/*.%s" % (compiler_info.target_platform, arch[0], dll_suffix)):
 					copy_to_dst(fname, dst_dir)
 
-		if (not arch[3]) and (compiler_info.target_platform != "android"):
+		if not arch[3]:
 			print("\nBuilding Python...\n")
 			build_Python(compiler_info, arch)
 
@@ -123,11 +123,11 @@ def build_external_libs(compiler_info):
 				for fname in glob.iglob("External/Python/Lib/encodings/*.py"):
 					copy_to_dst(fname, "%sLib/encodings/" % dst_dir)
 
-		if not arch[3]:
+		if (not arch[3]) and (compiler_info.target_platform != "android"):
 			print("\nBuilding libogg...\n")
 			build_libogg(compiler_info, arch)
 
-		if not arch[3]:
+		if (not arch[3]) and (compiler_info.target_platform != "android"):
 			print("\nBuilding libvorbis...\n")
 			build_libvorbis(compiler_info, arch)
 

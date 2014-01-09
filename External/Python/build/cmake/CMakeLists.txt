@@ -32,6 +32,11 @@ IF (NOT MSVC)
 		ENDIF()
 	ENDIF()
 ENDIF()
+IF(ANDROID)
+	SET(BUILD_STATIC ON)
+	SET(UNIX OFF)
+	SET(LINUX OFF)
+ENDIF()
 	
 # This is the major version number of Python
 set(LIBPYTHON_VERSION ${PY_VERSION_MAJOR}.${PY_VERSION_MINOR})
@@ -155,14 +160,9 @@ set(INCLUDE_BUILD_DIR ${SRC_DIR}/Include)
 set(ARCHIVEDIR "libs")      # Contains the static (*.a) and import libraries (*.lib)
 
 # Directories specific to 'libpython'
-set(LIBPYTHON_LIBDIR ${LIBDIR})
-set(LIBPYTHON_ARCHIVEDIR ${LIBDIR})
-set(LIBPYTHON_STATIC_ARCHIVEDIR ${LIBDIR})
-if(WIN32)
-    set(LIBPYTHON_LIBDIR ${BIN_INSTALL_DIR})
-    set(LIBPYTHON_ARCHIVEDIR ${ARCHIVEDIR})
-    set(LIBPYTHON_STATIC_ARCHIVEDIR "../../${ARCHIVEDIR}/${KLAYGE_PLATFORM_NAME}")
-endif()
+set(LIBPYTHON_LIBDIR ${BIN_INSTALL_DIR})
+set(LIBPYTHON_ARCHIVEDIR ${ARCHIVEDIR})
+set(LIBPYTHON_STATIC_ARCHIVEDIR "../../${ARCHIVEDIR}/${KLAYGE_PLATFORM_NAME}")
 
 set(EXTRA_PYTHONPATH "" CACHE STRING
     "A colon (:) separated list of extra paths to add to the PYTHONPATH")

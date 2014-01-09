@@ -4,9 +4,11 @@ if(MSVC)
     set(MSVC_BUILTIN BUILTIN)
 endif(MSVC)
 
-add_python_extension(array SOURCES arraymodule.c)
-add_python_extension(audioop SOURCES audioop.c)
-add_python_extension(_bisect SOURCES _bisectmodule.c)
+if(NOT ANDROID)
+    add_python_extension(array SOURCES arraymodule.c)
+    add_python_extension(audioop SOURCES audioop.c)
+    add_python_extension(_bisect SOURCES _bisectmodule.c)
+endif(NOT ANDROID)
 add_python_extension(cmath REQUIRES HAVE_LIBM SOURCES _math.c cmathmodule.c LIBRARIES ${M_LIBRARIES})
 add_python_extension(_codecs_cn SOURCES cjkcodecs/_codecs_cn.c)
 add_python_extension(_codecs_hk SOURCES cjkcodecs/_codecs_hk.c)
@@ -16,14 +18,18 @@ add_python_extension(_codecs_kr SOURCES cjkcodecs/_codecs_kr.c)
 add_python_extension(_codecs_tw SOURCES cjkcodecs/_codecs_tw.c)
 add_python_extension(_collections SOURCES _collectionsmodule.c)
 add_python_extension(crypt REQUIRES HAVE_LIBCRYPT SOURCES cryptmodule.c LIBRARIES ${HAVE_LIBCRYPT})
-add_python_extension(_csv SOURCES _csv.c)
-add_python_extension(_ctypes_test SOURCES _ctypes/_ctypes_test.c)
+if(NOT ANDROID)
+    add_python_extension(_csv SOURCES _csv.c)
+    add_python_extension(_ctypes_test SOURCES _ctypes/_ctypes_test.c)
+endif(NOT ANDROID)
 add_python_extension(datetime REQUIRES HAVE_LIBM SOURCES timemodule.c LIBRARIES ${M_LIBRARIES})
 if(ENABLE_DATETIME AND UNIX)
     set_property(SOURCE ${SRC_DIR}/Modules/datetimemodule.c PROPERTY COMPILE_FLAGS -Wno-unused-value)
 endif()
 add_python_extension(_functools ${MSVC_BUILTIN} SOURCES _functoolsmodule.c)
-add_python_extension(_heapq SOURCES _heapqmodule.c)
+if(NOT ANDROID)
+    add_python_extension(_heapq SOURCES _heapqmodule.c)
+endif(NOT ANDROID)
 add_python_extension(_io ${MSVC_BUILTIN} SOURCES
     _io/_iomodule.c
     _io/bufferedio.c
@@ -34,17 +40,25 @@ add_python_extension(_io ${MSVC_BUILTIN} SOURCES
     _io/textio.c
 )
 add_python_extension(itertools SOURCES itertoolsmodule.c)
-add_python_extension(_json SOURCES _json.c)
+if(NOT ANDROID)
+    add_python_extension(_json SOURCES _json.c)
+endif(NOT ANDROID)
 add_python_extension(_locale ${MSVC_BUILTIN} SOURCES _localemodule.c)
-add_python_extension(_lsprof SOURCES _lsprof.c rotatingtree.c)
+if(NOT ANDROID)
+    add_python_extension(_lsprof SOURCES _lsprof.c rotatingtree.c)
+endif(NOT ANDROID)
 add_python_extension(math ${MSVC_BUILTIN} SOURCES _math.c mathmodule.c)
-add_python_extension(mmap ${MSVC_BUILTIN} SOURCES mmapmodule.c)
+if(NOT ANDROID)
+    add_python_extension(mmap ${MSVC_BUILTIN} SOURCES mmapmodule.c)
+endif(NOT ANDROID)
 add_python_extension(_multibytecodec SOURCES cjkcodecs/multibytecodec.c)
 add_python_extension(operator ${MSVC_BUILTIN} SOURCES operator.c)
-add_python_extension(parser ${MSVC_BUILTIN} SOURCES parsermodule.c)
-add_python_extension(_random SOURCES _randommodule.c)
-add_python_extension(_struct SOURCES _struct.c)
-add_python_extension(_testcapi SOURCES _testcapimodule.c)
+if(NOT ANDROID)
+    add_python_extension(parser ${MSVC_BUILTIN} SOURCES parsermodule.c)
+    add_python_extension(_random SOURCES _randommodule.c)
+    add_python_extension(_struct SOURCES _struct.c)
+    add_python_extension(_testcapi SOURCES _testcapimodule.c)
+endif(NOT ANDROID)
 add_python_extension(time REQUIRES HAVE_LIBM SOURCES timemodule.c LIBRARIES ${M_LIBRARIES})
 add_python_extension(unicodedata SOURCES unicodedata.c)
 
@@ -67,7 +81,6 @@ add_python_extension(_scproxy
 )
 
 # Linux-only extensions
-add_python_extension(linuxaudiodev REQUIRES LINUX SOURCES linuxaudiodev.c)
 add_python_extension(ossaudiodev REQUIRES LINUX SOURCES ossaudiodev.c)
 
 # Windows-only extensions
@@ -103,24 +116,26 @@ elseif(WIN32)
 endif(UNIX)
 
 # Select needs winsock on Windows
-if(WIN32)
-    add_python_extension(select SOURCES selectmodule.c LIBRARIES ws2_32)
-else(WIN32)
-    add_python_extension(select SOURCES selectmodule.c)
-endif(WIN32)
+if(NOT ANDROID)
+    if(WIN32)
+        add_python_extension(select SOURCES selectmodule.c LIBRARIES ws2_32)
+    else(WIN32)
+        add_python_extension(select SOURCES selectmodule.c)
+    endif(WIN32)
 
-# Socket is different on Windows
-if(WIN32)
-    add_python_extension(_socket
-        SOURCES socketmodule.c
-        DEFINITIONS EAI_ADDRFAMILY
-                    HAVE_SOCKADDR_STORAGE
-                    HAVE_ADDRINFO
-        LIBRARIES ws2_32
-    )
-else(WIN32)
-    add_python_extension(_socket SOURCES socketmodule.c)
-endif(WIN32)
+    # Socket is different on Windows
+    if(WIN32)
+        add_python_extension(_socket
+            SOURCES socketmodule.c
+            DEFINITIONS EAI_ADDRFAMILY
+                        HAVE_SOCKADDR_STORAGE
+                        HAVE_ADDRINFO
+            LIBRARIES ws2_32
+        )
+    else(WIN32)
+        add_python_extension(_socket SOURCES socketmodule.c)
+    endif(WIN32)
+endif(NOT ANDROID)
 
 # ctypes is different on Windows
 if(WIN32)
@@ -162,64 +177,68 @@ else(WIN32)
         #                ${SRC_DIR}/Modules/_ctypes/libffi/include
         #)
     else(APPLE)
-        add_python_extension(_ctypes
-            SOURCES _ctypes/_ctypes.c
-                    _ctypes/callbacks.c
-                    _ctypes/callproc.c
-                    _ctypes/cfield.c
-                    _ctypes/libffi/src/closures.c
-                    _ctypes/libffi/src/dlmalloc.c
-                    _ctypes/libffi/src/x86/ffi.c
-                    _ctypes/libffi/src/x86/ffi64.c
-                    _ctypes/libffi/src/prep_cif.c
-                    _ctypes/stgdict.c
-                    _ctypes/libffi/src/x86/sysv.S
-                    _ctypes/libffi/src/x86/unix64.S
-            INCLUDEDIRS ${SRC_DIR}/Modules/_ctypes/libffi/src/x86
-                        ${SRC_DIR}/Modules/_ctypes/libffi/include
-        )
+        if(NOT ANDROID)
+            add_python_extension(_ctypes
+                SOURCES _ctypes/_ctypes.c
+                        _ctypes/callbacks.c
+                        _ctypes/callproc.c
+                        _ctypes/cfield.c
+                        _ctypes/libffi/src/closures.c
+                        _ctypes/libffi/src/dlmalloc.c
+                        _ctypes/libffi/src/x86/ffi.c
+                        _ctypes/libffi/src/x86/ffi64.c
+                        _ctypes/libffi/src/prep_cif.c
+                        _ctypes/stgdict.c
+                        _ctypes/libffi/src/x86/sysv.S
+                        _ctypes/libffi/src/x86/unix64.S
+                INCLUDEDIRS ${SRC_DIR}/Modules/_ctypes/libffi/src/x86
+                            ${SRC_DIR}/Modules/_ctypes/libffi/include
+            )
+        endif(NOT ANDROID)
     endif(APPLE)
 endif(WIN32)
 
 
 # Build expat using the system expat if it's installed, otherwise use the
 # builtin version.
-if(EXPAT_LIBRARIES AND EXPAT_INCLUDE_DIRS)
-    add_python_extension(pyexpat
-        SOURCES pyexpat.c
-        LIBRARIES ${EXPAT_LIBRARIES}
-        INCLUDEDIRS ${EXPAT_INCLUDE_DIRS}
-    )
-    add_python_extension(_elementtree
-        SOURCES _elementtree.c
-        LIBRARIES ${EXPAT_LIBRARIES}
-        INCLUDEDIRS ${EXPAT_INCLUDE_DIRS}
-    )
-else(EXPAT_LIBRARIES AND EXPAT_INCLUDE_DIRS)
-    set(_pyexpat_definitions XML_STATIC)
-    if(UNIX)
-        list(APPEND _pyexpat_definitions HAVE_EXPAT_CONFIG_H)
-    elseif(MSVC)
-        list(APPEND _pyexpat_definitions COMPILED_FROM_DSP)
-    endif(UNIX)
-    add_python_extension(pyexpat
-        SOURCES pyexpat.c
-                expat/xmlparse.c
-                expat/xmlrole.c
-                expat/xmltok.c
-        DEFINITIONS ${_pyexpat_definitions}
-        INCLUDEDIRS ${SRC_DIR}/Modules/expat
-    )
-    set(_elementtree_definitions USE_PYEXPAT_CAPI)
-    if(MSVC)
-        list(APPEND _elementtree_definitions COMPILED_FROM_DSP)
-    endif()
-    add_python_extension(_elementtree
-        SOURCES _elementtree.c
-        DEFINITIONS ${_elementtree_definitions}
-        INCLUDEDIRS ${SRC_DIR}/Modules/expat
-    )
-endif(EXPAT_LIBRARIES AND EXPAT_INCLUDE_DIRS)
+if(NOT ANDROID)
+    if(EXPAT_LIBRARIES AND EXPAT_INCLUDE_DIRS)
+        add_python_extension(pyexpat
+            SOURCES pyexpat.c
+            LIBRARIES ${EXPAT_LIBRARIES}
+            INCLUDEDIRS ${EXPAT_INCLUDE_DIRS}
+        )
+        add_python_extension(_elementtree
+            SOURCES _elementtree.c
+            LIBRARIES ${EXPAT_LIBRARIES}
+            INCLUDEDIRS ${EXPAT_INCLUDE_DIRS}
+        )
+    else(EXPAT_LIBRARIES AND EXPAT_INCLUDE_DIRS)
+        set(_pyexpat_definitions XML_STATIC)
+        if(UNIX)
+            list(APPEND _pyexpat_definitions HAVE_EXPAT_CONFIG_H)
+        elseif(MSVC)
+            list(APPEND _pyexpat_definitions COMPILED_FROM_DSP)
+        endif(UNIX)
+        add_python_extension(pyexpat
+            SOURCES pyexpat.c
+                    expat/xmlparse.c
+                    expat/xmlrole.c
+                    expat/xmltok.c
+            DEFINITIONS ${_pyexpat_definitions}
+            INCLUDEDIRS ${SRC_DIR}/Modules/expat
+        )
+        set(_elementtree_definitions USE_PYEXPAT_CAPI)
+        if(MSVC)
+            list(APPEND _elementtree_definitions COMPILED_FROM_DSP)
+        endif()
+        add_python_extension(_elementtree
+            SOURCES _elementtree.c
+            DEFINITIONS ${_elementtree_definitions}
+            INCLUDEDIRS ${SRC_DIR}/Modules/expat
+        )
+    endif(EXPAT_LIBRARIES AND EXPAT_INCLUDE_DIRS)
+endif(NOT ANDROID)
 
 # If openssl is NOT available then build some other hash implementations
 if(OPENSSL_LIBRARIES)
@@ -228,10 +247,12 @@ else(OPENSSL_LIBRARIES)
     set(OPENSSL_NOT_FOUND ON)
 endif(OPENSSL_LIBRARIES)
 
-add_python_extension(_md5 REQUIRES OPENSSL_NOT_FOUND SOURCES md5module.c)
-add_python_extension(_sha REQUIRES OPENSSL_NOT_FOUND SOURCES sha1module.c)
-add_python_extension(_sha256 REQUIRES OPENSSL_NOT_FOUND SOURCES sha256module.c)
-add_python_extension(_sha512 REQUIRES OPENSSL_NOT_FOUND SOURCES sha512module.c)
+if(NOT ANDROID)
+    add_python_extension(_md5 REQUIRES OPENSSL_NOT_FOUND SOURCES md5module.c)
+    add_python_extension(_sha REQUIRES OPENSSL_NOT_FOUND SOURCES sha1module.c)
+    add_python_extension(_sha256 REQUIRES OPENSSL_NOT_FOUND SOURCES sha256module.c)
+    add_python_extension(_sha512 REQUIRES OPENSSL_NOT_FOUND SOURCES sha512module.c)
+endif(NOT ANDROID)
 
 # Extensions that depend on other libraries
 set(binascii_REQUIRES "")
@@ -244,13 +265,15 @@ if(ZLIB_LIBRARY)
   list(APPEND binascii_LIBRARIES ${ZLIB_LIBRARY})
   list(APPEND binascii_INCLUDEDIRS ${ZLIB_INCLUDE_DIR})
 endif()
-add_python_extension(binascii
-    REQUIRES ${binascii_REQUIRES}
-    SOURCES binascii.c
-    DEFINITIONS ${binascii_DEFINITIONS}
-    LIBRARIES ${binascii_LIBRARIES}
-    INCLUDEDIRS ${binascii_INCLUDEDIRS}
-)
+if(NOT ANDROID)
+    add_python_extension(binascii
+        REQUIRES ${binascii_REQUIRES}
+        SOURCES binascii.c
+        DEFINITIONS ${binascii_DEFINITIONS}
+        LIBRARIES ${binascii_LIBRARIES}
+        INCLUDEDIRS ${binascii_INCLUDEDIRS}
+    )
+endif(NOT ANDROID)
 add_python_extension(_bsddb
     REQUIRES DB_INCLUDE_PATH DB_LIBRARIES
     SOURCES _bsddb.c

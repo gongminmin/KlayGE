@@ -309,7 +309,7 @@ def build_a_project(name, build_path, compiler_info, compiler_arch, need_install
 			if "android_ndk" == compiler_arch[2]:
 				config_options += " -DANDROID_ABI=%s" % compiler_arch[0]
 				if "x86" == compiler_arch[0]:
-					config_options += " -DANDROID_TOOLCHAIN_NAME=x86-linux-4.6"
+					config_options += " -DANDROID_TOOLCHAIN_NAME=x86-4.6"
 				else:
 					config_options += " -DANDROID_TOOLCHAIN_NAME=arm-linux-androideabi-4.6"
 			
