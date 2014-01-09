@@ -6,15 +6,36 @@ try:
 	import cfg_build
 except:
 	cfg_build_f = open("cfg_build.py", "w")
-	cfg_build_f.write("""
-################################################
+	cfg_build_f.write("""################################################
 # !!!! DO NOT DELETE ANY FIELD OF THIS FILE !!!!
 ################################################
 
-compiler		= "auto"		# could be "vc12", vc11", "vc10", "vc9", "mingw", "gcc", "auto".
-toolset			= "auto"		# could be "v120", "v120_xp", "v110", "v110_xp", "v100", "v90", "android_ndk", "auto".
-arch			= ("x86", )		# could be "x86", "x64", "arm_app", "x86_app", "x64_app", "armeabi", "armeabi-v7a"
-config			= ("Debug", "RelWithDebInfo") # could be "Debug", "Release", "MinSizeRel", "RelWithDebInfo"
+# Compiler name.
+#   On Windows, could be "vc12", "vc11", "vc10", "vc9", "mingw", "auto".
+#   On WinRT, could be "vc12", "vc11", "auto".
+#   On Android, could be "gcc", "auto".
+#   On Linux, could be "gcc", "auto".
+compiler		= "auto"
+
+# Toolset name.
+#   On Windows, could be "v120", "v120_xp", "v110", "v110_xp", "v100", "v90", "auto".
+#   On WinRT, could be "v120", "v110", "auto".
+#   On Android, could be "4.4.3", "4.6", "4.8", "auto".
+#   On Linux, could be "auto".
+toolset			= "auto"
+
+# Target CPU architecture.
+#   On Windows, could be "x86", "x64".
+#   On WinRT, could be  "arm_app", "x86_app", "x64_app".
+#   On Android, cound be "armeabi", "armeabi-v7a", "x86".
+#   On Linux, could be "x86", "x64".
+arch			= ("x86", )
+
+# Configuration. Could be "Debug", "Release", "MinSizeRel", "RelWithDebInfo".
+config			= ("Debug", "RelWithDebInfo")
+
+# Target platform for cross compiling. Could be "android", "auto".
+target			= "auto"
 """)
 	cfg_build_f.close()
 	import cfg_build
@@ -43,11 +64,13 @@ class compiler_info:
 			host_platform = "win"
 		elif 0 == host_platform.find("linux"):
 			host_platform = "linux"
-		if "android_ndk" == cfg_build.toolset:
-			target_platform = "android"
+		if "auto" == cfg_build.target:
+			target_platform = host_platform
+		else:
+			target_platform = cfg_build.target
+		if "android" == target_platform:
 			prefer_static = True
 		else:
-			target_platform = host_platform
 			prefer_static = False
 
 		try:
@@ -69,7 +92,7 @@ class compiler_info:
 
 		if "" == compiler:
 			if ("" == cfg_build.compiler) or ("auto" == cfg_build.compiler):
-				if "win" == host_platform:
+				if "win" == target_platform:
 					if "VS120COMNTOOLS" in env:
 						compiler = "vc12"
 					elif "VS110COMNTOOLS" in env:
@@ -80,7 +103,7 @@ class compiler_info:
 						compiler = "vc9"
 					elif os.path.exists("C:\MinGW\bin\gcc.exe"):
 						compiler = "mingw"
-				elif "linux" == host_platform:
+				elif "linux" == target_platform:
 					compiler = "gcc"
 				else:
 					log_error("Unsupported host platform\n")
@@ -89,7 +112,7 @@ class compiler_info:
 
 		toolset = cfg_build.toolset
 		if ("" == cfg_build.toolset) or ("auto" == cfg_build.toolset):
-			if "win" == host_platform:
+			if "win" == target_platform:
 				if "vc12" == compiler:
 					toolset = "v120"
 				elif "vc11" == compiler:
@@ -98,6 +121,8 @@ class compiler_info:
 					toolset = "v100"
 				elif "vc9" == compiler:
 					toolset = "v90"
+			elif "android" == target_platform:
+				toolset = "4.6"
 				
 		if "" == archs:
 			archs = cfg_build.arch
@@ -162,7 +187,7 @@ class compiler_info:
 		elif "gcc" == compiler:
 			compiler_name = "gcc"
 			compiler_version = 0
-			if ("android_ndk" == toolset) and ("win" == host_platform):
+			if ("android" == target_platform) and ("win" == host_platform):
 				for arch in archs:
 					arch_list.append((arch, "MinGW Makefiles", toolset, False))
 			else:
@@ -291,7 +316,7 @@ def build_a_project(name, build_path, compiler_info, compiler_arch, need_install
 			make_name = "mingw32-make.exe"
 		else:
 			make_name = "make"
-		if "android_ndk" == compiler_arch[2]:
+		if "android" == compiler_info.target_platform:
 			if "win" == compiler_info.host_platform:
 				make_name = "%ANDROID_NDK%\\prebuilt\\windows\\bin\\make.exe"
 			else:
@@ -306,12 +331,12 @@ def build_a_project(name, build_path, compiler_info, compiler_arch, need_install
 			os.chdir(build_dir)
 			
 			config_options = "-DCMAKE_BUILD_TYPE:STRING=\"%s\"" % config
-			if "android_ndk" == compiler_arch[2]:
+			if "android" == compiler_info.target_platform:
 				config_options += " -DANDROID_ABI=%s" % compiler_arch[0]
 				if "x86" == compiler_arch[0]:
-					config_options += " -DANDROID_TOOLCHAIN_NAME=x86-4.6"
+					config_options += " -DANDROID_TOOLCHAIN_NAME=x86-%s" % compiler_arch[2]
 				else:
-					config_options += " -DANDROID_TOOLCHAIN_NAME=arm-linux-androideabi-4.6"
+					config_options += " -DANDROID_TOOLCHAIN_NAME=arm-linux-androideabi-%s" % compiler_arch[2]
 			
 			cmake_cmd = batch_command()
 			cmake_cmd.add_command('cmake -G "%s" %s %s %s %s' % (compiler_arch[1], toolset_name, additional_options, config_options, "../cmake"))
@@ -319,7 +344,7 @@ def build_a_project(name, build_path, compiler_info, compiler_arch, need_install
 				log_error("Config %s failed." % name)		
 
 			install_str = ""
-			if need_install and (compiler_arch[2] != "android_ndk"):
+			if need_install and (not compiler_info.prefer_static):
 				install_str = "install"
 			build_cmd = batch_command()
 			build_cmd.add_command("@%s %s" % (make_name, install_str))

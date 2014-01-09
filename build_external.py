@@ -123,11 +123,11 @@ def build_external_libs(compiler_info):
 				for fname in glob.iglob("External/Python/Lib/encodings/*.py"):
 					copy_to_dst(fname, "%sLib/encodings/" % dst_dir)
 
-		if (not arch[3]) and (compiler_info.target_platform != "android"):
+		if not arch[3]:
 			print("\nBuilding libogg...\n")
 			build_libogg(compiler_info, arch)
 
-		if (not arch[3]) and (compiler_info.target_platform != "android"):
+		if not arch[3]:
 			print("\nBuilding libvorbis...\n")
 			build_libvorbis(compiler_info, arch)
 
