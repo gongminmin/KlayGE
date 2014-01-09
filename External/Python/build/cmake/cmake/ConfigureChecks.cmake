@@ -1242,19 +1242,24 @@ check_c_source_compiles("
 
 check_c_source_compiles("#include <unistd.h>\n int main() {getpgrp(0);}" GETPGRP_HAVE_ARG)
 
-check_c_source_runs("#include <unistd.h>\n int main() {
+if(NOT CMAKE_CROSSCOMPILING)
+    check_c_source_runs("#include <unistd.h>\n int main() {
         int val1 = nice(1); 
         if (val1 != -1 && val1 == nice(2)) exit(0);
         exit(1);}" HAVE_BROKEN_NICE)
 
-check_c_source_runs(" #include <poll.h>
-    int main () {
-    struct pollfd poll_struct = { 42, POLLIN|POLLPRI|POLLOUT, 0 }; close (42);
-    int poll_test = poll (&poll_struct, 1, 0);
-    if (poll_test < 0) { exit(0); }
-    else if (poll_test == 0 && poll_struct.revents != POLLNVAL) { exit(0); }
-    else { exit(1); } }" 
-    HAVE_BROKEN_POLL)
+    check_c_source_runs(" #include <poll.h>
+        int main () {
+        struct pollfd poll_struct = { 42, POLLIN|POLLPRI|POLLOUT, 0 }; close (42);
+        int poll_test = poll (&poll_struct, 1, 0);
+        if (poll_test < 0) { exit(0); }
+        else if (poll_test == 0 && poll_struct.revents != POLLNVAL) { exit(0); }
+        else { exit(1); } }" 
+        HAVE_BROKEN_POLL)
+else()
+    set(HAVE_BROKEN_NICE 0)
+    set(HAVE_BROKEN_POLL 0)
+endif()
 
 
 # Check tzset(3) exists and works like we expect it to
