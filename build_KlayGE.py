@@ -11,21 +11,22 @@ def build_KlayGE(compiler_info):
 
 def build_Samples(compiler_info):
 	for arch in compiler_info.arch_list:
-		build_a_project("Samples", "KlayGE/Samples", compiler_info, arch)
+		if (compiler_info.target_platform != "android"):
+			build_a_project("Samples", "KlayGE/Samples", compiler_info, arch)
 
 def build_Tools(compiler_info):
 	for arch in compiler_info.arch_list:
-		if not arch[3]:
+		if (not arch[3]) and (compiler_info.target_platform != "android"):
 			build_a_project("Tools", "KlayGE/Tools", compiler_info, arch)
 
 def build_Tutorials(compiler_info):
 	for arch in compiler_info.arch_list:
-		if not arch[3]:
+		if (not arch[3]) and (compiler_info.target_platform != "android"):
 			build_a_project("Tutorials", "KlayGE/Tutorials", compiler_info, arch)
 
 def build_Exporters(compiler_info):
 	for arch in compiler_info.arch_list:
-		if not arch[3]:
+		if (not arch[3]) and (compiler_info.target_platform != "android"):
 			build_a_project("Exporters", "KlayGE/Exporters", compiler_info, arch)
 
 if __name__ == "__main__":
