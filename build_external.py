@@ -20,7 +20,13 @@ def build_Boost(compiler_info, compiler_arch):
 	if "vc" == compiler_info.name:
 		boost_toolset = "ms%s-%d.0" % (compiler_info.name, compiler_info.version)
 	else:
-		boost_toolset = "gcc"
+		if "android" == compiler_info.target_platform:
+			if "armeabi-v7a" == compiler_arch[0]:
+				boost_toolset = "gcc-android_armeabi_v7a"
+			else:
+				boost_toolset = "gcc-android_%s" % compiler_arch[0]
+		else:
+			boost_toolset = "gcc"
 		
 	address_model = 32
 	if "x64" == compiler_arch[0]:
@@ -35,9 +41,8 @@ def build_Boost(compiler_info, compiler_arch):
 	else:
 		options += " --without-atomic --without-date_time --without-regex"
 
-	if ("x86" == compiler_arch[0]) or ("x64" == compiler_arch[0]):
-		options += " --disable-filesystem2"
-	elif ("x86_app" == compiler_arch[0]):
+	options += " --disable-filesystem2"
+	if ("x86_app" == compiler_arch[0]) or ("x64_app" == compiler_arch[0]):
 		options += " architecture=x86 --without-filesystem --without-program_options define=\"WINAPI_FAMILY=WINAPI_FAMILY_APP\" define=BOOST_NO_ANSI_APIS cxxflags=\"/ZW /EHsc\""
 	elif ("arm_app" == compiler_arch[0]):
 		options += " architecture=arm --without-filesystem --without-program_options define=\"WINAPI_FAMILY=WINAPI_FAMILY_APP\" define=BOOST_NO_ANSI_APIS cxxflags=\"/ZW /EHsc\""
@@ -47,14 +52,21 @@ def build_Boost(compiler_info, compiler_arch):
 		if ("x64" == compiler_arch[0]):
 			options += " define=BOOST_USE_WINDOWS_H"
 
-	config = ""
+	if "android" == compiler_info.target_platform:
+		options += " cxxflags=%%CXXFLAGS%% threadapi=pthread target-os=linux --user-config=./user-config-android-%s.jam" % compiler_arch[0]
 	if ("Debug" in compiler_info.cfg):
-		config += " variant=debug"
+		options += " variant=debug"
 	if ("Release" in compiler_info.cfg) or ("RelWithDebInfo" in compiler_info.cfg) or ("MinSizeRel" in compiler_info.cfg):
-		config += " variant=release"
+		options += " variant=release"
 		
 	build_cmd = batch_command()
-	build_cmd.add_command('%s --toolset=%s --stagedir=./lib/%s_%s --builddir=./ --layout=versioned address-model=%d %s %s link=shared runtime-link=shared threading=multi stage' % (b2_name, boost_toolset, compiler_info.target_platform, compiler_arch[0], address_model, config, options))
+	if "android" == compiler_info.target_platform:
+		build_cmd.add_command('set CXXFLAGS="-I%%ANDROID_NDK%%/platforms/android-9/arch-arm/usr/include -I%%ANDROID_NDK%%/sources/cxx-stl/gnu-libstdc++/%s/include -I%%ANDROID_NDK%%/sources/cxx-stl/gnu-libstdc++/%s/libs/armeabi/include"' % (compiler_arch[2], compiler_arch[2]))
+	if compiler_info.prefer_static:
+		link = "static"
+	else:
+		link = "shared"
+	build_cmd.add_command('%s --toolset=%s --stagedir=./lib/%s_%s --builddir=./ --layout=versioned address-model=%d %s link=%s runtime-link=%s threading=multi stage' % (b2_name, boost_toolset, compiler_info.target_platform, compiler_arch[0], address_model, options, link, link))
 	if build_cmd.execute() != 0:
 		log_error("Build boost failed.")
 
@@ -101,7 +113,7 @@ def build_external_libs(compiler_info):
 		platform_dir = "%s_%s" % (compiler_info.target_platform, arch[0])
 		dst_dir = "KlayGE/bin/%s/" % platform_dir
 
-		if (not arch[3]) and (compiler_info.target_platform != "android"):
+		if not arch[3]:
 			print("\nBuilding boost...\n")
 			build_Boost(compiler_info, arch)
 

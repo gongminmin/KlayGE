@@ -57,22 +57,6 @@ class cfg_from_argv:
 
 class compiler_info:
 	def __init__(self, compiler, archs, cfg):
-		env = os.environ
-		
-		host_platform = sys.platform
-		if 0 == host_platform.find("win"):
-			host_platform = "win"
-		elif 0 == host_platform.find("linux"):
-			host_platform = "linux"
-		if "auto" == cfg_build.target:
-			target_platform = host_platform
-		else:
-			target_platform = cfg_build.target
-		if "android" == target_platform:
-			prefer_static = True
-		else:
-			prefer_static = False
-
 		try:
 			cfg_build.compiler
 		except:
@@ -89,6 +73,26 @@ class compiler_info:
 			cfg_build.config
 		except:
 			cfg_build.config = ("Debug", "RelWithDebInfo")
+		try:
+			cfg_build.target
+		except:
+			cfg_build.target = "auto"
+			
+		env = os.environ
+		
+		host_platform = sys.platform
+		if 0 == host_platform.find("win"):
+			host_platform = "win"
+		elif 0 == host_platform.find("linux"):
+			host_platform = "linux"
+		if "auto" == cfg_build.target:
+			target_platform = host_platform
+		else:
+			target_platform = cfg_build.target
+		if "android" == target_platform:
+			prefer_static = True
+		else:
+			prefer_static = False
 
 		if "" == compiler:
 			if ("" == cfg_build.compiler) or ("auto" == cfg_build.compiler):
@@ -101,7 +105,7 @@ class compiler_info:
 						compiler = "vc10"
 					elif "VS90COMNTOOLS" in env:
 						compiler = "vc9"
-					elif os.path.exists("C:\MinGW\bin\gcc.exe"):
+					elif os.path.exists("C:/MinGW/bin/g++.exe") or (0 == os.system("where g++")):
 						compiler = "mingw"
 				elif "linux" == target_platform:
 					compiler = "gcc"
