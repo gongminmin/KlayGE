@@ -11,8 +11,7 @@ def build_KlayGE(compiler_info):
 
 def build_Samples(compiler_info):
 	for arch in compiler_info.arch_list:
-		if (compiler_info.target_platform != "android"):
-			build_a_project("Samples", "KlayGE/Samples", compiler_info, arch)
+		build_a_project("Samples", "KlayGE/Samples", compiler_info, arch)
 
 def build_Tools(compiler_info):
 	for arch in compiler_info.arch_list:

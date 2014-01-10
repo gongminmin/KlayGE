@@ -1,4 +1,4 @@
-call android update project -p . -s -t android-17
+call android update project -p . -s -t android-17 -n KlayGE_Text
 
 call %ANDROID_NDK%\ndk-build -j 3
 

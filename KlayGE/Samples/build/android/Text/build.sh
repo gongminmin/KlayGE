@@ -1,6 +1,6 @@
 #!/bin/bash
 
-android update project -p . -s -t android-17
+android update project -p . -s -t android-17 -n KlayGE_Text
 
 $ANDROID_NDK/ndk-build -j 3
 

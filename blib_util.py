@@ -278,7 +278,7 @@ def build_a_project(name, build_path, compiler_info, compiler_arch, need_install
 		additional_options += " -DKLAYGE_ARCH_NAME:STRING=\"%s\"" % compiler_arch[0]
 	if "android" == compiler_info.target_platform:
 		additional_options += " -DCMAKE_TOOLCHAIN_FILE=\"%s/cmake/android.toolchain.cmake\"" % curdir
-		additional_options += " -DANDROID_NATIVE_API_LEVEL=android-9"
+		additional_options += " -DANDROID_NATIVE_API_LEVEL=9"
 		if "win" == compiler_info.host_platform:
 			additional_options += " -DCMAKE_MAKE_PROGRAM=\"%ANDROID_NDK%\\prebuilt\\windows\\bin\\make.exe\""
 
