@@ -36,10 +36,6 @@
 #include <KlayGE/OpenGL/OGLMapping.hpp>
 #include <KlayGE/OpenGL/OGLTexture.hpp>
 
-#ifdef KLAYGE_COMPILER_MSVC
-#pragma comment(lib, "OpenGL32.lib")
-#endif
-
 namespace KlayGE
 {
 	OGLTexture2D::OGLTexture2D(uint32_t width, uint32_t height, uint32_t numMipMaps, uint32_t array_size, ElementFormat format,

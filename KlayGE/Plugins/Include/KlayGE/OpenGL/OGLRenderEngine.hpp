@@ -126,6 +126,12 @@ namespace KlayGE
 			return hack_for_intel_;
 		}
 
+#if defined KLAYGE_PLATFORM_WINDOWS
+		HGLRC wglCreateContext(HDC hdc);
+		BOOL wglDeleteContext(HGLRC hglrc);
+		BOOL wglMakeCurrent(HDC hdc, HGLRC hglrc);
+#endif
+
 	private:
 		void DoCreateRenderWindow(std::string const & name, RenderSettings const & settings);
 		void DoBindFrameBuffer(FrameBufferPtr const & fb);
@@ -146,6 +152,17 @@ namespace KlayGE
 		virtual void CheckConfig(RenderSettings& settings) KLAYGE_OVERRIDE;
 
 	private:
+#if defined KLAYGE_PLATFORM_WINDOWS
+		typedef HGLRC (WINAPI *wglCreateContextFUNC)(HDC hdc);
+		typedef BOOL (WINAPI *wglDeleteContextFUNC)(HGLRC hglrc);
+		typedef BOOL (WINAPI *wglMakeCurrentFUNC)(HDC hdc, HGLRC hglrc);
+
+		HMODULE mod_opengl32_;
+		wglCreateContextFUNC DynamicWglCreateContext_;
+		wglDeleteContextFUNC DynamicWglDeleteContext_;
+		wglMakeCurrentFUNC DynamicWglMakeCurrent_;
+#endif
+
 		GLuint fbo_blit_src_;
 		GLuint fbo_blit_dst_;
 

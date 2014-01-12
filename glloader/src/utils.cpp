@@ -75,6 +75,11 @@ namespace
 
 		return ret;
 	}
+
+#ifdef GLLOADER_WGL
+	typedef WINGDIAPI PROC (WINAPI *wglGetProcAddressFUNC)(LPCSTR lpszProc);
+	wglGetProcAddressFUNC DynamicWglGetProcAddress;
+#endif
 }
 
 namespace glloader
@@ -270,6 +275,10 @@ namespace glloader
 	private:
 		gl_features_extractor()
 		{
+#ifdef GLLOADER_WGL
+			DynamicWglGetProcAddress = (wglGetProcAddressFUNC)(glloader_get_gl_proc_address("wglGetProcAddress"));
+#endif
+
 			gl_features();
 			wgl_features();
 			glx_features();
@@ -434,7 +443,10 @@ namespace glloader
 			LOAD_FUNC1(wglGetExtensionsStringARB);
 			if (wglGetExtensionsStringARB != NULL)
 			{
-				exts_str = wglGetExtensionsStringARB(::wglGetCurrentDC());
+				typedef HDC (WINAPI *wglGetCurrentDCFUNC)();
+				wglGetCurrentDCFUNC DynamicWglGetCurrentDC
+					= (wglGetCurrentDCFUNC)(glloader_get_gl_proc_address("wglGetCurrentDC"));
+				exts_str = wglGetExtensionsStringARB(DynamicWglGetCurrentDC());
 			}
 			else
 			{
@@ -632,7 +644,7 @@ void* get_gl_proc_address_by_api(const char* name)
 	ret = (void*)(eglGetProcAddress(name));
 #endif
 #ifdef GLLOADER_WGL
-	ret = (void*)(::wglGetProcAddress(name));
+	ret = (void*)(DynamicWglGetProcAddress(name));
 #endif
 #ifdef GLLOADER_AGL
 	CFURLRef bundleURL = CFURLCreateWithFileSystemPath(kCFAllocatorDefault,

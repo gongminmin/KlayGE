@@ -41,6 +41,7 @@
 #include <glloader/glloader.h>
 
 #include <KlayGE/OpenGL/OGLRenderWindow.hpp>
+#include <KlayGE/OpenGL/OGLRenderEngine.hpp>
 
 namespace KlayGE
 {
@@ -125,8 +126,10 @@ namespace KlayGE
 
 		::SetPixelFormat(hDC_, pixelFormat, &pfd);
 
-		hRC_ = ::wglCreateContext(hDC_);
-		::wglMakeCurrent(hDC_, hRC_);
+		OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+
+		hRC_ = re.wglCreateContext(hDC_);
+		re.wglMakeCurrent(hDC_, hRC_);
 
 		uint32_t sample_count = settings.sample_count;
 
@@ -160,8 +163,8 @@ namespace KlayGE
 
 			if (valid && (sample_count > 1))
 			{
-				::wglMakeCurrent(hDC_, nullptr);
-				::wglDeleteContext(hRC_);
+				re.wglMakeCurrent(hDC_, nullptr);
+				re.wglDeleteContext(hRC_);
 				::ReleaseDC(hWnd_, hDC_);
 
 				main_wnd->Recreate();
@@ -175,8 +178,8 @@ namespace KlayGE
 
 				::SetPixelFormat(hDC_, pixelFormat, &pfd);
 
-				hRC_ = ::wglCreateContext(hDC_);
-				::wglMakeCurrent(hDC_, hRC_);
+				hRC_ = re.wglCreateContext(hDC_);
+				re.wglMakeCurrent(hDC_, hRC_);
 
 				// reinit glloader
 				glloader_init();
@@ -240,11 +243,11 @@ namespace KlayGE
 				HGLRC hRC_new = wglCreateContextAttribsARB(hDC_, nullptr, attribs);
 				if (hRC_new != nullptr)
 				{
-					::wglMakeCurrent(hDC_, nullptr);
-					::wglDeleteContext(hRC_);
+					re.wglMakeCurrent(hDC_, nullptr);
+					re.wglDeleteContext(hRC_);
 					hRC_ = hRC_new;
 
-					::wglMakeCurrent(hDC_, hRC_);
+					re.wglMakeCurrent(hDC_, hRC_);
 
 					// reinit glloader
 					glloader_init();
@@ -488,10 +491,12 @@ namespace KlayGE
 		{
 			if (hDC_ != nullptr)
 			{
-				::wglMakeCurrent(hDC_, nullptr);
+				OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+
+				re.wglMakeCurrent(hDC_, nullptr);
 				if (hRC_ != nullptr)
 				{
-					::wglDeleteContext(hRC_);
+					re.wglDeleteContext(hRC_);
 					hRC_ = nullptr;
 				}
 				::ReleaseDC(hWnd_, hDC_);

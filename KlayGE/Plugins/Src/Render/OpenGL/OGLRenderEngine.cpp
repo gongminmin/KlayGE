@@ -99,6 +99,13 @@ namespace KlayGE
 			cur_fbo_(0), restart_index_(0xFFFF)
 	{
 		clear_clr_.fill(0);
+
+#if defined KLAYGE_PLATFORM_WINDOWS
+		mod_opengl32_ = ::LoadLibrary(TEXT("opengl32.dll"));
+		DynamicWglCreateContext_ = (wglCreateContextFUNC)::GetProcAddress(mod_opengl32_, "wglCreateContext");
+		DynamicWglDeleteContext_ = (wglDeleteContextFUNC)::GetProcAddress(mod_opengl32_, "wglDeleteContext");
+		DynamicWglMakeCurrent_ = (wglMakeCurrentFUNC)::GetProcAddress(mod_opengl32_, "wglMakeCurrent");
+#endif
 	}
 
 	// 析构函数
@@ -113,6 +120,9 @@ namespace KlayGE
 		{
 			glDeleteFramebuffersEXT(1, &fbo_blit_dst_);
 		}
+
+		// Some other resources may still alive, so don't free them
+		//::FreeLibrary(mod_opengl32_);
 	}
 
 	// 返回渲染系统的名字
@@ -1736,4 +1746,21 @@ namespace KlayGE
 		stereoscopic_pp_->SetParam(2, eye);
 		stereoscopic_pp_->Render();
 	}
+
+#if defined KLAYGE_PLATFORM_WINDOWS
+	HGLRC OGLRenderEngine::wglCreateContext(HDC hdc)
+	{
+		return DynamicWglCreateContext_(hdc);
+	}
+
+	BOOL OGLRenderEngine::wglDeleteContext(HGLRC hglrc)
+	{
+		return DynamicWglDeleteContext_(hglrc);
+	}
+
+	BOOL OGLRenderEngine::wglMakeCurrent(HDC hdc, HGLRC hglrc)
+	{
+		return DynamicWglMakeCurrent_(hdc, hglrc);
+	}
+#endif
 }

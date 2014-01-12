@@ -35,10 +35,6 @@
 #include <KlayGE/OpenGL/OGLMapping.hpp>
 #include <KlayGE/OpenGL/OGLTexture.hpp>
 
-#ifdef KLAYGE_COMPILER_MSVC
-#pragma comment(lib, "OpenGL32.lib")
-#endif
-
 namespace KlayGE
 {
 	OGLTexture::OGLTexture(TextureType type, uint32_t array_size, uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint)
