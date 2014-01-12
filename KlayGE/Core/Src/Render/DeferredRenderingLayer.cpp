@@ -256,7 +256,7 @@ namespace KlayGE
 	DeferredRenderingLayer::DeferredRenderingLayer()
 		: active_viewport_(0), ssr_enabled_(true), taa_enabled_(true),
 			light_scale_(1), illum_(0), indirect_scale_(1.0f),
-			curr_cascade_index_(-1)
+			curr_cascade_index_(-1), force_line_mode_(false)
 	{
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 		RenderEngine& re = rf.RenderEngineInstance();
