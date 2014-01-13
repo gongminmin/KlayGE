@@ -28,11 +28,13 @@ def build_Boost(compiler_info, compiler_arch):
 		else:
 			boost_toolset = "gcc"
 		
-	address_model = 32
-	if "x64" == compiler_arch[0]:
-		address_model = 64
-	
 	options = ""
+	
+	if ("x86" == compiler_arch[0]) or ("x86_app" == compiler_arch[0]):
+		options += "address-model=32"
+	elif ("x64" == compiler_arch[0]) or ("x64_app" == compiler_arch[0]):
+		options += "address-model=64"
+	
 	if "vc" == compiler_info.name:
 		if compiler_info.version >= 10:
 			options += " --without-regex"
@@ -66,7 +68,7 @@ def build_Boost(compiler_info, compiler_arch):
 		link = "static"
 	else:
 		link = "shared"
-	build_cmd.add_command('%s --toolset=%s --stagedir=./lib/%s_%s --builddir=./ --layout=versioned address-model=%d %s link=%s runtime-link=%s threading=multi stage' % (b2_name, boost_toolset, compiler_info.target_platform, compiler_arch[0], address_model, options, link, link))
+	build_cmd.add_command('%s --toolset=%s --stagedir=./lib/%s_%s --builddir=./ --layout=versioned %s link=%s runtime-link=%s threading=multi stage' % (b2_name, boost_toolset, compiler_info.target_platform, compiler_arch[0], options, link, link))
 	if build_cmd.execute() != 0:
 		log_error("Build boost failed.")
 
