@@ -20,7 +20,7 @@ def build_Tools(compiler_info):
 
 def build_Tutorials(compiler_info):
 	for arch in compiler_info.arch_list:
-		if (not arch[3]) and (compiler_info.target_platform != "android"):
+		if not arch[3]:
 			build_a_project("Tutorials", "KlayGE/Tutorials", compiler_info, arch)
 
 def build_Exporters(compiler_info):
