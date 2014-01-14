@@ -333,14 +333,10 @@ void DetailedSkinnedMesh::Render()
 DetailedSkinnedModel::DetailedSkinnedModel(std::wstring const & name)
 		: SkinnedModel(name)
 {
-	std::vector<std::pair<std::string, std::string> > num_joints_macro;
-	num_joints_macro.push_back(std::make_pair("NUM_JOINTS", "128"));
-	num_joints_macro.push_back(std::make_pair("", ""));
-	effect_ = SyncLoadRenderEffect("ModelViewer.fxml", &num_joints_macro[0]);
+	effect_ = SyncLoadRenderEffect("ModelViewer128.fxml");
 	if (!effect_->TechniqueByName("MeshGBufferSkinnedRT0Tech")->Validate())
 	{
-		num_joints_macro[0].second = "64";
-		effect_ = SyncLoadRenderEffect("ModelViewer.fxml", &num_joints_macro[0]);
+		effect_ = SyncLoadRenderEffect("ModelViewer64.fxml");
 	}
 
 	std::string depth_tech_str;

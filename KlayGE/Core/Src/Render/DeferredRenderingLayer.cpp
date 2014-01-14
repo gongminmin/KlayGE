@@ -397,15 +397,13 @@ namespace KlayGE
 		if (caps.max_shader_model >= 4)
 		{
 			light_batch_ = 32;
+			dr_effect_ = SyncLoadRenderEffect("LightIndexedDeferredRendering32.fxml");
 		}
 		else
 		{
 			light_batch_ = 4;
+			dr_effect_ = SyncLoadRenderEffect("LightIndexedDeferredRendering4.fxml");
 		}
-		std::vector<std::pair<std::string, std::string> > light_batch_macro;
-		light_batch_macro.push_back(std::make_pair("LIGHT_BATCH", boost::lexical_cast<std::string>(light_batch_)));
-		light_batch_macro.push_back(std::make_pair("", ""));
-		dr_effect_ = SyncLoadRenderEffect("LightIndexedDeferredRendering.fxml", &light_batch_macro[0]);
 #endif
 
 		technique_shadows_[LightSource::LT_Point][0] = dr_effect_->TechniqueByName("DeferredShadowingPointR");

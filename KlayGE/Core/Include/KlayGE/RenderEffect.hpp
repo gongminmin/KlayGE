@@ -397,9 +397,9 @@ namespace KlayGE
 	public:
 		RenderEffect();
 
-		void Load(std::string const & name, std::pair<std::string, std::string>* macros);
+		void Load(std::string const & name);
 
-		bool StreamIn(ResIdentifierPtr const & source, std::pair<std::string, std::string>* predefined_macros,
+		bool StreamIn(ResIdentifierPtr const & source,
 			std::vector<std::vector<std::vector<uint8_t> > >& native_shader_blocks);
 		void StreamOut(std::ostream& os, std::vector<std::vector<std::vector<uint8_t> > > const & native_shader_blocks);
 
@@ -412,10 +412,6 @@ namespace KlayGE
 		uint64_t Timestamp() const
 		{
 			return timestamp_;
-		}
-		uint64_t PredefinedMacrosHash() const
-		{
-			return predefined_macros_hash_;
 		}
 
 		void PrototypeEffect(RenderEffectPtr const & prototype_effect)
@@ -484,7 +480,6 @@ namespace KlayGE
 	private:
 		shared_ptr<std::string> res_name_;
 		uint64_t timestamp_;
-		uint64_t predefined_macros_hash_;
 
 		std::vector<RenderEffectParameterPtr> params_;
 		shared_ptr<std::vector<std::pair<std::string, std::vector<uint32_t> > > > cbuffers_;
@@ -757,10 +752,8 @@ namespace KlayGE
 		shared_ptr<std::vector<RenderEffectAnnotationPtr> > annotations_;
 	};
 
-	KLAYGE_CORE_API RenderEffectPtr SyncLoadRenderEffect(std::string const & effect_name,
-		std::pair<std::string, std::string>* macros = nullptr);
-	KLAYGE_CORE_API function<RenderEffectPtr()> ASyncLoadRenderEffect(std::string const & effect_name,
-		std::pair<std::string, std::string>* macros = nullptr);
+	KLAYGE_CORE_API RenderEffectPtr SyncLoadRenderEffect(std::string const & effect_name);
+	KLAYGE_CORE_API function<RenderEffectPtr()> ASyncLoadRenderEffect(std::string const & effect_name);
 }
 
 #endif		// _RENDEREFFECT_HPP

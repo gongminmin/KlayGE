@@ -2650,25 +2650,14 @@ namespace KlayGE
 		struct EffectDesc
 		{
 			std::string res_name;
-			std::vector<std::pair<std::string, std::string> > macros;
 
 			RenderEffectPtr effect;
 		};
 
 	public:
-		EffectLoadingDesc(std::string const & name, std::pair<std::string, std::string>* macros)
+		explicit EffectLoadingDesc(std::string const & name)
 		{
 			effect_desc_.res_name = name;
-			if (macros)
-			{
-				size_t m = 0;
-				while (!macros[m].first.empty())
-				{
-					effect_desc_.macros.push_back(macros[m]);
-					++ m;
-				}
-				effect_desc_.macros.push_back(macros[m]);
-			}
 		}
 
 		uint64_t Type() const
@@ -2689,7 +2678,7 @@ namespace KlayGE
 		shared_ptr<void> MainThreadStage()
 		{
 			RenderEffectPtr prototype = MakeSharedPtr<RenderEffect>();
-			prototype->Load(effect_desc_.res_name, effect_desc_.macros.empty() ? nullptr : &effect_desc_.macros[0]);
+			prototype->Load(effect_desc_.res_name);
 			effect_desc_.effect = prototype->Clone();
 			effect_desc_.effect->PrototypeEffect(prototype);
 			return static_pointer_cast<void>(effect_desc_.effect);
@@ -2705,8 +2694,7 @@ namespace KlayGE
 			if (this->Type() == rhs.Type())
 			{
 				EffectLoadingDesc const & eld = static_cast<EffectLoadingDesc const &>(rhs);
-				return (effect_desc_.res_name == eld.effect_desc_.res_name)
-					&& (effect_desc_.macros == eld.effect_desc_.macros);
+				return (effect_desc_.res_name == eld.effect_desc_.res_name);
 			}
 			return false;
 		}
@@ -2717,7 +2705,6 @@ namespace KlayGE
 
 			EffectLoadingDesc const & eld = static_cast<EffectLoadingDesc const &>(rhs);
 			effect_desc_.res_name = eld.effect_desc_.res_name;
-			effect_desc_.macros = eld.effect_desc_.macros;
 		}
 
 		shared_ptr<void> CloneResourceFrom(shared_ptr<void> const & resource)
@@ -2762,7 +2749,7 @@ namespace KlayGE
 	{
 	}
 
-	void RenderEffect::Load(std::string const & name, std::pair<std::string, std::string>* predefined_macros)
+	void RenderEffect::Load(std::string const & name)
 	{
 		std::string fxml_name = ResLoader::Instance().Locate(name);
 		if (fxml_name.empty())
@@ -2799,25 +2786,9 @@ namespace KlayGE
 		{
 			timestamp_ = 0;
 		}
-		if (predefined_macros)
-		{
-			size_t hash_val = 0;
-			size_t m = 0;
-			while (!predefined_macros[m].first.empty())
-			{
-				boost::hash_range(hash_val, predefined_macros[m].first.begin(), predefined_macros[m].first.end());
-				boost::hash_range(hash_val, predefined_macros[m].second.begin(), predefined_macros[m].second.end());
-				++ m;
-			}
-			predefined_macros_hash_ = static_cast<uint64_t>(hash_val);
-		}
-		else
-		{
-			predefined_macros_hash_ = 0;
-		}
 
 		std::vector<std::vector<std::vector<uint8_t> > > native_shader_blocks;
-		if (!this->StreamIn(kfx_source, predefined_macros, native_shader_blocks))
+		if (!this->StreamIn(kfx_source, native_shader_blocks))
 		{
 			shader_descs_.reset();
 			cbuffers_.reset();
@@ -2859,18 +2830,9 @@ namespace KlayGE
 
 				{
 					XMLNodePtr macro_node = root->FirstNode("macro");
-					if (macro_node || predefined_macros)
+					if (macro_node)
 					{
 						macros_ = MakeSharedPtr<KLAYGE_DECLTYPE(*macros_)>();
-					}
-					if (predefined_macros)
-					{
-						size_t m = 0;
-						while (!predefined_macros[m].first.empty())
-						{
-							macros_->push_back(std::make_pair(std::make_pair(predefined_macros[m].first, predefined_macros[m].second), false));
-							++ m;
-						}
 					}
 					for (; macro_node; macro_node = macro_node->NextSibling("macro"))
 					{
@@ -2971,7 +2933,7 @@ namespace KlayGE
 		}
 	}
 
-	bool RenderEffect::StreamIn(ResIdentifierPtr const & source, std::pair<std::string, std::string>* predefined_macros,
+	bool RenderEffect::StreamIn(ResIdentifierPtr const & source,
 			std::vector<std::vector<std::vector<uint8_t> > >& native_shader_blocks)
 	{
 		bool ret = false;
@@ -3001,18 +2963,9 @@ namespace KlayGE
 							source->read(&num_macros, sizeof(num_macros));
 							LittleEndianToNative<sizeof(num_macros)>(&num_macros);
 
-							if ((num_macros > 0) || predefined_macros)
+							if (num_macros > 0)
 							{
 								macros_ = MakeSharedPtr<KLAYGE_DECLTYPE(*macros_)>();
-							}
-							if (predefined_macros)
-							{
-								size_t m = 0;
-								while (!predefined_macros[m].first.empty())
-								{
-									macros_->push_back(std::make_pair(std::make_pair(predefined_macros[m].first, predefined_macros[m].second), false));
-									++ m;
-								}
 							}
 							for (uint32_t i = 0; i < num_macros; ++ i)
 							{
@@ -5406,15 +5359,13 @@ namespace KlayGE
 	}
 
 
-	RenderEffectPtr SyncLoadRenderEffect(std::string const & effect_name,
-		std::pair<std::string, std::string>* macros)
+	RenderEffectPtr SyncLoadRenderEffect(std::string const & effect_name)
 	{
-		return ResLoader::Instance().SyncQueryT<RenderEffect>(MakeSharedPtr<EffectLoadingDesc>(effect_name, macros));
+		return ResLoader::Instance().SyncQueryT<RenderEffect>(MakeSharedPtr<EffectLoadingDesc>(effect_name));
 	}
 
-	function<RenderEffectPtr()> ASyncLoadRenderEffect(std::string const & effect_name,
-		std::pair<std::string, std::string>* macros)
+	function<RenderEffectPtr()> ASyncLoadRenderEffect(std::string const & effect_name)
 	{
-		return ResLoader::Instance().ASyncQueryT<RenderEffect>(MakeSharedPtr<EffectLoadingDesc>(effect_name, macros));
+		return ResLoader::Instance().ASyncQueryT<RenderEffect>(MakeSharedPtr<EffectLoadingDesc>(effect_name));
 	}
 }
