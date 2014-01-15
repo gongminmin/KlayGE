@@ -31,14 +31,13 @@
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/Context.hpp>
 #include <KlayGE/App3D.hpp>
+#include <KlayGE/RenderEffect.hpp>
 
 #include <iostream>
 #include <fstream>
 #include <sstream>
 #include <vector>
 #include <cstring>
-
-#include "Effect.hpp"
 
 using namespace std;
 using namespace KlayGE;
@@ -113,10 +112,7 @@ int main(int argc, char* argv[])
 	EmptyApp app;
 	app.Create();
 
-	std::string fxml_name = argv[2];
-
-	RenderEffectPtr effect = MakeSharedPtr<RenderEffect>();
-	effect->Load(fxml_name);
+	SyncLoadRenderEffect(argv[2]);
 
 	return 0;
 }
