@@ -435,19 +435,18 @@ namespace KlayGE
 	{
 		if (cur_rs_obj_ != rs_obj)
 		{
-			cur_rs_obj_ = rs_obj;
-
 			if (force_line_mode_)
 			{
-				RasterizerStateDesc desc = cur_rs_obj_->GetDesc();
+				RasterizerStateDesc desc = rs_obj->GetDesc();
 				desc.polygon_mode = PM_Line;
 				cur_line_rs_obj_ = Context::Instance().RenderFactoryInstance().MakeRasterizerStateObject(desc);
 				cur_line_rs_obj_->Active();
 			}
 			else
 			{
-				cur_rs_obj_->Active();
+				rs_obj->Active();
 			}
+			cur_rs_obj_ = rs_obj;
 		}
 
 		if ((cur_dss_obj_ != dss_obj) || (cur_front_stencil_ref_ != front_stencil_ref) || (cur_back_stencil_ref_ != back_stencil_ref))
