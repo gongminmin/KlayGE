@@ -870,48 +870,49 @@ namespace
 				for (XMLNodePtr state_node = node->FirstNode("state"); state_node; state_node = state_node->NextSibling("state"))
 				{
 					std::string name = state_node->Attrib("name")->ValueString();
-					if ("filtering" == name)
+					size_t const name_hash = CT_HASH(name.c_str());
+					if (CT_HASH("filtering") == name_hash)
 					{
 						std::string value_str = state_node->Attrib("value")->ValueString();
 						desc.filter = texture_filter_mode_define::instance().from_str(value_str);
 					}
-					else if ("address_u" == name)
+					else if (CT_HASH("address_u") == name_hash)
 					{
 						std::string value_str = state_node->Attrib("value")->ValueString();
 						desc.addr_mode_u = texture_addr_mode_define::instance().from_str(value_str);
 					}
-					else if ("address_v" == name)
+					else if (CT_HASH("address_v") == name_hash)
 					{
 						std::string value_str = state_node->Attrib("value")->ValueString();
 						desc.addr_mode_v = texture_addr_mode_define::instance().from_str(value_str);
 					}
-					else if ("address_w" == name)
+					else if (CT_HASH("address_w") == name_hash)
 					{
 						std::string value_str = state_node->Attrib("value")->ValueString();
 						desc.addr_mode_w = texture_addr_mode_define::instance().from_str(value_str);
 					}
-					else if ("max_anisotropy" == name)
+					else if (CT_HASH("max_anisotropy") == name_hash)
 					{
 						desc.max_anisotropy = static_cast<uint8_t>(state_node->Attrib("value")->ValueUInt());
 					}
-					else if ("min_lod" == name)
+					else if (CT_HASH("min_lod") == name_hash)
 					{
 						desc.min_lod = state_node->Attrib("value")->ValueFloat();
 					}
-					else if ("max_lod" == name)
+					else if (CT_HASH("max_lod") == name_hash)
 					{
 						desc.max_lod = state_node->Attrib("value")->ValueFloat();
 					}
-					else if ("mip_map_lod_bias" == name)
+					else if (CT_HASH("mip_map_lod_bias") == name_hash)
 					{
 						desc.mip_map_lod_bias = state_node->Attrib("value")->ValueFloat();
 					}
-					else if ("cmp_func" == name)
+					else if (CT_HASH("cmp_func") == name_hash)
 					{
 						std::string value_str = state_node->Attrib("value")->ValueString();
 						desc.cmp_func = compare_function_define::instance().from_str(value_str);
 					}
-					else if ("border_clr" == name)
+					else if (CT_HASH("border_clr") == name_hash)
 					{
 						attr = state_node->Attrib("r");
 						if (attr)
@@ -3775,120 +3776,121 @@ namespace KlayGE
 		for (XMLNodePtr state_node = node->FirstNode("state"); state_node; state_node = state_node->NextSibling("state"))
 		{
 			std::string state_name = state_node->Attrib("name")->ValueString();
+			size_t const state_name_hash = CT_HASH(state_name.c_str());
 
-			if ("polygon_mode" == state_name)
+			if (CT_HASH("polygon_mode") == state_name_hash)
 			{
 				std::string value_str = state_node->Attrib("value")->ValueString();
 				rs_desc.polygon_mode = polygon_mode_define::instance().from_str(value_str);
 			}
-			else if ("shade_mode" == state_name)
+			else if (CT_HASH("shade_mode") == state_name_hash)
 			{
 				std::string value_str = state_node->Attrib("value")->ValueString();
 				rs_desc.shade_mode = shade_mode_define::instance().from_str(value_str);
 			}
-			else if ("cull_mode" == state_name)
+			else if (CT_HASH("cull_mode") == state_name_hash)
 			{
 				std::string value_str = state_node->Attrib("value")->ValueString();
 				rs_desc.cull_mode = cull_mode_define::instance().from_str(value_str);
 			}
-			else if ("front_face_ccw" == state_name)
+			else if (CT_HASH("front_face_ccw") == state_name_hash)
 			{
 				std::string value_str = state_node->Attrib("value")->ValueString();
 				rs_desc.front_face_ccw = bool_from_str(value_str);
 			}
-			else if ("polygon_offset_factor" == state_name)
+			else if (CT_HASH("polygon_offset_factor") == state_name_hash)
 			{
 				rs_desc.polygon_offset_factor = state_node->Attrib("value")->ValueFloat();
 			}
-			else if ("polygon_offset_units" == state_name)
+			else if (CT_HASH("polygon_offset_units") == state_name_hash)
 			{
 				rs_desc.polygon_offset_units = state_node->Attrib("value")->ValueFloat();
 			}
-			else if ("depth_clip_enable" == state_name)
+			else if (CT_HASH("depth_clip_enable") == state_name_hash)
 			{
 				std::string value_str = state_node->Attrib("value")->ValueString();
 				rs_desc.depth_clip_enable = bool_from_str(value_str);
 			}
-			else if ("scissor_enable" == state_name)
+			else if (CT_HASH("scissor_enable") == state_name_hash)
 			{
 				std::string value_str = state_node->Attrib("value")->ValueString();
 				rs_desc.scissor_enable = bool_from_str(value_str);
 			}
-			else if ("multisample_enable" == state_name)
+			else if (CT_HASH("multisample_enable") == state_name_hash)
 			{
 				std::string value_str = state_node->Attrib("value")->ValueString();
 				rs_desc.multisample_enable = bool_from_str(value_str);
 			}
-			else if ("alpha_to_coverage_enable" == state_name)
+			else if (CT_HASH("alpha_to_coverage_enable") == state_name_hash)
 			{
 				std::string value_str = state_node->Attrib("value")->ValueString();
 				bs_desc.alpha_to_coverage_enable = bool_from_str(value_str);
 			}
-			else if ("independent_blend_enable" == state_name)
+			else if (CT_HASH("independent_blend_enable") == state_name_hash)
 			{
 				std::string value_str = state_node->Attrib("value")->ValueString();
 				bs_desc.independent_blend_enable = bool_from_str(value_str);
 			}
-			else if ("blend_enable" == state_name)
+			else if (CT_HASH("blend_enable") == state_name_hash)
 			{
 				int index = get_index(state_node);
 				std::string value_str = state_node->Attrib("value")->ValueString();
 				bs_desc.blend_enable[index] = bool_from_str(value_str);
 			}
-			else if ("logic_op_enable" == state_name)
+			else if (CT_HASH("logic_op_enable") == state_name_hash)
 			{
 				int index = get_index(state_node);
 				std::string value_str = state_node->Attrib("value")->ValueString();
 				bs_desc.logic_op_enable[index] = bool_from_str(value_str);
 			}
-			else if ("blend_op" == state_name)
+			else if (CT_HASH("blend_op") == state_name_hash)
 			{
 				int index = get_index(state_node);
 				std::string value_str = state_node->Attrib("value")->ValueString();
 				bs_desc.blend_op[index] = blend_operation_define::instance().from_str(value_str);
 			}
-			else if ("src_blend" == state_name)
+			else if (CT_HASH("src_blend") == state_name_hash)
 			{
 				int index = get_index(state_node);
 				std::string value_str = state_node->Attrib("value")->ValueString();
 				bs_desc.src_blend[index] = alpha_blend_factor_define::instance().from_str(value_str);
 			}
-			else if ("dest_blend" == state_name)
+			else if (CT_HASH("dest_blend") == state_name_hash)
 			{
 				int index = get_index(state_node);
 				std::string value_str = state_node->Attrib("value")->ValueString();
 				bs_desc.dest_blend[index] = alpha_blend_factor_define::instance().from_str(value_str);
 			}
-			else if ("blend_op_alpha" == state_name)
+			else if (CT_HASH("blend_op_alpha") == state_name_hash)
 			{
 				int index = get_index(state_node);
 				std::string value_str = state_node->Attrib("value")->ValueString();
 				bs_desc.blend_op_alpha[index] = blend_operation_define::instance().from_str(value_str);
 			}
-			else if ("src_blend_alpha" == state_name)
+			else if (CT_HASH("src_blend_alpha") == state_name_hash)
 			{
 				int index = get_index(state_node);
 				std::string value_str = state_node->Attrib("value")->ValueString();
 				bs_desc.src_blend_alpha[index] = alpha_blend_factor_define::instance().from_str(value_str);
 			}
-			else if ("dest_blend_alpha" == state_name)
+			else if (CT_HASH("dest_blend_alpha") == state_name_hash)
 			{
 				int index = get_index(state_node);
 				std::string value_str = state_node->Attrib("value")->ValueString();
 				bs_desc.dest_blend_alpha[index] = alpha_blend_factor_define::instance().from_str(value_str);
 			}
-			else if ("logic_op" == state_name)
+			else if (CT_HASH("logic_op") == state_name_hash)
 			{
 				int index = get_index(state_node);
 				std::string value_str = state_node->Attrib("value")->ValueString();
 				bs_desc.logic_op[index] = logic_operation_define::instance().from_str(value_str);
 			}
-			else if ("color_write_mask" == state_name)
+			else if (CT_HASH("color_write_mask") == state_name_hash)
 			{
 				int index = get_index(state_node);
 				bs_desc.color_write_mask[index] = static_cast<uint8_t>(state_node->Attrib("value")->ValueUInt());
 			}
-			else if ("blend_factor" == state_name)
+			else if (CT_HASH("blend_factor") == state_name_hash)
 			{
 				XMLAttributePtr attr = state_node->Attrib("r");
 				if (attr)
@@ -3911,122 +3913,123 @@ namespace KlayGE
 					blend_factor_.a() = attr->ValueFloat();
 				}
 			}
-			else if ("sample_mask" == state_name)
+			else if (CT_HASH("sample_mask") == state_name_hash)
 			{
 				sample_mask_ = state_node->Attrib("value")->ValueUInt();
 			}
-			else if ("depth_enable" == state_name)
+			else if (CT_HASH("depth_enable") == state_name_hash)
 			{
 				dss_desc.depth_enable = bool_from_str(state_node->Attrib("value")->ValueString());
 			}
-			else if ("depth_write_mask" == state_name)
+			else if (CT_HASH("depth_write_mask") == state_name_hash)
 			{
 				dss_desc.depth_write_mask = bool_from_str(state_node->Attrib("value")->ValueString());
 			}
-			else if ("depth_func" == state_name)
+			else if (CT_HASH("depth_func") == state_name_hash)
 			{
 				std::string value_str = state_node->Attrib("value")->ValueString();
 				dss_desc.depth_func = compare_function_define::instance().from_str(value_str);
 			}
-			else if ("front_stencil_enable" == state_name)
+			else if (CT_HASH("front_stencil_enable") == state_name_hash)
 			{
 				dss_desc.front_stencil_enable = bool_from_str(state_node->Attrib("value")->ValueString());
 			}
-			else if ("front_stencil_func" == state_name)
+			else if (CT_HASH("front_stencil_func") == state_name_hash)
 			{
 				std::string value_str = state_node->Attrib("value")->ValueString();
 				dss_desc.front_stencil_func = compare_function_define::instance().from_str(value_str);
 			}
-			else if ("front_stencil_ref" == state_name)
+			else if (CT_HASH("front_stencil_ref") == state_name_hash)
 			{
 				front_stencil_ref_ = static_cast<uint16_t>(state_node->Attrib("value")->ValueUInt());
 			}
-			else if ("front_stencil_read_mask" == state_name)
+			else if (CT_HASH("front_stencil_read_mask") == state_name_hash)
 			{
 				dss_desc.front_stencil_read_mask = static_cast<uint16_t>(state_node->Attrib("value")->ValueUInt());
 			}
-			else if ("front_stencil_write_mask" == state_name)
+			else if (CT_HASH("front_stencil_write_mask") == state_name_hash)
 			{
 				dss_desc.front_stencil_write_mask = static_cast<uint16_t>(state_node->Attrib("value")->ValueUInt());
 			}
-			else if ("front_stencil_fail" == state_name)
+			else if (CT_HASH("front_stencil_fail") == state_name_hash)
 			{
 				std::string value_str = state_node->Attrib("value")->ValueString();
 				dss_desc.front_stencil_fail = stencil_operation_define::instance().from_str(value_str);
 			}
-			else if ("front_stencil_depth_fail" == state_name)
+			else if (CT_HASH("front_stencil_depth_fail") == state_name_hash)
 			{
 				std::string value_str = state_node->Attrib("value")->ValueString();
 				dss_desc.front_stencil_depth_fail = stencil_operation_define::instance().from_str(value_str);
 			}
-			else if ("front_stencil_pass" == state_name)
+			else if (CT_HASH("front_stencil_pass") == state_name_hash)
 			{
 				std::string value_str = state_node->Attrib("value")->ValueString();
 				dss_desc.front_stencil_pass = stencil_operation_define::instance().from_str(value_str);
 			}
-			else if ("back_stencil_enable" == state_name)
+			else if (CT_HASH("back_stencil_enable") == state_name_hash)
 			{
 				dss_desc.back_stencil_enable = bool_from_str(state_node->Attrib("value")->ValueString());
 			}
-			else if ("back_stencil_func" == state_name)
+			else if (CT_HASH("back_stencil_func") == state_name_hash)
 			{
 				std::string value_str = state_node->Attrib("value")->ValueString();
 				dss_desc.back_stencil_func = compare_function_define::instance().from_str(value_str);
 			}
-			else if ("back_stencil_ref" == state_name)
+			else if (CT_HASH("back_stencil_ref") == state_name_hash)
 			{
 				back_stencil_ref_ = static_cast<uint16_t>(state_node->Attrib("value")->ValueUInt());
 			}
-			else if ("back_stencil_read_mask" == state_name)
+			else if (CT_HASH("back_stencil_read_mask") == state_name_hash)
 			{
 				dss_desc.back_stencil_read_mask = static_cast<uint16_t>(state_node->Attrib("value")->ValueUInt());
 			}
-			else if ("back_stencil_write_mask" == state_name)
+			else if (CT_HASH("back_stencil_write_mask") == state_name_hash)
 			{
 				dss_desc.back_stencil_write_mask = static_cast<uint16_t>(state_node->Attrib("value")->ValueUInt());
 			}
-			else if ("back_stencil_fail" == state_name)
+			else if (CT_HASH("back_stencil_fail") == state_name_hash)
 			{
 				std::string value_str = state_node->Attrib("value")->ValueString();
 				dss_desc.back_stencil_fail = stencil_operation_define::instance().from_str(value_str);
 			}
-			else if ("back_stencil_depth_fail" == state_name)
+			else if (CT_HASH("back_stencil_depth_fail") == state_name_hash)
 			{
 				std::string value_str = state_node->Attrib("value")->ValueString();
 				dss_desc.back_stencil_depth_fail = stencil_operation_define::instance().from_str(value_str);
 			}
-			else if ("back_stencil_pass" == state_name)
+			else if (CT_HASH("back_stencil_pass") == state_name_hash)
 			{
 				std::string value_str = state_node->Attrib("value")->ValueString();
 				dss_desc.back_stencil_pass = stencil_operation_define::instance().from_str(value_str);
 			}
-			else if (("vertex_shader" == state_name) || ("pixel_shader" == state_name) || ("geometry_shader" == state_name)
-				|| ("compute_shader" == state_name) || ("hull_shader" == state_name) || ("domain_shader" == state_name))
+			else if ((CT_HASH("vertex_shader") == state_name_hash) || (CT_HASH("pixel_shader") == state_name_hash)
+				|| (CT_HASH("geometry_shader") == state_name_hash) || (CT_HASH("compute_shader") == state_name_hash)
+				|| (CT_HASH("hull_shader") == state_name_hash) || (CT_HASH("domain_shader") == state_name_hash))
 			{
 				ShaderObject::ShaderType type;
-				if ("vertex_shader" == state_name)
+				if (CT_HASH("vertex_shader") == state_name_hash)
 				{
 					type = ShaderObject::ST_VertexShader;
 				}
-				else if ("pixel_shader" == state_name)
+				else if (CT_HASH("pixel_shader") == state_name_hash)
 				{
 					type = ShaderObject::ST_PixelShader;
 				}
-				else if ("geometry_shader" == state_name)
+				else if (CT_HASH("geometry_shader") == state_name_hash)
 				{
 					type = ShaderObject::ST_GeometryShader;
 				}
-				else if ("compute_shader" == state_name)
+				else if (CT_HASH("compute_shader") == state_name_hash)
 				{
 					type = ShaderObject::ST_ComputeShader;
 				}
-				else if ("hull_shader" == state_name)
+				else if (CT_HASH("hull_shader") == state_name_hash)
 				{
 					type = ShaderObject::ST_HullShader;
 				}
 				else
 				{
-					BOOST_ASSERT("domain_shader" == state_name);
+					BOOST_ASSERT(CT_HASH("domain_shader") == state_name_hash);
 					type = ShaderObject::ST_DomainShader;
 				}
 
@@ -4045,6 +4048,7 @@ namespace KlayGE
 							ShaderDesc::StreamOutputDecl decl;
 
 							std::string usage_str = slot_node->Attrib("usage")->ValueString();
+							size_t const usage_str_hash = CT_HASH(usage_str.c_str());
 							XMLAttributePtr attr = slot_node->Attrib("usage_index");
 							if (attr)
 							{
@@ -4055,15 +4059,15 @@ namespace KlayGE
 								decl.usage_index = 0;
 							}
 
-							if (("POSITION" == usage_str) || ("SV_Position" == usage_str))
+							if ((CT_HASH("POSITION") == usage_str_hash) || (CT_HASH("SV_Position") == usage_str_hash))
 							{
 								decl.usage = VEU_Position;
 							}
-							else if ("NORMAL" == usage_str)
+							else if (CT_HASH("NORMAL") == usage_str_hash)
 							{
 								decl.usage = VEU_Normal;
 							}
-							else if ("COLOR" == usage_str)
+							else if (CT_HASH("COLOR") == usage_str_hash)
 							{
 								if (0 == decl.usage_index)
 								{
@@ -4074,23 +4078,23 @@ namespace KlayGE
 									decl.usage = VEU_Specular;
 								}
 							}
-							else if ("BLENDWEIGHT" == usage_str)
+							else if (CT_HASH("BLENDWEIGHT") == usage_str_hash)
 							{
 								decl.usage = VEU_BlendWeight;
 							}
-							else if ("BLENDINDICES" == usage_str)
+							else if (CT_HASH("BLENDINDICES") == usage_str_hash)
 							{
 								decl.usage = VEU_BlendIndex;
 							}
-							else if ("TEXCOORD" == usage_str)
+							else if (CT_HASH("TEXCOORD") == usage_str_hash)
 							{
 								decl.usage = VEU_TextureCoord;
 							}
-							else if ("TANGENT" == usage_str)
+							else if (CT_HASH("TANGENT") == usage_str_hash)
 							{
 								decl.usage = VEU_Tangent;
 							}
-							else if ("BINORMAL" == usage_str)
+							else if (CT_HASH("BINORMAL") == usage_str_hash)
 							{
 								decl.usage = VEU_Binormal;
 							}
@@ -4745,28 +4749,30 @@ namespace KlayGE
 		if (attr)
 		{
 			std::string type_str = attr->ValueString();
-			if ("vertex_shader" == type_str)
+			size_t const type_str_hash = CT_HASH(type_str.c_str());
+			if (CT_HASH("vertex_shader") == type_str_hash)
 			{
 				type_ = ShaderObject::ST_VertexShader;
 			}
-			else if ("pixel_shader" == type_str)
+			else if (CT_HASH("pixel_shader") == type_str_hash)
 			{
 				type_ = ShaderObject::ST_PixelShader;
 			}
-			else if ("geometry_shader" == type_str)
+			else if (CT_HASH("geometry_shader") == type_str_hash)
 			{
 				type_ = ShaderObject::ST_GeometryShader;
 			}
-			else if ("compute_shader" == type_str)
+			else if (CT_HASH("compute_shader") == type_str_hash)
 			{
 				type_ = ShaderObject::ST_ComputeShader;
 			}
-			else if ("hull_shader" == type_str)
+			else if (CT_HASH("hull_shader") == type_str_hash)
 			{
 				type_ = ShaderObject::ST_HullShader;
 			}
-			else if ("domain_shader" == type_str)
+			else
 			{
+				BOOST_ASSERT(CT_HASH("domain_shader") == type_str_hash);
 				type_ = ShaderObject::ST_DomainShader;
 			}
 		}

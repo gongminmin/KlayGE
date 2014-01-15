@@ -375,39 +375,40 @@ namespace KlayGE
 			if (attr)
 			{
 				std::string method_str = attr->ValueString();
-				if ("none" == method_str)
+				size_t const method_str_hash = CT_HASH(method_str.c_str());
+				if (CT_HASH("none") == method_str_hash)
 				{
 					stereo_method = STM_None;
 				}
-				else if ("red_cyan" == method_str)
+				else if (CT_HASH("red_cyan") == method_str_hash)
 				{
 					stereo_method = STM_ColorAnaglyph_RedCyan;
 				}
-				else if ("yellow_blue" == method_str)
+				else if (CT_HASH("yellow_blue") == method_str_hash)
 				{
 					stereo_method = STM_ColorAnaglyph_YellowBlue;
 				}
-				else if ("green_red" == method_str)
+				else if (CT_HASH("green_red") == method_str_hash)
 				{
 					stereo_method = STM_ColorAnaglyph_GreenRed;
 				}
-				else if ("lcd_shutter" == method_str)
+				else if (CT_HASH("lcd_shutter") == method_str_hash)
 				{
 					stereo_method = STM_LCDShutter;
 				}
-				else if ("hor_interlacing" == method_str)
+				else if (CT_HASH("hor_interlacing") == method_str_hash)
 				{
 					stereo_method = STM_HorizontalInterlacing;
 				}
-				else if ("ver_interlacing" == method_str)
+				else if (CT_HASH("ver_interlacing") == method_str_hash)
 				{
 					stereo_method = STM_VerticalInterlacing;
 				}
-				else if ("horizontal" == method_str)
+				else if (CT_HASH("horizontal") == method_str_hash)
 				{
 					stereo_method = STM_Horizontal;
 				}
-				else if ("vertical" == method_str)
+				else if (CT_HASH("vertical") == method_str_hash)
 				{
 					stereo_method = STM_Vertical;
 				}

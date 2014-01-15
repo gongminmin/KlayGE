@@ -708,20 +708,21 @@ namespace KlayGE
 		for (XMLNodePtr curve_node = root->FirstNode("curve"); curve_node; curve_node = curve_node->NextSibling("curve"))
 		{
 			std::string type_str = curve_node->Attrib("type")->ValueString();
+			size_t const type_str_hash = CT_HASH(type_str.c_str());
 			CameraPathController::InterpolateType type;
-			if ("linear" == type_str)
+			if (CT_HASH("linear") == type_str_hash)
 			{
 				type = CameraPathController::IT_Linear;
 			}
-			else if ("catmull_rom" == type_str)
+			else if (CT_HASH("catmull_rom") == type_str_hash)
 			{
 				type = CameraPathController::IT_CatmullRom;
 			}
-			else if ("b_spline" == type_str)
+			else if (CT_HASH("b_spline") == type_str_hash)
 			{
 				type = CameraPathController::IT_BSpline;
 			}
-			else if ("bezier" == type_str)
+			else if (CT_HASH("bezier") == type_str_hash)
 			{
 				type = CameraPathController::IT_Bezier;
 			}

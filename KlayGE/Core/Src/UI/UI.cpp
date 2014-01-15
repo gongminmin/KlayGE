@@ -578,7 +578,8 @@ namespace KlayGE
 					}
 
 					std::string type_str = ctrl_node->Attrib("type")->ValueString();
-					if ("static" == type_str)
+					size_t const type_str_hash = CT_HASH(type_str.c_str());
+					if (CT_HASH("static") == type_str_hash)
 					{
 						std::string caption = ctrl_node->Attrib("caption")->ValueString();
 						std::wstring wcaption;
@@ -586,7 +587,7 @@ namespace KlayGE
 						dlg->AddControl(MakeSharedPtr<UIStatic>(dlg, id, wcaption,
 							int4(x, y, width, height), is_default));
 					}
-					else if ("button" == type_str)
+					else if (CT_HASH("button") == type_str_hash)
 					{
 						std::string caption = ctrl_node->Attrib("caption")->ValueString();
 						uint8_t hotkey = static_cast<uint8_t>(ctrl_node->AttribInt("hotkey", 0));
@@ -595,7 +596,7 @@ namespace KlayGE
 						dlg->AddControl(MakeSharedPtr<UIButton>(dlg, id, wcaption,
 							int4(x, y, width, height), hotkey, is_default));
 					}
-					else if ("tex_button" == type_str)
+					else if (CT_HASH("tex_button") == type_str_hash)
 					{
 						TexturePtr tex;
 						attr = ctrl_node->Attrib("texture");
@@ -608,7 +609,7 @@ namespace KlayGE
 						dlg->AddControl(MakeSharedPtr<UITexButton>(dlg, id, tex,
 							int4(x, y, width, height), hotkey, is_default));
 					}
-					else if ("check_box" == type_str)
+					else if (CT_HASH("check_box") == type_str_hash)
 					{
 						std::string caption = ctrl_node->Attrib("caption")->ValueString();
 						bool checked = ReadBool(ctrl_node, "checked", false);
@@ -618,7 +619,7 @@ namespace KlayGE
 						dlg->AddControl(MakeSharedPtr<UICheckBox>(dlg, id, wcaption,
 							int4(x, y, width, height), checked, hotkey, is_default));
 					}
-					else if ("radio_button" == type_str)
+					else if (CT_HASH("radio_button") == type_str_hash)
 					{
 						std::string caption = ctrl_node->Attrib("caption")->ValueString();
 						int32_t button_group = ctrl_node->Attrib("button_group")->ValueInt();
@@ -629,7 +630,7 @@ namespace KlayGE
 						dlg->AddControl(MakeSharedPtr<UIRadioButton>(dlg, id, button_group, wcaption,
 							int4(x, y, width, height), checked, hotkey, is_default));
 					}
-					else if ("slider" == type_str)
+					else if (CT_HASH("slider") == type_str_hash)
 					{
 						int32_t min_v = ctrl_node->AttribInt("min", 0);
 						int32_t max_v = ctrl_node->AttribInt("max", 100);
@@ -637,7 +638,7 @@ namespace KlayGE
 						dlg->AddControl(MakeSharedPtr<UISlider>(dlg, id,
 							int4(x, y, width, height), min_v, max_v, value, is_default));
 					}
-					else if ("scroll_bar" == type_str)
+					else if (CT_HASH("scroll_bar") == type_str_hash)
 					{
 						int32_t track_start = ctrl_node->AttribInt("track_start", 0);
 						int32_t track_end = ctrl_node->AttribInt("track_end", 1);
@@ -646,7 +647,7 @@ namespace KlayGE
 						dlg->AddControl(MakeSharedPtr<UIScrollBar>(dlg, id,
 							int4(x, y, width, height), track_start, track_end, track_pos, page_size));
 					}
-					else if ("list_box" == type_str)
+					else if (CT_HASH("list_box") == type_str_hash)
 					{
 						UIListBox::STYLE style = UIListBox::SINGLE_SELECTION;
 						attr = ctrl_node->Attrib("style");
@@ -680,7 +681,7 @@ namespace KlayGE
 							dlg->Control<UIListBox>(id)->SelectItem(attr->ValueInt());
 						}
 					}
-					else if ("combo_box" == type_str)
+					else if (CT_HASH("combo_box") == type_str_hash)
 					{
 						uint8_t hotkey = static_cast<uint8_t>(ctrl_node->AttribInt("hotkey", 0));
 						dlg->AddControl(MakeSharedPtr<UIComboBox>(dlg, id,
@@ -700,7 +701,7 @@ namespace KlayGE
 							dlg->Control<UIComboBox>(id)->SetSelectedByIndex(attr->ValueInt());
 						}
 					}
-					else if ("edit_box" == type_str)
+					else if (CT_HASH("edit_box") == type_str_hash)
 					{
 						std::string caption = ctrl_node->Attrib("caption")->ValueString();
 						std::wstring wcaption;
@@ -708,7 +709,7 @@ namespace KlayGE
 						dlg->AddControl(MakeSharedPtr<UIEditBox>(dlg, id, wcaption,
 							int4(x, y, width, height), is_default));
 					}
-					else if ("polyline_edit_box" == type_str)
+					else if (CT_HASH("polyline_edit_box") == type_str_hash)
 					{
 						Color line_clr(0, 1, 0, 1);
 						line_clr.r() = ctrl_node->AttribFloat("line_r", 0);
@@ -719,7 +720,7 @@ namespace KlayGE
 							int4(x, y, width, height), is_default));
 						dlg->Control<UIPolylineEditBox>(id)->SetColor(line_clr);
 					}
-					else if ("progress_bar" == type_str)
+					else if (CT_HASH("progress_bar") == type_str_hash)
 					{
 						int32_t progress = ctrl_node->AttribInt("value", 0);
 						dlg->AddControl(MakeSharedPtr<UIProgressBar>(dlg, id, progress,
