@@ -2749,6 +2749,49 @@ namespace KlayGE
 	{
 	}
 
+	void RenderEffect::RecursiveIncludeNode(XMLNodePtr const & root, std::vector<std::string>& include_names) const
+	{
+		std::vector<XMLDocumentPtr> include_docs;
+		for (XMLNodePtr node = root->FirstNode("include"); node; node = node->NextSibling("include"))
+		{
+			XMLAttributePtr attr = node->Attrib("name");
+			BOOST_ASSERT(attr);
+
+			std::string include_name = attr->ValueString();
+
+			XMLDocument include_doc;
+			XMLNodePtr include_root = include_doc.Parse(ResLoader::Instance().Open(include_name));
+			this->RecursiveIncludeNode(include_root, include_names);
+
+			bool found = false;
+			for (size_t i = 0; i < include_names.size(); ++ i)
+			{
+				if (include_name == include_names[i])
+				{
+					found = true;
+					break;
+				}
+			}
+
+			if (!found)
+			{
+				include_names.push_back(include_name);
+			}
+		}
+	}
+
+	void RenderEffect::InsertIncludeNodes(XMLDocument& target_doc, XMLNodePtr const & target_root,
+		XMLNodePtr const & target_place, XMLNodePtr const & include_root) const
+	{
+		for (XMLNodePtr child_node = include_root->FirstNode(); child_node; child_node = child_node->NextSibling())
+		{
+			if ((XNT_Element == child_node->Type()) && (child_node->Name() != "include"))
+			{
+				target_root->InsertNode(target_place, target_doc.CloneNode(child_node));
+			}
+		}
+	}
+
 	void RenderEffect::Load(std::string const & name)
 	{
 		std::string fxml_name = ResLoader::Instance().Locate(name);
@@ -2769,13 +2812,13 @@ namespace KlayGE
 			XMLDocument doc;
 			XMLNodePtr root = doc.Parse(source);
 
-			XMLAttributePtr attr;
+			std::vector<std::string> include_names;
+			this->RecursiveIncludeNode(root, include_names);
 
-			std::vector<XMLDocumentPtr> include_docs;
-			for (XMLNodePtr node = root->FirstNode("include"); node; node = node->NextSibling("include"))
+			typedef KLAYGE_DECLTYPE(include_names) IncludeNamesType;
+			KLAYGE_FOREACH(IncludeNamesType::const_reference include_name, include_names)
 			{
-				attr = node->Attrib("name");
-				ResIdentifierPtr include_source = ResLoader::Instance().Open(attr->ValueString());
+				ResIdentifierPtr include_source = ResLoader::Instance().Open(include_name);
 				if (include_source)
 				{
 					timestamp_ = std::max(timestamp_, include_source->Timestamp());
@@ -2808,18 +2851,63 @@ namespace KlayGE
 				XMLAttributePtr attr;
 
 				std::vector<XMLDocumentPtr> include_docs;
+				std::vector<std::string> whole_include_names;
 				for (XMLNodePtr node = root->FirstNode("include"); node;)
 				{
 					attr = node->Attrib("name");
-					include_docs.push_back(MakeSharedPtr<XMLDocument>());
-					XMLNodePtr include_root = include_docs.back()->Parse(ResLoader::Instance().Open(attr->ValueString()));
+					BOOST_ASSERT(attr);
+					std::string include_name = attr->ValueString();
 
-					for (XMLNodePtr child_node = include_root->FirstNode(); child_node; child_node = child_node->NextSibling())
+					include_docs.push_back(MakeSharedPtr<XMLDocument>());
+					XMLNodePtr include_root = include_docs.back()->Parse(ResLoader::Instance().Open(include_name));
+
+					std::vector<std::string> include_names;
+					this->RecursiveIncludeNode(include_root, include_names);
+
+					if (!include_names.empty())
 					{
-						if (XNT_Element == child_node->Type())
+						for (KLAYGE_AUTO(iter, include_names.begin()); iter != include_names.end();)
 						{
-							root->InsertNode(node, doc.CloneNode(child_node));
+							bool found = false;
+							for (KLAYGE_AUTO(iter_w, whole_include_names.begin()); iter_w != whole_include_names.end(); ++ iter_w)
+							{
+								if (*iter == *iter_w)
+								{
+									found = true;
+									break;
+								}
+							}
+
+							if (found)
+							{
+								include_names.erase(iter);
+							}
+							else
+							{
+								include_docs.push_back(MakeSharedPtr<XMLDocument>());
+								XMLNodePtr recursive_include_root = include_docs.back()->Parse(ResLoader::Instance().Open(*iter));
+								this->InsertIncludeNodes(doc, root, node, recursive_include_root);
+
+								whole_include_names.push_back(*iter);
+								++ iter;
+							}
 						}
+					}
+
+					bool found = false;
+					for (KLAYGE_AUTO(iter_w, whole_include_names.begin()); iter_w != whole_include_names.end(); ++ iter_w)
+					{
+						if (include_name == *iter_w)
+						{
+							found = true;
+							break;
+						}
+					}
+
+					if (!found)
+					{
+						this->InsertIncludeNodes(doc, root, node, include_root);
+						whole_include_names.push_back(include_name);
 					}
 
 					XMLNodePtr node_next = node->NextSibling("include");

@@ -477,6 +477,11 @@ namespace KlayGE
 		std::string const & TypeName(uint32_t code) const;
 
 	private:
+		void RecursiveIncludeNode(XMLNodePtr const & root, std::vector<std::string>& include_names) const;
+		void InsertIncludeNodes(XMLDocument& target_doc, XMLNodePtr const & target_root,
+			XMLNodePtr const & target_place, XMLNodePtr const & include_root) const;
+
+	private:
 		shared_ptr<std::string> res_name_;
 		uint64_t timestamp_;
 

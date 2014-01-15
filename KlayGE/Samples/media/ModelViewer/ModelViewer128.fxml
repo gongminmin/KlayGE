@@ -2,10 +2,5 @@
 
 <effect>
 	<macro name="NUM_JOINTS" value="128"/>
-
-	<include name="DeferredRenderingUtil.fxml"/>
-	<include name="util.fxml"/>
-	<include name="Quaternion.fxml"/>
-	<include name="GBuffer.fxml"/>
 	<include name="ModelViewer.fxml"/>
 </effect>

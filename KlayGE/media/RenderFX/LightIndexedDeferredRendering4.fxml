@@ -2,10 +2,5 @@
 
 <effect>
 	<macro name="LIGHT_BATCH" value="4"/>
-	
-	<include name="DeferredRenderingUtil.fxml"/>
-	<include name="Lighting.fxml"/>
-	<include name="util.fxml"/>
-	<include name="DeferredRendering.fxml"/>
 	<include name="LightIndexedDeferredRendering.fxml"/>
 </effect>

@@ -1,9 +1,6 @@
 <?xml version='1.0'?>
 
 <effect>
-	<include name="DeferredRenderingUtil.fxml"/>
-	<include name="Lighting.fxml"/>
-	<include name="util.fxml"/>
 	<include name="DeferredRendering.fxml"/>
 
 	<cbuffer name="overlap_test">
