@@ -100,7 +100,10 @@ namespace KlayGE
 
 		virtual bool AttachNativeShader(ShaderType type, RenderEffect const & effect, std::vector<uint32_t> const & shader_desc_ids,
 			std::vector<uint8_t> const & native_shader_block) = 0;
-		virtual void ExtractNativeShader(ShaderType type, RenderEffect const & effect, std::vector<uint8_t>& native_shader_block) = 0;
+
+		virtual bool StreamIn(ResIdentifierPtr const & res, ShaderType type, RenderEffect const & effect,
+			std::vector<uint32_t> const & shader_desc_ids, uint32_t tech_index, uint32_t pass_index) = 0;
+		virtual void StreamOut(std::ostream& os, ShaderType type) = 0;
 
 		virtual void AttachShader(ShaderType type, RenderEffect const & effect,
 			RenderTechnique const & tech, RenderPass const & pass, std::vector<uint32_t> const & shader_desc_ids) = 0;

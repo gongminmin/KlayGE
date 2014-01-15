@@ -20,6 +20,7 @@
 #include <KFL/Util.hpp>
 #include <KFL/Math.hpp>
 #include <KFL/COMPtr.hpp>
+#include <KFL/ResIdentifier.hpp>
 #include <KlayGE/Context.hpp>
 #include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/RenderFactory.hpp>
@@ -845,128 +846,121 @@ namespace KlayGE
 				LittleEndianToNative<sizeof(ver)>(&ver);
 				if (4 == ver)
 				{
-					uint64_t timestamp;
-					std::memcpy(&timestamp, nsbp, sizeof(timestamp));
-					nsbp += sizeof(timestamp);
-					LittleEndianToNative<sizeof(timestamp)>(&timestamp);
-					if (timestamp >= effect.Timestamp())
+					uint8_t len = *nsbp;
+					++ nsbp;
+					std::string profile;
+					profile.resize(len);
+					std::memcpy(&profile[0], nsbp, len);
+					nsbp += len;
+					if (profile == shader_profile)
 					{
-						uint8_t len = *nsbp;
-						++ nsbp;
-						std::string profile;
-						profile.resize(len);
-						std::memcpy(&profile[0], nsbp, len);
-						nsbp += len;
-						if (profile == shader_profile)
+						uint32_t blob_size;
+						std::memcpy(&blob_size, nsbp, sizeof(blob_size));
+						nsbp += sizeof(blob_size);
+						shared_ptr<std::vector<uint8_t> > code_blob = MakeSharedPtr<std::vector<uint8_t> >(blob_size);
+
+						std::memcpy(&((*code_blob)[0]), nsbp, blob_size);
+						nsbp += blob_size;
+
+						D3D11ShaderDesc& sd = shader_desc_[type];
+
+						uint16_t cb_desc_size;
+						std::memcpy(&cb_desc_size, nsbp, sizeof(cb_desc_size));
+						nsbp += sizeof(cb_desc_size);
+						LittleEndianToNative<sizeof(cb_desc_size)>(&cb_desc_size);
+						sd.cb_desc.resize(cb_desc_size);
+						for (size_t i = 0; i < sd.cb_desc.size(); ++ i)
 						{
-							uint32_t blob_size;
-							std::memcpy(&blob_size, nsbp, sizeof(blob_size));
-							nsbp += sizeof(blob_size);
-							shared_ptr<std::vector<uint8_t> > code_blob = MakeSharedPtr<std::vector<uint8_t> >(blob_size);
+							std::memcpy(&sd.cb_desc[i].size, nsbp, sizeof(sd.cb_desc[i].size));
+							nsbp += sizeof(sd.cb_desc[i].size);
+							LittleEndianToNative<sizeof(sd.cb_desc[i].size)>(&sd.cb_desc[i].size);
 
-							std::memcpy(&((*code_blob)[0]), nsbp, blob_size);
-							nsbp += blob_size;
-
-							D3D11ShaderDesc& sd = shader_desc_[type];
-
-							uint16_t cb_desc_size;
-							std::memcpy(&cb_desc_size, nsbp, sizeof(cb_desc_size));
-							nsbp += sizeof(cb_desc_size);
-							LittleEndianToNative<sizeof(cb_desc_size)>(&cb_desc_size);
-							sd.cb_desc.resize(cb_desc_size);
-							for (size_t i = 0; i < sd.cb_desc.size(); ++ i)
-							{
-								std::memcpy(&sd.cb_desc[i].size, nsbp, sizeof(sd.cb_desc[i].size));
-								nsbp += sizeof(sd.cb_desc[i].size);
-								LittleEndianToNative<sizeof(sd.cb_desc[i].size)>(&sd.cb_desc[i].size);
-
-								uint16_t var_desc_size;
-								std::memcpy(&var_desc_size, nsbp, sizeof(var_desc_size));
-								nsbp += sizeof(var_desc_size);
-								LittleEndianToNative<sizeof(var_desc_size)>(&var_desc_size);
-								sd.cb_desc[i].var_desc.resize(var_desc_size);
-								for (size_t j = 0; j < sd.cb_desc[i].var_desc.size(); ++ j)
-								{
-									len = *nsbp;
-									++ nsbp;
-									sd.cb_desc[i].var_desc[j].name.resize(len);
-									std::memcpy(&sd.cb_desc[i].var_desc[j].name[0], nsbp, len);
-									nsbp += len;
-
-									std::memcpy(&sd.cb_desc[i].var_desc[j].start_offset, nsbp, sizeof(sd.cb_desc[i].var_desc[j].start_offset));
-									nsbp += sizeof(sd.cb_desc[i].var_desc[j].start_offset);
-									LittleEndianToNative<sizeof(sd.cb_desc[i].var_desc[j].start_offset)>(&sd.cb_desc[i].var_desc[j].start_offset);
-									std::memcpy(&sd.cb_desc[i].var_desc[j].type, nsbp, sizeof(sd.cb_desc[i].var_desc[j].type));
-									nsbp += sizeof(sd.cb_desc[i].var_desc[j].type);
-									std::memcpy(&sd.cb_desc[i].var_desc[j].rows, nsbp, sizeof(sd.cb_desc[i].var_desc[j].rows));
-									nsbp += sizeof(sd.cb_desc[i].var_desc[j].rows);
-									std::memcpy(&sd.cb_desc[i].var_desc[j].columns, nsbp, sizeof(sd.cb_desc[i].var_desc[j].columns));
-									nsbp += sizeof(sd.cb_desc[i].var_desc[j].columns);
-									std::memcpy(&sd.cb_desc[i].var_desc[j].elements, nsbp, sizeof(sd.cb_desc[i].var_desc[j].elements));
-									nsbp += sizeof(sd.cb_desc[i].var_desc[j].elements);
-									LittleEndianToNative<sizeof(sd.cb_desc[i].var_desc[j].elements)>(&sd.cb_desc[i].var_desc[j].elements);
-								}
-							}
-
-							std::memcpy(&sd.num_samplers, nsbp, sizeof(sd.num_samplers));
-							nsbp += sizeof(sd.num_samplers);
-							LittleEndianToNative<sizeof(sd.num_samplers)>(&sd.num_samplers);
-							std::memcpy(&sd.num_srvs, nsbp, sizeof(sd.num_srvs));
-							nsbp += sizeof(sd.num_srvs);
-							LittleEndianToNative<sizeof(sd.num_srvs)>(&sd.num_srvs);
-							std::memcpy(&sd.num_uavs, nsbp, sizeof(sd.num_uavs));
-							nsbp += sizeof(sd.num_uavs);
-							LittleEndianToNative<sizeof(sd.num_uavs)>(&sd.num_uavs);
-
-							uint16_t res_desc_size;
-							std::memcpy(&res_desc_size, nsbp, sizeof(res_desc_size));
-							nsbp += sizeof(res_desc_size);
-							LittleEndianToNative<sizeof(res_desc_size)>(&res_desc_size);
-							sd.res_desc.resize(res_desc_size);
-							for (size_t i = 0; i < sd.res_desc.size(); ++ i)
+							uint16_t var_desc_size;
+							std::memcpy(&var_desc_size, nsbp, sizeof(var_desc_size));
+							nsbp += sizeof(var_desc_size);
+							LittleEndianToNative<sizeof(var_desc_size)>(&var_desc_size);
+							sd.cb_desc[i].var_desc.resize(var_desc_size);
+							for (size_t j = 0; j < sd.cb_desc[i].var_desc.size(); ++ j)
 							{
 								len = *nsbp;
 								++ nsbp;
-								sd.res_desc[i].name.resize(len);
-								std::memcpy(&sd.res_desc[i].name[0], nsbp, len);
+								sd.cb_desc[i].var_desc[j].name.resize(len);
+								std::memcpy(&sd.cb_desc[i].var_desc[j].name[0], nsbp, len);
 								nsbp += len;
 
-								std::memcpy(&sd.res_desc[i].type, nsbp, sizeof(sd.res_desc[i].type));
-								nsbp += sizeof(sd.res_desc[i].type);
-
-								std::memcpy(&sd.res_desc[i].dimension, nsbp, sizeof(sd.res_desc[i].dimension));
-								nsbp += sizeof(sd.res_desc[i].dimension);
-
-								std::memcpy(&sd.res_desc[i].bind_point, nsbp, sizeof(sd.res_desc[i].bind_point));
-								nsbp += sizeof(sd.res_desc[i].bind_point);
-								LittleEndianToNative<sizeof(sd.res_desc[i].bind_point)>(&sd.res_desc[i].bind_point);
+								std::memcpy(&sd.cb_desc[i].var_desc[j].start_offset, nsbp, sizeof(sd.cb_desc[i].var_desc[j].start_offset));
+								nsbp += sizeof(sd.cb_desc[i].var_desc[j].start_offset);
+								LittleEndianToNative<sizeof(sd.cb_desc[i].var_desc[j].start_offset)>(&sd.cb_desc[i].var_desc[j].start_offset);
+								std::memcpy(&sd.cb_desc[i].var_desc[j].type, nsbp, sizeof(sd.cb_desc[i].var_desc[j].type));
+								nsbp += sizeof(sd.cb_desc[i].var_desc[j].type);
+								std::memcpy(&sd.cb_desc[i].var_desc[j].rows, nsbp, sizeof(sd.cb_desc[i].var_desc[j].rows));
+								nsbp += sizeof(sd.cb_desc[i].var_desc[j].rows);
+								std::memcpy(&sd.cb_desc[i].var_desc[j].columns, nsbp, sizeof(sd.cb_desc[i].var_desc[j].columns));
+								nsbp += sizeof(sd.cb_desc[i].var_desc[j].columns);
+								std::memcpy(&sd.cb_desc[i].var_desc[j].elements, nsbp, sizeof(sd.cb_desc[i].var_desc[j].elements));
+								nsbp += sizeof(sd.cb_desc[i].var_desc[j].elements);
+								LittleEndianToNative<sizeof(sd.cb_desc[i].var_desc[j].elements)>(&sd.cb_desc[i].var_desc[j].elements);
 							}
-
-							if (ST_VertexShader == type)
-							{
-								std::memcpy(&vs_signature_, nsbp, sizeof(vs_signature_));
-								nsbp += sizeof(vs_signature_);
-								LittleEndianToNative<sizeof(vs_signature_)>(&vs_signature_);
-							}
-							else if (ST_ComputeShader == type)
-							{
-								std::memcpy(&cs_block_size_x_, nsbp, sizeof(cs_block_size_x_));
-								nsbp += sizeof(cs_block_size_x_);
-								LittleEndianToNative<sizeof(cs_block_size_x_)>(&cs_block_size_x_);
-
-								std::memcpy(&cs_block_size_y_, nsbp, sizeof(cs_block_size_y_));
-								nsbp += sizeof(cs_block_size_y_);
-								LittleEndianToNative<sizeof(cs_block_size_y_)>(&cs_block_size_y_);
-
-								std::memcpy(&cs_block_size_z_, nsbp, sizeof(cs_block_size_z_));
-								nsbp += sizeof(cs_block_size_z_);
-								LittleEndianToNative<sizeof(cs_block_size_z_)>(&cs_block_size_z_);
-							}
-
-							this->AttachShaderBytecode(type, effect, shader_desc_ids, code_blob);
-
-							ret = true;
 						}
+
+						std::memcpy(&sd.num_samplers, nsbp, sizeof(sd.num_samplers));
+						nsbp += sizeof(sd.num_samplers);
+						LittleEndianToNative<sizeof(sd.num_samplers)>(&sd.num_samplers);
+						std::memcpy(&sd.num_srvs, nsbp, sizeof(sd.num_srvs));
+						nsbp += sizeof(sd.num_srvs);
+						LittleEndianToNative<sizeof(sd.num_srvs)>(&sd.num_srvs);
+						std::memcpy(&sd.num_uavs, nsbp, sizeof(sd.num_uavs));
+						nsbp += sizeof(sd.num_uavs);
+						LittleEndianToNative<sizeof(sd.num_uavs)>(&sd.num_uavs);
+
+						uint16_t res_desc_size;
+						std::memcpy(&res_desc_size, nsbp, sizeof(res_desc_size));
+						nsbp += sizeof(res_desc_size);
+						LittleEndianToNative<sizeof(res_desc_size)>(&res_desc_size);
+						sd.res_desc.resize(res_desc_size);
+						for (size_t i = 0; i < sd.res_desc.size(); ++ i)
+						{
+							len = *nsbp;
+							++ nsbp;
+							sd.res_desc[i].name.resize(len);
+							std::memcpy(&sd.res_desc[i].name[0], nsbp, len);
+							nsbp += len;
+
+							std::memcpy(&sd.res_desc[i].type, nsbp, sizeof(sd.res_desc[i].type));
+							nsbp += sizeof(sd.res_desc[i].type);
+
+							std::memcpy(&sd.res_desc[i].dimension, nsbp, sizeof(sd.res_desc[i].dimension));
+							nsbp += sizeof(sd.res_desc[i].dimension);
+
+							std::memcpy(&sd.res_desc[i].bind_point, nsbp, sizeof(sd.res_desc[i].bind_point));
+							nsbp += sizeof(sd.res_desc[i].bind_point);
+							LittleEndianToNative<sizeof(sd.res_desc[i].bind_point)>(&sd.res_desc[i].bind_point);
+						}
+
+						if (ST_VertexShader == type)
+						{
+							std::memcpy(&vs_signature_, nsbp, sizeof(vs_signature_));
+							nsbp += sizeof(vs_signature_);
+							LittleEndianToNative<sizeof(vs_signature_)>(&vs_signature_);
+						}
+						else if (ST_ComputeShader == type)
+						{
+							std::memcpy(&cs_block_size_x_, nsbp, sizeof(cs_block_size_x_));
+							nsbp += sizeof(cs_block_size_x_);
+							LittleEndianToNative<sizeof(cs_block_size_x_)>(&cs_block_size_x_);
+
+							std::memcpy(&cs_block_size_y_, nsbp, sizeof(cs_block_size_y_));
+							nsbp += sizeof(cs_block_size_y_);
+							LittleEndianToNative<sizeof(cs_block_size_y_)>(&cs_block_size_y_);
+
+							std::memcpy(&cs_block_size_z_, nsbp, sizeof(cs_block_size_z_));
+							nsbp += sizeof(cs_block_size_z_);
+							LittleEndianToNative<sizeof(cs_block_size_z_)>(&cs_block_size_z_);
+						}
+
+						this->AttachShaderBytecode(type, effect, shader_desc_ids, code_blob);
+
+						ret = true;
 					}
 				}
 			}
@@ -975,9 +969,36 @@ namespace KlayGE
 		return ret;
 	}
 
-	void D3D11ShaderObject::ExtractNativeShader(ShaderType type, RenderEffect const & effect, std::vector<uint8_t>& native_shader_block)
+	bool D3D11ShaderObject::StreamIn(ResIdentifierPtr const & res, ShaderType type, RenderEffect const & effect,
+		std::vector<uint32_t> const & shader_desc_ids, uint32_t tech_index, uint32_t pass_index)
 	{
-		native_shader_block.clear();
+		uint32_t len;
+		res->read(&len, sizeof(len));
+		LittleEndianToNative<sizeof(len)>(&len);
+		std::vector<uint8_t> native_shader_block(len);
+		if (len > 0)
+		{
+			res->read(&native_shader_block[0], len * sizeof(native_shader_block[0]));
+		}
+
+		bool this_native_accepted = this->AttachNativeShader(type, effect, shader_desc_ids, native_shader_block);
+		if (!this_native_accepted)
+		{
+			RenderTechniquePtr const & tech = effect.TechniqueByIndex(tech_index);
+			RenderPassPtr const & pass = tech->Pass(pass_index);
+			this->AttachShader(type, effect, *tech, *pass, shader_desc_ids);
+			if (shader_code_[type].first)
+			{
+				this_native_accepted = true;
+			}
+		}
+
+		return this_native_accepted;
+	}
+
+	void D3D11ShaderObject::StreamOut(std::ostream& os, ShaderType type)
+	{
+		std::vector<uint8_t> native_shader_block;
 
 		shared_ptr<std::vector<uint8_t> > code_blob = shader_code_[type].first;
 		if (code_blob)
@@ -991,10 +1012,6 @@ namespace KlayGE
 			uint32_t ver = 4;
 			NativeToLittleEndian<sizeof(ver)>(&ver);
 			oss.write(reinterpret_cast<char const *>(&ver), sizeof(ver));
-
-			uint64_t timestamp = effect.Timestamp();
-			NativeToLittleEndian<sizeof(timestamp)>(&timestamp);
-			oss.write(reinterpret_cast<char const *>(&timestamp), sizeof(timestamp));
 
 			uint8_t len = static_cast<uint8_t>(shader_code_[type].second.size());
 			oss.write(reinterpret_cast<char const *>(&len), sizeof(len));
@@ -1087,6 +1104,17 @@ namespace KlayGE
 			std::string out_str = oss.str();
 			native_shader_block.resize(out_str.size());
 			std::memcpy(&native_shader_block[0], &out_str[0], out_str.size());
+		}
+
+		uint32_t len = static_cast<uint32_t>(native_shader_block.size());
+		{
+			uint32_t tmp = len;
+			NativeToLittleEndian<sizeof(tmp)>(&tmp);
+			os.write(reinterpret_cast<char const *>(&tmp), sizeof(tmp));
+		}
+		if (len > 0)
+		{
+			os.write(reinterpret_cast<char const *>(&native_shader_block[0]), len * sizeof(native_shader_block[0]));
 		}
 	}
 

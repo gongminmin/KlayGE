@@ -72,7 +72,7 @@ int main(int argc, char* argv[])
 {
 	if (argc < 2)
 	{
-		cout << "Usage: FXMLJIT pc_dx11|pc_dx10|pc_dx9|pc_gl4|pc_gl3|pc_gl2|android_tegra3 xxx.fxml [macro_name_0 macro_value_0 macro_name_1 macro_value_1 ... macro_name_n macro_value_n]" << endl;
+		cout << "Usage: FXMLJIT pc_dx11|pc_dx10|pc_dx9|pc_gl4|pc_gl3|pc_gl2|android_tegra3 xxx.fxml" << endl;
 		return 1;
 	}
 
@@ -114,18 +114,9 @@ int main(int argc, char* argv[])
 	app.Create();
 
 	std::string fxml_name = argv[2];
-	std::vector<std::pair<std::string, std::string> > macros;
-	for (int arg = 3; arg < argc; arg += 2)
-	{
-		macros.push_back(std::make_pair(argv[arg + 0], argv[arg + 1]));
-	}
-	if (!macros.empty())
-	{
-		macros.push_back(std::make_pair("", ""));
-	}
 
 	RenderEffectPtr effect = MakeSharedPtr<RenderEffect>();
-	effect->Load(fxml_name, macros.empty() ? nullptr : &macros[0]);
+	effect->Load(fxml_name);
 
 	return 0;
 }

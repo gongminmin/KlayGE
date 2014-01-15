@@ -12,6 +12,7 @@
 
 #include <KlayGE/KlayGE.hpp>
 #include <KFL/Util.hpp>
+#include <KlayGE/RenderEffect.hpp>
 
 #include <string>
 #include <vector>
@@ -30,9 +31,23 @@ namespace KlayGE
 			return true;
 		}
 
-		void ExtractNativeShader(ShaderType /*type*/, RenderEffect const & /*effect*/, std::vector<uint8_t>& native_shader_block)
+		virtual bool StreamIn(ResIdentifierPtr const & res, ShaderType type, RenderEffect const & effect,
+			std::vector<uint32_t> const & shader_desc_ids, uint32_t tech_index, uint32_t pass_index) KLAYGE_OVERRIDE
 		{
-			native_shader_block.clear();
+			UNREF_PARAM(res);
+			UNREF_PARAM(type);
+			UNREF_PARAM(effect);
+			UNREF_PARAM(shader_desc_ids);
+			UNREF_PARAM(tech_index);
+			UNREF_PARAM(pass_index);
+
+			return true;
+		}
+
+		virtual void StreamOut(std::ostream& os, ShaderType type) KLAYGE_OVERRIDE
+		{
+			UNREF_PARAM(os);
+			UNREF_PARAM(type);
 		}
 
 		void AttachShader(ShaderType /*type*/, RenderEffect const & /*effect*/,

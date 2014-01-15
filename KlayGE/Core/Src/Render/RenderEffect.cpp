@@ -83,7 +83,7 @@ namespace
 {
 	using namespace KlayGE;
 
-	uint32_t const KFX_VERSION = 0x0104;
+	uint32_t const KFX_VERSION = 0x0105;
 
 	mutex singleton_mutex;
 
@@ -2787,8 +2787,7 @@ namespace KlayGE
 			timestamp_ = 0;
 		}
 
-		std::vector<std::vector<std::vector<uint8_t> > > native_shader_blocks;
-		if (!this->StreamIn(kfx_source, native_shader_blocks))
+		if (!this->StreamIn(kfx_source))
 		{
 			shader_descs_.reset();
 			cbuffers_.reset();
@@ -2913,28 +2912,12 @@ namespace KlayGE
 				}
 			}
 
-			native_shader_blocks.resize(shader_descs_->size());
-			for (size_t i = 1; i < shader_descs_->size(); ++ i)
-			{
-				uint32_t tech_pass_type = (*shader_descs_)[i].tech_pass_type;
-				ShaderObjectPtr const & so = techniques_[tech_pass_type >> 16]->Pass((tech_pass_type >> 8) & 0xFF)->GetShaderObject();
-
-				native_shader_blocks[i].push_back(std::vector<uint8_t>());
-				so->ExtractNativeShader(static_cast<ShaderObject::ShaderType>(tech_pass_type & 0xFF), *this, native_shader_blocks[i].back());
-
-				if (native_shader_blocks[i].back().empty())
-				{
-					native_shader_blocks[i].pop_back();
-				}
-			}
-
 			std::ofstream ofs(kfx_name.c_str(), std::ios_base::binary | std::ios_base::out);
-			this->StreamOut(ofs, native_shader_blocks);
+			this->StreamOut(ofs);
 		}
 	}
 
-	bool RenderEffect::StreamIn(ResIdentifierPtr const & source,
-			std::vector<std::vector<std::vector<uint8_t> > >& native_shader_blocks)
+	bool RenderEffect::StreamIn(ResIdentifierPtr const & source)
 	{
 		bool ret = false;
 		if (source)
@@ -3050,8 +3033,6 @@ namespace KlayGE
 									}
 								}
 							}
-
-							native_shader_blocks.resize(shader_descs_->size());
 						}
 
 						ret = true;
@@ -3065,7 +3046,7 @@ namespace KlayGE
 								RenderTechniquePtr technique = MakeSharedPtr<RenderTechnique>(*this);
 								techniques_[i] = technique;
 
-								ret &= technique->StreamIn(source, i, native_shader_blocks);
+								ret &= technique->StreamIn(source, i);
 							}
 						}
 					}
@@ -3076,8 +3057,7 @@ namespace KlayGE
 		return ret;
 	}
 
-	void RenderEffect::StreamOut(std::ostream& os,
-		std::vector<std::vector<std::vector<uint8_t> > > const & native_shader_blocks)
+	void RenderEffect::StreamOut(std::ostream& os)
 	{
 		uint32_t fourcc = MakeFourCC<'K', 'F', 'X', ' '>::value;
 		NativeToLittleEndian<sizeof(fourcc)>(&fourcc);
@@ -3197,7 +3177,7 @@ namespace KlayGE
 			os.write(reinterpret_cast<char const *>(&num_techs), sizeof(num_techs));
 			for (uint32_t i = 0; i < techniques_.size(); ++ i)
 			{
-				techniques_[i]->StreamOut(os, i, native_shader_blocks);
+				techniques_[i]->StreamOut(os, i);
 			}
 		}
 	}
@@ -3459,8 +3439,7 @@ namespace KlayGE
 		}
 	}
 
-	bool RenderTechnique::StreamIn(ResIdentifierPtr const & res, uint32_t tech_index,
-			std::vector<std::vector<std::vector<uint8_t> > >& native_shader_blocks)
+	bool RenderTechnique::StreamIn(ResIdentifierPtr const & res, uint32_t tech_index)
 	{
 		name_ = MakeSharedPtr<KLAYGE_DECLTYPE(*name_)>(ReadShortString(res));
 
@@ -3511,7 +3490,7 @@ namespace KlayGE
 			RenderPassPtr pass = MakeSharedPtr<RenderPass>(effect_);
 			passes_[pass_index] = pass;
 
-			ret &= pass->StreamIn(res, tech_index, pass_index, native_shader_blocks);
+			ret &= pass->StreamIn(res, tech_index, pass_index);
 
 			is_validate_ &= pass->Validate();
 
@@ -3522,8 +3501,7 @@ namespace KlayGE
 		return ret;
 	}
 
-	void RenderTechnique::StreamOut(std::ostream& os, uint32_t tech_index,
-			std::vector<std::vector<std::vector<uint8_t> > > const & native_shader_blocks)
+	void RenderTechnique::StreamOut(std::ostream& os, uint32_t tech_index)
 	{
 		WriteShortString(os, *name_);
 
@@ -3570,7 +3548,7 @@ namespace KlayGE
 		os.write(reinterpret_cast<char const *>(&num_passes), sizeof(num_passes));
 		for (uint32_t pass_index = 0; pass_index < num_passes; ++ pass_index)
 		{
-			passes_[pass_index]->StreamOut(os, tech_index, pass_index, native_shader_blocks);
+			passes_[pass_index]->StreamOut(os, tech_index, pass_index);
 		}
 	}
 
@@ -4149,8 +4127,7 @@ namespace KlayGE
 		is_validate_ = shader_obj_->Validate();
 	}
 
-	bool RenderPass::StreamIn(ResIdentifierPtr const & res, uint32_t tech_index, uint32_t pass_index,
-			std::vector<std::vector<std::vector<uint8_t> > >& native_shader_blocks)
+	bool RenderPass::StreamIn(ResIdentifierPtr const & res, uint32_t tech_index, uint32_t pass_index)
 	{
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
@@ -4270,49 +4247,8 @@ namespace KlayGE
 				}
 				else
 				{
-					std::vector<std::vector<uint8_t> >& this_native_shader_block = native_shader_blocks[(*shader_desc_ids_)[type]];
-
-					uint8_t num;
-					res->read(&num, sizeof(num));
-					this_native_shader_block.resize(num);
-
-					for (uint32_t i = 0; i < num; ++ i)
-					{
-						uint32_t len;
-						res->read(&len, sizeof(len));
-						LittleEndianToNative<sizeof(len)>(&len);
-						this_native_shader_block[i].resize(len);
-						if (len > 0)
-						{
-							res->read(&this_native_shader_block[i][0], len * sizeof(this_native_shader_block[i][0]));
-						}
-					}
-
-					this_native_accepted = false;
-					for (uint32_t i = 0; i < num; ++ i)
-					{
-						if (shader_obj_->AttachNativeShader(st, effect_, *shader_desc_ids_, this_native_shader_block[i]))
-						{
-							this_native_accepted = true;
-							break;
-						}
-					}
-
-					if (!this_native_accepted)
-					{
-						RenderTechniquePtr const & tech = effect_.TechniqueByIndex(tech_index);
-						RenderPassPtr const & pass = tech->Pass(pass_index);
-						shader_obj_->AttachShader(st, effect_, *tech, *pass, *shader_desc_ids_);
-
-						this_native_shader_block.push_back(std::vector<uint8_t>());
-						shader_obj_->ExtractNativeShader(st, effect_, this_native_shader_block.back());
-
-						if (this_native_shader_block.back().empty())
-						{
-							this_native_shader_block.pop_back();
-							this_native_accepted = true;
-						}
-					}
+					this_native_accepted = shader_obj_->StreamIn(res, static_cast<ShaderObject::ShaderType>(type), effect_,
+						*shader_desc_ids_, tech_index, pass_index);
 				}
 
 				native_accepted &= this_native_accepted;
@@ -4326,8 +4262,7 @@ namespace KlayGE
 		return native_accepted;
 	}
 
-	void RenderPass::StreamOut(std::ostream& os, uint32_t tech_index, uint32_t pass_index,
-			std::vector<std::vector<std::vector<uint8_t> > > const & native_shader_blocks)
+	void RenderPass::StreamOut(std::ostream& os, uint32_t tech_index, uint32_t pass_index)
 	{
 		WriteShortString(os, *name_);
 
@@ -4427,6 +4362,7 @@ namespace KlayGE
 		for (uint32_t i = 0; i < shader_desc_ids_->size(); ++ i)
 		{
 			uint32_t tmp = (*shader_desc_ids_)[i];
+			NativeToLittleEndian<sizeof(tmp)>(&tmp);
 			os.write(reinterpret_cast<char const *>(&tmp), sizeof(tmp));
 		}
 
@@ -4438,22 +4374,7 @@ namespace KlayGE
 			{
 				if (sd.tech_pass_type == (tech_index << 16) + (pass_index << 8) + type)
 				{
-					uint8_t num = static_cast<uint8_t>(native_shader_blocks[(*shader_desc_ids_)[type]].size());
-					os.write(reinterpret_cast<char const *>(&num), sizeof(num));
-
-					for (uint32_t i = 0; i < num; ++ i)
-					{
-						uint32_t len = static_cast<uint32_t>(native_shader_blocks[(*shader_desc_ids_)[type]][i].size());
-						{
-							uint32_t tmp = len;
-							os.write(reinterpret_cast<char const *>(&tmp), sizeof(tmp));
-						}
-						if (len > 0)
-						{
-							os.write(reinterpret_cast<char const *>(&native_shader_blocks[(*shader_desc_ids_)[type]][i][0]),
-								len * sizeof(native_shader_blocks[(*shader_desc_ids_)[type]][i][0]));
-						}
-					}
+					shader_obj_->StreamOut(os, static_cast<ShaderObject::ShaderType>(type));
 				}
 			}
 		}

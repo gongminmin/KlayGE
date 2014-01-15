@@ -369,9 +369,9 @@ namespace KlayGE
 	public:
 		RenderEffect();
 
-		void Load(std::string const & name, std::pair<std::string, std::string>* macros);
+		void Load(std::string const & name);
 
-		void StreamOut(std::ostream& os, std::vector<std::vector<uint8_t> > const & native_shader_blocks);
+		void StreamOut(std::ostream& os);
 
 		RenderEffectPtr Clone();
 
@@ -382,10 +382,6 @@ namespace KlayGE
 		uint64_t Timestamp() const
 		{
 			return timestamp_;
-		}
-		uint64_t PredefinedMacrosHash() const
-		{
-			return predefined_macros_hash_;
 		}
 
 		void PrototypeEffect(RenderEffectPtr const & prototype_effect)
@@ -454,7 +450,6 @@ namespace KlayGE
 	private:
 		shared_ptr<std::string> res_name_;
 		uint64_t timestamp_;
-		uint64_t predefined_macros_hash_;
 
 		std::vector<RenderEffectParameterPtr> params_;
 		shared_ptr<std::vector<std::pair<std::string, std::vector<uint32_t> > > > cbuffers_;
@@ -478,8 +473,7 @@ namespace KlayGE
 
 		void Load(XMLNodePtr const & node, uint32_t tech_index);
 
-		void StreamOut(std::ostream& os, uint32_t tech_index,
-			std::vector<std::vector<uint8_t> > const & native_shader_blocks);
+		void StreamOut(std::ostream& os, uint32_t tech_index);
 
 		RenderTechniquePtr Clone(RenderEffect& effect);
 
@@ -576,8 +570,7 @@ namespace KlayGE
 		void Load(XMLNodePtr const & node, uint32_t tech_index, uint32_t pass_index, RenderPassPtr const & inherit_pass);
 		void Load(uint32_t tech_index, uint32_t pass_index, RenderPassPtr const & inherit_pass);
 
-		void StreamOut(std::ostream& os, uint32_t tech_index, uint32_t pass_index,
-			std::vector<std::vector<uint8_t> > const & native_shader_blocks);
+		void StreamOut(std::ostream& os, uint32_t tech_index, uint32_t pass_index);
 
 		RenderPassPtr Clone(RenderEffect& effect);
 

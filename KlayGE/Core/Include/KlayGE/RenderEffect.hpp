@@ -399,9 +399,8 @@ namespace KlayGE
 
 		void Load(std::string const & name);
 
-		bool StreamIn(ResIdentifierPtr const & source,
-			std::vector<std::vector<std::vector<uint8_t> > >& native_shader_blocks);
-		void StreamOut(std::ostream& os, std::vector<std::vector<std::vector<uint8_t> > > const & native_shader_blocks);
+		bool StreamIn(ResIdentifierPtr const & source);
+		void StreamOut(std::ostream& os);
 
 		RenderEffectPtr Clone();
 
@@ -503,10 +502,8 @@ namespace KlayGE
 
 		void Load(XMLNodePtr const & node, uint32_t tech_index);
 
-		bool StreamIn(ResIdentifierPtr const & res, uint32_t tech_index,
-			std::vector<std::vector<std::vector<uint8_t> > >& native_shader_blocks);
-		void StreamOut(std::ostream& os, uint32_t tech_index,
-			std::vector<std::vector<std::vector<uint8_t> > > const & native_shader_blocks);
+		bool StreamIn(ResIdentifierPtr const & res, uint32_t tech_index);
+		void StreamOut(std::ostream& os, uint32_t tech_index);
 
 		RenderTechniquePtr Clone(RenderEffect& effect);
 
@@ -603,10 +600,8 @@ namespace KlayGE
 		void Load(XMLNodePtr const & node, uint32_t tech_index, uint32_t pass_index, RenderPassPtr const & inherit_pass);
 		void Load(uint32_t tech_index, uint32_t pass_index, RenderPassPtr const & inherit_pass);
 
-		bool StreamIn(ResIdentifierPtr const & res, uint32_t tech_index, uint32_t pass_index,
-			std::vector<std::vector<std::vector<uint8_t> > >& native_shader_blocks);
-		void StreamOut(std::ostream& os, uint32_t tech_index, uint32_t pass_index,
-			std::vector<std::vector<std::vector<uint8_t> > > const & native_shader_blocks);
+		bool StreamIn(ResIdentifierPtr const & res, uint32_t tech_index, uint32_t pass_index);
+		void StreamOut(std::ostream& os, uint32_t tech_index, uint32_t pass_index);
 
 		RenderPassPtr Clone(RenderEffect& effect);
 

@@ -2643,7 +2643,7 @@ namespace KlayGE
 	{
 	}
 
-	void RenderEffect::Load(std::string const & name, std::pair<std::string, std::string>* predefined_macros)
+	void RenderEffect::Load(std::string const & name)
 	{
 		std::string fxml_name = ResLoader::Instance().Locate(name);
 		if (fxml_name.empty())
@@ -2680,24 +2680,7 @@ namespace KlayGE
 		{
 			timestamp_ = 0;
 		}
-		if (predefined_macros)
-		{
-			size_t hash_val = 0;
-			size_t m = 0;
-			while (!predefined_macros[m].first.empty())
-			{
-				boost::hash_range(hash_val, predefined_macros[m].first.begin(), predefined_macros[m].first.end());
-				boost::hash_range(hash_val, predefined_macros[m].second.begin(), predefined_macros[m].second.end());
-				++ m;
-			}
-			predefined_macros_hash_ = static_cast<uint64_t>(hash_val);
-		}
-		else
-		{
-			predefined_macros_hash_ = 0;
-		}
 
-		std::vector<std::vector<uint8_t> > native_shader_blocks;
 		shader_descs_.reset();
 		cbuffers_.reset();
 		macros_.reset();
@@ -2738,18 +2721,9 @@ namespace KlayGE
 
 			{
 				XMLNodePtr macro_node = root->FirstNode("macro");
-				if (macro_node || predefined_macros)
+				if (macro_node)
 				{
 					macros_ = MakeSharedPtr<KLAYGE_DECLTYPE(*macros_)>();
-				}
-				if (predefined_macros)
-				{
-					size_t m = 0;
-					while (!predefined_macros[m].first.empty())
-					{
-						macros_->push_back(std::make_pair(std::make_pair(predefined_macros[m].first, predefined_macros[m].second), false));
-						++ m;
-					}
 				}
 				for (; macro_node; macro_node = macro_node->NextSibling("macro"))
 				{
@@ -2830,21 +2804,11 @@ namespace KlayGE
 			}
 		}
 
-		native_shader_blocks.resize(shader_descs_->size());
-		for (size_t i = 1; i < shader_descs_->size(); ++ i)
-		{
-			uint32_t tech_pass_type = (*shader_descs_)[i].tech_pass_type;
-			ShaderObjectPtr const & so = techniques_[tech_pass_type >> 16]->Pass((tech_pass_type >> 8) & 0xFF)->GetShaderObject();
-
-			so->ExtractNativeShader(static_cast<ShaderObject::ShaderType>(tech_pass_type & 0xFF), *this, native_shader_blocks[i]);
-		}
-
 		std::ofstream ofs(kfx_name.c_str(), std::ios_base::binary | std::ios_base::out);
-		this->StreamOut(ofs, native_shader_blocks);
+		this->StreamOut(ofs);
 	}
 
-	void RenderEffect::StreamOut(std::ostream& os,
-		std::vector<std::vector<uint8_t> > const & native_shader_blocks)
+	void RenderEffect::StreamOut(std::ostream& os)
 	{
 		uint32_t fourcc = MakeFourCC<'K', 'F', 'X', ' '>::value;
 		NativeToLittleEndian<sizeof(fourcc)>(&fourcc);
@@ -2964,7 +2928,7 @@ namespace KlayGE
 			os.write(reinterpret_cast<char const *>(&num_techs), sizeof(num_techs));
 			for (uint32_t i = 0; i < techniques_.size(); ++ i)
 			{
-				techniques_[i]->StreamOut(os, i, native_shader_blocks);
+				techniques_[i]->StreamOut(os, i);
 			}
 		}
 	}
@@ -3211,8 +3175,7 @@ namespace KlayGE
 		}
 	}
 
-	void RenderTechnique::StreamOut(std::ostream& os, uint32_t tech_index,
-			std::vector<std::vector<uint8_t> > const & native_shader_blocks)
+	void RenderTechnique::StreamOut(std::ostream& os, uint32_t tech_index)
 	{
 		WriteShortString(os, *name_);
 
@@ -3259,7 +3222,7 @@ namespace KlayGE
 		os.write(reinterpret_cast<char const *>(&num_passes), sizeof(num_passes));
 		for (uint32_t pass_index = 0; pass_index < num_passes; ++ pass_index)
 		{
-			passes_[pass_index]->StreamOut(os, tech_index, pass_index, native_shader_blocks);
+			passes_[pass_index]->StreamOut(os, tech_index, pass_index);
 		}
 	}
 
@@ -3823,8 +3786,7 @@ namespace KlayGE
 		is_validate_ = shader_obj_->Validate();
 	}
 
-	void RenderPass::StreamOut(std::ostream& os, uint32_t tech_index, uint32_t pass_index,
-			std::vector<std::vector<uint8_t> > const & native_shader_blocks)
+	void RenderPass::StreamOut(std::ostream& os, uint32_t tech_index, uint32_t pass_index)
 	{
 		WriteShortString(os, *name_);
 
@@ -3935,19 +3897,7 @@ namespace KlayGE
 			{
 				if (sd.tech_pass_type == (tech_index << 16) + (pass_index << 8) + type)
 				{
-					uint8_t num = 1;
-					os.write(reinterpret_cast<char const *>(&num), sizeof(num));
-
-					uint32_t len = static_cast<uint32_t>(native_shader_blocks[(*shader_desc_ids_)[type]].size());
-					{
-						uint32_t tmp = len;
-						os.write(reinterpret_cast<char const *>(&tmp), sizeof(tmp));
-					}
-					if (len > 0)
-					{
-						os.write(reinterpret_cast<char const *>(&native_shader_blocks[(*shader_desc_ids_)[type]][0]),
-							len * sizeof(native_shader_blocks[(*shader_desc_ids_)[type]][0]));
-					}
+					shader_obj_->StreamOut(os, static_cast<ShaderObject::ShaderType>(type));
 				}
 			}
 		}
