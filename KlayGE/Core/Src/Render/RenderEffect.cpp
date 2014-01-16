@@ -105,9 +105,10 @@ namespace
 
 		uint32_t type_code(std::string const & name) const
 		{
-			for (uint32_t i = 0; i < types_.size(); ++ i)
+			size_t const name_hash = CT_HASH(name.c_str());
+			for (uint32_t i = 0; i < types_hash_.size(); ++ i)
 			{
-				if (types_[i] == name)
+				if (types_hash_[i] == name_hash)
 				{
 					return i;
 				}
@@ -176,10 +177,17 @@ namespace
 			types_.push_back("rw_byte_address_buffer");
 			types_.push_back("append_structured_buffer");
 			types_.push_back("consume_structured_buffer");
+
+			types_hash_.resize(types_.size());
+			for (size_t i = 0; i < types_.size(); ++ i)
+			{
+				types_hash_[i] = CT_HASH(types_[i].c_str());
+			}
 		}
 
 	private:
 		std::vector<std::string> types_;
+		std::vector<size_t> types_hash_;
 
 		static shared_ptr<type_define> instance_;
 	};
@@ -203,9 +211,10 @@ namespace
 
 		ShadeMode from_str(std::string const & name) const
 		{
-			for (uint32_t i = 0; i < sms_.size(); ++ i)
+			size_t const name_hash = CT_HASH(name.c_str());
+			for (uint32_t i = 0; i < sms_hash_.size(); ++ i)
 			{
-				if (sms_[i] == name)
+				if (sms_hash_[i] == name_hash)
 				{
 					return static_cast<ShadeMode>(i);
 				}
@@ -216,12 +225,12 @@ namespace
 
 		shade_mode_define()
 		{
-			sms_.push_back("flat");
-			sms_.push_back("gouraud");
+			sms_hash_.push_back(CT_HASH("flat"));
+			sms_hash_.push_back(CT_HASH("gouraud"));
 		}
 
 	private:
-		std::vector<std::string> sms_;
+		std::vector<size_t> sms_hash_;
 
 		static shared_ptr<shade_mode_define> instance_;
 	};
@@ -245,9 +254,10 @@ namespace
 
 		CompareFunction from_str(std::string const & name) const
 		{
-			for (uint32_t i = 0; i < cfs_.size(); ++ i)
+			size_t const name_hash = CT_HASH(name.c_str());
+			for (uint32_t i = 0; i < cfs_hash_.size(); ++ i)
 			{
-				if (cfs_[i] == name)
+				if (cfs_hash_[i] == name_hash)
 				{
 					return static_cast<CompareFunction>(i);
 				}
@@ -258,18 +268,18 @@ namespace
 
 		compare_function_define()
 		{
-			cfs_.push_back("always_fail");
-			cfs_.push_back("always_pass");
-			cfs_.push_back("less");
-			cfs_.push_back("less_equal");
-			cfs_.push_back("equal");
-			cfs_.push_back("not_equal");
-			cfs_.push_back("greater_equal");
-			cfs_.push_back("greater");
+			cfs_hash_.push_back(CT_HASH("always_fail"));
+			cfs_hash_.push_back(CT_HASH("always_pass"));
+			cfs_hash_.push_back(CT_HASH("less"));
+			cfs_hash_.push_back(CT_HASH("less_equal"));
+			cfs_hash_.push_back(CT_HASH("equal"));
+			cfs_hash_.push_back(CT_HASH("not_equal"));
+			cfs_hash_.push_back(CT_HASH("greater_equal"));
+			cfs_hash_.push_back(CT_HASH("greater"));
 		}
 
 	private:
-		std::vector<std::string> cfs_;
+		std::vector<size_t> cfs_hash_;
 
 		static shared_ptr<compare_function_define> instance_;
 	};
@@ -293,9 +303,10 @@ namespace
 
 		CullMode from_str(std::string const & name) const
 		{
-			for (uint32_t i = 0; i < cms_.size(); ++ i)
+			size_t const name_hash = CT_HASH(name.c_str());
+			for (uint32_t i = 0; i < cms_hash_.size(); ++ i)
 			{
-				if (cms_[i] == name)
+				if (cms_hash_[i] == name_hash)
 				{
 					return static_cast<CullMode>(i);
 				}
@@ -306,13 +317,13 @@ namespace
 
 		cull_mode_define()
 		{
-			cms_.push_back("none");
-			cms_.push_back("front");
-			cms_.push_back("back");
+			cms_hash_.push_back(CT_HASH("none"));
+			cms_hash_.push_back(CT_HASH("front"));
+			cms_hash_.push_back(CT_HASH("back"));
 		}
 
 	private:
-		std::vector<std::string> cms_;
+		std::vector<size_t> cms_hash_;
 
 		static shared_ptr<cull_mode_define> instance_;
 	};
@@ -336,9 +347,10 @@ namespace
 
 		PolygonMode from_str(std::string const & name) const
 		{
-			for (uint32_t i = 0; i < pms_.size(); ++ i)
+			size_t const name_hash = CT_HASH(name.c_str());
+			for (uint32_t i = 0; i < pms_hash_.size(); ++ i)
 			{
-				if (pms_[i] == name)
+				if (pms_hash_[i] == name_hash)
 				{
 					return static_cast<PolygonMode>(i);
 				}
@@ -349,13 +361,13 @@ namespace
 
 		polygon_mode_define()
 		{
-			pms_.push_back("point");
-			pms_.push_back("line");
-			pms_.push_back("fill");
+			pms_hash_.push_back(CT_HASH("point"));
+			pms_hash_.push_back(CT_HASH("line"));
+			pms_hash_.push_back(CT_HASH("fill"));
 		}
 
 	private:
-		std::vector<std::string> pms_;
+		std::vector<size_t> pms_hash_;
 
 		static shared_ptr<polygon_mode_define> instance_;
 	};
@@ -379,9 +391,10 @@ namespace
 
 		AlphaBlendFactor from_str(std::string const & name) const
 		{
-			for (uint32_t i = 0; i < abfs_.size(); ++ i)
+			size_t const name_hash = CT_HASH(name.c_str());
+			for (uint32_t i = 0; i < abfs_hash_.size(); ++ i)
 			{
-				if (abfs_[i] == name)
+				if (abfs_hash_[i] == name_hash)
 				{
 					return static_cast<AlphaBlendFactor>(i);
 				}
@@ -392,27 +405,27 @@ namespace
 
 		alpha_blend_factor_define()
 		{
-			abfs_.push_back("zero");
-			abfs_.push_back("one");
-			abfs_.push_back("src_alpha");
-			abfs_.push_back("dst_alpha");
-			abfs_.push_back("inv_src_alpha");
-			abfs_.push_back("inv_dst_alpha");
-			abfs_.push_back("src_color");
-			abfs_.push_back("dst_color");
-			abfs_.push_back("inv_src_color");
-			abfs_.push_back("inv_dst_color");
-			abfs_.push_back("src_alpha_sat");
-			abfs_.push_back("blend_factor");
-			abfs_.push_back("inv_blend_factor");
-			abfs_.push_back("src1_alpha");
-			abfs_.push_back("inv_src1_alpha");
-			abfs_.push_back("src1_color");
-			abfs_.push_back("inv_src1_color");
+			abfs_hash_.push_back(CT_HASH("zero"));
+			abfs_hash_.push_back(CT_HASH("one"));
+			abfs_hash_.push_back(CT_HASH("src_alpha"));
+			abfs_hash_.push_back(CT_HASH("dst_alpha"));
+			abfs_hash_.push_back(CT_HASH("inv_src_alpha"));
+			abfs_hash_.push_back(CT_HASH("inv_dst_alpha"));
+			abfs_hash_.push_back(CT_HASH("src_color"));
+			abfs_hash_.push_back(CT_HASH("dst_color"));
+			abfs_hash_.push_back(CT_HASH("inv_src_color"));
+			abfs_hash_.push_back(CT_HASH("inv_dst_color"));
+			abfs_hash_.push_back(CT_HASH("src_alpha_sat"));
+			abfs_hash_.push_back(CT_HASH("blend_factor"));
+			abfs_hash_.push_back(CT_HASH("inv_blend_factor"));
+			abfs_hash_.push_back(CT_HASH("src1_alpha"));
+			abfs_hash_.push_back(CT_HASH("inv_src1_alpha"));
+			abfs_hash_.push_back(CT_HASH("src1_color"));
+			abfs_hash_.push_back(CT_HASH("inv_src1_color"));
 		}
 
 	private:
-		std::vector<std::string> abfs_;
+		std::vector<size_t> abfs_hash_;
 
 		static shared_ptr<alpha_blend_factor_define> instance_;
 	};
@@ -436,9 +449,10 @@ namespace
 
 		BlendOperation from_str(std::string const & name) const
 		{
-			for (uint32_t i = 0; i < bops_.size(); ++ i)
+			size_t const name_hash = CT_HASH(name.c_str());
+			for (uint32_t i = 0; i < bops_hash_.size(); ++ i)
 			{
-				if (bops_[i] == name)
+				if (bops_hash_[i] == name_hash)
 				{
 					return static_cast<BlendOperation>(i + 1);
 				}
@@ -449,15 +463,15 @@ namespace
 
 		blend_operation_define()
 		{
-			bops_.push_back("add");
-			bops_.push_back("sub");
-			bops_.push_back("rev_sub");
-			bops_.push_back("min");
-			bops_.push_back("max");
+			bops_hash_.push_back(CT_HASH("add"));
+			bops_hash_.push_back(CT_HASH("sub"));
+			bops_hash_.push_back(CT_HASH("rev_sub"));
+			bops_hash_.push_back(CT_HASH("min"));
+			bops_hash_.push_back(CT_HASH("max"));
 		}
 
 	private:
-		std::vector<std::string> bops_;
+		std::vector<size_t> bops_hash_;
 
 		static shared_ptr<blend_operation_define> instance_;
 	};
@@ -481,9 +495,10 @@ namespace
 
 		StencilOperation from_str(std::string const & name) const
 		{
-			for (uint32_t i = 0; i < sops_.size(); ++ i)
+			size_t const name_hash = CT_HASH(name.c_str());
+			for (uint32_t i = 0; i < sops_hash_.size(); ++ i)
 			{
-				if (sops_[i] == name)
+				if (sops_hash_[i] == name_hash)
 				{
 					return static_cast<StencilOperation>(i);
 				}
@@ -494,18 +509,18 @@ namespace
 
 		stencil_operation_define()
 		{
-			sops_.push_back("keep");
-			sops_.push_back("zero");
-			sops_.push_back("replace");
-			sops_.push_back("incr");
-			sops_.push_back("decr");
-			sops_.push_back("invert");
-			sops_.push_back("incr_wrap");
-			sops_.push_back("decr_wrap");
+			sops_hash_.push_back(CT_HASH("keep"));
+			sops_hash_.push_back(CT_HASH("zero"));
+			sops_hash_.push_back(CT_HASH("replace"));
+			sops_hash_.push_back(CT_HASH("incr"));
+			sops_hash_.push_back(CT_HASH("decr"));
+			sops_hash_.push_back(CT_HASH("invert"));
+			sops_hash_.push_back(CT_HASH("incr_wrap"));
+			sops_hash_.push_back(CT_HASH("decr_wrap"));
 		}
 
 	private:
-		std::vector<std::string> sops_;
+		std::vector<size_t> sops_hash_;
 
 		static shared_ptr<stencil_operation_define> instance_;
 	};
@@ -541,14 +556,15 @@ namespace
 				cmp = 0;
 				f = name;
 			}
-			for (uint32_t i = 0; i < tfs_.size(); ++ i)
+			size_t const f_hash = CT_HASH(f.c_str());
+			for (uint32_t i = 0; i < tfs_hash_.size(); ++ i)
 			{
-				if (tfs_[i] == f)
+				if (tfs_hash_[i] == f_hash)
 				{
 					return static_cast<TexFilterOp>((cmp << 4) + i);
 				}
 			}
-			if ("anisotropic" == f)
+			if (CT_HASH("anisotropic") == f_hash)
 			{
 				return static_cast<TexFilterOp>((cmp << 4) + TFO_Anisotropic);
 			}
@@ -558,18 +574,18 @@ namespace
 
 		texture_filter_mode_define()
 		{
-			tfs_.push_back("min_mag_mip_point");
-			tfs_.push_back("min_mag_point_mip_linear");
-			tfs_.push_back("min_point_mag_linear_mip_point");
-			tfs_.push_back("min_point_mag_mip_linear");
-			tfs_.push_back("min_linear_mag_mip_point");
-			tfs_.push_back("min_linear_mag_point_mip_linear");
-			tfs_.push_back("min_mag_linear_mip_point");
-			tfs_.push_back("min_mag_mip_linear");
+			tfs_hash_.push_back(CT_HASH("min_mag_mip_point"));
+			tfs_hash_.push_back(CT_HASH("min_mag_point_mip_linear"));
+			tfs_hash_.push_back(CT_HASH("min_point_mag_linear_mip_point"));
+			tfs_hash_.push_back(CT_HASH("min_point_mag_mip_linear"));
+			tfs_hash_.push_back(CT_HASH("min_linear_mag_mip_point"));
+			tfs_hash_.push_back(CT_HASH("min_linear_mag_point_mip_linear"));
+			tfs_hash_.push_back(CT_HASH("min_mag_linear_mip_point"));
+			tfs_hash_.push_back(CT_HASH("min_mag_mip_linear"));
 		}
 
 	private:
-		std::vector<std::string> tfs_;
+		std::vector<size_t> tfs_hash_;
 
 		static shared_ptr<texture_filter_mode_define> instance_;
 	};
@@ -593,9 +609,10 @@ namespace
 
 		TexAddressingMode from_str(std::string const & name) const
 		{
-			for (uint32_t i = 0; i < tams_.size(); ++ i)
+			size_t const name_hash = CT_HASH(name.c_str());
+			for (uint32_t i = 0; i < tams_hash_.size(); ++ i)
 			{
-				if (tams_[i] == name)
+				if (tams_hash_[i] == name_hash)
 				{
 					return static_cast<TexAddressingMode>(i);
 				}
@@ -606,14 +623,14 @@ namespace
 
 		texture_addr_mode_define()
 		{
-			tams_.push_back("wrap");
-			tams_.push_back("mirror");
-			tams_.push_back("clamp");
-			tams_.push_back("border");
+			tams_hash_.push_back(CT_HASH("wrap"));
+			tams_hash_.push_back(CT_HASH("mirror"));
+			tams_hash_.push_back(CT_HASH("clamp"));
+			tams_hash_.push_back(CT_HASH("border"));
 		}
 
 	private:
-		std::vector<std::string> tams_;
+		std::vector<size_t> tams_hash_;
 
 		static shared_ptr<texture_addr_mode_define> instance_;
 	};
@@ -637,9 +654,10 @@ namespace
 
 		LogicOperation from_str(std::string const & name) const
 		{
-			for (uint32_t i = 0; i < lops_.size(); ++ i)
+			size_t const name_hash = CT_HASH(name.c_str());
+			for (uint32_t i = 0; i < lops_hash_.size(); ++ i)
 			{
-				if (lops_[i] == name)
+				if (lops_hash_[i] == name_hash)
 				{
 					return static_cast<LogicOperation>(i);
 				}
@@ -650,26 +668,26 @@ namespace
 
 		logic_operation_define()
 		{
-			lops_.push_back("clear");
-			lops_.push_back("set");
-			lops_.push_back("copy");
-			lops_.push_back("copy_inverted");
-			lops_.push_back("noop");
-			lops_.push_back("invert");
-			lops_.push_back("and");
-			lops_.push_back("nand");
-			lops_.push_back("or");
-			lops_.push_back("nor");
-			lops_.push_back("xor");
-			lops_.push_back("equiv");
-			lops_.push_back("and_reverse");
-			lops_.push_back("and_inverted");
-			lops_.push_back("or_reverse");
-			lops_.push_back("or_inverted");
+			lops_hash_.push_back(CT_HASH("clear"));
+			lops_hash_.push_back(CT_HASH("set"));
+			lops_hash_.push_back(CT_HASH("copy"));
+			lops_hash_.push_back(CT_HASH("copy_inverted"));
+			lops_hash_.push_back(CT_HASH("noop"));
+			lops_hash_.push_back(CT_HASH("invert"));
+			lops_hash_.push_back(CT_HASH("and"));
+			lops_hash_.push_back(CT_HASH("nand"));
+			lops_hash_.push_back(CT_HASH("or"));
+			lops_hash_.push_back(CT_HASH("nor"));
+			lops_hash_.push_back(CT_HASH("xor"));
+			lops_hash_.push_back(CT_HASH("equiv"));
+			lops_hash_.push_back(CT_HASH("and_reverse"));
+			lops_hash_.push_back(CT_HASH("and_inverted"));
+			lops_hash_.push_back(CT_HASH("or_reverse"));
+			lops_hash_.push_back(CT_HASH("or_inverted"));
 		}
 
 	private:
-		std::vector<std::string> lops_;
+		std::vector<size_t> lops_hash_;
 
 		static shared_ptr<logic_operation_define> instance_;
 	};
@@ -2805,13 +2823,16 @@ namespace KlayGE
 		ResIdentifierPtr source = ResLoader::Instance().Open(fxml_name);
 		ResIdentifierPtr kfx_source = ResLoader::Instance().Open(kfx_name);
 
+		XMLDocumentPtr doc;
+		XMLNodePtr root;
+
 		res_name_ = MakeSharedPtr<std::string>(fxml_name);
 		if (source)
 		{
 			timestamp_ = source->Timestamp();
 
-			XMLDocument doc;
-			XMLNodePtr root = doc.Parse(source);
+			doc = MakeSharedPtr<XMLDocument>();
+			root = doc->Parse(source);
 
 			std::vector<std::string> include_names;
 			this->RecursiveIncludeNode(root, include_names);
@@ -2843,9 +2864,6 @@ namespace KlayGE
 			if (source)
 			{
 				shader_descs_ = MakeSharedPtr<KLAYGE_DECLTYPE(*shader_descs_)>(1);
-
-				XMLDocument doc;
-				XMLNodePtr root = doc.Parse(source);
 
 				cbuffers_ = MakeSharedPtr<KLAYGE_DECLTYPE(*cbuffers_)>();
 
@@ -2887,7 +2905,7 @@ namespace KlayGE
 							{
 								include_docs.push_back(MakeSharedPtr<XMLDocument>());
 								XMLNodePtr recursive_include_root = include_docs.back()->Parse(ResLoader::Instance().Open(*iter));
-								this->InsertIncludeNodes(doc, root, node, recursive_include_root);
+								this->InsertIncludeNodes(*doc, root, node, recursive_include_root);
 
 								whole_include_names.push_back(*iter);
 								++ iter;
@@ -2907,7 +2925,7 @@ namespace KlayGE
 
 					if (!found)
 					{
-						this->InsertIncludeNodes(doc, root, node, include_root);
+						this->InsertIncludeNodes(*doc, root, node, include_root);
 						whole_include_names.push_back(include_name);
 					}
 
@@ -3302,10 +3320,11 @@ namespace KlayGE
 
 	RenderEffectParameterPtr RenderEffect::ParameterByName(std::string const & name) const
 	{
+		size_t const name_hash = boost::hash_range(name.begin(), name.end());
 		typedef KLAYGE_DECLTYPE(params_) ParamsType;
 		KLAYGE_FOREACH(ParamsType::const_reference param, params_)
 		{
-			if (name == *param->Name())
+			if (name_hash == param->NameHash())
 			{
 				return param;
 			}
@@ -3315,10 +3334,11 @@ namespace KlayGE
 
 	RenderEffectParameterPtr RenderEffect::ParameterBySemantic(std::string const & semantic) const
 	{
+		size_t const semantic_hash = boost::hash_range(semantic.begin(), semantic.end());
 		typedef KLAYGE_DECLTYPE(params_) ParamsType;
 		KLAYGE_FOREACH(ParamsType::const_reference param, params_)
 		{
-			if (semantic == *param->Semantic())
+			if (semantic_hash == param->SemanticHash())
 			{
 				return param;
 			}
@@ -3328,10 +3348,11 @@ namespace KlayGE
 
 	RenderTechniquePtr const & RenderEffect::TechniqueByName(std::string const & name) const
 	{
+		size_t const name_hash = boost::hash_range(name.begin(), name.end());
 		typedef KLAYGE_DECLTYPE(techniques_) TechsType;
 		KLAYGE_FOREACH(TechsType::const_reference tech, techniques_)
 		{
-			if (name == tech->Name())
+			if (name_hash == tech->NameHash())
 			{
 				return tech;
 			}
@@ -3376,6 +3397,7 @@ namespace KlayGE
 	void RenderTechnique::Load(XMLNodePtr const & node, uint32_t tech_index)
 	{
 		name_ = MakeSharedPtr<KLAYGE_DECLTYPE(*name_)>(node->Attrib("name")->ValueString());
+		name_hash_ = boost::hash_range(name_->begin(), name_->end());
 
 		RenderTechniquePtr parent_tech;
 		XMLAttributePtr inherit_attr = node->Attrib("inherit");
@@ -3531,6 +3553,7 @@ namespace KlayGE
 	bool RenderTechnique::StreamIn(ResIdentifierPtr const & res, uint32_t tech_index)
 	{
 		name_ = MakeSharedPtr<KLAYGE_DECLTYPE(*name_)>(ReadShortString(res));
+		name_hash_ = boost::hash_range(name_->begin(), name_->end());
 
 		uint8_t num_anno;
 		res->read(&num_anno, sizeof(num_anno));
@@ -3646,6 +3669,7 @@ namespace KlayGE
 		RenderTechniquePtr ret = MakeSharedPtr<RenderTechnique>(effect);
 
 		ret->name_ = name_;
+		ret->name_hash_ = name_hash_;
 
 		ret->annotations_ = annotations_;
 		ret->macros_ = macros_;
@@ -3670,6 +3694,7 @@ namespace KlayGE
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
 		name_ = MakeSharedPtr<KLAYGE_DECLTYPE(*name_)>(node->Attrib("name")->ValueString());
+		name_hash_ = boost::hash_range(name_->begin(), name_->end());
 
 		if (inherit_pass)
 		{
@@ -4167,6 +4192,7 @@ namespace KlayGE
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
 		name_ = inherit_pass->name_;
+		name_hash_ = boost::hash_range(name_->begin(), name_->end());
 		annotations_ = inherit_pass->annotations_;
 		macros_ = inherit_pass->macros_;
 
@@ -4228,6 +4254,7 @@ namespace KlayGE
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
 		name_ = MakeSharedPtr<KLAYGE_DECLTYPE(*name_)>(ReadShortString(res));
+		name_hash_ = boost::hash_range(name_->begin(), name_->end());
 
 		uint8_t num_anno;
 		res->read(&num_anno, sizeof(num_anno));
@@ -4481,6 +4508,7 @@ namespace KlayGE
 		RenderPassPtr ret = MakeSharedPtr<RenderPass>(effect);
 
 		ret->name_ = name_;
+		ret->name_hash_ = name_hash_;
 		ret->annotations_ = annotations_;
 		ret->macros_ = macros_;
 		ret->shader_desc_ids_ = shader_desc_ids_;
@@ -4527,6 +4555,7 @@ namespace KlayGE
 	{
 		type_ = type_define::instance().type_code(node->Attrib("type")->ValueString());
 		name_ = MakeSharedPtr<KLAYGE_DECLTYPE(*name_)>(node->Attrib("name")->ValueString());
+		name_hash_ = boost::hash_range(name_->begin(), name_->end());
 
 		XMLAttributePtr attr = node->Attrib("semantic");
 		if (attr)
@@ -4601,6 +4630,7 @@ namespace KlayGE
 		res->read(&type_, sizeof(type_));
 		LittleEndianToNative<sizeof(type_)>(&type_);
 		name_ = MakeSharedPtr<KLAYGE_DECLTYPE(*name_)>(ReadShortString(res));
+		name_hash_ = boost::hash_range(name_->begin(), name_->end());
 
 		std::string sem = ReadShortString(res);
 		if (!sem.empty())
@@ -4734,6 +4764,7 @@ namespace KlayGE
 		RenderEffectParameterPtr ret = MakeSharedPtr<RenderEffectParameter>(effect);
 
 		ret->name_ = name_;
+		ret->name_hash_ = name_hash_;
 		ret->semantic_ = semantic_;
 
 		ret->type_ = type_;

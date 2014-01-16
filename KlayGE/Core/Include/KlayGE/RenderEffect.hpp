@@ -408,10 +408,6 @@ namespace KlayGE
 		{
 			return *res_name_;
 		}
-		uint64_t Timestamp() const
-		{
-			return timestamp_;
-		}
 
 		void PrototypeEffect(RenderEffectPtr const & prototype_effect)
 		{
@@ -516,6 +512,10 @@ namespace KlayGE
 		{
 			return *name_;
 		}
+		size_t NameHash() const
+		{
+			return name_hash_;
+		}
 
 		RenderEffect& Effect() const
 		{
@@ -579,6 +579,7 @@ namespace KlayGE
 	private:
 		RenderEffect& effect_;
 		shared_ptr<std::string> name_;
+		size_t name_hash_;
 
 		std::vector<RenderPassPtr> passes_;
 		shared_ptr<std::vector<RenderEffectAnnotationPtr> > annotations_;
@@ -613,6 +614,10 @@ namespace KlayGE
 		std::string const & Name() const
 		{
 			return *name_;
+		}
+		size_t NameHash() const
+		{
+			return name_hash_;
 		}
 
 		void Bind();
@@ -664,6 +669,7 @@ namespace KlayGE
 		RenderEffect& effect_;
 
 		shared_ptr<std::string> name_;
+		size_t name_hash_;
 		shared_ptr<std::vector<RenderEffectAnnotationPtr> > annotations_;
 		shared_ptr<std::vector<std::pair<std::string, std::string> > > macros_;
 		shared_ptr<std::vector<uint32_t> > shader_desc_ids_;
@@ -711,9 +717,17 @@ namespace KlayGE
 		{
 			return name_;
 		}
+		size_t NameHash() const
+		{
+			return name_hash_;
+		}
 		shared_ptr<std::string> const & Semantic() const
 		{
 			return semantic_;
+		}
+		size_t SemanticHash() const
+		{
+			return semantic_hash_;
 		}
 
 		uint32_t NumAnnotations() const
@@ -743,7 +757,9 @@ namespace KlayGE
 		RenderEffect& effect_;
 
 		shared_ptr<std::string> name_;
+		size_t name_hash_;
 		shared_ptr<std::string> semantic_;
+		size_t semantic_hash_;
 
 		uint32_t type_;
 		shared_ptr<RenderVariable> var_;
