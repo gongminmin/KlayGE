@@ -987,6 +987,7 @@ namespace KlayGE
 				for (KLAYGE_AUTO(beg, tok.begin()); beg != tok.end();)
 				{
 					this_token = *beg;
+					size_t const this_token_hash = CT_HASH(this_token.c_str());
 
 					RenderEffectParameterPtr const & param = effect.ParameterByName(this_token);
 					if (param &&
@@ -1089,13 +1090,13 @@ namespace KlayGE
 					}
 					else
 					{
-						if ("SV_Position" == this_token)
+						if (CT_HASH("SV_Position") == this_token_hash)
 						{
 							shader_ss << "POSITION";
 						}
 						else
 						{
-							if ("SV_Depth" == this_token)
+							if (CT_HASH("SV_Depth") == this_token_hash)
 							{
 								shader_ss << "DEPTH";
 							}
@@ -1107,15 +1108,16 @@ namespace KlayGE
 								}
 								else
 								{
-									if ("[" == this_token)
+									if (CT_HASH("[") == this_token_hash)
 									{
 										++ beg;
-										if (("branch" == *beg)
-											|| ("flatten" == *beg)
-											|| ("forcecase" == *beg)
-											|| ("call" == *beg)
-											|| ("unroll" == *beg)
-											|| ("loop" == *beg))
+										size_t const token_hash = CT_HASH((*beg).c_str());
+										if ((CT_HASH("branch") == token_hash)
+											|| (CT_HASH("flatten") == token_hash)
+											|| (CT_HASH("forcecase") == token_hash)
+											|| (CT_HASH("call") == token_hash)
+											|| (CT_HASH("unroll") == token_hash)
+											|| (CT_HASH("loop") == token_hash))
 										{
 											std::string attr = *beg;
 											++ beg;
@@ -1296,14 +1298,15 @@ namespace KlayGE
 		for (KLAYGE_AUTO(beg, tok.begin()); beg != tok.end(); ++ beg)
 		{
 			std::string const & this_token = *beg;
+			size_t const this_token_hash = CT_HASH(this_token.c_str());
 
-			if ("#version" == this_token)
+			if (CT_HASH("#version") == this_token_hash)
 			{
 				++ beg; // Skip space
 				++ beg; // Skip version
 				++ beg; // Skip \n
 			}
-			else if ("#extension" == this_token)
+			else if (CT_HASH("#extension") == this_token_hash)
 			{
 				++ beg; // Skip space
 				++ beg; // Skip extension name
@@ -1317,18 +1320,18 @@ namespace KlayGE
 				switch (type)
 				{
 				case ST_VertexShader:
-					if (("gl_Color" == this_token) || ("gl_Normal" == this_token)
-						|| ("gl_Vertex" == this_token) || ("gl_FogCoord" == this_token)
+					if ((CT_HASH("gl_Color") == this_token_hash) || (CT_HASH("gl_Normal") == this_token_hash)
+						|| (CT_HASH("gl_Vertex") == this_token_hash) || (CT_HASH("gl_FogCoord") == this_token_hash)
 						|| (0 == this_token.find("gl_MultiTexCoord")))
 
 					{
 						ss << "a_" << this_token;
 					}
-					else if (("gl_TexCoord" == this_token) || ("gl_FogFragCoord" == this_token))
+					else if ((CT_HASH("gl_TexCoord") == this_token_hash) || (CT_HASH("gl_FogFragCoord") == this_token_hash))
 					{
 						ss << "v_" << this_token;
 					}
-					else if (("gl_FrontColor" == this_token) || ("gl_BackColor" == this_token))
+					else if ((CT_HASH("gl_FrontColor") == this_token_hash) || (CT_HASH("gl_BackColor") == this_token_hash))
 					{
 						ss << "v_gl_FrontColor";
 					}
@@ -1339,17 +1342,17 @@ namespace KlayGE
 					break;
 
 				case ST_PixelShader:
-					if (("gl_TexCoord" == this_token) || ("gl_FogFragCoord" == this_token))
+					if ((CT_HASH("gl_TexCoord") == this_token_hash) || (CT_HASH("gl_FogFragCoord") == this_token_hash))
 					{
 						ss << "v_" << this_token;
 					}
-					else if ("gl_Color" == this_token)
+					else if (CT_HASH("gl_Color") == this_token_hash)
 					{
 						ss << "v_gl_FrontColor";
 					}
 					else
 					{
-						if ("discard" == this_token)
+						if (CT_HASH("discard") == this_token_hash)
 						{
 							has_discard_ = true;
 						}
@@ -2288,35 +2291,37 @@ namespace KlayGE
 					{
 						std::string semantic = cgGetParameterSemantic(cg_param);
 						std::string glsl_param_name = semantic;//cgGetParameterResourceName(cg_param);
+						size_t const semantic_hash = CT_HASH(semantic.c_str());
+
 
 						VertexElementUsage usage = VEU_Position;
 						uint8_t usage_index = 0;
-						if ("POSITION" == semantic)
+						if (CT_HASH("POSITION") == semantic_hash)
 						{
 							usage = VEU_Position;
 							glsl_param_name = "a_gl_Vertex";
 						}
-						else if ("NORMAL" == semantic)
+						else if (CT_HASH("NORMAL") == semantic_hash)
 						{
 							usage = VEU_Normal;
 							glsl_param_name = "a_gl_Normal";
 						}
-						else if (("COLOR0" == semantic) || ("COLOR" == semantic))
+						else if ((CT_HASH("COLOR0") == semantic_hash) || (CT_HASH("COLOR") == semantic_hash))
 						{
 							usage = VEU_Diffuse;
 							glsl_param_name = "a_gl_Color";
 						}
-						else if ("COLOR1" == semantic)
+						else if (CT_HASH("COLOR1") == semantic_hash)
 						{
 							usage = VEU_Specular;
 							glsl_param_name = "a_gl_SecondaryColor";
 						}
-						else if ("BLENDWEIGHT" == semantic)
+						else if (CT_HASH("BLENDWEIGHT") == semantic_hash)
 						{
 							usage = VEU_BlendWeight;
 							glsl_param_name = "BLENDWEIGHT";
 						}
-						else if ("BLENDINDICES" == semantic)
+						else if (CT_HASH("BLENDINDICES") == semantic_hash)
 						{
 							usage = VEU_BlendIndex;
 							glsl_param_name = "BLENDINDICES";
@@ -2327,17 +2332,21 @@ namespace KlayGE
 							usage_index = static_cast<uint8_t>(boost::lexical_cast<int>(semantic.substr(8)));
 							glsl_param_name = "a_gl_MultiTexCoord" + semantic.substr(8);
 						}
-						else if ("TANGENT" == semantic)
+						else if (CT_HASH("TANGENT") == semantic_hash)
 						{
 							usage = VEU_Tangent;
 							glsl_param_name = "TANGENT";
 						}
-						else
+						else if (CT_HASH("BINORMAL") == semantic_hash)
 						{
-							BOOST_ASSERT("BINORMAL" == semantic);
-
 							usage = VEU_Binormal;
 							glsl_param_name = "BINORMAL";
+						}
+						else
+						{
+							BOOST_ASSERT(false);
+							usage = VEU_Position;
+							glsl_param_name = "a_gl_Vertex";
 						}
 
 						vs_usages_->push_back(usage);

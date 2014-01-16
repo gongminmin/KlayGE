@@ -761,17 +761,18 @@ namespace KlayGE
 		D3D11RenderEngine const & render_eng = *checked_cast<D3D11RenderEngine const *>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		RenderDeviceCaps const & caps = render_eng.DeviceCaps();
 		std::string shader_profile = sd.profile;
+		size_t const shader_profile_hash = CT_HASH(shader_profile.c_str());
 		switch (type)
 		{
 		case ST_VertexShader:
-			if ("auto" == shader_profile)
+			if (CT_HASH("auto") == shader_profile_hash)
 			{
 				shader_profile = render_eng.VertexShaderProfile();
 			}
 			break;
 
 		case ST_PixelShader:
-			if ("auto" == shader_profile)
+			if (CT_HASH("auto") == shader_profile_hash)
 			{
 				shader_profile = render_eng.PixelShaderProfile();
 			}
@@ -780,7 +781,7 @@ namespace KlayGE
 		case ST_GeometryShader:
 			if (caps.max_shader_model >= 4)
 			{
-				if ("auto" == shader_profile)
+				if (CT_HASH("auto") == shader_profile_hash)
 				{
 					shader_profile = render_eng.GeometryShaderProfile();
 				}
@@ -790,7 +791,7 @@ namespace KlayGE
 		case ST_ComputeShader:
 			if (caps.max_shader_model >= 4)
 			{
-				if ("auto" == shader_profile)
+				if (CT_HASH("auto") == shader_profile_hash)
 				{
 					shader_profile = render_eng.ComputeShaderProfile();
 				}
@@ -800,7 +801,7 @@ namespace KlayGE
 		case ST_HullShader:
 			if (caps.max_shader_model >= 5)
 			{
-				if ("auto" == shader_profile)
+				if (CT_HASH("auto") == shader_profile_hash)
 				{
 					shader_profile = render_eng.HullShaderProfile();
 				}
@@ -810,7 +811,7 @@ namespace KlayGE
 		case ST_DomainShader:
 			if (caps.max_shader_model >= 5)
 			{
-				if ("auto" == shader_profile)
+				if (CT_HASH("auto") == shader_profile_hash)
 				{
 					shader_profile = render_eng.DomainShaderProfile();
 				}
@@ -1170,17 +1171,18 @@ namespace KlayGE
 		is_shader_validate_[type] = true;
 
 		std::string shader_profile = sd.profile;
+		size_t const shader_profile_hash = CT_HASH(shader_profile.c_str());
 		switch (type)
 		{
 		case ST_VertexShader:
-			if ("auto" == shader_profile)
+			if (CT_HASH("auto") == shader_profile_hash)
 			{
 				shader_profile = render_eng.VertexShaderProfile();
 			}
 			break;
 
 		case ST_PixelShader:
-			if ("auto" == shader_profile)
+			if (CT_HASH("auto") == shader_profile_hash)
 			{
 				shader_profile = render_eng.PixelShaderProfile();
 			}
@@ -1193,7 +1195,7 @@ namespace KlayGE
 			}
 			else
 			{
-				if ("auto" == shader_profile)
+				if (CT_HASH("auto") == shader_profile_hash)
 				{
 					shader_profile = render_eng.GeometryShaderProfile();
 				}
@@ -1207,11 +1209,11 @@ namespace KlayGE
 			}
 			else
 			{
-				if ("auto" == shader_profile)
+				if (CT_HASH("auto") == shader_profile_hash)
 				{
 					shader_profile = render_eng.ComputeShaderProfile();
 				}
-				if (("cs_5_0" == shader_profile) && (caps.max_shader_model < 5))
+				if ((CT_HASH("cs_5_0") == shader_profile_hash) && (caps.max_shader_model < 5))
 				{
 					is_shader_validate_[type] = false;
 				}
@@ -1225,7 +1227,7 @@ namespace KlayGE
 			}
 			else
 			{
-				if ("auto" == shader_profile)
+				if (CT_HASH("auto") == shader_profile_hash)
 				{
 					shader_profile = render_eng.HullShaderProfile();
 				}
@@ -1239,7 +1241,7 @@ namespace KlayGE
 			}
 			else
 			{
-				if ("auto" == shader_profile)
+				if (CT_HASH("auto") == shader_profile_hash)
 				{
 					shader_profile = render_eng.DomainShaderProfile();
 				}

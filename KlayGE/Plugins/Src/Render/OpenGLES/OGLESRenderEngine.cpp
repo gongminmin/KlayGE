@@ -1020,7 +1020,8 @@ namespace KlayGE
 
 	void OGLESRenderEngine::GetCustomAttrib(std::string const & name, void* value)
 	{
-		if ("VENDOR" == name)
+		size_t const name_hash = CT_HASH(name.c_str());
+		if (CT_HASH("VENDOR") == name_hash)
 		{
 			char const * str = reinterpret_cast<char const *>(glGetString(GL_VENDOR));
 			if (str)
@@ -1032,7 +1033,7 @@ namespace KlayGE
 				static_cast<std::string*>(value)->clear();
 			}
 		}
-		if ("RENDERER" == name)
+		else if (CT_HASH("RENDERER") == name_hash)
 		{
 			char const * str = reinterpret_cast<char const *>(glGetString(GL_RENDERER));
 			if (str)
@@ -1044,7 +1045,7 @@ namespace KlayGE
 				static_cast<std::string*>(value)->clear();
 			}
 		}
-		if ("VERSION" == name)
+		else if (CT_HASH("VERSION") == name_hash)
 		{
 			char const * str = reinterpret_cast<char const *>(glGetString(GL_VERSION));
 			if (str)
@@ -1056,7 +1057,7 @@ namespace KlayGE
 				static_cast<std::string*>(value)->clear();
 			}
 		}
-		if ("SHADING_LANGUAGE_VERSION" == name)
+		else if (CT_HASH("SHADING_LANGUAGE_VERSION") == name_hash)
 		{
 			char const * str = reinterpret_cast<char const *>(glGetString(GL_SHADING_LANGUAGE_VERSION));
 			if (str)
@@ -1068,11 +1069,11 @@ namespace KlayGE
 				static_cast<std::string*>(value)->clear();
 			}
 		}
-		if ("NUM_FEATURES" == name)
+		else if (CT_HASH("NUM_FEATURES") == name_hash)
 		{
 			*static_cast<int*>(value) = glloader_num_features();
 		}
-		if (0 == name.find("FEATURE_NAME_"))
+		else if (0 == name.find("FEATURE_NAME_"))
 		{
 			std::istringstream iss(name.substr(13));
 			int n;

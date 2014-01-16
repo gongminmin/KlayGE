@@ -294,15 +294,16 @@ namespace
 						}
 
 						XMLAttributePtr attr = node->Attrib("name");
-						if ("size_over_life" == attr->ValueString())
+						size_t const name_hash = CT_HASH(attr->ValueString().c_str());
+						if (CT_HASH("size_over_life") == name_hash)
 						{
 							ps_desc_.ps_data->size_over_life_ctrl_pts = xys;
 						}
-						else if ("mass_over_life" == attr->ValueString())
+						else if (CT_HASH("mass_over_life") == name_hash)
 						{
 							ps_desc_.ps_data->mass_over_life_ctrl_pts = xys;
 						}
-						else if ("opacity_over_life" == attr->ValueString())
+						else if (CT_HASH("opacity_over_life") == name_hash)
 						{
 							ps_desc_.ps_data->opacity_over_life_ctrl_pts = xys;
 						}

@@ -258,28 +258,30 @@ namespace KlayGE
 				}
 			}
 
-			if ("ARGB8" == color_fmt_str)
+			size_t const color_fmt_str_hash = CT_HASH(color_fmt_str.c_str());
+			if (CT_HASH("ARGB8") == color_fmt_str_hash)
 			{
 				color_fmt = EF_ARGB8;
 			}
-			else if ("ABGR8" == color_fmt_str)
+			else if (CT_HASH("ABGR8") == color_fmt_str_hash)
 			{
 				color_fmt = EF_ABGR8;
 			}
-			else if ("A2BGR10" == color_fmt_str)
+			else if (CT_HASH("A2BGR10") == color_fmt_str_hash)
 			{
 				color_fmt = EF_A2BGR10;
 			}
 
-			if ("D16" == depth_stencil_fmt_str)
+			size_t const depth_stencil_fmt_str_hash = CT_HASH(depth_stencil_fmt_str.c_str());
+			if (CT_HASH("D16") == depth_stencil_fmt_str_hash)
 			{
 				depth_stencil_fmt = EF_D16;
 			}
-			else if ("D24S8" == depth_stencil_fmt_str)
+			else if (CT_HASH("D24S8") == depth_stencil_fmt_str_hash)
 			{
 				depth_stencil_fmt = EF_D24S8;
 			}
-			else if ("D32F" == depth_stencil_fmt_str)
+			else if (CT_HASH("D32F") == depth_stencil_fmt_str_hash)
 			{
 				depth_stencil_fmt = EF_D32F;
 			}

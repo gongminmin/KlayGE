@@ -4027,10 +4027,14 @@ namespace KlayGE
 				{
 					type = ShaderObject::ST_HullShader;
 				}
+				else if (CT_HASH("domain_shader") == state_name_hash)
+				{
+					type = ShaderObject::ST_DomainShader;
+				}
 				else
 				{
-					BOOST_ASSERT(CT_HASH("domain_shader") == state_name_hash);
-					type = ShaderObject::ST_DomainShader;
+					BOOST_ASSERT(false);
+					type = ShaderObject::ST_VertexShader;
 				}
 
 				ShaderDesc sd;
@@ -4770,10 +4774,14 @@ namespace KlayGE
 			{
 				type_ = ShaderObject::ST_HullShader;
 			}
+			else if (CT_HASH("domain_shader") == type_str_hash)
+			{
+				type_ = ShaderObject::ST_DomainShader;
+			}
 			else
 			{
-				BOOST_ASSERT(CT_HASH("domain_shader") == type_str_hash);
-				type_ = ShaderObject::ST_DomainShader;
+				BOOST_ASSERT(false);
+				type_ = ShaderObject::ST_VertexShader;
 			}
 		}
 		

@@ -493,31 +493,34 @@ namespace KlayGE
 				tl = ASyncLoadTexture(iter->second, EAH_GPU_Read | EAH_Immutable);
 			}
 
-			if (("Color" == iter->first) || ("Diffuse Color" == iter->first) || ("Diffuse Color Map" == iter->first))
+			size_t const slot_type_hash = CT_HASH(iter->first.c_str());
+
+			if ((CT_HASH("Color") == slot_type_hash) || (CT_HASH("Diffuse Color") == slot_type_hash)
+				|| (CT_HASH("Diffuse Color Map") == slot_type_hash))
 			{
 				diffuse_tl_ = tl;
 			}
-			else if (("Specular Level" == iter->first) || ("Specular Color" == iter->first))
+			else if ((CT_HASH("Specular Level") == slot_type_hash) || (CT_HASH("Specular Color") == slot_type_hash))
 			{
 				specular_tl_ = tl;
 			}
-			else if (("Glossiness" == iter->first) || ("Reflection Glossiness Map" == iter->first))
+			else if ((CT_HASH("Glossiness") == slot_type_hash) || (CT_HASH("Reflection Glossiness Map") == slot_type_hash))
 			{
 				shininess_tl_ = tl;
 			}
-			else if (("Bump" == iter->first) || ("Bump Map" == iter->first))
+			else if ((CT_HASH("Bump") == slot_type_hash) || (CT_HASH("Bump Map") == slot_type_hash))
 			{
 				normal_tl_ = tl;
 			}
-			else if (("Height" == iter->first) || ("Height Map" == iter->first))
+			else if ((CT_HASH("Height") == slot_type_hash) || (CT_HASH("Height Map") == slot_type_hash))
 			{
 				height_tl_ = tl;
 			}
-			else if ("Self-Illumination" == iter->first)
+			else if (CT_HASH("Self-Illumination") == slot_type_hash)
 			{
 				emit_tl_ = tl;
 			}
-			else if ("Opacity" == iter->first)
+			else if (CT_HASH("Opacity") == slot_type_hash)
 			{
 				ResIdentifierPtr tex_file = ResLoader::Instance().Open(iter->second);
 				if (tex_file)
