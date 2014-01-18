@@ -59,10 +59,6 @@
 		<state name="max_anisotropy" value="4"/>
 	</parameter>
 
-	<parameter type="texture2D" name="normals_fitting_tex">
-		<annotation type="string" name="SasResourceAddress" value="normals_fitting.dds"/>
-	</parameter>
-
 	<parameter type="texture2D" name="opaque_depth_tex"/>
 	<parameter type="texture2D" name="g_buffer_rt0_tex"/>
 
@@ -191,8 +187,6 @@ float3 RestoreNormal(float4 texcoord_2xy, float4 ts_to_view0_2z, float3 ts_to_vi
 		normal = normalize(mul(decompress_normal(normal_tex.Sample(trilinear_sampler, texcoord_2xy.xy)), ts_to_view));
 	}
 	
-	float3 fitting_tc = FittingCoord(normal);
-	normal *= fitting_tc.z * normals_fitting_tex.Sample(bilinear_sampler, fitting_tc.xy).r;
 	return normal;
 }
 

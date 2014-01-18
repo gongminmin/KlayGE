@@ -139,8 +139,6 @@ void CalcProceduralTerrainNormalColor(float3 world_pos, float debug_patch,
 	color = CalcTerrainColor(world_pos, debug_patch, mask);
 
 	normal = mul(normal, (float3x3)model_view);
-	float3 fitting_tc = FittingCoord(normal);
-	normal *= fitting_tc.z * normals_fitting_tex.Sample(bilinear_sampler, fitting_tc.xy).r;
 }
 
 float4 GBufferProceduralTerrainRT0PS(float3 world_pos : TEXCOORD0, float debug_patch : TEXCOORD1) : SV_Target

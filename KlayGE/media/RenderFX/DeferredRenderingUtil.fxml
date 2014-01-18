@@ -5,7 +5,11 @@
 		<![CDATA[
 float4 StoreGBufferRT0(float3 normal, float shininess)
 {
-	return float4(normal * 0.5f + 0.5f, shininess);
+	float p = sqrt(-normal.z * 8 + 8);
+	float2 enc = normal.xy / p + 0.5f;
+	float2 enc255 = enc * 255;
+	float2 residual = floor(frac(enc255) * 16);
+	return float4(float3(floor(enc255), residual.x * 16 + residual.y) / 255, shininess);
 }
 
 float4 StoreGBufferRT1(float3 diffuse, float3 specular)
@@ -22,7 +26,15 @@ void StoreGBufferMRT(float3 normal, float3 specular, float shininess, float3 dif
 
 float3 GetNormal(float4 ndc)
 {
-	return normalize(ndc.xyz * 2 - 1);
+	float nz = floor(ndc.z * 255) / 16;
+	ndc.xy += float2(floor(nz) / 16, frac(nz)) / 255;
+	float2 fenc = ndc.xy * 4 - 2;
+	float f = dot(fenc, fenc);
+	float g = sqrt(1 - f / 4);
+	float3 normal;
+	normal.xy = fenc * g;
+	normal.z = f / 2 - 1;
+	return normal;
 }
 
 float GetShininess(float4 ndc)

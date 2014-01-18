@@ -2900,6 +2900,10 @@ namespace KlayGE
 							if (found)
 							{
 								include_names.erase(iter);
+								if (include_names.empty())
+								{
+									break;
+								}
 							}
 							else
 							{
