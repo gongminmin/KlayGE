@@ -1,20 +1,32 @@
-// Input.hpp
-// KlayGE 输入引擎类 头文件
-// Ver 2.5.0
-// 版权所有(C) 龚敏敏, 2003-2005
-// Homepage: http://www.klayge.org
-//
-// 2.5.0
-// 增加了Action map id (2005.4.3)
-//
-// 2.0.4
-// 改进了InputActionsType
-//
-// 2.0.0
-// 初次建立 (2003.8.29)
-//
-// 修改记录
-/////////////////////////////////////////////////////////////////////////////////
+/**
+* @file Input.hpp
+* @author Minmin Gong
+*
+* @section DESCRIPTION
+*
+* This source file is part of KlayGE
+* For the latest info, see http://www.klayge.org
+*
+* @section LICENSE
+*
+* This program is free software; you can redistribute it and/or modify
+* it under the terms of the GNU General Public License as published
+* by the Free Software Foundation; either version 2 of the License, or
+* (at your option) any later version.
+*
+* This program is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+* GNU General Public License for more details.
+*
+* You should have received a copy of the GNU General Public License
+* along with this program; if not, write to the Free Software
+* Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+*
+* You may alternatively use this source under the terms of
+* the KlayGE Proprietary License (KPL). You can obtained such a license
+* from http://www.klayge.org/licensing/.
+*/
 
 #ifndef _INPUT_HPP
 #define _INPUT_HPP
@@ -302,6 +314,24 @@ namespace KlayGE
 		TS_AnyTouch
 	};
 
+	enum SensorSemantic
+	{
+		SS_Latitude			= 0x400,
+		SS_Longitude,
+		SS_Altitude,
+		SS_LocationErrorRadius,
+		SS_LocationAltitudeError,
+		SS_Accel,
+		SS_Speed,
+		SS_AngularAccel,
+		SS_AngularVelocity,
+		SS_Tilt,
+		SS_MagneticHeading,
+		SS_MagnetoMeterAccuracy,
+
+		SS_AnySensing
+	};
+
 	typedef std::pair<uint16_t, uint16_t> InputActionDefine;
 	typedef std::pair<uint16_t, InputActionParamPtr> InputAction;
 	typedef std::vector<InputAction> InputActionsType;
@@ -356,7 +386,8 @@ namespace KlayGE
 			IDT_Keyboard,
 			IDT_Mouse,
 			IDT_Joystick,
-			IDT_Touch
+			IDT_Touch,
+			IDT_Sensor
 		};
 
 	public:
@@ -581,6 +612,50 @@ namespace KlayGE
 		float2 two_finger_vec_;
 	};
 
+	class KLAYGE_CORE_API InputSensor : public InputDevice
+	{
+	public:
+		InputSensor();
+		virtual ~InputSensor();
+
+		virtual InputEngine::InputDeviceType Type() const KLAYGE_OVERRIDE
+		{
+			return InputEngine::IDT_Sensor;
+		}
+
+		float Latitude() const;
+		float Longitude() const;
+		float Altitude() const;
+		float LocationErrorRadius() const;
+		float LocationAltitudeError() const;
+		float3 const & Accel() const;
+		float Speed() const;
+		float3 const & AngularAccel() const;
+		float3 const & AngularVelocity() const;
+		float3 const & Tilt() const;
+		float3 const & MagneticHeading() const;
+		float MagnetoMeterAccuracy() const;
+
+		virtual InputActionsType UpdateActionMap(uint32_t id) KLAYGE_OVERRIDE;
+		virtual void ActionMap(uint32_t id, InputActionMap const & actionMap) KLAYGE_OVERRIDE;
+
+	protected:
+		float latitude_;
+		float longitude_;
+		float altitude_;
+		float location_error_radius_;
+		float location_altitude_error_;
+		float3 accel_;
+		float speed_;
+		float3 angular_accel_;
+		float3 angular_velocity_;
+		float3 tilt_;
+		float3 magnetic_heading_;
+		float magneto_meter_accuracy_;
+
+		InputSensorActionParamPtr action_param_;
+	};
+
 
 	struct KLAYGE_CORE_API InputActionParam
 	{
@@ -647,6 +722,22 @@ namespace KlayGE
 		uint16_t touches_state;
 		uint16_t touches_down;
 		uint16_t touches_up;
+	};
+
+	struct KLAYGE_CORE_API InputSensorActionParam : public InputActionParam
+	{
+		float latitude;
+		float longitude;
+		float altitude;
+		float location_error_radius;
+		float location_altitude_error;
+		float3 accel;
+		float speed;
+		float3 angular_accel;
+		float3 angular_velocity;
+		float3 tilt;
+		float3 magnetic_heading;
+		float magneto_meter_accuracy;
 	};
 }
 

@@ -26,6 +26,7 @@ private:
 	std::wstring mouse_str_;
 	std::wstring joystick_str_;
 	std::wstring touch_str_;
+	std::wstring sensor_str_;
 };
 
 #endif		// _DISTANCEMAPPING_HPP

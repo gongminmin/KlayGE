@@ -33,7 +33,6 @@
 
 #pragma once
 
-#if defined KLAYGE_PLATFORM_WINDOWS
 #if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
 #include <windows.h>
 #if (_WIN32_WINNT >= 0x0602 /*_WIN32_WINNT_WIN8*/)
@@ -203,7 +202,13 @@ typedef struct _HIDP_VALUE_CAPS
 
 #define HIDP_STATUS_SUCCESS                  (HIDP_ERROR_CODES(0x0,0))
 #endif
+
+#if (_WIN32_WINNT >= 0x0601 /*_WIN32_WINNT_WIN7*/)
+#include <LocationApi.h>
+#include <SensorsApi.h>
+#include <Sensors.h>
 #endif
+
 #endif
 
 #include <KlayGE/Input.hpp>
@@ -221,7 +226,6 @@ namespace KlayGE
 		std::wstring const & Name() const;
 		void EnumDevices();
 
-#if defined KLAYGE_PLATFORM_WINDOWS
 #if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
 		NTSTATUS HidP_GetCaps(PHIDP_PREPARSED_DATA PreparsedData, PHIDP_CAPS Capabilities) const;
 		NTSTATUS HidP_GetButtonCaps(HIDP_REPORT_TYPE ReportType, PHIDP_BUTTON_CAPS ButtonCaps,
@@ -241,7 +245,6 @@ namespace KlayGE
 		BOOL CloseTouchInputHandle(HTOUCHINPUT hTouchInput) const;
 #endif
 #endif
-#endif
 
 	private:
 		boost::signals2::connection on_raw_input_;
@@ -251,7 +254,6 @@ namespace KlayGE
 		boost::signals2::connection on_pointer_update_;
 		boost::signals2::connection on_pointer_wheel_;
 
-#if defined KLAYGE_PLATFORM_WINDOWS
 #if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
 		HMODULE mod_hid_;
 		typedef NTSTATUS (WINAPI *HidP_GetCapsFunc)(PHIDP_PREPARSED_DATA PreparsedData, PHIDP_CAPS Capabilities);
@@ -280,15 +282,12 @@ namespace KlayGE
 		CloseTouchInputHandleFunc DynamicCloseTouchInputHandle_;
 #endif
 #endif
-#endif
 
 	private:
-#if defined KLAYGE_PLATFORM_WINDOWS
 #if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
 		void OnRawInput(Window const & wnd, HRAWINPUT ri);
 #if (_WIN32_WINNT >= 0x0601 /*_WIN32_WINNT_WIN7*/)
 		void OnTouch(Window const & wnd, HTOUCHINPUT hti, uint32_t num_inputs);
-#endif
 #endif
 #endif
 		void OnPointerDown(int2 const & pt, uint32_t id);
@@ -297,7 +296,6 @@ namespace KlayGE
 		void OnPointerWheel(int2 const & pt, uint32_t id, int32_t wheel_delta);
 	};
 
-#if defined KLAYGE_PLATFORM_WINDOWS
 #if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
 	class MsgInputKeyboard : public InputKeyboard
 	{
@@ -353,7 +351,6 @@ namespace KlayGE
 		array<bool, 32> buttons_state_;
 	};
 #endif
-#endif
 
 	class MsgInputTouch : public InputTouch
 	{
@@ -361,10 +358,8 @@ namespace KlayGE
 		MsgInputTouch();
 
 		virtual std::wstring const & Name() const KLAYGE_OVERRIDE;
-#if defined KLAYGE_PLATFORM_WINDOWS
 #if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP && (_WIN32_WINNT >= 0x0601 /*_WIN32_WINNT_WIN7*/)
 		void OnTouch(Window const & wnd, HTOUCHINPUT hti, uint32_t num_inputs);
-#endif
 #endif
 		void OnPointerDown(int2 const & pt, uint32_t id);
 		void OnPointerUp(int2 const & pt, uint32_t id);
@@ -379,6 +374,24 @@ namespace KlayGE
 		array<bool, 16> touch_down_state_;
 		int32_t wheel_delta_state_;
 	};
+	
+#if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP && (_WIN32_WINNT >= 0x0601 /*_WIN32_WINNT_WIN7*/)
+	class MsgInputSensor : public InputSensor
+	{
+	public:
+		MsgInputSensor();
+
+		virtual std::wstring const & Name() const KLAYGE_OVERRIDE;
+
+	private:
+		virtual void UpdateInputs() KLAYGE_OVERRIDE;
+
+	private:
+		shared_ptr<ILocation> location_sensor_;
+		shared_ptr<ISensorCollection> motion_sensor_collection_;
+		shared_ptr<ISensorCollection> orientation_sensor_collection_;
+	};
+#endif
 }
 
 #endif		// _MINPUT_HPP

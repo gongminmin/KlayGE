@@ -62,7 +62,7 @@ namespace KlayGE
 			KLAYGE_FOREACH(InputsType::const_reference ti, inputs)
 			{
 				POINT pt = { TOUCH_COORD_TO_PIXEL(ti.x), TOUCH_COORD_TO_PIXEL(ti.y) };
-				::MapWindowPoints(NULL, wnd.HWnd(), &pt, 1);
+				::MapWindowPoints(nullptr, wnd.HWnd(), &pt, 1);
 				touch_coord_state_[ti.dwID] = int2(pt.x, pt.y);
 				touch_down_state_[ti.dwID] = (ti.dwFlags & (TOUCHEVENTF_MOVE | TOUCHEVENTF_DOWN)) ? true : false;
 			}

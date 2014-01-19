@@ -205,6 +205,7 @@ namespace
 		MouseMsg,
 		JoystickMsg,
 		TouchMsg,
+		SensorMsg,
 
 		Exit
 	};
@@ -238,7 +239,9 @@ namespace
 		InputActionDefine(TouchMsg, TS_Wheel),
 		InputActionDefine(TouchMsg, TS_AnyTouch),
 
-		InputActionDefine(Exit, KS_Escape),
+		InputActionDefine(SensorMsg, SS_AnySensing),
+
+		InputActionDefine(Exit, KS_Escape)
 	};
 }
 
@@ -397,6 +400,15 @@ void InputCaps::InputHandler(InputEngine const & /*sender*/, InputAction const &
 		}
 		break;
 
+	case SensorMsg:
+		{
+			InputSensorActionParamPtr param = checked_pointer_cast<InputSensorActionParam>(action.second);
+			std::wostringstream stream;
+			stream << "Lat: " << param->latitude << "  Lng: " << param->longitude;
+			sensor_str_ = stream.str();
+		}
+		break;
+
 	case Exit:
 		this->Quit();
 		break;
@@ -428,6 +440,9 @@ void InputCaps::DoUpdateOverlay()
 
 	font_->RenderText(0, 153, Color(1, 1, 1, 1), L"Touch: ", 24);
 	font_->RenderText(128, 153, Color(1, 1, 1, 1), touch_str_, 24);
+
+	font_->RenderText(0, 180, Color(1, 1, 1, 1), L"Sensor: ", 24);
+	font_->RenderText(128, 180, Color(1, 1, 1, 1), sensor_str_, 24);
 }
 
 uint32_t InputCaps::DoUpdate(uint32_t /*pass*/)

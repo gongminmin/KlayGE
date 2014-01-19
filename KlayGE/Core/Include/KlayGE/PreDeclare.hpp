@@ -332,6 +332,8 @@ namespace KlayGE
 	typedef shared_ptr<InputJoystick> InputJoystickPtr;
 	class InputTouch;
 	typedef shared_ptr<InputTouch> InputTouchPtr;
+	class InputSensor;
+	typedef shared_ptr<InputSensor> InputSensorPtr;
 	class InputFactory;
 	typedef shared_ptr<InputFactory> InputFactoryPtr;
 	struct InputActionParam;
@@ -344,6 +346,8 @@ namespace KlayGE
 	typedef shared_ptr<InputJoystickActionParam> InputJoystickActionParamPtr;
 	struct InputTouchActionParam;
 	typedef shared_ptr<InputTouchActionParam> InputTouchActionParamPtr;
+	struct InputSensorActionParam;
+	typedef shared_ptr<InputSensorActionParam> InputSensorActionParamPtr;
 
 	class ShowEngine;
 	typedef shared_ptr<ShowEngine> ShowEnginePtr;

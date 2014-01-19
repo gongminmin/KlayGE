@@ -6,6 +6,7 @@ SET(MSGINPUT_IE_SOURCE_FILES
 	${KLAYGE_PROJECT_DIR}/Plugins/Src/Input/MsgInput/MIMouse.cpp
 	${KLAYGE_PROJECT_DIR}/Plugins/Src/Input/MsgInput/MInputEngine.cpp
 	${KLAYGE_PROJECT_DIR}/Plugins/Src/Input/MsgInput/MInputFactory.cpp
+	${KLAYGE_PROJECT_DIR}/Plugins/Src/Input/MsgInput/MISensor.cpp
 	${KLAYGE_PROJECT_DIR}/Plugins/Src/Input/MsgInput/MITouch.cpp
 )
 
@@ -52,6 +53,10 @@ ELSE()
 		debug KlayGE_Core_${KLAYGE_COMPILER_NAME}_d optimized KlayGE_Core_${KLAYGE_COMPILER_NAME}
 		debug KFL_${KLAYGE_COMPILER_NAME}_${KLAYGE_ARCH_NAME}_d optimized KFL_${KLAYGE_COMPILER_NAME}_${KLAYGE_ARCH_NAME}
 		${Boost_CHRONO_LIBRARY} ${Boost_SYSTEM_LIBRARY})
+ENDIF()
+IF(WIN32)
+	SET(EXTRA_LINKED_LIBRARIES ${EXTRA_LINKED_LIBRARIES}
+		locationapi.lib sensorsapi.lib)
 ENDIF()
 
 SET_TARGET_PROPERTIES(${LIB_NAME} PROPERTIES
