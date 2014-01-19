@@ -42,7 +42,7 @@ namespace KlayGE
 			accel_(0, 0, 0), speed_(0),
 			angular_accel_(0, 0, 0), angular_velocity_(0, 0, 0),
 			tilt_(0, 0, 0), magnetic_heading_(0, 0, 0),
-			magneto_meter_accuracy_(-1),
+			magnetometer_accuracy_(-1),
 			action_param_(MakeSharedPtr<InputSensorActionParam>())
 	{
 		action_param_->type = InputEngine::IDT_Sensor;
@@ -96,9 +96,13 @@ namespace KlayGE
 	{
 		return magnetic_heading_;
 	}
-	float InputSensor::MagnetoMeterAccuracy() const
+	Quaternion const & InputSensor::OrientationQuat() const
 	{
-		return magneto_meter_accuracy_;
+		return orientation_quat_;
+	}
+	int32_t InputSensor::MagnetometerAccuracy() const
+	{
+		return magnetometer_accuracy_;
 	}
 
 	void InputSensor::ActionMap(uint32_t id, InputActionMap const & actionMap)
@@ -131,7 +135,8 @@ namespace KlayGE
 		action_param_->angular_velocity = angular_velocity_;
 		action_param_->tilt = tilt_;
 		action_param_->magnetic_heading = magnetic_heading_;
-		action_param_->magneto_meter_accuracy = magneto_meter_accuracy_;
+		action_param_->orientation_quat = orientation_quat_;
+		action_param_->magnetometer_accuracy = magnetometer_accuracy_;
 
 		bool any_sensing = false;
 		if (latitude_ >= 0)
@@ -189,9 +194,15 @@ namespace KlayGE
 			iam.UpdateInputActions(ret, SS_MagneticHeading, action_param_);
 			any_sensing = true;
 		}
-		if (magneto_meter_accuracy_ >= 0)
+		if ((orientation_quat_.x() != 0) || (orientation_quat_.y() != 0) || (orientation_quat_.z() != 0)
+			|| (orientation_quat_.w() != 0))
 		{
-			iam.UpdateInputActions(ret, SS_MagnetoMeterAccuracy, action_param_);
+			iam.UpdateInputActions(ret, SS_OrientationQuat, action_param_);
+			any_sensing = true;
+		}
+		if (magnetometer_accuracy_ >= 0)
+		{
+			iam.UpdateInputActions(ret, SS_MagnetometerAccuracy, action_param_);
 			any_sensing = true;
 		}
 

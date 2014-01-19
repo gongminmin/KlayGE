@@ -327,7 +327,8 @@ namespace KlayGE
 		SS_AngularVelocity,
 		SS_Tilt,
 		SS_MagneticHeading,
-		SS_MagnetoMeterAccuracy,
+		SS_OrientationQuat,
+		SS_MagnetometerAccuracy,
 
 		SS_AnySensing
 	};
@@ -634,7 +635,8 @@ namespace KlayGE
 		float3 const & AngularVelocity() const;
 		float3 const & Tilt() const;
 		float3 const & MagneticHeading() const;
-		float MagnetoMeterAccuracy() const;
+		Quaternion const & OrientationQuat() const;
+		int32_t MagnetometerAccuracy() const;
 
 		virtual InputActionsType UpdateActionMap(uint32_t id) KLAYGE_OVERRIDE;
 		virtual void ActionMap(uint32_t id, InputActionMap const & actionMap) KLAYGE_OVERRIDE;
@@ -651,7 +653,8 @@ namespace KlayGE
 		float3 angular_velocity_;
 		float3 tilt_;
 		float3 magnetic_heading_;
-		float magneto_meter_accuracy_;
+		Quaternion orientation_quat_;
+		int32_t magnetometer_accuracy_;
 
 		InputSensorActionParamPtr action_param_;
 	};
@@ -737,7 +740,8 @@ namespace KlayGE
 		float3 angular_velocity;
 		float3 tilt;
 		float3 magnetic_heading;
-		float magneto_meter_accuracy;
+		Quaternion orientation_quat;
+		int32_t magnetometer_accuracy;
 	};
 }
 

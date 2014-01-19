@@ -40,7 +40,6 @@
 namespace KlayGE
 {
 	MsgInputSensor::MsgInputSensor()
-		: location_sensor_(false), motion_sensor_collection_(nullptr), orientation_sensor_collection_(nullptr)
 	{
 		::CoInitialize(0);
 
@@ -149,7 +148,7 @@ namespace KlayGE
 						VARIANT_BOOL supported = VARIANT_FALSE;
 
 						sensor->SupportsDataField(SENSOR_DATA_TYPE_ACCELERATION_X_G, &supported);
-						if (supported != 0)
+						if (supported != VARIANT_FALSE)
 						{
 							PROPVARIANT prop;
 							data_report->GetSensorValue(SENSOR_DATA_TYPE_ACCELERATION_X_G, &prop);
@@ -160,7 +159,7 @@ namespace KlayGE
 						}
 
 						hr = sensor->SupportsDataField(SENSOR_DATA_TYPE_ACCELERATION_Y_G, &supported);
-						if (supported != 0)
+						if (supported != VARIANT_FALSE)
 						{
 							PROPVARIANT prop;
 							data_report->GetSensorValue(SENSOR_DATA_TYPE_ACCELERATION_Y_G, &prop);
@@ -171,7 +170,7 @@ namespace KlayGE
 						}
 
 						hr = sensor->SupportsDataField(SENSOR_DATA_TYPE_ACCELERATION_Z_G, &supported);
-						if (supported != 0)
+						if (supported != VARIANT_FALSE)
 						{
 							PROPVARIANT prop;
 							data_report->GetSensorValue(SENSOR_DATA_TYPE_ACCELERATION_Z_G, &prop);
@@ -182,7 +181,7 @@ namespace KlayGE
 						}
 
 						hr = sensor->SupportsDataField(SENSOR_DATA_TYPE_SPEED_METERS_PER_SECOND, &supported);
-						if (supported != 0)
+						if (supported != VARIANT_FALSE)
 						{
 							PROPVARIANT prop;
 							data_report->GetSensorValue(SENSOR_DATA_TYPE_SPEED_METERS_PER_SECOND, &prop);
@@ -193,7 +192,7 @@ namespace KlayGE
 						}
 
 						hr = sensor->SupportsDataField(SENSOR_DATA_TYPE_ANGULAR_ACCELERATION_X_DEGREES_PER_SECOND_SQUARED, &supported);
-						if (supported != 0)
+						if (supported != VARIANT_FALSE)
 						{
 							PROPVARIANT prop;
 							data_report->GetSensorValue(SENSOR_DATA_TYPE_ANGULAR_ACCELERATION_X_DEGREES_PER_SECOND_SQUARED, &prop);
@@ -204,7 +203,7 @@ namespace KlayGE
 						}
 
 						hr = sensor->SupportsDataField(SENSOR_DATA_TYPE_ANGULAR_ACCELERATION_Y_DEGREES_PER_SECOND_SQUARED, &supported);
-						if (supported != 0)
+						if (supported != VARIANT_FALSE)
 						{
 							PROPVARIANT prop;
 							data_report->GetSensorValue(SENSOR_DATA_TYPE_ANGULAR_ACCELERATION_Y_DEGREES_PER_SECOND_SQUARED, &prop);
@@ -215,7 +214,7 @@ namespace KlayGE
 						}
 
 						hr = sensor->SupportsDataField(SENSOR_DATA_TYPE_ANGULAR_ACCELERATION_Z_DEGREES_PER_SECOND_SQUARED, &supported);
-						if (supported != 0)
+						if (supported != VARIANT_FALSE)
 						{
 							PROPVARIANT prop;
 							data_report->GetSensorValue(SENSOR_DATA_TYPE_ANGULAR_ACCELERATION_Z_DEGREES_PER_SECOND_SQUARED, &prop);
@@ -226,7 +225,7 @@ namespace KlayGE
 						}
 
 						hr = sensor->SupportsDataField(SENSOR_DATA_TYPE_ANGULAR_VELOCITY_X_DEGREES_PER_SECOND, &supported);
-						if (supported != 0)
+						if (supported != VARIANT_FALSE)
 						{
 							PROPVARIANT prop;
 							data_report->GetSensorValue(SENSOR_DATA_TYPE_ANGULAR_VELOCITY_X_DEGREES_PER_SECOND, &prop);
@@ -237,7 +236,7 @@ namespace KlayGE
 						}
 
 						hr = sensor->SupportsDataField(SENSOR_DATA_TYPE_ANGULAR_VELOCITY_Y_DEGREES_PER_SECOND, &supported);
-						if (supported != 0)
+						if (supported != VARIANT_FALSE)
 						{
 							PROPVARIANT prop;
 							data_report->GetSensorValue(SENSOR_DATA_TYPE_ANGULAR_VELOCITY_Y_DEGREES_PER_SECOND, &prop);
@@ -248,7 +247,7 @@ namespace KlayGE
 						}
 
 						hr = sensor->SupportsDataField(SENSOR_DATA_TYPE_ANGULAR_VELOCITY_Z_DEGREES_PER_SECOND, &supported);
-						if (supported != 0)
+						if (supported != VARIANT_FALSE)
 						{
 							PROPVARIANT prop;
 							data_report->GetSensorValue(SENSOR_DATA_TYPE_ANGULAR_VELOCITY_Z_DEGREES_PER_SECOND, &prop);
@@ -283,7 +282,7 @@ namespace KlayGE
 						VARIANT_BOOL supported = VARIANT_FALSE;
 
 						sensor->SupportsDataField(SENSOR_DATA_TYPE_TILT_X_DEGREES, &supported);
-						if (supported != 0)
+						if (supported != VARIANT_FALSE)
 						{
 							PROPVARIANT prop;
 							data_report->GetSensorValue(SENSOR_DATA_TYPE_TILT_X_DEGREES, &prop);
@@ -294,7 +293,7 @@ namespace KlayGE
 						}
 
 						hr = sensor->SupportsDataField(SENSOR_DATA_TYPE_TILT_Y_DEGREES, &supported);
-						if (supported != 0)
+						if (supported != VARIANT_FALSE)
 						{
 							PROPVARIANT prop;
 							data_report->GetSensorValue(SENSOR_DATA_TYPE_TILT_Y_DEGREES, &prop);
@@ -305,18 +304,18 @@ namespace KlayGE
 						}
 
 						hr = sensor->SupportsDataField(SENSOR_DATA_TYPE_TILT_Z_DEGREES, &supported);
-						if (supported != 0)
+						if (supported != VARIANT_FALSE)
 						{
 							PROPVARIANT prop;
 							data_report->GetSensorValue(SENSOR_DATA_TYPE_TILT_Z_DEGREES, &prop);
-							if (VT_R8 == prop.vt)
+							if (VT_R4 == prop.vt)
 							{
 								tilt_.z() = prop.fltVal;
 							}
 						}
 
 						hr = sensor->SupportsDataField(SENSOR_DATA_TYPE_MAGNETIC_HEADING_X_DEGREES, &supported);
-						if (supported != 0)
+						if (supported != VARIANT_FALSE)
 						{
 							PROPVARIANT prop;
 							data_report->GetSensorValue(SENSOR_DATA_TYPE_MAGNETIC_HEADING_X_DEGREES, &prop);
@@ -327,7 +326,7 @@ namespace KlayGE
 						}
 
 						hr = sensor->SupportsDataField(SENSOR_DATA_TYPE_MAGNETIC_HEADING_Y_DEGREES, &supported);
-						if (supported != 0)
+						if (supported != VARIANT_FALSE)
 						{
 							PROPVARIANT prop;
 							data_report->GetSensorValue(SENSOR_DATA_TYPE_MAGNETIC_HEADING_Y_DEGREES, &prop);
@@ -338,13 +337,38 @@ namespace KlayGE
 						}
 
 						hr = sensor->SupportsDataField(SENSOR_DATA_TYPE_MAGNETIC_HEADING_Z_DEGREES, &supported);
-						if (supported != 0)
+						if (supported != VARIANT_FALSE)
 						{
 							PROPVARIANT prop;
 							data_report->GetSensorValue(SENSOR_DATA_TYPE_MAGNETIC_HEADING_Z_DEGREES, &prop);
 							if (VT_R4 == prop.vt)
 							{
 								magnetic_heading_.z() = prop.fltVal;
+							}
+						}
+
+						hr = sensor->SupportsDataField(SENSOR_DATA_TYPE_QUATERNION, &supported);
+						if (supported != VARIANT_FALSE)
+						{
+							PROPVARIANT prop;
+							data_report->GetSensorValue(SENSOR_DATA_TYPE_QUATERNION, &prop);
+							if ((VT_VECTOR | VT_UI1) == prop.vt)
+							{
+								orientation_quat_.x() = prop.caub.pElems[0] / 255.0f * 2 - 1;
+								orientation_quat_.y() = prop.caub.pElems[1] / 255.0f * 2 - 1;
+								orientation_quat_.z() = prop.caub.pElems[2] / 255.0f * 2 - 1;
+								orientation_quat_.w() = prop.caub.pElems[3] / 255.0f;
+							}
+						}
+
+						hr = sensor->SupportsDataField(SENSOR_DATA_TYPE_MAGNETOMETER_ACCURACY, &supported);
+						if (supported != VARIANT_FALSE)
+						{
+							PROPVARIANT prop;
+							data_report->GetSensorValue(SENSOR_DATA_TYPE_MAGNETOMETER_ACCURACY, &prop);
+							if (VT_I4 == prop.vt)
+							{
+								magnetometer_accuracy_ = prop.intVal;
 							}
 						}
 
