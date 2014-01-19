@@ -383,13 +383,18 @@ namespace KlayGE
 
 		virtual std::wstring const & Name() const KLAYGE_OVERRIDE;
 
+		void OnMotionDataUpdated(ISensor* sensor, ISensorDataReport* data_report);
+		void OnOrientationDataUpdated(ISensor* sensor, ISensorDataReport* data_report);
+
 	private:
 		virtual void UpdateInputs() KLAYGE_OVERRIDE;
 
 	private:
 		shared_ptr<ILocation> location_sensor_;
 		shared_ptr<ISensorCollection> motion_sensor_collection_;
+		std::vector<shared_ptr<ISensorEvents> > motion_sensor_events_;
 		shared_ptr<ISensorCollection> orientation_sensor_collection_;
+		std::vector<shared_ptr<ISensorEvents> > orientation_sensor_events_;
 	};
 #endif
 }

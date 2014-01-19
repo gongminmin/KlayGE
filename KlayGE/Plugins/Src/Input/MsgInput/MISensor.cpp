@@ -39,6 +39,141 @@
 #if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP && (_WIN32_WINNT >= 0x0601 /*_WIN32_WINNT_WIN7*/)
 namespace KlayGE
 {
+	class MsgInputSensorEvents : public ISensorEvents
+	{
+	public:
+		explicit MsgInputSensorEvents(MsgInputSensor* input_sensor)
+			: input_sensor_(input_sensor)
+		{
+		}
+		virtual ~MsgInputSensorEvents()
+		{
+		}
+
+		STDMETHODIMP QueryInterface(REFIID iid, void** ppv)
+		{
+			if (nullptr == ppv)
+			{
+				return E_POINTER;
+			}
+
+			if (IID_IUnknown == iid)
+			{
+				*ppv = static_cast<IUnknown*>(this);
+			}
+			else if (IID_ISensorEvents == iid)
+			{
+				*ppv = static_cast<ISensorEvents*>(this);
+			}
+			else
+			{
+				*ppv = NULL;
+				return E_NOINTERFACE;
+			}
+
+			this->AddRef();
+			return S_OK;
+		}
+
+		STDMETHODIMP_(ULONG) AddRef()
+		{
+			return ::InterlockedIncrement(&ref_);
+		}
+
+		STDMETHODIMP_(ULONG) Release()
+		{
+			ULONG count = ::InterlockedDecrement(&ref_);
+			if (0 == count)
+			{
+				delete this;
+			}
+			return count;
+		}
+
+		STDMETHODIMP OnEvent(ISensor* sensor, REFGUID event_id, IPortableDeviceValues* event_data)
+		{
+			UNREF_PARAM(sensor);
+			UNREF_PARAM(event_id);
+			UNREF_PARAM(event_data);
+
+			return S_OK;
+		}
+
+		STDMETHODIMP OnLeave(REFSENSOR_ID sensor_id)
+		{
+			UNREF_PARAM(sensor_id);
+
+			return S_OK;
+		}
+
+		STDMETHODIMP OnStateChanged(ISensor* sensor, SensorState state)
+		{
+			UNREF_PARAM(state);
+
+			HRESULT hr = S_OK;
+
+			if (nullptr == sensor)
+			{
+				return E_INVALIDARG;
+			}
+
+			return hr;
+		}
+
+	protected:
+		MsgInputSensor* input_sensor_;
+
+	private:
+		long ref_;
+	};
+
+	class MsgInputMotionSensorEvents : public MsgInputSensorEvents
+	{
+	public:
+		explicit MsgInputMotionSensorEvents(MsgInputSensor* input_sensor)
+			: MsgInputSensorEvents(input_sensor)
+		{
+		}
+
+		STDMETHODIMP OnDataUpdated(ISensor* sensor, ISensorDataReport* data_report)
+		{
+			HRESULT hr = S_OK;
+
+			if ((nullptr == data_report) || (nullptr == sensor))
+			{
+				return E_INVALIDARG;
+			}
+
+			input_sensor_->OnMotionDataUpdated(sensor, data_report);
+
+			return hr;
+		}
+	};
+
+	class MsgInputOrientationSensorEvents : public MsgInputSensorEvents
+	{
+	public:
+		explicit MsgInputOrientationSensorEvents(MsgInputSensor* input_sensor)
+			: MsgInputSensorEvents(input_sensor)
+		{
+		}
+
+		STDMETHODIMP OnDataUpdated(ISensor* sensor, ISensorDataReport* data_report)
+		{
+			HRESULT hr = S_OK;
+
+			if ((nullptr == data_report) || (nullptr == sensor))
+			{
+				return E_INVALIDARG;
+			}
+
+			input_sensor_->OnOrientationDataUpdated(sensor, data_report);
+
+			return hr;
+		}
+	};
+
+
 	MsgInputSensor::MsgInputSensor()
 	{
 		::CoInitialize(0);
@@ -71,6 +206,26 @@ namespace KlayGE
 			if (SUCCEEDED(hr))
 			{
 				motion_sensor_collection_ = MakeCOMPtr(motion_sensor_collection);
+
+				ULONG count = 0;
+				HRESULT hr = motion_sensor_collection_->GetCount(&count);
+				for (ULONG i = 0; i < count; ++ i)
+				{
+					ISensor* sensor;
+					hr = motion_sensor_collection_->GetAt(i, &sensor);
+					if (SUCCEEDED(hr))
+					{
+						shared_ptr<MsgInputMotionSensorEvents> motion_event = MakeSharedPtr<MsgInputMotionSensorEvents>(this);
+						ISensorEvents* sensor_event;
+						motion_event->QueryInterface(IID_ISensorEvents, reinterpret_cast<void**>(&sensor_event));
+						motion_sensor_events_.push_back(motion_event);
+
+						sensor->SetEventSink(sensor_event);
+
+						sensor_event->Release();
+						sensor->Release();
+					}
+				}
 			}
 
 			ISensorCollection* orientation_sensor_collection = nullptr;
@@ -78,6 +233,26 @@ namespace KlayGE
 			if (SUCCEEDED(hr))
 			{
 				orientation_sensor_collection_ = MakeCOMPtr(orientation_sensor_collection);
+
+				ULONG count = 0;
+				HRESULT hr = orientation_sensor_collection_->GetCount(&count);
+				for (ULONG i = 0; i < count; ++ i)
+				{
+					ISensor* sensor;
+					hr = orientation_sensor_collection_->GetAt(i, &sensor);
+					if (SUCCEEDED(hr))
+					{
+						shared_ptr<MsgInputOrientationSensorEvents> orientation_event = MakeSharedPtr<MsgInputOrientationSensorEvents>(this);
+						ISensorEvents* sensor_event;
+						orientation_event->QueryInterface(IID_ISensorEvents, reinterpret_cast<void**>(&sensor_event));
+						orientation_sensor_events_.push_back(orientation_event);
+
+						sensor->SetEventSink(sensor_event);
+
+						sensor_event->Release();
+						sensor->Release();
+					}
+				}
 			}
 
 			sensor_mgr->Release();
@@ -88,6 +263,235 @@ namespace KlayGE
 	{
 		static std::wstring const name(L"MsgInput Sensor");
 		return name;
+	}
+
+	void MsgInputSensor::OnMotionDataUpdated(ISensor* sensor, ISensorDataReport* data_report)
+	{
+		VARIANT_BOOL supported;
+
+		supported = VARIANT_FALSE;
+		sensor->SupportsDataField(SENSOR_DATA_TYPE_ACCELERATION_X_G, &supported);
+		if (supported != VARIANT_FALSE)
+		{
+			PROPVARIANT prop;
+			data_report->GetSensorValue(SENSOR_DATA_TYPE_ACCELERATION_X_G, &prop);
+			if (VT_R8 == prop.vt)
+			{
+				accel_.x() = static_cast<float>(prop.dblVal);
+			}
+		}
+
+		supported = VARIANT_FALSE;
+		sensor->SupportsDataField(SENSOR_DATA_TYPE_ACCELERATION_Y_G, &supported);
+		if (supported != VARIANT_FALSE)
+		{
+			PROPVARIANT prop;
+			data_report->GetSensorValue(SENSOR_DATA_TYPE_ACCELERATION_Y_G, &prop);
+			if (VT_R8 == prop.vt)
+			{
+				accel_.y() = static_cast<float>(prop.dblVal);
+			}
+		}
+
+		supported = VARIANT_FALSE;
+		sensor->SupportsDataField(SENSOR_DATA_TYPE_ACCELERATION_Z_G, &supported);
+		if (supported != VARIANT_FALSE)
+		{
+			PROPVARIANT prop;
+			data_report->GetSensorValue(SENSOR_DATA_TYPE_ACCELERATION_Z_G, &prop);
+			if (VT_R8 == prop.vt)
+			{
+				accel_.z() = static_cast<float>(prop.dblVal);
+			}
+		}
+
+		supported = VARIANT_FALSE;
+		sensor->SupportsDataField(SENSOR_DATA_TYPE_SPEED_METERS_PER_SECOND, &supported);
+		if (supported != VARIANT_FALSE)
+		{
+			PROPVARIANT prop;
+			data_report->GetSensorValue(SENSOR_DATA_TYPE_SPEED_METERS_PER_SECOND, &prop);
+			if (VT_R8 == prop.vt)
+			{
+				speed_ = static_cast<float>(prop.dblVal);
+			}
+		}
+
+		supported = VARIANT_FALSE;
+		sensor->SupportsDataField(SENSOR_DATA_TYPE_ANGULAR_ACCELERATION_X_DEGREES_PER_SECOND_SQUARED, &supported);
+		if (supported != VARIANT_FALSE)
+		{
+			PROPVARIANT prop;
+			data_report->GetSensorValue(SENSOR_DATA_TYPE_ANGULAR_ACCELERATION_X_DEGREES_PER_SECOND_SQUARED, &prop);
+			if (VT_R8 == prop.vt)
+			{
+				angular_accel_.x() = static_cast<float>(prop.dblVal);
+			}
+		}
+
+		supported = VARIANT_FALSE;
+		sensor->SupportsDataField(SENSOR_DATA_TYPE_ANGULAR_ACCELERATION_Y_DEGREES_PER_SECOND_SQUARED, &supported);
+		if (supported != VARIANT_FALSE)
+		{
+			PROPVARIANT prop;
+			data_report->GetSensorValue(SENSOR_DATA_TYPE_ANGULAR_ACCELERATION_Y_DEGREES_PER_SECOND_SQUARED, &prop);
+			if (VT_R8 == prop.vt)
+			{
+				angular_accel_.y() = static_cast<float>(prop.dblVal);
+			}
+		}
+
+		supported = VARIANT_FALSE;
+		sensor->SupportsDataField(SENSOR_DATA_TYPE_ANGULAR_ACCELERATION_Z_DEGREES_PER_SECOND_SQUARED, &supported);
+		if (supported != VARIANT_FALSE)
+		{
+			PROPVARIANT prop;
+			data_report->GetSensorValue(SENSOR_DATA_TYPE_ANGULAR_ACCELERATION_Z_DEGREES_PER_SECOND_SQUARED, &prop);
+			if (VT_R8 == prop.vt)
+			{
+				angular_accel_.z() = static_cast<float>(prop.dblVal);
+			}
+		}
+
+		supported = VARIANT_FALSE;
+		sensor->SupportsDataField(SENSOR_DATA_TYPE_ANGULAR_VELOCITY_X_DEGREES_PER_SECOND, &supported);
+		if (supported != VARIANT_FALSE)
+		{
+			PROPVARIANT prop;
+			data_report->GetSensorValue(SENSOR_DATA_TYPE_ANGULAR_VELOCITY_X_DEGREES_PER_SECOND, &prop);
+			if (VT_R8 == prop.vt)
+			{
+				angular_velocity_.x() = static_cast<float>(prop.dblVal);
+			}
+		}
+
+		supported = VARIANT_FALSE;
+		sensor->SupportsDataField(SENSOR_DATA_TYPE_ANGULAR_VELOCITY_Y_DEGREES_PER_SECOND, &supported);
+		if (supported != VARIANT_FALSE)
+		{
+			PROPVARIANT prop;
+			data_report->GetSensorValue(SENSOR_DATA_TYPE_ANGULAR_VELOCITY_Y_DEGREES_PER_SECOND, &prop);
+			if (VT_R8 == prop.vt)
+			{
+				angular_velocity_.y() = static_cast<float>(prop.dblVal);
+			}
+		}
+
+		supported = VARIANT_FALSE;
+		sensor->SupportsDataField(SENSOR_DATA_TYPE_ANGULAR_VELOCITY_Z_DEGREES_PER_SECOND, &supported);
+		if (supported != VARIANT_FALSE)
+		{
+			PROPVARIANT prop;
+			data_report->GetSensorValue(SENSOR_DATA_TYPE_ANGULAR_VELOCITY_Z_DEGREES_PER_SECOND, &prop);
+			if (VT_R8 == prop.vt)
+			{
+				angular_velocity_.z() = static_cast<float>(prop.dblVal);
+			}
+		}
+	}
+
+	void MsgInputSensor::OnOrientationDataUpdated(ISensor* sensor, ISensorDataReport* data_report)
+	{
+		VARIANT_BOOL supported;
+
+		supported = VARIANT_FALSE;
+		sensor->SupportsDataField(SENSOR_DATA_TYPE_TILT_X_DEGREES, &supported);
+		if (supported != VARIANT_FALSE)
+		{
+			PROPVARIANT prop;
+			data_report->GetSensorValue(SENSOR_DATA_TYPE_TILT_X_DEGREES, &prop);
+			if (VT_R4 == prop.vt)
+			{
+				tilt_.x() = prop.fltVal;
+			}
+		}
+
+		supported = VARIANT_FALSE;
+		sensor->SupportsDataField(SENSOR_DATA_TYPE_TILT_Y_DEGREES, &supported);
+		if (supported != VARIANT_FALSE)
+		{
+			PROPVARIANT prop;
+			data_report->GetSensorValue(SENSOR_DATA_TYPE_TILT_Y_DEGREES, &prop);
+			if (VT_R4 == prop.vt)
+			{
+				tilt_.y() = prop.fltVal;
+			}
+		}
+
+		supported = VARIANT_FALSE;
+		sensor->SupportsDataField(SENSOR_DATA_TYPE_TILT_Z_DEGREES, &supported);
+		if (supported != VARIANT_FALSE)
+		{
+			PROPVARIANT prop;
+			data_report->GetSensorValue(SENSOR_DATA_TYPE_TILT_Z_DEGREES, &prop);
+			if (VT_R4 == prop.vt)
+			{
+				tilt_.z() = prop.fltVal;
+			}
+		}
+
+		supported = VARIANT_FALSE;
+		sensor->SupportsDataField(SENSOR_DATA_TYPE_MAGNETIC_HEADING_X_DEGREES, &supported);
+		if (supported != VARIANT_FALSE)
+		{
+			PROPVARIANT prop;
+			data_report->GetSensorValue(SENSOR_DATA_TYPE_MAGNETIC_HEADING_X_DEGREES, &prop);
+			if (VT_R4 == prop.vt)
+			{
+				magnetic_heading_.x() = prop.fltVal;
+			}
+		}
+
+		supported = VARIANT_FALSE;
+		sensor->SupportsDataField(SENSOR_DATA_TYPE_MAGNETIC_HEADING_Y_DEGREES, &supported);
+		if (supported != VARIANT_FALSE)
+		{
+			PROPVARIANT prop;
+			data_report->GetSensorValue(SENSOR_DATA_TYPE_MAGNETIC_HEADING_Y_DEGREES, &prop);
+			if (VT_R4 == prop.vt)
+			{
+				magnetic_heading_.y() = prop.fltVal;
+			}
+		}
+
+		supported = VARIANT_FALSE;
+		sensor->SupportsDataField(SENSOR_DATA_TYPE_MAGNETIC_HEADING_Z_DEGREES, &supported);
+		if (supported != VARIANT_FALSE)
+		{
+			PROPVARIANT prop;
+			data_report->GetSensorValue(SENSOR_DATA_TYPE_MAGNETIC_HEADING_Z_DEGREES, &prop);
+			if (VT_R4 == prop.vt)
+			{
+				magnetic_heading_.z() = prop.fltVal;
+			}
+		}
+
+		supported = VARIANT_FALSE;
+		sensor->SupportsDataField(SENSOR_DATA_TYPE_QUATERNION, &supported);
+		if (supported != VARIANT_FALSE)
+		{
+			PROPVARIANT prop;
+			data_report->GetSensorValue(SENSOR_DATA_TYPE_QUATERNION, &prop);
+			if ((VT_VECTOR | VT_UI1) == prop.vt)
+			{
+				orientation_quat_.x() = prop.caub.pElems[0] / 255.0f * 2 - 1;
+				orientation_quat_.y() = prop.caub.pElems[1] / 255.0f * 2 - 1;
+				orientation_quat_.z() = prop.caub.pElems[2] / 255.0f * 2 - 1;
+				orientation_quat_.w() = prop.caub.pElems[3] / 255.0f;
+			}
+		}
+
+		supported = VARIANT_FALSE;
+		sensor->SupportsDataField(SENSOR_DATA_TYPE_MAGNETOMETER_ACCURACY, &supported);
+		if (supported != VARIANT_FALSE)
+		{
+			PROPVARIANT prop;
+			data_report->GetSensorValue(SENSOR_DATA_TYPE_MAGNETOMETER_ACCURACY, &prop);
+			if (VT_I4 == prop.vt)
+			{
+				magnetometer_accuracy_ = prop.intVal;
+			}
+		}
 	}
 
 	void MsgInputSensor::UpdateInputs()
@@ -127,255 +531,6 @@ namespace KlayGE
 					}
 
 					location_report->Release();
-				}
-			}
-		}
-
-		if (motion_sensor_collection_)
-		{
-			ULONG count = 0;
-			HRESULT hr = motion_sensor_collection_->GetCount(&count);
-			for (ULONG i = 0; i < count; ++ i)
-			{
-				ISensor* sensor;
-				hr = motion_sensor_collection_->GetAt(i, &sensor);
-				if (SUCCEEDED(hr))
-				{
-					ISensorDataReport* data_report;
-					hr = sensor->GetData(&data_report);
-					if (SUCCEEDED(hr))
-					{
-						VARIANT_BOOL supported = VARIANT_FALSE;
-
-						sensor->SupportsDataField(SENSOR_DATA_TYPE_ACCELERATION_X_G, &supported);
-						if (supported != VARIANT_FALSE)
-						{
-							PROPVARIANT prop;
-							data_report->GetSensorValue(SENSOR_DATA_TYPE_ACCELERATION_X_G, &prop);
-							if (VT_R8 == prop.vt)
-							{
-								accel_.x() = static_cast<float>(prop.dblVal);
-							}
-						}
-
-						hr = sensor->SupportsDataField(SENSOR_DATA_TYPE_ACCELERATION_Y_G, &supported);
-						if (supported != VARIANT_FALSE)
-						{
-							PROPVARIANT prop;
-							data_report->GetSensorValue(SENSOR_DATA_TYPE_ACCELERATION_Y_G, &prop);
-							if (VT_R8 == prop.vt)
-							{
-								accel_.y() = static_cast<float>(prop.dblVal);
-							}
-						}
-
-						hr = sensor->SupportsDataField(SENSOR_DATA_TYPE_ACCELERATION_Z_G, &supported);
-						if (supported != VARIANT_FALSE)
-						{
-							PROPVARIANT prop;
-							data_report->GetSensorValue(SENSOR_DATA_TYPE_ACCELERATION_Z_G, &prop);
-							if (VT_R8 == prop.vt)
-							{
-								accel_.z() = static_cast<float>(prop.dblVal);
-							}
-						}
-
-						hr = sensor->SupportsDataField(SENSOR_DATA_TYPE_SPEED_METERS_PER_SECOND, &supported);
-						if (supported != VARIANT_FALSE)
-						{
-							PROPVARIANT prop;
-							data_report->GetSensorValue(SENSOR_DATA_TYPE_SPEED_METERS_PER_SECOND, &prop);
-							if (VT_R8 == prop.vt)
-							{
-								speed_ = static_cast<float>(prop.dblVal);
-							}
-						}
-
-						hr = sensor->SupportsDataField(SENSOR_DATA_TYPE_ANGULAR_ACCELERATION_X_DEGREES_PER_SECOND_SQUARED, &supported);
-						if (supported != VARIANT_FALSE)
-						{
-							PROPVARIANT prop;
-							data_report->GetSensorValue(SENSOR_DATA_TYPE_ANGULAR_ACCELERATION_X_DEGREES_PER_SECOND_SQUARED, &prop);
-							if (VT_R8 == prop.vt)
-							{
-								angular_accel_.x() = static_cast<float>(prop.dblVal);
-							}
-						}
-
-						hr = sensor->SupportsDataField(SENSOR_DATA_TYPE_ANGULAR_ACCELERATION_Y_DEGREES_PER_SECOND_SQUARED, &supported);
-						if (supported != VARIANT_FALSE)
-						{
-							PROPVARIANT prop;
-							data_report->GetSensorValue(SENSOR_DATA_TYPE_ANGULAR_ACCELERATION_Y_DEGREES_PER_SECOND_SQUARED, &prop);
-							if (VT_R8 == prop.vt)
-							{
-								angular_accel_.y() = static_cast<float>(prop.dblVal);
-							}
-						}
-
-						hr = sensor->SupportsDataField(SENSOR_DATA_TYPE_ANGULAR_ACCELERATION_Z_DEGREES_PER_SECOND_SQUARED, &supported);
-						if (supported != VARIANT_FALSE)
-						{
-							PROPVARIANT prop;
-							data_report->GetSensorValue(SENSOR_DATA_TYPE_ANGULAR_ACCELERATION_Z_DEGREES_PER_SECOND_SQUARED, &prop);
-							if (VT_R8 == prop.vt)
-							{
-								angular_accel_.z() = static_cast<float>(prop.dblVal);
-							}
-						}
-
-						hr = sensor->SupportsDataField(SENSOR_DATA_TYPE_ANGULAR_VELOCITY_X_DEGREES_PER_SECOND, &supported);
-						if (supported != VARIANT_FALSE)
-						{
-							PROPVARIANT prop;
-							data_report->GetSensorValue(SENSOR_DATA_TYPE_ANGULAR_VELOCITY_X_DEGREES_PER_SECOND, &prop);
-							if (VT_R8 == prop.vt)
-							{
-								angular_velocity_.x() = static_cast<float>(prop.dblVal);
-							}
-						}
-
-						hr = sensor->SupportsDataField(SENSOR_DATA_TYPE_ANGULAR_VELOCITY_Y_DEGREES_PER_SECOND, &supported);
-						if (supported != VARIANT_FALSE)
-						{
-							PROPVARIANT prop;
-							data_report->GetSensorValue(SENSOR_DATA_TYPE_ANGULAR_VELOCITY_Y_DEGREES_PER_SECOND, &prop);
-							if (VT_R8 == prop.vt)
-							{
-								angular_velocity_.y() = static_cast<float>(prop.dblVal);
-							}
-						}
-
-						hr = sensor->SupportsDataField(SENSOR_DATA_TYPE_ANGULAR_VELOCITY_Z_DEGREES_PER_SECOND, &supported);
-						if (supported != VARIANT_FALSE)
-						{
-							PROPVARIANT prop;
-							data_report->GetSensorValue(SENSOR_DATA_TYPE_ANGULAR_VELOCITY_Z_DEGREES_PER_SECOND, &prop);
-							if (VT_R8 == prop.vt)
-							{
-								angular_velocity_.z() = static_cast<float>(prop.dblVal);
-							}
-						}
-
-						data_report->Release();
-					}
-
-					sensor->Release();
-				}
-			}
-		}
-
-		if (orientation_sensor_collection_)
-		{
-			ULONG count = 0;
-			HRESULT hr = orientation_sensor_collection_->GetCount(&count);
-			for (ULONG i = 0; i < count; ++ i)
-			{
-				ISensor* sensor;
-				hr = orientation_sensor_collection_->GetAt(i, &sensor);
-				if (SUCCEEDED(hr))
-				{
-					ISensorDataReport* data_report;
-					hr = sensor->GetData(&data_report);
-					if (SUCCEEDED(hr))
-					{
-						VARIANT_BOOL supported = VARIANT_FALSE;
-
-						sensor->SupportsDataField(SENSOR_DATA_TYPE_TILT_X_DEGREES, &supported);
-						if (supported != VARIANT_FALSE)
-						{
-							PROPVARIANT prop;
-							data_report->GetSensorValue(SENSOR_DATA_TYPE_TILT_X_DEGREES, &prop);
-							if (VT_R4 == prop.vt)
-							{
-								tilt_.x() = prop.fltVal;
-							}
-						}
-
-						hr = sensor->SupportsDataField(SENSOR_DATA_TYPE_TILT_Y_DEGREES, &supported);
-						if (supported != VARIANT_FALSE)
-						{
-							PROPVARIANT prop;
-							data_report->GetSensorValue(SENSOR_DATA_TYPE_TILT_Y_DEGREES, &prop);
-							if (VT_R4 == prop.vt)
-							{
-								tilt_.y() = prop.fltVal;
-							}
-						}
-
-						hr = sensor->SupportsDataField(SENSOR_DATA_TYPE_TILT_Z_DEGREES, &supported);
-						if (supported != VARIANT_FALSE)
-						{
-							PROPVARIANT prop;
-							data_report->GetSensorValue(SENSOR_DATA_TYPE_TILT_Z_DEGREES, &prop);
-							if (VT_R4 == prop.vt)
-							{
-								tilt_.z() = prop.fltVal;
-							}
-						}
-
-						hr = sensor->SupportsDataField(SENSOR_DATA_TYPE_MAGNETIC_HEADING_X_DEGREES, &supported);
-						if (supported != VARIANT_FALSE)
-						{
-							PROPVARIANT prop;
-							data_report->GetSensorValue(SENSOR_DATA_TYPE_MAGNETIC_HEADING_X_DEGREES, &prop);
-							if (VT_R4 == prop.vt)
-							{
-								magnetic_heading_.x() = prop.fltVal;
-							}
-						}
-
-						hr = sensor->SupportsDataField(SENSOR_DATA_TYPE_MAGNETIC_HEADING_Y_DEGREES, &supported);
-						if (supported != VARIANT_FALSE)
-						{
-							PROPVARIANT prop;
-							data_report->GetSensorValue(SENSOR_DATA_TYPE_MAGNETIC_HEADING_Y_DEGREES, &prop);
-							if (VT_R4 == prop.vt)
-							{
-								magnetic_heading_.y() = prop.fltVal;
-							}
-						}
-
-						hr = sensor->SupportsDataField(SENSOR_DATA_TYPE_MAGNETIC_HEADING_Z_DEGREES, &supported);
-						if (supported != VARIANT_FALSE)
-						{
-							PROPVARIANT prop;
-							data_report->GetSensorValue(SENSOR_DATA_TYPE_MAGNETIC_HEADING_Z_DEGREES, &prop);
-							if (VT_R4 == prop.vt)
-							{
-								magnetic_heading_.z() = prop.fltVal;
-							}
-						}
-
-						hr = sensor->SupportsDataField(SENSOR_DATA_TYPE_QUATERNION, &supported);
-						if (supported != VARIANT_FALSE)
-						{
-							PROPVARIANT prop;
-							data_report->GetSensorValue(SENSOR_DATA_TYPE_QUATERNION, &prop);
-							if ((VT_VECTOR | VT_UI1) == prop.vt)
-							{
-								orientation_quat_.x() = prop.caub.pElems[0] / 255.0f * 2 - 1;
-								orientation_quat_.y() = prop.caub.pElems[1] / 255.0f * 2 - 1;
-								orientation_quat_.z() = prop.caub.pElems[2] / 255.0f * 2 - 1;
-								orientation_quat_.w() = prop.caub.pElems[3] / 255.0f;
-							}
-						}
-
-						hr = sensor->SupportsDataField(SENSOR_DATA_TYPE_MAGNETOMETER_ACCURACY, &supported);
-						if (supported != VARIANT_FALSE)
-						{
-							PROPVARIANT prop;
-							data_report->GetSensorValue(SENSOR_DATA_TYPE_MAGNETOMETER_ACCURACY, &prop);
-							if (VT_I4 == prop.vt)
-							{
-								magnetometer_accuracy_ = prop.intVal;
-							}
-						}
-
-						data_report->Release();
-					}
-
-					sensor->Release();
 				}
 			}
 		}
