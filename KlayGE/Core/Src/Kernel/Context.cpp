@@ -258,7 +258,7 @@ namespace KlayGE
 				}
 			}
 
-			size_t const color_fmt_str_hash = CT_HASH(color_fmt_str.c_str());
+			size_t const color_fmt_str_hash = RT_HASH(color_fmt_str.c_str());
 			if (CT_HASH("ARGB8") == color_fmt_str_hash)
 			{
 				color_fmt = EF_ARGB8;
@@ -272,7 +272,7 @@ namespace KlayGE
 				color_fmt = EF_A2BGR10;
 			}
 
-			size_t const depth_stencil_fmt_str_hash = CT_HASH(depth_stencil_fmt_str.c_str());
+			size_t const depth_stencil_fmt_str_hash = RT_HASH(depth_stencil_fmt_str.c_str());
 			if (CT_HASH("D16") == depth_stencil_fmt_str_hash)
 			{
 				depth_stencil_fmt = EF_D16;
@@ -377,7 +377,7 @@ namespace KlayGE
 			if (attr)
 			{
 				std::string method_str = attr->ValueString();
-				size_t const method_str_hash = CT_HASH(method_str.c_str());
+				size_t const method_str_hash = RT_HASH(method_str.c_str());
 				if (CT_HASH("none") == method_str_hash)
 				{
 					stereo_method = STM_None;

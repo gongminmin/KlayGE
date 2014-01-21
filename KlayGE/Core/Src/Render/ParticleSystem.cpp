@@ -294,7 +294,7 @@ namespace
 						}
 
 						XMLAttributePtr attr = node->Attrib("name");
-						size_t const name_hash = CT_HASH(attr->ValueString().c_str());
+						size_t const name_hash = RT_HASH(attr->ValueString().c_str());
 						if (CT_HASH("size_over_life") == name_hash)
 						{
 							ps_desc_.ps_data->size_over_life_ctrl_pts = xys;

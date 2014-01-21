@@ -708,7 +708,7 @@ namespace KlayGE
 		for (XMLNodePtr curve_node = root->FirstNode("curve"); curve_node; curve_node = curve_node->NextSibling("curve"))
 		{
 			std::string type_str = curve_node->Attrib("type")->ValueString();
-			size_t const type_str_hash = CT_HASH(type_str.c_str());
+			size_t const type_str_hash = RT_HASH(type_str.c_str());
 			CameraPathController::InterpolateType type;
 			if (CT_HASH("linear") == type_str_hash)
 			{

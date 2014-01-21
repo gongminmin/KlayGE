@@ -578,7 +578,7 @@ namespace KlayGE
 					}
 
 					std::string type_str = ctrl_node->Attrib("type")->ValueString();
-					size_t const type_str_hash = CT_HASH(type_str.c_str());
+					size_t const type_str_hash = RT_HASH(type_str.c_str());
 					if (CT_HASH("static") == type_str_hash)
 					{
 						std::string caption = ctrl_node->Attrib("caption")->ValueString();

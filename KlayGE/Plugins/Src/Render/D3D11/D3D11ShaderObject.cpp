@@ -761,7 +761,7 @@ namespace KlayGE
 		D3D11RenderEngine const & render_eng = *checked_cast<D3D11RenderEngine const *>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		RenderDeviceCaps const & caps = render_eng.DeviceCaps();
 		std::string shader_profile = sd.profile;
-		size_t const shader_profile_hash = CT_HASH(shader_profile.c_str());
+		size_t const shader_profile_hash = RT_HASH(shader_profile.c_str());
 		switch (type)
 		{
 		case ST_VertexShader:
@@ -1171,7 +1171,7 @@ namespace KlayGE
 		is_shader_validate_[type] = true;
 
 		std::string shader_profile = sd.profile;
-		size_t const shader_profile_hash = CT_HASH(shader_profile.c_str());
+		size_t const shader_profile_hash = RT_HASH(shader_profile.c_str());
 		switch (type)
 		{
 		case ST_VertexShader:

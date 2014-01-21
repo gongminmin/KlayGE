@@ -493,7 +493,7 @@ namespace KlayGE
 				tl = ASyncLoadTexture(iter->second, EAH_GPU_Read | EAH_Immutable);
 			}
 
-			size_t const slot_type_hash = CT_HASH(iter->first.c_str());
+			size_t const slot_type_hash = RT_HASH(iter->first.c_str());
 
 			if ((CT_HASH("Color") == slot_type_hash) || (CT_HASH("Diffuse Color") == slot_type_hash)
 				|| (CT_HASH("Diffuse Color Map") == slot_type_hash))

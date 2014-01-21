@@ -105,7 +105,7 @@ namespace
 
 		uint32_t type_code(std::string const & name) const
 		{
-			size_t const name_hash = CT_HASH(name.c_str());
+			size_t const name_hash = RT_HASH(name.c_str());
 			for (uint32_t i = 0; i < types_hash_.size(); ++ i)
 			{
 				if (types_hash_[i] == name_hash)
@@ -181,7 +181,7 @@ namespace
 			types_hash_.resize(types_.size());
 			for (size_t i = 0; i < types_.size(); ++ i)
 			{
-				types_hash_[i] = CT_HASH(types_[i].c_str());
+				types_hash_[i] = RT_HASH(types_[i].c_str());
 			}
 		}
 
@@ -211,7 +211,7 @@ namespace
 
 		ShadeMode from_str(std::string const & name) const
 		{
-			size_t const name_hash = CT_HASH(name.c_str());
+			size_t const name_hash = RT_HASH(name.c_str());
 			for (uint32_t i = 0; i < sms_hash_.size(); ++ i)
 			{
 				if (sms_hash_[i] == name_hash)
@@ -219,6 +219,7 @@ namespace
 					return static_cast<ShadeMode>(i);
 				}
 			}
+			BOOST_ASSERT(false);
 			LogError("Wrong ShadeMode name: %s", name.c_str());
 			return static_cast<ShadeMode>(0xFFFFFFFF);
 		}
@@ -254,7 +255,7 @@ namespace
 
 		CompareFunction from_str(std::string const & name) const
 		{
-			size_t const name_hash = CT_HASH(name.c_str());
+			size_t const name_hash = RT_HASH(name.c_str());
 			for (uint32_t i = 0; i < cfs_hash_.size(); ++ i)
 			{
 				if (cfs_hash_[i] == name_hash)
@@ -262,6 +263,7 @@ namespace
 					return static_cast<CompareFunction>(i);
 				}
 			}
+			BOOST_ASSERT(false);
 			LogError("Wrong CompareFunction name: %s", name.c_str());
 			return static_cast<CompareFunction>(0xFFFFFFFF);
 		}
@@ -303,7 +305,7 @@ namespace
 
 		CullMode from_str(std::string const & name) const
 		{
-			size_t const name_hash = CT_HASH(name.c_str());
+			size_t const name_hash = RT_HASH(name.c_str());
 			for (uint32_t i = 0; i < cms_hash_.size(); ++ i)
 			{
 				if (cms_hash_[i] == name_hash)
@@ -311,6 +313,7 @@ namespace
 					return static_cast<CullMode>(i);
 				}
 			}
+			BOOST_ASSERT(false);
 			LogError("Wrong CullMode name: %s", name.c_str());
 			return static_cast<CullMode>(0xFFFFFFFF);
 		}
@@ -347,7 +350,7 @@ namespace
 
 		PolygonMode from_str(std::string const & name) const
 		{
-			size_t const name_hash = CT_HASH(name.c_str());
+			size_t const name_hash = RT_HASH(name.c_str());
 			for (uint32_t i = 0; i < pms_hash_.size(); ++ i)
 			{
 				if (pms_hash_[i] == name_hash)
@@ -355,6 +358,7 @@ namespace
 					return static_cast<PolygonMode>(i);
 				}
 			}
+			BOOST_ASSERT(false);
 			LogError("Wrong PolygonMode name: %s", name.c_str());
 			return static_cast<PolygonMode>(0xFFFFFFFF);
 		}
@@ -391,7 +395,7 @@ namespace
 
 		AlphaBlendFactor from_str(std::string const & name) const
 		{
-			size_t const name_hash = CT_HASH(name.c_str());
+			size_t const name_hash = RT_HASH(name.c_str());
 			for (uint32_t i = 0; i < abfs_hash_.size(); ++ i)
 			{
 				if (abfs_hash_[i] == name_hash)
@@ -399,6 +403,7 @@ namespace
 					return static_cast<AlphaBlendFactor>(i);
 				}
 			}
+			BOOST_ASSERT(false);
 			LogError("Wrong AlphaBlendFactor name: %s", name.c_str());
 			return static_cast<AlphaBlendFactor>(0xFFFFFFFF);
 		}
@@ -449,7 +454,7 @@ namespace
 
 		BlendOperation from_str(std::string const & name) const
 		{
-			size_t const name_hash = CT_HASH(name.c_str());
+			size_t const name_hash = RT_HASH(name.c_str());
 			for (uint32_t i = 0; i < bops_hash_.size(); ++ i)
 			{
 				if (bops_hash_[i] == name_hash)
@@ -457,6 +462,7 @@ namespace
 					return static_cast<BlendOperation>(i + 1);
 				}
 			}
+			BOOST_ASSERT(false);
 			LogError("Wrong BlendOperation name: %s", name.c_str());
 			return static_cast<BlendOperation>(0xFFFFFFFF);
 		}
@@ -495,7 +501,7 @@ namespace
 
 		StencilOperation from_str(std::string const & name) const
 		{
-			size_t const name_hash = CT_HASH(name.c_str());
+			size_t const name_hash = RT_HASH(name.c_str());
 			for (uint32_t i = 0; i < sops_hash_.size(); ++ i)
 			{
 				if (sops_hash_[i] == name_hash)
@@ -503,6 +509,7 @@ namespace
 					return static_cast<StencilOperation>(i);
 				}
 			}
+			BOOST_ASSERT(false);
 			LogError("Wrong StencilOperation name: %s", name.c_str());
 			return static_cast<StencilOperation>(0xFFFFFFFF);
 		}
@@ -556,7 +563,7 @@ namespace
 				cmp = 0;
 				f = name;
 			}
-			size_t const f_hash = CT_HASH(f.c_str());
+			size_t const f_hash = RT_HASH(f.c_str());
 			for (uint32_t i = 0; i < tfs_hash_.size(); ++ i)
 			{
 				if (tfs_hash_[i] == f_hash)
@@ -568,6 +575,7 @@ namespace
 			{
 				return static_cast<TexFilterOp>((cmp << 4) + TFO_Anisotropic);
 			}
+			BOOST_ASSERT(false);
 			LogError("Wrong TexFilterOp name: %s", name.c_str());
 			return static_cast<TexFilterOp>(0xFFFFFFFF);
 		}
@@ -609,7 +617,7 @@ namespace
 
 		TexAddressingMode from_str(std::string const & name) const
 		{
-			size_t const name_hash = CT_HASH(name.c_str());
+			size_t const name_hash = RT_HASH(name.c_str());
 			for (uint32_t i = 0; i < tams_hash_.size(); ++ i)
 			{
 				if (tams_hash_[i] == name_hash)
@@ -617,6 +625,7 @@ namespace
 					return static_cast<TexAddressingMode>(i);
 				}
 			}
+			BOOST_ASSERT(false);
 			LogError("Wrong TexAddressingMode name: %s", name.c_str());
 			return static_cast<TexAddressingMode>(0xFFFFFFFF);
 		}
@@ -654,7 +663,7 @@ namespace
 
 		LogicOperation from_str(std::string const & name) const
 		{
-			size_t const name_hash = CT_HASH(name.c_str());
+			size_t const name_hash = RT_HASH(name.c_str());
 			for (uint32_t i = 0; i < lops_hash_.size(); ++ i)
 			{
 				if (lops_hash_[i] == name_hash)
@@ -662,6 +671,7 @@ namespace
 					return static_cast<LogicOperation>(i);
 				}
 			}
+			BOOST_ASSERT(false);
 			LogError("Wrong LogicOperation name: %s", name.c_str());
 			return static_cast<LogicOperation>(0xFFFFFFFF);
 		}
@@ -888,7 +898,8 @@ namespace
 				for (XMLNodePtr state_node = node->FirstNode("state"); state_node; state_node = state_node->NextSibling("state"))
 				{
 					std::string name = state_node->Attrib("name")->ValueString();
-					size_t const name_hash = CT_HASH(name.c_str());
+					size_t const name_hash = RT_HASH(name.c_str());
+
 					if (CT_HASH("filtering") == name_hash)
 					{
 						std::string value_str = state_node->Attrib("value")->ValueString();
@@ -955,6 +966,7 @@ namespace
 					}
 					else
 					{
+						BOOST_ASSERT(false);
 						LogError("Wrong sampler state name: %s", name.c_str());
 					}
 				}
@@ -3805,7 +3817,7 @@ namespace KlayGE
 		for (XMLNodePtr state_node = node->FirstNode("state"); state_node; state_node = state_node->NextSibling("state"))
 		{
 			std::string state_name = state_node->Attrib("name")->ValueString();
-			size_t const state_name_hash = CT_HASH(state_name.c_str());
+			size_t const state_name_hash = RT_HASH(state_name.c_str());
 
 			if (CT_HASH("polygon_mode") == state_name_hash)
 			{
@@ -4081,7 +4093,7 @@ namespace KlayGE
 							ShaderDesc::StreamOutputDecl decl;
 
 							std::string usage_str = slot_node->Attrib("usage")->ValueString();
-							size_t const usage_str_hash = CT_HASH(usage_str.c_str());
+							size_t const usage_str_hash = RT_HASH(usage_str.c_str());
 							XMLAttributePtr attr = slot_node->Attrib("usage_index");
 							if (attr)
 							{
@@ -4154,6 +4166,7 @@ namespace KlayGE
 			}
 			else
 			{
+				BOOST_ASSERT(false);
 				LogError("Wrong state name: %s", state_name.c_str());
 			}
 		}
@@ -4788,7 +4801,7 @@ namespace KlayGE
 		if (attr)
 		{
 			std::string type_str = attr->ValueString();
-			size_t const type_str_hash = CT_HASH(type_str.c_str());
+			size_t const type_str_hash = RT_HASH(type_str.c_str());
 			if (CT_HASH("vertex_shader") == type_str_hash)
 			{
 				type_ = ShaderObject::ST_VertexShader;

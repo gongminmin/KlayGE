@@ -1045,7 +1045,7 @@ namespace KlayGE
 				for (KLAYGE_AUTO(beg, tok.begin()); beg != tok.end();)
 				{
 					this_token = *beg;
-					size_t const this_token_hash = CT_HASH(this_token.c_str());
+					size_t const this_token_hash = RT_HASH(this_token.c_str());
 
 					RenderEffectParameterPtr const & param = effect.ParameterByName(this_token);
 					if (param &&
@@ -1185,7 +1185,7 @@ namespace KlayGE
 									if (CT_HASH("[") == this_token_hash)
 									{
 										++ beg;
-										size_t const token_hash = CT_HASH((*beg).c_str());
+										size_t const token_hash = RT_HASH((*beg).c_str());
 										if ((CT_HASH("branch") == token_hash)
 											|| (CT_HASH("flatten") == token_hash)
 											|| (CT_HASH("forcecase") == token_hash)
@@ -1426,7 +1426,7 @@ namespace KlayGE
 		for (KLAYGE_AUTO(beg, tok.begin()); beg != tok.end(); ++ beg)
 		{
 			std::string const & this_token = *beg;
-			size_t const this_token_hash = CT_HASH(this_token.c_str());
+			size_t const this_token_hash = RT_HASH(this_token.c_str());
 
 			if (CT_HASH("#version") == this_token_hash)
 			{
@@ -2177,7 +2177,7 @@ namespace KlayGE
 						{
 							std::string semantic = cgGetParameterSemantic(cg_param);
 							std::string glsl_param_name = semantic;//cgGetParameterResourceName(cg_param);
-							size_t const semantic_hash = CT_HASH(semantic.c_str());
+							size_t const semantic_hash = RT_HASH(semantic.c_str());
 
 							VertexElementUsage usage = VEU_Position;
 							uint8_t usage_index = 0;

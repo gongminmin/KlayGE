@@ -1187,7 +1187,7 @@ namespace KlayGE
 
 	void OGLRenderEngine::GetCustomAttrib(std::string const & name, void* value)
 	{
-		size_t const name_hash = CT_HASH(name.c_str());
+		size_t const name_hash = RT_HASH(name.c_str());
 		if (CT_HASH("VENDOR") == name_hash)
 		{
 			char const * str = reinterpret_cast<char const *>(glGetString(GL_VENDOR));
