@@ -41,7 +41,7 @@ namespace KlayGE
 			location_error_radius_(-1), location_altitude_error_(-1),
 			accel_(0, 0, 0), speed_(0),
 			angular_accel_(0, 0, 0), angular_velocity_(0, 0, 0),
-			tilt_(0, 0, 0), magnetic_heading_(0, 0, 0),
+			tilt_(0, 0, 0), magnetic_heading_north_(0),
 			magnetometer_accuracy_(-1),
 			action_param_(MakeSharedPtr<InputSensorActionParam>())
 	{
@@ -92,9 +92,9 @@ namespace KlayGE
 	{
 		return tilt_;
 	}
-	float3 const & InputSensor::MagneticHeading() const
+	float InputSensor::MagneticHeadingNorth() const
 	{
-		return magnetic_heading_;
+		return magnetic_heading_north_;
 	}
 	Quaternion const & InputSensor::OrientationQuat() const
 	{
@@ -134,7 +134,7 @@ namespace KlayGE
 		action_param_->angular_accel = angular_accel_;
 		action_param_->angular_velocity = angular_velocity_;
 		action_param_->tilt = tilt_;
-		action_param_->magnetic_heading = magnetic_heading_;
+		action_param_->magnetic_heading_north = magnetic_heading_north_;
 		action_param_->orientation_quat = orientation_quat_;
 		action_param_->magnetometer_accuracy = magnetometer_accuracy_;
 
@@ -189,9 +189,9 @@ namespace KlayGE
 			iam.UpdateInputActions(ret, SS_Tilt, action_param_);
 			any_sensing = true;
 		}
-		if ((magnetic_heading_.x() != 0) || (magnetic_heading_.y() != 0) || (magnetic_heading_.z() != 0))
+		if (magnetic_heading_north_ != 0)
 		{
-			iam.UpdateInputActions(ret, SS_MagneticHeading, action_param_);
+			iam.UpdateInputActions(ret, SS_MagneticHeadingNorth, action_param_);
 			any_sensing = true;
 		}
 		if ((orientation_quat_.x() != 0) || (orientation_quat_.y() != 0) || (orientation_quat_.z() != 0)

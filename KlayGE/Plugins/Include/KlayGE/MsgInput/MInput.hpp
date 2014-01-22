@@ -396,6 +396,49 @@ namespace KlayGE
 		shared_ptr<ISensorCollection> orientation_sensor_collection_;
 		std::vector<shared_ptr<ISensorEvents> > orientation_sensor_events_;
 	};
+#elif defined KLAYGE_PLATFORM_WINDOWS_METRO
+	ref class MetroMsgInputSensorEvent;
+
+	class MsgInputSensor : public InputSensor
+	{
+	public:
+		MsgInputSensor();
+		virtual ~MsgInputSensor();
+
+		virtual std::wstring const & Name() const KLAYGE_OVERRIDE;
+
+		void OnPositionChanged(Windows::Devices::Geolocation::Geolocator^ sender,
+			Windows::Devices::Geolocation::PositionChangedEventArgs^ e);
+		void OnAccelerometeReadingChanged(Windows::Devices::Sensors::Accelerometer^ sender,
+			Windows::Devices::Sensors::AccelerometerReadingChangedEventArgs^ e);
+		void OnGyrometerReadingChanged(Windows::Devices::Sensors::Gyrometer^ sender,
+			Windows::Devices::Sensors::GyrometerReadingChangedEventArgs^ e);
+		void OnInclinometerReadingChanged(Windows::Devices::Sensors::Inclinometer^ sender,
+			Windows::Devices::Sensors::InclinometerReadingChangedEventArgs^ e);
+		void OnCompassReadingChanged(Windows::Devices::Sensors::Compass^ sender,
+			Windows::Devices::Sensors::CompassReadingChangedEventArgs^ e);
+
+	private:
+		virtual void UpdateInputs() KLAYGE_OVERRIDE;
+
+	private:
+		MetroMsgInputSensorEvent^ sensor_event_;
+
+		Windows::Devices::Geolocation::Geolocator^ locator_;
+		Windows::Foundation::EventRegistrationToken position_token_;
+
+		Windows::Devices::Sensors::Accelerometer^ accelerometer_;
+		Windows::Foundation::EventRegistrationToken accelerometer_reading_token_;
+
+		Windows::Devices::Sensors::Gyrometer^ gyrometer_;
+		Windows::Foundation::EventRegistrationToken gyrometer_reading_token_;
+
+		Windows::Devices::Sensors::Inclinometer^ inclinometer_;
+		Windows::Foundation::EventRegistrationToken inclinometer_reading_token_;
+
+		Windows::Devices::Sensors::Compass^ compass_;
+		Windows::Foundation::EventRegistrationToken compass_reading_token_;
+	};
 #endif
 }
 

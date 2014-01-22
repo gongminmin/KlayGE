@@ -326,7 +326,7 @@ namespace KlayGE
 		SS_AngularAccel,
 		SS_AngularVelocity,
 		SS_Tilt,
-		SS_MagneticHeading,
+		SS_MagneticHeadingNorth,
 		SS_OrientationQuat,
 		SS_MagnetometerAccuracy,
 
@@ -634,7 +634,7 @@ namespace KlayGE
 		float3 const & AngularAccel() const;
 		float3 const & AngularVelocity() const;
 		float3 const & Tilt() const;
-		float3 const & MagneticHeading() const;
+		float MagneticHeadingNorth() const;
 		Quaternion const & OrientationQuat() const;
 		int32_t MagnetometerAccuracy() const;
 
@@ -652,7 +652,7 @@ namespace KlayGE
 		float3 angular_accel_;
 		float3 angular_velocity_;
 		float3 tilt_;
-		float3 magnetic_heading_;
+		float magnetic_heading_north_;
 		Quaternion orientation_quat_;
 		int32_t magnetometer_accuracy_;
 
@@ -739,7 +739,7 @@ namespace KlayGE
 		float3 angular_accel;
 		float3 angular_velocity;
 		float3 tilt;
-		float3 magnetic_heading;
+		float magnetic_heading_north;
 		Quaternion orientation_quat;
 		int32_t magnetometer_accuracy;
 	};
