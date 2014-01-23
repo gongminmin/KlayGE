@@ -106,6 +106,10 @@ namespace KlayGE
 		{
 			return hack_for_mali_;
 		}
+		bool HackForAdreno() const
+		{
+			return hack_for_adreno_;
+		}
 
 	private:
 		void DoCreateRenderWindow(std::string const & name, RenderSettings const & settings);
@@ -159,6 +163,7 @@ namespace KlayGE
 		bool hack_for_tegra_;
 		bool hack_for_pvr_;
 		bool hack_for_mali_;
+		bool hack_for_adreno_;
 	};
 
 	typedef shared_ptr<OGLESRenderEngine> OGLESRenderEnginePtr;

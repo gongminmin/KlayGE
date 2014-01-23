@@ -9,6 +9,7 @@ IF(NOT KLAYGE_GLES_INCLUDE_DIR)
 	IF(WIN32)
 		FIND_PATH(KLAYGE_GLES_INCLUDE_DIR KHR/khrplatform.h
 			PATHS
+				"$ENV{SystemDrive}/AdrenoSDK/Development/Inc"
 				"$ENV{NV_WINGL_X86_PLAT}/include"
 				"$ENV{ProgramFiles}/NVIDIA Corporation/win_x86_es2emu/include"
 				"$ENV{ProgramFiles(x86)}/NVIDIA Corporation/win_x86_es2emu/include"

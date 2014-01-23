@@ -1146,6 +1146,14 @@ namespace KlayGE
 		{
 			hack_for_mali_ = false;
 		}
+		if (vendor.find("Qualcomm", 0) != std::string::npos)
+		{
+			hack_for_adreno_ = true;
+		}
+		else
+		{
+			hack_for_adreno_ = false;
+		}
 
 		GLint temp;
 
@@ -1173,7 +1181,7 @@ namespace KlayGE
 
 		glGetIntegerv(GL_MAX_TEXTURE_SIZE, &temp);
 		caps_.max_texture_height = caps_.max_texture_width = temp;
-		if (hack_for_pvr_ || hack_for_mali_)
+		if (hack_for_pvr_ || hack_for_mali_ || hack_for_adreno_)
 		{
 			caps_.max_texture_depth = 1;
 		}
@@ -1230,7 +1238,7 @@ namespace KlayGE
 		caps_.instance_id_support = false;
 		caps_.stream_output_support = false;
 		caps_.alpha_to_coverage_support = true;
-		if (glloader_GLES_VERSION_3_0())
+		if (glloader_GLES_VERSION_3_0() && !hack_for_adreno_)
 		{
 			caps_.primitive_restart_support = true;
 		}
@@ -1241,7 +1249,7 @@ namespace KlayGE
 		caps_.multithread_rendering_support = false;
 		caps_.multithread_res_creating_support = false;
 		caps_.mrt_independent_bit_depths_support = false;
-		if (hack_for_pvr_ || hack_for_mali_)
+		if (hack_for_pvr_ || hack_for_mali_ || hack_for_adreno_)
 		{
 			caps_.standard_derivatives_support = false;
 		}
@@ -1394,7 +1402,7 @@ namespace KlayGE
 			texture_format_.insert(EF_BC2);
 			texture_format_.insert(EF_BC3);
 		}
-		if (glloader_GLES_EXT_texture_compression_latc() && !(hack_for_pvr_ || hack_for_mali_))
+		if (glloader_GLES_EXT_texture_compression_latc() && !(hack_for_pvr_ || hack_for_mali_ || hack_for_adreno_))
 		{
 			texture_format_.insert(EF_BC4);
 			texture_format_.insert(EF_BC5);

@@ -102,7 +102,7 @@ namespace KlayGE
 		}
 
 		OGLESRenderEngine& ogl_re = *checked_cast<OGLESRenderEngine*>(&re);
-		if (!(ogl_re.HackForPVR() || ogl_re.HackForMali()) && this->UseIndices())
+		if (!(ogl_re.HackForPVR() || ogl_re.HackForMali() || ogl_re.HackForAdreno()) && this->UseIndices())
 		{
 			OGLESGraphicsBuffer& stream(*checked_pointer_cast<OGLESGraphicsBuffer>(this->GetIndexStream()));
 			BOOST_ASSERT(GL_ELEMENT_ARRAY_BUFFER == stream.GLType());
@@ -152,7 +152,7 @@ namespace KlayGE
 			}
 
 			OGLESRenderEngine& re = *checked_cast<OGLESRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-			if ((re.HackForPVR() || re.HackForMali()) && this->UseIndices())
+			if ((re.HackForPVR() || re.HackForMali() || re.HackForAdreno()) && this->UseIndices())
 			{
 				OGLESGraphicsBuffer& stream(*checked_pointer_cast<OGLESGraphicsBuffer>(this->GetIndexStream()));
 				BOOST_ASSERT(GL_ELEMENT_ARRAY_BUFFER == stream.GLType());
