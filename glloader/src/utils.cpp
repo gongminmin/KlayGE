@@ -34,9 +34,10 @@
 
 #include <string>
 #include <vector>
-
+#include <map>
 #include <algorithm>
 #include <cassert>
+#include <sstream>
 
 #ifdef GLLOADER_DEBUG
 #include <iostream>
@@ -106,6 +107,12 @@ namespace glloader
 		{
 			return gl_dlls_;
 		}
+#if defined(_WIN32) || defined(__CYGWIN__) || defined(__MINGW32__)
+		std::vector<std::map<std::string, std::string> > const & gl_dll_entries() const
+		{
+			return gl_dll_entries_;
+		}
+#endif
 
 	private:
 		gl_dll_container()
@@ -117,10 +124,13 @@ namespace glloader
 			if (ogl_dll != NULL)
 			{
 				gl_dlls_.push_back(ogl_dll);
+				this->DumpEntries("libEGL.dll");
+
 				ogl_dll = ::LoadLibraryA("libGLESv3.dll");
 				if (ogl_dll != NULL)
 				{
 					gl_dlls_.push_back(ogl_dll);
+					this->DumpEntries("libGLESv3.dll");
 				}
 				else
 				{
@@ -128,6 +138,7 @@ namespace glloader
 					if (ogl_dll != NULL)
 					{
 						gl_dlls_.push_back(ogl_dll);
+						this->DumpEntries("libGLESv2.dll");
 					}
 				}
 			}
@@ -137,6 +148,7 @@ namespace glloader
 				if (ogl_dll != NULL)
 				{
 					gl_dlls_.push_back(ogl_dll);
+					this->DumpEntries("libGLES20.dll");
 				}
 				else
 				{
@@ -144,6 +156,7 @@ namespace glloader
 					if (ogl_dll != NULL)
 					{
 						gl_dlls_.push_back(ogl_dll);
+						this->DumpEntries("atioglxx.dll");
 					}
 				}
 			}
@@ -152,6 +165,7 @@ namespace glloader
 			if (ogl_dll != NULL)
 			{
 				gl_dlls_.push_back(ogl_dll);
+				this->DumpEntries("opengl32.dll");
 			}
 #endif
 #endif
@@ -204,8 +218,61 @@ namespace glloader
 			}
 		}
 
+#if defined(_WIN32) || defined(__CYGWIN__) || defined(__MINGW32__)
+		void DumpEntries(char const * name)
+		{
+			HMODULE dll = ::LoadLibraryExA(name, NULL, DONT_RESOLVE_DLL_REFERENCES);
+			assert(IMAGE_DOS_SIGNATURE == reinterpret_cast<PIMAGE_DOS_HEADER>(dll)->e_magic);
+			PIMAGE_NT_HEADERS header = reinterpret_cast<PIMAGE_NT_HEADERS>(reinterpret_cast<BYTE*>(dll) + reinterpret_cast<PIMAGE_DOS_HEADER>(dll)->e_lfanew);
+			assert(IMAGE_NT_SIGNATURE == header->Signature);
+			assert(header->OptionalHeader.NumberOfRvaAndSizes > 0);
+			PIMAGE_EXPORT_DIRECTORY exports = reinterpret_cast<PIMAGE_EXPORT_DIRECTORY>(reinterpret_cast<BYTE*>(dll)
+				+ header->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT].VirtualAddress);
+			DWORD const * names = reinterpret_cast<DWORD*>(reinterpret_cast<BYTE*>(dll) + exports->AddressOfNames);
+			std::vector<std::string> entries(exports->NumberOfNames);
+			for (DWORD i = 0; i < exports->NumberOfNames; ++ i)
+			{
+				entries[i] = reinterpret_cast<char const *>(reinterpret_cast<BYTE const *>(dll) + names[i]);
+			}
+			::FreeLibrary(dll);
+
+			bool decorated = false;
+			for (size_t i = 0; i < entries.size(); ++ i)
+			{
+				if (('_' == entries[i][0]) || ('@' == entries[i][0]) || ('?' == entries[i][0]))
+				{
+					decorated = true;
+					break;
+				}
+			}
+
+			gl_dll_entries_.resize(gl_dll_entries_.size() + 1);
+			if (decorated)
+			{
+				for (size_t i = 0; i < entries.size(); ++ i)
+				{
+					if (('_' == entries[i][0]) || ('@' == entries[i][0]) || ('?' == entries[i][0]))
+					{
+						std::string::size_type at_pos = entries[i].find("@", 1);
+						if (at_pos != std::string::npos)
+						{
+							gl_dll_entries_.back().insert(std::make_pair(entries[i].substr(1, at_pos - 1), entries[i]));
+						}
+						else
+						{
+							gl_dll_entries_.back().insert(std::make_pair(entries[i].substr(1), entries[i]));
+						}
+					}
+				}
+			}
+		}
+#endif
+
 	private:
 		std::vector<void*> gl_dlls_;
+#if defined(_WIN32) || defined(__CYGWIN__) || defined(__MINGW32__)
+		std::vector<std::map<std::string, std::string> > gl_dll_entries_;
+#endif
 
 		static gl_dll_container* inst_;
 	};
@@ -618,9 +685,22 @@ void* get_gl_proc_address_by_dll(const char* name)
 	std::vector<void*> const & gl_dlls = glloader::gl_dll_container::instance().gl_dlls();
 
 #if defined(_WIN32) || defined(__CYGWIN__) || defined(__MINGW32__)
+	std::vector<std::map<std::string, std::string> > const & gl_dll_entries = glloader::gl_dll_container::instance().gl_dll_entries();
 	for (size_t i = 0; (i < gl_dlls.size()) && (NULL == ret); ++ i)
 	{
 		ret = (void*)(::GetProcAddress(static_cast<HMODULE>(gl_dlls[i]), name));
+		if (NULL == ret)
+		{
+			if (!gl_dll_entries[i].empty())
+			{
+				std::map<std::string, std::string>::const_iterator iter
+					= gl_dll_entries[i].find(name);
+				if (iter != gl_dll_entries[i].end())
+				{
+					ret = (void*)(::GetProcAddress(static_cast<HMODULE>(gl_dlls[i]), iter->second.c_str()));
+				}
+			}
+		}
 	}
 #endif
 #if defined(__APPLE__) || defined(__APPLE_CC__)
