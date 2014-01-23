@@ -417,6 +417,8 @@ namespace KlayGE
 			Windows::Devices::Sensors::InclinometerReadingChangedEventArgs^ e);
 		void OnCompassReadingChanged(Windows::Devices::Sensors::Compass^ sender,
 			Windows::Devices::Sensors::CompassReadingChangedEventArgs^ e);
+		void OnOrientationSensorReadingChanged(Windows::Devices::Sensors::OrientationSensor^ sender,
+			Windows::Devices::Sensors::OrientationSensorReadingChangedEventArgs^ e);
 
 	private:
 		virtual void UpdateInputs() KLAYGE_OVERRIDE;
@@ -438,6 +440,9 @@ namespace KlayGE
 
 		Windows::Devices::Sensors::Compass^ compass_;
 		Windows::Foundation::EventRegistrationToken compass_reading_token_;
+
+		Windows::Devices::Sensors::OrientationSensor^ orientation_;
+		Windows::Foundation::EventRegistrationToken orientation_reading_token_;
 	};
 #endif
 }

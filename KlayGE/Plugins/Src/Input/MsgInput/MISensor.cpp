@@ -576,6 +576,11 @@ namespace KlayGE
 			checked_pointer_cast<MsgInputSensor>(input_sensor_)->OnCompassReadingChanged(sender, e);
 		}
 
+		void OnOrientationSensorReadingChanged(OrientationSensor^ sender, OrientationSensorReadingChangedEventArgs^ e)
+		{
+			checked_pointer_cast<MsgInputSensor>(input_sensor_)->OnOrientationSensorReadingChanged(sender, e);
+		}
+
 		void BindWindow(InputSensorPtr const & input_sensor)
 		{
 			input_sensor_ = input_sensor;
@@ -591,7 +596,8 @@ namespace KlayGE
 			accelerometer_(Accelerometer::GetDefault()),
 			gyrometer_(Gyrometer::GetDefault()),
 			inclinometer_(Inclinometer::GetDefault()),
-			compass_(Compass::GetDefault())
+			compass_(Compass::GetDefault()),
+			orientation_(OrientationSensor::GetDefault())
 	{
 		position_token_ = locator_->PositionChanged::add(
 			ref new TypedEventHandler<Geolocator^, PositionChangedEventArgs^>(sensor_event_,
@@ -612,6 +618,10 @@ namespace KlayGE
 		compass_reading_token_ = compass_->ReadingChanged::add(
 			ref new TypedEventHandler<Compass^, CompassReadingChangedEventArgs^>(sensor_event_,
 				&MetroMsgInputSensorEvent::OnCompassReadingChanged));
+
+		orientation_reading_token_ = orientation_->ReadingChanged::add(
+			ref new TypedEventHandler<OrientationSensor^, OrientationSensorReadingChangedEventArgs^>(sensor_event_,
+				&MetroMsgInputSensorEvent::OnOrientationSensorReadingChanged));
 	}
 
 	MsgInputSensor::~MsgInputSensor()
@@ -621,6 +631,7 @@ namespace KlayGE
 		gyrometer_->ReadingChanged::remove(gyrometer_reading_token_);
 		inclinometer_->ReadingChanged::remove(inclinometer_reading_token_);
 		compass_->ReadingChanged::remove(compass_reading_token_);
+		orientation_->ReadingChanged::remove(orientation_reading_token_);
 	}
 
 	std::wstring const & MsgInputSensor::Name() const
@@ -667,7 +678,19 @@ namespace KlayGE
 	{
 		auto reading = e->Reading;
 		magnetic_heading_north_ = static_cast<float>(reading->HeadingMagneticNorth);
+#if (_WIN32_WINNT >= 0x0603 /*_WIN32_WINNT_WINBLUE*/)
 		magnetometer_accuracy_ = static_cast<int32_t>(reading->HeadingAccuracy);
+#else
+		magnetometer_accuracy_ = 0;
+#endif
+	}
+
+	void MsgInputSensor::OnOrientationSensorReadingChanged(OrientationSensor^ sender,
+		OrientationSensorReadingChangedEventArgs^ e)
+	{
+		auto reading = e->Reading;
+		orientation_quat_ = Quaternion(reading->Quaternion->X, reading->Quaternion->Y,
+			reading->Quaternion->Z, reading->Quaternion->W);
 	}
 
 	void MsgInputSensor::UpdateInputs()

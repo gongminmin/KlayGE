@@ -37,12 +37,12 @@
 namespace KlayGE
 {
 	InputSensor::InputSensor()
-		: latitude_(-1), longitude_(-1), altitude_(-1),
+		: latitude_(-180), longitude_(-360), altitude_(-1),
 			location_error_radius_(-1), location_altitude_error_(-1),
 			accel_(0, 0, 0), speed_(0),
 			angular_accel_(0, 0, 0), angular_velocity_(0, 0, 0),
-			tilt_(0, 0, 0), magnetic_heading_north_(0),
-			magnetometer_accuracy_(-1),
+			tilt_(0, 0, 0), magnetic_heading_north_(-1),
+			orientation_quat_(0, 0, 0, 0), magnetometer_accuracy_(0),
 			action_param_(MakeSharedPtr<InputSensorActionParam>())
 	{
 		action_param_->type = InputEngine::IDT_Sensor;
@@ -139,12 +139,12 @@ namespace KlayGE
 		action_param_->magnetometer_accuracy = magnetometer_accuracy_;
 
 		bool any_sensing = false;
-		if (latitude_ >= 0)
+		if ((latitude_ <= 90) && (latitude_ >= -90))
 		{
 			iam.UpdateInputActions(ret, SS_Latitude, action_param_);
 			any_sensing = true;
 		}
-		if (longitude_ >= 0)
+		if ((longitude_ <= 180) && (longitude_ > -180))
 		{
 			iam.UpdateInputActions(ret, SS_Longitude, action_param_);
 			any_sensing = true;
@@ -154,12 +154,12 @@ namespace KlayGE
 			iam.UpdateInputActions(ret, SS_Altitude, action_param_);
 			any_sensing = true;
 		}
-		if ((latitude_ >= 0) && (longitude_ >= 0) && (location_error_radius_ >= 0))
+		if (location_error_radius_ >= 0)
 		{
 			iam.UpdateInputActions(ret, SS_LocationErrorRadius, action_param_);
 			any_sensing = true;
 		}
-		if ((altitude_ >= 0) && (location_altitude_error_ >= 0))
+		if (location_altitude_error_ >= 0)
 		{
 			iam.UpdateInputActions(ret, SS_LocationAltitudeError, action_param_);
 			any_sensing = true;
@@ -189,7 +189,7 @@ namespace KlayGE
 			iam.UpdateInputActions(ret, SS_Tilt, action_param_);
 			any_sensing = true;
 		}
-		if (magnetic_heading_north_ != 0)
+		if (magnetic_heading_north_ >= 0)
 		{
 			iam.UpdateInputActions(ret, SS_MagneticHeadingNorth, action_param_);
 			any_sensing = true;
@@ -200,7 +200,7 @@ namespace KlayGE
 			iam.UpdateInputActions(ret, SS_OrientationQuat, action_param_);
 			any_sensing = true;
 		}
-		if (magnetometer_accuracy_ >= 0)
+		if (magnetometer_accuracy_ > 0)
 		{
 			iam.UpdateInputActions(ret, SS_MagnetometerAccuracy, action_param_);
 			any_sensing = true;
