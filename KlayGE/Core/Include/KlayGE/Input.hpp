@@ -322,8 +322,6 @@ namespace KlayGE
 		SS_LocationErrorRadius,
 		SS_LocationAltitudeError,
 		SS_Accel,
-		SS_Speed,
-		SS_AngularAccel,
 		SS_AngularVelocity,
 		SS_Tilt,
 		SS_MagneticHeadingNorth,
@@ -630,8 +628,6 @@ namespace KlayGE
 		float LocationErrorRadius() const;
 		float LocationAltitudeError() const;
 		float3 const & Accel() const;
-		float Speed() const;
-		float3 const & AngularAccel() const;
 		float3 const & AngularVelocity() const;
 		float3 const & Tilt() const;
 		float MagneticHeadingNorth() const;
@@ -648,8 +644,6 @@ namespace KlayGE
 		float location_error_radius_;
 		float location_altitude_error_;
 		float3 accel_;
-		float speed_;
-		float3 angular_accel_;
 		float3 angular_velocity_;
 		float3 tilt_;
 		float magnetic_heading_north_;
@@ -735,8 +729,6 @@ namespace KlayGE
 		float location_error_radius;
 		float location_altitude_error;
 		float3 accel;
-		float speed;
-		float3 angular_accel;
 		float3 angular_velocity;
 		float3 tilt;
 		float magnetic_heading_north;

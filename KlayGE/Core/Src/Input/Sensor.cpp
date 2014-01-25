@@ -39,8 +39,7 @@ namespace KlayGE
 	InputSensor::InputSensor()
 		: latitude_(-180), longitude_(-360), altitude_(-1),
 			location_error_radius_(-1), location_altitude_error_(-1),
-			accel_(0, 0, 0), speed_(0),
-			angular_accel_(0, 0, 0), angular_velocity_(0, 0, 0),
+			accel_(0, 0, 0), angular_velocity_(0, 0, 0),
 			tilt_(0, 0, 0), magnetic_heading_north_(-1),
 			orientation_quat_(0, 0, 0, 0), magnetometer_accuracy_(0),
 			action_param_(MakeSharedPtr<InputSensorActionParam>())
@@ -75,14 +74,6 @@ namespace KlayGE
 	float3 const & InputSensor::Accel() const
 	{
 		return accel_;
-	}
-	float InputSensor::Speed() const
-	{
-		return speed_;
-	}
-	float3 const & InputSensor::AngularAccel() const
-	{
-		return angular_accel_;
 	}
 	float3 const & InputSensor::AngularVelocity() const
 	{
@@ -130,8 +121,6 @@ namespace KlayGE
 		action_param_->location_error_radius = location_error_radius_;
 		action_param_->location_altitude_error = location_altitude_error_;
 		action_param_->accel = accel_;
-		action_param_->speed = speed_;
-		action_param_->angular_accel = angular_accel_;
 		action_param_->angular_velocity = angular_velocity_;
 		action_param_->tilt = tilt_;
 		action_param_->magnetic_heading_north = magnetic_heading_north_;
@@ -167,16 +156,6 @@ namespace KlayGE
 		if ((accel_.x() != 0) || (accel_.y() != 0) || (accel_.z() != 0))
 		{
 			iam.UpdateInputActions(ret, SS_Accel, action_param_);
-			any_sensing = true;
-		}
-		if (speed_ != 0)
-		{
-			iam.UpdateInputActions(ret, SS_Speed, action_param_);
-			any_sensing = true;
-		}
-		if ((angular_accel_.x() != 0) || (angular_accel_.y() != 0) || (angular_accel_.z() != 0))
-		{
-			iam.UpdateInputActions(ret, SS_AngularAccel, action_param_);
 			any_sensing = true;
 		}
 		if ((angular_velocity_.x() != 0) || (angular_velocity_.y() != 0) || (angular_velocity_.z() != 0))

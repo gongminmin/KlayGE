@@ -36,6 +36,19 @@
 
 #include <KlayGE/MsgInput/MInput.hpp>
 
+namespace KlayGE
+{
+	std::wstring const & MsgInputSensor::Name() const
+	{
+		static std::wstring const name(L"MsgInput Sensor");
+		return name;
+	}
+
+	void MsgInputSensor::UpdateInputs()
+	{
+	}
+}
+
 #if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP && (_WIN32_WINNT >= 0x0601 /*_WIN32_WINNT_WIN7*/)
 
 #if (_WIN32_WINNT < 0x0602 /*_WIN32_WINNT_WIN8*/)
@@ -59,6 +72,86 @@ DEFINE_PROPERTYKEY(SENSOR_DATA_TYPE_MAGNETOMETER_ACCURACY,          0X1637D8A2, 
 
 namespace KlayGE
 {
+	class MsgInputLocationEvents : public ILocationEvents
+	{
+	public:
+		explicit MsgInputLocationEvents(MsgInputSensor* input_sensor)
+			: input_sensor_(input_sensor)
+		{
+		}
+		virtual ~MsgInputLocationEvents()
+		{
+		}
+
+		STDMETHODIMP QueryInterface(REFIID iid, void** ppv)
+		{
+			if (nullptr == ppv)
+			{
+				return E_POINTER;
+			}
+
+			if (IID_IUnknown == iid)
+			{
+				*ppv = static_cast<IUnknown*>(this);
+			}
+			else if (IID_ILocationEvents == iid)
+			{
+				*ppv = static_cast<ILocationEvents*>(this);
+			}
+			else
+			{
+				*ppv = nullptr;
+				return E_NOINTERFACE;
+			}
+
+			this->AddRef();
+			return S_OK;
+		}
+
+		STDMETHODIMP_(ULONG) AddRef()
+		{
+			return ::InterlockedIncrement(&ref_);
+		}
+
+		STDMETHODIMP_(ULONG) Release()
+		{
+			ULONG count = ::InterlockedDecrement(&ref_);
+			if (0 == count)
+			{
+				delete this;
+			}
+			return count;
+		}
+
+		STDMETHODIMP OnLocationChanged(REFIID report_type, ILocationReport* location_report)
+		{
+			HRESULT hr = S_OK;
+
+			if (nullptr == location_report)
+			{
+				return E_INVALIDARG;
+			}
+
+			input_sensor_->OnLocationChanged(report_type, location_report);
+
+			return hr;
+		}
+
+		STDMETHODIMP OnStatusChanged(REFIID report_type, LOCATION_REPORT_STATUS new_status)
+		{
+			UNREF_PARAM(report_type);
+			UNREF_PARAM(new_status);
+
+			return S_OK;
+		}
+
+	protected:
+		MsgInputSensor* input_sensor_;
+
+	private:
+		long ref_;
+	};
+
 	class MsgInputSensorEvents : public ISensorEvents
 	{
 	public:
@@ -87,7 +180,7 @@ namespace KlayGE
 			}
 			else
 			{
-				*ppv = NULL;
+				*ppv = nullptr;
 				return E_NOINTERFACE;
 			}
 
@@ -208,7 +301,18 @@ namespace KlayGE
 				sizeof(REPORT_TYPES) / sizeof(REPORT_TYPES[0]), true);
 			if (SUCCEEDED(hr))
 			{
-				location_sensor_ = MakeCOMPtr(location);
+				locator_ = MakeCOMPtr(location);
+
+				location_event_ = MakeSharedPtr<MsgInputLocationEvents>(this);
+				ILocationEvents* sensor_event;
+				location_event_->QueryInterface(IID_ILocationEvents, reinterpret_cast<void**>(&sensor_event));
+
+				for (DWORD index = 0; index < sizeof(REPORT_TYPES) / sizeof(REPORT_TYPES[0]); ++ index)
+				{
+					hr = locator_->RegisterForReport(sensor_event, REPORT_TYPES[index], 1000);
+				}
+
+				sensor_event->Release();
 			}
 			else
 			{
@@ -279,10 +383,93 @@ namespace KlayGE
 		}
 	}
 
-	std::wstring const & MsgInputSensor::Name() const
+	MsgInputSensor::~MsgInputSensor()
 	{
-		static std::wstring const name(L"MsgInput Sensor");
-		return name;
+		if (locator_)
+		{
+			IID REPORT_TYPES[] = { IID_ILatLongReport };
+			for (DWORD index = 0; index < sizeof(REPORT_TYPES) / sizeof(REPORT_TYPES[0]); ++ index)
+			{
+				locator_->UnregisterForReport(REPORT_TYPES[index]);
+			}
+
+			location_event_.reset();
+			locator_.reset();
+		}
+
+		if (motion_sensor_collection_)
+		{
+			ULONG count = 0;
+			HRESULT hr = motion_sensor_collection_->GetCount(&count);
+			for (ULONG i = 0; i < count; ++ i)
+			{
+				ISensor* sensor;
+				hr = motion_sensor_collection_->GetAt(i, &sensor);
+				if (SUCCEEDED(hr))
+				{
+					sensor->SetEventSink(nullptr);
+					sensor->Release();
+				}
+			}
+
+			motion_sensor_events_.clear();
+			motion_sensor_collection_.reset();
+		}
+
+		if (orientation_sensor_collection_)
+		{
+			ULONG count = 0;
+			HRESULT hr = orientation_sensor_collection_->GetCount(&count);
+			for (ULONG i = 0; i < count; ++ i)
+			{
+				ISensor* sensor;
+				hr = orientation_sensor_collection_->GetAt(i, &sensor);
+				if (SUCCEEDED(hr))
+				{
+					sensor->SetEventSink(nullptr);
+					sensor->Release();
+				}
+			}
+
+			orientation_sensor_events_.clear();
+			orientation_sensor_collection_.reset();
+		}
+
+		::CoUninitialize();
+	}
+
+	void MsgInputSensor::OnLocationChanged(REFIID report_type, ILocationReport* location_report)
+	{
+		if (IID_ILatLongReport == report_type)
+		{
+			ILatLongReport* lat_long_report;
+			if (SUCCEEDED(location_report->QueryInterface(IID_ILatLongReport,
+				reinterpret_cast<void**>(&lat_long_report))))
+			{
+				if (lat_long_report != nullptr)
+				{
+					double lat = 0;
+					double lng = 0;
+					double alt = 0;
+					double err_radius = 0;
+					double alt_err = 0;
+
+					lat_long_report->GetLatitude(&lat);
+					lat_long_report->GetLongitude(&lng);
+					lat_long_report->GetAltitude(&alt);
+					lat_long_report->GetErrorRadius(&err_radius);
+					lat_long_report->GetAltitudeError(&alt_err);
+
+					latitude_ = static_cast<float>(lat);
+					longitude_ = static_cast<float>(lng);
+					altitude_ = static_cast<float>(alt);
+					location_error_radius_ = static_cast<float>(err_radius);
+					location_altitude_error_ = static_cast<float>(alt_err);
+
+					lat_long_report->Release();
+				}
+			}
+		}
 	}
 
 	void MsgInputSensor::OnMotionDataUpdated(ISensor* sensor, ISensorDataReport* data_report)
@@ -299,6 +486,8 @@ namespace KlayGE
 			{
 				accel_.x() = static_cast<float>(prop.dblVal);
 			}
+
+			::PropVariantClear(&prop);
 		}
 
 		supported = VARIANT_FALSE;
@@ -311,6 +500,8 @@ namespace KlayGE
 			{
 				accel_.y() = static_cast<float>(prop.dblVal);
 			}
+
+			::PropVariantClear(&prop);
 		}
 
 		supported = VARIANT_FALSE;
@@ -323,54 +514,8 @@ namespace KlayGE
 			{
 				accel_.z() = static_cast<float>(prop.dblVal);
 			}
-		}
 
-		supported = VARIANT_FALSE;
-		sensor->SupportsDataField(SENSOR_DATA_TYPE_SPEED_METERS_PER_SECOND, &supported);
-		if (supported != VARIANT_FALSE)
-		{
-			PROPVARIANT prop;
-			data_report->GetSensorValue(SENSOR_DATA_TYPE_SPEED_METERS_PER_SECOND, &prop);
-			if (VT_R8 == prop.vt)
-			{
-				speed_ = static_cast<float>(prop.dblVal);
-			}
-		}
-
-		supported = VARIANT_FALSE;
-		sensor->SupportsDataField(SENSOR_DATA_TYPE_ANGULAR_ACCELERATION_X_DEGREES_PER_SECOND_SQUARED, &supported);
-		if (supported != VARIANT_FALSE)
-		{
-			PROPVARIANT prop;
-			data_report->GetSensorValue(SENSOR_DATA_TYPE_ANGULAR_ACCELERATION_X_DEGREES_PER_SECOND_SQUARED, &prop);
-			if (VT_R8 == prop.vt)
-			{
-				angular_accel_.x() = static_cast<float>(prop.dblVal);
-			}
-		}
-
-		supported = VARIANT_FALSE;
-		sensor->SupportsDataField(SENSOR_DATA_TYPE_ANGULAR_ACCELERATION_Y_DEGREES_PER_SECOND_SQUARED, &supported);
-		if (supported != VARIANT_FALSE)
-		{
-			PROPVARIANT prop;
-			data_report->GetSensorValue(SENSOR_DATA_TYPE_ANGULAR_ACCELERATION_Y_DEGREES_PER_SECOND_SQUARED, &prop);
-			if (VT_R8 == prop.vt)
-			{
-				angular_accel_.y() = static_cast<float>(prop.dblVal);
-			}
-		}
-
-		supported = VARIANT_FALSE;
-		sensor->SupportsDataField(SENSOR_DATA_TYPE_ANGULAR_ACCELERATION_Z_DEGREES_PER_SECOND_SQUARED, &supported);
-		if (supported != VARIANT_FALSE)
-		{
-			PROPVARIANT prop;
-			data_report->GetSensorValue(SENSOR_DATA_TYPE_ANGULAR_ACCELERATION_Z_DEGREES_PER_SECOND_SQUARED, &prop);
-			if (VT_R8 == prop.vt)
-			{
-				angular_accel_.z() = static_cast<float>(prop.dblVal);
-			}
+			::PropVariantClear(&prop);
 		}
 
 		supported = VARIANT_FALSE;
@@ -383,6 +528,8 @@ namespace KlayGE
 			{
 				angular_velocity_.x() = static_cast<float>(prop.dblVal);
 			}
+
+			::PropVariantClear(&prop);
 		}
 
 		supported = VARIANT_FALSE;
@@ -395,6 +542,8 @@ namespace KlayGE
 			{
 				angular_velocity_.y() = static_cast<float>(prop.dblVal);
 			}
+
+			::PropVariantClear(&prop);
 		}
 
 		supported = VARIANT_FALSE;
@@ -407,6 +556,8 @@ namespace KlayGE
 			{
 				angular_velocity_.z() = static_cast<float>(prop.dblVal);
 			}
+
+			::PropVariantClear(&prop);
 		}
 	}
 
@@ -424,6 +575,8 @@ namespace KlayGE
 			{
 				tilt_.x() = prop.fltVal;
 			}
+
+			::PropVariantClear(&prop);
 		}
 
 		supported = VARIANT_FALSE;
@@ -436,6 +589,8 @@ namespace KlayGE
 			{
 				tilt_.y() = prop.fltVal;
 			}
+
+			::PropVariantClear(&prop);
 		}
 
 		supported = VARIANT_FALSE;
@@ -448,6 +603,8 @@ namespace KlayGE
 			{
 				tilt_.z() = prop.fltVal;
 			}
+
+			::PropVariantClear(&prop);
 		}
 
 		supported = VARIANT_FALSE;
@@ -460,6 +617,8 @@ namespace KlayGE
 			{
 				magnetic_heading_north_ = static_cast<float>(prop.dblVal);
 			}
+
+			::PropVariantClear(&prop);
 		}
 
 		supported = VARIANT_FALSE;
@@ -470,11 +629,11 @@ namespace KlayGE
 			data_report->GetSensorValue(SENSOR_DATA_TYPE_QUATERNION, &prop);
 			if ((VT_VECTOR | VT_UI1) == prop.vt)
 			{
-				orientation_quat_.x() = prop.caub.pElems[0] / 255.0f * 2 - 1;
-				orientation_quat_.y() = prop.caub.pElems[1] / 255.0f * 2 - 1;
-				orientation_quat_.z() = prop.caub.pElems[2] / 255.0f * 2 - 1;
-				orientation_quat_.w() = prop.caub.pElems[3] / 255.0f;
+				BOOST_ASSERT(prop.caub.cElems / sizeof(float) >= 4);
+				orientation_quat_ = Quaternion(reinterpret_cast<float const *>(prop.caub.pElems));
 			}
+
+			::PropVariantClear(&prop);
 		}
 
 		supported = VARIANT_FALSE;
@@ -487,48 +646,8 @@ namespace KlayGE
 			{
 				magnetometer_accuracy_ = prop.intVal;
 			}
-		}
-	}
 
-	void MsgInputSensor::UpdateInputs()
-	{
-		if (location_sensor_)
-		{
-			LOCATION_REPORT_STATUS status = REPORT_NOT_SUPPORTED;
-			HRESULT hr = location_sensor_->GetReportStatus(IID_ILatLongReport, &status);
-			if (SUCCEEDED(hr) && (REPORT_RUNNING == status))
-			{
-				ILocationReport* location_report;
-				ILatLongReport* latLong_report;
-				if (SUCCEEDED(location_sensor_->GetReport(IID_ILatLongReport, &location_report)))
-				{
-					if (SUCCEEDED(location_report->QueryInterface(&latLong_report)))
-					{
-						double lat = 0;
-						double lng = 0;
-						double alt = 0;
-						double err_radius = 0;
-						double alt_err = 0;
-
-						// Fetch the latitude & longitude
-						latLong_report->GetLatitude(&lat);
-						latLong_report->GetLongitude(&lng);
-						latLong_report->GetAltitude(&alt);
-						latLong_report->GetErrorRadius(&err_radius);
-						latLong_report->GetAltitudeError(&alt_err);
-
-						latitude_ = static_cast<float>(lat);
-						longitude_ = static_cast<float>(lng);
-						altitude_ = static_cast<float>(alt);
-						location_error_radius_ = static_cast<float>(err_radius);
-						location_altitude_error_ = static_cast<float>(alt_err);
-
-						latLong_report->Release();
-					}
-
-					location_report->Release();
-				}
-			}
+			::PropVariantClear(&prop);
 		}
 	}
 }
@@ -634,12 +753,6 @@ namespace KlayGE
 		orientation_->ReadingChanged::remove(orientation_reading_token_);
 	}
 
-	std::wstring const & MsgInputSensor::Name() const
-	{
-		static std::wstring const name(L"MsgInput Sensor");
-		return name;
-	}
-
 	void MsgInputSensor::OnPositionChanged(Geolocator^ sender, PositionChangedEventArgs^ e)
 	{
 		auto coordinate = e->Position->Coordinate;
@@ -691,10 +804,6 @@ namespace KlayGE
 		auto reading = e->Reading;
 		orientation_quat_ = Quaternion(reading->Quaternion->X, reading->Quaternion->Y,
 			reading->Quaternion->Z, reading->Quaternion->W);
-	}
-
-	void MsgInputSensor::UpdateInputs()
-	{
 	}
 }
 
