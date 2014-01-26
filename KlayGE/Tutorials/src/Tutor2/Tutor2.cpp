@@ -15,12 +15,7 @@
 #include <vector>
 #include <sstream>
 
-#ifdef KLAYGE_COMPILER_MSVC
-extern "C"
-{
-	_declspec(dllexport) uint32_t NvOptimusEnablement = 0x00000001;
-}
-#endif
+#include "SampleCommon.hpp"
 
 class TutorFramework : public KlayGE::App3DFramework
 {
@@ -54,12 +49,8 @@ public:
 	virtual void OnRenderBegin();
 };
 
-int main()
+int SampleMain()
 {
-	KlayGE::ResLoader::Instance().AddPath("../../Samples/media/Common");
-
-	KlayGE::Context::Instance().LoadCfg("KlayGE.cfg");
-
 	TutorFramework app;
 	app.Create();
 	app.Run();

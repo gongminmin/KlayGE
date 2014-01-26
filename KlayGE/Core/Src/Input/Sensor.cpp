@@ -39,6 +39,7 @@ namespace KlayGE
 	InputSensor::InputSensor()
 		: latitude_(-180), longitude_(-360), altitude_(-1),
 			location_error_radius_(-1), location_altitude_error_(-1),
+			speed_(-1),
 			accel_(0, 0, 0), angular_velocity_(0, 0, 0),
 			tilt_(0, 0, 0), magnetic_heading_north_(-1),
 			orientation_quat_(0, 0, 0, 0), magnetometer_accuracy_(0),
@@ -70,6 +71,10 @@ namespace KlayGE
 	float InputSensor::LocationAltitudeError() const
 	{
 		return location_altitude_error_;
+	}
+	float InputSensor::Speed() const
+	{
+		return speed_;
 	}
 	float3 const & InputSensor::Accel() const
 	{
@@ -120,6 +125,7 @@ namespace KlayGE
 		action_param_->altitude = altitude_;
 		action_param_->location_error_radius = location_error_radius_;
 		action_param_->location_altitude_error = location_altitude_error_;
+		action_param_->speed = speed_;
 		action_param_->accel = accel_;
 		action_param_->angular_velocity = angular_velocity_;
 		action_param_->tilt = tilt_;
@@ -151,6 +157,11 @@ namespace KlayGE
 		if (location_altitude_error_ >= 0)
 		{
 			iam.UpdateInputActions(ret, SS_LocationAltitudeError, action_param_);
+			any_sensing = true;
+		}
+		if (speed_ >= 0)
+		{
+			iam.UpdateInputActions(ret, SS_Speed, action_param_);
 			any_sensing = true;
 		}
 		if ((accel_.x() != 0) || (accel_.y() != 0) || (accel_.z() != 0))

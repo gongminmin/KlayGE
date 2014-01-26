@@ -14,115 +14,118 @@ SET(UI_FILES
 	${KLAYGE_PROJECT_DIR}/Samples/media/DeferredRendering/DeferredRendering.uiml
 )
 
+SET(CONTENT_FILES
+	${KLAYGE_PROJECT_DIR}/bin/KlayGE.cfg
+	${KLAYGE_PROJECT_DIR}/media/Fonts/gkai00mp.kfont
+	${KLAYGE_PROJECT_DIR}/media/Models/indirect_light_proxy.meshml.model_bin
+	${KLAYGE_PROJECT_DIR}/media/Models/point_light_proxy.meshml.model_bin
+	${KLAYGE_PROJECT_DIR}/media/Models/spot_light_proxy.meshml.model_bin
+	${KLAYGE_PROJECT_DIR}/media/PostProcessors/Copy.ppml
+	${KLAYGE_PROJECT_DIR}/media/PostProcessors/Copy2LightBuffer.ppml
+	${KLAYGE_PROJECT_DIR}/media/PostProcessors/Depth.ppml
+	${KLAYGE_PROJECT_DIR}/media/PostProcessors/LensEffects.ppml
+	${KLAYGE_PROJECT_DIR}/media/PostProcessors/MultiRes.ppml
+	${KLAYGE_PROJECT_DIR}/media/PostProcessors/PostToneMapping.ppml
+	${KLAYGE_PROJECT_DIR}/media/PostProcessors/Resizer.ppml
+	${KLAYGE_PROJECT_DIR}/media/PostProcessors/RSM2VPLs.ppml
+	${KLAYGE_PROJECT_DIR}/media/PostProcessors/TAA.ppml
+	${KLAYGE_PROJECT_DIR}/media/RenderFX/Blur.kfx
+	${KLAYGE_PROJECT_DIR}/media/RenderFX/CascadedShadow.kfx
+	${KLAYGE_PROJECT_DIR}/media/RenderFX/Copy.kfx
+	${KLAYGE_PROJECT_DIR}/media/RenderFX/Copy2LightBuffer.kfx
+	${KLAYGE_PROJECT_DIR}/media/RenderFX/DeferredRendering.kfx
+	${KLAYGE_PROJECT_DIR}/media/RenderFX/Depth.kfx
+	${KLAYGE_PROJECT_DIR}/media/RenderFX/GBuffer.kfx
+	${KLAYGE_PROJECT_DIR}/media/RenderFX/Font.kfx
+	${KLAYGE_PROJECT_DIR}/media/RenderFX/LensEffects.kfx
+	${KLAYGE_PROJECT_DIR}/media/RenderFX/LightSourceProxy.kfx
+	${KLAYGE_PROJECT_DIR}/media/RenderFX/LightIndexedDeferredRendering4.kfx
+	${KLAYGE_PROJECT_DIR}/media/RenderFX/LightIndexedDeferredRendering32.kfx
+	${KLAYGE_PROJECT_DIR}/media/RenderFX/MultiRes.kfx
+	${KLAYGE_PROJECT_DIR}/media/RenderFX/Particle.kfx
+	${KLAYGE_PROJECT_DIR}/media/RenderFX/PostToneMapping.kfx
+	${KLAYGE_PROJECT_DIR}/media/RenderFX/Resizer.kfx
+	${KLAYGE_PROJECT_DIR}/media/RenderFX/RSM2VPLs.kfx
+	${KLAYGE_PROJECT_DIR}/media/RenderFX/SelectMode.kfx
+	${KLAYGE_PROJECT_DIR}/media/RenderFX/SkyBox.kfx
+	${KLAYGE_PROJECT_DIR}/media/RenderFX/SSGI.kfx
+	${KLAYGE_PROJECT_DIR}/media/RenderFX/SSR.kfx
+	${KLAYGE_PROJECT_DIR}/media/RenderFX/SSVO.kfx
+	${KLAYGE_PROJECT_DIR}/media/RenderFX/SumLum.kfx
+	${KLAYGE_PROJECT_DIR}/media/RenderFX/TAA.kfx
+	${KLAYGE_PROJECT_DIR}/media/RenderFX/ToneMapping.kfx
+	${KLAYGE_PROJECT_DIR}/media/RenderFX/VPLsLighting.kfx
+	${KLAYGE_PROJECT_DIR}/media/RenderFX/UI.kfx
+	${KLAYGE_PROJECT_DIR}/media/Textures/2D/powered_by_klayge.dds
+	${KLAYGE_PROJECT_DIR}/media/Textures/2D/ui.dds
+	${KLAYGE_PROJECT_DIR}/media/Textures/2D/white_noise_tex.dds
+	${KLAYGE_PROJECT_DIR}/media/Textures/3D/color_grading.dds
+	${KLAYGE_PROJECT_DIR}/media/Textures/Cube/Lake_CraterLake03_c.dds
+	${KLAYGE_PROJECT_DIR}/media/Textures/Cube/Lake_CraterLake03_y.dds
+	${KLAYGE_PROJECT_DIR}/Samples/media/Common/sponza_crytek.meshml.model_bin
+	${KLAYGE_PROJECT_DIR}/Samples/media/Common/sponza_crytek/background.dds
+	${KLAYGE_PROJECT_DIR}/Samples/media/Common/sponza_crytek/background_ddn.dds
+	${KLAYGE_PROJECT_DIR}/Samples/media/Common/sponza_crytek/chain_texture.dds
+	${KLAYGE_PROJECT_DIR}/Samples/media/Common/sponza_crytek/chain_texture_ddn.dds
+	${KLAYGE_PROJECT_DIR}/Samples/media/Common/sponza_crytek/lion.dds
+	${KLAYGE_PROJECT_DIR}/Samples/media/Common/sponza_crytek/lion_ddn.dds
+	${KLAYGE_PROJECT_DIR}/Samples/media/Common/sponza_crytek/spnza_bricks_a_ddn.dds
+	${KLAYGE_PROJECT_DIR}/Samples/media/Common/sponza_crytek/spnza_bricks_a_diff.dds
+	${KLAYGE_PROJECT_DIR}/Samples/media/Common/sponza_crytek/spnza_bricks_a_spec.dds
+	${KLAYGE_PROJECT_DIR}/Samples/media/Common/sponza_crytek/sponza_arch_ddn.dds
+	${KLAYGE_PROJECT_DIR}/Samples/media/Common/sponza_crytek/sponza_arch_diff.dds
+	${KLAYGE_PROJECT_DIR}/Samples/media/Common/sponza_crytek/sponza_arch_spec.dds
+	${KLAYGE_PROJECT_DIR}/Samples/media/Common/sponza_crytek/sponza_ceiling_a_diff.dds
+	${KLAYGE_PROJECT_DIR}/Samples/media/Common/sponza_crytek/sponza_ceiling_a_spec.dds
+	${KLAYGE_PROJECT_DIR}/Samples/media/Common/sponza_crytek/sponza_column_a_ddn.dds
+	${KLAYGE_PROJECT_DIR}/Samples/media/Common/sponza_crytek/sponza_column_a_diff.dds
+	${KLAYGE_PROJECT_DIR}/Samples/media/Common/sponza_crytek/sponza_column_a_spec.dds
+	${KLAYGE_PROJECT_DIR}/Samples/media/Common/sponza_crytek/sponza_column_b_ddn.dds
+	${KLAYGE_PROJECT_DIR}/Samples/media/Common/sponza_crytek/sponza_column_b_diff.dds
+	${KLAYGE_PROJECT_DIR}/Samples/media/Common/sponza_crytek/sponza_column_b_spec.dds
+	${KLAYGE_PROJECT_DIR}/Samples/media/Common/sponza_crytek/sponza_column_c_ddn.dds
+	${KLAYGE_PROJECT_DIR}/Samples/media/Common/sponza_crytek/sponza_column_c_diff.dds
+	${KLAYGE_PROJECT_DIR}/Samples/media/Common/sponza_crytek/sponza_column_c_spec.dds
+	${KLAYGE_PROJECT_DIR}/Samples/media/Common/sponza_crytek/sponza_curtain_blue_diff.dds
+	${KLAYGE_PROJECT_DIR}/Samples/media/Common/sponza_crytek/sponza_curtain_diff.dds
+	${KLAYGE_PROJECT_DIR}/Samples/media/Common/sponza_crytek/sponza_curtain_green_diff.dds
+	${KLAYGE_PROJECT_DIR}/Samples/media/Common/sponza_crytek/sponza_details_diff.dds
+	${KLAYGE_PROJECT_DIR}/Samples/media/Common/sponza_crytek/sponza_details_spec.dds
+	${KLAYGE_PROJECT_DIR}/Samples/media/Common/sponza_crytek/sponza_fabric_blue_diff.dds
+	${KLAYGE_PROJECT_DIR}/Samples/media/Common/sponza_crytek/sponza_fabric_diff.dds
+	${KLAYGE_PROJECT_DIR}/Samples/media/Common/sponza_crytek/sponza_fabric_green_diff.dds
+	${KLAYGE_PROJECT_DIR}/Samples/media/Common/sponza_crytek/sponza_fabric_spec.dds
+	${KLAYGE_PROJECT_DIR}/Samples/media/Common/sponza_crytek/sponza_flagpole_diff.dds
+	${KLAYGE_PROJECT_DIR}/Samples/media/Common/sponza_crytek/sponza_flagpole_spec.dds
+	${KLAYGE_PROJECT_DIR}/Samples/media/Common/sponza_crytek/sponza_floor_a_diff.dds
+	${KLAYGE_PROJECT_DIR}/Samples/media/Common/sponza_crytek/sponza_floor_a_spec.dds
+	${KLAYGE_PROJECT_DIR}/Samples/media/Common/sponza_crytek/sponza_roof_diff.dds
+	${KLAYGE_PROJECT_DIR}/Samples/media/Common/sponza_crytek/sponza_thorn_ddn.dds
+	${KLAYGE_PROJECT_DIR}/Samples/media/Common/sponza_crytek/sponza_thorn_diff.dds
+	${KLAYGE_PROJECT_DIR}/Samples/media/Common/sponza_crytek/sponza_thorn_spec.dds
+	${KLAYGE_PROJECT_DIR}/Samples/media/Common/sponza_crytek/vase_ddn.dds
+	${KLAYGE_PROJECT_DIR}/Samples/media/Common/sponza_crytek/vase_dif.dds
+	${KLAYGE_PROJECT_DIR}/Samples/media/Common/sponza_crytek/vase_hanging.dds
+	${KLAYGE_PROJECT_DIR}/Samples/media/Common/sponza_crytek/vase_plant.dds
+	${KLAYGE_PROJECT_DIR}/Samples/media/Common/sponza_crytek/vase_plant_spec.dds
+	${KLAYGE_PROJECT_DIR}/Samples/media/Common/sponza_crytek/vase_round.dds
+	${KLAYGE_PROJECT_DIR}/Samples/media/Common/sponza_crytek/vase_round_ddn.dds
+	${KLAYGE_PROJECT_DIR}/Samples/media/Common/sponza_crytek/vase_round_spec.dds
+	${KLAYGE_PROJECT_DIR}/Samples/media/DeferredRendering/DeferredRenderingDebug.kfx
+	${KLAYGE_PROJECT_DIR}/Samples/media/DeferredRendering/fire.dds
+	${KLAYGE_PROJECT_DIR}/Samples/media/DeferredRendering/Fire.psml
+)
+
 IF(KLAYGE_BUILD_PLATFORM_WINRT)
 	SET(PACKAGE_GUID "f7ce04f3-92fc-4e92-8b55-acb9f159eb13")
-	SET(DISPLAY_NAME "Deferred Rendering")
-	SET(SHORT_NAME "DeferredRendering")
 
-	SET(CONTENT_FILES
-		${KLAYGE_PROJECT_DIR}/bin/KlayGE.cfg
-		${KLAYGE_PROJECT_DIR}/media/Fonts/gkai00mp.kfont
-		${KLAYGE_PROJECT_DIR}/media/Models/indirect_light_proxy.meshml.model_bin
-		${KLAYGE_PROJECT_DIR}/media/Models/point_light_proxy.meshml.model_bin
-		${KLAYGE_PROJECT_DIR}/media/Models/spot_light_proxy.meshml.model_bin
-		${KLAYGE_PROJECT_DIR}/media/PostProcessors/Copy.ppml
-		${KLAYGE_PROJECT_DIR}/media/PostProcessors/Copy2LightBuffer.ppml
-		${KLAYGE_PROJECT_DIR}/media/PostProcessors/Depth.ppml
-		${KLAYGE_PROJECT_DIR}/media/PostProcessors/LensEffects.ppml
-		${KLAYGE_PROJECT_DIR}/media/PostProcessors/MultiRes.ppml
-		${KLAYGE_PROJECT_DIR}/media/PostProcessors/PostToneMapping.ppml
-		${KLAYGE_PROJECT_DIR}/media/PostProcessors/Resizer.ppml
-		${KLAYGE_PROJECT_DIR}/media/PostProcessors/RSM2VPLs.ppml
-		${KLAYGE_PROJECT_DIR}/media/PostProcessors/TAA.ppml
-		${KLAYGE_PROJECT_DIR}/media/RenderFX/Blur.kfx
-		${KLAYGE_PROJECT_DIR}/media/RenderFX/CascadedShadow.kfx
-		${KLAYGE_PROJECT_DIR}/media/RenderFX/Copy.kfx
-		${KLAYGE_PROJECT_DIR}/media/RenderFX/Copy2LightBuffer.kfx
-		${KLAYGE_PROJECT_DIR}/media/RenderFX/DeferredRendering.kfx
-		${KLAYGE_PROJECT_DIR}/media/RenderFX/Depth.kfx
-		${KLAYGE_PROJECT_DIR}/media/RenderFX/GBuffer.kfx
-		${KLAYGE_PROJECT_DIR}/media/RenderFX/Font.kfx
-		${KLAYGE_PROJECT_DIR}/media/RenderFX/LensEffects.kfx
-		${KLAYGE_PROJECT_DIR}/media/RenderFX/LightSourceProxy.kfx
-		${KLAYGE_PROJECT_DIR}/media/RenderFX/MultiRes.kfx
-		${KLAYGE_PROJECT_DIR}/media/RenderFX/Particle.kfx
-		${KLAYGE_PROJECT_DIR}/media/RenderFX/PostToneMapping.kfx
-		${KLAYGE_PROJECT_DIR}/media/RenderFX/Resizer.kfx
-		${KLAYGE_PROJECT_DIR}/media/RenderFX/RSM2VPLs.kfx
-		${KLAYGE_PROJECT_DIR}/media/RenderFX/SelectMode.kfx
-		${KLAYGE_PROJECT_DIR}/media/RenderFX/SkyBox.kfx
-		${KLAYGE_PROJECT_DIR}/media/RenderFX/SSGI.kfx
-		${KLAYGE_PROJECT_DIR}/media/RenderFX/SSR.kfx
-		${KLAYGE_PROJECT_DIR}/media/RenderFX/SSVO.kfx
-		${KLAYGE_PROJECT_DIR}/media/RenderFX/SumLum.kfx
-		${KLAYGE_PROJECT_DIR}/media/RenderFX/TAA.kfx
-		${KLAYGE_PROJECT_DIR}/media/RenderFX/ToneMapping.kfx
-		${KLAYGE_PROJECT_DIR}/media/RenderFX/VPLsLighting.kfx
-		${KLAYGE_PROJECT_DIR}/media/RenderFX/UI.kfx
-		${KLAYGE_PROJECT_DIR}/media/Textures/2D/normals_fitting.dds
-		${KLAYGE_PROJECT_DIR}/media/Textures/2D/powered_by_klayge.dds
-		${KLAYGE_PROJECT_DIR}/media/Textures/2D/ui.dds
-		${KLAYGE_PROJECT_DIR}/media/Textures/2D/white_noise_tex.dds
-		${KLAYGE_PROJECT_DIR}/media/Textures/3D/color_grading.dds
-		${KLAYGE_PROJECT_DIR}/media/Textures/Cube/Lake_CraterLake03_c.dds
-		${KLAYGE_PROJECT_DIR}/media/Textures/Cube/Lake_CraterLake03_y.dds
-		${KLAYGE_PROJECT_DIR}/Samples/media/Common/sponza_crytek.meshml.model_bin
+	SET(CONTENT_FILES ${CONTENT_FILES}
 		${KLAYGE_PROJECT_DIR}/Samples/media/Common/Assets/Logo.png
 		${KLAYGE_PROJECT_DIR}/Samples/media/Common/Assets/SmallLogo.png
 		${KLAYGE_PROJECT_DIR}/Samples/media/Common/Assets/SplashScreen.png
 		${KLAYGE_PROJECT_DIR}/Samples/media/Common/Assets/StoreLogo.png
-		${KLAYGE_PROJECT_DIR}/Samples/media/Common/sponza_crytek/background.dds
-		${KLAYGE_PROJECT_DIR}/Samples/media/Common/sponza_crytek/background_ddn.dds
-		${KLAYGE_PROJECT_DIR}/Samples/media/Common/sponza_crytek/chain_texture.dds
-		${KLAYGE_PROJECT_DIR}/Samples/media/Common/sponza_crytek/chain_texture_ddn.dds
-		${KLAYGE_PROJECT_DIR}/Samples/media/Common/sponza_crytek/lion.dds
-		${KLAYGE_PROJECT_DIR}/Samples/media/Common/sponza_crytek/lion_ddn.dds
-		${KLAYGE_PROJECT_DIR}/Samples/media/Common/sponza_crytek/spnza_bricks_a_ddn.dds
-		${KLAYGE_PROJECT_DIR}/Samples/media/Common/sponza_crytek/spnza_bricks_a_diff.dds
-		${KLAYGE_PROJECT_DIR}/Samples/media/Common/sponza_crytek/spnza_bricks_a_spec.dds
-		${KLAYGE_PROJECT_DIR}/Samples/media/Common/sponza_crytek/sponza_arch_ddn.dds
-		${KLAYGE_PROJECT_DIR}/Samples/media/Common/sponza_crytek/sponza_arch_diff.dds
-		${KLAYGE_PROJECT_DIR}/Samples/media/Common/sponza_crytek/sponza_arch_spec.dds
-		${KLAYGE_PROJECT_DIR}/Samples/media/Common/sponza_crytek/sponza_ceiling_a_diff.dds
-		${KLAYGE_PROJECT_DIR}/Samples/media/Common/sponza_crytek/sponza_ceiling_a_spec.dds
-		${KLAYGE_PROJECT_DIR}/Samples/media/Common/sponza_crytek/sponza_column_a_ddn.dds
-		${KLAYGE_PROJECT_DIR}/Samples/media/Common/sponza_crytek/sponza_column_a_diff.dds
-		${KLAYGE_PROJECT_DIR}/Samples/media/Common/sponza_crytek/sponza_column_a_spec.dds
-		${KLAYGE_PROJECT_DIR}/Samples/media/Common/sponza_crytek/sponza_column_b_ddn.dds
-		${KLAYGE_PROJECT_DIR}/Samples/media/Common/sponza_crytek/sponza_column_b_diff.dds
-		${KLAYGE_PROJECT_DIR}/Samples/media/Common/sponza_crytek/sponza_column_b_spec.dds
-		${KLAYGE_PROJECT_DIR}/Samples/media/Common/sponza_crytek/sponza_column_c_ddn.dds
-		${KLAYGE_PROJECT_DIR}/Samples/media/Common/sponza_crytek/sponza_column_c_diff.dds
-		${KLAYGE_PROJECT_DIR}/Samples/media/Common/sponza_crytek/sponza_column_c_spec.dds
-		${KLAYGE_PROJECT_DIR}/Samples/media/Common/sponza_crytek/sponza_curtain_blue_diff.dds
-		${KLAYGE_PROJECT_DIR}/Samples/media/Common/sponza_crytek/sponza_curtain_diff.dds
-		${KLAYGE_PROJECT_DIR}/Samples/media/Common/sponza_crytek/sponza_curtain_green_diff.dds
-		${KLAYGE_PROJECT_DIR}/Samples/media/Common/sponza_crytek/sponza_details_diff.dds
-		${KLAYGE_PROJECT_DIR}/Samples/media/Common/sponza_crytek/sponza_details_spec.dds
-		${KLAYGE_PROJECT_DIR}/Samples/media/Common/sponza_crytek/sponza_fabric_blue_diff.dds
-		${KLAYGE_PROJECT_DIR}/Samples/media/Common/sponza_crytek/sponza_fabric_diff.dds
-		${KLAYGE_PROJECT_DIR}/Samples/media/Common/sponza_crytek/sponza_fabric_green_diff.dds
-		${KLAYGE_PROJECT_DIR}/Samples/media/Common/sponza_crytek/sponza_fabric_spec.dds
-		${KLAYGE_PROJECT_DIR}/Samples/media/Common/sponza_crytek/sponza_flagpole_diff.dds
-		${KLAYGE_PROJECT_DIR}/Samples/media/Common/sponza_crytek/sponza_flagpole_spec.dds
-		${KLAYGE_PROJECT_DIR}/Samples/media/Common/sponza_crytek/sponza_floor_a_diff.dds
-		${KLAYGE_PROJECT_DIR}/Samples/media/Common/sponza_crytek/sponza_floor_a_spec.dds
-		${KLAYGE_PROJECT_DIR}/Samples/media/Common/sponza_crytek/sponza_roof_diff.dds
-		${KLAYGE_PROJECT_DIR}/Samples/media/Common/sponza_crytek/sponza_thorn_ddn.dds
-		${KLAYGE_PROJECT_DIR}/Samples/media/Common/sponza_crytek/sponza_thorn_diff.dds
-		${KLAYGE_PROJECT_DIR}/Samples/media/Common/sponza_crytek/sponza_thorn_spec.dds
-		${KLAYGE_PROJECT_DIR}/Samples/media/Common/sponza_crytek/vase_ddn.dds
-		${KLAYGE_PROJECT_DIR}/Samples/media/Common/sponza_crytek/vase_dif.dds
-		${KLAYGE_PROJECT_DIR}/Samples/media/Common/sponza_crytek/vase_hanging.dds
-		${KLAYGE_PROJECT_DIR}/Samples/media/Common/sponza_crytek/vase_plant.dds
-		${KLAYGE_PROJECT_DIR}/Samples/media/Common/sponza_crytek/vase_plant_spec.dds
-		${KLAYGE_PROJECT_DIR}/Samples/media/Common/sponza_crytek/vase_round.dds
-		${KLAYGE_PROJECT_DIR}/Samples/media/Common/sponza_crytek/vase_round_ddn.dds
-		${KLAYGE_PROJECT_DIR}/Samples/media/Common/sponza_crytek/vase_round_spec.dds
-		${KLAYGE_PROJECT_DIR}/Samples/media/DeferredRendering/DeferredRenderingDebug.kfx
-		${KLAYGE_PROJECT_DIR}/Samples/media/DeferredRendering/fire.dds
-		${KLAYGE_PROJECT_DIR}/Samples/media/DeferredRendering/Fire.psml
 	)
+
 	SET(DEBUG_CONTENT_FILES
 		${KLAYGE_PROJECT_DIR}/bin/${KLAYGE_PLATFORM_NAME}/7zxa${CMAKE_DEBUG_POSTFIX}.dll
 		${KLAYGE_PROJECT_DIR}/bin/${KLAYGE_PLATFORM_NAME}/LZMA${CMAKE_DEBUG_POSTFIX}.dll
@@ -141,6 +144,7 @@ IF(KLAYGE_BUILD_PLATFORM_WINRT)
 		${KLAYGE_PROJECT_DIR}/bin/${KLAYGE_PLATFORM_NAME}/Scene/KlayGE_Scene_OCTree_${KLAYGE_COMPILER_NAME}.dll
 		${KLAYGE_PROJECT_DIR}/bin/${KLAYGE_PLATFORM_NAME}/Input/KlayGE_InputEngine_MsgInput_${KLAYGE_COMPILER_NAME}.dll
 	)
+ELSEIF(KLAYGE_BUILD_PLATFORM_ANDROID)
 ELSE()
 	SET(RESOURCE_FILES
 		${KLAYGE_PROJECT_DIR}/Samples/media/Common/KlayGESample.rc

@@ -2,7 +2,7 @@
 <Package xmlns="http://schemas.microsoft.com/appx/2010/manifest">
   <Identity Name="@PACKAGE_GUID@" Publisher="CN=KlayGE" Version="1.0.0.0" />
   <Properties>
-    <DisplayName>@DISPLAY_NAME@</DisplayName>
+    <DisplayName>@SHORT_NAME@</DisplayName>
     <PublisherDisplayName>KlayGE</PublisherDisplayName>
     <Logo>StoreLogo.png</Logo>
   </Properties>
@@ -15,10 +15,13 @@
   </Resources>
   <Applications>
     <Application Id="App" Executable="$targetnametoken$.exe" EntryPoint="@SHORT_NAME@.App">
-      <VisualElements DisplayName="@SHORT_NAME@" Description="KlayGE Sample: @DISPLAY_NAME@" BackgroundColor="#336699" ForegroundText="light" Logo="Logo.png" SmallLogo="SmallLogo.png">
+      <VisualElements DisplayName="@SHORT_NAME@" Description="KlayGE Sample: @SHORT_NAME@" BackgroundColor="#336699" ForegroundText="light" Logo="Logo.png" SmallLogo="SmallLogo.png">
         <DefaultTile ShowName="allLogos" ShortName="@SHORT_NAME@" />
         <SplashScreen Image="SplashScreen.png" />
       </VisualElements>
     </Application>
   </Applications>
+  <Capabilities>
+    <DeviceCapability Name="location" />
+  </Capabilities>
 </Package>
