@@ -101,10 +101,10 @@ namespace
 	};
 }
 
-class EmptyApp : public KlayGE::App3DFramework
+class GLCompatibilityApp : public KlayGE::App3DFramework
 {
 public:
-	EmptyApp()
+	GLCompatibilityApp()
 		: App3DFramework("GL Compatibility")
 	{
 	}
@@ -127,10 +127,11 @@ int main()
 	ContextCfg context_cfg = Context::Instance().Config();
 	context_cfg.render_factory_name = "OpenGL";
 	context_cfg.script_factory_name = "Python";
+	context_cfg.graphics_cfg.hide_win = true;
 	context_cfg.graphics_cfg.hdr = false;
 	Context::Instance().Config(context_cfg);
 
-	EmptyApp app;
+	GLCompatibilityApp app;
 	app.Create();
 
 	information info;

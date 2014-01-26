@@ -21,10 +21,10 @@ namespace
 	std::string shader_text;
 }
 
-class EmptyApp : public KlayGE::App3DFramework
+class FXML2ShaderApp : public KlayGE::App3DFramework
 {
 public:
-	EmptyApp()
+	FXML2ShaderApp()
 		: App3DFramework("FXML2Shader")
 	{
 	}
@@ -303,10 +303,11 @@ int main(int argc, char* argv[])
 
 	Context::Instance().LoadCfg("KlayGE.cfg");
 	ContextCfg context_cfg = Context::Instance().Config();
+	context_cfg.graphics_cfg.hide_win = true;
 	context_cfg.graphics_cfg.hdr = false;
 	Context::Instance().Config(context_cfg);
 
-	EmptyApp app;
+	FXML2ShaderApp app;
 	app.Create();
 
 	return 0;

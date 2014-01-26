@@ -32,12 +32,27 @@
 #include <KlayGE/Context.hpp>
 #include <KlayGE/App3D.hpp>
 #include <KlayGE/RenderEffect.hpp>
+#include <KlayGE/ResLoader.hpp>
 
 #include <iostream>
 #include <fstream>
 #include <sstream>
 #include <vector>
 #include <cstring>
+
+#ifdef KLAYGE_TR2_LIBRARY_FILESYSTEM_V2_SUPPORT
+#include <filesystem>
+namespace KlayGE
+{
+	namespace filesystem = std::tr2::sys;
+}
+#else
+#include <boost/filesystem.hpp>
+namespace KlayGE
+{
+	namespace filesystem = boost::filesystem;
+}
+#endif
 
 using namespace std;
 using namespace KlayGE;
@@ -49,11 +64,11 @@ extern "C"
 }
 #endif
 
-class EmptyApp : public KlayGE::App3DFramework
+class FXMLJITApp : public KlayGE::App3DFramework
 {
 public:
-	EmptyApp()
-		: App3DFramework("EmptyApp")
+	FXMLJITApp()
+		: App3DFramework("FXMLJIT")
 	{
 	}
 
@@ -71,7 +86,7 @@ int main(int argc, char* argv[])
 {
 	if (argc < 2)
 	{
-		cout << "Usage: FXMLJIT pc_dx11|pc_dx10|pc_dx9|pc_gl4|pc_gl3|pc_gl2|android_tegra3 xxx.fxml" << endl;
+		cout << "Usage: FXMLJIT pc_dx11|pc_dx10|pc_dx9|pc_gl4|pc_gl3|pc_gl2|android_tegra3 xxx.fxml [target folder]" << endl;
 		return 1;
 	}
 
@@ -103,16 +118,38 @@ int main(int argc, char* argv[])
 	{
 		context_cfg.render_factory_name = "OpenGLES";
 	}
+	context_cfg.graphics_cfg.hide_win = true;
 	context_cfg.graphics_cfg.hdr = false;
 	context_cfg.graphics_cfg.ppaa = false;
 	context_cfg.graphics_cfg.gamma = false;
 	context_cfg.graphics_cfg.color_grading = false;
 	Context::Instance().Config(context_cfg);
 
-	EmptyApp app;
+	FXMLJITApp app;
 	app.Create();
 
-	SyncLoadRenderEffect(argv[2]);
+	filesystem::path target_folder;
+	if (argc >= 4)
+	{
+		target_folder = argv[3];
+	}
+
+	filesystem::path file_name(argv[2]);
+	
+#ifdef KLAYGE_TR2_LIBRARY_FILESYSTEM_V2_SUPPORT
+	std::string const base_name = file_name.basename();
+#else
+	std::string const base_name = file_name.basename().string();
+#endif
+
+	filesystem::path kfx_path(base_name + ".kfx");
+	filesystem::remove(kfx_path);
+	SyncLoadRenderEffect(file_name);
+	if (!target_folder.empty())
+	{
+		filesystem::copy_file(kfx_path, target_folder / kfx_path,
+			filesystem::copy_option::overwrite_if_exists);
+	}
 
 	return 0;
 }

@@ -31,7 +31,7 @@ namespace KlayGE
 	struct RenderSettings
 	{
 		RenderSettings()
-			: full_screen(false),
+			: hide_win(false), full_screen(false),
 				left(0), top(0),
 				color_fmt(EF_ARGB8), depth_stencil_fmt(EF_D16),
 				sample_count(1), sample_quality(0),
@@ -40,6 +40,7 @@ namespace KlayGE
 		{
 		}
 
+		bool	hide_win;
 		bool	full_screen;
 		int		left;
 		int		top;

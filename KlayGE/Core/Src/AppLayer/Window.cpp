@@ -62,7 +62,7 @@ namespace KlayGE
 	}
 
 	Window::Window(std::string const & name, RenderSettings const & settings)
-		: active_(false), ready_(false), closed_(false)
+		: active_(false), ready_(false), closed_(false), hide_(settings.hide_win)
 	{
 		HINSTANCE hInst = ::GetModuleHandle(nullptr);
 
@@ -139,12 +139,12 @@ namespace KlayGE
 #pragma warning(pop)
 #endif
 
-		::ShowWindow(wnd_, SW_SHOWNORMAL);
+		::ShowWindow(wnd_, hide_ ? SW_HIDE : SW_SHOWNORMAL);
 		::UpdateWindow(wnd_);
 	}
 
 	Window::Window(std::string const & name, RenderSettings const & settings, void* native_wnd)
-		: active_(false), ready_(false), closed_(false)
+		: active_(false), ready_(false), closed_(false), hide_(settings.hide_win)
 	{
 		// Register the window class
 #ifdef KLAYGE_COMPILER_GCC
@@ -221,7 +221,7 @@ namespace KlayGE
 #pragma warning(pop)
 #endif
 
-			::ShowWindow(wnd_, SW_SHOWNORMAL);
+			::ShowWindow(wnd_, hide_ ? SW_HIDE : SW_SHOWNORMAL);
 			::UpdateWindow(wnd_);
 		}
 	}

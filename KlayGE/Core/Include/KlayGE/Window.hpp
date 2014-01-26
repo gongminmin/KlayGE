@@ -276,6 +276,7 @@ namespace KlayGE
 		bool active_;
 		bool ready_;
 		bool closed_;
+		bool hide_;
 
 #if defined KLAYGE_PLATFORM_WINDOWS
 #ifdef KLAYGE_COMPILER_GCC

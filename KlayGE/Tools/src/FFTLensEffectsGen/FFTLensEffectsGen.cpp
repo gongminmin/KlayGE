@@ -17,10 +17,10 @@
 using namespace std;
 using namespace KlayGE;
 
-class EmptyApp : public KlayGE::App3DFramework
+class FFTLensEffectsGenApp : public KlayGE::App3DFramework
 {
 public:
-	EmptyApp()
+	FFTLensEffectsGenApp()
 		: App3DFramework("FFTLensEffectsGen")
 	{
 	}
@@ -47,11 +47,12 @@ int main(int argc, char* argv[])
 
 	Context::Instance().LoadCfg("KlayGE.cfg");
 	ContextCfg context_cfg = Context::Instance().Config();
+	context_cfg.graphics_cfg.hide_win = true;
 	context_cfg.graphics_cfg.hdr = false;
 	context_cfg.graphics_cfg.ppaa = false;
 	Context::Instance().Config(context_cfg);
 	
-	EmptyApp app;
+	FFTLensEffectsGenApp app;
 	app.Create();
 
 	
