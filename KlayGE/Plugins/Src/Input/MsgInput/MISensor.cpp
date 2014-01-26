@@ -863,4 +863,74 @@ namespace KlayGE
 	}
 }
 
+#elif defined KLAYGE_PLATFORM_ANDROID
+
+#include <android/sensor.h>
+
+namespace KlayGE
+{
+	MsgInputSensor::MsgInputSensor()
+	{
+		sensor_mgr_ = ASensorManager_getInstance();
+		if (sensor_mgr_)
+		{
+			sensor_event_queue_ = ASensorManager_createEventQueue(sensor_mgr_, ALooper_forThread(),
+				LOOPER_ID_USER, &SensorCallback, this);
+
+			accelerometer_ = ASensorManager_getDefaultSensor(sensor_mgr_, ASENSOR_TYPE_ACCELEROMETER);
+			if (accelerometer_)
+			{
+				if (ASensorEventQueue_enableSensor(sensor_event_queue_, accelerometer_) >= 0)
+				{
+					ASensorEventQueue_setEventRate(sensor_event_queue_, accelerometer_, 1.0f / 60);
+				}
+			}
+
+			gyrometer_ = ASensorManager_getDefaultSensor(sensor_mgr_, ASENSOR_TYPE_GYROSCOPE);
+			if (gyrometer_)
+			{
+				if (ASensorEventQueue_enableSensor(sensor_event_queue_, gyrometer_) >= 0)
+				{
+					ASensorEventQueue_setEventRate(sensor_event_queue_, gyrometer_, 1.0f / 60);
+				}
+			}
+		}
+	}
+
+	MsgInputSensor::~MsgInputSensor()
+	{
+		ASensorManager_destroyEventQueue(sensor_mgr_, sensor_event_queue_);
+	}
+
+	int MsgInputSensor::SensorCallback(int fd, int events, void* data)
+	{
+		UNREF_PARAM(fd);
+		UNREF_PARAM(events);
+
+		MsgInputSensor* input_sensor = static_cast<MsgInputSensor*>(data);
+
+		ASensorEvent sensor_event;
+		while (ASensorEventQueue_getEvents(input_sensor->sensor_event_queue_, &sensor_event, 1) > 0)
+		{
+			switch (sensor_event.type)
+			{
+			case ASENSOR_TYPE_ACCELEROMETER:
+				accel_ = float3(sensor_event.acceleration.x, sensor_event.acceleration.y,
+					sensor_event.acceleration.z);
+				break;
+
+			case ASENSOR_TYPE_GYROSCOPE:
+				angular_velocity_ = float3(sensor_event.vector.x, sensor_event.vector.y,
+					sensor_event.vector.z);
+				break;
+
+			default:
+				break;
+			}
+		}
+
+		return 1;
+	}
+}
+
 #endif

@@ -447,6 +447,26 @@ namespace KlayGE
 		Windows::Devices::Sensors::OrientationSensor^ orientation_;
 		Windows::Foundation::EventRegistrationToken orientation_reading_token_;
 	};
+#elif defined KLAYGE_PLATFORM_ANDROID
+	class MsgInputSensor : public InputSensor
+	{
+	public:
+		MsgInputSensor();
+		virtual ~MsgInputSensor();
+
+		virtual std::wstring const & Name() const KLAYGE_OVERRIDE;
+
+	private:
+		virtual void UpdateInputs() KLAYGE_OVERRIDE;
+
+		static int SensorCallback(int fd, int events, void* data);
+
+	private:
+		ASensorManager* sensor_mgr_;
+		ASensorEventQueue* sensor_event_queue_;
+		ASensor const * accelerometer_;
+		ASensor const * gyrometer_;
+	}
 #endif
 }
 
