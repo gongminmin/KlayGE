@@ -10,9 +10,71 @@ SET(UI_FILES
 	${KLAYGE_PROJECT_DIR}/Samples/media/CascadedShadowMap/CascadedShadowMap.uiml
 )
 
-SET(RESOURCE_FILES
-	${KLAYGE_PROJECT_DIR}/Samples/media/Common/KlayGESample.rc
-	${KLAYGE_PROJECT_DIR}/klayge_logo.ico
+SET(CONTENT_FILES
+	${KLAYGE_PROJECT_DIR}/bin/KlayGE.cfg
+	${KLAYGE_PROJECT_DIR}/media/Fonts/gkai00mp.kfont
+	${KLAYGE_PROJECT_DIR}/media/Models/indirect_light_proxy.meshml.model_bin
+	${KLAYGE_PROJECT_DIR}/media/Models/point_light_proxy.meshml.model_bin
+	${KLAYGE_PROJECT_DIR}/media/Models/spot_light_proxy.meshml.model_bin
+	${KLAYGE_PROJECT_DIR}/media/PostProcessors/Copy.ppml
+	${KLAYGE_PROJECT_DIR}/media/PostProcessors/Copy2LightBuffer.ppml
+	${KLAYGE_PROJECT_DIR}/media/PostProcessors/Depth.ppml
+	${KLAYGE_PROJECT_DIR}/media/PostProcessors/LensEffects.ppml
+	${KLAYGE_PROJECT_DIR}/media/PostProcessors/MultiRes.ppml
+	${KLAYGE_PROJECT_DIR}/media/PostProcessors/PostToneMapping.ppml
+	${KLAYGE_PROJECT_DIR}/media/PostProcessors/Resizer.ppml
+	${KLAYGE_PROJECT_DIR}/media/PostProcessors/RSM2VPLs.ppml
+	${KLAYGE_PROJECT_DIR}/media/PostProcessors/TAA.ppml
+	${KLAYGE_PROJECT_DIR}/media/RenderFX/Blur.kfx
+	${KLAYGE_PROJECT_DIR}/media/RenderFX/CascadedShadow.kfx
+	${KLAYGE_PROJECT_DIR}/media/RenderFX/Copy.kfx
+	${KLAYGE_PROJECT_DIR}/media/RenderFX/Copy2LightBuffer.kfx
+	${KLAYGE_PROJECT_DIR}/media/RenderFX/DeferredRendering.kfx
+	${KLAYGE_PROJECT_DIR}/media/RenderFX/Depth.kfx
+	${KLAYGE_PROJECT_DIR}/media/RenderFX/GBuffer.kfx
+	${KLAYGE_PROJECT_DIR}/media/RenderFX/Font.kfx
+	${KLAYGE_PROJECT_DIR}/media/RenderFX/LensEffects.kfx
+	${KLAYGE_PROJECT_DIR}/media/RenderFX/LightSourceProxy.kfx
+	${KLAYGE_PROJECT_DIR}/media/RenderFX/LightIndexedDeferredRendering4.kfx
+	${KLAYGE_PROJECT_DIR}/media/RenderFX/LightIndexedDeferredRendering32.kfx
+	${KLAYGE_PROJECT_DIR}/media/RenderFX/MultiRes.kfx
+	${KLAYGE_PROJECT_DIR}/media/RenderFX/Particle.kfx
+	${KLAYGE_PROJECT_DIR}/media/RenderFX/PostToneMapping.kfx
+	${KLAYGE_PROJECT_DIR}/media/RenderFX/Resizer.kfx
+	${KLAYGE_PROJECT_DIR}/media/RenderFX/RSM2VPLs.kfx
+	${KLAYGE_PROJECT_DIR}/media/RenderFX/SelectMode.kfx
+	${KLAYGE_PROJECT_DIR}/media/RenderFX/SkyBox.kfx
+	${KLAYGE_PROJECT_DIR}/media/RenderFX/SSGI.kfx
+	${KLAYGE_PROJECT_DIR}/media/RenderFX/SSR.kfx
+	${KLAYGE_PROJECT_DIR}/media/RenderFX/SSVO.kfx
+	${KLAYGE_PROJECT_DIR}/media/RenderFX/SumLum.kfx
+	${KLAYGE_PROJECT_DIR}/media/RenderFX/TAA.kfx
+	${KLAYGE_PROJECT_DIR}/media/RenderFX/ToneMapping.kfx
+	${KLAYGE_PROJECT_DIR}/media/RenderFX/VPLsLighting.kfx
+	${KLAYGE_PROJECT_DIR}/media/RenderFX/UI.kfx
+	${KLAYGE_PROJECT_DIR}/media/Textures/2D/powered_by_klayge.dds
+	${KLAYGE_PROJECT_DIR}/media/Textures/2D/ui.dds
+	${KLAYGE_PROJECT_DIR}/media/Textures/2D/white_noise_tex.dds
+	${KLAYGE_PROJECT_DIR}/media/Textures/3D/color_grading.dds
+	${KLAYGE_PROJECT_DIR}/media/Textures/Cube/Lake_CraterLake03_c.dds
+	${KLAYGE_PROJECT_DIR}/media/Textures/Cube/Lake_CraterLake03_y.dds
+	${KLAYGE_PROJECT_DIR}/Samples/media/CascadedShadowMap/katapult.meshml.model_bin
+	${KLAYGE_PROJECT_DIR}/Samples/media/CascadedShadowMap/plane.meshml.model_bin
+	${KLAYGE_PROJECT_DIR}/Samples/media/CascadedShadowMap/p12_e.dds
+	${KLAYGE_PROJECT_DIR}/Samples/media/CascadedShadowMap/p12_f.dds
+	${KLAYGE_PROJECT_DIR}/Samples/media/CascadedShadowMap/p12_fb.dds
+	${KLAYGE_PROJECT_DIR}/Samples/media/CascadedShadowMap/stones.dds
+	${KLAYGE_PROJECT_DIR}/Samples/media/CascadedShadowMap/tau_bump.dds
 )
+
+IF(KLAYGE_BUILD_PLATFORM_WINRT)
+	SET(PACKAGE_GUID "1E41AEDF-AA5F-4D9D-930E-938C8B40B48E")
+ELSEIF(KLAYGE_BUILD_PLATFORM_ANDROID)
+ELSE()
+	SET(RESOURCE_FILES
+		${KLAYGE_PROJECT_DIR}/Samples/media/Common/KlayGESample.rc
+		${KLAYGE_PROJECT_DIR}/klayge_logo.ico
+	)
+ENDIF()
 
 SETUP_SAMPLE(CascadedShadowMap)
