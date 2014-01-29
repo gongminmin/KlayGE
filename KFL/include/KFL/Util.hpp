@@ -396,17 +396,31 @@ namespace KlayGE
 	#endif
 #endif
 
-	CONSTEXPR size_t CT_HASH(char const (&str)[1])
+	CONSTEXPR size_t _Hash(const char (&str)[1])
 	{
 		return *str + 0x9e3779b9;
 	}
 
 	template <size_t N>
-	CONSTEXPR size_t CT_HASH(char const (&str)[N])
+	CONSTEXPR size_t _Hash(const char (&str)[N])
 	{
-		typedef char const (&truncated_str)[N - 1];
-		size_t seed = CT_HASH((truncated_str)str);
+		typedef const char (&truncated_str)[N - 1];
+#ifdef KLAYGE_CXX11_CORE_CONSTEXPR_SUPPORT
+		#define seed _Hash((truncated_str)str)
+#else
+		size_t seed = _Hash((truncated_str)str);
+#endif
 		return seed ^ (*(str + N - 1) + 0x9e3779b9 + (seed << 6) + (seed >> 2));
+#ifdef KLAYGE_CXX11_CORE_CONSTEXPR_SUPPORT
+		#undef seed
+#endif
+	}
+
+	template <size_t N>
+	CONSTEXPR size_t CT_HASH(const char (&str)[N])
+	{
+		typedef const char (&truncated_str)[N - 1];
+		return _Hash((truncated_str)str);
 	}
 
 #undef CONSTEXPR
@@ -419,7 +433,6 @@ namespace KlayGE
 			seed ^= (*str + 0x9e3779b9 + (seed << 6) + (seed >> 2));
 			++ str;
 		}
-		seed ^= (*str + 0x9e3779b9 + (seed << 6) + (seed >> 2));
 		return seed;
 	}
 }
