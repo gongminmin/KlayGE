@@ -21,11 +21,6 @@ SET(UI_FILES
 	${KLAYGE_PROJECT_DIR}/Samples/media/MotionBlurDoF/MotionBlurDoF.uiml
 )
 
-SET(RESOURCE_FILES
-	${KLAYGE_PROJECT_DIR}/Samples/media/Common/KlayGESample.rc
-	${KLAYGE_PROJECT_DIR}/klayge_logo.ico
-)
-
 SETUP_SAMPLE(MotionBlurDoF)
 
 ADD_CUSTOM_COMMAND(TARGET MotionBlurDoF

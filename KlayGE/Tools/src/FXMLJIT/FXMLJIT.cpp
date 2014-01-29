@@ -134,13 +134,10 @@ int main(int argc, char* argv[])
 		target_folder = argv[3];
 	}
 
-	filesystem::path file_name(argv[2]);
-	
-#ifdef KLAYGE_TR2_LIBRARY_FILESYSTEM_V2_SUPPORT
-	std::string const base_name = file_name.basename();
-#else
-	std::string const base_name = file_name.basename().string();
-#endif
+	std::string file_name(argv[2]);
+	filesystem::path file_path(file_name);
+	std::string const base_name = filesystem::basename(file_path);
+	ResLoader::Instance().AddPath(file_path.parent_path().string());
 
 	filesystem::path kfx_path(base_name + ".kfx");
 	filesystem::remove(kfx_path);

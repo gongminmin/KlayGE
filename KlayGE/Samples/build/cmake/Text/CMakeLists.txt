@@ -10,6 +10,10 @@ SET(UI_FILES
 	${KLAYGE_PROJECT_DIR}/Samples/media/Text/Text.uiml
 )
 
+SET(RESOURCE_FILES
+	${KLAYGE_PROJECT_DIR}/Samples/media/Text/text.txt
+)
+
 SET(CONTENT_FILES
 	${KLAYGE_PROJECT_DIR}/bin/KlayGE.cfg
 	${KLAYGE_PROJECT_DIR}/media/Fonts/gkai00mp.kfont
@@ -35,13 +39,6 @@ SET(CONTENT_FILES
 
 IF(KLAYGE_BUILD_PLATFORM_WINRT)
 	SET(PACKAGE_GUID "0cf69a0d-fa24-4075-8971-82c545f4af61")
-ELSEIF(KLAYGE_BUILD_PLATFORM_ANDROID)
-ELSE()
-	SET(RESOURCE_FILES
-		${KLAYGE_PROJECT_DIR}/Samples/media/Text/text.txt
-		${KLAYGE_PROJECT_DIR}/Samples/media/Common/KlayGESample.rc
-		${KLAYGE_PROJECT_DIR}/klayge_logo.ico
-	)
 ENDIF()
 
 SETUP_SAMPLE(Text)
