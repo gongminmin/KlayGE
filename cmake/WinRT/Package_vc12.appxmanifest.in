@@ -26,6 +26,6 @@
     </Application>
   </Applications>
   <Capabilities>
-    <DeviceCapability Name="location" />
+    @PERMISSION_LOCATION_STR@
   </Capabilities>
 </Package>
