@@ -113,6 +113,7 @@ SET(COMMON_FILES
 	${SEVENZIP_PROJECT_DIR}/CPP/Common/IntToString.cpp
 	${SEVENZIP_PROJECT_DIR}/CPP/Common/MyString.cpp
 	${SEVENZIP_PROJECT_DIR}/CPP/Common/MyVector.cpp
+	${SEVENZIP_PROJECT_DIR}/CPP/Common/MyWindows.cpp
 	${SEVENZIP_PROJECT_DIR}/CPP/Common/NewHandler.cpp
 	${SEVENZIP_PROJECT_DIR}/CPP/Common/StringConvert.cpp
 	${SEVENZIP_PROJECT_DIR}/CPP/Common/StringToInt.cpp

@@ -1295,7 +1295,7 @@ namespace KlayGE
 
 				array<uint32_t, 9> new_tile_id_with_neighbors;
 				new_tile_id_with_neighbors.fill(0xFFFFFFFF);
-                new_tile_id_with_neighbors[0] = tile_ids[i];
+				new_tile_id_with_neighbors[0] = tile_ids[i];
 
 				array<bool, 9> new_in_same_image;
 				new_in_same_image.fill(false);

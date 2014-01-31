@@ -22,7 +22,7 @@
 
 #include <KlayGE/Window.hpp>
 
-#ifdef KLAYGE_PLATFORM_WINDOWS
+#ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
 #include <windowsx.h>
 
 #ifndef GET_KEYSTATE_WPARAM

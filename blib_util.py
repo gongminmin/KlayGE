@@ -222,7 +222,7 @@ class compiler_info:
 		self.prefer_static = prefer_static
 
 	def msvc_add_build_command(self, batch_cmd, sln_name, proj_name, config, arch = ""):
-		if self.use_msbuild:
+		if self.use_msbuild and (arch != "ARM"):
 			batch_cmd.add_command('@SET VisualStudioVersion=%d.0' % self.version)
 			if len(proj_name) != 0:
 				file_name = "%s.%s" % (proj_name, self.proj_ext_name)
@@ -234,8 +234,6 @@ class compiler_info:
 			batch_cmd.add_command('@MSBuild %s /nologo /m /v:m /p:%s' % (file_name, config_str))
 		else:
 			config_str = config
-			if len(arch) != 0:
-				config_str = "%s|%s" % (config_str, arch)
 			proj_str = ""
 			if len(proj_name) != 0:
 				proj_str = "/project %s" % proj_name
@@ -289,10 +287,13 @@ def build_a_project(name, build_path, compiler_info, compiler_arch, need_install
 	if "vc" == compiler_info.name:
 		if ("x86" == compiler_arch[0]) or ("x86_app" == compiler_arch[0]):
 			vc_option = "x86"
+			vc_arch = "Win32"
 		elif ("x64" == compiler_arch[0]) or ("x64_app" == compiler_arch[0]):
 			vc_option = "x86_amd64"
+			vc_arch = "x64"
 		elif ("arm_app" == compiler_arch[0]):
 			vc_option = "x86_arm"
+			vc_arch = "ARM"
 
 		build_dir = "%s/build/%s-%d_0-%s" % (build_path, compiler_info.name, compiler_info.version, compiler_arch[0])
 		if not os.path.exists(build_dir):
@@ -308,9 +309,9 @@ def build_a_project(name, build_path, compiler_info, compiler_arch, need_install
 		build_cmd = batch_command()
 		build_cmd.add_command('@CALL "%%VS%d0COMNTOOLS%%..\\..\\VC\\vcvarsall.bat" %s' % (compiler_info.version, vc_option))
 		for config in compiler_info.cfg:
-			compiler_info.msvc_add_build_command(build_cmd, name, "ALL_BUILD", config)
+			compiler_info.msvc_add_build_command(build_cmd, name, "ALL_BUILD", config, vc_arch)
 			if need_install:
-				compiler_info.msvc_add_build_command(build_cmd, name, "INSTALL", config)
+				compiler_info.msvc_add_build_command(build_cmd, name, "INSTALL", config, vc_arch)
 		if build_cmd.execute() != 0:
 			log_error("Build %s failed." % name)
 

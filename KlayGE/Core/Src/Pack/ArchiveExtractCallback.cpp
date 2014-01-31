@@ -86,7 +86,7 @@ namespace KlayGE
 		}
 		else
 		{
-#ifdef KLAYGE_PLATFORM_WINDOWS
+#ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
 			*password = SysAllocString(password_.c_str());
 #else
 			*password = nullptr;
