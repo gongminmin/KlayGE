@@ -61,6 +61,11 @@ KlayGE/Exporters/3DSMax/MeshML/build/*/ipch/
 KlayGE/Exporters/Maya/build/*/Debug/
 KlayGE/Exporters/Maya/build/*/Release/
 KlayGE/Exporters/Maya/build/*/ipch/
+KlayGE/media/Fonts/*.kfont
+KlayGE/media/Textures/2D/klayge_logo.dds
+KlayGE/media/Textures/2D/lens_effects_imag.dds
+KlayGE/media/Textures/2D/lens_effects_real.dds
+KlayGE/media/Textures/Cube/*.dds
 KlayGE/Samples/media/Ocean/OceanDisplacement.dds
 KlayGE/Samples/media/Ocean/OceanDisplacementParam.dds
 KlayGE/Samples/media/Ocean/OceanGradient.dds

@@ -7,21 +7,19 @@ IF(COMMAND cmake_policy)
 ENDIF(COMMAND cmake_policy)
 
 SET(DXSDK_DIR "${CMAKE_HOME_DIRECTORY}/../../")
+SET(KLAYGE_ROOT_DIR "${DXSDK_DIR}/../../")
 
-INCLUDE(${DXSDK_DIR}/../../cmake/Common.cmake)
-INCLUDE(${DXSDK_DIR}/../../cmake/Platform.cmake)
-INCLUDE(${DXSDK_DIR}/../../cmake/Compiler.cmake)
+INCLUDE(${KLAYGE_ROOT_DIR}/cmake/Common.cmake)
+INCLUDE(${KLAYGE_ROOT_DIR}/cmake/Platform.cmake)
+INCLUDE(${KLAYGE_ROOT_DIR}/cmake/Compiler.cmake)
 
 SET(KLAYGE_BIN_DIR "${DXSDK_DIR}/../../KlayGE/bin/${KLAYGE_PLATFORM_NAME}")
 SET(D3DCOMPILER_NAME "d3dcompiler_47.dll")
-SET(SRC_PATH "${DXSDK_DIR}/Redist/${KLAYGE_ARCH_NAME}/${D3DCOMPILER_NAME}")
+SET(REL_PATH "External/DXSDK/Redist/${KLAYGE_ARCH_NAME}/${D3DCOMPILER_NAME}")
+SET(SRC_PATH "${KLAYGE_ROOT_DIR}/${REL_PATH}")
 SET(DST_PATH "${KLAYGE_BIN_DIR}/${D3DCOMPILER_NAME}")
 
-IF(NOT EXISTS ${SRC_PATH})
-	SET(URL "http://www.klayge.org/download/KlayGE/External/DXSDK/Redist/${KLAYGE_ARCH_NAME}/${D3DCOMPILER_NAME}")
-	MESSAGE(STATUS "Downloading ${URL}...")
-	FILE(DOWNLOAD ${URL} ${SRC_PATH})
-ENDIF()
+DOWNLOAD_FILE(${REL_PATH})
 
 ADD_CUSTOM_COMMAND(OUTPUT ${DST_PATH}
 	COMMAND ${CMAKE_COMMAND} -E copy_if_different ${SRC_PATH} ${DST_PATH})

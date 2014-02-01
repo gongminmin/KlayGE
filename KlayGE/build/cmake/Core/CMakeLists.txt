@@ -1,3 +1,14 @@
+DOWNLOAD_FILE("KlayGE/media/Fonts/gkai00mp.kfont")
+DOWNLOAD_FILE("KlayGE/media/Textures/2D/klayge_logo.dds")
+DOWNLOAD_FILE("KlayGE/media/Textures/2D/lens_effects_imag.dds")
+DOWNLOAD_FILE("KlayGE/media/Textures/2D/lens_effects_real.dds")
+DOWNLOAD_FILE("KlayGE/media/Textures/Cube/Lake_CraterLake03_c.dds")
+DOWNLOAD_FILE("KlayGE/media/Textures/Cube/Lake_CraterLake03_y.dds")
+DOWNLOAD_FILE("KlayGE/media/Textures/Cube/rnl_cross_c.dds")
+DOWNLOAD_FILE("KlayGE/media/Textures/Cube/rnl_cross_y.dds")
+DOWNLOAD_FILE("KlayGE/media/Textures/Cube/uffizi_cross_c.dds")
+DOWNLOAD_FILE("KlayGE/media/Textures/Cube/uffizi_cross_y.dds")
+
 SET(LIB_NAME ${KLAYGE_CORELIB_NAME})
 
 SET(KERNEL_SOURCE_FILES
