@@ -209,6 +209,8 @@ typedef struct _HIDP_VALUE_CAPS
 #include <Sensors.h>
 #endif
 
+#elif defined KLAYGE_PLATFORM_ANDROID
+#include <android/sensor.h>
 #endif
 
 #include <KlayGE/Input.hpp>
@@ -466,7 +468,7 @@ namespace KlayGE
 		ASensorEventQueue* sensor_event_queue_;
 		ASensor const * accelerometer_;
 		ASensor const * gyrometer_;
-	}
+	};
 #endif
 }
 

@@ -865,8 +865,6 @@ namespace KlayGE
 
 #elif defined KLAYGE_PLATFORM_ANDROID
 
-#include <android/sensor.h>
-
 namespace KlayGE
 {
 	MsgInputSensor::MsgInputSensor()
@@ -915,12 +913,12 @@ namespace KlayGE
 			switch (sensor_event.type)
 			{
 			case ASENSOR_TYPE_ACCELEROMETER:
-				accel_ = float3(sensor_event.acceleration.x, sensor_event.acceleration.y,
+				input_sensor->accel_ = float3(sensor_event.acceleration.x, sensor_event.acceleration.y,
 					sensor_event.acceleration.z);
 				break;
 
 			case ASENSOR_TYPE_GYROSCOPE:
-				angular_velocity_ = float3(sensor_event.vector.x, sensor_event.vector.y,
+				input_sensor->angular_velocity_ = float3(sensor_event.vector.x, sensor_event.vector.y,
 					sensor_event.vector.z);
 				break;
 

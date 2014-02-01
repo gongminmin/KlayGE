@@ -365,12 +365,12 @@ namespace KlayGE
 			this->Reposition(new_left, new_top);
 		}
 
-		EGLint new_width, new_height;
-		eglQuerySurface(display_, surf_, EGL_WIDTH, &new_width);
-		eglQuerySurface(display_, surf_, EGL_HEIGHT, &new_height);
+		EGLint w, h;
+		eglQuerySurface(display_, surf_, EGL_WIDTH, &w);
+		eglQuerySurface(display_, surf_, EGL_HEIGHT, &h);
 
-		new_width -= new_left;
-		new_height -= new_top;
+		uint32_t new_width = w - new_left;
+		uint32_t new_height = h - new_top;
 #endif
 
 		if ((new_width != width_) || (new_height != height_))
