@@ -6,8 +6,10 @@
 	<include name="Quaternion.fxml"/>
 	<include name="GBuffer.fxml"/>
 
-	<parameter type="float4" name="joint_reals" array_size="NUM_JOINTS"/>
-	<parameter type="float4" name="joint_duals" array_size="NUM_JOINTS"/>
+	<cbuffer name="skinning">
+		<parameter type="float4" name="joint_reals" array_size="NUM_JOINTS"/>
+		<parameter type="float4" name="joint_duals" array_size="NUM_JOINTS"/>
+	</cbuffer>
 
 	<parameter type="sampler" name="linear_sampler">
 		<state name="filtering" value="min_mag_mip_linear"/>
@@ -494,21 +496,7 @@ void VisualizeTextureMRTPS(float2 tex0 : TEXCOORD0,
 		</pass>
 	</technique>
 
-	<technique name="MeshDepthSkinnedTech" inherit="DepthTech">
-		<macro name="SKINNING_ON" value="1"/>
-		<pass name="p0">
-			<state name="vertex_shader" value="MeshDepthVS()"/>
-		</pass>
-	</technique>
-
 	<technique name="MeshDepthAlphaTestTech" inherit="DepthAlphaTestTech">
-		<pass name="p0">
-			<state name="vertex_shader" value="MeshDepthVS()"/>
-		</pass>
-	</technique>
-
-	<technique name="MeshDepthSkinnedAlphaTestTech" inherit="DepthTech">
-		<macro name="SKINNING_ON" value="1"/>
 		<pass name="p0">
 			<state name="vertex_shader" value="MeshDepthVS()"/>
 		</pass>
@@ -525,40 +513,13 @@ void VisualizeTextureMRTPS(float2 tex0 : TEXCOORD0,
 		</pass>
 	</technique>
 
-	<technique name="MeshDepthSkinnedBlendBackTech" inherit="DepthAlphaBlendBackTech">
-		<macro name="SKINNING_ON" value="1"/>
-		<pass name="p0">
-			<state name="vertex_shader" value="MeshDepthVS()"/>
-		</pass>
-	</technique>
-	<technique name="MeshDepthSkinnedBlendFrontTech" inherit="DepthAlphaBlendFrontTech">
-		<macro name="SKINNING_ON" value="1"/>
-		<pass name="p0">
-			<state name="vertex_shader" value="MeshDepthVS()"/>
-		</pass>
-	</technique>
-
 	<technique name="MeshGBufferRT0Tech" inherit="GBufferRT0Tech">
 		<pass name="p0">
 			<state name="vertex_shader" value="MeshVS()"/>
 		</pass>
 	</technique>
 
-	<technique name="MeshGBufferSkinnedRT0Tech" inherit="GBufferRT0Tech">
-		<macro name="SKINNING_ON" value="1"/>
-		<pass name="p0">
-			<state name="vertex_shader" value="MeshVS()"/>
-		</pass>
-	</technique>
-
 	<technique name="MeshGBufferAlphaTestRT0Tech" inherit="GBufferAlphaTestRT0Tech">
-		<pass name="p0">
-			<state name="vertex_shader" value="MeshVS()"/>
-		</pass>
-	</technique>
-
-	<technique name="MeshGBufferSkinnedAlphaTestRT0Tech" inherit="GBufferRT0Tech">
-		<macro name="SKINNING_ON" value="1"/>
 		<pass name="p0">
 			<state name="vertex_shader" value="MeshVS()"/>
 		</pass>
@@ -575,40 +536,13 @@ void VisualizeTextureMRTPS(float2 tex0 : TEXCOORD0,
 		</pass>
 	</technique>
 
-	<technique name="MeshGBufferSkinnedBlendBackRT0Tech" inherit="GBufferAlphaBlendBackRT0Tech">
-		<macro name="SKINNING_ON" value="1"/>
-		<pass name="p0">
-			<state name="vertex_shader" value="MeshVS()"/>
-		</pass>
-	</technique>
-	<technique name="MeshGBufferSkinnedBlendFrontRT0Tech" inherit="GBufferAlphaBlendFrontRT0Tech">
-		<macro name="SKINNING_ON" value="1"/>
-		<pass name="p0">
-			<state name="vertex_shader" value="MeshVS()"/>
-		</pass>
-	</technique>
-
 	<technique name="MeshGBufferRT1Tech" inherit="GBufferRT1Tech">
 		<pass name="p0">
 			<state name="vertex_shader" value="MeshVS()"/>
 		</pass>
 	</technique>
 
-	<technique name="MeshGBufferSkinnedRT1Tech" inherit="GBufferRT1Tech">
-		<macro name="SKINNING_ON" value="1"/>
-		<pass name="p0">
-			<state name="vertex_shader" value="MeshVS()"/>
-		</pass>
-	</technique>
-
 	<technique name="MeshGBufferAlphaTestRT1Tech" inherit="GBufferAlphaTestRT1Tech">
-		<pass name="p0">
-			<state name="vertex_shader" value="MeshVS()"/>
-		</pass>
-	</technique>
-
-	<technique name="MeshGBufferSkinnedAlphaTestRT1Tech" inherit="GBufferRT1Tech">
-		<macro name="SKINNING_ON" value="1"/>
 		<pass name="p0">
 			<state name="vertex_shader" value="MeshVS()"/>
 		</pass>
@@ -625,27 +559,7 @@ void VisualizeTextureMRTPS(float2 tex0 : TEXCOORD0,
 		</pass>
 	</technique>
 
-	<technique name="MeshGBufferSkinnedBlendBackRT1Tech" inherit="GBufferAlphaBlendBackRT1Tech">
-		<macro name="SKINNING_ON" value="1"/>
-		<pass name="p0">
-			<state name="vertex_shader" value="MeshVS()"/>
-		</pass>
-	</technique>
-	<technique name="MeshGBufferSkinnedBlendFrontRT1Tech" inherit="GBufferAlphaBlendFrontRT1Tech">
-		<macro name="SKINNING_ON" value="1"/>
-		<pass name="p0">
-			<state name="vertex_shader" value="MeshVS()"/>
-		</pass>
-	</technique>
-
 	<technique name="MeshGBufferMRTTech" inherit="GBufferMRTTech">
-		<pass name="p0">
-			<state name="vertex_shader" value="MeshVS()"/>
-		</pass>
-	</technique>
-	
-	<technique name="MeshGBufferSkinnedMRTTech" inherit="GBufferMRTTech">
-		<macro name="SKINNING_ON" value="1"/>
 		<pass name="p0">
 			<state name="vertex_shader" value="MeshVS()"/>
 		</pass>
@@ -657,32 +571,12 @@ void VisualizeTextureMRTPS(float2 tex0 : TEXCOORD0,
 		</pass>
 	</technique>
 
-	<technique name="MeshGBufferSkinnedAlphaTestMRTTech" inherit="GBufferMRTTech">
-		<macro name="SKINNING_ON" value="1"/>
-		<pass name="p0">
-			<state name="vertex_shader" value="MeshVS()"/>
-		</pass>
-	</technique>
-
 	<technique name="MeshGBufferBlendBackMRTTech" inherit="GBufferAlphaBlendBackMRTTech">
 		<pass name="p0">			
 			<state name="vertex_shader" value="MeshVS()"/>
 		</pass>
 	</technique>
 	<technique name="MeshGBufferBlendFrontMRTTech" inherit="GBufferAlphaBlendFrontMRTTech">
-		<pass name="p0">
-			<state name="vertex_shader" value="MeshVS()"/>
-		</pass>
-	</technique>
-
-	<technique name="MeshGBufferSkinnedBlendBackMRTTech" inherit="GBufferAlphaBlendBackMRTTech">
-		<macro name="SKINNING_ON" value="1"/>
-		<pass name="p0">
-			<state name="vertex_shader" value="MeshVS()"/>
-		</pass>
-	</technique>
-	<technique name="MeshGBufferSkinnedBlendFrontMRTTech" inherit="GBufferAlphaBlendFrontMRTTech">
-		<macro name="SKINNING_ON" value="1"/>
 		<pass name="p0">
 			<state name="vertex_shader" value="MeshVS()"/>
 		</pass>
@@ -706,10 +600,6 @@ void VisualizeTextureMRTPS(float2 tex0 : TEXCOORD0,
 		</pass>
 	</technique>
 
-	<technique name="VisualizeVertexSkinnedRT0Tech" inherit="VisualizeVertexRT0Tech">
-		<macro name="SKINNING_ON" value="1"/>
-	</technique>
-
 	<technique name="VisualizeVertexRT1Tech">
 		<pass name="p0">
 			<state name="cull_mode" value="back"/>
@@ -726,10 +616,6 @@ void VisualizeTextureMRTPS(float2 tex0 : TEXCOORD0,
 			<state name="vertex_shader" value="VisualizeVertexVS()"/>
 			<state name="pixel_shader" value="VisualizeVertexRT1PS()"/>
 		</pass>
-	</technique>
-
-	<technique name="VisualizeVertexSkinnedRT1Tech" inherit="VisualizeVertexRT1Tech">
-		<macro name="SKINNING_ON" value="1"/>
 	</technique>
 
 	<technique name="VisualizeVertexMRTTech">
@@ -750,10 +636,6 @@ void VisualizeTextureMRTPS(float2 tex0 : TEXCOORD0,
 		</pass>
 	</technique>
 
-	<technique name="VisualizeVertexSkinnedMRTTech" inherit="VisualizeVertexMRTTech">
-		<macro name="SKINNING_ON" value="1"/>
-	</technique>
-
 	<technique name="VisualizeTextureRT0Tech">
 		<pass name="p0">
 			<state name="cull_mode" value="back"/>
@@ -770,10 +652,6 @@ void VisualizeTextureMRTPS(float2 tex0 : TEXCOORD0,
 			<state name="vertex_shader" value="MeshVS()"/>
 			<state name="pixel_shader" value="VisualizeTextureRT0PS()"/>
 		</pass>
-	</technique>
-
-	<technique name="VisualizeTextureSkinnedRT0Tech" inherit="VisualizeTextureRT0Tech">
-		<macro name="SKINNING_ON" value="1"/>
 	</technique>
 
 	<technique name="VisualizeTextureRT1Tech">
@@ -794,10 +672,6 @@ void VisualizeTextureMRTPS(float2 tex0 : TEXCOORD0,
 		</pass>
 	</technique>
 
-	<technique name="VisualizeTextureSkinnedRT1Tech" inherit="VisualizeTextureRT1Tech">
-		<macro name="SKINNING_ON" value="1"/>
-	</technique>
-
 	<technique name="VisualizeTextureMRTTech">
 		<pass name="p0">
 			<state name="cull_mode" value="back"/>
@@ -816,47 +690,37 @@ void VisualizeTextureMRTPS(float2 tex0 : TEXCOORD0,
 		</pass>
 	</technique>
 
-	<technique name="VisualizeTextureSkinnedMRTTech" inherit="VisualizeTextureMRTTech">
-		<macro name="SKINNING_ON" value="1"/>
-	</technique>
-
 
 	<shader>
 		<![CDATA[
 void MeshSpecialShadingVS(float4 pos : POSITION,
 			float2 texcoord : TEXCOORD0,
-			out float2 oTexCoord : TEXCOORD0,
-			out float4 oPos : SV_Position)
-{
-	pos = float4(pos.xyz * pos_extent + pos_center, 1);
-	texcoord = texcoord * tc_extent + tc_center;
-	
-	oPos = mul(pos, mvp);
-	oTexCoord = texcoord;
-}
-
-void SkinnedMeshSpecialShadingVS(float4 pos : POSITION,
-			float2 texcoord : TEXCOORD0,
 			float4 tangent_quat : TANGENT,
+#if SKINNING_ON
 			float4 blend_weights : BLENDWEIGHT,
 #if KLAYGE_OPENGL || KLAYGE_OPENGLES
 			float4 blend_indices_f : BLENDINDICES,
 #else
 			uint4 blend_indices : BLENDINDICES,
 #endif
+#endif
 			out float2 oTexCoord : TEXCOORD0,
 			out float4 oPos : SV_Position)
 {
+#if SKINNING_ON
 #if KLAYGE_OPENGL || KLAYGE_OPENGLES
 	int4 blend_indices = (int4)blend_indices_f;
+#endif
 #endif
 
 	pos = float4(pos.xyz * pos_extent + pos_center, 1);
 	texcoord = texcoord * tc_extent + tc_center;
 	tangent_quat = tangent_quat * 2 - 1;
-
+	
+#if SKINNING_ON
 	float4 result_tangent_quat;
 	Skinned(pos.xyz, tangent_quat, blend_weights, blend_indices, pos.xyz, result_tangent_quat);
+#endif
 	
 	oPos = mul(pos, mvp);
 	oTexCoord = texcoord;
@@ -877,22 +741,6 @@ void SkinnedMeshSpecialShadingVS(float4 pos : POSITION,
 	<technique name="MeshSpecialShadingBlendFrontTech" inherit="SpecialShadingAlphaBlendFrontTech">
 		<pass name="p0">
 			<state name="vertex_shader" value="SpecialShadingVS()"/>
-		</pass>
-	</technique>
-
-	<technique name="MeshSpecialShadingSkinnedTech" inherit="SpecialShadingTech">
-		<pass name="p0">
-			<state name="vertex_shader" value="SkinnedMeshSpecialShadingVS()"/>
-		</pass>
-	</technique>
-	<technique name="MeshSpecialShadingSkinnedBlendBackTech" inherit="SpecialShadingAlphaBlendBackTech">
-		<pass name="p0">
-			<state name="vertex_shader" value="SkinnedMeshSpecialShadingVS()"/>
-		</pass>
-	</technique>
-	<technique name="MeshSpecialShadingSkinnedBlendFrontTech" inherit="SpecialShadingAlphaBlendFrontTech">
-		<pass name="p0">
-			<state name="vertex_shader" value="SkinnedMeshSpecialShadingVS()"/>
 		</pass>
 	</technique>
 
@@ -1148,29 +996,7 @@ void SmoothDS(HS_CONSTANT_DATA_OUTPUT HSConstantData,
 		</pass>
 	</technique>
 
-	<technique name="MeshDepthSkinnedSmooth5Tech" inherit="MeshDepthTech">
-		<macro name="SKINNING_ON" value="1"/>
-		<pass name="p0">
-			<state name="cull_mode" value="none"/>
-
-			<state name="vertex_shader" value="SmoothVS()"/>
-			<state name="hull_shader" value="SmoothHS()"/>
-			<state name="domain_shader" value="SmoothDS()"/>
-		</pass>
-	</technique>
-
 	<technique name="MeshDepthAlphaTestSmooth5Tech" inherit="MeshDepthAlphaTestTech">
-		<pass name="p0">
-			<state name="cull_mode" value="none"/>
-
-			<state name="vertex_shader" value="SmoothVS()"/>
-			<state name="hull_shader" value="SmoothHS()"/>
-			<state name="domain_shader" value="SmoothDS()"/>
-		</pass>
-	</technique>
-
-	<technique name="MeshDepthSkinnedAlphaTestSmooth5Tech" inherit="MeshDepthAlphaTestTech">
-		<macro name="SKINNING_ON" value="1"/>
 		<pass name="p0">
 			<state name="cull_mode" value="none"/>
 
@@ -1195,23 +1021,6 @@ void SmoothDS(HS_CONSTANT_DATA_OUTPUT HSConstantData,
 		</pass>
 	</technique>
 
-	<technique name="MeshDepthSkinnedBlendBackSmooth5Tech" inherit="MeshDepthSkinnedBlendBackTech">
-		<macro name="SKINNING_ON" value="1"/>
-		<pass name="p0">
-			<state name="vertex_shader" value="SmoothVS()"/>
-			<state name="hull_shader" value="SmoothHS()"/>
-			<state name="domain_shader" value="SmoothDS()"/>
-		</pass>
-	</technique>
-	<technique name="MeshDepthSkinnedBlendFrontSmooth5Tech" inherit="MeshDepthSkinnedBlendFrontTech">
-		<macro name="SKINNING_ON" value="1"/>
-		<pass name="p0">
-			<state name="vertex_shader" value="SmoothVS()"/>
-			<state name="hull_shader" value="SmoothHS()"/>
-			<state name="domain_shader" value="SmoothDS()"/>
-		</pass>
-	</technique>
-
 	<technique name="MeshGBufferSmooth5RT0Tech" inherit="MeshGBufferRT0Tech">
 		<pass name="p0">
 			<state name="cull_mode" value="none"/>
@@ -1222,29 +1031,7 @@ void SmoothDS(HS_CONSTANT_DATA_OUTPUT HSConstantData,
 		</pass>
 	</technique>
 
-	<technique name="MeshGBufferSkinnedSmooth5RT0Tech" inherit="MeshGBufferRT0Tech">
-		<macro name="SKINNING_ON" value="1"/>
-		<pass name="p0">
-			<state name="cull_mode" value="none"/>
-
-			<state name="vertex_shader" value="SmoothVS()"/>
-			<state name="hull_shader" value="SmoothHS()"/>
-			<state name="domain_shader" value="SmoothDS()"/>
-		</pass>
-	</technique>
-
 	<technique name="MeshGBufferAlphaTestSmooth5RT0Tech" inherit="MeshGBufferAlphaTestRT0Tech">
-		<pass name="p0">
-			<state name="cull_mode" value="none"/>
-
-			<state name="vertex_shader" value="SmoothVS()"/>
-			<state name="hull_shader" value="SmoothHS()"/>
-			<state name="domain_shader" value="SmoothDS()"/>
-		</pass>
-	</technique>
-
-	<technique name="MeshGBufferSkinnedAlphaTestSmooth5RT0Tech" inherit="MeshGBufferAlphaTestRT0Tech">
-		<macro name="SKINNING_ON" value="1"/>
 		<pass name="p0">
 			<state name="cull_mode" value="none"/>
 
@@ -1269,23 +1056,6 @@ void SmoothDS(HS_CONSTANT_DATA_OUTPUT HSConstantData,
 		</pass>
 	</technique>
 
-	<technique name="MeshGBufferSkinnedBlendBackSmooth5RT0Tech" inherit="MeshGBufferSkinnedBlendBackRT0Tech">
-		<macro name="SKINNING_ON" value="1"/>
-		<pass name="p0">
-			<state name="vertex_shader" value="SmoothVS()"/>
-			<state name="hull_shader" value="SmoothHS()"/>
-			<state name="domain_shader" value="SmoothDS()"/>
-		</pass>
-	</technique>
-	<technique name="MeshGBufferSkinnedBlendFrontSmooth5RT0Tech" inherit="MeshGBufferSkinnedBlendFrontRT0Tech">
-		<macro name="SKINNING_ON" value="1"/>
-		<pass name="p0">
-			<state name="vertex_shader" value="SmoothVS()"/>
-			<state name="hull_shader" value="SmoothHS()"/>
-			<state name="domain_shader" value="SmoothDS()"/>
-		</pass>
-	</technique>
-
 	<technique name="MeshGBufferSmooth5RT1Tech" inherit="MeshGBufferRT1Tech">
 		<pass name="p0">
 			<state name="cull_mode" value="none"/>
@@ -1296,29 +1066,7 @@ void SmoothDS(HS_CONSTANT_DATA_OUTPUT HSConstantData,
 		</pass>
 	</technique>
 
-	<technique name="MeshGBufferSkinnedSmooth5RT1Tech" inherit="MeshGBufferRT1Tech">
-		<macro name="SKINNING_ON" value="1"/>
-		<pass name="p0">
-			<state name="cull_mode" value="none"/>
-
-			<state name="vertex_shader" value="SmoothVS()"/>
-			<state name="hull_shader" value="SmoothHS()"/>
-			<state name="domain_shader" value="SmoothDS()"/>
-		</pass>
-	</technique>
-
 	<technique name="MeshGBufferAlphaTestSmooth5RT1Tech" inherit="MeshGBufferAlphaTestRT1Tech">
-		<pass name="p0">
-			<state name="cull_mode" value="none"/>
-
-			<state name="vertex_shader" value="SmoothVS()"/>
-			<state name="hull_shader" value="SmoothHS()"/>
-			<state name="domain_shader" value="SmoothDS()"/>
-		</pass>
-	</technique>
-
-	<technique name="MeshGBufferSkinnedAlphaTestSmooth5RT1Tech" inherit="MeshGBufferAlphaTestRT1Tech">
-		<macro name="SKINNING_ON" value="1"/>
 		<pass name="p0">
 			<state name="cull_mode" value="none"/>
 
@@ -1343,35 +1091,7 @@ void SmoothDS(HS_CONSTANT_DATA_OUTPUT HSConstantData,
 		</pass>
 	</technique>
 
-	<technique name="MeshGBufferSkinnedBlendBackSmooth5RT1Tech" inherit="MeshGBufferSkinnedBlendBackRT1Tech">
-		<macro name="SKINNING_ON" value="1"/>
-		<pass name="p0">
-			<state name="vertex_shader" value="SmoothVS()"/>
-			<state name="hull_shader" value="SmoothHS()"/>
-			<state name="domain_shader" value="SmoothDS()"/>
-		</pass>
-	</technique>
-	<technique name="MeshGBufferSkinnedBlendFrontSmooth5RT1Tech" inherit="MeshGBufferSkinnedBlendFrontRT1Tech">
-		<macro name="SKINNING_ON" value="1"/>
-		<pass name="p0">
-			<state name="vertex_shader" value="SmoothVS()"/>
-			<state name="hull_shader" value="SmoothHS()"/>
-			<state name="domain_shader" value="SmoothDS()"/>
-		</pass>
-	</technique>
-
 	<technique name="MeshGBufferSmooth5MRTTech" inherit="MeshGBufferMRTTech">
-		<pass name="p0">
-			<state name="cull_mode" value="none"/>
-
-			<state name="vertex_shader" value="SmoothVS()"/>
-			<state name="hull_shader" value="SmoothHS()"/>
-			<state name="domain_shader" value="SmoothDS()"/>
-		</pass>
-	</technique>
-
-	<technique name="MeshGBufferSkinnedSmooth5MRTTech" inherit="MeshGBufferMRTTech">
-		<macro name="SKINNING_ON" value="1"/>
 		<pass name="p0">
 			<state name="cull_mode" value="none"/>
 
@@ -1385,15 +1105,6 @@ void SmoothDS(HS_CONSTANT_DATA_OUTPUT HSConstantData,
 		<pass name="p0">
 			<state name="cull_mode" value="none"/>
 
-			<state name="vertex_shader" value="SmoothVS()"/>
-			<state name="hull_shader" value="SmoothHS()"/>
-			<state name="domain_shader" value="SmoothDS()"/>
-		</pass>
-	</technique>
-
-	<technique name="MeshGBufferSkinnedAlphaTestSmooth5MRTTech" inherit="MeshGBufferAlphaTestMRTTech">
-		<macro name="SKINNING_ON" value="1"/>
-		<pass name="p0">
 			<state name="vertex_shader" value="SmoothVS()"/>
 			<state name="hull_shader" value="SmoothHS()"/>
 			<state name="domain_shader" value="SmoothDS()"/>
@@ -1415,29 +1126,7 @@ void SmoothDS(HS_CONSTANT_DATA_OUTPUT HSConstantData,
 		</pass>
 	</technique>
 
-	<technique name="MeshGBufferSkinnedBlendBackSmooth5MRTTech" inherit="MeshGBufferSkinnedBlendBackMRTTech">
-		<macro name="SKINNING_ON" value="1"/>
-		<pass name="p0">
-			<state name="vertex_shader" value="SmoothVS()"/>
-			<state name="hull_shader" value="SmoothHS()"/>
-			<state name="domain_shader" value="SmoothDS()"/>
-		</pass>
-	</technique>
-	<technique name="MeshGBufferSkinnedBlendFrontSmooth5MRTTech" inherit="MeshGBufferSkinnedBlendFrontMRTTech">
-		<macro name="SKINNING_ON" value="1"/>
-		<pass name="p0">
-			<state name="vertex_shader" value="SmoothVS()"/>
-			<state name="hull_shader" value="SmoothHS()"/>
-			<state name="domain_shader" value="SmoothDS()"/>
-		</pass>
-	</technique>
-
 	<technique name="VisualizeVertexSmooth5RT0Tech" inherit="VisualizeVertexRT0Tech">
-		<pass name="p0">
-		</pass>
-	</technique>
-
-	<technique name="VisualizeVertexSkinnedSmooth5RT0Tech" inherit="VisualizeVertexSkinnedRT0Tech">
 		<pass name="p0">
 		</pass>
 	</technique>
@@ -1447,33 +1136,12 @@ void SmoothDS(HS_CONSTANT_DATA_OUTPUT HSConstantData,
 		</pass>
 	</technique>
 
-	<technique name="VisualizeVertexSkinnedSmooth5RT1Tech" inherit="VisualizeVertexSkinnedRT1Tech">
-		<pass name="p0">
-		</pass>
-	</technique>
-
 	<technique name="VisualizeVertexSmooth5MRTTech" inherit="VisualizeVertexMRTTech">
 		<pass name="p0">
 		</pass>
 	</technique>
 
-	<technique name="VisualizeVertexSkinnedSmooth5MRTTech" inherit="VisualizeVertexSkinnedMRTTech">
-		<pass name="p0">
-		</pass>
-	</technique>
-
 	<technique name="VisualizeTextureSmooth5RT0Tech" inherit="VisualizeTextureRT0Tech">
-		<pass name="p0">
-			<state name="cull_mode" value="none"/>
-
-			<state name="vertex_shader" value="SmoothVS()"/>
-			<state name="hull_shader" value="SmoothHS()"/>
-			<state name="domain_shader" value="SmoothDS()"/>
-		</pass>
-	</technique>
-
-	<technique name="VisualizeTextureSkinnedSmooth5RT0Tech" inherit="VisualizeTextureSkinnedRT0Tech">
-		<macro name="SKINNING_ON" value="1"/>
 		<pass name="p0">
 			<state name="cull_mode" value="none"/>
 
@@ -1493,29 +1161,7 @@ void SmoothDS(HS_CONSTANT_DATA_OUTPUT HSConstantData,
 		</pass>
 	</technique>
 
-	<technique name="VisualizeTextureSkinnedSmooth5RT1Tech" inherit="VisualizeTextureSkinnedRT1Tech">
-		<macro name="SKINNING_ON" value="1"/>
-		<pass name="p0">
-			<state name="cull_mode" value="none"/>
-
-			<state name="vertex_shader" value="SmoothVS()"/>
-			<state name="hull_shader" value="SmoothHS()"/>
-			<state name="domain_shader" value="SmoothDS()"/>
-		</pass>
-	</technique>
-
 	<technique name="VisualizeTextureSmooth5MRTTech" inherit="VisualizeTextureMRTTech">
-		<pass name="p0">
-			<state name="cull_mode" value="none"/>
-
-			<state name="vertex_shader" value="SmoothVS()"/>
-			<state name="hull_shader" value="SmoothHS()"/>
-			<state name="domain_shader" value="SmoothDS()"/>
-		</pass>
-	</technique>
-
-	<technique name="VisualizeTextureSkinnedSmooth5MRTTech" inherit="VisualizeTextureSkinnedMRTTech">
-		<macro name="SKINNING_ON" value="1"/>
 		<pass name="p0">
 			<state name="cull_mode" value="none"/>
 
@@ -1543,33 +1189,6 @@ void SmoothDS(HS_CONSTANT_DATA_OUTPUT HSConstantData,
 		</pass>
 	</technique>
 	<technique name="MeshSpecialShadingBlendFrontSmooth5Tech" inherit="MeshSpecialShadingBlendFrontTech">
-		<pass name="p0">
-			<state name="vertex_shader" value="SmoothVS()"/>
-			<state name="hull_shader" value="SmoothHS()"/>
-			<state name="domain_shader" value="SmoothDS()"/>
-		</pass>
-	</technique>
-
-	<technique name="MeshSpecialShadingSkinnedSmooth5Tech" inherit="MeshSpecialShadingSkinnedTech">
-		<macro name="SKINNING_ON" value="1"/>
-		<pass name="p0">
-			<state name="cull_mode" value="none"/>
-
-			<state name="vertex_shader" value="SmoothVS()"/>
-			<state name="hull_shader" value="SmoothHS()"/>
-			<state name="domain_shader" value="SmoothDS()"/>
-		</pass>
-	</technique>
-	<technique name="MeshSpecialShadingSkinnedBlendBackSmooth5Tech" inherit="MeshSpecialShadingSkinnedBlendBackTech">
-		<macro name="SKINNING_ON" value="1"/>
-		<pass name="p0">
-			<state name="vertex_shader" value="SmoothVS()"/>
-			<state name="hull_shader" value="SmoothHS()"/>
-			<state name="domain_shader" value="SmoothDS()"/>
-		</pass>
-	</technique>
-	<technique name="MeshSpecialShadingSkinnedBlendFrontSmooth5Tech" inherit="MeshSpecialShadingSkinnedBlendFrontTech">
-		<macro name="SKINNING_ON" value="1"/>
 		<pass name="p0">
 			<state name="vertex_shader" value="SmoothVS()"/>
 			<state name="hull_shader" value="SmoothHS()"/>
@@ -1709,10 +1328,6 @@ void InstTessSmoothVisualizeVertexVS(float2 barycentric : TEXCOORD1,
 		</pass>
 	</technique>
 
-	<technique name="SkinnedStreamOutTech" inherit="StreamOutTech">
-		<macro name="SKINNING_ON" value="1"/>
-	</technique>
-
 
 	<technique name="MeshGBufferSmooth4RT0Tech" inherit="MeshGBufferRT0Tech">
 		<pass name="p0">
@@ -1722,23 +1337,7 @@ void InstTessSmoothVisualizeVertexVS(float2 barycentric : TEXCOORD1,
 		</pass>
 	</technique>
 
-	<technique name="MeshGBufferSkinnedSmooth4RT0Tech" inherit="MeshGBufferSkinnedRT0Tech">
-		<pass name="p0">
-			<state name="cull_mode" value="none"/>
-
-			<state name="vertex_shader" value="InstTessSmoothVS()"/>
-		</pass>
-	</technique>
-
 	<technique name="MeshGBufferAlphaTestSmooth4RT0Tech" inherit="MeshGBufferAlphaTestRT0Tech">
-		<pass name="p0">
-			<state name="cull_mode" value="none"/>
-
-			<state name="vertex_shader" value="InstTessSmoothVS()"/>
-		</pass>
-	</technique>
-
-	<technique name="MeshGBufferSkinnedAlphaTestSmooth4RT0Tech" inherit="MeshGBufferSkinnedAlphaTestRT0Tech">
 		<pass name="p0">
 			<state name="cull_mode" value="none"/>
 
@@ -1757,17 +1356,6 @@ void InstTessSmoothVisualizeVertexVS(float2 barycentric : TEXCOORD1,
 		</pass>
 	</technique>
 
-	<technique name="MeshGBufferSkinnedBlendBackSmooth4RT0Tech" inherit="MeshGBufferSkinnedBlendBackRT0Tech">
-		<pass name="p0">
-			<state name="vertex_shader" value="InstTessSmoothVS()"/>
-		</pass>
-	</technique>
-	<technique name="MeshGBufferSkinnedBlendFrontSmooth4RT0Tech" inherit="MeshGBufferSkinnedBlendFrontRT0Tech">
-		<pass name="p0">
-			<state name="vertex_shader" value="InstTessSmoothVS()"/>
-		</pass>
-	</technique>
-
 	<technique name="MeshGBufferSmooth4RT1Tech" inherit="MeshGBufferRT1Tech">
 		<pass name="p0">
 			<state name="cull_mode" value="none"/>
@@ -1776,23 +1364,7 @@ void InstTessSmoothVisualizeVertexVS(float2 barycentric : TEXCOORD1,
 		</pass>
 	</technique>
 
-	<technique name="MeshGBufferSkinnedSmooth4RT1Tech" inherit="MeshGBufferSkinnedRT1Tech">
-		<pass name="p0">
-			<state name="cull_mode" value="none"/>
-
-			<state name="vertex_shader" value="InstTessSmoothVS()"/>
-		</pass>
-	</technique>
-
 	<technique name="MeshGBufferAlphaTestSmooth4RT1Tech" inherit="MeshGBufferAlphaTestRT1Tech">
-		<pass name="p0">
-			<state name="cull_mode" value="none"/>
-
-			<state name="vertex_shader" value="InstTessSmoothVS()"/>
-		</pass>
-	</technique>
-
-	<technique name="MeshGBufferSkinnedAlphaTestSmooth4RT1Tech" inherit="MeshGBufferSkinnedAlphaTestRT1Tech">
 		<pass name="p0">
 			<state name="cull_mode" value="none"/>
 
@@ -1811,17 +1383,6 @@ void InstTessSmoothVisualizeVertexVS(float2 barycentric : TEXCOORD1,
 		</pass>
 	</technique>
 
-	<technique name="MeshGBufferSkinnedBlendBackSmooth4RT1Tech" inherit="MeshGBufferSkinnedBlendBackRT1Tech">
-		<pass name="p0">
-			<state name="vertex_shader" value="InstTessSmoothVS()"/>
-		</pass>
-	</technique>
-	<technique name="MeshGBufferSkinnedBlendFrontSmooth4RT1Tech" inherit="MeshGBufferSkinnedBlendFrontRT1Tech">
-		<pass name="p0">
-			<state name="vertex_shader" value="InstTessSmoothVS()"/>
-		</pass>
-	</technique>
-
 	<technique name="MeshGBufferSmooth4MRTTech" inherit="MeshGBufferMRTTech">
 		<pass name="p0">
 			<state name="cull_mode" value="none"/>
@@ -1830,23 +1391,7 @@ void InstTessSmoothVisualizeVertexVS(float2 barycentric : TEXCOORD1,
 		</pass>
 	</technique>
 
-	<technique name="MeshGBufferSkinnedSmooth4MRTTech" inherit="MeshGBufferSkinnedMRTTech">
-		<pass name="p0">
-			<state name="cull_mode" value="none"/>
-
-			<state name="vertex_shader" value="InstTessSmoothVS()"/>
-		</pass>
-	</technique>
-
 	<technique name="MeshGBufferAlphaTestSmooth4MRTTech" inherit="MeshGBufferAlphaTestMRTTech">
-		<pass name="p0">
-			<state name="cull_mode" value="none"/>
-
-			<state name="vertex_shader" value="InstTessSmoothVS()"/>
-		</pass>
-	</technique>
-
-	<technique name="MeshGBufferSkinnedAlphaTestSmooth4MRTTech" inherit="MeshGBufferSkinnedAlphaTestMRTTech">
 		<pass name="p0">
 			<state name="cull_mode" value="none"/>
 
@@ -1865,24 +1410,7 @@ void InstTessSmoothVisualizeVertexVS(float2 barycentric : TEXCOORD1,
 		</pass>
 	</technique>
 
-	<technique name="MeshGBufferSkinnedBlendBackSmooth4MRTTech" inherit="MeshGBufferSkinnedBlendBackMRTTech">
-		<pass name="p0">
-			<state name="vertex_shader" value="InstTessSmoothVS()"/>
-		</pass>
-	</technique>
-	<technique name="MeshGBufferSkinnedBlendFrontSmooth4MRTTech" inherit="MeshGBufferSkinnedBlendFrontMRTTech">
-		<pass name="p0">
-			<state name="vertex_shader" value="InstTessSmoothVS()"/>
-		</pass>
-	</technique>
-
 	<technique name="VisualizeVertexSmooth4RT0Tech" inherit="VisualizeVertexRT0Tech">
-		<pass name="p0">
-			<state name="vertex_shader" value="InstTessSmoothVisualizeVertexVS()"/>
-		</pass>
-	</technique>
-
-	<technique name="VisualizeVertexSkinnedSmooth4RT0Tech" inherit="VisualizeVertexSkinnedRT0Tech">
 		<pass name="p0">
 			<state name="vertex_shader" value="InstTessSmoothVisualizeVertexVS()"/>
 		</pass>
@@ -1894,19 +1422,7 @@ void InstTessSmoothVisualizeVertexVS(float2 barycentric : TEXCOORD1,
 		</pass>
 	</technique>
 
-	<technique name="VisualizeVertexSkinnedSmooth4RT1Tech" inherit="VisualizeVertexSkinnedRT1Tech">
-		<pass name="p0">
-			<state name="vertex_shader" value="InstTessSmoothVisualizeVertexVS()"/>
-		</pass>
-	</technique>
-
 	<technique name="VisualizeVertexSmooth4MRTTech" inherit="VisualizeVertexMRTTech">
-		<pass name="p0">
-			<state name="vertex_shader" value="InstTessSmoothVisualizeVertexVS()"/>
-		</pass>
-	</technique>
-
-	<technique name="VisualizeVertexSkinnedSmooth4MRTTech" inherit="VisualizeVertexSkinnedMRTTech">
 		<pass name="p0">
 			<state name="vertex_shader" value="InstTessSmoothVisualizeVertexVS()"/>
 		</pass>
@@ -1918,31 +1434,13 @@ void InstTessSmoothVisualizeVertexVS(float2 barycentric : TEXCOORD1,
 		</pass>
 	</technique>
 
-	<technique name="VisualizeTextureSkinnedSmooth4RT0Tech" inherit="VisualizeTextureSkinnedRT0Tech">
-		<pass name="p0">
-			<state name="vertex_shader" value="InstTessSmoothVS()"/>
-		</pass>
-	</technique>
-
 	<technique name="VisualizeTextureSmooth4RT1Tech" inherit="VisualizeTextureRT1Tech">
 		<pass name="p0">
 			<state name="vertex_shader" value="InstTessSmoothVS()"/>
 		</pass>
 	</technique>
 
-	<technique name="VisualizeTextureSkinnedSmooth4RT1Tech" inherit="VisualizeTextureSkinnedRT1Tech">
-		<pass name="p0">
-			<state name="vertex_shader" value="InstTessSmoothVS()"/>
-		</pass>
-	</technique>
-
 	<technique name="VisualizeTextureSmooth4MRTTech" inherit="VisualizeTextureMRTTech">
-		<pass name="p0">
-			<state name="vertex_shader" value="InstTessSmoothVS()"/>
-		</pass>
-	</technique>
-
-	<technique name="VisualizeTextureSkinnedSmooth4MRTTech" inherit="VisualizeTextureSkinnedMRTTech">
 		<pass name="p0">
 			<state name="vertex_shader" value="InstTessSmoothVS()"/>
 		</pass>
@@ -1962,24 +1460,6 @@ void InstTessSmoothVisualizeVertexVS(float2 barycentric : TEXCOORD1,
 		</pass>
 	</technique>
 	<technique name="MeshSpecialShadingBlendFrontSmooth4Tech" inherit="MeshSpecialShadingBlendFrontTech">
-		<pass name="p0">
-			<state name="vertex_shader" value="InstTessSmoothVS()"/>
-		</pass>
-	</technique>
-
-	<technique name="MeshSpecialShadingSkinnedSmooth4Tech" inherit="MeshSpecialShadingSkinnedTech">
-		<pass name="p0">
-			<state name="cull_mode" value="none"/>
-
-			<state name="vertex_shader" value="InstTessSmoothVS()"/>
-		</pass>
-	</technique>
-	<technique name="MeshSpecialShadingSkinnedBlendBackSmooth4Tech" inherit="MeshSpecialShadingSkinnedBlendBackTech">
-		<pass name="p0">
-			<state name="vertex_shader" value="InstTessSmoothVS()"/>
-		</pass>
-	</technique>
-	<technique name="MeshSpecialShadingSkinnedBlendFrontSmooth4Tech" inherit="MeshSpecialShadingSkinnedBlendFrontTech">
 		<pass name="p0">
 			<state name="vertex_shader" value="InstTessSmoothVS()"/>
 		</pass>

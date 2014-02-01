@@ -10,8 +10,9 @@ SET(HEADER_FILES
 
 SET(EFFECT_FILES
 	${KLAYGE_PROJECT_DIR}/Samples/media/ModelViewer/ModelViewer.fxml
-	${KLAYGE_PROJECT_DIR}/Samples/media/ModelViewer/ModelViewer64.fxml
-	${KLAYGE_PROJECT_DIR}/Samples/media/ModelViewer/ModelViewer128.fxml
+	${KLAYGE_PROJECT_DIR}/Samples/media/ModelViewer/ModelViewerNoSkinning.fxml
+	${KLAYGE_PROJECT_DIR}/Samples/media/ModelViewer/ModelViewerSkinning64.fxml
+	${KLAYGE_PROJECT_DIR}/Samples/media/ModelViewer/ModelViewerSkinning128.fxml
 	${KLAYGE_PROJECT_DIR}/Samples/media/ModelViewer/MVUtil.fxml
 )
 
