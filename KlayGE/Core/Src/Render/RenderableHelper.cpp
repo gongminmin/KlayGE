@@ -607,7 +607,7 @@ namespace KlayGE
 			TexturePtr const & specular_tex, float3 const & specular_level, float shininess)
 		: RenderableHelper(L"Decal")
 	{
-		BOOST_ASSERT(deferred_effect_);
+		this->BindDeferredEffect(SyncLoadRenderEffect("Decal.fxml"));
 
 		gbuffer_alpha_test_rt0_tech_ = deferred_effect_->TechniqueByName("DecalGBufferAlphaTestRT0Tech");
 		gbuffer_alpha_test_rt1_tech_ = deferred_effect_->TechniqueByName("DecalGBufferAlphaTestRT1Tech");

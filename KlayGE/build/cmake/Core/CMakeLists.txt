@@ -125,6 +125,7 @@ SET(RENDERING_EFFECT_FILES
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/ColorGrading.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/Copy.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/Copy2LightBuffer.fxml
+	${KLAYGE_PROJECT_DIR}/media/RenderFX/Decal.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/DeferredRendering.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/DeferredRenderingUtil.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/Depth.fxml
