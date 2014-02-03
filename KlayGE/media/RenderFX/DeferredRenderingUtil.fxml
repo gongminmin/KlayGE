@@ -24,11 +24,11 @@ void StoreGBufferMRT(float3 normal, float3 specular, float shininess, float3 dif
 	mrt_1 = StoreGBufferRT1(diffuse, specular);
 }
 
-float3 GetNormal(float4 ndc)
+float3 GetNormal(float4 mrt0)
 {
-	float nz = floor(ndc.z * 255) / 16;
-	ndc.xy += float2(floor(nz) / 16, frac(nz)) / 255;
-	float2 fenc = ndc.xy * 4 - 2;
+	float nz = floor(mrt0.z * 255) / 16;
+	mrt0.xy += float2(floor(nz) / 16, frac(nz)) / 255;
+	float2 fenc = mrt0.xy * 4 - 2;
 	float f = dot(fenc, fenc);
 	float g = sqrt(1 - f / 4);
 	float3 normal;
@@ -37,9 +37,19 @@ float3 GetNormal(float4 ndc)
 	return normal;
 }
 
-float GetShininess(float4 ndc)
+float GetShininess(float4 mrt0)
 {
-	return ndc.w * 256.0f;
+	return mrt0.w * 256.0f;
+}
+
+float3 GetDiffuse(float4 mrt1)
+{
+	return mrt1.xyz;
+}
+
+float GetSpecular(float4 mrt1)
+{
+	return mrt1.w;
 }
 
 

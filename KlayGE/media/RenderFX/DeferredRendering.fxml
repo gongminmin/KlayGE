@@ -712,8 +712,8 @@ float4 ShadingPS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Target
 	float3 normal = GetNormal(ndc);
 	
 	float4 lighting = lighting_tex.Sample(point_sampler, tc);
-	float4 diffuse = g_buffer_1_tex.Sample(point_sampler, tc);
-	return float4(Shading(lighting, shininess, diffuse.xyz, diffuse.w, view_dir, normal), 1);
+	float4 mrt1 = g_buffer_1_tex.Sample(point_sampler, tc);
+	return float4(Shading(lighting, shininess, GetDiffuse(mrt1), GetSpecular(mrt1), view_dir, normal), 1);
 }
 
 float4 MergeShadingPS(float2 tc : TEXCOORD0) : SV_Target

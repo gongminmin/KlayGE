@@ -5,6 +5,7 @@
 	<include name="Lighting.fxml"/>
 	<include name="Quaternion.fxml"/>
 	<include name="util.fxml"/>
+	<include name="DeferredRenderingUtil.fxml"/>
 
 	<parameter type="sampler" name="point_sampler">
 		<state name="filtering" value="min_mag_mip_point"/>
@@ -48,11 +49,11 @@ float3 texcoord_to_view(float2 tex)
 float4 RSM2VPLsSpot(float2 tc, float2 rsm_tc, float level, float factor)
 {
 	float4 albedo_spec = albedo_tex.SampleLevel(point_sampler, rsm_tc, level);
-	float3 albedo = albedo_spec.xyz;
-	float specular_level = albedo_spec.w;
+	float3 albedo = GetDiffuse(albedo_spec);
+	float specular_level = GetSpecular(albedo_spec);
 	float4 normal_shininess = normal_es_tex.SampleLevel(point_sampler, rsm_tc, level);
-	float3 normal_ls = normal_shininess.xyz * 2 - 1;
-	float shininess = normal_shininess.w * 256.0f;
+	float3 normal_ls = GetNormal(normal_shininess);
+	float shininess = GetShininess(normal_shininess);
 	float3 normal_es = mul(float4(normal_ls, 0), ls_to_es).xyz;
 	float depth_ls = ReadAFloat(depth_tex.Sample(point_sampler, rsm_tc), far_plane.x);
 

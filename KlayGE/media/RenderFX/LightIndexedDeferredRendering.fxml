@@ -254,8 +254,8 @@ float4 LightIndexedDeferredRenderingAmbientPS(float2 tc : TEXCOORD0, float3 view
 
 	float4 lighting = CalcColor(0.5f + 0.5f * dot(light_dir_es.xyz, normal), 0, 1, 1, light_color, light_attrib);
 	
-	float4 diffuse = g_buffer_1_tex.Sample(point_sampler, tc);
-	return float4(Shading(lighting, shininess, diffuse.xyz, diffuse.w, -view_dir, normal), 1);
+	float4 mrt1 = g_buffer_1_tex.Sample(point_sampler, tc);
+	return float4(Shading(lighting, shininess, GetDiffuse(mrt1), GetSpecular(mrt1), -view_dir, normal), 1);
 }
 
 float4 LightIndexedDeferredRenderingSunPS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Target
@@ -283,8 +283,8 @@ float4 LightIndexedDeferredRenderingSunPS(float2 tc : TEXCOORD0, float3 view_dir
 		float4 lighting = CalcColor(n_dot_l, spec, 1, shadow, light_color, light_attrib);
 
 		float shininess = GetShininess(ndc);
-		float4 diffuse = g_buffer_1_tex.Sample(point_sampler, tc);
-		shading = float4(Shading(lighting, shininess, diffuse.xyz, diffuse.w, -view_dir, normal), 1);
+		float4 mrt1 = g_buffer_1_tex.Sample(point_sampler, tc);
+		shading = float4(Shading(lighting, shininess, GetDiffuse(mrt1), GetSpecular(mrt1), -view_dir, normal), 1);
 	}
 	
 	return shading;
@@ -311,8 +311,8 @@ float4 LightIndexedDeferredRenderingDirectionalPS(float2 tc : TEXCOORD0, float3 
 		}
 	}
 
-	float4 diffuse = g_buffer_1_tex.Sample(point_sampler, tc);
-	return float4(Shading(lighting, shininess, diffuse.xyz, diffuse.w, -view_dir, normal), 1);
+	float4 mrt1 = g_buffer_1_tex.Sample(point_sampler, tc);
+	return float4(Shading(lighting, shininess, GetDiffuse(mrt1), GetSpecular(mrt1), -view_dir, normal), 1);
 }
 
 float4 CalcLightIndexedDeferredRenderingPointLighting(int index, float3 pos_es, float3 normal, float3 view_dir,
@@ -445,8 +445,8 @@ float4 LightIndexedDeferredRenderingPointPS(float2 tc : TEXCOORD0, float3 view_d
 #endif
 #endif
 
-		float4 diffuse = g_buffer_1_tex.Sample(point_sampler, tc);
-		shading = float4(Shading(lighting, shininess, diffuse.xyz, diffuse.w, -view_dir, normal), 1);
+		float4 mrt1 = g_buffer_1_tex.Sample(point_sampler, tc);
+		shading = float4(Shading(lighting, shininess, GetDiffuse(mrt1), GetSpecular(mrt1), -view_dir, normal), 1);
 	}
 
 	return shading;
@@ -526,8 +526,8 @@ float4 LightIndexedDeferredRenderingSpotPS(float2 tc : TEXCOORD0, float3 view_di
 #endif
 #endif
 
-		float4 diffuse = g_buffer_1_tex.Sample(point_sampler, tc);
-		shading = float4(Shading(lighting, shininess, diffuse.xyz, diffuse.w, -view_dir, normal), 1);
+		float4 mrt1 = g_buffer_1_tex.Sample(point_sampler, tc);
+		shading = float4(Shading(lighting, shininess, GetDiffuse(mrt1), GetSpecular(mrt1), -view_dir, normal), 1);
 	}
 
 	return shading;
