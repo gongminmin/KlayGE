@@ -30,6 +30,11 @@
 		<parameter type="int" name="opacity_map_enabled"/>
 	</cbuffer>
 
+	<cbuffer name="skinning">
+		<parameter type="float4" name="joint_reals" array_size="NUM_JOINTS"/>
+		<parameter type="float4" name="joint_duals" array_size="NUM_JOINTS"/>
+	</cbuffer>
+
 	<parameter type="texture2D" name="diffuse_tex"/>
 	<parameter type="texture2D" name="specular_tex"/>
 	<parameter type="texture2D" name="shininess_tex"/>
@@ -77,9 +82,82 @@
 #endif
 #endif
 
+#if SKINNING_ON
+void DQSkinned(float3 pos,
+			float4 tangent_quat,
+			float4 blend_weights,
+			int4 blend_indices,
+			out float3 result_pos,
+			out float4 result_tangent_quat)
+{
+	float4 dp0 = joint_reals[blend_indices[0]];
+
+	float3 pos_s = 0;
+	float4 blend_real = 0;
+	float4 blend_dual = 0;
+	for (int i = 0; i < 4; ++ i)
+	{
+		float4 joint_real = joint_reals[blend_indices[i]];
+		float4 joint_dual = joint_duals[blend_indices[i]];
+		
+		float scale = length(joint_real);
+		joint_real /= scale;
+
+		float weight = blend_weights[i];
+		
+		if (dot(dp0, joint_real) < 0)
+		{
+			joint_real = -joint_real;
+			joint_dual = -joint_dual;
+		}
+
+		pos_s += pos * scale * weight;
+		blend_real += joint_real * weight;
+		blend_dual += joint_dual * weight;
+	}
+
+	float len = length(blend_real);
+	blend_real /= len;
+	blend_dual /= len;
+
+	result_pos = transform_quat(pos_s, blend_real) + 2 * mul_quat(float4(blend_dual.xyz, -blend_dual.w), blend_real).xyz;
+	result_tangent_quat = mul_quat(tangent_quat, blend_real);
+}
+#endif
+
+void CalcMesh(float4 pos,
+				float2 tex0,
+				float4 tangent_quat,
+#if SKINNING_ON
+				float4 blend_weights,
+				int4 blend_indices,
+#endif
+				out float2 oTex,
+				out float3 oPos,
+				out float4 oTangentQuat)
+{
+#if SKINNING_ON
+	DQSkinned(pos.xyz, tangent_quat, blend_weights, blend_indices, oPos, oTangentQuat);
+#else
+	oPos = pos.xyz;
+	oTangentQuat = tangent_quat;
+#endif
+
+	oTex = tex0;
+	oTangentQuat = normalize(oTangentQuat);
+}
+
 void GBufferVS(float4 pos : POSITION,
 			float2 texcoord : TEXCOORD0,
 			float4 tangent_quat : TANGENT,
+#if SKINNING_ON
+			float4 blend_weights : BLENDWEIGHT,
+#if KLAYGE_OPENGL || KLAYGE_OPENGLES
+			float4 blend_indices_f : BLENDINDICES,
+#else
+			uint4 blend_indices : BLENDINDICES,
+#endif
+#endif
 			out float4 oTexCoord_2xy : TEXCOORD0,
 			out float4 oTsToView0_2z : TEXCOORD1,
 			out float4 oTsToView1_Depth : TEXCOORD2,
@@ -92,11 +170,18 @@ void GBufferVS(float4 pos : POSITION,
 {
 	pos = float4(pos.xyz * pos_extent + pos_center, 1);
 	texcoord = texcoord * tc_extent + tc_center;
-	
-	oPos = mul(pos, mvp);
-	oTexCoord_2xy.xy = texcoord;
-
 	tangent_quat = tangent_quat * 2 - 1;
+	
+	float3 result_pos;
+	float4 result_tangent_quat;
+	CalcMesh(pos, texcoord, tangent_quat,
+#if SKINNING_ON
+				blend_weights, blend_indices,
+#endif
+				oTexCoord_2xy.xy, result_pos,
+				result_tangent_quat);
+				
+	oPos = mul(float4(result_pos, 1), mvp);
 
 	float3x3 obj_to_ts;
 	obj_to_ts[0] = transform_quat(float3(1, 0, 0), tangent_quat);
@@ -494,14 +579,32 @@ void GBufferAlphaBlendMRTPS(float4 texcoord_2xy : TEXCOORD0, float4 ts_to_view0_
 		<![CDATA[
 void GenShadowMapVS(float4 pos : POSITION,
 						float2 texcoord : TEXCOORD0,
+						float4 tangent_quat : TANGENT,
+#if SKINNING_ON
+						float4 blend_weights : BLENDWEIGHT,
+#if KLAYGE_OPENGL || KLAYGE_OPENGLES
+						float4 blend_indices_f : BLENDINDICES,
+#else
+						uint4 blend_indices : BLENDINDICES,
+#endif
+#endif
 						out float2 oTc : TEXCOORD0,
 						out float4 oPos : SV_Position)
 {
 	pos = float4(pos.xyz * pos_extent + pos_center, 1);
 	texcoord = texcoord * tc_extent + tc_center;
+	tangent_quat = tangent_quat * 2 - 1;
 
-	oPos = mul(pos, mvp);
-	oTc = texcoord;
+	float3 result_pos;
+	float4 result_tangent_quat;
+	CalcMesh(pos, texcoord, tangent_quat,
+#if SKINNING_ON
+				blend_weights, blend_indices,
+#endif
+				oTc, result_pos,
+				result_tangent_quat);
+
+	oPos = mul(float4(result_pos, 1), mvp);
 }
 
 float4 GenShadowMapPS() : SV_Target
@@ -517,17 +620,34 @@ float4 GenShadowMapAlphaTestPS(float2 tc : TEXCOORD0) : SV_Target
 
 void GenShadowMapWODepthTextureVS(float4 pos : POSITION,
 						float2 texcoord : TEXCOORD0,
+						float4 tangent_quat : TANGENT,
+#if SKINNING_ON
+						float4 blend_weights : BLENDWEIGHT,
+#if KLAYGE_OPENGL || KLAYGE_OPENGLES
+						float4 blend_indices_f : BLENDINDICES,
+#else
+						uint4 blend_indices : BLENDINDICES,
+#endif
+#endif
 						out float2 oTc : TEXCOORD0,
 						out float3 oViewDir : TEXCOORD1,
 						out float4 oPos : SV_Position)
 {
 	pos = float4(pos.xyz * pos_extent + pos_center, 1);
 	texcoord = texcoord * tc_extent + tc_center;
+	tangent_quat = tangent_quat * 2 - 1;
 
-	oPos = mul(pos, mvp);
-	oTc = texcoord;
+	float3 result_pos;
+	float4 result_tangent_quat;
+	CalcMesh(pos, texcoord, tangent_quat,
+#if SKINNING_ON
+				blend_weights, blend_indices,
+#endif
+				oTc, result_pos,
+				result_tangent_quat);
 
-	oViewDir = mul(pos, model_view).xyz;
+	oPos = mul(float4(result_pos, 1), mvp);
+	oViewDir = mul(float4(result_pos, 1), model_view).xyz;
 }
 
 float4 GenShadowMapWODepthTexturePS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Target
@@ -543,17 +663,34 @@ float4 GenShadowMapWODepthTextureAlphaTestPS(float2 tc : TEXCOORD0, float3 view_
 
 void GenCascadedShadowMapVS(float4 pos : POSITION,
 						float2 texcoord : TEXCOORD0,
+						float4 tangent_quat : TANGENT,
+#if SKINNING_ON
+						float4 blend_weights : BLENDWEIGHT,
+#if KLAYGE_OPENGL || KLAYGE_OPENGLES
+						float4 blend_indices_f : BLENDINDICES,
+#else
+						uint4 blend_indices : BLENDINDICES,
+#endif
+#endif
 						out float2 oTc : TEXCOORD0,
 						out float oDepth : TEXCOORD1,
 						out float4 oPos : SV_Position)
 {
 	pos = float4(pos.xyz * pos_extent + pos_center, 1);
 	texcoord = texcoord * tc_extent + tc_center;
-	
-	oPos = mul(pos, mvp);
-	oTc = texcoord;
+	tangent_quat = tangent_quat * 2 - 1;
 
-	oDepth = mul(pos, model_view).z;
+	float3 result_pos;
+	float4 result_tangent_quat;
+	CalcMesh(pos, texcoord, tangent_quat,
+#if SKINNING_ON
+				blend_weights, blend_indices,
+#endif
+				oTc, result_pos,
+				result_tangent_quat);
+	
+	oPos = mul(float4(result_pos, 1), mvp);
+	oDepth = mul(float4(result_pos, 1), model_view).z;
 }
 
 float4 GenCascadedShadowMapPS(float2 tc : TEXCOORD0, float depth : TEXCOORD1) : SV_Target

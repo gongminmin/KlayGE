@@ -1,11 +1,8 @@
 <?xml version='1.0'?>
 
 <effect>
-	<include name="DeferredRenderingUtil.fxml"/>
 	<include name="Lighting.fxml"/>
-	<include name="util.fxml"/>
-	<include name="Quaternion.fxml"/>
-	<include name="GBuffer.fxml"/>
+	<include name="GBufferNoSkinning.fxml"/>
 
 	<parameter type="float4x4" name="model"/>
 	<parameter type="float4" name="light_color"/>

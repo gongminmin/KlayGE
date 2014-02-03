@@ -3,83 +3,31 @@
 <effect>
 	<include name="GBuffer.fxml"/>
 
-	<cbuffer name="skinning">
-		<parameter type="float4" name="joint_reals" array_size="NUM_JOINTS"/>
-		<parameter type="float4" name="joint_duals" array_size="NUM_JOINTS"/>
-	</cbuffer>
-
 	<cbuffer name="less_freq">
 		<parameter type="int" name="vertex_usage"/>
 		<parameter type="int" name="vertex_usage_index"/>
 		<parameter type="int" name="texture_slot"/>
 	</cbuffer>
 
+	<macro name="VEU_Position" value="0"/>
+	<macro name="VEU_Normal" value="1"/>
+	<macro name="VEU_Diffuse" value="2"/>
+	<macro name="VEU_Specular" value="3"/>
+	<macro name="VEU_BlendWeight" value="4"/>
+	<macro name="VEU_BlendIndex" value="5"/>
+	<macro name="VEU_TextureCoord" value="6"/>
+	<macro name="VEU_Tangent" value="7"/>
+	<macro name="VEU_Binormal" value="8"/>
+	
+	<macro name="TS_Diffuse" value="0"/>
+	<macro name="TS_Specular" value="1"/>
+	<macro name="TS_Shininess" value="2"/>
+	<macro name="TS_Normal" value="3"/>
+	<macro name="TS_Emit" value="4"/>
+	<macro name="TS_Opacity" value="5"/>
+
 	<shader>
 		<![CDATA[
-void Skinned(float3 pos,
-			float4 tangent_quat,
-			float4 blend_weights,
-			int4 blend_indices,
-			out float3 result_pos,
-			out float4 result_tangent_quat)
-{
-	float4 dp0 = joint_reals[blend_indices[0]];
-
-	float3 pos_s = 0;
-	float4 blend_real = 0;
-	float4 blend_dual = 0;
-	for (int i = 0; i < 4; ++ i)
-	{
-		float4 joint_real = joint_reals[blend_indices[i]];
-		float4 joint_dual = joint_duals[blend_indices[i]];
-		
-		float scale = length(joint_real);
-		joint_real /= scale;
-
-		float weight = blend_weights[i];
-		
-		if (dot(dp0, joint_real) < 0)
-		{
-			joint_real = -joint_real;
-			joint_dual = -joint_dual;
-		}
-
-		pos_s += pos * scale * weight;
-		blend_real += joint_real * weight;
-		blend_dual += joint_dual * weight;
-	}
-
-	float len = length(blend_real);
-	blend_real /= len;
-	blend_dual /= len;
-
-	result_pos = transform_quat(pos_s, blend_real) + 2 * mul_quat(float4(blend_dual.xyz, -blend_dual.w), blend_real).xyz;
-	result_tangent_quat = mul_quat(tangent_quat, blend_real);
-}
-
-void CalcMesh(float2 tex0,
-				float4 pos,
-#if SKINNING_ON
-				float4 blend_weights,
-				int4 blend_indices,
-#endif
-				float4 tangent_quat,
-
-				out float2 oTex,
-				out float3 oPos,
-				out float4 oTangentQuat)
-{
-#if SKINNING_ON
-	Skinned(pos.xyz, tangent_quat, blend_weights, blend_indices, oPos, oTangentQuat);
-#else
-	oPos = pos.xyz;
-	oTangentQuat = tangent_quat;
-#endif
-
-	oTex = tex0;
-	oTangentQuat = normalize(oTangentQuat);
-}
-
 void CalcPosLH(float3 pos,
 				float3x3 obj_to_ts,
 				out float4 oPos,
@@ -117,31 +65,31 @@ float4 VisualizeVertex(float3 pos, float3 tangent, float3 binormal, float3 norma
 						float4 blend_weights, int4 blend_indices, float2 tex)
 {
 	float4 oClr;
-	if (0 == vertex_usage)
+	if (VEU_Position == vertex_usage)
 	{
 		oClr = float4(pos, 1);
 	}
-	else if (1 == vertex_usage)
+	else if (VEU_Normal == vertex_usage)
 	{
 		oClr = float4(normal / 2 + 0.5f, 1);
 	}
-	else if (4 == vertex_usage)
+	else if (VEU_BlendWeight == vertex_usage)
 	{
 		oClr = blend_weights;
 	}
-	else if (5 == vertex_usage)
+	else if (VEU_BlendIndex == vertex_usage)
 	{
 		oClr = blend_indices / 255.0f;
 	}
-	else if (6 == vertex_usage)
+	else if (VEU_TextureCoord == vertex_usage)
 	{
 		oClr = float4(tex, 0, 1);
 	}
-	else if (7 == vertex_usage)
+	else if (VEU_Tangent == vertex_usage)
 	{
 		oClr = float4(tangent / 2 + 0.5f, 1);
 	}
-	else// if (8 == vertex_usage)
+	else// if (VEU_Binormal == vertex_usage)
 	{
 		oClr = float4(binormal / 2 + 0.5f, 1);
 	}
@@ -149,56 +97,77 @@ float4 VisualizeVertex(float3 pos, float3 tangent, float3 binormal, float3 norma
 	return oClr;
 }
 
-
-void MeshVS(float4 pos : POSITION,
-			float2 texcoord : TEXCOORD0,
-			float4 tangent_quat : TANGENT,
-#if SKINNING_ON
-			float4 blend_weights : BLENDWEIGHT,
-#if KLAYGE_OPENGL || KLAYGE_OPENGLES
-			float4 blend_indices_f : BLENDINDICES,
-#else
-			uint4 blend_indices : BLENDINDICES,
-#endif
-#endif
-			out float4 oTexCoord_2xy : TEXCOORD0,
-			out float4 oTsToView0_2z : TEXCOORD1,
-			out float4 oTsToView1_Depth : TEXCOORD2,
-#ifdef NOPERSPECTIVE_SUPPORT
-			out noperspective float2 oScreenTc : TEXCOORD3,
-#else
-			out float3 oScreenTc : TEXCOORD3,
-#endif
-			out float4 oPos : SV_Position)
+float4 VisualizeTexture(float2 tex0)
 {
-#if SKINNING_ON
-#if KLAYGE_OPENGL || KLAYGE_OPENGLES
-	int4 blend_indices = (int4)blend_indices_f;
-#endif
-#endif
+	float4 ret;
+	if (TS_Diffuse == texture_slot)
+	{
+		if (diffuse_clr.w > 0.5f)
+		{
+			ret = float4(diffuse_tex.Sample(aniso_sampler, tex0).rgb, 1);
+		}
+		else
+		{
+			ret = float4(diffuse_clr.rgb, 1);
+		}
+	}
+	else if (TS_Specular == texture_slot)
+	{
+		if (specular_clr.w > 0.5f)
+		{
+			ret = float4(specular_tex.Sample(aniso_sampler, tex0).rgb, 1);
+		}
+		else
+		{
+			ret = float4(specular_clr.rgb, 1);
+		}
+	}
+	else if (TS_Shininess == texture_slot)
+	{
+		if (shininess_clr.y > 0.5f)
+		{
+			ret = float4(shininess_tex.Sample(aniso_sampler, tex0).rrr, 1);
+		}
+		else
+		{
+			ret = float4(shininess_clr.rrr, 1);
+		}
+	}
+	else if (TS_Normal == texture_slot)
+	{
+		if (normal_map_enabled)
+		{
+			ret = float4(decompress_normal(normal_tex.Sample(aniso_sampler, tex0)).rgb, 1);
+		}
+		else
+		{
+			ret = float4(0, 0, 1, 1);
+		}
+	}
+	else if (TS_Emit == texture_slot)
+	{
+		if (emit_clr.w > 0.5f)
+		{
+			ret = float4(emit_tex.Sample(aniso_sampler, tex0).rgb * 16, 1);
+		}
+		else
+		{
+			ret = float4(emit_clr.rgb, 1);
+		}
+	}
+	else //if (TS_Opacity == texture_slot)
+	{
+		if (opacity_map_enabled)
+		{
+			ret = diffuse_tex.Sample(aniso_sampler, tex0).a;
+		}
+		else
+		{
+			ret = opacity_clr;
+		}
+	}
 
-	pos = float4(pos.xyz * pos_extent + pos_center, 1);
-	texcoord = texcoord * tc_extent + tc_center;
-	tangent_quat = tangent_quat * 2 - 1;
-	
-	float3 result_pos;
-	float4 result_tangent_quat;
-	CalcMesh(texcoord, pos,
-#if SKINNING_ON
-				blend_weights, blend_indices,
-#endif
-				tangent_quat,
-				oTexCoord_2xy.xy, result_pos,
-				result_tangent_quat);
-
-	float3x3 obj_to_ts;
-	obj_to_ts[0] = transform_quat(float3(1, 0, 0), result_tangent_quat);
-	obj_to_ts[1] = transform_quat(float3(0, 1, 0), result_tangent_quat) * sign(result_tangent_quat.w);
-	obj_to_ts[2] = transform_quat(float3(0, 0, 1), result_tangent_quat);
-
-	CalcPosLH(result_pos, obj_to_ts,
-				oPos, oTexCoord_2xy.zw, oTsToView0_2z, oTsToView1_Depth,
-				oScreenTc);
+	return ret;
 }
 
 void VisualizeVertexVS(float4 pos : POSITION,
@@ -231,11 +200,10 @@ void VisualizeVertexVS(float4 pos : POSITION,
 	float3 result_pos;
 	float4 result_tangent_quat;
 	float2 oTex;
-	CalcMesh(texcoord, pos,
+	CalcMesh(pos, texcoord, tangent_quat,
 #if SKINNING_ON
 				blend_weights, blend_indices,
 #endif
-				tangent_quat,
 				oTex, result_pos,
 				result_tangent_quat);
 				
@@ -272,242 +240,17 @@ float4 VisualizeTextureRT0PS() : SV_Target
 
 float4 VisualizeTextureRT1PS(float2 tex0 : TEXCOORD0) : SV_Target
 {
-	float4 ret;
-	if (0 == texture_slot)
-	{
-		if (diffuse_clr.w > 0.5f)
-		{
-			ret = float4(diffuse_tex.Sample(aniso_sampler, tex0).rgb, 1);
-		}
-		else
-		{
-			ret = float4(diffuse_clr.rgb, 1);
-		}
-	}
-	else if (1 == texture_slot)
-	{
-		if (specular_clr.w > 0.5f)
-		{
-			ret = float4(specular_tex.Sample(aniso_sampler, tex0).rgb, 1);
-		}
-		else
-		{
-			ret = float4(specular_clr.rgb, 1);
-		}
-	}
-	else if (2 == texture_slot)
-	{
-		if (shininess_clr.y > 0.5f)
-		{
-			ret = float4(shininess_tex.Sample(aniso_sampler, tex0).rrr, 1);
-		}
-		else
-		{
-			ret = float4(shininess_clr.rrr, 1);
-		}
-	}
-	else if (3 == texture_slot)
-	{
-		if (normal_map_enabled)
-		{
-			ret = float4(decompress_normal(normal_tex.Sample(aniso_sampler, tex0)).rgb, 1);
-		}
-		else
-		{
-			ret = float4(0, 0, 1, 1);
-		}
-	}
-	else if (4 == texture_slot)
-	{
-		if (emit_clr.w > 0.5f)
-		{
-			ret = float4(emit_tex.Sample(aniso_sampler, tex0).rgb * 16, 1);
-		}
-		else
-		{
-			ret = float4(emit_clr.rgb, 1);
-		}
-	}
-	else //if (5 == texture_slot)
-	{
-		if (opacity_map_enabled)
-		{
-			ret = diffuse_tex.Sample(aniso_sampler, tex0).a;
-		}
-		else
-		{
-			ret = opacity_clr;
-		}
-	}
-	
-	return ret;
+	return VisualizeTexture(tex0);
 }
 
 void VisualizeTextureMRTPS(float2 tex0 : TEXCOORD0,
 				out float4 mrt_0 : SV_Target0, out float4 mrt_1 : SV_Target1)
 {
 	mrt_0 = 0;
-	if (0 == texture_slot)
-	{
-		if (diffuse_clr.w > 0.5f)
-		{
-			mrt_1 = float4(diffuse_tex.Sample(aniso_sampler, tex0).rgb, 1);
-		}
-		else
-		{
-			mrt_1 = float4(diffuse_clr.rgb, 1);
-		}
-	}
-	else if (1 == texture_slot)
-	{
-		if (specular_clr.w > 0.5f)
-		{
-			mrt_1 = float4(specular_tex.Sample(aniso_sampler, tex0).rgb, 1);
-		}
-		else
-		{
-			mrt_1 = float4(specular_clr.rgb, 1);
-		}
-	}
-	else if (2 == texture_slot)
-	{
-		if (shininess_clr.y > 0.5f)
-		{
-			mrt_1 = float4(shininess_tex.Sample(aniso_sampler, tex0).rrr, 1);
-		}
-		else
-		{
-			mrt_1 = float4(shininess_clr.rrr, 1);
-		}
-	}
-	else if (3 == texture_slot)
-	{
-		if (normal_map_enabled)
-		{
-			mrt_1 = float4(decompress_normal(normal_tex.Sample(aniso_sampler, tex0)).rgb, 1);
-		}
-		else
-		{
-			mrt_1 = float4(0, 0, 1, 1);
-		}
-	}
-	else if (4 == texture_slot)
-	{
-		if (emit_clr.w > 0.5f)
-		{
-			mrt_1 = float4(emit_tex.Sample(aniso_sampler, tex0).rgb * 16, 1);
-		}
-		else
-		{
-			mrt_1 = float4(emit_clr.rgb, 1);
-		}
-	}
-	else //if (5 == texture_slot)
-	{
-		if (opacity_map_enabled)
-		{
-			mrt_1 = diffuse_tex.Sample(aniso_sampler, tex0).a;
-		}
-		else
-		{
-			mrt_1 = opacity_clr;
-		}
-	}
+	mrt_1 = VisualizeTexture(tex0);
 }
 		]]>
 	</shader>
-
-	<technique name="MeshDepthTech" inherit="DepthTech">
-		<pass name="p0">
-			<state name="vertex_shader" value="MeshVS()"/>
-		</pass>
-	</technique>
-
-	<technique name="MeshDepthAlphaTestTech" inherit="DepthAlphaTestTech">
-		<pass name="p0">
-			<state name="vertex_shader" value="MeshVS()"/>
-		</pass>
-	</technique>
-
-	<technique name="MeshDepthBlendBackTech" inherit="DepthAlphaBlendBackTech">
-		<pass name="p0">
-			<state name="vertex_shader" value="MeshVS()"/>
-		</pass>
-	</technique>
-	<technique name="MeshDepthBlendFrontTech" inherit="DepthAlphaBlendFrontTech">
-		<pass name="p0">
-			<state name="vertex_shader" value="MeshVS()"/>
-		</pass>
-	</technique>
-
-	<technique name="MeshGBufferRT0Tech" inherit="GBufferRT0Tech">
-		<pass name="p0">
-			<state name="vertex_shader" value="MeshVS()"/>
-		</pass>
-	</technique>
-
-	<technique name="MeshGBufferAlphaTestRT0Tech" inherit="GBufferAlphaTestRT0Tech">
-		<pass name="p0">
-			<state name="vertex_shader" value="MeshVS()"/>
-		</pass>
-	</technique>
-
-	<technique name="MeshGBufferBlendBackRT0Tech" inherit="GBufferAlphaBlendBackRT0Tech">
-		<pass name="p0">
-			<state name="vertex_shader" value="MeshVS()"/>
-		</pass>
-	</technique>
-	<technique name="MeshGBufferBlendFrontRT0Tech" inherit="GBufferAlphaBlendFrontRT0Tech">
-		<pass name="p0">
-			<state name="vertex_shader" value="MeshVS()"/>
-		</pass>
-	</technique>
-
-	<technique name="MeshGBufferRT1Tech" inherit="GBufferRT1Tech">
-		<pass name="p0">
-			<state name="vertex_shader" value="MeshVS()"/>
-		</pass>
-	</technique>
-
-	<technique name="MeshGBufferAlphaTestRT1Tech" inherit="GBufferAlphaTestRT1Tech">
-		<pass name="p0">
-			<state name="vertex_shader" value="MeshVS()"/>
-		</pass>
-	</technique>
-
-	<technique name="MeshGBufferBlendBackRT1Tech" inherit="GBufferAlphaBlendBackRT1Tech">
-		<pass name="p0">
-			<state name="vertex_shader" value="MeshVS()"/>
-		</pass>
-	</technique>
-	<technique name="MeshGBufferBlendFrontRT1Tech" inherit="GBufferAlphaBlendFrontRT1Tech">
-		<pass name="p0">
-			<state name="vertex_shader" value="MeshVS()"/>
-		</pass>
-	</technique>
-
-	<technique name="MeshGBufferMRTTech" inherit="GBufferMRTTech">
-		<pass name="p0">
-			<state name="vertex_shader" value="MeshVS()"/>
-		</pass>
-	</technique>
-
-	<technique name="MeshGBufferAlphaTestMRTTech" inherit="GBufferAlphaTestMRTTech">
-		<pass name="p0">
-			<state name="vertex_shader" value="MeshVS()"/>
-		</pass>
-	</technique>
-
-	<technique name="MeshGBufferBlendBackMRTTech" inherit="GBufferAlphaBlendBackMRTTech">
-		<pass name="p0">			
-			<state name="vertex_shader" value="MeshVS()"/>
-		</pass>
-	</technique>
-	<technique name="MeshGBufferBlendFrontMRTTech" inherit="GBufferAlphaBlendFrontMRTTech">
-		<pass name="p0">
-			<state name="vertex_shader" value="MeshVS()"/>
-		</pass>
-	</technique>
 
 	<technique name="VisualizeVertexRT0Tech">
 		<pass name="p0">
@@ -576,7 +319,7 @@ void VisualizeTextureMRTPS(float2 tex0 : TEXCOORD0,
 			<state name="back_stencil_ref" value="128"/>
 			<state name="back_stencil_pass" value="replace"/>
 
-			<state name="vertex_shader" value="MeshVS()"/>
+			<state name="vertex_shader" value="GBufferVS()"/>
 			<state name="pixel_shader" value="VisualizeTextureRT0PS()"/>
 		</pass>
 	</technique>
@@ -594,7 +337,7 @@ void VisualizeTextureMRTPS(float2 tex0 : TEXCOORD0,
 			<state name="back_stencil_ref" value="128"/>
 			<state name="back_stencil_pass" value="replace"/>
 
-			<state name="vertex_shader" value="MeshVS()"/>
+			<state name="vertex_shader" value="GBufferVS()"/>
 			<state name="pixel_shader" value="VisualizeTextureRT1PS()"/>
 		</pass>
 	</technique>
@@ -612,25 +355,8 @@ void VisualizeTextureMRTPS(float2 tex0 : TEXCOORD0,
 			<state name="back_stencil_ref" value="128"/>
 			<state name="back_stencil_pass" value="replace"/>
 
-			<state name="vertex_shader" value="MeshVS()"/>
+			<state name="vertex_shader" value="GBufferVS()"/>
 			<state name="pixel_shader" value="VisualizeTextureMRTPS()"/>
-		</pass>
-	</technique>
-
-
-	<technique name="MeshSpecialShadingTech" inherit="SpecialShadingTech">
-		<pass name="p0">
-			<state name="vertex_shader" value="MeshVS()"/>
-		</pass>
-	</technique>
-	<technique name="MeshSpecialShadingBlendBackTech" inherit="SpecialShadingAlphaBlendBackTech">
-		<pass name="p0">
-			<state name="vertex_shader" value="MeshVS()"/>
-		</pass>
-	</technique>
-	<technique name="MeshSpecialShadingBlendFrontTech" inherit="SpecialShadingAlphaBlendFrontTech">
-		<pass name="p0">
-			<state name="vertex_shader" value="MeshVS()"/>
 		</pass>
 	</technique>
 
@@ -719,11 +445,10 @@ CONTROL_POINT SmoothVS(float4 pos : POSITION,
 	texcoord = texcoord * tc_extent + tc_center;
 	tangent_quat = tangent_quat * 2 - 1;
 
-	CalcMesh(texcoord, pos,
+	CalcMesh(pos, texcoord, tangent_quat,
 #if SKINNING_ON
 				blend_weights, blend_indices,
 #endif
-				tangent_quat,
 				output.Texcoord0, output.Pos,
 				output.TangentQuat);
 
@@ -868,7 +593,7 @@ void SmoothDS(HS_CONSTANT_DATA_OUTPUT HSConstantData,
 		]]>
 	</shader>
 
-	<technique name="MeshDepthSmooth5Tech" inherit="MeshDepthTech">
+	<technique name="DepthSmooth5Tech" inherit="DepthTech">
 		<pass name="p0">
 			<state name="cull_mode" value="none"/>
 
@@ -878,7 +603,7 @@ void SmoothDS(HS_CONSTANT_DATA_OUTPUT HSConstantData,
 		</pass>
 	</technique>
 
-	<technique name="MeshDepthAlphaTestSmooth5Tech" inherit="MeshDepthAlphaTestTech">
+	<technique name="DepthAlphaTestSmooth5Tech" inherit="DepthAlphaTestTech">
 		<pass name="p0">
 			<state name="cull_mode" value="none"/>
 
@@ -888,14 +613,14 @@ void SmoothDS(HS_CONSTANT_DATA_OUTPUT HSConstantData,
 		</pass>
 	</technique>
 
-	<technique name="MeshDepthBlendBackSmooth5Tech" inherit="MeshDepthBlendBackTech">
+	<technique name="DepthAlphaBlendBackSmooth5Tech" inherit="DepthAlphaBlendBackTech">
 		<pass name="p0">
 			<state name="vertex_shader" value="SmoothVS()"/>
 			<state name="hull_shader" value="SmoothHS()"/>
 			<state name="domain_shader" value="SmoothDS()"/>
 		</pass>
 	</technique>
-	<technique name="MeshDepthBlendFrontSmooth5Tech" inherit="MeshDepthBlendFrontTech">
+	<technique name="DepthAlphaBlendFrontSmooth5Tech" inherit="DepthAlphaBlendFrontTech">
 		<pass name="p0">
 			<state name="vertex_shader" value="SmoothVS()"/>
 			<state name="hull_shader" value="SmoothHS()"/>
@@ -903,17 +628,7 @@ void SmoothDS(HS_CONSTANT_DATA_OUTPUT HSConstantData,
 		</pass>
 	</technique>
 
-	<technique name="MeshGBufferSmooth5RT0Tech" inherit="MeshGBufferRT0Tech">
-		<pass name="p0">
-			<state name="cull_mode" value="none"/>
-
-			<state name="vertex_shader" value="SmoothVS()"/>
-			<state name="hull_shader" value="SmoothHS()"/>
-			<state name="domain_shader" value="SmoothDS()"/>
-		</pass>
-	</technique>
-
-	<technique name="MeshGBufferAlphaTestSmooth5RT0Tech" inherit="MeshGBufferAlphaTestRT0Tech">
+	<technique name="GBufferSmooth5RT0Tech" inherit="GBufferRT0Tech">
 		<pass name="p0">
 			<state name="cull_mode" value="none"/>
 
@@ -923,22 +638,7 @@ void SmoothDS(HS_CONSTANT_DATA_OUTPUT HSConstantData,
 		</pass>
 	</technique>
 
-	<technique name="MeshGBufferBlendBackSmooth5RT0Tech" inherit="MeshGBufferBlendBackRT0Tech">
-		<pass name="p0">
-			<state name="vertex_shader" value="SmoothVS()"/>
-			<state name="hull_shader" value="SmoothHS()"/>
-			<state name="domain_shader" value="SmoothDS()"/>
-		</pass>
-	</technique>
-	<technique name="MeshGBufferBlendFrontSmooth5RT0Tech" inherit="MeshGBufferBlendFrontRT0Tech">
-		<pass name="p0">
-			<state name="vertex_shader" value="SmoothVS()"/>
-			<state name="hull_shader" value="SmoothHS()"/>
-			<state name="domain_shader" value="SmoothDS()"/>
-		</pass>
-	</technique>
-
-	<technique name="MeshGBufferSmooth5RT1Tech" inherit="MeshGBufferRT1Tech">
+	<technique name="GBufferAlphaTestSmooth5RT0Tech" inherit="GBufferAlphaTestRT0Tech">
 		<pass name="p0">
 			<state name="cull_mode" value="none"/>
 
@@ -948,7 +648,22 @@ void SmoothDS(HS_CONSTANT_DATA_OUTPUT HSConstantData,
 		</pass>
 	</technique>
 
-	<technique name="MeshGBufferAlphaTestSmooth5RT1Tech" inherit="MeshGBufferAlphaTestRT1Tech">
+	<technique name="GBufferAlphaBlendBackSmooth5RT0Tech" inherit="GBufferAlphaBlendBackRT0Tech">
+		<pass name="p0">
+			<state name="vertex_shader" value="SmoothVS()"/>
+			<state name="hull_shader" value="SmoothHS()"/>
+			<state name="domain_shader" value="SmoothDS()"/>
+		</pass>
+	</technique>
+	<technique name="GBufferAlphaBlendFrontSmooth5RT0Tech" inherit="GBufferAlphaBlendFrontRT0Tech">
+		<pass name="p0">
+			<state name="vertex_shader" value="SmoothVS()"/>
+			<state name="hull_shader" value="SmoothHS()"/>
+			<state name="domain_shader" value="SmoothDS()"/>
+		</pass>
+	</technique>
+
+	<technique name="GBufferSmooth5RT1Tech" inherit="GBufferRT1Tech">
 		<pass name="p0">
 			<state name="cull_mode" value="none"/>
 
@@ -958,22 +673,7 @@ void SmoothDS(HS_CONSTANT_DATA_OUTPUT HSConstantData,
 		</pass>
 	</technique>
 
-	<technique name="MeshGBufferBlendBackSmooth5RT1Tech" inherit="MeshGBufferBlendBackRT1Tech">
-		<pass name="p0">
-			<state name="vertex_shader" value="SmoothVS()"/>
-			<state name="hull_shader" value="SmoothHS()"/>
-			<state name="domain_shader" value="SmoothDS()"/>
-		</pass>
-	</technique>
-	<technique name="MeshGBufferBlendFrontSmooth5RT1Tech" inherit="MeshGBufferBlendFrontRT1Tech">
-		<pass name="p0">
-			<state name="vertex_shader" value="SmoothVS()"/>
-			<state name="hull_shader" value="SmoothHS()"/>
-			<state name="domain_shader" value="SmoothDS()"/>
-		</pass>
-	</technique>
-
-	<technique name="MeshGBufferSmooth5MRTTech" inherit="MeshGBufferMRTTech">
+	<technique name="GBufferAlphaTestSmooth5RT1Tech" inherit="GBufferAlphaTestRT1Tech">
 		<pass name="p0">
 			<state name="cull_mode" value="none"/>
 
@@ -983,7 +683,22 @@ void SmoothDS(HS_CONSTANT_DATA_OUTPUT HSConstantData,
 		</pass>
 	</technique>
 
-	<technique name="MeshGBufferAlphaTestSmooth5MRTTech" inherit="MeshGBufferAlphaTestMRTTech">
+	<technique name="GBufferAlphaBlendBackSmooth5RT1Tech" inherit="GBufferAlphaBlendBackRT1Tech">
+		<pass name="p0">
+			<state name="vertex_shader" value="SmoothVS()"/>
+			<state name="hull_shader" value="SmoothHS()"/>
+			<state name="domain_shader" value="SmoothDS()"/>
+		</pass>
+	</technique>
+	<technique name="GBufferAlphaBlendFrontSmooth5RT1Tech" inherit="GBufferAlphaBlendFrontRT1Tech">
+		<pass name="p0">
+			<state name="vertex_shader" value="SmoothVS()"/>
+			<state name="hull_shader" value="SmoothHS()"/>
+			<state name="domain_shader" value="SmoothDS()"/>
+		</pass>
+	</technique>
+
+	<technique name="GBufferSmooth5MRTTech" inherit="GBufferMRTTech">
 		<pass name="p0">
 			<state name="cull_mode" value="none"/>
 
@@ -993,14 +708,24 @@ void SmoothDS(HS_CONSTANT_DATA_OUTPUT HSConstantData,
 		</pass>
 	</technique>
 
-	<technique name="MeshGBufferBlendBackSmooth5MRTTech" inherit="MeshGBufferBlendBackMRTTech">
+	<technique name="GBufferAlphaTestSmooth5MRTTech" inherit="GBufferAlphaTestMRTTech">
+		<pass name="p0">
+			<state name="cull_mode" value="none"/>
+
+			<state name="vertex_shader" value="SmoothVS()"/>
+			<state name="hull_shader" value="SmoothHS()"/>
+			<state name="domain_shader" value="SmoothDS()"/>
+		</pass>
+	</technique>
+
+	<technique name="GBufferAlphaBlendBackSmooth5MRTTech" inherit="GBufferAlphaBlendBackMRTTech">
 		<pass name="p0">
 			<state name="vertex_shader" value="SmoothVS()"/>
 			<state name="hull_shader" value="SmoothHS()"/>
 			<state name="domain_shader" value="SmoothDS()"/>
 		</pass>
 	</technique>
-	<technique name="MeshGBufferBlendFrontSmooth5MRTTech" inherit="MeshGBufferBlendFrontMRTTech">
+	<technique name="GBufferAlphaBlendFrontSmooth5MRTTech" inherit="GBufferAlphaBlendFrontMRTTech">
 		<pass name="p0">
 			<state name="vertex_shader" value="SmoothVS()"/>
 			<state name="hull_shader" value="SmoothHS()"/>
@@ -1054,7 +779,7 @@ void SmoothDS(HS_CONSTANT_DATA_OUTPUT HSConstantData,
 	</technique>
 	
 
-	<technique name="MeshSpecialShadingSmooth5Tech" inherit="MeshSpecialShadingTech">
+	<technique name="SpecialShadingSmooth5Tech" inherit="SpecialShadingTech">
 		<pass name="p0">
 			<state name="cull_mode" value="none"/>
 
@@ -1063,14 +788,14 @@ void SmoothDS(HS_CONSTANT_DATA_OUTPUT HSConstantData,
 			<state name="domain_shader" value="SmoothDS()"/>
 		</pass>
 	</technique>
-	<technique name="MeshSpecialShadingBlendBackSmooth5Tech" inherit="MeshSpecialShadingBlendBackTech">
+	<technique name="SpecialShadingAlphaBlendBackSmooth5Tech" inherit="SpecialShadingAlphaBlendBackTech">
 		<pass name="p0">
 			<state name="vertex_shader" value="SmoothVS()"/>
 			<state name="hull_shader" value="SmoothHS()"/>
 			<state name="domain_shader" value="SmoothDS()"/>
 		</pass>
 	</technique>
-	<technique name="MeshSpecialShadingBlendFrontSmooth5Tech" inherit="MeshSpecialShadingBlendFrontTech">
+	<technique name="SpecialShadingAlphaBlendFrontSmooth5Tech" inherit="SpecialShadingAlphaBlendFrontTech">
 		<pass name="p0">
 			<state name="vertex_shader" value="SmoothVS()"/>
 			<state name="hull_shader" value="SmoothHS()"/>
@@ -1087,7 +812,7 @@ void SmoothDS(HS_CONSTANT_DATA_OUTPUT HSConstantData,
 	<shader type="vertex_shader" version="4">
 		<![CDATA[
 void StreamOutVS(float4 pos : POSITION,
-					float2 texcoord0 : TEXCOORD0,
+					float2 texcoord : TEXCOORD0,
 					float4 tangent_quat : Tangent,
 #if SKINNING_ON
 					float4 blend_weights : BLENDWEIGHT,
@@ -1102,16 +827,15 @@ void StreamOutVS(float4 pos : POSITION,
 					out float4 oTangentQuat : TANGENT)
 {
 	pos = float4(pos.xyz * pos_extent + pos_center, 1);
-	texcoord0 = texcoord0 * tc_extent + tc_center;
+	texcoord = texcoord * tc_extent + tc_center;
 	tangent_quat = tangent_quat * 2 - 1;
 	
 	float3 result_pos;
 	float4 result_tangent_quat;
-	CalcMesh(texcoord0, pos,
+	CalcMesh(pos, texcoord, tangent_quat,
 #if SKINNING_ON
 				blend_weights, blend_indices,
 #endif
-				tangent_quat,
 				oTex0, result_pos,
 				result_tangent_quat);
 				
@@ -1206,7 +930,7 @@ void InstTessSmoothVisualizeVertexVS(float2 barycentric : TEXCOORD1,
 	</technique>
 
 
-	<technique name="MeshGBufferSmooth4RT0Tech" inherit="MeshGBufferRT0Tech">
+	<technique name="GBufferSmooth4RT0Tech" inherit="GBufferRT0Tech">
 		<pass name="p0">
 			<state name="cull_mode" value="none"/>
 
@@ -1214,7 +938,7 @@ void InstTessSmoothVisualizeVertexVS(float2 barycentric : TEXCOORD1,
 		</pass>
 	</technique>
 
-	<technique name="MeshGBufferAlphaTestSmooth4RT0Tech" inherit="MeshGBufferAlphaTestRT0Tech">
+	<technique name="GBufferAlphaTestSmooth4RT0Tech" inherit="GBufferAlphaTestRT0Tech">
 		<pass name="p0">
 			<state name="cull_mode" value="none"/>
 
@@ -1222,26 +946,18 @@ void InstTessSmoothVisualizeVertexVS(float2 barycentric : TEXCOORD1,
 		</pass>
 	</technique>
 
-	<technique name="MeshGBufferBlendBackSmooth4RT0Tech" inherit="MeshGBufferBlendBackRT0Tech">
+	<technique name="GBufferAlphaBlendBackSmooth4RT0Tech" inherit="GBufferAlphaBlendBackRT0Tech">
 		<pass name="p0">
 			<state name="vertex_shader" value="InstTessSmoothVS()"/>
 		</pass>
 	</technique>
-	<technique name="MeshGBufferBlendFrontSmooth4RT0Tech" inherit="MeshGBufferBlendFrontRT0Tech">
+	<technique name="GBufferAlphaBlendFrontSmooth4RT0Tech" inherit="GBufferAlphaBlendFrontRT0Tech">
 		<pass name="p0">
 			<state name="vertex_shader" value="InstTessSmoothVS()"/>
 		</pass>
 	</technique>
 
-	<technique name="MeshGBufferSmooth4RT1Tech" inherit="MeshGBufferRT1Tech">
-		<pass name="p0">
-			<state name="cull_mode" value="none"/>
-
-			<state name="vertex_shader" value="InstTessSmoothVS()"/>
-		</pass>
-	</technique>
-
-	<technique name="MeshGBufferAlphaTestSmooth4RT1Tech" inherit="MeshGBufferAlphaTestRT1Tech">
+	<technique name="GBufferSmooth4RT1Tech" inherit="GBufferRT1Tech">
 		<pass name="p0">
 			<state name="cull_mode" value="none"/>
 
@@ -1249,18 +965,7 @@ void InstTessSmoothVisualizeVertexVS(float2 barycentric : TEXCOORD1,
 		</pass>
 	</technique>
 
-	<technique name="MeshGBufferBlendBackSmooth4RT1Tech" inherit="MeshGBufferBlendBackRT1Tech">
-		<pass name="p0">
-			<state name="vertex_shader" value="InstTessSmoothVS()"/>
-		</pass>
-	</technique>
-	<technique name="MeshGBufferBlendFrontSmooth4RT1Tech" inherit="MeshGBufferBlendFrontRT1Tech">
-		<pass name="p0">
-			<state name="vertex_shader" value="InstTessSmoothVS()"/>
-		</pass>
-	</technique>
-
-	<technique name="MeshGBufferSmooth4MRTTech" inherit="MeshGBufferMRTTech">
+	<technique name="GBufferAlphaTestSmooth4RT1Tech" inherit="GBufferAlphaTestRT1Tech">
 		<pass name="p0">
 			<state name="cull_mode" value="none"/>
 
@@ -1268,7 +973,18 @@ void InstTessSmoothVisualizeVertexVS(float2 barycentric : TEXCOORD1,
 		</pass>
 	</technique>
 
-	<technique name="MeshGBufferAlphaTestSmooth4MRTTech" inherit="MeshGBufferAlphaTestMRTTech">
+	<technique name="GBufferAlphaBlendBackSmooth4RT1Tech" inherit="GBufferAlphaBlendBackRT1Tech">
+		<pass name="p0">
+			<state name="vertex_shader" value="InstTessSmoothVS()"/>
+		</pass>
+	</technique>
+	<technique name="GBufferAlphaBlendFrontSmooth4RT1Tech" inherit="GBufferAlphaBlendFrontRT1Tech">
+		<pass name="p0">
+			<state name="vertex_shader" value="InstTessSmoothVS()"/>
+		</pass>
+	</technique>
+
+	<technique name="GBufferSmooth4MRTTech" inherit="GBufferMRTTech">
 		<pass name="p0">
 			<state name="cull_mode" value="none"/>
 
@@ -1276,12 +992,20 @@ void InstTessSmoothVisualizeVertexVS(float2 barycentric : TEXCOORD1,
 		</pass>
 	</technique>
 
-	<technique name="MeshGBufferBlendBackSmooth4MRTTech" inherit="MeshGBufferBlendBackMRTTech">
+	<technique name="GBufferAlphaTestSmooth4MRTTech" inherit="GBufferAlphaTestMRTTech">
+		<pass name="p0">
+			<state name="cull_mode" value="none"/>
+
+			<state name="vertex_shader" value="InstTessSmoothVS()"/>
+		</pass>
+	</technique>
+
+	<technique name="GBufferAlphaBlendBackSmooth4MRTTech" inherit="GBufferAlphaBlendBackMRTTech">
 		<pass name="p0">
 			<state name="vertex_shader" value="InstTessSmoothVS()"/>
 		</pass>
 	</technique>
-	<technique name="MeshGBufferBlendFrontSmooth4MRTTech" inherit="MeshGBufferBlendFrontMRTTech">
+	<technique name="GBufferAlphaBlendFrontSmooth4MRTTech" inherit="GBufferAlphaBlendFrontMRTTech">
 		<pass name="p0">
 			<state name="vertex_shader" value="InstTessSmoothVS()"/>
 		</pass>
@@ -1324,19 +1048,19 @@ void InstTessSmoothVisualizeVertexVS(float2 barycentric : TEXCOORD1,
 	</technique>
 
 
-	<technique name="MeshSpecialShadingSmooth4Tech" inherit="MeshSpecialShadingTech">
+	<technique name="SpecialShadingSmooth4Tech" inherit="SpecialShadingTech">
 		<pass name="p0">
 			<state name="cull_mode" value="none"/>
 
 			<state name="vertex_shader" value="InstTessSmoothVS()"/>
 		</pass>
 	</technique>
-	<technique name="MeshSpecialShadingBlendBackSmooth4Tech" inherit="MeshSpecialShadingBlendBackTech">
+	<technique name="SpecialShadingAlphaBlendBackSmooth4Tech" inherit="SpecialShadingAlphaBlendBackTech">
 		<pass name="p0">
 			<state name="vertex_shader" value="InstTessSmoothVS()"/>
 		</pass>
 	</technique>
-	<technique name="MeshSpecialShadingBlendFrontSmooth4Tech" inherit="MeshSpecialShadingBlendFrontTech">
+	<technique name="SpecialShadingAlphaBlendFrontSmooth4Tech" inherit="SpecialShadingAlphaBlendFrontTech">
 		<pass name="p0">
 			<state name="vertex_shader" value="InstTessSmoothVS()"/>
 		</pass>

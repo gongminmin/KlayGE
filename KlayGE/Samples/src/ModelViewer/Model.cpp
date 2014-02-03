@@ -137,7 +137,7 @@ void DetailedSkinnedMesh::BuildMeshInfo()
 		skinned_tangent_vb_->Resize(this->NumVertices() * sizeof(float4));
 		skinned_rl_->BindVertexStream(skinned_pos_vb_, KlayGE::make_tuple(vertex_element(VEU_Position, 0, EF_ABGR32F)));
 		skinned_rl_->BindVertexStream(skinned_tex_vb_, KlayGE::make_tuple(vertex_element(VEU_TextureCoord, 0, EF_GR32F)));
-		skinned_rl_->BindVertexStream(skinned_tangent_vb_, KlayGE::make_tuple(vertex_element(VEU_Tangent, 2, EF_ABGR32F)));
+		skinned_rl_->BindVertexStream(skinned_tangent_vb_, KlayGE::make_tuple(vertex_element(VEU_Tangent, 0, EF_ABGR32F)));
 		skinned_rl_->BindIndexStream(rl_->GetIndexStream(), rl_->IndexStreamFormat());
 
 		for (uint32_t i = 0; i < rl_->NumVertexStreams(); ++ i)
@@ -629,7 +629,7 @@ void DetailedSkinnedModel::BuildModelInfo()
 	if (has_skinned)
 	{
 		effect_ = SyncLoadRenderEffect("ModelViewerSkinning128.fxml");
-		if (!effect_->TechniqueByName("MeshGBufferRT0Tech")->Validate())
+		if (!effect_->TechniqueByName("GBufferRT0Tech")->Validate())
 		{
 			effect_ = SyncLoadRenderEffect("ModelViewerSkinning64.fxml");
 		}
@@ -661,9 +661,9 @@ void DetailedSkinnedModel::BuildModelInfo()
 			switch (vis)
 			{
 			case 0:
-				depth_tech_str = "MeshDepth";
-				g_buffer_tech_str = "MeshGBuffer";
-				special_shading_tech_str = "MeshSpecialShading";
+				depth_tech_str = "Depth";
+				g_buffer_tech_str = "GBuffer";
+				special_shading_tech_str = "SpecialShading";
 				break;
 
 			case 1:
@@ -690,19 +690,19 @@ void DetailedSkinnedModel::BuildModelInfo()
 			if (0 == vis)
 			{
 				depth_alpha_test_tech_str += "AlphaTest";
-				depth_alpha_blend_back_tech_str += "BlendBack";
-				depth_alpha_blend_front_tech_str += "BlendFront";
+				depth_alpha_blend_back_tech_str += "AlphaBlendBack";
+				depth_alpha_blend_front_tech_str += "AlphaBlendFront";
 
 				g_buffer_alpha_test_tech_str += "AlphaTest";
-				g_buffer_alpha_blend_back_tech_str += "BlendBack";
-				g_buffer_alpha_blend_front_tech_str += "BlendFront";
+				g_buffer_alpha_blend_back_tech_str += "AlphaBlendBack";
+				g_buffer_alpha_blend_front_tech_str += "AlphaBlendFront";
 
 				g_buffer_alpha_test_mrt_tech_str += "AlphaTest";
-				g_buffer_alpha_blend_back_mrt_tech_str += "BlendBack";
-				g_buffer_alpha_blend_front_mrt_tech_str += "BlendFront";
+				g_buffer_alpha_blend_back_mrt_tech_str += "AlphaBlendBack";
+				g_buffer_alpha_blend_front_mrt_tech_str += "AlphaBlendFront";
 
-				special_shading_alpha_blend_back_tech_str += "BlendBack";
-				special_shading_alpha_blend_front_tech_str += "BlendFront";
+				special_shading_alpha_blend_back_tech_str += "AlphaBlendBack";
+				special_shading_alpha_blend_front_tech_str += "AlphaBlendFront";
 			}
 
 			if (1 == smooth)

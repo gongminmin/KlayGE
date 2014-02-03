@@ -35,7 +35,7 @@ namespace KlayGE
 	enum VertexElementUsage
 	{
 		// vertex positions
-		VEU_Position,
+		VEU_Position = 0,
 		// vertex normals included (for lighting)
 		VEU_Normal,
 		// Vertex colors - diffuse

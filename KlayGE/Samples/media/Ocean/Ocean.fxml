@@ -1,12 +1,9 @@
 <?xml version='1.0'?>
 
 <effect>
-	<include name="DeferredRenderingUtil.fxml"/>
-	<include name="util.fxml"/>
 	<include name="Lighting.fxml"/>
 	<include name="Noise.fxml"/>
-	<include name="Quaternion.fxml"/>
-	<include name="GBuffer.fxml"/>
+	<include name="GBufferNoSkinning.fxml"/>
 	<include name="SkyBox.fxml"/>
 	<include name="InfTerrain.fxml"/>
 	<include name="PostProcess.fxml"/>

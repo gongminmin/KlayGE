@@ -390,7 +390,12 @@ namespace KlayGE
 		light_volume_rl_[LightSource::LT_Spot] = rl_cone_;
 		light_volume_rl_[LightSource::LT_Sun] = rl_quad_;
 
-		g_buffer_effect_ = SyncLoadRenderEffect("GBuffer.fxml");
+		g_buffer_effect_ = SyncLoadRenderEffect("GBufferNoSkinning.fxml");
+		g_buffer_skinning_effect_ = SyncLoadRenderEffect("GBufferSkinning128.fxml");
+		if (!g_buffer_skinning_effect_->TechniqueByName("GBufferRT0Tech")->Validate())
+		{
+			g_buffer_skinning_effect_ = SyncLoadRenderEffect("GBufferSkinning64.fxml");
+		}
 #if DEFAULT_DEFERRED == TRIDITIONAL_DEFERRED
 		dr_effect_ = SyncLoadRenderEffect("DeferredRendering.fxml");
 #elif DEFAULT_DEFERRED == LIGHT_INDEXED_DEFERRED

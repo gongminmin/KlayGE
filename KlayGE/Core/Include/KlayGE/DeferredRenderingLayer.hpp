@@ -147,6 +147,10 @@ namespace KlayGE
 		{
 			return g_buffer_effect_;
 		}
+		RenderEffectPtr const & GBufferSkinningEffect() const
+		{
+			return g_buffer_skinning_effect_;
+		}
 
 #if DEFAULT_DEFERRED == TRIDITIONAL_DEFERRED
 		TexturePtr const & LightingTex(uint32_t vp) const
@@ -285,6 +289,7 @@ namespace KlayGE
 		bool tex_array_support_;
 
 		RenderEffectPtr g_buffer_effect_;
+		RenderEffectPtr g_buffer_skinning_effect_;
 		RenderEffectPtr dr_effect_;
 #if DEFAULT_DEFERRED == LIGHT_INDEXED_DEFERRED
 		uint32_t light_batch_;

@@ -2,10 +2,7 @@
 
 <effect>
 	<include name="Lighting.fxml"/>
-	<include name="util.fxml" />
-	<include name="DeferredRenderingUtil.fxml" />
-	<include name="Quaternion.fxml"/>
-	<include name="GBuffer.fxml"/>
+	<include name="GBufferNoSkinning.fxml"/>
 	<include name="PostProcess.fxml"/>
 	<include name="SSR.fxml"/>
 

@@ -1,10 +1,7 @@
 <?xml version='1.0'?>
 
 <effect>
-	<include name="DeferredRenderingUtil.fxml"/>
-	<include name="util.fxml"/>
-	<include name="Quaternion.fxml"/>
-	<include name="GBuffer.fxml"/>
+	<include name="GBufferNoSkinning.fxml"/>
 	
 	<parameter type="float" name="stretch"/>
 	<parameter type="float" name="base_level"/>
