@@ -554,7 +554,7 @@ namespace KlayGE
 			effect_attrs_ |= EA_TransparencyBack;
 			effect_attrs_ |= EA_TransparencyFront;
 		}
-		if ((mtl_->emit.x() > 0) || (mtl_->emit.y() > 0) || (mtl_->emit.z() > 0) || emit_tex_
+		if ((mtl_->emit.x() > 0) || (mtl_->emit.y() > 0) || (mtl_->emit.z() > 0) || emit_tl_
 			|| (effect_attrs_ & EA_TransparencyBack) || (effect_attrs_ & EA_TransparencyFront)
 			|| (effect_attrs_ & EA_Reflection))
 		{

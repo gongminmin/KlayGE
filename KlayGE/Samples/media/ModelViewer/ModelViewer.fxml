@@ -1,21 +1,12 @@
 <?xml version='1.0'?>
 
 <effect>
-	<include name="DeferredRenderingUtil.fxml"/>
-	<include name="util.fxml"/>
-	<include name="Quaternion.fxml"/>
 	<include name="GBuffer.fxml"/>
 
 	<cbuffer name="skinning">
 		<parameter type="float4" name="joint_reals" array_size="NUM_JOINTS"/>
 		<parameter type="float4" name="joint_duals" array_size="NUM_JOINTS"/>
 	</cbuffer>
-
-	<parameter type="sampler" name="linear_sampler">
-		<state name="filtering" value="min_mag_mip_linear"/>
-		<state name="address_u" value="wrap"/>
-		<state name="address_v" value="wrap"/>
-	</parameter>
 
 	<cbuffer name="less_freq">
 		<parameter type="int" name="vertex_usage"/>
@@ -68,31 +59,25 @@ void Skinned(float3 pos,
 
 void CalcMesh(float2 tex0,
 				float4 pos,
-				float4 tangent_quat,
-
-				out float2 oTex,
-				out float3 oPos,
-				out float4 oTangentQuat)
-{
-	oPos = pos.xyz;
-	oTex = tex0;
-	oTangentQuat = normalize(tangent_quat);
-}
-
-void CalcSkinnedMesh(float2 tex0,
-				float4 pos,
+#if SKINNING_ON
 				float4 blend_weights,
 				int4 blend_indices,
+#endif
 				float4 tangent_quat,
 
 				out float2 oTex,
 				out float3 oPos,
 				out float4 oTangentQuat)
 {
+#if SKINNING_ON
 	Skinned(pos.xyz, tangent_quat, blend_weights, blend_indices, oPos, oTangentQuat);
-	
-	oTangentQuat = normalize(oTangentQuat);
+#else
+	oPos = pos.xyz;
+	oTangentQuat = tangent_quat;
+#endif
+
 	oTex = tex0;
+	oTangentQuat = normalize(oTangentQuat);
 }
 
 void CalcPosLH(float3 pos,
@@ -165,55 +150,6 @@ float4 VisualizeVertex(float3 pos, float3 tangent, float3 binormal, float3 norma
 }
 
 
-
-void MeshDepthVS(float4 pos : POSITION,
-			float2 texcoord : TEXCOORD0,
-			float4 tangent_quat : TANGENT,
-#if SKINNING_ON
-			float4 blend_weights : BLENDWEIGHT,
-#if KLAYGE_OPENGL || KLAYGE_OPENGLES
-			float4 blend_indices_f : BLENDINDICES,
-#else
-			uint4 blend_indices : BLENDINDICES,
-#endif
-#endif
-			out float3 oTexCoordDepth : TEXCOORD0,
-#ifdef NOPERSPECTIVE_SUPPORT
-			out noperspective float2 oScreenTc : TEXCOORD1,
-#else
-			out float3 oScreenTc : TEXCOORD1,
-#endif
-			out float4 oPos : SV_Position)
-{
-#if SKINNING_ON
-#if KLAYGE_OPENGL || KLAYGE_OPENGLES
-	int4 blend_indices = (int4)blend_indices_f;
-#endif
-#endif
-
-	pos = float4(pos.xyz * pos_extent + pos_center, 1);
-	texcoord = texcoord * tc_extent + tc_center;
-	tangent_quat = tangent_quat * 2 - 1;
-
-#if SKINNING_ON
-	float4 result_tangent_quat;
-	Skinned(pos.xyz, tangent_quat, blend_weights, blend_indices, pos.xyz, result_tangent_quat);
-#endif
-
-	oPos = mul(pos, mvp);
-	oTexCoordDepth.xy = texcoord;
-	oTexCoordDepth.z = oPos.w;
-
-	oScreenTc.xy = oPos.xy / oPos.w;
-	oScreenTc.y *= KLAYGE_FLIPPING;
-	oScreenTc.xy = oScreenTc.xy * 0.5f + 0.5f;
-
-#ifndef NOPERSPECTIVE_SUPPORT
-	oScreenTc.z = oPos.w;
-	oScreenTc.xy *= oScreenTc.z;
-#endif
-}
-
 void MeshVS(float4 pos : POSITION,
 			float2 texcoord : TEXCOORD0,
 			float4 tangent_quat : TANGENT,
@@ -247,31 +183,26 @@ void MeshVS(float4 pos : POSITION,
 	
 	float3 result_pos;
 	float4 result_tangent_quat;
-#if SKINNING_ON
-	CalcSkinnedMesh(texcoord, pos,
-				blend_weights, blend_indices,
-				tangent_quat,
-				oTexCoord_2xy.xy, result_pos,
-				result_tangent_quat);
-#else
 	CalcMesh(texcoord, pos,
+#if SKINNING_ON
+				blend_weights, blend_indices,
+#endif
 				tangent_quat,
 				oTexCoord_2xy.xy, result_pos,
 				result_tangent_quat);
-#endif
 
 	float3x3 obj_to_ts;
 	obj_to_ts[0] = transform_quat(float3(1, 0, 0), result_tangent_quat);
 	obj_to_ts[1] = transform_quat(float3(0, 1, 0), result_tangent_quat) * sign(result_tangent_quat.w);
 	obj_to_ts[2] = transform_quat(float3(0, 0, 1), result_tangent_quat);
-				
+
 	CalcPosLH(result_pos, obj_to_ts,
 				oPos, oTexCoord_2xy.zw, oTsToView0_2z, oTsToView1_Depth,
 				oScreenTc);
 }
 
 void VisualizeVertexVS(float4 pos : POSITION,
-				float2 tex0 : TEXCOORD0,
+				float2 texcoord : TEXCOORD0,
 				float4 tangent_quat	: TANGENT,	// in object space
 #if SKINNING_ON
 				float4 blend_weights : BLENDWEIGHT,
@@ -288,29 +219,25 @@ void VisualizeVertexVS(float4 pos : POSITION,
 #if KLAYGE_OPENGL || KLAYGE_OPENGLES
 	int4 blend_indices = (int4)blend_indices_f;
 #endif
+#else
+	float4 blend_weights = 0;
+	int4 blend_indices = 0;
 #endif
 
 	pos = float4(pos.xyz * pos_extent + pos_center, 1);
-	tex0 = tex0 * tc_extent + tc_center;
+	texcoord = texcoord * tc_extent + tc_center;
 	tangent_quat = tangent_quat * 2 - 1;
 	
 	float3 result_pos;
 	float4 result_tangent_quat;
 	float2 oTex;
+	CalcMesh(texcoord, pos,
 #if SKINNING_ON
-	CalcSkinnedMesh(tex0, pos,
 				blend_weights, blend_indices,
-				tangent_quat,
-				oTex, result_pos,
-				result_tangent_quat);
-#else
-	CalcMesh(tex0, pos,
-				tangent_quat,
-				oTex, result_pos,
-				result_tangent_quat);
-	float4 blend_weights = 0;
-	int4 blend_indices = 0;
 #endif
+				tangent_quat,
+				oTex, result_pos,
+				result_tangent_quat);
 				
 	float3x3 obj_to_ts;
 	obj_to_ts[0] = transform_quat(float3(1, 0, 0), result_tangent_quat);
@@ -350,7 +277,7 @@ float4 VisualizeTextureRT1PS(float2 tex0 : TEXCOORD0) : SV_Target
 	{
 		if (diffuse_clr.w > 0.5f)
 		{
-			ret = float4(diffuse_tex.Sample(linear_sampler, tex0).rgb, 1);
+			ret = float4(diffuse_tex.Sample(aniso_sampler, tex0).rgb, 1);
 		}
 		else
 		{
@@ -361,7 +288,7 @@ float4 VisualizeTextureRT1PS(float2 tex0 : TEXCOORD0) : SV_Target
 	{
 		if (specular_clr.w > 0.5f)
 		{
-			ret = float4(specular_tex.Sample(linear_sampler, tex0).rgb, 1);
+			ret = float4(specular_tex.Sample(aniso_sampler, tex0).rgb, 1);
 		}
 		else
 		{
@@ -372,7 +299,7 @@ float4 VisualizeTextureRT1PS(float2 tex0 : TEXCOORD0) : SV_Target
 	{
 		if (shininess_clr.y > 0.5f)
 		{
-			ret = float4(shininess_tex.Sample(linear_sampler, tex0).rrr, 1);
+			ret = float4(shininess_tex.Sample(aniso_sampler, tex0).rrr, 1);
 		}
 		else
 		{
@@ -383,7 +310,7 @@ float4 VisualizeTextureRT1PS(float2 tex0 : TEXCOORD0) : SV_Target
 	{
 		if (normal_map_enabled)
 		{
-			ret = float4(decompress_normal(normal_tex.Sample(linear_sampler, tex0)).rgb, 1);
+			ret = float4(decompress_normal(normal_tex.Sample(aniso_sampler, tex0)).rgb, 1);
 		}
 		else
 		{
@@ -394,7 +321,7 @@ float4 VisualizeTextureRT1PS(float2 tex0 : TEXCOORD0) : SV_Target
 	{
 		if (emit_clr.w > 0.5f)
 		{
-			ret = float4(emit_tex.Sample(linear_sampler, tex0).rgb * 16, 1);
+			ret = float4(emit_tex.Sample(aniso_sampler, tex0).rgb * 16, 1);
 		}
 		else
 		{
@@ -405,7 +332,7 @@ float4 VisualizeTextureRT1PS(float2 tex0 : TEXCOORD0) : SV_Target
 	{
 		if (opacity_map_enabled)
 		{
-			ret = diffuse_tex.Sample(linear_sampler, tex0).a;
+			ret = diffuse_tex.Sample(aniso_sampler, tex0).a;
 		}
 		else
 		{
@@ -424,7 +351,7 @@ void VisualizeTextureMRTPS(float2 tex0 : TEXCOORD0,
 	{
 		if (diffuse_clr.w > 0.5f)
 		{
-			mrt_1 = float4(diffuse_tex.Sample(linear_sampler, tex0).rgb, 1);
+			mrt_1 = float4(diffuse_tex.Sample(aniso_sampler, tex0).rgb, 1);
 		}
 		else
 		{
@@ -435,7 +362,7 @@ void VisualizeTextureMRTPS(float2 tex0 : TEXCOORD0,
 	{
 		if (specular_clr.w > 0.5f)
 		{
-			mrt_1 = float4(specular_tex.Sample(linear_sampler, tex0).rgb, 1);
+			mrt_1 = float4(specular_tex.Sample(aniso_sampler, tex0).rgb, 1);
 		}
 		else
 		{
@@ -446,7 +373,7 @@ void VisualizeTextureMRTPS(float2 tex0 : TEXCOORD0,
 	{
 		if (shininess_clr.y > 0.5f)
 		{
-			mrt_1 = float4(shininess_tex.Sample(linear_sampler, tex0).rrr, 1);
+			mrt_1 = float4(shininess_tex.Sample(aniso_sampler, tex0).rrr, 1);
 		}
 		else
 		{
@@ -457,7 +384,7 @@ void VisualizeTextureMRTPS(float2 tex0 : TEXCOORD0,
 	{
 		if (normal_map_enabled)
 		{
-			mrt_1 = float4(decompress_normal(normal_tex.Sample(linear_sampler, tex0)).rgb, 1);
+			mrt_1 = float4(decompress_normal(normal_tex.Sample(aniso_sampler, tex0)).rgb, 1);
 		}
 		else
 		{
@@ -468,7 +395,7 @@ void VisualizeTextureMRTPS(float2 tex0 : TEXCOORD0,
 	{
 		if (emit_clr.w > 0.5f)
 		{
-			mrt_1 = float4(emit_tex.Sample(linear_sampler, tex0).rgb * 16, 1);
+			mrt_1 = float4(emit_tex.Sample(aniso_sampler, tex0).rgb * 16, 1);
 		}
 		else
 		{
@@ -479,7 +406,7 @@ void VisualizeTextureMRTPS(float2 tex0 : TEXCOORD0,
 	{
 		if (opacity_map_enabled)
 		{
-			mrt_1 = diffuse_tex.Sample(linear_sampler, tex0).a;
+			mrt_1 = diffuse_tex.Sample(aniso_sampler, tex0).a;
 		}
 		else
 		{
@@ -492,24 +419,24 @@ void VisualizeTextureMRTPS(float2 tex0 : TEXCOORD0,
 
 	<technique name="MeshDepthTech" inherit="DepthTech">
 		<pass name="p0">
-			<state name="vertex_shader" value="MeshDepthVS()"/>
+			<state name="vertex_shader" value="MeshVS()"/>
 		</pass>
 	</technique>
 
 	<technique name="MeshDepthAlphaTestTech" inherit="DepthAlphaTestTech">
 		<pass name="p0">
-			<state name="vertex_shader" value="MeshDepthVS()"/>
+			<state name="vertex_shader" value="MeshVS()"/>
 		</pass>
 	</technique>
 
 	<technique name="MeshDepthBlendBackTech" inherit="DepthAlphaBlendBackTech">
 		<pass name="p0">
-			<state name="vertex_shader" value="MeshDepthVS()"/>
+			<state name="vertex_shader" value="MeshVS()"/>
 		</pass>
 	</technique>
 	<technique name="MeshDepthBlendFrontTech" inherit="DepthAlphaBlendFrontTech">
 		<pass name="p0">
-			<state name="vertex_shader" value="MeshDepthVS()"/>
+			<state name="vertex_shader" value="MeshVS()"/>
 		</pass>
 	</technique>
 
@@ -691,56 +618,19 @@ void VisualizeTextureMRTPS(float2 tex0 : TEXCOORD0,
 	</technique>
 
 
-	<shader>
-		<![CDATA[
-void MeshSpecialShadingVS(float4 pos : POSITION,
-			float2 texcoord : TEXCOORD0,
-			float4 tangent_quat : TANGENT,
-#if SKINNING_ON
-			float4 blend_weights : BLENDWEIGHT,
-#if KLAYGE_OPENGL || KLAYGE_OPENGLES
-			float4 blend_indices_f : BLENDINDICES,
-#else
-			uint4 blend_indices : BLENDINDICES,
-#endif
-#endif
-			out float2 oTexCoord : TEXCOORD0,
-			out float4 oPos : SV_Position)
-{
-#if SKINNING_ON
-#if KLAYGE_OPENGL || KLAYGE_OPENGLES
-	int4 blend_indices = (int4)blend_indices_f;
-#endif
-#endif
-
-	pos = float4(pos.xyz * pos_extent + pos_center, 1);
-	texcoord = texcoord * tc_extent + tc_center;
-	tangent_quat = tangent_quat * 2 - 1;
-	
-#if SKINNING_ON
-	float4 result_tangent_quat;
-	Skinned(pos.xyz, tangent_quat, blend_weights, blend_indices, pos.xyz, result_tangent_quat);
-#endif
-	
-	oPos = mul(pos, mvp);
-	oTexCoord = texcoord;
-}
-		]]>
-	</shader>
-
 	<technique name="MeshSpecialShadingTech" inherit="SpecialShadingTech">
 		<pass name="p0">
-			<state name="vertex_shader" value="SpecialShadingVS()"/>
+			<state name="vertex_shader" value="MeshVS()"/>
 		</pass>
 	</technique>
 	<technique name="MeshSpecialShadingBlendBackTech" inherit="SpecialShadingAlphaBlendBackTech">
 		<pass name="p0">
-			<state name="vertex_shader" value="SpecialShadingVS()"/>
+			<state name="vertex_shader" value="MeshVS()"/>
 		</pass>
 	</technique>
 	<technique name="MeshSpecialShadingBlendFrontTech" inherit="SpecialShadingAlphaBlendFrontTech">
 		<pass name="p0">
-			<state name="vertex_shader" value="SpecialShadingVS()"/>
+			<state name="vertex_shader" value="MeshVS()"/>
 		</pass>
 	</technique>
 
@@ -805,7 +695,7 @@ struct CONTROL_POINT
 };
 
 CONTROL_POINT SmoothVS(float4 pos : POSITION,
-				float2 tex0 : TEXCOORD0,				
+				float2 texcoord : TEXCOORD0,				
 				float4 tangent_quat	: TANGENT
 #if SKINNING_ON
 				, float4 blend_weights : BLENDWEIGHT,
@@ -826,24 +716,16 @@ CONTROL_POINT SmoothVS(float4 pos : POSITION,
 	CONTROL_POINT output;
 
 	pos = float4(pos.xyz * pos_extent + pos_center, 1);
-	tex0 = tex0 * tc_extent + tc_center;
+	texcoord = texcoord * tc_extent + tc_center;
 	tangent_quat = tangent_quat * 2 - 1;
 
+	CalcMesh(texcoord, pos,
 #if SKINNING_ON
-	CalcSkinnedMesh(tex0, pos,
 				blend_weights, blend_indices,
+#endif
 				tangent_quat,
 				output.Texcoord0, output.Pos,
 				output.TangentQuat);
-#else
-	float4 result_tangent_quat;
-	CalcMesh(tex0, pos,
-				tangent_quat,
-				output.Texcoord0, output.Pos,
-				result_tangent_quat);
-				
-	output.TangentQuat = result_tangent_quat;
-#endif
 
 	return output;
 }
@@ -1225,18 +1107,13 @@ void StreamOutVS(float4 pos : POSITION,
 	
 	float3 result_pos;
 	float4 result_tangent_quat;
-#if SKINNING_ON
-	CalcSkinnedMesh(texcoord0, pos,
-				blend_weights, blend_indices,
-				tangent_quat,
-				oTex0, result_pos,
-				result_tangent_quat);
-#else
 	CalcMesh(texcoord0, pos,
+#if SKINNING_ON
+				blend_weights, blend_indices,
+#endif
 				tangent_quat,
 				oTex0, result_pos,
 				result_tangent_quat);
-#endif
 				
 	oPosOS = float4(result_pos, 1);				
 	oTangentQuat = result_tangent_quat / 2 + 0.5f;

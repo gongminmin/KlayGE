@@ -77,61 +77,6 @@
 #endif
 #endif
 
-void DepthVS(float4 pos : POSITION,
-			float2 texcoord : TEXCOORD0,
-			float4 tangent_quat : TANGENT,
-			out float3 oTexCoordDepth : TEXCOORD0,
-#ifdef NOPERSPECTIVE_SUPPORT
-			out noperspective float2 oScreenTc : TEXCOORD2,
-#else
-			out float3 oScreenTc : TEXCOORD2,
-#endif
-			out float4 oPos : SV_Position)
-{
-	pos = float4(pos.xyz * pos_extent + pos_center, 1);
-	texcoord = texcoord * tc_extent + tc_center;
-	
-	oPos = mul(pos, mvp);
-	oTexCoordDepth.xy = texcoord;
-	oTexCoordDepth.z = oPos.w;
-	
-	oScreenTc.xy = oPos.xy / oPos.w * 0.5f;
-	oScreenTc.y *= KLAYGE_FLIPPING;
-	oScreenTc.xy += 0.5f;
-
-#ifndef NOPERSPECTIVE_SUPPORT
-	oScreenTc.z = oPos.w;
-	oScreenTc.xy *= oScreenTc.z;
-#endif
-}
-
-float4 DepthPS(float3 texcoord_depth : TEXCOORD0) : SV_Target
-{
-	return WriteAFloat(texcoord_depth.z, far_plane.y);
-}
-
-float4 DepthAlphaTestPS(float3 texcoord_depth : TEXCOORD0) : SV_Target
-{
-	clip(diffuse_tex.Sample(bilinear_sampler, texcoord_depth.xy).a - ALPHA_TEST_THRESHOLD);
-	return WriteAFloat(texcoord_depth.z, far_plane.y);
-}
-
-float4 DepthAlphaBlendPS(float3 texcoord_depth : TEXCOORD0,
-#ifdef NOPERSPECTIVE_SUPPORT
-					noperspective float2 screen_tc : TEXCOORD2
-#else
-					float3 screen_tc_w : TEXCOORD2
-#endif
-		) : SV_Target
-{
-#ifndef NOPERSPECTIVE_SUPPORT
-	float2 screen_tc = screen_tc_w.xy / screen_tc_w.z;
-#endif
-
-	clip(ReadAFloat(opaque_depth_tex.Sample(point_sampler, screen_tc), far_plane.x) - texcoord_depth.z);	
-	return WriteAFloat(texcoord_depth.z, far_plane.y);
-}
-
 void GBufferVS(float4 pos : POSITION,
 			float2 texcoord : TEXCOORD0,
 			float4 tangent_quat : TANGENT,
@@ -173,6 +118,33 @@ void GBufferVS(float4 pos : POSITION,
 	oScreenTc.z = oPos.w;
 	oScreenTc.xy *= oScreenTc.z;
 #endif
+}
+
+float4 DepthPS(float4 texcoord_2xy : TEXCOORD0, float4 ts_to_view0_2z : TEXCOORD1, float4 ts_to_view1_depth : TEXCOORD2) : SV_Target
+{
+	return WriteAFloat(ts_to_view1_depth.w, far_plane.y);
+}
+
+float4 DepthAlphaTestPS(float4 texcoord_2xy : TEXCOORD0, float4 ts_to_view0_2z : TEXCOORD1, float4 ts_to_view1_depth : TEXCOORD2) : SV_Target
+{
+	clip(diffuse_tex.Sample(bilinear_sampler, texcoord_2xy.xy).a - ALPHA_TEST_THRESHOLD);
+	return WriteAFloat(ts_to_view1_depth.w, far_plane.y);
+}
+
+float4 DepthAlphaBlendPS(float4 texcoord_2xy : TEXCOORD0, float4 ts_to_view0_2z : TEXCOORD1, float4 ts_to_view1_depth : TEXCOORD2,
+#ifdef NOPERSPECTIVE_SUPPORT
+					noperspective float2 screen_tc : TEXCOORD3
+#else
+					float3 screen_tc_w : TEXCOORD3
+#endif
+		) : SV_Target
+{
+#ifndef NOPERSPECTIVE_SUPPORT
+	float2 screen_tc = screen_tc_w.xy / screen_tc_w.z;
+#endif
+
+	clip(ReadAFloat(opaque_depth_tex.Sample(point_sampler, screen_tc), far_plane.x) - ts_to_view1_depth.w);	
+	return WriteAFloat(ts_to_view1_depth.w, far_plane.y);
 }
 
 float3 RestoreNormal(float4 texcoord_2xy, float4 ts_to_view0_2z, float3 ts_to_view1)
@@ -358,7 +330,7 @@ void GBufferAlphaBlendMRTPS(float4 texcoord_2xy : TEXCOORD0, float4 ts_to_view0_
 		<pass name="p0">
 			<state name="cull_mode" value="back"/>
 
-			<state name="vertex_shader" value="DepthVS()"/>
+			<state name="vertex_shader" value="GBufferVS()"/>
 			<state name="pixel_shader" value="DepthPS()"/>
 		</pass>
 	</technique>
@@ -373,7 +345,7 @@ void GBufferAlphaBlendMRTPS(float4 texcoord_2xy : TEXCOORD0, float4 ts_to_view0_
 
 			<state name="cull_mode" value="front"/>
 
-			<state name="vertex_shader" value="DepthVS()"/>
+			<state name="vertex_shader" value="GBufferVS()"/>
 			<state name="pixel_shader" value="DepthAlphaBlendPS()"/>
 		</pass>
 	</technique>
@@ -644,18 +616,6 @@ float4 GenCascadedShadowMapAlphaTestPS(float2 tc : TEXCOORD0, float depth : TEXC
 
 	<shader>
 		<![CDATA[
-void SpecialShadingVS(float4 pos : POSITION,
-			float2 texcoord : TEXCOORD0,
-			out float2 oTexCoord : TEXCOORD0,
-			out float4 oPos : SV_Position)
-{
-	pos = float4(pos.xyz * pos_extent + pos_center, 1);
-	texcoord = texcoord * tc_extent + tc_center;
-	
-	oPos = mul(pos, mvp);
-	oTexCoord = texcoord;
-}
-
 float4 SpecialShadingPS(float2 texcoord : TEXCOORD0) : SV_Target
 {
 	float3 emit;
@@ -710,7 +670,7 @@ float4 SpecialShadingAlphaBlendPS(float2 texcoord : TEXCOORD0) : SV_Target
 			<state name="src_blend_alpha" value="src_alpha"/>
 			<state name="dest_blend_alpha" value="zero"/>
 
-			<state name="vertex_shader" value="SpecialShadingVS()"/>
+			<state name="vertex_shader" value="GBufferVS()"/>
 			<state name="pixel_shader" value="SpecialShadingPS()"/>
 		</pass>
 	</technique>
