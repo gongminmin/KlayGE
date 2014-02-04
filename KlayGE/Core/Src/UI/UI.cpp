@@ -73,7 +73,8 @@ namespace
 		Key,
 		Move,
 		Wheel,
-		Click
+		Click,
+		Touch
 	};
 }
 
@@ -335,7 +336,7 @@ namespace KlayGE
 			InputActionDefine(Move, MS_Y),
 			InputActionDefine(Wheel, MS_Z),
 			InputActionDefine(Click, MS_Button0),
-			InputActionDefine(Click, TS_Tap)
+			InputActionDefine(Touch, TS_AnyTouch)
 		};
 
 		InputEngine& inputEngine(Context::Instance().InputFactoryInstance().InputEngineInstance());
@@ -1170,6 +1171,14 @@ namespace KlayGE
 				}
 				break;
 
+			default:
+				break;
+			}
+			break;
+		
+		case Touch:
+			switch (action.second->type)
+			{
 			case InputEngine::IDT_Touch:
 				{
 					InputTouchActionParamPtr param = checked_pointer_cast<InputTouchActionParam>(action.second);
@@ -1177,12 +1186,22 @@ namespace KlayGE
 					typedef KLAYGE_DECLTYPE(dialogs_) DialogsType;
 					KLAYGE_FOREACH(DialogsType::reference dialog, dialogs_)
 					{
-						if (dialog->GetVisible() && dialog->ContainsPoint(param->center))
+						if (dialog->GetVisible() && dialog->ContainsPoint(param->touches_coord[0]))
 						{
 							mouse_on_ui_ = true;
 						}
-						dialog->MouseDownHandler(MB_Left, param->center);
-						dialog->MouseUpHandler(MB_Left, param->center);
+						if (param->touches_down & 1UL)
+						{
+							dialog->MouseDownHandler(MB_Left, param->touches_coord[0]);
+						}
+						else if (param->touches_up & 1UL)
+						{
+							dialog->MouseUpHandler(MB_Left, param->touches_coord[0]);
+						}
+						else if (param->touches_state & 1UL)
+						{
+							dialog->MouseOverHandler(MB_Left, param->touches_coord[0]);
+						}
 					}
 				}
 				break;

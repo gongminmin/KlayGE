@@ -79,6 +79,7 @@ namespace KlayGE
 		{
 			TurnLeftRight,
 			TurnUpDown,
+			Turn,
 			RollLeft,
 			RollRight,
 
@@ -115,7 +116,8 @@ namespace KlayGE
 
 		enum
 		{
-			Turn
+			Turn,
+			ZoomInOut
 		};
 
 	private:

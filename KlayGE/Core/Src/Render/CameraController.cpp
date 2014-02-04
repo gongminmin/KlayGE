@@ -85,7 +85,8 @@ namespace KlayGE
 				InputActionDefine(Forward, KS_UpArrow),
 				InputActionDefine(Backward, KS_DownArrow),
 				InputActionDefine(MoveLeft, KS_LeftArrow),
-				InputActionDefine(MoveRight, KS_RightArrow)
+				InputActionDefine(MoveRight, KS_RightArrow),
+				InputActionDefine(Turn, TS_Pan)
 			};
 
 			InputEngine& inputEngine(Context::Instance().InputFactoryInstance().InputEngineInstance());
@@ -130,6 +131,13 @@ namespace KlayGE
 					{
 						this->Rotate(0, param->move_vec.y() * scaler, 0);
 					}
+				}
+				break;
+
+			case Turn:
+				{
+					InputTouchActionParamPtr param = checked_pointer_cast<InputTouchActionParam>(action.second);
+					this->Rotate(param->move_vec.x() * scaler, param->move_vec.y() * scaler, 0);
 				}
 				break;
 
@@ -258,7 +266,10 @@ namespace KlayGE
 			InputActionDefine actions[] =
 			{
 				InputActionDefine(Turn, MS_X),
-				InputActionDefine(Turn, MS_Y)
+				InputActionDefine(Turn, MS_Y),
+				InputActionDefine(Turn, TS_Pan),
+				InputActionDefine(Turn, TS_Pan),
+				InputActionDefine(ZoomInOut, TS_Zoom)
 			};
 
 			InputEngine& inputEngine(Context::Instance().InputFactoryInstance().InputEngineInstance());
@@ -274,27 +285,65 @@ namespace KlayGE
 
 	void TrackballCameraController::InputHandler(InputEngine const & /*ie*/, InputAction const & action)
 	{
-		if (camera_)
+		if (camera_ && !UIManager::Instance().MouseOnUI())
 		{
-			InputMouseActionParamPtr param = checked_pointer_cast<InputMouseActionParam>(action.second);
-
-			float xd = static_cast<float>(param->move_vec.x());
-			float yd = static_cast<float>(param->move_vec.y());
-
-			if (!UIManager::Instance().MouseOnUI())
+			switch (action.first)
 			{
-				if (param->buttons_state & rotate_button_)
+			case Turn:
+				switch (action.second->type)
 				{
-					this->Rotate(xd, yd);
+				case InputEngine::IDT_Mouse:
+					{
+						InputMouseActionParamPtr param = checked_pointer_cast<InputMouseActionParam>(action.second);
+
+						float xd = static_cast<float>(param->move_vec.x());
+						float yd = static_cast<float>(param->move_vec.y());
+
+						if (param->buttons_state & rotate_button_)
+						{
+							this->Rotate(xd, yd);
+						}
+						else if (param->buttons_state & zoom_button_)
+						{
+							this->Zoom(xd, yd);
+						}
+						else if (param->buttons_state & move_button_)
+						{
+							this->Move(xd, yd);
+						}
+					}
+					break;
+
+				case InputEngine::IDT_Touch:
+					{
+						InputTouchActionParamPtr param = checked_pointer_cast<InputTouchActionParam>(action.second);
+
+						float xd = static_cast<float>(param->move_vec.x());
+						float yd = static_cast<float>(param->move_vec.y());
+
+						this->Rotate(xd, yd);
+					}
+					break;
+
+				default:
+					break;
 				}
-				else if (param->buttons_state & zoom_button_)
+				break;
+
+			case ZoomInOut:
+				switch (action.second->type)
 				{
-					this->Zoom(xd, yd);
+				case InputEngine::IDT_Touch:
+					{
+						InputTouchActionParamPtr param = checked_pointer_cast<InputTouchActionParam>(action.second);
+						this->Zoom(param->zoom, 0);
+					}
+					break;
+
+				default:
+					break;
 				}
-				else if (param->buttons_state & move_button_)
-				{
-					this->Move(xd, yd);
-				}
+				break;
 			}
 		}
 	}
