@@ -57,6 +57,13 @@
 
 #include <Cg/cg.h>
 
+#define USE_DXBC2GLSL 0
+
+#if USE_DXBC2GLSL
+#include <DXBC2GLSL/DXBC2GLSL.hpp>
+#include <D3DCompiler.h>
+#endif
+
 #include <KlayGE/OpenGL/OGLRenderFactory.hpp>
 #include <KlayGE/OpenGL/OGLRenderFactoryInternal.hpp>
 #include <KlayGE/OpenGL/OGLRenderEngine.hpp>
@@ -1024,7 +1031,7 @@ namespace KlayGE
 		glDeleteProgram(glsl_program_);
 	}
 
-	std::string OGLShaderObject::GenShaderText(ShaderType type, RenderEffect const & effect,
+	std::string OGLShaderObject::GenCgShaderText(ShaderType type, RenderEffect const & effect,
 		RenderTechnique const & tech, RenderPass const & pass)
 	{
 		std::stringstream shader_ss;
@@ -1338,6 +1345,288 @@ namespace KlayGE
 
 		return ss.str();
 	}
+
+#if USE_DXBC2GLSL
+	std::string OGLShaderObject::GenHLSLShaderText(ShaderType type, RenderEffect const & effect,
+		RenderTechnique const & tech, RenderPass const & pass) const
+	{
+		std::stringstream ss;
+
+		for (uint32_t i = 0; i < effect.NumMacros(); ++ i)
+		{
+			std::pair<std::string, std::string> const & name_value = effect.MacroByIndex(i);
+			ss << "#define " << name_value.first << " " << name_value.second << std::endl;
+		}
+		ss << std::endl;
+
+		for (uint32_t i = 0; i < tech.NumMacros(); ++ i)
+		{
+			std::pair<std::string, std::string> const & name_value = tech.MacroByIndex(i);
+			ss << "#define " << name_value.first << " " << name_value.second << std::endl;
+		}
+		ss << std::endl;
+
+		for (uint32_t i = 0; i < pass.NumMacros(); ++ i)
+		{
+			std::pair<std::string, std::string> const & name_value = pass.MacroByIndex(i);
+			ss << "#define " << name_value.first << " " << name_value.second << std::endl;
+		}
+		ss << std::endl;
+
+		KLAYGE_AUTO(cbuffers, effect.CBuffers());
+		typedef KLAYGE_DECLTYPE(cbuffers) CBuffersType;
+		KLAYGE_FOREACH(CBuffersType::const_reference cbuff, cbuffers)
+		{
+			ss << "cbuffer " << cbuff.first << std::endl;
+			ss << "{" << std::endl;
+
+			typedef KLAYGE_DECLTYPE(cbuff.second) CBuffersSecondType;
+			KLAYGE_FOREACH(CBuffersSecondType::const_reference param_index, cbuff.second)
+			{
+				RenderEffectParameter& param = *effect.ParameterByIndex(param_index);
+				switch (param.Type())
+				{
+				case REDT_texture1D:
+				case REDT_texture2D:
+				case REDT_texture3D:
+				case REDT_textureCUBE:
+				case REDT_texture1DArray:
+				case REDT_texture2DArray:
+				case REDT_texture3DArray:
+				case REDT_textureCUBEArray:
+				case REDT_sampler:
+				case REDT_buffer:
+				case REDT_structured_buffer:
+				case REDT_byte_address_buffer:
+				case REDT_rw_buffer:
+				case REDT_rw_structured_buffer:
+				case REDT_rw_texture1D:
+				case REDT_rw_texture2D:
+				case REDT_rw_texture3D:
+				case REDT_rw_texture1DArray:
+				case REDT_rw_texture2DArray:
+				case REDT_rw_byte_address_buffer:
+				case REDT_append_structured_buffer:
+				case REDT_consume_structured_buffer:
+					break;
+
+				default:
+					ss << effect.TypeName(param.Type()) << " " << *param.Name();
+					if (param.ArraySize())
+					{
+						ss << "[" << *param.ArraySize() << "]";
+					}
+					ss << ";" << std::endl;
+					break;
+				}
+			}
+
+			ss << "};" << std::endl;
+		}
+
+		RenderDeviceCaps const & caps = Context::Instance().RenderFactoryInstance().RenderEngineInstance().DeviceCaps();
+		for (uint32_t i = 0; i < effect.NumParameters(); ++ i)
+		{
+			RenderEffectParameter& param = *effect.ParameterByIndex(i);
+
+			switch (param.Type())
+			{
+			case REDT_texture1D:
+			{
+				std::string elem_type;
+				param.Var()->Value(elem_type);
+				ss << "Texture1D<" << elem_type << "> " << *param.Name() << ";" << std::endl;
+			}
+				break;
+
+			case REDT_texture2D:
+			{
+				std::string elem_type;
+				param.Var()->Value(elem_type);
+				ss << "Texture2D<" << elem_type << "> " << *param.Name() << ";" << std::endl;
+			}
+				break;
+
+			case REDT_texture3D:
+			{
+				std::string elem_type;
+				param.Var()->Value(elem_type);
+				ss << "Texture3D<" << elem_type << "> " << *param.Name() << ";" << std::endl;
+			}
+				break;
+
+			case REDT_textureCUBE:
+			{
+				std::string elem_type;
+				param.Var()->Value(elem_type);
+				ss << "TextureCube<" << elem_type << "> " << *param.Name() << ";" << std::endl;
+			}
+				break;
+
+			case REDT_texture1DArray:
+				if (caps.max_shader_model >= 4)
+				{
+					std::string elem_type;
+					param.Var()->Value(elem_type);
+					ss << "Texture1DArray<" << elem_type << "> " << *param.Name() << ";" << std::endl;
+				}
+				break;
+
+			case REDT_texture2DArray:
+				if (caps.max_shader_model >= 4)
+				{
+					std::string elem_type;
+					param.Var()->Value(elem_type);
+					ss << "Texture2DArray<" << elem_type << "> " << *param.Name() << ";" << std::endl;
+				}
+				break;
+
+			case REDT_textureCUBEArray:
+				if (caps.max_shader_model >= 4)
+				{
+					std::string elem_type;
+					param.Var()->Value(elem_type);
+					ss << "TextureCubeArray<" << elem_type << "> " << *param.Name() << ";" << std::endl;
+				}
+				break;
+
+			case REDT_buffer:
+				if (caps.max_shader_model >= 4)
+				{
+					std::string elem_type;
+					param.Var()->Value(elem_type);
+					ss << "Buffer<" << elem_type << "> " << *param.Name() << ";" << std::endl;
+				}
+				break;
+
+			case REDT_sampler:
+				ss << "sampler " << *param.Name() << ";" << std::endl;
+				break;
+
+			case REDT_structured_buffer:
+				if (caps.max_shader_model >= 4)
+				{
+					std::string elem_type;
+					param.Var()->Value(elem_type);
+					ss << "StructuredBuffer<" << elem_type << "> " << *param.Name() << ";" << std::endl;
+				}
+				break;
+
+			case REDT_byte_address_buffer:
+				if (caps.max_shader_model >= 4)
+				{
+					ss << "ByteAddressBuffer " << *param.Name() << ";" << std::endl;
+				}
+				break;
+
+			case REDT_rw_buffer:
+				if (caps.max_shader_model >= 5)
+				{
+					std::string elem_type;
+					param.Var()->Value(elem_type);
+					ss << "RWBuffer<" << elem_type << "> " << *param.Name() << ";" << std::endl;
+				}
+				break;
+
+			case REDT_rw_structured_buffer:
+				if (caps.max_shader_model >= 4)
+				{
+					std::string elem_type;
+					param.Var()->Value(elem_type);
+					ss << "RWStructuredBuffer<" << elem_type << "> " << *param.Name() << ";" << std::endl;
+				}
+				break;
+
+			case REDT_rw_texture1D:
+				if (caps.max_shader_model >= 5)
+				{
+					std::string elem_type;
+					param.Var()->Value(elem_type);
+					ss << "RWTexture1D<" << elem_type << "> " << *param.Name() << ";" << std::endl;
+				}
+				break;
+
+			case REDT_rw_texture2D:
+				if (caps.max_shader_model >= 5)
+				{
+					std::string elem_type;
+					param.Var()->Value(elem_type);
+					ss << "RWTexture2D<" << elem_type << "> " << *param.Name() << ";" << std::endl;
+				}
+				break;
+
+			case REDT_rw_texture3D:
+				if (caps.max_shader_model >= 5)
+				{
+					std::string elem_type;
+					param.Var()->Value(elem_type);
+					ss << "RWTexture3D<" << elem_type << "> " << *param.Name() << ";" << std::endl;
+				}
+				break;
+			case REDT_rw_texture1DArray:
+				if (caps.max_shader_model >= 5)
+				{
+					std::string elem_type;
+					param.Var()->Value(elem_type);
+					ss << "RWTexture1DArray<" << elem_type << "> " << *param.Name() << ";" << std::endl;
+				}
+				break;
+
+			case REDT_rw_texture2DArray:
+				if (caps.max_shader_model >= 5)
+				{
+					std::string elem_type;
+					param.Var()->Value(elem_type);
+					ss << "RWTexture2DArray<" << elem_type << "> " << *param.Name() << ";" << std::endl;
+				}
+				break;
+
+			case REDT_rw_byte_address_buffer:
+				if (caps.max_shader_model >= 4)
+				{
+					ss << "RWByteAddressBuffer " << *param.Name() << ";" << std::endl;
+				}
+				break;
+
+			case REDT_append_structured_buffer:
+				if (caps.max_shader_model >= 5)
+				{
+					std::string elem_type;
+					param.Var()->Value(elem_type);
+					ss << "AppendStructuredBuffer<" << elem_type << "> " << *param.Name() << ";" << std::endl;
+				}
+				break;
+
+			case REDT_consume_structured_buffer:
+				if (caps.max_shader_model >= 5)
+				{
+					std::string elem_type;
+					param.Var()->Value(elem_type);
+					ss << "ConsumeStructuredBuffer<" << elem_type << "> " << *param.Name() << ";" << std::endl;
+				}
+				break;
+
+			default:
+				break;
+			}
+		}
+
+		for (uint32_t i = 0; i < effect.NumShaders(); ++ i)
+		{
+			RenderShaderFunc const & effect_shader = effect.ShaderByIndex(i);
+			ShaderType shader_type = effect_shader.Type();
+			if ((ST_NumShaderTypes == shader_type) || (type == shader_type))
+			{
+				if (caps.max_shader_model >= effect_shader.Version())
+				{
+					ss << effect_shader.str() << std::endl;
+				}
+			}
+		}
+
+		return ss.str();
+	}
+#endif
 
 	std::string OGLShaderObject::ConvertToGLSL(std::string const & glsl, ShaderType type, uint32_t gs_input_vertices, bool has_gs)
 	{
@@ -1879,126 +2168,135 @@ namespace KlayGE
 	}
 
 	void OGLShaderObject::AttachShader(ShaderType type, RenderEffect const & effect,
-			RenderTechnique const & tech, RenderPass const & pass, std::vector<uint32_t> const & shader_desc_ids)
+		RenderTechnique const & tech, RenderPass const & pass, std::vector<uint32_t> const & shader_desc_ids)
 	{
 		ShaderDesc const & sd = effect.GetShaderDesc(shader_desc_ids[type]);
 
 		(*shader_func_names_)[type] = sd.func_name;
 
-		OGLRenderFactory& rf = *checked_cast<OGLRenderFactory*>(&Context::Instance().RenderFactoryInstance());
-		RenderEngine& re = rf.RenderEngineInstance();
+		bool use_dxbc2glsl = false;
+
+#if USE_DXBC2GLSL
+		OGLRenderEngine const & re = *checked_cast<OGLRenderEngine const *>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		RenderDeviceCaps const & caps = re.DeviceCaps();
+
 		std::string max_sm_str;
 		{
 			std::stringstream ss;
-			ss << "-DKLAYGE_SHADER_MODEL=" << static_cast<int>(caps.max_shader_model);
+			ss << static_cast<int>(caps.max_shader_model);
 			max_sm_str = ss.str();
 		}
 		std::string max_tex_array_str;
 		{
 			std::stringstream ss;
-			ss << "-DKLAYGE_MAX_TEX_ARRAY_LEN=" << caps.max_texture_array_length;
+			ss << caps.max_texture_array_length;
 			max_tex_array_str = ss.str();
 		}
 		std::string max_tex_depth_str;
 		{
 			std::stringstream ss;
-			ss << "-DKLAYGE_MAX_TEX_DEPTH=" << caps.max_texture_depth;
+			ss << caps.max_texture_depth;
 			max_tex_depth_str = ss.str();
 		}
 		std::string max_tex_units_str;
 		{
 			std::stringstream ss;
-			ss << "-DKLAYGE_MAX_TEX_UNITS=" << static_cast<int>(caps.max_pixel_texture_units);
+			ss << static_cast<int>(caps.max_pixel_texture_units);
 			max_tex_units_str = ss.str();
 		}
 		std::string flipping_str;
 		{
 			std::stringstream ss;
-			ss << "-DKLAYGE_FLIPPING=" << (re.RequiresFlipping() ? -1 : +1);
+			ss << (re.RequiresFlipping() ? -1 : +1);
 			flipping_str = ss.str();
 		}
 		std::string standard_derivatives_str;
 		{
 			std::stringstream ss;
-			ss << "-DKLAYGE_DERIVATIVES=" << (caps.standard_derivatives_support ? 1 : 0);
+			ss << (caps.standard_derivatives_support ? 1 : 0);
 			standard_derivatives_str = ss.str();
 		}
 
-		std::string shader_text = this->GenShaderText(type, effect, tech, pass);
-
-		std::vector<char const *> args;
-		args.push_back("-DKLAYGE_OPENGL=1");
-		args.push_back(max_sm_str.c_str());
-		args.push_back(max_tex_array_str.c_str());
-		args.push_back(max_tex_depth_str.c_str());
-		args.push_back(max_tex_units_str.c_str());
-		args.push_back("-DKLAYGE_NO_TEX_LOD=0");
-		args.push_back(flipping_str.c_str());
-		args.push_back(standard_derivatives_str.c_str());
-		if (!caps.texture_format_support(EF_BC5)
-			|| !caps.texture_format_support(EF_BC5_SRGB))
-		{
-			args.push_back("-DKLAYGE_BC5_AS_AG");
-		}
-		if (!caps.texture_format_support(EF_BC4)
-			|| !caps.texture_format_support(EF_BC4_SRGB))
-		{
-			args.push_back("-DKLAYGE_BC4_AS_G");
-		}
-		if (!caps.fp_color_support)
-		{
-			args.push_back("-DKLAYGE_NO_FP_COLOR");
-		}
-		if (caps.pack_to_rgba_required)
-		{
-			args.push_back("-DKLAYGE_PACK_TO_RGBA");
-		}
-		switch (type)
-		{
-		case ST_VertexShader:
-			args.push_back("-DKLAYGE_VERTEX_SHADER");
-			break;
-
-		case ST_PixelShader:
-			args.push_back("-DKLAYGE_PIXEL_SHADER");
-			break;
-
-		case ST_GeometryShader:
-			args.push_back("-DKLAYGE_GEOMETRY_SHADER");
-			break;
-
-		case ST_ComputeShader:
-			args.push_back("-DKLAYGE_COMPUTE_SHADER");
-			break;
-
-		case ST_HullShader:
-			args.push_back("-DKLAYGE_HULL_SHADER");
-			break;
-
-		case ST_DomainShader:
-			args.push_back("-DKLAYGE_DOMAIN_SHADER");
-			break;
-
-		default:
-			BOOST_ASSERT(false);
-			break;
-		}
-		args.push_back(nullptr);
-
-		bool has_gs = false;
-		if (!effect.GetShaderDesc(shader_desc_ids[ST_GeometryShader]).func_name.empty())
-		{
-			has_gs = true;
-		}
+		std::string hlsl_shader_text = this->GenHLSLShaderText(type, effect, tech, pass);
 
 		is_shader_validate_[type] = true;
 
+		std::string shader_profile = sd.profile;
+		size_t const shader_profile_hash = RT_HASH(shader_profile.c_str());
 		switch (type)
 		{
 		case ST_VertexShader:
+			if (CT_HASH("auto") == shader_profile_hash)
+			{
+				shader_profile = "vs_5_0";
+			}
+			break;
+
 		case ST_PixelShader:
+			if (CT_HASH("auto") == shader_profile_hash)
+			{
+				shader_profile = "ps_5_0";
+			}
+			break;
+
 		case ST_GeometryShader:
+			if (caps.max_shader_model < 4)
+			{
+				is_shader_validate_[type] = false;
+			}
+			else
+			{
+				if (CT_HASH("auto") == shader_profile_hash)
+				{
+					shader_profile = "gs_5_0";
+				}
+			}
+			break;
+
+		case ST_ComputeShader:
+			if (caps.max_shader_model < 4)
+			{
+				is_shader_validate_[type] = false;
+			}
+			else
+			{
+				if (CT_HASH("auto") == shader_profile_hash)
+				{
+					shader_profile = "cs_5_0";
+				}
+				if ((CT_HASH("cs_5_0") == shader_profile_hash) && (caps.max_shader_model < 5))
+				{
+					is_shader_validate_[type] = false;
+				}
+			}
+			break;
+
+		case ST_HullShader:
+			if (caps.max_shader_model < 5)
+			{
+				is_shader_validate_[type] = false;
+			}
+			else
+			{
+				if (CT_HASH("auto") == shader_profile_hash)
+				{
+					shader_profile = "hs_5_0";
+				}
+			}
+			break;
+
+		case ST_DomainShader:
+			if (caps.max_shader_model < 5)
+			{
+				is_shader_validate_[type] = false;
+			}
+			else
+			{
+				if (CT_HASH("auto") == shader_profile_hash)
+				{
+					shader_profile = "ds_5_0";
+				}
+			}
 			break;
 
 		default:
@@ -2006,244 +2304,677 @@ namespace KlayGE
 			break;
 		}
 
+		ID3DBlob* code = nullptr;
 		if (is_shader_validate_[type])
-		{		
-			CGprofile profile;
-			switch (type)
+		{
+			ID3DBlob* err_msg;
+			std::vector<D3D_SHADER_MACRO> macros;
 			{
-			case ST_VertexShader:
-				profile = CG_PROFILE_GLSLV;
-				break;
-
-			case ST_PixelShader:
-				profile = CG_PROFILE_GLSLF;
-				break;
-
-			case ST_GeometryShader:
-				profile = CG_PROFILE_GLSLG;
-				break;
-
-			default:
-				profile = CG_PROFILE_UNKNOWN;
-				break;
+				D3D_SHADER_MACRO macro_d3d11 = { "KLAYGE_OPENGL", "1" };
+				macros.push_back(macro_d3d11);
 			}
-
-			CGprogram cg_shader = cgCreateProgram(CGContextIniter::Instance().Context(),
-					CG_SOURCE, shader_text.c_str(), profile, sd.func_name.c_str(), &args[0]);
-
-			CGerror error = cgGetError();
-			if (error != CG_NO_ERROR)
 			{
-				if (CG_COMPILER_ERROR == error)
+				D3D_SHADER_MACRO macro_d3d11 = { "KLAYGE_SHADER_MODEL", max_sm_str.c_str() };
+				macros.push_back(macro_d3d11);
+			}
+			{
+				D3D_SHADER_MACRO macro_d3d11 = { "KLAYGE_MAX_TEX_ARRAY_LEN", max_tex_array_str.c_str() };
+				macros.push_back(macro_d3d11);
+			}
+			{
+				D3D_SHADER_MACRO macro_d3d11 = { "KLAYGE_MAX_TEX_DEPTH", max_tex_depth_str.c_str() };
+				macros.push_back(macro_d3d11);
+			}
+			{
+				D3D_SHADER_MACRO macro_d3d11 = { "KLAYGE_MAX_TEX_UNITS", max_tex_units_str.c_str() };
+				macros.push_back(macro_d3d11);
+			}
+			{
+				D3D_SHADER_MACRO macro_d3d11 = { "KLAYGE_NO_TEX_LOD", "0" };
+				macros.push_back(macro_d3d11);
+			}
+			{
+				D3D_SHADER_MACRO macro_d3d11 = { "KLAYGE_FLIPPING", flipping_str.c_str() };
+				macros.push_back(macro_d3d11);
+			}
+			{
+				D3D_SHADER_MACRO macro_d3d11 = { "KLAYGE_DERIVATIVES", standard_derivatives_str.c_str() };
+				macros.push_back(macro_d3d11);
+			}
+			if (!caps.texture_format_support(EF_BC5)
+				|| !caps.texture_format_support(EF_BC5_SRGB))
+			{
+				D3D_SHADER_MACRO macro_bc5_as_bc3 = { "KLAYGE_BC5_AS_AG", "1" };
+				macros.push_back(macro_bc5_as_bc3);
+			}
+			if (!caps.texture_format_support(EF_BC4)
+				|| !caps.texture_format_support(EF_BC4_SRGB))
+			{
+				D3D_SHADER_MACRO macro_bc4_as_bc1 = { "KLAYGE_BC4_AS_G", "1" };
+				macros.push_back(macro_bc4_as_bc1);
+			}
+			if (!caps.fp_color_support)
+			{
+				D3D_SHADER_MACRO macro_no_fp_tex = { "KLAYGE_NO_FP_COLOR", "1" };
+				macros.push_back(macro_no_fp_tex);
+			}
+			if (caps.pack_to_rgba_required)
+			{
+				D3D_SHADER_MACRO macro_pack_to_rgba = { "KLAYGE_PACK_TO_RGBA", "1" };
+				macros.push_back(macro_pack_to_rgba);
+			}
+			{
+				D3D_SHADER_MACRO macro_shader_type = { "", "1" };
+				switch (type)
 				{
-					LogError("Error when compiling %s:", sd.func_name.c_str());
-					char const* listing = cgGetLastListing(CGContextIniter::Instance().Context());
-					if (listing)
+				case ST_VertexShader:
+					macro_shader_type.Name = "KLAYGE_VERTEX_SHADER";
+					break;
+
+				case ST_PixelShader:
+					macro_shader_type.Name = "KLAYGE_PIXEL_SHADER";
+					break;
+
+				case ST_GeometryShader:
+					macro_shader_type.Name = "KLAYGE_GEOMETRY_SHADER";
+					break;
+
+				case ST_ComputeShader:
+					macro_shader_type.Name = "KLAYGE_COMPUTE_SHADER";
+					break;
+
+				case ST_HullShader:
+					macro_shader_type.Name = "KLAYGE_HULL_SHADER";
+					break;
+
+				case ST_DomainShader:
+					macro_shader_type.Name = "KLAYGE_DOMAIN_SHADER";
+					break;
+
+				default:
+					BOOST_ASSERT(false);
+					break;
+				}
+				macros.push_back(macro_shader_type);
+			}
+			{
+				D3D_SHADER_MACRO macro_end = { nullptr, nullptr };
+				macros.push_back(macro_end);
+			}
+			uint32_t flags = 0;
+#if !defined(KLAYGE_DEBUG)
+			flags |= D3DCOMPILE_OPTIMIZATION_LEVEL3;
+#endif
+
+			typedef HRESULT(WINAPI *D3DCompileFunc)(LPCVOID pSrcData, SIZE_T SrcDataSize, LPCSTR pSourceName,
+				D3D_SHADER_MACRO const * pDefines, ID3DInclude* pInclude, LPCSTR pEntrypoint,
+				LPCSTR pTarget, UINT Flags1, UINT Flags2, ID3DBlob** ppCode, ID3DBlob** ppErrorMsgs);
+
+			HMODULE mod_d3dcompiler = ::LoadLibraryW(L"d3dcompiler_47.dll");
+			D3DCompileFunc DynamicD3DCompile = reinterpret_cast<D3DCompileFunc>(::GetProcAddress(mod_d3dcompiler, "D3DCompile"));
+
+			DynamicD3DCompile(hlsl_shader_text.c_str(), static_cast<UINT>(hlsl_shader_text.size()), nullptr, &macros[0],
+				nullptr, sd.func_name.c_str(), shader_profile.c_str(),
+				flags, 0, &code, &err_msg);
+			if (err_msg != nullptr)
+			{
+				LogError("Error when compiling %s:", sd.func_name.c_str());
+
+				std::map<int, std::vector<std::string> > err_lines;
+				{
+					std::istringstream err_iss(static_cast<char*>(err_msg->GetBufferPointer()));
+					std::string err_str;
+					while (err_iss)
 					{
-						std::string err_str = listing;
-						std::string::size_type pos = err_str.find(") : error ");
+						std::getline(err_iss, err_str);
+
+						int err_line = -1;
+						std::string::size_type pos = err_str.find("): error X");
 						if (pos == std::string::npos)
 						{
-							pos = err_str.find(") : warning ");
+							pos = err_str.find("): warning X");
 						}
 						if (pos != std::string::npos)
 						{
 							std::string part_err_str = err_str.substr(0, pos);
 							pos = part_err_str.rfind("(");
 							part_err_str = part_err_str.substr(pos + 1);
-							int err_line = boost::lexical_cast<int>(part_err_str);
-
-							std::istringstream iss(shader_text);
-							std::string s;
-							int line = 1;
-							LogError("...");
-							while (iss)
-							{
-								std::getline(iss, s);
-								if ((line - err_line > -3) && (line - err_line < 3))
-								{
-									LogError("%d %s", line, s.c_str());
-								}
-								++ line;
-							}
-							LogError("...");
+							std::istringstream(part_err_str) >> err_line;
 						}
 
-						LogError(cgGetErrorString(error));
-						LogError(listing);
-						LogError("\n");
-					}
-				}
-
-				is_shader_validate_[type] = false;
-			}
-			else
-			{
-				uint32_t gs_input_vertices = 0;
-				if (ST_GeometryShader == type)
-				{
-					switch (cgGetProgramInput(cg_shader))
-					{
-					case CG_POINT:
-						gs_input_type_ = GL_POINTS;
-						gs_input_vertices = 1;
-						break;
-
-					case CG_LINE:
-						gs_input_type_ = GL_LINES;
-						gs_input_vertices = 2;
-						break;
-
-					case CG_LINE_ADJ:
-						gs_input_type_ = GL_LINES_ADJACENCY_EXT;
-						gs_input_vertices = 4;
-						break;
-
-					case CG_TRIANGLE:
-						gs_input_type_ = GL_TRIANGLES;
-						gs_input_vertices = 3;
-						break;
-
-					case CG_TRIANGLE_ADJ:
-						gs_input_type_ = GL_TRIANGLES_ADJACENCY_EXT;
-						gs_input_vertices = 6;
-						break;
-
-					default:
-						BOOST_ASSERT(false);
-						gs_input_type_ = 0;
-						gs_input_vertices = 0;
-						break;
-					}
-
-					switch (cgGetProgramOutput(cg_shader))
-					{
-					case CG_POINT_OUT:
-						gs_output_type_ = GL_POINTS;
-						break;
-
-					case CG_LINE_OUT:
-						gs_output_type_ = GL_LINE_STRIP;
-						break;
-
-					case CG_TRIANGLE_OUT:
-						gs_output_type_ = GL_TRIANGLE_STRIP;
-						break;
-
-					default:
-						BOOST_ASSERT(false);
-						gs_output_type_ = 0;
-						break;
-					}
-				}
-
-				(*glsl_srcs_)[type] = MakeSharedPtr<std::string>(this->ConvertToGLSL(cgGetProgramString(cg_shader, CG_COMPILED_PROGRAM),
-					static_cast<ShaderType>(type), gs_input_vertices, has_gs));
-				(*pnames_)[type] = MakeSharedPtr<std::vector<std::string> >();
-				(*glsl_res_names_)[type] = MakeSharedPtr<std::vector<std::string> >();
-
-				CGparameter cg_param = cgGetFirstParameter(cg_shader, CG_GLOBAL);
-				while (cg_param)
-				{
-					if (cgIsParameterUsed(cg_param, cg_shader)
-						&& (CG_PARAMETERCLASS_OBJECT != cgGetParameterClass(cg_param)))
-					{
-						char const * pname = cgGetParameterName(cg_param);
-						(*pnames_)[type]->push_back(pname);
-
-						char const * glsl_param_name = cgGetParameterResourceName(cg_param);
-						std::string hacked_name = std::string("_") + pname;
-
-						if ((cgGetError() != CG_NO_ERROR) || (nullptr == glsl_param_name))
+						std::vector<std::string>& msgs = err_lines[err_line];
+						bool found = false;
+						typedef KLAYGE_DECLTYPE(msgs) ErrMsgsType;
+						KLAYGE_FOREACH(ErrMsgsType::const_reference msg, msgs)
 						{
-							// Some times cgGetParameterResourceName doesn't work
-							glsl_param_name = hacked_name.c_str();
+							if (msg == err_str)
+							{
+								found = true;
+								break;
+							}
 						}
 
-						(*glsl_res_names_)[type]->push_back(glsl_param_name);
+						if (!found)
+						{
+							msgs.push_back(err_str);
+						}
 					}
-
-					cg_param = cgGetNextParameter(cg_param);
 				}
 
-				if (ST_VertexShader == type)
+				for (KLAYGE_AUTO(iter, err_lines.begin()); iter != err_lines.end(); ++ iter)
 				{
-					cg_param = cgGetFirstParameter(cg_shader, CG_PROGRAM);
+					if (iter->first >= 0)
+					{
+						std::istringstream iss(hlsl_shader_text);
+						std::string s;
+						int line = 1;
+
+						LogInfo("...");
+						while (iss && ((iter->first - line) >= 3))
+						{
+							std::getline(iss, s);
+							++ line;
+						}
+						while (iss && (abs(line - iter->first) < 3))
+						{
+							std::getline(iss, s);
+
+							while (!s.empty() && (('\r' == s.back()) || ('\n' == s.back())))
+							{
+								s.pop_back();
+							}
+
+							LogInfo("%d %s", line, s.c_str());
+
+							++ line;
+						}
+						LogInfo("...");
+					}
+
+					typedef KLAYGE_DECLTYPE(iter->second) ErrMsgsType;
+					KLAYGE_FOREACH(ErrMsgsType::const_reference msg, iter->second)
+					{
+						LogError(msg.c_str());
+					}
+				}
+
+				err_msg->Release();
+			}
+
+			if (code)
+			{
+				try
+				{
+					DXBC2GLSL::DXBC2GLSL dxbc2glsl;
+					dxbc2glsl.FeedDXBC(code->GetBufferPointer(), GSV_120);
+					(*glsl_srcs_)[type] = MakeSharedPtr<std::string>(dxbc2glsl.GLSLString());
+					(*pnames_)[type] = MakeSharedPtr<std::vector<std::string> >();
+					(*glsl_res_names_)[type] = MakeSharedPtr<std::vector<std::string> >();
+
+					for (uint32_t i = 0; i < dxbc2glsl.NumCBuffers(); ++ i)
+					{
+						for (uint32_t j = 0; j < dxbc2glsl.NumVariables(i); ++ j)
+						{
+							if (dxbc2glsl.VariableUsed(i, j))
+							{
+								(*pnames_)[type]->push_back(dxbc2glsl.VariableName(i, j));
+								(*glsl_res_names_)[type]->push_back(dxbc2glsl.VariableName(i, j));
+							}
+						}
+					}
+
+					if (ST_VertexShader == type)
+					{
+						for (uint32_t i = 0; i < dxbc2glsl.NumInputParams(); ++ i)
+						{
+							if (dxbc2glsl.InputParam(i).mask != 0)
+							{
+								std::string semantic = dxbc2glsl.InputParam(i).semantic_name;
+								std::string glsl_param_name = semantic;
+								size_t const semantic_hash = RT_HASH(semantic.c_str());
+
+								VertexElementUsage usage = VEU_Position;
+								uint8_t usage_index = 0;
+								if (CT_HASH("POSITION") == semantic_hash)
+								{
+									usage = VEU_Position;
+									glsl_param_name = "a_gl_Vertex";
+								}
+								else if (CT_HASH("NORMAL") == semantic_hash)
+								{
+									usage = VEU_Normal;
+									glsl_param_name = "a_gl_Normal";
+								}
+								else if ((CT_HASH("COLOR0") == semantic_hash) || (CT_HASH("COLOR") == semantic_hash))
+								{
+									usage = VEU_Diffuse;
+									glsl_param_name = "a_gl_Color";
+								}
+								else if (CT_HASH("COLOR1") == semantic_hash)
+								{
+									usage = VEU_Specular;
+									glsl_param_name = "a_gl_SecondaryColor";
+								}
+								else if (CT_HASH("BLENDWEIGHT") == semantic_hash)
+								{
+									usage = VEU_BlendWeight;
+									glsl_param_name = "BLENDWEIGHT";
+								}
+								else if (CT_HASH("BLENDINDICES") == semantic_hash)
+								{
+									usage = VEU_BlendIndex;
+									glsl_param_name = "BLENDINDICES";
+								}
+								else if (0 == semantic.find("TEXCOORD"))
+								{
+									usage = VEU_TextureCoord;
+									usage_index = static_cast<uint8_t>(boost::lexical_cast<int>(semantic.substr(8)));
+									glsl_param_name = "a_gl_MultiTexCoord" + semantic.substr(8);
+								}
+								else if (CT_HASH("TANGENT") == semantic_hash)
+								{
+									usage = VEU_Tangent;
+									glsl_param_name = "TANGENT";
+								}
+								else if (CT_HASH("BINORMAL") == semantic_hash)
+								{
+									usage = VEU_Binormal;
+									glsl_param_name = "BINORMAL";
+								}
+								else
+								{
+									BOOST_ASSERT(false);
+									usage = VEU_Position;
+									glsl_param_name = "a_gl_Vertex";
+								}
+
+								vs_usages_->push_back(usage);
+								vs_usage_indices_->push_back(usage_index);
+								glsl_vs_attrib_names_->push_back(glsl_param_name);
+							}
+						}
+					}
+
+					use_dxbc2glsl = true;
+				}
+				catch (std::exception& ex)
+				{
+					LogError("Error(s) in conversion:");
+					LogError(ex.what());
+					LogError("Please send this information and your bytecode file to webmaster at klayge.org. We'll fix this ASAP.");
+				}
+
+				code->Release();
+			}
+
+			::FreeLibrary(mod_d3dcompiler);
+		}
+#endif
+
+		if (!use_dxbc2glsl)
+		{
+			OGLRenderFactory& rf = *checked_cast<OGLRenderFactory*>(&Context::Instance().RenderFactoryInstance());
+			RenderEngine& re = rf.RenderEngineInstance();
+			RenderDeviceCaps const & caps = re.DeviceCaps();
+			std::string max_sm_str;
+			{
+				std::stringstream ss;
+				ss << "-DKLAYGE_SHADER_MODEL=" << static_cast<int>(caps.max_shader_model);
+				max_sm_str = ss.str();
+			}
+			std::string max_tex_array_str;
+			{
+				std::stringstream ss;
+				ss << "-DKLAYGE_MAX_TEX_ARRAY_LEN=" << caps.max_texture_array_length;
+				max_tex_array_str = ss.str();
+			}
+			std::string max_tex_depth_str;
+			{
+				std::stringstream ss;
+				ss << "-DKLAYGE_MAX_TEX_DEPTH=" << caps.max_texture_depth;
+				max_tex_depth_str = ss.str();
+			}
+			std::string max_tex_units_str;
+			{
+				std::stringstream ss;
+				ss << "-DKLAYGE_MAX_TEX_UNITS=" << static_cast<int>(caps.max_pixel_texture_units);
+				max_tex_units_str = ss.str();
+			}
+			std::string flipping_str;
+			{
+				std::stringstream ss;
+				ss << "-DKLAYGE_FLIPPING=" << (re.RequiresFlipping() ? -1 : +1);
+				flipping_str = ss.str();
+			}
+			std::string standard_derivatives_str;
+			{
+				std::stringstream ss;
+				ss << "-DKLAYGE_DERIVATIVES=" << (caps.standard_derivatives_support ? 1 : 0);
+				standard_derivatives_str = ss.str();
+			}
+
+			std::string shader_text = this->GenCgShaderText(type, effect, tech, pass);
+
+			std::vector<char const *> args;
+			args.push_back("-DKLAYGE_OPENGL=1");
+			args.push_back(max_sm_str.c_str());
+			args.push_back(max_tex_array_str.c_str());
+			args.push_back(max_tex_depth_str.c_str());
+			args.push_back(max_tex_units_str.c_str());
+			args.push_back("-DKLAYGE_NO_TEX_LOD=0");
+			args.push_back(flipping_str.c_str());
+			args.push_back(standard_derivatives_str.c_str());
+			if (!caps.texture_format_support(EF_BC5)
+				|| !caps.texture_format_support(EF_BC5_SRGB))
+			{
+				args.push_back("-DKLAYGE_BC5_AS_AG");
+			}
+			if (!caps.texture_format_support(EF_BC4)
+				|| !caps.texture_format_support(EF_BC4_SRGB))
+			{
+				args.push_back("-DKLAYGE_BC4_AS_G");
+			}
+			if (!caps.fp_color_support)
+			{
+				args.push_back("-DKLAYGE_NO_FP_COLOR");
+			}
+			if (caps.pack_to_rgba_required)
+			{
+				args.push_back("-DKLAYGE_PACK_TO_RGBA");
+			}
+			switch (type)
+			{
+			case ST_VertexShader:
+				args.push_back("-DKLAYGE_VERTEX_SHADER");
+				break;
+
+			case ST_PixelShader:
+				args.push_back("-DKLAYGE_PIXEL_SHADER");
+				break;
+
+			case ST_GeometryShader:
+				args.push_back("-DKLAYGE_GEOMETRY_SHADER");
+				break;
+
+			case ST_ComputeShader:
+				args.push_back("-DKLAYGE_COMPUTE_SHADER");
+				break;
+
+			case ST_HullShader:
+				args.push_back("-DKLAYGE_HULL_SHADER");
+				break;
+
+			case ST_DomainShader:
+				args.push_back("-DKLAYGE_DOMAIN_SHADER");
+				break;
+
+			default:
+				BOOST_ASSERT(false);
+				break;
+			}
+			args.push_back(nullptr);
+
+			bool has_gs = false;
+			if (!effect.GetShaderDesc(shader_desc_ids[ST_GeometryShader]).func_name.empty())
+			{
+				has_gs = true;
+			}
+
+			is_shader_validate_[type] = true;
+
+			switch (type)
+			{
+			case ST_VertexShader:
+			case ST_PixelShader:
+			case ST_GeometryShader:
+				break;
+
+			default:
+				is_shader_validate_[type] = false;
+				break;
+			}
+
+			if (is_shader_validate_[type])
+			{
+				CGprofile profile;
+				switch (type)
+				{
+				case ST_VertexShader:
+					profile = CG_PROFILE_GLSLV;
+					break;
+
+				case ST_PixelShader:
+					profile = CG_PROFILE_GLSLF;
+					break;
+
+				case ST_GeometryShader:
+					profile = CG_PROFILE_GLSLG;
+					break;
+
+				default:
+					profile = CG_PROFILE_UNKNOWN;
+					break;
+				}
+
+				CGprogram cg_shader = cgCreateProgram(CGContextIniter::Instance().Context(),
+					CG_SOURCE, shader_text.c_str(), profile, sd.func_name.c_str(), &args[0]);
+
+				CGerror error = cgGetError();
+				if (error != CG_NO_ERROR)
+				{
+					if (CG_COMPILER_ERROR == error)
+					{
+						LogError("Error when compiling %s:", sd.func_name.c_str());
+						char const* listing = cgGetLastListing(CGContextIniter::Instance().Context());
+						if (listing)
+						{
+							std::string err_str = listing;
+							std::string::size_type pos = err_str.find(") : error ");
+							if (pos == std::string::npos)
+							{
+								pos = err_str.find(") : warning ");
+							}
+							if (pos != std::string::npos)
+							{
+								std::string part_err_str = err_str.substr(0, pos);
+								pos = part_err_str.rfind("(");
+								part_err_str = part_err_str.substr(pos + 1);
+								int err_line = boost::lexical_cast<int>(part_err_str);
+
+								std::istringstream iss(shader_text);
+								std::string s;
+								int line = 1;
+								LogError("...");
+								while (iss)
+								{
+									std::getline(iss, s);
+									if ((line - err_line > -3) && (line - err_line < 3))
+									{
+										LogError("%d %s", line, s.c_str());
+									}
+									++ line;
+								}
+								LogError("...");
+							}
+
+							LogError(cgGetErrorString(error));
+							LogError(listing);
+							LogError("\n");
+						}
+					}
+
+					is_shader_validate_[type] = false;
+				}
+				else
+				{
+					uint32_t gs_input_vertices = 0;
+					if (ST_GeometryShader == type)
+					{
+						switch (cgGetProgramInput(cg_shader))
+						{
+						case CG_POINT:
+							gs_input_type_ = GL_POINTS;
+							gs_input_vertices = 1;
+							break;
+
+						case CG_LINE:
+							gs_input_type_ = GL_LINES;
+							gs_input_vertices = 2;
+							break;
+
+						case CG_LINE_ADJ:
+							gs_input_type_ = GL_LINES_ADJACENCY_EXT;
+							gs_input_vertices = 4;
+							break;
+
+						case CG_TRIANGLE:
+							gs_input_type_ = GL_TRIANGLES;
+							gs_input_vertices = 3;
+							break;
+
+						case CG_TRIANGLE_ADJ:
+							gs_input_type_ = GL_TRIANGLES_ADJACENCY_EXT;
+							gs_input_vertices = 6;
+							break;
+
+						default:
+							BOOST_ASSERT(false);
+							gs_input_type_ = 0;
+							gs_input_vertices = 0;
+							break;
+						}
+
+						switch (cgGetProgramOutput(cg_shader))
+						{
+						case CG_POINT_OUT:
+							gs_output_type_ = GL_POINTS;
+							break;
+
+						case CG_LINE_OUT:
+							gs_output_type_ = GL_LINE_STRIP;
+							break;
+
+						case CG_TRIANGLE_OUT:
+							gs_output_type_ = GL_TRIANGLE_STRIP;
+							break;
+
+						default:
+							BOOST_ASSERT(false);
+							gs_output_type_ = 0;
+							break;
+						}
+					}
+
+					(*glsl_srcs_)[type] = MakeSharedPtr<std::string>(this->ConvertToGLSL(cgGetProgramString(cg_shader, CG_COMPILED_PROGRAM),
+						static_cast<ShaderType>(type), gs_input_vertices, has_gs));
+					(*pnames_)[type] = MakeSharedPtr<std::vector<std::string> >();
+					(*glsl_res_names_)[type] = MakeSharedPtr<std::vector<std::string> >();
+
+					CGparameter cg_param = cgGetFirstParameter(cg_shader, CG_GLOBAL);
 					while (cg_param)
 					{
 						if (cgIsParameterUsed(cg_param, cg_shader)
-							&& (CG_PARAMETERCLASS_OBJECT != cgGetParameterClass(cg_param))
-							&& ((CG_IN == cgGetParameterDirection(cg_param)) || (CG_INOUT == cgGetParameterDirection(cg_param))))
+							&& (CG_PARAMETERCLASS_OBJECT != cgGetParameterClass(cg_param)))
 						{
-							std::string semantic = cgGetParameterSemantic(cg_param);
-							std::string glsl_param_name = semantic;//cgGetParameterResourceName(cg_param);
-							size_t const semantic_hash = RT_HASH(semantic.c_str());
+							char const * pname = cgGetParameterName(cg_param);
+							(*pnames_)[type]->push_back(pname);
 
-							VertexElementUsage usage = VEU_Position;
-							uint8_t usage_index = 0;
-							if (CT_HASH("POSITION") == semantic_hash)
+							char const * glsl_param_name = cgGetParameterResourceName(cg_param);
+							std::string hacked_name = std::string("_") + pname;
+
+							if ((cgGetError() != CG_NO_ERROR) || (nullptr == glsl_param_name))
 							{
-								usage = VEU_Position;
-								glsl_param_name = "a_gl_Vertex";
-							}
-							else if (CT_HASH("NORMAL") == semantic_hash)
-							{
-								usage = VEU_Normal;
-								glsl_param_name = "a_gl_Normal";
-							}
-							else if ((CT_HASH("COLOR0") == semantic_hash) || (CT_HASH("COLOR") == semantic_hash))
-							{
-								usage = VEU_Diffuse;
-								glsl_param_name = "a_gl_Color";
-							}
-							else if (CT_HASH("COLOR1") == semantic_hash)
-							{
-								usage = VEU_Specular;
-								glsl_param_name = "a_gl_SecondaryColor";
-							}
-							else if (CT_HASH("BLENDWEIGHT") == semantic_hash)
-							{
-								usage = VEU_BlendWeight;
-								glsl_param_name = "BLENDWEIGHT";
-							}
-							else if (CT_HASH("BLENDINDICES") == semantic_hash)
-							{
-								usage = VEU_BlendIndex;
-								glsl_param_name = "BLENDINDICES";
-							}
-							else if (0 == semantic.find("TEXCOORD"))
-							{
-								usage = VEU_TextureCoord;
-								usage_index = static_cast<uint8_t>(boost::lexical_cast<int>(semantic.substr(8)));
-								glsl_param_name = "a_gl_MultiTexCoord" + semantic.substr(8);
-							}
-							else if (CT_HASH("TANGENT") == semantic_hash)
-							{
-								usage = VEU_Tangent;
-								glsl_param_name = "TANGENT";
-							}
-							else if (CT_HASH("BINORMAL") == semantic_hash)
-							{
-								usage = VEU_Binormal;
-								glsl_param_name = "BINORMAL";
-							}
-							else
-							{
-								BOOST_ASSERT(false);
-								usage = VEU_Position;
-								glsl_param_name = "a_gl_Vertex";
+								// Some times cgGetParameterResourceName doesn't work
+								glsl_param_name = hacked_name.c_str();
 							}
 
-							vs_usages_->push_back(usage);
-							vs_usage_indices_->push_back(usage_index);
-							glsl_vs_attrib_names_->push_back(glsl_param_name);
+							(*glsl_res_names_)[type]->push_back(glsl_param_name);
 						}
 
 						cg_param = cgGetNextParameter(cg_param);
 					}
-				}
 
-				cgDestroyProgram(cg_shader);
+					if (ST_VertexShader == type)
+					{
+						glsl_vs_attrib_names_->clear();
+
+						cg_param = cgGetFirstParameter(cg_shader, CG_PROGRAM);
+						while (cg_param)
+						{
+							if (cgIsParameterUsed(cg_param, cg_shader)
+								&& (CG_PARAMETERCLASS_OBJECT != cgGetParameterClass(cg_param))
+								&& ((CG_IN == cgGetParameterDirection(cg_param)) || (CG_INOUT == cgGetParameterDirection(cg_param))))
+							{
+								std::string semantic = cgGetParameterSemantic(cg_param);
+								std::string glsl_param_name = semantic;//cgGetParameterResourceName(cg_param);
+								size_t const semantic_hash = RT_HASH(semantic.c_str());
+
+								VertexElementUsage usage = VEU_Position;
+								uint8_t usage_index = 0;
+								if (CT_HASH("POSITION") == semantic_hash)
+								{
+									usage = VEU_Position;
+									glsl_param_name = "a_gl_Vertex";
+								}
+								else if (CT_HASH("NORMAL") == semantic_hash)
+								{
+									usage = VEU_Normal;
+									glsl_param_name = "a_gl_Normal";
+								}
+								else if ((CT_HASH("COLOR0") == semantic_hash) || (CT_HASH("COLOR") == semantic_hash))
+								{
+									usage = VEU_Diffuse;
+									glsl_param_name = "a_gl_Color";
+								}
+								else if (CT_HASH("COLOR1") == semantic_hash)
+								{
+									usage = VEU_Specular;
+									glsl_param_name = "a_gl_SecondaryColor";
+								}
+								else if (CT_HASH("BLENDWEIGHT") == semantic_hash)
+								{
+									usage = VEU_BlendWeight;
+									glsl_param_name = "BLENDWEIGHT";
+								}
+								else if (CT_HASH("BLENDINDICES") == semantic_hash)
+								{
+									usage = VEU_BlendIndex;
+									glsl_param_name = "BLENDINDICES";
+								}
+								else if (0 == semantic.find("TEXCOORD"))
+								{
+									usage = VEU_TextureCoord;
+									usage_index = static_cast<uint8_t>(boost::lexical_cast<int>(semantic.substr(8)));
+									glsl_param_name = "a_gl_MultiTexCoord" + semantic.substr(8);
+								}
+								else if (CT_HASH("TANGENT") == semantic_hash)
+								{
+									usage = VEU_Tangent;
+									glsl_param_name = "TANGENT";
+								}
+								else if (CT_HASH("BINORMAL") == semantic_hash)
+								{
+									usage = VEU_Binormal;
+									glsl_param_name = "BINORMAL";
+								}
+								else
+								{
+									BOOST_ASSERT(false);
+									usage = VEU_Position;
+									glsl_param_name = "a_gl_Vertex";
+								}
+
+								vs_usages_->push_back(usage);
+								vs_usage_indices_->push_back(usage_index);
+								glsl_vs_attrib_names_->push_back(glsl_param_name);
+							}
+
+							cg_param = cgGetNextParameter(cg_param);
+						}
+					}
+
+					cgDestroyProgram(cg_shader);
+				}
 			}
 		}
 
@@ -2787,6 +3518,43 @@ namespace KlayGE
 								pos += 4;
 								std::string::size_type pos2 = err_str.find(':', pos + 1);
 								std::string part_err_str = err_str.substr(pos, pos2 - pos);
+								int err_line = boost::lexical_cast<int>(part_err_str);
+
+								std::istringstream iss(glsl);
+								std::string s;
+								int line = 1;
+								LogError("...");
+								while (iss)
+								{
+									std::getline(iss, s);
+									if ((line - err_line > -3) && (line - err_line < 3))
+									{
+										LogError("%d %s", line, s.c_str());
+									}
+									++ line;
+								}
+								LogError("...");
+							}
+
+							LogError(err_str.c_str());
+							LogError("\n");
+						}
+					}
+				}
+				else if (re.HackForNV())
+				{
+					std::istringstream err_iss(&info[0]);
+					std::string err_str;
+					while (err_iss)
+					{
+						std::getline(err_iss, err_str);
+						if (!err_str.empty())
+						{
+							std::string::size_type pos = err_str.find(") : error");
+							if (pos != std::string::npos)
+							{
+								std::string::size_type pos2 = err_str.find('(') + 1;
+								std::string part_err_str = err_str.substr(pos2, pos - pos2);
 								int err_line = boost::lexical_cast<int>(part_err_str);
 
 								std::istringstream iss(glsl);

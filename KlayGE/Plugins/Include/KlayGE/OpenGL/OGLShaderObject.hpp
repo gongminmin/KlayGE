@@ -33,8 +33,10 @@ namespace KlayGE
 		OGLShaderObject();
 		~OGLShaderObject();
 
-		std::string GenShaderText(ShaderType type, RenderEffect const & effect,
+		std::string GenCgShaderText(ShaderType type, RenderEffect const & effect,
 			RenderTechnique const & tech, RenderPass const & pass);
+		std::string GenHLSLShaderText(ShaderType type, RenderEffect const & effect,
+			RenderTechnique const & tech, RenderPass const & pass) const;
 
 		bool AttachNativeShader(ShaderType type, RenderEffect const & effect, std::vector<uint32_t> const & shader_desc_ids,
 			std::vector<uint8_t> const & native_shader_block);
