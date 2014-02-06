@@ -147,12 +147,16 @@ class compiler_info:
 				if (arch.find("_app") > 0):
 					toolset = "v120"
 					is_winrt = True
-				if ("x86" == arch) or ("x86_app" == arch):
+				if "x86" == arch:
 					arch_list.append((arch, "Visual Studio 12", toolset, is_winrt))
+				elif "x86_app" == arch:
+					arch_list.append((arch, "Visual Studio 12 WinRT", toolset, is_winrt))
 				elif "arm_app" == arch:
-					arch_list.append((arch, "Visual Studio 12 ARM", toolset, is_winrt))
-				elif ("x64" == arch) or ("x64_app" == arch):
+					arch_list.append((arch, "Visual Studio 12 ARM WinRT", toolset, is_winrt))
+				elif "x64" == arch:
 					arch_list.append((arch, "Visual Studio 12 Win64", toolset, is_winrt))
+				elif "x64_app" == arch:
+					arch_list.append((arch, "Visual Studio 12 Win64 WinRT", toolset, is_winrt))
 		elif "vc11" == compiler:
 			compiler_name = "vc"
 			compiler_version = 11
@@ -161,12 +165,16 @@ class compiler_info:
 				if (arch.find("_app") > 0):
 					toolset = "v110"
 					is_winrt = True
-				if ("x86" == arch) or ("x86_app" == arch):
+				if "x86" == arch:
 					arch_list.append((arch, "Visual Studio 11", toolset, is_winrt))
+				elif "x86_app" == arch:
+					arch_list.append((arch, "Visual Studio 11 WinRT", toolset, is_winrt))
 				elif "arm_app" == arch:
-					arch_list.append((arch, "Visual Studio 11 ARM", toolset, is_winrt))
-				elif ("x64" == arch) or ("x64_app" == arch):
+					arch_list.append((arch, "Visual Studio 11 ARM WinRT", toolset, is_winrt))
+				elif "x64" == arch:
 					arch_list.append((arch, "Visual Studio 11 Win64", toolset, is_winrt))
+				elif "x64_app" == arch:
+					arch_list.append((arch, "Visual Studio 11 Win64 WinRT", toolset, is_winrt))
 		elif "vc10" == compiler:
 			compiler_name = "vc"
 			compiler_version = 10
@@ -222,7 +230,7 @@ class compiler_info:
 		self.prefer_static = prefer_static
 
 	def msvc_add_build_command(self, batch_cmd, sln_name, proj_name, config, arch = ""):
-		if self.use_msbuild and (arch != "ARM"):
+		if self.use_msbuild:
 			batch_cmd.add_command('@SET VisualStudioVersion=%d.0' % self.version)
 			if len(proj_name) != 0:
 				file_name = "%s.%s" % (proj_name, self.proj_ext_name)
