@@ -124,4 +124,10 @@ namespace DXBC2GLSL
 		BOOST_ASSERT(index < shader_->resource_bindings.size());
 		return shader_->resource_bindings[index].bind_point;
 	}
+
+	bool DXBC2GLSL::ResourceUsed(uint32_t index) const
+	{
+		BOOST_ASSERT(index < shader_->resource_bindings.size());
+		return !(shader_->resource_bindings[index].flags & DSIF_Unused);
+	}
 }

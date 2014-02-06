@@ -142,6 +142,17 @@ struct DXBCSignatureParamDesc
 	uint32_t stream;
 };
 
+enum DXBCShaderInputFlags
+{
+	DSIF_UserPacked = 0x1,
+	DSIF_ComparisonSampler = 0x2,
+	DSIF_TextureComponent0 = 0x4,
+	DSIF_TextureComponent1 = 0x8,
+	DSIF_TextureComponents = 0xC,
+	DSIF_Unused = 0x10,
+	DSIF_ForceDWORD = 0x7FFFFFFF
+};
+
 // Same layout with D3D11_SHADER_INPUT_BIND_DESC
 struct DXBCInputBindDesc
 {
@@ -150,7 +161,7 @@ struct DXBCInputBindDesc
 	uint32_t bind_point;
 	uint32_t bind_count;
 	
-	uint32_t flags;
+	uint32_t flags; // Combination of DXBCShaderInputFlags
 	ShaderResourceReturnType return_type;
 	ShaderSRVDimension dimension;
 	uint32_t num_samples;

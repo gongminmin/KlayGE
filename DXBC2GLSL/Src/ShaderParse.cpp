@@ -547,7 +547,7 @@ struct ShaderParser
 
 		uint32_t const * resource_binding_tokens = reinterpret_cast<uint32_t const *>(reinterpret_cast<char const *>(first_token) + resource_binding_offset);
 		program->resource_bindings.resize(num_resource_bindings);
-		for(uint32_t i = 0; i < num_resource_bindings; ++ i)
+		for (uint32_t i = 0; i < num_resource_bindings; ++ i)
 		{
 			DXBCInputBindDesc& bind = program->resource_bindings[i];
 			uint32_t name_offset = LE32ToNative(*resource_binding_tokens);
@@ -619,7 +619,7 @@ struct ShaderParser
 				{
 					var.var_desc.default_val = NULL;
 				}
-				if(type_offset)
+				if (type_offset)
 				{
 					var.has_type_desc = true;
 					uint16_t const * type_token = reinterpret_cast<uint16_t const *>(reinterpret_cast<char const *>(first_token) + type_offset);
@@ -639,12 +639,12 @@ struct ShaderParser
 					var.type_desc.members = LE16ToNative(*type_token);
 					++ type_token;
 
-					uint32_t varMemberOffset = LE16ToNative(*type_token) << 16;
+					uint32_t var_member_offset = LE16ToNative(*type_token) << 16;
 					++ type_token;
-					varMemberOffset |= LE16ToNative(*type_token);
+					var_member_offset |= LE16ToNative(*type_token);
 					++ type_token;
 					
-					var.type_desc.offset = varMemberOffset;
+					var.type_desc.offset = var_member_offset;
 					var.type_desc.name = ShaderVariableTypeName(var.type_desc.type);
 				}
 				else
@@ -653,7 +653,6 @@ struct ShaderParser
 				}
 			}
 
-			//cb desc
 			cb.desc.name = reinterpret_cast<char const *>(first_token) + name_offset;
 			cb.desc.size = *cb_tokens;
 			++ cb_tokens;
@@ -686,7 +685,7 @@ struct ShaderParser
 	uint32_t ParseSignature(DXBCChunkSignature const & sig, uint32_t fourcc) const
 	{
 		std::vector<DXBCSignatureParamDesc>* params = NULL;
-		switch(fourcc)
+		switch (fourcc)
 		{
 		case FOURCC_ISGN:
 			params = &program->params_in;

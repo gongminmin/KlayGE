@@ -52,7 +52,53 @@ int main(int argc, char** argv)
 		{
 			out << glsl;
 		}
-		std::cout << glsl;
+		std::cout << glsl << std::endl;
+
+		if (dxbc2glsl.NumInputParams() > 0)
+		{
+			std::cout << "Input:" << std::endl;
+			for (uint32_t i = 0; i < dxbc2glsl.NumInputParams(); ++ i)
+			{
+				std::cout << "\t" << dxbc2glsl.InputParam(i).semantic_name
+					<< dxbc2glsl.InputParam(i).semantic_index << std::endl;
+			}
+			std::cout << std::endl;
+		}
+		if (dxbc2glsl.NumOutputParams() > 0)
+		{
+			std::cout << "Output:" << std::endl;
+			for (uint32_t i = 0; i < dxbc2glsl.NumOutputParams(); ++ i)
+			{
+				std::cout << "\t" << dxbc2glsl.OutputParam(i).semantic_name
+					<< dxbc2glsl.OutputParam(i).semantic_index << std::endl;
+			}
+			std::cout << std::endl;
+		}
+
+		for (uint32_t i = 0; i < dxbc2glsl.NumCBuffers(); ++ i)
+		{
+			std::cout << "CBuffer " << i << ":" << std::endl;
+			for (uint32_t j = 0; j < dxbc2glsl.NumVariables(i); ++ j)
+			{
+				std::cout << "\t" << dxbc2glsl.VariableName(i, j)
+					<< ' ' << (dxbc2glsl.VariableUsed(i, j) ? "USED" : "UNUSED");
+				std::cout << std::endl;
+			}
+			std::cout << std::endl;
+		}
+
+		if (dxbc2glsl.NumResources() > 0)
+		{
+			std::cout << "Resource:" << std::endl;
+			for (uint32_t i = 0; i < dxbc2glsl.NumResources(); ++ i)
+			{
+				std::cout << "\t" << dxbc2glsl.ResourceName(i) << " : "
+					<< dxbc2glsl.ResourceBindPoint(i)
+					<< ' ' << (dxbc2glsl.ResourceUsed(i) ? "USED" : "UNUSED");
+				std::cout << std::endl;
+			}
+			std::cout << std::endl;
+		}
 	}
 	catch (std::exception& ex)
 	{
