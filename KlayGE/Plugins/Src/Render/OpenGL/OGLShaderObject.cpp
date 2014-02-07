@@ -1075,7 +1075,7 @@ namespace KlayGE
 								++ beg;
 							}
 
-							std::string combined_sampler_name = sample_tokens[0] + "__" + sample_tokens[4];
+							std::string combined_sampler_name = sample_tokens[0] + "_" + sample_tokens[4];
 							bool found = false;
 							for (uint32_t j = 0; j < tex_sampler_binds_.size(); ++ j)
 							{
@@ -1949,7 +1949,7 @@ namespace KlayGE
 						std::memcpy(&sampler_name[0], nsbp, len8);
 						nsbp += len8;
 
-						std::string combined_sampler_name = tex_name + "__" + sampler_name;
+						std::string combined_sampler_name = tex_name + "_" + sampler_name;
 
 						bool found = false;
 						for (uint32_t k = 0; k < tex_sampler_binds_.size(); ++ k)
@@ -2523,6 +2523,50 @@ namespace KlayGE
 						}
 					}
 
+					std::vector<char const *> tex_names;
+					std::vector<char const *> sampler_names;
+					for (uint32_t i = 0; i < dxbc2glsl.NumResources(); ++ i)
+					{
+						if (dxbc2glsl.ResourceUsed(i))
+						{
+							if (SIT_TEXTURE == dxbc2glsl.ResourceType(i))
+							{
+								tex_names.push_back(dxbc2glsl.ResourceName(i));
+							}
+							else if (SIT_SAMPLER == dxbc2glsl.ResourceType(i))
+							{
+								sampler_names.push_back(dxbc2glsl.ResourceName(i));
+							}
+						}
+					}
+
+					for (size_t i = 0; i < tex_names.size(); ++ i)
+					{
+						RenderEffectParameterPtr const & param = effect.ParameterByName(tex_names[i]);
+						for (size_t j = 0; j < sampler_names.size(); ++ j)
+						{
+							std::string combined_sampler_name = std::string(tex_names[i]) + "_" + sampler_names[j];
+							bool found = false;
+							for (uint32_t k = 0; k < tex_sampler_binds_.size(); ++ k)
+							{
+								if (get<0>(tex_sampler_binds_[k]) == combined_sampler_name)
+								{
+									get<3>(tex_sampler_binds_[k]) |= 1UL << type;
+									found = true;
+									break;
+								}
+							}
+							if (!found)
+							{
+								tex_sampler_binds_.push_back(KlayGE::make_tuple(combined_sampler_name,
+									param, effect.ParameterByName(sampler_names[j]), 1UL << type));
+
+								(*pnames_)[type]->push_back(combined_sampler_name);
+								(*glsl_res_names_)[type]->push_back(combined_sampler_name);
+							}
+						}
+					}
+
 					if (ST_VertexShader == type)
 					{
 						for (uint32_t i = 0; i < dxbc2glsl.NumInputParams(); ++ i)
@@ -2530,6 +2574,7 @@ namespace KlayGE
 							if (dxbc2glsl.InputParam(i).mask != 0)
 							{
 								std::string semantic = dxbc2glsl.InputParam(i).semantic_name;
+								uint32_t semantic_index = dxbc2glsl.InputParam(i).semantic_index;
 								std::string glsl_param_name = semantic;
 								size_t const semantic_hash = RT_HASH(semantic.c_str());
 
@@ -2538,54 +2583,57 @@ namespace KlayGE
 								if (CT_HASH("POSITION") == semantic_hash)
 								{
 									usage = VEU_Position;
-									glsl_param_name = "a_gl_Vertex";
+									glsl_param_name = "POSITION0";
 								}
 								else if (CT_HASH("NORMAL") == semantic_hash)
 								{
 									usage = VEU_Normal;
-									glsl_param_name = "a_gl_Normal";
+									glsl_param_name = "NORMAL0";
 								}
-								else if ((CT_HASH("COLOR0") == semantic_hash) || (CT_HASH("COLOR") == semantic_hash))
+								else if (CT_HASH("COLOR") == semantic_hash)
 								{
-									usage = VEU_Diffuse;
-									glsl_param_name = "a_gl_Color";
-								}
-								else if (CT_HASH("COLOR1") == semantic_hash)
-								{
-									usage = VEU_Specular;
-									glsl_param_name = "a_gl_SecondaryColor";
+									if (0 == semantic_index)
+									{
+										usage = VEU_Diffuse;
+										glsl_param_name = "COLOR0";
+									}
+									else
+									{
+										usage = VEU_Specular;
+										glsl_param_name = "COLOR1";
+									}
 								}
 								else if (CT_HASH("BLENDWEIGHT") == semantic_hash)
 								{
 									usage = VEU_BlendWeight;
-									glsl_param_name = "BLENDWEIGHT";
+									glsl_param_name = "BLENDWEIGHT0";
 								}
 								else if (CT_HASH("BLENDINDICES") == semantic_hash)
 								{
 									usage = VEU_BlendIndex;
-									glsl_param_name = "BLENDINDICES";
+									glsl_param_name = "BLENDINDICES0";
 								}
 								else if (0 == semantic.find("TEXCOORD"))
 								{
 									usage = VEU_TextureCoord;
-									usage_index = static_cast<uint8_t>(boost::lexical_cast<int>(semantic.substr(8)));
-									glsl_param_name = "a_gl_MultiTexCoord" + semantic.substr(8);
+									usage_index = static_cast<uint8_t>(semantic_index);
+									glsl_param_name = "TEXCOORD" + boost::lexical_cast<std::string>(semantic_index);
 								}
 								else if (CT_HASH("TANGENT") == semantic_hash)
 								{
 									usage = VEU_Tangent;
-									glsl_param_name = "TANGENT";
+									glsl_param_name = "TANGENT0";
 								}
 								else if (CT_HASH("BINORMAL") == semantic_hash)
 								{
 									usage = VEU_Binormal;
-									glsl_param_name = "BINORMAL";
+									glsl_param_name = "BINORMAL0";
 								}
 								else
 								{
 									BOOST_ASSERT(false);
 									usage = VEU_Position;
-									glsl_param_name = "a_gl_Vertex";
+									glsl_param_name = "POSITION0";
 								}
 
 								vs_usages_->push_back(usage);

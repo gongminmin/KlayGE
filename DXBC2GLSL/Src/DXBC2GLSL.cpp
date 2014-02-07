@@ -125,6 +125,12 @@ namespace DXBC2GLSL
 		return shader_->resource_bindings[index].bind_point;
 	}
 
+	ShaderInputType DXBC2GLSL::ResourceType(uint32_t index) const
+	{
+		BOOST_ASSERT(index < shader_->resource_bindings.size());
+		return shader_->resource_bindings[index].type;
+	}
+
 	bool DXBC2GLSL::ResourceUsed(uint32_t index) const
 	{
 		BOOST_ASSERT(index < shader_->resource_bindings.size());

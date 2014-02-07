@@ -27,6 +27,11 @@ enum GLSLRules
 	GSR_GlobalUniformsInUBO = 1UL << 1,		// Set means collect global uniforms in uniform block named $Globals.
 	GSR_UseUBO = 1UL << 2,					// Set means generating uniform blocks.
 	GSR_ExplicitPSOutputLayout = 1UL << 3,
+	GSR_ExplicitInputLayout = 1UL << 4,
+	GSR_UIntType = 1UL << 5,
+	GSR_GenericTexture = 1UL << 6,
+	GSR_PSInterpolation = 1UL << 7,
+	GSR_InOutPrefix = 1UL << 8,
 	GSR_ForceUInt32 = 0xFFFFFFFF
 };
 
@@ -39,7 +44,8 @@ public:
 	void ToGLSL(std::ostream& out);
 
 private:
-	void ToDeclarations(std::ostream& out, ShaderDecl const & dcl, uint32_t& clip_distance_index);
+	void ToDefines(std::ostream& out, ShaderDecl const & dcl, uint32_t& clip_distance_index);
+	void ToDeclarations(std::ostream& out, ShaderDecl const & dcl);
 	void ToInstructions(std::ostream& out, ShaderInstruction const & insn) const;
 	void ToOperands(std::ostream& out, ShaderOperand const & op, ShaderImmType imm_type, bool mask = true, bool dcl_array = false) const;
 	int ToSingleComponentSelector(std::ostream& out, ShaderOperand const & op, int i, bool dot = true) const;
