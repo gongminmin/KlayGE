@@ -7,6 +7,7 @@ from build_external import build_external_libs
 from blib_util import *
 from build_KFL import *
 from build_glloader import *
+from build_DXBC2GLSL import *
 from build_kfont import *
 from build_MeshMLLib import *
 from build_KlayGE import *
@@ -23,6 +24,9 @@ if __name__ == "__main__":
 
 	print("Building glloader...")
 	build_glloader(ci)
+
+	print("Building DXBC2GLSL...")
+	build_DXBC2GLSL(ci)
 
 	print("Building kfont...")
 	build_kfont(ci)

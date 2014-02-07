@@ -1142,7 +1142,7 @@ void GLSLGen::ToInstructions(std::ostream& out, ShaderInstruction const & insn) 
 		// r0.xy=equal();
 		// r0.x=r0.x?-1:0;
 		// r0.y=r0.y?-1:0;
-		if (this->IsImmediateNumber(*insn.ops[1]) || this->GetOperandComponentNum(*insn.ops[1]) == 1)
+		if (1 == this->GetOperandComponentNum(*insn.ops[1]))
 		{
 			this->ToOperands(out, *insn.ops[0], sit);
 			out << " = float(";
@@ -1166,7 +1166,7 @@ void GLSLGen::ToInstructions(std::ostream& out, ShaderInstruction const & insn) 
 
 	case SO_NE:
 	case SO_INE:
-		if (this->IsImmediateNumber(*insn.ops[1]) || this->GetOperandComponentNum(*insn.ops[1]) == 1)
+		if (1 == this->GetOperandComponentNum(*insn.ops[1]))
 		{
 			this->ToOperands(out, *insn.ops[0], sit);
 			out << " = float(";
@@ -1191,7 +1191,7 @@ void GLSLGen::ToInstructions(std::ostream& out, ShaderInstruction const & insn) 
 	case SO_LT:
 	case SO_ILT:
 	case SO_ULT:
-		if (this->IsImmediateNumber(*insn.ops[1]) || this->GetOperandComponentNum(*insn.ops[1]) == 1)
+		if (1 == this->GetOperandComponentNum(*insn.ops[1]))
 		{
 			this->ToOperands(out, *insn.ops[0], sit);
 			out << " = float(";
@@ -1216,7 +1216,7 @@ void GLSLGen::ToInstructions(std::ostream& out, ShaderInstruction const & insn) 
 	case SO_GE:
 	case SO_IGE:
 	case SO_UGE:
-		if (this->IsImmediateNumber(*insn.ops[1]) || this->GetOperandComponentNum(*insn.ops[1]) == 1)
+		if (1 == this->GetOperandComponentNum(*insn.ops[1]))
 		{
 			this->ToOperands(out, *insn.ops[0], sit);
 			out << " = float(";
@@ -1300,7 +1300,14 @@ void GLSLGen::ToInstructions(std::ostream& out, ShaderInstruction const & insn) 
 			selector[i] = this->ToSingleComponentSelector(out, *insn.ops[0], i, 0 == i);
 		}
 		out << " = ";
-		out << "vec" << num_comps << "(";
+		if (1 == num_comps)
+		{
+			out << "float(";
+		}
+		else
+		{
+			out << "vec" << num_comps << "(";
+		}
 		for (int i = 0; i < num_comps; ++ i)
 		{
 			if (i != 0)
@@ -1423,7 +1430,7 @@ void GLSLGen::ToInstructions(std::ostream& out, ShaderInstruction const & insn) 
 	case SO_SINCOS:
 		if (SOT_NULL == insn.ops[0]->type)
 		{
-			this->ToOperands(out, *insn.ops[0], sit);
+			this->ToOperands(out, *insn.ops[1], sit);
 			out << " = vec4(sin(";
 			this->ToOperands(out, *insn.ops[2], sit);
 			out << "))";
@@ -1436,7 +1443,7 @@ void GLSLGen::ToInstructions(std::ostream& out, ShaderInstruction const & insn) 
 			{
 				out << "\n";
 			}
-			this->ToOperands(out, *insn.ops[1], sit);
+			this->ToOperands(out, *insn.ops[0], sit);
 			out << " = vec4(cos(";
 			this->ToOperands(out, *insn.ops[2], sit);
 			out << "))";
@@ -4586,7 +4593,7 @@ void GLSLGen::ToOperandName(std::ostream& out, ShaderOperand const & op, bool* n
 							{
 								out << var_iter->var_desc.name;
 								//ajudge which cb member array element it's located in
-								if (element_count)
+								if (element_count != 0)
 								{
 									element_index = (16 * register_index - var_iter->var_desc.start_offset) / 16;
 									out << "[" << element_index << "]";
@@ -4594,7 +4601,7 @@ void GLSLGen::ToOperandName(std::ostream& out, ShaderOperand const & op, bool* n
 								// array is not packed, so doesn't need remap component_selector
 								// if not, because of register packing, we need to remap it.
 								// see: http://msdn.microsoft.com/zh-cn/library/windows/desktop/bb509632
-								if (element_count == 0)
+								if (0 == element_count)
 								{
 									*need_comps = false;
 									if ((SVC_VECTOR == var_iter->type_desc.var_class) && !no_swizzle)
@@ -4616,6 +4623,10 @@ void GLSLGen::ToOperandName(std::ostream& out, ShaderOperand const & op, bool* n
 											out << "xyzw"[remapped_component];
 										}
 									}
+								}
+								else if (SVC_SCALAR == var_iter->type_desc.var_class)
+								{
+									*need_comps = false;
 								}
 							}
 							else

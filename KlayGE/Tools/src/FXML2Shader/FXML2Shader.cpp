@@ -303,6 +303,7 @@ int main(int argc, char* argv[])
 
 	Context::Instance().LoadCfg("KlayGE.cfg");
 	ContextCfg context_cfg = Context::Instance().Config();
+	context_cfg.render_factory_name = "D3D11";
 	context_cfg.graphics_cfg.hide_win = true;
 	context_cfg.graphics_cfg.hdr = false;
 	Context::Instance().Config(context_cfg);
