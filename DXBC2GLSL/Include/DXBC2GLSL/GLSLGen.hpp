@@ -32,6 +32,9 @@ enum GLSLRules
 	GSR_GenericTexture = 1UL << 6,
 	GSR_PSInterpolation = 1UL << 7,
 	GSR_InOutPrefix = 1UL << 8,
+	GSR_Int64Type = 1UL << 9,
+	GSR_TextureGrad = 1UL << 10,
+	GSR_BitwiseOp = 1UL << 11,
 	GSR_ForceUInt32 = 0xFFFFFFFF
 };
 
@@ -47,9 +50,9 @@ private:
 	void ToDefines(std::ostream& out, ShaderDecl const & dcl, uint32_t& clip_distance_index);
 	void ToDeclarations(std::ostream& out, ShaderDecl const & dcl);
 	void ToInstructions(std::ostream& out, ShaderInstruction const & insn) const;
-	void ToOperands(std::ostream& out, ShaderOperand const & op, ShaderImmType imm_type, bool mask = true, bool dcl_array = false) const;
+	void ToOperands(std::ostream& out, ShaderOperand const & op, ShaderImmType imm_type, bool mask = true, bool dcl_array = false, bool no_swizzle = false) const;
 	int ToSingleComponentSelector(std::ostream& out, ShaderOperand const & op, int i, bool dot = true) const;
-	void ToOperandName(std::ostream& out, ShaderOperand const & op, bool* need_idx, bool* need_comps) const;
+	void ToOperandName(std::ostream& out, ShaderOperand const & op, bool* need_idx, bool* need_comps, bool no_swizzle = false) const;
 	void ToComponentSelectors(std::ostream& out, ShaderOperand const & op, bool dot = true) const;
 	void ToTemps(std::ostream& out, ShaderDecl const & dcl);
 	bool IsImmediateNumber(ShaderOperand const & op) const;

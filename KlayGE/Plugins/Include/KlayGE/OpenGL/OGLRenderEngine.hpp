@@ -97,6 +97,7 @@ namespace KlayGE
 		void Uniform4iv(GLint location, GLsizei count, GLint const * value);
 		void Uniform4uiv(GLint location, GLsizei count, GLuint const * value);
 		void Uniform4fv(GLint location, GLsizei count, GLfloat const * value);
+		void UniformMatrix4fv(GLint location, GLsizei count, GLboolean transpose, GLfloat const * value);
 
 		void EnableFramebufferSRGB(bool srgb);
 

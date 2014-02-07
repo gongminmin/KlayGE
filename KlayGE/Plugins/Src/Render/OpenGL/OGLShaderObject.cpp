@@ -586,7 +586,11 @@ namespace
 			param_->Value(v);
 
 			OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+#if USE_DXBC2GLSL
+			re.UniformMatrix4fv(location_, 1, false, &v[0]);
+#else
 			re.Uniform4fv(location_, 4, &v[0]);
+#endif
 		}
 
 	private:
@@ -950,7 +954,11 @@ namespace
 			if (!v.empty())
 			{
 				OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-				re.Uniform4fv(location_, static_cast<long>(v.size()) * 4, &v[0][0]);
+#if USE_DXBC2GLSL
+				re.UniformMatrix4fv(location_, static_cast<GLsizei>(v.size()), false, &v[0][0]);
+#else
+				re.Uniform4fv(location_, static_cast<GLsizei>(v.size()) * 4, &v[0][0]);
+#endif
 			}
 		}
 

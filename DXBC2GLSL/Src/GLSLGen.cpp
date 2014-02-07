@@ -44,6 +44,7 @@ uint32_t GLSLGen::DefaultRules(GLSLVersion version)
 		rules |= GSR_GenericTexture;
 		rules |= GSR_PSInterpolation;
 		rules |= GSR_InOutPrefix;
+		rules |= GSR_TextureGrad;
 	}
 	else if (version >= GSV_140)
 	{
@@ -61,6 +62,7 @@ uint32_t GLSLGen::DefaultRules(GLSLVersion version)
 	}
 	else if (version >= GSV_400)
 	{
+		rules |= GSR_Int64Type;
 	}
 	else if (version >= GSV_410)
 	{
@@ -960,6 +962,7 @@ void GLSLGen::ToDeclarations(std::ostream& out, ShaderDecl const & dcl)
 
 void GLSLGen::ToInstructions(std::ostream& out, ShaderInstruction const & insn) const
 {
+	int selector[4] = { 0 };
 	ShaderImmType sit = GetImmType(insn.opcode);
 	int num_comps = 0;
 	switch (insn.opcode)
@@ -1146,32 +1149,18 @@ void GLSLGen::ToInstructions(std::ostream& out, ShaderInstruction const & insn) 
 			this->ToOperands(out, *insn.ops[1], sit);
 			out << " == ";
 			this->ToOperands(out, *insn.ops[2], sit);
-			out << ");\n";
+			out << ");";
 		}
 		else
 		{
 			this->ToOperands(out, *insn.ops[0], sit);
-			out << " = vec4(equal(";
+			out << " = vec4(equal(vec4(";
 			this->ToOperands(out, *insn.ops[1], sit);
-			out << ", ";
+			out << "), ";
 			this->ToOperands(out, *insn.ops[2], sit);
 			out << "))";
 			this->ToComponentSelectors(out, *insn.ops[0]);
-			out << ";\n";
-		}
-		num_comps = this->GetOperandComponentNum(*insn.ops[0]);
-		for (int i = 0; i < num_comps; i++)
-		{
-			this->ToOperands(out, *insn.ops[0], sit, false);
-			this->ToSingleComponentSelector(out, *insn.ops[0], i);
-			out << " = bool(";
-			this->ToOperands(out, *insn.ops[0], sit, false);
-			this->ToSingleComponentSelector(out, *insn.ops[0], i);
-			out << ") ? -1.0 : 0.0;";
-			if (i != num_comps - 1)
-			{
-				out << "\n";
-			}
+			out << ";";
 		}
 		break;
 
@@ -1184,32 +1173,18 @@ void GLSLGen::ToInstructions(std::ostream& out, ShaderInstruction const & insn) 
 			this->ToOperands(out, *insn.ops[1], sit);
 			out << " != ";
 			this->ToOperands(out, *insn.ops[2], sit);
-			out << ");\n";
+			out << ");";
 		}
 		else
 		{
 			this->ToOperands(out, *insn.ops[0], sit);
-			out << " = vec4(notEqual(";
+			out << " = vec4(notEqual(vec4(";
 			this->ToOperands(out, *insn.ops[1], sit);
-			out << ", ";
+			out << "), ";
 			this->ToOperands(out, *insn.ops[2], sit);
 			out << "))";
 			this->ToComponentSelectors(out, *insn.ops[0]);
-			out << ";\n";
-		}
-		num_comps = this->GetOperandComponentNum(*insn.ops[0]);
-		for (int i = 0; i < num_comps; i++)
-		{
-			this->ToOperands(out, *insn.ops[0], sit, false);
-			this->ToSingleComponentSelector(out, *insn.ops[0], i);
-			out << " = bool(";
-			this->ToOperands(out, *insn.ops[0], sit, false);
-			this->ToSingleComponentSelector(out, *insn.ops[0], i);
-			out << ") ? -1.0 : 0.0;";
-			if (i != num_comps - 1)
-			{
-				out << "\n";
-			}
+			out << ";";
 		}
 		break;
 
@@ -1223,32 +1198,18 @@ void GLSLGen::ToInstructions(std::ostream& out, ShaderInstruction const & insn) 
 			this->ToOperands(out, *insn.ops[1], sit);
 			out << " < ";
 			this->ToOperands(out, *insn.ops[2], sit);
-			out << ");\n";
+			out << ");";
 		}
 		else
 		{
 			this->ToOperands(out, *insn.ops[0], sit);
-			out << " = vec4(lessThan(";
+			out << " = vec4(lessThan(vec4(";
 			this->ToOperands(out, *insn.ops[1], sit);
-			out << ", ";
+			out << "), ";
 			this->ToOperands(out, *insn.ops[2], sit);
 			out << "))";
 			this->ToComponentSelectors(out, *insn.ops[0]);
-			out << ";\n";
-		}
-		num_comps = this->GetOperandComponentNum(*insn.ops[0]);
-		for (int i = 0; i < num_comps; i++)
-		{
-			this->ToOperands(out, *insn.ops[0], sit, false);
-			this->ToSingleComponentSelector(out, *insn.ops[0], i);
-			out << " = bool(";
-			this->ToOperands(out, *insn.ops[0], sit, false);
-			this->ToSingleComponentSelector(out, *insn.ops[0], i);
-			out << ") ? -1.0 : 0.0;";
-			if (i != num_comps - 1)
-			{
-				out << "\n";
-			}
+			out << ";";
 		}
 		break;
 
@@ -1262,40 +1223,32 @@ void GLSLGen::ToInstructions(std::ostream& out, ShaderInstruction const & insn) 
 			this->ToOperands(out, *insn.ops[1], sit);
 			out << " >= ";
 			this->ToOperands(out, *insn.ops[2], sit);
-			out << ");\n";
+			out << ");";
 		}
 		else
 		{
 			this->ToOperands(out, *insn.ops[0], sit);
-			out << " = vec4(greaterThanEqual(";
+			out << " = vec4(greaterThanEqual(vec4(";
 			this->ToOperands(out, *insn.ops[1], sit);
-			out << ", ";
+			out << "), ";
 			this->ToOperands(out, *insn.ops[2], sit);
 			out << "))";
 			this->ToComponentSelectors(out, *insn.ops[0]);
-			out << ";\n";
-		}
-		num_comps = this->GetOperandComponentNum(*insn.ops[0]);
-		for (int i = 0; i < num_comps; i++)
-		{
-			this->ToOperands(out, *insn.ops[0], sit, false);
-			this->ToSingleComponentSelector(out, *insn.ops[0], i);
-			out << " = bool(";
-			this->ToOperands(out, *insn.ops[0], sit, false);
-			this->ToSingleComponentSelector(out, *insn.ops[0], i);
-			out << ") ? -1.0 : 0.0;";
-			if (i != num_comps - 1)
-			{
-				out << "\n";
-			}
+			out << ";";
 		}
 		break;
 
 	case SO_AND:
 		this->ToOperands(out, *insn.ops[0], sit);
-		out << " = vec4(ivec4(";
+		out << " = vec4(";
+		out << ((glsl_rules_ & GSR_BitwiseOp) ? "i" : "b");
+		out << "vec4(";
 		this->ToOperands(out, *insn.ops[1], sit);
-		out << ") & ivec4(";
+		out << ") ";
+		out << ((glsl_rules_ & GSR_BitwiseOp) ? "&" : "&&");
+		out << " ";
+		out << ((glsl_rules_ & GSR_BitwiseOp) ? "i" : "b");
+		out << "vec4(";
 		this->ToOperands(out, *insn.ops[2], sit);
 		out << "))";
 		this->ToComponentSelectors(out, *insn.ops[0]);
@@ -1304,9 +1257,15 @@ void GLSLGen::ToInstructions(std::ostream& out, ShaderInstruction const & insn) 
 
 	case SO_OR:
 		this->ToOperands(out, *insn.ops[0], sit);
-		out << " = vec4(ivec4(";
+		out << " = vec4(";
+		out << ((glsl_rules_ & GSR_BitwiseOp) ? "i" : "b");
+		out << "vec4(";
 		this->ToOperands(out, *insn.ops[1], sit);
-		out << ") | ivec4(";
+		out << ") ";
+		out << ((glsl_rules_ & GSR_BitwiseOp) ? "|" : "||");
+		out << " ";
+		out << ((glsl_rules_ & GSR_BitwiseOp) ? "i" : "b");
+		out << "vec4(";
 		this->ToOperands(out, *insn.ops[2], sit);
 		out << "))";
 		this->ToComponentSelectors(out, *insn.ops[0]);
@@ -1335,26 +1294,32 @@ void GLSLGen::ToInstructions(std::ostream& out, ShaderInstruction const & insn) 
 
 	case SO_MOVC:
 		num_comps = this->GetOperandComponentNum(*insn.ops[0]);
-		for (int i = 0; i < num_comps; i++)
+		this->ToOperands(out, *insn.ops[0], sit, false);
+		for (int i = 0; i < num_comps; ++ i)
 		{
-			this->ToOperands(out, *insn.ops[0], sit, false);
-			int j = this->ToSingleComponentSelector(out, *insn.ops[0], i);
-			out << " = bool(vec4(";
-			this->ToOperands(out, *insn.ops[1], sit, false);
-			out << ")";
-			this->ToSingleComponentSelector(out, *insn.ops[1], j);
-			out << ") ? ";
-			this->ToOperands(out, *insn.ops[2], sit, false);
-			this->ToSingleComponentSelector(out, *insn.ops[2], j);
-			out << " : ";
-			this->ToOperands(out, *insn.ops[3], sit, false);
-			this->ToSingleComponentSelector(out, *insn.ops[3], j);
-			out << ";";
-			if (i != num_comps - 1)
-			{
-				out << "\n";
-			}
+			selector[i] = this->ToSingleComponentSelector(out, *insn.ops[0], i, 0 == i);
 		}
+		out << " = ";
+		out << "vec" << num_comps << "(";
+		for (int i = 0; i < num_comps; ++ i)
+		{
+			if (i != 0)
+			{
+				out << ", ";
+			}
+
+			out << "bool(";
+			this->ToOperands(out, *insn.ops[1], sit, false);
+			this->ToSingleComponentSelector(out, *insn.ops[1], selector[i]);
+			out << ")";
+			out << " ? ";
+			this->ToOperands(out, *insn.ops[2], sit, false, false, true);
+			this->ToSingleComponentSelector(out, *insn.ops[2], selector[i]);
+			out << " : ";
+			this->ToOperands(out, *insn.ops[3], sit, false, false, true);
+			this->ToSingleComponentSelector(out, *insn.ops[3], selector[i]);
+		}
+		out << ");";
 		break;
 
 	case SO_MAX:
@@ -3388,6 +3353,7 @@ void GLSLGen::ToInstructions(std::ostream& out, ShaderInstruction const & insn) 
 				offset_mask = ".x";
 				deriv_mask = ".x";
 				texture_type = "1D";
+				offset = (insn.sample_offset[0] != 0);
 				break;
 
 			case SRD_TEXTURE2D:
@@ -3395,6 +3361,8 @@ void GLSLGen::ToInstructions(std::ostream& out, ShaderInstruction const & insn) 
 				offset_mask = ".xy";
 				deriv_mask = ".xy";
 				texture_type = "2D";
+				offset = (insn.sample_offset[0] != 0)
+					|| (insn.sample_offset[1] != 0);
 				break;
 
 			case SRD_TEXTURE3D:
@@ -3402,6 +3370,9 @@ void GLSLGen::ToInstructions(std::ostream& out, ShaderInstruction const & insn) 
 				offset_mask = ".xyz";
 				deriv_mask = ".xyz";
 				texture_type = "3D";
+				offset = (insn.sample_offset[0] != 0)
+					|| (insn.sample_offset[1] != 0)
+					|| (insn.sample_offset[2] != 0);
 				break;
 
 			case SRD_TEXTURE1DARRAY:
@@ -3409,6 +3380,7 @@ void GLSLGen::ToInstructions(std::ostream& out, ShaderInstruction const & insn) 
 				offset_mask = ".x";
 				deriv_mask = ".x";
 				texture_type = "2D";
+				offset = (insn.sample_offset[0] != 0);
 				break;
 
 			case SRD_TEXTURE2DARRAY:
@@ -3416,6 +3388,8 @@ void GLSLGen::ToInstructions(std::ostream& out, ShaderInstruction const & insn) 
 				offset_mask = ".xy";
 				deriv_mask = ".xy";
 				texture_type = "2D";
+				offset = (insn.sample_offset[0] != 0)
+					|| (insn.sample_offset[1] != 0);
 				break;
 
 			case SRD_TEXTURECUBE:
@@ -3437,19 +3411,22 @@ void GLSLGen::ToInstructions(std::ostream& out, ShaderInstruction const & insn) 
 			}
 			this->ToOperands(out, *insn.ops[0], sit);
 			out << " = vec4(texture" << ((glsl_rules_ & GSR_GenericTexture) ? "" : texture_type)
-				<< "Grad" << (offset ? "Offset" : "") << "(";
+				<< ((glsl_rules_ & GSR_TextureGrad) ? "Grad"  : "") << (offset ? "Offset" : "") << "(";
 			this->ToOperands(out, *insn.ops[2], sit, false);
 			out << "_";
 			this->ToOperands(out, *insn.ops[3], sit, false);
 			out << ", (";
 			this->ToOperands(out, *insn.ops[1], sit);
 			out << ")" << coord_mask;
-			out << ", (";
-			this->ToOperands(out, *insn.ops[4], sit);//ddx
-			out << ")" << deriv_mask;
-			out << ", (";
-			this->ToOperands(out, *insn.ops[5], sit);//ddy
-			out << ")" << deriv_mask;
+			if (glsl_rules_ & GSR_TextureGrad)
+			{
+				out << ", (";
+				this->ToOperands(out, *insn.ops[4], sit);//ddx
+				out << ")" << deriv_mask;
+				out << ", (";
+				this->ToOperands(out, *insn.ops[5], sit);//ddy
+				out << ")" << deriv_mask;
+			}
 			if (offset)
 			{
 				out << ", ivec3(";
@@ -4207,7 +4184,7 @@ void GLSLGen::ToInstructions(std::ostream& out, ShaderInstruction const & insn) 
 	}
 }
 
-void GLSLGen::ToOperands(std::ostream& out, ShaderOperand const & op, ShaderImmType imm_type, bool mask, bool dcl_array) const
+void GLSLGen::ToOperands(std::ostream& out, ShaderOperand const & op, ShaderImmType imm_type, bool mask, bool dcl_array, bool no_swizzle) const
 {
 	if (this->IsImmediateNumber(op) && (SO_MOV == current_insn_.opcode))
 	{
@@ -4401,7 +4378,7 @@ void GLSLGen::ToOperands(std::ostream& out, ShaderOperand const & op, ShaderImmT
 		}
 
 		// output operand name 
-		this->ToOperandName(out, op, &whether_output_idx, &whether_output_comps);
+		this->ToOperandName(out, op, &whether_output_idx, &whether_output_comps, no_swizzle);
 
 		// output index
 		// constant buffer is mapped to variable name,does not need index.
@@ -4507,7 +4484,7 @@ void GLSLGen::ToOperands(std::ostream& out, ShaderOperand const & op, ShaderImmT
 	}
 }
 
-void GLSLGen::ToOperandName(std::ostream& out, ShaderOperand const & op, bool* need_idx, bool* need_comps) const
+void GLSLGen::ToOperandName(std::ostream& out, ShaderOperand const & op, bool* need_idx, bool* need_comps, bool no_swizzle) const
 {
 	*need_comps = true;
 	*need_idx = true;
@@ -4556,6 +4533,7 @@ void GLSLGen::ToOperandName(std::ostream& out, ShaderOperand const & op, bool* n
 		{
 			if (iter->register_index == op.indices[0].disp)
 			{
+				*need_comps = (iter->mask > 1);
 				out << iter->semantic_name << iter->semantic_index;
 				break;
 			}
@@ -4619,7 +4597,7 @@ void GLSLGen::ToOperandName(std::ostream& out, ShaderOperand const & op, bool* n
 								if (element_count == 0)
 								{
 									*need_comps = false;
-									if (SVC_VECTOR == var_iter->type_desc.var_class)
+									if ((SVC_VECTOR == var_iter->type_desc.var_class) && !no_swizzle)
 									{
 										// remap register component to the right cb member variable component
 										// example case:
@@ -4696,7 +4674,7 @@ void GLSLGen::ToOperandName(std::ostream& out, ShaderOperand const & op, bool* n
 												out << "[" << element_index << "]";
 											}
 
-											if (SVC_VECTOR == var_iter->type_desc.var_class)
+											if ((SVC_VECTOR == var_iter->type_desc.var_class) && !no_swizzle)
 											{
 												// remap register selector to the right cb member variable component
 												out << ".";
@@ -4773,11 +4751,11 @@ void GLSLGen::ToOperandName(std::ostream& out, ShaderOperand const & op, bool* n
 									}
 									if (SVC_MATRIX_ROWS == var_iter->type_desc.var_class)
 									{
-										out << "[" << column << "]" << "[" << row << "]";
+										out << "[" << row << "]" << "[" << column << "]";
 									}
 									else
 									{
-										out << "[" << row << "]" << "[" << column << "]";
+										out << "[" << column << "]" << "[" << row << "]";
 									}
 								}
 								out << ")";
