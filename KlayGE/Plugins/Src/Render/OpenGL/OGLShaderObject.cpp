@@ -2568,10 +2568,10 @@ namespace KlayGE
 							{
 								tex_sampler_binds_.push_back(KlayGE::make_tuple(combined_sampler_name,
 									param, effect.ParameterByName(sampler_names[j]), 1UL << type));
-
-								(*pnames_)[type]->push_back(combined_sampler_name);
-								(*glsl_res_names_)[type]->push_back(combined_sampler_name);
 							}
+
+							(*pnames_)[type]->push_back(combined_sampler_name);
+							(*glsl_res_names_)[type]->push_back(combined_sampler_name);
 						}
 					}
 

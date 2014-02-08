@@ -1049,9 +1049,9 @@ void GLSLGen::ToInstructions(std::ostream& out, ShaderInstruction const & insn) 
 		this->ToOperands(out, *insn.ops[0], sit);
 		out << " = vec4(dot(";
 		this->ToOperands(out, *insn.ops[1], sit);
-		out << ", ";
+		out << ".xyz, ";
 		this->ToOperands(out, *insn.ops[2], sit);
-		out << "))";
+		out << ".xyz))";
 		this->ToComponentSelectors(out, *insn.ops[0]);
 		out << ";";
 		break;
@@ -1060,9 +1060,9 @@ void GLSLGen::ToInstructions(std::ostream& out, ShaderInstruction const & insn) 
 		this->ToOperands(out, *insn.ops[0], sit);
 		out << " = vec4(dot(";
 		this->ToOperands(out, *insn.ops[1], sit);
-		out << ", ";
+		out << ".xy, ";
 		this->ToOperands(out, *insn.ops[2], sit);
-		out << "))";
+		out << ".xy))";
 		this->ToComponentSelectors(out, *insn.ops[0]);
 		out << ";";
 		break;
@@ -1241,16 +1241,12 @@ void GLSLGen::ToInstructions(std::ostream& out, ShaderInstruction const & insn) 
 	case SO_AND:
 		this->ToOperands(out, *insn.ops[0], sit);
 		out << " = vec4(";
-		out << ((glsl_rules_ & GSR_BitwiseOp) ? "i" : "b");
-		out << "vec4(";
 		this->ToOperands(out, *insn.ops[1], sit);
-		out << ") ";
-		out << ((glsl_rules_ & GSR_BitwiseOp) ? "&" : "&&");
 		out << " ";
-		out << ((glsl_rules_ & GSR_BitwiseOp) ? "i" : "b");
-		out << "vec4(";
+		out << ((glsl_rules_ & GSR_BitwiseOp) ? "&" : "*");
+		out << " ";
 		this->ToOperands(out, *insn.ops[2], sit);
-		out << "))";
+		out << ")";
 		this->ToComponentSelectors(out, *insn.ops[0]);
 		out << ";";
 		break;
@@ -1258,16 +1254,11 @@ void GLSLGen::ToInstructions(std::ostream& out, ShaderInstruction const & insn) 
 	case SO_OR:
 		this->ToOperands(out, *insn.ops[0], sit);
 		out << " = vec4(";
-		out << ((glsl_rules_ & GSR_BitwiseOp) ? "i" : "b");
-		out << "vec4(";
 		this->ToOperands(out, *insn.ops[1], sit);
-		out << ") ";
-		out << ((glsl_rules_ & GSR_BitwiseOp) ? "|" : "||");
 		out << " ";
-		out << ((glsl_rules_ & GSR_BitwiseOp) ? "i" : "b");
-		out << "vec4(";
+		out << ((glsl_rules_ & GSR_BitwiseOp) ? "|" : "+");
 		this->ToOperands(out, *insn.ops[2], sit);
-		out << "))";
+		out << ")";
 		this->ToComponentSelectors(out, *insn.ops[0]);
 		out << ";";
 		break;

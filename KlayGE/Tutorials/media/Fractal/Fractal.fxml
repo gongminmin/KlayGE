@@ -31,7 +31,7 @@ float4 MandelbrotPS(float2 texcoord0 : TEXCOORD0) : SV_Target
 	{
 		z = float2(z.x * z.x - z.y * z.y, z.x * z.y + z.y * z.x) + c;
 		r2 = dot(z, z);
-    }
+	}
 
 	float3 clr = 0;
 	if (r2 >= 4)
