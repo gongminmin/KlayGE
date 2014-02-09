@@ -134,9 +134,8 @@ float4 DrawLightIndexPointPS(float2 tc : TEXCOORD0) : SV_Target
 	}
 
 #if LIGHT_BATCH > 4
-	int end_comp = (nl + 7) / 8;
 	int index = 0;
-	for (int comp = 0; comp < end_comp; ++ comp)
+	for (int comp = 0, li = 0; li < nl; li += 8, ++ comp)
 	{
 		int mask = 1;
 		int accum = 0;
@@ -198,9 +197,8 @@ float4 DrawLightIndexSpotPS(float2 tc : TEXCOORD0) : SV_Target
 	}
 
 #if LIGHT_BATCH > 4
-	int end_comp = (nl + 7) / 8;
 	int index = 0;
-	for (int comp = 0; comp < end_comp; ++ comp)
+	for (int comp = 0, li = 0; li < nl; li += 8, ++ comp)
 	{
 		int mask = 1;
 		int accum = 0;
@@ -409,10 +407,9 @@ float4 LightIndexedDeferredRenderingPointPS(float2 tc : TEXCOORD0, float3 view_d
 		}
 
 #if LIGHT_BATCH > 4
-		int start_comp = (nl + 7) / 8;
-		int index = start_comp * 8 - 1;
-		for (int comp = start_comp - 1; comp >= 0; -- comp)
+		for (int comp = 0, li = 0; li < nl; ++ comp, li += 8)
 		{
+			int index = li + 7;
 			int mask = 128;
 			int light_comp = light_index[comp];
 
@@ -490,10 +487,9 @@ float4 LightIndexedDeferredRenderingSpotPS(float2 tc : TEXCOORD0, float3 view_di
 		}
 
 #if LIGHT_BATCH > 4
-		int start_comp = (nl + 7) / 8;
-		int index = start_comp * 8 - 1;
-		for (int comp = start_comp - 1; comp >= 0; -- comp)
+		for (int comp = 0, li = 0; li < nl; ++ comp, li += 8)
 		{
+			int index = li + 7;
 			int mask = 128;
 			int light_comp = light_index[comp];
 
