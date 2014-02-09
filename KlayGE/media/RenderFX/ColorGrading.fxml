@@ -45,7 +45,7 @@ float3 ColorGrading(float3 rgb)
 	rgb.y = (rgb.y + slice) / DIM;
 
 	float3 col0 = color_grading_tex.Sample(linear_clamp_sampler, rgb.xy).xyz;
- 	float3 col1 = color_grading_tex.Sample(linear_clamp_sampler, float2(rgb.x, rgb.y + 1.0f / DIM)).xyz;
+	float3 col1 = color_grading_tex.Sample(linear_clamp_sampler, float2(rgb.x, rgb.y + 1.0f / DIM)).xyz;
 	return lerp(col0, col1, s);
 #endif
 }

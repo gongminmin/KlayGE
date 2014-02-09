@@ -7,7 +7,8 @@ from blib_util import *
 
 def build_DXBC2GLSL(compiler_info):
 	for arch in compiler_info.arch_list:
-		build_a_project("DXBC2GLSL", "DXBC2GLSL", compiler_info, arch)
+		if not arch[3]:
+			build_a_project("DXBC2GLSL", "DXBC2GLSL", compiler_info, arch)
 
 if __name__ == "__main__":
 	cfg = cfg_from_argv(sys.argv)

@@ -287,7 +287,7 @@ struct ShaderOperand
 	{
 		memset(swizzle, 0, sizeof(swizzle));
 		memset(imm_values, 0, sizeof(imm_values));
-		indices[0].disp = indices[1].disp = indices[2].disp;
+		indices[0].disp = indices[1].disp = indices[2].disp = 0;
 	}
 };
 
