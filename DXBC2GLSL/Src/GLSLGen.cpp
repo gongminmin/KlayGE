@@ -462,140 +462,126 @@ void GLSLGen::ToDeclarations(std::ostream& out, ShaderDecl const & dcl)
 
 	case SO_DCL_CONSTANT_BUFFER:
 		{
-			if (dcl.dcl_constant_buffer.dynamic)
-			{
-				// For dynamic indexed cb, use one big array
+			cb_index_mode_[dcl.op->indices[0].disp] = dcl.dcl_constant_buffer.dynamic;
 
-				cb_index_mode_[dcl.op->indices[0].disp] = true;
-				out << "uniform vec4 ";
-				out << "cb" << dcl.op->indices[0].disp << "[" << dcl.op->indices[1].disp << "]";
-				out << ";\n";
+			if (glsl_rules_ & GSR_UniformBlockBinding)
+			{
+				out<<"layout(binding="
+					<<dcl.op->indices[0].disp
+					<<") ";
 			}
-			else
+
+			// Find the cb corresponding to bind_point
+			for (std::vector<DXBCConstantBuffer>::const_iterator cb_iter = program_->cbuffers.begin();
+				cb_iter != program_->cbuffers.end(); ++ cb_iter)
 			{
-				// Map to cb memeber variable names
-
-				cb_index_mode_[dcl.op->indices[0].disp] = false;
-
-				if (glsl_rules_ & GSR_UniformBlockBinding)
+				if ((SCBT_CBUFFER == cb_iter->desc.type) && (cb_iter->bind_point == dcl.op->indices[0].disp))
 				{
-					out<<"layout(binding="
-						<<dcl.op->indices[0].disp
-						<<") ";
-				}
-
-				// Find the cb corresponding to bind_point
-				for (std::vector<DXBCConstantBuffer>::const_iterator cb_iter = program_->cbuffers.begin();
-					cb_iter != program_->cbuffers.end(); ++ cb_iter)
-				{
-					if ((SCBT_CBUFFER == cb_iter->desc.type) && (cb_iter->bind_point == dcl.op->indices[0].disp))
+					if ((glsl_rules_ & GSR_UseUBO) && ((glsl_rules_ & GSR_GlobalUniformsInUBO) || (cb_iter->desc.name[0] != '$')))
 					{
-						if ((glsl_rules_ & GSR_UseUBO) && ((glsl_rules_ & GSR_GlobalUniformsInUBO) || (cb_iter->desc.name[0] != '$')))
-						{
-							out << "uniform ";
-							out << cb_iter->desc.name << "\n{\n";
-						}
-						char* uniform = 0;
-						if (!(glsl_rules_ & GSR_GlobalUniformsInUBO))
-						{
-							uniform = "uniform ";
-						}
-						else
-						{
-							uniform = "";
-						}
+						out << "uniform ";
+						out << cb_iter->desc.name << "\n{\n";
+					}
+					char* uniform = 0;
+					if (!(glsl_rules_ & GSR_GlobalUniformsInUBO))
+					{
+						uniform = "uniform ";
+					}
+					else
+					{
+						uniform = "";
+					}
 						
-						for (std::vector<DXBCShaderVariable>::const_iterator var_iter = cb_iter->vars.begin();
-							var_iter != cb_iter->vars.end(); ++ var_iter)
+					for (std::vector<DXBCShaderVariable>::const_iterator var_iter = cb_iter->vars.begin();
+						var_iter != cb_iter->vars.end(); ++ var_iter)
+					{
+						if (var_iter->has_type_desc)
 						{
-							if (var_iter->has_type_desc)
+							// Array element count, 0 if not a array
+							uint32_t element_count = var_iter->type_desc.elements;
+							switch (var_iter->type_desc.var_class)
 							{
-								// Array element count, 0 if not a array
-								uint32_t element_count = var_iter->type_desc.elements;
-								switch (var_iter->type_desc.var_class)
+							case SVC_SCALAR:
+								out << uniform << var_iter->type_desc.name;
+								out << " " << var_iter->var_desc.name;
+								if (element_count)
 								{
-								case SVC_SCALAR:
-									out << uniform << var_iter->type_desc.name;
-									out << " " << var_iter->var_desc.name;
-									if (element_count)
-									{
-										out << "[" << element_count << "]";
-									}
-									out << ";\n";
-									break;
-
-								case SVC_VECTOR:
-									out << uniform;
-									if (1 == var_iter->type_desc.columns)
-									{
-										out << var_iter->type_desc.name;
-									}
-									else
-									{
-										switch (var_iter->type_desc.type)
-										{
-										case SVT_INT:
-											out << "i";
-											break;
-
-										case SVT_FLOAT:
-											break;
-
-										case SVT_UINT:
-											out << "u";
-											break;
-
-										default:
-											BOOST_ASSERT_MSG(false, "unexpected vector type");
-											break;
-										}
-										out << "vec";
-									}
-									out << var_iter->type_desc.columns << " " << var_iter->var_desc.name;
-									if (element_count)
-									{
-										out << "[" << element_count << "]";
-									}
-									out << ";\n";
-									break;
-
-								case SVC_MATRIX_COLUMNS:
-									// In glsl mat3x2 means 3 columns 2 rows, which is opposite to hlsl
-									out << uniform << "mat" << var_iter->type_desc.columns << "x" << var_iter->type_desc.rows
-										<< " " << var_iter->var_desc.name;
-									if (element_count)
-									{
-										out << "[" << element_count << "]";
-									}
-									out << ";\n";
-									break;
-
-								case SVC_MATRIX_ROWS:
-									// In glsl mat3x2 means 3 columns 2 rows, which is opposite to hlsl
-									out << "layout(row_major) "
-										<< uniform << "mat" << var_iter->type_desc.columns << "x" << var_iter->type_desc.rows
-										<< " " << var_iter->var_desc.name;
-									if (element_count)
-									{
-										out << "[" << element_count << "]";
-									}
-									out << ";\n";
-									break;
-
-								default:
-									BOOST_ASSERT_MSG(false, "Unhandled type,when converting dcl_constant_buffer");
-									break;
+									out << "[" << element_count << "]";
 								}
+								out << ";\n";
+								break;
+
+							case SVC_VECTOR:
+								out << uniform;
+								if (1 == var_iter->type_desc.columns)
+								{
+									out << var_iter->type_desc.name;
+								}
+								else
+								{
+									switch (var_iter->type_desc.type)
+									{
+									case SVT_INT:
+										out << "i";
+										break;
+
+									case SVT_FLOAT:
+										break;
+
+									case SVT_UINT:
+										out << "u";
+										break;
+
+									default:
+										BOOST_ASSERT_MSG(false, "unexpected vector type");
+										break;
+									}
+									out << "vec";
+								}
+								out << var_iter->type_desc.columns << " " << var_iter->var_desc.name;
+								if (element_count)
+								{
+									out << "[" << element_count << "]";
+								}
+								out << ";\n";
+								break;
+
+							case SVC_MATRIX_COLUMNS:
+								// In glsl mat3x2 means 3 columns 2 rows, which is opposite to hlsl
+								out << uniform << "mat" << var_iter->type_desc.columns << "x" << var_iter->type_desc.rows
+									<< " " << var_iter->var_desc.name;
+								if (element_count)
+								{
+									out << "[" << element_count << "]";
+								}
+								out << ";\n";
+								break;
+
+							case SVC_MATRIX_ROWS:
+								// In glsl mat3x2 means 3 columns 2 rows, which is opposite to hlsl
+								out << "layout(row_major) "
+									<< uniform << "mat" << var_iter->type_desc.columns << "x" << var_iter->type_desc.rows
+									<< " " << var_iter->var_desc.name;
+								if (element_count)
+								{
+									out << "[" << element_count << "]";
+								}
+								out << ";\n";
+								break;
+
+							default:
+								BOOST_ASSERT_MSG(false, "Unhandled type,when converting dcl_constant_buffer");
+								break;
 							}
 						}
-						if ((glsl_rules_ & GSR_UseUBO) && ((glsl_rules_ & GSR_GlobalUniformsInUBO) || (cb_iter->desc.name[0] != '$')))
-						{
-							out << "};\n";
-						}
-						out << "\n";
-
-						break;
 					}
+					if ((glsl_rules_ & GSR_UseUBO) && ((glsl_rules_ & GSR_GlobalUniformsInUBO) || (cb_iter->desc.name[0] != '$')))
+					{
+						out << "};\n";
+					}
+					out << "\n";
+
+					break;
 				}
 			}
 		}
@@ -1258,6 +1244,7 @@ void GLSLGen::ToInstructions(std::ostream& out, ShaderInstruction const & insn) 
 		this->ToOperands(out, *insn.ops[1], sit);
 		out << " ";
 		out << ((glsl_rules_ & GSR_BitwiseOp) ? "|" : "+");
+		out << " ";
 		this->ToOperands(out, *insn.ops[2], sit);
 		out << ")";
 		this->ToComponentSelectors(out, *insn.ops[0]);
@@ -1381,7 +1368,7 @@ void GLSLGen::ToInstructions(std::ostream& out, ShaderInstruction const & insn) 
 
 	case SO_FTOI:
 		this->ToOperands(out, *insn.ops[0], sit);
-		out << " = vec4(";
+		out << " = ivec4(";
 		this->ToOperands(out, *insn.ops[1], sit);
 		out << ")";
 		this->ToComponentSelectors(out, *insn.ops[0]);
@@ -1408,7 +1395,16 @@ void GLSLGen::ToInstructions(std::ostream& out, ShaderInstruction const & insn) 
 
 	case SO_FTOU:
 		this->ToOperands(out, *insn.ops[0], sit);
-		out << " = vec4(";
+		out << " = ";
+		if (glsl_rules_ & GSR_UIntType)
+		{
+			out << "u";
+		}
+		else
+		{
+			out << "i";
+		}
+		out << "vec4(";
 		this->ToOperands(out, *insn.ops[1], sit);
 		out << ")";
 		this->ToComponentSelectors(out, *insn.ops[0]);
@@ -4548,11 +4544,13 @@ void GLSLGen::ToOperandName(std::ostream& out, ShaderOperand const & op, bool* n
 			}
 		}	
 	}
-	else if ((SOT_CONSTANT_BUFFER == op.type) && !cb_index_mode_.at(op.indices[0].disp))
+	else if (SOT_CONSTANT_BUFFER == op.type)
 	{
+		*need_idx = false;
+		bool dynamic_indexed = cb_index_mode_.find(op.indices[0].disp)->second;
+
 		// map cb array element to cb member names(with array index if it's a array)
 
-		*need_idx = false;
 		// map cb#[i] to a cb member name
 		uint32_t bind_point = static_cast<uint32_t>(op.indices[0].disp);
 		uint32_t register_index = static_cast<uint32_t>(op.indices[1].disp);
@@ -4594,17 +4592,33 @@ void GLSLGen::ToOperandName(std::ostream& out, ShaderOperand const & op, bool* n
 							if (!contain_multi_var)
 							{
 								out << var_iter->var_desc.name;
-								//ajudge which cb member array element it's located in
+								if (0 == strcmp("color_weight", var_iter->var_desc.name))
+								{
+									int a = 0;
+									a = a;
+								}
 								if (element_count != 0)
 								{
-									element_index = (16 * register_index - var_iter->var_desc.start_offset) / 16;
-									out << "[" << element_index << "]";
+									out << "[";
+									if (dynamic_indexed && op.indices[1].reg)
+									{
+										out << "int(";
+										this->ToOperands(out, *op.indices[1].reg, SIT_Int);
+										out << ")";
+									}
+									else
+									{
+										element_index = (16 * register_index - var_iter->var_desc.start_offset) / 16;
+										out << element_index;
+									}
+									out << "]";
 								}
-								// array is not packed, so doesn't need remap component_selector
-								// if not, because of register packing, we need to remap it.
-								// see: http://msdn.microsoft.com/zh-cn/library/windows/desktop/bb509632
-								if (0 == element_count)
+								else
 								{
+									// array is not packed, so doesn't need remap component_selector
+									// if not, because of register packing, we need to remap it.
+									// see: http://msdn.microsoft.com/zh-cn/library/windows/desktop/bb509632
+
 									*need_comps = false;
 									if ((SVC_VECTOR == var_iter->type_desc.var_class) && !no_swizzle)
 									{
@@ -4626,7 +4640,8 @@ void GLSLGen::ToOperandName(std::ostream& out, ShaderOperand const & op, bool* n
 										}
 									}
 								}
-								else if (SVC_SCALAR == var_iter->type_desc.var_class)
+
+								if (SVC_SCALAR == var_iter->type_desc.var_class)
 								{
 									*need_comps = false;
 								}
@@ -4788,24 +4803,6 @@ void GLSLGen::ToOperandName(std::ostream& out, ShaderOperand const & op, bool* n
 				break;
 			}
 		}
-	}
-	else if (op.type == SOT_CONSTANT_BUFFER && cb_index_mode_.at(op.indices[0].disp))
-	{
-		// if cb is dynamic indexed,treat it as one big array
-
-		// TODO:
-		//uint32_t bind_point = static_cast<uint32_t>(op.indices[0].disp);
-		//find cb corresponding to bind_point
-		/*std::vector<DXBCConstantBuffer>::const_iterator cb_itr=program.cbuffers.begin();
-		std::vector<DXBCConstantBuffer>::const_iterator cb_itr_end=program.cbuffers.end();
-		for(;cb_itr!=cb_itr_end;cb_itr++)
-		{
-			if(cb_itr->desc.Type==D3D_CT_CBUFFER && cb_itr->bind_point==bind_point)
-			break;
-		}*/
-		out << "cb";
-		*need_comps = true;
-		*need_idx = true;
 	}
 	else
 	{
