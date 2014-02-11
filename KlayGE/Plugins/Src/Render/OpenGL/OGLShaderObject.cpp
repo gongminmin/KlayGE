@@ -2318,6 +2318,10 @@ namespace KlayGE
 			ID3DBlob* err_msg;
 			std::vector<D3D_SHADER_MACRO> macros;
 			{
+				D3D_SHADER_MACRO macro_d3d11 = { "KLAYGE_DXBC2GLSL", "1" };
+				macros.push_back(macro_d3d11);
+			}
+			{
 				D3D_SHADER_MACRO macro_d3d11 = { "KLAYGE_OPENGL", "1" };
 				macros.push_back(macro_d3d11);
 			}
@@ -2409,10 +2413,7 @@ namespace KlayGE
 				D3D_SHADER_MACRO macro_end = { nullptr, nullptr };
 				macros.push_back(macro_end);
 			}
-			uint32_t flags = 0;
-#if !defined(KLAYGE_DEBUG)
-			flags |= D3DCOMPILE_OPTIMIZATION_LEVEL3;
-#endif
+			uint32_t flags = D3DCOMPILE_PREFER_FLOW_CONTROL | D3DCOMPILE_SKIP_OPTIMIZATION;
 
 			typedef HRESULT(WINAPI *D3DCompileFunc)(LPCVOID pSrcData, SIZE_T SrcDataSize, LPCSTR pSourceName,
 				D3D_SHADER_MACRO const * pDefines, ID3DInclude* pInclude, LPCSTR pEntrypoint,

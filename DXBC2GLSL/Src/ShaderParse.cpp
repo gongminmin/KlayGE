@@ -329,7 +329,8 @@ struct ShaderParser
 					break;
 
 				case SO_DCL_INDEXABLE_TEMP:
-					READ_OP(INDEXABLE_TEMP);
+					dcl->op.reset(new ShaderOperand());
+					dcl->op->indices[0].disp = this->Read32();
 					dcl->indexable_temp.num = this->Read32();
 					dcl->indexable_temp.comps = this->Read32();
 					break;

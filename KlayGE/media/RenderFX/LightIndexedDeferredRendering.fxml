@@ -137,17 +137,13 @@ float4 DrawLightIndexPointPS(float2 tc : TEXCOORD0) : SV_Target
 	int index = 0;
 	for (int comp = 0, li = 0; li < nl; li += 8, ++ comp)
 	{
-		int mask = 1;
-		int accum = 0;
-		while (mask < 256)
+		uint accum = 0;
+		for (uint mask = 1; mask < 256; mask += mask, ++ index)
 		{
 			if (OverlapTestPoint(planes, index))
 			{
 				accum += mask;
 			}
-			
-			mask *= 2;
-			++ index;
 		}
 
 		all_light_id[comp] = (accum + 0.5f) / 255.0f;
@@ -200,17 +196,13 @@ float4 DrawLightIndexSpotPS(float2 tc : TEXCOORD0) : SV_Target
 	int index = 0;
 	for (int comp = 0, li = 0; li < nl; li += 8, ++ comp)
 	{
-		int mask = 1;
-		int accum = 0;
-		while (mask < 256)
+		uint accum = 0;
+		for (uint mask = 1; mask < 256; mask += mask, ++ index)
 		{
 			if (OverlapTestSpot(planes, index))
 			{
 				accum += mask;
 			}
-			
-			mask *= 2;
-			++ index;
 		}
 		
 		all_light_id[comp] = (accum + 0.5f) / 255.0f;
@@ -396,9 +388,9 @@ float4 LightIndexedDeferredRenderingPointPS(float2 tc : TEXCOORD0, float3 view_d
 		}
 #else
 #if WITH_SHADOW
-		int nl = 4;
+		uint nl = 4;
 #else
-		int nl = LIGHT_BATCH;
+		uint nl = LIGHT_BATCH;
 #endif
 		// TODO: Cg doesn't support min(int, int)
 		if (num_lights < nl)
@@ -407,11 +399,11 @@ float4 LightIndexedDeferredRenderingPointPS(float2 tc : TEXCOORD0, float3 view_d
 		}
 
 #if LIGHT_BATCH > 4
-		for (int comp = 0, li = 0; li < nl; ++ comp, li += 8)
+		for (uint comp = 0, li = 0; li < nl; ++ comp, li += 8)
 		{
-			int index = li + 7;
-			int mask = 128;
-			int light_comp = light_index[comp];
+			uint index = li + 7;
+			uint mask = 128;
+			uint light_comp = light_index[comp];
 
 #if KLAYGE_D3D11
 			[loop]
@@ -476,9 +468,9 @@ float4 LightIndexedDeferredRenderingSpotPS(float2 tc : TEXCOORD0, float3 view_di
 		}
 #else
 #if WITH_SHADOW
-		int nl = 4;
+		uint nl = 4;
 #else
-		int nl = LIGHT_BATCH;
+		uint nl = LIGHT_BATCH;
 #endif
 		// TODO: Cg doesn't support min(int, int)
 		if (num_lights < nl)
@@ -487,11 +479,11 @@ float4 LightIndexedDeferredRenderingSpotPS(float2 tc : TEXCOORD0, float3 view_di
 		}
 
 #if LIGHT_BATCH > 4
-		for (int comp = 0, li = 0; li < nl; ++ comp, li += 8)
+		for (uint comp = 0, li = 0; li < nl; ++ comp, li += 8)
 		{
-			int index = li + 7;
-			int mask = 128;
-			int light_comp = light_index[comp];
+			uint index = li + 7;
+			uint mask = 128;
+			uint light_comp = light_index[comp];
 
 #if KLAYGE_D3D11
 			[loop]

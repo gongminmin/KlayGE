@@ -28,6 +28,7 @@
 #include "ASMGen.hpp"
 #include <iomanip>
 #include <iostream>
+#include <limits>
 
 // TODO: we should fix this to output the same syntax as fxc, if sm_dump_short_syntax is set
 
@@ -62,7 +63,19 @@ void ASMGen::Disasm(std::ostream& out, ShaderOperand const & op, ShaderImmType i
 			switch (imm_type)
 			{
 			case SIT_Float:
-				out << op.imm_values[i].f32;
+				// Normalized float test
+				if ((op.imm_values[0].f32 == op.imm_values[0].f32)
+					&& ((op.imm_values[0].f32 >= std::numeric_limits<float>::min())
+						|| (-op.imm_values[0].f32 >= std::numeric_limits<float>::min()))
+					&& ((op.imm_values[0].f32 <= std::numeric_limits<float>::max())
+						|| (-op.imm_values[0].f32 <= std::numeric_limits<float>::max())))
+				{
+					out << op.imm_values[0].f32;
+				}
+				else
+				{
+					out << op.imm_values[0].i32;
+				}
 				break;
 
 			case SIT_Int:
@@ -175,7 +188,6 @@ void ASMGen::Disasm(std::ostream& out, ShaderOperand const & op, ShaderImmType i
 						out << "xyzw"[i];
 					}
 				}
-
 				break;
 
 			case SOSM_SWIZZLE://xxyy£¬xxxx
@@ -272,10 +284,34 @@ void ASMGen::Disasm(std::ostream& out, ShaderDecl const & dcl)
 			float const * data = reinterpret_cast<float const *>(&dcl.data[0]);
 			out << "{\n";
 			uint32_t vector_num = dcl.num / 4;
-			for (uint32_t i = 0; i < vector_num; i++)
+			for (uint32_t i = 0; i < vector_num; ++ i)
 			{
-				if (i != 0)out << ",\n";
-				out << "{" << data[i * 4 + 0] << "," << data[i * 4 + 1] << "," << data[i * 4 + 2] << "," << data[i * 4 + 3] << "}";
+				if (i != 0)
+				{
+					out << ",\n";
+				}
+				out << "{";
+				for (int j = 0; j < 4; ++ j)
+				{
+					// Normalized float test
+					if ((data[i * 4 + j] == data[i * 4 + j])
+						&& ((data[i * 4 + j] >= std::numeric_limits<float>::min())
+							|| (-data[i * 4 + j] >= std::numeric_limits<float>::min()))
+						&& ((data[i * 4 + j] <= std::numeric_limits<float>::max())
+							|| (-data[i * 4 + j] <= std::numeric_limits<float>::max())))
+					{
+						out << data[i * 4 + j];
+					}
+					else
+					{
+						out << *reinterpret_cast<int const *>(&data[i * 4 + j]);
+					}
+					if (j != 3)
+					{
+						out << ",";
+					}
+				}
+				out << "}";
 			}
 			out << "\n}\n";
 		}

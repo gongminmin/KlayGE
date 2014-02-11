@@ -826,6 +826,12 @@ void StreamOutVS(float4 pos : POSITION,
 					out float2 oTex0 : TEXCOORD0,
 					out float4 oTangentQuat : TANGENT)
 {
+#if SKINNING_ON
+#if KLAYGE_OPENGL || KLAYGE_OPENGLES
+	int4 blend_indices = (int4)blend_indices_f;
+#endif
+#endif
+
 	pos = float4(pos.xyz * pos_extent + pos_center, 1);
 	texcoord = texcoord * tc_extent + tc_center;
 	tangent_quat = tangent_quat * 2 - 1;

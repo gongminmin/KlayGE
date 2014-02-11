@@ -210,7 +210,7 @@ void GBufferNoTessTerrainVS(float2 position : TEXCOORD0,
 
 	if (show_patches)
 	{
-		int sum = int_uv.x + int_uv.y;
+		uint sum = int_uv.x + int_uv.y;
 		oDebugPatch = (0.5f * (sum / 2 * 2 != sum) + 0.5f);
 	}
 }
