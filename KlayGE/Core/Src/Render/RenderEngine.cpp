@@ -425,6 +425,40 @@ namespace KlayGE
 
 	void RenderEngine::DestroyRenderWindow()
 	{
+		if (cur_frame_buffer_)
+		{
+			cur_frame_buffer_->OnUnbind();
+		}
+		cur_frame_buffer_.reset();
+
+		stereoscopic_pp_.reset();
+		for (size_t i = 0; i < 2; ++ i)
+		{
+			resize_pps_[i].reset();
+		}
+		for (size_t i = 0; i < 12; ++ i)
+		{
+			ldr_pps_[i].reset();
+		}
+		ldr_pp_.reset();
+		skip_hdr_pp_.reset();
+		hdr_pp_.reset();
+
+		screen_frame_buffer_.reset();
+		overlay_frame_buffer_.reset();
+		mono_frame_buffer_.reset();
+		resize_frame_buffer_.reset();
+		ldr_frame_buffer_.reset();
+		hdr_frame_buffer_.reset();
+
+		overlay_tex_.reset();
+		mono_tex_.reset();
+		resize_tex_.reset();
+		hdr_tex_.reset();
+		hdr_tex_.reset();
+		ds_tex_.reset();
+		ldr_tex_.reset();
+
 		for (int i = 3; i >= 0; -- i)
 		{
 			default_frame_buffers_[i].reset();
