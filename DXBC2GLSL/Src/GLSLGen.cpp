@@ -1154,6 +1154,7 @@ void GLSLGen::ToInstructions(std::ostream& out, ShaderInstruction const & insn) 
 		// r0.xy=equal();
 		// r0.x=r0.x?-1:0;
 		// r0.y=r0.y?-1:0;
+		insn.ops[0]->as_type = SOAT_Bool;
 		if (1 == this->GetOperandComponentNum(*insn.ops[1]))
 		{
 			this->ToOperands(out, *insn.ops[0], sit);
@@ -1182,6 +1183,7 @@ void GLSLGen::ToInstructions(std::ostream& out, ShaderInstruction const & insn) 
 		// r0.xy=equal();
 		// r0.x=r0.x?-1:0;
 		// r0.y=r0.y?-1:0;
+		insn.ops[0]->as_type = SOAT_Bool;
 		if (1 == this->GetOperandComponentNum(*insn.ops[1]))
 		{
 			this->ToOperands(out, *insn.ops[0], sit);
@@ -1205,6 +1207,7 @@ void GLSLGen::ToInstructions(std::ostream& out, ShaderInstruction const & insn) 
 		break;
 
 	case SO_NE:
+		insn.ops[0]->as_type = SOAT_Bool;
 		if (1 == this->GetOperandComponentNum(*insn.ops[1]))
 		{
 			this->ToOperands(out, *insn.ops[0], sit);
@@ -1228,6 +1231,7 @@ void GLSLGen::ToInstructions(std::ostream& out, ShaderInstruction const & insn) 
 		break;
 
 	case SO_INE:
+		insn.ops[0]->as_type = SOAT_Bool;
 		if (1 == this->GetOperandComponentNum(*insn.ops[1]))
 		{
 			this->ToOperands(out, *insn.ops[0], sit);
@@ -1253,6 +1257,7 @@ void GLSLGen::ToInstructions(std::ostream& out, ShaderInstruction const & insn) 
 	case SO_LT:
 	case SO_ILT:
 	case SO_ULT:
+		insn.ops[0]->as_type = SOAT_Bool;
 		if (1 == this->GetOperandComponentNum(*insn.ops[1]))
 		{
 			this->ToOperands(out, *insn.ops[0], sit);
@@ -1278,6 +1283,7 @@ void GLSLGen::ToInstructions(std::ostream& out, ShaderInstruction const & insn) 
 	case SO_GE:
 	case SO_IGE:
 	case SO_UGE:
+		insn.ops[0]->as_type = SOAT_Bool;
 		if (1 == this->GetOperandComponentNum(*insn.ops[1]))
 		{
 			this->ToOperands(out, *insn.ops[0], sit);
@@ -1303,19 +1309,31 @@ void GLSLGen::ToInstructions(std::ostream& out, ShaderInstruction const & insn) 
 	case SO_AND:
 		this->ToOperands(out, *insn.ops[0], sit);
 		out << " = vec4(";
-		if (glsl_rules_ & GSR_BitwiseOp)
+		if ((SOAT_Bool == insn.ops[1]->as_type)
+			|| (SOAT_Bool == insn.ops[2]->as_type))
 		{
 			this->ToOperands(out, *insn.ops[1], sit);
-			out << " & ";
+			out << " * ";
 			this->ToOperands(out, *insn.ops[2], sit);
 		}
 		else
 		{
-			out << "bvec4(";
-			this->ToOperands(out, *insn.ops[1], sit);
-			out << ") && bvec4(";
-			this->ToOperands(out, *insn.ops[2], sit);
-			out << ")";
+			if (glsl_rules_ & GSR_BitwiseOp)
+			{
+				out << "ivec4(";
+				this->ToOperands(out, *insn.ops[1], sit);
+				out << ") & ivec4(";
+				this->ToOperands(out, *insn.ops[2], sit);
+				out << ")";
+			}
+			else
+			{
+				out << "bvec4(";
+				this->ToOperands(out, *insn.ops[1], sit);
+				out << ") && bvec4(";
+				this->ToOperands(out, *insn.ops[2], sit);
+				out << ")";
+			}
 		}
 		out << ")";
 		this->ToComponentSelectors(out, *insn.ops[0]);
@@ -1328,7 +1346,7 @@ void GLSLGen::ToInstructions(std::ostream& out, ShaderInstruction const & insn) 
 		if (glsl_rules_ & GSR_BitwiseOp)
 		{
 			this->ToOperands(out, *insn.ops[1], sit);
-			out << " & ";
+			out << " | ";
 			this->ToOperands(out, *insn.ops[2], sit);
 		}
 		else
@@ -5344,7 +5362,7 @@ void GLSLGen::FindLabels()
 			{
 				ShaderOperand& op = *program_->insns[insn_num]->ops[0];
 				LabelInfo info;
-				if ((SOT_LABEL == op.type) && op.has_simple_index())
+				if ((SOT_LABEL == op.type) && op.HasSimpleIndex())
 				{
 					uint32_t idx = static_cast<uint32_t>(op.indices[0].disp);
 					info.start_num = idx + 1;

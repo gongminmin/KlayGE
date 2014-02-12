@@ -253,6 +253,15 @@ enum ShaderImmType
 	SIT_Double
 };
 
+enum ShaderOperandAsType
+{
+	SOAT_Float,
+	SOAT_Int,
+	SOAT_UInt,
+	SOAT_Double,
+	SOAT_Bool
+};
+
 struct ShaderOperand
 {
 	uint8_t mode;
@@ -270,20 +279,23 @@ struct ShaderOperand
 		boost::shared_ptr<ShaderOperand> reg;
 	} indices[3];
 
-	bool is_index_simple(uint32_t i) const
+	ShaderOperandAsType as_type;
+
+	bool IsIndexSimple(uint32_t i) const
 	{
 		 return !indices[i].reg && (indices[i].disp >= 0)
 			 && (static_cast<int64_t>(static_cast<int32_t>(indices[i].disp)) == indices[i].disp);
 	}
 
-	bool has_simple_index() const//类似[1]的这种索引形式
+	bool HasSimpleIndex() const//类似[1]的这种索引形式
 	{
-		return (1 == num_indices) && is_index_simple(0);
+		return (1 == num_indices) && this->IsIndexSimple(0);
 	}
 
 	ShaderOperand()
 		: mode(0), comps(0), mask(0), num_indices(0),
-			type(SOT_TEMP), neg(false), abs(false)
+			type(SOT_TEMP), neg(false), abs(false),
+			as_type(SOAT_Bool)
 	{
 		memset(swizzle, 0, sizeof(swizzle));
 		memset(imm_values, 0, sizeof(imm_values));
