@@ -113,6 +113,7 @@ namespace KlayGE
 		size_t NumVerticesJustRendered();
 
 		void CreateRenderWindow(std::string const & name, RenderSettings& settings);
+		void DestroyRenderWindow();
 
 		void SetStateObjects(RasterizerStateObjectPtr const & rs_obj,
 			DepthStencilStateObjectPtr const & dss_obj, uint16_t front_stencil_ref, uint16_t back_stencil_ref,

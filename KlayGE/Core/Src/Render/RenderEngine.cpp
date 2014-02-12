@@ -423,6 +423,14 @@ namespace KlayGE
 		this->Stereo(settings.stereo_method);
 	}
 
+	void RenderEngine::DestroyRenderWindow()
+	{
+		for (int i = 3; i >= 0; -- i)
+		{
+			default_frame_buffers_[i].reset();
+		}
+	}
+
 	void RenderEngine::CheckConfig(RenderSettings& /*settings*/)
 	{
 	}
