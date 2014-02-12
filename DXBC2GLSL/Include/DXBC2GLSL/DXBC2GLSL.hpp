@@ -51,6 +51,8 @@ namespace DXBC2GLSL
 	class DXBC2GLSL
 	{
 	public:
+		static uint32_t DefaultRules(GLSLVersion version);
+
 		void FeedDXBC(void const * dxbc_data, GLSLVersion version);
 		void FeedDXBC(void const * dxbc_data, GLSLVersion version, uint32_t glsl_rules);
 

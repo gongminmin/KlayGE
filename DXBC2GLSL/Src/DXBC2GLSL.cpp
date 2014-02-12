@@ -31,9 +31,14 @@
 
 namespace DXBC2GLSL
 {
+	uint32_t DXBC2GLSL::DefaultRules(GLSLVersion version)
+	{
+		return GLSLGen::DefaultRules(version);
+	}
+
 	void DXBC2GLSL::FeedDXBC(void const * dxbc_data, GLSLVersion version)
 	{
-		this->FeedDXBC(dxbc_data, version, GLSLGen::DefaultRules(version));
+		this->FeedDXBC(dxbc_data, version, this->DefaultRules(version));
 	}
 
 	void DXBC2GLSL::FeedDXBC(void const * dxbc_data, GLSLVersion version, uint32_t glsl_rules)

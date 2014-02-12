@@ -35,45 +35,46 @@ uint32_t GLSLGen::DefaultRules(GLSLVersion version)
 	if (version >= GSV_110)
 	{
 	}
-	else if (version >= GSV_120)
+	if (version >= GSV_120)
 	{
 	}
-	else if (version >= GSV_130)
+	if (version >= GSV_130)
 	{
 		rules |= GSR_UIntType;
 		rules |= GSR_GenericTexture;
 		rules |= GSR_PSInterpolation;
 		rules |= GSR_InOutPrefix;
 		rules |= GSR_TextureGrad;
+		rules |= GSR_BitwiseOp;
 	}
-	else if (version >= GSV_140)
+	if (version >= GSV_140)
 	{
 		rules |= GSR_GlobalUniformsInUBO;
 		rules |= GSR_UseUBO;
 	}
-	else if (version >= GSV_150)
+	if (version >= GSV_150)
 	{
 	}
-	else if (version >= GSV_330)
+	if (version >= GSV_330)
 	{
 		rules |= GSR_UniformBlockBinding;
 		rules |= GSR_ExplicitPSOutputLayout;
 		rules |= GSR_ExplicitInputLayout;
 	}
-	else if (version >= GSV_400)
+	if (version >= GSV_400)
 	{
 		rules |= GSR_Int64Type;
 	}
-	else if (version >= GSV_410)
+	if (version >= GSV_410)
 	{
 	}
-	else if (version >= GSV_420)
+	if (version >= GSV_420)
 	{
 	}
-	else if (version >= GSV_430)
+	if (version >= GSV_430)
 	{
 	}
-	else if (version >= GSV_440)
+	if (version >= GSV_440)
 	{
 	}
 
@@ -89,6 +90,7 @@ void GLSLGen::FeedDXBC(boost::shared_ptr<ShaderProgram> const & program, GLSLVer
 
 	if (!(glsl_rules_ & GSR_UseUBO))
 	{
+		glsl_rules_ &= ~GSR_UniformBlockBinding;
 		glsl_rules_ &= ~GSR_GlobalUniformsInUBO;
 	}
 
@@ -423,10 +425,13 @@ void GLSLGen::ToDeclarations(std::ostream& out, ShaderDecl const & dcl)
 
 				if (!found)
 				{
-					out << "varying ";
 					if (glsl_rules_ & GSR_InOutPrefix)
 					{
 						out << "out ";
+					}
+					else
+					{
+						out << "varying ";
 					}
 					switch (type)
 					{
@@ -1352,7 +1357,16 @@ void GLSLGen::ToInstructions(std::ostream& out, ShaderInstruction const & insn) 
 
 	case SO_NOT:
 		this->ToOperands(out, *insn.ops[0], sit);
-		out << " = vec4(~ivec4(";
+		out << " = vec4(";
+		if (glsl_rules_ & GSR_BitwiseOp)
+		{
+			out << "~i";
+		}
+		else
+		{
+			out << "!b";
+		}
+		out << "vec4(";
 		this->ToOperands(out, *insn.ops[1], sit);
 		out << "))";
 		this->ToComponentSelectors(out, *insn.ops[0]);
@@ -1638,18 +1652,8 @@ void GLSLGen::ToInstructions(std::ostream& out, ShaderInstruction const & insn) 
 		// TODO: to be tested,is that true?
 		// dest.mask = ivec4(~src0-int(1)).mask;
 		this->ToOperands(out, *insn.ops[0], sit);
-		out << " = ivec4(";
-		if (glsl_rules_ & GSR_BitwiseOp)
-		{
-			out << "~";
-			this->ToOperands(out, *insn.ops[1], sit);
-			out << " - int(1)";
-		}
-		else
-		{
-			out << "-";
-			this->ToOperands(out, *insn.ops[1], sit);
-		}
+		out << " = ivec4(-";
+		this->ToOperands(out, *insn.ops[1], sit);
 		out << ")";
 		this->ToComponentSelectors(out, *insn.ops[0]);
 		out << ";";

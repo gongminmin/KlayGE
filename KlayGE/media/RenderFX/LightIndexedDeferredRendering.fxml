@@ -405,12 +405,12 @@ float4 LightIndexedDeferredRenderingPointPS(float2 tc : TEXCOORD0, float3 view_d
 			uint mask = 128;
 			uint light_comp = light_index[comp];
 
-#if KLAYGE_D3D11
+#if KLAYGE_D3D11 || KLAYGE_DXBC2GLSL
 			[loop]
 #endif
 			while (mask > 0)
 			{
-#if KLAYGE_D3D11
+#if KLAYGE_D3D11 || KLAYGE_DXBC2GLSL
 				[branch]
 #endif
 				if (mask <= light_comp)
@@ -485,12 +485,12 @@ float4 LightIndexedDeferredRenderingSpotPS(float2 tc : TEXCOORD0, float3 view_di
 			uint mask = 128;
 			uint light_comp = light_index[comp];
 
-#if KLAYGE_D3D11
+#if KLAYGE_D3D11 || KLAYGE_DXBC2GLSL
 			[loop]
 #endif
 			while (mask > 0)
 			{
-#if KLAYGE_D3D11
+#if KLAYGE_D3D11 || KLAYGE_DXBC2GLSL
 				[branch]
 #endif
 				if (mask <= light_comp)
