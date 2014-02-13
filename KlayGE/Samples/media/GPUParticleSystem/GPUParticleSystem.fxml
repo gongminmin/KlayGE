@@ -341,7 +341,7 @@ void ParticlesVS3(uint vid : SV_VertexID,
 
 	<shader type="geometry_shader" version="4">
 		<![CDATA[
-#if KLAYGE_OPENGL
+#if KLAYGE_CG
 POINT TRIANGLE_OUT void ParticlesGS(AttribArray<float4> input : POSITION)
 {
 #else
@@ -369,7 +369,7 @@ void ParticlesGS(point float4 input[1] : SV_Position, inout TriangleStream<PS_IN
 			gs_out.view_dir = view_pos.xyz;
 			gs_out.tex = tex * 0.5f + 0.5f;
 
-#if KLAYGE_OPENGL
+#if KLAYGE_CG
 			emitVertex(gs_out.pos : POSITION, gs_out.clr : COLOR0, gs_out.PosSS : TEXCOORD0,
 				gs_out.CenterView : TEXCOORD1, gs_out.view_dir : TEXCOORD2, gs_out.tex : TEXCOORD3);
 #else

@@ -27,6 +27,7 @@
 #include <DXBC2GLSL/Utils.hpp>
 #include <exception>
 #include <sstream>
+#include <limits>
 
 namespace boost
 {
@@ -43,4 +44,13 @@ namespace boost
 		ss << expr << ' ' << msg << " in " << function << ", line " << line << " of " << file;
 		throw std::exception(ss.str().c_str());
 	}
+}
+
+bool ValidFloat(float f)
+{
+	return (f == f)
+		&& ((f >= std::numeric_limits<float>::min())
+			|| (-f >= std::numeric_limits<float>::min()))
+		&& ((f <= std::numeric_limits<float>::max())
+			|| (-f <= std::numeric_limits<float>::max()));
 }

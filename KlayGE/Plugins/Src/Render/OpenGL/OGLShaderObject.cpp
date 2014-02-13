@@ -57,8 +57,6 @@
 
 #include <Cg/cg.h>
 
-#define USE_DXBC2GLSL 0
-
 #if USE_DXBC2GLSL
 #include <DXBC2GLSL/DXBC2GLSL.hpp>
 #include <D3DCompiler.h>
@@ -1993,9 +1991,12 @@ namespace KlayGE
 
 						std::memcpy(&num8, nsbp, sizeof(num8));
 						nsbp += sizeof(num8);
-						vs_usage_indices_->resize(num8);
-						std::memcpy(&(*vs_usage_indices_)[0], nsbp, num8 * sizeof((*vs_usage_indices_)[0]));
-						nsbp += num8 * sizeof((*vs_usage_indices_)[0]);
+						if (num8 > 0)
+						{
+							vs_usage_indices_->resize(num8);
+							std::memcpy(&(*vs_usage_indices_)[0], nsbp, num8 * sizeof((*vs_usage_indices_)[0]));
+							nsbp += num8 * sizeof((*vs_usage_indices_)[0]);
+						}
 
 						std::memcpy(&num8, nsbp, sizeof(num8));
 						nsbp += sizeof(num8);
@@ -2136,7 +2137,10 @@ namespace KlayGE
 
 				num8 = static_cast<uint8_t>(vs_usage_indices_->size());
 				oss.write(reinterpret_cast<char const *>(&num8), sizeof(num8));
-				oss.write(reinterpret_cast<char const *>(&(*vs_usage_indices_)[0]), vs_usage_indices_->size() * sizeof((*vs_usage_indices_)[0]));
+				if (!vs_usage_indices_->empty())
+				{
+					oss.write(reinterpret_cast<char const *>(&(*vs_usage_indices_)[0]), vs_usage_indices_->size() * sizeof((*vs_usage_indices_)[0]));
+				}
 
 				num8 = static_cast<uint8_t>(glsl_vs_attrib_names_->size());
 				oss.write(reinterpret_cast<char const *>(&num8), sizeof(num8));
@@ -2514,8 +2518,48 @@ namespace KlayGE
 			{
 				try
 				{
+					GLSLVersion gsv = GSV_120;
+					if (glloader_GL_VERSION_4_4())
+					{
+						gsv = GSV_440;
+					}
+					else if (glloader_GL_VERSION_4_3())
+					{
+						gsv = GSV_430;
+					}
+					else if (glloader_GL_VERSION_4_2())
+					{
+						gsv = GSV_420;
+					}
+					else if (glloader_GL_VERSION_4_1())
+					{
+						gsv = GSV_410;
+					}
+					else if (glloader_GL_VERSION_4_0())
+					{
+						gsv = GSV_400;
+					}
+					else if (glloader_GL_VERSION_3_3())
+					{
+						gsv = GSV_330;
+					}
+					else if (glloader_GL_VERSION_3_2())
+					{
+						gsv = GSV_150;
+					}
+					else if (glloader_GL_VERSION_3_1())
+					{
+						gsv = GSV_140;
+					}
+					else if (glloader_GL_VERSION_3_0())
+					{
+						gsv = GSV_130;
+					}
+
 					DXBC2GLSL::DXBC2GLSL dxbc2glsl;
-					dxbc2glsl.FeedDXBC(code->GetBufferPointer(), GSV_120);
+					uint32_t rules = DXBC2GLSL::DXBC2GLSL::DefaultRules(gsv);
+					rules &= ~GSR_UseUBO;
+					dxbc2glsl.FeedDXBC(code->GetBufferPointer(), gsv, rules);
 					(*glsl_srcs_)[type] = MakeSharedPtr<std::string>(dxbc2glsl.GLSLString());
 					(*pnames_)[type] = MakeSharedPtr<std::vector<std::string> >();
 					(*glsl_res_names_)[type] = MakeSharedPtr<std::vector<std::string> >();
@@ -2587,67 +2631,71 @@ namespace KlayGE
 								std::string glsl_param_name = semantic;
 								size_t const semantic_hash = RT_HASH(semantic.c_str());
 
-								VertexElementUsage usage = VEU_Position;
-								uint8_t usage_index = 0;
-								if (CT_HASH("POSITION") == semantic_hash)
+								if ((CT_HASH("SV_VertexID") != semantic_hash)
+									&& (CT_HASH("SV_InstanceID") != semantic_hash))
 								{
-									usage = VEU_Position;
-									glsl_param_name = "POSITION0";
-								}
-								else if (CT_HASH("NORMAL") == semantic_hash)
-								{
-									usage = VEU_Normal;
-									glsl_param_name = "NORMAL0";
-								}
-								else if (CT_HASH("COLOR") == semantic_hash)
-								{
-									if (0 == semantic_index)
+									VertexElementUsage usage = VEU_Position;
+									uint8_t usage_index = 0;
+									if (CT_HASH("POSITION") == semantic_hash)
 									{
-										usage = VEU_Diffuse;
-										glsl_param_name = "COLOR0";
+										usage = VEU_Position;
+										glsl_param_name = "POSITION0";
+									}
+									else if (CT_HASH("NORMAL") == semantic_hash)
+									{
+										usage = VEU_Normal;
+										glsl_param_name = "NORMAL0";
+									}
+									else if (CT_HASH("COLOR") == semantic_hash)
+									{
+										if (0 == semantic_index)
+										{
+											usage = VEU_Diffuse;
+											glsl_param_name = "COLOR0";
+										}
+										else
+										{
+											usage = VEU_Specular;
+											glsl_param_name = "COLOR1";
+										}
+									}
+									else if (CT_HASH("BLENDWEIGHT") == semantic_hash)
+									{
+										usage = VEU_BlendWeight;
+										glsl_param_name = "BLENDWEIGHT0";
+									}
+									else if (CT_HASH("BLENDINDICES") == semantic_hash)
+									{
+										usage = VEU_BlendIndex;
+										glsl_param_name = "BLENDINDICES0";
+									}
+									else if (0 == semantic.find("TEXCOORD"))
+									{
+										usage = VEU_TextureCoord;
+										usage_index = static_cast<uint8_t>(semantic_index);
+										glsl_param_name = "TEXCOORD" + boost::lexical_cast<std::string>(semantic_index);
+									}
+									else if (CT_HASH("TANGENT") == semantic_hash)
+									{
+										usage = VEU_Tangent;
+										glsl_param_name = "TANGENT0";
+									}
+									else if (CT_HASH("BINORMAL") == semantic_hash)
+									{
+										usage = VEU_Binormal;
+										glsl_param_name = "BINORMAL0";
 									}
 									else
 									{
-										usage = VEU_Specular;
-										glsl_param_name = "COLOR1";
+										BOOST_ASSERT(false);
+										usage = VEU_Position;
+										glsl_param_name = "POSITION0";
 									}
-								}
-								else if (CT_HASH("BLENDWEIGHT") == semantic_hash)
-								{
-									usage = VEU_BlendWeight;
-									glsl_param_name = "BLENDWEIGHT0";
-								}
-								else if (CT_HASH("BLENDINDICES") == semantic_hash)
-								{
-									usage = VEU_BlendIndex;
-									glsl_param_name = "BLENDINDICES0";
-								}
-								else if (0 == semantic.find("TEXCOORD"))
-								{
-									usage = VEU_TextureCoord;
-									usage_index = static_cast<uint8_t>(semantic_index);
-									glsl_param_name = "TEXCOORD" + boost::lexical_cast<std::string>(semantic_index);
-								}
-								else if (CT_HASH("TANGENT") == semantic_hash)
-								{
-									usage = VEU_Tangent;
-									glsl_param_name = "TANGENT0";
-								}
-								else if (CT_HASH("BINORMAL") == semantic_hash)
-								{
-									usage = VEU_Binormal;
-									glsl_param_name = "BINORMAL0";
-								}
-								else
-								{
-									BOOST_ASSERT(false);
-									usage = VEU_Position;
-									glsl_param_name = "POSITION0";
-								}
 
-								vs_usages_->push_back(usage);
-								vs_usage_indices_->push_back(usage_index);
-								glsl_vs_attrib_names_->push_back(glsl_param_name);
+									vs_usages_->push_back(usage);
+									vs_usage_indices_->push_back(usage_index);
+									glsl_vs_attrib_names_->push_back(glsl_param_name);
+								}
 							}
 						}
 					}
@@ -2713,6 +2761,7 @@ namespace KlayGE
 			std::string shader_text = this->GenCgShaderText(type, effect, tech, pass);
 
 			std::vector<char const *> args;
+			args.push_back("-DKLAYGE_CG=1");
 			args.push_back("-DKLAYGE_OPENGL=1");
 			args.push_back(max_sm_str.c_str());
 			args.push_back(max_tex_array_str.c_str());

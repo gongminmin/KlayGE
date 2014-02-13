@@ -26,9 +26,9 @@
  **************************************************************************/
 
 #include "ASMGen.hpp"
+#include "DXBC2GLSL/Utils.hpp"
 #include <iomanip>
 #include <iostream>
-#include <limits>
 
 // TODO: we should fix this to output the same syntax as fxc, if sm_dump_short_syntax is set
 
@@ -64,11 +64,7 @@ void ASMGen::Disasm(std::ostream& out, ShaderOperand const & op, ShaderImmType i
 			{
 			case SIT_Float:
 				// Normalized float test
-				if ((op.imm_values[0].f32 == op.imm_values[0].f32)
-					&& ((op.imm_values[0].f32 >= std::numeric_limits<float>::min())
-						|| (-op.imm_values[0].f32 >= std::numeric_limits<float>::min()))
-					&& ((op.imm_values[0].f32 <= std::numeric_limits<float>::max())
-						|| (-op.imm_values[0].f32 <= std::numeric_limits<float>::max())))
+				if (ValidFloat(op.imm_values[0].f32))
 				{
 					out << op.imm_values[0].f32;
 				}
@@ -294,11 +290,7 @@ void ASMGen::Disasm(std::ostream& out, ShaderDecl const & dcl)
 				for (int j = 0; j < 4; ++ j)
 				{
 					// Normalized float test
-					if ((data[i * 4 + j] == data[i * 4 + j])
-						&& ((data[i * 4 + j] >= std::numeric_limits<float>::min())
-							|| (-data[i * 4 + j] >= std::numeric_limits<float>::min()))
-						&& ((data[i * 4 + j] <= std::numeric_limits<float>::max())
-							|| (-data[i * 4 + j] <= std::numeric_limits<float>::max())))
+					if (ValidFloat(data[i * 4 + j]))
 					{
 						out << data[i * 4 + j];
 					}

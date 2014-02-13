@@ -50,9 +50,12 @@ private:
 	void ToDefines(std::ostream& out, ShaderDecl const & dcl, uint32_t& clip_distance_index);
 	void ToDeclarations(std::ostream& out, ShaderDecl const & dcl);
 	void ToInstructions(std::ostream& out, ShaderInstruction const & insn) const;
-	void ToOperands(std::ostream& out, ShaderOperand const & op, ShaderImmType imm_type, bool mask = true, bool dcl_array = false, bool no_swizzle = false) const;
+	void ToOperands(std::ostream& out, ShaderOperand const & op, uint32_t imm_as_type,
+		bool mask = true, bool dcl_array = false, bool no_swizzle = false) const;
+	ShaderImmType OperandAsType(ShaderOperand const & op, uint32_t imm_as_type) const;
 	int ToSingleComponentSelector(std::ostream& out, ShaderOperand const & op, int i, bool dot = true) const;
-	void ToOperandName(std::ostream& out, ShaderOperand const & op, bool* need_idx, bool* need_comps, bool no_swizzle = false) const;
+	void ToOperandName(std::ostream& out, ShaderOperand const & op, ShaderImmType as_type,
+		bool* need_idx, bool* need_comps, bool no_swizzle = false) const;
 	void ToComponentSelectors(std::ostream& out, ShaderOperand const & op, bool dot = true) const;
 	void ToTemps(std::ostream& out, ShaderDecl const & dcl);
 	bool IsImmediateNumber(ShaderOperand const & op) const;
@@ -99,6 +102,8 @@ private:
 
 	GLSLVersion glsl_version_;
 	uint32_t glsl_rules_;
+
+	mutable std::vector<uint8_t> temp_as_type_;
 };
 
 #endif		// _DXBC2GLSL_GLSLGEN_HPP

@@ -247,19 +247,11 @@ union ShaderAny
 
 enum ShaderImmType
 {
-	SIT_Float,
+	SIT_Unknown,
 	SIT_Int,
 	SIT_UInt,
+	SIT_Float,
 	SIT_Double
-};
-
-enum ShaderOperandAsType
-{
-	SOAT_Float,
-	SOAT_Int,
-	SOAT_UInt,
-	SOAT_Double,
-	SOAT_Bool
 };
 
 struct ShaderOperand
@@ -279,8 +271,6 @@ struct ShaderOperand
 		boost::shared_ptr<ShaderOperand> reg;
 	} indices[3];
 
-	ShaderOperandAsType as_type;
-
 	bool IsIndexSimple(uint32_t i) const
 	{
 		 return !indices[i].reg && (indices[i].disp >= 0)
@@ -294,8 +284,7 @@ struct ShaderOperand
 
 	ShaderOperand()
 		: mode(0), comps(0), mask(0), num_indices(0),
-			type(SOT_TEMP), neg(false), abs(false),
-			as_type(SOAT_Bool)
+			type(SOT_TEMP), neg(false), abs(false)
 	{
 		memset(swizzle, 0, sizeof(swizzle));
 		memset(imm_values, 0, sizeof(imm_values));

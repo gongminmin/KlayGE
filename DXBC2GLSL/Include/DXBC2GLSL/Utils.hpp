@@ -63,4 +63,6 @@ inline uint16_t LE16ToNative(uint16_t v)
 }
 #endif
 
+bool ValidFloat(float f);
+
 #endif		// _DXBC2GLSL_UTILS_HPP_

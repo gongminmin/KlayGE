@@ -95,9 +95,6 @@ void DQSkinned(float3 pos,
 	float3 pos_s = 0;
 	float4 blend_real = 0;
 	float4 blend_dual = 0;
-#if KLAYGE_D3D11 || KLAYGE_DXBC2GLSL
-	[unroll]
-#endif
 	for (int i = 0; i < 4; ++ i)
 	{
 		float4 joint_real = joint_reals[blend_indices[i]];

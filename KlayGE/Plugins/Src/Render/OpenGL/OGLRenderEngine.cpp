@@ -883,44 +883,47 @@ namespace KlayGE
 		uint32_t const num_passes = tech.NumPasses();
 		size_t const inst_format_size = rl.InstanceStreamFormat().size();
 
-		if ((glloader_GL_VERSION_3_3() || glloader_GL_ARB_instanced_arrays()) && rl.InstanceStream())
+		if ((glloader_GL_VERSION_3_3() || glloader_GL_ARB_instanced_arrays()) && (rl.NumInstances() > 1))
 		{
-			OGLGraphicsBuffer& stream(*checked_pointer_cast<OGLGraphicsBuffer>(rl.InstanceStream()));
-
-			uint32_t const instance_size = rl.InstanceSize();
-			BOOST_ASSERT(num_instance * instance_size <= stream.Size());
-
-			uint8_t* elem_offset = nullptr;
-			for (size_t i = 0; i < inst_format_size; ++ i)
+			if (rl.InstanceStream())
 			{
-				vertex_element const & vs_elem = rl.InstanceStreamFormat()[i];
+				OGLGraphicsBuffer& stream(*checked_pointer_cast<OGLGraphicsBuffer>(rl.InstanceStream()));
 
-				GLint attr = cur_shader->GetAttribLocation(vs_elem.usage, vs_elem.usage_index);
-				if (attr != -1)
+				uint32_t const instance_size = rl.InstanceSize();
+				BOOST_ASSERT(num_instance * instance_size <= stream.Size());
+
+				uint8_t* elem_offset = nullptr;
+				for (size_t i = 0; i < inst_format_size; ++ i)
 				{
-					GLint const num_components = static_cast<GLint>(NumComponents(vs_elem.format));
-					GLenum type;
-					GLboolean normalized;
-					OGLMapping::MappingVertexFormat(type, normalized, vs_elem.format);
-					normalized = (((VEU_Diffuse == vs_elem.usage) || (VEU_Specular == vs_elem.usage)) && !IsFloatFormat(vs_elem.format)) ? GL_TRUE : normalized;
-					GLvoid* offset = static_cast<GLvoid*>(elem_offset + rl.StartInstanceLocation() * instance_size);
+					vertex_element const & vs_elem = rl.InstanceStreamFormat()[i];
 
-					BOOST_ASSERT(GL_ARRAY_BUFFER == stream.GLType());
-					stream.Active(false);
-					glVertexAttribPointer(attr, num_components, type, normalized, instance_size, offset);
-					glEnableVertexAttribArray(attr);
+					GLint attr = cur_shader->GetAttribLocation(vs_elem.usage, vs_elem.usage_index);
+					if (attr != -1)
+					{
+						GLint const num_components = static_cast<GLint>(NumComponents(vs_elem.format));
+						GLenum type;
+						GLboolean normalized;
+						OGLMapping::MappingVertexFormat(type, normalized, vs_elem.format);
+						normalized = (((VEU_Diffuse == vs_elem.usage) || (VEU_Specular == vs_elem.usage)) && !IsFloatFormat(vs_elem.format)) ? GL_TRUE : normalized;
+						GLvoid* offset = static_cast<GLvoid*>(elem_offset + rl.StartInstanceLocation() * instance_size);
 
-					if (glloader_GL_VERSION_3_3())
-					{
-						glVertexAttribDivisor(attr, 1);
+						BOOST_ASSERT(GL_ARRAY_BUFFER == stream.GLType());
+						stream.Active(false);
+						glVertexAttribPointer(attr, num_components, type, normalized, instance_size, offset);
+						glEnableVertexAttribArray(attr);
+
+						if (glloader_GL_VERSION_3_3())
+						{
+							glVertexAttribDivisor(attr, 1);
+						}
+						else
+						{
+							glVertexAttribDivisorARB(attr, 1);
+						}
 					}
-					else
-					{
-						glVertexAttribDivisorARB(attr, 1);
-					}
+
+					elem_offset += vs_elem.element_size();
 				}
-
-				elem_offset += vs_elem.element_size();
 			}
 
 			if (so_rl_)
@@ -1436,7 +1439,11 @@ namespace KlayGE
 		caps_.is_tbdr = false;
 
 		caps_.hw_instancing_support = true;
+#if USE_DXBC2GLSL
+		caps_.instance_id_support = glloader_GL_VERSION_3_1() || glloader_GL_ARB_draw_instanced();
+#else
 		caps_.instance_id_support = false;
+#endif
 		caps_.stream_output_support = false;
 		caps_.alpha_to_coverage_support = true;
 		if (glloader_GL_VERSION_3_1() || glloader_GL_NV_primitive_restart())
@@ -1469,6 +1476,9 @@ namespace KlayGE
 			caps_.independent_blend_support = false;
 		}
 
+#if USE_DXBC2GLSL
+		caps_.gs_support = false;
+#else
 		if (glloader_GL_VERSION_3_2() || glloader_GL_ARB_geometry_shader4() || glloader_GL_EXT_geometry_shader4())
 		{
 			caps_.gs_support = true;
@@ -1477,6 +1487,7 @@ namespace KlayGE
 		{
 			caps_.gs_support = false;
 		}
+#endif
 			
 		caps_.cs_support = false;
 		if (glloader_GL_VERSION_4_0() || glloader_GL_ARB_tessellation_shader())

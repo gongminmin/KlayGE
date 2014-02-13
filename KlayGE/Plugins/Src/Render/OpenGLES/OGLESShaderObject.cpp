@@ -2121,6 +2121,7 @@ namespace KlayGE
 		}
 
 		std::vector<char const *> args;
+		args.push_back("-DKLAYGE_CG=1");
 		args.push_back("-DKLAYGE_OPENGLES=1");
 		args.push_back(max_sm_str.c_str());
 		args.push_back(max_tex_array_str.c_str());

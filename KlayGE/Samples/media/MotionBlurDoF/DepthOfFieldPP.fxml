@@ -319,7 +319,7 @@ void SeparateBokehVS4(float2 pos : POSITION,
 	}
 }
 
-#if KLAYGE_OPENGL
+#if KLAYGE_CG
 POINT TRIANGLE_OUT void SeparateBokehGS4(AttribArray<float3> in_clr : TEXCOORD0, AttribArray<float4> in_pos : POSITION)
 {
 #else
@@ -343,7 +343,7 @@ void SeparateBokehGS4(point float3 in_clr[1] : TEXCOORD0, point float4 in_pos[1]
 			gs_out.clr = clr;
 			gs_out.tc = offset * 0.5f + 0.5f;
 		
-#if KLAYGE_OPENGL
+#if KLAYGE_CG
 			emitVertex(gs_out.tc : TEXCOORD0, gs_out.clr : TEXCOORD1, gs_out.pos : POSITION);
 #else
 			out_stream.Append(gs_out);
