@@ -150,13 +150,13 @@ class compiler_info:
 				if "x86" == arch:
 					arch_list.append((arch, "Visual Studio 12", toolset, is_winrt))
 				elif "x86_app" == arch:
-					arch_list.append((arch, "Visual Studio 12 WinRT", toolset, is_winrt))
+					arch_list.append((arch, "Visual Studio 12 WinRT-x86", toolset, is_winrt))
 				elif "arm_app" == arch:
-					arch_list.append((arch, "Visual Studio 12 ARM WinRT", toolset, is_winrt))
+					arch_list.append((arch, "Visual Studio 12 WinRT-ARM", toolset, is_winrt))
 				elif "x64" == arch:
 					arch_list.append((arch, "Visual Studio 12 Win64", toolset, is_winrt))
 				elif "x64_app" == arch:
-					arch_list.append((arch, "Visual Studio 12 Win64 WinRT", toolset, is_winrt))
+					arch_list.append((arch, "Visual Studio 12 WinRT-x64", toolset, is_winrt))
 		elif "vc11" == compiler:
 			compiler_name = "vc"
 			compiler_version = 11
