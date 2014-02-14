@@ -76,7 +76,7 @@ namespace KlayGE
 	{
 	public:
 		explicit MsgInputLocationEvents(MsgInputSensor* input_sensor)
-			: input_sensor_(input_sensor)
+			: input_sensor_(input_sensor), ref_(1)
 		{
 		}
 		virtual ~MsgInputLocationEvents()
@@ -156,7 +156,7 @@ namespace KlayGE
 	{
 	public:
 		explicit MsgInputSensorEvents(MsgInputSensor* input_sensor)
-			: input_sensor_(input_sensor)
+			: input_sensor_(input_sensor), ref_(1)
 		{
 		}
 		virtual ~MsgInputSensorEvents()

@@ -4575,7 +4575,15 @@ void GLSLGen::ToOperands(std::ostream& out, ShaderOperand const & op, uint32_t i
 				break;
 
 			case SIT_UInt:
-				out << op.imm_values[0].u32;
+				if (0xC0490FDB == op.imm_values[0].u32)
+				{
+					// Hack for predefined magic value
+					out << op.imm_values[0].f32;
+				}
+				else
+				{
+					out << op.imm_values[0].u32;
+				}
 				break;
 
 			default:
@@ -4878,7 +4886,15 @@ ShaderImmType GLSLGen::OperandAsType(ShaderOperand const & op, uint32_t imm_as_t
 				break;
 
 			case SIT_UInt:
-				as_type = std::max(as_type, SIT_UInt);
+				if (0xC0490FDB == op.imm_values[0].u32)
+				{
+					// Hack for predefined magic value
+					as_type = std::max(as_type, SIT_Float);
+				}
+				else
+				{
+					as_type = std::max(as_type, SIT_UInt);
+				}
 				break;
 
 			default:
