@@ -142,15 +142,15 @@ void ParticleGS(point float4 in_CenterView_Life[1] : SV_Position, point float3 i
 		{
 			tex = float2(-1, 1);
 		}
-		if (1 == i)
+		else if (1 == i)
 		{
 			tex = float2(1, 1);
 		}
-		if (2 == i)
+		else if (2 == i)
 		{
 			tex = float2(-1, -1);
 		}
-		if (3 == i)
+		else 
 		{
 			tex = float2(1, -1);
 		}
