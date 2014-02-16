@@ -963,6 +963,12 @@ void GLSLGen::ToDeclarations(std::ostream& out, ShaderDecl const & dcl)
 		}
 		break;
 
+	case SO_DCL_STREAM:
+	case SO_DCL_GS_INPUT_PRIMITIVE:
+	case SO_DCL_GS_OUTPUT_PRIMITIVE_TOPOLOGY:
+	case SO_DCL_MAX_OUTPUT_VERTEX_COUNT:
+		break;
+
 	default:
 		BOOST_ASSERT_MSG(false, "Unhandled declarations");
 		break;

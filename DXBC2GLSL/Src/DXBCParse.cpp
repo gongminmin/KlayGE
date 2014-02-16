@@ -38,9 +38,21 @@ boost::shared_ptr<DXBCContainer> DXBCParse(void const * data)
 		return boost::shared_ptr<DXBCContainer>();
 	}
 	container->shader_chunk = DXBCFindShaderBytecode(data);
-	container->input_signature = DXBCFindSignature(data, DFS_INPUT);
+	container->input_signature = DXBCFindSignature(data, DFS_INPUT1);
+	if (!container->input_signature)
+	{
+		container->input_signature = DXBCFindSignature(data, DFS_INPUT);
+	}
 	container->resource_chunk = DXBCFindChunk(data, FOURCC_RDEF);
-	container->output_signature = DXBCFindSignature(data, DFS_OUTPUT);
+	container->output_signature = DXBCFindSignature(data, DFS_OUTPUT1);
+	if (!container->output_signature)
+	{
+		container->output_signature = DXBCFindSignature(data, DFS_OUTPUT5);
+		if (!container->output_signature)
+		{
+			container->output_signature = DXBCFindSignature(data, DFS_OUTPUT);
+		}
+	}
 
 	return container;
 }
@@ -57,7 +69,7 @@ DXBCChunkHeader const * DXBCFindChunk(void const * data, uint32_t fourcc)
 	for (uint32_t i = 0; i < num_chunks; ++ i)
 	{
 		uint32_t offset = LE32ToNative(chunk_offsets[i]);
-		DXBCChunkHeader const * chunk = reinterpret_cast<DXBCChunkHeader const *>(reinterpret_cast<char const *>(data)+ offset);
+		DXBCChunkHeader const * chunk = reinterpret_cast<DXBCChunkHeader const *>(reinterpret_cast<char const *>(data) + offset);
 		if (LE32ToNative(chunk->fourcc) == fourcc)
 		{
 			return chunk;
@@ -77,7 +89,7 @@ DXBCChunkHeader const * DXBCFindShaderBytecode(void const * data)
 	return chunk;
 }
 
-DXBCChunkSignature const * DXBCFindSignature(void const * data, uint32_t kind)
+DXBCChunkSignatureHeader const * DXBCFindSignature(void const * data, uint32_t kind)
 {
 	uint32_t fourcc;
 	switch (kind)
@@ -94,9 +106,21 @@ DXBCChunkSignature const * DXBCFindSignature(void const * data, uint32_t kind)
 		fourcc = FOURCC_PCSG;
 		break;
 
+	case DFS_INPUT1:
+		fourcc = FOURCC_ISG1;
+		break;
+
+	case DFS_OUTPUT5:
+		fourcc = FOURCC_OSG5;
+		break;
+
+	case DFS_OUTPUT1:
+		fourcc = FOURCC_OSG1;
+		break;
+
 	default:
 		return NULL;
 	}
 
-	return reinterpret_cast<DXBCChunkSignature const *>(DXBCFindChunk(data, fourcc));
+	return reinterpret_cast<DXBCChunkSignatureHeader const *>(DXBCFindChunk(data, fourcc));
 }

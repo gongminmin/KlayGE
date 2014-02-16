@@ -30,6 +30,48 @@
 
 namespace
 {
+#pragma pack(push, 1)
+	struct DXBCSignatureParameterD3D10
+	{
+		uint32_t name_offset;
+		uint32_t semantic_index;
+		uint32_t system_value_type;
+		uint32_t component_type;
+		uint32_t register_num;
+		uint8_t mask;
+		uint8_t read_write_mask;
+		uint8_t padding[2];
+	};
+
+	struct DXBCSignatureParameterD3D11
+	{
+		uint32_t stream;
+		uint32_t name_offset;
+		uint32_t semantic_index;
+		uint32_t system_value_type;
+		uint32_t component_type;
+		uint32_t register_num;
+		uint8_t mask;
+		uint8_t read_write_mask;
+		uint8_t padding[2];
+	};
+
+	struct DXBCSignatureParameterD3D11_1
+	{
+		uint32_t stream;
+		uint32_t name_offset;
+		uint32_t semantic_index;
+		uint32_t system_value_type;
+		uint32_t component_type;
+		uint32_t register_num;
+		uint8_t mask;
+		uint8_t read_write_mask;
+		uint8_t padding[2];
+		uint32_t min_precision;
+	};
+#pragma pack(pop)
+
+
 	bool SortFuncLess(DXBCShaderVariable const & lh, DXBCShaderVariable const & rh)
 	{
 		return lh.var_desc.start_offset < rh.var_desc.start_offset;
@@ -41,16 +83,16 @@ struct ShaderParser
 	uint32_t const * tokens;//shader tokens
 	uint32_t const * tokens_end;
 	DXBCChunkHeader const * resource_chunk;//resource definition and constant buffer chunk
-	DXBCChunkSignature const * input_signature;
-	DXBCChunkSignature const * output_signature;
+	DXBCChunkSignatureHeader const * input_signature;
+	DXBCChunkSignatureHeader const * output_signature;
 	boost::shared_ptr<ShaderProgram> program;
 
 	ShaderParser(const DXBCContainer& dxbc, boost::shared_ptr<ShaderProgram> const & program)
 		: program(program)
 	{
 		resource_chunk = dxbc.resource_chunk;
-		input_signature = reinterpret_cast<DXBCChunkSignature const *>(dxbc.input_signature);
-		output_signature = reinterpret_cast<DXBCChunkSignature const *>(dxbc.output_signature);
+		input_signature = reinterpret_cast<DXBCChunkSignatureHeader const *>(dxbc.input_signature);
+		output_signature = reinterpret_cast<DXBCChunkSignatureHeader const *>(dxbc.output_signature);
 		uint32_t size = LE32ToNative(dxbc.shader_chunk->size);
 		tokens = reinterpret_cast<uint32_t const *>(dxbc.shader_chunk + 1);
 		tokens_end = reinterpret_cast<uint32_t const *>(reinterpret_cast<char const *>(tokens) + size);
@@ -228,12 +270,14 @@ struct ShaderParser
 		uint32_t lentok = this->Read32();
 		tokens_end = tokens - 2 + lentok;
 
+		uint32_t cur_gs_stream = 0;
+
 		while (tokens != tokens_end)
 		{
 			TokenizedShaderInstruction insntok;
 			this->ReadToken(&insntok);
 			uint32_t const * insn_end = tokens - 1 + insntok.length;
-			ShaderOpcode opcode = static_cast<ShaderOpcode>(insntok.opcode);
+			ShaderOpcode opcode = insntok.opcode;
 			BOOST_ASSERT(opcode < SO_COUNT);
 
 			if (SO_IMMEDIATE_CONSTANT_BUFFER == opcode)
@@ -340,7 +384,12 @@ struct ShaderParser
 					break;
 
 				case SO_DCL_GS_INPUT_PRIMITIVE:
+					program->gs_input_primitive = dcl->dcl_gs_input_primitive.primitive;
+					break;
+
 				case SO_DCL_GS_OUTPUT_PRIMITIVE_TOPOLOGY:
+					program->gs_output_topology[cur_gs_stream]
+						= dcl->dcl_gs_output_primitive_topology.primitive_topology;
 					break;
 
 				case SO_DCL_MAX_OUTPUT_VERTEX_COUNT:
@@ -435,8 +484,9 @@ struct ShaderParser
 					break;
 
 				case SO_DCL_STREAM:
-					// TODO: dcl_stream is undocumented: what is it?
-					BOOST_ASSERT_MSG(false, "Unhandled dcl_stream since it's undocumented");
+					READ_OP(STREAM);
+					cur_gs_stream = static_cast<uint32_t>(dcl->op->indices[0].disp);
+					program->gs_output_topology.push_back(SPT_Undefined);
 					break;
 
 				default:
@@ -512,11 +562,31 @@ struct ShaderParser
 		
 		if (input_signature)
 		{
-			this->ParseSignature(*input_signature, FOURCC_ISGN);
+			if (FOURCC_ISG1 == input_signature->fourcc)
+			{
+				this->ParseSignature(input_signature, FOURCC_ISG1);
+			}
+			else
+			{
+				BOOST_ASSERT(FOURCC_ISGN == input_signature->fourcc);
+				this->ParseSignature(input_signature, FOURCC_ISGN);
+			}
 		}
 		if (output_signature)
 		{
-			this->ParseSignature(*output_signature, FOURCC_OSGN);
+			if (FOURCC_OSG1 == output_signature->fourcc)
+			{
+				this->ParseSignature(output_signature, FOURCC_OSG1);
+			}
+			else if (FOURCC_OSG5 == output_signature->fourcc)
+			{
+				this->ParseSignature(output_signature, FOURCC_OSG5);
+			}
+			else
+			{
+				BOOST_ASSERT(FOURCC_OSGN == output_signature->fourcc);
+				this->ParseSignature(output_signature, FOURCC_OSGN);
+			}
 		}
 
 		return NULL;
@@ -683,15 +753,18 @@ struct ShaderParser
 		return static_cast<uint32_t>(-1);
 	}
 
-	uint32_t ParseSignature(DXBCChunkSignature const & sig, uint32_t fourcc) const
+	uint32_t ParseSignature(DXBCChunkSignatureHeader const * sig, uint32_t fourcc) const
 	{
 		std::vector<DXBCSignatureParamDesc>* params = NULL;
 		switch (fourcc)
 		{
+		case FOURCC_ISG1:
 		case FOURCC_ISGN:
 			params = &program->params_in;
 			break;
 
+		case FOURCC_OSG1:
+		case FOURCC_OSG5:
 		case FOURCC_OSGN:
 			params = &program->params_out;
 			break;
@@ -701,20 +774,74 @@ struct ShaderParser
 			break;
 		}
 
-		uint32_t count = LE32ToNative(sig.count);
+		uint32_t offset = LE32ToNative(sig->offset);
+		void const * elements_base
+			= static_cast<void const *>(reinterpret_cast<uint8_t const *>(sig)
+				+ sizeof(DXBCChunkHeader) + offset);
+
+		uint32_t count = LE32ToNative(sig->count);
 		params->resize(count);
-		for (uint32_t i = 0; i < count; ++ i)
+
+		if ((FOURCC_ISG1 == fourcc) || (FOURCC_OSG1 == fourcc))
 		{
-			DXBCSignatureParamDesc& param = (*params)[i];
-			param.semantic_name = reinterpret_cast<const char*>(&sig.count) + LE32ToNative(sig.elements[i].name_offset);
-			param.semantic_index = LE32ToNative(sig.elements[i].semantic_index);
-			param.system_value_type = static_cast<ShaderName>(LE32ToNative(sig.elements[i].system_value_type));
-			param.component_type = static_cast<ShaderRegisterComponentType>(LE32ToNative(sig.elements[i].component_type));
-			param.register_index = LE32ToNative(sig.elements[i].register_num);
-			param.mask = sig.elements[i].mask;
-			param.read_write_mask = sig.elements[i].read_write_mask;
-			param.stream = sig.elements[i].stream;
+			DXBCSignatureParameterD3D11_1 const * elements
+				= reinterpret_cast<DXBCSignatureParameterD3D11_1 const *>(elements_base);
+			for (uint32_t i = 0; i < count; ++ i)
+			{
+				DXBCSignatureParamDesc& param = (*params)[i];
+				param.semantic_name = reinterpret_cast<char const *>(sig)
+					+ sizeof(DXBCChunkHeader) + LE32ToNative(elements[i].name_offset);
+				param.semantic_index = LE32ToNative(elements[i].semantic_index);
+				param.system_value_type = static_cast<ShaderName>(LE32ToNative(elements[i].system_value_type));
+				param.component_type = static_cast<ShaderRegisterComponentType>(LE32ToNative(elements[i].component_type));
+				param.register_index = LE32ToNative(elements[i].register_num);
+				param.mask = elements[i].mask;
+				param.read_write_mask = elements[i].read_write_mask;
+				param.stream = LE32ToNative(elements[i].stream);
+				param.min_precision = LE32ToNative(elements[i].min_precision);
+			}
 		}
+		else if (FOURCC_OSG5 == fourcc)
+		{
+			DXBCSignatureParameterD3D11 const * elements
+				= reinterpret_cast<DXBCSignatureParameterD3D11 const *>(elements_base);
+			for (uint32_t i = 0; i < count; ++ i)
+			{
+				DXBCSignatureParamDesc& param = (*params)[i];
+				param.semantic_name = reinterpret_cast<char const *>(sig)
+					+ sizeof(DXBCChunkHeader) + LE32ToNative(elements[i].name_offset);
+				param.semantic_index = LE32ToNative(elements[i].semantic_index);
+				param.system_value_type = static_cast<ShaderName>(LE32ToNative(elements[i].system_value_type));
+				param.component_type = static_cast<ShaderRegisterComponentType>(LE32ToNative(elements[i].component_type));
+				param.register_index = LE32ToNative(elements[i].register_num);
+				param.mask = elements[i].mask;
+				param.read_write_mask = elements[i].read_write_mask;
+				param.stream = LE32ToNative(elements[i].stream);
+				param.min_precision = 0;
+			}
+		}
+		else
+		{
+			BOOST_ASSERT((FOURCC_ISGN == fourcc) || (FOURCC_OSGN == fourcc));
+
+			DXBCSignatureParameterD3D10 const * elements
+				= reinterpret_cast<DXBCSignatureParameterD3D10 const *>(elements_base);
+			for (uint32_t i = 0; i < count; ++ i)
+			{
+				DXBCSignatureParamDesc& param = (*params)[i];
+				param.semantic_name = reinterpret_cast<char const *>(sig)
+					+ sizeof(DXBCChunkHeader) + LE32ToNative(elements[i].name_offset);
+				param.semantic_index = LE32ToNative(elements[i].semantic_index);
+				param.system_value_type = static_cast<ShaderName>(LE32ToNative(elements[i].system_value_type));
+				param.component_type = static_cast<ShaderRegisterComponentType>(LE32ToNative(elements[i].component_type));
+				param.register_index = LE32ToNative(elements[i].register_num);
+				param.mask = elements[i].mask;
+				param.read_write_mask = elements[i].read_write_mask;
+				param.stream = 0;
+				param.min_precision = 0;
+			}
+		}
+		
 		return count;
 	}
 

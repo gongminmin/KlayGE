@@ -56,7 +56,7 @@ struct DclIndexRangeInfo
 	uint32_t num;
 };
 
-struct TokenizedShaderVersion//共32位
+struct TokenizedShaderVersion // 32-bit
 {
 	uint32_t minor : 4;
 	uint32_t major : 4;
@@ -66,7 +66,7 @@ struct TokenizedShaderVersion//共32位
 
 #pragma warning(push)
 #pragma warning(disable: 4201)
-struct TokenizedShaderInstruction//大小32位
+struct TokenizedShaderInstruction // 32-bit
 {
 	// we don't make it an union directly because unions can't be inherited from but struct can be 
 	union
@@ -74,14 +74,14 @@ struct TokenizedShaderInstruction//大小32位
 		// length and extended are always present, but they are only here to reduce duplication
 		struct
 		{
-			uint32_t opcode : 11;
+			ShaderOpcode opcode : 11;
 			uint32_t _11_23 : 13;
 			uint32_t length : 7;
 			uint32_t extended : 1;
 		};
 		struct
 		{
-			uint32_t opcode : 11;
+			ShaderOpcode opcode : 11;
 			uint32_t resinfo_return_type : 2;
 			uint32_t sat : 1;
 			uint32_t _14_17 : 4;
@@ -93,7 +93,7 @@ struct TokenizedShaderInstruction//大小32位
 		} insn;
 		struct
 		{
-			uint32_t opcode : 11;
+			ShaderOpcode opcode : 11;
 			uint32_t threads_in_group : 1;
 			uint32_t shared_memory : 1;
 			uint32_t uav_group : 1;
@@ -102,7 +102,7 @@ struct TokenizedShaderInstruction//大小32位
 		} sync;
 		struct
 		{
-			uint32_t opcode : 11;
+			ShaderOpcode opcode : 11;
 			uint32_t allow_refactoring : 1;
 			uint32_t fp64 : 1;
 			uint32_t early_depth_stencil : 1;
@@ -110,59 +110,59 @@ struct TokenizedShaderInstruction//大小32位
 		} dcl_global_flags;
 		struct
 		{
-			uint32_t opcode : 11;
-			uint32_t target : 5;
+			ShaderOpcode opcode : 11;
+			ShaderResourceDimension target : 5;
 			uint32_t nr_samples : 7;
 		} dcl_resource;
 		struct
 		{
-			uint32_t opcode : 11;
+			ShaderOpcode opcode : 11;
 			uint32_t shadow : 1;
 			uint32_t mono : 1;
 		} dcl_sampler;
 		struct
 		{
-			uint32_t opcode : 11;
-			uint32_t interpolation : 5;
+			ShaderOpcode opcode : 11;
+			ShaderInterpolationMode interpolation : 5;
 		} dcl_input_ps;
 		struct
 		{
-			uint32_t opcode : 11;
+			ShaderOpcode opcode : 11;
 			uint32_t dynamic : 1;
 		} dcl_constant_buffer;
 		struct
 		{
-			uint32_t opcode : 11;
-			uint32_t primitive : 6;
+			ShaderOpcode opcode : 11;
+			ShaderPrimitive primitive : 6;
 		} dcl_gs_input_primitive;
 		struct
 		{
-			uint32_t opcode : 11;
-			uint32_t primitive_topology : 7;
+			ShaderOpcode opcode : 11;
+			ShaderPrimitiveTopology primitive_topology : 7;
 		} dcl_gs_output_primitive_topology;
 		struct
 		{
-			uint32_t opcode : 11;
+			ShaderOpcode opcode : 11;
 			uint32_t control_points : 6;
 		} dcl_input_control_point_count;
 		struct
 		{
-			uint32_t opcode : 11;
+			ShaderOpcode opcode : 11;
 			uint32_t control_points : 6;
 		} dcl_output_control_point_count;
 		struct
 		{
-			uint32_t opcode : 11;
+			ShaderOpcode opcode : 11;
 			uint32_t domain : 3; // D3D_TESSELLATOR_DOMAIN
 		} dcl_tess_domain;
 		struct
 		{
-			uint32_t opcode : 11;
+			ShaderOpcode opcode : 11;
 			uint32_t partitioning : 3; // D3D_TESSELLATOR_PARTITIONING
 		} dcl_tess_partitioning;
 		struct
 		{
-			uint32_t opcode : 11;
+			ShaderOpcode opcode : 11;
 			uint32_t primitive : 3; // D3D_TESSELLATOR_OUTPUT_PRIMITIVE
 		} dcl_tess_output_primitive;
 	};
@@ -205,10 +205,10 @@ union TokenizedShaderInstructionExtended
 
 struct TokenizedShaderResourceReturnType
 {
-	uint32_t x : 4;
-	uint32_t y : 4;
-	uint32_t z : 4;
-	uint32_t w : 4;
+	ShaderResourceReturnType x : 4;
+	ShaderResourceReturnType y : 4;
+	ShaderResourceReturnType z : 4;
+	ShaderResourceReturnType w : 4;
 };
 
 struct TokenizedShaderOperand
@@ -367,6 +367,9 @@ struct ShaderProgram
 	std::vector<DXBCSignatureParamDesc> params_patch;//patch signature
 	std::vector<DXBCConstantBuffer> cbuffers;//constant buffers(including tbuffer)
 	std::vector<DXBCInputBindDesc> resource_bindings;
+
+	ShaderPrimitive gs_input_primitive;
+	std::vector<ShaderPrimitiveTopology> gs_output_topology;
 
 	ShaderProgram()
 	{

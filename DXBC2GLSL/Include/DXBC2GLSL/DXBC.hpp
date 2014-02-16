@@ -36,14 +36,18 @@
 #include <DXBC2GLSL/Utils.hpp>
 
 #define FOURCC(a, b, c, d) ((uint32_t)(uint8_t)(a) | ((uint32_t)(uint8_t)(b) << 8) | ((uint32_t)(uint8_t)(c) << 16) | ((uint32_t)(uint8_t)(d) << 24 ))
-#define FOURCC_DXBC FOURCC('D', 'X', 'B', 'C')
-#define FOURCC_RDEF FOURCC('R', 'D', 'E', 'F') // resource definition
-#define FOURCC_ISGN FOURCC('I', 'S', 'G', 'N') // input signature
-#define FOURCC_OSGN FOURCC('O', 'S', 'G', 'N') // output signature
-#define FOURCC_SHDR FOURCC('S', 'H', 'D', 'R') // ?
-#define FOURCC_SHEX FOURCC('S', 'H', 'E', 'X') // shader extension
-#define FOURCC_STAT FOURCC('S', 'T', 'A', 'T') // ?
-#define FOURCC_PCSG FOURCC('P', 'C', 'S', 'G') // patch signature
+#define FOURCC_DXBC FOURCC('D', 'X', 'B', 'C') // DirectX byte code
+#define FOURCC_RDEF FOURCC('R', 'D', 'E', 'F') // Resource definition
+#define FOURCC_ISGN FOURCC('I', 'S', 'G', 'N') // Input signature
+#define FOURCC_OSGN FOURCC('O', 'S', 'G', 'N') // Output signature
+#define FOURCC_SHDR FOURCC('S', 'H', 'D', 'R') // Shader model 4 code
+#define FOURCC_SHEX FOURCC('S', 'H', 'E', 'X') // Shader model 5 code
+#define FOURCC_PCSG FOURCC('P', 'C', 'S', 'G') // Patch signature
+#define FOURCC_IFCH FOURCC('I', 'F', 'C', 'E') // Interface (for dynamic linking)
+#define FOURCC_OSG5 FOURCC('O', 'S', 'G', '5') // Input signature in shader model 5
+#define FOURCC_ISG1 FOURCC('I', 'S', 'G', '1') // Input signature with Stream and MinPrecision in D3D 11.1
+#define FOURCC_OSG1 FOURCC('O', 'S', 'G', '1') // Output signature with Stream and MinPrecision in D3D 11.1
+#define FOURCC_PSG1 FOURCC('P', 'S', 'G', '1') // Patch signature in D3D 11.1
 
 uint32_t const MAX_DXBC_STRING_LENGTH = 512;
 
@@ -56,25 +60,10 @@ struct DXBCChunkHeader
 };
 
 // this is always little-endian!
-struct DXBCChunkSignature : public DXBCChunkHeader
+struct DXBCChunkSignatureHeader : public DXBCChunkHeader
 {
 	uint32_t count;
-	uint32_t unk;
-#pragma warning(push)
-#pragma warning(disable: 4200)
-	struct
-	{
-		uint32_t name_offset;
-		uint32_t semantic_index;
-		uint32_t system_value_type;
-		uint32_t component_type;
-		uint32_t register_num;
-		uint8_t mask;
-		uint8_t read_write_mask;//fxc asm 中没有
-		uint8_t stream; // TODO: guess!fxc asm中没有
-		uint8_t unused;
-	} elements[];
-#pragma warning(pop)
+	uint32_t offset;
 };
 #pragma pack(pop)
 
@@ -140,6 +129,7 @@ struct DXBCSignatureParamDesc
 	uint8_t mask;
 	uint8_t read_write_mask;
 	uint32_t stream;
+	uint32_t min_precision;
 };
 
 enum DXBCShaderInputFlags
@@ -189,12 +179,15 @@ enum DXBCFindSignature
 {
 	DFS_INPUT = 0,
 	DFS_OUTPUT,
-	DFS_PATCH
+	DFS_PATCH,
+	DFS_INPUT1,
+	DFS_OUTPUT5,
+	DFS_OUTPUT1
 };
 
 boost::shared_ptr<DXBCContainer> DXBCParse(void const * data);
 DXBCChunkHeader const * DXBCFindChunk(void const * data, uint32_t fourcc);
 DXBCChunkHeader const * DXBCFindShaderBytecode(void const * data);
-DXBCChunkSignature const * DXBCFindSignature(void const * data, uint32_t kind);
+DXBCChunkSignatureHeader const * DXBCFindSignature(void const * data, uint32_t kind);
 
 #endif		// _DXBC2GLSL_DXBC_HPP

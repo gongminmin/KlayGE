@@ -538,6 +538,30 @@ enum ShaderName
 	SN_DEPTH_LESS_EQUAL = 68
 };
 
+enum ShaderPrimitive
+{
+	SP_Undefined = 0,
+	SP_Point = 1,
+	SP_Line = 2,
+	SP_Triangle = 3,
+	SP_LineAdj = 0x4 | SP_Line,
+	SP_TriangleAdj = 0x4 | SP_Triangle
+};
+
+enum ShaderPrimitiveTopology
+{
+	SPT_Undefined = 0,
+	SPT_PointList = 1,
+	SPT_LineList = 2,
+	SPT_LineStrip = 3,
+	SPT_TriangleList = 4,
+	SPT_TriangleStrip = 5,
+	SPT_LineListAdj = 0x8 | SPT_LineList,
+	SPT_LineStripAdj = 0x8 | SPT_LineStrip,
+	SPT_TriangleListAdj = 0x8 | SPT_TriangleList,
+	SPT_TriangleStripAdj = 0x8 | SPT_TriangleStrip
+};
+
 char const * ShaderOperandTypeName(ShaderOperandType v);
 char const * ShaderOperandTypeShortName(ShaderOperandType v);
 char const * ShaderInterpolationModeName(ShaderInterpolationMode v);
@@ -554,5 +578,7 @@ char const * ShaderVariableTypeName(ShaderVariableType v);
 char const * ShaderCBufferTypeName(ShaderCBufferType v);
 char const * ShaderInputTypeName(ShaderInputType v);
 char const * ShaderRegisterComponentTypeName(ShaderRegisterComponentType v);
+char const * ShaderPrimitiveName(ShaderPrimitive v);
+char const * ShaderPrimitiveTopologyName(ShaderPrimitiveTopology v);
 
 #endif		// _DXBC2GLSL_SHADERDEFS_HPP

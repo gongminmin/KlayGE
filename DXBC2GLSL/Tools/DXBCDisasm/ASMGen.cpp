@@ -122,7 +122,6 @@ void ASMGen::Disasm(std::ostream& out, ShaderOperand const & op, ShaderImmType i
 			switch (op.type)
 			{
 			case SOT_TEMP:
-			case SOT_INPUT:
 			case SOT_OUTPUT:
 			case SOT_CONSTANT_BUFFER:
 			case SOT_INDEXABLE_TEMP:
@@ -130,6 +129,7 @@ void ASMGen::Disasm(std::ostream& out, ShaderOperand const & op, ShaderImmType i
 			case SOT_THREAD_GROUP_SHARED_MEMORY:
 			case SOT_RESOURCE:
 			case SOT_SAMPLER:
+			case SOT_STREAM:
 				naked = true;
 				break;
 
@@ -214,7 +214,7 @@ void ASMGen::Disasm(std::ostream& out, ShaderOperand const & op, ShaderImmType i
 //disasm declarations
 void ASMGen::Disasm(std::ostream& out, ShaderDecl const & dcl)
 {
-	out << ShaderOpcodeName(static_cast<ShaderOpcode>(dcl.opcode));
+	out << ShaderOpcodeName(dcl.opcode);
 	switch (dcl.opcode)
 	{
 	case SO_DCL_GLOBAL_FLAGS:
@@ -239,7 +239,7 @@ void ASMGen::Disasm(std::ostream& out, ShaderDecl const & dcl)
 	case SO_DCL_INPUT_PS:
 	case SO_DCL_INPUT_PS_SIV:
 	case SO_DCL_INPUT_PS_SGV:
-		out << ' ' << ShaderInterpolationModeName(static_cast<ShaderInterpolationMode>(dcl.dcl_input_ps.interpolation));
+		out << ' ' << ShaderInterpolationModeName(dcl.dcl_input_ps.interpolation);
 		break;
 
 	case SO_DCL_TEMPS:
@@ -251,27 +251,27 @@ void ASMGen::Disasm(std::ostream& out, ShaderDecl const & dcl)
 		break;
 
 	case SO_DCL_RESOURCE:
-		out << "_" << ShaderResourceDimensionName(static_cast<ShaderResourceDimension>(dcl.dcl_resource.target));
+		out << "_" << ShaderResourceDimensionName(dcl.dcl_resource.target);
 		if ((SRD_TEXTURE2DMS == dcl.dcl_resource.target) || (SRD_TEXTURE2DMSARRAY == dcl.dcl_resource.target))
 		{
 			if (dcl.dcl_resource.nr_samples)
 			{
 				out << " (" << dcl.dcl_resource.nr_samples << ")";
 			}
-			out << " (" << ShaderResourceReturnTypeName(static_cast<ShaderResourceReturnType>(dcl.rrt.x))
-				<< "," << ShaderResourceReturnTypeName(static_cast<ShaderResourceReturnType>(dcl.rrt.y))
-				<< "," << ShaderResourceReturnTypeName(static_cast<ShaderResourceReturnType>(dcl.rrt.z))
-				<< "," << ShaderResourceReturnTypeName(static_cast<ShaderResourceReturnType>(dcl.rrt.w))
+			out << " (" << ShaderResourceReturnTypeName(dcl.rrt.x)
+				<< "," << ShaderResourceReturnTypeName(dcl.rrt.y)
+				<< "," << ShaderResourceReturnTypeName(dcl.rrt.z)
+				<< "," << ShaderResourceReturnTypeName(dcl.rrt.w)
 				<< ")";
 		}
 		break;
 
 	case SO_DCL_UNORDERED_ACCESS_VIEW_TYPED:
-		out << "_" << ShaderResourceDimensionName(static_cast<ShaderResourceDimension>(dcl.dcl_resource.target));
-		out << " (" << ShaderResourceReturnTypeName(static_cast<ShaderResourceReturnType>(dcl.rrt.x))
-			<< "," << ShaderResourceReturnTypeName(static_cast<ShaderResourceReturnType>(dcl.rrt.y))
-			<< "," << ShaderResourceReturnTypeName(static_cast<ShaderResourceReturnType>(dcl.rrt.z))
-			<< "," << ShaderResourceReturnTypeName(static_cast<ShaderResourceReturnType>(dcl.rrt.w))
+		out << "_" << ShaderResourceDimensionName(dcl.dcl_resource.target);
+		out << " (" << ShaderResourceReturnTypeName(dcl.rrt.x)
+			<< "," << ShaderResourceReturnTypeName(dcl.rrt.y)
+			<< "," << ShaderResourceReturnTypeName(dcl.rrt.z)
+			<< "," << ShaderResourceReturnTypeName(dcl.rrt.w)
 			<< ")";
 		break;
 
@@ -356,6 +356,18 @@ void ASMGen::Disasm(std::ostream& out, ShaderDecl const & dcl)
 		}
 		break;
 
+	case SO_DCL_GS_INPUT_PRIMITIVE:
+		out << ' ' << ShaderPrimitiveName(dcl.dcl_gs_input_primitive.primitive);
+		break;
+
+	case SO_DCL_GS_OUTPUT_PRIMITIVE_TOPOLOGY:
+		out << ' ' << ShaderPrimitiveTopologyName(dcl.dcl_gs_output_primitive_topology.primitive_topology);
+		break;
+
+	case SO_DCL_MAX_OUTPUT_VERTEX_COUNT:
+		out << ' ' << dcl.num;
+		break;
+
 	default:
 		break;
 	}
@@ -366,7 +378,7 @@ void ASMGen::Disasm(std::ostream& out, ShaderInstruction const & insn)
 {
 	ShaderImmType sit = GetImmType(insn.opcode);
 
-	out << ShaderOpcodeName(static_cast<ShaderOpcode>(insn.opcode));
+	out << ShaderOpcodeName(insn.opcode);
 	if (insn.insn.sat)
 	{
 		out << "_sat";

@@ -75,7 +75,7 @@ namespace
 		"null",
 		"rasterizer",
 		"oMask",
-		"stream",
+		"m",
 		"function_body",
 		"function_table",
 		"interface",
@@ -205,12 +205,12 @@ namespace
 		"utof",
 		"xor",
 		"dcl_resource",
-		"dcl_constant_buffer",
+		"dcl_constantbuffer",
 		"dcl_sampler",
 		"dcl_index_range",
-		"dcl_gs_output_primitive_topology",
-		"dcl_gs_input_primitive",
-		"dcl_max_output_vertex_count",
+		"dcl_outputtopology",
+		"dcl_inputprimitive",
+		"dcl_maxout",
 		"dcl_input",
 		"dcl_input_sgv",
 		"dcl_input_siv",
@@ -222,7 +222,7 @@ namespace
 		"dcl_output_siv",
 		"dcl_temps",
 		"dcl_indexable_temp",
-		"dcl_global_flags",
+		"dcl_globalFlags",
 		"d3d10_count",
 		"lod",
 		"gather4_indexable",
@@ -508,6 +508,30 @@ namespace
 		"int",
 		"float",
 	};
+
+	char const * shader_primitive_names[] =
+	{
+		"undefined",
+		"point",
+		"line",
+		"triangle",
+		"lineadj",
+		"triangleadj"
+	};
+
+	char const * shader_primitive_topology_names[] = 
+	{
+		"undefined",
+		"pointlist",
+		"linelist",
+		"linestrip",
+		"trianglelist",
+		"trianglestrip",
+		"linelistadj",
+		"linestripadj",
+		"trianglelistadj",
+		"trianglestripadj"
+	};
 }
 
 char const * ShaderOperandTypeName(ShaderOperandType v)
@@ -588,4 +612,14 @@ char const * ShaderInputTypeName(ShaderInputType v)
 char const * ShaderRegisterComponentTypeName(ShaderRegisterComponentType v)
 {
 	return shader_register_component_type_names[v];
+}
+
+char const * ShaderPrimitiveName(ShaderPrimitive v)
+{
+	return shader_primitive_names[v];
+}
+
+char const * ShaderPrimitiveTopologyName(ShaderPrimitiveTopology v)
+{
+	return shader_primitive_topology_names[v];
 }
