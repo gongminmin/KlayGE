@@ -35,6 +35,7 @@ enum GLSLRules
 	GSR_Int64Type = 1UL << 9,
 	GSR_TextureGrad = 1UL << 10,
 	GSR_BitwiseOp = 1UL << 11,
+	GSR_MultiStreamGS = 1UL << 12,
 	GSR_ForceUInt32 = 0xFFFFFFFF
 };
 

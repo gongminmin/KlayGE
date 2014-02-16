@@ -75,6 +75,11 @@ namespace DXBC2GLSL
 		ShaderInputType ResourceType(uint32_t index) const;
 		bool ResourceUsed(uint32_t index) const;
 
+		ShaderPrimitive GSInputPrimitive() const;
+		uint32_t NumGSOutputTopology() const;
+		ShaderPrimitiveTopology GSOutputTopology(uint32_t index) const;
+		uint32_t MaxGSOutputVertex() const;
+
 	private:
 		boost::shared_ptr<DXBCContainer> dxbc_;
 		boost::shared_ptr<ShaderProgram> shader_;

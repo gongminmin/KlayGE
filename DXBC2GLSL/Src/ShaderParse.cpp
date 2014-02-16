@@ -394,6 +394,7 @@ struct ShaderParser
 
 				case SO_DCL_MAX_OUTPUT_VERTEX_COUNT:
 					dcl->num = this->Read32();
+					program->max_gs_output_vertex = dcl->num;
 					break;
 
 				case SO_DCL_GS_INSTANCE_COUNT:

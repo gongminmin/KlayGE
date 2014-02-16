@@ -99,6 +99,19 @@ int main(int argc, char** argv)
 			}
 			std::cout << std::endl;
 		}
+
+		if (dxbc2glsl.GSInputPrimitive() != SP_Undefined)
+		{
+			std::cout << "GS input primitive: " << ShaderPrimitiveName(dxbc2glsl.GSInputPrimitive()) << std::endl;
+
+			std::cout << "GS output:" << std::endl;
+			for (uint32_t i = 0; i < dxbc2glsl.NumGSOutputTopology(); ++ i)
+			{
+				std::cout << "\t" << ShaderPrimitiveTopologyName(dxbc2glsl.GSOutputTopology(i)) << std::endl;
+			}
+
+			std::cout << "Max GS output vertex " << dxbc2glsl.MaxGSOutputVertex() << std::endl << std::endl;
+		}
 	}
 	catch (std::exception& ex)
 	{

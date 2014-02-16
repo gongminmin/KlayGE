@@ -141,4 +141,25 @@ namespace DXBC2GLSL
 		BOOST_ASSERT(index < shader_->resource_bindings.size());
 		return !(shader_->resource_bindings[index].flags & DSIF_Unused);
 	}
+
+	ShaderPrimitive DXBC2GLSL::GSInputPrimitive() const
+	{
+		return shader_->gs_input_primitive;
+	}
+
+	uint32_t DXBC2GLSL::NumGSOutputTopology() const
+	{
+		return static_cast<uint32_t>(shader_->gs_output_topology.size());
+	}
+
+	ShaderPrimitiveTopology DXBC2GLSL::GSOutputTopology(uint32_t index) const
+	{
+		BOOST_ASSERT(index < shader_->gs_output_topology.size());
+		return shader_->gs_output_topology[index];
+	}
+
+	uint32_t DXBC2GLSL::MaxGSOutputVertex() const
+	{
+		return shader_->max_gs_output_vertex;
+	}
 }

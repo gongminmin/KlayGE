@@ -64,6 +64,7 @@ uint32_t GLSLGen::DefaultRules(GLSLVersion version)
 	if (version >= GSV_400)
 	{
 		rules |= GSR_Int64Type;
+		rules |= GSR_MultiStreamGS;
 	}
 	if (version >= GSV_410)
 	{
@@ -4439,6 +4440,52 @@ void GLSLGen::ToInstructions(std::ostream& out, ShaderInstruction const & insn) 
 		out << ", ";
 		this->ToOperands(out, *insn.ops[3], sit);
 		out << ");";
+		break;
+
+		//------------------------------------------------------------------
+		// Geometry shader operations
+		//-------------------------------------------------------------------
+	case SO_EMIT:
+		out << "EmitVertex();";
+		break;
+
+	case SO_EMITTHENCUT:
+		out << "EndPrimitive();";
+		break;
+
+	case SO_EMIT_STREAM:
+		if (glsl_rules_ & GSR_MultiStreamGS)
+		{
+			out << "EmitStreamVertex(" << insn.ops[0]->indices[0].disp << ");";
+		}
+		else
+		{
+			out << "EmitVertex();";
+		}
+		break;
+
+	case SO_EMITTHENCUT_STREAM:
+		if (glsl_rules_ & GSR_MultiStreamGS)
+		{
+			out << "EmitStreamVertex(" << insn.ops[0]->indices[0].disp << ");\n";
+			out << "EndStreamPrimitive(" << insn.ops[0]->indices[0].disp << ");";
+		}
+		else
+		{
+			out << "EmitVertex();\n";
+			out << "EndPrimitive();";
+		}
+		break;
+
+	case SO_CUT_STREAM:
+		if (glsl_rules_ & GSR_MultiStreamGS)
+		{
+			out << "EndStreamPrimitive(" << insn.ops[0]->indices[0].disp << ");";
+		}
+		else
+		{
+			out << "EndPrimitive();";
+		}
 		break;
 
 	default:
