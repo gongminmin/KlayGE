@@ -61,7 +61,7 @@ struct TokenizedShaderVersion // 32-bit
 	uint32_t minor : 4;
 	uint32_t major : 4;
 	uint32_t format : 8;
-	uint32_t type : 16; //range:0-5 ¶ÔÓ¦ÓÚ"pvghdc" (ps,vs,gs,hs,ds,cs)
+	ShaderType type : 16;
 };
 
 #pragma warning(push)

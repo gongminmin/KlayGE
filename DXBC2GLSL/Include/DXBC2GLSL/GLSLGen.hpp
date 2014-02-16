@@ -68,7 +68,8 @@ private:
 	uint32_t GetMaxComponentSelector(ShaderOperand const & op) const;
 	uint32_t GetMinComponentSelector(ShaderOperand const & op) const;
 	ShaderRegisterComponentType GetOutputParamType(ShaderOperand const & op) const;
-	ShaderRegisterComponentType GetInputParamType(ShaderOperand const & op) const;
+	DXBCSignatureParamDesc const & GetOutputParamDesc(ShaderOperand const & op) const;
+	DXBCSignatureParamDesc const & GetInputParamDesc(ShaderOperand const & op) const;
 	DXBCInputBindDesc const & GetResourceDesc(ShaderInputType type, uint32_t bind_point) const;
 	void FindDclIndexRange();
 	void FindSamplers();
@@ -81,7 +82,7 @@ private:
 	boost::shared_ptr<ShaderProgram> program_;
 
 	ShaderInstruction current_insn_;
-	uint8_t shader_type_;
+	ShaderType shader_type_;
 	std::vector<DclIndexRangeInfo> idx_range_info_;
 	std::vector<int64_t> vs_output_dcl_record_;
 	std::vector<int64_t> ps_input_dcl_record_;

@@ -459,7 +459,8 @@ void GLSLGen::ToDeclarations(std::ostream& out, ShaderDecl const & dcl)
 						break;
 					}
 
-					out << "vec4 PSINPUT" << register_index << ";\n";
+					DXBCSignatureParamDesc const & param_desc = this->GetOutputParamDesc(*dcl.op);
+					out << "vec4 v_" << param_desc.semantic_name << param_desc.semantic_index << ";\n";
 					vs_output_dcl_record_.push_back(register_index);
 				}
 			}
@@ -636,7 +637,7 @@ void GLSLGen::ToDeclarations(std::ostream& out, ShaderDecl const & dcl)
 
 	case SO_DCL_INPUT_PS:
 		{
-			ShaderRegisterComponentType type = this->GetInputParamType(*dcl.op);
+			ShaderRegisterComponentType type = this->GetInputParamDesc(*dcl.op).component_type;
 			int64_t register_index = dcl.op->indices[0].disp;
 			bool found = false;
 			for (std::vector<int64_t>::const_iterator iter = ps_input_dcl_record_.begin();
@@ -726,7 +727,8 @@ void GLSLGen::ToDeclarations(std::ostream& out, ShaderDecl const & dcl)
 					break;
 				}
 
-				out << "vec4 PSINPUT" << register_index << ";\n";
+				DXBCSignatureParamDesc const & param_desc = GetInputParamDesc(*dcl.op);
+				out << "vec4 v_" << param_desc.semantic_name << param_desc.semantic_index << ";\n";
 			}
 		}
 		break;
@@ -4975,7 +4977,7 @@ ShaderImmType GLSLGen::OperandAsType(ShaderOperand const & op, uint32_t imm_as_t
 			}
 			else if (SOT_INPUT == op.type)
 			{
-				switch (this->GetInputParamType(op))
+				switch (this->GetInputParamDesc(op).component_type)
 				{
 				case SRCT_UINT32:
 					as_type = SIT_UInt;
@@ -5076,9 +5078,17 @@ void GLSLGen::ToOperandName(std::ostream& out, ShaderOperand const & op, ShaderI
 {
 	*need_comps = true;
 	*need_idx = true;
-	if (((ST_PS == shader_type_) && (SOT_INPUT == op.type)) || ((ST_VS == shader_type_) && (SOT_OUTPUT == op.type)))
+	if ((ST_PS == shader_type_) && (SOT_INPUT == op.type))
 	{
-		out << "PSINPUT";
+		*need_idx = false;
+		DXBCSignatureParamDesc const & param_desc = this->GetInputParamDesc(op);
+		out << "v_" << param_desc.semantic_name << param_desc.semantic_index;
+	}
+	else if ((ST_VS == shader_type_) && (SOT_OUTPUT == op.type))
+	{
+		*need_idx = false;
+		DXBCSignatureParamDesc const & param_desc = this->GetOutputParamDesc(op);
+		out << "v_" << param_desc.semantic_name << param_desc.semantic_index;
 	}
 	else if (SOT_OUTPUT_DEPTH == op.type)
 	{
@@ -5140,16 +5150,10 @@ void GLSLGen::ToOperandName(std::ostream& out, ShaderOperand const & op, ShaderI
 	else if ((SOT_INPUT == op.type) && (ST_VS == shader_type_))
 	{
 		*need_idx = false;
-		for (std::vector<DXBCSignatureParamDesc>::const_iterator iter = program_->params_in.begin();
-			iter != program_->params_in.end(); ++ iter)
-		{
-			if (iter->register_index == op.indices[0].disp)
-			{
-				*need_comps = (iter->mask > 1);
-				out << iter->semantic_name << iter->semantic_index;
-				break;
-			}
-		}	
+
+		DXBCSignatureParamDesc const & param_desc = this->GetInputParamDesc(op);
+		*need_comps = (param_desc.mask > 1);
+		out << param_desc.semantic_name << param_desc.semantic_index;
 	}
 	else if (SOT_CONSTANT_BUFFER == op.type)
 	{
@@ -5642,7 +5646,23 @@ ShaderRegisterComponentType GLSLGen::GetOutputParamType(ShaderOperand const & op
 	}
 }
 
-ShaderRegisterComponentType GLSLGen::GetInputParamType(ShaderOperand const & op) const
+DXBCSignatureParamDesc const & GLSLGen::GetOutputParamDesc(ShaderOperand const & op) const
+{
+	for (std::vector<DXBCSignatureParamDesc>::const_iterator iter = program_->params_out.begin();
+		iter != program_->params_out.end(); ++ iter)
+	{
+		if (iter->register_index == op.indices[0].disp)
+		{
+			return *iter;
+		}
+	}
+
+	BOOST_ASSERT(false);
+	static DXBCSignatureParamDesc invalid;
+	return invalid;
+}
+
+DXBCSignatureParamDesc const & GLSLGen::GetInputParamDesc(ShaderOperand const & op) const
 {
 	BOOST_ASSERT(SOT_INPUT == op.type);
 	for (std::vector<DXBCSignatureParamDesc>::const_iterator iter = program_->params_in.begin();
@@ -5650,10 +5670,13 @@ ShaderRegisterComponentType GLSLGen::GetInputParamType(ShaderOperand const & op)
 	{
 		if (iter->register_index == op.indices[0].disp)
 		{
-			return iter->component_type;
+			return *iter;
 		}
 	}
-	return SRCT_UNKNOWN;
+
+	BOOST_ASSERT(false);
+	static DXBCSignatureParamDesc invalid;
+	return invalid;
 }
 
 void GLSLGen::FindDclIndexRange()
