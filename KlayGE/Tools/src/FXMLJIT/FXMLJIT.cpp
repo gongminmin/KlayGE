@@ -137,14 +137,16 @@ int main(int argc, char* argv[])
 	std::string file_name(argv[2]);
 	filesystem::path file_path(file_name);
 	std::string const base_name = filesystem::basename(file_path);
-	ResLoader::Instance().AddPath(file_path.parent_path().string());
+	filesystem::path file_directory = file_path.parent_path();
+	ResLoader::Instance().AddPath(file_directory.string());
 
-	filesystem::path kfx_path(base_name + ".kfx");
+	filesystem::path kfx_name(base_name + ".kfx");
+	filesystem::path kfx_path = file_directory / kfx_name;
 	filesystem::remove(kfx_path);
 	SyncLoadRenderEffect(file_name);
 	if (!target_folder.empty())
 	{
-		filesystem::copy_file(kfx_path, target_folder / kfx_path,
+		filesystem::copy_file(kfx_path, target_folder / kfx_name,
 			filesystem::copy_option::overwrite_if_exists);
 	}
 
