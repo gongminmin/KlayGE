@@ -53,8 +53,8 @@ namespace DXBC2GLSL
 	public:
 		static uint32_t DefaultRules(GLSLVersion version);
 
-		void FeedDXBC(void const * dxbc_data, GLSLVersion version);
-		void FeedDXBC(void const * dxbc_data, GLSLVersion version, uint32_t glsl_rules);
+		void FeedDXBC(void const * dxbc_data, bool has_gs, GLSLVersion version);
+		void FeedDXBC(void const * dxbc_data, bool has_gs, GLSLVersion version, uint32_t glsl_rules);
 
 		std::string const & GLSLString() const;
 

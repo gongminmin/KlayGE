@@ -82,10 +82,11 @@ uint32_t GLSLGen::DefaultRules(GLSLVersion version)
 	return rules;
 }
 
-void GLSLGen::FeedDXBC(boost::shared_ptr<ShaderProgram> const & program, GLSLVersion version, uint32_t glsl_rules)
+void GLSLGen::FeedDXBC(boost::shared_ptr<ShaderProgram> const & program, bool has_gs, GLSLVersion version, uint32_t glsl_rules)
 {
 	program_ = program;
 	shader_type_ = program_->version.type;
+	has_gs_ = has_gs;
 	glsl_version_ = version;
 	glsl_rules_ = glsl_rules;
 
@@ -169,32 +170,38 @@ void GLSLGen::ToDefines(std::ostream& out, ShaderDecl const & dcl, uint32_t& cli
 		{
 		case SSV_POSITION:
 			out << "#define ";
-			this->ToOperands(out, *dcl.op, sit, false);
-			out << " gl_Position\n";
+			this->ToOperands(out, *dcl.op, sit, false, false, false, true);
+			out << " gl_Position";
+			if ((ST_GS == shader_type_)
+				&& ((SO_DCL_INPUT_SGV == dcl.opcode) || (SO_DCL_INPUT_SIV == dcl.opcode)))
+			{
+				out << "In";
+			}
+			out << "\n";
 			break;
 
 		case SSV_CLIP_DISTANCE:
 			out << "#define ";
-			this->ToOperands(out, *dcl.op, sit, false);
+			this->ToOperands(out, *dcl.op, sit, false, false, false, true);
 			out << " gl_ClipDistance[" << clip_distance_index << "]\n";
 			++ clip_distance_index;
 			break;
 
 		case SSV_VERTEX_ID:
 			out << "#define ";
-			this->ToOperands(out, *dcl.op, sit, false);
+			this->ToOperands(out, *dcl.op, sit, false, false, false, true);
 			out << " gl_VertexID\n";
 			break;
 
 		case SSV_INSTANCE_ID:
 			out << "#define ";
-			this->ToOperands(out, *dcl.op, sit, false);
+			this->ToOperands(out, *dcl.op, sit, false, false, false, true);
 			out << " gl_InstanceID\n";
 			break;
 
 		case SSV_SAMPLE_INDEX:
 			out << "#define ";
-			this->ToOperands(out, *dcl.op, sit, false);
+			this->ToOperands(out, *dcl.op, sit, false, false, false, true);
 			out << " uint(gl_SampleID)\n";
 			break;
 
@@ -239,10 +246,13 @@ void GLSLGen::ToDeclarations(std::ostream& out, ShaderDecl const & dcl)
 		}
 		if (flag != 2)
 		{
-			if (glsl_rules_ & GSR_ExplicitInputLayout)
+			if (shader_type_ != ST_GS)
 			{
-				// layout(location=N)
-				out << "layout(location=" << dcl.op->indices[0].disp << ") ";
+				if (glsl_rules_ & GSR_ExplicitInputLayout)
+				{
+					// layout(location=N)
+					out << "layout(location=" << dcl.op->indices[0].disp << ") ";
+				}
 			}
 			if (glsl_rules_ & GSR_InOutPrefix)
 			{
@@ -317,7 +327,7 @@ void GLSLGen::ToDeclarations(std::ostream& out, ShaderDecl const & dcl)
 				}
 			}
 
-			this->ToOperands(out, *dcl.op, sit, false, true);
+			this->ToOperands(out, *dcl.op, sit, false, true, false, true);
 			out << ";\n";
 		}
 		break;
@@ -407,7 +417,7 @@ void GLSLGen::ToDeclarations(std::ostream& out, ShaderDecl const & dcl)
 				}
 
 				out << " ";
-				this->ToOperands(out, *dcl.op, sit, false);
+				this->ToOperands(out, *dcl.op, sit, false, false, false, true);
 				out << ";\n";
 			}
 			else if (ST_VS == shader_type_)
@@ -460,7 +470,12 @@ void GLSLGen::ToDeclarations(std::ostream& out, ShaderDecl const & dcl)
 					}
 
 					DXBCSignatureParamDesc const & param_desc = this->GetOutputParamDesc(*dcl.op);
-					out << "vec4 v_" << param_desc.semantic_name << param_desc.semantic_index << ";\n";
+					out << "vec4 v_" << param_desc.semantic_name << param_desc.semantic_index;
+					if (has_gs_)
+					{
+						out << "In";
+					}
+					out << ";\n";
 					vs_output_dcl_record_.push_back(register_index);
 				}
 			}
@@ -817,7 +832,7 @@ void GLSLGen::ToDeclarations(std::ostream& out, ShaderDecl const & dcl)
 						{
 							out << " ";
 						}
-						this->ToOperands(out, *dcl.op, sit);
+						this->ToOperands(out, *dcl.op, sit, true, false, false, true);
 						DXBCInputBindDesc const & desc = this->GetResourceDesc(SIT_SAMPLER, static_cast<uint32_t>(sampler_iter->index));
 						out << "_" << desc.name;
 						out << ";\n";
@@ -891,7 +906,7 @@ void GLSLGen::ToDeclarations(std::ostream& out, ShaderDecl const & dcl)
 							BOOST_ASSERT_MSG(false, "Unexpected resource target type");
 							break;
 						}
-						this->ToOperands(out, *dcl.op, sit);
+						this->ToOperands(out, *dcl.op, sit, true, false, false, true);
 						out << ";\n";
 					}
 					break;
@@ -4570,7 +4585,7 @@ void GLSLGen::ToInstructions(std::ostream& out, ShaderInstruction const & insn) 
 }
 
 void GLSLGen::ToOperands(std::ostream& out, ShaderOperand const & op, uint32_t imm_as_type,
-		bool mask, bool dcl_array, bool no_swizzle) const
+		bool mask, bool dcl_array, bool no_swizzle, bool no_idx) const
 {
 	ShaderImmType imm_type = static_cast<ShaderImmType>(imm_as_type & 0xFF);
 	ShaderImmType as_type = static_cast<ShaderImmType>(imm_as_type >> 8);
@@ -4783,7 +4798,7 @@ void GLSLGen::ToOperands(std::ostream& out, ShaderOperand const & op, uint32_t i
 		}
 
 		// output operand name 
-		this->ToOperandName(out, op, as_type, &whether_output_idx, &whether_output_comps, no_swizzle);
+		this->ToOperandName(out, op, as_type, &whether_output_idx, &whether_output_comps, no_swizzle, no_idx);
 
 		// output index
 		// constant buffer is mapped to variable name,does not need index.
@@ -5074,7 +5089,8 @@ ShaderImmType GLSLGen::OperandAsType(ShaderOperand const & op, uint32_t imm_as_t
 	return as_type;
 }
 
-void GLSLGen::ToOperandName(std::ostream& out, ShaderOperand const & op, ShaderImmType as_type, bool* need_idx, bool* need_comps, bool no_swizzle) const
+void GLSLGen::ToOperandName(std::ostream& out, ShaderOperand const & op, ShaderImmType as_type,
+		bool* need_idx, bool* need_comps, bool no_swizzle, bool no_idx) const
 {
 	*need_comps = true;
 	*need_idx = true;
@@ -5089,6 +5105,29 @@ void GLSLGen::ToOperandName(std::ostream& out, ShaderOperand const & op, ShaderI
 		*need_idx = false;
 		DXBCSignatureParamDesc const & param_desc = this->GetOutputParamDesc(op);
 		out << "v_" << param_desc.semantic_name << param_desc.semantic_index;
+		if (has_gs_)
+		{
+			out << "In";
+		}
+	}
+	else if ((ST_GS == shader_type_) && ((SOT_INPUT == op.type) || (SOT_OUTPUT == op.type)))
+	{
+		*need_idx = false;
+		if (SOT_INPUT == op.type)
+		{
+			DXBCSignatureParamDesc const & param_desc = this->GetInputParamDesc(op, 1);
+			out << "v_" << param_desc.semantic_name << param_desc.semantic_index << "In";
+			if (!no_idx)
+			{
+				out << '[' << op.indices[0].disp << ']';
+			}
+		}
+		else
+		{
+			BOOST_ASSERT(SOT_OUTPUT == op.type);
+			DXBCSignatureParamDesc const & param_desc = this->GetOutputParamDesc(op);
+			out << "v_" << param_desc.semantic_name << param_desc.semantic_index;
+		}
 	}
 	else if (SOT_OUTPUT_DEPTH == op.type)
 	{
@@ -5646,12 +5685,12 @@ ShaderRegisterComponentType GLSLGen::GetOutputParamType(ShaderOperand const & op
 	}
 }
 
-DXBCSignatureParamDesc const & GLSLGen::GetOutputParamDesc(ShaderOperand const & op) const
+DXBCSignatureParamDesc const & GLSLGen::GetOutputParamDesc(ShaderOperand const & op, uint32_t index) const
 {
 	for (std::vector<DXBCSignatureParamDesc>::const_iterator iter = program_->params_out.begin();
 		iter != program_->params_out.end(); ++ iter)
 	{
-		if (iter->register_index == op.indices[0].disp)
+		if (iter->register_index == op.indices[index].disp)
 		{
 			return *iter;
 		}
@@ -5662,13 +5701,13 @@ DXBCSignatureParamDesc const & GLSLGen::GetOutputParamDesc(ShaderOperand const &
 	return invalid;
 }
 
-DXBCSignatureParamDesc const & GLSLGen::GetInputParamDesc(ShaderOperand const & op) const
+DXBCSignatureParamDesc const & GLSLGen::GetInputParamDesc(ShaderOperand const & op, uint32_t index) const
 {
 	BOOST_ASSERT(SOT_INPUT == op.type);
 	for (std::vector<DXBCSignatureParamDesc>::const_iterator iter = program_->params_in.begin();
 		iter != program_->params_in.end(); ++ iter)
 	{
-		if (iter->register_index == op.indices[0].disp)
+		if (iter->register_index == op.indices[index].disp)
 		{
 			return *iter;
 		}

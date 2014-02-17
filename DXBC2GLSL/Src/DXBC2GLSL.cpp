@@ -36,12 +36,12 @@ namespace DXBC2GLSL
 		return GLSLGen::DefaultRules(version);
 	}
 
-	void DXBC2GLSL::FeedDXBC(void const * dxbc_data, GLSLVersion version)
+	void DXBC2GLSL::FeedDXBC(void const * dxbc_data, bool has_gs, GLSLVersion version)
 	{
-		this->FeedDXBC(dxbc_data, version, this->DefaultRules(version));
+		this->FeedDXBC(dxbc_data, has_gs, version, this->DefaultRules(version));
 	}
 
-	void DXBC2GLSL::FeedDXBC(void const * dxbc_data, GLSLVersion version, uint32_t glsl_rules)
+	void DXBC2GLSL::FeedDXBC(void const * dxbc_data, bool has_gs, GLSLVersion version, uint32_t glsl_rules)
 	{
 		dxbc_ = DXBCParse(dxbc_data);
 		if (dxbc_)
@@ -53,7 +53,7 @@ namespace DXBC2GLSL
 				std::stringstream ss;
 
 				GLSLGen converter;
-				converter.FeedDXBC(shader_, version, glsl_rules);
+				converter.FeedDXBC(shader_, has_gs, version, glsl_rules);
 				converter.ToGLSL(ss);
 
 				glsl_ = ss.str();

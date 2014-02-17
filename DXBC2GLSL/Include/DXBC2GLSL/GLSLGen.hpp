@@ -44,7 +44,7 @@ class GLSLGen
 public:
 	static uint32_t DefaultRules(GLSLVersion version);
 
-	void FeedDXBC(boost::shared_ptr<ShaderProgram> const & program, GLSLVersion version, uint32_t glsl_rules);
+	void FeedDXBC(boost::shared_ptr<ShaderProgram> const & program, bool has_gs, GLSLVersion version, uint32_t glsl_rules);
 	void ToGLSL(std::ostream& out);
 
 private:
@@ -52,11 +52,11 @@ private:
 	void ToDeclarations(std::ostream& out, ShaderDecl const & dcl);
 	void ToInstructions(std::ostream& out, ShaderInstruction const & insn) const;
 	void ToOperands(std::ostream& out, ShaderOperand const & op, uint32_t imm_as_type,
-		bool mask = true, bool dcl_array = false, bool no_swizzle = false) const;
+		bool mask = true, bool dcl_array = false, bool no_swizzle = false, bool no_idx = false) const;
 	ShaderImmType OperandAsType(ShaderOperand const & op, uint32_t imm_as_type) const;
 	int ToSingleComponentSelector(std::ostream& out, ShaderOperand const & op, int i, bool dot = true) const;
 	void ToOperandName(std::ostream& out, ShaderOperand const & op, ShaderImmType as_type,
-		bool* need_idx, bool* need_comps, bool no_swizzle = false) const;
+		bool* need_idx, bool* need_comps, bool no_swizzle = false, bool no_idx = false) const;
 	void ToComponentSelectors(std::ostream& out, ShaderOperand const & op, bool dot = true) const;
 	void ToTemps(std::ostream& out, ShaderDecl const & dcl);
 	bool IsImmediateNumber(ShaderOperand const & op) const;
@@ -68,8 +68,8 @@ private:
 	uint32_t GetMaxComponentSelector(ShaderOperand const & op) const;
 	uint32_t GetMinComponentSelector(ShaderOperand const & op) const;
 	ShaderRegisterComponentType GetOutputParamType(ShaderOperand const & op) const;
-	DXBCSignatureParamDesc const & GetOutputParamDesc(ShaderOperand const & op) const;
-	DXBCSignatureParamDesc const & GetInputParamDesc(ShaderOperand const & op) const;
+	DXBCSignatureParamDesc const & GetOutputParamDesc(ShaderOperand const & op, uint32_t index = 0) const;
+	DXBCSignatureParamDesc const & GetInputParamDesc(ShaderOperand const & op, uint32_t index = 0) const;
 	DXBCInputBindDesc const & GetResourceDesc(ShaderInputType type, uint32_t bind_point) const;
 	void FindDclIndexRange();
 	void FindSamplers();
@@ -83,6 +83,7 @@ private:
 
 	ShaderInstruction current_insn_;
 	ShaderType shader_type_;
+	bool has_gs_;
 	std::vector<DclIndexRangeInfo> idx_range_info_;
 	std::vector<int64_t> vs_output_dcl_record_;
 	std::vector<int64_t> ps_input_dcl_record_;

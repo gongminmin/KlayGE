@@ -2530,6 +2530,12 @@ namespace KlayGE
 
 			if (code)
 			{
+				bool has_gs = false;
+				if (!effect.GetShaderDesc(shader_desc_ids[ST_GeometryShader]).func_name.empty())
+				{
+					has_gs = true;
+				}
+
 				try
 				{
 					GLSLVersion gsv = GSV_120;
@@ -2573,7 +2579,7 @@ namespace KlayGE
 					DXBC2GLSL::DXBC2GLSL dxbc2glsl;
 					uint32_t rules = DXBC2GLSL::DXBC2GLSL::DefaultRules(gsv);
 					rules &= ~GSR_UseUBO;
-					dxbc2glsl.FeedDXBC(code->GetBufferPointer(), gsv, rules);
+					dxbc2glsl.FeedDXBC(code->GetBufferPointer(), has_gs, gsv, rules);
 					(*glsl_srcs_)[type] = MakeSharedPtr<std::string>(dxbc2glsl.GLSLString());
 					(*pnames_)[type] = MakeSharedPtr<std::vector<std::string> >();
 					(*glsl_res_names_)[type] = MakeSharedPtr<std::vector<std::string> >();
