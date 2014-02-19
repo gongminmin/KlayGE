@@ -1154,6 +1154,14 @@ namespace KlayGE
 		{
 			hack_for_adreno_ = false;
 		}
+		if (vendor.find("Google", 0) != std::string::npos)
+		{
+			hack_for_google_ = true;
+		}
+		else
+		{
+			hack_for_google_ = false;
+		}
 
 		GLint temp;
 
@@ -1375,7 +1383,7 @@ namespace KlayGE
 			texture_format_.insert(EF_ABGR32UI);
 			texture_format_.insert(EF_ABGR32I);
 		}
-		if ((glloader_GLES_VERSION_3_0() || glloader_GLES_OES_texture_half_float()) && !hack_for_pvr_)
+		if ((glloader_GLES_VERSION_3_0() || glloader_GLES_OES_texture_half_float()) && !hack_for_pvr_ && !hack_for_google_)
 		{
 			texture_format_.insert(EF_R16F);
 			texture_format_.insert(EF_GR16F);

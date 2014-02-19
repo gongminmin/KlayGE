@@ -164,6 +164,7 @@ namespace KlayGE
 		bool hack_for_pvr_;
 		bool hack_for_mali_;
 		bool hack_for_adreno_;
+		bool hack_for_google_;
 	};
 
 	typedef shared_ptr<OGLESRenderEngine> OGLESRenderEnginePtr;
