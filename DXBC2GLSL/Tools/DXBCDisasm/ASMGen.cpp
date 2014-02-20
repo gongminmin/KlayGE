@@ -469,15 +469,17 @@ void ASMGen::Disasm(std::ostream& out, std::vector<DXBCSignatureParamDesc> const
 		break;
 	}
 	out << "//" << std::setw(15) << "Name"
-		<< std::setw(10) << "Index"
-		<< std::setw(10) << "Register"
+		<< std::setw(6) << "Index"
+		<< std::setw(7) << "Mask"
+		<< std::setw(9) << "Register"
 		<< std::setw(15) << "ValueType"
 		<< std::setw(15) << "ComponentType"
-		<< std::setw(10) << "Mask"
+		<< std::setw(10) << "Used"
 		<< "\n";
 	out << "//" << std::setw(15) << "-------------"
-		<< std::setw(10) << "--------"
-		<< std::setw(10) << "--------"
+		<< std::setw(6) << "-----"
+		<< std::setw(7) << "------"
+		<< std::setw(9) << "--------"
 		<< std::setw(15) << "-------------"
 		<< std::setw(15) << "-------------"
 		<< std::setw(10) << "-------"
@@ -486,12 +488,21 @@ void ASMGen::Disasm(std::ostream& out, std::vector<DXBCSignatureParamDesc> const
 	{
 		std::cout << "//"
 			<< std::setw(15) << signature[i].semantic_name
-			<< std::setw(10) << signature[i].semantic_index
-			<< std::setw(10) << signature[i].register_index
+			<< std::setw(6) << signature[i].semantic_index
+			<< std::setw(7) << static_cast<uint32_t>(signature[i].mask)
+			<< std::setw(9) << signature[i].register_index
 			<< std::setw(15) << ShaderSystemValueName(static_cast<ShaderSystemValue>(signature[i].system_value_type))
-			<< std::setw(15) << ShaderRegisterComponentTypeName(signature[i].component_type)
-			<< std::setw(10) << uint32_t(signature[i].read_write_mask)
-			<< "\n";
+			<< std::setw(15) << ShaderRegisterComponentTypeName(signature[i].component_type);
+		uint32_t used;
+		if (fourcc == FOURCC_OSGN)
+		{
+			used = ~static_cast<uint32_t>(signature[i].read_write_mask) & 0xF;
+		}
+		else
+		{
+			used = static_cast<uint32_t>(signature[i].read_write_mask);
+		}
+		std::cout << std::setw(10) << used << "\n";
 	}
 	out << "//\n";
 }

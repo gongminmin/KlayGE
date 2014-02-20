@@ -36,6 +36,7 @@ enum GLSLRules
 	GSR_TextureGrad = 1UL << 10,
 	GSR_BitwiseOp = 1UL << 11,
 	GSR_MultiStreamGS = 1UL << 12,
+	GSR_CoreGS = 1UL << 13,
 	GSR_ForceUInt32 = 0xFFFFFFFF
 };
 
@@ -48,9 +49,12 @@ public:
 	void ToGLSL(std::ostream& out);
 
 private:
-	void ToDefines(std::ostream& out, ShaderDecl const & dcl, uint32_t& clip_distance_index);
-	void ToDeclarations(std::ostream& out, ShaderDecl const & dcl);
-	void ToInstructions(std::ostream& out, ShaderInstruction const & insn) const;
+	void ToDefine(std::ostream& out, ShaderDecl const & dcl, uint32_t& clip_distance_index);
+	void ToDeclarations(std::ostream& out);
+	void ToDclInterShaderInputRecords(std::ostream& out);
+	void ToDclInterShaderOutputRecords(std::ostream& out);
+	void ToDeclaration(std::ostream& out, ShaderDecl const & dcl);
+	void ToInstruction(std::ostream& out, ShaderInstruction const & insn) const;
 	void ToOperands(std::ostream& out, ShaderOperand const & op, uint32_t imm_as_type,
 		bool mask = true, bool dcl_array = false, bool no_swizzle = false, bool no_idx = false) const;
 	ShaderImmType OperandAsType(ShaderOperand const & op, uint32_t imm_as_type) const;
@@ -85,8 +89,6 @@ private:
 	ShaderType shader_type_;
 	bool has_gs_;
 	std::vector<DclIndexRangeInfo> idx_range_info_;
-	std::vector<int64_t> vs_output_dcl_record_;
-	std::vector<int64_t> ps_input_dcl_record_;
 	std::vector<TextureSamplerInfo> textures_;
 	std::vector<boost::shared_ptr<ShaderDecl> > temp_dcls_;
 	std::map<int64_t, bool> cb_index_mode_;

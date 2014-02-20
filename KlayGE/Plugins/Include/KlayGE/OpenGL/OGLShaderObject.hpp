@@ -83,6 +83,8 @@ namespace KlayGE
 		parameter_bind_t GetBindFunc(GLint location, RenderEffectParameterPtr const & param);
 		void AttachGLSL(uint32_t type);
 		void LinkGLSL();
+		void PrintGLSLError(ShaderType type, char const * info);
+		void PrintGLSLErrorAtLine(std::string const & glsl, int err_line);
 
 	private:
 		GLuint glsl_program_;

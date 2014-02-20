@@ -27,6 +27,13 @@ namespace
 		"430",
 		"440"
 	};
+
+	struct RegisterDesc
+	{
+		uint32_t index;
+		ShaderRegisterComponentType type;
+		ShaderInterpolationMode interpolation;
+	};
 }
 
 uint32_t GLSLGen::DefaultRules(GLSLVersion version)
@@ -54,6 +61,7 @@ uint32_t GLSLGen::DefaultRules(GLSLVersion version)
 	}
 	if (version >= GSV_150)
 	{
+		rules |= GSR_CoreGS;
 	}
 	if (version >= GSV_330)
 	{
@@ -109,20 +117,71 @@ void GLSLGen::ToGLSL(std::ostream& out)
 	//out << "//" << "pvghdc"[program_->version.type] << "s_" << program_->version.major << "_" << program_->version.minor << "\n";
 
 	out << "#version " << GLSLVersionStr[glsl_version_] << "\n";
+	if ((ST_GS == shader_type_) && !(glsl_rules_ & GSR_CoreGS))
+	{
+		out << "#extension GL_EXT_geometry_shader4 : enable\n";
+	}
 	uint32_t clip_distance_index = 0;
 	for (size_t i = 0; i < program_->dcls.size(); ++ i)
 	{
-		this->ToDefines(out, *program_->dcls[i], clip_distance_index);
+		this->ToDefine(out, *program_->dcls[i], clip_distance_index);
 	}
 	out << "\n";
 
-	vs_output_dcl_record_.clear();
-	ps_input_dcl_record_.clear();
-
-	for (size_t i = 0; i < program_->dcls.size(); ++ i)
+	if ((ST_GS == shader_type_) && (glsl_rules_ & GSR_CoreGS))
 	{
-		this->ToDeclarations(out, *program_->dcls[i]);
+		out << "layout(";
+		switch (program_->gs_input_primitive)
+		{
+		case SP_Point:
+			out << "points";
+			break;
+
+		case SP_Line:
+			out << "lines";
+			break;
+
+		case SP_Triangle:
+			out << "triangles";
+			break;
+
+		case SP_LineAdj:
+			out << "lines_adjacency";
+			break;
+
+		case SP_TriangleAdj:
+			out << "triangles_adjacency";
+			break;
+
+		default:
+			BOOST_ASSERT_MSG(false, "Wrong input primitive name.");
+			break;
+		}
+		out << ") in;\n";
+
+		out << "layout(";
+		switch (program_->gs_output_topology[0])
+		{
+		case SPT_PointList:
+			out << "points";
+			break;
+
+		case SPT_LineStrip:
+			out << "line_strip";
+			break;
+
+		case SPT_TriangleStrip:
+			out << "triangle_strip";
+			break;
+
+		default:
+			BOOST_ASSERT_MSG(false, "Wrong output primitive topology name.");
+			break;
+		}
+		out << ", max_vertices = " << program_->max_gs_output_vertex << ") out;\n\n";
 	}
+
+	this->ToDeclarations(out);
 
 	out << "\nvoid main()" << "\n" << "{" << "\n";
 
@@ -145,7 +204,7 @@ void GLSLGen::ToGLSL(std::ostream& out)
 	for (size_t i = 0; i < program_->insns.size(); ++ i)
 	{
 		current_insn_ = *program_->insns[i];
-		this->ToInstructions(out, *program_->insns[i]);
+		this->ToInstruction(out, *program_->insns[i]);
 		out << "\n";
 		if (i == end_of_program_)
 		{
@@ -155,7 +214,7 @@ void GLSLGen::ToGLSL(std::ostream& out)
 	out << "}" << "\n";
 }
 
-void GLSLGen::ToDefines(std::ostream& out, ShaderDecl const & dcl, uint32_t& clip_distance_index)
+void GLSLGen::ToDefine(std::ostream& out, ShaderDecl const & dcl, uint32_t& clip_distance_index)
 {
 	ShaderImmType sit = GetImmType(dcl.opcode);
 	switch (dcl.opcode)
@@ -169,15 +228,15 @@ void GLSLGen::ToDefines(std::ostream& out, ShaderDecl const & dcl, uint32_t& cli
 		switch (dcl.num)
 		{
 		case SSV_POSITION:
-			out << "#define ";
-			this->ToOperands(out, *dcl.op, sit, false, false, false, true);
-			out << " gl_Position";
-			if ((ST_GS == shader_type_)
-				&& ((SO_DCL_INPUT_SGV == dcl.opcode) || (SO_DCL_INPUT_SIV == dcl.opcode)))
+			if (((ST_GS == shader_type_) && (!(glsl_rules_ & GSR_CoreGS)
+				|| ((glsl_rules_ & GSR_CoreGS) && (dcl.opcode != SO_DCL_INPUT_SGV) && (dcl.opcode != SO_DCL_INPUT_SIV))))
+					|| (shader_type_ != ST_GS))
 			{
-				out << "In";
+				out << "#define ";
+				this->ToOperands(out, *dcl.op, sit, false, false, false, true);
+				out << " gl_Position";
+				out << "\n";
 			}
-			out << "\n";
 			break;
 
 		case SSV_CLIP_DISTANCE:
@@ -216,7 +275,245 @@ void GLSLGen::ToDefines(std::ostream& out, ShaderDecl const & dcl, uint32_t& cli
 	}
 }
 
-void GLSLGen::ToDeclarations(std::ostream& out, ShaderDecl const & dcl)
+void GLSLGen::ToDeclarations(std::ostream& out)
+{
+	this->ToDclInterShaderInputRecords(out);
+	this->ToDclInterShaderOutputRecords(out);
+
+	for (size_t i = 0; i < program_->dcls.size(); ++ i)
+	{
+		this->ToDeclaration(out, *program_->dcls[i]);
+	}
+}
+
+void GLSLGen::ToDclInterShaderInputRecords(std::ostream& out)
+{
+	std::vector<RegisterDesc> input_dcl_record;
+
+	if (ST_PS == shader_type_)
+	{
+		for (size_t i = 0; i < program_->dcls.size(); ++ i)
+		{
+			ShaderDecl const & dcl = *program_->dcls[i];
+			switch (dcl.opcode)
+			{
+			case SO_DCL_INPUT_PS:
+				{
+					DXBCSignatureParamDesc const & sig_desc = this->GetInputParamDesc(*dcl.op);
+					ShaderRegisterComponentType type = sig_desc.component_type;
+					ShaderInterpolationMode interpolation = dcl.dcl_input_ps.interpolation;
+					uint32_t register_index = static_cast<uint32_t>(dcl.op->indices[0].disp);
+					bool found = false;
+					for (std::vector<RegisterDesc>::iterator iter = input_dcl_record.begin();
+						iter != input_dcl_record.end(); ++ iter)
+					{
+						if (iter->index == register_index)
+						{
+							BOOST_ASSERT(iter->type == type);
+							BOOST_ASSERT(iter->interpolation == interpolation);
+							found = true;
+							break;
+						}
+					}
+
+					if (!found)
+					{
+						RegisterDesc desc;
+						desc.index = register_index;
+						desc.type = type;
+						desc.interpolation = interpolation;
+						input_dcl_record.push_back(desc);
+					}
+				}
+				break;
+			}
+		}
+
+		for (size_t i = 0; i < input_dcl_record.size(); ++ i)
+		{
+			if (glsl_rules_ & GSR_PSInterpolation)
+			{
+				switch (input_dcl_record[i].interpolation)
+				{
+				case SIM_Undefined:
+					break;
+
+				case SIM_Constant:
+					out << "flat ";
+					break;
+
+				case SIM_Linear:
+					out << "smooth ";
+					break;
+
+				case SIM_LinearCentroid:
+					out << "smooth centroid ";
+					break;
+
+				case SIM_LinearNoPerspective:
+					out << "noperspective ";
+					break;
+
+				case SIM_LinearNoPerspectiveCentroid:
+					out << "noperspective centroid ";
+					break;
+
+				case SIM_LinearSample:
+					out << "smooth sample ";
+					break;
+
+				case SIM_LinearNoPerspectiveSample:
+					out << "noperspective sample ";
+					break;
+
+				default:
+					BOOST_ASSERT(false);
+					break;
+				}
+			}
+
+			// No layout qualifier here see dcl_output
+			if (glsl_rules_ & GSR_InOutPrefix)
+			{
+				out << "in ";
+			}
+			else
+			{
+				out << "varying ";
+			}
+			switch (input_dcl_record[i].type)
+			{
+			case SRCT_UINT32:
+				if (glsl_rules_ & GSR_UIntType)
+				{
+					out << "u";
+				}
+				else
+				{
+					out << "i";
+				}
+				break;
+
+			case SRCT_SINT32:
+				out << "i";
+				break;
+
+			case SRCT_FLOAT32:
+				break;
+
+			default:
+				BOOST_ASSERT(false);
+				break;
+			}
+
+			out << "vec4 v_REGISTER" << input_dcl_record[i].index << ";\n";
+		}
+	}
+
+	if (!input_dcl_record.empty())
+	{
+		out << "\n";
+	}
+}
+
+void GLSLGen::ToDclInterShaderOutputRecords(std::ostream& out)
+{
+	std::vector<RegisterDesc> output_dcl_record;
+
+	for (size_t i = 0; i < program_->dcls.size(); ++ i)
+	{
+		ShaderDecl const & dcl = *program_->dcls[i];
+		switch (dcl.opcode)
+		{
+		case SO_DCL_OUTPUT:
+			if (SOT_OUTPUT_DEPTH == dcl.op->type)
+			{
+				break;
+			}
+
+			if ((ST_VS == shader_type_) || (ST_GS == shader_type_))
+			{
+				DXBCSignatureParamDesc const & sig_desc = this->GetOutputParamDesc(*dcl.op);
+				ShaderRegisterComponentType type = sig_desc.component_type;
+				uint32_t register_index = static_cast<uint32_t>(dcl.op->indices[0].disp);
+				bool found = false;
+				for (std::vector<RegisterDesc>::iterator iter = output_dcl_record.begin();
+					iter != output_dcl_record.end(); ++ iter)
+				{
+					if (iter->index == register_index)
+					{
+						found = true;
+						break;
+					}
+				}
+
+				if (!found)
+				{
+					RegisterDesc desc;
+					desc.index = register_index;
+					desc.type = type;
+					desc.interpolation = SIM_Undefined;
+					output_dcl_record.push_back(desc);
+				}
+			}
+			break;
+		}
+	}
+
+	if ((ST_VS == shader_type_) || (ST_GS == shader_type_))
+	{
+		for (size_t i = 0; i < output_dcl_record.size(); ++ i)
+		{
+			if (glsl_rules_ & GSR_InOutPrefix)
+			{
+				out << "out ";
+			}
+			else
+			{
+				out << "varying ";
+			}
+			switch (output_dcl_record[i].type)
+			{
+			case SRCT_UINT32:
+				if (glsl_rules_ & GSR_UIntType)
+				{
+					out << "u";
+				}
+				else
+				{
+					out << "i";
+				}
+				break;
+
+			case SRCT_SINT32:
+				out << "i";
+				break;
+
+			case SRCT_FLOAT32:
+				break;
+
+			default:
+				BOOST_ASSERT(false);
+				break;
+			}
+
+			out << "vec4 v_REGISTER";
+			if ((ST_VS == shader_type_) && has_gs_)
+			{
+				out << "In";
+			}
+			out << output_dcl_record[i].index;
+			out << ";\n";
+		}
+	}
+
+	if (!output_dcl_record.empty())
+	{
+		out << "\n";
+	}
+}
+
+void GLSLGen::ToDeclaration(std::ostream& out, ShaderDecl const & dcl)
 {
 	ShaderImmType sit = GetImmType(dcl.opcode);
 	int num_comps;
@@ -269,29 +566,60 @@ void GLSLGen::ToDeclarations(std::ostream& out, ShaderDecl const & dcl)
 			{
 				if (iter->register_index == dcl.op->indices[0].disp)
 				{
-					if (num_comps == 1)
+					if (ST_VS == shader_type_)
 					{
-						switch (iter->component_type)
+						if (num_comps == 1)
 						{
-						case SRCT_UINT32:
-							if (glsl_rules_ & GSR_UIntType)
+							switch (iter->component_type)
 							{
-								out << "u";
+							case SRCT_UINT32:
+								if (glsl_rules_ & GSR_UIntType)
+								{
+									out << "u";
+								}
+								out << "int ";
+								break;
+
+							case SRCT_SINT32:
+								out << "int ";
+								break;
+
+							case SRCT_FLOAT32:
+								out << "float ";
+								break;
+
+							default:
+								BOOST_ASSERT(false);
+								break;
 							}
-							out << "int ";
-							break;
+						}
+						else
+						{
+							switch (iter->component_type)
+							{
+							case SRCT_UINT32:
+								if (glsl_rules_ & GSR_UIntType)
+								{
+									out << "u";
+								}
+								else
+								{
+									out << "i";
+								}
+								break;
 
-						case SRCT_SINT32:
-							out << "int ";
-							break;
+							case SRCT_SINT32:
+								out << "i";
+								break;
 
-						case SRCT_FLOAT32:
-							out << "float ";
-							break;
+							case SRCT_FLOAT32:
+								break;
 
-						default:
-							BOOST_ASSERT(false);
-							break;
+							default:
+								BOOST_ASSERT(false);
+								break;
+							}
+							out << "vec" << num_comps << " ";
 						}
 					}
 					else
@@ -320,14 +648,13 @@ void GLSLGen::ToDeclarations(std::ostream& out, ShaderDecl const & dcl)
 							BOOST_ASSERT(false);
 							break;
 						}
-						out << "vec" << num_comps << " ";
+						out << "vec4 ";
 					}
-
 					break;
 				}
 			}
 
-			this->ToOperands(out, *dcl.op, sit, false, true, false, true);
+			this->ToOperands(out, *dcl.op, sit, false, true, false, false);
 			out << ";\n";
 		}
 		break;
@@ -419,65 +746,6 @@ void GLSLGen::ToDeclarations(std::ostream& out, ShaderDecl const & dcl)
 				out << " ";
 				this->ToOperands(out, *dcl.op, sit, false, false, false, true);
 				out << ";\n";
-			}
-			else if (ST_VS == shader_type_)
-			{
-				int64_t register_index = dcl.op->indices[0].disp;
-				bool found = false;
-				for (std::vector<int64_t>::const_iterator iter = vs_output_dcl_record_.begin();
-					iter != vs_output_dcl_record_.end(); ++ iter)
-				{
-					if (*iter == register_index)
-					{
-						found = true;
-						break;
-					}
-				}
-
-				if (!found)
-				{
-					if (glsl_rules_ & GSR_InOutPrefix)
-					{
-						out << "out ";
-					}
-					else
-					{
-						out << "varying ";
-					}
-					switch (type)
-					{
-					case SRCT_UINT32:
-						if (glsl_rules_ & GSR_UIntType)
-						{
-							out << "u";
-						}
-						else
-						{
-							out << "i";
-						}
-						break;
-
-					case SRCT_SINT32:
-						out << "i";
-						break;
-
-					case SRCT_FLOAT32:
-						break;
-
-					default:
-						BOOST_ASSERT(false);
-						break;
-					}
-
-					DXBCSignatureParamDesc const & param_desc = this->GetOutputParamDesc(*dcl.op);
-					out << "vec4 v_" << param_desc.semantic_name << param_desc.semantic_index;
-					if (has_gs_)
-					{
-						out << "In";
-					}
-					out << ";\n";
-					vs_output_dcl_record_.push_back(register_index);
-				}
 			}
 		}
 		break;
@@ -651,101 +919,7 @@ void GLSLGen::ToDeclarations(std::ostream& out, ShaderDecl const & dcl)
 		break;
 
 	case SO_DCL_INPUT_PS:
-		{
-			ShaderRegisterComponentType type = this->GetInputParamDesc(*dcl.op).component_type;
-			int64_t register_index = dcl.op->indices[0].disp;
-			bool found = false;
-			for (std::vector<int64_t>::const_iterator iter = ps_input_dcl_record_.begin();
-				iter != ps_input_dcl_record_.end(); ++ iter)
-			{
-				if (*iter == register_index)
-				{
-					found = true;
-					break;
-				}
-			}
-			if (!found)
-			{
-				ps_input_dcl_record_.push_back(register_index);
-				if (glsl_rules_ & GSR_PSInterpolation)
-				{
-					switch (dcl.dcl_input_ps.interpolation)
-					{
-					case SIM_Undefined:
-						break;
-
-					case SIM_Constant:
-						out << "flat ";
-						break;
-
-					case SIM_Linear:
-						out << "smooth ";
-						break;
-
-					case SIM_LinearCentroid:
-						out << "smooth centroid ";
-						break;
-
-					case SIM_LinearNoPerspective:
-						out << "noperspective ";
-						break;
-
-					case SIM_LinearNoPerspectiveCentroid:
-						out << "noperspective centroid ";
-						break;
-
-					case SIM_LinearSample:
-						out << "smooth sample ";
-						break;
-
-					case SIM_LinearNoPerspectiveSample:
-						out << "noperspective sample ";
-						break;
-
-					default:
-						BOOST_ASSERT(false);
-						break;
-					}
-				}
-
-				// No layout qualifier here see dcl_output
-				if (glsl_rules_ & GSR_InOutPrefix)
-				{
-					out << "in ";
-				}
-				else
-				{
-					out << "varying ";
-				}
-				switch (type)
-				{
-				case SRCT_UINT32:
-					if (glsl_rules_ & GSR_UIntType)
-					{
-						out << "u";
-					}
-					else
-					{
-						out << "i";
-					}
-					break;
-
-				case SRCT_SINT32:
-					out << "i";
-					break;
-
-				case SRCT_FLOAT32:
-					break;
-
-				default:
-					BOOST_ASSERT(false);
-					break;
-				}
-
-				DXBCSignatureParamDesc const & param_desc = GetInputParamDesc(*dcl.op);
-				out << "vec4 v_" << param_desc.semantic_name << param_desc.semantic_index << ";\n";
-			}
-		}
+		// Moved to GLSLGen::ToInterShaderInputRecords();
 		break;
 
 	case SO_DCL_RESOURCE:
@@ -993,7 +1167,7 @@ void GLSLGen::ToDeclarations(std::ostream& out, ShaderDecl const & dcl)
 	}
 }
 
-void GLSLGen::ToInstructions(std::ostream& out, ShaderInstruction const & insn) const
+void GLSLGen::ToInstruction(std::ostream& out, ShaderInstruction const & insn) const
 {
 	int selector[4] = { 0 };
 	ShaderImmType sit = GetImmType(insn.opcode);
@@ -1012,13 +1186,20 @@ void GLSLGen::ToInstructions(std::ostream& out, ShaderInstruction const & insn) 
 		switch (as_type_out)
 		{
 		case SIT_UInt:
-			if (glsl_rules_ & GSR_UIntType)
+			if (SOT_TEMP == insn.ops[0]->type)
 			{
-				out << "u";
+				out << "i";
 			}
 			else
 			{
-				out << "i";
+				if (glsl_rules_ & GSR_UIntType)
+				{
+					out << "u";
+				}
+				else
+				{
+					out << "i";
+				}
 			}
 			break;
 
@@ -2541,7 +2722,7 @@ void GLSLGen::ToInstructions(std::ostream& out, ShaderInstruction const & insn) 
 			}
 			for (uint32_t i = label_to_insn_num_[label_value].start_num; i < label_to_insn_num_[label_value].end_num; i++)
 			{
-				this->ToInstructions(out, *program_->insns[i]);
+				this->ToInstruction(out, *program_->insns[i]);
 			}
 			if (SO_CALLC == insn.opcode)
 			{
@@ -5096,15 +5277,11 @@ void GLSLGen::ToOperandName(std::ostream& out, ShaderOperand const & op, ShaderI
 	*need_idx = true;
 	if ((ST_PS == shader_type_) && (SOT_INPUT == op.type))
 	{
-		*need_idx = false;
-		DXBCSignatureParamDesc const & param_desc = this->GetInputParamDesc(op);
-		out << "v_" << param_desc.semantic_name << param_desc.semantic_index;
+		out << "v_REGISTER";
 	}
 	else if ((ST_VS == shader_type_) && (SOT_OUTPUT == op.type))
 	{
-		*need_idx = false;
-		DXBCSignatureParamDesc const & param_desc = this->GetOutputParamDesc(op);
-		out << "v_" << param_desc.semantic_name << param_desc.semantic_index;
+		out << "v_REGISTER";
 		if (has_gs_)
 		{
 			out << "In";
@@ -5112,21 +5289,48 @@ void GLSLGen::ToOperandName(std::ostream& out, ShaderOperand const & op, ShaderI
 	}
 	else if ((ST_GS == shader_type_) && ((SOT_INPUT == op.type) || (SOT_OUTPUT == op.type)))
 	{
-		*need_idx = false;
 		if (SOT_INPUT == op.type)
 		{
+			*need_idx = false;
+
 			DXBCSignatureParamDesc const & param_desc = this->GetInputParamDesc(op, 1);
-			out << "v_" << param_desc.semantic_name << param_desc.semantic_index << "In";
-			if (!no_idx)
+			if (glsl_rules_ & GSR_CoreGS)
 			{
-				out << '[' << op.indices[0].disp << ']';
+				if (0 == strcmp(param_desc.semantic_name, "SV_Position"))
+				{
+					out << "gl_in" << '[' << op.indices[0].disp << "].gl_Position";
+				}
+				else
+				{
+					out << "v_REGISTERIn" << op.indices[1].disp;
+					if (!no_idx)
+					{
+						out << '[' << op.indices[0].disp << ']';
+					}
+				}
+			}
+			else
+			{
+				if (0 == strcmp(param_desc.semantic_name, "SV_Position"))
+				{
+					out << "gl_PositionIn";
+				}
+				else
+				{
+					out << "v_REGISTERIn" << op.indices[1].disp;
+				}
+				if (!no_idx)
+				{
+					out << '[' << op.indices[0].disp << ']';
+				}
 			}
 		}
 		else
 		{
+			*need_idx = true;
+
 			BOOST_ASSERT(SOT_OUTPUT == op.type);
-			DXBCSignatureParamDesc const & param_desc = this->GetOutputParamDesc(op);
-			out << "v_" << param_desc.semantic_name << param_desc.semantic_index;
+			out << "v_REGISTER";
 		}
 	}
 	else if (SOT_OUTPUT_DEPTH == op.type)

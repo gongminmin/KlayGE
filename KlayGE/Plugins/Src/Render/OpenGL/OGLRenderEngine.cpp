@@ -1476,9 +1476,6 @@ namespace KlayGE
 			caps_.independent_blend_support = false;
 		}
 
-#if USE_DXBC2GLSL
-		caps_.gs_support = false;
-#else
 		if (glloader_GL_VERSION_3_2() || glloader_GL_ARB_geometry_shader4() || glloader_GL_EXT_geometry_shader4())
 		{
 			caps_.gs_support = true;
@@ -1487,7 +1484,6 @@ namespace KlayGE
 		{
 			caps_.gs_support = false;
 		}
-#endif
 			
 		caps_.cs_support = false;
 		if (glloader_GL_VERSION_4_0() || glloader_GL_ARB_tessellation_shader())

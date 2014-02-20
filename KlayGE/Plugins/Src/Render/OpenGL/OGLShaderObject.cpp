@@ -3674,101 +3674,9 @@ namespace KlayGE
 			glGetShaderiv(object, GL_INFO_LOG_LENGTH, &len);
 			if (len > 0)
 			{
-				OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-
 				std::vector<char> info(len + 1, 0);
 				glGetShaderInfoLog(object, len, &len, &info[0]);
-
-				if (re.HackForIntel())
-				{
-					std::istringstream err_iss(&info[0]);
-					std::string err_str;
-					while (err_iss)
-					{
-						std::getline(err_iss, err_str);
-						if (!err_str.empty())
-						{
-							std::string::size_type pos = err_str.find(": 0:");
-							if (pos != std::string::npos)
-							{
-								pos += 4;
-								std::string::size_type pos2 = err_str.find(':', pos + 1);
-								std::string part_err_str = err_str.substr(pos, pos2 - pos);
-								int err_line = boost::lexical_cast<int>(part_err_str);
-
-								std::istringstream iss(glsl);
-								std::string s;
-								int line = 1;
-								LogError("...");
-								while (iss)
-								{
-									std::getline(iss, s);
-									if ((line - err_line > -3) && (line - err_line < 3))
-									{
-										LogError("%d %s", line, s.c_str());
-									}
-									++ line;
-								}
-								LogError("...");
-							}
-
-							LogError(err_str.c_str());
-							LogError("\n");
-						}
-					}
-				}
-				else if (re.HackForNV())
-				{
-					std::istringstream err_iss(&info[0]);
-					std::string err_str;
-					while (err_iss)
-					{
-						std::getline(err_iss, err_str);
-						if (!err_str.empty())
-						{
-							std::string::size_type pos = err_str.find(") : error");
-							if (pos != std::string::npos)
-							{
-								std::string::size_type pos2 = err_str.find('(') + 1;
-								std::string part_err_str = err_str.substr(pos2, pos - pos2);
-								int err_line = boost::lexical_cast<int>(part_err_str);
-
-								std::istringstream iss(glsl);
-								std::string s;
-								int line = 1;
-								LogError("...");
-								while (iss)
-								{
-									std::getline(iss, s);
-									if ((line - err_line > -3) && (line - err_line < 3))
-									{
-										LogError("%d %s", line, s.c_str());
-									}
-									++ line;
-								}
-								LogError("...");
-							}
-
-							LogError(err_str.c_str());
-							LogError("\n");
-						}
-					}
-				}
-				else
-				{
-					std::istringstream iss(glsl);
-					std::string s;
-					int line = 1;
-					while (iss)
-					{
-						std::getline(iss, s);
-						LogError("%d %s", line, s.c_str());
-						++ line;
-					}
-
-					LogError(&info[0]);
-					LogError("\n");
-				}
+				this->PrintGLSLError(static_cast<ShaderType>(type), &info[0]);
 			}
 		}
 
@@ -3795,13 +3703,55 @@ namespace KlayGE
 #ifdef KLAYGE_DEBUG
 		if (!linked)
 		{
+			std::string shader_names;
+			for (size_t type = 0; type < ShaderObject::ST_NumShaderTypes; ++ type)
+			{
+				if (!(*shader_func_names_)[type].empty())
+				{
+					shader_names += (*shader_func_names_)[type] + '/';
+				}
+			}
+			if (!shader_names.empty())
+			{
+				shader_names.pop_back();
+			}
+
+			LogError("Error when linking GLSLs %s:", shader_names.c_str());
+
 			GLint len = 0;
 			glGetProgramiv(glsl_program_, GL_INFO_LOG_LENGTH, &len);
 			if (len > 0)
 			{
 				std::vector<char> info(len + 1, 0);
 				glGetProgramInfoLog(glsl_program_, len, &len, &info[0]);
-				LogError(&info[0]);
+
+				OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+				if (re.HackForNV())
+				{
+					std::istringstream err_iss(&info[0]);
+					std::string type;
+					err_iss >> type;
+					if ("Vertex" == type)
+					{
+						this->PrintGLSLError(ST_VertexShader, &info[0]);
+					}
+					else if ("Geometry" == type)
+					{
+						this->PrintGLSLError(ST_VertexShader, &info[0]);
+					}
+					else if ("Fragment" == type)
+					{
+						this->PrintGLSLError(ST_VertexShader, &info[0]);
+					}
+					else
+					{
+						LogError(&info[0]);
+					}
+				}
+				else
+				{
+					LogError(&info[0]);
+				}
 			}
 		}
 #endif
@@ -3841,5 +3791,90 @@ namespace KlayGE
 	void OGLShaderObject::Unbind()
 	{
 		//glUseProgram(0);
+	}
+
+	void OGLShaderObject::PrintGLSLError(ShaderType type, char const * info)
+	{
+		OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+		std::string const & glsl = *(*glsl_srcs_)[type];
+
+		if (re.HackForIntel())
+		{
+			std::istringstream err_iss(info);
+			std::string err_str;
+			while (err_iss)
+			{
+				std::getline(err_iss, err_str);
+				if (!err_str.empty())
+				{
+					std::string::size_type pos = err_str.find(": 0:");
+					if (pos != std::string::npos)
+					{
+						pos += 4;
+						std::string::size_type pos2 = err_str.find(':', pos + 1);
+						std::string part_err_str = err_str.substr(pos, pos2 - pos);
+						this->PrintGLSLErrorAtLine(glsl, boost::lexical_cast<int>(part_err_str));
+					}
+
+					LogError(err_str.c_str());
+					LogError("\n");
+				}
+			}
+		}
+		else if (re.HackForNV())
+		{
+			std::istringstream err_iss(info);
+			std::string err_str;
+			while (err_iss)
+			{
+				std::getline(err_iss, err_str);
+				if (!err_str.empty())
+				{
+					std::string::size_type pos = err_str.find(") : error");
+					if (pos != std::string::npos)
+					{
+						std::string::size_type pos2 = err_str.find('(') + 1;
+						std::string part_err_str = err_str.substr(pos2, pos - pos2);
+						this->PrintGLSLErrorAtLine(glsl, boost::lexical_cast<int>(part_err_str));
+					}
+
+					LogError(err_str.c_str());
+					LogError("\n");
+				}
+			}
+		}
+		else
+		{
+			std::istringstream iss(glsl);
+			std::string s;
+			int line = 1;
+			while (iss)
+			{
+				std::getline(iss, s);
+				LogError("%d %s", line, s.c_str());
+				++ line;
+			}
+
+			LogError(&info[0]);
+			LogError("\n");
+		}
+	}
+
+	void OGLShaderObject::PrintGLSLErrorAtLine(std::string const & glsl, int err_line)
+	{
+		std::istringstream iss(glsl);
+		std::string s;
+		int line = 1;
+		LogError("...");
+		while (iss)
+		{
+			std::getline(iss, s);
+			if ((line - err_line > -3) && (line - err_line < 3))
+			{
+				LogError("%d %s", line, s.c_str());
+			}
+			++ line;
+		}
+		LogError("...");
 	}
 }
