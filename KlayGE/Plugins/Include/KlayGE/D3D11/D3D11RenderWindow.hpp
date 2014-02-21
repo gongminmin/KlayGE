@@ -103,7 +103,6 @@ namespace KlayGE
 		void OnExitSizeMove(Window const & win);
 		void OnSize(Window const & win, bool active);
 		void OnSetCursor(Window const & win);
-		void OnClose(Window const & win);
 
 	private:
 		void UpdateSurfacesPtrs();
@@ -185,7 +184,6 @@ namespace KlayGE
 		boost::signals2::connection on_exit_size_move_connect_;
 		boost::signals2::connection on_size_connect_;
 		boost::signals2::connection on_set_cursor_connect_;
-		boost::signals2::connection on_close_connect_;
 	};
 
 	typedef shared_ptr<D3D11RenderWindow> D3D11RenderWindowPtr;

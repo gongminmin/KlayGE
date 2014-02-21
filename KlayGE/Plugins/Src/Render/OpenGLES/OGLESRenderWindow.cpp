@@ -51,8 +51,6 @@ namespace KlayGE
 			placeholders::_1));
 		on_size_connect_ = main_wnd->OnSize().connect(bind(&OGLESRenderWindow::OnSize, this,
 			placeholders::_1, placeholders::_2));
-		on_close_connect_ = main_wnd->OnClose().connect(bind(&OGLESRenderWindow::OnClose, this,
-			placeholders::_1));
 
 		if (isFullScreen_)
 		{
@@ -246,7 +244,6 @@ namespace KlayGE
 		on_paint_connect_.disconnect();
 		on_exit_size_move_connect_.disconnect();
 		on_size_connect_.disconnect();
-		on_close_connect_.disconnect();
 
 		this->Destroy();
 	}
@@ -437,10 +434,5 @@ namespace KlayGE
 				this->WindowMovedOrResized(win);
 			}
 		}
-	}
-
-	void OGLESRenderWindow::OnClose(Window const & /*win*/)
-	{
-		this->Destroy();
 	}
 }

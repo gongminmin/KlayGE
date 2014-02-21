@@ -59,7 +59,6 @@ namespace KlayGE
 		void OnPaint(Window const & win);
 		void OnExitSizeMove(Window const & win);
 		void OnSize(Window const & win, bool active);
-		void OnClose(Window const & win);
 
 	private:
 		std::string	name_;
@@ -84,7 +83,6 @@ namespace KlayGE
 		boost::signals2::connection on_paint_connect_;
 		boost::signals2::connection on_exit_size_move_connect_;
 		boost::signals2::connection on_size_connect_;
-		boost::signals2::connection on_close_connect_;
 	};
 }
 

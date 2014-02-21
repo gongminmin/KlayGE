@@ -71,8 +71,6 @@ namespace KlayGE
 			placeholders::_1, placeholders::_2));
 		on_set_cursor_connect_ = main_wnd->OnSetCursor().connect(bind(&D3D11RenderWindow::OnSetCursor, this,
 			placeholders::_1));
-		on_close_connect_ = main_wnd->OnClose().connect(bind(&D3D11RenderWindow::OnClose, this,
-			placeholders::_1));
 
 		if (this->FullScreen())
 		{
@@ -498,7 +496,6 @@ namespace KlayGE
 		on_exit_size_move_connect_.disconnect();
 		on_size_connect_.disconnect();
 		on_set_cursor_connect_.disconnect();
-		on_close_connect_.disconnect();
 
 		this->Destroy();
 	}
@@ -963,11 +960,6 @@ namespace KlayGE
 
 	void D3D11RenderWindow::OnSetCursor(Window const & /*win*/)
 	{
-	}
-
-	void D3D11RenderWindow::OnClose(Window const & /*win*/)
-	{
-		this->Destroy();
 	}
 
 #if defined KLAYGE_PLATFORM_WINDOWS_METRO
