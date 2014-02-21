@@ -50,7 +50,7 @@ private:
 	KlayGE::function<KlayGE::RenderModelPtr()> dino_ml_;
 	KlayGE::function<KlayGE::TexturePtr()> y_cube_tl_;
 	KlayGE::function<KlayGE::TexturePtr()> c_cube_tl_;
-	uint32_t loading_percentage_;
+	KlayGE::uint32_t loading_percentage_;
 
 	KlayGE::UIDialogPtr parameter_dialog_;
 	int id_min_sample_num_static_;

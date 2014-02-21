@@ -1,4 +1,4 @@
-PROJECT(vorbis)
+PROJECT(libvorbis)
 
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8.6)
 

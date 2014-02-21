@@ -2506,9 +2506,9 @@ namespace KlayGE
 						{
 							std::getline(iss, s);
 
-							while (!s.empty() && (('\r' == s.back()) || ('\n' == s.back())))
+							while (!s.empty() && (('\r' == s[s.size() - 1]) || ('\n' == s[s.size() - 1])))
 							{
-								s.pop_back();
+								s.resize(s.size() - 1);
 							}
 
 							LogInfo("%d %s", line, s.c_str());
@@ -3719,7 +3719,7 @@ namespace KlayGE
 			}
 			if (!shader_names.empty())
 			{
-				shader_names.pop_back();
+				shader_names.resize(shader_names.size() - 1);
 			}
 
 			LogError("Error when linking GLSLs %s:", shader_names.c_str());

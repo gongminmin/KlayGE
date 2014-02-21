@@ -27,7 +27,7 @@ public:
 
 private:
 	virtual void InitObjects() KLAYGE_OVERRIDE;
-	virtual void OnResize(uint32_t width, uint32_t height) KLAYGE_OVERRIDE;
+	virtual void OnResize(KlayGE::uint32_t width, KlayGE::uint32_t height) KLAYGE_OVERRIDE;
 	virtual void DoUpdateOverlay();
 	virtual KlayGE::uint32_t DoUpdate(KlayGE::uint32_t pass);
 

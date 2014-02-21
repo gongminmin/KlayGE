@@ -31,7 +31,7 @@
 #include "SubsurfaceMesh.hpp"
 #include "SSSBlur.hpp"
 
-uint32_t const SHADOW_MAP_SIZE = 512;
+KlayGE::uint32_t const SHADOW_MAP_SIZE = 512;
 
 using namespace KlayGE;
 

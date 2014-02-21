@@ -18,7 +18,7 @@ except:
 compiler		= "auto"
 
 # Toolset name.
-#   On Windows, could be "v120", "v120_xp", "v110", "v110_xp", "v100", "v90", "auto".
+#   On Windows, could be "v120", "v120_xp", "v110", "v110_xp", "v100", "auto".
 #   On WinRT, could be "v120", "v110", "auto".
 #   On Android, could be "4.4.3", "4.6", "4.8", "auto".
 #   On Linux, could be "auto".
@@ -279,7 +279,7 @@ def build_a_project(name, build_path, compiler_info, compiler_arch, need_install
 	curdir = os.path.abspath(os.curdir)
 
 	toolset_name = ""
-	if "vc" == compiler_info.name:
+	if ("vc" == compiler_info.name) and (compiler_info.version >= 10):
 		toolset_name = "-T %s" % compiler_arch[2]
 
 	if compiler_arch[3]:

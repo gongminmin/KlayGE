@@ -59,7 +59,7 @@ void TutorFramework::DoUpdateOverlay()
 	font_->RenderText(0, 18, KlayGE::Color(1, 1, 0, 1), stream.str(), 16);
 }
 
-uint32_t TutorFramework::DoUpdate(uint32_t /*pass*/)
+KlayGE::uint32_t TutorFramework::DoUpdate(KlayGE::uint32_t /*pass*/)
 {
 	KlayGE::RenderEngine& re = KlayGE::Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 

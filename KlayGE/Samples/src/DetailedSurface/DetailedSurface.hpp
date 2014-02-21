@@ -47,7 +47,7 @@ private:
 	int id_na_length_;
 	int id_wireframe_;
 
-	uint32_t loading_percentage_;
+	KlayGE::uint32_t loading_percentage_;
 };
 
 #endif		// _DETAILEDSURFACE_HPP

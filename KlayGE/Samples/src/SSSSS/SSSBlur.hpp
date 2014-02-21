@@ -9,7 +9,7 @@ class SSSBlurPP : public KlayGE::PostProcess
 public:
 	SSSBlurPP();
 
-	virtual void InputPin(uint32_t index, KlayGE::TexturePtr const & tex) KLAYGE_OVERRIDE;
+	virtual void InputPin(KlayGE::uint32_t index, KlayGE::TexturePtr const & tex) KLAYGE_OVERRIDE;
 	using PostProcess::InputPin;
 
 	virtual void Apply() KLAYGE_OVERRIDE;

@@ -41,7 +41,7 @@ private:
 	int id_freq_static_;
 	int id_freq_slider_;
 
-	uint32_t loading_percentage_;
+	KlayGE::uint32_t loading_percentage_;
 };
 
 #endif		// _PARALLAX_HPP

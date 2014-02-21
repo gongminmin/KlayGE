@@ -38,7 +38,7 @@ private:
 	KlayGE::function<KlayGE::RenderModelPtr()> model_ml_;
 	KlayGE::function<KlayGE::TexturePtr()> y_cube_tl_;
 	KlayGE::function<KlayGE::TexturePtr()> c_cube_tl_;
-	uint32_t loading_percentage_;
+	KlayGE::uint32_t loading_percentage_;
 
 	KlayGE::FirstPersonCameraController fpcController_;
 	KlayGE::TrackballCameraController light_controller_;
@@ -61,7 +61,7 @@ private:
 	size_t num_primitives_rendered_;
 	size_t num_vertices_rendered_;
 
-	uint32_t num_cascades_;
+	KlayGE::uint32_t num_cascades_;
 	float pssm_factor_;
 };
 

@@ -36,6 +36,9 @@
 
 #include <KlayGE/MsgInput/MInput.hpp>
 
+#if (defined KLAYGE_PLATFORM_WINDOWS_DESKTOP && (_WIN32_WINNT >= 0x0601 /*_WIN32_WINNT_WIN7*/)) \
+	|| (defined KLAYGE_PLATFORM_WINDOWS_METRO) \
+	|| (defined KLAYGE_PLATFORM_ANDROID)
 namespace KlayGE
 {
 	std::wstring const & MsgInputSensor::Name() const
@@ -48,6 +51,7 @@ namespace KlayGE
 	{
 	}
 }
+#endif
 
 #if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP && (_WIN32_WINNT >= 0x0601 /*_WIN32_WINNT_WIN7*/)
 
