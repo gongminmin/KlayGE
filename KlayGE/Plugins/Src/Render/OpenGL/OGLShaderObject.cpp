@@ -2526,8 +2526,6 @@ namespace KlayGE
 				}
 
 				err_msg->Release();
-
-				is_shader_validate_[type] = false;
 			}
 
 			if (code)
@@ -2784,6 +2782,10 @@ namespace KlayGE
 				}
 
 				code->Release();
+			}
+			else
+			{
+				is_shader_validate_[type] = false;
 			}
 
 			::FreeLibrary(mod_d3dcompiler);

@@ -234,8 +234,7 @@ void GLSLGen::ToDefine(std::ostream& out, ShaderDecl const & dcl, uint32_t& clip
 			{
 				out << "#define ";
 				this->ToOperands(out, *dcl.op, sit, false, false, false, true);
-				out << " gl_Position";
-				out << "\n";
+				out << " gl_Position\n";
 			}
 			break;
 
@@ -262,6 +261,12 @@ void GLSLGen::ToDefine(std::ostream& out, ShaderDecl const & dcl, uint32_t& clip
 			out << "#define ";
 			this->ToOperands(out, *dcl.op, sit, false, false, false, true);
 			out << " uint(gl_SampleID)\n";
+			break;
+
+		case SSV_RENDER_TARGET_ARRAY_INDEX:
+			out << "#define ";
+			this->ToOperands(out, *dcl.op, sit, false, false, false, true);
+			out << " gl_Layer\n";
 			break;
 
 		default:
@@ -564,7 +569,16 @@ void GLSLGen::ToDeclaration(std::ostream& out, ShaderDecl const & dcl)
 			for (std::vector<DXBCSignatureParamDesc>::const_iterator iter = program_->params_in.begin();
 				iter != program_->params_in.end(); ++ iter)
 			{
-				if (iter->register_index == dcl.op->indices[0].disp)
+				int64_t disp;
+				if (ST_GS == shader_type_)
+				{
+					disp = dcl.op->indices[1].disp;
+				}
+				else
+				{
+					disp = dcl.op->indices[0].disp;
+				}
+				if (iter->register_index == disp)
 				{
 					if (ST_VS == shader_type_)
 					{
@@ -1180,49 +1194,131 @@ void GLSLGen::ToInstruction(std::ostream& out, ShaderInstruction const & insn) c
 		//common single-precision float instructions
 		//-----------------------------------------------------------------------------------------
 	case SO_MOV:
-		as_type_out = this->OperandAsType(*insn.ops[1], sit);
-		this->ToOperands(out, *insn.ops[0], sit | (as_type_out << 8));
-		out << " = ";
-		switch (as_type_out)
+		if (SOT_OUTPUT == insn.ops[0]->type)
 		{
-		case SIT_UInt:
-			if (SOT_TEMP == insn.ops[0]->type)
+			bool itof_cast = false;
+			bool ftoi_cast = false;
+			as_type_out = this->OperandAsType(*insn.ops[0], sit);
+			ShaderImmType as_type_op1 = this->OperandAsType(*insn.ops[1], sit);
+			if (as_type_out != as_type_op1)
 			{
-				out << "i";
-			}
-			else
-			{
-				if (glsl_rules_ & GSR_UIntType)
+				if ((SIT_Int == as_type_out) || (SIT_UInt == as_type_out))
 				{
-					out << "u";
+					ftoi_cast = true;
 				}
 				else
 				{
-					out << "i";
+					itof_cast = true;
 				}
 			}
-			break;
+			this->ToOperands(out, *insn.ops[0], sit | (as_type_out << 8));
+			out << " = ";
+			if (itof_cast)
+			{
+				out << "intBitsToFloat(";
+			}
+			else if (ftoi_cast)
+			{
+				out << "floatBitsToInt(";
+			}
+			switch (as_type_op1)
+			{
+			case SIT_UInt:
+				if (itof_cast)
+				{
+					out << "i";
+				}
+				else
+				{
+					if (SOT_TEMP == insn.ops[0]->type)
+					{
+						out << "i";
+					}
+					else
+					{
+						if (glsl_rules_ & GSR_UIntType)
+						{
+							out << "u";
+						}
+						else
+						{
+							out << "i";
+						}
+					}
+				}
+				break;
 
-		case SIT_Int:
-			out << "i";
-			break;
+			case SIT_Int:
+				out << "i";
+				break;
 
-		case SIT_Double:
-			out << "d";
-			break;
+			case SIT_Double:
+				out << "d";
+				break;
 
-		case SIT_Float:
-			break;
+			case SIT_Float:
+				break;
 
-		default:
-			BOOST_ASSERT(false);
-			break;
+			default:
+				BOOST_ASSERT(false);
+				break;
+			}
+			out << "vec4(";
+			this->ToOperands(out, *insn.ops[1], sit);
+			out << ")";
+			this->ToComponentSelectors(out, *insn.ops[0]);
+			if (itof_cast || ftoi_cast)
+			{
+				out << ")";
+			}
+			out << ";";
 		}
-		out << "vec4(";
-		this->ToOperands(out, *insn.ops[1], sit);
-		out << ")";
-		this->ToComponentSelectors(out, *insn.ops[0]);
-		out << ";";
+		else
+		{
+			as_type_out = this->OperandAsType(*insn.ops[1], sit);
+			this->ToOperands(out, *insn.ops[0], sit | (as_type_out << 8));
+			out << " = ";
+			switch (as_type_out)
+			{
+			case SIT_UInt:
+				if (SOT_TEMP == insn.ops[0]->type)
+				{
+					out << "i";
+				}
+				else
+				{
+					if (glsl_rules_ & GSR_UIntType)
+					{
+						out << "u";
+					}
+					else
+					{
+						out << "i";
+					}
+				}
+				break;
+
+			case SIT_Int:
+				out << "i";
+				break;
+
+			case SIT_Double:
+				out << "d";
+				break;
+
+			case SIT_Float:
+				break;
+
+			default:
+				BOOST_ASSERT(false);
+				break;
+			}
+			out << "vec4(";
+			this->ToOperands(out, *insn.ops[1], sit);
+			out << ")";
+			this->ToComponentSelectors(out, *insn.ops[0]);
+			out << ";";
+		}
 		break;
 
 	case SO_MUL:
@@ -2154,11 +2250,10 @@ void GLSLGen::ToInstruction(std::ostream& out, ShaderInstruction const & insn) c
 			out << ") * ivec4(";
 			this->ToOperands(out, *insn.ops[3], sit);
 		}
-		out << ");";
+		out << ");\n";
 		//destHI.xz=vec4(destHI).xz;
 		if (insn.ops[0]->type != SOT_NULL)
 		{
-			out << "\n";
 			this->ToOperands(out, *insn.ops[0], sit | (as_type_out << 8));
 			out << " = iTempX[0]";
 			this->ToComponentSelectors(out, *insn.ops[0]);
@@ -5173,7 +5268,7 @@ ShaderImmType GLSLGen::OperandAsType(ShaderOperand const & op, uint32_t imm_as_t
 			}
 			else if (SOT_INPUT == op.type)
 			{
-				switch (this->GetInputParamDesc(op).component_type)
+				switch (this->GetInputParamDesc(op, (ST_GS == shader_type_) ? 1 : 0).component_type)
 				{
 				case SRCT_UINT32:
 					as_type = SIT_UInt;
@@ -5451,9 +5546,7 @@ void GLSLGen::ToOperandName(std::ostream& out, ShaderOperand const & op, ShaderI
 									out << "[";
 									if (dynamic_indexed && op.indices[1].reg)
 									{
-										out << "int(";
 										this->ToOperands(out, *op.indices[1].reg, SIT_Int);
-										out << ")";
 									}
 									else
 									{
@@ -5598,7 +5691,7 @@ void GLSLGen::ToOperandName(std::ostream& out, ShaderOperand const & op, ShaderI
 								{
 									register_stride = var_iter->type_desc.columns;
 								}
-								if (element_count)
+								if (element_count != 0)
 								{
 									//identify which matrix array element it's loacated in
 									element_index = (16 * register_index - var_iter->var_desc.start_offset) / 16 / register_stride;
@@ -5624,7 +5717,16 @@ void GLSLGen::ToOperandName(std::ostream& out, ShaderOperand const & op, ShaderI
 									out << var_iter->var_desc.name;
 									if (element_count)
 									{
-										out << "[" << element_index << "]";
+										out << "[";
+										if (dynamic_indexed && op.indices[1].reg)
+										{
+											this->ToOperands(out, *op.indices[1].reg, SIT_Int);
+										}
+										else
+										{
+											out << element_index;
+										}
+										out << "]";
 									}
 									if (SVC_MATRIX_ROWS == var_iter->type_desc.var_class)
 									{
