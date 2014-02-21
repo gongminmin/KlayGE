@@ -63,6 +63,9 @@ private:
 		bool* need_idx, bool* need_comps, bool no_swizzle = false, bool no_idx = false) const;
 	void ToComponentSelectors(std::ostream& out, ShaderOperand const & op, bool dot = true) const;
 	void ToTemps(std::ostream& out, ShaderDecl const & dcl);
+	void ToDefaultValue(std::ostream& out, DXBCShaderVariable const & var);
+	void ToDefaultValue(std::ostream& out, DXBCShaderVariable const & var, uint32_t offset);
+	void ToDefaultValue(std::ostream& out, char const * value, ShaderVariableType type);
 	bool IsImmediateNumber(ShaderOperand const & op) const;
 	// param i:the component selector to get
 	// return:the idx of selector:0 1 2 3 stand for x y z w

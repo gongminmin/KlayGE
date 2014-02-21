@@ -781,7 +781,33 @@ void GLSLGen::ToDeclaration(std::ostream& out, ShaderDecl const & dcl)
 			{
 				if ((SCBT_CBUFFER == cb_iter->desc.type) && (cb_iter->bind_point == dcl.op->indices[0].disp))
 				{
-					if ((glsl_rules_ & GSR_UseUBO) && ((glsl_rules_ & GSR_GlobalUniformsInUBO) || (cb_iter->desc.name[0] != '$')))
+					// If this cb has a member with default value ,then treat all members of this cb as constant
+					// variables with intialization value in glsl.
+					// e.g.
+					/***********************************
+					cbuffer Immutable
+					{
+						int a = 5;
+						float b = 3.0f;
+					}
+					is converted to:
+					const int a = 5;
+					const float b = 3.0f;
+					In this case, uniform block is not used.
+					*************************************/
+						
+					bool has_default_value = false;
+					for (std::vector<DXBCShaderVariable>::const_iterator var_iter = cb_iter->vars.begin();
+						var_iter != cb_iter->vars.end(); ++ var_iter)
+					{
+						if (var_iter->var_desc.default_val)
+						{
+							has_default_value = true;
+							break;
+						}
+					}
+					if ((glsl_rules_ & GSR_UseUBO) && ((glsl_rules_ & GSR_GlobalUniformsInUBO) || (cb_iter->desc.name[0] != '$'))
+						&& (!has_default_value))
 					{
 						out << "uniform ";
 						out << cb_iter->desc.name << "\n{\n";
@@ -803,6 +829,10 @@ void GLSLGen::ToDeclaration(std::ostream& out, ShaderDecl const & dcl)
 						{
 							// Array element count, 0 if not a array
 							uint32_t element_count = var_iter->type_desc.elements;
+							if (has_default_value)
+							{
+								out << "const ";
+							}
 							switch (var_iter->type_desc.var_class)
 							{
 							case SVC_SCALAR:
@@ -812,7 +842,6 @@ void GLSLGen::ToDeclaration(std::ostream& out, ShaderDecl const & dcl)
 								{
 									out << "[" << element_count << "]";
 								}
-								out << ";\n";
 								break;
 
 							case SVC_VECTOR:
@@ -847,7 +876,6 @@ void GLSLGen::ToDeclaration(std::ostream& out, ShaderDecl const & dcl)
 								{
 									out << "[" << element_count << "]";
 								}
-								out << ";\n";
 								break;
 
 							case SVC_MATRIX_COLUMNS:
@@ -858,7 +886,6 @@ void GLSLGen::ToDeclaration(std::ostream& out, ShaderDecl const & dcl)
 								{
 									out << "[" << element_count << "]";
 								}
-								out << ";\n";
 								break;
 
 							case SVC_MATRIX_ROWS:
@@ -870,13 +897,18 @@ void GLSLGen::ToDeclaration(std::ostream& out, ShaderDecl const & dcl)
 								{
 									out << "[" << element_count << "]";
 								}
-								out << ";\n";
 								break;
 
 							default:
 								BOOST_ASSERT_MSG(false, "Unhandled type,when converting dcl_constant_buffer");
 								break;
 							}
+							if (has_default_value)
+							{
+								out << " = ";
+								this->ToDefaultValue(out, *var_iter);
+							}
+							out << ";\n";
 						}
 					}
 					if ((glsl_rules_ & GSR_UseUBO) && ((glsl_rules_ & GSR_GlobalUniformsInUBO) || (cb_iter->desc.name[0] != '$')))
@@ -6351,4 +6383,192 @@ uint32_t GLSLGen::GetMinComponentSelector(ShaderOperand const & op) const
 		min_idx = std::min(min_idx, idx);
 	}
 	return min_idx;
+}
+
+void GLSLGen::ToDefaultValue(std::ostream& out, DXBCShaderVariable const & var, uint32_t offset)
+{
+	char const * p_base = static_cast<char const *>(var.var_desc.default_val) + offset;
+	switch (var.type_desc.var_class)
+	{
+	case SVC_MATRIX_ROWS:
+	case SVC_MATRIX_COLUMNS:
+		if (var.type_desc.type != SVT_FLOAT)
+		{
+			BOOST_ASSERT_MSG(false, "Only support float matrix.");
+		}
+		if (var.type_desc.rows != var.type_desc.columns)
+		{
+			BOOST_ASSERT_MSG(false, "Only support square matrix's default value for now.");
+		}
+		out << "mat" << var.type_desc.rows << "(";
+		for (uint32_t column = 0; column < var.type_desc.rows; ++ column)
+		{
+			for (uint32_t row = 0; row < var.type_desc.rows; ++ row)
+			{
+				if ((row != 0) || (column != 0))
+				{
+					out << ",";
+				}
+				char const * p = p_base;
+				if (SVC_MATRIX_COLUMNS == var.type_desc.var_class)
+				{
+					p += row * 16 + column * 4;
+				}
+				else
+				{
+					p += column * 16 + row * 4;
+				}
+				this->ToDefaultValue(out, p, var.type_desc.type);
+			}
+		}
+		out << ")";
+		break;
+
+	case SVC_VECTOR:
+		{
+			switch (var.type_desc.type)
+			{
+			case SVT_INT:
+				out << "i";
+				break;
+
+			case SVT_UINT:
+				if (glsl_rules_ & GSR_UIntType)
+				{
+					out << "u";
+				}
+				else
+				{
+					out << "i";
+				}
+				break;
+
+			case SVT_FLOAT:
+				break;
+
+			default:
+				BOOST_ASSERT_MSG(false, "Unhandled type.");
+				break;
+			}
+			out << "vec" << var.type_desc.columns << "(";
+			char const * p = p_base;
+			for (uint32_t i = 0; i < var.type_desc.columns; ++ i)
+			{
+				if (i != 0)
+				{
+					out << ",";
+				}
+				this->ToDefaultValue(out, p, var.type_desc.type);
+				p += 4;
+			}
+			out << ")";
+		}
+		break;
+
+	case SVC_SCALAR:
+		this->ToDefaultValue(out, p_base, var.type_desc.type);
+		break;
+
+	default:
+		BOOST_ASSERT_MSG(false, "Unhandled type");
+		break;
+	}
+}
+
+void GLSLGen::ToDefaultValue(std::ostream& out, char const * value, ShaderVariableType type)
+{
+	switch (type)
+	{
+	case SVT_INT:
+		{
+			int32_t const * p = reinterpret_cast<int32_t const *>(value);
+			out << *p;
+		}
+		break;
+
+	case SVT_UINT:
+		{
+			uint32_t const * p = reinterpret_cast<uint32_t const *>(value);
+			out << *p;
+		}
+		break;
+
+	case SVT_FLOAT:
+		{
+			float const * p = reinterpret_cast<float const *>(value);
+			out << *p;
+		}
+		break;
+
+	default:
+		BOOST_ASSERT_MSG(false, "Unhandled type.");
+		break;
+	}
+}
+
+void GLSLGen::ToDefaultValue(std::ostream& out, DXBCShaderVariable const & var)
+{
+	if (0 == var.type_desc.elements)
+	{
+		this->ToDefaultValue(out, var, 0);
+	}
+	else
+	{
+		uint32_t stride = 0;
+		switch (var.type_desc.type)
+		{
+		case SVT_INT:
+			out << "i";
+			break;
+
+		case SVT_UINT:
+			if (glsl_rules_ & GSR_UIntType)
+			{
+				out << "u";
+			}
+			else
+			{
+				out << "i";
+			}
+			break;
+
+		case SVT_FLOAT:
+			break;
+
+		default:
+			BOOST_ASSERT_MSG(false, "Unhandled type.");
+			break;
+		}
+		switch (var.type_desc.var_class)
+		{
+		case SVC_SCALAR:
+			stride = 4;
+			break;
+					
+		case SVC_VECTOR:
+			stride = 16;
+			out << "vec" << var.type_desc.columns << "[]";
+			break;
+
+		case SVC_MATRIX_ROWS:
+		case SVC_MATRIX_COLUMNS:
+			stride = var.type_desc.columns * 16;
+			out << "mat" << var.type_desc.columns << "x" << var.type_desc.rows << "[]";
+			break;
+
+		default:
+			BOOST_ASSERT_MSG(false, "Unhandled type");
+			break;
+		}
+		out << "(";
+		for (uint32_t i = 0; i < var.type_desc.elements; ++ i)
+		{
+			if (i != 0)
+			{
+				out << ",";
+			}
+			this->ToDefaultValue(out, var, stride * i);
+		}
+		out << ")";
+	}
 }

@@ -578,6 +578,14 @@ void ASMGen::Disasm(std::ostream& out, std::vector<DXBCConstantBuffer> const & c
 				out << " [unused]";
 			}
 			out << "\n";
+
+			// cb default value
+			if(var_iter->var_desc.default_val)
+			{
+				out << "//=";
+				this->Disasm(out, *var_iter);
+				out << "\n";
+			}
 		}
 		out << "//}\n";
 	}
@@ -607,5 +615,161 @@ void ASMGen::Disasm(std::ostream& out, std::vector<DXBCInputBindDesc> const & bi
 			<< std::setw(30) << ShaderInputTypeName(iter->type)
 			<< std::setw(10) << iter->bind_point
 			<< "\n";
+	}
+}
+
+void ASMGen::Disasm(std::ostream& out, DXBCShaderVariable const & var,uint32_t offset)
+{
+	char const * p_base = static_cast<char const *>(var.var_desc.default_val) + offset;
+	switch (var.type_desc.var_class)
+	{
+	case SVC_MATRIX_ROWS:
+	case SVC_MATRIX_COLUMNS:
+		if(var.type_desc.type != SVT_FLOAT)
+		{
+			BOOST_ASSERT_MSG(false, "Only support float matrix.");
+		}
+		if(var.type_desc.rows!=var.type_desc.columns)
+		{
+			BOOST_ASSERT_MSG(false, "Only support square matrix's default value for now.");
+		}
+		out << "mat" << var.type_desc.rows << "(";
+		for (uint32_t column = 0; column < var.type_desc.rows; ++ column)
+		{
+			for (uint32_t row = 0; row < var.type_desc.rows; ++ row)
+			{
+				if ((row != 0) || (column != 0))
+				{
+					out << ",";
+				}
+				char const * p = p_base;
+				if (SVC_MATRIX_COLUMNS == var.type_desc.var_class)
+				{
+					p += row * 16 + column * 4;
+				}
+				else
+				{
+					p += column * 16 + row * 4;
+				}
+				this->Disasm(out, p, var.type_desc.type);
+			}
+		}
+		out<<" )";
+		break;
+
+	case SVC_VECTOR:
+		{
+			switch(var.type_desc.type)
+			{
+			case SVT_INT:
+				out << "i";
+				break;
+
+			case SVT_UINT:
+				out << "u";
+				break;
+
+			case SVT_FLOAT:
+				break;
+
+			default:
+				BOOST_ASSERT_MSG(false, "Unhandled type.");
+				break;
+			}
+			out << "vec" << var.type_desc.columns << "(";
+			char const * p = p_base;
+			for (uint32_t i = 0; i < var.type_desc.columns; ++ i)
+			{
+				if (i != 0)
+				{
+					out << ",";
+				}
+				this->Disasm(out, p, var.type_desc.type);
+				p += 4;
+			}
+			out << ")";
+		}
+		break;
+
+	case SVC_SCALAR:
+		this->Disasm(out, p_base, var.type_desc.type);
+		break;
+
+	default:
+		BOOST_ASSERT_MSG(false, "Unhandled type");
+		break;
+	}
+}
+
+void ASMGen::Disasm(std::ostream& out, char const * value, ShaderVariableType type)
+{
+	switch (type)
+	{
+	case SVT_INT:
+		{
+			int32_t const * p = reinterpret_cast<int32_t const *>(value);
+			out << *p;
+		}
+		break;
+
+	case SVT_UINT:
+		{
+			uint32_t const * p = reinterpret_cast<uint32_t const *>(value);
+			out << *p;
+		}
+		break;
+
+	case SVT_FLOAT:
+		{
+			float const * p = reinterpret_cast<float const *>(value);
+			out << *p;
+		}
+		break;
+
+	default:
+		BOOST_ASSERT_MSG(false, "Unhandled type.");
+		break;
+	}
+}
+
+void ASMGen::Disasm(std::ostream& out, DXBCShaderVariable const & var)
+{
+	if (0 == var.type_desc.elements)
+	{
+		this->Disasm(out, var, 0);
+	}
+	else
+	{
+		uint32_t stride = 0;
+		switch (var.type_desc.var_class)
+		{
+		case SVC_SCALAR:
+			stride = 4;
+			break;
+					
+		case SVC_VECTOR:
+			stride = 16;
+			break;
+
+		case SVC_MATRIX_ROWS:
+		case SVC_MATRIX_COLUMNS:
+			stride = var.type_desc.columns * 16;
+			break;
+
+		default:
+			BOOST_ASSERT_MSG(false, "Unhandled type.");
+			break;
+		}
+		out << "{";
+		for (uint32_t i = 0; i < var.type_desc.elements; ++ i)
+		{
+			if (i != 0)
+			{
+				out << ",";
+			}
+			this->Disasm(out, var, stride * i);
+						
+		}
+		out<<"}";
 	}
 }

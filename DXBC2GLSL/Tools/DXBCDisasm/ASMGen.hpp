@@ -19,6 +19,10 @@ private:
 	void Disasm(std::ostream& out, std::vector<DXBCSignatureParamDesc> const & signature, uint32_t fourcc);
 	void Disasm(std::ostream& out, std::vector<DXBCConstantBuffer> const & cb);
 	void Disasm(std::ostream& out, std::vector<DXBCInputBindDesc> const & bindings);
+	// Disasm cb default value
+	void Disasm(std::ostream& out, DXBCShaderVariable const & var);
+	void Disasm(std::ostream& out, DXBCShaderVariable const & var, uint32_t offset);
+	void Disasm(std::ostream& out, const char* value, ShaderVariableType type);
 
 private:
 	boost::shared_ptr<ShaderProgram> program_;
