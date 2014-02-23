@@ -370,7 +370,7 @@ void ASMGen::Disasm(std::ostream& out, ShaderDecl const & dcl)
 	if (dcl.op)
 	{
 		out << ' ';
-		this->Disasm(out, *dcl.op, GetImmType(dcl.opcode));
+		this->Disasm(out, *dcl.op, GetOpInType(dcl.opcode));
 	}
 	switch (dcl.opcode)
 	{
@@ -431,7 +431,7 @@ void ASMGen::Disasm(std::ostream& out, ShaderDecl const & dcl)
 //disasm instructions
 void ASMGen::Disasm(std::ostream& out, ShaderInstruction const & insn)
 {
-	ShaderImmType sit = GetImmType(insn.opcode);
+	ShaderImmType sit = GetOpInType(insn.opcode);
 
 	out << ShaderOpcodeName(insn.opcode);
 	if (insn.insn.sat)

@@ -385,8 +385,8 @@ struct ShaderProgram
 
 boost::shared_ptr<ShaderProgram> ShaderParse(DXBCContainer const & dxbc);
 
-//获取操作码对应的操作数的类型
-inline ShaderImmType GetImmType(uint32_t opcode)
+// Return the opcode's input type
+inline ShaderImmType GetOpInType(uint32_t opcode)
 {
 	ShaderImmType sit;
 	switch (opcode)
@@ -425,6 +425,8 @@ inline ShaderImmType GetImmType(uint32_t opcode)
 
 	case SO_AND:
 	case SO_XOR:
+	case SO_OR:
+	case SO_NOT:
 	case SO_ATOMIC_AND:
 	case SO_ATOMIC_OR:
 	case SO_ATOMIC_XOR:
@@ -469,6 +471,106 @@ inline ShaderImmType GetImmType(uint32_t opcode)
 	case SO_DMOV:
 	case SO_DMOVC:
 	case SO_DTOF:
+		sit = SIT_Double;
+		break;
+
+	default:
+		sit = SIT_Float;
+		break;
+	}
+
+	return sit;
+}
+
+// Return the opcode's output type
+inline ShaderImmType GetOpOutType(uint32_t opcode)
+{
+	ShaderImmType sit;
+	switch (opcode)
+	{
+	case SO_EQ:
+	case SO_FTOI:
+	case SO_IADD:
+	case SO_IEQ:
+	case SO_IGE:
+	case SO_ILT:
+	case SO_IMAD:
+	case SO_IMAX:
+	case SO_IMIN:
+	case SO_IMUL:
+	case SO_INE:
+	case SO_INEG:
+	case SO_ISHL:
+	case SO_ISHR:
+	case SO_ATOMIC_IADD:
+	case SO_ATOMIC_IMAX:
+	case SO_ATOMIC_IMIN:
+	case SO_IMM_ATOMIC_IADD:
+	case SO_IMM_ATOMIC_IMAX:
+	case SO_IMM_ATOMIC_IMIN:
+	case SO_CASE:
+	case SO_IBFE:
+	case SO_FIRSTBIT_SHI:
+	case SO_BREAKC:
+	case SO_IF:
+	case SO_CONTINUEC:
+	case SO_RETC:
+	case SO_DISCARD:
+	case SO_CALL:
+	case SO_CALLC:
+	case SO_NE:
+	case SO_LT:
+	case SO_ULT:
+	case SO_GE:
+	case SO_UGE:
+		sit = SIT_Int;
+		break;
+
+	case SO_AND:
+	case SO_XOR:
+	case SO_OR:
+	case SO_NOT:
+	case SO_ATOMIC_AND:
+	case SO_ATOMIC_OR:
+	case SO_ATOMIC_XOR:
+	case SO_IMM_ATOMIC_AND:
+	case SO_IMM_ATOMIC_OR:
+	case SO_IMM_ATOMIC_XOR:
+	case SO_UDIV:
+	case SO_UMUL:
+	case SO_UMAD:
+	case SO_UMAX:
+	case SO_UMIN:
+	case SO_USHR:
+	case SO_UADDC:
+	case SO_USUBB:
+	case SO_ATOMIC_UMAX:
+	case SO_ATOMIC_UMIN:
+	case SO_IMM_ATOMIC_UMAX:
+	case SO_IMM_ATOMIC_UMIN:
+	case SO_COUNTBITS:
+	case SO_BFI:
+	case SO_BFREV:
+	case SO_UBFE:
+	case SO_FIRSTBIT_LO:
+	case SO_FIRSTBIT_HI:
+	case SO_F16TOF32:
+	case SO_F32TOF16:
+	case SO_RESINFO:
+		sit = SIT_UInt;
+		break;
+
+	case SO_DADD:
+	case SO_DMAX:
+	case SO_DMIN:
+	case SO_DMUL:
+	case SO_DEQ:
+	case SO_DGE:
+	case SO_DLT:
+	case SO_DNE:
+	case SO_DMOV:
+	case SO_DMOVC:
+	case SO_FTOD:
 		sit = SIT_Double;
 		break;
 
