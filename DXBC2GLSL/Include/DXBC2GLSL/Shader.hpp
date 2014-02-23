@@ -107,6 +107,10 @@ struct TokenizedShaderInstruction // 32-bit
 			uint32_t fp64 : 1;
 			uint32_t early_depth_stencil : 1;
 			uint32_t enable_raw_and_structured_in_non_cs : 1;
+			uint32_t skip_optimization : 1;
+			uint32_t enable_minimum_precision : 1;
+			uint32_t enable_double_extensions : 1;
+			uint32_t enable_shader_extensions : 1;
 		} dcl_global_flags;
 		struct
 		{

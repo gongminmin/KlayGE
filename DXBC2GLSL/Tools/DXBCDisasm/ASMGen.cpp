@@ -218,21 +218,76 @@ void ASMGen::Disasm(std::ostream& out, ShaderDecl const & dcl)
 	switch (dcl.opcode)
 	{
 	case SO_DCL_GLOBAL_FLAGS:
-		if (dcl.dcl_global_flags.allow_refactoring)
 		{
-			out << " refactoringAllowed";
-		}
-		if (dcl.dcl_global_flags.early_depth_stencil)
-		{
-			out << " forceEarlyDepthStencil";
-		}
-		if (dcl.dcl_global_flags.fp64)
-		{
-			out << " enableDoublePrecisionFloatOps";
-		}
-		if (dcl.dcl_global_flags.enable_raw_and_structured_in_non_cs)
-		{
-			out << " enableRawAndStructuredBuffers";
+			bool first_flag = true;
+			if (dcl.dcl_global_flags.allow_refactoring)
+			{
+				out << " refactoringAllowed";
+				first_flag = false;
+			}
+			if (dcl.dcl_global_flags.early_depth_stencil)
+			{
+				if (!first_flag)
+				{
+					out << " |";
+				}
+				out << " forceEarlyDepthStencil";
+				first_flag = false;
+			}
+			if (dcl.dcl_global_flags.fp64)
+			{
+				if (!first_flag)
+				{
+					out << " |";
+				}
+				out << " enableDoublePrecisionFloatOps";
+				first_flag = false;
+			}
+			if (dcl.dcl_global_flags.enable_raw_and_structured_in_non_cs)
+			{
+				if (!first_flag)
+				{
+					out << " |";
+				}
+				out << " enableRawAndStructuredBuffers";
+				first_flag = false;
+			}
+			if (dcl.dcl_global_flags.skip_optimization)
+			{
+				if (!first_flag)
+				{
+					out << " |";
+				}
+				out << " skipOptimization";
+				first_flag = false;
+			}
+			if (dcl.dcl_global_flags.enable_minimum_precision)
+			{
+				if (!first_flag)
+				{
+					out << " |";
+				}
+				out << " enableMinimumPrecision";
+				first_flag = false;
+			}
+			if (dcl.dcl_global_flags.enable_raw_and_structured_in_non_cs)
+			{
+				if (!first_flag)
+				{
+					out << " |";
+				}
+				out << " enableDoubleExtensions";
+				first_flag = false;
+			}
+			if (dcl.dcl_global_flags.enable_raw_and_structured_in_non_cs)
+			{
+				if (!first_flag)
+				{
+					out << " |";
+				}
+				out << " enableShaderExtensions";
+				first_flag = false;
+			}
 		}
 		break;
 
