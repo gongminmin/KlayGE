@@ -269,6 +269,12 @@ void GLSLGen::ToDefine(std::ostream& out, ShaderDecl const & dcl, uint32_t& clip
 			out << " gl_Layer\n";
 			break;
 
+		case SSV_PRIMITIVE_ID:
+			out << "#define ";
+			this->ToOperands(out, *dcl.op, sit, false, false, false, true, true);
+			out << " gl_PrimitiveID\n";
+			break;
+
 		default:
 			BOOST_ASSERT(false);
 			break;
@@ -528,6 +534,11 @@ void GLSLGen::ToDeclaration(std::ostream& out, ShaderDecl const & dcl)
 	switch (dcl.opcode)
 	{
 	case SO_DCL_INPUT:
+		if (SOT_INPUT_PRIMITIVEID == dcl.op->type)
+		{
+			break;
+		}
+
 		// Convert to "in" qualified variable
 		for (; iter != idx_range_info_.end(); ++ iter)
 		{
@@ -5749,6 +5760,12 @@ void GLSLGen::ToOperandName(std::ostream& out, ShaderOperand const & op, ShaderI
 				break;
 			}
 		}
+	}
+	else if (SOT_INPUT_PRIMITIVEID == op.type)
+	{
+		out << "gl_PrimitiveIDIn";
+		*need_comps = false;
+		*need_idx = false;
 	}
 	else
 	{

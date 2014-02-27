@@ -64,13 +64,13 @@ void ASMGen::Disasm(std::ostream& out, ShaderOperand const & op, ShaderImmType i
 			{
 			case SIT_Float:
 				// Normalized float test
-				if (ValidFloat(op.imm_values[0].f32))
+				if (ValidFloat(op.imm_values[i].f32))
 				{
-					out << op.imm_values[0].f32;
+					out << op.imm_values[i].f32;
 				}
 				else
 				{
-					out << op.imm_values[0].i32;
+					out << op.imm_values[i].i32;
 				}
 				break;
 
