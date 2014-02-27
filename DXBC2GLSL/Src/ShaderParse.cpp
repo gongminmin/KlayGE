@@ -308,7 +308,8 @@ struct ShaderParser
 			}
 
 			if (((opcode >= SO_DCL_RESOURCE) && (opcode <= SO_DCL_GLOBAL_FLAGS))
-				|| ((opcode >= SO_DCL_STREAM) && (opcode <= SO_DCL_RESOURCE_STRUCTURED)))
+				|| ((opcode >= SO_DCL_STREAM) && (opcode <= SO_DCL_RESOURCE_STRUCTURED))
+				|| (SO_DCL_GS_INSTANCE_COUNT == opcode))
 			{
 				boost::shared_ptr<ShaderDecl> dcl(new ShaderDecl);
 				program->dcls.push_back(dcl);
@@ -399,6 +400,7 @@ struct ShaderParser
 
 				case SO_DCL_GS_INSTANCE_COUNT:
 					dcl->num = this->Read32();
+					program->gs_instance_count = dcl->num;
 					break;
 
 				case SO_DCL_INPUT_CONTROL_POINT_COUNT:

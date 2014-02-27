@@ -420,6 +420,7 @@ void ASMGen::Disasm(std::ostream& out, ShaderDecl const & dcl)
 		break;
 
 	case SO_DCL_MAX_OUTPUT_VERTEX_COUNT:
+	case SO_DCL_GS_INSTANCE_COUNT:
 		out << ' ' << dcl.num;
 		break;
 

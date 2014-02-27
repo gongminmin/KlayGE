@@ -79,6 +79,7 @@ namespace DXBC2GLSL
 		uint32_t NumGSOutputTopology() const;
 		ShaderPrimitiveTopology GSOutputTopology(uint32_t index) const;
 		uint32_t MaxGSOutputVertex() const;
+		uint32_t GSInstanceCount() const;
 
 	private:
 		boost::shared_ptr<DXBCContainer> dxbc_;

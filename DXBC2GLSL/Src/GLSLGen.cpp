@@ -157,6 +157,10 @@ void GLSLGen::ToGLSL(std::ostream& out)
 			BOOST_ASSERT_MSG(false, "Wrong input primitive name.");
 			break;
 		}
+		if (program_->gs_instance_count > 0)
+		{
+			out << ", invocation = " << program_->gs_instance_count;
+		}
 		out << ") in;\n";
 
 		out << "layout(";
@@ -534,7 +538,7 @@ void GLSLGen::ToDeclaration(std::ostream& out, ShaderDecl const & dcl)
 	switch (dcl.opcode)
 	{
 	case SO_DCL_INPUT:
-		if (SOT_INPUT_PRIMITIVEID == dcl.op->type)
+		if ((SOT_INPUT_PRIMITIVEID == dcl.op->type) || (SOT_INPUT_GS_INSTANCE_ID == dcl.op->type))
 		{
 			break;
 		}
@@ -1216,6 +1220,7 @@ void GLSLGen::ToDeclaration(std::ostream& out, ShaderDecl const & dcl)
 	case SO_DCL_GS_INPUT_PRIMITIVE:
 	case SO_DCL_GS_OUTPUT_PRIMITIVE_TOPOLOGY:
 	case SO_DCL_MAX_OUTPUT_VERTEX_COUNT:
+	case SO_DCL_GS_INSTANCE_COUNT:
 		break;
 
 	default:
@@ -5764,6 +5769,12 @@ void GLSLGen::ToOperandName(std::ostream& out, ShaderOperand const & op, ShaderI
 	else if (SOT_INPUT_PRIMITIVEID == op.type)
 	{
 		out << "gl_PrimitiveIDIn";
+		*need_comps = false;
+		*need_idx = false;
+	}
+	else if (SOT_INPUT_GS_INSTANCE_ID == op.type)
+	{
+		out << "gl_InvocationID";
 		*need_comps = false;
 		*need_idx = false;
 	}

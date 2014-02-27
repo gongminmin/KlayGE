@@ -322,7 +322,7 @@ namespace
 		"eval_snapped",
 		"eval_sample_index",
 		"eval_centroid",
-		"dcl_gs_instance_count",
+		"dcl_gsinstances",
 	};
 
 	char const * shader_system_value_names[] =

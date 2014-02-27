@@ -375,9 +375,11 @@ struct ShaderProgram
 	ShaderPrimitive gs_input_primitive;
 	std::vector<ShaderPrimitiveTopology> gs_output_topology;
 	uint32_t max_gs_output_vertex;
+	uint32_t gs_instance_count;
 
 	ShaderProgram()
-		: gs_input_primitive(SP_Undefined), max_gs_output_vertex(0)
+		: gs_input_primitive(SP_Undefined), max_gs_output_vertex(0),
+			gs_instance_count(0)
 	{
 		memset(&version, 0, sizeof(version));
 	}
