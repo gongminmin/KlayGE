@@ -10,6 +10,7 @@
 #include <DXBC2GLSL/GLSLGen.hpp>
 
 #include <string>
+#include <ostream>
 
 namespace
 {
@@ -827,14 +828,10 @@ void GLSLGen::ToDeclaration(std::ostream& out, ShaderDecl const & dcl)
 						out << "uniform ";
 						out << cb_iter->desc.name << "\n{\n";
 					}
-					char* uniform = 0;
+					char const * uniform = "";
 					if (!(glsl_rules_ & GSR_GlobalUniformsInUBO))
 					{
 						uniform = "uniform ";
-					}
-					else
-					{
-						uniform = "";
 					}
 						
 					for (std::vector<DXBCShaderVariable>::const_iterator var_iter = cb_iter->vars.begin();
@@ -3104,7 +3101,7 @@ void GLSLGen::ToInstruction(std::ostream& out, ShaderInstruction const & insn) c
 		{
 			//ignore _uint suffix
 			//process _rcpFloat suffix
-			char* c = insn.insn.resinfo_return_type == SRIRT_RCPFLOAT ? "1.0/" : "";
+			char const * c = (SRIRT_RCPFLOAT == insn.insn.resinfo_return_type) ? "1.0/" : "";
 			for (std::vector<TextureSamplerInfo>::const_iterator iter = textures_.begin();
 				iter != textures_.end(); ++ iter)
 			{
@@ -3469,9 +3466,9 @@ void GLSLGen::ToInstruction(std::ostream& out, ShaderInstruction const & insn) c
 		//dest.mask=textureOffset(src1,src0,offset).mask;
 		{
 			//cube and cubearray doesnt support tex-coord offset
-			char* coord_mask = "";
-			char* offset_mask = "";
-			char* texture_type = "";
+			char const * coord_mask = "";
+			char const * offset_mask = "";
+			char const * texture_type = "";
 			bool offset = true;
 			switch (insn.resource_target)
 			{
@@ -3558,9 +3555,9 @@ void GLSLGen::ToInstruction(std::ostream& out, ShaderInstruction const & insn) c
 		//sample_b_indexable(0,0,0)(texture2d)(float,float,float,float) dest,src0(coord),src1(t),src2(s),src3(bias)
 		//dest.mask=textureOffset(src1,src0,offset,src3).mask;
 		{
-			char* coord_mask = "";
-			char* offset_mask = "";
-			char* texture_type = "";
+			char const * coord_mask = "";
+			char const * offset_mask = "";
+			char const * texture_type = "";
 			bool offset = true;
 			switch (insn.resource_target)
 			{
@@ -3647,8 +3644,8 @@ void GLSLGen::ToInstruction(std::ostream& out, ShaderInstruction const & insn) c
 
 	case SO_SAMPLE_C:
 		{
-			char* offset_mask = "";
-			char* texture_type = "";
+			char const * offset_mask = "";
+			char const * texture_type = "";
 			bool offset = true;
 			switch (insn.resource_target)
 			{
@@ -3751,8 +3748,8 @@ void GLSLGen::ToInstruction(std::ostream& out, ShaderInstruction const & insn) c
 
 	case SO_SAMPLE_C_LZ:
 		{
-			char* offset_mask = "";
-			char* texture_type = "";
+			char const * offset_mask = "";
+			char const * texture_type = "";
 			bool offset = true;
 			switch (insn.resource_target)
 			{
@@ -3827,9 +3824,9 @@ void GLSLGen::ToInstruction(std::ostream& out, ShaderInstruction const & insn) c
 
 	case SO_SAMPLE_L:
 		{
-			char* coord_mask = "";
-			char* offset_mask = "";
-			char* texture_type = "";
+			char const * coord_mask = "";
+			char const * offset_mask = "";
+			char const * texture_type = "";
 			bool offset = true;
 			switch (insn.resource_target)
 			{
@@ -3916,10 +3913,10 @@ void GLSLGen::ToInstruction(std::ostream& out, ShaderInstruction const & insn) c
 
 	case SO_SAMPLE_D:
 		{
-			char* deriv_mask = "";
-			char* coord_mask = "";
-			char* offset_mask = "";
-			char* texture_type = "";
+			char const * deriv_mask = "";
+			char const * coord_mask = "";
+			char const * offset_mask = "";
+			char const * texture_type = "";
 			bool offset = true;
 			switch (insn.resource_target)
 			{
@@ -4022,7 +4019,7 @@ void GLSLGen::ToInstruction(std::ostream& out, ShaderInstruction const & insn) c
 		//lod dest[.mask], srcAddress[.swizzle], srcResource[.swizzle], srcSampler
 		//dest.mask=textureQueryLod(src2,src0).y;
 		{
-			char* mask = "";
+			char const * mask = "";
 			for (std::vector<TextureSamplerInfo>::const_iterator iter = textures_.begin();
 				iter != textures_.end(); ++ iter)
 			{
@@ -4092,9 +4089,9 @@ void GLSLGen::ToInstruction(std::ostream& out, ShaderInstruction const & insn) c
 						DXBCInputBindDesc const & desc = this->GetResourceDesc(SIT_SAMPLER, static_cast<uint32_t>(iter->samplers[0].index));
 						s = std::string("_") + desc.name;
 					}
-					char* mask = "";
-					char* lod_mask = "";
-					char* offset_mask = "";
+					char const * mask = "";
+					char const * lod_mask = "";
+					char const * offset_mask = "";
 					bool lod = true;
 					switch (insn.resource_target)
 					{
@@ -4185,7 +4182,7 @@ void GLSLGen::ToInstruction(std::ostream& out, ShaderInstruction const & insn) c
 						DXBCInputBindDesc const & desc = this->GetResourceDesc(SIT_SAMPLER, static_cast<uint32_t>(iter->samplers[0].index));
 						s = std::string("_") + desc.name;
 					}
-					char* mask = "";
+					char const * mask = "";
 					switch (insn.resource_target)
 					{
 					case SRD_TEXTURE2DMS:
@@ -4223,8 +4220,8 @@ void GLSLGen::ToInstruction(std::ostream& out, ShaderInstruction const & insn) c
 		//gather4_indexable(u,v,w)(texture2d)(float,float,float,float) dest.mask, src0(coord),src1(resource), src2(sampler)
 		//dest.mask=(textureGather[Offset](src1,src0[,offset],src2.comp).src1_mask).dest_mask;
 		{
-			char* coord_mask = "";
-			char* offset_mask = "";
+			char const * coord_mask = "";
+			char const * offset_mask = "";
 			bool offset = true;
 			switch (insn.resource_target)
 			{
@@ -4285,8 +4282,8 @@ void GLSLGen::ToInstruction(std::ostream& out, ShaderInstruction const & insn) c
 		//gather4_indexable(u,v,w)(target)(comp_type) dest.mask, src0(coord),src1(resource), src2(sampler),src3 cmp_ref
 		//dest.mask=(textureGather[Offset](src1,src0[,offset],src2.comp).src1_mask).dest_mask;
 		{
-			char* coord_mask = "";
-			char* offset_mask = "";
+			char const * coord_mask = "";
+			char const * offset_mask = "";
 			bool offset = true;
 			switch (insn.resource_target)
 			{
@@ -4347,8 +4344,8 @@ void GLSLGen::ToInstruction(std::ostream& out, ShaderInstruction const & insn) c
 		//gather4_po_indexable(target)(comp_type) dest.mask, src0(coord),src1(offset),src2(resource),src3(sampler)
 		//dest.mask=(textureGatherOffset(src2,src0,src1,src3.comp).src2_mask).dest_mask;
 		{
-			char* coord_mask = "";
-			char* offset_mask = "";
+			char const * coord_mask = "";
+			char const * offset_mask = "";
 			switch (insn.resource_target)
 			{
 			case SRD_TEXTURE2D:
@@ -4388,8 +4385,8 @@ void GLSLGen::ToInstruction(std::ostream& out, ShaderInstruction const & insn) c
 		//gather4_po_c_indexable(target)(comp_type) dest.mask, src0(coord),src1(offset),src2(resource),src3(sampler),scr4(cmp_ref)
 		//dest.mask=(textureGatherOffset(src2,src0,src1,src3.comp).src2_mask).dest_mask;
 		{
-			char* coord_mask = "";
-			char* offset_mask = "";
+			char const * coord_mask = "";
+			char const * offset_mask = "";
 			switch (insn.resource_target)
 			{
 			case SRD_TEXTURE2D:

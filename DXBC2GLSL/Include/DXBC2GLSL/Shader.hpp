@@ -32,6 +32,7 @@
 
 #include <boost/shared_ptr.hpp>
 #include <vector>
+#include <cstring>
 #include <DXBC2GLSL/DXBC.hpp>
 #include <DXBC2GLSL/Utils.hpp>
 #include <DXBC2GLSL/ShaderDefs.hpp>

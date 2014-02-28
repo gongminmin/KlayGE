@@ -78,7 +78,7 @@ namespace
 	}
 
 #ifdef GLLOADER_WGL
-	typedef WINGDIAPI PROC (WINAPI *wglGetProcAddressFUNC)(LPCSTR lpszProc);
+	typedef PROC (WINAPI *wglGetProcAddressFUNC)(LPCSTR lpszProc);
 	wglGetProcAddressFUNC DynamicWglGetProcAddress;
 #endif
 }

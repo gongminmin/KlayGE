@@ -29,20 +29,43 @@
 #include <sstream>
 #include <limits>
 
+namespace
+{
+	class bad_assert : public std::exception
+	{
+	public:
+		bad_assert(char const * expr, char const * msg, char const * function, char const * file, long line)
+		{
+			std::stringstream ss;
+			ss << expr;
+			if (msg)
+			{
+				ss << ' ' << msg;
+			}
+			ss << " in " << function << ", line " << line << " of " << file;
+			what_ = ss.str();
+		}
+
+		char const * what() const throw()
+		{
+			return what_.c_str();
+		}
+
+	private:
+		std::string what_;
+	};
+}
+
 namespace boost
 {
 	void assertion_failed(char const * expr, char const * function, char const * file, long line)
 	{
-		std::stringstream ss;
-		ss << expr << " in " << function << ", line " << line << " of " << file;
-		throw std::exception(ss.str().c_str());
+		throw bad_assert(expr, NULL, function, file, line);
 	}
 
 	void assertion_failed_msg(char const * expr, char const * msg, char const * function, char const * file, long line)
 	{
-		std::stringstream ss;
-		ss << expr << ' ' << msg << " in " << function << ", line " << line << " of " << file;
-		throw std::exception(ss.str().c_str());
+		throw bad_assert(expr, msg, function, file, line);
 	}
 }
 
