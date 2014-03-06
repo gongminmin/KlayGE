@@ -49,10 +49,13 @@ public:
 	void ToGLSL(std::ostream& out);
 
 private:
-	void ToDefine(std::ostream& out, ShaderDecl const & dcl, uint32_t& clip_distance_index);
 	void ToDeclarations(std::ostream& out);
 	void ToDclInterShaderInputRecords(std::ostream& out);
 	void ToDclInterShaderOutputRecords(std::ostream& out);
+	void ToDeclInterShaderInputRegisters(std::ostream& out) const;
+	void ToCopyToInterShaderInputRegisters(std::ostream& out) const;
+	void ToDeclInterShaderOutputRegisters(std::ostream& out) const;
+	void ToCopyToInterShaderOutputRegisters(std::ostream& out) const;
 	void ToDeclaration(std::ostream& out, ShaderDecl const & dcl);
 	void ToInstruction(std::ostream& out, ShaderInstruction const & insn) const;
 	void ToOperands(std::ostream& out, ShaderOperand const & op, uint32_t imm_as_type,
@@ -66,6 +69,11 @@ private:
 	void ToDefaultValue(std::ostream& out, DXBCShaderVariable const & var);
 	void ToDefaultValue(std::ostream& out, DXBCShaderVariable const & var, uint32_t offset);
 	void ToDefaultValue(std::ostream& out, char const * value, ShaderVariableType type);
+	uint32_t ComponentSelectorFromMask(uint32_t mask, uint32_t comps) const;
+	uint32_t ComponentSelectorFromSwizzle(uint8_t const swizzle[4], uint32_t comps) const;
+	uint32_t ComponentSelectorFromScalar(uint8_t scalar) const;
+	uint32_t ComponentSelectorFromCount(uint32_t count) const;
+	void ToComponentSelector(std::ostream& out, uint32_t comps) const;
 	bool IsImmediateNumber(ShaderOperand const & op) const;
 	// param i:the component selector to get
 	// return:the idx of selector:0 1 2 3 stand for x y z w

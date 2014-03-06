@@ -221,7 +221,7 @@ namespace
 		"dcl_output_sgv",
 		"dcl_output_siv",
 		"dcl_temps",
-		"dcl_indexable_temp",
+		"dcl_indexableTemp",
 		"dcl_globalFlags",
 		"d3d10_count",
 		"lod",

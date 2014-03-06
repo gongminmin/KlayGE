@@ -379,7 +379,7 @@ void ASMGen::Disasm(std::ostream& out, ShaderDecl const & dcl)
 		break;
 
 	case SO_DCL_INDEXABLE_TEMP:
-		out << dcl.op->indices[0].disp << "[" << dcl.num << "]" << "," << dcl.num;
+		out << dcl.op->indices[0].disp << "[" << dcl.indexable_temp.num << "]" << ", " << dcl.indexable_temp.comps;
 		break;
 
 	case SO_DCL_CONSTANT_BUFFER:
