@@ -610,7 +610,7 @@ void GLSLGen::ToCopyToInterShaderInputRegisters(std::ostream& out) const
 
 				uint32_t mask = sig_desc.mask;
 				out << '.';
-				this->ToComponentSelector(out, this->ComponentSelectorFromCount(bitcount32(mask)));
+				this->ToComponentSelector(out, this->ComponentSelectorFromMask(mask, 4));
 
 				out << " = ";
 
@@ -702,7 +702,7 @@ void GLSLGen::ToCopyToInterShaderInputRegisters(std::ostream& out) const
 				if (need_comps)
 				{
 					out << ".";
-					this->ToComponentSelector(out, this->ComponentSelectorFromMask(mask, 4));
+					this->ToComponentSelector(out, this->ComponentSelectorFromCount(bitcount32(mask)));
 				}
 				out << ";\n";
 			}
