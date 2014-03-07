@@ -45,6 +45,40 @@ namespace
 		x += (x >> 16);
 		return x & 0x0000003F;
 	}
+
+	uint32_t PrimitiveNumVertices(ShaderPrimitive primitive)
+	{
+		uint32_t num_vertices;
+		switch (primitive)
+		{
+		case SP_Point:
+			num_vertices = 1;
+			break;
+
+		case SP_Line:
+			num_vertices = 2;
+			break;
+
+		case SP_Triangle:
+			num_vertices = 3;
+			break;
+
+		case SP_LineAdj:
+			num_vertices = 4;
+			break;
+
+		case SP_TriangleAdj:
+			num_vertices = 6;
+			break;
+
+		default:
+			BOOST_ASSERT(false);
+			num_vertices = 0;
+			break;
+		}
+
+		return num_vertices;
+	}
 }
 
 uint32_t GLSLGen::DefaultRules(GLSLVersion version)
@@ -252,7 +286,8 @@ void GLSLGen::ToDclInterShaderInputRecords(std::ostream& out)
 {
 	for (size_t i = 0; i < program_->params_in.size(); ++ i)
 	{
-		if (SN_UNDEFINED == program_->params_in[i].system_value_type)
+		if ((program_->params_in[i].read_write_mask != 0)
+			&& (SN_UNDEFINED == program_->params_in[i].system_value_type))
 		{
 			ShaderRegisterComponentType type = program_->params_in[i].component_type;
 			uint32_t register_index = program_->params_in[i].register_index;
@@ -369,7 +404,7 @@ void GLSLGen::ToDclInterShaderInputRecords(std::ostream& out)
 			out << program_->params_in[i].semantic_name << program_->params_in[i].semantic_index;
 			if (ST_GS == shader_type_)
 			{
-				out << "In";
+				out << "In" << '[' << PrimitiveNumVertices(program_->gs_input_primitive) << ']';
 			}
 			out << ";\n";
 		}
@@ -385,7 +420,8 @@ void GLSLGen::ToDclInterShaderOutputRecords(std::ostream& out)
 {
 	for (size_t i = 0; i < program_->params_out.size(); ++ i)
 	{
-		if (SN_UNDEFINED == program_->params_out[i].system_value_type)
+		if ((program_->params_out[i].read_write_mask != 0xF)
+			&& (SN_UNDEFINED == program_->params_out[i].system_value_type))
 		{
 			if (ST_PS == shader_type_)
 			{
@@ -486,32 +522,38 @@ void GLSLGen::ToDeclInterShaderInputRegisters(std::ostream& out) const
 	for (size_t i = 0; i < program_->params_in.size(); ++ i)
 	{
 		DXBCSignatureParamDesc const & sig_desc = program_->params_in[i];
-		ShaderRegisterComponentType type = sig_desc.component_type;
-		uint32_t register_index = sig_desc.register_index;
-		bool found = false;
-		for (std::vector<RegisterDesc>::iterator iter = input_registers.begin();
-			iter != input_registers.end(); ++ iter)
+		if (sig_desc.read_write_mask != 0)
 		{
-			if (iter->index == register_index)
+			uint32_t register_index = sig_desc.register_index;
+			if (register_index != 0xFFFFFFFF)
 			{
-				found = true;
-				break;
-			}
-		}
+				ShaderRegisterComponentType type = sig_desc.component_type;
+				bool found = false;
+				for (std::vector<RegisterDesc>::iterator iter = input_registers.begin();
+					iter != input_registers.end(); ++ iter)
+				{
+					if (iter->index == register_index)
+					{
+						found = true;
+						break;
+					}
+				}
 
-		if (!found)
-		{
-			RegisterDesc desc;
-			desc.index = register_index;
-			desc.type = type;
-			desc.interpolation = SIM_Undefined;
-			input_registers.push_back(desc);
+				if (!found)
+				{
+					RegisterDesc desc;
+					desc.index = register_index;
+					desc.type = type;
+					desc.interpolation = SIM_Undefined;
+					input_registers.push_back(desc);
+				}
+			}
 		}
 	}
 
 	for (size_t i = 0; i < input_registers.size(); ++ i)
 	{
-		switch (program_->params_in[i].component_type)
+		switch (input_registers[i].type)
 		{
 		case SRCT_UINT32:
 			if (glsl_rules_ & GSR_UIntType)
@@ -536,75 +578,135 @@ void GLSLGen::ToDeclInterShaderInputRegisters(std::ostream& out) const
 			break;
 		}
 
-		out << "vec4 i_REGISTER" << i << ";\n";
+		out << "vec4 i_REGISTER" << input_registers[i].index;
+		if (ST_GS == shader_type_)
+		{
+			out << '[' << PrimitiveNumVertices(program_->gs_input_primitive) << ']';
+		}
+		out << ";\n";
 	}
 }
 
 void GLSLGen::ToCopyToInterShaderInputRegisters(std::ostream& out) const
 {
+	uint32_t num_vertices = 1;
+	if (ST_GS == shader_type_)
+	{
+		num_vertices = PrimitiveNumVertices(program_->gs_input_primitive);
+	}
+
 	for (size_t i = 0; i < program_->params_in.size(); ++ i)
 	{
-		out << "i_REGISTER" << program_->params_in[i].register_index;
-
-		uint32_t mask = program_->params_in[i].mask;
-		out << '.';
-		this->ToComponentSelector(out, this->ComponentSelectorFromCount(bitcount32(mask)));
-
-		out << " = ";
-
-		bool need_comps = true;
-		switch (program_->params_in[i].system_value_type)
+		DXBCSignatureParamDesc const & sig_desc = program_->params_in[i];
+		if ((sig_desc.read_write_mask != 0) && (sig_desc.register_index != 0xFFFFFFFF))
 		{
-		case SN_POSITION:
-			out << "gl_Position";
-			need_comps = true;
-			break;
-
-		case SN_RENDER_TARGET_ARRAY_INDEX:
-			out << "gl_Layer";
-			need_comps = false;
-			break;
-
-		case SN_VERTEX_ID:
-			out << "gl_VertexID";
-			need_comps = false;
-			break;
-
-		case SN_INSTANCE_ID:
-			out << "gl_InstanceID";
-			need_comps = false;
-			break;
-
-		case SN_PRIMITIVE_ID:
-			out << "gl_PrimitiveID";
-			need_comps = false;
-			break;
-
-		case SN_VIEWPORT_ARRAY_INDEX:
-			out << "gl_ViewportIndex";
-			need_comps = false;
-			break;
-
-		case SN_UNDEFINED:
-			if (shader_type_ != ST_VS)
+			for (uint32_t v = 0; v < num_vertices; ++ v)
 			{
-				out << "v_";
+				out << "i_REGISTER" << sig_desc.register_index;
+				if (ST_GS == shader_type_)
+				{
+					out << '[' << v << ']';
+				}
+
+				uint32_t mask = sig_desc.mask;
+				out << '.';
+				this->ToComponentSelector(out, this->ComponentSelectorFromCount(bitcount32(mask)));
+
+				out << " = ";
+
+				bool need_comps = true;
+				if (ST_GS == shader_type_)
+				{
+					switch (sig_desc.system_value_type)
+					{
+					case SN_POSITION:
+						if (glsl_rules_ & GSR_CoreGS)
+						{
+							out << "gl_in" << '[' << v << "].gl_Position";
+						}
+						else
+						{
+							out << "gl_PositionIn";
+						}
+						need_comps = true;
+						break;
+
+					case SN_CLIP_DISTANCE:
+						if (glsl_rules_ & GSR_CoreGS)
+						{
+							out << "gl_in" << '[' << v << "].gl_ClipDistance[" << sig_desc.semantic_index << "]";
+						}
+						else
+						{
+							out << "gl_ClipDistanceIn[" << sig_desc.semantic_index << "]";
+						}
+						need_comps = false;
+						break;
+
+					case SN_PRIMITIVE_ID:
+						out << "gl_PrimitiveIDIn";
+						need_comps = false;
+						break;
+
+					case SN_UNDEFINED:
+						out << "v_" << sig_desc.semantic_name << sig_desc.semantic_index << "In"
+							<< '[' << v << ']';
+						need_comps = true;
+						break;
+					}
+				}
+				else
+				{
+					switch (sig_desc.system_value_type)
+					{
+					case SN_POSITION:
+						out << "gl_Position";
+						need_comps = true;
+						break;
+
+					case SN_RENDER_TARGET_ARRAY_INDEX:
+						out << "gl_Layer";
+						need_comps = false;
+						break;
+
+					case SN_VERTEX_ID:
+						out << "gl_VertexID";
+						need_comps = false;
+						break;
+
+					case SN_INSTANCE_ID:
+						out << "gl_InstanceID";
+						need_comps = false;
+						break;
+
+					case SN_PRIMITIVE_ID:
+						out << "gl_PrimitiveID";
+						need_comps = false;
+						break;
+
+					case SN_VIEWPORT_ARRAY_INDEX:
+						out << "gl_ViewportIndex";
+						need_comps = false;
+						break;
+
+					case SN_UNDEFINED:
+						if (shader_type_ != ST_VS)
+						{
+							out << "v_";
+						}
+						out << sig_desc.semantic_name << sig_desc.semantic_index;
+						need_comps = true;
+						break;
+					}
+				}
+				if (need_comps)
+				{
+					out << ".";
+					this->ToComponentSelector(out, this->ComponentSelectorFromMask(mask, 4));
+				}
+				out << ";\n";
 			}
-			out << program_->params_in[i].semantic_name
-				<< program_->params_in[i].semantic_index;
-			need_comps = true;
-			break;
 		}
-		if (ST_GS == shader_type_)
-		{
-			out << "In";
-		}
-		if (need_comps)
-		{
-			out << ".";
-			this->ToComponentSelector(out, this->ComponentSelectorFromMask(mask, 4));
-		}
-		out << ";\n";
 	}
 
 	if (!program_->params_in.empty())
@@ -620,26 +722,29 @@ void GLSLGen::ToDeclInterShaderOutputRegisters(std::ostream& out) const
 	for (size_t i = 0; i < program_->params_out.size(); ++ i)
 	{
 		DXBCSignatureParamDesc const & sig_desc = program_->params_out[i];
-		ShaderRegisterComponentType type = sig_desc.component_type;
-		uint32_t register_index = sig_desc.register_index;
-		bool found = false;
-		for (std::vector<RegisterDesc>::iterator iter = output_dcl_record.begin();
-			iter != output_dcl_record.end(); ++ iter)
+		if (sig_desc.read_write_mask != 0xF)
 		{
-			if (iter->index == register_index)
+			ShaderRegisterComponentType type = sig_desc.component_type;
+			uint32_t register_index = sig_desc.register_index;
+			bool found = false;
+			for (std::vector<RegisterDesc>::iterator iter = output_dcl_record.begin();
+				iter != output_dcl_record.end(); ++ iter)
 			{
-				found = true;
-				break;
+				if (iter->index == register_index)
+				{
+					found = true;
+					break;
+				}
 			}
-		}
 
-		if (!found)
-		{
-			RegisterDesc desc;
-			desc.index = register_index;
-			desc.type = type;
-			desc.interpolation = SIM_Undefined;
-			output_dcl_record.push_back(desc);
+			if (!found)
+			{
+				RegisterDesc desc;
+				desc.index = register_index;
+				desc.type = type;
+				desc.interpolation = SIM_Undefined;
+				output_dcl_record.push_back(desc);
+			}
 		}
 	}
 
@@ -683,49 +788,52 @@ void GLSLGen::ToCopyToInterShaderOutputRegisters(std::ostream& out) const
 {
 	for (size_t i = 0; i < program_->params_out.size(); ++ i)
 	{
-		uint32_t mask = program_->params_out[i].mask;
-		bool need_comps = true;
-		switch (program_->params_out[i].system_value_type)
+		DXBCSignatureParamDesc const & sig_desc = program_->params_out[i];
+		if (sig_desc.read_write_mask != 0xF)
 		{
-		case SN_POSITION:
-			out << "gl_Position";
-			need_comps = true;
-			break;
+			uint32_t mask = sig_desc.mask;
+			bool need_comps = true;
+			switch (sig_desc.system_value_type)
+			{
+			case SN_POSITION:
+				out << "gl_Position";
+				need_comps = true;
+				break;
 
-		case SN_RENDER_TARGET_ARRAY_INDEX:
-			out << "gl_Layer";
-			need_comps = false;
-			break;
+			case SN_RENDER_TARGET_ARRAY_INDEX:
+				out << "gl_Layer";
+				need_comps = false;
+				break;
 
-		case SN_PRIMITIVE_ID:
-			out << "gl_PrimitiveID";
-			need_comps = false;
-			break;
+			case SN_PRIMITIVE_ID:
+				out << "gl_PrimitiveID";
+				need_comps = false;
+				break;
 
-		case SN_VIEWPORT_ARRAY_INDEX:
-			out << "gl_ViewportIndex";
-			need_comps = false;
-			break;
+			case SN_VIEWPORT_ARRAY_INDEX:
+				out << "gl_ViewportIndex";
+				need_comps = false;
+				break;
 
-		case SN_UNDEFINED:
-			out << "v_" << program_->params_out[i].semantic_name
-				<< program_->params_out[i].semantic_index;
-			need_comps = true;
-			break;
+			case SN_UNDEFINED:
+				out << "v_" << sig_desc.semantic_name << sig_desc.semantic_index;
+				if ((ST_VS == shader_type_) && has_gs_)
+				{
+					out << "In";
+				}
+				need_comps = true;
+				break;
+			}
+			if (need_comps)
+			{
+				out << '.';
+				this->ToComponentSelector(out, this->ComponentSelectorFromCount(bitcount32(mask)));
+			}
+			out << " = ";
+			out << "o_REGISTER" << sig_desc.register_index << '.';
+			this->ToComponentSelector(out, this->ComponentSelectorFromMask(mask, 4));
+			out << ";\n";
 		}
-		if ((ST_VS == shader_type_) && has_gs_)
-		{
-			out << "In";
-		}
-		if (need_comps)
-		{
-			out << '.';
-			this->ToComponentSelector(out, this->ComponentSelectorFromCount(bitcount32(mask)));
-		}
-		out << " = ";
-		out << "o_REGISTER" << program_->params_out[i].register_index << '.';
-		this->ToComponentSelector(out, this->ComponentSelectorFromMask(mask, 4));
-		out << ";\n";
 	}
 }
 
@@ -5346,7 +5454,7 @@ void GLSLGen::ToOperandName(std::ostream& out, ShaderOperand const & op, ShaderI
 			if (0 == strcmp(param_desc.semantic_name, "SV_Position"))
 			{
 				*need_idx = false;
-				out << "gl_Position";
+				out << "gl_FragCoord";
 			}
 			else if (0 == strcmp(param_desc.semantic_name, "SV_SampleIndex"))
 			{
@@ -5413,37 +5521,10 @@ void GLSLGen::ToOperandName(std::ostream& out, ShaderOperand const & op, ShaderI
 		if (SOT_INPUT == op.type)
 		{
 			*need_idx = false;
-
-			DXBCSignatureParamDesc const & param_desc = this->GetInputParamDesc(op, 1);
-			if (glsl_rules_ & GSR_CoreGS)
+			out << "i_REGISTER" << op.indices[1].disp;
+			if (!no_idx)
 			{
-				if (0 == strcmp(param_desc.semantic_name, "SV_Position"))
-				{
-					out << "gl_in" << '[' << op.indices[0].disp << "].gl_Position";
-				}
-				else
-				{
-					out << "i_REGISTER" << op.indices[1].disp;
-					if (!no_idx)
-					{
-						out << '[' << op.indices[0].disp << ']';
-					}
-				}
-			}
-			else
-			{
-				if (0 == strcmp(param_desc.semantic_name, "SV_Position"))
-				{
-					out << "gl_PositionIn";
-				}
-				else
-				{
-					out << "i_REGISTER" << op.indices[1].disp;
-				}
-				if (!no_idx)
-				{
-					out << '[' << op.indices[0].disp << ']';
-				}
+				out << '[' << op.indices[0].disp << ']';
 			}
 		}
 		else
