@@ -29,7 +29,7 @@
 	
 	<shader>
 		<![CDATA[
-#if KLAYGE_D3D11
+#if KLAYGE_D3D11 || KLAYGE_DXBC2GLSL
 #if KLAYGE_SHADER_MODEL >= 4
 #define INTEGER_SUPPORT 1
 #endif

@@ -286,8 +286,7 @@ void GLSLGen::ToDclInterShaderInputRecords(std::ostream& out)
 {
 	for (size_t i = 0; i < program_->params_in.size(); ++ i)
 	{
-		if ((program_->params_in[i].read_write_mask != 0)
-			&& (SN_UNDEFINED == program_->params_in[i].system_value_type))
+		if (SN_UNDEFINED == program_->params_in[i].system_value_type)
 		{
 			ShaderRegisterComponentType type = program_->params_in[i].component_type;
 			uint32_t register_index = program_->params_in[i].register_index;
@@ -310,13 +309,11 @@ void GLSLGen::ToDclInterShaderInputRecords(std::ostream& out)
 			{
 				switch (interpolation)
 				{
-				case SIM_Undefined:
-					break;
-
 				case SIM_Constant:
 					out << "flat ";
 					break;
 
+				case SIM_Undefined:
 				case SIM_Linear:
 					out << "smooth ";
 					break;
@@ -420,8 +417,7 @@ void GLSLGen::ToDclInterShaderOutputRecords(std::ostream& out)
 {
 	for (size_t i = 0; i < program_->params_out.size(); ++ i)
 	{
-		if ((program_->params_out[i].read_write_mask != 0xF)
-			&& (SN_UNDEFINED == program_->params_out[i].system_value_type))
+		if (SN_UNDEFINED == program_->params_out[i].system_value_type)
 		{
 			if (ST_PS == shader_type_)
 			{
@@ -2448,14 +2444,14 @@ void GLSLGen::ToInstruction(std::ostream& out, ShaderInstruction const & insn) c
 	case SO_USHR:
 		//dest.mask = uvec4(src0 >> src1).mask;
 		this->ToOperands(out, *insn.ops[0], oot | (oot << 8));
-		out << " = ";
+		out << " = ivec4(";
 		if (glsl_rules_ & GSR_UIntType)
 		{
-			out << "uvec4(uvec4(";
+			out << "uvec4(";
 		}
 		else
 		{
-			out << "ivec4(ivec4(";
+			out << "ivec4(";
 		}
 		this->ToOperands(out, *insn.ops[1], oit);
 		out << ") ";
