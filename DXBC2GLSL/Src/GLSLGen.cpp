@@ -1423,33 +1423,33 @@ void GLSLGen::ToInstruction(std::ostream& out, ShaderInstruction const & insn) c
 	case SO_DP4:
 		// Notice: dot()only support float vec2/3/4 type. In glsl, ivec and uvec are converted to vec implicitly.
 		this->ToOperands(out, *insn.ops[0], oot | (oot << 8));
-		out << " = vec4(dot(";
+		out << " = vec4(dot(vec4(";
 		this->ToOperands(out, *insn.ops[1], oit);
-		out << ", ";
+		out << "), vec4(";
 		this->ToOperands(out, *insn.ops[2], oit);
-		out << "))";
+		out << ")))";
 		this->ToComponentSelectors(out, *insn.ops[0]);
 		out << ";";
 		break;
 
 	case SO_DP3:
 		this->ToOperands(out, *insn.ops[0], oot | (oot << 8));
-		out << " = vec4(dot(";
+		out << " = vec4(dot(vec4(";
 		this->ToOperands(out, *insn.ops[1], oit);
-		out << ".xyz, ";
+		out << ").xyz, vec4(";
 		this->ToOperands(out, *insn.ops[2], oit);
-		out << ".xyz))";
+		out << ").xyz))";
 		this->ToComponentSelectors(out, *insn.ops[0]);
 		out << ";";
 		break;
 
 	case SO_DP2:
 		this->ToOperands(out, *insn.ops[0], oot | (oot << 8));
-		out << " = vec4(dot(";
+		out << " = vec4(dot(vec4(";
 		this->ToOperands(out, *insn.ops[1], oit);
-		out << ".xy, ";
+		out << ").xy, vec4(";
 		this->ToOperands(out, *insn.ops[2], oit);
-		out << ".xy))";
+		out << ").xy))";
 		this->ToComponentSelectors(out, *insn.ops[0]);
 		out << ";";
 		break;
@@ -1905,7 +1905,7 @@ void GLSLGen::ToInstruction(std::ostream& out, ShaderInstruction const & insn) c
 		}
 		else
 		{
-			oot = this->OperandAsType(*insn.ops[2], oit);
+			oot = std::max(this->OperandAsType(*insn.ops[2], oit), this->OperandAsType(*insn.ops[3], oit));
 			oit = oot;
 		}
 		this->ToOperands(out, *insn.ops[0], oot | (oot << 8), false);
@@ -2259,7 +2259,8 @@ void GLSLGen::ToInstruction(std::ostream& out, ShaderInstruction const & insn) c
 
 	case SO_IMUL:
 		//imul destHI[.mask], destLO[.mask], [-]src0[.swizzle], [-]src1[.swizzle]
-		if (glsl_rules_ & GSR_Int64Type)
+		if (((insn.ops[0]->type != SOT_NULL) && (insn.ops[1]->type != SOT_NULL))
+			&& (glsl_rules_ & GSR_Int64Type))
 		{
 			out << "imulExtended(ivec4(";
 			this->ToOperands(out, *insn.ops[2], oit);
@@ -2270,38 +2271,44 @@ void GLSLGen::ToInstruction(std::ostream& out, ShaderInstruction const & insn) c
 			out << "iTempX[0]";
 			out << ", ";
 			out << "iTempX[1]";
+			out << ");\n";
+
+			//destHI.xz=vec4(destHI).xz;
+			if (insn.ops[0]->type != SOT_NULL)
+			{
+				this->ToOperands(out, *insn.ops[0], oot | (oot << 8));
+				out << " = iTempX[0]";
+				this->ToComponentSelectors(out, *insn.ops[0]);
+				out << ";";
+			}
+			//destLO.xz=vec4(destLO).xz;
+			if (insn.ops[1]->type != SOT_NULL)
+			{
+				if (insn.ops[0]->type != SOT_NULL)
+				{
+					out << "\n";
+				}
+				this->ToOperands(out, *insn.ops[1], oot | (oot << 8));
+				out << " = iTempX[1]";
+				this->ToComponentSelectors(out, *insn.ops[1]);
+				out << ";";
+
+				dual_output = true;
+			}
 		}
 		else
 		{
-			out << "iTempX[0] = ivec4(0);\n";
-			out << "iTempX[1] = ";
-			out << "ivec4(";
+			BOOST_ASSERT(((SOT_NULL == insn.ops[0]->type) && (insn.ops[1]->type != SOT_NULL))
+				|| !(glsl_rules_ & GSR_Int64Type));
+
+			this->ToOperands(out, *insn.ops[1], oot | (oot << 8));
+			out << " = ivec4(ivec4(";
 			this->ToOperands(out, *insn.ops[2], oit);
 			out << ") * ivec4(";
 			this->ToOperands(out, *insn.ops[3], oit);
-		}
-		out << ");\n";
-		//destHI.xz=vec4(destHI).xz;
-		if (insn.ops[0]->type != SOT_NULL)
-		{
-			this->ToOperands(out, *insn.ops[0], oot | (oot << 8));
-			out << " = iTempX[0]";
-			this->ToComponentSelectors(out, *insn.ops[0]);
-			out << ";";
-		}
-		//destLO.xz=vec4(destLO).xz;
-		if (insn.ops[1]->type != SOT_NULL)
-		{
-			if (insn.ops[0]->type != SOT_NULL)
-			{
-				out << "\n";
-			}
-			this->ToOperands(out, *insn.ops[1], oot | (oot << 8));
-			out << " = iTempX[1]";
+			out << "))";
 			this->ToComponentSelectors(out, *insn.ops[1]);
 			out << ";";
-
-			dual_output = true;
 		}
 		break;
 
@@ -2373,11 +2380,12 @@ void GLSLGen::ToInstruction(std::ostream& out, ShaderInstruction const & insn) c
 		}
 		break;
 
+	case SO_UMUL:
 		//umul destHI[.mask], destLO[.mask], src0[.swizzle], src1[.swizzle]
 		//umulExtended(src0.xxxx,src1.xxxx,destHI,destLO);
-	case SO_UMUL:
 		// TODO: to be tested
-		if (glsl_rules_ & GSR_Int64Type)
+		if (((insn.ops[0]->type != SOT_NULL) && (insn.ops[1]->type != SOT_NULL))
+			&& (glsl_rules_ & GSR_Int64Type))
 		{
 			out << "umulExtended(uvec4(";
 			this->ToOperands(out, *insn.ops[2], oit);
@@ -2388,11 +2396,39 @@ void GLSLGen::ToInstruction(std::ostream& out, ShaderInstruction const & insn) c
 			out << "uTempX[0]";
 			out << ", ";
 			out << "uTempX[1]";
+			out << ");";
+
+			//destHI.xz=vec4(destHI).xz;
+			if (insn.ops[0]->type != SOT_NULL)
+			{
+				out << "\n";
+				this->ToOperands(out, *insn.ops[0], oot | (oot << 8));
+				out << " = uTempX[0]";
+				this->ToComponentSelectors(out, *insn.ops[0]);
+				out << ";";
+			}
+			//destLO.xz=vec4(destLO).xz;
+			if (insn.ops[1]->type != SOT_NULL)
+			{
+				if (insn.ops[0]->type != SOT_NULL)
+				{
+					out << "\n";
+				}
+				this->ToOperands(out, *insn.ops[1], oot | (oot << 8));
+				out << " = uTempX[1]";
+				this->ToComponentSelectors(out, *insn.ops[1]);
+				out << ";";
+
+				dual_output = true;
+			}
 		}
 		else
 		{
-			out << "uTempX[0] = uvec4(0);";
-			out << "uTempX[1] = ";
+			BOOST_ASSERT(((SOT_NULL == insn.ops[0]->type) && (insn.ops[1]->type != SOT_NULL))
+				|| !(glsl_rules_ & GSR_Int64Type));
+
+			this->ToOperands(out, *insn.ops[1], oot | (oot << 8));
+			out << " = ivec4(";
 			if (glsl_rules_ & GSR_UIntType)
 			{
 				out << "u";
@@ -2414,30 +2450,9 @@ void GLSLGen::ToInstruction(std::ostream& out, ShaderInstruction const & insn) c
 			}
 			out << "vec4(";
 			this->ToOperands(out, *insn.ops[3], oit);
-		}
-		out << ");";
-		//destHI.xz=vec4(destHI).xz;
-		if (insn.ops[0]->type != SOT_NULL)
-		{
-			out << "\n";
-			this->ToOperands(out, *insn.ops[0], oot | (oot << 8));
-			out << " = uTempX[0]";
-			this->ToComponentSelectors(out, *insn.ops[0]);
-			out << ";";
-		}
-		//destLO.xz=vec4(destLO).xz;
-		if (insn.ops[1]->type != SOT_NULL)
-		{
-			if (insn.ops[0]->type != SOT_NULL)
-			{
-				out << "\n";
-			}
-			this->ToOperands(out, *insn.ops[1], oot | (oot << 8));
-			out << " = uTempX[1]";
+			out << "))";
 			this->ToComponentSelectors(out, *insn.ops[1]);
 			out << ";";
-
-			dual_output = true;
 		}
 		break;
 
@@ -2447,12 +2462,13 @@ void GLSLGen::ToInstruction(std::ostream& out, ShaderInstruction const & insn) c
 		out << " = ivec4(";
 		if (glsl_rules_ & GSR_UIntType)
 		{
-			out << "uvec4(";
+			out << "u";
 		}
 		else
 		{
-			out << "ivec4(";
+			out << "i";
 		}
+		out << "vec4(";
 		this->ToOperands(out, *insn.ops[1], oit);
 		out << ") ";
 		if (glsl_rules_ & GSR_BitwiseOp)
@@ -2495,24 +2511,35 @@ void GLSLGen::ToInstruction(std::ostream& out, ShaderInstruction const & insn) c
 		//result.xz=uvec4(usubBorrow(src0,src1,borrow)).xz;
 		//差为负数时存在问题，见hlsl msdn 
 		this->ToOperands(out, *insn.ops[0], oot | (oot << 8));
-		out << " = uvec4(usubBorrow(";
-		this->ToOperands(out, *insn.ops[2], oit);
-		out << ", ";
-		this->ToOperands(out, *insn.ops[3], oit);
-		out << ", ";
-		out << "uTempX[0]";
-		out << "))";
-		this->ToComponentSelectors(out, *insn.ops[0]);
-		out << ";";
-		//borrow.xz=vec4(borrow).xz;
 		if (insn.ops[1]->type != SOT_NULL)
 		{
+			out << " = ivec4(usubBorrow(";
+			this->ToOperands(out, *insn.ops[2], oit);
+			out << ", ";
+			this->ToOperands(out, *insn.ops[3], oit);
+			out << ", ";
+			out << "uTempX[0]";
+			out << "))";
+			this->ToComponentSelectors(out, *insn.ops[0]);
+			out << ";";
+
+			//borrow.xz=vec4(borrow).xz;
 			this->ToOperands(out, *insn.ops[1], oot | (oot << 8));
 			out << " = uTempX[0]";
 			this->ToComponentSelectors(out, *insn.ops[0]);
 			out << ";";
 
 			dual_output = true;
+		}
+		else
+		{
+			out << " = ivec4(uvec4(";
+			this->ToOperands(out, *insn.ops[2], oit);
+			out << ") - uvec4(";
+			this->ToOperands(out, *insn.ops[3], oit);
+			out << "))";
+			this->ToComponentSelectors(out, *insn.ops[0]);
+			out << ";";
 		}
 		break;
 
@@ -2524,7 +2551,7 @@ void GLSLGen::ToInstruction(std::ostream& out, ShaderInstruction const & insn) c
 		//the number of bits set in src0
 		//dest.mask= uvec4(bitCount(src0)).mask;
 		this->ToOperands(out, *insn.ops[0], oot | (oot << 8));
-		out << " = uvec4(bitCount(uvec4(";
+		out << " = ivec4(bitCount(uvec4(";
 		this->ToOperands(out, *insn.ops[1], oit);
 		out << ")))";
 		this->ToComponentSelectors(out, *insn.ops[0]);
@@ -2541,7 +2568,7 @@ void GLSLGen::ToInstruction(std::ostream& out, ShaderInstruction const & insn) c
 		//this instruction is used for packing integers or flags
 		//dest.mask = bitfieldInsert(uvec4(src3),uvec4(src2),int(src1),int(src0)).mask;
 		this->ToOperands(out, *insn.ops[0], oot | (oot << 8));
-		out << " = uvec4(bitfieldInsert(uvec4(";
+		out << " = ivec4(bitfieldInsert(uvec4(";
 		this->ToOperands(out, *insn.ops[4], oit);
 		out << "), uvec4(";
 		this->ToOperands(out, *insn.ops[3], oit);
@@ -2559,7 +2586,7 @@ void GLSLGen::ToInstruction(std::ostream& out, ShaderInstruction const & insn) c
 		//reverse bits of src0
 		//dest.mask = bitfieldReverse(src0).mask;
 		this->ToOperands(out, *insn.ops[0], oot | (oot << 8));
-		out << " = uvec4(bitfieldReverse(uvec4(";
+		out << " = ivec4(bitfieldReverse(uvec4(";
 		this->ToOperands(out, *insn.ops[1], oit);
 		out << ")))";
 		this->ToComponentSelectors(out, *insn.ops[0]);
@@ -2577,11 +2604,11 @@ void GLSLGen::ToInstruction(std::ostream& out, ShaderInstruction const & insn) c
 		//dest.mask = uvec4(0x00000000).mask;
 		//dest.mask = bitfieldExtract(src2,src1,src0).mask;
 		this->ToOperands(out, *insn.ops[0], oot | (oot << 8));
-		out << " = uvec4(0x00000000)";
+		out << " = ivec4(0x00000000)";
 		this->ToComponentSelectors(out, *insn.ops[0]);
 		out << ";\n";
 		this->ToOperands(out, *insn.ops[0], oot | (oot << 8));
-		out << " = uvec4(bitfieldExtract(uvec4(";
+		out << " = ivec4(bitfieldExtract(uvec4(";
 		this->ToOperands(out, *insn.ops[3], oit);
 		out << "), int(";
 		this->ToOperands(out, *insn.ops[2], oit);
@@ -2597,7 +2624,7 @@ void GLSLGen::ToInstruction(std::ostream& out, ShaderInstruction const & insn) c
 		//dest.mask= uvec4(0x00000000).mask;
 		//dest.mask= bitfieldExtract(src2,src1,src0).mask;
 		this->ToOperands(out, *insn.ops[0], oot | (oot << 8));
-		out << " = uvec4(0x00000000)";
+		out << " = ivec4(0x00000000)";
 		this->ToComponentSelectors(out, *insn.ops[0]);
 		out << ";\n";
 		this->ToOperands(out, *insn.ops[0], oot | (oot << 8));
@@ -2615,7 +2642,7 @@ void GLSLGen::ToInstruction(std::ostream& out, ShaderInstruction const & insn) c
 	case SO_FIRSTBIT_LO:
 		//dest.mask =findLSB(src0).mask;
 		this->ToOperands(out, *insn.ops[0], oot | (oot << 8));
-		out << " = uvec4(findLSB(uvec4(";
+		out << " = ivec4(findLSB(uvec4(";
 		this->ToOperands(out, *insn.ops[1], oit);
 		out << ")))";
 		this->ToComponentSelectors(out, *insn.ops[0]);
@@ -2625,7 +2652,7 @@ void GLSLGen::ToInstruction(std::ostream& out, ShaderInstruction const & insn) c
 	case SO_FIRSTBIT_HI:
 		//dest.mask = findMSB(src0).mask;
 		this->ToOperands(out, *insn.ops[0], oot | (oot << 8));
-		out << " = uvec4(findMSB(uvec4(";
+		out << " = ivec4(findMSB(uvec4(";
 		this->ToOperands(out, *insn.ops[1], oit);
 		out << ")))";
 		this->ToComponentSelectors(out, *insn.ops[0]);
