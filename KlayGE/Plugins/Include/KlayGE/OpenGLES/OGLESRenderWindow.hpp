@@ -62,7 +62,6 @@ namespace KlayGE
 
 #if defined KLAYGE_PLATFORM_WINDOWS
 		HWND	hWnd_;
-		HDC		hDC_;
 #elif defined KLAYGE_PLATFORM_LINUX
 		::Window x_window_;
 #elif defined KLAYGE_PLATFORM_ANDROID

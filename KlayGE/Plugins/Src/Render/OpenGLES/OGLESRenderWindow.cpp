@@ -194,7 +194,6 @@ namespace KlayGE
 		NativeWindowType wnd;
 #if defined KLAYGE_PLATFORM_WINDOWS
 		wnd = hWnd_ = main_wnd->HWnd();
-		hDC_ = ::GetDC(hWnd_);
 #elif defined KLAYGE_PLATFORM_LINUX
 		wnd = x_window_ = main_wnd->XWindow();
 #elif defined KLAYGE_PLATFORM_ANDROID
@@ -208,7 +207,7 @@ namespace KlayGE
 
 		EGLint ctx_attr[] = { EGL_CONTEXT_CLIENT_VERSION, client_version, EGL_NONE };
 		context_ = eglCreateContext(display_, cfg_, EGL_NO_CONTEXT, ctx_attr);
-   
+
 		eglMakeCurrent(display_, surf_, surf_, context_);
 
 		if (!glloader_GLES_VERSION_2_0())
@@ -381,12 +380,10 @@ namespace KlayGE
 #if defined KLAYGE_PLATFORM_WINDOWS
 		if (hWnd_ != nullptr)
 		{
-			::ReleaseDC(hWnd_, hDC_);
-
 			if (isFullScreen_)
 			{
 				::ChangeDisplaySettings(nullptr, 0);
-				ShowCursor(TRUE);
+				::ShowCursor(TRUE);
 			}
 		}
 #elif defined KLAYGE_PLATFORM_LINUX
