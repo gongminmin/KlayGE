@@ -29,18 +29,19 @@
 
 #pragma once
 
-#ifdef _DEBUG
-	#define DEBUG_SUFFIX "_d"
-#else
-	#define DEBUG_SUFFIX ""
-#endif
+#include <KFL/KFL.hpp>
 
-#define LIB_FILE_NAME "DXBC2GLSLLib_vc_x86" DEBUG_SUFFIX ".lib"
+#ifdef KLAYGE_COMPILER_MSVC
+	#ifdef KLAYGE_DEBUG
+	#define LIB_FILE_NAME "DXBC2GLSLLib_" KFL_STRINGIZE(KLAYGE_COMPILER_NAME) "_" KFL_STRINGIZE(KLAYGE_COMPILER_TARGET) "_d.lib"
+	#else
+	#define LIB_FILE_NAME "DXBC2GLSLLib_" KFL_STRINGIZE(KLAYGE_COMPILER_NAME) "_" KFL_STRINGIZE(KLAYGE_COMPILER_TARGET) ".lib"
+	#endif
 
-#pragma comment(lib, LIB_FILE_NAME)
-//#pragma message("Linking to lib file: " LIB_FILE_NAME)
-#undef LIB_FILE_NAME
-#undef DEBUG_SUFFIX
+	#pragma comment(lib, LIB_FILE_NAME)
+	//#pragma message("Linking to lib file: " LIB_FILE_NAME)
+	#undef LIB_FILE_NAME
+#endif	// KLAYGE_COMPILER_MSVC
 
 #include <DXBC2GLSL/DXBC.hpp>
 #include <DXBC2GLSL/Shader.hpp>
@@ -82,8 +83,8 @@ namespace DXBC2GLSL
 		uint32_t GSInstanceCount() const;
 
 	private:
-		boost::shared_ptr<DXBCContainer> dxbc_;
-		boost::shared_ptr<ShaderProgram> shader_;
+		KlayGE::shared_ptr<DXBCContainer> dxbc_;
+		KlayGE::shared_ptr<ShaderProgram> shader_;
 		std::string glsl_;
 	};
 }

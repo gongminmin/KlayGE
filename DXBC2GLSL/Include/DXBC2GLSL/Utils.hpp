@@ -30,38 +30,18 @@
 
 #pragma once
 
-#include <boost/cstdint.hpp>
+#include <KFL/KFL.hpp>
 
 #define BOOST_ENABLE_ASSERT_HANDLER
 #include <boost/assert.hpp>
 
-using boost::int8_t;
-using boost::int32_t;
-using boost::int64_t;
-using boost::uint8_t;
-using boost::uint16_t;
-using boost::uint32_t;
-using boost::uint64_t;
-
-#ifdef WORDS_BIGENDIAN
-inline uint32_t LE32ToNative(uint32_t v)
-{
-	return ((v & 0xff) << 24) | ((v & 0xff00) << 8) | ((v & 0xff0000) >> 8) | ((v & 0xff000000) >> 24);
-}
-inline uint16_t LE16ToNative(uint16_t v)
-{
-	return ((v & 0xff) << 8) | ((v & 0xff00) >> 8);
-}
-#else
-inline uint32_t LE32ToNative(uint32_t v)
-{
-	return v;
-}
-inline uint16_t LE16ToNative(uint16_t v)
-{
-	return v;
-}
-#endif
+using KlayGE::int8_t;
+using KlayGE::int32_t;
+using KlayGE::int64_t;
+using KlayGE::uint8_t;
+using KlayGE::uint16_t;
+using KlayGE::uint32_t;
+using KlayGE::uint64_t;
 
 bool ValidFloat(float f);
 

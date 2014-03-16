@@ -30,7 +30,7 @@
 
 #pragma once
 
-#include <boost/shared_ptr.hpp>
+#include <KFL/KFL.hpp>
 #include <vector>
 #include <cstring>
 #include <DXBC2GLSL/DXBC.hpp>
@@ -65,8 +65,10 @@ struct TokenizedShaderVersion // 32-bit
 	ShaderType type : 16;
 };
 
+#ifdef KLAYGE_COMPILER_MSVC
 #pragma warning(push)
 #pragma warning(disable: 4201)
+#endif
 struct TokenizedShaderInstruction // 32-bit
 {
 	// we don't make it an union directly because unions can't be inherited from but struct can be 
@@ -172,10 +174,14 @@ struct TokenizedShaderInstruction // 32-bit
 		} dcl_tess_output_primitive;
 	};
 };
+#ifdef KLAYGE_COMPILER_MSVC
 #pragma warning(pop)
+#endif
 
+#ifdef KLAYGE_COMPILER_MSVC
 #pragma warning(push)
 #pragma warning(disable: 4201)
+#endif
 union TokenizedShaderInstructionExtended
 {
 	struct
@@ -206,7 +212,9 @@ union TokenizedShaderInstructionExtended
 		uint32_t w : 4;
 	} resource_return_type;
 };
+#ifdef KLAYGE_COMPILER_MSVC
 #pragma warning(pop)
+#endif
 
 struct TokenizedShaderResourceReturnType
 {
@@ -273,7 +281,7 @@ struct ShaderOperand
 	struct
 	{
 		int64_t disp;
-		boost::shared_ptr<ShaderOperand> reg;
+		KlayGE::shared_ptr<ShaderOperand> reg;
 	} indices[3];
 
 	bool IsIndexSimple(uint32_t i) const
@@ -308,7 +316,7 @@ struct ShaderInstruction : public TokenizedShaderInstruction
 
 	uint32_t num;
 	uint32_t num_ops;
-	boost::shared_ptr<ShaderOperand> ops[SM_MAX_OPS];
+	KlayGE::shared_ptr<ShaderOperand> ops[SM_MAX_OPS];
 
 	ShaderInstruction()
 		: resource_target(0), num(0), num_ops(0)
@@ -320,7 +328,7 @@ struct ShaderInstruction : public TokenizedShaderInstruction
 
 struct ShaderDecl : public TokenizedShaderInstruction
 {
-	boost::shared_ptr<ShaderOperand> op;
+	KlayGE::shared_ptr<ShaderOperand> op;
 	union
 	{
 		uint32_t num;
@@ -364,8 +372,8 @@ struct LabelInfo
 struct ShaderProgram
 {
 	TokenizedShaderVersion version;//program version
-	std::vector<boost::shared_ptr<ShaderDecl> > dcls;//declarations
-	std::vector<boost::shared_ptr<ShaderInstruction> > insns;//instructions
+	std::vector<KlayGE::shared_ptr<ShaderDecl> > dcls;//declarations
+	std::vector<KlayGE::shared_ptr<ShaderInstruction> > insns;//instructions
 
 	std::vector<DXBCSignatureParamDesc> params_in; //input signature
 	std::vector<DXBCSignatureParamDesc> params_out;//output signature
@@ -386,7 +394,7 @@ struct ShaderProgram
 	}
 };
 
-boost::shared_ptr<ShaderProgram> ShaderParse(DXBCContainer const & dxbc);
+KlayGE::shared_ptr<ShaderProgram> ShaderParse(DXBCContainer const & dxbc);
 
 // Return the opcode's input type
 inline ShaderImmType GetOpInType(uint32_t opcode)

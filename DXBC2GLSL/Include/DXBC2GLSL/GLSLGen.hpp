@@ -45,7 +45,7 @@ class GLSLGen
 public:
 	static uint32_t DefaultRules(GLSLVersion version);
 
-	void FeedDXBC(boost::shared_ptr<ShaderProgram> const & program, bool has_gs, GLSLVersion version, uint32_t glsl_rules);
+	void FeedDXBC(KlayGE::shared_ptr<ShaderProgram> const & program, bool has_gs, GLSLVersion version, uint32_t glsl_rules);
 	void ToGLSL(std::ostream& out);
 
 private:
@@ -94,14 +94,14 @@ private:
 	void FindTempDcls();
 
 private:
-	boost::shared_ptr<ShaderProgram> program_;
+	KlayGE::shared_ptr<ShaderProgram> program_;
 
 	ShaderInstruction current_insn_;
 	ShaderType shader_type_;
 	bool has_gs_;
 	std::vector<DclIndexRangeInfo> idx_range_info_;
 	std::vector<TextureSamplerInfo> textures_;
-	std::vector<boost::shared_ptr<ShaderDecl> > temp_dcls_;
+	std::vector<KlayGE::shared_ptr<ShaderDecl> > temp_dcls_;
 	std::map<int64_t, bool> cb_index_mode_;
 
 	// for ifs, the insn number of the else or endif if there is no else

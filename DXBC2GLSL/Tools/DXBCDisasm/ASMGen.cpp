@@ -25,6 +25,7 @@
  *
  **************************************************************************/
 
+#include <KFL/KFL.hpp>
 #include "ASMGen.hpp"
 #include "DXBC2GLSL/Utils.hpp"
 #include <iomanip>
@@ -34,7 +35,7 @@
 
 bool sm_dump_short_syntax = true;
 
-ASMGen::ASMGen(boost::shared_ptr<ShaderProgram> const & program)
+ASMGen::ASMGen(KlayGE::shared_ptr<ShaderProgram> const & program)
 	: program_(program)
 {
 }

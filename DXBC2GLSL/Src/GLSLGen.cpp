@@ -135,7 +135,7 @@ uint32_t GLSLGen::DefaultRules(GLSLVersion version)
 	return rules;
 }
 
-void GLSLGen::FeedDXBC(boost::shared_ptr<ShaderProgram> const & program, bool has_gs, GLSLVersion version, uint32_t glsl_rules)
+void GLSLGen::FeedDXBC(KlayGE::shared_ptr<ShaderProgram> const & program, bool has_gs, GLSLVersion version, uint32_t glsl_rules)
 {
 	program_ = program;
 	shader_type_ = program_->version.type;
@@ -233,7 +233,7 @@ void GLSLGen::ToGLSL(std::ostream& out)
 	this->ToCopyToInterShaderInputRegisters(out);
 	this->ToDeclInterShaderOutputRegisters(out);
 
-	for (std::vector<boost::shared_ptr<ShaderDecl> >::const_iterator iter = temp_dcls_.begin();
+	for (std::vector<KlayGE::shared_ptr<ShaderDecl> >::const_iterator iter = temp_dcls_.begin();
 		iter != temp_dcls_.end(); ++ iter)
 	{
 		this->ToTemps(out, **iter);

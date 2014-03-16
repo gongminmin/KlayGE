@@ -25,17 +25,20 @@
  *
  **************************************************************************/
 
+#include <KFL/KFL.hpp>
 #include <DXBC2GLSL/DXBC.hpp>
 #include <memory>
 
-boost::shared_ptr<DXBCContainer> DXBCParse(void const * data)
+KlayGE::shared_ptr<DXBCContainer> DXBCParse(void const * data)
 {
-	boost::shared_ptr<DXBCContainer> container(new DXBCContainer);
+	KlayGE::shared_ptr<DXBCContainer> container = KlayGE::MakeSharedPtr<DXBCContainer>();
 
 	DXBCContainerHeader const * header = reinterpret_cast<DXBCContainerHeader const *>(data);
-	if (LE32ToNative(header->fourcc) != FOURCC_DXBC)
+	uint32_t fourcc = header->fourcc;
+	KlayGE::LittleEndianToNative<sizeof(fourcc)>(&fourcc);
+	if (fourcc != FOURCC_DXBC)
 	{
-		return boost::shared_ptr<DXBCContainer>();
+		return KlayGE::shared_ptr<DXBCContainer>();
 	}
 	container->shader_chunk = DXBCFindShaderBytecode(data);
 	container->input_signature = DXBCFindSignature(data, DFS_INPUT1);
@@ -61,16 +64,22 @@ DXBCChunkHeader const * DXBCFindChunk(void const * data, uint32_t fourcc)
 {
 	DXBCContainerHeader const * header = reinterpret_cast<DXBCContainerHeader const *>(data);
 	uint32_t const * chunk_offsets = reinterpret_cast<uint32_t const *>(header + 1);
-	if (LE32ToNative(header->fourcc) != FOURCC_DXBC)
+	uint32_t header_fourcc = header->fourcc;
+	KlayGE::LittleEndianToNative<sizeof(header_fourcc)>(&header_fourcc);
+	if (header_fourcc != FOURCC_DXBC)
 	{
 		return NULL;
 	}
-	uint32_t num_chunks = LE32ToNative(header->chunk_count);
+	uint32_t num_chunks = header->chunk_count;
+	KlayGE::LittleEndianToNative<sizeof(num_chunks)>(&num_chunks);
 	for (uint32_t i = 0; i < num_chunks; ++ i)
 	{
-		uint32_t offset = LE32ToNative(chunk_offsets[i]);
+		uint32_t offset = chunk_offsets[i];
+		KlayGE::LittleEndianToNative<sizeof(offset)>(&offset);
 		DXBCChunkHeader const * chunk = reinterpret_cast<DXBCChunkHeader const *>(reinterpret_cast<char const *>(data) + offset);
-		if (LE32ToNative(chunk->fourcc) == fourcc)
+		uint32_t chunk_fourcc = chunk->fourcc;
+		KlayGE::LittleEndianToNative<sizeof(chunk_fourcc)>(&chunk_fourcc);
+		if (chunk_fourcc == fourcc)
 		{
 			return chunk;
 		}
