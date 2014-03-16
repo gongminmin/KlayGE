@@ -80,7 +80,92 @@ namespace
 {
 	using namespace KlayGE;
 
-#if !USE_DXBC2GLSL
+#if USE_DXBC2GLSL
+	class DXBC2GLSLIniter
+	{
+	public:
+		~DXBC2GLSLIniter()
+		{
+			::FreeLibrary(mod_d3dcompiler_);
+		}
+
+		static DXBC2GLSLIniter& Instance()
+		{
+			static DXBC2GLSLIniter initer;
+			return initer;
+		}
+
+		HRESULT D3DCompile(LPCVOID pSrcData, SIZE_T SrcDataSize, LPCSTR pSourceName,
+			D3D_SHADER_MACRO const * pDefines, ID3DInclude* pInclude, LPCSTR pEntrypoint,
+			LPCSTR pTarget, UINT Flags1, UINT Flags2, ID3DBlob** ppCode, ID3DBlob** ppErrorMsgs) const
+		{
+			return DynamicD3DCompile_(pSrcData, SrcDataSize, pSourceName, pDefines, pInclude, pEntrypoint,
+				pTarget, Flags1, Flags2, ppCode, ppErrorMsgs);
+		}
+
+		GLSLVersion GLSLVer() const
+		{
+			return gsv_;
+		}
+
+	private:
+		DXBC2GLSLIniter()
+		{
+			mod_d3dcompiler_ = ::LoadLibraryW(L"d3dcompiler_47.dll");
+			DynamicD3DCompile_ = reinterpret_cast<D3DCompileFunc>(::GetProcAddress(mod_d3dcompiler_, "D3DCompile"));
+
+			if (glloader_GL_VERSION_4_4())
+			{
+				gsv_ = GSV_440;
+			}
+			else if (glloader_GL_VERSION_4_3())
+			{
+				gsv_ = GSV_430;
+			}
+			else if (glloader_GL_VERSION_4_2())
+			{
+				gsv_ = GSV_420;
+			}
+			else if (glloader_GL_VERSION_4_1())
+			{
+				gsv_ = GSV_410;
+			}
+			else if (glloader_GL_VERSION_4_0())
+			{
+				gsv_ = GSV_400;
+			}
+			else if (glloader_GL_VERSION_3_3())
+			{
+				gsv_ = GSV_330;
+			}
+			else if (glloader_GL_VERSION_3_2())
+			{
+				gsv_ = GSV_150;
+			}
+			else if (glloader_GL_VERSION_3_1())
+			{
+				gsv_ = GSV_140;
+			}
+			else if (glloader_GL_VERSION_3_0())
+			{
+				gsv_ = GSV_130;
+			}
+			else
+			{
+				gsv_ = GSV_120;
+			}
+		}
+
+	private:
+		typedef HRESULT(WINAPI *D3DCompileFunc)(LPCVOID pSrcData, SIZE_T SrcDataSize, LPCSTR pSourceName,
+			D3D_SHADER_MACRO const * pDefines, ID3DInclude* pInclude, LPCSTR pEntrypoint,
+			LPCSTR pTarget, UINT Flags1, UINT Flags2, ID3DBlob** ppCode, ID3DBlob** ppErrorMsgs);
+
+		HMODULE mod_d3dcompiler_;
+		D3DCompileFunc DynamicD3DCompile_;
+		GLSLVersion gsv_;
+	};
+#else
 	class CGContextIniter
 	{
 	public:
@@ -2433,14 +2518,8 @@ namespace KlayGE
 			}
 			uint32_t flags = D3DCOMPILE_PREFER_FLOW_CONTROL | D3DCOMPILE_SKIP_OPTIMIZATION;
 
-			typedef HRESULT(WINAPI *D3DCompileFunc)(LPCVOID pSrcData, SIZE_T SrcDataSize, LPCSTR pSourceName,
-				D3D_SHADER_MACRO const * pDefines, ID3DInclude* pInclude, LPCSTR pEntrypoint,
-				LPCSTR pTarget, UINT Flags1, UINT Flags2, ID3DBlob** ppCode, ID3DBlob** ppErrorMsgs);
-
-			HMODULE mod_d3dcompiler = ::LoadLibraryW(L"d3dcompiler_47.dll");
-			D3DCompileFunc DynamicD3DCompile = reinterpret_cast<D3DCompileFunc>(::GetProcAddress(mod_d3dcompiler, "D3DCompile"));
-
-			DynamicD3DCompile(hlsl_shader_text.c_str(), static_cast<UINT>(hlsl_shader_text.size()), nullptr, &macros[0],
+			DXBC2GLSLIniter::Instance().D3DCompile(hlsl_shader_text.c_str(),
+				static_cast<UINT>(hlsl_shader_text.size()), nullptr, &macros[0],
 				nullptr, sd.func_name.c_str(), shader_profile.c_str(),
 				flags, 0, &code, &err_msg);
 			if (err_msg != nullptr)
@@ -2538,44 +2617,7 @@ namespace KlayGE
 
 				try
 				{
-					GLSLVersion gsv = GSV_120;
-					if (glloader_GL_VERSION_4_4())
-					{
-						gsv = GSV_440;
-					}
-					else if (glloader_GL_VERSION_4_3())
-					{
-						gsv = GSV_430;
-					}
-					else if (glloader_GL_VERSION_4_2())
-					{
-						gsv = GSV_420;
-					}
-					else if (glloader_GL_VERSION_4_1())
-					{
-						gsv = GSV_410;
-					}
-					else if (glloader_GL_VERSION_4_0())
-					{
-						gsv = GSV_400;
-					}
-					else if (glloader_GL_VERSION_3_3())
-					{
-						gsv = GSV_330;
-					}
-					else if (glloader_GL_VERSION_3_2())
-					{
-						gsv = GSV_150;
-					}
-					else if (glloader_GL_VERSION_3_1())
-					{
-						gsv = GSV_140;
-					}
-					else if (glloader_GL_VERSION_3_0())
-					{
-						gsv = GSV_130;
-					}
-
+					GLSLVersion gsv = DXBC2GLSLIniter::Instance().GLSLVer();
 					DXBC2GLSL::DXBC2GLSL dxbc2glsl;
 					uint32_t rules = DXBC2GLSL::DXBC2GLSL::DefaultRules(gsv);
 					rules &= ~GSR_UseUBO;
@@ -2787,8 +2829,6 @@ namespace KlayGE
 			{
 				is_shader_validate_[type] = false;
 			}
-
-			::FreeLibrary(mod_d3dcompiler);
 		}
 #else
 		OGLRenderFactory& rf = *checked_cast<OGLRenderFactory*>(&Context::Instance().RenderFactoryInstance());
