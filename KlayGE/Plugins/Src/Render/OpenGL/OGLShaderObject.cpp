@@ -57,6 +57,17 @@
 
 #if USE_DXBC2GLSL
 #include <DXBC2GLSL/DXBC2GLSL.hpp>
+#ifdef KLAYGE_COMPILER_GCC
+	#define __in
+	#define __in_ecount(size)
+	#define __out
+	#define __out_ecount(size)
+	#define __in_bcount(size)
+	#define __in_opt
+	#define __in_ecount_opt(size)
+	#define __out_opt
+	#define __in_xcount_opt(size) 
+#endif
 #include <D3DCompiler.h>
 #else
 #include <Cg/cg.h>

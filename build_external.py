@@ -50,7 +50,11 @@ def build_Boost(compiler_info, compiler_arch):
 		options += " architecture=arm --without-filesystem --without-program_options define=\"WINAPI_FAMILY=WINAPI_FAMILY_APP\" define=BOOST_NO_ANSI_APIS cxxflags=\"/ZW /EHsc\""
 	if "vc" == compiler_info.name:
 		options += " cxxflags=-wd4819 cxxflags=-wd4910 define=_CRT_SECURE_NO_DEPRECATE define=_SCL_SECURE_NO_DEPRECATE"
-	else:
+	elif ("mgw" == compiler_info.name) or ("gcc" == compiler_info.name):
+		if (compiler_info.version < 47):
+			options += " cxxflags=-std=c++0x linkflags=-std=c++0x"
+		else:
+			options += " cxxflags=-std=c++11 linkflags=-std=c++11"
 		if ("x64" == compiler_arch[0]):
 			options += " define=BOOST_USE_WINDOWS_H"
 

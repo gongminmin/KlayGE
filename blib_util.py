@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 #-*- coding: ascii -*-
 
-import os, sys, multiprocessing
+import os, sys, multiprocessing, subprocess
 try:
 	import cfg_build
 except:
@@ -193,12 +193,12 @@ class compiler_info:
 					arch_list.append((arch, "Visual Studio 9 2008 Win64", toolset, False))
 		elif "mingw" == compiler:
 			compiler_name = "mgw"
-			compiler_version = 0
+			compiler_version = self.retrive_gcc_version()
 			for arch in archs:
 				arch_list.append((arch, "MinGW Makefiles", toolset, False))
 		elif "gcc" == compiler:
 			compiler_name = "gcc"
-			compiler_version = 0
+			compiler_version = self.retrive_gcc_version()
 			if ("android" == target_platform) and ("win" == host_platform):
 				for arch in archs:
 					arch_list.append((arch, "MinGW Makefiles", toolset, False))
@@ -247,6 +247,12 @@ class compiler_info:
 				proj_str = "/project %s" % proj_name
 			batch_cmd.add_command('@devenv %s.sln /Build %s %s' % (sln_name, config_str, proj_str))
 		batch_cmd.add_command('@if ERRORLEVEL 1 exit /B 1')
+		
+	def retrive_gcc_version(self):
+		gcc_ver = subprocess.check_output(["gcc", "-dumpversion"])
+		dot1_pos = gcc_ver.find(".")
+		dot2_pos = gcc_ver.find(".", dot1_pos + 1)
+		return int(gcc_ver[0 : dot1_pos]) * 10 + int(gcc_ver[dot1_pos + 1 : dot2_pos])
 
 class batch_command:
 	def __init__(self):
