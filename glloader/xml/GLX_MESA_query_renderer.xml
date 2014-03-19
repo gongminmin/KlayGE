@@ -1,0 +1,49 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GLX_MESA_query_renderer" reg_no="446">
+	<tokens>
+		<token name="GLX_RENDERER_VENDOR_ID_MESA" value="0x8183"/>
+		<token name="GLX_RENDERER_DEVICE_ID_MESA" value="0x8184"/>
+		<token name="GLX_RENDERER_VERSION_MESA" value="0x8185"/>
+		<token name="GLX_RENDERER_ACCELERATED_MESA" value="0x8186"/>
+		<token name="GLX_RENDERER_VIDEO_MEMORY_MESA" value="0x8187"/>
+		<token name="GLX_RENDERER_UNIFIED_MEMORY_ARCHITECTURE_MESA" value="0x8188"/>
+		<token name="GLX_RENDERER_PREFERRED_PROFILE_MESA" value="0x8189"/>
+		<token name="GLX_RENDERER_OPENGL_CORE_PROFILE_VERSION_MESA" value="0x818A"/>
+		<token name="GLX_RENDERER_OPENGL_COMPATIBILITY_PROFILE_VERSION_MESA" value="0x818B"/>
+		<token name="GLX_RENDERER_OPENGL_ES_PROFILE_VERSION_MESA" value="0x818C"/>
+		<token name="GLX_RENDERER_OPENGL_ES2_PROFILE_VERSION_MESA" value="0x818D"/>
+		<token name="GLX_RENDERER_ID_MESA" value="0x818E"/>
+	</tokens>
+
+	<functions>	
+		<function name="glXQueryRendererIntegerMESA" return="Bool">
+			<params>
+				<param type="Display*" name="dpy"/>
+				<param type="int" name="screen"/>
+				<param type="int" name="renderer"/>
+				<param type="int" name="attribute"/>
+				<param type="unsigned int*" name="value"/>
+			</params>
+		</function>
+		<function name="glXQueryCurrentRendererIntegerMESA" return="Bool">
+			<params>
+				<param type="int" name="attribute"/>
+				<param type="unsigned int*" name="value"/>
+			</params>
+		</function>
+		<function name="glXQueryRendererStringMESA" return="const char*">
+			<params>
+				<param type="Display*" name="dpy"/>
+				<param type="int" name="screen"/>
+				<param type="int" name="renderer"/>
+				<param type="int" name="attribute"/>
+			</params>
+		</function>
+		<function name="glXQueryCurrentRendererStringMESA" return="const char*">
+			<params>
+				<param type="int" name="attribute"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

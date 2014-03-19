@@ -1,0 +1,13 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GLX_NV_delay_before_swap" reg_no="445">
+	<functions>
+		<function name="glXDelayBeforeSwapNV" return="Bool">
+			<params>
+				<param type="Display*" name="dpy"/>
+				<param type="GLXDrawable" name="drawable"/>
+				<param type="GLfloat" name="seconds"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

@@ -1,0 +1,11 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GL_NVX_gpu_memory_info" reg_no="438">
+	<tokens>
+		<token name="GL_GPU_MEMORY_INFO_DEDICATED_VIDMEM_NVX" value="0x9047"/>
+		<token name="GL_GPU_MEMORY_INFO_TOTAL_AVAILABLE_MEMORY_NVX" value="0x9048"/>
+		<token name="GL_GPU_MEMORY_INFO_CURRENT_AVAILABLE_VIDMEM_NVX" value="0x9049"/>
+		<token name="GL_GPU_MEMORY_INFO_EVICTION_COUNT_NVX" value="0x904A"/>
+		<token name="GL_GPU_MEMORY_INFO_EVICTED_MEMORY_NVX" value="0x904B"/>
+	</tokens>
+</gl_extension>

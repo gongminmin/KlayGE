@@ -1,0 +1,9 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GL_NV_shader_thread_group" reg_no="447">
+	<tokens>
+		<token name="GL_WARP_SIZE_NV" value="0x9339"/>
+		<token name="GL_WARPS_PER_SM_NV" value="0x933A"/>
+		<token name="GL_SM_COUNT_NV" value="0x933B"/>
+	</tokens>
+</gl_extension>
