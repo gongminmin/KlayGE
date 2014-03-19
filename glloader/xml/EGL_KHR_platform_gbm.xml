@@ -1,0 +1,7 @@
+<?xml version='1.0'?>
+
+<gl_extension name="EGL_KHR_platform_gbm" reg_no="69">
+	<tokens>
+		<token name="EGL_PLATFORM_GBM_KHR" value="0x31D7"/>
+	</tokens>
+</gl_extension>

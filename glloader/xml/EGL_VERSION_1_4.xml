@@ -7,4 +7,8 @@
 		<token name="EGL_MULTISAMPLE_RESOLVE" value="0x3099"/>
 		<token name="EGL_OPENGL_API" value="0x30A2"/>
 	</tokens>
+
+	<functions>
+		<function name="eglGetCurrentContext" return="EGLContext" link="static"/>
+	</functions>
 </gl_extension>

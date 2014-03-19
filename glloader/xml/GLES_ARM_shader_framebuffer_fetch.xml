@@ -1,0 +1,8 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GLES_ARM_shader_framebuffer_fetch" reg_no="165">
+	<tokens>
+		<token name="GL_FETCH_PER_SAMPLE_ARM" value="0x8F65"/>
+		<token name="GL_FRAGMENT_SHADER_FRAMEBUFFER_FETCH_MRT_ARM" value="0x8F66"/>
+	</tokens>
+</gl_extension>

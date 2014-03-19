@@ -1,0 +1,25 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GL_OES_texture_storage_multisample_2d_array" reg_no="174">
+	<tokens>
+		<token name="GL_TEXTURE_2D_MULTISAMPLE_ARRAY" value="0x9102"/>
+		<token name="GL_TEXTURE_BINDING_2D_MULTISAMPLE_ARRAY" value="0x9105"/>
+		<token name="GL_SAMPLER_2D_MULTISAMPLE_ARRAY" value="0x910B"/>
+		<token name="GL_INT_SAMPLER_2D_MULTISAMPLE_ARRAY" value="0x910C"/>
+		<token name="GL_UNSIGNED_INT_SAMPLER_2D_MULTISAMPLE_ARRAY" value="0x910D"/>
+	</tokens>
+
+	<functions>
+		<function name="glTexImage3DMultisampleOES" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLsizei" name="samples"/>
+				<param type="GLint" name="internalformat"/>
+				<param type="GLsizei" name="width"/>
+				<param type="GLsizei" name="height"/>
+				<param type="GLsizei" name="depth"/>
+				<param type="GLboolean" name="fixedsamplelocations"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

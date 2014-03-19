@@ -1,0 +1,26 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GLES_KHR_blend_equation_advanced" reg_no="168">
+	<tokens>
+		<token name="GL_BLEND_ADVANCED_COHERENT_KHR" value="0x9285"/>
+		<token name="GL_MULTIPLY_KHR" value="0x9294"/>
+		<token name="GL_SCREEN_KHR" value="0x9295"/>
+		<token name="GL_OVERLAY_KHR" value="0x9296"/>
+		<token name="GL_DARKEN_KHR" value="0x9297"/>
+		<token name="GL_LIGHTEN_KHR" value="0x9298"/>
+		<token name="GL_COLORDODGE_KHR" value="0x9299"/>
+		<token name="GL_COLORBURN_KHR" value="0x929A"/>
+		<token name="GL_HARDLIGHT_KHR" value="0x929B"/>
+		<token name="GL_SOFTLIGHT_KHR" value="0x929C"/>
+		<token name="GL_DIFFERENCE_KHR" value="0x929E"/>
+		<token name="GL_EXCLUSION_KHR" value="0x92A0"/>
+		<token name="GL_HSL_HUE_KHR" value="0x92AD"/>
+		<token name="GL_HSL_SATURATION_KHR" value="0x92AE"/>
+		<token name="GL_HSL_COLOR_KHR" value="0x92AF"/>
+		<token name="GL_HSL_LUMINOSITY_KHR" value="0x92B0"/>
+	</tokens>
+
+	<functions>
+		<function name="glBlendBarrierKHR" return="void"/>
+	</functions>
+</gl_extension>

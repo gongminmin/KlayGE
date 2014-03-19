@@ -1,0 +1,4 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GLES_ARM_shader_framebuffer_fetch_depth_stencil" reg_no="166">
+</gl_extension>

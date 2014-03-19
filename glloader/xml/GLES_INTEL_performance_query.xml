@@ -1,0 +1,102 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GLES_INTEL_performance_query" reg_no="164">
+	<tokens>
+		<token name="GL_PERFQUERY_SINGLE_CONTEXT_INTEL" value="0x0000"/>
+		<token name="GL_PERFQUERY_GLOBAL_CONTEXT_INTEL" value="0x0001"/>
+		<token name="GL_PERFQUERY_WAIT_INTEL" value="0x83FB"/>
+		<token name="GL_PERFQUERY_FLUSH_INTEL" value="0x83FA"/>
+		<token name="GL_PERFQUERY_DONOT_FLUSH_INTEL" value="0x83F9"/>
+		<token name="GL_PERFQUERY_COUNTER_EVENT_INTEL" value="0x94F0"/>
+		<token name="GL_PERFQUERY_COUNTER_DURATION_NORM_INTEL" value="0x94F1"/>
+		<token name="GL_PERFQUERY_COUNTER_DURATION_RAW_INTEL" value="0x94F2"/>
+		<token name="GL_PERFQUERY_COUNTER_THROUGHPUT_INTEL" value="0x94F3"/>
+		<token name="GL_PERFQUERY_COUNTER_RAW_INTEL" value="0x94F4"/>
+		<token name="GL_PERFQUERY_COUNTER_TIMESTAMP_INTEL" value="0x94F5"/>
+		<token name="GL_PERFQUERY_COUNTER_DATA_UINT32_INTEL" value="0x94F8"/>
+		<token name="GL_PERFQUERY_COUNTER_DATA_UINT64_INTEL" value="0x94F9"/>
+		<token name="GL_PERFQUERY_COUNTER_DATA_FLOAT_INTEL" value="0x94FA"/>
+		<token name="GL_PERFQUERY_COUNTER_DATA_DOUBLE_INTEL" value="0x94FB"/>
+		<token name="GL_PERFQUERY_COUNTER_DATA_BOOL32_INTEL" value="0x94FC"/>
+		<token name="GL_PERFQUERY_QUERY_NAME_LENGTH_MAX_INTEL" value="0x94FD"/>
+		<token name="GL_PERFQUERY_COUNTER_NAME_LENGTH_MAX_INTEL" value="0x94FE"/>
+		<token name="GL_PERFQUERY_COUNTER_DESC_LENGTH_MAX_INTEL" value="0x94FF"/>
+		<token name="GL_PERFQUERY_GPA_EXTENDED_COUNTERS_INTEL" value="0x9500"/>
+	</tokens>
+
+	<functions>
+		<function name="glGetFirstPerfQueryIdINTEL" return="void">
+			<params>
+				<param type="GLuint*" name="queryId"/>
+			</params>
+		</function>
+		<function name="glGetNextPerfQueryIdINTEL" return="void">
+			<params>
+				<param type="GLuint" name="queryId"/>
+				<param type="GLuint*" name="nextQueryId"/>
+			</params>
+		</function>
+		<function name="glGetPerfQueryIdByNameINTEL" return="void">
+			<params>
+				<param type="GLchar*" name="queryName"/>
+				<param type="GLuint*" name="queryId"/>
+			</params>
+		</function>
+		<function name="glGetPerfQueryInfoINTEL" return="void">
+			<params>
+				<param type="GLuint" name="queryId"/>
+				<param type="GLuint" name="queryNameLength"/>
+				<param type="GLchar*" name="queryName"/>
+				<param type="GLuint*" name="dataSize"/>
+				<param type="GLuint*" name="noCounters"/>
+				<param type="GLuint*" name="noInstances"/>
+				<param type="GLuint*" name="capsMask"/>
+			</params>
+		</function>
+		<function name="glGetPerfCounterInfoINTEL" return="void">
+			<params>
+				<param type="GLuint" name="queryId"/>
+				<param type="GLuint" name="counterId"/>
+				<param type="GLuint" name="counterNameLength"/>
+				<param type="GLchar*" name="counterName"/>
+				<param type="GLuint" name="counterDescLength"/>
+				<param type="GLchar*" name="counterDesc"/>
+				<param type="GLuint*" name="counterOffset"/>
+				<param type="GLuint*" name="counterDataSize"/>
+				<param type="GLuint*" name="counterTypeEnum"/>
+				<param type="GLuint*" name="counterDataTypeEnum"/>
+				<param type="GLuint64*" name="rawCounterMaxValue"/>
+			</params>
+		</function>
+		<function name="glCreatePerfQueryINTEL" return="void">
+			<params>
+				<param type="GLuint" name="queryId"/>
+				<param type="GLuint*" name="queryHandle"/>
+			</params>
+		</function>
+		<function name="glDeletePerfQueryINTEL" return="void">
+			<params>
+				<param type="GLuint" name="queryHandle"/>
+			</params>
+		</function>
+		<function name="glBeginPerfQueryINTEL" return="void">
+			<params>
+				<param type="GLuint" name="queryHandle"/>
+			</params>
+		</function>
+		<function name="glEndPerfQueryINTEL" return="void">
+			<params>
+				<param type="GLuint" name="queryHandle"/>
+			</params>
+		</function>
+		<function name="glGetPerfQueryDataINTEL" return="void">
+			<params>
+				<param type="GLuint" name="queryHandle"/>
+				<param type="GLuint" name="flags"/>
+				<param type="GLsizei" name="dataSize"/>
+				<param type="GLvoid*" name="data"/>
+				<param type="GLuint*" name="bytesWritten"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

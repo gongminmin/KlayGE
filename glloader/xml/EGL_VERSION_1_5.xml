@@ -1,0 +1,139 @@
+<?xml version='1.0'?>
+
+<gl_extension name="EGL_VERSION_1_5">
+	<typedefs>
+		<typedef type="void*"  synonym="EGLSync"/>
+		<typedef type="intptr_t" synonym="EGLAttrib"/>
+		<typedef type="khronos_utime_nanoseconds_t" synonym="EGLTime"/>
+	</typedefs>
+
+	<tokens>
+		<token name=" EGL_CONTEXT_MAJOR_VERSION" value="0x3098"/>
+		<token name=" EGL_CONTEXT_MINOR_VERSION" value="0x30FB"/>
+		<token name=" EGL_CONTEXT_OPENGL_PROFILE_MASK" value="0x30FD"/>
+		<token name=" EGL_CONTEXT_OPENGL_RESET_NOTIFICATION_STRATEGY" value="0x31BD"/>
+		<token name=" EGL_NO_RESET_NOTIFICATION" value="0x31BE"/>
+		<token name=" EGL_LOSE_CONTEXT_ON_RESET" value="0x31BF"/>
+		<token name=" EGL_CONTEXT_OPENGL_CORE_PROFILE_BIT" value="0x00000001"/>
+		<token name=" EGL_CONTEXT_OPENGL_COMPATIBILITY_PROFILE_BIT" value="0x00000002"/>
+		<token name=" EGL_CONTEXT_OPENGL_DEBUG" value="0x31B0"/>
+		<token name=" EGL_CONTEXT_OPENGL_FORWARD_COMPATIBLE" value="0x31B1"/>
+		<token name=" EGL_CONTEXT_OPENGL_ROBUST_ACCESS" value="0x31B2"/>
+		<token name=" EGL_OPENGL_ES3_BIT" value="0x00000040"/>
+		<token name=" EGL_CL_EVENT_HANDLE" value="0x309C"/>
+		<token name=" EGL_SYNC_CL_EVENT" value="0x30FE"/>
+		<token name=" EGL_SYNC_CL_EVENT_COMPLETE" value="0x30FF"/>
+		<token name=" EGL_SYNC_PRIOR_COMMANDS_COMPLETE" value="0x30F0"/>
+		<token name=" EGL_SYNC_TYPE" value="0x30F7"/>
+		<token name=" EGL_SYNC_STATUS" value="0x30F1"/>
+		<token name=" EGL_SYNC_CONDITION" value="0x30F8"/>
+		<token name=" EGL_SIGNALED" value="0x30F2"/>
+		<token name=" EGL_UNSIGNALED" value="0x30F3"/>
+		<token name=" EGL_SYNC_FLUSH_COMMANDS_BIT" value="0x0001"/>
+		<token name=" EGL_FOREVER" value="0xFFFFFFFFFFFFFFFFull"/>
+		<token name=" EGL_TIMEOUT_EXPIRED" value="0x30F5"/>
+		<token name=" EGL_CONDITION_SATISFIED" value="0x30F6"/>
+		<token name=" EGL_NO_SYNC" value="((EGLSync)0)"/>
+		<token name=" EGL_SYNC_FENCE" value="0x30F9"/>
+		<token name=" EGL_GL_COLORSPACE" value="0x309D"/>
+		<token name=" EGL_GL_COLORSPACE_SRGB" value="0x3089"/>
+		<token name=" EGL_GL_COLORSPACE_LINEAR" value="0x308A"/>
+		<token name=" EGL_GL_RENDERBUFFER" value="0x30B9"/>
+		<token name=" EGL_GL_TEXTURE_2D" value="0x30B1"/>
+		<token name=" EGL_GL_TEXTURE_LEVEL" value="0x30BC"/>
+		<token name=" EGL_GL_TEXTURE_3D" value="0x30B2"/>
+		<token name=" EGL_GL_TEXTURE_ZOFFSET" value="0x30BD"/>
+		<token name=" EGL_GL_TEXTURE_CUBE_MAP_POSITIVE_X" value="0x30B3"/>
+		<token name=" EGL_GL_TEXTURE_CUBE_MAP_NEGATIVE_X" value="0x30B4"/>
+		<token name=" EGL_GL_TEXTURE_CUBE_MAP_POSITIVE_Y" value="0x30B5"/>
+		<token name=" EGL_GL_TEXTURE_CUBE_MAP_NEGATIVE_Y" value="0x30B6"/>
+		<token name=" EGL_GL_TEXTURE_CUBE_MAP_POSITIVE_Z" value="0x30B7"/>
+		<token name=" EGL_GL_TEXTURE_CUBE_MAP_NEGATIVE_Z" value="0x30B8"/>
+	</tokens>
+
+	<functions>
+		<function name="eglCreateSync" return="EGLSync" link="static">
+			<params>
+				<param type="EGLDisplay" name="dpy"/>
+				<param type="EGLenum" name="type"/>
+				<param type="const EGLAttrib*" name="attrib_list"/>
+			</params>
+			<mappings>
+				<mapping from="EGL_KHR_fence_sync" name="eglCreateSyncKHR"/>
+			</mappings>
+		</function>
+		<function name="eglDestroySync" return="EGLBoolean" link="static">
+			<params>
+				<param type="EGLDisplay" name="dpy"/>
+				<param type="EGLSync" name="sync"/>
+			</params>
+			<mappings>
+				<mapping from="EGL_KHR_fence_sync" name="eglDestroySyncKHR"/>
+			</mappings>
+		</function>
+		<function name="eglClientWaitSync" return="EGLint" link="static">
+			<params>
+				<param type="EGLDisplay" name="dpy"/>
+				<param type="EGLSync" name="sync"/>
+				<param type="EGLint" name="flags"/>
+				<param type="EGLTime" name="timeout"/>
+			</params>
+			<mappings>
+				<mapping from="EGL_KHR_fence_sync" name="eglClientWaitSyncKHR"/>
+			</mappings>
+		</function>
+		<function name="eglGetSyncAttrib" return="EGLBoolean" link="static">
+			<params>
+				<param type="EGLDisplay" name="dpy"/>
+				<param type="EGLSync" name="sync"/>
+				<param type="EGLint" name="attribute"/>
+				<param type="EGLint*" name="value"/>
+			</params>
+			<mappings>
+				<mapping from="EGL_KHR_fence_sync" name="eglGetSyncAttribKHR"/>
+			</mappings>
+		</function>		
+		<function name="eglGetPlatformDisplay" return="EGLDisplay" link="static">
+			<params>
+				<param type="EGLenum" name="platform"/>
+				<param type="void*" name="native_display"/>
+				<param type="const EGLint*" name="attrib_list"/>
+			</params>
+			<mappings>
+				<mapping from="EGL_EXT_platform_base" name="eglGetPlatformDisplayEXT"/>
+			</mappings>
+		</function>
+		<function name="eglCreatePlatformWindowSurface" return="EGLSurface" link="static">
+			<params>
+				<param type="EGLDisplay" name="dpy"/>
+				<param type="EGLConfig" name="config"/>
+				<param type="void*" name="native_window"/>
+				<param type="const EGLint*" name="attrib_list"/>
+			</params>
+			<mappings>
+				<mapping from="EGL_EXT_platform_base" name="eglCreatePlatformWindowSurfaceEXT"/>
+			</mappings>
+		</function>
+		<function name="eglCreatePlatformPixmapSurface" return="EGLSurface" link="static">
+			<params>
+				<param type="EGLDisplay" name="dpy"/>
+				<param type="EGLConfig" name="config"/>
+				<param type="void*" name="native_pixmap"/>
+				<param type="const EGLint*" name="attrib_list"/>
+			</params>
+			<mappings>
+				<mapping from="EGL_EXT_platform_base" name="eglCreatePlatformPixmapSurfaceEXT"/>
+			</mappings>
+		</function>
+		<function name="eglWaitSync" return="EGLint" link="static">
+			<params>
+				<param type="EGLDisplay" name="dpy"/>
+				<param type="EGLSync" name="sync"/>
+				<param type="EGLint" name="flags"/>
+			</params>
+			<mappings>
+				<mapping from="EGL_KHR_wait_sync" name="eglWaitSyncKHR"/>
+			</mappings>
+		</function>
+	</functions>
+</gl_extension>

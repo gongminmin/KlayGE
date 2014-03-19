@@ -1,0 +1,16 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GL_OES_sample_shading" reg_no="169">
+	<tokens>
+		<token name="GL_SAMPLE_SHADING_OES" value="0x8C36"/>
+		<token name="GL_MIN_SAMPLE_SHADING_VALUE_OES" value="0x8C37"/>
+	</tokens>
+
+	<functions>
+		<function name="glMinSampleShadingOES" return="void">
+			<params>
+				<param type="GLfloat" name="value"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

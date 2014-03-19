@@ -1,0 +1,9 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GLES_EXT_shader_pixel_local_storage" reg_no="167">
+	<tokens>
+		<token name="GL_MAX_SHADER_PIXEL_LOCAL_STORAGE_FAST_SIZE_EXT" value="0x8F63"/>
+		<token name="GL_MAX_SHADER_PIXEL_LOCAL_STORAGE_SIZE_EXT" value="0x8F67"/>
+		<token name="GL_SHADER_PIXEL_LOCAL_STORAGE_EXT" value="0x8F64"/>
+	</tokens>
+</gl_extension>

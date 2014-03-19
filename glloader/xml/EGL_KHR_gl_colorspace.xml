@@ -1,0 +1,9 @@
+<?xml version='1.0'?>
+
+<gl_extension name="EGL_KHR_gl_colorspace" reg_no="66">
+	<tokens>
+		<token name="EGL_GL_COLORSPACE_KHR" value="0x309D"/>
+		<token name="EGL_GL_COLORSPACE_SRGB_KHR" value="0x3089"/>
+		<token name="EGL_GL_COLORSPACE_LINEAR_KHR" value="0x308A"/>
+	</tokens>
+</gl_extension>

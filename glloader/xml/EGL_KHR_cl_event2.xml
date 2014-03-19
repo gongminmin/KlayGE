@@ -1,0 +1,23 @@
+<?xml version='1.0'?>
+
+<gl_extension name="EGL_KHR_cl_event2" reg_no="65">
+	<typedefs>
+		<typedef type="intptr_t" synonym="EGLAttribKHR"/>
+	</typedefs>
+
+	<tokens>
+		<token name="EGL_CL_EVENT_HANDLE_KHR" value="0x309C"/>
+		<token name="EGL_SYNC_CL_EVENT_KHR" value="0x30FE"/>
+		<token name="EGL_SYNC_CL_EVENT_COMPLETE_KHR" value="0x30FF"/>
+	</tokens>
+
+	<functions>
+		<function name="eglCreateSync64KHR" return="EGLSyncKHR">
+			<params>
+				<param type="EGLDisplay" name="dpy"/>
+				<param type="EGLenum" name="type"/>
+				<param type="const EGLAttribKHR*" name="attrib_list"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

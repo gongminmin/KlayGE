@@ -224,7 +224,6 @@
 				<param type="EGLContext" name="ctx"/>
 			</params>
 		</function>
-		<function name="eglGetCurrentContext" return="EGLContext" link="static"/>
 		<function name="eglGetCurrentSurface" return="EGLSurface" link="static">
 			<params>
 				<param type="EGLint" name="readdraw"/>

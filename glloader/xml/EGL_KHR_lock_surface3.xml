@@ -1,0 +1,54 @@
+<?xml version='1.0'?>
+
+<gl_extension name="EGL_KHR_lock_surface3" reg_no="64">
+	<typedefs>
+		<typedef type="intptr_t" synonym="EGLAttribKHR"/>
+	</typedefs>
+
+	<tokens>
+		<token name="EGL_LOCK_SURFACE_BIT_KHR" value="0x0080"/>
+		<token name="EGL_OPTIMAL_FORMAT_BIT_KHR" value="0x0100"/>
+		<token name="EGL_MATCH_FORMAT_KHR" value="0x3043"/>
+		<token name="EGL_FORMAT_RGB_565_EXACT_KHR" value="0x30C0"/>
+		<token name="EGL_FORMAT_RGBA_8888_EXACT_KHR" value="0x30C2"/>
+		<token name="EGL_FORMAT_RGB_565_KHR" value="0x30C1"/>
+		<token name="EGL_FORMAT_RGBA_8888_KHR" value="0x30C3"/>
+		<token name="EGL_MAP_PRESERVE_PIXELS_KHR" value="0x30C4"/>
+		<token name="EGL_LOCK_USAGE_HINT_KHR" value="0x30C5"/>
+		<token name="EGL_READ_SURFACE_BIT_KHR" value="0x0001"/>
+		<token name="EGL_WRITE_SURFACE_BIT_KHR" value="0x0002"/>
+		<token name="EGL_BITMAP_PITCH_KHR" value="0x30C7"/>
+		<token name="EGL_BITMAP_ORIGIN_KHR" value="0x30C8"/>
+		<token name="EGL_BITMAP_PIXEL_RED_OFFSET_KHR" value="0x30C9"/>
+		<token name="EGL_BITMAP_PIXEL_GREEN_OFFSET_KHR" value="0x30CA"/>
+		<token name="EGL_BITMAP_PIXEL_BLUE_OFFSET_KHR" value="0x30CB"/>
+		<token name="EGL_BITMAP_PIXEL_ALPHA_OFFSET_KHR" value="0x30CC"/>
+		<token name="EGL_BITMAP_PIXEL_LUMINANCE_OFFSET_KHR" value="0x30CD"/>
+		<token name="EGL_BITMAP_PIXEL_SIZE_KHR" value="0x3110"/>
+		<token name="EGL_BITMAP_POINTER_KHR" value="0x30C6"/>
+		<token name="EGL_LOWER_LEFT_KHR" value="0x30CE"/>
+		<token name="EGL_UPPER_LEFT_KHR" value="0x30CF"/>
+	</tokens>
+
+	<functions>
+		<function name="eglLockSurfaceKHR" return="EGLBoolean">
+			<params>
+				<param type="const GLEGLint*" name="attrib_list"/>
+			</params>
+		</function>
+		<function name="eglUnlockSurfaceKHR" return="EGLBoolean">
+			<params>
+				<param type="EGLDisplay" name="dpy"/>
+				<param type="EGLSurface" name="surface"/>
+			</params>
+		</function>
+		<function name="eglQuerySurface64KHR" return="EGLSyncKHR">
+			<params>
+				<param type="EGLDisplay" name="dpy"/>
+				<param type="EGLSurface" name="surface"/>
+				<param type="EGLint" name="attribute"/>
+				<param type="EGLAttribKHR*" name="value"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

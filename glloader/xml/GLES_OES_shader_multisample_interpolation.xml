@@ -1,0 +1,9 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GL_OES_shader_multisample_interpolation" reg_no="172">
+	<tokens>
+		<token name="GL_MIN_FRAGMENT_INTERPOLATION_OFFSET_OES" value="0x8E5B"/>
+		<token name="GL_MAX_FRAGMENT_INTERPOLATION_OFFSET_OES" value="0x8E5C"/>
+		<token name="GL_FRAGMENT_INTERPOLATION_OFFSET_BITS_OES" value="0x8E5D"/>
+	</tokens>
+</gl_extension>

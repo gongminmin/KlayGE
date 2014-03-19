@@ -1,0 +1,7 @@
+<?xml version='1.0'?>
+
+<gl_extension name="EGL_KHR_platform_android" reg_no="68">
+	<tokens>
+		<token name="EGL_PLATFORM_ANDROID_KHR" value="0x3141"/>
+	</tokens>
+</gl_extension>
