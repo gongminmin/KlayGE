@@ -26,7 +26,11 @@ namespace
 		"410",
 		"420",
 		"430",
-		"440"
+		"440",
+
+		"100",
+		"300 es",
+		"310 es"
 	};
 
 	struct RegisterDesc
@@ -84,52 +88,79 @@ namespace
 uint32_t GLSLGen::DefaultRules(GLSLVersion version)
 {
 	uint32_t rules = 0;
-	if (version >= GSV_110)
+	if (version < GSV_100_ES)
 	{
+		if (version >= GSV_110)
+		{
+		}
+		if (version >= GSV_120)
+		{
+		}
+		if (version >= GSV_130)
+		{
+			rules |= GSR_UIntType;
+			rules |= GSR_GenericTexture;
+			rules |= GSR_PSInterpolation;
+			rules |= GSR_InOutPrefix;
+			rules |= GSR_TextureGrad;
+			rules |= GSR_BitwiseOp;
+		}
+		if (version >= GSV_140)
+		{
+			rules |= GSR_GlobalUniformsInUBO;
+			rules |= GSR_UseUBO;
+		}
+		if (version >= GSV_150)
+		{
+			rules |= GSR_CoreGS;
+		}
+		if (version >= GSV_330)
+		{
+			rules |= GSR_UniformBlockBinding;
+			rules |= GSR_ExplicitPSOutputLayout;
+			rules |= GSR_ExplicitInputLayout;
+		}
+		if (version >= GSV_400)
+		{
+			rules |= GSR_Int64Type;
+			rules |= GSR_MultiStreamGS;
+		}
+		if (version >= GSV_410)
+		{
+		}
+		if (version >= GSV_420)
+		{
+		}
+		if (version >= GSV_430)
+		{
+		}
+		if (version >= GSV_440)
+		{
+		}
 	}
-	if (version >= GSV_120)
+	else
 	{
-	}
-	if (version >= GSV_130)
-	{
-		rules |= GSR_UIntType;
-		rules |= GSR_GenericTexture;
-		rules |= GSR_PSInterpolation;
-		rules |= GSR_InOutPrefix;
-		rules |= GSR_TextureGrad;
-		rules |= GSR_BitwiseOp;
-	}
-	if (version >= GSV_140)
-	{
-		rules |= GSR_GlobalUniformsInUBO;
-		rules |= GSR_UseUBO;
-	}
-	if (version >= GSV_150)
-	{
-		rules |= GSR_CoreGS;
-	}
-	if (version >= GSV_330)
-	{
-		rules |= GSR_UniformBlockBinding;
-		rules |= GSR_ExplicitPSOutputLayout;
-		rules |= GSR_ExplicitInputLayout;
-	}
-	if (version >= GSV_400)
-	{
-		rules |= GSR_Int64Type;
-		rules |= GSR_MultiStreamGS;
-	}
-	if (version >= GSV_410)
-	{
-	}
-	if (version >= GSV_420)
-	{
-	}
-	if (version >= GSV_430)
-	{
-	}
-	if (version >= GSV_440)
-	{
+		if (version >= GSV_100_ES)
+		{
+		}
+		if (version >= GSV_300_ES)
+		{
+			rules |= GSR_UIntType;
+			rules |= GSR_GenericTexture;
+			rules |= GSR_PSInterpolation;
+			rules |= GSR_InOutPrefix;
+			rules |= GSR_TextureGrad;
+			rules |= GSR_BitwiseOp;
+			rules |= GSR_GlobalUniformsInUBO;
+			rules |= GSR_UseUBO;
+			rules |= GSR_CoreGS;
+			rules |= GSR_UniformBlockBinding;
+			rules |= GSR_ExplicitPSOutputLayout;
+			rules |= GSR_ExplicitInputLayout;
+		}
+		if (version >= GSV_310_ES)
+		{
+		}
 	}
 
 	return rules;
