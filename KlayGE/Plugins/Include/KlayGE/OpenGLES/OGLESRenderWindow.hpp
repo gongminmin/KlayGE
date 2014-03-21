@@ -74,7 +74,7 @@ namespace KlayGE
 		EGLContext context_;
 
 		bool	isFullScreen_;
-		
+
 		uint32_t color_bits_;
 
 		std::wstring			description_;

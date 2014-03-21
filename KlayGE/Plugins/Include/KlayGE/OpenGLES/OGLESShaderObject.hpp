@@ -27,8 +27,13 @@ namespace KlayGE
 		OGLESShaderObject();
 		~OGLESShaderObject();
 
-		std::string GenShaderText(ShaderType type, RenderEffect const & effect,
+#if USE_DXBC2GLSL
+		std::string GenHLSLShaderText(ShaderType type, RenderEffect const & effect,
+			RenderTechnique const & tech, RenderPass const & pass) const;
+#else
+		std::string GenCgShaderText(ShaderType type, RenderEffect const & effect,
 			RenderTechnique const & tech, RenderPass const & pass);
+#endif
 
 		bool AttachNativeShader(ShaderType type, RenderEffect const & effect, std::vector<uint32_t> const & shader_desc_ids,
 			std::vector<uint8_t> const & native_shader_block);
@@ -66,11 +71,14 @@ namespace KlayGE
 		};
 		typedef std::vector<parameter_bind_t> parameter_binds_t;
 
+#if !USE_DXBC2GLSL
 		std::string ConvertToESSL(std::string const & glsl, ShaderType type);
+#endif
 		parameter_bind_t GetBindFunc(GLint location, RenderEffectParameterPtr const & param);
-		void CompileToNative(std::string const & shader_text, int type, std::string const & func_name);
 		void AttachGLSL(uint32_t type);
 		void LinkGLSL();
+		void PrintGLSLError(ShaderType type, char const * info);
+		void PrintGLSLErrorAtLine(std::string const & glsl, int err_line);
 
 	private:
 		GLuint glsl_program_;

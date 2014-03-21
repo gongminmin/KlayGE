@@ -602,6 +602,44 @@ namespace KlayGE
 		}
 	}
 
+	void OGLESRenderEngine::UniformMatrix4fv(GLint location, GLsizei count, GLboolean transpose, GLfloat const * value)
+	{
+		bool dirty = false;
+		KLAYGE_AUTO(iter_p, uniformf_cache_.find(cur_program_));
+		if (iter_p == uniformf_cache_.end())
+		{
+			dirty = true;
+			iter_p = uniformf_cache_.insert(std::make_pair(cur_program_, std::map<GLint, float4>())).first;
+		}
+		for (GLsizei i = 0; i < count * 4; ++ i)
+		{
+			KLAYGE_AUTO(iter_v, iter_p->second.find(location + i));
+			if (iter_v == iter_p->second.end())
+			{
+				dirty = true;
+				iter_p->second.insert(std::make_pair(location,
+					float4(value[i * 4 + 0], value[i * 4 + 1], value[i * 4 + 2], value[i * 4 + 3])));
+			}
+			else
+			{
+				if ((iter_v->second.x() != value[i * 4 + 0]) || (iter_v->second.y() != value[i * 4 + 1])
+					|| (iter_v->second.z() != value[i * 4 + 2]) || (iter_v->second.z() != value[i * 4 + 3]))
+				{
+					dirty = true;
+					iter_v->second.x() = value[i * 4 + 0];
+					iter_v->second.y() = value[i * 4 + 1];
+					iter_v->second.z() = value[i * 4 + 2];
+					iter_v->second.w() = value[i * 4 + 3];
+				}
+			}
+		}
+
+		if (dirty)
+		{
+			glUniformMatrix4fv(location, count, transpose, value);
+		}
+	}
+
 	void OGLESRenderEngine::BindFramebuffer(GLuint fbo, bool force)
 	{
 		if (force || (cur_fbo_ != fbo))
@@ -726,7 +764,7 @@ namespace KlayGE
 			}
 		}
 	}
-	
+
 	// ‰÷»æ
 	/////////////////////////////////////////////////////////////////////////////////
 	void OGLESRenderEngine::DoRender(RenderTechnique const & tech, RenderLayout const & rl)
