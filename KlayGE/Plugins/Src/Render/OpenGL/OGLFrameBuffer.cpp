@@ -281,6 +281,64 @@ namespace KlayGE
 
 	void OGLFrameBuffer::Discard(uint32_t flags)
 	{
-		this->Clear(flags, Color(0, 0, 0, 0), 1, 0);
+		if (glloader_GL_VERSION_4_3() || glloader_GL_ARB_invalidate_subdata())
+		{
+			std::vector<GLenum> attachments;
+			if (fbo_ != 0)
+			{
+				if (flags & CBM_Color)
+				{
+					for (size_t i = 0; i < clr_views_.size(); ++ i)
+					{
+						if (clr_views_[i])
+						{
+							attachments.push_back(static_cast<GLenum>(GL_COLOR_ATTACHMENT0 + i));
+						}
+					}
+				}
+				if (flags & CBM_Depth)
+				{
+					if (rs_view_)
+					{
+						attachments.push_back(GL_DEPTH_ATTACHMENT);
+					}
+				}
+				if (flags & CBM_Stencil)
+				{
+					if (rs_view_)
+					{
+						attachments.push_back(GL_STENCIL_ATTACHMENT);
+					}
+				}
+			}
+			else
+			{
+				if (flags & CBM_Color)
+				{
+					attachments.push_back(GL_COLOR);
+				}
+				if (flags & CBM_Depth)
+				{
+					attachments.push_back(GL_DEPTH);
+				}
+				if (flags & CBM_Stencil)
+				{
+					attachments.push_back(GL_STENCIL);
+				}
+			}
+
+			OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+
+			GLuint old_fbo = re.BindFramebuffer();
+			re.BindFramebuffer(fbo_);
+
+			glInvalidateFramebuffer(GL_FRAMEBUFFER, static_cast<GLsizei>(attachments.size()), &attachments[0]);
+
+			re.BindFramebuffer(old_fbo);
+		}
+		else
+		{
+			this->Clear(flags, Color(0, 0, 0, 0), 1, 0);
+		}
 	}
 }

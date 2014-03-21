@@ -234,12 +234,62 @@ namespace KlayGE
 
 	void OGLRenderView::DoDiscardColor()
 	{
-		this->ClearColor(Color(0, 0, 0, 0));
+		if (glloader_GL_VERSION_4_3() || glloader_GL_ARB_invalidate_subdata())
+		{
+			GLenum attachment;
+			if (fbo_ != 0)
+			{
+				attachment = GL_COLOR_ATTACHMENT0 + index_;
+			}
+			else
+			{
+				attachment = GL_COLOR;
+			}
+
+			OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+
+			GLuint old_fbo = re.BindFramebuffer();
+			re.BindFramebuffer(fbo_);
+
+			glInvalidateFramebuffer(GL_FRAMEBUFFER, 1, &attachment);
+
+			re.BindFramebuffer(old_fbo);
+		}
+		else
+		{
+			this->ClearColor(Color(0, 0, 0, 0));
+		}
 	}
 
 	void OGLRenderView::DoDiscardDepthStencil()
 	{
-		this->ClearDepthStencil(1, 0);
+		if (glloader_GL_VERSION_4_3() || glloader_GL_ARB_invalidate_subdata())
+		{
+			GLenum attachments[2];
+			if (fbo_ != 0)
+			{
+				attachments[0] = GL_DEPTH_ATTACHMENT;
+				attachments[1] = GL_STENCIL_ATTACHMENT;
+			}
+			else
+			{
+				attachments[0] = GL_DEPTH;
+				attachments[1] = GL_STENCIL;
+			}
+
+			OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+
+			GLuint old_fbo = re.BindFramebuffer();
+			re.BindFramebuffer(fbo_);
+
+			glInvalidateFramebuffer(GL_FRAMEBUFFER, 2, attachments);
+
+			re.BindFramebuffer(old_fbo);
+		}
+		else
+		{
+			this->ClearDepthStencil(1, 0);
+		}
 	}
 
 

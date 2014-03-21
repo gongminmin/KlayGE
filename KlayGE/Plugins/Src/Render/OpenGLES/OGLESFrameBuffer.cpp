@@ -225,7 +225,7 @@ namespace KlayGE
 
 	void OGLESFrameBuffer::Discard(uint32_t flags)
 	{
-		if (glloader_GLES_EXT_discard_framebuffer())
+		if (glloader_GLES_VERSION_3_0() || glloader_GLES_EXT_discard_framebuffer())
 		{
 			std::vector<GLenum> attachments;
 			if (fbo_ != 0)
@@ -259,15 +259,15 @@ namespace KlayGE
 			{
 				if (flags & CBM_Color)
 				{
-					attachments.push_back(GL_COLOR_EXT);
+					attachments.push_back(GL_COLOR);
 				}
 				if (flags & CBM_Depth)
 				{
-					attachments.push_back(GL_DEPTH_EXT);
+					attachments.push_back(GL_DEPTH);
 				}
 				if (flags & CBM_Stencil)
 				{
-					attachments.push_back(GL_STENCIL_EXT);
+					attachments.push_back(GL_STENCIL);
 				}
 			}
 
@@ -276,7 +276,14 @@ namespace KlayGE
 			GLuint old_fbo = re.BindFramebuffer();
 			re.BindFramebuffer(fbo_);
 
-			glDiscardFramebufferEXT(GL_FRAMEBUFFER, static_cast<GLsizei>(attachments.size()), &attachments[0]);
+			if (glloader_GLES_VERSION_3_0())
+			{
+				glInvalidateFramebuffer(GL_FRAMEBUFFER, static_cast<GLsizei>(attachments.size()), &attachments[0]);
+			}
+			else
+			{
+				glDiscardFramebufferEXT(GL_FRAMEBUFFER, static_cast<GLsizei>(attachments.size()), &attachments[0]);
+			}
 
 			re.BindFramebuffer(old_fbo);
 		}
