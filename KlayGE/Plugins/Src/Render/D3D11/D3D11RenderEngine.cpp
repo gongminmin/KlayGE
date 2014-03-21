@@ -1238,6 +1238,7 @@ namespace KlayGE
 
 		switch (stereo_method_)
 		{
+#if (_WIN32_WINNT >= 0x0602 /*_WIN32_WINNT_WIN8*/)
 		case SM_DXGI:
 			{
 				ID3D11RenderTargetView* rtv = (0 == eye) ? win->D3DBackBufferRTV().get() : win->D3DBackBufferRightEyeRTV().get();
@@ -1256,6 +1257,7 @@ namespace KlayGE
 				stereoscopic_pp_->Render();
 			}
 			break;
+#endif
 
 		case SM_NV3DVision:
 			{
