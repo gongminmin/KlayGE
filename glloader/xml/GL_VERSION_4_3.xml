@@ -259,6 +259,7 @@
 		<token name="GL_VERTEX_BINDING_DIVISOR" value="0x82D6"/>
 		<token name="GL_VERTEX_BINDING_OFFSET" value="0x82D7"/>
 		<token name="GL_VERTEX_BINDING_STRIDE" value="0x82D8"/>
+		<token name="GL_VERTEX_BINDING_BUFFER" value="0x8F4F"/>
 		<token name="GL_MAX_VERTEX_ATTRIB_RELATIVE_OFFSET" value="0x82D9"/>
 		<token name="GL_MAX_VERTEX_ATTRIB_BINDINGS" value="0x82DA"/>
 	</tokens>

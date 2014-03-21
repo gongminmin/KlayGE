@@ -68,7 +68,7 @@ DXBCChunkHeader const * DXBCFindChunk(void const * data, uint32_t fourcc)
 	KlayGE::LittleEndianToNative<sizeof(header_fourcc)>(&header_fourcc);
 	if (header_fourcc != FOURCC_DXBC)
 	{
-		return NULL;
+		return nullptr;
 	}
 	uint32_t num_chunks = header->chunk_count;
 	KlayGE::LittleEndianToNative<sizeof(num_chunks)>(&num_chunks);
@@ -84,7 +84,7 @@ DXBCChunkHeader const * DXBCFindChunk(void const * data, uint32_t fourcc)
 			return chunk;
 		}
 	}
-	return NULL;
+	return nullptr;
 }
 
 DXBCChunkHeader const * DXBCFindShaderBytecode(void const * data)
@@ -128,7 +128,7 @@ DXBCChunkSignatureHeader const * DXBCFindSignature(void const * data, uint32_t k
 		break;
 
 	default:
-		return NULL;
+		return nullptr;
 	}
 
 	return reinterpret_cast<DXBCChunkSignatureHeader const *>(DXBCFindChunk(data, fourcc));

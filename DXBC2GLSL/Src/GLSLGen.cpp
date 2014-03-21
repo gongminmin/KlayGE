@@ -680,6 +680,9 @@ void GLSLGen::ToCopyToInterShaderInputRegisters(std::ostream& out) const
 							<< '[' << v << ']';
 						need_comps = true;
 						break;
+
+					default:
+						break;
 					}
 				}
 				else
@@ -723,6 +726,9 @@ void GLSLGen::ToCopyToInterShaderInputRegisters(std::ostream& out) const
 						}
 						out << sig_desc.semantic_name << sig_desc.semantic_index;
 						need_comps = true;
+						break;
+
+					default:
 						break;
 					}
 				}
@@ -849,6 +855,9 @@ void GLSLGen::ToCopyToInterShaderOutputRegisters(std::ostream& out) const
 					out << "In";
 				}
 				need_comps = true;
+				break;
+
+			default:
 				break;
 			}
 			if (need_comps)
@@ -2156,7 +2165,7 @@ void GLSLGen::ToInstruction(std::ostream& out, ShaderInstruction const & insn) c
 		}
 		if (insn.ops[1]->type != SOT_NULL)
 		{
-			if (insn.ops[0]->type != NULL)
+			if (insn.ops[0]->type != SOT_NULL)
 			{
 				out << "\n";
 			}
@@ -5478,6 +5487,10 @@ ShaderImmType GLSLGen::OperandAsType(ShaderOperand const & op, uint32_t imm_as_t
 
 								case SVT_FLOAT:
 									as_type = SIT_Float;
+									break;
+
+								default:
+									BOOST_ASSERT(false);
 									break;
 								}
 							}

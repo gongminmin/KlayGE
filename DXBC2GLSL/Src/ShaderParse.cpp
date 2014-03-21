@@ -597,7 +597,7 @@ struct ShaderParser
 			}
 		}
 
-		return NULL;
+		return nullptr;
 	}
 
 	uint32_t ParseCBAndResourceBinding() const
@@ -725,7 +725,7 @@ struct ShaderParser
 				}
 				else
 				{
-					var.var_desc.default_val = NULL;
+					var.var_desc.default_val = nullptr;
 				}
 				if (type_offset)
 				{
@@ -811,7 +811,7 @@ struct ShaderParser
 
 	uint32_t ParseSignature(DXBCChunkSignatureHeader const * sig, uint32_t fourcc) const
 	{
-		std::vector<DXBCSignatureParamDesc>* params = NULL;
+		std::vector<DXBCSignatureParamDesc>* params = nullptr;
 		switch (fourcc)
 		{
 		case FOURCC_ISG1:

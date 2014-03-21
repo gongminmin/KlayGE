@@ -60,7 +60,7 @@ namespace boost
 {
 	void assertion_failed(char const * expr, char const * function, char const * file, long line)
 	{
-		throw bad_assert(expr, NULL, function, file, line);
+		throw bad_assert(expr, nullptr, function, file, line);
 	}
 
 	void assertion_failed_msg(char const * expr, char const * msg, char const * function, char const * file, long line)
