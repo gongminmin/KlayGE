@@ -282,7 +282,6 @@ void GLSLGen::ToGLSL(std::ostream& out)
 	out << "\n";
 	for (size_t i = 0; i < program_->insns.size(); ++ i)
 	{
-		current_insn_ = *program_->insns[i];
 		this->ToInstruction(out, *program_->insns[i]);
 		out << "\n";
 		if (i == end_of_program_)
@@ -1339,7 +1338,7 @@ void GLSLGen::ToInstruction(std::ostream& out, ShaderInstruction const & insn) c
 	int selector[4] = { 0 };
 	ShaderImmType oit = GetOpInType(insn.opcode);
 	ShaderImmType oot = GetOpOutType(insn.opcode);
-	bool dual_output = false;
+	uint32_t num_outputs = std::min(insn.num_ops, GetNumOutputs(insn.opcode));
 	int num_comps = 0;
 	switch (insn.opcode)
 	{
@@ -2332,8 +2331,6 @@ void GLSLGen::ToInstruction(std::ostream& out, ShaderInstruction const & insn) c
 				out << " = iTempX[1]";
 				this->ToComponentSelectors(out, *insn.ops[1]);
 				out << ";";
-
-				dual_output = true;
 			}
 		}
 		else
@@ -2366,7 +2363,7 @@ void GLSLGen::ToInstruction(std::ostream& out, ShaderInstruction const & insn) c
 		this->ToOperands(out, *insn.ops[2], oit);
 		out << ", ";
 		this->ToOperands(out, *insn.ops[3], oit);
-		if (SOT_NULL == insn.ops[1]->type)
+		if (insn.ops[1]->type != SOT_NULL)
 		{
 			out << ", ";
 			this->ToOperands(out, *insn.ops[1], oit, false);
@@ -2415,8 +2412,6 @@ void GLSLGen::ToInstruction(std::ostream& out, ShaderInstruction const & insn) c
 			out << "))";
 			this->ToComponentSelectors(out, *insn.ops[1]);
 			out << ";";
-
-			dual_output = true;
 		}
 		break;
 
@@ -2458,8 +2453,6 @@ void GLSLGen::ToInstruction(std::ostream& out, ShaderInstruction const & insn) c
 				out << " = uTempX[1]";
 				this->ToComponentSelectors(out, *insn.ops[1]);
 				out << ";";
-
-				dual_output = true;
 			}
 		}
 		else
@@ -2568,8 +2561,6 @@ void GLSLGen::ToInstruction(std::ostream& out, ShaderInstruction const & insn) c
 			out << " = uTempX[0]";
 			this->ToComponentSelectors(out, *insn.ops[0]);
 			out << ";";
-
-			dual_output = true;
 		}
 		else
 		{
@@ -4940,22 +4931,16 @@ void GLSLGen::ToInstruction(std::ostream& out, ShaderInstruction const & insn) c
 		}
 	}
 
-	if ((insn.num_ops > 0) && (SOT_TEMP == insn.ops[0]->type))
+	for (uint32_t i = 0; i < num_outputs; ++ i)
 	{
-		num_comps = this->GetOperandComponentNum(*insn.ops[0]);
-		for (int i = 0; i < num_comps; ++ i)
+		if (SOT_TEMP == insn.ops[i]->type)
 		{
-			temp_as_type_[static_cast<size_t>(insn.ops[0]->indices[0].disp) * 4
-				+ this->GetComponentSelector(*insn.ops[0], i)] = static_cast<uint8_t>(oot);
-		}
-	}
-	if (dual_output && (insn.num_ops > 1) && (SOT_TEMP == insn.ops[1]->type))
-	{
-		num_comps = this->GetOperandComponentNum(*insn.ops[1]);
-		for (int i = 0; i < num_comps; ++ i)
-		{
-			temp_as_type_[static_cast<size_t>(insn.ops[1]->indices[0].disp) * 4
-				+ this->GetComponentSelector(*insn.ops[1], i)] = static_cast<uint8_t>(oot);
+			num_comps = this->GetOperandComponentNum(*insn.ops[i]);
+			for (int j = 0; j < num_comps; ++ j)
+			{
+				temp_as_type_[static_cast<size_t>(insn.ops[i]->indices[0].disp) * 4
+					+ this->GetComponentSelector(*insn.ops[i], j)] = static_cast<uint8_t>(oot);
+			}
 		}
 	}
 }
@@ -4965,29 +4950,6 @@ void GLSLGen::ToOperands(std::ostream& out, ShaderOperand const & op, uint32_t i
 {
 	ShaderImmType imm_type = static_cast<ShaderImmType>(imm_as_type & 0xFF);
 	ShaderImmType as_type = static_cast<ShaderImmType>(imm_as_type >> 8);
-
-	if (this->IsImmediateNumber(op) && (SO_MOV == current_insn_.opcode))
-	{
-		ShaderRegisterComponentType srct = this->GetOutputParamType(*current_insn_.ops[0]);
-		switch (srct)
-		{
-		case SRCT_UINT32:
-			imm_type = SIT_UInt;
-			break;
-
-		case SRCT_SINT32:
-			imm_type = SIT_Int;
-			break;
-
-		case SRCT_FLOAT32:
-			imm_type = SIT_Float;
-			break;
-
-		default:
-			BOOST_ASSERT(false);
-			break;
-		}
-	}
 
 	if (op.neg)
 	{
@@ -5323,29 +5285,6 @@ ShaderImmType GLSLGen::OperandAsType(ShaderOperand const & op, uint32_t imm_as_t
 {
 	ShaderImmType imm_type = static_cast<ShaderImmType>(imm_as_type & 0xFF);
 	ShaderImmType as_type = static_cast<ShaderImmType>(imm_as_type >> 8);
-
-	if (this->IsImmediateNumber(op) && (SO_MOV == current_insn_.opcode))
-	{
-		ShaderRegisterComponentType srct = this->GetOutputParamType(*current_insn_.ops[0]);
-		switch (srct)
-		{
-		case SRCT_UINT32:
-			imm_type = SIT_UInt;
-			break;
-
-		case SRCT_SINT32:
-			imm_type = SIT_Int;
-			break;
-
-		case SRCT_FLOAT32:
-			imm_type = SIT_Float;
-			break;
-
-		default:
-			BOOST_ASSERT(false);
-			break;
-		}
-	}
 
 	if (SOT_IMMEDIATE32 == op.type)
 	{

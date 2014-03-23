@@ -593,4 +593,43 @@ inline ShaderImmType GetOpOutType(uint32_t opcode)
 	return sit;
 }
 
+// Return the number of outputs
+inline uint32_t GetNumOutputs(uint32_t opcode)
+{
+	uint32_t ret;
+	switch (opcode)
+	{
+	case SO_SINCOS:
+	case SO_SWAPC:
+	case SO_IMUL:
+	case SO_UMUL:
+	case SO_UDIV:
+	case SO_UADDC:
+	case SO_USUBB:
+		ret = 2;
+		break;
+
+	case SO_RET:
+	case SO_NOP:
+	case SO_LOOP:
+	case SO_ENDLOOP:
+	case SO_BREAK:
+	case SO_CONTINUE:
+	case SO_DEFAULT:
+	case SO_ENDSWITCH:
+	case SO_ENDIF:
+	case SO_ELSE:
+	case SO_EMIT:
+	case SO_EMITTHENCUT:
+		ret = 0;
+		break;
+
+	default:
+		ret = 1;
+		break;
+	}
+
+	return ret;
+}
+
 #endif		// _DXBC2GLSL_SHADER_HPP

@@ -100,7 +100,6 @@ private:
 private:
 	KlayGE::shared_ptr<ShaderProgram> program_;
 
-	ShaderInstruction current_insn_;
 	ShaderType shader_type_;
 	bool has_gs_;
 	std::vector<DclIndexRangeInfo> idx_range_info_;
