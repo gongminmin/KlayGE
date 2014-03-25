@@ -181,13 +181,8 @@ namespace KlayGE
 
 	void OGLESTexture::BuildMipSubLevels()
 	{
-		this->GLBindTexture();
-		glGenerateMipmap(target_type_);
-	}
-
-	void OGLESTexture::GLBindTexture()
-	{
 		glBindTexture(target_type_, texture_);
+		glGenerateMipmap(target_type_);
 	}
 
 	void OGLESTexture::TexParameteri(GLenum pname, GLint param)

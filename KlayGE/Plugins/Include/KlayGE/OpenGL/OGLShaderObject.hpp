@@ -102,6 +102,8 @@ namespace KlayGE
 		parameter_binds_t param_binds_;
 
 		std::vector<std::pair<TexturePtr, SamplerStateObjectPtr> > samplers_;
+		std::vector<GLuint> gl_bind_targets_;
+		std::vector<GLuint> gl_bind_textures_;
 
 		std::vector<tuple<std::string, RenderEffectParameterPtr, RenderEffectParameterPtr, uint32_t> > tex_sampler_binds_;
 

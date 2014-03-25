@@ -73,6 +73,7 @@ namespace KlayGE
 		void AdjustProjectionMatrix(float4x4& proj_mat);
 
 		void ActiveTexture(GLenum tex_unit);
+		void BindTextures(GLuint first, GLsizei count, GLuint const * targets, GLuint const * textures, bool force = false);
 		void BindBuffer(GLenum target, GLuint buffer, bool force = false);
 		void DeleteBuffers(GLsizei n, GLuint const * buffers);
 
@@ -186,7 +187,9 @@ namespace KlayGE
 		std::vector<GLuint> so_buffs_;
 
 		GLenum active_tex_unit_;
-		std::map<GLenum, GLuint> binded_buffer_;
+		std::vector<GLuint> binded_targets_;
+		std::vector<GLuint> binded_textures_;
+		std::map<GLenum, GLuint> binded_buffers_;
 
 		GLuint restart_index_;
 

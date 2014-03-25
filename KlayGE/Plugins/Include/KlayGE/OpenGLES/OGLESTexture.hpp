@@ -50,7 +50,6 @@ namespace KlayGE
 
 		void BuildMipSubLevels();
 
-		void GLBindTexture();
 		GLuint GLTexture() const
 		{
 			return texture_;

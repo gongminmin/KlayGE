@@ -985,9 +985,11 @@ namespace
 	{
 	public:
 		SetOGLESShaderParameter(std::vector<std::pair<TexturePtr, SamplerStateObjectPtr> >& samplers,
+					std::vector<GLuint>& gl_bind_targets, std::vector<GLuint>& gl_bind_textures,
 					GLint location, GLuint stage,
 					RenderEffectParameterPtr const & tex_param, RenderEffectParameterPtr const & sampler_param)
-			: samplers_(&samplers), location_(location), stage_(stage), tex_param_(tex_param), sampler_param_(sampler_param)
+			: samplers_(&samplers), gl_bind_targets_(&gl_bind_targets), gl_bind_textures_(&gl_bind_textures),
+				location_(location), stage_(stage), tex_param_(tex_param), sampler_param_(sampler_param)
 		{
 		}
 
@@ -996,28 +998,26 @@ namespace
 			tex_param_->Value((*samplers_)[stage_].first);
 			sampler_param_->Value((*samplers_)[stage_].second);
 
-			OGLESRenderEngine& re = *checked_cast<OGLESRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 			if ((*samplers_)[stage_].first)
 			{
-				re.ActiveTexture(GL_TEXTURE0 + stage_);
 				checked_pointer_cast<OGLESSamplerStateObject>((*samplers_)[stage_].second)->Active((*samplers_)[stage_].first);
-				GLuint const tex_type = checked_pointer_cast<OGLESTexture>((*samplers_)[stage_].first)->GLType();
-				GLuint const gl_tex = checked_pointer_cast<OGLESTexture>((*samplers_)[stage_].first)->GLTexture();
-				glBindTexture(tex_type, gl_tex);
-
-				re.Uniform1i(location_, stage_);
+				(*gl_bind_targets_)[stage_] = checked_pointer_cast<OGLESTexture>((*samplers_)[stage_].first)->GLType();
+				(*gl_bind_textures_)[stage_] = checked_pointer_cast<OGLESTexture>((*samplers_)[stage_].first)->GLTexture();
 			}
 			else
 			{
-				re.ActiveTexture(GL_TEXTURE0 + stage_);
-				glBindTexture(GL_TEXTURE_2D, 0);
-
-				re.Uniform1i(location_, stage_);
+				(*gl_bind_targets_)[stage_] = GL_TEXTURE_2D;
+				(*gl_bind_textures_)[stage_] = 0;
 			}
+
+			OGLESRenderEngine& re = *checked_cast<OGLESRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+			re.Uniform1i(location_, stage_);
 		}
 
 	private:
 		std::vector<std::pair<TexturePtr, SamplerStateObjectPtr> >* samplers_;
+		std::vector<GLuint>* gl_bind_targets_;
+		std::vector<GLuint>* gl_bind_textures_;
 		GLint location_;
 		GLuint stage_;
 		RenderEffectParameterPtr tex_param_;
@@ -2946,9 +2946,12 @@ namespace KlayGE
 
 										uint32_t index = static_cast<uint32_t>(samplers_.size());
 										samplers_.resize(index + 1);
+										gl_bind_targets_.resize(index + 1);
+										gl_bind_textures_.resize(index + 1);
 
-										pb.func = SetOGLESShaderParameter<std::pair<TexturePtr, SamplerStateObjectPtr> >(samplers_, location,
-											index, get<1>(tex_sampler_binds_[i]), get<2>(tex_sampler_binds_[i]));
+										pb.func = SetOGLESShaderParameter<std::pair<TexturePtr, SamplerStateObjectPtr> >(samplers_,
+											gl_bind_targets_, gl_bind_textures_,
+											location, index, get<1>(tex_sampler_binds_[i]), get<2>(tex_sampler_binds_[i]));
 
 										param_binds_.push_back(pb);
 
@@ -3040,8 +3043,11 @@ namespace KlayGE
 
 							uint32_t index = static_cast<uint32_t>(ret->samplers_.size());
 							ret->samplers_.resize(index + 1);
+							ret->gl_bind_targets_.resize(index + 1);
+							ret->gl_bind_textures_.resize(index + 1);
 
 							new_pb.func = SetOGLESShaderParameter<std::pair<TexturePtr, SamplerStateObjectPtr> >(ret->samplers_,
+								ret->gl_bind_targets_, ret->gl_bind_textures_,
 								new_pb.location, index,
 								get<1>(ret->tex_sampler_binds_[new_pb.tex_sampler_bind_index]),
 								get<2>(ret->tex_sampler_binds_[new_pb.tex_sampler_bind_index]));
@@ -3340,6 +3346,11 @@ namespace KlayGE
 		KLAYGE_FOREACH(ParamBindsType::reference pb, param_binds_)
 		{
 			pb.func();
+		}
+
+		if (!gl_bind_textures_.empty())
+		{
+			re.BindTextures(0, gl_bind_textures_.size(), &gl_bind_targets_[0], &gl_bind_textures_[0]);
 		}
 
 #ifdef KLAYGE_DEBUG

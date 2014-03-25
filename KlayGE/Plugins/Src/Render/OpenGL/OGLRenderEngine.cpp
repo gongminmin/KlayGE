@@ -192,7 +192,9 @@ namespace KlayGE
 		active_tex_unit_ = GL_TEXTURE0;
 		glActiveTexture(active_tex_unit_);
 
-		binded_buffer_.clear();
+		binded_targets_.clear();
+		binded_textures_.clear();
+		binded_buffers_.clear();
 
 		fb_srgb_cache_ = false;
 		if (glloader_GL_VERSION_3_0() || glloader_GL_ARB_framebuffer_sRGB() || glloader_GL_EXT_framebuffer_sRGB())
@@ -210,13 +212,62 @@ namespace KlayGE
 		}
 	}
 
+	void OGLRenderEngine::BindTextures(GLuint first, GLsizei count, GLuint const * targets, GLuint const * textures, bool force)
+	{
+		if (first + count > binded_targets_.size())
+		{
+			binded_targets_.resize(first + count, 0);
+			binded_textures_.resize(binded_targets_.size(), 0xFFFFFFFF);
+		}
+
+		bool dirty = force;
+		if (!dirty)
+		{
+			uint32_t start_dirty = first;
+			uint32_t end_dirty = first + count;
+			while ((start_dirty != end_dirty) && (binded_targets_[start_dirty] == targets[start_dirty])
+				&& (binded_textures_[start_dirty] == textures[start_dirty]))
+			{
+				++ start_dirty;
+			}
+			while ((start_dirty != end_dirty) && (binded_targets_[end_dirty - 1] == targets[end_dirty - 1])
+				&& (binded_textures_[end_dirty - 1] == textures[end_dirty - 1]))
+			{
+				-- end_dirty;
+			}
+
+			dirty = (end_dirty - start_dirty > 0);
+			first = start_dirty;
+			count = end_dirty - start_dirty;
+		}
+
+		if (dirty)
+		{
+			if (glloader_GL_VERSION_4_4() || glloader_GL_ARB_multi_bind())
+			{
+				glBindTextures(first, count, &textures[first]);
+			}
+			else
+			{
+				for (size_t i = first; i < first + count; ++ i)
+				{
+					this->ActiveTexture(GL_TEXTURE0 + i);
+					glBindTexture(targets[i], textures[i]);
+				}
+			}
+
+			memcpy(&binded_targets_[first], targets, count * sizeof(targets[0]));
+			memcpy(&binded_textures_[first], textures, count * sizeof(textures[0]));
+		}
+	}
+
 	void OGLRenderEngine::BindBuffer(GLenum target, GLuint buffer, bool force)
 	{
-		KLAYGE_AUTO(iter, binded_buffer_.find(target));
-		if (force || (iter == binded_buffer_.end()) || (iter->second != buffer))
+		KLAYGE_AUTO(iter, binded_buffers_.find(target));
+		if (force || (iter == binded_buffers_.end()) || (iter->second != buffer))
 		{
 			glBindBuffer(target, buffer);
-			binded_buffer_[target] = buffer;
+			binded_buffers_[target] = buffer;
 		}
 	}
 
@@ -224,11 +275,11 @@ namespace KlayGE
 	{
 		for (GLsizei i = 0; i < n; ++ i)
 		{
-			for (KLAYGE_AUTO(iter, binded_buffer_.begin()); iter != binded_buffer_.end();)
+			for (KLAYGE_AUTO(iter, binded_buffers_.begin()); iter != binded_buffers_.end();)
 			{
 				if (iter->second == buffers[i])
 				{
-					binded_buffer_.erase(iter ++);
+					binded_buffers_.erase(iter ++);
 				}
 				else
 				{

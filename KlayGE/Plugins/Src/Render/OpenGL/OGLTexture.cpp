@@ -217,20 +217,8 @@ namespace KlayGE
 
 	void OGLTexture::BuildMipSubLevels()
 	{
-		if (glloader_GL_EXT_framebuffer_object())
-		{
-			this->GLBindTexture();
-			glGenerateMipmapEXT(target_type_);
-		}
-		else
-		{
-			THR(errc::function_not_supported);
-		}
-	}
-
-	void OGLTexture::GLBindTexture()
-	{
 		glBindTexture(target_type_, texture_);
+		glGenerateMipmapEXT(target_type_);
 	}
 
 	void OGLTexture::TexParameteri(GLenum pname, GLint param)
