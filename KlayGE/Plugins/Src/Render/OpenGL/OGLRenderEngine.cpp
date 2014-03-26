@@ -157,8 +157,6 @@ namespace KlayGE
 
 		glGenFramebuffersEXT(1, &fbo_blit_src_);
 		glGenFramebuffersEXT(1, &fbo_blit_dst_);
-
-		use_gl3_tfb_ = glloader_GL_VERSION_3_0() ? true : false;
 	}
 
 	void OGLRenderEngine::CheckConfig(RenderSettings& settings)
@@ -210,6 +208,11 @@ namespace KlayGE
 			glActiveTexture(tex_unit);
 			active_tex_unit_ = tex_unit;
 		}
+	}
+
+	void OGLRenderEngine::BindTexture(GLuint index, GLuint target, GLuint texture, bool force)
+	{
+		this->BindTextures(index, 1, &target, &texture, force);
 	}
 
 	void OGLRenderEngine::BindTextures(GLuint first, GLsizei count, GLuint const * targets, GLuint const * textures, bool force)
@@ -979,14 +982,7 @@ namespace KlayGE
 
 			if (so_rl_)
 			{
-				if (use_gl3_tfb_)
-				{
-					glBeginTransformFeedback(so_primitive_mode_);
-				}
-				else
-				{
-					glBeginTransformFeedbackEXT(so_primitive_mode_);
-				}
+				glBeginTransformFeedback(so_primitive_mode_);
 			}
 
 			if (rl.UseIndices())
@@ -1000,21 +996,10 @@ namespace KlayGE
 					if (so_rl_)
 					{
 						OGLShaderObjectPtr shader = checked_pointer_cast<OGLShaderObject>(pass->GetShaderObject());
-						if (use_gl3_tfb_)
+						glTransformFeedbackVaryings(shader->GLSLProgram(), static_cast<GLsizei>(so_vars_ptrs_.size()), &so_vars_ptrs_[0], GL_SEPARATE_ATTRIBS);
+						for (uint32_t j = 0; j < so_buffs_.size(); ++ j)
 						{
-							glTransformFeedbackVaryings(shader->GLSLProgram(), static_cast<GLsizei>(so_vars_ptrs_.size()), &so_vars_ptrs_[0], GL_SEPARATE_ATTRIBS);
-							for (uint32_t j = 0; j < so_buffs_.size(); ++ j)
-							{
-								glBindBufferBase(GL_TRANSFORM_FEEDBACK_BUFFER, j, so_buffs_[j]);
-							}
-						}
-						else
-						{
-							glTransformFeedbackVaryingsEXT(shader->GLSLProgram(), static_cast<GLsizei>(so_vars_ptrs_.size()), &so_vars_ptrs_[0], GL_SEPARATE_ATTRIBS_EXT);
-							for (uint32_t j = 0; j < so_buffs_.size(); ++ j)
-							{
-								glBindBufferBaseEXT(GL_TRANSFORM_FEEDBACK_BUFFER_EXT, j, so_buffs_[j]);
-							}
+							glBindBufferBase(GL_TRANSFORM_FEEDBACK_BUFFER, j, so_buffs_[j]);
 						}
 					}
 
@@ -1034,21 +1019,10 @@ namespace KlayGE
 					if (so_rl_)
 					{
 						OGLShaderObjectPtr shader = checked_pointer_cast<OGLShaderObject>(pass->GetShaderObject());
-						if (use_gl3_tfb_)
+						glTransformFeedbackVaryings(shader->GLSLProgram(), static_cast<GLsizei>(so_vars_ptrs_.size()), &so_vars_ptrs_[0], GL_SEPARATE_ATTRIBS);
+						for (uint32_t j = 0; j < so_buffs_.size(); ++ j)
 						{
-							glTransformFeedbackVaryings(shader->GLSLProgram(), static_cast<GLsizei>(so_vars_ptrs_.size()), &so_vars_ptrs_[0], GL_SEPARATE_ATTRIBS);
-							for (uint32_t j = 0; j < so_buffs_.size(); ++ j)
-							{
-								glBindBufferBase(GL_TRANSFORM_FEEDBACK_BUFFER, j, so_buffs_[j]);
-							}
-						}
-						else
-						{
-							glTransformFeedbackVaryingsEXT(shader->GLSLProgram(), static_cast<GLsizei>(so_vars_ptrs_.size()), &so_vars_ptrs_[0], GL_SEPARATE_ATTRIBS_EXT);
-							for (uint32_t j = 0; j < so_buffs_.size(); ++ j)
-							{
-								glBindBufferBaseEXT(GL_TRANSFORM_FEEDBACK_BUFFER_EXT, j, so_buffs_[j]);
-							}
+							glBindBufferBase(GL_TRANSFORM_FEEDBACK_BUFFER, j, so_buffs_[j]);
 						}
 					}
 
@@ -1059,14 +1033,7 @@ namespace KlayGE
 
 			if (so_rl_)
 			{
-				if (use_gl3_tfb_)
-				{
-					glEndTransformFeedback();
-				}
-				else
-				{
-					glEndTransformFeedbackEXT();
-				}
+				glEndTransformFeedback();
 			}
 
 			for (size_t i = 0; i < inst_format_size; ++ i)
@@ -1165,14 +1132,7 @@ namespace KlayGE
 
 				if (so_rl_)
 				{
-					if (use_gl3_tfb_)
-					{
-						glBeginTransformFeedback(so_primitive_mode_);
-					}
-					else
-					{
-						glBeginTransformFeedbackEXT(so_primitive_mode_);
-					}
+					glBeginTransformFeedback(so_primitive_mode_);
 				}
 
 				if (rl.UseIndices())
@@ -1186,21 +1146,10 @@ namespace KlayGE
 						if (so_rl_)
 						{
 							OGLShaderObjectPtr shader = checked_pointer_cast<OGLShaderObject>(pass->GetShaderObject());
-							if (use_gl3_tfb_)
+							glTransformFeedbackVaryings(shader->GLSLProgram(), static_cast<GLsizei>(so_vars_ptrs_.size()), &so_vars_ptrs_[0], GL_SEPARATE_ATTRIBS);
+							for (uint32_t j = 0; j < so_buffs_.size(); ++ j)
 							{
-								glTransformFeedbackVaryings(shader->GLSLProgram(), static_cast<GLsizei>(so_vars_ptrs_.size()), &so_vars_ptrs_[0], GL_SEPARATE_ATTRIBS);
-								for (uint32_t j = 0; j < so_buffs_.size(); ++ j)
-								{
-									glBindBufferBase(GL_TRANSFORM_FEEDBACK_BUFFER, j, so_buffs_[j]);
-								}
-							}
-							else
-							{
-								glTransformFeedbackVaryingsEXT(shader->GLSLProgram(), static_cast<GLsizei>(so_vars_ptrs_.size()), &so_vars_ptrs_[0], GL_SEPARATE_ATTRIBS_EXT);
-								for (uint32_t j = 0; j < so_buffs_.size(); ++ j)
-								{
-									glBindBufferBaseEXT(GL_TRANSFORM_FEEDBACK_BUFFER_EXT, j, so_buffs_[j]);
-								}
+								glBindBufferBase(GL_TRANSFORM_FEEDBACK_BUFFER, j, so_buffs_[j]);
 							}
 						}
 
@@ -1220,21 +1169,10 @@ namespace KlayGE
 						if (so_rl_)
 						{
 							OGLShaderObjectPtr shader = checked_pointer_cast<OGLShaderObject>(pass->GetShaderObject());
-							if (use_gl3_tfb_)
+							glTransformFeedbackVaryings(shader->GLSLProgram(), static_cast<GLsizei>(so_vars_ptrs_.size()), &so_vars_ptrs_[0], GL_SEPARATE_ATTRIBS);
+							for (uint32_t j = 0; j < so_buffs_.size(); ++ j)
 							{
-								glTransformFeedbackVaryings(shader->GLSLProgram(), static_cast<GLsizei>(so_vars_ptrs_.size()), &so_vars_ptrs_[0], GL_SEPARATE_ATTRIBS);
-								for (uint32_t j = 0; j < so_buffs_.size(); ++ j)
-								{
-									glBindBufferBase(GL_TRANSFORM_FEEDBACK_BUFFER, j, so_buffs_[j]);
-								}
-							}
-							else
-							{
-								glTransformFeedbackVaryingsEXT(shader->GLSLProgram(), static_cast<GLsizei>(so_vars_ptrs_.size()), &so_vars_ptrs_[0], GL_SEPARATE_ATTRIBS_EXT);
-								for (uint32_t j = 0; j < so_buffs_.size(); ++ j)
-								{
-									glBindBufferBaseEXT(GL_TRANSFORM_FEEDBACK_BUFFER_EXT, j, so_buffs_[j]);
-								}
+								glBindBufferBase(GL_TRANSFORM_FEEDBACK_BUFFER, j, so_buffs_[j]);
 							}
 						}
 
@@ -1245,14 +1183,7 @@ namespace KlayGE
 
 				if (so_rl_)
 				{
-					if (use_gl3_tfb_)
-					{
-						glEndTransformFeedback();
-					}
-					else
-					{
-						glEndTransformFeedbackEXT();
-					}
+					glEndTransformFeedback();
 				}
 			}
 		}

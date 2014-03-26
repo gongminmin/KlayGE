@@ -217,7 +217,8 @@ namespace KlayGE
 
 	void OGLTexture::BuildMipSubLevels()
 	{
-		glBindTexture(target_type_, texture_);
+		OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+		re.BindTexture(0, target_type_, texture_);
 		glGenerateMipmapEXT(target_type_);
 	}
 
@@ -232,7 +233,8 @@ namespace KlayGE
 			}
 			else
 			{
-				glBindTexture(target_type_, texture_);
+				OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+				re.BindTexture(0, target_type_, texture_);
 				glTexParameteri(target_type_, pname, param);
 			}
 
@@ -251,7 +253,8 @@ namespace KlayGE
 			}
 			else
 			{
-				glBindTexture(target_type_, texture_);
+				OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+				re.BindTexture(0, target_type_, texture_);
 				glTexParameterf(target_type_, pname, param);
 			}
 
@@ -271,7 +274,8 @@ namespace KlayGE
 			}
 			else
 			{
-				glBindTexture(target_type_, texture_);
+				OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+				re.BindTexture(0, target_type_, texture_);
 				glTexParameterfv(target_type_, pname, param);
 			}
 

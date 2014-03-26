@@ -21,6 +21,7 @@
 
 #include <glloader/glloader.h>
 
+#include <KlayGE/OpenGLES/OGLESRenderEngine.hpp>
 #include <KlayGE/OpenGLES/OGLESMapping.hpp>
 #include <KlayGE/OpenGLES/OGLESTexture.hpp>
 
@@ -181,7 +182,8 @@ namespace KlayGE
 
 	void OGLESTexture::BuildMipSubLevels()
 	{
-		glBindTexture(target_type_, texture_);
+		OGLESRenderEngine& re = *checked_cast<OGLESRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+		re.BindTexture(0, target_type_, texture_);
 		glGenerateMipmap(target_type_);
 	}
 
@@ -190,7 +192,8 @@ namespace KlayGE
 		KLAYGE_AUTO(iter, tex_param_i_.find(pname));
 		if ((iter == tex_param_i_.end()) || (iter->second != param))
 		{
-			glBindTexture(target_type_, texture_);
+			OGLESRenderEngine& re = *checked_cast<OGLESRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+			re.BindTexture(0, target_type_, texture_);
 			glTexParameteri(target_type_, pname, param);
 
 			tex_param_i_[pname] = param;
@@ -202,7 +205,8 @@ namespace KlayGE
 		KLAYGE_AUTO(iter, tex_param_f_.find(pname));
 		if ((iter == tex_param_f_.end()) || (iter->second != param))
 		{
-			glBindTexture(target_type_, texture_);
+			OGLESRenderEngine& re = *checked_cast<OGLESRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+			re.BindTexture(0, target_type_, texture_);
 			glTexParameterf(target_type_, pname, param);
 
 			tex_param_f_[pname] = param;

@@ -169,6 +169,11 @@ namespace KlayGE
 		}
 	}
 
+	void OGLESRenderEngine::BindTexture(GLuint index, GLuint target, GLuint texture, bool force)
+	{
+		this->BindTextures(index, 1, &target, &texture, force);
+	}
+
 	void OGLESRenderEngine::BindTextures(GLuint first, GLsizei count, GLuint const * targets, GLuint const * textures, bool force)
 	{
 		if (first + count > binded_targets_.size())
@@ -918,7 +923,8 @@ namespace KlayGE
 					if (so_rl_)
 					{
 						OGLESShaderObjectPtr shader = checked_pointer_cast<OGLESShaderObject>(pass->GetShaderObject());
-						glTransformFeedbackVaryings(shader->GLSLProgram(), static_cast<GLsizei>(so_vars_ptrs_.size()), &so_vars_ptrs_[0], GL_SEPARATE_ATTRIBS);							for (uint32_t j = 0; j < so_buffs_.size(); ++ j)
+						glTransformFeedbackVaryings(shader->GLSLProgram(), static_cast<GLsizei>(so_vars_ptrs_.size()), &so_vars_ptrs_[0], GL_SEPARATE_ATTRIBS);
+						for (uint32_t j = 0; j < so_buffs_.size(); ++ j)
 						{
 							glBindBufferBase(GL_TRANSFORM_FEEDBACK_BUFFER, j, so_buffs_[j]);
 						}

@@ -345,7 +345,7 @@ namespace KlayGE
 				re.BindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
 				re.BindBuffer(GL_PIXEL_PACK_BUFFER, pbos_[(array_index * 6 + face) * num_mip_maps_ + level]);
 
-				glBindTexture(target_type_, texture_);
+				re.BindTexture(0, target_type_, texture_);
 				if (IsCompressedFormat(format_))
 				{
 					glGetCompressedTexImage(GL_TEXTURE_CUBE_MAP_POSITIVE_X + face, level, nullptr);
@@ -419,7 +419,7 @@ namespace KlayGE
 					image_size = ((widths_[level] + 3) / 4) * ((widths_[level] + 3) / 4) * block_size;
 				}
 
-				glBindTexture(target_type_, texture_);
+				re.BindTexture(0, target_type_, texture_);
 
 				re.BindBuffer(GL_PIXEL_PACK_BUFFER, 0);
 				re.BindBuffer(GL_PIXEL_UNPACK_BUFFER, pbos_[(array_index * 6 + face) * num_mip_maps_ + level]);

@@ -319,7 +319,7 @@ namespace KlayGE
 				re.BindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
 				re.BindBuffer(GL_PIXEL_PACK_BUFFER, pbos_[level]);
 
-				glBindTexture(target_type_, texture_);
+				re.BindTexture(0, target_type_, texture_);
 				glGetTexImage(target_type_, level, gl_format, gl_type, nullptr);
 
 				p = static_cast<uint8_t*>(glMapBuffer(GL_PIXEL_PACK_BUFFER, GL_READ_ONLY));
@@ -382,7 +382,7 @@ namespace KlayGE
 					image_size = ((widths_[level] + 3) / 4) * ((heights_[level] + 3) / 4) * block_size;
 				}
 
-				glBindTexture(target_type_, texture_);
+				re.BindTexture(0, target_type_, texture_);
 
 				re.BindBuffer(GL_PIXEL_PACK_BUFFER, 0);
 				re.BindBuffer(GL_PIXEL_UNPACK_BUFFER, pbos_[level]);

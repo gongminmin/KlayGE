@@ -320,7 +320,8 @@ namespace KlayGE
 				GLenum gl_type;
 				OGLESMapping::MappingFormat(gl_internalFormat, gl_format, gl_type, format_);
 
-				glBindTexture(target_type_, texture_);
+				OGLESRenderEngine& re = *checked_cast<OGLESRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+				re.BindTexture(0, target_type_, texture_);
 
 				if (IsCompressedFormat(format_))
 				{

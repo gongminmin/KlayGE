@@ -382,7 +382,8 @@ namespace KlayGE
 		}
 		else
 		{
-			glBindTexture(texture_1d_.GLType(), tex_);
+			OGLESRenderEngine& re = *checked_cast<OGLESRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+			re.BindTexture(0, texture_1d_.GLType(), tex_);
 
 			std::vector<Color> mem_clr(width_, clr);
 			glTexSubImage2D(texture_1d_.GLType(), level_, 0, 0, width_, 1, GL_RGBA, GL_FLOAT, &mem_clr[0]);
@@ -459,7 +460,8 @@ namespace KlayGE
 		}
 		else
 		{
-			glBindTexture(texture_2d_.GLType(), tex_);
+			OGLESRenderEngine& re = *checked_cast<OGLESRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+			re.BindTexture(0, texture_2d_.GLType(), tex_);
 
 			std::vector<Color> mem_clr(width_ * height_, clr);
 			glTexSubImage2D(texture_2d_.GLType(), level_, 0, 0, width_, height_, GL_RGBA, GL_FLOAT, &mem_clr[0]);
@@ -645,14 +647,15 @@ namespace KlayGE
 		BOOST_ASSERT(att != FrameBuffer::ATT_DepthStencil);
 		UNREF_PARAM(att);
 
+		OGLESRenderEngine& re = *checked_cast<OGLESRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		if (glloader_GLES_VERSION_3_0())
 		{
-			glBindTexture(GL_TEXTURE_3D, tex_);
+			re.BindTexture(0, GL_TEXTURE_3D, tex_);
 			glCopyTexSubImage3D(GL_TEXTURE_3D, level_, 0, 0, slice_, 0, 0, width_, height_);
 		}
 		else
 		{
-			glBindTexture(GL_TEXTURE_3D_OES, tex_);
+			re.BindTexture(0, GL_TEXTURE_3D_OES, tex_);
 			glCopyTexSubImage3DOES(GL_TEXTURE_3D_OES, level_, 0, 0, slice_, 0, 0, width_, height_);
 		}
 	}
@@ -688,7 +691,8 @@ namespace KlayGE
 		}
 		else
 		{
-			glBindTexture(GL_TEXTURE_CUBE_MAP, tex_);
+			OGLESRenderEngine& re = *checked_cast<OGLESRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+			re.BindTexture(0, GL_TEXTURE_CUBE_MAP, tex_);
 
 			std::vector<Color> mem_clr(width_ * height_, clr);
 			glTexSubImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + face_ - Texture::CF_Positive_X,
