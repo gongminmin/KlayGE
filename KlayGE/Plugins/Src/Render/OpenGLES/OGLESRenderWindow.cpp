@@ -191,21 +191,18 @@ namespace KlayGE
 		EGLint egl_major_ver, egl_minor_ver;
 		EGLint num_cfgs;
 		eglInitialize(display_, &egl_major_ver, &egl_minor_ver);
-		eglGetConfigs(display_, nullptr, 0, &num_cfgs);
 
-		EGLint context_major_version = -1;
-		EGLint context_minor_version = -1;
+		int start_version_index = -1;
 		for (size_t i = 0; i < available_versions.size(); ++ i)
 		{
 			visual_attr[1] = get<1>(available_versions[i]);
 			if (eglChooseConfig(display_, &visual_attr[0], &cfg_, 1, &num_cfgs))
 			{
-				context_major_version = get<2>(available_versions[i]);
-				context_minor_version = get<3>(available_versions[i]);
+				start_version_index = static_cast<int>(i);
 				break;
 			}
 		}
-		BOOST_ASSERT((context_major_version != -1) && (context_minor_version != -1));
+		BOOST_ASSERT(start_version_index != -1);
 
 		NativeWindowType wnd;
 #if defined KLAYGE_PLATFORM_WINDOWS
@@ -221,13 +218,28 @@ namespace KlayGE
 
 		surf_ = eglCreateWindowSurface(display_, cfg_, wnd, nullptr);
 
-		EGLint ctx_attr[] = { EGL_CONTEXT_MAJOR_VERSION_KHR, context_major_version,
-			EGL_CONTEXT_MINOR_VERSION_KHR, context_minor_version, EGL_NONE };
-		if (0 == context_minor_version > 0)
+		context_ = nullptr;
+		EGLint ctx_attr[] = { EGL_CONTEXT_MAJOR_VERSION_KHR, get<2>(available_versions[start_version_index]),
+			EGL_CONTEXT_MINOR_VERSION_KHR, get<3>(available_versions[start_version_index]), EGL_NONE };
+		size_t test_version_index = start_version_index;
+		while ((nullptr == context_) && (test_version_index < available_versions.size()))
 		{
-			ctx_attr[2] = EGL_NONE;
+			ctx_attr[1] = get<2>(available_versions[test_version_index]);
+			ctx_attr[2] = EGL_CONTEXT_MINOR_VERSION_KHR;
+			ctx_attr[3] = get<3>(available_versions[test_version_index]);
+			context_ = eglCreateContext(display_, cfg_, EGL_NO_CONTEXT, ctx_attr);
+
+			if (nullptr == context_)
+			{
+				if (0 == ctx_attr[3] > 0)
+				{
+					ctx_attr[2] = EGL_NONE;
+				}
+				context_ = eglCreateContext(display_, cfg_, EGL_NO_CONTEXT, ctx_attr);
+			}
+
+			++ test_version_index;
 		}
-		context_ = eglCreateContext(display_, cfg_, EGL_NO_CONTEXT, ctx_attr);
 
 		eglMakeCurrent(display_, surf_, surf_, context_);
 
