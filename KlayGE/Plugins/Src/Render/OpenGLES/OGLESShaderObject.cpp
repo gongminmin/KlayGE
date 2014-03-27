@@ -1422,35 +1422,44 @@ namespace KlayGE
 			switch (param.Type())
 			{
 			case REDT_texture1D:
-			{
-				std::string elem_type;
-				param.Var()->Value(elem_type);
-				ss << "Texture1D<" << elem_type << "> " << *param.Name() << ";" << std::endl;
-			}
+				{
+					std::string elem_type;
+					param.Var()->Value(elem_type);
+					ss << "Texture1D<" << elem_type << "> " << *param.Name() << ";" << std::endl;
+				}
 				break;
 
 			case REDT_texture2D:
-			{
-				std::string elem_type;
-				param.Var()->Value(elem_type);
-				ss << "Texture2D<" << elem_type << "> " << *param.Name() << ";" << std::endl;
-			}
+				{
+					std::string elem_type;
+					param.Var()->Value(elem_type);
+					ss << "Texture2D<" << elem_type << "> " << *param.Name() << ";" << std::endl;
+				}
 				break;
 
 			case REDT_texture3D:
-			{
-				std::string elem_type;
-				param.Var()->Value(elem_type);
-				ss << "Texture3D<" << elem_type << "> " << *param.Name() << ";" << std::endl;
-			}
+				{
+					std::string elem_type;
+					param.Var()->Value(elem_type);
+					ss << "Texture";
+					if (caps.max_texture_depth <= 1)
+					{
+						ss << "2D";
+					}
+					else
+					{
+						ss << "3D";
+					}
+					ss << "<" << elem_type << "> " << *param.Name() << ";" << std::endl;
+				}
 				break;
 
 			case REDT_textureCUBE:
-			{
-				std::string elem_type;
-				param.Var()->Value(elem_type);
-				ss << "TextureCube<" << elem_type << "> " << *param.Name() << ";" << std::endl;
-			}
+				{
+					std::string elem_type;
+					param.Var()->Value(elem_type);
+					ss << "TextureCube<" << elem_type << "> " << *param.Name() << ";" << std::endl;
+				}
 				break;
 
 			case REDT_texture1DArray:
@@ -2390,6 +2399,10 @@ namespace KlayGE
 						DXBC2GLSL::DXBC2GLSL dxbc2glsl;
 						uint32_t rules = DXBC2GLSL::DXBC2GLSL::DefaultRules(gsv);
 						rules &= ~GSR_UseUBO;
+						if (!glloader_GLES_VERSION_3_0())
+						{
+							rules &= ~GSR_VersionDecl;
+						}
 						dxbc2glsl.FeedDXBC(code->GetBufferPointer(), false, gsv, rules);
 						(*glsl_srcs_)[type] = MakeSharedPtr<std::string>(dxbc2glsl.GLSLString());
 						(*pnames_)[type] = MakeSharedPtr<std::vector<std::string> >();

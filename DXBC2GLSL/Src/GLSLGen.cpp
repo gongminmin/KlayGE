@@ -87,7 +87,7 @@ namespace
 
 uint32_t GLSLGen::DefaultRules(GLSLVersion version)
 {
-	uint32_t rules = 0;
+	uint32_t rules = GSR_VersionDecl;
 	if (version < GSV_100_ES)
 	{
 		if (version >= GSV_110)
@@ -142,6 +142,7 @@ uint32_t GLSLGen::DefaultRules(GLSLVersion version)
 	{
 		if (version >= GSV_100_ES)
 		{
+			rules |= GSR_Precision;
 		}
 		if (version >= GSV_300_ES)
 		{
@@ -192,12 +193,20 @@ void GLSLGen::ToGLSL(std::ostream& out)
 {
 	//out << "//" << "pvghdc"[program_->version.type] << "s_" << program_->version.major << "_" << program_->version.minor << "\n";
 
-	out << "#version " << GLSLVersionStr[glsl_version_] << "\n";
+	if (glsl_rules_ & GSR_VersionDecl)
+	{
+		out << "#version " << GLSLVersionStr[glsl_version_] << "\n";
+	}
 	if ((ST_GS == shader_type_) && !(glsl_rules_ & GSR_CoreGS))
 	{
 		out << "#extension GL_EXT_geometry_shader4 : enable\n";
 	}
 	out << "\n";
+
+	if ((ST_PS == shader_type_) && (glsl_rules_ & GSR_Precision))
+	{
+		out << "precision highp float;" << std::endl << std::endl;
+	}
 
 	if ((ST_GS == shader_type_) && (glsl_rules_ & GSR_CoreGS))
 	{
@@ -464,6 +473,10 @@ void GLSLGen::ToDclInterShaderOutputRecords(std::ostream& out)
 			else
 			{
 				out << "varying ";
+				if (shader_type_ != ST_VS)
+				{
+					out << "out ";
+				}
 			}
 
 			int num_comps = 4;

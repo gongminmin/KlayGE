@@ -1540,35 +1540,35 @@ namespace KlayGE
 			switch (param.Type())
 			{
 			case REDT_texture1D:
-			{
-				std::string elem_type;
-				param.Var()->Value(elem_type);
-				ss << "Texture1D<" << elem_type << "> " << *param.Name() << ";" << std::endl;
-			}
+				{
+					std::string elem_type;
+					param.Var()->Value(elem_type);
+					ss << "Texture1D<" << elem_type << "> " << *param.Name() << ";" << std::endl;
+				}
 				break;
 
 			case REDT_texture2D:
-			{
-				std::string elem_type;
-				param.Var()->Value(elem_type);
-				ss << "Texture2D<" << elem_type << "> " << *param.Name() << ";" << std::endl;
-			}
+				{
+					std::string elem_type;
+					param.Var()->Value(elem_type);
+					ss << "Texture2D<" << elem_type << "> " << *param.Name() << ";" << std::endl;
+				}
 				break;
 
 			case REDT_texture3D:
-			{
-				std::string elem_type;
-				param.Var()->Value(elem_type);
-				ss << "Texture3D<" << elem_type << "> " << *param.Name() << ";" << std::endl;
-			}
+				{
+					std::string elem_type;
+					param.Var()->Value(elem_type);
+					ss << "Texture3D<" << elem_type << "> " << *param.Name() << ";" << std::endl;
+				}
 				break;
 
 			case REDT_textureCUBE:
-			{
-				std::string elem_type;
-				param.Var()->Value(elem_type);
-				ss << "TextureCube<" << elem_type << "> " << *param.Name() << ";" << std::endl;
-			}
+				{
+					std::string elem_type;
+					param.Var()->Value(elem_type);
+					ss << "TextureCube<" << elem_type << "> " << *param.Name() << ";" << std::endl;
+				}
 				break;
 
 			case REDT_texture1DArray:

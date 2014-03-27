@@ -41,6 +41,8 @@ enum GLSLRules
 	GSR_BitwiseOp = 1UL << 11,
 	GSR_MultiStreamGS = 1UL << 12,
 	GSR_CoreGS = 1UL << 13,
+	GSR_Precision = 1UL << 14,
+	GSR_VersionDecl = 1UL << 14,
 	GSR_ForceUInt32 = 0xFFFFFFFF
 };
 
