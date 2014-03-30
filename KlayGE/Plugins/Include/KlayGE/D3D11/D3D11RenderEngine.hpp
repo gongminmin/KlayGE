@@ -98,9 +98,9 @@ namespace KlayGE
 			return ds_profile_;
 		}
 
-		uint64_t TimestampFreq() const
+		double InvTimestampFreq() const
 		{
-			return timestamp_freq_;
+			return inv_timestamp_freq_;
 		}
 
 		void RSSetState(ID3D11RasterizerStatePtr const & ras);
@@ -248,7 +248,7 @@ namespace KlayGE
 		std::map<ElementFormat, std::vector<std::pair<uint32_t, uint32_t> > > rendertarget_format_;
 
 		ID3D11QueryPtr timestamp_disjoint_query_;
-		uint64_t timestamp_freq_;
+		double inv_timestamp_freq_;
 	};
 
 	typedef shared_ptr<D3D11RenderEngine> D3D11RenderEnginePtr;

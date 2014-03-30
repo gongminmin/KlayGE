@@ -101,6 +101,8 @@ namespace KlayGE
 
 	void OGLESRenderEngine::EndFrame()
 	{
+		RenderEngine::EndFrame();
+
 		GLint disjoint_occurred = 0;
 		glGetIntegerv(GL_GPU_DISJOINT_EXT, &disjoint_occurred);
 		gpu_disjoint_occurred_ = disjoint_occurred ? true : false;

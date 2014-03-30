@@ -164,9 +164,9 @@ namespace KlayGE
 		while (S_OK != d3d_imm_ctx->GetData(timestamp_start_query_.get(), &start_timestamp, sizeof(start_timestamp), 0));
 		while (S_OK != d3d_imm_ctx->GetData(timestamp_end_query_.get(), &end_timestamp, sizeof(end_timestamp), 0));
 
-		if (re.TimestampFreq() > 0)
+		if (re.InvTimestampFreq() > 0)
 		{
-			return static_cast<double>(end_timestamp - start_timestamp) / re.TimestampFreq();
+			return (end_timestamp - start_timestamp) * re.InvTimestampFreq();
 		}
 		else
 		{

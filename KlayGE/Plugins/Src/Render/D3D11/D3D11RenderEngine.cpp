@@ -98,7 +98,7 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	D3D11RenderEngine::D3D11RenderEngine()
 		: num_so_buffs_(0),
-			timestamp_freq_(0)
+			inv_timestamp_freq_(0)
 	{
 #ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
 		// Dynamic loading because these dlls can't be loaded on WinXP
@@ -189,23 +189,19 @@ namespace KlayGE
 	void D3D11RenderEngine::BeginFrame()
 	{
 		d3d_imm_ctx_->Begin(timestamp_disjoint_query_.get());
+
+		RenderEngine::BeginFrame();
 	}
 
 	void D3D11RenderEngine::EndFrame()
 	{
+		RenderEngine::EndFrame();
+
 		d3d_imm_ctx_->End(timestamp_disjoint_query_.get());
 
-		D3D10_QUERY_DATA_TIMESTAMP_DISJOINT disjoint;
+		D3D11_QUERY_DATA_TIMESTAMP_DISJOINT disjoint;
 		while (S_OK != d3d_imm_ctx_->GetData(timestamp_disjoint_query_.get(), &disjoint, sizeof(disjoint), 0));
-
-		if (!disjoint.Disjoint)
-		{
-			timestamp_freq_ = disjoint.Frequency;
-		}
-		else
-		{
-			timestamp_freq_ = 0;
-		}
+		inv_timestamp_freq_ = disjoint.Disjoint ? 0 : (1.0 / disjoint.Frequency);
 	}
 
 	// 获取D3D接口
