@@ -113,7 +113,7 @@ namespace KlayGE
 
 	OGLESTimerQuery::OGLESTimerQuery()
 	{
-		BOOST_ASSERT(glloader_GL_EXT_disjoint_timer_query());
+		BOOST_ASSERT(glloader_GLES_EXT_disjoint_timer_query());
 
 		glGenQueriesEXT(1, &query_);
 	}

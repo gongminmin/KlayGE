@@ -255,6 +255,7 @@ namespace KlayGE
 		}
 
 		void Display(DisplayType display_type);
+		void DumpIntermediaTextures();
 
 	private:
 		void SetupViewportGI(uint32_t vp, bool ssgi_enable);

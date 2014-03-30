@@ -87,11 +87,13 @@ namespace
 	enum
 	{
 		Exit,
+		Dump
 	};
 
 	InputActionDefine actions[] =
 	{
 		InputActionDefine(Exit, KS_Escape),
+		InputActionDefine(Dump, KS_Enter)
 	};
 }
 
@@ -266,6 +268,10 @@ void DeferredRenderingApp::InputHandler(InputEngine const & /*sender*/, InputAct
 {
 	switch (action.first)
 	{
+	case Dump:
+		deferred_rendering_->DumpIntermediaTextures();
+		break;
+
 	case Exit:
 		this->Quit();
 		break;

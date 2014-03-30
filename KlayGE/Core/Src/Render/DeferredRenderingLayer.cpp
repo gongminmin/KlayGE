@@ -265,6 +265,8 @@ namespace KlayGE
 			input_pins_.push_back(std::make_pair("lighting_tex", TexturePtr()));
 			input_pins_.push_back(std::make_pair("ssvo_tex", TexturePtr()));
 
+			output_pins_.push_back(std::make_pair("out_tex", TexturePtr()));
+
 			this->Technique(SyncLoadRenderEffect("DeferredRenderingDebug.fxml")->TechniqueByName("ShowPosition"));
 		}
 
@@ -2994,5 +2996,73 @@ namespace KlayGE
 	{
 		checked_pointer_cast<DeferredRenderingDebugPostProcess>(dr_debug_pp_)->Display(display_type);
 		display_type_ = display_type;
+	}
+
+	void DeferredRenderingLayer::DumpIntermediaTextures()
+	{
+		static int index = 0;
+		std::stringstream ss;
+
+		shared_ptr<DeferredRenderingDebugPostProcess> pp = checked_pointer_cast<DeferredRenderingDebugPostProcess>(dr_debug_pp_);
+
+		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+		TexturePtr temp_tex = rf.MakeTexture2D(viewports_[0].g_buffer->Width(), viewports_[0].g_buffer->Height(),
+			1, 1, EF_ABGR32F, 1, 0, EAH_GPU_Write, nullptr);
+		pp->OutputPin(0, temp_tex);
+
+		pp->Display(DT_Position);
+		pp->Apply();
+		ss.str("");
+		ss << "DumpPosition" << index << ".dds";
+		SaveTexture(temp_tex, ss.str());
+
+		pp->Display(DT_Normal);
+		pp->Apply();
+		ss.str("");
+		ss << "DumpNormal" << index << ".dds";
+		SaveTexture(temp_tex, ss.str());
+
+		pp->Display(DT_Depth);
+		pp->Apply();
+		ss.str("");
+		ss << "DumpDepth" << index << ".dds";
+		SaveTexture(temp_tex, ss.str());
+
+		pp->Display(DT_Diffuse);
+		pp->Apply();
+		ss.str("");
+		ss << "DumpDiffuse" << index << ".dds";
+		SaveTexture(temp_tex, ss.str());
+
+		pp->Display(DT_Specular);
+		pp->Apply();
+		ss.str("");
+		ss << "DumpSpecular" << index << ".dds";
+		SaveTexture(temp_tex, ss.str());
+
+		pp->Display(DT_Shininess);
+		pp->Apply();
+		ss.str("");
+		ss << "DumpShininess" << index << ".dds";
+		SaveTexture(temp_tex, ss.str());
+
+#if DEFAULT_DEFERRED == TRIDITIONAL_DEFERRED
+		pp->Display(DT_DiffuseLighting);
+		pp->Apply();
+		ss.str("");
+		ss << "DumpDiffuseLighting" << index << ".dds";
+		SaveTexture(temp_tex, ss.str());
+
+		pp->Display(DT_SpecularLighting);
+		pp->Apply();
+		ss.str("");
+		ss << "DumpSpecularLighting" << index << ".dds";
+		SaveTexture(temp_tex, ss.str());
+#endif
+
+		pp->Display(display_type_);
+		pp->OutputPin(0, TexturePtr());
+
+		++ index;
 	}
 }
