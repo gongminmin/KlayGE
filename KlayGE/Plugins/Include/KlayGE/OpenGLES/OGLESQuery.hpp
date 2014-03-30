@@ -36,6 +36,21 @@ namespace KlayGE
 	private:
 		GLuint query_;
 	};
+
+	class OGLESTimerQuery : public TimerQuery
+	{
+	public:
+		OGLESTimerQuery();
+		~OGLESTimerQuery();
+
+		void Begin();
+		void End();
+
+		double TimeElapsed();
+
+	private:
+		GLuint query_;
+	};
 }
 
 #endif		// _OGLQUERY_HPP

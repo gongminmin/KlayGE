@@ -55,6 +55,9 @@ namespace KlayGE
 			return true;
 		}
 
+		void BeginFrame() KLAYGE_OVERRIDE;
+		void EndFrame() KLAYGE_OVERRIDE;
+
 		IDXGIFactory1Ptr const & DXGIFactory() const;
 		ID3D11DevicePtr const & D3DDevice() const;
 		ID3D11DeviceContextPtr const & D3DDeviceImmContext() const;
@@ -93,6 +96,11 @@ namespace KlayGE
 		std::string const & DomainShaderProfile() const
 		{
 			return ds_profile_;
+		}
+
+		uint64_t TimestampFreq() const
+		{
+			return timestamp_freq_;
 		}
 
 		void RSSetState(ID3D11RasterizerStatePtr const & ras);
@@ -238,6 +246,9 @@ namespace KlayGE
 		std::set<ElementFormat> vertex_format_;
 		std::set<ElementFormat> texture_format_;
 		std::map<ElementFormat, std::vector<std::pair<uint32_t, uint32_t> > > rendertarget_format_;
+
+		ID3D11QueryPtr timestamp_disjoint_query_;
+		uint64_t timestamp_freq_;
 	};
 
 	typedef shared_ptr<D3D11RenderEngine> D3D11RenderEnginePtr;

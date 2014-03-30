@@ -71,7 +71,8 @@ namespace KlayGE
 		: fbo_blit_src_(0), fbo_blit_dst_(0),
 			clear_depth_(1), clear_stencil_(0), cur_program_(0),
 			vp_x_(0), vp_y_(0), vp_width_(0), vp_height_(0),
-			cur_fbo_(0)
+			cur_fbo_(0),
+			gpu_disjoint_occurred_(false)
 	{
 		clear_clr_.fill(0);
 	}
@@ -96,6 +97,13 @@ namespace KlayGE
 	{
 		static const std::wstring name(L"OpenGL ES Render Engine");
 		return name;
+	}
+
+	void OGLESRenderEngine::EndFrame()
+	{
+		GLint disjoint_occurred = 0;
+		glGetIntegerv(GL_GPU_DISJOINT_EXT, &disjoint_occurred);
+		gpu_disjoint_occurred_ = disjoint_occurred ? true : false;
 	}
 
 	// ½¨Á¢äÖÈ¾´°¿Ú

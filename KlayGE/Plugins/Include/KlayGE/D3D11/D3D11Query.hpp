@@ -49,6 +49,21 @@ namespace KlayGE
 	private:
 		ID3D11PredicatePtr predicate_;
 	};
+
+	class D3D11TimerQuery : public TimerQuery
+	{
+	public:
+		D3D11TimerQuery();
+
+		void Begin();
+		void End();
+
+		double TimeElapsed() KLAYGE_OVERRIDE;
+
+	private:
+		ID3D11QueryPtr timestamp_start_query_;
+		ID3D11QueryPtr timestamp_end_query_;
+	};
 }
 
 #endif		// _D3D11QUERY_HPP

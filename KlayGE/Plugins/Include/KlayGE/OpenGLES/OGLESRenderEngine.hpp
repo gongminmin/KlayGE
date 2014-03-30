@@ -44,6 +44,8 @@ namespace KlayGE
 			return false;
 		}
 
+		void EndFrame() KLAYGE_OVERRIDE;
+
 		void ForceFlush();
 
 		void ScissorRect(uint32_t x, uint32_t y, uint32_t width, uint32_t height);
@@ -114,6 +116,11 @@ namespace KlayGE
 			return hack_for_adreno_;
 		}
 
+		bool GPUDisjointOccurred() const
+		{
+			return gpu_disjoint_occurred_;
+		}
+
 	private:
 		void DoCreateRenderWindow(std::string const & name, RenderSettings const & settings);
 		void DoBindFrameBuffer(FrameBufferPtr const & fb);
@@ -170,6 +177,8 @@ namespace KlayGE
 		bool hack_for_mali_;
 		bool hack_for_adreno_;
 		bool hack_for_google_;
+
+		bool gpu_disjoint_occurred_;
 	};
 
 	typedef shared_ptr<OGLESRenderEngine> OGLESRenderEnginePtr;

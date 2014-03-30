@@ -48,6 +48,12 @@ namespace KlayGE
 
 	uint64_t OGLOcclusionQuery::SamplesPassed()
 	{
+		GLuint available = 0;
+		while (!available)
+		{
+			glGetQueryObjectuiv(query_, GL_QUERY_RESULT_AVAILABLE, &available);
+		}
+
 		GLuint ret;
 		glGetQueryObjectuiv(query_, GL_QUERY_RESULT, &ret);
 		return static_cast<uint64_t>(ret);
@@ -128,8 +134,48 @@ namespace KlayGE
 
 	bool OGLConditionalRender::AnySamplesPassed()
 	{
+		GLuint available = 0;
+		while (!available)
+		{
+			glGetQueryObjectuiv(query_, GL_QUERY_RESULT_AVAILABLE, &available);
+		}
+
 		GLuint ret;
 		glGetQueryObjectuiv(query_, GL_QUERY_RESULT, &ret);
 		return (ret != 0);
+	}
+
+
+	OGLTimerQuery::OGLTimerQuery()
+	{
+		glGenQueries(1, &query_);
+	}
+
+	OGLTimerQuery::~OGLTimerQuery()
+	{
+		glDeleteQueries(1, &query_);
+	}
+
+	void OGLTimerQuery::Begin()
+	{
+		glBeginQuery(GL_TIME_ELAPSED, query_);
+	}
+
+	void OGLTimerQuery::End()
+	{
+		glEndQuery(GL_TIME_ELAPSED);
+	}
+
+	double OGLTimerQuery::TimeElapsed()
+	{
+		GLuint available = 0;
+		while (!available)
+		{
+			glGetQueryObjectuiv(query_, GL_QUERY_RESULT_AVAILABLE, &available);
+		}
+
+		GLuint64 ret;
+		glGetQueryObjectui64v(query_, GL_QUERY_RESULT, &ret);
+		return static_cast<uint64_t>(ret) * 1e-9;
 	}
 }

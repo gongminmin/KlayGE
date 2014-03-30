@@ -93,6 +93,11 @@ namespace KlayGE
 		return MakeSharedPtr<OGLConditionalRender>();
 	}
 
+	QueryPtr OGLRenderFactory::MakeTimerQuery()
+	{
+		return MakeSharedPtr<OGLTimerQuery>();
+	}
+
 	RenderViewPtr OGLRenderFactory::Make1DRenderView(Texture& texture, int first_array_index, int /*array_size*/, int level)
 	{
 		// TODO: Support render-to-texture-array

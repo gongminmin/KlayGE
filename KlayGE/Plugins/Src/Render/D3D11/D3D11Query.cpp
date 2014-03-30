@@ -119,4 +119,58 @@ namespace KlayGE
 		while (S_OK != d3d_imm_ctx->GetData(predicate_.get(), &ret, sizeof(ret), 0));
 		return (TRUE == ret);
 	}
+
+
+	D3D11TimerQuery::D3D11TimerQuery()
+	{
+		D3D11RenderEngine const & re = *checked_cast<D3D11RenderEngine const *>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+		ID3D11DevicePtr const & d3d_device = re.D3DDevice();
+
+		D3D11_QUERY_DESC desc;
+		desc.Query = D3D11_QUERY_TIMESTAMP;
+		desc.MiscFlags = 0;
+
+		ID3D11Query* start_query;
+		d3d_device->CreateQuery(&desc, &start_query);
+		timestamp_start_query_ = MakeCOMPtr(start_query);
+
+		ID3D11Query* end_query;
+		d3d_device->CreateQuery(&desc, &end_query);
+		timestamp_end_query_ = MakeCOMPtr(end_query);
+	}
+
+	void D3D11TimerQuery::Begin()
+	{
+		D3D11RenderEngine const & re = *checked_cast<D3D11RenderEngine const *>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+		ID3D11DeviceContextPtr const & d3d_imm_ctx = re.D3DDeviceImmContext();
+
+		d3d_imm_ctx->End(timestamp_start_query_.get());
+	}
+
+	void D3D11TimerQuery::End()
+	{
+		D3D11RenderEngine const & re = *checked_cast<D3D11RenderEngine const *>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+		ID3D11DeviceContextPtr const & d3d_imm_ctx = re.D3DDeviceImmContext();
+
+		d3d_imm_ctx->End(timestamp_end_query_.get());
+	}
+
+	double D3D11TimerQuery::TimeElapsed()
+	{
+		D3D11RenderEngine const & re = *checked_cast<D3D11RenderEngine const *>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+		ID3D11DeviceContextPtr const & d3d_imm_ctx = re.D3DDeviceImmContext();
+
+		uint64_t start_timestamp, end_timestamp;
+		while (S_OK != d3d_imm_ctx->GetData(timestamp_start_query_.get(), &start_timestamp, sizeof(start_timestamp), 0));
+		while (S_OK != d3d_imm_ctx->GetData(timestamp_end_query_.get(), &end_timestamp, sizeof(end_timestamp), 0));
+
+		if (re.TimestampFreq() > 0)
+		{
+			return static_cast<double>(end_timestamp - start_timestamp) / re.TimestampFreq();
+		}
+		else
+		{
+			return -1;
+		}
+	}
 }

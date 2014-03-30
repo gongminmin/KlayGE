@@ -100,6 +100,18 @@ namespace KlayGE
 		}
 	}
 
+	QueryPtr OGLESRenderFactory::MakeTimerQuery()
+	{
+		if (glloader_GLES_EXT_disjoint_timer_query())
+		{
+			return MakeSharedPtr<OGLESTimerQuery>();
+		}
+		else
+		{
+			return QueryPtr();
+		}
+	}
+
 	RenderViewPtr OGLESRenderFactory::Make1DRenderView(Texture& texture, int first_array_index, int /*array_size*/, int level)
 	{
 		return MakeSharedPtr<OGLESTexture1DRenderView>(texture, first_array_index, level);

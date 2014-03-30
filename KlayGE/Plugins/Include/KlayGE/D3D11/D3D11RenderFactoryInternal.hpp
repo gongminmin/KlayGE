@@ -43,6 +43,7 @@ namespace KlayGE
 
 		QueryPtr MakeOcclusionQuery();
 		QueryPtr MakeConditionalRender();
+		QueryPtr MakeTimerQuery();
 
 		RenderViewPtr Make1DRenderView(Texture& texture, int first_array_index, int array_size, int level);
 		RenderViewPtr Make2DRenderView(Texture& texture, int first_array_index, int array_size, int level);

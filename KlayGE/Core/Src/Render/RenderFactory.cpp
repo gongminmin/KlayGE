@@ -92,6 +92,11 @@ namespace KlayGE
 			return Query::NullObject();
 		}
 
+		QueryPtr MakeTimerQuery()
+		{
+			return Query::NullObject();
+		}
+
 		RenderViewPtr Make1DRenderView(Texture& /*texture*/, int /*first_array_index*/, int /*array_size*/, int /*level*/)
 		{
 			return RenderView::NullObject();

@@ -65,6 +65,16 @@ namespace KlayGE
 
 		virtual bool AnySamplesPassed() = 0;
 	};
+
+	class KLAYGE_CORE_API TimerQuery : public Query
+	{
+	public:
+		virtual ~TimerQuery()
+		{
+		}
+
+		virtual double TimeElapsed() = 0; // In second.
+	};
 }
 
 #endif		// _QUERY_HPP

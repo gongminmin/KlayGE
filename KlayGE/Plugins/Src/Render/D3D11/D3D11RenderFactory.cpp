@@ -99,6 +99,11 @@ namespace KlayGE
 		}
 	}
 
+	QueryPtr D3D11RenderFactory::MakeTimerQuery()
+	{
+		return MakeSharedPtr<D3D11TimerQuery>();
+	}
+
 	RenderViewPtr D3D11RenderFactory::Make1DRenderView(Texture& texture, int first_array_index, int array_size, int level)
 	{
 		return MakeSharedPtr<D3D11RenderTargetRenderView>(texture, first_array_index, array_size, level);
