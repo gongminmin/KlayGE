@@ -253,10 +253,90 @@ namespace KlayGE
 	}
 
 
+	class DeferredRenderingDebugPostProcess : public PostProcess
+	{
+	public:
+		DeferredRenderingDebugPostProcess()
+			: PostProcess(L"DeferredRenderingDebug")
+		{
+			input_pins_.push_back(std::make_pair("g_buffer_tex", TexturePtr()));
+			input_pins_.push_back(std::make_pair("g_buffer_1_tex", TexturePtr()));
+			input_pins_.push_back(std::make_pair("depth_tex", TexturePtr()));
+			input_pins_.push_back(std::make_pair("lighting_tex", TexturePtr()));
+			input_pins_.push_back(std::make_pair("ssvo_tex", TexturePtr()));
+
+			this->Technique(SyncLoadRenderEffect("DeferredRenderingDebug.fxml")->TechniqueByName("ShowPosition"));
+		}
+
+		void Display(DeferredRenderingLayer::DisplayType display_type)
+		{
+			switch (display_type)
+			{
+			case DeferredRenderingLayer::DT_Final:
+				break;
+
+			case DeferredRenderingLayer::DT_Position:
+				technique_ = technique_->Effect().TechniqueByName("ShowPosition");
+				break;
+
+			case DeferredRenderingLayer::DT_Normal:
+				technique_ = technique_->Effect().TechniqueByName("ShowNormal");
+				break;
+
+			case DeferredRenderingLayer::DT_Depth:
+				technique_ = technique_->Effect().TechniqueByName("ShowDepth");
+				break;
+
+			case DeferredRenderingLayer::DT_Diffuse:
+				technique_ = technique_->Effect().TechniqueByName("ShowDiffuse");
+				break;
+
+			case DeferredRenderingLayer::DT_Specular:
+				technique_ = technique_->Effect().TechniqueByName("ShowSpecular");
+				break;
+
+			case DeferredRenderingLayer::DT_Shininess:
+				technique_ = technique_->Effect().TechniqueByName("ShowShininess");
+				break;
+
+			case DeferredRenderingLayer::DT_Edge:
+				break;
+
+			case DeferredRenderingLayer::DT_SSVO:
+				technique_ = technique_->Effect().TechniqueByName("ShowSSVO");
+				break;
+
+#if DEFAULT_DEFERRED == TRIDITIONAL_DEFERRED
+			case DeferredRenderingLayer::DT_DiffuseLighting:
+				technique_ = technique_->Effect().TechniqueByName("ShowDiffuseLighting");
+				break;
+
+			case DeferredRenderingLayer::DT_SpecularLighting:
+				technique_ = technique_->Effect().TechniqueByName("ShowSpecularLighting");
+				break;
+#endif
+
+			default:
+				break;
+			}
+		}
+
+		void OnRenderBegin() KLAYGE_OVERRIDE
+		{
+			PostProcess::OnRenderBegin();
+
+			Camera const & camera = Context::Instance().AppInstance().ActiveCamera();
+			*(technique_->Effect().ParameterByName("inv_proj")) = camera.InverseProjMatrix();
+			*(technique_->Effect().ParameterByName("depth_near_far_invfar")) = float3(camera.NearPlane(), camera.FarPlane(), 1 / camera.FarPlane());
+		}
+	};
+
+
 	DeferredRenderingLayer::DeferredRenderingLayer()
 		: active_viewport_(0), ssr_enabled_(true), taa_enabled_(true),
 			light_scale_(1), illum_(0), indirect_scale_(1.0f),
-			curr_cascade_index_(-1), force_line_mode_(false)
+			curr_cascade_index_(-1), force_line_mode_(false),
+			dr_debug_pp_(MakeSharedPtr<DeferredRenderingDebugPostProcess>())
 	{
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 		RenderEngine& re = rf.RenderEngineInstance();
@@ -994,6 +1074,17 @@ namespace KlayGE
 			(height + (TILE_SIZE - 1)) / TILE_SIZE, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
 		pvp.light_index_fb->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*pvp.light_index_tex, 0, 1, 0));
 #endif
+
+		if (0 == index)
+		{
+			dr_debug_pp_->InputPin(0, this->GBufferRT0Tex(index));
+			dr_debug_pp_->InputPin(1, this->GBufferRT1Tex(index));
+			dr_debug_pp_->InputPin(2, this->DepthTex(index));
+#if DEFAULT_DEFERRED == TRIDITIONAL_DEFERRED
+			dr_debug_pp_->InputPin(3, this->LightingTex(index));
+#endif
+			dr_debug_pp_->InputPin(4, this->SmallSSVOTex(index));
+		}
 	}
 
 	void DeferredRenderingLayer::EnableViewport(uint32_t index, bool enable)
@@ -1154,8 +1245,25 @@ namespace KlayGE
 					{
 						this->RenderDecals(pvp, (PRT_MRT == pass_rt) ? PT_OpaqueGBufferMRT : PT_OpaqueGBufferRT1);
 					}
+
+					if ((DT_Position == display_type_) || (DT_Normal == display_type_)
+						|| (DT_Depth == display_type_) || (DT_Diffuse == display_type_)
+						|| (DT_Specular == display_type_) || (DT_Shininess == display_type_))
+					{
+						re.BindFrameBuffer(FrameBufferPtr());
+						re.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->ClearDepth(1.0f);
+						dr_debug_pp_->Apply();
+						urv = App3DFramework::URV_SkipPostProcess | App3DFramework::URV_Finished;
+					}
+					else
+					{
+						urv = 0;
+					}
 				}
-				urv = 0;
+				else
+				{
+					urv = 0;
+				}
 			}
 			break;
 
@@ -1470,6 +1578,19 @@ namespace KlayGE
 				if (pass_scaned_.size() - 1 == pass)
 				{
 					urv |= App3DFramework::URV_Finished;
+
+					if ((DT_SSVO == display_type_)
+#if DEFAULT_DEFERRED == TRIDITIONAL_DEFERRED
+						|| (DT_DiffuseLighting == display_type_)
+						|| (DT_SpecularLighting == display_type_)
+#endif
+						)
+					{
+						re.BindFrameBuffer(FrameBufferPtr());
+						re.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->ClearDepth(1.0f);
+						dr_debug_pp_->Apply();
+						urv |= App3DFramework::URV_SkipPostProcess;
+					}
 				}
 			}
 			break;
@@ -2868,4 +2989,10 @@ namespace KlayGE
 		}
 	}
 #endif
+
+	void DeferredRenderingLayer::Display(DeferredRenderingLayer::DisplayType display_type)
+	{
+		checked_pointer_cast<DeferredRenderingDebugPostProcess>(dr_debug_pp_)->Display(display_type);
+		display_type_ = display_type;
+	}
 }

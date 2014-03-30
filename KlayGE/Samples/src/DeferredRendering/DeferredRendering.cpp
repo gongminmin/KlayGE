@@ -84,72 +84,6 @@ namespace
 	};
 
 
-	class DeferredRenderingDebug : public PostProcess
-	{
-	public:
-		DeferredRenderingDebug()
-			: PostProcess(L"DeferredRenderingDebug")
-		{
-			input_pins_.push_back(std::make_pair("g_buffer_tex", TexturePtr()));
-			input_pins_.push_back(std::make_pair("depth_tex", TexturePtr()));
-			input_pins_.push_back(std::make_pair("lighting_tex", TexturePtr()));
-			input_pins_.push_back(std::make_pair("ssvo_tex", TexturePtr()));
-
-			this->Technique(SyncLoadRenderEffect("DeferredRenderingDebug.fxml")->TechniqueByName("ShowPosition"));
-		}
-
-		void ShowType(int show_type)
-		{
-			switch (show_type)
-			{
-			case 0:
-				break;
-
-			case 1:
-				technique_ = technique_->Effect().TechniqueByName("ShowPosition");
-				break;
-
-			case 2:
-				technique_ = technique_->Effect().TechniqueByName("ShowNormal");
-				break;
-
-			case 3:
-				technique_ = technique_->Effect().TechniqueByName("ShowDepth");
-				break;
-
-			case 4:
-				break;
-
-			case 5:
-				technique_ = technique_->Effect().TechniqueByName("ShowSSVO");
-				break;
-
-#if DEFAULT_DEFERRED == TRIDITIONAL_DEFERRED
-			case 6:
-				technique_ = technique_->Effect().TechniqueByName("ShowDiffuseLighting");
-				break;
-
-			case 7:
-				technique_ = technique_->Effect().TechniqueByName("ShowSpecularLighting");
-				break;
-#endif
-
-			default:
-				break;
-			}
-		}
-
-		void OnRenderBegin()
-		{
-			PostProcess::OnRenderBegin();
-
-			Camera const & camera = Context::Instance().AppInstance().ActiveCamera();
-			*(technique_->Effect().ParameterByName("inv_proj")) = camera.InverseProjMatrix();
-			*(technique_->Effect().ParameterByName("depth_near_far_invfar")) = float3(camera.NearPlane(), camera.FarPlane(), 1 / camera.FarPlane());
-		}
-	};
-
-
 	enum
 	{
 		Exit,
@@ -258,8 +192,6 @@ void DeferredRenderingApp::InitObjects()
 	input_handler->connect(KlayGE::bind(&DeferredRenderingApp::InputHandler, this, KlayGE::placeholders::_1, KlayGE::placeholders::_2));
 	inputEngine.ActionMap(actionMap, input_handler);
 
-	debug_pp_ = MakeSharedPtr<DeferredRenderingDebug>();
-
 	UIManager::Instance().Load(ResLoader::Instance().Open("DeferredRendering.uiml"));
 	dialog_ = UIManager::Instance().GetDialogs()[0];
 
@@ -275,8 +207,8 @@ void DeferredRenderingApp::InitObjects()
 	id_ctrl_camera_ = dialog_->IDFromName("CtrlCamera");
 
 #if DEFAULT_DEFERRED != TRIDITIONAL_DEFERRED
-	dialog_->Control<UIComboBox>(id_buffer_combo_)->RemoveItem(7);
-	dialog_->Control<UIComboBox>(id_buffer_combo_)->RemoveItem(6);
+	dialog_->Control<UIComboBox>(id_buffer_combo_)->RemoveItem(10);
+	dialog_->Control<UIComboBox>(id_buffer_combo_)->RemoveItem(9);
 #endif
 
 	dialog_->Control<UIComboBox>(id_buffer_combo_)->OnSelectionChangedEvent().connect(KlayGE::bind(&DeferredRenderingApp::BufferChangedHandler, this, KlayGE::placeholders::_1));
@@ -327,13 +259,6 @@ void DeferredRenderingApp::OnResize(uint32_t width, uint32_t height)
 	RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 	deferred_rendering_->SetupViewport(0, re.CurFrameBuffer(), 0);
 
-	debug_pp_->InputPin(0, deferred_rendering_->GBufferRT0Tex(0));
-	debug_pp_->InputPin(1, deferred_rendering_->DepthTex(0));
-#if DEFAULT_DEFERRED == TRIDITIONAL_DEFERRED
-	debug_pp_->InputPin(2, deferred_rendering_->LightingTex(0));
-#endif
-	debug_pp_->InputPin(3, deferred_rendering_->SmallSSVOTex(0));
-
 	UIManager::Instance().SettleCtrls();
 }
 
@@ -350,11 +275,11 @@ void DeferredRenderingApp::InputHandler(InputEngine const & /*sender*/, InputAct
 void DeferredRenderingApp::BufferChangedHandler(UIComboBox const & sender)
 {
 	buffer_type_ = sender.GetSelectedIndex();
-	checked_pointer_cast<DeferredRenderingDebug>(debug_pp_)->ShowType(buffer_type_);
+	deferred_rendering_->Display(static_cast<DeferredRenderingLayer::DisplayType>(buffer_type_));
 
 	if (dialog_->Control<UICheckBox>(id_aa_)->GetChecked())
 	{
-		anti_alias_enabled_ = 1 + (4 == buffer_type_);
+		anti_alias_enabled_ = 1 + (DeferredRenderingLayer::DT_Edge == buffer_type_);
 		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 		re.PPAAEnabled(anti_alias_enabled_);
 	}
@@ -377,12 +302,12 @@ void DeferredRenderingApp::ILScaleChangedHandler(KlayGE::UISlider const & sender
 
 void DeferredRenderingApp::SSVOHandler(UICheckBox const & sender)
 {
-	if ((0 == buffer_type_) || (5 == buffer_type_))
+	if ((DeferredRenderingLayer::DT_Final == buffer_type_) || (DeferredRenderingLayer::DT_SSVO == buffer_type_))
 	{
 		ssvo_enabled_ = sender.GetChecked();
 		deferred_rendering_->SSVOEnabled(0, ssvo_enabled_);
 		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-		if (5 == buffer_type_)
+		if (DeferredRenderingLayer::DT_SSVO == buffer_type_)
 		{
 			re.HDREnabled(false);
 		}
@@ -395,7 +320,7 @@ void DeferredRenderingApp::SSVOHandler(UICheckBox const & sender)
 
 void DeferredRenderingApp::HDRHandler(UICheckBox const & sender)
 {
-	if (0 == buffer_type_)
+	if (DeferredRenderingLayer::DT_Final == buffer_type_)
 	{
 		hdr_enabled_ = sender.GetChecked();
 		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
@@ -405,7 +330,7 @@ void DeferredRenderingApp::HDRHandler(UICheckBox const & sender)
 
 void DeferredRenderingApp::AntiAliasHandler(UICheckBox const & sender)
 {
-	if (0 == buffer_type_)
+	if (DeferredRenderingLayer::DT_Final == buffer_type_)
 	{
 		anti_alias_enabled_ = sender.GetChecked();
 		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
@@ -485,7 +410,6 @@ void DeferredRenderingApp::DoUpdateOverlay()
 uint32_t DeferredRenderingApp::DoUpdate(uint32_t pass)
 {
 	SceneManager& sceneMgr(Context::Instance().SceneManagerInstance());
-	RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 
 	if (0 == pass)
 	{
@@ -544,28 +468,6 @@ uint32_t DeferredRenderingApp::DoUpdate(uint32_t pass)
 		num_primitives_rendered_ = sceneMgr.NumPrimitivesRendered();
 		num_vertices_rendered_ = sceneMgr.NumVerticesRendered();
 	}
-	else if (15 == pass)
-	{
-		if ((1 == buffer_type_) || (2 == buffer_type_) || (3 == buffer_type_))
-		{
-			renderEngine.BindFrameBuffer(FrameBufferPtr());
-			renderEngine.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->ClearDepth(1.0f);
-			debug_pp_->Apply();
-			return App3DFramework::URV_SkipPostProcess | App3DFramework::URV_Finished;
-		}
-	}
 
-	uint32_t ret = deferred_rendering_->Update(pass);
-	if (ret & App3DFramework::URV_Finished)
-	{
-		if ((5 == buffer_type_) || (6 == buffer_type_) || (7 == buffer_type_))
-		{
-			renderEngine.BindFrameBuffer(FrameBufferPtr());
-			renderEngine.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->ClearDepth(1.0f);
-			debug_pp_->Apply();
-			return App3DFramework::URV_SkipPostProcess | App3DFramework::URV_Finished;
-		}
-	}
-
-	return ret;
+	return deferred_rendering_->Update(pass);
 }

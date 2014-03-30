@@ -8,6 +8,9 @@
 			<item name="Position"/>
 			<item name="Normal"/>
 			<item name="Depth"/>
+			<item name="Diffuse"/>
+			<item name="Specular"/>
+			<item name="Shininess"/>
 			<item name="Edge"/>
 			<item name="SSVO"/>
 			<item name="Diffuse Lighting"/>

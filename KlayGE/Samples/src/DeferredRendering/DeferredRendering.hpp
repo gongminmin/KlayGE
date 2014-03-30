@@ -47,8 +47,6 @@ private:
 
 	KlayGE::DeferredRenderingLayerPtr deferred_rendering_;
 
-	KlayGE::PostProcessPtr debug_pp_;
-
 	KlayGE::UIDialogPtr dialog_;
 	int buffer_type_;
 	bool ssvo_enabled_;

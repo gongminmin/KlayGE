@@ -125,6 +125,25 @@ namespace KlayGE
 	class KLAYGE_CORE_API DeferredRenderingLayer
 	{
 	public:
+		enum DisplayType
+		{
+			DT_Final,
+			DT_Position,
+			DT_Normal,
+			DT_Depth,
+			DT_Diffuse,
+			DT_Specular,
+			DT_Shininess,
+			DT_Edge,
+			DT_SSVO,
+#if DEFAULT_DEFERRED == TRIDITIONAL_DEFERRED
+			DT_DiffuseLighting,
+			DT_SpecularLighting,
+#endif
+			Num_DT
+		};
+
+	public:
 		DeferredRenderingLayer();
 
 		void SSGIEnabled(uint32_t vp, bool ssgi);
@@ -234,6 +253,8 @@ namespace KlayGE
 		{
 			return force_line_mode_;
 		}
+
+		void Display(DisplayType display_type);
 
 	private:
 		void SetupViewportGI(uint32_t vp, bool ssgi_enable);
@@ -439,6 +460,9 @@ namespace KlayGE
 		int32_t curr_cascade_index_;
 
 		bool force_line_mode_;
+
+		PostProcessPtr dr_debug_pp_;
+		DisplayType display_type_;
 	};
 }
 
