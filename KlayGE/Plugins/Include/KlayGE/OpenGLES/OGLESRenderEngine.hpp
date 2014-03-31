@@ -44,7 +44,7 @@ namespace KlayGE
 			return false;
 		}
 
-		void EndFrame() KLAYGE_OVERRIDE;
+		void UpdateGPUTimestampsFrequency() KLAYGE_OVERRIDE;
 
 		void ForceFlush();
 

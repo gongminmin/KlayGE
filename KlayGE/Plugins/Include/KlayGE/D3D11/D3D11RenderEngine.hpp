@@ -57,6 +57,7 @@ namespace KlayGE
 
 		void BeginFrame() KLAYGE_OVERRIDE;
 		void EndFrame() KLAYGE_OVERRIDE;
+		void UpdateGPUTimestampsFrequency() KLAYGE_OVERRIDE;
 
 		IDXGIFactory1Ptr const & DXGIFactory() const;
 		ID3D11DevicePtr const & D3DDevice() const;

@@ -154,12 +154,16 @@ namespace KlayGE
 	{
 	}
 
+	void RenderEngine::EndPass()
+	{
+	}
+
 	void RenderEngine::EndFrame()
 	{
 		this->BindFrameBuffer(default_frame_buffers_[0]);
 	}
 
-	void RenderEngine::EndPass()
+	void RenderEngine::UpdateGPUTimestampsFrequency()
 	{
 	}
 

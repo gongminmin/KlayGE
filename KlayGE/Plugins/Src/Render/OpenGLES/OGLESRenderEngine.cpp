@@ -99,10 +99,8 @@ namespace KlayGE
 		return name;
 	}
 
-	void OGLESRenderEngine::EndFrame()
+	void OGLESRenderEngine::UpdateGPUTimestampsFrequency()
 	{
-		RenderEngine::EndFrame();
-
 		GLint disjoint_occurred = 0;
 		glGetIntegerv(GL_GPU_DISJOINT_EXT, &disjoint_occurred);
 		gpu_disjoint_occurred_ = disjoint_occurred ? true : false;

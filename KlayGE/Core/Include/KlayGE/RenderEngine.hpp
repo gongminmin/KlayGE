@@ -105,6 +105,7 @@ namespace KlayGE
 		void Dispatch(RenderTechnique const & tech, uint32_t tgx, uint32_t tgy, uint32_t tgz);
 		virtual void EndPass();
 		virtual void EndFrame();
+		virtual void UpdateGPUTimestampsFrequency();
 
 		// Just for debug or profile propose
 		virtual void ForceFlush() = 0;

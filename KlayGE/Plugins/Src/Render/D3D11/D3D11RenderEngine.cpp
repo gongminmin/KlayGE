@@ -198,7 +198,10 @@ namespace KlayGE
 		RenderEngine::EndFrame();
 
 		d3d_imm_ctx_->End(timestamp_disjoint_query_.get());
+	}
 
+	void D3D11RenderEngine::UpdateGPUTimestampsFrequency()
+	{
 		D3D11_QUERY_DATA_TIMESTAMP_DISJOINT disjoint;
 		while (S_OK != d3d_imm_ctx_->GetData(timestamp_disjoint_query_.get(), &disjoint, sizeof(disjoint), 0));
 		inv_timestamp_freq_ = disjoint.Disjoint ? 0 : (1.0 / disjoint.Frequency);
