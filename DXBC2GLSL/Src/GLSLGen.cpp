@@ -1,6 +1,5 @@
 //--------------------------------------------------------------------
 //this converter can convert HLSL5 to GLSL 2.1 3.x 4.x
-//for now, only support HLSL5->GLSL4.3
 //log:
 //dcl_immediateConstantBuffer unfound in disassembler.
 //sampleinfo samplepos hasn't corresponding functions in GLSL
@@ -38,6 +37,7 @@ namespace
 		uint32_t index;
 		ShaderRegisterComponentType type;
 		ShaderInterpolationMode interpolation;
+		bool is_depth;
 	};
 
 	uint32_t bitcount32(uint32_t x)
@@ -584,6 +584,7 @@ void GLSLGen::ToDeclInterShaderInputRegisters(std::ostream& out) const
 					desc.index = register_index;
 					desc.type = type;
 					desc.interpolation = SIM_Undefined;
+					desc.is_depth = false;
 					input_registers.push_back(desc);
 				}
 			}
@@ -788,6 +789,7 @@ void GLSLGen::ToDeclInterShaderOutputRegisters(std::ostream& out) const
 				desc.index = register_index;
 				desc.type = type;
 				desc.interpolation = SIM_Undefined;
+				desc.is_depth = (0 == strcmp("SV_Depth", sig_desc.semantic_name));
 				output_dcl_record.push_back(desc);
 			}
 		}
@@ -820,7 +822,16 @@ void GLSLGen::ToDeclInterShaderOutputRegisters(std::ostream& out) const
 			break;
 		}
 
-		out << "vec4 o_REGISTER" << output_dcl_record[i].index << ";\n";
+		out << "vec4 o_REGISTER";
+		if (output_dcl_record[i].is_depth)
+		{
+			out << "Depth";
+		}
+		else
+		{
+			out << output_dcl_record[i].index;
+		}
+		out << ";\n";
 	}
 
 	if (!output_dcl_record.empty())
@@ -877,8 +888,16 @@ void GLSLGen::ToCopyToInterShaderOutputRegisters(std::ostream& out) const
 				out << '.';
 				this->ToComponentSelector(out, this->ComponentSelectorFromCount(bitcount32(mask)));
 			}
-			out << " = ";
-			out << "o_REGISTER" << sig_desc.register_index << '.';
+			out << " = o_REGISTER";
+			if (0 == strcmp("SV_Depth", sig_desc.semantic_name))
+			{
+				out << "Depth";
+			}
+			else
+			{
+				out << sig_desc.register_index;
+			}
+			out << '.';
 			this->ToComponentSelector(out, this->ComponentSelectorFromMask(mask, 4));
 			out << ";\n";
 		}

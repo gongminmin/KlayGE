@@ -144,7 +144,11 @@ float4 ESM_Sun(float3 pos_es, float len)
 	float2 light_proj_pos = mul(float4(pos_es, 1), light_view_proj).xy;
 	light_proj_pos.y *= -1;
 	light_proj_pos = light_proj_pos * 0.5f + 0.5f;
+#if KLAYGE_DERIVATIVES
 	float4 tc_ddx_ddy = float4(ddx(light_proj_pos), ddy(light_proj_pos));
+#else
+	float4 tc_ddx_ddy = 0;
+#endif
 	
 	float shadow = 0;
 	if ((pos_es.z >= cascade_intervals[0].x) && (pos_es.z < cascade_intervals[num_cascades - 1].y))
@@ -273,8 +277,13 @@ float4 DeferredRenderingPointPS(
 	float2 tc = tc_w.xy / tc_w.z;
 #endif
 
+#if KLAYGE_DERIVATIVES
 	float2 tc_ddx = ddx(tc);
 	float2 tc_ddy = ddy(tc);
+#else
+	float2 tc_ddx = 0;
+	float2 tc_ddy = 0;
+#endif
 
 	float4 ndc = g_buffer_tex.Sample(point_sampler, tc);
 	float4 final_clr = 0;
@@ -311,8 +320,13 @@ float4 DeferredRenderingSpotPS(
 	float2 tc = tc_w.xy / tc_w.z;
 #endif
 
+#if KLAYGE_DERIVATIVES
 	float2 tc_ddx = ddx(tc);
 	float2 tc_ddy = ddy(tc);
+#else
+	float2 tc_ddx = 0;
+	float2 tc_ddy = 0;
+#endif
 
 	float4 ndc = g_buffer_tex.Sample(point_sampler, tc);
 	float4 final_clr = 0;
@@ -354,8 +368,13 @@ float4 DeferredRenderingSunPS(
 	float2 tc = tc_w.xy / tc_w.z;
 #endif
 
+#if KLAYGE_DERIVATIVES
 	float2 tc_ddx = ddx(tc);
 	float2 tc_ddy = ddy(tc);
+#else
+	float2 tc_ddx = 0;
+	float2 tc_ddy = 0;
+#endif
 	
 	float4 ndc = g_buffer_tex.Sample(point_sampler, tc);
 	float4 final_clr = 0;

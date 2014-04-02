@@ -2204,7 +2204,7 @@ namespace KlayGE
 					macros.push_back(macro_d3d11);
 				}
 				{
-					D3D_SHADER_MACRO macro_d3d11 = { "KLAYGE_OPENGL", "1" };
+					D3D_SHADER_MACRO macro_d3d11 = { "KLAYGE_OPENGLES", "1" };
 					macros.push_back(macro_d3d11);
 				}
 				{

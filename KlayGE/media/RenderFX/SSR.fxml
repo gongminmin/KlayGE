@@ -91,8 +91,13 @@ float4 CalcSSR(float2 tc, float3 normal, float3 pos_es, float3 incident_es, bool
 	float3 sample_step = tex_offset * step;
 
 	float3 cur_tex_pos = tex_pos;
+#if KLAYGE_DERIVATIVES
 	float2 tex_ddx = ddx(cur_tex_pos.xy);
 	float2 tex_ddy = ddy(cur_tex_pos.xy);
+#else
+	float2 tex_ddx = 0;
+	float2 tex_ddy = 0;
+#endif
 
 	float t = 0;
 	float2 pt1 = float2(linear_depth, linear_depth);

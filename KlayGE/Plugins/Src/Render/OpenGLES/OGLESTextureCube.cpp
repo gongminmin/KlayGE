@@ -73,10 +73,17 @@ namespace KlayGE
 			glTexParameteri(target_type_, GL_TEXTURE_BASE_LEVEL, 0);
 			glTexParameteri(target_type_, GL_TEXTURE_MAX_LEVEL, num_mip_maps_ - 1);
 		}
-		else 
-		if (glloader_GLES_APPLE_texture_max_level())
+		else if (glloader_GLES_APPLE_texture_max_level())
 		{
 			glTexParameteri(target_type_, GL_TEXTURE_MAX_LEVEL_APPLE, num_mip_maps_ - 1);
+		}
+		else
+		{
+			OGLESRenderEngine& re = *checked_cast<OGLESRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+			if (re.HackForTegra())
+			{
+				glTexParameteri(target_type_, GL_TEXTURE_MAX_LEVEL, num_mip_maps_ - 1);
+			}
 		}
 
 		tex_data_.resize(6 * num_mip_maps_);
