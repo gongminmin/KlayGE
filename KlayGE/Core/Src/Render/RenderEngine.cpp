@@ -53,6 +53,7 @@
 #include <KlayGE/SceneManager.hpp>
 #include <KlayGE/App3D.hpp>
 #include <KlayGE/Window.hpp>
+#include <KlayGE/PerfProfiler.hpp>
 
 #include <sstream>
 
@@ -849,6 +850,10 @@ namespace KlayGE
 		{
 			Context::Instance().SceneManagerInstance().Update();
 			fb.SwapBuffers();
+
+#ifndef KLAYGE_SHIP
+			Context::Instance().PerfProfilerInstance().CollectData();
+#endif
 		}
 	}
 

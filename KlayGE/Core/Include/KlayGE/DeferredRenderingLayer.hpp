@@ -257,12 +257,45 @@ namespace KlayGE
 		void Display(DisplayType display_type);
 		void DumpIntermediaTextures();
 
+#ifndef KLAYGE_SHIP
+		PerfRangePtr ShadowMapPerf() const
+		{
+			return shadow_map_perf_;
+		}
+		PerfRangePtr DepthPerf(PassTargetBuffer ptb) const
+		{
+			return depth_perfs_[ptb];
+		}
+		PerfRangePtr GBufferPerf(PassTargetBuffer ptb) const
+		{
+			return gbuffer_perfs_[ptb];
+		}
+		PerfRangePtr ShadowingPerf(PassTargetBuffer ptb) const
+		{
+			return shadowing_perfs_[ptb];
+		}
+		PerfRangePtr IndirectLightingPerf(PassTargetBuffer ptb) const
+		{
+			return indirect_lighting_perfs_[ptb];
+		}
+		PerfRangePtr ShadingPerf(PassTargetBuffer ptb) const
+		{
+			return shading_perfs_[ptb];
+		}
+		PerfRangePtr SpecialShadingPerf(PassTargetBuffer ptb) const
+		{
+			return special_shading_perfs_[ptb];
+		}
+#endif
+
 	private:
 		void SetupViewportGI(uint32_t vp, bool ssgi_enable);
 		void AccumulateToLightingTex(PerViewport const & pvp, uint32_t g_buffer_index);
 
-		uint32_t ComposePassScanCode(uint32_t vp_index, PassType pass_type, int32_t org_no, int32_t index_in_pass);
-		void DecomposePassScanCode(uint32_t& vp_index, PassType& pass_type, int32_t& org_no, int32_t& index_in_pass, uint32_t code);
+		uint32_t ComposePassScanCode(uint32_t vp_index, PassType pass_type,
+			int32_t org_no, int32_t index_in_pass, bool is_profile);
+		void DecomposePassScanCode(uint32_t& vp_index, PassType& pass_type,
+			int32_t& org_no, int32_t& index_in_pass, bool& is_profile, uint32_t code);
 
 		void BuildLightList();
 		void BuildVisibleSceneObjList(bool& has_opaque_objs, bool& has_transparency_back_objs, bool& has_transparency_front_objs);
@@ -464,6 +497,14 @@ namespace KlayGE
 
 		PostProcessPtr dr_debug_pp_;
 		DisplayType display_type_;
+
+		PerfRangePtr shadow_map_perf_;
+		PerfRangePtr depth_perfs_[PTB_None];
+		PerfRangePtr gbuffer_perfs_[PTB_None];
+		PerfRangePtr shadowing_perfs_[PTB_None];
+		PerfRangePtr indirect_lighting_perfs_[PTB_None];
+		PerfRangePtr shading_perfs_[PTB_None];
+		PerfRangePtr special_shading_perfs_[PTB_None];
 	};
 }
 

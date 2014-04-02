@@ -29,6 +29,7 @@
 #include <KlayGE/Mesh.hpp>
 #include <KlayGE/SSVOPostProcess.hpp>
 #include <KlayGE/SSRPostProcess.hpp>
+#include <KlayGE/PerfProfiler.hpp>
 
 #ifdef KLAYGE_COMPILER_MSVC
 #pragma warning(push)
@@ -703,6 +704,22 @@ namespace KlayGE
 #endif
 
 		this->SetCascadedShadowType(CSLT_Auto);
+
+		PerfProfiler& profiler = Context::Instance().PerfProfilerInstance();
+		shadow_map_perf_ = profiler.CreatePerfRange(0, "Gen shadow map");
+		std::string buffer_name[] = { "Opaque", "Transparency back", "TransparencyFront" };
+		for (uint32_t i = PTB_Opaque; i < PTB_None; ++ i)
+		{
+			if (!depth_texture_support_)
+			{
+				depth_perfs_[i] = profiler.CreatePerfRange(0, "Depth (" + buffer_name[i] + ")");
+			}
+			gbuffer_perfs_[i] = profiler.CreatePerfRange(0, "GBuffer (" + buffer_name[i] + ")");
+			shadowing_perfs_[i] = profiler.CreatePerfRange(0, "Shadowing (" + buffer_name[i] + ")");
+			indirect_lighting_perfs_[i] = profiler.CreatePerfRange(0, "Indirect lighting (" + buffer_name[i] + ")");
+			shading_perfs_[i] = profiler.CreatePerfRange(0, "Shading (" + buffer_name[i] + ")");
+			special_shading_perfs_[i] = profiler.CreatePerfRange(0, "Special shading (" + buffer_name[i] + ")");
+		}
 	}
 
 	void DeferredRenderingLayer::SSGIEnabled(uint32_t vp, bool ssgi)
@@ -1125,11 +1142,64 @@ namespace KlayGE
 		uint32_t vp_index;
 		PassType pass_type;
 		int32_t org_no, index_in_pass;
-		this->DecomposePassScanCode(vp_index, pass_type, org_no, index_in_pass, pass_scaned_[pass]);
+		bool is_profile;
+		this->DecomposePassScanCode(vp_index, pass_type, org_no, index_in_pass, is_profile, pass_scaned_[pass]);
 
 		PassRT const pass_rt = GetPassRT(pass_type);
 		PassTargetBuffer const pass_tb = GetPassTargetBuffer(pass_type);
 		PassCategory const pass_cat = GetPassCategory(pass_type);
+
+#ifndef KLAYGE_SHIP
+		if (is_profile)
+		{
+			PerfRangePtr perf;
+			switch (pass_cat)
+			{
+			case PC_Depth:
+				perf = depth_perfs_[pass_tb];
+				break;
+
+			case PC_GBuffer:
+				perf = gbuffer_perfs_[pass_tb];
+				break;
+
+			case PC_ShadowMap:
+				perf = shadow_map_perf_;
+				break;
+
+			case PC_IndirectLighting:
+				perf = indirect_lighting_perfs_[pass_tb];
+				break;
+
+			case PC_Shadowing:
+				perf = shadowing_perfs_[pass_tb];
+				break;
+
+			case PC_Shading:
+				perf = shading_perfs_[pass_tb];
+				break;
+
+			case PC_SpecialShading:
+				perf = special_shading_perfs_[pass_tb];
+				break;
+
+			default:
+				BOOST_ASSERT(false);
+				break;
+			}
+
+			if (0 == index_in_pass)
+			{
+				perf->Begin();
+			}
+			else
+			{
+				perf->End();
+			}
+
+			return 0;
+		}
+#endif
 
 		active_viewport_ = vp_index;
 
@@ -1757,7 +1827,10 @@ namespace KlayGE
 	void DeferredRenderingLayer::BuildPassScanList(bool has_opaque_objs, bool has_transparency_back_objs, bool has_transparency_front_objs)
 	{
 		pass_scaned_.clear();
-		
+
+#ifndef KLAYGE_SHIP
+		pass_scaned_.push_back(this->ComposePassScanCode(0, PT_GenShadowMap, 0, 0, true));
+#endif
 		for (uint32_t i = 0; i < lights_.size(); ++ i)
 		{
 			LightSourcePtr const & light = lights_[i];
@@ -1766,6 +1839,9 @@ namespace KlayGE
 				this->AppendShadowPassScanCode(i);
 			}
 		}
+#ifndef KLAYGE_SHIP
+		pass_scaned_.push_back(this->ComposePassScanCode(0, PT_GenShadowMap, 0, 1, true));
+#endif
 
 		for (uint32_t vpi = 0; vpi < viewports_.size(); ++ vpi)
 		{
@@ -1806,6 +1882,9 @@ namespace KlayGE
 
 					if (pvp.g_buffer_enables[i])
 					{
+#ifndef KLAYGE_SHIP
+						pass_scaned_.push_back(this->ComposePassScanCode(vpi, PT_Shadowing, 0, 0, true));
+#endif
 						for (uint32_t li = 0; li < lights_.size(); ++ li)
 						{
 							LightSourcePtr const & light = lights_[li];
@@ -1815,7 +1894,10 @@ namespace KlayGE
 								this->AppendShadowingPassScanCode(vpi, i, li);
 							}
 						}
-
+#ifndef KLAYGE_SHIP
+						pass_scaned_.push_back(this->ComposePassScanCode(vpi, PT_Shadowing, 0, 1, true));
+						pass_scaned_.push_back(this->ComposePassScanCode(vpi, PT_IndirectLighting, 0, 0, true));
+#endif
 						for (uint32_t li = 0; li < lights_.size(); ++ li)
 						{
 							LightSourcePtr const & light = lights_[li];
@@ -1831,12 +1913,15 @@ namespace KlayGE
 								}
 							}
 						}
+#ifndef KLAYGE_SHIP
+						pass_scaned_.push_back(this->ComposePassScanCode(vpi, PT_IndirectLighting, 0, 1, true));
+#endif
 
 						this->AppendShadingPassScanCode(vpi, i);
 					}
 				}
 
-				pass_scaned_.push_back(this->ComposePassScanCode(vpi, PT_OpaqueSpecialShading, 0, 2));
+				pass_scaned_.push_back(this->ComposePassScanCode(vpi, PT_OpaqueSpecialShading, 0, 2, false));
 			}
 		}
 	}
@@ -1882,27 +1967,57 @@ namespace KlayGE
 
 		if (!depth_texture_support_)
 		{
+#ifndef KLAYGE_SHIP
 			pass_scaned_.push_back(this->ComposePassScanCode(vp_index,
-				ComposePassType(PRT_None, ptb, PC_Depth), 0, 0));
+				ComposePassType(PRT_None, ptb, PC_Depth), 0, 0, true));
+#endif
+			pass_scaned_.push_back(this->ComposePassScanCode(vp_index,
+				ComposePassType(PRT_None, ptb, PC_Depth), 0, 0, false));
+#ifndef KLAYGE_SHIP
+			pass_scaned_.push_back(this->ComposePassScanCode(vp_index,
+				ComposePassType(PRT_None, ptb, PC_Depth), 0, 1, true));
+#endif
 		}
 
 		if (mrt_g_buffer_support_)
 		{
+#ifndef KLAYGE_SHIP
 			pass_scaned_.push_back(this->ComposePassScanCode(vp_index,
-				ComposePassType(PRT_MRT, ptb, PC_GBuffer), 0, 0));
+				ComposePassType(PRT_MRT, ptb, PC_GBuffer), 0, 0, true));
+#endif
 			pass_scaned_.push_back(this->ComposePassScanCode(vp_index,
-				ComposePassType(PRT_MRT, ptb, PC_GBuffer), 0, 1));
+				ComposePassType(PRT_MRT, ptb, PC_GBuffer), 0, 0, false));
+			pass_scaned_.push_back(this->ComposePassScanCode(vp_index,
+				ComposePassType(PRT_MRT, ptb, PC_GBuffer), 0, 1, false));
+#ifndef KLAYGE_SHIP
+			pass_scaned_.push_back(this->ComposePassScanCode(vp_index,
+				ComposePassType(PRT_MRT, ptb, PC_GBuffer), 0, 1, true));
+#endif
 		}
 		else
 		{
+#ifndef KLAYGE_SHIP
 			pass_scaned_.push_back(this->ComposePassScanCode(vp_index,
-				ComposePassType(PRT_RT0, ptb, PC_GBuffer), 0, 0));
+				ComposePassType(PRT_RT0, ptb, PC_GBuffer), 0, 0, true));
+#endif
 			pass_scaned_.push_back(this->ComposePassScanCode(vp_index,
-				ComposePassType(PRT_RT0, ptb, PC_GBuffer), 0, 1));
+				ComposePassType(PRT_RT0, ptb, PC_GBuffer), 0, 0, false));
 			pass_scaned_.push_back(this->ComposePassScanCode(vp_index,
-				ComposePassType(PRT_RT1, ptb, PC_GBuffer), 0, 0));
+				ComposePassType(PRT_RT0, ptb, PC_GBuffer), 0, 1, false));
+#ifndef KLAYGE_SHIP
 			pass_scaned_.push_back(this->ComposePassScanCode(vp_index,
-				ComposePassType(PRT_RT1, ptb, PC_GBuffer), 0, 1));
+				ComposePassType(PRT_RT0, ptb, PC_GBuffer), 0, 1, true));
+			pass_scaned_.push_back(this->ComposePassScanCode(vp_index,
+				ComposePassType(PRT_RT1, ptb, PC_GBuffer), 0, 0, true));
+#endif
+			pass_scaned_.push_back(this->ComposePassScanCode(vp_index,
+				ComposePassType(PRT_RT1, ptb, PC_GBuffer), 0, 0, false));
+			pass_scaned_.push_back(this->ComposePassScanCode(vp_index,
+				ComposePassType(PRT_RT1, ptb, PC_GBuffer), 0, 1, false));
+#ifndef KLAYGE_SHIP
+			pass_scaned_.push_back(this->ComposePassScanCode(vp_index,
+				ComposePassType(PRT_RT1, ptb, PC_GBuffer), 0, 1, true));
+#endif
 		}
 	}
 
@@ -1952,8 +2067,8 @@ namespace KlayGE
 
 				if (sm_seq != 0)
 				{
-					pass_scaned_.push_back(this->ComposePassScanCode(0, shadow_pt, light_index, 0));
-					pass_scaned_.push_back(this->ComposePassScanCode(0, shadow_pt, light_index, 1));
+					pass_scaned_.push_back(this->ComposePassScanCode(0, shadow_pt, light_index, 0, false));
+					pass_scaned_.push_back(this->ComposePassScanCode(0, shadow_pt, light_index, 1, false));
 				}
 			}
 			break;
@@ -1963,7 +2078,7 @@ namespace KlayGE
 			{
 				for (int j = 0; j < 7; ++ j)
 				{
-					pass_scaned_.push_back(this->ComposePassScanCode(0, shadow_pt, light_index, j));
+					pass_scaned_.push_back(this->ComposePassScanCode(0, shadow_pt, light_index, j, false));
 				}
 			}
 			break;
@@ -1974,7 +2089,7 @@ namespace KlayGE
 		default:
 			if (0 == (attr & LightSource::LSA_NoShadow))
 			{							
-				pass_scaned_.push_back(this->ComposePassScanCode(0, shadow_pt, light_index, 0));
+				pass_scaned_.push_back(this->ComposePassScanCode(0, shadow_pt, light_index, 0, false));
 			}
 			break;
 		}
@@ -1984,35 +2099,60 @@ namespace KlayGE
 	{
 		BOOST_ASSERT(LightSource::LT_Sun == lights_[light_index]->Type());
 
+#ifndef KLAYGE_SHIP
+		pass_scaned_.push_back(this->ComposePassScanCode(vp_index, PT_GenCascadedShadowMap,
+			light_index, 0, true));
+#endif
+
 		PerViewport& pvp = viewports_[vp_index];
 		for (uint32_t i = 0; i < pvp.num_cascades + 1; ++ i)
 		{
-			pass_scaned_.push_back(this->ComposePassScanCode(vp_index, PT_GenCascadedShadowMap, light_index, i));
+			pass_scaned_.push_back(this->ComposePassScanCode(vp_index, PT_GenCascadedShadowMap,
+				light_index, i, false));
 		}
+
+#ifndef KLAYGE_SHIP
+		pass_scaned_.push_back(this->ComposePassScanCode(vp_index, PT_GenCascadedShadowMap,
+			light_index, 1, true));
+#endif
 	}
 
 	void DeferredRenderingLayer::AppendShadowingPassScanCode(uint32_t vp_index, uint32_t g_buffer_index, uint32_t light_index)
 	{
 		PassTargetBuffer const pass_tb = static_cast<PassTargetBuffer>(g_buffer_index);
 		pass_scaned_.push_back(this->ComposePassScanCode(vp_index,
-			ComposePassType(PRT_None, pass_tb, PC_Shadowing), light_index, 0));
+			ComposePassType(PRT_None, pass_tb, PC_Shadowing), light_index, 0, false));
 	}
 
 	void DeferredRenderingLayer::AppendIndirectLightingPassScanCode(uint32_t vp_index, uint32_t light_index)
 	{
-		pass_scaned_.push_back(this->ComposePassScanCode(vp_index, PT_IndirectLighting, light_index, 0));
+		pass_scaned_.push_back(this->ComposePassScanCode(vp_index, PT_IndirectLighting, light_index, 0, false));
 	}
 
 	void DeferredRenderingLayer::AppendShadingPassScanCode(uint32_t vp_index, uint32_t g_buffer_index)
 	{
 		PassTargetBuffer const pass_tb = static_cast<PassTargetBuffer>(g_buffer_index);
 
+#ifndef KLAYGE_SHIP
+		pass_scaned_.push_back(this->ComposePassScanCode(vp_index,
+			ComposePassType(PRT_None, pass_tb, PC_Shading), 0, 0, true));
+#endif
 		pass_scaned_.push_back(this->ComposePassScanCode(vp_index, 
-			ComposePassType(PRT_None, pass_tb, PC_Shading), 0, 0));
+			ComposePassType(PRT_None, pass_tb, PC_Shading), 0, 0, false));
+#ifndef KLAYGE_SHIP
 		pass_scaned_.push_back(this->ComposePassScanCode(vp_index,
-			ComposePassType(PRT_None, pass_tb, PC_SpecialShading), 0, 0));
+			ComposePassType(PRT_None, pass_tb, PC_Shading), 0, 1, true));
 		pass_scaned_.push_back(this->ComposePassScanCode(vp_index,
-			ComposePassType(PRT_None, pass_tb, PC_SpecialShading), 0, 1));
+			ComposePassType(PRT_None, pass_tb, PC_SpecialShading), 0, 0, true));
+#endif
+		pass_scaned_.push_back(this->ComposePassScanCode(vp_index,
+			ComposePassType(PRT_None, pass_tb, PC_SpecialShading), 0, 0, false));
+		pass_scaned_.push_back(this->ComposePassScanCode(vp_index,
+			ComposePassType(PRT_None, pass_tb, PC_SpecialShading), 0, 1, false));
+#ifndef KLAYGE_SHIP
+		pass_scaned_.push_back(this->ComposePassScanCode(vp_index,
+			ComposePassType(PRT_None, pass_tb, PC_SpecialShading), 0, 1, true));
+#endif
 	}
 
 	void DeferredRenderingLayer::PreparePVP(PerViewport& pvp)
@@ -2687,17 +2827,21 @@ namespace KlayGE
 		indirect_scale_ = scale;
 	}
 
-	uint32_t DeferredRenderingLayer::ComposePassScanCode(uint32_t vp_index, PassType pass_type, int32_t org_no, int32_t index_in_pass)
+	uint32_t DeferredRenderingLayer::ComposePassScanCode(uint32_t vp_index, PassType pass_type,
+		int32_t org_no, int32_t index_in_pass, bool is_profile)
 	{
-		return (vp_index << 28) | (pass_type << 18) | (org_no << 6) | index_in_pass;
+		return (vp_index << 28) | (pass_type << 18) | (org_no << 6)
+			| (index_in_pass << 1) | (is_profile ? 1 : 0);
 	}
 
-	void DeferredRenderingLayer::DecomposePassScanCode(uint32_t& vp_index, PassType& pass_type, int32_t& org_no, int32_t& index_in_pass, uint32_t code)
+	void DeferredRenderingLayer::DecomposePassScanCode(uint32_t& vp_index, PassType& pass_type,
+		int32_t& org_no, int32_t& index_in_pass, bool& is_profile, uint32_t code)
 	{
 		vp_index = code >> 28;				//  4 bits, [31 - 28]
 		pass_type = static_cast<PassType>((code >> 18) & 0x03FF);	//  10 bits, [27 - 18]
 		org_no = (code >> 6) & 0x0FFF;		// 12 bits, [17 - 6]
-		index_in_pass = (code >> 0) & 0x3F;		//  6 bits, [5 -  0]
+		index_in_pass = (code >> 1) & 0x1F;		//  5 bits, [5 -  1]
+		is_profile = (code & 1) ? true : false;
 	}
 
 #if DEFAULT_DEFERRED == LIGHT_INDEXED_DEFERRED

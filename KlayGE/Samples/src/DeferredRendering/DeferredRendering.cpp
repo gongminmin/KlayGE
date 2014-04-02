@@ -18,6 +18,7 @@
 #include <KlayGE/Camera.hpp>
 #include <KlayGE/DeferredRenderingLayer.hpp>
 #include <KlayGE/ParticleSystem.hpp>
+#include <KlayGE/PerfProfiler.hpp>
 
 #include <sstream>
 
@@ -87,13 +88,15 @@ namespace
 	enum
 	{
 		Exit,
-		Dump
+		Dump,
+		Profile
 	};
 
 	InputActionDefine actions[] =
 	{
 		InputActionDefine(Exit, KS_Escape),
-		InputActionDefine(Dump, KS_Enter)
+		InputActionDefine(Dump, KS_Enter),
+		InputActionDefine(Profile, KS_P)
 	};
 }
 
@@ -274,6 +277,12 @@ void DeferredRenderingApp::InputHandler(InputEngine const & /*sender*/, InputAct
 
 	case Exit:
 		this->Quit();
+		break;
+
+	case Profile:
+#ifndef KLAYGE_SHIP
+		Context::Instance().PerfProfilerInstance().ExportToCSV("profile.csv");
+#endif
 		break;
 	}
 }

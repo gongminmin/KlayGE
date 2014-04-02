@@ -158,14 +158,14 @@ namespace KlayGE
 	double D3D11TimerQuery::TimeElapsed()
 	{
 		D3D11RenderEngine const & re = *checked_cast<D3D11RenderEngine const *>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-		ID3D11DeviceContextPtr const & d3d_imm_ctx = re.D3DDeviceImmContext();
-
-		uint64_t start_timestamp, end_timestamp;
-		while (S_OK != d3d_imm_ctx->GetData(timestamp_start_query_.get(), &start_timestamp, sizeof(start_timestamp), 0));
-		while (S_OK != d3d_imm_ctx->GetData(timestamp_end_query_.get(), &end_timestamp, sizeof(end_timestamp), 0));
-
 		if (re.InvTimestampFreq() > 0)
 		{
+			ID3D11DeviceContextPtr const & d3d_imm_ctx = re.D3DDeviceImmContext();
+
+			uint64_t start_timestamp, end_timestamp;
+			while (S_OK != d3d_imm_ctx->GetData(timestamp_start_query_.get(), &start_timestamp, sizeof(start_timestamp), 0));
+			while (S_OK != d3d_imm_ctx->GetData(timestamp_end_query_.get(), &end_timestamp, sizeof(end_timestamp), 0));
+
 			return (end_timestamp - start_timestamp) * re.InvTimestampFreq();
 		}
 		else

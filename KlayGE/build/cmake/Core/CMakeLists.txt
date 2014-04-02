@@ -14,6 +14,7 @@ SET(LIB_NAME ${KLAYGE_CORELIB_NAME})
 SET(KERNEL_SOURCE_FILES
 	${KLAYGE_PROJECT_DIR}/Core/Src/Kernel/Context.cpp
 	${KLAYGE_PROJECT_DIR}/Core/Src/Kernel/KlayGE.cpp
+	${KLAYGE_PROJECT_DIR}/Core/Src/Kernel/PerfProfiler.cpp
 	${KLAYGE_PROJECT_DIR}/Core/Src/Kernel/ResLoader.cpp
 )
 
@@ -22,6 +23,7 @@ SET(KERNEL_HEADER_FILES
 	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/Context.hpp
 	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/KlayGE.hpp
 	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/PreDeclare.hpp
+	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/PerfProfiler.hpp
 	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/ResLoader.hpp
 )
 

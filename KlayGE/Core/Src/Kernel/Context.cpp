@@ -34,6 +34,7 @@
 #include <KFL/XMLDom.hpp>
 #include <KlayGE/DeferredRenderingLayer.hpp>
 #include <KFL/Thread.hpp>
+#include <KlayGE/PerfProfiler.hpp>
 
 #include <fstream>
 #include <sstream>
@@ -101,6 +102,8 @@ namespace KlayGE
 		_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 #endif
 #endif
+
+		perf_profiler_ = MakeSharedPtr<PerfProfiler>();
 
 		gtp_instance_ = MakeSharedPtr<thread_pool>(1, 16);
 	}
@@ -687,6 +690,11 @@ namespace KlayGE
 	ContextCfg const & Context::Config() const
 	{
 		return cfg_;
+	}
+
+	PerfProfiler& Context::PerfProfilerInstance() const
+	{
+		return *perf_profiler_;
 	}
 
 	void Context::LoadRenderFactory(std::string const & rf_name)
