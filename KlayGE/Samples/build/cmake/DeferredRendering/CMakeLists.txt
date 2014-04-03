@@ -30,6 +30,7 @@ SET(CONTENT_FILES
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/Copy.kfx
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/Copy2LightBuffer.kfx
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/DeferredRendering.kfx
+	${KLAYGE_PROJECT_DIR}/media/RenderFX/DeferredRenderingDebug.kfx
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/Depth.kfx
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/GBufferNoSkinning.kfx
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/GBufferSkinning64.kfx
@@ -108,7 +109,6 @@ SET(CONTENT_FILES
 	${KLAYGE_PROJECT_DIR}/Samples/media/Common/sponza_crytek/vase_round.dds
 	${KLAYGE_PROJECT_DIR}/Samples/media/Common/sponza_crytek/vase_round_ddn.dds
 	${KLAYGE_PROJECT_DIR}/Samples/media/Common/sponza_crytek/vase_round_spec.dds
-	${KLAYGE_PROJECT_DIR}/Samples/media/DeferredRendering/DeferredRenderingDebug.kfx
 	${KLAYGE_PROJECT_DIR}/Samples/media/DeferredRendering/fire.dds
 	${KLAYGE_PROJECT_DIR}/Samples/media/DeferredRendering/Fire.psml
 )

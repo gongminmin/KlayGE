@@ -41,6 +41,7 @@ SET(CONTENT_FILES
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/Copy.kfx
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/Copy2LightBuffer.kfx
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/DeferredRendering.kfx
+	${KLAYGE_PROJECT_DIR}/media/RenderFX/DeferredRenderingDebug.kfx
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/Depth.kfx
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/GBufferNoSkinning.kfx
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/GBufferSkinning64.kfx
