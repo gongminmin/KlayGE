@@ -278,6 +278,13 @@ namespace KlayGE
 		PostProcessPtr ldr_pps_[12];
 
 		bool force_line_mode_;
+
+#ifndef KLAYGE_SHIP
+		PerfRangePtr hdr_pp_perf_;
+		PerfRangePtr ldr_pp_perf_;
+		PerfRangePtr resize_pp_perf_;
+		PerfRangePtr stereoscopic_pp_perf_;
+#endif
 	};
 }
 

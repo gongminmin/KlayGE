@@ -705,6 +705,7 @@ namespace KlayGE
 
 		this->SetCascadedShadowType(CSLT_Auto);
 
+#ifndef KLAYGE_SHIP
 		PerfProfiler& profiler = Context::Instance().PerfProfilerInstance();
 		shadow_map_perf_ = profiler.CreatePerfRange(0, "Gen shadow map");
 		std::string buffer_name[] = { "Opaque", "Transparency back", "TransparencyFront" };
@@ -720,9 +721,10 @@ namespace KlayGE
 			shading_perfs_[i] = profiler.CreatePerfRange(0, "Shading (" + buffer_name[i] + ")");
 			special_shading_perfs_[i] = profiler.CreatePerfRange(0, "Special shading (" + buffer_name[i] + ")");
 		}
-		ssr_perf_ = profiler.CreatePerfRange(0, "SSR");
-		atmospheric_perf_ = profiler.CreatePerfRange(0, "Atmospheric");
-		taa_perf_ = profiler.CreatePerfRange(0, "TAA");
+		ssr_pp_perf_ = profiler.CreatePerfRange(0, "SSR PP");
+		atmospheric_pp_perf_ = profiler.CreatePerfRange(0, "Atmospheric PP");
+		taa_pp_perf_ = profiler.CreatePerfRange(0, "TAA PP");
+#endif
 	}
 
 	void DeferredRenderingLayer::SSGIEnabled(uint32_t vp, bool ssgi)
@@ -1618,31 +1620,31 @@ namespace KlayGE
 				if (has_reflective_objs_ && ssr_enabled_)
 				{
 #ifndef KLAYGE_SHIP
-					ssr_perf_->Begin();
+					ssr_pp_perf_->Begin();
 #endif
 					this->AddSSR(pvp);
 #ifndef KLAYGE_SHIP
-					ssr_perf_->End();
+					ssr_pp_perf_->End();
 #endif
 				}
 
 				if (atmospheric_pp_)
 				{
 #ifndef KLAYGE_SHIP
-					atmospheric_perf_->Begin();
+					atmospheric_pp_perf_->Begin();
 #endif
 					this->AddAtmospheric(pvp);
 #ifndef KLAYGE_SHIP
-					atmospheric_perf_->End();
+					atmospheric_pp_perf_->End();
 #endif
 				}
 
 #ifndef KLAYGE_SHIP
-				taa_perf_->Begin();
+				taa_pp_perf_->Begin();
 #endif
 				this->AddTAA(pvp);
 #ifndef KLAYGE_SHIP
-				taa_perf_->End();
+				taa_pp_perf_->End();
 #endif
 
 				std::swap(pvp.curr_merged_shading_fb, pvp.prev_merged_shading_fb);

@@ -426,6 +426,14 @@ namespace KlayGE
 
 		this->BindFrameBuffer(default_frame_buffers_[0]);
 		this->Stereo(settings.stereo_method);
+
+#ifndef KLAYGE_SHIP
+		PerfProfiler& profiler = Context::Instance().PerfProfilerInstance();
+		hdr_pp_perf_ = profiler.CreatePerfRange(0, "HDR PP");
+		ldr_pp_perf_ = profiler.CreatePerfRange(0, "LDR PP");
+		resize_pp_perf_ = profiler.CreatePerfRange(0, "Resize PP");
+		stereoscopic_pp_perf_ = profiler.CreatePerfRange(0, "Stereoscopic PP");
+#endif
 	}
 
 	void RenderEngine::DestroyRenderWindow()
@@ -731,6 +739,9 @@ namespace KlayGE
 
 		fb_stage_ = 1;
 
+#ifndef KLAYGE_SHIP
+		hdr_pp_perf_->Begin();
+#endif
 		if (hdr_enabled_)
 		{
 			if (skip)
@@ -750,9 +761,15 @@ namespace KlayGE
 				skip_hdr_pp_->Apply();
 			}
 		}
+#ifndef KLAYGE_SHIP
+		hdr_pp_perf_->End();
+#endif
 
 		fb_stage_ = 2;
 
+#ifndef KLAYGE_SHIP
+		ldr_pp_perf_->Begin();
+#endif
 		if (ppaa_enabled_ || gamma_enabled_ || color_grading_enabled_)
 		{
 			if (skip)
@@ -771,6 +788,9 @@ namespace KlayGE
 				ldr_pps_[0]->Apply();
 			}
 		}
+#ifndef KLAYGE_SHIP
+		ldr_pp_perf_->End();
+#endif
 
 		fb_stage_ = 3;
 
@@ -781,6 +801,9 @@ namespace KlayGE
 		bool need_resize = ((render_width != screen_width) || (render_height != screen_height));
 		if ((STM_None == stereo_method_) && need_resize)
 		{
+#ifndef KLAYGE_SHIP
+			resize_pp_perf_->Begin();
+#endif
 			float const scale_x = static_cast<float>(screen_width) / render_width;
 			float const scale_y = static_cast<float>(screen_height) / render_height;
 
@@ -797,6 +820,9 @@ namespace KlayGE
 			{
 				resize_pps_[0]->Apply();
 			}
+#ifndef KLAYGE_SHIP
+			resize_pp_perf_->End();
+#endif
 		}
 
 		this->DefaultFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->ClearDepth(1.0f);
@@ -863,6 +889,10 @@ namespace KlayGE
 		{
 			fb_stage_ = 3;
 
+#ifndef KLAYGE_SHIP
+			stereoscopic_pp_perf_->Begin();
+#endif
+
 			this->BindFrameBuffer(screen_frame_buffer_);
 			if (stereoscopic_pp_)
 			{
@@ -880,6 +910,10 @@ namespace KlayGE
 
 				this->BindFrameBuffer(screen_frame_buffer_);
 			}
+
+#ifndef KLAYGE_SHIP
+			stereoscopic_pp_perf_->End();
+#endif
 
 			fb_stage_ = 0;
 		}

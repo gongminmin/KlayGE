@@ -498,6 +498,7 @@ namespace KlayGE
 		PostProcessPtr dr_debug_pp_;
 		DisplayType display_type_;
 
+#ifndef KLAYGE_SHIP
 		PerfRangePtr shadow_map_perf_;
 		array<PerfRangePtr, PTB_None> depth_perfs_;
 		array<PerfRangePtr, PTB_None> gbuffer_perfs_;
@@ -505,9 +506,10 @@ namespace KlayGE
 		array<PerfRangePtr, PTB_None> indirect_lighting_perfs_;
 		array<PerfRangePtr, PTB_None> shading_perfs_;
 		array<PerfRangePtr, PTB_None> special_shading_perfs_;
-		PerfRangePtr ssr_perf_;
-		PerfRangePtr atmospheric_perf_;
-		PerfRangePtr taa_perf_;
+		PerfRangePtr ssr_pp_perf_;
+		PerfRangePtr atmospheric_pp_perf_;
+		PerfRangePtr taa_pp_perf_;
+#endif
 	};
 }
 
