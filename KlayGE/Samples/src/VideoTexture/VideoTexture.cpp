@@ -186,7 +186,7 @@ void VideoTextureApp::InitObjects()
 	ground_ = MakeSharedPtr<TeapotObject>();
 	ground_->AddToSceneManager();
 
-#if KLAYGE_PLATFORM_WINDOWS_DESKTOP
+#ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
 	ShowEngine& se = Context::Instance().ShowFactoryInstance().ShowEngineInstance();
 	se.Load(ResLoader::Instance().Locate("big_buck_bunny.avi"));
 	se.Play();
@@ -227,7 +227,7 @@ void VideoTextureApp::DoUpdateOverlay()
 uint32_t VideoTextureApp::DoUpdate(uint32_t /*pass*/)
 {
 	RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-#if KLAYGE_PLATFORM_WINDOWS_DESKTOP
+#ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
 	ShowEngine& se = Context::Instance().ShowFactoryInstance().ShowEngineInstance();
 #endif
 
@@ -240,7 +240,7 @@ uint32_t VideoTextureApp::DoUpdate(uint32_t /*pass*/)
 	}		
 	re.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, clear_clr, 1.0f, 0);
 
-#if KLAYGE_PLATFORM_WINDOWS_DESKTOP
+#ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
 	checked_pointer_cast<TeapotObject>(ground_)->VideoTexture(se.PresentTexture());
 #endif
 	checked_pointer_cast<TeapotObject>(ground_)->LightPos(light_->Position());

@@ -78,11 +78,22 @@ namespace KlayGE
 		return gpu_time_;
 	}
 
+	bool PerfRange::Dirty() const
+	{
+		return dirty_;
+	}
+
+
+	PerfProfiler::PerfProfiler()
+		: frame_id_(0)
+	{
+	}
 
 	PerfRangePtr PerfProfiler::CreatePerfRange(int category, std::string const & name)
 	{
 		PerfRangePtr range = MakeSharedPtr<PerfRange>();
-		perf_ranges_.insert(std::make_pair(std::make_pair(category, name), range));
+		typedef KLAYGE_DECLTYPE(get<3>(perf_ranges_[0])) PerfDataType;
+		perf_ranges_.push_back(KlayGE::make_tuple(category, name, range, PerfDataType()));
 		return range;
 	}
 
@@ -95,22 +106,37 @@ namespace KlayGE
 		typedef KLAYGE_DECLTYPE(perf_ranges_) PerfRangesType;
 		KLAYGE_FOREACH(PerfRangesType::reference range, perf_ranges_)
 		{
-			range.second->CollectData();
+			if (get<2>(range)->Dirty())
+			{
+				get<2>(range)->CollectData();
+				get<3>(range).push_back(KlayGE::make_tuple(frame_id_,
+					get<2>(range)->CPUTime(), get<2>(range)->GPUTime()));
+			}
 		}
+
+		++ frame_id_;
 	}
 
-	void PerfProfiler::ExportToCSV(std::string const & file_name)
+	void PerfProfiler::ExportToCSV(std::string const & file_name) const
 	{
 		std::ofstream ofs(file_name.c_str());
-		ofs << "Category" << ',' << "Name" << ','
+		ofs << "Frame" << ',' << "Category" << ',' << "Name" << ','
 			<< "CPU Timing (ms)" << ',' << "GPU Timing (ms)" << std::endl;
 
 		typedef KLAYGE_DECLTYPE(perf_ranges_) PerfRangesType;
-		KLAYGE_FOREACH(PerfRangesType::reference range, perf_ranges_)
+		KLAYGE_FOREACH(PerfRangesType::const_reference range, perf_ranges_)
 		{
-			ofs << range.first.first << ',' << range.first.second << ','
-				<< range.second->CPUTime() * 1000 << ',' << range.second->GPUTime() * 1000
-				<< std::endl;
+			typedef KLAYGE_DECLTYPE(get<3>(range)) PerfDataType;
+			KLAYGE_FOREACH(PerfDataType::const_reference data, get<3>(range))
+			{
+				ofs << get<0>(data) << ',' << get<0>(range) << ',' << get<1>(range) << ','
+					<< get<1>(data) * 1000 << ',';
+				if (get<2>(data) >= 0)
+				{
+					ofs << get<2>(data) * 1000;
+				}
+				ofs << std::endl;
+			}
 		}
 
 		ofs << std::endl;

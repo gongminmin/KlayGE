@@ -720,6 +720,9 @@ namespace KlayGE
 			shading_perfs_[i] = profiler.CreatePerfRange(0, "Shading (" + buffer_name[i] + ")");
 			special_shading_perfs_[i] = profiler.CreatePerfRange(0, "Special shading (" + buffer_name[i] + ")");
 		}
+		ssr_perf_ = profiler.CreatePerfRange(0, "SSR");
+		atmospheric_perf_ = profiler.CreatePerfRange(0, "Atmospheric");
+		taa_perf_ = profiler.CreatePerfRange(0, "TAA");
 	}
 
 	void DeferredRenderingLayer::SSGIEnabled(uint32_t vp, bool ssgi)
@@ -1614,15 +1617,33 @@ namespace KlayGE
 			{
 				if (has_reflective_objs_ && ssr_enabled_)
 				{
+#ifndef KLAYGE_SHIP
+					ssr_perf_->Begin();
+#endif
 					this->AddSSR(pvp);
+#ifndef KLAYGE_SHIP
+					ssr_perf_->End();
+#endif
 				}
 
 				if (atmospheric_pp_)
 				{
+#ifndef KLAYGE_SHIP
+					atmospheric_perf_->Begin();
+#endif
 					this->AddAtmospheric(pvp);
+#ifndef KLAYGE_SHIP
+					atmospheric_perf_->End();
+#endif
 				}
 
+#ifndef KLAYGE_SHIP
+				taa_perf_->Begin();
+#endif
 				this->AddTAA(pvp);
+#ifndef KLAYGE_SHIP
+				taa_perf_->End();
+#endif
 
 				std::swap(pvp.curr_merged_shading_fb, pvp.prev_merged_shading_fb);
 				std::swap(pvp.curr_merged_shading_tex, pvp.prev_merged_shading_tex);
@@ -1883,7 +1904,8 @@ namespace KlayGE
 					if (pvp.g_buffer_enables[i])
 					{
 #ifndef KLAYGE_SHIP
-						pass_scaned_.push_back(this->ComposePassScanCode(vpi, PT_Shadowing, 0, 0, true));
+						pass_scaned_.push_back(this->ComposePassScanCode(vpi,
+							ComposePassType(PRT_None, static_cast<PassTargetBuffer>(i), PC_Shadowing), 0, 0, true));
 #endif
 						for (uint32_t li = 0; li < lights_.size(); ++ li)
 						{
@@ -1895,8 +1917,10 @@ namespace KlayGE
 							}
 						}
 #ifndef KLAYGE_SHIP
-						pass_scaned_.push_back(this->ComposePassScanCode(vpi, PT_Shadowing, 0, 1, true));
-						pass_scaned_.push_back(this->ComposePassScanCode(vpi, PT_IndirectLighting, 0, 0, true));
+						pass_scaned_.push_back(this->ComposePassScanCode(vpi,
+							ComposePassType(PRT_None, static_cast<PassTargetBuffer>(i), PC_Shadowing), 0, 1, true));
+						pass_scaned_.push_back(this->ComposePassScanCode(vpi,
+							ComposePassType(PRT_None, static_cast<PassTargetBuffer>(i), PC_IndirectLighting), 0, 0, true));
 #endif
 						for (uint32_t li = 0; li < lights_.size(); ++ li)
 						{
@@ -1914,7 +1938,8 @@ namespace KlayGE
 							}
 						}
 #ifndef KLAYGE_SHIP
-						pass_scaned_.push_back(this->ComposePassScanCode(vpi, PT_IndirectLighting, 0, 1, true));
+						pass_scaned_.push_back(this->ComposePassScanCode(vpi,
+							ComposePassType(PRT_None, static_cast<PassTargetBuffer>(i), PC_IndirectLighting), 0, 1, true));
 #endif
 
 						this->AppendShadingPassScanCode(vpi, i);

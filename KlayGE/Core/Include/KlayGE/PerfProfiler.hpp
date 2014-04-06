@@ -53,6 +53,7 @@ namespace KlayGE
 
 		double CPUTime() const;
 		double GPUTime() const;
+		bool Dirty() const;
 
 	private:
 		Timer cpu_timer_;
@@ -67,13 +68,17 @@ namespace KlayGE
 	class KLAYGE_CORE_API PerfProfiler
 	{
 	public:
+		PerfProfiler();
+
 		PerfRangePtr CreatePerfRange(int category, std::string const & name);
 		void CollectData();
 
-		void ExportToCSV(std::string const & file_name);
+		void ExportToCSV(std::string const & file_name) const;
 
 	private:
-		std::map<std::pair<int, std::string>, PerfRangePtr> perf_ranges_;
+		std::vector<tuple<int, std::string, PerfRangePtr,
+			std::vector<tuple<uint32_t, double, double> > > > perf_ranges_;
+		uint32_t frame_id_;
 	};
 }
 

@@ -499,12 +499,15 @@ namespace KlayGE
 		DisplayType display_type_;
 
 		PerfRangePtr shadow_map_perf_;
-		PerfRangePtr depth_perfs_[PTB_None];
-		PerfRangePtr gbuffer_perfs_[PTB_None];
-		PerfRangePtr shadowing_perfs_[PTB_None];
-		PerfRangePtr indirect_lighting_perfs_[PTB_None];
-		PerfRangePtr shading_perfs_[PTB_None];
-		PerfRangePtr special_shading_perfs_[PTB_None];
+		array<PerfRangePtr, PTB_None> depth_perfs_;
+		array<PerfRangePtr, PTB_None> gbuffer_perfs_;
+		array<PerfRangePtr, PTB_None> shadowing_perfs_;
+		array<PerfRangePtr, PTB_None> indirect_lighting_perfs_;
+		array<PerfRangePtr, PTB_None> shading_perfs_;
+		array<PerfRangePtr, PTB_None> special_shading_perfs_;
+		PerfRangePtr ssr_perf_;
+		PerfRangePtr atmospheric_perf_;
+		PerfRangePtr taa_perf_;
 	};
 }
 
