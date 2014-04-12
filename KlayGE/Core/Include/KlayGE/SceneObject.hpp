@@ -46,6 +46,11 @@ namespace KlayGE
 		explicit SceneObject(uint32_t attrib);
 		virtual ~SceneObject();
 
+		SceneObject* Parent() const;
+		void Parent(SceneObject* so);
+		uint32_t NumChildren() const;
+		const SceneObjectPtr& Child(uint32_t index) const;
+
 		RenderablePtr const & GetRenderable() const;
 
 		virtual void ModelMatrix(float4x4 const & mat);
@@ -99,6 +104,9 @@ namespace KlayGE
 
 	protected:
 		uint32_t attrib_;
+
+		SceneObject* parent_;
+		std::vector<SceneObjectPtr> children_;
 
 		RenderablePtr renderable_;
 		vertex_elements_type instance_format_;

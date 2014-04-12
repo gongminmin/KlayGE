@@ -27,12 +27,33 @@
 namespace KlayGE
 {
 	SceneObject::SceneObject(uint32_t attrib)
-		: attrib_(attrib), model_(float4x4::Identity())
+		: attrib_(attrib), parent_(nullptr), model_(float4x4::Identity())
 	{
 	}
 
 	SceneObject::~SceneObject()
 	{
+	}
+
+	SceneObject* SceneObject::Parent() const
+	{
+		return parent_;
+	}
+
+	void SceneObject::Parent(SceneObject* so)
+	{
+		parent_ = so;
+	}
+
+	uint32_t SceneObject::NumChildren() const
+	{
+		return children_.size();
+	}
+
+	const SceneObjectPtr& SceneObject::Child(uint32_t index) const
+	{
+		BOOST_ASSERT(index < children_.size());
+		return children_[index];
 	}
 
 	RenderablePtr const & SceneObject::GetRenderable() const
@@ -55,7 +76,6 @@ namespace KlayGE
 	void SceneObject::ModelMatrix(float4x4 const & mat)
 	{
 		model_ = mat;
-		renderable_->ModelMatrix(model_);
 	}
 
 	float4x4 const & SceneObject::ModelMatrix() const
@@ -92,10 +112,20 @@ namespace KlayGE
 	void SceneObject::AddToSceneManager()
 	{
 		Context::Instance().SceneManagerInstance().AddSceneObject(this->shared_from_this());
+		typedef KLAYGE_DECLTYPE(children_) ChildrenType;
+		KLAYGE_FOREACH(ChildrenType::reference child, children_)
+		{
+			child->AddToSceneManager();
+		}
 	}
 
 	void SceneObject::DelFromSceneManager()
 	{
+		typedef KLAYGE_DECLTYPE(children_) ChildrenType;
+		KLAYGE_FOREACH(ChildrenType::reference child, children_)
+		{
+			child->DelFromSceneManager();
+		}
 		Context::Instance().SceneManagerInstance().DelSceneObject(this->shared_from_this());
 	}
 
@@ -118,6 +148,12 @@ namespace KlayGE
 		else
 		{
 			attrib_ |= SOA_Invisible;
+		}
+
+		typedef KLAYGE_DECLTYPE(children_) ChildrenType;
+		KLAYGE_FOREACH(ChildrenType::reference child, children_)
+		{
+			child->Visible(vis);
 		}
 	}
 

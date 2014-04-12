@@ -155,16 +155,26 @@ namespace KlayGE
 
 			SceneObjAABBPtrType const & soaabb = scene_objs_[i];
 			SceneObjectPtr const & obj = soaabb->so;
-			if (!(obj->Attrib() & SceneObject::SOA_Overlay) && obj->Visible())
+			uint32_t const attr = obj->Attrib();
+			if (!(attr & SceneObject::SOA_Overlay) && obj->Visible())
 			{
-				AABBox aabb_ws;
-				if (obj->Attrib() & SceneObject::SOA_Cullable)
+				float4x4 mat;
+				if (attr & SceneObject::SOA_Moveable)
 				{
-					if (obj->Attrib() & SceneObject::SOA_Moveable)
+					mat = obj->ModelMatrix();
+					if (obj->Parent())
+					{
+						mat = obj->Parent()->ModelMatrix() * mat;
+					}
+					obj->GetRenderable()->ModelMatrix(mat);
+				}
+
+				AABBox aabb_ws;
+				if (attr & SceneObject::SOA_Cullable)
+				{
+					if (attr & SceneObject::SOA_Moveable)
 					{
 						AABBox const & aabb = obj->PosBound();
-						float4x4 const & mat = obj->ModelMatrix();
-
 						aabb_ws = MathLib::transform_aabb(aabb, mat);
 					}
 					else
@@ -180,7 +190,7 @@ namespace KlayGE
 					visible = true;
 				}
 
-				if (!camera.OmniDirectionalMode() && (obj->Attrib() & SceneObject::SOA_Cullable))
+				if (!camera.OmniDirectionalMode() && (attr & SceneObject::SOA_Cullable))
 				{
 					visible &= this->AABBVisible(aabb_ws);
 				}
@@ -271,8 +281,13 @@ namespace KlayGE
 			&& !(attr & SceneObject::SOA_Moveable))
 		{
 			AABBox const & aabb = obj->PosBound();
-			float4x4 const & mat = obj->ModelMatrix();
+			float4x4 mat = obj->ModelMatrix();
+			if (obj->Parent())
+			{
+				mat = obj->Parent()->ModelMatrix() * mat;
+			}
 			aabb_ws = MakeSharedPtr<AABBox>(MathLib::transform_aabb(aabb, mat));
+			obj->GetRenderable()->ModelMatrix(mat);
 		}
 
 		scene_objs_.push_back(MakeSharedPtr<SceneObjAABB>(obj, aabb_ws, false));
@@ -593,20 +608,23 @@ namespace KlayGE
 			if (scene_obj->visible)
 			{
 				SceneObjectPtr const & so = scene_obj->so;
-				RenderablePtr const & renderable = so->GetRenderable();
-
-				KLAYGE_AUTO(iter, renderables_map.lower_bound(renderable));
-				if ((iter != renderables_map.end()) && (iter->first == renderable))
+				if (0 == so->NumChildren())
 				{
-					renderables[iter->second].second.push_back(so);
-				}
-				else
-				{
-					renderables_map.insert(std::make_pair(renderable, renderables.size()));
-					renderables.push_back(std::make_pair(renderable, std::vector<SceneObjectPtr>(1, so)));
-				}
+					RenderablePtr const & renderable = so->GetRenderable();
 
-				++ numObjectsRendered_;
+					KLAYGE_AUTO(iter, renderables_map.lower_bound(renderable));
+					if ((iter != renderables_map.end()) && (iter->first == renderable))
+					{
+						renderables[iter->second].second.push_back(so);
+					}
+					else
+					{
+						renderables_map.insert(std::make_pair(renderable, renderables.size()));
+						renderables.push_back(std::make_pair(renderable, std::vector<SceneObjectPtr>(1, so)));
+					}
+
+					++ numObjectsRendered_;
+				}
 			}
 		}
 		renderables_map.clear();

@@ -222,8 +222,6 @@ namespace KlayGE
 
 		void AddToRenderQueue();
 
-		virtual void ModelMatrix(float4x4 const & mat) KLAYGE_OVERRIDE;
-
 		virtual void Pass(PassType type);
 
 		virtual bool SpecialShading() const;

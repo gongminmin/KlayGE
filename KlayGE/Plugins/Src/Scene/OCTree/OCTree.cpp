@@ -177,25 +177,40 @@ namespace KlayGE
 			KLAYGE_FOREACH(SceneObjAABBPtrType const & soaabb, scene_objs_)
 			{
 				SceneObjectPtr const & obj = soaabb->so;
-				soaabb->visible = (!(obj->Attrib() & SceneObject::SOA_Overlay) && obj->Visible());
-				
-				if (obj->Attrib() & SceneObject::SOA_Cullable)
+				uint32_t const attr = obj->Attrib();
+				if (!(attr & SceneObject::SOA_Overlay) && obj->Visible())
 				{
-					AABBox aabb_ws;
-					if (obj->Attrib() & SceneObject::SOA_Moveable)
+					float4x4 mat;
+					if (attr & SceneObject::SOA_Moveable)
 					{
-						AABBox const & aabb = obj->PosBound();
-						float4x4 const & mat = obj->ModelMatrix();
-
-						aabb_ws = MathLib::transform_aabb(aabb, mat);
-					}
-					else
-					{
-						aabb_ws = *soaabb->aabb_ws;
+						mat = obj->ModelMatrix();
+						if (obj->Parent())
+						{
+							mat = obj->Parent()->ModelMatrix() * mat;
+						}
+						obj->GetRenderable()->ModelMatrix(mat);
 					}
 
-					soaabb->visible &= (MathLib::perspective_area(camera.EyePos(), view_proj,
-						aabb_ws) > small_obj_threshold_);
+					if (attr & SceneObject::SOA_Cullable)
+					{
+						AABBox aabb_ws;
+						if (attr & SceneObject::SOA_Moveable)
+						{
+							AABBox const & aabb = obj->PosBound();
+							aabb_ws = MathLib::transform_aabb(aabb, mat);
+						}
+						else
+						{
+							aabb_ws = *soaabb->aabb_ws;
+						}
+
+						soaabb->visible = (MathLib::perspective_area(camera.EyePos(), view_proj,
+							aabb_ws) > small_obj_threshold_);
+					}
+				}
+				else
+				{
+					soaabb->visible = false;
 				}
 			}
 		}
@@ -209,21 +224,28 @@ namespace KlayGE
 			KLAYGE_FOREACH(SceneObjAABBPtrType const & soaabb, scene_objs_)
 			{
 				SceneObjectPtr const & obj = soaabb->so;
-				if (obj->Visible())
+				uint32_t const attr = obj->Attrib();
+				if (!(attr & SceneObject::SOA_Overlay) && obj->Visible())
 				{
-					uint32_t const attr = obj->Attrib();
-					if (!(attr & SceneObject::SOA_Overlay))
+					float4x4 mat;
+					if (attr & SceneObject::SOA_Moveable)
 					{
-						if (!(attr & SceneObject::SOA_Cullable))
+						mat = obj->ModelMatrix();
+						if (obj->Parent())
 						{
-							soaabb->visible = true;
+							mat = obj->Parent()->ModelMatrix() * mat;
 						}
-						else if (attr & SceneObject::SOA_Moveable)
-						{
-							AABBox const & aabb = obj->PosBound();
-							float4x4 const & mat = obj->ModelMatrix();
-							soaabb->visible = this->AABBVisible(MathLib::transform_aabb(aabb, mat));
-						}
+						obj->GetRenderable()->ModelMatrix(mat);
+					}
+
+					if (!(attr & SceneObject::SOA_Cullable))
+					{
+						soaabb->visible = true;
+					}
+					else if (attr & SceneObject::SOA_Moveable)
+					{
+						AABBox const & aabb = obj->PosBound();
+						soaabb->visible = this->AABBVisible(MathLib::transform_aabb(aabb, mat));
 					}
 				}
 			}

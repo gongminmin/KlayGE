@@ -438,6 +438,12 @@ namespace KlayGE
 		this->OnRenderEnd();
 	}
 
+	void HQTerrainRenderable::ModelMatrix(float4x4 const & mat)
+	{
+		UNREF_PARAM(mat);
+		// Calculate matrix in SetMatrices.
+	}
+
 	void HQTerrainRenderable::UpdateTechnique()
 	{
 		uint32_t tech_index;

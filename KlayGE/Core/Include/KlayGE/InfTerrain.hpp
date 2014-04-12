@@ -170,6 +170,8 @@ namespace KlayGE
 
 		virtual void Render() KLAYGE_OVERRIDE;
 
+		virtual void ModelMatrix(float4x4 const & mat) KLAYGE_OVERRIDE;
+
 		void Tessellation(bool tess);
 		void ShowPatches(bool sp);
 		void ShowTiles(bool st);

@@ -389,16 +389,6 @@ namespace KlayGE
 		}
 	}
 
-	void RenderModel::ModelMatrix(float4x4 const & mat)
-	{
-		Renderable::ModelMatrix(mat);
-		typedef KLAYGE_DECLTYPE(meshes_) MeshesType;
-		KLAYGE_FOREACH(MeshesType::const_reference mesh, meshes_)
-		{
-			mesh->ModelMatrix(mat);
-		}
-	}
-
 	void RenderModel::Pass(PassType type)
 	{
 		Renderable::Pass(type);
