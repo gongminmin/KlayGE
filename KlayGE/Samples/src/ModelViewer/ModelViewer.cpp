@@ -413,7 +413,7 @@ void ModelViewerApp::OpenModel(std::string const & name)
 		dialog_model_->Control<UIComboBox>(id_mesh_)->AddItem(model->Mesh(i)->Name());
 	}
 
-	AABBox const & bb = model_->PosBound();
+	AABBox const & bb = model_->GetRenderable()->PosBound();
 	float3 center = bb.Center();
 	float3 half_size = bb.HalfSize();
 	this->LookAt(center + float3(half_size.x() * 2, half_size.y() * 2.5f, half_size.z() * 3), float3(0, center.y(), 0), float3(0.0f, 1.0f, 0.0f));
@@ -731,8 +731,8 @@ uint32_t ModelViewerApp::DoUpdate(KlayGE::uint32_t pass)
 	{
 		Camera const & camera = this->ActiveCamera();
 
-		AABBox bb = MathLib::transform_aabb(model_->PosBound(), camera.ViewMatrix())
-			| MathLib::transform_aabb(grid_->PosBound(), camera.ViewMatrix());
+		AABBox bb = MathLib::transform_aabb(model_->GetRenderable()->PosBound(), camera.ViewMatrix())
+			| MathLib::transform_aabb(grid_->GetRenderable()->PosBound(), camera.ViewMatrix());
 		float near_plane = std::max(0.01f, bb.Min().z() * 0.8f);
 		float far_plane = std::max(near_plane + 0.1f, bb.Max().z() * 1.2f);
 		this->Proj(near_plane, far_plane);

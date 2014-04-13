@@ -1090,7 +1090,7 @@ void CausticsMapApp::ModelSelectionComboBox(KlayGE::UIComboBox const & sender)
 		break;
 	}
 
-	dummy_light_env_->Position(MathLib::transform_coord(refract_obj_->PosBound().Center(), refract_obj_->ModelMatrix()));
+	dummy_light_env_->Position(MathLib::transform_coord(refract_obj_->GetRenderable()->PosBound().Center(), refract_obj_->ModelMatrix()));
 }
 
 void CausticsMapApp::DoUpdateOverlay()

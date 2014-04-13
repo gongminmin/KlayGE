@@ -29,7 +29,7 @@ namespace KlayGE
 	SceneObject::SceneObject(uint32_t attrib)
 		: attrib_(attrib), parent_(nullptr),
 			model_(float4x4::Identity()), abs_model_(float4x4::Identity()),
-			visible_mark_(false)
+			visible_mark_(BO_No)
 	{
 		if (!(attrib & SOA_Overlay) && (attrib & (SOA_Cullable | SOA_Moveable)))
 		{
@@ -106,12 +106,12 @@ namespace KlayGE
 		renderable_->ModelMatrix(abs_model_);
 	}
 
-	void SceneObject::VisibleMark(bool vm)
+	void SceneObject::VisibleMark(BoundOverlap vm)
 	{
 		visible_mark_ = vm;
 	}
 
-	bool SceneObject::VisibleMark() const
+	BoundOverlap SceneObject::VisibleMark() const
 	{
 		return visible_mark_;
 	}

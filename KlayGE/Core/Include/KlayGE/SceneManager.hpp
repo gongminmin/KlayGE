@@ -75,10 +75,10 @@ namespace KlayGE
 		SceneObjectPtr& GetSceneObject(uint32_t index);
 		SceneObjectPtr const & GetSceneObject(uint32_t index) const;
 
-		virtual bool AABBVisible(AABBox const & aabb);
-		virtual bool OBBVisible(OBBox const & obb);
-		virtual bool SphereVisible(Sphere const & sphere);
-		virtual bool FrustumVisible(Frustum const & frustum);
+		virtual BoundOverlap AABBVisible(AABBox const & aabb) const;
+		virtual BoundOverlap OBBVisible(OBBox const & obb) const;
+		virtual BoundOverlap SphereVisible(Sphere const & sphere) const;
+		virtual BoundOverlap FrustumVisible(Frustum const & frustum) const;
 
 		virtual void ClearCamera();
 		virtual void ClearLight();
@@ -108,7 +108,7 @@ namespace KlayGE
 		std::vector<LightSourcePtr> lights_;
 		SceneObjsType scene_objs_;
 
-		unordered_map<size_t, shared_ptr<std::vector<char> > > visible_marks_map_;
+		unordered_map<size_t, shared_ptr<std::vector<BoundOverlap> > > visible_marks_map_;
 
 		float small_obj_threshold_;
 		float update_elapse_;

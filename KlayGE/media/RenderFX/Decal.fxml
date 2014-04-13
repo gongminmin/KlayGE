@@ -18,7 +18,7 @@ void DecalGBufferVS(float4 pos : POSITION,
 			out float4 oPos : SV_Position)
 {
 	oPos = mul(pos, mvp);
-	oTexCoord_2xy.xy = float2(pos.x * 0.5f + 0.5f, KLAYGE_FLIPPING * pos.y * 0.5f + 0.5f);;
+	oTexCoord_2xy.xy = float2(pos.x * 0.5f + 0.5f, KLAYGE_FLIPPING * pos.y * 0.5f + 0.5f);
 
 	float3x3 obj_to_ts;
 	obj_to_ts[0] = float3(1, 0, 0);

@@ -237,7 +237,7 @@ namespace KlayGE
 		RenderDeviceCaps const & caps = re.DeviceCaps();
 
 		*vpl_view_param_ = g_buffer_camera_->ViewMatrix();
-		*vpl_proj_param_ = g_buffer_camera_->ProjMatrix();;
+		*vpl_proj_param_ = g_buffer_camera_->ProjMatrix();
 		*vpl_depth_near_far_invfar_param_ = float3(g_buffer_camera_->NearPlane(),
 			g_buffer_camera_->FarPlane(), 1 / g_buffer_camera_->FarPlane());
 

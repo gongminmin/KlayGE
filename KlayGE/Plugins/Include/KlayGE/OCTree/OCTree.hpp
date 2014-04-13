@@ -41,25 +41,26 @@ namespace KlayGE
 		void MaxTreeDepth(uint32_t max_tree_depth);
 		uint32_t MaxTreeDepth() const;
 
-		bool AABBVisible(AABBox const & aabb);
-		bool OBBVisible(OBBox const & obb);
-		bool SphereVisible(Sphere const & sphere);
+		virtual void ClipScene() KLAYGE_OVERRIDE;
+
+		virtual BoundOverlap AABBVisible(AABBox const & aabb) const KLAYGE_OVERRIDE;
+		virtual BoundOverlap OBBVisible(OBBox const & obb) const KLAYGE_OVERRIDE;
+		virtual BoundOverlap SphereVisible(Sphere const & sphere) const KLAYGE_OVERRIDE;
+
+		virtual void ClearObject() KLAYGE_OVERRIDE;
 
 	private:
-		void ClipScene();
-		void ClearObject();
-
-		void OnAddSceneObject(SceneObjectPtr const & obj);
-		void OnDelSceneObject(SceneObjsType::iterator iter);
+		virtual void OnAddSceneObject(SceneObjectPtr const & obj) KLAYGE_OVERRIDE;
+		virtual void OnDelSceneObject(SceneObjsType::iterator iter) KLAYGE_OVERRIDE;
 
 		void DivideNode(size_t index, uint32_t curr_depth);
 		void NodeVisible(size_t index);
 		void MarkNodeObjs(size_t index, bool force);
 
-		bool BoundVisible(size_t index, AABBox const & aabb) const;
-		bool BoundVisible(size_t index, OBBox const & obb) const;
-		bool BoundVisible(size_t index, Sphere const & sphere) const;
-		bool BoundVisible(size_t index, Frustum const & frustum) const;
+		BoundOverlap BoundVisible(size_t index, AABBox const & aabb) const;
+		BoundOverlap BoundVisible(size_t index, OBBox const & obb) const;
+		BoundOverlap BoundVisible(size_t index, Sphere const & sphere) const;
+		BoundOverlap BoundVisible(size_t index, Frustum const & frustum) const;
 
 	private:
 		OCTree(OCTree const & rhs);

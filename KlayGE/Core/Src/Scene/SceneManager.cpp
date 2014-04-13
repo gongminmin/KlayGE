@@ -137,7 +137,7 @@ namespace KlayGE
 		App3DFramework& app = Context::Instance().AppInstance();
 		Camera& camera = app.ActiveCamera();
 
-		float4x4 view_proj = camera.ViewProjMatrix();;
+		float4x4 view_proj = camera.ViewProjMatrix();
 		DeferredRenderingLayerPtr const & drl = Context::Instance().DeferredRenderingLayerInstance();
 		if (drl)
 		{
@@ -151,7 +151,7 @@ namespace KlayGE
 
 		for (size_t i = 0; i < scene_objs_.size(); ++ i)
 		{
-			bool visible;
+			BoundOverlap visible;
 
 			SceneObjectPtr const & obj = scene_objs_[i];
 			uint32_t const attr = obj->Attrib();
@@ -167,21 +167,22 @@ namespace KlayGE
 				{
 					aabb_ws = obj->PosBoundWS();
 					visible = (MathLib::perspective_area(camera.EyePos(), view_proj,
-						*aabb_ws) > small_obj_threshold_);
+						*aabb_ws) > small_obj_threshold_) ? BO_Yes : BO_No;
 				}
 				else
 				{
-					visible = true;
+					visible = BO_Yes;
 				}
 
-				if (!camera.OmniDirectionalMode() && (attr & SceneObject::SOA_Cullable))
+				if (!camera.OmniDirectionalMode() && (attr & SceneObject::SOA_Cullable)
+					&& (BO_Yes == visible))
 				{
-					visible &= this->AABBVisible(*aabb_ws);
+					visible = this->AABBVisible(*aabb_ws);
 				}
 			}
 			else
 			{
-				visible = false;
+				visible = BO_No;
 			}
 
 			obj->VisibleMark(visible);
@@ -351,51 +352,51 @@ namespace KlayGE
 		}
 	}
 
-	bool SceneManager::AABBVisible(AABBox const & aabb)
+	BoundOverlap SceneManager::AABBVisible(AABBox const & aabb) const
 	{
 		if (frustum_)
 		{
-			return frustum_->Intersect(aabb) != BO_No;
+			return frustum_->Intersect(aabb);
 		}
 		else
 		{
-			return true;
+			return BO_Yes;
 		}
 	}
 
-	bool SceneManager::OBBVisible(OBBox const & obb)
+	BoundOverlap SceneManager::OBBVisible(OBBox const & obb) const
 	{
 		if (frustum_)
 		{
-			return frustum_->Intersect(obb) != BO_No;
+			return frustum_->Intersect(obb);
 		}
 		else
 		{
-			return true;
+			return BO_Yes;
 		}
 	}
 
-	bool SceneManager::SphereVisible(Sphere const & sphere)
+	BoundOverlap SceneManager::SphereVisible(Sphere const & sphere) const
 	{
 		if (frustum_)
 		{
-			return frustum_->Intersect(sphere) != BO_No;
+			return frustum_->Intersect(sphere);
 		}
 		else
 		{
-			return true;
+			return BO_Yes;
 		}
 	}
 
-	bool SceneManager::FrustumVisible(Frustum const & frustum)
+	BoundOverlap SceneManager::FrustumVisible(Frustum const & frustum) const
 	{
 		if (frustum_)
 		{
-			return frustum_->Intersect(frustum) != BO_No;
+			return frustum_->Intersect(frustum);
 		}
 		else
 		{
-			return true;
+			return BO_Yes;
 		}
 	}
 
@@ -523,7 +524,7 @@ namespace KlayGE
 
 		KLAYGE_FOREACH(SceneObjsType::const_reference scene_obj, scene_objs_)
 		{
-			scene_obj->VisibleMark(false);
+			scene_obj->VisibleMark(BO_No);
 		}
 		if (urt & App3DFramework::URV_NeedFlush)
 		{
@@ -548,7 +549,8 @@ namespace KlayGE
 			{
 				this->ClipScene();
 
-				shared_ptr<std::vector<char> > visible_marks = MakeSharedPtr<std::vector<char> >(scene_objs_.size());
+				shared_ptr<std::vector<BoundOverlap> > visible_marks
+					= MakeSharedPtr<std::vector<BoundOverlap> >(scene_objs_.size());
 				for (size_t i = 0; i < scene_objs_.size(); ++ i)
 				{
 					(*visible_marks)[i] = scene_objs_[i]->VisibleMark();
@@ -560,7 +562,7 @@ namespace KlayGE
 			{
 				for (size_t i = 0; i < scene_objs_.size(); ++ i)
 				{
-					scene_objs_[i]->VisibleMark((*vmiter->second)[i] ? true : false);
+					scene_objs_[i]->VisibleMark((*vmiter->second)[i]);
 				}
 			}
 		}
@@ -571,7 +573,7 @@ namespace KlayGE
 				if (scene_obj->Attrib() & SceneObject::SOA_Overlay)
 				{
 					scene_obj->MainThreadUpdate(app_time, frame_time);
-					scene_obj->VisibleMark(scene_obj->Visible());
+					scene_obj->VisibleMark(scene_obj->Visible() ? BO_Yes : BO_No);
 				}
 			}
 		}
@@ -580,7 +582,7 @@ namespace KlayGE
 		std::map<RenderablePtr, size_t> renderables_map;
 		KLAYGE_FOREACH(SceneObjsType::const_reference so, scene_objs_)
 		{
-			if (so->VisibleMark())
+			if (so->VisibleMark() != BO_No)
 			{
 				if (0 == so->NumChildren())
 				{

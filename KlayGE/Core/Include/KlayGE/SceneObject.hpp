@@ -58,8 +58,8 @@ namespace KlayGE
 		virtual float4x4 const & AbsModelMatrix() const;
 		virtual AABBoxPtr const & PosBoundWS() const;
 		void UpdateAbsModelMatrix();
-		void VisibleMark(bool vm);
-		bool VisibleMark() const;
+		void VisibleMark(BoundOverlap vm);
+		BoundOverlap VisibleMark() const;
 
 		virtual void AddToSceneManager();
 		virtual void DelFromSceneManager();
@@ -117,7 +117,7 @@ namespace KlayGE
 		float4x4 model_;
 		float4x4 abs_model_;
 		AABBoxPtr pos_aabb_ws_;
-		bool visible_mark_;
+		BoundOverlap visible_mark_;
 
 		function<void(SceneObject&, float, float)> sub_thread_update_func_;
 		function<void(SceneObject&, float, float)> main_thread_update_func_;
