@@ -428,7 +428,7 @@ namespace KlayGE
 		this->Stereo(settings.stereo_method);
 
 #ifndef KLAYGE_SHIP
-		PerfProfiler& profiler = Context::Instance().PerfProfilerInstance();
+		PerfProfiler& profiler = PerfProfiler::Instance();
 		hdr_pp_perf_ = profiler.CreatePerfRange(0, "HDR PP");
 		ldr_pp_perf_ = profiler.CreatePerfRange(0, "LDR PP");
 		resize_pp_perf_ = profiler.CreatePerfRange(0, "Resize PP");
@@ -878,7 +878,7 @@ namespace KlayGE
 			fb.SwapBuffers();
 
 #ifndef KLAYGE_SHIP
-			Context::Instance().PerfProfilerInstance().CollectData();
+			PerfProfiler::Instance().CollectData();
 #endif
 		}
 	}

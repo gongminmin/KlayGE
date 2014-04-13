@@ -40,6 +40,7 @@
 #include <KlayGE/UI.hpp>
 #include <KlayGE/SceneManager.hpp>
 #include <KlayGE/DeferredRenderingLayer.hpp>
+#include <KlayGE/PerfProfiler.hpp>
 
 #include <boost/assert.hpp>
 
@@ -359,6 +360,7 @@ namespace KlayGE
 		main_wnd_.reset();
 
 		ResLoader::Destroy();
+		PerfProfiler::Destroy();
 		UIManager::Destroy();
 		Context::Destroy();
 	}

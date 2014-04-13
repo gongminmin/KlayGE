@@ -706,7 +706,7 @@ namespace KlayGE
 		this->SetCascadedShadowType(CSLT_Auto);
 
 #ifndef KLAYGE_SHIP
-		PerfProfiler& profiler = Context::Instance().PerfProfilerInstance();
+		PerfProfiler& profiler = PerfProfiler::Instance();
 		shadow_map_perf_ = profiler.CreatePerfRange(0, "Gen shadow map");
 		std::string buffer_name[] = { "Opaque", "Transparency back", "TransparencyFront" };
 		for (uint32_t i = PTB_Opaque; i < PTB_None; ++ i)

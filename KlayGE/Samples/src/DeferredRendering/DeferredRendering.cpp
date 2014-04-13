@@ -281,7 +281,7 @@ void DeferredRenderingApp::InputHandler(InputEngine const & /*sender*/, InputAct
 
 	case Profile:
 #ifndef KLAYGE_SHIP
-		Context::Instance().PerfProfilerInstance().ExportToCSV("profile.csv");
+		PerfProfiler::Instance().ExportToCSV("profile.csv");
 #endif
 		break;
 	}

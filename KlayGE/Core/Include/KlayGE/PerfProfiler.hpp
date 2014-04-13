@@ -70,12 +70,17 @@ namespace KlayGE
 	public:
 		PerfProfiler();
 
+		static PerfProfiler& Instance();
+		static void Destroy();
+
 		PerfRangePtr CreatePerfRange(int category, std::string const & name);
 		void CollectData();
 
 		void ExportToCSV(std::string const & file_name) const;
 
 	private:
+		static shared_ptr<PerfProfiler> perf_profiler_instance_;
+
 		std::vector<tuple<int, std::string, PerfRangePtr,
 			std::vector<tuple<uint32_t, double, double> > > > perf_ranges_;
 		uint32_t frame_id_;

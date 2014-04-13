@@ -103,8 +103,6 @@ namespace KlayGE
 #endif
 #endif
 
-		perf_profiler_ = MakeSharedPtr<PerfProfiler>();
-
 		gtp_instance_ = MakeSharedPtr<thread_pool>(1, 16);
 	}
 
@@ -113,6 +111,7 @@ namespace KlayGE
 		scene_mgr_.reset();
 
 		ResLoader::Destroy();
+		PerfProfiler::Destroy();
 
 		render_factory_.reset();
 		audio_factory_.reset();
@@ -142,6 +141,7 @@ namespace KlayGE
 
 	void Context::Destroy()
 	{
+		unique_lock<mutex> lock(singleton_mutex);
 		context_instance_.reset();
 	}
 
@@ -690,11 +690,6 @@ namespace KlayGE
 	ContextCfg const & Context::Config() const
 	{
 		return cfg_;
-	}
-
-	PerfProfiler& Context::PerfProfilerInstance() const
-	{
-		return *perf_profiler_;
 	}
 
 	void Context::LoadRenderFactory(std::string const & rf_name)

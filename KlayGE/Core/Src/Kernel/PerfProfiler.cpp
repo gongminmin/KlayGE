@@ -32,13 +32,21 @@
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/Query.hpp>
+#include <KFL/Thread.hpp>
 
 #include <fstream>
 
 #include <KlayGE/PerfProfiler.hpp>
 
+namespace
+{
+	KlayGE::mutex singleton_mutex;
+}
+
 namespace KlayGE
 {
+	shared_ptr<PerfProfiler> PerfProfiler::perf_profiler_instance_;
+
 	PerfRange::PerfRange()
 		: cpu_time_(0), gpu_time_(0), dirty_(false)
 	{
@@ -87,6 +95,25 @@ namespace KlayGE
 	PerfProfiler::PerfProfiler()
 		: frame_id_(0)
 	{
+	}
+
+	PerfProfiler& PerfProfiler::Instance()
+	{
+		if (!perf_profiler_instance_)
+		{
+			unique_lock<mutex> lock(singleton_mutex);
+			if (!perf_profiler_instance_)
+			{
+				perf_profiler_instance_ = MakeSharedPtr<PerfProfiler>();
+			}
+		}
+		return *perf_profiler_instance_;
+	}
+
+	void PerfProfiler::Destroy()
+	{
+		unique_lock<mutex> lock(singleton_mutex);
+		perf_profiler_instance_.reset();
 	}
 
 	PerfRangePtr PerfProfiler::CreatePerfRange(int category, std::string const & name)

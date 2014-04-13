@@ -83,8 +83,6 @@ namespace KlayGE
 		void Config(ContextCfg const & cfg);
 		ContextCfg const & Config() const;
 
-		PerfProfiler& PerfProfilerInstance() const;
-
 		void LoadRenderFactory(std::string const & rf_name);
 		void LoadAudioFactory(std::string const & af_name);
 		void LoadInputFactory(std::string const & if_name);
@@ -206,8 +204,6 @@ namespace KlayGE
 #ifdef KLAYGE_PLATFORM_ANDROID
 		android_app* state_;
 #endif
-
-		PerfProfilerPtr perf_profiler_;
 
 		App3DFramework*		app_;
 
