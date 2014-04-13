@@ -437,6 +437,13 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void SceneManager::Update()
 	{
+		deferred_mode_ = !!Context::Instance().DeferredRenderingLayerInstance();
+
+		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+		re.BeginFrame();
+
+		this->FlushScene();
+
 		if (!update_thread_ && !quit_)
 		{
 			update_thread_ = MakeSharedPtr<joiner<void> >(Context::Instance().ThreadPool()(
@@ -445,11 +452,6 @@ namespace KlayGE
 
 		InputEngine& ie = Context::Instance().InputFactoryInstance().InputEngineInstance();
 		ie.Update();
-
-		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-		re.BeginFrame();
-
-		deferred_mode_ = !!Context::Instance().DeferredRenderingLayerInstance();
 
 		App3DFramework& app = Context::Instance().AppInstance();
 		float const app_time = app.AppTime();
@@ -477,8 +479,6 @@ namespace KlayGE
 				scene_obj->MainThreadUpdate(app_time, frame_time);
 			}
 		}
-
-		this->FlushScene();
 
 		for (KLAYGE_AUTO(iter, scene_objs_.begin()); iter != scene_objs_.end();)
 		{
