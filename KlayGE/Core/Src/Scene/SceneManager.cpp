@@ -149,35 +149,37 @@ namespace KlayGE
 			}
 		}
 
-		for (size_t i = 0; i < scene_objs_.size(); ++ i)
+		KLAYGE_FOREACH(SceneObjsType::const_reference obj, scene_objs_)
 		{
 			BoundOverlap visible;
-
-			SceneObjectPtr const & obj = scene_objs_[i];
 			uint32_t const attr = obj->Attrib();
 			if (!(attr & SceneObject::SOA_Overlay) && obj->Visible())
 			{
-				if (attr & SceneObject::SOA_Moveable)
+				visible = this->VisibleTestFromParent(obj, camera.EyePos(), view_proj);
+				if (BO_Partial == visible)
 				{
-					obj->UpdateAbsModelMatrix();
-				}
+					if (attr & SceneObject::SOA_Moveable)
+					{
+						obj->UpdateAbsModelMatrix();
+					}
 
-				AABBoxPtr aabb_ws;
-				if (attr & SceneObject::SOA_Cullable)
-				{
-					aabb_ws = obj->PosBoundWS();
-					visible = (MathLib::perspective_area(camera.EyePos(), view_proj,
-						*aabb_ws) > small_obj_threshold_) ? BO_Yes : BO_No;
-				}
-				else
-				{
-					visible = BO_Yes;
-				}
+					AABBoxPtr aabb_ws;
+					if (attr & SceneObject::SOA_Cullable)
+					{
+						aabb_ws = obj->PosBoundWS();
+						visible = (MathLib::perspective_area(camera.EyePos(), view_proj,
+							*aabb_ws) > small_obj_threshold_) ? BO_Yes : BO_No;
+					}
+					else
+					{
+						visible = BO_Yes;
+					}
 
-				if (!camera.OmniDirectionalMode() && (attr & SceneObject::SOA_Cullable)
-					&& (BO_Yes == visible))
-				{
-					visible = this->AABBVisible(*aabb_ws);
+					if (!camera.OmniDirectionalMode() && (attr & SceneObject::SOA_Cullable)
+						&& (BO_Yes == visible))
+					{
+						visible = this->AABBVisible(*aabb_ws);
+					}
 				}
 			}
 			else
@@ -766,5 +768,45 @@ namespace KlayGE
 				}
 			}
 		}
+	}
+
+	BoundOverlap SceneManager::VisibleTestFromParent(SceneObjectPtr const & obj,
+		float3 const & eye_pos, float4x4 const & view_proj)
+	{
+		BoundOverlap visible;
+		if (obj->Parent())
+		{
+			BoundOverlap parent_bo = obj->Parent()->VisibleMark();
+			if (BO_No == parent_bo)
+			{
+				visible = BO_No;
+			}
+			else
+			{
+				uint32_t const attr = obj->Attrib();
+				if (attr & SceneObject::SOA_Moveable)
+				{
+					obj->UpdateAbsModelMatrix();
+				}
+
+				AABBoxPtr aabb_ws;
+				if (attr & SceneObject::SOA_Cullable)
+				{
+					aabb_ws = obj->PosBoundWS();
+					visible = (MathLib::perspective_area(eye_pos, view_proj,
+						*aabb_ws) > small_obj_threshold_) ? parent_bo : BO_No;
+				}
+				else
+				{
+					visible = parent_bo;
+				}
+			}
+		}
+		else
+		{
+			visible = BO_Partial;
+		}
+
+		return visible;
 	}
 }

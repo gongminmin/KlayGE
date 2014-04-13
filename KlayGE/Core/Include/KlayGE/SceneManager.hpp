@@ -102,6 +102,9 @@ namespace KlayGE
 
 		void UpdateThreadFunc();
 
+		BoundOverlap VisibleTestFromParent(SceneObjectPtr const & obj,
+			float3 const & eye_pos, float4x4 const & view_proj);
+
 	protected:
 		std::vector<CameraPtr> cameras_;
 		Frustum const * frustum_;

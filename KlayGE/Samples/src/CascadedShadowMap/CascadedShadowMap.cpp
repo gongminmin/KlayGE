@@ -246,7 +246,6 @@ uint32_t CascadedShadowMapApp::DoUpdate(uint32_t pass)
 							SceneObject::SOA_Cullable);
 					so->ModelMatrix(MathLib::scaling(200.0f, 1.0f, 200.0f));
 					so->AddToSceneManager();
-					scene_objs_.push_back(so);
 
 					loading_percentage_ = 15;
 				}
@@ -261,18 +260,11 @@ uint32_t CascadedShadowMapApp::DoUpdate(uint32_t pass)
 			}
 			else
 			{
-				uint32_t n = (scene_model_->NumMeshes() + 20 - 1) / 20;
-				uint32_t s = (loading_percentage_ - 80) * n;
-				uint32_t e = std::min(s + n, scene_model_->NumMeshes());
-				for (uint32_t i = s; i < e; ++ i)
-				{
-					SceneObjectPtr so = MakeSharedPtr<SceneObjectHelper>(scene_model_->Mesh(i),
-						SceneObject::SOA_Cullable);
-					so->AddToSceneManager();
-					scene_objs_.push_back(so);
-				}
+				SceneObjectPtr so = MakeSharedPtr<SceneObjectHelper>(scene_model_,
+					SceneObject::SOA_Cullable);
+				so->AddToSceneManager();
 
-				++ loading_percentage_;
+				loading_percentage_ = 10;
 			}
 		}
 		else

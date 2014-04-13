@@ -33,7 +33,6 @@ private:
 
 	KlayGE::FontPtr font_;
 	KlayGE::RenderModelPtr scene_model_;
-	std::vector<KlayGE::SceneObjectPtr> scene_objs_;
 	KlayGE::SceneObjectPtr sky_box_;
 	KlayGE::SceneObjectPtr spot_light_src_;
 

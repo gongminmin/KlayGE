@@ -681,17 +681,14 @@ void ScenePlayerApp::LoadScene(std::string const & name)
 
 		RenderModelPtr model = SyncLoadModel(attr->ValueString(), EAH_GPU_Read | EAH_Immutable);
 		scene_models_.push_back(model);
-		for (size_t i = 0; i < model->NumMeshes(); ++ i)
+		SceneObjectPtr scene_obj = MakeSharedPtr<SceneObjectHelper>(model, obj_attr);
+		scene_obj->ModelMatrix(obj_mat);
+		if (!update_script.empty())
 		{
-			SceneObjectPtr scene_obj = MakeSharedPtr<SceneObjectHelper>(model->Mesh(i), obj_attr);
-			scene_obj->ModelMatrix(obj_mat);
-			if (!update_script.empty())
-			{
-				scene_obj->BindSubThreadUpdateFunc(SceneObjectUpdate(update_script));
-			}
-			scene_objs_.push_back(scene_obj);
-			scene_obj->AddToSceneManager();
+			scene_obj->BindSubThreadUpdateFunc(SceneObjectUpdate(update_script));
 		}
+		scene_objs_.push_back(scene_obj);
+		scene_obj->AddToSceneManager();
 	}
 
 	{

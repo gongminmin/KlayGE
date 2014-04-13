@@ -208,18 +208,26 @@ namespace KlayGE
 				uint32_t const attr = obj->Attrib();
 				if (!(attr & SceneObject::SOA_Overlay) && obj->Visible())
 				{
-					if (attr & SceneObject::SOA_Moveable)
+					BoundOverlap visible = this->VisibleTestFromParent(obj, camera.EyePos(), view_proj);
+					if (BO_Partial == visible)
 					{
-						obj->UpdateAbsModelMatrix();
-					}
+						if (attr & SceneObject::SOA_Moveable)
+						{
+							obj->UpdateAbsModelMatrix();
+						}
 
-					if (!(attr & SceneObject::SOA_Cullable))
-					{
-						obj->VisibleMark(BO_Yes);
+						if (!(attr & SceneObject::SOA_Cullable))
+						{
+							obj->VisibleMark(BO_Yes);
+						}
+						else if (attr & SceneObject::SOA_Moveable)
+						{
+							obj->VisibleMark(this->AABBVisible(*obj->PosBoundWS()));
+						}
 					}
-					else if (attr & SceneObject::SOA_Moveable)
+					else
 					{
-						obj->VisibleMark(this->AABBVisible(*obj->PosBoundWS()));
+						obj->VisibleMark(visible);
 					}
 				}
 			}
@@ -391,14 +399,22 @@ namespace KlayGE
 			{
 				if ((BO_No == so->VisibleMark()) && so->Visible())
 				{
-					if (MathLib::perspective_area(camera.EyePos(), view_proj,
-						*so->PosBoundWS()) > small_obj_threshold_)
+					BoundOverlap visible = this->VisibleTestFromParent(so, camera.EyePos(), view_proj);
+					if (BO_Partial == visible)
 					{
-						so->VisibleMark(frustum_->Intersect(*so->PosBoundWS()));
+						if (so->Parent() || (MathLib::perspective_area(camera.EyePos(), view_proj,
+							*so->PosBoundWS()) > small_obj_threshold_))
+						{
+							so->VisibleMark(frustum_->Intersect(*so->PosBoundWS()));
+						}
+						else
+						{
+							so->VisibleMark(BO_No);
+						}
 					}
 					else
 					{
-						so->VisibleMark(BO_No);
+						so->VisibleMark(visible);
 					}
 				}
 			}
