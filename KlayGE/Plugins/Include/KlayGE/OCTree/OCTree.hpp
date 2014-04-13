@@ -50,7 +50,7 @@ namespace KlayGE
 		void ClearObject();
 
 		void OnAddSceneObject(SceneObjectPtr const & obj);
-		void OnDelSceneObject(SceneObjAABBsType::iterator iter);
+		void OnDelSceneObject(SceneObjsType::iterator iter);
 
 		void DivideNode(size_t index, uint32_t curr_depth);
 		void NodeVisible(size_t index);
@@ -72,7 +72,7 @@ namespace KlayGE
 			int first_child_index;
 			BoundOverlap visible;
 
-			SceneObjAABBsType obj_ptrs;
+			SceneObjsType obj_ptrs;
 		};
 
 		std::vector<octree_node_t> octree_;

@@ -121,16 +121,15 @@ namespace KlayGE
 			AABBox bb_root(float3(0, 0, 0), float3(0, 0, 0));
 			octree_[0].first_child_index = -1;
 			octree_[0].visible = BO_No;
-			KLAYGE_FOREACH(SceneObjAABBPtrType const & soaabb, scene_objs_)
+			KLAYGE_FOREACH(SceneObjsType::const_reference obj, scene_objs_)
 			{
-				SceneObjectPtr const & obj = soaabb->so;
 				uint32_t const attr = obj->Attrib();
 				if ((attr & SceneObject::SOA_Cullable)
 					&& !(attr & SceneObject::SOA_Overlay)
 					&& !(attr & SceneObject::SOA_Moveable))
 				{
-					bb_root |= *soaabb->aabb_ws;
-					octree_[0].obj_ptrs.push_back(soaabb);
+					bb_root |= *obj->PosBoundWS();
+					octree_[0].obj_ptrs.push_back(obj);
 				}
 			}
 			float3 const & center = bb_root.Center();
@@ -174,43 +173,26 @@ namespace KlayGE
 
 		if (camera.OmniDirectionalMode())
 		{
-			KLAYGE_FOREACH(SceneObjAABBPtrType const & soaabb, scene_objs_)
+			KLAYGE_FOREACH(SceneObjsType::const_reference obj, scene_objs_)
 			{
-				SceneObjectPtr const & obj = soaabb->so;
 				uint32_t const attr = obj->Attrib();
 				if (!(attr & SceneObject::SOA_Overlay) && obj->Visible())
 				{
-					float4x4 mat;
 					if (attr & SceneObject::SOA_Moveable)
 					{
-						mat = obj->ModelMatrix();
-						if (obj->Parent())
-						{
-							mat = obj->Parent()->ModelMatrix() * mat;
-						}
-						obj->GetRenderable()->ModelMatrix(mat);
+						obj->UpdateAbsModelMatrix();
 					}
 
 					if (attr & SceneObject::SOA_Cullable)
 					{
-						AABBox aabb_ws;
-						if (attr & SceneObject::SOA_Moveable)
-						{
-							AABBox const & aabb = obj->PosBound();
-							aabb_ws = MathLib::transform_aabb(aabb, mat);
-						}
-						else
-						{
-							aabb_ws = *soaabb->aabb_ws;
-						}
-
-						soaabb->visible = (MathLib::perspective_area(camera.EyePos(), view_proj,
-							aabb_ws) > small_obj_threshold_);
+						AABBoxPtr aabb_ws = obj->PosBoundWS();
+						obj->VisibleMark(MathLib::perspective_area(camera.EyePos(), view_proj,
+							*aabb_ws) > small_obj_threshold_);
 					}
 				}
 				else
 				{
-					soaabb->visible = false;
+					obj->VisibleMark(false);
 				}
 			}
 		}
@@ -221,31 +203,23 @@ namespace KlayGE
 				this->MarkNodeObjs(0, false);
 			}
 
-			KLAYGE_FOREACH(SceneObjAABBPtrType const & soaabb, scene_objs_)
+			KLAYGE_FOREACH(SceneObjsType::const_reference obj, scene_objs_)
 			{
-				SceneObjectPtr const & obj = soaabb->so;
 				uint32_t const attr = obj->Attrib();
 				if (!(attr & SceneObject::SOA_Overlay) && obj->Visible())
 				{
-					float4x4 mat;
 					if (attr & SceneObject::SOA_Moveable)
 					{
-						mat = obj->ModelMatrix();
-						if (obj->Parent())
-						{
-							mat = obj->Parent()->ModelMatrix() * mat;
-						}
-						obj->GetRenderable()->ModelMatrix(mat);
+						obj->UpdateAbsModelMatrix();
 					}
 
 					if (!(attr & SceneObject::SOA_Cullable))
 					{
-						soaabb->visible = true;
+						obj->VisibleMark(true);
 					}
 					else if (attr & SceneObject::SOA_Moveable)
 					{
-						AABBox const & aabb = obj->PosBound();
-						soaabb->visible = this->AABBVisible(MathLib::transform_aabb(aabb, mat));
+						obj->VisibleMark(this->AABBVisible(*obj->PosBoundWS()));
 					}
 				}
 			}
@@ -275,11 +249,11 @@ namespace KlayGE
 		}
 	}
 
-	void OCTree::OnDelSceneObject(SceneObjAABBsType::iterator iter)
+	void OCTree::OnDelSceneObject(SceneObjsType::iterator iter)
 	{
 		if (iter != scene_objs_.end())
 		{
-			uint32_t const attr = (*iter)->so->Attrib();
+			uint32_t const attr = (*iter)->Attrib();
 			if ((attr & SceneObject::SOA_Cullable)
 				&& !(attr & SceneObject::SOA_Overlay)
 				&& !(attr & SceneObject::SOA_Moveable))
@@ -300,9 +274,9 @@ namespace KlayGE
 			octree_[index].visible = BO_No;
 
 			octree_.resize(this_size + 8);
-			KLAYGE_FOREACH(SceneObjAABBPtrType const & soaabb, octree_[index].obj_ptrs)
+			KLAYGE_FOREACH(SceneObjsType::const_reference so, octree_[index].obj_ptrs)
 			{
-				AABBox const & aabb = *soaabb->aabb_ws;
+				AABBox const & aabb = *so->PosBoundWS();
 				int mark[6];
 				mark[0] = aabb.Min().x() >= parent_center.x() ? 1 : 0;
 				mark[1] = aabb.Min().y() >= parent_center.y() ? 2 : 0;
@@ -316,7 +290,7 @@ namespace KlayGE
 						+ ((j & 2) ? mark[4] : mark[1])
 						+ ((j & 4) ? mark[5] : mark[2]))
 					{
-						octree_[this_size + j].obj_ptrs.push_back(soaabb);
+						octree_[this_size + j].obj_ptrs.push_back(so);
 					}
 				}
 			}
@@ -338,7 +312,7 @@ namespace KlayGE
 				}
 			}
 
-			SceneObjAABBsType empty;
+			SceneObjsType empty;
 			octree_[index].obj_ptrs.swap(empty);
 		}
 	}
@@ -413,19 +387,19 @@ namespace KlayGE
 		octree_node_t const & node = octree_[index];
 		if ((node.visible != BO_No) || force)
 		{
-			KLAYGE_FOREACH(SceneObjAABBPtrType const & soaabb, node.obj_ptrs)
+			KLAYGE_FOREACH(SceneObjsType::const_reference so, node.obj_ptrs)
 			{
-				if (!soaabb->visible && soaabb->so->Visible())
+				if (!so->VisibleMark() && so->Visible())
 				{
 					if (MathLib::perspective_area(camera.EyePos(), view_proj,
-						*soaabb->aabb_ws) > small_obj_threshold_)
+						*so->PosBoundWS()) > small_obj_threshold_)
 					{
-						BoundOverlap const bo = frustum_->Intersect(*soaabb->aabb_ws);
-						soaabb->visible = (bo != BO_No);
+						BoundOverlap const bo = frustum_->Intersect(*so->PosBoundWS());
+						so->VisibleMark(bo != BO_No);
 					}
 					else
 					{
-						soaabb->visible = false;
+						so->VisibleMark(false);
 					}
 				}
 			}

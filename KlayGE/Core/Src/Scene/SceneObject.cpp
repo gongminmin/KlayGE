@@ -27,8 +27,14 @@
 namespace KlayGE
 {
 	SceneObject::SceneObject(uint32_t attrib)
-		: attrib_(attrib), parent_(nullptr), model_(float4x4::Identity())
+		: attrib_(attrib), parent_(nullptr),
+			model_(float4x4::Identity()), abs_model_(float4x4::Identity()),
+			visible_mark_(false)
 	{
+		if (!(attrib & SOA_Overlay) && (attrib & (SOA_Cullable | SOA_Moveable)))
+		{
+			pos_aabb_ws_ = MakeSharedPtr<AABBox>();
+		}
 	}
 
 	SceneObject::~SceneObject()
@@ -61,18 +67,6 @@ namespace KlayGE
 		return renderable_;
 	}
 
-	AABBox const & SceneObject::PosBound() const
-	{
-		BOOST_ASSERT(renderable_);
-		return renderable_->PosBound();
-	}
-
-	AABBox const & SceneObject::TexcoordBound() const
-	{
-		BOOST_ASSERT(renderable_);
-		return renderable_->TexcoordBound();
-	}
-
 	void SceneObject::ModelMatrix(float4x4 const & mat)
 	{
 		model_ = mat;
@@ -81,6 +75,45 @@ namespace KlayGE
 	float4x4 const & SceneObject::ModelMatrix() const
 	{
 		return model_;
+	}
+
+	float4x4 const & SceneObject::AbsModelMatrix() const
+	{
+		return abs_model_;
+	}
+
+	AABBoxPtr const & SceneObject::PosBoundWS() const
+	{
+		return pos_aabb_ws_;
+	}
+
+	void SceneObject::UpdateAbsModelMatrix()
+	{
+		if (parent_)
+		{
+			abs_model_ = parent_->ModelMatrix() * model_;
+		}
+		else
+		{
+			abs_model_ = model_;
+		}
+
+		if (pos_aabb_ws_)
+		{
+			*pos_aabb_ws_ = MathLib::transform_aabb(renderable_->PosBound(), abs_model_);
+		}
+
+		renderable_->ModelMatrix(abs_model_);
+	}
+
+	void SceneObject::VisibleMark(bool vm)
+	{
+		visible_mark_ = vm;
+	}
+
+	bool SceneObject::VisibleMark() const
+	{
+		return visible_mark_;
 	}
 
 	void SceneObject::BindSubThreadUpdateFunc(function<void(SceneObject&, float, float)> const & update_func)

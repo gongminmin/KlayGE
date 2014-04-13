@@ -41,20 +41,7 @@ namespace KlayGE
 	class KLAYGE_CORE_API SceneManager : boost::noncopyable
 	{
 	protected:
-		struct SceneObjAABB
-		{
-			SceneObjectPtr so;
-			AABBoxPtr aabb_ws;
-			bool visible;
-
-			SceneObjAABB(SceneObjectPtr const & s, AABBoxPtr const & abw, bool v)
-				: so(s), aabb_ws(abw), visible(v)
-			{
-			}
-		};
-
-		typedef shared_ptr<SceneObjAABB> SceneObjAABBPtrType;
-		typedef std::vector<SceneObjAABBPtrType> SceneObjAABBsType;
+		typedef std::vector<SceneObjectPtr> SceneObjsType;
 		typedef std::vector<RenderablePtr> RenderItemsType;
 		typedef std::vector<std::pair<RenderTechniquePtr, RenderItemsType> > RenderQueueType;
 
@@ -109,9 +96,9 @@ namespace KlayGE
 
 		std::vector<CameraPtr>::iterator DelCamera(std::vector<CameraPtr>::iterator iter);
 		std::vector<LightSourcePtr>::iterator DelLight(std::vector<LightSourcePtr>::iterator iter);
-		SceneObjAABBsType::iterator DelSceneObject(SceneObjAABBsType::iterator iter);
+		SceneObjsType::iterator DelSceneObject(SceneObjsType::iterator iter);
 		virtual void OnAddSceneObject(SceneObjectPtr const & obj) = 0;
-		virtual void OnDelSceneObject(SceneObjAABBsType::iterator iter) = 0;
+		virtual void OnDelSceneObject(SceneObjsType::iterator iter) = 0;
 
 		void UpdateThreadFunc();
 
@@ -119,7 +106,7 @@ namespace KlayGE
 		std::vector<CameraPtr> cameras_;
 		Frustum const * frustum_;
 		std::vector<LightSourcePtr> lights_;
-		SceneObjAABBsType scene_objs_;
+		SceneObjsType scene_objs_;
 
 		unordered_map<size_t, shared_ptr<std::vector<char> > > visible_marks_map_;
 
