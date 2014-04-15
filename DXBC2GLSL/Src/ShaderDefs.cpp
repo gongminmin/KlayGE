@@ -86,7 +86,7 @@ namespace
 		"vJoinInstanceID",
 		"vicp",
 		"vocp",
-		"input_patch_constant",
+		"vpc",
 		"vDomain",
 		"this",
 		"u",
@@ -265,9 +265,9 @@ namespace
 		"dcl_interface",
 		"dcl_input_control_point_count",
 		"dcl_output_control_point_count",
-		"dcl_tess_domain",
-		"dcl_tess_partitioning",
-		"dcl_tess_output_primitive",
+		"dcl_tessellator_domain",
+		"dcl_tessellator_partitioning",
+		"dcl_tessellator_output_primitive",
 		"dcl_hs_max_tessfactor",
 		"dcl_hs_fork_phase_instance_count",
 		"dcl_hs_join_phase_instance_count",
@@ -532,6 +532,32 @@ namespace
 		"trianglelistadj",
 		"trianglestripadj"
 	};
+
+	char const * shader_tessellator_domain_names[] =
+	{
+		"undefined",
+		"domain_isoline",
+		"domain_tri",
+		"domain_quad"
+	};
+
+	char const * shader_tessellator_partitioning_names[] =
+	{
+		"undefined",
+		"partitioning_integer",
+		"partitioning_pow2",
+		"partitioning_odd",
+		"partitioning_even"
+	};
+
+	char const * shader_tessellator_output_primitive_names[] =
+	{
+		"undefined",
+		"output_point",
+		"output_line",
+		"output_triangle_cw",
+		"output_triangle_ccw"
+	};
 }
 
 char const * ShaderOperandTypeName(ShaderOperandType v)
@@ -622,4 +648,19 @@ char const * ShaderPrimitiveName(ShaderPrimitive v)
 char const * ShaderPrimitiveTopologyName(ShaderPrimitiveTopology v)
 {
 	return shader_primitive_topology_names[v];
+}
+
+char const * ShaderTessellatorDomainName(ShaderTessellatorDomain v)
+{
+	return shader_tessellator_domain_names[v];
+}
+
+char const * ShaderTessellatorPartitioningName(ShaderTessellatorPartitioning v)
+{
+	return shader_tessellator_partitioning_names[v];
+}
+
+char const * ShaderTessellatorOutputPrimitiveName(ShaderTessellatorOutputPrimitive v)
+{
+	return shader_tessellator_output_primitive_names[v];
 }
