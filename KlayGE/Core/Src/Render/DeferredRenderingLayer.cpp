@@ -1821,7 +1821,7 @@ namespace KlayGE
 		for (uint32_t i = 0; i < num_scene_objs; ++ i)
 		{
 			SceneObjectPtr const & so = scene_mgr.GetSceneObject(i);
-			if ((0 == (so->Attrib() & SceneObject::SOA_Overlay)) && so->Visible())
+			if (so->Visible())
 			{
 				visible_scene_objs_.push_back(so.get());
 

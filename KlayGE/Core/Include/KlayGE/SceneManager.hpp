@@ -110,6 +110,7 @@ namespace KlayGE
 		Frustum const * frustum_;
 		std::vector<LightSourcePtr> lights_;
 		SceneObjsType scene_objs_;
+		SceneObjsType overlay_scene_objs_;
 
 		unordered_map<size_t, shared_ptr<std::vector<BoundOverlap> > > visible_marks_map_;
 

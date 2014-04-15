@@ -125,7 +125,6 @@ namespace KlayGE
 			{
 				uint32_t const attr = obj->Attrib();
 				if ((attr & SceneObject::SOA_Cullable)
-					&& !(attr & SceneObject::SOA_Overlay)
 					&& !(attr & SceneObject::SOA_Moveable))
 				{
 					bb_root |= *obj->PosBoundWS();
@@ -175,9 +174,9 @@ namespace KlayGE
 		{
 			KLAYGE_FOREACH(SceneObjsType::const_reference obj, scene_objs_)
 			{
-				uint32_t const attr = obj->Attrib();
-				if (!(attr & SceneObject::SOA_Overlay) && obj->Visible())
+				if (obj->Visible())
 				{
+					uint32_t const attr = obj->Attrib();
 					if (attr & SceneObject::SOA_Moveable)
 					{
 						obj->UpdateAbsModelMatrix();
@@ -205,12 +204,12 @@ namespace KlayGE
 
 			KLAYGE_FOREACH(SceneObjsType::const_reference obj, scene_objs_)
 			{
-				uint32_t const attr = obj->Attrib();
-				if (!(attr & SceneObject::SOA_Overlay) && obj->Visible())
+				if (obj->Visible())
 				{
 					BoundOverlap visible = this->VisibleTestFromParent(obj, camera.EyePos(), view_proj);
 					if (BO_Partial == visible)
 					{
+						uint32_t const attr = obj->Attrib();
 						if (attr & SceneObject::SOA_Moveable)
 						{
 							obj->UpdateAbsModelMatrix();
@@ -250,7 +249,6 @@ namespace KlayGE
 	{
 		uint32_t const attr = obj->Attrib();
 		if ((attr & SceneObject::SOA_Cullable)
-			&& !(attr & SceneObject::SOA_Overlay)
 			&& !(attr & SceneObject::SOA_Moveable))
 		{
 			rebuild_tree_ = true;
@@ -259,15 +257,13 @@ namespace KlayGE
 
 	void OCTree::OnDelSceneObject(SceneObjsType::iterator iter)
 	{
-		if (iter != scene_objs_.end())
+		BOOST_ASSERT(iter != normal_scene_objs_.end());
+
+		uint32_t const attr = (*iter)->Attrib();
+		if ((attr & SceneObject::SOA_Cullable)
+			&& !(attr & SceneObject::SOA_Moveable))
 		{
-			uint32_t const attr = (*iter)->Attrib();
-			if ((attr & SceneObject::SOA_Cullable)
-				&& !(attr & SceneObject::SOA_Overlay)
-				&& !(attr & SceneObject::SOA_Moveable))
-			{
-				rebuild_tree_ = true;
-			}
+			rebuild_tree_ = true;
 		}
 	}
 

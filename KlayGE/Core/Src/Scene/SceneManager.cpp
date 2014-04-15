@@ -153,7 +153,7 @@ namespace KlayGE
 		{
 			BoundOverlap visible;
 			uint32_t const attr = obj->Attrib();
-			if (!(attr & SceneObject::SOA_Overlay) && obj->Visible())
+			if (obj->Visible())
 			{
 				visible = this->VisibleTestFromParent(obj, camera.EyePos(), view_proj);
 				if (BO_Partial == visible)
@@ -262,16 +262,21 @@ namespace KlayGE
 		unique_lock<mutex> lock(update_mutex_);
 
 		uint32_t const attr = obj->Attrib();
-		if ((attr & SceneObject::SOA_Cullable)
-			&& !(attr & SceneObject::SOA_Overlay)
-			&& !(attr & SceneObject::SOA_Moveable))
+		if (attr & SceneObject::SOA_Overlay)
 		{
-			obj->UpdateAbsModelMatrix();
+			overlay_scene_objs_.push_back(obj);
 		}
+		else
+		{
+			if ((attr & SceneObject::SOA_Cullable)
+				&& !(attr & SceneObject::SOA_Moveable))
+			{
+				obj->UpdateAbsModelMatrix();
+			}
 
-		scene_objs_.push_back(obj);
-
-		this->OnAddSceneObject(obj);
+			scene_objs_.push_back(obj);
+			this->OnAddSceneObject(obj);
+		}
 	}
 
 	// 删除渲染物体
@@ -431,6 +436,7 @@ namespace KlayGE
 	{
 		unique_lock<mutex> lock(update_mutex_);
 		scene_objs_.resize(0);
+		overlay_scene_objs_.resize(0);
 	}
 
 	// 更新场景管理器
@@ -474,23 +480,10 @@ namespace KlayGE
 
 		KLAYGE_FOREACH(SceneObjsType::const_reference scene_obj, scene_objs_)
 		{
-			if (!(scene_obj->Attrib() & SceneObject::SOA_Overlay))
-			{
-				scene_obj->MainThreadUpdate(app_time, frame_time);
-			}
+			scene_obj->MainThreadUpdate(app_time, frame_time);
 		}
 
-		for (KLAYGE_AUTO(iter, scene_objs_.begin()); iter != scene_objs_.end();)
-		{
-			if ((*iter)->Attrib() & SceneObject::SOA_Overlay)
-			{
-				iter = this->DelSceneObject(iter);
-			}
-			else
-			{
-				++ iter;
-			}
-		}
+		overlay_scene_objs_.clear();
 		for (KLAYGE_AUTO(iter, lights_.begin()); iter != lights_.end();)
 		{
 			if ((*iter)->Attrib() & LightSource::LSA_Temporary)
@@ -523,8 +516,9 @@ namespace KlayGE
 		numVerticesRendered_ = 0;
 
 		Camera& camera = app.ActiveCamera();
+		SceneObjsType& scene_objs = (urt & App3DFramework::URV_Overlay) ? overlay_scene_objs_ : scene_objs_;
 
-		KLAYGE_FOREACH(SceneObjsType::const_reference scene_obj, scene_objs_)
+		KLAYGE_FOREACH(SceneObjsType::const_reference scene_obj, scene_objs)
 		{
 			scene_obj->VisibleMark(BO_No);
 		}
@@ -532,11 +526,10 @@ namespace KlayGE
 		{
 			frustum_ = &camera.ViewFrustum();
 
-			std::vector<uint32_t> visible_list((scene_objs_.size() + 31) / 32, 0);
-			for (size_t i = 0; i < scene_objs_.size(); ++ i)
+			std::vector<uint32_t> visible_list((scene_objs.size() + 31) / 32, 0);
+			for (size_t i = 0; i < scene_objs.size(); ++ i)
 			{
-				SceneObjectPtr const & obj = scene_objs_[i];
-				if (!(obj->Attrib() & SceneObject::SOA_Overlay) && obj->Visible())
+				if (scene_objs[i]->Visible())
 				{
 					visible_list[i / 32] |= (1UL << (i & 31));
 				}
@@ -552,37 +545,34 @@ namespace KlayGE
 				this->ClipScene();
 
 				shared_ptr<std::vector<BoundOverlap> > visible_marks
-					= MakeSharedPtr<std::vector<BoundOverlap> >(scene_objs_.size());
-				for (size_t i = 0; i < scene_objs_.size(); ++ i)
+					= MakeSharedPtr<std::vector<BoundOverlap> >(scene_objs.size());
+				for (size_t i = 0; i < scene_objs.size(); ++ i)
 				{
-					(*visible_marks)[i] = scene_objs_[i]->VisibleMark();
+					(*visible_marks)[i] = scene_objs[i]->VisibleMark();
 				}
 
 				visible_marks_map_.insert(std::make_pair(seed, visible_marks));
 			}
 			else
 			{
-				for (size_t i = 0; i < scene_objs_.size(); ++ i)
+				for (size_t i = 0; i < scene_objs.size(); ++ i)
 				{
-					scene_objs_[i]->VisibleMark((*vmiter->second)[i]);
+					scene_objs[i]->VisibleMark((*vmiter->second)[i]);
 				}
 			}
 		}
 		if (urt & App3DFramework::URV_Overlay)
 		{
-			KLAYGE_FOREACH(SceneObjsType::const_reference scene_obj, scene_objs_)
+			KLAYGE_FOREACH(SceneObjsType::const_reference scene_obj, scene_objs)
 			{
-				if (scene_obj->Attrib() & SceneObject::SOA_Overlay)
-				{
-					scene_obj->MainThreadUpdate(app_time, frame_time);
-					scene_obj->VisibleMark(scene_obj->Visible() ? BO_Yes : BO_No);
-				}
+				scene_obj->MainThreadUpdate(app_time, frame_time);
+				scene_obj->VisibleMark(scene_obj->Visible() ? BO_Yes : BO_No);
 			}
 		}
 
 		std::vector<std::pair<RenderablePtr, std::vector<SceneObjectPtr> > > renderables;
 		std::map<RenderablePtr, size_t> renderables_map;
-		KLAYGE_FOREACH(SceneObjsType::const_reference so, scene_objs_)
+		KLAYGE_FOREACH(SceneObjsType::const_reference so, scene_objs)
 		{
 			if (so->VisibleMark() != BO_No)
 			{
@@ -757,6 +747,10 @@ namespace KlayGE
 					unique_lock<mutex> lock(update_mutex_);
 
 					KLAYGE_FOREACH(SceneObjsType::const_reference scene_obj, scene_objs_)
+					{
+						scene_obj->SubThreadUpdate(app_time, frame_time);
+					}
+					KLAYGE_FOREACH(SceneObjsType::const_reference scene_obj, overlay_scene_objs_)
 					{
 						scene_obj->SubThreadUpdate(app_time, frame_time);
 					}
