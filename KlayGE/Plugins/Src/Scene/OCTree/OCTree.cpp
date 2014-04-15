@@ -257,7 +257,7 @@ namespace KlayGE
 
 	void OCTree::OnDelSceneObject(SceneObjsType::iterator iter)
 	{
-		BOOST_ASSERT(iter != normal_scene_objs_.end());
+		BOOST_ASSERT(iter != scene_objs_.end());
 
 		uint32_t const attr = (*iter)->Attrib();
 		if ((attr & SceneObject::SOA_Cullable)

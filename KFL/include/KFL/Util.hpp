@@ -76,11 +76,11 @@ namespace KlayGE
 	// 取低字节
 	inline uint16_t
 	LO_U8(uint16_t x)
-		{ return static_cast<uint16_t>(x & 0xFF); }
+		{ return x & 0xFF; }
 	// 取高字节
 	inline uint16_t
 	HI_U8(uint16_t x)
-		{ return static_cast<uint16_t>((x & 0xFF) >> 8); }
+		{ return x >> 8; }
 
 	// 取低字
 	inline uint32_t
@@ -89,12 +89,12 @@ namespace KlayGE
 	// 取高字
 	inline uint32_t
 	HI_U16(uint32_t x)
-		{ return (x & 0xFFFF) >> 16; }
+		{ return x >> 16; }
 
 	// 高低字节交换
 	inline uint16_t
 	HI_LO_SwapU8(uint16_t x)
-		{ return static_cast<uint16_t>((LO_U8(x) << 8) | HI_U8(x)); }
+		{ return (LO_U8(x) << 8) | HI_U8(x); }
 	// 高低字交换
 	inline uint32_t
 	HI_LO_SwapU16(uint32_t x)
