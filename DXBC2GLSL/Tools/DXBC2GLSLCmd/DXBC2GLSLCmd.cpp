@@ -24,8 +24,6 @@ int main(int argc, char** argv)
 
 	std::vector<char> data;
 	std::ifstream in(argv[1], std::ios_base::in | std::ios_base::binary);
-	/*std::ifstream in;
-	in.open("hs.o");*/
 	std::ofstream out;
 	bool screen_only = false;
 	if (argc < 3)
@@ -121,5 +119,4 @@ int main(int argc, char** argv)
 		std::cout << ex.what() << std::endl;
 		std::cout << "Please send this information and your bytecode file to webmaster at klayge.org. We'll fix this ASAP." << std::endl;
 	}
-	//system("pause");
 }

@@ -24,8 +24,6 @@ int main(int argc, char** argv)
 
 	std::vector<char> data;
 	std::ifstream in(argv[1], std::ios_base::in | std::ios_base::binary);
-	//std::ifstream in;
-	//in.open("hs.o");
 	std::ofstream out;
 	bool screen_only = false;
 	if (argc < 3)
@@ -43,7 +41,6 @@ int main(int argc, char** argv)
 	while (in >> c)
 	{
 		data.push_back(c);
-		
 	}
 	in.close();
 
@@ -64,5 +61,4 @@ int main(int argc, char** argv)
 			}
 		}
 	}
-	//system("pause");
 }

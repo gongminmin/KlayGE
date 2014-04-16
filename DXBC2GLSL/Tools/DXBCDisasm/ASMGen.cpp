@@ -421,8 +421,7 @@ void ASMGen::Disasm(std::ostream& out, ShaderDecl const & dcl)
 		break;
 
 	case SO_DCL_MAX_OUTPUT_VERTEX_COUNT:
-	case SO_DCL_GS_INSTANCE_COUNT:
-	
+	case SO_DCL_GS_INSTANCE_COUNT:	
 		out << ' ' << dcl.num;
 		break;
 
@@ -673,7 +672,7 @@ void ASMGen::Disasm(std::ostream& out, std::vector<DXBCConstantBuffer> const & c
 			out << "\n";
 
 			// cb default value
-			if(var_iter->var_desc.default_val)
+			if (var_iter->var_desc.default_val)
 			{
 				out << "//=";
 				this->Disasm(out, *var_iter);
@@ -718,11 +717,11 @@ void ASMGen::Disasm(std::ostream& out, DXBCShaderVariable const & var,uint32_t o
 	{
 	case SVC_MATRIX_ROWS:
 	case SVC_MATRIX_COLUMNS:
-		if(var.type_desc.type != SVT_FLOAT)
+		if (var.type_desc.type != SVT_FLOAT)
 		{
 			BOOST_ASSERT_MSG(false, "Only support float matrix.");
 		}
-		if(var.type_desc.rows!=var.type_desc.columns)
+		if (var.type_desc.rows != var.type_desc.columns)
 		{
 			BOOST_ASSERT_MSG(false, "Only support square matrix's default value for now.");
 		}

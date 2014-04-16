@@ -158,11 +158,11 @@ private:
 	bool labels_found_;
 	// the id of ret instruction which is not nested in any flow control statements
 	uint32_t end_of_program_;
+
 	GLSLVersion glsl_version_;
 	uint32_t glsl_rules_;
 
 	mutable std::vector<uint8_t> temp_as_type_;
-
 };
 
 #endif		// _DXBC2GLSL_GLSLGEN_HPP

@@ -394,9 +394,9 @@ struct ShaderProgram
 
 	ShaderProgram()
 		: gs_input_primitive(SP_Undefined), max_gs_output_vertex(0),
-			gs_instance_count(0),hs_input_control_point_count(0),
-		hs_output_control_point_count(0),ds_tessellator_domain(SDT_Undefined),
-		ds_tessellator_partitioning(STP_Undefined),ds_tessellator_output_primitive(STOP_Undefined)
+			gs_instance_count(0), hs_input_control_point_count(0),
+			hs_output_control_point_count(0), ds_tessellator_domain(SDT_Undefined),
+			ds_tessellator_partitioning(STP_Undefined), ds_tessellator_output_primitive(STOP_Undefined)
 	{
 		memset(&version, 0, sizeof(version));
 	}

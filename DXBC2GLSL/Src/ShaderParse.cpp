@@ -429,11 +429,7 @@ struct ShaderParser
 					break;
 
 				case SO_DCL_HS_MAX_TESSFACTOR:
-					{
-					uint32_t ret=this->Read32();
-					float* pf=reinterpret_cast<float*>(&ret);
-					dcl->f32 = *pf;
-					}
+					dcl->num = this->Read32();
 					break;
 
 				case SO_DCL_HS_FORK_PHASE_INSTANCE_COUNT:
@@ -523,7 +519,10 @@ struct ShaderParser
 			}
 			else
 			{
-				if(SO_HS_DECLS == opcode)continue;
+				if (SO_HS_DECLS == opcode)
+				{
+					continue;
+				}
 				KlayGE::shared_ptr<ShaderInstruction> insn = KlayGE::MakeSharedPtr<ShaderInstruction>();
 				program->insns.push_back(insn);
 				reinterpret_cast<TokenizedShaderInstruction&>(*insn) = insntok;
@@ -616,7 +615,7 @@ struct ShaderParser
 			}
 		}
 
-		if(patch_constant_signature)
+		if (patch_constant_signature)
 		{
 			this->ParseSignature(patch_constant_signature, FOURCC_PCSG);
 		}
