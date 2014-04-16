@@ -88,6 +88,7 @@ struct ShaderParser
 	DXBCChunkHeader const * resource_chunk;//resource definition and constant buffer chunk
 	DXBCChunkSignatureHeader const * input_signature;
 	DXBCChunkSignatureHeader const * output_signature;
+	DXBCChunkSignatureHeader const * patch_constant_signature;
 	KlayGE::shared_ptr<ShaderProgram> program;
 
 	ShaderParser(const DXBCContainer& dxbc, KlayGE::shared_ptr<ShaderProgram> const & program)
@@ -96,6 +97,7 @@ struct ShaderParser
 		resource_chunk = dxbc.resource_chunk;
 		input_signature = reinterpret_cast<DXBCChunkSignatureHeader const *>(dxbc.input_signature);
 		output_signature = reinterpret_cast<DXBCChunkSignatureHeader const *>(dxbc.output_signature);
+		patch_constant_signature = reinterpret_cast<DXBCChunkSignatureHeader const *>(dxbc.patch_constant_signature);
 		uint32_t size = dxbc.shader_chunk->size;
 		KlayGE::LittleEndianToNative<sizeof(size)>(&size);
 		tokens = reinterpret_cast<uint32_t const *>(dxbc.shader_chunk + 1);
@@ -303,7 +305,7 @@ struct ShaderParser
 				continue;
 			}
 
-			if ((SO_HS_FORK_PHASE == opcode) || (SO_HS_JOIN_PHASE == opcode))
+			if ((SO_HS_FORK_PHASE == opcode) || (SO_HS_JOIN_PHASE == opcode) || (SO_HS_CONTROL_POINT_PHASE == opcode) || (SO_HS_DECLS == opcode ))
 			{
 				// need to interleave these with the declarations or we cannot
 				// assign fork/join phase instance counts to phases
@@ -407,16 +409,33 @@ struct ShaderParser
 					dcl->num = this->Read32();
 					program->gs_instance_count = dcl->num;
 					break;
+				
+				case SO_DCL_TESS_OUTPUT_PRIMITIVE:
+					program->ds_tessellator_output_primitive = dcl->dcl_tess_output_primitive.primitive;
+					break;
+
+				case SO_DCL_TESS_PARTITIONING:
+					program->ds_tessellator_partitioning = dcl->dcl_tess_partitioning.partitioning;
+					break;
+
+				case SO_DCL_TESS_DOMAIN:
+					program->ds_tessellator_domain = dcl->dcl_tess_domain.domain;
+					break;
+
+				case SO_DCL_OUTPUT_CONTROL_POINT_COUNT:
+					program->hs_output_control_point_count = dcl->dcl_output_control_point_count.control_points;
+					break;
 
 				case SO_DCL_INPUT_CONTROL_POINT_COUNT:
-				case SO_DCL_OUTPUT_CONTROL_POINT_COUNT:
-				case SO_DCL_TESS_DOMAIN:
-				case SO_DCL_TESS_PARTITIONING:
-				case SO_DCL_TESS_OUTPUT_PRIMITIVE:
+					program->hs_input_control_point_count = dcl->dcl_input_control_point_count.control_points;
 					break;
 
 				case SO_DCL_HS_MAX_TESSFACTOR:
-					dcl->f32 = static_cast<float>(this->Read32());
+					{
+					uint32_t ret=this->Read32();
+					float* pf=reinterpret_cast<float*>(&ret);
+					dcl->f32 = *pf;
+					}
 					break;
 
 				case SO_DCL_HS_FORK_PHASE_INSTANCE_COUNT:
@@ -506,6 +525,7 @@ struct ShaderParser
 			}
 			else
 			{
+				if(SO_HS_DECLS == opcode)continue;
 				KlayGE::shared_ptr<ShaderInstruction> insn = KlayGE::MakeSharedPtr<ShaderInstruction>();
 				program->insns.push_back(insn);
 				reinterpret_cast<TokenizedShaderInstruction&>(*insn) = insntok;
@@ -580,6 +600,7 @@ struct ShaderParser
 				this->ParseSignature(input_signature, FOURCC_ISGN);
 			}
 		}
+
 		if (output_signature)
 		{
 			if (FOURCC_OSG1 == output_signature->fourcc)
@@ -595,6 +616,11 @@ struct ShaderParser
 				BOOST_ASSERT(FOURCC_OSGN == output_signature->fourcc);
 				this->ParseSignature(output_signature, FOURCC_OSGN);
 			}
+		}
+
+		if(patch_constant_signature)
+		{
+			this->ParseSignature(patch_constant_signature, FOURCC_PCSG);
 		}
 
 		return nullptr;
@@ -825,6 +851,10 @@ struct ShaderParser
 			params = &program->params_out;
 			break;
 
+		case FOURCC_PCSG:
+			params = &program->params_patch;
+			break;
+
 		default:
 			BOOST_ASSERT(false);
 			break;
@@ -895,7 +925,7 @@ struct ShaderParser
 		}
 		else
 		{
-			BOOST_ASSERT((FOURCC_ISGN == fourcc) || (FOURCC_OSGN == fourcc));
+			BOOST_ASSERT((FOURCC_ISGN == fourcc) || (FOURCC_OSGN == fourcc) || (FOURCC_PCSG == fourcc));
 
 			DXBCSignatureParameterD3D10 const * elements
 				= reinterpret_cast<DXBCSignatureParameterD3D10 const *>(elements_base);
@@ -934,6 +964,7 @@ struct ShaderParser
 			}
 		}
 	}
+
 };
 
 KlayGE::shared_ptr<ShaderProgram> ShaderParse(DXBCContainer const & dxbc)

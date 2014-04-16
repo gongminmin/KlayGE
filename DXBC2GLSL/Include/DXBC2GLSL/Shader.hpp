@@ -160,17 +160,17 @@ struct TokenizedShaderInstruction // 32-bit
 		struct
 		{
 			ShaderOpcode opcode : 11;
-			uint32_t domain : 3; // D3D_TESSELLATOR_DOMAIN
+			ShaderTessellatorDomain domain: 3; // D3D_TESSELLATOR_DOMAIN
 		} dcl_tess_domain;
 		struct
 		{
 			ShaderOpcode opcode : 11;
-			uint32_t partitioning : 3; // D3D_TESSELLATOR_PARTITIONING
+			ShaderTessellatorPartitioning partitioning : 3; // D3D_TESSELLATOR_PARTITIONING
 		} dcl_tess_partitioning;
 		struct
 		{
 			ShaderOpcode opcode : 11;
-			uint32_t primitive : 3; // D3D_TESSELLATOR_OUTPUT_PRIMITIVE
+			ShaderTessellatorOutputPrimitive primitive : 3; // D3D_TESSELLATOR_OUTPUT_PRIMITIVE
 		} dcl_tess_output_primitive;
 	};
 };
@@ -386,9 +386,17 @@ struct ShaderProgram
 	uint32_t max_gs_output_vertex;
 	uint32_t gs_instance_count;
 
+	uint32_t hs_input_control_point_count;
+	uint32_t hs_output_control_point_count;
+	ShaderTessellatorDomain ds_tessellator_domain;
+	ShaderTessellatorPartitioning ds_tessellator_partitioning;
+	ShaderTessellatorOutputPrimitive ds_tessellator_output_primitive;
+
 	ShaderProgram()
 		: gs_input_primitive(SP_Undefined), max_gs_output_vertex(0),
-			gs_instance_count(0)
+			gs_instance_count(0),hs_input_control_point_count(0),
+		hs_output_control_point_count(0),ds_tessellator_domain(SDT_Undefined),
+		ds_tessellator_partitioning(STP_Undefined),ds_tessellator_output_primitive(STOP_Undefined)
 	{
 		memset(&version, 0, sizeof(version));
 	}

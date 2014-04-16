@@ -30,8 +30,8 @@ enum ShaderOperandType
 	SOT_OUTPUT_CONTROL_POINT_ID,
 	SOT_INPUT_FORK_INSTANCE_ID,
 	SOT_INPUT_JOIN_INSTANCE_ID,
-	SOT_INPUT_CONTROL_POINT,
-	SOT_OUTPUT_CONTROL_POINT,
+	SOT_INPUT_CONTROL_POINT,//"vicp"
+	SOT_OUTPUT_CONTROL_POINT,//"vocp"
 	SOT_INPUT_PATCH_CONSTANT,
 	SOT_INPUT_DOMAIN_POINT,
 	SOT_THIS_POINTER,
@@ -562,6 +562,32 @@ enum ShaderPrimitiveTopology
 	SPT_TriangleStripAdj = 0x8 | SPT_TriangleStrip
 };
 
+enum ShaderTessellatorDomain
+{
+	SDT_Undefined = 0,
+	SDT_Isoline = 1,
+	SDT_Triangle = 2,
+	SDT_Quad = 3
+};
+
+enum ShaderTessellatorPartitioning
+{
+	STP_Undefined = 0,
+	STP_Integer = 1,
+	STP_Pow2 = 2,
+	STP_Fractional_Odd = 3,
+	STP_Fractional_Even = 4
+};
+
+enum ShaderTessellatorOutputPrimitive
+{
+	STOP_Undefined = 0,
+	STOP_Point = 1,
+	STOP_Line = 2,
+	STOP_Triangle_CW = 3,
+	STOP_Triangle_CCW = 4
+};
+
 char const * ShaderOperandTypeName(ShaderOperandType v);
 char const * ShaderOperandTypeShortName(ShaderOperandType v);
 char const * ShaderInterpolationModeName(ShaderInterpolationMode v);
@@ -580,5 +606,8 @@ char const * ShaderInputTypeName(ShaderInputType v);
 char const * ShaderRegisterComponentTypeName(ShaderRegisterComponentType v);
 char const * ShaderPrimitiveName(ShaderPrimitive v);
 char const * ShaderPrimitiveTopologyName(ShaderPrimitiveTopology v);
+char const * ShaderTessellatorDomainName(ShaderTessellatorDomain v);
+char const * ShaderTessellatorPartitioningName(ShaderTessellatorPartitioning v);
+char const * ShaderTessellatorOutputPrimitiveName(ShaderTessellatorOutputPrimitive v);
 
 #endif		// _DXBC2GLSL_SHADERDEFS_HPP

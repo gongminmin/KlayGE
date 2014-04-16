@@ -422,6 +422,35 @@ void ASMGen::Disasm(std::ostream& out, ShaderDecl const & dcl)
 
 	case SO_DCL_MAX_OUTPUT_VERTEX_COUNT:
 	case SO_DCL_GS_INSTANCE_COUNT:
+	
+		out << ' ' << dcl.num;
+		break;
+
+	case SO_DCL_INPUT_CONTROL_POINT_COUNT:
+		out << ' ' << dcl.dcl_input_control_point_count.control_points;
+		break;
+
+	case SO_DCL_OUTPUT_CONTROL_POINT_COUNT:
+		out << ' ' << dcl.dcl_output_control_point_count.control_points;
+		break;
+
+	case SO_DCL_TESS_DOMAIN:
+		out << ' ' << ShaderTessellatorDomainName(dcl.dcl_tess_domain.domain);
+		break;
+
+	case SO_DCL_TESS_PARTITIONING:
+		out << ' ' << ShaderTessellatorPartitioningName(dcl.dcl_tess_partitioning.partitioning);
+		break;
+
+	case SO_DCL_TESS_OUTPUT_PRIMITIVE:
+		out << ' ' << ShaderTessellatorOutputPrimitiveName(dcl.dcl_tess_output_primitive.primitive);
+		break;
+
+	case SO_DCL_HS_MAX_TESSFACTOR:
+		out << ' ' << dcl.f32;
+		break;
+
+	case SO_DCL_HS_FORK_PHASE_INSTANCE_COUNT:
 		out << ' ' << dcl.num;
 		break;
 
@@ -489,10 +518,13 @@ void ASMGen::ToASM(std::ostream& out)
 	this->Disasm(out, program_->cbuffers);
 	//disasm resource bindings
 	this->Disasm(out, program_->resource_bindings);
+	//disasm patch constant signature
+	this->Disasm(out, program_->params_patch, FOURCC_PCSG);
 	//disasm input signature
 	this->Disasm(out, program_->params_in, FOURCC_ISGN);
 	//disasm output signature
 	this->Disasm(out, program_->params_out, FOURCC_OSGN);
+	
 	out << "pvghdc"[program_->version.type] << "s_" << program_->version.major << "_" << program_->version.minor << "\n";
 	for (size_t i = 0; i < program_->dcls.size(); ++ i)
 	{
@@ -510,7 +542,7 @@ void ASMGen::ToASM(std::ostream& out)
 void ASMGen::Disasm(std::ostream& out, std::vector<DXBCSignatureParamDesc> const & signature, uint32_t fourcc)
 {
 	if (signature.empty())return;
-	uint32_t count = signature.size();
+	uint32_t count = static_cast<uint32_t>(signature.size());
 	switch (fourcc)
 	{
 	case FOURCC_ISGN:
@@ -519,6 +551,10 @@ void ASMGen::Disasm(std::ostream& out, std::vector<DXBCSignatureParamDesc> const
 
 	case FOURCC_OSGN:
 		out << "//\n//Output Signature:\n//\n";
+		break;
+
+	case FOURCC_PCSG:
+		out << "//\n//Patch Constant Signature:\n//\n";
 		break;
 
 	default:

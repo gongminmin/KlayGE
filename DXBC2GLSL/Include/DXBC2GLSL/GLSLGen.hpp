@@ -46,6 +46,30 @@ enum GLSLRules
 	GSR_ForceUInt32 = 0xFFFFFFFF
 };
 
+struct RegisterDesc
+{
+	uint32_t index;
+	ShaderRegisterComponentType type;
+	ShaderInterpolationMode interpolation;
+	bool is_depth;
+};
+
+struct HSForkPhase
+{
+	uint32_t fork_instance_count;
+	std::vector<KlayGE::shared_ptr<ShaderDecl>> dcls;
+	std::vector<KlayGE::shared_ptr<ShaderInstruction> > insns;//instructions
+	
+	HSForkPhase()
+		:fork_instance_count(0){}
+};
+
+struct HSControlPointPhase
+{
+	std::vector<KlayGE::shared_ptr<ShaderDecl>> dcls;
+	std::vector<KlayGE::shared_ptr<ShaderInstruction> > insns;//instructions
+};
+
 class GLSLGen
 {
 public:
@@ -53,15 +77,22 @@ public:
 
 	void FeedDXBC(KlayGE::shared_ptr<ShaderProgram> const & program, bool has_gs, GLSLVersion version, uint32_t glsl_rules);
 	void ToGLSL(std::ostream& out);
+	void ToHSForkPhases(std::ostream& out);
+	void ToHSControlPointPhase(std::ostream& out);
 
 private:
 	void ToDeclarations(std::ostream& out);
 	void ToDclInterShaderInputRecords(std::ostream& out);
 	void ToDclInterShaderOutputRecords(std::ostream& out);
+	void ToDclInterShaderPatchConstantRecords(std::ostream& out);
 	void ToDeclInterShaderInputRegisters(std::ostream& out) const;
 	void ToCopyToInterShaderInputRegisters(std::ostream& out) const;
 	void ToDeclInterShaderOutputRegisters(std::ostream& out) const;
-	void ToCopyToInterShaderOutputRegisters(std::ostream& out) const;
+	void ToCopyToInterShaderOutputRecords(std::ostream& out) const;
+	void ToDclInterShaderPatchConstantRegisters(std::ostream& out);
+	void ToCopyToInterShaderPatchConstantRecords(std::ostream& out)const;
+	void ToCopyToInterShaderPatchConstantRegisters(std::ostream& out)const;
+	void ToDefaultHSControlPointPhase(std::ostream& out)const;
 	void ToDeclaration(std::ostream& out, ShaderDecl const & dcl);
 	void ToInstruction(std::ostream& out, ShaderInstruction const & insn) const;
 	void ToOperands(std::ostream& out, ShaderOperand const & op, uint32_t imm_as_type,
@@ -92,12 +123,15 @@ private:
 	DXBCSignatureParamDesc const & GetOutputParamDesc(ShaderOperand const & op, uint32_t index = 0) const;
 	DXBCSignatureParamDesc const & GetInputParamDesc(ShaderOperand const & op, uint32_t index = 0) const;
 	DXBCInputBindDesc const & GetResourceDesc(ShaderInputType type, uint32_t bind_point) const;
+	uint32_t GetNumPatchConstantSignatureRegisters(std::vector<DXBCSignatureParamDesc> const & params_patch)const;
 	void FindDclIndexRange();
 	void FindSamplers();
 	void LinkCFInsns();
 	void FindLabels();
 	void FindEndOfProgram();
 	void FindTempDcls();
+	void FindHSForkPhases();
+	void FindHSControlPointPhase();
 
 private:
 	KlayGE::shared_ptr<ShaderProgram> program_;
@@ -108,6 +142,10 @@ private:
 	std::vector<TextureSamplerInfo> textures_;
 	std::vector<KlayGE::shared_ptr<ShaderDecl> > temp_dcls_;
 	std::map<int64_t, bool> cb_index_mode_;
+	std::vector<HSForkPhase> hs_fork_phases_;
+	std::vector<HSControlPointPhase> hs_control_point_phase_;
+	bool enter_hs_fork_phase_;
+	bool enter_final_hs_fork_phase_;
 
 	// for ifs, the insn number of the else or endif if there is no else
 	// for elses, the insn number of the endif
@@ -120,11 +158,11 @@ private:
 	bool labels_found_;
 	// the id of ret instruction which is not nested in any flow control statements
 	uint32_t end_of_program_;
-
 	GLSLVersion glsl_version_;
 	uint32_t glsl_rules_;
 
 	mutable std::vector<uint8_t> temp_as_type_;
+
 };
 
 #endif		// _DXBC2GLSL_GLSLGEN_HPP

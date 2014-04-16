@@ -165,6 +165,7 @@ struct DXBCContainer
 	DXBCChunkHeader const * resource_chunk;
 	DXBCChunkHeader const * input_signature;
 	DXBCChunkHeader const * output_signature;
+	DXBCChunkHeader const * patch_constant_signature;
 };
 
 struct DXBCContainerHeader

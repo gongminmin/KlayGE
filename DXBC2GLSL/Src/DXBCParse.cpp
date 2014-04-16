@@ -56,6 +56,7 @@ KlayGE::shared_ptr<DXBCContainer> DXBCParse(void const * data)
 			container->output_signature = DXBCFindSignature(data, DFS_OUTPUT);
 		}
 	}
+	container->patch_constant_signature = DXBCFindSignature(data, DFS_PATCH);
 
 	return container;
 }
