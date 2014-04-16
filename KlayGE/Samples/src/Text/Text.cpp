@@ -97,7 +97,7 @@ void TextApp::InitObjects()
 		text_.resize(ucs2_text.size(), L'\0');
 		for (size_t i = 0; i < ucs2_text.size(); ++ i)
 		{
-			LittleEndianToNative<sizeof(ucs2_text[i])>(&ucs2_text[i]);
+			ucs2_text[i] = LE2Native(ucs2_text[i]);
 			text_[i] = ucs2_text[i];
 		}
 	}

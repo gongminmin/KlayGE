@@ -98,8 +98,7 @@ struct ShaderParser
 		input_signature = reinterpret_cast<DXBCChunkSignatureHeader const *>(dxbc.input_signature);
 		output_signature = reinterpret_cast<DXBCChunkSignatureHeader const *>(dxbc.output_signature);
 		patch_constant_signature = reinterpret_cast<DXBCChunkSignatureHeader const *>(dxbc.patch_constant_signature);
-		uint32_t size = dxbc.shader_chunk->size;
-		KlayGE::LittleEndianToNative<sizeof(size)>(&size);
+		uint32_t size = KlayGE::LE2Native(dxbc.shader_chunk->size);
 		tokens = reinterpret_cast<uint32_t const *>(dxbc.shader_chunk + 1);
 		tokens_end = reinterpret_cast<uint32_t const *>(reinterpret_cast<char const *>(tokens) + size);
 	}
@@ -107,8 +106,7 @@ struct ShaderParser
 	uint32_t Read32()
 	{
 		BOOST_ASSERT(tokens < tokens_end);
-		uint32_t cur_token = *tokens;
-		KlayGE::LittleEndianToNative<sizeof(cur_token)>(&cur_token);
+		uint32_t cur_token = KlayGE::LE2Native(*tokens);
 		++ tokens; 
 		return cur_token;
 	}
@@ -632,26 +630,20 @@ struct ShaderParser
 
 		uint32_t const * tokens = reinterpret_cast<uint32_t const *>(resource_chunk + 1);
 		uint32_t const * first_token = tokens;
-		uint32_t num_cb = *tokens;
-		KlayGE::LittleEndianToNative<sizeof(num_cb)>(&num_cb);
+		uint32_t num_cb = KlayGE::LE2Native(*tokens);
 		++ tokens;
-		uint32_t cb_offset = *tokens;
-		KlayGE::LittleEndianToNative<sizeof(cb_offset)>(&cb_offset);
+		uint32_t cb_offset = KlayGE::LE2Native(*tokens);
 		++ tokens;
 
-		uint32_t num_resource_bindings = *tokens;
-		KlayGE::LittleEndianToNative<sizeof(num_resource_bindings)>(&num_resource_bindings);
+		uint32_t num_resource_bindings = KlayGE::LE2Native(*tokens);
 		++ tokens;
-		uint32_t resource_binding_offset = *tokens;
-		KlayGE::LittleEndianToNative<sizeof(resource_binding_offset)>(&resource_binding_offset);
+		uint32_t resource_binding_offset = KlayGE::LE2Native(*tokens);
 		++ tokens;
-		uint32_t shader_model = *tokens;
-		KlayGE::LittleEndianToNative<sizeof(shader_model)>(&shader_model);
+		uint32_t shader_model = KlayGE::LE2Native(*tokens);
 		++ tokens;
 		// TODO: check here, shader_model is unused.
 		shader_model = shader_model;
-		uint32_t compile_flags = *tokens;
-		KlayGE::LittleEndianToNative<sizeof(compile_flags)>(&compile_flags);
+		uint32_t compile_flags = KlayGE::LE2Native(*tokens);
 		++ tokens;
 		// TODO: check here, compile_flags is unused.
 		compile_flags = compile_flags;
@@ -661,30 +653,22 @@ struct ShaderParser
 		for (uint32_t i = 0; i < num_resource_bindings; ++ i)
 		{
 			DXBCInputBindDesc& bind = program->resource_bindings[i];
-			uint32_t name_offset = *resource_binding_tokens;
-			KlayGE::LittleEndianToNative<sizeof(name_offset)>(&name_offset);
+			uint32_t name_offset = KlayGE::LE2Native(*resource_binding_tokens);
 			++ resource_binding_tokens;
 			bind.name = reinterpret_cast<char const *>(first_token) + name_offset;
-			bind.type = static_cast<ShaderInputType>(*resource_binding_tokens);
-			KlayGE::LittleEndianToNative<sizeof(bind.type)>(&bind.type);
+			bind.type = KlayGE::LE2Native(static_cast<ShaderInputType>(*resource_binding_tokens));
 			++ resource_binding_tokens;
-			bind.return_type = static_cast<ShaderResourceReturnType>(*resource_binding_tokens);
-			KlayGE::LittleEndianToNative<sizeof(bind.return_type)>(&bind.return_type);
+			bind.return_type = KlayGE::LE2Native(static_cast<ShaderResourceReturnType>(*resource_binding_tokens));
 			++ resource_binding_tokens;
-			bind.dimension = static_cast<ShaderSRVDimension>(*resource_binding_tokens);
-			KlayGE::LittleEndianToNative<sizeof(bind.dimension)>(&bind.dimension);
+			bind.dimension = KlayGE::LE2Native(static_cast<ShaderSRVDimension>(*resource_binding_tokens));
 			++ resource_binding_tokens;
-			bind.num_samples = *resource_binding_tokens;
-			KlayGE::LittleEndianToNative<sizeof(bind.num_samples)>(&bind.num_samples);
+			bind.num_samples = KlayGE::LE2Native(*resource_binding_tokens);
 			++ resource_binding_tokens;
-			bind.bind_point = *resource_binding_tokens;
-			KlayGE::LittleEndianToNative<sizeof(bind.bind_point)>(&bind.bind_point);
+			bind.bind_point = KlayGE::LE2Native(*resource_binding_tokens);
 			++ resource_binding_tokens;
-			bind.bind_count = *resource_binding_tokens;
-			KlayGE::LittleEndianToNative<sizeof(bind.bind_count)>(&bind.bind_count);
+			bind.bind_count = KlayGE::LE2Native(*resource_binding_tokens);
 			++ resource_binding_tokens;
-			bind.flags = *resource_binding_tokens;
-			KlayGE::LittleEndianToNative<sizeof(bind.flags)>(&bind.flags);
+			bind.flags = KlayGE::LE2Native(*resource_binding_tokens);
 			++ resource_binding_tokens;
 		}
 
@@ -693,56 +677,42 @@ struct ShaderParser
 
 		for (uint32_t i = 0; i < num_cb; ++ i)
 		{
-			DXBCConstantBuffer& cb=program->cbuffers[i];
-			uint32_t name_offset = *cb_tokens;
-			KlayGE::LittleEndianToNative<sizeof(name_offset)>(&name_offset);
+			DXBCConstantBuffer& cb = program->cbuffers[i];
+			uint32_t name_offset = KlayGE::LE2Native(*cb_tokens);
 			++ cb_tokens;
-			uint32_t var_count = *cb_tokens;
-			KlayGE::LittleEndianToNative<sizeof(var_count)>(&var_count);
+			uint32_t var_count = KlayGE::LE2Native(*cb_tokens);
 			++ cb_tokens;
-			uint32_t var_offset = *cb_tokens;
-			KlayGE::LittleEndianToNative<sizeof(var_offset)>(&var_offset);
+			uint32_t var_offset = KlayGE::LE2Native(*cb_tokens);
 			++ cb_tokens;
 			const uint32_t* var_token = reinterpret_cast<uint32_t const *>(reinterpret_cast<char const *>(first_token) + var_offset);
 			cb.vars.resize(var_count);
 			for (uint32_t j = 0; j < var_count; ++ j)
 			{
 				DXBCShaderVariable& var = cb.vars[j];
-				uint32_t name_offset = *var_token;
-				KlayGE::LittleEndianToNative<sizeof(name_offset)>(&name_offset);
+				uint32_t name_offset = KlayGE::LE2Native(*var_token);
 				++ var_token;
 				var.var_desc.name = reinterpret_cast<char const *>(first_token) + name_offset;
-				var.var_desc.start_offset = *var_token;
-				KlayGE::LittleEndianToNative<sizeof(var.var_desc.start_offset)>(&var.var_desc.start_offset);
+				var.var_desc.start_offset = KlayGE::LE2Native(*var_token);
 				++ var_token;
-				var.var_desc.size = *var_token;
-				KlayGE::LittleEndianToNative<sizeof(var.var_desc.size)>(&var.var_desc.size);
+				var.var_desc.size = KlayGE::LE2Native(*var_token);
 				++ var_token;
-				var.var_desc.flags = *var_token;
-				KlayGE::LittleEndianToNative<sizeof(var.var_desc.flags)>(&var.var_desc.flags);
+				var.var_desc.flags = KlayGE::LE2Native(*var_token);
 				++ var_token;
-				uint32_t type_offset = *var_token;
-				KlayGE::LittleEndianToNative<sizeof(type_offset)>(&type_offset);
+				uint32_t type_offset = KlayGE::LE2Native(*var_token);
 				++ var_token;
-				uint32_t default_value_offset = *var_token;
-				KlayGE::LittleEndianToNative<sizeof(default_value_offset)>(&default_value_offset);
+				uint32_t default_value_offset = KlayGE::LE2Native(*var_token);
 				++ var_token;
 
 				if (program->version.major >= 5)
 				{
-					var.var_desc.start_texture = *var_token;
+					var.var_desc.start_texture = KlayGE::LE2Native(*var_token);
 					++ var_token;
-					var.var_desc.texture_size = *var_token;
+					var.var_desc.texture_size = KlayGE::LE2Native(*var_token);
 					++ var_token;
-					var.var_desc.start_sampler = *var_token;
+					var.var_desc.start_sampler = KlayGE::LE2Native(*var_token);
 					++ var_token;
-					var.var_desc.sampler_size = *var_token;
+					var.var_desc.sampler_size = KlayGE::LE2Native(*var_token);
 					++ var_token;
-
-					KlayGE::LittleEndianToNative<sizeof(var.var_desc.start_texture)>(&var.var_desc.start_texture);
-					KlayGE::LittleEndianToNative<sizeof(var.var_desc.texture_size)>(&var.var_desc.texture_size);
-					KlayGE::LittleEndianToNative<sizeof(var.var_desc.start_sampler)>(&var.var_desc.start_sampler);
-					KlayGE::LittleEndianToNative<sizeof(var.var_desc.sampler_size)>(&var.var_desc.sampler_size);
 
 				}
 				if (default_value_offset)
@@ -758,43 +728,25 @@ struct ShaderParser
 					var.has_type_desc = true;
 					uint16_t const * type_token = reinterpret_cast<uint16_t const *>(reinterpret_cast<char const *>(first_token) + type_offset);
 
-					uint16_t tmp;
-
-					tmp = *type_token;
-					KlayGE::LittleEndianToNative<sizeof(tmp)>(&tmp);
-					var.type_desc.var_class = static_cast<ShaderVariableClass>(tmp);
+					var.type_desc.var_class = static_cast<ShaderVariableClass>(KlayGE::LE2Native(*type_token));
 					++ type_token;
 
-					tmp = *type_token;
-					KlayGE::LittleEndianToNative<sizeof(tmp)>(&tmp);
-					var.type_desc.type = static_cast<ShaderVariableType>(tmp);
+					var.type_desc.type = static_cast<ShaderVariableType>(KlayGE::LE2Native(*type_token));
 					++ type_token;
 
-					tmp = *type_token;
-					KlayGE::LittleEndianToNative<sizeof(tmp)>(&tmp);
-					var.type_desc.rows = tmp;
+					var.type_desc.rows = KlayGE::LE2Native(*type_token);
 					++ type_token;
-					tmp = *type_token;
-					KlayGE::LittleEndianToNative<sizeof(tmp)>(&tmp);
-					var.type_desc.columns = tmp;
+					var.type_desc.columns = KlayGE::LE2Native(*type_token);
 					++ type_token;
 
-					tmp = *type_token;
-					KlayGE::LittleEndianToNative<sizeof(tmp)>(&tmp);
-					var.type_desc.elements = tmp;
+					var.type_desc.elements = KlayGE::LE2Native(*type_token);
 					++ type_token;
-					tmp = *type_token;
-					KlayGE::LittleEndianToNative<sizeof(tmp)>(&tmp);
-					var.type_desc.members = tmp;
+					var.type_desc.members = KlayGE::LE2Native(*type_token);
 					++ type_token;
 
-					tmp = *type_token;
-					KlayGE::LittleEndianToNative<sizeof(tmp)>(&tmp);
-					uint32_t var_member_offset = tmp << 16;
+					uint32_t var_member_offset = KlayGE::LE2Native(*type_token) << 16;
 					++ type_token;
-					tmp = *type_token;
-					KlayGE::LittleEndianToNative<sizeof(tmp)>(&tmp);
-					var_member_offset |= tmp;
+					var_member_offset |= KlayGE::LE2Native(*type_token);
 					++ type_token;
 					
 					var.type_desc.offset = var_member_offset;
@@ -860,14 +812,12 @@ struct ShaderParser
 			break;
 		}
 
-		uint32_t offset = sig->offset;
-		KlayGE::LittleEndianToNative<sizeof(offset)>(&offset);
+		uint32_t offset = KlayGE::LE2Native(sig->offset);
 		void const * elements_base
 			= static_cast<void const *>(reinterpret_cast<uint8_t const *>(sig)
 				+ sizeof(DXBCChunkHeader) + offset);
 
-		uint32_t count = sig->count;
-		KlayGE::LittleEndianToNative<sizeof(count)>(&count);
+		uint32_t count = KlayGE::LE2Native(sig->count);
 		params->resize(count);
 
 		if ((FOURCC_ISG1 == fourcc) || (FOURCC_OSG1 == fourcc))
@@ -877,24 +827,16 @@ struct ShaderParser
 			for (uint32_t i = 0; i < count; ++ i)
 			{
 				DXBCSignatureParamDesc& param = (*params)[i];
-				uint32_t name_offset = elements[i].name_offset;
-				KlayGE::LittleEndianToNative<sizeof(name_offset)>(&name_offset);
+				uint32_t name_offset = KlayGE::LE2Native(elements[i].name_offset);
 				param.semantic_name = reinterpret_cast<char const *>(sig) + sizeof(DXBCChunkHeader) + name_offset;
-				param.semantic_index = elements[i].semantic_index;
-				param.system_value_type = static_cast<ShaderName>(elements[i].system_value_type);
-				param.component_type = static_cast<ShaderRegisterComponentType>(elements[i].component_type);
-				param.register_index = elements[i].register_num;
+				param.semantic_index = KlayGE::LE2Native(elements[i].semantic_index);
+				param.system_value_type = KlayGE::LE2Native(static_cast<ShaderName>(elements[i].system_value_type));
+				param.component_type = KlayGE::LE2Native(static_cast<ShaderRegisterComponentType>(elements[i].component_type));
+				param.register_index = KlayGE::LE2Native(elements[i].register_num);
 				param.mask = elements[i].mask;
 				param.read_write_mask = elements[i].read_write_mask;
-				param.stream = elements[i].stream;
-				param.min_precision = elements[i].min_precision;
-
-				KlayGE::LittleEndianToNative<sizeof(param.semantic_index)>(&param.semantic_index);
-				KlayGE::LittleEndianToNative<sizeof(param.system_value_type)>(&param.system_value_type);
-				KlayGE::LittleEndianToNative<sizeof(param.component_type)>(&param.component_type);
-				KlayGE::LittleEndianToNative<sizeof(param.register_index)>(&param.register_index);
-				KlayGE::LittleEndianToNative<sizeof(param.stream)>(&param.stream);
-				KlayGE::LittleEndianToNative<sizeof(param.min_precision)>(&param.min_precision);
+				param.stream = KlayGE::LE2Native(elements[i].stream);
+				param.min_precision = KlayGE::LE2Native(elements[i].min_precision);
 			}
 		}
 		else if (FOURCC_OSG5 == fourcc)
@@ -904,23 +846,16 @@ struct ShaderParser
 			for (uint32_t i = 0; i < count; ++ i)
 			{
 				DXBCSignatureParamDesc& param = (*params)[i];
-				uint32_t name_offset = elements[i].name_offset;
-				KlayGE::LittleEndianToNative<sizeof(name_offset)>(&name_offset);
+				uint32_t name_offset = KlayGE::LE2Native(elements[i].name_offset);
 				param.semantic_name = reinterpret_cast<char const *>(sig) + sizeof(DXBCChunkHeader) + name_offset;
-				param.semantic_index = elements[i].semantic_index;
-				param.system_value_type = static_cast<ShaderName>(elements[i].system_value_type);
-				param.component_type = static_cast<ShaderRegisterComponentType>(elements[i].component_type);
-				param.register_index = elements[i].register_num;
+				param.semantic_index = KlayGE::LE2Native(elements[i].semantic_index);
+				param.system_value_type = KlayGE::LE2Native(static_cast<ShaderName>(elements[i].system_value_type));
+				param.component_type = KlayGE::LE2Native(static_cast<ShaderRegisterComponentType>(elements[i].component_type));
+				param.register_index = KlayGE::LE2Native(elements[i].register_num);
 				param.mask = elements[i].mask;
 				param.read_write_mask = elements[i].read_write_mask;
-				param.stream = elements[i].stream;
-				param.min_precision = 0;
-
-				KlayGE::LittleEndianToNative<sizeof(param.semantic_index)>(&param.semantic_index);
-				KlayGE::LittleEndianToNative<sizeof(param.system_value_type)>(&param.system_value_type);
-				KlayGE::LittleEndianToNative<sizeof(param.component_type)>(&param.component_type);
-				KlayGE::LittleEndianToNative<sizeof(param.register_index)>(&param.register_index);
-				KlayGE::LittleEndianToNative<sizeof(param.stream)>(&param.stream);
+				param.stream = KlayGE::LE2Native(elements[i].stream);
+				param.min_precision = KlayGE::LE2Native(0);
 			}
 		}
 		else
@@ -932,22 +867,16 @@ struct ShaderParser
 			for (uint32_t i = 0; i < count; ++ i)
 			{
 				DXBCSignatureParamDesc& param = (*params)[i];
-				uint32_t name_offset = elements[i].name_offset;
-				KlayGE::LittleEndianToNative<sizeof(name_offset)>(&name_offset);
+				uint32_t name_offset = KlayGE::LE2Native(elements[i].name_offset);
 				param.semantic_name = reinterpret_cast<char const *>(sig) + sizeof(DXBCChunkHeader) + name_offset;
-				param.semantic_index = elements[i].semantic_index;
-				param.system_value_type = static_cast<ShaderName>(elements[i].system_value_type);
-				param.component_type = static_cast<ShaderRegisterComponentType>(elements[i].component_type);
-				param.register_index = elements[i].register_num;
+				param.semantic_index = KlayGE::LE2Native(elements[i].semantic_index);
+				param.system_value_type = KlayGE::LE2Native(static_cast<ShaderName>(elements[i].system_value_type));
+				param.component_type = KlayGE::LE2Native(static_cast<ShaderRegisterComponentType>(elements[i].component_type));
+				param.register_index = KlayGE::LE2Native(elements[i].register_num);
 				param.mask = elements[i].mask;
 				param.read_write_mask = elements[i].read_write_mask;
-				param.stream = 0;
-				param.min_precision = 0;
-
-				KlayGE::LittleEndianToNative<sizeof(param.semantic_index)>(&param.semantic_index);
-				KlayGE::LittleEndianToNative<sizeof(param.system_value_type)>(&param.system_value_type);
-				KlayGE::LittleEndianToNative<sizeof(param.component_type)>(&param.component_type);
-				KlayGE::LittleEndianToNative<sizeof(param.register_index)>(&param.register_index);
+				param.stream = KlayGE::LE2Native(0);
+				param.min_precision = KlayGE::LE2Native(0);
 			}
 		}
 		

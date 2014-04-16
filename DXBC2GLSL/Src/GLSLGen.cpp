@@ -7077,7 +7077,7 @@ void GLSLGen::FindHSForkPhases()
 {
 	std::vector<KlayGE::shared_ptr<ShaderDecl> >::const_iterator itr_dcl = program_->dcls.begin();
 	std::vector<KlayGE::shared_ptr<ShaderInstruction> >::const_iterator itr_insn = program_->insns.begin();
-	while(true)
+	for (;;)
 	{
 		//find iterator to next hs_fork_phase.
 		for(; itr_dcl != program_->dcls.end(); ++itr_dcl)
@@ -7152,7 +7152,7 @@ void GLSLGen::FindHSControlPointPhase()
 			phase.dcls.push_back(*itr_dcl1);
 		}
 		std::vector<KlayGE::shared_ptr<ShaderInstruction> >::const_iterator itr_insn1 = itr_insn;
-		for(; (itr_insn1-program_->insns.begin()) != end_of_program_; ++itr_insn1)
+		for(; static_cast<uint32_t>(itr_insn1-program_->insns.begin()) != end_of_program_; ++itr_insn1)
 		{
 			phase.insns.push_back(*itr_insn1);
 		}

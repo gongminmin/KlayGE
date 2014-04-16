@@ -125,41 +125,36 @@ namespace KlayGE
 	template <int size>
 	void EndianSwitch(void* p);
 
-	template <>
-	void EndianSwitch<2>(void* p);
-	template <>
-	void EndianSwitch<4>(void* p);
-	template <>
-	void EndianSwitch<8>(void* p);
-
-	template <int size>
-	void NativeToBigEndian(void* p)
+	template <typename T>
+	T Native2BE(T x)
 	{
-	#ifdef KLAYGE_LITTLE_ENDIAN
-		EndianSwitch<size>(p);
-	#else
-		UNREF_PARAM(p);
-	#endif
+#ifdef KLAYGE_LITTLE_ENDIAN
+		EndianSwitch<sizeof(T)>(&x);
+#else
+		UNREF_PARAM(x);
+#endif
+		return x;
 	}
-	template <int size>
-	void NativeToLittleEndian(void* p)
+	template <typename T>
+	T Native2LE(T x)
 	{
-	#ifdef KLAYGE_LITTLE_ENDIAN
-		UNREF_PARAM(p);
-	#else
-		EndianSwitch<size>(p);
-	#endif
+#ifdef KLAYGE_LITTLE_ENDIAN
+		UNREF_PARAM(x);
+#else
+		EndianSwitch<sizeof(T)>(&x);
+#endif
+		return x;
 	}
 
-	template <int size>
-	void BigEndianToNative(void* p)
+	template <typename T>
+	T BE2Native(T x)
 	{
-		NativeToBigEndian<size>(p);
+		return Native2BE(x);
 	}
-	template <int size>
-	void LittleEndianToNative(void* p)
+	template <typename T>
+	T LE2Native(T x)
 	{
-		NativeToLittleEndian<size>(p);
+		return Native2LE(x);
 	}
 
 

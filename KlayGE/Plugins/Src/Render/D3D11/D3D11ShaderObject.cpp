@@ -838,13 +838,13 @@ namespace KlayGE
 			uint32_t fourcc;
 			std::memcpy(&fourcc, nsbp, sizeof(fourcc));
 			nsbp += sizeof(fourcc);
-			LittleEndianToNative<sizeof(fourcc)>(&fourcc);
+			fourcc = LE2Native(fourcc);
 			if (MakeFourCC<'D', 'X', 'B', 'C'>::value == fourcc)
 			{
 				uint32_t ver;
 				std::memcpy(&ver, nsbp, sizeof(ver));
 				nsbp += sizeof(ver);
-				LittleEndianToNative<sizeof(ver)>(&ver);
+				ver = LE2Native(ver);
 				if (4 == ver)
 				{
 					uint8_t len = *nsbp;
@@ -868,18 +868,18 @@ namespace KlayGE
 						uint16_t cb_desc_size;
 						std::memcpy(&cb_desc_size, nsbp, sizeof(cb_desc_size));
 						nsbp += sizeof(cb_desc_size);
-						LittleEndianToNative<sizeof(cb_desc_size)>(&cb_desc_size);
+						cb_desc_size = LE2Native(cb_desc_size);
 						sd.cb_desc.resize(cb_desc_size);
 						for (size_t i = 0; i < sd.cb_desc.size(); ++ i)
 						{
 							std::memcpy(&sd.cb_desc[i].size, nsbp, sizeof(sd.cb_desc[i].size));
 							nsbp += sizeof(sd.cb_desc[i].size);
-							LittleEndianToNative<sizeof(sd.cb_desc[i].size)>(&sd.cb_desc[i].size);
+							sd.cb_desc[i].size = LE2Native(sd.cb_desc[i].size);
 
 							uint16_t var_desc_size;
 							std::memcpy(&var_desc_size, nsbp, sizeof(var_desc_size));
 							nsbp += sizeof(var_desc_size);
-							LittleEndianToNative<sizeof(var_desc_size)>(&var_desc_size);
+							var_desc_size = LE2Native(var_desc_size);
 							sd.cb_desc[i].var_desc.resize(var_desc_size);
 							for (size_t j = 0; j < sd.cb_desc[i].var_desc.size(); ++ j)
 							{
@@ -891,7 +891,7 @@ namespace KlayGE
 
 								std::memcpy(&sd.cb_desc[i].var_desc[j].start_offset, nsbp, sizeof(sd.cb_desc[i].var_desc[j].start_offset));
 								nsbp += sizeof(sd.cb_desc[i].var_desc[j].start_offset);
-								LittleEndianToNative<sizeof(sd.cb_desc[i].var_desc[j].start_offset)>(&sd.cb_desc[i].var_desc[j].start_offset);
+								sd.cb_desc[i].var_desc[j].start_offset = LE2Native(sd.cb_desc[i].var_desc[j].start_offset);
 								std::memcpy(&sd.cb_desc[i].var_desc[j].type, nsbp, sizeof(sd.cb_desc[i].var_desc[j].type));
 								nsbp += sizeof(sd.cb_desc[i].var_desc[j].type);
 								std::memcpy(&sd.cb_desc[i].var_desc[j].rows, nsbp, sizeof(sd.cb_desc[i].var_desc[j].rows));
@@ -900,24 +900,24 @@ namespace KlayGE
 								nsbp += sizeof(sd.cb_desc[i].var_desc[j].columns);
 								std::memcpy(&sd.cb_desc[i].var_desc[j].elements, nsbp, sizeof(sd.cb_desc[i].var_desc[j].elements));
 								nsbp += sizeof(sd.cb_desc[i].var_desc[j].elements);
-								LittleEndianToNative<sizeof(sd.cb_desc[i].var_desc[j].elements)>(&sd.cb_desc[i].var_desc[j].elements);
+								sd.cb_desc[i].var_desc[j].elements = LE2Native(sd.cb_desc[i].var_desc[j].elements);
 							}
 						}
 
 						std::memcpy(&sd.num_samplers, nsbp, sizeof(sd.num_samplers));
 						nsbp += sizeof(sd.num_samplers);
-						LittleEndianToNative<sizeof(sd.num_samplers)>(&sd.num_samplers);
+						sd.num_samplers = LE2Native(sd.num_samplers);
 						std::memcpy(&sd.num_srvs, nsbp, sizeof(sd.num_srvs));
 						nsbp += sizeof(sd.num_srvs);
-						LittleEndianToNative<sizeof(sd.num_srvs)>(&sd.num_srvs);
+						sd.num_srvs = LE2Native(sd.num_srvs);
 						std::memcpy(&sd.num_uavs, nsbp, sizeof(sd.num_uavs));
 						nsbp += sizeof(sd.num_uavs);
-						LittleEndianToNative<sizeof(sd.num_uavs)>(&sd.num_uavs);
+						sd.num_uavs = LE2Native(sd.num_uavs);
 
 						uint16_t res_desc_size;
 						std::memcpy(&res_desc_size, nsbp, sizeof(res_desc_size));
 						nsbp += sizeof(res_desc_size);
-						LittleEndianToNative<sizeof(res_desc_size)>(&res_desc_size);
+						res_desc_size = LE2Native(res_desc_size);
 						sd.res_desc.resize(res_desc_size);
 						for (size_t i = 0; i < sd.res_desc.size(); ++ i)
 						{
@@ -935,28 +935,28 @@ namespace KlayGE
 
 							std::memcpy(&sd.res_desc[i].bind_point, nsbp, sizeof(sd.res_desc[i].bind_point));
 							nsbp += sizeof(sd.res_desc[i].bind_point);
-							LittleEndianToNative<sizeof(sd.res_desc[i].bind_point)>(&sd.res_desc[i].bind_point);
+							sd.res_desc[i].bind_point = LE2Native(sd.res_desc[i].bind_point);
 						}
 
 						if (ST_VertexShader == type)
 						{
 							std::memcpy(&vs_signature_, nsbp, sizeof(vs_signature_));
 							nsbp += sizeof(vs_signature_);
-							LittleEndianToNative<sizeof(vs_signature_)>(&vs_signature_);
+							vs_signature_ = LE2Native(vs_signature_);
 						}
 						else if (ST_ComputeShader == type)
 						{
 							std::memcpy(&cs_block_size_x_, nsbp, sizeof(cs_block_size_x_));
 							nsbp += sizeof(cs_block_size_x_);
-							LittleEndianToNative<sizeof(cs_block_size_x_)>(&cs_block_size_x_);
+							cs_block_size_x_ = LE2Native(cs_block_size_x_);
 
 							std::memcpy(&cs_block_size_y_, nsbp, sizeof(cs_block_size_y_));
 							nsbp += sizeof(cs_block_size_y_);
-							LittleEndianToNative<sizeof(cs_block_size_y_)>(&cs_block_size_y_);
+							cs_block_size_y_ = LE2Native(cs_block_size_y_);
 
 							std::memcpy(&cs_block_size_z_, nsbp, sizeof(cs_block_size_z_));
 							nsbp += sizeof(cs_block_size_z_);
-							LittleEndianToNative<sizeof(cs_block_size_z_)>(&cs_block_size_z_);
+							cs_block_size_z_ = LE2Native(cs_block_size_z_);
 						}
 
 						this->AttachShaderBytecode(type, effect, shader_desc_ids, code_blob);
@@ -975,7 +975,7 @@ namespace KlayGE
 	{
 		uint32_t len;
 		res->read(&len, sizeof(len));
-		LittleEndianToNative<sizeof(len)>(&len);
+		len = LE2Native(len);
 		std::vector<uint8_t> native_shader_block(len);
 		if (len > 0)
 		{
@@ -1006,36 +1006,30 @@ namespace KlayGE
 		{
 			std::ostringstream oss(std::ios_base::binary | std::ios_base::out);
 
-			uint32_t fourcc = MakeFourCC<'D', 'X', 'B', 'C'>::value;
-			NativeToLittleEndian<sizeof(fourcc)>(&fourcc);
+			uint32_t fourcc = Native2LE(MakeFourCC<'D', 'X', 'B', 'C'>::value);
 			oss.write(reinterpret_cast<char const *>(&fourcc), sizeof(fourcc));
 
-			uint32_t ver = 4;
-			NativeToLittleEndian<sizeof(ver)>(&ver);
+			uint32_t ver = Native2LE(4);
 			oss.write(reinterpret_cast<char const *>(&ver), sizeof(ver));
 
 			uint8_t len = static_cast<uint8_t>(shader_code_[type].second.size());
 			oss.write(reinterpret_cast<char const *>(&len), sizeof(len));
 			oss.write(reinterpret_cast<char const *>(&shader_code_[type].second[0]), len);
 
-			uint32_t blob_size = static_cast<uint32_t>(code_blob->size());
-			NativeToLittleEndian<sizeof(blob_size)>(&blob_size);
+			uint32_t blob_size = Native2LE(static_cast<uint32_t>(code_blob->size()));
 			oss.write(reinterpret_cast<char const *>(&blob_size), sizeof(blob_size));
 			oss.write(reinterpret_cast<char const *>(&((*code_blob)[0])), code_blob->size());
 
 			D3D11ShaderDesc const & sd = shader_desc_[type];
 
-			uint16_t cb_desc_size = static_cast<uint16_t>(sd.cb_desc.size());
-			NativeToLittleEndian<sizeof(cb_desc_size)>(&cb_desc_size);
+			uint16_t cb_desc_size = Native2LE(static_cast<uint16_t>(sd.cb_desc.size()));
 			oss.write(reinterpret_cast<char const *>(&cb_desc_size), sizeof(cb_desc_size));
 			for (size_t i = 0; i < sd.cb_desc.size(); ++ i)
 			{
-				uint32_t size = sd.cb_desc[i].size;
-				NativeToLittleEndian<sizeof(size)>(&size);
+				uint32_t size = Native2LE(sd.cb_desc[i].size);
 				oss.write(reinterpret_cast<char const *>(&size), sizeof(size));
 
-				uint16_t var_desc_size = static_cast<uint16_t>(sd.cb_desc[i].var_desc.size());
-				NativeToLittleEndian<sizeof(var_desc_size)>(&var_desc_size);
+				uint16_t var_desc_size = Native2LE(static_cast<uint16_t>(sd.cb_desc[i].var_desc.size()));
 				oss.write(reinterpret_cast<char const *>(&var_desc_size), sizeof(var_desc_size));
 				for (size_t j = 0; j < sd.cb_desc[i].var_desc.size(); ++ j)
 				{
@@ -1043,30 +1037,24 @@ namespace KlayGE
 					oss.write(reinterpret_cast<char const *>(&len), sizeof(len));
 					oss.write(reinterpret_cast<char const *>(&sd.cb_desc[i].var_desc[j].name[0]), len);
 
-					uint32_t start_offset = sd.cb_desc[i].var_desc[j].start_offset;
-					NativeToLittleEndian<sizeof(start_offset)>(&start_offset);
+					uint32_t start_offset = Native2LE(sd.cb_desc[i].var_desc[j].start_offset);
 					oss.write(reinterpret_cast<char const *>(&start_offset), sizeof(start_offset));
 					oss.write(reinterpret_cast<char const *>(&sd.cb_desc[i].var_desc[j].type), sizeof(sd.cb_desc[i].var_desc[j].type));
 					oss.write(reinterpret_cast<char const *>(&sd.cb_desc[i].var_desc[j].rows), sizeof(sd.cb_desc[i].var_desc[j].rows));
 					oss.write(reinterpret_cast<char const *>(&sd.cb_desc[i].var_desc[j].columns), sizeof(sd.cb_desc[i].var_desc[j].columns));
-					uint16_t elements = sd.cb_desc[i].var_desc[j].elements;
-					NativeToLittleEndian<sizeof(elements)>(&elements);
+					uint16_t elements = Native2LE(sd.cb_desc[i].var_desc[j].elements);
 					oss.write(reinterpret_cast<char const *>(&elements), sizeof(elements));
 				}
 			}
 
-			uint16_t num_samplers = sd.num_samplers;
-			NativeToLittleEndian<sizeof(num_samplers)>(&num_samplers);
+			uint16_t num_samplers = Native2LE(sd.num_samplers);
 			oss.write(reinterpret_cast<char const *>(&num_samplers), sizeof(num_samplers));
-			uint16_t num_srvs = sd.num_srvs;
-			NativeToLittleEndian<sizeof(num_srvs)>(&num_srvs);
+			uint16_t num_srvs = Native2LE(sd.num_srvs);
 			oss.write(reinterpret_cast<char const *>(&num_srvs), sizeof(num_srvs));
-			uint16_t num_uavs = sd.num_uavs;
-			NativeToLittleEndian<sizeof(num_uavs)>(&num_uavs);
-			oss.write(reinterpret_cast<char const *>(&sd.num_uavs), sizeof(sd.num_uavs));
+			uint16_t num_uavs = Native2LE(sd.num_uavs);
+			oss.write(reinterpret_cast<char const *>(&num_uavs), sizeof(num_uavs));
 
-			uint16_t res_desc_size = static_cast<uint16_t>(sd.res_desc.size());
-			NativeToLittleEndian<sizeof(res_desc_size)>(&res_desc_size);
+			uint16_t res_desc_size = Native2LE(static_cast<uint16_t>(sd.res_desc.size()));
 			oss.write(reinterpret_cast<char const *>(&res_desc_size), sizeof(res_desc_size));
 			for (size_t i = 0; i < sd.res_desc.size(); ++ i)
 			{
@@ -1076,29 +1064,24 @@ namespace KlayGE
 
 				oss.write(reinterpret_cast<char const *>(&sd.res_desc[i].type), sizeof(sd.res_desc[i].type));
 				oss.write(reinterpret_cast<char const *>(&sd.res_desc[i].dimension), sizeof(sd.res_desc[i].dimension));
-				uint16_t bind_point = sd.res_desc[i].bind_point;
-				NativeToLittleEndian<sizeof(bind_point)>(&bind_point);
+				uint16_t bind_point = Native2LE(sd.res_desc[i].bind_point);
 				oss.write(reinterpret_cast<char const *>(&bind_point), sizeof(bind_point));
 			}
 
 			if (ST_VertexShader == type)
 			{
-				uint32_t vs_signature = vs_signature_;
-				NativeToLittleEndian<sizeof(vs_signature)>(&vs_signature);
+				uint32_t vs_signature = Native2LE(vs_signature_);
 				oss.write(reinterpret_cast<char const *>(&vs_signature), sizeof(vs_signature));
 			}
 			else if (ST_ComputeShader == type)
 			{
-				uint32_t cs_block_size_x = cs_block_size_x_;
-				NativeToLittleEndian<sizeof(cs_block_size_x)>(&cs_block_size_x);
+				uint32_t cs_block_size_x = Native2LE(cs_block_size_x_);
 				oss.write(reinterpret_cast<char const *>(&cs_block_size_x), sizeof(cs_block_size_x));
 
-				uint32_t cs_block_size_y = cs_block_size_y_;
-				NativeToLittleEndian<sizeof(cs_block_size_y)>(&cs_block_size_y);
+				uint32_t cs_block_size_y = Native2LE(cs_block_size_y_);
 				oss.write(reinterpret_cast<char const *>(&cs_block_size_y), sizeof(cs_block_size_y));
 
-				uint32_t cs_block_size_z = cs_block_size_z_;
-				NativeToLittleEndian<sizeof(cs_block_size_z)>(&cs_block_size_z);
+				uint32_t cs_block_size_z = Native2LE(cs_block_size_z_);
 				oss.write(reinterpret_cast<char const *>(&cs_block_size_z), sizeof(cs_block_size_z));
 			}
 
@@ -1109,8 +1092,7 @@ namespace KlayGE
 
 		uint32_t len = static_cast<uint32_t>(native_shader_block.size());
 		{
-			uint32_t tmp = len;
-			NativeToLittleEndian<sizeof(tmp)>(&tmp);
+			uint32_t tmp = Native2LE(len);
 			os.write(reinterpret_cast<char const *>(&tmp), sizeof(tmp));
 		}
 		if (len > 0)

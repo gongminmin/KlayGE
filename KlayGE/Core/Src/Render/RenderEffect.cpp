@@ -1621,10 +1621,9 @@ namespace
 			{
 				uint32_t tmp;
 				res->read(&tmp, sizeof(tmp));
-				LittleEndianToNative<sizeof(tmp)>(&tmp);
 
 				var = MakeSharedPtr<RenderVariableUInt>();
-				*var = tmp;
+				*var = LE2Native(tmp);
 			}
 			else
 			{
@@ -1632,14 +1631,14 @@ namespace
 
 				uint32_t len;
 				res->read(&len, sizeof(len));
-				LittleEndianToNative<sizeof(len)>(&len);
+				len = LE2Native(len);
 				if (len > 0)
 				{
 					std::vector<uint32_t> init_val(len);
 					res->read(&init_val[0], len * sizeof(init_val[0]));
 					for (uint32_t i = 0; i < len; ++ i)
 					{
-						LittleEndianToNative<sizeof(init_val[i])>(&init_val[i]);
+						init_val[i] = LE2Native(init_val[i]);
 					}
 					*var = init_val;
 				}
@@ -1651,10 +1650,9 @@ namespace
 			{
 				int32_t tmp;
 				res->read(&tmp, sizeof(tmp));
-				LittleEndianToNative<sizeof(tmp)>(&tmp);
 
 				var = MakeSharedPtr<RenderVariableInt>();
-				*var = tmp;
+				*var = LE2Native(tmp);
 			}
 			else
 			{
@@ -1662,14 +1660,14 @@ namespace
 
 				uint32_t len;
 				res->read(&len, sizeof(len));
-				LittleEndianToNative<sizeof(len)>(&len);
+				len = LE2Native(len);
 				if (len > 0)
 				{
 					std::vector<int32_t> init_val(len);
 					res->read(&init_val[0], len * sizeof(init_val[0]));
 					for (uint32_t i = 0; i < len; ++ i)
 					{
-						LittleEndianToNative<sizeof(init_val[i])>(&init_val[i]);
+						init_val[i] = LE2Native(init_val[i]);
 					}
 					*var = init_val;
 				}
@@ -1707,18 +1705,18 @@ namespace
 			{
 				SamplerStateDesc desc;
 				res->read(&desc, sizeof(desc));
-				LittleEndianToNative<sizeof(desc.border_clr[0])>(&desc.border_clr[0]);
-				LittleEndianToNative<sizeof(desc.border_clr[1])>(&desc.border_clr[1]);
-				LittleEndianToNative<sizeof(desc.border_clr[2])>(&desc.border_clr[2]);
-				LittleEndianToNative<sizeof(desc.border_clr[3])>(&desc.border_clr[3]);
-				LittleEndianToNative<sizeof(desc.addr_mode_u)>(&desc.addr_mode_u);
-				LittleEndianToNative<sizeof(desc.addr_mode_v)>(&desc.addr_mode_v);
-				LittleEndianToNative<sizeof(desc.addr_mode_w)>(&desc.addr_mode_w);
-				LittleEndianToNative<sizeof(desc.filter)>(&desc.filter);
-				LittleEndianToNative<sizeof(desc.min_lod)>(&desc.min_lod);
-				LittleEndianToNative<sizeof(desc.max_lod)>(&desc.max_lod);
-				LittleEndianToNative<sizeof(desc.mip_map_lod_bias)>(&desc.mip_map_lod_bias);
-				LittleEndianToNative<sizeof(desc.cmp_func)>(&desc.cmp_func);
+				desc.border_clr[0] = LE2Native(desc.border_clr[0]);
+				desc.border_clr[1] = LE2Native(desc.border_clr[1]);
+				desc.border_clr[2] = LE2Native(desc.border_clr[2]);
+				desc.border_clr[3] = LE2Native(desc.border_clr[3]);
+				desc.addr_mode_u = LE2Native(desc.addr_mode_u);
+				desc.addr_mode_v = LE2Native(desc.addr_mode_v);
+				desc.addr_mode_w = LE2Native(desc.addr_mode_w);
+				desc.filter = LE2Native(desc.filter);
+				desc.min_lod = LE2Native(desc.min_lod);
+				desc.max_lod = LE2Native(desc.max_lod);
+				desc.mip_map_lod_bias = LE2Native(desc.mip_map_lod_bias);
+				desc.cmp_func = LE2Native(desc.cmp_func);
 
 				var = MakeSharedPtr<RenderVariableSampler>();
 				*var = Context::Instance().RenderFactoryInstance().MakeSamplerStateObject(desc);
@@ -1741,10 +1739,9 @@ namespace
 			{
 				float tmp;
 				res->read(&tmp, sizeof(tmp));
-				LittleEndianToNative<sizeof(tmp)>(&tmp);
 
 				var = MakeSharedPtr<RenderVariableFloat>();
-				*var = tmp;
+				*var = LE2Native(tmp);
 			}
 			else
 			{
@@ -1752,14 +1749,14 @@ namespace
 
 				uint32_t len;
 				res->read(&len, sizeof(len));
-				LittleEndianToNative<sizeof(len)>(&len);
+				len = LE2Native(len);
 				if (len > 0)
 				{
 					std::vector<float> init_val(len);
 					res->read(&init_val[0], len * sizeof(init_val[0]));
 					for (uint32_t i = 0; i < len; ++ i)
 					{
-						LittleEndianToNative<sizeof(init_val[i])>(&init_val[i]);
+						init_val[i] = LE2Native(init_val[i]);
 					}
 					*var = init_val;
 				}
@@ -1773,7 +1770,7 @@ namespace
 				res->read(&tmp, sizeof(tmp));
 				for (int i = 0; i < 2; ++ i)
 				{
-					LittleEndianToNative<sizeof(tmp[i])>(&tmp[i]);
+					tmp[i] = LE2Native(tmp[i]);
 				}
 
 				var = MakeSharedPtr<RenderVariableUInt2>();
@@ -1785,7 +1782,7 @@ namespace
 
 				uint32_t len;
 				res->read(&len, sizeof(len));
-				LittleEndianToNative<sizeof(len)>(&len);
+				len = LE2Native(len);
 				if (len > 0)
 				{
 					std::vector<int2> init_val(len);
@@ -1794,7 +1791,7 @@ namespace
 					{
 						for (int j = 0; j < 2; ++ j)
 						{
-							LittleEndianToNative<sizeof(init_val[i][j])>(&init_val[i][j]);
+							init_val[i][j] = LE2Native(init_val[i][j]);
 						}
 					}
 					*var = init_val;
@@ -1809,7 +1806,7 @@ namespace
 				res->read(&tmp, sizeof(tmp));
 				for (int i = 0; i < 3; ++ i)
 				{
-					LittleEndianToNative<sizeof(tmp[i])>(&tmp[i]);
+					tmp[i] = LE2Native(tmp[i]);
 				}
 
 				var = MakeSharedPtr<RenderVariableUInt3>();
@@ -1821,7 +1818,7 @@ namespace
 
 				uint32_t len;
 				res->read(&len, sizeof(len));
-				LittleEndianToNative<sizeof(len)>(&len);
+				len = LE2Native(len);
 				if (len > 0)
 				{
 					std::vector<int3> init_val(len);
@@ -1830,7 +1827,7 @@ namespace
 					{
 						for (int j = 0; j < 3; ++ j)
 						{
-							LittleEndianToNative<sizeof(init_val[i][j])>(&init_val[i][j]);
+							init_val[i][j] = LE2Native(init_val[i][j]);
 						}
 					}
 					*var = init_val;
@@ -1845,7 +1842,7 @@ namespace
 				res->read(&tmp, sizeof(tmp));
 				for (int i = 0; i < 4; ++ i)
 				{
-					LittleEndianToNative<sizeof(tmp[i])>(&tmp[i]);
+					tmp[i] = LE2Native(tmp[i]);
 				}
 
 				var = MakeSharedPtr<RenderVariableUInt4>();
@@ -1857,7 +1854,7 @@ namespace
 
 				uint32_t len;
 				res->read(&len, sizeof(len));
-				LittleEndianToNative<sizeof(len)>(&len);
+				len = LE2Native(len);
 				if (len > 0)
 				{
 					std::vector<int4> init_val(len);
@@ -1866,7 +1863,7 @@ namespace
 					{
 						for (int j = 0; j < 4; ++ j)
 						{
-							LittleEndianToNative<sizeof(init_val[i][j])>(&init_val[i][j]);
+							init_val[i][j] = LE2Native(init_val[i][j]);
 						}
 					}
 					*var = init_val;
@@ -1881,7 +1878,7 @@ namespace
 				res->read(&tmp, sizeof(tmp));
 				for (int i = 0; i < 2; ++ i)
 				{
-					LittleEndianToNative<sizeof(tmp[i])>(&tmp[i]);
+					tmp[i] = LE2Native(tmp[i]);
 				}
 
 				var = MakeSharedPtr<RenderVariableInt2>();
@@ -1893,7 +1890,7 @@ namespace
 
 				uint32_t len;
 				res->read(&len, sizeof(len));
-				LittleEndianToNative<sizeof(len)>(&len);
+				len = LE2Native(len);
 				if (len > 0)
 				{
 					std::vector<int2> init_val(len);
@@ -1902,7 +1899,7 @@ namespace
 					{
 						for (int j = 0; j < 2; ++ j)
 						{
-							LittleEndianToNative<sizeof(init_val[i][j])>(&init_val[i][j]);
+							init_val[i][j] = LE2Native(init_val[i][j]);
 						}
 					}
 					*var = init_val;
@@ -1917,7 +1914,7 @@ namespace
 				res->read(&tmp, sizeof(tmp));
 				for (int i = 0; i < 3; ++ i)
 				{
-					LittleEndianToNative<sizeof(tmp[i])>(&tmp[i]);
+					tmp[i] = LE2Native(tmp[i]);
 				}
 
 				var = MakeSharedPtr<RenderVariableInt3>();
@@ -1929,7 +1926,7 @@ namespace
 
 				uint32_t len;
 				res->read(&len, sizeof(len));
-				LittleEndianToNative<sizeof(len)>(&len);
+				len = LE2Native(len);
 				if (len > 0)
 				{
 					std::vector<int3> init_val(len);
@@ -1938,7 +1935,7 @@ namespace
 					{
 						for (int j = 0; j < 3; ++ j)
 						{
-							LittleEndianToNative<sizeof(init_val[i][j])>(&init_val[i][j]);
+							init_val[i][j] = LE2Native(init_val[i][j]);
 						}
 					}
 					*var = init_val;
@@ -1953,7 +1950,7 @@ namespace
 				res->read(&tmp, sizeof(tmp));
 				for (int i = 0; i < 4; ++ i)
 				{
-					LittleEndianToNative<sizeof(tmp[i])>(&tmp[i]);
+					tmp[i] = LE2Native(tmp[i]);
 				}
 
 				var = MakeSharedPtr<RenderVariableInt4>();
@@ -1965,7 +1962,7 @@ namespace
 
 				uint32_t len;
 				res->read(&len, sizeof(len));
-				LittleEndianToNative<sizeof(len)>(&len);
+				len = LE2Native(len);
 				if (len > 0)
 				{
 					std::vector<int4> init_val(len);
@@ -1974,7 +1971,7 @@ namespace
 					{
 						for (int j = 0; j < 4; ++ j)
 						{
-							LittleEndianToNative<sizeof(init_val[i][j])>(&init_val[i][j]);
+							init_val[i][j] = LE2Native(init_val[i][j]);
 						}
 					}
 					*var = init_val;
@@ -1989,7 +1986,7 @@ namespace
 				res->read(&tmp, sizeof(tmp));
 				for (int i = 0; i < 2; ++ i)
 				{
-					LittleEndianToNative<sizeof(tmp[i])>(&tmp[i]);
+					tmp[i] = LE2Native(tmp[i]);
 				}
 
 				var = MakeSharedPtr<RenderVariableFloat2>();
@@ -2001,7 +1998,7 @@ namespace
 
 				uint32_t len;
 				res->read(&len, sizeof(len));
-				LittleEndianToNative<sizeof(len)>(&len);
+				len = LE2Native(len);
 				if (len > 0)
 				{
 					std::vector<float2> init_val(len);
@@ -2010,7 +2007,7 @@ namespace
 					{
 						for (int j = 0; j < 2; ++ j)
 						{
-							LittleEndianToNative<sizeof(init_val[i][j])>(&init_val[i][j]);
+							init_val[i][j] = LE2Native(init_val[i][j]);
 						}
 					}
 					*var = init_val;
@@ -2025,7 +2022,7 @@ namespace
 				res->read(&tmp, sizeof(tmp));
 				for (int i = 0; i < 3; ++ i)
 				{
-					LittleEndianToNative<sizeof(tmp[i])>(&tmp[i]);
+					tmp[i] = LE2Native(tmp[i]);
 				}
 
 				var = MakeSharedPtr<RenderVariableFloat3>();
@@ -2037,7 +2034,7 @@ namespace
 
 				uint32_t len;
 				res->read(&len, sizeof(len));
-				LittleEndianToNative<sizeof(len)>(&len);
+				len = LE2Native(len);
 				if (len > 0)
 				{
 					std::vector<float3> init_val(len);
@@ -2046,7 +2043,7 @@ namespace
 					{
 						for (int j = 0; j < 3; ++ j)
 						{
-							LittleEndianToNative<sizeof(init_val[i][j])>(&init_val[i][j]);
+							init_val[i][j] = LE2Native(init_val[i][j]);
 						}
 					}
 					*var = init_val;
@@ -2061,7 +2058,7 @@ namespace
 				res->read(&tmp, sizeof(tmp));
 				for (int i = 0; i < 4; ++ i)
 				{
-					LittleEndianToNative<sizeof(tmp[i])>(&tmp[i]);
+					tmp[i] = LE2Native(tmp[i]);
 				}
 
 				var = MakeSharedPtr<RenderVariableFloat4>();
@@ -2073,7 +2070,7 @@ namespace
 
 				uint32_t len;
 				res->read(&len, sizeof(len));
-				LittleEndianToNative<sizeof(len)>(&len);
+				len = LE2Native(len);
 				if (len > 0)
 				{
 					std::vector<float4> init_val(len);
@@ -2082,7 +2079,7 @@ namespace
 					{
 						for (int j = 0; j < 4; ++ j)
 						{
-							LittleEndianToNative<sizeof(init_val[i][j])>(&init_val[i][j]);
+							init_val[i][j] = LE2Native(init_val[i][j]);
 						}
 					}
 					*var = init_val;
@@ -2097,7 +2094,7 @@ namespace
 				res->read(&tmp, sizeof(tmp));
 				for (int i = 0; i < 16; ++ i)
 				{
-					LittleEndianToNative<sizeof(tmp[i])>(&tmp[i]);
+					tmp[i] = LE2Native(tmp[i]);
 				}
 
 				var = MakeSharedPtr<RenderVariableFloat4x4>();
@@ -2109,7 +2106,7 @@ namespace
 
 				uint32_t len;
 				res->read(&len, sizeof(len));
-				LittleEndianToNative<sizeof(len)>(&len);
+				len = LE2Native(len);
 				if (len > 0)
 				{
 					std::vector<float4x4> init_val(len);
@@ -2118,7 +2115,7 @@ namespace
 					{
 						for (int j = 0; j < 16; ++ j)
 						{
-							LittleEndianToNative<sizeof(init_val[i][j])>(&init_val[i][j]);
+							init_val[i][j] = LE2Native(init_val[i][j]);
 						}
 					}
 					*var = init_val;
@@ -2173,7 +2170,7 @@ namespace
 				uint32_t tmp;
 				var->Value(tmp);
 
-				NativeToLittleEndian<sizeof(tmp)>(&tmp);
+				tmp = Native2LE(tmp);
 				os.write(reinterpret_cast<char const *>(&tmp), sizeof(tmp));
 			}
 			else
@@ -2182,13 +2179,13 @@ namespace
 				var->Value(init_val);
 
 				uint32_t len = static_cast<uint32_t>(init_val.size());
-				NativeToLittleEndian<sizeof(len)>(&len);
+				len = Native2LE(len);
 				os.write(reinterpret_cast<char const *>(&len), sizeof(len));
 				if (len > 0)
 				{
 					for (uint32_t i = 0; i < len; ++ i)
 					{
-						NativeToLittleEndian<sizeof(init_val[i])>(&init_val[i]);
+						init_val[i] = Native2LE(init_val[i]);
 					}
 					os.write(reinterpret_cast<char const *>(&init_val[0]), len * sizeof(init_val[0]));
 				}
@@ -2201,7 +2198,7 @@ namespace
 				int32_t tmp;
 				var->Value(tmp);
 
-				NativeToLittleEndian<sizeof(tmp)>(&tmp);
+				tmp = Native2LE(tmp);
 				os.write(reinterpret_cast<char const *>(&tmp), sizeof(tmp));
 			}
 			else
@@ -2210,13 +2207,13 @@ namespace
 				var->Value(init_val);
 
 				uint32_t len = static_cast<uint32_t>(init_val.size());
-				NativeToLittleEndian<sizeof(len)>(&len);
+				len = Native2LE(len);
 				os.write(reinterpret_cast<char const *>(&len), sizeof(len));
 				if (len > 0)
 				{
 					for (uint32_t i = 0; i < len; ++ i)
 					{
-						NativeToLittleEndian<sizeof(init_val[i])>(&init_val[i]);
+						init_val[i] = Native2LE(init_val[i]);
 					}
 					os.write(reinterpret_cast<char const *>(&init_val[0]), len * sizeof(init_val[0]));
 				}
@@ -2256,18 +2253,18 @@ namespace
 				SamplerStateObjectPtr tmp;
 				var->Value(tmp);
 				SamplerStateDesc desc = tmp->GetDesc();
-				NativeToLittleEndian<sizeof(desc.border_clr[0])>(&desc.border_clr[0]);
-				NativeToLittleEndian<sizeof(desc.border_clr[1])>(&desc.border_clr[1]);
-				NativeToLittleEndian<sizeof(desc.border_clr[2])>(&desc.border_clr[2]);
-				NativeToLittleEndian<sizeof(desc.border_clr[3])>(&desc.border_clr[3]);
-				NativeToLittleEndian<sizeof(desc.addr_mode_u)>(&desc.addr_mode_u);
-				NativeToLittleEndian<sizeof(desc.addr_mode_v)>(&desc.addr_mode_v);
-				NativeToLittleEndian<sizeof(desc.addr_mode_w)>(&desc.addr_mode_w);
-				NativeToLittleEndian<sizeof(desc.filter)>(&desc.filter);
-				NativeToLittleEndian<sizeof(desc.min_lod)>(&desc.min_lod);
-				NativeToLittleEndian<sizeof(desc.max_lod)>(&desc.max_lod);
-				NativeToLittleEndian<sizeof(desc.mip_map_lod_bias)>(&desc.mip_map_lod_bias);
-				NativeToLittleEndian<sizeof(desc.cmp_func)>(&desc.cmp_func);
+				desc.border_clr[0] = Native2LE(desc.border_clr[0]);
+				desc.border_clr[1] = Native2LE(desc.border_clr[1]);
+				desc.border_clr[2] = Native2LE(desc.border_clr[2]);
+				desc.border_clr[3] = Native2LE(desc.border_clr[3]);
+				desc.addr_mode_u = Native2LE(desc.addr_mode_u);
+				desc.addr_mode_v = Native2LE(desc.addr_mode_v);
+				desc.addr_mode_w = Native2LE(desc.addr_mode_w);
+				desc.filter = Native2LE(desc.filter);
+				desc.min_lod = Native2LE(desc.min_lod);
+				desc.max_lod = Native2LE(desc.max_lod);
+				desc.mip_map_lod_bias = Native2LE(desc.mip_map_lod_bias);
+				desc.cmp_func = Native2LE(desc.cmp_func);
 				os.write(reinterpret_cast<char const *>(&desc), sizeof(desc));
 			}
 			break;
@@ -2287,7 +2284,7 @@ namespace
 				float tmp;
 				var->Value(tmp);
 
-				NativeToLittleEndian<sizeof(tmp)>(&tmp);
+				tmp = Native2LE(tmp);
 				os.write(reinterpret_cast<char const *>(&tmp), sizeof(tmp));
 			}
 			else
@@ -2296,13 +2293,13 @@ namespace
 				var->Value(init_val);
 
 				uint32_t len = static_cast<uint32_t>(init_val.size());
-				NativeToLittleEndian<sizeof(len)>(&len);
+				len = Native2LE(len);
 				os.write(reinterpret_cast<char const *>(&len), sizeof(len));
 				if (len > 0)
 				{
 					for (uint32_t i = 0; i < len; ++ i)
 					{
-						NativeToLittleEndian<sizeof(init_val[i])>(&init_val[i]);
+						init_val[i] = Native2LE(init_val[i]);
 					}
 					os.write(reinterpret_cast<char const *>(&init_val[0]), len * sizeof(init_val[0]));
 				}
@@ -2317,7 +2314,7 @@ namespace
 
 				for (int i = 0; i < 2; ++ i)
 				{
-					NativeToLittleEndian<sizeof(tmp[i])>(&tmp[i]);
+					tmp[i] = Native2LE(tmp[i]);
 				}
 				os.write(reinterpret_cast<char const *>(&tmp), sizeof(tmp));
 			}
@@ -2327,7 +2324,7 @@ namespace
 				var->Value(init_val);
 
 				uint32_t len = static_cast<uint32_t>(init_val.size());
-				NativeToLittleEndian<sizeof(len)>(&len);
+				len = Native2LE(len);
 				os.write(reinterpret_cast<char const *>(&len), sizeof(len));
 				if (len > 0)
 				{
@@ -2335,7 +2332,7 @@ namespace
 					{
 						for (int j = 0; j < 2; ++ j)
 						{
-							NativeToLittleEndian<sizeof(init_val[i][j])>(&init_val[i][j]);
+							init_val[i][j] = Native2LE(init_val[i][j]);
 						}
 					}
 					os.write(reinterpret_cast<char const *>(&init_val[0]), len * sizeof(init_val[0]));
@@ -2351,7 +2348,7 @@ namespace
 
 				for (int i = 0; i < 3; ++ i)
 				{
-					NativeToLittleEndian<sizeof(tmp[i])>(&tmp[i]);
+					tmp[i] = Native2LE(tmp[i]);
 				}
 				os.write(reinterpret_cast<char const *>(&tmp), sizeof(tmp));
 			}
@@ -2361,7 +2358,7 @@ namespace
 				var->Value(init_val);
 
 				uint32_t len = static_cast<uint32_t>(init_val.size());
-				NativeToLittleEndian<sizeof(len)>(&len);
+				len = Native2LE(len);
 				os.write(reinterpret_cast<char const *>(&len), sizeof(len));
 				if (len > 0)
 				{
@@ -2369,7 +2366,7 @@ namespace
 					{
 						for (int j = 0; j < 3; ++ j)
 						{
-							NativeToLittleEndian<sizeof(init_val[i][j])>(&init_val[i][j]);
+							init_val[i][j] = Native2LE(init_val[i][j]);
 						}
 					}
 					os.write(reinterpret_cast<char const *>(&init_val[0]), len * sizeof(init_val[0]));
@@ -2385,7 +2382,7 @@ namespace
 
 				for (int i = 0; i < 3; ++ i)
 				{
-					NativeToLittleEndian<sizeof(tmp[i])>(&tmp[i]);
+					tmp[i] = Native2LE(tmp[i]);
 				}
 				os.write(reinterpret_cast<char const *>(&tmp), sizeof(tmp));
 			}
@@ -2395,7 +2392,7 @@ namespace
 				var->Value(init_val);
 
 				uint32_t len = static_cast<uint32_t>(init_val.size());
-				NativeToLittleEndian<sizeof(len)>(&len);
+				len = Native2LE(len);
 				os.write(reinterpret_cast<char const *>(&len), sizeof(len));
 				if (len > 0)
 				{
@@ -2403,7 +2400,7 @@ namespace
 					{
 						for (int j = 0; j < 4; ++ j)
 						{
-							NativeToLittleEndian<sizeof(init_val[i][j])>(&init_val[i][j]);
+							init_val[i][j] = Native2LE(init_val[i][j]);
 						}
 					}
 					os.write(reinterpret_cast<char const *>(&init_val[0]), len * sizeof(init_val[0]));
@@ -2419,7 +2416,7 @@ namespace
 
 				for (int i = 0; i < 2; ++ i)
 				{
-					NativeToLittleEndian<sizeof(tmp[i])>(&tmp[i]);
+					tmp[i] = Native2LE(tmp[i]);
 				}
 				os.write(reinterpret_cast<char const *>(&tmp), sizeof(tmp));
 			}
@@ -2429,7 +2426,7 @@ namespace
 				var->Value(init_val);
 
 				uint32_t len = static_cast<uint32_t>(init_val.size());
-				NativeToLittleEndian<sizeof(len)>(&len);
+				len = Native2LE(len);
 				os.write(reinterpret_cast<char const *>(&len), sizeof(len));
 				if (len > 0)
 				{
@@ -2437,7 +2434,7 @@ namespace
 					{
 						for (int j = 0; j < 2; ++ j)
 						{
-							NativeToLittleEndian<sizeof(init_val[i][j])>(&init_val[i][j]);
+							init_val[i][j] = Native2LE(init_val[i][j]);
 						}
 					}
 					os.write(reinterpret_cast<char const *>(&init_val[0]), len * sizeof(init_val[0]));
@@ -2453,7 +2450,7 @@ namespace
 
 				for (int i = 0; i < 3; ++ i)
 				{
-					NativeToLittleEndian<sizeof(tmp[i])>(&tmp[i]);
+					tmp[i] = Native2LE(tmp[i]);
 				}
 				os.write(reinterpret_cast<char const *>(&tmp), sizeof(tmp));
 			}
@@ -2463,7 +2460,7 @@ namespace
 				var->Value(init_val);
 
 				uint32_t len = static_cast<uint32_t>(init_val.size());
-				NativeToLittleEndian<sizeof(len)>(&len);
+				len = Native2LE(len);
 				os.write(reinterpret_cast<char const *>(&len), sizeof(len));
 				if (len > 0)
 				{
@@ -2471,7 +2468,7 @@ namespace
 					{
 						for (int j = 0; j < 3; ++ j)
 						{
-							NativeToLittleEndian<sizeof(init_val[i][j])>(&init_val[i][j]);
+							init_val[i][j] = Native2LE(init_val[i][j]);
 						}
 					}
 					os.write(reinterpret_cast<char const *>(&init_val[0]), len * sizeof(init_val[0]));
@@ -2487,7 +2484,7 @@ namespace
 
 				for (int i = 0; i < 4; ++ i)
 				{
-					NativeToLittleEndian<sizeof(tmp[i])>(&tmp[i]);
+					tmp[i] = Native2LE(tmp[i]);
 				}
 				os.write(reinterpret_cast<char const *>(&tmp), sizeof(tmp));
 			}
@@ -2497,7 +2494,7 @@ namespace
 				var->Value(init_val);
 
 				uint32_t len = static_cast<uint32_t>(init_val.size());
-				NativeToLittleEndian<sizeof(len)>(&len);
+				len = Native2LE(len);
 				os.write(reinterpret_cast<char const *>(&len), sizeof(len));
 				if (len > 0)
 				{
@@ -2505,7 +2502,7 @@ namespace
 					{
 						for (int j = 0; j < 4; ++ j)
 						{
-							NativeToLittleEndian<sizeof(init_val[i][j])>(&init_val[i][j]);
+							init_val[i][j] = Native2LE(init_val[i][j]);
 						}
 					}
 					os.write(reinterpret_cast<char const *>(&init_val[0]), len * sizeof(init_val[0]));
@@ -2521,7 +2518,7 @@ namespace
 
 				for (int i = 0; i < 2; ++ i)
 				{
-					NativeToLittleEndian<sizeof(tmp[i])>(&tmp[i]);
+					tmp[i] = Native2LE(tmp[i]);
 				}
 				os.write(reinterpret_cast<char const *>(&tmp), sizeof(tmp));
 			}
@@ -2531,7 +2528,7 @@ namespace
 				var->Value(init_val);
 
 				uint32_t len = static_cast<uint32_t>(init_val.size());
-				NativeToLittleEndian<sizeof(len)>(&len);
+				len = Native2LE(len);
 				os.write(reinterpret_cast<char const *>(&len), sizeof(len));
 				if (len > 0)
 				{
@@ -2539,7 +2536,7 @@ namespace
 					{
 						for (int j = 0; j < 2; ++ j)
 						{
-							NativeToLittleEndian<sizeof(init_val[i][j])>(&init_val[i][j]);
+							init_val[i][j] = Native2LE(init_val[i][j]);
 						}
 					}
 					os.write(reinterpret_cast<char const *>(&init_val[0]), len * sizeof(init_val[0]));
@@ -2555,7 +2552,7 @@ namespace
 
 				for (int i = 0; i < 3; ++ i)
 				{
-					NativeToLittleEndian<sizeof(tmp[i])>(&tmp[i]);
+					tmp[i] = Native2LE(tmp[i]);
 				}
 				os.write(reinterpret_cast<char const *>(&tmp), sizeof(tmp));
 			}
@@ -2565,7 +2562,7 @@ namespace
 				var->Value(init_val);
 
 				uint32_t len = static_cast<uint32_t>(init_val.size());
-				NativeToLittleEndian<sizeof(len)>(&len);
+				len = Native2LE(len);
 				os.write(reinterpret_cast<char const *>(&len), sizeof(len));
 				if (len > 0)
 				{
@@ -2573,7 +2570,7 @@ namespace
 					{
 						for (int j = 0; j < 3; ++ j)
 						{
-							NativeToLittleEndian<sizeof(init_val[i][j])>(&init_val[i][j]);
+							init_val[i][j] = Native2LE(init_val[i][j]);
 						}
 					}
 					os.write(reinterpret_cast<char*>(&init_val[0]), len * sizeof(init_val[0]));
@@ -2589,7 +2586,7 @@ namespace
 
 				for (int i = 0; i < 4; ++ i)
 				{
-					NativeToLittleEndian<sizeof(tmp[i])>(&tmp[i]);
+					tmp[i] = Native2LE(tmp[i]);
 				}
 				os.write(reinterpret_cast<char const *>(&tmp), sizeof(tmp));
 			}
@@ -2599,7 +2596,7 @@ namespace
 				var->Value(init_val);
 
 				uint32_t len = static_cast<uint32_t>(init_val.size());
-				NativeToLittleEndian<sizeof(len)>(&len);
+				len = Native2LE(len);
 				os.write(reinterpret_cast<char const *>(&len), sizeof(len));
 				if (len > 0)
 				{
@@ -2607,7 +2604,7 @@ namespace
 					{
 						for (int j = 0; j < 4; ++ j)
 						{
-							NativeToLittleEndian<sizeof(init_val[i][j])>(&init_val[i][j]);
+							init_val[i][j] = Native2LE(init_val[i][j]);
 						}
 					}
 					os.write(reinterpret_cast<char const *>(&init_val[0]), len * sizeof(init_val[0]));
@@ -2623,7 +2620,7 @@ namespace
 
 				for (int i = 0; i < 16; ++ i)
 				{
-					NativeToLittleEndian<sizeof(tmp[i])>(&tmp[i]);
+					tmp[i] = Native2LE(tmp[i]);
 				}
 				os.write(reinterpret_cast<char const *>(&tmp), sizeof(tmp));
 			}
@@ -2633,7 +2630,7 @@ namespace
 				var->Value(init_val);
 
 				uint32_t len = static_cast<uint32_t>(init_val.size());
-				NativeToLittleEndian<sizeof(len)>(&len);
+				len = Native2LE(len);
 				os.write(reinterpret_cast<char const *>(&len), sizeof(len));
 				if (len > 0)
 				{
@@ -2641,7 +2638,7 @@ namespace
 					{
 						for (int j = 0; j < 16; ++ j)
 						{
-							NativeToLittleEndian<sizeof(init_val[i][j])>(&init_val[i][j]);
+							init_val[i][j] = Native2LE(init_val[i][j]);
 						}
 					}
 					os.write(reinterpret_cast<char const *>(&init_val[0]), len * sizeof(init_val[0]));
@@ -2761,15 +2758,14 @@ namespace KlayGE
 	void RenderEffectAnnotation::StreamIn(ResIdentifierPtr const & res)
 	{
 		res->read(&type_, sizeof(type_));
-		LittleEndianToNative<sizeof(type_)>(&type_);
+		type_ = LE2Native(type_);
 		name_ = ReadShortString(res);
 		var_ = stream_in_var(res, type_, 0);
 	}
 
 	void RenderEffectAnnotation::StreamOut(std::ostream& os)
 	{
-		uint32_t t = type_;
-		NativeToLittleEndian<sizeof(t)>(&t);
+		uint32_t t = Native2LE(type_);
 		os.write(reinterpret_cast<char const *>(&t), sizeof(t));
 		WriteShortString(os, name_);
 		stream_out_var(os, var_, type_, 0);
@@ -3043,17 +3039,17 @@ namespace KlayGE
 		{
 			uint32_t fourcc;
 			source->read(&fourcc, sizeof(fourcc));
-			LittleEndianToNative<sizeof(fourcc)>(&fourcc);
+			fourcc = LE2Native(fourcc);
 			if (MakeFourCC<'K', 'F', 'X', ' '>::value == fourcc)
 			{
 				uint32_t ver;
 				source->read(&ver, sizeof(ver));
-				LittleEndianToNative<sizeof(ver)>(&ver);
+				ver = LE2Native(ver);
 				if (KFX_VERSION == ver)
 				{
 					uint64_t timestamp;
 					source->read(&timestamp, sizeof(timestamp));
-					LittleEndianToNative<sizeof(timestamp)>(&timestamp);
+					timestamp = LE2Native(timestamp);
 					if (timestamp_ <= timestamp)
 					{
 						shader_descs_ = MakeSharedPtr<KLAYGE_DECLTYPE(*shader_descs_)>(1);
@@ -3063,7 +3059,7 @@ namespace KlayGE
 						{
 							uint16_t num_macros;
 							source->read(&num_macros, sizeof(num_macros));
-							LittleEndianToNative<sizeof(num_macros)>(&num_macros);
+							num_macros = LE2Native(num_macros);
 
 							if (num_macros > 0)
 							{
@@ -3080,7 +3076,7 @@ namespace KlayGE
 						{
 							uint16_t num_cbufs;
 							source->read(&num_cbufs, sizeof(num_cbufs));
-							LittleEndianToNative<sizeof(num_cbufs)>(&num_cbufs);
+							num_cbufs = LE2Native(num_cbufs);
 							cbuffers_->resize(num_cbufs);
 							for (uint32_t i = 0; i < num_cbufs; ++ i)
 							{
@@ -3088,12 +3084,12 @@ namespace KlayGE
 
 								uint16_t len;
 								source->read(&len, sizeof(len));
-								LittleEndianToNative<sizeof(len)>(&len);
+								len = LE2Native(len);
 								(*cbuffers_)[i].second.resize(len);
 								source->read(&(*cbuffers_)[i].second[0], len * sizeof((*cbuffers_)[i].second[0]));
 								for (uint32_t j = 0; j < len; ++ j)
 								{
-									LittleEndianToNative<sizeof((*cbuffers_)[i].second[j])>(&(*cbuffers_)[i].second[j]);
+									(*cbuffers_)[i].second[j] = LE2Native((*cbuffers_)[i].second[j]);
 								}
 							}
 						}
@@ -3101,7 +3097,7 @@ namespace KlayGE
 						{
 							uint16_t num_params;
 							source->read(&num_params, sizeof(num_params));
-							LittleEndianToNative<sizeof(num_params)>(&num_params);
+							num_params = LE2Native(num_params);
 							params_.resize(num_params);
 							for (uint32_t i = 0; i < num_params; ++ i)
 							{
@@ -3115,7 +3111,7 @@ namespace KlayGE
 						{
 							uint16_t num_shaders;
 							source->read(&num_shaders, sizeof(num_shaders));
-							LittleEndianToNative<sizeof(num_shaders)>(&num_shaders);
+							num_shaders = LE2Native(num_shaders);
 							if (num_shaders > 0)
 							{
 								shaders_ = MakeSharedPtr<KLAYGE_DECLTYPE(*shaders_)>(num_shaders);
@@ -3129,7 +3125,7 @@ namespace KlayGE
 						{
 							uint16_t num_shader_descs;
 							source->read(&num_shader_descs, sizeof(num_shader_descs));
-							LittleEndianToNative<sizeof(num_shader_descs)>(&num_shader_descs);
+							num_shader_descs = LE2Native(num_shader_descs);
 							shader_descs_->resize(num_shader_descs + 1);
 							for (uint32_t i = 0; i < num_shader_descs; ++ i)
 							{
@@ -3138,7 +3134,7 @@ namespace KlayGE
 								source->read(&(*shader_descs_)[i + 1].macros_hash, sizeof((*shader_descs_)[i + 1].macros_hash));
 
 								source->read(&(*shader_descs_)[i + 1].tech_pass_type, sizeof((*shader_descs_)[i + 1].tech_pass_type));
-								LittleEndianToNative<sizeof((*shader_descs_)[i + 1].tech_pass_type)>(&(*shader_descs_)[i + 1].tech_pass_type);
+								(*shader_descs_)[i + 1].tech_pass_type = LE2Native((*shader_descs_)[i + 1].tech_pass_type);
 
 								uint8_t len;
 								source->read(&len, sizeof(len));
@@ -3148,7 +3144,7 @@ namespace KlayGE
 									source->read(&(*shader_descs_)[i + 1].so_decl[0], len * sizeof((*shader_descs_)[i + 1].so_decl[0]));
 									for (uint32_t j = 0; j < len; ++ j)
 									{
-										LittleEndianToNative<sizeof((*shader_descs_)[i + 1].so_decl[j].usage)>(&(*shader_descs_)[i + 1].so_decl[j].usage);
+										(*shader_descs_)[i + 1].so_decl[j].usage = LE2Native((*shader_descs_)[i + 1].so_decl[j].usage);
 									}
 								}
 							}
@@ -3158,7 +3154,7 @@ namespace KlayGE
 						{
 							uint16_t num_techs;
 							source->read(&num_techs, sizeof(num_techs));
-							LittleEndianToNative<sizeof(num_techs)>(&num_techs);
+							num_techs = LE2Native(num_techs);
 							techniques_.resize(num_techs);
 							for (uint32_t i = 0; i < num_techs; ++ i)
 							{
@@ -3178,16 +3174,13 @@ namespace KlayGE
 
 	void RenderEffect::StreamOut(std::ostream& os)
 	{
-		uint32_t fourcc = MakeFourCC<'K', 'F', 'X', ' '>::value;
-		NativeToLittleEndian<sizeof(fourcc)>(&fourcc);
+		uint32_t fourcc = Native2LE(MakeFourCC<'K', 'F', 'X', ' '>::value);
 		os.write(reinterpret_cast<char const *>(&fourcc), sizeof(fourcc));
 
-		uint32_t ver = KFX_VERSION;
-		NativeToLittleEndian<sizeof(ver)>(&ver);
+		uint32_t ver = Native2LE(KFX_VERSION);
 		os.write(reinterpret_cast<char const *>(&ver), sizeof(ver));
 
-		uint64_t timestamp = timestamp_;
-		NativeToLittleEndian<sizeof(timestamp)>(&timestamp);
+		uint64_t timestamp = Native2LE(timestamp_);
 		os.write(reinterpret_cast<char const *>(&timestamp), sizeof(timestamp));
 
 		{
@@ -3203,7 +3196,7 @@ namespace KlayGE
 				}
 			}
 
-			NativeToLittleEndian<sizeof(num_macros)>(&num_macros);
+			num_macros = Native2LE(num_macros);
 			os.write(reinterpret_cast<char const *>(&num_macros), sizeof(num_macros));
 
 			if (macros_)
@@ -3220,28 +3213,24 @@ namespace KlayGE
 		}
 
 		{
-			uint16_t num_cbufs = static_cast<uint16_t>(cbuffers_->size());
-			NativeToLittleEndian<sizeof(num_cbufs)>(&num_cbufs);
+			uint16_t num_cbufs = Native2LE(static_cast<uint16_t>(cbuffers_->size()));
 			os.write(reinterpret_cast<char const *>(&num_cbufs), sizeof(num_cbufs));
 			for (uint32_t i = 0; i < cbuffers_->size(); ++ i)
 			{
 				WriteShortString(os, (*cbuffers_)[i].first);
 
-				uint16_t len = static_cast<uint16_t>((*cbuffers_)[i].second.size());
-				NativeToLittleEndian<sizeof(len)>(&len);
+				uint16_t len = Native2LE(static_cast<uint16_t>((*cbuffers_)[i].second.size()));
 				os.write(reinterpret_cast<char const *>(&len), sizeof(len));
 				for (size_t j = 0; j < (*cbuffers_)[i].second.size(); ++ j)
 				{
-					uint32_t tmp = (*cbuffers_)[i].second[j];
-					NativeToLittleEndian<sizeof(tmp)>(&tmp);
+					uint32_t tmp = Native2LE((*cbuffers_)[i].second[j]);
 					os.write(reinterpret_cast<char const *>(&tmp), sizeof(tmp));
 				}
 			}
 		}
 
 		{
-			uint16_t num_params = static_cast<uint16_t>(params_.size());
-			NativeToLittleEndian<sizeof(num_params)>(&num_params);
+			uint16_t num_params = Native2LE(static_cast<uint16_t>(params_.size()));
 			os.write(reinterpret_cast<char const *>(&num_params), sizeof(num_params));
 			for (uint32_t i = 0; i < params_.size(); ++ i)
 			{
@@ -3250,8 +3239,7 @@ namespace KlayGE
 		}
 
 		{
-			uint16_t num_shaders = shaders_ ? static_cast<uint16_t>(shaders_->size()) : 0;
-			NativeToLittleEndian<sizeof(num_shaders)>(&num_shaders);
+			uint16_t num_shaders = Native2LE(static_cast<uint16_t>(shaders_ ? shaders_->size() : 0));
 			os.write(reinterpret_cast<char const *>(&num_shaders), sizeof(num_shaders));
 			if (shaders_)
 			{
@@ -3263,20 +3251,17 @@ namespace KlayGE
 		}
 
 		{
-			uint16_t num_shader_descs = static_cast<uint16_t>(shader_descs_->size() - 1);
-			NativeToLittleEndian<sizeof(num_shader_descs)>(&num_shader_descs);
+			uint16_t num_shader_descs = Native2LE(static_cast<uint16_t>(shader_descs_->size() - 1));
 			os.write(reinterpret_cast<char const *>(&num_shader_descs), sizeof(num_shader_descs));
 			for (uint32_t i = 0; i < shader_descs_->size() - 1; ++ i)
 			{
 				WriteShortString(os, (*shader_descs_)[i + 1].profile);
 				WriteShortString(os, (*shader_descs_)[i + 1].func_name);
 
-				uint64_t tmp64 = (*shader_descs_)[i + 1].macros_hash;
-				NativeToLittleEndian<sizeof(tmp64)>(&tmp64);
+				uint64_t tmp64 = Native2LE((*shader_descs_)[i + 1].macros_hash);
 				os.write(reinterpret_cast<char const *>(&tmp64), sizeof(tmp64));
 
-				uint32_t tmp32 = (*shader_descs_)[i + 1].tech_pass_type;
-				NativeToLittleEndian<sizeof(tmp32)>(&tmp32);
+				uint32_t tmp32 = Native2LE((*shader_descs_)[i + 1].tech_pass_type);
 				os.write(reinterpret_cast<char const *>(&tmp32), sizeof(tmp32));
 
 				uint8_t len = static_cast<uint8_t>((*shader_descs_)[i + 1].so_decl.size());
@@ -3284,15 +3269,14 @@ namespace KlayGE
 				for (uint32_t j = 0; j < len; ++ j)
 				{
 					ShaderDesc::StreamOutputDecl so_decl = (*shader_descs_)[i + 1].so_decl[j];
-					NativeToLittleEndian<sizeof(so_decl.usage)>(&so_decl.usage);
+					so_decl.usage = Native2LE(so_decl.usage);
 					os.write(reinterpret_cast<char const *>(&so_decl), sizeof(so_decl));
 				}
 			}
 		}
 
 		{
-			uint16_t num_techs = static_cast<uint16_t>(techniques_.size());
-			NativeToLittleEndian<sizeof(num_techs)>(&num_techs);
+			uint16_t num_techs = Native2LE(static_cast<uint16_t>(techniques_.size()));
 			os.write(reinterpret_cast<char const *>(&num_techs), sizeof(num_techs));
 			for (uint32_t i = 0; i < techniques_.size(); ++ i)
 			{
@@ -3603,7 +3587,7 @@ namespace KlayGE
 		
 		res->read(&transparent_, sizeof(transparent_));
 		res->read(&weight_, sizeof(weight_));
-		LittleEndianToNative<sizeof(weight_)>(&weight_);
+		weight_ = LE2Native(weight_);
 
 		bool ret = true;
 		uint8_t num_passes;
@@ -3664,8 +3648,7 @@ namespace KlayGE
 		}
 
 		os.write(reinterpret_cast<char const *>(&transparent_), sizeof(transparent_));
-		float w = weight_;
-		NativeToLittleEndian<sizeof(w)>(&w);
+		float w = Native2LE(weight_);
 		os.write(reinterpret_cast<char const *>(&w), sizeof(w));
 
 		uint8_t num_passes = static_cast<uint8_t>(passes_.size());
@@ -4299,36 +4282,36 @@ namespace KlayGE
 		BlendStateDesc bs_desc;
 
 		res->read(&rs_desc, sizeof(rs_desc));
-		LittleEndianToNative<sizeof(rs_desc.polygon_mode)>(&rs_desc.polygon_mode);
-		LittleEndianToNative<sizeof(rs_desc.shade_mode)>(&rs_desc.shade_mode);
-		LittleEndianToNative<sizeof(rs_desc.cull_mode)>(&rs_desc.cull_mode);
-		LittleEndianToNative<sizeof(rs_desc.polygon_offset_factor)>(&rs_desc.polygon_offset_factor);
-		LittleEndianToNative<sizeof(rs_desc.polygon_offset_units)>(&rs_desc.polygon_offset_units);
+		rs_desc.polygon_mode = LE2Native(rs_desc.polygon_mode);
+		rs_desc.shade_mode = LE2Native(rs_desc.shade_mode);
+		rs_desc.cull_mode = LE2Native(rs_desc.cull_mode);
+		rs_desc.polygon_offset_factor = LE2Native(rs_desc.polygon_offset_factor);
+		rs_desc.polygon_offset_units = LE2Native(rs_desc.polygon_offset_units);
 		
 		res->read(&dss_desc, sizeof(dss_desc));
-		LittleEndianToNative<sizeof(dss_desc.depth_func)>(&dss_desc.depth_func);
-		LittleEndianToNative<sizeof(dss_desc.front_stencil_func)>(&dss_desc.front_stencil_func);
-		LittleEndianToNative<sizeof(dss_desc.front_stencil_read_mask)>(&dss_desc.front_stencil_read_mask);
-		LittleEndianToNative<sizeof(dss_desc.front_stencil_write_mask)>(&dss_desc.front_stencil_write_mask);
-		LittleEndianToNative<sizeof(dss_desc.front_stencil_fail)>(&dss_desc.front_stencil_fail);
-		LittleEndianToNative<sizeof(dss_desc.front_stencil_depth_fail)>(&dss_desc.front_stencil_depth_fail);
-		LittleEndianToNative<sizeof(dss_desc.front_stencil_pass)>(&dss_desc.front_stencil_pass);
-		LittleEndianToNative<sizeof(dss_desc.back_stencil_func)>(&dss_desc.back_stencil_func);
-		LittleEndianToNative<sizeof(dss_desc.back_stencil_read_mask)>(&dss_desc.back_stencil_read_mask);
-		LittleEndianToNative<sizeof(dss_desc.back_stencil_write_mask)>(&dss_desc.back_stencil_write_mask);
-		LittleEndianToNative<sizeof(dss_desc.back_stencil_fail)>(&dss_desc.back_stencil_fail);
-		LittleEndianToNative<sizeof(dss_desc.back_stencil_depth_fail)>(&dss_desc.back_stencil_depth_fail);
-		LittleEndianToNative<sizeof(dss_desc.back_stencil_pass)>(&dss_desc.back_stencil_pass);
+		dss_desc.depth_func = LE2Native(dss_desc.depth_func);
+		dss_desc.front_stencil_func = LE2Native(dss_desc.front_stencil_func);
+		dss_desc.front_stencil_read_mask = LE2Native(dss_desc.front_stencil_read_mask);
+		dss_desc.front_stencil_write_mask = LE2Native(dss_desc.front_stencil_write_mask);
+		dss_desc.front_stencil_fail = LE2Native(dss_desc.front_stencil_fail);
+		dss_desc.front_stencil_depth_fail = LE2Native(dss_desc.front_stencil_depth_fail);
+		dss_desc.front_stencil_pass = LE2Native(dss_desc.front_stencil_pass);
+		dss_desc.back_stencil_func = LE2Native(dss_desc.back_stencil_func);
+		dss_desc.back_stencil_read_mask = LE2Native(dss_desc.back_stencil_read_mask);
+		dss_desc.back_stencil_write_mask = LE2Native(dss_desc.back_stencil_write_mask);
+		dss_desc.back_stencil_fail = LE2Native(dss_desc.back_stencil_fail);
+		dss_desc.back_stencil_depth_fail = LE2Native(dss_desc.back_stencil_depth_fail);
+		dss_desc.back_stencil_pass = LE2Native(dss_desc.back_stencil_pass);
 
 		res->read(&bs_desc, sizeof(bs_desc));
 		for (size_t i = 0; i < bs_desc.blend_op.size(); ++ i)
 		{
-			LittleEndianToNative<sizeof(bs_desc.blend_op[i])>(&bs_desc.blend_op[i]);
-			LittleEndianToNative<sizeof(bs_desc.src_blend[i])>(&bs_desc.src_blend[i]);
-			LittleEndianToNative<sizeof(bs_desc.dest_blend[i])>(&bs_desc.dest_blend[i]);
-			LittleEndianToNative<sizeof(bs_desc.blend_op_alpha[i])>(&bs_desc.blend_op_alpha[i]);
-			LittleEndianToNative<sizeof(bs_desc.src_blend_alpha[i])>(&bs_desc.src_blend_alpha[i]);
-			LittleEndianToNative<sizeof(bs_desc.dest_blend_alpha[i])>(&bs_desc.dest_blend_alpha[i]);
+			bs_desc.blend_op[i] = LE2Native(bs_desc.blend_op[i]);
+			bs_desc.src_blend[i] = LE2Native(bs_desc.src_blend[i]);
+			bs_desc.dest_blend[i] = LE2Native(bs_desc.dest_blend[i]);
+			bs_desc.blend_op_alpha[i] = LE2Native(bs_desc.blend_op_alpha[i]);
+			bs_desc.src_blend_alpha[i] = LE2Native(bs_desc.src_blend_alpha[i]);
+			bs_desc.dest_blend_alpha[i] = LE2Native(bs_desc.dest_blend_alpha[i]);
 		}
 		
 		rasterizer_state_obj_ = rf.MakeRasterizerStateObject(rs_desc);
@@ -4336,23 +4319,23 @@ namespace KlayGE
 		blend_state_obj_ = rf.MakeBlendStateObject(bs_desc);
 
 		res->read(&front_stencil_ref_, sizeof(front_stencil_ref_));
-		LittleEndianToNative<sizeof(front_stencil_ref_)>(&front_stencil_ref_);
+		front_stencil_ref_ = LE2Native(front_stencil_ref_);
 		res->read(&back_stencil_ref_, sizeof(back_stencil_ref_));
-		LittleEndianToNative<sizeof(back_stencil_ref_)>(&back_stencil_ref_);
+		back_stencil_ref_ = LE2Native(back_stencil_ref_);
 		res->read(&blend_factor_, sizeof(blend_factor_));
 		for (int i = 0; i < 4; ++ i)
 		{
-			LittleEndianToNative<sizeof(blend_factor_[i])>(&blend_factor_[i]);
+			blend_factor_[i] = LE2Native(blend_factor_[i]);
 		}
 		res->read(&sample_mask_, sizeof(sample_mask_));
-		LittleEndianToNative<sizeof(sample_mask_)>(&sample_mask_);
+		sample_mask_ = LE2Native(sample_mask_);
 
 		shader_desc_ids_ = MakeSharedPtr<KLAYGE_DECLTYPE(*shader_desc_ids_)>();
 		shader_desc_ids_->resize(ShaderObject::ST_NumShaderTypes, 0);
 		res->read(&(*shader_desc_ids_)[0], shader_desc_ids_->size() * sizeof((*shader_desc_ids_)[0]));
 		for (int i = 0; i < ShaderObject::ST_NumShaderTypes; ++ i)
 		{
-			LittleEndianToNative<sizeof((*shader_desc_ids_)[i])>(&(*shader_desc_ids_)[i]);
+			(*shader_desc_ids_)[i] = LE2Native((*shader_desc_ids_)[i]);
 		}
 
 		
@@ -4436,65 +4419,62 @@ namespace KlayGE
 		DepthStencilStateDesc dss_desc = depth_stencil_state_obj_->GetDesc();
 		BlendStateDesc bs_desc = blend_state_obj_->GetDesc();
 
-		NativeToLittleEndian<sizeof(rs_desc.polygon_mode)>(&rs_desc.polygon_mode);
-		NativeToLittleEndian<sizeof(rs_desc.shade_mode)>(&rs_desc.shade_mode);
-		NativeToLittleEndian<sizeof(rs_desc.cull_mode)>(&rs_desc.cull_mode);
-		NativeToLittleEndian<sizeof(rs_desc.polygon_offset_factor)>(&rs_desc.polygon_offset_factor);
-		NativeToLittleEndian<sizeof(rs_desc.polygon_offset_units)>(&rs_desc.polygon_offset_units);
+		rs_desc.polygon_mode = Native2LE(rs_desc.polygon_mode);
+		rs_desc.shade_mode = Native2LE(rs_desc.shade_mode);
+		rs_desc.cull_mode = Native2LE(rs_desc.cull_mode);
+		rs_desc.polygon_offset_factor = Native2LE(rs_desc.polygon_offset_factor);
+		rs_desc.polygon_offset_units = Native2LE(rs_desc.polygon_offset_units);
 		os.write(reinterpret_cast<char const *>(&rs_desc), sizeof(rs_desc));
 		
-		NativeToLittleEndian<sizeof(dss_desc.depth_func)>(&dss_desc.depth_func);
-		NativeToLittleEndian<sizeof(dss_desc.front_stencil_func)>(&dss_desc.front_stencil_func);
-		NativeToLittleEndian<sizeof(dss_desc.front_stencil_read_mask)>(&dss_desc.front_stencil_read_mask);
-		NativeToLittleEndian<sizeof(dss_desc.front_stencil_write_mask)>(&dss_desc.front_stencil_write_mask);
-		NativeToLittleEndian<sizeof(dss_desc.front_stencil_fail)>(&dss_desc.front_stencil_fail);
-		NativeToLittleEndian<sizeof(dss_desc.front_stencil_depth_fail)>(&dss_desc.front_stencil_depth_fail);
-		NativeToLittleEndian<sizeof(dss_desc.front_stencil_pass)>(&dss_desc.front_stencil_pass);
-		NativeToLittleEndian<sizeof(dss_desc.back_stencil_func)>(&dss_desc.back_stencil_func);
-		NativeToLittleEndian<sizeof(dss_desc.back_stencil_read_mask)>(&dss_desc.back_stencil_read_mask);
-		NativeToLittleEndian<sizeof(dss_desc.back_stencil_write_mask)>(&dss_desc.back_stencil_write_mask);
-		NativeToLittleEndian<sizeof(dss_desc.back_stencil_fail)>(&dss_desc.back_stencil_fail);
-		NativeToLittleEndian<sizeof(dss_desc.back_stencil_depth_fail)>(&dss_desc.back_stencil_depth_fail);
-		NativeToLittleEndian<sizeof(dss_desc.back_stencil_pass)>(&dss_desc.back_stencil_pass);
+		dss_desc.depth_func = Native2LE(dss_desc.depth_func);
+		dss_desc.front_stencil_func = Native2LE(dss_desc.front_stencil_func);
+		dss_desc.front_stencil_read_mask = Native2LE(dss_desc.front_stencil_read_mask);
+		dss_desc.front_stencil_write_mask = Native2LE(dss_desc.front_stencil_write_mask);
+		dss_desc.front_stencil_fail = Native2LE(dss_desc.front_stencil_fail);
+		dss_desc.front_stencil_depth_fail = Native2LE(dss_desc.front_stencil_depth_fail);
+		dss_desc.front_stencil_pass = Native2LE(dss_desc.front_stencil_pass);
+		dss_desc.back_stencil_func = Native2LE(dss_desc.back_stencil_func);
+		dss_desc.back_stencil_read_mask = Native2LE(dss_desc.back_stencil_read_mask);
+		dss_desc.back_stencil_write_mask = Native2LE(dss_desc.back_stencil_write_mask);
+		dss_desc.back_stencil_fail = Native2LE(dss_desc.back_stencil_fail);
+		dss_desc.back_stencil_depth_fail = Native2LE(dss_desc.back_stencil_depth_fail);
+		dss_desc.back_stencil_pass = Native2LE(dss_desc.back_stencil_pass);
 		os.write(reinterpret_cast<char const *>(&dss_desc), sizeof(dss_desc));
 
 		for (size_t i = 0; i < bs_desc.blend_op.size(); ++ i)
 		{
-			NativeToLittleEndian<sizeof(bs_desc.blend_op[i])>(&bs_desc.blend_op[i]);
-			NativeToLittleEndian<sizeof(bs_desc.src_blend[i])>(&bs_desc.src_blend[i]);
-			NativeToLittleEndian<sizeof(bs_desc.dest_blend[i])>(&bs_desc.dest_blend[i]);
-			NativeToLittleEndian<sizeof(bs_desc.blend_op_alpha[i])>(&bs_desc.blend_op_alpha[i]);
-			NativeToLittleEndian<sizeof(bs_desc.src_blend_alpha[i])>(&bs_desc.src_blend_alpha[i]);
-			NativeToLittleEndian<sizeof(bs_desc.dest_blend_alpha[i])>(&bs_desc.dest_blend_alpha[i]);
+			bs_desc.blend_op[i] = Native2LE(bs_desc.blend_op[i]);
+			bs_desc.src_blend[i] = Native2LE(bs_desc.src_blend[i]);
+			bs_desc.dest_blend[i] = Native2LE(bs_desc.dest_blend[i]);
+			bs_desc.blend_op_alpha[i] = Native2LE(bs_desc.blend_op_alpha[i]);
+			bs_desc.src_blend_alpha[i] = Native2LE(bs_desc.src_blend_alpha[i]);
+			bs_desc.dest_blend_alpha[i] = Native2LE(bs_desc.dest_blend_alpha[i]);
 		}		
 		os.write(reinterpret_cast<char const *>(&bs_desc), sizeof(bs_desc));
 
 		{
-			uint16_t tmp = front_stencil_ref_;
-			NativeToLittleEndian<sizeof(tmp)>(&tmp);
+			uint16_t tmp;
+			tmp = Native2LE(front_stencil_ref_);
 			os.write(reinterpret_cast<char const *>(&tmp), sizeof(tmp));
-			tmp = back_stencil_ref_;
-			NativeToLittleEndian<sizeof(tmp)>(&tmp);
-			os.write(reinterpret_cast<char const *>(&tmp), sizeof(tmp));
-		}
-		{
-			Color tmp = blend_factor_;
-			NativeToLittleEndian<sizeof(tmp[0])>(&tmp[0]);
-			NativeToLittleEndian<sizeof(tmp[1])>(&tmp[1]);
-			NativeToLittleEndian<sizeof(tmp[2])>(&tmp[2]);
-			NativeToLittleEndian<sizeof(tmp[3])>(&tmp[3]);
+			tmp = Native2LE(back_stencil_ref_);
 			os.write(reinterpret_cast<char const *>(&tmp), sizeof(tmp));
 		}
 		{
-			uint32_t tmp = sample_mask_;
-			NativeToLittleEndian<sizeof(tmp)>(&tmp);
+			Color tmp;
+			tmp.r() = Native2LE(blend_factor_.r());
+			tmp.g() = Native2LE(blend_factor_.g());
+			tmp.b() = Native2LE(blend_factor_.b());
+			tmp.a() = Native2LE(blend_factor_.a());
+			os.write(reinterpret_cast<char const *>(&tmp), sizeof(tmp));
+		}
+		{
+			uint32_t tmp = Native2LE(sample_mask_);
 			os.write(reinterpret_cast<char const *>(&tmp), sizeof(tmp));
 		}
 
 		for (uint32_t i = 0; i < shader_desc_ids_->size(); ++ i)
 		{
-			uint32_t tmp = (*shader_desc_ids_)[i];
-			NativeToLittleEndian<sizeof(tmp)>(&tmp);
+			uint32_t tmp = Native2LE((*shader_desc_ids_)[i]);
 			os.write(reinterpret_cast<char const *>(&tmp), sizeof(tmp));
 		}
 
@@ -4637,7 +4617,7 @@ namespace KlayGE
 	void RenderEffectParameter::StreamIn(ResIdentifierPtr const & res)
 	{
 		res->read(&type_, sizeof(type_));
-		LittleEndianToNative<sizeof(type_)>(&type_);
+		type_ = LE2Native(type_);
 		name_ = MakeSharedPtr<KLAYGE_DECLTYPE(*name_)>(ReadShortString(res));
 		name_hash_ = boost::hash_range(name_->begin(), name_->end());
 
@@ -4711,8 +4691,7 @@ namespace KlayGE
 
 	void RenderEffectParameter::StreamOut(std::ostream& os)
 	{
-		uint32_t t = type_;
-		NativeToLittleEndian<sizeof(t)>(&t);
+		uint32_t t = Native2LE(type_);
 		os.write(reinterpret_cast<char const *>(&t), sizeof(t));
 		WriteShortString(os, *name_);
 		if (semantic_)
@@ -4840,29 +4819,27 @@ namespace KlayGE
 	void RenderShaderFunc::StreamIn(ResIdentifierPtr const & res)
 	{
 		res->read(&type_, sizeof(type_));
-		LittleEndianToNative<sizeof(type_)>(&type_);
+		type_ = LE2Native(type_);
 		res->read(&version_, sizeof(version_));
-		LittleEndianToNative<sizeof(version_)>(&version_);
+		version_ = LE2Native(version_);
 
 		uint32_t len;
 		res->read(&len, sizeof(len));
-		LittleEndianToNative<sizeof(len)>(&len);
+		len = LE2Native(len);
 		str_.resize(len);
 		res->read(&str_[0], len * sizeof(str_[0]));
 	}
 
 	void RenderShaderFunc::StreamOut(std::ostream& os)
 	{
-		uint32_t tmp = type_;
-		NativeToLittleEndian<sizeof(tmp)>(&tmp);
+		uint32_t tmp;
+		tmp = Native2LE(type_);
 		os.write(reinterpret_cast<char const *>(&tmp), sizeof(tmp));
-		tmp = version_;
-		NativeToLittleEndian<sizeof(tmp)>(&tmp);
+		tmp = Native2LE(version_);
 		os.write(reinterpret_cast<char const *>(&tmp), sizeof(tmp));
 
 		uint32_t len = static_cast<uint32_t>(str_.size());
-		tmp = len;
-		NativeToLittleEndian<sizeof(tmp)>(&tmp);
+		tmp = Native2LE(len);
 		os.write(reinterpret_cast<char const *>(&tmp), sizeof(tmp));
 		os.write(&str_[0], len * sizeof(str_[0]));
 	}

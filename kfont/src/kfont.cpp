@@ -156,14 +156,14 @@ namespace KlayGE
 		{
 			kfont_header header;
 			kfont_input.read(reinterpret_cast<char*>(&header), sizeof(header));
-			LittleEndianToNative<sizeof(header.fourcc)>(&header.fourcc);
-			LittleEndianToNative<sizeof(header.version)>(&header.version);
-			LittleEndianToNative<sizeof(header.start_ptr)>(&header.start_ptr);
-			LittleEndianToNative<sizeof(header.validate_chars)>(&header.validate_chars);
-			LittleEndianToNative<sizeof(header.non_empty_chars)>(&header.non_empty_chars);
-			LittleEndianToNative<sizeof(header.char_size)>(&header.char_size);
-			LittleEndianToNative<sizeof(header.base)>(&header.base);
-			LittleEndianToNative<sizeof(header.scale)>(&header.scale);
+			header.fourcc = LE2Native(header.fourcc);
+			header.version = LE2Native(header.version);
+			header.start_ptr = LE2Native(header.start_ptr);
+			header.validate_chars = LE2Native(header.validate_chars);
+			header.non_empty_chars = LE2Native(header.non_empty_chars);
+			header.char_size = LE2Native(header.char_size);
+			header.base = LE2Native(header.base);
+			header.scale = LE2Native(header.scale);
 			if ((MakeFourCC<'K', 'F', 'N', 'T'>::value == header.fourcc) && (KFONT_VERSION == header.version))
 			{
 				char_size_ = header.char_size;
@@ -180,16 +180,16 @@ namespace KlayGE
 				typedef KLAYGE_DECLTYPE(temp_char_index) TCIType;
 				KLAYGE_FOREACH(TCIType::reference ci, temp_char_index)
 				{
-					LittleEndianToNative<sizeof(ci.first)>(&ci.first);
-					LittleEndianToNative<sizeof(ci.second)>(&ci.second);
+					ci.first = LE2Native(ci.first);
+					ci.second = LE2Native(ci.second);
 
 					char_index_advance_.insert(std::make_pair(ci.first, std::make_pair(ci.second, 0)));
 				}
 				typedef KLAYGE_DECLTYPE(temp_char_advance) TCAType;
 				KLAYGE_FOREACH(TCAType::reference ca, temp_char_advance)
 				{
-					LittleEndianToNative<sizeof(ca.first)>(&ca.first);
-					LittleEndianToNative<sizeof(ca.second)>(&ca.second);
+					ca.first = LE2Native(ca.first);
+					ca.second = LE2Native(ca.second);
 
 					KLAYGE_AUTO(iter, char_index_advance_.find(ca.first));
 					if (iter != char_index_advance_.end())
@@ -208,10 +208,10 @@ namespace KlayGE
 				typedef KLAYGE_DECLTYPE(char_info_) CIType;
 				KLAYGE_FOREACH(CIType::reference ci, char_info_)
 				{
-					LittleEndianToNative<sizeof(ci.left)>(&ci.left);
-					LittleEndianToNative<sizeof(ci.top)>(&ci.top);
-					LittleEndianToNative<sizeof(ci.width)>(&ci.width);
-					LittleEndianToNative<sizeof(ci.height)>(&ci.height);
+					ci.left = LE2Native(ci.left);
+					ci.top = LE2Native(ci.top);
+					ci.width = LE2Native(ci.width);
+					ci.height = LE2Native(ci.height);
 				}
 
 				distances_addr_.resize(header.non_empty_chars + 1);
@@ -223,7 +223,7 @@ namespace KlayGE
 
 					uint64_t len;
 					kfont_input.read(reinterpret_cast<char*>(&len), sizeof(len));
-					LittleEndianToNative<sizeof(len)>(&len);
+					len = LE2Native(len);
 					distances_lzma_.resize(static_cast<size_t>(distances_lzma_.size() + len));
 
 					kfont_input.read(reinterpret_cast<char*>(&distances_lzma_[distances_addr_[i]]), static_cast<size_t>(len));
@@ -246,22 +246,14 @@ namespace KlayGE
 			this->Compact();
 
 			kfont_header header;
-			header.fourcc = MakeFourCC<'K', 'F', 'N', 'T'>::value;
-			header.version = KFONT_VERSION;
-			header.start_ptr = sizeof(header);
-			header.validate_chars = static_cast<uint32_t>(char_index_advance_.size());
-			header.non_empty_chars = static_cast<uint32_t>(char_info_.size());
-			header.char_size = char_size_;
-			header.base = dist_base_;
-			header.scale = dist_scale_;
-			NativeToLittleEndian<sizeof(header.fourcc)>(&header.fourcc);
-			NativeToLittleEndian<sizeof(header.version)>(&header.version);
-			NativeToLittleEndian<sizeof(header.start_ptr)>(&header.start_ptr);
-			NativeToLittleEndian<sizeof(header.validate_chars)>(&header.validate_chars);
-			NativeToLittleEndian<sizeof(header.non_empty_chars)>(&header.non_empty_chars);
-			NativeToLittleEndian<sizeof(header.char_size)>(&header.char_size);
-			NativeToLittleEndian<sizeof(header.base)>(&header.base);
-			NativeToLittleEndian<sizeof(header.scale)>(&header.scale);
+			header.fourcc = Native2LE(MakeFourCC<'K', 'F', 'N', 'T'>::value);
+			header.version = Native2LE(KFONT_VERSION);
+			header.start_ptr = Native2LE(sizeof(header));
+			header.validate_chars = Native2LE(static_cast<uint32_t>(char_index_advance_.size()));
+			header.non_empty_chars = Native2LE(static_cast<uint32_t>(char_info_.size()));
+			header.char_size = Native2LE(char_size_);
+			header.base = Native2LE(dist_base_);
+			header.scale = Native2LE(dist_scale_);
 
 			kfont_output.write(reinterpret_cast<char*>(&header), sizeof(header));
 
@@ -292,18 +284,18 @@ namespace KlayGE
 			typedef KLAYGE_DECLTYPE(temp_char_index) TCIType;
 			KLAYGE_FOREACH(TCIType::reference ci, temp_char_index)
 			{
-				TCIType::value_type tci = ci;
-				NativeToLittleEndian<sizeof(tci.first)>(&tci.first);
-				NativeToLittleEndian<sizeof(tci.second)>(&tci.second);
+				TCIType::value_type tci;
+				tci.first = Native2LE(ci.first);
+				tci.second = Native2LE(ci.second);
 
 				kfont_output.write(reinterpret_cast<char*>(&tci), sizeof(tci));
 			}
 			typedef KLAYGE_DECLTYPE(temp_char_advance) TCAType;
 			KLAYGE_FOREACH(TCAType::reference ca, temp_char_advance)
 			{
-				TCAType::value_type tca = ca;
-				NativeToLittleEndian<sizeof(tca.first)>(&tca.first);
-				NativeToLittleEndian<sizeof(tca.second)>(&tca.second);
+				TCAType::value_type tca;
+				tca.first = Native2LE(ca.first);
+				tca.second = Native2LE(ca.second);
 
 				kfont_output.write(reinterpret_cast<char*>(&tca), sizeof(tca));
 			}
@@ -312,17 +304,14 @@ namespace KlayGE
 			{
 				int const index = temp_char_index[i].second;
 
-				int16_t tmp = char_info_[index].top;
-				NativeToLittleEndian<sizeof(tmp)>(&tmp);
+				int16_t tmp;
+				tmp = Native2LE(char_info_[index].top);
 				kfont_output.write(reinterpret_cast<char*>(&tmp), sizeof(tmp));
-				tmp = char_info_[index].left;
-				NativeToLittleEndian<sizeof(tmp)>(&tmp);
+				tmp = Native2LE(char_info_[index].left);
 				kfont_output.write(reinterpret_cast<char*>(&tmp), sizeof(tmp));
-				tmp = char_info_[index].width;
-				NativeToLittleEndian<sizeof(tmp)>(&tmp);
+				tmp = Native2LE(char_info_[index].width);
 				kfont_output.write(reinterpret_cast<char*>(&tmp), sizeof(tmp));
-				tmp = char_info_[index].height;
-				NativeToLittleEndian<sizeof(tmp)>(&tmp);
+				tmp = Native2LE(char_info_[index].height);
 				kfont_output.write(reinterpret_cast<char*>(&tmp), sizeof(tmp));
 			}
 
@@ -331,8 +320,8 @@ namespace KlayGE
 				uint32_t index = temp_char_index[i].second;
 				size_t addr = distances_addr_[index];
 				uint64_t len = distances_addr_[index + 1] - addr;
-				NativeToLittleEndian<sizeof(len)>(&len);
-				kfont_output.write(reinterpret_cast<char*>(&len), sizeof(len));
+				uint64_t len_le = Native2LE(len);
+				kfont_output.write(reinterpret_cast<char*>(&len_le), sizeof(len_le));
 				kfont_output.write(reinterpret_cast<char*>(&distances_lzma_[addr]),
 					static_cast<std::streamsize>(len * sizeof(distances_lzma_[0])));
 			}

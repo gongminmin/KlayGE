@@ -1762,19 +1762,19 @@ namespace KlayGE
 			uint32_t fourcc;
 			std::memcpy(&fourcc, nsbp, sizeof(fourcc));
 			nsbp += sizeof(fourcc);
-			LittleEndianToNative<sizeof(fourcc)>(&fourcc);
+			fourcc = LE2Native(fourcc);
 			if (MakeFourCC<'E', 'S', 'S', 'L'>::value == fourcc)
 			{
 				uint32_t ver;
 				std::memcpy(&ver, nsbp, sizeof(ver));
 				nsbp += sizeof(ver);
-				LittleEndianToNative<sizeof(ver)>(&ver);
+				ver = LE2Native(ver);
 				if (3 == ver)
 				{
 					uint32_t len32;
 					std::memcpy(&len32, nsbp, sizeof(len32));
 					nsbp += sizeof(len32);
-					LittleEndianToNative<sizeof(len32)>(&len32);
+					len32 = LE2Native(len32);
 					(*shader_func_names_)[type] = effect.GetShaderDesc(shader_desc_ids[type]).func_name;
 					(*glsl_srcs_)[type] = MakeSharedPtr<std::string>(len32, '\0');
 					std::memcpy(&(*(*glsl_srcs_)[type])[0], nsbp, len32);
@@ -1783,7 +1783,7 @@ namespace KlayGE
 					uint16_t num16;
 					std::memcpy(&num16, nsbp, sizeof(num16));
 					nsbp += sizeof(num16);
-					LittleEndianToNative<sizeof(num16)>(&num16);
+					num16 = LE2Native(num16);
 					(*pnames_)[type] = MakeSharedPtr<std::vector<std::string> >(num16);
 					for (size_t i = 0; i < num16; ++ i)
 					{
@@ -1798,7 +1798,7 @@ namespace KlayGE
 
 					std::memcpy(&num16, nsbp, sizeof(num16));
 					nsbp += sizeof(num16);
-					LittleEndianToNative<sizeof(num16)>(&num16);
+					num16 = LE2Native(num16);
 					(*glsl_res_names_)[type] = MakeSharedPtr<std::vector<std::string> >(num16);
 					for (size_t i = 0; i < num16; ++ i)
 					{
@@ -1813,7 +1813,7 @@ namespace KlayGE
 
 					std::memcpy(&num16, nsbp, sizeof(num16));
 					nsbp += sizeof(num16);
-					LittleEndianToNative<sizeof(num16)>(&num16);
+					num16 = LE2Native(num16);
 					for (size_t i = 0; i < num16; ++ i)
 					{
 						uint8_t len8;
@@ -1906,7 +1906,7 @@ namespace KlayGE
 	{
 		uint32_t len;
 		res->read(&len, sizeof(len));
-		LittleEndianToNative<sizeof(len)>(&len);
+		len = LE2Native(len);
 		std::vector<uint8_t> native_shader_block(len);
 		if (len > 0)
 		{
@@ -1936,21 +1936,17 @@ namespace KlayGE
 		{
 			std::ostringstream oss(std::ios_base::binary | std::ios_base::out);
 
-			uint32_t fourcc = MakeFourCC<'E', 'S', 'S', 'L'>::value;
-			NativeToLittleEndian<sizeof(fourcc)>(&fourcc);
+			uint32_t fourcc = Native2LE(MakeFourCC<'E', 'S', 'S', 'L'>::value);
 			oss.write(reinterpret_cast<char const *>(&fourcc), sizeof(fourcc));
 
-			uint32_t ver = 3;
-			NativeToLittleEndian<sizeof(ver)>(&ver);
+			uint32_t ver = Native2LE(3);
 			oss.write(reinterpret_cast<char const *>(&ver), sizeof(ver));
 
-			uint32_t len32 = static_cast<uint32_t>((*glsl_srcs_)[type]->size());
-			NativeToLittleEndian<sizeof(len32)>(&len32);
+			uint32_t len32 = Native2LE(static_cast<uint32_t>((*glsl_srcs_)[type]->size()));
 			oss.write(reinterpret_cast<char const *>(&len32), sizeof(len32));
 			oss.write(&(*(*glsl_srcs_)[type])[0], (*glsl_srcs_)[type]->size());
 
-			uint16_t num16 = static_cast<uint16_t>((*pnames_)[type]->size());
-			NativeToLittleEndian<sizeof(num16)>(&num16);
+			uint16_t num16 = Native2LE(static_cast<uint16_t>((*pnames_)[type]->size()));
 			oss.write(reinterpret_cast<char const *>(&num16), sizeof(num16));
 			for (size_t i = 0; i < (*pnames_)[type]->size(); ++ i)
 			{
@@ -1959,8 +1955,7 @@ namespace KlayGE
 				oss.write(&(*(*pnames_)[type])[i][0], (*(*pnames_)[type])[i].size());
 			}
 
-			num16 = static_cast<uint16_t>((*glsl_res_names_)[type]->size());
-			NativeToLittleEndian<sizeof(num16)>(&num16);
+			num16 = Native2LE(static_cast<uint16_t>((*glsl_res_names_)[type]->size()));
 			oss.write(reinterpret_cast<char const *>(&num16), sizeof(num16));
 			for (size_t i = 0; i < (*glsl_res_names_)[type]->size(); ++ i)
 			{
@@ -1979,8 +1974,7 @@ namespace KlayGE
 				}
 			}
 
-			num16 = static_cast<uint16_t>(tex_sampler_pairs.size());
-			NativeToLittleEndian<sizeof(num16)>(&num16);
+			num16 = Native2LE(static_cast<uint16_t>(tex_sampler_pairs.size()));
 			oss.write(reinterpret_cast<char const *>(&num16), sizeof(num16));
 			for (size_t i = 0; i < num16; ++ i)
 			{
@@ -2027,8 +2021,7 @@ namespace KlayGE
 
 		uint32_t len = static_cast<uint32_t>(native_shader_block.size());
 		{
-			uint32_t tmp = len;
-			NativeToLittleEndian<sizeof(tmp)>(&tmp);
+			uint32_t tmp = Native2LE(len);
 			os.write(reinterpret_cast<char const *>(&tmp), sizeof(tmp));
 		}
 		if (len > 0)

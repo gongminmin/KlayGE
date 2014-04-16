@@ -863,15 +863,11 @@ namespace
 							uint32_t buf_index = ves_mapping[i];
 							int16_t s_pos[4] = 
 							{
-								positions[vert_index * 4 + 0],
-								positions[vert_index * 4 + 1],
-								positions[vert_index * 4 + 2],
-								positions[vert_index * 4 + 3]
+								Native2LE(positions[vert_index * 4 + 0]),
+								Native2LE(positions[vert_index * 4 + 1]),
+								Native2LE(positions[vert_index * 4 + 2]),
+								Native2LE(positions[vert_index * 4 + 3])
 							};
-							NativeToLittleEndian<sizeof(s_pos[0])>(&s_pos[0]);
-							NativeToLittleEndian<sizeof(s_pos[1])>(&s_pos[1]);
-							NativeToLittleEndian<sizeof(s_pos[2])>(&s_pos[2]);
-							NativeToLittleEndian<sizeof(s_pos[3])>(&s_pos[3]);
 							std::memcpy(&merged_vertices[buf_index][(base_vertices + vert_index) * merged_ves[buf_index].element_size()],
 								s_pos, sizeof(s_pos));
 							break;
@@ -886,8 +882,7 @@ namespace
 						if (VEU_Diffuse == ves[i].usage)
 						{
 							uint32_t buf_index = ves_mapping[i];
-							uint32_t compact = diffuses[vert_index];
-							NativeToLittleEndian<sizeof(compact)>(&compact);
+							uint32_t compact = Native2LE(diffuses[vert_index]);
 							std::memcpy(&merged_vertices[buf_index][(base_vertices + vert_index) * merged_ves[buf_index].element_size()],
 								&compact, sizeof(compact));
 							break;
@@ -902,8 +897,7 @@ namespace
 						if (VEU_Specular == ves[i].usage)
 						{
 							uint32_t buf_index = ves_mapping[i];
-							uint32_t compact = speculars[vert_index];
-							NativeToLittleEndian<sizeof(compact)>(&compact);
+							uint32_t compact = Native2LE(speculars[vert_index]);
 							std::memcpy(&merged_vertices[buf_index][(base_vertices + vert_index) * merged_ves[buf_index].element_size()],
 								&compact, sizeof(compact));
 							break;
@@ -918,8 +912,7 @@ namespace
 						if (VEU_BlendIndex == ves[i].usage)
 						{
 							uint32_t buf_index = ves_mapping[i];
-							uint32_t compact = bone_indices[vert_index];
-							NativeToLittleEndian<sizeof(compact)>(&compact);
+							uint32_t compact = Native2LE(bone_indices[vert_index]);
 							std::memcpy(&merged_vertices[buf_index][(base_vertices + vert_index) * merged_ves[buf_index].element_size()],
 								&compact, sizeof(compact));
 							break;
@@ -930,8 +923,7 @@ namespace
 						if (VEU_BlendWeight == ves[i].usage)
 						{
 							uint32_t buf_index = ves_mapping[i];
-							uint32_t compact = bone_weights[vert_index];
-							NativeToLittleEndian<sizeof(compact)>(&compact);
+							uint32_t compact = Native2LE(bone_weights[vert_index]);
 							std::memcpy(&merged_vertices[buf_index][(base_vertices + vert_index) * merged_ves[buf_index].element_size()],
 								&compact, sizeof(compact));
 							break;
@@ -948,11 +940,9 @@ namespace
 							uint32_t buf_index = ves_mapping[i];
 							int16_t s_tc[2] = 
 							{
-								tex_coords[vert_index * 2 + 0],
-								tex_coords[vert_index * 2 + 1]
+								Native2LE(tex_coords[vert_index * 2 + 0]),
+								Native2LE(tex_coords[vert_index * 2 + 1])
 							};
-							NativeToLittleEndian<sizeof(s_tc[0])>(&s_tc[0]);
-							NativeToLittleEndian<sizeof(s_tc[1])>(&s_tc[1]);
 							std::memcpy(&merged_vertices[buf_index][(base_vertices + vert_index) * merged_ves[buf_index].element_size()],
 								&s_tc, sizeof(s_tc));
 							break;
@@ -967,8 +957,7 @@ namespace
 						if (VEU_Tangent == ves[i].usage)
 						{
 							uint32_t buf_index = ves_mapping[i];
-							uint32_t compact = tangent_quats[vert_index];
-							NativeToLittleEndian<sizeof(compact)>(&compact);
+							uint32_t compact = Native2LE(tangent_quats[vert_index]);
 							std::memcpy(&merged_vertices[buf_index][(base_vertices + vert_index) * merged_ves[buf_index].element_size()],
 								&compact, sizeof(compact));
 							break;
@@ -984,8 +973,7 @@ namespace
 							if (VEU_Normal == ves[i].usage)
 							{
 								uint32_t buf_index = ves_mapping[i];
-								uint32_t compact = normals[vert_index];
-								NativeToLittleEndian<sizeof(compact)>(&compact);
+								uint32_t compact = Native2LE(normals[vert_index]);
 								std::memcpy(&merged_vertices[buf_index][(base_vertices + vert_index) * merged_ves[buf_index].element_size()],
 									&compact, sizeof(compact));
 								break;
@@ -1114,8 +1102,7 @@ namespace
 			std::vector<uint8_t> merged_indices_16(merged_indices.size() / 2);
 			for (uint32_t ind_index = 0; ind_index < mesh_start_indices.back(); ++ ind_index)
 			{
-				uint16_t ind16 = static_cast<uint16_t>(*reinterpret_cast<uint32_t*>(&merged_indices[ind_index * sizeof(uint32_t)]));
-				NativeToLittleEndian<sizeof(ind16)>(&ind16);
+				uint16_t ind16 = Native2LE(static_cast<uint16_t>(*reinterpret_cast<uint32_t*>(&merged_indices[ind_index * sizeof(uint32_t)])));
 				std::memcpy(&merged_indices_16[ind_index * sizeof(uint16_t)], &ind16, sizeof(ind16));
 			}
 
@@ -1438,7 +1425,7 @@ namespace
 				rgb[i] = static_cast<uint8_t>(MathLib::clamp(static_cast<int>(mtl.specular[i] / specular_level * 255.0f + 0.5f), 0, 255));
 			}
 			os.write(reinterpret_cast<char*>(rgb), sizeof(rgb));
-			NativeToLittleEndian<sizeof(specular_level)>(&specular_level);
+			specular_level = Native2LE(specular_level);
 			os.write(reinterpret_cast<char*>(&specular_level), sizeof(specular_level));
 
 			for (uint32_t i = 0; i < 3; ++ i)
@@ -1447,14 +1434,13 @@ namespace
 			}
 			os.write(reinterpret_cast<char*>(rgb), sizeof(rgb));
 			
+			mtl.opacity = Native2LE(mtl.opacity);
 			os.write(reinterpret_cast<char*>(&mtl.opacity), sizeof(mtl.opacity));
-			NativeToLittleEndian<sizeof(mtl.opacity)>(&mtl.opacity);
 
-			NativeToLittleEndian<sizeof(mtl.shininess)>(&mtl.shininess);
+			mtl.shininess = Native2LE(mtl.shininess);
 			os.write(reinterpret_cast<char*>(&mtl.shininess), sizeof(mtl.shininess));
 
-			uint32_t num_texs = static_cast<uint32_t>(mtl.texture_slots.size());
-			NativeToLittleEndian<sizeof(num_texs)>(&num_texs);
+			uint32_t num_texs = Native2LE(static_cast<uint32_t>(mtl.texture_slots.size()));
 			os.write(reinterpret_cast<char*>(&num_texs), sizeof(num_texs));
 
 			if (!mtl.texture_slots.empty())
@@ -1476,22 +1462,19 @@ namespace
 		std::vector<std::vector<uint8_t> > const & merged_vertices, std::vector<uint8_t> const & merged_indices,
 		char is_index_16_bit, std::ostream& os)
 	{
-		uint32_t num_merged_ves = static_cast<uint32_t>(merged_ves.size());
-		NativeToLittleEndian<sizeof(num_merged_ves)>(&num_merged_ves);
+		uint32_t num_merged_ves = Native2LE(static_cast<uint32_t>(merged_ves.size()));
 		os.write(reinterpret_cast<char*>(&num_merged_ves), sizeof(num_merged_ves));
 		for (size_t i = 0; i < merged_ves.size(); ++ i)
 		{
 			vertex_element ve = merged_ves[i];
-			NativeToLittleEndian<sizeof(ve.usage)>(&ve.usage);
-			NativeToLittleEndian<sizeof(ve.format)>(&ve.format);
+			ve.usage = Native2LE(ve.usage);
+			ve.format = Native2LE(ve.format);
 			os.write(reinterpret_cast<char*>(&ve), sizeof(ve));
 		}
 
-		uint32_t num_vertices = mesh_base_vertices.back();
-		NativeToLittleEndian<sizeof(num_vertices)>(&num_vertices);
+		uint32_t num_vertices = Native2LE(mesh_base_vertices.back());
 		os.write(reinterpret_cast<char*>(&num_vertices), sizeof(num_vertices));
-		uint32_t num_indices = mesh_start_indices.back();
-		NativeToLittleEndian<sizeof(num_indices)>(&num_indices);
+		uint32_t num_indices = Native2LE(mesh_start_indices.back());
 		os.write(reinterpret_cast<char*>(&num_indices), sizeof(num_indices));
 		os.write(&is_index_16_bit, sizeof(is_index_16_bit));
 
@@ -1505,43 +1488,36 @@ namespace
 		{
 			WriteShortString(os, mesh_names[mesh_index]);
 
-			int32_t mtl_id = mtl_ids[mesh_index];
-			NativeToLittleEndian<sizeof(mtl_id)>(&mtl_id);
+			int32_t mtl_id = Native2LE(mtl_ids[mesh_index]);
 			os.write(reinterpret_cast<char*>(&mtl_id), sizeof(mtl_id));
 
-			float3 min_bb = pos_bbs[mesh_index].Min();
-			NativeToLittleEndian<sizeof(min_bb[0])>(&min_bb[0]);
-			NativeToLittleEndian<sizeof(min_bb[1])>(&min_bb[1]);
-			NativeToLittleEndian<sizeof(min_bb[2])>(&min_bb[2]);
+			float3 min_bb;
+			min_bb.x() = Native2LE(pos_bbs[mesh_index].Min().x());
+			min_bb.y() = Native2LE(pos_bbs[mesh_index].Min().y());
+			min_bb.z() = Native2LE(pos_bbs[mesh_index].Min().z());
 			os.write(reinterpret_cast<char*>(&min_bb), sizeof(min_bb));
-			float3 max_bb = pos_bbs[mesh_index].Max();
-			NativeToLittleEndian<sizeof(max_bb[0])>(&max_bb[0]);
-			NativeToLittleEndian<sizeof(max_bb[1])>(&max_bb[1]);
-			NativeToLittleEndian<sizeof(max_bb[2])>(&max_bb[2]);
+			float3 max_bb;
+			max_bb.x() = Native2LE(pos_bbs[mesh_index].Max().x());
+			max_bb.y() = Native2LE(pos_bbs[mesh_index].Max().y());
+			max_bb.z() = Native2LE(pos_bbs[mesh_index].Max().z());
 			os.write(reinterpret_cast<char*>(&max_bb), sizeof(max_bb));
 
-			min_bb = tc_bbs[mesh_index].Min();
-			NativeToLittleEndian<sizeof(min_bb[0])>(&min_bb[0]);
-			NativeToLittleEndian<sizeof(min_bb[1])>(&min_bb[1]);
+			min_bb.x() = Native2LE(tc_bbs[mesh_index].Min().x());
+			min_bb.y() = Native2LE(tc_bbs[mesh_index].Min().y());
 			os.write(reinterpret_cast<char*>(&min_bb[0]), sizeof(min_bb[0]));
 			os.write(reinterpret_cast<char*>(&min_bb[1]), sizeof(min_bb[1]));
-			max_bb = tc_bbs[mesh_index].Max();
-			NativeToLittleEndian<sizeof(max_bb[0])>(&max_bb[0]);
-			NativeToLittleEndian<sizeof(max_bb[1])>(&max_bb[1]);
+			max_bb.x() = Native2LE(tc_bbs[mesh_index].Max().x());
+			max_bb.y() = Native2LE(tc_bbs[mesh_index].Max().y());
 			os.write(reinterpret_cast<char*>(&max_bb[0]), sizeof(max_bb[0]));
 			os.write(reinterpret_cast<char*>(&max_bb[1]), sizeof(max_bb[1]));
 
-			uint32_t nv = mesh_num_vertices[mesh_index];
-			NativeToLittleEndian<sizeof(nv)>(&nv);
+			uint32_t nv = Native2LE(mesh_num_vertices[mesh_index]);
 			os.write(reinterpret_cast<char*>(&nv), sizeof(nv));
-			uint32_t bv = mesh_base_vertices[mesh_index];
-			NativeToLittleEndian<sizeof(bv)>(&bv);
+			uint32_t bv = Native2LE(mesh_base_vertices[mesh_index]);
 			os.write(reinterpret_cast<char*>(&bv), sizeof(bv));
-			uint32_t ni = mesh_num_indices[mesh_index];
-			NativeToLittleEndian<sizeof(ni)>(&ni);
+			uint32_t ni = Native2LE(mesh_num_indices[mesh_index]);
 			os.write(reinterpret_cast<char*>(&ni), sizeof(ni));
-			uint32_t si = mesh_start_indices[mesh_index];
-			NativeToLittleEndian<sizeof(si)>(&si);
+			uint32_t si = Native2LE(mesh_start_indices[mesh_index]);
 			os.write(reinterpret_cast<char*>(&si), sizeof(si));
 		}
 	}
@@ -1552,21 +1528,20 @@ namespace
 		{
 			WriteShortString(os, joints[i].name);
 
-			int16_t joint_parent = joints[i].parent;
-			NativeToLittleEndian<sizeof(joint_parent)>(&joint_parent);
+			int16_t joint_parent = Native2LE(joints[i].parent);
 			os.write(reinterpret_cast<char*>(&joint_parent), sizeof(joint_parent));
 
-			Quaternion bind_real = joints[i].bind_real;
-			Quaternion bind_dual = joints[i].bind_dual;
-			NativeToLittleEndian<sizeof(bind_real[0])>(&bind_real[0]);
-			NativeToLittleEndian<sizeof(bind_real[1])>(&bind_real[1]);
-			NativeToLittleEndian<sizeof(bind_real[2])>(&bind_real[2]);
-			NativeToLittleEndian<sizeof(bind_real[3])>(&bind_real[3]);
+			Quaternion bind_real;
+			bind_real.x() = Native2LE(joints[i].bind_real.x());
+			bind_real.y() = Native2LE(joints[i].bind_real.y());
+			bind_real.z() = Native2LE(joints[i].bind_real.z());
+			bind_real.w() = Native2LE(joints[i].bind_real.w());
 			os.write(reinterpret_cast<char*>(&bind_real), sizeof(bind_real));
-			NativeToLittleEndian<sizeof(bind_dual[0])>(&bind_dual[0]);
-			NativeToLittleEndian<sizeof(bind_dual[1])>(&bind_dual[1]);
-			NativeToLittleEndian<sizeof(bind_dual[2])>(&bind_dual[2]);
-			NativeToLittleEndian<sizeof(bind_dual[3])>(&bind_dual[3]);
+			Quaternion bind_dual;
+			bind_dual.x() = Native2LE(joints[i].bind_dual.x());
+			bind_dual.y() = Native2LE(joints[i].bind_dual.y());
+			bind_dual.z() = Native2LE(joints[i].bind_dual.z());
+			bind_dual.w() = Native2LE(joints[i].bind_dual.w());
 			os.write(reinterpret_cast<char*>(&bind_dual), sizeof(bind_dual));
 		}
 	}
@@ -1574,36 +1549,34 @@ namespace
 	void WriteKeyFramesChunk(uint32_t num_frames, uint32_t frame_rate, std::vector<KeyFrames>& kfs,
 		std::ostream& os)
 	{
-		NativeToLittleEndian<sizeof(num_frames)>(&num_frames);
+		num_frames = Native2LE(num_frames);
 		os.write(reinterpret_cast<char*>(&num_frames), sizeof(num_frames));
-		NativeToLittleEndian<sizeof(frame_rate)>(&frame_rate);
+		frame_rate = Native2LE(frame_rate);
 		os.write(reinterpret_cast<char*>(&frame_rate), sizeof(frame_rate));
 
 		for (size_t i = 0; i < kfs.size(); ++ i)
 		{
-			uint32_t num_kf = static_cast<uint32_t>(kfs[i].frame_id.size());
-			NativeToLittleEndian<sizeof(num_kf)>(&num_kf);
+			uint32_t num_kf = Native2LE(static_cast<uint32_t>(kfs[i].frame_id.size()));
 			os.write(reinterpret_cast<char*>(&num_kf), sizeof(num_kf));
 
 			for (size_t j = 0; j < kfs[i].frame_id.size(); ++ j)
 			{
-				uint32_t frame_id = kfs[i].frame_id[j];
 				Quaternion bind_real = kfs[i].bind_real[j];
 				Quaternion bind_dual = kfs[i].bind_dual[j];
 				float bind_scale = kfs[i].bind_scale[j];
 
-				NativeToLittleEndian<sizeof(frame_id)>(&frame_id);
+				uint32_t frame_id = Native2LE(kfs[i].frame_id[j]);
 				os.write(reinterpret_cast<char*>(&frame_id), sizeof(frame_id));
 				bind_real *= bind_scale;
-				NativeToLittleEndian<sizeof(bind_real[0])>(&bind_real[0]);
-				NativeToLittleEndian<sizeof(bind_real[1])>(&bind_real[1]);
-				NativeToLittleEndian<sizeof(bind_real[2])>(&bind_real[2]);
-				NativeToLittleEndian<sizeof(bind_real[3])>(&bind_real[3]);
+				bind_real.x() = Native2LE(bind_real.x());
+				bind_real.y() = Native2LE(bind_real.y());
+				bind_real.z() = Native2LE(bind_real.z());
+				bind_real.w() = Native2LE(bind_real.w());
 				os.write(reinterpret_cast<char*>(&bind_real), sizeof(bind_real));
-				NativeToLittleEndian<sizeof(bind_dual[0])>(&bind_dual[0]);
-				NativeToLittleEndian<sizeof(bind_dual[1])>(&bind_dual[1]);
-				NativeToLittleEndian<sizeof(bind_dual[2])>(&bind_dual[2]);
-				NativeToLittleEndian<sizeof(bind_dual[3])>(&bind_dual[3]);
+				bind_dual.x() = Native2LE(bind_dual.x());
+				bind_dual.y() = Native2LE(bind_dual.y());
+				bind_dual.z() = Native2LE(bind_dual.z());
+				bind_dual.w() = Native2LE(bind_dual.w());
 				os.write(reinterpret_cast<char*>(&bind_dual), sizeof(bind_dual));
 			}
 		}
@@ -1613,24 +1586,22 @@ namespace
 	{
 		for (size_t i = 0; i < bb_kfs.size(); ++ i)
 		{
-			uint32_t num_bb_kf = static_cast<uint32_t>(bb_kfs[i].frame_id.size());
-			NativeToLittleEndian<sizeof(num_bb_kf)>(&num_bb_kf);
+			uint32_t num_bb_kf = Native2LE(static_cast<uint32_t>(bb_kfs[i].frame_id.size()));
 			os.write(reinterpret_cast<char*>(&num_bb_kf), sizeof(num_bb_kf));
 
 			for (uint32_t j = 0; j < bb_kfs[i].frame_id.size(); ++ j)
 			{
-				uint32_t frame_id = bb_kfs[i].frame_id[j];
-				NativeToLittleEndian<sizeof(frame_id)>(&frame_id);
+				uint32_t frame_id = Native2LE(bb_kfs[i].frame_id[j]);
 				os.write(reinterpret_cast<char*>(&frame_id), sizeof(frame_id));
-				float3 bb_min = bb_kfs[i].bb[j].Min();
-				float3 bb_max = bb_kfs[i].bb[j].Max();
-				NativeToLittleEndian<sizeof(bb_min[0])>(&bb_min[0]);
-				NativeToLittleEndian<sizeof(bb_min[1])>(&bb_min[1]);
-				NativeToLittleEndian<sizeof(bb_min[2])>(&bb_min[2]);
+				float3 bb_min;
+				bb_min.x() = Native2LE(bb_kfs[i].bb[j].Min().x());
+				bb_min.y() = Native2LE(bb_kfs[i].bb[j].Min().y());
+				bb_min.z() = Native2LE(bb_kfs[i].bb[j].Min().z());
 				os.write(reinterpret_cast<char*>(&bb_min), sizeof(bb_min));
-				NativeToLittleEndian<sizeof(bb_max[0])>(&bb_max[0]);
-				NativeToLittleEndian<sizeof(bb_max[1])>(&bb_max[1]);
-				NativeToLittleEndian<sizeof(bb_max[2])>(&bb_max[2]);
+				float3 bb_max = bb_kfs[i].bb[j].Max();
+				bb_max.x() = Native2LE(bb_kfs[i].bb[j].Max().x());
+				bb_max.y() = Native2LE(bb_kfs[i].bb[j].Max().y());
+				bb_max.z() = Native2LE(bb_kfs[i].bb[j].Max().z());
 				os.write(reinterpret_cast<char*>(&bb_max), sizeof(bb_max));
 			}
 		}
@@ -1642,13 +1613,10 @@ namespace
 		{
 			WriteShortString(os, actions[i].name);
 
-			uint32_t sf = actions[i].start_frame;
-			uint32_t ef = actions[i].end_frame;
-
-			NativeToLittleEndian<sizeof(sf)>(&sf);
+			uint32_t sf = Native2LE(actions[i].start_frame);
 			os.write(reinterpret_cast<char*>(&sf), sizeof(sf));
 
-			NativeToLittleEndian<sizeof(ef)>(&ef);
+			uint32_t ef = Native2LE(actions[i].end_frame);
 			os.write(reinterpret_cast<char*>(&ef), sizeof(ef));
 		}
 	}
@@ -1670,8 +1638,7 @@ namespace
 			CompileMaterialsChunk(materials_chunk, mtls);
 		}
 		{
-			uint32_t num_mtls = static_cast<uint32_t>(mtls.size());
-			NativeToLittleEndian<sizeof(num_mtls)>(&num_mtls);
+			uint32_t num_mtls = Native2LE(static_cast<uint32_t>(mtls.size()));
 			ss.write(reinterpret_cast<char*>(&num_mtls), sizeof(num_mtls));
 		}
 
@@ -1697,8 +1664,7 @@ namespace
 				is_index_16_bit);
 		}
 		{
-			uint32_t num_meshes = static_cast<uint32_t>(pos_bbs.size());
-			NativeToLittleEndian<sizeof(num_meshes)>(&num_meshes);
+			uint32_t num_meshes = Native2LE(static_cast<uint32_t>(pos_bbs.size()));
 			ss.write(reinterpret_cast<char*>(&num_meshes), sizeof(num_meshes));
 		}
 
@@ -1709,8 +1675,7 @@ namespace
 			CompileBonesChunk(bones_chunk, joints);
 		}
 		{
-			uint32_t num_joints = static_cast<uint32_t>(joints.size());
-			NativeToLittleEndian<sizeof(num_joints)>(&num_joints);
+			uint32_t num_joints = Native2LE(static_cast<uint32_t>(joints.size()));
 			ss.write(reinterpret_cast<char*>(&num_joints), sizeof(num_joints));
 		}
 
@@ -1727,8 +1692,7 @@ namespace
 			CompileBBKeyFramesChunk(bb_kfs_chunk, pos_bbs, num_frames, bb_kfs);
 		}
 		{
-			uint32_t num_kfs = static_cast<uint32_t>(kfs.size());
-			NativeToLittleEndian<sizeof(num_kfs)>(&num_kfs);
+			uint32_t num_kfs = Native2LE(static_cast<uint32_t>(kfs.size()));
 			ss.write(reinterpret_cast<char*>(&num_kfs), sizeof(num_kfs));
 		}
 
@@ -1739,8 +1703,7 @@ namespace
 			CompileActionsChunk(actions_chunk, num_frames, actions);
 		}
 		{
-			uint32_t num_actions = key_frames_chunk ? std::max(static_cast<uint32_t>(actions.size()), 1U) : 0;
-			NativeToLittleEndian<sizeof(num_actions)>(&num_actions);
+			uint32_t num_actions = Native2LE(key_frames_chunk ? std::max(static_cast<uint32_t>(actions.size()), 1U) : 0);
 			ss.write(reinterpret_cast<char*>(&num_actions), sizeof(num_actions));
 		}
 
@@ -1770,16 +1733,13 @@ namespace
 
 		std::ofstream ofs(output_name.c_str(), std::ios_base::binary);
 		BOOST_ASSERT(ofs);
-		uint32_t fourcc = MakeFourCC<'K', 'L', 'M', ' '>::value;
-		NativeToLittleEndian<sizeof(fourcc)>(&fourcc);
+		uint32_t fourcc = Native2LE(MakeFourCC<'K', 'L', 'M', ' '>::value);
 		ofs.write(reinterpret_cast<char*>(&fourcc), sizeof(fourcc));
 
-		uint32_t ver = MODEL_BIN_VERSION;
-		NativeToLittleEndian<sizeof(ver)>(&ver);
+		uint32_t ver = Native2LE(MODEL_BIN_VERSION);
 		ofs.write(reinterpret_cast<char*>(&ver), sizeof(ver));
 
-		uint64_t original_len = ss.str().size();
-		NativeToLittleEndian<sizeof(original_len)>(&original_len);
+		uint64_t original_len = Native2LE(static_cast<uint64_t>(ss.str().size()));
 		ofs.write(reinterpret_cast<char*>(&original_len), sizeof(original_len));
 
 		std::ofstream::pos_type p = ofs.tellp();
@@ -1790,7 +1750,7 @@ namespace
 		len = lzma.Encode(ofs, ss.str().c_str(), ss.str().size());
 
 		ofs.seekp(p, std::ios_base::beg);
-		NativeToLittleEndian<sizeof(len)>(&len);
+		len = Native2LE(len);
 		ofs.write(reinterpret_cast<char*>(&len), sizeof(len));
 	}
 }

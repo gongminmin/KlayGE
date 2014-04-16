@@ -34,8 +34,7 @@ KlayGE::shared_ptr<DXBCContainer> DXBCParse(void const * data)
 	KlayGE::shared_ptr<DXBCContainer> container = KlayGE::MakeSharedPtr<DXBCContainer>();
 
 	DXBCContainerHeader const * header = reinterpret_cast<DXBCContainerHeader const *>(data);
-	uint32_t fourcc = header->fourcc;
-	KlayGE::LittleEndianToNative<sizeof(fourcc)>(&fourcc);
+	uint32_t fourcc = KlayGE::LE2Native(header->fourcc);
 	if (fourcc != FOURCC_DXBC)
 	{
 		return KlayGE::shared_ptr<DXBCContainer>();
@@ -65,22 +64,17 @@ DXBCChunkHeader const * DXBCFindChunk(void const * data, uint32_t fourcc)
 {
 	DXBCContainerHeader const * header = reinterpret_cast<DXBCContainerHeader const *>(data);
 	uint32_t const * chunk_offsets = reinterpret_cast<uint32_t const *>(header + 1);
-	uint32_t header_fourcc = header->fourcc;
-	KlayGE::LittleEndianToNative<sizeof(header_fourcc)>(&header_fourcc);
+	uint32_t header_fourcc = KlayGE::LE2Native(header->fourcc);
 	if (header_fourcc != FOURCC_DXBC)
 	{
 		return nullptr;
 	}
-	uint32_t num_chunks = header->chunk_count;
-	KlayGE::LittleEndianToNative<sizeof(num_chunks)>(&num_chunks);
+	uint32_t num_chunks = KlayGE::LE2Native(header->chunk_count);
 	for (uint32_t i = 0; i < num_chunks; ++ i)
 	{
-		uint32_t offset = chunk_offsets[i];
-		KlayGE::LittleEndianToNative<sizeof(offset)>(&offset);
+		uint32_t offset = KlayGE::LE2Native(chunk_offsets[i]);
 		DXBCChunkHeader const * chunk = reinterpret_cast<DXBCChunkHeader const *>(reinterpret_cast<char const *>(data) + offset);
-		uint32_t chunk_fourcc = chunk->fourcc;
-		KlayGE::LittleEndianToNative<sizeof(chunk_fourcc)>(&chunk_fourcc);
-		if (chunk_fourcc == fourcc)
+		if (KlayGE::LE2Native(chunk->fourcc) == fourcc)
 		{
 			return chunk;
 		}
