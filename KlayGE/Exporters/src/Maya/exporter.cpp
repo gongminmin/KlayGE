@@ -114,7 +114,7 @@ private:
 	std::map<std::string, int> joint_to_id_;
 	std::map<int, MDagPath> joint_id_to_path_;
 
-	std::vector<std::pair<MFnSkinCluster, std::vector<MObject> > > skin_clusters_;
+	std::vector<std::pair<shared_ptr<MFnSkinCluster>, std::vector<MObject> > > skin_clusters_;
 };
 
 MayaMeshExporter::MayaMeshExporter()
@@ -160,15 +160,15 @@ void MayaMeshExporter::ExportMayaNodes(MItDag& dag_iterator)
 	{
 		MStatus status = MS::kSuccess;
 		MObject object = dn.item();
-		MFnSkinCluster skin_cluster(object, &status);
+		shared_ptr<MFnSkinCluster> skin_cluster = MakeSharedPtr<MFnSkinCluster>(object, &status);
 
 		std::vector<MObject> objs;
-		unsigned int num_geometries = skin_cluster.numOutputConnections();
+		unsigned int num_geometries = skin_cluster->numOutputConnections();
 		for (unsigned int i = 0; i < num_geometries; ++ i) 
- 		{
-			unsigned int index = skin_cluster.indexForOutputConnection(i);
-			objs.push_back(skin_cluster.outputShapeAtIndex(index));
- 		}
+		{
+			unsigned int index = skin_cluster->indexForOutputConnection(i);
+			objs.push_back(skin_cluster->outputShapeAtIndex(index));
+		}
 
 		if (num_geometries > 0)
 		{
@@ -176,7 +176,7 @@ void MayaMeshExporter::ExportMayaNodes(MItDag& dag_iterator)
 		}
 
 		MDagPathArray influence_paths;
-		int num_influence_objs = skin_cluster.influenceObjects(influence_paths, &status);
+		int num_influence_objs = skin_cluster->influenceObjects(influence_paths, &status);
 
 		MDagPath joint_path, root_path;
 		for (int i = 0; i < num_influence_objs; ++ i)
@@ -505,7 +505,7 @@ void MayaMeshExporter::ExportMesh(MString const & obj_name, MFnMesh& fn_mesh, MD
 			{
 				MObject component = geom_iterator.component();
 				MFloatArray vertex_weights;
-				status = skin_clusters_[skin_cluster_index].first.getWeights(dag_path, component, vertex_weights, num_weights);
+				status = skin_clusters_[skin_cluster_index].first->getWeights(dag_path, component, vertex_weights, num_weights);
 				if (status != MS::kSuccess)
 				{
 					std::cout << "Fail to retrieve vertex weights." << std::endl;
@@ -516,7 +516,7 @@ void MayaMeshExporter::ExportMesh(MString const & obj_name, MFnMesh& fn_mesh, MD
 				joint_paths[i].resize(vertex_weights.length());
 
 				MDagPathArray influence_objs;
-				skin_clusters_[skin_cluster_index].first.influenceObjects(influence_objs, &status);
+				skin_clusters_[skin_cluster_index].first->influenceObjects(influence_objs, &status);
 				if (MS::kSuccess == status)
 				{
 					for (unsigned int j = 0; j < influence_objs.length(); ++ j)
