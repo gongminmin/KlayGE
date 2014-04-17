@@ -59,6 +59,8 @@ namespace KlayGE
 
 		RenderSettings graphics_cfg;
 		bool deferred_rendering;
+
+		bool perf_profiler_on;
 	};
 
 	class KLAYGE_CORE_API Context

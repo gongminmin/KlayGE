@@ -56,15 +56,21 @@ namespace KlayGE
 
 	void PerfRange::Begin()
 	{
-		dirty_ = true;
-		cpu_timer_.restart();
-		gpu_timer_query_->Begin();
+		if (Context::Instance().Config().perf_profiler_on)
+		{
+			dirty_ = true;
+			cpu_timer_.restart();
+			gpu_timer_query_->Begin();
+		}
 	}
 
 	void PerfRange::End()
 	{
-		cpu_time_ = cpu_timer_.elapsed();
-		gpu_timer_query_->End();
+		if (Context::Instance().Config().perf_profiler_on)
+		{
+			cpu_time_ = cpu_timer_.elapsed();
+			gpu_timer_query_->End();
+		}
 	}
 
 	void PerfRange::CollectData()
