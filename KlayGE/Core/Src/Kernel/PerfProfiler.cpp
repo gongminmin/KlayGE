@@ -132,46 +132,52 @@ namespace KlayGE
 
 	void PerfProfiler::CollectData()
 	{
-		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-		RenderEngine& re = rf.RenderEngineInstance();
-		re.UpdateGPUTimestampsFrequency();
-
-		typedef KLAYGE_DECLTYPE(perf_ranges_) PerfRangesType;
-		KLAYGE_FOREACH(PerfRangesType::reference range, perf_ranges_)
+		if (Context::Instance().Config().perf_profiler_on)
 		{
-			if (get<2>(range)->Dirty())
-			{
-				get<2>(range)->CollectData();
-				get<3>(range).push_back(KlayGE::make_tuple(frame_id_,
-					get<2>(range)->CPUTime(), get<2>(range)->GPUTime()));
-			}
-		}
+			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+			RenderEngine& re = rf.RenderEngineInstance();
+			re.UpdateGPUTimestampsFrequency();
 
-		++ frame_id_;
+			typedef KLAYGE_DECLTYPE(perf_ranges_) PerfRangesType;
+			KLAYGE_FOREACH(PerfRangesType::reference range, perf_ranges_)
+			{
+				if (get<2>(range)->Dirty())
+				{
+					get<2>(range)->CollectData();
+					get<3>(range).push_back(KlayGE::make_tuple(frame_id_,
+						get<2>(range)->CPUTime(), get<2>(range)->GPUTime()));
+				}
+			}
+
+			++ frame_id_;
+		}
 	}
 
 	void PerfProfiler::ExportToCSV(std::string const & file_name) const
 	{
-		std::ofstream ofs(file_name.c_str());
-		ofs << "Frame" << ',' << "Category" << ',' << "Name" << ','
-			<< "CPU Timing (ms)" << ',' << "GPU Timing (ms)" << std::endl;
-
-		typedef KLAYGE_DECLTYPE(perf_ranges_) PerfRangesType;
-		KLAYGE_FOREACH(PerfRangesType::const_reference range, perf_ranges_)
+		if (Context::Instance().Config().perf_profiler_on)
 		{
-			typedef KLAYGE_DECLTYPE(get<3>(range)) PerfDataType;
-			KLAYGE_FOREACH(PerfDataType::const_reference data, get<3>(range))
-			{
-				ofs << get<0>(data) << ',' << get<0>(range) << ',' << get<1>(range) << ','
-					<< get<1>(data) * 1000 << ',';
-				if (get<2>(data) >= 0)
-				{
-					ofs << get<2>(data) * 1000;
-				}
-				ofs << std::endl;
-			}
-		}
+			std::ofstream ofs(file_name.c_str());
+			ofs << "Frame" << ',' << "Category" << ',' << "Name" << ','
+				<< "CPU Timing (ms)" << ',' << "GPU Timing (ms)" << std::endl;
 
-		ofs << std::endl;
+			typedef KLAYGE_DECLTYPE(perf_ranges_) PerfRangesType;
+			KLAYGE_FOREACH(PerfRangesType::const_reference range, perf_ranges_)
+			{
+				typedef KLAYGE_DECLTYPE(get<3>(range)) PerfDataType;
+				KLAYGE_FOREACH(PerfDataType::const_reference data, get<3>(range))
+				{
+					ofs << get<0>(data) << ',' << get<0>(range) << ',' << get<1>(range) << ','
+						<< get<1>(data) * 1000 << ',';
+					if (get<2>(data) >= 0)
+					{
+						ofs << get<2>(data) * 1000;
+					}
+					ofs << std::endl;
+				}
+			}
+
+			ofs << std::endl;
+		}
 	}
 }
