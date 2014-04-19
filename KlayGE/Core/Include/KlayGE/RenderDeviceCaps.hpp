@@ -60,6 +60,7 @@ namespace KlayGE
 		bool depth_texture_support : 1;
 		bool fp_color_support : 1;
 		bool pack_to_rgba_required : 1;
+		bool draw_indirect_support : 1;
 
 		bool gs_support : 1;
 		bool cs_support : 1;

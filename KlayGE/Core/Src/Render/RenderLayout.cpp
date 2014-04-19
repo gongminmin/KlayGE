@@ -216,6 +216,26 @@ namespace KlayGE
 		return start_instance_location_;
 	}
 
+	void RenderLayout::BindIndirectArgs(GraphicsBufferPtr const & args_buff)
+	{
+		indirect_args_buff_ = args_buff;
+	}
+
+	GraphicsBufferPtr const & RenderLayout::GetIndirectArgs() const
+	{
+		return indirect_args_buff_;
+	}
+
+	void RenderLayout::IndirectArgsOffset(uint32_t offset)
+	{
+		indirect_args_offset = offset;
+	}
+
+	uint32_t RenderLayout::IndirectArgsOffset() const
+	{
+		return indirect_args_offset;
+	}
+
 	void RenderLayout::ExpandInstance(GraphicsBufferPtr& hint, uint32_t inst_no) const
 	{
 		BOOST_ASSERT(instance_stream_.stream);

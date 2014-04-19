@@ -136,12 +136,14 @@ namespace KlayGE
 #endif
 
 	private:
-		void DoCreateRenderWindow(std::string const & name, RenderSettings const & settings);
-		void DoBindFrameBuffer(FrameBufferPtr const & fb);
-		void DoBindSOBuffers(RenderLayoutPtr const & rl);
-		void DoRender(RenderTechnique const & tech, RenderLayout const & rl);
-		void DoDispatch(RenderTechnique const & tech, uint32_t tgx, uint32_t tgy, uint32_t tgz);
-		void DoResize(uint32_t width, uint32_t height);
+		virtual void DoCreateRenderWindow(std::string const & name, RenderSettings const & settings) KLAYGE_OVERRIDE;
+		virtual void DoBindFrameBuffer(FrameBufferPtr const & fb) KLAYGE_OVERRIDE;
+		virtual void DoBindSOBuffers(RenderLayoutPtr const & rl) KLAYGE_OVERRIDE;
+		virtual void DoRender(RenderTechnique const & tech, RenderLayout const & rl) KLAYGE_OVERRIDE;
+		virtual void DoDispatch(RenderTechnique const & tech, uint32_t tgx, uint32_t tgy, uint32_t tgz) KLAYGE_OVERRIDE;
+		virtual void DoDispatchIndirect(RenderTechnique const & tech,
+			GraphicsBufferPtr const & buff_args, uint32_t offset) KLAYGE_OVERRIDE;
+		virtual void DoResize(uint32_t width, uint32_t height) KLAYGE_OVERRIDE;
 
 		void FillRenderDeviceCaps();
 		void DetectD3D11_1Runtime(ID3D11DevicePtr const & device, ID3D11DeviceContextPtr const & imm_ctx);

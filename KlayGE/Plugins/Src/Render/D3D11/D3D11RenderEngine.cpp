@@ -736,84 +736,110 @@ namespace KlayGE
 		num_primitives_just_rendered_ += num_instances * prim_count;
 		num_vertices_just_rendered_ += num_instances * vertex_count;
 
-		uint32_t const num_passes = tech.NumPasses();
-		if (num_instances > 1)
+		if (rl.UseIndices())
 		{
+			D3D11GraphicsBuffer& d3dib = *checked_cast<D3D11GraphicsBuffer*>(rl.GetIndexStream().get());
+			if (ib_cache_ != d3dib.D3DBuffer())
+			{
+				d3d_imm_ctx_->IASetIndexBuffer(d3dib.D3DBuffer().get(), D3D11Mapping::MappingFormat(rl.IndexStreamFormat()), 0);
+				ib_cache_ = d3dib.D3DBuffer();
+			}
+		}
+		else
+		{
+			if (ib_cache_)
+			{
+				d3d_imm_ctx_->IASetIndexBuffer(nullptr, DXGI_FORMAT_R16_UINT, 0);
+				ib_cache_.reset();
+			}
+		}
+
+		uint32_t const num_passes = tech.NumPasses();
+		GraphicsBufferPtr const & indirect_buff = rl.GetIndirectArgs();
+		if (indirect_buff)
+		{
+			uint32_t const num_passes = tech.NumPasses();
 			if (rl.UseIndices())
 			{
-				D3D11GraphicsBuffer& d3dib = *checked_cast<D3D11GraphicsBuffer*>(rl.GetIndexStream().get());
-				if (ib_cache_ != d3dib.D3DBuffer())
-				{
-					d3d_imm_ctx_->IASetIndexBuffer(d3dib.D3DBuffer().get(), D3D11Mapping::MappingFormat(rl.IndexStreamFormat()), 0);
-					ib_cache_ = d3dib.D3DBuffer();
-				}
-
-				uint32_t const num_indices = rl.NumIndices();
 				for (uint32_t i = 0; i < num_passes; ++ i)
 				{
 					RenderPassPtr const & pass = tech.Pass(i);
 
 					pass->Bind();
-					d3d_imm_ctx_->DrawIndexedInstanced(num_indices, num_instances, rl.StartIndexLocation(), rl.StartVertexLocation(), rl.StartInstanceLocation());
+					d3d_imm_ctx_->DrawIndexedInstancedIndirect(
+						checked_cast<D3D11GraphicsBuffer const *>(indirect_buff.get())->D3DBuffer().get(),
+						rl.IndirectArgsOffset());
 					pass->Unbind();
 				}
 			}
 			else
 			{
-				if (ib_cache_)
-				{
-					d3d_imm_ctx_->IASetIndexBuffer(nullptr, DXGI_FORMAT_R16_UINT, 0);
-					ib_cache_.reset();
-				}
-
-				uint32_t const num_vertices = rl.NumVertices();
 				for (uint32_t i = 0; i < num_passes; ++ i)
 				{
 					RenderPassPtr const & pass = tech.Pass(i);
 
 					pass->Bind();
-					d3d_imm_ctx_->DrawInstanced(num_vertices, num_instances, rl.StartVertexLocation(), rl.StartInstanceLocation());
+					d3d_imm_ctx_->DrawInstancedIndirect(
+						checked_cast<D3D11GraphicsBuffer const *>(indirect_buff.get())->D3DBuffer().get(),
+						rl.IndirectArgsOffset());
 					pass->Unbind();
 				}
 			}
 		}
 		else
 		{
-			if (rl.UseIndices())
+			if (num_instances > 1)
 			{
-				D3D11GraphicsBuffer& d3dib = *checked_cast<D3D11GraphicsBuffer*>(rl.GetIndexStream().get());
-				if (ib_cache_ != d3dib.D3DBuffer())
+				if (rl.UseIndices())
 				{
-					d3d_imm_ctx_->IASetIndexBuffer(d3dib.D3DBuffer().get(), D3D11Mapping::MappingFormat(rl.IndexStreamFormat()), 0);
-					ib_cache_ = d3dib.D3DBuffer();
+					uint32_t const num_indices = rl.NumIndices();
+					for (uint32_t i = 0; i < num_passes; ++ i)
+					{
+						RenderPassPtr const & pass = tech.Pass(i);
+
+						pass->Bind();
+						d3d_imm_ctx_->DrawIndexedInstanced(num_indices, num_instances, rl.StartIndexLocation(), rl.StartVertexLocation(), rl.StartInstanceLocation());
+						pass->Unbind();
+					}
 				}
-
-				uint32_t const num_indices = rl.NumIndices();
-				for (uint32_t i = 0; i < num_passes; ++ i)
+				else
 				{
-					RenderPassPtr const & pass = tech.Pass(i);
+					uint32_t const num_vertices = rl.NumVertices();
+					for (uint32_t i = 0; i < num_passes; ++ i)
+					{
+						RenderPassPtr const & pass = tech.Pass(i);
 
-					pass->Bind();
-					d3d_imm_ctx_->DrawIndexed(num_indices, rl.StartIndexLocation(), rl.StartVertexLocation());
-					pass->Unbind();
+						pass->Bind();
+						d3d_imm_ctx_->DrawInstanced(num_vertices, num_instances, rl.StartVertexLocation(), rl.StartInstanceLocation());
+						pass->Unbind();
+					}
 				}
 			}
 			else
 			{
-				if (ib_cache_)
+				if (rl.UseIndices())
 				{
-					d3d_imm_ctx_->IASetIndexBuffer(nullptr, DXGI_FORMAT_R16_UINT, 0);
-					ib_cache_.reset();
+					uint32_t const num_indices = rl.NumIndices();
+					for (uint32_t i = 0; i < num_passes; ++ i)
+					{
+						RenderPassPtr const & pass = tech.Pass(i);
+
+						pass->Bind();
+						d3d_imm_ctx_->DrawIndexed(num_indices, rl.StartIndexLocation(), rl.StartVertexLocation());
+						pass->Unbind();
+					}
 				}
-
-				uint32_t const num_vertices = rl.NumVertices();
-				for (uint32_t i = 0; i < num_passes; ++ i)
+				else
 				{
-					RenderPassPtr const & pass = tech.Pass(i);
+					uint32_t const num_vertices = rl.NumVertices();
+					for (uint32_t i = 0; i < num_passes; ++ i)
+					{
+						RenderPassPtr const & pass = tech.Pass(i);
 
-					pass->Bind();
-					d3d_imm_ctx_->Draw(num_vertices, rl.StartVertexLocation());
-					pass->Unbind();
+						pass->Bind();
+						d3d_imm_ctx_->Draw(num_vertices, rl.StartVertexLocation());
+						pass->Unbind();
+					}
 				}
 			}
 		}
@@ -830,6 +856,23 @@ namespace KlayGE
 
 			pass->Bind();
 			d3d_imm_ctx_->Dispatch(tgx, tgy, tgz);
+			pass->Unbind();
+		}
+
+		num_dispatches_just_called_ += num_passes;
+	}
+
+	void D3D11RenderEngine::DoDispatchIndirect(RenderTechnique const & tech, GraphicsBufferPtr const & buff_args,
+			uint32_t offset)
+	{
+		uint32_t const num_passes = tech.NumPasses();
+		for (uint32_t i = 0; i < num_passes; ++ i)
+		{
+			RenderPassPtr const & pass = tech.Pass(i);
+
+			pass->Bind();
+			d3d_imm_ctx_->DispatchIndirect(checked_cast<D3D11GraphicsBuffer*>(buff_args.get())->D3DBuffer().get(),
+				offset);
 			pass->Unbind();
 		}
 
@@ -1026,6 +1069,7 @@ namespace KlayGE
 			caps_.tess_method = TM_No;
 			break;
 		}
+		caps_.draw_indirect_support = (d3d_feature_level_ >= D3D_FEATURE_LEVEL_11_0);
 
 		std::pair<ElementFormat, DXGI_FORMAT> fmts[] = 
 		{

@@ -93,27 +93,32 @@ namespace KlayGE
 		}
 
 	private:
-		void DoCreateRenderWindow(std::string const & /*name*/, RenderSettings const & /*settings*/)
+		virtual void DoCreateRenderWindow(std::string const & /*name*/, RenderSettings const & /*settings*/) KLAYGE_OVERRIDE
 		{
 		}
 
-		void DoBindFrameBuffer(FrameBufferPtr const & /*fb*/)
+		virtual void DoBindFrameBuffer(FrameBufferPtr const & /*fb*/) KLAYGE_OVERRIDE
 		{
 		}
 
-		void DoBindSOBuffers(RenderLayoutPtr const & /*rl*/)
+		virtual void DoBindSOBuffers(RenderLayoutPtr const & /*rl*/) KLAYGE_OVERRIDE
 		{
 		}
 
-		void DoRender(RenderTechnique const & /*tech*/, RenderLayout const & /*rl*/)
+		virtual void DoRender(RenderTechnique const & /*tech*/, RenderLayout const & /*rl*/) KLAYGE_OVERRIDE
 		{
 		}
 
-		void DoDispatch(RenderTechnique const & /*tech*/, uint32_t /*tgx*/, uint32_t /*tgy*/, uint32_t /*tgz*/)
+		virtual void DoDispatch(RenderTechnique const & /*tech*/, uint32_t /*tgx*/, uint32_t /*tgy*/, uint32_t /*tgz*/) KLAYGE_OVERRIDE
 		{
 		}
 
-		void DoResize(uint32_t /*width*/, uint32_t /*height*/)
+		virtual void DoDispatchIndirect(RenderTechnique const & /*tech*/,
+			GraphicsBufferPtr const & /*buff_args*/, uint32_t /*offset*/) KLAYGE_OVERRIDE
+		{
+		}
+
+		virtual void DoResize(uint32_t /*width*/, uint32_t /*height*/) KLAYGE_OVERRIDE
 		{
 		}
 	};
@@ -591,6 +596,12 @@ namespace KlayGE
 	void RenderEngine::Dispatch(RenderTechnique const & tech, uint32_t tgx, uint32_t tgy, uint32_t tgz)
 	{
 		this->DoDispatch(tech, tgx, tgy, tgz);
+	}
+
+	void RenderEngine::DispatchIndirect(RenderTechnique const & tech,
+		GraphicsBufferPtr const & buff_args, uint32_t offset)
+	{
+		this->DoDispatchIndirect(tech, buff_args, offset);
 	}
 
 	// 上次Render()所渲染的图元数

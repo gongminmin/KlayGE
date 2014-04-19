@@ -103,6 +103,7 @@ namespace KlayGE
 		virtual void BeginPass();
 		void Render(RenderTechnique const & tech, RenderLayout const & rl);
 		void Dispatch(RenderTechnique const & tech, uint32_t tgx, uint32_t tgy, uint32_t tgz);
+		void DispatchIndirect(RenderTechnique const & tech, GraphicsBufferPtr const & buff_args, uint32_t offset);
 		virtual void EndPass();
 		virtual void EndFrame();
 		virtual void UpdateGPUTimestampsFrequency();
@@ -220,6 +221,8 @@ namespace KlayGE
 		virtual void DoBindSOBuffers(RenderLayoutPtr const & rl) = 0;
 		virtual void DoRender(RenderTechnique const & tech, RenderLayout const & rl) = 0;
 		virtual void DoDispatch(RenderTechnique const & tech, uint32_t tgx, uint32_t tgy, uint32_t tgz) = 0;
+		virtual void DoDispatchIndirect(RenderTechnique const & tech,
+			GraphicsBufferPtr const & buff_args, uint32_t offset) = 0;
 		virtual void DoResize(uint32_t width, uint32_t height) = 0;
 
 	private:

@@ -246,6 +246,11 @@ namespace KlayGE
 		void StartInstanceLocation(uint32_t location);
 		uint32_t StartInstanceLocation() const;
 
+		void BindIndirectArgs(GraphicsBufferPtr const & args_buff);
+		GraphicsBufferPtr const & GetIndirectArgs() const;
+		void IndirectArgsOffset(uint32_t offset);
+		uint32_t IndirectArgsOffset() const;
+
 		void ExpandInstance(GraphicsBufferPtr& hint, uint32_t inst_no) const;
 
 	private:
@@ -295,6 +300,9 @@ namespace KlayGE
 		uint32_t start_index_location_;
 		int32_t base_vertex_location_;
 		uint32_t start_instance_location_;
+
+		GraphicsBufferPtr indirect_args_buff_;
+		uint32_t indirect_args_offset;
 	};
 }
 
