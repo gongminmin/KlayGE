@@ -55,11 +55,6 @@ private:
 
 	KlayGE::SunLightSourcePtr sun_light_;
 
-	size_t num_objs_rendered_;
-	size_t num_renderable_rendered_;
-	size_t num_primitives_rendered_;
-	size_t num_vertices_rendered_;
-
 	KlayGE::uint32_t num_cascades_;
 	float pssm_factor_;
 };

@@ -116,9 +116,7 @@ int SampleMain()
 DeferredRenderingApp::DeferredRenderingApp()
 			: App3DFramework("DeferredRendering"),
 				anti_alias_enabled_(1),
-				il_scale_(1.0f),
-				num_objs_rendered_(0), num_renderable_rendered_(0),
-				num_primitives_rendered_(0), num_vertices_rendered_(0)
+				il_scale_(1.0f)
 {
 	ResLoader::Instance().AddPath("../../Samples/media/DeferredRendering");
 }
@@ -411,10 +409,10 @@ void DeferredRenderingApp::DoUpdateOverlay()
 	font_->RenderText(0, 36, Color(1, 1, 0, 1), stream.str(), 16);
 
 	stream.str(L"");
-	stream << num_objs_rendered_ << " Scene objects "
-		<< num_renderable_rendered_ << " Renderables "
-		<< num_primitives_rendered_ << " Primitives "
-		<< num_vertices_rendered_ << " Vertices";
+	stream << deferred_rendering_->NumObjectsRendered() << " Scene objects "
+		<< deferred_rendering_->NumRenderablesRendered() << " Renderables "
+		<< deferred_rendering_->NumPrimitivesRendered() << " Primitives "
+		<< deferred_rendering_->NumVerticesRendered() << " Vertices";
 	font_->RenderText(0, 54, Color(1, 1, 1, 1), stream.str(), 16);
 
 	stream.str(L"");
@@ -424,8 +422,6 @@ void DeferredRenderingApp::DoUpdateOverlay()
 
 uint32_t DeferredRenderingApp::DoUpdate(uint32_t pass)
 {
-	SceneManager& sceneMgr(Context::Instance().SceneManagerInstance());
-
 	if (0 == pass)
 	{
 		if (loading_percentage_ < 100)
@@ -468,13 +464,6 @@ uint32_t DeferredRenderingApp::DoUpdate(uint32_t pass)
 			particle_lights_[i]->Position(float3(8 * sin(factor * i),
 				5.0f + 10.0f / particle_lights_.size() * i, 8 * cos(factor * i)));
 		}
-	}
-	else if (14 == pass)
-	{
-		num_objs_rendered_ = sceneMgr.NumObjectsRendered();
-		num_renderable_rendered_ = sceneMgr.NumRenderablesRendered();
-		num_primitives_rendered_ = sceneMgr.NumPrimitivesRendered();
-		num_vertices_rendered_ = sceneMgr.NumVerticesRendered();
 	}
 
 	return deferred_rendering_->Update(pass);

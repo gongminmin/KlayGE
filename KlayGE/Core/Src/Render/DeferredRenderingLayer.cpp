@@ -1142,6 +1142,11 @@ namespace KlayGE
 			this->BuildVisibleSceneObjList(has_opaque_objs, has_transparency_back_objs, has_transparency_front_objs);
 
 			this->BuildPassScanList(has_opaque_objs, has_transparency_back_objs, has_transparency_front_objs);
+
+			num_objects_rendered_ = 0;
+			num_renderables_rendered_ = 0;
+			num_primitives_rendered_ = 0;
+			num_vertices_rendered_ = 0;
 		}
 
 		uint32_t vp_index;
@@ -1281,6 +1286,14 @@ namespace KlayGE
 			}
 			else
 			{
+				if (1 == index_in_pass)
+				{
+					num_objects_rendered_ += scene_mgr.NumObjectsRendered();
+					num_renderables_rendered_ += scene_mgr.NumRenderablesRendered();
+					num_primitives_rendered_ += scene_mgr.NumPrimitivesRendered();
+					num_vertices_rendered_ += scene_mgr.NumVerticesRendered();
+				}
+
 				if ((PRT_RT0 == pass_rt) || (PRT_MRT == pass_rt))
 				{
 					this->PostGenerateGBuffer(pvp);
@@ -3235,5 +3248,25 @@ namespace KlayGE
 		pp->OutputPin(0, TexturePtr());
 
 		++ index;
+	}
+
+	size_t DeferredRenderingLayer::NumObjectsRendered() const
+	{
+		return num_objects_rendered_;
+	}
+
+	size_t DeferredRenderingLayer::NumRenderablesRendered() const
+	{
+		return num_renderables_rendered_;
+	}
+
+	size_t DeferredRenderingLayer::NumPrimitivesRendered() const
+	{
+		return num_primitives_rendered_;
+	}
+
+	size_t DeferredRenderingLayer::NumVerticesRendered() const
+	{
+		return num_vertices_rendered_;
 	}
 }

@@ -83,7 +83,7 @@ private:
 	int id_ctrl_camera_;
 
 	size_t num_objs_rendered_;
-	size_t num_renderable_rendered_;
+	size_t num_renderables_rendered_;
 	size_t num_primitives_rendered_;
 	size_t num_vertices_rendered_;
 };

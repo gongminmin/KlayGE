@@ -1041,8 +1041,6 @@ void OceanApp::DoUpdateOverlay()
 {
 	UIManager::Instance().Render();
 
-	SceneManager& sceneMgr(Context::Instance().SceneManagerInstance());
-
 	std::wostringstream stream;
 	stream.precision(2);
 	stream << std::fixed << this->FPS() << " FPS";
@@ -1051,9 +1049,10 @@ void OceanApp::DoUpdateOverlay()
 	font_->RenderText(0, 18, Color(1, 1, 0, 1), stream.str(), 16);
 
 	stream.str(L"");
-	stream << sceneMgr.NumRenderablesRendered() << " Renderables "
-		<< sceneMgr.NumPrimitivesRendered() << " Primitives "
-		<< sceneMgr.NumVerticesRendered() << " Vertices";
+	stream << deferred_rendering_->NumObjectsRendered() << " Scene objects "
+		<< deferred_rendering_->NumRenderablesRendered() << " Renderables "
+		<< deferred_rendering_->NumPrimitivesRendered() << " Primitives "
+		<< deferred_rendering_->NumVerticesRendered() << " Vertices";
 	font_->RenderText(0, 36, Color(1, 1, 1, 1), stream.str(), 16);
 }
 

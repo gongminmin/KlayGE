@@ -157,7 +157,7 @@ namespace KlayGE
 			re.BindBuffer(GL_COPY_READ_BUFFER, vb_);
 			re.BindBuffer(GL_COPY_WRITE_BUFFER, checked_cast<OGLGraphicsBuffer*>(&rhs)->vb_);
 			glCopyBufferSubData(GL_COPY_READ_BUFFER, GL_COPY_WRITE_BUFFER,
-                          0, 0, size_in_byte_);
+						  0, 0, size_in_byte_);
 		}
 		else
 		{

@@ -69,11 +69,6 @@ private:
 	std::vector<KlayGE::LightSourcePtr> particle_lights_;
 	std::vector<KlayGE::SceneObjectPtr> particle_light_srcs_;
 
-	size_t num_objs_rendered_;
-	size_t num_renderable_rendered_;
-	size_t num_primitives_rendered_;
-	size_t num_vertices_rendered_;
-
 	KlayGE::ParticleSystemPtr ps_;
 };
 

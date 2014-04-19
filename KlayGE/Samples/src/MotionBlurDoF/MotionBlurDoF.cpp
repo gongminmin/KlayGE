@@ -718,7 +718,8 @@ int SampleMain()
 MotionBlurDoFApp::MotionBlurDoFApp()
 					: App3DFramework("Motion Blur and Depth of field"),
 						dof_on_(true), bokeh_on_(true), mb_on_(true),
-						num_objs_rendered_(0), num_renderable_rendered_(0), num_primitives_rendered_(0), num_vertices_rendered_(0)
+						num_objs_rendered_(0), num_renderables_rendered_(0),
+						num_primitives_rendered_(0), num_vertices_rendered_(0)
 {
 	ResLoader::Instance().AddPath("../../Samples/media/MotionBlurDoF");
 }
@@ -1075,7 +1076,7 @@ void MotionBlurDoFApp::DoUpdateOverlay()
 
 	stream.str(L"");
 	stream << num_objs_rendered_ << " Scene objects "
-		<< num_renderable_rendered_ << " Renderables "
+		<< num_renderables_rendered_ << " Renderables "
 		<< num_primitives_rendered_ << " Primitives "
 		<< num_vertices_rendered_ << " Vertices";
 	font_->RenderText(0, 54, Color(1, 1, 1, 1), stream.str(), 16);
@@ -1204,7 +1205,7 @@ uint32_t MotionBlurDoFApp::DoUpdate(uint32_t pass)
 
 	default:
 		num_objs_rendered_ = sceneMgr.NumObjectsRendered();
-		num_renderable_rendered_ = sceneMgr.NumRenderablesRendered();
+		num_renderables_rendered_ = sceneMgr.NumRenderablesRendered();
 		num_primitives_rendered_ = sceneMgr.NumPrimitivesRendered();
 		num_vertices_rendered_ = sceneMgr.NumVerticesRendered();
 

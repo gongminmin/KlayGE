@@ -55,8 +55,6 @@ int SampleMain()
 CascadedShadowMapApp::CascadedShadowMapApp()
 			: App3DFramework("CascadedShadowMap"),
 				light_controller_(true, MB_Right, 0, 0),
-				num_objs_rendered_(0), num_renderable_rendered_(0),
-				num_primitives_rendered_(0), num_vertices_rendered_(0),
 				pssm_factor_(0.8f)
 {
 	ResLoader::Instance().AddPath("../../Samples/media/CascadedShadowMap");
@@ -212,17 +210,15 @@ void CascadedShadowMapApp::DoUpdateOverlay()
 	font_->RenderText(0, 36, Color(1, 1, 0, 1), stream.str(), 16);
 
 	stream.str(L"");
-	stream << num_objs_rendered_ << " Scene objects "
-		<< num_renderable_rendered_ << " Renderables "
-		<< num_primitives_rendered_ << " Primitives "
-		<< num_vertices_rendered_ << " Vertices";
+	stream << deferred_rendering_->NumObjectsRendered() << " Scene objects "
+		<< deferred_rendering_->NumRenderablesRendered() << " Renderables "
+		<< deferred_rendering_->NumPrimitivesRendered() << " Primitives "
+		<< deferred_rendering_->NumVerticesRendered() << " Vertices";
 	font_->RenderText(0, 54, Color(1, 1, 1, 1), stream.str(), 16);
 }
 
 uint32_t CascadedShadowMapApp::DoUpdate(uint32_t pass)
 {
-	SceneManager& sceneMgr(Context::Instance().SceneManagerInstance());
-
 	if (0 == pass)
 	{
 		if (loading_percentage_ < 100)
@@ -264,20 +260,13 @@ uint32_t CascadedShadowMapApp::DoUpdate(uint32_t pass)
 					SceneObject::SOA_Cullable);
 				so->AddToSceneManager();
 
-				loading_percentage_ = 10;
+				loading_percentage_ = 100;
 			}
 		}
 		else
 		{
 			sun_light_->Direction(light_ctrl_camera_.ForwardVec());
 		}
-	}
-	else if (1 == pass)
-	{
-		num_objs_rendered_ = sceneMgr.NumObjectsRendered();
-		num_renderable_rendered_ = sceneMgr.NumRenderablesRendered();
-		num_primitives_rendered_ = sceneMgr.NumPrimitivesRendered();
-		num_vertices_rendered_ = sceneMgr.NumVerticesRendered();
 	}
 
 	return deferred_rendering_->Update(pass);
