@@ -100,10 +100,9 @@ namespace KlayGE
 		: frustum_(nullptr),
 			small_obj_threshold_(0),
 			update_elapse_(1.0f / 60),
-			numObjectsRendered_(0),
-			numRenderablesRendered_(0),
-			numPrimitivesRendered_(0),
-			numVerticesRendered_(0),
+			num_objects_rendered_(0), num_renderables_rendered_(0),
+			num_primitives_rendered_(0), num_vertices_rendered_(0),
+			num_draw_calls_(0), num_dispatch_calls_(0),
 			quit_(false), deferred_mode_(false)
 	{
 	}
@@ -510,10 +509,10 @@ namespace KlayGE
 		float const app_time = app.AppTime();
 		float const frame_time = app.FrameTime();
 
-		numObjectsRendered_ = 0;
-		numRenderablesRendered_ = 0;
-		numPrimitivesRendered_ = 0;
-		numVerticesRendered_ = 0;
+		num_objects_rendered_ = 0;
+		num_renderables_rendered_ = 0;
+		num_primitives_rendered_ = 0;
+		num_vertices_rendered_ = 0;
 
 		Camera& camera = app.ActiveCamera();
 		SceneObjsType& scene_objs = (urt & App3DFramework::URV_Overlay) ? overlay_scene_objs_ : scene_objs_;
@@ -591,7 +590,7 @@ namespace KlayGE
 						renderables.push_back(std::make_pair(renderable, std::vector<SceneObjectPtr>(1, so)));
 					}
 
-					++ numObjectsRendered_;
+					++ num_objects_rendered_;
 				}
 			}
 		}
@@ -649,13 +648,13 @@ namespace KlayGE
 			KLAYGE_FOREACH(ItemsType::reference item, items.second)
 			{
 				item->Render();
-
-				numPrimitivesRendered_ += re.NumPrimitivesJustRendered();
-				numVerticesRendered_ += re.NumVerticesJustRendered();
 			}
-			numRenderablesRendered_ += items.second.size();
+			num_renderables_rendered_ += items.second.size();
 		}
 		render_queue_.resize(0);
+
+		num_primitives_rendered_ += re.NumPrimitivesJustRendered();
+		num_vertices_rendered_ += re.NumVerticesJustRendered();
 
 		app.RenderOver();
 
@@ -664,30 +663,40 @@ namespace KlayGE
 
 	// 获取渲染的物体数量
 	/////////////////////////////////////////////////////////////////////////////////
-	size_t SceneManager::NumObjectsRendered() const
+	uint32_t SceneManager::NumObjectsRendered() const
 	{
-		return numObjectsRendered_;
+		return num_objects_rendered_;
 	}
 
 	// 获取渲染的可渲染对象数量
 	/////////////////////////////////////////////////////////////////////////////////
-	size_t SceneManager::NumRenderablesRendered() const
+	uint32_t SceneManager::NumRenderablesRendered() const
 	{
-		return numRenderablesRendered_;
+		return num_renderables_rendered_;
 	}
 
 	// 获取渲染的图元数量
 	/////////////////////////////////////////////////////////////////////////////////
-	size_t SceneManager::NumPrimitivesRendered() const
+	uint32_t SceneManager::NumPrimitivesRendered() const
 	{
-		return numPrimitivesRendered_;
+		return num_primitives_rendered_;
 	}
 
 	// 获取渲染的顶点数量
 	/////////////////////////////////////////////////////////////////////////////////
-	size_t SceneManager::NumVerticesRendered() const
+	uint32_t SceneManager::NumVerticesRendered() const
 	{
-		return numVerticesRendered_;
+		return num_vertices_rendered_;
+	}
+
+	uint32_t SceneManager::NumDrawCalls() const
+	{
+		return num_draw_calls_;
+	}
+
+	uint32_t SceneManager::NumDispatchCalls() const
+	{
+		return num_dispatch_calls_;
 	}
 
 	void SceneManager::FlushScene()
@@ -727,6 +736,9 @@ namespace KlayGE
 		this->Flush(App3DFramework::URV_Overlay);
 
 		re.Stereoscopic();
+
+		num_draw_calls_ = re.NumDrawsJustCalled();
+		num_dispatch_calls_ = re.NumDispatchesJustCalled();
 	}
 
 	void SceneManager::UpdateThreadFunc()

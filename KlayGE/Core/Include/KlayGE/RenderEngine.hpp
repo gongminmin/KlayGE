@@ -110,8 +110,10 @@ namespace KlayGE
 		// Just for debug or profile propose
 		virtual void ForceFlush() = 0;
 
-		size_t NumPrimitivesJustRendered();
-		size_t NumVerticesJustRendered();
+		uint32_t NumPrimitivesJustRendered();
+		uint32_t NumVerticesJustRendered();
+		uint32_t NumDrawsJustCalled();
+		uint32_t NumDispatchesJustCalled();
 
 		void CreateRenderWindow(std::string const & name, RenderSettings& settings);
 		void DestroyRenderWindow();
@@ -244,8 +246,10 @@ namespace KlayGE
 
 		RenderLayoutPtr so_buffers_;
 
-		size_t numPrimitivesJustRendered_;
-		size_t numVerticesJustRendered_;
+		uint32_t num_primitives_just_rendered_;
+		uint32_t num_vertices_just_rendered_;
+		uint32_t num_draws_just_called_;
+		uint32_t num_dispatches_just_called_;
 
 		RenderDeviceCaps caps_;
 

@@ -397,6 +397,7 @@ void DeferredRenderingApp::CtrlCameraHandler(UICheckBox const & sender)
 void DeferredRenderingApp::DoUpdateOverlay()
 {
 	RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+	SceneManager& scene_mgr = Context::Instance().SceneManagerInstance();
 
 	UIManager::Instance().Render();
 
@@ -418,6 +419,11 @@ void DeferredRenderingApp::DoUpdateOverlay()
 	stream.str(L"");
 	stream << ps_->NumActiveParticles() << " Particles";
 	font_->RenderText(0, 72, Color(1, 1, 1, 1), stream.str(), 16);
+
+	stream.str(L"");
+	stream << scene_mgr.NumDrawCalls() << " Draws/frame "
+		<< scene_mgr.NumDispatchCalls() << " Dispatches/frame";
+	font_->RenderText(0, 90, Color(1, 1, 1, 1), stream.str(), 16);
 }
 
 uint32_t DeferredRenderingApp::DoUpdate(uint32_t pass)

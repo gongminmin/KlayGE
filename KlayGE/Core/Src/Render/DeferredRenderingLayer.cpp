@@ -3250,22 +3250,22 @@ namespace KlayGE
 		++ index;
 	}
 
-	size_t DeferredRenderingLayer::NumObjectsRendered() const
+	uint32_t DeferredRenderingLayer::NumObjectsRendered() const
 	{
 		return num_objects_rendered_;
 	}
 
-	size_t DeferredRenderingLayer::NumRenderablesRendered() const
+	uint32_t DeferredRenderingLayer::NumRenderablesRendered() const
 	{
 		return num_renderables_rendered_;
 	}
 
-	size_t DeferredRenderingLayer::NumPrimitivesRendered() const
+	uint32_t DeferredRenderingLayer::NumPrimitivesRendered() const
 	{
 		return num_primitives_rendered_;
 	}
 
-	size_t DeferredRenderingLayer::NumVerticesRendered() const
+	uint32_t DeferredRenderingLayer::NumVerticesRendered() const
 	{
 		return num_vertices_rendered_;
 	}

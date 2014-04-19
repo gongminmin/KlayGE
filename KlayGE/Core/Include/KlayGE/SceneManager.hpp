@@ -86,10 +86,12 @@ namespace KlayGE
 
 		void Update();
 
-		size_t NumObjectsRendered() const;
-		size_t NumRenderablesRendered() const;
-		size_t NumPrimitivesRendered() const;
-		size_t NumVerticesRendered() const;
+		uint32_t NumObjectsRendered() const;
+		uint32_t NumRenderablesRendered() const;
+		uint32_t NumPrimitivesRendered() const;
+		uint32_t NumVerticesRendered() const;
+		uint32_t NumDrawCalls() const;
+		uint32_t NumDispatchCalls() const;
 
 	protected:
 		void Flush(uint32_t urt);
@@ -125,10 +127,12 @@ namespace KlayGE
 
 		RenderQueueType render_queue_;
 
-		size_t numObjectsRendered_;
-		size_t numRenderablesRendered_;
-		size_t numPrimitivesRendered_;
-		size_t numVerticesRendered_;
+		uint32_t num_objects_rendered_;
+		uint32_t num_renderables_rendered_;
+		uint32_t num_primitives_rendered_;
+		uint32_t num_vertices_rendered_;
+		uint32_t num_draw_calls_;
+		uint32_t num_dispatch_calls_;
 
 		mutex update_mutex_;
 		shared_ptr<joiner<void> > update_thread_;

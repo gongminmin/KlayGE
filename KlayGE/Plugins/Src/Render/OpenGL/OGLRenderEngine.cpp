@@ -886,19 +886,19 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void OGLRenderEngine::DoRender(RenderTechnique const & tech, RenderLayout const & rl)
 	{
-		uint32_t const num_instance = rl.NumInstances();
-		BOOST_ASSERT(num_instance != 0);
+		uint32_t const num_instances = rl.NumInstances();
+		BOOST_ASSERT(num_instances != 0);
 
 		OGLShaderObjectPtr cur_shader = checked_pointer_cast<OGLShaderObject>(tech.Pass(0)->GetShaderObject());
 		checked_cast<OGLRenderLayout const *>(&rl)->Active(cur_shader);
 
-		size_t const vertexCount = rl.UseIndices() ? rl.NumIndices() : rl.NumVertices();
+		size_t const vertex_count = rl.UseIndices() ? rl.NumIndices() : rl.NumVertices();
 		GLenum mode;
-		uint32_t primCount;
-		OGLMapping::Mapping(mode, primCount, rl);
+		uint32_t prim_count;
+		OGLMapping::Mapping(mode, prim_count, rl);
 
-		numPrimitivesJustRendered_ += num_instance * primCount;
-		numVerticesJustRendered_ += num_instance * vertexCount;
+		num_primitives_just_rendered_ += num_instances * prim_count;
+		num_vertices_just_rendered_ += num_instances * vertex_count;
 
 		GLenum index_type = GL_UNSIGNED_SHORT;
 		uint8_t* index_offset = nullptr;
@@ -944,7 +944,7 @@ namespace KlayGE
 				OGLGraphicsBuffer& stream(*checked_pointer_cast<OGLGraphicsBuffer>(rl.InstanceStream()));
 
 				uint32_t const instance_size = rl.InstanceSize();
-				BOOST_ASSERT(num_instance * instance_size <= stream.Size());
+				BOOST_ASSERT(num_instances * instance_size <= stream.Size());
 
 				uint8_t* elem_offset = nullptr;
 				for (size_t i = 0; i < inst_format_size; ++ i)
@@ -1004,7 +1004,7 @@ namespace KlayGE
 					}
 
 					glDrawElementsInstanced(mode, static_cast<GLsizei>(rl.NumIndices()),
-						index_type, index_offset, num_instance);
+						index_type, index_offset, num_instances);
 					pass->Unbind();
 				}
 			}
@@ -1026,7 +1026,7 @@ namespace KlayGE
 						}
 					}
 
-					glDrawArraysInstanced(mode, rl.StartVertexLocation(), static_cast<GLsizei>(rl.NumVertices()), num_instance);
+					glDrawArraysInstanced(mode, rl.StartVertexLocation(), static_cast<GLsizei>(rl.NumVertices()), num_instances);
 					pass->Unbind();
 				}
 			}
@@ -1053,17 +1053,19 @@ namespace KlayGE
 					}
 				}
 			}
+
+			num_draws_just_called_ += num_passes;
 		}
 		else
 		{
-			for (uint32_t instance = rl.StartInstanceLocation(); instance < rl.StartInstanceLocation() + num_instance; ++ instance)
+			for (uint32_t instance = rl.StartInstanceLocation(); instance < rl.StartInstanceLocation() + num_instances; ++ instance)
 			{
 				if (rl.InstanceStream())
 				{
 					GraphicsBuffer& stream = *rl.InstanceStream();
 
 					uint32_t const instance_size = rl.InstanceSize();
-					BOOST_ASSERT(num_instance * instance_size <= stream.Size());
+					BOOST_ASSERT(num_instances * instance_size <= stream.Size());
 					GraphicsBuffer::Mapper mapper(stream, BA_Read_Only);
 					uint8_t const * buffer = mapper.Pointer<uint8_t>();
 
@@ -1186,6 +1188,8 @@ namespace KlayGE
 					glEndTransformFeedback();
 				}
 			}
+
+			num_draws_just_called_ += num_instances * num_passes;
 		}
 
 		checked_cast<OGLRenderLayout const *>(&rl)->Deactive(cur_shader);

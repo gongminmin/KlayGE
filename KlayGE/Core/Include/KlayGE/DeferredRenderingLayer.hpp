@@ -257,10 +257,10 @@ namespace KlayGE
 		void Display(DisplayType display_type);
 		void DumpIntermediaTextures();
 
-		size_t NumObjectsRendered() const;
-		size_t NumRenderablesRendered() const;
-		size_t NumPrimitivesRendered() const;
-		size_t NumVerticesRendered() const;
+		uint32_t NumObjectsRendered() const;
+		uint32_t NumRenderablesRendered() const;
+		uint32_t NumPrimitivesRendered() const;
+		uint32_t NumVerticesRendered() const;
 
 #ifndef KLAYGE_SHIP
 		PerfRangePtr ShadowMapPerf() const
@@ -503,10 +503,10 @@ namespace KlayGE
 		PostProcessPtr dr_debug_pp_;
 		DisplayType display_type_;
 
-		size_t num_objects_rendered_;
-		size_t num_renderables_rendered_;
-		size_t num_primitives_rendered_;
-		size_t num_vertices_rendered_;
+		uint32_t num_objects_rendered_;
+		uint32_t num_renderables_rendered_;
+		uint32_t num_primitives_rendered_;
+		uint32_t num_vertices_rendered_;
 
 #ifndef KLAYGE_SHIP
 		PerfRangePtr shadow_map_perf_;

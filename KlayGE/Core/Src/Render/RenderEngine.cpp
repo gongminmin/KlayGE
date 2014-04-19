@@ -121,8 +121,8 @@ namespace KlayGE
 	// 构造函数
 	/////////////////////////////////////////////////////////////////////////////////
 	RenderEngine::RenderEngine()
-		: numPrimitivesJustRendered_(0),
-			numVerticesJustRendered_(0),
+		: num_primitives_just_rendered_(0), num_vertices_just_rendered_(0),
+			num_draws_just_called_(0), num_dispatches_just_called_(0),
 			cur_front_stencil_ref_(0),
 			cur_back_stencil_ref_(0),
 			cur_blend_factor_(1, 1, 1, 1),
@@ -595,19 +595,33 @@ namespace KlayGE
 
 	// 上次Render()所渲染的图元数
 	/////////////////////////////////////////////////////////////////////////////////
-	size_t RenderEngine::NumPrimitivesJustRendered()
+	uint32_t RenderEngine::NumPrimitivesJustRendered()
 	{
-		size_t const ret = numPrimitivesJustRendered_;
-		numPrimitivesJustRendered_ = 0;
+		uint32_t const ret = num_primitives_just_rendered_;
+		num_primitives_just_rendered_ = 0;
 		return ret;
 	}
 
 	// 上次Render()所渲染的顶点数
 	/////////////////////////////////////////////////////////////////////////////////
-	size_t RenderEngine::NumVerticesJustRendered()
+	uint32_t RenderEngine::NumVerticesJustRendered()
 	{
-		size_t const ret = numVerticesJustRendered_;
-		numVerticesJustRendered_ = 0;
+		uint32_t const ret = num_vertices_just_rendered_;
+		num_vertices_just_rendered_ = 0;
+		return ret;
+	}
+
+	uint32_t RenderEngine::NumDrawsJustCalled()
+	{
+		uint32_t const ret = num_draws_just_called_;
+		num_draws_just_called_ = 0;
+		return ret;
+	}
+
+	uint32_t RenderEngine::NumDispatchesJustCalled()
+	{
+		uint32_t const ret = num_dispatches_just_called_;
+		num_dispatches_just_called_ = 0;
 		return ret;
 	}
 

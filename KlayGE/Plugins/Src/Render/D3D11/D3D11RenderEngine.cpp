@@ -731,11 +731,12 @@ namespace KlayGE
 			break;
 		}
 
-		numPrimitivesJustRendered_ += prim_count;
-		numVerticesJustRendered_ += vertex_count;
+		uint32_t const num_instances = rl.NumInstances();
+
+		num_primitives_just_rendered_ += num_instances * prim_count;
+		num_vertices_just_rendered_ += num_instances * vertex_count;
 
 		uint32_t const num_passes = tech.NumPasses();
-		uint32_t const num_instances = rl.NumInstances();
 		if (num_instances > 1)
 		{
 			if (rl.UseIndices())
@@ -816,6 +817,8 @@ namespace KlayGE
 				}
 			}
 		}
+
+		num_draws_just_called_ += num_passes;
 	}
 
 	void D3D11RenderEngine::DoDispatch(RenderTechnique const & tech, uint32_t tgx, uint32_t tgy, uint32_t tgz)
@@ -829,6 +832,8 @@ namespace KlayGE
 			d3d_imm_ctx_->Dispatch(tgx, tgy, tgz);
 			pass->Unbind();
 		}
+
+		num_dispatches_just_called_ += num_passes;
 	}
 
 	void D3D11RenderEngine::ForceFlush()
