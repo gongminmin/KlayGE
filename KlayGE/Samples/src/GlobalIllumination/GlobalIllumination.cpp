@@ -92,7 +92,7 @@ void GlobalIlluminationApp::InitObjects()
 	loading_percentage_ = 0;
 	c_cube_tl_ = ASyncLoadTexture("Lake_CraterLake03_c.dds", EAH_GPU_Read | EAH_Immutable);
 	y_cube_tl_ = ASyncLoadTexture("Lake_CraterLake03_y.dds", EAH_GPU_Read | EAH_Immutable);
-	model_ml_ = ASyncLoadModel("sponza_crytek.7z//sponza_crytek.meshml", EAH_GPU_Read | EAH_Immutable);
+	ASyncLoadModelSceneObject("sponza_crytek.7z//sponza_crytek.meshml", EAH_GPU_Read | EAH_Immutable);
 
 	font_ = SyncLoadFont("gkai00mp.kfont");
 
@@ -264,24 +264,8 @@ uint32_t GlobalIlluminationApp::DoUpdate(uint32_t pass)
 				checked_pointer_cast<SceneObjectSkyBox>(sky_box_)->CompressedCubeMap(y_cube_tex, c_cube_tex);
 				if (!!y_cube_tex && !!c_cube_tex)
 				{
-					loading_percentage_ = 10;
+					loading_percentage_ = 100;
 				}
-			}
-			else if (loading_percentage_ < 80)
-			{
-				scene_model_ = model_ml_();
-				if (scene_model_)
-				{
-					loading_percentage_ = 80;
-				}
-			}
-			else
-			{
-				SceneObjectPtr so = MakeSharedPtr<SceneObjectHelper>(scene_model_,
-					SceneObject::SOA_Cullable);
-				so->AddToSceneManager();
-
-				loading_percentage_ = 100;
 			}
 		}
 	}

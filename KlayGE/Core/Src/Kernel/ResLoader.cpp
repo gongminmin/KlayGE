@@ -31,7 +31,6 @@
 #include <KlayGE/KlayGE.hpp>
 #include <KFL/Util.hpp>
 #include <KlayGE/Extract7z.hpp>
-#include <KFL/Thread.hpp>
 
 #include <fstream>
 #include <sstream>
@@ -454,15 +453,19 @@ namespace KlayGE
 		{
 			shared_ptr<volatile bool> async_is_done;
 			bool found = false;
-			typedef KLAYGE_DECLTYPE(loading_res_) LoadingResQueueType;
-			KLAYGE_FOREACH(LoadingResQueueType::const_reference lrq, loading_res_)
 			{
-				if (lrq.first->Match(*res_desc))
+				unique_lock<mutex> lock(loading_mutex_);
+
+				typedef KLAYGE_DECLTYPE(loading_res_) LoadingResQueueType;
+				KLAYGE_FOREACH(LoadingResQueueType::const_reference lrq, loading_res_)
 				{
-					res_desc->CopyDataFrom(*lrq.first);
-					async_is_done = lrq.second;
-					found = true;
-					break;
+					if (lrq.first->Match(*res_desc))
+					{
+						res_desc->CopyDataFrom(*lrq.first);
+						async_is_done = lrq.second;
+						found = true;
+						break;
+					}
 				}
 			}
 
@@ -474,8 +477,12 @@ namespace KlayGE
 			{
 				if (res_desc->HasSubThreadStage())
 				{
-					async_is_done = MakeSharedPtr<bool>(false);
-					loading_res_.push_back(std::make_pair(res_desc, async_is_done));
+					{
+						unique_lock<mutex> lock(loading_mutex_);
+
+						async_is_done = MakeSharedPtr<bool>(false);
+						loading_res_.push_back(std::make_pair(res_desc, async_is_done));
+					}
 					loading_res_queue_.push(std::make_pair(res_desc, async_is_done));
 					return ResLoader::ASyncRecreateFunctor(loaded_res, res_desc, async_is_done);
 				}
@@ -508,6 +515,8 @@ namespace KlayGE
 
 	void ResLoader::Unload(shared_ptr<void> const & res)
 	{
+		unique_lock<mutex> lock(loading_mutex_);
+
 		for (KLAYGE_AUTO(iter, loaded_res_.begin()); iter != loaded_res_.end(); ++ iter)
 		{
 			if (res == iter->second.lock())
@@ -520,6 +529,8 @@ namespace KlayGE
 
 	void ResLoader::AddLoadedResource(ResLoadingDescPtr const & res_desc, shared_ptr<void> const & res)
 	{
+		unique_lock<mutex> lock(loading_mutex_);
+
 		bool found = false;
 		typedef KLAYGE_DECLTYPE(loaded_res_) CachedDescType;
 		KLAYGE_FOREACH(CachedDescType::reference c_desc, loaded_res_)
@@ -539,6 +550,8 @@ namespace KlayGE
 
 	shared_ptr<void> ResLoader::FindMatchLoadedResource(ResLoadingDescPtr const & res_desc)
 	{
+		unique_lock<mutex> lock(loading_mutex_);
+
 		shared_ptr<void> loaded_res;
 		typedef KLAYGE_DECLTYPE(loaded_res_) LoadedResType;
 		KLAYGE_FOREACH(LoadedResType::const_reference lr, loaded_res_)
@@ -554,6 +567,8 @@ namespace KlayGE
 
 	void ResLoader::RemoveUnrefResources()
 	{
+		unique_lock<mutex> lock(loading_mutex_);
+
 		for (KLAYGE_AUTO(iter, loaded_res_.begin()); iter != loaded_res_.end();)
 		{
 			if (!iter->second.lock())
@@ -569,6 +584,8 @@ namespace KlayGE
 
 	void ResLoader::Update()
 	{
+		unique_lock<mutex> lock(loading_mutex_);
+
 		for (KLAYGE_AUTO(iter, loading_res_.begin()); iter != loading_res_.end();)
 		{
 			if (*(iter->second))

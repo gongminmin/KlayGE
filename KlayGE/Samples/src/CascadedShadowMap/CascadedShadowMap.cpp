@@ -28,6 +28,16 @@ using namespace KlayGE;
 
 namespace
 {
+	struct CreateGroundSceneObjectFactory
+	{
+		SceneObjectPtr operator()(RenderModelPtr const & model)
+		{
+			SceneObjectPtr so = MakeSharedPtr<SceneObjectHelper>(model, SceneObject::SOA_Cullable);
+			so->ModelMatrix(MathLib::scaling(200.0f, 1.0f, 200.0f));
+			return so;
+		}
+	};
+
 	enum
 	{
 		Exit,
@@ -82,8 +92,9 @@ void CascadedShadowMapApp::InitObjects()
 	loading_percentage_ = 0;
 	c_cube_tl_ = ASyncLoadTexture("Lake_CraterLake03_c.dds", EAH_GPU_Read | EAH_Immutable);
 	y_cube_tl_ = ASyncLoadTexture("Lake_CraterLake03_y.dds", EAH_GPU_Read | EAH_Immutable);
-	ground_ml_ = ASyncLoadModel("plane.meshml", EAH_GPU_Read | EAH_Immutable);
-	model_ml_ = ASyncLoadModel("katapult.meshml", EAH_GPU_Read | EAH_Immutable);
+	ASyncLoadModelSceneObject("plane.meshml", EAH_GPU_Read | EAH_Immutable, CreateModelFactory<RenderModel>(),
+		CreateMeshFactory<StaticMesh>(), CreateGroundSceneObjectFactory());
+	ASyncLoadModelSceneObject("katapult.meshml", EAH_GPU_Read | EAH_Immutable);
 
 	font_ = SyncLoadFont("gkai00mp.kfont");
 
@@ -230,37 +241,8 @@ uint32_t CascadedShadowMapApp::DoUpdate(uint32_t pass)
 				checked_pointer_cast<SceneObjectSkyBox>(sky_box_)->CompressedCubeMap(y_cube_tex, c_cube_tex);
 				if (!!y_cube_tex && !!c_cube_tex)
 				{
-					loading_percentage_ = 10;
+					loading_percentage_ = 100;
 				}
-			}
-			else if (loading_percentage_ < 15)
-			{
-				ground_model_ = ground_ml_();
-				if (ground_model_)
-				{
-					SceneObjectPtr so = MakeSharedPtr<SceneObjectHelper>(ground_model_->Mesh(0),
-							SceneObject::SOA_Cullable);
-					so->ModelMatrix(MathLib::scaling(200.0f, 1.0f, 200.0f));
-					so->AddToSceneManager();
-
-					loading_percentage_ = 15;
-				}
-			}
-			else if (loading_percentage_ < 80)
-			{
-				scene_model_ = model_ml_();
-				if (scene_model_)
-				{
-					loading_percentage_ = 80;
-				}
-			}
-			else
-			{
-				SceneObjectPtr so = MakeSharedPtr<SceneObjectHelper>(scene_model_,
-					SceneObject::SOA_Cullable);
-				so->AddToSceneManager();
-
-				loading_percentage_ = 100;
 			}
 		}
 		else

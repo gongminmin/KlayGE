@@ -40,6 +40,7 @@
 #include <boost/lockfree/spsc_queue.hpp>
 
 #include <KFL/ResIdentifier.hpp>
+#include <KFL/Thread.hpp>
 
 namespace KlayGE
 {
@@ -161,6 +162,7 @@ namespace KlayGE
 		std::string exe_path_;
 		std::vector<std::string> paths_;
 
+		mutex loading_mutex_;
 		std::vector<std::pair<ResLoadingDescPtr, weak_ptr<void> > > loaded_res_;
 		std::vector<std::pair<ResLoadingDescPtr, shared_ptr<volatile bool> > > loading_res_;
 		boost::lockfree::spsc_queue<std::pair<ResLoadingDescPtr, shared_ptr<volatile bool> >,

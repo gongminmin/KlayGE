@@ -36,6 +36,7 @@
 #include <KlayGE/Renderable.hpp>
 #include <KlayGE/RenderLayout.hpp>
 #include <KFL/Math.hpp>
+#include <KlayGE/SceneObject.hpp>
 
 #include <vector>
 #include <string>
@@ -432,6 +433,15 @@ namespace KlayGE
 		}
 	};
 
+	template <typename T>
+	struct CreateSceneObjectFactory
+	{
+		SceneObjectPtr operator()(RenderModelPtr const & model)
+		{
+			return MakeSharedPtr<T>(model, SceneObject::SOA_Cullable);
+		}
+	};
+
 	KLAYGE_CORE_API void LoadModel(std::string const & meshml_name, std::vector<RenderMaterialPtr>& mtls,
 		std::vector<vertex_element>& merged_ves, char& all_is_index_16_bit,
 		std::vector<std::vector<uint8_t> >& merged_buff, std::vector<uint8_t>& merged_indices,
@@ -448,6 +458,14 @@ namespace KlayGE
 	KLAYGE_CORE_API function<RenderModelPtr()> ASyncLoadModel(std::string const & meshml_name, uint32_t access_hint,
 		function<RenderModelPtr(std::wstring const &)> CreateModelFactoryFunc = CreateModelFactory<RenderModel>(),
 		function<StaticMeshPtr(RenderModelPtr const &, std::wstring const &)> CreateMeshFactoryFunc = CreateMeshFactory<StaticMesh>());
+	KLAYGE_CORE_API RenderModelPtr SyncLoadModelSceneObject(std::string const & meshml_name, uint32_t access_hint,
+		function<RenderModelPtr(std::wstring const &)> CreateModelFactoryFunc = CreateModelFactory<RenderModel>(),
+		function<StaticMeshPtr(RenderModelPtr const &, std::wstring const &)> CreateMeshFactoryFunc = CreateMeshFactory<StaticMesh>(),
+		function<SceneObjectPtr(RenderModelPtr const &)> CreateSceneObjectFunc = CreateSceneObjectFactory<SceneObjectHelper>());
+	KLAYGE_CORE_API function<RenderModelPtr()> ASyncLoadModelSceneObject(std::string const & meshml_name, uint32_t access_hint,
+		function<RenderModelPtr(std::wstring const &)> CreateModelFactoryFunc = CreateModelFactory<RenderModel>(),
+		function<StaticMeshPtr(RenderModelPtr const &, std::wstring const &)> CreateMeshFactoryFunc = CreateMeshFactory<StaticMesh>(),
+		function<SceneObjectPtr(RenderModelPtr const &)> CreateSceneObjectFunc = CreateSceneObjectFactory<SceneObjectHelper>());
 
 	KLAYGE_CORE_API void SaveModel(std::string const & meshml_name, std::vector<RenderMaterialPtr> const & mtls,
 		std::vector<vertex_element> const & merged_ves, char all_is_index_16_bit, 

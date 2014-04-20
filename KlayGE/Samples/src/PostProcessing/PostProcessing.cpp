@@ -55,6 +55,16 @@ namespace
 		}
 	};
 
+	struct CreateDinoSceneObjectFactory
+	{
+		SceneObjectPtr operator()(RenderModelPtr const & model)
+		{
+			SceneObjectPtr so = MakeSharedPtr<SceneObjectHelper>(model, SceneObject::SOA_Cullable | SceneObject::SOA_Moveable);
+			so->BindMainThreadUpdateFunc(ObjectUpdate());
+			return so;
+		}
+	};
+
 	enum
 	{
 		Exit,
@@ -103,7 +113,8 @@ void PostProcessingApp::InitObjects()
 	loading_percentage_ = 0;
 	c_cube_tl_ = ASyncLoadTexture("rnl_cross_c.dds", EAH_GPU_Read | EAH_Immutable);
 	y_cube_tl_ = ASyncLoadTexture("rnl_cross_y.dds", EAH_GPU_Read | EAH_Immutable);
-	model_ml_ = ASyncLoadModel("dino50.7z//dino50.meshml", EAH_GPU_Read | EAH_Immutable);
+	ASyncLoadModelSceneObject("dino50.7z//dino50.meshml", EAH_GPU_Read | EAH_Immutable,
+		CreateModelFactory<RenderModel>(), CreateMeshFactory<StaticMesh>(), CreateDinoSceneObjectFactory());
 
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 	RenderEngine& re = rf.RenderEngineInstance();
@@ -321,17 +332,6 @@ uint32_t PostProcessingApp::DoUpdate(uint32_t pass)
 				checked_pointer_cast<SceneObjectSkyBox>(sky_box_)->CompressedCubeMap(y_cube_tex, c_cube_tex);
 				if (!!y_cube_tex && !!c_cube_tex)
 				{
-					loading_percentage_ = 10;
-				}
-			}
-			else
-			{
-				RenderModelPtr scene_model = model_ml_();
-				if (scene_model)
-				{
-					scene_obj_ = MakeSharedPtr<SceneObjectHelper>(scene_model->Mesh(0), SceneObject::SOA_Cullable | SceneObject::SOA_Moveable);
-					scene_obj_->BindMainThreadUpdateFunc(ObjectUpdate());
-					scene_obj_->AddToSceneManager();
 					loading_percentage_ = 100;
 				}
 			}

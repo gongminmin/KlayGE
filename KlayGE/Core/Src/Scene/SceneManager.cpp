@@ -482,16 +482,20 @@ namespace KlayGE
 			scene_obj->MainThreadUpdate(app_time, frame_time);
 		}
 
-		overlay_scene_objs_.clear();
-		for (KLAYGE_AUTO(iter, lights_.begin()); iter != lights_.end();)
 		{
-			if ((*iter)->Attrib() & LightSource::LSA_Temporary)
+			unique_lock<mutex> lock(update_mutex_);
+
+			overlay_scene_objs_.clear();
+			for (KLAYGE_AUTO(iter, lights_.begin()); iter != lights_.end();)
 			{
-				iter = this->DelLight(iter);
-			}
-			else
-			{
-				++ iter;
+				if ((*iter)->Attrib() & LightSource::LSA_Temporary)
+				{
+					iter = this->DelLight(iter);
+				}
+				else
+				{
+					++ iter;
+				}
 			}
 		}
 
@@ -502,6 +506,8 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void SceneManager::Flush(uint32_t urt)
 	{
+		unique_lock<mutex> lock(update_mutex_);
+
 		urt_ = urt;
 
 		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();

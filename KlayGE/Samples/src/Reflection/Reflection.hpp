@@ -29,7 +29,6 @@ private:
 	KlayGE::TrackballCameraController tb_controller_;
 
 	KlayGE::SceneObjectPtr teapot_;
-	KlayGE::SceneObjectPtr dino_;
 
 	KlayGE::LightSourcePtr point_light_;
 
@@ -47,7 +46,6 @@ private:
 	KlayGE::CameraPathControllerPtr screen_camera_path_;
 
 	KlayGE::function<KlayGE::RenderModelPtr()> teapot_ml_;
-	KlayGE::function<KlayGE::RenderModelPtr()> dino_ml_;
 	KlayGE::function<KlayGE::TexturePtr()> y_cube_tl_;
 	KlayGE::function<KlayGE::TexturePtr()> c_cube_tl_;
 	KlayGE::uint32_t loading_percentage_;

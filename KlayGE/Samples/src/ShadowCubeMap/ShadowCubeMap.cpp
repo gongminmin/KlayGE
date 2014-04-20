@@ -783,26 +783,20 @@ uint32_t ShadowCubeMap::DoUpdate(uint32_t pass)
 				scene_model_ = model_ml_();
 				if (scene_model_)
 				{
-					loading_percentage_ = 80;
-				}
-			}
-			else if (loading_percentage_ < 90)
-			{
-				uint32_t n = (scene_model_->NumMeshes() + 10 - 1) / 10;
-				uint32_t s = (loading_percentage_ - 80) * n;
-				uint32_t e = std::min(s + n, scene_model_->NumMeshes());
-				for (uint32_t i = s; i < e; ++ i)
-				{
-					SceneObjectPtr so = MakeSharedPtr<SceneObjectHelper>(scene_model_->Mesh(i), SceneObject::SOA_Cullable);
+					SceneObjectPtr so = MakeSharedPtr<SceneObjectHelper>(scene_model_, SceneObject::SOA_Cullable);
 					so->AddToSceneManager();
-					checked_pointer_cast<OccluderMesh>(so->GetRenderable())->LampTexture(lamp_tex_);
-					checked_pointer_cast<OccluderMesh>(so->GetRenderable())->CubeSMTexture(shadow_cube_tex_);
-					checked_pointer_cast<OccluderMesh>(so->GetRenderable())->DPSMTexture(shadow_dual_tex_);
-					checked_pointer_cast<OccluderMesh>(so->GetRenderable())->ScaleFactor(esm_scale_factor_);
-					scene_objs_.push_back(so);
-				}
 
-				++ loading_percentage_;
+					for (uint32_t i = 0; i < so->NumChildren(); ++ i)
+					{
+						checked_pointer_cast<OccluderMesh>(so->Child(i)->GetRenderable())->LampTexture(lamp_tex_);
+						checked_pointer_cast<OccluderMesh>(so->Child(i)->GetRenderable())->CubeSMTexture(shadow_cube_tex_);
+						checked_pointer_cast<OccluderMesh>(so->Child(i)->GetRenderable())->DPSMTexture(shadow_dual_tex_);
+						checked_pointer_cast<OccluderMesh>(so->Child(i)->GetRenderable())->ScaleFactor(esm_scale_factor_);
+						scene_objs_.push_back(so->Child(i));
+					}
+
+					loading_percentage_ = 90;
+				}
 			}
 			else if (loading_percentage_ < 95)
 			{
@@ -817,9 +811,9 @@ uint32_t ShadowCubeMap::DoUpdate(uint32_t pass)
 				SceneObjectPtr so = MakeSharedPtr<SceneObjectHelper>(teapot_model_->Mesh(0), SceneObject::SOA_Cullable | SceneObject::SOA_Moveable);
 				so->BindSubThreadUpdateFunc(OccluderObjectUpdate());
 				so->AddToSceneManager();
-				checked_pointer_cast<OccluderMesh>(scene_objs_.back()->GetRenderable())->LampTexture(lamp_tex_);
-				checked_pointer_cast<OccluderMesh>(scene_objs_.back()->GetRenderable())->CubeSMTexture(shadow_cube_tex_);
-				checked_pointer_cast<OccluderMesh>(scene_objs_.back()->GetRenderable())->DPSMTexture(shadow_dual_tex_);
+				checked_pointer_cast<OccluderMesh>(so->GetRenderable())->LampTexture(lamp_tex_);
+				checked_pointer_cast<OccluderMesh>(so->GetRenderable())->CubeSMTexture(shadow_cube_tex_);
+				checked_pointer_cast<OccluderMesh>(so->GetRenderable())->DPSMTexture(shadow_dual_tex_);
 				checked_pointer_cast<OccluderMesh>(so->GetRenderable())->ScaleFactor(esm_scale_factor_);
 				scene_objs_.push_back(so);
 

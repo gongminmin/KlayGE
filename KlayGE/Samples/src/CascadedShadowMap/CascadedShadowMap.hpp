@@ -28,13 +28,9 @@ private:
 	void CtrlCameraHandler(KlayGE::UICheckBox const & sender);
 
 	KlayGE::FontPtr font_;
-	KlayGE::RenderModelPtr ground_model_;
-	KlayGE::RenderModelPtr scene_model_;
 
 	KlayGE::SceneObjectPtr sky_box_;
 
-	KlayGE::function<KlayGE::RenderModelPtr()> ground_ml_;
-	KlayGE::function<KlayGE::RenderModelPtr()> model_ml_;
 	KlayGE::function<KlayGE::TexturePtr()> y_cube_tl_;
 	KlayGE::function<KlayGE::TexturePtr()> c_cube_tl_;
 	KlayGE::uint32_t loading_percentage_;

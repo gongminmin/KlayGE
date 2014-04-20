@@ -32,10 +32,8 @@ private:
 	void OldFashionHandler(KlayGE::UIRadioButton const & sender);
 
 	KlayGE::FontPtr font_;
-	KlayGE::SceneObjectPtr scene_obj_;
 	KlayGE::SceneObjectPtr sky_box_;
 
-	KlayGE::function<KlayGE::RenderModelPtr()> model_ml_;
 	KlayGE::function<KlayGE::TexturePtr()> y_cube_tl_;
 	KlayGE::function<KlayGE::TexturePtr()> c_cube_tl_;
 	KlayGE::uint32_t loading_percentage_;

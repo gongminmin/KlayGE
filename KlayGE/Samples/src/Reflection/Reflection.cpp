@@ -169,6 +169,16 @@ namespace
 		}
 	};
 
+	struct CreateDinoSceneObjectFactory
+	{
+		SceneObjectPtr operator()(RenderModelPtr const & model)
+		{
+			SceneObjectPtr so = MakeSharedPtr<SceneObjectHelper>(model, SceneObject::SOA_Cullable);
+			so->ModelMatrix(MathLib::scaling(float3(2, 2, 2)) * MathLib::translation(0.0f, 1.0f, -2.5f));
+			return so;
+		}
+	};
+
 
 	enum
 	{
@@ -220,8 +230,9 @@ void ScreenSpaceReflectionApp::InitObjects()
 	y_cube_tl_ = ASyncLoadTexture("Lake_CraterLake03_y.dds", EAH_GPU_Read | EAH_Immutable);
 	teapot_ml_ = ASyncLoadModel("teapot.meshml", EAH_GPU_Read | EAH_Immutable,
 		CreateModelFactory<RenderModel>(), CreateMeshFactory<ReflectMesh>());
-	dino_ml_ = ASyncLoadModel("dino50.7z//dino50.meshml", EAH_GPU_Read | EAH_Immutable,
-		CreateModelFactory<RenderModel>(), CreateMeshFactory<DinoMesh>());
+	ASyncLoadModelSceneObject("dino50.7z//dino50.meshml", EAH_GPU_Read | EAH_Immutable,
+		CreateModelFactory<RenderModel>(), CreateMeshFactory<DinoMesh>(),
+		CreateDinoSceneObjectFactory());
 
 	this->LookAt(float3(2.0f, 2.0f, -5.0f), float3(0.0f, 1.0f, 0.0f), float3(0, 1, 0));
 	this->Proj(0.1f, 500.0f);
@@ -382,21 +393,10 @@ uint32_t ScreenSpaceReflectionApp::DoUpdate(KlayGE::uint32_t pass)
 			{
 				TexturePtr y_cube_tex = y_cube_tl_();
 				TexturePtr c_cube_tex = c_cube_tl_();
-				checked_pointer_cast<SceneObjectSkyBox>(sky_box_)->CompressedCubeMap(y_cube_tex, c_cube_tex);
-				checked_pointer_cast<ReflectMesh>(teapot_->GetRenderable())->SkyBox(y_cube_tex, c_cube_tex);
 				if (!!y_cube_tex && !!c_cube_tex)
 				{
-					loading_percentage_ = 40;
-				}
-			}
-			else if (loading_percentage_ < 90)
-			{
-				RenderModelPtr model = dino_ml_();
-				if (model)
-				{
-					dino_ = MakeSharedPtr<SceneObjectHelper>(model->Mesh(0), SceneObjectHelper::SOA_Cullable);
-					dino_->ModelMatrix(MathLib::scaling(float3(2, 2, 2)) * MathLib::translation(0.0f, 1.0f, -2.5f));
-					dino_->AddToSceneManager();
+					checked_pointer_cast<SceneObjectSkyBox>(sky_box_)->CompressedCubeMap(y_cube_tex, c_cube_tex);
+					checked_pointer_cast<ReflectMesh>(teapot_->GetRenderable())->SkyBox(y_cube_tex, c_cube_tex);
 
 					loading_percentage_ = 100;
 				}
