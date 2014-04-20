@@ -747,6 +747,7 @@ namespace
 			uint32_t flag;
 
 			shared_ptr<KFont> kfont_loader;
+			shared_ptr<FontPtr> kfont;
 		};
 
 	public:
@@ -755,6 +756,7 @@ namespace
 			font_desc_.res_name = res_name;
 			font_desc_.flag = flag;
 			font_desc_.kfont_loader = MakeSharedPtr<KFont>();
+			font_desc_.kfont = MakeSharedPtr<FontPtr>();
 		}
 
 		uint64_t Type() const
@@ -772,12 +774,23 @@ namespace
 		{
 			ResIdentifierPtr kfont_input = ResLoader::Instance().Open(font_desc_.res_name);
 			font_desc_.kfont_loader->Load(kfont_input->input_stream());
+
+			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+			RenderDeviceCaps const & caps = rf.RenderEngineInstance().DeviceCaps();
+			if (caps.multithread_res_creating_support)
+			{
+				this->MainThreadStage();
+			}
 		}
 
 		shared_ptr<void> MainThreadStage()
 		{
-			shared_ptr<FontRenderable> fr = MakeSharedPtr<FontRenderable>(font_desc_.kfont_loader);
-			return static_pointer_cast<void>(MakeSharedPtr<Font>(fr, font_desc_.flag));
+			if (!*font_desc_.kfont)
+			{
+				shared_ptr<FontRenderable> fr = MakeSharedPtr<FontRenderable>(font_desc_.kfont_loader);
+				*font_desc_.kfont = MakeSharedPtr<Font>(fr, font_desc_.flag);
+			}
+			return static_pointer_cast<void>(*font_desc_.kfont);
 		}
 
 		bool HasSubThreadStage() const
@@ -804,6 +817,7 @@ namespace
 			font_desc_.res_name = fld.font_desc_.res_name;
 			font_desc_.flag = fld.font_desc_.flag;
 			font_desc_.kfont_loader = fld.font_desc_.kfont_loader;
+			font_desc_.kfont = fld.font_desc_.kfont;
 		}
 
 		shared_ptr<void> CloneResourceFrom(shared_ptr<void> const & resource)

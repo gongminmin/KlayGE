@@ -64,7 +64,7 @@ namespace
 			};
 			shared_ptr<PostProcessData> pp_data;
 
-			PostProcessPtr pp;
+			shared_ptr<PostProcessPtr> pp;
 		};
 
 	public:
@@ -73,6 +73,7 @@ namespace
 			pp_desc_.res_name = res_name;
 			pp_desc_.pp_name = pp_name;
 			pp_desc_.pp_data = MakeSharedPtr<PostProcessDesc::PostProcessData>();
+			pp_desc_.pp = MakeSharedPtr<PostProcessPtr>();
 		}
 
 		uint64_t Type() const
@@ -152,19 +153,29 @@ namespace
 					}
 				}
 			}
+
+			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+			RenderDeviceCaps const & caps = rf.RenderEngineInstance().DeviceCaps();
+			if (caps.multithread_res_creating_support)
+			{
+				this->MainThreadStage();
+			}
 		}
 
 		shared_ptr<void> MainThreadStage()
 		{
-			RenderTechniquePtr tech = SyncLoadRenderEffect(pp_desc_.pp_data->effect_name)->TechniqueByName(pp_desc_.pp_data->tech_name);
+			if (!*pp_desc_.pp)
+			{
+				RenderTechniquePtr tech = SyncLoadRenderEffect(pp_desc_.pp_data->effect_name)->TechniqueByName(pp_desc_.pp_data->tech_name);
 
-			PostProcessPtr pp = MakeSharedPtr<PostProcess>(pp_desc_.pp_data->name, pp_desc_.pp_data->param_names,
-				pp_desc_.pp_data->input_pin_names, pp_desc_.pp_data->output_pin_names, tech);
-			pp->CSPixelPerThreadX(pp_desc_.pp_data->cs_data_per_thread_x);
-			pp->CSPixelPerThreadY(pp_desc_.pp_data->cs_data_per_thread_y);
-			pp->CSPixelPerThreadZ(pp_desc_.pp_data->cs_data_per_thread_z);
-			pp_desc_.pp = pp;
-			return static_pointer_cast<void>(pp);
+				PostProcessPtr pp = MakeSharedPtr<PostProcess>(pp_desc_.pp_data->name, pp_desc_.pp_data->param_names,
+					pp_desc_.pp_data->input_pin_names, pp_desc_.pp_data->output_pin_names, tech);
+				pp->CSPixelPerThreadX(pp_desc_.pp_data->cs_data_per_thread_x);
+				pp->CSPixelPerThreadY(pp_desc_.pp_data->cs_data_per_thread_y);
+				pp->CSPixelPerThreadZ(pp_desc_.pp_data->cs_data_per_thread_z);
+				*pp_desc_.pp = pp;
+			}
+			return static_pointer_cast<void>(*pp_desc_.pp);
 		}
 
 		bool HasSubThreadStage() const

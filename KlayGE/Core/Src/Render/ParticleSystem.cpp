@@ -88,7 +88,7 @@ namespace
 			};
 			shared_ptr<ParticleSystemData> ps_data;
 
-			ParticleSystemPtr ps;
+			shared_ptr<ParticleSystemPtr> ps;
 		};
 
 	public:
@@ -96,6 +96,7 @@ namespace
 		{
 			ps_desc_.res_name = res_name;
 			ps_desc_.ps_data = MakeSharedPtr<ParticleSystemDesc::ParticleSystemData>();
+			ps_desc_.ps = MakeSharedPtr<ParticleSystemPtr>();
 		}
 
 		uint64_t Type() const
@@ -310,37 +311,47 @@ namespace
 					}
 				}
 			}
+
+			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+			RenderDeviceCaps const & caps = rf.RenderEngineInstance().DeviceCaps();
+			if (caps.multithread_res_creating_support)
+			{
+				this->MainThreadStage();
+			}
 		}
 
 		shared_ptr<void> MainThreadStage()
 		{
-			ParticleSystemPtr ps = MakeSharedPtr<ParticleSystem>(NUM_PARTICLES);
+			if (!*ps_desc_.ps)
+			{
+				ParticleSystemPtr ps = MakeSharedPtr<ParticleSystem>(NUM_PARTICLES);
 
-			ps->ParticleAlphaFromTex(ps_desc_.ps_data->particle_alpha_from_tex);
-			ps->ParticleAlphaToTex(ps_desc_.ps_data->particle_alpha_to_tex);
-			ps->ParticleColorFrom(ps_desc_.ps_data->particle_color_from);
-			ps->ParticleColorTo(ps_desc_.ps_data->particle_color_to);
+				ps->ParticleAlphaFromTex(ps_desc_.ps_data->particle_alpha_from_tex);
+				ps->ParticleAlphaToTex(ps_desc_.ps_data->particle_alpha_to_tex);
+				ps->ParticleColorFrom(ps_desc_.ps_data->particle_color_from);
+				ps->ParticleColorTo(ps_desc_.ps_data->particle_color_to);
 
-			ParticleEmitterPtr emitter = ps->MakeEmitter(ps_desc_.ps_data->emitter_type);
-			ps->AddEmitter(emitter);
+				ParticleEmitterPtr emitter = ps->MakeEmitter(ps_desc_.ps_data->emitter_type);
+				ps->AddEmitter(emitter);
 
-			emitter->Frequency(ps_desc_.ps_data->frequency);
-			emitter->EmitAngle(ps_desc_.ps_data->angle);
-			emitter->MinPosition(ps_desc_.ps_data->min_pos);
-			emitter->MaxPosition(ps_desc_.ps_data->max_pos);
-			emitter->MinVelocity(ps_desc_.ps_data->min_vel);
-			emitter->MaxVelocity(ps_desc_.ps_data->max_vel);
-			emitter->MinLife(ps_desc_.ps_data->min_life);
-			emitter->MaxLife(ps_desc_.ps_data->max_life);
+				emitter->Frequency(ps_desc_.ps_data->frequency);
+				emitter->EmitAngle(ps_desc_.ps_data->angle);
+				emitter->MinPosition(ps_desc_.ps_data->min_pos);
+				emitter->MaxPosition(ps_desc_.ps_data->max_pos);
+				emitter->MinVelocity(ps_desc_.ps_data->min_vel);
+				emitter->MaxVelocity(ps_desc_.ps_data->max_vel);
+				emitter->MinLife(ps_desc_.ps_data->min_life);
+				emitter->MaxLife(ps_desc_.ps_data->max_life);
 
-			ParticleUpdaterPtr updater = ps->MakeUpdater(ps_desc_.ps_data->updater_type);
-			ps->AddUpdater(updater);
-			checked_pointer_cast<PolylineParticleUpdater>(updater)->SizeOverLife(ps_desc_.ps_data->size_over_life_ctrl_pts);
-			checked_pointer_cast<PolylineParticleUpdater>(updater)->MassOverLife(ps_desc_.ps_data->mass_over_life_ctrl_pts);
-			checked_pointer_cast<PolylineParticleUpdater>(updater)->OpacityOverLife(ps_desc_.ps_data->opacity_over_life_ctrl_pts);
+				ParticleUpdaterPtr updater = ps->MakeUpdater(ps_desc_.ps_data->updater_type);
+				ps->AddUpdater(updater);
+				checked_pointer_cast<PolylineParticleUpdater>(updater)->SizeOverLife(ps_desc_.ps_data->size_over_life_ctrl_pts);
+				checked_pointer_cast<PolylineParticleUpdater>(updater)->MassOverLife(ps_desc_.ps_data->mass_over_life_ctrl_pts);
+				checked_pointer_cast<PolylineParticleUpdater>(updater)->OpacityOverLife(ps_desc_.ps_data->opacity_over_life_ctrl_pts);
 
-			ps_desc_.ps = ps;
-			return static_pointer_cast<void>(ps);
+				*ps_desc_.ps = ps;
+			}
+			return static_pointer_cast<void>(*ps_desc_.ps);
 		}
 
 		bool HasSubThreadStage() const
@@ -365,6 +376,7 @@ namespace
 			ParticleSystemLoadingDesc const & psld = static_cast<ParticleSystemLoadingDesc const &>(rhs);
 			ps_desc_.res_name = psld.ps_desc_.res_name;
 			ps_desc_.ps_data = psld.ps_desc_.ps_data;
+			ps_desc_.ps = psld.ps_desc_.ps;
 		}
 
 		shared_ptr<void> CloneResourceFrom(shared_ptr<void> const & resource)

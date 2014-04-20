@@ -906,6 +906,8 @@ namespace
 				std::vector<uint8_t> data_block;
 			};
 			shared_ptr<TexData> tex_data;
+
+			shared_ptr<TexturePtr> tex;
 		};
 
 	public:
@@ -914,6 +916,7 @@ namespace
 			tex_desc_.res_name = res_name;
 			tex_desc_.access_hint = access_hint;
 			tex_desc_.tex_data = MakeSharedPtr<TexDesc::TexData>();
+			tex_desc_.tex = MakeSharedPtr<TexturePtr>();
 		}
 
 		uint64_t Type() const
@@ -934,9 +937,12 @@ namespace
 
 		shared_ptr<void> MainThreadStage()
 		{
-			shared_ptr<void> ret = static_pointer_cast<void>(this->CreateTexture());
-			tex_desc_.tex_data.reset();
-			return ret;
+			if (!*tex_desc_.tex)
+			{
+				*tex_desc_.tex = this->CreateTexture();
+				tex_desc_.tex_data.reset();
+			}
+			return static_pointer_cast<void>(*tex_desc_.tex);
 		}
 
 		bool HasSubThreadStage() const
@@ -963,6 +969,7 @@ namespace
 			tex_desc_.res_name = tld.tex_desc_.res_name;
 			tex_desc_.access_hint = tld.tex_desc_.access_hint;
 			tex_desc_.tex_data = tld.tex_desc_.tex_data;
+			tex_desc_.tex = tld.tex_desc_.tex;
 		}
 
 		shared_ptr<void> CloneResourceFrom(shared_ptr<void> const & resource)
@@ -1371,6 +1378,11 @@ namespace
 						}
 					}
 				}
+			}
+
+			if (caps.multithread_res_creating_support)
+			{
+				this->MainThreadStage();
 			}
 		}
 

@@ -81,6 +81,8 @@ namespace
 				std::vector<shared_ptr<AABBKeyFrames> > frame_pos_bbs;
 			};
 			shared_ptr<ModelData> model_data;
+
+			shared_ptr<RenderModelPtr> model;
 		};
 
 	public:
@@ -93,6 +95,7 @@ namespace
 			model_desc_.CreateModelFactoryFunc = CreateModelFactoryFunc;
 			model_desc_.CreateMeshFactoryFunc = CreateMeshFactoryFunc;
 			model_desc_.model_data = MakeSharedPtr<ModelDesc::ModelData>();
+			model_desc_.model = MakeSharedPtr<RenderModelPtr>();
 		}
 
 		uint64_t Type() const
@@ -118,20 +121,31 @@ namespace
 				model_desc_.model_data->joints, model_desc_.model_data->actions, model_desc_.model_data->kfs,
 				model_desc_.model_data->num_frames, model_desc_.model_data->frame_rate,
 				model_desc_.model_data->frame_pos_bbs);
+
+			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+			RenderDeviceCaps const & caps = rf.RenderEngineInstance().DeviceCaps();
+			if (caps.multithread_res_creating_support)
+			{
+				this->MainThreadStage();
+			}
 		}
 
 		shared_ptr<void> MainThreadStage()
 		{
-			RenderModelPtr model = this->CreateModel();
-
-			model->BuildModelInfo();
-			for (uint32_t i = 0; i < model->NumMeshes(); ++ i)
+			if (!*model_desc_.model)
 			{
-				model->Mesh(i)->BuildMeshInfo();
-			}
+				RenderModelPtr model = this->CreateModel();
+				*model_desc_.model = model;
 
-			model_desc_.model_data.reset();
-			return static_pointer_cast<void>(model);
+				model->BuildModelInfo();
+				for (uint32_t i = 0; i < model->NumMeshes(); ++ i)
+				{
+					model->Mesh(i)->BuildMeshInfo();
+				}
+
+				model_desc_.model_data.reset();
+			}
+			return static_pointer_cast<void>(*model_desc_.model);
 		}
 
 		bool HasSubThreadStage() const
@@ -158,6 +172,7 @@ namespace
 			model_desc_.res_name = rmld.model_desc_.res_name;
 			model_desc_.access_hint = rmld.model_desc_.access_hint;
 			model_desc_.model_data = rmld.model_desc_.model_data;
+			model_desc_.model = rmld.model_desc_.model;
 		}
 
 		shared_ptr<void> CloneResourceFrom(shared_ptr<void> const & resource)
