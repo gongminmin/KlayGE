@@ -89,9 +89,8 @@ void GlobalIlluminationApp::InitObjects()
 	this->LookAt(float3(-14.5f, 18, -3), float3(-13.6f, 17.55f, -2.8f));
 	this->Proj(0.1f, 500.0f);
 
-	loading_percentage_ = 0;
-	c_cube_tl_ = ASyncLoadTexture("Lake_CraterLake03_c.dds", EAH_GPU_Read | EAH_Immutable);
-	y_cube_tl_ = ASyncLoadTexture("Lake_CraterLake03_y.dds", EAH_GPU_Read | EAH_Immutable);
+	function<TexturePtr()> c_cube_tl = ASyncLoadTexture("Lake_CraterLake03_c.dds", EAH_GPU_Read | EAH_Immutable);
+	function<TexturePtr()> y_cube_tl = ASyncLoadTexture("Lake_CraterLake03_y.dds", EAH_GPU_Read | EAH_Immutable);
 	ASyncLoadModelSceneObject("sponza_crytek.7z//sponza_crytek.meshml", EAH_GPU_Read | EAH_Immutable);
 
 	font_ = SyncLoadFont("gkai00mp.kfont");
@@ -161,6 +160,7 @@ void GlobalIlluminationApp::InitObjects()
 	dialog_->Control<UICheckBox>(id_ctrl_camera_)->OnChangedEvent().connect(KlayGE::bind(&GlobalIlluminationApp::CtrlCameraHandler, this, KlayGE::placeholders::_1));
 
 	sky_box_ = MakeSharedPtr<SceneObjectSkyBox>();
+	checked_pointer_cast<SceneObjectSkyBox>(sky_box_)->CompressedCubeMap(y_cube_tl, c_cube_tl);
 	sky_box_->AddToSceneManager();
 }
 
@@ -253,22 +253,5 @@ void GlobalIlluminationApp::DoUpdateOverlay()
 
 uint32_t GlobalIlluminationApp::DoUpdate(uint32_t pass)
 {
-	if (0 == pass)
-	{
-		if (loading_percentage_ < 100)
-		{
-			if (loading_percentage_ < 10)
-			{
-				TexturePtr y_cube_tex = y_cube_tl_();
-				TexturePtr c_cube_tex = c_cube_tl_();
-				checked_pointer_cast<SceneObjectSkyBox>(sky_box_)->CompressedCubeMap(y_cube_tex, c_cube_tex);
-				if (!!y_cube_tex && !!c_cube_tex)
-				{
-					loading_percentage_ = 100;
-				}
-			}
-		}
-	}
-
 	return deferred_rendering_->Update(pass);
 }

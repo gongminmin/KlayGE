@@ -110,9 +110,8 @@ void PostProcessingApp::InitObjects()
 	this->LookAt(float3(0, 0.5f, -2), float3(0, 0, 0));
 	this->Proj(0.1f, 150.0f);
 
-	loading_percentage_ = 0;
-	c_cube_tl_ = ASyncLoadTexture("rnl_cross_c.dds", EAH_GPU_Read | EAH_Immutable);
-	y_cube_tl_ = ASyncLoadTexture("rnl_cross_y.dds", EAH_GPU_Read | EAH_Immutable);
+	function<TexturePtr()> c_cube_tl = ASyncLoadTexture("rnl_cross_c.dds", EAH_GPU_Read | EAH_Immutable);
+	function<TexturePtr()> y_cube_tl = ASyncLoadTexture("rnl_cross_y.dds", EAH_GPU_Read | EAH_Immutable);
 	ASyncLoadModelSceneObject("dino50.7z//dino50.meshml", EAH_GPU_Read | EAH_Immutable,
 		CreateModelFactory<RenderModel>(), CreateMeshFactory<StaticMesh>(), CreateDinoSceneObjectFactory());
 
@@ -176,6 +175,7 @@ void PostProcessingApp::InitObjects()
 	this->CartoonHandler(*dialog_->Control<UIRadioButton>(id_cartoon_));
 	
 	sky_box_ = MakeSharedPtr<SceneObjectSkyBox>();
+	checked_pointer_cast<SceneObjectSkyBox>(sky_box_)->CompressedCubeMap(y_cube_tl, c_cube_tl);
 	sky_box_->AddToSceneManager();
 
 	color_fb_ = rf.MakeFrameBuffer();
@@ -321,23 +321,6 @@ void PostProcessingApp::DoUpdateOverlay()
 
 uint32_t PostProcessingApp::DoUpdate(uint32_t pass)
 {
-	if (0 == pass)
-	{
-		if (loading_percentage_ < 100)
-		{
-			if (loading_percentage_ < 10)
-			{
-				TexturePtr y_cube_tex = y_cube_tl_();
-				TexturePtr c_cube_tex = c_cube_tl_();
-				checked_pointer_cast<SceneObjectSkyBox>(sky_box_)->CompressedCubeMap(y_cube_tex, c_cube_tex);
-				if (!!y_cube_tex && !!c_cube_tex)
-				{
-					loading_percentage_ = 100;
-				}
-			}
-		}
-	}
-
 	RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 		
 	uint32_t ret = deferred_rendering_->Update(pass);

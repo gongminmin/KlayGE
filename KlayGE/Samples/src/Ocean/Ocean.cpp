@@ -796,9 +796,8 @@ void OceanApp::InitObjects()
 	this->LookAt(float3(-3455.78f, 23.4f, 8133.55f), float3(-3456.18f, 23.4f, 8134.49f));
 	this->Proj(0.1f, 5000);
 
-	loading_percentage_ = 0;
-	c_cube_tl_ = ASyncLoadTexture("DH001cross_c.dds", EAH_GPU_Read | EAH_Immutable);
-	y_cube_tl_ = ASyncLoadTexture("DH001cross_y.dds", EAH_GPU_Read | EAH_Immutable);
+	function<TexturePtr()> c_cube_tl = ASyncLoadTexture("DH001cross_c.dds", EAH_GPU_Read | EAH_Immutable);
+	function<TexturePtr()> y_cube_tl = ASyncLoadTexture("DH001cross_y.dds", EAH_GPU_Read | EAH_Immutable);
 
 	font_ = SyncLoadFont("gkai00mp.kfont");
 
@@ -835,6 +834,7 @@ void OceanApp::InitObjects()
 	ocean_->AddToSceneManager();
 
 	sky_box_ = MakeSharedPtr<SceneObjectFoggySkyBox>();
+	checked_pointer_cast<SceneObjectFoggySkyBox>(sky_box_)->CompressedCubeMap(y_cube_tl, c_cube_tl);
 	checked_pointer_cast<SceneObjectFoggySkyBox>(sky_box_)->FogColor(fog_color);
 	sky_box_->AddToSceneManager();
 
@@ -1058,20 +1058,6 @@ void OceanApp::DoUpdateOverlay()
 
 uint32_t OceanApp::DoUpdate(uint32_t pass)
 {
-	if (0 == pass)
-	{
-		if (loading_percentage_ < 100)
-		{
-			TexturePtr y_cube_tex = y_cube_tl_();
-			TexturePtr c_cube_tex = c_cube_tl_();
-			checked_pointer_cast<SceneObjectSkyBox>(sky_box_)->CompressedCubeMap(y_cube_tex, c_cube_tex);
-			if (!!y_cube_tex && !!c_cube_tex)
-			{
-				loading_percentage_ = 100;
-			}
-		}
-	}
-
 	uint32_t ret = deferred_rendering_->Update(pass);
 	if (ret & App3DFramework::URV_Finished)
 	{

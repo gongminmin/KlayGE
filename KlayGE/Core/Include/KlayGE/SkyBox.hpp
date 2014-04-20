@@ -48,7 +48,9 @@ namespace KlayGE
 
 		virtual void Technique(RenderTechniquePtr const & tech);
 		void CubeMap(TexturePtr const & cube);
+		void CubeMap(function<TexturePtr()> const & cube_tl);
 		void CompressedCubeMap(TexturePtr const & y_cube, TexturePtr const & c_cube);
+		void CompressedCubeMap(function<TexturePtr()> const & y_cube_tl, function<TexturePtr()> const & c_cube_tl);
 
 		void OnRenderBegin();
 

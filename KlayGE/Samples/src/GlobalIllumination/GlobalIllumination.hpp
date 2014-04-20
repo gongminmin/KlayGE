@@ -37,10 +37,6 @@ private:
 
 	KlayGE::SpotLightSourcePtr spot_light_;
 
-	KlayGE::function<KlayGE::TexturePtr()> y_cube_tl_;
-	KlayGE::function<KlayGE::TexturePtr()> c_cube_tl_;
-	KlayGE::uint32_t loading_percentage_;
-
 	KlayGE::FirstPersonCameraController fpcController_;
 
 	KlayGE::DeferredRenderingLayerPtr deferred_rendering_;

@@ -31,10 +31,6 @@ private:
 
 	KlayGE::SceneObjectPtr sky_box_;
 
-	KlayGE::function<KlayGE::TexturePtr()> y_cube_tl_;
-	KlayGE::function<KlayGE::TexturePtr()> c_cube_tl_;
-	KlayGE::uint32_t loading_percentage_;
-
 	KlayGE::FirstPersonCameraController fpcController_;
 	KlayGE::TrackballCameraController light_controller_;
 	KlayGE::Camera light_ctrl_camera_;
