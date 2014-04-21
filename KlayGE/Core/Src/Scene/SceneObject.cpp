@@ -53,7 +53,7 @@ namespace KlayGE
 
 	uint32_t SceneObject::NumChildren() const
 	{
-		return children_.size();
+		return static_cast<uint32_t>(children_.size());
 	}
 
 	const SceneObjectPtr& SceneObject::Child(uint32_t index) const

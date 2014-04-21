@@ -655,7 +655,7 @@ namespace KlayGE
 			{
 				item->Render();
 			}
-			num_renderables_rendered_ += items.second.size();
+			num_renderables_rendered_ += static_cast<uint32_t>(items.second.size());
 		}
 		render_queue_.resize(0);
 

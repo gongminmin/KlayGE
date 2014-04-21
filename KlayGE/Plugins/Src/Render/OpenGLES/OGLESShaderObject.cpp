@@ -3356,7 +3356,7 @@ namespace KlayGE
 
 		if (!gl_bind_textures_.empty())
 		{
-			re.BindTextures(0, gl_bind_textures_.size(), &gl_bind_targets_[0], &gl_bind_textures_[0]);
+			re.BindTextures(0, static_cast<GLsizei>(gl_bind_textures_.size()), &gl_bind_targets_[0], &gl_bind_textures_[0]);
 		}
 
 #ifdef KLAYGE_DEBUG

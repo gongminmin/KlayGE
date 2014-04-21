@@ -213,7 +213,7 @@ namespace KlayGE
 
 		if (dirty)
 		{
-			for (size_t i = first; i < first + count; ++ i)
+			for (uint32_t i = first; i < first + count; ++ i)
 			{
 				this->ActiveTexture(GL_TEXTURE0 + i);
 				glBindTexture(targets[i], textures[i]);
@@ -832,7 +832,7 @@ namespace KlayGE
 		OGLESShaderObjectPtr cur_shader = checked_pointer_cast<OGLESShaderObject>(tech.Pass(0)->GetShaderObject());
 		checked_cast<OGLESRenderLayout const *>(&rl)->Active(cur_shader);
 
-		size_t const vertex_count = rl.UseIndices() ? rl.NumIndices() : rl.NumVertices();
+		uint32_t const vertex_count = rl.UseIndices() ? rl.NumIndices() : rl.NumVertices();
 		GLenum mode;
 		uint32_t prim_count;
 		OGLESMapping::Mapping(mode, prim_count, rl);

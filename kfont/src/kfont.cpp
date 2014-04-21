@@ -248,7 +248,7 @@ namespace KlayGE
 			kfont_header header;
 			header.fourcc = Native2LE(MakeFourCC<'K', 'F', 'N', 'T'>::value);
 			header.version = Native2LE(KFONT_VERSION);
-			header.start_ptr = Native2LE(sizeof(header));
+			header.start_ptr = Native2LE(static_cast<uint32_t>(sizeof(header)));
 			header.validate_chars = Native2LE(static_cast<uint32_t>(char_index_advance_.size()));
 			header.non_empty_chars = Native2LE(static_cast<uint32_t>(char_info_.size()));
 			header.char_size = Native2LE(char_size_);
