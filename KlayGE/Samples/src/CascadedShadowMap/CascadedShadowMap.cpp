@@ -89,8 +89,8 @@ void CascadedShadowMapApp::InitObjects()
 	light_controller_.AttachCamera(light_ctrl_camera_);
 	light_controller_.Scalers(0.003f, 0.003f);
 
-	function<TexturePtr()> c_cube_tl = ASyncLoadTexture("Lake_CraterLake03_c.dds", EAH_GPU_Read | EAH_Immutable);
-	function<TexturePtr()> y_cube_tl = ASyncLoadTexture("Lake_CraterLake03_y.dds", EAH_GPU_Read | EAH_Immutable);
+	KlayGE::function<TexturePtr()> c_cube_tl = ASyncLoadTexture("Lake_CraterLake03_c.dds", EAH_GPU_Read | EAH_Immutable);
+	KlayGE::function<TexturePtr()> y_cube_tl = ASyncLoadTexture("Lake_CraterLake03_y.dds", EAH_GPU_Read | EAH_Immutable);
 	ASyncLoadModelSceneObject("plane.meshml", EAH_GPU_Read | EAH_Immutable, CreateModelFactory<RenderModel>(),
 		CreateMeshFactory<StaticMesh>(), CreateGroundSceneObjectFactory());
 	ASyncLoadModelSceneObject("katapult.meshml", EAH_GPU_Read | EAH_Immutable);
