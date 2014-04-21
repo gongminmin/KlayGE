@@ -108,6 +108,10 @@ namespace KlayGE
 
 	Context::~Context()
 	{
+	}
+
+	void Context::DestroyAll()
+	{
 		scene_mgr_.reset();
 
 		ResLoader::Destroy();
@@ -141,6 +145,8 @@ namespace KlayGE
 
 	void Context::Destroy()
 	{
+		context_instance_->DestroyAll();
+
 		unique_lock<mutex> lock(singleton_mutex);
 		context_instance_.reset();
 	}

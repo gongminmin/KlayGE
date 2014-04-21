@@ -477,13 +477,13 @@ namespace KlayGE
 			}
 		}
 
-		KLAYGE_FOREACH(SceneObjsType::const_reference scene_obj, scene_objs_)
-		{
-			scene_obj->MainThreadUpdate(app_time, frame_time);
-		}
-
 		{
 			unique_lock<mutex> lock(update_mutex_);
+
+			KLAYGE_FOREACH(SceneObjsType::const_reference scene_obj, scene_objs_)
+			{
+				scene_obj->MainThreadUpdate(app_time, frame_time);
+			}
 
 			overlay_scene_objs_.clear();
 			for (KLAYGE_AUTO(iter, lights_.begin()); iter != lights_.end();)

@@ -148,6 +148,8 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	D3D11RenderEngine::~D3D11RenderEngine()
 	{
+		timestamp_disjoint_query_.reset();
+
 		cur_frame_buffer_.reset();
 		screen_frame_buffer_.reset();
 		mono_tex_.reset();
@@ -188,7 +190,10 @@ namespace KlayGE
 
 	void D3D11RenderEngine::BeginFrame()
 	{
-		d3d_imm_ctx_->Begin(timestamp_disjoint_query_.get());
+		if (Context::Instance().Config().perf_profiler_on)
+		{
+			d3d_imm_ctx_->Begin(timestamp_disjoint_query_.get());
+		}
 
 		RenderEngine::BeginFrame();
 	}
@@ -197,7 +202,10 @@ namespace KlayGE
 	{
 		RenderEngine::EndFrame();
 
-		d3d_imm_ctx_->End(timestamp_disjoint_query_.get());
+		if (Context::Instance().Config().perf_profiler_on)
+		{
+			d3d_imm_ctx_->End(timestamp_disjoint_query_.get());
+		}
 	}
 
 	void D3D11RenderEngine::UpdateGPUTimestampsFrequency()

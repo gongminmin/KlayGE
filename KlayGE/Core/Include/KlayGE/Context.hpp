@@ -199,6 +199,9 @@ namespace KlayGE
 		}
 
 	private:
+		void DestroyAll();
+
+	private:
 		static shared_ptr<Context> context_instance_;
 
 		ContextCfg cfg_;
