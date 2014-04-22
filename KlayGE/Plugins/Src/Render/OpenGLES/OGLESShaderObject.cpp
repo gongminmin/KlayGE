@@ -1051,6 +1051,7 @@ namespace KlayGE
 		glDeleteProgram(glsl_program_);
 	}
 
+#ifndef KLAYGE_PLATFORM_ANDROID
 #if !USE_DXBC2GLSL
 	std::string OGLESShaderObject::GenCgShaderText(ShaderType type, RenderEffect const & effect,
 			RenderTechnique const & tech, RenderPass const & pass)
@@ -1749,6 +1750,7 @@ namespace KlayGE
 
 		return ss.str();
 	}
+#endif
 #endif
 
 	bool OGLESShaderObject::AttachNativeShader(ShaderType type, RenderEffect const & effect, std::vector<uint32_t> const & shader_desc_ids,

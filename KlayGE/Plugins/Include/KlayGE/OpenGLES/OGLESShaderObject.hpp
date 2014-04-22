@@ -27,12 +27,14 @@ namespace KlayGE
 		OGLESShaderObject();
 		~OGLESShaderObject();
 
+#ifndef KLAYGE_PLATFORM_ANDROID
 #if USE_DXBC2GLSL
 		std::string GenHLSLShaderText(ShaderType type, RenderEffect const & effect,
 			RenderTechnique const & tech, RenderPass const & pass) const;
 #else
 		std::string GenCgShaderText(ShaderType type, RenderEffect const & effect,
 			RenderTechnique const & tech, RenderPass const & pass);
+#endif
 #endif
 
 		bool AttachNativeShader(ShaderType type, RenderEffect const & effect, std::vector<uint32_t> const & shader_desc_ids,
