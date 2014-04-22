@@ -43,6 +43,11 @@
 #include <KFL/Quaternion.hpp>
 #include <KFL/Matrix.hpp>
 
+#ifndef MESHMLLIB_SOURCE
+	#define KLAYGE_LIB_NAME MeshMLLib
+	#include <KFL/Detail/AutoLink.hpp>
+#endif	// MESHMLLIB_SOURCE
+
 namespace KlayGE
 {
 	class MeshMLObj
