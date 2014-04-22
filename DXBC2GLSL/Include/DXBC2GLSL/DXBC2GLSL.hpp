@@ -31,17 +31,10 @@
 
 #include <KFL/KFL.hpp>
 
-#ifdef KLAYGE_COMPILER_MSVC
-	#ifdef KLAYGE_DEBUG
-	#define LIB_FILE_NAME "DXBC2GLSLLib_" KFL_STRINGIZE(KLAYGE_COMPILER_NAME) "_" KFL_STRINGIZE(KLAYGE_COMPILER_TARGET) "_d.lib"
-	#else
-	#define LIB_FILE_NAME "DXBC2GLSLLib_" KFL_STRINGIZE(KLAYGE_COMPILER_NAME) "_" KFL_STRINGIZE(KLAYGE_COMPILER_TARGET) ".lib"
-	#endif
-
-	#pragma comment(lib, LIB_FILE_NAME)
-	//#pragma message("Linking to lib file: " LIB_FILE_NAME)
-	#undef LIB_FILE_NAME
-#endif	// KLAYGE_COMPILER_MSVC
+#ifndef DXBC2GLSL_SOURCE
+	#define KLAYGE_LIB_NAME DXBC2GLSLLib
+	#include <KFL/Detail/AutoLink.hpp>
+#endif	// DXBC2GLSL_SOURCE
 
 #include <DXBC2GLSL/DXBC.hpp>
 #include <DXBC2GLSL/Shader.hpp>

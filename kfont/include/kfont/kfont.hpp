@@ -36,19 +36,10 @@
 #include <vector>
 #include <istream>
 
-#ifdef KLAYGE_COMPILER_MSVC
-	#ifndef KFONT_SOURCE
-		#ifdef KLAYGE_DEBUG
-		#define LIB_FILE_NAME "kfont_" KFL_STRINGIZE(KLAYGE_COMPILER_NAME) "_" KFL_STRINGIZE(KLAYGE_COMPILER_TARGET) "_d.lib"
-		#else
-		#define LIB_FILE_NAME "kfont_" KFL_STRINGIZE(KLAYGE_COMPILER_NAME) "_" KFL_STRINGIZE(KLAYGE_COMPILER_TARGET) ".lib"
-		#endif
-
-		#pragma comment(lib, LIB_FILE_NAME)
-		//#pragma message("Linking to lib file: " LIB_FILE_NAME)
-		#undef LIB_FILE_NAME
-	#endif	// KFONT_SOURCE
-#endif	// KLAYGE_COMPILER_MSVC
+#ifndef KFONT_SOURCE
+	#define KLAYGE_LIB_NAME kfont
+	#include <KFL/Detail/AutoLink.hpp>
+#endif	// KFONT_SOURCE
 
 #ifdef KLAYGE_HAS_DECLSPEC
 	#ifdef KFONT_SOURCE		// Build dll

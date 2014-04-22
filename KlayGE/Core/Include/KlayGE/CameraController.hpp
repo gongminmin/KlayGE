@@ -24,11 +24,6 @@
 
 #pragma once
 
-#ifndef KLAYGE_CORE_SOURCE
-#define KLAYGE_LIB_NAME KlayGE_Core
-#include <KlayGE/config/auto_link.hpp>
-#endif
-
 #include <KFL/Math.hpp>
 #include <KFL/Timer.hpp>
 #include <KlayGE/Input.hpp>

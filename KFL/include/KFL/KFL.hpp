@@ -46,20 +46,8 @@
 #include <KFL/Math.hpp>
 
 #ifndef KFL_SOURCE
-	#ifdef KLAYGE_COMPILER_MSVC
-		#ifdef KLAYGE_DEBUG
-			#define DEBUG_SUFFIX "_d"
-		#else
-			#define DEBUG_SUFFIX ""
-		#endif
-
-		#define LIB_FILE_NAME "KFL_" KFL_STRINGIZE(KLAYGE_COMPILER_NAME) "_" KFL_STRINGIZE(KLAYGE_COMPILER_TARGET) DEBUG_SUFFIX ".lib"
-
-		#pragma comment(lib, LIB_FILE_NAME)
-		//#pragma message("Linking to lib file: " LIB_FILE_NAME)
-		#undef LIB_FILE_NAME
-		#undef DEBUG_SUFFIX
-	#endif	// KLAYGE_COMPILER_MSVC
+	#define KLAYGE_LIB_NAME KFL
+	#include <KFL/Detail/AutoLink.hpp>
 #endif	// KFL_SOURCE
 
 #endif		// _KFL_KFL_HPP

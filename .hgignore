@@ -30,9 +30,9 @@ cfg_build.py
 */build/codelite/Debug*
 */build/codelite/Release*
 */build/codelite/*.workspace.*
-*/build/mgw-*/
-*/build/gcc-*/
-*/build/vc-*/
+*/build/mgw*/
+*/build/gcc*/
+*/build/vc*/
 */lib/
 glloader/doc/html/
 glloader/include/glloader/glloader_egl.h

@@ -15,11 +15,6 @@
 
 #pragma once
 
-#ifndef KLAYGE_CORE_SOURCE
-#define KLAYGE_LIB_NAME KlayGE_Core
-#include <KlayGE/config/auto_link.hpp>
-#endif
-
 #include <KlayGE/PreDeclare.hpp>
 #include <KlayGE/Light.hpp>
 #include <KlayGE/IndirectLightingLayer.hpp>

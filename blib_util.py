@@ -11,8 +11,8 @@ except:
 ################################################
 
 # Compiler name.
-#   On Windows, could be "vc12", "vc11", "vc10", "vc9", "mingw", "auto".
-#   On WinRT, could be "vc12", "vc11", "auto".
+#   On Windows, could be "vc120", "vc110", "vc100", "vc90", "mingw", "auto".
+#   On WinRT, could be "vc120", "vc110", "auto".
 #   On Android, could be "gcc", "auto".
 #   On Linux, could be "gcc", "auto".
 compiler		= "auto"
@@ -94,17 +94,21 @@ class compiler_info:
 		else:
 			prefer_static = False
 
+		self.host_platform = host_platform
+		self.target_platform = target_platform
+		self.prefer_static = prefer_static
+
 		if "" == compiler:
 			if ("" == cfg_build.compiler) or ("auto" == cfg_build.compiler):
 				if "win" == target_platform:
 					if "VS120COMNTOOLS" in env:
-						compiler = "vc12"
+						compiler = "vc120"
 					elif "VS110COMNTOOLS" in env:
-						compiler = "vc11"
+						compiler = "vc110"
 					elif "VS100COMNTOOLS" in env:
-						compiler = "vc10"
+						compiler = "vc100"
 					elif "VS90COMNTOOLS" in env:
-						compiler = "vc9"
+						compiler = "vc90"
 					elif os.path.exists("C:/MinGW/bin/g++.exe") or (0 == os.system("where g++")):
 						compiler = "mingw"
 				elif "linux" == target_platform:
@@ -117,13 +121,13 @@ class compiler_info:
 		toolset = cfg_build.toolset
 		if ("" == cfg_build.toolset) or ("auto" == cfg_build.toolset):
 			if "win" == target_platform:
-				if "vc12" == compiler:
+				if "vc120" == compiler:
 					toolset = "v120"
-				elif "vc11" == compiler:
+				elif "vc110" == compiler:
 					toolset = "v110"
-				elif "vc10" == compiler:
+				elif "vc100" == compiler:
 					toolset = "v100"
-				elif "vc9" == compiler:
+				elif "vc90" == compiler:
 					toolset = "v90"
 			elif "android" == target_platform:
 				toolset = "4.6"
@@ -139,9 +143,9 @@ class compiler_info:
 				cfg = ("Debug", "RelWithDebInfo")
 
 		arch_list = []
-		if "vc12" == compiler:
+		if "vc120" == compiler:
 			compiler_name = "vc"
-			compiler_version = 12
+			compiler_version = 120
 			for arch in archs:
 				is_winrt = False
 				if (arch.find("_app") > 0):
@@ -157,9 +161,9 @@ class compiler_info:
 					arch_list.append((arch, "Visual Studio 12 Win64", toolset, is_winrt))
 				elif "x64_app" == arch:
 					arch_list.append((arch, "Visual Studio 12 WinRT-x64", toolset, is_winrt))
-		elif "vc11" == compiler:
+		elif "vc110" == compiler:
 			compiler_name = "vc"
-			compiler_version = 11
+			compiler_version = 110
 			for arch in archs:
 				is_winrt = False
 				if (arch.find("_app") > 0):
@@ -175,17 +179,17 @@ class compiler_info:
 					arch_list.append((arch, "Visual Studio 11 Win64", toolset, is_winrt))
 				elif "x64_app" == arch:
 					arch_list.append((arch, "Visual Studio 11 Win64 WinRT", toolset, is_winrt))
-		elif "vc10" == compiler:
+		elif "vc100" == compiler:
 			compiler_name = "vc"
-			compiler_version = 10
+			compiler_version = 100
 			for arch in archs:
 				if "x86" == arch:
 					arch_list.append((arch, "Visual Studio 10", toolset, False))
 				elif "x64" == arch:
 					arch_list.append((arch, "Visual Studio 10 Win64", toolset, False))
-		elif "vc9" == compiler:
+		elif "vc90" == compiler:
 			compiler_name = "vc"
-			compiler_version = 9
+			compiler_version = 90
 			for arch in archs:
 				if "x86" == arch:
 					arch_list.append((arch, "Visual Studio 9 2008", toolset, False))
@@ -198,6 +202,7 @@ class compiler_info:
 				arch_list.append((arch, "MinGW Makefiles", toolset, False))
 		elif "gcc" == compiler:
 			compiler_name = "gcc"
+			self.toolset = toolset
 			compiler_version = self.retrive_gcc_version()
 			if ("android" == target_platform) and ("win" == host_platform):
 				for arch in archs:
@@ -211,7 +216,7 @@ class compiler_info:
 			log_error("Wrong configuration\n")
 
 		if "vc" == compiler_name:
-			if compiler_version >= 10:
+			if compiler_version >= 100:
 				self.use_msbuild = True
 				self.proj_ext_name = "vcxproj"
 			else:
@@ -225,13 +230,10 @@ class compiler_info:
 		self.version = compiler_version
 		self.arch_list = arch_list
 		self.cfg = cfg
-		self.host_platform = host_platform
-		self.target_platform = target_platform
-		self.prefer_static = prefer_static
 
 	def msvc_add_build_command(self, batch_cmd, sln_name, proj_name, config, arch = ""):
 		if self.use_msbuild:
-			batch_cmd.add_command('@SET VisualStudioVersion=%d.0' % self.version)
+			batch_cmd.add_command('@SET VisualStudioVersion=%d.0' % (self.version / 10))
 			if len(proj_name) != 0:
 				file_name = "%s.%s" % (proj_name, self.proj_ext_name)
 			else:
@@ -249,10 +251,12 @@ class compiler_info:
 		batch_cmd.add_command('@if ERRORLEVEL 1 exit /B 1')
 		
 	def retrive_gcc_version(self):
-		gcc_ver = subprocess.check_output(["gcc", "-dumpversion"])
-		dot1_pos = gcc_ver.find(".")
-		dot2_pos = gcc_ver.find(".", dot1_pos + 1)
-		return int(gcc_ver[0 : dot1_pos]) * 10 + int(gcc_ver[dot1_pos + 1 : dot2_pos])
+		if ("android" == self.target_platform):
+			gcc_ver = self.toolset
+		else:
+			gcc_ver = subprocess.check_output(["gcc", "-dumpversion"])
+		gcc_ver_components = gcc_ver.split(".")
+		return int(gcc_ver_components[0]) * 10 + int(gcc_ver_components[1])
 
 class batch_command:
 	def __init__(self):
@@ -285,7 +289,7 @@ def build_a_project(name, build_path, compiler_info, compiler_arch, need_install
 	curdir = os.path.abspath(os.curdir)
 
 	toolset_name = ""
-	if ("vc" == compiler_info.name) and (compiler_info.version >= 10):
+	if ("vc" == compiler_info.name) and (compiler_info.version >= 100):
 		toolset_name = "-T %s" % compiler_arch[2]
 
 	if compiler_arch[3]:
@@ -309,7 +313,7 @@ def build_a_project(name, build_path, compiler_info, compiler_arch, need_install
 			vc_option = "x86_arm"
 			vc_arch = "ARM"
 
-		build_dir = "%s/build/%s-%d_0-%s" % (build_path, compiler_info.name, compiler_info.version, compiler_arch[0])
+		build_dir = "%s/build/%s%d_%s_%s" % (build_path, compiler_info.name, compiler_info.version, compiler_info.target_platform, compiler_arch[0])
 		if not os.path.exists(build_dir):
 			os.makedirs(build_dir)
 
@@ -321,7 +325,7 @@ def build_a_project(name, build_path, compiler_info, compiler_arch, need_install
 			log_error("Config %s failed." % name)
 
 		build_cmd = batch_command()
-		build_cmd.add_command('@CALL "%%VS%d0COMNTOOLS%%..\\..\\VC\\vcvarsall.bat" %s' % (compiler_info.version, vc_option))
+		build_cmd.add_command('@CALL "%%VS%dCOMNTOOLS%%..\\..\\VC\\vcvarsall.bat" %s' % (compiler_info.version, vc_option))
 		for config in compiler_info.cfg:
 			compiler_info.msvc_add_build_command(build_cmd, name, "ALL_BUILD", config, vc_arch)
 			if need_install:
@@ -343,7 +347,7 @@ def build_a_project(name, build_path, compiler_info, compiler_arch, need_install
 		make_name += " -j%d" % multiprocessing.cpu_count()
 
 		for config in compiler_info.cfg:
-			build_dir = "%s/build/%s-%s-%s" % (build_path, compiler_info.name, compiler_arch[0], config)
+			build_dir = "%s/build/%s%d_%s_%s-%s" % (build_path, compiler_info.name, compiler_info.version, compiler_info.target_platform, compiler_arch[0], config)
 			if not os.path.exists(build_dir):
 				os.makedirs(build_dir)
 

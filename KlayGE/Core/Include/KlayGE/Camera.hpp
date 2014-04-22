@@ -19,11 +19,6 @@
 
 #pragma once
 
-#ifndef KLAYGE_CORE_SOURCE
-#define KLAYGE_LIB_NAME KlayGE_Core
-#include <KlayGE/config/auto_link.hpp>
-#endif
-
 #ifdef KLAYGE_COMPILER_MSVC
 #pragma warning(push)
 #pragma warning(disable: 4172 4913 6011)

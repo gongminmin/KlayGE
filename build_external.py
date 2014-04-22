@@ -18,7 +18,7 @@ def build_Boost(compiler_info, compiler_arch):
 			os.system("./bootstrap.sh")
 
 	if "vc" == compiler_info.name:
-		boost_toolset = "ms%s-%d.0" % (compiler_info.name, compiler_info.version)
+		boost_toolset = "ms%s-%d.0" % (compiler_info.name, (compiler_info.version / 10))
 	else:
 		if "android" == compiler_info.target_platform:
 			if "armeabi-v7a" == compiler_arch[0]:
@@ -36,9 +36,9 @@ def build_Boost(compiler_info, compiler_arch):
 		options += "address-model=64"
 	
 	if "vc" == compiler_info.name:
-		if compiler_info.version >= 10:
+		if compiler_info.version >= 100:
 			options += " --without-regex"
-		if compiler_info.version >= 11:
+		if compiler_info.version >= 110:
 			options += " --without-atomic --without-chrono --without-date_time --without-filesystem --without-system --without-thread"
 	else:
 		options += " --without-atomic --without-date_time --without-regex"
