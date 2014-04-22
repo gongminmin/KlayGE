@@ -1,0 +1,14 @@
+<?xml version='1.0'?>
+
+<gl_extension name="EGL_NOK_swap_region2" reg_no="23">
+	<functions>			  
+		<function name="eglSwapBuffersRegion2NOK" return="EGLBoolean">
+			<params>
+				<param type="EGLDisplay" name="dpy"/>
+				<param type="EGLSurface" name="surface"/>
+				<param type="EGLint" name="numRects"/>
+				<param type="const EGLint*" name="rects"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

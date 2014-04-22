@@ -1,0 +1,7 @@
+<?xml version='1.0'?>
+
+<gl_extension name="EGL_KHR_lock_surface2" reg_no="16">
+	<tokens>
+		<token name="EGL_BITMAP_PIXEL_SIZE_KHR" value="0x3110"/>
+	</tokens>
+</gl_extension>

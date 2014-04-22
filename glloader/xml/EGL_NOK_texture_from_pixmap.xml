@@ -1,0 +1,7 @@
+<?xml version='1.0'?>
+
+<gl_extension name="EGL_NOK_texture_from_pixmap" reg_no="14">
+	<tokens>
+		<token name="EGL_Y_INVERTED_NOK" value="0x307F"/>
+	</tokens>
+</gl_extension>

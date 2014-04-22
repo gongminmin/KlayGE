@@ -1,0 +1,7 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GL_AMD_transform_feedback4" reg_no="450">
+	<tokens>
+		<token name="GL_STREAM_RASTERIZATION_AMD" value="0x91A0"/>
+	</tokens>
+</gl_extension>

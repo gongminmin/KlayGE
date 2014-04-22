@@ -1,0 +1,13 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GLX_EXT_stereo_tree" reg_no="452">
+	<typedefs>
+		<typedef type="struct { int type; unsigned long serial; Bool send_event; Display* display; int extension; int evtype; GLXDrawable window; Bool stereo_tree; }" synonym="GLXStereoNotifyEventEXT"/>
+	</typedefs>
+
+	<tokens>
+		<token name="GLX_STEREO_TREE_EXT" value="0x20F5"/>
+		<token name="GLX_STEREO_NOTIFY_MASK_EXT" value="0x00000001"/>
+		<token name="GLX_STEREO_NOTIFY_EXT" value="0x00000000"/>
+	</tokens>
+</gl_extension>

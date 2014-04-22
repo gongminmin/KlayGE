@@ -1,0 +1,299 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GL_AMD_gpu_shader_int64" reg_no="451">
+	<tokens>
+		<token name="GL_INT64_NV" value="0x140E"/>
+		<token name="GL_UNSIGNED_INT64_NV" value="0x140F"/>
+		<token name="GL_INT8_NV" value="0x8FE0"/>
+		<token name="GL_INT8_VEC2_NV" value="0x8FE1"/>
+		<token name="GL_INT8_VEC3_NV" value="0x8FE2"/>
+		<token name="GL_INT8_VEC4_NV" value="0x8FE3"/>
+		<token name="GL_INT16_NV" value="0x8FE4"/>
+		<token name="GL_INT16_VEC2_NV" value="0x8FE5"/>
+		<token name="GL_INT16_VEC3_NV" value="0x8FE6"/>
+		<token name="GL_INT16_VEC4_NV" value="0x8FE7"/>
+		<token name="GL_INT64_VEC2_NV" value="0x8FE9"/>
+		<token name="GL_INT64_VEC3_NV" value="0x8FEA"/>
+		<token name="GL_INT64_VEC4_NV" value="0x8FEB"/>
+		<token name="GL_UNSIGNED_INT8_NV" value="0x8FEC"/>
+		<token name="GL_UNSIGNED_INT8_VEC2_NV" value="0x8FED"/>
+		<token name="GL_UNSIGNED_INT8_VEC3_NV" value="0x8FEE"/>
+		<token name="GL_UNSIGNED_INT8_VEC4_NV" value="0x8FEF"/>
+		<token name="GL_UNSIGNED_INT16_NV" value="0x8FF0"/>
+		<token name="GL_UNSIGNED_INT16_VEC2_NV" value="0x8FF1"/>
+		<token name="GL_UNSIGNED_INT16_VEC3_NV" value="0x8FF2"/>
+		<token name="GL_UNSIGNED_INT16_VEC4_NV" value="0x8FF3"/>
+		<token name="GL_UNSIGNED_INT64_VEC2_NV" value="0x8FF5"/>
+		<token name="GL_UNSIGNED_INT64_VEC3_NV" value="0x8FF6"/>
+		<token name="GL_UNSIGNED_INT64_VEC4_NV" value="0x8FF7"/>
+		<token name="GL_FLOAT16_NV" value="0x8FF8"/>
+		<token name="GL_FLOAT16_VEC2_NV" value="0x8FF9"/>
+		<token name="GL_FLOAT16_VEC3_NV" value="0x8FFA"/>
+		<token name="GL_FLOAT16_VEC4_NV" value="0x8FFB"/>
+	</tokens>
+
+	<functions>
+		<function name="glUniform1i64NV" return="void">
+			<params>
+				<param type="GLint" name="location"/>
+				<param type="GLint64EXT" name="x"/>
+			</params>
+		</function>
+		<function name="glUniform2i64NV" return="void">
+			<params>
+				<param type="GLint" name="location"/>
+				<param type="GLint64EXT" name="x"/>
+				<param type="GLint64EXT" name="y"/>
+			</params>
+		</function>
+		<function name="glUniform3i64NV" return="void">
+			<params>
+				<param type="GLint" name="location"/>
+				<param type="GLint64EXT" name="x"/>
+				<param type="GLint64EXT" name="y"/>
+				<param type="GLint64EXT" name="z"/>
+			</params>
+		</function>
+		<function name="glUniform4i64NV" return="void">
+			<params>
+				<param type="GLint" name="location"/>
+				<param type="GLint64EXT" name="x"/>
+				<param type="GLint64EXT" name="y"/>
+				<param type="GLint64EXT" name="z"/>
+				<param type="GLint64EXT" name="w"/>
+			</params>
+		</function>
+		<function name="glUniform1i64vNV" return="void">
+			<params>
+				<param type="GLint" name="location"/>
+				<param type="GLsizei" name="count"/>
+				<param type="const GLint64EXT*" name="value"/>
+			</params>
+		</function>
+		<function name="glUniform2i64vNV" return="void">
+			<params>
+				<param type="GLint" name="location"/>
+				<param type="GLsizei" name="count"/>
+				<param type="const GLint64EXT*" name="value"/>
+			</params>
+		</function>
+		<function name="glUniform3i64vNV" return="void">
+			<params>
+				<param type="GLint" name="location"/>
+				<param type="GLsizei" name="count"/>
+				<param type="const GLint64EXT*" name="value"/>
+			</params>
+		</function>
+		<function name="glUniform4i64vNV" return="void">
+			<params>
+				<param type="GLint" name="location"/>
+				<param type="GLsizei" name="count"/>
+				<param type="const GLint64EXT*" name="value"/>
+			</params>
+		</function>
+		<function name="glUniform1ui64NV" return="void">
+			<params>
+				<param type="GLint" name="location"/>
+				<param type="GLuint64EXT" name="x"/>
+			</params>
+		</function>
+		<function name="glUniform2ui64NV" return="void">
+			<params>
+				<param type="GLint" name="location"/>
+				<param type="GLuint64EXT" name="x"/>
+				<param type="GLuint64EXT" name="y"/>
+			</params>
+		</function>
+		<function name="glUniform3ui64NV" return="void">
+			<params>
+				<param type="GLint" name="location"/>
+				<param type="GLuint64EXT" name="x"/>
+				<param type="GLuint64EXT" name="y"/>
+				<param type="GLuint64EXT" name="z"/>
+			</params>
+		</function>
+		<function name="glUniform4ui64NV" return="void">
+			<params>
+				<param type="GLint" name="location"/>
+				<param type="GLuint64EXT" name="x"/>
+				<param type="GLuint64EXT" name="y"/>
+				<param type="GLuint64EXT" name="z"/>
+				<param type="GLuint64EXT" name="w"/>
+			</params>
+		</function>
+		<function name="glUniform1ui64vNV" return="void">
+			<params>
+				<param type="GLint" name="location"/>
+				<param type="GLsizei" name="count"/>
+				<param type="const GLuint64EXT*" name="value"/>
+			</params>
+		</function>
+		<function name="glUniform2ui64vNV" return="void">
+			<params>
+				<param type="GLint" name="location"/>
+				<param type="GLsizei" name="count"/>
+				<param type="const GLuint64EXT*" name="value"/>
+			</params>
+		</function>
+		<function name="glUniform3ui64vNV" return="void">
+			<params>
+				<param type="GLint" name="location"/>
+				<param type="GLsizei" name="count"/>
+				<param type="const GLuint64EXT*" name="value"/>
+			</params>
+		</function>
+		<function name="glUniform4ui64vNV" return="void">
+			<params>
+				<param type="GLint" name="location"/>
+				<param type="GLsizei" name="count"/>
+				<param type="const GLuint64EXT*" name="value"/>
+			</params>
+		</function>
+		<function name="glGetUniformi64vNV" return="void">
+			<params>
+				<param type="GLuint" name="program"/>
+				<param type="GLint" name="location"/>
+				<param type="GLint64EXT*" name="params"/>
+			</params>
+		</function>
+		<function name="glGetUniformui64vNV" return="void">
+			<params>
+				<param type="GLuint" name="program"/>
+				<param type="GLint" name="location"/>
+				<param type="GLuint64EXT*" name="params"/>
+			</params>
+		</function>
+		<function name="glProgramUniform1i64NV" return="void">
+			<params>
+				<param type="GLuint" name="program"/>
+				<param type="GLint" name="location"/>
+				<param type="GLint64EXT" name="x"/>
+			</params>
+		</function>
+		<function name="glProgramUniform2i64NV" return="void">
+			<params>
+				<param type="GLuint" name="program"/>
+				<param type="GLint" name="location"/>
+				<param type="GLint64EXT" name="x"/>
+				<param type="GLint64EXT" name="y"/>
+			</params>
+		</function>
+		<function name="glProgramUniform3i64NV" return="void">
+			<params>
+				<param type="GLuint" name="program"/>
+				<param type="GLint" name="location"/>
+				<param type="GLint64EXT" name="x"/>
+				<param type="GLint64EXT" name="y"/>
+				<param type="GLint64EXT" name="z"/>
+			</params>
+		</function>
+		<function name="glProgramUniform4i64NV" return="void">
+			<params>
+				<param type="GLuint" name="program"/>
+				<param type="GLint" name="location"/>
+				<param type="GLint64EXT" name="x"/>
+				<param type="GLint64EXT" name="y"/>
+				<param type="GLint64EXT" name="z"/>
+				<param type="GLint64EXT" name="w"/>
+			</params>
+		</function>
+		<function name="glProgramUniform1i64vNV" return="void">
+			<params>
+				<param type="GLuint" name="program"/>
+				<param type="GLint" name="location"/>
+				<param type="GLsizei" name="count"/>
+				<param type="const GLint64EXT*" name="value"/>
+			</params>
+		</function>
+		<function name="glProgramUniform2i64vNV" return="void">
+			<params>
+				<param type="GLuint" name="program"/>
+				<param type="GLint" name="location"/>
+				<param type="GLsizei" name="count"/>
+				<param type="const GLint64EXT*" name="value"/>
+			</params>
+		</function>
+		<function name="glProgramUniform3i64vNV" return="void">
+			<params>
+				<param type="GLuint" name="program"/>
+				<param type="GLint" name="location"/>
+				<param type="GLsizei" name="count"/>
+				<param type="const GLint64EXT*" name="value"/>
+			</params>
+		</function>
+		<function name="glProgramUniform4i64vNV" return="void">
+			<params>
+				<param type="GLuint" name="program"/>
+				<param type="GLint" name="location"/>
+				<param type="GLsizei" name="count"/>
+				<param type="const GLint64EXT*" name="value"/>
+			</params>
+		</function>
+		<function name="glProgramUniform1ui64NV" return="void">
+			<params>
+				<param type="GLuint" name="program"/>
+				<param type="GLint" name="location"/>
+				<param type="GLuint64EXT" name="x"/>
+			</params>
+		</function>
+		<function name="glProgramUniform2ui64NV" return="void">
+			<params>
+				<param type="GLuint" name="program"/>
+				<param type="GLint" name="location"/>
+				<param type="GLuint64EXT" name="x"/>
+				<param type="GLuint64EXT" name="y"/>
+			</params>
+		</function>
+		<function name="glProgramUniform3ui64NV" return="void">
+			<params>
+				<param type="GLuint" name="program"/>
+				<param type="GLint" name="location"/>
+				<param type="GLuint64EXT" name="x"/>
+				<param type="GLuint64EXT" name="y"/>
+				<param type="GLuint64EXT" name="z"/>
+			</params>
+		</function>
+		<function name="glProgramUniform4ui64NV" return="void">
+			<params>
+				<param type="GLuint" name="program"/>
+				<param type="GLint" name="location"/>
+				<param type="GLuint64EXT" name="x"/>
+				<param type="GLuint64EXT" name="y"/>
+				<param type="GLuint64EXT" name="z"/>
+				<param type="GLuint64EXT" name="w"/>
+			</params>
+		</function>
+		<function name="glProgramUniform1ui64vNV" return="void">
+			<params>
+				<param type="GLuint" name="program"/>
+				<param type="GLint" name="location"/>
+				<param type="GLsizei" name="count"/>
+				<param type="const GLuint64EXT*" name="value"/>
+			</params>
+		</function>
+		<function name="glProgramUniform2ui64vNV" return="void">
+			<params>
+				<param type="GLuint" name="program"/>
+				<param type="GLint" name="location"/>
+				<param type="GLsizei" name="count"/>
+				<param type="const GLuint64EXT*" name="value"/>
+			</params>
+		</function>
+		<function name="glProgramUniform3ui64vNV" return="void">
+			<params>
+				<param type="GLuint" name="program"/>
+				<param type="GLint" name="location"/>
+				<param type="GLsizei" name="count"/>
+				<param type="const GLuint64EXT*" name="value"/>
+			</params>
+		</function>
+		<function name="glProgramUniform4ui64vNV" return="void">
+			<params>
+				<param type="GLuint" name="program"/>
+				<param type="GLint" name="location"/>
+				<param type="GLsizei" name="count"/>
+				<param type="const GLuint64EXT*" name="value"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>
