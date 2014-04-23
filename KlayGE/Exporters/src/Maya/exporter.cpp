@@ -774,12 +774,12 @@ int MayaMeshExporter::ExportMaterialAndTexture(MObject* shader, MObjectArray con
 			}
 			else
 			{
-				std::cout << "Unknown material type." << std::endl;
+				MGlobal::displayError("Unknown material type.");
 			}
 		}
 		else
 		{
-			std::cout << "Only one surface shader is accepted while constructing mesh material." << std::endl;
+			MGlobal::displayError("Only one surface shader is accepted while constructing mesh material.");
 		}
 	}
 
