@@ -169,7 +169,8 @@ namespace KlayGE
 		int stereo_method = 0;
 		float stereo_separation = 0;
 		std::string graphics_options;
-		bool perf_profiler_on = false;
+		bool perf_profiler = false;
+		bool location_sensor = false;
 
 		std::string rf_name = "D3D11";
 		std::string af_name = "OpenAL";
@@ -233,7 +234,13 @@ namespace KlayGE
 			XMLNodePtr perf_profile_node = context_node->FirstNode("perf_profile");
 			if (perf_profile_node)
 			{
-				perf_profiler_on = perf_profile_node->Attrib("enabled")->ValueInt() ? true : false;
+				perf_profiler = perf_profile_node->Attrib("enabled")->ValueInt() ? true : false;
+			}
+
+			XMLNodePtr location_sensor_node = context_node->FirstNode("location_sensor");
+			if (location_sensor_node)
+			{
+				location_sensor = location_sensor_node->Attrib("enabled")->ValueInt() ? true : false;
 			}
 
 			XMLNodePtr frame_node = graphics_node->FirstNode("frame");
@@ -517,7 +524,8 @@ namespace KlayGE
 		cfg_.graphics_cfg.options = graphics_options;
 
 		cfg_.deferred_rendering = false;
-		cfg_.perf_profiler_on = perf_profiler_on;
+		cfg_.perf_profiler = perf_profiler;
+		cfg_.location_sensor = location_sensor;
 	}
 
 	void Context::SaveCfg(std::string const & cfg_file)
@@ -557,8 +565,12 @@ namespace KlayGE
 			context_node->AppendNode(adsf_node);
 
 			XMLNodePtr perf_profiler_node = cfg_doc.AllocNode(XNT_Element, "perf_profiler");
-			perf_profiler_node->AppendAttrib(cfg_doc.AllocAttribInt("enabled", cfg_.perf_profiler_on));
+			perf_profiler_node->AppendAttrib(cfg_doc.AllocAttribInt("enabled", cfg_.perf_profiler));
 			context_node->AppendNode(perf_profiler_node);
+
+			XMLNodePtr location_sensor_node = cfg_doc.AllocNode(XNT_Element, "location_sensor");
+			location_sensor_node->AppendAttrib(cfg_doc.AllocAttribInt("enabled", cfg_.location_sensor));
+			context_node->AppendNode(location_sensor_node);
 		}
 		root->AppendNode(context_node);
 

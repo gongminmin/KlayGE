@@ -190,7 +190,7 @@ namespace KlayGE
 
 	void D3D11RenderEngine::BeginFrame()
 	{
-		if (Context::Instance().Config().perf_profiler_on)
+		if (Context::Instance().Config().perf_profiler)
 		{
 			d3d_imm_ctx_->Begin(timestamp_disjoint_query_.get());
 		}
@@ -202,7 +202,7 @@ namespace KlayGE
 	{
 		RenderEngine::EndFrame();
 
-		if (Context::Instance().Config().perf_profiler_on)
+		if (Context::Instance().Config().perf_profiler)
 		{
 			d3d_imm_ctx_->End(timestamp_disjoint_query_.get());
 		}

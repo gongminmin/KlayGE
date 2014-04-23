@@ -295,32 +295,37 @@ namespace KlayGE
 	{
 		::CoInitialize(0);
 
-		ILocation* location = nullptr;
-		HRESULT hr = ::CoCreateInstance(CLSID_Location, nullptr, CLSCTX_INPROC_SERVER,
-			IID_ILocation, reinterpret_cast<void**>(&location));
-		if (SUCCEEDED(hr))
+		HRESULT hr;
+
+		if (Context::Instance().Config().location_sensor)
 		{
-			IID REPORT_TYPES[] = { IID_ILatLongReport };
-			hr = location->RequestPermissions(nullptr, REPORT_TYPES,
-				sizeof(REPORT_TYPES) / sizeof(REPORT_TYPES[0]), true);
+			ILocation* location = nullptr;
+			hr = ::CoCreateInstance(CLSID_Location, nullptr, CLSCTX_INPROC_SERVER,
+				IID_ILocation, reinterpret_cast<void**>(&location));
 			if (SUCCEEDED(hr))
 			{
-				locator_ = MakeCOMPtr(location);
-
-				location_event_ = MakeSharedPtr<MsgInputLocationEvents>(this);
-				ILocationEvents* sensor_event;
-				location_event_->QueryInterface(IID_ILocationEvents, reinterpret_cast<void**>(&sensor_event));
-
-				for (DWORD index = 0; index < sizeof(REPORT_TYPES) / sizeof(REPORT_TYPES[0]); ++ index)
+				IID REPORT_TYPES[] = { IID_ILatLongReport };
+				hr = location->RequestPermissions(nullptr, REPORT_TYPES,
+					sizeof(REPORT_TYPES) / sizeof(REPORT_TYPES[0]), true);
+				if (SUCCEEDED(hr))
 				{
-					hr = locator_->RegisterForReport(sensor_event, REPORT_TYPES[index], 1000);
-				}
+					locator_ = MakeCOMPtr(location);
 
-				sensor_event->Release();
-			}
-			else
-			{
-				location->Release();
+					location_event_ = MakeSharedPtr<MsgInputLocationEvents>(this);
+					ILocationEvents* sensor_event;
+					location_event_->QueryInterface(IID_ILocationEvents, reinterpret_cast<void**>(&sensor_event));
+
+					for (DWORD index = 0; index < sizeof(REPORT_TYPES) / sizeof(REPORT_TYPES[0]); ++ index)
+					{
+						hr = locator_->RegisterForReport(sensor_event, REPORT_TYPES[index], 1000);
+					}
+
+					sensor_event->Release();
+				}
+				else
+				{
+					location->Release();
+				}
 			}
 		}
 
@@ -729,7 +734,6 @@ namespace KlayGE
 
 	MsgInputSensor::MsgInputSensor()
 		: sensor_event_(ref new MetroMsgInputSensorEvent),
-			locator_(ref new Geolocator),
 			accelerometer_(Accelerometer::GetDefault()),
 			gyrometer_(Gyrometer::GetDefault()),
 			inclinometer_(Inclinometer::GetDefault()),
@@ -738,10 +742,13 @@ namespace KlayGE
 	{
 		sensor_event_->BindSensor(this);
 
-		position_token_ = locator_->PositionChanged::add(
-			ref new TypedEventHandler<Geolocator^, PositionChangedEventArgs^>(sensor_event_,
+		if (Context::Instance().Config().location_sensor)
+		{
+			locator_ = ref new Geolocator;
+			position_token_ = locator_->PositionChanged::add(
+				ref new TypedEventHandler<Geolocator^, PositionChangedEventArgs^>(sensor_event_,
 				&MetroMsgInputSensorEvent::OnPositionChanged));
-
+		}
 		if (accelerometer_)
 		{
 			accelerometer_reading_token_ = accelerometer_->ReadingChanged::add(
@@ -776,7 +783,10 @@ namespace KlayGE
 
 	MsgInputSensor::~MsgInputSensor()
 	{
-		locator_->PositionChanged::remove(position_token_);
+		if (Context::Instance().Config().location_sensor)
+		{
+			locator_->PositionChanged::remove(position_token_);
+		}
 		if (accelerometer_)
 		{
 			accelerometer_->ReadingChanged::remove(accelerometer_reading_token_);

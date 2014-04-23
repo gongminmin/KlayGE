@@ -56,7 +56,7 @@ namespace KlayGE
 
 	void PerfRange::Begin()
 	{
-		if (Context::Instance().Config().perf_profiler_on)
+		if (Context::Instance().Config().perf_profiler)
 		{
 			dirty_ = true;
 			cpu_timer_.restart();
@@ -66,7 +66,7 @@ namespace KlayGE
 
 	void PerfRange::End()
 	{
-		if (Context::Instance().Config().perf_profiler_on)
+		if (Context::Instance().Config().perf_profiler)
 		{
 			cpu_time_ = cpu_timer_.elapsed();
 			gpu_timer_query_->End();
@@ -132,7 +132,7 @@ namespace KlayGE
 
 	void PerfProfiler::CollectData()
 	{
-		if (Context::Instance().Config().perf_profiler_on)
+		if (Context::Instance().Config().perf_profiler)
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 			RenderEngine& re = rf.RenderEngineInstance();
@@ -155,7 +155,7 @@ namespace KlayGE
 
 	void PerfProfiler::ExportToCSV(std::string const & file_name) const
 	{
-		if (Context::Instance().Config().perf_profiler_on)
+		if (Context::Instance().Config().perf_profiler)
 		{
 			std::ofstream ofs(file_name.c_str());
 			ofs << "Frame" << ',' << "Category" << ',' << "Name" << ','

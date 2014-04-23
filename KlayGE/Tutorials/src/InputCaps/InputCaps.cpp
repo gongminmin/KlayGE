@@ -241,6 +241,10 @@ namespace
 
 int SampleMain()
 {
+	ContextCfg cfg = Context::Instance().Config();
+	cfg.location_sensor = true;
+	Context::Instance().Config(cfg);
+
 	InputCaps app;
 	app.Create();
 	app.Run();
