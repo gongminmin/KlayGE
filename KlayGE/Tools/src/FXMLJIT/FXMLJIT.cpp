@@ -148,7 +148,10 @@ int main(int argc, char* argv[])
 	{
 		filesystem::copy_file(kfx_path, target_folder / kfx_name,
 			filesystem::copy_option::overwrite_if_exists);
+		kfx_path = target_folder / kfx_name;
 	}
+
+	cout << "Compiled kfx has been saved to " << kfx_path << "." << endl;
 
 	return 0;
 }

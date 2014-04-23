@@ -231,7 +231,7 @@ namespace KlayGE
 
 			if (nullptr == context_)
 			{
-				if (0 == ctx_attr[3] > 0)
+				if (0 == ctx_attr[3])
 				{
 					ctx_attr[2] = EGL_NONE;
 				}

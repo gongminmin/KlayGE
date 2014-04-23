@@ -158,7 +158,7 @@ namespace
 		}
 	}
 
-	void CompileMeshesVerticesChunk(XMLNodePtr const & vertices_chunk, bool normal_in_8_bit,
+	void CompileMeshesVerticesChunk(XMLNodePtr const & vertices_chunk,
 		AABBox& pos_bb, AABBox& tc_bb, std::vector<vertex_element>& vertex_elements,
 		std::vector<int16_t>& positions, std::vector<uint32_t>& normals,
 		std::vector<uint32_t>& tangent_quats, 
@@ -576,7 +576,7 @@ namespace
 				{
 					ve.usage = VEU_Normal;
 					ve.usage_index = 0;
-					ve.format = normal_in_8_bit ? EF_ABGR8 : EF_A2BGR10;
+					ve.format = EF_ABGR8;
 					vertex_elements.push_back(ve);
 				}
 				else
@@ -744,19 +744,9 @@ namespace
 		for (uint32_t index = 0; index < mesh_normals.size(); ++ index)
 		{
 			float3 const normal = MathLib::normalize(mesh_normals[index]) * 0.5f + 0.5f;
-			uint32_t compact;
-			if (normal_in_8_bit)
-			{
-				compact = MathLib::clamp<uint32_t>(static_cast<uint32_t>(normal.x() * 255), 0, 255)
-					| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(normal.y() * 255), 0, 255) << 8)
-					| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(normal.z() * 255), 0, 255) << 16);
-			}
-			else
-			{
-				compact = MathLib::clamp<uint32_t>(static_cast<uint32_t>(normal.x() * 1023), 0, 1023)
-					| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(normal.y() * 1023), 0, 1023) << 10)
-					| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(normal.z() * 1023), 0, 1023) << 20);
-			}
+			uint32_t compact = MathLib::clamp<uint32_t>(static_cast<uint32_t>(normal.x() * 255), 0, 255)
+				| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(normal.y() * 255), 0, 255) << 8)
+				| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(normal.z() * 255), 0, 255) << 16);
 			normals.push_back(compact);					
 		}
 		bone_indices = mesh_bone_indices;
@@ -1016,7 +1006,7 @@ namespace
 		}
 	}
 
-	void CompileMeshesChunk(XMLNodePtr const & meshes_chunk, bool normal_in_8_bit,
+	void CompileMeshesChunk(XMLNodePtr const & meshes_chunk,
 		std::vector<std::string>& mesh_names, std::vector<int32_t>& mtl_ids,
 		std::vector<AABBox>& pos_bbs, std::vector<AABBox>& tc_bbs, 
 		std::vector<uint32_t>& mesh_num_vertices, std::vector<uint32_t>& mesh_base_vertices,
@@ -1070,7 +1060,7 @@ namespace
 			XMLNodePtr vertices_chunk = mesh_node->FirstNode("vertices_chunk");
 			if (vertices_chunk)
 			{
-				CompileMeshesVerticesChunk(vertices_chunk, normal_in_8_bit,
+				CompileMeshesVerticesChunk(vertices_chunk,
 					pos_bbs[mesh_index], tc_bbs[mesh_index], ves,
 					positions, normals,	tangent_quats,
 					diffuses, speculars, tex_coords,
@@ -1621,7 +1611,7 @@ namespace
 		}
 	}
 
-	void MeshMLJIT(std::string const & meshml_name, std::string const & output_name, bool normal_in_8_bit)
+	void MeshMLJIT(std::string const & meshml_name, std::string const & output_name)
 	{
 		std::ostringstream ss;
 
@@ -1657,7 +1647,7 @@ namespace
 		char is_index_16_bit = true;
 		if (meshes_chunk)
 		{
-			CompileMeshesChunk(meshes_chunk, normal_in_8_bit, mesh_names, mtl_ids, pos_bbs, tc_bbs,
+			CompileMeshesChunk(meshes_chunk, mesh_names, mtl_ids, pos_bbs, tc_bbs,
 				mesh_num_vertices, mesh_base_vertices,
 				mesh_num_indices, mesh_start_indices,
 				merged_ves, merged_vertices, merged_indices,
@@ -1759,35 +1749,72 @@ int main(int argc, char* argv[])
 {
 	if (argc < 2)
 	{
-		cout << "Usage: MeshMLJIT xxx.meshml [N8|N10] [xxx.meshml.model_bin] [-q]" << endl;
+		cout << "Usage: MeshMLJIT xxx.meshml [target folder] [-q]" << endl;
 		return 1;
 	}
 
-	std::string meshml_name = argv[1];
-
-	bool normal_in_8_bit = false;
-	if ((argc >= 3) && ("N8" == std::string(argv[2])))
+	std::string target_folder;
+	if (argc >= 3)
 	{
-		normal_in_8_bit = true;
+		target_folder = argv[2];
+		if ((target_folder[target_folder.size() - 1] != '\\')
+			&& (target_folder[target_folder.size() - 1] != '/'))
+		{
+			target_folder += '/';
+		}
 	}
 
-	std::string output_name;
-	if (argc >= 4)
+	std::string input_name = argv[1];
+	std::replace(input_name.begin(), input_name.end(), '\\', '/');
+	std::string meshml_name = ResLoader::Instance().Locate(input_name);
+	if (meshml_name.empty())
 	{
-		output_name = argv[3];
+		std::string::size_type const ext_offset = input_name.find(".meshml");
+		meshml_name = input_name.substr(0, ext_offset);
+		std::string::size_type slash_offset = meshml_name.rfind("/");
+		std::string folder = meshml_name.substr(0, slash_offset + 1);
+		std::string base_name = input_name.substr(slash_offset + 1, ext_offset - slash_offset - 1);
+		meshml_name = folder + base_name + ".7z//" + base_name + ".meshml";
+	}
+
+	std::string::size_type const pkt_offset(meshml_name.find("//"));
+	std::string file_name;
+	if (pkt_offset != std::string::npos)
+	{
+		std::string pkt_name = meshml_name.substr(0, pkt_offset);
+		std::string::size_type const password_offset = pkt_name.find("|");
+		if (password_offset != std::string::npos)
+		{
+			pkt_name = pkt_name.substr(0, password_offset - 1);
+		}
+
+		if (target_folder.empty())
+		{
+			std::string::size_type offset = pkt_name.rfind("/");
+			target_folder = pkt_name.substr(0, offset + 1);
+		}
+
+		file_name = meshml_name.substr(pkt_offset + 2);
 	}
 	else
 	{
-		output_name = meshml_name + JIT_EXT_NAME;
+		std::string::size_type offset = meshml_name.rfind("/");
+		if (target_folder.empty())
+		{
+			target_folder = meshml_name.substr(0, offset + 1);
+		}
+		file_name = meshml_name.substr(offset + 1);
 	}
 
+	std::string output_name = target_folder + file_name + JIT_EXT_NAME;
+
 	bool quiet = false;
-	if ((argc >= 5) && ("-q" == std::string(argv[4])))
+	if ((argc >= 4) && ("-q" == std::string(argv[3])))
 	{
 		quiet = true;
 	}
 
-	MeshMLJIT(meshml_name, output_name, normal_in_8_bit);
+	MeshMLJIT(meshml_name, output_name);
 
 	if (!quiet)
 	{

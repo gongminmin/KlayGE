@@ -933,6 +933,7 @@ namespace KlayGE
 	void ModelJIT(std::string const & meshml_name)
 	{
 		std::string::size_type const pkt_offset(meshml_name.find("//"));
+		std::string folder_name;
 		std::string path_name;
 		if (pkt_offset != std::string::npos)
 		{
@@ -946,14 +947,20 @@ namespace KlayGE
 			std::string::size_type offset = pkt_name.rfind("/");
 			if (offset != std::string::npos)
 			{
-				path_name = pkt_name.substr(0, offset + 1);
+				folder_name = pkt_name.substr(0, offset + 1);
 			}
 
 			std::string const file_name = meshml_name.substr(pkt_offset + 2);
-			path_name += file_name;
+			path_name = folder_name + file_name;
 		}
 		else
 		{
+			std::string::size_type offset = meshml_name.rfind("/");
+			if (offset != std::string::npos)
+			{
+				folder_name = meshml_name.substr(0, offset + 1);
+			}
+
 			path_name = meshml_name;
 		}
 
@@ -1000,7 +1007,7 @@ namespace KlayGE
 #endif
 			meshmljit_name = ResLoader::Instance().Locate(meshmljit_name);
 			if (meshmljit_name.empty() ||
-				system((meshmljit_name + " \"" + meshml_name + "\" N10 " + "\"" + path_name + jit_ext_name + "\" -q").c_str()) != 0)
+				system((meshmljit_name + " \"" + meshml_name + "\" \"" + folder_name + "\" -q").c_str()) != 0)
 			{
 				LogError("MeshMLJIT failed. Forgot to build Tools?");
 			}
