@@ -1757,8 +1757,8 @@ int main(int argc, char* argv[])
 	if (argc >= 3)
 	{
 		target_folder = argv[2];
-		if ((target_folder[target_folder.size() - 1] != '\\')
-			&& (target_folder[target_folder.size() - 1] != '/'))
+		std::replace(target_folder.begin(), target_folder.end(), '\\', '/');
+		if (target_folder[target_folder.size() - 1] != '/')
 		{
 			target_folder += '/';
 		}

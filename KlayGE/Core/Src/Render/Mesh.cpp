@@ -1040,6 +1040,7 @@ namespace KlayGE
 			{
 				full_meshml_name = meshml_name;
 			}
+			std::replace(full_meshml_name.begin(), full_meshml_name.end(), '\\', '/');
 			ModelJIT(full_meshml_name);
 
 			std::string no_packing_name;
