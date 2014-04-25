@@ -24,18 +24,6 @@
 
 #include <KlayGE/OggVorbis/OggVorbisSource.hpp>
 
-#ifdef KLAYGE_COMPILER_MSVC
-#ifdef KLAYGE_DEBUG
-#pragma comment(lib, "libogg_static_d.lib")
-#pragma comment(lib, "libvorbis_static_d.lib")
-#pragma comment(lib, "libvorbisfile_static_d.lib")
-#else
-#pragma comment(lib, "libogg_static.lib")
-#pragma comment(lib, "libvorbis_static.lib")
-#pragma comment(lib, "libvorbisfile_static.lib")
-#endif
-#endif
-
 namespace KlayGE
 {
 	// ¹¹Ôìº¯Êý

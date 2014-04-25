@@ -38,17 +38,17 @@ ADD_DEPENDENCIES(${LIB_NAME} ${KLAYGE_CORELIB_NAME})
 
 IF(MSVC)
 	SET(EXTRA_LINKED_LIBRARIES
-		debug libogg_static_d optimized libogg_static
-		debug libvorbis_static_d optimized libvorbis_static
-		debug libvorbisfile_static_d optimized libvorbisfile_static)
+		debug libogg_static${KLAYGE_OUTPUT_SUFFIX}_d optimized libogg_static${KLAYGE_OUTPUT_SUFFIX}
+		debug libvorbis_static${KLAYGE_OUTPUT_SUFFIX}_d optimized libvorbis_static${KLAYGE_OUTPUT_SUFFIX}
+		debug libvorbisfile_static${KLAYGE_OUTPUT_SUFFIX}_d optimized libvorbisfile_static${KLAYGE_OUTPUT_SUFFIX})
 ELSE()
 	SET(EXTRA_LINKED_LIBRARIES
 		debug KlayGE_Core${KLAYGE_OUTPUT_SUFFIX}_d optimized KlayGE_Core${KLAYGE_OUTPUT_SUFFIX}
 		debug KFL${KLAYGE_OUTPUT_SUFFIX}_d optimized KFL${KLAYGE_OUTPUT_SUFFIX}
 		${Boost_SYSTEM_LIBRARY}
-		debug vorbisfile_static_d optimized vorbisfile_static
-		debug vorbis_static_d optimized vorbis_static
-		debug ogg_static_d optimized ogg_static)
+		debug vorbisfile_static${KLAYGE_OUTPUT_SUFFIX}_d optimized vorbisfile_static${KLAYGE_OUTPUT_SUFFIX}
+		debug vorbis_static${KLAYGE_OUTPUT_SUFFIX}_d optimized vorbis_static${KLAYGE_OUTPUT_SUFFIX}
+		debug ogg_static${KLAYGE_OUTPUT_SUFFIX}_d optimized ogg_static${KLAYGE_OUTPUT_SUFFIX})
 ENDIF()
 
 SET_TARGET_PROPERTIES(${LIB_NAME} PROPERTIES
