@@ -40,7 +40,76 @@
 #endif
 
 // Defines supported compilers
-#if defined(__GNUC__)
+#if defined(__clang__)
+	// Clang++
+
+	#include <bits/c++config.h>
+	#ifdef _GLIBCXX_USE_FLOAT128
+		#undef _GLIBCXX_USE_FLOAT128
+	#endif
+	#ifdef _GLIBCXX_USE_INT128
+		#undef _GLIBCXX_USE_INT128
+	#endif
+
+	#define KLAYGE_COMPILER_CLANG
+
+	#if __clang_major__ >= 3
+		#if __clang_minor__ >= 5
+			#define KLAYGE_COMPILER_VERSION 35
+		#elif __clang_minor__ >= 4
+			#define KLAYGE_COMPILER_VERSION 34
+		#elif __clang_minor__ >= 3
+			#define KLAYGE_COMPILER_VERSION 33
+		#elif __clang_minor__ >= 2
+			#define KLAYGE_COMPILER_VERSION 32
+		#elif __clang_minor__ >= 1
+			#define KLAYGE_COMPILER_VERSION 31
+		#elif __clang_minor__ >= 0
+			#define KLAYGE_COMPILER_VERSION 30
+		#endif
+
+		#define KLAYGE_CXX11_CORE_STATIC_ASSERT_SUPPORT
+		#define KLAYGE_CXX11_CORE_DECLTYPE_SUPPORT
+		#define KLAYGE_CXX11_CORE_RVALUE_REFERENCES_SUPPORT
+		#define KLAYGE_CXX11_CORE_EXTERN_TEMPLATES_SUPPORT
+		#define KLAYGE_CXX11_CORE_VARIADIC_TEMPLATES
+		#define KLAYGE_CXX11_CORE_STRONGLY_TYPED_ENUMS_SUPPORT
+		#define KLAYGE_CXX11_CORE_NULLPTR_SUPPORT
+		#define KLAYGE_CXX11_CORE_FOREACH_SUPPORT
+		#define KLAYGE_CXX11_CORE_NOEXCEPT_SUPPORT
+		#define KLAYGE_CXX11_CORE_OVERRIDE_SUPPORT
+		#if __clang_minor__ >= 1
+			#define KLAYGE_CXX11_CORE_CONSTEXPR_SUPPORT
+		#endif
+
+		#if defined(__GNUC__)
+			#if __GNUC_MINOR__ >= 3
+				#ifdef __GXX_EXPERIMENTAL_CXX0X__
+					#define KLAYGE_CXX11_LIBRARY_ALGORITHM_SUPPORT
+					#define KLAYGE_CXX11_LIBRARY_ARRAY_SUPPORT
+					#define KLAYGE_CXX11_LIBRARY_CSTDINT_SUPPORT
+					#define KLAYGE_CXX11_LIBRARY_FUNCTIONAL_SUPPORT
+					#define KLAYGE_CXX11_LIBRARY_RANDOM_SUPPORT
+					#define KLAYGE_CXX11_LIBRARY_REGEX_SUPPORT
+					#define KLAYGE_CXX11_LIBRARY_SMART_PTR_SUPPORT
+					#define KLAYGE_CXX11_LIBRARY_TUPLE_SUPPORT
+					#define KLAYGE_CXX11_LIBRARY_TYPE_TRAITS_SUPPORT
+					#define KLAYGE_CXX11_LIBRARY_UNORDERED_SUPPORT
+					#if __GNUC_MINOR__ >= 4
+						#define KLAYGE_CXX11_LIBRARY_ATOMIC_SUPPORT
+						#define KLAYGE_CXX11_LIBRARY_SYSTEM_ERROR_SUPPORT
+						#ifdef _GLIBCXX_HAS_GTHREADS
+							#define KLAYGE_CXX11_LIBRARY_CHRONO_SUPPORT
+							#define KLAYGE_CXX11_LIBRARY_THREAD_SUPPORT
+						#endif
+					#endif
+				#endif
+			#endif
+		#endif
+	#else
+		#error Unknown compiler.
+	#endif
+#elif defined(__GNUC__)
 	// GNU C++
 
 	#include <bits/c++config.h>
@@ -270,7 +339,7 @@
 	#else
 		#error Unknown CPU type.
 	#endif
-#elif defined(KLAYGE_COMPILER_GCC)
+#elif defined(KLAYGE_COMPILER_GCC) || defined(KLAYGE_COMPILER_CLANG)
 	#if defined(__x86_64__)
 		#define KLAYGE_CPU_X64
 		#define KLAYGE_COMPILER_TARGET x64
@@ -319,7 +388,7 @@
 			#define KLAYGE_SSE_SUPPORT
 			#define KLAYGE_SSE2_SUPPORT
 		#endif
-	#elif defined(KLAYGE_COMPILER_GCC)
+	#elif defined(KLAYGE_COMPILER_GCC) || defined(KLAYGE_COMPILER_CLANG)
 		#ifdef __MMX__
 			#define KLAYGE_MMX_SUPPORT
 		#endif
@@ -348,14 +417,14 @@
 #elif defined KLAYGE_CPU_ARM
 	#if defined(KLAYGE_COMPILER_MSVC)
 		#define KLAYGE_NEON_SUPPORT
-	#elif defined(KLAYGE_COMPILER_GCC)
+	#elif defined(KLAYGE_COMPILER_GCC) || defined(KLAYGE_COMPILER_CLANG)
 		#ifdef __ARM_NEON__
 			#define KLAYGE_NEON_SUPPORT
 		#endif
 	#endif
 #endif
 
-#if defined(KLAYGE_COMPILER_MSVC) || defined(KLAYGE_COMPILER_GCC)
+#if defined(KLAYGE_COMPILER_MSVC) || defined(KLAYGE_COMPILER_GCC) || defined(KLAYGE_COMPILER_CLANG)
 	#define KLAYGE_HAS_STRUCT_PACK
 #endif
 
@@ -364,13 +433,13 @@
 	#define BOOST_SYSTEM_NO_DEPRECATED
 #endif
 
-#if defined(KLAYGE_COMPILER_GCC) && defined(KLAYGE_PLATFORM_WINDOWS) && defined(KLAYGE_CPU_X64)
+#if (defined(KLAYGE_COMPILER_GCC) || defined(KLAYGE_COMPILER_CLANG)) && defined(KLAYGE_PLATFORM_WINDOWS) && defined(KLAYGE_CPU_X64)
 	#ifndef BOOST_USE_WINDOWS_H
 		#define BOOST_USE_WINDOWS_H
 	#endif
 #endif
 
-#if defined(KLAYGE_COMPILER_GCC) || (defined(KLAYGE_COMPILER_MSVC) && (KLAYGE_COMPILER_VERSION >= 110))
+#if defined(KLAYGE_COMPILER_GCC) || defined(KLAYGE_COMPILER_CLANG) || (defined(KLAYGE_COMPILER_MSVC) && (KLAYGE_COMPILER_VERSION >= 110))
 	// Prevent Boost to link the Boost.DateTime
 	#ifndef BOOST_DATE_TIME_NO_LIB
 		#define BOOST_DATE_TIME_NO_LIB

@@ -53,7 +53,7 @@ namespace
 #ifndef KLAYGE_CPU_ARM
 	void get_cpuid(uint32_t* peax, uint32_t* pebx, uint32_t* pecx, uint32_t* pedx)
 	{	
-#ifdef KLAYGE_COMPILER_MSVC
+#if defined(KLAYGE_COMPILER_MSVC)
 	#if KLAYGE_COMPILER_VERSION >= 90 
 		int CPUInfo[4];
 		__cpuidex(CPUInfo, *peax, *pecx);
@@ -73,7 +73,7 @@ namespace
 			mov		[pedx], edx
 		}
 	#endif
-#elif defined KLAYGE_COMPILER_GCC
+#elif (defined(KLAYGE_COMPILER_GCC) || defined(KLAYGE_COMPILER_CLANG))
 	#ifdef KLAYGE_CPU_X64
 		__asm__
 		(

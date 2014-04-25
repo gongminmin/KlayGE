@@ -109,6 +109,8 @@ class compiler_info:
 						compiler = "vc100"
 					elif "VS90COMNTOOLS" in env:
 						compiler = "vc90"
+					elif 0 == os.system("where clang++"):
+						compiler = "clang"
 					elif os.path.exists("C:/MinGW/bin/g++.exe") or (0 == os.system("where g++")):
 						compiler = "mingw"
 				elif "linux" == target_platform:
@@ -195,6 +197,15 @@ class compiler_info:
 					arch_list.append((arch, "Visual Studio 9 2008", toolset, False))
 				elif "x64" == arch:
 					arch_list.append((arch, "Visual Studio 9 2008 Win64", toolset, False))
+		elif "clang" == compiler:
+			compiler_name = "clang"
+			compiler_version = self.retrive_clang_version()
+			if ("win" == host_platform):
+				for arch in archs:
+					arch_list.append((arch, "MinGW Makefiles", toolset, False))
+			else:
+				for arch in archs:
+					arch_list.append((arch, "Unix Makefiles", toolset, False))			
 		elif "mingw" == compiler:
 			compiler_name = "mgw"
 			compiler_version = self.retrive_gcc_version()
@@ -256,7 +267,12 @@ class compiler_info:
 		else:
 			gcc_ver = subprocess.check_output(["gcc", "-dumpversion"])
 		gcc_ver_components = gcc_ver.split(".")
-		return int(gcc_ver_components[0]) * 10 + int(gcc_ver_components[1])
+		return int(gcc_ver_components[0] + gcc_ver_components[1])
+
+	def retrive_clang_version(self):
+		clang_ver = subprocess.check_output(["clang", "--version"])
+		clang_ver_components = clang_ver.split()[2].split(".")
+		return int(clang_ver_components[0] + clang_ver_components[1])
 
 class batch_command:
 	def __init__(self):
@@ -296,6 +312,8 @@ def build_a_project(name, build_path, compiler_info, compiler_arch, need_install
 		additional_options += " -DKLAYGE_BUILD_PLATFORM_WINRT:BOOL=\"TRUE\""
 	if compiler_info.name != "vc":
 		additional_options += " -DKLAYGE_ARCH_NAME:STRING=\"%s\"" % compiler_arch[0]
+		if ("clang" == compiler_info.name) and (compiler_info.target_platform != "android"):
+			additional_options += " -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++"
 	if "android" == compiler_info.target_platform:
 		additional_options += " -DCMAKE_TOOLCHAIN_FILE=\"%s/cmake/android.toolchain.cmake\"" % curdir
 		additional_options += " -DANDROID_NATIVE_API_LEVEL=9"
@@ -335,15 +353,13 @@ def build_a_project(name, build_path, compiler_info, compiler_arch, need_install
 
 		os.chdir(curdir)
 	else:
-		if "mgw" == compiler_info.name:
-			make_name = "mingw32-make.exe"
-		else:
-			make_name = "make"
-		if "android" == compiler_info.target_platform:
-			if "win" == compiler_info.host_platform:
+		if "win" == compiler_info.host_platform:
+			if "android" == compiler_info.target_platform:
 				make_name = "%ANDROID_NDK%\\prebuilt\\windows\\bin\\make.exe"
 			else:
-				make_name = "make"
+				make_name = "mingw32-make.exe"
+		else:
+			make_name = "make"
 		make_name += " -j%d" % multiprocessing.cpu_count()
 
 		for config in compiler_info.cfg:

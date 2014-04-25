@@ -32,6 +32,16 @@
 #define LOGW(...) ((void)__android_log_print(ANDROID_LOG_WARN, "glloader", __VA_ARGS__))
 #endif
 
+#if defined(__clang__)
+	#include <bits/c++config.h>
+	#ifdef _GLIBCXX_USE_FLOAT128
+		#undef _GLIBCXX_USE_FLOAT128
+	#endif
+	#ifdef _GLIBCXX_USE_INT128
+		#undef _GLIBCXX_USE_INT128
+	#endif
+#endif
+
 #include <string>
 #include <vector>
 #include <map>

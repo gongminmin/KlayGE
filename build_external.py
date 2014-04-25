@@ -26,7 +26,10 @@ def build_Boost(compiler_info, compiler_arch):
 			else:
 				boost_toolset = "gcc-android_%s" % compiler_arch[0]
 		else:
-			boost_toolset = "gcc"
+			if "clang" == compiler_info.name:
+				boost_toolset = "clang"
+			else:
+				boost_toolset = "gcc"
 		
 	options = ""
 	
@@ -57,6 +60,8 @@ def build_Boost(compiler_info, compiler_arch):
 			options += " cxxflags=-std=c++11 linkflags=-std=c++11"
 		if ("x64" == compiler_arch[0]):
 			options += " define=BOOST_USE_WINDOWS_H"
+	elif ("clang" == compiler_info.name):
+		options += " define=BOOST_USE_WINDOWS_H cxxflags=\"-std=c++11 -I\"C:/mingw64/lib/gcc/i686-w64-mingw32/4.8.2/include/c++/\" -I\"C:/mingw64/lib/gcc/i686-w64-mingw32/4.8.2/include/c++/i686-w64-mingw32/\"\" linkflags=-std=c++11"
 
 	if "android" == compiler_info.target_platform:
 		options += " cxxflags=%%CXXFLAGS%% threadapi=pthread target-os=linux --user-config=./user-config-android-%s.jam" % compiler_arch[0]

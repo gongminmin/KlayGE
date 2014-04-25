@@ -33,6 +33,7 @@ cfg_build.py
 */build/mgw*/
 */build/gcc*/
 */build/vc*/
+*/build/clang*/
 */lib/
 glloader/doc/html/
 glloader/include/glloader/glloader_egl.h
