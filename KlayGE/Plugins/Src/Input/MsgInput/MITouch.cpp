@@ -32,6 +32,9 @@
 #include <KlayGE/Context.hpp>
 #include <KlayGE/InputFactory.hpp>
 #include <KlayGE/Window.hpp>
+#ifdef KLAYGE_PLATFORM_ANDROID
+#include <KlayGE/App3D.hpp>
+#endif
 
 #include <KlayGE/MsgInput/MInput.hpp>
 
@@ -114,6 +117,16 @@ namespace KlayGE
 
 	void MsgInputTouch::UpdateInputs()
 	{
+#ifdef KLAYGE_PLATFORM_ANDROID
+		// TODO: Is it correct?
+		WindowPtr const & win = Context::Instance().AppInstance().MainWnd();
+		int2 offset(win->Left() / 2, win->Top() / 2);
+		for (size_t i = 0; i < touch_coord_state_.size(); ++ i)
+		{
+			touch_coord_state_[i] -= offset;
+		}
+#endif
+
 		index_ = !index_;
 		touch_coords_[index_] = touch_coord_state_;
 		touch_downs_[index_] = touch_down_state_;

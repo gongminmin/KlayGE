@@ -387,6 +387,7 @@ namespace KlayGE
 		uint32_t new_width = DisplayWidth(x_display_, screen);
 		uint32_t new_height = DisplayHeight(x_display_, screen);
 #elif defined KLAYGE_PLATFORM_ANDROID
+		// TODO: Is it correct?
 		uint32_t new_left = win.Left() / 2;
 		uint32_t new_top = win.Top() / 2;
 		if ((new_left != left_) || (new_top != top_))
