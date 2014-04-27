@@ -60,8 +60,6 @@
 using namespace std;
 using namespace KlayGE;
 
-#define EXE_SUFFIX "_" KFL_STRINGIZE(KLAYGE_COMPILER_NAME) KFL_STRINGIZE(KLAYGE_COMPILER_VERSION)
-
 std::string DosWildcardToRegex(std::string const & wildcard)
 {
 	std::string ret;
@@ -116,7 +114,7 @@ void Deploy(std::vector<std::string> const & res_names, std::string const & res_
 		{
 			for (size_t i = 0; i < res_names.size(); ++ i)
 			{
-				ofs << "ForceTexSRGB" EXE_SUFFIX " \"" << res_names[i] << "\" temp.dds" << std::endl;
+				ofs << "ForceTexSRGB" KLAYGE_OUTPUT_SUFFIX " \"" << res_names[i] << "\" temp.dds" << std::endl;
 				ofs << "Mipmapper temp.dds" << std::endl; 
 				ofs << "TexCompressor BC1 temp.dds \"" << res_names[i] << "\"" << std::endl;
 				ofs << "del temp.dds" << std::endl;
@@ -126,7 +124,7 @@ void Deploy(std::vector<std::string> const & res_names, std::string const & res_
 		{
 			for (size_t i = 0; i < res_names.size(); ++ i)
 			{
-				ofs << "Mipmapper" EXE_SUFFIX " \"" << res_names[i] << "\" temp.dds" << std::endl;
+				ofs << "Mipmapper" KLAYGE_OUTPUT_SUFFIX " \"" << res_names[i] << "\" temp.dds" << std::endl;
 				ofs << "NormalMapCompressor temp.dds \"" << res_names[i] << "\" BC5" << std::endl;
 				ofs << "del temp.dds" << std::endl;
 			}
@@ -135,7 +133,7 @@ void Deploy(std::vector<std::string> const & res_names, std::string const & res_
 		{
 			for (size_t i = 0; i < res_names.size(); ++ i)
 			{
-				ofs << "Bump2Normal" EXE_SUFFIX " \"" << res_names[i] << "\" temp.dds 0.4" << std::endl;
+				ofs << "Bump2Normal" KLAYGE_OUTPUT_SUFFIX " \"" << res_names[i] << "\" temp.dds 0.4" << std::endl;
 				ofs << "Mipmapper temp.dds" << std::endl; 
 				ofs << "NormalMapCompressor temp.dds \"" << res_names[i] << "\" BC5" << std::endl;
 				ofs << "del temp.dds" << std::endl;
@@ -145,21 +143,21 @@ void Deploy(std::vector<std::string> const & res_names, std::string const & res_
 		{
 			for (size_t i = 0; i < res_names.size(); ++ i)
 			{
-				ofs << "HDRCompressor" EXE_SUFFIX " \"" << res_names[i] << "\" R16 BC5" << std::endl;
+				ofs << "HDRCompressor" KLAYGE_OUTPUT_SUFFIX " \"" << res_names[i] << "\" R16 BC5" << std::endl;
 			}
 		}
 		else if ("model" == res_type)
 		{
 			for (size_t i = 0; i < res_names.size(); ++ i)
 			{
-				ofs << "MeshMLJIT" EXE_SUFFIX " \"" << res_names[i] << "\"" << std::endl;
+				ofs << "MeshMLJIT" KLAYGE_OUTPUT_SUFFIX " \"" << res_names[i] << "\"" << std::endl;
 			}
 		}
 		else if ("effect" == res_type)
 		{
 			for (size_t i = 0; i < res_names.size(); ++ i)
 			{
-				ofs << "FXMLJIT" EXE_SUFFIX " " << platform << " \"" << res_names[i] << std::endl;
+				ofs << "FXMLJIT" KLAYGE_OUTPUT_SUFFIX " " << platform << " \"" << res_names[i] << std::endl;
 			}
 		}
 	}
@@ -171,9 +169,9 @@ void Deploy(std::vector<std::string> const & res_names, std::string const & res_
 		{
 			for (size_t i = 0; i < res_names.size(); ++ i)
 			{
-				ofs << "ForceTexSRGB" EXE_SUFFIX " \"" << res_names[i] << "\" temp.dds" << std::endl;
-				ofs << "Mipmapper" EXE_SUFFIX " temp.dds" << std::endl;
-				ofs << "TexCompressor" EXE_SUFFIX " BC1 temp.dds \"" << res_names[i] << "\"" << std::endl;
+				ofs << "ForceTexSRGB" KLAYGE_OUTPUT_SUFFIX " \"" << res_names[i] << "\" temp.dds" << std::endl;
+				ofs << "Mipmapper" KLAYGE_OUTPUT_SUFFIX " temp.dds" << std::endl;
+				ofs << "TexCompressor" KLAYGE_OUTPUT_SUFFIX " BC1 temp.dds \"" << res_names[i] << "\"" << std::endl;
 				ofs << "del temp.dds" << std::endl;
 			}
 		}
@@ -181,8 +179,8 @@ void Deploy(std::vector<std::string> const & res_names, std::string const & res_
 		{
 			for (size_t i = 0; i < res_names.size(); ++ i)
 			{
-				ofs << "Mipmapper" EXE_SUFFIX " \"" << res_names[i] << "\" temp.dds" << std::endl;
-				ofs << "NormalMapCompressor" EXE_SUFFIX " temp.dds \"" << res_names[i] << "\" BC3" << std::endl;
+				ofs << "Mipmapper" KLAYGE_OUTPUT_SUFFIX " \"" << res_names[i] << "\" temp.dds" << std::endl;
+				ofs << "NormalMapCompressor" KLAYGE_OUTPUT_SUFFIX " temp.dds \"" << res_names[i] << "\" BC3" << std::endl;
 				ofs << "del temp.dds" << std::endl;
 			}
 		}
@@ -190,9 +188,9 @@ void Deploy(std::vector<std::string> const & res_names, std::string const & res_
 		{
 			for (size_t i = 0; i < res_names.size(); ++ i)
 			{
-				ofs << "Bump2Normal" EXE_SUFFIX " \"" << res_names[i] << "\" temp.dds 0.4" << std::endl;
-				ofs << "Mipmapper" EXE_SUFFIX " temp.dds" << std::endl;
-				ofs << "NormalMapCompressor" EXE_SUFFIX " temp.dds \"" << res_names[i] << "\" BC3" << std::endl;
+				ofs << "Bump2Normal" KLAYGE_OUTPUT_SUFFIX " \"" << res_names[i] << "\" temp.dds 0.4" << std::endl;
+				ofs << "Mipmapper" KLAYGE_OUTPUT_SUFFIX " temp.dds" << std::endl;
+				ofs << "NormalMapCompressor" KLAYGE_OUTPUT_SUFFIX " temp.dds \"" << res_names[i] << "\" BC3" << std::endl;
 				ofs << "del temp.dds" << std::endl;
 			}
 		}
@@ -200,21 +198,21 @@ void Deploy(std::vector<std::string> const & res_names, std::string const & res_
 		{
 			for (size_t i = 0; i < res_names.size(); ++ i)
 			{
-				ofs << "HDRCompressor" EXE_SUFFIX " \"" << res_names[i] << "\" R16 BC3" << std::endl;
+				ofs << "HDRCompressor" KLAYGE_OUTPUT_SUFFIX " \"" << res_names[i] << "\" R16 BC3" << std::endl;
 			}
 		}
 		else if ("model" == res_type)
 		{
 			for (size_t i = 0; i < res_names.size(); ++ i)
 			{
-				ofs << "MeshMLJIT" EXE_SUFFIX " \"" << res_names[i] << "\"" << std::endl;
+				ofs << "MeshMLJIT" KLAYGE_OUTPUT_SUFFIX " \"" << res_names[i] << "\"" << std::endl;
 			}
 		}
 		else if ("effect" == res_type)
 		{
 			for (size_t i = 0; i < res_names.size(); ++ i)
 			{
-				ofs << "FXMLJIT" EXE_SUFFIX " " << platform << " \"" << res_names[i] << std::endl;
+				ofs << "FXMLJIT" KLAYGE_OUTPUT_SUFFIX " " << platform << " \"" << res_names[i] << std::endl;
 			}
 		}
 	}
@@ -226,8 +224,8 @@ void Deploy(std::vector<std::string> const & res_names, std::string const & res_
 		{
 			for (size_t i = 0; i < res_names.size(); ++ i)
 			{
-				ofs << "Mipmapper" EXE_SUFFIX " \"" << res_names[i] << "\" temp.dds" << std::endl;
-				ofs << "TexCompressor" EXE_SUFFIX " BC1 temp.dds \"" << res_names[i] << "\"" << std::endl;
+				ofs << "Mipmapper" KLAYGE_OUTPUT_SUFFIX " \"" << res_names[i] << "\" temp.dds" << std::endl;
+				ofs << "TexCompressor" KLAYGE_OUTPUT_SUFFIX " BC1 temp.dds \"" << res_names[i] << "\"" << std::endl;
 				ofs << "del temp.dds" << std::endl;
 			}
 		}
@@ -235,8 +233,8 @@ void Deploy(std::vector<std::string> const & res_names, std::string const & res_
 		{
 			for (size_t i = 0; i < res_names.size(); ++ i)
 			{
-				ofs << "Mipmapper" EXE_SUFFIX " \"" << res_names[i] << "\" temp.dds" << std::endl;
-				ofs << "NormalMapCompressor" EXE_SUFFIX " temp.dds \"" << res_names[i] << "\" BC3" << std::endl;
+				ofs << "Mipmapper" KLAYGE_OUTPUT_SUFFIX " \"" << res_names[i] << "\" temp.dds" << std::endl;
+				ofs << "NormalMapCompressor" KLAYGE_OUTPUT_SUFFIX " temp.dds \"" << res_names[i] << "\" BC3" << std::endl;
 				ofs << "del temp.dds" << std::endl;
 			}
 		}
@@ -244,9 +242,9 @@ void Deploy(std::vector<std::string> const & res_names, std::string const & res_
 		{
 			for (size_t i = 0; i < res_names.size(); ++ i)
 			{
-				ofs << "Bump2Normal" EXE_SUFFIX " \"" << res_names[i] << "\" temp.dds 0.4" << std::endl;
-				ofs << "Mipmapper" EXE_SUFFIX " temp.dds" << std::endl;
-				ofs << "NormalMapCompressor" EXE_SUFFIX " temp.dds \"" << res_names[i] << "\" BC3" << std::endl;
+				ofs << "Bump2Normal" KLAYGE_OUTPUT_SUFFIX " \"" << res_names[i] << "\" temp.dds 0.4" << std::endl;
+				ofs << "Mipmapper" KLAYGE_OUTPUT_SUFFIX " temp.dds" << std::endl;
+				ofs << "NormalMapCompressor" KLAYGE_OUTPUT_SUFFIX " temp.dds \"" << res_names[i] << "\" BC3" << std::endl;
 				ofs << "del temp.dds" << std::endl;
 			}
 		}
@@ -254,21 +252,21 @@ void Deploy(std::vector<std::string> const & res_names, std::string const & res_
 		{
 			for (size_t i = 0; i < res_names.size(); ++ i)
 			{
-				ofs << "HDRCompressor" EXE_SUFFIX " \"" << res_names[i] << "\" R16F BC3" << std::endl;
+				ofs << "HDRCompressor" KLAYGE_OUTPUT_SUFFIX " \"" << res_names[i] << "\" R16F BC3" << std::endl;
 			}
 		}
 		else if ("model" == res_type)
 		{
 			for (size_t i = 0; i < res_names.size(); ++ i)
 			{
-				ofs << "MeshMLJIT" EXE_SUFFIX " \"" << res_names[i] << "\"" << std::endl;
+				ofs << "MeshMLJIT" KLAYGE_OUTPUT_SUFFIX " \"" << res_names[i] << "\"" << std::endl;
 			}
 		}
 		else if ("effect" == res_type)
 		{
 			for (size_t i = 0; i < res_names.size(); ++ i)
 			{
-				ofs << "FXMLJIT" EXE_SUFFIX " " << platform << " \"" << res_names[i] << std::endl;
+				ofs << "FXMLJIT" KLAYGE_OUTPUT_SUFFIX " " << platform << " \"" << res_names[i] << std::endl;
 			}
 		}
 	}

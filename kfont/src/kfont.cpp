@@ -46,18 +46,13 @@
 #else
 	#define DLL_PREFIX ""
 #endif
-#ifdef KLAYGE_DEBUG
-	#define DBG_SUFFIX "_d"
-#else
-	#define DBG_SUFFIX ""
-#endif
 #ifdef KLAYGE_PLATFORM_WINDOWS
 	#define DLL_EXT_NAME "dll"
 #else
 	#define DLL_EXT_NAME "so"
 #endif
 
-#define DLL_SUFFIX "_" KFL_STRINGIZE(KLAYGE_COMPILER_NAME) KFL_STRINGIZE(KLAYGE_COMPILER_VERSION) DBG_SUFFIX "." DLL_EXT_NAME
+#define DLL_SUFFIX KLAYGE_OUTPUT_SUFFIX "." DLL_EXT_NAME
 
 namespace KlayGE
 {

@@ -998,10 +998,7 @@ namespace KlayGE
 #if (defined KLAYGE_PLATFORM_WINDOWS_DESKTOP) || (defined KLAYGE_PLATFORM_LINUX)
 		if (jit)
 		{
-			std::string meshmljit_name = "MeshMLJIT_" KFL_STRINGIZE(KLAYGE_COMPILER_NAME) KFL_STRINGIZE(KLAYGE_COMPILER_VERSION);
-#ifdef KLAYGE_DEBUG
-			meshmljit_name += "_d";
-#endif
+			std::string meshmljit_name = "MeshMLJIT_" KLAYGE_OUTPUT_SUFFIX;
 #ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
 			meshmljit_name += ".exe";
 #endif
