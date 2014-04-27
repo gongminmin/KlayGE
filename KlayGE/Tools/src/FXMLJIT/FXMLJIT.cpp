@@ -142,7 +142,6 @@ int main(int argc, char* argv[])
 
 	filesystem::path kfx_name(base_name + ".kfx");
 	filesystem::path kfx_path = file_directory / kfx_name;
-	filesystem::remove(kfx_path);
 	SyncLoadRenderEffect(file_name);
 	if (!target_folder.empty())
 	{
