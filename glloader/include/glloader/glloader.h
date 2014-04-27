@@ -149,6 +149,12 @@ typedef EGLNativeWindowType  NativeWindowType;
 #if defined(__gl3_h_) || defined(__GL3_H_)
 #error glloader.h should be included before gl3.h
 #endif
+#if defined(__gl31_h_) || defined(__GL31_H_)
+#error glloader.h should be included before gl31.h
+#endif
+#if defined(__glcorearb_h_)
+#error glloader.h should be included before glcorearb.h
+#endif
 #if defined(__glext_h_) || defined(__GLEXT_H_)
 #error glloader.h should be included before glext.h
 #endif
@@ -219,6 +225,9 @@ typedef EGLNativeWindowType  NativeWindowType;
 #define __GL2_H_
 #define __gl3_h_
 #define __GL3_H_
+#define __gl31_h_
+#define __GL31_H_
+#define __glcorearb_h_
 #define __glext_h_
 #define __GLEXT_H_
 #define __gl2ext_h_
@@ -265,7 +274,7 @@ typedef double			GLdouble;
 typedef double			GLclampd;
 typedef int				GLfixed;
 typedef int				GLclampx;
-#if defined(__STDC_VERSION__) && __STDC_VERSION__ >= 199901L
+#if defined(__STDC_VERSION__) && (__STDC_VERSION__ >= 199901L)
 	#include <inttypes.h>
 	typedef int64_t		GLint64;
 	typedef uint64_t	GLuint64;
