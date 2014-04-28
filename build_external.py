@@ -44,7 +44,7 @@ def build_Boost(compiler_info, compiler_arch):
 		if compiler_info.version >= 110:
 			options += " --without-atomic --without-chrono --without-date_time --without-filesystem --without-system --without-thread"
 	else:
-		options += " --without-atomic --without-date_time --without-regex"
+		options += " --without-atomic --without-date_time"
 
 	options += " --disable-filesystem2"
 	if ("x86_app" == compiler_arch[0]) or ("x64_app" == compiler_arch[0]):
