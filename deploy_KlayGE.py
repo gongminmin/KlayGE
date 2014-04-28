@@ -5,17 +5,17 @@ from __future__ import print_function
 import os, sys
 from blib_util import *
 
-def deploy_KlayGE(target_dir, compiler_info, compiler_arch):
+def deploy_KlayGE(target_dir, build_info, compiler_arch):
 	import glob
 
-	bin_dst_dir = "%s/bin/%s_%s/" % (target_dir, compiler_info.target_platform, compiler_arch)
-	if "win" == compiler_info.target_platform:
+	bin_dst_dir = "%s/bin/%s_%s/" % (target_dir, build_info.target_platform, compiler_arch)
+	if "win" == build_info.target_platform:
 		bat_suffix = "bat"
 		dll_suffix = "dll"
 	elif "linux" == target_platform:
 		bat_suffix = "sh"
 		dll_suffix = "so"
-	lib_suffix = "_%s%d*.%s" % (compiler_info.name, compiler_info.version, dll_suffix)
+	lib_suffix = "_%s%d*.%s" % (build_info.compiler_name, build_info.compiler_version, dll_suffix)
 		
 	if not os.path.exists("%s/bin" % target_dir):
 		os.mkdir("%s/bin" % target_dir);
@@ -77,7 +77,7 @@ def deploy_KlayGE(target_dir, compiler_info, compiler_arch):
 		copy_to_dst(fname, "%sScene/" % bin_dst_dir);
 	for fname in glob.iglob("KlayGE/bin/win_%s/Show/KlayGE_Show*%s" % (compiler_arch, lib_suffix)):
 		copy_to_dst(fname, "%sShow/" % bin_dst_dir);
-	for fname in glob.iglob("KlayGE/bin/win_%s/MeshMLJIT_%s%d*" % (compiler_arch, compiler_info.name, compiler_info.version)):
+	for fname in glob.iglob("KlayGE/bin/win_%s/MeshMLJIT_%s%d*" % (compiler_arch, build_info.compiler_name, build_info.compiler_version)):
 		copy_to_dst(fname, bin_dst_dir);
 
 	print("Deploying media files...\n")
@@ -133,7 +133,7 @@ if __name__ == "__main__":
 		target_dir = ""
 
 	cfg = cfg_from_argv(sys.argv, 1)
-	ci = compiler_info(cfg.compiler, cfg.archs, cfg.cfg)
+	bi = build_info(cfg.compiler, cfg.archs, cfg.cfg)
 
-	for arch in ci.arch_list:
-		deploy_KlayGE(target_dir, ci, arch[0])
+	for arch in bi.arch_list:
+		deploy_KlayGE(target_dir, bi, arch[0])

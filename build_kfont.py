@@ -5,13 +5,13 @@ from __future__ import print_function
 import sys
 from blib_util import *
 
-def build_kfont(compiler_info):
-	for arch in compiler_info.arch_list:
-		build_a_project("kfont", "kfont", compiler_info, arch, True)
+def build_kfont(build_info):
+	for arch in build_info.arch_list:
+		build_a_project("kfont", "kfont", build_info, arch, True)
 
 if __name__ == "__main__":
 	cfg = cfg_from_argv(sys.argv)
-	ci = compiler_info(cfg.compiler, cfg.archs, cfg.cfg)
+	bi = build_info(cfg.compiler, cfg.archs, cfg.cfg)
 
 	print("Building kfont...")
-	build_kfont(ci)
+	build_kfont(bi)

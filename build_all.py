@@ -14,37 +14,37 @@ from build_KlayGE import *
 
 if __name__ == "__main__":
 	cfg = cfg_from_argv(sys.argv)
-	ci = compiler_info(cfg.compiler, cfg.archs, cfg.cfg)
+	bi = build_info(cfg.compiler, cfg.archs, cfg.cfg)
 
 	print("Building external libs...")
-	build_external_libs(ci)
+	build_external_libs(bi)
 
 	print("Building KFL...")
-	build_KFL(ci)
+	build_KFL(bi)
 
 	print("Building glloader...")
-	build_glloader(ci)
+	build_glloader(bi)
 
 	print("Building DXBC2GLSL...")
-	build_DXBC2GLSL(ci)
+	build_DXBC2GLSL(bi)
 
 	print("Building kfont...")
-	build_kfont(ci)
+	build_kfont(bi)
 
 	print("Building MeshMLLib...")
-	build_MeshMLLib(ci)
+	build_MeshMLLib(bi)
 
 	print("Building KlayGE...")
-	build_KlayGE(ci)
+	build_KlayGE(bi)
 
 	print("Building KlayGE Samples...")
-	build_Samples(ci)
+	build_Samples(bi)
 
 	print("Building KlayGE Tools...")
-	build_Tools(ci)
+	build_Tools(bi)
 
 	print("Building KlayGE Tutorials...")
-	build_Tutorials(ci)
+	build_Tutorials(bi)
 
 	print("Building KlayGE Exporters...")
-	build_Exporters(ci)
+	build_Exporters(bi)

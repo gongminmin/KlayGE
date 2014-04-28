@@ -55,7 +55,7 @@ class cfg_from_argv:
 		else:
 			self.cfg = ""
 
-class compiler_info:
+class build_info:
 	def __init__(self, compiler, archs, cfg):
 		try:
 			cfg_build.compiler
@@ -237,14 +237,14 @@ class compiler_info:
 			self.use_msbuild = False
 			self.proj_ext_name = ""
 
-		self.name = compiler_name
-		self.version = compiler_version
+		self.compiler_name = compiler_name
+		self.compiler_version = compiler_version
 		self.arch_list = arch_list
 		self.cfg = cfg
 
 	def msvc_add_build_command(self, batch_cmd, sln_name, proj_name, config, arch = ""):
 		if self.use_msbuild:
-			batch_cmd.add_command('@SET VisualStudioVersion=%d.0' % (self.version / 10))
+			batch_cmd.add_command('@SET VisualStudioVersion=%d.0' % (self.compiler_version / 10))
 			if len(proj_name) != 0:
 				file_name = "%s.%s" % (proj_name, self.proj_ext_name)
 			else:
@@ -301,24 +301,24 @@ def log_info(message):
 def log_warning(message):
 	print("[W] %s" % message)
 
-def build_a_project(name, build_path, compiler_info, compiler_arch, need_install = False, additional_options = ""):
+def build_a_project(name, build_path, build_info, compiler_arch, need_install = False, additional_options = ""):
 	curdir = os.path.abspath(os.curdir)
 
 	toolset_name = ""
-	if ("vc" == compiler_info.name) and (compiler_info.version >= 100):
+	if ("vc" == build_info.compiler_name) and (build_info.compiler_version >= 100):
 		toolset_name = "-T %s" % compiler_arch[2]
 
 	if compiler_arch[3]:
 		additional_options += " -DKLAYGE_BUILD_PLATFORM_WINRT:BOOL=\"TRUE\""
-	if compiler_info.name != "vc":
+	if build_info.compiler_name != "vc":
 		additional_options += " -DKLAYGE_ARCH_NAME:STRING=\"%s\"" % compiler_arch[0]
-	if "android" == compiler_info.target_platform:
+	if "android" == build_info.target_platform:
 		additional_options += " -DCMAKE_TOOLCHAIN_FILE=\"%s/cmake/android.toolchain.cmake\"" % curdir
 		additional_options += " -DANDROID_NATIVE_API_LEVEL=9"
-		if "win" == compiler_info.host_platform:
+		if "win" == build_info.host_platform:
 			additional_options += " -DCMAKE_MAKE_PROGRAM=\"%ANDROID_NDK%\\prebuilt\\windows\\bin\\make.exe\""
 
-	if "vc" == compiler_info.name:
+	if "vc" == build_info.compiler_name:
 		if ("x86" == compiler_arch[0]) or ("x86_app" == compiler_arch[0]):
 			vc_option = "x86"
 			vc_arch = "Win32"
@@ -329,7 +329,7 @@ def build_a_project(name, build_path, compiler_info, compiler_arch, need_install
 			vc_option = "x86_arm"
 			vc_arch = "ARM"
 
-		build_dir = "%s/build/%s%d_%s_%s" % (build_path, compiler_info.name, compiler_info.version, compiler_info.target_platform, compiler_arch[0])
+		build_dir = "%s/build/%s%d_%s_%s" % (build_path, build_info.compiler_name, build_info.compiler_version, build_info.target_platform, compiler_arch[0])
 		if not os.path.exists(build_dir):
 			os.makedirs(build_dir)
 
@@ -341,18 +341,18 @@ def build_a_project(name, build_path, compiler_info, compiler_arch, need_install
 			log_error("Config %s failed." % name)
 
 		build_cmd = batch_command()
-		build_cmd.add_command('@CALL "%%VS%dCOMNTOOLS%%..\\..\\VC\\vcvarsall.bat" %s' % (compiler_info.version, vc_option))
-		for config in compiler_info.cfg:
-			compiler_info.msvc_add_build_command(build_cmd, name, "ALL_BUILD", config, vc_arch)
+		build_cmd.add_command('@CALL "%%VS%dCOMNTOOLS%%..\\..\\VC\\vcvarsall.bat" %s' % (build_info.compiler_version, vc_option))
+		for config in build_info.cfg:
+			build_info.msvc_add_build_command(build_cmd, name, "ALL_BUILD", config, vc_arch)
 			if need_install:
-				compiler_info.msvc_add_build_command(build_cmd, name, "INSTALL", config, vc_arch)
+				build_info.msvc_add_build_command(build_cmd, name, "INSTALL", config, vc_arch)
 		if build_cmd.execute() != 0:
 			log_error("Build %s failed." % name)
 
 		os.chdir(curdir)
 	else:
-		if "win" == compiler_info.host_platform:
-			if "android" == compiler_info.target_platform:
+		if "win" == build_info.host_platform:
+			if "android" == build_info.target_platform:
 				make_name = "%ANDROID_NDK%\\prebuilt\\windows\\bin\\make.exe"
 			else:
 				make_name = "mingw32-make.exe"
@@ -360,17 +360,17 @@ def build_a_project(name, build_path, compiler_info, compiler_arch, need_install
 			make_name = "make"
 		make_name += " -j%d" % multiprocessing.cpu_count()
 
-		for config in compiler_info.cfg:
-			build_dir = "%s/build/%s%d_%s_%s-%s" % (build_path, compiler_info.name, compiler_info.version, compiler_info.target_platform, compiler_arch[0], config)
+		for config in build_info.cfg:
+			build_dir = "%s/build/%s%d_%s_%s-%s" % (build_path, build_info.compiler_name, build_info.compiler_version, build_info.target_platform, compiler_arch[0], config)
 			if not os.path.exists(build_dir):
 				os.makedirs(build_dir)
-				if ("clang" == compiler_info.name) and (compiler_info.target_platform != "android"):
+				if ("clang" == build_info.compiler_name) and (build_info.target_platform != "android"):
 					additional_options += " -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++"
 
 			os.chdir(build_dir)
 			
 			config_options = "-DCMAKE_BUILD_TYPE:STRING=\"%s\"" % config
-			if "android" == compiler_info.target_platform:
+			if "android" == build_info.target_platform:
 				config_options += " -DANDROID_ABI=%s" % compiler_arch[0]
 				if "x86" == compiler_arch[0]:
 					config_options += " -DANDROID_TOOLCHAIN_NAME=x86-%s" % compiler_arch[2]
@@ -383,7 +383,7 @@ def build_a_project(name, build_path, compiler_info, compiler_arch, need_install
 				log_error("Config %s failed." % name)		
 
 			install_str = ""
-			if need_install and (not compiler_info.prefer_static):
+			if need_install and (not build_info.prefer_static):
 				install_str = "install"
 			build_cmd = batch_command()
 			build_cmd.add_command("@%s %s" % (make_name, install_str))
