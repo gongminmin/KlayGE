@@ -61,7 +61,38 @@ def build_Boost(compiler_info, compiler_arch):
 		if ("x64" == compiler_arch[0]):
 			options += " define=BOOST_USE_WINDOWS_H"
 	elif ("clang" == compiler_info.name):
-		options += " define=BOOST_USE_WINDOWS_H cxxflags=\"-std=c++11 -I\"C:/mingw64/lib/gcc/i686-w64-mingw32/4.8.2/include/c++/\" -I\"C:/mingw64/lib/gcc/i686-w64-mingw32/4.8.2/include/c++/i686-w64-mingw32/\"\" linkflags=-std=c++11"
+		import subprocess
+
+		clang_path = subprocess.check_output(["where", "clang"])
+		clang_path = clang_path.replace("\\", "/")
+		clang_path = clang_path[0 : clang_path.rfind("/")]
+		gcc_ver = subprocess.check_output(["gcc", "-dumpversion"])
+		
+		if os.path.exists("%s/../lib/gcc/i686-w64-mingw32/%s/include/c++/" % (clang_path, gcc_ver)):
+			mingw_name = "i686-w64-mingw32"
+			mingw_in_lib_folder = True
+		elif os.path.exists("%s/../lib/gcc/x86_64-w64-mingw32/%s/include/c++/" % (clang_path, gcc_ver)):
+			mingw_name = "x86_64-w64-mingw32"
+			mingw_in_lib_folder = True
+		elif os.path.exists("%s/../lib/gcc/mingw32/%s/include/c++/" % (clang_path, gcc_ver)):
+			mingw_name = "mingw32"
+			mingw_in_lib_folder = True
+		elif os.path.exists("%s/../i686-w64-mingw32/include/c++/" % clang_path):
+			mingw_name = "i686-w64-mingw32"
+			mingw_in_lib_folder = False
+		elif os.path.exists("%s/../x86_64-w64-mingw32/include/c++/" % clang_path):
+			mingw_name = "x86_64-w64-mingw32"
+			mingw_in_lib_folder = False
+		elif os.path.exists("%s/../mingw32/include/c++/" % clang_path):
+			mingw_name = "mingw32"
+			mingw_in_lib_folder = False
+
+		if mingw_in_lib_folder:
+			mingw_cxx_include = "%s/../lib/gcc/%s/%s/include/c++/" % (clang_path, mingw_name, gcc_ver)
+		else:
+			mingw_cxx_include = "%s/../%s/include/c++/" % (clang_path, mingw_name)
+		
+		options += " define=BOOST_USE_WINDOWS_H cxxflags=\"-std=c++11 -I\"%s\" -I\"%s%s/\"\" linkflags=-std=c++11" % (mingw_cxx_include, mingw_cxx_include, mingw_name)
 
 	if "android" == compiler_info.target_platform:
 		options += " cxxflags=%%CXXFLAGS%% threadapi=pthread target-os=linux --user-config=./user-config-android-%s.jam" % compiler_arch[0]

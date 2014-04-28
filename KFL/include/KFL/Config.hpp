@@ -437,7 +437,7 @@
 	#define BOOST_SYSTEM_NO_DEPRECATED
 #endif
 
-#if (defined(KLAYGE_COMPILER_GCC) || defined(KLAYGE_COMPILER_CLANG)) && defined(KLAYGE_PLATFORM_WINDOWS) && defined(KLAYGE_CPU_X64)
+#if defined(KLAYGE_PLATFORM_WINDOWS) && ((defined(KLAYGE_COMPILER_GCC) && defined(KLAYGE_CPU_X64)) || defined(KLAYGE_COMPILER_CLANG))
 	#ifndef BOOST_USE_WINDOWS_H
 		#define BOOST_USE_WINDOWS_H
 	#endif

@@ -312,8 +312,6 @@ def build_a_project(name, build_path, compiler_info, compiler_arch, need_install
 		additional_options += " -DKLAYGE_BUILD_PLATFORM_WINRT:BOOL=\"TRUE\""
 	if compiler_info.name != "vc":
 		additional_options += " -DKLAYGE_ARCH_NAME:STRING=\"%s\"" % compiler_arch[0]
-		if ("clang" == compiler_info.name) and (compiler_info.target_platform != "android"):
-			additional_options += " -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++"
 	if "android" == compiler_info.target_platform:
 		additional_options += " -DCMAKE_TOOLCHAIN_FILE=\"%s/cmake/android.toolchain.cmake\"" % curdir
 		additional_options += " -DANDROID_NATIVE_API_LEVEL=9"
@@ -366,6 +364,8 @@ def build_a_project(name, build_path, compiler_info, compiler_arch, need_install
 			build_dir = "%s/build/%s%d_%s_%s-%s" % (build_path, compiler_info.name, compiler_info.version, compiler_info.target_platform, compiler_arch[0], config)
 			if not os.path.exists(build_dir):
 				os.makedirs(build_dir)
+				if ("clang" == compiler_info.name) and (compiler_info.target_platform != "android"):
+					additional_options += " -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++"
 
 			os.chdir(build_dir)
 			

@@ -91,7 +91,7 @@ namespace
 		{
 			ResIdentifierPtr ppmm_input = ResLoader::Instance().Open(pp_desc_.res_name);
 
-			XMLDocument doc;
+			KlayGE::XMLDocument doc;
 			XMLNodePtr root = doc.Parse(ppmm_input);
 
 			pp_desc_.pp_data->cs_data_per_thread_x = 1;
