@@ -15,7 +15,8 @@ def deploy_KlayGE(target_dir, build_info, compiler_arch):
 	elif "linux" == target_platform:
 		bat_suffix = "sh"
 		dll_suffix = "so"
-	lib_suffix = "_%s%d*.%s" % (build_info.compiler_name, build_info.compiler_version, dll_suffix)
+	output_suffix = "_%s%d*" % (build_info.compiler_name, build_info.compiler_version)
+	lib_suffix = "%s.%s" % (output_suffix, dll_suffix)
 		
 	if not os.path.exists("%s/bin" % target_dir):
 		os.mkdir("%s/bin" % target_dir);
@@ -77,7 +78,7 @@ def deploy_KlayGE(target_dir, build_info, compiler_arch):
 		copy_to_dst(fname, "%sScene/" % bin_dst_dir);
 	for fname in glob.iglob("KlayGE/bin/win_%s/Show/KlayGE_Show*%s" % (compiler_arch, lib_suffix)):
 		copy_to_dst(fname, "%sShow/" % bin_dst_dir);
-	for fname in glob.iglob("KlayGE/bin/win_%s/MeshMLJIT_%s%d*" % (compiler_arch, build_info.compiler_name, build_info.compiler_version)):
+	for fname in glob.iglob("KlayGE/bin/win_%s/MeshMLJIT%s" % (compiler_arch, output_suffix)):
 		copy_to_dst(fname, bin_dst_dir);
 
 	print("Deploying media files...\n")
