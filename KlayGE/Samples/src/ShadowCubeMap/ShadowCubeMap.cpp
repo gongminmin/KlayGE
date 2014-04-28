@@ -342,6 +342,10 @@ namespace
 							}
 						}
 						break;
+
+					default:
+						BOOST_ASSERT(false);
+						break;
 					}
 				
 					ElementInitData init_data;
