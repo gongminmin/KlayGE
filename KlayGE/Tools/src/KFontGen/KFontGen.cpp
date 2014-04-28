@@ -31,6 +31,21 @@
 #include FT_FREETYPE_H
 #include FT_STROKER_H
 
+#ifdef KLAYGE_COMPILER_GCC
+#ifdef DEBUG
+extern "C"
+{
+	int z_verbose = 0;
+	void z_error (char *m)
+	{
+		fprintf(stderr, "%s\n", m);
+		exit(1);
+	}
+}
+#endif
+#endif
+
+
 using namespace std;
 using namespace KlayGE;
 
