@@ -78,7 +78,7 @@ def deploy_KlayGE(target_dir, build_info, compiler_arch):
 		copy_to_dst(fname, "%sScene/" % bin_dst_dir);
 	for fname in glob.iglob("KlayGE/bin/win_%s/Show/KlayGE_Show*%s" % (compiler_arch, lib_suffix)):
 		copy_to_dst(fname, "%sShow/" % bin_dst_dir);
-	for fname in glob.iglob("KlayGE/bin/win_%s/MeshMLJIT%s" % (compiler_arch, output_suffix)):
+	for fname in glob.iglob("KlayGE/bin/win_%s/MeshMLJIT*" % compiler_arch):
 		copy_to_dst(fname, bin_dst_dir);
 
 	print("Deploying media files...\n")
