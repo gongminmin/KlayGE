@@ -934,19 +934,22 @@ namespace KlayGE
 			TIF(swap_chain_->Present(sync_interval_, 0));
 
 #if (_WIN32_WINNT >= 0x0602 /*_WIN32_WINNT_WIN8*/)
-			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-			D3D11RenderEngine& d3d11_re = *checked_cast<D3D11RenderEngine*>(&rf.RenderEngineInstance());
-			ID3D11DeviceContextPtr d3d_imm_ctx = d3d11_re.D3DDeviceImmContext();
-			ID3D11DeviceContext1Ptr const & d3d_imm_ctx_1 = static_pointer_cast<ID3D11DeviceContext1>(d3d_imm_ctx);
-			d3d_imm_ctx_1->DiscardView(render_target_view_.get());
-			d3d_imm_ctx_1->DiscardView(depth_stencil_view_.get());
-			if (render_target_view_right_eye_)
+			if (has_dxgi_1_2_)
 			{
-				d3d_imm_ctx_1->DiscardView(render_target_view_right_eye_.get());
-			}
-			if (depth_stencil_view_right_eye_)
-			{
-				d3d_imm_ctx_1->DiscardView(depth_stencil_view_right_eye_.get());
+				RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+				D3D11RenderEngine& d3d11_re = *checked_cast<D3D11RenderEngine*>(&rf.RenderEngineInstance());
+				ID3D11DeviceContextPtr d3d_imm_ctx = d3d11_re.D3DDeviceImmContext();
+				ID3D11DeviceContext1Ptr const & d3d_imm_ctx_1 = static_pointer_cast<ID3D11DeviceContext1>(d3d_imm_ctx);
+				d3d_imm_ctx_1->DiscardView(render_target_view_.get());
+				d3d_imm_ctx_1->DiscardView(depth_stencil_view_.get());
+				if (render_target_view_right_eye_)
+				{
+					d3d_imm_ctx_1->DiscardView(render_target_view_right_eye_.get());
+				}
+				if (depth_stencil_view_right_eye_)
+				{
+					d3d_imm_ctx_1->DiscardView(depth_stencil_view_right_eye_.get());
+				}
 			}
 #endif
 		}
