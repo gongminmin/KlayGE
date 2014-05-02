@@ -360,6 +360,17 @@ namespace KlayGE
 		depth_texture_support_ = caps.depth_texture_support;
 		tex_array_support_ = (caps.max_texture_array_length >= 4);
 
+		if ((caps.max_shader_model >= 5) && (caps.cs_support))
+		{
+			KLAYGE_STATIC_ASSERT(32 == TILE_SIZE);
+
+			cs_tbdr_ = true;
+		}
+		else
+		{
+			cs_tbdr_ = false;
+		}
+
 		for (size_t vpi = 0; vpi < viewports_.size(); ++ vpi)
 		{
 			PerViewport& pvp = viewports_[vpi];
@@ -383,7 +394,14 @@ namespace KlayGE
 			pvp.prev_merged_shading_fb = rf.MakeFrameBuffer();
 			pvp.prev_merged_depth_fb = rf.MakeFrameBuffer();
 #if DEFAULT_DEFERRED == LIGHT_INDEXED_DEFERRED
-			pvp.light_index_fb = rf.MakeFrameBuffer();
+			if (cs_tbdr_)
+			{
+				pvp.lighting_mask_fb = rf.MakeFrameBuffer();
+			}
+			else
+			{
+				pvp.light_index_fb = rf.MakeFrameBuffer();
+			}
 #endif
 		}
 
@@ -482,15 +500,23 @@ namespace KlayGE
 #if DEFAULT_DEFERRED == TRIDITIONAL_DEFERRED
 		dr_effect_ = SyncLoadRenderEffect("DeferredRendering.fxml");
 #elif DEFAULT_DEFERRED == LIGHT_INDEXED_DEFERRED
-		if (caps.max_shader_model >= 4)
+		if (cs_tbdr_)
 		{
-			light_batch_ = 32;
-			dr_effect_ = SyncLoadRenderEffect("LightIndexedDeferredRendering32.fxml");
+			light_batch_ = 512;
+			dr_effect_ = SyncLoadRenderEffect("TileBasedDeferredRendering.fxml");
 		}
 		else
 		{
-			light_batch_ = 4;
-			dr_effect_ = SyncLoadRenderEffect("LightIndexedDeferredRendering4.fxml");
+			if (caps.max_shader_model >= 4)
+			{
+				light_batch_ = 32;
+				dr_effect_ = SyncLoadRenderEffect("LightIndexedDeferredRendering32.fxml");
+			}
+			else
+			{
+				light_batch_ = 4;
+				dr_effect_ = SyncLoadRenderEffect("LightIndexedDeferredRendering4.fxml");
+			}
 		}
 #endif
 
@@ -701,6 +727,19 @@ namespace KlayGE
 
 		depth_to_min_max_pp_ = SyncLoadPostProcess("Depth.ppml", "DepthToMinMax");
 		reduce_min_max_pp_ = SyncLoadPostProcess("Depth.ppml", "ReduceMinMax");
+
+		technique_depth_to_tiled_min_max_ = dr_effect_->TechniqueByName("DepthToTiledMinMax");
+		technique_tile_based_deferred_rendering_lighting_mask_ = dr_effect_->TechniqueByName("TileBasedDeferredRenderingLightingMask");
+		depth_to_tiled_near_far_width_height_param_ = dr_effect_->ParameterByName("near_far_width_height");
+		depth_to_tiled_depth_in_tex_param_ = dr_effect_->ParameterByName("depth_in_tex");
+		depth_to_tiled_min_max_depth_rw_tex_param_ = dr_effect_->ParameterByName("min_max_depth_rw_tex");
+		upper_left_param_ = dr_effect_->ParameterByName("upper_left");
+		x_dir_param_ = dr_effect_->ParameterByName("x_dir");
+		y_dir_param_ = dr_effect_->ParameterByName("y_dir");
+		lighting_mask_tex_param_ = dr_effect_->ParameterByName("lighting_mask_tex");
+		shading_in_tex_param_ = dr_effect_->ParameterByName("shading_in_tex");
+		shading_rw_tex_param_ = dr_effect_->ParameterByName("shading_rw_tex");
+		copy_pp_ = SyncLoadPostProcess("Copy.ppml", "copy");
 #endif
 
 		this->SetCascadedShadowType(CSLT_Auto);
@@ -859,14 +898,24 @@ namespace KlayGE
 				min_max_depth_fmt = depth_fmt;
 			}
 
-			uint32_t w = std::max(1U, (width + 1) / 2);
-			uint32_t h = std::max(1U, (height + 1) / 2);
-			for (uint32_t ts = TILE_SIZE; ts > 1; ts /= 2)
+			if (cs_tbdr_)
 			{
+				uint32_t w = std::max(1U, (width + TILE_SIZE - 1) / TILE_SIZE);
+				uint32_t h = std::max(1U, (height + TILE_SIZE - 1) / TILE_SIZE);
 				pvp.g_buffer_min_max_depth_texs.push_back(rf.MakeTexture2D(w, h, 1, 1, min_max_depth_fmt, 1, 0,
-					EAH_GPU_Read | EAH_GPU_Write, nullptr));
-				w = std::max(1U, (w + 1) / 2);
-				h = std::max(1U, (h + 1) / 2);
+					EAH_GPU_Read | EAH_GPU_Write | EAH_GPU_Unordered, nullptr));
+			}
+			else
+			{
+				uint32_t w = std::max(1U, (width + 1) / 2);
+				uint32_t h = std::max(1U, (height + 1) / 2);
+				for (uint32_t ts = TILE_SIZE; ts > 1; ts /= 2)
+				{
+					pvp.g_buffer_min_max_depth_texs.push_back(rf.MakeTexture2D(w, h, 1, 1, min_max_depth_fmt, 1, 0,
+						EAH_GPU_Read | EAH_GPU_Write, nullptr));
+					w = std::max(1U, (w + 1) / 2);
+					h = std::max(1U, (h + 1) / 2);
+				}
 			}
 		}
 #endif
@@ -1050,6 +1099,31 @@ namespace KlayGE
 		pvp.curr_merged_depth_tex = rf.MakeTexture2D(width, height, 1, 1, depth_fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
 		pvp.prev_merged_shading_tex = rf.MakeTexture2D(width, height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
 		pvp.prev_merged_depth_tex = rf.MakeTexture2D(width, height, 1, 1, depth_fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
+#if DEFAULT_DEFERRED == LIGHT_INDEXED_DEFERRED
+		if (cs_tbdr_)
+		{
+			pvp.temp_shading_tex = rf.MakeTexture2D(width, height, 1, 1, shading_fmt, 1, 0,
+				EAH_GPU_Read | EAH_GPU_Write | EAH_GPU_Unordered, nullptr);
+
+			ElementFormat lighting_mask_fmt;
+			if (caps.rendertarget_format_support(EF_R8, 1, 0))
+			{
+				lighting_mask_fmt = EF_R8;
+			}
+			else if (caps.rendertarget_format_support(EF_ABGR8, 1, 0))
+			{
+				lighting_mask_fmt = EF_ABGR8;
+			}
+			else
+			{
+				BOOST_ASSERT(caps.rendertarget_format_support(EF_ARGB8, 1, 0));
+				lighting_mask_fmt = EF_ARGB8;
+			}
+			pvp.lighting_mask_tex = rf.MakeTexture2D(width, height, 1, 1, lighting_mask_fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
+			pvp.lighting_mask_fb->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*pvp.lighting_mask_tex, 0, 1, 0));
+			pvp.lighting_mask_fb->Attach(FrameBuffer::ATT_DepthStencil, ds_view);
+		}
+#endif
 
 		pvp.shading_fb->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*pvp.shading_tex, 0, 1, 0));
 		pvp.shading_fb->Attach(FrameBuffer::ATT_DepthStencil, ds_view);
@@ -1084,19 +1158,22 @@ namespace KlayGE
 		pvp.small_ssvo_tex = rf.MakeTexture2D(width / 2, height / 2, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
 
 #if DEFAULT_DEFERRED == LIGHT_INDEXED_DEFERRED
-		if (caps.rendertarget_format_support(EF_ABGR8, 1, 0))
+		if (!cs_tbdr_)
 		{
-			fmt = EF_ABGR8;
-		}
-		else
-		{
-			BOOST_ASSERT(caps.rendertarget_format_support(EF_ARGB8, 1, 0));
+			if (caps.rendertarget_format_support(EF_ABGR8, 1, 0))
+			{
+				fmt = EF_ABGR8;
+			}
+			else
+			{
+				BOOST_ASSERT(caps.rendertarget_format_support(EF_ARGB8, 1, 0));
 
-			fmt = EF_ARGB8;
+				fmt = EF_ARGB8;
+			}
+			pvp.light_index_tex = rf.MakeTexture2D((width + (TILE_SIZE - 1)) / TILE_SIZE,
+				(height + (TILE_SIZE - 1)) / TILE_SIZE, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
+			pvp.light_index_fb->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*pvp.light_index_tex, 0, 1, 0));
 		}
-		pvp.light_index_tex = rf.MakeTexture2D((width + (TILE_SIZE - 1)) / TILE_SIZE,
-			(height + (TILE_SIZE - 1)) / TILE_SIZE, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
-		pvp.light_index_fb->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*pvp.light_index_tex, 0, 1, 0));
 #endif
 
 		if (0 == index)
@@ -1466,6 +1543,12 @@ namespace KlayGE
 					re.Render(*technique_no_lighting_, *rl_quad_);
 				}
 
+				if (cs_tbdr_)
+				{
+					re.BindFrameBuffer(pvp.lighting_mask_fb);
+					re.Render(*technique_tile_based_deferred_rendering_lighting_mask_, *rl_quad_);
+				}
+
 				std::vector<uint32_t> directional_lights;
 				std::vector<uint32_t> point_lights_shadow;
 				std::vector<uint32_t> point_lights_no_shadow;
@@ -1481,6 +1564,12 @@ namespace KlayGE
 						{
 						case LightSource::LT_Ambient:
 						case LightSource::LT_Sun:
+							if (cs_tbdr_)
+							{
+								this->UpdateLightIndexedLightingAmbientSunCS(pvp, type, li,
+									GetPassCategory(pass_type), index_in_pass, pass_tb);
+							}
+							else
 							{
 								this->UpdateLightIndexedLightingAmbientSun(pvp, type, li,
 									GetPassCategory(pass_type), index_in_pass, pass_tb);
@@ -1527,7 +1616,14 @@ namespace KlayGE
 						uint32_t nl = std::min(light_batch_, static_cast<uint32_t>(directional_lights.size() - li));
 						std::vector<uint32_t>::const_iterator iter_beg = directional_lights.begin() + li;
 						std::vector<uint32_t>::const_iterator iter_end = iter_beg + nl;
-						this->UpdateLightIndexedLightingDirectional(pvp, pass_tb, iter_beg, iter_end);
+						if (cs_tbdr_)
+						{
+							this->UpdateLightIndexedLightingDirectionalCS(pvp, pass_tb, iter_beg, iter_end);
+						}
+						else
+						{
+							this->UpdateLightIndexedLightingDirectional(pvp, pass_tb, iter_beg, iter_end);
+						}
 						li += nl;
 					}
 				}
@@ -1538,7 +1634,14 @@ namespace KlayGE
 						uint32_t nl = std::min(light_batch_, static_cast<uint32_t>(point_lights_no_shadow.size() - li));
 						std::vector<uint32_t>::iterator iter_beg = point_lights_no_shadow.begin() + li;
 						std::vector<uint32_t>::iterator iter_end = iter_beg + nl;
-						this->UpdateLightIndexedLightingPointSpot(pvp, iter_beg, iter_end, pass_tb, true, false);
+						if (cs_tbdr_)
+						{
+							this->UpdateLightIndexedLightingPointSpotCS(pvp, iter_beg, iter_end, pass_tb, true, false);
+						}
+						else
+						{
+							this->UpdateLightIndexedLightingPointSpot(pvp, iter_beg, iter_end, pass_tb, true, false);
+						}
 						li += nl;
 					}
 				}
@@ -1549,7 +1652,14 @@ namespace KlayGE
 						uint32_t nl = std::min(light_batch_, static_cast<uint32_t>(point_lights_shadow.size() - li));
 						std::vector<uint32_t>::iterator iter_beg = point_lights_shadow.begin() + li;
 						std::vector<uint32_t>::iterator iter_end = iter_beg + nl;
-						this->UpdateLightIndexedLightingPointSpot(pvp, iter_beg, iter_end, pass_tb, true, true);
+						if (cs_tbdr_)
+						{
+							this->UpdateLightIndexedLightingPointSpotCS(pvp, iter_beg, iter_end, pass_tb, true, true);
+						}
+						else
+						{
+							this->UpdateLightIndexedLightingPointSpot(pvp, iter_beg, iter_end, pass_tb, true, true);
+						}
 						li += nl;
 					}
 				}
@@ -1560,7 +1670,14 @@ namespace KlayGE
 						uint32_t nl = std::min(light_batch_, static_cast<uint32_t>(spot_lights_no_shadow.size() - li));
 						std::vector<uint32_t>::iterator iter_beg = spot_lights_no_shadow.begin() + li;
 						std::vector<uint32_t>::iterator iter_end = iter_beg + nl;
-						this->UpdateLightIndexedLightingPointSpot(pvp, iter_beg, iter_end, pass_tb, false, false);
+						if (cs_tbdr_)
+						{
+							this->UpdateLightIndexedLightingPointSpotCS(pvp, iter_beg, iter_end, pass_tb, false, false);
+						}
+						else
+						{
+							this->UpdateLightIndexedLightingPointSpot(pvp, iter_beg, iter_end, pass_tb, false, false);
+						}
 						li += nl;
 					}
 				}
@@ -1571,7 +1688,14 @@ namespace KlayGE
 						uint32_t nl = std::min(light_batch_, static_cast<uint32_t>(spot_lights_shadow.size() - li));
 						std::vector<uint32_t>::iterator iter_beg = spot_lights_shadow.begin() + li;
 						std::vector<uint32_t>::iterator iter_end = iter_beg + nl;
-						this->UpdateLightIndexedLightingPointSpot(pvp, iter_beg, iter_end, pass_tb, false, true);
+						if (cs_tbdr_)
+						{
+							this->UpdateLightIndexedLightingPointSpotCS(pvp, iter_beg, iter_end, pass_tb, false, true);
+						}
+						else
+						{
+							this->UpdateLightIndexedLightingPointSpot(pvp, iter_beg, iter_end, pass_tb, false, true);
+						}
 						li += nl;
 					}
 				}
@@ -2287,7 +2411,14 @@ namespace KlayGE
 		}
 
 #if DEFAULT_DEFERRED == LIGHT_INDEXED_DEFERRED
-		this->CreateDepthMinMaxMap(pvp);
+		if (cs_tbdr_)
+		{
+			this->CreateDepthMinMaxMapCS(pvp);
+		}
+		else
+		{
+			this->CreateDepthMinMaxMap(pvp);
+		}
 #endif
 	}
 
@@ -2987,7 +3118,6 @@ namespace KlayGE
 		*lights_attrib_param_ = lights_attrib;
 		*num_lights_param_ = static_cast<int32_t>(iter_end - iter_beg);
 
-		*light_index_tex_param_ = pvp.light_index_tex;
 		*g_buffer_tex_param_ = pvp.g_buffer_rt0_tex;
 		*g_buffer_1_tex_param_ = pvp.g_buffer_rt1_tex;
 		*depth_tex_param_ = pvp.g_buffer_depth_tex;
@@ -3173,6 +3303,337 @@ namespace KlayGE
 			reduce_min_max_pp_->OutputPin(0, pvp.g_buffer_min_max_depth_texs[i]);
 			reduce_min_max_pp_->Apply();
 		}
+	}
+
+
+	void DeferredRenderingLayer::UpdateLightIndexedLightingAmbientSunCS(PerViewport const & pvp, LightSource::LightType type,
+		int32_t org_no, PassCategory pass_cat, int32_t index_in_pass, uint32_t g_buffer_index)
+	{
+		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+
+		LightSourcePtr const & light = lights_[org_no];
+		int32_t shadowing_channel;
+		if (0 == (light->Attrib() & LightSource::LSA_NoShadow))
+		{
+			shadowing_channel = sm_light_indices_[org_no].second;
+		}
+		else
+		{
+			shadowing_channel = -1;
+		}
+		*shadowing_channel_param_ = shadowing_channel;
+
+		int32_t attr = light->Attrib();
+		*light_attrib_param_ = float4(attr & LightSource::LSA_NoDiffuse ? 0.0f : 1.0f,
+			attr & LightSource::LSA_NoSpecular ? 0.0f : 1.0f,
+			attr & LightSource::LSA_NoShadow ? -1.0f : 1.0f, light->ProjectiveTexture() ? 1.0f : -1.0f);
+		*light_color_param_ = light->Color();
+		*light_falloff_param_ = light->Falloff();
+
+		RenderTechniquePtr tech;
+		if (LightSource::LT_Sun == type)
+		{
+			float3 dir_es = MathLib::transform_normal(-light->Direction(), pvp.view);
+			CameraPtr sm_camera = light->SMCamera(0);
+			*light_dir_es_param_ = float4(dir_es.x(), dir_es.y(), dir_es.z(), 0);
+
+			sm_fb_->GetViewport()->camera = sm_camera;
+
+			if ((pass_cat != PC_Shadowing) && (pass_cat != PC_Shading))
+			{
+				curr_cascade_index_ = index_in_pass;
+			}
+			else
+			{
+				curr_cascade_index_ = -1;
+			}
+
+			*light_view_proj_param_ = pvp.inv_view * sm_camera->ViewProjMatrix();
+
+			float3 const & p = light->Position();
+			float3 loc_es = MathLib::transform_coord(p, pvp.view);
+			*light_pos_es_param_ = float4(loc_es.x(), loc_es.y(), loc_es.z(), 1);
+
+			tech = technique_light_indexed_deferred_rendering_sun_;
+		}
+		else
+		{
+			BOOST_ASSERT(LightSource::LT_Ambient == type);
+
+			float3 dir_es = MathLib::transform_normal(float3(0, 1, 0), pvp.view);
+			*light_dir_es_param_ = float4(dir_es.x(), dir_es.y(), dir_es.z(), 0);
+
+			tech = technique_light_indexed_deferred_rendering_ambient_;
+		}
+
+		*g_buffer_tex_param_ = pvp.g_buffer_rt0_tex;
+		*g_buffer_1_tex_param_ = pvp.g_buffer_rt1_tex;
+		*light_volume_mv_param_ = pvp.inv_proj;
+
+		uint32_t w = pvp.g_buffer_depth_tex->Width(0);
+		uint32_t h = pvp.g_buffer_depth_tex->Height(0);
+		*inv_width_height_param_ = float2(1.0f / w, 1.0f / h);
+
+		re.BindFrameBuffer(re.DefaultFrameBuffer());
+		re.DefaultFrameBuffer()->Discard(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth | FrameBuffer::CBM_Stencil);
+
+		if (Opaque_GBuffer == g_buffer_index)
+		{
+			*shading_in_tex_param_ = pvp.curr_merged_shading_tex;
+		}
+		else
+		{
+			*shading_in_tex_param_ = pvp.shading_tex;
+		}
+		*shading_rw_tex_param_ = pvp.temp_shading_tex;
+		*lighting_mask_tex_param_ = pvp.lighting_mask_tex;
+		re.Dispatch(*tech, (w + 16 - 1) / 16, (h + 16 - 1) / 16, 1);
+
+		copy_pp_->InputPin(0, pvp.temp_shading_tex);
+		if (Opaque_GBuffer == g_buffer_index)
+		{
+			copy_pp_->OutputPin(0, pvp.curr_merged_shading_tex);
+		}
+		else
+		{
+			copy_pp_->OutputPin(0, pvp.shading_tex);
+		}
+		copy_pp_->Apply();
+	}
+
+	void DeferredRenderingLayer::UpdateLightIndexedLightingDirectionalCS(PerViewport const & pvp,
+		uint32_t g_buffer_index, std::vector<uint32_t>::const_iterator iter_beg, std::vector<uint32_t>::const_iterator iter_end)
+	{
+		std::vector<float4> lights_color;
+		std::vector<float4> lights_dir_es;
+		std::vector<float4> lights_attrib;
+		for (std::vector<uint32_t>::const_iterator iter = iter_beg; iter != iter_end; ++ iter)
+		{
+			LightSourcePtr const & light = lights_[*iter];
+			BOOST_ASSERT(LightSource::LT_Directional == light->Type());
+			int32_t attr = light->Attrib();
+
+			lights_color.push_back(light->Color());
+
+			float3 dir_es = MathLib::transform_normal(-light->Direction(), pvp.view);
+			lights_dir_es.push_back(float4(dir_es.x(), dir_es.y(), dir_es.z(), 0));
+
+			lights_attrib.push_back(float4(attr & LightSource::LSA_NoDiffuse ? 0.0f : 1.0f,
+				attr & LightSource::LSA_NoSpecular ? 0.0f : 1.0f,
+				attr & LightSource::LSA_NoShadow ? -1.0f : 1.0f, light->ProjectiveTexture() ? 1.0f : -1.0f));
+		}
+
+		*lights_color_param_ = lights_color;
+		*lights_dir_es_param_ = lights_dir_es;
+		*lights_attrib_param_ = lights_attrib;
+		*num_lights_param_ = static_cast<int32_t>(iter_end - iter_beg);
+
+		*g_buffer_tex_param_ = pvp.g_buffer_rt0_tex;
+		*g_buffer_1_tex_param_ = pvp.g_buffer_rt1_tex;
+		*depth_tex_param_ = pvp.g_buffer_depth_tex;
+		*light_volume_mv_param_ = pvp.inv_proj;
+
+		uint32_t w = pvp.g_buffer_depth_tex->Width(0);
+		uint32_t h = pvp.g_buffer_depth_tex->Height(0);
+		*inv_width_height_param_ = float2(1.0f / w, 1.0f / h);
+
+		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+		re.BindFrameBuffer(re.DefaultFrameBuffer());
+		re.DefaultFrameBuffer()->Discard(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth | FrameBuffer::CBM_Stencil);
+
+		if (Opaque_GBuffer == g_buffer_index)
+		{
+			*shading_in_tex_param_ = pvp.curr_merged_shading_tex;
+		}
+		else
+		{
+			*shading_in_tex_param_ = pvp.shading_tex;
+		}
+		*shading_rw_tex_param_ = pvp.temp_shading_tex;
+		*lighting_mask_tex_param_ = pvp.lighting_mask_tex;
+		re.Dispatch(*technique_light_indexed_deferred_rendering_directional_, (w + 16 - 1) / 16, (h + 16 - 1) / 16, 1);
+
+		copy_pp_->InputPin(0, pvp.temp_shading_tex);
+		if (Opaque_GBuffer == g_buffer_index)
+		{
+			copy_pp_->OutputPin(0, pvp.curr_merged_shading_tex);
+		}
+		else
+		{
+			copy_pp_->OutputPin(0, pvp.shading_tex);
+		}
+		copy_pp_->Apply();
+	}
+
+	void DeferredRenderingLayer::UpdateLightIndexedLightingPointSpotCS(PerViewport const & pvp,
+		std::vector<uint32_t>::const_iterator iter_beg, std::vector<uint32_t>::const_iterator iter_end,
+		uint32_t g_buffer_index, bool is_point, bool with_shadow)
+	{
+		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+		re.BindFrameBuffer(re.DefaultFrameBuffer());
+		re.DefaultFrameBuffer()->Discard(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth | FrameBuffer::CBM_Stencil);
+
+		*min_max_depth_tex_param_ = pvp.g_buffer_min_max_depth_texs.back();
+
+		uint32_t w = (pvp.g_buffer_depth_tex->Width(0) + TILE_SIZE - 1) & ~(TILE_SIZE - 1);
+		uint32_t h = (pvp.g_buffer_depth_tex->Height(0) + TILE_SIZE - 1) & ~(TILE_SIZE - 1);
+		float2 tile_scale(w / (2.0f * TILE_SIZE), h / (2.0f * TILE_SIZE));
+		*tile_scale_param_ = float4(tile_scale.x(), tile_scale.y(), 0, 0);
+
+		*camera_proj_01_param_ = float2(pvp.proj(0, 0) * tile_scale.x(), pvp.proj(1, 1) * tile_scale.y());
+
+		std::vector<float4> lights_color;
+		std::vector<float4> lights_pos_es;
+		std::vector<float4> lights_dir_es;
+		std::vector<float4> lights_falloff_range;
+		std::vector<float4> lights_attrib;
+		int4 lights_shadowing_channel(-1, -1, -1, -1);
+		std::vector<float3> lights_aabb_min;
+		std::vector<float3> lights_aabb_max;
+		for (std::vector<uint32_t>::const_iterator iter = iter_beg; iter != iter_end; ++ iter)
+		{
+			LightSourcePtr const & light = lights_[*iter];
+			LightSource::LightType type = light->Type();
+			int32_t attr = light->Attrib();
+
+			BOOST_ASSERT((LightSource::LT_Point == type) || (LightSource::LT_Spot == type));
+
+			lights_color.push_back(light->Color());
+
+			float3 const & p = light->Position();
+			float3 loc_es = MathLib::transform_coord(p, pvp.view);
+			lights_pos_es.push_back(float4(loc_es.x(), loc_es.y(), loc_es.z(), 1));
+
+			float3 dir_es(0, 0, 0);
+			if (LightSource::LT_Spot == type)
+			{
+				dir_es = MathLib::transform_normal(light->Direction(), pvp.view);
+			}
+			lights_dir_es.push_back(float4(dir_es.x(), dir_es.y(), dir_es.z(), 0));
+
+			if (LightSource::LT_Spot == type)
+			{
+				lights_pos_es.back().w() = light->CosOuterInner().x();
+				lights_dir_es.back().w() = light->CosOuterInner().y();
+			}
+
+			lights_attrib.push_back(float4(attr & LightSource::LSA_NoDiffuse ? 0.0f : 1.0f,
+				attr & LightSource::LSA_NoSpecular ? 0.0f : 1.0f,
+				attr & LightSource::LSA_NoShadow ? -1.0f : 1.0f, light->ProjectiveTexture() ? 1.0f : -1.0f));
+
+			if (with_shadow)
+			{
+				BOOST_ASSERT(0 == (light->Attrib() & LightSource::LSA_NoShadow));
+				BOOST_ASSERT(iter - iter_beg < 4);
+				lights_shadowing_channel[iter - iter_beg] = sm_light_indices_[*iter].second;
+			}
+
+			float range = light->Range() * light_scale_;
+			AABBox aabb(float3(0, 0, 0), float3(0, 0, 0));
+			if (LightSource::LT_Spot == type)
+			{
+				float4x4 light_to_view = light->SMCamera(0)->InverseViewMatrix() * pvp.view;
+				float const scale = light->CosOuterInner().w();
+				float4x4 light_model = MathLib::scaling(range * 0.01f * float3(scale, scale, 1));
+				float4x4 light_mv = light_model * light_to_view;
+				aabb = MathLib::transform_aabb(cone_aabb_, light_mv);
+			}
+			lights_falloff_range.push_back(float4(light->Falloff().x(), light->Falloff().y(),
+				light->Falloff().z(), range));
+			lights_aabb_min.push_back(aabb.Min());
+			lights_aabb_max.push_back(aabb.Max());
+		}
+
+		*lights_color_param_ = lights_color;
+		*lights_pos_es_param_ = lights_pos_es;
+		*lights_dir_es_param_ = lights_dir_es;
+		*lights_falloff_range_param_ = lights_falloff_range;
+		*lights_attrib_param_ = lights_attrib;
+		*lights_shadowing_channel_param_ = lights_shadowing_channel;
+		*lights_aabb_min_param_ = lights_aabb_min;
+		*lights_aabb_max_param_ = lights_aabb_max;
+		*num_lights_param_ = static_cast<int32_t>(iter_end - iter_beg);
+
+		w = pvp.g_buffer_depth_tex->Width(0);
+		h = pvp.g_buffer_depth_tex->Height(0);
+		*tc_to_tile_scale_param_ = float2(static_cast<float>(w) / ((w + TILE_SIZE - 1) & ~(TILE_SIZE - 1)),
+			static_cast<float>(h) / ((h + TILE_SIZE - 1) & ~(TILE_SIZE - 1)));
+		*g_buffer_tex_param_ = pvp.g_buffer_rt0_tex;
+		*g_buffer_1_tex_param_ = pvp.g_buffer_rt1_tex;
+		*depth_tex_param_ = pvp.g_buffer_depth_tex;
+		*light_volume_mv_param_ = pvp.inv_proj;
+
+		float3 upper_left = MathLib::transform_coord(float3(-1, +1, 1), pvp.inv_proj);
+		float3 upper_right = MathLib::transform_coord(float3(+1, +1, 1), pvp.inv_proj);
+		float3 lower_left = MathLib::transform_coord(float3(-1, -1, 1), pvp.inv_proj);
+		*upper_left_param_ = upper_left;
+		*x_dir_param_ = upper_right - upper_left;
+		*y_dir_param_ = lower_left - upper_left;
+		*inv_width_height_param_ = float2(1.0f / w, 1.0f / h);
+
+		RenderTechniquePtr tech;
+		if (is_point)
+		{
+			if (with_shadow)
+			{
+				tech = technique_light_indexed_deferred_rendering_point_shadow_;
+			}
+			else
+			{
+				tech = technique_light_indexed_deferred_rendering_point_no_shadow_;
+			}
+		}
+		else
+		{
+			if (with_shadow)
+			{
+				tech = technique_light_indexed_deferred_rendering_spot_shadow_;
+			}
+			else
+			{
+				tech = technique_light_indexed_deferred_rendering_spot_no_shadow_;
+			}
+		}
+
+		if (Opaque_GBuffer == g_buffer_index)
+		{
+			*shading_in_tex_param_ = pvp.curr_merged_shading_tex;
+		}
+		else
+		{
+			*shading_in_tex_param_ = pvp.shading_tex;
+		}
+		*shading_rw_tex_param_ = pvp.temp_shading_tex;
+		*lighting_mask_tex_param_ = pvp.lighting_mask_tex;
+		re.Dispatch(*tech, (w + TILE_SIZE - 1) / TILE_SIZE, (h + TILE_SIZE - 1) / TILE_SIZE, 1);
+
+		copy_pp_->InputPin(0, pvp.temp_shading_tex);
+		if (Opaque_GBuffer == g_buffer_index)
+		{
+			copy_pp_->OutputPin(0, pvp.curr_merged_shading_tex);
+		}
+		else
+		{
+			copy_pp_->OutputPin(0, pvp.shading_tex);
+		}
+		copy_pp_->Apply();
+	}
+
+	void DeferredRenderingLayer::CreateDepthMinMaxMapCS(PerViewport const & pvp)
+	{
+		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+		re.BindFrameBuffer(re.DefaultFrameBuffer());
+		re.DefaultFrameBuffer()->Discard(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth | FrameBuffer::CBM_Stencil);
+
+		CameraPtr const & camera = pvp.frame_buffer->GetViewport()->camera;
+		TexturePtr const & in_tex = pvp.g_buffer_depth_tex;
+		TexturePtr const & out_tex = pvp.g_buffer_min_max_depth_texs.back();
+		*depth_to_tiled_near_far_width_height_param_ = float4(camera->NearPlane(), camera->FarPlane(),
+			static_cast<float>(in_tex->Width(0) - 1), static_cast<float>(in_tex->Height(0) - 1));
+		*depth_to_tiled_depth_in_tex_param_ = in_tex;
+		*depth_to_tiled_min_max_depth_rw_tex_param_ = out_tex;
+
+		re.Dispatch(*technique_depth_to_tiled_min_max_, out_tex->Width(0), out_tex->Height(0), 1);
 	}
 #endif
 

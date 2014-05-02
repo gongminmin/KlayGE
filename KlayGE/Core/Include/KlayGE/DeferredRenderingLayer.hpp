@@ -114,6 +114,11 @@ namespace KlayGE
 #if DEFAULT_DEFERRED == LIGHT_INDEXED_DEFERRED
 		FrameBufferPtr light_index_fb;
 		TexturePtr light_index_tex;
+
+		TexturePtr temp_shading_tex;
+
+		TexturePtr lighting_mask_tex;
+		FrameBufferPtr lighting_mask_fb;
 #endif
 	};
 
@@ -336,6 +341,15 @@ namespace KlayGE
 			std::vector<uint32_t>::const_iterator iter_beg, std::vector<uint32_t>::const_iterator iter_end,
 			uint32_t g_buffer_index, bool is_point, bool with_shadow);
 		void CreateDepthMinMaxMap(PerViewport const & pvp);
+
+		void UpdateLightIndexedLightingAmbientSunCS(PerViewport const & pvp, LightSource::LightType type,
+			int32_t org_no, PassCategory pass_cat, int32_t index_in_pass, uint32_t g_buffer_index);
+		void UpdateLightIndexedLightingDirectionalCS(PerViewport const & pvp, uint32_t g_buffer_index,
+			std::vector<uint32_t>::const_iterator iter_beg, std::vector<uint32_t>::const_iterator iter_end);
+		void UpdateLightIndexedLightingPointSpotCS(PerViewport const & pvp,
+			std::vector<uint32_t>::const_iterator iter_beg, std::vector<uint32_t>::const_iterator iter_end,
+			uint32_t g_buffer_index, bool is_point, bool with_shadow);
+		void CreateDepthMinMaxMapCS(PerViewport const & pvp);
 #endif
 
 	private:
@@ -348,6 +362,7 @@ namespace KlayGE
 		RenderEffectPtr dr_effect_;
 #if DEFAULT_DEFERRED == LIGHT_INDEXED_DEFERRED
 		uint32_t light_batch_;
+		bool cs_tbdr_;
 #endif
 
 		array<PerViewport, 8> viewports_;
@@ -470,6 +485,19 @@ namespace KlayGE
 
 		PostProcessPtr depth_to_min_max_pp_;
 		PostProcessPtr reduce_min_max_pp_;
+
+		RenderTechniquePtr technique_depth_to_tiled_min_max_;
+		RenderTechniquePtr technique_tile_based_deferred_rendering_lighting_mask_;
+		RenderEffectParameterPtr depth_to_tiled_near_far_width_height_param_;
+		RenderEffectParameterPtr depth_to_tiled_depth_in_tex_param_;
+		RenderEffectParameterPtr depth_to_tiled_min_max_depth_rw_tex_param_;
+		RenderEffectParameterPtr upper_left_param_;
+		RenderEffectParameterPtr x_dir_param_;
+		RenderEffectParameterPtr y_dir_param_;
+		RenderEffectParameterPtr lighting_mask_tex_param_;
+		RenderEffectParameterPtr shading_in_tex_param_;
+		RenderEffectParameterPtr shading_rw_tex_param_;
+		PostProcessPtr copy_pp_;
 #endif
 
 		std::vector<SceneObject*> visible_scene_objs_;
