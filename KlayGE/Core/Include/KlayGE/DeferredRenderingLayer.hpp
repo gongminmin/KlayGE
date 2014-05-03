@@ -334,7 +334,7 @@ namespace KlayGE
 
 #if DEFAULT_DEFERRED == LIGHT_INDEXED_DEFERRED
 		void UpdateLightIndexedLightingAmbientSun(PerViewport const & pvp, LightSource::LightType type,
-			int32_t org_no, PassCategory pass_cat, int32_t index_in_pass, uint32_t g_buffer_index);
+			int32_t org_no, uint32_t g_buffer_index);
 		void UpdateLightIndexedLightingDirectional(PerViewport const & pvp, uint32_t g_buffer_index,
 			std::vector<uint32_t>::const_iterator iter_beg, std::vector<uint32_t>::const_iterator iter_end);
 		void UpdateLightIndexedLightingPointSpot(PerViewport const & pvp,
@@ -343,7 +343,7 @@ namespace KlayGE
 		void CreateDepthMinMaxMap(PerViewport const & pvp);
 
 		void UpdateLightIndexedLightingAmbientSunCS(PerViewport const & pvp, LightSource::LightType type,
-			int32_t org_no, PassCategory pass_cat, int32_t index_in_pass, uint32_t g_buffer_index);
+			int32_t org_no, uint32_t g_buffer_index);
 		void UpdateLightIndexedLightingDirectionalCS(PerViewport const & pvp, uint32_t g_buffer_index,
 			std::vector<uint32_t>::const_iterator iter_beg, std::vector<uint32_t>::const_iterator iter_end);
 		void UpdateLightIndexedLightingPointSpotCS(PerViewport const & pvp,

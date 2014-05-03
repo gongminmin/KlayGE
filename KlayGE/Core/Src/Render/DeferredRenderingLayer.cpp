@@ -1547,156 +1547,221 @@ namespace KlayGE
 				{
 					re.BindFrameBuffer(pvp.lighting_mask_fb);
 					re.Render(*technique_tile_based_deferred_rendering_lighting_mask_, *rl_quad_);
-				}
 
-				std::vector<uint32_t> directional_lights;
-				std::vector<uint32_t> point_lights_shadow;
-				std::vector<uint32_t> point_lights_no_shadow;
-				std::vector<uint32_t> spot_lights_shadow;
-				std::vector<uint32_t> spot_lights_no_shadow;
-				for (uint32_t li = 0; li < lights_.size(); ++ li)
-				{
-					LightSourcePtr const & light = lights_[li];
-					if (light->Enabled() && pvp.light_visibles[li])
+					std::vector<uint32_t> directional_lights;
+					std::vector<uint32_t> point_lights_shadow;
+					std::vector<uint32_t> point_lights_no_shadow;
+					std::vector<uint32_t> spot_lights_shadow;
+					std::vector<uint32_t> spot_lights_no_shadow;
+					for (uint32_t li = 0; li < lights_.size(); ++ li)
 					{
-						LightSource::LightType type = light->Type();
-						switch (type)
+						LightSourcePtr const & light = lights_[li];
+						if (light->Enabled() && pvp.light_visibles[li])
 						{
-						case LightSource::LT_Ambient:
-						case LightSource::LT_Sun:
-							if (cs_tbdr_)
+							LightSource::LightType type = light->Type();
+							switch (type)
 							{
-								this->UpdateLightIndexedLightingAmbientSunCS(pvp, type, li,
-									GetPassCategory(pass_type), index_in_pass, pass_tb);
-							}
-							else
-							{
-								this->UpdateLightIndexedLightingAmbientSun(pvp, type, li,
-									GetPassCategory(pass_type), index_in_pass, pass_tb);
-							}
-							break;
+							case LightSource::LT_Ambient:
+							case LightSource::LT_Sun:
+								this->UpdateLightIndexedLightingAmbientSunCS(pvp, type, li, pass_tb);
+								break;
 
-						case LightSource::LT_Directional:
-							directional_lights.push_back(li);
-							break;
+							case LightSource::LT_Directional:
+								directional_lights.push_back(li);
+								break;
 
-						case LightSource::LT_Point:
-							if (light->Attrib() & LightSource::LSA_NoShadow)
-							{
-								point_lights_no_shadow.push_back(li);
-							}
-							else
-							{
-								point_lights_shadow.push_back(li);
-							}
-							break;
+							case LightSource::LT_Point:
+								if (light->Attrib() & LightSource::LSA_NoShadow)
+								{
+									point_lights_no_shadow.push_back(li);
+								}
+								else
+								{
+									point_lights_shadow.push_back(li);
+								}
+								break;
 
-						case LightSource::LT_Spot:
-							if (light->Attrib() & LightSource::LSA_NoShadow)
-							{
-								spot_lights_no_shadow.push_back(li);
-							}
-							else
-							{
-								spot_lights_shadow.push_back(li);
-							}
-							break;
+							case LightSource::LT_Spot:
+								if (light->Attrib() & LightSource::LSA_NoShadow)
+								{
+									spot_lights_no_shadow.push_back(li);
+								}
+								else
+								{
+									spot_lights_shadow.push_back(li);
+								}
+								break;
 
-						default:
-							BOOST_ASSERT(false);
-							break;
+							default:
+								BOOST_ASSERT(false);
+								break;
+							}
 						}
 					}
-				}
 
-				{
-					uint32_t li = 0;
-					while (li < directional_lights.size())
 					{
-						uint32_t nl = std::min(light_batch_, static_cast<uint32_t>(directional_lights.size() - li));
-						std::vector<uint32_t>::const_iterator iter_beg = directional_lights.begin() + li;
-						std::vector<uint32_t>::const_iterator iter_end = iter_beg + nl;
-						if (cs_tbdr_)
+						uint32_t li = 0;
+						while (li < directional_lights.size())
 						{
+							uint32_t nl = std::min(light_batch_, static_cast<uint32_t>(directional_lights.size() - li));
+							std::vector<uint32_t>::const_iterator iter_beg = directional_lights.begin() + li;
+							std::vector<uint32_t>::const_iterator iter_end = iter_beg + nl;
 							this->UpdateLightIndexedLightingDirectionalCS(pvp, pass_tb, iter_beg, iter_end);
+							li += nl;
 						}
-						else
-						{
-							this->UpdateLightIndexedLightingDirectional(pvp, pass_tb, iter_beg, iter_end);
-						}
-						li += nl;
 					}
-				}
-				{
-					uint32_t li = 0;
-					while (li < point_lights_no_shadow.size())
 					{
-						uint32_t nl = std::min(light_batch_, static_cast<uint32_t>(point_lights_no_shadow.size() - li));
-						std::vector<uint32_t>::iterator iter_beg = point_lights_no_shadow.begin() + li;
-						std::vector<uint32_t>::iterator iter_end = iter_beg + nl;
-						if (cs_tbdr_)
+						uint32_t li = 0;
+						while (li < point_lights_no_shadow.size())
 						{
+							uint32_t nl = std::min(light_batch_, static_cast<uint32_t>(point_lights_no_shadow.size() - li));
+							std::vector<uint32_t>::iterator iter_beg = point_lights_no_shadow.begin() + li;
+							std::vector<uint32_t>::iterator iter_end = iter_beg + nl;
 							this->UpdateLightIndexedLightingPointSpotCS(pvp, iter_beg, iter_end, pass_tb, true, false);
+							li += nl;
 						}
-						else
-						{
-							this->UpdateLightIndexedLightingPointSpot(pvp, iter_beg, iter_end, pass_tb, true, false);
-						}
-						li += nl;
 					}
-				}
-				{
-					uint32_t li = 0;
-					while (li < point_lights_shadow.size())
 					{
-						uint32_t nl = std::min(light_batch_, static_cast<uint32_t>(point_lights_shadow.size() - li));
-						std::vector<uint32_t>::iterator iter_beg = point_lights_shadow.begin() + li;
-						std::vector<uint32_t>::iterator iter_end = iter_beg + nl;
-						if (cs_tbdr_)
+						uint32_t li = 0;
+						while (li < point_lights_shadow.size())
 						{
+							uint32_t nl = std::min(light_batch_, static_cast<uint32_t>(point_lights_shadow.size() - li));
+							std::vector<uint32_t>::iterator iter_beg = point_lights_shadow.begin() + li;
+							std::vector<uint32_t>::iterator iter_end = iter_beg + nl;
 							this->UpdateLightIndexedLightingPointSpotCS(pvp, iter_beg, iter_end, pass_tb, true, true);
+							li += nl;
 						}
-						else
-						{
-							this->UpdateLightIndexedLightingPointSpot(pvp, iter_beg, iter_end, pass_tb, true, true);
-						}
-						li += nl;
 					}
-				}
-				{
-					uint32_t li = 0;
-					while (li < spot_lights_no_shadow.size())
 					{
-						uint32_t nl = std::min(light_batch_, static_cast<uint32_t>(spot_lights_no_shadow.size() - li));
-						std::vector<uint32_t>::iterator iter_beg = spot_lights_no_shadow.begin() + li;
-						std::vector<uint32_t>::iterator iter_end = iter_beg + nl;
-						if (cs_tbdr_)
+						uint32_t li = 0;
+						while (li < spot_lights_no_shadow.size())
 						{
+							uint32_t nl = std::min(light_batch_, static_cast<uint32_t>(spot_lights_no_shadow.size() - li));
+							std::vector<uint32_t>::iterator iter_beg = spot_lights_no_shadow.begin() + li;
+							std::vector<uint32_t>::iterator iter_end = iter_beg + nl;
 							this->UpdateLightIndexedLightingPointSpotCS(pvp, iter_beg, iter_end, pass_tb, false, false);
+							li += nl;
 						}
-						else
+					}
+					{
+						uint32_t li = 0;
+						while (li < spot_lights_shadow.size())
 						{
-							this->UpdateLightIndexedLightingPointSpot(pvp, iter_beg, iter_end, pass_tb, false, false);
+							uint32_t nl = std::min(light_batch_, static_cast<uint32_t>(spot_lights_shadow.size() - li));
+							std::vector<uint32_t>::iterator iter_beg = spot_lights_shadow.begin() + li;
+							std::vector<uint32_t>::iterator iter_end = iter_beg + nl;
+							this->UpdateLightIndexedLightingPointSpotCS(pvp, iter_beg, iter_end, pass_tb, false, true);
+							li += nl;
 						}
-						li += nl;
 					}
 				}
+				else
 				{
-					uint32_t li = 0;
-					while (li < spot_lights_shadow.size())
+					std::vector<uint32_t> directional_lights;
+					std::vector<uint32_t> point_lights_shadow;
+					std::vector<uint32_t> point_lights_no_shadow;
+					std::vector<uint32_t> spot_lights_shadow;
+					std::vector<uint32_t> spot_lights_no_shadow;
+					for (uint32_t li = 0; li < lights_.size(); ++ li)
 					{
-						uint32_t nl = std::min(light_batch_, static_cast<uint32_t>(spot_lights_shadow.size() - li));
-						std::vector<uint32_t>::iterator iter_beg = spot_lights_shadow.begin() + li;
-						std::vector<uint32_t>::iterator iter_end = iter_beg + nl;
-						if (cs_tbdr_)
+						LightSourcePtr const & light = lights_[li];
+						if (light->Enabled() && pvp.light_visibles[li])
 						{
-							this->UpdateLightIndexedLightingPointSpotCS(pvp, iter_beg, iter_end, pass_tb, false, true);
+							LightSource::LightType type = light->Type();
+							switch (type)
+							{
+							case LightSource::LT_Ambient:
+							case LightSource::LT_Sun:
+								this->UpdateLightIndexedLightingAmbientSun(pvp, type, li, pass_tb);
+								break;
+
+							case LightSource::LT_Directional:
+								directional_lights.push_back(li);
+								break;
+
+							case LightSource::LT_Point:
+								if (light->Attrib() & LightSource::LSA_NoShadow)
+								{
+									point_lights_no_shadow.push_back(li);
+								}
+								else
+								{
+									point_lights_shadow.push_back(li);
+								}
+								break;
+
+							case LightSource::LT_Spot:
+								if (light->Attrib() & LightSource::LSA_NoShadow)
+								{
+									spot_lights_no_shadow.push_back(li);
+								}
+								else
+								{
+									spot_lights_shadow.push_back(li);
+								}
+								break;
+
+							default:
+								BOOST_ASSERT(false);
+								break;
+							}
 						}
-						else
+					}
+
+					{
+						uint32_t li = 0;
+						while (li < directional_lights.size())
 						{
+							uint32_t nl = std::min(light_batch_, static_cast<uint32_t>(directional_lights.size() - li));
+							std::vector<uint32_t>::const_iterator iter_beg = directional_lights.begin() + li;
+							std::vector<uint32_t>::const_iterator iter_end = iter_beg + nl;
+							this->UpdateLightIndexedLightingDirectional(pvp, pass_tb, iter_beg, iter_end);
+							li += nl;
+						}
+					}
+					{
+						uint32_t li = 0;
+						while (li < point_lights_no_shadow.size())
+						{
+							uint32_t nl = std::min(light_batch_, static_cast<uint32_t>(point_lights_no_shadow.size() - li));
+							std::vector<uint32_t>::iterator iter_beg = point_lights_no_shadow.begin() + li;
+							std::vector<uint32_t>::iterator iter_end = iter_beg + nl;
+							this->UpdateLightIndexedLightingPointSpot(pvp, iter_beg, iter_end, pass_tb, true, false);
+							li += nl;
+						}
+					}
+					{
+						uint32_t li = 0;
+						while (li < point_lights_shadow.size())
+						{
+							uint32_t nl = std::min(light_batch_, static_cast<uint32_t>(point_lights_shadow.size() - li));
+							std::vector<uint32_t>::iterator iter_beg = point_lights_shadow.begin() + li;
+							std::vector<uint32_t>::iterator iter_end = iter_beg + nl;
+							this->UpdateLightIndexedLightingPointSpot(pvp, iter_beg, iter_end, pass_tb, true, true);
+							li += nl;
+						}
+					}
+					{
+						uint32_t li = 0;
+						while (li < spot_lights_no_shadow.size())
+						{
+							uint32_t nl = std::min(light_batch_, static_cast<uint32_t>(spot_lights_no_shadow.size() - li));
+							std::vector<uint32_t>::iterator iter_beg = spot_lights_no_shadow.begin() + li;
+							std::vector<uint32_t>::iterator iter_end = iter_beg + nl;
+							this->UpdateLightIndexedLightingPointSpot(pvp, iter_beg, iter_end, pass_tb, false, false);
+							li += nl;
+						}
+					}
+					{
+						uint32_t li = 0;
+						while (li < spot_lights_shadow.size())
+						{
+							uint32_t nl = std::min(light_batch_, static_cast<uint32_t>(spot_lights_shadow.size() - li));
+							std::vector<uint32_t>::iterator iter_beg = spot_lights_shadow.begin() + li;
+							std::vector<uint32_t>::iterator iter_end = iter_beg + nl;
 							this->UpdateLightIndexedLightingPointSpot(pvp, iter_beg, iter_end, pass_tb, false, true);
+							li += nl;
 						}
-						li += nl;
 					}
 				}
 #elif DEFAULT_DEFERRED == TRIDITIONAL_DEFERRED
@@ -3017,7 +3082,7 @@ namespace KlayGE
 
 #if DEFAULT_DEFERRED == LIGHT_INDEXED_DEFERRED
 	void DeferredRenderingLayer::UpdateLightIndexedLightingAmbientSun(PerViewport const & pvp, LightSource::LightType type,
-		int32_t org_no, PassCategory pass_cat, int32_t index_in_pass, uint32_t g_buffer_index)
+		int32_t org_no, uint32_t g_buffer_index)
 	{
 		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 
@@ -3049,15 +3114,7 @@ namespace KlayGE
 
 			sm_fb_->GetViewport()->camera = sm_camera;
 
-			if ((pass_cat != PC_Shadowing) && (pass_cat != PC_Shading))
-			{
-				curr_cascade_index_ = index_in_pass;
-			}
-			else
-			{
-				curr_cascade_index_ = -1;
-			}
-
+			curr_cascade_index_ = -1;
 			*light_view_proj_param_ = pvp.inv_view * sm_camera->ViewProjMatrix();
 
 			float3 const & p = light->Position();
@@ -3307,7 +3364,7 @@ namespace KlayGE
 
 
 	void DeferredRenderingLayer::UpdateLightIndexedLightingAmbientSunCS(PerViewport const & pvp, LightSource::LightType type,
-		int32_t org_no, PassCategory pass_cat, int32_t index_in_pass, uint32_t g_buffer_index)
+		int32_t org_no, uint32_t g_buffer_index)
 	{
 		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 
@@ -3339,15 +3396,7 @@ namespace KlayGE
 
 			sm_fb_->GetViewport()->camera = sm_camera;
 
-			if ((pass_cat != PC_Shadowing) && (pass_cat != PC_Shading))
-			{
-				curr_cascade_index_ = index_in_pass;
-			}
-			else
-			{
-				curr_cascade_index_ = -1;
-			}
-
+			curr_cascade_index_ = -1;
 			*light_view_proj_param_ = pvp.inv_view * sm_camera->ViewProjMatrix();
 
 			float3 const & p = light->Position();

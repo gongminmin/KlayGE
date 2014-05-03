@@ -181,17 +181,6 @@ float3 texcoord_to_view(float2 tex)
 	return upper_left + x_dir * tex.x + y_dir * tex.y;
 }
 
-void LightIndexedDeferredRenderingVS(float4 pos : POSITION,
-			out float2 oTexCoord : TEXCOORD0,
-			out float4 oPos : SV_Position)
-{
-	oPos = pos;
-
-	oTexCoord = pos.xy / 2;
-	oTexCoord.y *= KLAYGE_FLIPPING;
-	oTexCoord += 0.5f;
-}
-
 [numthreads(BLOCK_X, BLOCK_Y, 1)]
 void LightIndexedDeferredRenderingAmbientCS(uint3 dtid : SV_DispatchThreadID)
 {
@@ -199,14 +188,14 @@ void LightIndexedDeferredRenderingAmbientCS(uint3 dtid : SV_DispatchThreadID)
 	{
 		float2 tc = (dtid.xy + 0.5f) * inv_width_height;
 	
-		float4 ndc = g_buffer_tex.SampleLevel(point_sampler, tc, 0);
+		float4 ndc = g_buffer_tex.Load(dtid);
 		float3 view_dir = normalize(texcoord_to_view(tc));
 		float3 normal = GetNormal(ndc);
 		float shininess = GetShininess(ndc);
 
 		float4 lighting = CalcColor(0.5f + 0.5f * dot(light_dir_es.xyz, normal), 0, 1, 1, light_color, light_attrib);
 	
-		float4 mrt1 = g_buffer_1_tex.SampleLevel(point_sampler, tc, 0);
+		float4 mrt1 = g_buffer_1_tex.Load(dtid);
 		shading_rw_tex[dtid.xy] = float4(Shading(lighting, shininess, GetDiffuse(mrt1), GetSpecular(mrt1), -view_dir, normal), 1);
 	}
 }
@@ -220,7 +209,7 @@ void LightIndexedDeferredRenderingSunCS(uint3 dtid : SV_DispatchThreadID)
 
 		float4 shading = 0;
 
-		float4 ndc = g_buffer_tex.SampleLevel(point_sampler, tc, 0);
+		float4 ndc = g_buffer_tex.Load(dtid);
 		float3 normal = GetNormal(ndc);
 
 		float3 dir = light_dir_es.xyz;
@@ -238,7 +227,7 @@ void LightIndexedDeferredRenderingSunCS(uint3 dtid : SV_DispatchThreadID)
 			float4 lighting = CalcColor(n_dot_l, spec, 1, shadow, light_color, light_attrib);
 
 			float shininess = GetShininess(ndc);
-			float4 mrt1 = g_buffer_1_tex.SampleLevel(point_sampler, tc, 0);
+			float4 mrt1 = g_buffer_1_tex.Load(dtid);
 			shading = float4(Shading(lighting, shininess, GetDiffuse(mrt1), GetSpecular(mrt1), -view_dir, normal), 1);
 		}
 
@@ -255,9 +244,9 @@ void LightIndexedDeferredRenderingDirectionalCS(uint3 dtid : SV_DispatchThreadID
 
 		float4 lighting = 0;
 
-		float4 ndc = g_buffer_tex.SampleLevel(point_sampler, tc, 0);
+		float4 ndc = g_buffer_tex.Load(dtid);
 		float3 view_dir = normalize(texcoord_to_view(tc));
-		float3 pos_es = view_dir * (ReadAFloat(depth_tex.SampleLevel(point_sampler, tc, 0), depth_near_far_invfar.y) / view_dir.z);
+		float3 pos_es = view_dir * (ReadAFloat(depth_tex.Load(dtid), depth_near_far_invfar.y) / view_dir.z);
 		float3 normal = GetNormal(ndc);
 		float shininess = GetShininess(ndc);
 
@@ -272,7 +261,7 @@ void LightIndexedDeferredRenderingDirectionalCS(uint3 dtid : SV_DispatchThreadID
 			}
 		}
 
-		float4 mrt1 = g_buffer_1_tex.SampleLevel(point_sampler, tc, 0);
+		float4 mrt1 = g_buffer_1_tex.Load(dtid);
 		float4 shading = float4(Shading(lighting, shininess, GetDiffuse(mrt1), GetSpecular(mrt1), -view_dir, normal), 1);
 		shading_rw_tex[dtid.xy] = shading_in_tex.Load(dtid) + shading;
 	}
@@ -335,8 +324,8 @@ float4 CalcLightIndexedDeferredRenderingSpotLighting(int index, float3 pos_es, f
 }
 
 groupshared float4 planes_sh[6];
-groupshared uint accum_sh[LIGHT_BATCH / 32];
-groupshared uint non_empty_tile_sh;
+groupshared uint light_indices_sh[LIGHT_BATCH];
+groupshared uint num_available_lights_sh;
 
 [numthreads(BLOCK_X, BLOCK_Y, 1)]
 void LightIndexedDeferredRenderingPointCS(uint3 gid : SV_GroupID,
@@ -347,27 +336,22 @@ void LightIndexedDeferredRenderingPointCS(uint3 gid : SV_GroupID,
 	{
 		float2 min_max = min_max_depth_tex.Load(gid).xy;
 		CalcTileViewFrustum(gid.xy, min_max, planes_sh);
-		non_empty_tile_sh = 0;
+		num_available_lights_sh = 0;
 	}
 	GroupMemoryBarrierWithGroupSync();
 
-	if (GI < LIGHT_BATCH / 32)
+	for (int index = GI; index < num_lights; index += BLOCK_SIZE)
 	{
-		uint accum = 0;
-		for (uint index = GI * 32; index < min((GI + 1) * 32, num_lights); ++ index)
+		if (OverlapTestPoint(planes_sh, index))
 		{
-			if (OverlapTestPoint(planes_sh, index))
-			{
-				accum |= (1UL << (index - GI * 32));
-				non_empty_tile_sh |= 1;
-			}
+			uint light_index;
+			InterlockedAdd(num_available_lights_sh, 1, light_index);
+			light_indices_sh[light_index] = index;
 		}
-		
-		accum_sh[GI] = accum;
 	}
 	GroupMemoryBarrierWithGroupSync();
 
-	if (non_empty_tile_sh)
+	if (num_available_lights_sh > 0)
 	{
 		uint2 tile_start = gid.xy * TILE_SIZE + gtid.xy;
 		for (uint tile_y = 0; tile_y < TILE_SIZE; tile_y += BLOCK_Y)
@@ -381,28 +365,18 @@ void LightIndexedDeferredRenderingPointCS(uint3 gid : SV_GroupID,
 					float2 tc = (dtid.xy + 0.5f) * inv_width_height;
 
 					float4 lighting = 0;
-					float4 ndc = g_buffer_tex.SampleLevel(point_sampler, tc, 0);
+					float4 ndc = g_buffer_tex.Load(dtid);
 					float3 view_dir = normalize(texcoord_to_view(tc));
-					float3 pos_es = view_dir * (ReadAFloat(depth_tex.SampleLevel(point_sampler, tc, 0), depth_near_far_invfar.y) / view_dir.z);
+					float3 pos_es = view_dir * (ReadAFloat(depth_tex.Load(dtid), depth_near_far_invfar.y) / view_dir.z);
 					float3 normal = GetNormal(ndc);
 					float shininess = GetShininess(ndc);
-			
-					for (uint i = 0; i < LIGHT_BATCH / 32; ++ i)
+
+					for (uint i = 0; i < num_available_lights_sh; ++ i)
 					{
-						uint light_index_all = accum_sh[i];
-						if (light_index_all != 0)
-						{
-							uint nl = countbits(light_index_all);
-							for (uint il = 0; il < nl; ++ il)
-							{
-								uint index = firstbitlow(light_index_all) + i * 32;
-								lighting += CalcLightIndexedDeferredRenderingPointLighting(index, pos_es, normal, view_dir, shininess, tc);
-								light_index_all = light_index_all & (light_index_all - 1);
-							}
-						}
+						lighting += CalcLightIndexedDeferredRenderingPointLighting(light_indices_sh[i], pos_es, normal, view_dir, shininess, tc);
 					}
 
-					float4 mrt1 = g_buffer_1_tex.SampleLevel(point_sampler, tc, 0);
+					float4 mrt1 = g_buffer_1_tex.Load(dtid);
 					float4 shading = float4(Shading(lighting, shininess, GetDiffuse(mrt1), GetSpecular(mrt1), -view_dir, normal), 1);
 
 					shading_rw_tex[dtid.xy] = shading_in_tex.Load(dtid) + shading;
@@ -421,27 +395,22 @@ void LightIndexedDeferredRenderingSpotCS(uint3 gid : SV_GroupID,
 	{
 		float2 min_max = min_max_depth_tex.Load(gid).xy;
 		CalcTileViewFrustum(gid.xy, min_max, planes_sh);
-		non_empty_tile_sh = 0;
+		num_available_lights_sh = 0;
 	}
 	GroupMemoryBarrierWithGroupSync();
 	
-	if (GI < LIGHT_BATCH / 32)
+	for (int index = GI; index < num_lights; index += BLOCK_SIZE)
 	{
-		uint accum = 0;
-		for (uint index = GI * 32; index < min((GI + 1) * 32, num_lights); ++ index)
+		if (OverlapTestPoint(planes_sh, index))
 		{
-			if (OverlapTestPoint(planes_sh, index))
-			{
-				accum |= (1UL << (index - GI * 32));
-				non_empty_tile_sh |= 1;
-			}
+			uint light_index;
+			InterlockedAdd(num_available_lights_sh, 1, light_index);
+			light_indices_sh[light_index] = index;
 		}
-		
-		accum_sh[GI] = accum;
 	}
 	GroupMemoryBarrierWithGroupSync();
 
-	if (non_empty_tile_sh)
+	if (num_available_lights_sh > 0)
 	{
 		uint2 tile_start = gid.xy * TILE_SIZE + gtid.xy;
 		for (uint tile_y = 0; tile_y < TILE_SIZE; tile_y += BLOCK_Y)
@@ -455,28 +424,18 @@ void LightIndexedDeferredRenderingSpotCS(uint3 gid : SV_GroupID,
 					float2 tc = (dtid.xy + 0.5f) * inv_width_height;
 	
 					float4 lighting = 0;
-					float4 ndc = g_buffer_tex.SampleLevel(point_sampler, tc, 0);
+					float4 ndc = g_buffer_tex.Load(dtid);
 					float3 view_dir = normalize(texcoord_to_view(tc));
-					float3 pos_es = view_dir * (ReadAFloat(depth_tex.SampleLevel(point_sampler, tc, 0), depth_near_far_invfar.y) / view_dir.z);
+					float3 pos_es = view_dir * (ReadAFloat(depth_tex.Load(dtid), depth_near_far_invfar.y) / view_dir.z);
 					float3 normal = GetNormal(ndc);
 					float shininess = GetShininess(ndc);
-				
-					for (uint i = 0; i < LIGHT_BATCH / 32; ++ i)
+
+					for (uint i = 0; i < num_available_lights_sh; ++ i)
 					{
-						uint light_index_all = accum_sh[i];
-						if (light_index_all != 0)
-						{
-							uint nl = countbits(light_index_all);
-							for (uint il = 0; il < nl; ++ il)
-							{
-								uint index = firstbitlow(light_index_all) + i * 32;
-								lighting += CalcLightIndexedDeferredRenderingSpotLighting(index, pos_es, normal, view_dir, shininess, tc);
-								light_index_all = light_index_all & (light_index_all - 1);
-							}
-						}
+						lighting += CalcLightIndexedDeferredRenderingSpotLighting(light_indices_sh[i], pos_es, normal, view_dir, shininess, tc);
 					}
 
-					float4 mrt1 = g_buffer_1_tex.SampleLevel(point_sampler, tc, 0);
+					float4 mrt1 = g_buffer_1_tex.Load(dtid);
 					float4 shading = float4(Shading(lighting, shininess, GetDiffuse(mrt1), GetSpecular(mrt1), -view_dir, normal), 1);
 
 					shading_rw_tex[dtid.xy] = shading_in_tex.Load(dtid) + shading;
