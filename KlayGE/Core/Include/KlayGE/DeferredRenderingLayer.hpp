@@ -333,22 +333,17 @@ namespace KlayGE
 		void AddTAA(PerViewport const & pvp);
 
 #if DEFAULT_DEFERRED == LIGHT_INDEXED_DEFERRED
+		void UpdateLightIndexedLighting(PerViewport const & pvp, uint32_t g_buffer_index);
 		void UpdateLightIndexedLightingAmbientSun(PerViewport const & pvp, LightSource::LightType type,
 			int32_t org_no, uint32_t g_buffer_index);
 		void UpdateLightIndexedLightingDirectional(PerViewport const & pvp, uint32_t g_buffer_index,
 			std::vector<uint32_t>::const_iterator iter_beg, std::vector<uint32_t>::const_iterator iter_end);
-		void UpdateLightIndexedLightingPointSpot(PerViewport const & pvp,
+		void UpdateLightIndexedLightingPointSpot(PerViewport const & pvp, uint32_t g_buffer_index,
 			std::vector<uint32_t>::const_iterator iter_beg, std::vector<uint32_t>::const_iterator iter_end,
-			uint32_t g_buffer_index, bool is_point, bool with_shadow);
+			bool is_point, bool with_shadow);
 		void CreateDepthMinMaxMap(PerViewport const & pvp);
 
-		void UpdateLightIndexedLightingAmbientSunCS(PerViewport const & pvp, LightSource::LightType type,
-			int32_t org_no, uint32_t g_buffer_index);
-		void UpdateLightIndexedLightingDirectionalCS(PerViewport const & pvp, uint32_t g_buffer_index,
-			std::vector<uint32_t>::const_iterator iter_beg, std::vector<uint32_t>::const_iterator iter_end);
-		void UpdateLightIndexedLightingPointSpotCS(PerViewport const & pvp,
-			std::vector<uint32_t>::const_iterator iter_beg, std::vector<uint32_t>::const_iterator iter_end,
-			uint32_t g_buffer_index, bool is_point, bool with_shadow);
+		void UpdateLightIndexedLightingCS(PerViewport const & pvp, uint32_t g_buffer_index);
 		void CreateDepthMinMaxMapCS(PerViewport const & pvp);
 #endif
 
@@ -414,6 +409,8 @@ namespace KlayGE
 		RenderTechniquePtr technique_light_indexed_deferred_rendering_point_no_shadow_;
 		RenderTechniquePtr technique_light_indexed_deferred_rendering_spot_shadow_;
 		RenderTechniquePtr technique_light_indexed_deferred_rendering_spot_no_shadow_;
+
+		RenderTechniquePtr technique_light_indexed_deferred_rendering_unified_;
 #endif
 		static uint32_t const MAX_NUM_SHADOWED_LIGHTS = 4;
 		static uint32_t const MAX_NUM_SHADOWED_SPOT_LIGHTS = 4;
@@ -498,6 +495,7 @@ namespace KlayGE
 		RenderEffectParameterPtr shading_in_tex_param_;
 		RenderEffectParameterPtr shading_rw_tex_param_;
 		PostProcessPtr copy_pp_;
+		RenderEffectParameterPtr lights_type_param_;
 #endif
 
 		std::vector<SceneObject*> visible_scene_objs_;

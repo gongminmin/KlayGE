@@ -1,7 +1,7 @@
 <?xml version='1.0'?>
 
 <effect>
-	<macro name="LIGHT_BATCH" value="512"/>
+	<macro name="LIGHT_BATCH" value="1024"/>
 	
 	<include name="DeferredRendering.fxml"/>
 
@@ -70,36 +70,6 @@ void DepthToTiledMinMaxCS(uint3 gid : SV_GroupID,
 		</pass>
 	</technique>
 
-	<cbuffer name="overlap_test">
-		<parameter type="float4" name="tile_scale"/>
-		<parameter type="float2" name="camera_proj_01"/>
-		<parameter type="float3" name="lights_aabb_min" array_size="LIGHT_BATCH"/>
-		<parameter type="float3" name="lights_aabb_max" array_size="LIGHT_BATCH"/>
-	</cbuffer>
-	<cbuffer name="light_batch">
-		<parameter type="float4" name="lights_color" array_size="LIGHT_BATCH"/>
-		<parameter type="float4" name="lights_pos_es" array_size="LIGHT_BATCH"/>
-		<parameter type="float4" name="lights_dir_es" array_size="LIGHT_BATCH"/>
-		<parameter type="float4" name="lights_falloff_range" array_size="LIGHT_BATCH"/>
-		<parameter type="float4" name="lights_attrib" array_size="LIGHT_BATCH"/>
-		<parameter type="int4" name="lights_shadowing_channel"/>
-		<parameter type="int" name="num_lights"/>
-		<parameter type="float2" name="tc_to_tile_scale"/>
-	</cbuffer>
-	<parameter type="texture2D" name="min_max_depth_tex"/>
-	<parameter type="texture2D" name="lighting_mask_tex"/>
-	<parameter type="texture2D" name="shading_in_tex"/>
-	<parameter type="rw_texture2D" name="shading_rw_tex"/>
-	<macro name="LT_Ambient" value="0"/>
-	<macro name="LT_Sun" value="1"/>
-	<macro name="LT_Directional" value="2"/>
-	<macro name="LT_Point" value="3"/>
-	<macro name="LT_Spot" value="4"/>
-
-	<parameter type="float3" name="upper_left"/>
-	<parameter type="float3" name="x_dir"/>
-	<parameter type="float3" name="y_dir"/>
-
 	<shader>
 		<![CDATA[
 void TileBasedDeferredRenderingLightingMaskVS(float4 pos : POSITION,
@@ -114,6 +84,59 @@ float4 TileBasedDeferredRenderingLightingMaskPS() : SV_Target
 }
 		]]>
 	</shader>
+
+	<technique name="TileBasedDeferredRenderingLightingMask">
+		<pass name="p0">
+			<state name="depth_enable" value="false"/>
+			<state name="depth_write_mask" value="false"/>
+
+			<state name="cull_mode" value="front"/>
+
+			<state name="front_stencil_enable" value="true"/>
+			<state name="front_stencil_func" value="not_equal"/>
+			<state name="front_stencil_ref" value="128"/>
+			<state name="front_stencil_pass" value="keep"/>
+			<state name="back_stencil_enable" value="true"/>
+			<state name="back_stencil_func" value="not_equal"/>
+			<state name="back_stencil_ref" value="128"/>
+			<state name="back_stencil_pass" value="keep"/>
+
+			<state name="vertex_shader" value="TileBasedDeferredRenderingLightingMaskVS()"/>
+			<state name="pixel_shader" value="TileBasedDeferredRenderingLightingMaskPS()"/>
+		</pass>
+	</technique>
+
+	<cbuffer name="overlap_test">
+		<parameter type="float4" name="tile_scale"/>
+		<parameter type="float2" name="camera_proj_01"/>
+		<parameter type="float3" name="lights_aabb_min" array_size="LIGHT_BATCH"/>
+		<parameter type="float3" name="lights_aabb_max" array_size="LIGHT_BATCH"/>
+	</cbuffer>
+	<cbuffer name="light_batch1">
+		<parameter type="float4" name="lights_color" array_size="LIGHT_BATCH"/>
+		<parameter type="float4" name="lights_pos_es" array_size="LIGHT_BATCH"/>
+		<parameter type="float4" name="lights_dir_es" array_size="LIGHT_BATCH"/>
+		<parameter type="float4" name="lights_falloff_range" array_size="LIGHT_BATCH"/>
+	</cbuffer>
+	<cbuffer name="light_batch2">
+		<parameter type="float4" name="lights_attrib" array_size="LIGHT_BATCH"/>
+		<parameter type="int" name="lights_shadowing_channel" array_size="6"/>
+		<parameter type="float2" name="tc_to_tile_scale"/>
+		<parameter type="uint" name="lights_type" array_size="8"/>
+	</cbuffer>
+	<parameter type="texture2D" name="min_max_depth_tex"/>
+	<parameter type="texture2D" name="lighting_mask_tex"/>
+	<parameter type="texture2D" name="shading_in_tex"/>
+	<parameter type="rw_texture2D" name="shading_rw_tex"/>
+	<macro name="LT_Ambient" value="0"/>
+	<macro name="LT_Sun" value="1"/>
+	<macro name="LT_Directional" value="2"/>
+	<macro name="LT_Point" value="3"/>
+	<macro name="LT_Spot" value="4"/>
+
+	<parameter type="float3" name="upper_left"/>
+	<parameter type="float3" name="x_dir"/>
+	<parameter type="float3" name="y_dir"/>
 
 	<shader type="compute_shader" version="5">
 		<![CDATA[
@@ -175,100 +198,49 @@ int OverlapTestSpot(float4 planes[6], int light_index)
 	return overlap;
 }
 
-
 float3 texcoord_to_view(float2 tex)
 {
 	return upper_left + x_dir * tex.x + y_dir * tex.y;
 }
 
-[numthreads(BLOCK_X, BLOCK_Y, 1)]
-void LightIndexedDeferredRenderingAmbientCS(uint3 dtid : SV_DispatchThreadID)
+float4 NearestDepthUpsamplingShadowLevel(float2 tc, int channel)
 {
-	if (lighting_mask_tex.Load(dtid).x > 0)
+	float2 l1_inv_width_height = inv_width_height * 2;
+	float2 tc0 = tc - inv_width_height;
+	float z00 = ReadAFloat(depth_tex.SampleLevel(point_sampler, tc0, 1), depth_near_far_invfar.y);
+	float z10 = ReadAFloat(depth_tex.SampleLevel(point_sampler, tc0 + float2(l1_inv_width_height.x, 0), 1), depth_near_far_invfar.y);
+	float z01 = ReadAFloat(depth_tex.SampleLevel(point_sampler, tc0 + float2(0, l1_inv_width_height.y), 1), depth_near_far_invfar.y);
+	float z11 = ReadAFloat(depth_tex.SampleLevel(point_sampler, tc0 + l1_inv_width_height, 1), depth_near_far_invfar.y);
+	float z_full = ReadAFloat(depth_tex.SampleLevel(point_sampler, tc, 0), depth_near_far_invfar.y);
+	float threshold = 0.25f;
+
+	float3 ndus = NearestDepthUpsampling(tc0, float4(z00, z10, z01, z11), z_full, l1_inv_width_height, threshold);
+	if (ndus.z > 0)
 	{
-		float2 tc = (dtid.xy + 0.5f) * inv_width_height;
-	
-		float4 ndc = g_buffer_tex.Load(dtid);
-		float3 view_dir = normalize(texcoord_to_view(tc));
-		float3 normal = GetNormal(ndc);
-		float shininess = GetShininess(ndc);
-
-		float4 lighting = CalcColor(0.5f + 0.5f * dot(light_dir_es.xyz, normal), 0, 1, 1, light_color, light_attrib);
-	
-		float4 mrt1 = g_buffer_1_tex.Load(dtid);
-		shading_rw_tex[dtid.xy] = float4(Shading(lighting, shininess, GetDiffuse(mrt1), GetSpecular(mrt1), -view_dir, normal), 1);
-	}
-}
-
-[numthreads(BLOCK_X, BLOCK_Y, 1)]
-void LightIndexedDeferredRenderingSunCS(uint3 dtid : SV_DispatchThreadID)
-{
-	if (lighting_mask_tex.Load(dtid).x > 0)
-	{
-		float2 tc = (dtid.xy + 0.5f) * inv_width_height;
-
-		float4 shading = 0;
-
-		float4 ndc = g_buffer_tex.Load(dtid);
-		float3 normal = GetNormal(ndc);
-
-		float3 dir = light_dir_es.xyz;
-		float n_dot_l = dot(normal, dir);
-		if (n_dot_l > 0)
+		if (channel < 4)
 		{
-			float3 view_dir = normalize(texcoord_to_view(tc));
-
-			float spec = roughness_term(normalize(dir - view_dir), normal, GetShininess(ndc)).x;
-			float3 shadow = 1;
-			if (shadowing_channel >= 0)
-			{
-				shadow = NearestDepthUpsamplingShadow(tc, 0, 0, shadowing_channel).xyz;
-			}
-			float4 lighting = CalcColor(n_dot_l, spec, 1, shadow, light_color, light_attrib);
-
-			float shininess = GetShininess(ndc);
-			float4 mrt1 = g_buffer_1_tex.Load(dtid);
-			shading = float4(Shading(lighting, shininess, GetDiffuse(mrt1), GetSpecular(mrt1), -view_dir, normal), 1);
+			return shadowing_tex.SampleLevel(linear_sampler, tc, 0)[channel];
 		}
-
-		shading_rw_tex[dtid.xy] = shading_in_tex.Load(dtid) + shading;
-	}
-}
-
-[numthreads(BLOCK_X, BLOCK_Y, 1)]
-void LightIndexedDeferredRenderingDirectionalCS(uint3 dtid : SV_DispatchThreadID)
-{
-	if (lighting_mask_tex.Load(dtid).x > 0)
-	{
-		float2 tc = (dtid.xy + 0.5f) * inv_width_height;
-
-		float4 lighting = 0;
-
-		float4 ndc = g_buffer_tex.Load(dtid);
-		float3 view_dir = normalize(texcoord_to_view(tc));
-		float3 pos_es = view_dir * (ReadAFloat(depth_tex.Load(dtid), depth_near_far_invfar.y) / view_dir.z);
-		float3 normal = GetNormal(ndc);
-		float shininess = GetShininess(ndc);
-
-		for (int i = 0; i < num_lights; ++ i)
+		else
 		{
-			float3 dir = lights_dir_es[i].xyz;
-			float n_dot_l = dot(normal, dir);
-			if (n_dot_l > 0)
-			{
-				float spec = roughness_term(normalize(dir - view_dir), normal, shininess).x;
-				lighting += CalcColor(n_dot_l, spec, 1, 1, lights_color[i], lights_attrib[i]);
-			}
+			return projective_shadowing_tex.SampleLevel(linear_sampler, tc, 0);
 		}
-
-		float4 mrt1 = g_buffer_1_tex.Load(dtid);
-		float4 shading = float4(Shading(lighting, shininess, GetDiffuse(mrt1), GetSpecular(mrt1), -view_dir, normal), 1);
-		shading_rw_tex[dtid.xy] = shading_in_tex.Load(dtid) + shading;
+	}
+	else
+	{
+		if (channel < 4)
+		{
+			return shadowing_tex.SampleLevel(point_sampler, ndus.xy, 0)[channel];
+		}
+		else
+		{
+			return projective_shadowing_tex.SampleLevel(point_sampler, ndus.xy, 0);
+		}
 	}
 }
 
-float4 CalcLightIndexedDeferredRenderingPointLighting(int index, float3 pos_es, float3 normal, float3 view_dir,
-		float shininess, float2 tc)
+float4 CalcLightIndexedDeferredRenderingPoint(int index, int shadow_index, float3 pos_es, float3 normal, float3 view_dir,
+		float shininess, float2 tc, bool with_shadow)
 {
 	float4 lighting = 0;
 	float3 dir = lights_pos_es[index].xyz - pos_es;
@@ -280,9 +252,10 @@ float4 CalcLightIndexedDeferredRenderingPointLighting(int index, float3 pos_es, 
 		if (n_dot_l > 0)
 		{
 			float3 shadow = 1;
-#if WITH_SHADOW
-			shadow = NearestDepthUpsamplingShadow(tc, 0, 0, lights_shadowing_channel[index]).xyz;
-#endif
+			if (with_shadow)
+			{
+				shadow = NearestDepthUpsamplingShadowLevel(tc, lights_shadowing_channel[shadow_index + 1]).xyz;
+			}
 
 			float spec = roughness_term(normalize(dir - view_dir), normal, shininess).x;
 			float atten = attenuation_term(lights_pos_es[index].xyz, pos_es, lights_falloff_range[index].xyz);
@@ -292,8 +265,8 @@ float4 CalcLightIndexedDeferredRenderingPointLighting(int index, float3 pos_es, 
 	return lighting;
 }
 
-float4 CalcLightIndexedDeferredRenderingSpotLighting(int index, float3 pos_es, float3 normal, float3 view_dir,
-		float shininess, float2 tc)
+float4 CalcLightIndexedDeferredRenderingSpot(int index, int shadow_index, float3 pos_es, float3 normal, float3 view_dir,
+		float shininess, float2 tc, bool with_shadow)
 {
 	float4 lighting = 0;
 	float spot = spot_lighting(lights_pos_es[index].xyz, lights_dir_es[index].xyz,
@@ -309,9 +282,10 @@ float4 CalcLightIndexedDeferredRenderingSpotLighting(int index, float3 pos_es, f
 			if (n_dot_l > 0)
 			{
 				float3 shadow = 1;
-#if WITH_SHADOW
-				shadow = NearestDepthUpsamplingShadow(tc, 0, 0, lights_shadowing_channel[index]).xyz;
-#endif
+				if (with_shadow)
+				{
+					shadow = NearestDepthUpsamplingShadowLevel(tc, lights_shadowing_channel[shadow_index + 2]).xyz;
+				}
 
 				float spec = roughness_term(normalize(dir - view_dir), normal, shininess).x;
 				float atten = spot * attenuation_term(lights_pos_es[index].xyz, pos_es, lights_falloff_range[index].xyz);
@@ -324,122 +298,150 @@ float4 CalcLightIndexedDeferredRenderingSpotLighting(int index, float3 pos_es, f
 }
 
 groupshared float4 planes_sh[6];
-groupshared uint light_indices_sh[LIGHT_BATCH];
-groupshared uint num_available_lights_sh;
+groupshared uint intersected_light_indices_sh[LIGHT_BATCH];
+groupshared uint num_intersected_lights_sh;
 
 [numthreads(BLOCK_X, BLOCK_Y, 1)]
-void LightIndexedDeferredRenderingPointCS(uint3 gid : SV_GroupID,
+void LightIndexedDeferredRenderingUnifiedCS(uint3 gid : SV_GroupID,
 							uint3 gtid : SV_GroupThreadID,
 							uint GI : SV_GroupIndex)
 {
+	uint light_start[4];
+
 	if (0 == GI)
 	{
 		float2 min_max = min_max_depth_tex.Load(gid).xy;
 		CalcTileViewFrustum(gid.xy, min_max, planes_sh);
-		num_available_lights_sh = 0;
+		num_intersected_lights_sh = 0;
 	}
 	GroupMemoryBarrierWithGroupSync();
 
-	for (int index = GI; index < num_lights; index += BLOCK_SIZE)
+	for (uint index = lights_type[3] + GI; index < lights_type[4]; index += BLOCK_SIZE)
 	{
 		if (OverlapTestPoint(planes_sh, index))
 		{
 			uint light_index;
-			InterlockedAdd(num_available_lights_sh, 1, light_index);
-			light_indices_sh[light_index] = index;
+			InterlockedAdd(num_intersected_lights_sh, 1, light_index);
+			intersected_light_indices_sh[light_index] = index;
 		}
-	}
-	GroupMemoryBarrierWithGroupSync();
-
-	if (num_available_lights_sh > 0)
-	{
-		uint2 tile_start = gid.xy * TILE_SIZE + gtid.xy;
-		for (uint tile_y = 0; tile_y < TILE_SIZE; tile_y += BLOCK_Y)
-		{
-			for (uint tile_x = 0; tile_x < TILE_SIZE; tile_x += BLOCK_X)
-			{
-				uint3 dtid = uint3(tile_start + uint2(tile_x, tile_y), 0);
-
-				if (lighting_mask_tex.Load(dtid).x > 0)
-				{
-					float2 tc = (dtid.xy + 0.5f) * inv_width_height;
-
-					float4 lighting = 0;
-					float4 ndc = g_buffer_tex.Load(dtid);
-					float3 view_dir = normalize(texcoord_to_view(tc));
-					float3 pos_es = view_dir * (ReadAFloat(depth_tex.Load(dtid), depth_near_far_invfar.y) / view_dir.z);
-					float3 normal = GetNormal(ndc);
-					float shininess = GetShininess(ndc);
-
-					for (uint i = 0; i < num_available_lights_sh; ++ i)
-					{
-						lighting += CalcLightIndexedDeferredRenderingPointLighting(light_indices_sh[i], pos_es, normal, view_dir, shininess, tc);
-					}
-
-					float4 mrt1 = g_buffer_1_tex.Load(dtid);
-					float4 shading = float4(Shading(lighting, shininess, GetDiffuse(mrt1), GetSpecular(mrt1), -view_dir, normal), 1);
-
-					shading_rw_tex[dtid.xy] = shading_in_tex.Load(dtid) + shading;
-				}
-			}
-		}
-	}
-}
-
-[numthreads(BLOCK_X, BLOCK_Y, 1)]
-void LightIndexedDeferredRenderingSpotCS(uint3 gid : SV_GroupID,
-							uint3 gtid : SV_GroupThreadID,
-							uint GI : SV_GroupIndex)
-{
-	if (0 == GI)
-	{
-		float2 min_max = min_max_depth_tex.Load(gid).xy;
-		CalcTileViewFrustum(gid.xy, min_max, planes_sh);
-		num_available_lights_sh = 0;
 	}
 	GroupMemoryBarrierWithGroupSync();
 	
-	for (int index = GI; index < num_lights; index += BLOCK_SIZE)
+	light_start[0] = num_intersected_lights_sh;
+
+	for (index = lights_type[4] + GI; index < lights_type[5]; index += BLOCK_SIZE)
 	{
 		if (OverlapTestPoint(planes_sh, index))
 		{
 			uint light_index;
-			InterlockedAdd(num_available_lights_sh, 1, light_index);
-			light_indices_sh[light_index] = index;
+			InterlockedAdd(num_intersected_lights_sh, 1, light_index);
+			intersected_light_indices_sh[light_index] = index;
 		}
 	}
 	GroupMemoryBarrierWithGroupSync();
-
-	if (num_available_lights_sh > 0)
-	{
-		uint2 tile_start = gid.xy * TILE_SIZE + gtid.xy;
-		for (uint tile_y = 0; tile_y < TILE_SIZE; tile_y += BLOCK_Y)
-		{
-			for (uint tile_x = 0; tile_x < TILE_SIZE; tile_x += BLOCK_X)
-			{
-				uint3 dtid = uint3(tile_start + uint2(tile_x, tile_y), 0);
-
-				if (lighting_mask_tex.Load(dtid).x > 0)
-				{
-					float2 tc = (dtid.xy + 0.5f) * inv_width_height;
 	
-					float4 lighting = 0;
-					float4 ndc = g_buffer_tex.Load(dtid);
-					float3 view_dir = normalize(texcoord_to_view(tc));
-					float3 pos_es = view_dir * (ReadAFloat(depth_tex.Load(dtid), depth_near_far_invfar.y) / view_dir.z);
-					float3 normal = GetNormal(ndc);
-					float shininess = GetShininess(ndc);
+	light_start[1] = num_intersected_lights_sh;
 
-					for (uint i = 0; i < num_available_lights_sh; ++ i)
-					{
-						lighting += CalcLightIndexedDeferredRenderingSpotLighting(light_indices_sh[i], pos_es, normal, view_dir, shininess, tc);
-					}
+	for (index = lights_type[5] + GI; index < lights_type[6]; index += BLOCK_SIZE)
+	{
+		if (OverlapTestSpot(planes_sh, index))
+		{
+			uint light_index;
+			InterlockedAdd(num_intersected_lights_sh, 1, light_index);
+			intersected_light_indices_sh[light_index] = index;
+		}
+	}
+	GroupMemoryBarrierWithGroupSync();
+	
+	light_start[2] = num_intersected_lights_sh;
+	
+	for (index = lights_type[6] + GI; index < lights_type[7]; index += BLOCK_SIZE)
+	{
+		if (OverlapTestSpot(planes_sh, index))
+		{
+			uint light_index;
+			InterlockedAdd(num_intersected_lights_sh, 1, light_index);
+			intersected_light_indices_sh[light_index] = index;
+		}
+	}
+	GroupMemoryBarrierWithGroupSync();
+	
+	light_start[3] = num_intersected_lights_sh;
+	
+	uint2 tile_start = gid.xy * TILE_SIZE + gtid.xy;
+	for (uint tile_y = 0; tile_y < TILE_SIZE; tile_y += BLOCK_Y)
+	{
+		for (uint tile_x = 0; tile_x < TILE_SIZE; tile_x += BLOCK_X)
+		{
+			uint3 coord = uint3(tile_start + uint2(tile_x, tile_y), 0);
+			
+			if (lighting_mask_tex.Load(coord).x > 0)
+			{
+				float2 tc = (coord.xy + 0.5f) * inv_width_height;
 
-					float4 mrt1 = g_buffer_1_tex.Load(dtid);
-					float4 shading = float4(Shading(lighting, shininess, GetDiffuse(mrt1), GetSpecular(mrt1), -view_dir, normal), 1);
+				float4 mrt0 = g_buffer_tex.Load(coord);
+				float3 view_dir = normalize(texcoord_to_view(tc));
+				float3 normal = GetNormal(mrt0);
+				float shininess = GetShininess(mrt0);
+				float3 pos_es = view_dir * (ReadAFloat(depth_tex.Load(coord), depth_near_far_invfar.y) / view_dir.z);
 
-					shading_rw_tex[dtid.xy] = shading_in_tex.Load(dtid) + shading;
+				float4 lighting = 0;
+				for (uint i = lights_type[0]; i < lights_type[1]; ++ i)
+				{
+					lighting += CalcColor(0.5f + 0.5f * dot(lights_dir_es[i].xyz, normal), 0, 1, 1, lights_color[i], lights_attrib[i]);
 				}
+				for (i = lights_type[1]; i < lights_type[2]; ++ i)
+				{
+					float3 dir = lights_dir_es[i].xyz;
+					float n_dot_l = dot(normal, dir);
+					if (n_dot_l > 0)
+					{
+						float spec = roughness_term(normalize(dir - view_dir), normal, shininess).x;
+						float3 shadow = 1;
+						if (lights_shadowing_channel[0] >= 0)
+						{
+							shadow = NearestDepthUpsamplingShadowLevel(tc, lights_shadowing_channel[0]).xyz;
+						}
+						lighting += CalcColor(n_dot_l, spec, 1, shadow, lights_color[i], lights_attrib[i]);
+					}
+				}
+				for (i = lights_type[2]; i < lights_type[3]; ++ i)
+				{
+					float3 dir = lights_dir_es[i].xyz;
+					float n_dot_l = dot(normal, dir);
+					if (n_dot_l > 0)
+					{
+						float spec = roughness_term(normalize(dir - view_dir), normal, shininess).x;
+						lighting += CalcColor(n_dot_l, spec, 1, 1, lights_color[i], lights_attrib[i]);
+					}
+				}
+
+				for (i = 0; i < light_start[0]; ++ i)
+				{
+					lighting += CalcLightIndexedDeferredRenderingPoint(intersected_light_indices_sh[i], -1,
+						pos_es, normal, view_dir, shininess, tc, false);
+				}
+				for (i = light_start[0]; i < light_start[1]; ++ i)
+				{
+					lighting += CalcLightIndexedDeferredRenderingPoint(intersected_light_indices_sh[i],
+						intersected_light_indices_sh[i] - lights_type[4],
+						pos_es, normal, view_dir, shininess, tc, true);
+				}
+				for (i = light_start[1]; i < light_start[2]; ++ i)
+				{
+					lighting += CalcLightIndexedDeferredRenderingSpot(intersected_light_indices_sh[i], -1,
+						pos_es, normal, view_dir, shininess, tc, false);
+				}
+				for (i = light_start[2]; i < light_start[3]; ++ i)
+				{
+					lighting += CalcLightIndexedDeferredRenderingSpot(intersected_light_indices_sh[i],
+						intersected_light_indices_sh[i] - lights_type[6],
+						pos_es, normal, view_dir, shininess, tc, true);
+				}
+	
+				float4 mrt1 = g_buffer_1_tex.Load(coord);
+				float4 shading = float4(Shading(lighting, shininess, GetDiffuse(mrt1), GetSpecular(mrt1), -view_dir, normal), 1);
+				shading_rw_tex[coord.xy] = shading_in_tex.Load(coord) + shading;
 			}
 		}
 	}
@@ -447,58 +449,9 @@ void LightIndexedDeferredRenderingSpotCS(uint3 gid : SV_GroupID,
 		]]>
 	</shader>
 
-	<technique name="LightIndexedDeferredRenderingAmbient">
+	<technique name="LightIndexedDeferredRenderingUnified">
 		<pass name="p0">
-			<state name="compute_shader" value="LightIndexedDeferredRenderingAmbientCS()"/>
-		</pass>
-	</technique>
-	<technique name="LightIndexedDeferredRenderingSun">
-		<pass name="p0">
-			<state name="compute_shader" value="LightIndexedDeferredRenderingSunCS()"/>
-		</pass>
-	</technique>
-	<technique name="LightIndexedDeferredRenderingDirectional">
-		<pass name="p0">
-			<state name="compute_shader" value="LightIndexedDeferredRenderingDirectionalCS()"/>
-		</pass>
-	</technique>
-	<technique name="LightIndexedDeferredRenderingPointShadow">
-		<macro name="WITH_SHADOW" value="1"/>
-		<pass name="p0">
-			<state name="compute_shader" value="LightIndexedDeferredRenderingPointCS()"/>
-		</pass>
-	</technique>
-	<technique name="LightIndexedDeferredRenderingPointNoShadow" inherit="LightIndexedDeferredRenderingPointShadow">
-		<macro name="WITH_SHADOW" value="0"/>
-	</technique>
-	<technique name="LightIndexedDeferredRenderingSpotShadow">
-		<macro name="WITH_SHADOW" value="1"/>
-		<pass name="p0">
-			<state name="compute_shader" value="LightIndexedDeferredRenderingSpotCS()"/>
-		</pass>
-	</technique>
-	<technique name="LightIndexedDeferredRenderingSpotNoShadow" inherit="LightIndexedDeferredRenderingSpotShadow">
-		<macro name="WITH_SHADOW" value="0"/>
-	</technique>
-
-	<technique name="TileBasedDeferredRenderingLightingMask">
-		<pass name="p0">
-			<state name="depth_enable" value="false"/>
-			<state name="depth_write_mask" value="false"/>
-
-			<state name="cull_mode" value="front"/>
-
-			<state name="front_stencil_enable" value="true"/>
-			<state name="front_stencil_func" value="not_equal"/>
-			<state name="front_stencil_ref" value="128"/>
-			<state name="front_stencil_pass" value="keep"/>
-			<state name="back_stencil_enable" value="true"/>
-			<state name="back_stencil_func" value="not_equal"/>
-			<state name="back_stencil_ref" value="128"/>
-			<state name="back_stencil_pass" value="keep"/>
-
-			<state name="vertex_shader" value="TileBasedDeferredRenderingLightingMaskVS()"/>
-			<state name="pixel_shader" value="TileBasedDeferredRenderingLightingMaskPS()"/>
+			<state name="compute_shader" value="LightIndexedDeferredRenderingUnifiedCS()"/>
 		</pass>
 	</technique>
 </effect>
