@@ -737,7 +737,7 @@ namespace KlayGE
 
 		technique_depth_to_tiled_min_max_ = dr_effect_->TechniqueByName("DepthToTiledMinMax");
 		technique_tile_based_deferred_rendering_lighting_mask_ = dr_effect_->TechniqueByName("TileBasedDeferredRenderingLightingMask");
-		depth_to_tiled_near_far_width_height_param_ = dr_effect_->ParameterByName("near_far_width_height");
+		width_height_param_ = dr_effect_->ParameterByName("width_height");
 		depth_to_tiled_depth_in_tex_param_ = dr_effect_->ParameterByName("depth_in_tex");
 		depth_to_tiled_min_max_depth_rw_tex_param_ = dr_effect_->ParameterByName("min_max_depth_rw_tex");
 		upper_left_param_ = dr_effect_->ParameterByName("upper_left");
@@ -1111,7 +1111,7 @@ namespace KlayGE
 		if (cs_tbdr_)
 		{
 			pvp.temp_shading_tex = rf.MakeTexture2D(width, height, 1, 1, shading_fmt, 1, 0,
-				EAH_GPU_Read | EAH_GPU_Write | EAH_GPU_Unordered, nullptr);
+				EAH_GPU_Read | EAH_GPU_Unordered, nullptr);
 
 			ElementFormat lighting_mask_fmt;
 			if (caps.rendertarget_format_support(EF_R8, 1, 0))
@@ -3477,8 +3477,6 @@ namespace KlayGE
 
 			w = pvp.g_buffer_depth_tex->Width(0);
 			h = pvp.g_buffer_depth_tex->Height(0);
-			*tc_to_tile_scale_param_ = float2(static_cast<float>(w) / ((w + TILE_SIZE - 1) & ~(TILE_SIZE - 1)),
-				static_cast<float>(h) / ((h + TILE_SIZE - 1) & ~(TILE_SIZE - 1)));
 			*g_buffer_tex_param_ = pvp.g_buffer_rt0_tex;
 			*g_buffer_1_tex_param_ = pvp.g_buffer_rt1_tex;
 			*depth_tex_param_ = pvp.g_buffer_depth_tex;
@@ -3490,6 +3488,7 @@ namespace KlayGE
 			*x_dir_param_ = upper_right - upper_left;
 			*y_dir_param_ = lower_left - upper_left;
 			*inv_width_height_param_ = float2(1.0f / w, 1.0f / h);
+			*width_height_param_ = uint2(w, h);
 
 			if (Opaque_GBuffer == g_buffer_index)
 			{
@@ -3523,11 +3522,9 @@ namespace KlayGE
 		re.BindFrameBuffer(re.DefaultFrameBuffer());
 		re.DefaultFrameBuffer()->Discard(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth | FrameBuffer::CBM_Stencil);
 
-		CameraPtr const & camera = pvp.frame_buffer->GetViewport()->camera;
 		TexturePtr const & in_tex = pvp.g_buffer_depth_tex;
 		TexturePtr const & out_tex = pvp.g_buffer_min_max_depth_texs.back();
-		*depth_to_tiled_near_far_width_height_param_ = float4(camera->NearPlane(), camera->FarPlane(),
-			static_cast<float>(in_tex->Width(0) - 1), static_cast<float>(in_tex->Height(0) - 1));
+		*width_height_param_ = uint2(in_tex->Width(0) - 1, in_tex->Height(0) - 1);
 		*depth_to_tiled_depth_in_tex_param_ = in_tex;
 		*depth_to_tiled_min_max_depth_rw_tex_param_ = out_tex;
 

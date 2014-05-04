@@ -485,7 +485,7 @@ namespace KlayGE
 
 		RenderTechniquePtr technique_depth_to_tiled_min_max_;
 		RenderTechniquePtr technique_tile_based_deferred_rendering_lighting_mask_;
-		RenderEffectParameterPtr depth_to_tiled_near_far_width_height_param_;
+		RenderEffectParameterPtr width_height_param_;
 		RenderEffectParameterPtr depth_to_tiled_depth_in_tex_param_;
 		RenderEffectParameterPtr depth_to_tiled_min_max_depth_rw_tex_param_;
 		RenderEffectParameterPtr upper_left_param_;

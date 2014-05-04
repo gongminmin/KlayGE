@@ -10,7 +10,7 @@
 	<macro name="BLOCK_SIZE" value="(BLOCK_X * BLOCK_Y)"/>
 	<macro name="TILE_SIZE" value="32"/>
 
-	<parameter type="float4" name="near_far_width_height"/>
+	<parameter type="uint2" name="width_height"/>
 	<parameter type="texture2D" name="depth_in_tex"/>
 	<parameter type="rw_texture2D" elem_type="float2" name="min_max_depth_rw_tex"/>
 
@@ -23,14 +23,14 @@ void DepthToTiledMinMaxCS(uint3 gid : SV_GroupID,
 							uint3 gtid : SV_GroupThreadID,
 							uint GI : SV_GroupIndex)
 {
-	float2 min_max_z = near_far_width_height.yx;
+	float2 min_max_z = float2(asfloat(0x7F7FFFFF), 0.0f);
 	
 	uint2 tile_start = gid.xy * TILE_SIZE + gtid.xy;
 	for (uint tile_y = 0; tile_y < TILE_SIZE; tile_y += BLOCK_Y)
 	{
 		for (uint tile_x = 0; tile_x < TILE_SIZE; tile_x += BLOCK_X)
 		{
-			float depth = depth_in_tex.Load(uint3(clamp(tile_start + uint2(tile_x, tile_y), 0, near_far_width_height.zw), 0)).x;
+			float depth = depth_in_tex.Load(uint3(min(tile_start + uint2(tile_x, tile_y), width_height), 0)).x;
 			min_max_z = float2(min(min_max_z.x, depth), max(min_max_z.y, depth));
 		}
 	}
@@ -121,18 +121,12 @@ float4 TileBasedDeferredRenderingLightingMaskPS() : SV_Target
 	<cbuffer name="light_batch2">
 		<parameter type="float4" name="lights_attrib" array_size="LIGHT_BATCH"/>
 		<parameter type="int" name="lights_shadowing_channel" array_size="6"/>
-		<parameter type="float2" name="tc_to_tile_scale"/>
 		<parameter type="uint" name="lights_type" array_size="8"/>
 	</cbuffer>
 	<parameter type="texture2D" name="min_max_depth_tex"/>
 	<parameter type="texture2D" name="lighting_mask_tex"/>
 	<parameter type="texture2D" name="shading_in_tex"/>
 	<parameter type="rw_texture2D" name="shading_rw_tex"/>
-	<macro name="LT_Ambient" value="0"/>
-	<macro name="LT_Sun" value="1"/>
-	<macro name="LT_Directional" value="2"/>
-	<macro name="LT_Point" value="3"/>
-	<macro name="LT_Spot" value="4"/>
 
 	<parameter type="float3" name="upper_left"/>
 	<parameter type="float3" name="x_dir"/>
@@ -375,7 +369,7 @@ void LightIndexedDeferredRenderingUnifiedCS(uint3 gid : SV_GroupID,
 		{
 			uint3 coord = uint3(tile_start + uint2(tile_x, tile_y), 0);
 			
-			if (lighting_mask_tex.Load(coord).x > 0)
+			if (all(coord.xy < width_height) && (lighting_mask_tex.Load(coord).x > 0))
 			{
 				float2 tc = (coord.xy + 0.5f) * inv_width_height;
 
