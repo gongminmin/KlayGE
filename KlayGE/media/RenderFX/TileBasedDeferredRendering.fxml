@@ -5,8 +5,8 @@
 	
 	<include name="DeferredRendering.fxml"/>
 
-	<macro name="BLOCK_X" value="16"/>
-	<macro name="BLOCK_Y" value="16"/>
+	<macro name="BLOCK_X" value="8"/>
+	<macro name="BLOCK_Y" value="8"/>
 	<macro name="BLOCK_SIZE" value="(BLOCK_X * BLOCK_Y)"/>
 	<macro name="TILE_SIZE" value="32"/>
 
@@ -291,7 +291,6 @@ float4 CalcLightIndexedDeferredRenderingSpot(int index, int shadow_index, float3
 	return lighting;
 }
 
-groupshared float4 planes_sh[6];
 groupshared uint intersected_light_indices_sh[LIGHT_BATCH];
 groupshared uint num_intersected_lights_sh;
 
@@ -300,19 +299,21 @@ void LightIndexedDeferredRenderingUnifiedCS(uint3 gid : SV_GroupID,
 							uint3 gtid : SV_GroupThreadID,
 							uint GI : SV_GroupIndex)
 {
-	uint light_start[4];
-
 	if (0 == GI)
 	{
-		float2 min_max = min_max_depth_tex.Load(gid).xy;
-		CalcTileViewFrustum(gid.xy, min_max, planes_sh);
 		num_intersected_lights_sh = 0;
 	}
 	GroupMemoryBarrierWithGroupSync();
+	
+	float4 planes[6];
+	float2 min_max = min_max_depth_tex.Load(gid).xy;
+	CalcTileViewFrustum(gid.xy, min_max, planes);
+
+	uint light_start[4];
 
 	for (uint index = lights_type[3] + GI; index < lights_type[4]; index += BLOCK_SIZE)
 	{
-		if (OverlapTestPoint(planes_sh, index))
+		if (OverlapTestPoint(planes, index))
 		{
 			uint light_index;
 			InterlockedAdd(num_intersected_lights_sh, 1, light_index);
@@ -325,7 +326,7 @@ void LightIndexedDeferredRenderingUnifiedCS(uint3 gid : SV_GroupID,
 
 	for (index = lights_type[4] + GI; index < lights_type[5]; index += BLOCK_SIZE)
 	{
-		if (OverlapTestPoint(planes_sh, index))
+		if (OverlapTestPoint(planes, index))
 		{
 			uint light_index;
 			InterlockedAdd(num_intersected_lights_sh, 1, light_index);
@@ -338,7 +339,7 @@ void LightIndexedDeferredRenderingUnifiedCS(uint3 gid : SV_GroupID,
 
 	for (index = lights_type[5] + GI; index < lights_type[6]; index += BLOCK_SIZE)
 	{
-		if (OverlapTestSpot(planes_sh, index))
+		if (OverlapTestSpot(planes, index))
 		{
 			uint light_index;
 			InterlockedAdd(num_intersected_lights_sh, 1, light_index);
@@ -351,7 +352,7 @@ void LightIndexedDeferredRenderingUnifiedCS(uint3 gid : SV_GroupID,
 	
 	for (index = lights_type[6] + GI; index < lights_type[7]; index += BLOCK_SIZE)
 	{
-		if (OverlapTestSpot(planes_sh, index))
+		if (OverlapTestSpot(planes, index))
 		{
 			uint light_index;
 			InterlockedAdd(num_intersected_lights_sh, 1, light_index);
