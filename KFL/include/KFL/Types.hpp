@@ -372,7 +372,7 @@ private:
 	namespace KlayGE
 	{
 		using std::add_lvalue_reference;
-#if defined(KLAYGE_COMPILER_GCC) && (KLAYGE_COMPILER_VERSION >= 48)
+#if (defined(KLAYGE_COMPILER_GCC) || defined(KLAYGE_COMPILER_CLANG)) && (__GLIBCXX__ >= 20130531)
 		using std::is_trivially_destructible;
 #else
 		template <typename T>
