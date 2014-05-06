@@ -641,11 +641,11 @@ struct ShaderParser
 		uint32_t shader_model = KlayGE::LE2Native(*tokens);
 		++ tokens;
 		// TODO: check here, shader_model is unused.
-		shader_model = shader_model;
+		UNREF_PARAM(shader_model);
 		uint32_t compile_flags = KlayGE::LE2Native(*tokens);
 		++ tokens;
 		// TODO: check here, compile_flags is unused.
-		compile_flags = compile_flags;
+		UNREF_PARAM(compile_flags);
 
 		uint32_t const * resource_binding_tokens = reinterpret_cast<uint32_t const *>(reinterpret_cast<char const *>(first_token) + resource_binding_offset);
 		program->resource_bindings.resize(num_resource_bindings);

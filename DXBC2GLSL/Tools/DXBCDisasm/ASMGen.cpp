@@ -84,6 +84,7 @@ void ASMGen::Disasm(std::ostream& out, ShaderOperand const & op, ShaderImmType i
 				break;
 
 			case SIT_Double:
+			default:
 				BOOST_ASSERT(false);
 				break;
 			}
@@ -104,6 +105,7 @@ void ASMGen::Disasm(std::ostream& out, ShaderOperand const & op, ShaderImmType i
 			case SIT_Float:
 			case SIT_Int:
 			case SIT_UInt:
+			default:
 				BOOST_ASSERT(false);
 				break;
 
