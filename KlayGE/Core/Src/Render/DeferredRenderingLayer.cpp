@@ -555,7 +555,7 @@ namespace KlayGE
 #if DEFAULT_DEFERRED == LIGHT_INDEXED_DEFERRED
 		if (cs_tbdr_)
 		{
-			technique_light_indexed_deferred_rendering_unified_ = dr_effect_->TechniqueByName("LightIndexedDeferredRenderingUnified");
+			technique_tile_based_deferred_rendering_unified_ = dr_effect_->TechniqueByName("TileBasedDeferredRenderingUnified");
 		}
 		else
 		{
@@ -726,28 +726,36 @@ namespace KlayGE
 		lights_shadowing_channel_param_ = dr_effect_->ParameterByName("lights_shadowing_channel");
 		lights_aabb_min_param_ = dr_effect_->ParameterByName("lights_aabb_min");
 		lights_aabb_max_param_ = dr_effect_->ParameterByName("lights_aabb_max");
-		num_lights_param_ = dr_effect_->ParameterByName("num_lights");
-		light_index_tex_param_ = dr_effect_->ParameterByName("light_index_tex");
 		tile_scale_param_ = dr_effect_->ParameterByName("tile_scale");
 		camera_proj_01_param_ = dr_effect_->ParameterByName("camera_proj_01");
 		tc_to_tile_scale_param_ = dr_effect_->ParameterByName("tc_to_tile_scale");
 
-		depth_to_min_max_pp_ = SyncLoadPostProcess("Depth.ppml", "DepthToMinMax");
-		reduce_min_max_pp_ = SyncLoadPostProcess("Depth.ppml", "ReduceMinMax");
+		if (cs_tbdr_)
+		{
+			technique_depth_to_tiled_min_max_ = dr_effect_->TechniqueByName("DepthToTiledMinMax");
+			technique_tile_based_deferred_rendering_lighting_mask_ = dr_effect_->TechniqueByName("TileBasedDeferredRenderingLightingMask");
 
-		technique_depth_to_tiled_min_max_ = dr_effect_->TechniqueByName("DepthToTiledMinMax");
-		technique_tile_based_deferred_rendering_lighting_mask_ = dr_effect_->TechniqueByName("TileBasedDeferredRenderingLightingMask");
-		width_height_param_ = dr_effect_->ParameterByName("width_height");
-		depth_to_tiled_depth_in_tex_param_ = dr_effect_->ParameterByName("depth_in_tex");
-		depth_to_tiled_min_max_depth_rw_tex_param_ = dr_effect_->ParameterByName("min_max_depth_rw_tex");
-		upper_left_param_ = dr_effect_->ParameterByName("upper_left");
-		x_dir_param_ = dr_effect_->ParameterByName("x_dir");
-		y_dir_param_ = dr_effect_->ParameterByName("y_dir");
-		lighting_mask_tex_param_ = dr_effect_->ParameterByName("lighting_mask_tex");
-		shading_in_tex_param_ = dr_effect_->ParameterByName("shading_in_tex");
-		shading_rw_tex_param_ = dr_effect_->ParameterByName("shading_rw_tex");
-		copy_pp_ = SyncLoadPostProcess("Copy.ppml", "copy");
-		lights_type_param_ = dr_effect_->ParameterByName("lights_type");
+			width_height_param_ = dr_effect_->ParameterByName("width_height");
+			depth_to_tiled_depth_in_tex_param_ = dr_effect_->ParameterByName("depth_in_tex");
+			depth_to_tiled_min_max_depth_rw_tex_param_ = dr_effect_->ParameterByName("min_max_depth_rw_tex");
+			upper_left_param_ = dr_effect_->ParameterByName("upper_left");
+			x_dir_param_ = dr_effect_->ParameterByName("x_dir");
+			y_dir_param_ = dr_effect_->ParameterByName("y_dir");
+			lighting_mask_tex_param_ = dr_effect_->ParameterByName("lighting_mask_tex");
+			shading_in_tex_param_ = dr_effect_->ParameterByName("shading_in_tex");
+			shading_rw_tex_param_ = dr_effect_->ParameterByName("shading_rw_tex");
+			lights_type_param_ = dr_effect_->ParameterByName("lights_type");
+
+			copy_pp_ = SyncLoadPostProcess("Copy.ppml", "copy");
+		}
+		else
+		{
+			num_lights_param_ = dr_effect_->ParameterByName("num_lights");
+			light_index_tex_param_ = dr_effect_->ParameterByName("light_index_tex");
+
+			depth_to_min_max_pp_ = SyncLoadPostProcess("Depth.ppml", "DepthToMinMax");
+			reduce_min_max_pp_ = SyncLoadPostProcess("Depth.ppml", "ReduceMinMax");
+		}
 #endif
 
 		this->SetCascadedShadowType(CSLT_Auto);
@@ -1553,7 +1561,7 @@ namespace KlayGE
 
 				if (cs_tbdr_)
 				{
-					this->UpdateLightIndexedLightingCS(pvp, pass_tb);
+					this->UpdateTileBasedLightingCS(pvp, pass_tb);
 				}
 				else
 				{
@@ -3268,7 +3276,7 @@ namespace KlayGE
 	}
 
 
-	void DeferredRenderingLayer::UpdateLightIndexedLightingCS(PerViewport const & pvp, uint32_t g_buffer_index)
+	void DeferredRenderingLayer::UpdateTileBasedLightingCS(PerViewport const & pvp, uint32_t g_buffer_index)
 	{
 		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 
@@ -3283,7 +3291,7 @@ namespace KlayGE
 		{
 			re.BindFrameBuffer(pvp.shading_fb);
 		}
-		re.CurFrameBuffer()->Attached(FrameBuffer::ATT_Color0)->ClearColor(Color(0, 0, 0, 0));
+		re.CurFrameBuffer()->Discard(FrameBuffer::CBM_Color);
 
 		for (uint32_t li = 0; li < lights_.size();)
 		{
@@ -3500,7 +3508,7 @@ namespace KlayGE
 			}
 			*shading_rw_tex_param_ = pvp.temp_shading_tex;
 			*lighting_mask_tex_param_ = pvp.lighting_mask_tex;
-			re.Dispatch(*technique_light_indexed_deferred_rendering_unified_,
+			re.Dispatch(*technique_tile_based_deferred_rendering_unified_,
 				(w + TILE_SIZE - 1) / TILE_SIZE, (h + TILE_SIZE - 1) / TILE_SIZE, 1);
 
 			copy_pp_->InputPin(0, pvp.temp_shading_tex);

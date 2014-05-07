@@ -343,7 +343,7 @@ namespace KlayGE
 			bool is_point, bool with_shadow);
 		void CreateDepthMinMaxMap(PerViewport const & pvp);
 
-		void UpdateLightIndexedLightingCS(PerViewport const & pvp, uint32_t g_buffer_index);
+		void UpdateTileBasedLightingCS(PerViewport const & pvp, uint32_t g_buffer_index);
 		void CreateDepthMinMaxMapCS(PerViewport const & pvp);
 #endif
 
@@ -410,7 +410,7 @@ namespace KlayGE
 		RenderTechniquePtr technique_light_indexed_deferred_rendering_spot_shadow_;
 		RenderTechniquePtr technique_light_indexed_deferred_rendering_spot_no_shadow_;
 
-		RenderTechniquePtr technique_light_indexed_deferred_rendering_unified_;
+		RenderTechniquePtr technique_tile_based_deferred_rendering_unified_;
 #endif
 		static uint32_t const MAX_NUM_SHADOWED_LIGHTS = 4;
 		static uint32_t const MAX_NUM_SHADOWED_SPOT_LIGHTS = 4;
@@ -479,7 +479,6 @@ namespace KlayGE
 		RenderEffectParameterPtr tile_scale_param_;
 		RenderEffectParameterPtr camera_proj_01_param_;
 		RenderEffectParameterPtr tc_to_tile_scale_param_;
-
 		PostProcessPtr depth_to_min_max_pp_;
 		PostProcessPtr reduce_min_max_pp_;
 
@@ -494,8 +493,8 @@ namespace KlayGE
 		RenderEffectParameterPtr lighting_mask_tex_param_;
 		RenderEffectParameterPtr shading_in_tex_param_;
 		RenderEffectParameterPtr shading_rw_tex_param_;
-		PostProcessPtr copy_pp_;
 		RenderEffectParameterPtr lights_type_param_;
+		PostProcessPtr copy_pp_;
 #endif
 
 		std::vector<SceneObject*> visible_scene_objs_;

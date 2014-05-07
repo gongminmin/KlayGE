@@ -38,6 +38,7 @@ void DepthToTiledMinMaxCS(uint3 gid : SV_GroupID,
 	min_max_z_sh[GI] = min_max_z;
 	GroupMemoryBarrierWithGroupSync();
 
+	[unroll]
 	for (uint offset = BLOCK_SIZE >> 1; offset > 32; offset >>= 1)
 	{
 		if (GI < offset)
@@ -47,6 +48,7 @@ void DepthToTiledMinMaxCS(uint3 gid : SV_GroupID,
 		}
 		GroupMemoryBarrierWithGroupSync();
 	}
+	[unroll]
 	for (offset = 32; offset > 0; offset >>= 1)
 	{
 		if (GI < offset)
@@ -233,7 +235,7 @@ float4 NearestDepthUpsamplingShadowLevel(float2 tc, int channel)
 	}
 }
 
-float4 CalcLightIndexedDeferredRenderingPoint(int index, int shadow_index, float3 pos_es, float3 normal, float3 view_dir,
+float4 CalcTileBasedDeferredRenderingPoint(int index, int shadow_index, float3 pos_es, float3 normal, float3 view_dir,
 		float shininess, float2 tc, bool with_shadow)
 {
 	float4 lighting = 0;
@@ -259,7 +261,7 @@ float4 CalcLightIndexedDeferredRenderingPoint(int index, int shadow_index, float
 	return lighting;
 }
 
-float4 CalcLightIndexedDeferredRenderingSpot(int index, int shadow_index, float3 pos_es, float3 normal, float3 view_dir,
+float4 CalcTileBasedDeferredRenderingSpot(int index, int shadow_index, float3 pos_es, float3 normal, float3 view_dir,
 		float shininess, float2 tc, bool with_shadow)
 {
 	float4 lighting = 0;
@@ -295,7 +297,7 @@ groupshared uint intersected_light_indices_sh[LIGHT_BATCH];
 groupshared uint num_intersected_lights_sh;
 
 [numthreads(BLOCK_X, BLOCK_Y, 1)]
-void LightIndexedDeferredRenderingUnifiedCS(uint3 gid : SV_GroupID,
+void TileBasedDeferredRenderingUnifiedCS(uint3 gid : SV_GroupID,
 							uint3 gtid : SV_GroupThreadID,
 							uint GI : SV_GroupIndex)
 {
@@ -369,7 +371,8 @@ void LightIndexedDeferredRenderingUnifiedCS(uint3 gid : SV_GroupID,
 		for (uint tile_x = 0; tile_x < TILE_SIZE; tile_x += BLOCK_X)
 		{
 			uint3 coord = uint3(tile_start + uint2(tile_x, tile_y), 0);
-			
+
+			[branch]
 			if (all(coord.xy < width_height) && (lighting_mask_tex.Load(coord).x > 0))
 			{
 				float2 tc = (coord.xy + 0.5f) * inv_width_height;
@@ -413,30 +416,34 @@ void LightIndexedDeferredRenderingUnifiedCS(uint3 gid : SV_GroupID,
 
 				for (i = 0; i < light_start[0]; ++ i)
 				{
-					lighting += CalcLightIndexedDeferredRenderingPoint(intersected_light_indices_sh[i], -1,
+					lighting += CalcTileBasedDeferredRenderingPoint(intersected_light_indices_sh[i], -1,
 						pos_es, normal, view_dir, shininess, tc, false);
 				}
 				for (i = light_start[0]; i < light_start[1]; ++ i)
 				{
-					lighting += CalcLightIndexedDeferredRenderingPoint(intersected_light_indices_sh[i],
+					lighting += CalcTileBasedDeferredRenderingPoint(intersected_light_indices_sh[i],
 						intersected_light_indices_sh[i] - lights_type[4],
 						pos_es, normal, view_dir, shininess, tc, true);
 				}
 				for (i = light_start[1]; i < light_start[2]; ++ i)
 				{
-					lighting += CalcLightIndexedDeferredRenderingSpot(intersected_light_indices_sh[i], -1,
+					lighting += CalcTileBasedDeferredRenderingSpot(intersected_light_indices_sh[i], -1,
 						pos_es, normal, view_dir, shininess, tc, false);
 				}
 				for (i = light_start[2]; i < light_start[3]; ++ i)
 				{
-					lighting += CalcLightIndexedDeferredRenderingSpot(intersected_light_indices_sh[i],
+					lighting += CalcTileBasedDeferredRenderingSpot(intersected_light_indices_sh[i],
 						intersected_light_indices_sh[i] - lights_type[6],
 						pos_es, normal, view_dir, shininess, tc, true);
 				}
 	
 				float4 mrt1 = g_buffer_1_tex.Load(coord);
 				float4 shading = float4(Shading(lighting, shininess, GetDiffuse(mrt1), GetSpecular(mrt1), -view_dir, normal), 1);
-				shading_rw_tex[coord.xy] = shading_in_tex.Load(coord) + shading;
+				if (lights_type[0] == lights_type[1])
+				{
+					shading += shading_in_tex.Load(coord);
+				}
+				shading_rw_tex[coord.xy] = shading;
 			}
 		}
 	}
@@ -444,9 +451,9 @@ void LightIndexedDeferredRenderingUnifiedCS(uint3 gid : SV_GroupID,
 		]]>
 	</shader>
 
-	<technique name="LightIndexedDeferredRenderingUnified">
+	<technique name="TileBasedDeferredRenderingUnified">
 		<pass name="p0">
-			<state name="compute_shader" value="LightIndexedDeferredRenderingUnifiedCS()"/>
+			<state name="compute_shader" value="TileBasedDeferredRenderingUnifiedCS()"/>
 		</pass>
 	</technique>
 </effect>
