@@ -222,7 +222,7 @@ float4 DrawLightIndexSpotPS(float2 tc : TEXCOORD0) : SV_Target
 #endif
 }
 
-void LightIndexedDeferredRenderingVS(float4 pos : POSITION,
+void LIDRVS(float4 pos : POSITION,
 			out float2 oTexCoord : TEXCOORD0,
 			out float3 oViewDir : TEXCOORD1,
 			out float4 oPos : SV_Position)
@@ -235,7 +235,7 @@ void LightIndexedDeferredRenderingVS(float4 pos : POSITION,
 	oTexCoord += 0.5f;
 }
 
-float4 LightIndexedDeferredRenderingAmbientPS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Target
+float4 LIDRAmbientPS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Target
 {
 	float4 ndc = g_buffer_tex.Sample(point_sampler, tc);
 	view_dir = normalize(view_dir);
@@ -248,7 +248,7 @@ float4 LightIndexedDeferredRenderingAmbientPS(float2 tc : TEXCOORD0, float3 view
 	return float4(Shading(lighting, shininess, GetDiffuse(mrt1), GetSpecular(mrt1), -view_dir, normal), 1);
 }
 
-float4 LightIndexedDeferredRenderingSunPS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Target
+float4 LIDRSunPS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Target
 {
 #if KLAYGE_DERIVATIVES
 	float2 tc_ddx = ddx(tc);
@@ -285,7 +285,7 @@ float4 LightIndexedDeferredRenderingSunPS(float2 tc : TEXCOORD0, float3 view_dir
 	return shading;
 }
 
-float4 LightIndexedDeferredRenderingDirectionalPS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Target
+float4 LIDRDirectionalPS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Target
 {
 	float4 lighting = 0;
 
@@ -310,7 +310,7 @@ float4 LightIndexedDeferredRenderingDirectionalPS(float2 tc : TEXCOORD0, float3 
 	return float4(Shading(lighting, shininess, GetDiffuse(mrt1), GetSpecular(mrt1), -view_dir, normal), 1);
 }
 
-float4 CalcLightIndexedDeferredRenderingPointLighting(int index, float3 pos_es, float3 normal, float3 view_dir,
+float4 CalcLIDRPointLighting(int index, float3 pos_es, float3 normal, float3 view_dir,
 		float shininess, float2 tc, float2 tc_ddx, float2 tc_ddy)
 {
 	float4 lighting = 0;
@@ -335,7 +335,7 @@ float4 CalcLightIndexedDeferredRenderingPointLighting(int index, float3 pos_es, 
 	return lighting;
 }
 
-float4 CalcLightIndexedDeferredRenderingSpotLighting(int index, float3 pos_es, float3 normal, float3 view_dir,
+float4 CalcLIDRSpotLighting(int index, float3 pos_es, float3 normal, float3 view_dir,
 		float shininess, float2 tc, float2 tc_ddx, float2 tc_ddy)
 {
 	float4 lighting = 0;
@@ -366,7 +366,7 @@ float4 CalcLightIndexedDeferredRenderingSpotLighting(int index, float3 pos_es, f
 	return lighting;
 }
 				
-float4 LightIndexedDeferredRenderingPointPS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Target
+float4 LIDRPointPS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Target
 {
 #if KLAYGE_DERIVATIVES
 	float2 tc_ddx = ddx(tc);
@@ -393,7 +393,7 @@ float4 LightIndexedDeferredRenderingPointPS(float2 tc : TEXCOORD0, float3 view_d
 		for (uint il = 0; il < nl; ++ il)
 		{
 			uint index = firstbitlow(light_index_all);
-			lighting += CalcLightIndexedDeferredRenderingPointLighting(index, pos_es, normal, view_dir, shininess, tc, tc_ddx, tc_ddy);
+			lighting += CalcLIDRPointLighting(index, pos_es, normal, view_dir, shininess, tc, tc_ddx, tc_ddy);
 			light_index_all = light_index_all & (light_index_all - 1);
 		}
 #else
@@ -425,7 +425,7 @@ float4 LightIndexedDeferredRenderingPointPS(float2 tc : TEXCOORD0, float3 view_d
 #endif
 				if (mask <= light_comp)
 				{
-					lighting += CalcLightIndexedDeferredRenderingPointLighting(index, pos_es, normal, view_dir, shininess, tc, tc_ddx, tc_ddy);
+					lighting += CalcLIDRPointLighting(index, pos_es, normal, view_dir, shininess, tc, tc_ddx, tc_ddy);
 					light_comp -= mask;
 				}
 
@@ -438,7 +438,7 @@ float4 LightIndexedDeferredRenderingPointPS(float2 tc : TEXCOORD0, float3 view_d
 		{
 			if (light_index[index])
 			{
-				lighting += CalcLightIndexedDeferredRenderingPointLighting(index, pos_es, normal, view_dir, shininess, tc, tc_ddx, tc_ddy);
+				lighting += CalcLIDRPointLighting(index, pos_es, normal, view_dir, shininess, tc, tc_ddx, tc_ddy);
 			}
 		}
 #endif
@@ -451,7 +451,7 @@ float4 LightIndexedDeferredRenderingPointPS(float2 tc : TEXCOORD0, float3 view_d
 	return shading;
 }
 
-float4 LightIndexedDeferredRenderingSpotPS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Target
+float4 LIDRSpotPS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Target
 {
 #if KLAYGE_DERIVATIVES
 	float2 tc_ddx = ddx(tc);
@@ -478,7 +478,7 @@ float4 LightIndexedDeferredRenderingSpotPS(float2 tc : TEXCOORD0, float3 view_di
 		for (uint il = 0; il < nl; ++ il)
 		{
 			uint index = firstbitlow(light_index_all);
-			lighting += CalcLightIndexedDeferredRenderingSpotLighting(index, pos_es, normal, view_dir, shininess, tc, tc_ddx, tc_ddy);
+			lighting += CalcLIDRSpotLighting(index, pos_es, normal, view_dir, shininess, tc, tc_ddx, tc_ddy);
 			light_index_all = light_index_all & (light_index_all - 1);
 		}
 #else
@@ -510,7 +510,7 @@ float4 LightIndexedDeferredRenderingSpotPS(float2 tc : TEXCOORD0, float3 view_di
 #endif
 				if (mask <= light_comp)
 				{
-					lighting += CalcLightIndexedDeferredRenderingSpotLighting(index, pos_es, normal, view_dir, shininess, tc, tc_ddx, tc_ddy);
+					lighting += CalcLIDRSpotLighting(index, pos_es, normal, view_dir, shininess, tc, tc_ddx, tc_ddy);
 					light_comp -= mask;
 				}
 
@@ -523,7 +523,7 @@ float4 LightIndexedDeferredRenderingSpotPS(float2 tc : TEXCOORD0, float3 view_di
 		{
 			if (light_index[index])
 			{
-				lighting += CalcLightIndexedDeferredRenderingSpotLighting(index, pos_es, normal, view_dir, shininess, tc, tc_ddx, tc_ddy);
+				lighting += CalcLIDRSpotLighting(index, pos_es, normal, view_dir, shininess, tc, tc_ddx, tc_ddy);
 			}
 		}
 #endif
@@ -555,7 +555,7 @@ float4 LightIndexedDeferredRenderingSpotPS(float2 tc : TEXCOORD0, float3 view_di
 		</pass>
 	</technique>
 
-	<technique name="LightIndexedDeferredRenderingAmbient">
+	<technique name="LIDRAmbient">
 		<pass name="p0">
 			<state name="depth_enable" value="false"/>
 			<state name="depth_write_mask" value="false"/>
@@ -571,11 +571,11 @@ float4 LightIndexedDeferredRenderingSpotPS(float2 tc : TEXCOORD0, float3 view_di
 			<state name="back_stencil_ref" value="128"/>
 			<state name="back_stencil_pass" value="keep"/>
 
-			<state name="vertex_shader" value="LightIndexedDeferredRenderingVS()"/>			
-			<state name="pixel_shader" value="LightIndexedDeferredRenderingAmbientPS()"/>
+			<state name="vertex_shader" value="LIDRVS()"/>			
+			<state name="pixel_shader" value="LIDRAmbientPS()"/>
 		</pass>
 	</technique>
-	<technique name="LightIndexedDeferredRenderingSun" inherit="LightIndexedDeferredRenderingAmbient">
+	<technique name="LIDRSun" inherit="LIDRAmbient">
 		<pass name="p0">
 			<state name="blend_enable" value="true"/>
 			<state name="blend_op" value="add"/>
@@ -585,30 +585,30 @@ float4 LightIndexedDeferredRenderingSpotPS(float2 tc : TEXCOORD0, float3 view_di
 			<state name="src_blend_alpha" value="one"/>
 			<state name="dest_blend_alpha" value="one"/>
 
-			<state name="pixel_shader" value="LightIndexedDeferredRenderingSunPS()"/>
+			<state name="pixel_shader" value="LIDRSunPS()"/>
 		</pass>
 	</technique>
-	<technique name="LightIndexedDeferredRenderingDirectional" inherit="LightIndexedDeferredRenderingSun">
+	<technique name="LIDRDirectional" inherit="LIDRSun">
 		<pass name="p0">
-			<state name="pixel_shader" value="LightIndexedDeferredRenderingDirectionalPS()"/>
+			<state name="pixel_shader" value="LIDRDirectionalPS()"/>
 		</pass>
 	</technique>
-	<technique name="LightIndexedDeferredRenderingPointShadow" inherit="LightIndexedDeferredRenderingDirectional">
+	<technique name="LIDRPointShadow" inherit="LIDRDirectional">
 		<macro name="WITH_SHADOW" value="1"/>
 		<pass name="p0">
-			<state name="pixel_shader" value="LightIndexedDeferredRenderingPointPS()"/>
+			<state name="pixel_shader" value="LIDRPointPS()"/>
 		</pass>
 	</technique>
-	<technique name="LightIndexedDeferredRenderingPointNoShadow" inherit="LightIndexedDeferredRenderingPointShadow">
+	<technique name="LIDRPointNoShadow" inherit="LIDRPointShadow">
 		<macro name="WITH_SHADOW" value="0"/>
 	</technique>
-	<technique name="LightIndexedDeferredRenderingSpotShadow" inherit="LightIndexedDeferredRenderingDirectional">
+	<technique name="LIDRSpotShadow" inherit="LIDRDirectional">
 		<macro name="WITH_SHADOW" value="1"/>
 		<pass name="p0">
-			<state name="pixel_shader" value="LightIndexedDeferredRenderingSpotPS()"/>
+			<state name="pixel_shader" value="LIDRSpotPS()"/>
 		</pass>
 	</technique>
-	<technique name="LightIndexedDeferredRenderingSpotNoShadow" inherit="LightIndexedDeferredRenderingSpotShadow">
+	<technique name="LIDRSpotNoShadow" inherit="LIDRSpotShadow">
 		<macro name="WITH_SHADOW" value="0"/>
 	</technique>
 </effect>

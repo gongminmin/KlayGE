@@ -402,13 +402,13 @@ namespace KlayGE
 #if DEFAULT_DEFERRED == LIGHT_INDEXED_DEFERRED
 		RenderTechniquePtr technique_draw_light_index_point_;
 		RenderTechniquePtr technique_draw_light_index_spot_;
-		RenderTechniquePtr technique_light_indexed_deferred_rendering_ambient_;
-		RenderTechniquePtr technique_light_indexed_deferred_rendering_sun_;
-		RenderTechniquePtr technique_light_indexed_deferred_rendering_directional_;
-		RenderTechniquePtr technique_light_indexed_deferred_rendering_point_shadow_;
-		RenderTechniquePtr technique_light_indexed_deferred_rendering_point_no_shadow_;
-		RenderTechniquePtr technique_light_indexed_deferred_rendering_spot_shadow_;
-		RenderTechniquePtr technique_light_indexed_deferred_rendering_spot_no_shadow_;
+		RenderTechniquePtr technique_lidr_ambient_;
+		RenderTechniquePtr technique_lidr_sun_;
+		RenderTechniquePtr technique_lidr_directional_;
+		RenderTechniquePtr technique_lidr_point_shadow_;
+		RenderTechniquePtr technique_lidr_point_no_shadow_;
+		RenderTechniquePtr technique_lidr_spot_shadow_;
+		RenderTechniquePtr technique_lidr_spot_no_shadow_;
 
 		RenderTechniquePtr technique_tbdr_unified_;
 #endif

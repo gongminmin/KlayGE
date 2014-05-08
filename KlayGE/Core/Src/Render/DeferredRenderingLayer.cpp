@@ -561,13 +561,13 @@ namespace KlayGE
 		{
 			technique_draw_light_index_point_ = dr_effect_->TechniqueByName("DrawLightIndexPoint");
 			technique_draw_light_index_spot_ = dr_effect_->TechniqueByName("DrawLightIndexSpot");
-			technique_light_indexed_deferred_rendering_ambient_ = dr_effect_->TechniqueByName("LightIndexedDeferredRenderingAmbient");
-			technique_light_indexed_deferred_rendering_sun_ = dr_effect_->TechniqueByName("LightIndexedDeferredRenderingSun");
-			technique_light_indexed_deferred_rendering_directional_ = dr_effect_->TechniqueByName("LightIndexedDeferredRenderingDirectional");
-			technique_light_indexed_deferred_rendering_point_shadow_ = dr_effect_->TechniqueByName("LightIndexedDeferredRenderingPointShadow");
-			technique_light_indexed_deferred_rendering_point_no_shadow_ = dr_effect_->TechniqueByName("LightIndexedDeferredRenderingPointNoShadow");
-			technique_light_indexed_deferred_rendering_spot_shadow_ = dr_effect_->TechniqueByName("LightIndexedDeferredRenderingSpotShadow");
-			technique_light_indexed_deferred_rendering_spot_no_shadow_ = dr_effect_->TechniqueByName("LightIndexedDeferredRenderingSpotNoShadow");
+			technique_lidr_ambient_ = dr_effect_->TechniqueByName("LIDRAmbient");
+			technique_lidr_sun_ = dr_effect_->TechniqueByName("LIDRSun");
+			technique_lidr_directional_ = dr_effect_->TechniqueByName("LIDRDirectional");
+			technique_lidr_point_shadow_ = dr_effect_->TechniqueByName("LIDRPointShadow");
+			technique_lidr_point_no_shadow_ = dr_effect_->TechniqueByName("LIDRPointNoShadow");
+			technique_lidr_spot_shadow_ = dr_effect_->TechniqueByName("LIDRSpotShadow");
+			technique_lidr_spot_no_shadow_ = dr_effect_->TechniqueByName("LIDRSpotNoShadow");
 		}
 #endif
 
@@ -3041,7 +3041,7 @@ namespace KlayGE
 			float3 loc_es = MathLib::transform_coord(p, pvp.view);
 			*light_pos_es_param_ = float4(loc_es.x(), loc_es.y(), loc_es.z(), 1);
 
-			tech = technique_light_indexed_deferred_rendering_sun_;
+			tech = technique_lidr_sun_;
 		}
 		else
 		{
@@ -3050,7 +3050,7 @@ namespace KlayGE
 			float3 dir_es = MathLib::transform_normal(float3(0, 1, 0), pvp.view);
 			*light_dir_es_param_ = float4(dir_es.x(), dir_es.y(), dir_es.z(), 0);
 
-			tech = technique_light_indexed_deferred_rendering_ambient_;
+			tech = technique_lidr_ambient_;
 		}
 
 		*g_buffer_tex_param_ = pvp.g_buffer_rt0_tex;
@@ -3109,7 +3109,7 @@ namespace KlayGE
 		{
 			re.BindFrameBuffer(pvp.shading_fb);
 		}
-		re.Render(*technique_light_indexed_deferred_rendering_directional_, *rl_quad_);
+		re.Render(*technique_lidr_directional_, *rl_quad_);
 	}
 
 	void DeferredRenderingLayer::UpdateLightIndexedLightingPointSpot(PerViewport const & pvp, uint32_t g_buffer_index,
@@ -3237,22 +3237,22 @@ namespace KlayGE
 		{
 			if (with_shadow)
 			{
-				tech = technique_light_indexed_deferred_rendering_point_shadow_;
+				tech = technique_lidr_point_shadow_;
 			}
 			else
 			{
-				tech = technique_light_indexed_deferred_rendering_point_no_shadow_;
+				tech = technique_lidr_point_no_shadow_;
 			}
 		}
 		else
 		{
 			if (with_shadow)
 			{
-				tech = technique_light_indexed_deferred_rendering_spot_shadow_;
+				tech = technique_lidr_spot_shadow_;
 			}
 			else
 			{
-				tech = technique_light_indexed_deferred_rendering_spot_no_shadow_;
+				tech = technique_lidr_spot_no_shadow_;
 			}
 		}
 		re.Render(*tech, *rl_quad_);
