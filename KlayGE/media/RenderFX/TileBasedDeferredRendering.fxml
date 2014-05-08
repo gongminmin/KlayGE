@@ -74,20 +74,20 @@ void DepthToTiledMinMaxCS(uint3 gid : SV_GroupID,
 
 	<shader>
 		<![CDATA[
-void TileBasedDeferredRenderingLightingMaskVS(float4 pos : POSITION,
+void TBDRLightingMaskVS(float4 pos : POSITION,
 			out float4 oPos : SV_Position)
 {
 	oPos = pos;
 }
 
-float4 TileBasedDeferredRenderingLightingMaskPS() : SV_Target
+float4 TBDRLightingMaskPS() : SV_Target
 {
 	return 1;
 }
 		]]>
 	</shader>
 
-	<technique name="TileBasedDeferredRenderingLightingMask">
+	<technique name="TBDRLightingMask">
 		<pass name="p0">
 			<state name="depth_enable" value="false"/>
 			<state name="depth_write_mask" value="false"/>
@@ -103,8 +103,8 @@ float4 TileBasedDeferredRenderingLightingMaskPS() : SV_Target
 			<state name="back_stencil_ref" value="128"/>
 			<state name="back_stencil_pass" value="keep"/>
 
-			<state name="vertex_shader" value="TileBasedDeferredRenderingLightingMaskVS()"/>
-			<state name="pixel_shader" value="TileBasedDeferredRenderingLightingMaskPS()"/>
+			<state name="vertex_shader" value="TBDRLightingMaskVS()"/>
+			<state name="pixel_shader" value="TBDRLightingMaskPS()"/>
 		</pass>
 	</technique>
 
@@ -235,7 +235,7 @@ float4 NearestDepthUpsamplingShadowLevel(float2 tc, int channel)
 	}
 }
 
-float4 CalcTileBasedDeferredRenderingPoint(int index, int shadow_index, float3 pos_es, float3 normal, float3 view_dir,
+float4 CalcTBDRPoint(int index, int shadow_index, float3 pos_es, float3 normal, float3 view_dir,
 		float shininess, float2 tc, bool with_shadow)
 {
 	float4 lighting = 0;
@@ -261,7 +261,7 @@ float4 CalcTileBasedDeferredRenderingPoint(int index, int shadow_index, float3 p
 	return lighting;
 }
 
-float4 CalcTileBasedDeferredRenderingSpot(int index, int shadow_index, float3 pos_es, float3 normal, float3 view_dir,
+float4 CalcTBDRSpot(int index, int shadow_index, float3 pos_es, float3 normal, float3 view_dir,
 		float shininess, float2 tc, bool with_shadow)
 {
 	float4 lighting = 0;
@@ -297,7 +297,7 @@ groupshared uint intersected_light_indices_sh[LIGHT_BATCH];
 groupshared uint num_intersected_lights_sh;
 
 [numthreads(BLOCK_X, BLOCK_Y, 1)]
-void TileBasedDeferredRenderingUnifiedCS(uint3 gid : SV_GroupID,
+void TBDRUnifiedCS(uint3 gid : SV_GroupID,
 							uint3 gtid : SV_GroupThreadID,
 							uint GI : SV_GroupIndex)
 {
@@ -416,23 +416,23 @@ void TileBasedDeferredRenderingUnifiedCS(uint3 gid : SV_GroupID,
 
 				for (i = 0; i < light_start[0]; ++ i)
 				{
-					lighting += CalcTileBasedDeferredRenderingPoint(intersected_light_indices_sh[i], -1,
+					lighting += CalcTBDRPoint(intersected_light_indices_sh[i], -1,
 						pos_es, normal, view_dir, shininess, tc, false);
 				}
 				for (i = light_start[0]; i < light_start[1]; ++ i)
 				{
-					lighting += CalcTileBasedDeferredRenderingPoint(intersected_light_indices_sh[i],
+					lighting += CalcTBDRPoint(intersected_light_indices_sh[i],
 						intersected_light_indices_sh[i] - lights_type[4],
 						pos_es, normal, view_dir, shininess, tc, true);
 				}
 				for (i = light_start[1]; i < light_start[2]; ++ i)
 				{
-					lighting += CalcTileBasedDeferredRenderingSpot(intersected_light_indices_sh[i], -1,
+					lighting += CalcTBDRSpot(intersected_light_indices_sh[i], -1,
 						pos_es, normal, view_dir, shininess, tc, false);
 				}
 				for (i = light_start[2]; i < light_start[3]; ++ i)
 				{
-					lighting += CalcTileBasedDeferredRenderingSpot(intersected_light_indices_sh[i],
+					lighting += CalcTBDRSpot(intersected_light_indices_sh[i],
 						intersected_light_indices_sh[i] - lights_type[6],
 						pos_es, normal, view_dir, shininess, tc, true);
 				}
@@ -451,9 +451,9 @@ void TileBasedDeferredRenderingUnifiedCS(uint3 gid : SV_GroupID,
 		]]>
 	</shader>
 
-	<technique name="TileBasedDeferredRenderingUnified">
+	<technique name="TBDRUnified">
 		<pass name="p0">
-			<state name="compute_shader" value="TileBasedDeferredRenderingUnifiedCS()"/>
+			<state name="compute_shader" value="TBDRUnifiedCS()"/>
 		</pass>
 	</technique>
 </effect>

@@ -343,7 +343,7 @@ namespace KlayGE
 			bool is_point, bool with_shadow);
 		void CreateDepthMinMaxMap(PerViewport const & pvp);
 
-		void UpdateTileBasedLightingCS(PerViewport const & pvp, uint32_t g_buffer_index);
+		void UpdateTileBasedLighting(PerViewport const & pvp, uint32_t g_buffer_index);
 		void CreateDepthMinMaxMapCS(PerViewport const & pvp);
 #endif
 
@@ -410,7 +410,7 @@ namespace KlayGE
 		RenderTechniquePtr technique_light_indexed_deferred_rendering_spot_shadow_;
 		RenderTechniquePtr technique_light_indexed_deferred_rendering_spot_no_shadow_;
 
-		RenderTechniquePtr technique_tile_based_deferred_rendering_unified_;
+		RenderTechniquePtr technique_tbdr_unified_;
 #endif
 		static uint32_t const MAX_NUM_SHADOWED_LIGHTS = 4;
 		static uint32_t const MAX_NUM_SHADOWED_SPOT_LIGHTS = 4;
@@ -483,7 +483,7 @@ namespace KlayGE
 		PostProcessPtr reduce_min_max_pp_;
 
 		RenderTechniquePtr technique_depth_to_tiled_min_max_;
-		RenderTechniquePtr technique_tile_based_deferred_rendering_lighting_mask_;
+		RenderTechniquePtr technique_tbdr_lighting_mask_;
 		RenderEffectParameterPtr width_height_param_;
 		RenderEffectParameterPtr depth_to_tiled_depth_in_tex_param_;
 		RenderEffectParameterPtr depth_to_tiled_min_max_depth_rw_tex_param_;

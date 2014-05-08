@@ -555,7 +555,7 @@ namespace KlayGE
 #if DEFAULT_DEFERRED == LIGHT_INDEXED_DEFERRED
 		if (cs_tbdr_)
 		{
-			technique_tile_based_deferred_rendering_unified_ = dr_effect_->TechniqueByName("TileBasedDeferredRenderingUnified");
+			technique_tbdr_unified_ = dr_effect_->TechniqueByName("TBDRUnified");
 		}
 		else
 		{
@@ -733,7 +733,7 @@ namespace KlayGE
 		if (cs_tbdr_)
 		{
 			technique_depth_to_tiled_min_max_ = dr_effect_->TechniqueByName("DepthToTiledMinMax");
-			technique_tile_based_deferred_rendering_lighting_mask_ = dr_effect_->TechniqueByName("TileBasedDeferredRenderingLightingMask");
+			technique_tbdr_lighting_mask_ = dr_effect_->TechniqueByName("TBDRLightingMask");
 
 			width_height_param_ = dr_effect_->ParameterByName("width_height");
 			depth_to_tiled_depth_in_tex_param_ = dr_effect_->ParameterByName("depth_in_tex");
@@ -1110,10 +1110,17 @@ namespace KlayGE
 				fmt = EF_ARGB8;
 			}
 		}
-		pvp.shading_tex = rf.MakeTexture2D(width, height, 1, 1, shading_fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
-		pvp.curr_merged_shading_tex = rf.MakeTexture2D(width, height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
+		uint32_t hint = EAH_GPU_Read | EAH_GPU_Write;
+#if DEFAULT_DEFERRED == LIGHT_INDEXED_DEFERRED
+		if (cs_tbdr_)
+		{
+			hint |= EAH_GPU_Unordered;
+		}
+#endif
+		pvp.shading_tex = rf.MakeTexture2D(width, height, 1, 1, shading_fmt, 1, 0, hint, nullptr);
+		pvp.curr_merged_shading_tex = rf.MakeTexture2D(width, height, 1, 1, fmt, 1, 0, hint, nullptr);
 		pvp.curr_merged_depth_tex = rf.MakeTexture2D(width, height, 1, 1, depth_fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
-		pvp.prev_merged_shading_tex = rf.MakeTexture2D(width, height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
+		pvp.prev_merged_shading_tex = rf.MakeTexture2D(width, height, 1, 1, fmt, 1, 0, hint, nullptr);
 		pvp.prev_merged_depth_tex = rf.MakeTexture2D(width, height, 1, 1, depth_fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
 #if DEFAULT_DEFERRED == LIGHT_INDEXED_DEFERRED
 		if (cs_tbdr_)
@@ -1561,7 +1568,7 @@ namespace KlayGE
 
 				if (cs_tbdr_)
 				{
-					this->UpdateTileBasedLightingCS(pvp, pass_tb);
+					this->UpdateTileBasedLighting(pvp, pass_tb);
 				}
 				else
 				{
@@ -3276,33 +3283,43 @@ namespace KlayGE
 	}
 
 
-	void DeferredRenderingLayer::UpdateTileBasedLightingCS(PerViewport const & pvp, uint32_t g_buffer_index)
+	void DeferredRenderingLayer::UpdateTileBasedLighting(PerViewport const & pvp, uint32_t g_buffer_index)
 	{
 		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 
 		re.BindFrameBuffer(pvp.lighting_mask_fb);
-		re.Render(*technique_tile_based_deferred_rendering_lighting_mask_, *rl_quad_);
+		re.Render(*technique_tbdr_lighting_mask_, *rl_quad_);
 
-		if (Opaque_GBuffer == g_buffer_index)
-		{
-			re.BindFrameBuffer(pvp.curr_merged_shading_fb);
-		}
-		else
-		{
-			re.BindFrameBuffer(pvp.shading_fb);
-		}
-		re.CurFrameBuffer()->Discard(FrameBuffer::CBM_Color);
+		*min_max_depth_tex_param_ = pvp.g_buffer_min_max_depth_texs.back();
+
+		uint32_t w = pvp.g_buffer_depth_tex->Width(0);
+		uint32_t h = pvp.g_buffer_depth_tex->Height(0);
+		float2 tile_scale(((w + TILE_SIZE - 1) & ~(TILE_SIZE - 1)) / (2.0f * TILE_SIZE),
+			((h + TILE_SIZE - 1) & ~(TILE_SIZE - 1)) / (2.0f * TILE_SIZE));
+		*tile_scale_param_ = float4(tile_scale.x(), tile_scale.y(), 0, 0);
+		*camera_proj_01_param_ = float2(pvp.proj(0, 0) * tile_scale.x(), pvp.proj(1, 1) * tile_scale.y());
+
+		*g_buffer_tex_param_ = pvp.g_buffer_rt0_tex;
+		*g_buffer_1_tex_param_ = pvp.g_buffer_rt1_tex;
+		*depth_tex_param_ = pvp.g_buffer_depth_tex;
+
+		float3 upper_left = MathLib::transform_coord(float3(-1, +1, 1), pvp.inv_proj);
+		float3 upper_right = MathLib::transform_coord(float3(+1, +1, 1), pvp.inv_proj);
+		float3 lower_left = MathLib::transform_coord(float3(-1, -1, 1), pvp.inv_proj);
+		*upper_left_param_ = upper_left;
+		*x_dir_param_ = upper_right - upper_left;
+		*y_dir_param_ = lower_left - upper_left;
+
+		*inv_width_height_param_ = float2(1.0f / w, 1.0f / h);
+		*width_height_param_ = uint2(w, h);
+
+		*shading_in_tex_param_ = (Opaque_GBuffer == g_buffer_index)
+			? pvp.curr_merged_shading_tex : pvp.shading_tex;
+		*lighting_mask_tex_param_ = pvp.lighting_mask_tex;
 
 		for (uint32_t li = 0; li < lights_.size();)
 		{
-			std::vector<uint32_t> ambient_lights;
-			std::vector<uint32_t> sun_lights;
-			std::vector<uint32_t> directional_lights;
-			std::vector<uint32_t> point_lights_shadow;
-			std::vector<uint32_t> point_lights_no_shadow;
-			std::vector<uint32_t> spot_lights_shadow;
-			std::vector<uint32_t> spot_lights_no_shadow;
-
+			array<std::vector<uint32_t>, 7> available_lights;
 			for (uint32_t batch = 0; (batch < light_batch_) && (li < lights_.size()); ++ li)
 			{
 				LightSourcePtr const & light = lights_[li];
@@ -3314,36 +3331,36 @@ namespace KlayGE
 					switch (type)
 					{
 					case LightSource::LT_Ambient:
-						ambient_lights.push_back(li);
+						available_lights[0].push_back(li);
 						break;
 
 					case LightSource::LT_Sun:
-						sun_lights.push_back(li);
+						available_lights[1].push_back(li);
 						break;
 
 					case LightSource::LT_Directional:
-						directional_lights.push_back(li);
+						available_lights[2].push_back(li);
 						break;
 
 					case LightSource::LT_Point:
 						if (light->Attrib() & LightSource::LSA_NoShadow)
 						{
-							point_lights_no_shadow.push_back(li);
+							available_lights[3].push_back(li);
 						}
 						else
 						{
-							point_lights_shadow.push_back(li);
+							available_lights[4].push_back(li);
 						}
 						break;
 
 					case LightSource::LT_Spot:
 						if (light->Attrib() & LightSource::LSA_NoShadow)
 						{
-							spot_lights_no_shadow.push_back(li);
+							available_lights[5].push_back(li);
 						}
 						else
 						{
-							spot_lights_shadow.push_back(li);
+							available_lights[6].push_back(li);
 						}
 						break;
 
@@ -3356,121 +3373,106 @@ namespace KlayGE
 
 			std::vector<uint32_t> lights_type(8);
 			lights_type[0] = 0;
-			
-			std::vector<uint32_t> lights_index;
-			lights_index.insert(lights_index.end(), ambient_lights.begin(), ambient_lights.end());
-			lights_type[1] = static_cast<uint32_t>(lights_index.size());
-			lights_index.insert(lights_index.end(), sun_lights.begin(), sun_lights.end());
-			lights_type[2] = static_cast<uint32_t>(lights_index.size());
-			lights_index.insert(lights_index.end(), directional_lights.begin(), directional_lights.end());
-			lights_type[3] = static_cast<uint32_t>(lights_index.size());
-			lights_index.insert(lights_index.end(), point_lights_no_shadow.begin(), point_lights_no_shadow.end());
-			lights_type[4] = static_cast<uint32_t>(lights_index.size());
-			lights_index.insert(lights_index.end(), point_lights_shadow.begin(), point_lights_shadow.end());
-			lights_type[5] = static_cast<uint32_t>(lights_index.size());
-			lights_index.insert(lights_index.end(), spot_lights_no_shadow.begin(), spot_lights_no_shadow.end());
-			lights_type[6] = static_cast<uint32_t>(lights_index.size());
-			lights_index.insert(lights_index.end(), spot_lights_shadow.begin(), spot_lights_shadow.end());
-			lights_type[7] = static_cast<uint32_t>(lights_index.size());
+			for (size_t i = 1; i < lights_type.size(); ++ i)
+			{
+				lights_type[i] = lights_type[i - 1] + static_cast<uint32_t>(available_lights[i - 1].size());
+			}
 
 			re.BindFrameBuffer(re.DefaultFrameBuffer());
-			re.DefaultFrameBuffer()->Discard(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth | FrameBuffer::CBM_Stencil);
+			re.DefaultFrameBuffer()->Discard(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth
+				| FrameBuffer::CBM_Stencil);
 
-			*min_max_depth_tex_param_ = pvp.g_buffer_min_max_depth_texs.back();
-
-			uint32_t w = (pvp.g_buffer_depth_tex->Width(0) + TILE_SIZE - 1) & ~(TILE_SIZE - 1);
-			uint32_t h = (pvp.g_buffer_depth_tex->Height(0) + TILE_SIZE - 1) & ~(TILE_SIZE - 1);
-			float2 tile_scale(w / (2.0f * TILE_SIZE), h / (2.0f * TILE_SIZE));
-			*tile_scale_param_ = float4(tile_scale.x(), tile_scale.y(), 0, 0);
-
-			*camera_proj_01_param_ = float2(pvp.proj(0, 0) * tile_scale.x(), pvp.proj(1, 1) * tile_scale.y());
-
-			std::vector<float4> lights_color;
-			std::vector<float4> lights_pos_es;
-			std::vector<float4> lights_dir_es;
-			std::vector<float4> lights_falloff_range;
-			std::vector<float4> lights_attrib;
+			std::vector<float4> lights_color(lights_type[7]);
+			std::vector<float4> lights_pos_es(lights_type[7]);
+			std::vector<float4> lights_dir_es(lights_type[7]);
+			std::vector<float4> lights_falloff_range(lights_type[7]);
+			std::vector<float4> lights_attrib(lights_type[7]);
+			std::vector<float3> lights_aabb_min(lights_type[7]);
+			std::vector<float3> lights_aabb_max(lights_type[7]);
 			std::vector<int> lights_shadowing_channel(6, -1);
-			std::vector<float3> lights_aabb_min;
-			std::vector<float3> lights_aabb_max;
-			for (uint32_t i = lights_type.front(); i < lights_type.back(); ++ i)
+			for (uint32_t t = 0; t < available_lights.size(); ++ t)
 			{
-				LightSourcePtr const & light = lights_[lights_index[i]];
-				LightSource::LightType type = light->Type();
-				int32_t attr = light->Attrib();
-
-				lights_color.push_back(light->Color());
-
-				float3 const & p = light->Position();
-				float3 loc_es = MathLib::transform_coord(p, pvp.view);
-				lights_pos_es.push_back(float4(loc_es.x(), loc_es.y(), loc_es.z(), 1));
-
-				float3 dir_es(0, 0, 0);
-				switch (type)
+				for (uint32_t i = 0; i < available_lights[t].size(); ++ i)
 				{
-				case LightSource::LT_Ambient:
-					dir_es = MathLib::transform_normal(float3(0, 1, 0), pvp.view);
-					break;
+					LightSourcePtr const & light = lights_[available_lights[t][i]];
+					LightSource::LightType type = light->Type();
+					int32_t attr = light->Attrib();
+					uint32_t offset = lights_type[t] + i;
 
-				case LightSource::LT_Sun:
-				case LightSource::LT_Directional:
-					dir_es = MathLib::transform_normal(-light->Direction(), pvp.view);
-					break;
+					lights_color[offset] = light->Color();
 
-				case LightSource::LT_Spot:
-					dir_es = MathLib::transform_normal(light->Direction(), pvp.view);
-					break;
+					float3 const & p = light->Position();
+					float3 loc_es = MathLib::transform_coord(p, pvp.view);
+					lights_pos_es[offset] = float4(loc_es.x(), loc_es.y(), loc_es.z(), 1);
 
-				default:
-					break;
-				}
-				lights_dir_es.push_back(float4(dir_es.x(), dir_es.y(), dir_es.z(), 0));
-
-				if (LightSource::LT_Spot == type)
-				{
-					lights_pos_es.back().w() = light->CosOuterInner().x();
-					lights_dir_es.back().w() = light->CosOuterInner().y();
-				}
-
-				lights_attrib.push_back(float4(attr & LightSource::LSA_NoDiffuse ? 0.0f : 1.0f,
-					attr & LightSource::LSA_NoSpecular ? 0.0f : 1.0f,
-					attr & LightSource::LSA_NoShadow ? -1.0f : 1.0f, light->ProjectiveTexture() ? 1.0f : -1.0f));
-
-				if (0 == (attr & LightSource::LSA_NoShadow))
-				{
+					float3 dir_es(0, 0, 0);
 					switch (type)
 					{
-					case LightSource::LT_Sun:
-						lights_shadowing_channel[0] = sm_light_indices_[lights_index[i]].second;
+					case LightSource::LT_Ambient:
+						dir_es = MathLib::transform_normal(float3(0, 1, 0), pvp.view);
 						break;
 
-					case LightSource::LT_Point:
-						lights_shadowing_channel[1] = sm_light_indices_[lights_index[i]].second;
+					case LightSource::LT_Sun:
+					case LightSource::LT_Directional:
+						dir_es = MathLib::transform_normal(-light->Direction(), pvp.view);
 						break;
 
 					case LightSource::LT_Spot:
-						lights_shadowing_channel[2 + i - lights_type[6]] = sm_light_indices_[lights_index[i]].second;
+						dir_es = MathLib::transform_normal(light->Direction(), pvp.view);
 						break;
 
 					default:
 						break;
 					}
-				}
+					lights_dir_es[offset] = float4(dir_es.x(), dir_es.y(), dir_es.z(), 0);
 
-				float range = light->Range() * light_scale_;
-				AABBox aabb(float3(0, 0, 0), float3(0, 0, 0));
-				if (LightSource::LT_Spot == type)
-				{
-					float4x4 light_to_view = light->SMCamera(0)->InverseViewMatrix() * pvp.view;
-					float const scale = light->CosOuterInner().w();
-					float4x4 light_model = MathLib::scaling(range * 0.01f * float3(scale, scale, 1));
-					float4x4 light_mv = light_model * light_to_view;
-					aabb = MathLib::transform_aabb(cone_aabb_, light_mv);
+					if (LightSource::LT_Spot == type)
+					{
+						lights_pos_es[offset].w() = light->CosOuterInner().x();
+						lights_dir_es[offset].w() = light->CosOuterInner().y();
+					}
+
+					lights_attrib[offset] = float4(attr & LightSource::LSA_NoDiffuse ? 0.0f : 1.0f,
+						attr & LightSource::LSA_NoSpecular ? 0.0f : 1.0f,
+						attr & LightSource::LSA_NoShadow ? -1.0f : 1.0f, light->ProjectiveTexture() ? 1.0f : -1.0f);
+
+					if (0 == (attr & LightSource::LSA_NoShadow))
+					{
+						int32_t channel = sm_light_indices_[available_lights[t][i]].second;
+						switch (type)
+						{
+						case LightSource::LT_Sun:
+							lights_shadowing_channel[0] = channel;
+							break;
+
+						case LightSource::LT_Point:
+							lights_shadowing_channel[1] = channel;
+							break;
+
+						case LightSource::LT_Spot:
+							lights_shadowing_channel[2 + i] = channel;
+							break;
+
+						default:
+							break;
+						}
+					}
+
+					float range = light->Range() * light_scale_;
+					AABBox aabb(float3(0, 0, 0), float3(0, 0, 0));
+					if (LightSource::LT_Spot == type)
+					{
+						float4x4 light_to_view = light->SMCamera(0)->InverseViewMatrix() * pvp.view;
+						float const scale = light->CosOuterInner().w();
+						float4x4 light_model = MathLib::scaling(range * 0.01f * float3(scale, scale, 1));
+						float4x4 light_mv = light_model * light_to_view;
+						aabb = MathLib::transform_aabb(cone_aabb_, light_mv);
+					}
+					lights_falloff_range[offset] = float4(light->Falloff().x(), light->Falloff().y(),
+						light->Falloff().z(), range);
+					lights_aabb_min[offset] = aabb.Min();
+					lights_aabb_max[offset] = aabb.Max();
 				}
-				lights_falloff_range.push_back(float4(light->Falloff().x(), light->Falloff().y(),
-					light->Falloff().z(), range));
-				lights_aabb_min.push_back(aabb.Min());
-				lights_aabb_max.push_back(aabb.Max());
 			}
 
 			*lights_type_param_ = lights_type;
@@ -3483,44 +3485,25 @@ namespace KlayGE
 			*lights_aabb_min_param_ = lights_aabb_min;
 			*lights_aabb_max_param_ = lights_aabb_max;
 
-			w = pvp.g_buffer_depth_tex->Width(0);
-			h = pvp.g_buffer_depth_tex->Height(0);
-			*g_buffer_tex_param_ = pvp.g_buffer_rt0_tex;
-			*g_buffer_1_tex_param_ = pvp.g_buffer_rt1_tex;
-			*depth_tex_param_ = pvp.g_buffer_depth_tex;
-
-			float3 upper_left = MathLib::transform_coord(float3(-1, +1, 1), pvp.inv_proj);
-			float3 upper_right = MathLib::transform_coord(float3(+1, +1, 1), pvp.inv_proj);
-			float3 lower_left = MathLib::transform_coord(float3(-1, -1, 1), pvp.inv_proj);
-			*upper_left_param_ = upper_left;
-			*x_dir_param_ = upper_right - upper_left;
-			*y_dir_param_ = lower_left - upper_left;
-			*inv_width_height_param_ = float2(1.0f / w, 1.0f / h);
-			*width_height_param_ = uint2(w, h);
-
-			if (Opaque_GBuffer == g_buffer_index)
+			if (lights_type[0] != lights_type[1])
 			{
-				*shading_in_tex_param_ = pvp.curr_merged_shading_tex;
+				*shading_rw_tex_param_ = (Opaque_GBuffer == g_buffer_index)
+					? pvp.curr_merged_shading_tex : pvp.shading_tex;
 			}
 			else
 			{
-				*shading_in_tex_param_ = pvp.shading_tex;
+				*shading_rw_tex_param_ = pvp.temp_shading_tex;
 			}
-			*shading_rw_tex_param_ = pvp.temp_shading_tex;
-			*lighting_mask_tex_param_ = pvp.lighting_mask_tex;
-			re.Dispatch(*technique_tile_based_deferred_rendering_unified_,
+			re.Dispatch(*technique_tbdr_unified_,
 				(w + TILE_SIZE - 1) / TILE_SIZE, (h + TILE_SIZE - 1) / TILE_SIZE, 1);
 
-			copy_pp_->InputPin(0, pvp.temp_shading_tex);
-			if (Opaque_GBuffer == g_buffer_index)
+			if (lights_type[0] == lights_type[1])
 			{
-				copy_pp_->OutputPin(0, pvp.curr_merged_shading_tex);
+				copy_pp_->InputPin(0, pvp.temp_shading_tex);
+				copy_pp_->OutputPin(0,
+					(Opaque_GBuffer == g_buffer_index) ? pvp.curr_merged_shading_tex : pvp.shading_tex);
+				copy_pp_->Apply();
 			}
-			else
-			{
-				copy_pp_->OutputPin(0, pvp.shading_tex);
-			}
-			copy_pp_->Apply();
 		}
 	}
 
