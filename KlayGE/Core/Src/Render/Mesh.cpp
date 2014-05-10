@@ -1004,7 +1004,7 @@ namespace KlayGE
 #endif
 			meshmljit_name = ResLoader::Instance().Locate(meshmljit_name);
 			if (meshmljit_name.empty() ||
-				system((meshmljit_name + " \"" + meshml_name + "\" \"" + folder_name + "\" -q").c_str()) != 0)
+				system((meshmljit_name + " -I \"" + meshml_name + "\" -T \"" + folder_name + "\" -q").c_str()) != 0)
 			{
 				LogError("MeshMLJIT failed. Forgot to build Tools?");
 			}

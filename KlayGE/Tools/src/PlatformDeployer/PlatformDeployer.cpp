@@ -150,7 +150,7 @@ void Deploy(std::vector<std::string> const & res_names, std::string const & res_
 		{
 			for (size_t i = 0; i < res_names.size(); ++ i)
 			{
-				ofs << "MeshMLJIT \"" << res_names[i] << "\"" << std::endl;
+				ofs << "MeshMLJIT -I \"" << res_names[i] << "\" -P " << platform << std::endl;
 			}
 		}
 		else if ("effect" == res_type)
@@ -205,7 +205,7 @@ void Deploy(std::vector<std::string> const & res_names, std::string const & res_
 		{
 			for (size_t i = 0; i < res_names.size(); ++ i)
 			{
-				ofs << "MeshMLJIT \"" << res_names[i] << "\"" << std::endl;
+				ofs << "MeshMLJIT -I \"" << res_names[i] << "\" -P " << platform << std::endl;
 			}
 		}
 		else if ("effect" == res_type)
@@ -259,7 +259,7 @@ void Deploy(std::vector<std::string> const & res_names, std::string const & res_
 		{
 			for (size_t i = 0; i < res_names.size(); ++ i)
 			{
-				ofs << "MeshMLJIT \"" << res_names[i] << "\"" << std::endl;
+				ofs << "MeshMLJIT -I \"" << res_names[i] << "\" -P " << platform << std::endl;
 			}
 		}
 		else if ("effect" == res_type)

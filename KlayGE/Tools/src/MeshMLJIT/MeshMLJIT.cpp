@@ -17,6 +17,28 @@
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string/trim.hpp>
 
+#ifdef KLAYGE_TR2_LIBRARY_FILESYSTEM_V2_SUPPORT
+	#include <filesystem>
+	namespace KlayGE
+	{
+		namespace filesystem = std::tr2::sys;
+	}
+#else
+	#include <boost/filesystem.hpp>
+	namespace KlayGE
+	{
+		namespace filesystem = boost::filesystem;
+	}
+#endif
+#ifdef KLAYGE_COMPILER_MSVC
+#pragma warning(push)
+#pragma warning(disable: 4100 4251 4275 4273 4512 4701 4702)
+#endif
+#include <boost/program_options.hpp>
+#ifdef KLAYGE_COMPILER_MSVC
+#pragma warning(pop)
+#endif
+
 using namespace std;
 using namespace KlayGE;
 
@@ -1747,33 +1769,66 @@ namespace
 
 int main(int argc, char* argv[])
 {
-	if (argc < 2)
+	std::string input_name;
+	filesystem::path target_folder;
+	std::string platform;
+	bool quiet = false;
+
+	boost::program_options::options_description desc("Allowed options");
+	desc.add_options()
+		("help,H", "Produce help message")
+		("input-name,I", boost::program_options::value<std::string>(), "Input meshml name.")
+		("target-folder,T", boost::program_options::value<std::string>(), "Target folder.")
+		("platform,P", boost::program_options::value<std::string>(), "Platform name.")
+		("quiet,q", boost::program_options::value<bool>()->implicit_value(true), "Quiet mode.")
+		("version,v", "Version.");
+
+	boost::program_options::variables_map vm;
+	boost::program_options::store(boost::program_options::parse_command_line(argc, argv, desc), vm);
+	boost::program_options::notify(vm);
+
+	if ((argc <= 1) || (vm.count("help") > 0))
 	{
-		cout << "Usage: MeshMLJIT xxx.meshml [target folder] [-q]" << endl;
+		cout << desc << endl;
 		return 1;
 	}
-
-	std::string target_folder;
-	if (argc >= 3)
+	if (vm.count("version") > 0)
 	{
-		target_folder = argv[2];
-		std::replace(target_folder.begin(), target_folder.end(), '\\', '/');
-		if (target_folder[target_folder.size() - 1] != '/')
-		{
-			target_folder += '/';
-		}
+		cout << "KlayGE MeshMLJIT, Version 1.0.0" << endl;
+		return 1;
+	}
+	if (vm.count("input-name") > 0)
+	{
+		input_name = vm["input-name"].as<std::string>();
+	}
+	else
+	{
+		cout << "Need input meshml name." << endl;
+		return 1;
+	}
+	if (vm.count("target-folder") > 0)
+	{
+		target_folder = vm["target-folder"].as<std::string>();
+	}
+	if (vm.count("platform") > 0)
+	{
+		platform = vm["platform"].as<std::string>();
+	}
+	else
+	{
+		platform = "pc_dx11";
+	}
+	if (vm.count("quiet") > 0)
+	{
+		quiet = vm["quiet"].as<bool>();
 	}
 
-	std::string input_name = argv[1];
-	std::replace(input_name.begin(), input_name.end(), '\\', '/');
 	std::string meshml_name = ResLoader::Instance().Locate(input_name);
 	if (meshml_name.empty())
 	{
-		std::string::size_type const ext_offset = input_name.find(".meshml");
-		meshml_name = input_name.substr(0, ext_offset);
-		std::string::size_type slash_offset = meshml_name.rfind("/");
-		std::string folder = meshml_name.substr(0, slash_offset + 1);
-		std::string base_name = input_name.substr(slash_offset + 1, ext_offset - slash_offset - 1);
+		filesystem::path input_path(input_name);
+		std::string base_name = filesystem::basename(input_path);
+		std::string folder = input_path.parent_path().string();
 		meshml_name = folder + base_name + ".7z//" + base_name + ".meshml";
 	}
 
@@ -1790,29 +1845,26 @@ int main(int argc, char* argv[])
 
 		if (target_folder.empty())
 		{
-			std::string::size_type offset = pkt_name.rfind("/");
-			target_folder = pkt_name.substr(0, offset + 1);
+			target_folder = filesystem::path(pkt_name).parent_path();
 		}
 
 		file_name = meshml_name.substr(pkt_offset + 2);
 	}
 	else
 	{
-		std::string::size_type offset = meshml_name.rfind("/");
+		filesystem::path meshml_path = filesystem::path(meshml_name);
 		if (target_folder.empty())
 		{
-			target_folder = meshml_name.substr(0, offset + 1);
+			target_folder = meshml_path.parent_path();
 		}
-		file_name = meshml_name.substr(offset + 1);
+#ifdef KLAYGE_TR2_LIBRARY_FILESYSTEM_V2_SUPPORT
+		file_name = meshml_path.filename();
+#else
+		file_name = meshml_path.filename().string();
+#endif
 	}
 
-	std::string output_name = target_folder + file_name + JIT_EXT_NAME;
-
-	bool quiet = false;
-	if ((argc >= 4) && ("-q" == std::string(argv[3])))
-	{
-		quiet = true;
-	}
+	std::string output_name = (target_folder / filesystem::path(file_name)).string() + JIT_EXT_NAME;
 
 	MeshMLJIT(meshml_name, output_name);
 
