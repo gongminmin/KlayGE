@@ -454,6 +454,18 @@ void ASMGen::Disasm(std::ostream& out, ShaderDecl const & dcl)
 		out << ' ' << dcl.num;
 		break;
 
+	case SO_DCL_RESOURCE_STRUCTURED:
+	case SO_DCL_UNORDERED_ACCESS_VIEW_STRUCTURED:
+		out << ' ' <<dcl.structured.stride;
+		break;
+
+	case SO_DCL_THREAD_GROUP:
+		out <<' '
+			<< dcl.thread_group_size[0] << ','
+			<< dcl.thread_group_size[1] << ','
+			<< dcl.thread_group_size[2];
+		break;
+
 	default:
 		break;
 	}
@@ -468,6 +480,26 @@ void ASMGen::Disasm(std::ostream& out, ShaderInstruction const & insn)
 	if (insn.insn.sat)
 	{
 		out << "_sat";
+	}
+	if(SO_SYNC == insn.opcode)
+	{
+		if(insn.sync.uav_global)
+		{
+			out << "_uglobal";
+		}
+		if(insn.sync.uav_group)
+		{
+			out << "_ugroup";
+		}
+		if(insn.sync.shared_memory)
+		{
+			out << "_g";
+		}
+		if(insn.sync.threads_in_group)
+		{
+			out << "_t";
+		}
+
 	}
 	if ((SO_BREAKC == insn.opcode) || (SO_IF == insn.opcode) || (SO_CONTINUEC == insn.opcode)
 		|| (SO_RETC == insn.opcode) || (SO_DISCARD == insn.opcode))

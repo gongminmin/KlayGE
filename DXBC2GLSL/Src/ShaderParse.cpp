@@ -474,6 +474,9 @@ struct ShaderParser
 					dcl->thread_group_size[0] = this->Read32();
 					dcl->thread_group_size[1] = this->Read32();
 					dcl->thread_group_size[2] = this->Read32();
+					program->cs_thread_group_size[0] = dcl->thread_group_size[0];
+					program->cs_thread_group_size[1] = dcl->thread_group_size[1];
+					program->cs_thread_group_size[2] = dcl->thread_group_size[2];
 					break;
 
 				case SO_DCL_UNORDERED_ACCESS_VIEW_TYPED:
@@ -559,7 +562,7 @@ struct ShaderParser
 				case SO_INTERFACE_CALL:
 					insn->num = this->Read32();
 					break;
-
+		
 				default:
 					break;
 				}

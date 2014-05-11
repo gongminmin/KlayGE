@@ -317,6 +317,14 @@ void GLSLGen::ToGLSL(std::ostream& out)
 		out << ") out;\n\n";
 	}
 
+	if(ST_CS == shader_type_)
+	{
+		out << "layout (local_size_x = " << program_->cs_thread_group_size[0]
+		<<", local_size_y = " << program_->cs_thread_group_size[1]
+		<<", local_size_z = " << program_->cs_thread_group_size[2]
+		<<") in;\n";
+	}
+
 	this->ToDeclarations(out);
 
 	out << "\nvoid main()" << "\n" << "{" << "\n";
@@ -3149,6 +3157,25 @@ void GLSLGen::ToInstruction(std::ostream& out, ShaderInstruction const & insn) c
 			{
 				out << "\n}";
 			}
+		}
+		break;
+		//memory barrier and synchronization
+	case SO_SYNC:
+		if(insn.sync.uav_global)
+		{
+			out << "memoryBarrier();\n";
+		}
+		if(insn.sync.uav_group)
+		{
+			out << "groupMemoryBarrier();\n";
+		}
+		if(insn.sync.shared_memory)
+		{
+			out << "memoryBarrierShared();\n";
+		}
+		if(insn.sync.threads_in_group)
+		{
+			out << "barrier();\n";
 		}
 		break;
 
@@ -6240,6 +6267,26 @@ void GLSLGen::ToOperandName(std::ostream& out, ShaderOperand const & op, ShaderI
 		*need_comps = false;
 		*need_idx = false;
 	}
+	else if (SOT_INPUT_THREAD_ID == op.type)
+	{
+		out << "gl_GlobalInvocationID";
+		*need_idx = false;
+	}
+	else if (SOT_INPUT_THREAD_GROUP_ID == op.type)
+	{
+		out << "gl_WorkGroupID";
+		*need_idx = false;
+	}
+	else if (SOT_INPUT_THREAD_ID_IN_GROUP == op.type)
+	{
+		out << "gl_LocalInvocationID";
+		*need_idx = false;
+	}
+	else if (SOT_INPUT_THREAD_ID_IN_GROUP_FLATTENED == op.type)
+	{
+		out << "gl_LocalInvocationIndex";
+		*need_idx=false;
+	}
 	else
 	{
 		out << ShaderOperandTypeShortName(op.type);
@@ -7077,7 +7124,8 @@ void GLSLGen::FindHSForkPhases()
 {
 	std::vector<KlayGE::shared_ptr<ShaderDecl> >::const_iterator itr_dcl = program_->dcls.begin();
 	std::vector<KlayGE::shared_ptr<ShaderInstruction> >::const_iterator itr_insn = program_->insns.begin();
-	while(true)
+	bool go=true;
+	while(go)
 	{
 		//find iterator to next hs_fork_phase.
 		for(; itr_dcl != program_->dcls.end(); ++itr_dcl)
@@ -7105,7 +7153,7 @@ void GLSLGen::FindHSForkPhases()
 		{
 			if(SO_HS_FORK_PHASE == (*itr_dcl1)->opcode)
 			{
-				//traverse dcls before next hs_fork_phase
+				//traverse dcls at the begin of next hs_fork_phase part
 				break;
 			}
 			if(SO_DCL_HS_FORK_PHASE_INSTANCE_COUNT == (*itr_dcl1)->opcode)
