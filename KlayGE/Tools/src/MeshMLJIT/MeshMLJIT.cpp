@@ -44,6 +44,39 @@ using namespace KlayGE;
 
 namespace
 {
+	// Return path when appended to a_From will resolve to same as a_To
+	filesystem::path make_relative(filesystem::path from_path, filesystem::path to_path)
+	{
+#ifdef KLAYGE_TR2_LIBRARY_FILESYSTEM_V2_SUPPORT
+		from_path = filesystem::complete(from_path);
+		to_path = filesystem::complete(to_path);
+#else
+		from_path = filesystem::absolute(from_path);
+		to_path = filesystem::absolute(to_path);
+#endif
+
+		filesystem::path::const_iterator iter_from(from_path.begin());
+		filesystem::path::const_iterator iter_to(to_path.begin());
+		for (filesystem::path::const_iterator to_end(to_path.end()), from_end(from_path.end());
+			(iter_from != from_end) && (iter_to != to_end) && (*iter_from == *iter_to);
+			++ iter_from, ++ iter_to);
+
+		filesystem::path ret;
+		for (filesystem::path::const_iterator from_end(from_path.end()); iter_from != from_end; ++ iter_from)
+		{
+			if (*iter_from != ".")
+			{
+				ret /= "..";
+			}
+		}
+
+		for (; iter_to != to_path.end(); ++ iter_to)
+		{
+			ret /= *iter_to;
+		}
+		return ret;
+	}
+
 	std::string const JIT_EXT_NAME = ".model_bin";
 	uint32_t const MODEL_BIN_VERSION = 9;
 
@@ -1633,7 +1666,132 @@ namespace
 		}
 	}
 
-	void MeshMLJIT(std::string const & meshml_name, std::string const & output_name)
+	void ConvertTextures(std::string const & output_name, std::vector<RenderMaterial>& mtls, std::string const & platform)
+	{
+		std::map<filesystem::path, std::vector<std::pair<size_t, size_t> > > all_texture_slots;
+		for (size_t i = 0; i < mtls.size(); ++ i)
+		{
+			for (size_t j = 0; j < mtls[i].texture_slots.size(); ++ j)
+			{
+				all_texture_slots[filesystem::path(mtls[i].texture_slots[j].second)].push_back(std::make_pair(i, j));
+			}
+		}
+
+		std::vector<std::pair<filesystem::path, std::string> > deploy_files;
+		typedef KLAYGE_DECLTYPE(all_texture_slots) AllTextureSlotsType;
+		KLAYGE_FOREACH(AllTextureSlotsType::reference slot, all_texture_slots)
+		{
+			std::string ext_name = filesystem::extension(slot.first);
+			if (ext_name != ".dds")
+			{
+				std::string cmd = "texconv -f A8B8G8R8 -ft DDS -m 1 \"" + slot.first.string() + "\"";
+				system(cmd.c_str());
+
+				std::string tex_base = (slot.first.parent_path() / filesystem::path(filesystem::basename(slot.first))).string();
+				deploy_files.push_back(std::make_pair(filesystem::path(tex_base + ".dds"),
+					mtls[slot.second[0].first].texture_slots[slot.second[0].second].first));
+			}
+		}
+
+		std::vector<std::pair<filesystem::path, filesystem::path> > dup_files;
+		std::map<filesystem::path, std::vector<std::pair<size_t, size_t> > > augmented_texture_slots;
+		KLAYGE_FOREACH(AllTextureSlotsType::reference slot, all_texture_slots)
+		{
+			std::string tex_base = (slot.first.parent_path() / filesystem::path(filesystem::basename(slot.first))).string();
+			augmented_texture_slots[filesystem::path(tex_base + ".dds")].push_back(slot.second[0]);
+
+			for (size_t i = 1; i < slot.second.size(); ++ i)
+			{
+				std::pair<size_t, size_t> const & slot_index = slot.second[i];
+				std::string const & type = mtls[slot_index.first].texture_slots[slot_index.second].first;
+				if (type != mtls[slot.second[0].first].texture_slots[slot.second[0].second].first)
+				{
+					filesystem::path new_name(filesystem::path(tex_base + "_" + type + ".dds"));
+					if (filesystem::exists(new_name))
+					{
+						size_t j = 0;
+						do
+						{
+							std::stringstream ss;
+							ss << tex_base << "_" << type << "_" << j << ".dds";
+							new_name = filesystem::path(ss.str());
+							++ j;
+						} while (filesystem::exists(new_name));
+					}
+
+					if (augmented_texture_slots.find(new_name) == augmented_texture_slots.end())
+					{
+						dup_files.push_back(std::make_pair(filesystem::path(tex_base + ".dds"), new_name));
+						deploy_files.push_back(std::make_pair(new_name, type));
+					}
+					augmented_texture_slots[new_name].push_back(slot_index);
+				}
+			}
+		}
+
+		typedef KLAYGE_DECLTYPE(dup_files) DupFilesType;
+		KLAYGE_FOREACH(DupFilesType::const_reference dup, dup_files)
+		{
+			filesystem::copy_file(KlayGE::get<0>(dup), KlayGE::get<1>(dup));
+		}
+
+		typedef KLAYGE_DECLTYPE(deploy_files) DeployFilesType;
+		KLAYGE_FOREACH(DeployFilesType::const_reference df, deploy_files)
+		{
+			std::string deploy_type;
+			size_t const type_hash = RT_HASH(df.second.c_str());
+			if ((CT_HASH("Color") == type_hash) || (CT_HASH("Diffuse Color") == type_hash)
+				|| (CT_HASH("Diffuse Color Map") == type_hash))
+			{
+				deploy_type = "diffuse";
+			}
+			else if ((CT_HASH("Specular Level") == type_hash) || (CT_HASH("Specular Color") == type_hash))
+			{
+				deploy_type = "specular";
+			}
+			else if ((CT_HASH("Glossiness") == type_hash) || (CT_HASH("Reflection Glossiness Map") == type_hash))
+			{
+				deploy_type = "shininess";
+			}
+			else if ((CT_HASH("Bump") == type_hash) || (CT_HASH("Bump Map") == type_hash))
+			{
+				deploy_type = "bump";
+			}
+			else if ((CT_HASH("Height") == type_hash) || (CT_HASH("Height Map") == type_hash))
+			{
+				deploy_type = "height";
+			}
+			else if (CT_HASH("Self-Illumination") == type_hash)
+			{
+				deploy_type = "emit";
+			}
+			else
+			{
+				// TODO
+				deploy_type = df.second;
+			}
+
+			cout << "Processing " << df.first.string() << endl;
+
+			std::string cmd = "platformdeployer -P " + platform + " -I \"" + df.first.string() + "\" -T " + deploy_type;
+			system(cmd.c_str());
+		}
+
+		filesystem::path output_folder = filesystem::path(output_name).parent_path();
+		typedef KLAYGE_DECLTYPE(augmented_texture_slots) AugmentedTextureSlotsType;
+		KLAYGE_FOREACH(AugmentedTextureSlotsType::const_reference slot, augmented_texture_slots)
+		{
+			std::string rel_path = make_relative(output_folder, slot.first);
+
+			typedef KLAYGE_DECLTYPE(slot.second) SlotIndexType;
+			KLAYGE_FOREACH(SlotIndexType::const_reference slot_index, slot.second)
+			{
+				mtls[slot_index.first].texture_slots[slot_index.second].second = rel_path;
+			}
+		}
+	}
+
+	void MeshMLJIT(std::string const & meshml_name, std::string const & output_name, std::string const & platform)
 	{
 		std::ostringstream ss;
 
@@ -1648,6 +1806,7 @@ namespace
 		if (materials_chunk)
 		{
 			CompileMaterialsChunk(materials_chunk, mtls);
+			ConvertTextures(output_name, mtls, platform);
 		}
 		{
 			uint32_t num_mtls = Native2LE(static_cast<uint32_t>(mtls.size()));
@@ -1828,8 +1987,8 @@ int main(int argc, char* argv[])
 	{
 		filesystem::path input_path(input_name);
 		std::string base_name = filesystem::basename(input_path);
-		std::string folder = input_path.parent_path().string();
-		meshml_name = folder + base_name + ".7z//" + base_name + ".meshml";
+		filesystem::path folder = input_path.parent_path();
+		meshml_name = (folder / filesystem::path(base_name)).string() + ".7z//" + base_name + ".meshml";
 	}
 
 	std::string::size_type const pkt_offset(meshml_name.find("//"));
@@ -1852,7 +2011,7 @@ int main(int argc, char* argv[])
 	}
 	else
 	{
-		filesystem::path meshml_path = filesystem::path(meshml_name);
+		filesystem::path meshml_path(meshml_name);
 		if (target_folder.empty())
 		{
 			target_folder = meshml_path.parent_path();
@@ -1866,7 +2025,7 @@ int main(int argc, char* argv[])
 
 	std::string output_name = (target_folder / filesystem::path(file_name)).string() + JIT_EXT_NAME;
 
-	MeshMLJIT(meshml_name, output_name);
+	MeshMLJIT(meshml_name, output_name, platform);
 
 	if (!quiet)
 	{
