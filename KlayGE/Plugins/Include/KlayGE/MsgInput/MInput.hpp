@@ -360,7 +360,7 @@ namespace KlayGE
 		MsgInputTouch();
 
 		virtual std::wstring const & Name() const KLAYGE_OVERRIDE;
-#if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP && (_WIN32_WINNT >= 0x0601 /*_WIN32_WINNT_WIN7*/)
+#if (defined KLAYGE_PLATFORM_WINDOWS_DESKTOP) && (_WIN32_WINNT >= 0x0601 /*_WIN32_WINNT_WIN7*/)
 		void OnTouch(Window const & wnd, HTOUCHINPUT hti, uint32_t num_inputs);
 #endif
 		void OnPointerDown(int2 const & pt, uint32_t id);
@@ -377,7 +377,7 @@ namespace KlayGE
 		int32_t wheel_delta_state_;
 	};
 	
-#if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP && (_WIN32_WINNT >= 0x0601 /*_WIN32_WINNT_WIN7*/)
+#if (defined KLAYGE_PLATFORM_WINDOWS_DESKTOP) && (_WIN32_WINNT >= 0x0601 /*_WIN32_WINNT_WIN7*/)
 	class MsgInputSensor : public InputSensor
 	{
 	public:
