@@ -501,17 +501,15 @@ namespace KlayGE
 		}
 		ss << std::endl;
 
-		KLAYGE_AUTO(cbuffers, effect.CBuffers());
-		typedef KLAYGE_DECLTYPE(cbuffers) CBuffersType;
-		KLAYGE_FOREACH(CBuffersType::const_reference cbuff, cbuffers)
+		for (uint32_t i = 0; i < effect.NumCBuffers(); ++ i)
 		{
-			ss << "cbuffer " << cbuff.first << std::endl;
+			RenderEffectConstantBufferPtr const & cbuff = effect.CBufferByIndex(i);
+			ss << "cbuffer " << *cbuff->Name() << std::endl;
 			ss << "{" << std::endl;
 
-			typedef KLAYGE_DECLTYPE(cbuff.second) CBuffersSecondType;
-			KLAYGE_FOREACH(CBuffersSecondType::const_reference param_index, cbuff.second)
+			for (uint32_t j = 0; j < cbuff->NumParameters(); ++ j)
 			{
-				RenderEffectParameter& param = *effect.ParameterByIndex(param_index);
+				RenderEffectParameter& param = *effect.ParameterByIndex(cbuff->ParameterIndex(j));
 				switch (param.Type())
 				{
 				case REDT_texture1D:

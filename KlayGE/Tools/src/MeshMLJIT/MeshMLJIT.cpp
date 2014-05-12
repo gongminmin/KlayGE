@@ -1781,7 +1781,7 @@ namespace
 		typedef KLAYGE_DECLTYPE(augmented_texture_slots) AugmentedTextureSlotsType;
 		KLAYGE_FOREACH(AugmentedTextureSlotsType::const_reference slot, augmented_texture_slots)
 		{
-			std::string rel_path = make_relative(output_folder, slot.first);
+			std::string rel_path = make_relative(output_folder, slot.first).string();
 
 			typedef KLAYGE_DECLTYPE(slot.second) SlotIndexType;
 			KLAYGE_FOREACH(SlotIndexType::const_reference slot_index, slot.second)

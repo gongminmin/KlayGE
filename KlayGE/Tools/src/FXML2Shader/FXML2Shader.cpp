@@ -51,17 +51,15 @@ public:
 		}
 		ofs << "\r\n";
 
-		KLAYGE_AUTO(cbuffers, effect->CBuffers());
-		typedef KLAYGE_DECLTYPE(cbuffers) CBuffersType;
-		KLAYGE_FOREACH(CBuffersType::const_reference cbuff, cbuffers)
+		for (uint32_t i = 0; i < effect->NumCBuffers(); ++ i)
 		{
-			ofs << "cbuffer " << cbuff.first << "\r\n";
+			RenderEffectConstantBufferPtr const & cbuff = effect->CBufferByIndex(i);
+			ofs << "cbuffer " << *cbuff->Name() << std::endl;
 			ofs << "{" << "\r\n";
 
-			typedef KLAYGE_DECLTYPE(cbuff.second) CBuffersSecondType;
-			KLAYGE_FOREACH(CBuffersSecondType::const_reference param_index, cbuff.second)
+			for (uint32_t j = 0; j < cbuff->NumParameters(); ++ j)
 			{
-				RenderEffectParameter& param = *(effect->ParameterByIndex(param_index));
+				RenderEffectParameter& param = *effect->ParameterByIndex(cbuff->ParameterIndex(j));
 				switch (param.Type())
 				{
 				case REDT_texture1D:

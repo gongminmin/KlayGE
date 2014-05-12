@@ -316,14 +316,14 @@ namespace KlayGE
 	typedef RenderVariableConcrete<std::vector<bool> > RenderVariableBoolArray;
 	typedef RenderVariableConcrete<std::vector<uint32_t> > RenderVariableUIntArray;
 	typedef RenderVariableConcrete<std::vector<int32_t> > RenderVariableIntArray;
-	typedef RenderVariableConcrete<std::vector<float> >  RenderVariableFloatArray;
-	typedef RenderVariableConcrete<std::vector<int2> >  RenderVariableInt2Array;
-	typedef RenderVariableConcrete<std::vector<int3> >  RenderVariableInt3Array;
-	typedef RenderVariableConcrete<std::vector<int4> >  RenderVariableInt4Array;
-	typedef RenderVariableConcrete<std::vector<float2> >  RenderVariableFloat2Array;
-	typedef RenderVariableConcrete<std::vector<float3> >  RenderVariableFloat3Array;
-	typedef RenderVariableConcrete<std::vector<float4> >  RenderVariableFloat4Array;
-	typedef RenderVariableConcrete<std::vector<float4x4> >  RenderVariableFloat4x4Array;
+	typedef RenderVariableConcrete<std::vector<float> > RenderVariableFloatArray;
+	typedef RenderVariableConcrete<std::vector<int2> > RenderVariableInt2Array;
+	typedef RenderVariableConcrete<std::vector<int3> > RenderVariableInt3Array;
+	typedef RenderVariableConcrete<std::vector<int4> > RenderVariableInt4Array;
+	typedef RenderVariableConcrete<std::vector<float2> > RenderVariableFloat2Array;
+	typedef RenderVariableConcrete<std::vector<float3> > RenderVariableFloat3Array;
+	typedef RenderVariableConcrete<std::vector<float4> > RenderVariableFloat4Array;
+	typedef RenderVariableConcrete<std::vector<float4x4> > RenderVariableFloat4x4Array;
 
 
 	class KLAYGE_CORE_API RenderEffectAnnotation
@@ -417,17 +417,23 @@ namespace KlayGE
 		{
 			return static_cast<uint32_t>(params_.size());
 		}
-		RenderEffectParameterPtr ParameterBySemantic(std::string const & semantic) const;
-		RenderEffectParameterPtr ParameterByName(std::string const & name) const;
-		RenderEffectParameterPtr ParameterByIndex(uint32_t n) const
+		RenderEffectParameterPtr const & ParameterBySemantic(std::string const & semantic) const;
+		RenderEffectParameterPtr const & ParameterByName(std::string const & name) const;
+		RenderEffectParameterPtr const & ParameterByIndex(uint32_t n) const
 		{
 			BOOST_ASSERT(n < this->NumParameters());
 			return params_[n];
 		}
 
-		std::vector<std::pair<std::string, std::vector<uint32_t> > > const & CBuffers() const
+		uint32_t NumCBuffers() const
 		{
-			return *cbuffers_;
+			return cbuffers_ ? static_cast<uint32_t>(cbuffers_->size()) : 0;
+		}
+		RenderEffectConstantBufferPtr const & CBufferByName(std::string const & name) const;
+		RenderEffectConstantBufferPtr const & CBufferByIndex(uint32_t n) const
+		{
+			BOOST_ASSERT(n < this->NumCBuffers());
+			return (*cbuffers_)[n];
 		}
 
 		uint32_t NumTechniques() const
@@ -477,7 +483,7 @@ namespace KlayGE
 		uint64_t timestamp_;
 
 		std::vector<RenderEffectParameterPtr> params_;
-		shared_ptr<std::vector<std::pair<std::string, std::vector<uint32_t> > > > cbuffers_;
+		shared_ptr<std::vector<RenderEffectConstantBufferPtr> > cbuffers_;
 		std::vector<RenderTechniquePtr> techniques_;
 
 		shared_ptr<std::vector<std::pair<std::pair<std::string, std::string>, bool> > > macros_;
@@ -678,6 +684,45 @@ namespace KlayGE
 		ShaderObjectPtr shader_obj_;
 
 		bool is_validate_;
+	};
+
+	class KLAYGE_CORE_API RenderEffectConstantBuffer : boost::noncopyable
+	{
+	public:
+		RenderEffectConstantBuffer();
+		~RenderEffectConstantBuffer();
+
+		void Load(std::string const & name);
+
+		void StreamIn(ResIdentifierPtr const & res);
+		void StreamOut(std::ostream& os);
+
+		RenderEffectConstantBufferPtr Clone();
+
+		shared_ptr<std::string> const & Name() const
+		{
+			return name_;
+		}
+		size_t NameHash() const
+		{
+			return name_hash_;
+		}
+
+		void AddParameter(uint32_t index);
+
+		uint32_t NumParameters() const
+		{
+			return param_indices_ ? param_indices_->size() : 0;
+		}
+		uint32_t ParameterIndex(uint32_t index) const
+		{
+			return (*param_indices_)[index];
+		}
+
+	private:
+		shared_ptr<std::string> name_;
+		size_t name_hash_;
+		shared_ptr<std::vector<uint32_t> > param_indices_;
 	};
 
 	class KLAYGE_CORE_API RenderEffectParameter : boost::noncopyable

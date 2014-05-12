@@ -2976,26 +2976,41 @@ namespace KlayGE
 
 					uint32_t type = type_define::instance().type_code(node->Attrib("type")->ValueString());
 					if ((type != REDT_sampler)
-						&& (type != REDT_texture1D) && (type != REDT_texture2D) && (type != REDT_texture3D) && (type != REDT_textureCUBE)
-						&& (type != REDT_texture1DArray) && (type != REDT_texture2DArray) && (type != REDT_texture3DArray) && (type != REDT_textureCUBEArray))
+						&& (type != REDT_texture1D) && (type != REDT_texture2D) && (type != REDT_texture3D)
+						&& (type != REDT_textureCUBE)
+						&& (type != REDT_texture1DArray) && (type != REDT_texture2DArray)
+						&& (type != REDT_texture3DArray) && (type != REDT_textureCUBEArray)
+						&& (type != REDT_buffer) && (type != REDT_structured_buffer)
+						&& (type != REDT_byte_address_buffer) && (type != REDT_rw_buffer)
+						&& (type != REDT_rw_structured_buffer) && (type != REDT_rw_texture1D)
+						&& (type != REDT_rw_texture2D) && (type != REDT_rw_texture3D)
+						&& (type != REDT_rw_texture1DArray) && (type != REDT_rw_texture2DArray)
+						&& (type != REDT_rw_byte_address_buffer) && (type != REDT_append_structured_buffer)
+						&& (type != REDT_consume_structured_buffer))
 					{
+						RenderEffectConstantBufferPtr cbuff;
 						XMLNodePtr parent_node = node->Parent();
 						std::string cbuff_name = parent_node->AttribString("name", "global_cb");
+						size_t const cbuff_name_hash = RT_HASH(cbuff_name.c_str());
 
 						bool found = false;
 						for (size_t i = 0; i < cbuffers_->size(); ++ i)
 						{
-							if ((*cbuffers_)[i].first == cbuff_name)
+							if ((*cbuffers_)[i]->NameHash() == cbuff_name_hash)
 							{
-								(*cbuffers_)[i].second.push_back(param_index);
+								cbuff = (*cbuffers_)[i];
 								found = true;
 								break;
 							}
 						}
 						if (!found)
 						{
-							cbuffers_->push_back(std::make_pair(cbuff_name, std::vector<uint32_t>(1, param_index)));
+							cbuff = MakeSharedPtr<RenderEffectConstantBuffer>();
+							cbuff->Load(cbuff_name);
+							cbuffers_->push_back(cbuff);
 						}
+
+						cbuff->AddParameter(param_index);
 					}
 
 					RenderEffectParameterPtr param = MakeSharedPtr<RenderEffectParameter>(*this);
@@ -3080,17 +3095,8 @@ namespace KlayGE
 							cbuffers_->resize(num_cbufs);
 							for (uint32_t i = 0; i < num_cbufs; ++ i)
 							{
-								(*cbuffers_)[i].first = ReadShortString(source);
-
-								uint16_t len;
-								source->read(&len, sizeof(len));
-								len = LE2Native(len);
-								(*cbuffers_)[i].second.resize(len);
-								source->read(&(*cbuffers_)[i].second[0], len * sizeof((*cbuffers_)[i].second[0]));
-								for (uint32_t j = 0; j < len; ++ j)
-								{
-									(*cbuffers_)[i].second[j] = LE2Native((*cbuffers_)[i].second[j]);
-								}
+								(*cbuffers_)[i] = MakeSharedPtr<RenderEffectConstantBuffer>();
+								(*cbuffers_)[i]->StreamIn(source);
 							}
 						}
 
@@ -3217,15 +3223,7 @@ namespace KlayGE
 			os.write(reinterpret_cast<char const *>(&num_cbufs), sizeof(num_cbufs));
 			for (uint32_t i = 0; i < cbuffers_->size(); ++ i)
 			{
-				WriteShortString(os, (*cbuffers_)[i].first);
-
-				uint16_t len = Native2LE(static_cast<uint16_t>((*cbuffers_)[i].second.size()));
-				os.write(reinterpret_cast<char const *>(&len), sizeof(len));
-				for (size_t j = 0; j < (*cbuffers_)[i].second.size(); ++ j)
-				{
-					uint32_t tmp = Native2LE((*cbuffers_)[i].second[j]);
-					os.write(reinterpret_cast<char const *>(&tmp), sizeof(tmp));
-				}
+				(*cbuffers_)[i]->StreamOut(os);
 			}
 		}
 
@@ -3314,7 +3312,7 @@ namespace KlayGE
 		return ret;
 	}
 
-	RenderEffectParameterPtr RenderEffect::ParameterByName(std::string const & name) const
+	RenderEffectParameterPtr const & RenderEffect::ParameterByName(std::string const & name) const
 	{
 		size_t const name_hash = boost::hash_range(name.begin(), name.end());
 		typedef KLAYGE_DECLTYPE(params_) ParamsType;
@@ -3325,10 +3323,11 @@ namespace KlayGE
 				return param;
 			}
 		}
-		return RenderEffectParameterPtr();
+		static RenderEffectParameterPtr null_param;
+		return null_param;
 	}
 
-	RenderEffectParameterPtr RenderEffect::ParameterBySemantic(std::string const & semantic) const
+	RenderEffectParameterPtr const & RenderEffect::ParameterBySemantic(std::string const & semantic) const
 	{
 		size_t const semantic_hash = boost::hash_range(semantic.begin(), semantic.end());
 		typedef KLAYGE_DECLTYPE(params_) ParamsType;
@@ -3339,7 +3338,23 @@ namespace KlayGE
 				return param;
 			}
 		}
-		return RenderEffectParameterPtr();
+		static RenderEffectParameterPtr null_param;
+		return null_param;
+	}
+
+	RenderEffectConstantBufferPtr const & RenderEffect::CBufferByName(std::string const & name) const
+	{
+		size_t const name_hash = boost::hash_range(name.begin(), name.end());
+		typedef KLAYGE_DECLTYPE(*cbuffers_) CBuffersType;
+		KLAYGE_FOREACH(CBuffersType::const_reference cbuffer, *cbuffers_)
+		{
+			if (name_hash == cbuffer->NameHash())
+			{
+				return cbuffer;
+			}
+		}
+		static RenderEffectConstantBufferPtr null_cbuffer;
+		return null_cbuffer;
 	}
 
 	RenderTechniquePtr const & RenderEffect::TechniqueByName(std::string const & name) const
@@ -4528,6 +4543,69 @@ namespace KlayGE
 	void RenderPass::Unbind()
 	{
 		shader_obj_->Unbind();
+	}
+
+
+	
+	RenderEffectConstantBuffer::RenderEffectConstantBuffer()
+	{
+	}
+
+	RenderEffectConstantBuffer::~RenderEffectConstantBuffer()
+	{
+	}
+
+	void RenderEffectConstantBuffer::Load(std::string const & name)
+	{
+		name_ = MakeSharedPtr<KLAYGE_DECLTYPE(*name_)>(name);
+		name_hash_ = boost::hash_range(name_->begin(), name_->end());
+		param_indices_ = MakeSharedPtr<KLAYGE_DECLTYPE(*param_indices_)>();
+	}
+
+	void RenderEffectConstantBuffer::StreamIn(ResIdentifierPtr const & res)
+	{
+		name_ = MakeSharedPtr<KLAYGE_DECLTYPE(*name_)>(ReadShortString(res));
+		name_hash_ = boost::hash_range(name_->begin(), name_->end());
+		param_indices_ = MakeSharedPtr<KLAYGE_DECLTYPE(*param_indices_)>();
+
+		uint16_t len;
+		res->read(&len, sizeof(len));
+		len = LE2Native(len);
+		param_indices_->resize(len);
+		res->read(&(*param_indices_)[0], len * sizeof((*param_indices_)[0]));
+		for (uint32_t i = 0; i < len; ++ i)
+		{
+			(*param_indices_)[i] = LE2Native((*param_indices_)[i]);
+		}
+	}
+
+	void RenderEffectConstantBuffer::StreamOut(std::ostream& os)
+	{
+		WriteShortString(os, *name_);
+
+		uint16_t len = Native2LE(static_cast<uint16_t>(param_indices_->size()));
+		os.write(reinterpret_cast<char const *>(&len), sizeof(len));
+		for (size_t i = 0; i < param_indices_->size(); ++ i)
+		{
+			uint32_t tmp = Native2LE((*param_indices_)[i]);
+			os.write(reinterpret_cast<char const *>(&tmp), sizeof(tmp));
+		}
+	}
+
+	RenderEffectConstantBufferPtr RenderEffectConstantBuffer::Clone()
+	{
+		RenderEffectConstantBufferPtr ret = MakeSharedPtr<RenderEffectConstantBuffer>();
+
+		ret->name_ = name_;
+		ret->name_hash_ = name_hash_;
+		ret->param_indices_ = param_indices_;
+
+		return ret;
+	}
+
+	void RenderEffectConstantBuffer::AddParameter(uint32_t index)
+	{
+		param_indices_->push_back(index);
 	}
 
 

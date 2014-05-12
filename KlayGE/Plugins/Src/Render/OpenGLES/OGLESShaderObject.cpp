@@ -1260,14 +1260,12 @@ namespace KlayGE
 		}
 		ss << std::endl;
 
-		KLAYGE_AUTO(cbuffers, effect.CBuffers());
-		typedef KLAYGE_DECLTYPE(cbuffers) CBuffersType;
-		KLAYGE_FOREACH(CBuffersType::const_reference cbuff, cbuffers)
+		for (uint32_t i = 0; i < effect.NumCBuffers(); ++ i)
 		{
-			typedef KLAYGE_DECLTYPE(cbuff.second) CBuffersSecondType;
-			KLAYGE_FOREACH(CBuffersSecondType::const_reference param_index, cbuff.second)
+			RenderEffectConstantBufferPtr const & cbuff = effect.CBufferByIndex(i);
+			for (uint32_t j = 0; j < cbuff->NumParameters(); ++ j)
 			{
-				RenderEffectParameter& param = *effect.ParameterByIndex(param_index);
+				RenderEffectParameter& param = *effect.ParameterByIndex(cbuff->ParameterIndex(j));
 
 				switch (param.Type())
 				{
