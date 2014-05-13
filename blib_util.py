@@ -120,6 +120,10 @@ class build_info:
 			else:
 				compiler = cfg_build.compiler
 
+				if compiler in ("vc12", "vc11", "vc10", "vc9"):
+					compiler += '0'
+					log_warning("Deprecated compiler name, please use " + compiler + " instead.\n")
+
 		toolset = cfg_build.toolset
 		if ("" == cfg_build.toolset) or ("auto" == cfg_build.toolset):
 			if "win" == target_platform:
