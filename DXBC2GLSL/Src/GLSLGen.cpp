@@ -322,7 +322,7 @@ void GLSLGen::ToGLSL(std::ostream& out)
 		out << "layout (local_size_x = " << program_->cs_thread_group_size[0]
 		<<", local_size_y = " << program_->cs_thread_group_size[1]
 		<<", local_size_z = " << program_->cs_thread_group_size[2]
-		<<") in;\n";
+		<<") in;\n\n";
 	}
 
 	this->ToDeclarations(out);
@@ -1487,13 +1487,69 @@ void GLSLGen::ToDeclaration(std::ostream& out, ShaderDecl const & dcl)
 			}
 		}
 		break;
+	case SO_DCL_RESOURCE_STRUCTURED:
+		{
+			out << "layout(std430) buffer ";
+			DXBCInputBindDesc const & desc = this->GetResourceDesc(SIT_STRUCTURED,static_cast<uint32_t>(dcl.op->indices[0].disp));
+			out << ShaderOperandTypeShortName(dcl.op->type)
+				<< dcl.op->indices[0].disp << " {\n";
+			DXBCConstantBuffer const & cbuffer = this->GetConstantBuffer(SCBT_RESOURCE_BIND_INFO,desc.name);
+			BOOST_ASSERT(cbuffer.vars[0].has_type_desc && "cbuffer vars must have type desc.");
+			switch (cbuffer.vars[0].type_desc.var_class)
+			{
+				case SVC_VECTOR:
+				out << cbuffer.vars[0].type_desc.name
+					<< cbuffer.vars[0].type_desc.columns;
+				break;
 
+				case SVC_SCALAR:
+					out << cbuffer.vars[0].type_desc.name;
+				break;
+
+				default:
+					BOOST_ASSERT(false);
+				break;
+			}
+			out << " "
+				<< desc.name
+				<<"[];\n}\n";
+		}
+		break;
 	case SO_DCL_GLOBAL_FLAGS:
 		// TODO: ignore it for now
 		break;
 
 	case SO_DCL_SAMPLER:
 		// TODO: ignore it for now
+		break;
+
+	case SO_DCL_UNORDERED_ACCESS_VIEW_STRUCTURED:
+		{
+			out << "layout(std430) buffer ";
+			DXBCInputBindDesc const & desc = this->GetResourceDesc(SIT_UAV_RWSTRUCTURED,static_cast<uint32_t>(dcl.op->indices[0].disp));
+			out << ShaderOperandTypeShortName(dcl.op->type)
+				<< dcl.op->indices[0].disp << " {\n";
+			DXBCConstantBuffer const & cbuffer = this->GetConstantBuffer(SCBT_RESOURCE_BIND_INFO,desc.name);
+			BOOST_ASSERT(cbuffer.vars[0].has_type_desc && "cbuffer vars must have type desc.");
+			switch (cbuffer.vars[0].type_desc.var_class)
+			{
+				case SVC_VECTOR:
+				out << cbuffer.vars[0].type_desc.name
+					<< cbuffer.vars[0].type_desc.columns;
+				break;
+
+				case SVC_SCALAR:
+					out << cbuffer.vars[0].type_desc.name;
+				break;
+
+				default:
+					BOOST_ASSERT(false);
+				break;
+			}
+			out << " "
+				<<desc.name
+				<<"[];\n}\n";
+		}
 		break;
 
 	case SO_DCL_UNORDERED_ACCESS_VIEW_TYPED:
@@ -1551,6 +1607,23 @@ void GLSLGen::ToDeclaration(std::ostream& out, ShaderDecl const & dcl)
 			}
 			DXBCInputBindDesc const & desc = this->GetResourceDesc(SIT_UAV_RWTYPED, static_cast<uint32_t>(dcl.op->indices[0].disp));
 			out << " " << desc.name << ";\n";
+		}
+		break;
+
+	case SO_DCL_THREAD_GROUP_SHARED_MEMORY_STRUCTURED:
+		{
+			out << "shared ";
+			BOOST_ASSERT( (dcl.structured.stride <= 16) && "thread group shared memory size can't exceed 16 bytes");
+			size_t elem_num=dcl.structured.stride/4;
+			if(1 == elem_num)
+			{
+				out << "float";
+			}else if(elem_num > 1)
+			{
+				out << "vec" << elem_num;
+			}
+			out << " g" << dcl.op->indices[0].disp;
+			out << "[" << dcl.structured.count << "]" << ";\n";
 		}
 		break;
 
@@ -3175,7 +3248,7 @@ void GLSLGen::ToInstruction(std::ostream& out, ShaderInstruction const & insn) c
 		}
 		if(insn.sync.threads_in_group)
 		{
-			out << "barrier();\n";
+			out << "barrier();";
 		}
 		break;
 
@@ -4887,6 +4960,50 @@ void GLSLGen::ToInstruction(std::ostream& out, ShaderInstruction const & insn) c
 		}
 		break;
 
+	case SO_LD_STRUCTURED:
+		// ld_structured dst0[.mask], srcAddress[.select_component], srcByteOffset[.select_component], src0[.swizzle]
+		// dst0[.mask]=src0[srcAddress[.select_component]][.swizzle].dst0_mask;
+		this->ToOperands(out, *insn.ops[0], oot | (oot << 8), true);
+		out << " = vec4(";
+		ShaderInputType sit;
+		switch(insn.ops[3]->type)
+		{
+		case SOT_RESOURCE:
+			sit = SIT_STRUCTURED;
+			break;
+		case SOT_UNORDERED_ACCESS_VIEW:
+		case SOT_THREAD_GROUP_SHARED_MEMORY:
+			sit = SIT_UAV_RWSTRUCTURED;
+			break;
+		default:
+			BOOST_ASSERT(false);
+			break;
+		}
+		this->ToOperands(out, *insn.ops[3], oit, false,false,false,false,false,sit);
+		out << "[";
+		this->ToOperands(out, *insn.ops[1], SIT_UInt);
+		out << "]";
+		this->ToComponentSelectors(out, *insn.ops[3],true,static_cast<uint32_t>(insn.ops[2]->imm_values[0].u32)/4);
+		out << ")";
+		this->ToComponentSelectors(out, *insn.ops[0]);
+		out << ";";
+		break;
+
+	case SO_STORE_STRUCTURED:
+		//store_structured dst0[.write_mask], dstAddress[.select_component], dstByteOffset[.select_component], src0[.swizzle]
+		//dst0[dstAddress[.select_component]][.write_mask]=src0[.swizzle]
+		this->ToOperands(out, *insn.ops[0], oot | (oot << 8), false,false,false,false,false,SIT_UAV_RWSTRUCTURED);
+		out << "[";
+		this->ToOperands(out, *insn.ops[1], SIT_UInt);
+		out << "]";
+		this->ToComponentSelectors(out, *insn.ops[0],true,static_cast<uint32_t>(insn.ops[2]->imm_values[0].u32)/4);
+		out << " = vec4(";
+		this->ToOperands(out, *insn.ops[3], oit, true);
+		out <<")";
+		this->ToComponentSelectors(out,*insn.ops[0]);
+		out << ";";
+		break;
+
 		//------------------------------------------------------------------
 		//atomic operations
 		//-------------------------------------------------------------------
@@ -5210,7 +5327,7 @@ void GLSLGen::ToInstruction(std::ostream& out, ShaderInstruction const & insn) c
 }
 
 void GLSLGen::ToOperands(std::ostream& out, ShaderOperand const & op, uint32_t imm_as_type,
-		bool mask, bool dcl_array, bool no_swizzle, bool no_idx, bool no_cast) const
+		bool mask, bool dcl_array, bool no_swizzle, bool no_idx, bool no_cast,ShaderInputType const & sit) const
 {
 	ShaderImmType imm_type = static_cast<ShaderImmType>(imm_as_type & 0xFF);
 	ShaderImmType as_type = static_cast<ShaderImmType>(imm_as_type >> 8);
@@ -5442,7 +5559,7 @@ void GLSLGen::ToOperands(std::ostream& out, ShaderOperand const & op, uint32_t i
 		}
 
 		// output operand name 
-		this->ToOperandName(out, op, as_type, &whether_output_idx, &whether_output_comps, no_swizzle, no_idx);
+		this->ToOperandName(out, op, as_type, &whether_output_idx, &whether_output_comps, no_swizzle, no_idx,sit);
 
 		// output index
 		// constant buffer is mapped to variable name,does not need index.
@@ -5712,7 +5829,7 @@ ShaderImmType GLSLGen::OperandAsType(ShaderOperand const & op, uint32_t imm_as_t
 }
 
 void GLSLGen::ToOperandName(std::ostream& out, ShaderOperand const & op, ShaderImmType as_type,
-		bool* need_idx, bool* need_comps, bool no_swizzle, bool no_idx) const
+		bool* need_idx, bool* need_comps, bool no_swizzle, bool no_idx,ShaderInputType const & sit) const
 {
 	*need_comps = true;
 	*need_idx = true;
@@ -5963,14 +6080,24 @@ void GLSLGen::ToOperandName(std::ostream& out, ShaderOperand const & op, ShaderI
 	}
 	else if (SOT_RESOURCE == op.type)
 	{
-		DXBCInputBindDesc const & desc = this->GetResourceDesc(SIT_TEXTURE, static_cast<uint32_t>(op.indices[0].disp));
+		ShaderInputType type=SIT_TEXTURE;
+		if(SIT_UNDEFINED != sit)
+		{
+			type = sit;
+		}
+		DXBCInputBindDesc const & desc = this->GetResourceDesc(type, static_cast<uint32_t>(op.indices[0].disp));
 		out << desc.name;
 		*need_comps = false;
 		*need_idx = false;
 	}
 	else if (SOT_UNORDERED_ACCESS_VIEW == op.type)
 	{
-		DXBCInputBindDesc const & desc = this->GetResourceDesc(SIT_UAV_RWTYPED, static_cast<uint32_t>(op.indices[0].disp));
+		ShaderInputType type=SIT_UAV_RWTYPED;
+		if(SIT_UNDEFINED != sit)
+		{
+			type = sit;
+		}
+		DXBCInputBindDesc const & desc = this->GetResourceDesc(type, static_cast<uint32_t>(op.indices[0].disp));
 		out << desc.name;
 		*need_comps = false;
 		*need_idx = false;
@@ -6352,7 +6479,7 @@ int GLSLGen::GetComponentSelector(ShaderOperand const & op, int i) const
 	return comp;
 }
 
-void GLSLGen::ToComponentSelectors(std::ostream& out, ShaderOperand const & op, bool dot) const
+void GLSLGen::ToComponentSelectors(std::ostream& out, ShaderOperand const & op, bool dot, uint32_t offset) const
 {
 	if ((op.type != SOT_IMMEDIATE32) && (op.type != SOT_IMMEDIATE64))
 	{
@@ -6365,17 +6492,17 @@ void GLSLGen::ToComponentSelectors(std::ostream& out, ShaderOperand const & op, 
 				{
 					out << '.';
 				}
-				this->ToComponentSelector(out, this->ComponentSelectorFromMask(op.mask, op.comps));
+				this->ToComponentSelector(out, this->ComponentSelectorFromMask(op.mask, op.comps),offset);
 				break;
 
 			case SOSM_SWIZZLE:
 				out << '.';
-				this->ToComponentSelector(out, this->ComponentSelectorFromSwizzle(op.swizzle, op.comps));
+				this->ToComponentSelector(out, this->ComponentSelectorFromSwizzle(op.swizzle, op.comps),offset);
 				break;
 
 			case SOSM_SCALAR:
 				out << '.';
-				this->ToComponentSelector(out, this->ComponentSelectorFromScalar(op.swizzle[0]));
+				this->ToComponentSelector(out, this->ComponentSelectorFromScalar(op.swizzle[0]),offset);
 				break;
 
 			default:
@@ -6786,6 +6913,22 @@ DXBCInputBindDesc const & GLSLGen::GetResourceDesc(ShaderInputType type, uint32_
 	return ret;
 }
 
+DXBCConstantBuffer const & GLSLGen::GetConstantBuffer(ShaderCBufferType type, char const * name) const
+{
+	for (std::vector<DXBCConstantBuffer>::const_iterator iter = program_->cbuffers.begin();
+		iter != program_->cbuffers.end(); ++ iter)
+	{
+		if ((iter->desc.type == type) && (iter->desc.name == name))
+		{
+			return *iter;
+		}
+	}
+
+	BOOST_ASSERT(false);
+	static DXBCConstantBuffer ret;
+	return ret;
+}
+
 uint32_t GLSLGen::GetNumPatchConstantSignatureRegisters(std::vector<DXBCSignatureParamDesc> const & params_patch)const
 {
 	uint32_t num = 0;
@@ -7108,14 +7251,14 @@ uint32_t GLSLGen::ComponentSelectorFromCount(uint32_t count) const
 	return comps_index;
 }
 
-void GLSLGen::ToComponentSelector(std::ostream& out, uint32_t comps) const
+void GLSLGen::ToComponentSelector(std::ostream& out, uint32_t comps, uint32_t offset) const
 {
 	for (int i = 0; i < 4; ++ i)
 	{
 		uint32_t comp = (comps >> (i * 8)) & 0xFF;
 		if (comp != 0xFF)
 		{
-			out << "xyzw"[comp];
+			out << "xyzw"[comp+offset];
 		}
 	}
 }

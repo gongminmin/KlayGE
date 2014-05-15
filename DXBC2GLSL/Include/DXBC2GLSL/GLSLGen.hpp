@@ -96,12 +96,12 @@ private:
 	void ToDeclaration(std::ostream& out, ShaderDecl const & dcl);
 	void ToInstruction(std::ostream& out, ShaderInstruction const & insn) const;
 	void ToOperands(std::ostream& out, ShaderOperand const & op, uint32_t imm_as_type,
-		bool mask = true, bool dcl_array = false, bool no_swizzle = false, bool no_idx = false, bool no_cast = false) const;
+		bool mask = true, bool dcl_array = false, bool no_swizzle = false, bool no_idx = false, bool no_cast = false,ShaderInputType const & sit=SIT_UNDEFINED) const;
 	ShaderImmType OperandAsType(ShaderOperand const & op, uint32_t imm_as_type) const;
 	int ToSingleComponentSelector(std::ostream& out, ShaderOperand const & op, int i, bool dot = true) const;
 	void ToOperandName(std::ostream& out, ShaderOperand const & op, ShaderImmType as_type,
-		bool* need_idx, bool* need_comps, bool no_swizzle = false, bool no_idx = false) const;
-	void ToComponentSelectors(std::ostream& out, ShaderOperand const & op, bool dot = true) const;
+		bool* need_idx, bool* need_comps, bool no_swizzle = false, bool no_idx = false,ShaderInputType const & sit=SIT_UNDEFINED) const;
+	void ToComponentSelectors(std::ostream& out, ShaderOperand const & op, bool dot = true,uint32_t offset = 0) const;
 	void ToTemps(std::ostream& out, ShaderDecl const & dcl);
 	void ToDefaultValue(std::ostream& out, DXBCShaderVariable const & var);
 	void ToDefaultValue(std::ostream& out, DXBCShaderVariable const & var, uint32_t offset);
@@ -110,7 +110,7 @@ private:
 	uint32_t ComponentSelectorFromSwizzle(uint8_t const swizzle[4], uint32_t comps) const;
 	uint32_t ComponentSelectorFromScalar(uint8_t scalar) const;
 	uint32_t ComponentSelectorFromCount(uint32_t count) const;
-	void ToComponentSelector(std::ostream& out, uint32_t comps) const;
+	void ToComponentSelector(std::ostream& out, uint32_t comps, uint32_t offset = 0) const;
 	bool IsImmediateNumber(ShaderOperand const & op) const;
 	// param i:the component selector to get
 	// return:the idx of selector:0 1 2 3 stand for x y z w
@@ -123,6 +123,7 @@ private:
 	DXBCSignatureParamDesc const & GetOutputParamDesc(ShaderOperand const & op, uint32_t index = 0) const;
 	DXBCSignatureParamDesc const & GetInputParamDesc(ShaderOperand const & op, uint32_t index = 0) const;
 	DXBCInputBindDesc const & GetResourceDesc(ShaderInputType type, uint32_t bind_point) const;
+	DXBCConstantBuffer const & GetConstantBuffer(ShaderCBufferType type, char const * name) const;
 	uint32_t GetNumPatchConstantSignatureRegisters(std::vector<DXBCSignatureParamDesc> const & params_patch)const;
 	void FindDclIndexRange();
 	void FindSamplers();

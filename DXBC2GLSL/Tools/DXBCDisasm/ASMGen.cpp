@@ -459,6 +459,11 @@ void ASMGen::Disasm(std::ostream& out, ShaderDecl const & dcl)
 		out << ' ' <<dcl.structured.stride;
 		break;
 
+	case SO_DCL_THREAD_GROUP_SHARED_MEMORY_STRUCTURED:
+		out << ' ' <<dcl.structured.stride
+			<< ' ' <<dcl.structured.count;
+		break;
+
 	case SO_DCL_THREAD_GROUP:
 		out <<' '
 			<< dcl.thread_group_size[0] << ','

@@ -10,7 +10,7 @@ void usage()
 	std::cerr << "Not affiliated with or endorsed by Microsoft in any way\n";
 	std::cerr << "Latest version available from http://www.klayge.org/\n";
 	std::cerr << "\n";
-	std::cerr << "Usage: fxdis FILE [OUTPUT]\n";
+	std::cerr << "Usage: DXBCDisasm FILE [OUTPUT]\n";
 	std::cerr << std::endl;
 }
 
@@ -24,8 +24,6 @@ int main(int argc, char** argv)
 
 	std::vector<char> data;
 	std::ifstream in(argv[1], std::ios_base::in | std::ios_base::binary);
-	//std::ifstream in;
-	//in.open("hs.o");
 	std::ofstream out;
 	bool screen_only = false;
 	if (argc < 3)
@@ -64,5 +62,5 @@ int main(int argc, char** argv)
 			}
 		}
 	}
-	//system("pause");
+	
 }
