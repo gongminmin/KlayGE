@@ -1469,7 +1469,7 @@ namespace KlayGE
 			T sqz = quat.z() * quat.z();
 			T sqw = quat.w() * quat.w();
 			T unit = sqx + sqy + sqz + sqw;
-			T test = quat.w() * quat.x() - quat.y() * quat.z();
+			T test = quat.w() * quat.x() + quat.y() * quat.z();
 			if (test > T(0.499) * unit)
 			{
 				// singularity at north pole
@@ -1488,9 +1488,9 @@ namespace KlayGE
 				}
 				else
 				{
-					yaw = atan2(2 * (quat.y() * quat.w() + quat.x() * quat.z()), -sqx - sqy + sqz + sqw);
+					yaw = atan2(2 * (quat.y() * quat.w() - quat.x() * quat.z()), -sqx - sqy + sqz + sqw);
 					pitch = asin(2 * test / unit);
-					roll = atan2(2 * (quat.z() * quat.w() + quat.x() * quat.y()), -sqx + sqy - sqz + sqw);
+					roll = atan2(2 * (quat.z() * quat.w() - quat.x() * quat.y()), -sqx + sqy - sqz + sqw);
 				}
 			}
 		}

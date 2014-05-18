@@ -173,36 +173,9 @@ namespace KlayGE
 		float3 scale, trans;
 		Quaternion quat;
 		MathLib::decompose(scale, quat, trans, camera.ViewMatrix());
-		float sqx = quat.x() * quat.x();
-		float sqy = quat.y() * quat.y();
-		float sqz = quat.z() * quat.z();
-		float sqw = quat.w() * quat.w();
-		float unit = sqx + sqy + sqz + sqw;
-		float test = quat.w() * quat.x() + quat.y() * quat.z();
+
 		float yaw, pitch, roll;
-		if (test > 0.499f * unit)
-		{
-			// singularity at north pole
-			yaw = 2 * atan2(quat.z(), quat.w());
-			pitch = PI / 2;
-			roll = 0;
-		}
-		else
-		{
-			if (test < -0.499f * unit)
-			{
-				// singularity at south pole
-				yaw = -2 * atan2(quat.z(), quat.w());
-				pitch = -PI / 2;
-				roll = 0;
-			}
-			else
-			{
-				yaw = atan2(2 * (quat.y() * quat.w() - quat.x() * quat.z()), -sqx - sqy + sqz + sqw);
-				pitch = asin(2 * test / unit);
-				roll = atan2(2 * (quat.z() * quat.w() - quat.x() * quat.y()), -sqx + sqy - sqz + sqw);
-			}
-		}
+		MathLib::to_yaw_pitch_roll(yaw, pitch, roll, quat);
 
 		MathLib::sincos(pitch / 2, rot_x_.x(), rot_x_.y());
 		MathLib::sincos(yaw / 2, rot_y_.x(), rot_y_.y());
