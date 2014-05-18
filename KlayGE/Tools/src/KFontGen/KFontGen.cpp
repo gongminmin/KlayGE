@@ -49,7 +49,13 @@ extern "C"
 using namespace std;
 using namespace KlayGE;
 
+//#define AA_EDT
+
+#ifdef AA_EDT
+uint32_t const INTERNAL_CHAR_SIZE = 128;
+#else
 uint32_t const INTERNAL_CHAR_SIZE = 4096;
+#endif
 uint32_t const NUM_CHARS = 65536;
 
 struct font_info
@@ -116,6 +122,7 @@ bool bsf64(uint32_t& index, uint64_t v)
 #endif
 
 
+#ifndef AA_EDT
 // A type to hold the distance map while it's being constructed
 class DistanceMap
 {
@@ -210,6 +217,231 @@ void ComputeDistanceField(std::vector<float>& distances, uint32_t width, uint32_
 	}
 }
 
+#else
+
+float EdgeDistance(float2 const & grad, float val)
+{
+	float df;
+	if ((0 == grad.x()) || (0 == grad.y()))
+	{
+		df = 0.5f - val;
+	}
+	else
+	{
+		float2 n_grad = MathLib::abs(MathLib::normalize(grad));
+		if (n_grad.x() < n_grad.y())
+		{
+			std::swap(n_grad.x(), n_grad.y());
+		}
+
+		float v1 = 0.5f * n_grad.y() / n_grad.x();
+		if (val < v1)
+		{
+			df = 0.5f * (n_grad.x() + n_grad.y()) - MathLib::sqrt(2 * n_grad.x() * n_grad.y() * val);
+		}
+		else if (val < 1 - v1)
+		{
+			df = (0.5f - val) * n_grad.x();
+		}
+		else
+		{
+			df = -0.5f * (n_grad.x() + n_grad.y()) + MathLib::sqrt(2 * n_grad.x() * n_grad.y() * (1 - val));
+		}
+	}
+	return df;
+}
+
+float AADist(std::vector<float> const & img, std::vector<float2> const & grad,
+	int width, int offset_addr, int2 const & offset_dist_xy, float2 const & new_dist)
+{
+	int closest = offset_addr - offset_dist_xy.y() * width - offset_dist_xy.x(); // Index to the edge pixel pointed to from c
+	float val = img[closest];
+	if (0 == val)
+	{
+		return 1e10f;
+	}
+
+	float di = MathLib::length(new_dist);
+	float df;
+	if (0 == di)
+	{
+		df = EdgeDistance(grad[closest], val);
+	}
+	else
+	{
+		df = EdgeDistance(new_dist, val);
+	}
+	return di + df;
+}
+
+bool UpdateDistance(int x, int y, int dx, int dy, std::vector<float> const & img, int width,
+	std::vector<float2> const & grad, std::vector<int2>& dist_xy, std::vector<float>& dist)
+{
+	float const EPSILON = 1e-3f;
+
+	bool changed = false;
+	int addr = y * width + x;
+	float old_dist = dist[addr];
+	if (old_dist > 0)
+	{
+		int offset_addr = (y + dy) * width + (x + dx);
+		int2 new_dist_xy = dist_xy[offset_addr] - int2(dx, dy);
+		float new_dist = AADist(img, grad, width, offset_addr, dist_xy[offset_addr], new_dist_xy);
+		if (new_dist < old_dist - EPSILON)
+		{
+			dist_xy[addr] = new_dist_xy;
+			dist[addr] = new_dist;
+			changed = true;
+		}
+	}
+
+	return changed;
+}
+
+void AAEuclideanDistance(std::vector<float> const & img, std::vector<float2> const & grad,
+	int width, int height, std::vector<float>& dist)
+{
+	std::vector<int2> dist_xy(img.size(), int2(0, 0));
+
+	for (size_t i = 0; i < img.size(); ++ i)
+	{
+		if (img[i] <= 0)
+		{
+			dist[i] = 1e10f;
+		}
+		else if (img[i] < 1)
+		{
+			dist[i] = EdgeDistance(grad[i], img[i]);
+		}
+		else
+		{
+			dist[i] = 0;
+		}
+	}
+
+	bool changed;
+	do
+	{
+		changed = false;
+
+		for (int y = 1; y < height; ++ y)
+		{
+			// Scan right, propagate distances from above & left
+			for (int x = 0; x < width; ++ x)
+			{
+				if (x > 0)
+				{
+					changed |= UpdateDistance(x, y, -1, +0, img, width, grad, dist_xy, dist);
+					changed |= UpdateDistance(x, y, -1, -1, img, width, grad, dist_xy, dist);
+				}
+				changed |= UpdateDistance(x, y, +0, -1, img, width, grad, dist_xy, dist);
+				if (x < width - 1)
+				{
+					changed |= UpdateDistance(x, y, +1, -1, img, width, grad, dist_xy, dist);
+				}
+			}
+
+			// Scan left, propagate distance from right
+			for (int x = width - 2; x >= 0; -- x)
+			{
+				changed |= UpdateDistance(x, y, +1, +0, img, width, grad, dist_xy, dist);
+			}
+		}
+
+		for (int y = height - 2; y >= 0; -- y)
+		{
+			// Scan left, propagate distances from below & right
+			for (int x = width - 1; x >= 0; -- x)
+			{
+				if (x < width - 1)
+				{
+					changed |= UpdateDistance(x, y, +1, +0, img, width, grad, dist_xy, dist);
+					changed |= UpdateDistance(x, y, +1, +1, img, width, grad, dist_xy, dist);
+				}
+				changed |= UpdateDistance(x, y, +0, +1, img, width, grad, dist_xy, dist);
+				if (x > 0)
+				{
+					changed |= UpdateDistance(x, y, -1, +1, img, width, grad, dist_xy, dist);
+				}
+			}
+
+			// Scan right, propagate distance from left
+			for (int x = 1; x < width; ++ x)
+			{
+				changed |= UpdateDistance(x, y, -1, +0, img, width, grad, dist_xy, dist);
+			}
+		}
+	} while (changed);
+}
+
+void ComputeGradient(std::vector<float> const & img_2x, int w, int h, std::vector<float2>& grad)
+{
+	BOOST_ASSERT(img_2x.size() == static_cast<size_t>(w * h * 4));
+	BOOST_ASSERT(grad.size() == static_cast<size_t>(w * h));
+
+	std::vector<float2> grad_2x(w * h * 4, float2(0, 0));
+	for (int y = 1; y < h * 2 - 1; ++ y)
+	{
+		for (int x = 1; x < w * 2 - 1; ++ x)
+		{
+			int addr = y * w * 2 + x;
+			if ((img_2x[addr] > 0) && (img_2x[addr] < 1))
+			{
+				float s = -img_2x[addr - w * 2 - 1] - img_2x[addr + w * 2 - 1] + img_2x[addr - w * 2 + 1] + img_2x[addr + w * 2 + 1];
+				grad_2x[addr] = MathLib::normalize(float2(s - SQRT2 * (img_2x[addr - 1] - img_2x[addr + 1]),
+					s - SQRT2 * (img_2x[addr - w * 2] - img_2x[addr + w * 2])));
+			}
+		}
+	}
+
+	for (int y = 0; y < h; ++ y)
+	{
+		for (int x = 0; x < w; ++ x)
+		{
+			grad[y * w + x] = (grad_2x[(y * 2 + 0) * w * 2 + (x * 2 + 0)]
+				+ grad_2x[(y * 2 + 0) * w * 2 + (x * 2 + 1)]
+				+ grad_2x[(y * 2 + 1) * w * 2 + (x * 2 + 0)]
+				+ grad_2x[(y * 2 + 1) * w * 2 + (x * 2 + 1)]) * 0.25f;
+		}
+	}
+}
+
+void ComputeDistanceField2(std::vector<float>& char_bitmap_2x, std::vector<float>& char_bitmap, uint32_t width, uint32_t height, float* char_dist)
+{
+	std::vector<float2> grad(width * height, float2(0, 0));
+	std::vector<float> outside(width * height, 0);
+	std::vector<float> inside(width * height, 0);
+
+	ComputeGradient(char_bitmap_2x, width, height, grad);
+
+	AAEuclideanDistance(char_bitmap, grad, width, height, outside);
+
+	for (size_t i = 0; i < grad.size(); ++ i)
+	{
+		char_bitmap[i] = 1 - char_bitmap[i];
+		grad[i] = -grad[i];
+	}
+
+	AAEuclideanDistance(char_bitmap, grad, width, height, inside);
+
+	float const s = 1 / MathLib::sqrt(static_cast<float>(width * width + height * height));
+	for (uint32_t i = 0; i < outside.size(); ++ i)
+	{
+		if (inside[i] < 0)
+		{
+			inside[i] = 0;
+		}
+		if (outside[i] < 0)
+		{
+			outside[i] = 0;
+		}
+
+		char_dist[i] = (inside[i] - outside[i]) * s;
+	}
+}
+
+#endif
+
 struct raster_user_struct
 {
 	FT_BBox bbox;
@@ -218,10 +450,11 @@ struct raster_user_struct
 	bool non_empty;
 	uint8_t* char_bitmap;
 };
-		
+
 void RasterCallback(int y, int count, FT_Span const * const spans, void* const user) 
 {
 	raster_user_struct* sptr = static_cast<raster_user_struct*>(user);
+
 	int const y0 = sptr->buf_height - 1 - (y - sptr->bbox.yMin);
 	if (y0 >= 0)
 	{
@@ -234,7 +467,7 @@ void RasterCallback(int y, int count, FT_Span const * const spans, void* const u
 				int const x_end = x0 + spans[i].len;
 				int const x_align_8 = ((x0 + 7) & ~0x7);
 				int x = max(0, x0);
-				sptr->char_bitmap[(y0 * INTERNAL_CHAR_SIZE + x) / 8] = static_cast<uint8_t>(~(0xFF >> (x_align_8 - x)));
+				sptr->char_bitmap[(y0 * INTERNAL_CHAR_SIZE + x) / 8] |= static_cast<uint8_t>(~(0xFF >> (x_align_8 - x)));
 				if (x_align_8 < x_end)
 				{
 					x = x_align_8;
@@ -264,7 +497,9 @@ class ttf_to_dist
 		int width;
 		uint8_t const * char_bitmap;
 		int y;
+#ifndef AA_EDT
 		DistanceMap* dmap;
+#endif
 		std::vector<float>* dist_cache;
 		float x_offset;
 		float y_offset;
@@ -281,6 +516,7 @@ public:
 			cur_package_(&cur_package),
 			num_chars_(num_chars), thread_id_(thread_id), num_threads_(num_threads), num_chars_per_package_(num_chars_per_package)
 	{
+#ifndef AA_EDT
 		CPUInfo cpu;
 		if (cpu.IsFeatureSupport(CPUInfo::CF_SSE2))
 		{
@@ -292,14 +528,17 @@ public:
 			edge_extract = KlayGE::bind(&ttf_to_dist::edge_extract_cpp, this,
 				KlayGE::placeholders::_1);
 		}
+#endif
 	}
 
 	void operator()()
 	{
 		FT_GlyphSlot ft_slot = ft_face_->glyph;
 
+#ifndef AA_EDT
 		int const max_dist_sq = 2 * INTERNAL_CHAR_SIZE * INTERNAL_CHAR_SIZE;
 		float const scale = static_cast<float>(INTERNAL_CHAR_SIZE * INTERNAL_CHAR_SIZE) / (char_size_ * char_size_) / max_dist_sq;
+#endif
 
 		std::vector<uint8_t, aligned_allocator<uint8_t, 16> > char_bitmap(INTERNAL_CHAR_SIZE / 8 * INTERNAL_CHAR_SIZE);
 		std::vector<int2> edge_points;
@@ -348,10 +587,17 @@ public:
 
 				if (raster_user.non_empty)
 				{
-					DistanceMap dmap(char_size_, char_size_);
-					std::vector<float> tmp_dist(char_size_ * char_size_, static_cast<float>(max_dist_sq));
 					float const x_offset = (INTERNAL_CHAR_SIZE - buf_width) / 2.0f;
 					float const y_offset = (INTERNAL_CHAR_SIZE - buf_height) / 2.0f;
+
+					ci.left = static_cast<int16_t>((bbox.xMin - x_offset) / INTERNAL_CHAR_SIZE * char_size_ + 0.5f);
+					ci.top = static_cast<int16_t>((3 / 4.0f - (bbox.yMax + y_offset) / INTERNAL_CHAR_SIZE) * char_size_ + 0.5f);
+					ci.width = static_cast<uint16_t>(std::min<float>(1.0f, (buf_width + x_offset) / INTERNAL_CHAR_SIZE) * char_size_ + 0.5f);
+					ci.height = static_cast<uint16_t>(std::min<float>(1.0f, (buf_height + y_offset) / INTERNAL_CHAR_SIZE) * char_size_ + 0.5f);
+
+#ifndef AA_EDT
+					DistanceMap dmap(char_size_, char_size_);
+					std::vector<float> tmp_dist(char_size_ * char_size_, static_cast<float>(max_dist_sq));
 					edge_extract_param eep;
 					eep.width = buf_width;
 					eep.char_bitmap = &char_bitmap[0];
@@ -367,11 +613,6 @@ public:
 
 					std::vector<float> distances(char_size_ * char_size_);
 					ComputeDistanceField(distances, char_size_, char_size_, dmap);
-
-					ci.left = static_cast<int16_t>((bbox.xMin - x_offset) / INTERNAL_CHAR_SIZE * char_size_ + 0.5f);
-					ci.top = static_cast<int16_t>((3 / 4.0f - (bbox.yMax + y_offset) / INTERNAL_CHAR_SIZE) * char_size_ + 0.5f);
-					ci.width = static_cast<uint16_t>(std::min<float>(1.0f, (buf_width + x_offset) / INTERNAL_CHAR_SIZE) * char_size_ + 0.5f);
-					ci.height = static_cast<uint16_t>(std::min<float>(1.0f, (buf_height + y_offset) / INTERNAL_CHAR_SIZE) * char_size_ + 0.5f);
 
 					for (uint32_t y = 0; y < char_size_; ++ y)
 					{
@@ -395,6 +636,50 @@ public:
 							char_dist_data_[ci.dist_index + y * char_size_ + x] = value;
 						}
 					}
+#else
+					std::vector<float> aa_char_bitmap_2x(char_size_ * char_size_ * 4, 0);
+					std::vector<float> aa_char_bitmap(char_size_ * char_size_);
+					{
+						float const fscale = static_cast<float>(INTERNAL_CHAR_SIZE) / ((char_size_ - 2) * 2);
+						uint32_t const scale = static_cast<uint32_t>(fscale + 0.5f);
+						uint32_t const scale_sq = scale * scale;
+						for (uint32_t y = 2; y < char_size_ * 2 - 2; ++ y)
+						{
+							for (uint32_t x = 2; x < char_size_ * 2 - 2; ++ x)
+							{
+								int2 const map_xy = float2(x + 0.5f, y + 0.5f) * fscale
+									- float2(static_cast<float>(x_offset), static_cast<float>(y_offset));
+								uint64_t aa64 = 0;
+								for (uint32_t dy = 0; dy < scale; ++ dy)
+								{
+									for (uint32_t dx = 0; dx < scale; ++ dx)
+									{
+										if ((static_cast<uint32_t>(map_xy.x() + dx) < INTERNAL_CHAR_SIZE)
+											&& (static_cast<uint32_t>(map_xy.y() + dy) < INTERNAL_CHAR_SIZE))
+										{
+											aa64 += ((char_bitmap[((map_xy.y() + dy) * INTERNAL_CHAR_SIZE + (map_xy.x() + dx)) / 8] >> ((map_xy.x() + dx) & 0x7)) & 0x1) != 0 ? 1 : 0;
+										}
+									}
+								}
+
+								aa_char_bitmap_2x[y * char_size_ * 2 + x] = static_cast<float>(aa64) / scale_sq;
+							}
+						}
+
+						for (uint32_t y = 0; y < char_size_; ++ y)
+						{
+							for (uint32_t x = 0; x < char_size_; ++ x)
+							{
+								aa_char_bitmap[y * char_size_ + x] = (aa_char_bitmap_2x[(y * 2 + 0) * char_size_ * 2 + (x * 2 + 0)]
+									+ aa_char_bitmap_2x[(y * 2 + 0) * char_size_ * 2 + (x * 2 + 1)]
+									+ aa_char_bitmap_2x[(y * 2 + 1) * char_size_ * 2 + (x * 2 + 0)]
+									+ aa_char_bitmap_2x[(y * 2 + 1) * char_size_ * 2 + (x * 2 + 1)]) * 0.25f;
+							}
+						}
+					}
+
+					ComputeDistanceField2(aa_char_bitmap_2x, aa_char_bitmap, char_size_, char_size_, char_dist_data_ + ci.dist_index);
+#endif
 				}
 				else
 				{
@@ -409,6 +694,7 @@ public:
 	}
 
 private:
+#ifndef AA_EDT
 	void edge_extract_sse2(edge_extract_param& param)
 	{
 		int const y = param.y;
@@ -605,6 +891,7 @@ private:
 			}
 		}
 	}
+#endif
 
 private:
 	FT_Library ft_lib_;
@@ -620,7 +907,9 @@ private:
 	uint32_t num_threads_;
 	uint32_t num_chars_per_package_;
 
+#ifndef AA_EDT
 	KlayGE::function<void(edge_extract_param&)> edge_extract;
+#endif
 };
 
 void compute_distance(std::vector<font_info>& char_info, std::vector<float>& char_dist_data,
