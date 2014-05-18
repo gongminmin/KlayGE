@@ -283,7 +283,7 @@ void ModelViewerApp::InitObjects()
 	point_light_->BindUpdateFunc(PointLightSourceUpdate());
 	point_light_->AddToSceneManager();
 	
-	axis_ = MakeSharedPtr<SceneObjectHelper>(MakeSharedPtr<RenderAxis>(), 0);
+	axis_ = MakeSharedPtr<SceneObjectHelper>(MakeSharedPtr<RenderAxis>(), SceneObject::SOA_Moveable);
 	axis_->AddToSceneManager();
 
 	grid_ = MakeSharedPtr<SceneObjectHelper>(MakeSharedPtr<RenderGrid>(), 0);
