@@ -86,7 +86,8 @@ namespace KlayGE
 				InputActionDefine(Backward, KS_DownArrow),
 				InputActionDefine(MoveLeft, KS_LeftArrow),
 				InputActionDefine(MoveRight, KS_RightArrow),
-				InputActionDefine(Turn, TS_Pan)
+				InputActionDefine(Turn, TS_Pan),
+				InputActionDefine(Turn, SS_OrientationQuat)
 			};
 
 			InputEngine& inputEngine(Context::Instance().InputFactoryInstance().InputEngineInstance());
@@ -119,7 +120,7 @@ namespace KlayGE
 					InputMouseActionParamPtr param = checked_pointer_cast<InputMouseActionParam>(action.second);
 					if ((left_button_down_ && (param->buttons_state & MB_Left)) || !left_button_down_)
 					{
-						this->Rotate(param->move_vec.x() * scaler, 0, 0);
+						this->RotateRel(param->move_vec.x() * scaler, 0, 0);
 					}
 				}
 				break;
@@ -129,24 +130,40 @@ namespace KlayGE
 					InputMouseActionParamPtr param = checked_pointer_cast<InputMouseActionParam>(action.second);
 					if ((left_button_down_ && (param->buttons_state & MB_Left)) || !left_button_down_)
 					{
-						this->Rotate(0, param->move_vec.y() * scaler, 0);
+						this->RotateRel(0, param->move_vec.y() * scaler, 0);
 					}
 				}
 				break;
 
 			case Turn:
+				switch (action.second->type)
 				{
-					InputTouchActionParamPtr param = checked_pointer_cast<InputTouchActionParam>(action.second);
-					this->Rotate(param->move_vec.x() * scaler, param->move_vec.y() * scaler, 0);
+				case InputEngine::IDT_Touch:
+					{
+						InputTouchActionParamPtr param = checked_pointer_cast<InputTouchActionParam>(action.second);
+						this->RotateRel(param->move_vec.x() * scaler, param->move_vec.y() * scaler, 0);
+					}
+					break;
+
+				case InputEngine::IDT_Sensor:
+					{
+						InputSensorActionParamPtr param = checked_pointer_cast<InputSensorActionParam>(action.second);
+						this->RotateAbs(param->orientation_quat);
+					}
+					break;
+
+				default:
+					BOOST_ASSERT(false);
+					break;
 				}
 				break;
 
 			case RollLeft:
-				this->Rotate(0, 0, -scaler);
+				this->RotateRel(0, 0, -scaler);
 				break;
 
 			case RollRight:
-				this->Rotate(0, 0, scaler);
+				this->RotateRel(0, 0, scaler);
 				break;
 
 			case Forward:
@@ -200,7 +217,7 @@ namespace KlayGE
 		}
 	}
 
-	void FirstPersonCameraController::Rotate(float yaw, float pitch, float roll)
+	void FirstPersonCameraController::RotateRel(float yaw, float pitch, float roll)
 	{
 		if (camera_)
 		{
@@ -222,6 +239,25 @@ namespace KlayGE
 			rot_z_ = float2(quat_z.z(), quat_z.w());
 
 			inv_rot_ = MathLib::inverse(quat_y * quat_x * quat_z);
+			float3 view_vec = MathLib::transform_quat(float3(0, 0, 1), inv_rot_);
+			float3 up_vec = MathLib::transform_quat(float3(0, 1, 0), inv_rot_);
+
+			camera_->ViewParams(camera_->EyePos(), camera_->EyePos() + view_vec * camera_->LookAtDist(), up_vec);
+		}
+	}
+
+	void FirstPersonCameraController::RotateAbs(Quaternion const & quat)
+	{
+		if (camera_)
+		{
+			float yaw, pitch, roll;
+			MathLib::to_yaw_pitch_roll(yaw, pitch, roll, quat);
+
+			MathLib::sincos(pitch / 2, rot_x_.x(), rot_x_.y());
+			MathLib::sincos(yaw / 2, rot_y_.x(), rot_y_.y());
+			MathLib::sincos(roll / 2, rot_z_.x(), rot_z_.y());
+
+			inv_rot_ = MathLib::inverse(quat);
 			float3 view_vec = MathLib::transform_quat(float3(0, 0, 1), inv_rot_);
 			float3 up_vec = MathLib::transform_quat(float3(0, 1, 0), inv_rot_);
 

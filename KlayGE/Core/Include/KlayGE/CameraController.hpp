@@ -60,7 +60,8 @@ namespace KlayGE
 		void RequiresLeftButtonDown(bool lbd);
 
 		void Move(float x, float y, float z);
-		void Rotate(float yaw, float pitch, float roll);
+		void RotateRel(float yaw, float pitch, float roll);
+		void RotateAbs(Quaternion const & quat);
 
 	private:
 		float2		rot_x_;
