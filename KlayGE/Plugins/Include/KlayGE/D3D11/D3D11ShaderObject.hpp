@@ -66,6 +66,8 @@ namespace KlayGE
 			};
 			std::vector<VariableDesc> var_desc;
 
+			std::string name;
+			size_t name_hash;
 			uint32_t size;
 		};
 		std::vector<ConstantBufferDesc> cb_desc;
@@ -156,10 +158,13 @@ namespace KlayGE
 		array<std::vector<ID3D11ShaderResourceViewPtr>, ST_NumShaderTypes> srvs_;
 		array<std::vector<void*>, ST_NumShaderTypes> uavsrcs_;
 		array<std::vector<ID3D11UnorderedAccessViewPtr>, ST_NumShaderTypes> uavs_;
+		array<std::vector<uint32_t>, ST_NumShaderTypes> cbuf_indices_;
 		array<std::vector<ID3D11BufferPtr>, ST_NumShaderTypes> cbufs_;
 
-		array<std::vector<char>, ST_NumShaderTypes> dirty_;
-		array<std::vector<std::vector<uint8_t> >, ST_NumShaderTypes> mem_cbufs_;
+		std::vector<size_t> all_cbufs_name_hash_;
+		std::vector<ID3D11BufferPtr> all_cbufs_;
+		std::vector<char> all_dirty_cbufs_;
+		std::vector<std::vector<uint8_t> > all_mem_cbufs_;
 
 		uint32_t vs_signature_;
 	};
