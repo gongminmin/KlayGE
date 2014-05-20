@@ -50,7 +50,7 @@ ADD_CUSTOM_COMMAND(OUTPUT ${GLLOADER_PROJECT_DIR}/src/glloader_egl.c
 		${GLLOADER_PROJECT_DIR}/include/glloader/glloader_gles.h
 		${GLLOADER_PROJECT_DIR}/include/glloader/glloader_glx.h
 		${GLLOADER_PROJECT_DIR}/include/glloader/glloader_wgl.h
-	COMMAND "${GLLOADER_PROJECT_DIR}/autogen.py" "-q")
+	COMMAND "${PYTHON_EXE}" "${GLLOADER_PROJECT_DIR}/autogen.py" "-q")
 ADD_CUSTOM_TARGET(autogen ALL DEPENDS ${GLLOADER_PROJECT_DIR}/src/glloader_gl.c)
 
 # The project settings

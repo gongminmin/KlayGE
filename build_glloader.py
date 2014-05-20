@@ -6,9 +6,10 @@ import sys
 from blib_util import *
 
 def build_glloader(build_info):
+	additional_options = '-D PYTHON_EXE:STRING="%s"' % sys.executable
 	for arch in build_info.arch_list:
 		if not arch[3]:
-			build_a_project("glloader", "glloader", build_info, arch, True)
+			build_a_project("glloader", "glloader", build_info, arch, True, additional_options)
 
 if __name__ == "__main__":
 	cfg = cfg_from_argv(sys.argv)
