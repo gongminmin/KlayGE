@@ -2140,7 +2140,7 @@ namespace KlayGE
 	}
 
 	bool OGLShaderObject::StreamIn(ResIdentifierPtr const & res, ShaderType type, RenderEffect const & effect,
-		std::vector<uint32_t> const & shader_desc_ids, uint32_t tech_index, uint32_t pass_index)
+		std::vector<uint32_t> const & shader_desc_ids)
 	{
 		uint32_t len;
 		res->read(&len, sizeof(len));
@@ -2151,19 +2151,7 @@ namespace KlayGE
 			res->read(&native_shader_block[0], len * sizeof(native_shader_block[0]));
 		}
 
-		bool this_native_accepted = this->AttachNativeShader(type, effect, shader_desc_ids, native_shader_block);
-		if (!this_native_accepted)
-		{
-			RenderTechniquePtr const & tech = effect.TechniqueByIndex(tech_index);
-			RenderPassPtr const & pass = tech->Pass(pass_index);
-			this->AttachShader(type, effect, *tech, *pass, shader_desc_ids);
-			if ((*glsl_srcs_)[type])
-			{
-				this_native_accepted = true;
-			}
-		}
-
-		return this_native_accepted;
+		return this->AttachNativeShader(type, effect, shader_desc_ids, native_shader_block);
 	}
 
 	void OGLShaderObject::StreamOut(std::ostream& os, ShaderType type)

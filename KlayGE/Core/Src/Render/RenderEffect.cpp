@@ -4371,14 +4371,13 @@ namespace KlayGE
 				{
 					RenderTechniquePtr const & tech = effect_.TechniqueByIndex(sd.tech_pass_type >> 16);
 					RenderPassPtr const & pass = tech->Pass((sd.tech_pass_type >> 8) & 0xFF);
-					shader_obj_->AttachShader(st,
-						effect_, *tech, *pass, pass->GetShaderObject());
+					shader_obj_->AttachShader(st, effect_, *tech, *pass, pass->GetShaderObject());
 					this_native_accepted = true;
 				}
 				else
 				{
-					this_native_accepted = shader_obj_->StreamIn(res, static_cast<ShaderObject::ShaderType>(type), effect_,
-						*shader_desc_ids_, tech_index, pass_index);
+					this_native_accepted = shader_obj_->StreamIn(res, static_cast<ShaderObject::ShaderType>(type),
+						effect_, *shader_desc_ids_);
 				}
 
 				native_accepted &= this_native_accepted;

@@ -41,7 +41,7 @@ namespace KlayGE
 			std::vector<uint8_t> const & native_shader_block);
 
 		virtual bool StreamIn(ResIdentifierPtr const & res, ShaderType type, RenderEffect const & effect,
-			std::vector<uint32_t> const & shader_desc_ids, uint32_t tech_index, uint32_t pass_index) KLAYGE_OVERRIDE;
+			std::vector<uint32_t> const & shader_desc_ids) KLAYGE_OVERRIDE;
 		virtual void StreamOut(std::ostream& os, ShaderType type) KLAYGE_OVERRIDE;
 
 		void AttachShader(ShaderType type, RenderEffect const & effect,

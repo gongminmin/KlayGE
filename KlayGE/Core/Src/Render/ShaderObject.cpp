@@ -32,14 +32,12 @@ namespace KlayGE
 		}
 
 		virtual bool StreamIn(ResIdentifierPtr const & res, ShaderType type, RenderEffect const & effect,
-			std::vector<uint32_t> const & shader_desc_ids, uint32_t tech_index, uint32_t pass_index) KLAYGE_OVERRIDE
+			std::vector<uint32_t> const & shader_desc_ids) KLAYGE_OVERRIDE
 		{
 			UNREF_PARAM(res);
 			UNREF_PARAM(type);
 			UNREF_PARAM(effect);
 			UNREF_PARAM(shader_desc_ids);
-			UNREF_PARAM(tech_index);
-			UNREF_PARAM(pass_index);
 
 			return true;
 		}
