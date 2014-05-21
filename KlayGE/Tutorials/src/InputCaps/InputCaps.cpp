@@ -399,6 +399,8 @@ void InputCaps::InputHandler(InputEngine const & /*sender*/, InputAction const &
 			InputSensorActionParamPtr param = checked_pointer_cast<InputSensorActionParam>(action.second);
 			std::wostringstream stream;
 			stream << "Lat: " << param->latitude << "  Lng: " << param->longitude;
+			stream << " Orientation: " << param->orientation_quat.x() << ' ' << param->orientation_quat.y()
+				<< ' ' << param->orientation_quat.z() << ' ' << param->orientation_quat.w();
 			sensor_str_ = stream.str();
 		}
 		break;
