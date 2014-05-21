@@ -2052,12 +2052,24 @@ namespace KlayGE
 		}
 	}
 
-	void D3D11ShaderObject::LinkShaders(RenderEffect const & /*effect*/)
+	void D3D11ShaderObject::LinkShaders(RenderEffect const & effect)
 	{
 		is_validate_ = true;
 		for (size_t type = 0; type < ShaderObject::ST_NumShaderTypes; ++ type)
 		{
 			is_validate_ &= is_shader_validate_[type];
+
+			for (size_t i = 0; i < shader_desc_[type].cb_desc.size(); ++ i)
+			{
+				RenderEffectConstantBufferPtr const & cbuff = effect.CBufferByName(shader_desc_[type].cb_desc[i].name);
+				cbuff->Resize(shader_desc_[type].cb_desc[i].size);
+				BOOST_ASSERT(cbuff->NumParameters() == shader_desc_[type].cb_desc[i].var_desc.size());
+				for (uint32_t j = 0; j < cbuff->NumParameters(); ++ j)
+				{
+					RenderEffectParameterPtr const & param = effect.ParameterByIndex(cbuff->ParameterIndex(j));
+					param->BindToCBuffer(cbuff, shader_desc_[type].cb_desc[i].var_desc[j].start_offset);
+				}
+			}
 		}
 	}
 	

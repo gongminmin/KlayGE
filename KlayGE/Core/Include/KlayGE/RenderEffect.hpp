@@ -214,34 +214,111 @@ namespace KlayGE
 		virtual void Value(std::vector<float3>& val) const;
 		virtual void Value(std::vector<float4>& val) const;
 		virtual void Value(std::vector<float4x4>& val) const;
+
+		virtual void BindToCBuffer(RenderEffectConstantBuffer* cbuff, uint32_t offset);
+		virtual void RebindToCBuffer(RenderEffectConstantBuffer* cbuff);
+		virtual bool InCBuffer() const
+		{
+			return false;
+		}
+		virtual uint32_t CBufferOffset() const
+		{
+			return 0;
+		}
 	};
 
 	template <typename T>
 	class RenderVariableConcrete : public RenderVariable
 	{
 	public:
-		virtual RenderVariablePtr Clone()
+		RenderVariableConcrete()
+			: in_cbuff_(false)
 		{
-			RenderVariablePtr ret = MakeSharedPtr<RenderVariableConcrete<T> >();
+			new (data_.val) T;
+		}
+
+		virtual RenderVariablePtr Clone() KLAYGE_OVERRIDE
+		{
+			shared_ptr<RenderVariableConcrete<T> > ret = MakeSharedPtr<RenderVariableConcrete<T> >();
+			ret->in_cbuff_ = in_cbuff_;
+			if (in_cbuff_)
+			{
+				ret->data_ = data_;
+			}
 			T val;
 			this->Value(val);
 			*ret = val;
 			return ret;
 		}
 
-		virtual RenderVariable& operator=(T const & value)
+		virtual RenderVariable& operator=(T const & value) KLAYGE_OVERRIDE
 		{
-			val_ = value;
+			if (in_cbuff_)
+			{
+				*(data_.cbuff_offset.cbuff->VariableInBuff<T>(data_.cbuff_offset.offset)) = value;
+			}
+			else
+			{
+				*reinterpret_cast<T*>(data_.val) = value;
+			}
 			return *this;
 		}
 
-		virtual void Value(T& val) const
+		virtual void Value(T& val) const KLAYGE_OVERRIDE
 		{
-			val = val_;
+			if (in_cbuff_)
+			{
+				val = *(data_.cbuff_offset.cbuff->VariableInBuff<T>(data_.cbuff_offset.offset));
+			}
+			else
+			{
+				val = *reinterpret_cast<T const *>(data_.val);
+			}
+		}
+
+		virtual void BindToCBuffer(RenderEffectConstantBuffer* cbuff, uint32_t offset) KLAYGE_OVERRIDE
+		{
+			if (!in_cbuff_)
+			{
+				T val;
+				this->Value(val);
+				in_cbuff_ = true;
+				data_.cbuff_offset.cbuff = cbuff;
+				data_.cbuff_offset.offset = offset;
+				new (data_.cbuff_offset.cbuff->VariableInBuff<T>(data_.cbuff_offset.offset)) T;
+				this->operator=(val);
+			}
+		}
+
+		virtual void RebindToCBuffer(RenderEffectConstantBuffer* cbuff) KLAYGE_OVERRIDE
+		{
+			BOOST_ASSERT(in_cbuff_);
+			data_.cbuff_offset.cbuff = cbuff;
+		}
+
+		virtual bool InCBuffer() const KLAYGE_OVERRIDE
+		{
+			return in_cbuff_;
+		}
+		virtual uint32_t CBufferOffset() const KLAYGE_OVERRIDE
+		{
+			return data_.cbuff_offset.offset;
 		}
 
 	protected:
-		T val_;
+		bool in_cbuff_;
+		union VarData
+		{
+			struct CBufferOffset
+			{
+				RenderEffectConstantBuffer* cbuff;
+				uint32_t offset;
+			};
+
+			CBufferOffset cbuff_offset;
+			uint8_t val[sizeof(T)];
+		};
+		VarData data_;
 	};
 
 	class RenderVariableTexture : public RenderVariable
@@ -427,13 +504,13 @@ namespace KlayGE
 
 		uint32_t NumCBuffers() const
 		{
-			return cbuffers_ ? static_cast<uint32_t>(cbuffers_->size()) : 0;
+			return static_cast<uint32_t>(cbuffers_.size());
 		}
 		RenderEffectConstantBufferPtr const & CBufferByName(std::string const & name) const;
 		RenderEffectConstantBufferPtr const & CBufferByIndex(uint32_t n) const
 		{
 			BOOST_ASSERT(n < this->NumCBuffers());
-			return (*cbuffers_)[n];
+			return cbuffers_[n];
 		}
 
 		uint32_t NumTechniques() const
@@ -483,7 +560,7 @@ namespace KlayGE
 		uint64_t timestamp_;
 
 		std::vector<RenderEffectParameterPtr> params_;
-		shared_ptr<std::vector<RenderEffectConstantBufferPtr> > cbuffers_;
+		std::vector<RenderEffectConstantBufferPtr> cbuffers_;
 		std::vector<RenderTechniquePtr> techniques_;
 
 		shared_ptr<std::vector<std::pair<std::pair<std::string, std::string>, bool> > > macros_;
@@ -697,7 +774,7 @@ namespace KlayGE
 		void StreamIn(ResIdentifierPtr const & res);
 		void StreamOut(std::ostream& os);
 
-		RenderEffectConstantBufferPtr Clone();
+		RenderEffectConstantBufferPtr Clone(RenderEffect& src_effect, RenderEffect& dst_effect);
 
 		shared_ptr<std::string> const & Name() const
 		{
@@ -719,16 +796,31 @@ namespace KlayGE
 			return (*param_indices_)[index];
 		}
 
+		void Resize(uint32_t size);
+
+		template <typename T>
+		T const * VariableInBuff(uint32_t offset) const
+		{
+			return reinterpret_cast<T*>(&buff_[offset]);
+		}
+		template <typename T>
+		T* VariableInBuff(uint32_t offset)
+		{
+			return reinterpret_cast<T*>(&buff_[offset]);
+		}
+
 	private:
 		shared_ptr<std::string> name_;
 		size_t name_hash_;
 		shared_ptr<std::vector<uint32_t> > param_indices_;
+
+		std::vector<uint8_t> buff_;
 	};
 
 	class KLAYGE_CORE_API RenderEffectParameter : boost::noncopyable
 	{
 	public:
-		explicit RenderEffectParameter(RenderEffect& effect);
+		explicit RenderEffectParameter();
 		~RenderEffectParameter();
 
 		void Load(XMLNodePtr const & node);
@@ -736,7 +828,7 @@ namespace KlayGE
 		void StreamIn(ResIdentifierPtr const & res);
 		void StreamOut(std::ostream& os);
 
-		RenderEffectParameterPtr Clone(RenderEffect& effect);
+		RenderEffectParameterPtr Clone();
 
 		uint32_t Type() const
 		{
@@ -793,9 +885,18 @@ namespace KlayGE
 			var_->Value(val);
 		}
 
-	private:
-		RenderEffect& effect_;
+		void BindToCBuffer(RenderEffectConstantBufferPtr const & cbuff, uint32_t offset);
+		void RebindToCBuffer(RenderEffectConstantBufferPtr const & cbuff);
+		bool InCBuffer() const
+		{
+			return var_->InCBuffer();
+		}
+		uint32_t CBufferOffset() const
+		{
+			return var_->CBufferOffset();
+		}
 
+	private:
 		shared_ptr<std::string> name_;
 		size_t name_hash_;
 		shared_ptr<std::string> semantic_;
@@ -806,6 +907,8 @@ namespace KlayGE
 		shared_ptr<std::string> array_size_;
 
 		shared_ptr<std::vector<RenderEffectAnnotationPtr> > annotations_;
+
+		RenderEffectConstantBufferPtr cbuff_;
 	};
 
 	KLAYGE_CORE_API RenderEffectPtr SyncLoadRenderEffect(std::string const & effect_name);

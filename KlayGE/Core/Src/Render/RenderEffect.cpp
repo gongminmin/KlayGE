@@ -2863,8 +2863,8 @@ namespace KlayGE
 		if (!this->StreamIn(kfx_source))
 		{
 			shader_descs_.reset();
-			cbuffers_.reset();
 			macros_.reset();
+			cbuffers_.clear();
 			params_.clear();
 			shaders_.reset();
 			techniques_.clear();
@@ -2872,8 +2872,6 @@ namespace KlayGE
 			if (source)
 			{
 				shader_descs_ = MakeSharedPtr<KLAYGE_DECLTYPE(*shader_descs_)>(1);
-
-				cbuffers_ = MakeSharedPtr<KLAYGE_DECLTYPE(*cbuffers_)>();
 
 				XMLAttributePtr attr;
 
@@ -2994,11 +2992,11 @@ namespace KlayGE
 						size_t const cbuff_name_hash = RT_HASH(cbuff_name.c_str());
 
 						bool found = false;
-						for (size_t i = 0; i < cbuffers_->size(); ++ i)
+						for (size_t i = 0; i < cbuffers_.size(); ++ i)
 						{
-							if ((*cbuffers_)[i]->NameHash() == cbuff_name_hash)
+							if (cbuffers_[i]->NameHash() == cbuff_name_hash)
 							{
-								cbuff = (*cbuffers_)[i];
+								cbuff = cbuffers_[i];
 								found = true;
 								break;
 							}
@@ -3007,13 +3005,13 @@ namespace KlayGE
 						{
 							cbuff = MakeSharedPtr<RenderEffectConstantBuffer>();
 							cbuff->Load(cbuff_name);
-							cbuffers_->push_back(cbuff);
+							cbuffers_.push_back(cbuff);
 						}
 
 						cbuff->AddParameter(param_index);
 					}
 
-					RenderEffectParameterPtr param = MakeSharedPtr<RenderEffectParameter>(*this);
+					RenderEffectParameterPtr param = MakeSharedPtr<RenderEffectParameter>();
 					params_.push_back(param);
 
 					param->Load(node);
@@ -3069,8 +3067,6 @@ namespace KlayGE
 					{
 						shader_descs_ = MakeSharedPtr<KLAYGE_DECLTYPE(*shader_descs_)>(1);
 
-						cbuffers_ = MakeSharedPtr<KLAYGE_DECLTYPE(*cbuffers_)>();
-
 						{
 							uint16_t num_macros;
 							source->read(&num_macros, sizeof(num_macros));
@@ -3092,11 +3088,11 @@ namespace KlayGE
 							uint16_t num_cbufs;
 							source->read(&num_cbufs, sizeof(num_cbufs));
 							num_cbufs = LE2Native(num_cbufs);
-							cbuffers_->resize(num_cbufs);
+							cbuffers_.resize(num_cbufs);
 							for (uint32_t i = 0; i < num_cbufs; ++ i)
 							{
-								(*cbuffers_)[i] = MakeSharedPtr<RenderEffectConstantBuffer>();
-								(*cbuffers_)[i]->StreamIn(source);
+								cbuffers_[i] = MakeSharedPtr<RenderEffectConstantBuffer>();
+								cbuffers_[i]->StreamIn(source);
 							}
 						}
 
@@ -3107,7 +3103,7 @@ namespace KlayGE
 							params_.resize(num_params);
 							for (uint32_t i = 0; i < num_params; ++ i)
 							{
-								RenderEffectParameterPtr param = MakeSharedPtr<RenderEffectParameter>(*this);
+								RenderEffectParameterPtr param = MakeSharedPtr<RenderEffectParameter>();
 								params_[i] = param;
 
 								param->StreamIn(source);
@@ -3219,11 +3215,11 @@ namespace KlayGE
 		}
 
 		{
-			uint16_t num_cbufs = Native2LE(static_cast<uint16_t>(cbuffers_->size()));
+			uint16_t num_cbufs = Native2LE(static_cast<uint16_t>(cbuffers_.size()));
 			os.write(reinterpret_cast<char const *>(&num_cbufs), sizeof(num_cbufs));
-			for (uint32_t i = 0; i < cbuffers_->size(); ++ i)
+			for (uint32_t i = 0; i < cbuffers_.size(); ++ i)
 			{
-				(*cbuffers_)[i]->StreamOut(os);
+				cbuffers_[i]->StreamOut(os);
 			}
 		}
 
@@ -3298,10 +3294,14 @@ namespace KlayGE
 		ret->params_.resize(params_.size());
 		for (size_t i = 0; i < params_.size(); ++ i)
 		{
-			ret->params_[i] = params_[i]->Clone(*ret);
+			ret->params_[i] = params_[i]->Clone();
 		}
 
-		ret->cbuffers_ = cbuffers_;
+		ret->cbuffers_.resize(cbuffers_.size());
+		for (size_t i = 0; i < cbuffers_.size(); ++ i)
+		{
+			ret->cbuffers_[i] = cbuffers_[i]->Clone(*this, *ret);
+		}
 
 		ret->techniques_.resize(techniques_.size());
 		for (size_t i = 0; i < techniques_.size(); ++ i)
@@ -3345,8 +3345,8 @@ namespace KlayGE
 	RenderEffectConstantBufferPtr const & RenderEffect::CBufferByName(std::string const & name) const
 	{
 		size_t const name_hash = boost::hash_range(name.begin(), name.end());
-		typedef KLAYGE_DECLTYPE(*cbuffers_) CBuffersType;
-		KLAYGE_FOREACH(CBuffersType::const_reference cbuffer, *cbuffers_)
+		typedef KLAYGE_DECLTYPE(cbuffers_) CBuffersType;
+		KLAYGE_FOREACH(CBuffersType::const_reference cbuffer, cbuffers_)
 		{
 			if (name_hash == cbuffer->NameHash())
 			{
@@ -4545,7 +4545,6 @@ namespace KlayGE
 	}
 
 
-	
 	RenderEffectConstantBuffer::RenderEffectConstantBuffer()
 	{
 	}
@@ -4591,13 +4590,24 @@ namespace KlayGE
 		}
 	}
 
-	RenderEffectConstantBufferPtr RenderEffectConstantBuffer::Clone()
+	RenderEffectConstantBufferPtr RenderEffectConstantBuffer::Clone(RenderEffect& src_effect, RenderEffect& dst_effect)
 	{
 		RenderEffectConstantBufferPtr ret = MakeSharedPtr<RenderEffectConstantBuffer>();
 
 		ret->name_ = name_;
 		ret->name_hash_ = name_hash_;
 		ret->param_indices_ = param_indices_;
+		ret->buff_ = buff_;
+
+		for (size_t i = 0; i < param_indices_->size(); ++ i)
+		{
+			RenderEffectParameterPtr const & src_param = src_effect.ParameterByIndex((*param_indices_)[i]);
+			if (src_param->InCBuffer())
+			{
+				RenderEffectParameterPtr const & dst_param = dst_effect.ParameterByIndex((*param_indices_)[i]);
+				dst_param->RebindToCBuffer(ret);
+			}
+		}
 
 		return ret;
 	}
@@ -4607,9 +4617,13 @@ namespace KlayGE
 		param_indices_->push_back(index);
 	}
 
+	void RenderEffectConstantBuffer::Resize(uint32_t size)
+	{
+		buff_.resize(size);
+	}
 
-	RenderEffectParameter::RenderEffectParameter(RenderEffect& effect)
-		: effect_(effect)
+
+	RenderEffectParameter::RenderEffectParameter()
 	{
 	}
 
@@ -4824,9 +4838,9 @@ namespace KlayGE
 		}
 	}
 
-	RenderEffectParameterPtr RenderEffectParameter::Clone(RenderEffect& effect)
+	RenderEffectParameterPtr RenderEffectParameter::Clone()
 	{
-		RenderEffectParameterPtr ret = MakeSharedPtr<RenderEffectParameter>(effect);
+		RenderEffectParameterPtr ret = MakeSharedPtr<RenderEffectParameter>();
 
 		ret->name_ = name_;
 		ret->name_hash_ = name_hash_;
@@ -4839,6 +4853,18 @@ namespace KlayGE
 		ret->annotations_ = annotations_;
 
 		return ret;
+	}
+
+	void RenderEffectParameter::BindToCBuffer(RenderEffectConstantBufferPtr const & cbuff, uint32_t offset)
+	{
+		cbuff_ = cbuff;
+		var_->BindToCBuffer(cbuff.get(), offset);
+	}
+
+	void RenderEffectParameter::RebindToCBuffer(RenderEffectConstantBufferPtr const & cbuff)
+	{
+		cbuff_ = cbuff;
+		var_->RebindToCBuffer(cbuff.get());
 	}
 
 
@@ -5307,6 +5333,21 @@ namespace KlayGE
 
 	void RenderVariable::Value(std::vector<float4x4>& /*value*/) const
 	{
+		BOOST_ASSERT(false);
+	}
+
+	void RenderVariable::BindToCBuffer(RenderEffectConstantBuffer* cbuff, uint32_t offset)
+	{
+		UNREF_PARAM(cbuff);
+		UNREF_PARAM(offset);
+
+		BOOST_ASSERT(false);
+	}
+
+	void RenderVariable::RebindToCBuffer(RenderEffectConstantBuffer* cbuff)
+	{
+		UNREF_PARAM(cbuff);
+
 		BOOST_ASSERT(false);
 	}
 
