@@ -256,6 +256,7 @@ namespace KlayGE
 			if (in_cbuff_)
 			{
 				*(data_.cbuff_offset.cbuff->VariableInBuff<T>(data_.cbuff_offset.offset)) = value;
+				data_.cbuff_offset.cbuff->Dirty(true);
 			}
 			else
 			{
@@ -809,12 +810,22 @@ namespace KlayGE
 			return reinterpret_cast<T*>(&buff_[offset]);
 		}
 
+		void Dirty(bool dirty)
+		{
+			dirty_ = dirty;
+		}
+		bool Dirty() const
+		{
+			return dirty_;
+		}
+
 	private:
 		shared_ptr<std::string> name_;
 		size_t name_hash_;
 		shared_ptr<std::vector<uint32_t> > param_indices_;
 
 		std::vector<uint8_t> buff_;
+		bool dirty_;
 	};
 
 	class KLAYGE_CORE_API RenderEffectParameter : boost::noncopyable

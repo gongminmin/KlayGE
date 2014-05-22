@@ -4546,6 +4546,7 @@ namespace KlayGE
 
 
 	RenderEffectConstantBuffer::RenderEffectConstantBuffer()
+		: dirty_(true)
 	{
 	}
 
