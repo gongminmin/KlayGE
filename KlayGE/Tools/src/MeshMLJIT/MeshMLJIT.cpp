@@ -1806,7 +1806,10 @@ namespace
 		if (materials_chunk)
 		{
 			CompileMaterialsChunk(materials_chunk, mtls);
-			ConvertTextures(output_name, mtls, platform);
+			if (!platform.empty())
+			{
+				ConvertTextures(output_name, mtls, platform);
+			}
 		}
 		{
 			uint32_t num_mtls = Native2LE(static_cast<uint32_t>(mtls.size()));
@@ -1938,7 +1941,7 @@ int main(int argc, char* argv[])
 		("help,H", "Produce help message")
 		("input-name,I", boost::program_options::value<std::string>(), "Input meshml name.")
 		("target-folder,T", boost::program_options::value<std::string>(), "Target folder.")
-		("platform,P", boost::program_options::value<std::string>(), "Platform name.")
+		("platform,P", boost::program_options::value<std::string>()->implicit_value(""), "Platform name.")
 		("quiet,q", boost::program_options::value<bool>()->implicit_value(true), "Quiet mode.")
 		("version,v", "Version.");
 
@@ -1972,10 +1975,6 @@ int main(int argc, char* argv[])
 	if (vm.count("platform") > 0)
 	{
 		platform = vm["platform"].as<std::string>();
-	}
-	else
-	{
-		platform = "pc_dx11";
 	}
 	if (vm.count("quiet") > 0)
 	{
