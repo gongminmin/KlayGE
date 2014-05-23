@@ -158,13 +158,9 @@ namespace KlayGE
 		array<std::vector<ID3D11ShaderResourceViewPtr>, ST_NumShaderTypes> srvs_;
 		array<std::vector<void*>, ST_NumShaderTypes> uavsrcs_;
 		array<std::vector<ID3D11UnorderedAccessViewPtr>, ST_NumShaderTypes> uavs_;
-		array<std::vector<uint32_t>, ST_NumShaderTypes> cbuf_indices_;
-		array<std::vector<ID3D11BufferPtr>, ST_NumShaderTypes> cbufs_;
-
-		std::vector<size_t> all_cbufs_name_hash_;
-		std::vector<ID3D11BufferPtr> all_cbufs_;
-		std::vector<char> all_dirty_cbufs_;
-		std::vector<std::vector<uint8_t> > all_mem_cbufs_;
+		array<std::vector<uint32_t>, ST_NumShaderTypes> cbuff_indices_;
+		array<std::vector<RenderEffectConstantBufferPtr>, ST_NumShaderTypes> cbuffs_;
+		array<std::vector<ID3D11BufferPtr>, ST_NumShaderTypes> d3d11_cbuffs_;
 
 		uint32_t vs_signature_;
 	};

@@ -322,6 +322,155 @@ namespace KlayGE
 		VarData data_;
 	};
 
+	class RenderVariableFloat4x4 : public RenderVariableConcrete<float4x4>
+	{
+	public:
+		virtual RenderVariablePtr Clone() KLAYGE_OVERRIDE;
+
+		virtual RenderVariable& operator=(float4x4 const & value) KLAYGE_OVERRIDE;
+		virtual void Value(float4x4& val) const KLAYGE_OVERRIDE;
+	};
+
+	template <typename T>
+	class RenderVariableArray : public RenderVariableConcrete<std::vector<T> >
+	{
+	public:
+		virtual RenderVariablePtr Clone() KLAYGE_OVERRIDE
+		{
+			shared_ptr<RenderVariableArray<T> > ret = MakeSharedPtr<RenderVariableArray<T> >();
+			ret->in_cbuff_ = in_cbuff_;
+			if (in_cbuff_)
+			{
+				ret->data_ = data_;
+			}
+			std::vector<T> val;
+			this->Value(val);
+			*ret = val;
+			return ret;
+		}
+
+		virtual RenderVariable& operator=(std::vector<T> const & value) KLAYGE_OVERRIDE
+		{
+			if (in_cbuff_)
+			{
+				T* target = data_.cbuff_offset.cbuff->VariableInBuff<T>(data_.cbuff_offset.offset);
+
+				size_ = static_cast<uint32_t>(value.size());
+				for (size_t i = 0; i < value.size(); ++ i)
+				{
+					target[i * 4] = value[i];
+				}
+
+				data_.cbuff_offset.cbuff->Dirty(true);
+			}
+			else
+			{
+				*reinterpret_cast<std::vector<T>*>(data_.val) = value;
+			}
+			return *this;
+		}
+
+		virtual void Value(std::vector<T>& val) const KLAYGE_OVERRIDE
+		{
+			if (in_cbuff_)
+			{
+				T const * src = data_.cbuff_offset.cbuff->VariableInBuff<T>(data_.cbuff_offset.offset);
+
+				val.resize(size_);
+				for (size_t i = 0; i < size_; ++ i)
+				{
+					val[i] = src[i * 4];
+				}
+			}
+			else
+			{
+				val = *reinterpret_cast<std::vector<T> const *>(data_.val);
+			}
+		}
+
+	private:
+		uint32_t size_;
+	};
+
+	template <typename T, int N>
+	class RenderVariableVectorArray : public RenderVariableConcrete<std::vector<Vector_T<T, N> > >
+	{
+	public:
+		virtual RenderVariablePtr Clone() KLAYGE_OVERRIDE
+		{
+			shared_ptr<RenderVariableVectorArray<T, N> > ret = MakeSharedPtr<RenderVariableVectorArray<T, N> >();
+			ret->in_cbuff_ = in_cbuff_;
+			if (in_cbuff_)
+			{
+				ret->data_ = data_;
+			}
+			std::vector<Vector_T<T, N> > val;
+			this->Value(val);
+			*ret = val;
+			return ret;
+		}
+
+		virtual RenderVariable& operator=(std::vector<Vector_T<T, N> > const & value) KLAYGE_OVERRIDE
+		{
+			if (in_cbuff_)
+			{
+				Vector_T<T, 4>* target = data_.cbuff_offset.cbuff->VariableInBuff<Vector_T<T, 4> >(data_.cbuff_offset.offset);
+
+				size_ = static_cast<uint32_t>(value.size());
+				for (size_t i = 0; i < value.size(); ++ i)
+				{
+					for (int j = 0; j < N; ++ j)
+					{
+						target[i][j] = value[i][j];
+					}
+				}
+
+				data_.cbuff_offset.cbuff->Dirty(true);
+			}
+			else
+			{
+				*reinterpret_cast<std::vector<Vector_T<T, N> >*>(data_.val) = value;
+			}
+			return *this;
+		}
+
+		virtual void Value(std::vector<Vector_T<T, N> >& val) const KLAYGE_OVERRIDE
+		{
+			if (in_cbuff_)
+			{
+				Vector_T<T, 4> const * src = data_.cbuff_offset.cbuff->VariableInBuff<Vector_T<T, 4> >(data_.cbuff_offset.offset);
+
+				val.resize(size_);
+				for (size_t i = 0; i < size_; ++ i)
+				{
+					for (int j = 0; j < N; ++ j)
+					{
+						val[i][j] = src[i][j];
+					}
+				}
+			}
+			else
+			{
+				val = *reinterpret_cast<std::vector<Vector_T<T, N> > const *>(data_.val);
+			}
+		}
+
+	private:
+		uint32_t size_;
+	};
+
+	class RenderVariableFloat4x4Array : public RenderVariableConcrete<std::vector<float4x4> >
+	{
+	public:
+		virtual RenderVariablePtr Clone() KLAYGE_OVERRIDE;
+
+		virtual RenderVariable& operator=(std::vector<float4x4> const & value) KLAYGE_OVERRIDE;
+		virtual void Value(std::vector<float4x4>& val) const KLAYGE_OVERRIDE;
+
+	private:
+		uint32_t size_;
+	};
+
 	class RenderVariableTexture : public RenderVariable
 	{
 	public:
@@ -387,21 +536,19 @@ namespace KlayGE
 	typedef RenderVariableConcrete<float2> RenderVariableFloat2;
 	typedef RenderVariableConcrete<float3> RenderVariableFloat3;
 	typedef RenderVariableConcrete<float4> RenderVariableFloat4;
-	typedef RenderVariableConcrete<float4x4> RenderVariableFloat4x4;
 	typedef RenderVariableConcrete<SamplerStateObjectPtr> RenderVariableSampler;
 	typedef RenderVariableConcrete<std::string> RenderVariableString;
 	typedef RenderVariableConcrete<ShaderDesc> RenderVariableShader;
-	typedef RenderVariableConcrete<std::vector<bool> > RenderVariableBoolArray;
-	typedef RenderVariableConcrete<std::vector<uint32_t> > RenderVariableUIntArray;
-	typedef RenderVariableConcrete<std::vector<int32_t> > RenderVariableIntArray;
-	typedef RenderVariableConcrete<std::vector<float> > RenderVariableFloatArray;
-	typedef RenderVariableConcrete<std::vector<int2> > RenderVariableInt2Array;
-	typedef RenderVariableConcrete<std::vector<int3> > RenderVariableInt3Array;
-	typedef RenderVariableConcrete<std::vector<int4> > RenderVariableInt4Array;
-	typedef RenderVariableConcrete<std::vector<float2> > RenderVariableFloat2Array;
-	typedef RenderVariableConcrete<std::vector<float3> > RenderVariableFloat3Array;
-	typedef RenderVariableConcrete<std::vector<float4> > RenderVariableFloat4Array;
-	typedef RenderVariableConcrete<std::vector<float4x4> > RenderVariableFloat4x4Array;
+	typedef RenderVariableArray<bool> RenderVariableBoolArray;
+	typedef RenderVariableArray<uint32_t> RenderVariableUIntArray;
+	typedef RenderVariableArray<int32_t> RenderVariableIntArray;
+	typedef RenderVariableArray<float> RenderVariableFloatArray;
+	typedef RenderVariableVectorArray<int, 2> RenderVariableInt2Array;
+	typedef RenderVariableVectorArray<int, 3> RenderVariableInt3Array;
+	typedef RenderVariableVectorArray<int, 4> RenderVariableInt4Array;
+	typedef RenderVariableVectorArray<float, 2> RenderVariableFloat2Array;
+	typedef RenderVariableVectorArray<float, 3> RenderVariableFloat3Array;
+	typedef RenderVariableVectorArray<float, 4> RenderVariableFloat4Array;
 
 
 	class KLAYGE_CORE_API RenderEffectAnnotation
@@ -819,11 +966,18 @@ namespace KlayGE
 			return dirty_;
 		}
 
+		void Update();
+		GraphicsBufferPtr const & HWBuff() const
+		{
+			return hw_buff_;
+		}
+
 	private:
 		shared_ptr<std::string> name_;
 		size_t name_hash_;
 		shared_ptr<std::vector<uint32_t> > param_indices_;
 
+		GraphicsBufferPtr hw_buff_;
 		std::vector<uint8_t> buff_;
 		bool dirty_;
 	};

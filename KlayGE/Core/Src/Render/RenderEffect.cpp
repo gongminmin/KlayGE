@@ -4598,7 +4598,7 @@ namespace KlayGE
 		ret->name_ = name_;
 		ret->name_hash_ = name_hash_;
 		ret->param_indices_ = param_indices_;
-		ret->buff_ = buff_;
+		ret->Resize(buff_.size());
 
 		for (size_t i = 0; i < param_indices_->size(); ++ i)
 		{
@@ -4621,6 +4621,31 @@ namespace KlayGE
 	void RenderEffectConstantBuffer::Resize(uint32_t size)
 	{
 		buff_.resize(size);
+		if (size > 0)
+		{
+			if (!hw_buff_)
+			{
+				RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+				hw_buff_ = rf.MakeConstantBuffer(BU_Dynamic, EAH_CPU_Write, nullptr);
+			}
+			if (hw_buff_)
+			{
+				hw_buff_->Resize(size);
+			}
+		}
+
+		dirty_ = true;
+	}
+
+	void RenderEffectConstantBuffer::Update()
+	{
+		if (dirty_)
+		{
+			GraphicsBuffer::Mapper mapper(*hw_buff_, BA_Write_Only);
+			std::memcpy(mapper.Pointer<uint8_t>(), &buff_[0], buff_.size());
+
+			dirty_ = false;
+		}
 	}
 
 
@@ -5350,6 +5375,84 @@ namespace KlayGE
 		UNREF_PARAM(cbuff);
 
 		BOOST_ASSERT(false);
+	}
+
+	RenderVariablePtr RenderVariableFloat4x4::Clone()
+	{
+		shared_ptr<RenderVariableFloat4x4> ret = MakeSharedPtr<RenderVariableFloat4x4>();
+		ret->in_cbuff_ = in_cbuff_;
+		if (in_cbuff_)
+		{
+			ret->data_ = data_;
+		}
+		float4x4 val;
+		this->Value(val);
+		*ret = val;
+		return ret;
+	}
+
+	RenderVariable& RenderVariableFloat4x4::operator=(float4x4 const & value)
+	{
+		return RenderVariableConcrete<float4x4>::operator=(MathLib::transpose(value));
+	}
+
+	void RenderVariableFloat4x4::Value(float4x4& val) const
+	{
+		RenderVariableConcrete<float4x4>::Value(val);
+		val = MathLib::transpose(val);
+	}
+
+	RenderVariablePtr RenderVariableFloat4x4Array::Clone()
+	{
+		shared_ptr<RenderVariableFloat4x4Array> ret = MakeSharedPtr<RenderVariableFloat4x4Array>();
+		ret->in_cbuff_ = in_cbuff_;
+		if (in_cbuff_)
+		{
+			ret->data_ = data_;
+		}
+		std::vector<float4x4> val;
+		this->Value(val);
+		*ret = val;
+		return ret;
+	}
+
+	RenderVariable& RenderVariableFloat4x4Array::operator=(std::vector<float4x4> const & value)
+	{
+		if (in_cbuff_)
+		{
+			float4x4* target = data_.cbuff_offset.cbuff->VariableInBuff<float4x4>(data_.cbuff_offset.offset);
+
+			size_ = static_cast<uint32_t>(value.size());
+			for (size_t i = 0; i < value.size(); ++ i)
+			{
+				target[i] = MathLib::transpose(value[i]);
+			}
+
+			data_.cbuff_offset.cbuff->Dirty(true);
+		}
+		else
+		{
+			*reinterpret_cast<std::vector<float4x4>*>(data_.val) = value;
+		}
+		return *this;
+	}
+
+	void RenderVariableFloat4x4Array::Value(std::vector<float4x4>& val) const
+	{
+		if (in_cbuff_)
+		{
+			float4x4 const * src = data_.cbuff_offset.cbuff->VariableInBuff<float4x4>(data_.cbuff_offset.offset);
+
+			val.resize(size_);
+			for (size_t i = 0; i < size_; ++ i)
+			{
+				val[i] = MathLib::transpose(src[i]);
+			}
+		}
+		else
+		{
+			val = *reinterpret_cast<std::vector<float4x4> const *>(data_.val);
+		}
 	}
 
 	RenderVariablePtr RenderVariableTexture::Clone()

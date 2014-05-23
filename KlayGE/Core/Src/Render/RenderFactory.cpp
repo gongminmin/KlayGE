@@ -81,6 +81,10 @@ namespace KlayGE
 		{
 			return GraphicsBuffer::NullObject();
 		}
+		GraphicsBufferPtr MakeConstantBuffer(BufferUsage /*usage*/, uint32_t /*access_hint*/, ElementInitData const * /*init_data*/, ElementFormat /*fmt*/)
+		{
+			return GraphicsBuffer::NullObject();
+		}
 
 		QueryPtr MakeOcclusionQuery()
 		{
