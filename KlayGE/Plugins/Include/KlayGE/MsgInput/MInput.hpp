@@ -35,6 +35,9 @@
 
 #if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
 #include <windows.h>
+#if defined KLAYGE_HAVE_LIBOVR
+#include <OVR.h>
+#endif
 #if (_WIN32_WINNT >= 0x0602 /*_WIN32_WINNT_WIN8*/)
 #include <hidsdi.h>
 #else
@@ -352,6 +355,31 @@ namespace KlayGE
 		int2 slider_state_;
 		array<bool, 32> buttons_state_;
 	};
+
+#if defined KLAYGE_HAVE_LIBOVR
+	class MsgInputOVR : public InputSensor, public OVR::MessageHandler
+	{
+	public:
+		MsgInputOVR();
+		virtual ~MsgInputOVR();
+
+		virtual std::wstring const & Name() const KLAYGE_OVERRIDE;
+
+		virtual void OnMessage(OVR::Message const & msg) KLAYGE_OVERRIDE;
+
+	private:
+		virtual void UpdateInputs() KLAYGE_OVERRIDE;
+
+	private:
+		OVR::Ptr<OVR::DeviceManager> manager_;
+		OVR::Ptr<OVR::SensorDevice> sensor_;
+		OVR::Ptr<OVR::HMDDevice> hmd_;
+		OVR::SensorFusion sfusion_;
+		OVR::HMDInfo hmd_info_;
+
+		OVR::Util::Render::StereoConfig sconfig_;
+	};
+#endif
 #endif
 
 	class MsgInputTouch : public InputTouch
