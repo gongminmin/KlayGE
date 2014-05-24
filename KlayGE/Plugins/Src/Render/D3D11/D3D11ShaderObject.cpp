@@ -76,251 +76,10 @@ namespace
 {
 	using namespace KlayGE;
 
-	template <typename SrcType, typename DstType>
-	class SetD3D11ShaderParameter
+	class SetD3D11ShaderParameterSampler
 	{
 	public:
-		SetD3D11ShaderParameter(uint8_t* target, RenderEffectParameterPtr const & param, char* dirty)
-			: target_(reinterpret_cast<DstType*>(target)), param_(param), dirty_(dirty)
-		{
-		}
-
-		void operator()()
-		{
-			SrcType v;
-			param_->Value(v);
-
-			if (*target_ != static_cast<DstType>(v))
-			{
-				*target_ = static_cast<DstType>(v);
-				*dirty_ = true;
-			}
-		}
-
-	private:
-		DstType* target_;
-		RenderEffectParameterPtr param_;
-		char* dirty_;
-	};
-
-	template <typename T, int N>
-	class SetD3D11ShaderParameter<Vector_T<T, N>, T>
-	{
-	public:
-		SetD3D11ShaderParameter(uint8_t* target, RenderEffectParameterPtr const & param, char* dirty)
-			: target_(reinterpret_cast<Vector_T<T, N>*>(target)), param_(param), dirty_(dirty)
-		{
-		}
-
-		void operator()()
-		{
-			Vector_T<T, N> v;
-			param_->Value(v);
-
-			if (*target_ != v)
-			{
-				*target_ = v;
-				*dirty_ = true;
-			}
-		}
-
-	private:
-		Vector_T<T, N>* target_;
-		RenderEffectParameterPtr param_;
-		char* dirty_;
-	};
-
-	template <>
-	class SetD3D11ShaderParameter<float4x4, float>
-	{
-	public:
-		SetD3D11ShaderParameter(uint8_t* target, uint32_t rows, RenderEffectParameterPtr const & param, char* dirty)
-			: target_(reinterpret_cast<float4*>(target)), size_(rows * sizeof(float4)), param_(param), dirty_(dirty)
-		{
-		}
-
-		void operator()()
-		{
-			float4x4 v;
-			param_->Value(v);
-
-			v = MathLib::transpose(v);
-			if (std::memcmp(target_, &v[0], size_))
-			{
-				std::memcpy(target_, &v[0], size_);
-				*dirty_ = true;
-			}
-		}
-
-	private:
-		float4* target_;
-		size_t size_;
-		RenderEffectParameterPtr param_;
-		char* dirty_;
-	};
-
-	template <typename SrcType, typename DstType>
-	class SetD3D11ShaderParameter<SrcType*, DstType>
-	{
-	public:
-		SetD3D11ShaderParameter(uint8_t* target, uint32_t elements, RenderEffectParameterPtr const & param, char* dirty)
-			: target_(reinterpret_cast<DstType*>(target)), elements_(elements), param_(param), dirty_(dirty)
-		{
-		}
-
-		void operator()()
-		{
-			std::vector<SrcType> v;
-			param_->Value(v);
-
-			for (size_t i = 0; i < v.size(); ++ i)
-			{
-				if (target_[i * 4] != static_cast<DstType>(v[i]))
-				{
-					target_[i * 4] = static_cast<DstType>(v[i]);
-					*dirty_ = true;
-				}
-			}
-		}
-
-	private:
-		DstType* target_;
-		uint32_t elements_;
-		RenderEffectParameterPtr param_;
-		char* dirty_;
-	};
-
-	template <typename T>
-	class SetD3D11ShaderParameter<Vector_T<T, 2>*, T>
-	{
-	public:
-		SetD3D11ShaderParameter(uint8_t* target, uint32_t elements, RenderEffectParameterPtr const & param, char* dirty)
-			: target_(reinterpret_cast<Vector_T<T, 4>*>(target)), size_(elements * sizeof(int4)), param_(param), dirty_(dirty)
-		{
-		}
-
-		void operator()()
-		{
-			std::vector<Vector_T<T, 2> > v;
-			param_->Value(v);
-
-			if (!v.empty())
-			{
-				std::vector<Vector_T<T, 4> > v4(v.size());
-				for (size_t i = 0; i < v.size(); ++ i)
-				{
-					v4[i] = Vector_T<T, 4>(v[i].x(), v[i].y(), 0, 0);
-				}
-				std::memcpy(target_, &v4[0], std::min(size_, v4.size() * sizeof(v4[0])));
-			}
-			*dirty_ = true;
-		}
-
-	private:
-		Vector_T<T, 4>* target_;
-		size_t size_;
-		RenderEffectParameterPtr param_;
-		char* dirty_;
-	};
-
-	template <typename T>
-	class SetD3D11ShaderParameter<Vector_T<T, 3>*, T>
-	{
-	public:
-		SetD3D11ShaderParameter(uint8_t* target, uint32_t elements, RenderEffectParameterPtr const & param, char* dirty)
-			: target_(reinterpret_cast<Vector_T<T, 4>*>(target)), size_(elements * sizeof(int4)), param_(param), dirty_(dirty)
-		{
-		}
-
-		void operator()()
-		{
-			std::vector<Vector_T<T, 3> > v;
-			param_->Value(v);
-
-			if (!v.empty())
-			{
-				std::vector<Vector_T<T, 4> > v4(v.size());
-				for (size_t i = 0; i < v.size(); ++ i)
-				{
-					v4[i] = Vector_T<T, 4>(v[i].x(), v[i].y(), v[i].z(), 0);
-				}
-				std::memcpy(target_, &v4[0], std::min(size_, v4.size() * sizeof(v4[0])));
-			}
-			*dirty_ = true;
-		}
-
-	private:
-		Vector_T<T, 4>* target_;
-		size_t size_;
-		RenderEffectParameterPtr param_;
-		char* dirty_;
-	};
-
-	template <typename T>
-	class SetD3D11ShaderParameter<Vector_T<T, 4>*, T>
-	{
-	public:
-		SetD3D11ShaderParameter(uint8_t* target, uint32_t elements, RenderEffectParameterPtr const & param, char* dirty)
-			: target_(reinterpret_cast<Vector_T<T, 4>*>(target)), size_(elements * sizeof(int4)), param_(param), dirty_(dirty)
-		{
-		}
-
-		void operator()()
-		{
-			std::vector<Vector_T<T, 4> > v;
-			param_->Value(v);
-
-			if (!v.empty())
-			{
-				std::memcpy(target_, &v[0], std::min(size_, v.size() * sizeof(v[0])));
-			}
-			*dirty_ = true;
-		}
-
-	private:
-		Vector_T<T, 4>* target_;
-		size_t size_;
-		RenderEffectParameterPtr param_;
-		char* dirty_;
-	};
-
-	template <>
-	class SetD3D11ShaderParameter<float4x4*, float>
-	{
-	public:
-		SetD3D11ShaderParameter(uint8_t* target, size_t rows, RenderEffectParameterPtr const & param, char* dirty)
-			: target_(reinterpret_cast<float4*>(target)), rows_(rows), param_(param), dirty_(dirty)
-		{
-		}
-
-		void operator()()
-		{
-			std::vector<float4x4> v;
-			param_->Value(v);
-
-			size_t start = 0;
-			typedef KLAYGE_DECLTYPE(v) VType;
-			KLAYGE_FOREACH(VType::reference mat, v)
-			{
-				mat = MathLib::transpose(mat);
-				std::memcpy(&target_[start], &mat[0], rows_ * sizeof(float4));
-				start += rows_;
-			}
-			*dirty_ = true;
-		}
-
-	private:
-		float4* target_;
-		size_t rows_;
-		RenderEffectParameterPtr param_;
-		char* dirty_;
-	};
-
-	template <>
-	class SetD3D11ShaderParameter<SamplerStateObjectPtr, ID3D11SamplerStatePtr>
-	{
-	public:
-		SetD3D11ShaderParameter(ID3D11SamplerStatePtr& sampler, RenderEffectParameterPtr const & param)
+		SetD3D11ShaderParameterSampler(ID3D11SamplerStatePtr& sampler, RenderEffectParameterPtr const & param)
 			: sampler_(&sampler), param_(param)
 		{
 		}
@@ -340,11 +99,10 @@ namespace
 		RenderEffectParameterPtr param_;
 	};
 
-	template <>
-	class SetD3D11ShaderParameter<TexturePtr, ID3D11ShaderResourceViewPtr>
+	class SetD3D11ShaderParameterTextureSRV
 	{
 	public:
-		SetD3D11ShaderParameter(tuple<void*, uint32_t, uint32_t>& srvsrc, ID3D11ShaderResourceViewPtr& srv, RenderEffectParameterPtr const & param)
+		SetD3D11ShaderParameterTextureSRV(tuple<void*, uint32_t, uint32_t>& srvsrc, ID3D11ShaderResourceViewPtr& srv, RenderEffectParameterPtr const & param)
 			: srvsrc_(&srvsrc), srv_(&srv), param_(param)
 		{
 		}
@@ -374,11 +132,10 @@ namespace
 		RenderEffectParameterPtr param_;
 	};
 
-	template <>
-	class SetD3D11ShaderParameter<GraphicsBufferPtr, ID3D11ShaderResourceViewPtr>
+	class SetD3D11ShaderParameterGraphicsBufferSRV
 	{
 	public:
-		SetD3D11ShaderParameter(tuple<void*, uint32_t, uint32_t>& srvsrc, ID3D11ShaderResourceViewPtr& srv, RenderEffectParameterPtr const & param)
+		SetD3D11ShaderParameterGraphicsBufferSRV(tuple<void*, uint32_t, uint32_t>& srvsrc, ID3D11ShaderResourceViewPtr& srv, RenderEffectParameterPtr const & param)
 			: srvsrc_(&srvsrc), srv_(&srv), param_(param)
 		{
 		}
@@ -404,11 +161,10 @@ namespace
 		RenderEffectParameterPtr param_;
 	};
 
-	template <>
-	class SetD3D11ShaderParameter<TexturePtr, ID3D11UnorderedAccessViewPtr>
+	class SetD3D11ShaderParameterTextureUAV
 	{
 	public:
-		SetD3D11ShaderParameter(void*& uavsrc, ID3D11UnorderedAccessViewPtr& uav, RenderEffectParameterPtr const & param)
+		SetD3D11ShaderParameterTextureUAV(void*& uavsrc, ID3D11UnorderedAccessViewPtr& uav, RenderEffectParameterPtr const & param)
 			: uavsrc_(&uavsrc), uav_(&uav), param_(param)
 		{
 		}
@@ -435,11 +191,10 @@ namespace
 		RenderEffectParameterPtr param_;
 	};
 
-	template <>
-	class SetD3D11ShaderParameter<GraphicsBufferPtr, ID3D11UnorderedAccessViewPtr>
+	class SetD3D11ShaderParameterGraphicsBufferUAV
 	{
 	public:
-		SetD3D11ShaderParameter(void*& uavsrc, ID3D11UnorderedAccessViewPtr& uav, RenderEffectParameterPtr const & param)
+		SetD3D11ShaderParameterGraphicsBufferUAV(void*& uavsrc, ID3D11UnorderedAccessViewPtr& uav, RenderEffectParameterPtr const & param)
 			: uavsrc_(&uavsrc), uav_(&uav), param_(param)
 		{
 		}
@@ -1843,7 +1598,6 @@ namespace KlayGE
 
 			// Shader reflection
 			cbuff_indices_[type].resize(shader_desc_[type].cb_desc.size());
-			cbuffs_[type].resize(shader_desc_[type].cb_desc.size());
 			d3d11_cbuffs_[type].resize(shader_desc_[type].cb_desc.size());
 			for (size_t c = 0; c < shader_desc_[type].cb_desc.size(); ++ c)
 			{
@@ -1852,8 +1606,7 @@ namespace KlayGE
 				{
 					if (effect.CBufferByIndex(i)->NameHash() == shader_desc_[type].cb_desc[c].name_hash)
 					{
-						cbuff_indices_[type][c] = static_cast<uint32_t>(i);
-						cbuffs_[type][c] = effect.CBufferByIndex(i);
+						cbuff_indices_[type][c] = static_cast<uint8_t>(i);
 						found = true;
 						break;
 					}
@@ -1968,7 +1721,6 @@ namespace KlayGE
 			uavs_[type].resize(so.uavs_[type].size());
 
 			cbuff_indices_[type] = so.cbuff_indices_[type];
-			cbuffs_[type] = so.cbuffs_[type];
 			d3d11_cbuffs_[type].resize(so.d3d11_cbuffs_[type].size());
 
 			param_binds_[type].reserve(so.param_binds_[type].size());
@@ -1982,14 +1734,17 @@ namespace KlayGE
 
 	void D3D11ShaderObject::LinkShaders(RenderEffect const & effect)
 	{
+		std::vector<uint32_t> all_cbuff_indices;
 		is_validate_ = true;
 		for (size_t type = 0; type < ShaderObject::ST_NumShaderTypes; ++ type)
 		{
 			is_validate_ &= is_shader_validate_[type];
 
-			for (size_t i = 0; i < shader_desc_[type].cb_desc.size(); ++ i)
+			all_cbuff_indices.insert(all_cbuff_indices.end(),
+				cbuff_indices_[type].begin(), cbuff_indices_[type].end());
+			for (size_t i = 0; i < cbuff_indices_[type].size(); ++ i)
 			{
-				RenderEffectConstantBufferPtr const & cbuff = effect.CBufferByName(shader_desc_[type].cb_desc[i].name);
+				RenderEffectConstantBufferPtr const & cbuff = effect.CBufferByIndex(cbuff_indices_[type][i]);
 				cbuff->Resize(shader_desc_[type].cb_desc[i].size);
 				BOOST_ASSERT(cbuff->NumParameters() == shader_desc_[type].cb_desc[i].var_desc.size());
 				for (uint32_t j = 0; j < cbuff->NumParameters(); ++ j)
@@ -1997,7 +1752,18 @@ namespace KlayGE
 					RenderEffectParameterPtr const & param = effect.ParameterByIndex(cbuff->ParameterIndex(j));
 					param->BindToCBuffer(cbuff, shader_desc_[type].cb_desc[i].var_desc[j].start_offset);
 				}
+
+				d3d11_cbuffs_[type][i] = checked_cast<D3D11GraphicsBuffer*>(cbuff->HWBuff().get())->D3DBuffer();
 			}
+		}
+
+		std::sort(all_cbuff_indices.begin(), all_cbuff_indices.end());
+		all_cbuff_indices.erase(std::unique(all_cbuff_indices.begin(), all_cbuff_indices.end()),
+			all_cbuff_indices.end());
+		all_cbuffs_.resize(all_cbuff_indices.size());
+		for (size_t i = 0; i < all_cbuff_indices.size(); ++ i)
+		{
+			all_cbuffs_[i] = effect.CBufferByIndex(all_cbuff_indices[i]);
 		}
 	}
 	
@@ -2019,6 +1785,7 @@ namespace KlayGE
 		ret->cs_block_size_y_ = cs_block_size_y_;
 		ret->cs_block_size_z_ = cs_block_size_z_;
 
+		std::vector<uint32_t> all_cbuff_indices;
 		for (size_t i = 0; i < ST_NumShaderTypes; ++ i)
 		{
 			ret->shader_code_[i] = shader_code_[i];
@@ -2031,11 +1798,12 @@ namespace KlayGE
 			ret->uavs_[i].resize(uavs_[i].size());
 
 			ret->cbuff_indices_[i] = cbuff_indices_[i];
-			ret->cbuffs_[i].resize(cbuffs_[i].size());
 			ret->d3d11_cbuffs_[i].resize(d3d11_cbuffs_.size());
-			for (size_t j = 0; j < cbuffs_[i].size(); ++ j)
+			all_cbuff_indices.insert(all_cbuff_indices.end(), cbuff_indices_[i].begin(), cbuff_indices_[i].end());
+			for (size_t j = 0; j < cbuff_indices_[i].size(); ++ j)
 			{
-				ret->cbuffs_[i][j] = effect.CBufferByIndex(cbuff_indices_[i][j]);
+				RenderEffectConstantBufferPtr cbuff = effect.CBufferByIndex(cbuff_indices_[i][j]);
+				ret->d3d11_cbuffs_[i][j] = checked_cast<D3D11GraphicsBuffer*>(cbuff->HWBuff().get())->D3DBuffer();
 			}
 
 			ret->param_binds_[i].reserve(param_binds_[i].size());
@@ -2044,6 +1812,15 @@ namespace KlayGE
 			{
 				ret->param_binds_[i].push_back(ret->GetBindFunc(pb.p_handle, effect.ParameterByName(*(pb.param->Name()))));
 			}
+		}
+
+		std::sort(all_cbuff_indices.begin(), all_cbuff_indices.end());
+		all_cbuff_indices.erase(std::unique(all_cbuff_indices.begin(), all_cbuff_indices.end()),
+			all_cbuff_indices.end());
+		ret->all_cbuffs_.resize(all_cbuff_indices.size());
+		for (size_t i = 0; i < all_cbuff_indices.size(); ++ i)
+		{
+			ret->all_cbuffs_[i] = effect.CBufferByIndex(all_cbuff_indices[i]);
 		}
 
 		return ret;
@@ -2074,7 +1851,7 @@ namespace KlayGE
 			break;
 
 		case REDT_sampler:
-			ret.func = SetD3D11ShaderParameter<SamplerStateObjectPtr, ID3D11SamplerStatePtr>(samplers_[p_handle.shader_type][p_handle.offset], param);
+			ret.func = SetD3D11ShaderParameterSampler(samplers_[p_handle.shader_type][p_handle.offset], param);
 			break;
 
 		case REDT_texture1D:
@@ -2085,7 +1862,7 @@ namespace KlayGE
 		case REDT_texture2DArray:
 		case REDT_texture3DArray:
 		case REDT_textureCUBEArray:
-			ret.func = SetD3D11ShaderParameter<TexturePtr, ID3D11ShaderResourceViewPtr>(srvsrcs_[p_handle.shader_type][p_handle.offset], srvs_[p_handle.shader_type][p_handle.offset], param);
+			ret.func = SetD3D11ShaderParameterTextureSRV(srvsrcs_[p_handle.shader_type][p_handle.offset], srvs_[p_handle.shader_type][p_handle.offset], param);
 			break;
 
 		case REDT_buffer:
@@ -2093,7 +1870,7 @@ namespace KlayGE
 		case REDT_consume_structured_buffer:
 		case REDT_append_structured_buffer:
 		case REDT_byte_address_buffer:
-			ret.func = SetD3D11ShaderParameter<GraphicsBufferPtr, ID3D11ShaderResourceViewPtr>(srvsrcs_[p_handle.shader_type][p_handle.offset], srvs_[p_handle.shader_type][p_handle.offset], param);
+			ret.func = SetD3D11ShaderParameterGraphicsBufferSRV(srvsrcs_[p_handle.shader_type][p_handle.offset], srvs_[p_handle.shader_type][p_handle.offset], param);
 			break;
 
 		case REDT_rw_texture1D:
@@ -2101,13 +1878,13 @@ namespace KlayGE
 		case REDT_rw_texture3D:
 		case REDT_rw_texture1DArray:
 		case REDT_rw_texture2DArray:
-			ret.func = SetD3D11ShaderParameter<TexturePtr, ID3D11UnorderedAccessViewPtr>(uavsrcs_[p_handle.shader_type][p_handle.offset], uavs_[p_handle.shader_type][p_handle.offset], param);
+			ret.func = SetD3D11ShaderParameterTextureUAV(uavsrcs_[p_handle.shader_type][p_handle.offset], uavs_[p_handle.shader_type][p_handle.offset], param);
 			break;
 
 		case REDT_rw_buffer:
 		case REDT_rw_structured_buffer:
 		case REDT_rw_byte_address_buffer:
-			ret.func = SetD3D11ShaderParameter<GraphicsBufferPtr, ID3D11UnorderedAccessViewPtr>(uavsrcs_[p_handle.shader_type][p_handle.offset], uavs_[p_handle.shader_type][p_handle.offset], param);
+			ret.func = SetD3D11ShaderParameterGraphicsBufferUAV(uavsrcs_[p_handle.shader_type][p_handle.offset], uavs_[p_handle.shader_type][p_handle.offset], param);
 			break;
 
 		default:
@@ -2139,6 +1916,11 @@ namespace KlayGE
 			}
 		}
 
+		for (size_t i = 0; i < all_cbuffs_.size(); ++ i)
+		{
+			all_cbuffs_[i]->Update();
+		}
+
 		for (size_t st = 0; st < ST_NumShaderTypes; ++ st)
 		{
 			if (!srvs_[st].empty())
@@ -2151,14 +1933,8 @@ namespace KlayGE
 				re.SetSamplers(static_cast<ShaderObject::ShaderType>(st), samplers_[st]);
 			}
 
-			if (!cbuffs_[st].empty())
+			if (!d3d11_cbuffs_[st].empty())
 			{
-				for (size_t i = 0; i < cbuffs_[st].size(); ++ i)
-				{
-					cbuffs_[st][i]->Update();
-					d3d11_cbuffs_[st][i] = checked_cast<D3D11GraphicsBuffer*>(cbuffs_[st][i]->HWBuff().get())->D3DBuffer();
-				}
-
 				re.SetConstantBuffers(static_cast<ShaderObject::ShaderType>(st), d3d11_cbuffs_[st]);
 			}
 		}
