@@ -202,6 +202,23 @@ namespace KlayGE
 		{
 			return stereo_separation_;
 		}
+		// For Oculus VR
+		void OVRHMDWarpParam(float4 const & hmd_warp_param)
+		{
+			ovr_hmd_warp_param_ = hmd_warp_param;
+		}
+		void OVRChromAbParam(float4 const & chrom_ab_param)
+		{
+			ovr_chrom_ab_param_ = chrom_ab_param;
+		}
+		void OVRXCenterOffset(float x_center_offset)
+		{
+			ovr_x_center_offset_ = x_center_offset;
+		}
+		void OVRScale(float scale)
+		{
+			ovr_scale_ = scale;
+		}
 		
 		// For debug only
 		void ForceLineMode(bool line);
@@ -264,6 +281,11 @@ namespace KlayGE
 
 		StereoMethod stereo_method_;
 		float stereo_separation_;
+		// Oculus VR
+		float4 ovr_hmd_warp_param_;
+		float4 ovr_chrom_ab_param_;
+		float ovr_x_center_offset_;
+		float ovr_scale_;
 
 		PostProcessPtr hdr_pp_;
 		PostProcessPtr skip_hdr_pp_;

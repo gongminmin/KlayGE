@@ -926,6 +926,35 @@ namespace KlayGE
 			}
 			if (stereo_method_ != STM_LCDShutter)
 			{
+				if (STM_OculusVR == stereo_method_)
+				{
+					Viewport const & vp = *screen_frame_buffer_->GetViewport();
+
+					float w = 0.5f;
+					float h = 1;
+					float x_left = 0;
+					float x_right = 0.5f;
+					float y = 0;
+
+					float aspect = static_cast<float>(vp.width / 2) / vp.height;
+
+					float3 lens_center(x_left + (w + ovr_x_center_offset_ * 0.5f) * 0.5f,
+						x_right + (w - ovr_x_center_offset_ * 0.5f) * 0.5f, y + h * 0.5f);
+					float3 screen_center(x_left + w * 0.5f, x_right + w * 0.5f, y + h * 0.5f);
+
+					float scale_factor = 1.0f / ovr_scale_;
+
+					float2 scale((w / 2) * scale_factor, (h / 2) * scale_factor * aspect);
+					float2 scale_in(2 / w, 2 / h / aspect);
+
+					stereoscopic_pp_->SetParam(2, lens_center);
+					stereoscopic_pp_->SetParam(3, screen_center);
+					stereoscopic_pp_->SetParam(4, scale);
+					stereoscopic_pp_->SetParam(5, scale_in);
+					stereoscopic_pp_->SetParam(6, ovr_hmd_warp_param_);
+					stereoscopic_pp_->SetParam(7, ovr_chrom_ab_param_);
+				}
+
 				stereoscopic_pp_->Render();
 			}
 			else
@@ -986,6 +1015,10 @@ namespace KlayGE
 
 			case STM_LCDShutter:
 				pp_name = "stereoscopic_lcd_shutter";
+				break;
+
+			case STM_OculusVR:
+				pp_name = "stereoscopic_oculus_vr";
 				break;
 
 			default:

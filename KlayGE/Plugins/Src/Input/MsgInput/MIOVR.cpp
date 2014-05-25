@@ -29,6 +29,9 @@
 */
 
 #include <KlayGE/KlayGE.hpp>
+#include <KlayGE/Context.hpp>
+#include <KlayGE/RenderFactory.hpp>
+#include <KlayGE/RenderEngine.hpp>
 
 #include <KlayGE/MsgInput/MInput.hpp>
 
@@ -65,7 +68,20 @@ namespace KlayGE
 			sfusion_.SetPredictionEnabled(true);
 		}
 
-		sconfig_.SetFullViewport(Util::Render::Viewport::Viewport(0, 0, hmd_info_.HResolution, hmd_info_.VResolution));
+		uint32_t width;
+		uint32_t height;
+		if (hmd_info_.HResolution > 0)
+		{
+			width = hmd_info_.HResolution;
+			height = hmd_info_.VResolution;
+		}
+		else
+		{
+			width = 1280;
+			height = 800;
+		}
+
+		sconfig_.SetFullViewport(Util::Render::Viewport::Viewport(0, 0, width, height));
 		sconfig_.SetStereoMode(Util::Render::Stereo_LeftRight_Multipass);
 
 		if (hmd_info_.HScreenSize > 0.0f)
@@ -81,6 +97,14 @@ namespace KlayGE
 		}
 
 		sconfig_.Set2DAreaFov(DegreeToRad(85.0f));
+
+		OVR::Util::Render::StereoEyeParams left_eye = sconfig_.GetEyeRenderParams(OVR::Util::Render::StereoEye_Left);
+
+		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+		re.OVRScale(sconfig_.GetDistortionScale());
+		re.OVRHMDWarpParam(float4(left_eye.pDistortion->K));
+		re.OVRChromAbParam(float4(left_eye.pDistortion->ChromaticAberration));
+		re.OVRXCenterOffset(left_eye.pDistortion->XCenterOffset);
 	}
 
 	MsgInputOVR::~MsgInputOVR()

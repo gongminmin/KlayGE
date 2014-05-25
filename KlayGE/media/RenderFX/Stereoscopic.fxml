@@ -29,13 +29,13 @@ float4 CalcStereoCoord(float2 tc : TEXCOORD0)
 	float2 uv = 0;
 	for (int i = 0; i < 3; ++ i)
 	{
-	    uv.x = samples[i] * separation;
-	    min_depth_l = min(min_depth_l, depth_tex.Sample(point_sampler, tc + uv).x);
-	    min_depth_r = min(min_depth_r, depth_tex.Sample(point_sampler, tc - uv).x);
+		uv.x = samples[i] * separation;
+		min_depth_l = min(min_depth_l, depth_tex.Sample(point_sampler, tc + uv).x);
+		min_depth_r = min(min_depth_r, depth_tex.Sample(point_sampler, tc - uv).x);
 	}
 	
 	float parallax_l = (min_depth_l > 0 ? separation * (1 - zpd / min_depth_l) : 0);
-    float parallax_r = (min_depth_r > 0 ? separation * (1 - zpd / min_depth_r) : 0);
+	float parallax_r = (min_depth_r > 0 ? separation * (1 - zpd / min_depth_r) : 0);
 	
 	return float4(tc + float2(parallax_l, 0), tc - float2(parallax_r, 0));
 }
@@ -203,6 +203,72 @@ float4 LCDShutterOneEyePS(float2 tex : TEXCOORD0) : SV_Target
 
 			<state name="vertex_shader" value="PostProcessVS()"/>
 			<state name="pixel_shader" value="LCDShutterOneEyePS()"/>
+		</pass>
+	</technique>
+
+	<cbuffer name="oculus_vr">
+		<parameter type="float3" name="lens_center"/>
+		<parameter type="float3" name="screen_center"/>
+		<parameter type="float2" name="scale"/>
+		<parameter type="float2" name="scale_in"/>
+		<parameter type="float4" name="hmd_warp_param"/>
+		<parameter type="float4" name="chrom_ab_param"/>
+	</cbuffer>
+
+	<shader>
+		<![CDATA[
+float4 OculusVRPS(float2 tex : TEXCOORD0) : SV_Target
+{
+	float2 overlay_coord = (tex.x < 0.5f) ? float2(tex.x * 2, tex.y) : float2((tex.x - 0.5f) * 2, tex.y);
+	float4 lr_coord = CalcStereoCoord(overlay_coord);
+	float2 coord = (tex.x < 0.5f) ? (lr_coord.xy * float2(0.5f, 1)) : (lr_coord.zw * float2(0.5f, 1) + float2(0.5f, 0));
+	float2 lens_center_coord = (tex.x < 0.5f) ? lens_center.xz : lens_center.yz;
+	float2 screen_center_coord = (tex.x < 0.5f) ? screen_center.xz : screen_center.yz;
+	
+	float2 theta = (coord - lens_center_coord) * scale_in;
+	float rsq = theta.x * theta.x + theta.y * theta.y;
+	float2 theta1 = theta * (hmd_warp_param.x + hmd_warp_param.y * rsq
+		+ hmd_warp_param.z * rsq * rsq + hmd_warp_param.w * rsq * rsq * rsq);
+
+	// Detect whether blue texture coordinates are out of range since these will scaled out the furthest.
+	float2 theta_blue = theta1 * (chrom_ab_param.z + chrom_ab_param.w * rsq);
+	float2 tc_blue = lens_center_coord + scale * theta_blue;
+	if (any(clamp(tc_blue, screen_center_coord - float2(0.25f, 0.5f), screen_center_coord + float2(0.25f, 0.5f)) - tc_blue))
+	{
+		return 0;
+	}
+
+	// Now do blue texture lookup.
+	tc_blue.x = ((tex.x < 0.5f) ? tc_blue.x : (tc_blue.x - 0.5f)) * 2;
+	float blue = color_tex.Sample(point_sampler, tc_blue).b;
+
+	// Do green lookup (no scaling).
+	float2 tc_green = lens_center_coord + scale * theta1;
+	tc_green.x = ((tex.x < 0.5f) ? tc_green.x : (tc_green.x - 0.5f)) * 2;
+	float4 green_color = color_tex.Sample(point_sampler, tc_green);
+	float green = green_color.g;
+	float alpha = green_color.a;
+
+	// Do red scale and lookup.
+	float2 theta_red = theta1 * (chrom_ab_param.x + chrom_ab_param.y * rsq);
+	float2 tc_red = lens_center_coord + scale * theta_red;
+	tc_red.x = ((tex.x < 0.5f) ? tc_red.x : (tc_red.x - 0.5f)) * 2;
+	float red = color_tex.Sample(point_sampler, tc_red).r;
+
+	float4 scene = float4(red, green, blue, alpha);	
+	float4 overlay = overlay_tex.Sample(point_sampler, tc_green);
+	return lerp(scene, overlay, overlay.a);
+}
+		]]>
+	</shader>
+
+	<technique name="OculusVR">
+		<pass name="p0">
+			<state name="depth_enable" value="false"/>
+			<state name="depth_write_mask" value="0"/>
+
+			<state name="vertex_shader" value="PostProcessVS()"/>
+			<state name="pixel_shader" value="OculusVRPS()"/>
 		</pass>
 	</technique>
 </effect>

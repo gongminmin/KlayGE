@@ -432,6 +432,10 @@ namespace KlayGE
 				{
 					stereo_method = STM_Vertical;
 				}
+				else if (CT_HASH("oculus_vr") == method_str_hash)
+				{
+					stereo_method = STM_OculusVR;
+				}
 				else
 				{
 					stereo_method = STM_ColorAnaglyph_RedCyan;
@@ -690,6 +694,14 @@ namespace KlayGE
 
 			case STM_Vertical:
 				method_str = "vertical";
+				break;
+
+			case STM_OculusVR:
+				method_str = "oculus_vr";
+				break;
+
+			default:
+				method_str = "none";
 				break;
 			}
 			stereo_node->AppendAttrib(cfg_doc.AllocAttribString("method", method_str));

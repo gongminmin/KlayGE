@@ -123,4 +123,26 @@
 		</output>
 		<shader effect="Stereoscopic.fxml" tech="LCDShutterOneEye"/>
 	</post_processor>
+
+	<post_processor name="stereoscopic_oculus_vr">
+		<params>
+			<param name="separation"/>
+			<param name="zpd"/>
+			<param name="lens_center"/>
+			<param name="screen_center"/>
+			<param name="scale"/>
+			<param name="scale_in"/>
+			<param name="hmd_warp_param"/>
+			<param name="chrom_ab_param"/>
+		</params>
+		<input>
+			<pin name="color_tex"/>
+			<pin name="depth_tex"/>
+			<pin name="overlay_tex"/>
+		</input>
+		<output>
+			<pin name="output"/>
+		</output>
+		<shader effect="Stereoscopic.fxml" tech="OculusVR"/>
+	</post_processor>
 </post_processors>

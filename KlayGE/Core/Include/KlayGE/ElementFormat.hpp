@@ -837,7 +837,8 @@ namespace KlayGE
 		STM_HorizontalInterlacing,
 		STM_VerticalInterlacing,
 		STM_Horizontal,
-		STM_Vertical
+		STM_Vertical,
+		STM_OculusVR
 	};
 }
 
