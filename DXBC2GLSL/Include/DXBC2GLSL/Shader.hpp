@@ -380,17 +380,19 @@ struct ShaderProgram
 	std::vector<DXBCSignatureParamDesc> params_patch;//patch signature
 	std::vector<DXBCConstantBuffer> cbuffers;//constant buffers(including tbuffer)
 	std::vector<DXBCInputBindDesc> resource_bindings;
-
+	//gs stuff
 	ShaderPrimitive gs_input_primitive;
 	std::vector<ShaderPrimitiveTopology> gs_output_topology;
 	uint32_t max_gs_output_vertex;
 	uint32_t gs_instance_count;
-
+	//hs ds stuff
 	uint32_t hs_input_control_point_count;
 	uint32_t hs_output_control_point_count;
 	ShaderTessellatorDomain ds_tessellator_domain;
 	ShaderTessellatorPartitioning ds_tessellator_partitioning;
 	ShaderTessellatorOutputPrimitive ds_tessellator_output_primitive;
+	//cs stuff
+	uint32_t cs_thread_group_size[3];
 
 	ShaderProgram()
 		: gs_input_primitive(SP_Undefined), max_gs_output_vertex(0),
@@ -399,6 +401,7 @@ struct ShaderProgram
 			ds_tessellator_partitioning(STP_Undefined), ds_tessellator_output_primitive(STOP_Undefined)
 	{
 		memset(&version, 0, sizeof(version));
+		memset(cs_thread_group_size,0,sizeof(uint32_t)*3);
 	}
 };
 

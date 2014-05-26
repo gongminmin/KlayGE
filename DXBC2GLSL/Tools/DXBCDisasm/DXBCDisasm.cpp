@@ -10,7 +10,7 @@ void usage()
 	std::cerr << "Not affiliated with or endorsed by Microsoft in any way\n";
 	std::cerr << "Latest version available from http://www.klayge.org/\n";
 	std::cerr << "\n";
-	std::cerr << "Usage: fxdis FILE [OUTPUT]\n";
+	std::cerr << "Usage: DXBCDisasm FILE [OUTPUT]\n";
 	std::cerr << std::endl;
 }
 

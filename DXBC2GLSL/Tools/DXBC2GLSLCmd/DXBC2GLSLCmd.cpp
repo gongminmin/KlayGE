@@ -46,7 +46,7 @@ int main(int argc, char** argv)
 	try
 	{
 		DXBC2GLSL::DXBC2GLSL dxbc2glsl;
-		dxbc2glsl.FeedDXBC(&data[0], true, GSV_400);
+		dxbc2glsl.FeedDXBC(&data[0], true, GSV_430);
 		std::string glsl = dxbc2glsl.GLSLString();
 		if (!screen_only)
 		{
