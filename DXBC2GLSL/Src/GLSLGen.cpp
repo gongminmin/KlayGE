@@ -2850,7 +2850,7 @@ void GLSLGen::ToInstruction(std::ostream& out, ShaderInstruction const & insn) c
 	case SO_USUBB:
 		//usubb result borrow src0 src1
 		//result.xz=uvec4(usubBorrow(src0,src1,borrow)).xz;
-		//²îÎª¸ºÊýÊ±´æÔÚÎÊÌâ£¬¼ûhlsl msdn 
+		//ï¿½ï¿½Îªï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½â£¬ï¿½ï¿½hlsl msdn 
 		this->ToOperands(out, *insn.ops[0], oot | (oot << 8));
 		if (insn.ops[1]->type != SOT_NULL)
 		{
@@ -3009,7 +3009,7 @@ void GLSLGen::ToInstruction(std::ostream& out, ShaderInstruction const & insn) c
 		break;
 
 	case SO_F16TOF32:
-		//»ñÈ¡dest maskµÄ¸öÊý
+		//ï¿½ï¿½È¡dest maskï¿½Ä¸ï¿½ï¿½ï¿½
 		//for each select component
 		//dest.select_component=unpackHalf2x16(bitfieldExtract(src.select_component,0,16)).x;
 		num_comps = this->GetOperandComponentNum(*insn.ops[0]);
@@ -3029,7 +3029,7 @@ void GLSLGen::ToInstruction(std::ostream& out, ShaderInstruction const & insn) c
 		break;
 
 	case SO_F32TOF16:
-		//»ñÈ¡dest maskµÄ¸öÊý
+		//ï¿½ï¿½È¡dest maskï¿½Ä¸ï¿½ï¿½ï¿½
 		//for each component
 		//dest.select_component=bitfieldExtract(packHalf2x16(vec2(src.comp)),0,16);
 		num_comps = this->GetOperandComponentNum(*insn.ops[0]);
@@ -3258,7 +3258,7 @@ void GLSLGen::ToInstruction(std::ostream& out, ShaderInstruction const & insn) c
 
 	case SO_FTOD:
 		//ftod dest.mask src0.swwizle swwizle can only be xy or x or y
-		//»ñÈ¡maskµÄ¸öÊý£¬Ö»ÄÜÎª2»ò4£¨xy zw xyzw)
+		//ï¿½ï¿½È¡maskï¿½Ä¸ï¿½ï¿½ï¿½ï¿½ï¿½Ö»ï¿½ï¿½Îª2ï¿½ï¿½4ï¿½ï¿½xy zw xyzw)
 		num_comps = this->GetOperandComponentNum(*insn.ops[0]) / 2;
 		for (int i = 0; i < num_comps; i++)
 		{
@@ -3277,7 +3277,7 @@ void GLSLGen::ToInstruction(std::ostream& out, ShaderInstruction const & insn) c
 		break;
 
 	case SO_DTOF:
-		//»ñÈ¡maskµÄ¸öÊý£¬Ö»ÄÜÎª1»ò2£¨x y z w xy zx xw yz yw zw)
+		//ï¿½ï¿½È¡maskï¿½Ä¸ï¿½ï¿½ï¿½ï¿½ï¿½Ö»ï¿½ï¿½Îª1ï¿½ï¿½2ï¿½ï¿½x y z w xy zx xw yz yw zw)
 		num_comps = this->GetOperandComponentNum(*insn.ops[0]);
 		for (int i = 0; i < num_comps; i++)
 		{
@@ -3329,7 +3329,7 @@ void GLSLGen::ToInstruction(std::ostream& out, ShaderInstruction const & insn) c
 
 	case SO_DMOVC:
 		// TODO: to be tested
-		// »ñÈ¡dest maskµÄ¸öÊý£¬Ö»ÄÜÎª2»ò4£¨xy zw xyzw)
+		// ï¿½ï¿½È¡dest maskï¿½Ä¸ï¿½ï¿½ï¿½ï¿½ï¿½Ö»ï¿½ï¿½Îª2ï¿½ï¿½4ï¿½ï¿½xy zw xyzw)
 		num_comps = this->GetOperandComponentNum(*insn.ops[0]) / 2;
 		for (int i = 0; i < num_comps; i++)
 		{
@@ -3355,7 +3355,7 @@ void GLSLGen::ToInstruction(std::ostream& out, ShaderInstruction const & insn) c
 		break;
 
 	case SO_DLT:
-		// »ñÈ¡maskµÄ¸öÊý£¬Ö»ÄÜÎª1»ò2£¨x y z w xy zx xw yz yw zw)
+		// ï¿½ï¿½È¡maskï¿½Ä¸ï¿½ï¿½ï¿½ï¿½ï¿½Ö»ï¿½ï¿½Îª1ï¿½ï¿½2ï¿½ï¿½x y z w xy zx xw yz yw zw)
 		num_comps = this->GetOperandComponentNum(*insn.ops[0]);
 		for (int i = 0; i < num_comps; i++)
 		{
@@ -3385,7 +3385,7 @@ void GLSLGen::ToInstruction(std::ostream& out, ShaderInstruction const & insn) c
 		break;
 
 	case SO_DGE:
-		// »ñÈ¡maskµÄ¸öÊý£¬Ö»ÄÜÎª1»ò2£¨x y z w xy zx xw yz yw zw)
+		// ï¿½ï¿½È¡maskï¿½Ä¸ï¿½ï¿½ï¿½ï¿½ï¿½Ö»ï¿½ï¿½Îª1ï¿½ï¿½2ï¿½ï¿½x y z w xy zx xw yz yw zw)
 		num_comps = this->GetOperandComponentNum(*insn.ops[0]);
 		for (int i = 0; i < num_comps; i++)
 		{
@@ -3415,7 +3415,7 @@ void GLSLGen::ToInstruction(std::ostream& out, ShaderInstruction const & insn) c
 		break;
 
 	case SO_DEQ:
-		// »ñÈ¡maskµÄ¸öÊý£¬Ö»ÄÜÎª1»ò2£¨x y z w xy zx xw yz yw zw)
+		// ï¿½ï¿½È¡maskï¿½Ä¸ï¿½ï¿½ï¿½ï¿½ï¿½Ö»ï¿½ï¿½Îª1ï¿½ï¿½2ï¿½ï¿½x y z w xy zx xw yz yw zw)
 		num_comps = this->GetOperandComponentNum(*insn.ops[0]);
 		for (int i = 0; i < num_comps; i++)
 		{
@@ -3445,7 +3445,7 @@ void GLSLGen::ToInstruction(std::ostream& out, ShaderInstruction const & insn) c
 		break;
 
 	case SO_DNE:
-		// »ñÈ¡maskµÄ¸öÊý£¬Ö»ÄÜÎª1»ò2£¨x y z w xy zx xw yz yw zw)
+		// ï¿½ï¿½È¡maskï¿½Ä¸ï¿½ï¿½ï¿½ï¿½ï¿½Ö»ï¿½ï¿½Îª1ï¿½ï¿½2ï¿½ï¿½x y z w xy zx xw yz yw zw)
 		num_comps = this->GetOperandComponentNum(*insn.ops[0]);
 		for (int i = 0; i < num_comps; i++)
 		{
@@ -3475,7 +3475,7 @@ void GLSLGen::ToInstruction(std::ostream& out, ShaderInstruction const & insn) c
 		break;
 
 	case SO_DMAX:
-		// »ñÈ¡dest maskµÄ¸öÊý£¬Ö»ÄÜÎª2»ò4£¨xy zw xyzw)
+		// ï¿½ï¿½È¡dest maskï¿½Ä¸ï¿½ï¿½ï¿½ï¿½ï¿½Ö»ï¿½ï¿½Îª2ï¿½ï¿½4ï¿½ï¿½xy zw xyzw)
 		num_comps = this->GetOperandComponentNum(*insn.ops[0]) / 2;
 		for (int i = 0; i < num_comps; i++)
 		{
@@ -3500,7 +3500,7 @@ void GLSLGen::ToInstruction(std::ostream& out, ShaderInstruction const & insn) c
 		break;
 
 	case SO_DMIN:
-		// »ñÈ¡dest maskµÄ¸öÊý£¬Ö»ÄÜÎª2»ò4£¨xy zw xyzw)
+		// ï¿½ï¿½È¡dest maskï¿½Ä¸ï¿½ï¿½ï¿½ï¿½ï¿½Ö»ï¿½ï¿½Îª2ï¿½ï¿½4ï¿½ï¿½xy zw xyzw)
 		num_comps = this->GetOperandComponentNum(*insn.ops[0]) / 2;
 		for (int i = 0; i < num_comps; i++)
 		{
@@ -3525,7 +3525,7 @@ void GLSLGen::ToInstruction(std::ostream& out, ShaderInstruction const & insn) c
 		break;
 
 	case SO_DMUL:
-		// dest mask:xy zw xyzw ¸öÊý2»ò4
+		// dest mask:xy zw xyzw ï¿½ï¿½ï¿½ï¿½2ï¿½ï¿½4
 		num_comps = this->GetOperandComponentNum(*insn.ops[0]) / 2;
 		for (int i = 0; i < num_comps; i++)
 		{
@@ -5279,7 +5279,7 @@ void GLSLGen::ToInstruction(std::ostream& out, ShaderInstruction const & insn) c
 			case SO_DGE:
 			case SO_DEQ:
 				// TODO: to be tested
-				// ÕâËÄ¸öÖ¸Áîdest mask Îª1¸ö»ò2¸ö
+				// ï¿½ï¿½ï¿½Ä¸ï¿½Ö¸ï¿½ï¿½dest mask Îª1ï¿½ï¿½ï¿½ï¿½2ï¿½ï¿½
 				out << "\n";
 				this->ToOperands(out, *insn.ops[0], oot | (oot << 8));
 				out << " = clamp(";
@@ -5288,9 +5288,9 @@ void GLSLGen::ToInstruction(std::ostream& out, ShaderInstruction const & insn) c
 				break;
 
 			default:
-				//ÆäÓàÖ¸Áîdest maskÎª2¸ö»ò4¸ö
+				//ï¿½ï¿½ï¿½ï¿½Ö¸ï¿½ï¿½dest maskÎª2ï¿½ï¿½ï¿½ï¿½4ï¿½ï¿½
 				//dest.xy=uintBitsToFloat(unpackDouble2x32(clamp(packDouble2x32(floatBitsToUint(dest.xy)))));
-				//»ñÈ¡dest maskµÄ¸öÊý£¬Ö»ÄÜÎª2»ò4£¨xy zw xyzw)
+				//ï¿½ï¿½È¡dest maskï¿½Ä¸ï¿½ï¿½ï¿½ï¿½ï¿½Ö»ï¿½ï¿½Îª2ï¿½ï¿½4ï¿½ï¿½xy zw xyzw)
 				num_comps = this->GetOperandComponentNum(*insn.ops[0]) / 2;
 				for (int i = 0; i < num_comps; i++)
 				{
@@ -5459,7 +5459,7 @@ void GLSLGen::ToOperands(std::ostream& out, ShaderOperand const & op, uint32_t i
 	}
 	else
 	{
-		// Ó¦¸ÃÊÇÀàËÆv1 v2[2] o0 cb0[1]µÄÕâÖÖ±äÁ¿ÃûÐÎÊ½
+		// Ó¦ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½v1 v2[2] o0 cb0[1]ï¿½ï¿½ï¿½ï¿½ï¿½Ö±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê½
 
 		int flag = 0;
 		int64_t start = 0;
@@ -5491,8 +5491,8 @@ void GLSLGen::ToOperands(std::ostream& out, ShaderOperand const & op, uint32_t i
 
 		bool naked = false;
 		//ajudge whether it is naked
-		//nakedÎªtrue±íÊ¾ÓÐ³£Êýºó×ºÈçcb0[Êý×Ö»ò±í´ïÊ½]
-		//nakedÎªfalse±íÊ¾Ã»ÓÐ³£Êýºó×ºÈçv[Êý×Ö»ò±í´ïÊ½],ÓÃÓÚarray input variable
+		//nakedÎªtrueï¿½ï¿½Ê¾ï¿½Ð³ï¿½ï¿½ï¿½ï¿½ï¿½×ºï¿½ï¿½cb0[ï¿½ï¿½ï¿½Ö»ï¿½ï¿½ï¿½Ê½]
+		//nakedÎªfalseï¿½ï¿½Ê¾Ã»ï¿½Ð³ï¿½ï¿½ï¿½ï¿½ï¿½×ºï¿½ï¿½v[ï¿½ï¿½ï¿½Ö»ï¿½ï¿½ï¿½Ê½],ï¿½ï¿½ï¿½ï¿½array input variable
 		switch (op.type)
 		{
 		case SOT_TEMP:
@@ -5568,7 +5568,7 @@ void GLSLGen::ToOperands(std::ostream& out, ShaderOperand const & op, uint32_t i
 		{
 			for (uint32_t i = 0; i < op.num_indices; ++ i)
 			{
-				//µÚÒ»²ãË÷Òý²»ÐèÒª[]£¬Èçcb0[22]ÖÐ0ÎªµÚÒ»²ã,naked==falseÐèÒª[]
+				//ï¿½ï¿½Ò»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Òª[]ï¿½ï¿½ï¿½ï¿½cb0[22]ï¿½ï¿½0Îªï¿½ï¿½Ò»ï¿½ï¿½,naked==falseï¿½ï¿½Òª[]
 				if (!naked || i != 0)
 				{
 					out << '[';
@@ -7267,8 +7267,7 @@ void GLSLGen::FindHSForkPhases()
 {
 	std::vector<KlayGE::shared_ptr<ShaderDecl> >::const_iterator itr_dcl = program_->dcls.begin();
 	std::vector<KlayGE::shared_ptr<ShaderInstruction> >::const_iterator itr_insn = program_->insns.begin();
-	bool go=true;
-	while(go)
+	for (;;)
 	{
 		//find iterator to next hs_fork_phase.
 		for(; itr_dcl != program_->dcls.end(); ++itr_dcl)
