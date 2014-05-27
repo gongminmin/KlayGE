@@ -124,10 +124,14 @@ namespace KlayGE
 	{
 		if (sensor_)
 		{
-			orientation_quat_ = Quaternion(sfusion_.GetOrientation().x, 
-				sfusion_.GetOrientation().y,
-				sfusion_.GetOrientation().z,
-				sfusion_.GetOrientation().w);
+			OVR::Quatf const & quat = sfusion_.GetPredictedOrientation();
+			orientation_quat_ = Quaternion(quat.x, quat.y, quat.z, quat.w);
+
+			OVR::Vector3f const & accel = sfusion_.GetAcceleration();
+			accel_ = float3(accel.x, accel.y, accel.z);
+
+			OVR::Vector3f const & ang_vel = sfusion_.GetAngularVelocity();
+			angular_velocity_ = float3(ang_vel.x, ang_vel.y, ang_vel.z);
 		}
 	}
 
