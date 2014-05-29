@@ -35,8 +35,6 @@ namespace KlayGE
 
 		d3d_viewport_.MinDepth = 0.0f;
 		d3d_viewport_.MaxDepth = 1.0f;
-		d3d_viewport_.TopLeftX = 0;
-		d3d_viewport_.TopLeftY = 0;
 	}
 
 	D3D11FrameBuffer::~D3D11FrameBuffer()
@@ -171,6 +169,8 @@ namespace KlayGE
 	
 		if (!rt_view.empty())
 		{
+			d3d_viewport_.TopLeftX = static_cast<float>(viewport_->left);
+			d3d_viewport_.TopLeftY = static_cast<float>(viewport_->top);
 			d3d_viewport_.Width = static_cast<float>(viewport_->width);
 			d3d_viewport_.Height = static_cast<float>(viewport_->height);
 			re.RSSetViewports(1, &d3d_viewport_);
