@@ -775,7 +775,10 @@ namespace KlayGE
 		{
 			FrameBufferPtr const & fb = (0 == num_bind_output_) ? re.DefaultFrameBuffer() : frame_buffer_;
 			re.BindFrameBuffer(fb);
-			if (!technique_->Transparent())
+			ViewportPtr const & vp = fb->GetViewport();
+			if ((!technique_->Transparent()) && (0 == vp->left) && (0 == vp->top)
+				&& (fb->Width() == static_cast<uint32_t>(vp->width))
+				&& (fb->Height() == static_cast<uint32_t>(vp->height)))
 			{
 				fb->Discard(FrameBuffer::CBM_Color);
 			}
