@@ -751,7 +751,7 @@ namespace KlayGE
 		if (cs_based_)
 		{
 			re.BindFrameBuffer(re.DefaultFrameBuffer());
-			re.DefaultFrameBuffer()->Discard(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth | FrameBuffer::CBM_Stencil);
+			re.DefaultFrameBuffer()->Discard(FrameBuffer::CBM_Color);
 
 			ShaderObjectPtr const & so = technique_->Pass(0)->GetShaderObject();
 			uint32_t const bx = so->CSBlockSizeX() * cs_pixel_per_thread_x_;

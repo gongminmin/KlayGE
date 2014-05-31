@@ -2,9 +2,11 @@
 
 <effect>
 	<include name="PostProcess.fxml"/>
+	<include name="util.fxml"/>
 
 	<parameter type="float" name="separation"/>
 	<parameter type="float" name="zpd"/>
+	<parameter type="float2" name="near_q"/>
 	<parameter type="int" name="eye"/>
 	
 	<parameter type="sampler" name="point_sampler">
@@ -33,6 +35,9 @@ float4 CalcStereoCoord(float2 tc : TEXCOORD0)
 		min_depth_l = min(min_depth_l, depth_tex.Sample(point_sampler, tc + uv).x);
 		min_depth_r = min(min_depth_r, depth_tex.Sample(point_sampler, tc - uv).x);
 	}
+	
+	min_depth_l = non_linear_depth_to_linear(min_depth_l, near_q.x, near_q.y);
+	min_depth_r = non_linear_depth_to_linear(min_depth_r, near_q.x, near_q.y);
 	
 	float parallax_l = (min_depth_l > 0 ? separation * (1 - zpd / min_depth_l) : 0);
 	float parallax_r = (min_depth_r > 0 ? separation * (1 - zpd / min_depth_r) : 0);
@@ -219,12 +224,10 @@ float4 LCDShutterOneEyePS(float2 tex : TEXCOORD0) : SV_Target
 		<![CDATA[
 float4 OculusVRPS(float2 tex : TEXCOORD0) : SV_Target
 {
-	float2 overlay_coord = (tex.x < 0.5f) ? float2(tex.x * 2, tex.y) : float2((tex.x - 0.5f) * 2, tex.y);
-	float4 lr_coord = CalcStereoCoord(overlay_coord);
-	float2 coord = (tex.x < 0.5f) ? (lr_coord.xy * float2(0.5f, 1)) : (lr_coord.zw * float2(0.5f, 1) + float2(0.5f, 0));
+	float2 coord = tex;
 	float2 lens_center_coord = (tex.x < 0.5f) ? lens_center.xz : lens_center.yz;
 	float2 screen_center_coord = (tex.x < 0.5f) ? screen_center.xz : screen_center.yz;
-	
+
 	float2 theta = (coord - lens_center_coord) * scale_in;
 	float rsq = theta.x * theta.x + theta.y * theta.y;
 	float2 theta1 = theta * (hmd_warp_param.x + hmd_warp_param.y * rsq
@@ -240,11 +243,16 @@ float4 OculusVRPS(float2 tex : TEXCOORD0) : SV_Target
 
 	// Now do blue texture lookup.
 	tc_blue.x = ((tex.x < 0.5f) ? tc_blue.x : (tc_blue.x - 0.5f)) * 2;
+	float2 tc_overlay = tc_blue;
+	float4 lr_coord = CalcStereoCoord(tc_blue);
+	tc_blue = (tex.x < 0.5f) ? lr_coord.xy : lr_coord.zw;
 	float blue = color_tex.Sample(point_sampler, tc_blue).b;
 
 	// Do green lookup (no scaling).
 	float2 tc_green = lens_center_coord + scale * theta1;
 	tc_green.x = ((tex.x < 0.5f) ? tc_green.x : (tc_green.x - 0.5f)) * 2;
+	lr_coord = CalcStereoCoord(tc_green);
+	tc_green = (tex.x < 0.5f) ? lr_coord.xy : lr_coord.zw;
 	float4 green_color = color_tex.Sample(point_sampler, tc_green);
 	float green = green_color.g;
 	float alpha = green_color.a;
@@ -253,10 +261,12 @@ float4 OculusVRPS(float2 tex : TEXCOORD0) : SV_Target
 	float2 theta_red = theta1 * (chrom_ab_param.x + chrom_ab_param.y * rsq);
 	float2 tc_red = lens_center_coord + scale * theta_red;
 	tc_red.x = ((tex.x < 0.5f) ? tc_red.x : (tc_red.x - 0.5f)) * 2;
+	lr_coord = CalcStereoCoord(tc_red);
+	tc_red = (tex.x < 0.5f) ? lr_coord.xy : lr_coord.zw;
 	float red = color_tex.Sample(point_sampler, tc_red).r;
 
-	float4 scene = float4(red, green, blue, alpha);	
-	float4 overlay = overlay_tex.Sample(point_sampler, tc_green);
+	float4 scene = float4(red, green, blue, alpha);
+	float4 overlay = overlay_tex.Sample(point_sampler, tc_overlay);
 	return lerp(scene, overlay, overlay.a);
 }
 		]]>

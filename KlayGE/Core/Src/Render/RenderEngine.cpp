@@ -132,6 +132,7 @@ namespace KlayGE
 			cur_back_stencil_ref_(0),
 			cur_blend_factor_(1, 1, 1, 1),
 			cur_sample_mask_(0xFFFFFFFF),
+			default_fov_(PI / 4), default_render_width_scale_(1), default_render_height_scale_(1),
 			motion_frames_(0),
 			stereo_method_(STM_None), stereo_separation_(0),
 			fb_stage_(0), force_line_mode_(false)
@@ -177,7 +178,10 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void RenderEngine::CreateRenderWindow(std::string const & name, RenderSettings& settings)
 	{
-		stereo_separation_ = settings.stereo_separation;
+		if (settings.stereo_method != STM_OculusVR)
+		{
+			stereo_separation_ = settings.stereo_separation;
+		}
 		this->DoCreateRenderWindow(name, settings);
 		this->CheckConfig(settings);
 		RenderDeviceCaps const & caps = this->DeviceCaps();
@@ -186,8 +190,8 @@ namespace KlayGE
 
 		uint32_t const screen_width = screen_frame_buffer_->Width();
 		uint32_t const screen_height = screen_frame_buffer_->Height();
-		uint32_t const render_width = settings.width;
-		uint32_t const render_height = settings.height;
+		uint32_t const render_width = static_cast<uint32_t>(settings.width * default_render_width_scale_ + 0.5f);
+		uint32_t const render_height = static_cast<uint32_t>(settings.height * default_render_height_scale_ + 0.5f);
 
 		hdr_enabled_ = settings.hdr;
 		if (settings.hdr)
@@ -923,6 +927,11 @@ namespace KlayGE
 			{
 				stereoscopic_pp_->SetParam(0, stereo_separation_);
 				stereoscopic_pp_->SetParam(1, screen_frame_buffer_->GetViewport()->camera->NearPlane());
+
+				CameraPtr const & camera = screen_frame_buffer_->GetViewport()->camera;
+				float q = camera->FarPlane() / (camera->FarPlane() - camera->NearPlane());
+				float2 near_q(camera->NearPlane() * q, q);
+				stereoscopic_pp_->SetParam(2, near_q);
 			}
 			if (stereo_method_ != STM_LCDShutter)
 			{
@@ -947,12 +956,12 @@ namespace KlayGE
 					float2 scale((w / 2) * scale_factor, (h / 2) * scale_factor * aspect);
 					float2 scale_in(2 / w, 2 / h / aspect);
 
-					stereoscopic_pp_->SetParam(2, lens_center);
-					stereoscopic_pp_->SetParam(3, screen_center);
-					stereoscopic_pp_->SetParam(4, scale);
-					stereoscopic_pp_->SetParam(5, scale_in);
-					stereoscopic_pp_->SetParam(6, ovr_hmd_warp_param_);
-					stereoscopic_pp_->SetParam(7, ovr_chrom_ab_param_);
+					stereoscopic_pp_->SetParam(3, lens_center);
+					stereoscopic_pp_->SetParam(4, screen_center);
+					stereoscopic_pp_->SetParam(5, scale);
+					stereoscopic_pp_->SetParam(6, scale_in);
+					stereoscopic_pp_->SetParam(7, ovr_hmd_warp_param_);
+					stereoscopic_pp_->SetParam(8, ovr_chrom_ab_param_);
 				}
 
 				stereoscopic_pp_->Render();

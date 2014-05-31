@@ -146,6 +146,23 @@ namespace KlayGE
 		void GammaEnabled(bool gamma);
 		void ColorGradingEnabled(bool cg);
 
+		float DefaultFOV() const
+		{
+			return default_fov_;
+		}
+		void DefaultFOV(float fov)
+		{
+			default_fov_ = fov;
+		}
+		void DefaultRenderWidthScale(float scale)
+		{
+			default_render_width_scale_ = scale;
+		}
+		void DefaultRenderHeightScale(float scale)
+		{
+			default_render_height_scale_ = scale;
+		}
+
 		// Render a frame when no pending message
 		virtual void Refresh();
 
@@ -276,6 +293,10 @@ namespace KlayGE
 		BlendStateObjectPtr cur_bs_obj_;
 		Color cur_blend_factor_;
 		uint32_t cur_sample_mask_;
+
+		float default_fov_;
+		float default_render_width_scale_;
+		float default_render_height_scale_;
 
 		uint32_t motion_frames_;
 

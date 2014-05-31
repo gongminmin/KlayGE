@@ -1896,7 +1896,7 @@ namespace KlayGE
 		this->EnableFramebufferSRGB(false);
 
 		glDrawBuffer((0 == eye) ? GL_BACK_LEFT : GL_BACK_RIGHT);
-		stereoscopic_pp_->SetParam(2, eye);
+		stereoscopic_pp_->SetParam(3, eye);
 		stereoscopic_pp_->Render();
 	}
 

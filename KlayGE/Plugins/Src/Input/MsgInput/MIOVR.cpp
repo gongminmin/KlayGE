@@ -86,7 +86,7 @@ namespace KlayGE
 
 		if (hmd_info_.HScreenSize > 0.0f)
 		{
-			if (hmd_info_.HScreenSize > 0.140f) // 7"
+			if (hmd_info_.HScreenSize > 0.140f) // 7" screen
 			{
 				sconfig_.SetDistortionFitPointVP(-1.0f, 0.0f);
 			}
@@ -98,10 +98,18 @@ namespace KlayGE
 
 		sconfig_.Set2DAreaFov(DegreeToRad(85.0f));
 
-		OVR::Util::Render::StereoEyeParams left_eye = sconfig_.GetEyeRenderParams(OVR::Util::Render::StereoEye_Left);
+		Util::Render::StereoEyeParams left_eye = sconfig_.GetEyeRenderParams(Util::Render::StereoEye_Left);
+		float scale = sconfig_.GetDistortionScale();
 
 		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-		re.OVRScale(sconfig_.GetDistortionScale());
+		if (hmd_info_.VScreenSize > 0)
+		{
+			re.DefaultFOV(atan(hmd_info_.VScreenSize / 2 * scale / hmd_info_.EyeToScreenDistance) * 2);
+			re.DefaultRenderWidthScale(scale / 2);
+			re.DefaultRenderHeightScale(scale);
+			re.StereoSeparation(-hmd_info_.InterpupillaryDistance * scale);
+		}
+		re.OVRScale(scale);
 		re.OVRHMDWarpParam(float4(left_eye.pDistortion->K));
 		re.OVRChromAbParam(float4(left_eye.pDistortion->ChromaticAberration));
 		re.OVRXCenterOffset(left_eye.pDistortion->XCenterOffset);

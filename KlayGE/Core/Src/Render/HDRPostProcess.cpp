@@ -98,7 +98,7 @@ namespace KlayGE
 	{
 		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 		re.BindFrameBuffer(re.DefaultFrameBuffer());
-		re.DefaultFrameBuffer()->Discard(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth | FrameBuffer::CBM_Stencil);
+		re.DefaultFrameBuffer()->Discard(FrameBuffer::CBM_Color);
 
 		*(technique_->Effect().ParameterByName("dst_tex_dim")) = int2(64, 64);
 
@@ -190,7 +190,7 @@ namespace KlayGE
 	{
 		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 		re.BindFrameBuffer(re.DefaultFrameBuffer());
-		re.DefaultFrameBuffer()->Discard(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth | FrameBuffer::CBM_Stencil);
+		re.DefaultFrameBuffer()->Discard(FrameBuffer::CBM_Color);
 
 		this->OnRenderBegin();
 		re.Dispatch(*technique_, 1, 1, 1);

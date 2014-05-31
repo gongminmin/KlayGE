@@ -1340,7 +1340,7 @@ namespace KlayGE
 				vp.MaxDepth = 1;
 
 				d3d_imm_ctx_->RSSetViewports(1, &vp);
-				stereoscopic_pp_->SetParam(2, eye);
+				stereoscopic_pp_->SetParam(3, eye);
 				stereoscopic_pp_->Render();
 			}
 			break;
@@ -1359,7 +1359,7 @@ namespace KlayGE
 				vp.TopLeftX = (0 == eye) ? 0 : vp.Width;
 
 				d3d_imm_ctx_->RSSetViewports(1, &vp);
-				stereoscopic_pp_->SetParam(2, eye);
+				stereoscopic_pp_->SetParam(3, eye);
 				stereoscopic_pp_->Render();
 		
 				if (0 == eye)
@@ -1393,7 +1393,7 @@ namespace KlayGE
 				vp.MaxDepth = 1;
 
 				d3d_imm_ctx_->RSSetViewports(1, &vp);
-				stereoscopic_pp_->SetParam(2, eye);
+				stereoscopic_pp_->SetParam(3, eye);
 				stereoscopic_pp_->Render();
 			}
 			break;
