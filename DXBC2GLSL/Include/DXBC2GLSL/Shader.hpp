@@ -401,7 +401,7 @@ struct ShaderProgram
 			ds_tessellator_partitioning(STP_Undefined), ds_tessellator_output_primitive(STOP_Undefined)
 	{
 		memset(&version, 0, sizeof(version));
-		memset(cs_thread_group_size,0,sizeof(uint32_t)*3);
+		memset(cs_thread_group_size, 0, sizeof(cs_thread_group_size));
 	}
 };
 

@@ -457,19 +457,18 @@ void ASMGen::Disasm(std::ostream& out, ShaderDecl const & dcl)
 
 	case SO_DCL_RESOURCE_STRUCTURED:
 	case SO_DCL_UNORDERED_ACCESS_VIEW_STRUCTURED:
-		out << ' ' <<dcl.structured.stride;
+		out << ' ' << dcl.structured.stride;
 		break;
 
 	case SO_DCL_THREAD_GROUP_SHARED_MEMORY_STRUCTURED:
-		out << ' ' <<dcl.structured.stride
-			<< ' ' <<dcl.structured.count;
+		out << ' ' << dcl.structured.stride
+			<< ' ' << dcl.structured.count;
 		break;
 
 	case SO_DCL_THREAD_GROUP:
-		out <<' '
-			<< dcl.thread_group_size[0] << ','
-			<< dcl.thread_group_size[1] << ','
-			<< dcl.thread_group_size[2];
+		out << ' ' << dcl.thread_group_size[0]
+			<< ',' << dcl.thread_group_size[1]
+			<< ',' << dcl.thread_group_size[2];
 		break;
 
 	default:
@@ -487,21 +486,21 @@ void ASMGen::Disasm(std::ostream& out, ShaderInstruction const & insn)
 	{
 		out << "_sat";
 	}
-	if(SO_SYNC == insn.opcode)
+	if (SO_SYNC == insn.opcode)
 	{
-		if(insn.sync.uav_global)
+		if (insn.sync.uav_global)
 		{
 			out << "_uglobal";
 		}
-		if(insn.sync.uav_group)
+		if (insn.sync.uav_group)
 		{
 			out << "_ugroup";
 		}
-		if(insn.sync.shared_memory)
+		if (insn.sync.shared_memory)
 		{
 			out << "_g";
 		}
-		if(insn.sync.threads_in_group)
+		if (insn.sync.threads_in_group)
 		{
 			out << "_t";
 		}

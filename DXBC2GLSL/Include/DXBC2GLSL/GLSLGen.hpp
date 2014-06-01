@@ -96,12 +96,14 @@ private:
 	void ToDeclaration(std::ostream& out, ShaderDecl const & dcl);
 	void ToInstruction(std::ostream& out, ShaderInstruction const & insn) const;
 	void ToOperands(std::ostream& out, ShaderOperand const & op, uint32_t imm_as_type,
-		bool mask = true, bool dcl_array = false, bool no_swizzle = false, bool no_idx = false, bool no_cast = false,ShaderInputType const & sit=SIT_UNDEFINED) const;
+		bool mask = true, bool dcl_array = false, bool no_swizzle = false, bool no_idx = false, bool no_cast = false,
+		ShaderInputType const & sit = SIT_UNDEFINED) const;
 	ShaderImmType OperandAsType(ShaderOperand const & op, uint32_t imm_as_type) const;
 	int ToSingleComponentSelector(std::ostream& out, ShaderOperand const & op, int i, bool dot = true) const;
 	void ToOperandName(std::ostream& out, ShaderOperand const & op, ShaderImmType as_type,
-		bool* need_idx, bool* need_comps, bool no_swizzle = false, bool no_idx = false,ShaderInputType const & sit=SIT_UNDEFINED) const;
-	void ToComponentSelectors(std::ostream& out, ShaderOperand const & op, bool dot = true,uint32_t offset = 0) const;
+		bool* need_idx, bool* need_comps, bool no_swizzle = false, bool no_idx = false,
+		ShaderInputType const & sit = SIT_UNDEFINED) const;
+	void ToComponentSelectors(std::ostream& out, ShaderOperand const & op, bool dot = true, uint32_t offset = 0) const;
 	void ToTemps(std::ostream& out, ShaderDecl const & dcl);
 	void ToDefaultValue(std::ostream& out, DXBCShaderVariable const & var);
 	void ToDefaultValue(std::ostream& out, DXBCShaderVariable const & var, uint32_t offset);

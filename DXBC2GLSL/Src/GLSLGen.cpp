@@ -317,7 +317,7 @@ void GLSLGen::ToGLSL(std::ostream& out)
 		out << ") out;\n\n";
 	}
 
-	if(ST_CS == shader_type_)
+	if (ST_CS == shader_type_)
 	{
 		out << "layout (local_size_x = " << program_->cs_thread_group_size[0]
 		<<", local_size_y = " << program_->cs_thread_group_size[1]
@@ -406,7 +406,7 @@ void GLSLGen::ToDclInterShaderInputRecords(std::ostream& out)
 	{
 		if (SN_UNDEFINED == program_->params_in[i].system_value_type)
 		{
-			if (!strcmp("POSITION", program_->params_in[i].semantic_name))
+			if ((shader_type_ != ST_VS) && !strcmp("POSITION", program_->params_in[i].semantic_name))
 			{
 				continue;
 			}
@@ -427,7 +427,7 @@ void GLSLGen::ToDclInterShaderInputRecords(std::ostream& out)
 				}
 			}
 
-			if ((glsl_rules_ & GSR_PSInterpolation) && ST_PS == shader_type_)
+			if ((glsl_rules_ & GSR_PSInterpolation) && (ST_PS == shader_type_))
 			{
 				switch (interpolation)
 				{
@@ -1492,34 +1492,33 @@ void GLSLGen::ToDeclaration(std::ostream& out, ShaderDecl const & dcl)
 			}
 		}
 		break;
+
 	case SO_DCL_RESOURCE_STRUCTURED:
 		{
 			out << "layout(std430) buffer ";
-			DXBCInputBindDesc const & desc = this->GetResourceDesc(SIT_STRUCTURED,static_cast<uint32_t>(dcl.op->indices[0].disp));
-			out << ShaderOperandTypeShortName(dcl.op->type)
-				<< dcl.op->indices[0].disp << " {\n";
-			DXBCConstantBuffer const & cbuffer = this->GetConstantBuffer(SCBT_RESOURCE_BIND_INFO,desc.name);
-			BOOST_ASSERT(cbuffer.vars[0].has_type_desc && "cbuffer vars must have type desc.");
+			DXBCInputBindDesc const & desc = this->GetResourceDesc(SIT_STRUCTURED,
+				static_cast<uint32_t>(dcl.op->indices[0].disp));
+			out << ShaderOperandTypeShortName(dcl.op->type) << dcl.op->indices[0].disp << " {\n";
+			DXBCConstantBuffer const & cbuffer = this->GetConstantBuffer(SCBT_RESOURCE_BIND_INFO, desc.name);
+			BOOST_ASSERT_MSG(cbuffer.vars[0].has_type_desc, "cbuffer vars must have type desc.");
 			switch (cbuffer.vars[0].type_desc.var_class)
 			{
-				case SVC_VECTOR:
-				out << cbuffer.vars[0].type_desc.name
-					<< cbuffer.vars[0].type_desc.columns;
+			case SVC_VECTOR:
+				out << cbuffer.vars[0].type_desc.name << cbuffer.vars[0].type_desc.columns;
 				break;
 
-				case SVC_SCALAR:
-					out << cbuffer.vars[0].type_desc.name;
+			case SVC_SCALAR:
+				out << cbuffer.vars[0].type_desc.name;
 				break;
 
-				default:
-					BOOST_ASSERT(false);
+			default:
+				BOOST_ASSERT(false);
 				break;
 			}
-			out << " "
-				<< desc.name
-				<<"[];\n}\n";
+			out << " " << desc.name <<"[];\n}\n";
 		}
 		break;
+
 	case SO_DCL_GLOBAL_FLAGS:
 		// TODO: ignore it for now
 		break;
@@ -1531,29 +1530,26 @@ void GLSLGen::ToDeclaration(std::ostream& out, ShaderDecl const & dcl)
 	case SO_DCL_UNORDERED_ACCESS_VIEW_STRUCTURED:
 		{
 			out << "layout(std430) buffer ";
-			DXBCInputBindDesc const & desc = this->GetResourceDesc(SIT_UAV_RWSTRUCTURED,static_cast<uint32_t>(dcl.op->indices[0].disp));
-			out << ShaderOperandTypeShortName(dcl.op->type)
-				<< dcl.op->indices[0].disp << " {\n";
-			DXBCConstantBuffer const & cbuffer = this->GetConstantBuffer(SCBT_RESOURCE_BIND_INFO,desc.name);
-			BOOST_ASSERT(cbuffer.vars[0].has_type_desc && "cbuffer vars must have type desc.");
+			DXBCInputBindDesc const & desc = this->GetResourceDesc(SIT_UAV_RWSTRUCTURED,
+				static_cast<uint32_t>(dcl.op->indices[0].disp));
+			out << ShaderOperandTypeShortName(dcl.op->type) << dcl.op->indices[0].disp << " {\n";
+			DXBCConstantBuffer const & cbuffer = this->GetConstantBuffer(SCBT_RESOURCE_BIND_INFO, desc.name);
+			BOOST_ASSERT_MSG(cbuffer.vars[0].has_type_desc, "cbuffer vars must have type desc.");
 			switch (cbuffer.vars[0].type_desc.var_class)
 			{
-				case SVC_VECTOR:
-				out << cbuffer.vars[0].type_desc.name
-					<< cbuffer.vars[0].type_desc.columns;
+			case SVC_VECTOR:
+				out << cbuffer.vars[0].type_desc.name << cbuffer.vars[0].type_desc.columns;
 				break;
 
-				case SVC_SCALAR:
-					out << cbuffer.vars[0].type_desc.name;
+			case SVC_SCALAR:
+				out << cbuffer.vars[0].type_desc.name;
 				break;
 
-				default:
-					BOOST_ASSERT(false);
+			default:
+				BOOST_ASSERT(false);
 				break;
 			}
-			out << " "
-				<<desc.name
-				<<"[];\n}\n";
+			out << " " <<desc.name <<"[];\n}\n";
 		}
 		break;
 
@@ -1618,12 +1614,13 @@ void GLSLGen::ToDeclaration(std::ostream& out, ShaderDecl const & dcl)
 	case SO_DCL_THREAD_GROUP_SHARED_MEMORY_STRUCTURED:
 		{
 			out << "shared ";
-			BOOST_ASSERT( (dcl.structured.stride <= 16) && "thread group shared memory size can't exceed 16 bytes");
-			size_t elem_num=dcl.structured.stride/4;
-			if(1 == elem_num)
+			BOOST_ASSERT_MSG(dcl.structured.stride <= 16, "thread group shared memory size can't exceed 16 bytes");
+			size_t elem_num=dcl.structured.stride / 4;
+			if (1 == elem_num)
 			{
 				out << "float";
-			}else if(elem_num > 1)
+			}
+			else if (elem_num > 1)
 			{
 				out << "vec" << elem_num;
 			}
@@ -3239,6 +3236,7 @@ void GLSLGen::ToInstruction(std::ostream& out, ShaderInstruction const & insn) c
 			}
 		}
 		break;
+
 		//memory barrier and synchronization
 	case SO_SYNC:
 		if(insn.sync.uav_global)
@@ -4978,19 +4976,21 @@ void GLSLGen::ToInstruction(std::ostream& out, ShaderInstruction const & insn) c
 		case SOT_RESOURCE:
 			sit = SIT_STRUCTURED;
 			break;
+
 		case SOT_UNORDERED_ACCESS_VIEW:
 		case SOT_THREAD_GROUP_SHARED_MEMORY:
 			sit = SIT_UAV_RWSTRUCTURED;
 			break;
+
 		default:
 			BOOST_ASSERT(false);
 			break;
 		}
-		this->ToOperands(out, *insn.ops[3], oit, false,false,false,false,false,sit);
+		this->ToOperands(out, *insn.ops[3], oit, false, false, false, false, false,sit);
 		out << "[";
 		this->ToOperands(out, *insn.ops[1], SIT_UInt);
 		out << "]";
-		this->ToComponentSelectors(out, *insn.ops[3],true,static_cast<uint32_t>(insn.ops[2]->imm_values[0].u32)/4);
+		this->ToComponentSelectors(out, *insn.ops[3], true, static_cast<uint32_t>(insn.ops[2]->imm_values[0].u32) / 4);
 		out << ")";
 		this->ToComponentSelectors(out, *insn.ops[0]);
 		out << ";";
@@ -4999,11 +4999,11 @@ void GLSLGen::ToInstruction(std::ostream& out, ShaderInstruction const & insn) c
 	case SO_STORE_STRUCTURED:
 		//store_structured dst0[.write_mask], dstAddress[.select_component], dstByteOffset[.select_component], src0[.swizzle]
 		//dst0[dstAddress[.select_component]][.write_mask]=src0[.swizzle]
-		this->ToOperands(out, *insn.ops[0], oot | (oot << 8), false,false,false,false,false,SIT_UAV_RWSTRUCTURED);
+		this->ToOperands(out, *insn.ops[0], oot | (oot << 8), false, false, false, false, false, SIT_UAV_RWSTRUCTURED);
 		out << "[";
 		this->ToOperands(out, *insn.ops[1], SIT_UInt);
 		out << "]";
-		this->ToComponentSelectors(out, *insn.ops[0],true,static_cast<uint32_t>(insn.ops[2]->imm_values[0].u32)/4);
+		this->ToComponentSelectors(out, *insn.ops[0], true, static_cast<uint32_t>(insn.ops[2]->imm_values[0].u32) / 4);
 		out << " = vec4(";
 		this->ToOperands(out, *insn.ops[3], oit, true);
 		out <<")";
@@ -5334,7 +5334,7 @@ void GLSLGen::ToInstruction(std::ostream& out, ShaderInstruction const & insn) c
 }
 
 void GLSLGen::ToOperands(std::ostream& out, ShaderOperand const & op, uint32_t imm_as_type,
-		bool mask, bool dcl_array, bool no_swizzle, bool no_idx, bool no_cast,ShaderInputType const & sit) const
+		bool mask, bool dcl_array, bool no_swizzle, bool no_idx, bool no_cast, ShaderInputType const & sit) const
 {
 	ShaderImmType imm_type = static_cast<ShaderImmType>(imm_as_type & 0xFF);
 	ShaderImmType as_type = static_cast<ShaderImmType>(imm_as_type >> 8);
@@ -5566,7 +5566,7 @@ void GLSLGen::ToOperands(std::ostream& out, ShaderOperand const & op, uint32_t i
 		}
 
 		// output operand name 
-		this->ToOperandName(out, op, as_type, &whether_output_idx, &whether_output_comps, no_swizzle, no_idx,sit);
+		this->ToOperandName(out, op, as_type, &whether_output_idx, &whether_output_comps, no_swizzle, no_idx, sit);
 
 		// output index
 		// constant buffer is mapped to variable name,does not need index.
@@ -5836,7 +5836,7 @@ ShaderImmType GLSLGen::OperandAsType(ShaderOperand const & op, uint32_t imm_as_t
 }
 
 void GLSLGen::ToOperandName(std::ostream& out, ShaderOperand const & op, ShaderImmType as_type,
-		bool* need_idx, bool* need_comps, bool no_swizzle, bool no_idx,ShaderInputType const & sit) const
+		bool* need_idx, bool* need_comps, bool no_swizzle, bool no_idx, ShaderInputType const & sit) const
 {
 	*need_comps = true;
 	*need_idx = true;
@@ -6096,7 +6096,7 @@ void GLSLGen::ToOperandName(std::ostream& out, ShaderOperand const & op, ShaderI
 	}
 	else if (SOT_RESOURCE == op.type)
 	{
-		ShaderInputType type=SIT_TEXTURE;
+		ShaderInputType type = SIT_TEXTURE;
 		if(SIT_UNDEFINED != sit)
 		{
 			type = sit;
@@ -6108,7 +6108,7 @@ void GLSLGen::ToOperandName(std::ostream& out, ShaderOperand const & op, ShaderI
 	}
 	else if (SOT_UNORDERED_ACCESS_VIEW == op.type)
 	{
-		ShaderInputType type=SIT_UAV_RWTYPED;
+		ShaderInputType type = SIT_UAV_RWTYPED;
 		if(SIT_UNDEFINED != sit)
 		{
 			type = sit;
@@ -6428,7 +6428,7 @@ void GLSLGen::ToOperandName(std::ostream& out, ShaderOperand const & op, ShaderI
 	else if (SOT_INPUT_THREAD_ID_IN_GROUP_FLATTENED == op.type)
 	{
 		out << "gl_LocalInvocationIndex";
-		*need_idx=false;
+		*need_idx = false;
 	}
 	else
 	{
@@ -6508,17 +6508,17 @@ void GLSLGen::ToComponentSelectors(std::ostream& out, ShaderOperand const & op, 
 				{
 					out << '.';
 				}
-				this->ToComponentSelector(out, this->ComponentSelectorFromMask(op.mask, op.comps),offset);
+				this->ToComponentSelector(out, this->ComponentSelectorFromMask(op.mask, op.comps), offset);
 				break;
 
 			case SOSM_SWIZZLE:
 				out << '.';
-				this->ToComponentSelector(out, this->ComponentSelectorFromSwizzle(op.swizzle, op.comps),offset);
+				this->ToComponentSelector(out, this->ComponentSelectorFromSwizzle(op.swizzle, op.comps), offset);
 				break;
 
 			case SOSM_SCALAR:
 				out << '.';
-				this->ToComponentSelector(out, this->ComponentSelectorFromScalar(op.swizzle[0]),offset);
+				this->ToComponentSelector(out, this->ComponentSelectorFromScalar(op.swizzle[0]), offset);
 				break;
 
 			default:
@@ -6569,7 +6569,7 @@ int GLSLGen::GetOperandComponentNum(ShaderOperand const & op) const
 
 ShaderRegisterComponentType GLSLGen::GetOutputParamType(ShaderOperand const & op) const
 {
-	if (SOT_OUTPUT == op.type )
+	if (SOT_OUTPUT == op.type)
 	{
 		for (std::vector<DXBCSignatureParamDesc>::const_iterator iter = program_->params_out.begin();
 			iter != program_->params_out.end(); ++ iter)
@@ -7274,7 +7274,7 @@ void GLSLGen::ToComponentSelector(std::ostream& out, uint32_t comps, uint32_t of
 		uint32_t comp = (comps >> (i * 8)) & 0xFF;
 		if (comp != 0xFF)
 		{
-			out << "xyzw"[comp+offset];
+			out << "xyzw"[comp + offset];
 		}
 	}
 }
@@ -7285,7 +7285,7 @@ void GLSLGen::FindHSForkPhases()
 	std::vector<KlayGE::shared_ptr<ShaderInstruction> >::const_iterator itr_insn = program_->insns.begin();
 	for (;;)
 	{
-		//find iterator to next hs_fork_phase.
+		// find iterator to next hs_fork_phase.
 		for (; itr_dcl != program_->dcls.end(); ++ itr_dcl)
 		{
 			if (SO_HS_FORK_PHASE == (*itr_dcl)->opcode)
@@ -7295,7 +7295,7 @@ void GLSLGen::FindHSForkPhases()
 		}
 		if (itr_dcl == program_->dcls.end())
 		{
-			//all the hs_fork_phase are found.
+			// all the hs_fork_phase are found.
 			break;
 		}
 		HSForkPhase phase;
@@ -7311,7 +7311,7 @@ void GLSLGen::FindHSForkPhases()
 		{
 			if (SO_HS_FORK_PHASE == (*itr_dcl1)->opcode)
 			{
-				//traverse dcls at the begin of next hs_fork_phase part
+				// traverse dcls at the begin of next hs_fork_phase part
 				break;
 			}
 			if (SO_DCL_HS_FORK_PHASE_INSTANCE_COUNT == (*itr_dcl1)->opcode)
@@ -7362,7 +7362,7 @@ void GLSLGen::FindHSControlPointPhase()
 		{
 			phase.insns.push_back(*itr_insn1);
 		}
-		//add ret;
+		// add ret;
 		phase.insns.push_back(*itr_insn1);
 		hs_control_point_phase_.push_back(phase);
 
@@ -7382,12 +7382,12 @@ void GLSLGen::ToHSForkPhases(std::ostream& out)
 {
 	ToDclInterShaderPatchConstantRegisters(out);
 
-	//set enter_hs_fork_phase to true;
+	// set enter_hs_fork_phase to true;
 	if (!this->hs_fork_phases_.empty())
 	{
 		enter_hs_fork_phase_ = true;
 	}
-	//convert instructions of all the hs fork phase
+	// convert instructions of all the hs fork phase
 	std::vector<HSForkPhase>::const_iterator itr = this->hs_fork_phases_.begin();
 	for (; itr != this->hs_fork_phases_.end(); ++ itr)
 	{
@@ -7395,7 +7395,7 @@ void GLSLGen::ToHSForkPhases(std::ostream& out)
 		{
 			enter_final_hs_fork_phase_ = true;
 		}
-		//add a for(){} to iterate each hs_fork_phase instance
+		// add a for(){} to iterate each hs_fork_phase instance
 		if (itr->fork_instance_count > 0)
 		{
 			out << "\nfor (int vForkInstanceID = 0; vForkInstanceID < " << itr->fork_instance_count
@@ -7411,7 +7411,7 @@ void GLSLGen::ToHSForkPhases(std::ostream& out)
 			}
 		}
 
-		//end of for(){}
+		// end of for(){}
 		if (itr->fork_instance_count > 0)
 		{
 			out << "}\n";

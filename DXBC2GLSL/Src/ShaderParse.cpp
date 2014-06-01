@@ -559,7 +559,7 @@ struct ShaderParser
 				case SO_INTERFACE_CALL:
 					insn->num = this->Read32();
 					break;
-		
+
 				default:
 					break;
 				}
