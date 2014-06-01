@@ -215,13 +215,17 @@ namespace KlayGE
 		virtual void Value(std::vector<float4>& val) const;
 		virtual void Value(std::vector<float4x4>& val) const;
 
-		virtual void BindToCBuffer(RenderEffectConstantBuffer* cbuff, uint32_t offset);
+		virtual void BindToCBuffer(RenderEffectConstantBuffer* cbuff, uint32_t offset, uint32_t stride);
 		virtual void RebindToCBuffer(RenderEffectConstantBuffer* cbuff);
 		virtual bool InCBuffer() const
 		{
 			return false;
 		}
 		virtual uint32_t CBufferOffset() const
+		{
+			return 0;
+		}
+		virtual uint32_t Stride() const
 		{
 			return 0;
 		}
@@ -255,8 +259,8 @@ namespace KlayGE
 		{
 			if (in_cbuff_)
 			{
-				*(data_.cbuff_offset.cbuff->VariableInBuff<T>(data_.cbuff_offset.offset)) = value;
-				data_.cbuff_offset.cbuff->Dirty(true);
+				*(data_.cbuff_desc.cbuff->VariableInBuff<T>(data_.cbuff_desc.offset)) = value;
+				data_.cbuff_desc.cbuff->Dirty(true);
 			}
 			else
 			{
@@ -269,7 +273,7 @@ namespace KlayGE
 		{
 			if (in_cbuff_)
 			{
-				val = *(data_.cbuff_offset.cbuff->VariableInBuff<T>(data_.cbuff_offset.offset));
+				val = *(data_.cbuff_desc.cbuff->VariableInBuff<T>(data_.cbuff_desc.offset));
 			}
 			else
 			{
@@ -277,16 +281,17 @@ namespace KlayGE
 			}
 		}
 
-		virtual void BindToCBuffer(RenderEffectConstantBuffer* cbuff, uint32_t offset) KLAYGE_OVERRIDE
+		virtual void BindToCBuffer(RenderEffectConstantBuffer* cbuff, uint32_t offset, uint32_t stride) KLAYGE_OVERRIDE
 		{
 			if (!in_cbuff_)
 			{
 				T val;
 				this->Value(val);
 				in_cbuff_ = true;
-				data_.cbuff_offset.cbuff = cbuff;
-				data_.cbuff_offset.offset = offset;
-				new (data_.cbuff_offset.cbuff->VariableInBuff<T>(data_.cbuff_offset.offset)) T;
+				data_.cbuff_desc.cbuff = cbuff;
+				data_.cbuff_desc.offset = offset;
+				data_.cbuff_desc.stride = stride;
+				new (data_.cbuff_desc.cbuff->VariableInBuff<T>(data_.cbuff_desc.offset)) T;
 				this->operator=(val);
 			}
 		}
@@ -294,7 +299,7 @@ namespace KlayGE
 		virtual void RebindToCBuffer(RenderEffectConstantBuffer* cbuff) KLAYGE_OVERRIDE
 		{
 			BOOST_ASSERT(in_cbuff_);
-			data_.cbuff_offset.cbuff = cbuff;
+			data_.cbuff_desc.cbuff = cbuff;
 		}
 
 		virtual bool InCBuffer() const KLAYGE_OVERRIDE
@@ -303,20 +308,25 @@ namespace KlayGE
 		}
 		virtual uint32_t CBufferOffset() const KLAYGE_OVERRIDE
 		{
-			return data_.cbuff_offset.offset;
+			return data_.cbuff_desc.offset;
+		}
+		virtual uint32_t Stride() const KLAYGE_OVERRIDE
+		{
+			return data_.cbuff_desc.stride;
 		}
 
 	protected:
 		bool in_cbuff_;
 		union VarData
 		{
-			struct CBufferOffset
+			struct CBufferDesc
 			{
 				RenderEffectConstantBuffer* cbuff;
 				uint32_t offset;
+				uint32_t stride;
 			};
 
-			CBufferOffset cbuff_offset;
+			CBufferDesc cbuff_desc;
 			uint8_t val[sizeof(T)];
 		};
 		VarData data_;
@@ -353,15 +363,15 @@ namespace KlayGE
 		{
 			if (in_cbuff_)
 			{
-				T* target = data_.cbuff_offset.cbuff->VariableInBuff<T>(data_.cbuff_offset.offset);
+				uint8_t* target = data_.cbuff_desc.cbuff->VariableInBuff<uint8_t>(data_.cbuff_desc.offset);
 
 				size_ = static_cast<uint32_t>(value.size());
 				for (size_t i = 0; i < value.size(); ++ i)
 				{
-					target[i * 4] = value[i];
+					*reinterpret_cast<T*>(target + i * data_.cbuff_desc.stride) = value[i];
 				}
 
-				data_.cbuff_offset.cbuff->Dirty(true);
+				data_.cbuff_desc.cbuff->Dirty(true);
 			}
 			else
 			{
@@ -374,12 +384,12 @@ namespace KlayGE
 		{
 			if (in_cbuff_)
 			{
-				T const * src = data_.cbuff_offset.cbuff->VariableInBuff<T>(data_.cbuff_offset.offset);
+				uint8_t const * src = data_.cbuff_desc.cbuff->VariableInBuff<uint8_t>(data_.cbuff_desc.offset);
 
 				val.resize(size_);
 				for (size_t i = 0; i < size_; ++ i)
 				{
-					val[i] = src[i * 4];
+					val[i] = *reinterpret_cast<T const *>(src + i * data_.cbuff_desc.stride);
 				}
 			}
 			else
@@ -414,18 +424,18 @@ namespace KlayGE
 		{
 			if (in_cbuff_)
 			{
-				Vector_T<T, 4>* target = data_.cbuff_offset.cbuff->VariableInBuff<Vector_T<T, 4> >(data_.cbuff_offset.offset);
+				uint8_t* target = data_.cbuff_desc.cbuff->VariableInBuff<uint8_t>(data_.cbuff_desc.offset);
 
 				size_ = static_cast<uint32_t>(value.size());
 				for (size_t i = 0; i < value.size(); ++ i)
 				{
 					for (int j = 0; j < N; ++ j)
 					{
-						target[i][j] = value[i][j];
+						reinterpret_cast<T*>(target + i * data_.cbuff_desc.stride)[j] = value[i][j];
 					}
 				}
 
-				data_.cbuff_offset.cbuff->Dirty(true);
+				data_.cbuff_desc.cbuff->Dirty(true);
 			}
 			else
 			{
@@ -438,14 +448,14 @@ namespace KlayGE
 		{
 			if (in_cbuff_)
 			{
-				Vector_T<T, 4> const * src = data_.cbuff_offset.cbuff->VariableInBuff<Vector_T<T, 4> >(data_.cbuff_offset.offset);
+				uint8_t const * src = data_.cbuff_desc.cbuff->VariableInBuff<uint8_t>(data_.cbuff_desc.offset);
 
 				val.resize(size_);
 				for (size_t i = 0; i < size_; ++ i)
 				{
 					for (int j = 0; j < N; ++ j)
 					{
-						val[i][j] = src[i][j];
+						val[i][j] = reinterpret_cast<T const *>(src + i * data_.cbuff_desc.stride)[j];
 					}
 				}
 			}
@@ -971,6 +981,7 @@ namespace KlayGE
 		{
 			return hw_buff_;
 		}
+		void BindHWBuff(GraphicsBufferPtr const & buff);
 
 	private:
 		shared_ptr<std::string> name_;
@@ -1050,8 +1061,12 @@ namespace KlayGE
 			var_->Value(val);
 		}
 
-		void BindToCBuffer(RenderEffectConstantBufferPtr const & cbuff, uint32_t offset);
+		void BindToCBuffer(RenderEffectConstantBufferPtr const & cbuff, uint32_t offset, uint32_t stride);
 		void RebindToCBuffer(RenderEffectConstantBufferPtr const & cbuff);
+		RenderEffectConstantBufferPtr const & CBuffer() const
+		{
+			return cbuff_;
+		}
 		bool InCBuffer() const
 		{
 			return var_->InCBuffer();
@@ -1059,6 +1074,20 @@ namespace KlayGE
 		uint32_t CBufferOffset() const
 		{
 			return var_->CBufferOffset();
+		}
+		uint32_t Stride() const
+		{
+			return var_->Stride();
+		}
+		template <typename T>
+		T const * MemoryInCBuff() const
+		{
+			return cbuff_->VariableInBuff<T>(var_->CBufferOffset());
+		}
+		template <typename T>
+		T* MemoryInCBuff()
+		{
+			return cbuff_->VariableInBuff<T>(var_->CBufferOffset());
 		}
 
 	private:

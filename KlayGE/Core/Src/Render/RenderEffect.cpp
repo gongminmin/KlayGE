@@ -4649,6 +4649,12 @@ namespace KlayGE
 		}
 	}
 
+	void RenderEffectConstantBuffer::BindHWBuff(GraphicsBufferPtr const & buff)
+	{
+		hw_buff_ = buff;
+		buff_.resize(buff->Size());
+	}
+
 
 	RenderEffectParameter::RenderEffectParameter()
 	{
@@ -4882,10 +4888,11 @@ namespace KlayGE
 		return ret;
 	}
 
-	void RenderEffectParameter::BindToCBuffer(RenderEffectConstantBufferPtr const & cbuff, uint32_t offset)
+	void RenderEffectParameter::BindToCBuffer(RenderEffectConstantBufferPtr const & cbuff, uint32_t offset,
+		uint32_t stride)
 	{
 		cbuff_ = cbuff;
-		var_->BindToCBuffer(cbuff.get(), offset);
+		var_->BindToCBuffer(cbuff.get(), offset, stride);
 	}
 
 	void RenderEffectParameter::RebindToCBuffer(RenderEffectConstantBufferPtr const & cbuff)
@@ -5363,10 +5370,11 @@ namespace KlayGE
 		BOOST_ASSERT(false);
 	}
 
-	void RenderVariable::BindToCBuffer(RenderEffectConstantBuffer* cbuff, uint32_t offset)
+	void RenderVariable::BindToCBuffer(RenderEffectConstantBuffer* cbuff, uint32_t offset, uint32_t stride)
 	{
 		UNREF_PARAM(cbuff);
 		UNREF_PARAM(offset);
+		UNREF_PARAM(stride);
 
 		BOOST_ASSERT(false);
 	}
@@ -5421,7 +5429,7 @@ namespace KlayGE
 	{
 		if (in_cbuff_)
 		{
-			float4x4* target = data_.cbuff_offset.cbuff->VariableInBuff<float4x4>(data_.cbuff_offset.offset);
+			float4x4* target = data_.cbuff_desc.cbuff->VariableInBuff<float4x4>(data_.cbuff_desc.offset);
 
 			size_ = static_cast<uint32_t>(value.size());
 			for (size_t i = 0; i < value.size(); ++ i)
@@ -5429,7 +5437,7 @@ namespace KlayGE
 				target[i] = MathLib::transpose(value[i]);
 			}
 
-			data_.cbuff_offset.cbuff->Dirty(true);
+			data_.cbuff_desc.cbuff->Dirty(true);
 		}
 		else
 		{
@@ -5442,7 +5450,7 @@ namespace KlayGE
 	{
 		if (in_cbuff_)
 		{
-			float4x4 const * src = data_.cbuff_offset.cbuff->VariableInBuff<float4x4>(data_.cbuff_offset.offset);
+			float4x4 const * src = data_.cbuff_desc.cbuff->VariableInBuff<float4x4>(data_.cbuff_desc.offset);
 
 			val.resize(size_);
 			for (size_t i = 0; i < size_; ++ i)

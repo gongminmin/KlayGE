@@ -3371,25 +3371,28 @@ namespace KlayGE
 				}
 			}
 
-			std::vector<uint32_t> lights_type(8);
-			lights_type[0] = 0;
-			for (size_t i = 1; i < lights_type.size(); ++ i)
+			uint8_t* lights_type = lights_type_param_->MemoryInCBuff<uint8_t>();
+			*reinterpret_cast<uint32_t*>(lights_type + 0 * lights_type_param_->Stride()) = 0;
+			for (size_t i = 1; i < 8; ++ i)
 			{
-				lights_type[i] = lights_type[i - 1] + static_cast<uint32_t>(available_lights[i - 1].size());
+				*reinterpret_cast<uint32_t*>(lights_type + i * lights_type_param_->Stride()) =
+					*reinterpret_cast<uint32_t*>(lights_type + (i - 1) * lights_type_param_->Stride())
+						+ static_cast<uint32_t>(available_lights[i - 1].size());
 			}
 
 			re.BindFrameBuffer(re.DefaultFrameBuffer());
 			re.DefaultFrameBuffer()->Discard(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth
 				| FrameBuffer::CBM_Stencil);
 
-			std::vector<float4> lights_color(lights_type[7]);
-			std::vector<float4> lights_pos_es(lights_type[7]);
-			std::vector<float4> lights_dir_es(lights_type[7]);
-			std::vector<float4> lights_falloff_range(lights_type[7]);
-			std::vector<float4> lights_attrib(lights_type[7]);
-			std::vector<float3> lights_aabb_min(lights_type[7]);
-			std::vector<float3> lights_aabb_max(lights_type[7]);
-			std::vector<int> lights_shadowing_channel(6, -1);
+			uint8_t* lights_color = lights_color_param_->MemoryInCBuff<uint8_t>();
+			uint8_t* lights_pos_es = lights_pos_es_param_->MemoryInCBuff<uint8_t>();
+			uint8_t* lights_dir_es = lights_dir_es_param_->MemoryInCBuff<uint8_t>();
+			uint8_t* lights_falloff_range = lights_falloff_range_param_->MemoryInCBuff<uint8_t>();
+			uint8_t* lights_attrib = lights_attrib_param_->MemoryInCBuff<uint8_t>();
+			uint8_t* lights_aabb_min = lights_aabb_min_param_->MemoryInCBuff<uint8_t>();
+			uint8_t* lights_aabb_max = lights_aabb_max_param_->MemoryInCBuff<uint8_t>();
+			uint8_t* lights_shadowing_channel = lights_shadowing_channel_param_->MemoryInCBuff<uint8_t>();
+			memset(lights_shadowing_channel, 0xFF, 6 * lights_shadowing_channel_param_->Stride());
 			for (uint32_t t = 0; t < available_lights.size(); ++ t)
 			{
 				for (uint32_t i = 0; i < available_lights[t].size(); ++ i)
@@ -3397,13 +3400,15 @@ namespace KlayGE
 					LightSourcePtr const & light = lights_[available_lights[t][i]];
 					LightSource::LightType type = light->Type();
 					int32_t attr = light->Attrib();
-					uint32_t offset = lights_type[t] + i;
+					uint32_t offset = *reinterpret_cast<uint32_t*>(lights_type + t * lights_type_param_->Stride()) + i;
 
-					lights_color[offset] = light->Color();
+					*reinterpret_cast<float4*>(lights_color
+						+ offset * lights_color_param_->Stride()) = light->Color();
 
 					float3 const & p = light->Position();
 					float3 loc_es = MathLib::transform_coord(p, pvp.view);
-					lights_pos_es[offset] = float4(loc_es.x(), loc_es.y(), loc_es.z(), 1);
+					*reinterpret_cast<float4*>(lights_pos_es
+						+ offset * lights_pos_es_param_->Stride()) = float4(loc_es.x(), loc_es.y(), loc_es.z(), 1);
 
 					float3 dir_es(0, 0, 0);
 					switch (type)
@@ -3424,15 +3429,19 @@ namespace KlayGE
 					default:
 						break;
 					}
-					lights_dir_es[offset] = float4(dir_es.x(), dir_es.y(), dir_es.z(), 0);
+					*reinterpret_cast<float4*>(lights_dir_es
+						+ offset * lights_dir_es_param_->Stride()) = float4(dir_es.x(), dir_es.y(), dir_es.z(), 0);
 
 					if (LightSource::LT_Spot == type)
 					{
-						lights_pos_es[offset].w() = light->CosOuterInner().x();
-						lights_dir_es[offset].w() = light->CosOuterInner().y();
+						reinterpret_cast<float4*>(lights_pos_es
+							+ offset * lights_pos_es_param_->Stride())->w() = light->CosOuterInner().x();
+						reinterpret_cast<float4*>(lights_dir_es
+							+ offset * lights_dir_es_param_->Stride())->w() = light->CosOuterInner().y();
 					}
 
-					lights_attrib[offset] = float4(attr & LightSource::LSA_NoDiffuse ? 0.0f : 1.0f,
+					*reinterpret_cast<float4*>(lights_attrib
+						+ offset * lights_attrib_param_->Stride()) = float4(attr & LightSource::LSA_NoDiffuse ? 0.0f : 1.0f,
 						attr & LightSource::LSA_NoSpecular ? 0.0f : 1.0f,
 						attr & LightSource::LSA_NoShadow ? -1.0f : 1.0f, light->ProjectiveTexture() ? 1.0f : -1.0f);
 
@@ -3442,15 +3451,18 @@ namespace KlayGE
 						switch (type)
 						{
 						case LightSource::LT_Sun:
-							lights_shadowing_channel[0] = channel;
+							*reinterpret_cast<int*>(lights_shadowing_channel
+								+ 0 * lights_shadowing_channel_param_->Stride()) = channel;
 							break;
 
 						case LightSource::LT_Point:
-							lights_shadowing_channel[1] = channel;
+							*reinterpret_cast<int*>(lights_shadowing_channel
+								+ 1 * lights_shadowing_channel_param_->Stride()) = channel;
 							break;
 
 						case LightSource::LT_Spot:
-							lights_shadowing_channel[2 + i] = channel;
+							*reinterpret_cast<int*>(lights_shadowing_channel
+								+ (2 + i) * lights_shadowing_channel_param_->Stride()) = channel;
 							break;
 
 						default:
@@ -3468,22 +3480,27 @@ namespace KlayGE
 						float4x4 light_mv = light_model * light_to_view;
 						aabb = MathLib::transform_aabb(cone_aabb_, light_mv);
 					}
-					lights_falloff_range[offset] = float4(light->Falloff().x(), light->Falloff().y(),
-						light->Falloff().z(), range);
-					lights_aabb_min[offset] = aabb.Min();
-					lights_aabb_max[offset] = aabb.Max();
+					*reinterpret_cast<float4*>(lights_falloff_range
+						+ offset * lights_falloff_range_param_->Stride()) = float4(light->Falloff().x(),
+						light->Falloff().y(), light->Falloff().z(), range);
+					*reinterpret_cast<float4*>(lights_aabb_min
+						+ offset * lights_aabb_min_param_->Stride()) = float4(aabb.Min().x(), aabb.Min().y(),
+						aabb.Min().z(), 0);
+					*reinterpret_cast<float4*>(lights_aabb_max
+						+ offset * lights_aabb_max_param_->Stride()) = float4(aabb.Max().x(), aabb.Max().y(),
+						aabb.Max().z(), 0);
 				}
 			}
 
-			*lights_type_param_ = lights_type;
-			*lights_color_param_ = lights_color;
-			*lights_pos_es_param_ = lights_pos_es;
-			*lights_dir_es_param_ = lights_dir_es;
-			*lights_falloff_range_param_ = lights_falloff_range;
-			*lights_attrib_param_ = lights_attrib;
-			*lights_shadowing_channel_param_ = lights_shadowing_channel;
-			*lights_aabb_min_param_ = lights_aabb_min;
-			*lights_aabb_max_param_ = lights_aabb_max;
+			lights_type_param_->CBuffer()->Dirty(true);
+			lights_color_param_->CBuffer()->Dirty(true);
+			lights_pos_es_param_->CBuffer()->Dirty(true);
+			lights_dir_es_param_->CBuffer()->Dirty(true);
+			lights_falloff_range_param_->CBuffer()->Dirty(true);
+			lights_attrib_param_->CBuffer()->Dirty(true);
+			lights_shadowing_channel_param_->CBuffer()->Dirty(true);
+			lights_aabb_min_param_->CBuffer()->Dirty(true);
+			lights_aabb_max_param_->CBuffer()->Dirty(true);
 
 			if (lights_type[0] != lights_type[1])
 			{

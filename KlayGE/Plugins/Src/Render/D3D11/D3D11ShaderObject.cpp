@@ -1750,7 +1750,30 @@ namespace KlayGE
 				for (uint32_t j = 0; j < cbuff->NumParameters(); ++ j)
 				{
 					RenderEffectParameterPtr const & param = effect.ParameterByIndex(cbuff->ParameterIndex(j));
-					param->BindToCBuffer(cbuff, shader_desc_[type].cb_desc[i].var_desc[j].start_offset);
+					uint32_t stride;
+					if (shader_desc_[type].cb_desc[i].var_desc[j].elements > 0)
+					{
+						if (param->Type() != REDT_float4x4)
+						{
+							stride = 16;
+						}
+						else
+						{
+							stride = 64;
+						}
+					}
+					else
+					{
+						if (param->Type() != REDT_float4x4)
+						{
+							stride = 4;
+						}
+						else
+						{
+							stride = 16;
+						}
+					}
+					param->BindToCBuffer(cbuff, shader_desc_[type].cb_desc[i].var_desc[j].start_offset, stride);
 				}
 
 				d3d11_cbuffs_[type][i] = checked_cast<D3D11GraphicsBuffer*>(cbuff->HWBuff().get())->D3DBuffer();
