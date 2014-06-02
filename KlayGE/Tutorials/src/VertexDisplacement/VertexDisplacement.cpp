@@ -76,9 +76,10 @@ namespace
 			renderable_ = MakeSharedPtr<FlagRenderable>(length_segs, width_segs);
 		}
 
-		virtual void MainThreadUpdate(float app_time, float /*elapsed_time*/) KLAYGE_OVERRIDE
+		virtual bool MainThreadUpdate(float app_time, float /*elapsed_time*/) KLAYGE_OVERRIDE
 		{
 			checked_pointer_cast<FlagRenderable>(renderable_)->SetAngle(app_time / 0.4f);
+			return false;
 		}
 	};
 
