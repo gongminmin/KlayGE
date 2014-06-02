@@ -28,16 +28,6 @@ using namespace KlayGE;
 
 namespace
 {
-	struct CreateGroundSceneObjectFactory
-	{
-		SceneObjectPtr operator()(RenderModelPtr const & model)
-		{
-			SceneObjectPtr so = MakeSharedPtr<SceneObjectHelper>(model, SceneObject::SOA_Cullable);
-			so->ModelMatrix(MathLib::scaling(200.0f, 1.0f, 200.0f));
-			return so;
-		}
-	};
-
 	enum
 	{
 		Exit,
@@ -91,9 +81,9 @@ void CascadedShadowMapApp::InitObjects()
 
 	KlayGE::function<TexturePtr()> c_cube_tl = ASyncLoadTexture("Lake_CraterLake03_c.dds", EAH_GPU_Read | EAH_Immutable);
 	KlayGE::function<TexturePtr()> y_cube_tl = ASyncLoadTexture("Lake_CraterLake03_y.dds", EAH_GPU_Read | EAH_Immutable);
-	ASyncLoadModelSceneObject("plane.meshml", EAH_GPU_Read | EAH_Immutable, CreateModelFactory<RenderModel>(),
-		CreateMeshFactory<StaticMesh>(), CreateGroundSceneObjectFactory());
-	ASyncLoadModelSceneObject("katapult.meshml", EAH_GPU_Read | EAH_Immutable);
+	KlayGE::function<RenderablePtr()> plane_ml = ASyncLoadModel("plane.meshml", EAH_GPU_Read | EAH_Immutable,
+		CreateModelFactory<RenderModel>(), CreateMeshFactory<StaticMesh>());
+	KlayGE::function<RenderablePtr()> katapult_ml = ASyncLoadModel("katapult.meshml", EAH_GPU_Read | EAH_Immutable);
 
 	font_ = SyncLoadFont("gkai00mp.kfont");
 
@@ -105,6 +95,13 @@ void CascadedShadowMapApp::InitObjects()
 	sun_light_->Direction(MathLib::normalize(float3(50, -50, 50)));
 	sun_light_->Color(float3(1, 1, 1));
 	sun_light_->AddToSceneManager();
+
+	SceneObjectPtr plane_so = MakeSharedPtr<SceneObjectHelper>(plane_ml, SceneObject::SOA_Cullable, 0);
+	plane_so->ModelMatrix(MathLib::scaling(200.0f, 1.0f, 200.0f));
+	plane_so->AddToSceneManager();
+
+	SceneObjectPtr katapult_so = MakeSharedPtr<SceneObjectHelper>(katapult_ml, SceneObject::SOA_Cullable, 0);
+	katapult_so->AddToSceneManager();
 
 	fpcController_.Scalers(0.05f, 1.0f);
 

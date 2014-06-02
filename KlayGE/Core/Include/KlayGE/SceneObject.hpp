@@ -56,14 +56,18 @@ namespace KlayGE
 		void VisibleMark(BoundOverlap vm);
 		BoundOverlap VisibleMark() const;
 
+		virtual void OnAttachRenderable(bool add_to_scene);
+
 		virtual void AddToSceneManager();
+		virtual void AddToSceneManagerLocked();
 		virtual void DelFromSceneManager();
+		virtual void DelFromSceneManagerLocked();
 
 		void BindSubThreadUpdateFunc(function<void(SceneObject&, float, float)> const & update_func);
 		void BindMainThreadUpdateFunc(function<void(SceneObject&, float, float)> const & update_func);
 
 		virtual void SubThreadUpdate(float app_time, float elapsed_time);
-		virtual void MainThreadUpdate(float app_time, float elapsed_time);
+		virtual bool MainThreadUpdate(float app_time, float elapsed_time);
 
 		uint32_t Attrib() const;
 		bool Visible() const;
@@ -75,30 +79,15 @@ namespace KlayGE
 		// For select mode
 		virtual void ObjectID(uint32_t id);
 		virtual void SelectMode(bool select_mode);
-		bool SelectMode() const
-		{
-			return renderable_->SelectMode();
-		}
+		bool SelectMode() const;
 
 		// For deferred only
 		virtual void Pass(PassType type);
 
-		bool TransparencyBackFace() const
-		{
-			return renderable_->TransparencyBackFace();
-		}
-		bool TransparencyFrontFace() const
-		{
-			return renderable_->TransparencyFrontFace();
-		}
-		bool Reflection() const
-		{
-			return renderable_->Reflection();
-		}
-		bool SimpleForward() const
-		{
-			return renderable_->SimpleForward();
-		}
+		bool TransparencyBackFace() const;
+		bool TransparencyFrontFace() const;
+		bool Reflection() const;
+		bool SimpleForward() const;
 
 	protected:
 		uint32_t attrib_;
@@ -106,6 +95,7 @@ namespace KlayGE
 		SceneObject* parent_;
 		std::vector<SceneObjectPtr> children_;
 
+		function<RenderablePtr()> renderable_rl_;
 		RenderablePtr renderable_;
 		vertex_elements_type instance_format_;
 

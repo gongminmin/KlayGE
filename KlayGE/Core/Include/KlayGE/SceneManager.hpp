@@ -63,7 +63,9 @@ namespace KlayGE
 		LightSourcePtr const & GetLight(uint32_t index) const;
 
 		void AddSceneObject(SceneObjectPtr const & obj);
+		void AddSceneObjectLocked(SceneObjectPtr const & obj);
 		void DelSceneObject(SceneObjectPtr const & obj);
+		void DelSceneObjectLocked(SceneObjectPtr const & obj);
 		void AddRenderable(RenderablePtr const & obj);
 
 		uint32_t NumSceneObjects() const;
@@ -94,6 +96,7 @@ namespace KlayGE
 		std::vector<CameraPtr>::iterator DelCamera(std::vector<CameraPtr>::iterator iter);
 		std::vector<LightSourcePtr>::iterator DelLight(std::vector<LightSourcePtr>::iterator iter);
 		SceneObjsType::iterator DelSceneObject(SceneObjsType::iterator iter);
+		SceneObjsType::iterator DelSceneObjectLocked(SceneObjsType::iterator iter);
 		virtual void OnAddSceneObject(SceneObjectPtr const & obj) = 0;
 		virtual void OnDelSceneObject(SceneObjsType::iterator iter) = 0;
 

@@ -106,7 +106,7 @@ namespace KlayGE
 		return dir_;
 	}
 
-	void LensFlareSceneObject::MainThreadUpdate(float /*app_time*/, float /*elapsed_time*/)
+	bool LensFlareSceneObject::MainThreadUpdate(float /*app_time*/, float /*elapsed_time*/)
 	{
 		float const FLARE_RENDERANGLE = 0.9f;
 		float const FLARE_SCALEAMOUNT = 0.2f;
@@ -165,6 +165,8 @@ namespace KlayGE
 		}
 
 		this->Visible(true);
+
+		return false;
 	}
 
 	void LensFlareSceneObject::Pass(PassType type)

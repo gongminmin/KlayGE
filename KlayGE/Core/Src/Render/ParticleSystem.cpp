@@ -767,7 +767,7 @@ namespace KlayGE
 		active_particles_ = active_particles;
 	}
 
-	void ParticleSystem::MainThreadUpdate(float app_time, float elapsed_time)
+	bool ParticleSystem::MainThreadUpdate(float app_time, float elapsed_time)
 	{
 		UNREF_PARAM(app_time);
 		UNREF_PARAM(elapsed_time);
@@ -810,6 +810,8 @@ namespace KlayGE
 				}
 			}
 		}
+
+		return false;
 	}
 
 	void ParticleSystem::ParticleAlphaFromTex(std::string const & tex_name)

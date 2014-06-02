@@ -57,7 +57,6 @@ namespace
 			uint32_t access_hint;
 			function<RenderModelPtr(std::wstring const &)> CreateModelFactoryFunc;
 			function<StaticMeshPtr(RenderModelPtr const &, std::wstring const &)> CreateMeshFactoryFunc;
-			function<SceneObjectPtr(RenderModelPtr const &)> CreateSceneObjectFunc;
 
 			struct ModelData
 			{
@@ -89,14 +88,12 @@ namespace
 	public:
 		RenderModelLoadingDesc(std::string const & res_name, uint32_t access_hint, 
 			function<RenderModelPtr(std::wstring const &)> CreateModelFactoryFunc,
-			function<StaticMeshPtr(RenderModelPtr const &, std::wstring const &)> CreateMeshFactoryFunc,
-			function<SceneObjectPtr(RenderModelPtr const &)> CreateSceneObjectFunc)
+			function<StaticMeshPtr(RenderModelPtr const &, std::wstring const &)> CreateMeshFactoryFunc)
 		{
 			model_desc_.res_name = res_name;
 			model_desc_.access_hint = access_hint;
 			model_desc_.CreateModelFactoryFunc = CreateModelFactoryFunc;
 			model_desc_.CreateMeshFactoryFunc = CreateMeshFactoryFunc;
-			model_desc_.CreateSceneObjectFunc = CreateSceneObjectFunc;
 			model_desc_.model_data = MakeSharedPtr<ModelDesc::ModelData>();
 			model_desc_.model = MakeSharedPtr<RenderModelPtr>();
 		}
@@ -147,12 +144,6 @@ namespace
 				}
 
 				model_desc_.model_data.reset();
-
-				if (model_desc_.CreateSceneObjectFunc)
-				{
-					SceneObjectPtr so = model_desc_.CreateSceneObjectFunc(model);
-					so->AddToSceneManager();
-				}
 			}
 			return static_pointer_cast<void>(*model_desc_.model);
 		}
@@ -1432,8 +1423,7 @@ namespace KlayGE
 		BOOST_ASSERT(CreateMeshFactoryFunc);
 
 		return ResLoader::Instance().SyncQueryT<RenderModel>(MakeSharedPtr<RenderModelLoadingDesc>(meshml_name,
-			access_hint, CreateModelFactoryFunc, CreateMeshFactoryFunc,
-			function<SceneObjectPtr(RenderModelPtr const &)>()));
+			access_hint, CreateModelFactoryFunc, CreateMeshFactoryFunc));
 	}
 
 	function<RenderModelPtr()> ASyncLoadModel(std::string const & meshml_name, uint32_t access_hint,
@@ -1444,34 +1434,7 @@ namespace KlayGE
 		BOOST_ASSERT(CreateMeshFactoryFunc);
 
 		return ResLoader::Instance().ASyncQueryT<RenderModel>(MakeSharedPtr<RenderModelLoadingDesc>(meshml_name,
-			access_hint, CreateModelFactoryFunc, CreateMeshFactoryFunc,
-			function<SceneObjectPtr(RenderModelPtr const &)>()));
-	}
-
-	RenderModelPtr SyncLoadModelSceneObject(std::string const & meshml_name, uint32_t access_hint,
-		function<RenderModelPtr(std::wstring const &)> CreateModelFactoryFunc,
-		function<StaticMeshPtr(RenderModelPtr const &, std::wstring const &)> CreateMeshFactoryFunc,
-		function<SceneObjectPtr(RenderModelPtr const &)> CreateSceneObjectFunc)
-	{
-		BOOST_ASSERT(CreateModelFactoryFunc);
-		BOOST_ASSERT(CreateMeshFactoryFunc);
-		BOOST_ASSERT(CreateSceneObjectFunc);
-
-		return ResLoader::Instance().SyncQueryT<RenderModel>(MakeSharedPtr<RenderModelLoadingDesc>(meshml_name,
-			access_hint, CreateModelFactoryFunc, CreateMeshFactoryFunc, CreateSceneObjectFunc));
-	}
-
-	function<RenderModelPtr()> ASyncLoadModelSceneObject(std::string const & meshml_name, uint32_t access_hint,
-		function<RenderModelPtr(std::wstring const &)> CreateModelFactoryFunc,
-		function<StaticMeshPtr(RenderModelPtr const &, std::wstring const &)> CreateMeshFactoryFunc,
-		function<SceneObjectPtr(RenderModelPtr const &)> CreateSceneObjectFunc)
-	{
-		BOOST_ASSERT(CreateModelFactoryFunc);
-		BOOST_ASSERT(CreateMeshFactoryFunc);
-		BOOST_ASSERT(CreateSceneObjectFunc);
-
-		return ResLoader::Instance().ASyncQueryT<RenderModel>(MakeSharedPtr<RenderModelLoadingDesc>(meshml_name,
-			access_hint, CreateModelFactoryFunc, CreateMeshFactoryFunc, CreateSceneObjectFunc));
+			access_hint, CreateModelFactoryFunc, CreateMeshFactoryFunc));
 	}
 
 	void SaveModel(std::string const & meshml_name, std::vector<RenderMaterialPtr> const & mtls,

@@ -55,16 +55,6 @@ namespace
 		}
 	};
 
-	struct CreateDinoSceneObjectFactory
-	{
-		SceneObjectPtr operator()(RenderModelPtr const & model)
-		{
-			SceneObjectPtr so = MakeSharedPtr<SceneObjectHelper>(model, SceneObject::SOA_Cullable | SceneObject::SOA_Moveable);
-			so->BindMainThreadUpdateFunc(ObjectUpdate());
-			return so;
-		}
-	};
-
 	enum
 	{
 		Exit,
@@ -112,8 +102,8 @@ void PostProcessingApp::InitObjects()
 
 	KlayGE::function<TexturePtr()> c_cube_tl = ASyncLoadTexture("rnl_cross_c.dds", EAH_GPU_Read | EAH_Immutable);
 	KlayGE::function<TexturePtr()> y_cube_tl = ASyncLoadTexture("rnl_cross_y.dds", EAH_GPU_Read | EAH_Immutable);
-	ASyncLoadModelSceneObject("dino50.7z//dino50.meshml", EAH_GPU_Read | EAH_Immutable,
-		CreateModelFactory<RenderModel>(), CreateMeshFactory<StaticMesh>(), CreateDinoSceneObjectFactory());
+	KlayGE::function<RenderablePtr()> model_ml = ASyncLoadModel("dino50.7z//dino50.meshml", EAH_GPU_Read | EAH_Immutable,
+		CreateModelFactory<RenderModel>(), CreateMeshFactory<StaticMesh>());
 
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 	RenderEngine& re = rf.RenderEngineInstance();
@@ -133,6 +123,10 @@ void PostProcessingApp::InitObjects()
 	point_light_->Falloff(float3(1, 0, 1));
 	point_light_->BindUpdateFunc(PointLightSourceUpdate());
 	point_light_->AddToSceneManager();
+
+	SceneObjectPtr scene_obj = MakeSharedPtr<SceneObjectHelper>(model_ml, SceneObject::SOA_Cullable | SceneObject::SOA_Moveable, 0);
+	scene_obj->BindMainThreadUpdateFunc(ObjectUpdate());
+	scene_obj->AddToSceneManager();
 
 	fpcController_.Scalers(0.05f, 0.1f);
 

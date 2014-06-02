@@ -362,7 +362,7 @@ namespace
 			return ocean_plane_;
 		}
 
-		virtual void MainThreadUpdate(float app_time, float elapsed_time) KLAYGE_OVERRIDE
+		virtual bool MainThreadUpdate(float app_time, float elapsed_time) KLAYGE_OVERRIDE
 		{
 			if (dirty_)
 			{
@@ -391,6 +391,8 @@ namespace
 			}
 			checked_pointer_cast<RenderOcean>(renderable_)->DisplacementParam(displacement_params_[frame0], displacement_params_[frame1],
 				displacement_params_[ocean_param_.num_frames + frame0], displacement_params_[ocean_param_.num_frames + frame1]);
+
+			return false;
 		}
 
 		int DMapDim() const

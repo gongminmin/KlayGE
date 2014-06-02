@@ -453,14 +453,6 @@ namespace KlayGE
 	KLAYGE_CORE_API function<RenderModelPtr()> ASyncLoadModel(std::string const & meshml_name, uint32_t access_hint,
 		function<RenderModelPtr(std::wstring const &)> CreateModelFactoryFunc = CreateModelFactory<RenderModel>(),
 		function<StaticMeshPtr(RenderModelPtr const &, std::wstring const &)> CreateMeshFactoryFunc = CreateMeshFactory<StaticMesh>());
-	KLAYGE_CORE_API RenderModelPtr SyncLoadModelSceneObject(std::string const & meshml_name, uint32_t access_hint,
-		function<RenderModelPtr(std::wstring const &)> CreateModelFactoryFunc = CreateModelFactory<RenderModel>(),
-		function<StaticMeshPtr(RenderModelPtr const &, std::wstring const &)> CreateMeshFactoryFunc = CreateMeshFactory<StaticMesh>(),
-		function<SceneObjectPtr(RenderModelPtr const &)> CreateSceneObjectFunc = CreateSceneObjectFactory<SceneObjectHelper>());
-	KLAYGE_CORE_API function<RenderModelPtr()> ASyncLoadModelSceneObject(std::string const & meshml_name, uint32_t access_hint,
-		function<RenderModelPtr(std::wstring const &)> CreateModelFactoryFunc = CreateModelFactory<RenderModel>(),
-		function<StaticMeshPtr(RenderModelPtr const &, std::wstring const &)> CreateMeshFactoryFunc = CreateMeshFactory<StaticMesh>(),
-		function<SceneObjectPtr(RenderModelPtr const &)> CreateSceneObjectFunc = CreateSceneObjectFactory<SceneObjectHelper>());
 
 	KLAYGE_CORE_API void SaveModel(std::string const & meshml_name, std::vector<RenderMaterialPtr> const & mtls,
 		std::vector<vertex_element> const & merged_ves, char all_is_index_16_bit, 

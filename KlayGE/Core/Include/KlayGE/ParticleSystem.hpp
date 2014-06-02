@@ -285,7 +285,7 @@ namespace KlayGE
 		}
 
 		virtual void SubThreadUpdate(float app_time, float elapsed_time) KLAYGE_OVERRIDE;
-		virtual void MainThreadUpdate(float app_time, float elapsed_time) KLAYGE_OVERRIDE;
+		virtual bool MainThreadUpdate(float app_time, float elapsed_time) KLAYGE_OVERRIDE;
 
 		uint32_t NumParticles() const
 		{

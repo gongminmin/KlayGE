@@ -98,12 +98,15 @@ namespace KlayGE
 			abs_model_ = model_;
 		}
 
-		if (pos_aabb_ws_)
+		if (renderable_)
 		{
-			*pos_aabb_ws_ = MathLib::transform_aabb(renderable_->PosBound(), abs_model_);
-		}
+			if (pos_aabb_ws_)
+			{
+				*pos_aabb_ws_ = MathLib::transform_aabb(renderable_->PosBound(), abs_model_);
+			}
 
-		renderable_->ModelMatrix(abs_model_);
+			renderable_->ModelMatrix(abs_model_);
+		}
 	}
 
 	void SceneObject::VisibleMark(BoundOverlap vm)
@@ -134,12 +137,25 @@ namespace KlayGE
 		}
 	}
 
-	void SceneObject::MainThreadUpdate(float app_time, float elapsed_time)
+	bool SceneObject::MainThreadUpdate(float app_time, float elapsed_time)
 	{
+		bool refreshed = false;
+		if (!renderable_ && renderable_rl_)
+		{
+			renderable_ = renderable_rl_();
+			if (renderable_)
+			{
+				this->UpdateAbsModelMatrix();
+				refreshed = true;
+			}
+		}
+
 		if (main_thread_update_func_)
 		{
 			main_thread_update_func_(*this, app_time, elapsed_time);
 		}
+
+		return refreshed;
 	}
 
 	void SceneObject::AddToSceneManager()
@@ -152,6 +168,16 @@ namespace KlayGE
 		}
 	}
 
+	void SceneObject::AddToSceneManagerLocked()
+	{
+		Context::Instance().SceneManagerInstance().AddSceneObjectLocked(this->shared_from_this());
+		typedef KLAYGE_DECLTYPE(children_) ChildrenType;
+		KLAYGE_FOREACH(ChildrenType::reference child, children_)
+		{
+			child->AddToSceneManagerLocked();
+		}
+	}
+
 	void SceneObject::DelFromSceneManager()
 	{
 		typedef KLAYGE_DECLTYPE(children_) ChildrenType;
@@ -160,6 +186,16 @@ namespace KlayGE
 			child->DelFromSceneManager();
 		}
 		Context::Instance().SceneManagerInstance().DelSceneObject(this->shared_from_this());
+	}
+
+	void SceneObject::DelFromSceneManagerLocked()
+	{
+		typedef KLAYGE_DECLTYPE(children_) ChildrenType;
+		KLAYGE_FOREACH(ChildrenType::reference child, children_)
+		{
+			child->DelFromSceneManagerLocked();
+		}
+		Context::Instance().SceneManagerInstance().DelSceneObjectLocked(this->shared_from_this());
 	}
 
 	uint32_t SceneObject::Attrib() const
@@ -202,20 +238,97 @@ namespace KlayGE
 
 	void SceneObject::SelectMode(bool select_mode)
 	{
-		renderable_->SelectMode(select_mode);
+		if (renderable_)
+		{
+			renderable_->SelectMode(select_mode);
+		}
 	}
 
 	void SceneObject::ObjectID(uint32_t id)
 	{
-		renderable_->ObjectID(id);
+		if (renderable_)
+		{
+			renderable_->ObjectID(id);
+		}
+	}
+
+	bool SceneObject::SelectMode() const
+	{
+		if (renderable_)
+		{
+			return renderable_->SelectMode();
+		}
+		else
+		{
+			return false;
+		}
 	}
 
 	void SceneObject::Pass(PassType type)
 	{
-		renderable_->Pass(type);
-		if (attrib_ & SOA_NotCastShadow)
+		if (renderable_)
 		{
-			this->Visible(PC_ShadowMap != GetPassCategory(type));
+			renderable_->Pass(type);
+			if (attrib_ & SOA_NotCastShadow)
+			{
+				this->Visible(PC_ShadowMap != GetPassCategory(type));
+			}
+		}
+	}
+
+	bool SceneObject::TransparencyBackFace() const
+	{
+		if (renderable_)
+		{
+			return renderable_->TransparencyBackFace();
+		}
+		else
+		{
+			return false;
+		}
+	}
+
+	bool SceneObject::TransparencyFrontFace() const
+	{
+		if (renderable_)
+		{
+			return renderable_->TransparencyFrontFace();
+		}
+		else
+		{
+			return false;
+		}
+	}
+
+	bool SceneObject::Reflection() const
+	{
+		if (renderable_)
+		{
+			return renderable_->Reflection();
+		}
+		else
+		{
+			return false;
+		}
+	}
+
+	bool SceneObject::SimpleForward() const
+	{
+		if (renderable_)
+		{
+			return renderable_->SimpleForward();
+		}
+		else
+		{
+			return false;
+		}
+	}
+
+	void SceneObject::OnAttachRenderable(bool add_to_scene)
+	{
+		if (add_to_scene)
+		{
+			this->AddToSceneManagerLocked();
 		}
 	}
 }

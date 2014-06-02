@@ -91,7 +91,7 @@ void GlobalIlluminationApp::InitObjects()
 
 	KlayGE::function<TexturePtr()> c_cube_tl = ASyncLoadTexture("Lake_CraterLake03_c.dds", EAH_GPU_Read | EAH_Immutable);
 	KlayGE::function<TexturePtr()> y_cube_tl = ASyncLoadTexture("Lake_CraterLake03_y.dds", EAH_GPU_Read | EAH_Immutable);
-	ASyncLoadModelSceneObject("sponza_crytek.7z//sponza_crytek.meshml", EAH_GPU_Read | EAH_Immutable);
+	KlayGE::function<RenderablePtr()> model_ml = ASyncLoadModel("sponza_crytek.7z//sponza_crytek.meshml", EAH_GPU_Read | EAH_Immutable);
 
 	font_ = SyncLoadFont("gkai00mp.kfont");
 
@@ -111,6 +111,9 @@ void GlobalIlluminationApp::InitObjects()
 	spot_light_src_ = MakeSharedPtr<SceneObjectLightSourceProxy>(spot_light_);
 	checked_pointer_cast<SceneObjectLightSourceProxy>(spot_light_src_)->Scaling(0.1f, 0.1f, 0.1f);
 	spot_light_src_->AddToSceneManager();
+
+	SceneObjectPtr scene_obj = MakeSharedPtr<SceneObjectHelper>(model_ml, SceneObject::SOA_Cullable, 0);
+	scene_obj->AddToSceneManager();
 
 	fpcController_.Scalers(0.05f, 0.5f);
 

@@ -49,17 +49,35 @@ namespace KlayGE
 		: SceneObject(attrib)
 	{
 		renderable_ = renderable;
+		this->OnAttachRenderable(false);
+	}
+
+	SceneObjectHelper::SceneObjectHelper(function<RenderablePtr()> const & renderable_rl, uint32_t attrib, int dummy)
+		: SceneObject(attrib)
+	{
+		UNREF_PARAM(dummy);
+
+		renderable_rl_ = renderable_rl;
+	}
+
+	void SceneObjectHelper::OnAttachRenderable(bool add_to_scene)
+	{
 		if (renderable_)
 		{
-			RenderModelPtr render_model = dynamic_pointer_cast<RenderModel>(renderable);
+			RenderModelPtr render_model = dynamic_pointer_cast<RenderModel>(renderable_);
 			if (render_model)
 			{
 				children_.resize(render_model->NumMeshes());
 				for (uint32_t i = 0; i < render_model->NumMeshes(); ++ i)
 				{
-					SceneObjectHelperPtr child = MakeSharedPtr<SceneObjectHelper>(render_model->Mesh(i), attrib);
+					SceneObjectHelperPtr child = MakeSharedPtr<SceneObjectHelper>(render_model->Mesh(i), attrib_);
 					child->Parent(this);
 					children_[i] = child;
+
+					if (add_to_scene)
+					{
+						child->AddToSceneManagerLocked();
+					}
 				}
 			}
 		}
@@ -119,7 +137,7 @@ namespace KlayGE
 		this->Init(light, CreateMeshFactoryFunc);
 	}
 
-	void SceneObjectLightSourceProxy::MainThreadUpdate(float /*app_time*/, float /*elapsed_time*/)
+	bool SceneObjectLightSourceProxy::MainThreadUpdate(float /*app_time*/, float /*elapsed_time*/)
 	{
 		model_ = model_scaling_ * MathLib::to_matrix(light_->Rotation()) * MathLib::translation(light_->Position());
 		if (LightSource::LT_Spot == light_->Type())
@@ -134,6 +152,8 @@ namespace KlayGE
 			RenderableLightSourceProxyPtr light_mesh = checked_pointer_cast<RenderableLightSourceProxy>(light_model->Mesh(i));
 			light_mesh->Update();
 		}
+
+		return false;
 	}
 
 	void SceneObjectLightSourceProxy::Scaling(float x, float y, float z)

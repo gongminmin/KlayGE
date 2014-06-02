@@ -259,7 +259,11 @@ namespace KlayGE
 	void SceneManager::AddSceneObject(SceneObjectPtr const & obj)
 	{
 		unique_lock<mutex> lock(update_mutex_);
+		this->AddSceneObjectLocked(obj);
+	}
 
+	void SceneManager::AddSceneObjectLocked(SceneObjectPtr const & obj)
+	{
 		uint32_t const attr = obj->Attrib();
 		if (attr & SceneObject::SOA_Overlay)
 		{
@@ -282,11 +286,17 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void SceneManager::DelSceneObject(SceneObjectPtr const & obj)
 	{
+		unique_lock<mutex> lock(update_mutex_);
+		this->DelSceneObjectLocked(obj);
+	}
+
+	void SceneManager::DelSceneObjectLocked(SceneObjectPtr const & obj)
+	{
 		for (SceneObjsType::iterator iter = scene_objs_.begin(); iter != scene_objs_.end(); ++ iter)
 		{
 			if (*iter == obj)
 			{
-				this->DelSceneObject(iter);
+				this->DelSceneObjectLocked(iter);
 				break;
 			}
 		}
@@ -295,7 +305,11 @@ namespace KlayGE
 	SceneManager::SceneObjsType::iterator SceneManager::DelSceneObject(SceneManager::SceneObjsType::iterator iter)
 	{
 		unique_lock<mutex> lock(update_mutex_);
+		return this->DelSceneObjectLocked(iter);
+	}
 
+	SceneManager::SceneObjsType::iterator SceneManager::DelSceneObjectLocked(SceneManager::SceneObjsType::iterator iter)
+	{
 		this->OnDelSceneObject(iter);
 		return scene_objs_.erase(iter);
 	}
@@ -477,12 +491,16 @@ namespace KlayGE
 			}
 		}
 
+		std::vector<SceneObjectPtr> added_scene_objs;
 		{
 			unique_lock<mutex> lock(update_mutex_);
 
 			KLAYGE_FOREACH(SceneObjsType::const_reference scene_obj, scene_objs_)
 			{
-				scene_obj->MainThreadUpdate(app_time, frame_time);
+				if (scene_obj->MainThreadUpdate(app_time, frame_time))
+				{
+					added_scene_objs.push_back(scene_obj);
+				}
 			}
 
 			overlay_scene_objs_.clear();
@@ -496,6 +514,12 @@ namespace KlayGE
 				{
 					++ iter;
 				}
+			}
+		
+			KLAYGE_FOREACH(SceneObjsType::const_reference scene_obj, added_scene_objs)
+			{
+				scene_obj->OnAttachRenderable(true);
+				this->OnAddSceneObject(scene_obj);
 			}
 		}
 
@@ -584,19 +608,21 @@ namespace KlayGE
 				if (0 == so->NumChildren())
 				{
 					RenderablePtr const & renderable = so->GetRenderable();
-
-					KLAYGE_AUTO(iter, renderables_map.lower_bound(renderable));
-					if ((iter != renderables_map.end()) && (iter->first == renderable))
+					if (renderable)
 					{
-						renderables[iter->second].second.push_back(so);
-					}
-					else
-					{
-						renderables_map.insert(std::make_pair(renderable, renderables.size()));
-						renderables.push_back(std::make_pair(renderable, std::vector<SceneObjectPtr>(1, so)));
-					}
+						KLAYGE_AUTO(iter, renderables_map.lower_bound(renderable));
+						if ((iter != renderables_map.end()) && (iter->first == renderable))
+						{
+							renderables[iter->second].second.push_back(so);
+						}
+						else
+						{
+							renderables_map.insert(std::make_pair(renderable, renderables.size()));
+							renderables.push_back(std::make_pair(renderable, std::vector<SceneObjectPtr>(1, so)));
+						}
 
-					++ num_objects_rendered_;
+						++ num_objects_rendered_;
+					}
 				}
 			}
 		}

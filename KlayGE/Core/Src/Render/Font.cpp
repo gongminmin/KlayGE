@@ -727,9 +727,10 @@ namespace KlayGE
 		{
 		}
 
-		void MainThreadUpdate(float /*app_time*/, float /*elapsed_time*/)
+		virtual bool MainThreadUpdate(float /*app_time*/, float /*elapsed_time*/) KLAYGE_OVERRIDE
 		{
 			checked_pointer_cast<FontRenderable>(renderable_)->UpdateBuffers();
+			return false;
 		}
 	};
 }

@@ -169,16 +169,6 @@ namespace
 		}
 	};
 
-	struct CreateDinoSceneObjectFactory
-	{
-		SceneObjectPtr operator()(RenderModelPtr const & model)
-		{
-			SceneObjectPtr so = MakeSharedPtr<SceneObjectHelper>(model, SceneObject::SOA_Cullable);
-			so->ModelMatrix(MathLib::scaling(float3(2, 2, 2)) * MathLib::translation(0.0f, 1.0f, -2.5f));
-			return so;
-		}
-	};
-
 
 	enum
 	{
@@ -230,9 +220,8 @@ void ScreenSpaceReflectionApp::InitObjects()
 	y_cube_tl_ = ASyncLoadTexture("Lake_CraterLake03_y.dds", EAH_GPU_Read | EAH_Immutable);
 	teapot_ml_ = ASyncLoadModel("teapot.meshml", EAH_GPU_Read | EAH_Immutable,
 		CreateModelFactory<RenderModel>(), CreateMeshFactory<ReflectMesh>());
-	ASyncLoadModelSceneObject("dino50.7z//dino50.meshml", EAH_GPU_Read | EAH_Immutable,
-		CreateModelFactory<RenderModel>(), CreateMeshFactory<DinoMesh>(),
-		CreateDinoSceneObjectFactory());
+	KlayGE::function<RenderablePtr()> dino_ml = ASyncLoadModel("dino50.7z//dino50.meshml", EAH_GPU_Read | EAH_Immutable,
+		CreateModelFactory<RenderModel>(), CreateMeshFactory<DinoMesh>());
 
 	this->LookAt(float3(2.0f, 2.0f, -5.0f), float3(0.0f, 1.0f, 0.0f), float3(0, 1, 0));
 	this->Proj(0.1f, 500.0f);
@@ -249,6 +238,10 @@ void ScreenSpaceReflectionApp::InitObjects()
 	point_light_->Position(float3(0, 3, -2));
 	point_light_->Falloff(float3(1, 0, 0.3f));
 	point_light_->AddToSceneManager();
+
+	SceneObjectPtr scene_obj = MakeSharedPtr<SceneObjectHelper>(dino_ml, SceneObject::SOA_Cullable, 0);
+	scene_obj->ModelMatrix(MathLib::scaling(float3(2, 2, 2)) * MathLib::translation(0.0f, 1.0f, -2.5f));
+	scene_obj->AddToSceneManager();
 
 	deferred_rendering_ = Context::Instance().DeferredRenderingLayerInstance();
 

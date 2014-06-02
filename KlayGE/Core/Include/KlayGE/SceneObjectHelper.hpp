@@ -33,9 +33,12 @@ namespace KlayGE
 	public:
 		explicit SceneObjectHelper(uint32_t attrib);
 		SceneObjectHelper(RenderablePtr const & renderable, uint32_t attrib);
+		SceneObjectHelper(function<RenderablePtr()> const & renderable_rl, uint32_t attrib, int dummy);
 		virtual ~SceneObjectHelper()
 		{
 		}
+
+		virtual void OnAttachRenderable(bool add_to_scene) KLAYGE_OVERRIDE;
 	};
 
 	class KLAYGE_CORE_API SceneObjectSkyBox : public SceneObjectHelper
@@ -61,7 +64,7 @@ namespace KlayGE
 		SceneObjectLightSourceProxy(LightSourcePtr const & light,
 			function<StaticMeshPtr(RenderModelPtr const &, std::wstring const &)> CreateMeshFactoryFunc);
 
-		virtual void MainThreadUpdate(float app_time, float elapsed_time) KLAYGE_OVERRIDE;
+		virtual bool MainThreadUpdate(float app_time, float elapsed_time) KLAYGE_OVERRIDE;
 
 		void Scaling(float x, float y, float z);
 		void Scaling(float3 const & s);

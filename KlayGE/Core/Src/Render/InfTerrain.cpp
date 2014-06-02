@@ -162,7 +162,7 @@ namespace KlayGE
 	{
 	}
 
-	void InfTerrainSceneObject::MainThreadUpdate(float /*app_time*/, float /*elapsed_time*/)
+	bool InfTerrainSceneObject::MainThreadUpdate(float /*app_time*/, float /*elapsed_time*/)
 	{
 		App3DFramework const & app = Context::Instance().AppInstance();
 		Camera const & camera = app.ActiveCamera();
@@ -220,6 +220,8 @@ namespace KlayGE
 		checked_pointer_cast<InfTerrainRenderable>(renderable_)->OffsetY(sy);
 
 		this->Visible(intersect);
+
+		return false;
 	}
 
 
@@ -772,7 +774,7 @@ namespace KlayGE
 	{
 	}
 
-	void HQTerrainSceneObject::MainThreadUpdate(float app_time, float elapsed_time)
+	bool HQTerrainSceneObject::MainThreadUpdate(float app_time, float elapsed_time)
 	{
 		UNREF_PARAM(app_time);
 		UNREF_PARAM(elapsed_time);
@@ -789,6 +791,8 @@ namespace KlayGE
 			reset_terrain_ = false;
 			last_eye_pos_ = camera->EyePos();
 		}
+
+		return false;
 	}
 
 	void HQTerrainSceneObject::Tessellation(bool tess)
