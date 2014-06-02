@@ -728,6 +728,7 @@ namespace KlayGE
 			}
 		}
 
+		is_shader_validate_[type] = ret;
 		return ret;
 	}
 

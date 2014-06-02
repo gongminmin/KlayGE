@@ -2136,6 +2136,7 @@ namespace KlayGE
 			}
 		}
 
+		is_shader_validate_[type] = ret;
 		return ret;
 	}
 
@@ -3249,7 +3250,7 @@ namespace KlayGE
 		is_validate_ = true;
 		for (size_t type = 0; type < ShaderObject::ST_NumShaderTypes; ++ type)
 		{
-			if (!(*glsl_srcs_)[type])
+			if (!(*shader_func_names_)[type].empty())
 			{
 				is_validate_ &= is_shader_validate_[type];
 			}

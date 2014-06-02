@@ -4360,7 +4360,6 @@ namespace KlayGE
 
 		for (int type = 0; type < ShaderObject::ST_NumShaderTypes; ++ type)
 		{
-			ShaderObjectPtr shared_so;
 			ShaderDesc const & sd = effect_.GetShaderDesc((*shader_desc_ids_)[type]);
 			if (!sd.func_name.empty())
 			{
@@ -4494,7 +4493,6 @@ namespace KlayGE
 
 		for (int type = 0; type < ShaderObject::ST_NumShaderTypes; ++ type)
 		{
-			ShaderObjectPtr shared_so;
 			ShaderDesc const & sd = effect_.GetShaderDesc((*shader_desc_ids_)[type]);
 			if (!sd.func_name.empty())
 			{
