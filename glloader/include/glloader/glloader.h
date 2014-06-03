@@ -92,6 +92,12 @@
 #define WIN32_LEAN_AND_MEAN 1
 #endif
 #include <windows.h>
+#elif (defined(__unix__) || defined(linux) || defined(__linux) || defined(__linux__))
+#include <X11/Xlib.h>
+#include <X11/Xutil.h>
+
+typedef XID GLXDrawable;
+typedef XID GLXContextID;
 #endif
 #else
 

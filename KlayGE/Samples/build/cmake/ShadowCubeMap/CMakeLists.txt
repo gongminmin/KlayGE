@@ -1,17 +1,17 @@
 SET(SOURCE_FILES
-	${KLAYGE_PROJECT_DIR}/Samples/src/ShadowCubemap/ShadowCubemap.cpp
+	${KLAYGE_PROJECT_DIR}/Samples/src/ShadowCubeMap/ShadowCubeMap.cpp
 )
 
 SET(HEADER_FILES
-	${KLAYGE_PROJECT_DIR}/Samples/src/ShadowCubemap/ShadowCubemap.hpp
+	${KLAYGE_PROJECT_DIR}/Samples/src/ShadowCubeMap/ShadowCubeMap.hpp
 )
 
 SET(EFFECT_FILES
-	${KLAYGE_PROJECT_DIR}/Samples/media/ShadowCubemap/ShadowCubemap.fxml
+	${KLAYGE_PROJECT_DIR}/Samples/media/ShadowCubeMap/ShadowCubeMap.fxml
 )
 
 SET(UI_FILES
-	${KLAYGE_PROJECT_DIR}/Samples/media/ShadowCubemap/ShadowCubemap.uiml
+	${KLAYGE_PROJECT_DIR}/Samples/media/ShadowCubeMap/ShadowCubeMap.uiml
 )
 
 SET(CONTENT_FILES
@@ -36,8 +36,8 @@ SET(CONTENT_FILES
 	${KLAYGE_PROJECT_DIR}/media/Textures/2D/powered_by_klayge.dds
 	${KLAYGE_PROJECT_DIR}/media/Textures/2D/ui.dds
 	${KLAYGE_PROJECT_DIR}/media/Textures/3D/color_grading.dds
-	${KLAYGE_PROJECT_DIR}/Samples/media/ShadowCubemap/lamp.dds
-	${KLAYGE_PROJECT_DIR}/Samples/media/ShadowCubemap/ShadowCubemap.kfx
+	${KLAYGE_PROJECT_DIR}/Samples/media/ShadowCubeMap/lamp.dds
+	${KLAYGE_PROJECT_DIR}/Samples/media/ShadowCubeMap/ShadowCubeMap.kfx
 	${KLAYGE_PROJECT_DIR}/Samples/media/Common/ScifiRoom.meshml.model_bin
 	${KLAYGE_PROJECT_DIR}/Samples/media/Common/teapot.meshml.model_bin
 	${KLAYGE_PROJECT_DIR}/Samples/media/Common/ScifiRoom/Sci1.dds

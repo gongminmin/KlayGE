@@ -84,7 +84,7 @@ SET(RENDERING_HEADER_FILES
 	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/FrameBuffer.hpp
 	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/GraphicsBuffer.hpp
 	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/HDRPostProcess.hpp
-	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/Heightmap.hpp
+	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/HeightMap.hpp
 	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/IndirectLightingLayer.hpp
 	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/InfTerrain.hpp
 	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/JudaTexture.hpp

@@ -129,8 +129,8 @@ private:
 
 #ifdef KLAYGE_CXX11_LIBRARY_ALGORITHM_SUPPORT
 	#ifndef KLAYGE_PLATFORM_ANDROID
-		#ifdef KLAYGE_COMPILER_GCC
-			// Fix C++ linkage problem in GCC 4.8.2
+		#if defined(KLAYGE_COMPILER_GCC) && defined(__MINGW32__)
+			// Fix C++ linkage problem in MinGW 4.8.2
 			#include <intrin.h>
 		#endif
 	#endif

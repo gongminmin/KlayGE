@@ -101,7 +101,7 @@ def build_Boost(build_info, compiler_arch):
 	if ("Release" in build_info.cfg) or ("RelWithDebInfo" in build_info.cfg) or ("MinSizeRel" in build_info.cfg):
 		options += " variant=release"
 		
-	build_cmd = batch_command()
+	build_cmd = batch_command(build_info.host_platform)
 	if "android" == build_info.target_platform:
 		build_cmd.add_command('set CXXFLAGS="-I%%ANDROID_NDK%%/platforms/android-9/arch-arm/usr/include -I%%ANDROID_NDK%%/sources/cxx-stl/gnu-libstdc++/%s/include -I%%ANDROID_NDK%%/sources/cxx-stl/gnu-libstdc++/%s/libs/armeabi/include"' % (compiler_arch[2], compiler_arch[2]))
 	if build_info.prefer_static:
@@ -120,6 +120,7 @@ def build_Python(build_info, compiler_arch):
 		-D BUILTIN_COLLECTIONS:BOOL=\"ON\" -D BUILTIN_FUNCTOOLS:BOOL=\"ON\" -D BUILTIN_IO:BOOL=\"ON\" -D BUILTIN_ITERTOOLS:BOOL=\"ON\" \
 		-D BUILTIN_LOCALE:BOOL=\"ON\" -D BUILTIN_MATH:BOOL=\"ON\" -D BUILTIN_MSI:BOOL=\"OFF\" -D BUILTIN_MULTIBYTECODEC:BOOL=\"ON\" \
 		-D BUILTIN_OPERATOR:BOOL=\"ON\" -D BUILTIN_UNICODEDATA:BOOL=\"ON\" \
+		-D ENABLE_AUDIOOP:BOOL=\"OFF\" -D ENABLE_OSSAUDIODEV:BOOL=\"OFF\" \
 		-D USE_SYSTEM_Curses:BOOL=\"OFF\" -D USE_SYSTEM_EXPAT:BOOL=\"OFF\" -D USE_SYSTEM_DB:BOOL=\"OFF\" -D USE_SYSTEM_GDBM:BOOL=\"OFF\" \
 		-D USE_SYSTEM_OpenSSL:BOOL=\"OFF\" -D USE_SYSTEM_READLINE:BOOL=\"OFF\" -D USE_SYSTEM_SQLITE3:BOOL=\"OFF\" -D USE_SYSTEM_TCL:BOOL=\"OFF\" \
 		-D USE_SYSTEM_ZLIB:BOOL=\"OFF\""

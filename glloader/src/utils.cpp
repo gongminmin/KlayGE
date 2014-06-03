@@ -22,9 +22,7 @@
 #endif
 
 #if defined(__unix__) || defined(linux) || defined(__linux) || defined(__linux__) || defined(__CYGWIN__) || defined(__ANDROID__) || defined(ANDROID)
-#ifdef GLLOADER_GLES
-	#include <dlfcn.h>
-#endif
+#include <dlfcn.h>
 #endif
 
 #if defined(__ANDROID__) || defined(ANDROID)

@@ -691,7 +691,7 @@ void ShadowCubeMap::InitObjects()
 	input_handler->connect(KlayGE::bind(&ShadowCubeMap::InputHandler, this, KlayGE::placeholders::_1, KlayGE::placeholders::_2));
 	inputEngine.ActionMap(actionMap, input_handler);
 
-	UIManager::Instance().Load(ResLoader::Instance().Open("ShadowCubemap.uiml"));
+	UIManager::Instance().Load(ResLoader::Instance().Open("ShadowCubeMap.uiml"));
 	dialog_ = UIManager::Instance().GetDialogs()[0];
 
 	id_scale_factor_static_ = dialog_->IDFromName("ScaleFactorStatic");

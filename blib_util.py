@@ -279,18 +279,27 @@ class build_info:
 		return int(clang_ver_components[0] + clang_ver_components[1])
 
 class batch_command:
-	def __init__(self):
+	def __init__(self, host_platform):
 		self.commands_ = []
+		self.host_platform_ = host_platform
 
 	def add_command(self, cmd):
 		self.commands_ += [cmd]
 
 	def execute(self):
-		batch_file = "kge_build.bat"
+		batch_file = "kge_build."
+		if "win" == self.host_platform_:
+			batch_file += "bat"
+		else:
+			batch_file += "sh"
 		batch_f = open(batch_file, "w")
 		batch_f.writelines([cmd_line + "\n" for cmd_line in self.commands_])
 		batch_f.close()
-		ret_code = os.system(batch_file)
+		if "win" == self.host_platform_:
+			ret_code = os.system(batch_file)
+		else:
+			os.system("chmod 777 " + batch_file)
+			ret_code = os.system("./" + batch_file)
 		os.remove(batch_file)
 		return ret_code
 
@@ -339,12 +348,12 @@ def build_a_project(name, build_path, build_info, compiler_arch, need_install = 
 
 		os.chdir(build_dir)
 
-		cmake_cmd = batch_command()
+		cmake_cmd = batch_command(build_info.host_platform)
 		cmake_cmd.add_command('cmake -G "%s" %s %s %s' % (compiler_arch[1], toolset_name, additional_options, "../cmake"))
 		if cmake_cmd.execute() != 0:
 			log_error("Config %s failed." % name)
 
-		build_cmd = batch_command()
+		build_cmd = batch_command(build_info.host_platform)
 		build_cmd.add_command('@CALL "%%VS%dCOMNTOOLS%%..\\..\\VC\\vcvarsall.bat" %s' % (build_info.compiler_version, vc_option))
 		for config in build_info.cfg:
 			build_info.msvc_add_build_command(build_cmd, name, "ALL_BUILD", config, vc_arch)
@@ -381,7 +390,7 @@ def build_a_project(name, build_path, build_info, compiler_arch, need_install = 
 				else:
 					config_options += " -DANDROID_TOOLCHAIN_NAME=arm-linux-androideabi-%s" % compiler_arch[2]
 			
-			cmake_cmd = batch_command()
+			cmake_cmd = batch_command(build_info.host_platform)
 			cmake_cmd.add_command('cmake -G "%s" %s %s %s %s' % (compiler_arch[1], toolset_name, additional_options, config_options, "../cmake"))
 			if cmake_cmd.execute() != 0:
 				log_error("Config %s failed." % name)		
@@ -389,9 +398,13 @@ def build_a_project(name, build_path, build_info, compiler_arch, need_install = 
 			install_str = ""
 			if need_install and (not build_info.prefer_static):
 				install_str = "install"
-			build_cmd = batch_command()
-			build_cmd.add_command("@%s %s" % (make_name, install_str))
-			build_cmd.add_command('@if ERRORLEVEL 1 exit /B 1')
+			build_cmd = batch_command(build_info.host_platform)
+			if "win" == build_info.host_platform:
+				build_cmd.add_command("@%s %s" % (make_name, install_str))
+				build_cmd.add_command('@if ERRORLEVEL 1 exit /B 1')
+			else:
+				build_cmd.add_command("%s %s" % (make_name, install_str))
+				build_cmd.add_command('if (($? != 0)); then exit 1; fi')
 			if build_cmd.execute() != 0:
 				log_error("Build %s failed." % name)
 
