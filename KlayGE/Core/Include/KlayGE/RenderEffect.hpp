@@ -259,7 +259,7 @@ namespace KlayGE
 		{
 			if (in_cbuff_)
 			{
-				*(data_.cbuff_desc.cbuff->VariableInBuff<T>(data_.cbuff_desc.offset)) = value;
+				*(data_.cbuff_desc.cbuff->template VariableInBuff<T>(data_.cbuff_desc.offset)) = value;
 				data_.cbuff_desc.cbuff->Dirty(true);
 			}
 			else
@@ -273,7 +273,7 @@ namespace KlayGE
 		{
 			if (in_cbuff_)
 			{
-				val = *(data_.cbuff_desc.cbuff->VariableInBuff<T>(data_.cbuff_desc.offset));
+				val = *(data_.cbuff_desc.cbuff->template VariableInBuff<T>(data_.cbuff_desc.offset));
 			}
 			else
 			{
@@ -291,7 +291,7 @@ namespace KlayGE
 				data_.cbuff_desc.cbuff = cbuff;
 				data_.cbuff_desc.offset = offset;
 				data_.cbuff_desc.stride = stride;
-				new (data_.cbuff_desc.cbuff->VariableInBuff<T>(data_.cbuff_desc.offset)) T;
+				new (data_.cbuff_desc.cbuff->template VariableInBuff<T>(data_.cbuff_desc.offset)) T;
 				this->operator=(val);
 			}
 		}
@@ -348,10 +348,10 @@ namespace KlayGE
 		virtual RenderVariablePtr Clone() KLAYGE_OVERRIDE
 		{
 			shared_ptr<RenderVariableArray<T> > ret = MakeSharedPtr<RenderVariableArray<T> >();
-			ret->in_cbuff_ = in_cbuff_;
-			if (in_cbuff_)
+			ret->RenderVariableConcrete<std::vector<T> >::in_cbuff_ = this->in_cbuff_;
+			if (this->in_cbuff_)
 			{
-				ret->data_ = data_;
+				ret->RenderVariableConcrete<std::vector<T> >::data_ = this->data_;
 			}
 			std::vector<T> val;
 			this->Value(val);
@@ -361,107 +361,40 @@ namespace KlayGE
 
 		virtual RenderVariable& operator=(std::vector<T> const & value) KLAYGE_OVERRIDE
 		{
-			if (in_cbuff_)
+			if (this->in_cbuff_)
 			{
-				uint8_t* target = data_.cbuff_desc.cbuff->VariableInBuff<uint8_t>(data_.cbuff_desc.offset);
+				uint8_t* target = this->data_.cbuff_desc.cbuff->template VariableInBuff<uint8_t>(this->data_.cbuff_desc.offset);
 
 				size_ = static_cast<uint32_t>(value.size());
 				for (size_t i = 0; i < value.size(); ++ i)
 				{
-					*reinterpret_cast<T*>(target + i * data_.cbuff_desc.stride) = value[i];
+					memcpy(target + i * this->data_.cbuff_desc.stride, &value[i], sizeof(value[i]));
 				}
 
-				data_.cbuff_desc.cbuff->Dirty(true);
+				this->data_.cbuff_desc.cbuff->Dirty(true);
 			}
 			else
 			{
-				*reinterpret_cast<std::vector<T>*>(data_.val) = value;
+				*reinterpret_cast<std::vector<T>*>(this->data_.val) = value;
 			}
 			return *this;
 		}
 
 		virtual void Value(std::vector<T>& val) const KLAYGE_OVERRIDE
 		{
-			if (in_cbuff_)
+			if (this->in_cbuff_)
 			{
-				uint8_t const * src = data_.cbuff_desc.cbuff->VariableInBuff<uint8_t>(data_.cbuff_desc.offset);
+				uint8_t const * src = this->data_.cbuff_desc.cbuff->template VariableInBuff<uint8_t>(this->data_.cbuff_desc.offset);
 
 				val.resize(size_);
 				for (size_t i = 0; i < size_; ++ i)
 				{
-					val[i] = *reinterpret_cast<T const *>(src + i * data_.cbuff_desc.stride);
+					memcpy(&val[i], src + i * this->data_.cbuff_desc.stride, sizeof(val[i]));
 				}
 			}
 			else
 			{
-				val = *reinterpret_cast<std::vector<T> const *>(data_.val);
-			}
-		}
-
-	private:
-		uint32_t size_;
-	};
-
-	template <typename T, int N>
-	class RenderVariableVectorArray : public RenderVariableConcrete<std::vector<Vector_T<T, N> > >
-	{
-	public:
-		virtual RenderVariablePtr Clone() KLAYGE_OVERRIDE
-		{
-			shared_ptr<RenderVariableVectorArray<T, N> > ret = MakeSharedPtr<RenderVariableVectorArray<T, N> >();
-			ret->in_cbuff_ = in_cbuff_;
-			if (in_cbuff_)
-			{
-				ret->data_ = data_;
-			}
-			std::vector<Vector_T<T, N> > val;
-			this->Value(val);
-			*ret = val;
-			return ret;
-		}
-
-		virtual RenderVariable& operator=(std::vector<Vector_T<T, N> > const & value) KLAYGE_OVERRIDE
-		{
-			if (in_cbuff_)
-			{
-				uint8_t* target = data_.cbuff_desc.cbuff->VariableInBuff<uint8_t>(data_.cbuff_desc.offset);
-
-				size_ = static_cast<uint32_t>(value.size());
-				for (size_t i = 0; i < value.size(); ++ i)
-				{
-					for (int j = 0; j < N; ++ j)
-					{
-						reinterpret_cast<T*>(target + i * data_.cbuff_desc.stride)[j] = value[i][j];
-					}
-				}
-
-				data_.cbuff_desc.cbuff->Dirty(true);
-			}
-			else
-			{
-				*reinterpret_cast<std::vector<Vector_T<T, N> >*>(data_.val) = value;
-			}
-			return *this;
-		}
-
-		virtual void Value(std::vector<Vector_T<T, N> >& val) const KLAYGE_OVERRIDE
-		{
-			if (in_cbuff_)
-			{
-				uint8_t const * src = data_.cbuff_desc.cbuff->VariableInBuff<uint8_t>(data_.cbuff_desc.offset);
-
-				val.resize(size_);
-				for (size_t i = 0; i < size_; ++ i)
-				{
-					for (int j = 0; j < N; ++ j)
-					{
-						val[i][j] = reinterpret_cast<T const *>(src + i * data_.cbuff_desc.stride)[j];
-					}
-				}
-			}
-			else
-			{
-				val = *reinterpret_cast<std::vector<Vector_T<T, N> > const *>(data_.val);
+				val = *reinterpret_cast<std::vector<T> const *>(this->data_.val);
 			}
 		}
 
@@ -553,12 +486,12 @@ namespace KlayGE
 	typedef RenderVariableArray<uint32_t> RenderVariableUIntArray;
 	typedef RenderVariableArray<int32_t> RenderVariableIntArray;
 	typedef RenderVariableArray<float> RenderVariableFloatArray;
-	typedef RenderVariableVectorArray<int, 2> RenderVariableInt2Array;
-	typedef RenderVariableVectorArray<int, 3> RenderVariableInt3Array;
-	typedef RenderVariableVectorArray<int, 4> RenderVariableInt4Array;
-	typedef RenderVariableVectorArray<float, 2> RenderVariableFloat2Array;
-	typedef RenderVariableVectorArray<float, 3> RenderVariableFloat3Array;
-	typedef RenderVariableVectorArray<float, 4> RenderVariableFloat4Array;
+	typedef RenderVariableArray<int2> RenderVariableInt2Array;
+	typedef RenderVariableArray<int3> RenderVariableInt3Array;
+	typedef RenderVariableArray<int4> RenderVariableInt4Array;
+	typedef RenderVariableArray<float2> RenderVariableFloat2Array;
+	typedef RenderVariableArray<float3> RenderVariableFloat3Array;
+	typedef RenderVariableArray<float4> RenderVariableFloat4Array;
 
 
 	class KLAYGE_CORE_API RenderEffectAnnotation
