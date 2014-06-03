@@ -1,0 +1,26 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GLES_EXT_texture_view" reg_no="185">
+	<tokens>
+		<token name="GL_TEXTURE_VIEW_MIN_LEVEL_EXT" value="0x82DB"/>
+		<token name="GL_TEXTURE_VIEW_NUM_LEVELS_EXT" value="0x82DC"/>
+		<token name="GL_TEXTURE_VIEW_MIN_LAYER_EXT" value="0x82DD"/>
+		<token name="GL_TEXTURE_VIEW_NUM_LAYERS_EXT" value="0x82DE"/>
+		<token name="GL_TEXTURE_IMMUTABLE_LEVELS_EXT" value="0x82DF"/>
+	</tokens>
+
+	<functions>
+		<function name="glTextureViewEXT" return="void">
+			<params>
+				<param type="GLuint" name="texture"/>
+				<param type="GLenum" name="target"/>
+				<param type="GLuint" name="origtexture"/>
+				<param type="GLenum" name="internalformat"/>
+				<param type="GLuint" name="minlevel"/>
+				<param type="GLuint" name="numlevels"/>
+				<param type="GLuint" name="minlayer"/>
+				<param type="GLuint" name="numlayers"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

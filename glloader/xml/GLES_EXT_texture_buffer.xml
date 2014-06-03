@@ -1,0 +1,39 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GLES_EXT_texture_buffer" reg_no="183">
+	<tokens>
+		<token name="GL_TEXTURE_BUFFER_EXT" value="0x8C2A"/>
+		<token name="GL_TEXTURE_BUFFER_BINDING_EXT" value="0x8C2A"/>
+		<token name="GL_MAX_TEXTURE_BUFFER_SIZE_EXT" value="0x8C2B"/>
+		<token name="GL_TEXTURE_BINDING_BUFFER_EXT" value="0x8C2C"/>
+		<token name="GL_TEXTURE_BUFFER_DATA_STORE_BINDING_EXT" value="0x8C2D"/>
+		<token name="GL_TEXTURE_BUFFER_OFFSET_ALIGNMENT_EXT" value="0x919F"/>
+		<token name="GL_SAMPLER_BUFFER_EXT" value="0x8DC2"/>
+		<token name="GL_INT_SAMPLER_BUFFER_EXT" value="0x8DD0"/>
+		<token name="GL_UNSIGNED_INT_SAMPLER_BUFFER_EXT" value="0x8DD8"/>
+		<token name="GL_IMAGE_BUFFER_EXT" value="0x9051"/>
+		<token name="GL_INT_IMAGE_BUFFER_EXT" value="0x905C"/>
+		<token name="GL_UNSIGNED_INT_IMAGE_BUFFER_EXT" value="0x9067"/>
+		<token name="GL_TEXTURE_BUFFER_OFFSET_EXT" value="0x919D"/>
+		<token name="GL_TEXTURE_BUFFER_SIZE_EXT" value="0x919E"/>
+	</tokens>
+
+	<functions>
+		<function name="glTexBufferEXT" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLenum" name="internalformat"/>
+				<param type="GLuint" name="buffer"/>
+			</params>
+		</function>
+	</functions>
+		<function name="glTexBufferRangeEXT" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLenum" name="internalformat"/>
+				<param type="GLuint" name="buffer"/>
+				<param type="GLintptr" name="offset"/>
+				<param type="GLsizeiptr" name="size"/>
+			</params>
+		</function>
+</gl_extension>
