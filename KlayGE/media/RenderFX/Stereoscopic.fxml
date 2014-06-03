@@ -14,6 +14,11 @@
 		<state name="address_u" value="clamp"/>
 		<state name="address_v" value="clamp"/>
 	</parameter>
+	<parameter type="sampler" name="linear_sampler">
+		<state name="filtering" value="min_mag_linear_mip_point"/>
+		<state name="address_u" value="clamp"/>
+		<state name="address_v" value="clamp"/>
+	</parameter>
 
 	<parameter type="float4" name="width_height"/>
 	<parameter type="texture2D" name="color_tex"/>
@@ -49,9 +54,9 @@ float4 CalcStereoCoord(float2 tc : TEXCOORD0)
 float4 RedCyanPS(float2 tex : TEXCOORD0) : SV_Target
 {
 	float4 lr_coord = CalcStereoCoord(tex);
-	float4 left = color_tex.Sample(point_sampler, lr_coord.xy);
-	float4 right = color_tex.Sample(point_sampler, lr_coord.zw);
-	float4 overlay = overlay_tex.Sample(point_sampler, tex);
+	float4 left = color_tex.Sample(linear_sampler, lr_coord.xy);
+	float4 right = color_tex.Sample(linear_sampler, lr_coord.zw);
+	float4 overlay = overlay_tex.Sample(linear_sampler, tex);
 	left = lerp(left, overlay, overlay.a);
 	right = lerp(right, overlay, overlay.a);
 	return float4(dot(left.gb, float2(0.7f, 0.3f)), right.gb, 1);
@@ -60,9 +65,9 @@ float4 RedCyanPS(float2 tex : TEXCOORD0) : SV_Target
 float4 YellowBluePS(float2 tex : TEXCOORD0) : SV_Target
 {
 	float4 lr_coord = CalcStereoCoord(tex);
-	float4 left = color_tex.Sample(point_sampler, lr_coord.xy);
-	float4 right = color_tex.Sample(point_sampler, lr_coord.zw);
-	float4 overlay = overlay_tex.Sample(point_sampler, tex);
+	float4 left = color_tex.Sample(linear_sampler, lr_coord.xy);
+	float4 right = color_tex.Sample(linear_sampler, lr_coord.zw);
+	float4 overlay = overlay_tex.Sample(linear_sampler, tex);
 	left = lerp(left, overlay, overlay.a);
 	right = lerp(right, overlay, overlay.a);
 	return float4(left.rg, right.b, 1);
@@ -71,9 +76,9 @@ float4 YellowBluePS(float2 tex : TEXCOORD0) : SV_Target
 float4 GreenRedPS(float2 tex : TEXCOORD0) : SV_Target
 {
 	float4 lr_coord = CalcStereoCoord(tex);
-	float4 left = color_tex.Sample(point_sampler, lr_coord.xy);
-	float4 right = color_tex.Sample(point_sampler, lr_coord.zw);
-	float4 overlay = overlay_tex.Sample(point_sampler, tex);
+	float4 left = color_tex.Sample(linear_sampler, lr_coord.xy);
+	float4 right = color_tex.Sample(linear_sampler, lr_coord.zw);
+	float4 overlay = overlay_tex.Sample(linear_sampler, tex);
 	left = lerp(left, overlay, overlay.a);
 	right = lerp(right, overlay, overlay.a);
 	return float4(right.r, left.gb, 1);
@@ -85,8 +90,8 @@ float4 HorInterlacingPS(float2 tex : TEXCOORD0) : SV_Target
 	float4 lr_coord = CalcStereoCoord(tex);	
 	uint u = tex.x * width_height.x;
 	float2 coord = (u % 2) ? lr_coord.xy : lr_coord.zw;
-	float4 scene = color_tex.Sample(point_sampler, coord);
-	float4 overlay = overlay_tex.Sample(point_sampler, tex);
+	float4 scene = color_tex.Sample(linear_sampler, coord);
+	float4 overlay = overlay_tex.Sample(linear_sampler, tex);
 	return lerp(scene, overlay, overlay.a);
 }
 
@@ -95,8 +100,8 @@ float4 VerInterlacingPS(float2 tex : TEXCOORD0) : SV_Target
 	float4 lr_coord = CalcStereoCoord(tex);	
 	uint v = tex.y * width_height.y;
 	float2 coord = (v % 2) ? lr_coord.xy : lr_coord.zw;
-	float4 scene = color_tex.Sample(point_sampler, coord);
-	float4 overlay = overlay_tex.Sample(point_sampler, tex);
+	float4 scene = color_tex.Sample(linear_sampler, coord);
+	float4 overlay = overlay_tex.Sample(linear_sampler, tex);
 	return lerp(scene, overlay, overlay.a);
 }
 
@@ -105,8 +110,8 @@ float4 HorizontalPS(float2 tex : TEXCOORD0) : SV_Target
 	float2 overlay_coord = (tex.x < 0.5f) ? float2(tex.x * 2, tex.y) : float2((tex.x - 0.5f) * 2, tex.y);
 	float4 lr_coord = CalcStereoCoord(overlay_coord);
 	float2 coord = (tex.x < 0.5f) ? lr_coord.xy : lr_coord.zw;
-	float4 scene = color_tex.Sample(point_sampler, coord);
-	float4 overlay = overlay_tex.Sample(point_sampler, overlay_coord);
+	float4 scene = color_tex.Sample(linear_sampler, coord);
+	float4 overlay = overlay_tex.Sample(linear_sampler, overlay_coord);
 	return lerp(scene, overlay, overlay.a);
 }
 
@@ -115,8 +120,8 @@ float4 VerticalPS(float2 tex : TEXCOORD0) : SV_Target
 	float2 overlay_coord = (tex.y < 0.5f) ? float2(tex.x, tex.y * 2) : float2(tex.x, (tex.y - 0.5f) * 2);
 	float4 lr_coord = CalcStereoCoord(overlay_coord);
 	float2 coord = (tex.y < 0.5f) ? lr_coord.xy : lr_coord.zw;
-	float4 scene = color_tex.Sample(point_sampler, coord);
-	float4 overlay = overlay_tex.Sample(point_sampler, overlay_coord);
+	float4 scene = color_tex.Sample(linear_sampler, coord);
+	float4 overlay = overlay_tex.Sample(linear_sampler, overlay_coord);
 	return lerp(scene, overlay, overlay.a);
 }
 
@@ -124,8 +129,8 @@ float4 LCDShutterOneEyePS(float2 tex : TEXCOORD0) : SV_Target
 {
 	float4 lr_coord = CalcStereoCoord(tex);
 	float2 coord = (0 == eye) ? lr_coord.xy : lr_coord.zw;
-	float4 scene = color_tex.Sample(point_sampler, coord);
-	float4 overlay = overlay_tex.Sample(point_sampler, tex);
+	float4 scene = color_tex.Sample(linear_sampler, coord);
+	float4 overlay = overlay_tex.Sample(linear_sampler, tex);
 	return lerp(scene, overlay, overlay.a);
 }
 		]]>
@@ -229,9 +234,9 @@ float4 OculusVRPS(float2 tex : TEXCOORD0) : SV_Target
 	float2 screen_center_coord = (tex.x < 0.5f) ? screen_center.xz : screen_center.yz;
 
 	float2 theta = (coord - lens_center_coord) * scale_in;
-	float rsq = theta.x * theta.x + theta.y * theta.y;
-	float2 theta1 = theta * (hmd_warp_param.x + hmd_warp_param.y * rsq
-		+ hmd_warp_param.z * rsq * rsq + hmd_warp_param.w * rsq * rsq * rsq);
+	float rsq = dot(theta, theta);
+	float2 theta1 = theta * (hmd_warp_param.x + (hmd_warp_param.y
+		+ (hmd_warp_param.z + hmd_warp_param.w * rsq) * rsq) * rsq);
 
 	// Detect whether blue texture coordinates are out of range since these will scaled out the furthest.
 	float2 theta_blue = theta1 * (chrom_ab_param.z + chrom_ab_param.w * rsq);
@@ -243,17 +248,17 @@ float4 OculusVRPS(float2 tex : TEXCOORD0) : SV_Target
 
 	// Now do blue texture lookup.
 	tc_blue.x = ((tex.x < 0.5f) ? tc_blue.x : (tc_blue.x - 0.5f)) * 2;
-	float2 tc_overlay = tc_blue;
+	float2 tc_overlay = (tc_blue * 2 - 1) * 1.35f * 0.5f + 0.5f;
 	float4 lr_coord = CalcStereoCoord(tc_blue);
 	tc_blue = (tex.x < 0.5f) ? lr_coord.xy : lr_coord.zw;
-	float blue = color_tex.Sample(point_sampler, tc_blue).b;
+	float blue = color_tex.Sample(linear_sampler, tc_blue).b;
 
 	// Do green lookup (no scaling).
 	float2 tc_green = lens_center_coord + scale * theta1;
 	tc_green.x = ((tex.x < 0.5f) ? tc_green.x : (tc_green.x - 0.5f)) * 2;
 	lr_coord = CalcStereoCoord(tc_green);
 	tc_green = (tex.x < 0.5f) ? lr_coord.xy : lr_coord.zw;
-	float4 green_color = color_tex.Sample(point_sampler, tc_green);
+	float4 green_color = color_tex.Sample(linear_sampler, tc_green);
 	float green = green_color.g;
 	float alpha = green_color.a;
 
@@ -263,10 +268,10 @@ float4 OculusVRPS(float2 tex : TEXCOORD0) : SV_Target
 	tc_red.x = ((tex.x < 0.5f) ? tc_red.x : (tc_red.x - 0.5f)) * 2;
 	lr_coord = CalcStereoCoord(tc_red);
 	tc_red = (tex.x < 0.5f) ? lr_coord.xy : lr_coord.zw;
-	float red = color_tex.Sample(point_sampler, tc_red).r;
+	float red = color_tex.Sample(linear_sampler, tc_red).r;
 
 	float4 scene = float4(red, green, blue, alpha);
-	float4 overlay = overlay_tex.Sample(point_sampler, tc_overlay);
+	float4 overlay = overlay_tex.Sample(linear_sampler, tc_overlay);
 	return lerp(scene, overlay, overlay.a);
 }
 		]]>
