@@ -984,7 +984,7 @@ namespace KlayGE
 			return Matrix4_T<T>(
 				near2 * invWidth,			0,								0,				0,
 				0,							near2 * invHeight,				0,				0,
-				-(left + right)* invWidth,	-(top + bottom) * invHeight,	q,				1,
+				-(left + right) * invWidth,	-(top + bottom) * invHeight,	q,				1,
 				0,							0,								-nearPlane * q, 0);
 		}
 
