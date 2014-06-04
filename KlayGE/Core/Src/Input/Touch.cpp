@@ -271,10 +271,10 @@ namespace KlayGE
 				float vec_len = MathLib::length(vec);
 				vec /= vec_len;
 
-				float d = abs(MathLib::dot(two_finger_vec_, vec));
+				float d = MathLib::abs(MathLib::dot(two_finger_vec_, vec));
 				if (d > ZOOM_THRESHOLD)
 				{
-					if (abs(1 - abs(vec_len / two_finger_start_len_)) > ZOOM_DISTANCE_THRESHOLD)
+					if (MathLib::abs(1 - MathLib::abs(vec_len / two_finger_start_len_)) > ZOOM_DISTANCE_THRESHOLD)
 					{
 						this->CurrState(GS_Zoom);
 					}
@@ -308,10 +308,10 @@ namespace KlayGE
 				float vec_len = MathLib::length(vec);
 				vec /= vec_len;
 
-				float d = abs(MathLib::dot(two_finger_vec_, vec));
+				float d = MathLib::abs(MathLib::dot(two_finger_vec_, vec));
 				if (d > ZOOM_THRESHOLD)
 				{
-					if (abs(1 - abs(vec_len / two_finger_start_len_)) > ZOOM_DISTANCE_THRESHOLD)
+					if (MathLib::abs(1 - MathLib::abs(vec_len / two_finger_start_len_)) > ZOOM_DISTANCE_THRESHOLD)
 					{
 						this->CurrState(GS_Zoom);
 					}
@@ -361,7 +361,7 @@ namespace KlayGE
 			{
 				float2 vec = MathLib::normalize(float2(touch_coords_[index_][0] - touch_coords_[index_][1]));
 				float delta_angle = atan2(two_finger_vec_.y(), two_finger_vec_.x()) - atan2(vec.y(), vec.x());
-				if (abs(delta_angle) > 0.01f)
+				if (MathLib::abs(delta_angle) > 0.01f)
 				{
 					two_finger_vec_ = vec;
 					gesture_ = TS_Rotate;
