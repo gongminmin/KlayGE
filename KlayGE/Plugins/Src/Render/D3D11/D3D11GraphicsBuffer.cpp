@@ -121,8 +121,12 @@ namespace KlayGE
 		misc_flags = 0;
 		if (access_hint_ & EAH_GPU_Unordered)
 		{
-			misc_flags = (access_hint_ & EAH_GPU_Structured)
+			misc_flags |= (access_hint_ & EAH_GPU_Structured)
 				? D3D11_RESOURCE_MISC_BUFFER_STRUCTURED : D3D11_RESOURCE_MISC_BUFFER_ALLOW_RAW_VIEWS;
+		}
+		if (access_hint_ & EAH_DrawIndirectArgs)
+		{
+			misc_flags |= D3D11_RESOURCE_MISC_DRAWINDIRECT_ARGS;
 		}
 	}
 

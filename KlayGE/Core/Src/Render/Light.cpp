@@ -180,15 +180,15 @@ namespace KlayGE
 		{
 			const float4 RGB_TO_LUM(0.2126f, 0.7152f, 0.0722f, 0);
 			float lum = MathLib::dot(color_, RGB_TO_LUM);
-			if (abs(falloff_.z()) < 1e-6f)
+			if (MathLib::abs(falloff_.z()) < 1e-6f)
 			{
-				if (abs(falloff_.y()) < 1e-6f)
+				if (MathLib::abs(falloff_.y()) < 1e-6f)
 				{
 					range_ = 100;
 				}
 				else
 				{
-					range_ = abs(falloff_.y()) < 1e-6f ? 1 : -(falloff_.x() - lum * 255) / falloff_.y();
+					range_ = MathLib::abs(falloff_.y()) < 1e-6f ? 1 : -(falloff_.x() - lum * 255) / falloff_.y();
 				}
 			}
 			else
@@ -481,7 +481,7 @@ namespace KlayGE
 		float3 const dir = this->Direction();
 
 		float3 up_vec;
-		if (abs(MathLib::dot(-dir, scene_camera.UpVec())) > 0.95f)
+		if (MathLib::abs(MathLib::dot(-dir, scene_camera.UpVec())) > 0.95f)
 		{
 			up_vec = scene_camera.RightVec();
 		}

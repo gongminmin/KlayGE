@@ -816,7 +816,8 @@ namespace KlayGE
 		EAH_Immutable = 1UL << 7,
 		EAH_Raw = 1UL << 8,
 		EAH_Append = 1UL << 9,
-		EAH_Counter = 1UL << 10
+		EAH_Counter = 1UL << 10,
+		EAH_DrawIndirectArgs = 1UL << 11
 	};
 
 	struct ElementInitData
