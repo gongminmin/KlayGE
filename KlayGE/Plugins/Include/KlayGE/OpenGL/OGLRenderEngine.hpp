@@ -116,6 +116,8 @@ namespace KlayGE
 		}
 		void DeleteFramebuffers(GLsizei n, GLuint const * framebuffers);
 
+		void SetPolygonMode(GLenum face, GLenum mode);
+
 		bool HackForNV() const
 		{
 			return hack_for_nv_;
@@ -203,6 +205,8 @@ namespace KlayGE
 		std::map<GLuint, std::map<GLint, int4> > uniformi_cache_;
 		std::map<GLuint, std::map<GLint, float4> > uniformf_cache_;
 		bool fb_srgb_cache_;
+
+		GLenum polygon_mode_override_;
 
 		bool hack_for_nv_;
 		bool hack_for_ati_;

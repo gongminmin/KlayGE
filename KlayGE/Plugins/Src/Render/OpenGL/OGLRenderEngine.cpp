@@ -156,6 +156,7 @@ namespace KlayGE
 	{
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 		cur_rs_obj_ = rf.MakeRasterizerStateObject(RasterizerStateDesc());
+		polygon_mode_override_ = OGLMapping::Mapping(cur_rs_obj_->GetDesc().polygon_mode);
 		cur_dss_obj_ = rf.MakeDepthStencilStateObject(DepthStencilStateDesc());
 		cur_bs_obj_ = rf.MakeBlendStateObject(BlendStateDesc());
 		checked_pointer_cast<OGLRasterizerStateObject>(cur_rs_obj_)->ForceDefaultState();
@@ -760,6 +761,15 @@ namespace KlayGE
 			}
 		}
 		glDeleteFramebuffersEXT(n, framebuffers);
+	}
+
+	void OGLRenderEngine::SetPolygonMode(GLenum face, GLenum mode)
+	{
+		if (polygon_mode_override_ != mode)
+		{
+			glPolygonMode(face, mode);
+			polygon_mode_override_ = mode;
+		}
 	}
 
 	// 设置当前渲染目标

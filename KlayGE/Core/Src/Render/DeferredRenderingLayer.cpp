@@ -1324,22 +1324,12 @@ namespace KlayGE
 			}
 		}
 
-		if (force_line_mode_)
-		{
-			if ((PC_Depth == pass_cat) || (PC_GBuffer == pass_cat))
-			{
-				re.ForceLineMode(force_line_mode_);
-			}
-			else
-			{
-				re.ForceLineMode(false);
-			}
-		}
-
 		uint32_t urv;
 		switch (pass_cat)
 		{
 		case PC_Depth:
+			re.ForceLineMode(force_line_mode_);
+
 			// Pre depth for no depth texture support platforms
 			this->PreparePVP(pvp);
 			this->GenerateDepthBuffer(pvp, pass_tb);
@@ -1349,6 +1339,8 @@ namespace KlayGE
 		case PC_GBuffer:
 			if (0 == index_in_pass)
 			{
+				re.ForceLineMode(force_line_mode_);
+
 				if ((PRT_RT0 == pass_rt) || (PRT_MRT == pass_rt))
 				{
 					CameraPtr const & camera = pvp.frame_buffer->GetViewport()->camera;
@@ -1396,6 +1388,8 @@ namespace KlayGE
 
 				if ((PRT_RT0 == pass_rt) || (PRT_MRT == pass_rt))
 				{
+					re.ForceLineMode(false);
+
 					this->PostGenerateGBuffer(pvp);
 					if (PTB_Opaque == pass_tb)
 					{
