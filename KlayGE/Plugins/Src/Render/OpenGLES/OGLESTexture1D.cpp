@@ -107,32 +107,38 @@ namespace KlayGE
 
 				GLsizei const image_size = ((width + 3) / 4) * block_size;
 
+				void* ptr;
 				if (nullptr == init_data)
 				{
 					tex_data_[level].resize(image_size, 0);
+					ptr = nullptr;
 				}
 				else
 				{
 					tex_data_[level].resize(image_size);
 					std::memcpy(&tex_data_[level][0], init_data[level].data, image_size);
+					ptr = &tex_data_[level][0];
 				}
 				glCompressedTexImage2D(target_type_, level, glinternalFormat,
-					width, 1, 0, image_size, &tex_data_[level][0]);
+					width, 1, 0, image_size, ptr);
 			}
 			else
 			{
 				GLsizei const image_size = width * texel_size;
 
+				void* ptr;
 				if (nullptr == init_data)
 				{
 					tex_data_[level].resize(image_size, 0);
+					ptr = nullptr;
 				}
 				else
 				{
 					tex_data_[level].resize(image_size);
 					std::memcpy(&tex_data_[level][0], init_data[level].data, image_size);
+					ptr = &tex_data_[level][0];
 				}
-				glTexImage2D(target_type_, level, glinternalFormat, width, 1, 0, glformat, gltype, &tex_data_[level][0]);
+				glTexImage2D(target_type_, level, glinternalFormat, width, 1, 0, glformat, gltype, ptr);
 			}
 
 			width = std::max(1U, width / 2);

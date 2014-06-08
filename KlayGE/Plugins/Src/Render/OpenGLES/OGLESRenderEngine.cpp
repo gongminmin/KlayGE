@@ -1325,6 +1325,7 @@ namespace KlayGE
 	void OGLESRenderEngine::FillRenderDeviceCaps()
 	{
 		std::string vendor(reinterpret_cast<char const *>(glGetString(GL_VENDOR)));
+		std::string renderer(reinterpret_cast<char const *>(glGetString(GL_RENDERER)));
 		if (vendor.find("NVIDIA", 0) != std::string::npos)
 		{
 			hack_for_tegra_ = true;
@@ -1359,11 +1360,20 @@ namespace KlayGE
 		}
 		if (vendor.find("Google", 0) != std::string::npos)
 		{
-			hack_for_google_ = true;
+			if (renderer.find("ANGLE", 0) != std::string::npos)
+			{
+				hack_for_angle_ = true;
+				hack_for_android_emulator_ = false;
+			}
+			else
+			{
+				hack_for_angle_ = false;
+				hack_for_android_emulator_ = true;
+			}
 		}
 		else
 		{
-			hack_for_google_ = false;
+			hack_for_android_emulator_ = false;
 		}
 
 		GLint temp;
@@ -1460,7 +1470,7 @@ namespace KlayGE
 		caps_.multithread_rendering_support = false;
 		caps_.multithread_res_creating_support = false;
 		caps_.mrt_independent_bit_depths_support = false;
-		if (hack_for_pvr_ || hack_for_mali_ || hack_for_adreno_)
+		if (hack_for_pvr_ || hack_for_mali_ || hack_for_adreno_ || hack_for_angle_)
 		{
 			caps_.standard_derivatives_support = false;
 		}
@@ -1594,7 +1604,7 @@ namespace KlayGE
 			texture_format_.insert(EF_ABGR32UI);
 			texture_format_.insert(EF_ABGR32I);
 		}
-		if ((glloader_GLES_VERSION_3_0() || glloader_GLES_OES_texture_half_float()) && !hack_for_pvr_ && !hack_for_google_)
+		if ((glloader_GLES_VERSION_3_0() || glloader_GLES_OES_texture_half_float()) && !hack_for_pvr_ && !hack_for_android_emulator_)
 		{
 			texture_format_.insert(EF_R16F);
 			texture_format_.insert(EF_GR16F);
