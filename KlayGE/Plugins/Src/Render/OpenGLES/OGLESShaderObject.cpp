@@ -1095,7 +1095,7 @@ namespace KlayGE
 								++ beg;
 							}
 
-							std::string combined_sampler_name = sample_tokens[0] + "__" + sample_tokens[4];
+							std::string combined_sampler_name = sample_tokens[0] + "_" + sample_tokens[4];
 							bool found = false;
 							for (uint32_t j = 0; j < tex_sampler_binds_.size(); ++ j)
 							{
@@ -1756,6 +1756,7 @@ namespace KlayGE
 	{
 		bool ret = false;
 
+		is_shader_validate_[type] = false;
 		if (native_shader_block.size() >= 24)
 		{
 			uint8_t const * nsbp = &native_shader_block[0];
@@ -1893,12 +1894,11 @@ namespace KlayGE
 
 					this->AttachGLSL(type);
 
-					ret = true;
+					ret = is_shader_validate_[type];
 				}
 			}
 		}
 
-		is_shader_validate_[type] = ret;
 		return ret;
 	}
 
@@ -2573,7 +2573,7 @@ namespace KlayGE
 			std::string no_tex_lod_str;
 			{
 				std::stringstream ss;
-				ss << "-DKLAYGE_NO_TEX_LOD=" << ((ST_VertexShader == type) ? 0 : (glloader_GLES_EXT_shader_texture_lod() ? 0 : 1));
+				ss << "-DKLAYGE_NO_TEX_LOD=" << ((ST_VertexShader == type) ? 0 : 1);//(glloader_GLES_EXT_shader_texture_lod() ? 0 : 1));
 				no_tex_lod_str = ss.str();
 			}		
 			std::string flipping_str;

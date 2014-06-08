@@ -181,9 +181,9 @@ namespace KlayGE
 
 		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 
-		GraphicsBufferPtr const & inst_stream = this->GetRenderLayout()->InstanceStream();
-		RenderTechniquePtr const & tech = this->GetRenderTechnique();
 		RenderLayoutPtr const & layout = this->GetRenderLayout();
+		GraphicsBufferPtr const & inst_stream = layout->InstanceStream();
+		RenderTechniquePtr const & tech = this->GetRenderTechnique();
 		if (inst_stream)
 		{
 			if (layout->NumInstances() > 0)

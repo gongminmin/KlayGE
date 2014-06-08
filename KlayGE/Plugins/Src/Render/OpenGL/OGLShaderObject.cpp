@@ -1980,6 +1980,7 @@ namespace KlayGE
 	{
 		bool ret = false;
 
+		is_shader_validate_[type] = false;
 		if (native_shader_block.size() >= 24)
 		{
 			uint8_t const * nsbp = &native_shader_block[0];
@@ -2131,12 +2132,11 @@ namespace KlayGE
 
 					this->AttachGLSL(type);
 
-					ret = true;
+					ret = is_shader_validate_[type];
 				}
 			}
 		}
 
-		is_shader_validate_[type] = ret;
 		return ret;
 	}
 

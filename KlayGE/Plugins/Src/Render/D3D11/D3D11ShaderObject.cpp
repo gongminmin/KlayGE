@@ -583,6 +583,7 @@ namespace KlayGE
 	{
 		bool ret = false;
 
+		is_shader_validate_[type] = false;
 		std::string shader_profile = this->GetShaderProfile(type, effect, shader_desc_ids[type]);
 		if (native_shader_block.size() >= 25 + shader_profile.size())
 		{
@@ -722,13 +723,12 @@ namespace KlayGE
 
 						this->AttachShaderBytecode(type, effect, shader_desc_ids, code_blob);
 
-						ret = true;
+						ret = is_shader_validate_[type];
 					}
 				}
 			}
 		}
 
-		is_shader_validate_[type] = ret;
 		return ret;
 	}
 
