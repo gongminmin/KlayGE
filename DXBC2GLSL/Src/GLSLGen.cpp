@@ -180,6 +180,7 @@ uint32_t GLSLGen::DefaultRules(GLSLVersion version)
 			rules |= GSR_UniformBlockBinding;
 			rules |= GSR_ExplicitPSOutputLayout;
 			rules |= GSR_ExplicitInputLayout;
+			rules |= GSR_MatrixType;
 		}
 		if (version >= GSV_310_ES)
 		{
@@ -596,99 +597,108 @@ void GLSLGen::ToDclInterShaderOutputRecords(std::ostream& out)
 					out << "layout(location=" << i << ") ";
 				}
 			}
-
+			
+			bool output_var = false;
 			if (glsl_rules_ & GSR_InOutPrefix)
 			{
 				out << "out ";
+				output_var = true;
 			}
 			else
 			{
-				out << "varying ";
-				if (shader_type_ != ST_VS)
+				if (shader_type_ != ST_PS)
 				{
-					out << "out ";
+					out << "varying ";
+					if (shader_type_ != ST_VS)
+					{
+						out << "out ";
+					}
+					output_var = true;
 				}
 			}
 
-			int num_comps = 4;
-			if (ST_PS == shader_type_)
+			if (output_var)
 			{
-				num_comps = bitcount32(program_->params_out[i].mask);
-			}
-
-			if (1 == num_comps)
-			{
-				switch (program_->params_out[i].component_type)
+				int num_comps = 4;
+				if (ST_PS == shader_type_)
 				{
-				case SRCT_UINT32:
-					if (glsl_rules_ & GSR_UIntType)
-					{
-						out << "u";
-					}
-					out << "int";
-					break;
-
-				case SRCT_SINT32:
-					out << "int";
-					break;
-
-				case SRCT_FLOAT32:
-					out << "float";
-					break;
-
-				default:
-					BOOST_ASSERT(false);
-					break;
+					num_comps = bitcount32(program_->params_out[i].mask);
 				}
-			}
-			else
-			{
-				switch (program_->params_out[i].component_type)
+
+				if (1 == num_comps)
 				{
-				case SRCT_UINT32:
-					if (glsl_rules_ & GSR_UIntType)
+					switch (program_->params_out[i].component_type)
 					{
-						out << "u";
+					case SRCT_UINT32:
+						if (glsl_rules_ & GSR_UIntType)
+						{
+							out << "u";
+						}
+						out << "int";
+						break;
+
+					case SRCT_SINT32:
+						out << "int";
+						break;
+
+					case SRCT_FLOAT32:
+						out << "float";
+						break;
+
+					default:
+						BOOST_ASSERT(false);
+						break;
 					}
-					else
+				}
+				else
+				{
+					switch (program_->params_out[i].component_type)
 					{
+					case SRCT_UINT32:
+						if (glsl_rules_ & GSR_UIntType)
+						{
+							out << "u";
+						}
+						else
+						{
+							out << "i";
+						}
+						break;
+
+					case SRCT_SINT32:
 						out << "i";
+						break;
+
+					case SRCT_FLOAT32:
+						break;
+
+					default:
+						BOOST_ASSERT(false);
+						break;
 					}
-					break;
-
-				case SRCT_SINT32:
-					out << "i";
-					break;
-
-				case SRCT_FLOAT32:
-					break;
-
-				default:
-					BOOST_ASSERT(false);
-					break;
+					out << "vec" << num_comps;
 				}
-				out << "vec" << num_comps;
-			}
-			
-			out << " v_" << program_->params_out[i].semantic_name
-				<< program_->params_out[i].semantic_index;
-			if ((ST_VS == shader_type_) && has_gs_)
-			{
-				out << "In";
-			}
-			if (ST_HS == shader_type_)
-			{
-				if (!has_gs_)
+
+				out << " v_" << program_->params_out[i].semantic_name
+					<< program_->params_out[i].semantic_index;
+				if ((ST_VS == shader_type_) && has_gs_)
 				{
-					out<< "In";
+					out << "In";
 				}
-				out<< '[' << program_->hs_output_control_point_count << ']';
+				if (ST_HS == shader_type_)
+				{
+					if (!has_gs_)
+					{
+						out << "In";
+					}
+					out << '[' << program_->hs_output_control_point_count << ']';
+				}
+				if (ST_DS == shader_type_ && has_gs_)
+				{
+					out << "In";
+				}
+				out << ";\n";
 			}
-			if (ST_DS == shader_type_ && has_gs_)
-			{
-				out << "In";
-			}
-			out << ";\n";
 		}
 	}
 
@@ -1107,10 +1117,49 @@ void GLSLGen::ToCopyToInterShaderOutputRecords(std::ostream& out) const
 					break;
 
 				case SN_UNDEFINED:
-					out << "v_" << sig_desc.semantic_name << sig_desc.semantic_index;
-					if ((ST_VS == shader_type_) && has_gs_)
 					{
-						out << "In";
+						bool output_var = false;
+						if (glsl_rules_ & GSR_InOutPrefix)
+						{
+							output_var = true;
+						}
+						else
+						{
+							if (shader_type_ != ST_PS)
+							{
+								output_var = true;
+							}
+						}
+
+						bool output_semantic = false;
+						if (output_var)
+						{
+							output_semantic = true;
+						}
+						else
+						{
+							if (0 == strcmp("SV_Depth", sig_desc.semantic_name))
+							{
+								out << "gl_FragDepth";
+							}
+							else if (0 == strcmp("SV_Target", sig_desc.semantic_name))
+							{
+								out << "gl_FragData[" << sig_desc.semantic_index << ']';
+							}
+							else
+							{
+								output_semantic = true;
+							}
+						}
+
+						if (output_semantic)
+						{
+							out << "v_" << sig_desc.semantic_name << sig_desc.semantic_index;
+							if ((ST_VS == shader_type_) && has_gs_)
+							{
+								out << "In";
+							}
+						}
 					}
 					need_comps = true;
 					break;
@@ -1266,23 +1315,49 @@ void GLSLGen::ToDeclaration(std::ostream& out, ShaderDecl const & dcl)
 								break;
 
 							case SVC_MATRIX_COLUMNS:
-								// In glsl mat3x2 means 3 columns 2 rows, which is opposite to hlsl
-								out << uniform << "mat" << var_iter->type_desc.columns << "x" << var_iter->type_desc.rows
-									<< " " << var_iter->var_desc.name;
-								if (element_count)
+								if (glsl_rules_ & GSR_MatrixType)
 								{
-									out << "[" << element_count << "]";
+									// In glsl mat3x2 means 3 columns 2 rows, which is opposite to hlsl
+									out << uniform << "mat" << var_iter->type_desc.columns << 'x'
+										<< var_iter->type_desc.rows << " " << var_iter->var_desc.name;
+									if (element_count)
+									{
+										out << "[" << element_count << "]";
+									}
+								}
+								else
+								{
+									uint32_t array_size = var_iter->type_desc.rows;
+									if (element_count)
+									{
+										array_size *= element_count;
+									}
+									out << uniform << "vec" << var_iter->type_desc.columns << ' '
+										<< var_iter->var_desc.name << "[" << array_size << "]";
 								}
 								break;
 
 							case SVC_MATRIX_ROWS:
-								// In glsl mat3x2 means 3 columns 2 rows, which is opposite to hlsl
-								out << "layout(row_major) "
-									<< uniform << "mat" << var_iter->type_desc.columns << "x" << var_iter->type_desc.rows
-									<< " " << var_iter->var_desc.name;
-								if (element_count)
+								if (glsl_rules_ & GSR_MatrixType)
 								{
-									out << "[" << element_count << "]";
+									// In glsl mat3x2 means 3 columns 2 rows, which is opposite to hlsl
+									out << "layout(row_major) "
+										<< uniform << "mat" << var_iter->type_desc.columns << 'x'
+										<< var_iter->type_desc.rows << " " << var_iter->var_desc.name;
+									if (element_count)
+									{
+										out << "[" << element_count << "]";
+									}
+								}
+								else
+								{
+									uint32_t array_size = var_iter->type_desc.columns;
+									if (element_count)
+									{
+										array_size *= element_count;
+									}
+									out << uniform << "vec" << var_iter->type_desc.rows << ' '
+										<< var_iter->var_desc.name << "[" << array_size << "]";
 								}
 								break;
 
@@ -7069,7 +7144,20 @@ void GLSLGen::ToDefaultValue(std::ostream& out, DXBCShaderVariable const & var, 
 		{
 			BOOST_ASSERT_MSG(false, "Only support square matrix's default value for now.");
 		}
-		out << "mat" << var.type_desc.rows << "(";
+		if (glsl_rules_ & GSR_MatrixType)
+		{
+			out << "mat" << var.type_desc.rows << "(";
+		}
+		else
+		{
+			uint32_t array_size = var.type_desc.columns;
+			if (var.type_desc.elements)
+			{
+				array_size *= var.type_desc.elements;
+			}
+			out << "vec" << var.type_desc.rows
+				<< "[" << array_size << "](";
+		}
 		for (uint32_t column = 0; column < var.type_desc.rows; ++ column)
 		{
 			for (uint32_t row = 0; row < var.type_desc.rows; ++ row)
@@ -7222,7 +7310,14 @@ void GLSLGen::ToDefaultValue(std::ostream& out, DXBCShaderVariable const & var)
 		case SVC_MATRIX_ROWS:
 		case SVC_MATRIX_COLUMNS:
 			stride = var.type_desc.columns * 16;
-			out << "mat" << var.type_desc.columns << "x" << var.type_desc.rows << "[]";
+			if (glsl_rules_ & GSR_MatrixType)
+			{
+				out << "mat" << var.type_desc.columns << "x" << var.type_desc.rows << "[]";
+			}
+			else
+			{
+				out << "vec" << var.type_desc.rows << "[]";
+			}
 			break;
 
 		default:

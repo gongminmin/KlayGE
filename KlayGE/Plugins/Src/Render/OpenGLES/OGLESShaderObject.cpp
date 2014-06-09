@@ -599,11 +599,7 @@ namespace
 			param_->Value(v);
 
 			OGLESRenderEngine& re = *checked_cast<OGLESRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-#if USE_DXBC2GLSL
-			re.UniformMatrix4fv(location_, 1, false, &v[0]);
-#else
 			re.Uniform4fv(location_, 4, &v[0]);
-#endif
 		}
 
 	private:
@@ -967,11 +963,7 @@ namespace
 			if (!v.empty())
 			{
 				OGLESRenderEngine& re = *checked_cast<OGLESRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-#if USE_DXBC2GLSL
-				re.UniformMatrix4fv(location_, static_cast<GLsizei>(v.size()), false, &v[0][0]);
-#else
 				re.Uniform4fv(location_, static_cast<GLsizei>(v.size()) * 4, &v[0][0]);
-#endif
 			}
 		}
 
@@ -1362,17 +1354,15 @@ namespace KlayGE
 		}
 		ss << std::endl;
 
-		KLAYGE_AUTO(cbuffers, effect.CBuffers());
-		typedef KLAYGE_DECLTYPE(cbuffers) CBuffersType;
-		KLAYGE_FOREACH(CBuffersType::const_reference cbuff, cbuffers)
+		for (uint32_t i = 0; i < effect.NumCBuffers(); ++ i)
 		{
-			ss << "cbuffer " << cbuff.first << std::endl;
+			RenderEffectConstantBufferPtr const & cbuff = effect.CBufferByIndex(i);
+			ss << "cbuffer " << *cbuff->Name() << std::endl;
 			ss << "{" << std::endl;
 
-			typedef KLAYGE_DECLTYPE(cbuff.second) CBuffersSecondType;
-			KLAYGE_FOREACH(CBuffersSecondType::const_reference param_index, cbuff.second)
+			for (uint32_t j = 0; j < cbuff->NumParameters(); ++ j)
 			{
-				RenderEffectParameter& param = *effect.ParameterByIndex(param_index);
+				RenderEffectParameter& param = *effect.ParameterByIndex(cbuff->ParameterIndex(j));
 				switch (param.Type())
 				{
 				case REDT_texture1D:
@@ -2073,7 +2063,7 @@ namespace KlayGE
 			{
 				std::stringstream ss;
 				ss << static_cast<int>(caps.max_pixel_texture_units);
-				ss << (ST_VertexShader == type) ? 0 : (glloader_GLES_EXT_shader_texture_lod() ? 0 : 1);
+				ss << (ST_VertexShader == type) ? 0 : 1;//(glloader_GLES_EXT_shader_texture_lod() ? 0 : 1);
 				no_tex_lod_str = ss.str();
 			}
 			std::string flipping_str;
@@ -2381,6 +2371,7 @@ namespace KlayGE
 						DXBC2GLSL::DXBC2GLSL dxbc2glsl;
 						uint32_t rules = DXBC2GLSL::DXBC2GLSL::DefaultRules(gsv);
 						rules &= ~GSR_UseUBO;
+						rules &= ~GSR_MatrixType;
 						if (!glloader_GLES_VERSION_3_0())
 						{
 							rules &= ~GSR_VersionDecl;
