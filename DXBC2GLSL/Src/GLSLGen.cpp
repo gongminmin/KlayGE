@@ -2284,9 +2284,9 @@ void GLSLGen::ToInstruction(std::ostream& out, ShaderInstruction const & insn) c
 				}
 				else
 				{
-					out << "bvec4(";
+					out << "bool(";
 					this->ToOperands(out, *insn.ops[1], oit);
-					out << ") && bvec4(";
+					out << ") && bool(";
 					this->ToOperands(out, *insn.ops[2], oit);
 					out << ")";
 				}
@@ -2310,9 +2310,9 @@ void GLSLGen::ToInstruction(std::ostream& out, ShaderInstruction const & insn) c
 		}
 		else
 		{
-			out << "bvec4(";
+			out << "bool(";
 			this->ToOperands(out, *insn.ops[1], oit);
-			out << ") || bvec4(";
+			out << ") || bool(";
 			this->ToOperands(out, *insn.ops[2], oit);
 			out << ")";
 		}
@@ -2341,11 +2341,15 @@ void GLSLGen::ToInstruction(std::ostream& out, ShaderInstruction const & insn) c
 		}
 		else
 		{
-			out << "!b";
+			out << "not(b";
 		}
 		out << "vec4(";
 		this->ToOperands(out, *insn.ops[1], oit);
 		out << "))";
+		if (!(glsl_rules_ & GSR_BitwiseOp))
+		{
+			out << ")";
+		}
 		this->ToComponentSelectors(out, *insn.ops[0]);
 		out << ";";
 		break;
@@ -2956,7 +2960,7 @@ void GLSLGen::ToInstruction(std::ostream& out, ShaderInstruction const & insn) c
 	case SO_USUBB:
 		//usubb result borrow src0 src1
 		//result.xz=uvec4(usubBorrow(src0,src1,borrow)).xz;
-		//��Ϊ����ʱ�������⣬��hlsl msdn 
+		//差为负数时存在问题，见hlsl msdn 
 		this->ToOperands(out, *insn.ops[0], oot | (oot << 8));
 		if (insn.ops[1]->type != SOT_NULL)
 		{
@@ -3115,7 +3119,7 @@ void GLSLGen::ToInstruction(std::ostream& out, ShaderInstruction const & insn) c
 		break;
 
 	case SO_F16TOF32:
-		//��ȡdest mask�ĸ���
+		//获取dest mask的个数
 		//for each select component
 		//dest.select_component=unpackHalf2x16(bitfieldExtract(src.select_component,0,16)).x;
 		num_comps = this->GetOperandComponentNum(*insn.ops[0]);
@@ -3135,7 +3139,7 @@ void GLSLGen::ToInstruction(std::ostream& out, ShaderInstruction const & insn) c
 		break;
 
 	case SO_F32TOF16:
-		//��ȡdest mask�ĸ���
+		//获取dest mask的个数
 		//for each component
 		//dest.select_component=bitfieldExtract(packHalf2x16(vec2(src.comp)),0,16);
 		num_comps = this->GetOperandComponentNum(*insn.ops[0]);
@@ -3367,7 +3371,7 @@ void GLSLGen::ToInstruction(std::ostream& out, ShaderInstruction const & insn) c
 
 	case SO_FTOD:
 		//ftod dest.mask src0.swwizle swwizle can only be xy or x or y
-		//��ȡmask�ĸ�����ֻ��Ϊ2��4��xy zw xyzw)
+		//获取mask的个数，只能为2或4（xy zw xyzw)
 		num_comps = this->GetOperandComponentNum(*insn.ops[0]) / 2;
 		for (int i = 0; i < num_comps; i++)
 		{
@@ -3386,7 +3390,7 @@ void GLSLGen::ToInstruction(std::ostream& out, ShaderInstruction const & insn) c
 		break;
 
 	case SO_DTOF:
-		//��ȡmask�ĸ�����ֻ��Ϊ1��2��x y z w xy zx xw yz yw zw)
+		//获取mask的个数，只能为1或2（x y z w xy zx xw yz yw zw)
 		num_comps = this->GetOperandComponentNum(*insn.ops[0]);
 		for (int i = 0; i < num_comps; i++)
 		{
@@ -3438,7 +3442,7 @@ void GLSLGen::ToInstruction(std::ostream& out, ShaderInstruction const & insn) c
 
 	case SO_DMOVC:
 		// TODO: to be tested
-		// ��ȡdest mask�ĸ�����ֻ��Ϊ2��4��xy zw xyzw)
+		// 获取dest mask的个数，只能为2或4（xy zw xyzw)
 		num_comps = this->GetOperandComponentNum(*insn.ops[0]) / 2;
 		for (int i = 0; i < num_comps; i++)
 		{
@@ -3464,7 +3468,7 @@ void GLSLGen::ToInstruction(std::ostream& out, ShaderInstruction const & insn) c
 		break;
 
 	case SO_DLT:
-		// ��ȡmask�ĸ�����ֻ��Ϊ1��2��x y z w xy zx xw yz yw zw)
+		// 获取mask的个数，只能为1或2（x y z w xy zx xw yz yw zw)
 		num_comps = this->GetOperandComponentNum(*insn.ops[0]);
 		for (int i = 0; i < num_comps; i++)
 		{
@@ -3494,7 +3498,7 @@ void GLSLGen::ToInstruction(std::ostream& out, ShaderInstruction const & insn) c
 		break;
 
 	case SO_DGE:
-		// ��ȡmask�ĸ�����ֻ��Ϊ1��2��x y z w xy zx xw yz yw zw)
+		// 获取mask的个数，只能为1或2（x y z w xy zx xw yz yw zw)
 		num_comps = this->GetOperandComponentNum(*insn.ops[0]);
 		for (int i = 0; i < num_comps; i++)
 		{
@@ -3524,7 +3528,7 @@ void GLSLGen::ToInstruction(std::ostream& out, ShaderInstruction const & insn) c
 		break;
 
 	case SO_DEQ:
-		// ��ȡmask�ĸ�����ֻ��Ϊ1��2��x y z w xy zx xw yz yw zw)
+		// 获取mask的个数，只能为1或2（x y z w xy zx xw yz yw zw)
 		num_comps = this->GetOperandComponentNum(*insn.ops[0]);
 		for (int i = 0; i < num_comps; i++)
 		{
@@ -3554,7 +3558,7 @@ void GLSLGen::ToInstruction(std::ostream& out, ShaderInstruction const & insn) c
 		break;
 
 	case SO_DNE:
-		// ��ȡmask�ĸ�����ֻ��Ϊ1��2��x y z w xy zx xw yz yw zw)
+		// 获取mask的个数，只能为1或2（x y z w xy zx xw yz yw zw)
 		num_comps = this->GetOperandComponentNum(*insn.ops[0]);
 		for (int i = 0; i < num_comps; i++)
 		{
@@ -3584,7 +3588,7 @@ void GLSLGen::ToInstruction(std::ostream& out, ShaderInstruction const & insn) c
 		break;
 
 	case SO_DMAX:
-		// ��ȡdest mask�ĸ�����ֻ��Ϊ2��4��xy zw xyzw)
+		// 获取dest mask的个数，只能为2或4（xy zw xyzw)
 		num_comps = this->GetOperandComponentNum(*insn.ops[0]) / 2;
 		for (int i = 0; i < num_comps; i++)
 		{
@@ -3609,7 +3613,7 @@ void GLSLGen::ToInstruction(std::ostream& out, ShaderInstruction const & insn) c
 		break;
 
 	case SO_DMIN:
-		// ��ȡdest mask�ĸ�����ֻ��Ϊ2��4��xy zw xyzw)
+		// 获取dest mask的个数，只能为2或4（xy zw xyzw)
 		num_comps = this->GetOperandComponentNum(*insn.ops[0]) / 2;
 		for (int i = 0; i < num_comps; i++)
 		{
@@ -3634,7 +3638,7 @@ void GLSLGen::ToInstruction(std::ostream& out, ShaderInstruction const & insn) c
 		break;
 
 	case SO_DMUL:
-		// dest mask:xy zw xyzw ����2��4
+		// dest mask:xy zw xyzw 个数2或4
 		num_comps = this->GetOperandComponentNum(*insn.ops[0]) / 2;
 		for (int i = 0; i < num_comps; i++)
 		{
@@ -5390,7 +5394,7 @@ void GLSLGen::ToInstruction(std::ostream& out, ShaderInstruction const & insn) c
 			case SO_DGE:
 			case SO_DEQ:
 				// TODO: to be tested
-				// ���ĸ�ָ��dest mask Ϊ1����2��
+				// 这四个指令dest mask 为1个或2个
 				out << "\n";
 				this->ToOperands(out, *insn.ops[0], oot | (oot << 8));
 				out << " = clamp(";
@@ -5399,9 +5403,9 @@ void GLSLGen::ToInstruction(std::ostream& out, ShaderInstruction const & insn) c
 				break;
 
 			default:
-				//����ָ��dest maskΪ2����4��
+				//其余指令dest mask为2个或4个
 				//dest.xy=uintBitsToFloat(unpackDouble2x32(clamp(packDouble2x32(floatBitsToUint(dest.xy)))));
-				//��ȡdest mask�ĸ�����ֻ��Ϊ2��4��xy zw xyzw)
+				//获取dest mask的个数，只能为2或4（xy zw xyzw)
 				num_comps = this->GetOperandComponentNum(*insn.ops[0]) / 2;
 				for (int i = 0; i < num_comps; i++)
 				{
@@ -5462,6 +5466,7 @@ void GLSLGen::ToOperands(std::ostream& out, ShaderOperand const & op, uint32_t i
 				// Normalized float test
 				if (ValidFloat(op.imm_values[0].f32))
 				{
+					out.setf(std::ios::showpoint);
 					out << op.imm_values[0].f32;
 				}
 				else
@@ -5478,6 +5483,7 @@ void GLSLGen::ToOperands(std::ostream& out, ShaderOperand const & op, uint32_t i
 				if ((0xC0490FDB == op.imm_values[0].u32) || (0x3F800000 == op.imm_values[0].u32))
 				{
 					// Hack for predefined magic value
+					out.setf(std::ios::showpoint);
 					out << op.imm_values[0].f32;
 				}
 				else
@@ -5521,6 +5527,7 @@ void GLSLGen::ToOperands(std::ostream& out, ShaderOperand const & op, uint32_t i
 					// Normalized float test
 					if (ValidFloat(op.imm_values[i].f32))
 					{
+						out.setf(std::ios::showpoint);
 						out << op.imm_values[i].f32;
 					}
 					else
@@ -5570,7 +5577,7 @@ void GLSLGen::ToOperands(std::ostream& out, ShaderOperand const & op, uint32_t i
 	}
 	else
 	{
-		// Ӧ��������v1 v2[2] o0 cb0[1]�����ֱ�������ʽ
+		// 应该是类似v1 v2[2] o0 cb0[1]的这种变量名形式
 
 		int flag = 0;
 		int64_t start = 0;
@@ -5602,8 +5609,8 @@ void GLSLGen::ToOperands(std::ostream& out, ShaderOperand const & op, uint32_t i
 
 		bool naked = false;
 		//ajudge whether it is naked
-		//nakedΪtrue��ʾ�г�����׺��cb0[���ֻ���ʽ]
-		//nakedΪfalse��ʾû�г�����׺��v[���ֻ���ʽ],����array input variable
+		//naked为true表示有常数后缀如cb0[数字或表达式]
+		//naked为false表示没有常数后缀如v[数字或表达式],用于array input variable
 		switch (op.type)
 		{
 		case SOT_TEMP:
@@ -5679,7 +5686,7 @@ void GLSLGen::ToOperands(std::ostream& out, ShaderOperand const & op, uint32_t i
 		{
 			for (uint32_t i = 0; i < op.num_indices; ++ i)
 			{
-				//��һ����������Ҫ[]����cb0[22]��0Ϊ��һ��,naked==false��Ҫ[]
+				//第一层索引不需要[]，如cb0[22]中0为第一层,naked==false需要[]
 				if (!naked || i != 0)
 				{
 					out << '[';
