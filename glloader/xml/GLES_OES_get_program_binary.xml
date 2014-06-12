@@ -3,8 +3,8 @@
 <gl_extension name="GLES_OES_get_program_binary" reg_no="47">
 	<tokens>
 		<token name="GL_PROGRAM_BINARY_LENGTH_OES" value="0x8741"/>
-		<token name="GL_NUM_PROGRAM_BINARY_FORMAT_OES" value="0x87FE"/>
-		<token name="GL_PROGRAM_BINARY_FORMAT_OES" value="0x87FF"/>
+		<token name="GL_NUM_PROGRAM_BINARY_FORMATS_OES" value="0x87FE"/>
+		<token name="GL_PROGRAM_BINARY_FORMATS_OES" value="0x87FF"/>
 	</tokens>
 
 	<functions>

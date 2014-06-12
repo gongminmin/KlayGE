@@ -3267,17 +3267,14 @@ namespace KlayGE
 
 			if (is_validate_ && (glloader_GL_VERSION_4_1() || glloader_GL_ARB_get_program_binary()))
 			{
-				GLint formats = 0;
-				glGetIntegerv(GL_NUM_PROGRAM_BINARY_FORMATS, &formats);
-				glsl_bin_formats_ = MakeSharedPtr<std::vector<GLint> >(formats);
-				if (formats > 0)
+				GLint num = 0;
+				glGetIntegerv(GL_NUM_PROGRAM_BINARY_FORMATS, &num);
+				if (num > 0)
 				{
-					glGetIntegerv(GL_PROGRAM_BINARY_FORMATS, &(*glsl_bin_formats_)[0]);
-
 					GLint len = 0;
 					glGetProgramiv(glsl_program_, GL_PROGRAM_BINARY_LENGTH, &len);
 					glsl_bin_program_ = MakeSharedPtr<std::vector<uint8_t> >(len);
-					glGetProgramBinary(glsl_program_, len, nullptr, reinterpret_cast<GLenum*>(&(*glsl_bin_formats_)[0]), &(*glsl_bin_program_)[0]);
+					glGetProgramBinary(glsl_program_, len, nullptr, &glsl_bin_format_, &(*glsl_bin_program_)[0]);
 				}
 			}
 
@@ -3344,7 +3341,7 @@ namespace KlayGE
 
 		ret->has_discard_ = has_discard_;
 		ret->has_tessellation_ = has_tessellation_;
-		ret->glsl_bin_formats_ = glsl_bin_formats_;
+		ret->glsl_bin_format_ = glsl_bin_format_;
 		ret->glsl_bin_program_ = glsl_bin_program_;
 		ret->shader_func_names_ = shader_func_names_;
 		ret->glsl_srcs_ = glsl_srcs_;
@@ -3388,7 +3385,7 @@ namespace KlayGE
 
 				glProgramParameteri(ret->glsl_program_, GL_PROGRAM_BINARY_RETRIEVABLE_HINT, GL_TRUE);
 
-				glProgramBinary(ret->glsl_program_, static_cast<GLenum>((*glsl_bin_formats_)[0]),
+				glProgramBinary(ret->glsl_program_, glsl_bin_format_,
 					&(*glsl_bin_program_)[0], static_cast<GLsizei>(glsl_bin_program_->size()));
 
 				GLint linked = false;

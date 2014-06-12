@@ -2902,7 +2902,32 @@ namespace KlayGE
 
 		if (is_validate_)
 		{
+			if (glloader_GLES_VERSION_3_0())
+			{
+				glProgramParameteri(glsl_program_, GL_PROGRAM_BINARY_RETRIEVABLE_HINT, GL_TRUE);
+			}
+
 			this->LinkGLSL();
+
+			if (is_validate_ && (glloader_GLES_VERSION_3_0() || glloader_GLES_OES_get_program_binary()))
+			{
+				GLint num = 0;
+				glGetIntegerv(GL_NUM_PROGRAM_BINARY_FORMATS, &num);
+				if (num > 0)
+				{
+					GLint len = 0;
+					glGetProgramiv(glsl_program_, GL_PROGRAM_BINARY_LENGTH, &len);
+					glsl_bin_program_ = MakeSharedPtr<std::vector<uint8_t> >(len);
+					if (glloader_GLES_VERSION_3_0())
+					{
+						glGetProgramBinary(glsl_program_, len, nullptr, &glsl_bin_format_, &(*glsl_bin_program_)[0]);
+					}
+					else
+					{
+						glGetProgramBinaryOES(glsl_program_, len, nullptr, &glsl_bin_format_, &(*glsl_bin_program_)[0]);
+					}
+				}
+			}
 
 			for (int type = 0; type < ST_NumShaderTypes; ++ type)
 			{
@@ -2967,6 +2992,8 @@ namespace KlayGE
 
 		ret->has_discard_ = has_discard_;
 		ret->has_tessellation_ = has_tessellation_;
+		ret->glsl_bin_format_ = glsl_bin_format_;
+		ret->glsl_bin_program_ = glsl_bin_program_;
 		ret->shader_func_names_ = shader_func_names_;
 		ret->glsl_srcs_ = glsl_srcs_;
 		ret->pnames_ = pnames_;
@@ -2984,26 +3011,73 @@ namespace KlayGE
 			get<3>(ret->tex_sampler_binds_[i]) = get<3>(tex_sampler_binds_[i]);
 		}
 
-		ret->is_validate_ = true;
-		for (size_t type = 0; type < ST_NumShaderTypes; ++ type)
+		if ((glloader_GLES_VERSION_3_0() || glloader_GLES_OES_get_program_binary()) && glsl_bin_program_)
 		{
-			ret->is_shader_validate_[type] = is_shader_validate_[type];
-
-			if (is_shader_validate_[type])
+			ret->is_validate_ = is_validate_;
+			for (size_t type = 0; type < ST_NumShaderTypes; ++ type)
 			{
-				if ((*glsl_srcs_)[type] && !(*glsl_srcs_)[type]->empty())
-				{
-					ret->AttachGLSL(static_cast<uint32_t>(type));
-				}
+				ret->is_shader_validate_[type] = is_shader_validate_[type];
 			}
 
-			ret->is_validate_ &= ret->is_shader_validate_[type];
+			if (ret->is_validate_)
+			{
+				if (glloader_GLES_VERSION_3_0())
+				{
+					glProgramParameteri(ret->glsl_program_, GL_PROGRAM_BINARY_RETRIEVABLE_HINT, GL_TRUE);
+
+					glProgramBinary(ret->glsl_program_, glsl_bin_format_,
+						&(*glsl_bin_program_)[0], static_cast<GLsizei>(glsl_bin_program_->size()));
+				}
+				else
+				{
+					glProgramBinaryOES(ret->glsl_program_, glsl_bin_format_,
+						&(*glsl_bin_program_)[0], static_cast<GLsizei>(glsl_bin_program_->size()));
+				}
+
+				GLint linked = false;
+				glGetProgramiv(ret->glsl_program_, GL_LINK_STATUS, &linked);
+#ifdef KLAYGE_DEBUG
+				if (!linked)
+				{
+					GLint len = 0;
+					glGetProgramiv(ret->glsl_program_, GL_INFO_LOG_LENGTH, &len);
+					if (len > 0)
+					{
+						std::vector<char> info(len + 1, 0);
+						glGetProgramInfoLog(ret->glsl_program_, len, &len, &info[0]);
+						LogError(&info[0]);
+					}
+				}
+#endif
+				ret->is_validate_ &= linked ? true : false;
+			}
+		}
+		else
+		{
+			ret->is_validate_ = true;
+			for (size_t type = 0; type < ST_NumShaderTypes; ++ type)
+			{
+				ret->is_shader_validate_[type] = is_shader_validate_[type];
+
+				if (is_shader_validate_[type])
+				{
+					if ((*glsl_srcs_)[type] && !(*glsl_srcs_)[type]->empty())
+					{
+						ret->AttachGLSL(static_cast<uint32_t>(type));
+					}
+				}
+
+				ret->is_validate_ &= ret->is_shader_validate_[type];
+			}
+
+			if (ret->is_validate_)
+			{
+				ret->LinkGLSL();
+			}
 		}
 
 		if (ret->is_validate_)
 		{
-			ret->LinkGLSL();
-
 			ret->attrib_locs_ = attrib_locs_;
 
 			typedef KLAYGE_DECLTYPE(param_binds_) ParamBindsType;
