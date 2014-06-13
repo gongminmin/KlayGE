@@ -491,7 +491,10 @@ namespace
 				single_caustics_pass_ = effect->TechniqueByName("GenSingleFaceCausticsMap");
 				BOOST_ASSERT(single_caustics_pass_->Validate());
 				dual_caustics_pass_ = effect->TechniqueByName("GenDualFaceCausticsMap");
-				BOOST_ASSERT(dual_caustics_pass_->Validate());
+				if (!dual_caustics_pass_->Validate())
+				{
+					dual_caustics_pass_ = single_caustics_pass_;
+				}
 			}
 
 			pos_aabb_ = AABBox(float3(0.0f, 0.0f, 0.0f), float3(1.0f, 1.0f, 0.0f));
