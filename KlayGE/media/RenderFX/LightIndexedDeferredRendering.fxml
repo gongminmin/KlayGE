@@ -15,7 +15,7 @@
 		<parameter type="float4" name="lights_dir_es" array_size="LIGHT_BATCH"/>
 		<parameter type="float4" name="lights_falloff_range" array_size="LIGHT_BATCH"/>
 		<parameter type="float4" name="lights_attrib" array_size="LIGHT_BATCH"/>
-		<parameter type="int4" name="lights_shadowing_channel"/>
+		<parameter type="int" name="lights_shadowing_channel" array_size="4"/>
 		<parameter type="int" name="num_lights"/>
 		<parameter type="float2" name="tc_to_tile_scale"/>
 	</cbuffer>
@@ -149,6 +149,7 @@ float4 DrawLightIndexPointPS(float2 tc : TEXCOORD0) : SV_Target
 		all_light_id[comp] = (accum + 0.5f) / 255.0f;
 	}
 #else
+	[unroll]
 	for (int index = 0; index < nl; ++ index)
 	{
 		if (OverlapTestPoint(planes, index))
@@ -208,6 +209,7 @@ float4 DrawLightIndexSpotPS(float2 tc : TEXCOORD0) : SV_Target
 		all_light_id[comp] = (accum + 0.5f) / 255.0f;
 	}
 #else
+	[unroll]
 	for (int index = 0; index < nl; ++ index)
 	{
 		if (OverlapTestPoint(planes, index))
@@ -434,6 +436,7 @@ float4 LIDRPointPS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Targ
 			}
 		}
 #else
+		[unroll]
 		for (int index = 0; index < nl; ++ index)
 		{
 			if (light_index[index])
@@ -519,6 +522,7 @@ float4 LIDRSpotPS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Targe
 			}
 		}
 #else
+		[unroll]
 		for (int index = 0; index < nl; ++ index)
 		{
 			if (light_index[index])

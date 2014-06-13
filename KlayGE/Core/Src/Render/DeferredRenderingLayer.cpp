@@ -3131,7 +3131,7 @@ namespace KlayGE
 		std::vector<float4> lights_dir_es;
 		std::vector<float4> lights_falloff_range;
 		std::vector<float4> lights_attrib;
-		int4 lights_shadowing_channel(-1, -1, -1, -1);
+		std::vector<int> lights_shadowing_channel(4, -1);
 		std::vector<float3> lights_aabb_min;
 		std::vector<float3> lights_aabb_max;
 		for (std::vector<uint32_t>::const_iterator iter = iter_beg; iter != iter_end; ++ iter)

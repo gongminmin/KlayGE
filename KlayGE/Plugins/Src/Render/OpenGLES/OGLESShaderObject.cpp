@@ -2063,7 +2063,7 @@ namespace KlayGE
 			{
 				std::stringstream ss;
 				ss << static_cast<int>(caps.max_pixel_texture_units);
-				ss << (ST_VertexShader == type) ? 0 : 1;//(glloader_GLES_EXT_shader_texture_lod() ? 0 : 1);
+				ss << (ST_VertexShader == type) ? 0 : (glloader_GLES_EXT_shader_texture_lod() ? 0 : 1);
 				no_tex_lod_str = ss.str();
 			}
 			std::string flipping_str;
@@ -2374,6 +2374,8 @@ namespace KlayGE
 						rules &= ~GSR_MatrixType;
 						if (!glloader_GLES_VERSION_3_0())
 						{
+							rules |= glloader_GLES_EXT_shader_texture_lod() ? GSR_EXTShaderTextureLod : 0;
+							rules |= glloader_GLES_EXT_draw_buffers() ? GSR_EXTDrawBuffers : 0;
 							rules &= ~GSR_VersionDecl;
 						}
 						dxbc2glsl.FeedDXBC(code->GetBufferPointer(), false, gsv, rules);
