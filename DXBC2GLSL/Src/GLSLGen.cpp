@@ -114,6 +114,7 @@ uint32_t GLSLGen::DefaultRules(GLSLVersion version)
 	{
 		if (version >= GSV_110)
 		{
+			rules |= GSR_MatrixType;
 			rules |= GSR_DrawBuffers;
 		}
 		if (version >= GSV_120)
@@ -485,7 +486,8 @@ void GLSLGen::ToDclInterShaderInputRecords(std::ostream& out)
 	{
 		if (SN_UNDEFINED == program_->params_in[i].system_value_type)
 		{
-			if ((shader_type_ != ST_VS) && !strcmp("POSITION", program_->params_in[i].semantic_name))
+			if ((shader_type_ != ST_VS) && (shader_type_ != ST_GS)
+				&& !strcmp("POSITION", program_->params_in[i].semantic_name))
 			{
 				continue;
 			}
