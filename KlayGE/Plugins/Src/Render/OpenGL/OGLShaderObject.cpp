@@ -2491,6 +2491,10 @@ namespace KlayGE
 					macros.push_back(macro_pack_to_rgba);
 				}
 				{
+					D3D_SHADER_MACRO macro_frag_depth = { "KLAYGE_FRAG_DEPTH", "1" };
+					macros.push_back(macro_frag_depth);
+				}
+				{
 					D3D_SHADER_MACRO macro_shader_type = { "", "1" };
 					switch (type)
 					{
@@ -2907,6 +2911,7 @@ namespace KlayGE
 			{
 				args.push_back("-DKLAYGE_PACK_TO_RGBA");
 			}
+			args.push_back("-DKLAYGE_FRAG_DEPTH=1");
 			switch (type)
 			{
 			case ST_VertexShader:

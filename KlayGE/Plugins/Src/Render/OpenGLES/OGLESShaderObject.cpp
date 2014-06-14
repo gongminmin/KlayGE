@@ -2081,6 +2081,12 @@ namespace KlayGE
 				ss << (caps.standard_derivatives_support ? 1 : 0);
 				standard_derivatives_str = ss.str();
 			}
+			std::string frag_depth_str;
+			{
+				std::stringstream ss;
+				ss << (glloader_GLES_EXT_frag_depth() ? 1 : 0);
+				frag_depth_str = ss.str();
+			}
 
 			std::string hlsl_shader_text = this->GenHLSLShaderText(type, effect, tech, pass);
 
@@ -2238,6 +2244,10 @@ namespace KlayGE
 					macros.push_back(macro_pack_to_rgba);
 				}
 				{
+					D3D_SHADER_MACRO macro_frag_depth = { "KLAYGE_FRAG_DEPTH", frag_depth_str.c_str() };
+					macros.push_back(macro_frag_depth);
+				}
+				{
 					D3D_SHADER_MACRO macro_shader_type = { "", "1" };
 					switch (type)
 					{
@@ -2376,6 +2386,7 @@ namespace KlayGE
 						rules &= ~GSR_UseUBO;
 						rules &= ~GSR_MatrixType;
 						rules |= caps.max_simultaneous_rts > 1 ? GSR_DrawBuffers : 0;
+						rules |= glloader_GLES_EXT_frag_depth() ? GSR_EXTFragDepth : 0;
 						if (!glloader_GLES_VERSION_3_0())
 						{
 							rules |= glloader_GLES_EXT_shader_texture_lod() ? GSR_EXTShaderTextureLod : 0;
@@ -2621,6 +2632,7 @@ namespace KlayGE
 			{
 				args.push_back("-DKLAYGE_PACK_TO_RGBA");
 			}
+			args.push_back("-DKLAYGE_FRAG_DEPTH=0");
 			switch (type)
 			{
 			case ST_VertexShader:

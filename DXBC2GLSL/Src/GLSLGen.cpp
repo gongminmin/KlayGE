@@ -234,13 +234,17 @@ void GLSLGen::ToGLSL(std::ostream& out)
 	{
 		out << "#extension GL_EXT_shader_texture_lod : enable\n";
 	}
+	if ((ST_PS == shader_type_) && (glsl_rules_ & GSR_EXTDrawBuffers))
+	{
+		out << "#extension GL_EXT_draw_buffers : enable\n";
+	}
 	if (glsl_rules_ & GSR_OESStandardDerivatives)
 	{
 		out << "#extension GL_OES_standard_derivatives : enable\n";
 	}
-	if ((ST_PS == shader_type_) && (glsl_rules_ & GSR_EXTDrawBuffers))
+	if ((ST_PS == shader_type_) && (glsl_rules_ & GSR_EXTFragDepth))
 	{
-		out << "#extension GL_EXT_draw_buffers : enable\n";
+		out << "#extension GL_EXT_frag_depth : enable\n";
 	}
 	out << "\n";
 
@@ -258,6 +262,13 @@ void GLSLGen::ToGLSL(std::ostream& out)
 		out << "#define texture2DGrad texture2DGradEXT\n";
 		out << "#define texture2DProjGrad texture2DProjGradEXT\n";
 		out << "#define textureCubeGrad textureCubeGradEXT\n";
+		out << "#endif\n";
+	}
+
+	if ((ST_PS == shader_type_) && (glsl_rules_ & GSR_EXTFragDepth))
+	{
+		out << "#ifdef GL_EXT_frag_depth\n";
+		out << "#define gl_FragDepth gl_FragDepthEXT\n";
 		out << "#endif\n";
 	}
 

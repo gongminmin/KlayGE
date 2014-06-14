@@ -79,6 +79,7 @@ enum GLSLRules
 	GSR_EXTShaderTextureLod = 1UL << 19,
 	GSR_EXTDrawBuffers = 1UL << 20,
 	GSR_OESStandardDerivatives = 1UL << 21,
+	GSR_EXTFragDepth = 1UL << 22,
 	GSR_ForceUInt32 = 0xFFFFFFFF
 };
 
