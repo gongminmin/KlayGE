@@ -74,9 +74,11 @@ enum GLSLRules
 	GSR_Precision = 1UL << 14,
 	GSR_VersionDecl = 1UL << 15,
 	GSR_MatrixType = 1UL << 16,
-	GSR_EXTShaderTextureLod = 1UL << 17,
-	GSR_EXTDrawBuffers = 1UL << 18,
-	GSR_ArrayConstructors = 1UL << 19,
+	GSR_ArrayConstructors = 1UL << 17,
+	GSR_DrawBuffers = 1UL << 18,
+	GSR_EXTShaderTextureLod = 1UL << 19,
+	GSR_EXTDrawBuffers = 1UL << 20,
+	GSR_OESStandardDerivatives = 1UL << 21,
 	GSR_ForceUInt32 = 0xFFFFFFFF
 };
 

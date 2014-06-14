@@ -1117,8 +1117,16 @@ namespace KlayGE
 						}
 					}
 
-					glDrawElementsInstanced(mode, static_cast<GLsizei>(rl.NumIndices()),
-						index_type, index_offset, num_instances);
+					if (glloader_GL_VERSION_3_3())
+					{
+						glDrawElementsInstanced(mode, static_cast<GLsizei>(rl.NumIndices()),
+							index_type, index_offset, num_instances);
+					}
+					else
+					{
+						glDrawElementsInstancedARB(mode, static_cast<GLsizei>(rl.NumIndices()),
+							index_type, index_offset, num_instances);
+					}
 					pass->Unbind();
 				}
 			}
@@ -1140,7 +1148,14 @@ namespace KlayGE
 						}
 					}
 
-					glDrawArraysInstanced(mode, rl.StartVertexLocation(), static_cast<GLsizei>(rl.NumVertices()), num_instances);
+					if (glloader_GL_VERSION_3_3())
+					{
+						glDrawArraysInstanced(mode, rl.StartVertexLocation(), static_cast<GLsizei>(rl.NumVertices()), num_instances);
+					}
+					else
+					{
+						glDrawArraysInstancedARB(mode, rl.StartVertexLocation(), static_cast<GLsizei>(rl.NumVertices()), num_instances);
+					}
 					pass->Unbind();
 				}
 			}

@@ -1980,6 +1980,8 @@ namespace KlayGE
 	{
 		bool ret = false;
 
+		(*shader_func_names_)[type] = effect.GetShaderDesc(shader_desc_ids[type]).func_name;
+
 		is_shader_validate_[type] = false;
 		if (native_shader_block.size() >= 24)
 		{
@@ -1996,11 +1998,12 @@ namespace KlayGE
 				ver = LE2Native(ver);
 				if (3 == ver)
 				{
+					is_shader_validate_[type] = true;
+
 					uint32_t len32;
 					std::memcpy(&len32, nsbp, sizeof(len32));
 					nsbp += sizeof(len32);
 					len32 = LE2Native(len32);
-					(*shader_func_names_)[type] = effect.GetShaderDesc(shader_desc_ids[type]).func_name;
 					(*glsl_srcs_)[type] = MakeSharedPtr<std::string>(len32, '\0');
 					std::memcpy(&(*(*glsl_srcs_)[type])[0], nsbp, len32);
 					nsbp += len32;

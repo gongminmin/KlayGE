@@ -949,7 +949,7 @@ namespace KlayGE
 
 			num_draws_just_called_ += num_passes;
 		}
-		else if (glloader_GLES_VERSION_3_0() && (rl.NumInstances() > 1))
+		else if ((glloader_GLES_VERSION_3_0() || glloader_GLES_EXT_instanced_arrays()) && (rl.NumInstances() > 1))
 		{
 			if (rl.InstanceStream())
 			{
@@ -978,7 +978,14 @@ namespace KlayGE
 						glVertexAttribPointer(attr, num_components, type, normalized, instance_size, offset);
 						glEnableVertexAttribArray(attr);
 
-						glVertexAttribDivisor(attr, 1);
+						if (glloader_GLES_VERSION_3_0())
+						{
+							glVertexAttribDivisor(attr, 1);
+						}
+						else
+						{
+							glVertexAttribDivisorEXT(attr, 1);
+						}
 					}
 
 					elem_offset += vs_elem.element_size();
@@ -1008,8 +1015,16 @@ namespace KlayGE
 						}
 					}
 
-					glDrawElementsInstanced(mode, static_cast<GLsizei>(rl.NumIndices()),
-						index_type, index_offset, num_instances);
+					if (glloader_GLES_VERSION_3_0())
+					{
+						glDrawElementsInstanced(mode, static_cast<GLsizei>(rl.NumIndices()),
+							index_type, index_offset, num_instances);
+					}
+					else
+					{
+						glDrawElementsInstancedEXT(mode, static_cast<GLsizei>(rl.NumIndices()),
+							index_type, index_offset, num_instances);
+					}
 					pass->Unbind();
 				}
 			}
@@ -1031,7 +1046,14 @@ namespace KlayGE
 						}
 					}
 
-					glDrawArraysInstanced(mode, rl.StartVertexLocation(), static_cast<GLsizei>(rl.NumVertices()), num_instances);
+					if (glloader_GLES_VERSION_3_0())
+					{
+						glDrawArraysInstanced(mode, rl.StartVertexLocation(), static_cast<GLsizei>(rl.NumVertices()), num_instances);
+					}
+					else
+					{
+						glDrawArraysInstancedEXT(mode, rl.StartVertexLocation(), static_cast<GLsizei>(rl.NumVertices()), num_instances);
+					}
 					pass->Unbind();
 				}
 			}
@@ -1048,7 +1070,14 @@ namespace KlayGE
 				if (attr != -1)
 				{
 					glDisableVertexAttribArray(attr);
-					glVertexAttribDivisor(attr, 0);
+					if (glloader_GLES_VERSION_3_0())
+					{
+						glVertexAttribDivisor(attr, 0);
+					}
+					else
+					{
+						glVertexAttribDivisorEXT(attr, 0);
+					}
 				}
 			}
 
@@ -1470,22 +1499,19 @@ namespace KlayGE
 		caps_.multithread_rendering_support = false;
 		caps_.multithread_res_creating_support = false;
 		caps_.mrt_independent_bit_depths_support = false;
-		if (hack_for_pvr_ || hack_for_mali_ || hack_for_adreno_ || hack_for_angle_)
+#if !USE_DXBC2GLSL
+		caps_.standard_derivatives_support = false;
+#else
+		if (glloader_GLES_VERSION_3_0() || glloader_GLES_OES_standard_derivatives())
 		{
-			caps_.standard_derivatives_support = false;
+			glGetIntegerv(GL_FRAGMENT_SHADER_DERIVATIVE_HINT_OES, &temp);
+			caps_.standard_derivatives_support = (temp != 0);
 		}
 		else
 		{
-			if (glloader_GLES_VERSION_3_0() || glloader_GLES_OES_standard_derivatives())
-			{
-				glGetIntegerv(GL_FRAGMENT_SHADER_DERIVATIVE_HINT_OES, &temp);
-				caps_.standard_derivatives_support = (temp != 0);
-			}
-			else
-			{
-				caps_.standard_derivatives_support = false;
-			}
+			caps_.standard_derivatives_support = false;
 		}
+#endif
 		caps_.logic_op_support = false;
 		caps_.independent_blend_support = false;
 		if (glloader_GLES_VERSION_3_1())

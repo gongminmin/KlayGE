@@ -1746,6 +1746,8 @@ namespace KlayGE
 	{
 		bool ret = false;
 
+		(*shader_func_names_)[type] = effect.GetShaderDesc(shader_desc_ids[type]).func_name;
+
 		is_shader_validate_[type] = false;
 		if (native_shader_block.size() >= 24)
 		{
@@ -1762,11 +1764,12 @@ namespace KlayGE
 				ver = LE2Native(ver);
 				if (3 == ver)
 				{
+					is_shader_validate_[type] = true;
+
 					uint32_t len32;
 					std::memcpy(&len32, nsbp, sizeof(len32));
 					nsbp += sizeof(len32);
 					len32 = LE2Native(len32);
-					(*shader_func_names_)[type] = effect.GetShaderDesc(shader_desc_ids[type]).func_name;
 					(*glsl_srcs_)[type] = MakeSharedPtr<std::string>(len32, '\0');
 					std::memcpy(&(*(*glsl_srcs_)[type])[0], nsbp, len32);
 					nsbp += len32;
@@ -2372,9 +2375,11 @@ namespace KlayGE
 						uint32_t rules = DXBC2GLSL::DXBC2GLSL::DefaultRules(gsv);
 						rules &= ~GSR_UseUBO;
 						rules &= ~GSR_MatrixType;
+						rules |= caps.max_simultaneous_rts > 1 ? GSR_DrawBuffers : 0;
 						if (!glloader_GLES_VERSION_3_0())
 						{
 							rules |= glloader_GLES_EXT_shader_texture_lod() ? GSR_EXTShaderTextureLod : 0;
+							rules |= glloader_GLES_OES_standard_derivatives() ? GSR_OESStandardDerivatives : 0;
 							rules |= glloader_GLES_EXT_draw_buffers() ? GSR_EXTDrawBuffers : 0;
 							rules &= ~GSR_VersionDecl;
 						}

@@ -114,6 +114,7 @@ uint32_t GLSLGen::DefaultRules(GLSLVersion version)
 	{
 		if (version >= GSV_110)
 		{
+			rules |= GSR_DrawBuffers;
 		}
 		if (version >= GSV_120)
 		{
@@ -183,6 +184,7 @@ uint32_t GLSLGen::DefaultRules(GLSLVersion version)
 			rules |= GSR_ExplicitInputLayout;
 			rules |= GSR_MatrixType;
 			rules |= GSR_ArrayConstructors;
+			rules |= GSR_DrawBuffers;
 		}
 		if (version >= GSV_310_ES)
 		{
@@ -231,6 +233,10 @@ void GLSLGen::ToGLSL(std::ostream& out)
 	if ((ST_PS == shader_type_) && (glsl_rules_ & GSR_EXTShaderTextureLod))
 	{
 		out << "#extension GL_EXT_shader_texture_lod : enable\n";
+	}
+	if (glsl_rules_ & GSR_OESStandardDerivatives)
+	{
+		out << "#extension GL_OES_standard_derivatives : enable\n";
 	}
 	if ((ST_PS == shader_type_) && (glsl_rules_ & GSR_EXTDrawBuffers))
 	{
@@ -1176,7 +1182,12 @@ void GLSLGen::ToCopyToInterShaderOutputRecords(std::ostream& out) const
 							}
 							else if (0 == strcmp("SV_Target", sig_desc.semantic_name))
 							{
-								out << "gl_FragData[" << sig_desc.semantic_index << ']';
+								uint32_t index = 0;
+								if (glsl_rules_ & GSR_DrawBuffers)
+								{
+									index = sig_desc.semantic_index;
+								}
+								out << "gl_FragData[" << index << ']';
 							}
 							else
 							{
