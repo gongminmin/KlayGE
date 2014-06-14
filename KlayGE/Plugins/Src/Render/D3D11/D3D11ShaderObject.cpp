@@ -609,6 +609,8 @@ namespace KlayGE
 					nsbp += len;
 					if (profile == shader_profile)
 					{
+						is_shader_validate_[type] = true;
+
 						uint32_t blob_size;
 						std::memcpy(&blob_size, nsbp, sizeof(blob_size));
 						nsbp += sizeof(blob_size);
