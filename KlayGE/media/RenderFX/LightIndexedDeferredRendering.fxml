@@ -15,9 +15,6 @@
 		<parameter type="float4" name="lights_dir_es" array_size="LIGHT_BATCH"/>
 		<parameter type="float4" name="lights_falloff_range" array_size="LIGHT_BATCH"/>
 		<parameter type="float4" name="lights_attrib" array_size="LIGHT_BATCH"/>
-		<parameter type="int" name="lights_shadowing_channel" array_size="4"/>
-		<parameter type="int" name="num_lights"/>
-		<parameter type="float2" name="tc_to_tile_scale"/>
 	</cbuffer>
 	<parameter type="texture2D" name="min_max_depth_tex"/>
 	<parameter type="texture2D" name="light_index_tex"/>
@@ -110,9 +107,11 @@ float4 DrawLightIndexPointPS(float2 tc : TEXCOORD0) : SV_Target
 	float4 planes[6];
 	CalcTileViewFrustum(tc, min_max, planes);
 
+	int num_lights = int(lights_attrib[0].w);
+
 #if INTEGER_SUPPORT
 	uint accum = 0;
-	
+
 	for (int index = 0; index < num_lights; ++ index)
 	{
 		if (OverlapTestPoint(planes, index))
@@ -169,6 +168,8 @@ float4 DrawLightIndexSpotPS(float2 tc : TEXCOORD0) : SV_Target
 	float2 min_max = ReadTwoHalf(min_max_depth_tex.Sample(point_sampler, tc), depth_near_far_invfar.y);
 	float4 planes[6];
 	CalcTileViewFrustum(tc, min_max, planes);
+	
+	int num_lights = int(lights_attrib[0].w);
 
 #if INTEGER_SUPPORT
 	uint accum = 0;
@@ -296,6 +297,8 @@ float4 LIDRDirectionalPS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) : S
 	float3 pos_es = view_dir * (ReadAFloat(depth_tex.Sample(point_sampler, tc), depth_near_far_invfar.y) / view_dir.z);
 	float3 normal = GetNormal(ndc);
 	float shininess = GetShininess(ndc);
+	
+	int num_lights = int(lights_attrib[0].w);
 
 	for (int i = 0; i < num_lights; ++ i)
 	{
@@ -326,7 +329,7 @@ float4 CalcLIDRPointLighting(int index, float3 pos_es, float3 normal, float3 vie
 		{
 			float3 shadow = 1;
 #if WITH_SHADOW
-			shadow = NearestDepthUpsamplingShadow(tc, tc_ddx, tc_ddy, lights_shadowing_channel[index]).xyz;
+			shadow = NearestDepthUpsamplingShadow(tc, tc_ddx, tc_ddy, int(lights_attrib[index].z)).xyz;
 #endif
 
 			float spec = roughness_term(normalize(dir - view_dir), normal, shininess).x;
@@ -355,7 +358,7 @@ float4 CalcLIDRSpotLighting(int index, float3 pos_es, float3 normal, float3 view
 			{
 				float3 shadow = 1;
 #if WITH_SHADOW
-				shadow = NearestDepthUpsamplingShadow(tc, tc_ddx, tc_ddy, lights_shadowing_channel[index]).xyz;
+				shadow = NearestDepthUpsamplingShadow(tc, tc_ddx, tc_ddy, int(lights_attrib[index].z)).xyz;
 #endif
 
 				float spec = roughness_term(normalize(dir - view_dir), normal, shininess).x;
@@ -377,8 +380,11 @@ float4 LIDRPointPS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Targ
 	float2 tc_ddx = 0;
 	float2 tc_ddy = 0;
 #endif
+
+	int num_lights = int(lights_attrib[0].w);
 	
 	float4 shading = 0;
+	float2 tc_to_tile_scale = float2(lights_attrib[1].w, lights_attrib[2].w);
 	int4 light_index = light_index_tex.Sample(point_sampler, tc * tc_to_tile_scale) * 255 + 0.5f;
 	if (any(light_index))
 	{
@@ -471,8 +477,11 @@ float4 LIDRSpotPS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Targe
 	float2 tc_ddx = 0;
 	float2 tc_ddy = 0;
 #endif
+
+	int num_lights = int(lights_attrib[0].w);
 	
 	float4 shading = 0;
+	float2 tc_to_tile_scale = float2(lights_attrib[1].w, lights_attrib[2].w);
 	int4 light_index = light_index_tex.Sample(point_sampler, tc * tc_to_tile_scale) * 255 + 0.5f;
 	if (any(light_index))
 	{
