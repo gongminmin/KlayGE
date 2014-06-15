@@ -212,7 +212,7 @@ float4 DrawLightIndexSpotPS(float2 tc : TEXCOORD0) : SV_Target
 	[unroll]
 	for (int index = 0; index < nl; ++ index)
 	{
-		if (OverlapTestPoint(planes, index))
+		if (OverlapTestSpot(planes, index))
 		{
 			all_light_id[index] = 1;
 		}
@@ -399,10 +399,18 @@ float4 LIDRPointPS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Targ
 			light_index_all = light_index_all & (light_index_all - 1);
 		}
 #else
+#if KLAYGE_DXBC2GLSL
 #if WITH_SHADOW
 		uint nl = 4;
 #else
 		uint nl = LIGHT_BATCH;
+#endif
+#else
+#if WITH_SHADOW
+		int nl = 4;
+#else
+		int nl = LIGHT_BATCH;
+#endif
 #endif
 		// TODO: Cg doesn't support min(int, int)
 		if (num_lights < nl)
@@ -485,10 +493,18 @@ float4 LIDRSpotPS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Targe
 			light_index_all = light_index_all & (light_index_all - 1);
 		}
 #else
+#if KLAYGE_DXBC2GLSL
 #if WITH_SHADOW
 		uint nl = 4;
 #else
 		uint nl = LIGHT_BATCH;
+#endif
+#else
+#if WITH_SHADOW
+		int nl = 4;
+#else
+		int nl = LIGHT_BATCH;
+#endif
 #endif
 		// TODO: Cg doesn't support min(int, int)
 		if (num_lights < nl)

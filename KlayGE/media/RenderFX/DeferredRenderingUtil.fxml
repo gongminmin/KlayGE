@@ -76,16 +76,6 @@ float3 NearestDepthUpsampling(float2 tc, float4 z_half, float z_full, float2 l1_
 
 	return float3(nearest_tc, all(dist_z < threshold) ? 1 : -1);
 }
-
-float3 FittingCoord(float3 normal)
-{
-	float3 normal_uns = abs(normal);
-	float max_comp = max(normal_uns.z, max(normal_uns.x, normal_uns.y));
-	float2 tc = normal_uns.z < max_comp ? (normal_uns.y < max_comp ? normal_uns.yz : normal_uns.xz) : normal_uns.xy;
-	tc = tc.x < tc.y ? tc.yx : tc.xy;
-	tc.y /= tc.x;
-	return float3(tc, 1 / max_comp);
-}
 		]]>
 	</shader>
 </effect>
