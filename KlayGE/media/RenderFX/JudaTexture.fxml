@@ -266,7 +266,7 @@ float4 judatex2d_clamp(int4 tile_bb, float2 texcoord)
 #if KLAYGE_DERIVATIVES
 	return judatex2d_grad_internal(tile_xy, in_tile_coord, ddx(texcoord), ddy(texcoord));
 #else
-	return judatex2d_grad_internal(tile_xy, in_tile_coord, 0, 0);
+	return judatex2d_internal(tile_xy, in_tile_coord);
 #endif
 }
 float4 judatex2d_wrap(int4 tile_bb, float2 texcoord)
@@ -277,7 +277,7 @@ float4 judatex2d_wrap(int4 tile_bb, float2 texcoord)
 #if KLAYGE_DERIVATIVES
 	return judatex2d_grad_internal(tile_xy, in_tile_coord, ddx(texcoord), ddy(texcoord));
 #else
-	return judatex2d_grad_internal(tile_xy, in_tile_coord, 0, 0);
+	return judatex2d_internal(tile_xy, in_tile_coord);
 #endif
 }
 float4 judatex2d_mirror(int4 tile_bb, float2 texcoord)
@@ -288,7 +288,7 @@ float4 judatex2d_mirror(int4 tile_bb, float2 texcoord)
 #if KLAYGE_DERIVATIVES
 	return judatex2d_grad_internal(tile_xy, in_tile_coord, ddx(texcoord), ddy(texcoord));
 #else
-	return judatex2d_grad_internal(tile_xy, in_tile_coord, 0, 0);
+	return judatex2d_internal(tile_xy, in_tile_coord);
 #endif
 }
 float4 judatex2d_border(int4 tile_bb, float2 texcoord)
@@ -299,7 +299,7 @@ float4 judatex2d_border(int4 tile_bb, float2 texcoord)
 #if KLAYGE_DERIVATIVES
 	return judatex2d_grad_internal(tile_xy, in_tile_coord, ddx(texcoord), ddy(texcoord));
 #else
-	return judatex2d_grad_internal(tile_xy, in_tile_coord, 0, 0);
+	return judatex2d_internal(tile_xy, in_tile_coord);
 #endif
 }
 
