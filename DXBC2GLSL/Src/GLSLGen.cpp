@@ -652,6 +652,11 @@ void GLSLGen::ToDclInterShaderOutputRecords(std::ostream& out)
 			bool output_var = false;
 			if (glsl_rules_ & GSR_InOutPrefix)
 			{
+				if ((shader_type_ != ST_PS) && (glsl_rules_ & GSR_PSInterpolation))
+				{
+					out << "smooth ";
+				}
+
 				out << "out ";
 				output_var = true;
 			}
@@ -1461,6 +1466,7 @@ void GLSLGen::ToDeclaration(std::ostream& out, ShaderDecl const & dcl)
 					// Normalized float test
 					if (ValidFloat(data[i * 4 + j]))
 					{
+						out.setf(std::ios::showpoint);
 						out << data[i * 4 + j];
 					}
 					else
@@ -2356,9 +2362,9 @@ void GLSLGen::ToInstruction(std::ostream& out, ShaderInstruction const & insn) c
 				if (glsl_rules_ & GSR_BitwiseOp)
 				{
 					out << "ivec4(";
-					this->ToOperands(out, *insn.ops[1], oit);
+					this->ToOperands(out, *insn.ops[1], SIT_Int);
 					out << ") & ivec4(";
-					this->ToOperands(out, *insn.ops[2], oit);
+					this->ToOperands(out, *insn.ops[2], SIT_Int);
 					out << ")";
 				}
 				else
@@ -2382,9 +2388,9 @@ void GLSLGen::ToInstruction(std::ostream& out, ShaderInstruction const & insn) c
 		if (glsl_rules_ & GSR_BitwiseOp)
 		{
 			out << "ivec4(";
-			this->ToOperands(out, *insn.ops[1], oit);
+			this->ToOperands(out, *insn.ops[1], SIT_Int);
 			out << ") | ivec4(";
-			this->ToOperands(out, *insn.ops[2], oit);
+			this->ToOperands(out, *insn.ops[2], SIT_Int);
 			out << ")";
 		}
 		else
@@ -2403,9 +2409,9 @@ void GLSLGen::ToInstruction(std::ostream& out, ShaderInstruction const & insn) c
 	case SO_XOR:
 		this->ToOperands(out, *insn.ops[0], oot | (oot << 8));
 		out << " = ivec4(ivec4(";
-		this->ToOperands(out, *insn.ops[1], oit);
+		this->ToOperands(out, *insn.ops[1], SIT_Int);
 		out << ") ^ ivec4(";
-		this->ToOperands(out, *insn.ops[2], oit);
+		this->ToOperands(out, *insn.ops[2], SIT_Int);
 		out << "))";
 		this->ToComponentSelectors(out, *insn.ops[0]);
 		out << ";";
@@ -7205,6 +7211,7 @@ void GLSLGen::ToImmConstBuffer(std::ostream& out, ShaderDecl const & dcl)
 			// Normalized float test
 			if (ValidFloat(data[i * 4 + j]))
 			{
+				out.setf(std::ios::showpoint);
 				out << data[i * 4 + j];
 			}
 			else
