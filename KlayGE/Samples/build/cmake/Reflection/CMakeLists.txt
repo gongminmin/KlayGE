@@ -66,6 +66,7 @@ SET(CONTENT_FILES
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/SSVO.kfx
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/SumLum.kfx
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/TAA.kfx
+	${KLAYGE_PROJECT_DIR}/media/RenderFX/TileBasedDeferredRendering.kfx
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/ToneMapping.kfx
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/VPLsLighting.kfx
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/UI.kfx
