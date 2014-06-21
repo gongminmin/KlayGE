@@ -413,14 +413,11 @@ void GLSLGen::ToGLSL(std::ostream& out)
 	{
 		this->ToTemps(out, **iter);
 	}
-	if (!(glsl_rules_ & GSR_ArrayConstructors))
+	for (size_t i = 0; i < program_->dcls.size(); ++ i)
 	{
-		for (size_t i = 0; i < program_->dcls.size(); ++ i)
+		if (SO_IMMEDIATE_CONSTANT_BUFFER == program_->dcls[i]->opcode)
 		{
-			if (SO_IMMEDIATE_CONSTANT_BUFFER == program_->dcls[i]->opcode)
-			{
-				this->ToImmConstBuffer(out, *program_->dcls[i]);
-			}
+			this->ToImmConstBuffer(out, *program_->dcls[i]);
 		}
 	}
 	out << "ivec4 iTempX[2];\n";
@@ -632,7 +629,8 @@ void GLSLGen::ToDclInterShaderOutputRecords(std::ostream& out)
 {
 	for (size_t i = 0; i < program_->params_out.size(); ++ i)
 	{
-		if (SN_UNDEFINED == program_->params_out[i].system_value_type)
+		if ((SN_UNDEFINED == program_->params_out[i].system_value_type)
+			&& (strcmp("SV_Depth", program_->params_out[i].semantic_name) != 0))
 		{
 			if (ST_HS == shader_type_)
 			{
@@ -791,7 +789,16 @@ void GLSLGen::ToDeclInterShaderInputRegisters(std::ostream& out) const
 				{
 					RegisterDesc desc;
 					desc.index = register_index;
-					desc.type = type;
+					if ((SN_VERTEX_ID == sig_desc.system_value_type)
+						|| (SN_PRIMITIVE_ID == sig_desc.system_value_type)
+						|| (SN_INSTANCE_ID == sig_desc.system_value_type))
+					{
+						desc.type = SRCT_SINT32;
+					}
+					else
+					{
+						desc.type = type;
+					}
 					desc.interpolation = SIM_Undefined;
 					desc.is_depth = false;
 					input_registers.push_back(desc);
@@ -1173,6 +1180,12 @@ void GLSLGen::ToCopyToInterShaderOutputRecords(std::ostream& out) const
 					break;
 
 				case SN_UNDEFINED:
+					if (0 == strcmp("SV_Depth", sig_desc.semantic_name))
+					{
+						out << "gl_FragDepth";
+						need_comps = false;
+					}
+					else
 					{
 						bool output_var = false;
 						if (glsl_rules_ & GSR_InOutPrefix)
@@ -1194,11 +1207,7 @@ void GLSLGen::ToCopyToInterShaderOutputRecords(std::ostream& out) const
 						}
 						else
 						{
-							if (0 == strcmp("SV_Depth", sig_desc.semantic_name))
-							{
-								out << "gl_FragDepth";
-							}
-							else if (0 == strcmp("SV_Target", sig_desc.semantic_name))
+							if (0 == strcmp("SV_Target", sig_desc.semantic_name))
 							{
 								uint32_t index = 0;
 								if (glsl_rules_ & GSR_DrawBuffers)
@@ -1221,8 +1230,9 @@ void GLSLGen::ToCopyToInterShaderOutputRecords(std::ostream& out) const
 								out << "In";
 							}
 						}
+
+						need_comps = true;
 					}
-					need_comps = true;
 					break;
 
 				default:
@@ -1443,44 +1453,6 @@ void GLSLGen::ToDeclaration(std::ostream& out, ShaderDecl const & dcl)
 					break;
 				}
 			}
-		}
-		break;
-
-	case SO_IMMEDIATE_CONSTANT_BUFFER:
-		if (glsl_rules_ & GSR_ArrayConstructors)
-		{
-			uint32_t vector_num = dcl.num / 4;
-			float const * data = reinterpret_cast<float const *>(&dcl.data[0]);
-			BOOST_ASSERT_MSG(vector_num != 0, "immediate cb size can't be 0");
-			out << "const vec4 icb[" << vector_num << "] = vec4[" << vector_num  << "](\n";
-			for (uint32_t i = 0; i < vector_num; ++ i)
-			{
-				if (i != 0)
-				{
-					out << ",\n";
-				}
-
-				out << "vec4(";
-				for (int j = 0; j < 4; ++ j)
-				{
-					// Normalized float test
-					if (ValidFloat(data[i * 4 + j]))
-					{
-						out.setf(std::ios::showpoint);
-						out << data[i * 4 + j];
-					}
-					else
-					{
-						out << *reinterpret_cast<int const *>(&data[i * 4 + j]);
-					}
-					if (j != 3)
-					{
-						out << ", ";
-					}
-				}
-				out << ")";
-			}
-			out << "\n);\n";
 		}
 		break;
 
@@ -6073,13 +6045,15 @@ void GLSLGen::ToOperandName(std::ostream& out, ShaderOperand const & op, ShaderI
 		if (SOT_INPUT == op.type)
 		{
 			DXBCSignatureParamDesc const & param_desc = this->GetInputParamDesc(op);
-			if (0 == strcmp(param_desc.semantic_name, "SV_VertexID"))
+			if (SN_VERTEX_ID == param_desc.system_value_type)
 			{
+				*need_comps = false;
 				*need_idx = false;
 				out << "gl_VertexID";
 			}
-			else if (0 == strcmp(param_desc.semantic_name, "SV_InstanceID"))
+			else if (SN_INSTANCE_ID == param_desc.system_value_type)
 			{
+				*need_comps = false;
 				*need_idx = false;
 				out << "gl_InstanceID";
 			}
@@ -6253,8 +6227,8 @@ void GLSLGen::ToOperandName(std::ostream& out, ShaderOperand const & op, ShaderI
 	}
 	else if (SOT_OUTPUT_DEPTH == op.type)
 	{
-		out << "gl_FragDepth";
-		*need_comps = false;
+		out << "o_REGISTERDepth";
+		*need_comps = true;
 		*need_idx = false;
 	}
 	else if (SOT_TEMP == op.type)
