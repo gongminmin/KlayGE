@@ -762,7 +762,7 @@ namespace
 
 		uint64_t Type() const
 		{
-			static uint64_t const type = static_cast<uint64_t>(boost::hash_value("FontLoadingDesc"));
+			static uint64_t const type = CT_HASH("FontLoadingDesc");
 			return type;
 		}
 

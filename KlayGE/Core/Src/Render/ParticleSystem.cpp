@@ -101,7 +101,7 @@ namespace
 
 		uint64_t Type() const
 		{
-			static uint64_t const type = static_cast<uint64_t>(boost::hash_value("ParticleSystemLoadingDesc"));
+			static uint64_t const type = CT_HASH("ParticleSystemLoadingDesc");
 			return type;
 		}
 
