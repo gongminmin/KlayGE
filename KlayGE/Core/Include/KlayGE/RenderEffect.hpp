@@ -240,15 +240,26 @@ namespace KlayGE
 		{
 			new (data_.val) T;
 		}
+		virtual ~RenderVariableConcrete()
+		{
+			if (!in_cbuff_)
+			{
+				reinterpret_cast<T*>(data_.val)->~T();
+			}
+		}
 
 		virtual RenderVariablePtr Clone() KLAYGE_OVERRIDE
 		{
 			shared_ptr<RenderVariableConcrete<T> > ret = MakeSharedPtr<RenderVariableConcrete<T> >();
-			ret->in_cbuff_ = in_cbuff_;
 			if (in_cbuff_)
 			{
+				if (!ret->in_cbuff_)
+				{
+					reinterpret_cast<T*>(ret->data_.val)->~T();
+				}
 				ret->data_ = data_;
 			}
+			ret->in_cbuff_ = in_cbuff_;
 			T val;
 			this->Value(val);
 			*ret = val;
@@ -287,11 +298,11 @@ namespace KlayGE
 			{
 				T val;
 				this->Value(val);
+				reinterpret_cast<T*>(data_.val)->~T();
 				in_cbuff_ = true;
 				data_.cbuff_desc.cbuff = cbuff;
 				data_.cbuff_desc.offset = offset;
 				data_.cbuff_desc.stride = stride;
-				new (data_.cbuff_desc.cbuff->template VariableInBuff<T>(data_.cbuff_desc.offset)) T;
 				this->operator=(val);
 			}
 		}
@@ -348,11 +359,15 @@ namespace KlayGE
 		virtual RenderVariablePtr Clone() KLAYGE_OVERRIDE
 		{
 			shared_ptr<RenderVariableArray<T> > ret = MakeSharedPtr<RenderVariableArray<T> >();
-			ret->RenderVariableConcrete<std::vector<T> >::in_cbuff_ = this->in_cbuff_;
 			if (this->in_cbuff_)
 			{
+				if (!ret->in_cbuff_)
+				{
+					reinterpret_cast<std::vector<T>*>(ret->data_.val)->~vector<T>();
+				}
 				ret->RenderVariableConcrete<std::vector<T> >::data_ = this->data_;
 			}
+			ret->RenderVariableConcrete<std::vector<T> >::in_cbuff_ = this->in_cbuff_;
 			std::vector<T> val;
 			this->Value(val);
 			*ret = val;
