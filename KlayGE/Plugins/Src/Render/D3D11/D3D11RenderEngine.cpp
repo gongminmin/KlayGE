@@ -171,6 +171,7 @@ namespace KlayGE
 		input_layout_bank_.clear();
 
 		d3d_imm_ctx_->ClearState();
+		d3d_imm_ctx_->Flush();
 		d3d_imm_ctx_.reset();
 		d3d_device_.reset();
 		gi_factory_.reset();
