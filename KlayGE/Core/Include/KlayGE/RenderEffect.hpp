@@ -363,7 +363,7 @@ namespace KlayGE
 			{
 				if (!ret->in_cbuff_)
 				{
-					reinterpret_cast<std::vector<T>*>(ret->data_.val)->~vector<T>();
+					reinterpret_cast<std::vector<T>*>(ret->data_.val)->~vector();
 				}
 				ret->RenderVariableConcrete<std::vector<T> >::data_ = this->data_;
 			}

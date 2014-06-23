@@ -5416,7 +5416,7 @@ namespace KlayGE
 		{
 			if (!ret->in_cbuff_)
 			{
-				reinterpret_cast<std::vector<float4x4>*>(ret->data_.val)->~vector<float4x4>();
+				reinterpret_cast<std::vector<float4x4>*>(ret->data_.val)->~vector();
 			}
 			ret->data_ = data_;
 		}
