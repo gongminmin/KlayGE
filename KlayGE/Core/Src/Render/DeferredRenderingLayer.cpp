@@ -3286,6 +3286,7 @@ namespace KlayGE
 		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 
 		re.BindFrameBuffer(pvp.lighting_mask_fb);
+		re.CurFrameBuffer()->Attached(FrameBuffer::ATT_Color0)->ClearColor(Color(0, 0, 0, 0));
 		re.Render(*technique_tbdr_lighting_mask_, *rl_quad_);
 
 		*min_max_depth_tex_param_ = pvp.g_buffer_min_max_depth_texs.back();
@@ -3501,19 +3502,19 @@ namespace KlayGE
 			lights_aabb_min_param_->CBuffer()->Dirty(true);
 			lights_aabb_max_param_->CBuffer()->Dirty(true);
 
-			if (lights_type[0] != lights_type[1])
+			if (available_lights[0].empty())
+			{
+				*shading_rw_tex_param_ = pvp.temp_shading_tex;
+			}
+			else
 			{
 				*shading_rw_tex_param_ = (Opaque_GBuffer == g_buffer_index)
 					? pvp.curr_merged_shading_tex : pvp.shading_tex;
 			}
-			else
-			{
-				*shading_rw_tex_param_ = pvp.temp_shading_tex;
-			}
 			re.Dispatch(*technique_tbdr_unified_,
 				(w + TILE_SIZE - 1) / TILE_SIZE, (h + TILE_SIZE - 1) / TILE_SIZE, 1);
 
-			if (lights_type[0] == lights_type[1])
+			if (available_lights[0].empty())
 			{
 				copy_pp_->InputPin(0, pvp.temp_shading_tex);
 				copy_pp_->OutputPin(0,
