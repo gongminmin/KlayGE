@@ -361,6 +361,7 @@ namespace KlayGE
 		depth_texture_support_ = caps.depth_texture_support;
 		tex_array_support_ = (caps.max_texture_array_length >= 4);
 
+#if DEFAULT_DEFERRED == LIGHT_INDEXED_DEFERRED
 		if ((caps.max_shader_model >= 5) && (caps.cs_support))
 		{
 			KLAYGE_STATIC_ASSERT(32 == TILE_SIZE);
@@ -371,6 +372,7 @@ namespace KlayGE
 		{
 			cs_tbdr_ = false;
 		}
+#endif
 
 		for (size_t vpi = 0; vpi < viewports_.size(); ++ vpi)
 		{

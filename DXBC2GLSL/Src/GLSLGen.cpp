@@ -1369,7 +1369,14 @@ void GLSLGen::ToDeclaration(std::ostream& out, ShaderDecl const & dcl)
 										break;
 
 									case SVT_UINT:
-										out << "u";
+										if (glsl_rules_ & GSR_UIntType)
+										{
+											out << "u";
+										}
+										else
+										{
+											out << "i";
+										}
 										break;
 
 									default:
@@ -6413,7 +6420,14 @@ void GLSLGen::ToOperandName(std::ostream& out, ShaderOperand const & op, ShaderI
 									break;
 
 								case SVT_UINT:
-									out << "u";
+									if (glsl_rules_ & GSR_UIntType)
+									{
+										out << "u";
+									}
+									else
+									{
+										out << "i";
+									}
 									break;
 
 								case SVT_FLOAT:
