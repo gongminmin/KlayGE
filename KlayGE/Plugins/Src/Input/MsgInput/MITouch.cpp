@@ -80,7 +80,7 @@ namespace KlayGE
 		if (id > 0)
 		{
 			-- id;
-			touch_coord_state_[id] = pt;
+			touch_coord_state_[id] = this->AdjustPoint(pt);
 			touch_down_state_[id] = true;
 		}
 	}
@@ -90,7 +90,7 @@ namespace KlayGE
 		if (id > 0)
 		{
 			-- id;
-			touch_coord_state_[id] = pt;
+			touch_coord_state_[id] = this->AdjustPoint(pt);
 			touch_down_state_[id] = false;
 		}
 	}
@@ -100,7 +100,7 @@ namespace KlayGE
 		if (id > 0)
 		{
 			-- id;
-			touch_coord_state_[id] = pt;
+			touch_coord_state_[id] = this->AdjustPoint(pt);
 			touch_down_state_[id] = down;
 		}
 	}
@@ -110,23 +110,13 @@ namespace KlayGE
 		if (id > 0)
 		{
 			-- id;
-			touch_coord_state_[id] = pt;
+			touch_coord_state_[id] = this->AdjustPoint(pt);
 		}
 		wheel_delta_state_ += wheel_delta;
 	}
 
 	void MsgInputTouch::UpdateInputs()
 	{
-#ifdef KLAYGE_PLATFORM_ANDROID
-		// TODO: Is it correct?
-		WindowPtr const & win = Context::Instance().AppInstance().MainWnd();
-		int2 offset(win->Left() / 2, win->Top() / 2);
-		for (size_t i = 0; i < touch_coord_state_.size(); ++ i)
-		{
-			touch_coord_state_[i] -= offset;
-		}
-#endif
-
 		index_ = !index_;
 		touch_coords_[index_] = touch_coord_state_;
 		touch_downs_[index_] = touch_down_state_;
@@ -143,5 +133,15 @@ namespace KlayGE
 		action_param_->move_vec = float2(0.0f, 0.0f);
 		curr_gesture_(static_cast<float>(timer_.elapsed()));
 		timer_.restart();
+	}
+
+	int2 MsgInputTouch::AdjustPoint(int2 const & pt) const
+	{
+#ifdef KLAYGE_PLATFORM_ANDROID
+		WindowPtr const & win = Context::Instance().AppInstance().MainWnd();
+		return pt - int2(win->Left() / 2, win->Top() / 2);
+#else
+		return pt;
+#endif
 	}
 }
