@@ -2862,15 +2862,15 @@ namespace KlayGE
 
 		if (!this->StreamIn(kfx_source))
 		{
-			shader_descs_.reset();
-			macros_.reset();
-			cbuffers_.clear();
-			params_.clear();
-			shaders_.reset();
-			techniques_.clear();
-
 			if (source)
 			{
+				shader_descs_.reset();
+				macros_.reset();
+				cbuffers_.clear();
+				params_.clear();
+				shaders_.reset();
+				techniques_.clear();
+
 				shader_descs_ = MakeSharedPtr<KLAYGE_DECLTYPE(*shader_descs_)>(1);
 
 				XMLAttributePtr attr;
