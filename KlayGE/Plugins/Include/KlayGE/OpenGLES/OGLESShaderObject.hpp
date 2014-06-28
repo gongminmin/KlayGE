@@ -84,6 +84,8 @@ namespace KlayGE
 
 	private:
 		GLuint glsl_program_;
+		GLenum glsl_bin_format_;
+		shared_ptr<std::vector<uint8_t> > glsl_bin_program_;
 		shared_ptr<array<std::string, ST_NumShaderTypes> > shader_func_names_;
 		shared_ptr<array<shared_ptr<std::string>, ST_NumShaderTypes> > glsl_srcs_;
 		shared_ptr<array<shared_ptr<std::vector<std::string> >, ST_NumShaderTypes> > pnames_;

@@ -28,10 +28,9 @@ namespace KlayGE
 	}
 
 	D3D11Adapter::D3D11Adapter(uint32_t adapter_no, IDXGIAdapter1Ptr const & adapter)
-					: adapter_no_(adapter_no),
-						adapter_(adapter)
+					: adapter_no_(adapter_no)
 	{
-		adapter_->GetDesc1(&adapter_desc_);
+		this->ResetAdapter(adapter);
 	}
 
 	// 获取设备描述字符串
@@ -113,5 +112,17 @@ namespace KlayGE
 		adapter_ = ada;
 		adapter_->GetDesc1(&adapter_desc_);
 		modes_.resize(0);
+
+#if (_WIN32_WINNT >= 0x0602 /*_WIN32_WINNT_WIN8*/)
+		IDXGIAdapter2* adapter2;
+		adapter_->QueryInterface(IID_IDXGIAdapter2, reinterpret_cast<void**>(&adapter2));
+		if (adapter2 != nullptr)
+		{
+			DXGI_ADAPTER_DESC2 desc2;
+			adapter2->GetDesc2(&desc2);
+			memcpy(adapter_desc_.Description, desc2.Description, sizeof(desc2.Description));
+			adapter2->Release();
+		}
+#endif
 	}
 }

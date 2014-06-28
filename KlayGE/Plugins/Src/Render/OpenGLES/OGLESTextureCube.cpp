@@ -110,33 +110,39 @@ namespace KlayGE
 
 					GLsizei const image_size = ((s + 3) / 4) * ((s + 3) / 4) * block_size;
 
+					void* ptr;
 					if (nullptr == init_data)
 					{
 						tex_data_[face * num_mip_maps_ + level].resize(image_size, 0);
+						ptr = nullptr;
 					}
 					else
 					{
 						tex_data_[face * num_mip_maps_ + level].resize(image_size);
 						std::memcpy(&tex_data_[face * num_mip_maps_ + level][0], init_data[face * num_mip_maps_ + level].data, image_size);
+						ptr = &tex_data_[face * num_mip_maps_ + level][0];
 					}
 					glCompressedTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + face, level, glinternalFormat,
-						s, s, 0, image_size, &tex_data_[face * num_mip_maps_ + level][0]);
+						s, s, 0, image_size, ptr);
 				}
 				else
 				{
 					GLsizei const image_size = s * s * texel_size;
 
+					void* ptr;
 					if (nullptr == init_data)
 					{
 						tex_data_[face * num_mip_maps_ + level].resize(image_size, 0);
+						ptr = nullptr;
 					}
 					else
 					{
 						tex_data_[face * num_mip_maps_ + level].resize(image_size);
 						std::memcpy(&tex_data_[face * num_mip_maps_ + level][0], init_data[face * num_mip_maps_ + level].data, image_size);
+						ptr = &tex_data_[face * num_mip_maps_ + level][0];
 					}
 					glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + face, level, glinternalFormat,
-						s, s, 0, glformat, gltype, &tex_data_[face * num_mip_maps_ + level][0]);
+						s, s, 0, glformat, gltype, ptr);
 				}
 
 				s = std::max(1U, s / 2);

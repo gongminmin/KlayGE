@@ -198,8 +198,11 @@ namespace KlayGE
 			visual_attr[1] = get<1>(available_versions[i]);
 			if (eglChooseConfig(display_, &visual_attr[0], &cfg_, 1, &num_cfgs))
 			{
-				start_version_index = static_cast<int>(i);
-				break;
+				if (num_cfgs > 0)
+				{
+					start_version_index = static_cast<int>(i);
+					break;
+				}
 			}
 		}
 		BOOST_ASSERT(start_version_index != -1);

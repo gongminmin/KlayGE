@@ -1980,6 +1980,9 @@ namespace KlayGE
 	{
 		bool ret = false;
 
+		(*shader_func_names_)[type] = effect.GetShaderDesc(shader_desc_ids[type]).func_name;
+
+		is_shader_validate_[type] = false;
 		if (native_shader_block.size() >= 24)
 		{
 			uint8_t const * nsbp = &native_shader_block[0];
@@ -1995,11 +1998,12 @@ namespace KlayGE
 				ver = LE2Native(ver);
 				if (3 == ver)
 				{
+					is_shader_validate_[type] = true;
+
 					uint32_t len32;
 					std::memcpy(&len32, nsbp, sizeof(len32));
 					nsbp += sizeof(len32);
 					len32 = LE2Native(len32);
-					(*shader_func_names_)[type] = effect.GetShaderDesc(shader_desc_ids[type]).func_name;
 					(*glsl_srcs_)[type] = MakeSharedPtr<std::string>(len32, '\0');
 					std::memcpy(&(*(*glsl_srcs_)[type])[0], nsbp, len32);
 					nsbp += len32;
@@ -2131,12 +2135,11 @@ namespace KlayGE
 
 					this->AttachGLSL(type);
 
-					ret = true;
+					ret = is_shader_validate_[type];
 				}
 			}
 		}
 
-		is_shader_validate_[type] = ret;
 		return ret;
 	}
 
@@ -2486,6 +2489,10 @@ namespace KlayGE
 				{
 					D3D_SHADER_MACRO macro_pack_to_rgba = { "KLAYGE_PACK_TO_RGBA", "1" };
 					macros.push_back(macro_pack_to_rgba);
+				}
+				{
+					D3D_SHADER_MACRO macro_frag_depth = { "KLAYGE_FRAG_DEPTH", "1" };
+					macros.push_back(macro_frag_depth);
 				}
 				{
 					D3D_SHADER_MACRO macro_shader_type = { "", "1" };
@@ -2904,6 +2911,7 @@ namespace KlayGE
 			{
 				args.push_back("-DKLAYGE_PACK_TO_RGBA");
 			}
+			args.push_back("-DKLAYGE_FRAG_DEPTH=1");
 			switch (type)
 			{
 			case ST_VertexShader:
@@ -3267,17 +3275,14 @@ namespace KlayGE
 
 			if (is_validate_ && (glloader_GL_VERSION_4_1() || glloader_GL_ARB_get_program_binary()))
 			{
-				GLint formats = 0;
-				glGetIntegerv(GL_NUM_PROGRAM_BINARY_FORMATS, &formats);
-				glsl_bin_formats_ = MakeSharedPtr<std::vector<GLint> >(formats);
-				if (formats > 0)
+				GLint num = 0;
+				glGetIntegerv(GL_NUM_PROGRAM_BINARY_FORMATS, &num);
+				if (num > 0)
 				{
-					glGetIntegerv(GL_PROGRAM_BINARY_FORMATS, &(*glsl_bin_formats_)[0]);
-
 					GLint len = 0;
 					glGetProgramiv(glsl_program_, GL_PROGRAM_BINARY_LENGTH, &len);
 					glsl_bin_program_ = MakeSharedPtr<std::vector<uint8_t> >(len);
-					glGetProgramBinary(glsl_program_, len, nullptr, reinterpret_cast<GLenum*>(&(*glsl_bin_formats_)[0]), &(*glsl_bin_program_)[0]);
+					glGetProgramBinary(glsl_program_, len, nullptr, &glsl_bin_format_, &(*glsl_bin_program_)[0]);
 				}
 			}
 
@@ -3344,7 +3349,7 @@ namespace KlayGE
 
 		ret->has_discard_ = has_discard_;
 		ret->has_tessellation_ = has_tessellation_;
-		ret->glsl_bin_formats_ = glsl_bin_formats_;
+		ret->glsl_bin_format_ = glsl_bin_format_;
 		ret->glsl_bin_program_ = glsl_bin_program_;
 		ret->shader_func_names_ = shader_func_names_;
 		ret->glsl_srcs_ = glsl_srcs_;
@@ -3388,7 +3393,7 @@ namespace KlayGE
 
 				glProgramParameteri(ret->glsl_program_, GL_PROGRAM_BINARY_RETRIEVABLE_HINT, GL_TRUE);
 
-				glProgramBinary(ret->glsl_program_, static_cast<GLenum>((*glsl_bin_formats_)[0]),
+				glProgramBinary(ret->glsl_program_, glsl_bin_format_,
 					&(*glsl_bin_program_)[0], static_cast<GLsizei>(glsl_bin_program_->size()));
 
 				GLint linked = false;

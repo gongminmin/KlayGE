@@ -398,6 +398,7 @@ namespace KlayGE
 
 	private:
 		virtual void UpdateInputs() KLAYGE_OVERRIDE;
+		int2 AdjustPoint(int2 const & pt) const;
 
 		Timer timer_;
 		array<int2, 16> touch_coord_state_;

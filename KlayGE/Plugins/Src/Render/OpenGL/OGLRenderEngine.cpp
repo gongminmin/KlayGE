@@ -156,6 +156,7 @@ namespace KlayGE
 	{
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 		cur_rs_obj_ = rf.MakeRasterizerStateObject(RasterizerStateDesc());
+		polygon_mode_override_ = OGLMapping::Mapping(cur_rs_obj_->GetDesc().polygon_mode);
 		cur_dss_obj_ = rf.MakeDepthStencilStateObject(DepthStencilStateDesc());
 		cur_bs_obj_ = rf.MakeBlendStateObject(BlendStateDesc());
 		checked_pointer_cast<OGLRasterizerStateObject>(cur_rs_obj_)->ForceDefaultState();
@@ -762,6 +763,15 @@ namespace KlayGE
 		glDeleteFramebuffersEXT(n, framebuffers);
 	}
 
+	void OGLRenderEngine::SetPolygonMode(GLenum face, GLenum mode)
+	{
+		if (polygon_mode_override_ != mode)
+		{
+			glPolygonMode(face, mode);
+			polygon_mode_override_ = mode;
+		}
+	}
+
 	// 设置当前渲染目标
 	/////////////////////////////////////////////////////////////////////////////////
 	void OGLRenderEngine::DoBindFrameBuffer(FrameBufferPtr const & fb)
@@ -1107,8 +1117,16 @@ namespace KlayGE
 						}
 					}
 
-					glDrawElementsInstanced(mode, static_cast<GLsizei>(rl.NumIndices()),
-						index_type, index_offset, num_instances);
+					if (glloader_GL_VERSION_3_3())
+					{
+						glDrawElementsInstanced(mode, static_cast<GLsizei>(rl.NumIndices()),
+							index_type, index_offset, num_instances);
+					}
+					else
+					{
+						glDrawElementsInstancedARB(mode, static_cast<GLsizei>(rl.NumIndices()),
+							index_type, index_offset, num_instances);
+					}
 					pass->Unbind();
 				}
 			}
@@ -1130,7 +1148,14 @@ namespace KlayGE
 						}
 					}
 
-					glDrawArraysInstanced(mode, rl.StartVertexLocation(), static_cast<GLsizei>(rl.NumVertices()), num_instances);
+					if (glloader_GL_VERSION_3_3())
+					{
+						glDrawArraysInstanced(mode, rl.StartVertexLocation(), static_cast<GLsizei>(rl.NumVertices()), num_instances);
+					}
+					else
+					{
+						glDrawArraysInstancedARB(mode, rl.StartVertexLocation(), static_cast<GLsizei>(rl.NumVertices()), num_instances);
+					}
 					pass->Unbind();
 				}
 			}

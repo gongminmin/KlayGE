@@ -115,6 +115,14 @@ namespace KlayGE
 		{
 			return hack_for_adreno_;
 		}
+		bool HackForAndroidEmulator() const
+		{
+			return hack_for_android_emulator_;
+		}
+		bool HackForAngle() const
+		{
+			return hack_for_angle_;
+		}
 
 		bool GPUDisjointOccurred() const
 		{
@@ -178,7 +186,8 @@ namespace KlayGE
 		bool hack_for_pvr_;
 		bool hack_for_mali_;
 		bool hack_for_adreno_;
-		bool hack_for_google_;
+		bool hack_for_android_emulator_;
+		bool hack_for_angle_;
 
 		bool gpu_disjoint_occurred_;
 	};

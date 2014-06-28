@@ -706,6 +706,15 @@ void ShadowCubeMap::InitObjects()
 
 	this->ScaleFactorChangedHandler(*dialog_->Control<UISlider>(id_scale_factor_slider_));
 	this->SMTypeChangedHandler(*dialog_->Control<UIComboBox>(id_sm_type_combo_));
+
+	while (!teapot_model_)
+	{
+		teapot_model_ = teapot_ml_();
+	}
+	while (!scene_model_)
+	{
+		scene_model_ = model_ml_();
+	}
 }
 
 void ShadowCubeMap::OnResize(uint32_t width, uint32_t height)
@@ -784,7 +793,6 @@ uint32_t ShadowCubeMap::DoUpdate(uint32_t pass)
 			}
 			else if (loading_percentage_ < 80)
 			{
-				scene_model_ = model_ml_();
 				if (scene_model_)
 				{
 					SceneObjectPtr so = MakeSharedPtr<SceneObjectHelper>(scene_model_, SceneObject::SOA_Cullable);
@@ -804,7 +812,6 @@ uint32_t ShadowCubeMap::DoUpdate(uint32_t pass)
 			}
 			else if (loading_percentage_ < 95)
 			{
-				teapot_model_ = teapot_ml_();
 				if (teapot_model_)
 				{
 					loading_percentage_ = 95;

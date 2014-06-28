@@ -43,18 +43,6 @@
 
 #ifndef KLAYGE_PLATFORM_WINDOWS_METRO
 
-#ifdef KLAYGE_COMPILER_MSVC
-#define PYTHON_VER_STR KFL_STRINGIZE(PY_MAJOR_VERSION)KFL_STRINGIZE(PY_MINOR_VERSION)
-
-#ifdef KLAYGE_DEBUG
-#define PYTHON_DBG_SUFFIX "_d"
-#else
-#define PYTHON_DBG_SUFFIX ""
-#endif
-
-#define PYTHON_LIB_STR KFL_STRINGIZE("python")KFL_STRINGIZE(FREETYPE_VER_STR)KFL_STRINGIZE(FREETYPE_DBG_SUFFIX)KFL_STRINGIZE(".lib")
-#endif
-
 namespace KlayGE
 {
 	class PyObjDeleter
@@ -262,19 +250,18 @@ namespace KlayGE
 		return ret;
 	}
 
-	PythonScriptModule::PythonScriptModule()
-	{
-		module_	= MakePyObjectPtr(PyImport_AddModule("__main__"));
-		dict_	= MakePyObjectPtr(PyModule_GetDict(module_.get()));
-		Py_IncRef(module_.get());
-		Py_IncRef(dict_.get());
-	}
-
 	PythonScriptModule::PythonScriptModule(std::string const & name)
 	{
-		module_	= MakePyObjectPtr(PyImport_ImportModule(name.c_str()));
-		dict_	= MakePyObjectPtr(PyModule_GetDict(module_.get()));
-		Py_IncRef(module_.get());
+		if (name.empty())
+		{
+			module_ = MakePyObjectPtr(PyImport_AddModule("__main__"));
+			Py_IncRef(module_.get());
+		}
+		else
+		{
+			module_ = MakePyObjectPtr(PyImport_ImportModule(name.c_str()));
+		}
+		dict_ = MakePyObjectPtr(PyModule_GetDict(module_.get()));
 		Py_IncRef(dict_.get());
 	}
 
@@ -312,7 +299,7 @@ namespace KlayGE
 
 	PythonEngine::PythonEngine()
 	{
-		Py_Initialize();
+		Py_InitializeEx(0);
 	}
 
 	PythonEngine::~PythonEngine()
@@ -322,10 +309,7 @@ namespace KlayGE
 
 	ScriptModulePtr PythonEngine::CreateModule(std::string const & name)
 	{
-		ScriptModulePtr obj = name.empty() ?
-							  MakeSharedPtr<PythonScriptModule>() :
-							  MakeSharedPtr<PythonScriptModule>(name);
-		return obj;
+		return MakeSharedPtr<PythonScriptModule>(name);
 	}
 }
 

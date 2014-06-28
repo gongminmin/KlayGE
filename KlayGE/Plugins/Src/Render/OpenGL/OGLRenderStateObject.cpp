@@ -40,10 +40,7 @@ namespace KlayGE
 
 		RasterizerStateDesc const & cur_desc = re.CurRSObj()->GetDesc();
 
-		if (cur_desc.polygon_mode != desc_.polygon_mode)
-		{
-			glPolygonMode(GL_FRONT_AND_BACK, ogl_polygon_mode_);
-		}
+		re.SetPolygonMode(GL_FRONT_AND_BACK, ogl_polygon_mode_);
 		if (cur_desc.shade_mode != desc_.shade_mode)
 		{
 			glShadeModel(ogl_shade_mode_);

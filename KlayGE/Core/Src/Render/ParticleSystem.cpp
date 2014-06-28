@@ -101,7 +101,7 @@ namespace
 
 		uint64_t Type() const
 		{
-			static uint64_t const type = static_cast<uint64_t>(boost::hash_value("ParticleSystemLoadingDesc"));
+			static uint64_t const type = CT_HASH("ParticleSystemLoadingDesc");
 			return type;
 		}
 
@@ -446,7 +446,8 @@ namespace
 				init_data.slice_pitch = 0;
 				init_data.data = texs;
 				GraphicsBufferPtr tex_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, &init_data);
-				rl_->BindVertexStream(tex_vb, KlayGE::make_tuple(vertex_element(VEU_Position, 0, EF_GR32F)));
+				rl_->BindVertexStream(tex_vb, KlayGE::make_tuple(vertex_element(VEU_Position, 0, EF_GR32F)),
+					RenderLayout::ST_Geometry, 0);
 
 				GraphicsBufferPtr pos_vb = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Read | EAH_CPU_Write, nullptr);
 				rl_->BindVertexStream(pos_vb,

@@ -949,7 +949,7 @@ namespace KlayGE
 
 			num_draws_just_called_ += num_passes;
 		}
-		else if (glloader_GLES_VERSION_3_0() && (rl.NumInstances() > 1))
+		else if ((glloader_GLES_VERSION_3_0() || glloader_GLES_EXT_instanced_arrays()) && (rl.NumInstances() > 1))
 		{
 			if (rl.InstanceStream())
 			{
@@ -978,7 +978,14 @@ namespace KlayGE
 						glVertexAttribPointer(attr, num_components, type, normalized, instance_size, offset);
 						glEnableVertexAttribArray(attr);
 
-						glVertexAttribDivisor(attr, 1);
+						if (glloader_GLES_VERSION_3_0())
+						{
+							glVertexAttribDivisor(attr, 1);
+						}
+						else
+						{
+							glVertexAttribDivisorEXT(attr, 1);
+						}
 					}
 
 					elem_offset += vs_elem.element_size();
@@ -1008,8 +1015,16 @@ namespace KlayGE
 						}
 					}
 
-					glDrawElementsInstanced(mode, static_cast<GLsizei>(rl.NumIndices()),
-						index_type, index_offset, num_instances);
+					if (glloader_GLES_VERSION_3_0())
+					{
+						glDrawElementsInstanced(mode, static_cast<GLsizei>(rl.NumIndices()),
+							index_type, index_offset, num_instances);
+					}
+					else
+					{
+						glDrawElementsInstancedEXT(mode, static_cast<GLsizei>(rl.NumIndices()),
+							index_type, index_offset, num_instances);
+					}
 					pass->Unbind();
 				}
 			}
@@ -1031,7 +1046,14 @@ namespace KlayGE
 						}
 					}
 
-					glDrawArraysInstanced(mode, rl.StartVertexLocation(), static_cast<GLsizei>(rl.NumVertices()), num_instances);
+					if (glloader_GLES_VERSION_3_0())
+					{
+						glDrawArraysInstanced(mode, rl.StartVertexLocation(), static_cast<GLsizei>(rl.NumVertices()), num_instances);
+					}
+					else
+					{
+						glDrawArraysInstancedEXT(mode, rl.StartVertexLocation(), static_cast<GLsizei>(rl.NumVertices()), num_instances);
+					}
 					pass->Unbind();
 				}
 			}
@@ -1048,7 +1070,14 @@ namespace KlayGE
 				if (attr != -1)
 				{
 					glDisableVertexAttribArray(attr);
-					glVertexAttribDivisor(attr, 0);
+					if (glloader_GLES_VERSION_3_0())
+					{
+						glVertexAttribDivisor(attr, 0);
+					}
+					else
+					{
+						glVertexAttribDivisorEXT(attr, 0);
+					}
 				}
 			}
 
@@ -1325,6 +1354,7 @@ namespace KlayGE
 	void OGLESRenderEngine::FillRenderDeviceCaps()
 	{
 		std::string vendor(reinterpret_cast<char const *>(glGetString(GL_VENDOR)));
+		std::string renderer(reinterpret_cast<char const *>(glGetString(GL_RENDERER)));
 		if (vendor.find("NVIDIA", 0) != std::string::npos)
 		{
 			hack_for_tegra_ = true;
@@ -1359,11 +1389,20 @@ namespace KlayGE
 		}
 		if (vendor.find("Google", 0) != std::string::npos)
 		{
-			hack_for_google_ = true;
+			if (renderer.find("ANGLE", 0) != std::string::npos)
+			{
+				hack_for_angle_ = true;
+				hack_for_android_emulator_ = false;
+			}
+			else
+			{
+				hack_for_angle_ = false;
+				hack_for_android_emulator_ = true;
+			}
 		}
 		else
 		{
-			hack_for_google_ = false;
+			hack_for_android_emulator_ = false;
 		}
 
 		GLint temp;
@@ -1460,22 +1499,19 @@ namespace KlayGE
 		caps_.multithread_rendering_support = false;
 		caps_.multithread_res_creating_support = false;
 		caps_.mrt_independent_bit_depths_support = false;
-		if (hack_for_pvr_ || hack_for_mali_ || hack_for_adreno_)
+#if !USE_DXBC2GLSL
+		caps_.standard_derivatives_support = false;
+#else
+		if (glloader_GLES_VERSION_3_0() || glloader_GLES_OES_standard_derivatives())
 		{
-			caps_.standard_derivatives_support = false;
+			glGetIntegerv(GL_FRAGMENT_SHADER_DERIVATIVE_HINT_OES, &temp);
+			caps_.standard_derivatives_support = (temp != 0);
 		}
 		else
 		{
-			if (glloader_GLES_VERSION_3_0() || glloader_GLES_OES_standard_derivatives())
-			{
-				glGetIntegerv(GL_FRAGMENT_SHADER_DERIVATIVE_HINT_OES, &temp);
-				caps_.standard_derivatives_support = (temp != 0);
-			}
-			else
-			{
-				caps_.standard_derivatives_support = false;
-			}
+			caps_.standard_derivatives_support = false;
 		}
+#endif
 		caps_.logic_op_support = false;
 		caps_.independent_blend_support = false;
 		if (glloader_GLES_VERSION_3_1())
@@ -1594,7 +1630,7 @@ namespace KlayGE
 			texture_format_.insert(EF_ABGR32UI);
 			texture_format_.insert(EF_ABGR32I);
 		}
-		if ((glloader_GLES_VERSION_3_0() || glloader_GLES_OES_texture_half_float()) && !hack_for_pvr_ && !hack_for_google_)
+		if ((glloader_GLES_VERSION_3_0() || glloader_GLES_OES_texture_half_float()) && !hack_for_pvr_ && !hack_for_android_emulator_)
 		{
 			texture_format_.insert(EF_R16F);
 			texture_format_.insert(EF_GR16F);
@@ -1693,12 +1729,12 @@ namespace KlayGE
 			rendertarget_format_.insert(EF_ABGR32UI);
 			rendertarget_format_.insert(EF_ABGR32I);
 		}
-		if (glloader_GLES_EXT_color_buffer_half_float() || glloader_GLES_EXT_color_buffer_float())
+		if (glloader_GLES_EXT_color_buffer_half_float() || glloader_GLES_EXT_color_buffer_float() || hack_for_angle_)
 		{
 			rendertarget_format_.insert(EF_R16F);
 			rendertarget_format_.insert(EF_GR16F);
 		}
-		if (glloader_GLES_EXT_color_buffer_half_float() || glloader_GLES_EXT_color_buffer_float() || hack_for_tegra_)
+		if (glloader_GLES_EXT_color_buffer_half_float() || glloader_GLES_EXT_color_buffer_float() || hack_for_angle_ || hack_for_tegra_)
 		{
 			rendertarget_format_.insert(EF_ABGR16F);
 		}

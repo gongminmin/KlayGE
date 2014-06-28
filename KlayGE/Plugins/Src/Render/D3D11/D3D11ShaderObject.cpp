@@ -583,6 +583,7 @@ namespace KlayGE
 	{
 		bool ret = false;
 
+		is_shader_validate_[type] = false;
 		std::string shader_profile = this->GetShaderProfile(type, effect, shader_desc_ids[type]);
 		if (native_shader_block.size() >= 25 + shader_profile.size())
 		{
@@ -608,6 +609,8 @@ namespace KlayGE
 					nsbp += len;
 					if (profile == shader_profile)
 					{
+						is_shader_validate_[type] = true;
+
 						uint32_t blob_size;
 						std::memcpy(&blob_size, nsbp, sizeof(blob_size));
 						nsbp += sizeof(blob_size);
@@ -722,13 +725,12 @@ namespace KlayGE
 
 						this->AttachShaderBytecode(type, effect, shader_desc_ids, code_blob);
 
-						ret = true;
+						ret = is_shader_validate_[type];
 					}
 				}
 			}
 		}
 
-		is_shader_validate_[type] = ret;
 		return ret;
 	}
 
@@ -1044,6 +1046,10 @@ namespace KlayGE
 			{
 				D3D_SHADER_MACRO macro_pack_to_rgba = { "KLAYGE_PACK_TO_RGBA", "1" };
 				macros.push_back(macro_pack_to_rgba);
+			}
+			{
+				D3D_SHADER_MACRO macro_frag_depth = { "KLAYGE_FRAG_DEPTH", "1" };
+				macros.push_back(macro_frag_depth);
 			}
 			{
 				D3D_SHADER_MACRO macro_shader_type = { "", "1" };

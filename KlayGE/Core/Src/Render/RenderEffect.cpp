@@ -2690,7 +2690,7 @@ namespace KlayGE
 
 		uint64_t Type() const
 		{
-			static uint64_t const type = static_cast<uint64_t>(boost::hash_value("EffectLoadingDesc"));
+			static uint64_t const type = CT_HASH("EffectLoadingDesc");
 			return type;
 		}
 
@@ -2862,15 +2862,15 @@ namespace KlayGE
 
 		if (!this->StreamIn(kfx_source))
 		{
-			shader_descs_.reset();
-			macros_.reset();
-			cbuffers_.clear();
-			params_.clear();
-			shaders_.reset();
-			techniques_.clear();
-
 			if (source)
 			{
+				shader_descs_.reset();
+				macros_.reset();
+				cbuffers_.clear();
+				params_.clear();
+				shaders_.reset();
+				techniques_.clear();
+
 				shader_descs_ = MakeSharedPtr<KLAYGE_DECLTYPE(*shader_descs_)>(1);
 
 				XMLAttributePtr attr;
@@ -5412,11 +5412,15 @@ namespace KlayGE
 	RenderVariablePtr RenderVariableFloat4x4Array::Clone()
 	{
 		shared_ptr<RenderVariableFloat4x4Array> ret = MakeSharedPtr<RenderVariableFloat4x4Array>();
-		ret->in_cbuff_ = in_cbuff_;
 		if (in_cbuff_)
 		{
+			if (!ret->in_cbuff_)
+			{
+				reinterpret_cast<std::vector<float4x4>*>(ret->data_.val)->~vector();
+			}
 			ret->data_ = data_;
 		}
+		ret->in_cbuff_ = in_cbuff_;
 		std::vector<float4x4> val;
 		this->Value(val);
 		*ret = val;

@@ -72,7 +72,14 @@ enum GLSLRules
 	GSR_MultiStreamGS = 1UL << 12,
 	GSR_CoreGS = 1UL << 13,
 	GSR_Precision = 1UL << 14,
-	GSR_VersionDecl = 1UL << 14,
+	GSR_VersionDecl = 1UL << 15,
+	GSR_MatrixType = 1UL << 16,
+	GSR_ArrayConstructors = 1UL << 17,
+	GSR_DrawBuffers = 1UL << 18,
+	GSR_EXTShaderTextureLod = 1UL << 19,
+	GSR_EXTDrawBuffers = 1UL << 20,
+	GSR_OESStandardDerivatives = 1UL << 21,
+	GSR_EXTFragDepth = 1UL << 22,
 	GSR_ForceUInt32 = 0xFFFFFFFF
 };
 
@@ -135,6 +142,7 @@ private:
 		ShaderInputType const & sit = SIT_UNDEFINED) const;
 	void ToComponentSelectors(std::ostream& out, ShaderOperand const & op, bool dot = true, uint32_t offset = 0) const;
 	void ToTemps(std::ostream& out, ShaderDecl const & dcl);
+	void ToImmConstBuffer(std::ostream& out, ShaderDecl const & dcl);
 	void ToDefaultValue(std::ostream& out, DXBCShaderVariable const & var);
 	void ToDefaultValue(std::ostream& out, DXBCShaderVariable const & var, uint32_t offset);
 	void ToDefaultValue(std::ostream& out, char const * value, ShaderVariableType type);

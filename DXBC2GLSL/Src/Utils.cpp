@@ -75,9 +75,9 @@ namespace boost
 
 bool ValidFloat(float f)
 {
-	return (f == f)
+	return (0x80000000 == *reinterpret_cast<uint32_t*>(&f)) || ((f == f)
 		&& ((f >= std::numeric_limits<float>::min())
 			|| (-f >= std::numeric_limits<float>::min()))
 		&& ((f <= std::numeric_limits<float>::max())
-			|| (-f <= std::numeric_limits<float>::max()));
+			|| (-f <= std::numeric_limits<float>::max())));
 }

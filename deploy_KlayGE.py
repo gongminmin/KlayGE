@@ -30,8 +30,14 @@ def deploy_KlayGE(target_dir, build_info, compiler_arch):
 		os.mkdir("%sRender/" % bin_dst_dir);
 	if not os.path.exists("%sScene/" % bin_dst_dir):
 		os.mkdir("%sScene/" % bin_dst_dir);
+	if not os.path.exists("%sScript/" % bin_dst_dir):
+		os.mkdir("%sScript/" % bin_dst_dir);
 	if not os.path.exists("%sShow/" % bin_dst_dir):
 		os.mkdir("%sShow/" % bin_dst_dir);
+	if not os.path.exists("%sLib/" % bin_dst_dir):
+		os.mkdir("%sLib/" % bin_dst_dir);
+	if not os.path.exists("%sLib/encodings/" % bin_dst_dir):
+		os.mkdir("%sLib/encodings/" % bin_dst_dir);
 
 	copy_to_dst("KlayGE/bin/KlayGE.cfg", "%s/bin/" % target_dir);
 	
@@ -76,10 +82,16 @@ def deploy_KlayGE(target_dir, build_info, compiler_arch):
 		copy_to_dst(fname, "%sRender/" % bin_dst_dir);
 	for fname in glob.iglob("KlayGE/bin/win_%s/Scene/KlayGE_Scene*%s" % (compiler_arch, lib_suffix)):
 		copy_to_dst(fname, "%sScene/" % bin_dst_dir);
+	for fname in glob.iglob("KlayGE/bin/win_%s/Script/KlayGE_Script*%s" % (compiler_arch, lib_suffix)):
+		copy_to_dst(fname, "%sScript/" % bin_dst_dir);
 	for fname in glob.iglob("KlayGE/bin/win_%s/Show/KlayGE_Show*%s" % (compiler_arch, lib_suffix)):
 		copy_to_dst(fname, "%sShow/" % bin_dst_dir);
 	for fname in glob.iglob("KlayGE/bin/win_%s/MeshMLJIT*" % compiler_arch):
 		copy_to_dst(fname, bin_dst_dir);
+	for fname in glob.iglob("KlayGE/bin/win_%s/Lib/*.py" % compiler_arch):
+		copy_to_dst(fname, "%sLib/" % bin_dst_dir);
+	for fname in glob.iglob("KlayGE/bin/win_%s/Lib/encodings/*.py" % compiler_arch):
+		copy_to_dst(fname, "%sLib/encodings/" % bin_dst_dir);
 
 	print("Deploying media files...\n")
 

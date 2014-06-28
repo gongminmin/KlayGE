@@ -78,7 +78,6 @@ namespace KlayGE
 	class PythonScriptModule : public ScriptModule
 	{
 	public:
-		PythonScriptModule();
 		explicit PythonScriptModule(std::string const & name);
 		~PythonScriptModule();
 

@@ -471,14 +471,11 @@ namespace KlayGE
 		RenderEffectParameterPtr lights_dir_es_param_;
 		RenderEffectParameterPtr lights_falloff_range_param_;
 		RenderEffectParameterPtr lights_attrib_param_;
-		RenderEffectParameterPtr lights_shadowing_channel_param_;
 		RenderEffectParameterPtr lights_aabb_min_param_;
 		RenderEffectParameterPtr lights_aabb_max_param_;
-		RenderEffectParameterPtr num_lights_param_;
 		RenderEffectParameterPtr light_index_tex_param_;
 		RenderEffectParameterPtr tile_scale_param_;
 		RenderEffectParameterPtr camera_proj_01_param_;
-		RenderEffectParameterPtr tc_to_tile_scale_param_;
 		PostProcessPtr depth_to_min_max_pp_;
 		PostProcessPtr reduce_min_max_pp_;
 

@@ -120,46 +120,52 @@ namespace KlayGE
 
 				GLsizei const image_size = ((width + 3) / 4) * ((height + 3) / 4) * depth * block_size;
 
+				void* ptr;
 				if (nullptr == init_data)
 				{
 					tex_data_[level].resize(image_size, 0);
+					ptr = nullptr;
 				}
 				else
 				{
 					tex_data_[level].resize(image_size);
 					std::memcpy(&tex_data_[level][0], init_data[level].data, image_size);
+					ptr = &tex_data_[level][0];
 				}
 				if (glloader_GLES_VERSION_3_0())
 				{
 					glCompressedTexImage3D(target_type_, level, glinternalFormat,
-						width, height, depth, 0, image_size, &tex_data_[level][0]);
+						width, height, depth, 0, image_size, ptr);
 				}
 				else
 				{
 					glCompressedTexImage3DOES(target_type_, level, glinternalFormat,
-						width, height, depth, 0, image_size, &tex_data_[level][0]);
+						width, height, depth, 0, image_size, ptr);
 				}
 			}
 			else
 			{
 				GLsizei const image_size = width * height * depth * texel_size;
 
+				void* ptr;
 				if (nullptr == init_data)
 				{
 					tex_data_[level].resize(image_size, 0);
+					ptr = nullptr;
 				}
 				else
 				{
 					tex_data_[level].resize(image_size);
 					std::memcpy(&tex_data_[level][0], init_data[level].data, image_size);
+					ptr = &tex_data_[level][0];
 				}
 				if (glloader_GLES_VERSION_3_0())
 				{
-					glTexImage3D(target_type_, level, glinternalFormat, width, height, depth, 0, glformat, gltype, &tex_data_[level][0]);
+					glTexImage3D(target_type_, level, glinternalFormat, width, height, depth, 0, glformat, gltype, ptr);
 				}
 				else
 				{
-					glTexImage3DOES(target_type_, level, glinternalFormat, width, height, depth, 0, glformat, gltype, &tex_data_[level][0]);
+					glTexImage3DOES(target_type_, level, glinternalFormat, width, height, depth, 0, glformat, gltype, ptr);
 				}
 			}
 

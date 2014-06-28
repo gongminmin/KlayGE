@@ -599,11 +599,7 @@ namespace
 			param_->Value(v);
 
 			OGLESRenderEngine& re = *checked_cast<OGLESRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-#if USE_DXBC2GLSL
-			re.UniformMatrix4fv(location_, 1, false, &v[0]);
-#else
 			re.Uniform4fv(location_, 4, &v[0]);
-#endif
 		}
 
 	private:
@@ -967,11 +963,7 @@ namespace
 			if (!v.empty())
 			{
 				OGLESRenderEngine& re = *checked_cast<OGLESRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-#if USE_DXBC2GLSL
-				re.UniformMatrix4fv(location_, static_cast<GLsizei>(v.size()), false, &v[0][0]);
-#else
 				re.Uniform4fv(location_, static_cast<GLsizei>(v.size()) * 4, &v[0][0]);
-#endif
 			}
 		}
 
@@ -1095,7 +1087,7 @@ namespace KlayGE
 								++ beg;
 							}
 
-							std::string combined_sampler_name = sample_tokens[0] + "__" + sample_tokens[4];
+							std::string combined_sampler_name = sample_tokens[0] + "_" + sample_tokens[4];
 							bool found = false;
 							for (uint32_t j = 0; j < tex_sampler_binds_.size(); ++ j)
 							{
@@ -1362,17 +1354,15 @@ namespace KlayGE
 		}
 		ss << std::endl;
 
-		KLAYGE_AUTO(cbuffers, effect.CBuffers());
-		typedef KLAYGE_DECLTYPE(cbuffers) CBuffersType;
-		KLAYGE_FOREACH(CBuffersType::const_reference cbuff, cbuffers)
+		for (uint32_t i = 0; i < effect.NumCBuffers(); ++ i)
 		{
-			ss << "cbuffer " << cbuff.first << std::endl;
+			RenderEffectConstantBufferPtr const & cbuff = effect.CBufferByIndex(i);
+			ss << "cbuffer " << *cbuff->Name() << std::endl;
 			ss << "{" << std::endl;
 
-			typedef KLAYGE_DECLTYPE(cbuff.second) CBuffersSecondType;
-			KLAYGE_FOREACH(CBuffersSecondType::const_reference param_index, cbuff.second)
+			for (uint32_t j = 0; j < cbuff->NumParameters(); ++ j)
 			{
-				RenderEffectParameter& param = *effect.ParameterByIndex(param_index);
+				RenderEffectParameter& param = *effect.ParameterByIndex(cbuff->ParameterIndex(j));
 				switch (param.Type())
 				{
 				case REDT_texture1D:
@@ -1756,6 +1746,9 @@ namespace KlayGE
 	{
 		bool ret = false;
 
+		(*shader_func_names_)[type] = effect.GetShaderDesc(shader_desc_ids[type]).func_name;
+
+		is_shader_validate_[type] = false;
 		if (native_shader_block.size() >= 24)
 		{
 			uint8_t const * nsbp = &native_shader_block[0];
@@ -1771,11 +1764,12 @@ namespace KlayGE
 				ver = LE2Native(ver);
 				if (3 == ver)
 				{
+					is_shader_validate_[type] = true;
+
 					uint32_t len32;
 					std::memcpy(&len32, nsbp, sizeof(len32));
 					nsbp += sizeof(len32);
 					len32 = LE2Native(len32);
-					(*shader_func_names_)[type] = effect.GetShaderDesc(shader_desc_ids[type]).func_name;
 					(*glsl_srcs_)[type] = MakeSharedPtr<std::string>(len32, '\0');
 					std::memcpy(&(*(*glsl_srcs_)[type])[0], nsbp, len32);
 					nsbp += len32;
@@ -1893,12 +1887,11 @@ namespace KlayGE
 
 					this->AttachGLSL(type);
 
-					ret = true;
+					ret = is_shader_validate_[type];
 				}
 			}
 		}
 
-		is_shader_validate_[type] = ret;
 		return ret;
 	}
 
@@ -2088,6 +2081,12 @@ namespace KlayGE
 				ss << (caps.standard_derivatives_support ? 1 : 0);
 				standard_derivatives_str = ss.str();
 			}
+			std::string frag_depth_str;
+			{
+				std::stringstream ss;
+				ss << (glloader_GLES_EXT_frag_depth() ? 1 : 0);
+				frag_depth_str = ss.str();
+			}
 
 			std::string hlsl_shader_text = this->GenHLSLShaderText(type, effect, tech, pass);
 
@@ -2245,6 +2244,10 @@ namespace KlayGE
 					macros.push_back(macro_pack_to_rgba);
 				}
 				{
+					D3D_SHADER_MACRO macro_frag_depth = { "KLAYGE_FRAG_DEPTH", frag_depth_str.c_str() };
+					macros.push_back(macro_frag_depth);
+				}
+				{
 					D3D_SHADER_MACRO macro_shader_type = { "", "1" };
 					switch (type)
 					{
@@ -2381,8 +2384,14 @@ namespace KlayGE
 						DXBC2GLSL::DXBC2GLSL dxbc2glsl;
 						uint32_t rules = DXBC2GLSL::DXBC2GLSL::DefaultRules(gsv);
 						rules &= ~GSR_UseUBO;
+						rules &= ~GSR_MatrixType;
+						rules |= caps.max_simultaneous_rts > 1 ? GSR_DrawBuffers : 0;
+						rules |= glloader_GLES_EXT_frag_depth() ? GSR_EXTFragDepth : 0;
 						if (!glloader_GLES_VERSION_3_0())
 						{
+							rules |= glloader_GLES_EXT_shader_texture_lod() ? GSR_EXTShaderTextureLod : 0;
+							rules |= glloader_GLES_OES_standard_derivatives() ? GSR_OESStandardDerivatives : 0;
+							rules |= glloader_GLES_EXT_draw_buffers() ? GSR_EXTDrawBuffers : 0;
 							rules &= ~GSR_VersionDecl;
 						}
 						dxbc2glsl.FeedDXBC(code->GetBufferPointer(), false, gsv, rules);
@@ -2573,7 +2582,7 @@ namespace KlayGE
 			std::string no_tex_lod_str;
 			{
 				std::stringstream ss;
-				ss << "-DKLAYGE_NO_TEX_LOD=" << ((ST_VertexShader == type) ? 0 : (glloader_GLES_EXT_shader_texture_lod() ? 0 : 1));
+				ss << "-DKLAYGE_NO_TEX_LOD=" << ((ST_VertexShader == type) ? 0 : 1);//(glloader_GLES_EXT_shader_texture_lod() ? 0 : 1));
 				no_tex_lod_str = ss.str();
 			}		
 			std::string flipping_str;
@@ -2623,6 +2632,7 @@ namespace KlayGE
 			{
 				args.push_back("-DKLAYGE_PACK_TO_RGBA");
 			}
+			args.push_back("-DKLAYGE_FRAG_DEPTH=0");
 			switch (type)
 			{
 			case ST_VertexShader:
@@ -2911,7 +2921,32 @@ namespace KlayGE
 
 		if (is_validate_)
 		{
+			if (glloader_GLES_VERSION_3_0())
+			{
+				glProgramParameteri(glsl_program_, GL_PROGRAM_BINARY_RETRIEVABLE_HINT, GL_TRUE);
+			}
+
 			this->LinkGLSL();
+
+			if (is_validate_ && (glloader_GLES_VERSION_3_0() || glloader_GLES_OES_get_program_binary()))
+			{
+				GLint num = 0;
+				glGetIntegerv(GL_NUM_PROGRAM_BINARY_FORMATS, &num);
+				if (num > 0)
+				{
+					GLint len = 0;
+					glGetProgramiv(glsl_program_, GL_PROGRAM_BINARY_LENGTH, &len);
+					glsl_bin_program_ = MakeSharedPtr<std::vector<uint8_t> >(len);
+					if (glloader_GLES_VERSION_3_0())
+					{
+						glGetProgramBinary(glsl_program_, len, nullptr, &glsl_bin_format_, &(*glsl_bin_program_)[0]);
+					}
+					else
+					{
+						glGetProgramBinaryOES(glsl_program_, len, nullptr, &glsl_bin_format_, &(*glsl_bin_program_)[0]);
+					}
+				}
+			}
 
 			for (int type = 0; type < ST_NumShaderTypes; ++ type)
 			{
@@ -2976,6 +3011,8 @@ namespace KlayGE
 
 		ret->has_discard_ = has_discard_;
 		ret->has_tessellation_ = has_tessellation_;
+		ret->glsl_bin_format_ = glsl_bin_format_;
+		ret->glsl_bin_program_ = glsl_bin_program_;
 		ret->shader_func_names_ = shader_func_names_;
 		ret->glsl_srcs_ = glsl_srcs_;
 		ret->pnames_ = pnames_;
@@ -2993,26 +3030,73 @@ namespace KlayGE
 			get<3>(ret->tex_sampler_binds_[i]) = get<3>(tex_sampler_binds_[i]);
 		}
 
-		ret->is_validate_ = true;
-		for (size_t type = 0; type < ST_NumShaderTypes; ++ type)
+		if ((glloader_GLES_VERSION_3_0() || glloader_GLES_OES_get_program_binary()) && glsl_bin_program_)
 		{
-			ret->is_shader_validate_[type] = is_shader_validate_[type];
-
-			if (is_shader_validate_[type])
+			ret->is_validate_ = is_validate_;
+			for (size_t type = 0; type < ST_NumShaderTypes; ++ type)
 			{
-				if ((*glsl_srcs_)[type] && !(*glsl_srcs_)[type]->empty())
-				{
-					ret->AttachGLSL(static_cast<uint32_t>(type));
-				}
+				ret->is_shader_validate_[type] = is_shader_validate_[type];
 			}
 
-			ret->is_validate_ &= ret->is_shader_validate_[type];
+			if (ret->is_validate_)
+			{
+				if (glloader_GLES_VERSION_3_0())
+				{
+					glProgramParameteri(ret->glsl_program_, GL_PROGRAM_BINARY_RETRIEVABLE_HINT, GL_TRUE);
+
+					glProgramBinary(ret->glsl_program_, glsl_bin_format_,
+						&(*glsl_bin_program_)[0], static_cast<GLsizei>(glsl_bin_program_->size()));
+				}
+				else
+				{
+					glProgramBinaryOES(ret->glsl_program_, glsl_bin_format_,
+						&(*glsl_bin_program_)[0], static_cast<GLsizei>(glsl_bin_program_->size()));
+				}
+
+				GLint linked = false;
+				glGetProgramiv(ret->glsl_program_, GL_LINK_STATUS, &linked);
+#ifdef KLAYGE_DEBUG
+				if (!linked)
+				{
+					GLint len = 0;
+					glGetProgramiv(ret->glsl_program_, GL_INFO_LOG_LENGTH, &len);
+					if (len > 0)
+					{
+						std::vector<char> info(len + 1, 0);
+						glGetProgramInfoLog(ret->glsl_program_, len, &len, &info[0]);
+						LogError(&info[0]);
+					}
+				}
+#endif
+				ret->is_validate_ &= linked ? true : false;
+			}
+		}
+		else
+		{
+			ret->is_validate_ = true;
+			for (size_t type = 0; type < ST_NumShaderTypes; ++ type)
+			{
+				ret->is_shader_validate_[type] = is_shader_validate_[type];
+
+				if (is_shader_validate_[type])
+				{
+					if ((*glsl_srcs_)[type] && !(*glsl_srcs_)[type]->empty())
+					{
+						ret->AttachGLSL(static_cast<uint32_t>(type));
+					}
+				}
+
+				ret->is_validate_ &= ret->is_shader_validate_[type];
+			}
+
+			if (ret->is_validate_)
+			{
+				ret->LinkGLSL();
+			}
 		}
 
 		if (ret->is_validate_)
 		{
-			ret->LinkGLSL();
-
 			ret->attrib_locs_ = attrib_locs_;
 
 			typedef KLAYGE_DECLTYPE(param_binds_) ParamBindsType;
