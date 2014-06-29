@@ -895,7 +895,7 @@ namespace KlayGE
 
 		uint32_t NumParameters() const
 		{
-			return param_indices_ ? param_indices_->size() : 0;
+			return param_indices_ ? static_cast<uint32_t>(param_indices_->size()) : 0;
 		}
 		uint32_t ParameterIndex(uint32_t index) const
 		{

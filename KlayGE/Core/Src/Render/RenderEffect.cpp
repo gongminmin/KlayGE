@@ -4597,7 +4597,7 @@ namespace KlayGE
 		ret->name_hash_ = name_hash_;
 		ret->param_indices_ = param_indices_;
 		ret->buff_ = buff_;
-		ret->Resize(buff_.size());
+		ret->Resize(static_cast<uint32_t>(buff_.size()));
 
 		for (size_t i = 0; i < param_indices_->size(); ++ i)
 		{
