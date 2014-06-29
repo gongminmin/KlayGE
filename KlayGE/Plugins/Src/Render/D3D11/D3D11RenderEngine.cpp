@@ -102,17 +102,17 @@ namespace KlayGE
 	{
 #ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
 		// Dynamic loading because these dlls can't be loaded on WinXP
-		mod_dxgi_ = ::LoadLibraryW(L"dxgi.dll");
+		mod_dxgi_ = ::LoadLibraryEx(TEXT("dxgi.dll"), nullptr, 0);
 		if (nullptr == mod_dxgi_)
 		{
 			::MessageBoxW(nullptr, L"Can't load dxgi.dll", L"Error", MB_OK);
 		}
-		mod_d3d11_ = ::LoadLibraryW(L"D3D11.dll");
+		mod_d3d11_ = ::LoadLibraryEx(TEXT("D3D11.dll"), nullptr, 0);
 		if (nullptr == mod_d3d11_)
 		{
 			::MessageBoxW(nullptr, L"Can't load d3d11.dll", L"Error", MB_OK);
 		}
-		mod_d3dcompiler_ = ::LoadLibraryW(L"d3dcompiler_47.dll");
+		mod_d3dcompiler_ = ::LoadLibraryEx(TEXT("d3dcompiler_47.dll"), nullptr, 0);
 		if (nullptr == mod_d3dcompiler_)
 		{
 			::MessageBoxW(nullptr, L"Can't load d3dcompiler_47.dll", L"Error", MB_OK);
@@ -176,9 +176,9 @@ namespace KlayGE
 		d3d_device_.reset();
 		gi_factory_.reset();
 
-		// Some other resources may still alive, so don't free them
-		//::FreeLibrary(mod_d3d11_);
-		//::FreeLibrary(mod_dxgi_);
+		::FreeLibrary(mod_d3dcompiler_);
+		::FreeLibrary(mod_d3d11_);
+		::FreeLibrary(mod_dxgi_);
 	}
 
 	// 返回渲染系统的名字

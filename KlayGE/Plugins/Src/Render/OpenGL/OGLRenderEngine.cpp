@@ -85,7 +85,7 @@ namespace KlayGE
 		clear_clr_.fill(0);
 
 #if defined KLAYGE_PLATFORM_WINDOWS
-		mod_opengl32_ = ::LoadLibrary(TEXT("opengl32.dll"));
+		mod_opengl32_ = ::LoadLibraryEx(TEXT("opengl32.dll"), nullptr, 0);
 		DynamicWglCreateContext_ = (wglCreateContextFUNC)::GetProcAddress(mod_opengl32_, "wglCreateContext");
 		DynamicWglDeleteContext_ = (wglDeleteContextFUNC)::GetProcAddress(mod_opengl32_, "wglDeleteContext");
 		DynamicWglMakeCurrent_ = (wglMakeCurrentFUNC)::GetProcAddress(mod_opengl32_, "wglMakeCurrent");
@@ -105,8 +105,7 @@ namespace KlayGE
 			glDeleteFramebuffersEXT(1, &fbo_blit_dst_);
 		}
 
-		// Some other resources may still alive, so don't free them
-		//::FreeLibrary(mod_opengl32_);
+		::FreeLibrary(mod_opengl32_);
 	}
 
 	// 返回渲染系统的名字

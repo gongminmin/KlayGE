@@ -79,25 +79,25 @@ INT_PTR CALLBACK Graphics_Tab_DlgProc(HWND hDlg, UINT uMsg, WPARAM /*wParam*/, L
 	case WM_INITDIALOG:
 		{
 			HWND hFactoryCombo = GetDlgItem(hDlg, IDC_FACTORY_COMBO);
-			HMODULE mod_d3d11 = LoadLibrary(TEXT("D3D11.dll"));
+			HMODULE mod_d3d11 = LoadLibraryEx(TEXT("D3D11.dll"), nullptr, 0);
 			if (mod_d3d11)
 			{
 				SendMessage(hFactoryCombo, CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(TEXT("D3D11")));
 				FreeLibrary(mod_d3d11);
 			}
-			HMODULE mod_gl = LoadLibrary(TEXT("OpenGL32.dll"));
+			HMODULE mod_gl = LoadLibraryEx(TEXT("OpenGL32.dll"), nullptr, 0);
 			if (mod_gl)
 			{
 				SendMessage(hFactoryCombo, CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(TEXT("OpenGL")));
 				FreeLibrary(mod_gl);
 			}
-			HMODULE mod_gles2 = LoadLibrary(TEXT("libGLESv2.dll"));
+			HMODULE mod_gles2 = LoadLibraryEx(TEXT("libGLESv2.dll"), nullptr, 0);
 			if (!mod_gles2)
 			{
-				mod_gles2 = LoadLibrary(TEXT("libGLES20.dll"));
+				mod_gles2 = LoadLibraryEx(TEXT("libGLES20.dll"), nullptr, 0);
 				if (!mod_gles2)
 				{
-					mod_gles2 = LoadLibrary(TEXT("atioglxx.dll"));
+					mod_gles2 = LoadLibraryEx(TEXT("atioglxx.dll"), nullptr, 0);
 				}
 			}
 			if (mod_gles2)
@@ -338,13 +338,13 @@ INT_PTR CALLBACK Audio_Tab_DlgProc(HWND hDlg, UINT uMsg, WPARAM /*wParam*/, LPAR
 	case WM_INITDIALOG:
 		{
 			HWND hFactoryCombo = GetDlgItem(hDlg, IDC_FACTORY_COMBO);
-			HMODULE mod_al = LoadLibrary(TEXT("OpenAL32.dll"));
+			HMODULE mod_al = LoadLibraryEx(TEXT("OpenAL32.dll"), nullptr, 0);
 			if (mod_al)
 			{
 				SendMessage(hFactoryCombo, CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(TEXT("OpenAL")));
 				FreeLibrary(mod_al);
 			}
-			HMODULE mod_ds = LoadLibrary(TEXT("dsound.dll"));
+			HMODULE mod_ds = LoadLibraryEx(TEXT("dsound.dll"), nullptr, 0);
 			if (mod_ds)
 			{
 				SendMessage(hFactoryCombo, CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(TEXT("DSound")));

@@ -42,7 +42,7 @@ namespace KlayGE
 	MsgInputEngine::MsgInputEngine()
 	{
 #if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
-		mod_hid_ = ::LoadLibraryW(L"hid.dll");
+		mod_hid_ = ::LoadLibraryEx(TEXT("hid.dll"), nullptr, 0);
 		if (nullptr == mod_hid_)
 		{
 			::MessageBoxW(nullptr, L"Can't load hid.dll", L"Error", MB_OK);

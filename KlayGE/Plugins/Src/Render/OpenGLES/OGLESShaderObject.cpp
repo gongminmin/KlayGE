@@ -119,7 +119,7 @@ namespace
 	private:
 		DXBC2GLSLIniter()
 		{
-			mod_d3dcompiler_ = ::LoadLibraryW(L"d3dcompiler_47.dll");
+			mod_d3dcompiler_ = ::LoadLibraryEx(TEXT("d3dcompiler_47.dll"), nullptr, 0);
 			DynamicD3DCompile_ = reinterpret_cast<D3DCompileFunc>(::GetProcAddress(mod_d3dcompiler_, "D3DCompile"));
 
 			if (glloader_GLES_VERSION_3_1())

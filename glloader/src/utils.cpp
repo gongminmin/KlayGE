@@ -128,13 +128,13 @@ namespace glloader
 			void* ogl_dll;
 #if defined(_WIN32) || defined(__CYGWIN__) || defined(__MINGW32__)
 #ifdef GLLOADER_GLES
-			ogl_dll = ::LoadLibraryA("libEGL.dll");
+			ogl_dll = ::LoadLibraryExA("libEGL.dll", NULL, 0);
 			if (ogl_dll != NULL)
 			{
 				gl_dlls_.push_back(ogl_dll);
 				this->DumpEntries("libEGL.dll");
 
-				ogl_dll = ::LoadLibraryA("libGLESv3.dll");
+				ogl_dll = ::LoadLibraryExA("libGLESv3.dll", NULL, 0);
 				if (ogl_dll != NULL)
 				{
 					gl_dlls_.push_back(ogl_dll);
@@ -142,7 +142,7 @@ namespace glloader
 				}
 				else
 				{
-					ogl_dll = ::LoadLibraryA("libGLESv2.dll");
+					ogl_dll = ::LoadLibraryExA("libGLESv2.dll", NULL, 0);
 					if (ogl_dll != NULL)
 					{
 						gl_dlls_.push_back(ogl_dll);
@@ -152,7 +152,7 @@ namespace glloader
 			}
 			else
 			{
-				ogl_dll = ::LoadLibraryA("libGLES20.dll");
+				ogl_dll = ::LoadLibraryExA("libGLES20.dll", NULL, 0);
 				if (ogl_dll != NULL)
 				{
 					gl_dlls_.push_back(ogl_dll);
@@ -160,7 +160,7 @@ namespace glloader
 				}
 				else
 				{
-					ogl_dll = ::LoadLibraryA("atioglxx.dll");
+					ogl_dll = ::LoadLibraryExA("atioglxx.dll", NULL, 0);
 					if (ogl_dll != NULL)
 					{
 						gl_dlls_.push_back(ogl_dll);
@@ -169,7 +169,7 @@ namespace glloader
 				}
 			}
 #else
-			ogl_dll = ::LoadLibraryA("opengl32.dll");
+			ogl_dll = ::LoadLibraryExA("opengl32.dll", NULL, 0);
 			if (ogl_dll != NULL)
 			{
 				gl_dlls_.push_back(ogl_dll);

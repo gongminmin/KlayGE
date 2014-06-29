@@ -58,7 +58,7 @@ namespace KlayGE
 			wfx.nChannels		= 2;
 			break;
 
-        case AF_Unknown:
+		case AF_Unknown:
 			BOOST_ASSERT(false);
 			break;
 		}
@@ -91,10 +91,10 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	DSAudioEngine::DSAudioEngine()
 	{
-		mod_dsound_ = ::LoadLibraryW(L"dsound.dll");
+		mod_dsound_ = ::LoadLibraryEx(TEXT("dsound.dll"), nullptr, 0);
 		if (nullptr == mod_dsound_)
 		{
-			::MessageBoxW(nullptr, L"Can't load dinput8.dll", L"Error", MB_OK);
+			::MessageBoxW(nullptr, L"Can't load dsound.dll", L"Error", MB_OK);
 		}
 
 		if (mod_dsound_ != nullptr)
@@ -148,8 +148,7 @@ namespace KlayGE
 		ds3dListener_.reset();
 		dsound_.reset();
 
-		// Some other resources may still alive, so don't free them
-		//::FreeLibrary(mod_dsound_);
+		::FreeLibrary(mod_dsound_);
 	}
 
 	// ÒôÆµÒýÇæÃû×Ö

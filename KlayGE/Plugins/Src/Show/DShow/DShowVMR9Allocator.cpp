@@ -33,7 +33,7 @@ namespace KlayGE
 					: wnd_(wnd), ref_count_(1),
 						cur_surf_index_(0xFFFFFFFF)
 	{
-		mod_d3d9_ = ::LoadLibraryW(L"d3d9.dll");
+		mod_d3d9_ = ::LoadLibraryEx(TEXT("d3d9.dll"), nullptr, 0);
 		if (nullptr == mod_d3d9_)
 		{
 			::MessageBoxW(nullptr, L"Can't load d3d9.dll", L"Error", MB_OK);
@@ -53,8 +53,7 @@ namespace KlayGE
 	{
 		this->DeleteSurfaces();
 
-		// Some other resources may still alive, so don't free them
-		//::FreeLibrary(mod_d3d9_);
+		::FreeLibrary(mod_d3d9_);
 	}
 
 	void DShowVMR9Allocator::CreateDevice()

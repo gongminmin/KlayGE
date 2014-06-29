@@ -55,7 +55,7 @@ namespace KlayGE
 	{
 #ifdef KLAYGE_PLATFORM_WINDOWS
 #ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
-		dll_handle_ = static_cast<void*>(::LoadLibraryA(dll_name.c_str()));
+		dll_handle_ = static_cast<void*>(::LoadLibraryExA(dll_name.c_str(), nullptr, 0));
 #else
 		std::wstring wname;
 		Convert(wname, dll_name);
