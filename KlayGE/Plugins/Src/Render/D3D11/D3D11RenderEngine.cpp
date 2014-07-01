@@ -176,9 +176,11 @@ namespace KlayGE
 		d3d_device_.reset();
 		gi_factory_.reset();
 
+#ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
 		::FreeLibrary(mod_d3dcompiler_);
 		::FreeLibrary(mod_d3d11_);
 		::FreeLibrary(mod_dxgi_);
+#endif
 	}
 
 	// 返回渲染系统的名字
