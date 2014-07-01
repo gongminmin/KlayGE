@@ -1,5 +1,3 @@
-from __future__ import print_function
-
 def is_supported(feature_name):
 	return feature_name in is_supported.exts
 

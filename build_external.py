@@ -180,8 +180,19 @@ def build_external_libs(build_info):
 			if not build_info.prefer_static:
 				if not os.path.exists("%sLib" % dst_dir):
 					os.mkdir("%sLib" % dst_dir)
-				for fname in glob.iglob("External/Python/Lib/*.py"):
-					copy_to_dst(fname, "%sLib/" % dst_dir)
+				copy_to_dst("External/Python/Lib/_abcoll.py", "%sLib/" % dst_dir)
+				copy_to_dst("External/Python/Lib/_weakrefset.py", "%sLib/" % dst_dir)
+				copy_to_dst("External/Python/Lib/abc.py", "%sLib/" % dst_dir)
+				copy_to_dst("External/Python/Lib/codecs.py", "%sLib/" % dst_dir)
+				copy_to_dst("External/Python/Lib/copyreg.py", "%sLib/" % dst_dir)
+				copy_to_dst("External/Python/Lib/genericpath.py", "%sLib/" % dst_dir)
+				copy_to_dst("External/Python/Lib/io.py", "%sLib/" % dst_dir)
+				copy_to_dst("External/Python/Lib/macpath.py", "%sLib/" % dst_dir)
+				copy_to_dst("External/Python/Lib/ntpath.py", "%sLib/" % dst_dir)
+				copy_to_dst("External/Python/Lib/os.py", "%sLib/" % dst_dir)
+				copy_to_dst("External/Python/Lib/os2emxpath.py", "%sLib/" % dst_dir)
+				copy_to_dst("External/Python/Lib/posixpath.py", "%sLib/" % dst_dir)
+				copy_to_dst("External/Python/Lib/stat.py", "%sLib/" % dst_dir)
 				if not os.path.exists("%sLib/encodings" % dst_dir):
 					os.mkdir("%sLib/encodings" % dst_dir)
 				for fname in glob.iglob("External/Python/Lib/encodings/*.py"):

@@ -1,5 +1,3 @@
-from __future__ import print_function
-
 def is_supported(feature_name):
 	return feature_name in is_supported.exts
 
@@ -130,7 +128,7 @@ features_db = {
 			'Primitive restart' : lambda : is_supported('GL_NV_primitive_restart'),
 			'Texture buffer objects' : lambda : is_supported('GL_ARB_texture_buffer_object'),
 			'Rectangular textures' : lambda : support_one(['GL_ARB_texture_rectangle', 'GL_EXT_texture_rectangle', 'GL_NV_texture_rectangle']),
-			'Uniform buffer objects' : lambda : support_one(['GL_ARB_uniform_buffer_object', 'GL_EXT_bindable_uniform'])
+			'Uniform buffer objects' : lambda : support_one(['GL_ARB_uniform_buffer_object', 'GL_EXT_bindable_uniform']),
 			'Signed normalized texture component formats' : lambda : support_one(['GL_EXT_texture_snorm', 'GL_NV_texture_shader']),
 		},
 		
@@ -395,12 +393,3 @@ def gl_compatibility(vendor, renderer, major_ver, minor_ver, glsl_major_ver, gls
 
 	import os
 	os.system(report_file_name);
-
-
-if __name__ == '__main__':
-	import sys
-
-	if len(sys.argv) >= 2:
-		gl_compatibility(sys.argv[1])
-	else:
-		print('Usage: GLCompatibility.py info.xml')

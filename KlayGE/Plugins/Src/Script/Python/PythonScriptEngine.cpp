@@ -299,6 +299,7 @@ namespace KlayGE
 
 	PythonEngine::PythonEngine()
 	{
+		Py_NoSiteFlag = 1;
 		Py_InitializeEx(0);
 	}
 
