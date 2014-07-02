@@ -321,8 +321,6 @@ def build_a_project(name, build_path, build_info, compiler_arch, need_install = 
 	if ("vc" == build_info.compiler_name) and (build_info.compiler_version >= 100):
 		toolset_name = "-T %s" % compiler_arch[2]
 
-	if compiler_arch[3]:
-		additional_options += " -DKLAYGE_BUILD_PLATFORM_WINRT:BOOL=\"TRUE\""
 	if build_info.compiler_name != "vc":
 		additional_options += " -DKLAYGE_ARCH_NAME:STRING=\"%s\"" % compiler_arch[0]
 	if "android" == build_info.target_platform:

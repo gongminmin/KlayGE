@@ -178,8 +178,8 @@ namespace KlayGE
 
 #ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
 		::FreeLibrary(mod_d3dcompiler_);
-		::FreeLibrary(mod_d3d11_);
-		::FreeLibrary(mod_dxgi_);
+		//::FreeLibrary(mod_d3d11_);
+		//::FreeLibrary(mod_dxgi_);
 #endif
 	}
 
