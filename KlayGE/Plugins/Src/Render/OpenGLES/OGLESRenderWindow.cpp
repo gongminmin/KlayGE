@@ -205,6 +205,22 @@ namespace KlayGE
 				}
 			}
 		}
+		if ((start_version_index < 0) && (24 == d_size))
+		{
+			visual_attr[11] = 16;
+			for (size_t i = 0; i < available_versions.size(); ++ i)
+			{
+				visual_attr[1] = get<1>(available_versions[i]);
+				if (eglChooseConfig(display_, &visual_attr[0], &cfg_, 1, &num_cfgs))
+				{
+					if (num_cfgs > 0)
+					{
+						start_version_index = static_cast<int>(i);
+						break;
+					}
+				}
+			}
+		}
 		BOOST_ASSERT(start_version_index != -1);
 
 		NativeWindowType wnd;
@@ -243,6 +259,7 @@ namespace KlayGE
 
 			++ test_version_index;
 		}
+		BOOST_ASSERT(context_ != nullptr);
 
 		eglMakeCurrent(display_, surf_, surf_, context_);
 

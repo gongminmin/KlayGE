@@ -197,7 +197,7 @@ namespace KlayGE
 		int array_index_;
 		int level_;
 		uint32_t sample_count_, sample_quality_;
-		GLuint rbo_;
+		GLuint rbos_[2];
 	};
 
 	typedef shared_ptr<OGLESDepthStencilRenderView> OGLES2DepthStencilRenderViewPtr;

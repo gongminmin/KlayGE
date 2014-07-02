@@ -994,7 +994,7 @@ namespace KlayGE
 				glformat = GL_DEPTH_STENCIL;
 				gltype = GL_UNSIGNED_INT_24_8;
 			}
-			else if (glloader_GLES_OES_packed_depth_stencil() || ogl_re.HackForTegra())
+			else if (glloader_GLES_OES_packed_depth_stencil())
 			{
 				internalFormat = GL_DEPTH_STENCIL_OES;
 				glformat = GL_DEPTH_STENCIL_OES;

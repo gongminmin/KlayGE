@@ -825,29 +825,30 @@ namespace KlayGE
 		{
 			int32_t action = AMotionEvent_getAction(event);
 			int32_t action_code = action & AMOTION_EVENT_ACTION_MASK;
-			int32_t pointer_id = (action & AMOTION_EVENT_ACTION_POINTER_INDEX_MASK)
+			int32_t pointer_index = (action & AMOTION_EVENT_ACTION_POINTER_INDEX_MASK)
 				>> AMOTION_EVENT_ACTION_POINTER_INDEX_SHIFT;
 			switch (action_code)
 			{
 			case AMOTION_EVENT_ACTION_DOWN:
 			case AMOTION_EVENT_ACTION_POINTER_DOWN:
 				win->OnPointerDown()(*win,
-					int2(AMotionEvent_getX(event, pointer_id), AMotionEvent_getY(event, pointer_id)),
-					pointer_id + 1);
+					int2(AMotionEvent_getX(event, pointer_index), AMotionEvent_getY(event, pointer_index)),
+					AMotionEvent_getPointerId(event, pointer_index) + 1);
 				break;
 
 			case AMOTION_EVENT_ACTION_UP:
 			case AMOTION_EVENT_ACTION_POINTER_UP:
 				win->OnPointerUp()(*win,
-					int2(AMotionEvent_getX(event, pointer_id), AMotionEvent_getY(event, pointer_id)),
-					pointer_id + 1);
+					int2(AMotionEvent_getX(event, pointer_index), AMotionEvent_getY(event, pointer_index)),
+					AMotionEvent_getPointerId(event, pointer_index) + 1);
 				break;
 
 			case AMOTION_EVENT_ACTION_MOVE:
 				for (size_t i = 0; i < AMotionEvent_getPointerCount(event); ++i)
 				{
 					win->OnPointerUpdate()(*win,
-						int2(AMotionEvent_getX(event, i), AMotionEvent_getY(event, i)), i + 1, true);
+						int2(AMotionEvent_getX(event, i), AMotionEvent_getY(event, i)),
+						AMotionEvent_getPointerId(event, i) + 1, true);
 				}
 				break;
 

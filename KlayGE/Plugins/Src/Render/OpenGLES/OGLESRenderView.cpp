@@ -753,29 +753,50 @@ namespace KlayGE
 		height_ = height;
 		pf_ = pf;
 
-		GLint internalFormat;
-		GLenum glformat;
-		GLenum gltype;
-		OGLESMapping::MappingFormat(internalFormat, glformat, gltype, pf_);
-
-		switch (internalFormat)
+		if (glloader_GLES_VERSION_3_0() || glloader_GLES_OES_packed_depth_stencil())
 		{
-		case GL_DEPTH_COMPONENT:
-			internalFormat = GL_DEPTH_COMPONENT16;
-			break;
+			GLint internalFormat;
+			GLenum glformat;
+			GLenum gltype;
+			OGLESMapping::MappingFormat(internalFormat, glformat, gltype, pf_);
 
-		case GL_DEPTH_STENCIL_OES:
-			internalFormat = GL_DEPTH24_STENCIL8_OES;
-			break;
+			switch (internalFormat)
+			{
+			case GL_DEPTH_COMPONENT:
+				internalFormat = GL_DEPTH_COMPONENT16;
+				break;
 
-		default:
-			break;
+			case GL_DEPTH_STENCIL_OES:
+				internalFormat = GL_DEPTH24_STENCIL8_OES;
+				break;
+
+			default:
+				break;
+			}
+
+			glGenRenderbuffers(1, rbos_);
+			glBindRenderbuffer(GL_RENDERBUFFER, rbos_[0]);
+			glRenderbufferStorage(GL_RENDERBUFFER,
+									internalFormat, width_, height_);
+			rbos_[1] = rbos_[0];
 		}
-
-		glGenRenderbuffers(1, &rbo_);
-		glBindRenderbuffer(GL_RENDERBUFFER, rbo_);
-		glRenderbufferStorage(GL_RENDERBUFFER,
-								internalFormat, width_, height_);
+		else
+		{
+			glGenRenderbuffers(2, rbos_);
+			glBindRenderbuffer(GL_RENDERBUFFER, rbos_[0]);
+			glRenderbufferStorage(GL_RENDERBUFFER,
+									GL_DEPTH_COMPONENT16, width_, height_);
+			if (IsStencilFormat(pf_))
+			{
+				glBindRenderbuffer(GL_RENDERBUFFER, rbos_[1]);
+				glRenderbufferStorage(GL_RENDERBUFFER,
+										GL_STENCIL_INDEX8, width_, height_);
+			}
+			else
+			{
+				rbos_[1] = rbos_[0];
+			}
+		}
 	}
 
 	OGLESDepthStencilRenderView::OGLESDepthStencilRenderView(Texture& texture, int array_index, int level)
@@ -798,7 +819,14 @@ namespace KlayGE
 
 	OGLESDepthStencilRenderView::~OGLESDepthStencilRenderView()
 	{
-		glDeleteRenderbuffers(1, &rbo_);
+		if (rbos_[0] == rbos_[1])
+		{
+			glDeleteRenderbuffers(1, rbos_);
+		}
+		else
+		{
+			glDeleteRenderbuffers(2, rbos_);
+		}
 	}
 
 	void OGLESDepthStencilRenderView::ClearColor(Color const & /*clr*/)
@@ -827,12 +855,12 @@ namespace KlayGE
 
 			glFramebufferRenderbuffer(GL_FRAMEBUFFER,
 									GL_DEPTH_ATTACHMENT,
-									GL_RENDERBUFFER, rbo_);
+									GL_RENDERBUFFER, rbos_[0]);
 			if (IsStencilFormat(pf_))
 			{
 				glFramebufferRenderbuffer(GL_FRAMEBUFFER,
 									GL_STENCIL_ATTACHMENT,
-									GL_RENDERBUFFER, rbo_);
+									GL_RENDERBUFFER, rbos_[1]);
 			}
 
 			re.BindFramebuffer(0);
