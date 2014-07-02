@@ -279,11 +279,7 @@ namespace KlayGE
 		bool hide_;
 
 #if defined KLAYGE_PLATFORM_WINDOWS
-#ifdef KLAYGE_COMPILER_GCC
-		std::string name_;
-#else
 		std::wstring wname_;
-#endif
 
 #if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
 		HWND wnd_;

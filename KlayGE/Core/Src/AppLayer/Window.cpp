@@ -67,13 +67,8 @@ namespace KlayGE
 		HINSTANCE hInst = ::GetModuleHandle(nullptr);
 
 		// Register the window class
-#ifdef KLAYGE_COMPILER_GCC
-		name_ = name;
-		WNDCLASSEXA wc;
-#else
 		Convert(wname_, name);
 		WNDCLASSEXW wc;
-#endif
 		wc.cbSize			= sizeof(wc);
 		wc.style			= CS_HREDRAW | CS_VREDRAW;
 		wc.lpfnWndProc		= WndProc;
@@ -84,17 +79,9 @@ namespace KlayGE
 		wc.hCursor			= ::LoadCursor(nullptr, IDC_ARROW);
 		wc.hbrBackground	= static_cast<HBRUSH>(::GetStockObject(BLACK_BRUSH));
 		wc.lpszMenuName		= nullptr;
-#ifdef KLAYGE_COMPILER_GCC
-		wc.lpszClassName	= name_.c_str();
-#else
 		wc.lpszClassName	= wname_.c_str();
-#endif
 		wc.hIconSm			= nullptr;
-#ifdef KLAYGE_COMPILER_GCC
-		::RegisterClassExA(&wc);
-#else
 		::RegisterClassExW(&wc);
-#endif
 
 		uint32_t style;
 		if (settings.full_screen)
@@ -111,15 +98,9 @@ namespace KlayGE
 
 		// Create our main window
 		// Pass pointer to self
-#ifdef KLAYGE_COMPILER_GCC
-		wnd_ = ::CreateWindowA(name_.c_str(), name_.c_str(),
-			style, settings.left, settings.top,
-			rc.right - rc.left, rc.bottom - rc.top, 0, 0, hInst, nullptr);
-#else
 		wnd_ = ::CreateWindowW(wname_.c_str(), wname_.c_str(),
 			style, settings.left, settings.top,
 			rc.right - rc.left, rc.bottom - rc.top, 0, 0, hInst, nullptr);
-#endif
 
 		default_wnd_proc_ = ::DefWindowProc;
 		external_wnd_ = false;
@@ -147,11 +128,7 @@ namespace KlayGE
 		: active_(false), ready_(false), closed_(false), hide_(settings.hide_win)
 	{
 		// Register the window class
-#ifdef KLAYGE_COMPILER_GCC
-		name_ = name;
-#else
 		Convert(wname_, name);
-#endif
 
 		wnd_ = static_cast<HWND>(native_wnd);
 		default_wnd_proc_ = reinterpret_cast<WNDPROC>(::GetWindowLongPtrW(wnd_, GWLP_WNDPROC));
@@ -198,15 +175,9 @@ namespace KlayGE
 
 			::DestroyWindow(wnd_);
 
-#ifdef KLAYGE_COMPILER_GCC
-			wnd_ = ::CreateWindowA(name_.c_str(), name_.c_str(),
-				style, left_, top_,
-				rc.right - rc.left, rc.bottom - rc.top, 0, 0, hInst, nullptr);
-#else
 			wnd_ = ::CreateWindowW(wname_.c_str(), wname_.c_str(),
 				style, left_, top_,
 				rc.right - rc.left, rc.bottom - rc.top, 0, 0, hInst, nullptr);
-#endif
 
 			::GetClientRect(wnd_, &rc);
 			width_ = rc.right - rc.left;
