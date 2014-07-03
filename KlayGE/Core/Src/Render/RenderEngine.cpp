@@ -121,6 +121,10 @@ namespace KlayGE
 		virtual void DoResize(uint32_t /*width*/, uint32_t /*height*/) KLAYGE_OVERRIDE
 		{
 		}
+
+		virtual void DoDestroy() KLAYGE_OVERRIDE
+		{
+		}
 	};
 
 	// ¹¹Ôìº¯Êý
@@ -1149,5 +1153,55 @@ namespace KlayGE
 				}
 			}
 		}
+	}
+
+	void RenderEngine::Destroy()
+	{
+		cur_frame_buffer_.reset();
+		screen_frame_buffer_.reset();
+		ds_tex_.reset();
+		hdr_frame_buffer_.reset();
+		hdr_tex_.reset();
+		ldr_frame_buffer_.reset();
+		ldr_tex_.reset();
+		resize_frame_buffer_.reset();
+		resize_tex_.reset();
+		mono_frame_buffer_.reset();
+		mono_tex_.reset();
+		for (int i = 0; i < 4; ++ i)
+		{
+			default_frame_buffers_[i].reset();
+		}
+
+		overlay_frame_buffer_.reset();
+		overlay_tex_.reset();
+
+		so_buffers_.reset();
+
+		cur_rs_obj_.reset();
+		cur_line_rs_obj_.reset();
+		cur_dss_obj_.reset();
+		cur_bs_obj_.reset();
+
+		hdr_pp_.reset();
+		skip_hdr_pp_.reset();
+		ldr_pp_.reset();
+		resize_pps_[0].reset();
+		resize_pps_[1].reset();
+		stereoscopic_pp_.reset();
+
+		for (int i = 0; i < 12; ++ i)
+		{
+			ldr_pps_[i].reset();
+		}
+
+#ifndef KLAYGE_SHIP
+		hdr_pp_perf_.reset();
+		ldr_pp_perf_.reset();
+		resize_pp_perf_.reset();
+		stereoscopic_pp_perf_.reset();
+#endif
+
+		this->DoDestroy();
 	}
 }

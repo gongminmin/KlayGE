@@ -96,16 +96,7 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	OGLRenderEngine::~OGLRenderEngine()
 	{
-		if (fbo_blit_src_ != 0)
-		{
-			glDeleteFramebuffersEXT(1, &fbo_blit_src_);
-		}
-		if (fbo_blit_dst_ != 0)
-		{
-			glDeleteFramebuffersEXT(1, &fbo_blit_dst_);
-		}
-
-		::FreeLibrary(mod_opengl32_);
+		this->Destroy();
 	}
 
 	// 返回渲染系统的名字
@@ -1417,6 +1408,22 @@ namespace KlayGE
 	void OGLRenderEngine::DoResize(uint32_t width, uint32_t height)
 	{
 		checked_pointer_cast<OGLRenderWindow>(screen_frame_buffer_)->Resize(width, height);
+	}
+
+	void OGLRenderEngine::DoDestroy()
+	{
+		if (fbo_blit_src_ != 0)
+		{
+			glDeleteFramebuffersEXT(1, &fbo_blit_src_);
+		}
+		if (fbo_blit_dst_ != 0)
+		{
+			glDeleteFramebuffersEXT(1, &fbo_blit_dst_);
+		}
+
+		so_rl_.reset();
+
+		::FreeLibrary(mod_opengl32_);
 	}
 
 	bool OGLRenderEngine::FullScreen() const

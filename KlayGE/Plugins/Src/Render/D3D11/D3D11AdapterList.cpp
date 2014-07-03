@@ -29,6 +29,12 @@ namespace KlayGE
 	{
 	}
 
+	void D3D11AdapterList::Destroy()
+	{
+		adapters_.clear();
+		current_adapter_ = 0;
+	}
+
 	// 获取系统显卡数目
 	/////////////////////////////////////////////////////////////////////////////////
 	size_t D3D11AdapterList::NumAdapter() const

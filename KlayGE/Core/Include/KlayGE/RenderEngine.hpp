@@ -245,6 +245,13 @@ namespace KlayGE
 		}
 
 	protected:
+		void Destroy();
+
+	private:
+		virtual void CheckConfig(RenderSettings& settings);
+		virtual void StereoscopicForLCDShutter(int32_t eye);
+		void AssemblePostProcessChain();
+
 		virtual void DoCreateRenderWindow(std::string const & name, RenderSettings const & settings) = 0;
 		virtual void DoBindFrameBuffer(FrameBufferPtr const & fb) = 0;
 		virtual void DoBindSOBuffers(RenderLayoutPtr const & rl) = 0;
@@ -253,11 +260,7 @@ namespace KlayGE
 		virtual void DoDispatchIndirect(RenderTechnique const & tech,
 			GraphicsBufferPtr const & buff_args, uint32_t offset) = 0;
 		virtual void DoResize(uint32_t width, uint32_t height) = 0;
-
-	private:
-		virtual void CheckConfig(RenderSettings& settings);
-		virtual void StereoscopicForLCDShutter(int32_t eye);
-		void AssemblePostProcessChain();
+		virtual void DoDestroy() = 0;
 
 	protected:
 		FrameBufferPtr cur_frame_buffer_;

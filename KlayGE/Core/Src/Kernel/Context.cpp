@@ -112,13 +112,13 @@ namespace KlayGE
 		ResLoader::Destroy();
 		PerfProfiler::Destroy();
 
+		deferred_rendering_layer_.reset();
+		show_factory_.reset();
 		render_factory_.reset();
 		audio_factory_.reset();
 		input_factory_.reset();
-		show_factory_.reset();
 		script_factory_.reset();
 		audio_data_src_factory_.reset();
-		deferred_rendering_layer_.reset();
 
 		app_ = nullptr;
 

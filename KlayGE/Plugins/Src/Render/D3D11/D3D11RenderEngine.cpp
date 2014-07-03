@@ -148,39 +148,7 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	D3D11RenderEngine::~D3D11RenderEngine()
 	{
-		timestamp_disjoint_query_.reset();
-
-		cur_frame_buffer_.reset();
-		screen_frame_buffer_.reset();
-		mono_tex_.reset();
-		stereo_nv_3d_vision_fb_.reset();
-		stereo_nv_3d_vision_tex_.reset();
-
-		rasterizer_state_cache_.reset();
-		depth_stencil_state_cache_.reset();
-		blend_state_cache_.reset();
-		vertex_shader_cache_.reset();
-		pixel_shader_cache_.reset();
-		geometry_shader_cache_.reset();
-		compute_shader_cache_.reset();
-		hull_shader_cache_.reset();
-		domain_shader_cache_.reset();
-		input_layout_cache_.reset();
-		ib_cache_.reset();
-
-		input_layout_bank_.clear();
-
-		d3d_imm_ctx_->ClearState();
-		d3d_imm_ctx_->Flush();
-		d3d_imm_ctx_.reset();
-		d3d_device_.reset();
-		gi_factory_.reset();
-
-#ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
-		::FreeLibrary(mod_d3dcompiler_);
-		//::FreeLibrary(mod_d3d11_);
-		//::FreeLibrary(mod_dxgi_);
-#endif
+		this->Destroy();
 	}
 
 	// 返回渲染系统的名字
@@ -907,6 +875,49 @@ namespace KlayGE
 	void D3D11RenderEngine::DoResize(uint32_t width, uint32_t height)
 	{
 		checked_cast<D3D11RenderWindow*>(screen_frame_buffer_.get())->Resize(width, height);
+	}
+
+	void D3D11RenderEngine::DoDestroy()
+	{
+		adapterList_.Destroy();
+
+		rasterizer_state_cache_.reset();
+		depth_stencil_state_cache_.reset();
+		blend_state_cache_.reset();
+		vertex_shader_cache_.reset();
+		pixel_shader_cache_.reset();
+		geometry_shader_cache_.reset();
+		compute_shader_cache_.reset();
+		hull_shader_cache_.reset();
+		domain_shader_cache_.reset();
+		input_layout_cache_.reset();
+		ib_cache_.reset();
+
+		for (size_t i = 0; i < ShaderObject::ST_NumShaderTypes; ++ i)
+		{
+			shader_srv_cache_[i].clear();
+			shader_sampler_cache_[i].clear();
+			shader_cb_cache_[i].clear();
+		}
+
+		input_layout_bank_.clear();
+
+		stereo_nv_3d_vision_fb_.reset();
+		stereo_nv_3d_vision_tex_.reset();
+
+		timestamp_disjoint_query_.reset();
+
+		d3d_imm_ctx_->ClearState();
+		d3d_imm_ctx_->Flush();
+		d3d_imm_ctx_.reset();
+		d3d_device_.reset();
+		gi_factory_.reset();
+
+#ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
+		::FreeLibrary(mod_d3dcompiler_);
+		::FreeLibrary(mod_d3d11_);
+		::FreeLibrary(mod_dxgi_);
+#endif
 	}
 
 	bool D3D11RenderEngine::FullScreen() const

@@ -53,6 +53,11 @@ namespace KlayGE
 	{
 		this->DeleteSurfaces();
 
+		vmr_surf_alloc_notify_.reset();
+
+		d3d_device_.reset();
+		d3d_.reset();
+
 		::FreeLibrary(mod_d3d9_);
 	}
 

@@ -144,6 +144,7 @@ namespace KlayGE
 		virtual void DoDispatchIndirect(RenderTechnique const & tech,
 			GraphicsBufferPtr const & buff_args, uint32_t offset) KLAYGE_OVERRIDE;
 		virtual void DoResize(uint32_t width, uint32_t height) KLAYGE_OVERRIDE;
+		virtual void DoDestroy() KLAYGE_OVERRIDE;
 
 		void FillRenderDeviceCaps();
 		void DetectD3D11_1Runtime(ID3D11DevicePtr const & device, ID3D11DeviceContextPtr const & imm_ctx);
