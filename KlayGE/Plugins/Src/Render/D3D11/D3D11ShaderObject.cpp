@@ -1136,6 +1136,12 @@ namespace KlayGE
 
 						if (!found)
 						{
+							// To make the error message unrecognized by Visual Studio
+							if ((0 == err_str.find("error X")) || (0 == err_str.find("warning X")))
+							{
+								err_str = "(0): " + err_str;
+							}
+
 							msgs.push_back(err_str);
 						}
 					}

@@ -381,6 +381,11 @@ namespace KlayGE
 		if (d3d_feature_level_ <= D3D_FEATURE_LEVEL_9_2)
 		{
 			settings.ppaa = false;
+#ifdef KLAYGE_CPU_ARM
+			settings.hdr = false;
+			settings.gamma = false;
+			settings.color_grading = false;
+#endif
 		}
 	}
 
@@ -1226,7 +1231,8 @@ namespace KlayGE
 					}
 				}
 
-				if (s & (D3D11_FORMAT_SUPPORT_RENDER_TARGET | D3D11_FORMAT_SUPPORT_MULTISAMPLE_RENDERTARGET))
+				if (s & (D3D11_FORMAT_SUPPORT_RENDER_TARGET | D3D11_FORMAT_SUPPORT_MULTISAMPLE_RENDERTARGET
+					| D3D11_FORMAT_SUPPORT_DEPTH_STENCIL))
 				{
 					UINT count = 1;
 					UINT quality;
