@@ -86,7 +86,7 @@ int main(int argc, char* argv[])
 {
 	if (argc < 2)
 	{
-		cout << "Usage: FXMLJIT pc_dx11|pc_dx10|pc_dx9|pc_gl4|pc_gl3|pc_gl2|android_tegra3 xxx.fxml [target folder]" << endl;
+		cout << "Usage: FXMLJIT pc_dx11|pc_dx10|pc_dx9|win_tegra3|pc_gl4|pc_gl3|pc_gl2|android_tegra3 xxx.fxml [target folder]" << endl;
 		return 1;
 	}
 
@@ -94,7 +94,7 @@ int main(int argc, char* argv[])
 
 	Context::Instance().LoadCfg("KlayGE.cfg");
 	ContextCfg context_cfg = Context::Instance().Config();
-	if (("pc_dx11" == platform) || ("pc_dx10" == platform) || ("pc_dx9" == platform))
+	if (("pc_dx11" == platform) || ("pc_dx10" == platform) || ("pc_dx9" == platform) || ("win_tegra3" == platform))
 	{
 		context_cfg.render_factory_name = "D3D11";
 		if ("pc_dx11" == platform)
@@ -108,6 +108,10 @@ int main(int argc, char* argv[])
 		else if ("pc_dx9" == platform)
 		{
 			context_cfg.graphics_cfg.options = "level:9_3";
+		}
+		else if ("win_tegra3" == platform)
+		{
+			context_cfg.graphics_cfg.options = "level:9_1";
 		}
 	}
 	else if (("pc_gl4" == platform) || ("pc_gl3" == platform) || ("pc_gl2" == platform))
