@@ -125,6 +125,8 @@ namespace KlayGE
 
 	private:
 		WindowPtr win_;
+
+		array<uint32_t, 16> pointer_id_map_;
 	};
 
 	MetroFramework::MetroFramework()
@@ -225,6 +227,7 @@ namespace KlayGE
 
 	MetroMsgs::MetroMsgs()
 	{
+		pointer_id_map_.fill(0);
 	}
 
 	void MetroMsgs::OnWindowSizeChanged(CoreWindow^ /*sender*/, WindowSizeChangedEventArgs^ /*args*/)
@@ -250,30 +253,72 @@ namespace KlayGE
 
 	void MetroMsgs::OnPointerPressed(CoreWindow^ /*sender*/, PointerEventArgs^ args)
 	{
+		uint32_t conv_id = 0;
+		for (size_t i = 0; i < pointer_id_map_.size(); ++ i)
+		{
+			if (0 == pointer_id_map_[i])
+			{
+				conv_id = static_cast<uint32_t>(i + 1);
+				pointer_id_map_[i] = args->CurrentPoint->PointerId;
+				break;
+			}
+		}
+		
 		win_->OnPointerDown()(*win_,
 			int2(static_cast<int>(args->CurrentPoint->Position.X), static_cast<int>(args->CurrentPoint->Position.Y)),
-			args->CurrentPoint->PointerId);
+			conv_id);
 	}
 
 	void MetroMsgs::OnPointerReleased(CoreWindow^ /*sender*/, PointerEventArgs^ args)
 	{
+		uint32_t conv_id = 0;
+		for (size_t i = 0; i < pointer_id_map_.size(); ++ i)
+		{
+			if (args->CurrentPoint->PointerId == pointer_id_map_[i])
+			{
+				conv_id = static_cast<uint32_t>(i + 1);
+				pointer_id_map_[i] = 0;
+				break;
+			}
+		}
+
 		win_->OnPointerUp()(*win_,
 			int2(static_cast<int>(args->CurrentPoint->Position.X), static_cast<int>(args->CurrentPoint->Position.Y)),
-			args->CurrentPoint->PointerId);
+			conv_id);
 	}
 
 	void MetroMsgs::OnPointerMoved(CoreWindow^ /*sender*/, PointerEventArgs^ args)
 	{
+		uint32_t conv_id = 0;
+		for (size_t i = 0; i < pointer_id_map_.size(); ++ i)
+		{
+			if (args->CurrentPoint->PointerId == pointer_id_map_[i])
+			{
+				conv_id = static_cast<uint32_t>(i + 1);
+				break;
+			}
+		}
+
 		win_->OnPointerUpdate()(*win_,
 			int2(static_cast<int>(args->CurrentPoint->Position.X), static_cast<int>(args->CurrentPoint->Position.Y)),
-			args->CurrentPoint->PointerId, args->CurrentPoint->IsInContact);
+			conv_id, args->CurrentPoint->IsInContact);
 	}
 
 	void MetroMsgs::OnPointerWheelChanged(CoreWindow^ /*sender*/, PointerEventArgs^ args)
 	{
+		uint32_t conv_id = 0;
+		for (size_t i = 0; i < pointer_id_map_.size(); ++ i)
+		{
+			if (args->CurrentPoint->PointerId == pointer_id_map_[i])
+			{
+				conv_id = static_cast<uint32_t>(i + 1);
+				break;
+			}
+		}
+
 		win_->OnPointerWheel()(*win_,
 			int2(static_cast<int>(args->CurrentPoint->Position.X), static_cast<int>(args->CurrentPoint->Position.Y)),
-			args->CurrentPoint->PointerId, args->CurrentPoint->Properties->MouseWheelDelta);
+			conv_id, args->CurrentPoint->Properties->MouseWheelDelta);
 	}
 
 	void MetroMsgs::BindWindow(WindowPtr const & win)
