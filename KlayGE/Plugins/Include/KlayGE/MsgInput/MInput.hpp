@@ -497,6 +497,7 @@ namespace KlayGE
 		ASensorEventQueue* sensor_event_queue_;
 		ASensor const * accelerometer_;
 		ASensor const * gyrometer_;
+		ASensor const * magnetic_;
 	};
 #endif
 }

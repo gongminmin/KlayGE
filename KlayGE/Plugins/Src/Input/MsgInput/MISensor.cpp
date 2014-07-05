@@ -911,6 +911,15 @@ namespace KlayGE
 					ASensorEventQueue_setEventRate(sensor_event_queue_, gyrometer_, 1.0f / 60);
 				}
 			}
+
+			magnetic_ = ASensorManager_getDefaultSensor(sensor_mgr_, ASENSOR_TYPE_MAGNETIC_FIELD);
+			if (magnetic_)
+			{
+				if (ASensorEventQueue_enableSensor(sensor_event_queue_, magnetic_) >= 0)
+				{
+					ASensorEventQueue_setEventRate(sensor_event_queue_, magnetic_, 1.0f / 60);
+				}
+			}
 		}
 	}
 
@@ -926,14 +935,20 @@ namespace KlayGE
 
 		MsgInputSensor* input_sensor = static_cast<MsgInputSensor*>(data);
 
+		float3 accel;
+		bool has_accel = false;
+		float3 magnetic;
+		bool has_magnetic = false;
 		ASensorEvent sensor_event;
 		while (ASensorEventQueue_getEvents(input_sensor->sensor_event_queue_, &sensor_event, 1) > 0)
 		{
 			switch (sensor_event.type)
 			{
 			case ASENSOR_TYPE_ACCELEROMETER:
-				input_sensor->accel_ = float3(sensor_event.acceleration.x, sensor_event.acceleration.y,
+				accel = float3(sensor_event.acceleration.x, sensor_event.acceleration.y,
 					sensor_event.acceleration.z);
+				has_accel = true;
+				input_sensor->accel_ = accel;
 				break;
 
 			case ASENSOR_TYPE_GYROSCOPE:
@@ -941,8 +956,35 @@ namespace KlayGE
 					sensor_event.vector.z);
 				break;
 
+			case ASENSOR_TYPE_MAGNETIC_FIELD:
+				magnetic = float3(sensor_event.magnetic.x, sensor_event.magnetic.y,
+					sensor_event.magnetic.z);
+				has_magnetic = true;
+				break;
+
 			default:
 				break;
+			}
+		}
+
+		if (has_accel && has_magnetic)
+		{
+			float3 h = MathLib::cross(magnetic, accel);
+			float const len_h = MathLib::length(h);
+			if (len_h >= 0.1f)
+			{
+				h /= len_h;
+				accel = MathLib::normalize(accel);
+				float3 const m = MathLib::cross(accel, h);
+				float4x4 rotate(h.x(), h.y(), h.z(), 0,
+					m.x(), m.y, m.z, 0,
+					accel.x(), accel.y(), accel.z(), 0,
+					0, 0, 0, 1);
+				input_sensor->orientation_quat_ = MathLib::to_quaternion(rotate);
+				MathLib::to_yaw_pitch_roll(input_sensor->tilt_.x(), input_sensor->tilt_.y(), input_sensor->tilt_.z(),
+					input_sensor->orientation_quat_);
+				input_sensor->magnetic_heading_north_ = atan2(Mathlib::dot(magnetic, accel),
+					Mathlib::dot(magnetic, m));
 			}
 		}
 
