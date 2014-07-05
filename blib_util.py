@@ -178,13 +178,13 @@ class build_info:
 				if "x86" == arch:
 					arch_list.append((arch, "Visual Studio 11", toolset, is_winrt))
 				elif "x86_app" == arch:
-					arch_list.append((arch, "Visual Studio 11 WinRT", toolset, is_winrt))
+					arch_list.append((arch, "Visual Studio 11 WinRT-x86", toolset, is_winrt))
 				elif "arm_app" == arch:
-					arch_list.append((arch, "Visual Studio 11 ARM WinRT", toolset, is_winrt))
+					arch_list.append((arch, "Visual Studio 11 WinRT-ARM", toolset, is_winrt))
 				elif "x64" == arch:
 					arch_list.append((arch, "Visual Studio 11 Win64", toolset, is_winrt))
 				elif "x64_app" == arch:
-					arch_list.append((arch, "Visual Studio 11 Win64 WinRT", toolset, is_winrt))
+					arch_list.append((arch, "Visual Studio 11 WinRT-x64", toolset, is_winrt))
 		elif "vc100" == compiler:
 			compiler_name = "vc"
 			compiler_version = 100
