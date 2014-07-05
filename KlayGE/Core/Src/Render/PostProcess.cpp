@@ -1465,6 +1465,13 @@ namespace KlayGE
 	{
 		BOOST_ASSERT((kernel_radius > 0) && (kernel_radius <= 7));
 
+		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+		RenderDeviceCaps const & caps = rf.RenderEngineInstance().DeviceCaps();
+		if (2 == caps.max_shader_model)
+		{
+			kernel_radius_ = std::min(kernel_radius_, 2);
+		}
+
 		params_.push_back(std::make_pair("esm_scale_factor", RenderEffectParameterPtr()));
 		params_.push_back(std::make_pair("near_q_far", RenderEffectParameterPtr()));
 		input_pins_.push_back(std::make_pair("src_tex", TexturePtr()));
@@ -1493,6 +1500,12 @@ namespace KlayGE
 		BOOST_ASSERT((radius > 0) && (radius <= 7));
 
 		kernel_radius_ = radius;
+		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+		RenderDeviceCaps const & caps = rf.RenderEngineInstance().DeviceCaps();
+		if (2 == caps.max_shader_model)
+		{
+			kernel_radius_ = std::min(kernel_radius_, 2);
+		}
 		TexturePtr const & tex = this->InputPin(0);
 		if (!!tex)
 		{
@@ -1610,8 +1623,9 @@ namespace KlayGE
 		pp_chain_[1]->SetParam(0, esm_scale_factor);
 
 		float q = fp / (fp - np);
-		float4 near_q_far(np * q, q, fp, 1 / fp);
+		float4 near_q_far(np * q, q, fp, 1 / fp / esm_scale_factor);
 		pp_chain_[0]->SetParam(1, near_q_far);
+		near_q_far.z() *= esm_scale_factor;
 		pp_chain_[1]->SetParam(1, near_q_far);
 	}
 

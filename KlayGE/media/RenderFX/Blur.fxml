@@ -126,44 +126,90 @@ float4 BlurYPS(float4 iTex0 : TEXCOORD0,
 
 	<shader>
 		<![CDATA[
-float4 LogBlurXPS(float2 tc : TEXCOORD0) : SV_Target0
+void LogBlurXVS(float4 pos : POSITION,
+					out float4 oTex0 : TEXCOORD0,
+					out float4 oTex1 : TEXCOORD1,
+					out float4 oTex2 : TEXCOORD2,
+					out float4 oTex3 : TEXCOORD3,
+					out float4 oPos : SV_Position)
 {
+	oPos = pos;
+	
+	float2 Tex0 = TexCoordFromPos(pos);
+	oTex0 = Tex0.x + float4(+tex_coord_offset[0], -tex_coord_offset[0], +tex_coord_offset[1], -tex_coord_offset[1]);
+	oTex1 = Tex0.x + float4(+tex_coord_offset[2], -tex_coord_offset[2], +tex_coord_offset[3], -tex_coord_offset[3]);
+	oTex2 = Tex0.x + float4(+tex_coord_offset[4], -tex_coord_offset[4], +tex_coord_offset[5], -tex_coord_offset[5]);
+	oTex3.xy = Tex0.x + float2(+tex_coord_offset[6], -tex_coord_offset[6]);
+	oTex3.zw = Tex0;
+}
+
+void LogBlurYVS(float4 pos : POSITION,
+					out float4 oTex0 : TEXCOORD0,
+					out float4 oTex1 : TEXCOORD1,
+					out float4 oTex2 : TEXCOORD2,
+					out float4 oTex3 : TEXCOORD3,
+					out float4 oPos : SV_Position)
+{
+	oPos = pos;
+	
+	float2 Tex0 = TexCoordFromPos(pos);
+	oTex0 = Tex0.y + float4(+tex_coord_offset[0], -tex_coord_offset[0], +tex_coord_offset[1], -tex_coord_offset[1]);
+	oTex1 = Tex0.y + float4(+tex_coord_offset[2], -tex_coord_offset[2], +tex_coord_offset[3], -tex_coord_offset[3]);
+	oTex2 = Tex0.y + float4(+tex_coord_offset[4], -tex_coord_offset[4], +tex_coord_offset[5], -tex_coord_offset[5]);
+	oTex3.xy = Tex0.y + float2(+tex_coord_offset[6], -tex_coord_offset[6]);
+	oTex3.zw = Tex0;
+}
+
+float4 LogBlurXPS(float4 tex0 : TEXCOORD0, float4 tex1 : TEXCOORD1,
+		float4 tex2 : TEXCOORD2, float4 tex3 : TEXCOORD3) : SV_Target0
+{
+	float2 tex[7] = { tex0.xy, tex0.zw, tex1.xy, tex1.zw, tex2.xy, tex2.zw, tex3.xy };
+
 #if NON_LINEAR_DEPTH
-	float d0 = non_linear_depth_to_linear(src_tex.Sample(src_sampler, tc).x, near_q_far.x, near_q_far.y);
+	float d0 = non_linear_depth_to_linear(src_tex.Sample(src_sampler, tex3.zw).x, near_q_far.x, near_q_far.y);
 #else
-	float d0 = ReadAFloat(src_tex.Sample(src_sampler, tc), near_q_far.z);
+	float d0 = ReadAFloat(src_tex.Sample(src_sampler, tex3.zw), near_q_far.z);
 #endif
-	float w0 = color_weight[7];
-	float color = w0;
+	float color = color_weight[7];
+#if KLAYGE_SHADER_MODEL >= 3
 	for (int i = 0; i < 7; ++ i)
+#else
+	for (int i = 0; i < 2; ++ i)
+#endif
 	{
 #if NON_LINEAR_DEPTH
-		float d1 = non_linear_depth_to_linear(src_tex.Sample(src_sampler, tc + float2(+tex_coord_offset[i], 0)).x, near_q_far.x, near_q_far.y);
-		float d2 = non_linear_depth_to_linear(src_tex.Sample(src_sampler, tc + float2(-tex_coord_offset[i], 0)).x, near_q_far.x, near_q_far.y);
+		float d1 = non_linear_depth_to_linear(src_tex.Sample(src_sampler, float2(tex[i].x, tex3.w)).x, near_q_far.x, near_q_far.y);
+		float d2 = non_linear_depth_to_linear(src_tex.Sample(src_sampler, float2(tex[i].y, tex3.w)).x, near_q_far.x, near_q_far.y);
 #else
-		float d1 = ReadAFloat(src_tex.Sample(src_sampler, tc + float2(+tex_coord_offset[i], 0)), near_q_far.z);
-		float d2 = ReadAFloat(src_tex.Sample(src_sampler, tc + float2(-tex_coord_offset[i], 0)), near_q_far.z);
+		float d1 = ReadAFloat(src_tex.Sample(src_sampler, float2(tex[i].x, tex3.w)), near_q_far.z);
+		float d2 = ReadAFloat(src_tex.Sample(src_sampler, float2(tex[i].y, tex3.w)), near_q_far.z);
 #endif
 		color += (exp(esm_scale_factor * (d1 - d0))
 			+ exp(esm_scale_factor * (d2 - d0))) * color_weight[i];
 	}
 
-	return WriteAFloat(esm_scale_factor * d0 + log(color), near_q_far.w / esm_scale_factor);
+	return WriteAFloat(esm_scale_factor * d0 + log(color), near_q_far.w);
 }
 
-float4 LogBlurYPS(float2 tc : TEXCOORD0) : SV_Target0
+float4 LogBlurYPS(float4 tex0 : TEXCOORD0, float4 tex1 : TEXCOORD1,
+		float4 tex2 : TEXCOORD2, float4 tex3 : TEXCOORD3) : SV_Target0
 {
-	float d0 = ReadAFloat(src_tex.Sample(src_sampler, tc), near_q_far.z * esm_scale_factor);
-	float w0 = color_weight[7];
-	float color = w0;
+	float2 tex[7] = { tex0.xy, tex0.zw, tex1.xy, tex1.zw, tex2.xy, tex2.zw, tex3.xy };
+
+	float d0 = ReadAFloat(src_tex.Sample(src_sampler, tex3.zw), near_q_far.z);
+	float color = color_weight[7];
+#if KLAYGE_SHADER_MODEL >= 3
 	for (int i = 0; i < 7; ++ i)
+#else
+	for (int i = 0; i < 2; ++ i)
+#endif
 	{
-		float d1 = ReadAFloat(src_tex.Sample(src_sampler, tc + float2(0, +tex_coord_offset[i])), near_q_far.z * esm_scale_factor);
-		float d2 = ReadAFloat(src_tex.Sample(src_sampler, tc + float2(0, -tex_coord_offset[i])), near_q_far.z * esm_scale_factor);
+		float d1 = ReadAFloat(src_tex.Sample(src_sampler, float2(tex3.z, tex[i].x)), near_q_far.z);
+		float d2 = ReadAFloat(src_tex.Sample(src_sampler, float2(tex3.z, tex[i].y)), near_q_far.z);
 		color += (exp(d1 - d0) + exp(d2 - d0)) * color_weight[i];
 	}
 
-	return WriteAFloat(d0 + log(color), near_q_far.w / esm_scale_factor);
+	return WriteAFloat(d0 + log(color), near_q_far.w);
 }
 		]]>
 	</shader>
@@ -173,7 +219,7 @@ float4 LogBlurYPS(float2 tc : TEXCOORD0) : SV_Target0
 			<state name="depth_enable" value="false"/>
 			<state name="depth_write_mask" value="0"/>
 
-			<state name="vertex_shader" value="PostProcessVS()"/>
+			<state name="vertex_shader" value="LogBlurXVS()"/>
 			<state name="pixel_shader" value="LogBlurXPS()"/>
 		</pass>
 	</technique>
@@ -186,7 +232,7 @@ float4 LogBlurYPS(float2 tc : TEXCOORD0) : SV_Target0
 			<state name="depth_enable" value="false"/>
 			<state name="depth_write_mask" value="0"/>
 
-			<state name="vertex_shader" value="PostProcessVS()"/>
+			<state name="vertex_shader" value="LogBlurYVS()"/>
 			<state name="pixel_shader" value="LogBlurYPS()"/>
 		</pass>
 	</technique>
