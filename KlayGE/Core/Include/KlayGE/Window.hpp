@@ -163,6 +163,10 @@ namespace KlayGE
 		typedef boost::signals2::signal<void(Window const & wnd, int2 const & pt, uint32_t id)> PointerUpEvent;
 		typedef boost::signals2::signal<void(Window const & wnd, int2 const & pt, uint32_t id, bool down)> PointerUpdateEvent;
 		typedef boost::signals2::signal<void(Window const & wnd, int2 const & pt, uint32_t id, int32_t wheel_delta)> PointerWheelEvent;
+#if defined KLAYGE_PLATFORM_ANDROID
+		typedef boost::signals2::signal<void(Window const & wnd, uint32_t key)> KeyDownEvent;
+		typedef boost::signals2::signal<void(Window const & wnd, uint32_t key)> KeyUpEvent;
+#endif
 		typedef boost::signals2::signal<void(Window const & wnd)> CloseEvent;
 
 		ActiveEvent& OnActive()
@@ -223,6 +227,16 @@ namespace KlayGE
 		{
 			return pointer_wheel_event_;
 		}
+#if defined KLAYGE_PLATFORM_ANDROID
+		KeyDownEvent& OnKeyDown()
+		{
+			return key_down_event_;
+		}
+		KeyUpEvent& OnKeyUp()
+		{
+			return key_up_event_;
+		}
+#endif
 		CloseEvent& OnClose()
 		{
 			return close_event_;
@@ -248,6 +262,10 @@ namespace KlayGE
 		PointerUpEvent pointer_up_event_;
 		PointerUpdateEvent pointer_update_event_;
 		PointerWheelEvent pointer_wheel_event_;
+#if defined KLAYGE_PLATFORM_ANDROID
+		KeyDownEvent key_down_event_;
+		KeyUpEvent key_up_event_;
+#endif
 		CloseEvent close_event_;
 
 #if defined KLAYGE_PLATFORM_WINDOWS

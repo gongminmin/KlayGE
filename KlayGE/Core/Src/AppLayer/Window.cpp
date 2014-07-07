@@ -792,41 +792,97 @@ namespace KlayGE
 	int32_t Window::HandleInput(android_app* app, AInputEvent* event)
 	{
 		Window* win = static_cast<Window*>(app->userData);
-		if (AINPUT_EVENT_TYPE_MOTION == AInputEvent_getType(event))
+		int32_t source = AInputEvent_getSource(event);
+		switch (AInputEvent_getType(event))
 		{
-			int32_t action = AMotionEvent_getAction(event);
-			int32_t action_code = action & AMOTION_EVENT_ACTION_MASK;
-			int32_t pointer_index = (action & AMOTION_EVENT_ACTION_POINTER_INDEX_MASK)
-				>> AMOTION_EVENT_ACTION_POINTER_INDEX_SHIFT;
-			switch (action_code)
+		case AINPUT_EVENT_TYPE_MOTION:
 			{
-			case AMOTION_EVENT_ACTION_DOWN:
-			case AMOTION_EVENT_ACTION_POINTER_DOWN:
-				win->OnPointerDown()(*win,
-					int2(AMotionEvent_getX(event, pointer_index), AMotionEvent_getY(event, pointer_index)),
-					AMotionEvent_getPointerId(event, pointer_index) + 1);
-				break;
-
-			case AMOTION_EVENT_ACTION_UP:
-			case AMOTION_EVENT_ACTION_POINTER_UP:
-				win->OnPointerUp()(*win,
-					int2(AMotionEvent_getX(event, pointer_index), AMotionEvent_getY(event, pointer_index)),
-					AMotionEvent_getPointerId(event, pointer_index) + 1);
-				break;
-
-			case AMOTION_EVENT_ACTION_MOVE:
-				for (size_t i = 0; i < AMotionEvent_getPointerCount(event); ++i)
+				int32_t action = AMotionEvent_getAction(event);
+				int32_t action_code = action & AMOTION_EVENT_ACTION_MASK;
+				int32_t pointer_index = (action & AMOTION_EVENT_ACTION_POINTER_INDEX_MASK)
+					>> AMOTION_EVENT_ACTION_POINTER_INDEX_SHIFT;
+				switch (source)
 				{
-					win->OnPointerUpdate()(*win,
-						int2(AMotionEvent_getX(event, i), AMotionEvent_getY(event, i)),
-						AMotionEvent_getPointerId(event, i) + 1, true);
+				case AINPUT_SOURCE_MOUSE:
+					/*{
+						BOOST_ASSERT(1 == AMotionEvent_getPointerCount(event));
+
+						int2(AMotionEvent_getX(event, 0), AMotionEvent_getY(event, 0));
+					}*/
+					break;
+
+				case AINPUT_SOURCE_TOUCHSCREEN:
+					switch (action_code)
+					{
+					case AMOTION_EVENT_ACTION_DOWN:
+					case AMOTION_EVENT_ACTION_POINTER_DOWN:
+						win->OnPointerDown()(*win,
+							int2(AMotionEvent_getX(event, pointer_index), AMotionEvent_getY(event, pointer_index)),
+							AMotionEvent_getPointerId(event, pointer_index) + 1);
+						break;
+
+					case AMOTION_EVENT_ACTION_UP:
+					case AMOTION_EVENT_ACTION_POINTER_UP:
+						win->OnPointerUp()(*win,
+							int2(AMotionEvent_getX(event, pointer_index), AMotionEvent_getY(event, pointer_index)),
+							AMotionEvent_getPointerId(event, pointer_index) + 1);
+						break;
+
+					case AMOTION_EVENT_ACTION_MOVE:
+						for (size_t i = 0; i < AMotionEvent_getPointerCount(event); ++i)
+						{
+							win->OnPointerUpdate()(*win,
+								int2(AMotionEvent_getX(event, i), AMotionEvent_getY(event, i)),
+								AMotionEvent_getPointerId(event, i) + 1, true);
+						}
+						break;
+
+					default:
+						break;
+					}
+					break;
+
+#if (__ANDROID_API__ >= 13)
+				case AINPUT_SOURCE_JOYSTICK:
+					break;
+#endif
+
+				default:
+					break;
+				}	
+			}
+			return 1;
+
+		case AINPUT_EVENT_TYPE_KEY:
+			switch (source)
+			{
+			case AINPUT_SOURCE_KEYBOARD:
+				{
+					int32_t key_code = AKeyEvent_getKeyCode(event);
+					switch (AKeyEvent_getAction(event))
+					{
+					case AKEY_EVENT_ACTION_DOWN:
+						win->OnKeyDown()(*win, key_code);
+						break;
+
+					case AKEY_EVENT_ACTION_UP:
+						win->OnKeyUp()(*win, key_code);
+						break;
+
+					default:
+						break;
+					}
 				}
 				break;
+
+#if (__ANDROID_API__ >= 13)
+			case AINPUT_SOURCE_JOYSTICK:
+				break;
+#endif
 
 			default:
 				break;
 			}
-
 			return 1;
 		}
 		return 0;

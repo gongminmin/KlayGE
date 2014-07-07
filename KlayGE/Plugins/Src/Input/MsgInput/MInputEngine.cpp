@@ -70,7 +70,12 @@ namespace KlayGE
 
 	MsgInputEngine::~MsgInputEngine()
 	{
+#if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
 		on_raw_input_.disconnect();
+#elif defined KLAYGE_PLATFORM_ANDROID
+		on_key_down_.disconnect();
+		on_key_up_.disconnect();
+#endif
 		on_touch_.disconnect();
 		on_pointer_down_.disconnect();
 		on_pointer_up_.disconnect();
@@ -202,6 +207,13 @@ namespace KlayGE
 		on_pointer_wheel_ = main_wnd->OnPointerWheel().connect(KlayGE::bind(&MsgInputEngine::OnPointerWheel, this,
 			KlayGE::placeholders::_2, KlayGE::placeholders::_3, KlayGE::placeholders::_4));
 		devices_.push_back(MakeSharedPtr<MsgInputTouch>());
+#if defined KLAYGE_PLATFORM_ANDROID
+		on_key_down_ = main_wnd->OnKeyDown().connect(KlayGE::bind(&MsgInputEngine::OnKeyDown, this,
+			KlayGE::placeholders::_2));
+		on_key_up_ = main_wnd->OnKeyDown().connect(KlayGE::bind(&MsgInputEngine::OnKeyUp, this,
+			KlayGE::placeholders::_2));
+		devices_.push_back(MakeSharedPtr<MsgInputKeyboard>());
+#endif
 #endif
 
 #if (defined KLAYGE_PLATFORM_WINDOWS_DESKTOP) && (defined KLAYGE_HAVE_LIBOVR)
@@ -321,6 +333,32 @@ namespace KlayGE
 			}
 		}
 	}
+
+#if defined KLAYGE_PLATFORM_ANDROID
+	void MsgInputEngine::OnKeyDown(uint32_t key)
+	{
+		typedef KLAYGE_DECLTYPE(devices_) DevicesType;
+		KLAYGE_FOREACH(DevicesType::reference device, devices_)
+		{
+			if (InputEngine::IDT_Keyboard == device->Type())
+			{
+				checked_pointer_cast<MsgInputKeyboard>(device)->OnKeyDown(key);
+			}
+		}
+	}
+
+	void MsgInputEngine::OnKeyUp(uint32_t key)
+	{
+		typedef KLAYGE_DECLTYPE(devices_) DevicesType;
+		KLAYGE_FOREACH(DevicesType::reference device, devices_)
+		{
+			if (InputEngine::IDT_Keyboard == device->Type())
+			{
+				checked_pointer_cast<MsgInputKeyboard>(device)->OnKeyUp(key);
+			}
+		}
+	}
+#endif
 
 #if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
 	NTSTATUS MsgInputEngine::HidP_GetCaps(PHIDP_PREPARSED_DATA PreparsedData, PHIDP_CAPS Capabilities) const

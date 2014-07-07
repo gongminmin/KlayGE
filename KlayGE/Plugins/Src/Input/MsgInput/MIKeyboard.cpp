@@ -32,7 +32,6 @@
 
 #include <KlayGE/MsgInput/MInput.hpp>
 
-#if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
 namespace
 {
 	using namespace KlayGE;
@@ -300,8 +299,12 @@ namespace
 
 namespace KlayGE
 {
+#if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
 	MsgInputKeyboard::MsgInputKeyboard(HWND hwnd, HANDLE device)
 		: hwnd_(hwnd), device_(device)
+#elif defined KLAYGE_PLATFORM_ANDROID
+	MsgInputKeyboard::MsgInputKeyboard()
+#endif
 	{
 		keys_state_.fill(false);
 	}
@@ -312,6 +315,7 @@ namespace KlayGE
 		return name;
 	}
 
+#if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
 	void MsgInputKeyboard::OnRawInput(RAWINPUT const & ri)
 	{
 		if ((RIM_TYPEKEYBOARD == ri.header.dwType) && (ri.header.hDevice == device_)
@@ -324,6 +328,27 @@ namespace KlayGE
 			}
 		}
 	}
+#elif defined KLAYGE_PLATFORM_ANDROID
+	void MsgInputKeyboard::OnKeyDown(uint32_t key)
+	{
+		// TODO: a VK_MAPPING for Android
+		int32_t ks = VK_MAPPING[key];
+		if (ks >= 0)
+		{
+			keys_state_[ks] = 1;
+		}
+	}
+
+	void MsgInputKeyboard::OnKeyUp(uint32_t key)
+	{
+		// TODO: a VK_MAPPING for Android
+		int32_t ks = VK_MAPPING[key];
+		if (ks >= 0)
+		{
+			keys_state_[ks] = 0;
+		}
+	}
+#endif
 
 	void MsgInputKeyboard::UpdateInputs()
 	{
@@ -331,4 +356,3 @@ namespace KlayGE
 		keys_[index_] = keys_state_;
 	}
 }
-#endif

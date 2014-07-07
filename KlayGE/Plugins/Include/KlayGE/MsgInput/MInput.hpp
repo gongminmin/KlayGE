@@ -252,7 +252,12 @@ namespace KlayGE
 #endif
 
 	private:
+#if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
 		boost::signals2::connection on_raw_input_;
+#elif defined KLAYGE_PLATFORM_ANDROID
+		boost::signals2::connection on_key_down_;
+		boost::signals2::connection on_key_up_;
+#endif
 		boost::signals2::connection on_touch_;
 		boost::signals2::connection on_pointer_down_;
 		boost::signals2::connection on_pointer_up_;
@@ -299,26 +304,42 @@ namespace KlayGE
 		void OnPointerUp(int2 const & pt, uint32_t id);
 		void OnPointerUpdate(int2 const & pt, uint32_t id, bool down);
 		void OnPointerWheel(int2 const & pt, uint32_t id, int32_t wheel_delta);
+
+#if defined KLAYGE_PLATFORM_ANDROID
+		void OnKeyDown(uint32_t key);
+		void OnKeyUp(uint32_t key);
+#endif
 	};
 
-#if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
 	class MsgInputKeyboard : public InputKeyboard
 	{
 	public:
+#if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
 		MsgInputKeyboard(HWND hwnd, HANDLE device);
+#elif defined KLAYGE_PLATFORM_ANDROID
+		MsgInputKeyboard();
+#endif
 
 		virtual std::wstring const & Name() const KLAYGE_OVERRIDE;
+#if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
 		void OnRawInput(RAWINPUT const & ri);
+#elif defined KLAYGE_PLATFORM_ANDROID
+		void OnKeyDown(uint32_t key);
+		void OnKeyUp(uint32_t key);
+#endif
 
 	private:
 		virtual void UpdateInputs() KLAYGE_OVERRIDE;
 
 	private:
+#if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
 		HWND hwnd_;
 		HANDLE device_;
+#endif
 		array<bool, 256> keys_state_;
 	};
 
+#if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
 	class MsgInputMouse : public InputMouse
 	{
 	public:
