@@ -89,6 +89,54 @@ class build_info:
 			target_platform = host_platform
 		else:
 			target_platform = cfg_build.target
+			if 0 == target_platform.find("android"):
+				space_place = target_platform.find(' ')
+				if space_place != -1:
+					android_ver = target_platform[space_place + 1:]
+					if "4.4" == android_ver:
+						target_api_level = 19
+					elif "4.3" == android_ver:
+						target_api_level = 18
+					elif "4.2" == android_ver:
+						target_api_level = 17
+					elif "4.1" == android_ver:
+						target_api_level = 16
+					elif ("4.0.3" == android_ver) or ("4.0.4" == android_ver):
+						target_api_level = 15
+					elif "4.0" == android_ver:
+						target_api_level = 14
+					elif "3.2" == android_ver:
+						target_api_level = 13
+					elif "3.1" == android_ver:
+						target_api_level = 12
+					elif "3.0" == android_ver:
+						target_api_level = 11
+					elif ("2.3.4" == android_ver) or ("2.3.3" == android_ver):
+						target_api_level = 10
+					elif "2.3" == android_ver:
+						target_api_level = 9
+					elif "2.2" == android_ver:
+						target_api_level = 8
+					elif "2.1" == android_ver:
+						target_api_level = 7
+					elif "2.0.1" == android_ver:
+						target_api_level = 6
+					elif "2.0" == android_ver:
+						target_api_level = 5
+					elif "1.6" == android_ver:
+						target_api_level = 4
+					elif "1.5" == android_ver:
+						target_api_level = 3
+					elif "1.1" == android_ver:
+						target_api_level = 2
+					elif "1.0" == android_ver:
+						target_api_level = 1
+					else:
+						log_error("Unsupported android version\n")
+				else:
+					target_api_level = 10
+				target_platform = "android"
+				self.target_api_level = target_api_level
 		if "android" == target_platform:
 			prefer_static = True
 		else:
@@ -325,7 +373,7 @@ def build_a_project(name, build_path, build_info, compiler_arch, need_install = 
 		additional_options += " -DKLAYGE_ARCH_NAME:STRING=\"%s\"" % compiler_arch[0]
 	if "android" == build_info.target_platform:
 		additional_options += " -DCMAKE_TOOLCHAIN_FILE=\"%s/cmake/android.toolchain.cmake\"" % curdir
-		additional_options += " -DANDROID_NATIVE_API_LEVEL=9"
+		additional_options += " -DANDROID_NATIVE_API_LEVEL=%d" % build_info.target_api_level
 		if "win" == build_info.host_platform:
 			additional_options += " -DCMAKE_MAKE_PROGRAM=\"%ANDROID_NDK%\\prebuilt\\windows\\bin\\make.exe\""
 
