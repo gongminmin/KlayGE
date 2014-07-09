@@ -75,6 +75,10 @@ namespace KlayGE
 #elif defined KLAYGE_PLATFORM_ANDROID
 		on_key_down_.disconnect();
 		on_key_up_.disconnect();
+		on_mouse_down_.disconnect();
+		on_mouse_up_.disconnect();
+		on_mouse_move_.disconnect();
+		on_mouse_wheel_.disconnect();
 #endif
 		on_touch_.disconnect();
 		on_pointer_down_.disconnect();
@@ -210,9 +214,19 @@ namespace KlayGE
 #if defined KLAYGE_PLATFORM_ANDROID
 		on_key_down_ = main_wnd->OnKeyDown().connect(KlayGE::bind(&MsgInputEngine::OnKeyDown, this,
 			KlayGE::placeholders::_2));
-		on_key_up_ = main_wnd->OnKeyDown().connect(KlayGE::bind(&MsgInputEngine::OnKeyUp, this,
+		on_key_up_ = main_wnd->OnKeyUp().connect(KlayGE::bind(&MsgInputEngine::OnKeyUp, this,
 			KlayGE::placeholders::_2));
 		devices_.push_back(MakeSharedPtr<MsgInputKeyboard>());
+
+		on_mouse_down_ = main_wnd->OnMouseDown().connect(KlayGE::bind(&MsgInputEngine::OnMouseDown, this,
+			KlayGE::placeholders::_2, KlayGE::placeholders::_3));
+		on_mouse_up_ = main_wnd->OnMouseUp().connect(KlayGE::bind(&MsgInputEngine::OnMouseUp, this,
+			KlayGE::placeholders::_2, KlayGE::placeholders::_3));
+		on_mouse_move_ = main_wnd->OnMouseMove().connect(KlayGE::bind(&MsgInputEngine::OnMouseMove, this,
+			KlayGE::placeholders::_2));
+		on_mouse_wheel_ = main_wnd->OnMouseWheel().connect(KlayGE::bind(&MsgInputEngine::OnMouseWheel, this,
+			KlayGE::placeholders::_2, KlayGE::placeholders::_3));
+		devices_.push_back(MakeSharedPtr<MsgInputMouse>());
 #endif
 #endif
 
@@ -355,6 +369,54 @@ namespace KlayGE
 			if (InputEngine::IDT_Keyboard == device->Type())
 			{
 				checked_pointer_cast<MsgInputKeyboard>(device)->OnKeyUp(key);
+			}
+		}
+	}
+
+	void MsgInputEngine::OnMouseDown(int2 const & pt, uint32_t buttons)
+	{
+		typedef KLAYGE_DECLTYPE(devices_) DevicesType;
+		KLAYGE_FOREACH(DevicesType::reference device, devices_)
+		{
+			if (InputEngine::IDT_Mouse == device->Type())
+			{
+				checked_pointer_cast<MsgInputMouse>(device)->OnMouseDown(pt, buttons);
+			}
+		}
+	}
+
+	void MsgInputEngine::OnMouseUp(int2 const & pt, uint32_t buttons)
+	{
+		typedef KLAYGE_DECLTYPE(devices_) DevicesType;
+		KLAYGE_FOREACH(DevicesType::reference device, devices_)
+		{
+			if (InputEngine::IDT_Mouse == device->Type())
+			{
+				checked_pointer_cast<MsgInputMouse>(device)->OnMouseUp(pt, buttons);
+			}
+		}
+	}
+
+	void MsgInputEngine::OnMouseMove(int2 const & pt)
+	{
+		typedef KLAYGE_DECLTYPE(devices_) DevicesType;
+		KLAYGE_FOREACH(DevicesType::reference device, devices_)
+		{
+			if (InputEngine::IDT_Mouse == device->Type())
+			{
+				checked_pointer_cast<MsgInputMouse>(device)->OnMouseMove(pt);
+			}
+		}
+	}
+
+	void MsgInputEngine::OnMouseWheel(int2 const & pt, int32_t wheel_delta)
+	{
+		typedef KLAYGE_DECLTYPE(devices_) DevicesType;
+		KLAYGE_FOREACH(DevicesType::reference device, devices_)
+		{
+			if (InputEngine::IDT_Mouse == device->Type())
+			{
+				checked_pointer_cast<MsgInputMouse>(device)->OnMouseWheel(pt, wheel_delta);
 			}
 		}
 	}

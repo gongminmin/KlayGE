@@ -804,11 +804,31 @@ namespace KlayGE
 				switch (source)
 				{
 				case AINPUT_SOURCE_MOUSE:
-					/*{
+					{
 						BOOST_ASSERT(1 == AMotionEvent_getPointerCount(event));
 
-						int2(AMotionEvent_getX(event, 0), AMotionEvent_getY(event, 0));
-					}*/
+						int2 pt(AMotionEvent_getX(event, pointer_index), AMotionEvent_getY(event, pointer_index));
+						int32_t buttons = AMotionEvent_getButtonState(event);
+						switch (action_code)
+						{
+						case AMOTION_EVENT_ACTION_DOWN:
+							win->OnMouseDown()(*win, pt, buttons);
+							break;
+
+						case AMOTION_EVENT_ACTION_UP:
+							win->OnMouseUp()(*win, pt, buttons);
+							break;
+
+						case AMOTION_EVENT_ACTION_SCROLL:
+							win->OnMouseWheel()(*win, pt,
+								AMotionEvent_getAxisValue(event, AMOTION_EVENT_AXIS_VSCROLL, pointer_index));
+							break;
+
+						default:
+							win->OnMouseMove()(*win, pt);
+							break;
+						}
+					}
 					break;
 
 				case AINPUT_SOURCE_TOUCHSCREEN:
@@ -842,7 +862,7 @@ namespace KlayGE
 					}
 					break;
 
-#if (__ANDROID_API__ >= 13)
+#if (__ANDROID_API__ >= 12)
 				case AINPUT_SOURCE_JOYSTICK:
 					break;
 #endif
@@ -875,7 +895,7 @@ namespace KlayGE
 				}
 				break;
 
-#if (__ANDROID_API__ >= 13)
+#if (__ANDROID_API__ >= 12)
 			case AINPUT_SOURCE_JOYSTICK:
 				break;
 #endif

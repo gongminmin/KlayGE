@@ -166,6 +166,10 @@ namespace KlayGE
 #if defined KLAYGE_PLATFORM_ANDROID
 		typedef boost::signals2::signal<void(Window const & wnd, uint32_t key)> KeyDownEvent;
 		typedef boost::signals2::signal<void(Window const & wnd, uint32_t key)> KeyUpEvent;
+		typedef boost::signals2::signal<void(Window const & wnd, int2 const & pt, uint32_t buttons)> MouseDownEvent;
+		typedef boost::signals2::signal<void(Window const & wnd, int2 const & pt, uint32_t buttons)> MouseUpEvent;
+		typedef boost::signals2::signal<void(Window const & wnd, int2 const & pt)> MouseMoveEvent;
+		typedef boost::signals2::signal<void(Window const & wnd, int2 const & pt, int32_t wheel_delta)> MouseWheelEvent;
 #endif
 		typedef boost::signals2::signal<void(Window const & wnd)> CloseEvent;
 
@@ -236,6 +240,22 @@ namespace KlayGE
 		{
 			return key_up_event_;
 		}
+		MouseDownEvent& OnMouseDown()
+		{
+			return mouse_down_event_;
+		}
+		MouseUpEvent& OnMouseUp()
+		{
+			return mouse_up_event_;
+		}
+		MouseMoveEvent& OnMouseMove()
+		{
+			return mouse_move_event_;
+		}
+		MouseWheelEvent& OnMouseWheel()
+		{
+			return mouse_wheel_event_;
+		}
 #endif
 		CloseEvent& OnClose()
 		{
@@ -265,6 +285,10 @@ namespace KlayGE
 #if defined KLAYGE_PLATFORM_ANDROID
 		KeyDownEvent key_down_event_;
 		KeyUpEvent key_up_event_;
+		MouseDownEvent mouse_down_event_;
+		MouseUpEvent mouse_up_event_;
+		MouseMoveEvent mouse_move_event_;
+		MouseWheelEvent mouse_wheel_event_;
 #endif
 		CloseEvent close_event_;
 

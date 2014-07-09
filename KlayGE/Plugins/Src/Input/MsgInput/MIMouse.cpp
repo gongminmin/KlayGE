@@ -35,15 +35,20 @@
 
 #include <KlayGE/MsgInput/MInput.hpp>
 
-#if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
 namespace KlayGE
 {
+#if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
 	MsgInputMouse::MsgInputMouse(HWND hwnd, HANDLE device)
 		: hwnd_(hwnd), device_(device),
+#elif defined KLAYGE_PLATFORM_ANDROID
+	MsgInputMouse::MsgInputMouse()
+		: last_abs_state_(-1, -1), abs_state_(0, 0),
+#endif
 			offset_state_(0, 0, 0)
 	{
 		buttons_state_.fill(false);
 
+#if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
 		UINT size;
 		if (0 == ::GetRawInputDeviceInfo(device, RIDI_DEVICEINFO, nullptr, &size))
 		{
@@ -54,6 +59,9 @@ namespace KlayGE
 			num_buttons_ = std::min(static_cast<uint32_t>(buttons_[0].size()),
 				static_cast<uint32_t>(info->mouse.dwNumberOfButtons));
 		}
+#elif defined KLAYGE_PLATFORM_ANDROID
+		num_buttons_ = 5;
+#endif
 	}
 
 	std::wstring const & MsgInputMouse::Name() const
@@ -62,6 +70,7 @@ namespace KlayGE
 		return name;
 	}
 
+#if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
 	void MsgInputMouse::OnRawInput(RAWINPUT const & ri)
 	{
 		if ((RIM_TYPEMOUSE == ri.header.dwType) && (ri.header.hDevice == device_)
@@ -90,23 +99,77 @@ namespace KlayGE
 			}
 		}
 	}
+#elif defined KLAYGE_PLATFORM_ANDROID
+	void MsgInputMouse::OnMouseDown(int2 const & pt, uint32_t buttons)
+	{
+		for (int i = 0; i < 5; ++ i)
+		{
+			if (buttons & (1UL << i))
+			{
+				buttons_state_[i] = true;
+			}
+		}
+
+		this->OnMouseMove(pt);
+	}
+
+	void MsgInputMouse::OnMouseUp(int2 const & pt, uint32_t buttons)
+	{
+		for (int i = 0; i < 5; ++ i)
+		{
+			if (buttons & (1UL << i))
+			{
+				buttons_state_[i] = false;
+			}
+		}
+
+		this->OnMouseMove(pt);
+	}
+
+	void MsgInputMouse::OnMouseMove(int2 const & pt)
+	{
+		abs_state_ = pt;
+		if ((last_abs_state_.x() < 0) && (last_abs_state_.y() < 0))
+		{
+			last_abs_state_ = abs_state_;
+		}
+
+		offset_state_.x() = abs_state_.x() - last_abs_state_.x();
+		offset_state_.y() = abs_state_.y() - last_abs_state_.y();
+		last_abs_state_ = abs_state_;
+	}
+
+	void MsgInputMouse::OnMouseWheel(int2 const & pt, int32_t wheel_delta)
+	{
+		offset_state_.z() = wheel_delta;
+
+		this->OnMouseMove(pt);
+	}
+#endif
 
 	void MsgInputMouse::UpdateInputs()
 	{
+#if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
 		POINT pt;
 		::GetCursorPos(&pt);
 		::ScreenToClient(Context::Instance().AppInstance().MainWnd()->HWnd(), &pt);
 		abs_pos_ = int2(pt.x, pt.y);
+#elif defined KLAYGE_PLATFORM_ANDROID
+		abs_pos_ = abs_state_;
+#endif
 		offset_ = offset_state_;
 
 		index_ = !index_;
 		buttons_[index_] = buttons_state_;
 
+#if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
 		shift_ctrl_alt_ = ((GetKeyState(VK_SHIFT) & 0x80) ? MB_Shift : 0)
 			| ((GetKeyState(VK_CONTROL) & 0x80) ? MB_Ctrl : 0)
 			| ((GetKeyState(VK_MENU) & 0x80) ? MB_Alt : 0);
+#elif defined KLAYGE_PLATFORM_ANDROID
+		// TODO
+#endif
 
 		offset_state_ = int3(0, 0, 0);
 	}
 }
-#endif
