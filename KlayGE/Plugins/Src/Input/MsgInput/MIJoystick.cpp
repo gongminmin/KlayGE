@@ -34,15 +34,20 @@
 
 #include <KlayGE/MsgInput/MInput.hpp>
 
-#if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
 namespace KlayGE
 {
+#if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
 	MsgInputJoystick::MsgInputJoystick(HANDLE device)
 		: device_(device),
+#elif defined KLAYGE_PLATFORM_ANDROID
+	MsgInputJoystick::MsgInputJoystick()
+		:
+#endif
 			pos_state_(0, 0, 0), rot_state_(0, 0, 0), slider_state_(0, 0)
 	{
 		buttons_state_.fill(false);
 
+#if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
 		MsgInputEngine const & mie = *checked_cast<MsgInputEngine const *>(&Context::Instance().InputFactoryInstance().InputEngineInstance());
 
 		UINT size;
@@ -66,6 +71,9 @@ namespace KlayGE
 				}
 			}
 		}
+#elif defined KLAYGE_PLATFORM_ANDROID
+		num_buttons_ = 32;
+#endif
 	}
 	
 	const std::wstring& MsgInputJoystick::Name() const
@@ -74,6 +82,7 @@ namespace KlayGE
 		return name;
 	}
 
+#if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
 	void MsgInputJoystick::OnRawInput(RAWINPUT const & ri)
 	{
 		if ((RIM_TYPEHID == ri.header.dwType) && (ri.header.hDevice == device_))
@@ -185,6 +194,57 @@ namespace KlayGE
 			}
 		}
 	}
+#elif defined KLAYGE_PLATFORM_ANDROID
+	void MsgInputJoystick::OnJoystickAxis(uint32_t axis, int32_t value)
+	{
+		// TODO: Is it correct?
+		switch (axis)
+		{
+		case 0:
+			pos_state_.x() = value;
+			break;
+
+		case 1:
+			pos_state_.y() = value;
+			break;
+
+		case 2:
+			pos_state_.z() = value;
+			break;
+
+		case 3:
+			rot_state_.x() = value;
+			break;
+
+		case 4:
+			rot_state_.y() = value;
+			break;
+
+		case 5:
+			rot_state_.z() = value;
+			break;
+
+		case 6:
+			slider_state_.x() = value;
+			break;
+
+		case 7:
+			slider_state_.y() = value;
+			break;
+
+		default:
+			break;
+		}
+	}
+
+	void MsgInputJoystick::OnJoystickButtons(uint32_t buttons)
+	{
+		for (size_t i = 0; i < buttons_state_.size(); ++ i)
+		{
+			buttons_state_[i] = (buttons & (1UL << i)) ? true : false;
+		}
+	}
+#endif
 
 	void MsgInputJoystick::UpdateInputs()
 	{
@@ -196,4 +256,3 @@ namespace KlayGE
 		buttons_[index_] = buttons_state_;
 	}
 }
-#endif

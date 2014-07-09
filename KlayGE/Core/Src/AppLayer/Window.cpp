@@ -864,6 +864,12 @@ namespace KlayGE
 
 #if (__ANDROID_API__ >= 12)
 				case AINPUT_SOURCE_JOYSTICK:
+					{
+						for (uint32_t i = 0; i < 8; i++)
+						{
+							win->OnJoystickAxis()(*win, i, AMotionEvent_getAxisValue(event, i, 0));
+						}
+					}
 					break;
 #endif
 
@@ -897,6 +903,7 @@ namespace KlayGE
 
 #if (__ANDROID_API__ >= 12)
 			case AINPUT_SOURCE_JOYSTICK:
+				win->OnJoystickButtons()(*win, AMotionEvent_getButtonState(event));
 				break;
 #endif
 

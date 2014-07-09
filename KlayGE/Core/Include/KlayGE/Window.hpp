@@ -170,6 +170,8 @@ namespace KlayGE
 		typedef boost::signals2::signal<void(Window const & wnd, int2 const & pt, uint32_t buttons)> MouseUpEvent;
 		typedef boost::signals2::signal<void(Window const & wnd, int2 const & pt)> MouseMoveEvent;
 		typedef boost::signals2::signal<void(Window const & wnd, int2 const & pt, int32_t wheel_delta)> MouseWheelEvent;
+		typedef boost::signals2::signal<void(Window const & wnd, int32_t axis, int32_t value)> JoystickAxisEvent;
+		typedef boost::signals2::signal<void(Window const & wnd, uint32_t buttons)> JoystickButtonsEvent;
 #endif
 		typedef boost::signals2::signal<void(Window const & wnd)> CloseEvent;
 
@@ -256,6 +258,14 @@ namespace KlayGE
 		{
 			return mouse_wheel_event_;
 		}
+		JoystickAxisEvent& OnJoystickAxis()
+		{
+			return joystick_axis_event_;
+		}
+		JoystickButtonsEvent& OnJoystickButtons()
+		{
+			return joystick_buttons_event_;
+		}
 #endif
 		CloseEvent& OnClose()
 		{
@@ -289,6 +299,8 @@ namespace KlayGE
 		MouseUpEvent mouse_up_event_;
 		MouseMoveEvent mouse_move_event_;
 		MouseWheelEvent mouse_wheel_event_;
+		JoystickAxisEvent joystick_axis_event_;
+		JoystickButtonsEvent joystick_buttons_event_;
 #endif
 		CloseEvent close_event_;
 

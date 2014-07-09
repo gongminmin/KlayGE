@@ -261,6 +261,8 @@ namespace KlayGE
 		boost::signals2::connection on_mouse_up_;
 		boost::signals2::connection on_mouse_move_;
 		boost::signals2::connection on_mouse_wheel_;
+		boost::signals2::connection on_joystick_axis_;
+		boost::signals2::connection on_joystick_buttons_;
 #endif
 		boost::signals2::connection on_touch_;
 		boost::signals2::connection on_pointer_down_;
@@ -316,6 +318,8 @@ namespace KlayGE
 		void OnMouseUp(int2 const & pt, uint32_t buttons);
 		void OnMouseMove(int2 const & pt);
 		void OnMouseWheel(int2 const & pt, int32_t wheel_delta);
+		void OnJoystickAxis(uint32_t axis, int32_t value);
+		void OnJoystickButtons(uint32_t buttons);
 #endif
 	};
 
@@ -381,20 +385,30 @@ namespace KlayGE
 		array<bool, 8> buttons_state_;
 	};
 
-#if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
 	class MsgInputJoystick : public InputJoystick
 	{
 	public:
+#if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
 		explicit MsgInputJoystick(HANDLE device);
+#elif defined KLAYGE_PLATFORM_ANDROID
+		MsgInputJoystick();
+#endif
 
 		virtual std::wstring const & Name() const KLAYGE_OVERRIDE;
+#if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
 		void OnRawInput(RAWINPUT const & ri);
+#elif defined KLAYGE_PLATFORM_ANDROID
+		void OnJoystickAxis(uint32_t axis, int32_t value);
+		void OnJoystickButtons(uint32_t buttons);
+#endif
 
 	private:
 		virtual void UpdateInputs() KLAYGE_OVERRIDE;
 
 	private:
+#if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
 		HANDLE device_;
+#endif
 		int3 pos_state_;
 		int3 rot_state_;
 		int2 slider_state_;
@@ -424,7 +438,6 @@ namespace KlayGE
 
 		OVR::Util::Render::StereoConfig sconfig_;
 	};
-#endif
 #endif
 
 	class MsgInputTouch : public InputTouch

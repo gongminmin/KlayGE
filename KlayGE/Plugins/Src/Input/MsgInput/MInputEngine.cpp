@@ -79,6 +79,8 @@ namespace KlayGE
 		on_mouse_up_.disconnect();
 		on_mouse_move_.disconnect();
 		on_mouse_wheel_.disconnect();
+		on_joystick_axis_.disconnect();
+		on_joystick_buttons_.disconnect();
 #endif
 		on_touch_.disconnect();
 		on_pointer_down_.disconnect();
@@ -227,6 +229,12 @@ namespace KlayGE
 		on_mouse_wheel_ = main_wnd->OnMouseWheel().connect(KlayGE::bind(&MsgInputEngine::OnMouseWheel, this,
 			KlayGE::placeholders::_2, KlayGE::placeholders::_3));
 		devices_.push_back(MakeSharedPtr<MsgInputMouse>());
+
+		on_joystick_axis_ = main_wnd->OnJoystickAxis().connect(KlayGE::bind(&MsgInputEngine::OnJoystickAxis, this,
+			KlayGE::placeholders::_2, KlayGE::placeholders::_3));
+		on_joystick_buttons_ = main_wnd->OnJoystickButtons().connect(KlayGE::bind(&MsgInputEngine::OnJoystickButtons, this,
+			KlayGE::placeholders::_2));
+		devices_.push_back(MakeSharedPtr<MsgInputJoystick>());
 #endif
 #endif
 
@@ -417,6 +425,30 @@ namespace KlayGE
 			if (InputEngine::IDT_Mouse == device->Type())
 			{
 				checked_pointer_cast<MsgInputMouse>(device)->OnMouseWheel(pt, wheel_delta);
+			}
+		}
+	}
+
+	void MsgInputEngine::OnJoystickAxis(uint32_t axis, int32_t value)
+	{
+		typedef KLAYGE_DECLTYPE(devices_) DevicesType;
+		KLAYGE_FOREACH(DevicesType::reference device, devices_)
+		{
+			if (InputEngine::IDT_Joystick == device->Type())
+			{
+				checked_pointer_cast<MsgInputJoystick>(device)->OnJoystickAxis(axis, value);
+			}
+		}
+	}
+
+	void MsgInputEngine::OnJoystickButtons(uint32_t buttons)
+	{
+		typedef KLAYGE_DECLTYPE(devices_) DevicesType;
+		KLAYGE_FOREACH(DevicesType::reference device, devices_)
+		{
+			if (InputEngine::IDT_Joystick == device->Type())
+			{
+				checked_pointer_cast<MsgInputJoystick>(device)->OnJoystickButtons(buttons);
 			}
 		}
 	}
