@@ -24,9 +24,6 @@
 #pragma warning(pop)
 #endif
 
-#include <mmintrin.h>
-#include <emmintrin.h>
-
 #include <ft2build.h>
 #include FT_FREETYPE_H
 #include FT_STROKER_H

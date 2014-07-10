@@ -34,9 +34,11 @@ def build_Boost(build_info, compiler_arch):
 	options = ""
 	
 	if ("x86" == compiler_arch[0]) or ("x86_app" == compiler_arch[0]):
-		options += "address-model=32"
+		options += "address-model=32 architecture=x86"
 	elif ("x64" == compiler_arch[0]) or ("x64_app" == compiler_arch[0]):
-		options += "address-model=64"
+		options += "address-model=64 architecture=x86"
+	elif ("arm" == compiler_arch[0]) or ("arm_app" == compiler_arch[0]):
+		options += "address-model=32 architecture=arm"
 	
 	if "vc" == build_info.compiler_name:
 		if build_info.compiler_version >= 100:
@@ -47,10 +49,10 @@ def build_Boost(build_info, compiler_arch):
 		options += " --without-atomic --without-date_time"
 
 	options += " --disable-filesystem2"
-	if ("x86_app" == compiler_arch[0]) or ("x64_app" == compiler_arch[0]):
-		options += " architecture=x86 --without-filesystem --without-program_options define=\"WINAPI_FAMILY=WINAPI_FAMILY_APP\" define=BOOST_NO_ANSI_APIS cxxflags=\"/ZW /EHsc\""
-	elif ("arm_app" == compiler_arch[0]):
-		options += " architecture=arm --without-filesystem --without-program_options define=\"WINAPI_FAMILY=WINAPI_FAMILY_APP\" define=BOOST_NO_ANSI_APIS cxxflags=\"/ZW /EHsc\""
+	if (compiler_arch[0].find("_app") != -1):
+		options += " --without-filesystem --without-program_options define=\"WINAPI_FAMILY=WINAPI_FAMILY_APP\" define=BOOST_NO_ANSI_APIS cxxflags=\"/ZW /EHsc\""
+	if ("win" == build_info.target_platform) and ("arm" == compiler_arch[0]):
+		options += " define=_ARM_WINAPI_PARTITION_DESKTOP_SDK_AVAILABLE"
 	if "vc" == build_info.compiler_name:
 		options += " cxxflags=-wd4819 cxxflags=-wd4910 define=_CRT_SECURE_NO_DEPRECATE define=_SCL_SECURE_NO_DEPRECATE"
 	elif ("mgw" == build_info.compiler_name) or ("gcc" == build_info.compiler_name):
@@ -223,11 +225,11 @@ def build_external_libs(build_info):
 				setup_DXSDK(build_info, arch)
 
 		if (not arch[3]) and (build_info.target_platform != "android"):
-			if "win" == build_info.target_platform:
+			if ("win" == build_info.target_platform) and (arch[0] != "arm"):
 				print("\nSeting up OpenAL SDK...\n")
 				setup_OpenALSDK(build_info, arch)
 
-		if (not arch[3]) and (build_info.target_platform != "android"):
+		if (not arch[3]) and (arch[0] != "arm") and (build_info.target_platform != "android"):
 			print("\nSeting up Cg...\n")
 			setup_Cg(build_info, arch)
 

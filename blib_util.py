@@ -209,6 +209,8 @@ class build_info:
 					arch_list.append((arch, "Visual Studio 12", toolset, is_winrt))
 				elif "x86_app" == arch:
 					arch_list.append((arch, "Visual Studio 12 WinRT-x86", toolset, is_winrt))
+				elif "arm" == arch:
+					arch_list.append((arch, "Visual Studio 12 ARM", toolset, is_winrt))
 				elif "arm_app" == arch:
 					arch_list.append((arch, "Visual Studio 12 WinRT-ARM", toolset, is_winrt))
 				elif "x64" == arch:
@@ -227,6 +229,8 @@ class build_info:
 					arch_list.append((arch, "Visual Studio 11", toolset, is_winrt))
 				elif "x86_app" == arch:
 					arch_list.append((arch, "Visual Studio 11 WinRT-x86", toolset, is_winrt))
+				elif "arm" == arch:
+					arch_list.append((arch, "Visual Studio 11 ARM", toolset, is_winrt))
 				elif "arm_app" == arch:
 					arch_list.append((arch, "Visual Studio 11 WinRT-ARM", toolset, is_winrt))
 				elif "x64" == arch:
@@ -384,7 +388,7 @@ def build_a_project(name, build_path, build_info, compiler_arch, need_install = 
 		elif ("x64" == compiler_arch[0]) or ("x64_app" == compiler_arch[0]):
 			vc_option = "x86_amd64"
 			vc_arch = "x64"
-		elif ("arm_app" == compiler_arch[0]):
+		elif ("arm" == compiler_arch[0]) or ("arm_app" == compiler_arch[0]):
 			vc_option = "x86_arm"
 			vc_arch = "ARM"
 
