@@ -42,8 +42,8 @@ SET(CONTENT_FILES
 	${KLAYGE_PROJECT_DIR}/media/Textures/3D/color_grading.dds
 	${KLAYGE_PROJECT_DIR}/media/Textures/Cube/uffizi_cross_c.dds
 	${KLAYGE_PROJECT_DIR}/media/Textures/Cube/uffizi_cross_y.dds
+	${KLAYGE_PROJECT_DIR}/Samples/media/Common/sphere_high.meshml.model_bin
 	${KLAYGE_PROJECT_DIR}/Samples/media/CausticsMap/bunny.meshml.model_bin
-	${KLAYGE_PROJECT_DIR}/Samples/media/CausticsMap/sphere_high.meshml.model_bin
 	${KLAYGE_PROJECT_DIR}/Samples/media/CausticsMap/point.dds
 	${KLAYGE_PROJECT_DIR}/Samples/media/CausticsMap/Caustics.kfx
 	${KLAYGE_PROJECT_DIR}/Samples/media/CausticsMap/Scene.kfx
