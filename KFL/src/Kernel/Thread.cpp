@@ -101,23 +101,29 @@ namespace KlayGE
 		{
 			{
 				shared_ptr<thread_pool_common_data_t> data = info_->data_.lock();
-
-				unique_lock<mutex> lock(info_->wake_up_mut_);
-
-				// Sleep until someone has a job to do or the pool is being destroyed
-				while (!info_->wake_up_ && !data->general_cleanup_)
+				if (data)
 				{
-					info_->wake_up_cond_.wait(lock);
-				}
+					unique_lock<mutex> lock(info_->wake_up_mut_);
 
-				// This is an invitation to leave the pool
-				if (!info_->func_ || data->general_cleanup_)
+					// Sleep until someone has a job to do or the pool is being destroyed
+					while (!info_->wake_up_ && !data->general_cleanup_)
+					{
+						info_->wake_up_cond_.wait(lock);
+					}
+
+					// This is an invitation to leave the pool
+					if (!info_->func_ || data->general_cleanup_)
+					{
+						return;
+					}
+
+					// If function is zero, this is a exit request
+					info_->wake_up_ = false;
+				}
+				else
 				{
 					return;
 				}
-
-				// If function is zero, this is a exit request
-				info_->wake_up_ = false;
 			}
 
 			// Execute requested functor
@@ -139,23 +145,29 @@ namespace KlayGE
 			// Locked code to try to insert the thread again in the thread pool
 			{
 				shared_ptr<thread_pool_common_data_t> data = info_->data_.lock();
-
-				unique_lock<mutex> lock(data->mut_);
-
-				// If there is a general cleanup request, finish
-				if (data->general_cleanup_)
+				if (data)
 				{
-					return;
-				}
+					unique_lock<mutex> lock(data->mut_);
 
-				// Now return thread data to the queue if there are less than num_max_cached_threads_ threads
-				if (data->threads_.size() < data->num_max_cached_threads_)
-				{
-					data->threads_.push_back(info_);
+					// If there is a general cleanup request, finish
+					if (data->general_cleanup_)
+					{
+						return;
+					}
+
+					// Now return thread data to the queue if there are less than num_max_cached_threads_ threads
+					if (data->threads_.size() < data->num_max_cached_threads_)
+					{
+						data->threads_.push_back(info_);
+					}
+					else
+					{
+						// This thread shouldn't be cached since we have enough cached threads
+						return;
+					}
 				}
 				else
 				{
-					// This thread shouldn't be cached since we have enough cached threads
 					return;
 				}
 			}
