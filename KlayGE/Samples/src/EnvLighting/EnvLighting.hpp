@@ -19,6 +19,7 @@ private:
 	void OnResize(KlayGE::uint32_t width, KlayGE::uint32_t height);
 
 	void InputHandler(KlayGE::InputEngine const & sender, KlayGE::InputAction const & action);
+	void TypeChangedHandler(KlayGE::UIComboBox const & sender);
 
 	KlayGE::FontPtr font_;
 	std::vector<KlayGE::SceneObjectPtr> spheres_;
@@ -28,6 +29,10 @@ private:
 
 	KlayGE::TexturePtr y_cube_map_;
 	KlayGE::TexturePtr c_cube_map_;
+
+	KlayGE::UIDialogPtr dialog_;
+	int rendering_type_;
+	int id_type_combo_;
 };
 
 #endif		// _ENVLIGHTING_HPP

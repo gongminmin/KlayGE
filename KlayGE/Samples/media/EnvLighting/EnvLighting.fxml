@@ -50,7 +50,7 @@ float2 Hammersley2D(uint i, uint N)
 	return float2(float(i) / N, RadicalInverseVdC(i));
 }
 
-float3 ImportanceSampleGGX(float2 xi, float roughness, float3 normal)
+float3 ImportanceSampleGGX(float2 xi, float roughness)
 {
 	const float PI = 3.1415926f;
 	
@@ -58,7 +58,12 @@ float3 ImportanceSampleGGX(float2 xi, float roughness, float3 normal)
 	float phi = 2 * PI * xi.x;
 	float cos_theta = sqrt((1 - xi.y) / ((alpha * alpha - 1) * xi.y + 1));
 	float sin_theta = sqrt(1 - cos_theta * cos_theta);
-	float3 h = float3(sin_theta * cos(phi), sin_theta * sin(phi), cos_theta);
+	return float3(sin_theta * cos(phi), sin_theta * sin(phi), cos_theta);
+}
+
+float3 ImportanceSampleGGX(float2 xi, float roughness, float3 normal)
+{
+	float3 h = ImportanceSampleGGX(xi, roughness);
 	
 	float3 up_vec = abs(normal.z) < 0.999f ? float3(0, 0, 1) : float3(1, 0, 0);
 	float3 tangent = normalize(cross(up_vec, normal));
@@ -83,8 +88,8 @@ float3 SpecularIBL(float3 c_spec, float roughness, float3 normal, float3 view)
 {
 	float3 specular = 0;
 	
-	const int NUM_SAMPLES = 1024;
-	for (int i = 0; i < NUM_SAMPLES; ++ i)
+	const uint NUM_SAMPLES = 1024;
+	for (uint i = 0; i < NUM_SAMPLES; ++ i)
 	{
 		float2 xi = Hammersley2D(i, NUM_SAMPLES);
 		float3 h = ImportanceSampleGGX(xi, roughness, normal);
@@ -92,19 +97,79 @@ float3 SpecularIBL(float3 c_spec, float roughness, float3 normal, float3 view)
 		float n_dot_v = saturate(dot(normal, view));
 		float n_dot_l = saturate(dot(normal, l));
 		float n_dot_h = saturate(dot(normal, h));
-		float v_dot_h = saturate(dot(view, normal));
-		if ((n_dot_l > 0) && (n_dot_h * n_dot_v > 0))
+		float v_dot_h = saturate(dot(view, h));
+		if (n_dot_l > 0)
 		{
 			float3 env_clr = decode_hdr_yc(skybox_Ycube_tex.SampleLevel(skybox_sampler, l, 0).r,
 				skybox_Ccube_tex.SampleLevel(skybox_sampler, l, 0)).xyz;
 			float g = GSmith(n_dot_v, n_dot_l, roughness);
 			float fc = pow(1 - v_dot_h, 5);
 			float3 f = (1 - fc) * c_spec + fc;
-			specular += env_clr * f * g * v_dot_h / (n_dot_h * n_dot_v);
+			specular += env_clr * f * g * v_dot_h / max(1e-6f, n_dot_h * n_dot_v);
 		}
 	}
 	
 	return specular / NUM_SAMPLES;
+}
+
+float3 PrefilterEnvMap(float roughness, float3 r)
+{
+	float3 normal = r;
+	float3 view = r;
+	float3 prefiltered_clr = 0;
+	float total_weight = 0;
+	
+	const uint NUM_SAMPLES = 1024;
+	for (uint i = 0; i < NUM_SAMPLES; ++ i)
+	{
+		float2 xi = Hammersley2D(i, NUM_SAMPLES);
+		float3 h = ImportanceSampleGGX(xi, roughness, normal);
+		float3 l = -reflect(view, h);
+		float n_dot_l = saturate(dot(normal, l));
+		if (n_dot_l > 0)
+		{
+			prefiltered_clr += decode_hdr_yc(skybox_Ycube_tex.SampleLevel(skybox_sampler, l, 0).r,
+				skybox_Ccube_tex.SampleLevel(skybox_sampler, l, 0)).xyz * n_dot_l;
+			total_weight += n_dot_l;
+		}
+	}
+	
+	return prefiltered_clr / total_weight;
+}
+
+float2 IntegrateBRDF(float roughness, float n_dot_v)
+{
+	float3 view = float3(sqrt(1 - n_dot_v * n_dot_v), 0, n_dot_v);
+	float2 rg = 0;
+	
+	const uint NUM_SAMPLES = 1024;
+	for (uint i = 0; i < NUM_SAMPLES; ++ i)
+	{
+		float2 xi = Hammersley2D(i, NUM_SAMPLES);
+		float3 h = ImportanceSampleGGX(xi, roughness);
+		float3 l = -reflect(view, h);
+		float n_dot_l = saturate(l.z);
+		float n_dot_h = saturate(h.z);
+		float v_dot_h = saturate(dot(view, h));
+		if ((n_dot_l > 0) && (n_dot_h * n_dot_v != 0))
+		{
+			float g = GSmith(n_dot_v, n_dot_l, roughness);
+			float g_vis = g * v_dot_h / max(1e-6f, n_dot_h * n_dot_v);
+			float fc = pow(1 - v_dot_h, 5);
+			rg += float2(1 - fc, fc) * g_vis;
+		}
+	}
+	
+	return rg / NUM_SAMPLES;
+}
+
+float3 ApproximateSpecularIBL(float3 c_spec, float roughness, float3 normal, float3 view)
+{
+	float n_dot_v = saturate(dot(normal, view));
+	float3 r = -reflect(view, normal);
+	float3 prefiltered_clr = PrefilterEnvMap(roughness, r);
+	float2 env_brdf = IntegrateBRDF(roughness, n_dot_v);
+	return prefiltered_clr * (c_spec * env_brdf.x + env_brdf.y);
 }
 
 void GroundTruthVS(float4 pos		: POSITION,
@@ -128,6 +193,14 @@ float4 GroundTruthPS(float3 normal : TEXCOORD0, float3 incident : TEXCOORD1) : S
 	
 	return float4(SpecularIBL(0.4f, roughness, normal, incident), 1);
 }
+
+float4 ApproximatePS(float3 normal : TEXCOORD0, float3 incident : TEXCOORD1) : SV_Target
+{
+	normal = normalize(normal);
+	incident = normalize(incident);
+	
+	return float4(ApproximateSpecularIBL(0.4f, roughness, normal, incident), 1);
+}
 		]]>
 	</shader>
 
@@ -135,6 +208,12 @@ float4 GroundTruthPS(float3 normal : TEXCOORD0, float3 incident : TEXCOORD1) : S
 		<pass name="p0">
 			<state name="vertex_shader" value="GroundTruthVS()"/>
 			<state name="pixel_shader" value="GroundTruthPS()"/>
+		</pass>
+	</technique>
+	<technique name="Approximate">
+		<pass name="p0">
+			<state name="vertex_shader" value="GroundTruthVS()"/>
+			<state name="pixel_shader" value="ApproximatePS()"/>
 		</pass>
 	</technique>
 </effect>

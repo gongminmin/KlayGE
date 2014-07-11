@@ -40,7 +40,9 @@ namespace
 			: StaticMesh(model, L"Sphere")
 		{
 			RenderEffectPtr effect = SyncLoadRenderEffect("EnvLighting.fxml");
-			technique_ = effect->TechniqueByName("GroundTruth");
+			techs_[0] = effect->TechniqueByName("GroundTruth");
+			techs_[1] = effect->TechniqueByName("Approximate");
+			this->RenderingType(0);
 		}
 
 		void BuildMeshInfo()
@@ -65,6 +67,11 @@ namespace
 			*(technique_->Effect().ParameterByName("roughness")) = roughness;
 		}
 
+		void RenderingType(int type)
+		{
+			technique_ = techs_[type];
+		}
+
 		void OnRenderBegin()
 		{
 			App3DFramework const & app = Context::Instance().AppInstance();
@@ -77,6 +84,9 @@ namespace
 			*(technique_->Effect().ParameterByName("mvp")) = mvp;
 			*(technique_->Effect().ParameterByName("eye_pos")) = camera.EyePos();
 		}
+
+	private:
+		array<RenderTechniquePtr, 2> techs_;
 	};
 
 	class SphereObject : public SceneObjectHelper
@@ -88,6 +98,11 @@ namespace
 			renderable_ = SyncLoadModel("sphere_high.7z//sphere_high.meshml", EAH_GPU_Read | EAH_Immutable, CreateModelFactory<RenderModel>(), CreateMeshFactory<SphereRenderable>())->Mesh(0);
 			checked_pointer_cast<SphereRenderable>(renderable_)->CompressedCubeMap(y_cube, c_cube);
 			checked_pointer_cast<SphereRenderable>(renderable_)->Roughness(roughness);
+		}
+
+		void RenderingType(int type)
+		{
+			checked_pointer_cast<SphereRenderable>(renderable_)->RenderingType(type);
 		}
 	};
 
@@ -165,6 +180,12 @@ void EnvLightingApp::InitObjects()
 	inputEngine.ActionMap(actionMap, input_handler);
 
 	UIManager::Instance().Load(ResLoader::Instance().Open("EnvLighting.uiml"));
+
+	dialog_ = UIManager::Instance().GetDialog("Method");
+	id_type_combo_ = dialog_->IDFromName("TypeCombo");
+
+	dialog_->Control<UIComboBox>(id_type_combo_)->OnSelectionChangedEvent().connect(KlayGE::bind(&EnvLightingApp::TypeChangedHandler, this, KlayGE::placeholders::_1));
+	this->TypeChangedHandler(*dialog_->Control<UIComboBox>(id_type_combo_));
 }
 
 void EnvLightingApp::OnResize(uint32_t width, uint32_t height)
@@ -181,6 +202,15 @@ void EnvLightingApp::InputHandler(InputEngine const & /*sender*/, InputAction co
 	case Exit:
 		this->Quit();
 		break;
+	}
+}
+
+void EnvLightingApp::TypeChangedHandler(KlayGE::UIComboBox const & sender)
+{
+	rendering_type_ = sender.GetSelectedIndex();
+	for (size_t i = 0; i < spheres_.size(); ++ i)
+	{
+		checked_pointer_cast<SphereObject>(spheres_[i])->RenderingType(rendering_type_);
 	}
 }
 
