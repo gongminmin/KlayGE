@@ -475,8 +475,8 @@ void OrderIndependentTransparencyApp::InitObjects()
 	RenderEngine& re = rf.RenderEngineInstance();
 	RenderDeviceCaps const & caps = re.DeviceCaps();
 
-	TexturePtr y_cube_map = SyncLoadTexture("uffizi_cross_y.dds", EAH_GPU_Read | EAH_Immutable);
-	TexturePtr c_cube_map = SyncLoadTexture("uffizi_cross_c.dds", EAH_GPU_Read | EAH_Immutable);
+	TexturePtr y_cube_map = SyncLoadTexture("uffizi_cross_filtered_y.dds", EAH_GPU_Read | EAH_Immutable);
+	TexturePtr c_cube_map = SyncLoadTexture("uffizi_cross_filtered_c.dds", EAH_GPU_Read | EAH_Immutable);
 	sky_box_ = MakeSharedPtr<SceneObjectSkyBox>(0);
 	checked_pointer_cast<SceneObjectSkyBox>(sky_box_)->CompressedCubeMap(y_cube_map, c_cube_map);
 	sky_box_->AddToSceneManager();

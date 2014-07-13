@@ -44,8 +44,8 @@ SET(CONTENT_FILES
 	${KLAYGE_PROJECT_DIR}/media/Textures/2D/powered_by_klayge.dds
 	${KLAYGE_PROJECT_DIR}/media/Textures/2D/ui.dds
 	${KLAYGE_PROJECT_DIR}/media/Textures/3D/color_grading.dds
-	${KLAYGE_PROJECT_DIR}/media/Textures/Cube/uffizi_cross_c.dds
-	${KLAYGE_PROJECT_DIR}/media/Textures/Cube/uffizi_cross_y.dds
+	${KLAYGE_PROJECT_DIR}/media/Textures/Cube/uffizi_cross_filtered_c.dds
+	${KLAYGE_PROJECT_DIR}/media/Textures/Cube/uffizi_cross_filtered_y.dds
 	${KLAYGE_PROJECT_DIR}/Samples/media/OrderIndependentTransparency/AdaptiveTransparency.kfx
 	${KLAYGE_PROJECT_DIR}/Samples/media/OrderIndependentTransparency/Blend.kfx
 	${KLAYGE_PROJECT_DIR}/Samples/media/OrderIndependentTransparency/DepthPeeling.kfx

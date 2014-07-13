@@ -6,8 +6,8 @@ DOWNLOAD_FILE("KlayGE/media/Textures/Cube/Lake_CraterLake03_c.dds")
 DOWNLOAD_FILE("KlayGE/media/Textures/Cube/Lake_CraterLake03_y.dds")
 DOWNLOAD_FILE("KlayGE/media/Textures/Cube/rnl_cross_c.dds")
 DOWNLOAD_FILE("KlayGE/media/Textures/Cube/rnl_cross_y.dds")
-DOWNLOAD_FILE("KlayGE/media/Textures/Cube/uffizi_cross_c.dds")
-DOWNLOAD_FILE("KlayGE/media/Textures/Cube/uffizi_cross_y.dds")
+DOWNLOAD_FILE("KlayGE/media/Textures/Cube/uffizi_cross_filtered_c.dds")
+DOWNLOAD_FILE("KlayGE/media/Textures/Cube/uffizi_cross_filtered_y.dds")
 
 SET(LIB_NAME ${KLAYGE_CORELIB_NAME})
 

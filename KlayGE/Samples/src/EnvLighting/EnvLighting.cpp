@@ -40,8 +40,9 @@ namespace
 			: StaticMesh(model, L"Sphere")
 		{
 			RenderEffectPtr effect = SyncLoadRenderEffect("EnvLighting.fxml");
-			techs_[0] = effect->TechniqueByName("GroundTruth");
+			techs_[0] = effect->TechniqueByName("Prefiltered");
 			techs_[1] = effect->TechniqueByName("Approximate");
+			techs_[2] = effect->TechniqueByName("GroundTruth");
 			this->RenderingType(0);
 		}
 
@@ -72,6 +73,11 @@ namespace
 			technique_ = techs_[type];
 		}
 
+		void IntegrateBRDFTex(TexturePtr const & tex)
+		{
+			*(technique_->Effect().ParameterByName("integrated_brdf_tex")) = tex;
+		}
+
 		void OnRenderBegin()
 		{
 			App3DFramework const & app = Context::Instance().AppInstance();
@@ -86,7 +92,7 @@ namespace
 		}
 
 	private:
-		array<RenderTechniquePtr, 2> techs_;
+		array<RenderTechniquePtr, 3> techs_;
 	};
 
 	class SphereObject : public SceneObjectHelper
@@ -104,6 +110,11 @@ namespace
 		{
 			checked_pointer_cast<SphereRenderable>(renderable_)->RenderingType(type);
 		}
+
+		void IntegrateBRDFTex(TexturePtr const & tex)
+		{
+			checked_pointer_cast<SphereRenderable>(renderable_)->IntegrateBRDFTex(tex);
+		}
 	};
 
 	enum
@@ -115,6 +126,103 @@ namespace
 	{
 		InputActionDefine(Exit, KS_Escape),
 	};
+
+
+	uint32_t ReverseBits(uint32_t bits)
+	{
+		bits = (bits << 16) | (bits >> 16);
+		bits = ((bits & 0x55555555) << 1) | ((bits & 0xAAAAAAAA) >> 1);
+		bits = ((bits & 0x33333333) << 2) | ((bits & 0xCCCCCCCC) >> 2);
+		bits = ((bits & 0x0F0F0F0F) << 4) | ((bits & 0xF0F0F0F0) >> 4);
+		bits = ((bits & 0x00FF00FF) << 8) | ((bits & 0xFF00FF00) >> 8);
+		return bits;
+	}
+
+	float RadicalInverseVdC(uint32_t bits)
+	{
+		return ReverseBits(bits) * 2.3283064365386963e-10f; // / 0x100000000
+	}
+
+	float2 Hammersley2D(uint32_t i, uint32_t N)
+	{
+		return float2(static_cast<float>(i) / N, RadicalInverseVdC(i));
+	}
+
+	float3 ImportanceSampleGGX(float2 const & xi, float roughness)
+	{
+		float alpha = roughness * roughness;
+		float phi = 2 * PI * xi.x();
+		float cos_theta = sqrt((1 - xi.y()) / ((alpha * alpha - 1) * xi.y() + 1));
+		float sin_theta = sqrt(1 - cos_theta * cos_theta);
+		return float3(sin_theta * cos(phi), sin_theta * sin(phi), cos_theta);
+	}
+
+	// http://graphicrants.blogspot.com.au/2013/08/specular-brdf-reference.html
+	float G1(float n_dot_x, float roughness)
+	{
+		float alpha = roughness * roughness;
+		float k = alpha * alpha;
+		return 2 * n_dot_x / (n_dot_x + sqrt(k + (1 - k) * n_dot_x * n_dot_x));
+	}
+
+	float GSmith(float n_dot_v, float n_dot_l, float roughness)
+	{
+		return G1(n_dot_v, roughness) * G1(n_dot_l, roughness);
+	}
+
+	float2 IntegrateBRDFGGX(float roughness, float n_dot_v)
+	{
+		float3 view(sqrt(1.0f - n_dot_v * n_dot_v), 0, n_dot_v);
+		float2 rg(0, 0);
+
+		uint32_t const NUM_SAMPLES = 1024;
+		for (uint32_t i = 0; i < NUM_SAMPLES; ++ i)
+		{
+			float2 xi = Hammersley2D(i, NUM_SAMPLES);
+			float3 h = ImportanceSampleGGX(xi, roughness);
+			float3 l = -MathLib::reflect(view, h);
+			float n_dot_l = MathLib::clamp(l.z(), 0.0f, 1.0f);
+			float n_dot_h = MathLib::clamp(h.z(), 0.0f, 1.0f);
+			float v_dot_h = MathLib::clamp(MathLib::dot(view, h), 0.0f, 1.0f);
+			if ((n_dot_l > 0) && (n_dot_h * n_dot_v != 0))
+			{
+				float g = GSmith(n_dot_v, n_dot_l, roughness);
+				float g_vis = g * v_dot_h / std::max(1e-6f, n_dot_h * n_dot_v);
+				float fc = pow(1 - v_dot_h, 5);
+				rg += float2(1 - fc, fc) * g_vis;
+			}
+		}
+
+		return rg / NUM_SAMPLES;
+	}
+
+	TexturePtr GenIntegrateBRDF()
+	{
+		uint32_t const WIDTH = 128;
+		uint32_t const HEIGHT = 128;
+
+		std::vector<uint8_t> integrate_brdf(WIDTH * HEIGHT * 2);
+		for (uint32_t y = 0; y < HEIGHT; ++ y)
+		{
+			float roughness = (y + 0.5f) / HEIGHT;
+			for (uint32_t x = 0; x < WIDTH; ++ x)
+			{
+				float cos_theta = (x + 0.5f) / WIDTH;
+
+				float2 lut = IntegrateBRDFGGX(roughness, cos_theta);
+				integrate_brdf[(y * WIDTH + x) * 2 + 0] = static_cast<uint8_t>(MathLib::clamp(static_cast<int>(lut.x() * 255 + 0.5f), 0, 255));
+				integrate_brdf[(y * WIDTH + x) * 2 + 1] = static_cast<uint8_t>(MathLib::clamp(static_cast<int>(lut.y() * 255 + 0.5f), 0, 255));
+			}
+		}
+
+		std::vector<ElementInitData> init_data(1);
+		init_data[0].data = &integrate_brdf[0];
+		init_data[0].row_pitch = WIDTH * 2;
+		init_data[0].slice_pitch = HEIGHT * init_data[0].row_pitch;
+		
+		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+		return rf.MakeTexture2D(WIDTH, HEIGHT, 1, 1, EF_GR8, 1, 0, EAH_GPU_Read | EAH_Immutable, &init_data[0]);
+	}
 }
 
 
@@ -137,7 +245,7 @@ EnvLightingApp::EnvLightingApp()
 bool EnvLightingApp::ConfirmDevice() const
 {
 	RenderDeviceCaps const & caps = Context::Instance().RenderFactoryInstance().RenderEngineInstance().DeviceCaps();
-	if (caps.max_shader_model < 2)
+	if (caps.max_shader_model < 4)
 	{
 		return false;
 	}
@@ -149,15 +257,17 @@ void EnvLightingApp::InitObjects()
 {
 	font_ = SyncLoadFont("gkai00mp.kfont");
 
-	y_cube_map_ = SyncLoadTexture("uffizi_cross_y.dds", EAH_GPU_Read | EAH_Immutable);
-	c_cube_map_ = SyncLoadTexture("uffizi_cross_c.dds", EAH_GPU_Read | EAH_Immutable);
+	y_cube_map_ = SyncLoadTexture("uffizi_cross_filtered_y.dds", EAH_GPU_Read | EAH_Immutable);
+	c_cube_map_ = SyncLoadTexture("uffizi_cross_filtered_c.dds", EAH_GPU_Read | EAH_Immutable);
+	integrate_brdf_tex_ = GenIntegrateBRDF();
 
 	spheres_.resize(10);
 	for (size_t i = 0; i < spheres_.size(); ++ i)
 	{
 		spheres_[i] = MakeSharedPtr<SphereObject>(y_cube_map_, c_cube_map_, 1 - static_cast<float>(i) / (spheres_.size() - 1));
 		spheres_[i]->ModelMatrix(MathLib::scaling(1.3f, 1.3f, 1.3f)
-			* MathLib::translation((-static_cast<float>(spheres_.size() / 2) + i + 0.5f) * 0.1f, 0.0f, 0.0f));
+			* MathLib::translation((-static_cast<float>(spheres_.size() / 2) + i + 0.5f) * 0.08f, 0.0f, 0.0f));
+		checked_pointer_cast<SphereObject>(spheres_[i])->IntegrateBRDFTex(integrate_brdf_tex_);
 		spheres_[i]->AddToSceneManager();
 	}
 
@@ -165,7 +275,7 @@ void EnvLightingApp::InitObjects()
 	checked_pointer_cast<SceneObjectSkyBox>(sky_box_)->CompressedCubeMap(y_cube_map_, c_cube_map_);
 	sky_box_->AddToSceneManager();
 
-	this->LookAt(float3(0.0f, 0.0f, -0.8f), float3(0, 0.0f, 0));
+	this->LookAt(float3(0.0f, 0.2f, -0.6f), float3(0, 0, 0));
 	this->Proj(0.05f, 100);
 
 	obj_controller_.AttachCamera(this->ActiveCamera());

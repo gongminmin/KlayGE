@@ -22,6 +22,14 @@
 	<parameter type="textureCUBE" name="skybox_Ycube_tex"/>
 	<parameter type="textureCUBE" name="skybox_Ccube_tex"/>
 	<parameter type="sampler" name="skybox_sampler">
+		<state name="filtering" value="min_mag_mip_linear"/>
+		<state name="address_u" value="clamp"/>
+		<state name="address_v" value="clamp"/>
+		<state name="address_w" value="clamp"/>
+	</parameter>
+
+	<parameter type="texture2D" name="integrated_brdf_tex"/>
+	<parameter type="sampler" name="bilinear_sampler">
 		<state name="filtering" value="min_mag_linear_mip_point"/>
 		<state name="address_u" value="clamp"/>
 		<state name="address_v" value="clamp"/>
@@ -108,7 +116,7 @@ float3 SpecularIBL(float3 c_spec, float roughness, float3 normal, float3 view)
 			specular += env_clr * f * g * v_dot_h / max(1e-6f, n_dot_h * n_dot_v);
 		}
 	}
-	
+
 	return specular / NUM_SAMPLES;
 }
 
@@ -118,7 +126,7 @@ float3 PrefilterEnvMap(float roughness, float3 r)
 	float3 view = r;
 	float3 prefiltered_clr = 0;
 	float total_weight = 0;
-	
+
 	const uint NUM_SAMPLES = 1024;
 	for (uint i = 0; i < NUM_SAMPLES; ++ i)
 	{
@@ -133,7 +141,7 @@ float3 PrefilterEnvMap(float roughness, float3 r)
 			total_weight += n_dot_l;
 		}
 	}
-	
+
 	return prefiltered_clr / total_weight;
 }
 
@@ -141,7 +149,7 @@ float2 IntegrateBRDF(float roughness, float n_dot_v)
 {
 	float3 view = float3(sqrt(1 - n_dot_v * n_dot_v), 0, n_dot_v);
 	float2 rg = 0;
-	
+
 	const uint NUM_SAMPLES = 1024;
 	for (uint i = 0; i < NUM_SAMPLES; ++ i)
 	{
@@ -159,7 +167,7 @@ float2 IntegrateBRDF(float roughness, float n_dot_v)
 			rg += float2(1 - fc, fc) * g_vis;
 		}
 	}
-	
+
 	return rg / NUM_SAMPLES;
 }
 
@@ -172,6 +180,18 @@ float3 ApproximateSpecularIBL(float3 c_spec, float roughness, float3 normal, flo
 	return prefiltered_clr * (c_spec * env_brdf.x + env_brdf.y);
 }
 
+float3 PrefilteredSpecularIBL(float3 c_spec, float roughness, float3 normal, float3 view)
+{
+	int num_mip = 9;
+	int mip = roughness * num_mip;
+	float n_dot_v = saturate(dot(normal, view));
+	float3 r = -reflect(view, normal);
+	float3 prefiltered_clr = decode_hdr_yc(skybox_Ycube_tex.SampleLevel(skybox_sampler, r, mip).r,
+		skybox_Ccube_tex.SampleLevel(skybox_sampler, r, mip)).xyz;
+	float2 env_brdf = integrated_brdf_tex.Sample(bilinear_sampler, float2(n_dot_v, roughness)).xy;
+	return prefiltered_clr * (c_spec * env_brdf.x + env_brdf.y);
+}
+
 void GroundTruthVS(float4 pos		: POSITION,
 				float4 tangent_quat	: TANGENT,
 				out float3 oNormal	: TEXCOORD0,
@@ -180,7 +200,7 @@ void GroundTruthVS(float4 pos		: POSITION,
 {
 	pos = float4(pos.xyz * pos_extent + pos_center, 1);
 	tangent_quat = tangent_quat * 2 - 1;
-	
+
 	oPos = mul(pos, mvp);
 	oNormal = mul(transform_quat(float3(0, 0, 1), tangent_quat), (float3x3)model);
 	oIncident = eye_pos - mul(pos, model).xyz;
@@ -190,7 +210,7 @@ float4 GroundTruthPS(float3 normal : TEXCOORD0, float3 incident : TEXCOORD1) : S
 {
 	normal = normalize(normal);
 	incident = normalize(incident);
-	
+
 	return float4(SpecularIBL(0.4f, roughness, normal, incident), 1);
 }
 
@@ -198,8 +218,16 @@ float4 ApproximatePS(float3 normal : TEXCOORD0, float3 incident : TEXCOORD1) : S
 {
 	normal = normalize(normal);
 	incident = normalize(incident);
-	
+
 	return float4(ApproximateSpecularIBL(0.4f, roughness, normal, incident), 1);
+}
+
+float4 PrefilteredPS(float3 normal : TEXCOORD0, float3 incident : TEXCOORD1) : SV_Target
+{
+	normal = normalize(normal);
+	incident = normalize(incident);
+
+	return float4(PrefilteredSpecularIBL(0.4f, roughness, normal, incident), 1);
 }
 		]]>
 	</shader>
@@ -214,6 +242,12 @@ float4 ApproximatePS(float3 normal : TEXCOORD0, float3 incident : TEXCOORD1) : S
 		<pass name="p0">
 			<state name="vertex_shader" value="GroundTruthVS()"/>
 			<state name="pixel_shader" value="ApproximatePS()"/>
+		</pass>
+	</technique>
+	<technique name="Prefiltered">
+		<pass name="p0">
+			<state name="vertex_shader" value="GroundTruthVS()"/>
+			<state name="pixel_shader" value="PrefilteredPS()"/>
 		</pass>
 	</technique>
 </effect>

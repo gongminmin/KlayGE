@@ -186,8 +186,8 @@ void Refract::InitObjects()
 {
 	font_ = SyncLoadFont("gkai00mp.kfont");
 
-	y_cube_map_ = SyncLoadTexture("uffizi_cross_y.dds", EAH_GPU_Read | EAH_Immutable);
-	c_cube_map_ = SyncLoadTexture("uffizi_cross_c.dds", EAH_GPU_Read | EAH_Immutable);
+	y_cube_map_ = SyncLoadTexture("uffizi_cross_filtered_y.dds", EAH_GPU_Read | EAH_Immutable);
+	c_cube_map_ = SyncLoadTexture("uffizi_cross_filtered_c.dds", EAH_GPU_Read | EAH_Immutable);
 
 	refractor_ = MakeSharedPtr<RefractorObject>(y_cube_map_, c_cube_map_);
 	refractor_->AddToSceneManager();
