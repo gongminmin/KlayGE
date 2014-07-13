@@ -119,13 +119,13 @@ namespace
 				uint8_t uncom_v[16];
 				for (int y = 0; y < 4; ++ y)
 				{
-					uint32_t const y0 = MathLib::clamp((y_base + y) * 2 + 0, 0U, c_height - 1);
-					uint32_t const y1 = MathLib::clamp((y_base + y) * 2 + 1, 0U, c_height - 1);
+					uint32_t const y0 = MathLib::clamp((y_base + y) * 2 + 0, 0U, height - 1);
+					uint32_t const y1 = MathLib::clamp((y_base + y) * 2 + 1, 0U, height - 1);
 
 					for (int x = 0; x < 4; ++ x)
 					{
-						uint32_t const x0 = MathLib::clamp((x_base + x) * 2 + 0, 0U, c_width - 1);
-						uint32_t const x1 = MathLib::clamp((x_base + x) * 2 + 1, 0U, c_width - 1);
+						uint32_t const x0 = MathLib::clamp((x_base + x) * 2 + 0, 0U, width - 1);
+						uint32_t const x1 = MathLib::clamp((x_base + x) * 2 + 1, 0U, width - 1);
 
 						float R = hdr_src[(y0 * width + x0) * 4 + 0]
 							+ hdr_src[(y0 * width + x1) * 4 + 0]
@@ -329,6 +329,29 @@ namespace
 		{
 			cout << "Unsupported texture format" << endl;
 			return;
+		}
+
+		uint32_t last_width = in_data.back().row_pitch / (sizeof(float) * 4);
+		uint32_t last_height = in_data.back().slice_pitch / in_data.back().row_pitch;
+		if ((1 == last_width) && (1 == last_height))
+		{
+			uint32_t array_size = in_array_size;
+			if (Texture::TT_Cube == in_type)
+			{
+				array_size *= 6;
+			}
+
+			std::vector<ElementInitData> no_last_in_data(array_size * (in_num_mipmaps - 1));
+			for (uint32_t array_index = 0; array_index < array_size; ++ array_index)
+			{
+				for (uint32_t mip = 0; mip < in_num_mipmaps - 1; ++ mip)
+				{
+					no_last_in_data[array_index * (in_num_mipmaps - 1) + mip] = in_data[array_index * in_num_mipmaps + mip];
+				}
+			}
+
+			in_data.swap(no_last_in_data);
+			-- in_num_mipmaps;
 		}
 
 		std::vector<ElementInitData> y_data(in_data.size());

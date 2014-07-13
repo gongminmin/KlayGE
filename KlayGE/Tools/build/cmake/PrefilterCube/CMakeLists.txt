@@ -1,5 +1,5 @@
 SET(SOURCE_FILES
-	${KLAYGE_PROJECT_DIR}/Tools/src/HDRCompressor/HDRCompressor.cpp
+	${KLAYGE_PROJECT_DIR}/Tools/src/PrefilterCube/PrefilterCube.cpp
 )
 
 IF(MSVC)
@@ -9,4 +9,4 @@ ELSE()
 		${Boost_FILESYSTEM_LIBRARY})
 ENDIF()
 
-SETUP_TOOL(HDRCompressor)
+SETUP_TOOL(PrefilterCube)
