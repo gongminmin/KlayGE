@@ -161,18 +161,17 @@ namespace
 		return float2(static_cast<float>(i) / N, RadicalInverseVdC(i));
 	}
 
-	float3 ImportanceSampleGGX(float2 const & xi, float roughness)
+	float3 ImportanceSampleBP(float2 const & xi, float roughness)
 	{
-		float alpha = roughness * roughness;
 		float phi = 2 * PI * xi.x();
-		float cos_theta = sqrt((1 - xi.y()) / ((alpha * alpha - 1) * xi.y() + 1));
+		float cos_theta = pow(1 - xi.y() * (roughness + 1) / (roughness + 2), 1 / (roughness + 1));
 		float sin_theta = sqrt(1 - cos_theta * cos_theta);
 		return float3(sin_theta * cos(phi), sin_theta * sin(phi), cos_theta);
 	}
 
-	float3 ImportanceSampleGGX(float2 const & xi, float roughness, float3 const & normal)
+	float3 ImportanceSampleBP(float2 const & xi, float roughness, float3 const & normal)
 	{
-		float3 h = ImportanceSampleGGX(xi, roughness);
+		float3 h = ImportanceSampleBP(xi, roughness);
 
 		float3 up_vec = abs(normal.z()) < 0.999f ? float3(0, 0, 1) : float3(1, 0, 0);
 		float3 tangent = MathLib::normalize(MathLib::cross(up_vec, normal));
@@ -191,7 +190,7 @@ namespace
 		for (uint32_t i = 0; i < NUM_SAMPLES; ++ i)
 		{
 			float2 xi = Hammersley2D(i, NUM_SAMPLES);
-			float3 h = ImportanceSampleGGX(xi, roughness, normal);
+			float3 h = ImportanceSampleBP(xi, roughness, normal);
 			float3 l = -MathLib::reflect(view, h);
 			float n_dot_l = MathLib::clamp(MathLib::dot(normal, l), 0.0f, 1.0f);
 			if (n_dot_l > 0)
@@ -251,7 +250,8 @@ namespace
 			for (uint32_t mip = 1; mip < out_num_mipmaps; ++ mip)
 			{
 				prefilted_data[face * out_num_mipmaps + mip].resize(w * w);
-				float roughness = 1 - static_cast<float>(out_num_mipmaps - 1 - mip) / (out_num_mipmaps - 1);
+				float roughness = static_cast<float>(out_num_mipmaps - 1 - mip) / (out_num_mipmaps - 1);
+				roughness = pow(8192.0f, roughness);
 
 				for (uint32_t y = 0; y < w; ++ y)
 				{

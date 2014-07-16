@@ -40,9 +40,10 @@ namespace
 			: StaticMesh(model, L"Sphere")
 		{
 			RenderEffectPtr effect = SyncLoadRenderEffect("EnvLighting.fxml");
-			techs_[0] = effect->TechniqueByName("Prefiltered");
-			techs_[1] = effect->TechniqueByName("Approximate");
-			techs_[2] = effect->TechniqueByName("GroundTruth");
+			techs_[0] = effect->TechniqueByName("PBPrefiltered");
+			techs_[1] = effect->TechniqueByName("Prefiltered");
+			techs_[2] = effect->TechniqueByName("Approximate");
+			techs_[3] = effect->TechniqueByName("GroundTruth");
 			this->RenderingType(0);
 		}
 
@@ -92,7 +93,7 @@ namespace
 		}
 
 	private:
-		array<RenderTechniquePtr, 3> techs_;
+		array<RenderTechniquePtr, 4> techs_;
 	};
 
 	class SphereObject : public SceneObjectHelper
@@ -143,34 +144,26 @@ namespace
 		return ReverseBits(bits) * 2.3283064365386963e-10f; // / 0x100000000
 	}
 
+	// http://holger.dammertz.org/stuff/notes_HammersleyOnHemisphere.html
 	float2 Hammersley2D(uint32_t i, uint32_t N)
 	{
 		return float2(static_cast<float>(i) / N, RadicalInverseVdC(i));
 	}
 
-	float3 ImportanceSampleGGX(float2 const & xi, float roughness)
+	float3 ImportanceSampleBP(float2 const & xi, float roughness)
 	{
-		float alpha = roughness * roughness;
 		float phi = 2 * PI * xi.x();
-		float cos_theta = sqrt((1 - xi.y()) / ((alpha * alpha - 1) * xi.y() + 1));
+		float cos_theta = pow(1 - xi.y() * (roughness + 1) / (roughness + 2), 1 / (roughness + 1));
 		float sin_theta = sqrt(1 - cos_theta * cos_theta);
 		return float3(sin_theta * cos(phi), sin_theta * sin(phi), cos_theta);
 	}
 
-	// http://graphicrants.blogspot.com.au/2013/08/specular-brdf-reference.html
-	float G1(float n_dot_x, float roughness)
+	float GImplicit(float n_dot_v, float n_dot_l)
 	{
-		float alpha = roughness * roughness;
-		float k = alpha * alpha;
-		return 2 * n_dot_x / (n_dot_x + sqrt(k + (1 - k) * n_dot_x * n_dot_x));
+		return n_dot_v * n_dot_l;
 	}
 
-	float GSmith(float n_dot_v, float n_dot_l, float roughness)
-	{
-		return G1(n_dot_v, roughness) * G1(n_dot_l, roughness);
-	}
-
-	float2 IntegrateBRDFGGX(float roughness, float n_dot_v)
+	float2 IntegrateBRDFBP(float roughness, float n_dot_v)
 	{
 		float3 view(sqrt(1.0f - n_dot_v * n_dot_v), 0, n_dot_v);
 		float2 rg(0, 0);
@@ -179,14 +172,14 @@ namespace
 		for (uint32_t i = 0; i < NUM_SAMPLES; ++ i)
 		{
 			float2 xi = Hammersley2D(i, NUM_SAMPLES);
-			float3 h = ImportanceSampleGGX(xi, roughness);
+			float3 h = ImportanceSampleBP(xi, roughness);
 			float3 l = -MathLib::reflect(view, h);
 			float n_dot_l = MathLib::clamp(l.z(), 0.0f, 1.0f);
 			float n_dot_h = MathLib::clamp(h.z(), 0.0f, 1.0f);
 			float v_dot_h = MathLib::clamp(MathLib::dot(view, h), 0.0f, 1.0f);
 			if ((n_dot_l > 0) && (n_dot_h * n_dot_v != 0))
 			{
-				float g = GSmith(n_dot_v, n_dot_l, roughness);
+				float g = GImplicit(n_dot_v, n_dot_l);
 				float g_vis = g * v_dot_h / std::max(1e-6f, n_dot_h * n_dot_v);
 				float fc = pow(1 - v_dot_h, 5);
 				rg += float2(1 - fc, fc) * g_vis;
@@ -205,11 +198,12 @@ namespace
 		for (uint32_t y = 0; y < HEIGHT; ++ y)
 		{
 			float roughness = (y + 0.5f) / HEIGHT;
+			roughness = pow(8192.0f, roughness);
 			for (uint32_t x = 0; x < WIDTH; ++ x)
 			{
 				float cos_theta = (x + 0.5f) / WIDTH;
 
-				float2 lut = IntegrateBRDFGGX(roughness, cos_theta);
+				float2 lut = IntegrateBRDFBP(roughness, cos_theta);
 				integrate_brdf[(y * WIDTH + x) * 2 + 0] = static_cast<uint8_t>(MathLib::clamp(static_cast<int>(lut.x() * 255 + 0.5f), 0, 255));
 				integrate_brdf[(y * WIDTH + x) * 2 + 1] = static_cast<uint8_t>(MathLib::clamp(static_cast<int>(lut.y() * 255 + 0.5f), 0, 255));
 			}
@@ -264,7 +258,7 @@ void EnvLightingApp::InitObjects()
 	spheres_.resize(10);
 	for (size_t i = 0; i < spheres_.size(); ++ i)
 	{
-		spheres_[i] = MakeSharedPtr<SphereObject>(y_cube_map_, c_cube_map_, 1 - static_cast<float>(i) / (spheres_.size() - 1));
+		spheres_[i] = MakeSharedPtr<SphereObject>(y_cube_map_, c_cube_map_, static_cast<float>(i) / (spheres_.size() - 1));
 		spheres_[i]->ModelMatrix(MathLib::scaling(1.3f, 1.3f, 1.3f)
 			* MathLib::translation((-static_cast<float>(spheres_.size() / 2) + i + 0.5f) * 0.08f, 0.0f, 0.0f));
 		checked_pointer_cast<SphereObject>(spheres_[i])->IntegrateBRDFTex(integrate_brdf_tex_);

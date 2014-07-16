@@ -58,20 +58,19 @@ float2 Hammersley2D(uint i, uint N)
 	return float2(float(i) / N, RadicalInverseVdC(i));
 }
 
-float3 ImportanceSampleGGX(float2 xi, float roughness)
+float3 ImportanceSampleBP(float2 xi, float roughness)
 {
 	const float PI = 3.1415926f;
-	
-	float alpha = roughness * roughness;
+
 	float phi = 2 * PI * xi.x;
-	float cos_theta = sqrt((1 - xi.y) / ((alpha * alpha - 1) * xi.y + 1));
+	float cos_theta = pow(1 - xi.y * (roughness + 1) / (roughness + 2), 1 / (roughness + 1));
 	float sin_theta = sqrt(1 - cos_theta * cos_theta);
 	return float3(sin_theta * cos(phi), sin_theta * sin(phi), cos_theta);
 }
 
-float3 ImportanceSampleGGX(float2 xi, float roughness, float3 normal)
+float3 ImportanceSampleBP(float2 xi, float roughness, float3 normal)
 {
-	float3 h = ImportanceSampleGGX(xi, roughness);
+	float3 h = ImportanceSampleBP(xi, roughness);
 	
 	float3 up_vec = abs(normal.z) < 0.999f ? float3(0, 0, 1) : float3(1, 0, 0);
 	float3 tangent = normalize(cross(up_vec, normal));
@@ -79,28 +78,22 @@ float3 ImportanceSampleGGX(float2 xi, float roughness, float3 normal)
 	return tangent * h.x + binormal * h.y + normal * h.z;
 }
 
-// http://graphicrants.blogspot.com.au/2013/08/specular-brdf-reference.html
-float G1(float n_dot_x, float roughness)
+float GImplicit(float n_dot_v, float n_dot_l)
 {
-	float alpha = roughness * roughness;
-	float k = alpha * alpha;
-	return 2 * n_dot_x / (n_dot_x + sqrt(k + (1 - k) * n_dot_x * n_dot_x));
-}
-
-float GSmith(float n_dot_v, float n_dot_l, float roughness)
-{
-	return G1(n_dot_v, roughness) * G1(n_dot_l, roughness);
+	return n_dot_v * n_dot_l;
 }
 
 float3 SpecularIBL(float3 c_spec, float roughness, float3 normal, float3 view)
 {
+	roughness = pow(8192.0f, roughness);
+
 	float3 specular = 0;
 	
 	const uint NUM_SAMPLES = 1024;
 	for (uint i = 0; i < NUM_SAMPLES; ++ i)
 	{
 		float2 xi = Hammersley2D(i, NUM_SAMPLES);
-		float3 h = ImportanceSampleGGX(xi, roughness, normal);
+		float3 h = ImportanceSampleBP(xi, roughness, normal);
 		float3 l = -reflect(view, h);
 		float n_dot_v = saturate(dot(normal, view));
 		float n_dot_l = saturate(dot(normal, l));
@@ -110,7 +103,7 @@ float3 SpecularIBL(float3 c_spec, float roughness, float3 normal, float3 view)
 		{
 			float3 env_clr = decode_hdr_yc(skybox_Ycube_tex.SampleLevel(skybox_sampler, l, 0).r,
 				skybox_Ccube_tex.SampleLevel(skybox_sampler, l, 0)).xyz;
-			float g = GSmith(n_dot_v, n_dot_l, roughness);
+			float g = GImplicit(n_dot_v, n_dot_l);
 			float fc = pow(1 - v_dot_h, 5);
 			float3 f = (1 - fc) * c_spec + fc;
 			specular += env_clr * f * g * v_dot_h / max(1e-6f, n_dot_h * n_dot_v);
@@ -131,7 +124,7 @@ float3 PrefilterEnvMap(float roughness, float3 r)
 	for (uint i = 0; i < NUM_SAMPLES; ++ i)
 	{
 		float2 xi = Hammersley2D(i, NUM_SAMPLES);
-		float3 h = ImportanceSampleGGX(xi, roughness, normal);
+		float3 h = ImportanceSampleBP(xi, roughness, normal);
 		float3 l = -reflect(view, h);
 		float n_dot_l = saturate(dot(normal, l));
 		if (n_dot_l > 0)
@@ -154,14 +147,14 @@ float2 IntegrateBRDF(float roughness, float n_dot_v)
 	for (uint i = 0; i < NUM_SAMPLES; ++ i)
 	{
 		float2 xi = Hammersley2D(i, NUM_SAMPLES);
-		float3 h = ImportanceSampleGGX(xi, roughness);
+		float3 h = ImportanceSampleBP(xi, roughness);
 		float3 l = -reflect(view, h);
 		float n_dot_l = saturate(l.z);
 		float n_dot_h = saturate(h.z);
 		float v_dot_h = saturate(dot(view, h));
 		if ((n_dot_l > 0) && (n_dot_h * n_dot_v != 0))
 		{
-			float g = GSmith(n_dot_v, n_dot_l, roughness);
+			float g = GImplicit(n_dot_v, n_dot_l);
 			float g_vis = g * v_dot_h / max(1e-6f, n_dot_h * n_dot_v);
 			float fc = pow(1 - v_dot_h, 5);
 			rg += float2(1 - fc, fc) * g_vis;
@@ -173,6 +166,8 @@ float2 IntegrateBRDF(float roughness, float n_dot_v)
 
 float3 ApproximateSpecularIBL(float3 c_spec, float roughness, float3 normal, float3 view)
 {
+	roughness = pow(8192.0f, roughness);
+
 	float n_dot_v = saturate(dot(normal, view));
 	float3 r = -reflect(view, normal);
 	float3 prefiltered_clr = PrefilterEnvMap(roughness, r);
@@ -182,8 +177,19 @@ float3 ApproximateSpecularIBL(float3 c_spec, float roughness, float3 normal, flo
 
 float3 PrefilteredSpecularIBL(float3 c_spec, float roughness, float3 normal, float3 view)
 {
-	int num_mip = 9;
-	int mip = roughness * num_mip;
+	int num_mip = 6;
+	int mip = num_mip - roughness * num_mip;
+	roughness = pow(8192.0f, roughness);
+	float3 r = -reflect(view, normal);
+	float3 prefiltered_clr = decode_hdr_yc(skybox_Ycube_tex.SampleLevel(skybox_sampler, r, mip).r,
+		skybox_Ccube_tex.SampleLevel(skybox_sampler, r, mip)).xyz;
+	return prefiltered_clr * saturate(calc_brdf(0, 0.4f, roughness, r, normal, normal));
+}
+
+float3 PBPrefilteredSpecularIBL(float3 c_spec, float roughness, float3 normal, float3 view)
+{
+	int num_mip = 6;
+	int mip = num_mip - roughness * num_mip;
 	float n_dot_v = saturate(dot(normal, view));
 	float3 r = -reflect(view, normal);
 	float3 prefiltered_clr = decode_hdr_yc(skybox_Ycube_tex.SampleLevel(skybox_sampler, r, mip).r,
@@ -229,6 +235,14 @@ float4 PrefilteredPS(float3 normal : TEXCOORD0, float3 incident : TEXCOORD1) : S
 
 	return float4(PrefilteredSpecularIBL(0.4f, roughness, normal, incident), 1);
 }
+
+float4 PBPrefilteredPS(float3 normal : TEXCOORD0, float3 incident : TEXCOORD1) : SV_Target
+{
+	normal = normalize(normal);
+	incident = normalize(incident);
+
+	return float4(PBPrefilteredSpecularIBL(0.4f, roughness, normal, incident), 1);
+}
 		]]>
 	</shader>
 
@@ -248,6 +262,12 @@ float4 PrefilteredPS(float3 normal : TEXCOORD0, float3 incident : TEXCOORD1) : S
 		<pass name="p0">
 			<state name="vertex_shader" value="GroundTruthVS()"/>
 			<state name="pixel_shader" value="PrefilteredPS()"/>
+		</pass>
+	</technique>
+	<technique name="PBPrefiltered">
+		<pass name="p0">
+			<state name="vertex_shader" value="GroundTruthVS()"/>
+			<state name="pixel_shader" value="PBPrefilteredPS()"/>
 		</pass>
 	</technique>
 </effect>
