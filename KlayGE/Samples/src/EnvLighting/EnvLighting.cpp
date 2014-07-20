@@ -40,10 +40,11 @@ namespace
 			: StaticMesh(model, L"Sphere")
 		{
 			RenderEffectPtr effect = SyncLoadRenderEffect("EnvLighting.fxml");
-			techs_[0] = effect->TechniqueByName("PBPrefiltered");
-			techs_[1] = effect->TechniqueByName("Prefiltered");
-			techs_[2] = effect->TechniqueByName("Approximate");
-			techs_[3] = effect->TechniqueByName("GroundTruth");
+			techs_[0] = effect->TechniqueByName("PBFittingPrefiltered"); 
+			techs_[1] = effect->TechniqueByName("PBPrefiltered");
+			techs_[2] = effect->TechniqueByName("Prefiltered");
+			techs_[3] = effect->TechniqueByName("Approximate");
+			techs_[4] = effect->TechniqueByName("GroundTruth");
 			this->RenderingType(0);
 		}
 
@@ -93,7 +94,7 @@ namespace
 		}
 
 	private:
-		array<RenderTechniquePtr, 4> techs_;
+		array<RenderTechniquePtr, 5> techs_;
 	};
 
 	class SphereObject : public SceneObjectHelper
