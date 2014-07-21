@@ -93,6 +93,37 @@ float3 Shading(float4 lighting, float shininess, float3 diffuse, float3 specular
 	return Shading(diff_lighting, spec_lighting, shininess, diffuse, specular,
 		view_dir, normal);
 }
+
+
+// Environment BRDF
+
+float CalcPrefilteredEnvMip(float roughness, int num_mip)
+{
+	return num_mip - roughness * num_mip;
+}
+
+float3 CalcPrefilteredEnvVec(float3 normal, float3 view)
+{
+	return -reflect(view, normal);
+}
+
+float3 CalcEnvSpecular(float3 prefiltered_env, float3 c_spec, float roughness, float3 normal, float3 view)
+{
+	float n_dot_v = saturate(dot(normal, view));
+	roughness = max(0.5f / 16, roughness);
+	float2 env_brdf;
+	float4 tmp = ((float4(-4.996914762f, 7.253111161f, -1.963867075f, -0.170416225f) * roughness
+		+ float4(8.993475061f, -15.42473953f, 4.712593001f, 0.448102365f)) * roughness
+		+ float4(-4.928234727f, 10.95286522f, -3.852980973f, -0.389332014f)) * roughness
+		+ float4(0.846124834f, -1.596815751f, 1.005729748f, 0.113484128f);
+	env_brdf.x = (((tmp.x * n_dot_v + tmp.y) * n_dot_v + tmp.z) * n_dot_v) + tmp.w;
+	tmp = ((float4(-0.684077741f, 1.316163916f, -0.70869252f, 0.073264505f) * roughness
+		+ float4(0.719315865f, -1.384932814f, 0.775880046f, -0.105818706f)) * roughness
+		+ float4(-0.101034049f, 0.18680998f, -0.117919199f, 0.030727381f)) * roughness
+		+ float4(0.001922126f, 0.006697305f, -0.015741592f, 0.007229544f);
+	env_brdf.y = (((tmp.x * n_dot_v + tmp.y) * n_dot_v + tmp.z) * n_dot_v) + tmp.w;;
+	return prefiltered_env * (c_spec * env_brdf.x + env_brdf.y);
+}
 		]]>
 	</shader>
 </effect>
