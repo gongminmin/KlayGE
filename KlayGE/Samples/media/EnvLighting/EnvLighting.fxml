@@ -58,6 +58,26 @@ float2 Hammersley2D(uint i, uint N)
 	return float2(float(i) / N, RadicalInverseVdC(i));
 }
 
+float3 ImportanceSampleLambert(float2 xi)
+{
+	const float PI = 3.1415926f;
+
+	float phi = 2 * PI * xi.x;
+	float cos_theta = sqrt(1 - xi.y);
+	float sin_theta = sqrt(1 - cos_theta * cos_theta);
+	return float3(sin_theta * cos(phi), sin_theta * sin(phi), cos_theta);
+}
+
+float3 ImportanceSampleLambert(float2 xi, float3 normal)
+{
+	float3 h = ImportanceSampleLambert(xi);
+	
+	float3 up_vec = abs(normal.z) < 0.999f ? float3(0, 0, 1) : float3(1, 0, 0);
+	float3 tangent = normalize(cross(up_vec, normal));
+	float3 binormal = cross(normal, tangent);
+	return tangent * h.x + binormal * h.y + normal * h.z;
+}
+
 float3 ImportanceSampleBP(float2 xi, float roughness)
 {
 	const float PI = 3.1415926f;
@@ -81,6 +101,29 @@ float3 ImportanceSampleBP(float2 xi, float roughness, float3 normal)
 float GImplicit(float n_dot_v, float n_dot_l)
 {
 	return n_dot_v * n_dot_l;
+}
+
+float3 DiffuseIBL(float3 c_diff, float3 normal, float3 view)
+{
+	float3 prefiltered_clr = 0;
+	float total_weight = 0;
+	
+	const uint NUM_SAMPLES = 1024;
+	for (uint i = 0; i < NUM_SAMPLES; ++ i)
+	{
+		float2 xi = Hammersley2D(i, NUM_SAMPLES);
+		float3 h = ImportanceSampleLambert(xi, normal);
+		float3 l = -reflect(view, h);
+		float n_dot_l = saturate(dot(normal, l));
+		if (n_dot_l > 0)
+		{
+			prefiltered_clr += decode_hdr_yc(skybox_Ycube_tex.SampleLevel(skybox_sampler, l, 0).r,
+				skybox_Ccube_tex.SampleLevel(skybox_sampler, l, 0)).xyz * n_dot_l;
+			total_weight += n_dot_l;
+		}
+	}
+
+	return c_diff * prefiltered_clr / total_weight;
 }
 
 float3 SpecularIBL(float3 c_spec, float roughness, float3 normal, float3 view)
@@ -113,7 +156,32 @@ float3 SpecularIBL(float3 c_spec, float roughness, float3 normal, float3 view)
 	return specular / NUM_SAMPLES;
 }
 
-float3 PrefilterEnvMap(float roughness, float3 r)
+float3 PrefilterEnvMapDiffuse(float3 r)
+{
+	float3 normal = r;
+	float3 view = r;
+	float3 prefiltered_clr = 0;
+	float total_weight = 0;
+
+	const uint NUM_SAMPLES = 1024;
+	for (uint i = 0; i < NUM_SAMPLES; ++ i)
+	{
+		float2 xi = Hammersley2D(i, NUM_SAMPLES);
+		float3 h = ImportanceSampleLambert(xi, normal);
+		float3 l = -reflect(view, h);
+		float n_dot_l = saturate(dot(normal, l));
+		if (n_dot_l > 0)
+		{
+			prefiltered_clr += decode_hdr_yc(skybox_Ycube_tex.SampleLevel(skybox_sampler, l, 0).r,
+				skybox_Ccube_tex.SampleLevel(skybox_sampler, l, 0)).xyz * n_dot_l;
+			total_weight += n_dot_l;
+		}
+	}
+
+	return prefiltered_clr / total_weight;
+}
+
+float3 PrefilterEnvMapSpecular(float roughness, float3 r)
 {
 	float3 normal = r;
 	float3 view = r;
@@ -164,20 +232,36 @@ float2 IntegrateBRDF(float roughness, float n_dot_v)
 	return rg / NUM_SAMPLES;
 }
 
+float3 ApproximateDiffuseIBL(float3 c_diff, float3 normal, float3 view)
+{
+	float3 r = -reflect(view, normal);
+	float3 prefiltered_clr = PrefilterEnvMapDiffuse(r);
+	return prefiltered_clr * c_diff;
+}
+
 float3 ApproximateSpecularIBL(float3 c_spec, float roughness, float3 normal, float3 view)
 {
 	roughness = pow(8192.0f, roughness);
 
 	float n_dot_v = saturate(dot(normal, view));
 	float3 r = -reflect(view, normal);
-	float3 prefiltered_clr = PrefilterEnvMap(roughness, r);
+	float3 prefiltered_clr = PrefilterEnvMapSpecular(roughness, r);
 	float2 env_brdf = IntegrateBRDF(roughness, n_dot_v);
 	return prefiltered_clr * (c_spec * env_brdf.x + env_brdf.y);
 }
 
+float3 PrefilteredDiffuseIBL(float3 c_diff, float3 normal, float3 view)
+{
+	int diff_mip = 6;
+	float3 r = CalcPrefilteredEnvVec(normal, view);
+	float3 prefiltered_clr = decode_hdr_yc(skybox_Ycube_tex.SampleLevel(skybox_sampler, r, diff_mip).r,
+		skybox_Ccube_tex.SampleLevel(skybox_sampler, r, diff_mip)).xyz;
+	return prefiltered_clr * c_diff;
+}
+
 float3 PrefilteredSpecularIBL(float3 c_spec, float roughness, float3 normal, float3 view)
 {
-	int num_mip = 6;
+	int num_mip = 5;
 	float mip = CalcPrefilteredEnvMip(roughness, num_mip);
 	roughness = pow(8192.0f, roughness);
 	float3 r = CalcPrefilteredEnvVec(normal, view);
@@ -188,7 +272,7 @@ float3 PrefilteredSpecularIBL(float3 c_spec, float roughness, float3 normal, flo
 
 float3 PBPrefilteredSpecularIBL(float3 c_spec, float roughness, float3 normal, float3 view)
 {
-	int num_mip = 6;
+	int num_mip = 5;
 	float mip = CalcPrefilteredEnvMip(roughness, num_mip);
 	float n_dot_v = saturate(dot(normal, view));
 	float3 r = CalcPrefilteredEnvVec(normal, view);
@@ -200,7 +284,7 @@ float3 PBPrefilteredSpecularIBL(float3 c_spec, float roughness, float3 normal, f
 
 float3 PBFittingPrefilteredSpecularIBL(float3 c_spec, float roughness, float3 normal, float3 view)
 {
-	int num_mip = 6;
+	int num_mip = 5;
 	float mip = CalcPrefilteredEnvMip(roughness, num_mip);
 	float3 r = CalcPrefilteredEnvVec(normal, view);
 	float3 prefiltered_clr = decode_hdr_yc(skybox_Ycube_tex.SampleLevel(skybox_sampler, r, mip).r,
@@ -227,7 +311,8 @@ float4 GroundTruthPS(float3 normal : TEXCOORD0, float3 incident : TEXCOORD1) : S
 	normal = normalize(normal);
 	incident = normalize(incident);
 
-	return float4(SpecularIBL(0.4f, roughness, normal, incident), 1);
+	return float4(DiffuseIBL(float3(0.31f, 0.25f, 0.15f), normal, incident)
+		+ SpecularIBL(0.2f, roughness, normal, incident), 1);
 }
 
 float4 ApproximatePS(float3 normal : TEXCOORD0, float3 incident : TEXCOORD1) : SV_Target
@@ -235,7 +320,8 @@ float4 ApproximatePS(float3 normal : TEXCOORD0, float3 incident : TEXCOORD1) : S
 	normal = normalize(normal);
 	incident = normalize(incident);
 
-	return float4(ApproximateSpecularIBL(0.4f, roughness, normal, incident), 1);
+	return float4(ApproximateDiffuseIBL(float3(0.31f, 0.25f, 0.15f), normal, incident)
+		+ ApproximateSpecularIBL(0.2f, roughness, normal, incident), 1);
 }
 
 float4 PrefilteredPS(float3 normal : TEXCOORD0, float3 incident : TEXCOORD1) : SV_Target
@@ -243,7 +329,8 @@ float4 PrefilteredPS(float3 normal : TEXCOORD0, float3 incident : TEXCOORD1) : S
 	normal = normalize(normal);
 	incident = normalize(incident);
 
-	return float4(PrefilteredSpecularIBL(0.4f, roughness, normal, incident), 1);
+	return float4(PrefilteredDiffuseIBL(float3(0.31f, 0.25f, 0.15f), normal, incident)
+		+ PrefilteredSpecularIBL(0.2f, roughness, normal, incident), 1);
 }
 
 float4 PBPrefilteredPS(float3 normal : TEXCOORD0, float3 incident : TEXCOORD1) : SV_Target
@@ -251,7 +338,8 @@ float4 PBPrefilteredPS(float3 normal : TEXCOORD0, float3 incident : TEXCOORD1) :
 	normal = normalize(normal);
 	incident = normalize(incident);
 
-	return float4(PBPrefilteredSpecularIBL(0.4f, roughness, normal, incident), 1);
+	return float4(PrefilteredDiffuseIBL(float3(0.31f, 0.25f, 0.15f), normal, incident)
+		+ PBPrefilteredSpecularIBL(0.2f, roughness, normal, incident), 1);
 }
 
 float4 PBFittingPrefilteredPS(float3 normal : TEXCOORD0, float3 incident : TEXCOORD1) : SV_Target
@@ -259,7 +347,8 @@ float4 PBFittingPrefilteredPS(float3 normal : TEXCOORD0, float3 incident : TEXCO
 	normal = normalize(normal);
 	incident = normalize(incident);
 
-	return float4(PBFittingPrefilteredSpecularIBL(0.4f, roughness, normal, incident), 1);
+	return float4(PrefilteredDiffuseIBL(float3(0.31f, 0.25f, 0.15f), normal, incident)
+		+ PBFittingPrefilteredSpecularIBL(0.2f, roughness, normal, incident), 1);
 }
 		]]>
 	</shader>

@@ -161,6 +161,26 @@ namespace
 		return float2(static_cast<float>(i) / N, RadicalInverseVdC(i));
 	}
 
+	float3 ImportanceSampleLambert(float2 const & xi)
+	{
+		const float PI = 3.1415926f;
+
+		float phi = 2 * PI * xi.x();
+		float cos_theta = sqrt(1 - xi.y());
+		float sin_theta = sqrt(1 - cos_theta * cos_theta);
+		return float3(sin_theta * cos(phi), sin_theta * sin(phi), cos_theta);
+	}
+
+	float3 ImportanceSampleLambert(float2 const & xi, float3 const & normal)
+	{
+		float3 h = ImportanceSampleLambert(xi);
+
+		float3 up_vec = abs(normal.z()) < 0.999f ? float3(0, 0, 1) : float3(1, 0, 0);
+		float3 tangent = MathLib::normalize(MathLib::cross(up_vec, normal));
+		float3 binormal = MathLib::cross(normal, tangent);
+		return tangent * h.x() + binormal * h.y() + normal * h.z();
+	}
+
 	float3 ImportanceSampleBP(float2 const & xi, float roughness)
 	{
 		float phi = 2 * PI * xi.x();
@@ -179,7 +199,33 @@ namespace
 		return tangent * h.x() + binormal * h.y() + normal * h.z();
 	}
 
-	Color PrefilterEnvMap(float roughness, float3 const & r, Color* env_map[6], uint32_t size)
+	Color PrefilterEnvMapDiffuse(float3 const & r, Color* env_map[6], uint32_t size)
+	{
+		float3 normal = r;
+		float3 view = r;
+		Color prefiltered_clr(0.0f, 0.0f, 0.0f, 0.0f);
+		float total_weight = 0;
+
+		uint32_t const NUM_SAMPLES = 1024;
+		for (uint32_t i = 0; i < NUM_SAMPLES; ++ i)
+		{
+			float2 xi = Hammersley2D(i, NUM_SAMPLES);
+			float3 h = ImportanceSampleLambert(xi, normal);
+			float3 l = -MathLib::reflect(view, h);
+			float n_dot_l = MathLib::clamp(MathLib::dot(normal, l), 0.0f, 1.0f);
+			if (n_dot_l > 0)
+			{
+				uint32_t face, x, y;
+				ToAddress(face, x, y, l, size);
+				prefiltered_clr += env_map[face][y * size + x] * n_dot_l;
+				total_weight += n_dot_l;
+			}
+		}
+
+		return prefiltered_clr / total_weight;
+	}
+
+	Color PrefilterEnvMapSpecular(float roughness, float3 const & r, Color* env_map[6], uint32_t size)
 	{
 		float3 normal = r;
 		float3 view = r;
@@ -247,10 +293,11 @@ namespace
 		for (uint32_t face = 0; face < 6; ++ face)
 		{
 			w = std::max<uint32_t>(1U, in_width / 2);
-			for (uint32_t mip = 1; mip < out_num_mipmaps; ++ mip)
+
+			for (uint32_t mip = 1; mip < out_num_mipmaps - 1; ++ mip)
 			{
 				prefilted_data[face * out_num_mipmaps + mip].resize(w * w);
-				float roughness = static_cast<float>(out_num_mipmaps - 1 - mip) / (out_num_mipmaps - 1);
+				float roughness = static_cast<float>(out_num_mipmaps - 2 - mip) / (out_num_mipmaps - 2);
 				roughness = pow(8192.0f, roughness);
 
 				for (uint32_t y = 0; y < w; ++ y)
@@ -258,11 +305,23 @@ namespace
 					for (uint32_t x = 0; x < w; ++ x)
 					{
 						prefilted_data[face * out_num_mipmaps + mip][y * w + x]
-							= PrefilterEnvMap(roughness, ToDir(face, x, y, w), env_map, in_width);
+							= PrefilterEnvMapSpecular(roughness, ToDir(face, x, y, w), env_map, in_width);
 					}
 				}
 
 				w = std::max<uint32_t>(1U, w / 2);
+			}
+
+			{
+				prefilted_data[face * out_num_mipmaps + out_num_mipmaps - 1].resize(w * w);
+				for (uint32_t y = 0; y < w; ++ y)
+				{
+					for (uint32_t x = 0; x < w; ++ x)
+					{
+						prefilted_data[face * out_num_mipmaps + out_num_mipmaps - 1][y * w + x]
+							= PrefilterEnvMapDiffuse(ToDir(face, x, y, w), env_map, in_width);
+					}
+				}
 			}
 		}
 
