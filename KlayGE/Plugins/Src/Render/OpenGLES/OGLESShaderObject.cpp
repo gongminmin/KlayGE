@@ -2847,6 +2847,9 @@ namespace KlayGE
 				cgDestroyProgram(cg_shader);
 			}
 #endif
+#else
+			UNREF_PARAM(tech);
+			UNREF_PARAM(pass);
 #endif
 		}
 

@@ -747,6 +747,8 @@ namespace KlayGE
 				break;
 			}
 		}
+#else
+		UNREF_PARAM(ch);
 #endif
 	}
 

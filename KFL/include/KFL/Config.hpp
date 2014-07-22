@@ -113,6 +113,12 @@
 	// GNU C++
 
 	#include <bits/c++config.h>
+	#ifdef _GLIBCXX_USE_FLOAT128
+		#undef _GLIBCXX_USE_FLOAT128
+	#endif
+	#ifdef _GLIBCXX_USE_INT128
+		#undef _GLIBCXX_USE_INT128
+	#endif
 
 	#define KLAYGE_COMPILER_GCC
 

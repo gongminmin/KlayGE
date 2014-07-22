@@ -37,10 +37,12 @@ def build_Boost(build_info, compiler_arch):
 	
 	if ("x86" == compiler_arch[0]) or ("x86_app" == compiler_arch[0]):
 		options += "address-model=32 architecture=x86"
-	elif ("x64" == compiler_arch[0]) or ("x64_app" == compiler_arch[0]):
+	elif ("x64" == compiler_arch[0]) or ("x64_app" == compiler_arch[0]) or ("x86_64" == compiler_arch[0]):
 		options += "address-model=64 architecture=x86"
-	elif ("arm" == compiler_arch[0]) or ("arm_app" == compiler_arch[0]):
+	elif ("arm" == compiler_arch[0]) or ("arm_app" == compiler_arch[0]) or ("armeabi" == compiler_arch[0]) or ("armeabi-v7a" == compiler_arch[0]):
 		options += "address-model=32 architecture=arm"
+	elif ("arm64-v8a" == compiler_arch[0]):
+		options += "address-model=64 architecture=arm"
 	
 	if "vc" == build_info.compiler_name:
 		if build_info.compiler_version >= 100:
@@ -112,6 +114,7 @@ def build_Boost(build_info, compiler_arch):
 			arch_name = "arm"
 		elif "arm64-v8a" == arch_name:
 			arch_name = "arm64"
+		build_cmd.add_command('set NDK_TOOLSET="%s"' % build_info.toolset)
 		build_cmd.add_command('set CXXFLAGS="-I%%ANDROID_NDK%%/platforms/android-%s/arch-%s/usr/include -I%%ANDROID_NDK%%/sources/cxx-stl/gnu-libstdc++/%s/include -I%%ANDROID_NDK%%/sources/cxx-stl/gnu-libstdc++/%s/libs/%s/include"' % (build_info.target_api_level, arch_name, compiler_arch[2], compiler_arch[2], compiler_arch[0]))
 	if build_info.prefer_static:
 		link = "static"
