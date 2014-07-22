@@ -83,13 +83,13 @@ namespace KlayGE
 		}
 
 		// IProgress
-		STDMETHOD(SetTotal)(uint64_t size);
-		STDMETHOD(SetCompleted)(const uint64_t* completeValue);
+		STDMETHOD(SetTotal)(UInt64 size);
+		STDMETHOD(SetCompleted)(const UInt64* completeValue);
 
 		// IExtractCallBack
-		STDMETHOD(GetStream)(uint32_t index, ISequentialOutStream **outStream, int32_t askExtractMode);
-		STDMETHOD(PrepareOperation)(int32_t askExtractMode);
-		STDMETHOD(SetOperationResult)(int32_t resultEOperationResult);
+		STDMETHOD(GetStream)(UInt32 index, ISequentialOutStream **outStream, Int32 askExtractMode);
+		STDMETHOD(PrepareOperation)(Int32 askExtractMode);
+		STDMETHOD(SetOperationResult)(Int32 resultEOperationResult);
 
 		// ICryptoGetTextPassword
 		STDMETHOD(CryptoGetTextPassword)(BSTR *aPassword);

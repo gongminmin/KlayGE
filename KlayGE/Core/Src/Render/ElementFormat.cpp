@@ -1066,7 +1066,7 @@ namespace KlayGE
 			for (uint32_t i = 0; i < num_elems; ++ i, ++ input, p += elem_size)
 			{
 				uint32_t* s = reinterpret_cast<uint32_t*>(p);
-				*s = static_cast<uint32_t>(MathLib::clamp(static_cast<uint64_t>(input->r() * 0xFFFFFFFFULL + 0.5f), 0ULL, 0xFFFFFFFFULL));
+				*s = static_cast<uint32_t>(MathLib::clamp<uint64_t>(static_cast<uint64_t>(input->r() * 0xFFFFFFFFULL + 0.5f), 0ULL, 0xFFFFFFFFULL));
 			}
 			break;
 
@@ -1074,7 +1074,7 @@ namespace KlayGE
 			for (uint32_t i = 0; i < num_elems; ++ i, ++ input, p += elem_size)
 			{
 				int32_t* s = reinterpret_cast<int32_t*>(p);
-				*s = static_cast<int32_t>(MathLib::clamp(static_cast<int64_t>(input->r() * 0x7FFFFFFFLL + 0.5f), -0x7FFFFFFFLL, 0x7FFFFFFFLL));
+				*s = static_cast<int32_t>(MathLib::clamp<int64_t>(static_cast<int64_t>(input->r() * 0x7FFFFFFFLL + 0.5f), -0x7FFFFFFFLL, 0x7FFFFFFFLL));
 			}
 			break;
 
@@ -1082,8 +1082,8 @@ namespace KlayGE
 			for (uint32_t i = 0; i < num_elems; ++ i, ++ input, p += elem_size)
 			{
 				uint32_t* s = reinterpret_cast<uint32_t*>(p);
-				s[0] = static_cast<uint32_t>(MathLib::clamp(static_cast<uint64_t>(input->r() * 0xFFFFFFFFULL + 0.5f), 0ULL, 0xFFFFFFFFULL));
-				s[1] = static_cast<uint32_t>(MathLib::clamp(static_cast<uint64_t>(input->g() * 0xFFFFFFFFULL + 0.5f), 0ULL, 0xFFFFFFFFULL));
+				s[0] = static_cast<uint32_t>(MathLib::clamp<uint64_t>(static_cast<uint64_t>(input->r() * 0xFFFFFFFFULL + 0.5f), 0ULL, 0xFFFFFFFFULL));
+				s[1] = static_cast<uint32_t>(MathLib::clamp<uint64_t>(static_cast<uint64_t>(input->g() * 0xFFFFFFFFULL + 0.5f), 0ULL, 0xFFFFFFFFULL));
 			}
 			break;
 
@@ -1091,8 +1091,8 @@ namespace KlayGE
 			for (uint32_t i = 0; i < num_elems; ++ i, ++ input, p += elem_size)
 			{
 				int32_t* s = reinterpret_cast<int32_t*>(p);
-				s[0] = static_cast<int32_t>(MathLib::clamp(static_cast<int64_t>(input->r() * 0x7FFFFFFFLL + 0.5f), -0x7FFFFFFFLL, 0x7FFFFFFFLL));
-				s[1] = static_cast<int32_t>(MathLib::clamp(static_cast<int64_t>(input->g() * 0x7FFFFFFFLL + 0.5f), -0x7FFFFFFFLL, 0x7FFFFFFFLL));
+				s[0] = static_cast<int32_t>(MathLib::clamp<int64_t>(static_cast<int64_t>(input->r() * 0x7FFFFFFFLL + 0.5f), -0x7FFFFFFFLL, 0x7FFFFFFFLL));
+				s[1] = static_cast<int32_t>(MathLib::clamp<int64_t>(static_cast<int64_t>(input->g() * 0x7FFFFFFFLL + 0.5f), -0x7FFFFFFFLL, 0x7FFFFFFFLL));
 			}
 			break;
 
@@ -1100,9 +1100,9 @@ namespace KlayGE
 			for (uint32_t i = 0; i < num_elems; ++ i, ++ input, p += elem_size)
 			{
 				uint32_t* s = reinterpret_cast<uint32_t*>(p);
-				s[0] = static_cast<uint32_t>(MathLib::clamp(static_cast<uint64_t>(input->r() * 0xFFFFFFFFULL + 0.5f), 0ULL, 0xFFFFFFFFULL));
-				s[1] = static_cast<uint32_t>(MathLib::clamp(static_cast<uint64_t>(input->g() * 0xFFFFFFFFULL + 0.5f), 0ULL, 0xFFFFFFFFULL));
-				s[2] = static_cast<uint32_t>(MathLib::clamp(static_cast<uint64_t>(input->b() * 0xFFFFFFFFULL + 0.5f), 0ULL, 0xFFFFFFFFULL));
+				s[0] = static_cast<uint32_t>(MathLib::clamp<uint64_t>(static_cast<uint64_t>(input->r() * 0xFFFFFFFFULL + 0.5f), 0ULL, 0xFFFFFFFFULL));
+				s[1] = static_cast<uint32_t>(MathLib::clamp<uint64_t>(static_cast<uint64_t>(input->g() * 0xFFFFFFFFULL + 0.5f), 0ULL, 0xFFFFFFFFULL));
+				s[2] = static_cast<uint32_t>(MathLib::clamp<uint64_t>(static_cast<uint64_t>(input->b() * 0xFFFFFFFFULL + 0.5f), 0ULL, 0xFFFFFFFFULL));
 			}
 			break;
 
@@ -1110,9 +1110,9 @@ namespace KlayGE
 			for (uint32_t i = 0; i < num_elems; ++ i, ++ input, p += elem_size)
 			{
 				int32_t* s = reinterpret_cast<int32_t*>(p);
-				s[0] = static_cast<int32_t>(MathLib::clamp(static_cast<int64_t>(input->r() * 0x7FFFFFFFLL + 0.5f), -0x7FFFFFFFLL, 0x7FFFFFFFLL));
-				s[1] = static_cast<int32_t>(MathLib::clamp(static_cast<int64_t>(input->g() * 0x7FFFFFFFLL + 0.5f), -0x7FFFFFFFLL, 0x7FFFFFFFLL));
-				s[2] = static_cast<int32_t>(MathLib::clamp(static_cast<int64_t>(input->b() * 0x7FFFFFFFLL + 0.5f), -0x7FFFFFFFLL, 0x7FFFFFFFLL));
+				s[0] = static_cast<int32_t>(MathLib::clamp<int64_t>(static_cast<int64_t>(input->r() * 0x7FFFFFFFLL + 0.5f), -0x7FFFFFFFLL, 0x7FFFFFFFLL));
+				s[1] = static_cast<int32_t>(MathLib::clamp<int64_t>(static_cast<int64_t>(input->g() * 0x7FFFFFFFLL + 0.5f), -0x7FFFFFFFLL, 0x7FFFFFFFLL));
+				s[2] = static_cast<int32_t>(MathLib::clamp<int64_t>(static_cast<int64_t>(input->b() * 0x7FFFFFFFLL + 0.5f), -0x7FFFFFFFLL, 0x7FFFFFFFLL));
 			}
 			break;
 
@@ -1120,10 +1120,10 @@ namespace KlayGE
 			for (uint32_t i = 0; i < num_elems; ++ i, ++ input, p += elem_size)
 			{
 				uint32_t* s = reinterpret_cast<uint32_t*>(p);
-				s[0] = static_cast<uint32_t>(MathLib::clamp(static_cast<uint64_t>(input->r() * 0xFFFFFFFFULL + 0.5f), 0ULL, 0xFFFFFFFFULL));
-				s[1] = static_cast<uint32_t>(MathLib::clamp(static_cast<uint64_t>(input->g() * 0xFFFFFFFFULL + 0.5f), 0ULL, 0xFFFFFFFFULL));
-				s[2] = static_cast<uint32_t>(MathLib::clamp(static_cast<uint64_t>(input->b() * 0xFFFFFFFFULL + 0.5f), 0ULL, 0xFFFFFFFFULL));
-				s[3] = static_cast<uint32_t>(MathLib::clamp(static_cast<uint64_t>(input->a() * 0xFFFFFFFFULL + 0.5f), 0ULL, 0xFFFFFFFFULL));
+				s[0] = static_cast<uint32_t>(MathLib::clamp<uint64_t>(static_cast<uint64_t>(input->r() * 0xFFFFFFFFULL + 0.5f), 0ULL, 0xFFFFFFFFULL));
+				s[1] = static_cast<uint32_t>(MathLib::clamp<uint64_t>(static_cast<uint64_t>(input->g() * 0xFFFFFFFFULL + 0.5f), 0ULL, 0xFFFFFFFFULL));
+				s[2] = static_cast<uint32_t>(MathLib::clamp<uint64_t>(static_cast<uint64_t>(input->b() * 0xFFFFFFFFULL + 0.5f), 0ULL, 0xFFFFFFFFULL));
+				s[3] = static_cast<uint32_t>(MathLib::clamp<uint64_t>(static_cast<uint64_t>(input->a() * 0xFFFFFFFFULL + 0.5f), 0ULL, 0xFFFFFFFFULL));
 			}
 			break;
 
@@ -1131,10 +1131,10 @@ namespace KlayGE
 			for (uint32_t i = 0; i < num_elems; ++ i, ++ input, p += elem_size)
 			{
 				int32_t* s = reinterpret_cast<int32_t*>(p);
-				s[0] = static_cast<int32_t>(MathLib::clamp(static_cast<int64_t>(input->r() * 0x7FFFFFFFLL + 0.5f), -0x7FFFFFFFLL, 0x7FFFFFFFLL));
-				s[1] = static_cast<int32_t>(MathLib::clamp(static_cast<int64_t>(input->g() * 0x7FFFFFFFLL + 0.5f), -0x7FFFFFFFLL, 0x7FFFFFFFLL));
-				s[2] = static_cast<int32_t>(MathLib::clamp(static_cast<int64_t>(input->b() * 0x7FFFFFFFLL + 0.5f), -0x7FFFFFFFLL, 0x7FFFFFFFLL));
-				s[3] = static_cast<int32_t>(MathLib::clamp(static_cast<int64_t>(input->a() * 0x7FFFFFFFLL + 0.5f), -0x7FFFFFFFLL, 0x7FFFFFFFLL));
+				s[0] = static_cast<int32_t>(MathLib::clamp<int64_t>(static_cast<int64_t>(input->r() * 0x7FFFFFFFLL + 0.5f), -0x7FFFFFFFLL, 0x7FFFFFFFLL));
+				s[1] = static_cast<int32_t>(MathLib::clamp<int64_t>(static_cast<int64_t>(input->g() * 0x7FFFFFFFLL + 0.5f), -0x7FFFFFFFLL, 0x7FFFFFFFLL));
+				s[2] = static_cast<int32_t>(MathLib::clamp<int64_t>(static_cast<int64_t>(input->b() * 0x7FFFFFFFLL + 0.5f), -0x7FFFFFFFLL, 0x7FFFFFFFLL));
+				s[3] = static_cast<int32_t>(MathLib::clamp<int64_t>(static_cast<int64_t>(input->a() * 0x7FFFFFFFLL + 0.5f), -0x7FFFFFFFLL, 0x7FFFFFFFLL));
 			}
 			break;
 

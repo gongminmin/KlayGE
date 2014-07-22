@@ -95,10 +95,10 @@ namespace KlayGE
 
 		void Attach(ResIdentifierPtr const & is);
 
-		STDMETHOD(Read)(void* data, uint32_t size, uint32_t* processedSize);
-		STDMETHOD(Seek)(int64_t offset, uint32_t seekOrigin, uint64_t* newPosition);
+		STDMETHOD(Read)(void* data, UInt32 size, UInt32* processedSize);
+		STDMETHOD(Seek)(Int64 offset, UInt32 seekOrigin, UInt64* newPosition);
 
-		STDMETHOD(GetSize)(uint64_t* size);
+		STDMETHOD(GetSize)(UInt64* size);
 
 	private:
 		atomic<int32_t> ref_count_;
@@ -150,9 +150,9 @@ namespace KlayGE
 
 		void Attach(shared_ptr<std::ostream> const & os);
 
-		STDMETHOD(Write)(const void* data, uint32_t size, uint32_t* processedSize);
-		STDMETHOD(Seek)(int64_t offset, uint32_t seekOrigin, uint64_t* newPosition);
-		STDMETHOD(SetSize)(uint64_t newSize);
+		STDMETHOD(Write)(const void* data, UInt32 size, UInt32* processedSize);
+		STDMETHOD(Seek)(Int64 offset, UInt32 seekOrigin, UInt64* newPosition);
+		STDMETHOD(SetSize)(UInt64 newSize);
 
 	private:
 		atomic<int32_t> ref_count_;

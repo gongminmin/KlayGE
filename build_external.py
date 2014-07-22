@@ -23,6 +23,8 @@ def build_Boost(build_info, compiler_arch):
 		if "android" == build_info.target_platform:
 			if "armeabi-v7a" == compiler_arch[0]:
 				boost_toolset = "gcc-android_armeabi_v7a"
+			elif "arm64-v8a" == compiler_arch[0]:
+				boost_toolset = "gcc-android_arm64_v8a"
 			else:
 				boost_toolset = "gcc-android_%s" % compiler_arch[0]
 		else:
@@ -105,7 +107,12 @@ def build_Boost(build_info, compiler_arch):
 		
 	build_cmd = batch_command(build_info.host_platform)
 	if "android" == build_info.target_platform:
-		build_cmd.add_command('set CXXFLAGS="-I%%ANDROID_NDK%%/platforms/android-9/arch-arm/usr/include -I%%ANDROID_NDK%%/sources/cxx-stl/gnu-libstdc++/%s/include -I%%ANDROID_NDK%%/sources/cxx-stl/gnu-libstdc++/%s/libs/armeabi/include"' % (compiler_arch[2], compiler_arch[2]))
+		arch_name = compiler_arch[0]
+		if ("armeabi" == arch_name) or ("armeabi-v7a" == arch_name):
+			arch_name = "arm"
+		elif "arm64-v8a" == arch_name:
+			arch_name = "arm64"
+		build_cmd.add_command('set CXXFLAGS="-I%%ANDROID_NDK%%/platforms/android-%s/arch-%s/usr/include -I%%ANDROID_NDK%%/sources/cxx-stl/gnu-libstdc++/%s/include -I%%ANDROID_NDK%%/sources/cxx-stl/gnu-libstdc++/%s/libs/%s/include"' % (build_info.target_api_level, arch_name, compiler_arch[2], compiler_arch[2], compiler_arch[0]))
 	if build_info.prefer_static:
 		link = "static"
 	else:

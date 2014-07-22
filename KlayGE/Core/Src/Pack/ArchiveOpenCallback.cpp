@@ -37,12 +37,12 @@
 
 namespace KlayGE
 {
-	STDMETHODIMP CArchiveOpenCallback::SetTotal(const uint64_t* /*files*/, const uint64_t* /*bytes*/)
+	STDMETHODIMP CArchiveOpenCallback::SetTotal(const UInt64* /*files*/, const UInt64* /*bytes*/)
 	{
 		return S_OK;
 	}
 
-	STDMETHODIMP CArchiveOpenCallback::SetCompleted(const uint64_t* /*files*/, const uint64_t* /*bytes*/)
+	STDMETHODIMP CArchiveOpenCallback::SetCompleted(const UInt64* /*files*/, const UInt64* /*bytes*/)
 	{
 		return S_OK;
 	}

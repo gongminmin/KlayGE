@@ -37,17 +37,17 @@
 
 namespace KlayGE
 {
-	STDMETHODIMP CArchiveExtractCallback::SetTotal(uint64_t /*size*/)
+	STDMETHODIMP CArchiveExtractCallback::SetTotal(UInt64 /*size*/)
 	{
 		return S_OK;
 	}
 
-	STDMETHODIMP CArchiveExtractCallback::SetCompleted(const uint64_t* /*completeValue*/)
+	STDMETHODIMP CArchiveExtractCallback::SetCompleted(const UInt64* /*completeValue*/)
 	{
 		return S_OK;
 	}
 
-	STDMETHODIMP CArchiveExtractCallback::GetStream(uint32_t /*index*/, ISequentialOutStream** outStream, int32_t askExtractMode)
+	STDMETHODIMP CArchiveExtractCallback::GetStream(UInt32 /*index*/, ISequentialOutStream** outStream, Int32 askExtractMode)
 	{
 		enum 
 		{
@@ -68,12 +68,12 @@ namespace KlayGE
 		return S_OK;
 	}
 
-	STDMETHODIMP CArchiveExtractCallback::PrepareOperation(int32_t /*askExtractMode*/)
+	STDMETHODIMP CArchiveExtractCallback::PrepareOperation(Int32 /*askExtractMode*/)
 	{
 		return S_OK;
 	}
 
-	STDMETHODIMP CArchiveExtractCallback::SetOperationResult(int32_t /*operationResult*/)
+	STDMETHODIMP CArchiveExtractCallback::SetOperationResult(Int32 /*operationResult*/)
 	{
 		return S_OK;
 	}

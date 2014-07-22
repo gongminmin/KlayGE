@@ -20,14 +20,14 @@ compiler		= "auto"
 # Toolset name.
 #   On Windows, could be "v120", "v120_xp", "v110", "v110_xp", "v100", "auto".
 #   On WinRT, could be "v120", "v110", "auto".
-#   On Android, could be "4.4.3", "4.6", "4.8", "auto".
+#   On Android, could be "4.4.3", "4.6", "4.8", "4.9", "auto".
 #   On Linux, could be "auto".
 toolset			= "auto"
 
 # Target CPU architecture.
 #   On Windows, could be "x86", "x64".
 #   On WinRT, could be  "arm_app", "x86_app", "x64_app".
-#   On Android, cound be "armeabi", "armeabi-v7a", "x86".
+#   On Android, cound be "armeabi", "armeabi-v7a", "arm64-v8a", "x86", "x86_64".
 #   On Linux, could be "x86", "x64".
 arch			= ("x86", )
 
@@ -93,48 +93,50 @@ class build_info:
 				space_place = target_platform.find(' ')
 				if space_place != -1:
 					android_ver = target_platform[space_place + 1:]
-					if "4.4" == android_ver:
-						target_api_level = 19
+					if "L" == android_ver:
+						target_api_level = "L"
+					elif "4.4" == android_ver:
+						target_api_level = "19"
 					elif "4.3" == android_ver:
-						target_api_level = 18
+						target_api_level = "18"
 					elif "4.2" == android_ver:
-						target_api_level = 17
+						target_api_level = "17"
 					elif "4.1" == android_ver:
-						target_api_level = 16
+						target_api_level = "16"
 					elif ("4.0.3" == android_ver) or ("4.0.4" == android_ver):
-						target_api_level = 15
+						target_api_level = "15"
 					elif "4.0" == android_ver:
-						target_api_level = 14
+						target_api_level = "14"
 					elif "3.2" == android_ver:
-						target_api_level = 13
+						target_api_level = "13"
 					elif "3.1" == android_ver:
-						target_api_level = 12
+						target_api_level = "12"
 					elif "3.0" == android_ver:
-						target_api_level = 11
+						target_api_level = "11"
 					elif ("2.3.4" == android_ver) or ("2.3.3" == android_ver):
-						target_api_level = 10
+						target_api_level = "10"
 					elif "2.3" == android_ver:
-						target_api_level = 9
+						target_api_level = "9"
 					elif "2.2" == android_ver:
-						target_api_level = 8
+						target_api_level = "8"
 					elif "2.1" == android_ver:
-						target_api_level = 7
+						target_api_level = "7"
 					elif "2.0.1" == android_ver:
-						target_api_level = 6
+						target_api_level = "6"
 					elif "2.0" == android_ver:
-						target_api_level = 5
+						target_api_level = "5"
 					elif "1.6" == android_ver:
-						target_api_level = 4
+						target_api_level = "4"
 					elif "1.5" == android_ver:
-						target_api_level = 3
+						target_api_level = "3"
 					elif "1.1" == android_ver:
-						target_api_level = 2
+						target_api_level = "2"
 					elif "1.0" == android_ver:
-						target_api_level = 1
+						target_api_level = "1"
 					else:
 						log_error("Unsupported android version\n")
 				else:
-					target_api_level = 10
+					target_api_level = "10"
 				target_platform = "android"
 				self.target_api_level = target_api_level
 		if "android" == target_platform:
@@ -184,7 +186,10 @@ class build_info:
 				elif "vc90" == compiler:
 					toolset = "v90"
 			elif "android" == target_platform:
-				toolset = "4.6"
+				if "L" == target_api_level:
+					toolset = "4.9"
+				else:
+					toolset = "4.6"
 				
 		if "" == archs:
 			archs = cfg_build.arch
@@ -377,7 +382,7 @@ def build_a_project(name, build_path, build_info, compiler_arch, need_install = 
 		additional_options += " -DKLAYGE_ARCH_NAME:STRING=\"%s\"" % compiler_arch[0]
 	if "android" == build_info.target_platform:
 		additional_options += " -DCMAKE_TOOLCHAIN_FILE=\"%s/cmake/android.toolchain.cmake\"" % curdir
-		additional_options += " -DANDROID_NATIVE_API_LEVEL=%d" % build_info.target_api_level
+		additional_options += " -DANDROID_NATIVE_API_LEVEL=%s" % build_info.target_api_level
 		if "win" == build_info.host_platform:
 			additional_options += " -DCMAKE_MAKE_PROGRAM=\"%ANDROID_NDK%\\prebuilt\\windows\\bin\\make.exe\""
 
@@ -437,6 +442,10 @@ def build_a_project(name, build_path, build_info, compiler_arch, need_install = 
 				config_options += " -DANDROID_ABI=%s" % compiler_arch[0]
 				if "x86" == compiler_arch[0]:
 					config_options += " -DANDROID_TOOLCHAIN_NAME=x86-%s" % compiler_arch[2]
+				elif "x86_64" == compiler_arch[0]:
+					config_options += " -DANDROID_TOOLCHAIN_NAME=x86_64-%s" % compiler_arch[2]
+				elif "arm64-v8a" == compiler_arch[0]:
+					config_options += " -DANDROID_TOOLCHAIN_NAME=aarch64-linux-android-%s" % compiler_arch[2]
 				else:
 					config_options += " -DANDROID_TOOLCHAIN_NAME=arm-linux-androideabi-%s" % compiler_arch[2]
 			

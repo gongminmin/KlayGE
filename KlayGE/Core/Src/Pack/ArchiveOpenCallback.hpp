@@ -82,8 +82,8 @@ namespace KlayGE
 			}
 		}
 
-		STDMETHOD(SetTotal)(const uint64_t* files, const uint64_t* bytes);
-		STDMETHOD(SetCompleted)(const uint64_t* files, const uint64_t* bytes);
+		STDMETHOD(SetTotal)(const UInt64* files, const UInt64* bytes);
+		STDMETHOD(SetCompleted)(const UInt64* files, const UInt64* bytes);
 
 		// ICryptoGetTextPassword
 		STDMETHOD(CryptoGetTextPassword)(BSTR *password);

@@ -49,7 +49,7 @@ namespace KlayGE
 		is_->seekg(0, std::ios_base::beg);
 	}
 
-	STDMETHODIMP CInStream::Read(void *data, uint32_t size, uint32_t* processedSize)
+	STDMETHODIMP CInStream::Read(void *data, UInt32 size, UInt32* processedSize)
 	{
 		is_->read(data, size);
 		if (processedSize)
@@ -60,7 +60,7 @@ namespace KlayGE
 		return *is_ ? S_OK: E_FAIL;
 	}
 
-	STDMETHODIMP CInStream::Seek(int64_t offset, uint32_t seekOrigin, uint64_t* newPosition)
+	STDMETHODIMP CInStream::Seek(Int64 offset, uint32_t seekOrigin, UInt64* newPosition)
 	{
 		std::ios_base::seekdir way;
 		switch (seekOrigin)
@@ -90,7 +90,7 @@ namespace KlayGE
 		return *is_ ? S_OK: E_FAIL;
 	}
 
-	STDMETHODIMP CInStream::GetSize(uint64_t* size)
+	STDMETHODIMP CInStream::GetSize(UInt64* size)
 	{
 		*size = stream_size_;
 		return S_OK;
@@ -105,7 +105,7 @@ namespace KlayGE
 		os_ = os;
 	}
 
-	STDMETHODIMP COutStream::Write(const void *data, uint32_t size, uint32_t* processedSize)
+	STDMETHODIMP COutStream::Write(const void *data, UInt32 size, UInt32* processedSize)
 	{
 		os_->write(static_cast<char const *>(data), size);
 		if (processedSize)
@@ -116,7 +116,7 @@ namespace KlayGE
 		return *os_ ? S_OK: E_FAIL;
 	}
 
-	STDMETHODIMP COutStream::Seek(int64_t offset, uint32_t seekOrigin, uint64_t* newPosition)
+	STDMETHODIMP COutStream::Seek(Int64 offset, UInt32 seekOrigin, UInt64* newPosition)
 	{
 		std::ios_base::seekdir way;
 		switch (seekOrigin)
@@ -146,7 +146,7 @@ namespace KlayGE
 		return *os_ ? S_OK: E_FAIL;
 	}
 
-	STDMETHODIMP COutStream::SetSize(uint64_t /*newSize*/)
+	STDMETHODIMP COutStream::SetSize(UInt64 /*newSize*/)
 	{
 		return E_NOTIMPL;
 	}
