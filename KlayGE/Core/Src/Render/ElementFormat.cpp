@@ -53,6 +53,22 @@ namespace KlayGE
 			}
 			break;
 
+		case EF_R5G6B5:
+			for (uint32_t i = 0; i < num_elems; ++ i, p += elem_size, ++ output)
+			{
+				*output = Color(((p[1] >> 3) & 0x1F) / 31.0f, (((p[1] & 0x7) << 3) | (p[0] >> 5)) / 63.0f,
+					(p[0] & 0x1F) / 31.0f, 1);
+			}
+			break;
+
+		case EF_A1RGB5:
+			for (uint32_t i = 0; i < num_elems; ++ i, p += elem_size, ++ output)
+			{
+				*output = Color(((p[1] >> 2) & 0x1F) / 31.0f, (((p[1] & 0x3) << 3) | (p[0] >> 5)) / 31.0f,
+					(p[0] & 0x1F) / 31.0f, (p[1] & 0x80) ? 1.0f : 0.0f);
+			}
+			break;
+
 		case EF_ARGB4:
 			for (uint32_t i = 0; i < num_elems; ++ i, p += elem_size, ++ output)
 			{
@@ -740,6 +756,29 @@ namespace KlayGE
 			for (uint32_t i = 0; i < num_elems; ++ i, ++ input, p += elem_size)
 			{
 				*p = static_cast<uint8_t>(MathLib::clamp(static_cast<int>(input->a() * 255.0f + 0.5f), 0, 255));
+			}
+			break;
+
+		case EF_R5G6B5:
+			for (uint32_t i = 0; i < num_elems; ++ i, ++ input, p += elem_size)
+			{
+				int r = MathLib::clamp(static_cast<int>(input->r() * 31.0f + 0.5f), 0, 31);
+				int g = MathLib::clamp(static_cast<int>(input->g() * 63.0f + 0.5f), 0, 63);
+				int b = MathLib::clamp(static_cast<int>(input->b() * 31.0f + 0.5f), 0, 31);
+				p[0] = static_cast<uint8_t>(((g & 0x7) << 5) | b);
+				p[1] = static_cast<uint8_t>((r << 3) | (g >> 3));
+			}
+			break;
+
+		case EF_A1RGB5:
+			for (uint32_t i = 0; i < num_elems; ++ i, ++ input, p += elem_size)
+			{
+				int r = MathLib::clamp(static_cast<int>(input->r() * 31.0f + 0.5f), 0, 31);
+				int g = MathLib::clamp(static_cast<int>(input->g() * 31.0f + 0.5f), 0, 31);
+				int b = MathLib::clamp(static_cast<int>(input->b() * 31.0f + 0.5f), 0, 31);
+				int a = (input->a() >= 0.5f) ? 1 : 0;
+				p[0] = static_cast<uint8_t>(((g & 0x7) << 5) | b);
+				p[1] = static_cast<uint8_t>((a << 7) | (r << 2) | (g >> 3));
 			}
 			break;
 
