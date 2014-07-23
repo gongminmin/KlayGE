@@ -163,8 +163,6 @@ namespace
 
 	float3 ImportanceSampleLambert(float2 const & xi)
 	{
-		const float PI = 3.1415926f;
-
 		float phi = 2 * PI * xi.x();
 		float cos_theta = sqrt(1 - xi.y());
 		float sin_theta = sqrt(1 - cos_theta * cos_theta);
@@ -199,10 +197,8 @@ namespace
 		return tangent * h.x() + binormal * h.y() + normal * h.z();
 	}
 
-	Color PrefilterEnvMapDiffuse(float3 const & r, Color* env_map[6], uint32_t size)
+	Color PrefilterEnvMapDiffuse(float3 const & normal, Color* env_map[6], uint32_t size)
 	{
-		float3 normal = r;
-		float3 view = r;
 		Color prefiltered_clr(0.0f, 0.0f, 0.0f, 0.0f);
 		float total_weight = 0;
 
@@ -211,7 +207,7 @@ namespace
 		{
 			float2 xi = Hammersley2D(i, NUM_SAMPLES);
 			float3 h = ImportanceSampleLambert(xi, normal);
-			float3 l = -MathLib::reflect(view, h);
+			float3 l = -MathLib::reflect(normal, h);
 			float n_dot_l = MathLib::clamp(MathLib::dot(normal, l), 0.0f, 1.0f);
 			if (n_dot_l > 0)
 			{
@@ -222,7 +218,7 @@ namespace
 			}
 		}
 
-		return prefiltered_clr / total_weight;
+		return prefiltered_clr / max(1e-6f, total_weight);
 	}
 
 	Color PrefilterEnvMapSpecular(float roughness, float3 const & r, Color* env_map[6], uint32_t size)
@@ -248,7 +244,7 @@ namespace
 			}
 		}
 
-		return prefiltered_clr / total_weight;
+		return prefiltered_clr / max(1e-6f, total_weight);
 	}
 
 	void PrefilterCube(std::string const & in_file, std::string const & out_file)

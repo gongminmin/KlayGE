@@ -178,7 +178,7 @@ namespace
 			float n_dot_l = MathLib::clamp(l.z(), 0.0f, 1.0f);
 			float n_dot_h = MathLib::clamp(h.z(), 0.0f, 1.0f);
 			float v_dot_h = MathLib::clamp(MathLib::dot(view, h), 0.0f, 1.0f);
-			if ((n_dot_l > 0) && (n_dot_h * n_dot_v != 0))
+			if (n_dot_l > 0)
 			{
 				float g = GImplicit(n_dot_v, n_dot_l);
 				float g_vis = g * v_dot_h / std::max(1e-6f, n_dot_h * n_dot_v);
