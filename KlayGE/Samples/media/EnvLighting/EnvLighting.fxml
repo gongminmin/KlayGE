@@ -106,24 +106,17 @@ float GImplicit(float n_dot_v, float n_dot_l)
 float3 DiffuseIBL(float3 c_diff, float3 normal)
 {
 	float3 prefiltered_clr = 0;
-	float total_weight = 0;
 	
 	const uint NUM_SAMPLES = 1024;
 	for (uint i = 0; i < NUM_SAMPLES; ++ i)
 	{
 		float2 xi = Hammersley2D(i, NUM_SAMPLES);
-		float3 h = ImportanceSampleLambert(xi, normal);
-		float3 l = -reflect(normal, h);
-		float n_dot_l = saturate(dot(normal, l));
-		if (n_dot_l > 0)
-		{
-			prefiltered_clr += decode_hdr_yc(skybox_Ycube_tex.SampleLevel(skybox_sampler, l, 0).r,
-				skybox_Ccube_tex.SampleLevel(skybox_sampler, l, 0)).xyz * n_dot_l;
-			total_weight += n_dot_l;
-		}
+		float3 l = ImportanceSampleLambert(xi, normal);
+		prefiltered_clr += decode_hdr_yc(skybox_Ycube_tex.SampleLevel(skybox_sampler, l, 0).r,
+			skybox_Ccube_tex.SampleLevel(skybox_sampler, l, 0)).xyz;
 	}
 
-	return c_diff * prefiltered_clr / max(1e-6f, total_weight);
+	return c_diff * prefiltered_clr / NUM_SAMPLES;
 }
 
 float3 SpecularIBL(float3 c_spec, float roughness, float3 normal, float3 view)

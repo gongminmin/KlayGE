@@ -200,25 +200,18 @@ namespace
 	Color PrefilterEnvMapDiffuse(float3 const & normal, Color* env_map[6], uint32_t size)
 	{
 		Color prefiltered_clr(0.0f, 0.0f, 0.0f, 0.0f);
-		float total_weight = 0;
 
 		uint32_t const NUM_SAMPLES = 1024;
 		for (uint32_t i = 0; i < NUM_SAMPLES; ++ i)
 		{
 			float2 xi = Hammersley2D(i, NUM_SAMPLES);
-			float3 h = ImportanceSampleLambert(xi, normal);
-			float3 l = -MathLib::reflect(normal, h);
-			float n_dot_l = MathLib::clamp(MathLib::dot(normal, l), 0.0f, 1.0f);
-			if (n_dot_l > 0)
-			{
-				uint32_t face, x, y;
-				ToAddress(face, x, y, l, size);
-				prefiltered_clr += env_map[face][y * size + x] * n_dot_l;
-				total_weight += n_dot_l;
-			}
+			float3 l = ImportanceSampleLambert(xi, normal);
+			uint32_t face, x, y;
+			ToAddress(face, x, y, l, size);
+			prefiltered_clr += env_map[face][y * size + x];
 		}
 
-		return prefiltered_clr / max(1e-6f, total_weight);
+		return prefiltered_clr / NUM_SAMPLES;
 	}
 
 	Color PrefilterEnvMapSpecular(float roughness, float3 const & r, Color* env_map[6], uint32_t size)
