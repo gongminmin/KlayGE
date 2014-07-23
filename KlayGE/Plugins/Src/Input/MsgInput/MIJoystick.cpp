@@ -34,6 +34,7 @@
 
 #include <KlayGE/MsgInput/MInput.hpp>
 
+#if (defined KLAYGE_PLATFORM_WINDOWS_DESKTOP) || (defined KLAYGE_PLATFORM_ANDROID)
 namespace KlayGE
 {
 #if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
@@ -256,3 +257,4 @@ namespace KlayGE
 		buttons_[index_] = buttons_state_;
 	}
 }
+#endif

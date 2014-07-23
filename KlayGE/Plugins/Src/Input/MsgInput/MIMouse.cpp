@@ -35,6 +35,7 @@
 
 #include <KlayGE/MsgInput/MInput.hpp>
 
+#if (defined KLAYGE_PLATFORM_WINDOWS_DESKTOP) || (defined KLAYGE_PLATFORM_ANDROID)
 namespace KlayGE
 {
 #if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
@@ -173,3 +174,4 @@ namespace KlayGE
 		offset_state_ = int3(0, 0, 0);
 	}
 }
+#endif
