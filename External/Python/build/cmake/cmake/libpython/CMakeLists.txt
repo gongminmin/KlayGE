@@ -1,5 +1,10 @@
 add_definitions(-DPy_BUILD_CORE)
 add_definitions(-DNDEBUG)
+if(WINRT)
+  add_definitions(-D_WIN32_WINNT=0x0602)
+  add_definitions(-DWINVER=0x0602)
+  add_definitions(-DNTDDI_VERSION=0x06020000)
+endif()
 
 set(LIBPYTHON_SOURCES
     ${CMAKE_BINARY_DIR}/CMakeFiles/config.c
