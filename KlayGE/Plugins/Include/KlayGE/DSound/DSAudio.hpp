@@ -20,7 +20,7 @@
 
 #include <vector>
 #include <windows.h>
-#ifdef KLAYGE_COMPILER_GCC
+#if defined(KLAYGE_COMPILER_GCC) || defined(KLAYGE_COMPILER_CLANG)
 	#define __bcount(size)
 	#define __in
 	#define __in_ecount(size)

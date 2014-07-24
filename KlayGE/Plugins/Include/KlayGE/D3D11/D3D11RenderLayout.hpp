@@ -16,6 +16,8 @@
 #pragma once
 
 #include <vector>
+
+#include <KlayGE/D3D11/D3D11MinGWDefs.hpp>
 #include <D3D11Shader.h>
 
 #include <KlayGE/RenderLayout.hpp>

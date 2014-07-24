@@ -134,11 +134,6 @@ namespace KlayGE
 	};
 	shared_ptr<LZMALoader> LZMALoader::instance_;
 
-	KFont::KFont()
-		: distances_addr_(1, 0)
-	{
-	}
-	
 	bool KFont::Load(std::string const & file_name)
 	{
 		std::ifstream kfont_input(file_name.c_str(), std::ios_base::binary | std::ios_base::in);

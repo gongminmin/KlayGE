@@ -57,7 +57,7 @@
 
 #if USE_DXBC2GLSL
 #include <DXBC2GLSL/DXBC2GLSL.hpp>
-#ifdef KLAYGE_COMPILER_GCC
+#if defined(KLAYGE_COMPILER_GCC) || defined(KLAYGE_COMPILER_CLANG)
 	#define __in
 	#define __in_ecount(size)
 	#define __out

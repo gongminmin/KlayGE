@@ -90,7 +90,10 @@ namespace KlayGE
 #endif
 
 	public:
-		KFont();
+		KFont()
+			: distances_addr_(1, 0)
+		{
+		}
 		
 		bool Load(std::string const & file_name);
 		bool Load(std::istream& kfont_input);

@@ -18,6 +18,7 @@
 #include <KlayGE/PreDeclare.hpp>
 #include <KlayGE/ShaderObject.hpp>
 
+#include <KlayGE/D3D11/D3D11MinGWDefs.hpp>
 #include <D3D11Shader.h>
 
 #include <KlayGE/D3D11/D3D11Typedefs.hpp>
