@@ -46,7 +46,7 @@
 
 #include <KlayGE/App3D.hpp>
 
-#ifdef KLAYGE_PLATFORM_WINDOWS_METRO
+#ifdef KLAYGE_PLATFORM_WINDOWS_RUNTIME
 #include <ppl.h>
 #include <ppltasks.h>
 
@@ -60,7 +60,7 @@ using namespace concurrency;
 
 namespace KlayGE
 {
-#if defined KLAYGE_PLATFORM_WINDOWS_METRO
+#if defined KLAYGE_PLATFORM_WINDOWS_RUNTIME
 	ref class MetroFrameworkSource;
 	ref class MetroMsgs;
 
@@ -338,7 +338,7 @@ namespace KlayGE
 
 		ContextCfg cfg = Context::Instance().Config();
 		main_wnd_ = this->MakeWindow(name_, cfg.graphics_cfg);
-#ifndef KLAYGE_PLATFORM_WINDOWS_METRO
+#ifndef KLAYGE_PLATFORM_WINDOWS_RUNTIME
 		cfg.graphics_cfg.left = main_wnd_->Left();
 		cfg.graphics_cfg.top = main_wnd_->Top();
 		cfg.graphics_cfg.width = main_wnd_->Width();
@@ -356,7 +356,7 @@ namespace KlayGE
 
 		ContextCfg cfg = Context::Instance().Config();
 		main_wnd_ = this->MakeWindow(name_, cfg.graphics_cfg, native_wnd);
-#ifndef KLAYGE_PLATFORM_WINDOWS_METRO
+#ifndef KLAYGE_PLATFORM_WINDOWS_RUNTIME
 		cfg.graphics_cfg.left = main_wnd_->Left();
 		cfg.graphics_cfg.top = main_wnd_->Top();
 		cfg.graphics_cfg.width = main_wnd_->Width();
@@ -372,7 +372,7 @@ namespace KlayGE
 
 	// 建立应用程序主窗口
 	/////////////////////////////////////////////////////////////////////////////////
-#ifdef KLAYGE_PLATFORM_WINDOWS_METRO
+#ifdef KLAYGE_PLATFORM_WINDOWS_RUNTIME
 	void App3DFramework::Create()
 	{
 	}
@@ -425,7 +425,7 @@ namespace KlayGE
 		return MakeSharedPtr<Window>(name, settings, native_wnd);
 	}
 
-#if defined KLAYGE_PLATFORM_WINDOWS_METRO
+#if defined KLAYGE_PLATFORM_WINDOWS_RUNTIME
 	void App3DFramework::Run()
 	{
 		MetroFrameworkSource^ metro_app = ref new MetroFrameworkSource;
@@ -469,7 +469,7 @@ namespace KlayGE
 				re.Refresh();
 			}
 		}
-#elif defined KLAYGE_PLATFORM_WINDOWS_METRO
+#elif defined KLAYGE_PLATFORM_WINDOWS_RUNTIME
 		while (!main_wnd_->Closed())
 		{
 			if (main_wnd_->Active())

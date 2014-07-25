@@ -143,7 +143,7 @@ namespace KlayGE
 
 		WindowPtr main_wnd_;
 
-#if defined KLAYGE_PLATFORM_WINDOWS_METRO
+#if defined KLAYGE_PLATFORM_WINDOWS_RUNTIME
 	public:
 		void MetroCreate();
 		void MetroRun();

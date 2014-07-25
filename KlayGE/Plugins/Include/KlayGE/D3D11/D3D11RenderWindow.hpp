@@ -18,7 +18,7 @@
 #include <KlayGE/D3D11/D3D11FrameBuffer.hpp>
 #include <KlayGE/D3D11/D3D11Adapter.hpp>
 
-#if defined KLAYGE_PLATFORM_WINDOWS_METRO
+#if defined KLAYGE_PLATFORM_WINDOWS_RUNTIME
 #include <agile.h>
 #endif
 
@@ -36,7 +36,7 @@ typedef KlayGE::shared_ptr<IAmdDxExtQuadBufferStereo> IAmdDxExtQuadBufferStereoP
 
 namespace KlayGE
 {
-#if defined KLAYGE_PLATFORM_WINDOWS_METRO
+#if defined KLAYGE_PLATFORM_WINDOWS_RUNTIME
 	ref class MetroD3D11RenderWindow;
 #endif
 

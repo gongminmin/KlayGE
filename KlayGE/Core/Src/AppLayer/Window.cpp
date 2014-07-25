@@ -30,7 +30,7 @@
 #endif
 #endif
 
-#ifdef KLAYGE_PLATFORM_WINDOWS_METRO
+#ifdef KLAYGE_PLATFORM_WINDOWS_RUNTIME
 using namespace Windows::ApplicationModel::Core;
 using namespace Windows::ApplicationModel::Activation;
 using namespace Windows::UI::Core;

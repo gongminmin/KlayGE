@@ -22,7 +22,7 @@
 #include <list>
 #include <KlayGE/Socket.hpp>
 
-#ifndef KLAYGE_PLATFORM_WINDOWS_METRO
+#ifndef KLAYGE_PLATFORM_WINDOWS_RUNTIME
 
 namespace KlayGE
 {
@@ -33,20 +33,20 @@ namespace KlayGE
 	class Processor
 	{
 	public:
-        virtual ~Processor()
-        {
-        }
+		virtual ~Processor()
+		{
+		}
 
 		virtual void OnJoin(uint32_t /*ID*/) const
 		{
-        }
+		}
 		virtual void OnQuit(uint32_t /*ID*/) const
 		{
-        }
+		}
 		virtual void OnDefault(void* /*revBuf*/, int /*maxSize*/,
 			void* /*sendBuf*/, int& /*numSend*/, sockaddr_in& /*from*/) const
 		{
-        }
+		}
 	};
 
 	// √Ë ˆPlayer

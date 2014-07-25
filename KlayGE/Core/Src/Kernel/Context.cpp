@@ -480,7 +480,7 @@ namespace KlayGE
 			}
 		}
 		
-#elif defined(KLAYGE_PLATFORM_WINDOWS_METRO)
+#elif defined(KLAYGE_PLATFORM_WINDOWS_RUNTIME)
 		rf_name = "D3D11";
 #elif defined(KLAYGE_PLATFORM_WINDOWS_LINUX)
 		if ("D3D11" == rf_name)

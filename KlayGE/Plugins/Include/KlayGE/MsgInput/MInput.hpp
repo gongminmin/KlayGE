@@ -488,7 +488,7 @@ namespace KlayGE
 		shared_ptr<ISensorCollection> orientation_sensor_collection_;
 		std::vector<shared_ptr<ISensorEvents> > orientation_sensor_events_;
 	};
-#elif defined KLAYGE_PLATFORM_WINDOWS_METRO
+#elif defined KLAYGE_PLATFORM_WINDOWS_RUNTIME
 	ref class MetroMsgInputSensorEvent;
 
 	class MsgInputSensor : public InputSensor

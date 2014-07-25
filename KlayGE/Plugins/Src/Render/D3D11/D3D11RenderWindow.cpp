@@ -53,7 +53,7 @@ namespace KlayGE
 		name_				= name;
 		isFullScreen_		= settings.full_screen;
 		sync_interval_		= settings.sync_interval;
-#ifdef KLAYGE_PLATFORM_WINDOWS_METRO
+#ifdef KLAYGE_PLATFORM_WINDOWS_RUNTIME
 		sync_interval_ = std::max(1U, sync_interval_);
 #endif
 
@@ -240,7 +240,7 @@ namespace KlayGE
 								adapter_->ResetAdapter(MakeCOMPtr(ada1));
 								adapter_->Enumerate();
 							}
-#ifdef KLAYGE_PLATFORM_WINDOWS_METRO
+#ifdef KLAYGE_PLATFORM_WINDOWS_RUNTIME
 							dxgi_device->SetMaximumFrameLatency(1);
 #endif
 							dxgi_device->Release();
@@ -987,7 +987,7 @@ namespace KlayGE
 	{
 	}
 
-#if defined KLAYGE_PLATFORM_WINDOWS_METRO
+#if defined KLAYGE_PLATFORM_WINDOWS_RUNTIME
 #if (_WIN32_WINNT >= 0x0603 /*_WIN32_WINNT_WINBLUE*/)
 	void D3D11RenderWindow::MetroD3D11RenderWindow::OnStereoEnabledChanged(
 		Windows::Graphics::Display::DisplayInformation^ /*sender*/, Platform::Object^ /*args*/)

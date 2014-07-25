@@ -685,7 +685,7 @@ namespace KlayGE
 				}
 #endif
 
-#if defined KLAYGE_PLATFORM_WINDOWS_METRO
+#if defined KLAYGE_PLATFORM_WINDOWS_RUNTIME
 				num_cores_ = num_hw_threads_;
 #else
 				std::vector<uint8_t> pkg_core_ids(apic_ids.size());

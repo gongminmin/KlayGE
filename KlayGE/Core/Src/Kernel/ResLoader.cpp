@@ -116,7 +116,7 @@ namespace KlayGE
 
 		paths_.push_back("");
 
-#if defined KLAYGE_PLATFORM_WINDOWS_METRO
+#if defined KLAYGE_PLATFORM_WINDOWS_RUNTIME
 		this->AddPath("Assets/");
 #else
 		this->AddPath("");
@@ -286,7 +286,7 @@ namespace KlayGE
 		}
 #endif
 
-#ifndef KLAYGE_PLATFORM_WINDOWS_METRO
+#ifndef KLAYGE_PLATFORM_WINDOWS_RUNTIME
 		return "";
 #else
 		std::string::size_type pos = name.rfind('/');
@@ -389,7 +389,7 @@ namespace KlayGE
 #endif
 
 
-#ifndef KLAYGE_PLATFORM_WINDOWS_METRO
+#ifndef KLAYGE_PLATFORM_WINDOWS_RUNTIME
 		return ResIdentifierPtr();
 #else
 		std::string::size_type pos = name.rfind('/');

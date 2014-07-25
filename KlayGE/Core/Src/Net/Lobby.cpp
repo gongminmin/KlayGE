@@ -20,7 +20,7 @@
 #include <KlayGE/NetMsg.hpp>
 #include <KlayGE/Lobby.hpp>
 
-#ifndef KLAYGE_PLATFORM_WINDOWS_METRO
+#ifndef KLAYGE_PLATFORM_WINDOWS_RUNTIME
 
 namespace KlayGE
 {

@@ -37,7 +37,7 @@
 #include <KlayGE/MsgInput/MInput.hpp>
 
 #if ((defined KLAYGE_PLATFORM_WINDOWS_DESKTOP) && (_WIN32_WINNT >= 0x0601 /*_WIN32_WINNT_WIN7*/)) \
-	|| (defined KLAYGE_PLATFORM_WINDOWS_METRO) \
+	|| (defined KLAYGE_PLATFORM_WINDOWS_RUNTIME) \
 	|| (defined KLAYGE_PLATFORM_ANDROID)
 namespace KlayGE
 {
@@ -680,7 +680,7 @@ namespace KlayGE
 	}
 }
 
-#elif defined KLAYGE_PLATFORM_WINDOWS_METRO
+#elif defined KLAYGE_PLATFORM_WINDOWS_RUNTIME
 
 using namespace Windows::Foundation;
 using namespace Windows::Devices::Geolocation;

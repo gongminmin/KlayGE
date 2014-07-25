@@ -27,7 +27,7 @@ extern "C"
 
 int SampleMain();
 
-#ifdef KLAYGE_PLATFORM_WINDOWS_METRO
+#ifdef KLAYGE_PLATFORM_WINDOWS_RUNTIME
 [Platform::MTAThread]
 int main(Platform::Array<Platform::String^>^ /*args*/)
 #else

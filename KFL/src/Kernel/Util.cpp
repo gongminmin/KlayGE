@@ -151,7 +151,7 @@ namespace KlayGE
 	{
 #if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
 		::Sleep(ms);
-#elif defined KLAYGE_PLATFORM_WINDOWS_METRO
+#elif defined KLAYGE_PLATFORM_WINDOWS_RUNTIME
 		static HANDLE singleton_event = nullptr;
 
 		HANDLE sleep_event = singleton_event;
