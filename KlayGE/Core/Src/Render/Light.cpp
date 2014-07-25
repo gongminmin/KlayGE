@@ -98,6 +98,42 @@ namespace KlayGE
 		this->Range(-1);
 	}
 
+	TexturePtr const & LightSource::SkylightTexY() const
+	{
+		BOOST_ASSERT(false);
+		static TexturePtr ret;
+		return ret;
+	}
+
+	TexturePtr const & LightSource::SkylightTexC() const
+	{
+		BOOST_ASSERT(false);
+		static TexturePtr ret;
+		return ret;
+	}
+
+	TexturePtr const & LightSource::SkylightTex() const
+	{
+		BOOST_ASSERT(false);
+		static TexturePtr ret;
+		return ret;
+	}
+
+	void LightSource::SkylightTex(TexturePtr const & tex_y, TexturePtr const & tex_c)
+	{
+		UNREF_PARAM(tex_y);
+		UNREF_PARAM(tex_c);
+
+		BOOST_ASSERT(false);
+	}
+
+	void LightSource::SkylightTex(TexturePtr const & tex)
+	{
+		UNREF_PARAM(tex);
+
+		BOOST_ASSERT(false);
+	}
+
 	float3 const & LightSource::Position() const
 	{
 		return pos_;
@@ -245,6 +281,32 @@ namespace KlayGE
 		// Disable shadow and GI
 		attrib_ |= LSA_NoShadow;
 		attrib_ &= ~LSA_IndirectLighting;
+	}
+
+	TexturePtr const & AmbientLightSource::SkylightTexY() const
+	{
+		return sky_tex_y_;
+	}
+
+	TexturePtr const & AmbientLightSource::SkylightTexC() const
+	{
+		return sky_tex_c_;
+	}
+
+	TexturePtr const & AmbientLightSource::SkylightTex() const
+	{
+		return sky_tex_y_;
+	}
+
+	void AmbientLightSource::SkylightTex(TexturePtr const & tex_y, TexturePtr const & tex_c)
+	{
+		sky_tex_y_ = tex_y;
+		sky_tex_c_ = tex_c;
+	}
+
+	void AmbientLightSource::SkylightTex(TexturePtr const & tex)
+	{
+		sky_tex_y_ = tex;
 	}
 
 

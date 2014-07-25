@@ -107,6 +107,11 @@ float3 CalcPrefilteredEnvVec(float3 normal, float3 view)
 	return -reflect(view, normal);
 }
 
+float3 CalcEnvDiffuse(float3 prefiltered_env, float3 c_spec)
+{
+	return prefiltered_env * c_spec;
+}
+
 float3 CalcEnvSpecular(float3 prefiltered_env, float3 c_spec, float roughness, float3 normal, float3 view)
 {
 	float n_dot_v = saturate(dot(normal, view));

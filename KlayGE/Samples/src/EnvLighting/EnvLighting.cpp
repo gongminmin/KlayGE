@@ -18,6 +18,7 @@
 #include <KlayGE/Camera.hpp>
 #include <KlayGE/UI.hpp>
 #include <KlayGE/PostProcess.hpp>
+#include <KlayGE/Light.hpp>
 
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/InputFactory.hpp>
@@ -46,6 +47,23 @@ namespace
 			techs_[3] = effect->TechniqueByName("Approximate");
 			techs_[4] = effect->TechniqueByName("GroundTruth");
 			this->RenderingType(0);
+
+			SceneManager& sm = Context::Instance().SceneManagerInstance();
+			for (uint32_t i = 0; i < sm.NumLights(); ++ i)
+			{
+				LightSourcePtr const & light = sm.GetLight(i);
+				if (LightSource::LT_Ambient == light->Type())
+				{
+					*(technique_->Effect().ParameterByName("skybox_Ycube_tex")) = light->SkylightTexY();
+					*(technique_->Effect().ParameterByName("skybox_Ccube_tex")) = light->SkylightTexC();
+
+					uint32_t const mip = light->SkylightTexY()->NumMipMaps();
+					*(technique_->Effect().ParameterByName("diff_spec_mip")) = int2(mip - 1, mip - 2);
+					break;
+				}
+			}
+
+			*(technique_->Effect().ParameterByName("diff_spec")) = float4(0.31f, 0.25f, 0.15f, 0.2f);
 		}
 
 		void BuildMeshInfo()
@@ -57,12 +75,6 @@ namespace
 			AABBox const & tc_bb = this->TexcoordBound();
 			*(technique_->Effect().ParameterByName("tc_center")) = float2(tc_bb.Center().x(), tc_bb.Center().y());
 			*(technique_->Effect().ParameterByName("tc_extent")) = float2(tc_bb.HalfSize().x(), tc_bb.HalfSize().y());
-		}
-
-		void CompressedCubeMap(TexturePtr const & y_cube, TexturePtr const & c_cube)
-		{
-			*(technique_->Effect().ParameterByName("skybox_Ycube_tex")) = y_cube;
-			*(technique_->Effect().ParameterByName("skybox_Ccube_tex")) = c_cube;
 		}
 
 		void Roughness(float roughness)
@@ -100,11 +112,10 @@ namespace
 	class SphereObject : public SceneObjectHelper
 	{
 	public:
-		SphereObject(TexturePtr const & y_cube, TexturePtr const & c_cube, float roughness)
+		explicit SphereObject(float roughness)
 			: SceneObjectHelper(SOA_Cullable)
 		{
 			renderable_ = SyncLoadModel("sphere_high.7z//sphere_high.meshml", EAH_GPU_Read | EAH_Immutable, CreateModelFactory<RenderModel>(), CreateMeshFactory<SphereRenderable>())->Mesh(0);
-			checked_pointer_cast<SphereRenderable>(renderable_)->CompressedCubeMap(y_cube, c_cube);
 			checked_pointer_cast<SphereRenderable>(renderable_)->Roughness(roughness);
 		}
 
@@ -195,7 +206,38 @@ namespace
 		uint32_t const WIDTH = 128;
 		uint32_t const HEIGHT = 128;
 
-		std::vector<uint8_t> integrate_brdf(WIDTH * HEIGHT * 2);
+		ElementFormat fmt;
+		uint32_t channels;
+		uint32_t r_offset;
+		uint32_t g_offset;
+
+		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+		RenderDeviceCaps const & caps = rf.RenderEngineInstance().DeviceCaps();
+		if (caps.texture_format_support(EF_GR8))
+		{
+			fmt = EF_GR8;
+			channels = 2;
+			r_offset = 0;
+			g_offset = 1;
+		}
+		else if (caps.texture_format_support(EF_ABGR8))
+		{
+			fmt = EF_ABGR8;
+			channels = 4;
+			r_offset = 0;
+			g_offset = 1;
+		}
+		else
+		{
+			BOOST_ASSERT(caps.texture_format_support(EF_ARGB8));
+
+			fmt = EF_ARGB8;
+			channels = 4;
+			r_offset = 2;
+			g_offset = 1;
+		}
+
+		std::vector<uint8_t> integrate_brdf(WIDTH * HEIGHT * channels, 0);
 		for (uint32_t y = 0; y < HEIGHT; ++ y)
 		{
 			float roughness = (y + 0.5f) / HEIGHT;
@@ -205,18 +247,19 @@ namespace
 				float cos_theta = (x + 0.5f) / WIDTH;
 
 				float2 lut = IntegrateBRDFBP(roughness, cos_theta);
-				integrate_brdf[(y * WIDTH + x) * 2 + 0] = static_cast<uint8_t>(MathLib::clamp(static_cast<int>(lut.x() * 255 + 0.5f), 0, 255));
-				integrate_brdf[(y * WIDTH + x) * 2 + 1] = static_cast<uint8_t>(MathLib::clamp(static_cast<int>(lut.y() * 255 + 0.5f), 0, 255));
+				integrate_brdf[(y * WIDTH + x) * channels + r_offset]
+					= static_cast<uint8_t>(MathLib::clamp(static_cast<int>(lut.x() * 255 + 0.5f), 0, 255));
+				integrate_brdf[(y * WIDTH + x) * channels + g_offset]
+					= static_cast<uint8_t>(MathLib::clamp(static_cast<int>(lut.y() * 255 + 0.5f), 0, 255));
 			}
 		}
 
 		std::vector<ElementInitData> init_data(1);
 		init_data[0].data = &integrate_brdf[0];
-		init_data[0].row_pitch = WIDTH * 2;
+		init_data[0].row_pitch = WIDTH * channels;
 		init_data[0].slice_pitch = HEIGHT * init_data[0].row_pitch;
 		
-		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-		return rf.MakeTexture2D(WIDTH, HEIGHT, 1, 1, EF_GR8, 1, 0, EAH_GPU_Read | EAH_Immutable, &init_data[0]);
+		return rf.MakeTexture2D(WIDTH, HEIGHT, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_Immutable, &init_data[0]);
 	}
 }
 
@@ -240,7 +283,7 @@ EnvLightingApp::EnvLightingApp()
 bool EnvLightingApp::ConfirmDevice() const
 {
 	RenderDeviceCaps const & caps = Context::Instance().RenderFactoryInstance().RenderEngineInstance().DeviceCaps();
-	if (caps.max_shader_model < 4)
+	if (caps.max_shader_model < 3)
 	{
 		return false;
 	}
@@ -250,16 +293,50 @@ bool EnvLightingApp::ConfirmDevice() const
 
 void EnvLightingApp::InitObjects()
 {
+	RenderDeviceCaps const & caps = Context::Instance().RenderFactoryInstance().RenderEngineInstance().DeviceCaps();
+
 	font_ = SyncLoadFont("gkai00mp.kfont");
 
-	y_cube_map_ = SyncLoadTexture("uffizi_cross_filtered_y.dds", EAH_GPU_Read | EAH_Immutable);
-	c_cube_map_ = SyncLoadTexture("uffizi_cross_filtered_c.dds", EAH_GPU_Read | EAH_Immutable);
-	integrate_brdf_tex_ = GenIntegrateBRDF();
+	TexturePtr y_cube_map = SyncLoadTexture("uffizi_cross_filtered_y.dds", EAH_GPU_Read | EAH_Immutable);
+	TexturePtr c_cube_map = SyncLoadTexture("uffizi_cross_filtered_c.dds", EAH_GPU_Read | EAH_Immutable);
+	bool regen_brdf = false;
+	if (ResLoader::Instance().Locate("IntegratedBRDF.dds").empty())
+	{
+		regen_brdf = true;
+	}
+	else
+	{
+		Texture::TextureType type;
+		uint32_t width, height, depth;
+		uint32_t num_mipmaps;
+		uint32_t array_size;
+		ElementFormat format;
+		uint32_t row_pitch, slice_pitch;
+		GetImageInfo("IntegratedBRDF.dds", type, width, height, depth, num_mipmaps, array_size, format,
+			row_pitch, slice_pitch);
+		if (!caps.texture_format_support(format))
+		{
+			regen_brdf = true;
+		}
+	}
+	if (regen_brdf)
+	{
+		integrate_brdf_tex_ = GenIntegrateBRDF();
+		SaveTexture(integrate_brdf_tex_, "../../Samples/media/EnvLighting/IntegratedBRDF.dds");
+	}
+	else
+	{
+		integrate_brdf_tex_ = SyncLoadTexture("IntegratedBRDF.dds", EAH_GPU_Read | EAH_Immutable);
+	}
+
+	AmbientLightSourcePtr ambient_light = MakeSharedPtr<AmbientLightSource>();
+	ambient_light->SkylightTex(y_cube_map, c_cube_map);
+	ambient_light->AddToSceneManager();
 
 	spheres_.resize(10);
 	for (size_t i = 0; i < spheres_.size(); ++ i)
 	{
-		spheres_[i] = MakeSharedPtr<SphereObject>(y_cube_map_, c_cube_map_, static_cast<float>(i) / (spheres_.size() - 1));
+		spheres_[i] = MakeSharedPtr<SphereObject>(static_cast<float>(i) / (spheres_.size() - 1));
 		spheres_[i]->ModelMatrix(MathLib::scaling(1.3f, 1.3f, 1.3f)
 			* MathLib::translation((-static_cast<float>(spheres_.size() / 2) + i + 0.5f) * 0.08f, 0.0f, 0.0f));
 		checked_pointer_cast<SphereObject>(spheres_[i])->IntegrateBRDFTex(integrate_brdf_tex_);
@@ -267,7 +344,7 @@ void EnvLightingApp::InitObjects()
 	}
 
 	sky_box_ = MakeSharedPtr<SceneObjectSkyBox>(0);
-	checked_pointer_cast<SceneObjectSkyBox>(sky_box_)->CompressedCubeMap(y_cube_map_, c_cube_map_);
+	checked_pointer_cast<SceneObjectSkyBox>(sky_box_)->CompressedCubeMap(y_cube_map, c_cube_map);
 	sky_box_->AddToSceneManager();
 
 	this->LookAt(float3(0.0f, 0.2f, -0.6f), float3(0, 0, 0));
@@ -291,6 +368,12 @@ void EnvLightingApp::InitObjects()
 
 	dialog_->Control<UIComboBox>(id_type_combo_)->OnSelectionChangedEvent().connect(KlayGE::bind(&EnvLightingApp::TypeChangedHandler, this, KlayGE::placeholders::_1));
 	this->TypeChangedHandler(*dialog_->Control<UIComboBox>(id_type_combo_));
+
+	if (caps.max_shader_model < 4)
+	{
+		dialog_->Control<UIComboBox>(id_type_combo_)->RemoveItem(4);
+		dialog_->Control<UIComboBox>(id_type_combo_)->RemoveItem(3);
+	}
 }
 
 void EnvLightingApp::OnResize(uint32_t width, uint32_t height)

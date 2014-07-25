@@ -67,6 +67,7 @@ KlayGE/media/Textures/2D/klayge_logo.dds
 KlayGE/media/Textures/2D/lens_effects_imag.dds
 KlayGE/media/Textures/2D/lens_effects_real.dds
 KlayGE/media/Textures/Cube/*.dds
+KlayGE/Samples/media/EnvLighting/IntegratedBRDF.dds
 KlayGE/Samples/media/Ocean/OceanDisplacement.dds
 KlayGE/Samples/media/Ocean/OceanDisplacementParam.dds
 KlayGE/Samples/media/Ocean/OceanGradient.dds

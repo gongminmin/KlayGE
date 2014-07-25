@@ -27,8 +27,6 @@ private:
 
 	KlayGE::TrackballCameraController obj_controller_;
 
-	KlayGE::TexturePtr y_cube_map_;
-	KlayGE::TexturePtr c_cube_map_;
 	KlayGE::TexturePtr integrate_brdf_tex_;
 
 	KlayGE::UIDialogPtr dialog_;

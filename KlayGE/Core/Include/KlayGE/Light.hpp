@@ -65,6 +65,12 @@ namespace KlayGE
 		float4 const & Color() const;
 		void Color(float3 const & clr);
 
+		virtual TexturePtr const & SkylightTexY() const;
+		virtual TexturePtr const & SkylightTexC() const;
+		virtual TexturePtr const & SkylightTex() const;
+		virtual void SkylightTex(TexturePtr const & tex_y, TexturePtr const & tex_c);
+		virtual void SkylightTex(TexturePtr const & tex);
+
 		virtual float3 const & Position() const;
 		virtual void Position(float3 const & pos);
 		virtual float3 Direction() const;
@@ -109,6 +115,16 @@ namespace KlayGE
 
 		using LightSource::Attrib;
 		virtual void Attrib(int32_t attrib) KLAYGE_OVERRIDE;
+
+		virtual TexturePtr const & SkylightTexY() const KLAYGE_OVERRIDE;
+		virtual TexturePtr const & SkylightTexC() const KLAYGE_OVERRIDE;
+		virtual TexturePtr const & SkylightTex() const KLAYGE_OVERRIDE;
+		virtual void SkylightTex(TexturePtr const & tex_y, TexturePtr const & tex_c) KLAYGE_OVERRIDE;
+		virtual void SkylightTex(TexturePtr const & tex) KLAYGE_OVERRIDE;
+
+	private:
+		TexturePtr sky_tex_y_;
+		TexturePtr sky_tex_c_;
 	};
 
 	class KLAYGE_CORE_API PointLightSource : public LightSource
