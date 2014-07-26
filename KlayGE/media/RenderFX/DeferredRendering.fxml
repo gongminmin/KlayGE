@@ -704,8 +704,47 @@ float4 DeferredShadowingSunPS(
 
 	<parameter type="float2" name="near_q"/>
 
+	<parameter type="float4x4" name="inv_view"/>
+	<parameter type="int3" name="skylight_diff_spec_mip"/>
+	<parameter type="textureCUBE" name="skylight_y_cube_tex"/>
+	<parameter type="textureCUBE" name="skylight_c_cube_tex"/>
+	<parameter type="sampler" name="skylight_sampler">
+		<state name="filtering" value="min_mag_mip_linear"/>
+		<state name="address_u" value="clamp"/>
+		<state name="address_v" value="clamp"/>
+		<state name="address_w" value="clamp"/>
+	</parameter>
+
 	<shader>
 		<![CDATA[
+float4 SkylightShading(float shininess, float4 mrt1, float3 normal, float3 view)
+{
+	float4 shading = 0;
+	
+	if (skylight_diff_spec_mip.z)
+	{
+		float3 c_diff = GetDiffuse(mrt1);
+		float c_spec = GetSpecular(mrt1);
+		
+		normal = mul(normal, (float3x3)inv_view);
+		view = mul(view, (float3x3)inv_view);
+
+		float3 prefiltered_clr = decode_hdr_yc(skylight_y_cube_tex.SampleLevel(skylight_sampler, normal, skylight_diff_spec_mip.x).r,
+			skylight_c_cube_tex.SampleLevel(skylight_sampler, normal, skylight_diff_spec_mip.x)).xyz;
+		shading.xyz + CalcEnvDiffuse(prefiltered_clr, c_diff);
+		
+		shininess = log(shininess) / log(8192);
+	
+		float mip = CalcPrefilteredEnvMip(shininess, skylight_diff_spec_mip.y);
+		float3 r = CalcPrefilteredEnvVec(normal, view);
+		prefiltered_clr = decode_hdr_yc(skylight_y_cube_tex.SampleLevel(skylight_sampler, r, mip).r,
+			skylight_c_cube_tex.SampleLevel(skylight_sampler, r, mip)).xyz;
+		shading.xyz += CalcEnvSpecular(prefiltered_clr, c_spec, shininess, normal, view);
+	}
+	
+	return shading;
+}
+
 void ShadingVS(float4 pos : POSITION,
 			out float2 oTexCoord : TEXCOORD0,
 			out float3 oViewDir : TEXCOORD1,
@@ -732,7 +771,9 @@ float4 ShadingPS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Target
 	
 	float4 lighting = lighting_tex.Sample(point_sampler, tc);
 	float4 mrt1 = g_buffer_1_tex.Sample(point_sampler, tc);
-	return float4(Shading(lighting, shininess, GetDiffuse(mrt1), GetSpecular(mrt1), view_dir, normal), 1);
+	float4 shading = float4(Shading(lighting, shininess, GetDiffuse(mrt1), GetSpecular(mrt1), view_dir, normal), 1);
+	shading += SkylightShading(shininess, mrt1, normal, view_dir);
+	return shading;
 }
 
 float4 MergeShadingPS(float2 tc : TEXCOORD0) : SV_Target

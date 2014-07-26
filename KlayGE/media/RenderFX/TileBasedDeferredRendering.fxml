@@ -442,6 +442,11 @@ void TBDRUnifiedCS(uint3 gid : SV_GroupID,
 				{
 					shading += shading_in_tex.Load(coord);
 				}
+				else
+				{
+					shading += SkylightShading(shininess, mrt1, normal, -view_dir);
+				}
+	
 				shading_rw_tex[coord.xy] = shading;
 			}
 		}

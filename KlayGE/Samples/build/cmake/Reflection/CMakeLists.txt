@@ -74,8 +74,8 @@ SET(CONTENT_FILES
 	${KLAYGE_PROJECT_DIR}/media/Textures/2D/ui.dds
 	${KLAYGE_PROJECT_DIR}/media/Textures/2D/white_noise_tex.dds
 	${KLAYGE_PROJECT_DIR}/media/Textures/3D/color_grading.dds
-	${KLAYGE_PROJECT_DIR}/media/Textures/Cube/Lake_CraterLake03_c.dds
-	${KLAYGE_PROJECT_DIR}/media/Textures/Cube/Lake_CraterLake03_y.dds
+	${KLAYGE_PROJECT_DIR}/media/Textures/Cube/Lake_CraterLake03_filtered_c.dds
+	${KLAYGE_PROJECT_DIR}/media/Textures/Cube/Lake_CraterLake03_filtered_y.dds
 	${KLAYGE_PROJECT_DIR}/Samples/media/Reflection/Reflection.cam_path
 	${KLAYGE_PROJECT_DIR}/Samples/media/Reflection/Reflection.kfx
 	${KLAYGE_PROJECT_DIR}/Samples/media/Common/teapot.meshml.model_bin

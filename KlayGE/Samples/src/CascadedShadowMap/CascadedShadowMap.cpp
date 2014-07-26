@@ -79,8 +79,8 @@ void CascadedShadowMapApp::InitObjects()
 	light_controller_.AttachCamera(light_ctrl_camera_);
 	light_controller_.Scalers(0.003f, 0.003f);
 
-	KlayGE::function<TexturePtr()> c_cube_tl = ASyncLoadTexture("Lake_CraterLake03_c.dds", EAH_GPU_Read | EAH_Immutable);
-	KlayGE::function<TexturePtr()> y_cube_tl = ASyncLoadTexture("Lake_CraterLake03_y.dds", EAH_GPU_Read | EAH_Immutable);
+	KlayGE::function<TexturePtr()> c_cube_tl = ASyncLoadTexture("Lake_CraterLake03_filtered_c.dds", EAH_GPU_Read | EAH_Immutable);
+	KlayGE::function<TexturePtr()> y_cube_tl = ASyncLoadTexture("Lake_CraterLake03_filtered_y.dds", EAH_GPU_Read | EAH_Immutable);
 	KlayGE::function<RenderablePtr()> plane_ml = ASyncLoadModel("plane.meshml", EAH_GPU_Read | EAH_Immutable,
 		CreateModelFactory<RenderModel>(), CreateMeshFactory<StaticMesh>());
 	KlayGE::function<RenderablePtr()> katapult_ml = ASyncLoadModel("katapult.meshml", EAH_GPU_Read | EAH_Immutable);
@@ -89,6 +89,11 @@ void CascadedShadowMapApp::InitObjects()
 
 	deferred_rendering_ = Context::Instance().DeferredRenderingLayerInstance();
 	deferred_rendering_->SSVOEnabled(0, false);
+
+	AmbientLightSourcePtr ambient_light = MakeSharedPtr<AmbientLightSource>();
+	ambient_light->SkylightTex(y_cube_tl, c_cube_tl);
+	ambient_light->Color(float3(0.1f, 0.1f, 0.1f));
+	ambient_light->AddToSceneManager();
 	
 	sun_light_ = MakeSharedPtr<SunLightSource>();
 	sun_light_->Attrib(0);

@@ -134,6 +134,22 @@ namespace KlayGE
 		BOOST_ASSERT(false);
 	}
 
+	void LightSource::SkylightTex(KlayGE::function<TexturePtr()> const & y_cube_tl,
+		KlayGE::function<TexturePtr()> const & c_cube_tl)
+	{
+		UNREF_PARAM(y_cube_tl);
+		UNREF_PARAM(c_cube_tl);
+
+		BOOST_ASSERT(false);
+	}
+
+	void LightSource::SkylightTex(KlayGE::function<TexturePtr()> const & cube_tl)
+	{
+		UNREF_PARAM(cube_tl);
+
+		BOOST_ASSERT(false);
+	}
+
 	float3 const & LightSource::Position() const
 	{
 		return pos_;
@@ -285,16 +301,28 @@ namespace KlayGE
 
 	TexturePtr const & AmbientLightSource::SkylightTexY() const
 	{
+		if (sky_tex_y_tl_)
+		{
+			sky_tex_y_ = sky_tex_y_tl_();
+		}
 		return sky_tex_y_;
 	}
 
 	TexturePtr const & AmbientLightSource::SkylightTexC() const
 	{
+		if (sky_tex_c_tl_)
+		{
+			sky_tex_c_ = sky_tex_c_tl_();
+		}
 		return sky_tex_c_;
 	}
 
 	TexturePtr const & AmbientLightSource::SkylightTex() const
 	{
+		if (sky_tex_y_tl_)
+		{
+			sky_tex_y_ = sky_tex_y_tl_();
+		}
 		return sky_tex_y_;
 	}
 
@@ -307,6 +335,18 @@ namespace KlayGE
 	void AmbientLightSource::SkylightTex(TexturePtr const & tex)
 	{
 		sky_tex_y_ = tex;
+	}
+
+	void AmbientLightSource::SkylightTex(KlayGE::function<TexturePtr()> const & y_cube_tl,
+		KlayGE::function<TexturePtr()> const & c_cube_tl)
+	{
+		sky_tex_y_tl_ = y_cube_tl;
+		sky_tex_c_tl_ = c_cube_tl;
+	}
+
+	void AmbientLightSource::SkylightTex(KlayGE::function<TexturePtr()> const & cube_tl)
+	{
+		sky_tex_y_tl_ = cube_tl;
 	}
 
 

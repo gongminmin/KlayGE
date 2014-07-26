@@ -63,7 +63,7 @@ def update(app_time, elapsed_time):
 
 	<model name="sponza_crytek.7z//sponza_crytek.meshml"/>
 
-	<skybox y_cube="Lake_CraterLake03_y.dds" c_cube="Lake_CraterLake03_c.dds"/>
+	<skybox y_cube="Lake_CraterLake03_filtered_y.dds" c_cube="Lake_CraterLake03_filtered_c.dds"/>
 
 	<camera x="-14.5" y="18" z="-3">
 		<look_at x="-13.6" y="17.55" z="-2.8"/>

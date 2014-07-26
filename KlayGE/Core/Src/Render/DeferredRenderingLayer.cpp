@@ -719,6 +719,10 @@ namespace KlayGE
 			filtered_csm_texs_param_[2] = dr_effect_->ParameterByName("filtered_csm_2_tex");
 			filtered_csm_texs_param_[3] = dr_effect_->ParameterByName("filtered_csm_3_tex");
 		}
+		skylight_diff_spec_mip_param_ = dr_effect_->ParameterByName("skylight_diff_spec_mip");
+		inv_view_param_ = dr_effect_->ParameterByName("inv_view");
+		skylight_y_cube_tex_param_ = dr_effect_->ParameterByName("skylight_y_cube_tex");
+		skylight_c_cube_tex_param_ = dr_effect_->ParameterByName("skylight_c_cube_tex");
 #if DEFAULT_DEFERRED == LIGHT_INDEXED_DEFERRED
 		min_max_depth_tex_param_ = dr_effect_->ParameterByName("min_max_depth_tex");
 		lights_color_param_ = dr_effect_->ParameterByName("lights_color");
@@ -1708,10 +1712,23 @@ namespace KlayGE
 		lights_.clear();
 		sm_light_indices_.clear();
 
-		lights_.push_back(MakeSharedPtr<AmbientLightSource>());
+		uint32_t const num_lights = scene_mgr.NumLights();
+		
+		for (uint32_t i = 0; i < num_lights; ++ i)
+		{
+			LightSourcePtr const & light = scene_mgr.GetLight(i);
+			if (light->Enabled() && (LightSource::LT_Ambient == light->Type()))
+			{
+				lights_.push_back(light);
+				break;
+			}
+		}
+		if (lights_.empty())
+		{
+			lights_.push_back(MakeSharedPtr<AmbientLightSource>());
+		}
 		sm_light_indices_.push_back(std::make_pair(-1, 0));
 
-		uint32_t const num_lights = scene_mgr.NumLights();
 		uint32_t num_ambient_lights = 0;
 		float3 ambient_clr(0, 0, 0);
 
@@ -2641,6 +2658,24 @@ namespace KlayGE
 			re.Render(*technique_light_stencil_, *rl);
 		}
 
+		if (LightSource::LT_Ambient == type)
+		{
+			if (light->SkylightTexY())
+			{
+				*skylight_y_cube_tex_param_ = light->SkylightTexY();
+				*skylight_c_cube_tex_param_ = light->SkylightTexC();
+
+				uint32_t const mip = light->SkylightTexY()->NumMipMaps();
+				*skylight_diff_spec_mip_param_ = int3(mip - 1, mip - 2, 1);
+
+				*inv_view_param_ = pvp.inv_view;
+			}
+			else
+			{
+				*skylight_diff_spec_mip_param_ = int3(0, 0, 0);
+			}
+		}
+
 		re.Render(*technique_lights_[type], *rl);
 	}
 
@@ -3043,6 +3078,21 @@ namespace KlayGE
 			float3 dir_es = MathLib::transform_normal(float3(0, 1, 0), pvp.view);
 			*light_dir_es_param_ = float4(dir_es.x(), dir_es.y(), dir_es.z(), 0);
 
+			if (light->SkylightTexY())
+			{
+				*skylight_y_cube_tex_param_ = light->SkylightTexY();
+				*skylight_c_cube_tex_param_ = light->SkylightTexC();
+
+				uint32_t const mip = light->SkylightTexY()->NumMipMaps();
+				*skylight_diff_spec_mip_param_ = int3(mip - 1, mip - 2, 1);
+
+				*inv_view_param_ = pvp.inv_view;
+			}
+			else
+			{
+				*skylight_diff_spec_mip_param_ = int3(0, 0, 0);
+			}
+
 			tech = technique_lidr_ambient_;
 		}
 
@@ -3318,6 +3368,8 @@ namespace KlayGE
 			? pvp.curr_merged_shading_tex : pvp.shading_tex;
 		*lighting_mask_tex_param_ = pvp.lighting_mask_tex;
 
+		*skylight_diff_spec_mip_param_ = int3(0, 0, 0);
+
 		for (uint32_t li = 0; li < lights_.size();)
 		{
 			array<std::vector<uint32_t>, 7> available_lights;
@@ -3333,6 +3385,16 @@ namespace KlayGE
 					{
 					case LightSource::LT_Ambient:
 						available_lights[0].push_back(li);
+						if (light->SkylightTexY())
+						{
+							*skylight_y_cube_tex_param_ = light->SkylightTexY();
+							*skylight_c_cube_tex_param_ = light->SkylightTexC();
+
+							uint32_t const mip = light->SkylightTexY()->NumMipMaps();
+							*skylight_diff_spec_mip_param_ = int3(mip - 1, mip - 2, 1);
+
+							*inv_view_param_ = pvp.inv_view;
+						}
 						break;
 
 					case LightSource::LT_Sun:

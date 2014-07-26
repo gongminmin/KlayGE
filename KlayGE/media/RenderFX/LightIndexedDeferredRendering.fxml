@@ -248,7 +248,9 @@ float4 LIDRAmbientPS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Ta
 	float4 lighting = CalcColor(0.5f + 0.5f * dot(light_dir_es.xyz, normal), 0, 1, 1, light_color, light_attrib);
 	
 	float4 mrt1 = g_buffer_1_tex.Sample(point_sampler, tc);
-	return float4(Shading(lighting, shininess, GetDiffuse(mrt1), GetSpecular(mrt1), -view_dir, normal), 1);
+	float4 shading = float4(Shading(lighting, shininess, GetDiffuse(mrt1), GetSpecular(mrt1), -view_dir, normal), 1);
+	shading += SkylightShading(shininess, mrt1, normal, -view_dir);
+	return shading;
 }
 
 float4 LIDRSunPS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Target

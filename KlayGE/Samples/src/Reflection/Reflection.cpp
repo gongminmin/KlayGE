@@ -216,8 +216,8 @@ void ScreenSpaceReflectionApp::InitObjects()
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
 	loading_percentage_ = 0;
-	c_cube_tl_ = ASyncLoadTexture("Lake_CraterLake03_c.dds", EAH_GPU_Read | EAH_Immutable);
-	y_cube_tl_ = ASyncLoadTexture("Lake_CraterLake03_y.dds", EAH_GPU_Read | EAH_Immutable);
+	c_cube_tl_ = ASyncLoadTexture("Lake_CraterLake03_filtered_c.dds", EAH_GPU_Read | EAH_Immutable);
+	y_cube_tl_ = ASyncLoadTexture("Lake_CraterLake03_filtered_y.dds", EAH_GPU_Read | EAH_Immutable);
 	teapot_ml_ = ASyncLoadModel("teapot.meshml", EAH_GPU_Read | EAH_Immutable,
 		CreateModelFactory<RenderModel>(), CreateMeshFactory<ReflectMesh>());
 	KlayGE::function<RenderablePtr()> dino_ml = ASyncLoadModel("dino50.7z//dino50.meshml", EAH_GPU_Read | EAH_Immutable,
@@ -231,6 +231,11 @@ void ScreenSpaceReflectionApp::InitObjects()
 	screen_camera_path_ = LoadCameraPath(ResLoader::Instance().Open("Reflection.cam_path"));
 	screen_camera_path_->AttachCamera(this->ActiveCamera());
 	this->ActiveCamera().AddToSceneManager();
+
+	AmbientLightSourcePtr ambient_light = MakeSharedPtr<AmbientLightSource>();
+	ambient_light->SkylightTex(y_cube_tl_, c_cube_tl_);
+	ambient_light->Color(float3(0.1f, 0.1f, 0.1f));
+	ambient_light->AddToSceneManager();
 
 	point_light_ = MakeSharedPtr<PointLightSource>();
 	point_light_->Attrib(LightSource::LSA_NoShadow);
