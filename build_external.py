@@ -88,15 +88,6 @@ def setup_Cg(build_info, compiler_info):
 def build_external_libs(build_info):
 	import glob
 
-	if "win" == build_info.host_platform:
-		bat_suffix = "bat"
-	elif "linux" == build_info.host_platform:
-		bat_suffix = "sh"
-	if "win" == build_info.target_platform:
-		dll_suffix = "dll"
-	elif "linux" == build_info.target_platform:
-		dll_suffix = "so"
-
 	for compiler_info in build_info.compilers:
 		platform_dir = "%s_%s" % (build_info.target_platform, compiler_info.arch)
 		dst_dir = "KlayGE/bin/%s/" % platform_dir
@@ -144,10 +135,6 @@ def build_external_libs(build_info):
 
 		print("\nBuilding 7z...\n")
 		build_7z(build_info, compiler_info)
-
-		if not build_info.prefer_static:
-			for fname in glob.iglob("External/7z/lib/%s/*.%s" % (platform_dir, dll_suffix)):
-				copy_to_dst(fname, dst_dir)
 
 		if (not compiler_info.is_windows_runtime) and (not compiler_info.is_android):
 			if "win" == build_info.target_platform:
