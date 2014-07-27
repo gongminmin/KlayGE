@@ -6,17 +6,48 @@ import os, sys
 from blib_util import *
 
 def build_Boost(build_info, compiler_arch):
-	additional_options = ""
+	with_atomic = True
+	with_chrono = True
+	with_date_time = True
+	with_filesystem = True
+	with_program_options = True
+	with_regex = True
+	with_system = True
+	with_thread = True
 	if "vc" == build_info.compiler_name:
-		if 100 == build_info.compiler_version:
-			additional_options += " -DWITH_ATOMIC:BOOL=\"ON\" -DWITH_CHRONO:BOOL=\"ON\" -DWITH_DATE_TIME:BOOL=\"ON\" -DWITH_FILESYSTEM:BOOL=\"ON\" \
-				-DWITH_PROGRAM_OPTIONS:BOOL=\"ON\" -DWITH_SYSTEM -DWITH_THREAD:BOOL=\"ON\""
-		elif build_info.compiler_version >= 110:
-			if -1 == compiler_arch[0].find("_app"):
-				additional_options += " -DWITH_PROGRAM_OPTIONS:BOOL=\"ON\""
+		if build_info.compiler_version >= 100:
+			with_regex = False
+		if build_info.compiler_version >= 110:
+			with_atomic = False
+			with_chrono = False
+			with_date_time = False
+			with_filesystem = False
+			with_system = False
+			with_thread = False
 	else:
-		additional_options += " -DWITH_CHRONO:BOOL=\"ON\" -DWITH_FILESYSTEM:BOOL=\"ON\" -DWITH_PROGRAM_OPTIONS:BOOL=\"ON\" -DWITH_REGEX:BOOL=\"ON\" \
-			-DWITH_SYSTEM:BOOL=\"ON\" -DWITH_THREAD:BOOL=\"ON\""
+		with_atomic = False
+		with_date_time = False
+	if compiler_arch[0].find("_app") != -1:
+		with_filesystem = False
+		with_program_options = False
+
+	additional_options = ""
+	if with_atomic:
+		additional_options += " -DWITH_ATOMIC:BOOL=\"ON\""
+	if with_chrono:
+		additional_options += " -DWITH_CHRONO:BOOL=\"ON\""
+	if with_date_time:
+		additional_options += " -DWITH_DATE_TIME:BOOL=\"ON\""
+	if with_filesystem:
+		additional_options += " -DWITH_FILESYSTEM:BOOL=\"ON\""
+	if with_program_options:
+		additional_options += " -DWITH_PROGRAM_OPTIONS:BOOL=\"ON\""
+	if with_regex:
+		additional_options += " -DWITH_REGEX:BOOL=\"ON\""
+	if with_system:
+		additional_options += " -DWITH_SYSTEM:BOOL=\"ON\""
+	if with_thread:
+		additional_options += " -DWITH_THREAD:BOOL=\"ON\""
 	build_a_project("boost", "External/boost", build_info, compiler_arch, True, additional_options)
 
 def build_Python(build_info, compiler_arch):
