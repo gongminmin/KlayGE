@@ -55,6 +55,32 @@ class cfg_from_argv:
 		else:
 			self.cfg = ""
 
+class compiler_info:
+	def __init__(self, arch, gen_name, toolset, target_platform):
+		self.arch = arch
+		self.generator = gen_name
+		self.toolset = toolset
+
+		self.is_windows_desktop = False
+		self.is_windows_store = False
+		self.is_windows_phone = False
+		self.is_windows_runtime = False
+		self.is_windows = False
+		self.is_android = False
+		self.is_linux = False
+
+		if "win" == target_platform:
+			self.is_windows = True
+			if arch.find("_app") > 0:
+				self.is_windows_store = True
+				self.is_windows_runtime = True
+			else:
+				self.is_windows_desktop = True
+		elif "android" == target_platform:
+			self.is_android = True
+		elif "linux" == target_platform:
+			self.is_linux = True
+
 class build_info:
 	def __init__(self, compiler, archs, cfg):
 		try:
@@ -194,94 +220,94 @@ class build_info:
 		if "" == archs:
 			archs = cfg_build.arch
 			if "" == archs:
-				archs = ("x86", )
+				archs = ("x64", )
 				
 		if "" == cfg:
 			cfg = cfg_build.config
 			if "" == cfg:
 				cfg = ("Debug", "RelWithDebInfo")
 
-		arch_list = []
+		compilers = []
 		if "vc120" == compiler:
 			compiler_name = "vc"
 			compiler_version = 120
 			for arch in archs:
-				is_winrt = False
 				if (arch.find("_app") > 0):
 					toolset = "v120"
-					is_winrt = True
 				if "x86" == arch:
-					arch_list.append((arch, "Visual Studio 12", toolset, is_winrt))
+					gen_name = "Visual Studio 12"
 				elif "x86_app" == arch:
-					arch_list.append((arch, "Visual Studio 12 WinRT-x86", toolset, is_winrt))
+					gen_name = "Visual Studio 12 WinRT-x86"
 				elif "arm" == arch:
-					arch_list.append((arch, "Visual Studio 12 ARM", toolset, is_winrt))
+					gen_name = "Visual Studio 12 ARM"
 				elif "arm_app" == arch:
-					arch_list.append((arch, "Visual Studio 12 WinRT-ARM", toolset, is_winrt))
+					gen_name = "Visual Studio 12 WinRT-ARM"
 				elif "x64" == arch:
-					arch_list.append((arch, "Visual Studio 12 Win64", toolset, is_winrt))
+					gen_name = "Visual Studio 12 Win64"
 				elif "x64_app" == arch:
-					arch_list.append((arch, "Visual Studio 12 WinRT-x64", toolset, is_winrt))
+					gen_name = "Visual Studio 12 WinRT-x64"
+				compilers.append(compiler_info(arch, gen_name, toolset, target_platform))
 		elif "vc110" == compiler:
 			compiler_name = "vc"
 			compiler_version = 110
 			for arch in archs:
-				is_winrt = False
 				if (arch.find("_app") > 0):
 					toolset = "v110"
-					is_winrt = True
 				if "x86" == arch:
-					arch_list.append((arch, "Visual Studio 11", toolset, is_winrt))
+					gen_name = "Visual Studio 11"
 				elif "x86_app" == arch:
-					arch_list.append((arch, "Visual Studio 11 WinRT-x86", toolset, is_winrt))
+					gen_name = "Visual Studio 11 WinRT-x86"
 				elif "arm" == arch:
-					arch_list.append((arch, "Visual Studio 11 ARM", toolset, is_winrt))
+					gen_name = "Visual Studio 11 ARM"
 				elif "arm_app" == arch:
-					arch_list.append((arch, "Visual Studio 11 WinRT-ARM", toolset, is_winrt))
+					gen_name = "Visual Studio 11 WinRT-ARM"
 				elif "x64" == arch:
-					arch_list.append((arch, "Visual Studio 11 Win64", toolset, is_winrt))
+					gen_name = "Visual Studio 11 Win64"
 				elif "x64_app" == arch:
-					arch_list.append((arch, "Visual Studio 11 WinRT-x64", toolset, is_winrt))
+					gen_name = "Visual Studio 11 WinRT-x64"
+				compilers.append(compiler_info(arch, gen_name, toolset, target_platform))
 		elif "vc100" == compiler:
 			compiler_name = "vc"
 			compiler_version = 100
 			for arch in archs:
 				if "x86" == arch:
-					arch_list.append((arch, "Visual Studio 10", toolset, False))
+					gen_name = "Visual Studio 10"
 				elif "x64" == arch:
-					arch_list.append((arch, "Visual Studio 10 Win64", toolset, False))
+					gen_name = "Visual Studio 10 Win64"
+				compilers.append(compiler_info(arch, gen_name, toolset, target_platform))
 		elif "vc90" == compiler:
 			compiler_name = "vc"
 			compiler_version = 90
 			for arch in archs:
 				if "x86" == arch:
-					arch_list.append((arch, "Visual Studio 9 2008", toolset, False))
+					gen_name = "Visual Studio 9 2008"
 				elif "x64" == arch:
-					arch_list.append((arch, "Visual Studio 9 2008 Win64", toolset, False))
+					gen_name = "Visual Studio 9 2008 Win64"
+				compilers.append(compiler_info(arch, gen_name, toolset, target_platform))
 		elif "clang" == compiler:
 			compiler_name = "clang"
 			compiler_version = self.retrive_clang_version()
-			if ("win" == host_platform):
-				for arch in archs:
-					arch_list.append((arch, "MinGW Makefiles", toolset, False))
+			if "win" == host_platform:
+				gen_name = "MinGW Makefiles"
 			else:
-				for arch in archs:
-					arch_list.append((arch, "Unix Makefiles", toolset, False))			
+				gen_name = "Unix Makefiles"
+			for arch in archs:
+				compilers.append(compiler_info(arch, gen_name, toolset, target_platform))
 		elif "mingw" == compiler:
 			compiler_name = "mgw"
 			compiler_version = self.retrive_gcc_version()
 			for arch in archs:
-				arch_list.append((arch, "MinGW Makefiles", toolset, False))
+				compilers.append(compiler_info(arch, "MinGW Makefiles", toolset, target_platform))
 		elif "gcc" == compiler:
 			compiler_name = "gcc"
 			self.toolset = toolset
 			compiler_version = self.retrive_gcc_version()
 			if ("android" == target_platform) and ("win" == host_platform):
-				for arch in archs:
-					arch_list.append((arch, "MinGW Makefiles", toolset, False))
+				gen_name = "MinGW Makefiles"
 			else:
-				for arch in archs:
-					arch_list.append((arch, "Unix Makefiles", toolset, False))
+				gen_name = "Unix Makefiles"
+			for arch in archs:
+				compilers.append(compiler_info(arch, gen_name, toolset, target_platform))
 		else:
 			compiler_name = ""
 			compiler_version = 0
@@ -300,7 +326,7 @@ class build_info:
 
 		self.compiler_name = compiler_name
 		self.compiler_version = compiler_version
-		self.arch_list = arch_list
+		self.compilers = compilers
 		self.cfg = cfg
 
 	def msvc_add_build_command(self, batch_cmd, sln_name, proj_name, config, arch = ""):
@@ -371,15 +397,15 @@ def log_info(message):
 def log_warning(message):
 	print("[W] %s" % message)
 
-def build_a_project(name, build_path, build_info, compiler_arch, need_install = False, additional_options = ""):
+def build_a_project(name, build_path, build_info, compiler_info, need_install = False, additional_options = ""):
 	curdir = os.path.abspath(os.curdir)
 
 	toolset_name = ""
 	if ("vc" == build_info.compiler_name) and (build_info.compiler_version >= 100):
-		toolset_name = "-T %s" % compiler_arch[2]
+		toolset_name = "-T %s" % compiler_info.toolset
 
 	if build_info.compiler_name != "vc":
-		additional_options += " -DKLAYGE_ARCH_NAME:STRING=\"%s\"" % compiler_arch[0]
+		additional_options += " -DKLAYGE_ARCH_NAME:STRING=\"%s\"" % compiler_info.arch
 	if "android" == build_info.target_platform:
 		additional_options += " -DCMAKE_TOOLCHAIN_FILE=\"%s/cmake/android.toolchain.cmake\"" % curdir
 		additional_options += " -DANDROID_NATIVE_API_LEVEL=%s" % build_info.target_api_level
@@ -387,24 +413,24 @@ def build_a_project(name, build_path, build_info, compiler_arch, need_install = 
 			additional_options += " -DCMAKE_MAKE_PROGRAM=\"%ANDROID_NDK%\\prebuilt\\windows\\bin\\make.exe\""
 
 	if "vc" == build_info.compiler_name:
-		if ("x86" == compiler_arch[0]) or ("x86_app" == compiler_arch[0]):
+		if ("x86" == compiler_info.arch) or ("x86_app" == compiler_info.arch):
 			vc_option = "x86"
 			vc_arch = "Win32"
-		elif ("x64" == compiler_arch[0]) or ("x64_app" == compiler_arch[0]):
+		elif ("x64" == compiler_info.arch) or ("x64_app" == compiler_info.arch):
 			vc_option = "x86_amd64"
 			vc_arch = "x64"
-		elif ("arm" == compiler_arch[0]) or ("arm_app" == compiler_arch[0]):
+		elif ("arm" == compiler_info.arch) or ("arm_app" == compiler_info.arch):
 			vc_option = "x86_arm"
 			vc_arch = "ARM"
 
-		build_dir = "%s/build/%s%d_%s_%s" % (build_path, build_info.compiler_name, build_info.compiler_version, build_info.target_platform, compiler_arch[0])
+		build_dir = "%s/build/%s%d_%s_%s" % (build_path, build_info.compiler_name, build_info.compiler_version, build_info.target_platform, compiler_info.arch)
 		if not os.path.exists(build_dir):
 			os.makedirs(build_dir)
 
 		os.chdir(build_dir)
 
 		cmake_cmd = batch_command(build_info.host_platform)
-		cmake_cmd.add_command('cmake -G "%s" %s %s %s' % (compiler_arch[1], toolset_name, additional_options, "../cmake"))
+		cmake_cmd.add_command('cmake -G "%s" %s %s %s' % (compiler_info.generator, toolset_name, additional_options, "../cmake"))
 		if cmake_cmd.execute() != 0:
 			log_error("Config %s failed." % name)
 
@@ -429,7 +455,7 @@ def build_a_project(name, build_path, build_info, compiler_arch, need_install = 
 		make_name += " -j%d" % multiprocessing.cpu_count()
 
 		for config in build_info.cfg:
-			build_dir = "%s/build/%s%d_%s_%s-%s" % (build_path, build_info.compiler_name, build_info.compiler_version, build_info.target_platform, compiler_arch[0], config)
+			build_dir = "%s/build/%s%d_%s_%s-%s" % (build_path, build_info.compiler_name, build_info.compiler_version, build_info.target_platform, compiler_info.arch, config)
 			if not os.path.exists(build_dir):
 				os.makedirs(build_dir)
 				if ("clang" == build_info.compiler_name) and (build_info.target_platform != "android"):
@@ -439,18 +465,18 @@ def build_a_project(name, build_path, build_info, compiler_arch, need_install = 
 			
 			config_options = "-DCMAKE_BUILD_TYPE:STRING=\"%s\"" % config
 			if "android" == build_info.target_platform:
-				config_options += " -DANDROID_ABI=%s" % compiler_arch[0]
-				if "x86" == compiler_arch[0]:
-					config_options += " -DANDROID_TOOLCHAIN_NAME=x86-%s" % compiler_arch[2]
-				elif "x86_64" == compiler_arch[0]:
-					config_options += " -DANDROID_TOOLCHAIN_NAME=x86_64-%s" % compiler_arch[2]
-				elif "arm64-v8a" == compiler_arch[0]:
-					config_options += " -DANDROID_TOOLCHAIN_NAME=aarch64-linux-android-%s" % compiler_arch[2]
+				config_options += " -DANDROID_ABI=%s" % compiler_info.arch
+				if "x86" == compiler_info.arch:
+					config_options += " -DANDROID_TOOLCHAIN_NAME=x86-%s" % compiler_info.toolset
+				elif "x86_64" == compiler_info.arch:
+					config_options += " -DANDROID_TOOLCHAIN_NAME=x86_64-%s" % compiler_info.toolset
+				elif "arm64-v8a" == compiler_info.arch:
+					config_options += " -DANDROID_TOOLCHAIN_NAME=aarch64-linux-android-%s" % compiler_info.toolset
 				else:
-					config_options += " -DANDROID_TOOLCHAIN_NAME=arm-linux-androideabi-%s" % compiler_arch[2]
+					config_options += " -DANDROID_TOOLCHAIN_NAME=arm-linux-androideabi-%s" % compiler_info.toolset
 			
 			cmake_cmd = batch_command(build_info.host_platform)
-			cmake_cmd.add_command('cmake -G "%s" %s %s %s %s' % (compiler_arch[1], toolset_name, additional_options, config_options, "../cmake"))
+			cmake_cmd.add_command('cmake -G "%s" %s %s %s %s' % (compiler_info.generator, toolset_name, additional_options, config_options, "../cmake"))
 			if cmake_cmd.execute() != 0:
 				log_error("Config %s failed." % name)		
 

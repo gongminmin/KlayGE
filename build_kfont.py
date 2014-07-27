@@ -6,8 +6,8 @@ import sys
 from blib_util import *
 
 def build_kfont(build_info):
-	for arch in build_info.arch_list:
-		build_a_project("kfont", "kfont", build_info, arch, True)
+	for compiler_info in build_info.compilers:
+		build_a_project("kfont", "kfont", build_info, compiler_info, True)
 
 if __name__ == "__main__":
 	cfg = cfg_from_argv(sys.argv)

@@ -6,26 +6,26 @@ import sys
 from blib_util import *
 
 def build_KlayGE(build_info):
-	for arch in build_info.arch_list:
-		build_a_project("KlayGE", "KlayGE", build_info, arch)
+	for compiler_info in build_info.compilers:
+		build_a_project("KlayGE", "KlayGE", build_info, compiler_info)
 
 def build_Samples(build_info):
-	for arch in build_info.arch_list:
-		build_a_project("Samples", "KlayGE/Samples", build_info, arch)
+	for compiler_info in build_info.compilers:
+		build_a_project("Samples", "KlayGE/Samples", build_info, compiler_info)
 
 def build_Tools(build_info):
-	for arch in build_info.arch_list:
-		if (not arch[3]) and (build_info.target_platform != "android"):
-			build_a_project("Tools", "KlayGE/Tools", build_info, arch)
+	for compiler_info in build_info.compilers:
+		if (not compiler_info.is_windows_runtime) and (not compiler_info.is_android):
+			build_a_project("Tools", "KlayGE/Tools", build_info, compiler_info)
 
 def build_Tutorials(build_info):
-	for arch in build_info.arch_list:
-		build_a_project("Tutorials", "KlayGE/Tutorials", build_info, arch)
+	for compiler_info in build_info.compilers:
+		build_a_project("Tutorials", "KlayGE/Tutorials", build_info, compiler_info)
 
 def build_Exporters(build_info):
-	for arch in build_info.arch_list:
-		if (not arch[3]) and (build_info.target_platform != "android"):
-			build_a_project("Exporters", "KlayGE/Exporters", build_info, arch)
+	for compiler_info in build_info.compilers:
+		if (not compiler_info.is_windows_runtime) and (not compiler_info.is_android):
+			build_a_project("Exporters", "KlayGE/Exporters", build_info, compiler_info)
 
 if __name__ == "__main__":
 	cfg = cfg_from_argv(sys.argv)

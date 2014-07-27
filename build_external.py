@@ -5,7 +5,7 @@ from __future__ import print_function
 import os, sys
 from blib_util import *
 
-def build_Boost(build_info, compiler_arch):
+def build_Boost(build_info, compiler_info):
 	with_atomic = True
 	with_chrono = True
 	with_date_time = True
@@ -27,7 +27,7 @@ def build_Boost(build_info, compiler_arch):
 	else:
 		with_atomic = False
 		with_date_time = False
-	if compiler_arch[0].find("_app") != -1:
+	if compiler_info.is_windows_runtime:
 		with_filesystem = False
 		with_program_options = False
 
@@ -48,9 +48,9 @@ def build_Boost(build_info, compiler_arch):
 		additional_options += " -DWITH_SYSTEM:BOOL=\"ON\""
 	if with_thread:
 		additional_options += " -DWITH_THREAD:BOOL=\"ON\""
-	build_a_project("boost", "External/boost", build_info, compiler_arch, True, additional_options)
+	build_a_project("boost", "External/boost", build_info, compiler_info, True, additional_options)
 
-def build_Python(build_info, compiler_arch):
+def build_Python(build_info, compiler_info):
 	additional_options = "-D BUILTIN_CODECS_CN:BOOL=\"ON\" -D BUILTIN_CODECS_HK:BOOL=\"ON\" -D BUILTIN_CODECS_ISO2022:BOOL=\"ON\" \
 		-D BUILTIN_CODECS_CN:BOOL=\"ON\" -D BUILTIN_CODECS_JP:BOOL=\"ON\" -D BUILTIN_CODECS_KR:BOOL=\"ON\" -D BUILTIN_CODECS_TW:BOOL=\"ON\" \
 		-D BUILTIN_COLLECTIONS:BOOL=\"ON\" -D BUILTIN_FUNCTOOLS:BOOL=\"ON\" -D BUILTIN_IO:BOOL=\"ON\" -D BUILTIN_ITERTOOLS:BOOL=\"ON\" \
@@ -62,28 +62,28 @@ def build_Python(build_info, compiler_arch):
 		-D USE_SYSTEM_Curses:BOOL=\"OFF\" -D USE_SYSTEM_EXPAT:BOOL=\"OFF\" -D USE_SYSTEM_DB:BOOL=\"OFF\" -D USE_SYSTEM_GDBM:BOOL=\"OFF\" \
 		-D USE_SYSTEM_OpenSSL:BOOL=\"OFF\" -D USE_SYSTEM_READLINE:BOOL=\"OFF\" -D USE_SYSTEM_SQLITE3:BOOL=\"OFF\" -D USE_SYSTEM_TCL:BOOL=\"OFF\" \
 		-D USE_SYSTEM_ZLIB:BOOL=\"OFF\""
-	build_a_project("Python", "External/Python", build_info, compiler_arch, False, additional_options)
+	build_a_project("Python", "External/Python", build_info, compiler_info, False, additional_options)
 
-def build_libogg(build_info, compiler_arch):
-	build_a_project("libogg", "External/libogg", build_info, compiler_arch)
+def build_libogg(build_info, compiler_info):
+	build_a_project("libogg", "External/libogg", build_info, compiler_info)
 
-def build_libvorbis(build_info, compiler_arch):
-	build_a_project("libvorbis", "External/libvorbis", build_info, compiler_arch)
+def build_libvorbis(build_info, compiler_info):
+	build_a_project("libvorbis", "External/libvorbis", build_info, compiler_info)
 
-def build_freetype(build_info, compiler_arch):
-	build_a_project("freetype", "External/freetype", build_info, compiler_arch)
+def build_freetype(build_info, compiler_info):
+	build_a_project("freetype", "External/freetype", build_info, compiler_info)
 
-def build_7z(build_info, compiler_arch):
-	build_a_project("7z", "External/7z", build_info, compiler_arch)
+def build_7z(build_info, compiler_info):
+	build_a_project("7z", "External/7z", build_info, compiler_info)
 
-def setup_DXSDK(build_info, compiler_arch):
-	build_a_project("DXSDK", "External/DXSDK", build_info, compiler_arch)
+def setup_DXSDK(build_info, compiler_info):
+	build_a_project("DXSDK", "External/DXSDK", build_info, compiler_info)
 
-def setup_OpenALSDK(build_info, compiler_arch):
-	build_a_project("OpenALSDK", "External/OpenALSDK", build_info, compiler_arch)
+def setup_OpenALSDK(build_info, compiler_info):
+	build_a_project("OpenALSDK", "External/OpenALSDK", build_info, compiler_info)
 
-def setup_Cg(build_info, compiler_arch):
-	build_a_project("Cg", "External/Cg", build_info, compiler_arch)
+def setup_Cg(build_info, compiler_info):
+	build_a_project("Cg", "External/Cg", build_info, compiler_info)
 
 def build_external_libs(build_info):
 	import glob
@@ -97,17 +97,17 @@ def build_external_libs(build_info):
 	elif "linux" == build_info.target_platform:
 		dll_suffix = "so"
 
-	for arch in build_info.arch_list:
-		platform_dir = "%s_%s" % (build_info.target_platform, arch[0])
+	for compiler_info in build_info.compilers:
+		platform_dir = "%s_%s" % (build_info.target_platform, compiler_info.arch)
 		dst_dir = "KlayGE/bin/%s/" % platform_dir
 
-		if not arch[3]:
+		if not compiler_info.is_windows_runtime:
 			print("\nBuilding boost...\n")
-			build_Boost(build_info, arch)
+			build_Boost(build_info, compiler_info)
 
-		if not arch[3]:
+		if not compiler_info.is_windows_runtime:
 			print("\nBuilding Python...\n")
-			build_Python(build_info, arch)
+			build_Python(build_info, compiler_info)
 
 			if not build_info.prefer_static:
 				if not os.path.exists("%sLib" % dst_dir):
@@ -130,38 +130,38 @@ def build_external_libs(build_info):
 				for fname in glob.iglob("External/Python/Lib/encodings/*.py"):
 					copy_to_dst(fname, "%sLib/encodings/" % dst_dir)
 
-		if not arch[3]:
+		if not compiler_info.is_windows_runtime:
 			print("\nBuilding libogg...\n")
-			build_libogg(build_info, arch)
+			build_libogg(build_info, compiler_info)
 
-		if not arch[3]:
+		if not compiler_info.is_windows_runtime:
 			print("\nBuilding libvorbis...\n")
-			build_libvorbis(build_info, arch)
+			build_libvorbis(build_info, compiler_info)
 
-		if (not arch[3]) and (build_info.target_platform != "android"):
+		if (not compiler_info.is_windows_runtime) and (not compiler_info.is_android):
 			print("\nBuilding freetype...\n")
-			build_freetype(build_info, arch)
+			build_freetype(build_info, compiler_info)
 
 		print("\nBuilding 7z...\n")
-		build_7z(build_info, arch)
+		build_7z(build_info, compiler_info)
 
 		if not build_info.prefer_static:
 			for fname in glob.iglob("External/7z/lib/%s/*.%s" % (platform_dir, dll_suffix)):
 				copy_to_dst(fname, dst_dir)
 
-		if (not arch[3]) and (build_info.target_platform != "android"):
+		if (not compiler_info.is_windows_runtime) and (not compiler_info.is_android):
 			if "win" == build_info.target_platform:
 				print("\nSeting up DXSDK...\n")
-				setup_DXSDK(build_info, arch)
+				setup_DXSDK(build_info, compiler_info)
 
-		if (not arch[3]) and (build_info.target_platform != "android"):
-			if ("win" == build_info.target_platform) and (arch[0] != "arm"):
+		if (not compiler_info.is_windows_runtime) and (not compiler_info.is_android):
+			if ("win" == build_info.target_platform) and (compiler_info.arch != "arm"):
 				print("\nSeting up OpenAL SDK...\n")
-				setup_OpenALSDK(build_info, arch)
+				setup_OpenALSDK(build_info, compiler_info)
 
-		if (not arch[3]) and (arch[0] != "arm") and (build_info.target_platform != "android"):
+		if (not compiler_info.is_windows_runtime) and (compiler_info.arch != "arm") and (not compiler_info.is_android):
 			print("\nSeting up Cg...\n")
-			setup_Cg(build_info, arch)
+			setup_Cg(build_info, compiler_info)
 
 if __name__ == "__main__":
 	cfg = cfg_from_argv(sys.argv)

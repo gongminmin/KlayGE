@@ -148,5 +148,5 @@ if __name__ == "__main__":
 	cfg = cfg_from_argv(sys.argv, 1)
 	bi = build_info(cfg.compiler, cfg.archs, cfg.cfg)
 
-	for arch in bi.arch_list:
-		deploy_KlayGE(target_dir, bi, arch[0])
+	for compiler_info in bi.compilers:
+		deploy_KlayGE(target_dir, bi, compiler_info.arch)
