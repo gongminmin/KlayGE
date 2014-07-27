@@ -1,6 +1,7 @@
 #include <KlayGE/KlayGE.hpp>
 #include <KFL/Half.hpp>
 #include <KFL/Math.hpp>
+#include <KFL/Timer.hpp>
 #include <KlayGE/Texture.hpp>
 #include <KlayGE/ResLoader.hpp>
 
@@ -240,6 +241,65 @@ namespace
 		return prefiltered_clr / max(1e-6f, total_weight);
 	}
 
+	void PrefilterCubeFace(std::vector<std::vector<Color> >& prefilted_data,
+		std::vector<ElementInitData>& out_data, std::vector<std::vector<half> >& out_data_block,
+		uint32_t face, uint32_t width, uint32_t num_mipmaps, atomic<uint32_t>& processed_texels)
+	{
+		Color* env_map[6];
+		for (uint32_t f = 0; f < 6; ++ f)
+		{
+			env_map[f] = &prefilted_data[f * num_mipmaps][0];
+		}
+
+		uint32_t w = std::max<uint32_t>(1U, width / 2);
+
+		for (uint32_t mip = 1; mip < num_mipmaps - 1; ++ mip)
+		{
+			prefilted_data[face * num_mipmaps + mip].resize(w * w);
+			float roughness = static_cast<float>(num_mipmaps - 2 - mip) / (num_mipmaps - 2);
+			roughness = pow(8192.0f, roughness);
+
+			for (uint32_t y = 0; y < w; ++ y)
+			{
+				for (uint32_t x = 0; x < w; ++ x)
+				{
+					prefilted_data[face * num_mipmaps + mip][y * w + x]
+						= PrefilterEnvMapSpecular(roughness, ToDir(face, x, y, w), env_map, width);
+					++ processed_texels;
+				}
+			}
+
+			w = std::max<uint32_t>(1U, w / 2);
+		}
+
+		{
+			prefilted_data[face * num_mipmaps + num_mipmaps - 1].resize(w * w);
+			for (uint32_t y = 0; y < w; ++ y)
+			{
+				for (uint32_t x = 0; x < w; ++ x)
+				{
+					prefilted_data[face * num_mipmaps + num_mipmaps - 1][y * w + x]
+						= PrefilterEnvMapDiffuse(ToDir(face, x, y, w), env_map, width);
+					++ processed_texels;
+				}
+			}
+		}
+
+		w = width;
+		for (uint32_t mip = 0; mip < num_mipmaps; ++ mip)
+		{
+			out_data_block[face * num_mipmaps + mip].resize(w * w * sizeof(half) * 4);
+			out_data[face * num_mipmaps + mip].data = &out_data_block[face * num_mipmaps + mip][0];
+			out_data[face * num_mipmaps + mip].row_pitch = w * sizeof(half) * 4;
+			out_data[face * num_mipmaps + mip].slice_pitch = w * out_data[face * num_mipmaps + mip].row_pitch;
+
+			ConvertFromABGR32F(EF_ABGR16F, &prefilted_data[face * num_mipmaps + mip][0], w * w,
+				&out_data_block[face * num_mipmaps + mip][0]);
+
+			w = std::max<uint32_t>(1U, w / 2);
+		}
+	}
+
 	void PrefilterCube(std::string const & in_file, std::string const & out_file)
 	{
 		Texture::TextureType in_type;
@@ -251,6 +311,7 @@ namespace
 		std::vector<uint8_t> in_data_block;
 		LoadTexture(in_file, in_type, in_width, in_height, in_depth, in_num_mipmaps, in_array_size, in_format, in_data, in_data_block);
 
+		uint32_t total_texels = 0;
 		uint32_t out_num_mipmaps = 1;
 		{
 			uint32_t w = in_width;
@@ -259,6 +320,7 @@ namespace
 				++ out_num_mipmaps;
 
 				w = std::max<uint32_t>(1U, w / 2);
+				total_texels += w * w * 6;
 			}
 		}
 
@@ -279,58 +341,37 @@ namespace
 			env_map[face] = &prefilted_data[face * out_num_mipmaps][0];
 		}
 
-		for (uint32_t face = 0; face < 6; ++ face)
-		{
-			w = std::max<uint32_t>(1U, in_width / 2);
-
-			for (uint32_t mip = 1; mip < out_num_mipmaps - 1; ++ mip)
-			{
-				prefilted_data[face * out_num_mipmaps + mip].resize(w * w);
-				float roughness = static_cast<float>(out_num_mipmaps - 2 - mip) / (out_num_mipmaps - 2);
-				roughness = pow(8192.0f, roughness);
-
-				for (uint32_t y = 0; y < w; ++ y)
-				{
-					for (uint32_t x = 0; x < w; ++ x)
-					{
-						prefilted_data[face * out_num_mipmaps + mip][y * w + x]
-							= PrefilterEnvMapSpecular(roughness, ToDir(face, x, y, w), env_map, in_width);
-					}
-				}
-
-				w = std::max<uint32_t>(1U, w / 2);
-			}
-
-			{
-				prefilted_data[face * out_num_mipmaps + out_num_mipmaps - 1].resize(w * w);
-				for (uint32_t y = 0; y < w; ++ y)
-				{
-					for (uint32_t x = 0; x < w; ++ x)
-					{
-						prefilted_data[face * out_num_mipmaps + out_num_mipmaps - 1][y * w + x]
-							= PrefilterEnvMapDiffuse(ToDir(face, x, y, w), env_map, in_width);
-					}
-				}
-			}
-		}
-
 		std::vector<ElementInitData> out_data(out_num_mipmaps * 6);
 		std::vector<std::vector<half> > out_data_block(out_num_mipmaps * 6);
-		for (uint32_t face = 0; face < 6; ++ face)
+
+		atomic<uint32_t> processed_texels(0);
+
+		thread_pool tp(1, 6);
+		std::vector<joiner<void> > joiners(6);
+		for (size_t face = 0; face < joiners.size(); ++ face)
 		{
-			w = in_width;
-			for (uint32_t mip = 0; mip < out_num_mipmaps; ++ mip)
+			joiners[face] = tp(KlayGE::bind(PrefilterCubeFace, KlayGE::ref(prefilted_data),
+				KlayGE::ref(out_data), KlayGE::ref(out_data_block),
+				static_cast<uint32_t>(face), in_width, out_num_mipmaps, KlayGE::ref(processed_texels)));
+		}
+
+		for (;;)
+		{
+			cout << '\r';
+			cout.precision(2);
+			cout << "Processing " << fixed << processed_texels / static_cast<float>(total_texels) * 100 << " %     ";
+			if (processed_texels == total_texels)
 			{
-				out_data_block[face * out_num_mipmaps + mip].resize(w * w * sizeof(half) * 4);
-				out_data[face * out_num_mipmaps + mip].data = &out_data_block[face * out_num_mipmaps + mip][0];
-				out_data[face * out_num_mipmaps + mip].row_pitch = w * sizeof(half) * 4;
-				out_data[face * out_num_mipmaps + mip].slice_pitch = w * out_data[face * out_num_mipmaps + mip].row_pitch;
-
-				ConvertFromABGR32F(EF_ABGR16F, &prefilted_data[face * out_num_mipmaps + mip][0], w * w,
-					&out_data_block[face * out_num_mipmaps + mip][0]);
-
-				w = std::max<uint32_t>(1U, w / 2);
+				break;
 			}
+
+			KlayGE::Sleep(1000);
+		}
+		cout << endl;
+
+		for (size_t face = 0; face < joiners.size(); ++ face)
+		{
+			joiners[face]();
 		}
 
 		SaveTexture(out_file, in_type, in_width, in_height, in_depth, out_num_mipmaps, in_array_size, EF_ABGR16F, out_data);
@@ -359,8 +400,11 @@ int main(int argc, char* argv[])
 		output = filesystem::basename(output_path) + "_filtered.dds";
 	}
 
+	Timer timer;
+
 	PrefilterCube(input, output);
 
+	cout << timer.elapsed() << " s" << endl;
 	cout << "Filtered cube map is saved into " << output << endl;
 
 	ResLoader::Destroy();
