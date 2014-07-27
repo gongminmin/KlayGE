@@ -1,0 +1,62 @@
+SET(LIB_NAME thread)
+
+SET(WIN32_SOURCE_FILES
+	${BOOST_PROJECT_DIR}/libs/thread/src/win32/thread.cpp
+	${BOOST_PROJECT_DIR}/libs/thread/src/win32/tss_dll.cpp
+	${BOOST_PROJECT_DIR}/libs/thread/src/win32/tss_pe.cpp
+	${BOOST_PROJECT_DIR}/libs/thread/src/future.cpp
+)
+
+SET(PTHREAD_SOURCE_FILES
+	${BOOST_PROJECT_DIR}/libs/thread/src/pthread/thread.cpp
+	${BOOST_PROJECT_DIR}/libs/thread/src/pthread/once.cpp
+	${BOOST_PROJECT_DIR}/libs/thread/src/future.cpp
+)
+
+IF(KLAYGE_BUILD_PLATFORM_ANDROID OR KLAYGE_BUILD_PLATFORM_LINUX)
+	SET(THREAD_API_WIN32 0)
+ELSE()
+	SET(THREAD_API_WIN32 1)
+ENDIF()
+
+IF(THREAD_API_WIN32)
+	SET(SOURCE_FILES ${WIN32_SOURCE_FILES})
+ELSE()
+	SET(SOURCE_FILES ${PTHREAD_SOURCE_FILES})
+ENDIF()
+
+IF(KLAYGE_PREFERRED_LIB_TYPE STREQUAL "SHARED")
+	ADD_DEFINITIONS(-DBOOST_THREAD_BUILD_DLL=1)
+ELSE()
+	ADD_DEFINITIONS(-DBOOST_THREAD_BUILD_LIB=1)
+ENDIF()
+IF(THREAD_API_WIN32)
+	ADD_DEFINITIONS(-DBOOST_THREAD_USES_CHRONO)
+ELSE()
+	ADD_DEFINITIONS(-DBOOST_THREAD_POSIX)
+	ADD_DEFINITIONS(-DBOOST_THREAD_DONT_USE_CHRONO)
+ENDIF()
+IF(CMAKE_COMPILER_IS_GNUCXX)
+	SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wextra -pedantic -Wno-long-long -Wno-variadic-macros -Wunused-function")
+ENDIF()
+IF(APPLE)
+	SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wextra -pedantic -fpermissive -Wno-long-long -Wno-variadic-macros -Wunused-function -Wno-delete-non-virtual-dtor")
+ENDIF()
+IF(CMAKE_C_COMPILER_ID STREQUAL "Clang")
+	SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wextra -pedantic -Wno-long-long -Wno-variadic-macros -Wunused-function -Wno-delete-non-virtual-dtor")
+ENDIF()
+IF(MINGW)
+	SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fdiagnostics-show-option")
+ENDIF()
+IF(MSVC)
+	SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd4512")
+ENDIF()
+
+SETUP_BOOST_LIBRARY(${LIB_NAME})
+
+ADD_DEPENDENCIES(${LIB_NAME} system)
+IF(THREAD_API_WIN32)
+	ADD_DEPENDENCIES(${LIB_NAME} chrono)
+ELSE()
+	ADD_DEPENDENCIES(${LIB_NAME} atomic)
+ENDIF()

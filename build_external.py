@@ -6,125 +6,18 @@ import os, sys
 from blib_util import *
 
 def build_Boost(build_info, compiler_arch):
-	b2_name = ""
-	os.chdir("External/boost")
-	if "win" == build_info.host_platform:
-		b2_name = "b2.exe"
-		if not os.path.exists(b2_name):
-			os.system("bootstrap.bat")
-	elif "linux" == build_info.host_platform:
-		b2_name = "./b2"
-		if not os.path.exists(b2_name):
-			os.system("./bootstrap.sh")
-
+	additional_options = ""
 	if "vc" == build_info.compiler_name:
-		boost_toolset = "ms%s-%d.0" % (build_info.compiler_name, (build_info.compiler_version / 10))
+		if 100 == build_info.compiler_version:
+			additional_options += " -DWITH_ATOMIC:BOOL=\"ON\" -DWITH_CHRONO:BOOL=\"ON\" -DWITH_DATE_TIME:BOOL=\"ON\" -DWITH_FILESYSTEM:BOOL=\"ON\" \
+				-DWITH_PROGRAM_OPTIONS:BOOL=\"ON\" -DWITH_SYSTEM -DWITH_THREAD:BOOL=\"ON\""
+		elif build_info.compiler_version >= 110:
+			if -1 == compiler_arch[0].find("_app"):
+				additional_options += " -DWITH_PROGRAM_OPTIONS:BOOL=\"ON\""
 	else:
-		if "android" == build_info.target_platform:
-			if "armeabi-v7a" == compiler_arch[0]:
-				boost_toolset = "gcc-android_armeabi_v7a"
-			elif "arm64-v8a" == compiler_arch[0]:
-				boost_toolset = "gcc-android_arm64_v8a"
-			else:
-				boost_toolset = "gcc-android_%s" % compiler_arch[0]
-		else:
-			if "clang" == build_info.compiler_name:
-				boost_toolset = "clang"
-			else:
-				boost_toolset = "gcc"
-		
-	options = ""
-	
-	if ("x86" == compiler_arch[0]) or ("x86_app" == compiler_arch[0]):
-		options += "address-model=32 architecture=x86"
-	elif ("x64" == compiler_arch[0]) or ("x64_app" == compiler_arch[0]) or ("x86_64" == compiler_arch[0]):
-		options += "address-model=64 architecture=x86"
-	elif ("arm" == compiler_arch[0]) or ("arm_app" == compiler_arch[0]) or ("armeabi" == compiler_arch[0]) or ("armeabi-v7a" == compiler_arch[0]):
-		options += "address-model=32 architecture=arm"
-	elif ("arm64-v8a" == compiler_arch[0]):
-		options += "address-model=64 architecture=arm"
-	
-	if "vc" == build_info.compiler_name:
-		if build_info.compiler_version >= 100:
-			options += " --without-regex"
-		if build_info.compiler_version >= 110:
-			options += " --without-atomic --without-chrono --without-date_time --without-filesystem --without-system --without-thread"
-	else:
-		options += " --without-atomic --without-date_time"
-
-	options += " --disable-filesystem2"
-	if (compiler_arch[0].find("_app") != -1):
-		options += " --without-filesystem --without-program_options define=\"WINAPI_FAMILY=WINAPI_FAMILY_APP\" define=BOOST_NO_ANSI_APIS cxxflags=\"/ZW /EHsc\""
-	if ("win" == build_info.target_platform) and ("arm" == compiler_arch[0]):
-		options += " define=_ARM_WINAPI_PARTITION_DESKTOP_SDK_AVAILABLE"
-	if "vc" == build_info.compiler_name:
-		options += " cxxflags=-wd4819 cxxflags=-wd4910 define=_CRT_SECURE_NO_DEPRECATE define=_SCL_SECURE_NO_DEPRECATE"
-	elif ("mgw" == build_info.compiler_name) or ("gcc" == build_info.compiler_name):
-		if (build_info.compiler_version < 47):
-			options += " cxxflags=-std=c++0x linkflags=-std=c++0x"
-		else:
-			options += " cxxflags=-std=c++11 linkflags=-std=c++11"
-		if ("x64" == compiler_arch[0]):
-			options += " define=BOOST_USE_WINDOWS_H"
-	elif ("clang" == build_info.compiler_name):
-		import subprocess
-
-		clang_path = subprocess.check_output(["where", "clang"])
-		clang_path = clang_path.replace("\\", "/")
-		clang_path = clang_path[0 : clang_path.rfind("/")]
-		gcc_ver = subprocess.check_output(["gcc", "-dumpversion"])
-		
-		if os.path.exists("%s/../lib/gcc/i686-w64-mingw32/%s/include/c++/" % (clang_path, gcc_ver)):
-			mingw_name = "i686-w64-mingw32"
-			mingw_in_lib_folder = True
-		elif os.path.exists("%s/../lib/gcc/x86_64-w64-mingw32/%s/include/c++/" % (clang_path, gcc_ver)):
-			mingw_name = "x86_64-w64-mingw32"
-			mingw_in_lib_folder = True
-		elif os.path.exists("%s/../lib/gcc/mingw32/%s/include/c++/" % (clang_path, gcc_ver)):
-			mingw_name = "mingw32"
-			mingw_in_lib_folder = True
-		elif os.path.exists("%s/../i686-w64-mingw32/include/c++/" % clang_path):
-			mingw_name = "i686-w64-mingw32"
-			mingw_in_lib_folder = False
-		elif os.path.exists("%s/../x86_64-w64-mingw32/include/c++/" % clang_path):
-			mingw_name = "x86_64-w64-mingw32"
-			mingw_in_lib_folder = False
-		elif os.path.exists("%s/../mingw32/include/c++/" % clang_path):
-			mingw_name = "mingw32"
-			mingw_in_lib_folder = False
-
-		if mingw_in_lib_folder:
-			mingw_cxx_include = "%s/../lib/gcc/%s/%s/include/c++/" % (clang_path, mingw_name, gcc_ver)
-		else:
-			mingw_cxx_include = "%s/../%s/include/c++/" % (clang_path, mingw_name)
-		
-		options += " define=BOOST_USE_WINDOWS_H cxxflags=\"-std=c++11 -I\"%s\" -I\"%s%s/\"\" linkflags=-std=c++11" % (mingw_cxx_include, mingw_cxx_include, mingw_name)
-
-	if "android" == build_info.target_platform:
-		options += " cxxflags=%%CXXFLAGS%% threadapi=pthread target-os=linux --user-config=./user-config-android-%s.jam" % compiler_arch[0]
-	if ("Debug" in build_info.cfg):
-		options += " variant=debug"
-	if ("Release" in build_info.cfg) or ("RelWithDebInfo" in build_info.cfg) or ("MinSizeRel" in build_info.cfg):
-		options += " variant=release"
-		
-	build_cmd = batch_command(build_info.host_platform)
-	if "android" == build_info.target_platform:
-		arch_name = compiler_arch[0]
-		if ("armeabi" == arch_name) or ("armeabi-v7a" == arch_name):
-			arch_name = "arm"
-		elif "arm64-v8a" == arch_name:
-			arch_name = "arm64"
-		build_cmd.add_command('set NDK_TOOLSET="%s"' % build_info.toolset)
-		build_cmd.add_command('set CXXFLAGS="-I%%ANDROID_NDK%%/platforms/android-%s/arch-%s/usr/include -I%%ANDROID_NDK%%/sources/cxx-stl/gnu-libstdc++/%s/include -I%%ANDROID_NDK%%/sources/cxx-stl/gnu-libstdc++/%s/libs/%s/include"' % (build_info.target_api_level, arch_name, compiler_arch[2], compiler_arch[2], compiler_arch[0]))
-	if build_info.prefer_static:
-		link = "static"
-	else:
-		link = "shared"
-	build_cmd.add_command('%s --toolset=%s --stagedir=./lib/%s_%s --builddir=./ --layout=versioned %s link=%s runtime-link=%s threading=multi stage' % (b2_name, boost_toolset, build_info.target_platform, compiler_arch[0], options, link, link))
-	if build_cmd.execute() != 0:
-		log_error("Build boost failed.")
-
-	os.chdir("../../")
+		additional_options += " -DWITH_CHRONO:BOOL=\"ON\" -DWITH_FILESYSTEM:BOOL=\"ON\" -DWITH_PROGRAM_OPTIONS:BOOL=\"ON\" -DWITH_REGEX:BOOL=\"ON\" \
+			-DWITH_SYSTEM:BOOL=\"ON\" -DWITH_THREAD:BOOL=\"ON\""
+	build_a_project("boost", "External/boost", build_info, compiler_arch, True, additional_options)
 
 def build_Python(build_info, compiler_arch):
 	additional_options = "-D BUILTIN_CODECS_CN:BOOL=\"ON\" -D BUILTIN_CODECS_HK:BOOL=\"ON\" -D BUILTIN_CODECS_ISO2022:BOOL=\"ON\" \
@@ -180,10 +73,6 @@ def build_external_libs(build_info):
 		if not arch[3]:
 			print("\nBuilding boost...\n")
 			build_Boost(build_info, arch)
-
-			if not build_info.prefer_static:
-				for fname in glob.iglob("External/boost/lib/%s_%s/lib/*.%s" % (build_info.target_platform, arch[0], dll_suffix)):
-					copy_to_dst(fname, dst_dir)
 
 		if not arch[3]:
 			print("\nBuilding Python...\n")
