@@ -39,7 +39,14 @@
 #endif
 #endif
 
+#ifdef KLAYGE_COMPILER_MSVC
+#pragma warning(push)
+#pragma warning(disable: 4273 4510 4512 4610)
+#endif
 #include <Python.h>
+#ifdef KLAYGE_COMPILER_MSVC
+#pragma warning(pop)
+#endif
 #include <vector>
 #include <string>
 

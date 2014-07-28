@@ -56,7 +56,7 @@ def build_Python(build_info, compiler_info):
 		-D BUILTIN_COLLECTIONS:BOOL=\"ON\" -D BUILTIN_FUNCTOOLS:BOOL=\"ON\" -D BUILTIN_IO:BOOL=\"ON\" -D BUILTIN_ITERTOOLS:BOOL=\"ON\" \
 		-D BUILTIN_LOCALE:BOOL=\"ON\" -D BUILTIN_MATH:BOOL=\"ON\" -D BUILTIN_MSI:BOOL=\"OFF\" -D BUILTIN_MULTIBYTECODEC:BOOL=\"ON\" \
 		-D BUILTIN_OPERATOR:BOOL=\"ON\" -D BUILTIN_UNICODEDATA:BOOL=\"ON\" -D BUILTIN_MSVCRT:BOOL=\"OFF\" \
-		-D BUILTIN_WINREG:BOOL=\"OFF\" -D BUILTIN_SUBPROCESS:BOOL=\"OFF\" -D BUILTIN_MULTIPROCESSING:BOOL=\"OFF\" \
+		-D BUILTIN_WINREG:BOOL=\"ON\" -D BUILTIN_SUBPROCESS:BOOL=\"OFF\" -D BUILTIN_MULTIPROCESSING:BOOL=\"OFF\" \
 		-D BUILTIN_SELECT:BOOL=\"OFF\" -D BUILTIN_SOCKET:BOOL=\"OFF\" -D BUILTIN_MMAP:BOOL=\"OFF\" \
 		-D ENABLE_AUDIOOP:BOOL=\"OFF\" -D ENABLE_OSSAUDIODEV:BOOL=\"OFF\" \
 		-D USE_SYSTEM_Curses:BOOL=\"OFF\" -D USE_SYSTEM_EXPAT:BOOL=\"OFF\" -D USE_SYSTEM_DB:BOOL=\"OFF\" -D USE_SYSTEM_GDBM:BOOL=\"OFF\" \
@@ -103,7 +103,7 @@ def build_external_libs(build_info):
 			if not build_info.prefer_static:
 				if not os.path.exists("%sLib" % dst_dir):
 					os.mkdir("%sLib" % dst_dir)
-				copy_to_dst("External/Python/Lib/_abcoll.py", "%sLib/" % dst_dir)
+				copy_to_dst("External/Python/Lib/_collections_abc.py", "%sLib/" % dst_dir)
 				copy_to_dst("External/Python/Lib/_weakrefset.py", "%sLib/" % dst_dir)
 				copy_to_dst("External/Python/Lib/abc.py", "%sLib/" % dst_dir)
 				copy_to_dst("External/Python/Lib/codecs.py", "%sLib/" % dst_dir)
@@ -113,7 +113,7 @@ def build_external_libs(build_info):
 				copy_to_dst("External/Python/Lib/macpath.py", "%sLib/" % dst_dir)
 				copy_to_dst("External/Python/Lib/ntpath.py", "%sLib/" % dst_dir)
 				copy_to_dst("External/Python/Lib/os.py", "%sLib/" % dst_dir)
-				copy_to_dst("External/Python/Lib/os2emxpath.py", "%sLib/" % dst_dir)
+				copy_to_dst("External/Python/Lib/pathlib.py", "%sLib/" % dst_dir)
 				copy_to_dst("External/Python/Lib/posixpath.py", "%sLib/" % dst_dir)
 				copy_to_dst("External/Python/Lib/stat.py", "%sLib/" % dst_dir)
 				if not os.path.exists("%sLib/encodings" % dst_dir):

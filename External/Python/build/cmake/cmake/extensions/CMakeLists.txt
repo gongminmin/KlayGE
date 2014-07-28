@@ -17,7 +17,7 @@ add_python_extension(_codecs_jp SOURCES cjkcodecs/_codecs_jp.c)
 add_python_extension(_codecs_kr SOURCES cjkcodecs/_codecs_kr.c)
 add_python_extension(_codecs_tw SOURCES cjkcodecs/_codecs_tw.c)
 add_python_extension(_collections SOURCES _collectionsmodule.c)
-add_python_extension(crypt REQUIRES HAVE_LIBCRYPT SOURCES cryptmodule.c LIBRARIES ${HAVE_LIBCRYPT})
+add_python_extension(crypt REQUIRES HAVE_LIBCRYPT SOURCES _cryptmodule.c LIBRARIES ${HAVE_LIBCRYPT})
 if(NOT ANDROID)
     add_python_extension(_csv SOURCES _csv.c)
     add_python_extension(_ctypes_test SOURCES _ctypes/_ctypes_test.c)
@@ -52,7 +52,7 @@ if(NOT ANDROID)
     add_python_extension(mmap ${MSVC_BUILTIN} SOURCES mmapmodule.c)
 endif(NOT ANDROID)
 add_python_extension(_multibytecodec SOURCES cjkcodecs/multibytecodec.c)
-add_python_extension(operator ${MSVC_BUILTIN} SOURCES operator.c)
+add_python_extension(_operator ${MSVC_BUILTIN} SOURCES _operator.c)
 if(NOT ANDROID)
     add_python_extension(parser ${MSVC_BUILTIN} SOURCES parsermodule.c)
     add_python_extension(_random SOURCES _randommodule.c)
@@ -282,7 +282,7 @@ add_python_extension(_bsddb
 )
 add_python_extension(bz2
     REQUIRES BZIP2_LIBRARIES
-    SOURCES bz2module.c
+    SOURCES _bz2module.c
     LIBRARIES ${BZIP2_LIBRARIES}
 )
 add_python_extension(_curses_panel
