@@ -1796,7 +1796,7 @@ namespace
 		std::ostringstream ss;
 
 		ResIdentifierPtr file = ResLoader::Instance().Open(meshml_name);
-		XMLDocument doc;
+		KlayGE::XMLDocument doc;
 		XMLNodePtr root = doc.Parse(file);
 
 		BOOST_ASSERT(root->Attrib("version") && (root->Attrib("version")->ValueInt() >= 1));

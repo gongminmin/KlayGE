@@ -24,9 +24,6 @@ def build_Boost(build_info, compiler_info):
 			with_filesystem = False
 			with_system = False
 			with_thread = False
-	else:
-		with_atomic = False
-		with_date_time = False
 	if compiler_info.is_windows_runtime:
 		with_filesystem = False
 		with_program_options = False
