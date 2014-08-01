@@ -241,10 +241,25 @@ namespace
 		return prefiltered_clr / max(1e-6f, total_weight);
 	}
 
-	void PrefilterCubeFace(std::vector<std::vector<Color> >& prefilted_data,
-		std::vector<ElementInitData>& out_data, std::vector<std::vector<half> >& out_data_block,
-		uint32_t face, uint32_t width, uint32_t num_mipmaps, atomic<uint32_t>& processed_texels)
+	struct PrefilterCubeFaceParam
 	{
+		std::vector<std::vector<Color> >* prefilted_data;
+		std::vector<ElementInitData>* out_data;
+		std::vector<std::vector<half> >* out_data_block;
+		uint32_t width;
+		uint32_t num_mipmaps;
+		atomic<uint32_t>* processed_texels;
+	};
+
+	void PrefilterCubeFace(PrefilterCubeFaceParam& param, uint32_t face)
+	{
+		std::vector<std::vector<Color> >& prefilted_data = *param.prefilted_data;
+		std::vector<ElementInitData>& out_data = *param.out_data;
+		std::vector<std::vector<half> >& out_data_block = *param.out_data_block;
+		uint32_t width = param.width;
+		uint32_t num_mipmaps = param.num_mipmaps;
+		atomic<uint32_t>& processed_texels = *param.processed_texels;
+
 		Color* env_map[6];
 		for (uint32_t f = 0; f < 6; ++ f)
 		{
@@ -348,11 +363,16 @@ namespace
 
 		thread_pool tp(1, 6);
 		std::vector<joiner<void> > joiners(6);
+		PrefilterCubeFaceParam param;
+		param.prefilted_data = &prefilted_data;
+		param.out_data = &out_data;
+		param.out_data_block = &out_data_block;
+		param.width = in_width;
+		param.num_mipmaps = out_num_mipmaps;
+		param.processed_texels = &processed_texels;
 		for (size_t face = 0; face < joiners.size(); ++ face)
 		{
-			joiners[face] = tp(KlayGE::bind(PrefilterCubeFace, KlayGE::ref(prefilted_data),
-				KlayGE::ref(out_data), KlayGE::ref(out_data_block),
-				static_cast<uint32_t>(face), in_width, out_num_mipmaps, KlayGE::ref(processed_texels)));
+			joiners[face] = tp(KlayGE::bind(PrefilterCubeFace, KlayGE::ref(param), static_cast<uint32_t>(face)));
 		}
 
 		for (;;)
