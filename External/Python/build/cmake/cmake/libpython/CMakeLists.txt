@@ -1,6 +1,6 @@
 add_definitions(-DPy_BUILD_CORE)
 add_definitions(-DNDEBUG)
-if(WINRT)
+if(WINDOWS_STORE OR WINDOWS_PHONE)
   add_definitions(-D_WIN32_WINNT=0x0602)
   add_definitions(-DWINVER=0x0602)
   add_definitions(-DNTDDI_VERSION=0x06020000)

@@ -48,14 +48,14 @@ def build_Boost(build_info, compiler_info):
 	build_a_project("boost", "External/boost", build_info, compiler_info, True, additional_options)
 
 def build_Python(build_info, compiler_info):
-	additional_options = "-D BUILTIN_CODECS_CN:BOOL=\"ON\" -D BUILTIN_CODECS_HK:BOOL=\"ON\" -D BUILTIN_CODECS_ISO2022:BOOL=\"ON\" \
-		-D BUILTIN_CODECS_CN:BOOL=\"ON\" -D BUILTIN_CODECS_JP:BOOL=\"ON\" -D BUILTIN_CODECS_KR:BOOL=\"ON\" -D BUILTIN_CODECS_TW:BOOL=\"ON\" \
-		-D BUILTIN_COLLECTIONS:BOOL=\"ON\" -D BUILTIN_FUNCTOOLS:BOOL=\"ON\" -D BUILTIN_IO:BOOL=\"ON\" -D BUILTIN_ITERTOOLS:BOOL=\"ON\" \
-		-D BUILTIN_LOCALE:BOOL=\"ON\" -D BUILTIN_MATH:BOOL=\"ON\" -D BUILTIN_MSI:BOOL=\"OFF\" -D BUILTIN_MULTIBYTECODEC:BOOL=\"ON\" \
+	additional_options = "-D BUILTIN_COLLECTIONS:BOOL=\"ON\" -D BUILTIN_FUNCTOOLS:BOOL=\"ON\" -D BUILTIN_ITERTOOLS:BOOL=\"ON\" \
+		-D BUILTIN_MATH:BOOL=\"ON\" -D BUILTIN_MSI:BOOL=\"OFF\" \
 		-D BUILTIN_OPERATOR:BOOL=\"ON\" -D BUILTIN_UNICODEDATA:BOOL=\"ON\" -D BUILTIN_MSVCRT:BOOL=\"OFF\" \
 		-D BUILTIN_WINREG:BOOL=\"ON\" -D BUILTIN_SUBPROCESS:BOOL=\"OFF\" -D BUILTIN_MULTIPROCESSING:BOOL=\"OFF\" \
 		-D BUILTIN_SELECT:BOOL=\"OFF\" -D BUILTIN_SOCKET:BOOL=\"OFF\" -D BUILTIN_MMAP:BOOL=\"OFF\" \
-		-D ENABLE_AUDIOOP:BOOL=\"OFF\" -D ENABLE_OSSAUDIODEV:BOOL=\"OFF\" \
+		-D ENABLE_AUDIOOP:BOOL=\"OFF\" -D ENABLE_CODECS_CN:BOOL=\"OFF\" -D ENABLE_CODECS_HK:BOOL=\"OFF\" -D ENABLE_CODECS_ISO2022:BOOL=\"OFF\" \
+		-D ENABLE_CODECS_JP:BOOL=\"OFF\" -D ENABLE_CODECS_KR:BOOL=\"OFF\" -D ENABLE_CODECS_TW:BOOL=\"OFF\" \
+		-D ENABLE_LOCALE:BOOL=\"OFF\" -D ENABLE_MULTIBYTECODEC:BOOL=\"OFF\" -D ENABLE_OSSAUDIODEV:BOOL=\"OFF\" \
 		-D USE_SYSTEM_Curses:BOOL=\"OFF\" -D USE_SYSTEM_EXPAT:BOOL=\"OFF\" -D USE_SYSTEM_DB:BOOL=\"OFF\" -D USE_SYSTEM_GDBM:BOOL=\"OFF\" \
 		-D USE_SYSTEM_OpenSSL:BOOL=\"OFF\" -D USE_SYSTEM_READLINE:BOOL=\"OFF\" -D USE_SYSTEM_SQLITE3:BOOL=\"OFF\" -D USE_SYSTEM_TCL:BOOL=\"OFF\" \
 		-D USE_SYSTEM_ZLIB:BOOL=\"OFF\""
@@ -104,19 +104,20 @@ def build_external_libs(build_info):
 				copy_to_dst("External/Python/Lib/_weakrefset.py", "%sLib/" % dst_dir)
 				copy_to_dst("External/Python/Lib/abc.py", "%sLib/" % dst_dir)
 				copy_to_dst("External/Python/Lib/codecs.py", "%sLib/" % dst_dir)
-				copy_to_dst("External/Python/Lib/copyreg.py", "%sLib/" % dst_dir)
 				copy_to_dst("External/Python/Lib/genericpath.py", "%sLib/" % dst_dir)
 				copy_to_dst("External/Python/Lib/io.py", "%sLib/" % dst_dir)
 				copy_to_dst("External/Python/Lib/macpath.py", "%sLib/" % dst_dir)
 				copy_to_dst("External/Python/Lib/ntpath.py", "%sLib/" % dst_dir)
 				copy_to_dst("External/Python/Lib/os.py", "%sLib/" % dst_dir)
-				copy_to_dst("External/Python/Lib/pathlib.py", "%sLib/" % dst_dir)
 				copy_to_dst("External/Python/Lib/posixpath.py", "%sLib/" % dst_dir)
 				copy_to_dst("External/Python/Lib/stat.py", "%sLib/" % dst_dir)
 				if not os.path.exists("%sLib/encodings" % dst_dir):
 					os.mkdir("%sLib/encodings" % dst_dir)
-				for fname in glob.iglob("External/Python/Lib/encodings/*.py"):
-					copy_to_dst(fname, "%sLib/encodings/" % dst_dir)
+				copy_to_dst("External/Python/Lib/encodings/__init__.py", "%sLib/encodings/" % dst_dir)
+				copy_to_dst("External/Python/Lib/encodings/aliases.py", "%sLib/encodings/" % dst_dir)
+				copy_to_dst("External/Python/Lib/encodings/ascii.py", "%sLib/encodings/" % dst_dir)
+				copy_to_dst("External/Python/Lib/encodings/latin_1.py", "%sLib/encodings/" % dst_dir)
+				copy_to_dst("External/Python/Lib/encodings/utf_8.py", "%sLib/encodings/" % dst_dir)
 
 		if not compiler_info.is_windows_runtime:
 			print("\nBuilding libogg...\n")
