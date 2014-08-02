@@ -71,7 +71,7 @@ def build_freetype(build_info, compiler_info):
 	build_a_project("freetype", "External/freetype", build_info, compiler_info)
 
 def build_7z(build_info, compiler_info):
-	build_a_project("7z", "External/7z", build_info, compiler_info)
+	build_a_project("7z", "External/7z", build_info, compiler_info, True)
 
 def setup_DXSDK(build_info, compiler_info):
 	build_a_project("DXSDK", "External/DXSDK", build_info, compiler_info)

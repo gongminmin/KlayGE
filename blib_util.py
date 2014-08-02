@@ -11,30 +11,33 @@ except:
 ################################################
 
 # Compiler name.
-#   On Windows, could be "vc120", "vc110", "vc100", "vc90", "mingw", "auto".
-#   On WinRT, could be "vc120", "vc110", "auto".
+#   On Windows desktop, could be "vc120", "vc110", "vc100", "vc90", "mingw", "auto".
+#   On Windows store, could be "vc120", "vc110", "auto".
+#   On Windows phone, could be "vc120", "vc110", "auto".
 #   On Android, could be "gcc", "auto".
 #   On Linux, could be "gcc", "auto".
 compiler		= "auto"
 
 # Toolset name.
-#   On Windows, could be "v120", "v120_xp", "v110", "v110_xp", "v100", "auto".
-#   On WinRT, could be "v120", "v110", "auto".
+#   On Windows desktop, could be "v120", "v120_xp", "v110", "v110_xp", "v100", "auto".
+#   On Windows store, could be "v120", "v110", "auto".
+#   On Windows phone, could be "v120", "v110", "auto".
 #   On Android, could be "4.4.3", "4.6", "4.8", "4.9", "auto".
 #   On Linux, could be "auto".
 toolset			= "auto"
 
 # Target CPU architecture.
-#   On Windows, could be "x86", "x64".
-#   On WinRT, could be  "arm_app", "x86_app", "x64_app".
+#   On Windows desktop, could be "x86", "x64".
+#   On Windows store, could be "arm", "x86", "x64".
+#   On Windows phone, could be "arm".
 #   On Android, cound be "armeabi", "armeabi-v7a", "arm64-v8a", "x86", "x86_64".
 #   On Linux, could be "x86", "x64".
-arch			= ("x86", )
+arch			= ("x64", )
 
 # Configuration. Could be "Debug", "Release", "MinSizeRel", "RelWithDebInfo".
 config			= ("Debug", "RelWithDebInfo")
 
-# Target platform for cross compiling. Could be "android", "auto".
+# Target platform for cross compiling. Could be "android", "win_store", "win_phone" plus version number, or "auto".
 target			= "auto"
 """)
 	cfg_build_f.close()
@@ -71,11 +74,13 @@ class compiler_info:
 
 		if "win" == target_platform:
 			self.is_windows = True
-			if arch.find("_app") > 0:
-				self.is_windows_store = True
-				self.is_windows_runtime = True
-			else:
-				self.is_windows_desktop = True
+			self.is_windows_desktop = True
+		elif "win_store" == target_platform:
+			self.is_windows_store = True
+			self.is_windows_runtime = True
+		elif "win_phone" == target_platform:
+			self.is_windows_phone = True
+			self.is_windows_runtime = True
 		elif "android" == target_platform:
 			self.is_android = True
 		elif "linux" == target_platform:
@@ -94,7 +99,7 @@ class build_info:
 		try:
 			cfg_build.arch
 		except:
-			cfg_build.arch = ("x86", )
+			cfg_build.arch = ("x64", )
 		try:
 			cfg_build.config
 		except:
@@ -163,7 +168,15 @@ class build_info:
 						log_error("Unsupported android version\n")
 				else:
 					target_api_level = "10"
-				target_platform = "android"
+				target_platform = target_platform[0:space_place]
+				self.target_api_level = target_api_level
+			elif (0 == target_platform.find("win_store")) or (0 == target_platform.find("win_phone")):
+				space_place = target_platform.find(' ')
+				if space_place != -1:
+					target_api_level = target_platform[space_place + 1:]
+				else:
+					target_api_level = "8.0"
+				target_platform = target_platform[0:space_place]
 				self.target_api_level = target_api_level
 		if "android" == target_platform:
 			prefer_static = True
@@ -176,7 +189,7 @@ class build_info:
 
 		if "" == compiler:
 			if ("" == cfg_build.compiler) or ("auto" == cfg_build.compiler):
-				if "win" == target_platform:
+				if 0 == target_platform.find("win"):
 					if "VS120COMNTOOLS" in env:
 						compiler = "vc120"
 					elif "VS110COMNTOOLS" in env:
@@ -202,7 +215,7 @@ class build_info:
 
 		toolset = cfg_build.toolset
 		if ("" == cfg_build.toolset) or ("auto" == cfg_build.toolset):
-			if "win" == target_platform:
+			if 0 == target_platform.find("win"):
 				if "vc120" == compiler:
 					toolset = "v120"
 				elif "vc110" == compiler:
@@ -232,39 +245,27 @@ class build_info:
 			compiler_name = "vc"
 			compiler_version = 120
 			for arch in archs:
-				if (arch.find("_app") > 0):
+				if ("win_store" == target_platform) or ("win_phone" == target_platform):
 					toolset = "v120"
 				if "x86" == arch:
 					gen_name = "Visual Studio 12"
-				elif "x86_app" == arch:
-					gen_name = "Visual Studio 12 WinRT-x86"
 				elif "arm" == arch:
 					gen_name = "Visual Studio 12 ARM"
-				elif "arm_app" == arch:
-					gen_name = "Visual Studio 12 WinRT-ARM"
 				elif "x64" == arch:
 					gen_name = "Visual Studio 12 Win64"
-				elif "x64_app" == arch:
-					gen_name = "Visual Studio 12 WinRT-x64"
 				compilers.append(compiler_info(arch, gen_name, toolset, target_platform))
 		elif "vc110" == compiler:
 			compiler_name = "vc"
 			compiler_version = 110
 			for arch in archs:
-				if (arch.find("_app") > 0):
+				if ("win_store" == target_platform) or ("win_phone" == target_platform):
 					toolset = "v110"
 				if "x86" == arch:
 					gen_name = "Visual Studio 11"
-				elif "x86_app" == arch:
-					gen_name = "Visual Studio 11 WinRT-x86"
 				elif "arm" == arch:
 					gen_name = "Visual Studio 11 ARM"
-				elif "arm_app" == arch:
-					gen_name = "Visual Studio 11 WinRT-ARM"
 				elif "x64" == arch:
 					gen_name = "Visual Studio 11 Win64"
-				elif "x64_app" == arch:
-					gen_name = "Visual Studio 11 WinRT-x64"
 				compilers.append(compiler_info(arch, gen_name, toolset, target_platform))
 		elif "vc100" == compiler:
 			compiler_name = "vc"
@@ -413,15 +414,20 @@ def build_a_project(name, build_path, build_info, compiler_info, need_install = 
 			additional_options += " -DCMAKE_MAKE_PROGRAM=\"%ANDROID_NDK%\\prebuilt\\windows\\bin\\make.exe\""
 
 	if "vc" == build_info.compiler_name:
-		if ("x86" == compiler_info.arch) or ("x86_app" == compiler_info.arch):
+		if "x86" == compiler_info.arch:
 			vc_option = "x86"
 			vc_arch = "Win32"
-		elif ("x64" == compiler_info.arch) or ("x64_app" == compiler_info.arch):
+		elif "x64" == compiler_info.arch:
 			vc_option = "x86_amd64"
 			vc_arch = "x64"
-		elif ("arm" == compiler_info.arch) or ("arm_app" == compiler_info.arch):
+		elif "arm" == compiler_info.arch:
 			vc_option = "x86_arm"
 			vc_arch = "ARM"
+			
+		if compiler_info.is_windows_store:
+			additional_options += " -DCMAKE_VS_TARGET_PLATFORM=\"WindowsStore\" -DCMAKE_VS_TARGET_VERSION=\"%s\"" % build_info.target_api_level
+		elif compiler_info.is_windows_phone:
+			additional_options += " -DCMAKE_VS_TARGET_PLATFORM=\"WindowsPhone\" -DCMAKE_VS_TARGET_VERSION=\"%s\"" % build_info.target_api_level
 
 		build_dir = "%s/build/%s%d_%s_%s" % (build_path, build_info.compiler_name, build_info.compiler_version, build_info.target_platform, compiler_info.arch)
 		if not os.path.exists(build_dir):
