@@ -71,6 +71,7 @@ KlayGE/Samples/media/EnvLighting/IntegratedBRDF.dds
 KlayGE/Samples/media/Ocean/OceanDisplacement.dds
 KlayGE/Samples/media/Ocean/OceanDisplacementParam.dds
 KlayGE/Samples/media/Ocean/OceanGradient.dds
+KlayGE/Samples/media/*/MakePyZip.py
 External/boost/lib/
 External/Cg/bin/
 External/DXSDK/Redist/

@@ -1,0 +1,36 @@
+import os, zipfile
+
+try:
+    os.unlink("@EXE_NAME@Py.zip")
+except Exception:
+    pass
+out = zipfile.ZipFile("@EXE_NAME@Py.zip", 'w')#, compression = zipfile.ZIP_DEFLATED)
+
+prefix = "@KLAYGE_ROOT_DIR@/External/Python/Lib/"
+file_list = ("_collections_abc",
+	"_weakrefset",
+	"abc",
+	"codecs",
+	"genericpath",
+	"io",
+	"macpath",
+	"ntpath",
+	"os",
+	"posixpath",
+	"stat",
+	"encodings/__init__",
+	"encodings/aliases",
+	"encodings/ascii",
+	"encodings/latin_1",
+	"encodings/utf_8"
+)
+for file in file_list:
+	out.write(prefix + file + ".py", file + ".py")
+
+file_list = (
+	@PY_SRCS@,
+)
+for file in file_list:
+	out.write(file + ".py", file + ".py")
+
+out.close()

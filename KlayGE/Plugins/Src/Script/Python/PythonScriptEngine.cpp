@@ -34,14 +34,14 @@
 #include <KFL/Vector.hpp>
 #include <KFL/Matrix.hpp>
 #include <KFL/Plane.hpp>
+#include <KlayGE/ResLoader.hpp>
+#include <KlayGE/App3D.hpp>
 
 #include <algorithm>
 #include <functional>
 #include <boost/assert.hpp>
 
 #include <KlayGE/Python/PythonScriptEngine.hpp>
-
-#ifndef KLAYGE_PLATFORM_WINDOWS_RUNTIME
 
 namespace KlayGE
 {
@@ -300,6 +300,9 @@ namespace KlayGE
 	PythonEngine::PythonEngine()
 	{
 		Py_NoSiteFlag = 1;
+		std::wstring py_lib;
+		Convert(py_lib, ResLoader::Instance().AbsPath(Context::Instance().AppInstance().Name() + "Py.zip"));
+		Py_SetPath(&py_lib[0]);
 		Py_InitializeEx(0);
 	}
 
@@ -313,5 +316,3 @@ namespace KlayGE
 		return MakeSharedPtr<PythonScriptModule>(name);
 	}
 }
-
-#endif

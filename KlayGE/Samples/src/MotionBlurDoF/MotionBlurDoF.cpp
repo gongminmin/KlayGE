@@ -716,7 +716,7 @@ int SampleMain()
 }
 
 MotionBlurDoFApp::MotionBlurDoFApp()
-					: App3DFramework("Motion Blur and Depth of field"),
+					: App3DFramework("MotionBlurDoF"),
 						dof_on_(true), bokeh_on_(true), mb_on_(true),
 						num_objs_rendered_(0), num_renderables_rendered_(0),
 						num_primitives_rendered_(0), num_vertices_rendered_(0)
