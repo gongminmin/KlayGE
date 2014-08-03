@@ -93,31 +93,8 @@ def build_external_libs(build_info):
 			print("\nBuilding boost...\n")
 			build_Boost(build_info, compiler_info)
 
-		if not compiler_info.is_windows_runtime:
-			print("\nBuilding Python...\n")
-			build_Python(build_info, compiler_info)
-
-			if not build_info.prefer_static:
-				if not os.path.exists("%sLib" % dst_dir):
-					os.mkdir("%sLib" % dst_dir)
-				copy_to_dst("External/Python/Lib/_collections_abc.py", "%sLib/" % dst_dir)
-				copy_to_dst("External/Python/Lib/_weakrefset.py", "%sLib/" % dst_dir)
-				copy_to_dst("External/Python/Lib/abc.py", "%sLib/" % dst_dir)
-				copy_to_dst("External/Python/Lib/codecs.py", "%sLib/" % dst_dir)
-				copy_to_dst("External/Python/Lib/genericpath.py", "%sLib/" % dst_dir)
-				copy_to_dst("External/Python/Lib/io.py", "%sLib/" % dst_dir)
-				copy_to_dst("External/Python/Lib/macpath.py", "%sLib/" % dst_dir)
-				copy_to_dst("External/Python/Lib/ntpath.py", "%sLib/" % dst_dir)
-				copy_to_dst("External/Python/Lib/os.py", "%sLib/" % dst_dir)
-				copy_to_dst("External/Python/Lib/posixpath.py", "%sLib/" % dst_dir)
-				copy_to_dst("External/Python/Lib/stat.py", "%sLib/" % dst_dir)
-				if not os.path.exists("%sLib/encodings" % dst_dir):
-					os.mkdir("%sLib/encodings" % dst_dir)
-				copy_to_dst("External/Python/Lib/encodings/__init__.py", "%sLib/encodings/" % dst_dir)
-				copy_to_dst("External/Python/Lib/encodings/aliases.py", "%sLib/encodings/" % dst_dir)
-				copy_to_dst("External/Python/Lib/encodings/ascii.py", "%sLib/encodings/" % dst_dir)
-				copy_to_dst("External/Python/Lib/encodings/latin_1.py", "%sLib/encodings/" % dst_dir)
-				copy_to_dst("External/Python/Lib/encodings/utf_8.py", "%sLib/encodings/" % dst_dir)
+		print("\nBuilding Python...\n")
+		build_Python(build_info, compiler_info)
 
 		if not compiler_info.is_windows_runtime:
 			print("\nBuilding libogg...\n")

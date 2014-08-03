@@ -500,8 +500,3 @@ def build_a_project(name, build_path, build_info, compiler_info, need_install = 
 				log_error("Build %s failed." % name)
 
 			os.chdir(curdir)
-
-def copy_to_dst(src_name, dst_dir):
-	print("Copy %s to %s" % (src_name, dst_dir))
-	import shutil
-	shutil.copy2(src_name, dst_dir)
