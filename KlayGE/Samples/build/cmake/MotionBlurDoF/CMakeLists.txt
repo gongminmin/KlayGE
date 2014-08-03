@@ -1,6 +1,7 @@
 SET(EXE_NAME "MotionBlurDoF")
 SET(KLAYGE_ROOT_DIR "${KLAYGE_ROOT_DIR}")
-SET(PY_SRCS "\"${KLAYGE_PROJECT_DIR}/Samples/media/MotionBlurDoF/MotionBlurDoF_init\"")
+SET(MEDIA_DIR "${KLAYGE_PROJECT_DIR}/Samples/media/MotionBlurDoF/")
+SET(PY_SRCS "\"MotionBlurDoF_init\"")
 CONFIGURE_FILE(
 	${KLAYGE_ROOT_DIR}/cmake/MakePyZip.py.in
 	${KLAYGE_PROJECT_DIR}/Samples/media/MotionBlurDoF/MakePyZip.py

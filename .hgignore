@@ -55,6 +55,7 @@ KlayGE/bin/*/*.so
 KlayGE/bin/*/*.exe
 KlayGE/bin/*/*.py
 KlayGE/bin/*/Lib
+KlayGE/bin/*/*Py.zip
 KlayGE/Core/Include/KlayGE/*.gch
 KlayGE/Exporters/3DSMax/MeshML/build/*/Debug/
 KlayGE/Exporters/3DSMax/MeshML/build/*/Release/
@@ -72,6 +73,7 @@ KlayGE/Samples/media/Ocean/OceanDisplacement.dds
 KlayGE/Samples/media/Ocean/OceanDisplacementParam.dds
 KlayGE/Samples/media/Ocean/OceanGradient.dds
 KlayGE/Samples/media/*/MakePyZip.py
+KlayGE/Samples/media/*/*Py.zip
 External/boost/lib/
 External/Cg/bin/
 External/DXSDK/Redist/
