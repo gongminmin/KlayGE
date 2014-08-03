@@ -122,6 +122,7 @@ namespace KlayGE
 
 		ResIdentifierPtr Open(std::string const & name);
 		std::string Locate(std::string const & name);
+		std::string AbsPath(std::string const & path);
 
 		shared_ptr<void> SyncQuery(ResLoadingDescPtr const & res_desc);
 		function<shared_ptr<void>()> ASyncQuery(ResLoadingDescPtr const & res_desc);

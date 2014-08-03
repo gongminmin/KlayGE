@@ -75,6 +75,10 @@ namespace KlayGE
 		GetModuleFileNameA(nullptr, buf, sizeof(buf));
 		exe_path_ = buf;
 		exe_path_ = exe_path_.substr(0, exe_path_.rfind("\\"));
+#else
+		Windows::ApplicationModel::Package^ package = Windows::ApplicationModel::Package::Current;
+		Windows::Storage::StorageFolder^ installed_loc = package->InstalledLocation;
+		Convert(exe_path_, installed_loc->Path->Data());
 #endif
 #elif defined KLAYGE_PLATFORM_LINUX || defined KLAYGE_PLATFORM_ANDROID
 		{
@@ -159,7 +163,7 @@ namespace KlayGE
 		res_loader_instance_.reset();
 	}
 
-	std::string ResLoader::RealPath(std::string const & path)
+	std::string ResLoader::AbsPath(std::string const & path)
 	{
 		filesystem::path new_path(path);
 #ifdef KLAYGE_TR2_LIBRARY_FILESYSTEM_V2_SUPPORT
@@ -187,14 +191,18 @@ namespace KlayGE
 			}
 			new_path = full_path;
 		}
-		std::string path_str = new_path.string();
+		return new_path.string();
+	}
 
-		if (path_str[path_str.length() - 1] != '/')
+	std::string ResLoader::RealPath(std::string const & path)
+	{
+		std::string abs_path = this->AbsPath(path);
+		if (!abs_path.empty() && (abs_path[abs_path.length() - 1] != '/'))
 		{
-			path_str.push_back('/');
+			abs_path.push_back('/');
 		}
 
-		return path_str;
+		return abs_path;
 	}
 
 	void ResLoader::AddPath(std::string const & path)
