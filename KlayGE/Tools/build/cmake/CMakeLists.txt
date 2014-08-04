@@ -10,6 +10,8 @@ FIND_PATH(KLAYGE_PROJECT_DIR klayge_logo.ico PATHS ../../../)
 MARK_AS_ADVANCED(KLAYGE_PROJECT_DIR)
 SET(KLAYGE_ROOT_DIR "${KLAYGE_PROJECT_DIR}/..")
 
+SET(PYTHON_EXE "python" CACHE STRING "Executable of Python.")
+
 INCLUDE(${KLAYGE_ROOT_DIR}/cmake/Common.cmake)
 INCLUDE(${KLAYGE_ROOT_DIR}/cmake/Platform.cmake)
 INCLUDE(${KLAYGE_ROOT_DIR}/cmake/Compiler.cmake)

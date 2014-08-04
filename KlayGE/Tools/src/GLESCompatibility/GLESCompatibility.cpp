@@ -105,7 +105,7 @@ class GLESCompatibilityApp : public KlayGE::App3DFramework
 {
 public:
 	GLESCompatibilityApp()
-		: App3DFramework("GLES Compatibility")
+		: App3DFramework("GLESCompatibility")
 	{
 	}
 

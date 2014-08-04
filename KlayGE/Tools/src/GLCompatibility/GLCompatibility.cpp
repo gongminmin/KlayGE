@@ -112,7 +112,7 @@ class GLCompatibilityApp : public KlayGE::App3DFramework
 {
 public:
 	GLCompatibilityApp()
-		: App3DFramework("GL Compatibility")
+		: App3DFramework("GLCompatibility")
 	{
 	}
 

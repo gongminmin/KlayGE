@@ -15,9 +15,10 @@ def build_Samples(build_info):
 		build_a_project("Samples", "KlayGE/Samples", build_info, compiler_info, False, additional_options)
 
 def build_Tools(build_info):
+	additional_options = '-D PYTHON_EXE:STRING="%s"' % sys.executable
 	for compiler_info in build_info.compilers:
 		if (not compiler_info.is_windows_runtime) and (not compiler_info.is_android):
-			build_a_project("Tools", "KlayGE/Tools", build_info, compiler_info)
+			build_a_project("Tools", "KlayGE/Tools", build_info, compiler_info, False, additional_options)
 
 def build_Tutorials(build_info):
 	for compiler_info in build_info.compilers:

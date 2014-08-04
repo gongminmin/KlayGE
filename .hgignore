@@ -74,10 +74,11 @@ KlayGE/Samples/media/Ocean/OceanDisplacementParam.dds
 KlayGE/Samples/media/Ocean/OceanGradient.dds
 KlayGE/Samples/media/*/MakePyZip.py
 KlayGE/Samples/media/*/*Py.zip
+KlayGE/Tools/media/*/MakePyZip.py
+KlayGE/Tools/media/*/*Py.zip
 External/boost/lib/
 External/Cg/bin/
 External/DXSDK/Redist/
-External/Python/Include/pyconfig.h
 External/Python/Lib/__pycache__/
 External/Python/Lib/encodings/__pycache__/
 External/Python/PC/python3dll.obj
