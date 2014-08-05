@@ -21,7 +21,7 @@ compiler		= "auto"
 # Toolset name.
 #   On Windows desktop, could be "v120", "v120_xp", "v110", "v110_xp", "v100", "auto".
 #   On Windows store, could be "v120", "v110", "auto".
-#   On Windows phone, could be "v120", "v110", "auto".
+#   On Windows phone, could be "auto".
 #   On Android, could be "4.4.3", "4.6", "4.8", "4.9", "auto".
 #   On Linux, could be "auto".
 toolset			= "auto"
@@ -124,6 +124,7 @@ class build_info:
 				space_place = target_platform.find(' ')
 				if space_place != -1:
 					android_ver = target_platform[space_place + 1:]
+					target_platform = target_platform[0:space_place]
 					if "L" == android_ver:
 						target_api_level = "L"
 					elif "4.4" == android_ver:
@@ -168,15 +169,14 @@ class build_info:
 						log_error("Unsupported android version\n")
 				else:
 					target_api_level = "10"
-				target_platform = target_platform[0:space_place]
 				self.target_api_level = target_api_level
 			elif (0 == target_platform.find("win_store")) or (0 == target_platform.find("win_phone")):
 				space_place = target_platform.find(' ')
 				if space_place != -1:
 					target_api_level = target_platform[space_place + 1:]
+					target_platform = target_platform[0:space_place]
 				else:
 					target_api_level = "8.0"
-				target_platform = target_platform[0:space_place]
 				self.target_api_level = target_api_level
 		if "android" == target_platform:
 			prefer_static = True
@@ -214,7 +214,9 @@ class build_info:
 					log_warning("Deprecated compiler name, please use " + compiler + " instead.\n")
 
 		toolset = cfg_build.toolset
-		if ("" == cfg_build.toolset) or ("auto" == cfg_build.toolset):
+		if (toolset.find("_xp") >= 0) and (("win_store" == target_platform) or ("win_phone" == target_platform)):
+			toolset = "auto"
+		if ("" == toolset) or ("auto" == toolset) and (target_platform != "win_phone"):
 			if 0 == target_platform.find("win"):
 				if "vc120" == compiler:
 					toolset = "v120"
@@ -245,8 +247,6 @@ class build_info:
 			compiler_name = "vc"
 			compiler_version = 120
 			for arch in archs:
-				if ("win_store" == target_platform) or ("win_phone" == target_platform):
-					toolset = "v120"
 				if "x86" == arch:
 					gen_name = "Visual Studio 12"
 				elif "arm" == arch:
@@ -258,8 +258,6 @@ class build_info:
 			compiler_name = "vc"
 			compiler_version = 110
 			for arch in archs:
-				if ("win_store" == target_platform) or ("win_phone" == target_platform):
-					toolset = "v110"
 				if "x86" == arch:
 					gen_name = "Visual Studio 11"
 				elif "arm" == arch:
@@ -402,7 +400,7 @@ def build_a_project(name, build_path, build_info, compiler_info, need_install = 
 	curdir = os.path.abspath(os.curdir)
 
 	toolset_name = ""
-	if ("vc" == build_info.compiler_name) and (build_info.compiler_version >= 100):
+	if ("vc" == build_info.compiler_name) and (build_info.compiler_version >= 100) and (not compiler_info.is_windows_phone):
 		toolset_name = "-T %s" % compiler_info.toolset
 
 	if build_info.compiler_name != "vc":
