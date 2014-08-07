@@ -33,8 +33,10 @@
 
 #ifdef KLAYGE_PLATFORM_WINDOWS
 #include <windows.h>
+#ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
 #if (_WIN32_WINNT >= 0x0603 /*_WIN32_WINNT_WINBLUE*/)
 #include <VersionHelpers.h>
+#endif
 #endif
 #ifdef KLAYGE_COMPILER_MSVC
 #include <intrin.h>

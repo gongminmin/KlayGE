@@ -41,8 +41,10 @@
 
 #ifdef KLAYGE_PLATFORM_WINDOWS
 #include <windows.h>
+#if defined(KLAYGE_PLATFORM_WINDOWS_DESKTOP)
 #if (_WIN32_WINNT >= 0x0603 /*_WIN32_WINNT_WINBLUE*/)
 #include <VersionHelpers.h>
+#endif
 #endif
 #endif
 
