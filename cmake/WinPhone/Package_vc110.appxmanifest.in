@@ -1,0 +1,33 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Deployment xmlns="http://schemas.microsoft.com/windowsphone/2012/deployment" AppPlatformVersion="8.0">
+  <DefaultLanguage xmlns="" code="en-US"/>
+  <App xmlns="" ProductID="{@PACKAGE_GUID@}" Title="@SHORT_NAME@" RuntimeType="Modern Native" Version="1.0.0.0" Genre="apps.normal" Author="Minmin Gong" Description="KlayGE Sample: @SHORT_NAME@" Publisher="CN=KlayGE" PublisherID="{00000000-0000-0000-0000-000000000000}">
+    <IconPath IsRelative="true" IsResource="false">SplashScreen.png</IconPath>
+    <Tasks>
+      <DefaultTask Name="_default" ImagePath="@SHORT_NAME@.exe" ImageParams="" />
+    </Tasks>
+    <Tokens>
+      <PrimaryToken TokenID="@SHORT_NAME@Token" TaskName="_default">
+        <TemplateFlip>
+          <SmallImageURI IsRelative="true" IsResource="false">StoreLogo.png</SmallImageURI>
+          <Count>0</Count>
+          <BackgroundImageURI IsRelative="true" IsResource="false">Logo.png</BackgroundImageURI>
+          <Title>@SHORT_NAME@</Title>
+          <BackContent></BackContent>
+          <BackBackgroundImageURI></BackBackgroundImageURI>
+          <BackTitle></BackTitle>
+          <DeviceLockImageURI></DeviceLockImageURI>
+          <HasLarge></HasLarge>
+        </TemplateFlip>
+      </PrimaryToken>
+    </Tokens>
+    <ScreenResolutions>
+      <ScreenResolution Name="ID_RESOLUTION_WVGA" />
+      <ScreenResolution Name="ID_RESOLUTION_WXGA" />
+      <ScreenResolution Name="ID_RESOLUTION_HD720P" />
+    </ScreenResolutions>
+    <Capabilities>
+      @PERMISSION_LOCATION_STR@
+    </Capabilities>
+  </App>
+</Deployment>
