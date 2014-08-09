@@ -20,7 +20,7 @@ compiler		= "auto"
 
 # Toolset name.
 #   On Windows desktop, could be "v120", "v120_xp", "v110", "v110_xp", "v100", "auto".
-#   On Windows store, could be "v120", "v110", "auto".
+#   On Windows store, could be "auto".
 #   On Windows phone, could be "auto".
 #   On Android, could be "4.4.3", "4.6", "4.8", "4.9", "auto".
 #   On Linux, could be "auto".
@@ -29,7 +29,7 @@ toolset			= "auto"
 # Target CPU architecture.
 #   On Windows desktop, could be "x86", "x64".
 #   On Windows store, could be "arm", "x86", "x64".
-#   On Windows phone, could be "arm".
+#   On Windows phone, could be "arm", "x86".
 #   On Android, cound be "armeabi", "armeabi-v7a", "arm64-v8a", "x86", "x86_64".
 #   On Linux, could be "x86", "x64".
 arch			= ("x64", )
@@ -214,9 +214,9 @@ class build_info:
 					log_warning("Deprecated compiler name, please use " + compiler + " instead.\n")
 
 		toolset = cfg_build.toolset
-		if (toolset.find("_xp") >= 0) and (("win_store" == target_platform) or ("win_phone" == target_platform)):
+		if ("win_store" == target_platform) or ("win_phone" == target_platform):
 			toolset = "auto"
-		if ("" == toolset) or ("auto" == toolset) and (target_platform != "win_phone"):
+		elif ("" == toolset) or ("auto" == toolset):
 			if 0 == target_platform.find("win"):
 				if "vc120" == compiler:
 					toolset = "v120"
@@ -400,7 +400,7 @@ def build_a_project(name, build_path, build_info, compiler_info, need_install = 
 	curdir = os.path.abspath(os.curdir)
 
 	toolset_name = ""
-	if ("vc" == build_info.compiler_name) and (build_info.compiler_version >= 100) and (not compiler_info.is_windows_phone):
+	if ("vc" == build_info.compiler_name) and (build_info.compiler_version >= 100) and (not compiler_info.is_windows_runtime):
 		toolset_name = "-T %s" % compiler_info.toolset
 
 	if build_info.compiler_name != "vc":
