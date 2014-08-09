@@ -371,8 +371,8 @@ namespace
 
 		void BindLight(LightSourcePtr const & light)
 		{
-			typedef KLAYGE_DECLTYPE(meshes_) MeshesType;
-			KLAYGE_FOREACH(MeshesType::reference mesh, meshes_)
+			typedef KLAYGE_DECLTYPE(subrenderables_) MeshesType;
+			KLAYGE_FOREACH(MeshesType::reference mesh, subrenderables_)
 			{
 				checked_pointer_cast<RefractMesh>(mesh)->BindLight(light);
 			}
@@ -380,8 +380,8 @@ namespace
 
 		void SceneTexture(TexturePtr const & scene_texture)
 		{
-			typedef KLAYGE_DECLTYPE(meshes_) MeshesType;
-			KLAYGE_FOREACH(MeshesType::reference mesh, meshes_)
+			typedef KLAYGE_DECLTYPE(subrenderables_) MeshesType;
+			KLAYGE_FOREACH(MeshesType::reference mesh, subrenderables_)
 			{
 				checked_pointer_cast<RefractMesh>(mesh)->SceneTexture(scene_texture);
 			}
@@ -389,8 +389,8 @@ namespace
 
 		void ModelMatrix(float4x4 const & model)
 		{
-			typedef KLAYGE_DECLTYPE(meshes_) MeshesType;
-			KLAYGE_FOREACH(MeshesType::reference mesh, meshes_)
+			typedef KLAYGE_DECLTYPE(subrenderables_) MeshesType;
+			KLAYGE_FOREACH(MeshesType::reference mesh, subrenderables_)
 			{
 				checked_pointer_cast<RefractMesh>(mesh)->ModelMatrix(model);
 			}
@@ -398,8 +398,8 @@ namespace
 
 		void SetEnvCube(TexturePtr const & texture)
 		{
-			typedef KLAYGE_DECLTYPE(meshes_) MeshesType;
-			KLAYGE_FOREACH(MeshesType::reference mesh, meshes_)
+			typedef KLAYGE_DECLTYPE(subrenderables_) MeshesType;
+			KLAYGE_FOREACH(MeshesType::reference mesh, subrenderables_)
 			{
 				checked_pointer_cast<RefractMesh>(mesh)->SetEnvCube(texture);
 			}
@@ -407,8 +407,8 @@ namespace
 
 		void Pass(uint32_t pass)
 		{
-			typedef KLAYGE_DECLTYPE(meshes_) MeshesType;
-			KLAYGE_FOREACH(MeshesType::reference mesh, meshes_)
+			typedef KLAYGE_DECLTYPE(subrenderables_) MeshesType;
+			KLAYGE_FOREACH(MeshesType::reference mesh, subrenderables_)
 			{
 				checked_pointer_cast<RefractMesh>(mesh)->Pass(pass);
 			}

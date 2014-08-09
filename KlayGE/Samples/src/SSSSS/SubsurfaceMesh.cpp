@@ -100,7 +100,7 @@ MySceneObjectHelper::MySceneObjectHelper(std::string const & modelName)
 		: SceneObjectHelper(SOA_Cullable)
 {
 	renderable_ = SyncLoadModel(modelName, EAH_GPU_Read | EAH_Immutable,
-		CreateModelFactory<RenderModel>(), CreateMeshFactory<SubsurfaceMesh>())->Mesh(0);
+		CreateModelFactory<RenderModel>(), CreateMeshFactory<SubsurfaceMesh>())->Subrenderable(0);
 }
 
 void MySceneObjectHelper::EyePosition(float3 const & eye_pos)

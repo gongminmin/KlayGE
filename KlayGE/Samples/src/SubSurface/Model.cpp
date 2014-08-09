@@ -161,64 +161,72 @@ DetailedModel::DetailedModel(std::wstring const & name)
 
 void DetailedModel::EyePos(KlayGE::float3 const & eye_pos)
 {
-	for (StaticMeshesPtrType::iterator iter = meshes_.begin(); iter != meshes_.end(); ++ iter)
+	typedef KLAYGE_DECLTYPE(subrenderables_) MeshesType;
+	KLAYGE_FOREACH(MeshesType::reference mesh, subrenderables_)
 	{
-		checked_pointer_cast<DetailedMesh>(*iter)->EyePos(eye_pos);
+		checked_pointer_cast<DetailedMesh>(mesh)->EyePos(eye_pos);
 	}
 }
 
 void DetailedModel::LightPos(KlayGE::float3 const & light_pos)
 {
-	for (StaticMeshesPtrType::iterator iter = meshes_.begin(); iter != meshes_.end(); ++ iter)
+	typedef KLAYGE_DECLTYPE(subrenderables_) MeshesType;
+	KLAYGE_FOREACH(MeshesType::reference mesh, subrenderables_)
 	{
-		checked_pointer_cast<DetailedMesh>(*iter)->LightPos(light_pos);
+		checked_pointer_cast<DetailedMesh>(mesh)->LightPos(light_pos);
 	}
 }
 
 void DetailedModel::LightColor(KlayGE::float3 const & light_color)
 {
-	for (StaticMeshesPtrType::iterator iter = meshes_.begin(); iter != meshes_.end(); ++ iter)
+	typedef KLAYGE_DECLTYPE(subrenderables_) MeshesType;
+	KLAYGE_FOREACH(MeshesType::reference mesh, subrenderables_)
 	{
-		checked_pointer_cast<DetailedMesh>(*iter)->LightColor(light_color);
+		checked_pointer_cast<DetailedMesh>(mesh)->LightColor(light_color);
 	}
 }
 
 void DetailedModel::LightFalloff(KlayGE::float3 const & light_falloff)
 {
-	for (StaticMeshesPtrType::iterator iter = meshes_.begin(); iter != meshes_.end(); ++ iter)
+	typedef KLAYGE_DECLTYPE(subrenderables_) MeshesType;
+	KLAYGE_FOREACH(MeshesType::reference mesh, subrenderables_)
 	{
-		checked_pointer_cast<DetailedMesh>(*iter)->LightFalloff(light_falloff);
+		checked_pointer_cast<DetailedMesh>(mesh)->LightFalloff(light_falloff);
 	}
 }
 
 void DetailedModel::BackFaceDepthPass(bool dfdp)
 {
-	for (StaticMeshesPtrType::iterator iter = meshes_.begin(); iter != meshes_.end(); ++ iter)
+	typedef KLAYGE_DECLTYPE(subrenderables_) MeshesType;
+	KLAYGE_FOREACH(MeshesType::reference mesh, subrenderables_)
 	{
-		checked_pointer_cast<DetailedMesh>(*iter)->BackFaceDepthPass(dfdp);
+		checked_pointer_cast<DetailedMesh>(mesh)->BackFaceDepthPass(dfdp);
 	}
 }
 
 void DetailedModel::BackFaceDepthTex(KlayGE::TexturePtr const & tex)
 {
-	for (StaticMeshesPtrType::iterator iter = meshes_.begin(); iter != meshes_.end(); ++ iter)
+	typedef KLAYGE_DECLTYPE(subrenderables_) MeshesType;
+	KLAYGE_FOREACH(MeshesType::reference mesh, subrenderables_)
 	{
-		checked_pointer_cast<DetailedMesh>(*iter)->BackFaceDepthTex(tex);
+		checked_pointer_cast<DetailedMesh>(mesh)->BackFaceDepthTex(tex);
 	}
 }
 
 void DetailedModel::SigmaT(float sigma_t)
 {
-	for (StaticMeshesPtrType::iterator iter = meshes_.begin(); iter != meshes_.end(); ++ iter)
+	typedef KLAYGE_DECLTYPE(subrenderables_) MeshesType;
+	KLAYGE_FOREACH(MeshesType::reference mesh, subrenderables_)
 	{
-		checked_pointer_cast<DetailedMesh>(*iter)->SigmaT(sigma_t);
+		checked_pointer_cast<DetailedMesh>(mesh)->SigmaT(sigma_t);
 	}
 }
 
 void DetailedModel::MtlThickness(float thickness)
 {
-	for (StaticMeshesPtrType::iterator iter = meshes_.begin(); iter != meshes_.end(); ++ iter)
+	typedef KLAYGE_DECLTYPE(subrenderables_) MeshesType;
+	KLAYGE_FOREACH(MeshesType::reference mesh, subrenderables_)
 	{
-		checked_pointer_cast<DetailedMesh>(*iter)->MtlThickness(thickness);
+		checked_pointer_cast<DetailedMesh>(mesh)->MtlThickness(thickness);
 	}
 }

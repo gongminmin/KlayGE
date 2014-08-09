@@ -81,7 +81,7 @@ namespace KlayGE
 		*(vpls_lighting_effect->ParameterByName("vpl_params")) = float2(1.0f / VPL_COUNT, 0.5f / VPL_COUNT);
 
 		rl_vpl_ = SyncLoadModel("indirect_light_proxy.meshml", EAH_GPU_Read | EAH_Immutable,
-			CreateModelFactory<RenderModel>(), CreateMeshFactory<StaticMesh>())->Mesh(0)->GetRenderLayout();
+			CreateModelFactory<RenderModel>(), CreateMeshFactory<StaticMesh>())->Subrenderable(0)->GetRenderLayout();
 		if (caps.instance_id_support)
 		{
 			rl_vpl_->NumInstances(VPL_COUNT);

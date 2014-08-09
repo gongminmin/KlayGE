@@ -156,14 +156,14 @@ namespace
 			return checked_pointer_cast<DetailedSkinnedModel>(renderable_)->FrameRate();
 		}
 
-		StaticMeshPtr const & Mesh(size_t id) const
+		RenderablePtr const & Mesh(size_t id) const
 		{
-			return checked_pointer_cast<DetailedSkinnedModel>(renderable_)->Mesh(id);
+			return checked_pointer_cast<DetailedSkinnedModel>(renderable_)->Subrenderable(id);
 		}
 
 		uint32_t NumMeshes() const
 		{
-			return checked_pointer_cast<DetailedSkinnedModel>(renderable_)->NumMeshes();
+			return checked_pointer_cast<DetailedSkinnedModel>(renderable_)->NumSubrenderables();
 		}
 
 		void RebindJoints()
@@ -652,7 +652,7 @@ void ModelViewerApp::MeshChangedHandler(KlayGE::UIComboBox const & sender)
 
 	dialog_model_->Control<UIListBox>(id_textures_)->RemoveAllItems();
 	KlayGE::shared_ptr<ModelObject> model = checked_pointer_cast<ModelObject>(model_);
-	TextureSlotsType const & texture_slots = model->GetMaterial(model->Mesh(mi)->MaterialID())->texture_slots;
+	TextureSlotsType const & texture_slots = model->GetMaterial(checked_pointer_cast<StaticMesh>(model->Mesh(mi))->MaterialID())->texture_slots;
 	for (size_t i = 0; i < texture_slots.size(); ++ i)
 	{
 		std::wostringstream oss;

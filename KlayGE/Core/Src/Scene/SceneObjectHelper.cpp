@@ -62,22 +62,18 @@ namespace KlayGE
 
 	void SceneObjectHelper::OnAttachRenderable(bool add_to_scene)
 	{
-		if (renderable_)
+		if (renderable_ && (renderable_->NumSubrenderables() > 0))
 		{
-			RenderModelPtr render_model = dynamic_pointer_cast<RenderModel>(renderable_);
-			if (render_model)
+			children_.resize(renderable_->NumSubrenderables());
+			for (uint32_t i = 0; i < renderable_->NumSubrenderables(); ++ i)
 			{
-				children_.resize(render_model->NumMeshes());
-				for (uint32_t i = 0; i < render_model->NumMeshes(); ++ i)
-				{
-					SceneObjectHelperPtr child = MakeSharedPtr<SceneObjectHelper>(render_model->Mesh(i), attrib_);
-					child->Parent(this);
-					children_[i] = child;
+				SceneObjectHelperPtr child = MakeSharedPtr<SceneObjectHelper>(renderable_->Subrenderable(i), attrib_);
+				child->Parent(this);
+				children_[i] = child;
 
-					if (add_to_scene)
-					{
-						child->AddToSceneManagerLocked();
-					}
+				if (add_to_scene)
+				{
+					child->AddToSceneManagerLocked();
 				}
 			}
 		}
@@ -147,9 +143,9 @@ namespace KlayGE
 		}
 
 		RenderModelPtr light_model = checked_pointer_cast<RenderModel>(renderable_);
-		for (uint32_t i = 0; i < light_model->NumMeshes(); ++ i)
+		for (uint32_t i = 0; i < light_model->NumSubrenderables(); ++ i)
 		{
-			RenderableLightSourceProxyPtr light_mesh = checked_pointer_cast<RenderableLightSourceProxy>(light_model->Mesh(i));
+			RenderableLightSourceProxyPtr light_mesh = checked_pointer_cast<RenderableLightSourceProxy>(light_model->Subrenderable(i));
 			light_mesh->Update();
 		}
 
@@ -171,12 +167,12 @@ namespace KlayGE
 		renderable_ = light_model;
 		model_scaling_ = float4x4::Identity();
 
-		children_.resize(light_model->NumMeshes());
-		for (uint32_t i = 0; i < light_model->NumMeshes(); ++ i)
+		children_.resize(light_model->NumSubrenderables());
+		for (uint32_t i = 0; i < light_model->NumSubrenderables(); ++ i)
 		{
-			checked_pointer_cast<RenderableLightSourceProxy>(light_model->Mesh(i))->AttachLightSrc(light);
+			checked_pointer_cast<RenderableLightSourceProxy>(light_model->Subrenderable(i))->AttachLightSrc(light);
 
-			SceneObjectHelperPtr child = MakeSharedPtr<SceneObjectHelper>(light_model->Mesh(i), attrib_);
+			SceneObjectHelperPtr child = MakeSharedPtr<SceneObjectHelper>(light_model->Subrenderable(i), attrib_);
 			child->Parent(this);
 			children_[i] = child;
 		}
@@ -257,12 +253,12 @@ namespace KlayGE
 		renderable_ = camera_model;
 		model_scaling_ = float4x4::Identity();
 
-		children_.resize(camera_model->NumMeshes());
-		for (uint32_t i = 0; i < camera_model->NumMeshes(); ++ i)
+		children_.resize(camera_model->NumSubrenderables());
+		for (uint32_t i = 0; i < camera_model->NumSubrenderables(); ++ i)
 		{
-			checked_pointer_cast<RenderableCameraProxy>(camera_model->Mesh(i))->AttachCamera(camera);
+			checked_pointer_cast<RenderableCameraProxy>(camera_model->Subrenderable(i))->AttachCamera(camera);
 
-			SceneObjectHelperPtr child = MakeSharedPtr<SceneObjectHelper>(camera_model->Mesh(i), attrib_);
+			SceneObjectHelperPtr child = MakeSharedPtr<SceneObjectHelper>(camera_model->Subrenderable(i), attrib_);
 			child->Parent(this);
 			children_[i] = child;
 		}

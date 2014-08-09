@@ -345,78 +345,78 @@ namespace
 		void LightPos(float3 const & light_pos)
 		{
 			RenderModelPtr model = checked_pointer_cast<RenderModel>(renderable_);
-			for (uint32_t i = 0; i < model->NumMeshes(); ++ i)
+			for (uint32_t i = 0; i < model->NumSubrenderables(); ++ i)
 			{
-				checked_pointer_cast<RenderPolygon>(model->Mesh(i))->LightPos(light_pos);
+				checked_pointer_cast<RenderPolygon>(model->Subrenderable(i))->LightPos(light_pos);
 			}
 		}
 
 		void SetOITMode(OITMode mode)
 		{
 			RenderModelPtr model = checked_pointer_cast<RenderModel>(renderable_);
-			for (uint32_t i = 0; i < model->NumMeshes(); ++ i)
+			for (uint32_t i = 0; i < model->NumSubrenderables(); ++ i)
 			{
-				checked_pointer_cast<RenderPolygon>(model->Mesh(i))->SetOITMode(mode);
+				checked_pointer_cast<RenderPolygon>(model->Subrenderable(i))->SetOITMode(mode);
 			}
 		}
 
 		void SetAlpha(float alpha)
 		{
 			RenderModelPtr model = checked_pointer_cast<RenderModel>(renderable_);
-			for (uint32_t i = 0; i < model->NumMeshes(); ++ i)
+			for (uint32_t i = 0; i < model->NumSubrenderables(); ++ i)
 			{
-				checked_pointer_cast<RenderPolygon>(model->Mesh(i))->SetAlpha(alpha);
+				checked_pointer_cast<RenderPolygon>(model->Subrenderable(i))->SetAlpha(alpha);
 			}
 		}
 
 		void FirstPass(bool fp)
 		{
 			RenderModelPtr model = checked_pointer_cast<RenderModel>(renderable_);
-			for (uint32_t i = 0; i < model->NumMeshes(); ++ i)
+			for (uint32_t i = 0; i < model->NumSubrenderables(); ++ i)
 			{
-				checked_pointer_cast<RenderPolygon>(model->Mesh(i))->FirstPass(fp);
+				checked_pointer_cast<RenderPolygon>(model->Subrenderable(i))->FirstPass(fp);
 			}
 		}
 
 		void DepthPass(bool dp)
 		{
 			RenderModelPtr model = checked_pointer_cast<RenderModel>(renderable_);
-			for (uint32_t i = 0; i < model->NumMeshes(); ++ i)
+			for (uint32_t i = 0; i < model->NumSubrenderables(); ++ i)
 			{
-				checked_pointer_cast<RenderPolygon>(model->Mesh(i))->DepthPass(dp);
+				checked_pointer_cast<RenderPolygon>(model->Subrenderable(i))->DepthPass(dp);
 			}
 		}
 
 		void LastDepth(TexturePtr const & depth_tex)
 		{
 			RenderModelPtr model = checked_pointer_cast<RenderModel>(renderable_);
-			for (uint32_t i = 0; i < model->NumMeshes(); ++ i)
+			for (uint32_t i = 0; i < model->NumSubrenderables(); ++ i)
 			{
-				checked_pointer_cast<RenderPolygon>(model->Mesh(i))->LastDepth(depth_tex);
+				checked_pointer_cast<RenderPolygon>(model->Subrenderable(i))->LastDepth(depth_tex);
 			}
 		}
 
 		void BackgroundTex(TexturePtr const & bg_tex)
 		{
 			RenderModelPtr model = checked_pointer_cast<RenderModel>(renderable_);
-			for (uint32_t i = 0; i < model->NumMeshes(); ++ i)
+			for (uint32_t i = 0; i < model->NumSubrenderables(); ++ i)
 			{
-				checked_pointer_cast<RenderPolygon>(model->Mesh(i))->BackgroundTex(bg_tex);
+				checked_pointer_cast<RenderPolygon>(model->Subrenderable(i))->BackgroundTex(bg_tex);
 			}
 		}
 		void LinkedListBuffer(GraphicsBufferPtr const & fragment_link_buf, GraphicsBufferPtr const & start_offset_buf)
 		{
 			RenderModelPtr model = checked_pointer_cast<RenderModel>(renderable_);
-			for (uint32_t i = 0; i < model->NumMeshes(); ++ i)
+			for (uint32_t i = 0; i < model->NumSubrenderables(); ++ i)
 			{
-				checked_pointer_cast<RenderPolygon>(model->Mesh(i))->LinkedListBuffer(fragment_link_buf, start_offset_buf);
+				checked_pointer_cast<RenderPolygon>(model->Subrenderable(i))->LinkedListBuffer(fragment_link_buf, start_offset_buf);
 			}
 		}
 
 		void RenderQuad()
 		{
 			RenderModelPtr model = checked_pointer_cast<RenderModel>(renderable_);
-			checked_pointer_cast<RenderPolygon>(model->Mesh(0))->RenderQuad();
+			checked_pointer_cast<RenderPolygon>(model->Subrenderable(0))->RenderQuad();
 		}
 	};
 

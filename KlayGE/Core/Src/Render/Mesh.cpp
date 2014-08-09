@@ -138,9 +138,9 @@ namespace
 				*model_desc_.model = model;
 
 				model->BuildModelInfo();
-				for (uint32_t i = 0; i < model->NumMeshes(); ++ i)
+				for (uint32_t i = 0; i < model->NumSubrenderables(); ++ i)
 				{
-					model->Mesh(i)->BuildMeshInfo();
+					checked_pointer_cast<StaticMesh>(model->Subrenderable(i))->BuildMeshInfo();
 				}
 
 				model_desc_.model_data.reset();
@@ -186,14 +186,14 @@ namespace
 				model->GetMaterial(mtl_index) = rhs_model->GetMaterial(mtl_index);
 			}
 
-			if (rhs_model->NumMeshes() > 0)
+			if (rhs_model->NumSubrenderables() > 0)
 			{
-				RenderLayoutPtr rhs_rl = rhs_model->Mesh(0)->GetRenderLayout();
+				RenderLayoutPtr rhs_rl = rhs_model->Subrenderable(0)->GetRenderLayout();
 			
-				std::vector<StaticMeshPtr> meshes(rhs_model->NumMeshes());
-				for (uint32_t mesh_index = 0; mesh_index < rhs_model->NumMeshes(); ++ mesh_index)
+				std::vector<StaticMeshPtr> meshes(rhs_model->NumSubrenderables());
+				for (uint32_t mesh_index = 0; mesh_index < rhs_model->NumSubrenderables(); ++ mesh_index)
 				{
-					StaticMeshPtr rhs_mesh = rhs_model->Mesh(mesh_index);
+					StaticMeshPtr rhs_mesh = checked_pointer_cast<StaticMesh>(rhs_model->Subrenderable(mesh_index));
 
 					meshes[mesh_index] = model_desc_.CreateMeshFactoryFunc(model, rhs_mesh->Name());
 					StaticMeshPtr& mesh = meshes[mesh_index];
@@ -235,19 +235,19 @@ namespace
 
 					for (size_t mesh_index = 0; mesh_index < meshes.size(); ++ mesh_index)
 					{
-						SkinnedMeshPtr rhs_skinned_mesh = checked_pointer_cast<SkinnedMesh>(rhs_skinned_model->Mesh(mesh_index));
+						SkinnedMeshPtr rhs_skinned_mesh = checked_pointer_cast<SkinnedMesh>(rhs_skinned_model->Subrenderable(mesh_index));
 						SkinnedMeshPtr skinned_mesh = checked_pointer_cast<SkinnedMesh>(meshes[mesh_index]);
 						skinned_mesh->AttachFramePosBounds(rhs_skinned_mesh->GetFramePosBounds());
 					}
 				}
 
-				model->AssignMeshes(meshes.begin(), meshes.end());
+				model->AssignSubrenderables(meshes.begin(), meshes.end());
 			}
 
 			model->BuildModelInfo();
-			for (uint32_t i = 0; i < model->NumMeshes(); ++ i)
+			for (uint32_t i = 0; i < model->NumSubrenderables(); ++ i)
 			{
-				model->Mesh(i)->BuildMeshInfo();
+				checked_pointer_cast<StaticMesh>(model->Subrenderable(i))->BuildMeshInfo();
 			}
 
 			return static_pointer_cast<void>(model);
@@ -338,7 +338,7 @@ namespace
 				}
 			}
 
-			model->AssignMeshes(meshes.begin(), meshes.end());
+			model->AssignSubrenderables(meshes.begin(), meshes.end());
 
 			return model;
 		}
@@ -357,8 +357,8 @@ namespace KlayGE
 
 	void RenderModel::AddToRenderQueue()
 	{
-		typedef KLAYGE_DECLTYPE(meshes_) MeshesType;
-		KLAYGE_FOREACH(MeshesType::reference mesh, meshes_)
+		typedef KLAYGE_DECLTYPE(subrenderables_) MeshesType;
+		KLAYGE_FOREACH(MeshesType::reference mesh, subrenderables_)
 		{
 			mesh->AddToRenderQueue();
 		}
@@ -366,8 +366,8 @@ namespace KlayGE
 
 	void RenderModel::OnRenderBegin()
 	{
-		typedef KLAYGE_DECLTYPE(meshes_) MeshesType;
-		KLAYGE_FOREACH(MeshesType::reference mesh, meshes_)
+		typedef KLAYGE_DECLTYPE(subrenderables_) MeshesType;
+		KLAYGE_FOREACH(MeshesType::reference mesh, subrenderables_)
 		{
 			mesh->OnRenderBegin();
 		}
@@ -375,8 +375,8 @@ namespace KlayGE
 
 	void RenderModel::OnRenderEnd()
 	{
-		typedef KLAYGE_DECLTYPE(meshes_) MeshesType;
-		KLAYGE_FOREACH(MeshesType::reference mesh, meshes_)
+		typedef KLAYGE_DECLTYPE(subrenderables_) MeshesType;
+		KLAYGE_FOREACH(MeshesType::reference mesh, subrenderables_)
 		{
 			mesh->OnRenderEnd();
 		}
@@ -396,8 +396,8 @@ namespace KlayGE
 	{
 		pos_aabb_ = AABBox(float3(0, 0, 0), float3(0, 0, 0));
 		tc_aabb_ = AABBox(float3(0, 0, 0), float3(0, 0, 0));
-		typedef KLAYGE_DECLTYPE(meshes_) MeshesType;
-		KLAYGE_FOREACH(MeshesType::const_reference mesh, meshes_)
+		typedef KLAYGE_DECLTYPE(subrenderables_) MeshesType;
+		KLAYGE_FOREACH(MeshesType::const_reference mesh, subrenderables_)
 		{
 			pos_aabb_ |= mesh->PosBound();
 			tc_aabb_ |= mesh->TexcoordBound();
@@ -407,8 +407,8 @@ namespace KlayGE
 	void RenderModel::Pass(PassType type)
 	{
 		Renderable::Pass(type);
-		typedef KLAYGE_DECLTYPE(meshes_) MeshesType;
-		KLAYGE_FOREACH(MeshesType::const_reference mesh, meshes_)
+		typedef KLAYGE_DECLTYPE(subrenderables_) MeshesType;
+		KLAYGE_FOREACH(MeshesType::const_reference mesh, subrenderables_)
 		{
 			mesh->Pass(type);
 		}
@@ -417,8 +417,8 @@ namespace KlayGE
 	bool RenderModel::SpecialShading() const
 	{
 		bool ss = false;
-		typedef KLAYGE_DECLTYPE(meshes_) MeshesType;
-		KLAYGE_FOREACH(MeshesType::const_reference mesh, meshes_)
+		typedef KLAYGE_DECLTYPE(subrenderables_) MeshesType;
+		KLAYGE_FOREACH(MeshesType::const_reference mesh, subrenderables_)
 		{
 			ss |= mesh->SpecialShading();
 		}
@@ -428,8 +428,8 @@ namespace KlayGE
 	bool RenderModel::TransparencyBackFace() const
 	{
 		bool ab = false;
-		typedef KLAYGE_DECLTYPE(meshes_) MeshesType;
-		KLAYGE_FOREACH(MeshesType::const_reference mesh, meshes_)
+		typedef KLAYGE_DECLTYPE(subrenderables_) MeshesType;
+		KLAYGE_FOREACH(MeshesType::const_reference mesh, subrenderables_)
 		{
 			ab |= mesh->TransparencyBackFace();
 		}
@@ -439,8 +439,8 @@ namespace KlayGE
 	bool RenderModel::TransparencyFrontFace() const
 	{
 		bool ab = false;
-		typedef KLAYGE_DECLTYPE(meshes_) MeshesType;
-		KLAYGE_FOREACH(MeshesType::const_reference mesh, meshes_)
+		typedef KLAYGE_DECLTYPE(subrenderables_) MeshesType;
+		KLAYGE_FOREACH(MeshesType::const_reference mesh, subrenderables_)
 		{
 			ab |= mesh->TransparencyFrontFace();
 		}
@@ -450,8 +450,8 @@ namespace KlayGE
 	bool RenderModel::Reflection() const
 	{
 		bool ab = false;
-		typedef KLAYGE_DECLTYPE(meshes_) MeshesType;
-		KLAYGE_FOREACH(MeshesType::const_reference mesh, meshes_)
+		typedef KLAYGE_DECLTYPE(subrenderables_) MeshesType;
+		KLAYGE_FOREACH(MeshesType::const_reference mesh, subrenderables_)
 		{
 			ab |= mesh->Reflection();
 		}
@@ -461,8 +461,8 @@ namespace KlayGE
 	bool RenderModel::SimpleForward() const
 	{
 		bool ab = false;
-		typedef KLAYGE_DECLTYPE(meshes_) MeshesType;
-		KLAYGE_FOREACH(MeshesType::const_reference mesh, meshes_)
+		typedef KLAYGE_DECLTYPE(subrenderables_) MeshesType;
+		KLAYGE_FOREACH(MeshesType::const_reference mesh, subrenderables_)
 		{
 			ab |= mesh->SimpleForward();
 		}
@@ -862,8 +862,8 @@ namespace KlayGE
 	AABBox SkinnedModel::FramePosBound(uint32_t frame) const
 	{
 		AABBox pos_aabb(float3(0, 0, 0), float3(0, 0, 0));
-		typedef KLAYGE_DECLTYPE(meshes_) MeshesType;
-		KLAYGE_FOREACH(MeshesType::const_reference mesh, meshes_)
+		typedef KLAYGE_DECLTYPE(subrenderables_) MeshesType;
+		KLAYGE_FOREACH(MeshesType::const_reference mesh, subrenderables_)
 		{
 			pos_aabb |= checked_pointer_cast<SkinnedMesh>(mesh)->FramePosBound(frame);
 		}
@@ -1778,7 +1778,7 @@ namespace KlayGE
 		std::vector<std::vector<uint8_t> > merged_buffs;
 		char all_is_index_16_bit = false;
 		std::vector<uint8_t> merged_indices;
-		std::vector<std::string> mesh_names(model->NumMeshes());
+		std::vector<std::string> mesh_names(model->NumSubrenderables());
 		std::vector<int32_t> mtl_ids(mesh_names.size());
 		std::vector<AABBox> pos_bbs(mesh_names.size());
 		std::vector<AABBox> tc_bbs(mesh_names.size());
@@ -1789,7 +1789,7 @@ namespace KlayGE
 		if (!mesh_names.empty())
 		{
 			{
-				StaticMesh const & mesh = *model->Mesh(0);
+				StaticMesh const & mesh = *checked_pointer_cast<StaticMesh>(model->Subrenderable(0));
 
 				RenderLayoutPtr const & rl = mesh.GetRenderLayout();
 				merged_ves.resize(rl->NumVertexStreams());
@@ -1839,7 +1839,7 @@ namespace KlayGE
 
 			for (uint32_t mesh_index = 0; mesh_index < mesh_names.size(); ++ mesh_index)
 			{
-				StaticMesh const & mesh = *model->Mesh(mesh_index);
+				StaticMesh const & mesh = *checked_pointer_cast<StaticMesh>(model->Subrenderable(mesh_index));
 
 				Convert(mesh_names[mesh_index], mesh.Name());
 				mtl_ids[mesh_index] = mesh.MaterialID();

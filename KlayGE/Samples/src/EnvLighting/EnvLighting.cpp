@@ -115,7 +115,7 @@ namespace
 		explicit SphereObject(float roughness)
 			: SceneObjectHelper(SOA_Cullable)
 		{
-			renderable_ = SyncLoadModel("sphere_high.7z//sphere_high.meshml", EAH_GPU_Read | EAH_Immutable, CreateModelFactory<RenderModel>(), CreateMeshFactory<SphereRenderable>())->Mesh(0);
+			renderable_ = SyncLoadModel("sphere_high.7z//sphere_high.meshml", EAH_GPU_Read | EAH_Immutable, CreateModelFactory<RenderModel>(), CreateMeshFactory<SphereRenderable>())->Subrenderable(0);
 			checked_pointer_cast<SphereRenderable>(renderable_)->Roughness(roughness);
 		}
 

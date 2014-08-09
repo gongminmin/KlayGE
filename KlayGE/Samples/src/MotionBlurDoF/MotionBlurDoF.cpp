@@ -1102,7 +1102,7 @@ uint32_t MotionBlurDoFApp::DoUpdate(uint32_t pass)
 				RenderModelPtr model = model_instance_ml_();
 				if (model)
 				{
-					renderInstance_ = model->Mesh(0);
+					renderInstance_ = model->Subrenderable(0);
 					loading_percentage_ = 80 - NUM_LINE;
 				}
 			}
@@ -1144,7 +1144,7 @@ uint32_t MotionBlurDoFApp::DoUpdate(uint32_t pass)
 				RenderModelPtr model = model_mesh_ml_();
 				if (model)
 				{
-					renderMesh_ = model->Mesh(0);
+					renderMesh_ = model->Subrenderable(0);
 					loading_percentage_ = 100;
 				}
 			}

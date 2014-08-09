@@ -376,7 +376,7 @@ uint32_t ScreenSpaceReflectionApp::DoUpdate(KlayGE::uint32_t pass)
 				RenderModelPtr model = teapot_ml_();
 				if (model)
 				{
-					teapot_ = MakeSharedPtr<SceneObjectHelper>(model->Mesh(0), SceneObjectHelper::SOA_Cullable);
+					teapot_ = MakeSharedPtr<SceneObjectHelper>(model->Subrenderable(0), SceneObjectHelper::SOA_Cullable);
 					teapot_->ModelMatrix(MathLib::scaling(float3(15, 15, 15)));
 					teapot_->AddToSceneManager();
 

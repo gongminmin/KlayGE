@@ -130,7 +130,7 @@ namespace
 		RefractorObject(TexturePtr const & y_cube, TexturePtr const & c_cube)
 			: SceneObjectHelper(SOA_Cullable)
 		{
-			renderable_ = SyncLoadModel("teapot.meshml", EAH_GPU_Read | EAH_Immutable, CreateModelFactory<RenderModel>(), CreateMeshFactory<RefractorRenderable>())->Mesh(0);
+			renderable_ = SyncLoadModel("teapot.meshml", EAH_GPU_Read | EAH_Immutable, CreateModelFactory<RenderModel>(), CreateMeshFactory<RefractorRenderable>())->Subrenderable(0);
 			checked_pointer_cast<RefractorRenderable>(renderable_)->CompressedCubeMap(y_cube, c_cube);
 		}
 

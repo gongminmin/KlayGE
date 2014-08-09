@@ -321,7 +321,7 @@ void DetailedSkinnedModel::BuildModelInfo()
 	bool has_normal = false;
 	bool has_tangent_quat = false;
 	bool has_skinned = false;
-	RenderLayoutPtr const & rl = meshes_[0]->GetRenderLayout();
+	RenderLayoutPtr const & rl = subrenderables_[0]->GetRenderLayout();
 	for (uint32_t i = 0; i < rl->NumVertexStreams(); ++ i)
 	{
 		switch (rl->VertexStreamFormat(i)[0].usage)
@@ -350,9 +350,10 @@ void DetailedSkinnedModel::BuildModelInfo()
 
 	uint32_t total_num_vertices = 0;
 	uint32_t total_num_indices = 0;
-	typedef KLAYGE_DECLTYPE(meshes_) MeshesType;
-	KLAYGE_FOREACH(MeshesType::const_reference mesh, meshes_)
+	typedef KLAYGE_DECLTYPE(subrenderables_) MeshesType;
+	KLAYGE_FOREACH(MeshesType::const_reference renderable, subrenderables_)
 	{
+		StaticMeshPtr mesh = checked_pointer_cast<StaticMesh>(renderable);
 		total_num_vertices += mesh->NumVertices();
 		total_num_indices += mesh->NumTriangles() * 3;
 	}
@@ -513,8 +514,9 @@ void DetailedSkinnedModel::BuildModelInfo()
 			texcoords[i] = float2(positions[i].x(), positions[i].y());
 		}
 
-		KLAYGE_FOREACH(MeshesType::const_reference mesh, meshes_)
+		KLAYGE_FOREACH(MeshesType::const_reference renderable, subrenderables_)
 		{
+			StaticMeshPtr mesh = checked_pointer_cast<StaticMesh>(renderable);
 			mesh->AddVertexStream(&texcoords[0], static_cast<uint32_t>(sizeof(texcoords[0]) * texcoords.size()),
 				vertex_element(VEU_TextureCoord, 0, EF_GR32F), EAH_GPU_Read);
 		}
@@ -522,8 +524,9 @@ void DetailedSkinnedModel::BuildModelInfo()
 
 	if (!has_normal && !has_tc)
 	{
-		KLAYGE_FOREACH(MeshesType::const_reference mesh, meshes_)
+		KLAYGE_FOREACH(MeshesType::const_reference renderable, subrenderables_)
 		{
+			StaticMeshPtr mesh = checked_pointer_cast<StaticMesh>(renderable);
 			MathLib::compute_normal(normals.begin() + mesh->StartVertexLocation(),
 				indices.begin() + mesh->StartIndexLocation(), indices.begin() + mesh->StartIndexLocation() + mesh->NumTriangles() * 3,
 				positions.begin() + mesh->StartVertexLocation(), positions.begin() + mesh->StartVertexLocation() + mesh->NumVertices());
@@ -567,8 +570,9 @@ void DetailedSkinnedModel::BuildModelInfo()
 			}
 		}
 
-		KLAYGE_FOREACH(MeshesType::const_reference mesh, meshes_)
+		KLAYGE_FOREACH(MeshesType::const_reference renderable, subrenderables_)
 		{
+			StaticMeshPtr mesh = checked_pointer_cast<StaticMesh>(renderable);
 			mesh->AddVertexStream(&compacted[0], static_cast<uint32_t>(sizeof(compacted[0]) * compacted.size()),
 				vertex_element(VEU_Normal, 0, fmt), EAH_GPU_Read);
 		}
@@ -579,8 +583,9 @@ void DetailedSkinnedModel::BuildModelInfo()
 		std::vector<float3> binormals(total_num_vertices);
 		
 		// Compute TBN
-		KLAYGE_FOREACH(MeshesType::const_reference mesh, meshes_)
+		KLAYGE_FOREACH(MeshesType::const_reference renderable, subrenderables_)
 		{
+			StaticMeshPtr mesh = checked_pointer_cast<StaticMesh>(renderable);
 			MathLib::compute_tangent(tangents.begin() + mesh->StartVertexLocation(), binormals.begin() + mesh->StartVertexLocation(),
 				indices.begin() + mesh->StartIndexLocation(), indices.begin() + mesh->StartIndexLocation() + mesh->NumTriangles() * 3,
 				positions.begin() + mesh->StartVertexLocation(), positions.begin() + mesh->StartVertexLocation() + mesh->NumVertices(),
@@ -619,8 +624,9 @@ void DetailedSkinnedModel::BuildModelInfo()
 			}
 		}
 
-		KLAYGE_FOREACH(MeshesType::const_reference mesh, meshes_)
+		KLAYGE_FOREACH(MeshesType::const_reference renderable, subrenderables_)
 		{
+			StaticMeshPtr mesh = checked_pointer_cast<StaticMesh>(renderable);
 			mesh->AddVertexStream(&compacted[0], static_cast<uint32_t>(sizeof(compacted[0]) * compacted.size()),
 				vertex_element(VEU_Tangent, 0, fmt), EAH_GPU_Read);
 		}
@@ -794,40 +800,50 @@ void DetailedSkinnedModel::SetTime(float time)
 
 void DetailedSkinnedModel::VisualizeLighting()
 {
-	for (StaticMeshesPtrType::iterator iter = meshes_.begin(); iter != meshes_.end(); ++ iter)
+	typedef KLAYGE_DECLTYPE(subrenderables_) MeshesType;
+	KLAYGE_FOREACH(MeshesType::const_reference renderable, subrenderables_)
 	{
-		checked_pointer_cast<DetailedSkinnedMesh>(*iter)->VisualizeLighting();
+		DetailedSkinnedMesh* mesh = checked_cast<DetailedSkinnedMesh*>(renderable.get());
+		mesh->VisualizeLighting();
 	}
 }
 
 void DetailedSkinnedModel::VisualizeVertex(VertexElementUsage usage, uint8_t usage_index)
 {
-	for (StaticMeshesPtrType::iterator iter = meshes_.begin(); iter != meshes_.end(); ++ iter)
+	typedef KLAYGE_DECLTYPE(subrenderables_) MeshesType;
+	KLAYGE_FOREACH(MeshesType::const_reference renderable, subrenderables_)
 	{
-		checked_pointer_cast<DetailedSkinnedMesh>(*iter)->VisualizeVertex(usage, usage_index);
+		DetailedSkinnedMesh* mesh = checked_cast<DetailedSkinnedMesh*>(renderable.get()); 
+		mesh->VisualizeVertex(usage, usage_index);
 	}
 }
 
 void DetailedSkinnedModel::VisualizeTexture(int slot)
 {
-	for (StaticMeshesPtrType::iterator iter = meshes_.begin(); iter != meshes_.end(); ++ iter)
+	typedef KLAYGE_DECLTYPE(subrenderables_) MeshesType;
+	KLAYGE_FOREACH(MeshesType::const_reference renderable, subrenderables_)
 	{
-		checked_pointer_cast<DetailedSkinnedMesh>(*iter)->VisualizeTexture(slot);
+		DetailedSkinnedMesh* mesh = checked_cast<DetailedSkinnedMesh*>(renderable.get());
+		mesh->VisualizeTexture(slot);
 	}
 }
 
 void DetailedSkinnedModel::SmoothMesh(bool smooth)
 {
-	for (StaticMeshesPtrType::iterator iter = meshes_.begin(); iter != meshes_.end(); ++ iter)
+	typedef KLAYGE_DECLTYPE(subrenderables_) MeshesType;
+	KLAYGE_FOREACH(MeshesType::const_reference renderable, subrenderables_)
 	{
-		checked_pointer_cast<DetailedSkinnedMesh>(*iter)->SmoothMesh(smooth);
+		DetailedSkinnedMesh* mesh = checked_cast<DetailedSkinnedMesh*>(renderable.get());
+		mesh->SmoothMesh(smooth);
 	}
 }
 
 void DetailedSkinnedModel::SetTessFactor(int32_t tess_factor)
 {
-	for (StaticMeshesPtrType::iterator iter = meshes_.begin(); iter != meshes_.end(); ++ iter)
+	typedef KLAYGE_DECLTYPE(subrenderables_) MeshesType;
+	KLAYGE_FOREACH(MeshesType::const_reference renderable, subrenderables_)
 	{
-		checked_pointer_cast<DetailedSkinnedMesh>(*iter)->SetTessFactor(tess_factor);
+		DetailedSkinnedMesh* mesh = checked_cast<DetailedSkinnedMesh*>(renderable.get());
+		mesh->SetTessFactor(tess_factor);
 	}
 }

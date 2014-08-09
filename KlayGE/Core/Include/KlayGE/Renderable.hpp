@@ -196,6 +196,22 @@ namespace KlayGE
 
 		virtual void ModelMatrix(float4x4 const & mat);
 
+		template <typename ForwardIterator>
+		void AssignSubrenderables(ForwardIterator first, ForwardIterator last)
+		{
+			subrenderables_.assign(first, last);
+
+			this->UpdateBoundBox();
+		}
+		RenderablePtr const & Subrenderable(size_t id) const
+		{
+			return subrenderables_[id];
+		}
+		uint32_t NumSubrenderables() const
+		{
+			return static_cast<uint32_t>(subrenderables_.size());
+		}
+
 		// For select mode
 
 		virtual void ObjectID(uint32_t id);
@@ -236,6 +252,7 @@ namespace KlayGE
 
 	protected:
 		virtual void UpdateInstanceStream();
+		virtual void UpdateBoundBox();
 
 		// For select mode
 		virtual void BindSelectModeEffect();
@@ -333,6 +350,8 @@ namespace KlayGE
 		TexturePtr normal_tex_;
 		TexturePtr height_tex_;
 		TexturePtr emit_tex_;
+
+		std::vector<RenderablePtr> subrenderables_;
 	};
 }
 

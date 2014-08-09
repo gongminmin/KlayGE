@@ -54,7 +54,7 @@ namespace
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-			RenderLayoutPtr rl = this->Mesh(0)->GetRenderLayout();
+			RenderLayoutPtr rl = this->Subrenderable(0)->GetRenderLayout();
 
 			AABBox const & pos_bb = this->PosBound();
 			AABBox const & tc_bb = this->TexcoordBound();
@@ -325,78 +325,78 @@ namespace
 		void LightPos(float3 const & light_pos)
 		{
 			RenderModelPtr model = checked_pointer_cast<RenderModel>(renderable_);
-			for (uint32_t i = 0; i < model->NumMeshes(); ++ i)
+			for (uint32_t i = 0; i < model->NumSubrenderables(); ++ i)
 			{
-				checked_pointer_cast<RenderPolygon>(model->Mesh(i))->LightPos(light_pos);
+				checked_pointer_cast<RenderPolygon>(model->Subrenderable(i))->LightPos(light_pos);
 			}
 		}
 
 		void LightColor(float3 const & light_color)
 		{
 			RenderModelPtr model = checked_pointer_cast<RenderModel>(renderable_);
-			for (uint32_t i = 0; i < model->NumMeshes(); ++ i)
+			for (uint32_t i = 0; i < model->NumSubrenderables(); ++ i)
 			{
-				checked_pointer_cast<RenderPolygon>(model->Mesh(i))->LightColor(light_color);
+				checked_pointer_cast<RenderPolygon>(model->Subrenderable(i))->LightColor(light_color);
 			}
 		}
 
 		void LightFalloff(float3 const & light_falloff)
 		{
 			RenderModelPtr model = checked_pointer_cast<RenderModel>(renderable_);
-			for (uint32_t i = 0; i < model->NumMeshes(); ++ i)
+			for (uint32_t i = 0; i < model->NumSubrenderables(); ++ i)
 			{
-				checked_pointer_cast<RenderPolygon>(model->Mesh(i))->LightFalloff(light_falloff);
+				checked_pointer_cast<RenderPolygon>(model->Subrenderable(i))->LightFalloff(light_falloff);
 			}
 		}
 
 		void HeightScale(float scale)
 		{
 			RenderModelPtr model = checked_pointer_cast<RenderModel>(renderable_);
-			for (uint32_t i = 0; i < model->NumMeshes(); ++ i)
+			for (uint32_t i = 0; i < model->NumSubrenderables(); ++ i)
 			{
-				checked_pointer_cast<RenderPolygon>(model->Mesh(i))->HeightScale(scale);
+				checked_pointer_cast<RenderPolygon>(model->Subrenderable(i))->HeightScale(scale);
 			}
 		}
 
 		void BindJudaTexture(JudaTexturePtr const & juda_tex)
 		{
 			RenderModelPtr model = checked_pointer_cast<RenderModel>(renderable_);
-			for (uint32_t i = 0; i < model->NumMeshes(); ++ i)
+			for (uint32_t i = 0; i < model->NumSubrenderables(); ++ i)
 			{
-				checked_pointer_cast<RenderPolygon>(model->Mesh(i))->BindJudaTexture(juda_tex);
+				checked_pointer_cast<RenderPolygon>(model->Subrenderable(i))->BindJudaTexture(juda_tex);
 			}
 		}
 
 		std::vector<uint32_t> const & JudaTexTileIDs(uint32_t index) const
 		{
 			RenderModelPtr model = checked_pointer_cast<RenderModel>(renderable_);
-			return checked_pointer_cast<RenderPolygon>(model->Mesh(index))->JudaTexTileIDs();
+			return checked_pointer_cast<RenderPolygon>(model->Subrenderable(index))->JudaTexTileIDs();
 		}
 
 		void DetailType(uint32_t dt)
 		{
 			RenderModelPtr model = checked_pointer_cast<RenderModel>(renderable_);
-			for (uint32_t i = 0; i < model->NumMeshes(); ++ i)
+			for (uint32_t i = 0; i < model->NumSubrenderables(); ++ i)
 			{
-				checked_pointer_cast<RenderPolygon>(model->Mesh(i))->DetailType(dt);
+				checked_pointer_cast<RenderPolygon>(model->Subrenderable(i))->DetailType(dt);
 			}
 		}
 
 		void NaLength(bool len)
 		{
 			RenderModelPtr model = checked_pointer_cast<RenderModel>(renderable_);
-			for (uint32_t i = 0; i < model->NumMeshes(); ++ i)
+			for (uint32_t i = 0; i < model->NumSubrenderables(); ++ i)
 			{
-				checked_pointer_cast<RenderPolygon>(model->Mesh(i))->NaLength(len);
+				checked_pointer_cast<RenderPolygon>(model->Subrenderable(i))->NaLength(len);
 			}
 		}
 
 		void Wireframe(bool wf)
 		{
 			RenderModelPtr model = checked_pointer_cast<RenderModel>(renderable_);
-			for (uint32_t i = 0; i < model->NumMeshes(); ++ i)
+			for (uint32_t i = 0; i < model->NumSubrenderables(); ++ i)
 			{
-				checked_pointer_cast<RenderPolygon>(model->Mesh(i))->Wireframe(wf);
+				checked_pointer_cast<RenderPolygon>(model->Subrenderable(i))->Wireframe(wf);
 			}
 		}
 	};

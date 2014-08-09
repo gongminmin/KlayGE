@@ -102,54 +102,54 @@ namespace
 		void LightPos(float3 const & light_pos)
 		{
 			RenderModelPtr model = checked_pointer_cast<RenderModel>(renderable_);
-			for (uint32_t i = 0; i < model->NumMeshes(); ++ i)
+			for (uint32_t i = 0; i < model->NumSubrenderables(); ++ i)
 			{
-				checked_pointer_cast<RenderPolygon>(model->Mesh(i))->LightPos(light_pos);
+				checked_pointer_cast<RenderPolygon>(model->Subrenderable(i))->LightPos(light_pos);
 			}
 		}
 
 		void LightColor(float3 const & light_color)
 		{
 			RenderModelPtr model = checked_pointer_cast<RenderModel>(renderable_);
-			for (uint32_t i = 0; i < model->NumMeshes(); ++ i)
+			for (uint32_t i = 0; i < model->NumSubrenderables(); ++ i)
 			{
-				checked_pointer_cast<RenderPolygon>(model->Mesh(i))->LightColor(light_color);
+				checked_pointer_cast<RenderPolygon>(model->Subrenderable(i))->LightColor(light_color);
 			}
 		}
 
 		void LightFalloff(float3 const & light_falloff)
 		{
 			RenderModelPtr model = checked_pointer_cast<RenderModel>(renderable_);
-			for (uint32_t i = 0; i < model->NumMeshes(); ++ i)
+			for (uint32_t i = 0; i < model->NumSubrenderables(); ++ i)
 			{
-				checked_pointer_cast<RenderPolygon>(model->Mesh(i))->LightFalloff(light_falloff);
+				checked_pointer_cast<RenderPolygon>(model->Subrenderable(i))->LightFalloff(light_falloff);
 			}
 		}
 
 		void ProceduralType(int type)
 		{
 			RenderModelPtr model = checked_pointer_cast<RenderModel>(renderable_);
-			for (uint32_t i = 0; i < model->NumMeshes(); ++ i)
+			for (uint32_t i = 0; i < model->NumSubrenderables(); ++ i)
 			{
-				checked_pointer_cast<RenderPolygon>(model->Mesh(i))->ProceduralType(type);
+				checked_pointer_cast<RenderPolygon>(model->Subrenderable(i))->ProceduralType(type);
 			}
 		}
 
 		void ProceduralFreq(float freq)
 		{
 			RenderModelPtr model = checked_pointer_cast<RenderModel>(renderable_);
-			for (uint32_t i = 0; i < model->NumMeshes(); ++ i)
+			for (uint32_t i = 0; i < model->NumSubrenderables(); ++ i)
 			{
-				checked_pointer_cast<RenderPolygon>(model->Mesh(i))->ProceduralFreq(freq);
+				checked_pointer_cast<RenderPolygon>(model->Subrenderable(i))->ProceduralFreq(freq);
 			}
 		}
 
 		virtual void SubThreadUpdate(float app_time, float /*elapsed_time*/) KLAYGE_OVERRIDE
 		{
 			RenderModelPtr model = checked_pointer_cast<RenderModel>(renderable_);
-			for (uint32_t i = 0; i < model->NumMeshes(); ++ i)
+			for (uint32_t i = 0; i < model->NumSubrenderables(); ++ i)
 			{
-				checked_pointer_cast<RenderPolygon>(model->Mesh(i))->AppTime(app_time);
+				checked_pointer_cast<RenderPolygon>(model->Subrenderable(i))->AppTime(app_time);
 			}
 		}
 	};

@@ -161,23 +161,6 @@ namespace KlayGE
 			return false;
 		}
 
-		template <typename ForwardIterator>
-		void AssignMeshes(ForwardIterator first, ForwardIterator last)
-		{
-			meshes_.assign(first, last);
-
-			this->UpdateBoundBox();
-		}
-
-		StaticMeshPtr const & Mesh(size_t id) const
-		{
-			return meshes_[id];
-		}
-		uint32_t NumMeshes() const
-		{
-			return static_cast<uint32_t>(meshes_.size());
-		}
-
 		void SetRenderTechnique(RenderTechniquePtr const & tech)
 		{
 			technique_ = tech;
@@ -227,7 +210,7 @@ namespace KlayGE
 		virtual bool SimpleForward() const;
 
 	protected:
-		void UpdateBoundBox();
+		virtual void UpdateBoundBox() KLAYGE_OVERRIDE;
 
 	protected:
 		std::wstring name_;
@@ -238,9 +221,6 @@ namespace KlayGE
 		AABBox tc_aabb_;
 
 		std::vector<RenderMaterialPtr> materials_;
-
-		typedef std::vector<StaticMeshPtr> StaticMeshesPtrType;
-		StaticMeshesPtrType meshes_;
 	};
 
 
