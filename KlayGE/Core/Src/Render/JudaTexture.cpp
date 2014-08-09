@@ -669,8 +669,14 @@ namespace KlayGE
 				shared_ptr<std::vector<uint8_t> > data = MakeSharedPtr<std::vector<uint8_t> >(full_tile_bytes);
 				if (data_index != EMPTY_DATA_INDEX)
 				{
-					uint32_t const comed_len = static_cast<uint32_t>(data_blocks_pos_[data_index + 1] - data_blocks_pos_[data_index]);
-					lzma_dec_.Decode(&(*data)[0], &input_buf_[data_blocks_pos_[data_index]], comed_len, full_tile_bytes);
+					uint64_t offsets[2];
+					input_file_->seekg(data_blocks_offset_ + data_index * sizeof(uint64_t), std::ios_base::beg);
+					input_file_->read(offsets, sizeof(offsets));
+					uint32_t const comed_len = static_cast<uint32_t>(offsets[1] - offsets[0]);
+					std::vector<uint8_t> comed_data(comed_len);
+					input_file_->seekg(offsets[0], std::ios_base::beg);
+					input_file_->read(&comed_data[0], comed_len);
+					lzma_dec_.Decode(&(*data)[0], &comed_data[0], comed_len, full_tile_bytes);
 				}
 				else
 				{
@@ -891,58 +897,45 @@ namespace KlayGE
 		uint32_t tile_size;
 		ElementFormat format;
 
-		shared_ptr<boost::interprocess::file_mapping> file = MakeSharedPtr<boost::interprocess::file_mapping>(ResLoader::Instance().Locate(file_name).c_str(), boost::interprocess::read_only);
-		shared_ptr<boost::interprocess::mapped_region> region = MakeSharedPtr<boost::interprocess::mapped_region>(*file, boost::interprocess::read_only);
-		uint8_t* buf = static_cast<uint8_t*>(region->get_address());
-		uint8_t* ptr = buf;
+		ResIdentifierPtr file = ResLoader::Instance().Open(ResLoader::Instance().Locate(file_name));
 
-		uint32_t fourcc = *reinterpret_cast<uint32_t*>(ptr);
+		uint32_t fourcc;
+		file->read(&fourcc, sizeof(fourcc));
 		Verify(MakeFourCC<'J', 'D', 'T', ' '>::value == fourcc);
-		ptr += sizeof(fourcc);
 
-		uint32_t version = *reinterpret_cast<uint32_t*>(ptr);
+		uint32_t version;
+		file->read(&version, sizeof(version));
 		Verify(JUDA_TEX_VERSION == version);
-		ptr += sizeof(version);
 
-		num_tiles = *reinterpret_cast<uint32_t*>(ptr);
-		ptr += sizeof(num_tiles);
-		tile_size = *reinterpret_cast<uint32_t*>(ptr);
-		ptr += sizeof(tile_size);
-		format = *reinterpret_cast<ElementFormat*>(ptr);
-		ptr += sizeof(format);
+		file->read(&num_tiles, sizeof(num_tiles));
+		file->read(&tile_size, sizeof(tile_size));
+		file->read(&format, sizeof(format));
 
-		uint32_t non_empty_nodes = *reinterpret_cast<uint32_t*>(ptr);
-		ptr += sizeof(non_empty_nodes);
+		uint32_t non_empty_nodes;
+		file->read(&non_empty_nodes, sizeof(non_empty_nodes));
 
-		uint32_t num_image_entries = *reinterpret_cast<uint32_t*>(ptr);
-		ptr += sizeof(num_image_entries);
+		uint32_t num_image_entries;
+		file->read(&num_image_entries, sizeof(num_image_entries));
 		std::vector<JudaTexture::ImageEntry> image_entries(num_image_entries);
 		for (uint32_t i = 0; i < num_image_entries; ++ i)
 		{
-			uint16_t len = *reinterpret_cast<uint16_t*>(ptr);
-			ptr += sizeof(len);
+			uint16_t len;
+			file->read(&len, sizeof(len));
 			image_entries[i].name.resize(len);
-			std::memcpy(&image_entries[i].name[0], ptr, len);
-			ptr += len;
+			file->read(&image_entries[i].name[0], len);
 
-			image_entries[i].x = *reinterpret_cast<uint16_t*>(ptr);
-			ptr += sizeof(image_entries[i].x);
-			image_entries[i].y = *reinterpret_cast<uint16_t*>(ptr);
-			ptr += sizeof(image_entries[i].y);
-			image_entries[i].w = *reinterpret_cast<uint16_t*>(ptr);
-			ptr += sizeof(image_entries[i].w);
-			image_entries[i].h = *reinterpret_cast<uint16_t*>(ptr);
-			ptr += sizeof(image_entries[i].h);
+			file->read(&image_entries[i].x, sizeof(image_entries[i].x));
+			file->read(&image_entries[i].y, sizeof(image_entries[i].y));
+			file->read(&image_entries[i].w, sizeof(image_entries[i].w));
+			file->read(&image_entries[i].h, sizeof(image_entries[i].h));
 
-			image_entries[i].addr_u_v = *reinterpret_cast<uint8_t*>(ptr);
-			ptr += sizeof(image_entries[i].addr_u_v);
+			file->read(&image_entries[i].addr_u_v, sizeof(image_entries[i].addr_u_v));
 
-			image_entries[i].border_clr = *reinterpret_cast<Color*>(ptr);
-			ptr += sizeof(image_entries[i].border_clr);
+			file->read(&image_entries[i].border_clr, sizeof(image_entries[i].border_clr));
 		}
 
-		uint32_t data_blocks_offset = *reinterpret_cast<uint32_t*>(ptr);
-		ptr += sizeof(data_blocks_offset);
+		uint32_t data_blocks_offset;
+		file->read(&data_blocks_offset, sizeof(data_blocks_offset));
 
 		JudaTexturePtr ret = MakeSharedPtr<JudaTexture>(num_tiles, tile_size, format);
 
@@ -954,12 +947,12 @@ namespace KlayGE
 		std::vector<uint32_t> last_start_index_levels;
 		for (size_t i = 0; i < tree_levels; ++ i)
 		{
-			uint32_t size = *reinterpret_cast<uint32_t*>(ptr);
-			ptr += sizeof(size);
+			uint32_t size;
+			file->read(&size, sizeof(size));
 
 			std::vector<JudaTexture::quadtree_node_ptr> this_level(size);
-			std::vector<uint32_t> this_start_index_levels(reinterpret_cast<uint32_t*>(ptr), reinterpret_cast<uint32_t*>(ptr) + size);
-			ptr += size * sizeof(this_start_index_levels[0]);
+			std::vector<uint32_t> this_start_index_levels(size);
+			file->read(&this_start_index_levels[0], size * sizeof(this_start_index_levels[0]));
 			for (size_t j = 0; j < size; ++ j)
 			{
 				this_level[j] = MakeSharedPtr<JudaTexture::quadtree_node>();
@@ -972,8 +965,8 @@ namespace KlayGE
 			}
 			if (i == tree_levels - 1)
 			{
-				std::vector<uint32_t> this_attr_levels(reinterpret_cast<uint32_t*>(ptr), reinterpret_cast<uint32_t*>(ptr) + size);
-				ptr += size * sizeof(this_attr_levels[0]);
+				std::vector<uint32_t> this_attr_levels(size);
+				file->read(&this_attr_levels[0], size * sizeof(this_attr_levels[0]));
 				for (size_t j = 0; j < size; ++ j)
 				{
 					this_level[j]->attr = this_attr_levels[j];
@@ -1018,9 +1011,7 @@ namespace KlayGE
 		}
 
 		ret->input_file_ = file;
-		ret->input_region_ = region;
-		ret->input_buf_ = buf;
-		ret->data_blocks_pos_ = reinterpret_cast<uint64_t*>(buf + data_blocks_offset - (non_empty_nodes + 1) * sizeof(uint64_t));
+		ret->data_blocks_offset_ = data_blocks_offset - (non_empty_nodes + 1) * sizeof(uint64_t);
 		ret->image_entries_ = image_entries;
 
 		return ret;

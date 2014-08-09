@@ -22,23 +22,6 @@
 #include <vector>
 #include <deque>
 
-#ifdef KLAYGE_COMPILER_MSVC
-#pragma warning(push)
-#pragma warning(disable: 6244 6248 6282 6385 6386)
-#endif
-#include <boost/interprocess/file_mapping.hpp>
-#ifdef KLAYGE_COMPILER_MSVC
-#pragma warning(pop)
-#endif
-#ifdef KLAYGE_COMPILER_MSVC
-#pragma warning(push)
-#pragma warning(disable: 6285)
-#endif
-#include <boost/interprocess/mapped_region.hpp>
-#ifdef KLAYGE_COMPILER_MSVC
-#pragma warning(pop)
-#endif
-
 #include <KlayGE/LZMACodec.hpp>
 
 namespace KlayGE
@@ -182,10 +165,8 @@ namespace KlayGE
 
 	private:
 		// Input only
-		shared_ptr<boost::interprocess::file_mapping> input_file_;
-		shared_ptr<boost::interprocess::mapped_region> input_region_;
-		uint8_t* input_buf_;
-		uint64_t* data_blocks_pos_;
+		ResIdentifierPtr input_file_;
+		uint32_t data_blocks_offset_;
 		LZMACodec lzma_dec_;
 		struct DecodedBlockInfo
 		{
