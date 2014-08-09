@@ -421,11 +421,13 @@ def build_a_project(name, build_path, build_info, compiler_info, need_install = 
 		elif "arm" == compiler_info.arch:
 			vc_option = "x86_arm"
 			vc_arch = "ARM"
-			
-		if compiler_info.is_windows_store:
-			additional_options += " -DCMAKE_VS_TARGET_PLATFORM=\"WindowsStore\" -DCMAKE_VS_TARGET_VERSION=\"%s\"" % build_info.target_api_level
-		elif compiler_info.is_windows_phone:
-			additional_options += " -DCMAKE_VS_TARGET_PLATFORM=\"WindowsPhone\" -DCMAKE_VS_TARGET_VERSION=\"%s\"" % build_info.target_api_level
+
+		if compiler_info.is_windows_runtime:
+			if compiler_info.is_windows_store:
+				system_name = "WindowsStore"
+			elif compiler_info.is_windows_phone:
+				system_name = "WindowsPhone"
+			additional_options += " -DCMAKE_SYSTEM_NAME=%s -DCMAKE_SYSTEM_VERSION=%s" % (system_name, build_info.target_api_level)
 
 		build_dir = "%s/build/%s%d_%s_%s" % (build_path, build_info.compiler_name, build_info.compiler_version, build_info.target_platform, compiler_info.arch)
 		if not os.path.exists(build_dir):
