@@ -1,0 +1,29 @@
+<?xml version='1.0'?>
+
+<post_processors>
+	<post_processor name="PrefilterCubeDiffuse">
+		<params>
+			<param name="face"/>
+		</params>
+		<input>
+			<pin name="skybox_cube_tex"/>
+		</input>
+		<output>
+			<pin name="output"/>
+		</output>
+		<shader effect="PrefilterCube.fxml" tech="PrefilterCubeDiffuse"/>
+	</post_processor>
+	<post_processor name="PrefilterCubeSpecular">
+		<params>
+			<param name="face"/>
+			<param name="roughness"/>
+		</params>
+		<input>
+			<pin name="skybox_cube_tex"/>
+		</input>
+		<output>
+			<pin name="output"/>
+		</output>
+		<shader effect="PrefilterCube.fxml" tech="PrefilterCubeSpecular"/>
+	</post_processor>
+</post_processors>

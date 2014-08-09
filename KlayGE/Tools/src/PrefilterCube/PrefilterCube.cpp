@@ -4,6 +4,10 @@
 #include <KFL/Timer.hpp>
 #include <KlayGE/Texture.hpp>
 #include <KlayGE/ResLoader.hpp>
+#include <KlayGE/RenderFactory.hpp>
+#include <KlayGE/RenderEngine.hpp>
+#include <KlayGE/PostProcess.hpp>
+#include <KlayGE/App3D.hpp>
 
 #include <iostream>
 #include <fstream>
@@ -396,10 +400,91 @@ namespace
 
 		SaveTexture(out_file, in_type, in_width, in_height, in_depth, out_num_mipmaps, in_array_size, EF_ABGR16F, out_data);
 	}
+
+	void PrefilterCubeGPU(std::string const & in_file, std::string const & out_file)
+	{
+		TexturePtr in_tex = SyncLoadTexture(in_file, EAH_GPU_Read | EAH_Immutable);
+		uint32_t in_width = in_tex->Width(0);
+
+		uint32_t out_num_mipmaps = 1;
+		{
+			uint32_t w = in_width;
+			while (w > 8)
+			{
+				++ out_num_mipmaps;
+
+				w = std::max<uint32_t>(1U, w / 2);
+			}
+		}
+
+		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+
+		PostProcessPtr diff_pp = SyncLoadPostProcess("PrefilterCube.ppml", "PrefilterCubeDiffuse");
+		PostProcessPtr spec_pp = SyncLoadPostProcess("PrefilterCube.ppml", "PrefilterCubeSpecular");
+		diff_pp->InputPin(0, in_tex);
+		spec_pp->InputPin(0, in_tex);
+
+		TexturePtr out_tex = rf.MakeTextureCube(in_width, out_num_mipmaps, 1, EF_ABGR16F, 1, 0, EAH_GPU_Write, nullptr);
+
+		for (int face = 0; face < 6; ++ face)
+		{
+			in_tex->CopyToSubTextureCube(*out_tex, 0, static_cast<Texture::CubeFaces>(face), 0, 0, 0, in_width, in_width,
+				0, static_cast<Texture::CubeFaces>(face), 0, 0, 0, in_width, in_width);
+
+			for (uint32_t level = 1; level < out_num_mipmaps - 1; ++ level)
+			{
+				float roughness = static_cast<float>(out_num_mipmaps - 2 - level) / (out_num_mipmaps - 2);
+				roughness = pow(8192.0f, roughness);
+
+				spec_pp->OutputPin(0, out_tex, level, 0, face);
+				spec_pp->SetParam(0, face);
+				spec_pp->SetParam(1, roughness);
+				spec_pp->Apply();
+			}
+
+			{
+				diff_pp->OutputPin(0, out_tex, out_num_mipmaps - 1, 0, face);
+				diff_pp->SetParam(0, face);
+				diff_pp->Apply();
+			}
+		}
+
+		SaveTexture(out_tex, out_file);
+	}
 }
+
+class PrefilterCubeApp : public KlayGE::App3DFramework
+{
+public:
+	PrefilterCubeApp()
+		: App3DFramework("PrefilterCube")
+	{
+		ResLoader::Instance().AddPath("../../Tools/media/PrefilterCube");
+	}
+
+	virtual void DoUpdateOverlay() KLAYGE_OVERRIDE
+	{
+	}
+
+	virtual uint32_t DoUpdate(uint32_t /*pass*/) KLAYGE_OVERRIDE
+	{
+		return URV_Finished;
+	}
+};
 
 int main(int argc, char* argv[])
 {
+	Context::Instance().LoadCfg("KlayGE.cfg");
+	ContextCfg context_cfg = Context::Instance().Config();
+	context_cfg.graphics_cfg.hide_win = true;
+	context_cfg.graphics_cfg.hdr = false;
+	context_cfg.graphics_cfg.color_grading = false;
+	context_cfg.graphics_cfg.gamma = false;
+	Context::Instance().Config(context_cfg);
+
+	PrefilterCubeApp app;
+	app.Create();
+
 	using namespace KlayGE;
 
 	if (argc < 2)
@@ -422,12 +507,18 @@ int main(int argc, char* argv[])
 
 	Timer timer;
 
-	PrefilterCube(input, output);
+	RenderDeviceCaps const & caps = Context::Instance().RenderFactoryInstance().RenderEngineInstance().DeviceCaps();
+	if (caps.max_shader_model < 4)
+	{
+		PrefilterCube(input, output);
+	}
+	else
+	{
+		PrefilterCubeGPU(input, output);
+	}
 
 	cout << timer.elapsed() << " s" << endl;
 	cout << "Filtered cube map is saved into " << output << endl;
-
-	ResLoader::Destroy();
 
 	return 0;
 }
