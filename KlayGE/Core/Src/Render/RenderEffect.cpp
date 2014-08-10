@@ -83,7 +83,7 @@ namespace
 {
 	using namespace KlayGE;
 
-	uint32_t const KFX_VERSION = 0x0105;
+	uint32_t const KFX_VERSION = 0x0106;
 
 	mutex singleton_mutex;
 
@@ -3047,18 +3047,30 @@ namespace KlayGE
 
 	bool RenderEffect::StreamIn(ResIdentifierPtr const & source)
 	{
+		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+
 		bool ret = false;
 		if (source)
 		{
 			uint32_t fourcc;
 			source->read(&fourcc, sizeof(fourcc));
 			fourcc = LE2Native(fourcc);
-			if (MakeFourCC<'K', 'F', 'X', ' '>::value == fourcc)
+			
+			uint32_t ver;
+			source->read(&ver, sizeof(ver));
+			ver = LE2Native(ver);
+			
+			if ((MakeFourCC<'K', 'F', 'X', ' '>::value == fourcc) && (KFX_VERSION == ver))
 			{
-				uint32_t ver;
-				source->read(&ver, sizeof(ver));
-				ver = LE2Native(ver);
-				if (KFX_VERSION == ver)
+				uint32_t shader_fourcc;
+				source->read(&shader_fourcc, sizeof(shader_fourcc));
+				shader_fourcc = LE2Native(shader_fourcc);
+
+				uint32_t shader_ver;
+				source->read(&shader_ver, sizeof(shader_ver));
+				shader_ver = LE2Native(shader_ver);
+
+				if ((re.NativeShaderFourCC() == shader_fourcc) && (re.NativeShaderVersion() == shader_ver))
 				{
 					uint64_t timestamp;
 					source->read(&timestamp, sizeof(timestamp));
@@ -3176,11 +3188,19 @@ namespace KlayGE
 
 	void RenderEffect::StreamOut(std::ostream& os)
 	{
+		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+
 		uint32_t fourcc = Native2LE(MakeFourCC<'K', 'F', 'X', ' '>::value);
 		os.write(reinterpret_cast<char const *>(&fourcc), sizeof(fourcc));
 
 		uint32_t ver = Native2LE(KFX_VERSION);
 		os.write(reinterpret_cast<char const *>(&ver), sizeof(ver));
+
+		uint32_t shader_fourcc = Native2LE(re.NativeShaderFourCC());
+		os.write(reinterpret_cast<char const *>(&shader_fourcc), sizeof(shader_fourcc));
+
+		uint32_t shader_ver = Native2LE(re.NativeShaderVersion());
+		os.write(reinterpret_cast<char const *>(&shader_ver), sizeof(shader_ver));
 
 		uint64_t timestamp = Native2LE(timestamp_);
 		os.write(reinterpret_cast<char const *>(&timestamp), sizeof(timestamp));

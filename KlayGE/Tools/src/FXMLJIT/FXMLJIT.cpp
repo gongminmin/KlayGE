@@ -33,6 +33,8 @@
 #include <KlayGE/App3D.hpp>
 #include <KlayGE/RenderEffect.hpp>
 #include <KlayGE/ResLoader.hpp>
+#include <KlayGE/RenderFactory.hpp>
+#include <KlayGE/RenderEngine.hpp>
 
 #include <iostream>
 #include <fstream>
@@ -63,6 +65,8 @@ extern "C"
 	_declspec(dllexport) KlayGE::uint32_t NvOptimusEnablement = 0x00000001;
 }
 #endif
+
+uint32_t const KFX_VERSION = 0x0106;
 
 class FXMLJITApp : public KlayGE::App3DFramework
 {
@@ -138,15 +142,59 @@ int main(int argc, char* argv[])
 		target_folder = argv[3];
 	}
 
-	std::string file_name(argv[2]);
-	filesystem::path file_path(file_name);
-	std::string const base_name = filesystem::basename(file_path);
-	filesystem::path file_directory = file_path.parent_path();
-	ResLoader::Instance().AddPath(file_directory.string());
+	std::string fxml_name(argv[2]);
+	filesystem::path fxml_path(fxml_name);
+	std::string const base_name = filesystem::basename(fxml_path);
+	filesystem::path fxml_directory = fxml_path.parent_path();
+	ResLoader::Instance().AddPath(fxml_directory.string());
 
 	filesystem::path kfx_name(base_name + ".kfx");
-	filesystem::path kfx_path = file_directory / kfx_name;
-	SyncLoadRenderEffect(file_name);
+	filesystem::path kfx_path = fxml_directory / kfx_name;
+	bool skip_jit = false;
+	if (filesystem::exists(kfx_path))
+	{
+		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+
+		ResIdentifierPtr source = ResLoader::Instance().Open(fxml_name);
+		ResIdentifierPtr kfx_source = ResLoader::Instance().Open(kfx_path.string());
+
+		uint64_t src_timestamp = source->Timestamp();
+
+		uint32_t fourcc;
+		source->read(&fourcc, sizeof(fourcc));
+		fourcc = LE2Native(fourcc);
+
+		uint32_t ver;
+		source->read(&ver, sizeof(ver));
+		ver = LE2Native(ver);
+
+		if ((MakeFourCC<'K', 'F', 'X', ' '>::value == fourcc) && (KFX_VERSION == ver))
+		{
+			uint32_t shader_fourcc;
+			source->read(&shader_fourcc, sizeof(shader_fourcc));
+			shader_fourcc = LE2Native(shader_fourcc);
+
+			uint32_t shader_ver;
+			source->read(&shader_ver, sizeof(shader_ver));
+			shader_ver = LE2Native(shader_ver);
+
+			if ((re.NativeShaderFourCC() == shader_fourcc) && (re.NativeShaderVersion() == shader_ver))
+			{
+				uint64_t timestamp;
+				source->read(&timestamp, sizeof(timestamp));
+				timestamp = LE2Native(timestamp);
+				if (src_timestamp <= timestamp)
+				{
+					skip_jit = true;
+				}
+			}
+		}
+	}
+
+	if (!skip_jit)
+	{
+		SyncLoadRenderEffect(fxml_name);
+	}
 	if (!target_folder.empty())
 	{
 		filesystem::copy_file(kfx_path, target_folder / kfx_name,

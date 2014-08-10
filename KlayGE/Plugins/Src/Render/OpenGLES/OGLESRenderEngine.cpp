@@ -58,6 +58,9 @@ namespace KlayGE
 			cur_fbo_(0),
 			gpu_disjoint_occurred_(false)
 	{
+		native_shader_fourcc_ = MakeFourCC<'E', 'S', 'S', 'L'>::value;
+		native_shader_version_ = 3;
+
 		clear_clr_.fill(0);
 	}
 

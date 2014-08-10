@@ -589,145 +589,131 @@ namespace KlayGE
 		{
 			uint8_t const * nsbp = &native_shader_block[0];
 
-			uint32_t fourcc;
-			std::memcpy(&fourcc, nsbp, sizeof(fourcc));
-			nsbp += sizeof(fourcc);
-			fourcc = LE2Native(fourcc);
-			if (MakeFourCC<'D', 'X', 'B', 'C'>::value == fourcc)
+			uint8_t len = *nsbp;
+			++ nsbp;
+			std::string profile;
+			profile.resize(len);
+			std::memcpy(&profile[0], nsbp, len);
+			nsbp += len;
+			if (profile == shader_profile)
 			{
-				uint32_t ver;
-				std::memcpy(&ver, nsbp, sizeof(ver));
-				nsbp += sizeof(ver);
-				ver = LE2Native(ver);
-				if (5 == ver)
+				is_shader_validate_[type] = true;
+
+				uint32_t blob_size;
+				std::memcpy(&blob_size, nsbp, sizeof(blob_size));
+				nsbp += sizeof(blob_size);
+				shared_ptr<std::vector<uint8_t> > code_blob = MakeSharedPtr<std::vector<uint8_t> >(blob_size);
+
+				std::memcpy(&((*code_blob)[0]), nsbp, blob_size);
+				nsbp += blob_size;
+
+				D3D11ShaderDesc& sd = shader_desc_[type];
+
+				uint16_t cb_desc_size;
+				std::memcpy(&cb_desc_size, nsbp, sizeof(cb_desc_size));
+				nsbp += sizeof(cb_desc_size);
+				cb_desc_size = LE2Native(cb_desc_size);
+				sd.cb_desc.resize(cb_desc_size);
+				for (size_t i = 0; i < sd.cb_desc.size(); ++ i)
 				{
-					uint8_t len = *nsbp;
+					len = *nsbp;
 					++ nsbp;
-					std::string profile;
-					profile.resize(len);
-					std::memcpy(&profile[0], nsbp, len);
+					sd.cb_desc[i].name.resize(len);
+					std::memcpy(&sd.cb_desc[i].name[0], nsbp, len);
 					nsbp += len;
-					if (profile == shader_profile)
+
+					sd.cb_desc[i].name_hash = RT_HASH(sd.cb_desc[i].name.c_str());
+
+					std::memcpy(&sd.cb_desc[i].size, nsbp, sizeof(sd.cb_desc[i].size));
+					nsbp += sizeof(sd.cb_desc[i].size);
+					sd.cb_desc[i].size = LE2Native(sd.cb_desc[i].size);
+
+					uint16_t var_desc_size;
+					std::memcpy(&var_desc_size, nsbp, sizeof(var_desc_size));
+					nsbp += sizeof(var_desc_size);
+					var_desc_size = LE2Native(var_desc_size);
+					sd.cb_desc[i].var_desc.resize(var_desc_size);
+					for (size_t j = 0; j < sd.cb_desc[i].var_desc.size(); ++ j)
 					{
-						is_shader_validate_[type] = true;
+						len = *nsbp;
+						++ nsbp;
+						sd.cb_desc[i].var_desc[j].name.resize(len);
+						std::memcpy(&sd.cb_desc[i].var_desc[j].name[0], nsbp, len);
+						nsbp += len;
 
-						uint32_t blob_size;
-						std::memcpy(&blob_size, nsbp, sizeof(blob_size));
-						nsbp += sizeof(blob_size);
-						shared_ptr<std::vector<uint8_t> > code_blob = MakeSharedPtr<std::vector<uint8_t> >(blob_size);
-
-						std::memcpy(&((*code_blob)[0]), nsbp, blob_size);
-						nsbp += blob_size;
-
-						D3D11ShaderDesc& sd = shader_desc_[type];
-
-						uint16_t cb_desc_size;
-						std::memcpy(&cb_desc_size, nsbp, sizeof(cb_desc_size));
-						nsbp += sizeof(cb_desc_size);
-						cb_desc_size = LE2Native(cb_desc_size);
-						sd.cb_desc.resize(cb_desc_size);
-						for (size_t i = 0; i < sd.cb_desc.size(); ++ i)
-						{
-							len = *nsbp;
-							++ nsbp;
-							sd.cb_desc[i].name.resize(len);
-							std::memcpy(&sd.cb_desc[i].name[0], nsbp, len);
-							nsbp += len;
-
-							sd.cb_desc[i].name_hash = RT_HASH(sd.cb_desc[i].name.c_str());
-
-							std::memcpy(&sd.cb_desc[i].size, nsbp, sizeof(sd.cb_desc[i].size));
-							nsbp += sizeof(sd.cb_desc[i].size);
-							sd.cb_desc[i].size = LE2Native(sd.cb_desc[i].size);
-
-							uint16_t var_desc_size;
-							std::memcpy(&var_desc_size, nsbp, sizeof(var_desc_size));
-							nsbp += sizeof(var_desc_size);
-							var_desc_size = LE2Native(var_desc_size);
-							sd.cb_desc[i].var_desc.resize(var_desc_size);
-							for (size_t j = 0; j < sd.cb_desc[i].var_desc.size(); ++ j)
-							{
-								len = *nsbp;
-								++ nsbp;
-								sd.cb_desc[i].var_desc[j].name.resize(len);
-								std::memcpy(&sd.cb_desc[i].var_desc[j].name[0], nsbp, len);
-								nsbp += len;
-
-								std::memcpy(&sd.cb_desc[i].var_desc[j].start_offset, nsbp, sizeof(sd.cb_desc[i].var_desc[j].start_offset));
-								nsbp += sizeof(sd.cb_desc[i].var_desc[j].start_offset);
-								sd.cb_desc[i].var_desc[j].start_offset = LE2Native(sd.cb_desc[i].var_desc[j].start_offset);
-								std::memcpy(&sd.cb_desc[i].var_desc[j].type, nsbp, sizeof(sd.cb_desc[i].var_desc[j].type));
-								nsbp += sizeof(sd.cb_desc[i].var_desc[j].type);
-								std::memcpy(&sd.cb_desc[i].var_desc[j].rows, nsbp, sizeof(sd.cb_desc[i].var_desc[j].rows));
-								nsbp += sizeof(sd.cb_desc[i].var_desc[j].rows);
-								std::memcpy(&sd.cb_desc[i].var_desc[j].columns, nsbp, sizeof(sd.cb_desc[i].var_desc[j].columns));
-								nsbp += sizeof(sd.cb_desc[i].var_desc[j].columns);
-								std::memcpy(&sd.cb_desc[i].var_desc[j].elements, nsbp, sizeof(sd.cb_desc[i].var_desc[j].elements));
-								nsbp += sizeof(sd.cb_desc[i].var_desc[j].elements);
-								sd.cb_desc[i].var_desc[j].elements = LE2Native(sd.cb_desc[i].var_desc[j].elements);
-							}
-						}
-
-						std::memcpy(&sd.num_samplers, nsbp, sizeof(sd.num_samplers));
-						nsbp += sizeof(sd.num_samplers);
-						sd.num_samplers = LE2Native(sd.num_samplers);
-						std::memcpy(&sd.num_srvs, nsbp, sizeof(sd.num_srvs));
-						nsbp += sizeof(sd.num_srvs);
-						sd.num_srvs = LE2Native(sd.num_srvs);
-						std::memcpy(&sd.num_uavs, nsbp, sizeof(sd.num_uavs));
-						nsbp += sizeof(sd.num_uavs);
-						sd.num_uavs = LE2Native(sd.num_uavs);
-
-						uint16_t res_desc_size;
-						std::memcpy(&res_desc_size, nsbp, sizeof(res_desc_size));
-						nsbp += sizeof(res_desc_size);
-						res_desc_size = LE2Native(res_desc_size);
-						sd.res_desc.resize(res_desc_size);
-						for (size_t i = 0; i < sd.res_desc.size(); ++ i)
-						{
-							len = *nsbp;
-							++ nsbp;
-							sd.res_desc[i].name.resize(len);
-							std::memcpy(&sd.res_desc[i].name[0], nsbp, len);
-							nsbp += len;
-
-							std::memcpy(&sd.res_desc[i].type, nsbp, sizeof(sd.res_desc[i].type));
-							nsbp += sizeof(sd.res_desc[i].type);
-
-							std::memcpy(&sd.res_desc[i].dimension, nsbp, sizeof(sd.res_desc[i].dimension));
-							nsbp += sizeof(sd.res_desc[i].dimension);
-
-							std::memcpy(&sd.res_desc[i].bind_point, nsbp, sizeof(sd.res_desc[i].bind_point));
-							nsbp += sizeof(sd.res_desc[i].bind_point);
-							sd.res_desc[i].bind_point = LE2Native(sd.res_desc[i].bind_point);
-						}
-
-						if (ST_VertexShader == type)
-						{
-							std::memcpy(&vs_signature_, nsbp, sizeof(vs_signature_));
-							nsbp += sizeof(vs_signature_);
-							vs_signature_ = LE2Native(vs_signature_);
-						}
-						else if (ST_ComputeShader == type)
-						{
-							std::memcpy(&cs_block_size_x_, nsbp, sizeof(cs_block_size_x_));
-							nsbp += sizeof(cs_block_size_x_);
-							cs_block_size_x_ = LE2Native(cs_block_size_x_);
-
-							std::memcpy(&cs_block_size_y_, nsbp, sizeof(cs_block_size_y_));
-							nsbp += sizeof(cs_block_size_y_);
-							cs_block_size_y_ = LE2Native(cs_block_size_y_);
-
-							std::memcpy(&cs_block_size_z_, nsbp, sizeof(cs_block_size_z_));
-							nsbp += sizeof(cs_block_size_z_);
-							cs_block_size_z_ = LE2Native(cs_block_size_z_);
-						}
-
-						this->AttachShaderBytecode(type, effect, shader_desc_ids, code_blob);
-
-						ret = is_shader_validate_[type];
+						std::memcpy(&sd.cb_desc[i].var_desc[j].start_offset, nsbp, sizeof(sd.cb_desc[i].var_desc[j].start_offset));
+						nsbp += sizeof(sd.cb_desc[i].var_desc[j].start_offset);
+						sd.cb_desc[i].var_desc[j].start_offset = LE2Native(sd.cb_desc[i].var_desc[j].start_offset);
+						std::memcpy(&sd.cb_desc[i].var_desc[j].type, nsbp, sizeof(sd.cb_desc[i].var_desc[j].type));
+						nsbp += sizeof(sd.cb_desc[i].var_desc[j].type);
+						std::memcpy(&sd.cb_desc[i].var_desc[j].rows, nsbp, sizeof(sd.cb_desc[i].var_desc[j].rows));
+						nsbp += sizeof(sd.cb_desc[i].var_desc[j].rows);
+						std::memcpy(&sd.cb_desc[i].var_desc[j].columns, nsbp, sizeof(sd.cb_desc[i].var_desc[j].columns));
+						nsbp += sizeof(sd.cb_desc[i].var_desc[j].columns);
+						std::memcpy(&sd.cb_desc[i].var_desc[j].elements, nsbp, sizeof(sd.cb_desc[i].var_desc[j].elements));
+						nsbp += sizeof(sd.cb_desc[i].var_desc[j].elements);
+						sd.cb_desc[i].var_desc[j].elements = LE2Native(sd.cb_desc[i].var_desc[j].elements);
 					}
 				}
+
+				std::memcpy(&sd.num_samplers, nsbp, sizeof(sd.num_samplers));
+				nsbp += sizeof(sd.num_samplers);
+				sd.num_samplers = LE2Native(sd.num_samplers);
+				std::memcpy(&sd.num_srvs, nsbp, sizeof(sd.num_srvs));
+				nsbp += sizeof(sd.num_srvs);
+				sd.num_srvs = LE2Native(sd.num_srvs);
+				std::memcpy(&sd.num_uavs, nsbp, sizeof(sd.num_uavs));
+				nsbp += sizeof(sd.num_uavs);
+				sd.num_uavs = LE2Native(sd.num_uavs);
+
+				uint16_t res_desc_size;
+				std::memcpy(&res_desc_size, nsbp, sizeof(res_desc_size));
+				nsbp += sizeof(res_desc_size);
+				res_desc_size = LE2Native(res_desc_size);
+				sd.res_desc.resize(res_desc_size);
+				for (size_t i = 0; i < sd.res_desc.size(); ++ i)
+				{
+					len = *nsbp;
+					++ nsbp;
+					sd.res_desc[i].name.resize(len);
+					std::memcpy(&sd.res_desc[i].name[0], nsbp, len);
+					nsbp += len;
+
+					std::memcpy(&sd.res_desc[i].type, nsbp, sizeof(sd.res_desc[i].type));
+					nsbp += sizeof(sd.res_desc[i].type);
+
+					std::memcpy(&sd.res_desc[i].dimension, nsbp, sizeof(sd.res_desc[i].dimension));
+					nsbp += sizeof(sd.res_desc[i].dimension);
+
+					std::memcpy(&sd.res_desc[i].bind_point, nsbp, sizeof(sd.res_desc[i].bind_point));
+					nsbp += sizeof(sd.res_desc[i].bind_point);
+					sd.res_desc[i].bind_point = LE2Native(sd.res_desc[i].bind_point);
+				}
+
+				if (ST_VertexShader == type)
+				{
+					std::memcpy(&vs_signature_, nsbp, sizeof(vs_signature_));
+					nsbp += sizeof(vs_signature_);
+					vs_signature_ = LE2Native(vs_signature_);
+				}
+				else if (ST_ComputeShader == type)
+				{
+					std::memcpy(&cs_block_size_x_, nsbp, sizeof(cs_block_size_x_));
+					nsbp += sizeof(cs_block_size_x_);
+					cs_block_size_x_ = LE2Native(cs_block_size_x_);
+
+					std::memcpy(&cs_block_size_y_, nsbp, sizeof(cs_block_size_y_));
+					nsbp += sizeof(cs_block_size_y_);
+					cs_block_size_y_ = LE2Native(cs_block_size_y_);
+
+					std::memcpy(&cs_block_size_z_, nsbp, sizeof(cs_block_size_z_));
+					nsbp += sizeof(cs_block_size_z_);
+					cs_block_size_z_ = LE2Native(cs_block_size_z_);
+				}
+
+				this->AttachShaderBytecode(type, effect, shader_desc_ids, code_blob);
+
+				ret = is_shader_validate_[type];
 			}
 		}
 
@@ -757,12 +743,6 @@ namespace KlayGE
 		if (code_blob)
 		{
 			std::ostringstream oss(std::ios_base::binary | std::ios_base::out);
-
-			uint32_t fourcc = Native2LE(MakeFourCC<'D', 'X', 'B', 'C'>::value);
-			oss.write(reinterpret_cast<char const *>(&fourcc), sizeof(fourcc));
-
-			uint32_t ver = Native2LE(5);
-			oss.write(reinterpret_cast<char const *>(&ver), sizeof(ver));
 
 			uint8_t len = static_cast<uint8_t>(shader_code_[type].second.size());
 			oss.write(reinterpret_cast<char const *>(&len), sizeof(len));

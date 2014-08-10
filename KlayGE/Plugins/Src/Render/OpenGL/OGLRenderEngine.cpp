@@ -82,6 +82,9 @@ namespace KlayGE
 			vp_x_(0), vp_y_(0), vp_width_(0), vp_height_(0),
 			cur_fbo_(0), restart_index_(0xFFFF)
 	{
+		native_shader_fourcc_ = MakeFourCC<'G', 'L', 'S', 'L'>::value;
+		native_shader_version_ = 3;
+
 		clear_clr_.fill(0);
 
 #if defined KLAYGE_PLATFORM_WINDOWS

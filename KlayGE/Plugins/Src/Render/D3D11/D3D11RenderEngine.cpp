@@ -100,6 +100,9 @@ namespace KlayGE
 		: num_so_buffs_(0),
 			inv_timestamp_freq_(0)
 	{
+		native_shader_fourcc_ = MakeFourCC<'D', 'X', 'B', 'C'>::value;
+		native_shader_version_ = 5;
+
 #ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
 		// Dynamic loading because these dlls can't be loaded on WinXP
 		mod_dxgi_ = ::LoadLibraryEx(TEXT("dxgi.dll"), nullptr, 0);

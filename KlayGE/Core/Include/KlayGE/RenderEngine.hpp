@@ -139,6 +139,15 @@ namespace KlayGE
 		virtual bool FullScreen() const = 0;
 		virtual void FullScreen(bool fs) = 0;
 
+		uint32_t NativeShaderFourCC() const
+		{
+			return native_shader_fourcc_;
+		}
+		uint32_t NativeShaderVersion() const
+		{
+				return native_shader_version_;
+		}
+
 		void PostProcess(bool skip);
 
 		void HDREnabled(bool hdr);
@@ -326,6 +335,9 @@ namespace KlayGE
 		PostProcessPtr ldr_pps_[12];
 
 		bool force_line_mode_;
+
+		uint32_t native_shader_fourcc_;
+		uint32_t native_shader_version_;
 
 #ifndef KLAYGE_SHIP
 		PerfRangePtr hdr_pp_perf_;

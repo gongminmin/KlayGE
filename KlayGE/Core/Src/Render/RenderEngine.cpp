@@ -219,8 +219,11 @@ namespace KlayGE
 			ldr_pp_ = ldr_pps_[ppaa_enabled_ * 4 + gamma_enabled_ * 2 + color_grading_enabled_];
 		}
 
-		bool need_resize = ((render_width != screen_width) || (render_height != screen_height));
+		bool need_resize = false;
+		if (!settings.hide_win)
 		{
+			need_resize = ((render_width != screen_width) || (render_height != screen_height));
+
 			resize_pps_[0] = SyncLoadPostProcess("Resizer.ppml", "bilinear");
 			resize_pps_[1] = MakeSharedPtr<BicubicFilteringPostProcess>();
 
@@ -827,35 +830,38 @@ namespace KlayGE
 
 		fb_stage_ = 3;
 
-		uint32_t const screen_width = default_frame_buffers_[3]->Width();
-		uint32_t const screen_height = default_frame_buffers_[3]->Height();
-		uint32_t const render_width = default_frame_buffers_[0]->Width();
-		uint32_t const render_height = default_frame_buffers_[0]->Height();
-		bool need_resize = ((render_width != screen_width) || (render_height != screen_height));
-		if ((STM_None == stereo_method_) && need_resize)
+		if (resize_pps_[0])
 		{
+			uint32_t const screen_width = default_frame_buffers_[3]->Width();
+			uint32_t const screen_height = default_frame_buffers_[3]->Height();
+			uint32_t const render_width = default_frame_buffers_[0]->Width();
+			uint32_t const render_height = default_frame_buffers_[0]->Height();
+			bool need_resize = ((render_width != screen_width) || (render_height != screen_height));
+			if ((STM_None == stereo_method_) && need_resize)
+			{
 #ifndef KLAYGE_SHIP
-			resize_pp_perf_->Begin();
+				resize_pp_perf_->Begin();
 #endif
-			float const scale_x = static_cast<float>(screen_width) / render_width;
-			float const scale_y = static_cast<float>(screen_height) / render_height;
+				float const scale_x = static_cast<float>(screen_width) / render_width;
+				float const scale_y = static_cast<float>(screen_height) / render_height;
 
-			if (!MathLib::equal(scale_x, scale_y))
-			{
-				this->DefaultFrameBuffer()->Attached(FrameBuffer::ATT_Color0)->ClearColor(Color(0, 0, 0, 0));
-			}
+				if (!MathLib::equal(scale_x, scale_y))
+				{
+					this->DefaultFrameBuffer()->Attached(FrameBuffer::ATT_Color0)->ClearColor(Color(0, 0, 0, 0));
+				}
 
-			if ((scale_x > 2) || (scale_y > 2))
-			{
-				resize_pps_[1]->Apply();
-			}
-			else
-			{
-				resize_pps_[0]->Apply();
-			}
+				if ((scale_x > 2) || (scale_y > 2))
+				{
+					resize_pps_[1]->Apply();
+				}
+				else
+				{
+					resize_pps_[0]->Apply();
+				}
 #ifndef KLAYGE_SHIP
-			resize_pp_perf_->End();
+				resize_pp_perf_->End();
 #endif
+			}
 		}
 
 		this->DefaultFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->ClearDepth(1.0f);
@@ -1104,9 +1110,12 @@ namespace KlayGE
 					skip_hdr_pp_->OutputPin(0, resize_tex_);
 				}
 
-				for (size_t i = 0; i < 2; ++ i)
+				if (resize_pps_[0])
 				{
-					resize_pps_[i]->InputPin(0, resize_tex_);
+					for (size_t i = 0; i < 2; ++ i)
+					{
+						resize_pps_[i]->InputPin(0, resize_tex_);
+					}
 				}
 			}
 		}
