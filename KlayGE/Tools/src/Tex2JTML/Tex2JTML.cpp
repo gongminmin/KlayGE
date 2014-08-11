@@ -13,7 +13,7 @@
 #include <sstream>
 #include <vector>
 
-#ifdef KLAYGE_TR2_LIBRARY_FILESYSTEM_V2_SUPPORT
+#if defined(KLAYGE_TR2_LIBRARY_FILESYSTEM_V2_SUPPORT) || defined(KLAYGE_TR2_LIBRARY_FILESYSTEM_V3_SUPPORT)
 	#include <filesystem>
 	namespace KlayGE
 	{

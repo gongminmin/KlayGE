@@ -181,8 +181,6 @@ namespace KlayGE
 	SDSMCascadedShadowLayer::SDSMCascadedShadowLayer()
 		: frame_index_(0)
 	{
-		int const MAX_NUM_CASCADES = 4;
-
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 		RenderDeviceCaps const & caps = rf.RenderEngineInstance().DeviceCaps();
 		cs_support_ = caps.cs_support && (caps.max_shader_model >= 5);

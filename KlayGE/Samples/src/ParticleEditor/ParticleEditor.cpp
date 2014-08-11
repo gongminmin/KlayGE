@@ -667,7 +667,7 @@ void ParticleEditorApp::ChangeParticleColorFromHandler(KlayGE::UITexButton const
 
 	if (ChooseColorA(&occ))
 	{
-		Color clr_srgb(occ.rgbResult);
+		clr_srgb = Color(occ.rgbResult);
 		Color clr_linear;
 		clr_linear.r() = MathLib::srgb_to_linear(clr_srgb.b());
 		clr_linear.g() = MathLib::srgb_to_linear(clr_srgb.g());
@@ -707,7 +707,7 @@ void ParticleEditorApp::ChangeParticleColorToHandler(KlayGE::UITexButton const &
 
 	if (ChooseColorA(&occ))
 	{
-		Color clr_srgb(occ.rgbResult);
+		clr_srgb = Color(occ.rgbResult);
 		Color clr_linear;
 		clr_linear.r() = MathLib::srgb_to_linear(clr_srgb.b());
 		clr_linear.g() = MathLib::srgb_to_linear(clr_srgb.g());

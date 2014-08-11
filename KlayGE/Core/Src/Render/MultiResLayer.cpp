@@ -202,7 +202,7 @@ namespace KlayGE
 
 			delta_x = 1.0f / width;
 			delta_y = 1.0f / height;
-			float4 delta_offset(delta_x, delta_y, delta_x / 2, delta_y / 2);			
+			delta_offset = float4(delta_x, delta_y, delta_x / 2, delta_y / 2);
 			depth_derivate_mipmap_pp_->SetParam(0, delta_offset);
 			depth_derivate_mipmap_pp_->SetParam(1, float2(vp_camera->FarPlane(), 1.0f / vp_camera->FarPlane()));
 			
@@ -229,9 +229,9 @@ namespace KlayGE
 		{
 			int width = normal_cone_tex_->Width(i - 1);
 			int height = normal_cone_tex_->Height(i - 1);
-			float delta_x = 1.0f / width;
-			float delta_y = 1.0f / height;
-			float4 delta_offset(delta_x, delta_y, delta_x / 2, delta_y / 2);
+			delta_x = 1.0f / width;
+			delta_y = 1.0f / height;
+			delta_offset = float4(delta_x, delta_y, delta_x / 2, delta_y / 2);
 
 			normal_cone_mipmap_pp_->SetParam(0, delta_offset);
 

@@ -34,7 +34,7 @@
 
 #include <fstream>
 #include <sstream>
-#ifdef KLAYGE_TR2_LIBRARY_FILESYSTEM_V2_SUPPORT
+#if defined(KLAYGE_TR2_LIBRARY_FILESYSTEM_V2_SUPPORT) || defined(KLAYGE_TR2_LIBRARY_FILESYSTEM_V3_SUPPORT)
 	#include <filesystem>
 	namespace KlayGE
 	{
@@ -267,7 +267,11 @@ namespace KlayGE
 							}
 							std::string const file_name = res_name.substr(pkt_offset + 2);
 
+#ifdef KLAYGE_TR2_LIBRARY_FILESYSTEM_V3_SUPPORT
+							uint64_t timestamp = filesystem::last_write_time(pkt_path).time_since_epoch().count();
+#else
 							uint64_t timestamp = filesystem::last_write_time(pkt_path);
+#endif
 							ResIdentifierPtr pkt_file = MakeSharedPtr<ResIdentifier>(name, timestamp,
 								MakeSharedPtr<std::ifstream>(pkt_name.c_str(), std::ios_base::binary));
 							if (*pkt_file)
@@ -321,7 +325,11 @@ namespace KlayGE
 			filesystem::path res_path(name);
 			if (filesystem::exists(res_path))
 			{
+#ifdef KLAYGE_TR2_LIBRARY_FILESYSTEM_V3_SUPPORT
+				uint64_t timestamp = filesystem::last_write_time(res_path).time_since_epoch().count();
+#else
 				uint64_t timestamp = filesystem::last_write_time(res_path);
+#endif
 				return MakeSharedPtr<ResIdentifier>(name, timestamp,
 					MakeSharedPtr<std::ifstream>(name.c_str(), std::ios_base::binary));
 			}
@@ -336,7 +344,11 @@ namespace KlayGE
 				filesystem::path res_path(res_name);
 				if (filesystem::exists(res_path))
 				{
+#ifdef KLAYGE_TR2_LIBRARY_FILESYSTEM_V3_SUPPORT
+					uint64_t timestamp = filesystem::last_write_time(res_path).time_since_epoch().count();
+#else
 					uint64_t timestamp = filesystem::last_write_time(res_path);
+#endif
 					return MakeSharedPtr<ResIdentifier>(name, timestamp,
 						MakeSharedPtr<std::ifstream>(res_name.c_str(), std::ios_base::binary));
 				}
@@ -360,7 +372,11 @@ namespace KlayGE
 							}
 							std::string const file_name = res_name.substr(pkt_offset + 2);
 
+#ifdef KLAYGE_TR2_LIBRARY_FILESYSTEM_V3_SUPPORT
+							uint64_t timestamp = filesystem::last_write_time(pkt_path).time_since_epoch().count();
+#else
 							uint64_t timestamp = filesystem::last_write_time(pkt_path);
+#endif
 							ResIdentifierPtr pkt_file = MakeSharedPtr<ResIdentifier>(name, timestamp,
 								MakeSharedPtr<std::ifstream>(pkt_name.c_str(), std::ios_base::binary));
 							if (*pkt_file)

@@ -346,7 +346,7 @@ namespace KlayGE
 				motion_sensor_collection_ = MakeCOMPtr(motion_sensor_collection);
 
 				ULONG count = 0;
-				HRESULT hr = motion_sensor_collection_->GetCount(&count);
+				hr = motion_sensor_collection_->GetCount(&count);
 				for (ULONG i = 0; i < count; ++ i)
 				{
 					ISensor* sensor;
@@ -373,7 +373,7 @@ namespace KlayGE
 				orientation_sensor_collection_ = MakeCOMPtr(orientation_sensor_collection);
 
 				ULONG count = 0;
-				HRESULT hr = orientation_sensor_collection_->GetCount(&count);
+				hr = orientation_sensor_collection_->GetCount(&count);
 				for (ULONG i = 0; i < count; ++ i)
 				{
 					ISensor* sensor;

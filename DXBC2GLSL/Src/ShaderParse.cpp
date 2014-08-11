@@ -633,23 +633,23 @@ struct ShaderParser
 	{
 		BOOST_ASSERT_MSG(FOURCC_RDEF == resource_chunk->fourcc, "parameter chunk is not a resource chunk,parse_constant_buffer()");
 
-		uint32_t const * tokens = reinterpret_cast<uint32_t const *>(resource_chunk + 1);
-		uint32_t const * first_token = tokens;
-		uint32_t num_cb = KlayGE::LE2Native(*tokens);
-		++ tokens;
-		uint32_t cb_offset = KlayGE::LE2Native(*tokens);
-		++ tokens;
+		uint32_t const * res_token = reinterpret_cast<uint32_t const *>(resource_chunk + 1);
+		uint32_t const * first_token = res_token;
+		uint32_t num_cb = KlayGE::LE2Native(*res_token);
+		++ res_token;
+		uint32_t cb_offset = KlayGE::LE2Native(*res_token);
+		++ res_token;
 
-		uint32_t num_resource_bindings = KlayGE::LE2Native(*tokens);
-		++ tokens;
-		uint32_t resource_binding_offset = KlayGE::LE2Native(*tokens);
-		++ tokens;
-		uint32_t shader_model = KlayGE::LE2Native(*tokens);
-		++ tokens;
+		uint32_t num_resource_bindings = KlayGE::LE2Native(*res_token);
+		++ res_token;
+		uint32_t resource_binding_offset = KlayGE::LE2Native(*res_token);
+		++ res_token;
+		uint32_t shader_model = KlayGE::LE2Native(*res_token);
+		++ res_token;
 		// TODO: check here, shader_model is unused.
 		UNREF_PARAM(shader_model);
-		uint32_t compile_flags = KlayGE::LE2Native(*tokens);
-		++ tokens;
+		uint32_t compile_flags = KlayGE::LE2Native(*res_token);
+		++ res_token;
 		// TODO: check here, compile_flags is unused.
 		UNREF_PARAM(compile_flags);
 
@@ -683,7 +683,7 @@ struct ShaderParser
 		for (uint32_t i = 0; i < num_cb; ++ i)
 		{
 			DXBCConstantBuffer& cb = program->cbuffers[i];
-			uint32_t name_offset = KlayGE::LE2Native(*cb_tokens);
+			uint32_t cb_name_offset = KlayGE::LE2Native(*cb_tokens);
 			++ cb_tokens;
 			uint32_t var_count = KlayGE::LE2Native(*cb_tokens);
 			++ cb_tokens;
@@ -694,9 +694,9 @@ struct ShaderParser
 			for (uint32_t j = 0; j < var_count; ++ j)
 			{
 				DXBCShaderVariable& var = cb.vars[j];
-				uint32_t name_offset = KlayGE::LE2Native(*var_token);
+				uint32_t var_name_offset = KlayGE::LE2Native(*var_token);
 				++ var_token;
-				var.var_desc.name = reinterpret_cast<char const *>(first_token) + name_offset;
+				var.var_desc.name = reinterpret_cast<char const *>(first_token) + var_name_offset;
 				var.var_desc.start_offset = KlayGE::LE2Native(*var_token);
 				++ var_token;
 				var.var_desc.size = KlayGE::LE2Native(*var_token);
@@ -763,7 +763,7 @@ struct ShaderParser
 				}
 			}
 
-			cb.desc.name = reinterpret_cast<char const *>(first_token) + name_offset;
+			cb.desc.name = reinterpret_cast<char const *>(first_token) + cb_name_offset;
 			cb.desc.size = *cb_tokens;
 			++ cb_tokens;
 			cb.desc.flags = *cb_tokens;

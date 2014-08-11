@@ -9,7 +9,7 @@
 #include <fstream>
 #include <vector>
 #include <cstring>
-#ifdef KLAYGE_TR2_LIBRARY_FILESYSTEM_V2_SUPPORT
+#if defined(KLAYGE_TR2_LIBRARY_FILESYSTEM_V2_SUPPORT) || defined(KLAYGE_TR2_LIBRARY_FILESYSTEM_V3_SUPPORT)
 	#include <filesystem>
 	namespace KlayGE
 	{
@@ -444,8 +444,13 @@ int main(int argc, char* argv[])
 	}
 
 	filesystem::path output_path(argv[1]);
-	std::string y_file = filesystem::basename(output_path) + "_y" + filesystem::extension(output_path);
-	std::string c_file = filesystem::basename(output_path) + "_c" + filesystem::extension(output_path);
+#ifdef KLAYGE_TR2_LIBRARY_FILESYSTEM_V2_SUPPORT
+	std::string y_file = output_path.stem() + "_y" + output_path.extension();
+	std::string c_file = output_path.stem() + "_c" + output_path.extension();
+#else
+	std::string y_file = output_path.stem().string() + "_y" + output_path.extension().string();
+	std::string c_file = output_path.stem().string() + "_c" + output_path.extension().string();
+#endif
 
 	CompressHDR(argv[1], y_file, c_file, y_format, c_format);
 

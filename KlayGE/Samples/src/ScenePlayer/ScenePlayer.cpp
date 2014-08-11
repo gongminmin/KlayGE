@@ -581,7 +581,7 @@ void ScenePlayerApp::LoadScene(std::string const & name)
 		if (proxy_node)
 		{
 			float scale = 1;
-			XMLAttributePtr attr = proxy_node->Attrib("scale");
+			attr = proxy_node->Attrib("scale");
 			if (attr)
 			{
 				scale = attr->ValueFloat();
@@ -794,19 +794,19 @@ void ScenePlayerApp::LoadScene(std::string const & name)
 		XMLNodePtr look_at_node = camera_node->FirstNode("look_at");
 		if (look_at_node)
 		{
-			XMLAttributePtr x_attr = look_at_node->Attrib("x");
+			x_attr = look_at_node->Attrib("x");
 			if (x_attr)
 			{
 				look_at.x() = x_attr->ValueFloat();
 			}
 
-			XMLAttributePtr y_attr = look_at_node->Attrib("y");
+			y_attr = look_at_node->Attrib("y");
 			if (y_attr)
 			{
 				look_at.y() = y_attr->ValueFloat();
 			}
 
-			XMLAttributePtr z_attr = look_at_node->Attrib("z");
+			z_attr = look_at_node->Attrib("z");
 			if (z_attr)
 			{
 				look_at.z() = z_attr->ValueFloat();
@@ -816,19 +816,19 @@ void ScenePlayerApp::LoadScene(std::string const & name)
 		XMLNodePtr up_node = camera_node->FirstNode("up");
 		if (up_node)
 		{
-			XMLAttributePtr x_attr = up_node->Attrib("x");
+			x_attr = up_node->Attrib("x");
 			if (x_attr)
 			{
 				up.x() = x_attr->ValueFloat();
 			}
 
-			XMLAttributePtr y_attr = up_node->Attrib("y");
+			y_attr = up_node->Attrib("y");
 			if (y_attr)
 			{
 				up.y() = y_attr->ValueFloat();
 			}
 
-			XMLAttributePtr z_attr = up_node->Attrib("z");
+			z_attr = up_node->Attrib("z");
 			if (z_attr)
 			{
 				up.z() = z_attr->ValueFloat();

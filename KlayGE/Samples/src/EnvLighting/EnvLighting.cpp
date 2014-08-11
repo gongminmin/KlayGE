@@ -198,7 +198,7 @@ namespace
 			}
 		}
 
-		return rg / NUM_SAMPLES;
+		return rg / static_cast<float>(NUM_SAMPLES);
 	}
 
 	TexturePtr GenIntegrateBRDF()

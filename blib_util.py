@@ -11,15 +11,15 @@ except:
 ################################################
 
 # Compiler name.
-#   On Windows desktop, could be "vc120", "vc110", "vc100", "vc90", "mingw", "auto".
-#   On Windows store, could be "vc120", "vc110", "auto".
-#   On Windows phone, could be "vc120", "vc110", "auto".
+#   On Windows desktop, could be "vc140", "vc120", "vc110", "vc100", "vc90", "mingw", "auto".
+#   On Windows store, could be "vc140", "vc120", "vc110", "auto".
+#   On Windows phone, could be "vc140", "vc120", "vc110", "auto".
 #   On Android, could be "gcc", "auto".
 #   On Linux, could be "gcc", "auto".
 compiler		= "auto"
 
 # Toolset name.
-#   On Windows desktop, could be "v120", "v120_xp", "v110", "v110_xp", "v100", "auto".
+#   On Windows desktop, could be "vc140", "v140_xp", "v120", "v120_xp", "v110", "v110_xp", "v100", "auto".
 #   On Windows store, could be "auto".
 #   On Windows phone, could be "auto".
 #   On Android, could be "4.4.3", "4.6", "4.8", "4.9", "auto".
@@ -190,6 +190,8 @@ class build_info:
 		if "" == compiler:
 			if ("" == cfg_build.compiler) or ("auto" == cfg_build.compiler):
 				if 0 == target_platform.find("win"):
+					if "VS140COMNTOOLS" in env:
+						compiler = "vc140"
 					if "VS120COMNTOOLS" in env:
 						compiler = "vc120"
 					elif "VS110COMNTOOLS" in env:
@@ -209,7 +211,7 @@ class build_info:
 			else:
 				compiler = cfg_build.compiler
 
-				if compiler in ("vc12", "vc11", "vc10", "vc9"):
+				if compiler in ("vc14", "vc12", "vc11", "vc10", "vc9"):
 					compiler += '0'
 					log_warning("Deprecated compiler name, please use " + compiler + " instead.\n")
 
@@ -218,7 +220,9 @@ class build_info:
 			toolset = "auto"
 		elif ("" == toolset) or ("auto" == toolset):
 			if 0 == target_platform.find("win"):
-				if "vc120" == compiler:
+				if "vc140" == compiler:
+					toolset = "v140"
+				elif "vc120" == compiler:
 					toolset = "v120"
 				elif "vc110" == compiler:
 					toolset = "v110"
@@ -243,7 +247,18 @@ class build_info:
 				cfg = ("Debug", "RelWithDebInfo")
 
 		compilers = []
-		if "vc120" == compiler:
+		if "vc140" == compiler:
+			compiler_name = "vc"
+			compiler_version = 140
+			for arch in archs:
+				if "x86" == arch:
+					gen_name = "Visual Studio 14"
+				elif "arm" == arch:
+					gen_name = "Visual Studio 14 ARM"
+				elif "x64" == arch:
+					gen_name = "Visual Studio 14 Win64"
+				compilers.append(compiler_info(arch, gen_name, toolset, target_platform))
+		elif "vc120" == compiler:
 			compiler_name = "vc"
 			compiler_version = 120
 			for arch in archs:

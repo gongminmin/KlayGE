@@ -12,7 +12,7 @@
 #include <iostream>
 #include <fstream>
 #include <vector>
-#ifdef KLAYGE_TR2_LIBRARY_FILESYSTEM_V2_SUPPORT
+#if defined(KLAYGE_TR2_LIBRARY_FILESYSTEM_V2_SUPPORT) || defined(KLAYGE_TR2_LIBRARY_FILESYSTEM_V3_SUPPORT)
 	#include <filesystem>
 	namespace KlayGE
 	{
@@ -216,7 +216,7 @@ namespace
 			prefiltered_clr += env_map[face][y * size + x];
 		}
 
-		return prefiltered_clr / NUM_SAMPLES;
+		return prefiltered_clr / static_cast<float>(NUM_SAMPLES);
 	}
 
 	Color PrefilterEnvMapSpecular(float roughness, float3 const & r, Color* env_map[6], uint32_t size)
@@ -502,7 +502,11 @@ int main(int argc, char* argv[])
 	else
 	{
 		filesystem::path output_path(argv[1]);
-		output = filesystem::basename(output_path) + "_filtered.dds";
+#ifdef KLAYGE_TR2_LIBRARY_FILESYSTEM_V2_SUPPORT
+		output = output_path.stem() + "_filtered.dds";
+#else
+		output = output_path.stem().string() + "_filtered.dds";
+#endif
 	}
 
 	Timer timer;

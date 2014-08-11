@@ -494,12 +494,12 @@ void GLSLGen::ToDclInterShaderInputRecords(std::ostream& out)
 			ShaderInterpolationMode interpolation = SIM_Undefined;
 			if (ST_PS == shader_type_)
 			{
-				for (size_t i = 0; i < program_->dcls.size(); ++ i)
+				for (size_t j = 0; j < program_->dcls.size(); ++ j)
 				{
-					if ((SO_DCL_INPUT_PS == program_->dcls[i]->opcode)
-						&& (program_->dcls[i]->op->indices[0].disp == register_index))
+					if ((SO_DCL_INPUT_PS == program_->dcls[j]->opcode)
+						&& (program_->dcls[j]->op->indices[0].disp == register_index))
 					{
-						interpolation = program_->dcls[i]->dcl_input_ps.interpolation;
+						interpolation = program_->dcls[j]->dcl_input_ps.interpolation;
 						break;
 					}
 				}
@@ -6449,17 +6449,17 @@ void GLSLGen::ToOperandName(std::ostream& out, ShaderOperand const & op, ShaderI
 									uint32_t register_selector = this->GetComponentSelector(op, i);
 									// find the cb member this register selector correspond to
 									// TODO: Check the O(N^2) here
-									uint32_t offset = 16 * register_index + register_selector * 4;
+									uint32_t offset2 = 16 * register_index + register_selector * 4;
 									for (std::vector<DXBCShaderVariable>::const_iterator var_iter2 = cb_iter->vars.begin();
 										var_iter2 != cb_iter->vars.end(); ++ var_iter2)
 									{
-										if ((offset >= var_iter2->var_desc.start_offset)
-											&& (var_iter2->var_desc.start_offset + var_iter2->var_desc.size > offset))
+										if ((offset2 >= var_iter2->var_desc.start_offset)
+											&& (var_iter2->var_desc.start_offset + var_iter2->var_desc.size > offset2))
 										{
 											out << var_iter2->var_desc.name;
-											uint32_t element_count = var_iter2->type_desc.elements;
+											uint32_t element_count2 = var_iter2->type_desc.elements;
 											// ajudge which cb member array element it's located in
-											if (element_count)
+											if (element_count2)
 											{
 												element_index = (16 * register_index - var_iter2->var_desc.start_offset) / 16;
 												out << "[" << element_index << "]";
@@ -6471,7 +6471,7 @@ void GLSLGen::ToOperandName(std::ostream& out, ShaderOperand const & op, ShaderI
 												out << ".";
 												// for array,doesn't need to remap because array element is always at the start of a register,since
 												// array is not packed.
-												if (element_count)
+												if (element_count2)
 												{
 													out << "xyzw"[register_selector];
 												}
@@ -6851,33 +6851,33 @@ void GLSLGen::FindSamplers()
 			TextureSamplerInfo tex;
 			tex.type = program_->dcls[i]->dcl_resource.target;
 			tex.tex_index = program_->dcls[i]->op->indices[0].disp;
-			for (size_t i = 0; i < program_->insns.size(); ++ i)
+			for (size_t j = 0; j < program_->insns.size(); ++ j)
 			{
-				if ((SO_SAMPLE == program_->insns[i]->opcode)
-					|| (SO_SAMPLE_C == program_->insns[i]->opcode)
-					|| (SO_SAMPLE_C_LZ == program_->insns[i]->opcode)
-					|| (SO_SAMPLE_L == program_->insns[i]->opcode)
-					|| (SO_SAMPLE_D == program_->insns[i]->opcode)
-					|| (SO_SAMPLE_B == program_->insns[i]->opcode)
-					|| (SO_LOD == program_->insns[i]->opcode)
-					|| (SO_GATHER4 == program_->insns[i]->opcode)
-					|| (SO_GATHER4_C == program_->insns[i]->opcode)
-					|| (SO_GATHER4_PO == program_->insns[i]->opcode)
-					|| (SO_GATHER4_PO_C == program_->insns[i]->opcode))
+				if ((SO_SAMPLE == program_->insns[j]->opcode)
+					|| (SO_SAMPLE_C == program_->insns[j]->opcode)
+					|| (SO_SAMPLE_C_LZ == program_->insns[j]->opcode)
+					|| (SO_SAMPLE_L == program_->insns[j]->opcode)
+					|| (SO_SAMPLE_D == program_->insns[j]->opcode)
+					|| (SO_SAMPLE_B == program_->insns[j]->opcode)
+					|| (SO_LOD == program_->insns[j]->opcode)
+					|| (SO_GATHER4 == program_->insns[j]->opcode)
+					|| (SO_GATHER4_C == program_->insns[j]->opcode)
+					|| (SO_GATHER4_PO == program_->insns[j]->opcode)
+					|| (SO_GATHER4_PO_C == program_->insns[j]->opcode))
 				{
 					// 3:sampler, 2:resource
 					int i_tex = 2;
 					int i_sam = 3;
-					if ((SO_GATHER4_PO == program_->insns[i]->opcode)
-						|| (SO_GATHER4_PO_C == program_->insns[i]->opcode))
+					if ((SO_GATHER4_PO == program_->insns[j]->opcode)
+						|| (SO_GATHER4_PO_C == program_->insns[j]->opcode))
 					{
 						i_tex = 3;
 						i_sam = 4;
 					}
-					if (tex.tex_index == program_->insns[i]->ops[i_tex]->indices[0].disp)
+					if (tex.tex_index == program_->insns[j]->ops[i_tex]->indices[0].disp)
 					{
 						SamplerInfo sam;
-						sam.index = program_->insns[i]->ops[i_sam]->indices[0].disp;
+						sam.index = program_->insns[j]->ops[i_sam]->indices[0].disp;
 						bool found = false;
 						for (std::vector<SamplerInfo>::const_iterator iter = tex.samplers.begin();
 							iter != tex.samplers.end(); ++ iter)
@@ -6891,12 +6891,12 @@ void GLSLGen::FindSamplers()
 						if (!found)
 						{
 							// search sampler dcls
-							for (size_t i = 0; i < program_->dcls.size(); ++ i)
+							for (size_t k = 0; k < program_->dcls.size(); ++ k)
 							{
-								if ((SO_DCL_SAMPLER == program_->dcls[i]->opcode)
-									&& (sam.index == program_->dcls[i]->op->indices[0].disp))
+								if ((SO_DCL_SAMPLER == program_->dcls[k]->opcode)
+									&& (sam.index == program_->dcls[k]->op->indices[0].disp))
 								{
-									if (program_->dcls[i]->dcl_sampler.shadow)
+									if (program_->dcls[k]->dcl_sampler.shadow)
 									{
 										sam.shadow = true;
 									}

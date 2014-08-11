@@ -9,7 +9,7 @@
 
 #include <boost/algorithm/string/case_conv.hpp>
 
-#ifdef KLAYGE_TR2_LIBRARY_FILESYSTEM_V2_SUPPORT
+#if defined(KLAYGE_TR2_LIBRARY_FILESYSTEM_V2_SUPPORT) || defined(KLAYGE_TR2_LIBRARY_FILESYSTEM_V3_SUPPORT)
 	#include <filesystem>
 	namespace KlayGE
 	{
@@ -356,7 +356,11 @@ int main(int argc, char* argv[])
 	}
 	else
 	{
-		std::string ext_name = filesystem::extension(filesystem::path(res_names[0]));
+#ifdef KLAYGE_TR2_LIBRARY_FILESYSTEM_V2_SUPPORT
+		std::string ext_name = filesystem::path(res_names[0]).extension();
+#else
+		std::string ext_name = filesystem::path(res_names[0]).extension().string();
+#endif
 		if (".dds" == ext_name)
 		{
 			res_type = "diffuse";

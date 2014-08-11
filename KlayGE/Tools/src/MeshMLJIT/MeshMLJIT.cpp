@@ -17,7 +17,7 @@
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string/trim.hpp>
 
-#ifdef KLAYGE_TR2_LIBRARY_FILESYSTEM_V2_SUPPORT
+#if defined(KLAYGE_TR2_LIBRARY_FILESYSTEM_V2_SUPPORT) || defined(KLAYGE_TR2_LIBRARY_FILESYSTEM_V3_SUPPORT)
 	#include <filesystem>
 	namespace KlayGE
 	{
@@ -1452,30 +1452,30 @@ namespace
 
 			uint8_t rgb[3];
 
-			for (uint32_t i = 0; i < 3; ++ i)
+			for (uint32_t j = 0; j < 3; ++ j)
 			{
-				rgb[i] = static_cast<uint8_t>(MathLib::clamp(static_cast<int>(mtl.ambient[i] * 255.0f + 0.5f), 0, 255));
+				rgb[j] = static_cast<uint8_t>(MathLib::clamp(static_cast<int>(mtl.ambient[j] * 255.0f + 0.5f), 0, 255));
 			}
 			os.write(reinterpret_cast<char*>(rgb), sizeof(rgb));
 
-			for (uint32_t i = 0; i < 3; ++ i)
+			for (uint32_t j = 0; j < 3; ++ j)
 			{
-				rgb[i] = static_cast<uint8_t>(MathLib::clamp(static_cast<int>(mtl.diffuse[i] * 255.0f + 0.5f), 0, 255));
+				rgb[j] = static_cast<uint8_t>(MathLib::clamp(static_cast<int>(mtl.diffuse[j] * 255.0f + 0.5f), 0, 255));
 			}
 			os.write(reinterpret_cast<char*>(rgb), sizeof(rgb));
 
 			float specular_level = std::max(std::max(mtl.specular.x(), mtl.specular.y()), mtl.specular.z());
-			for (uint32_t i = 0; i < 3; ++ i)
+			for (uint32_t j = 0; j < 3; ++ j)
 			{
-				rgb[i] = static_cast<uint8_t>(MathLib::clamp(static_cast<int>(mtl.specular[i] / specular_level * 255.0f + 0.5f), 0, 255));
+				rgb[j] = static_cast<uint8_t>(MathLib::clamp(static_cast<int>(mtl.specular[j] / specular_level * 255.0f + 0.5f), 0, 255));
 			}
 			os.write(reinterpret_cast<char*>(rgb), sizeof(rgb));
 			specular_level = Native2LE(specular_level);
 			os.write(reinterpret_cast<char*>(&specular_level), sizeof(specular_level));
 
-			for (uint32_t i = 0; i < 3; ++ i)
+			for (uint32_t j = 0; j < 3; ++ j)
 			{
-				rgb[i] = static_cast<uint8_t>(MathLib::clamp(static_cast<int>(mtl.emit[i] * 255.0f + 0.5f), 0, 255));
+				rgb[j] = static_cast<uint8_t>(MathLib::clamp(static_cast<int>(mtl.emit[j] * 255.0f + 0.5f), 0, 255));
 			}
 			os.write(reinterpret_cast<char*>(rgb), sizeof(rgb));
 			
@@ -1681,13 +1681,21 @@ namespace
 		typedef KLAYGE_DECLTYPE(all_texture_slots) AllTextureSlotsType;
 		KLAYGE_FOREACH(AllTextureSlotsType::reference slot, all_texture_slots)
 		{
-			std::string ext_name = filesystem::extension(slot.first);
+#ifdef KLAYGE_TR2_LIBRARY_FILESYSTEM_V2_SUPPORT
+			std::string ext_name = slot.first.extension();
+#else
+			std::string ext_name = slot.first.extension().string();
+#endif
 			if (ext_name != ".dds")
 			{
 				std::string cmd = "texconv -f A8B8G8R8 -ft DDS -m 1 \"" + slot.first.string() + "\"";
 				system(cmd.c_str());
 
-				std::string tex_base = (slot.first.parent_path() / filesystem::path(filesystem::basename(slot.first))).string();
+#ifdef KLAYGE_TR2_LIBRARY_FILESYSTEM_V2_SUPPORT
+				std::string tex_base = (slot.first.parent_path() / filesystem::path(slot.first.stem())).string();
+#else
+				std::string tex_base = (slot.first.parent_path() / slot.first.stem()).string();
+#endif
 				deploy_files.push_back(std::make_pair(filesystem::path(tex_base + ".dds"),
 					mtls[slot.second[0].first].texture_slots[slot.second[0].second].first));
 			}
@@ -1697,7 +1705,11 @@ namespace
 		std::map<filesystem::path, std::vector<std::pair<size_t, size_t> > > augmented_texture_slots;
 		KLAYGE_FOREACH(AllTextureSlotsType::reference slot, all_texture_slots)
 		{
-			std::string tex_base = (slot.first.parent_path() / filesystem::path(filesystem::basename(slot.first))).string();
+#ifdef KLAYGE_TR2_LIBRARY_FILESYSTEM_V2_SUPPORT
+			std::string tex_base = (slot.first.parent_path() / filesystem::path(slot.first.stem())).string();
+#else
+			std::string tex_base = (slot.first.parent_path() / slot.first.stem()).string();
+#endif
 			augmented_texture_slots[filesystem::path(tex_base + ".dds")].push_back(slot.second[0]);
 
 			for (size_t i = 1; i < slot.second.size(); ++ i)
@@ -1985,7 +1997,11 @@ int main(int argc, char* argv[])
 	if (meshml_name.empty())
 	{
 		filesystem::path input_path(input_name);
-		std::string base_name = filesystem::basename(input_path);
+#ifdef KLAYGE_TR2_LIBRARY_FILESYSTEM_V2_SUPPORT
+		std::string base_name = input_path.stem();
+#else
+		std::string base_name = input_path.stem().string();
+#endif
 		filesystem::path folder = input_path.parent_path();
 		meshml_name = (folder / filesystem::path(base_name)).string() + ".7z//" + base_name + ".meshml";
 	}

@@ -957,9 +957,9 @@ namespace KlayGE
 				XMLNodePtr size_over_life_node = doc.AllocNode(XNT_Element, "curve");
 				size_over_life_node->AppendAttrib(doc.AllocAttribString("name", "size_over_life"));
 				std::vector<float2> const & size_over_life = polyline_updater->SizeOverLife();
-				for (size_t i = 0; i < size_over_life.size(); ++ i)
+				for (size_t j = 0; j < size_over_life.size(); ++ j)
 				{
-					float2 const & pt = size_over_life[i];
+					float2 const & pt = size_over_life[j];
 
 					XMLNodePtr ctrl_point_node = doc.AllocNode(XNT_Element, "ctrl_point");
 					ctrl_point_node->AppendAttrib(doc.AllocAttribFloat("x", pt.x()));
@@ -972,9 +972,9 @@ namespace KlayGE
 				XMLNodePtr mass_over_life_node = doc.AllocNode(XNT_Element, "curve");
 				mass_over_life_node->AppendAttrib(doc.AllocAttribString("name", "mass_over_life"));
 				std::vector<float2> const & mass_over_life = polyline_updater->MassOverLife();
-				for (size_t i = 0; i < mass_over_life.size(); ++ i)
+				for (size_t j = 0; j < mass_over_life.size(); ++ j)
 				{
-					float2 const & pt = mass_over_life[i];
+					float2 const & pt = mass_over_life[j];
 
 					XMLNodePtr ctrl_point_node = doc.AllocNode(XNT_Element, "ctrl_point");
 					ctrl_point_node->AppendAttrib(doc.AllocAttribFloat("x", pt.x()));
@@ -987,9 +987,9 @@ namespace KlayGE
 				XMLNodePtr opacity_over_life_node = doc.AllocNode(XNT_Element, "curve");
 				opacity_over_life_node->AppendAttrib(doc.AllocAttribString("name", "opacity_over_life"));
 				std::vector<float2> const & opacity_over_life = polyline_updater->OpacityOverLife();
-				for (size_t i = 0; i < opacity_over_life.size(); ++ i)
+				for (size_t j = 0; j < opacity_over_life.size(); ++ j)
 				{
-					float2 const & pt = opacity_over_life[i];
+					float2 const & pt = opacity_over_life[j];
 
 					XMLNodePtr ctrl_point_node = doc.AllocNode(XNT_Element, "ctrl_point");
 					ctrl_point_node->AppendAttrib(doc.AllocAttribFloat("x", pt.x()));

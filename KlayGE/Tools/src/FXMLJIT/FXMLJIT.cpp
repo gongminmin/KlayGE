@@ -42,7 +42,7 @@
 #include <vector>
 #include <cstring>
 
-#ifdef KLAYGE_TR2_LIBRARY_FILESYSTEM_V2_SUPPORT
+#if defined(KLAYGE_TR2_LIBRARY_FILESYSTEM_V2_SUPPORT) || defined(KLAYGE_TR2_LIBRARY_FILESYSTEM_V3_SUPPORT)
 #include <filesystem>
 namespace KlayGE
 {
@@ -144,7 +144,11 @@ int main(int argc, char* argv[])
 
 	std::string fxml_name(argv[2]);
 	filesystem::path fxml_path(fxml_name);
-	std::string const base_name = filesystem::basename(fxml_path);
+#ifdef KLAYGE_TR2_LIBRARY_FILESYSTEM_V2_SUPPORT
+	std::string const base_name = fxml_path.stem();
+#else
+	std::string const base_name = fxml_path.stem().string();
+#endif
 	filesystem::path fxml_directory = fxml_path.parent_path();
 	ResLoader::Instance().AddPath(fxml_directory.string());
 
@@ -198,7 +202,11 @@ int main(int argc, char* argv[])
 	if (!target_folder.empty())
 	{
 		filesystem::copy_file(kfx_path, target_folder / kfx_name,
+#ifdef KLAYGE_TR2_LIBRARY_FILESYSTEM_V3_SUPPORT
+			filesystem::copy_options::overwrite_existing);
+#else
 			filesystem::copy_option::overwrite_if_exists);
+#endif
 		kfx_path = target_folder / kfx_name;
 	}
 

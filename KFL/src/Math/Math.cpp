@@ -1928,7 +1928,7 @@ namespace KlayGE
 				cov[i] = 0;
 			}
 
-			for (Iterator iter = first; iter != last; ++ iter)
+			for (iter = first; iter != last; ++ iter)
 			{
 				Vector_T<value_type, 3> diff = Vector_T<value_type, 3>(*iter) - center;
 				cov[0] += diff[0] * diff[0];
