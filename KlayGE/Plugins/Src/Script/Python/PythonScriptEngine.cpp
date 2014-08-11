@@ -141,63 +141,63 @@ namespace KlayGE
 
 	PyObjectPtr CppType2PyObjectPtr(boost::any const & t)
 	{
-		if (typeid(std::string) == t.type())
+		if (boost::any_cast<std::string>(&t) != nullptr)
 		{
 			return CppType2PyObjectPtr(boost::any_cast<std::string>(t));
 		}
-		else if (typeid(char*) == t.type())
+		else if (boost::any_cast<char*>(&t) != nullptr)
 		{
 			return CppType2PyObjectPtr(boost::any_cast<char*>(t));
 		}
-		else if (typeid(wchar_t*) == t.type())
+		else if (boost::any_cast<wchar_t*>(&t) != nullptr)
 		{
 			return CppType2PyObjectPtr(boost::any_cast<wchar_t*>(t));
 		}
-		else if (typeid(int8_t) == t.type())
+		else if (boost::any_cast<int8_t>(&t) != nullptr)
 		{
 			return CppType2PyObjectPtr(boost::any_cast<int8_t>(t));
 		}
-		else if (typeid(int16_t) == t.type())
+		else if (boost::any_cast<int16_t>(&t) != nullptr)
 		{
 			return CppType2PyObjectPtr(boost::any_cast<int16_t>(t));
 		}
-		else if (typeid(int32_t) == t.type())
+		else if (boost::any_cast<int32_t>(&t) != nullptr)
 		{
 			return CppType2PyObjectPtr(boost::any_cast<int32_t>(t));
 		}
-		else if (typeid(int64_t) == t.type())
+		else if (boost::any_cast<int64_t>(&t) != nullptr)
 		{
 			return CppType2PyObjectPtr(boost::any_cast<int64_t>(t));
 		}
-		else if (typeid(uint8_t) == t.type())
+		else if (boost::any_cast<uint8_t>(&t) != nullptr)
 		{
 			return CppType2PyObjectPtr(boost::any_cast<uint8_t>(t));
 		}
-		else if (typeid(uint16_t) == t.type())
+		else if (boost::any_cast<uint16_t>(&t) != nullptr)
 		{
 			return CppType2PyObjectPtr(boost::any_cast<uint16_t>(t));
 		}
-		else if (typeid(uint32_t) == t.type())
+		else if (boost::any_cast<uint32_t>(&t) != nullptr)
 		{
 			return CppType2PyObjectPtr(boost::any_cast<uint32_t>(t));
 		}
-		else if (typeid(uint64_t) == t.type())
+		else if (boost::any_cast<uint64_t>(&t) != nullptr)
 		{
 			return CppType2PyObjectPtr(boost::any_cast<uint64_t>(t));
 		}
-		else if (typeid(double) == t.type())
+		else if (boost::any_cast<double>(&t) != nullptr)
 		{
 			return CppType2PyObjectPtr(boost::any_cast<double>(t));
 		}
-		else if (typeid(float) == t.type())
+		else if (boost::any_cast<float>(&t) != nullptr)
 		{
 			return CppType2PyObjectPtr(boost::any_cast<float>(t));
 		}
-		else if (typeid(PyObject*) == t.type())
+		else if (boost::any_cast<PyObject*>(&t) != nullptr)
 		{
 			return CppType2PyObjectPtr(boost::any_cast<PyObject*>(t));
 		}
-		else if (typeid(PyObjectPtr) == t.type())
+		else if (boost::any_cast<PyObjectPtr>(&t) != nullptr)
 		{
 			return CppType2PyObjectPtr(boost::any_cast<PyObjectPtr>(t));
 		}

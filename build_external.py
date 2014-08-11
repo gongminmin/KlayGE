@@ -27,29 +27,55 @@ def build_Boost(build_info, compiler_info):
 	if compiler_info.is_windows_runtime:
 		with_filesystem = False
 		with_program_options = False
+	elif compiler_info.is_android:
+		with_program_options = False
+		with_regex = False
 
-	additional_options = ""
+	additional_options = " -DWITH_ATOMIC:BOOL="
 	if with_atomic:
-		additional_options += " -DWITH_ATOMIC:BOOL=\"ON\""
+		additional_options += "\"ON\""
+	else:
+		additional_options += "\"OFF\""
+	additional_options += " -DWITH_CHRONO:BOOL="
 	if with_chrono:
-		additional_options += " -DWITH_CHRONO:BOOL=\"ON\""
+		additional_options += "\"ON\""
+	else:
+		additional_options += "\"OFF\""
+	additional_options += " -DWITH_DATE_TIME:BOOL="
 	if with_date_time:
-		additional_options += " -DWITH_DATE_TIME:BOOL=\"ON\""
+		additional_options += "\"ON\""
+	else:
+		additional_options += "\"OFF\""
+	additional_options += " -DWITH_FILESYSTEM:BOOL="
 	if with_filesystem:
-		additional_options += " -DWITH_FILESYSTEM:BOOL=\"ON\""
+		additional_options += "\"ON\""
+	else:
+		additional_options += "\"OFF\""
+	additional_options += " -DWITH_PROGRAM_OPTIONS:BOOL="
 	if with_program_options:
-		additional_options += " -DWITH_PROGRAM_OPTIONS:BOOL=\"ON\""
+		additional_options += "\"ON\""
+	else:
+		additional_options += "\"OFF\""
+	additional_options += " -DWITH_REGEX:BOOL="
 	if with_regex:
-		additional_options += " -DWITH_REGEX:BOOL=\"ON\""
+		additional_options += "\"ON\""
+	else:
+		additional_options += "\"OFF\""
+	additional_options += " -DWITH_SYSTEM:BOOL="
 	if with_system:
-		additional_options += " -DWITH_SYSTEM:BOOL=\"ON\""
+		additional_options += "\"ON\""
+	else:
+		additional_options += "\"OFF\""
+	additional_options += " -DWITH_THREAD:BOOL="
 	if with_thread:
-		additional_options += " -DWITH_THREAD:BOOL=\"ON\""
+		additional_options += "\"ON\""
+	else:
+		additional_options += "\"OFF\""
 	build_a_project("boost", "External/boost", build_info, compiler_info, True, additional_options)
 
 def build_Python(build_info, compiler_info):
-	additional_options = "-D BUILTIN_COLLECTIONS:BOOL=\"ON\" -D BUILTIN_FUNCTOOLS:BOOL=\"ON\" -D BUILTIN_ITERTOOLS:BOOL=\"ON\" \
-		-D BUILTIN_MATH:BOOL=\"ON\" -D BUILTIN_MSI:BOOL=\"OFF\" \
+	additional_options = "-D BUILTIN_COLLECTIONS:BOOL=\"ON\" -D BUILTIN_FUNCTOOLS:BOOL=\"ON\" -D BUILTIN_IO:BOOL=\"ON\" \
+		-D BUILTIN_ITERTOOLS:BOOL=\"ON\" -D BUILTIN_MATH:BOOL=\"ON\" -D BUILTIN_MSI:BOOL=\"OFF\" \
 		-D BUILTIN_OPERATOR:BOOL=\"ON\" -D BUILTIN_UNICODEDATA:BOOL=\"ON\" -D BUILTIN_MSVCRT:BOOL=\"OFF\" \
 		-D BUILTIN_WINREG:BOOL=\"ON\" -D BUILTIN_SUBPROCESS:BOOL=\"OFF\" -D BUILTIN_MULTIPROCESSING:BOOL=\"OFF\" \
 		-D BUILTIN_SELECT:BOOL=\"OFF\" -D BUILTIN_SOCKET:BOOL=\"OFF\" -D BUILTIN_MMAP:BOOL=\"OFF\" \

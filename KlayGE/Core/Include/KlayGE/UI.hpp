@@ -1358,7 +1358,7 @@ namespace KlayGE
 			{
 				shared_ptr<UIComboBoxItem> pItem = items_[i];
 
-				if ((pItem->data.type() == typeid(data)) && (boost::any_cast<T>(pItem->data) == data))
+				if (boost::any_cast<T>(pItem->data) == data)
 				{
 					this->SetSelectedByIndex(static_cast<uint32_t>(i));
 				}
