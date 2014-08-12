@@ -192,7 +192,7 @@ class build_info:
 				if 0 == target_platform.find("win"):
 					if "VS140COMNTOOLS" in env:
 						compiler = "vc140"
-					if "VS120COMNTOOLS" in env:
+					elif "VS120COMNTOOLS" in env:
 						compiler = "vc120"
 					elif "VS110COMNTOOLS" in env:
 						compiler = "vc110"
