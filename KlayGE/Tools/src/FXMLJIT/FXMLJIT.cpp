@@ -165,27 +165,27 @@ int main(int argc, char* argv[])
 		uint64_t src_timestamp = source->Timestamp();
 
 		uint32_t fourcc;
-		source->read(&fourcc, sizeof(fourcc));
+		kfx_source->read(&fourcc, sizeof(fourcc));
 		fourcc = LE2Native(fourcc);
 
 		uint32_t ver;
-		source->read(&ver, sizeof(ver));
+		kfx_source->read(&ver, sizeof(ver));
 		ver = LE2Native(ver);
 
 		if ((MakeFourCC<'K', 'F', 'X', ' '>::value == fourcc) && (KFX_VERSION == ver))
 		{
 			uint32_t shader_fourcc;
-			source->read(&shader_fourcc, sizeof(shader_fourcc));
+			kfx_source->read(&shader_fourcc, sizeof(shader_fourcc));
 			shader_fourcc = LE2Native(shader_fourcc);
 
 			uint32_t shader_ver;
-			source->read(&shader_ver, sizeof(shader_ver));
+			kfx_source->read(&shader_ver, sizeof(shader_ver));
 			shader_ver = LE2Native(shader_ver);
 
 			if ((re.NativeShaderFourCC() == shader_fourcc) && (re.NativeShaderVersion() == shader_ver))
 			{
 				uint64_t timestamp;
-				source->read(&timestamp, sizeof(timestamp));
+				kfx_source->read(&timestamp, sizeof(timestamp));
 				timestamp = LE2Native(timestamp);
 				if (src_timestamp <= timestamp)
 				{

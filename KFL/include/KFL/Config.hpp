@@ -340,25 +340,13 @@
 #if defined(KLAYGE_COMPILER_MSVC)
 	#if defined(_M_X64)
 		#define KLAYGE_CPU_X64		
-		#ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
-			#define KLAYGE_COMPILER_TARGET x64
-		#else
-			#define KLAYGE_COMPILER_TARGET x64_app
-		#endif
+		#define KLAYGE_COMPILER_TARGET x64
 	#elif defined(_M_IX86)
 		#define KLAYGE_CPU_X86
-		#ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
-			#define KLAYGE_COMPILER_TARGET x86
-		#else
-			#define KLAYGE_COMPILER_TARGET x86_app
-		#endif
+		#define KLAYGE_COMPILER_TARGET x86
 	#elif defined(_M_ARM)
 		#define KLAYGE_CPU_ARM
-		#ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
-			#define KLAYGE_COMPILER_TARGET arm
-		#else
-			#define KLAYGE_COMPILER_TARGET arm_app
-		#endif
+		#define KLAYGE_COMPILER_TARGET arm
 	#else
 		#error Unknown CPU type.
 	#endif

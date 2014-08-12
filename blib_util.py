@@ -423,8 +423,6 @@ def build_a_project(name, build_path, build_info, compiler_info, need_install = 
 	if "android" == build_info.target_platform:
 		additional_options += " -DCMAKE_TOOLCHAIN_FILE=\"%s/cmake/android.toolchain.cmake\"" % curdir
 		additional_options += " -DANDROID_NATIVE_API_LEVEL=%s" % build_info.target_api_level
-		if "win" == build_info.host_platform:
-			additional_options += " -DCMAKE_MAKE_PROGRAM=\"%ANDROID_NDK%\\prebuilt\\windows\\bin\\make.exe\""
 
 	if "vc" == build_info.compiler_name:
 		if "x86" == compiler_info.arch:
@@ -468,7 +466,7 @@ def build_a_project(name, build_path, build_info, compiler_info, need_install = 
 	else:
 		if "win" == build_info.host_platform:
 			if "android" == build_info.target_platform:
-				make_name = "%ANDROID_NDK%\\prebuilt\\windows\\bin\\make.exe"
+				make_name = "%s\\prebuilt\\windows\\bin\\make.exe" % os.environ["ANDROID_NDK"]
 			else:
 				make_name = "mingw32-make.exe"
 		else:
