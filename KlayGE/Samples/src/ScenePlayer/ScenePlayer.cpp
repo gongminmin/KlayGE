@@ -92,7 +92,7 @@ namespace
 		void operator()(LightSource& light, float app_time, float elapsed_time)
 		{
 			boost::any py_ret = this->Run(app_time, elapsed_time);
-			if (typeid(std::vector<boost::any>) == py_ret.type())
+			if (boost::any_cast<std::vector<boost::any> >(&py_ret) != nullptr)
 			{
 				std::vector<boost::any> ret = boost::any_cast<std::vector<boost::any> >(py_ret);
 				size_t s = ret.size();
@@ -100,7 +100,7 @@ namespace
 				if (s > 0)
 				{
 					boost::any py_mat = ret[0];
-					if (typeid(std::vector<boost::any>) == py_mat.type())
+					if (boost::any_cast<std::vector<boost::any> >(&py_mat) != nullptr)
 					{
 						std::vector<boost::any> mat = boost::any_cast<std::vector<boost::any> >(py_mat);
 						if (!mat.empty())
@@ -117,7 +117,7 @@ namespace
 				if (s > 1)
 				{
 					boost::any py_clr = ret[1];
-					if (typeid(std::vector<boost::any>) == py_clr.type())
+					if (boost::any_cast<std::vector<boost::any> >(&py_clr) != nullptr)
 					{
 						std::vector<boost::any> clr = boost::any_cast<std::vector<boost::any> >(py_clr);
 						if (!clr.empty())
@@ -134,7 +134,7 @@ namespace
 				if (s > 2)
 				{
 					boost::any py_fo = ret[2];
-					if (typeid(std::vector<boost::any>) == py_fo.type())
+					if (boost::any_cast<std::vector<boost::any> >(&py_fo) != nullptr)
 					{
 						std::vector<boost::any> fo = boost::any_cast<std::vector<boost::any> >(py_fo);
 						if (!fo.empty())
@@ -151,7 +151,7 @@ namespace
 				if (s > 3)
 				{
 					boost::any py_oi = ret[3];
-					if (typeid(std::vector<boost::any>) == py_oi.type())
+					if (boost::any_cast<std::vector<boost::any> >(&py_oi) != nullptr)
 					{
 						std::vector<boost::any> oi = boost::any_cast<std::vector<boost::any> >(py_oi);
 						if (!oi.empty())
@@ -181,7 +181,7 @@ namespace
 		void operator()(SceneObject& obj, float app_time, float elapsed_time)
 		{
 			boost::any py_ret = this->Run(app_time, elapsed_time);
-			if (typeid(std::vector<boost::any>) == py_ret.type())
+			if (boost::any_cast<std::vector<boost::any> >(&py_ret) != nullptr)
 			{
 				std::vector<boost::any> ret = boost::any_cast<std::vector<boost::any> >(py_ret);
 				size_t s = ret.size();
@@ -189,7 +189,7 @@ namespace
 				if (s > 0)
 				{
 					boost::any py_mat = ret[0];
-					if (typeid(std::vector<boost::any>) == py_mat.type())
+					if (boost::any_cast<std::vector<boost::any> >(&py_mat) != nullptr)
 					{
 						std::vector<boost::any> mat = boost::any_cast<std::vector<boost::any> >(py_mat);
 						if (!mat.empty())
@@ -218,7 +218,7 @@ namespace
 		void operator()(Camera& camera, float app_time, float elapsed_time)
 		{
 			boost::any py_ret = this->Run(app_time, elapsed_time);
-			if (typeid(std::vector<boost::any>) == py_ret.type())
+			if (boost::any_cast<std::vector<boost::any> >(&py_ret) != nullptr)
 			{
 				std::vector<boost::any> ret = boost::any_cast<std::vector<boost::any> >(py_ret);
 				size_t s = ret.size();
@@ -234,7 +234,7 @@ namespace
 				if (s > 0)
 				{
 					boost::any py_eye = ret[0];
-					if (typeid(std::vector<boost::any>) == py_eye.type())
+					if (boost::any_cast<std::vector<boost::any> >(&py_eye) != nullptr)
 					{
 						std::vector<boost::any> eye = boost::any_cast<std::vector<boost::any> >(py_eye);
 						if (!eye.empty())
@@ -249,7 +249,7 @@ namespace
 				if (s > 1)
 				{
 					boost::any py_lookat = ret[1];
-					if (typeid(std::vector<boost::any>) == py_lookat.type())
+					if (boost::any_cast<std::vector<boost::any> >(&py_lookat) != nullptr)
 					{
 						std::vector<boost::any> lookat = boost::any_cast<std::vector<boost::any> >(py_lookat);
 						if (!lookat.empty())
@@ -264,7 +264,7 @@ namespace
 				if (s > 2)
 				{
 					boost::any py_up = ret[2];
-					if (typeid(std::vector<boost::any>) == py_up.type())
+					if (boost::any_cast<std::vector<boost::any> >(&py_up) != nullptr)
 					{
 						std::vector<boost::any> up = boost::any_cast<std::vector<boost::any> >(py_up);
 						if (!up.empty())
@@ -279,7 +279,7 @@ namespace
 				if (s > 3)
 				{
 					boost::any py_np = ret[3];
-					if (typeid(float) == py_np.type())
+					if (boost::any_cast<float>(&py_np) != nullptr)
 					{
 						cam_np = boost::any_cast<float>(py_np);
 					}
@@ -287,7 +287,7 @@ namespace
 				if (s > 4)
 				{
 					boost::any py_fp = ret[3];
-					if (typeid(float) == py_fp.type())
+					if (boost::any_cast<float>(&py_fp) != nullptr)
 					{
 						cam_fp = boost::any_cast<float>(py_fp);
 					}
