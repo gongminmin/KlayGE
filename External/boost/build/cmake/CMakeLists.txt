@@ -18,6 +18,8 @@ OPTION(WITH_THREAD "Build with thread" OFF)
 SET(BOOST_PROJECT_DIR "${CMAKE_HOME_DIRECTORY}/../..")
 SET(KLAYGE_ROOT_DIR "${BOOST_PROJECT_DIR}/../..")
 
+SET(FORCE_RTTI 1)
+
 INCLUDE(${KLAYGE_ROOT_DIR}/cmake/Common.cmake)
 INCLUDE(${KLAYGE_ROOT_DIR}/cmake/Platform.cmake)
 INCLUDE(${KLAYGE_ROOT_DIR}/cmake/Compiler.cmake)
