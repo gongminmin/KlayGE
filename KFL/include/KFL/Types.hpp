@@ -179,7 +179,14 @@ private:
 	}
 #endif
 #else
+	#ifdef KLAYGE_COMPILER_MSVC
+		#pragma warning(push)
+		#pragma warning(disable: 4100)
+	#endif
 	#include <boost/atomic.hpp>
+	#ifdef KLAYGE_COMPILER_MSVC
+		#pragma warning(pop)
+	#endif
 	namespace KlayGE
 	{
 		using boost::atomic;
