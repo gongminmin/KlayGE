@@ -71,6 +71,7 @@ class compiler_info:
 		self.is_windows = False
 		self.is_android = False
 		self.is_linux = False
+		self.is_darwin = False
 
 		if "win" == target_platform:
 			self.is_windows = True
@@ -85,6 +86,8 @@ class compiler_info:
 			self.is_android = True
 		elif "linux" == target_platform:
 			self.is_linux = True
+		elif "darwin" == target_platform:
+			self.is_darwin = True
 
 class build_info:
 	def __init__(self, compiler, archs, cfg):
@@ -116,6 +119,8 @@ class build_info:
 			host_platform = "win"
 		elif 0 == host_platform.find("linux"):
 			host_platform = "linux"
+		elif 0 == host_platform.find("darwin"):
+			host_platform = "darwin"
 		if "auto" == cfg_build.target:
 			target_platform = host_platform
 		else:
@@ -303,6 +308,8 @@ class build_info:
 			compiler_version = self.retrive_clang_version()
 			if "win" == host_platform:
 				gen_name = "MinGW Makefiles"
+			elif "darwin" == host_platform:
+				gen_name = "XCode"
 			else:
 				gen_name = "Unix Makefiles"
 			for arch in archs:

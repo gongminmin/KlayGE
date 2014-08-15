@@ -6,9 +6,9 @@ SET(SOURCE_FILES
 	${BOOST_PROJECT_DIR}/libs/chrono/src/process_cpu_clocks.cpp
 )
 
-IF(UNIX)
+IF(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
 	SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -lrt -lpthread")
-ENDIF()
+ENDIF
 IF(CMAKE_COMPILER_IS_GNUCXX OR (CMAKE_C_COMPILER_ID STREQUAL "Clang") OR APPLE)
 	SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wextra -pedantic -Wno-long-long -Wno-variadic-macros")
 ENDIF()
