@@ -156,9 +156,21 @@ namespace KlayGE
 
 	Window::~Window()
 	{
-		if ((wnd_ != nullptr) && !external_wnd_)
+		if (wnd_ != nullptr)
 		{
-			::DestroyWindow(wnd_);
+#ifdef KLAYGE_COMPILER_MSVC
+#pragma warning(push)
+#pragma warning(disable: 4244)
+#endif
+			::SetWindowLongPtrW(wnd_, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(nullptr));
+#ifdef KLAYGE_COMPILER_MSVC
+#pragma warning(pop)
+#endif
+			if (!external_wnd_)
+			{
+				::DestroyWindow(wnd_);
+			}
+
 			wnd_ = nullptr;
 		}
 	}
