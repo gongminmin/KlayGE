@@ -159,7 +159,9 @@ namespace KlayGE
 		window->Closed += 
 			ref new TypedEventHandler<CoreWindow^, CoreWindowEventArgs^>(msgs_, &MetroMsgs::OnWindowClosed);
 
+#ifndef KLAYGE_PLATFORM_WINDOWS_PHONE
 		window->PointerCursor = ref new CoreCursor(CoreCursorType::Arrow, 0);
+#endif
 
 		window->PointerPressed +=
 			ref new TypedEventHandler<CoreWindow^, PointerEventArgs^>(msgs_, &MetroMsgs::OnPointerPressed);
