@@ -23,8 +23,9 @@
 	<macro name="TS_Specular" value="1"/>
 	<macro name="TS_Shininess" value="2"/>
 	<macro name="TS_Normal" value="3"/>
-	<macro name="TS_Emit" value="4"/>
-	<macro name="TS_Opacity" value="5"/>
+	<macro name="TS_Height" value="4"/>
+	<macro name="TS_Emit" value="5"/>
+	<macro name="TS_Opacity" value="6"/>
 
 	<shader>
 		<![CDATA[
@@ -142,6 +143,17 @@ float4 VisualizeTexture(float2 tex0)
 		else
 		{
 			ret = float4(0, 0, 1, 1);
+		}
+	}
+	else if (TS_Height == texture_slot)
+	{
+		if (height_map_enabled)
+		{
+			ret = float4(height_tex.Sample(aniso_sampler, tex0).rrr, 1);
+		}
+		else
+		{
+			ret = float4(0, 0, 0, 1);
 		}
 	}
 	else if (TS_Emit == texture_slot)

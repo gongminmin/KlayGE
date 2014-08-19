@@ -53,6 +53,8 @@ KlayGE/bin/*/*/*.so
 KlayGE/bin/*/*.dll
 KlayGE/bin/*/*.so
 KlayGE/bin/*/*.exe
+KlayGE/bin/*/*.exe.config
+KlayGE/bin/*/*.pdb
 KlayGE/bin/*/*.py
 KlayGE/bin/*/Lib
 KlayGE/bin/*/*Py.zip
@@ -74,6 +76,7 @@ KlayGE/Samples/media/Ocean/OceanDisplacementParam.dds
 KlayGE/Samples/media/Ocean/OceanGradient.dds
 KlayGE/Samples/media/*/MakePyZip.py
 KlayGE/Samples/media/*/*Py.zip
+KlayGE/Tools/build/csharp/*/obj
 KlayGE/Tools/media/*/MakePyZip.py
 KlayGE/Tools/media/*/*Py.zip
 External/boost/lib/
@@ -110,3 +113,5 @@ External/libvorbis/vorbis*.pc
 External/libvorbis/stamp-h1
 External/libvorbis/doc/Doxyfile
 External/OpenALSDK/redist/
+External/wpftoolkit/bin
+External/wpftoolkit/Source/ExtendedWPFToolkitSolution/Src/*/obj
