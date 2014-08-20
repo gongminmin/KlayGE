@@ -211,8 +211,10 @@ class build_info:
 						compiler = "mingw"
 				elif "linux" == target_platform:
 					compiler = "gcc"
+				elif "darwin" == target_platform:
+					compiler = "clang"
 				else:
-					log_error("Unsupported host platform\n")
+					log_error("Unsupported target platform\n")
 			else:
 				compiler = cfg_build.compiler
 
@@ -309,7 +311,7 @@ class build_info:
 			if "win" == host_platform:
 				gen_name = "MinGW Makefiles"
 			elif "darwin" == host_platform:
-				gen_name = "XCode"
+				gen_name = "Xcode"
 			else:
 				gen_name = "Unix Makefiles"
 			for arch in archs:
@@ -379,7 +381,7 @@ class build_info:
 
 	def retrive_clang_version(self):
 		clang_ver = subprocess.check_output(["clang", "--version"])
-		clang_ver_components = clang_ver.split()[2].split(".")
+		clang_ver_components = clang_ver.split()[("darwin" == self.host_platform) and 3 or 2].split(".")
 		return int(clang_ver_components[0] + clang_ver_components[1])
 
 class batch_command:
