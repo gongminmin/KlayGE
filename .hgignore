@@ -54,6 +54,7 @@ KlayGE/bin/*/*.dll
 KlayGE/bin/*/*.so
 KlayGE/bin/*/*.exe
 KlayGE/bin/*/*.exe.config
+KlayGE/bin/*/*.exe.manifest
 KlayGE/bin/*/*.pdb
 KlayGE/bin/*/*.py
 KlayGE/bin/*/Lib
