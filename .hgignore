@@ -77,9 +77,9 @@ KlayGE/Samples/media/Ocean/OceanDisplacementParam.dds
 KlayGE/Samples/media/Ocean/OceanGradient.dds
 KlayGE/Samples/media/*/MakePyZip.py
 KlayGE/Samples/media/*/*Py.zip
-KlayGE/Tools/build/csharp/*/obj
 KlayGE/Tools/media/*/MakePyZip.py
 KlayGE/Tools/media/*/*Py.zip
+KlayGE/Tools/src/MeshMLViewer/MeshMLViewer/obj
 External/boost/lib/
 External/Cg/bin/
 External/DXSDK/Redist/
