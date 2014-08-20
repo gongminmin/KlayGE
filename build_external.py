@@ -108,6 +108,9 @@ def setup_OpenALSDK(build_info, compiler_info):
 def setup_Cg(build_info, compiler_info):
 	build_a_project("Cg", "External/Cg", build_info, compiler_info)
 
+def setup_wpftoolkit(build_info, compiler_info):
+	build_a_project("wpftoolkit", "External/wpftoolkit", build_info, compiler_info)
+
 def build_external_libs(build_info):
 	import glob
 
@@ -150,6 +153,10 @@ def build_external_libs(build_info):
 		if (not compiler_info.is_windows_runtime) and (compiler_info.arch != "arm") and (not compiler_info.is_android):
 			print("\nSeting up Cg...\n")
 			setup_Cg(build_info, compiler_info)
+
+		if compiler_info.is_windows:
+			print("\nSeting up wpftoolkit...\n")
+			setup_wpftoolkit(build_info, compiler_info)
 
 if __name__ == "__main__":
 	cfg = cfg_from_argv(sys.argv)

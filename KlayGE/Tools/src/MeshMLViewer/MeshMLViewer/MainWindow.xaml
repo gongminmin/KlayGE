@@ -91,21 +91,21 @@
                                 <xctk:PropertyGrid x:Name="properties" NameColumnWidth="110"
                                            AutoGenerateProperties="False" PropertyValueChanged="PropertyGridValueChanged">
                                     <xctk:PropertyGrid.PropertyDefinitions>
-                                        <xctk:PropertyDefinition Name="meshes" DisplayOrder="0"/>
-                                        <xctk:PropertyDefinition Name="vertex_streams" DisplayOrder="1"/>
-                                        <xctk:PropertyDefinition Name="ambient" DisplayOrder="2"/>
-                                        <xctk:PropertyDefinition Name="diffuse" DisplayOrder="3"/>
-                                        <xctk:PropertyDefinition Name="specular" DisplayOrder="4"/>
-                                        <xctk:PropertyDefinition Name="shininess" DisplayOrder="5"/>
-                                        <xctk:PropertyDefinition Name="emit" DisplayOrder="6"/>
-                                        <xctk:PropertyDefinition Name="opacity" DisplayOrder="7"/>
-                                        <xctk:PropertyDefinition Name="diffuse_tex" DisplayOrder="8"/>
-                                        <xctk:PropertyDefinition Name="specular_tex" DisplayOrder="9"/>
-                                        <xctk:PropertyDefinition Name="shininess_tex" DisplayOrder="10"/>
-                                        <xctk:PropertyDefinition Name="bump_tex" DisplayOrder="11"/>
-                                        <xctk:PropertyDefinition Name="height_tex" DisplayOrder="12"/>
-                                        <xctk:PropertyDefinition Name="emit_tex" DisplayOrder="13"/>
-                                        <xctk:PropertyDefinition Name="opacity_tex" DisplayOrder="14"/>
+                                        <xctk:PropertyDefinition TargetProperties="meshes" DisplayOrder="0"/>
+                                        <xctk:PropertyDefinition TargetProperties="vertex_streams" DisplayOrder="1"/>
+                                        <xctk:PropertyDefinition TargetProperties="ambient" DisplayOrder="2"/>
+                                        <xctk:PropertyDefinition TargetProperties="diffuse" DisplayOrder="3"/>
+                                        <xctk:PropertyDefinition TargetProperties="specular" DisplayOrder="4"/>
+                                        <xctk:PropertyDefinition TargetProperties="shininess" DisplayOrder="5"/>
+                                        <xctk:PropertyDefinition TargetProperties="emit" DisplayOrder="6"/>
+                                        <xctk:PropertyDefinition TargetProperties="opacity" DisplayOrder="7"/>
+                                        <xctk:PropertyDefinition TargetProperties="diffuse_tex" DisplayOrder="8"/>
+                                        <xctk:PropertyDefinition TargetProperties="specular_tex" DisplayOrder="9"/>
+                                        <xctk:PropertyDefinition TargetProperties="shininess_tex" DisplayOrder="10"/>
+                                        <xctk:PropertyDefinition TargetProperties="bump_tex" DisplayOrder="11"/>
+                                        <xctk:PropertyDefinition TargetProperties="height_tex" DisplayOrder="12"/>
+                                        <xctk:PropertyDefinition TargetProperties="emit_tex" DisplayOrder="13"/>
+                                        <xctk:PropertyDefinition TargetProperties="opacity_tex" DisplayOrder="14"/>
                                     </xctk:PropertyGrid.PropertyDefinitions>
                                 </xctk:PropertyGrid>
                             </xcad:LayoutAnchorable>
