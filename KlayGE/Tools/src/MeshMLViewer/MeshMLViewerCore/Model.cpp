@@ -634,15 +634,15 @@ void DetailedSkinnedModel::BuildModelInfo()
 
 	if (has_skinned)
 	{
-		effect_ = SyncLoadRenderEffect("ModelViewerSkinning128.fxml");
+		effect_ = SyncLoadRenderEffect("MeshMLViewerSkinning128.fxml");
 		if (!effect_->TechniqueByName("GBufferRT0Tech")->Validate())
 		{
-			effect_ = SyncLoadRenderEffect("ModelViewerSkinning64.fxml");
+			effect_ = SyncLoadRenderEffect("MeshMLViewerSkinning64.fxml");
 		}
 	}
 	else
 	{
-		effect_ = SyncLoadRenderEffect("ModelViewerNoSkinning.fxml");
+		effect_ = SyncLoadRenderEffect("MeshMLViewerNoSkinning.fxml");
 	}
 
 	std::string depth_tech_str;

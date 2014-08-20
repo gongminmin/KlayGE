@@ -15,9 +15,7 @@
 #include <KlayGE/SceneManager.hpp>
 #include <KlayGE/Input.hpp>
 #include <KlayGE/InputFactory.hpp>
-#include <KFL/XMLDom.hpp>
 
-#include <d3d11.h>
 #include <sstream>
 #include <fstream>
 
@@ -331,7 +329,7 @@ namespace KlayGE
 
 	void MeshMLViewerCore::OpenModel(std::string const & name)
 	{
-		if (last_file_path_.empty())
+		if (!last_file_path_.empty())
 		{
 			ResLoader::Instance().DelPath(last_file_path_);
 		}
@@ -348,12 +346,6 @@ namespace KlayGE
 		model_->AddToSceneManager();
 
 		shared_ptr<ModelObject> model = checked_pointer_cast<ModelObject>(model_);
-
-		/*dialog_model_->Control<UIComboBox>(id_mesh_)->RemoveAllItems();
-		for (uint32_t i = 0; i < model->NumMeshes(); ++ i)
-		{
-			dialog_model_->Control<UIComboBox>(id_mesh_)->AddItem(model->Mesh(i)->Name());
-		}*/
 
 		AABBox const & bb = model_->GetRenderable()->PosBound();
 		float3 center = bb.Center();
@@ -373,8 +365,6 @@ namespace KlayGE
 		}
 		tb_controller_.Scalers(0.01f, MathLib::length(half_size) * 0.001f);
 		fps_controller_.Scalers(0.01f, 0.2f);
-
-		/*this->MeshChangedHandler(*dialog_model_->Control<UIComboBox>(id_mesh_));*/
 	}
 
 	void MeshMLViewerCore::SaveAsModel(std::string const & name)
