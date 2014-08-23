@@ -160,7 +160,6 @@ SET(RENDERING_EFFECT_FILES
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/RenderableHelper.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/Resizer.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/RSM2VPLs.fxml
-	${KLAYGE_PROJECT_DIR}/media/RenderFX/SelectMode.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/SkyBox.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/Sort.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/SSGI.fxml

@@ -254,9 +254,6 @@ namespace KlayGE
 		virtual void UpdateInstanceStream();
 		virtual void UpdateBoundBox();
 
-		// For select mode
-		virtual void BindSelectModeEffect();
-
 		// For deferred only
 		virtual void BindDeferredEffect(RenderEffectPtr const & deferred_effect);
 		virtual RenderTechniquePtr const & PassTech(PassType type) const;
@@ -268,15 +265,8 @@ namespace KlayGE
 
 		// For select mode
 
-		RenderEffectPtr select_mode_effect_;
-
 		RenderTechniquePtr select_mode_tech_;
-
-		RenderEffectParameterPtr select_mode_mvp_param_;
-		RenderEffectParameterPtr select_mode_pos_center_param_;
-		RenderEffectParameterPtr select_mode_pos_extent_param_;
 		RenderEffectParameterPtr select_mode_object_id_param_;
-
 		float4 select_mode_object_id_;
 		bool select_mode_on_;
 

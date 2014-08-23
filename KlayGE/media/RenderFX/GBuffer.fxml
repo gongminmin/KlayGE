@@ -28,6 +28,7 @@
 		<parameter type="int" name="normal_map_enabled"/>
 		<parameter type="int" name="height_map_enabled"/>
 		<parameter type="int" name="opacity_map_enabled"/>
+		<parameter type="float4" name="object_id"/>
 	</cbuffer>
 
 	<cbuffer name="skinning">
@@ -846,6 +847,25 @@ float4 SpecialShadingAlphaBlendPS(float2 texcoord : TEXCOORD0) : SV_Target
 	<technique name="SpecialShadingAlphaBlendFrontTech" inherit="SpecialShadingAlphaBlendBackTech">
 		<pass name="p0">
 			<state name="cull_mode" value="back"/>
+		</pass>
+	</technique>
+
+
+	<shader>
+		<![CDATA[
+float4 SelectModePS() : SV_Target
+{
+	return object_id;
+}
+		]]>
+	</shader>
+
+	<technique name="SelectModeTech">
+		<pass name="p0">
+			<state name="cull_mode" value="back"/>
+
+			<state name="vertex_shader" value="GBufferVS()"/>
+			<state name="pixel_shader" value="SelectModePS()"/>
 		</pass>
 	</technique>
 </effect>

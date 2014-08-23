@@ -36,8 +36,6 @@ namespace KlayGE
 		: select_mode_on_(false),
 			model_mat_(float4x4::Identity()), effect_attrs_(0)
 	{
-		this->BindSelectModeEffect();
-
 		DeferredRenderingLayerPtr const & drl = Context::Instance().DeferredRenderingLayerInstance();
 		if (drl)
 		{
@@ -61,23 +59,26 @@ namespace KlayGE
 		AABBox const & pos_bb = this->PosBound();
 		AABBox const & tc_bb = this->TexcoordBound();
 
-		if (select_mode_on_)
-		{
-			*select_mode_mvp_param_ = mvp;
-			*select_mode_pos_center_param_ = pos_bb.Center();
-			*select_mode_pos_extent_param_ = pos_bb.HalfSize();
-			*select_mode_object_id_param_ = select_mode_object_id_;
-		}
-		else if (deferred_effect_)
-		{
-			DeferredRenderingLayerPtr const & drl = Context::Instance().DeferredRenderingLayerInstance();
+		DeferredRenderingLayerPtr const & drl = Context::Instance().DeferredRenderingLayerInstance();
 
+		if (drl)
+		{
 			int32_t cas_index = drl->CurrCascadeIndex();
 			if (cas_index >= 0)
 			{
 				mvp *= drl->GetCascadedShadowLayer()->CascadeCropMatrix(cas_index);
 			}
+		}
 
+		if (select_mode_on_)
+		{
+			*mvp_param_ = mvp;
+			*pos_center_param_ = pos_bb.Center();
+			*pos_extent_param_ = pos_bb.HalfSize();
+			*select_mode_object_id_param_ = select_mode_object_id_;
+		}
+		else if (deferred_effect_)
+		{
 			*mvp_param_ = mvp;
 			*model_view_param_ = mv;
 			*far_plane_param_ = float2(camera.FarPlane(), 1.0f / camera.FarPlane());
@@ -289,18 +290,6 @@ namespace KlayGE
 		technique_ = this->PassTech(type);
 	}
 
-	void Renderable::BindSelectModeEffect()
-	{
-		select_mode_effect_ = SyncLoadRenderEffect("SelectMode.fxml");
-
-		select_mode_tech_ = select_mode_effect_->TechniqueByName("SelectModeTech");
-
-		select_mode_mvp_param_ = select_mode_effect_->ParameterByName("mvp");
-		select_mode_pos_center_param_ = select_mode_effect_->ParameterByName("pos_center");
-		select_mode_pos_extent_param_ = select_mode_effect_->ParameterByName("pos_extent");
-		select_mode_object_id_param_ = select_mode_effect_->ParameterByName("object_id");
-	}
-
 	void Renderable::BindDeferredEffect(RenderEffectPtr const & deferred_effect)
 	{
 		deferred_effect_ = deferred_effect;
@@ -332,6 +321,7 @@ namespace KlayGE
 		special_shading_tech_ = deferred_effect_->TechniqueByName("SpecialShadingTech");
 		special_shading_alpha_blend_back_tech_ = deferred_effect_->TechniqueByName("SpecialShadingAlphaBlendBackTech");
 		special_shading_alpha_blend_front_tech_ = deferred_effect_->TechniqueByName("SpecialShadingAlphaBlendFrontTech");
+		select_mode_tech_ = deferred_effect_->TechniqueByName("SelectModeTech");
 
 		mvp_param_ = deferred_effect_->ParameterByName("mvp");
 		model_view_param_ = deferred_effect_->ParameterByName("model_view");
@@ -355,6 +345,7 @@ namespace KlayGE
 		opacity_clr_param_ = deferred_effect_->ParameterByName("opacity_clr");
 		opacity_map_enabled_param_ = deferred_effect_->ParameterByName("opacity_map_enabled");
 		opaque_depth_tex_param_ = deferred_effect_->ParameterByName("opaque_depth_tex");
+		select_mode_object_id_param_ = deferred_effect_->ParameterByName("object_id");
 	}
 
 	RenderTechniquePtr const & Renderable::PassTech(PassType type) const
