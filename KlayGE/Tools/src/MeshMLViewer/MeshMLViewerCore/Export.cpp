@@ -205,8 +205,13 @@ extern "C"
 		return core->OpacityTexture(material_index);
 	}
 
-	__declspec(dllexport) uint32_t APIENTRY SelectedObject(MeshMLViewerCore* core)
+	__declspec(dllexport) uint32_t APIENTRY SelectedMesh(MeshMLViewerCore* core)
 	{
-		return core->SelectedObject();
+		return core->SelectedMesh();
+	}
+
+	__declspec(dllexport) void APIENTRY SelectMesh(MeshMLViewerCore* core, uint32_t mesh_index)
+	{
+		return core->SelectMesh(mesh_index);
 	}
 }

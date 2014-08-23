@@ -45,7 +45,8 @@ namespace KlayGE
 		char const * HeightTexture(uint32_t material_index) const;
 		char const * EmitTexture(uint32_t material_index) const;
 		char const * OpacityTexture(uint32_t material_index) const;
-		uint32_t SelectedObject() const;
+		uint32_t SelectedMesh() const;
+		void SelectMesh(uint32_t mesh_index);
 
 		void SkinningOn(bool on);
 		void SmoothMeshOn(bool on);
@@ -64,6 +65,8 @@ namespace KlayGE
 		virtual void DoUpdateOverlay() KLAYGE_OVERRIDE;
 		virtual uint32_t DoUpdate(uint32_t pass) KLAYGE_OVERRIDE;
 
+		void UpdateSelectedMesh();
+
 	private:
 		FontPtr font_;
 
@@ -81,6 +84,7 @@ namespace KlayGE
 		DeferredRenderingLayerPtr deferred_rendering_;
 
 		bool skinning_;
+		float curr_frame_;
 
 		std::string last_file_path_;
 
@@ -93,6 +97,7 @@ namespace KlayGE
 		TexturePtr selective_cpu_tex_;
 		bool update_selective_buffer_;
 		uint32_t selected_obj_;
+		SceneObjectPtr selected_bb_;
 	};
 }
 

@@ -220,7 +220,7 @@ namespace KlayGE
 	MeshMLViewerCore::MeshMLViewerCore(void* native_wnd)
 				: App3DFramework("MeshMLViewer", native_wnd),
 					fps_controller_(false), tb_controller_(false), is_fps_camera_(false),
-					skinning_(true), mouse_down_in_wnd_(false), mouse_tracking_mode_(false),
+					skinning_(true), curr_frame_(0), mouse_down_in_wnd_(false), mouse_tracking_mode_(false),
 					update_selective_buffer_(false), selected_obj_(0)
 	{
 		ResLoader::Instance().AddPath("../../Tools/media/MeshMLViewer");
@@ -322,6 +322,12 @@ namespace KlayGE
 		sky_box_ = MakeSharedPtr<SceneObjectSkyBox>();
 		checked_pointer_cast<SceneObjectSkyBox>(sky_box_)->CubeMap(rf.MakeTextureCube(1, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_Immutable, init_data));
 		sky_box_->AddToSceneManager();
+
+		selected_bb_ = MakeSharedPtr<SceneObjectHelper>(MakeSharedPtr<RenderableLineBox>(),
+			SceneObject::SOA_Moveable | SceneObject::SOA_NotCastShadow);
+		selected_bb_->Visible(false);
+		selected_bb_->AddToSceneManager();
+		checked_pointer_cast<RenderableLineBox>(selected_bb_->GetRenderable())->SetColor(Color(1, 1, 1, 1));
 
 		this->LookAt(float3(-5, 5, -5), float3(0, 1, 0), float3(0.0f, 1.0f, 0.0f));
 		this->Proj(0.1f, 100);
@@ -464,6 +470,7 @@ namespace KlayGE
 				axis_->Visible(false);
 				grid_->Visible(false);
 				sky_box_->Visible(false);
+				selected_bb_->Visible(false);
 				for (uint32_t i = 0; i < model_->GetRenderable()->NumSubrenderables(); ++ i)
 				{
 					model_->GetRenderable()->Subrenderable(i)->SelectMode(true);
@@ -479,6 +486,7 @@ namespace KlayGE
 				axis_->Visible(true);
 				grid_->Visible(true);
 				sky_box_->Visible(true);
+				selected_bb_->Visible(selected_obj_ > 0);
 				for (uint32_t i = 0; i < model_->GetRenderable()->NumSubrenderables(); ++ i)
 				{
 					model_->GetRenderable()->Subrenderable(i)->SelectMode(false);
@@ -530,6 +538,9 @@ namespace KlayGE
 		if (skinning_)
 		{
 			checked_pointer_cast<ModelObject>(model_)->SetFrame(frame);
+			curr_frame_ = frame;
+
+			this->UpdateSelectedMesh();
 		}
 	}
 
@@ -725,9 +736,15 @@ namespace KlayGE
 		return nullptr;
 	}
 
-	uint32_t MeshMLViewerCore::SelectedObject() const
+	uint32_t MeshMLViewerCore::SelectedMesh() const
 	{
 		return selected_obj_;
+	}
+
+	void MeshMLViewerCore::SelectMesh(uint32_t mesh_index)
+	{
+		selected_obj_ = mesh_index;
+		this->UpdateSelectedMesh();
 	}
 
 	void MeshMLViewerCore::SkinningOn(bool on)
@@ -887,6 +904,7 @@ namespace KlayGE
 					}
 
 					selected_obj_ = entity_id;
+					this->UpdateSelectedMesh();
 				}
 			}
 		}
@@ -935,6 +953,32 @@ namespace KlayGE
 				update_selective_buffer_ = true;
 			}
 			break;
+		}
+	}
+
+	void MeshMLViewerCore::UpdateSelectedMesh()
+	{
+		if (selected_obj_ > 0)
+		{
+			RenderablePtr const & model = model_->GetRenderable();
+			RenderablePtr const & mesh = model->Subrenderable(selected_obj_ - 1);
+			OBBox obb;
+			if (checked_pointer_cast<RenderModel>(model)->IsSkinned() && skinning_)
+			{
+				obb = MathLib::convert_to_obbox(
+					checked_pointer_cast<SkinnedMesh>(mesh)->FramePosBound(static_cast<uint32_t>(curr_frame_ + 0.5f)));
+			}
+			else
+			{
+				obb = MathLib::convert_to_obbox(mesh->PosBound());
+			}
+			checked_pointer_cast<RenderableLineBox>(selected_bb_->GetRenderable())->SetBox(obb);
+			selected_bb_->ModelMatrix(model_->ModelMatrix());
+			selected_bb_->Visible(true);
+		}
+		else
+		{
+			selected_bb_->Visible(false);
 		}
 	}
 }

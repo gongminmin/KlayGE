@@ -103,7 +103,9 @@ namespace MeshMLViewer
 		[DllImport(CORE_NAME)]
 		public static extern IntPtr OpacityTexture(IntPtr core, uint material_index);
 		[DllImport(CORE_NAME)]
-		public static extern uint SelectedObject(IntPtr core);
+		public static extern uint SelectedMesh(IntPtr core);
+		[DllImport(CORE_NAME)]
+		public static extern void SelectMesh(IntPtr core, uint mesh_index);
 	}
 
 	/// <summary>
@@ -281,13 +283,14 @@ namespace MeshMLViewer
 				properties.SelectedObject = null;
 
 				MeshItemsSource.items.Clear();
+				MeshItemsSource.items.Add("");
 				uint num_meshes = MeshMLViewerCore.NumMeshes(core_);
 				for (uint i = 0; i < num_meshes; ++ i)
 				{
 					MeshItemsSource.items.Add(Marshal.PtrToStringUni(MeshMLViewerCore.MeshName(core_, i)));
 				}
 
-				properties_obj_.meshes = MeshItemsSource.items[0].DisplayName;
+				properties_obj_.meshes = "";
 				this.UpdateMeshProperties(0);
 
 				properties.SelectedObject = properties_obj_;
@@ -397,10 +400,10 @@ namespace MeshMLViewer
 
 			if (MouseButtons.Left == e.Button)
 			{
-				uint selected_mesh = MeshMLViewerCore.SelectedObject(core_);
-				if ((selected_mesh > 0) && (selected_mesh - 1 != selected_mesh_index_))
+				uint selected_mesh = MeshMLViewerCore.SelectedMesh(core_);
+				if (selected_mesh != selected_mesh_index_)
 				{
-					this.UpdateMeshProperties(selected_mesh - 1);
+					this.UpdateMeshProperties(selected_mesh);
 				}
 			}
 		}
@@ -429,6 +432,7 @@ namespace MeshMLViewer
 		private void UpdateMeshProperties(uint mesh_index)
 		{
 			selected_mesh_index_ = mesh_index;
+			MeshMLViewerCore.SelectMesh(core_, mesh_index);
 
 			properties.SelectedObject = null;
 
@@ -436,84 +440,104 @@ namespace MeshMLViewer
 
 			properties_obj_.vertex_streams.Clear();
 
-			uint num_vss = MeshMLViewerCore.NumVertexStreams(core_, mesh_index);
-			for (uint stream_index = 0; stream_index < num_vss; ++ stream_index)
+			if (mesh_index > 0)
 			{
-				string stream_name = "";
-				uint num_usages = MeshMLViewerCore.NumVertexStreamUsages(core_, mesh_index, stream_index);
-				for (uint usage_index = 0; usage_index < num_usages; ++ usage_index)
+				uint num_vss = MeshMLViewerCore.NumVertexStreams(core_, mesh_index - 1);
+				for (uint stream_index = 0; stream_index < num_vss; ++ stream_index)
 				{
-					uint usage = MeshMLViewerCore.VertexStreamUsage(core_, mesh_index, stream_index, usage_index);
-					string usage_name;
-					switch (usage >> 16)
+					string stream_name = "";
+					uint num_usages = MeshMLViewerCore.NumVertexStreamUsages(core_, mesh_index - 1, stream_index);
+					for (uint usage_index = 0; usage_index < num_usages; ++usage_index)
 					{
-						case 0:
-							usage_name = "Position";
-							break;
-						case 1:
-							usage_name = "Normal";
-							break;
-						case 2:
-							usage_name = "Diffuse";
-							break;
-						case 3:
-							usage_name = "Specular";
-							break;
-						case 4:
-							usage_name = "Blend Weight";
-							break;
-						case 5:
-							usage_name = "Blend Index";
-							break;
-						case 6:
-							usage_name = "TexCoord";
-							break;
-						case 7:
-							usage_name = "Tangent";
-							break;
-						case 8:
-						default:
-							usage_name = "Binormal";
-							break;
+						uint usage = MeshMLViewerCore.VertexStreamUsage(core_, mesh_index - 1, stream_index, usage_index);
+						string usage_name;
+						switch (usage >> 16)
+						{
+							case 0:
+								usage_name = "Position";
+								break;
+							case 1:
+								usage_name = "Normal";
+								break;
+							case 2:
+								usage_name = "Diffuse";
+								break;
+							case 3:
+								usage_name = "Specular";
+								break;
+							case 4:
+								usage_name = "Blend Weight";
+								break;
+							case 5:
+								usage_name = "Blend Index";
+								break;
+							case 6:
+								usage_name = "TexCoord";
+								break;
+							case 7:
+								usage_name = "Tangent";
+								break;
+							case 8:
+							default:
+								usage_name = "Binormal";
+								break;
+						}
+						stream_name += usage_name + ' ' + (usage & 0xFFFF).ToString();
+						if (usage_index != num_usages - 1)
+						{
+							stream_name += " | ";
+						}
 					}
-					stream_name += usage_name + ' ' + (usage & 0xFFFF).ToString();
-					if (usage_index != num_usages - 1)
-					{
-						stream_name += " | ";
-					}
+
+					properties_obj_.vertex_streams.Add(stream_name);
 				}
 
-				properties_obj_.vertex_streams.Add(stream_name);
+				uint mat_id = MeshMLViewerCore.MaterialID(core_, mesh_index - 1);
+				float[] temp = new float[3];
+				Marshal.Copy(MeshMLViewerCore.AmbientMaterial(core_, mat_id), temp, 0, 3);
+				properties_obj_.ambient = Color.FromArgb(255, (byte)Math.Max(Math.Min(temp[0] * 255 + 0.5f, 255), 0),
+					(byte)Math.Max(Math.Min(temp[1] * 255 + 0.5f, 255), 0),
+					(byte)Math.Max(Math.Min(temp[2] * 255 + 0.5f, 255), 0));
+				Marshal.Copy(MeshMLViewerCore.DiffuseMaterial(core_, mat_id), temp, 0, 3);
+				properties_obj_.diffuse = Color.FromArgb(255, (byte)Math.Max(Math.Min(temp[0] * 255 + 0.5f, 255), 0),
+					(byte)Math.Max(Math.Min(temp[1] * 255 + 0.5f, 255), 0),
+					(byte)Math.Max(Math.Min(temp[2] * 255 + 0.5f, 255), 0));
+				Marshal.Copy(MeshMLViewerCore.SpecularMaterial(core_, mat_id), temp, 0, 3);
+				properties_obj_.specular = Color.FromArgb(255, (byte)Math.Max(Math.Min(temp[0] * 255 + 0.5f, 255), 0),
+					(byte)Math.Max(Math.Min(temp[1] * 255 + 0.5f, 255), 0),
+					(byte)Math.Max(Math.Min(temp[2] * 255 + 0.5f, 255), 0));
+				Marshal.Copy(MeshMLViewerCore.EmitMaterial(core_, mat_id), temp, 0, 3);
+				properties_obj_.emit = Color.FromArgb(255, (byte)Math.Max(Math.Min(temp[0] * 255 + 0.5f, 255), 0),
+					(byte)Math.Max(Math.Min(temp[1] * 255 + 0.5f, 255), 0),
+					(byte)Math.Max(Math.Min(temp[2] * 255 + 0.5f, 255), 0));
+				properties_obj_.shininess = MeshMLViewerCore.ShininessMaterial(core_, mat_id);
+				properties_obj_.opacity = MeshMLViewerCore.OpacityMaterial(core_, mat_id);
+
+				properties_obj_.diffuse_tex = Marshal.PtrToStringAnsi(MeshMLViewerCore.DiffuseTexture(core_, mat_id));
+				properties_obj_.specular_tex = Marshal.PtrToStringAnsi(MeshMLViewerCore.SpecularTexture(core_, mat_id));
+				properties_obj_.shininess_tex = Marshal.PtrToStringAnsi(MeshMLViewerCore.ShininessTexture(core_, mat_id));
+				properties_obj_.bump_tex = Marshal.PtrToStringAnsi(MeshMLViewerCore.BumpTexture(core_, mat_id));
+				properties_obj_.height_tex = Marshal.PtrToStringAnsi(MeshMLViewerCore.HeightTexture(core_, mat_id));
+				properties_obj_.emit_tex = Marshal.PtrToStringAnsi(MeshMLViewerCore.EmitTexture(core_, mat_id));
+				properties_obj_.opacity_tex = Marshal.PtrToStringAnsi(MeshMLViewerCore.OpacityTexture(core_, mat_id));
 			}
+			else
+			{
+				properties_obj_.ambient = Color.FromArgb(0, 0, 0, 0);
+				properties_obj_.diffuse = Color.FromArgb(0, 0, 0, 0);
+				properties_obj_.specular = Color.FromArgb(0, 0, 0, 0);
+				properties_obj_.emit = Color.FromArgb(0, 0, 0, 0);
+				properties_obj_.shininess = 0;
+				properties_obj_.opacity = 0;
 
-			uint mat_id = MeshMLViewerCore.MaterialID(core_, mesh_index);
-			float[] temp = new float[3];
-			Marshal.Copy(MeshMLViewerCore.AmbientMaterial(core_, mat_id), temp, 0, 3);
-			properties_obj_.ambient = Color.FromArgb(255, (byte)Math.Max(Math.Min(temp[0] * 255 + 0.5f, 255), 0),
-				(byte)Math.Max(Math.Min(temp[1] * 255 + 0.5f, 255), 0),
-				(byte)Math.Max(Math.Min(temp[2] * 255 + 0.5f, 255), 0));
-			Marshal.Copy(MeshMLViewerCore.DiffuseMaterial(core_, mat_id), temp, 0, 3);
-			properties_obj_.diffuse = Color.FromArgb(255, (byte)Math.Max(Math.Min(temp[0] * 255 + 0.5f, 255), 0),
-				(byte)Math.Max(Math.Min(temp[1] * 255 + 0.5f, 255), 0),
-				(byte)Math.Max(Math.Min(temp[2] * 255 + 0.5f, 255), 0));
-			Marshal.Copy(MeshMLViewerCore.SpecularMaterial(core_, mat_id), temp, 0, 3);
-			properties_obj_.specular = Color.FromArgb(255, (byte)Math.Max(Math.Min(temp[0] * 255 + 0.5f, 255), 0),
-				(byte)Math.Max(Math.Min(temp[1] * 255 + 0.5f, 255), 0),
-				(byte)Math.Max(Math.Min(temp[2] * 255 + 0.5f, 255), 0));
-			Marshal.Copy(MeshMLViewerCore.EmitMaterial(core_, mat_id), temp, 0, 3);
-			properties_obj_.emit = Color.FromArgb(255, (byte)Math.Max(Math.Min(temp[0] * 255 + 0.5f, 255), 0),
-				(byte)Math.Max(Math.Min(temp[1] * 255 + 0.5f, 255), 0),
-				(byte)Math.Max(Math.Min(temp[2] * 255 + 0.5f, 255), 0));
-			properties_obj_.shininess = MeshMLViewerCore.ShininessMaterial(core_, mat_id);
-			properties_obj_.opacity = MeshMLViewerCore.OpacityMaterial(core_, mat_id);
-
-			properties_obj_.diffuse_tex = Marshal.PtrToStringAnsi(MeshMLViewerCore.DiffuseTexture(core_, mat_id));
-			properties_obj_.specular_tex = Marshal.PtrToStringAnsi(MeshMLViewerCore.SpecularTexture(core_, mat_id));
-			properties_obj_.shininess_tex = Marshal.PtrToStringAnsi(MeshMLViewerCore.ShininessTexture(core_, mat_id));
-			properties_obj_.bump_tex = Marshal.PtrToStringAnsi(MeshMLViewerCore.BumpTexture(core_, mat_id));
-			properties_obj_.height_tex = Marshal.PtrToStringAnsi(MeshMLViewerCore.HeightTexture(core_, mat_id));
-			properties_obj_.emit_tex = Marshal.PtrToStringAnsi(MeshMLViewerCore.EmitTexture(core_, mat_id));
-			properties_obj_.opacity_tex = Marshal.PtrToStringAnsi(MeshMLViewerCore.OpacityTexture(core_, mat_id));
+				properties_obj_.diffuse_tex = "";
+				properties_obj_.specular_tex = "";
+				properties_obj_.shininess_tex = "";
+				properties_obj_.bump_tex = "";
+				properties_obj_.height_tex = "";
+				properties_obj_.emit_tex = "";
+				properties_obj_.opacity_tex = "";
+			}
 
 			properties.SelectedObject = properties_obj_;
 		}
